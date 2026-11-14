@@ -73,6 +73,10 @@ const BADGE_SIT: Record<string, number> = {
   "Blue Whale": 115, "Megalodon": 114,
 };
 
+// The gold seal ends in a thin point, so it rests on the same quarter-width
+// line as the tiers: the lowest row a quarter as wide as the seal.
+const GOLD_SIT = 117;
+
 function badgeNameFromAssetUrl(url: string | null): string | undefined {
   if (!url) return undefined;
   let decodedUrl = url;
@@ -117,7 +121,7 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
   const bounds = gold ? { left: 1, top: 1, right: 127, bottom: 123 } : optics ?? { left: 0, top: 0, right: 128, bottom: 128 };
   const artworkHeight = bounds.bottom - bounds.top;
   // Each tier's optical resting line (its body, not a dangling claw or tail tip).
-  const sitRow = gold ? bounds.bottom : !visualName ? bounds.bottom
+  const sitRow = gold ? GOLD_SIT : !visualName ? bounds.bottom
     : (originalStill || !art ? BADGE_SIT[visualName] : badgePosterSit[visualName]) ?? bounds.bottom;
   const sit = Math.min(1, Math.max(0, (sitRow - bounds.top) / artworkHeight));
   // Full artwork height: 1.27x the adjacent font's cap height (cap height,
