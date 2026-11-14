@@ -2993,7 +2993,7 @@ export const newPostsMetadata: BlogPost[] = [
     "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
     "excerpt": "Every \"decentralized\" social app runs on an internet that is already very centralized. Here is an honest spectrum of 30 crypto and decentralized social platforms, where Riftn sits on it, and why open source matters more than a perfect score.",
     "content": "",
-    "bannerImage": "/media/decentralization-spectrum-banner-manrope.jpg",
+    "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
     "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
     "author": {
       "name": "Riftn Team"
@@ -3019,7 +3019,7 @@ export const newPostsMetadata: BlogPost[] = [
     "title": "Is Riftn the Same as DeHub? What Changed and What Did Not",
     "excerpt": "Yes. Riftn is the new name of DeHub. Here is what changed with the rename, what stayed exactly the same, and what to do if you still have a DeHub account or DHB.",
     "content": "",
-    "bannerImage": "/media/is-riftn-the-same-as-dehub-banner-manrope.jpg",
+    "bannerImage": "/media/is-riftn-the-same-as-dehub-banner-r2.jpg",
     "bannerImageAlt": "DeHub to Riftn, the same platform under a new name",
     "author": {
       "name": "Riftn Team"
@@ -3732,7 +3732,7 @@ export const latestPostMetadata: BlogPost | undefined = {
   "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
   "excerpt": "Every \"decentralized\" social app runs on an internet that is already very centralized. Here is an honest spectrum of 30 crypto and decentralized social platforms, where Riftn sits on it, and why open source matters more than a perfect score.",
   "content": "",
-  "bannerImage": "/media/decentralization-spectrum-banner-manrope.jpg",
+  "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
   "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
   "author": {
     "name": "Riftn Team"
