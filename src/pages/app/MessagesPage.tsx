@@ -20,7 +20,7 @@ import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import ExitFullscreen from "@/components/ui/cut-icons/exit-fullscreen";
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
-import { ChatIconButton, ChatListTop, ChatMeDock } from '@/components/app/chat/FullScreenChatChrome';
+import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
 import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
@@ -836,6 +836,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const fullscreenTop = fullscreen && !phonePill ? (
     <ChatListTop
       title={_copy('fullscreenChat.title', { defaultValue: 'Chat' })}
+      searchLabel={_copy('fullscreenChat.search', { defaultValue: 'Search chats' })}
+      searchValue={searchQuery}
+      onClearSearch={() => setSearchQuery('')}
+      onOpenSettings={() => setShowSettings(true)}
       search={(
         <input
           type="text"
@@ -857,14 +861,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </ChatIconButton>
         </>
       )}
-      actions={(
-        <>
-          <ChatTextSizeButton className="rounded-full" />
-          <ChatIconButton label={_copy('fullscreenChat.exit', { defaultValue: 'Leave full screen' })} onClick={() => navigate('/app/messages')} data-chat-exit-fullscreen="">
-            <ExitFullscreen />
-          </ChatIconButton>
-        </>
-      )}
+      actions={<ChatTextSizeButton className="rounded-full" />}
     />
   ) : null;
 
@@ -956,7 +953,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </PageIsland>)}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-24' : fullscreen ? 'pt-3 pb-4' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : fullscreen ? 'pt-3 pb-4' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1127,7 +1124,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.3084651a3386", { defaultValue: "Searching users..." })}</div>
             )}
           </div>
-          {fullscreen && !phonePill && <ChatMeDock onOpenSettings={() => setShowSettings(true)} />}
         </div>
       </div>
   );
