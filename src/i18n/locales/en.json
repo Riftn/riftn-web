@@ -780,6 +780,14 @@
     "showOnlineDesc": "People you message see a green dot next to your name while you're using Riftn",
     "showDislikes": "Show my dislikes to everyone",
     "showDislikesDesc": "Anyone can open the Dislikes tab on your profile. When this is off, only you can see it.",
+    "showLikes": "Show my likes to everyone",
+    "showLikesDesc": "Anyone can open the Likes tab on your profile. Off by default, so only you can see what you liked.",
+    "showFollowersList": "Show who follows me",
+    "showFollowersListDesc": "Let anyone open your followers list. When this is off, only you can see it.",
+    "showFollowingList": "Show who I follow",
+    "showFollowingListDesc": "Let anyone open the list of people you follow. When this is off, only you can see it.",
+    "showFollowCounts": "Show my follower numbers",
+    "showFollowCountsDesc": "Show how many followers you have and how many people you follow. Turning this off also hides both lists.",
     "smartReplies": "Suggested replies",
     "smartRepliesDesc": "Draft two replies you can tap in a chat. The × on the suggestions turns this off.",
     "title": "Settings",
@@ -2476,11 +2484,20 @@
     "tabs": {
       "playlists": "Playlists",
       "dislikes": "Dislikes",
+      "likes": "Likes",
       "articles": "Articles"
     },
     "articles": {
       "emptyTitle": "No articles yet",
       "emptySubtitle": "Articles will appear here"
+    },
+    "likedPosts": {
+      "emptyTitle": "No likes yet",
+      "emptyOwn": "Posts you like show up here. Only you can see them unless you turn on Show my likes in Settings.",
+      "emptyOther": "Nothing liked yet.",
+      "privateTitle": "Likes are private",
+      "privateDesc": "This account keeps its likes to itself.",
+      "loadMore": "Load more"
     },
     "dislikes": {
       "emptyTitle": "No dislikes yet",

@@ -1168,7 +1168,15 @@
     "socialConnectedShort": "Đã kết nối",
     "socialConnectFailed": "Không thể kết nối {{platform}}. Vui lòng thử lại.",
     "socialVerifiedFollowers": "{{value}} người theo dõi",
-    "socialFollowersPending": "Đang cập nhật số người theo dõi"
+    "socialFollowersPending": "Đang cập nhật số người theo dõi",
+    "showLikes": "Hiển thị lượt thích của tôi cho mọi người",
+    "showLikesDesc": "Ai cũng có thể mở tab Lượt thích trên hồ sơ của bạn. Mặc định tắt, nên chỉ bạn thấy những gì mình đã thích.",
+    "showFollowersList": "Hiển thị ai theo dõi tôi",
+    "showFollowersListDesc": "Cho phép mọi người mở danh sách người theo dõi bạn. Khi tắt, chỉ bạn xem được.",
+    "showFollowingList": "Hiển thị tôi theo dõi ai",
+    "showFollowingListDesc": "Cho phép mọi người mở danh sách những người bạn theo dõi. Khi tắt, chỉ bạn xem được.",
+    "showFollowCounts": "Hiển thị số người theo dõi",
+    "showFollowCountsDesc": "Hiển thị bạn có bao nhiêu người theo dõi và đang theo dõi bao nhiêu người. Tắt đi cũng ẩn cả hai danh sách."
   },
   "common": {
     "confirm": "Xác nhận",
@@ -2235,7 +2243,8 @@
     "tabs": {
       "playlists": "Danh sách phát",
       "dislikes": "Không thích",
-      "articles": "Bài viết"
+      "articles": "Bài viết",
+      "likes": "Lượt thích"
     },
     "articles": {
       "emptyTitle": "Chưa có bài viết nào",
@@ -2264,7 +2273,15 @@
     "sortMostLiked": "Được thích nhiều nhất",
     "searchThisChannel": "Tìm kiếm kênh này",
     "searchResultCount": "1 kết quả cho \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} kết quả cho \"{{query}}\""
+    "searchResultCountPlural": "{{count}} kết quả cho \"{{query}}\"",
+    "likedPosts": {
+      "emptyTitle": "Chưa có lượt thích",
+      "emptyOwn": "Các bài bạn thích sẽ hiện ở đây. Chỉ bạn xem được, trừ khi bạn bật Hiển thị lượt thích của tôi trong Cài đặt.",
+      "emptyOther": "Chưa thích gì cả.",
+      "privateTitle": "Lượt thích là riêng tư",
+      "privateDesc": "Tài khoản này giữ lượt thích cho riêng mình.",
+      "loadMore": "Tải thêm"
+    }
   },
   "tv": {
     "seoTitle": "Live TV: Các Kênh Miễn Phí Từ Khắp Nơi Trên Thế Giới",

@@ -1343,7 +1343,15 @@
     "socialConnectedShort": "Connecté",
     "socialConnectFailed": "Impossible de connecter {{platform}}. Veuillez réessayer.",
     "socialVerifiedFollowers": "{{value}} abonnés",
-    "socialFollowersPending": "Mise à jour des abonnés"
+    "socialFollowersPending": "Mise à jour des abonnés",
+    "showLikes": "Montrer mes j'aime à tout le monde",
+    "showLikesDesc": "Tout le monde peut ouvrir l'onglet J'aime de ton profil. Désactivé par défaut : toi seul vois ce que tu as aimé.",
+    "showFollowersList": "Montrer qui me suit",
+    "showFollowersListDesc": "Permet à tout le monde d'ouvrir ta liste d'abonnés. Désactivé, toi seul peux la voir.",
+    "showFollowingList": "Montrer qui je suis",
+    "showFollowingListDesc": "Permet à tout le monde d'ouvrir la liste des personnes que tu suis. Désactivé, toi seul peux la voir.",
+    "showFollowCounts": "Montrer mes nombres d'abonnés",
+    "showFollowCountsDesc": "Affiche combien d'abonnés tu as et combien de personnes tu suis. Le désactiver masque aussi les deux listes."
   },
   "common": {
     "confirm": "Confirmer",
@@ -2476,7 +2484,8 @@
     "tabs": {
       "playlists": "Playlists",
       "dislikes": "Je n'aime pas",
-      "articles": "Articles"
+      "articles": "Articles",
+      "likes": "J'aime"
     },
     "articles": {
       "emptyTitle": "Aucun article pour l’instant",
@@ -2522,6 +2531,14 @@
       "saveFailed": "Impossible d'enregistrer votre ordre. Veuillez réessayer.",
       "loadFailed": "Impossible de charger vos publications. Fermez ceci et réessayez.",
       "empty": "Rien à organiser pour l'instant. Publiez d'abord quelque chose."
+    },
+    "likedPosts": {
+      "emptyTitle": "Aucun j'aime pour l'instant",
+      "emptyOwn": "Les publications que tu aimes apparaissent ici. Toi seul peux les voir, sauf si tu actives Montrer mes j'aime dans les Paramètres.",
+      "emptyOther": "Rien d'aimé pour l'instant.",
+      "privateTitle": "Les j'aime sont privés",
+      "privateDesc": "Ce compte garde ses j'aime pour lui.",
+      "loadMore": "Charger plus"
     }
   },
   "tv": {

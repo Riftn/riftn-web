@@ -1343,7 +1343,15 @@
     "socialConnectedShort": "Gekoppeld",
     "socialConnectFailed": "Kan {{platform}} niet koppelen. Probeer het opnieuw.",
     "socialVerifiedFollowers": "{{value}} volgers",
-    "socialFollowersPending": "Aantal volgers wordt bijgewerkt"
+    "socialFollowersPending": "Aantal volgers wordt bijgewerkt",
+    "showLikes": "Mijn likes aan iedereen tonen",
+    "showLikesDesc": "Iedereen kan het tabblad Likes op je profiel openen. Standaard uit, dus alleen jij ziet wat je leuk vond.",
+    "showFollowersList": "Tonen wie mij volgt",
+    "showFollowersListDesc": "Laat iedereen je volgerslijst openen. Als dit uit staat, kun alleen jij die zien.",
+    "showFollowingList": "Tonen wie ik volg",
+    "showFollowingListDesc": "Laat iedereen de lijst openen van mensen die je volgt. Als dit uit staat, kun alleen jij die zien.",
+    "showFollowCounts": "Mijn volgersaantallen tonen",
+    "showFollowCountsDesc": "Toont hoeveel volgers je hebt en hoeveel mensen je volgt. Uitzetten verbergt ook beide lijsten."
   },
   "common": {
     "confirm": "Bevestigen",
@@ -2666,7 +2674,8 @@
     "tabs": {
       "playlists": "Afspeellijsten",
       "dislikes": "Dislikes",
-      "articles": "Artikelen"
+      "articles": "Artikelen",
+      "likes": "Likes"
     },
     "articles": {
       "emptyTitle": "Nog geen artikelen",
@@ -2712,6 +2721,14 @@
       "saveFailed": "Je volgorde kon niet worden opgeslagen. Probeer het opnieuw.",
       "loadFailed": "Je berichten konden niet worden geladen. Sluit dit en probeer het opnieuw.",
       "empty": "Er valt nog niets te ordenen. Plaats eerst iets."
+    },
+    "likedPosts": {
+      "emptyTitle": "Nog geen likes",
+      "emptyOwn": "Berichten die je leuk vindt verschijnen hier. Alleen jij ziet ze, tenzij je Mijn likes aan iedereen tonen aanzet in Instellingen.",
+      "emptyOther": "Nog niets geliket.",
+      "privateTitle": "Likes zijn privé",
+      "privateDesc": "Dit account houdt zijn likes voor zichzelf.",
+      "loadMore": "Meer laden"
     }
   },
   "tv": {

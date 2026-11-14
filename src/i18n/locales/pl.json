@@ -1110,7 +1110,15 @@
     "socialConnectedShort": "Połączono",
     "socialConnectFailed": "Nie udało się połączyć {{platform}}. Spróbuj ponownie.",
     "socialVerifiedFollowers": "{{value}} obserwujących",
-    "socialFollowersPending": "Aktualizowanie liczby obserwujących"
+    "socialFollowersPending": "Aktualizowanie liczby obserwujących",
+    "showLikes": "Pokazuj moje polubienia wszystkim",
+    "showLikesDesc": "Każdy może otworzyć kartę Polubienia na twoim profilu. Domyślnie wyłączone, więc tylko ty widzisz, co polubiłeś.",
+    "showFollowersList": "Pokazuj, kto mnie obserwuje",
+    "showFollowersListDesc": "Pozwól każdemu otworzyć listę twoich obserwujących. Gdy wyłączone, widzisz ją tylko ty.",
+    "showFollowingList": "Pokazuj, kogo obserwuję",
+    "showFollowingListDesc": "Pozwól każdemu otworzyć listę osób, które obserwujesz. Gdy wyłączone, widzisz ją tylko ty.",
+    "showFollowCounts": "Pokazuj liczby obserwujących",
+    "showFollowCountsDesc": "Pokazuje, ilu masz obserwujących i ile osób obserwujesz. Wyłączenie ukrywa też obie listy."
   },
   "common": {
     "confirm": "Potwierdź",
@@ -2167,7 +2175,8 @@
     "tabs": {
       "playlists": "Playlisty",
       "dislikes": "Nie lubię",
-      "articles": "Artykuły"
+      "articles": "Artykuły",
+      "likes": "Polubienia"
     },
     "articles": {
       "emptyTitle": "Brak artykułów",
@@ -2196,7 +2205,15 @@
     "sortMostLiked": "Najbardziej lubiany",
     "searchThisChannel": "Wyszukaj na tym kanale",
     "searchResultCount": "1 wynik dla „{{query}}”",
-    "searchResultCountPlural": "{{count}} wyniki dla {{query}}"
+    "searchResultCountPlural": "{{count}} wyniki dla {{query}}",
+    "likedPosts": {
+      "emptyTitle": "Brak polubień",
+      "emptyOwn": "Posty, które polubisz, pojawią się tutaj. Widzisz je tylko ty, chyba że włączysz Pokazuj moje polubienia wszystkim w Ustawieniach.",
+      "emptyOther": "Jeszcze nic nie polubiono.",
+      "privateTitle": "Polubienia są prywatne",
+      "privateDesc": "To konto zachowuje swoje polubienia dla siebie.",
+      "loadMore": "Wczytaj więcej"
+    }
   },
   "tv": {
     "seoTitle": "Live TV: Bezpłatne kanały z całego świata",

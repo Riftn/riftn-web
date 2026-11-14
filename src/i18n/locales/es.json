@@ -1343,7 +1343,15 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "No se pudo conectar {{platform}}. Inténtalo de nuevo.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Actualizando seguidores"
+    "socialFollowersPending": "Actualizando seguidores",
+    "showLikes": "Mostrar mis me gusta a todos",
+    "showLikesDesc": "Cualquiera puede abrir la pestaña Me gusta de tu perfil. Desactivado por defecto, así que solo tú ves lo que te gustó.",
+    "showFollowersList": "Mostrar quién me sigue",
+    "showFollowersListDesc": "Deja que cualquiera abra tu lista de seguidores. Si está desactivado, solo tú puedes verla.",
+    "showFollowingList": "Mostrar a quién sigo",
+    "showFollowingListDesc": "Deja que cualquiera abra la lista de personas que sigues. Si está desactivado, solo tú puedes verla.",
+    "showFollowCounts": "Mostrar mis números de seguidores",
+    "showFollowCountsDesc": "Muestra cuántos seguidores tienes y a cuántas personas sigues. Al desactivarlo también se ocultan ambas listas."
   },
   "common": {
     "confirm": "Confirmar",
@@ -2476,7 +2484,8 @@
     "tabs": {
       "playlists": "Listas de reproducción",
       "dislikes": "No me gusta",
-      "articles": "Artículos"
+      "articles": "Artículos",
+      "likes": "Me gusta"
     },
     "articles": {
       "emptyTitle": "Aún no hay artículos",
@@ -2522,6 +2531,14 @@
       "saveFailed": "No se pudo guardar tu orden. Inténtalo de nuevo.",
       "loadFailed": "No se pudieron cargar tus publicaciones. Cierra esto e inténtalo de nuevo.",
       "empty": "Aún no hay nada que ordenar. Publica algo primero."
+    },
+    "likedPosts": {
+      "emptyTitle": "Aún no hay me gusta",
+      "emptyOwn": "Las publicaciones que te gustan aparecen aquí. Solo tú puedes verlas, salvo que actives Mostrar mis me gusta en Ajustes.",
+      "emptyOther": "Aún no le ha gustado nada.",
+      "privateTitle": "Los me gusta son privados",
+      "privateDesc": "Esta cuenta mantiene sus me gusta en privado.",
+      "loadMore": "Cargar más"
     }
   },
   "tv": {

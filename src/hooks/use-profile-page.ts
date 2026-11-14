@@ -2,7 +2,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { useMemo, useEffect, useLayoutEffect, useRef, useCallback, useState } from 'react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
-import { Film, Star, Pin, ListVideo, ThumbsDown } from "lucide-react";
+import { Film, Star, Pin, ListVideo, ThumbsDown, ThumbsUp } from "lucide-react";
 import Image from "@/components/ui/cut-icons/images";
 import Radio from "@/components/ui/cut-icons/live";
 import PieChart from "@/components/ui/cut-icons/fractions";
@@ -27,7 +27,7 @@ import {
 } from '@/hooks/use-dehub-profile';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useCreatorPlans, useIsSubscribed } from '@/hooks/use-subscriptions';
-import { parseVisibility } from '@/hooks/use-privacy-settings';
+import { parseFollowLists } from '@/hooks/use-privacy-settings';
 import { useReauthHandler } from '@/hooks/use-reauth-handler';
 
 import { getBadgeName, getBadgeUrl } from '@/lib/staking-badges';
@@ -44,6 +44,7 @@ import type { TextPost, ImagePost, VideoItem } from '@/types/feed.types';
 import type { TabValue } from '@/components/app/profile/ProfileConstants';
 import { useProfileContentCounts } from '@/hooks/use-profile-content-counts';
 import { canSeeDislikesTab, useProfileDislikes } from '@/hooks/use-profile-dislikes';
+import { canSeeLikesTab, useProfileLikes } from '@/hooks/use-profile-likes';
 
 /** The /api/feed postType each type tab lists; the same split the app uses. */
 const PROFILE_TAB_POST_TYPE: Partial<Record<TabValue, string>> = {
@@ -516,6 +517,10 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
   const showDislikesTab = canSeeDislikesTab(!!isViewingOwnProfile, apiProfile?.customs as Record<string, unknown> | undefined);
   const dislikesQuery = useProfileDislikes(apiProfile?.walletAddress, showDislikesTab && secondaryEnabled);
   const dislikesCount = dislikesQuery.data?.pages?.[0]?.totalCount ?? 0;
+  // Likes: same rule, and private by default for everyone.
+  const showLikesTab = canSeeLikesTab(!!isViewingOwnProfile, apiProfile?.customs as Record<string, unknown> | undefined);
+  const likesQuery = useProfileLikes(apiProfile?.walletAddress, showLikesTab && secondaryEnabled);
+  const likesCount = likesQuery.data?.pages?.[0]?.totalCount ?? 0;
 
   // Fractions: the same portfolio read the tab itself lists (shared cache, so
   // opening the tab is instant). Blank until it answers, never a false 0.
@@ -556,19 +561,22 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
         : []),
     ].sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
     // Last, not sorted in: it is about what you turned away, not what you made.
+    const likesTab = showLikesTab
+      ? [{ icon: ThumbsUp as unknown as typeof Home, label: _copy("profile.tabs.likes", { defaultValue: "Likes" }), value: 'likes' as TabValue, count: likesCount }]
+      : [];
     const dislikesTab = showDislikesTab
       ? [{ icon: ThumbsDown as unknown as typeof Home, label: _copy("profile.tabs.dislikes", { defaultValue: "Dislikes" }), value: 'dislikes' as TabValue, count: dislikesCount }]
       : [];
     // Blank, never a false 0, until the number that tab shows has answered.
     const answered = (tab: TabValue) =>
       tab === 'subscribers' ? secondaryEnabled && !isLoadingPlans
-        : tab === 'pinned' || tab === 'playlists' || tab === 'dislikes' || tab === 'fractions' ? true
+        : tab === 'pinned' || tab === 'playlists' || tab === 'likes' || tab === 'dislikes' || tab === 'fractions' ? true
         : isCountsSettled;
-    return [homeTab, ...restTabs, ...dislikesTab].map((tab) =>
+    return [homeTab, ...restTabs, ...likesTab, ...dislikesTab].map((tab) =>
       tab.count === 0 && !answered(tab.value) ? { ...tab, count: null } : tab);
     // tabCount reads only the values listed here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCountsSettled, secondaryEnabled, isLoadingPlans, serverCounts, activeTab, isContentFiltered, contentTotal, ALL_CONTENT.length, PROFILE_POSTS.length, PROFILE_IMAGES.length, ALL_PROFILE_VIDEOS.length, PROFILE_LIVE.length, commentCount, plans.length, pinnedCount, playlistCount, articleCount, fractionsCount, showDislikesTab, dislikesCount, _copy]);
+  }, [isCountsSettled, secondaryEnabled, isLoadingPlans, serverCounts, activeTab, isContentFiltered, contentTotal, ALL_CONTENT.length, PROFILE_POSTS.length, PROFILE_IMAGES.length, ALL_PROFILE_VIDEOS.length, PROFILE_LIVE.length, commentCount, plans.length, pinnedCount, playlistCount, articleCount, fractionsCount, showDislikesTab, dislikesCount, showLikesTab, likesCount, _copy]);
   const { isSubscribed, isLoading: isLoadingSubscription } = useIsSubscribed(
     !isViewingOwnProfile ? apiProfile?.walletAddress : undefined,
     secondaryEnabled
@@ -580,9 +588,10 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
   // Privacy — parse straight off the profile we already fetched.
   // (useUserPrivacySettings re-fetched the same profile keyed by wallet
   // address — a fully redundant round-trip on every profile view.)
-  const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(
-    (apiProfile?.customs as Record<string, unknown> | undefined)?.followVisibility
+  const { showFollowersList, showFollowingList, hideFollowerCounts } = parseFollowLists(
+    apiProfile?.customs as Record<string, unknown> | undefined
   );
+  const showFollowersFollowing = showFollowersList || showFollowingList;
 
   // Re-auth
   const { handleApiError } = useReauthHandler();
@@ -756,6 +765,8 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     optimisticPosts,
     // Privacy
     showFollowersFollowing,
+    showFollowersList,
+    showFollowingList,
     hideFollowerCounts,
     // Re-auth
     handleApiError,

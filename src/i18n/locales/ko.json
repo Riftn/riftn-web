@@ -1167,7 +1167,15 @@
     "socialConnectedShort": "연결됨",
     "socialConnectFailed": "{{platform}}에 연결하지 못했습니다. 다시 시도해 주세요.",
     "socialVerifiedFollowers": "팔로워 {{value}}명",
-    "socialFollowersPending": "팔로워 수 업데이트 중"
+    "socialFollowersPending": "팔로워 수 업데이트 중",
+    "showLikes": "내 좋아요를 모두에게 보이기",
+    "showLikesDesc": "누구나 내 프로필의 좋아요 탭을 열 수 있어요. 기본값은 꺼짐이라 내가 좋아요한 게시물은 나만 볼 수 있어요.",
+    "showFollowersList": "나를 팔로우하는 사람 보이기",
+    "showFollowersListDesc": "누구나 내 팔로워 목록을 열 수 있게 해요. 끄면 나만 볼 수 있어요.",
+    "showFollowingList": "내가 팔로우하는 사람 보이기",
+    "showFollowingListDesc": "누구나 내가 팔로우하는 사람 목록을 열 수 있게 해요. 끄면 나만 볼 수 있어요.",
+    "showFollowCounts": "팔로워 수 보이기",
+    "showFollowCountsDesc": "팔로워 수와 팔로잉 수를 보여줘요. 끄면 두 목록도 숨겨져요."
   },
   "common": {
     "confirm": "확인",
@@ -2224,7 +2232,8 @@
     "tabs": {
       "playlists": "재생 목록",
       "dislikes": "싫어요",
-      "articles": "아티클"
+      "articles": "아티클",
+      "likes": "좋아요"
     },
     "articles": {
       "emptyTitle": "아직 아티클이 없습니다",
@@ -2253,7 +2262,15 @@
     "sortMostLiked": "가장 많이 좋아요",
     "searchThisChannel": "채널 검색",
     "searchResultCount": "1 개 결과 {{query}}",
-    "searchResultCountPlural": "{{count}} 개 결과 {{query}}"
+    "searchResultCountPlural": "{{count}} 개 결과 {{query}}",
+    "likedPosts": {
+      "emptyTitle": "아직 좋아요가 없어요",
+      "emptyOwn": "좋아요한 게시물이 여기에 표시돼요. 설정에서 내 좋아요를 모두에게 보이기를 켜지 않으면 나만 볼 수 있어요.",
+      "emptyOther": "아직 좋아요한 게시물이 없어요.",
+      "privateTitle": "좋아요는 비공개예요",
+      "privateDesc": "이 계정은 좋아요를 공개하지 않아요.",
+      "loadMore": "더 보기"
+    }
   },
   "tv": {
     "seoTitle": "라이브 TV: 전 세계의 무료 채널",

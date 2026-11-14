@@ -1343,7 +1343,15 @@
     "socialConnectedShort": "Bağlı",
     "socialConnectFailed": "{{platform}} bağlanamadı. Lütfen tekrar dene.",
     "socialVerifiedFollowers": "{{value}} takipçi",
-    "socialFollowersPending": "Takipçi sayısı güncelleniyor"
+    "socialFollowersPending": "Takipçi sayısı güncelleniyor",
+    "showLikes": "Beğenilerimi herkese göster",
+    "showLikesDesc": "Herkes profilindeki Beğeniler sekmesini açabilir. Varsayılan olarak kapalı, yani neyi beğendiğini yalnızca sen görürsün.",
+    "showFollowersList": "Beni kimlerin takip ettiğini göster",
+    "showFollowersListDesc": "Herkesin takipçi listeni açmasına izin ver. Kapalıyken yalnızca sen görebilirsin.",
+    "showFollowingList": "Kimleri takip ettiğimi göster",
+    "showFollowingListDesc": "Herkesin takip ettiğin kişilerin listesini açmasına izin ver. Kapalıyken yalnızca sen görebilirsin.",
+    "showFollowCounts": "Takipçi sayılarımı göster",
+    "showFollowCountsDesc": "Kaç takipçin olduğunu ve kaç kişiyi takip ettiğini gösterir. Kapatmak iki listeyi de gizler."
   },
   "common": {
     "confirm": "Onayla",
@@ -2476,7 +2484,8 @@
     "tabs": {
       "playlists": "Oynatma Listeleri",
       "dislikes": "Beğenilmeyenler",
-      "articles": "Makaleler"
+      "articles": "Makaleler",
+      "likes": "Beğeniler"
     },
     "articles": {
       "emptyTitle": "Henüz makale yok",
@@ -2522,6 +2531,14 @@
       "saveFailed": "Sıralamanız kaydedilemedi. Lütfen tekrar deneyin.",
       "loadFailed": "Gönderileriniz yüklenemedi. Bunu kapatıp tekrar deneyin.",
       "empty": "Henüz sıralanacak bir şey yok. Önce bir şey paylaşın."
+    },
+    "likedPosts": {
+      "emptyTitle": "Henüz beğeni yok",
+      "emptyOwn": "Beğendiğin gönderiler burada görünür. Ayarlar'da Beğenilerimi herkese göster'i açmadıkça yalnızca sen görürsün.",
+      "emptyOther": "Henüz hiçbir şey beğenilmedi.",
+      "privateTitle": "Beğeniler gizli",
+      "privateDesc": "Bu hesap beğenilerini kendine saklıyor.",
+      "loadMore": "Daha fazla yükle"
     }
   },
   "tv": {

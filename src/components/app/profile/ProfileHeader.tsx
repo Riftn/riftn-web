@@ -80,6 +80,9 @@ export interface ProfileHeaderProps {
   ShareOptions: React.ComponentType;
   // Privacy
   showFollowersFollowing: boolean;
+  /** Per-list visibility; fall back to showFollowersFollowing when not given. */
+  showFollowersList?: boolean;
+  showFollowingList?: boolean;
   hideFollowerCounts: boolean;
   // Followers list
   setFollowListType: (type: 'followers' | 'following') => void;
@@ -114,6 +117,8 @@ export function ProfileHeader({
   setLoginModalOpen,
   ShareOptions,
   showFollowersFollowing,
+  showFollowersList = showFollowersFollowing,
+  showFollowingList = showFollowersFollowing,
   hideFollowerCounts,
   setFollowListType,
   setFollowListDrawerOpen,
@@ -470,7 +475,7 @@ export function ProfileHeader({
           {/* Followers/Following */}
           {(!hideFollowerCounts || isViewingOwnProfile) ? (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
-              {(showFollowersFollowing || isViewingOwnProfile) ? (
+              {(showFollowingList || isViewingOwnProfile) ? (
                 <button 
                   onClick={() => {
                     setFollowListType('following');
@@ -493,7 +498,7 @@ export function ProfileHeader({
                   )}
                 </div>
               )}
-              {(showFollowersFollowing || isViewingOwnProfile) ? (
+              {(showFollowersList || isViewingOwnProfile) ? (
                 <button 
                   onClick={() => {
                     setFollowListType('followers');

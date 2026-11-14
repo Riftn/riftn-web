@@ -1164,7 +1164,15 @@
     "socialConnectedShort": "已连接",
     "socialConnectFailed": "无法连接 {{platform}}，请重试。",
     "socialVerifiedFollowers": "{{value}} 位粉丝",
-    "socialFollowersPending": "粉丝数更新中"
+    "socialFollowersPending": "粉丝数更新中",
+    "showLikes": "向所有人显示我的点赞",
+    "showLikesDesc": "任何人都可以打开你主页上的“点赞”标签。默认关闭，所以只有你能看到自己点赞了什么。",
+    "showFollowersList": "显示谁关注了我",
+    "showFollowersListDesc": "允许任何人打开你的粉丝列表。关闭后只有你能看到。",
+    "showFollowingList": "显示我关注了谁",
+    "showFollowingListDesc": "允许任何人打开你关注的人的列表。关闭后只有你能看到。",
+    "showFollowCounts": "显示我的关注数",
+    "showFollowCountsDesc": "显示你有多少粉丝以及你关注了多少人。关闭后两个列表也会隐藏。"
   },
   "common": {
     "confirm": "确认",
@@ -2221,7 +2229,8 @@
     "tabs": {
       "playlists": "播放列表",
       "dislikes": "踩",
-      "articles": "文章"
+      "articles": "文章",
+      "likes": "点赞"
     },
     "articles": {
       "emptyTitle": "还没有文章",
@@ -2250,7 +2259,15 @@
     "sortMostLiked": "最受欢迎",
     "searchThisChannel": "搜索频道",
     "searchResultCount": "1 个结果为“{{query}}”",
-    "searchResultCountPlural": "{{count}} 个结果为“{{query}}”"
+    "searchResultCountPlural": "{{count}} 个结果为“{{query}}”",
+    "likedPosts": {
+      "emptyTitle": "还没有点赞",
+      "emptyOwn": "你点赞的帖子会显示在这里。除非在设置中打开“向所有人显示我的点赞”，否则只有你能看到。",
+      "emptyOther": "还没有点赞任何内容。",
+      "privateTitle": "点赞是私密的",
+      "privateDesc": "此账号不公开其点赞。",
+      "loadMore": "加载更多"
+    }
   },
   "tv": {
     "seoTitle": "电视直播: 来自世界各地的免费频道",
