@@ -1,6 +1,6 @@
 ---
 name: dehub-poster
-description: Generate DeHub-branded posters, social images, banners and OG cards in the official "SM Template 2.0" monochrome chrome style. Triggers on requests like "make me a dehub poster", "dehub content", "dehub social image", "dehub banner", "dehub announcement graphic", or any DeHub image generation request.
+description: Generate Riftn (formerly DeHub) posters, social images, blog and guide banners, share images and OG cards in the official "SM Template 2.0" monochrome chrome style with the white Riftn logo in the bottom corner. Use for every new article or guide banner, and on requests like "riftn banner", "dehub poster", "social image", "blog banner", "announcement graphic".
 ---
 
 # DeHub Poster & Content Generator (SM Template 2.0)
@@ -49,15 +49,15 @@ Everything here is what the renderer already does. Describe it accurately when b
 - **Multi-line headlines share ONE sweep across the whole block.** In SVG that means `userSpaceOnUse`, not `objectBoundingBox` — per-line bounding boxes restart the ramp, so a 3-letter line and a 7-letter line each run the full grey→white→grey sweep and the two lines read as different tones.
 
 **Alignment — the thing most often got wrong.**
-- ONE left gutter (~5.2% of width landscape, ~7.5% portrait) shared by the pill, the headline and the sub row. The headline needs a ~-.091em left nudge and the sub ~-.03em to cancel Manrope's left side bearing; without it the type looks indented against the pill and reads as sloppy.
-- ONE bottom baseline (~10.4% of height up from the bottom) whose **centre line** is shared by the wordmark pill, the `//dehub.io` box and the QR. Centre, not bottom — their heights differ.
+- ONE left gutter (~5.2% of width landscape, ~7.5% portrait) shared by the logo, the headline and the sub row. The headline needs a ~-.091em left nudge and the sub ~-.03em to cancel Manrope's left side bearing; without it the type looks indented against the pill and reads as sloppy.
+- ONE bottom inset: the white Riftn logo (bottom-left) and the QR (bottom-right) are each pinned by their own outer edge to the same PAD from the canvas edge.
 - Top tag box and QR share a right gutter (~4.2%).
 
 **HUD chrome.**
 - **Boxes are NOT dashed rectangles. They are four CORNER BRACKETS** — one short L-shaped mark at each corner, middles of the edges completely empty, like crop marks. A repeating dash pattern is the classic wrong answer: it looks technical, it survives a glance, and it is visibly not the brand. Arm length is fixed (~15px h / 12px v at 1920), never a percentage, so every box's brackets match regardless of box size. Stroke ~46% white over a near-black fill at ~.80 alpha — at ~.42 the marks compute darker than bright chrome behind them and vanish.
 - Top-right: **two-line** tag — `// type =` dim on line 1, the value on line 2.
-- Bottom-left: solid white DEHUB wordmark pill with an outer glow.
-- Bottom-centre-left (~47%): `//dehub.io` in a bracketed box.
+- Bottom-left: the **plain white Riftn logo** (`public/brand-kit/brand/riftn-logo-white.png`) with a soft dark halo under it. **No pill, no white box, no black logo on white.** This is the same corner logo every Riftn share image uses (post, profile and page cards since PR #3990). The old white DEHUB pill is retired.
+- No `//dehub.io` box any more; the QR (`brand/qr-riftn.png`) carries the link.
 - Bottom-right: QR, no border, **but on a dark backing plate** — the hero bleeds under it and white QR modules on polished chrome will not scan.
 
 **Hero.** ONE big content-matched chrome icon that **bleeds off the right and bottom edges** — it is not contained in the frame. Radial white glow behind it, deep drop shadow. Pick the icon for the CONTENT, never generic coins for a non-money topic. Two failure modes to check every time:
@@ -66,9 +66,20 @@ Everything here is what the renderer already does. Describe it accurately when b
 
 **STRICTLY monochrome.** Blacks, charcoals, silvers, chromes, cool off-whites, pure white. **No colour accents at all** — not a status pill, not a live-green dot, not a tinted glow. Every colour accent tried so far has been rejected. The reference renders look faintly blue in places; that is JPEG cast, not a hue. Any ambient tint must be a cool near-white under ~10% saturation.
 
-**`pillPos`.** The wordmark pill defaults to bottom-left (poster/social composition). **Blog banners pass `pillPos:'top'`** — blog cards crop the banner bottom-anchored, so top elements are hidden on the card and appear only on the post page, and the pill is parked there deliberately to keep card thumbnails clean. With the pill at the top the type tag drops to the bottom-left automatically.
+**Logo position.** The white Riftn logo sits bottom-left on everything, blog banners included (see every `*-banner-r2.jpg` in `public/media/`). The old kit's `pillPos:'top'` note below is legacy: **Blog banners used to pass `pillPos:'top'`** — blog cards crop the banner bottom-anchored, so top elements are hidden on the card and appear only on the post page, and the pill is parked there deliberately to keep card thumbnails clean. With the pill at the top the type tag drops to the bottom-left automatically.
 
 **Every blog post needs its own banner.** The banner is also the post's share card: the edge worker serves it as `og:image` / `twitter:image`, cropped to 1200x630 when it is already close to that shape (render landscape at 1.91:1) and padded onto near-black when it is not. A post that arrives with its own picture keeps it; a post without one gets a banner rendered here, saved under a new name in `public/media/` and set as `bannerImage` with real `bannerImageAlt` text. `src/test/blog-share-cards.test.ts` fails the build for a post with no banner, a missing file, a shared banner or no alt text.
+
+## Every new article or guide gets one (do not skip)
+
+Every new blog post, guide or article ships with a Riftn template banner, rendered by this renderer, never a plain text-on-black card. Two guides (the decentralization spectrum and "Is Riftn the same as DeHub") went out with text cards and had to be backfilled.
+
+Render one locally (no edge function, no credits):
+
+1. Copy `supabase/functions/_shared/dehub-template-banner.ts` to a scratch folder. Swap the `esm.sh` resvg-wasm import for `@resvg/resvg-js` (npm, same 2.6.x API; make `initWasm` a no-op) and stub the `ai-chat.ts` import.
+2. Set `globalThis.DEHUB_KIT_BASE = "file://<repo>/public/brand-kit"` before importing it, then call `renderTemplateBanner(spec)` under `bun` with a hand-written spec: `{format:"landscape", layout:"hero", headline:[{text:"THE"},{text:"SPECTRUM"}], subtitle:"words_on_chain", extra:"code_in_the_open", typeTag:"guide", icon:"chain", bg:"bg-12", overlay:true}`. Landscape is already 1200x630, the share-card size.
+3. Save as JPG (q90) to `public/media/<slug>-banner-r2.jpg`, set `bannerImage` + real `bannerImageAlt` on the post, run `node scripts/generate-blog-manifest.mjs` (needs `esbuild`), and revert any unrelated `public/sitemap-static.xml` churn it makes.
+4. Open the image and run the self-check below before committing.
 
 ## Formats
 
@@ -94,7 +105,7 @@ The template is filled from a small structured spec, not a paragraph of prose. W
 - **Sub** — one `//SNAKE_CASE_LINE` under the headline, a counter-statement or proof (`//NO_ALGORITHM_OWNS_YOU`, `//NO_THRESHOLD_TO_CROSS`). Not a sentence.
 - **Type tag** — the one-word value for `// type =` (movement, creators, stages, shipping…).
 - **Icon** — the chrome hero matched to the content.
-- **Layout** — format, `pillPos`, `overlay` on/off, `blurMode`.
+- **Layout** — format, `overlay` on/off, `bg` (silk key).
 
 If the spec call fails there is a zero-AI heuristic fallback, so a dead model key does not break the template — but a lazy spec produces a bland-yet-valid banner, which is worse than a failure because it ships.
 
@@ -159,7 +170,7 @@ Dimensions: 1024×1024 square default; 1536×1024 poster/banner; 1024×1536 stor
 
 ## Official brand links
 
-Include these only if the user explicitly asks for socials, website, links, contact or QR. Otherwise omit — the template already carries `//dehub.io` and the QR.
+Include these only if the user explicitly asks for socials, website, links, contact or QR. Otherwise omit — the template already carries the Riftn QR.
 
 - **Website**: `dehub.io`
 - **X / Twitter**: `x.com/riftn_com`
@@ -186,10 +197,10 @@ The graphic is half the post. Match @riftn_com or it reads as an ad:
 ## Workflow
 
 1. Read the brief. Unless the user named a cinematic archetype, attached an image, or asked for photoreal — **it is a template request**. Do not offer to render a scene instead.
-2. Pick format (see the table), `pillPos`, `overlay`, and — critical — the **content-matched chrome icon**. Never generic coins for a non-money topic.
+2. Pick format (see the table), `overlay`, background, and — critical — the **content-matched chrome icon**. Never generic coins for a non-money topic.
 3. Write the spec: headline (2–5 words, two short lines), `//SNAKE_CASE` sub, one-word type tag.
 4. Render. Template renders are free — no paywall, no credit quote.
-5. **Look at the output yourself before showing it.** Check, in this order: left gutter agreement (pill / headline / sub on one line); bottom baseline agreement (pill / `//dehub.io` / QR centres aligned); headline still legible where it crosses bright chrome; QR sitting on its dark plate; hero bleeding right + bottom only, not clipped at the top; corner brackets visible, not dashes; zero colour. Any failure → fix the spec and re-render.
+5. **Look at the output yourself before showing it.** Check, in this order: left gutter agreement (logo / headline / sub on one line); logo is the plain white Riftn mark bottom-left with no pill behind it; logo and QR the same distance from the bottom edge; headline still legible where it crosses bright chrome; QR sitting on its dark plate; hero bleeding right + bottom only, not clipped at the top; corner brackets visible, not dashes; zero colour. Any failure → fix the spec and re-render.
 6. Show it. Offer one variant if they want tweaks.
 
 If the render returns 503 `TEMPLATE_RENDER_FAILED`, that is a server fault, not a bad prompt — say so plainly rather than retrying the same brief or quietly switching to paid diffusion.
@@ -199,7 +210,8 @@ If the render returns 503 `TEMPLATE_RENDER_FAILED`, that is a server fault, not 
 - **Don't reach for diffusion on a vague brief.** "Make a DeHub poster" is the template's job. Inventing a cinematic monolith scene is the single most common way to ship something off-brand and bill for it.
 - **Don't use any colour.** No status pills, no live-green dot, no neon ambient glow, no tinted light. Monochrome only — blacks, greys, silvers, chromes, whites. If a swatch has a nameable hue, it's wrong.
 - **Don't draw HUD boxes as dashed rectangles.** Four corner brackets, empty edge middles.
-- **Don't break the two alignment rules** — one left gutter, one bottom baseline through the centres of the pill, the `//dehub.io` box and the QR.
+- **Don't break the two alignment rules** — one left gutter, one bottom inset shared by the logo and the QR.
+- **Don't put the logo in a white pill** or use the black DeHub mark. White Riftn logo, bottom corner, nothing behind it but the halo.
 - **Don't let the hero be contained.** It bleeds off the right and bottom. A hero that merely kisses the edge reads as a mistake.
 - **Don't put the QR on bare chrome.** It needs its dark backing plate or it will not scan.
 - **Don't ship a flat pure-black background** on the scene path. Texture, gradient, atmospheric depth, or a real material. Flat #000 is the #1 failure mode there.

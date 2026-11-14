@@ -161,7 +161,7 @@ That is the standard we hold ourselves to as well. Riftn's web and mobile apps a
 - **Open source is the foundation.** It is what lets you check, fork and leave, and it is achievable today.
 
 Want to see the spectrum from the inside? Open [riftn.com](https://riftn.com), mint a post, and read it back from the chain yourself. New here? Start with [What is Riftn?](/guides/what-is-dehub)`,
-  bannerImage: '/media/decentralization-spectrum-banner-manrope.jpg',
+  bannerImage: '/media/decentralization-spectrum-banner-r2.jpg',
   bannerImageAlt: 'The decentralization spectrum: how decentralized can social media really get?',
   author: { name: 'Riftn Team' },
   publishedAt: '2026-11-13T22:00:00.000Z',
