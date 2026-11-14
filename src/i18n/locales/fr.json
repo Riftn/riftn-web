@@ -13089,6 +13089,9 @@
     "reminderLater": "Pas maintenant"
   },
   "copy": {
+    "27c26a5a38b3": "Connectez-vous pour voir les messages plus anciens",
+    "674e70bcd915": "L'historique complet de la discussion est accessible à toute personne possédant un compte.",
+    "feaf753f6557": "Début de la discussion",
     "3f9b2c71d0a4": "{{n}} résultats",
     "8c4e1a6b2f57": "pour « {{query}} »",
     "1d7234ff1b79": "dans {{feed}}",

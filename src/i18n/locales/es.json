@@ -13085,6 +13085,9 @@
     "reminderLater": "Ahora no"
   },
   "copy": {
+    "27c26a5a38b3": "Inicia sesión para ver mensajes antiguos",
+    "674e70bcd915": "El historial completo de chat está abierto para todos los usuarios con cuenta.",
+    "feaf753f6557": "Inicio del chat",
     "3f9b2c71d0a4": "{{n}} resultados",
     "8c4e1a6b2f57": "para “{{query}}”",
     "1d7234ff1b79": "en {{feed}}",
