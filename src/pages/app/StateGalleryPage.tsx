@@ -142,6 +142,7 @@ import { ConversationItem } from '@/pages/app/MessagesPage';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
@@ -384,6 +385,23 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Unread marker + jump button</h3>
+      <div data-unread-jump-gallery className="grid gap-3 sm:grid-cols-2">
+        {[{ up: true, count: 3 }, { up: false, count: 2 }].map(({ up, count }) => (
+          <div key={String(up)} className="relative h-[26rem] overflow-hidden rounded-2xl border border-white/10">
+            <div data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 pb-4">
+              {thread.map(({ m, mine, first, last, day }) => (
+                <div key={m._id}>
+                  {day && <CozyDayPill iso={m.createdAt} />}
+                  {m._id === 'c' && <UnreadMarker count={3} />}
+                  <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} />
+                </div>
+              ))}
+            </div>
+            <UnreadJumpButton up={up} count={count} onClick={noop} className="absolute bottom-4 right-4 z-10" />
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

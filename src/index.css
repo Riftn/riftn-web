@@ -7294,3 +7294,15 @@ html:is([data-theme="light"], [data-system-tone="light"]) [data-notice-gate] but
   border-radius: 9999px !important;
   box-shadow: none !important;
 }
+
+/* Chat unread marker + jump capsule on paper. The capsule takes the theme's
+   own control look there; only the arrow's inner disc (white wash) and the
+   marker's hairlines (white fade) need a grey to show on paper. */
+html[data-theme="light"] [data-chat-jump] [data-jump-orb],
+html[data-system-tone="light"] [data-chat-jump] [data-jump-orb] {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+html[data-theme="light"] [data-chat-unread-marker] [data-unread-hairline],
+html[data-system-tone="light"] [data-chat-unread-marker] [data-unread-hairline] {
+  --tw-gradient-to: rgba(0, 0, 0, 0.22) var(--tw-gradient-to-position) !important;
+}
