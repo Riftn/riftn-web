@@ -784,9 +784,19 @@ html[data-feed-loading] [data-feed-welcome-bounds] :is(
   [data-feed-swallow-content]
 ) {
   transform: none !important;
-  translate: none !important;
   clip-path: none !important;
   overflow: visible !important;
+}
+/* `translate` gets its own rule ON PURPOSE. In one block with `transform:
+   none`, the CSS minifier folds the pair into `transform: translate(0,0)` —
+   a real transform, so every wrapper became a stacking context again and the
+   welcome card went under the frost with everything else. Different selector,
+   so the two can't be merged. */
+html[data-feed-loading] [data-feed-welcome-bounds] :is(
+  [data-feed-swallow-cut],
+  [data-feed-swallow-motion]
+) {
+  translate: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
