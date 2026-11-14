@@ -34,6 +34,25 @@ export class AccountMcpAuth {
     await this.store.put(key, record(value, ttl));
     if (!await this.store.getAlarm()) await this.store.setAlarm(Date.now() + HOUR);
   }
+  async drafts(wallet, action, input = {}) {
+    const key = `drafts:${wallet}`;
+    return this.store.transaction(async tx => {
+      const drafts = live(await tx.get(key)) || [];
+      if (action === 'list') return drafts;
+      if (action === 'delete') {
+        const next = drafts.filter(draft => draft.id !== input.id);
+        await tx.put(key, record(next, 180 * DAY));
+        return { deleted: next.length !== drafts.length };
+      }
+      const now = new Date().toISOString();
+      const index = drafts.findIndex(draft => draft.id === input.id);
+      if (index < 0 && drafts.length >= 20) throw new Error('Draft limit reached. Delete a draft before saving another.');
+      const draft = { id: input.id, title: input.title || '', content: input.content, category: input.category || 'General', updated_at: now };
+      if (index >= 0) drafts[index] = draft; else drafts.push(draft);
+      await tx.put(key, record(drafts, 180 * DAY));
+      return draft;
+    });
+  }
   async alarm() {
     const cursor = await this.store.get('_gc');
     const rows = await this.store.list({ ...(cursor ? { startAfter: cursor } : {}), limit: 256 });
@@ -399,6 +418,7 @@ export class AccountMcpAuth {
         once: (kind, id, args, operation) => this.once(grant.wallet, kind, id, args, operation),
         spend: kind => this.budget(`day:${kind}:${grant.wallet}`, DAILY_LIMITS[kind], DAY),
         agent: name => this.agentSession(grant, name),
+        drafts: (action, input) => this.drafts(grant.wallet, action, input),
         generate: args => this.generate(args, ctx), generationStatus: id => this.generationStatus(id, ctx) };
       return reply(await callAccountTool(rpc.params?.name, rpc.params?.arguments ?? {}, ctx));
     } catch (error) {

@@ -8,9 +8,9 @@ HTTPS callbacks and the MCP resource bound to `https://riftn.com/mcp`.
 
 | Scope | Account controls |
 | --- | --- |
-| `dehub:read` | Connected identity, own posts, scheduled posts, post analytics, audience activity, polls, followers/following, notifications, bookmarks, generation status, private Creator library and your agents' new member welcomes |
+| `dehub:read` | Connected identity, MCP drafts, own posts, scheduled posts, post analytics, audience activity, polls, followers/following, notifications, bookmarks, generation status, private Creator library and your agents' new member welcomes |
 | `dehub:profile` | Username, display name, bio, avatar, banner and profile privacy |
-| `dehub:social` | Publish and schedule posts, edit or delete owned posts, manage their visibility, media, polls and covers, comment/reply, react, follow/unfollow, bookmark, mark notifications read and switch your agents to welcome new members |
+| `dehub:social` | Save or delete MCP drafts, publish and schedule posts, edit or delete owned posts, manage their visibility, media, polls and covers, comment/reply, react, follow/unfollow, bookmark, mark notifications read and switch your agents to welcome new members |
 | `dehub:generate` | Images, video, audio and 3D through the existing Creator endpoints |
 
 `dehub_features` describes supported chat controls and links to app surfaces for
@@ -66,8 +66,9 @@ The account connector now supports multi-image publication, scheduling and
 rescheduling, post edits and deletion, visibility and reply rules, post analytics,
 poll creation and voting, and image and cover replacement.
 These actions use the same account and ownership checks as the web and mobile
-post controls. Drafts remain on the device in the web and mobile composers; the
-connector does not claim to store or edit those local drafts.
+post controls. MCP drafts are private to the connected account and expire 180
+days after the last edit. They are separate from local drafts in the web and
+mobile composers.
 
 ## Deployment and app registration
 

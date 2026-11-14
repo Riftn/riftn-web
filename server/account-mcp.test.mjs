@@ -104,6 +104,21 @@ test('expanded post controls declare the right access and reject untrusted input
   const wrongScope = await callAccountTool('dehub_delete_post', { token_id: '42' }, { token: 'one', scopes: ['dehub:read'] });
   assert.equal(wrongScope.isError, true);
 });
+test('post drafts stay private to the connected account and can be edited or deleted', async () => {
+  const f = fixture();
+  const one = await connect(f, { scope: 'dehub:read dehub:social' });
+  const two = await connect(f, { scope: 'dehub:read dehub:social' }, 'two');
+  const draft_id = '9dbdd100-45bc-4a9c-a8c2-9ea19a933002';
+  const save = await (await rpc(f, 'dehub_save_draft', { draft_id, content: 'First' }, one.access_token)).json();
+  assert.equal(save.result.structuredContent.content, 'First');
+  await rpc(f, 'dehub_save_draft', { draft_id, content: 'Edited' }, one.access_token);
+  const own = await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json();
+  const other = await (await rpc(f, 'dehub_drafts', {}, two.access_token)).json();
+  assert.equal(own.result.structuredContent.drafts[0].content, 'Edited');
+  assert.deepEqual(other.result.structuredContent.drafts, []);
+  await rpc(f, 'dehub_delete_draft', { draft_id }, one.access_token);
+  assert.deepEqual((await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json()).result.structuredContent.drafts, []);
+});
 test('opening /mcp in a browser lands on the connect guide; chat apps still get the MCP reply', async () => {
   const f = fixture();
   const page = await f.service.fetch(req('/mcp', 'GET', undefined, { Accept: 'text/html,application/xhtml+xml' }));
