@@ -91,6 +91,13 @@ async function file(ctx, url, kind, maxBytes = 12 * 1024 * 1024) {
   } finally { await reader.cancel().catch(() => {}); }
   return new Blob(chunks, { type: mime });
 }
+function inlineImage(value) {
+  const match = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  if (!match || match[2].length > 5_600_000) throw new Error('Provide a PNG, JPEG or WebP data URL under 4 MB.');
+  const bytes = Uint8Array.from(atob(match[2]), character => character.charCodeAt(0));
+  if (bytes.length > 4 * 1024 * 1024) throw new Error('Image is too large.');
+  return new Blob([bytes], { type: match[1] });
+}
 
 const tools = [];
 const asAgent = z.string().trim().toLowerCase().regex(/^@?[a-z0-9_.-]{1,60}$/).optional()
@@ -110,7 +117,7 @@ tool('dehub_features', 'Discover Riftn account controls', 'List the chat control
   endpoint: RESOURCE,
   features: [
     { feature: 'Profile and privacy', tools: ['dehub_account','dehub_update_profile'] },
-    { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_create_post','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
+    { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_save_draft','dehub_drafts','dehub_delete_draft','dehub_create_post','dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_reschedule_post','dehub_fans_online','dehub_create_poll','dehub_poll','dehub_vote_poll','dehub_remove_poll_vote','dehub_close_poll','dehub_post_image_allowance','dehub_add_post_images','dehub_replace_post_image','dehub_replace_video_cover','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
     { feature: 'Your agents', tools: ['dehub_my_agents'], note: 'Pass as_agent to post, reply, react, repost, follow, edit the profile or read notifications as one of your agents.' },
     { feature: 'Social and notifications', tools: ['dehub_follow','dehub_follow_list','dehub_notifications','dehub_mark_notification_read'] },
     { feature: 'Bookmarks', tools: ['dehub_bookmark_folders','dehub_bookmark_items','dehub_save_bookmark'] },
@@ -185,16 +192,29 @@ tool('dehub_update_profile', 'Update my Riftn profile', 'Change only the connect
 }, { destructive: true, open: true, agents: true, cap: 'profile' });
 
 tool('dehub_my_posts', 'List my posts', 'Read the connected account\'s own published posts.', { page, limit }, 'dehub:read', async (a, ctx) => success(await api(ctx, `/myPosts?page=${a.page}&limit=${a.limit}`)), { read: true, agents: true });
-tool('dehub_create_post', 'Publish a Riftn post', 'Publish an ordinary text, image or video post as the connected person. Requires an explicit request to publish. Does not mint or sign blockchain transactions. Use one request_id for the same publication, including retries. Video needs a thumbnail.', {
-  request_id: z.string().uuid(), content: text(500), title: text(150).optional(), media_url: media.optional(), media_type: z.enum(['image','video']).optional(), thumbnail_url: media.optional(), category: text(100).default('General'),
+tool('dehub_save_draft', 'Save a post draft', 'Save or replace a private connector draft by ID. Drafts are available to this account through MCP for 180 days after the last edit.', { draft_id: z.string().uuid(), content: text(500), title: text(150).optional(), category: text(100).optional() }, 'dehub:social', async (a, ctx) => success(await ctx.drafts('save', { id: a.draft_id, content: a.content, title: a.title, category: a.category })), { idempotent: true });
+tool('dehub_drafts', 'List my post drafts', 'Read private drafts saved through this account connector.', {}, 'dehub:read', async (_, ctx) => success({ drafts: await ctx.drafts('list') }), { read: true });
+tool('dehub_delete_draft', 'Delete a post draft', 'Delete a private connector draft by ID.', { draft_id: z.string().uuid() }, 'dehub:social', async (a, ctx) => success(await ctx.drafts('delete', { id: a.draft_id })), { destructive: true, idempotent: true });
+tool('dehub_create_post', 'Publish a Riftn post', 'Publish or schedule an ordinary text, image or video post as the connected person. Requires an explicit request to publish. Does not mint or sign blockchain transactions. Reuse request_id on retries. Video needs a thumbnail.', {
+  request_id: z.string().uuid(), content: text(500), title: text(150).optional(), media_url: media.optional(), media_urls: z.array(media).min(2).max(10).optional(), image_data_url: z.string().max(5_600_030).optional(), media_type: z.enum(['image','video']).optional(), thumbnail_url: media.optional(), category: text(100).default('General'), scheduled_at: z.string().datetime({ offset: true }).optional(), visibility: z.enum(['public','followers','direct']).optional(), reply_policy: z.enum(['public','followers','following','mentioned']).optional(), quote_policy: z.enum(['public','followers','nobody']).optional(),
 }, 'dehub:social', async (a, ctx) => ctx.once('post', a.request_id, a, async () => {
-  if (!!a.media_url !== !!a.media_type) throw new Error('Provide both media_url and media_type together.');
+  if ([a.media_url, a.media_urls, a.image_data_url].filter(Boolean).length > 1) throw new Error('Use only one media source.');
+  if (!!(a.media_url || a.media_urls || a.image_data_url) !== !!a.media_type) throw new Error('Provide media and media_type together.');
+  if (a.image_data_url && a.media_type !== 'image') throw new Error('Inline image requires image media type.');
+  if (a.media_urls && a.media_type !== 'image') throw new Error('Multiple media URLs require image type.');
   if (a.media_type === 'video' && !a.thumbnail_url) throw new Error('Video posts need a thumbnail.');
+  if (a.scheduled_at && Date.parse(a.scheduled_at) <= Date.now()) throw new Error('scheduled_at must be in the future.');
   const form = new FormData();
   for (const [key, value] of Object.entries({ name: a.title && !a.content.startsWith(a.title) ? a.title : ' ', description: a.content,
-    postType: a.media_url ? a.media_type === 'video' ? 'video' : 'feed-images' : 'feed-simple', chainId: '8453',
+    postType: a.media_url || a.media_urls || a.image_data_url ? a.media_type === 'video' ? 'video' : 'feed-images' : 'feed-simple', chainId: '8453',
     category: JSON.stringify([a.category]), minter: ctx.wallet, mintOptOut: 'true', idempotencyKey: a.request_id,
     streamInfo: JSON.stringify({ isLockContent: false, isPayPerView: false, isAddBounty: false }) })) form.set(key, value);
+  if (a.scheduled_at) form.set('scheduledAt', a.scheduled_at);
+  if (a.visibility && a.visibility !== 'public') form.set('visibility', a.visibility);
+  if (a.reply_policy && a.reply_policy !== 'public') form.set('replyPolicy', a.reply_policy);
+  if (a.quote_policy && a.quote_policy !== 'public') form.set('quotePolicy', a.quote_policy);
+  if (a.media_urls) for (const url of a.media_urls) form.append('file', await file(ctx, url, 'image'), 'image.png');
+  if (a.image_data_url) form.append('file', inlineImage(a.image_data_url), 'image.png');
   if (a.media_url) {
     form.append('file', await file(ctx, a.media_url, a.media_type, a.media_type === 'video' ? 64 * 1024 * 1024 : undefined), a.media_type === 'video' ? 'video.mp4' : 'image.png');
     form.set('media_type', a.media_type);
@@ -202,8 +222,48 @@ tool('dehub_create_post', 'Publish a Riftn post', 'Publish an ordinary text, ima
   }
   const result = unwrap(await api(ctx, '/user_mint', 'POST', form));
   if (!result?.createdTokenId) throw new Error('Publication outcome is unknown. Read your posts before retrying.');
+  return success({ published: !a.scheduled_at, scheduled: !!a.scheduled_at, scheduled_at: a.scheduled_at || null, minted: false, token_id: result.createdTokenId, url: `${ORIGIN}/app/post/${result.createdTokenId}` });
+}), { open: true, agents: true, cap: 'post' });
+tool('dehub_quote_post', 'Quote a post', 'Publish an ordinary quote post with your commentary. Reuse request_id on retries.', { request_id: z.string().uuid(), quoted_token_id: id, content: text(500), category: text(100).default('General') }, 'dehub:social', async (a, ctx) => ctx.once('post', a.request_id, a, async () => {
+  const form = new FormData();
+  for (const [key, value] of Object.entries({ quotedTokenId: a.quoted_token_id, name: ' ', description: a.content, postType: 'feed-simple', category: JSON.stringify([a.category]), chainId: '8453', minter: ctx.wallet, mintOptOut: 'true', idempotencyKey: a.request_id, streamInfo: JSON.stringify({}) })) form.set(key, value);
+  const result = unwrap(await api(ctx, '/quote_post', 'POST', form));
+  if (!result?.createdTokenId) throw new Error('Quote outcome is unknown. Read your posts before retrying.');
   return success({ published: true, minted: false, token_id: result.createdTokenId, url: `${ORIGIN}/app/post/${result.createdTokenId}` });
 }), { open: true, agents: true, cap: 'post' });
+tool('dehub_edit_post', 'Edit my post', 'Edit text, category, content warning, or reply and quote rules on a post you own.', {
+  token_id: id, title: text(150).optional(), content: text(2000).optional(), category: text(100).optional(), spoiler_text: z.string().max(300).optional(), comments_disabled: z.boolean().optional(), reply_policy: z.enum(['public','followers','following','mentioned']).optional(), quote_policy: z.enum(['public','followers','nobody']).optional(),
+}, 'dehub:social', async (a, ctx) => {
+  const body = Object.fromEntries(Object.entries({ name: a.title, description: a.content, category: a.category ? [a.category] : undefined, spoilerText: a.spoiler_text, commentsDisabled: a.comments_disabled, replyPolicy: a.reply_policy, quotePolicy: a.quote_policy }).filter(([, v]) => v !== undefined));
+  if (!Object.keys(body).length) throw new Error('Provide at least one field to edit.');
+  return success(await api(ctx, `/nft/${a.token_id}`, 'PATCH', body));
+}, { destructive: true, open: true, agents: true });
+tool('dehub_delete_post', 'Delete my post', 'Permanently delete a post you own. Requires an explicit request to delete.', { token_id: id }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/nft/${a.token_id}`, 'DELETE')), { destructive: true, open: true, agents: true });
+tool('dehub_post_visibility', 'Show or hide my post', 'Set a post you own to public or hidden. Hidden posts are not shown in public feeds.', { token_id: id, visibility: z.enum(['public','hidden']) }, 'dehub:social', async (a, ctx) => success(await api(ctx, '/token_visibility', 'POST', { id: Number(a.token_id), isHidden: a.visibility === 'hidden' })), { destructive: true, open: true, agents: true, idempotent: true });
+tool('dehub_post_stats', 'Read my post analytics', 'Read reach, retention, engagement and follower impact for a post you own.', { token_id: id }, 'dehub:read', async (a, ctx) => success(await api(ctx, `/post-stats/${a.token_id}`)), { read: true, agents: true });
+tool('dehub_best_post_times', 'See best posting times', 'Read the account audience activity grid by UTC hour.', {}, 'dehub:read', async (_, ctx) => success(await api(ctx, '/post-stats/best-times')), { read: true, agents: true });
+tool('dehub_scheduled_posts', 'List my scheduled posts', 'List posts waiting for publication.', {}, 'dehub:read', async (_, ctx) => success(await api(ctx, '/scheduled_posts')), { read: true, agents: true });
+tool('dehub_reschedule_post', 'Move a scheduled post', 'Change the publication time of your scheduled post; use now to publish promptly.', { token_id: id, scheduled_at: z.union([z.literal('now'), z.string().datetime({ offset: true })]) }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/scheduled_posts/${a.token_id}`, 'PATCH', { scheduledAt: a.scheduled_at })), { destructive: true, open: true, agents: true });
+tool('dehub_fans_online', 'See when followers are online', 'Read the follower activity grid by UTC hour to plan a scheduled post.', {}, 'dehub:read', async (_, ctx) => success(await api(ctx, '/scheduled_posts/fans_online')), { read: true, agents: true });
+tool('dehub_create_poll', 'Attach a poll to my post', 'Add a poll to a post you own. A post can have only one poll.', { token_id: id, question: text(300), options: z.array(text(100)).min(2).max(10), expires_at: z.string().datetime({ offset: true }).optional(), multiple_choice: z.boolean().default(false) }, 'dehub:social', async (a, ctx) => success(await api(ctx, '/poll', 'POST', { tokenId: Number(a.token_id), question: a.question, options: a.options, expiresAt: a.expires_at, isMultipleChoice: a.multiple_choice })), { open: true, agents: true });
+tool('dehub_poll', 'Read a post poll', 'Read the poll attached to a post.', { token_id: id }, null, async (a, ctx) => success(await api(ctx, `/poll/${a.token_id}`)), { read: true });
+tool('dehub_vote_poll', 'Vote in a poll', 'Submit one or more option indexes to a post poll.', { token_id: id, option_indexes: z.array(z.number().int().min(0).max(9)).min(1).max(10) }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/poll/${a.token_id}/vote`, 'POST', { optionIndexes: a.option_indexes })), { open: true, agents: true });
+tool('dehub_remove_poll_vote', 'Remove my poll vote', 'Remove the connected account vote on a post poll.', { token_id: id }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/poll/${a.token_id}/vote`, 'DELETE')), { destructive: true, open: true, agents: true });
+tool('dehub_close_poll', 'Close my poll', 'Close a poll attached to a post you own.', { token_id: id }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/poll/${a.token_id}/close`, 'POST')), { destructive: true, open: true, agents: true });
+tool('dehub_post_image_allowance', 'Check post image allowance', 'Read how many images a post can hold.', { token_id: id }, 'dehub:read', async (a, ctx) => success(await api(ctx, `/nft/${a.token_id}/image-allowance`)), { read: true, agents: true });
+tool('dehub_add_post_images', 'Add images to my post', 'Append images from Riftn media URLs to a post you own.', { token_id: id, media_urls: z.array(media).min(1).max(10) }, 'dehub:social', async (a, ctx) => {
+  const form = new FormData();
+  for (const url of a.media_urls) form.append('images', await file(ctx, url, 'image'), 'image.png');
+  return success(await api(ctx, `/nft/${a.token_id}/images`, 'POST', form));
+}, { open: true, agents: true });
+tool('dehub_replace_post_image', 'Replace a post image', 'Replace an image in a post you own by its zero-based index.', { token_id: id, index: z.number().int().min(0).max(19), media_url: media }, 'dehub:social', async (a, ctx) => {
+  const form = new FormData(); form.append('image', await file(ctx, a.media_url, 'image'), 'image.png');
+  return success(await api(ctx, `/nft/${a.token_id}/images/${a.index}`, 'POST', form));
+}, { destructive: true, open: true, agents: true });
+tool('dehub_replace_video_cover', 'Replace my video cover', 'Set the thumbnail of a video post you own.', { token_id: id, media_url: media }, 'dehub:social', async (a, ctx) => {
+  const form = new FormData(); form.append('thumbnail', await file(ctx, a.media_url, 'image'), 'cover.png');
+  return success(await api(ctx, `/nft/${a.token_id}/thumbnail`, 'POST', form));
+}, { destructive: true, open: true, agents: true });
 tool('dehub_comment', 'Comment or reply', 'Publish a comment or threaded reply as the connected person. Read the thread first. Reuse request_id on retries.', {
   request_id: z.string().uuid(), token_id: id, content: text(2000), reply_to_comment_id: id.optional(),
 }, 'dehub:social', async (a, ctx) => ctx.once('comment', a.request_id, a, async () => success(await api(ctx, '/request_comment', 'POST', {
