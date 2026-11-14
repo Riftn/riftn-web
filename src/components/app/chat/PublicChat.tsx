@@ -589,7 +589,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
             className="flex h-[52px] w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left text-zinc-400 hover:bg-white/[0.07]"
           >
             <span className="text-base md:text-sm">{_copy('publicChat.guestPrompt', { defaultValue: 'Sign up or log in to chat' })}</span>
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-black">{_copy('publicChat.guestJoin', { defaultValue: 'Join' })}</span>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold" style={{ color: '#000' }}>{_copy('publicChat.guestJoin', { defaultValue: 'Join' })}</span>
           </button>
         </div>
       ) : (
