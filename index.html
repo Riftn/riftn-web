@@ -318,7 +318,7 @@
       (function () {
         try {
           var p = location.pathname;
-          var isApp = p === "/" || p === "/app" || p.indexOf("/app/") === 0;
+          var isApp = p === "/" || p === "/app" || p.indexOf("/app/") === 0 || p === "/chat";
 
           if (isApp) {
             var head = document.head;
@@ -494,6 +494,20 @@
          skeleton had already been cleared. That is the gap that read as the
          middle loading out of step with the sides. */
       .bskel-rail, .bskel-rrail { display: none; flex: none; }
+      /* riftn.com/chat has no rails or feed: it waits as a chat list beside an
+         empty chat, the shape of FullScreenChatShell. The script before #root
+         picks it. */
+      .bskel-chat { display: none; position: fixed; inset: 0; }
+      html[data-boot-chat] .bskel { display: none; }
+      html[data-boot-chat] .bskel-chat { display: flex; }
+      .bskel-chat-list { width: 100%; padding-top: 12px; }
+      .bskel-chat-top { height: 48px; margin: 0 12px 12px; border-radius: 16px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-chat-row { height: 80px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+      .bskel-chat-row::before { content: ''; flex: none; width: 48px; height: 48px; border-radius: 8px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-chat-row::after { content: ''; width: 55%; height: 14px; border-radius: 4px; background: var(--bskel, rgba(255,255,255,.07)); }
+      @media (min-width: 768px) {
+        .bskel-chat-list { flex: none; width: clamp(18rem, 30vw, 26.5rem); border-right: 1px solid rgba(255,255,255,.07); }
+      }
       .bskel-wash { background: var(--bskel, rgba(255,255,255,.07)); border-radius: 4px; }
       .bskel-logo { height: 41px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
       .bskel-sidebar { height: calc(100dvh - 116px); padding: 10px; border-radius: 16px; background: var(--bskel-surface, #18181b); overflow: hidden; }
@@ -612,7 +626,8 @@
          render, so React replaces this in the same commit that paints the app.
          aria-hidden because it is decorative scaffolding; the no-JS fallback
          below is what non-rendering fetchers get. -->
-    <div id="root"><div class="bskel" aria-hidden="true">
+    <script>try{if(location.pathname.replace(/\/+$/,'')==='/chat')document.documentElement.setAttribute('data-boot-chat','')}catch(e){}</script>
+    <div id="root"><div class="bskel-chat" aria-hidden="true"><div class="bskel-chat-list"><div class="bskel-chat-top"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div></div></div><div class="bskel" aria-hidden="true">
       <div class="bskel-rail">
         <div class="bskel-logo"><div class="bskel-wash" style="width:28px;height:28px"></div><div class="bskel-wash" style="width:135px;height:28px"></div></div>
         <div class="bskel-sidebar" data-desktop-sidebar-bento>
