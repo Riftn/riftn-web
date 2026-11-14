@@ -292,6 +292,27 @@ const PageLoader = () => {
   );
 };
 
+// riftn.com/chat waits in its own shape: the chat list beside an empty chat.
+const ChatPageLoader = () => {
+  const { t: copy } = _useCopy();
+  return (
+    <div role="status" aria-label={copy('copy.dc380888c4e2', { defaultValue: 'Loading' })} data-startup-skeleton className="fixed inset-0 z-[70] flex h-[100dvh] overflow-hidden bg-black">
+      <div aria-hidden="true" className="flex h-full w-full flex-col md:w-[clamp(18rem,30vw,26.5rem)] md:shrink-0 md:border-r md:border-white/[0.07]">
+        <div className="px-3 pb-2 pt-3"><div className="theme-skeleton h-12 rounded-2xl" /></div>
+        {[...Array(7)].map((_, i) => (
+          <div key={i} className="flex items-center gap-3 p-4">
+            <div className="theme-skeleton h-12 w-12 shrink-0 rounded-lg" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="theme-skeleton h-4 w-32 rounded" />
+              <div className="theme-skeleton h-3 w-48 max-w-full rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /**
  * Builder lived at /app/builder until it took the top-level /builder URL.
  * Direct hits are 301'd at the edge (SPA_REDIRECTS + the preview rule in
@@ -680,7 +701,7 @@ function AppContent() {
           {/* Messages full screen, Telegram-style: list and chat side by side,
               no app chrome. Standalone for the same reason as /apk: it owns
               the viewport. Reached from the button in Messages. */}
-          <Route path="/chat" element={<Suspense fallback={<PageLoader />}><FullScreenChatPage /></Suspense>} />
+          <Route path="/chat" element={<Suspense fallback={<ChatPageLoader />}><FullScreenChatPage /></Suspense>} />
           <Route path="/app/chat" element={<Navigate to="/chat" replace />} />
           <Route path="/stream" element={<StreamPage />} />
 
