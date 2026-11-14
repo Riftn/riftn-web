@@ -160,6 +160,42 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
 
   if (!url) return null;
   const poster = originalStill ? url : art?.poster ?? url;
+  // The name's glyphs and this box's edges both land on whole device pixels.
+  // An overflowing <img> rounds its own edges instead, so its resting line
+  // drifted up to a pixel above or below the name from one row to the next.
+  // The still is painted as the box's background, cut at the resting line, so
+  // that line shares the baseline's pixel row at every size and scroll offset.
+  // A second slice below the box paints the tips that hang under the line.
+  const smallSet = gold ? undefined : badgeSmallSrcSet(visualName);
+  const stillImage = smallSet
+    ? `-webkit-image-set(${smallSet.split(', ').map((entry) => {
+        const [source, density] = entry.split(' ');
+        return `url("${source}") ${density}`;
+      }).join(', ')})`
+    : `url("${poster.replace(/"/g, '%22')}")`;
+  const artworkWidth = bounds.right - bounds.left;
+  const bodyRows = sit * artworkHeight;
+  const tipRows = artworkHeight - bodyRows;
+  const slice = (start: number, rows: number) => (rows >= 128 ? 0 : (start / (128 - rows)) * 100);
+  const stillStyle: CSSProperties | null = bodyRows > 0 ? {
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: stillImage,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${(128 / artworkWidth) * 100}% ${(128 / bodyRows) * 100}%`,
+    backgroundPosition: `${slice(bounds.left, artworkWidth)}% ${slice(bounds.top, bodyRows)}%`,
+  } : null;
+  const tipStyle: CSSProperties | null = stillStyle && tipRows > 0 ? {
+    position: 'absolute',
+    left: 0,
+    top: '100%',
+    width: '100%',
+    height: `${(tipRows / bodyRows) * 100}%`,
+    backgroundImage: stillImage,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${(128 / artworkWidth) * 100}% ${(128 / tipRows) * 100}%`,
+    backgroundPosition: `${slice(bounds.left, artworkWidth)}% ${slice(bounds.top + bodyRows, tipRows)}%`,
+  } : null;
 
   return (
     <Tooltip>
@@ -194,6 +230,11 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
         >
           {playing && <BadgeAnimation key={art.animation} src={art.animation} style={imageStyleFor(art.posterBounds)}
             onError={() => setFailedAnimation(art.animation)} />}
+          {stillStyle && (
+            <span aria-hidden data-badge-still style={stillStyle} className="pointer-events-none peer-data-[ready=true]:opacity-0">
+              {tipStyle && <span style={tipStyle} />}
+            </span>
+          )}
           <img
             style={imageStyle}
             data-badge-icon
@@ -203,7 +244,7 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
             width={16}
             height={16}
             decoding="sync"
-            className="relative block w-full h-full rounded-none bg-transparent object-contain peer-data-[ready=true]:opacity-0"
+            className={`relative block w-full h-full rounded-none bg-transparent object-contain ${stillStyle ? 'opacity-0' : 'peer-data-[ready=true]:opacity-0'}`}
           />
         </span>
       </TooltipTrigger>
