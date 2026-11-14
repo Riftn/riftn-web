@@ -107,7 +107,16 @@ export function PublicChat({ onBack }: PublicChatProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { isAuthenticated, walletAddress } = useAuth();
+  const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+
+  // Signed out, the room reads but does not write. Anything that would write
+  // opens the sign-in sheet, and signing in lands back here in this room.
+  const promptSignIn = useCallback(() => {
+    openLoginModal({ path: '/chat?chat=public' });
+  }, [openLoginModal]);
+  // Signed out, the history on screen is the one page the room loads. Reaching
+  // its top opens the sheet once; scrolling back down re-arms it.
+  const topPromptArmed = useRef(true);
 
   // Search state
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -485,6 +494,14 @@ export function PublicChat({ onBack }: PublicChatProps) {
           onScroll={(event) => {
             const el = event.currentTarget;
             followLatest.current = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
+            if (!isAuthenticated && el.scrollHeight > el.clientHeight) {
+              if (el.scrollTop < 40 && topPromptArmed.current) {
+                topPromptArmed.current = false;
+                promptSignIn();
+              } else if (el.scrollTop > 240) {
+                topPromptArmed.current = true;
+              }
+            }
           }}
           onPointerDown={dismissKeyboard}
           className="absolute inset-0 chat-text-zone overflow-y-auto py-2"
@@ -546,7 +563,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
                 onUnban={handleUnbanUser}
                 onDelete={handleDeleteMessage}
                 onEdit={handleEditMessage}
-                onReact={addReaction}
+                onReact={isAuthenticated ? addReaction : promptSignIn}
                 onRemoveReaction={removeReaction}
                 onReply={isAuthenticated ? handleReply : undefined}
                 onRetrySend={retrySend}
@@ -563,6 +580,19 @@ export function PublicChat({ onBack }: PublicChatProps) {
       </SharedTranslationContext.Provider>
       
       {/* Input Area */}
+      {!isAuthenticated ? (
+        <div className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+          <button
+            type="button"
+            data-guest-chat-signin
+            onClick={promptSignIn}
+            className="flex h-[52px] w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left text-zinc-400 hover:bg-white/[0.07]"
+          >
+            <span className="text-base md:text-sm">{_copy('publicChat.guestPrompt', { defaultValue: 'Sign up or log in to chat' })}</span>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-black">{_copy('publicChat.guestJoin', { defaultValue: 'Join' })}</span>
+          </button>
+        </div>
+      ) : (
       <div className="relative">
         <ChatInput
         voiceMaxDuration={29}
@@ -574,6 +604,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
           draftKey={selectedRoomId ? `room:${selectedRoomId}` : null}
         />
       </div>
+      )}
 
       {/* Modals */}
       <CreateTopicRoomModal
