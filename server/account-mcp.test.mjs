@@ -89,6 +89,21 @@ test('OAuth metadata and tool descriptors are explicit about account scopes and 
   }
   assert.equal(accountTools.find(t => t.name === 'dehub_update_profile').descriptor.annotations.destructiveHint, true);
 });
+test('expanded post controls declare the right access and reject untrusted input', async () => {
+  for (const name of ['dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_reschedule_post','dehub_create_poll','dehub_vote_poll','dehub_add_post_images']) {
+    const entry = accountTools.find(tool => tool.name === name);
+    assert.equal(entry.scope, 'dehub:social', name);
+    assert.equal(entry.descriptor.inputSchema.additionalProperties, false, name);
+  }
+  for (const name of ['dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_fans_online']) {
+    assert.equal(accountTools.find(tool => tool.name === name).scope, 'dehub:read', name);
+  }
+  assert.equal(accountTools.find(tool => tool.name === 'dehub_poll').scope, null);
+  const invalid = await callAccountTool('dehub_reschedule_post', { token_id: '42', scheduled_at: 'yesterday' }, { token: 'one', scopes: SCOPES });
+  assert.equal(invalid.isError, true);
+  const wrongScope = await callAccountTool('dehub_delete_post', { token_id: '42' }, { token: 'one', scopes: ['dehub:read'] });
+  assert.equal(wrongScope.isError, true);
+});
 test('opening /mcp in a browser lands on the connect guide; chat apps still get the MCP reply', async () => {
   const f = fixture();
   const page = await f.service.fetch(req('/mcp', 'GET', undefined, { Accept: 'text/html,application/xhtml+xml' }));
