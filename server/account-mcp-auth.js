@@ -401,7 +401,7 @@ export class AccountMcpAuth {
       const origin = originOf(url);
       try { grant = await this.bearer(request); } catch { return json({ error: 'Link your Riftn account again.' }, 401, { 'WWW-Authenticate': challenge('dehub:read', origin) }); }
       const raw = await request.text();
-      if (raw.length > 65536) return json({ error: 'Request is too large.' }, 413);
+      if (raw.length > (grant ? 5_700_000 : 65536)) return json({ error: 'Request is too large.' }, 413);
       let rpc;
       try { rpc = JSON.parse(raw); } catch { return json({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Invalid JSON' } }, 400); }
       if (!rpc || Array.isArray(rpc) || rpc.jsonrpc !== '2.0' || typeof rpc.method !== 'string') return json({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Invalid JSON-RPC request' } }, 400);

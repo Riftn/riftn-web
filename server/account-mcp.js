@@ -91,6 +91,13 @@ async function file(ctx, url, kind, maxBytes = 12 * 1024 * 1024) {
   } finally { await reader.cancel().catch(() => {}); }
   return new Blob(chunks, { type: mime });
 }
+function inlineImage(value) {
+  const match = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+  if (!match || match[2].length > 5_600_000) throw new Error('Provide a PNG, JPEG or WebP data URL under 4 MB.');
+  const bytes = Uint8Array.from(atob(match[2]), character => character.charCodeAt(0));
+  if (bytes.length > 4 * 1024 * 1024) throw new Error('Image is too large.');
+  return new Blob([bytes], { type: match[1] });
+}
 
 const tools = [];
 const asAgent = z.string().trim().toLowerCase().regex(/^@?[a-z0-9_.-]{1,60}$/).optional()
@@ -189,16 +196,17 @@ tool('dehub_save_draft', 'Save a post draft', 'Save or replace a private connect
 tool('dehub_drafts', 'List my post drafts', 'Read private drafts saved through this account connector.', {}, 'dehub:read', async (_, ctx) => success({ drafts: await ctx.drafts('list') }), { read: true });
 tool('dehub_delete_draft', 'Delete a post draft', 'Delete a private connector draft by ID.', { draft_id: z.string().uuid() }, 'dehub:social', async (a, ctx) => success(await ctx.drafts('delete', { id: a.draft_id })), { destructive: true, idempotent: true });
 tool('dehub_create_post', 'Publish a Riftn post', 'Publish or schedule an ordinary text, image or video post as the connected person. Requires an explicit request to publish. Does not mint or sign blockchain transactions. Reuse request_id on retries. Video needs a thumbnail.', {
-  request_id: z.string().uuid(), content: text(500), title: text(150).optional(), media_url: media.optional(), media_urls: z.array(media).min(2).max(10).optional(), media_type: z.enum(['image','video']).optional(), thumbnail_url: media.optional(), category: text(100).default('General'), scheduled_at: z.string().datetime({ offset: true }).optional(), visibility: z.enum(['public','followers','direct']).optional(), reply_policy: z.enum(['public','followers','following','mentioned']).optional(), quote_policy: z.enum(['public','followers','nobody']).optional(),
+  request_id: z.string().uuid(), content: text(500), title: text(150).optional(), media_url: media.optional(), media_urls: z.array(media).min(2).max(10).optional(), image_data_url: z.string().max(5_600_030).optional(), media_type: z.enum(['image','video']).optional(), thumbnail_url: media.optional(), category: text(100).default('General'), scheduled_at: z.string().datetime({ offset: true }).optional(), visibility: z.enum(['public','followers','direct']).optional(), reply_policy: z.enum(['public','followers','following','mentioned']).optional(), quote_policy: z.enum(['public','followers','nobody']).optional(),
 }, 'dehub:social', async (a, ctx) => ctx.once('post', a.request_id, a, async () => {
-  if (a.media_url && a.media_urls) throw new Error('Use media_url or media_urls, not both.');
-  if (!!(a.media_url || a.media_urls) !== !!a.media_type) throw new Error('Provide media and media_type together.');
+  if ([a.media_url, a.media_urls, a.image_data_url].filter(Boolean).length > 1) throw new Error('Use only one media source.');
+  if (!!(a.media_url || a.media_urls || a.image_data_url) !== !!a.media_type) throw new Error('Provide media and media_type together.');
+  if (a.image_data_url && a.media_type !== 'image') throw new Error('Inline image requires image media type.');
   if (a.media_urls && a.media_type !== 'image') throw new Error('Multiple media URLs require image type.');
   if (a.media_type === 'video' && !a.thumbnail_url) throw new Error('Video posts need a thumbnail.');
   if (a.scheduled_at && Date.parse(a.scheduled_at) <= Date.now()) throw new Error('scheduled_at must be in the future.');
   const form = new FormData();
   for (const [key, value] of Object.entries({ name: a.title && !a.content.startsWith(a.title) ? a.title : ' ', description: a.content,
-    postType: a.media_url || a.media_urls ? a.media_type === 'video' ? 'video' : 'feed-images' : 'feed-simple', chainId: '8453',
+    postType: a.media_url || a.media_urls || a.image_data_url ? a.media_type === 'video' ? 'video' : 'feed-images' : 'feed-simple', chainId: '8453',
     category: JSON.stringify([a.category]), minter: ctx.wallet, mintOptOut: 'true', idempotencyKey: a.request_id,
     streamInfo: JSON.stringify({ isLockContent: false, isPayPerView: false, isAddBounty: false }) })) form.set(key, value);
   if (a.scheduled_at) form.set('scheduledAt', a.scheduled_at);
@@ -206,6 +214,7 @@ tool('dehub_create_post', 'Publish a Riftn post', 'Publish or schedule an ordina
   if (a.reply_policy && a.reply_policy !== 'public') form.set('replyPolicy', a.reply_policy);
   if (a.quote_policy && a.quote_policy !== 'public') form.set('quotePolicy', a.quote_policy);
   if (a.media_urls) for (const url of a.media_urls) form.append('file', await file(ctx, url, 'image'), 'image.png');
+  if (a.image_data_url) form.append('file', inlineImage(a.image_data_url), 'image.png');
   if (a.media_url) {
     form.append('file', await file(ctx, a.media_url, a.media_type, a.media_type === 'video' ? 64 * 1024 * 1024 : undefined), a.media_type === 'video' ? 'video.mp4' : 'image.png');
     form.set('media_type', a.media_type);

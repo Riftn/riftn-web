@@ -61,6 +61,10 @@ with the same private library upload protocol. Save failures are reported using
 Profile/post media inputs accept only HTTPS DeHub CDN or storage URLs. Downloads
 reject redirects, enforce MIME type and stream size limits. Output links can
 expire and can be refreshed from the account's Creator library.
+For an image already available inside a chat, `dehub_create_post` also accepts
+`image_data_url` as a PNG, JPEG or WebP data URL up to 4 MB when the MCP client
+can provide the image bytes. This is sent directly to the existing post upload
+route and is never retained as a connector draft.
 
 The account connector now supports multi-image publication, scheduling and
 rescheduling, post edits and deletion, visibility and reply rules, post analytics,

@@ -119,6 +119,18 @@ test('post drafts stay private to the connected account and can be edited or del
   await rpc(f, 'dehub_delete_draft', { draft_id }, one.access_token);
   assert.deepEqual((await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json()).result.structuredContent.drafts, []);
 });
+test('a connected account can publish an inline chat image without an external URL', async () => {
+  let upload;
+  const f = fixture(async (url, init) => {
+    if (url.endsWith('/user_mint')) { upload = init.body; return Response.json({ result: { createdTokenId: '42' } }); }
+    throw new Error(`Unexpected upstream request: ${url}`);
+  });
+  const connected = await connect(f, { scope: 'dehub:social' });
+  const result = await (await rpc(f, 'dehub_create_post', { request_id: jobId, content: 'Image post', image_data_url: 'data:image/png;base64,iVBORw0KGgo=', media_type: 'image' }, connected.access_token)).json();
+  assert.equal(result.result.structuredContent.token_id, '42');
+  assert.equal(upload.get('postType'), 'feed-images');
+  assert.equal(upload.get('file').type, 'image/png');
+});
 test('opening /mcp in a browser lands on the connect guide; chat apps still get the MCP reply', async () => {
   const f = fixture();
   const page = await f.service.fetch(req('/mcp', 'GET', undefined, { Accept: 'text/html,application/xhtml+xml' }));
