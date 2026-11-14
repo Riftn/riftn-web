@@ -1170,7 +1170,15 @@
     "socialConnectedShort": "कनेक्टेड",
     "socialConnectFailed": "{{platform}} कनेक्ट नहीं हो सका। फिर से कोशिश करें।",
     "socialVerifiedFollowers": "{{value}} फ़ॉलोअर",
-    "socialFollowersPending": "फ़ॉलोअर संख्या अपडेट हो रही है"
+    "socialFollowersPending": "फ़ॉलोअर संख्या अपडेट हो रही है",
+    "showLikes": "मेरी लाइक्स सबको दिखाएं",
+    "showLikesDesc": "कोई भी आपकी प्रोफ़ाइल पर लाइक्स टैब खोल सकता है। डिफ़ॉल्ट रूप से बंद है, इसलिए आपने क्या लाइक किया यह सिर्फ़ आप देखते हैं।",
+    "showFollowersList": "दिखाएं कि मुझे कौन फ़ॉलो करता है",
+    "showFollowersListDesc": "किसी को भी अपनी फ़ॉलोअर सूची खोलने दें। बंद होने पर सिर्फ़ आप इसे देख सकते हैं।",
+    "showFollowingList": "दिखाएं कि मैं किसे फ़ॉलो करता हूं",
+    "showFollowingListDesc": "किसी को भी उन लोगों की सूची खोलने दें जिन्हें आप फ़ॉलो करते हैं। बंद होने पर सिर्फ़ आप इसे देख सकते हैं।",
+    "showFollowCounts": "मेरी फ़ॉलोअर संख्या दिखाएं",
+    "showFollowCountsDesc": "दिखाता है कि आपके कितने फ़ॉलोअर हैं और आप कितनों को फ़ॉलो करते हैं। बंद करने पर दोनों सूचियां भी छिप जाती हैं।"
   },
   "common": {
     "confirm": "कन्फ़र्म करें",
@@ -2234,7 +2242,8 @@
     "tabs": {
       "playlists": "प्लेलिस्ट",
       "dislikes": "नापसंद",
-      "articles": "लेख"
+      "articles": "लेख",
+      "likes": "लाइक्स"
     },
     "articles": {
       "emptyTitle": "अभी कोई लेख नहीं",
@@ -2263,7 +2272,15 @@
     "sortMostLiked": "सबसे ज़्यादा पसंद किया गया",
     "searchThisChannel": "इस चैनल को खोजें",
     "searchResultCount": "\"{{query}}\" के लिए 1 परिणाम",
-    "searchResultCountPlural": "\"{{query}}\" के लिए {{count}} परिणाम"
+    "searchResultCountPlural": "\"{{query}}\" के लिए {{count}} परिणाम",
+    "likedPosts": {
+      "emptyTitle": "अभी तक कोई लाइक नहीं",
+      "emptyOwn": "आपकी लाइक की गई पोस्ट यहां दिखती हैं। जब तक आप सेटिंग्स में मेरी लाइक्स सबको दिखाएं चालू नहीं करते, सिर्फ़ आप इन्हें देख सकते हैं।",
+      "emptyOther": "अभी तक कुछ लाइक नहीं किया।",
+      "privateTitle": "लाइक्स निजी हैं",
+      "privateDesc": "यह अकाउंट अपनी लाइक्स निजी रखता है।",
+      "loadMore": "और लोड करें"
+    }
   },
   "tv": {
     "seoTitle": "लाइव TV: दुनिया भर के मुफ़्त चैनल",

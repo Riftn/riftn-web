@@ -1168,7 +1168,15 @@
     "socialConnectedShort": "連携済み",
     "socialConnectFailed": "{{platform}}を連携できませんでした。もう一度お試しください。",
     "socialVerifiedFollowers": "フォロワー{{value}}人",
-    "socialFollowersPending": "フォロワー数を更新中"
+    "socialFollowersPending": "フォロワー数を更新中",
+    "showLikes": "いいねを全員に表示",
+    "showLikesDesc": "誰でもプロフィールの「いいね」タブを開けます。初期設定はオフなので、自分がいいねした投稿は自分だけが見られます。",
+    "showFollowersList": "フォロワーを表示",
+    "showFollowersListDesc": "誰でもフォロワー一覧を開けるようにします。オフにすると自分だけが見られます。",
+    "showFollowingList": "フォロー中を表示",
+    "showFollowingListDesc": "誰でもあなたがフォローしている人の一覧を開けるようにします。オフにすると自分だけが見られます。",
+    "showFollowCounts": "フォロー数を表示",
+    "showFollowCountsDesc": "フォロワー数とフォロー数を表示します。オフにすると両方の一覧も非表示になります。"
   },
   "common": {
     "confirm": "確認",
@@ -2224,7 +2232,8 @@
     "tabs": {
       "playlists": "プレイリスト",
       "dislikes": "よくないね",
-      "articles": "記事"
+      "articles": "記事",
+      "likes": "いいね"
     },
     "articles": {
       "emptyTitle": "まだ記事はありません",
@@ -2253,7 +2262,15 @@
     "sortMostLiked": "最もいいねされた",
     "searchThisChannel": "このチャンネルを検索",
     "searchResultCount": "「{{query}}」の検索結果1件",
-    "searchResultCountPlural": "「{{query}}」の検索結果{{count}}件"
+    "searchResultCountPlural": "「{{query}}」の検索結果{{count}}件",
+    "likedPosts": {
+      "emptyTitle": "まだいいねはありません",
+      "emptyOwn": "いいねした投稿はここに表示されます。設定で「いいねを全員に表示」をオンにしない限り、自分だけが見られます。",
+      "emptyOther": "まだいいねはありません。",
+      "privateTitle": "いいねは非公開です",
+      "privateDesc": "このアカウントはいいねを公開していません。",
+      "loadMore": "さらに読み込む"
+    }
   },
   "tv": {
     "seoTitle": "ライブTV: 世界中の無料チャンネル",

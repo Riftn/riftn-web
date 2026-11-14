@@ -1231,7 +1231,15 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "Não foi possível conectar {{platform}}. Tente novamente.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Atualizando seguidores"
+    "socialFollowersPending": "Atualizando seguidores",
+    "showLikes": "Mostrar minhas curtidas para todos",
+    "showLikesDesc": "Qualquer pessoa pode abrir a aba Curtidas do seu perfil. Desativado por padrão, então só você vê o que curtiu.",
+    "showFollowersList": "Mostrar quem me segue",
+    "showFollowersListDesc": "Permite que qualquer pessoa abra sua lista de seguidores. Desativado, só você pode vê-la.",
+    "showFollowingList": "Mostrar quem eu sigo",
+    "showFollowingListDesc": "Permite que qualquer pessoa abra a lista de quem você segue. Desativado, só você pode vê-la.",
+    "showFollowCounts": "Mostrar meus números de seguidores",
+    "showFollowCountsDesc": "Mostra quantos seguidores você tem e quantas pessoas você segue. Desativar também oculta as duas listas."
   },
   "common": {
     "confirm": "Confirmar",
@@ -2310,7 +2318,8 @@
     "tabs": {
       "playlists": "Listas de reprodução",
       "dislikes": "Não gostei",
-      "articles": "Artigos"
+      "articles": "Artigos",
+      "likes": "Curtidas"
     },
     "articles": {
       "emptyTitle": "Ainda não há artigos",
@@ -2356,6 +2365,14 @@
       "saveFailed": "Não foi possível salvar sua ordem. Tente novamente.",
       "loadFailed": "Não foi possível carregar suas publicações. Feche isto e tente novamente.",
       "empty": "Ainda não há nada para organizar. Publique algo primeiro."
+    },
+    "likedPosts": {
+      "emptyTitle": "Nenhuma curtida ainda",
+      "emptyOwn": "Os posts que você curte aparecem aqui. Só você pode vê-los, a menos que ative Mostrar minhas curtidas nas Configurações.",
+      "emptyOther": "Nada curtido ainda.",
+      "privateTitle": "Curtidas são privadas",
+      "privateDesc": "Esta conta mantém as curtidas só para si.",
+      "loadMore": "Carregar mais"
     }
   },
   "tv": {

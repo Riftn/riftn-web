@@ -1111,7 +1111,15 @@
     "socialConnectedShort": "เชื่อมต่อแล้ว",
     "socialConnectFailed": "ไม่สามารถเชื่อมต่อ {{platform}} ได้ โปรดลองอีกครั้ง",
     "socialVerifiedFollowers": "ผู้ติดตาม {{value}} คน",
-    "socialFollowersPending": "กำลังอัปเดตจำนวนผู้ติดตาม"
+    "socialFollowersPending": "กำลังอัปเดตจำนวนผู้ติดตาม",
+    "showLikes": "แสดงการถูกใจของฉันให้ทุกคน",
+    "showLikesDesc": "ทุกคนเปิดแท็บถูกใจในโปรไฟล์ของคุณได้ ค่าเริ่มต้นปิดอยู่ จึงมีแค่คุณที่เห็นว่าคุณถูกใจอะไร",
+    "showFollowersList": "แสดงว่าใครติดตามฉัน",
+    "showFollowersListDesc": "ให้ทุกคนเปิดรายชื่อผู้ติดตามของคุณได้ เมื่อปิด มีแค่คุณที่เห็น",
+    "showFollowingList": "แสดงว่าฉันติดตามใคร",
+    "showFollowingListDesc": "ให้ทุกคนเปิดรายชื่อคนที่คุณติดตามได้ เมื่อปิด มีแค่คุณที่เห็น",
+    "showFollowCounts": "แสดงจำนวนผู้ติดตาม",
+    "showFollowCountsDesc": "แสดงจำนวนผู้ติดตามและจำนวนคนที่คุณติดตาม การปิดจะซ่อนทั้งสองรายชื่อด้วย"
   },
   "common": {
     "confirm": "ยืนยัน",
@@ -2188,7 +2196,8 @@
     },
     "tabs": {
       "playlists": "เพลย์ลิสต์",
-      "dislikes": "ไม่ชอบ"
+      "dislikes": "ไม่ชอบ",
+      "likes": "ถูกใจ"
     },
     "dislikes": {
       "emptyTitle": "ยังไม่มีสิ่งที่ไม่ชอบ",
@@ -2213,7 +2222,15 @@
     "sortMostLiked": "ชอบมากที่สุด",
     "searchThisChannel": "ค้นหาแชทนี้",
     "searchResultCount": "ผลการค้นหา 1 รายการสำหรับคำว่า \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} ผลลัพธ์สำหรับ {{query}}"
+    "searchResultCountPlural": "{{count}} ผลลัพธ์สำหรับ {{query}}",
+    "likedPosts": {
+      "emptyTitle": "ยังไม่มีการถูกใจ",
+      "emptyOwn": "โพสต์ที่คุณถูกใจจะแสดงที่นี่ มีแค่คุณที่เห็น เว้นแต่คุณเปิดแสดงการถูกใจของฉันให้ทุกคนในการตั้งค่า",
+      "emptyOther": "ยังไม่ได้ถูกใจอะไร",
+      "privateTitle": "การถูกใจเป็นส่วนตัว",
+      "privateDesc": "บัญชีนี้เก็บการถูกใจไว้เป็นส่วนตัว",
+      "loadMore": "โหลดเพิ่ม"
+    }
   },
   "tv": {
     "seoTitle": "Live TV: ช่องทีวีฟรีจากทั่วโลก",

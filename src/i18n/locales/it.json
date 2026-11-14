@@ -1170,7 +1170,15 @@
     "socialConnectedShort": "Collegato",
     "socialConnectFailed": "Impossibile collegare {{platform}}. Riprova.",
     "socialVerifiedFollowers": "{{value}} follower",
-    "socialFollowersPending": "Aggiornamento follower"
+    "socialFollowersPending": "Aggiornamento follower",
+    "showLikes": "Mostra i miei Mi piace a tutti",
+    "showLikesDesc": "Chiunque può aprire la scheda Mi piace del tuo profilo. Disattivato di default, quindi solo tu vedi cosa ti è piaciuto.",
+    "showFollowersList": "Mostra chi mi segue",
+    "showFollowersListDesc": "Permetti a chiunque di aprire la lista dei tuoi follower. Se disattivato, solo tu puoi vederla.",
+    "showFollowingList": "Mostra chi seguo",
+    "showFollowingListDesc": "Permetti a chiunque di aprire la lista delle persone che segui. Se disattivato, solo tu puoi vederla.",
+    "showFollowCounts": "Mostra i miei numeri di follower",
+    "showFollowCountsDesc": "Mostra quanti follower hai e quante persone segui. Disattivarlo nasconde anche entrambe le liste."
   },
   "common": {
     "confirm": "Conferma",
@@ -2227,7 +2235,8 @@
     "tabs": {
       "playlists": "Playlist",
       "dislikes": "Non mi piace",
-      "articles": "Articoli"
+      "articles": "Articoli",
+      "likes": "Mi piace"
     },
     "articles": {
       "emptyTitle": "Ancora nessun articolo",
@@ -2256,7 +2265,15 @@
     "sortMostLiked": "I più graditi",
     "searchThisChannel": "Cerca in questo canale",
     "searchResultCount": "1 risultato per \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} risultati per \"{{query}}\""
+    "searchResultCountPlural": "{{count}} risultati per \"{{query}}\"",
+    "likedPosts": {
+      "emptyTitle": "Ancora nessun Mi piace",
+      "emptyOwn": "I post che ti piacciono compaiono qui. Solo tu puoi vederli, a meno che non attivi Mostra i miei Mi piace nelle Impostazioni.",
+      "emptyOther": "Ancora nessun Mi piace.",
+      "privateTitle": "I Mi piace sono privati",
+      "privateDesc": "Questo account tiene per sé i suoi Mi piace.",
+      "loadMore": "Carica altro"
+    }
   },
   "tv": {
     "seoTitle": "TV in diretta: Canali gratuiti da tutto il mondo",

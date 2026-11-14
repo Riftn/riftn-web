@@ -44,6 +44,7 @@ import { getUserComments, getNFTInfo, getMediaUrl, editComment, deleteComment } 
 import type { DeHubNFT } from '@/lib/api/dehub';
 import { useUserPins } from '@/hooks/use-pins';
 import { useProfileDislikes } from '@/hooks/use-profile-dislikes';
+import { useProfileLikes } from '@/hooks/use-profile-likes';
 import { mapNFTToFeedItem } from '@/lib/nft-to-feed-item';
 import { usePublicPlaylists, usePublicPlaylistItems } from '@/hooks/use-bookmark-folders';
 import type { PublicPlaylist } from '@/lib/api/dehub';
@@ -443,6 +444,11 @@ export function ProfileTabContent({
       {/* PLAYLISTS TAB — the profile's public bookmark folders */}
       <TabPanel activeTab={activeTab} visitedTabs={visitedTabs.current} tab="playlists">
         <PlaylistsTabPanel profileAddress={profileAddress} isOwnProfile={!!isViewingOwnProfile} />
+      </TabPanel>
+
+      {/* LIKES TAB — private unless the owner made it public */}
+      <TabPanel activeTab={activeTab} visitedTabs={visitedTabs.current} tab="likes">
+        <ReactionsTabPanel kind="likes" profileAddress={profileAddress} isOwnProfile={!!isViewingOwnProfile} />
       </TabPanel>
 
       {/* DISLIKES TAB — private unless the owner made it public */}
@@ -1009,8 +1015,18 @@ function PlaylistPostsPanel({
  * feeds; undoing the dislike here (tap the 👎 thumb) brings a post back.
  */
 function DislikesTabPanel({ profileAddress, isOwnProfile }: { profileAddress: string; isOwnProfile: boolean }) {
+  return <ReactionsTabPanel kind="dislikes" profileAddress={profileAddress} isOwnProfile={isOwnProfile} />;
+}
+
+/**
+ * Posts this account liked or disliked, newest first. Both are private unless
+ * the owner made them public; the API answers 403 otherwise.
+ */
+function ReactionsTabPanel({ kind, profileAddress, isOwnProfile }: { kind: 'likes' | 'dislikes'; profileAddress: string; isOwnProfile: boolean }) {
   const { t } = useTranslation();
-  const query = useProfileDislikes(profileAddress, true);
+  const likesQuery = useProfileLikes(profileAddress, kind === 'likes');
+  const dislikesQuery = useProfileDislikes(profileAddress, kind === 'dislikes');
+  const query = kind === 'likes' ? likesQuery : dislikesQuery;
   const items = (query.data?.pages ?? []).flatMap((page) => page.items).map(mapNFTToFeedItem);
 
   if (query.isLoading) {
@@ -1022,25 +1038,25 @@ function DislikesTabPanel({ profileAddress, isOwnProfile }: { profileAddress: st
   }
 
   if (query.isError) {
-    return <AppState icon="lock" title={t('profile.dislikes.privateTitle')} description={t('profile.dislikes.privateDesc')} size="section" />;
+    return <AppState icon="lock" title={(kind === 'likes' ? t('profile.likedPosts.privateTitle') : t('profile.dislikes.privateTitle'))} description={(kind === 'likes' ? t('profile.likedPosts.privateDesc') : t('profile.dislikes.privateDesc'))} size="section" />;
   }
 
   if (items.length === 0) {
     return (
       <AppState
         icon="posts"
-        title={t('profile.dislikes.emptyTitle')}
-        description={isOwnProfile ? t('profile.dislikes.emptyOwn') : t('profile.dislikes.emptyOther')}
+        title={(kind === 'likes' ? t('profile.likedPosts.emptyTitle') : t('profile.dislikes.emptyTitle'))}
+        description={isOwnProfile ? (kind === 'likes' ? t('profile.likedPosts.emptyOwn') : t('profile.dislikes.emptyOwn')) : (kind === 'likes' ? t('profile.likedPosts.emptyOther') : t('profile.dislikes.emptyOther'))}
         size="section"
       />
     );
   }
 
   return (
-    <div className="space-y-3" data-profile-dislikes>
+    <div className="space-y-3" data-profile-reactions={kind}>
       {items.map((item) => (
         <div
-          key={`dislike-${item.id}`}
+          key={`${kind}-${item.id}`}
           data-feed-item
           data-cinematic={item.type === 'video' ? 'video' : item.type === 'image' ? 'image' : 'post'}
           className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3"
@@ -1062,7 +1078,7 @@ function DislikesTabPanel({ profileAddress, isOwnProfile }: { profileAddress: st
             disabled={query.isFetchingNextPage}
             className="h-9 rounded-lg bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white text-xs"
           >
-            {query.isFetchingNextPage ? <Loader2 className="w-4 h-4 animate-spin" /> : t('profile.dislikes.loadMore')}
+            {query.isFetchingNextPage ? <Loader2 className="w-4 h-4 animate-spin" /> : (kind === 'likes' ? t('profile.likedPosts.loadMore') : t('profile.dislikes.loadMore'))}
           </Button>
         </div>
       )}

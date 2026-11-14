@@ -1170,7 +1170,15 @@
     "socialConnectedShort": "Terhubung",
     "socialConnectFailed": "Tidak dapat menghubungkan {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Memperbarui jumlah pengikut"
+    "socialFollowersPending": "Memperbarui jumlah pengikut",
+    "showLikes": "Tampilkan suka saya ke semua orang",
+    "showLikesDesc": "Siapa pun bisa membuka tab Suka di profilmu. Mati secara bawaan, jadi hanya kamu yang melihat apa yang kamu sukai.",
+    "showFollowersList": "Tampilkan siapa yang mengikuti saya",
+    "showFollowersListDesc": "Izinkan siapa pun membuka daftar pengikutmu. Jika mati, hanya kamu yang bisa melihatnya.",
+    "showFollowingList": "Tampilkan siapa yang saya ikuti",
+    "showFollowingListDesc": "Izinkan siapa pun membuka daftar orang yang kamu ikuti. Jika mati, hanya kamu yang bisa melihatnya.",
+    "showFollowCounts": "Tampilkan jumlah pengikut saya",
+    "showFollowCountsDesc": "Menampilkan berapa pengikutmu dan berapa orang yang kamu ikuti. Mematikannya juga menyembunyikan kedua daftar."
   },
   "common": {
     "confirm": "Konfirmasi",
@@ -2227,7 +2235,8 @@
     "tabs": {
       "playlists": "Daftar Putar",
       "dislikes": "Tidak Suka",
-      "articles": "Artikel"
+      "articles": "Artikel",
+      "likes": "Suka"
     },
     "articles": {
       "emptyTitle": "Belum ada artikel",
@@ -2256,7 +2265,15 @@
     "sortMostLiked": "Paling disukai",
     "searchThisChannel": "Cari saluran ini",
     "searchResultCount": "1 hasil untuk \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\""
+    "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\"",
+    "likedPosts": {
+      "emptyTitle": "Belum ada suka",
+      "emptyOwn": "Postingan yang kamu sukai muncul di sini. Hanya kamu yang bisa melihatnya kecuali kamu menyalakan Tampilkan suka saya di Pengaturan.",
+      "emptyOther": "Belum ada yang disukai.",
+      "privateTitle": "Suka bersifat pribadi",
+      "privateDesc": "Akun ini menyimpan sukanya untuk dirinya sendiri.",
+      "loadMore": "Muat lebih banyak"
+    }
   },
   "tv": {
     "seoTitle": "TV Langsung: Kanal gratis dari seluruh dunia",

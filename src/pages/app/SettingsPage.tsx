@@ -103,7 +103,7 @@ import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
 import { KidsModeDrawer } from '@/components/app/settings/KidsModeDrawer';
-import { Baby, RectangleHorizontal, ThumbsDown } from 'lucide-react';
+import { Baby, RectangleHorizontal, ThumbsDown, UserCheck, Hash } from 'lucide-react';
 import { JungleMoodToggle } from '@/components/app/jungle/JungleMoodToggle';
 import { useJungleMood } from '@/lib/jungle-mood';
 import { useHideWatched } from '@/hooks/use-watched-videos';
@@ -1727,7 +1727,7 @@ function QuietHoursSection() {
 function PrivacySettings() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const { showFollowersFollowing, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showDislikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   const { whoCanMessage, doNotDisturb, isUpdating: isDmUpdating, updateWhoCanMessage, updateDoNotDisturb } = useDmSettings();
   const { option: walletUnlockInterval, setOption: setWalletUnlockInterval } = useWalletUnlockInterval();
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
@@ -1904,6 +1904,15 @@ function PrivacySettings() {
             disabled={isUpdating || isLoading}
           />
           <SettingToggle
+            icon={ThumbsUp}
+            anchor="show-likes"
+            title={t('settings.showLikes')}
+            description={t('settings.showLikesDesc')}
+            defaultChecked={showLikes}
+            onCheckedChange={(checked) => updateSettings({ show_likes: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
             icon={ThumbsDown}
             anchor="show-dislikes"
             title={t('settings.showDislikes')}
@@ -1937,34 +1946,32 @@ function PrivacySettings() {
             defaultChecked
             comingSoon
           />
-          <SettingsRow
-            icon={<Users />}
+          <SettingToggle
+            icon={Users}
+            anchor="show-followers-list"
+            title={t('settings.showFollowersList')}
+            description={t('settings.showFollowersListDesc')}
+            defaultChecked={showFollowersList}
+            onCheckedChange={(checked) => updateSettings({ show_followers_list: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={UserCheck}
+            anchor="show-following-list"
+            title={t('settings.showFollowingList')}
+            description={t('settings.showFollowingListDesc')}
+            defaultChecked={showFollowingList}
+            onCheckedChange={(checked) => updateSettings({ show_following_list: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={Hash}
             anchor="follow-visibility"
-            title={t('settings.followVisibility')}
-            description={t('settings.followVisibilityDesc')}
-            action={<SettingDrawerSelect
-              value={
-                hideFollowerCounts ? 'hidden' : 
-                showFollowersFollowing ? 'public' : 
-                'counts-only'
-              }
-              onValueChange={(value) => {
-                if (value === 'public') {
-                  updateSettings({ show_followers_following: true, hide_follower_counts: false });
-                } else if (value === 'counts-only') {
-                  updateSettings({ show_followers_following: false, hide_follower_counts: false });
-                } else {
-                  updateSettings({ show_followers_following: false, hide_follower_counts: true });
-                }
-              }}
-              disabled={isUpdating || isLoading}
-              title={t('settings.followVisibility')}
-              options={[
-                { value: 'public', label: t('settings.publicOption'), description: t('settings.publicOptionDesc') },
-                { value: 'counts-only', label: t('settings.numbersOnly'), description: t('settings.numbersOnlyDesc') },
-                { value: 'hidden', label: t('settings.hiddenOption'), description: t('settings.hiddenOptionDesc') },
-              ]}
-            />}
+            title={t('settings.showFollowCounts')}
+            description={t('settings.showFollowCountsDesc')}
+            defaultChecked={!hideFollowerCounts}
+            onCheckedChange={(checked) => updateSettings({ show_follower_counts: checked })}
+            disabled={isUpdating || isLoading}
           />
           <SettingToggle
             icon={Globe}
