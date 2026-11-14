@@ -97,7 +97,7 @@ function RecoveringScreen({ compact }: { compact?: boolean }) {
       aria-busy="true"
       aria-label="Loading"
       data-chunk-recovering
-      className={compact ? 'min-h-[50vh] w-full px-4 py-8' : 'min-h-[100dvh] w-full bg-background px-4 py-16'}
+      className={compact ? 'min-h-[50vh] w-full px-4 py-8' : 'min-h-[100dvh] w-full px-4 py-16'}
     >
       <div aria-hidden="true" className="mx-auto max-w-xl space-y-4">
         <div className="theme-skeleton h-10 w-2/3 rounded-xl" />
