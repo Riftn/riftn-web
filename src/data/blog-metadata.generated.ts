@@ -2991,7 +2991,7 @@ export const newPostsMetadata: BlogPost[] = [
     "id": "decentralization-spectrum-social-media",
     "slug": "decentralization-spectrum-social-media",
     "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
-    "excerpt": "Every \"decentralized\" social app runs on an internet that is already very centralized. Here is an honest spectrum of 30 crypto and decentralized social platforms, where Riftn sits on it, and why open source matters more than a perfect score.",
+    "excerpt": "Putting data on a blockchain does not make a social network decentralized. We ranked 30 crypto and decentralized social platforms by who really controls them: rules, moderation, ownership, revenue and code. Here is the spectrum, and why Riftn sits at the top.",
     "content": "",
     "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
     "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
@@ -3007,11 +3007,11 @@ export const newPostsMetadata: BlogPost[] = [
       "Blockchain",
       "Riftn"
     ],
-    "readingTime": 11,
+    "readingTime": 12,
     "featured": false,
     "status": "published",
     "seoTitle": "The Decentralization Spectrum: How Decentralized Can Social Media Get?",
-    "seoDescription": "An honest look at 30 decentralized and crypto social apps, from Mastodon and Bluesky to Farcaster, Nostr and Hive. What goes on chain, who moderates, and why open source matters most."
+    "seoDescription": "30 decentralized and crypto social apps ranked by who really controls them, from Bluesky and Farcaster to Nostr and Hive. Why on-chain is not the same as decentralized."
   },
   {
     "id": "is-riftn-the-same-as-dehub",
@@ -3730,7 +3730,7 @@ export const latestPostMetadata: BlogPost | undefined = {
   "id": "decentralization-spectrum-social-media",
   "slug": "decentralization-spectrum-social-media",
   "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
-  "excerpt": "Every \"decentralized\" social app runs on an internet that is already very centralized. Here is an honest spectrum of 30 crypto and decentralized social platforms, where Riftn sits on it, and why open source matters more than a perfect score.",
+  "excerpt": "Putting data on a blockchain does not make a social network decentralized. We ranked 30 crypto and decentralized social platforms by who really controls them: rules, moderation, ownership, revenue and code. Here is the spectrum, and why Riftn sits at the top.",
   "content": "",
   "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
   "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
@@ -3746,11 +3746,11 @@ export const latestPostMetadata: BlogPost | undefined = {
     "Blockchain",
     "Riftn"
   ],
-  "readingTime": 11,
+  "readingTime": 12,
   "featured": false,
   "status": "published",
   "seoTitle": "The Decentralization Spectrum: How Decentralized Can Social Media Get?",
-  "seoDescription": "An honest look at 30 decentralized and crypto social apps, from Mastodon and Bluesky to Farcaster, Nostr and Hive. What goes on chain, who moderates, and why open source matters most."
+  "seoDescription": "30 decentralized and crypto social apps ranked by who really controls them, from Bluesky and Farcaster to Nostr and Hive. Why on-chain is not the same as decentralized."
 };
 
 export const excludedTitles: string[] = [

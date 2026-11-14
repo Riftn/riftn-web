@@ -4,12 +4,14 @@ export const decentralizationSpectrumPost: BlogPost = {
   id: 'decentralization-spectrum-social-media',
   slug: 'decentralization-spectrum-social-media',
   title: 'The Decentralization Spectrum: How Decentralized Can Social Media Really Get?',
-  excerpt: 'Every "decentralized" social app runs on an internet that is already very centralized. Here is an honest spectrum of 30 crypto and decentralized social platforms, where Riftn sits on it, and why open source matters more than a perfect score.',
+  excerpt: 'Putting data on a blockchain does not make a social network decentralized. We ranked 30 crypto and decentralized social platforms by who really controls them: rules, moderation, ownership, revenue and code. Here is the spectrum, and why Riftn sits at the top.',
   content: `Every decentralized social app has a slightly awkward secret: it runs on the same internet as everything else. And the internet is a lot more centralized than most "Web3" marketing would like you to believe.
 
-So instead of asking whether an app is decentralized, yes or no, it is more honest to ask **how far along the spectrum it is**, and on which parts. This guide lays out that spectrum, places 30 crypto and decentralized social platforms on it, and shows exactly where Riftn sits, including the bits that are centralized on purpose.
+There is a second secret too. **Putting data on a blockchain does not make a platform decentralized.** If one founder or one company still sets the rules, moderates the feed, decides what gets built and keeps the money, the platform is centralized, however many hashes it writes on chain.
 
-![The decentralization spectrum: from fully centralized apps to fully on-chain networks, with 30 social platforms placed along it](/media/fig-decentralization-spectrum-riftn.jpg)
+So this guide ranks 30 crypto and decentralized social platforms on what actually matters: **who controls the platform**. Who sets the rules, who moderates, who owns it, who gets paid, who builds it, and only then where the data lives.
+
+![The decentralization spectrum: 30 social platforms ranked by who really controls them, from founder-run apps to fully user-owned networks](/media/fig-decentralization-spectrum-control-riftn.jpg)
 
 ## First, a reality check: the internet is already centralized
 
@@ -22,92 +24,99 @@ Before anyone gets too proud of their node count, here is what almost every dece
 - **Your internet provider.** Whoever runs your connection can block, throttle or log what you reach.
 - **Blockchains too.** Most wallets and apps read the chain through a few big node providers instead of running their own node, and a large share of nodes live in the same handful of clouds. Riftn is no exception: we use Alchemy to watch the chain.
 
-None of this means decentralization is pointless. It means it is a matter of degree, and anyone who claims to be "fully decentralized" is either running on a ham radio or rounding up.
+None of this means decentralization is pointless. It means the pipes will always be shared. The real fight is over **who is in charge of the platform on top of them**.
 
-## The five questions that place an app on the spectrum
+## On-chain is not the same as decentralized
 
-Decentralization is not one dial. It is at least five, and most apps score very differently on each.
+Two stories make the point.
 
-1. **Who holds your identity?** A company account, a server you picked, or a key only you control?
-2. **Where are your words stored?** In one company's database, across many servers, or on a blockchain?
-3. **Where is your media stored?** Photos and videos are huge. Almost nobody puts them on chain.
-4. **Who decides what gets seen?** One trust and safety team, each server's admin, the community, or you?
-5. **Can anyone read and run the code?** If the code is public, people can check it, and leave with it.
+- **Steemit** stored every post on its own blockchain. In 2020, after Justin Sun bought Steemit Inc., exchanges used their customers' deposits to vote in new validators and took control of the chain. Everything was on chain, and it still changed hands overnight. The community only escaped by copying the code and the data and leaving to start Hive.
+- **Friend.tech** put its keys on Base. When the team walked away in 2024, the contracts stayed on chain and the app went quiet. On-chain data with nobody empowered to carry on is a museum, not a network.
+
+The lesson: **having things on chain means nothing if a founder dictates the platform.** What matters is whether the people who use a network also govern it, moderate it, build it, own it and share in what it earns.
+
+## The six questions that place an app on the spectrum
+
+1. **Who sets the rules?** A founder, a company board, server admins, or the users through open proposals and votes?
+2. **Who moderates?** One trust and safety team, each server's admin, or the community, with a team only for the law?
+3. **Who builds it?** A roadmap decided behind closed doors, or features anyone can ask for and get shipped?
+4. **Who owns it, and who gets paid?** Shareholders and a founder, or the users and holders themselves?
+5. **Where does the data live?** One company's database, many servers, or a chain you can read without anyone's permission?
+6. **Can anyone read the code?** If the code is public, people can check it, and leave with it.
 
 ## The spectrum, rung by rung
 
-Here is the ladder from fully centralized to fully on-chain, with 30 platforms placed where they really sit today. Placements are our honest read of how each works, not a ranking of how good they are. For user numbers and developer activity, see our [Top 50 Decentralized Social Apps 2026](/guides/top-50-decentralized-social-apps-2026) index.
+Here is the ladder from founder-run to fully user-owned, with 30 platforms placed by those six questions. Placements are our read of how each one works today. For user numbers and developer activity, see our [Top 50 Decentralized Social Apps 2026](/guides/top-50-decentralized-social-apps-2026) index.
 
-### Rung 0: Fully centralized
+### Rung 0: Founder or company run
 
-One company owns the accounts, the data, the servers, the rules and the code.
+One company owns the accounts, the data, the servers, the rules, the roadmap and the revenue.
 
 - **X, Instagram, TikTok, YouTube, Facebook**: the baseline. Your account is a row in their database and can disappear with one decision.
 
-### Rung 1: Centralized, but with a token or open code
+### Rung 1: Crypto features, central control
 
-Still one company running the servers, but with something extra: public code, or a token and a wallet bolted on.
+Tokens, wallets or on-chain trading, but one team still runs the app, sets the rules and keeps the business.
 
-- **Minds**: open source code under the AGPL, but one company runs the network.
-- **Phaver, Arena, UXLINK, Cheelee**: crypto rewards and wallets, but the app, the data and the rules are run centrally.
+- **Phaver, Arena, UXLINK, Cheelee**: crypto rewards and wallets, with the app, data and rules run centrally.
+- **Zora**: every post is a coin on Base, but the app, the media and the roadmap are Zora's.
+- **Base App**: Coinbase's wallet and social app. Its social side rides on Farcaster and Zora, while Coinbase runs the app.
+- **Friend.tech**: everything on Base, nobody left in charge.
 - **Odysee**: started on the LBRY blockchain. After LBRY Inc. lost its case with the SEC in 2023, Odysee carried on as a mostly ordinary video platform.
-- **Friend.tech**: keys were traded on Base, but the app itself was centralized. When the team walked away in 2024, the contracts stayed on chain and the app went quiet. A good lesson in why "on-chain" alone is not the whole story.
+- **Minds**: open source code under the AGPL, but one company runs the network.
+- **Steemit**: every post on its own chain, yet one buyer took control in 2020.
+- **DSCVR**: a crypto community portal on the Internet Computer, run by its own team.
 
-### Rung 2: Federated
+### Rung 2: Open protocol, company-run app
 
-Thousands of independent servers that talk to each other. Each server's admin moderates their own patch and can block other servers.
+Anyone can build on the protocol, and some data is portable or on chain, but one company runs the main app, most of the infrastructure and the business.
 
-- **Mastodon**: microblogging on ActivityPub, fully open source. Your identity belongs to your server, so if it shuts down, you move.
+- **Bluesky**: your posts live in a personal data server you can move, and you can add other people's moderation labelers. Most accounts still live on Bluesky's servers, and Bluesky runs the main relay, the app and the company.
+- **Farcaster**: your account ID is registered on Optimism and posts are spread across Farcaster's own nodes. The main app and the protocol's direction are still set by its core team.
+- **Lens**: profiles and the social graph live on Lens Chain, while content is stored off chain and the protocol is stewarded by one team.
+- **DeSo** (Focus, Diamond): a blockchain built for social that stores posts on chain, with its founding team still steering it.
+- **Audius**: music on content nodes run by independent operators, with token governance, but a core company driving the product.
+- **Blacksky and Skylight**: community and video apps on Bluesky's AT Protocol.
+
+### Rung 3: Federated
+
+Thousands of independent servers that talk to each other. Power is spread out, but each server is its own small kingdom: its admin moderates, sets the rules and can shut it down.
+
+- **Mastodon**: microblogging on ActivityPub, fully open source. Your identity belongs to your server, so if it closes, you move.
 - **Pixelfed, PeerTube, Misskey, Lemmy, Friendica**: the same idea for photos, video, Japanese-style microblogging, link sharing and Facebook-style profiles.
 - **Matrix and Element**: federated, encrypted chat that any organization can host.
 
-### Rung 3: Portable identity on shared infrastructure
+### Rung 4: Nobody in charge
 
-You can take your account and followers to another provider, but in practice most of the pipes are still run by one team.
+No company, no chain, no servers you have to trust. Just a key you hold and many relays that pass messages around. Nobody can take it from you, but nobody governs it, funds it or keeps it safe either.
 
-- **Bluesky**: built on the AT Protocol. Your posts live in a personal data server that you can move, and moderation is stackable, so you can subscribe to labelers run by other people. Most accounts still live on Bluesky's own servers, and Bluesky runs the main relay and app.
-- **Blacksky and Skylight**: community and video apps on the same protocol, proving others can build on it.
+- **Nostr** (Damus, Primal, Amethyst, Iris, Coracle): your identity is a key pair and anyone can run a relay. There is no central moderation, no shared revenue and no shared roadmap. Each app and relay decides for itself.
 
-### Rung 4: Hybrid on-chain
+### Rung 5: Community-governed chains
 
-Identity, ownership or payments on a blockchain. Posts and media mostly off chain, for speed and cost.
+The chain and its treasury are governed by token holders, not one company.
 
-- **Farcaster**: your account ID is registered on Optimism, an Ethereum layer 2. Posts are spread across Farcaster's own network of nodes, not a blockchain. Images are links to files hosted elsewhere.
-- **Lens**: profiles and the social graph live on Lens Chain. Post content and media are stored off chain.
-- **Zora**: every post is a coin on Base. The trading is on chain; the app and the media hosting are run by Zora.
-- **Base App**: Coinbase's wallet and social app. Its social side rides on Farcaster and Zora, while the app itself is run by Coinbase.
-- **Audius**: music is stored on content nodes run by independent operators, with a token for governance and rewards.
-- **Riftn**: identity is your wallet, and any post can be minted so **its words are written onto the blockchain itself**. Media stays off chain. More on exactly how below.
+- **Hive** (PeakD, Ecency): every post is on chain, block producers are voted in by stakeholders, and a community fund pays for proposals. Born from the Steemit takeover.
+- **OpenChat, Taggr**: apps that run as smart contracts on the Internet Computer, with control handed to token-holder DAOs.
 
-### Rung 5: Keys and relays
+### Rung 6: Fully user owned
 
-No company, no chain, no servers you have to trust. Just a key you hold and many relays that pass messages around.
+The users govern it, moderate it, build it, own it and share in all of its profit, and the parts worth keeping forever go on chain.
 
-- **Nostr** (Damus, Primal, Amethyst, Iris, Coracle): your identity is a key pair. You post to as many relays as you like, and anyone can run one. Media is hosted separately. There is no central moderation, so relays and apps choose what to carry and show.
+- **Riftn**: the only platform here that ticks all six questions. Here is why.
 
-### Rung 6: Everything on chain
+## Why Riftn sits at the top
 
-The posts themselves are blockchain data.
+Here is how Riftn answers the six questions.
 
-- **Hive** (PeakD, Ecency): every post and comment is stored on the Hive blockchain. Images are hosted elsewhere and linked.
-- **Steemit**: the original. In 2020, after Justin Sun bought Steemit Inc., exchanges used their customers' deposits to vote in new validators. The community answered by copying the chain and leaving to start Hive. That was only possible because the code and the data were public.
-- **DeSo** (Focus, Diamond): a layer 1 blockchain built just for social, storing posts on chain, with images kept off chain.
-- **OpenChat, DSCVR, Taggr**: apps that run as smart contracts on the Internet Computer, so the content and the app itself live on chain.
+- **Rules: set by the community.** Badge holders submit proposals for free on the governance board, and holders vote on them. There is no single owner deciding the rules on a whim.
+- **Moderation: done by the community first.** Reports are weighted by standing, and posts the crowd turns on drop out of public feeds. A small team handles only what the law requires. Details below.
+- **Building: done by the users.** The [requests page](https://riftn.com/features) works like a prompt for the whole platform. Anyone can ask for a feature or a fix, and it gets built in public. In our October 2026 index, Riftn shipped more public code in 90 days than any other decentralized social app.
+- **Ownership and revenue: shared.** Riftn is user owned, and 100% of platform profit is shared with $RIFT stakers. Even the money is decentralized. There is no set APY and no guaranteed return; stakers share in whatever the platform earns.
+- **Data: on chain where it counts.** Identity is your wallet. Any post can be minted so its full text, with a keccak256 fingerprint of the original, is written into the blockchain itself. You can also keep a copy of who you follow on the Ethereum Follow Protocol on Base, in a list your wallet owns. Media stays off chain, for good reasons explained below.
+- **Code: in the open.** Our web and mobile apps are public on GitHub, and you can read every change as it lands. Your profile can even be followed from Mastodon and the wider fediverse at @yourname@riftn.com.
 
-Notice something? **Even at the very top of the ladder, images and video almost always live off chain.** Storing a two minute video on a blockchain would cost a fortune and be slow for everyone. That is not a flaw in any one project. It is physics and economics.
-
-## Where Riftn sits, honestly
-
-Here is how Riftn answers the five questions.
-
-- **Identity:** your wallet. Sign in with it, and your on-chain posts and payments are tied to an address you control, not to a password we hold.
-- **Words:** off chain by default, on chain when you mint. When a post is minted, its full text goes into the blockchain record of the mint, along with a fingerprint (a keccak256 hash) of the original. Very long posts are trimmed in that record, but the fingerprint still proves the full original. Later edits never change what was minted. If Riftn vanished tomorrow, anyone could still read your minted words straight from the chain.
-- **Media:** off chain. Videos, images and audio live in regular cloud storage behind a CDN, served by our apps.
-- **Moderation:** layered. Part community, part you, part us. Details in the next section.
-- **Federation:** your Riftn profile can be followed from Mastodon and the wider fediverse at @yourname@riftn.com.
-- **Code:** our web and mobile apps are public on GitHub, and you can read every change as it lands. Our server code is not public yet.
-
-That puts Riftn on rung 4: hybrid on-chain. That is a choice, not an accident, and the next two sections explain why.
+Other platforms put more bytes on chain. None of them hand the rules, the moderation, the roadmap and the profits to their users at the same time. That is what puts Riftn on rung 6.
 
 ## Why only words go on chain
 
@@ -150,25 +159,25 @@ If we had to choose between a perfectly decentralized network with closed code a
 - **Trust comes from openness.** Signal runs central servers, yet privacy experts trust it, because its code is public and its claims can be tested. Mastodon became the backbone of the fediverse because anyone could run it.
 - **Decentralization without openness can still be a trap.** A network can be spread across thousands of nodes and still be controlled by whoever writes the only client nobody else can read.
 
-That is the standard we hold ourselves to as well. Riftn's web and mobile apps are public, built in the open with [thousands of public commits](/guides/top-50-decentralized-social-apps-2026), and shaped by community requests on [riftn.com/features](https://riftn.com/features). Opening up the server code is the obvious next step on that path.
+That is the standard we hold ourselves to as well. Riftn's web and mobile apps are public, built in the open with [thousands of public commits](/guides/top-50-decentralized-social-apps-2026), and shaped by community requests on [riftn.com/features](https://riftn.com/features).
 
 ## The bottom line
 
-- **Total decentralization is a myth.** Every app on this list still leans on DNS, clouds, app stores and internet providers somewhere.
-- **The useful question is which parts are decentralized**: identity, words, media, moderation and code.
-- **Words on chain, media off chain** gives you a permanent, censorship-resistant record without turning the network into a permanent home for the worst files on the internet.
-- **Good moderation is layered**: community signals, personal tools, and a central team for the law.
-- **Open source is the foundation.** It is what lets you check, fork and leave, and it is achievable today.
+- **Total decentralization of the pipes is a myth.** Every app on this list still leans on DNS, clouds, app stores and internet providers somewhere.
+- **On-chain is not the same as decentralized.** If a founder dictates the platform, the chain does not save you.
+- **The real test is control**: who sets the rules, who moderates, who builds, who owns it and who gets paid.
+- **Riftn hands all of that to its users**: community governance and moderation, a roadmap anyone can prompt, and 100% of profit shared with stakers.
+- **Words and follows on chain, media off chain** gives you a permanent, censorship-resistant record without turning the network into a home for the worst files on the internet.
 
-Want to see the spectrum from the inside? Open [riftn.com](https://riftn.com), mint a post, and read it back from the chain yourself. New here? Start with [What is Riftn?](/guides/what-is-dehub)`,
+Want to see the top of the spectrum from the inside? Open [riftn.com](https://riftn.com), mint a post, file a request on [the features page](https://riftn.com/features), and read your words back from the chain yourself. New here? Start with [What is Riftn?](/guides/what-is-dehub)`,
   bannerImage: '/media/decentralization-spectrum-banner-r2.jpg',
   bannerImageAlt: 'The decentralization spectrum: how decentralized can social media really get?',
   author: { name: 'Riftn Team' },
   publishedAt: '2026-11-13T22:00:00.000Z',
   tags: ['Decentralization', 'Decentralized Social Media', 'Open Source', 'Moderation', 'Blockchain', 'Riftn'],
-  readingTime: 11,
+  readingTime: 12,
   featured: false,
   status: 'published',
   seoTitle: 'The Decentralization Spectrum: How Decentralized Can Social Media Get?',
-  seoDescription: 'An honest look at 30 decentralized and crypto social apps, from Mastodon and Bluesky to Farcaster, Nostr and Hive. What goes on chain, who moderates, and why open source matters most.',
+  seoDescription: '30 decentralized and crypto social apps ranked by who really controls them, from Bluesky and Farcaster to Nostr and Hive. Why on-chain is not the same as decentralized.',
 };
