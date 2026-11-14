@@ -27,6 +27,9 @@ import { getFollowList } from '@/lib/api/dehub';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 
 import '@/styles/live-now-glass.css';
+import { BadgedName } from '@/components/app/BadgedName';
+import type { BadgeLock } from '@/lib/staking-badges';
+import { parseBadgeLock } from '@/lib/staking-badges';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
 import type { SpaceParticipant } from '@/types/audio-spaces.types';
 
@@ -46,6 +49,11 @@ export interface LiveNowItem {
   size: number;
   /** A frame of the broadcast when the stream has one; Stages never do. */
   cover?: string | null;
+  /** Name shown before the badge; the handle when there is none. */
+  displayName?: string | null;
+  /** Staking badge, when the payload carries it (streams). Stages look it up by wallet. */
+  badgeBalance?: number | null;
+  badgeLock?: BadgeLock | null;
 }
 
 export function LiveNowBar() {
@@ -134,6 +142,9 @@ export function LiveNowBar() {
           followed: isFollowed(stream.creatorId),
           size: watching ?? 0,
           cover: stream.thumbnail || null,
+          displayName: (raw as any).account?.displayName || null,
+          badgeBalance: stream.creatorBadgeBalance ?? null,
+          badgeLock: (raw as any).account?.hideBadgeAndBalance ? null : parseBadgeLock((raw as any).account?.badgeLock),
         });
       });
     });
@@ -186,8 +197,8 @@ export function LiveNowBar() {
 export function LiveNowRow({ items, onOpen, onSeeAll }: { items: LiveNowItem[]; onOpen: (item: LiveNowItem) => void; onSeeAll: () => void }) {
   const { t } = useTranslation();
   const single = items.length === 1 ? items[0] : null;
-  const names = items.slice(0, 2).map(handleOf);
-  const rest = items.length - names.length;
+  const named = items.slice(0, 2);
+  const rest = items.length - named.length;
   const backdrop = items.slice(0, 3);
 
   return (
@@ -219,19 +230,25 @@ export function LiveNowRow({ items, onOpen, onSeeAll }: { items: LiveNowItem[]; 
           <p className="text-[13px] text-white/95 font-semibold truncate">
             {single ? single.title : t('stages.liveNow', { defaultValue: 'Live now' })}
           </p>
-          <p className="text-[11.5px] text-white/60 truncate">
+          <div className="flex items-baseline gap-1 min-w-0 text-[11.5px] text-white/60 whitespace-nowrap overflow-hidden">
             {single ? (
               <>
-                {single.kind === 'stage' && <>{t('stages.hostedBy', { defaultValue: 'Hosted by' })} </>}
-                {handleOf(single)}
+                {single.kind === 'stage' && <span className="shrink-0">{t('stages.hostedBy', { defaultValue: 'Hosted by' })}</span>}
+                <NameWithBadge item={single} className="text-white/85 font-medium" />
+                {single.displayName && <span className="truncate min-w-0 text-white/50">{handleOf(single)}</span>}
               </>
             ) : (
               <>
-                {names.join(', ')}
-                {rest > 0 && ` +${rest}`}
+                {named.map((item, i) => (
+                  <span key={`${item.kind}-${item.id}`} className="inline-flex items-baseline min-w-0">
+                    <NameWithBadge item={item} className="text-white/80" />
+                    {i < named.length - 1 && <span>,</span>}
+                  </span>
+                ))}
+                {rest > 0 && <span className="shrink-0">+{rest}</span>}
               </>
             )}
-          </p>
+          </div>
         </div>
 
         <span className="relative flex items-center gap-1.5 shrink-0 text-[11.5px] font-semibold text-white/85">
@@ -314,15 +331,31 @@ export function LiveNowList({ items, onOpen }: { items: LiveNowItem[]; onOpen: (
           </LiveRipple>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[13px] font-medium text-white/90 truncate">{item.title}</p>
-            <p className="text-[11px] text-white/50 truncate">
-              {item.kind === 'stage' && <>{t('stages.hostedBy', { defaultValue: 'Hosted by' })} </>}
-              <span className="text-white/70">{handleOf(item)}</span>
-            </p>
+            <div className="flex items-baseline gap-1 min-w-0 text-[11px] text-white/50 whitespace-nowrap overflow-hidden">
+              {item.kind === 'stage' && <span className="shrink-0">{t('stages.hostedBy', { defaultValue: 'Hosted by' })}</span>}
+              <NameWithBadge item={item} className="text-white/75" />
+              {item.displayName && <span className="truncate min-w-0">{handleOf(item)}</span>}
+            </div>
           </div>
           <LiveCount item={item} />
         </button>
       ))}
     </div>
+  );
+}
+
+/** Display name (or handle) with the person's staking badge right after it. */
+function NameWithBadge({ item, className }: { item: LiveNowItem; className?: string }) {
+  return (
+    <BadgedName
+      badgeBalance={item.badgeBalance ?? undefined}
+      badgeLock={item.badgeLock ?? undefined}
+      lookupId={item.badgeBalance == null ? item.username || item.wallet : undefined}
+      username={item.username}
+      className={className}
+    >
+      {item.displayName || handleOf(item)}
+    </BadgedName>
   );
 }
 
