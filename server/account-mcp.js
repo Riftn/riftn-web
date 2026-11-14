@@ -110,7 +110,7 @@ tool('dehub_features', 'Discover Riftn account controls', 'List the chat control
   endpoint: RESOURCE,
   features: [
     { feature: 'Profile and privacy', tools: ['dehub_account','dehub_update_profile'] },
-    { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_save_draft','dehub_drafts','dehub_delete_draft','dehub_create_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_reschedule_post','dehub_fans_online','dehub_create_poll','dehub_poll','dehub_vote_poll','dehub_remove_poll_vote','dehub_close_poll','dehub_post_image_allowance','dehub_add_post_images','dehub_replace_post_image','dehub_replace_video_cover','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
+    { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_save_draft','dehub_drafts','dehub_delete_draft','dehub_create_post','dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_reschedule_post','dehub_fans_online','dehub_create_poll','dehub_poll','dehub_vote_poll','dehub_remove_poll_vote','dehub_close_poll','dehub_post_image_allowance','dehub_add_post_images','dehub_replace_post_image','dehub_replace_video_cover','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
     { feature: 'Your agents', tools: ['dehub_my_agents'], note: 'Pass as_agent to post, reply, react, repost, follow, edit the profile or read notifications as one of your agents.' },
     { feature: 'Social and notifications', tools: ['dehub_follow','dehub_follow_list','dehub_notifications','dehub_mark_notification_read'] },
     { feature: 'Bookmarks', tools: ['dehub_bookmark_folders','dehub_bookmark_items','dehub_save_bookmark'] },
@@ -214,6 +214,13 @@ tool('dehub_create_post', 'Publish a Riftn post', 'Publish or schedule an ordina
   const result = unwrap(await api(ctx, '/user_mint', 'POST', form));
   if (!result?.createdTokenId) throw new Error('Publication outcome is unknown. Read your posts before retrying.');
   return success({ published: !a.scheduled_at, scheduled: !!a.scheduled_at, scheduled_at: a.scheduled_at || null, minted: false, token_id: result.createdTokenId, url: `${ORIGIN}/app/post/${result.createdTokenId}` });
+}), { open: true, agents: true, cap: 'post' });
+tool('dehub_quote_post', 'Quote a post', 'Publish an ordinary quote post with your commentary. Reuse request_id on retries.', { request_id: z.string().uuid(), quoted_token_id: id, content: text(500), category: text(100).default('General') }, 'dehub:social', async (a, ctx) => ctx.once('post', a.request_id, a, async () => {
+  const form = new FormData();
+  for (const [key, value] of Object.entries({ quotedTokenId: a.quoted_token_id, name: ' ', description: a.content, postType: 'feed-simple', category: JSON.stringify([a.category]), chainId: '8453', minter: ctx.wallet, mintOptOut: 'true', idempotencyKey: a.request_id, streamInfo: JSON.stringify({}) })) form.set(key, value);
+  const result = unwrap(await api(ctx, '/quote_post', 'POST', form));
+  if (!result?.createdTokenId) throw new Error('Quote outcome is unknown. Read your posts before retrying.');
+  return success({ published: true, minted: false, token_id: result.createdTokenId, url: `${ORIGIN}/app/post/${result.createdTokenId}` });
 }), { open: true, agents: true, cap: 'post' });
 tool('dehub_edit_post', 'Edit my post', 'Edit text, category, content warning, or reply and quote rules on a post you own.', {
   token_id: id, title: text(150).optional(), content: text(2000).optional(), category: text(100).optional(), spoiler_text: z.string().max(300).optional(), comments_disabled: z.boolean().optional(), reply_policy: z.enum(['public','followers','following','mentioned']).optional(), quote_policy: z.enum(['public','followers','nobody']).optional(),

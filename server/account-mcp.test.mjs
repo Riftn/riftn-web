@@ -90,7 +90,7 @@ test('OAuth metadata and tool descriptors are explicit about account scopes and 
   assert.equal(accountTools.find(t => t.name === 'dehub_update_profile').descriptor.annotations.destructiveHint, true);
 });
 test('expanded post controls declare the right access and reject untrusted input', async () => {
-  for (const name of ['dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_reschedule_post','dehub_create_poll','dehub_vote_poll','dehub_add_post_images']) {
+  for (const name of ['dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_reschedule_post','dehub_create_poll','dehub_vote_poll','dehub_add_post_images']) {
     const entry = accountTools.find(tool => tool.name === name);
     assert.equal(entry.scope, 'dehub:social', name);
     assert.equal(entry.descriptor.inputSchema.additionalProperties, false, name);
