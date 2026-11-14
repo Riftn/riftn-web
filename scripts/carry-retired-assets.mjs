@@ -23,6 +23,9 @@
  * Never fails the deploy: anything that cannot be fetched is skipped with a
  * warning, and the deploy goes ahead with whatever was carried.
  *
+ * Runs as wrangler's build.command (wrangler.jsonc / wrangler.staging.jsonc),
+ * so every `wrangler deploy` does it, whoever starts the deploy.
+ *
  * Usage: node scripts/carry-retired-assets.mjs https://riftn.com [distDir]
  */
 import fs from 'node:fs';
@@ -37,6 +40,19 @@ const MAX_TOTAL_FILES = Number(process.env.MAX_TOTAL_FILES || 19_000);
 const MAX_CARRIED_BYTES = Number(process.env.MAX_CARRIED_BYTES || 1_500_000_000);
 const CONCURRENCY = 16;
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) riftn-deploy/1.0';
+
+// Wired in as wrangler's build.command, so `wrangler dev` runs it too. Only a
+// real deploy (GitHub Actions or Cloudflare's Workers Builds) should touch the
+// live site; CARRY_ASSETS=1 forces it anywhere.
+const IN_CI = Boolean(process.env.CARRY_ASSETS || process.env.WORKERS_CI || process.env.GITHUB_ACTIONS || process.env.CI);
+if (!IN_CI) {
+  console.log('[carry-assets] not a deploy build, skipping');
+  process.exit(0);
+}
+if (!fs.existsSync(path.join(DIST, 'index.html'))) {
+  console.log('[carry-assets] no built dist yet, skipping');
+  process.exit(0);
+}
 
 if (!LIVE) {
   console.error('usage: carry-retired-assets.mjs <live-origin> [distDir]');

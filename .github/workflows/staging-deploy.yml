@@ -52,9 +52,6 @@ jobs:
       - name: Build staging assets
         if: ${{ !inputs.validate_only }}
         run: pnpm build
-      - name: Keep the live build's code files for tabs opened before this deploy
-        if: ${{ !inputs.validate_only }}
-        run: node scripts/carry-retired-assets.mjs https://staging.dehub.io dist
       - name: Deploy staging worker and assets
         if: ${{ !inputs.validate_only }}
         run: pnpm exec wrangler deploy --config wrangler.staging.jsonc
