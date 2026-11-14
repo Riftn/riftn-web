@@ -733,6 +733,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     ? { top: vvOffsetTop, height: vvHeight, bottom: 'auto' }
     : undefined;
 
+  // riftn.com/chat signed out: the public room, read only. Sending, reacting or
+  // scrolling past its one page of history opens the sign-in sheet in place.
+  if (!isAuthenticated && fullscreen) {
+    return (
+      <div id="app-root" data-fullscreen-chat data-guest-chat className="fixed inset-0 z-[70] flex flex-col bg-black text-white">
+        {chatSeo}
+        <div className="mx-auto flex h-full w-full max-w-3xl flex-col overflow-hidden">
+          <PublicChat onBack={() => navigate('/')} />
+        </div>
+      </div>
+    );
+  }
+
   // Block access for unauthenticated users
   if (!isAuthenticated) {
     const gate = (
