@@ -1,7 +1,7 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from "@/hooks/use-draft-state";
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
@@ -99,6 +99,15 @@ function toLocalMessage(msg: SupabaseLiveChatMessage): Message {
  */
 const ROOM_MANAGEMENT_ENABLED = false;
 
+/**
+ * The chat opens on the newest lines and reads further back a page at a time
+ * as the reader scrolls up, until the start of the room. Signed out, one page
+ * past the opening one, then the sign-in wall.
+ */
+const CHAT_PAGE_SIZE = 20;
+/** How close to the top (px) the next older page is fetched. */
+const LOAD_OLDER_AT = 240;
+
 export function PublicChat({ onBack }: PublicChatProps) {
   // A mention notification names the line that tagged the reader.
   useFocusChatMessage();
@@ -114,9 +123,6 @@ export function PublicChat({ onBack }: PublicChatProps) {
   const promptSignIn = useCallback(() => {
     openLoginModal({ path: '/chat?chat=public' });
   }, [openLoginModal]);
-  // Signed out, the history on screen is the one page the room loads. Reaching
-  // its top opens the sheet once; scrolling back down re-arms it.
-  const topPromptArmed = useRef(true);
 
   // Search state
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -146,7 +152,8 @@ export function PublicChat({ onBack }: PublicChatProps) {
   const {
     messages: apiMessages, isLoading: messagesLoading, isBanned,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage, refetch,
-  } = useLiveChatMessages(selectedRoomId);
+    hasOlder, loadingOlder, loadOlder, signInWall,
+  } = useLiveChatMessages(selectedRoomId, { pageSize: CHAT_PAGE_SIZE });
 
   // Fetch full room details
   const { room: roomDetails } = useLiveChatRoomDetails(selectedRoomId);
@@ -193,8 +200,12 @@ export function PublicChat({ onBack }: PublicChatProps) {
 
   // Filter messages based on search query and merge buy alerts
   const filteredMessages = useMemo(() => {
-    // Convert buy alerts to Message format for merging
-    const buyAlertMessages: Message[] = buyAlerts.map((alert) => ({
+    // Buy alerts sit beside the history that is loaded, never further back:
+    // a trade from months ago must not stack up above the first page.
+    const oldestLoaded = messages.length ? messages[0].timestamp.getTime() : Date.now();
+    const buyAlertMessages: Message[] = buyAlerts
+      .filter((alert) => new Date(alert.created_at).getTime() >= oldestLoaded)
+      .map((alert) => ({
       id: `buy-alert-${alert.id}`,
       userId: 'buy-bot',
       userName: 'Buy Bot',
@@ -245,6 +256,32 @@ export function PublicChat({ onBack }: PublicChatProps) {
       setIsAllTranslated(true);
     }
   }, [isAllTranslated]);
+
+  /**
+   * Where the reader was when an older page was asked for, so the page lands
+   * above them without moving what they were reading.
+   */
+  const olderAnchor = useRef<{ height: number; top: number } | null>(null);
+  const requestOlder = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el || !hasOlder || loadingOlder || signInWall || searchQuery.trim()) return;
+    olderAnchor.current = { height: el.scrollHeight, top: el.scrollTop };
+    void loadOlder();
+  }, [hasOlder, loadingOlder, signInWall, searchQuery, loadOlder]);
+  useLayoutEffect(() => {
+    const el = scrollContainerRef.current;
+    const anchor = olderAnchor.current;
+    if (!el || !anchor || loadingOlder) return;
+    olderAnchor.current = null;
+    el.scrollTop = el.scrollHeight - anchor.height + anchor.top;
+  }, [filteredMessages.length, loadingOlder, signInWall]);
+  // A first page too short to scroll can never be scrolled up from: keep
+  // reading back until the list fills the panel or the history runs out.
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el || messagesLoading || !filteredMessages.length) return;
+    if (el.scrollHeight <= el.clientHeight + 8) requestOlder();
+  }, [filteredMessages.length, messagesLoading, requestOlder]);
 
   const followedRoom = useRef<string | null>(null);
   const followLatest = useRef(true);
@@ -496,14 +533,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
           onScroll={(event) => {
             const el = event.currentTarget;
             followLatest.current = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
-            if (!isAuthenticated && el.scrollHeight > el.clientHeight) {
-              if (el.scrollTop < 40 && topPromptArmed.current) {
-                topPromptArmed.current = false;
-                promptSignIn();
-              } else if (el.scrollTop > 240) {
-                topPromptArmed.current = true;
-              }
-            }
+            if (el.scrollTop < LOAD_OLDER_AT) requestOlder();
           }}
           onPointerDown={dismissKeyboard}
           className="absolute inset-0 chat-text-zone overflow-y-auto py-2"
@@ -537,7 +567,21 @@ export function PublicChat({ onBack }: PublicChatProps) {
           ) : filteredMessages.length === 0 && searchQuery ? (
             <AppState icon="search" title={t('publicChat.noResults')} description={_copy("copy.2e6d79de50dc", { defaultValue: "Try a different search." })} kind="search-empty" size="compact" className="h-full" />
           ) : (
-            filteredMessages.map((message) => (
+            <>
+            {signInWall && !searchQuery ? (
+              <div data-chat-sign-in-wall className="mx-4 my-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4 text-center">
+                <p className="text-sm font-semibold text-white">{_copy("copy.27c26a5a38b3", { defaultValue: "Sign in to see older messages" })}</p>
+                <p className="mt-1 text-xs text-zinc-400">{_copy("copy.674e70bcd915", { defaultValue: "The full chat history is open to everyone with an account." })}</p>
+                <Button size="sm" className="mt-3 rounded-full px-5" onClick={promptSignIn}>
+                  {_copy("copy.bfd402b2f6f3", { defaultValue: "Sign in" })}
+                </Button>
+              </div>
+            ) : !hasOlder && !messagesLoading && !searchQuery && messages.length > 0 ? (
+              <p data-chat-history-start className="py-3 text-center text-[11px] text-zinc-500">
+                {_copy("copy.feaf753f6557", { defaultValue: "Start of the chat" })}
+              </p>
+            ) : null}
+            {filteredMessages.map((message) => (
               message.id.startsWith('buy-alert-') ? (
                 buyBotHidden ? null : (
                   <BuyAlertCard
@@ -574,10 +618,18 @@ export function PublicChat({ onBack }: PublicChatProps) {
                 replying={!!replyTo && replyTo.id === message.id}
               />
               )
-            ))
+            ))}
+            </>
           )}
           <div ref={bottomRef} />
         </div>
+        {loadingOlder && (
+          <div data-chat-loading-older className="pointer-events-none absolute inset-x-0 top-2 flex justify-center">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/50 backdrop-blur">
+              <Loader2 className="h-4 w-4 animate-spin text-white/80" />
+            </span>
+          </div>
+        )}
       </div>
       </SharedTranslationContext.Provider>
       
