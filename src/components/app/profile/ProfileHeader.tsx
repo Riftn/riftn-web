@@ -22,6 +22,7 @@ import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
 import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
 import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
 import { MutualFollowers } from '@/components/app/profile/MutualFollowers';
+import { useMutualFollowers } from '@/hooks/use-mutual-followers';
 import { StreamerLevelCard } from '@/components/app/live/StreamerLevelCard';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
 import { PinnedCommunities } from '@/components/app/communities/PinnedCommunities';
@@ -125,8 +126,11 @@ export function ProfileHeader({
   const navigate = useNavigate();
 
   const { t } = useTranslation();
-  // The links pill joins the Following/Followers line, on every screen size.
-  const linksOnCountsRow = !hideFollowerCounts || isViewingOwnProfile;
+  // The links pill sits in the card's bottom corner: on the mutuals row when
+  // one shows, otherwise at the end of the Following/Followers line.
+  const mutualFollowers = useMutualFollowers({ profileAddress: apiProfile?.walletAddress, enabled: !isViewingOwnProfile });
+  const hasMutualsRow = !isViewingOwnProfile && !mutualFollowers.isLoading && mutualFollowers.mutuals.length > 0;
+  const linksOnCountsRow = !hasMutualsRow && (!hideFollowerCounts || isViewingOwnProfile);
   const messageSettings = (apiProfile as (ProfileData & {
     dmSettings?: { disables?: string[] } | Array<{ disables?: string[] }>;
     dmSetting?: { disables?: string[] } | Array<{ disables?: string[] }>;
@@ -524,8 +528,8 @@ export function ProfileHeader({
           ) : null}
 
           {/* The bottom row: mutual followers on the left, the creator's
-              social icons tucked into the right-hand corner. The icons still
-              take this row when there are no mutuals to show. Each side
+              social icons tucked into the right-hand corner. The icons
+              take this row whenever mutuals show, or the counts line is hidden. Each side
               carries its own top margin, so an empty row takes no space. */}
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
