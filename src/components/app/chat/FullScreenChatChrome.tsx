@@ -13,6 +13,7 @@ import Close from '@/components/ui/cut-icons/close';
 import HomeIcon from '@/components/ui/cut-icons/home';
 import ProfileIcon from '@/components/ui/cut-icons/profile';
 import SettingsIcon from '@/components/ui/cut-icons/settings-cog';
+import { Plus } from 'lucide-react';
 
 /*
  * The top of the chat list on riftn.com/chat on computers. Phones keep the
@@ -158,9 +159,29 @@ function ChatMeMenu({ onOpenSettings }: { onOpenSettings?: () => void }) {
   const { t: _copy } = _useCopy();
   const navigate = useNavigate();
   // useContext, not useAuth: the state gallery renders this without a provider.
-  const user = useContext(AuthContext)?.user;
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
   const [menuOpen, setMenuOpen] = useState(false);
-  if (!user) return null;
+  if (!user) {
+    // Signed out: a + where the picture goes. Signing in lands back in the chat.
+    if (!auth) return null;
+    const joinLabel = _copy('fullscreenChat.signIn', { defaultValue: 'Log in or sign up' });
+    return (
+      <button
+        type="button"
+        data-fsc-me
+        data-fsc-sign-in
+        aria-label={joinLabel}
+        title={joinLabel}
+        onClick={() => auth.openLoginModal({ path: '/chat?chat=public' })}
+        className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-80"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-700 text-white">
+          <Plus className="h-[18px] w-[18px]" />
+        </span>
+      </button>
+    );
+  }
   const name = user.displayName || user.username || '';
   const avatarSrc = user.address && user.avatarImageUrl ? buildAvatarUrl(user.address, user.avatarImageUrl) : undefined;
   const profileLabel = _copy('fullscreenChat.profile', { defaultValue: 'Your profile' });

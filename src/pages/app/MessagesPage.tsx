@@ -289,7 +289,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
   const groupChats = chatsFromMemberships(myMemberships).filter(c =>
     !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  const { isAuthenticated, walletAddress } = useAuth();
+  const { isAuthenticated, walletAddress, isLoading: authLoading, openLoginModal } = useAuth();
+  const guest = !authLoading && !isAuthenticated;
 
   // Subscribe to DM realtime updates only when on messages page
   useDMRealtime();
@@ -304,7 +305,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const createConversation = useCreateConversation();
 
+  // Signed out on a computer, the public room is open beside the list rather
+  // than an empty "Pick a chat" pane: it is the one chat they can read.
+  useEffect(() => {
+    if (fullscreen && guest && !phonePill) setShowPublicChat(true);
+  }, [fullscreen, guest, phonePill]);
+
   const openNewMessage = useCallback(() => {
+    if (guest) { openLoginModal({ path: '/chat?chat=public' }); return; }
     const phone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
     if (!phone) {
       setShowMessageSelector(true);
@@ -313,7 +321,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     // Inside the tap, so iOS lets the keyboard come up with the drawer.
     newMessageDrawerRef.current?.primeKeyboard();
     setShowNewMessageDrawer(true);
-  }, []);
+  }, [guest, openLoginModal]);
 
   /**
    * A person picked in the drawer: open the chat in place right away (a thread
@@ -450,6 +458,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   /** Handle clicking a user search result — always create conversation and open chat */
   const handleSelectSearchUser = (user: DeHubUser) => {
+    if (guest) { openLoginModal({ path: '/chat?chat=public' }); return; }
     const dmSettingsObj = (() => {
       const raw = (user as any).dmSettings || (user as any).dmSetting;
       return Array.isArray(raw) ? raw[0] : raw;
@@ -733,30 +742,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     ? { top: vvOffsetTop, height: vvHeight, bottom: 'auto' }
     : undefined;
 
-  // riftn.com/chat signed out: the public room, read only. Sending, reacting or
-  // scrolling past its one page of history opens the sign-in sheet in place.
-  if (!isAuthenticated && fullscreen) {
-    return (
-      <div id="app-root" data-fullscreen-chat data-guest-chat className="fixed inset-0 z-[70] flex flex-col bg-black text-white">
-        {chatSeo}
-        <div className="mx-auto flex h-full w-full max-w-3xl flex-col overflow-hidden">
-          <PublicChat onBack={() => navigate('/')} />
-        </div>
-      </div>
-    );
-  }
-
-  // Block access for unauthenticated users
-  if (!isAuthenticated) {
-    const gate = (
-      <AuthGate description={_copy("copy.b38dabfa0639", { defaultValue: "Log in to access your messages and chat with others." })} />
-    );
-    return fullscreen ? (
-      <div id="app-root" data-fullscreen-chat className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-black text-white">
-        {chatSeo}
-        <div className="m-auto w-full max-w-md p-4">{gate}</div>
-      </div>
-    ) : gate;
+  // riftn.com/chat signed out is the same page everyone else gets, with the
+  // public room readable: sending, reacting, starting a chat or scrolling past
+  // its one page of history opens the sign-in sheet in place.
+  // Block access for unauthenticated users everywhere else.
+  if (!isAuthenticated && !fullscreen) {
+    return <AuthGate description={_copy("copy.b38dabfa0639", { defaultValue: "Log in to access your messages and chat with others." })} />;
   }
 
   // If Public Chat is open, show full-screen chat
@@ -1021,7 +1012,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
 
             {/* Empty state */}
-            {!isLoading && !isError && !searchQuery.trim() && visibleConversations.length === 0 && (
+            {!guest && !isLoading && !isError && !searchQuery.trim() && visibleConversations.length === 0 && (
               <AppState
                 icon="messages"
                 title={t('messages.noConversationsYet', 'No conversations yet')}
