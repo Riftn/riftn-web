@@ -281,7 +281,9 @@ export function PublicChat({ onBack }: PublicChatProps) {
   }, []);
 
   const handleSendMessage = async (args: { content: string; type: string; gifUrl?: string; mediaFile?: File; duration?: number }) => {
-    if (!isAuthenticated || !selectedRoomId) return false;
+    // Signed out: the typed line stays in the box while they sign in.
+    if (!isAuthenticated) { promptSignIn(); return false; }
+    if (!selectedRoomId) return false;
     const replyToId = replyTo?.id;
     try {
       if (args.type === 'media' && args.mediaFile) {
@@ -580,19 +582,6 @@ export function PublicChat({ onBack }: PublicChatProps) {
       </SharedTranslationContext.Provider>
       
       {/* Input Area */}
-      {!isAuthenticated ? (
-        <div className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-          <button
-            type="button"
-            data-guest-chat-signin
-            onClick={promptSignIn}
-            className="flex h-[52px] w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left text-zinc-400 hover:bg-white/[0.07]"
-          >
-            <span className="text-base md:text-sm">{_copy('publicChat.guestPrompt', { defaultValue: 'Sign up or log in to chat' })}</span>
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold" style={{ color: '#000' }}>{_copy('publicChat.guestJoin', { defaultValue: 'Join' })}</span>
-          </button>
-        </div>
-      ) : (
       <div className="relative">
         <ChatInput
         voiceMaxDuration={29}
@@ -604,7 +593,6 @@ export function PublicChat({ onBack }: PublicChatProps) {
           draftKey={selectedRoomId ? `room:${selectedRoomId}` : null}
         />
       </div>
-      )}
 
       {/* Modals */}
       <CreateTopicRoomModal
