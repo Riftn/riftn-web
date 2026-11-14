@@ -2472,7 +2472,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     <div data-page-bento data-bento-flat className="h-full flex flex-col overflow-hidden relative">
       {/* Header. The shell carries no fill now, so the bar is separated by a
           hairline instead of sitting on its own slightly-lighter slab. */}
-      <div className={`flex items-center justify-between border-b border-white/[0.07] ${dock ? 'px-3 py-2' : 'px-4 py-3'}`}>
+      <div data-chat-header className={`flex items-center justify-between border-b border-white/[0.07] ${dock ? 'px-3 py-2' : 'px-4 py-3'}`}>
         <div className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
           {!dock && (
             <Button
