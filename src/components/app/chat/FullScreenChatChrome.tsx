@@ -180,17 +180,18 @@ function ChatMeMenu({ onOpenSettings }: { onOpenSettings?: () => void }) {
           data-fsc-me
           aria-label={profileLabel}
           title={profileLabel}
-          className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80"
+          className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-80"
         >
-          <Avatar className="h-8 w-8 rounded-full">
-            {avatarSrc && <AvatarImage src={avatarSrc} alt="" className="rounded-full object-cover" />}
-            <AvatarFallback className="rounded-full bg-zinc-700 text-sm font-medium text-white">
+          <Avatar className="h-8 w-8 rounded-lg">
+            {avatarSrc && <AvatarImage src={avatarSrc} alt="" className="rounded-lg object-cover" />}
+            <AvatarFallback className="rounded-lg bg-zinc-700 text-sm font-medium text-white">
               {name.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
         </button>
       </PopoverTrigger>
-      <PopoverContent data-fsc-me-menu side="bottom" align="end" sideOffset={10} className="w-60 rounded-2xl border-zinc-700 bg-zinc-900 p-1.5">
+      {/* No focus on open: it would land on the badge and pop its tooltip. */}
+      <PopoverContent data-fsc-me-menu side="bottom" align="end" sideOffset={10} onOpenAutoFocus={(e) => e.preventDefault()} className="w-60 rounded-2xl border-zinc-700 bg-zinc-900 p-1.5">
         <div className="flex min-w-0 flex-col px-2.5 pb-2 pt-1.5">
           <span className="flex min-w-0 text-[14px] font-semibold leading-tight text-white">
             <BadgedName badgeBalance={user.badgeBalance} username={user.username} lookupId={user.username || user.address}>
