@@ -124,10 +124,20 @@ export function SearchRequestPrompt({ query, source, compact = false, onNavigate
         {!compact && sendButton}
       </div>
       {compact ? (
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <span className="text-[11px] text-zinc-500">{t('sidebar.requestPostsTo', 'Posts to Requests')}</span>
-          {sendButton}
-        </div>
+        // One pill, label and arrow together, with the corner radius of the
+        // input above it.
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={send}
+          disabled={!text.trim() || submit.isPending}
+          aria-label={t('sidebar.requestSend', 'Send request')}
+          data-search-request-send
+          className="mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-semibold text-black transition-opacity disabled:opacity-40"
+        >
+          <span className="truncate">{t('sidebar.requestPostsTo', 'Posts to Requests')}</span>
+          <ArrowUp className="h-3.5 w-3.5 shrink-0" strokeWidth={2.6} />
+        </button>
       ) : (
         <p className="mt-2 text-xs text-zinc-500">{t('sidebar.requestHint', 'Posts to Requests as you. We will tell you when it ships.')}</p>
       )}
