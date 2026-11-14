@@ -77,6 +77,38 @@ function reportError(error: Error, errorInfo: ErrorInfo, label?: string): void {
     });
 }
 
+/**
+ * How long a page may sit on the quiet loading state waiting for a recovery
+ * reload before the crash screen (with its manual buttons) takes over. The
+ * reload itself is queued ~1.5s after the failure; anything past this means the
+ * browser never navigated.
+ */
+const RECOVERY_FALLBACK_MS = 10_000;
+
+/**
+ * What a page shows while it reloads onto the new version: the same skeleton
+ * a page shows while its code downloads, so the swap reads as a slow load,
+ * not an error.
+ */
+function RecoveringScreen({ compact }: { compact?: boolean }) {
+  return (
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+      data-chunk-recovering
+      className={compact ? 'min-h-[50vh] w-full px-4 py-8' : 'min-h-[100dvh] w-full bg-background px-4 py-16'}
+    >
+      <div aria-hidden="true" className="mx-auto max-w-xl space-y-4">
+        <div className="theme-skeleton h-10 w-2/3 rounded-xl" />
+        <div className="theme-skeleton h-48 w-full rounded-xl" />
+        <div className="theme-skeleton h-4 w-4/5 rounded" />
+        <div className="theme-skeleton h-4 w-3/5 rounded" />
+      </div>
+    </div>
+  );
+}
+
 interface ErrorBoundaryProps {
   children: ReactNode;
   /** Custom fallback UI to show when an error occurs */
@@ -103,6 +135,13 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  /**
+   * A missing code file (an older tab after a deploy) is being fixed by
+   * reloading the page. Show a plain loading state meanwhile, not the crash
+   * screen: the reload lands on the new version a moment later and the person
+   * should never see "Something went wrong" for what is routine.
+   */
+  recovering: boolean;
   /** Last `resetKey` we reconciled against (for auto-recovery on change). */
   lastResetKey: unknown;
 }
@@ -110,11 +149,14 @@ interface ErrorBoundaryState {
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null, lastResetKey: props.resetKey };
+    this.state = { hasError: false, error: null, recovering: false, lastResetKey: props.resetKey };
   }
 
+  /** Shows the crash screen after all if a recovery reload never happened. */
+  private recoveryTimer: ReturnType<typeof setTimeout> | null = null;
+
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    return { hasError: true, error };
+    return { hasError: true, error, recovering: isChunkLoadError(error) };
   }
 
   static getDerivedStateFromProps(
@@ -123,7 +165,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   ): Partial<ErrorBoundaryState> | null {
     // Auto-recover when the reset key (route) changes.
     if (props.resetKey !== state.lastResetKey) {
-      return { hasError: false, error: null, lastResetKey: props.resetKey };
+      return { hasError: false, error: null, recovering: false, lastResetKey: props.resetKey };
     }
     return null;
   }
@@ -137,11 +179,32 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // shared with lazyWithRetry and main.tsx's vite:preloadError handler — see
     // lib/lazy-with-retry.
     if (isChunkLoadError(error)) {
-      recoverFromChunkError();
+      this.clearRecoveryTimer();
+      if (recoverFromChunkError() === 'exhausted') {
+        // Both reloads already ran and the file is still missing: only now is
+        // the crash screen (with its manual buttons) the right thing to show.
+        this.setState({ recovering: false });
+      } else {
+        // Keep a way out if the browser never navigates (blocked reload,
+        // storage disabled, a tab that stays hidden).
+        this.recoveryTimer = setTimeout(() => {
+          this.recoveryTimer = null;
+          if (this.state.recovering) this.setState({ recovering: false });
+        }, RECOVERY_FALLBACK_MS);
+      }
     }
 
     reportError(error, errorInfo, this.props.label);
     this.props.onError?.(error, errorInfo);
+  }
+
+  componentWillUnmount(): void {
+    this.clearRecoveryTimer();
+  }
+
+  private clearRecoveryTimer(): void {
+    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
+    this.recoveryTimer = null;
   }
 
   handleReset = (): void => {
@@ -160,6 +223,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   render(): ReactNode {
+    if (this.state.hasError && this.state.recovering) {
+      // Widgets with their own fallback (often null) keep it.
+      if (this.props.fallback !== undefined) return this.props.fallback;
+      return <RecoveringScreen compact={this.props.compact} />;
+    }
+
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

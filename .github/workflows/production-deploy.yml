@@ -59,6 +59,8 @@ jobs:
       - name: Save the live sitemap for IndexNow
         continue-on-error: true
         run: curl --fail --silent --show-error https://riftn.com/sitemap-static.xml --output /tmp/live-sitemap-static.xml
+      - name: Keep the live build's code files for tabs opened before this deploy
+        run: node scripts/carry-retired-assets.mjs https://riftn.com dist
       - name: Deploy production worker and assets
         run: pnpm exec wrangler deploy --config wrangler.jsonc
       - name: Verify public routing after deploying
