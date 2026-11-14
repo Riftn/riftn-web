@@ -360,7 +360,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 p-4 border-b border-white/[0.07]">
+      <div data-chat-header className="flex items-center justify-between gap-2 p-4 border-b border-white/[0.07]">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button
             variant="ghost"
