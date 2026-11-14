@@ -909,7 +909,8 @@ html[data-theme='war'] [data-feed-filter-panel] button[data-active='true'] {
 }
 
 /* Badge icons. */
-html[data-theme='war'] img[data-badge-icon] {
+html[data-theme='war'] img[data-badge-icon],
+html[data-theme='war'] [data-badge-still] {
   border-radius: 0 !important;
   filter: drop-shadow(0 0 4px rgb(var(--war-hud) / 0.3));
 }
