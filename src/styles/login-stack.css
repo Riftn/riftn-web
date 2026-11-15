@@ -115,6 +115,7 @@ html[data-system-tone="light"] .login-stack-corner {
   justify-content: center;
   pointer-events: none;
   filter: var(--ls-neon-glow) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
+  animation: ls-neon 3.2s ease-in-out infinite;
 }
 /* Light themes: the lanes fade to paper behind the logo, so a darker shade keeps the white tube readable. */
 html[data-theme="light"] .login-stack__logo,
@@ -134,6 +135,10 @@ html[data-theme="osaka"] .login-stack__logo {
   background: linear-gradient(180deg, #fff, color-mix(in srgb, var(--ls-neon) 35%, #fff));
   -webkit-mask: url('/brand-kit/brand/riftn-logo-white.png') center / contain no-repeat;
   mask: url('/brand-kit/brand/riftn-logo-white.png') center / contain no-repeat;
+}
+@keyframes ls-neon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.82; }
 }
 .login-stack__headline {
   position: relative;
@@ -213,7 +218,7 @@ html[data-theme="osaka"] .login-stack__headline { --ls-sign: #ffc2e0; --ls-sign-
 }
 @media (prefers-reduced-motion: reduce) {
   .login-stack__lane { animation: none; }
-  .login-stack__title { animation: none; }
+  .login-stack__logo { animation: none; }
 }
 
 /* The email-first option list under the hero. */
@@ -265,68 +270,4 @@ html[data-system-tone="light"] .login-stack__logo {
 html[data-theme="light"] .login-stack__logo-mark,
 html[data-system-tone="light"] .login-stack__logo-mark {
   background: #0b0b0d;
-}
-
-/* Old TV: the logo and headline sit on a tube screen. Faint scanlines over
-   both, a soft bright band rolling down, and a steady flicker that never
-   switches them off. Colour themes add red/blue edges; System and Light stay
-   clean (no colour behind the letters). */
-.login-stack__title {
-  --ls-tv-red: transparent;
-  --ls-tv-blue: transparent;
-  animation: ls-tv-flicker 3.6s steps(1) infinite;
-}
-html:not([data-theme="system"]):not([data-theme="dark"]):not([data-theme="light"]):not([data-system-tone="light"]) .login-stack__title {
-  --ls-tv-red: rgba(255, 40, 80, 0.7);
-  --ls-tv-blue: rgba(40, 220, 255, 0.7);
-}
-html:not([data-theme="system"]):not([data-theme="dark"]):not([data-theme="light"]):not([data-system-tone="light"]) .login-stack__logo {
-  filter: drop-shadow(-1.5px 0 var(--ls-tv-red)) drop-shadow(1.5px 0 var(--ls-tv-blue)) var(--ls-neon-glow) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
-}
-html:not([data-theme="system"]):not([data-theme="dark"]):not([data-theme="light"]):not([data-system-tone="light"]) .login-stack__headline {
-  text-shadow: -1.5px 0 var(--ls-tv-red), 1.5px 0 var(--ls-tv-blue), 0 0 6px var(--ls-sign-glow), 0 0 12px var(--ls-sign-glow), 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-.login-stack__title::after {
-  content: '';
-  position: absolute;
-  left: -12px;
-  right: -12px;
-  top: -96px;
-  bottom: -8px;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.07) 50%, transparent 100%) 0 0 / 100% 40px no-repeat,
-    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px);
-  -webkit-mask: radial-gradient(60% 70% at 50% 55%, #000 60%, transparent);
-  mask: radial-gradient(60% 70% at 50% 55%, #000 60%, transparent);
-  animation: ls-tv-roll 5s linear infinite;
-}
-html[data-theme="light"] .login-stack__title::after,
-html[data-system-tone="light"] .login-stack__title::after {
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.04) 50%, transparent 100%) 0 0 / 100% 40px no-repeat,
-    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px 3px);
-}
-@keyframes ls-tv-roll {
-  from { background-position: 0 -40px, 0 0; }
-  to { background-position: 0 220px, 0 0; }
-}
-/* Small dips and a tiny sideways twitch; the lowest point stays readable. */
-@keyframes ls-tv-flicker {
-  0%, 100% { opacity: 1; transform: none; }
-  9% { opacity: 0.86; }
-  10% { opacity: 1; }
-  27% { opacity: 0.93; }
-  28% { opacity: 1; }
-  29% { opacity: 0.82; }
-  30% { opacity: 1; }
-  52% { opacity: 0.9; transform: translateX(1.5px); }
-  53% { opacity: 1; transform: none; }
-  71% { opacity: 0.94; }
-  72% { opacity: 1; }
-  86% { opacity: 0.84; transform: translateX(-1px); }
-  87% { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .login-stack__title::after { animation: none; }
 }
