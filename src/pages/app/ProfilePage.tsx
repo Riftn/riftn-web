@@ -927,6 +927,8 @@ return () => rail.removeEventListener('wheel', onWheel);
               isPending={data.isPending}
               isViewingOwnProfile={data.isViewingOwnProfile}
               isContentFiltered={data.isContentFiltered}
+              canReorderGrid={data.canReorderGrid}
+              onGridReordered={() => data.setContentSort('custom')}
               contentQuery={data.contentQuery}
               optimisticPosts={data.optimisticPosts}
               isLoadingPlans={data.isLoadingPlans}

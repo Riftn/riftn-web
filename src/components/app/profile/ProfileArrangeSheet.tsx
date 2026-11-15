@@ -40,11 +40,11 @@ export interface ArrangeRow {
 const LOAD_LIMIT = 300;
 const PAGE_SIZE = 50;
 
-const tokenIdOf = (id: string | undefined): number => Number(/(\d+)$/.exec(id ?? '')?.[1] ?? NaN);
+export const tokenIdOf = (id: string | undefined): number => Number(/(\d+)$/.exec(id ?? '')?.[1] ?? NaN);
 const plain = (text: string | undefined): string => (text ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
 /** The creator's posts in the order the profile shows them now. */
-async function loadRows(address: string, signal: AbortSignal): Promise<ArrangeRow[]> {
+export async function loadArrangeRows(address: string, signal: AbortSignal): Promise<ArrangeRow[]> {
   const rows: ArrangeRow[] = [];
   const token = getAuthToken();
   for (let page = 1; rows.length < LOAD_LIMIT; page += 1) {
@@ -107,7 +107,7 @@ export function ProfileArrangeSheet({ open, onOpenChange, address, hasCustomOrde
     if (!address) return;
     const abort = new AbortController();
     setState('loading');
-    loadRows(address, abort.signal)
+    loadArrangeRows(address, abort.signal)
       .then((loaded) => { setRows(loaded); setState('ready'); })
       .catch(() => { if (!abort.signal.aborted) setState('failed'); });
     return () => abort.abort();

@@ -37,6 +37,7 @@ import { ProfileEmptyState } from '@/components/app/profile/ProfileEmptyState';
 import { AppState } from '@/components/app/AppState';
 import { ProfileImageGrid } from '@/components/app/profile/ProfileImageGrid';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
+import { useProfileGridMove } from '@/hooks/use-profile-grid-move';
 import { PostBgLayer, postBgHostProps, useProfilePostBg } from '@/components/app/profile/PostBackground';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useProfileViewMode } from '@/lib/profile-view-mode';
@@ -188,6 +189,10 @@ interface ProfileTabContentProps {
   isViewingOwnProfile: boolean | undefined;
   /** A sort or search from the channel toolbar is narrowing what's shown. */
   isContentFiltered?: boolean;
+  /** Own profile, showing the order a drag would change: tiles carry a grip. */
+  canReorderGrid?: boolean;
+  /** A drag on the grid saved a new order. */
+  onGridReordered?: () => void;
   /** The content query behind the tab lists, so an opened post can continue it. */
   contentQuery?: ProfileFeedQuery;
   // Optimistic
@@ -221,6 +226,8 @@ export function ProfileTabContent({
   isPending,
   isViewingOwnProfile,
   isContentFiltered = false,
+  canReorderGrid = false,
+  onGridReordered,
   contentQuery,
   optimisticPosts,
   isLoadingPlans,
@@ -302,6 +309,8 @@ export function ProfileTabContent({
           optimisticPosts={optimisticPosts}
           isLoading={showLoading}
           isContentFiltered={isContentFiltered}
+          reorderAddress={canReorderGrid ? profileAddress : undefined}
+          onReordered={onGridReordered}
         />
       </TabPanel>
 
@@ -479,15 +488,21 @@ function HomeTabPanel({
   optimisticPosts,
   isLoading,
   isContentFiltered = false,
+  reorderAddress,
+  onReordered,
 }: {
   ALL_CONTENT: ProfileContentItem[];
   isViewingOwnProfile: boolean | undefined;
   optimisticPosts: OptimisticPost[];
   isLoading: boolean;
   isContentFiltered?: boolean;
+  /** The owner's wallet when tiles can be dragged into a new order. */
+  reorderAddress?: string;
+  onReordered?: () => void;
 }) {
   const { t: _copy } = _useCopy();
   const viewMode = useProfileViewMode();
+  const moveTile = useProfileGridMove(reorderAddress, onReordered);
   const postBg = useProfilePostBg();
   const hasOptimisticPosts = isViewingOwnProfile && optimisticPosts.length > 0;
 
@@ -511,7 +526,7 @@ function HomeTabPanel({
       ...filteredOptimisticPosts.map((op) => ({ key: `op-${op.id}`, type: op.type, data: op.data, isOptimistic: true }) as MixedGridEntry),
       ...ALL_CONTENT.map((item) => ({ key: `${item.isRepost ? 'rp-' : ''}${item.data.id}`, type: item.type, data: item.data, isPinned: item.isPinned, isRepost: item.isRepost }) as MixedGridEntry),
     ];
-    return <ProfileMixedGrid entries={entries} />;
+    return <ProfileMixedGrid entries={entries} onMove={moveTile} />;
   }
 
   return (

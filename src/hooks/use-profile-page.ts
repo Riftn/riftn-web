@@ -206,6 +206,14 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     !!debouncedContentSearch.trim() ||
     countActiveProfileFilters(visitorFilters) > 0;
 
+  // The owner can drag tiles on the grid itself only while it shows the order
+  // a drag would change: their saved order, or newest first before any is saved.
+  const canReorderGrid =
+    isOwnContent &&
+    !debouncedContentSearch.trim() &&
+    countActiveProfileFilters(visitorFilters) === 0 &&
+    (contentSort === 'custom' || (contentSort === 'newest' && !hasCustomOrder));
+
   // Reset the toolbar when the visitor moves to another profile — a query
   // typed on one channel has no meaning on the next, and neither does a
   // category the next creator never posts in.
@@ -752,6 +760,7 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     setContentFiltersOpen,
     showPostTypeFilter,
     isContentFiltered,
+    canReorderGrid,
     contentQuery,
     // Subscriptions
     plans,
