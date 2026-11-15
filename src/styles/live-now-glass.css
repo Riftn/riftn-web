@@ -9,7 +9,6 @@
   --live-now-tone: 255 99 99;
   --live-now-veil: rgb(8 8 10 / 0.5);
   --live-now-glass-brightness: 1;
-  --live-now-corner-ring: #000;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
   -webkit-tap-highlight-color: transparent;
 }
@@ -17,13 +16,11 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-live-now-bar] {
   --live-now-tone: 224 64 70;
   --live-now-veil: rgb(250 250 252 / 0.62);
   --live-now-glass-brightness: 1.35;
-  --live-now-corner-ring: #fff;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
 }
 html[data-theme='osaka'] [data-live-now-bar] {
   --live-now-tone: 255 176 92;
   --live-now-veil: rgb(17 14 28 / 0.6);
-  --live-now-corner-ring: #15121f;
 }
 
 [data-live-now-glass] {
@@ -79,12 +76,24 @@ html[data-theme='osaka'] [data-live-now-bar] {
 [data-live-now-faceframe] > * {
   position: relative;
 }
+/* The streamer's face on the still's corner. No border: the still itself is
+   cut away around the face with a thin 1.5px gap, so the glass shows through
+   between them. The notch is the face's own shape grown by the gap (20px at
+   6px radius -> 23px at 7.5px), so the two curves stay concentric. */
 [data-live-now-corner] {
   position: absolute;
-  right: -6px;
-  bottom: -5px;
-  border-radius: 7px;
-  box-shadow: 0 0 0 2px var(--live-now-corner-ring);
+  right: -5px;
+  bottom: -4px;
+  display: block;
+  border-radius: 6px;
+}
+[data-live-now-corner] > * {
+  border-radius: 6px !important;
+}
+[data-live-now-still='single'] img[data-live-now-frame] {
+  --live-now-notch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='34'%3E%3Cpath fill-rule='evenodd' d='M0 0H56V34H0Z M47 16.5H55A7.5 7.5 0 0 1 62.5 24V32A7.5 7.5 0 0 1 55 39.5H47A7.5 7.5 0 0 1 39.5 32V24A7.5 7.5 0 0 1 47 16.5Z'/%3E%3C/svg%3E");
+  -webkit-mask: var(--live-now-notch) 0 0 / 56px 34px no-repeat;
+  mask: var(--live-now-notch) 0 0 / 56px 34px no-repeat;
 }
 [data-live-now-corner] > *,
 [data-live-now-faceframe] > * {
