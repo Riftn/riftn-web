@@ -6189,11 +6189,27 @@ function standbyAcmeChallenge(request) {
   return fetch(`http://dehub.io/.well-known/acme-challenge/${match[1]}`, { redirect: 'manual' });
 }
 
+/**
+ * /stream/<id> was a video's address on the old site. Google and old links
+ * still arrive on it, and it was answering as an empty noindex page, so
+ * everything those links had earned stopped there. The id is the post's
+ * number, so it moves to the post for good.
+ */
+export function legacyStreamRedirect(request) {
+  const url = new URL(request.url);
+  if (url.hostname !== 'riftn.com' && url.hostname !== 'www.riftn.com') return null;
+  const match = /^\/stream\/(\d{1,9})\/?$/.exec(url.pathname);
+  if (!match || (request.method !== 'GET' && request.method !== 'HEAD')) return null;
+  return new Response(null, { status: 301, headers: { Location: `${APP_URL}/app/post/${match[1]}` } });
+}
+
 async function handleRequest(request, env, ctx) {
   const acme = standbyAcmeChallenge(request);
   if (acme) return acme;
   const aiRefusal = aiTrainingBotRefusal(request);
   if (aiRefusal) return aiRefusal;
+  const legacyStream = legacyStreamRedirect(request);
+  if (legacyStream) return legacyStream;
   const visitorIp = edgeVisitorIp(request);
   const maintenance = await edgeMaintenanceResponse(request, env);
   if (maintenance) return maintenance;

@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import worker, { isAiTrainingBotUa, isBountyIndexable, isFilePath, setPageUrl, stylePrerendered } from '../../CLOUDFLARE_WORKER_SEO.js';
+import worker, { isAiTrainingBotUa, legacyStreamRedirect, isBountyIndexable, isFilePath, setPageUrl, stylePrerendered } from '../../CLOUDFLARE_WORKER_SEO.js';
 import { isBountyIndexable as spaIsBountyIndexable } from '@/features/work/seo';
 
 const ROOT = resolve(__dirname, '../..');
@@ -626,5 +626,18 @@ describe('docs routes', () => {
     expect(res.body).toContain('Community Guidelines');
     expect(res.body).toContain('https://riftn.com/og/docs.jpg');
     expect(canonicalOf(res.body)).toBe('https://riftn.com/docs/guidelines');
+  });
+});
+
+describe('old /stream/<id> video links', () => {
+  it('move to the post instead of an empty page', () => {
+    const res = legacyStreamRedirect(new Request('https://riftn.com/stream/955'));
+    expect(res?.status).toBe(301);
+    expect(res?.headers.get('Location')).toBe('https://riftn.com/app/post/955');
+  });
+  it('leave the Live page and everything else alone', () => {
+    for (const url of ['https://riftn.com/stream', 'https://riftn.com/stream/abc', 'https://dehub.io/stream/955']) {
+      expect(legacyStreamRedirect(new Request(url)), url).toBeNull();
+    }
   });
 });
