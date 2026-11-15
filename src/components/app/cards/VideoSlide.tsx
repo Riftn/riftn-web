@@ -137,6 +137,8 @@ const VideoSlideBody = memo(function VideoSlideBody({
   // a slide that has left the active position can never restart itself.
   const isActiveRef = useRef(isActive);
   isActiveRef.current = isActive;
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
   // Shorts thumbnails may live at shorts/{id}.jpg instead of the mapped
   // images/{id}.jpg — resolve to whichever exists so the poster isn't a 403.
   const thumbnail = useResolvedThumbnail(short.thumbnail);
@@ -222,9 +224,15 @@ const VideoSlideBody = memo(function VideoSlideBody({
     if (!video) return;
     if (isActive) {
       if (video.ended) video.currentTime = 0;
+      // A short the viewer started silently while it was dragged in keeps
+      // playing from where it is, with sound if the viewer has it on.
+      delete video.dataset.shortsPeek;
+      video.muted = isMutedRef.current;
       void requestVideoPlayback(video).catch(() => {});
-    } else video.pause();
+    } else if (!video.dataset.shortsPeek) video.pause();
     return () => {
+      // Becoming the active short is not a reason to stop it.
+      if (!isActive && video.dataset.shortsPeek) return;
       releaseAfterPictureInPicture(video, () => video.pause());
     };
   }, [isActive, transcodingStatus]);
@@ -232,7 +240,10 @@ const VideoSlideBody = memo(function VideoSlideBody({
   const handlePlay = useCallback(() => {
     // Safari can complete an older play() request after pause(). Treat React's
     // active slide as the authority and immediately silence that stale start.
-    if (!isActiveRef.current && !isVideoInPictureInPicture(videoRef.current)) videoRef.current?.pause();
+    // The short a drag is heading for plays ahead of becoming active
+    // (ShortsViewer's peek); that start is wanted.
+    const video = videoRef.current;
+    if (!isActiveRef.current && !video?.dataset.shortsPeek && !isVideoInPictureInPicture(video)) video?.pause();
   }, []);
 
   // Update muted state
