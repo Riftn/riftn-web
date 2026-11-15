@@ -5,6 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChatSearchDiscover } from '../ChatSearchDiscover';
 import type { DeHubUser } from '@/lib/api/dehub';
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (_k: string, o: Record<string, unknown> = {}) =>
+      String(o.defaultValue ?? _k).replace(/\{\{(\w+)\}\}/g, (_, n) => String(o[n] ?? '')),
+  }),
+}));
+
 const navigate = vi.fn();
 vi.mock('react-router-dom', async (orig) => ({ ...(await orig<typeof import('react-router-dom')>()), useNavigate: () => navigate }));
 

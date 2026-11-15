@@ -8,7 +8,6 @@ import type { DeHubUser } from '@/lib/api/dehub';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { buildAvatarUrl, extractAvatarPath, storageImage, deviceWidth } from '@/lib/media-url';
-import { exploreSearchHref } from '@/components/app/navigation/nav-search';
 import Search from '@/components/ui/cut-icons/search';
 import MessageCircle from '@/components/ui/cut-icons/message-envelope';
 import Users from '@/components/ui/cut-icons/communities';
@@ -53,6 +52,9 @@ function useCommunitySearch(query: string) {
     staleTime: 60_000,
   });
 }
+
+/** Same hand-off as the menu search's "search Riftn for …" row. */
+const exploreSearchHref = (q: string) => `/app/explore?q=${encodeURIComponent(q.trim())}`;
 
 const compact = (n: number) =>
   new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(n || 0);
