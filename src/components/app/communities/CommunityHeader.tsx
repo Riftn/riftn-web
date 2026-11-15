@@ -125,60 +125,87 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
     }
   };
 
+  const avatarSrc = storageImage(community.avatar_url, deviceWidth(104));
+  const hasBanner = !!community.banner_url;
+  const buttonBase = 'rounded-xl gap-1.5 h-9 px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15';
+  const joinPrimary = !isOwner && !isMember && !isPendingMember;
+
   return (
-    <div className="px-3 pt-3 pb-4">
-      {/* Banner */}
-      <div
-        className="h-28 sm:h-36 rounded-xl bg-white/[0.04] overflow-hidden relative group"
-        onClick={canEdit ? () => bannerInputRef.current?.click() : undefined}
-        style={canEdit ? { cursor: 'pointer' } : undefined}
-      >
-        {community.banner_url ? (
+    <div className="px-3 pt-3 pb-4 relative">
+      {/* Hero: the banner when there is one. Without one, a soft glow made from
+          the community photo itself, so every page gets colour, not a grey box. */}
+      {hasBanner ? (
+        <div
+          data-community-banner
+          className="h-36 sm:h-44 rounded-2xl bg-white/[0.04] overflow-hidden relative group"
+          onClick={canEdit ? () => bannerInputRef.current?.click() : undefined}
+          style={canEdit ? { cursor: 'pointer' } : undefined}
+        >
           <img src={storageImage(community.banner_url, deviceWidth(isMdUp() ? 900 : 430))} alt="" className="w-full h-full object-cover" fetchPriority="high" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-white/[0.06] to-white/[0.02]" />
-        )}
-        {canEdit && (
-          <>
+          {canEdit && (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Camera className="w-6 h-6 text-white" />
             </div>
-            <input
-              ref={bannerInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={e => {
-                const f = e.target.files?.[0];
-                if (f) handleMediaChange(f, 'banner');
-                e.target.value = '';
-              }}
-            />
-          </>
-        )}
-        {uploading === 'banner' && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          )}
+          {uploading === 'banner' && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div data-community-aura className="h-24 sm:h-28 relative">
+          <div aria-hidden className="pointer-events-none absolute -inset-x-3 -top-3 h-72 overflow-hidden [mask-image:radial-gradient(ellipse_60%_55%_at_50%_35%,black_40%,transparent_100%)]">
+            {avatarSrc ? (
+              <img src={avatarSrc} alt="" className="absolute left-1/2 top-6 w-72 h-72 -translate-x-1/2 object-cover rounded-full blur-3xl opacity-60 scale-150 saturate-150" />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(255,255,255,0.10),transparent_65%)]" />
+            )}
           </div>
-        )}
-      </div>
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => bannerInputRef.current?.click()}
+              className="absolute right-0 top-0 inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs text-zinc-300 bg-black/40 border border-white/15 hover:text-white hover:bg-black/60 transition-colors"
+            >
+              {uploading === 'banner'
+                ? <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                : <Camera className="w-3.5 h-3.5" />}
+              {t('communities.addBanner', { defaultValue: 'Add banner' })}
+            </button>
+          )}
+        </div>
+      )}
+      {canEdit && (
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={e => {
+            const f = e.target.files?.[0];
+            if (f) handleMediaChange(f, 'banner');
+            e.target.value = '';
+          }}
+        />
+      )}
 
-      {/* Avatar + buttons row */}
-      <div className="flex items-start justify-between -mt-8">
+      {/* Centered identity: photo, name, chips, description, members, actions */}
+      <div className={`relative z-10 flex flex-col items-center text-center ${hasBanner ? '-mt-[52px]' : '-mt-16'}`}>
         <div
-          className="w-16 h-16 rounded-xl bg-black border-2 border-black flex items-center justify-center overflow-hidden flex-shrink-0 relative group"
+          className="w-[104px] h-[104px] rounded-[28px] bg-black border-4 border-black shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden flex-shrink-0 relative group"
           onClick={canEdit ? () => avatarInputRef.current?.click() : undefined}
           style={canEdit ? { cursor: 'pointer' } : undefined}
         >
-          {community.avatar_url ? (
-            <img src={storageImage(community.avatar_url, deviceWidth(64))} alt={community.name} className="w-full h-full object-cover" />
+          {avatarSrc ? (
+            <img src={avatarSrc} alt={community.name} className="w-full h-full object-cover rounded-[24px]" />
           ) : (
-            <Users className="w-7 h-7 text-zinc-500" />
+            <Users className="w-9 h-9 text-zinc-500" />
           )}
           {canEdit && (
             <>
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Camera className="w-4 h-4 text-white" />
+                <Camera className="w-5 h-5 text-white" />
               </div>
               <input
                 ref={avatarInputRef}
@@ -195,41 +222,121 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
           )}
           {uploading === 'avatar' && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0 pt-[39px]">
-          {canManage && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onManage}
-              className="rounded-xl gap-1.5 h-9 px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15"
-              title={t('communities.manageButton', { defaultValue: 'Manage' })}
-            >
-              <Settings2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('communities.manageButton', { defaultValue: 'Manage' })}</span>
-            </Button>
+
+        {/* Name */}
+        <div className="mt-3 max-w-full px-2">
+          {canEdit && editingName ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
+                className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-lg px-2 py-1 text-xl font-bold text-white text-center outline-none focus:border-white/20"
+                autoFocus
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && nameInput.trim()) {
+                    updateMutation.mutate({ id: community.id, name: nameInput.trim() } as any, { onSuccess: () => { setNameInput.complete(nameInput, nameInput); setEditingName(false); } });
+                  }
+                  if (e.key === 'Escape') { setNameInput(community.name); setEditingName(false); }
+                }}
+              />
+              <button onClick={() => {
+                if (nameInput.trim()) updateMutation.mutate({ id: community.id, name: nameInput.trim() } as any, { onSuccess: () => { setNameInput.complete(nameInput, nameInput); setEditingName(false); } });
+              }} className="text-white hover:text-green-400"><Check className="w-4 h-4" /></button>
+              <button onClick={() => { setNameInput(community.name); setEditingName(false); }} className="text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-1.5 group/name">
+              <h1 className="text-2xl font-bold tracking-tight text-white truncate">{community.name}</h1>
+              {canEdit && (
+                <button onClick={() => setEditingName(true)} className="opacity-0 group-hover/name:opacity-100 text-zinc-500 hover:text-white transition-all">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           )}
-          {isMember && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handlePinToggle}
-              disabled={pinMutation.isPending || unpinMutation.isPending}
-              className="rounded-xl gap-1.5 h-9 px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15"
-            >
-              {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
-              {isPinned ? t('communities.unpin') : t('communities.pin')}
-            </Button>
-          )}
+        </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-x-1.5 [&>p]:mr-0">
+            {holderGate && <HolderGateChip gate={holderGate} />}
+            <CommunityKindChip community={community} />
+            {community.ticker_symbol && !canEdit && (
+              <p className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/[0.1] bg-white/[0.05] px-2.5 py-1 text-xs text-zinc-300">
+                <TrendingUp className="w-3 h-3" />${community.ticker_symbol}
+              </p>
+            )}
+          </div>
+
+        {/* Description */}
+        {canEdit && editingDesc ? (
+          <div className="mt-3 w-full max-w-lg flex items-start gap-1.5 text-left">
+            <textarea
+              value={descInput}
+              onChange={e => setDescInput(e.target.value)}
+              rows={2}
+              className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-lg px-2.5 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-white/20 resize-none"
+              placeholder={t('communities.communityDescription')}
+              autoFocus
+            />
+            <button onClick={() => {
+              updateMutation.mutate({ id: community.id, description: descInput.trim() || null } as any, { onSuccess: () => { setDescInput.complete(descInput, descInput); setEditingDesc(false); } });
+            }} className="text-white hover:text-green-400 mt-1"><Check className="w-4 h-4" /></button>
+            <button onClick={() => { setDescInput(community.description || ''); setEditingDesc(false); }} className="text-zinc-500 hover:text-white mt-1"><X className="w-3.5 h-3.5" /></button>
+          </div>
+        ) : (community.description || canEdit) ? (
+          <div className="mt-3 max-w-lg px-2 group/desc flex items-start justify-center gap-1.5">
+            {community.description ? (
+              <DescriptionWithLinks text={community.description} />
+            ) : (
+              <p className="text-zinc-600 text-sm italic">{t('communities.addDescription')}</p>
+            )}
+            {canEdit && (
+              <button onClick={() => setEditingDesc(true)} className="opacity-0 group-hover/desc:opacity-100 text-zinc-500 hover:text-white transition-all flex-shrink-0 mt-0.5">
+                <Pencil className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        ) : null}
+
+        <p className="mt-3 text-sm text-zinc-400">
+          <span className="font-bold text-white tabular-nums">{community.member_count.toLocaleString()}</span> {t('communities.members')}
+        </p>
+
+        {/* Actions */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <Button
+            size="sm"
+            disabled={isPending || isOwner}
+            onClick={onJoinLeave}
+            className={`rounded-xl gap-1.5 h-9 ${
+              joinPrimary
+                ? 'px-6 bg-white text-black font-bold border border-white hover:bg-white/90'
+                : isMember
+                ? 'px-3 bg-white/10 border border-white/20 text-white hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'
+                : isPendingMember
+                ? 'px-3 bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'
+                : 'px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15'
+            }`}
+          >
+            {isOwner ? (
+              <><Crown className="w-3.5 h-3.5" /> {t('communities.owner')}</>
+            ) : isMember ? (
+              <><LogOut className="w-3.5 h-3.5" /> {t('communities.leave')}</>
+            ) : isPendingMember ? (
+              <><X className="w-3.5 h-3.5" /> {t('communities.requested')}</>
+            ) : (
+              <><LogIn className="w-3.5 h-3.5" /> {t('communities.join')}{entryPrice > 0 && <span className="inline-flex items-center gap-1 tabular-nums">· <img src={dehubCoin} alt="" className="w-3.5 h-3.5" />{entryPrice.toLocaleString()}</span>}</>
+            )}
+          </Button>
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 size="sm"
                 variant="ghost"
-                className="rounded-xl gap-1.5 h-9 px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15"
+                className={buttonBase}
               >
                 <Share2 className="w-3.5 h-3.5" />
                 {t('communities.share')}
@@ -280,70 +387,36 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
               )}
             </PopoverContent>
           </Popover>
-          <Button
-            size="sm"
-            disabled={isPending || isOwner}
-            onClick={onJoinLeave}
-            className={`rounded-xl gap-1.5 h-9 px-3 ${
-              isMember 
-                ? 'bg-white/10 border border-white/20 text-white hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'
-                : isPendingMember
-                ? 'bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'
-                : 'bg-white/10 border border-white/20 text-white hover:bg-white/15'
-            }`}
-          >
-            {isOwner ? (
-              <><Crown className="w-3.5 h-3.5" /> {t('communities.owner')}</>
-            ) : isMember ? (
-              <><LogOut className="w-3.5 h-3.5" /> {t('communities.leave')}</>
-            ) : isPendingMember ? (
-              <><X className="w-3.5 h-3.5" /> {t('communities.requested')}</>
-            ) : (
-              <><LogIn className="w-3.5 h-3.5" /> {t('communities.join')}{entryPrice > 0 && <span className="inline-flex items-center gap-1 tabular-nums">· <img src={dehubCoin} alt="" className="w-3.5 h-3.5" />{entryPrice.toLocaleString()}</span>}</>
-            )}
-          </Button>
+          {isMember && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handlePinToggle}
+              disabled={pinMutation.isPending || unpinMutation.isPending}
+              className={buttonBase}
+            >
+              {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+              {isPinned ? t('communities.unpin') : t('communities.pin')}
+            </Button>
+          )}
+          {canManage && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onManage}
+              className={buttonBase}
+              title={t('communities.manageButton', { defaultValue: 'Manage' })}
+            >
+              <Settings2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('communities.manageButton', { defaultValue: 'Manage' })}</span>
+            </Button>
+          )}
         </div>
-      </div>
-
-      {/* Name + member count */}
-      <div className="px-2 mt-2">
-        {canEdit && editingName ? (
-          <div className="flex items-center gap-1.5">
-            <input
-              value={nameInput}
-              onChange={e => setNameInput(e.target.value)}
-              className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-lg px-2 py-1 text-lg font-bold text-white outline-none focus:border-white/20"
-              autoFocus
-              onKeyDown={e => {
-                if (e.key === 'Enter' && nameInput.trim()) {
-                  updateMutation.mutate({ id: community.id, name: nameInput.trim() } as any, { onSuccess: () => { setNameInput.complete(nameInput, nameInput); setEditingName(false); } });
-                }
-                if (e.key === 'Escape') { setNameInput(community.name); setEditingName(false); }
-              }}
-            />
-            <button onClick={() => {
-              if (nameInput.trim()) updateMutation.mutate({ id: community.id, name: nameInput.trim() } as any, { onSuccess: () => { setNameInput.complete(nameInput, nameInput); setEditingName(false); } });
-            }} className="text-white hover:text-green-400"><Check className="w-4 h-4" /></button>
-            <button onClick={() => { setNameInput(community.name); setEditingName(false); }} className="text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5 group/name">
-            <h1 className="text-lg font-bold text-white truncate">{community.name}</h1>
-            {canEdit && (
-              <button onClick={() => setEditingName(true)} className="opacity-0 group-hover/name:opacity-100 text-zinc-500 hover:text-white transition-all">
-                <Pencil className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        )}
-        <p className="text-white text-sm">{community.member_count.toLocaleString()} {t('communities.members')}</p>
-        {holderGate && <HolderGateChip gate={holderGate} />}
-        <CommunityKindChip community={community} />
       </div>
 
       {/* Ticker */}
       {canEdit && (
-        <div className="px-2 mt-2">
+        <div className="relative z-10 mt-3 flex justify-center">
           {community.ticker_symbol ? (
             <div className="flex items-center gap-2">
               <span className="text-xs text-zinc-400 flex items-center gap-1">
@@ -392,36 +465,6 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
         </div>
       )}
 
-      {canEdit && editingDesc ? (
-        <div className="px-2 mt-3 flex items-start gap-1.5">
-          <textarea
-            value={descInput}
-            onChange={e => setDescInput(e.target.value)}
-            rows={2}
-            className="flex-1 bg-white/[0.06] border border-white/[0.1] rounded-lg px-2.5 py-1.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-white/20 resize-none"
-            placeholder={t('communities.communityDescription')}
-            autoFocus
-          />
-          <button onClick={() => {
-            updateMutation.mutate({ id: community.id, description: descInput.trim() || null } as any, { onSuccess: () => { setDescInput.complete(descInput, descInput); setEditingDesc(false); } });
-          }} className="text-white hover:text-green-400 mt-1"><Check className="w-4 h-4" /></button>
-          <button onClick={() => { setDescInput(community.description || ''); setEditingDesc(false); }} className="text-zinc-500 hover:text-white mt-1"><X className="w-3.5 h-3.5" /></button>
-        </div>
-      ) : (
-        <div className="px-2 mt-3 group/desc flex items-start gap-1.5">
-          {community.description ? (
-            <DescriptionWithLinks text={community.description} />
-          
-          ) : canEdit ? (
-            <p className="text-zinc-600 text-sm italic">{t('communities.addDescription')}</p>
-          ) : null}
-          {canEdit && (
-            <button onClick={() => setEditingDesc(true)} className="opacity-0 group-hover/desc:opacity-100 text-zinc-500 hover:text-white transition-all flex-shrink-0 mt-0.5">
-              <Pencil className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-      )}
       <NewConversationModal
         open={inviteOpen}
         onOpenChange={setInviteOpen}
