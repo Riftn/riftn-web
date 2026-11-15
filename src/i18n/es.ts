@@ -2074,7 +2074,7 @@ export const es = {
     decentralizedModerationItem3: 'Proceso de apelación gestionado por la gobernanza comunitaria',
     decentralizedModerationItem4: "La política es establecida por la gobernanza en lugar de por una sola entidad; la aplicación de esa política se delega en moderadores designados que actúan con prontitud",
     contentRestrictions: 'Restricciones de contenido',
-    contentRestrictionsText: 'El contenido solo puede ser restringido por:',
+    contentRestrictionsText: 'Riftn no tolera a los usuarios abusivos ni el contenido que infrinja la ley o las normas de la comunidad. El contenido puede restringirse, eliminarse o dejar de estar disponible por:',
     contentRestrictionsItem1: 'Contenido ilegal según la ley aplicable',
     contentRestrictionsItem2: 'Contenido que viola directrices aprobadas por la comunidad',
     contentRestrictionsItem3: 'Spam técnico o actividades maliciosas',

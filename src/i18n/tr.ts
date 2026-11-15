@@ -2176,7 +2176,7 @@ export const tr = {
     designatedModeratorsItem3: "Kullanıcıların gönderdiği raporlar inceleme için görevli denetçilere yönlendirilir",
     designatedModeratorsItem4: "Yönetişim, denetçilerin uyguladığı politikayı belirler ve kararlarını gözden geçirebilir ya da tersine çevirebilir; ancak uygulamanın kendisi anlıktır",
     contentRestrictions: "İçerik Kısıtlamaları",
-    contentRestrictionsText: "İçerik şu nedenlerle kısıtlanabilir, kaldırılabilir ya da erişilemez hale getirilebilir:",
+    contentRestrictionsText: 'Riftn, taciz edici kullanıcılara veya yasayı ya da topluluk kurallarını ihlal eden içeriklere hiçbir şekilde tolerans göstermez. İçerik şu nedenlerle kısıtlanabilir, kaldırılabilir veya erişilemez hale getirilebilir:',
     contentRestrictionsItem1: "Yürürlükteki yasalarca tanımlanan yasa dışı içerik",
     contentRestrictionsItem2: "Görevli denetçilerce uygulandığı üzere topluluk kurallarını ihlal eden içerik",
     contentRestrictionsItem3: "Platform güvenliğini tehdit eden teknik istenmeyen posta ya da kötü niyetli etkinlikler",

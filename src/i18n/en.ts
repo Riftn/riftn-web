@@ -2379,7 +2379,7 @@ export const en = {
   termsOfService: {
     title: 'Riftn Terms of Service',
     lastUpdated: 'Last updated:',
-    lastUpdatedDate: '7 July 2026',
+    lastUpdatedDate: '15 November 2026',
     effective: 'Effective:',
     effectiveDate: 'December 2, 2024',
     welcomeTitle: 'Welcome to Riftn!',
@@ -2460,7 +2460,7 @@ export const en = {
     designatedModeratorsItem3: 'Reports submitted by users are routed to designated moderators for review',
     designatedModeratorsItem4: 'Governance sets the policy those moderators enforce and can review or reverse their decisions, but enforcement itself is immediate',
     contentRestrictions: 'Content Restrictions',
-    contentRestrictionsText: 'Content may be restricted, removed or made unavailable for:',
+    contentRestrictionsText: 'Riftn has no tolerance for abusive users or for content that breaks the law or the community guidelines. Content may be restricted, removed or made unavailable for:',
     contentRestrictionsItem1: 'Illegal content as defined by applicable law',
     contentRestrictionsItem2: 'Content violating the community guidelines, as enforced by designated moderators',
     contentRestrictionsItem3: 'Technical spam or malicious activities that threaten platform security',
