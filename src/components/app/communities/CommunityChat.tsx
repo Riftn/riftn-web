@@ -199,9 +199,12 @@ interface CommunityChatProps {
   isMember: boolean;
   /** The chat is the tab on screen. Defaults to true for a chat shown on its own. */
   active?: boolean;
+  /** Joins the community: the "join to chat" bar calls it. */
+  onJoin?: () => void;
+  joining?: boolean;
 }
 
-export function CommunityChat({ communityId, community, membership, isMember, active = true }: CommunityChatProps) {
+export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining }: CommunityChatProps) {
   const { t: _copy } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/communities/CommunityChat.tsx:newMessage", '', communityId);
   const [replyTo, setReplyTo] = useDraftState<CommunityChatMessage | null>(`community:${communityId}:reply`, null);
@@ -1186,8 +1189,12 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       {!isMember ? (
         <div className="px-1 py-3">
           <button
-            onClick={() => !isAuthenticated ? openLoginModal() : null}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-500 text-sm hover:text-white transition-colors"
+            onClick={() => {
+              if (!isAuthenticated) { openLoginModal(); return; }
+              if (membership?.status !== 'pending') onJoin?.();
+            }}
+            disabled={joining}
+            className="disabled:opacity-50 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-500 text-sm hover:text-white transition-colors"
           >
             <LogIn className="w-4 h-4" />
             {t('communities.joinToChat')}
