@@ -1129,21 +1129,6 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized]);
 
-  // Handle drag for visual feedback during swipe
-  const isRestoreDrag = useCallback((info: PanInfo) => {
-    const frame = videoContainer?.getBoundingClientRect();
-    if (!isMobile || !overlaysHidden || showComments || !frame) return false;
-    const startY = info.point.y - window.scrollY - info.offset.y - frame.top;
-    return startY > frame.height * RESTORE_ZONE_TOP &&
-      startY < frame.height * RESTORE_ZONE_BOTTOM &&
-      info.offset.y < -16 && Math.abs(info.offset.y) > Math.abs(info.offset.x);
-  }, [isMobile, overlaysHidden, autoHidden, showComments, videoContainer]);
-
-  /** Phones: a drag down on the first short leaves, instead of paging back to nothing. */
-  const dragLeaves = useCallback((info: PanInfo) =>
-    isMobile && currentIndex === 0 && info.offset.y > 0 && Math.abs(info.offset.y) > Math.abs(info.offset.x),
-  [isMobile, currentIndex]);
-
   /**
    * The short a drag is heading for, already playing (silently) while it
    * slides in. Waiting for the finger to lift held it on a still frame for the
@@ -1193,6 +1178,21 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     }, 1500);
   }, [isMuted, stopPeek]);
   useEffect(() => stopPeek, [stopPeek]);
+
+  // Handle drag for visual feedback during swipe
+  const isRestoreDrag = useCallback((info: PanInfo) => {
+    const frame = videoContainer?.getBoundingClientRect();
+    if (!isMobile || !overlaysHidden || showComments || !frame) return false;
+    const startY = info.point.y - window.scrollY - info.offset.y - frame.top;
+    return startY > frame.height * RESTORE_ZONE_TOP &&
+      startY < frame.height * RESTORE_ZONE_BOTTOM &&
+      info.offset.y < -16 && Math.abs(info.offset.y) > Math.abs(info.offset.x);
+  }, [isMobile, overlaysHidden, autoHidden, showComments, videoContainer]);
+
+  /** Phones: a drag down on the first short leaves, instead of paging back to nothing. */
+  const dragLeaves = useCallback((info: PanInfo) =>
+    isMobile && currentIndex === 0 && info.offset.y > 0 && Math.abs(info.offset.y) > Math.abs(info.offset.x),
+  [isMobile, currentIndex]);
 
   const handleDrag = useCallback((_: any, info: PanInfo) => {
     if (holdOwnsGesture.current) { stopPeek(); setDragOffset(0); return; }
