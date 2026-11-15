@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { removeCanonical, upsertCanonical, upsertMeta, upsertSocialMeta, setRobots, setJsonLd, setTdmReservation, setFeedLink } from '@/lib/head-meta';
-import { HUB_ROUTE_META, SHARE_IMAGE, SITE_URL, canonicalUrl as toCanonicalUrl } from '@/lib/seo/route-meta';
+import { HUB_ROUTE_META, SHARE_IMAGE, SITE_URL, versionedShareImage, canonicalUrl as toCanonicalUrl } from '@/lib/seo/route-meta';
 import type { AiScrapingPreference } from '@/lib/ai-scraping';
 
 interface SEOHeadProps {
@@ -40,7 +40,7 @@ interface SEOHeadProps {
 export function SEOHead({
   title,
   description,
-  image = SHARE_IMAGE,
+  image: rawImage = SHARE_IMAGE,
   url,
   type = 'website',
   jsonLd,
@@ -55,6 +55,7 @@ export function SEOHead({
   // Hidden cached pages stay mounted; if they kept rendering Helmet, whichever
   // page happened to render last would own the tab title for every route.
   const isActivePage = useContext(CachedPageActiveContext);
+  const image = versionedShareImage(rawImage);
   // Defaults are the homepage's — the same strings the worker serves for "/".
   const fullTitle = page.data?.title || title || t(HUB_ROUTE_META.home.titleKey);
   const desc = page.data?.description ?? description ?? t(HUB_ROUTE_META.home.descriptionKey);
