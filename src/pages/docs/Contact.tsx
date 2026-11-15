@@ -34,9 +34,9 @@ const Contact = () => {
   ];
 
   const emailContacts = [
-    { title: t('contact.techSupport'), email: 'tech@dehub.net', description: t('contact.techSupportDesc') },
-    { title: t('contact.marketing'), email: 'marketing@dehub.net', description: t('contact.marketingDesc') },
-    { title: t('contact.hr'), email: 'hr@dehub.net', description: t('contact.hrDesc') },
+    { title: t('contact.techSupport'), email: 'dev@riftn.com', description: t('contact.techSupportDesc') },
+    { title: t('contact.marketing'), email: 'dev@riftn.com', description: t('contact.marketingDesc') },
+    { title: t('contact.hr'), email: 'dev@riftn.com', description: t('contact.hrDesc') },
   ];
 
   const colors = ['from-sky-blue to-middle-blue', 'from-middle-blue to-royal-blue', 'from-royal-blue to-sky-blue', 'from-sky-blue to-royal-blue'];

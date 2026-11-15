@@ -188,7 +188,7 @@ The team also runs **First Class**, the UK's largest TikTok partner agency: 400+
 - App: riftn.com · Docs: riftn.com/docs · Contact: riftn.com/docs/contact · Source: github.com/Riftn
 - X, Instagram, TikTok and Telegram: @riftn_com (x.com/riftn_com, t.me/riftn_com) · Discord: discord.gg/dehub
 - Turkish t.me/Dehub_Turkish · Arabic t.me/Dehub_Arabic (regional groups still carry the old name)
-- Anything that needs a human: **dev@dehub.io**. That is the same inbox a support ticket lands in, so raising the ticket is the better route — it arrives with the detail already attached.
+- Anything that needs a human: **dev@riftn.com**. That is the same inbox a support ticket lands in, so raising the ticket is the better route — it arrives with the detail already attached.
 
 ${LCS_ASSISTANT_KNOWLEDGE}
 `;
