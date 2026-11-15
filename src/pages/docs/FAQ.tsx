@@ -36,7 +36,7 @@ const FAQ = () => {
                     {t(`faq.q${i}`)}
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
-                    {t(`faq.a${i}`)}
+                    {t(i === 4 ? 'faq.a4Launch' : `faq.a${i}`)}
                   </AccordionContent>
                 </AccordionItem>
               ))}

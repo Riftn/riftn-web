@@ -65,7 +65,7 @@ export const DOCS_SEO: Record<string, DocsSeoEntry> = {
   "token/where-to-buy": {
     title: "Where to Buy Tokens | Riftn Docs",
     description:
-      "Official exchanges, DEXs and on-ramps where you can buy the Riftn token.",
+      "Where to buy Riftn tokens: the new token is coming soon and not trading yet. Join the launch list to get an email when trading opens.",
   },
   "token/governance": {
     title: "Token Governance | Riftn Docs",
