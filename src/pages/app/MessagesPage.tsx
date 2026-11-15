@@ -18,7 +18,6 @@ import Plus from "@/components/ui/cut-icons/add";
 import MessageCircle from "@/components/ui/cut-icons/message-envelope";
 import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
-import { MobileBottomNav } from '@/components/app/MobileBottomNav';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
@@ -239,6 +238,8 @@ export function ConversationItem({
  */
 // Settings open inside the full-screen chat (computers) rather than leaving it.
 const EmbeddedSettings = lazy(() => import('@/pages/app/SettingsPage'));
+// Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
+const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
 
 export default function MessagesPage({ fullscreen = false }: { fullscreen?: boolean } = {}) {
   const { t: _copy } = _useCopy();
@@ -1175,7 +1176,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
         chat={settingsPane ?? publicChatPane ?? dmPane}
-        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <MobileBottomNav />}</>}
+        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
       />
     );
   }
