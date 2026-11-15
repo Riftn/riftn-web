@@ -64,6 +64,7 @@ import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
+import { ChatSearchDiscover } from '@/components/app/chat/ChatSearchDiscover';
 import { useUserCommunities } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
 
@@ -456,6 +457,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const newUserResults = (userSearchResults?.items || []).filter(
     (user: DeHubUser) => !existingAddresses.has(user.address?.toLowerCase())
   );
+
+  // A search that matches none of your chats shows who and what does match,
+  // instead of a blank list.
+  const searchDiscover = !guest && !isLoading && !isError && !showArchived
+    && searchQuery.trim().length >= 2 && debouncedSearchQuery.trim() === searchQuery.trim()
+    && listedConversations.length === 0 && groupChats.length === 0;
 
   /** Handle clicking a user search result — always create conversation and open chat */
   const handleSelectSearchUser = (user: DeHubUser) => {
@@ -1061,8 +1068,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </button>
             )}
 
+            {searchDiscover && (
+              <ChatSearchDiscover
+                query={searchQuery}
+                users={newUserResults}
+                usersLoading={isSearchingUsers}
+                onMessageUser={handleSelectSearchUser}
+                onNewChat={openNewMessage}
+                onNewGroup={() => setNewChatKind('group')}
+              />
+            )}
+
             {/* User search results (people not in existing conversations) */}
-            {searchQuery.trim().length >= 2 && newUserResults.length > 0 && (
+            {!searchDiscover && searchQuery.trim().length >= 2 && newUserResults.length > 0 && (
               <>
                 <div className="px-4 py-2 mt-2">
                   <p className="text-zinc-500 text-xs uppercase tracking-wider font-medium">{_copy("copy.4787aa7e2d5c", { defaultValue: "Start new conversation" })}</p>
@@ -1120,7 +1138,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             )}
 
             {/* Searching indicator */}
-            {searchQuery.trim().length >= 2 && isSearchingUsers && (
+            {!searchDiscover && searchQuery.trim().length >= 2 && isSearchingUsers && (
               <div className="flex items-center justify-center gap-2 py-4 text-zinc-500 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.3084651a3386", { defaultValue: "Searching users..." })}</div>
             )}
