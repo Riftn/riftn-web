@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { FEATURES, PLATFORMS, SOURCES, filterFeatures, entryFor, comparisonCoverage } from '../data/platform-comparison';
 import { RIVAL_ROWS } from '../data/platform-comparison-rival-inventory';
+import { NEW_ROWS, PEER_UPDATES, RIFTN_UPDATES } from '../data/platform-comparison-updates';
 import { CATEGORY_FAMILIES, REVIEWED_FEATURE_IDS, REVIEW_SCOPES, RESEARCH_RULES, researchedEntry } from '../data/platform-comparison-research';
 
 describe('public platform comparison', () => {
@@ -57,7 +58,8 @@ describe('public platform comparison', () => {
   });
   it('accounts for every feature/platform pair without automatically reviewing future additions', () => {
     const inventory = new Set(RIVAL_ROWS.map(row => row.id));
-    const documented = FEATURES.filter(feature => !inventory.has(feature.id));
+    const added = new Set(NEW_ROWS.map(([id]) => id));
+    const documented = FEATURES.filter(feature => !inventory.has(feature.id) && !added.has(feature.id));
     expect([...REVIEWED_FEATURE_IDS].sort()).toEqual(documented.map(feature => feature.id).sort());
     for (const feature of documented) for (const platform of PLATFORMS) {
       const scope = REVIEW_SCOPES[platform.id][CATEGORY_FAMILIES[feature.category]];
@@ -77,14 +79,23 @@ describe('public platform comparison', () => {
       expect(names.has(row.name.toLowerCase()), row.id).toBe(false);
       expect(PLATFORMS.some(platform => row.marks[platform.id]), `${row.id} needs at least one rival`).toBe(true);
       const feature = FEATURES.find(f => f.id === row.id)!;
-      expect(feature.dehub.status).toBe(row.marks.dehub === 'yes' ? 'documented' : row.marks.dehub === 'partial' ? 'ecosystem' : 'not_offered');
+      if (!RIFTN_UPDATES[row.id]) expect(feature.dehub.status).toBe(row.marks.dehub === 'yes' ? 'documented' : row.marks.dehub === 'partial' ? 'ecosystem' : 'not_offered');
       for (const platform of PLATFORMS) {
         const entry = feature.peers[platform.id];
-        if (!row.marks[platform.id]) { expect(entry, `${platform.id}:${row.id}`).toBeUndefined(); continue; }
+        if (!row.marks[platform.id] && !PEER_UPDATES[row.id]?.[platform.id]) { expect(entry, `${platform.id}:${row.id}`).toBeUndefined(); continue; }
         expect(SOURCES[entry!.source!]?.url, `${platform.id}:${row.id}`).toMatch(/^https:\/\//);
       }
     }
     expect(FEATURES.some(feature => feature.category === 'Features Riftn does not have yet')).toBe(false);
+  });
+  it('applies the November update on top of earlier findings', () => {
+    const find = (id: string) => FEATURES.find(feature => feature.id === id)!;
+    for (const [id, entry] of Object.entries(RIFTN_UPDATES)) expect(find(id).dehub, id).toEqual(expect.objectContaining({ status: entry.status, note: entry.note }));
+    for (const [id, peers] of Object.entries(PEER_UPDATES)) for (const [platform, entry] of Object.entries(peers)) {
+      expect(entryFor(find(id), platform as typeof PLATFORMS[number]['id']), `${platform}:${id}`).toEqual(entry);
+    }
+    for (const [id] of NEW_ROWS) expect(find(id).dehub.status).toBe('documented');
+    expect(entryFor(find('dex'), 'dehub').status).toBe('announced');
   });
   it('retains competitor matches and explicit current limitations discovered by research', () => {
     const peer = (id: string, platform: typeof PLATFORMS[number]['id']) => entryFor(FEATURES.find(feature => feature.id === id)!, platform);
