@@ -431,7 +431,7 @@ const DOCS_PAGES = {
   // description-only body in buildDocsHtml is only the fallback for a failed
   // fetch. docs-content-coverage.test.ts fails if an entry lands without one.
   'token/utility': { title: 'Token Utility & Holder Benefits | Riftn Docs', description: 'What holding tokens unlocks: governance rights, staking rewards, moderation power and marketplace perks across Riftn.' },
-  'token/where-to-buy': { title: 'Where to Buy Tokens | Riftn Docs', description: 'Where to buy Riftn tokens: Uniswap on Base, PancakeSwap on BNB Chain, listed CEX venues and direct in-app purchase.' },
+  'token/where-to-buy': { title: 'Where to Buy Tokens | Riftn Docs', description: 'Where to buy Riftn tokens: the new token is coming soon and not trading yet. Join the launch list to get an email when trading opens.' },
   'token/governance': { title: 'Riftn Governance: Voting & Proposals', description: 'How Riftn governance works: proposals, burn-to-vote mechanics, whale prevention and how holders steer the platform.' },
   'token/bridge': { title: 'Bridge tokens Between BASE & BNB | Riftn Docs', description: 'How to move tokens between the BASE and BNB networks with the manual Riftn bridge, and what to expect while it processes.' },
   'featured-in': { title: 'Riftn in the Press: Featured In', description: 'Press and media coverage of Riftn, including US Weekly, Yahoo Finance, Entrepreneur and Investing.com.' },
