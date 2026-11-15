@@ -315,7 +315,7 @@ const BrandAssets = () => {
                     <Download className="w-4 h-4 mr-2" />{_copy("copy.8bd075ad6b13", { defaultValue: "Download kit" })}</a>
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="mailto:marketing@dehub.net">{t('brandAssets.contactBrandTeam')}</a>
+                  <a href="mailto:dev@riftn.com">{t('brandAssets.contactBrandTeam')}</a>
                 </Button>
               </div>
             </div>

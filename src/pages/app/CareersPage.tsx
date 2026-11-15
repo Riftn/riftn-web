@@ -331,7 +331,7 @@ export default function CareersPage() {
       <div className="!mt-8 text-center">
         <p className="text-zinc-500 text-xs">
           {t('careers.footerText')}{' '}
-          <a href="mailto:dev@dehub.io" className="text-zinc-300 underline underline-offset-2 hover:text-white transition-colors">{_copy("copy.4001b1e9d20e", { defaultValue: "dev@dehub.io" })}</a>
+          <a href="mailto:dev@riftn.com" className="text-zinc-300 underline underline-offset-2 hover:text-white transition-colors">{_copy("copy.4001b1e9d20e", { defaultValue: "dev@riftn.com" })}</a>
         </p>
       </div>
       </PageBody>

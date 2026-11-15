@@ -7453,7 +7453,7 @@
     "ambWant5": "Muuxannoon ambaasaaddara, dhiibbaa uumuu, ykn bulchiinsa hawaasaa kanaan duraa bonasii dha",
     "ambassadorCompensation": "Ambaasaaddaroonni Biraandii mindaa ji'aa <b>negotiable</b> wal irraa hin cinne kaffalamu argatu. Bonus dabalataa raawwii duula, galmee fayyadamtootaa, fi guddina hawaasaa irratti hundaa’uun kennamuu danda’a. Akkasumas, akkuma sirni ikoo guddachaa deemuun daldala Riftn addaa, qaqqabummaa amala duraa, fi ramaddii mallattoo ni argatta.",
     "applyAsAmbassador": "Ambaasaaddara Biraandii ta'uun iyyachuu",
-    "noRoleFits": "Gahee walsimu hin argituu? <mail>dev@dehub.io</mail> irratti nu qunnamaa — yeroo hunda namoota dandeettii qaban barbaanna."
+    "noRoleFits": "Gahee walsimu hin argituu? <mail>dev@riftn.com</mail> irratti nu qunnamaa — yeroo hunda namoota dandeettii qaban barbaanna."
   },
   "depin": {
     "seoTitle": "DePin | Bu'uuraalee Miidiyaa Hawaasa Humna Qaban | Riftn jedhamuun beekama",
@@ -16096,7 +16096,7 @@
     "0ec80d3905a0": "Riftn Hojii — Haasawa Hawaasaa Giddeqsifamtuu, Censorship Resistant & Bilisa Dubbii",
     "a2dd3acadb1c": "Jeen Ismiiz",
     "93100fc44c0a": "@maqaa fayyadamaa",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Wallet keessan irratti seenaa fi maallaqa keessan bulchisuuf seenaa.",
     "a2364c207356": "Command: Dashboard & Wallet Keessan",
     "d97180b4753f": "Tuqaa ajajaa keessan Riftn irratti. Wallet keessan bulchaa, saldhoo hordofaa, fi akkaawuntii keessan tokko dashboard keessatti ilaalaa.",
@@ -16402,7 +16402,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Waan Mul'ate Keessatti",
     "ee1c1eecf1b6": "Riftn gazetaawwan guddaa fi jidha qabu addunyaa irraa irraa seenuun beekamaa dha. Muraasni artikeelota keenya gosa media democratise gochuuf jecha mul'isu dha.",

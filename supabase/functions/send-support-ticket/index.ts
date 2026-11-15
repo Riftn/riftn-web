@@ -13,7 +13,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts'
 
-const SUPPORT_INBOX = 'dev@dehub.io'
+const SUPPORT_INBOX = 'dev@riftn.com'
 
 // Caps mirror the backend's own, so a request that somehow skips them cannot
 // send an unbounded payload.
