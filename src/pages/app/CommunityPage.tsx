@@ -261,6 +261,8 @@ export default function CommunityPage() {
                   community={community}
                   membership={membership}
                   isMember={isMember}
+                  onJoin={handleJoinLeave}
+                  joining={joinMutation.isPending || checkingHolder}
                 />
               </div>
             )}
