@@ -3,8 +3,10 @@ import { AUDIT_REVISIONS, DETAIL_GROUPS } from './platform-comparison-details';
 import { CATEGORY_FAMILIES, COMPETITOR_REVIEWED_ON, RESEARCH_SOURCES, REVIEW_SCOPES, REVIEWED_FEATURE_IDS, researchedEntry } from './platform-comparison-research';
 import { PRODUCT_REVIEW, PRODUCT_REVIEWED_ON } from './platform-comparison-product-review';
 import { RIVAL_INVENTORY_REVIEWED_ON, RIVAL_ROWS, rivalSource } from './platform-comparison-rival-inventory';
+import { NEW_ROWS, PEER_UPDATES, RIFTN_UPDATES, UPDATE_SOURCES } from './platform-comparison-updates';
 export { AUDIT_REVISIONS } from './platform-comparison-details';
 export { COMPETITOR_REVIEWED_ON, REVIEWED_FEATURE_IDS } from './platform-comparison-research';
+export { UPDATES_REVIEWED_ON } from './platform-comparison-updates';
 export const REVIEWED_ON = '2026-10-27';
 export const PLATFORMS = [
   { id: 'youtube', name: 'YouTube' }, { id: 'x', name: 'X / Twitter' },
@@ -22,6 +24,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 };
 export const SOURCES: Record<string, { title: string; url: string }> = {
   ...RESEARCH_SOURCES,
+  ...UPDATE_SOURCES,
   dehub: { title: 'Riftn product guide', url: 'https://riftn.com/docs/dapps' },
   dehubLaunchpad: { title: 'Riftn Launchpad', url: 'https://riftn.com/launchpad' },
   dehubEncryption: { title: 'Riftn encrypted messaging implementation', url: `https://github.com/Riftn/riftn-web/blob/${AUDIT_REVISIONS.web}/src/lib/dm-e2ee/media-send.ts` },
@@ -390,10 +393,22 @@ const RIVAL_FEATURES: ComparisonFeature[] = RIVAL_ROWS.map(row => ({
     } satisfies ComparisonEntry]];
   })),
 }));
-export const FEATURES: ComparisonFeature[] = [...CATALOGUE, ...EXPANDED_FEATURES, ...NOT_YET, ...RIVAL_FEATURES].map(feature => ({
+/** Features added to the chart on the 2026-11-15 update. */
+const UPDATE_FEATURES: ComparisonFeature[] = NEW_ROWS.map(([id, category, name, note, peers]) => ({
+  id, category, name, dehub: e('riftnNew', note), peers, iosRestricted: false,
+}));
+const MERGED: ComparisonFeature[] = [...CATALOGUE, ...EXPANDED_FEATURES, ...NOT_YET, ...RIVAL_FEATURES, ...UPDATE_FEATURES].map(feature => ({
   ...feature,
   dehub: feature.id === 'encrypted-text' ? e('dehubEncryption', feature.dehub.note, 'limited') : feature.id === 'encrypted-attachments' ? { ...feature.dehub, status: 'limited' as const } : feature.dehub,
   peers: Object.fromEntries(PLATFORMS.map(platform => [platform.id, researchedEntry(feature.id, feature.name, feature.category, platform.id, ADDITIONAL_EVIDENCE[feature.id]?.[platform.id] ?? feature.peers[platform.id])]).map(([id, entry]) => [id, CORE_EVIDENCE[feature.id]?.[id as PlatformId] ?? productReviewed(feature, id as PlatformId, entry as ComparisonEntry | undefined)]).filter(([, entry]) => entry)) as Partial<Record<PlatformId, ComparisonEntry>>,
+}));
+/** The 2026-11-15 update wins over every earlier finding for the same feature and platform. */
+export const FEATURES: ComparisonFeature[] = MERGED.map(feature => ({
+  ...feature,
+  // Rows with Riftn source files keep those links; only the status and note change.
+  dehub: !RIFTN_UPDATES[feature.id] ? feature.dehub
+    : feature.implementation ? { ...feature.dehub, status: RIFTN_UPDATES[feature.id].status, note: RIFTN_UPDATES[feature.id].note } : RIFTN_UPDATES[feature.id],
+  peers: { ...feature.peers, ...PEER_UPDATES[feature.id] },
 }));
 const CATEGORY_ORDER = [
   'Posts and discovery', 'Profiles and identity', 'Playback and uploads', 'Live video and audio', 'Communities and messages',
