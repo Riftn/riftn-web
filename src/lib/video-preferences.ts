@@ -20,11 +20,15 @@ interface VideoPreferences {
   mediaMuted: boolean | null;
   /** Lowercased creator address → the rate chosen while watching them. */
   ratesByCreator: Record<string, number>;
-  /** 2 once speeds are kept per creator only; older blobs carried one speed everywhere. */
+  /**
+   * 3 once the stale per-creator speeds are cleared. Blobs before 2 carried
+   * one speed everywhere; blobs before 3 still hold creator speeds pinned by
+   * the old button, which pinned on every tap.
+   */
   rateScope?: number;
 }
 
-const RATE_SCOPE = 2;
+const RATE_SCOPE = 3;
 
 const DEFAULTS: VideoPreferences = {
   playbackRate: 1,
@@ -43,19 +47,21 @@ export function getVideoPreferences(): VideoPreferences {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const stored = JSON.parse(raw);
+      const current = stored?.rateScope === RATE_SCOPE;
       cached = {
         ...DEFAULTS,
         ...stored,
         isLooping: stored?.isLooping === true,
-        // One tap on a creator's speed button used to move every other video
-        // to that speed as well. Blobs written back then go back to normal
-        // speed once; the creators that were tuned keep their own.
-        playbackRate: stored?.rateScope === RATE_SCOPE && stored?.playbackRate > 0 ? stored.playbackRate : DEFAULTS.playbackRate,
+        // The old speed button pinned every tap on the creator being watched
+        // and moved every other video too, so people found whole profiles
+        // (often their own) stuck at 2x. Blobs written before this go back to
+        // normal speed once, creator speeds included.
+        playbackRate: current && stored?.playbackRate > 0 ? stored.playbackRate : DEFAULTS.playbackRate,
         rateScope: RATE_SCOPE,
         // Spread alone would carry through a null/array left by an older blob
         // and every read of it would then throw on lookup.
         ratesByCreator:
-          stored?.ratesByCreator && !Array.isArray(stored.ratesByCreator) && typeof stored.ratesByCreator === 'object'
+          current && stored?.ratesByCreator && !Array.isArray(stored.ratesByCreator) && typeof stored.ratesByCreator === 'object'
             ? stored.ratesByCreator
             : {},
       };

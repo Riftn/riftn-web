@@ -242,9 +242,12 @@ const VideoSlideBody = memo(function VideoSlideBody({
     }
   }, [isMuted]);
 
-  // Update playback rate
+  // Update playback rate. The default rate is set too: loading a source (the
+  // HLS ladder attaching after the handoff) puts playbackRate back to the
+  // default, which left the button reading 1.5x over a video playing at 1x.
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.defaultPlaybackRate = playbackRate;
       videoRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
@@ -283,13 +286,18 @@ const VideoSlideBody = memo(function VideoSlideBody({
     className: `shorts-inline-video pointer-events-none w-full h-full ${fitWhole || isFullscreen ? 'object-contain' : 'object-cover'} transition-none`,
     onTimeUpdate: handleTimeUpdate,
     onLoadedMetadata: handleLoadedMetadata,
-    onPlaybackChange: (playing) => { if (playing) handlePlay(); },
+    onPlaybackChange: (playing) => {
+      const video = videoRef.current;
+      if (playing && video && video.playbackRate !== playbackRate) video.playbackRate = playbackRate;
+      if (playing) handlePlay();
+    },
     onAdopt: (video) => {
       video.controls = false;
       video.setAttribute('controlsList', 'nofullscreen noremoteplayback nodownload');
       video.disableRemotePlayback = true;
       video.muted = isMuted;
       video.loop = isLooping;
+      video.defaultPlaybackRate = playbackRate;
       video.playbackRate = playbackRate;
       handleLoadedMetadata();
     },

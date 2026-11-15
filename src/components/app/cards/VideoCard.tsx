@@ -2057,8 +2057,12 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // The <video> element is shared between cards, so it arrives carrying
   // whatever rate the last card left on it. Re-stamp this card's rate on every
   // claim, or a channel pinned to 2× would keep playing the next one at 2×.
+  // The default rate too, since the Shorts viewer sets it and a new source
+  // falls back to it.
   useEffect(() => {
-    if (ownsVideoElement && videoRef.current) videoRef.current.playbackRate = playbackRate;
+    if (!ownsVideoElement || !videoRef.current) return;
+    videoRef.current.defaultPlaybackRate = playbackRate;
+    videoRef.current.playbackRate = playbackRate;
   }, [ownsVideoElement, playbackRate]);
 
   const hiddenScrubStart = useRef<{ x: number; y: number } | null>(null);
