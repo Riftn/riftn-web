@@ -17,14 +17,17 @@ import { saveProfileOrder } from '@/lib/api/dehub/profile-order';
 
 const tokenIdOf = (id: string): number => Number(/(\d+)$/.exec(id)?.[1] ?? NaN);
 
-/** `after` null puts the post first. Returns null when either post is not in the list. */
-export function moveInOrder(order: number[], moved: number, after: number | null): number[] | null {
-  if (!order.includes(moved) || moved === after) return null;
+/**
+ * `before`: the posts ahead of the new place, nearest first. The post goes
+ * right after the nearest one the order knows (a scheduled post on your own
+ * grid is not part of it yet); none known puts it first.
+ */
+export function moveInOrder(order: number[], moved: number, before: number[]): number[] | null {
+  if (!order.includes(moved)) return null;
   const next = order.filter((id) => id !== moved);
-  if (after === null) return [moved, ...next];
-  const at = next.indexOf(after);
-  if (at < 0) return null;
-  next.splice(at + 1, 0, moved);
+  const anchor = before.find((id) => id !== moved && next.includes(id));
+  if (anchor === undefined) return [moved, ...next];
+  next.splice(next.indexOf(anchor) + 1, 0, moved);
   return next;
 }
 
@@ -35,12 +38,12 @@ export function moveInOrder(order: number[], moved: number, after: number | null
 export function useProfileGridMove(address: string | undefined, onSaved?: () => void) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const move = useCallback(async (movedId: string, afterId: string | null) => {
+  const move = useCallback(async (movedId: string, beforeIds: string[]) => {
     if (!address) return;
     try {
       const { loadArrangeRows } = await import('@/components/app/profile/ProfileArrangeSheet');
       const rows = await loadArrangeRows(address, new AbortController().signal);
-      const next = moveInOrder(rows.map((row) => row.tokenId), tokenIdOf(movedId), afterId === null ? null : tokenIdOf(afterId));
+      const next = moveInOrder(rows.map((row) => row.tokenId), tokenIdOf(movedId), beforeIds.map(tokenIdOf));
       if (!next) throw new Error('post not in the saved order');
       await saveProfileOrder(next);
       onSaved?.();

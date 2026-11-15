@@ -2339,12 +2339,12 @@ function GridReorderGallery() {
     pillVideo('gr-video-b', 'Rooftop set, full hour', pillArtE, { duration: '58:10', views: '880' }),
     pillImage('gr-photo-d', pillArtC),
   ] as unknown as MixedGridEntry[]);
-  const onMove = async (movedId: string, afterId: string | null) => {
+  const onMove = async (movedId: string, beforeIds: string[]) => {
     setEntries((current) => {
       const moved = current.find((entry) => entry.data.id === movedId);
       if (!moved) return current;
       const rest = current.filter((entry) => entry !== moved);
-      const at = afterId === null ? 0 : rest.findIndex((entry) => entry.data.id === afterId) + 1;
+      const at = beforeIds.length ? rest.findIndex((entry) => entry.data.id === beforeIds[0]) + 1 : 0;
       rest.splice(at, 0, moved);
       return rest;
     });

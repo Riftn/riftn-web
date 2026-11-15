@@ -58,10 +58,10 @@ interface ProfileMixedGridProps {
   entries: MixedGridEntry[];
   /**
    * Own profile: each of the owner's posts carries a grip in its bottom right
-   * corner. Hold the grip and slide the tile to a new place; `after` is the
-   * post it now follows (null = first). The tile's own tap and hold are as before.
+   * corner. Hold the grip and slide the tile to a new place; `before` lists
+   * the posts now ahead of it, nearest first. The tile's own tap and hold are as before.
    */
-  onMove?: (movedId: string, afterId: string | null) => Promise<void>;
+  onMove?: (movedId: string, beforeIds: string[]) => Promise<void>;
 }
 
 /** The one key that changed place between two orders of the same keys. */
@@ -138,15 +138,15 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
     const key = movedKey(shownKeys, next);
     if (!key || !onMove) return;
     const byKey = new Map(entries.map((entry) => [entry.key, entry]));
-    let after: string | null = null;
+    const before: string[] = [];
     for (let i = next.indexOf(key) - 1; i >= 0; i -= 1) {
       const entry = byKey.get(next[i]);
-      if (entry && movable(entry)) { after = entry.data.id; break; }
+      if (entry && movable(entry)) before.push(entry.data.id);
     }
     const moved = byKey.get(key);
     if (!moved) return;
     setDropped(next);
-    void onMove(moved.data.id, after).finally(() => setDropped(null));
+    void onMove(moved.data.id, before).finally(() => setDropped(null));
   }, [shownKeys, entries, movable, onMove]);
   const reorder = useDragReorder({ ids: shownKeys, onCommit, disabled: !onMove || !!dropped, handle: true, holdMs: 160, liftScale: 1.05 });
   const shown = useMemo(() => {
