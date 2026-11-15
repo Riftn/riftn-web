@@ -158,6 +158,60 @@ html[data-theme='hazy'] [data-profile-mixed-grid] {
   text-shadow: none;
 }
 [data-profile-mixed-grid] .pmg-views { right: 0.7em; }
+
+/* Own profile: the grip a tile is moved by. A thumb-sized target in the
+   bottom right corner around a small glass chip of six dots. */
+[data-profile-mixed-grid] .pmg-grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: end;
+  padding: 5px;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+[data-profile-mixed-grid] .pmg-grip-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  gap: 2.5px;
+  place-content: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px) saturate(1.4);
+  -webkit-backdrop-filter: blur(8px) saturate(1.4);
+  transition: opacity 0.15s ease-out, background-color 0.15s ease-out;
+}
+[data-profile-mixed-grid] .pmg-grip-chip i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+[data-profile-mixed-grid] .pmg-poster .pmg-grip-chip { color: var(--pmg-ink); background: var(--pmg-glass); border-color: var(--pmg-glass-line); }
+/* What sat in that corner makes room. */
+[data-profile-mixed-grid] .pmg-tile[data-grip] .pmg-views { right: 32px; bottom: 9px; }
+[data-profile-mixed-grid] .pmg-tile[data-grip] .pmg-audio-title { right: 32px; }
+[data-profile-mixed-grid] .pmg-tile[data-reorder-dragging] { border-radius: 10px; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45); cursor: grabbing; }
+[data-profile-mixed-grid] .pmg-tile[data-reorder-dragging] .pmg-grip { cursor: grabbing; }
+[data-profile-mixed-grid] .pmg-tile[data-reorder-dragging] .pmg-grip-chip { color: #111; background: #fff; border-color: #fff; }
+[data-profile-mixed-grid] .pmg-tile[data-reorder-item]:active { transform: none; }
+/* With a mouse the grip waits for the pointer, so the grid reads clean. */
+@media (hover: hover) and (pointer: fine) {
+  [data-profile-mixed-grid] .pmg-grip-chip { opacity: 0; }
+  [data-profile-mixed-grid] .pmg-tile:hover .pmg-grip-chip,
+  [data-profile-mixed-grid] .pmg-tile[data-reorder-dragging] .pmg-grip-chip,
+  [data-profile-mixed-grid] .pmg-grip:focus-visible .pmg-grip-chip { opacity: 1; }
+  [data-profile-mixed-grid] .pmg-tile[data-grip]:not(:hover) .pmg-views { right: 0.7em; bottom: 0.65em; }
+}
+@media (min-width: 1024px) {
+  [data-profile-mixed-grid] .pmg-grip { width: 48px; height: 48px; padding: 8px; }
+  [data-profile-mixed-grid] .pmg-grip-chip { width: 28px; height: 28px; border-radius: 9px; grid-template-columns: repeat(2, 4px); gap: 3px; }
+  [data-profile-mixed-grid] .pmg-grip-chip i { width: 4px; height: 4px; }
+  [data-profile-mixed-grid] .pmg-tile[data-grip]:hover .pmg-views { right: 44px; bottom: 14px; }
+}
 [data-profile-mixed-grid] .pmg-lock {
   position: absolute;
   left: 50%;

@@ -1768,6 +1768,7 @@ export default function StateGalleryPage() {
         <TextTilesGallery />
         <ArticleTilesGallery initialLook={params.get('atile')} initiallyOpen={params.get('sheet') === 'article-tile'} />
         <GridCardsGallery />
+        <GridReorderGallery />
 
         <PollGallery />
         <LockedChatGallery />
@@ -2323,6 +2324,39 @@ function seedGridCards(qc: ReturnType<typeof useQueryClient>) {
   qc.setQueryData(['store-listing', PILL_LISTING], { id: PILL_LISTING, store_id: PILL_STORE, title: 'A3 print: Rain City', price: 25, images: [pillAbs(pillArtB)], stores: { name: 'Marco prints' } });
   for (const preview of GALLERY_SPOTIFY_PREVIEWS) qc.setQueryData(['grid-link-preview', preview.url], preview);
   qc.setQueryData(['single-post', '5162'], { tokenId: 5162, name: 'Ready to rock', description: '', minterDisplayName: 'Riftn', imageUrls: [pillAbs(pillArtE)], postType: 'feed-images' });
+}
+
+/** Own profile grid: a grip in each tile's corner moves it. Drops reorder this list only. */
+function GridReorderGallery() {
+  const [entries, setEntries] = useState<MixedGridEntry[]>(() => [
+    pillVideo('gr-video', 'Night ride through the city', pillArtB),
+    pillText('9201', 'gm. shipping all day again'),
+    pillImage('gr-photo-a', pillArtF),
+    pillVideo('gr-short', 'POV: first ride', pillArtC, { isShort: true, views: '12.4K' }),
+    pillImage('gr-photo-b', pillArtA),
+    pillText('9202', 'Own everything you post'),
+    pillImage('gr-photo-c', pillArtD),
+    pillVideo('gr-video-b', 'Rooftop set, full hour', pillArtE, { duration: '58:10', views: '880' }),
+    pillImage('gr-photo-d', pillArtC),
+  ] as unknown as MixedGridEntry[]);
+  const onMove = async (movedId: string, beforeIds: string[]) => {
+    setEntries((current) => {
+      const moved = current.find((entry) => entry.data.id === movedId);
+      if (!moved) return current;
+      const rest = current.filter((entry) => entry !== moved);
+      const at = beforeIds.length ? rest.findIndex((entry) => entry.data.id === beforeIds[0]) + 1 : 0;
+      rest.splice(at, 0, moved);
+      return rest;
+    });
+  };
+  return (
+    <section data-page-bento data-grid-reorder-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: move a post by its grip</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[720px]"><ProfileMixedGrid entries={entries} onMove={onMove} /></div>
+      </AuthContext.Provider>
+    </section>
+  );
 }
 
 /** Profile grid posts that carry a card: each tile is a small copy of its card (GridCardTile). */
