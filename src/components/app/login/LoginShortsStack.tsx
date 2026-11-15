@@ -112,6 +112,12 @@ export interface LoginStackHeadline {
   accent: string;
 }
 
+// Warm the wordmark mask as soon as this chunk loads, so the logo is there on the sheet's first frame.
+if (typeof window !== 'undefined') {
+  const logo = new Image();
+  logo.src = '/brand-kit/brand/riftn-logo-white.png';
+}
+
 export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline } = {}) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
