@@ -120,7 +120,7 @@ const FeaturedIn = () => {
         <CardContent>
           <div className="flex items-center gap-3 flex-wrap">
             <Button asChild>
-              <a href="mailto:marketing@dehub.net">{_copy("copy.44635127331a", { defaultValue: "Contact the team" })}</a>
+              <a href="mailto:dev@riftn.com">{_copy("copy.44635127331a", { defaultValue: "Contact the team" })}</a>
             </Button>
             <Button variant="outline" asChild>
               <a href="/docs/brand-assets" className="flex items-center gap-2">{_copy("copy.5491b0ff70a2", { defaultValue: "Brand assets" })}</a>

@@ -8,7 +8,7 @@ export const template = {
   subject: (data: Record<string, any>) =>
     `[${data.reference ?? 'ticket'}] ${data.severity === 'urgent' ? 'URGENT · ' : ''}${data.subject ?? 'Support ticket'}`,
   displayName: 'Support ticket',
-  to: 'dev@dehub.io',
+  to: 'dev@riftn.com',
   previewData: {
     reference: 'DH-1234',
     subject: 'Cannot upload a video',
