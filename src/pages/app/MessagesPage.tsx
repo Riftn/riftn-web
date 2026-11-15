@@ -17,7 +17,6 @@ import Search from "@/components/ui/cut-icons/search";
 import Plus from "@/components/ui/cut-icons/add";
 import MessageCircle from "@/components/ui/cut-icons/message-envelope";
 import Fullscreen from "@/components/ui/cut-icons/fullscreen";
-import ExitFullscreen from "@/components/ui/cut-icons/exit-fullscreen";
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
@@ -239,6 +238,8 @@ export function ConversationItem({
  */
 // Settings open inside the full-screen chat (computers) rather than leaving it.
 const EmbeddedSettings = lazy(() => import('@/pages/app/SettingsPage'));
+// Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
+const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
 
 export default function MessagesPage({ fullscreen = false }: { fullscreen?: boolean } = {}) {
   const { t: _copy } = _useCopy();
@@ -883,18 +884,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
             title={fullscreen ? _copy('fullscreenChat.title', { defaultValue: 'Chat' }) : t('messages.title')}
             actions={fullscreen ? (
+              // Only phones reach this header (computers get fullscreenTop).
+              // A phone has no full screen to leave, so the spare square is
+              // the + : sign in when signed out, the new chat drawer when in.
               <>
                 <ChatTextSizeButton />
-                <button
-                  type="button"
-                  data-kit-square
-                  data-chat-exit-fullscreen
-                  onClick={() => navigate('/app/messages')}
-                  aria-label={_copy('fullscreenChat.exit', { defaultValue: 'Leave full screen' })}
-                  title={_copy('fullscreenChat.exit', { defaultValue: 'Leave full screen' })}
-                >
-                  <ExitFullscreen className="h-[18px] w-[18px]" />
-                </button>
+                <IslandAction label={_copy("copy.4787aa7e2d5c", { defaultValue: "Start new conversation" })} onClick={openNewMessage}>
+                  <Plus />
+                </IslandAction>
               </>
             ) : phonePill ? (
               // Phones: search waits in the drawer behind the pill's search
@@ -927,7 +924,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 >
                   <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
                 </button>
-                {!(phonePill && !fullscreen) && (
+                {!phonePill && (
                   <button
                     type="button"
                     data-messages-search-action
@@ -957,7 +954,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </PageIsland>)}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : fullscreen ? 'pt-3 pb-4' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1179,7 +1176,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
         chat={settingsPane ?? publicChatPane ?? dmPane}
-        list={<>{chatSeo}{listColumn}{dialogs}</>}
+        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
       />
     );
   }
