@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import worker, { isAiTrainingBotUa, isBountyIndexable, isFilePath, setPageUrl, stylePrerendered } from '../../CLOUDFLARE_WORKER_SEO.js';
+import worker, { isAiTrainingBotUa, legacyStreamRedirect, isBountyIndexable, isFilePath, setPageUrl, stylePrerendered } from '../../CLOUDFLARE_WORKER_SEO.js';
 import { isBountyIndexable as spaIsBountyIndexable } from '@/features/work/seo';
 
 const ROOT = resolve(__dirname, '../..');
@@ -510,10 +510,19 @@ describe('AI training crawlers', () => {
 
   it('get a 403 on pages, relays and files', async () => {
     for (const ua of [GPTBOT, CLAUDEBOT, BYTESPIDER, META_AGENT]) {
-      for (const path of ['/', '/explore', '/maldoteth', '/llms.txt', '/_api/api/feed']) {
+      for (const path of ['/explore', '/maldoteth', '/app/post/7001', '/docsfake', '/_api/api/feed']) {
         const res = await get(path, ua);
         expect(res.status, `${ua} ${path}`).toBe(403);
       }
+    }
+  });
+  it('may read what Riftn publishes about itself, as robots.txt says', async () => {
+    for (const path of ['/', '/llms.txt', '/docs', '/docs/faq', '/guides/what-is-dehub', '/rss.xml']) {
+      expect((await get(path, GPTBOT)).status, path).not.toBe(403);
+    }
+    const robots = readFileSync(resolve(ROOT, 'public/robots.txt'), 'utf8');
+    for (const allow of ['Allow: /$', 'Allow: /llms.txt', 'Allow: /docs', 'Allow: /guides/', 'Allow: /blog']) {
+      expect(robots).toContain(allow);
     }
   });
   it('can still read robots.txt', async () => {
@@ -617,5 +626,18 @@ describe('docs routes', () => {
     expect(res.body).toContain('Community Guidelines');
     expect(res.body).toContain('https://riftn.com/og/docs.jpg');
     expect(canonicalOf(res.body)).toBe('https://riftn.com/docs/guidelines');
+  });
+});
+
+describe('old /stream/<id> video links', () => {
+  it('move to the post instead of an empty page', () => {
+    const res = legacyStreamRedirect(new Request('https://riftn.com/stream/955'));
+    expect(res?.status).toBe(301);
+    expect(res?.headers.get('Location')).toBe('https://riftn.com/app/post/955');
+  });
+  it('leave the Live page and everything else alone', () => {
+    for (const url of ['https://riftn.com/stream', 'https://riftn.com/stream/abc', 'https://dehub.io/stream/955']) {
+      expect(legacyStreamRedirect(new Request(url)), url).toBeNull();
+    }
   });
 });
