@@ -4341,7 +4341,7 @@ const SYSTEM_ROUTES = new Set([
 // AI fetchers (the `*-User/1.0` agents, matched on `-user/`). Each of them unfurled
 // every Riftn link as the homepage card. Naver's Yeti and Yahoo's Slurp are
 // search crawlers that do not run the SPA.
-const BOT_UA_PATTERN = /bot|crawl|spider|wordpress|facebook|twitter|linkedin|whatsapp|telegram|slack|discord|facebot|oggrabber|google-inspectiontool|googleother|apis-google|feedfetcher|curl|wget|python-requests|python-urllib|axios|node-fetch|got |okhttp|go-http-client|java\/|libwww-perl|ruby|postmanruntime|insomnia|httpie|cardyb|bluesky|mastodon|http\.rb|skypeuripreview|embedly|iframely|vkshare|yeti|slurp|-user\/|google \(\+https/i;
+const BOT_UA_PATTERN = /bot|crawl|spider|wordpress|facebook|twitter|linkedin|whatsapp|telegram|slack|discord|facebot|oggrabber|google-inspectiontool|googleother|apis-google|feedfetcher|curl|wget|python-requests|python-urllib|axios|node-fetch|got |okhttp|go-http-client|java\/|libwww-perl|ruby|postmanruntime|insomnia|httpie|cardyb|bluesky|mastodon|http\.rb|skypeuripreview|embedly|iframely|vkshare|yeti|slurp|-user\/|gemini-deep-research|google-notebooklm|google \(\+https/i;
 
 // Search engines, as opposed to link previewers. When the data behind a page
 // cannot be read, a search engine should be told to come back (503) rather
@@ -4368,9 +4368,18 @@ export function isAiTrainingBotUa(ua) {
 }
 
 /** The 403 an AI training crawler gets, or null for everyone else. */
+/**
+ * Riftn's own pages about itself: the home page, docs, guides, blog and
+ * llms.txt. Training crawlers may read these, so that assistants know what
+ * Riftn is and that DeHub became Riftn. Nothing a member posted is in here.
+ * public/robots.txt carries the same list as Allow lines.
+ */
+const AI_TRAINING_OPEN_PATH = /^\/(?:$|robots\.txt$|llms(?:-full)?\.txt$|rss\.xml$|(?:docs|guides|blog)(?:\/|$))/;
+
 export function aiTrainingBotRefusal(request) {
   if (!isAiTrainingBotUa(request.headers.get('User-Agent'))) return null;
-  if (new URL(request.url).pathname === '/robots.txt') return null;
+  const url = new URL(request.url);
+  if (AI_TRAINING_OPEN_PATH.test(url.pathname)) return null;
   return new Response('AI training crawlers are not allowed on Riftn. See /robots.txt.\n', {
     status: 403,
     headers: {
@@ -4888,16 +4897,20 @@ export function postSitemapXml(posts) {
     if (!Number.isFinite(id) || seen.has(id)) continue;
     if (!postQualifiesForSitemap(post)) continue;
     seen.add(id);
-    rows.push({ id, createdAt: post.createdAt, image: postSitemapImage(post) });
+    // The readable link, where the post has one: /app/post/<id> moves there
+    // with a 301, and a sitemap of redirects is read as "page with redirect"
+    // rather than indexed.
+    const slug = typeof post.slug === 'string' && /^[a-z0-9-]+$/.test(post.slug) ? post.slug : '';
+    rows.push({ id, slug, createdAt: post.createdAt, image: postSitemapImage(post) });
   }
   rows.sort((a, b) => a.id - b.id);
-  const urls = rows.map(({ id, createdAt, image }) => {
+  const urls = rows.map(({ id, slug, createdAt, image }) => {
     // Anything not an ISO date is dropped rather than passed through: a
     // malformed lastmod invalidates the whole file for some parsers.
     const day = /^\d{4}-\d{2}-\d{2}/.test(String(createdAt || '')) ? String(createdAt).slice(0, 10) : '';
     const lastmod = day ? `<lastmod>${day}</lastmod>` : '';
     const img = image ? `<image:image><image:loc>${xmlText(image)}</image:loc></image:image>` : '';
-    return `  <url><loc>${APP_URL}/app/post/${id}</loc>${lastmod}<changefreq>weekly</changefreq><priority>0.6</priority>${img}</url>`;
+    return `  <url><loc>${APP_URL}/app/post/${slug || id}</loc>${lastmod}<changefreq>weekly</changefreq><priority>0.6</priority>${img}</url>`;
   });
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls.join('\n')}\n</urlset>`;
 }

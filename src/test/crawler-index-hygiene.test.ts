@@ -510,10 +510,19 @@ describe('AI training crawlers', () => {
 
   it('get a 403 on pages, relays and files', async () => {
     for (const ua of [GPTBOT, CLAUDEBOT, BYTESPIDER, META_AGENT]) {
-      for (const path of ['/', '/explore', '/maldoteth', '/llms.txt', '/_api/api/feed']) {
+      for (const path of ['/explore', '/maldoteth', '/app/post/7001', '/docsfake', '/_api/api/feed']) {
         const res = await get(path, ua);
         expect(res.status, `${ua} ${path}`).toBe(403);
       }
+    }
+  });
+  it('may read what Riftn publishes about itself, as robots.txt says', async () => {
+    for (const path of ['/', '/llms.txt', '/docs', '/docs/faq', '/guides/what-is-dehub', '/rss.xml']) {
+      expect((await get(path, GPTBOT)).status, path).not.toBe(403);
+    }
+    const robots = readFileSync(resolve(ROOT, 'public/robots.txt'), 'utf8');
+    for (const allow of ['Allow: /$', 'Allow: /llms.txt', 'Allow: /docs', 'Allow: /guides/', 'Allow: /blog']) {
+      expect(robots).toContain(allow);
     }
   });
   it('can still read robots.txt', async () => {
