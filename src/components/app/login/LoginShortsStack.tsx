@@ -29,13 +29,77 @@ const GESTURES = ['pointerdown', 'touchend', 'keydown'] as const;
  * When the browser refuses to start a clip on its own (iPhone Low Power Mode),
  * the first tap or key press anywhere starts it.
  */
-function Clip({ name }: { name: ClipName }) {
+/**
+ * The wordmark mask and each tile's still go first; clips only start
+ * downloading once those are in, so a slow connection shows the logo and a
+ * picture in every tile instead of blank boxes while videos crawl in.
+ */
+const LOGO_SRC = '/brand-kit/brand/riftn-logo-white.png';
+let logoReady: Promise<void> | null = null;
+function whenLogoReady() {
+  if (!logoReady) {
+    logoReady = typeof Image === 'undefined'
+      ? Promise.resolve()
+      : new Promise<void>((done) => {
+        const logo = new Image();
+        logo.onload = () => done();
+        logo.onerror = () => done();
+        logo.src = LOGO_SRC;
+        // Never hold the clips back for long.
+        setTimeout(done, 4000);
+      });
+  }
+  return logoReady;
+}
+
+let blurLoad: Promise<Record<string, string> | null> | null = null;
+/**
+ * Start the wordmark and the blurred frames (about 15 KB). Called when the
+ * sheet is warmed (idle prefetch for guests, or intent) and again on open, so
+ * they are usually in before the sheet paints, without riding on every page.
+ */
+export function warmLoginStack() {
+  void whenLogoReady();
+  if (!blurLoad) blurLoad = import('./login-clip-blur').then((m) => m.LOGIN_CLIP_BLUR).catch(() => { blurLoad = null; return null; });
+  return blurLoad;
+}
+
+/** Stills still on their way across every tile; clips wait until they are all in. */
+let stillsPending = 0;
+const stillsListeners = new Set<() => void>();
+function stillStarted() { stillsPending += 1; }
+function stillSettled() {
+  stillsPending = Math.max(0, stillsPending - 1);
+  if (stillsPending === 0) stillsListeners.forEach((fn) => fn());
+}
+
+function Clip({ name, blur }: { name: ClipName; blur?: string }) {
   const tileRef = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useState(false);
+  const [stillIn, setStillIn] = useState(false);
+  const [logoIn, setLogoIn] = useState(false);
   const visibleRef = useRef(false);
+  const stillCounted = useRef(false);
+  const settleStill = () => {
+    if (!stillCounted.current) return;
+    stillCounted.current = false;
+    stillSettled();
+  };
+  useEffect(() => {
+    let live = true;
+    void whenLogoReady().then(() => { if (live) setLogoIn(true); });
+    stillCounted.current = true;
+    stillStarted();
+    const allIn = () => { if (live) setStillIn(true); };
+    stillsListeners.add(allIn);
+    // A still that never arrives must not hold the clips back for good.
+    const t = setTimeout(allIn, 5000);
+    return () => { live = false; clearTimeout(t); stillsListeners.delete(allIn); settleStill(); };
+  }, []);
+  const mountVideo = loaded && stillIn && logoIn;
   useEffect(() => {
     const tile = tileRef.current;
     if (!tile) return;
@@ -51,7 +115,7 @@ function Clip({ name }: { name: ClipName }) {
   useEffect(() => {
     visibleRef.current = visible;
     const video = ref.current;
-    if (!video || !loaded) return;
+    if (!video || !mountVideo) return;
     // React does not reflect `muted` as an attribute, and Safari refuses to
     // autoplay a video it cannot see is muted.
     video.muted = true;
@@ -73,10 +137,24 @@ function Clip({ name }: { name: ClipName }) {
       for (const type of GESTURES) document.addEventListener(type, retry, { capture: true, passive: true });
     });
     return () => { cancelled = true; stopRetry(); };
-  }, [loaded, visible]);
+  }, [mountVideo, visible]);
   return (
-    <div ref={tileRef} className="login-stack__tile">
-      {loaded && (
+    <div
+      ref={tileRef}
+      className="login-stack__tile"
+      // A tiny blurred frame shows the instant the tile exists, under the still and the clip.
+      style={blur ? { backgroundImage: `url(${blur})` } : undefined}
+    >
+      <img
+        src={`/login-stack/${name}.jpg`}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        className="login-stack__still"
+        onLoad={settleStill}
+        onError={settleStill}
+      />
+      {mountVideo && (
         <video
           ref={ref}
           src={`/login-stack/${name}.mp4`}
@@ -95,10 +173,10 @@ function Clip({ name }: { name: ClipName }) {
   );
 }
 
-function Lane({ clips, reverse }: { clips: ClipName[]; reverse?: boolean }) {
+function Lane({ clips, reverse, blurs }: { clips: ClipName[]; reverse?: boolean; blurs: Record<string, string> | null }) {
   return (
     <div className={reverse ? 'login-stack__lane login-stack__lane--down' : 'login-stack__lane'}>
-      {[...clips, ...clips].map((name, i) => <Clip key={i} name={name} />)}
+      {[...clips, ...clips].map((name, i) => <Clip key={i} name={name} blur={blurs?.[name]} />)}
     </div>
   );
 }
@@ -112,17 +190,19 @@ export interface LoginStackHeadline {
   accent: string;
 }
 
-// Warm the wordmark mask as soon as this chunk loads, so the logo is there on the sheet's first frame.
-if (typeof window !== 'undefined') {
-  const logo = new Image();
-  logo.src = '/brand-kit/brand/riftn-logo-white.png';
-}
 
 export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline } = {}) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const count = DESKTOP_LANES;
   const [lanes] = useState(() => loginClipLanes(LOGIN_CLIP_IDS, Math.random, 12));
+  // The blurred frames (about 15 KB) and the wordmark load with the sheet, not with every page.
+  const [blurs, setBlurs] = useState<Record<string, string> | null>(null);
+  useEffect(() => {
+    let live = true;
+    void warmLoginStack().then((b) => { if (live && b) setBlurs(b); });
+    return () => { live = false; };
+  }, []);
   const selected = [...lanes.first, ...lanes.second];
   const perLane = Math.ceil(selected.length / count);
   // Phones keep two lanes of four so they drift at the same speed as before.
@@ -132,7 +212,7 @@ export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline }
   return (
     <div className="login-stack" data-login-stack>
       <div className="login-stack__lanes" aria-hidden="true">
-        {columns.map((clips, index) => <Lane key={index} clips={clips} reverse={index % 2 === 1} />)}
+        {columns.map((clips, index) => <Lane key={index} clips={clips} reverse={index % 2 === 1} blurs={blurs} />)}
       </div>
       <div className="login-stack__title">
         {/* Riftn wordmark as a neon sign, just above the headline, over the clips. */}

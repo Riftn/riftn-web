@@ -31,7 +31,7 @@ import { LoginBodySkeleton } from '@/components/app/login/LoginBodySkeleton';
 // Not lazy: the lanes and headline are plain boxes and text, so the sheet's
 // first frame is already the sheet people see. Clips are built only once a
 // tile is on screen (see Clip), so this costs nothing in the tap.
-import { LoginShortsStack } from '@/components/app/login/LoginShortsStack';
+import { LoginShortsStack, warmLoginStack } from '@/components/app/login/LoginShortsStack';
 import { useTwoFactorPrompt } from '@/lib/two-factor-login';
 import { buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, warmDeferredSheets } from '@/components/ui/drawer';
@@ -86,6 +86,7 @@ const TwoFactorLoginStep = React.lazy(() =>
  */
 export function prefetchLoginModal(): void {
   void LoginModalBody.preload().catch(() => {});
+  void warmLoginStack();
 }
 
 /**
