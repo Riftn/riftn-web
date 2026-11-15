@@ -348,6 +348,10 @@ html[data-theme='glass'] [data-shorts-viewer] .viewer-control {
   html[data-theme='glass'] :is([data-glass-playback-control], [data-glass-playback-surface] button, [data-glass-mini-audio] button):hover { filter: brightness(1.12); }
 }
 
+/* Full-screen chat: the open chat's header and message box sit straight on
+   the glass, with no rule under one or over the other. */
+html[data-theme='glass'] [data-fsc-chat] :is([data-chat-header], [data-drop-attach]):not(#_) { border-color: transparent; }
+
 /* Full-screen chat on computers: no lines in the chat list. Pinned chats sit
    as round glass bubbles under the search; every other chat is a slim glass
    pill with a round avatar, and the open one glows. Phones keep the plain list. */
