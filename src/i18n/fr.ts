@@ -2197,7 +2197,7 @@ export const fr = {
     yourContent: 'Votre contenu',
     yourContentText: "En tant que plateforme décentralisée, vous conservez la pleine propriété de tout le contenu que vous créez. Votre contenu est tokenisé et enregistré sur la blockchain, vous offrant une propriété permanente et vérifiable.",
     contentRestrictions: 'Restrictions de contenu',
-    contentRestrictionsText: "Bien que nous défendions la résistance à la censure, le contenu suivant peut être soumis à modération par la gouvernance communautaire :",
+    contentRestrictionsText: 'Riftn ne tolère ni les utilisateurs abusifs ni les contenus qui enfreignent la loi ou les règles de la communauté. Un contenu peut être restreint, supprimé ou rendu indisponible pour :',
     contentRestrictionsItem1: 'Contenu illégal tel que défini par la loi applicable',
     contentRestrictionsItem2: 'Contenu violant les directives approuvées par la communauté via des votes de gouvernance',
     contentRestrictionsItem3: 'Spam technique ou activités malveillantes menaçant la sécurité de la plateforme',
