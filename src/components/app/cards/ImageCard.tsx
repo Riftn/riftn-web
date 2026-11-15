@@ -983,7 +983,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   const soundtrackEnabled = !matureGate.isGated && !isPPV && !isLocked && !isSubGated && !isW2E;
   const soundtrack = useImageSoundtrack(post.soundtrackUrl, viewRef, soundtrackEnabled, post.id);
   const soundtrackControl = post.soundtrackUrl && soundtrackEnabled ? (
-    <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} {...soundtrack} />
+    <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} />
   ) : null;
   
   // Translation hook for text content
@@ -1712,7 +1712,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
       <FullscreenImageViewerLazy
         images={images}
         soundtrackControl={soundtrackControl && (
-          <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} {...soundtrack} layout="inline" />
+          <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="inline" />
         )}
         initialIndex={fullscreenIndex}
         isOpen={fullscreenOpen}

@@ -11,8 +11,11 @@ export interface AttachedSound {
   title: string;
   creator: string;
   creatorAvatar?: string;
+  /** "0" for songs from outside libraries. */
   tokenId: string;
   duration?: number;
+  /** Which library the song came from. */
+  source?: 'audius' | 'riftn' | 'commons';
 }
 
 export function usePostSound() {

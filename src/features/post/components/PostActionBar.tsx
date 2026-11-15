@@ -34,6 +34,7 @@ import { AI_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
 import { GoLiveModal } from '@/components/app/modals';
 import { EmojiGifPicker } from '@/components/app/chat/EmojiGifPicker';
 import type { LiveMode, LiveStreamHandoff } from '../types';
+import { clock, soundWindow } from '@/lib/sound-window';
 import type { AttachedSound } from '../hooks/usePostSound';
 
 interface PostActionBarProps {
@@ -366,24 +367,45 @@ export function PostActionBar({
         </div>
       )}
 
-      {/* Attached sound chip */}
-      {attachedSound && (
+      {/* Attached sound chip; with a photo or video and no song yet, the way to add one. */}
+      {attachedSound ? (
         <div className="px-4 py-1.5 border-t border-white/10">
           <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5">
             <Music className="w-3.5 h-3.5 text-white/60 flex-shrink-0" />
-            <span className="text-xs text-white/80 truncate flex-1">
+            <button
+              type="button"
+              onClick={onOpenSoundPicker}
+              disabled={!onOpenSoundPicker}
+              className="min-w-0 flex-1 truncate text-left text-xs text-white/80"
+            >
               ♪ {attachedSound.title} — {attachedSound.creator}
-            </span>
+              {soundWindow(attachedSound.url) && (
+                <span className="text-white/45"> · {clock(soundWindow(attachedSound.url)!.start)}{soundWindow(attachedSound.url)!.end != null ? `–${clock(soundWindow(attachedSound.url)!.end!)}` : ''}</span>
+              )}
+            </button>
             <button
               type="button"
               onClick={onClearSound}
+              aria-label={_copy("copy.55fd43d20da5", { defaultValue: "Remove sound" })}
               className="p-0.5 hover:bg-white/10 rounded transition-colors flex-shrink-0"
             >
               <X className="w-3.5 h-3.5 text-white/50" />
             </button>
           </div>
         </div>
-      )}
+      ) : onOpenSoundPicker && !isLive && (hasImage || hasVideo) ? (
+        <div className="px-4 py-1.5 border-t border-white/10">
+          <button
+            type="button"
+            onClick={onOpenSoundPicker}
+            data-add-sound
+            className="flex h-8 items-center gap-1.5 rounded-full bg-white/10 px-3 text-xs font-semibold text-white transition-colors hover:bg-white/15"
+          >
+            <Music className="w-3.5 h-3.5" />
+            {_copy("copy.d14064f80f52", { defaultValue: "Add sound" })}
+          </button>
+        </div>
+      ) : null}
 
     <div data-composer-action-bar className="px-4 py-2 border-t border-white/10 flex items-center justify-between gap-2">
       <div className="flex items-center gap-0.5">

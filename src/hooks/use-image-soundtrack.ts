@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
+import { bindSoundWindow } from '@/lib/sound-window';
 import { claimHandoffAudio, getHandoffAudio, isHandoffAudioActive, raiseHandoffAudio, releaseHandoffAudio, setHandoffAudio, subscribeHandoffAudio } from '@/lib/audio-handoff';
 
 export function useImageSoundtrack(url: string | undefined, anchor: RefObject<HTMLElement>, enabled: boolean, postId?: string) {
@@ -26,6 +27,7 @@ export function useImageSoundtrack(url: string | undefined, anchor: RefObject<HT
     if (!getHandoffAudio(key, token.current)) {
       const el = new Audio();
       el.loop = true;
+      bindSoundWindow(el);
       el.preload = 'none';
       setHandoffAudio(key, token.current, { el, source: null, analyser: null });
     }
@@ -67,6 +69,7 @@ export function useImageSoundtrack(url: string | undefined, anchor: RefObject<HT
     if (!audio) {
       audio = new Audio();
       audio.loop = true;
+      bindSoundWindow(audio);
       audio.preload = 'none';
       audioRef.current = audio;
       setHandoffAudio(key, token.current, { el: audio, source: null, analyser: null });

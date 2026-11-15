@@ -59,6 +59,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import { ListPlus, Clock, Zap, Ticket, Star, Loader2, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
+import { SoundCreditLink } from './SoundCreditLink';
 import { AltTextBadge } from './AltTextBadge';
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
@@ -2899,6 +2900,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             <span className="text-white text-[10px] truncate">
               {video.soundtrackTitle}{video.soundtrackCreator ? ` — ${video.soundtrackCreator}` : ''}
             </span>
+            <SoundCreditLink url={video.soundtrackUrl} creator={video.soundtrackCreator} variant="short" className="shrink-0 text-[10px] text-white/70" />
           </div>
         )}
         

@@ -1,3 +1,6 @@
+import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { SoundtrackControl } from '@/components/app/cards/SoundtrackControl';
+import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
@@ -427,6 +430,43 @@ function FollowCardsGallery() {
           ))}
         </div>
       </div>
+    </section>
+  );
+}
+
+/** ?sounds=1 — free songs: the picker (list or &soundstep=part) and the credit on posts. */
+function SoundsGallery({ step, library }: { step: string | null; library: string | null }) {
+  const [open, setOpen] = useState(true);
+  const song = 'https://api.audius.co/v1/tracks/ZlwB7/stream?app_name=Riftn';
+  const credited = withSoundWindow(song, { start: 42, end: 72 }, {
+    source: 'audius', license: 'Audius Open Music License',
+    licenseUrl: 'https://audius.org/open-music-license.pdf', page: 'https://audius.co/arly/instrumental-chill',
+  });
+  const picked: SoundCandidate = {
+    key: 'audius:ZlwB7', library: 'audius', url: song, title: 'Instrumental chill', creator: 'Arly',
+    tokenId: '0', duration: 138, pageUrl: 'https://audius.co/arly/instrumental-chill',
+    license: 'Audius Open Music License', licenseUrl: 'https://audius.org/open-music-license.pdf',
+  };
+  const idle = { playing: false, loading: false, error: false, toggle: () => setOpen(true) };
+  return (
+    <section data-sounds-gallery className="mb-5 space-y-4 rounded-2xl border border-white/10 bg-background/80 p-4">
+      <h2 className="text-lg font-semibold">Free songs</h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <SoundtrackControl title="Instrumental chill" creator="Arly" url={credited} layout="inline" {...idle} />
+        <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-white/10 px-3 py-1.5 text-xs">Open picker</button>
+      </div>
+      <div className="relative h-40 max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-fuchsia-700 to-sky-700">
+        <div className="absolute inset-x-0 bottom-0">
+          <SoundtrackControl title="Instrumental chill" creator="Arly" url={credited} {...idle} playing />
+        </div>
+      </div>
+      <SoundPicker
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onSelect={() => {}}
+        initialPicked={step === 'part' ? picked : undefined}
+        initialLibrary={library === 'riftn' || library === 'commons' ? library : 'audius'}
+      />
     </section>
   );
 }
@@ -1689,6 +1729,7 @@ export default function StateGalleryPage() {
 
         {params.get('predictions') === '1' && <PredictionGallery />}
         {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />

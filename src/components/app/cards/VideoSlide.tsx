@@ -36,6 +36,7 @@ import { useHandoffVideo } from '@/hooks/use-handoff-video';
 import { AuthContext } from '@/contexts/AuthContext';
 import { isVideoAccessExpiring, useResumeAcrossRefresh, useVideoAccess } from '@/lib/api/dehub/video-access';
 import { useMediaLooping } from '@/lib/video-preferences';
+import { bindSoundWindow } from '@/lib/sound-window';
 
 interface VideoSlideProps {
   short: ShortVideo;
@@ -144,6 +145,9 @@ const VideoSlideBody = memo(function VideoSlideBody({
   const thumbnail = useResolvedThumbnail(short.thumbnail);
   const [videoAspect, setVideoAspect] = useState<'portrait' | 'landscape' | 'square'>('portrait');
   const playableSrc = short.soundtrackUrl || (playbackSrc !== undefined ? playbackSrc || undefined : short.videoUrl);
+  // A photo short plays its song in this element: keep it to the part the
+  // poster picked.
+  useEffect(() => { if (short.soundtrackUrl) bindSoundWindow(videoRef.current); }, [short.soundtrackUrl]);
   // A short that mounts off screen (the next one) starts its ladder on the
   // lowest rung, so its first segment is small and lands before the swipe;
   // the player steps up once it plays.
