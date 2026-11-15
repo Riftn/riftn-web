@@ -482,7 +482,7 @@ export const blogPostsMetadata: BlogPost[] = [
       "name": "Riftn Team"
     },
     "publishedAt": "2026-07-03T11:30:00.000Z",
-    "updatedAt": "2026-07-03T11:30:00.000Z",
+    "updatedAt": "2026-11-15T18:00:00.000Z",
     "tags": [
       "DHB token",
       "Riftn",

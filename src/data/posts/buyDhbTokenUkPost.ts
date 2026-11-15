@@ -9,6 +9,8 @@ export const buyDhbTokenUkPost: BlogPostType = {
   excerpt: 'A plain-English UK guide to the DHB token: what it does, which chains it runs on, where it trades, and a careful, non-advisory step-by-step for buying it safely.',
   content: `**Don't invest unless you're prepared to lose all the money you invest. This is a high-risk investment and you should not expect to be protected if something goes wrong. Take 2 mins to learn more.**
 
+**Update, 15 November 2026:** DeHub is now Riftn, and its token $RIFT replaces DHB. Trading on Riftn is paused until $RIFT launches, so the buying steps below are kept for reference only. If you already hold DHB, you keep your balance and claim $RIFT by logging in to Riftn once after listing. See [Is Riftn the same as DeHub?](/guides/is-riftn-the-same-as-dehub).
+
 If you want to know how to buy DHB token in the UK, the short version is this: set up a self-custody crypto wallet, buy ETH or USDC on an FCA-registered exchange that serves UK customers, move those funds onto the Base network, and swap them for $DHB on a decentralised exchange. DHB is the ecosystem token of Riftn, a Web3 social network, and it runs primarily on Base with contracts also live on BNB Chain and Polygon. This guide walks through each step carefully and explains what the token actually does, so you can decide whether it belongs in your plans at all.
 
 This article is information, not financial advice. Nothing here is a recommendation to buy, sell or hold any asset. Cryptoassets are unregulated and high-risk in the UK; always do your own research and, if in doubt, speak to an independent, FCA-authorised financial adviser.
@@ -114,7 +116,7 @@ Yes. Buying, holding and trading cryptoassets is legal in the UK. Since 2023 the
   bannerImageAlt: 'A guide to buying the DHB token in the UK on the Base network, with the Riftn logo',
   author: { name: 'Riftn Team' },
   publishedAt: '2026-07-03T11:30:00.000Z',
-  updatedAt: '2026-07-03T11:30:00.000Z',
+  updatedAt: '2026-11-15T18:00:00.000Z',
   tags: ['DHB token', 'Riftn', 'how to buy DHB', 'crypto UK', 'Base', 'tokenomics', 'Web3'],
   readingTime: 9,
   featured: false,
