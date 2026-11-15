@@ -595,6 +595,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onClose={() => setSoundPickerOpen(false)}
         onSelect={selectSound}
         currentSound={attachedSound}
+        clipSeconds={state.media.find(m => m.type === 'video')?.duration}
       />
 
       {planDrawerOpen && (

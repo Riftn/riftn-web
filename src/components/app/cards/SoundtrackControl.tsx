@@ -8,10 +8,14 @@ import Play from "@/components/ui/cut-icons/play";
 
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { SoundCreditLink } from './SoundCreditLink';
+import { soundCredit } from '@/lib/sound-window';
 
 interface Props {
   title?: string;
   creator?: string;
+  /** The song's link; carries the credit for songs from outside libraries. */
+  url?: string;
   playing: boolean;
   loading: boolean;
   error: boolean;
@@ -55,7 +59,7 @@ function useProgress(audioRef: RefObject<HTMLAudioElement | null> | undefined, a
 
 const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 
-export function SoundtrackControl({ title, creator, playing, loading, error, toggle, audioRef, layout = 'overlay' }: Props) {
+export function SoundtrackControl({ title, creator, url, playing, loading, error, toggle, audioRef, layout = 'overlay' }: Props) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const action = error ? t('explorePage.retry') : loading ? t('common.cancel') : playing ? t('audioPost.pause') : t('audioPost.play');
@@ -122,6 +126,7 @@ export function SoundtrackControl({ title, creator, playing, loading, error, tog
           <div data-keep-dark className="min-w-0 flex-1 [text-shadow:0_1px_8px_rgba(0,0,0,.6)]">
             <span className="flex items-center gap-1.5 truncate text-sm font-semibold"><Music className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{name}</span>
             {creator && <span className="block truncate text-xs text-white/80">{creator}</span>}
+            <SoundCreditLink url={url} creator={creator} className="block truncate text-[10px] text-white/70" />
           </div>
           <button
             type="button"
@@ -166,7 +171,7 @@ export function SoundtrackControl({ title, creator, playing, loading, error, tog
     );
   }
 
-  return (
+  const capsule = (
     <button
       type="button"
       data-no-navigate
@@ -187,5 +192,14 @@ export function SoundtrackControl({ title, creator, playing, loading, error, tog
       <span className="min-w-0 max-w-[10rem] truncate text-xs font-semibold">{name}</span>
       {playing ? <Pause className="h-3.5 w-3.5 shrink-0 fill-current" aria-hidden="true" /> : !error && !loading && <Play className="h-3.5 w-3.5 shrink-0 fill-current" aria-hidden="true" />}
     </button>
+  );
+  // A song from an outside library names its library next to the capsule;
+  // the link opens the song's page and its title holds the full credit.
+  if (layout !== 'inline' || !soundCredit(url)) return capsule;
+  return (
+    <span className="inline-flex max-w-full items-center gap-2">
+      {capsule}
+      <SoundCreditLink url={url} creator={creator} variant="short" className="shrink-0 text-[11px] font-medium text-white/70" />
+    </span>
   );
 }
