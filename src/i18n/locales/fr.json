@@ -780,6 +780,14 @@
     "showOnlineDesc": "Les personnes que vous envoyez un message voient un point vert à côté de votre nom lorsque vous utilisez Riftn",
     "showDislikes": "Montrer mes « je n'aime pas » à tout le monde",
     "showDislikesDesc": "Tout le monde peut ouvrir l'onglet « Je n'aime pas » de votre profil. Désactivé, vous seul pouvez le voir.",
+    "showLikes": "Montrer mes j'aime à tout le monde",
+    "showLikesDesc": "Tout le monde peut ouvrir l'onglet J'aime de ton profil. Désactivé par défaut : toi seul vois ce que tu as aimé.",
+    "showFollowersList": "Montrer qui me suit",
+    "showFollowersListDesc": "Permet à tout le monde d'ouvrir ta liste d'abonnés. Désactivé, toi seul peux la voir.",
+    "showFollowingList": "Montrer qui je suis",
+    "showFollowingListDesc": "Permet à tout le monde d'ouvrir la liste des personnes que tu suis. Désactivé, toi seul peux la voir.",
+    "showFollowCounts": "Montrer mes nombres d'abonnés",
+    "showFollowCountsDesc": "Affiche combien d'abonnés tu as et combien de personnes tu suis. Le désactiver masque aussi les deux listes.",
     "smartReplies": "Réponses suggérées",
     "smartRepliesDesc": "Rédige deux réponses à toucher dans une discussion. La × sur les suggestions désactive l'option.",
     "title": "Paramètres",
@@ -1343,15 +1351,7 @@
     "socialConnectedShort": "Connecté",
     "socialConnectFailed": "Impossible de connecter {{platform}}. Veuillez réessayer.",
     "socialVerifiedFollowers": "{{value}} abonnés",
-    "socialFollowersPending": "Mise à jour des abonnés",
-    "showLikes": "Montrer mes j'aime à tout le monde",
-    "showLikesDesc": "Tout le monde peut ouvrir l'onglet J'aime de ton profil. Désactivé par défaut : toi seul vois ce que tu as aimé.",
-    "showFollowersList": "Montrer qui me suit",
-    "showFollowersListDesc": "Permet à tout le monde d'ouvrir ta liste d'abonnés. Désactivé, toi seul peux la voir.",
-    "showFollowingList": "Montrer qui je suis",
-    "showFollowingListDesc": "Permet à tout le monde d'ouvrir la liste des personnes que tu suis. Désactivé, toi seul peux la voir.",
-    "showFollowCounts": "Montrer mes nombres d'abonnés",
-    "showFollowCountsDesc": "Affiche combien d'abonnés tu as et combien de personnes tu suis. Le désactiver masque aussi les deux listes."
+    "socialFollowersPending": "Mise à jour des abonnés"
   },
   "common": {
     "confirm": "Confirmer",
@@ -2289,12 +2289,12 @@
     "loadFailed": "Impossible de charger les demandes"
   },
   "auth": {
-    "loginRequired": "Connexion requise",
     "accountDeleted": "Ce compte a été supprimé. Vous pouvez vous réinscrire avec un nouveau compte.",
     "accountDeletedHours_one": "Ce compte a été supprimé. Vous pourrez vous réinscrire avec le même e-mail ou téléphone dans environ {{count}} heure.",
     "accountDeletedHours_other": "Ce compte a été supprimé. Vous pourrez vous réinscrire avec le même e-mail ou téléphone dans environ {{count}} heures.",
     "accountDeletedDays_one": "Ce compte a été supprimé. Vous pourrez vous réinscrire avec le même e-mail ou téléphone dans environ {{count}} jour.",
-    "accountDeletedDays_other": "Ce compte a été supprimé. Vous pourrez vous réinscrire avec le même e-mail ou téléphone dans environ {{count}} jours."
+    "accountDeletedDays_other": "Ce compte a été supprimé. Vous pourrez vous réinscrire avec le même e-mail ou téléphone dans environ {{count}} jours.",
+    "loginRequired": "Connexion requise"
   },
   "messages": {
     "newDrawer": {
@@ -2484,12 +2484,20 @@
     "tabs": {
       "playlists": "Playlists",
       "dislikes": "Je n'aime pas",
-      "articles": "Articles",
-      "likes": "J'aime"
+      "likes": "J'aime",
+      "articles": "Articles"
     },
     "articles": {
       "emptyTitle": "Aucun article pour l’instant",
       "emptySubtitle": "Les articles apparaîtront ici"
+    },
+    "likedPosts": {
+      "emptyTitle": "Aucun j'aime pour l'instant",
+      "emptyOwn": "Les publications que tu aimes apparaissent ici. Toi seul peux les voir, sauf si tu actives Montrer mes j'aime dans les Paramètres.",
+      "emptyOther": "Rien d'aimé pour l'instant.",
+      "privateTitle": "Les j'aime sont privés",
+      "privateDesc": "Ce compte garde ses j'aime pour lui.",
+      "loadMore": "Charger plus"
     },
     "dislikes": {
       "emptyTitle": "Aucun « je n'aime pas » pour l'instant",
@@ -2512,9 +2520,6 @@
     "sortMostViewed": "Les plus vus",
     "sortLikes": "J'aime",
     "sortMostLiked": "Les plus aimés",
-    "searchThisChannel": "Rechercher dans ce canal",
-    "searchResultCount": "1 résultat pour \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} résultats pour \"{{query}}\"",
     "sortCustom": "Ordre personnalisé",
     "sortCustomShort": "Personnalisé",
     "arrangeButton": "Organiser les publications",
@@ -2532,14 +2537,9 @@
       "loadFailed": "Impossible de charger vos publications. Fermez ceci et réessayez.",
       "empty": "Rien à organiser pour l'instant. Publiez d'abord quelque chose."
     },
-    "likedPosts": {
-      "emptyTitle": "Aucun j'aime pour l'instant",
-      "emptyOwn": "Les publications que tu aimes apparaissent ici. Toi seul peux les voir, sauf si tu actives Montrer mes j'aime dans les Paramètres.",
-      "emptyOther": "Rien d'aimé pour l'instant.",
-      "privateTitle": "Les j'aime sont privés",
-      "privateDesc": "Ce compte garde ses j'aime pour lui.",
-      "loadMore": "Charger plus"
-    }
+    "searchThisChannel": "Rechercher dans ce canal",
+    "searchResultCount": "1 résultat pour \"{{query}}\"",
+    "searchResultCountPlural": "{{count}} résultats pour \"{{query}}\""
   },
   "tv": {
     "seoTitle": "Télévision en direct: Chaînes gratuites du monde entier",
@@ -13089,9 +13089,6 @@
     "reminderLater": "Pas maintenant"
   },
   "copy": {
-    "27c26a5a38b3": "Connectez-vous pour voir les messages plus anciens",
-    "674e70bcd915": "L'historique complet de la discussion est accessible à toute personne possédant un compte.",
-    "feaf753f6557": "Début de la discussion",
     "3f9b2c71d0a4": "{{n}} résultats",
     "8c4e1a6b2f57": "pour « {{query}} »",
     "1d7234ff1b79": "dans {{feed}}",
@@ -16946,6 +16943,19 @@
     "dd3bfd98b141": "Cela ne ressemble pas à une adresse web.",
     "62b242593656": " Ajouter un lien",
     "76d311c4cef6": "Ajouter un son",
+    "c0963b7d9c5d": "Bibliothèque gratuite",
+    "55b1ec6f0360": "Choisir la partie",
+    "284b838e96e5": "Où commence la partie",
+    "46b0e30a32b0": "Chanson entière",
+    "3a84120779c5": "Faites glisser pour choisir la partie",
+    "1cb1b494ee3b": "Le morceau correspond à votre vidéo ({{value1}}).",
+    "0418db35eb35": "Utiliser ce son",
+    "ecb30523a48a": "Rechercher des chansons et des artistes",
+    "cbade2afaee2": "Tendance cette semaine sur Audius. Utilisation gratuite ; l'artiste est crédité sur votre publication.",
+    "d2e45b7406fc": "Musique du domaine public et sous licence Creative Commons provenant de Wikimedia Commons. L'artiste est crédité sur votre publication.",
+    "d0c1a3684775": "Les chansons n'ont pas été chargées. Réessayez dans un instant.",
+    "55fd43d20da5": "Supprimer le son",
+    "d14064f80f52": "Ajouter un son",
     "db66c92fd9e0": "Rechercher des sons...",
     "af6ed946e090": "Couper Vidéo",
     "1c0eba609c44": "Sélectionner la plage de coupe",
@@ -17885,6 +17895,9 @@
     "bcc015afda01": "Veuillez entrer un message",
     "3c53e332cf13": "Impossible de démarrer une conversation avec cet utilisateur",
     "8e51a80a4d7d": "Nouveau message",
+    "27c26a5a38b3": "Connectez-vous pour voir les messages plus anciens",
+    "674e70bcd915": "L'historique complet de la discussion est accessible à toute personne possédant un compte.",
+    "feaf753f6557": "Début de la discussion",
     "7a523e7dc8a3": "Connectez-vous pour modérer",
     "29a7e1c24c92": "Tout traduire",
     "90395d452a30": "Anonyme",

@@ -608,6 +608,14 @@
     "showOnlineDesc": "Orang yang Anda kirimi pesan melihat titik hijau di samping nama Anda saat Anda menggunakan Riftn",
     "showDislikes": "Tampilkan tidak sukaku ke semua orang",
     "showDislikesDesc": "Siapa pun bisa membuka tab Tidak Suka di profilmu. Jika nonaktif, hanya kamu yang bisa melihatnya.",
+    "showLikes": "Tampilkan suka saya ke semua orang",
+    "showLikesDesc": "Siapa pun bisa membuka tab Suka di profilmu. Mati secara bawaan, jadi hanya kamu yang melihat apa yang kamu sukai.",
+    "showFollowersList": "Tampilkan siapa yang mengikuti saya",
+    "showFollowersListDesc": "Izinkan siapa pun membuka daftar pengikutmu. Jika mati, hanya kamu yang bisa melihatnya.",
+    "showFollowingList": "Tampilkan siapa yang saya ikuti",
+    "showFollowingListDesc": "Izinkan siapa pun membuka daftar orang yang kamu ikuti. Jika mati, hanya kamu yang bisa melihatnya.",
+    "showFollowCounts": "Tampilkan jumlah pengikut saya",
+    "showFollowCountsDesc": "Menampilkan berapa pengikutmu dan berapa orang yang kamu ikuti. Mematikannya juga menyembunyikan kedua daftar.",
     "smartReplies": "Balasan yang disarankan",
     "smartRepliesDesc": "Menyusun dua balasan yang bisa kamu ketuk di obrolan. Tanda × pada saran akan mematikannya.",
     "title": "Pengaturan",
@@ -1170,15 +1178,7 @@
     "socialConnectedShort": "Terhubung",
     "socialConnectFailed": "Tidak dapat menghubungkan {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Memperbarui jumlah pengikut",
-    "showLikes": "Tampilkan suka saya ke semua orang",
-    "showLikesDesc": "Siapa pun bisa membuka tab Suka di profilmu. Mati secara bawaan, jadi hanya kamu yang melihat apa yang kamu sukai.",
-    "showFollowersList": "Tampilkan siapa yang mengikuti saya",
-    "showFollowersListDesc": "Izinkan siapa pun membuka daftar pengikutmu. Jika mati, hanya kamu yang bisa melihatnya.",
-    "showFollowingList": "Tampilkan siapa yang saya ikuti",
-    "showFollowingListDesc": "Izinkan siapa pun membuka daftar orang yang kamu ikuti. Jika mati, hanya kamu yang bisa melihatnya.",
-    "showFollowCounts": "Tampilkan jumlah pengikut saya",
-    "showFollowCountsDesc": "Menampilkan berapa pengikutmu dan berapa orang yang kamu ikuti. Mematikannya juga menyembunyikan kedua daftar."
+    "socialFollowersPending": "Memperbarui jumlah pengikut"
   },
   "common": {
     "confirm": "Konfirmasi",
@@ -2235,12 +2235,20 @@
     "tabs": {
       "playlists": "Daftar Putar",
       "dislikes": "Tidak Suka",
-      "articles": "Artikel",
-      "likes": "Suka"
+      "likes": "Suka",
+      "articles": "Artikel"
     },
     "articles": {
       "emptyTitle": "Belum ada artikel",
       "emptySubtitle": "Artikel akan muncul di sini"
+    },
+    "likedPosts": {
+      "emptyTitle": "Belum ada suka",
+      "emptyOwn": "Postingan yang kamu sukai muncul di sini. Hanya kamu yang bisa melihatnya kecuali kamu menyalakan Tampilkan suka saya di Pengaturan.",
+      "emptyOther": "Belum ada yang disukai.",
+      "privateTitle": "Suka bersifat pribadi",
+      "privateDesc": "Akun ini menyimpan sukanya untuk dirinya sendiri.",
+      "loadMore": "Muat lebih banyak"
     },
     "dislikes": {
       "emptyTitle": "Belum ada tidak suka",
@@ -2265,15 +2273,7 @@
     "sortMostLiked": "Paling disukai",
     "searchThisChannel": "Cari saluran ini",
     "searchResultCount": "1 hasil untuk \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\"",
-    "likedPosts": {
-      "emptyTitle": "Belum ada suka",
-      "emptyOwn": "Postingan yang kamu sukai muncul di sini. Hanya kamu yang bisa melihatnya kecuali kamu menyalakan Tampilkan suka saya di Pengaturan.",
-      "emptyOther": "Belum ada yang disukai.",
-      "privateTitle": "Suka bersifat pribadi",
-      "privateDesc": "Akun ini menyimpan sukanya untuk dirinya sendiri.",
-      "loadMore": "Muat lebih banyak"
-    }
+    "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\""
   },
   "tv": {
     "seoTitle": "TV Langsung: Kanal gratis dari seluruh dunia",
@@ -12105,9 +12105,6 @@
     "reminderLater": "Tidak sekarang"
   },
   "copy": {
-    "27c26a5a38b3": "Masuk untuk melihat pesan yang lebih lama",
-    "674e70bcd915": "Riwayat obrolan lengkap terbuka untuk siapa saja yang memiliki akun.",
-    "feaf753f6557": "Awal obrolan",
     "1607715e45ed": "Ketuk bola untuk bicara, atau ketik di bawah",
     "00140a37bd26": "Transaksi di jaringan tersebut sementara tidak tersedia. Silakan coba lagi.",
     "002286513398": "Anda tidak memiliki izin untuk mengelola acara",
@@ -15930,6 +15927,19 @@
     "dd3bfd98b141": "Itu tidak tampak seperti alamat web.",
     "62b242593656": "Tambah tautan",
     "76d311c4cef6": "Tambah Suara",
+    "c0963b7d9c5d": "Perpustakaan gratis",
+    "55b1ec6f0360": "Pilih bagian",
+    "284b838e96e5": "Di mana bagian dimulai",
+    "46b0e30a32b0": "Seluruh lagu",
+    "3a84120779c5": "Geser untuk memilih bagian",
+    "1cb1b494ee3b": "Bagian tersebut cocok dengan video Anda ({{value1}}).",
+    "0418db35eb35": "Gunakan suara ini",
+    "ecb30523a48a": "Cari lagu dan artis",
+    "cbade2afaee2": "Tren minggu ini di Audius. Gratis digunakan, artis akan dikreditkan di postingan Anda.",
+    "d2e45b7406fc": "Domain publik dan musik Creative Commons dari Wikimedia Commons. Artis akan dikreditkan di postingan Anda.",
+    "d0c1a3684775": "Lagu tidak dimuat. Coba lagi sebentar lagi.",
+    "55fd43d20da5": "Hapus suara",
+    "d14064f80f52": "Tambahkan suara",
     "db66c92fd9e0": "Cari suara...",
     "af6ed946e090": "Trim Video",
     "1c0eba609c44": "Pilih rentang potong",
@@ -16860,6 +16870,9 @@
     "bcc015afda01": "Silakan masukkan pesan",
     "3c53e332cf13": "Tidak dapat memulai percakapan dengan pengguna ini",
     "8e51a80a4d7d": "Pesan Baru",
+    "27c26a5a38b3": "Masuk untuk melihat pesan yang lebih lama",
+    "674e70bcd915": "Riwayat obrolan lengkap terbuka untuk siapa saja yang memiliki akun.",
+    "feaf753f6557": "Awal obrolan",
     "7a523e7dc8a3": "Masuk untuk memoderasi",
     "29a7e1c24c92": "Terjemahkan semua",
     "90395d452a30": "Anon",

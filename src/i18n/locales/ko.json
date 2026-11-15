@@ -607,6 +607,14 @@
     "showOnlineDesc": "Riftn를 사용하는 동안 내가 메시지를 보내는 사람들에게 내 이름 옆에 초록색 점이 표시됩니다.",
     "showDislikes": "내 싫어요를 모두에게 공개",
     "showDislikesDesc": "누구나 내 프로필의 싫어요 탭을 열 수 있습니다. 끄면 나만 볼 수 있습니다.",
+    "showLikes": "내 좋아요를 모두에게 보이기",
+    "showLikesDesc": "누구나 내 프로필의 좋아요 탭을 열 수 있어요. 기본값은 꺼짐이라 내가 좋아요한 게시물은 나만 볼 수 있어요.",
+    "showFollowersList": "나를 팔로우하는 사람 보이기",
+    "showFollowersListDesc": "누구나 내 팔로워 목록을 열 수 있게 해요. 끄면 나만 볼 수 있어요.",
+    "showFollowingList": "내가 팔로우하는 사람 보이기",
+    "showFollowingListDesc": "누구나 내가 팔로우하는 사람 목록을 열 수 있게 해요. 끄면 나만 볼 수 있어요.",
+    "showFollowCounts": "팔로워 수 보이기",
+    "showFollowCountsDesc": "팔로워 수와 팔로잉 수를 보여줘요. 끄면 두 목록도 숨겨져요.",
     "smartReplies": "추천 답장",
     "smartRepliesDesc": "채팅에서 탭할 수 있는 답장 두 개를 만들어 줍니다. 추천의 × 를 누르면 꺼집니다.",
     "title": "설정",
@@ -1167,15 +1175,7 @@
     "socialConnectedShort": "연결됨",
     "socialConnectFailed": "{{platform}}에 연결하지 못했습니다. 다시 시도해 주세요.",
     "socialVerifiedFollowers": "팔로워 {{value}}명",
-    "socialFollowersPending": "팔로워 수 업데이트 중",
-    "showLikes": "내 좋아요를 모두에게 보이기",
-    "showLikesDesc": "누구나 내 프로필의 좋아요 탭을 열 수 있어요. 기본값은 꺼짐이라 내가 좋아요한 게시물은 나만 볼 수 있어요.",
-    "showFollowersList": "나를 팔로우하는 사람 보이기",
-    "showFollowersListDesc": "누구나 내 팔로워 목록을 열 수 있게 해요. 끄면 나만 볼 수 있어요.",
-    "showFollowingList": "내가 팔로우하는 사람 보이기",
-    "showFollowingListDesc": "누구나 내가 팔로우하는 사람 목록을 열 수 있게 해요. 끄면 나만 볼 수 있어요.",
-    "showFollowCounts": "팔로워 수 보이기",
-    "showFollowCountsDesc": "팔로워 수와 팔로잉 수를 보여줘요. 끄면 두 목록도 숨겨져요."
+    "socialFollowersPending": "팔로워 수 업데이트 중"
   },
   "common": {
     "confirm": "확인",
@@ -2232,12 +2232,20 @@
     "tabs": {
       "playlists": "재생 목록",
       "dislikes": "싫어요",
-      "articles": "아티클",
-      "likes": "좋아요"
+      "likes": "좋아요",
+      "articles": "아티클"
     },
     "articles": {
       "emptyTitle": "아직 아티클이 없습니다",
       "emptySubtitle": "아티클이 여기에 표시됩니다"
+    },
+    "likedPosts": {
+      "emptyTitle": "아직 좋아요가 없어요",
+      "emptyOwn": "좋아요한 게시물이 여기에 표시돼요. 설정에서 내 좋아요를 모두에게 보이기를 켜지 않으면 나만 볼 수 있어요.",
+      "emptyOther": "아직 좋아요한 게시물이 없어요.",
+      "privateTitle": "좋아요는 비공개예요",
+      "privateDesc": "이 계정은 좋아요를 공개하지 않아요.",
+      "loadMore": "더 보기"
     },
     "dislikes": {
       "emptyTitle": "아직 싫어요가 없습니다",
@@ -2262,15 +2270,7 @@
     "sortMostLiked": "가장 많이 좋아요",
     "searchThisChannel": "채널 검색",
     "searchResultCount": "1 개 결과 {{query}}",
-    "searchResultCountPlural": "{{count}} 개 결과 {{query}}",
-    "likedPosts": {
-      "emptyTitle": "아직 좋아요가 없어요",
-      "emptyOwn": "좋아요한 게시물이 여기에 표시돼요. 설정에서 내 좋아요를 모두에게 보이기를 켜지 않으면 나만 볼 수 있어요.",
-      "emptyOther": "아직 좋아요한 게시물이 없어요.",
-      "privateTitle": "좋아요는 비공개예요",
-      "privateDesc": "이 계정은 좋아요를 공개하지 않아요.",
-      "loadMore": "더 보기"
-    }
+    "searchResultCountPlural": "{{count}} 개 결과 {{query}}"
   },
   "tv": {
     "seoTitle": "라이브 TV: 전 세계의 무료 채널",
@@ -12095,9 +12095,6 @@
     "reminderLater": "나중에"
   },
   "copy": {
-    "27c26a5a38b3": "로그인하여 이전 메시지를 보세요.",
-    "674e70bcd915": "전체 채팅 기록은 계정이 있는 모든 사람에게 공개되어 있습니다.",
-    "feaf753f6557": "채팅을 시작합니다.",
     "1607715e45ed": "공을 탭해서 말하거나 아래에 입력하세요",
     "00140a37bd26": "해당 네트워크의 거래를 일시적으로 사용할 수 없습니다. 다시 시도해주세요.",
     "002286513398": "이벤트를 관리할 권한이 없습니다",
@@ -15873,6 +15870,19 @@
     "dd3bfd98b141": "웹 주소가 아닌 것 같습니다.",
     "62b242593656": "링크 추가",
     "76d311c4cef6": "사운드 추가",
+    "c0963b7d9c5d": "무료 라이브러리",
+    "55b1ec6f0360": "파트 선택",
+    "284b838e96e5": "파트가 시작되는 곳",
+    "46b0e30a32b0": "전체 곡",
+    "3a84120779c5": "파트를 선택하려면 슬라이드",
+    "1cb1b494ee3b": "파트가 당신의 비디오와 일치합니다 ({{value1}}).",
+    "0418db35eb35": "이 사운드 사용",
+    "ecb30523a48a": "노래와 아티스트 검색",
+    "cbade2afaee2": "이번 주 Audius 트렌드. 무료 사용, 아티스트는 당신의 게시물에 크레딧이 표시됩니다.",
+    "d2e45b7406fc": "위키미디어 커먼즈의 퍼블릭 도메인 및 크리에이티브 커먼즈 음악. 아티스트는 당신의 게시물에 크레딧이 표시됩니다.",
+    "d0c1a3684775": "노래를 불러오지 못했습니다. 잠시 후 다시 시도하세요.",
+    "55fd43d20da5": "사운드 제거",
+    "d14064f80f52": "사운드 추가",
     "db66c92fd9e0": "소리 검색...",
     "af6ed946e090": "동영상 자르기",
     "1c0eba609c44": "트림 범위 선택",
@@ -16779,6 +16789,9 @@
     "bcc015afda01": "메시지 입력",
     "3c53e332cf13": "이 유저와 대화 시작할 수 없음",
     "8e51a80a4d7d": "새로운 메시지",
+    "27c26a5a38b3": "로그인하여 이전 메시지를 보세요.",
+    "674e70bcd915": "전체 채팅 기록은 계정이 있는 모든 사람에게 공개되어 있습니다.",
+    "feaf753f6557": "채팅을 시작합니다.",
     "7a523e7dc8a3": "관리자 로그인",
     "29a7e1c24c92": "모두 번역",
     "90395d452a30": "익명",

@@ -548,6 +548,14 @@
     "showOnlineDesc": "Osoby, do których piszesz, widzą zieloną kropkę obok Twojego imienia podczas korzystania z Riftn",
     "showDislikes": "Pokazuj wszystkim moje łapki w dół",
     "showDislikesDesc": "Każdy może otworzyć kartę „Nie lubię” na twoim profilu. Gdy to jest wyłączone, widzisz ją tylko ty.",
+    "showLikes": "Pokazuj moje polubienia wszystkim",
+    "showLikesDesc": "Każdy może otworzyć kartę Polubienia na twoim profilu. Domyślnie wyłączone, więc tylko ty widzisz, co polubiłeś.",
+    "showFollowersList": "Pokazuj, kto mnie obserwuje",
+    "showFollowersListDesc": "Pozwól każdemu otworzyć listę twoich obserwujących. Gdy wyłączone, widzisz ją tylko ty.",
+    "showFollowingList": "Pokazuj, kogo obserwuję",
+    "showFollowingListDesc": "Pozwól każdemu otworzyć listę osób, które obserwujesz. Gdy wyłączone, widzisz ją tylko ty.",
+    "showFollowCounts": "Pokazuj liczby obserwujących",
+    "showFollowCountsDesc": "Pokazuje, ilu masz obserwujących i ile osób obserwujesz. Wyłączenie ukrywa też obie listy.",
     "smartReplies": "Sugerowane odpowiedzi",
     "smartRepliesDesc": "Przygotowuje dwie odpowiedzi, które możesz dotknąć na czacie. × przy sugestiach je wyłącza.",
     "title": "Ustawienia",
@@ -1110,15 +1118,7 @@
     "socialConnectedShort": "Połączono",
     "socialConnectFailed": "Nie udało się połączyć {{platform}}. Spróbuj ponownie.",
     "socialVerifiedFollowers": "{{value}} obserwujących",
-    "socialFollowersPending": "Aktualizowanie liczby obserwujących",
-    "showLikes": "Pokazuj moje polubienia wszystkim",
-    "showLikesDesc": "Każdy może otworzyć kartę Polubienia na twoim profilu. Domyślnie wyłączone, więc tylko ty widzisz, co polubiłeś.",
-    "showFollowersList": "Pokazuj, kto mnie obserwuje",
-    "showFollowersListDesc": "Pozwól każdemu otworzyć listę twoich obserwujących. Gdy wyłączone, widzisz ją tylko ty.",
-    "showFollowingList": "Pokazuj, kogo obserwuję",
-    "showFollowingListDesc": "Pozwól każdemu otworzyć listę osób, które obserwujesz. Gdy wyłączone, widzisz ją tylko ty.",
-    "showFollowCounts": "Pokazuj liczby obserwujących",
-    "showFollowCountsDesc": "Pokazuje, ilu masz obserwujących i ile osób obserwujesz. Wyłączenie ukrywa też obie listy."
+    "socialFollowersPending": "Aktualizowanie liczby obserwujących"
   },
   "common": {
     "confirm": "Potwierdź",
@@ -2175,12 +2175,20 @@
     "tabs": {
       "playlists": "Playlisty",
       "dislikes": "Nie lubię",
-      "articles": "Artykuły",
-      "likes": "Polubienia"
+      "likes": "Polubienia",
+      "articles": "Artykuły"
     },
     "articles": {
       "emptyTitle": "Brak artykułów",
       "emptySubtitle": "Tutaj pojawią się artykuły"
+    },
+    "likedPosts": {
+      "emptyTitle": "Brak polubień",
+      "emptyOwn": "Posty, które polubisz, pojawią się tutaj. Widzisz je tylko ty, chyba że włączysz Pokazuj moje polubienia wszystkim w Ustawieniach.",
+      "emptyOther": "Jeszcze nic nie polubiono.",
+      "privateTitle": "Polubienia są prywatne",
+      "privateDesc": "To konto zachowuje swoje polubienia dla siebie.",
+      "loadMore": "Wczytaj więcej"
     },
     "dislikes": {
       "emptyTitle": "Brak łapek w dół",
@@ -2205,15 +2213,7 @@
     "sortMostLiked": "Najbardziej lubiany",
     "searchThisChannel": "Wyszukaj na tym kanale",
     "searchResultCount": "1 wynik dla „{{query}}”",
-    "searchResultCountPlural": "{{count}} wyniki dla {{query}}",
-    "likedPosts": {
-      "emptyTitle": "Brak polubień",
-      "emptyOwn": "Posty, które polubisz, pojawią się tutaj. Widzisz je tylko ty, chyba że włączysz Pokazuj moje polubienia wszystkim w Ustawieniach.",
-      "emptyOther": "Jeszcze nic nie polubiono.",
-      "privateTitle": "Polubienia są prywatne",
-      "privateDesc": "To konto zachowuje swoje polubienia dla siebie.",
-      "loadMore": "Wczytaj więcej"
-    }
+    "searchResultCountPlural": "{{count}} wyniki dla {{query}}"
   },
   "tv": {
     "seoTitle": "Live TV: Bezpłatne kanały z całego świata",
@@ -12098,9 +12098,6 @@
     "reminderLater": "Nie teraz"
   },
   "copy": {
-    "27c26a5a38b3": "Zaloguj się, aby zobaczyć starsze wiadomości",
-    "674e70bcd915": "Pełna historia czatu jest dostępna dla każdego, kto posiada konto.",
-    "feaf753f6557": "Początek czatu",
     "1607715e45ed": "Dotknij kuli, aby mówić, albo pisz poniżej",
     "00140a37bd26": "Transakcje w tej sieci są obecnie niedostępne. Proszę spróbować ponownie.",
     "002286513398": "Nie masz uprawnień do zarządzania wydarzeniami.",
@@ -15922,6 +15919,19 @@
     "dd3bfd98b141": "To nie wygląda na adres URL.",
     "62b242593656": "Dodaj odniesienie",
     "76d311c4cef6": "Dodaj dźwięk",
+    "c0963b7d9c5d": "Darmowa biblioteka",
+    "55b1ec6f0360": "Wybierz fragment",
+    "284b838e96e5": "Gdzie zaczyna się fragment",
+    "46b0e30a32b0": "Cała piosenka",
+    "3a84120779c5": "Przesuń, aby wybrać fragment",
+    "1cb1b494ee3b": "Fragment pasuje do twojego wideo ({{value1}}).",
+    "0418db35eb35": "Użyj tego dźwięku",
+    "ecb30523a48a": "Wyszukaj piosenki i artystów",
+    "cbade2afaee2": "Trendy tego tygodnia na Audius. Darmowe do użycia, artysta zostaje wymieniony w twoim poście.",
+    "d2e45b7406fc": "Muzyka z domeny publicznej i na licencji Creative Commons z Wikimedia Commons. Artysta zostaje wymieniony w twoim poście.",
+    "d0c1a3684775": "Nie udało się załadować piosenek. Spróbuj ponownie za chwilę.",
+    "55fd43d20da5": "Usuń dźwięk",
+    "d14064f80f52": "Dodaj dźwięk",
     "db66c92fd9e0": "Szukaj dźwięków...",
     "af6ed946e090": "Przytnij film",
     "1c0eba609c44": "Wybierz zakres przycinania",
@@ -16852,6 +16862,9 @@
     "bcc015afda01": "Wprowadź wiadomość",
     "3c53e332cf13": "Nie można rozpocząć rozmowy z tym użytkownikiem",
     "8e51a80a4d7d": "Nowa wiadomość",
+    "27c26a5a38b3": "Zaloguj się, aby zobaczyć starsze wiadomości",
+    "674e70bcd915": "Pełna historia czatu jest dostępna dla każdego, kto posiada konto.",
+    "feaf753f6557": "Początek czatu",
     "7a523e7dc8a3": "Zaloguj się, aby moderować",
     "29a7e1c24c92": "Przetłumacz wszystko",
     "90395d452a30": "Anonimowy",

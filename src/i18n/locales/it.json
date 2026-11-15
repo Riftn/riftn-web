@@ -608,6 +608,14 @@
     "showOnlineDesc": "Le persone a cui invii un messaggio vedono un punto verde accanto al tuo nome mentre utilizzi Riftn",
     "showDislikes": "Mostra a tutti i miei «non mi piace»",
     "showDislikesDesc": "Chiunque può aprire la scheda «Non mi piace» del tuo profilo. Se disattivato, solo tu puoi vederla.",
+    "showLikes": "Mostra i miei Mi piace a tutti",
+    "showLikesDesc": "Chiunque può aprire la scheda Mi piace del tuo profilo. Disattivato di default, quindi solo tu vedi cosa ti è piaciuto.",
+    "showFollowersList": "Mostra chi mi segue",
+    "showFollowersListDesc": "Permetti a chiunque di aprire la lista dei tuoi follower. Se disattivato, solo tu puoi vederla.",
+    "showFollowingList": "Mostra chi seguo",
+    "showFollowingListDesc": "Permetti a chiunque di aprire la lista delle persone che segui. Se disattivato, solo tu puoi vederla.",
+    "showFollowCounts": "Mostra i miei numeri di follower",
+    "showFollowCountsDesc": "Mostra quanti follower hai e quante persone segui. Disattivarlo nasconde anche entrambe le liste.",
     "smartReplies": "Risposte suggerite",
     "smartRepliesDesc": "Prepara due risposte che puoi toccare in chat. La × sui suggerimenti le disattiva.",
     "title": "Impostazioni",
@@ -1170,15 +1178,7 @@
     "socialConnectedShort": "Collegato",
     "socialConnectFailed": "Impossibile collegare {{platform}}. Riprova.",
     "socialVerifiedFollowers": "{{value}} follower",
-    "socialFollowersPending": "Aggiornamento follower",
-    "showLikes": "Mostra i miei Mi piace a tutti",
-    "showLikesDesc": "Chiunque può aprire la scheda Mi piace del tuo profilo. Disattivato di default, quindi solo tu vedi cosa ti è piaciuto.",
-    "showFollowersList": "Mostra chi mi segue",
-    "showFollowersListDesc": "Permetti a chiunque di aprire la lista dei tuoi follower. Se disattivato, solo tu puoi vederla.",
-    "showFollowingList": "Mostra chi seguo",
-    "showFollowingListDesc": "Permetti a chiunque di aprire la lista delle persone che segui. Se disattivato, solo tu puoi vederla.",
-    "showFollowCounts": "Mostra i miei numeri di follower",
-    "showFollowCountsDesc": "Mostra quanti follower hai e quante persone segui. Disattivarlo nasconde anche entrambe le liste."
+    "socialFollowersPending": "Aggiornamento follower"
   },
   "common": {
     "confirm": "Conferma",
@@ -2235,12 +2235,20 @@
     "tabs": {
       "playlists": "Playlist",
       "dislikes": "Non mi piace",
-      "articles": "Articoli",
-      "likes": "Mi piace"
+      "likes": "Mi piace",
+      "articles": "Articoli"
     },
     "articles": {
       "emptyTitle": "Ancora nessun articolo",
       "emptySubtitle": "Gli articoli appariranno qui"
+    },
+    "likedPosts": {
+      "emptyTitle": "Ancora nessun Mi piace",
+      "emptyOwn": "I post che ti piacciono compaiono qui. Solo tu puoi vederli, a meno che non attivi Mostra i miei Mi piace nelle Impostazioni.",
+      "emptyOther": "Ancora nessun Mi piace.",
+      "privateTitle": "I Mi piace sono privati",
+      "privateDesc": "Questo account tiene per sé i suoi Mi piace.",
+      "loadMore": "Carica altro"
     },
     "dislikes": {
       "emptyTitle": "Ancora nessun «non mi piace»",
@@ -2265,15 +2273,7 @@
     "sortMostLiked": "I più graditi",
     "searchThisChannel": "Cerca in questo canale",
     "searchResultCount": "1 risultato per \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} risultati per \"{{query}}\"",
-    "likedPosts": {
-      "emptyTitle": "Ancora nessun Mi piace",
-      "emptyOwn": "I post che ti piacciono compaiono qui. Solo tu puoi vederli, a meno che non attivi Mostra i miei Mi piace nelle Impostazioni.",
-      "emptyOther": "Ancora nessun Mi piace.",
-      "privateTitle": "I Mi piace sono privati",
-      "privateDesc": "Questo account tiene per sé i suoi Mi piace.",
-      "loadMore": "Carica altro"
-    }
+    "searchResultCountPlural": "{{count}} risultati per \"{{query}}\""
   },
   "tv": {
     "seoTitle": "TV in diretta: Canali gratuiti da tutto il mondo",
@@ -12102,9 +12102,6 @@
     "reminderLater": "Non ora"
   },
   "copy": {
-    "27c26a5a38b3": "Accedi per visualizzare i messaggi precedenti",
-    "674e70bcd915": "Tutta la storia del chat è accessibile a tutti gli utenti con un account.",
-    "feaf753f6557": "Inizio della conversazione",
     "1607715e45ed": "Tocca la sfera per parlare, o scrivi qui sotto",
     "00140a37bd26": "Transazioni sulla rete non disponibili al momento. Riprova più tardi.",
     "002286513398": "Non hai il permesso di gestire gli eventi.",
@@ -15926,6 +15923,19 @@
     "dd3bfd98b141": "Non sembra un indirizzo web.",
     "62b242593656": "Aggiungi un link",
     "76d311c4cef6": "Aggiungi suono",
+    "c0963b7d9c5d": "Libreria gratuita",
+    "55b1ec6f0360": "Scegli la parte",
+    "284b838e96e5": "Dove inizia la parte",
+    "46b0e30a32b0": "Canzone intera",
+    "3a84120779c5": "Scorri per scegliere la parte",
+    "1cb1b494ee3b": "La parte corrisponde al tuo video ({{value1}}).",
+    "0418db35eb35": "Usa questo suono",
+    "ecb30523a48a": "Cerca canzoni e artisti",
+    "cbade2afaee2": "Di tendenza questa settimana su Audius. Gratuito da usare, l'artista viene accreditato nel tuo post.",
+    "d2e45b7406fc": "Musica di pubblico dominio e Creative Commons da Wikimedia Commons. L'artista viene accreditato nel tuo post.",
+    "d0c1a3684775": "Le canzoni non sono state caricate. Riprova tra un attimo.",
+    "55fd43d20da5": "Rimuovi suono",
+    "d14064f80f52": "Aggiungi suono",
     "db66c92fd9e0": "Cerca suoni...",
     "af6ed946e090": "Taglia video",
     "1c0eba609c44": "Seleziona la gamma di finiture",
@@ -16855,6 +16865,9 @@
     "bcc015afda01": "Inserisci un messaggio",
     "3c53e332cf13": "Impossibile iniziare una conversazione con questo utente",
     "8e51a80a4d7d": "Nuovo messaggio",
+    "27c26a5a38b3": "Accedi per visualizzare i messaggi precedenti",
+    "674e70bcd915": "Tutta la storia del chat è accessibile a tutti gli utenti con un account.",
+    "feaf753f6557": "Inizio della conversazione",
     "7a523e7dc8a3": "Accedi per moderare",
     "29a7e1c24c92": "Traduci tutto",
     "90395d452a30": "Anonimo",
