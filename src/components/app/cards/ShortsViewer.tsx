@@ -378,6 +378,9 @@ const DISMISS_OUT = { duration: 0.2, ease: 'easeOut' } as const;
 // it straight back, so clearing early costs nothing.
 const DESKTOP_AUTO_HIDE_MS = 2000;
 
+/** Drag travel before the short it is heading for starts playing (silently). */
+const PEEK_START_PX = 8;
+
 /**
  * The pair of controls in the video's top-right corner, as one class string.
  *
@@ -1126,6 +1129,56 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized]);
 
+  /**
+   * The short a drag is heading for, already playing (silently) while it
+   * slides in. Waiting for the finger to lift held it on a still frame for the
+   * whole drag plus the start of playback; started here it is moving the
+   * moment it shows. Driven on the element itself, not through state, so the
+   * drag's frames re-render nothing.
+   */
+  const peekRef = useRef<{ index: number; el: HTMLVideoElement; rewind: boolean } | null>(null);
+  const stopPeek = useCallback(() => {
+    const peek = peekRef.current;
+    peekRef.current = null;
+    if (!peek) return;
+    delete peek.el.dataset.shortsPeek;
+    peek.el.pause();
+    // The next short starts from the top when it is reached for real; one
+    // swiped back to keeps the spot it was left at.
+    if (peek.rewind) { try { peek.el.currentTime = 0; } catch { /* not seekable yet */ } }
+  }, []);
+  const startPeek = useCallback((index: number) => {
+    if (peekRef.current?.index === index) return;
+    stopPeek();
+    const short = shorts[index];
+    if (!short || short.live || short.reelPost || short.imageUrls?.length) return;
+    const el = document.querySelector<HTMLVideoElement>(`[data-shorts-slide="${index}"] video`);
+    if (!el || !el.paused) return;
+    peekRef.current = { index, el, rewind: index > currentIndex };
+    el.dataset.shortsPeek = '1';
+    el.muted = true;
+    el.play().catch(() => {});
+  }, [shorts, currentIndex, stopPeek]);
+  /** Hand the peeking short its sound as it becomes the one being watched. */
+  const promotePeek = useCallback((index: number) => {
+    const peek = peekRef.current;
+    if (!peek || peek.index !== index) { stopPeek(); return; }
+    peekRef.current = null;
+    const el = peek.el;
+    // VideoSlide clears this as the short becomes active; until then it keeps
+    // the hand-over from pausing the short it is handing over.
+    el.dataset.shortsPeek = 'promoted';
+    // Inside the finger-up handler, so Safari lets the sound come on.
+    el.muted = isMuted;
+    // Never left playing if the page change somehow did not happen.
+    setTimeout(() => {
+      if (el.dataset.shortsPeek !== 'promoted') return;
+      delete el.dataset.shortsPeek;
+      el.pause();
+    }, 1500);
+  }, [isMuted, stopPeek]);
+  useEffect(() => stopPeek, [stopPeek]);
+
   // Handle drag for visual feedback during swipe
   const isRestoreDrag = useCallback((info: PanInfo) => {
     const frame = videoContainer?.getBoundingClientRect();
@@ -1142,18 +1195,37 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   [isMobile, currentIndex]);
 
   const handleDrag = useCallback((_: any, info: PanInfo) => {
-    if (holdOwnsGesture.current) { setDragOffset(0); return; }
-    if (mini.drag(info)) { setDragOffset(0); return; }
+    if (holdOwnsGesture.current) { stopPeek(); setDragOffset(0); return; }
+    if (mini.drag(info)) { stopPeek(); setDragOffset(0); return; }
     if (dragLeaves(info)) {
+      stopPeek();
       setDragOffset(0);
       leaveY.set(info.offset.y);
       return;
     }
     leaveY.set(0);
-    setDragOffset(Math.abs(info.offset.x) > Math.abs(info.offset.y) ? 0 : info.offset.y);
-  }, [setDragOffset, mini.drag, dragLeaves, leaveY]);
+    const vertical = Math.abs(info.offset.y) >= Math.abs(info.offset.x);
+    setDragOffset(vertical ? info.offset.y : 0);
+    if (vertical && info.offset.y < -PEEK_START_PX && currentIndex < shorts.length - 1) startPeek(currentIndex + 1);
+    else if (vertical && info.offset.y > PEEK_START_PX && currentIndex > 0) startPeek(currentIndex - 1);
+    else stopPeek();
+  }, [setDragOffset, mini.drag, dragLeaves, leaveY, currentIndex, shorts.length, startPeek, stopPeek]);
 
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+    // Whatever this drag turns out to be, a peek it started either becomes the
+    // short being watched below or stops here.
+    const pagesTo = (step: 1 | -1) => {
+      const target = currentIndex + step;
+      const pages = !minimizedRef.current && !(isMobile && showComments) && !transitioningRef.current &&
+        target >= 0 && target < shorts.length;
+      if (pages) promotePeek(target); else stopPeek();
+    };
+    if (_.type !== 'pointercancel' && _.type !== 'touchcancel' && !holdOwnsGesture.current &&
+        Math.abs(info.offset.y) >= Math.abs(info.offset.x) && !(leaveY.get() > 0 || dragLeaves(info))) {
+      if (info.offset.y < -80 || info.velocity.y < -300) pagesTo(1);
+      else if (info.offset.y > 80 || info.velocity.y > 300) pagesTo(-1);
+      else stopPeek();
+    } else stopPeek();
     resetDragOffset();
     if (holdOwnsGesture.current) { mini.cancel(); return; }
     if (_.type === 'pointercancel' || _.type === 'touchcancel') {
@@ -1177,7 +1249,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     }
     
     if (Math.abs(info.offset.x) > Math.abs(info.offset.y)) return;
-    // Navigate based on drag velocity and offset
+    // Navigate based on drag velocity and offset (the peek above reads the
+    // same thresholds).
     const swipeThreshold = 80;
     const velocityThreshold = 300;
     
@@ -1186,7 +1259,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     } else if (info.offset.y > swipeThreshold || info.velocity.y > velocityThreshold) {
       goToPrev();
     }
-  }, [goToNext, goToPrev, isRestoreDrag, resetDragOffset, mini.finish, mini.cancel, dragLeaves, leaveY, leaveViewer]);
+  }, [goToNext, goToPrev, isRestoreDrag, resetDragOffset, mini.finish, mini.cancel, dragLeaves, leaveY, leaveViewer, currentIndex, isMobile, showComments, shorts.length, promotePeek, stopPeek]);
 
   // Toggle play/pause - only shows indicator on explicit tap
   /**
