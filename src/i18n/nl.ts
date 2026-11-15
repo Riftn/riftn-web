@@ -2209,7 +2209,7 @@ export const nl = {
     designatedModeratorsItem3: 'Rapporten die door gebruikers worden ingediend, worden ter beoordeling doorgestuurd naar aangewezen moderators',
     designatedModeratorsItem4: 'Governance bepaalt het beleid dat die moderators afdwingen en hun beslissingen kunnen herzien of terugdraaien, maar de handhaving zelf is onmiddellijk',
     contentRestrictions: 'Inhoudsbeperkingen',
-    contentRestrictionsText: 'Inhoud kan worden beperkt, verwijderd of onbeschikbaar worden gemaakt voor:',
+    contentRestrictionsText: 'Riftn tolereert geen misbruikende gebruikers of content die de wet of de communityrichtlijnen overtreedt. Content kan worden beperkt, verwijderd of onbeschikbaar gemaakt wegens:',
     contentRestrictionsItem1: 'Illegale inhoud zoals gedefinieerd door de toepasselijke wetgeving',
     contentRestrictionsItem2: 'Inhoud die de communityrichtlijnen schendt, zoals afgedwongen door aangewezen moderators',
     contentRestrictionsItem3: 'Technische spam of kwaadaardige activiteiten die de platformbeveiliging bedreigen',
