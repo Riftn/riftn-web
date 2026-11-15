@@ -117,9 +117,7 @@ const getMenuItems = (t: (key: string) => string) => [{
     }, {
       title: t('dapp.tocBounties'),
       path: '/docs/dapps#work'
-    }, {
-      title: t('dapp.storesTitle'),
-      path: '/docs/dapps#stores'
+
     }, {
       title: t('dapp.affiliateTitle'),
       path: '/docs/dapps#affiliate'

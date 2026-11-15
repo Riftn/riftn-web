@@ -2117,7 +2117,7 @@ const Dapp = () => {
 <GuideSection
           id="exchange"
           title="dapp.exchangeTitle"
-          paras={['dapp.exchangeDesc', 'dapp.exchangePaused']}
+          paras={['dapp.exchangePaused', 'dapp.exchangeDesc']}
           bullets={[['dapp.exchangeB1', 'dapp.exchangeB1Desc'], ['dapp.exchangeB2', 'dapp.exchangeB2Desc'], ['dapp.exchangeB3', 'dapp.exchangeB3Desc']]}
         />
 
@@ -2267,7 +2267,9 @@ const Dapp = () => {
             ['dapp.postToolsB3', 'dapp.postToolsB3Desc'],
             ['dapp.postToolsB4', 'dapp.postToolsB4Desc'],
             ['dapp.postToolsB5', 'dapp.postToolsB5Desc'],
-            ['dapp.postToolsB6', 'dapp.postToolsB6Desc']
+            ['dapp.postToolsB6', 'dapp.postToolsB6Desc'],
+            ['dapp.postToolsB7', 'dapp.postToolsB7Desc'],
+            ['dapp.postToolsB8', 'dapp.postToolsB8Desc']
           ]}
         />
 
@@ -2408,7 +2410,9 @@ const Dapp = () => {
           bullets={[
             ['dapp.accountControlsB1', 'dapp.accountControlsB1Desc'],
             ['dapp.accountControlsB2', 'dapp.accountControlsB2Desc'],
-            ['dapp.accountControlsB3', 'dapp.accountControlsB3Desc']
+            ['dapp.accountControlsB3', 'dapp.accountControlsB3Desc'],
+            ['dapp.accountControlsB4', 'dapp.accountControlsB4Desc'],
+            ['dapp.accountControlsB5', 'dapp.accountControlsB5Desc']
           ]}
         />
 
@@ -2456,7 +2460,8 @@ const Dapp = () => {
           bullets={[
             ['dapp.watchAnywhereB1', 'dapp.watchAnywhereB1Desc'],
             ['dapp.watchAnywhereB2', 'dapp.watchAnywhereB2Desc'],
-            ['dapp.watchAnywhereB3', 'dapp.watchAnywhereB3Desc']
+            ['dapp.watchAnywhereB3', 'dapp.watchAnywhereB3Desc'],
+            ['dapp.watchAnywhereB4', 'dapp.watchAnywhereB4Desc']
           ]}
         />
 
