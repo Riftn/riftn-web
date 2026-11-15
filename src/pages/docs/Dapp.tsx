@@ -95,6 +95,7 @@ const Dapp = () => {
 
   const tocItems: Array<{ id: string; label: string }> = [
     { id: 'getting-started', label: t('dapp.tocIntro') },
+    { id: 'whats-new', label: t('dapp.tocWhatsNew') },
     { id: 'accounts', label: t('dapp.tocAccounts') },
     { id: 'post-controls', label: t('dapp.tocPostControls') },
     { id: 'fediverse', label: t('dapp.tocFediverse') },
@@ -136,7 +137,6 @@ const Dapp = () => {
     { id: 'exchange', label: t('dapp.tocExchange') },
     { id: 'marketplaces', label: t('dapp.tocMarkets') },
     { id: 'work', label: t('dapp.tocBounties') },
-    { id: 'stores', label: t('dapp.storesTitle') },
     { id: 'sharing', label: t('dapp.tocSharing') },
     { id: 'affiliate', label: t('dapp.affiliateTitle') },
     { id: 'ai-suite', label: t('dapp.tocAi') },
@@ -374,6 +374,27 @@ const Dapp = () => {
           
           <p className="text-foreground/80 leading-relaxed mb-4 font-exo">{t('dapp.intro4')}</p>
         </section>
+
+        <GuideSection
+          id="whats-new"
+          title="dapp.whatsNewTitle"
+          paras={['dapp.whatsNewDesc']}
+          bullets={[
+            ['dapp.whatsNewB1', 'dapp.whatsNewB1Desc'],
+            ['dapp.whatsNewB2', 'dapp.whatsNewB2Desc'],
+            ['dapp.whatsNewB3', 'dapp.whatsNewB3Desc'],
+            ['dapp.whatsNewB4', 'dapp.whatsNewB4Desc'],
+            ['dapp.whatsNewB5', 'dapp.whatsNewB5Desc'],
+            ['dapp.whatsNewB6', 'dapp.whatsNewB6Desc'],
+            ['dapp.whatsNewB7', 'dapp.whatsNewB7Desc'],
+            ['dapp.whatsNewB8', 'dapp.whatsNewB8Desc'],
+            ['dapp.whatsNewB9', 'dapp.whatsNewB9Desc'],
+            ['dapp.whatsNewB10', 'dapp.whatsNewB10Desc'],
+            ['dapp.whatsNewB11', 'dapp.whatsNewB11Desc'],
+            ['dapp.whatsNewB12', 'dapp.whatsNewB12Desc'],
+            ['dapp.whatsNewB13', 'dapp.whatsNewB13Desc']
+          ]}
+        />
 
         <section id="accounts" className="scroll-mt-32">
           <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.accountsTitle')}</h2>
@@ -851,6 +872,7 @@ const Dapp = () => {
 
         <section id="top-up" className="scroll-mt-32">
           <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.topUpTitle')}</h2>
+          <p className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-foreground/90 leading-relaxed mb-4 font-exo">{t('dapp.tokenPausedNote')}</p>
           <Shot src="/media/docs-buy.png" alt={t('dapp.topUpShotAlt')} />
           <p className="text-foreground/80 leading-relaxed mb-6 font-exo">{t('dapp.topUpDesc')}</p>
           
@@ -2085,8 +2107,7 @@ const Dapp = () => {
 <GuideSection
           id="exchange"
           title="dapp.exchangeTitle"
-          paras={['dapp.exchangeDesc']}
-          bullets={[['dapp.exchangeB1', 'dapp.exchangeB1Desc'], ['dapp.exchangeB2', 'dapp.exchangeB2Desc'], ['dapp.exchangeB3', 'dapp.exchangeB3Desc']]}
+          paras={['dapp.exchangeSoonDesc']}
         />
 
         <GuideSection
@@ -2113,18 +2134,6 @@ const Dapp = () => {
             <li><strong>{t('dapp.workB5')}</strong> {t('dapp.workB5Desc')}</li>
             <li><strong>{t('dapp.workB6')}</strong> {t('dapp.workB6Desc')}</li>
             <li><strong>{t('dapp.workB7')}</strong> {t('dapp.workB7Desc')}</li>
-          </ul>
-        </section>
-
-        <section id="stores" className="scroll-mt-32">
-          <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.storesTitle')}</h2>
-          <p className="text-foreground/80 leading-relaxed mb-4 font-exo">{t('dapp.storesDesc')}</p>
-          <Shot src="/media/docs-stores.png" alt={t('dapp.altStores')} />
-          <ul className="list-disc list-inside text-foreground/80 space-y-2 mb-4 font-exo">
-            <li><strong>{t('dapp.storesB1')}</strong> {t('dapp.storesB1Desc')}</li>
-            <li><strong>{t('dapp.storesB2')}</strong> {t('dapp.storesB2Desc')}</li>
-            <li><strong>{t('dapp.storesB3')}</strong> {t('dapp.storesB3Desc')}</li>
-            <li><strong>{t('dapp.storesB4')}</strong> {t('dapp.storesB4Desc')}</li>
           </ul>
         </section>
 
