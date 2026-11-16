@@ -563,3 +563,35 @@ export async function unbanFromStreams(userAddress: string): Promise<MyStreamMod
     await apiCall(`/api/livechat/moderation/mine/bans/${userAddress.toLowerCase()}`, { method: 'DELETE', requiresAuth: true }),
   );
 }
+
+export interface ChatReactor {
+  address: string;
+  username?: string | null;
+  displayName?: string | null;
+  avatarImageUrl?: string | null;
+  badgeBalance?: number;
+  /** Every reaction this person left on the line. */
+  emojis: string[];
+}
+
+export interface ChatReactorsResponse {
+  result: boolean;
+  /** False for everyone but the person who wrote the line; `data` is then empty by design. */
+  canViewLikers: boolean;
+  data: ChatReactor[];
+  /** People per reaction, across the whole line. */
+  reactionCounts?: Record<string, number>;
+  /** Everyone who reacted, whatever the emoji filter. */
+  peopleCount?: number;
+  pagination: { page: number; limit: number; totalCount: number; hasMore: boolean };
+}
+
+/** Who reacted to one of your own chat lines, newest first. */
+export async function getChatReactors(
+  messageId: string,
+  params: { emoji?: string; page?: number; limit?: number } = {},
+): Promise<ChatReactorsResponse> {
+  return apiCall<ChatReactorsResponse>(`/api/livechat/reactors/${encodeURIComponent(messageId)}`, {
+    params: { emoji: params.emoji, page: params.page ?? 0, limit: params.limit ?? 50 },
+  });
+}

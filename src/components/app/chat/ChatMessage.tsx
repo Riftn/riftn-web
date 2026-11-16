@@ -44,6 +44,7 @@ import {
 import { VoiceWaveformPlayer } from './VoiceWaveformPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
 import { MoreReactionsButton } from './MoreReactionsButton';
+import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 
@@ -157,13 +158,17 @@ function ReactionBar({
   onReact,
   onRemoveReaction,
   messageId,
+  ownLine,
 }: {
   reactions: ReactionData;
   currentUserAddress?: string;
   onReact?: (messageId: string, emoji: string) => void;
   onRemoveReaction?: (messageId: string, emoji: string) => void;
   messageId: string;
+  /** Your own line: a reaction opens the list of who left it. */
+  ownLine?: boolean;
 }) {
+  const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
 
@@ -176,8 +181,11 @@ function ReactionBar({
         return (
           <button
             key={emoji}
+            data-chat-reaction-chip
             onClick={() => {
-              if (myReaction) {
+              if (ownLine) {
+                setShowWho(true);
+              } else if (myReaction) {
                 onRemoveReaction?.(messageId, emoji);
               } else {
                 onReact?.(messageId, emoji);
@@ -190,7 +198,7 @@ function ReactionBar({
             }`}
           >
             <span className="inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
-            {myReaction ? (
+            {myReaction && !ownLine ? (
               <>
                 <span className="text-[10px] group-hover/reaction:hidden">{addresses.length}</span>
                 <X className="w-3 h-3 hidden group-hover/reaction:block text-white" />
@@ -201,6 +209,7 @@ function ReactionBar({
           </button>
         );
       })}
+      {showWho && <ChatReactorsDrawer messageId={messageId} reactions={reactions} onClose={() => setShowWho(false)} />}
     </div>
   );
 }
@@ -693,6 +702,7 @@ export const ChatMessage = memo(function ChatMessage({
             currentUserAddress={currentUserAddress}
             onReact={onReact}
             onRemoveReaction={onRemoveReaction}
+            ownLine={isMine}
             messageId={message.id}
           />
         )}

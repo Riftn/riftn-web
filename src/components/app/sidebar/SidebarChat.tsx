@@ -62,6 +62,7 @@ import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
+import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -126,13 +127,17 @@ function SidebarReactions({
   onReact,
   onRemoveReaction,
   messageId,
+  ownLine,
 }: {
   reactions: ReactionData;
   currentUserAddress?: string;
   onReact: (id: string, emoji: string) => void;
   onRemoveReaction: (id: string, emoji: string) => void;
   messageId: string;
+  /** Your own line: a reaction opens the list of who left it. */
+  ownLine?: boolean;
 }) {
+  const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
 
@@ -145,7 +150,8 @@ function SidebarReactions({
         return (
           <button
             key={emoji}
-            onClick={() => mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
+            data-chat-reaction-chip
+            onClick={() => ownLine ? setShowWho(true) : mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
             className={`group/reaction inline-flex items-center gap-0.5 text-[10px] px-0.5 py-0.5 transition-colors ${
               mine
                 ? 'text-white'
@@ -153,7 +159,7 @@ function SidebarReactions({
             }`}
           >
             <span className="text-xs inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
-            {mine ? (
+            {mine && !ownLine ? (
               <>
                 <span className="group-hover/reaction:hidden">{addresses.length}</span>
                 <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
@@ -164,6 +170,7 @@ function SidebarReactions({
           </button>
         );
       })}
+      {showWho && <ChatReactorsDrawer messageId={messageId} reactions={reactions} onClose={() => setShowWho(false)} />}
     </div>
   );
 }
@@ -669,6 +676,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           onReact={addReaction}
                           onRemoveReaction={removeReaction}
                           messageId={msg.id}
+                          ownLine={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()}
                         />
                       )}
                     </div>
