@@ -3,7 +3,8 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
  * Sound Picker
  * =============
- * Bottom sheet to put a song on a post. Three libraries:
+ * Bottom sheet to put a song on a post. One list and one search over three
+ * libraries, shown Riftn first, then Audius, then the free library:
  *  - Audius: free songs from independent artists (Audius Open Music License)
  *  - Riftn: audio posts people uploaded here
  *  - Free library: public domain / CC0 / CC BY music on Wikimedia Commons
@@ -66,7 +67,7 @@ interface SoundPickerProps {
   clipSeconds?: number;
   /** Open straight on the part step for this song (state gallery). */
   initialPicked?: SoundCandidate;
-  /** Library shown first (state gallery). */
+  /** @deprecated The list shows every library at once; kept so callers compile. */
   initialLibrary?: Library;
 }
 
@@ -90,7 +91,7 @@ async function fetchOutside(source: 'audius' | 'commons', q: string, offset: num
 }
 
 async function fetchRiftn(q: string, page: number) {
-  const searchParams = { page, unit: PAGE, sortMode: 'new' as const, status: 'all' as const, ...(q ? { search: q } : {}) };
+  const searchParams = { page, unit: PAGE, sortMode: 'popular' as const, status: 'all' as const, ...(q ? { search: q } : {}) };
   type Row = DeHubNFT & Record<string, unknown> & { audioUrl?: string; audioDuration?: number; media_url?: string; token_id?: string | number; minterDisplayName?: string; mintername?: string };
   const empty = { data: [] as DeHubNFT[], has_more: false };
   const [audioRes, feedAudioRes] = await Promise.all([
@@ -115,6 +116,37 @@ async function fetchRiftn(q: string, page: number) {
   return { items, next: audioRes.has_more || feedAudioRes.has_more ? page + 1 : undefined };
 }
 
+/** Where each library's next page starts; a library with nothing left is absent. */
+type Cursor = { riftn?: number; audius?: number; commons?: number };
+
+/** The order the one list is shown in. */
+const LIBRARY_ORDER: Library[] = ['riftn', 'audius', 'commons'];
+
+/** One page of every library that still has songs, for the single list. */
+async function fetchAll(q: string, cursor: Cursor) {
+  const none = { items: [] as SoundCandidate[], next: undefined as number | undefined };
+  const jobs = [
+    cursor.riftn === undefined ? null : fetchRiftn(q, cursor.riftn),
+    cursor.audius === undefined ? null : fetchOutside('audius', q, cursor.audius),
+    cursor.commons === undefined ? null : fetchOutside('commons', q, cursor.commons),
+  ];
+  const settled = await Promise.allSettled(jobs.map(job => job ?? Promise.resolve(none)));
+  // One library being down should not empty the list; all of them down is an error.
+  if (settled.every((result, i) => jobs[i] === null || result.status === 'rejected')) throw new Error('sounds unavailable');
+  const page = (i: number) => {
+    const result = settled[i];
+    return result && result.status === 'fulfilled' ? result.value : none;
+  };
+  const riftn = page(0);
+  const audius = page(1);
+  const commons = page(2);
+  const next: Cursor = { riftn: riftn.next, audius: audius.next, commons: commons.next };
+  return {
+    items: [...riftn.items, ...audius.items, ...commons.items],
+    next: LIBRARY_ORDER.some(library => next[library] !== undefined) ? next : undefined,
+  };
+}
+
 /** Stable bar heights per song, so the same song always draws the same wave. */
 function waveFor(seed: string, count: number): number[] {
   let h = 2166136261;
@@ -125,10 +157,9 @@ function waveFor(seed: string, count: number): number[] {
   });
 }
 
-export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSeconds, initialPicked, initialLibrary }: SoundPickerProps) {
+export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSeconds, initialPicked }: SoundPickerProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const [library, setLibrary] = useState<Library>(initialLibrary ?? 'audius');
   const [search, setSearch] = useSurfaceDraft("features/post/components/SoundPicker.tsx:search", '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [playingKey, setPlayingKey] = useState<string | null>(null);
@@ -145,19 +176,20 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
   useEffect(() => { bindSoundWindow(audioRef.current); });
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } = useInfiniteQuery({
-    queryKey: ['sound-picker', library, debouncedSearch],
-    queryFn: ({ pageParam = 0 }) => library === 'riftn'
-      ? fetchRiftn(debouncedSearch, pageParam)
-      : fetchOutside(library, debouncedSearch, pageParam),
+    queryKey: ['sound-picker', 'all', debouncedSearch],
+    queryFn: ({ pageParam }) => fetchAll(debouncedSearch, pageParam),
     getNextPageParam: (lastPage) => lastPage.next,
-    initialPageParam: 0,
+    initialPageParam: { riftn: 0, audius: 0, commons: 0 } as Cursor,
     enabled: isOpen,
     staleTime: 5 * 60 * 1000,
   });
 
   const tracks = useMemo(() => {
     const seen = new Set<string>();
-    return (data?.pages.flatMap(p => p.items) ?? []).filter(item => !seen.has(item.key) && !!seen.add(item.key));
+    // Riftn first, then Audius, then the free library, however the pages arrived.
+    return (data?.pages.flatMap(p => p.items) ?? [])
+      .filter(item => !seen.has(item.key) && !!seen.add(item.key))
+      .sort((a, b) => LIBRARY_ORDER.indexOf(a.library) - LIBRARY_ORDER.indexOf(b.library));
   }, [data]);
 
   const stopPreview = useCallback(() => {
@@ -230,11 +262,6 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start, partLength]);
 
-  const libraries: { id: Library; label: string }[] = [
-    { id: 'audius', label: 'Audius' },
-    { id: 'riftn', label: 'Riftn' },
-    { id: 'commons', label: _copy("copy.c0963b7d9c5d", { defaultValue: "Free library" }) },
-  ];
   const bars = useMemo(() => waveFor(picked?.key ?? '', 56), [picked?.key]);
 
   const credit = picked && picked.library !== 'riftn'
@@ -348,25 +375,6 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
           </div>
         ) : (
           <>
-            {/* Libraries */}
-            <div className="flex gap-2 px-4 pt-3" role="tablist">
-              {libraries.map(item => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={library === item.id}
-                  onClick={() => { stopPreview(); setLibrary(item.id); }}
-                  className={cn(
-                    'h-8 rounded-full px-3.5 text-sm font-medium transition-colors',
-                    library === item.id ? 'bg-white/25 text-white font-semibold ring-1 ring-inset ring-white/60' : 'bg-white/[0.06] text-white/60 hover:bg-white/10',
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
             {/* Search */}
             <div className="px-4 py-3">
               <div className="relative">
@@ -374,19 +382,10 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={library === 'audius'
-                    ? _copy("copy.ecb30523a48a", { defaultValue: "Search songs and artists" })
-                    : _copy("copy.db66c92fd9e0", { defaultValue: "Search sounds..." })}
+                  placeholder={_copy("copy.db66c92fd9e0", { defaultValue: "Search sounds..." })}
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30"
                 />
               </div>
-              {library !== 'riftn' && !debouncedSearch && (
-                <p className="mt-2 text-[11px] text-white/45">
-                  {library === 'audius'
-                    ? _copy("copy.cbade2afaee2", { defaultValue: "Trending this week on Audius. Free to use, the artist gets credited on your post." })
-                    : _copy("copy.d2e45b7406fc", { defaultValue: "Public domain and Creative Commons music from Wikimedia Commons. The artist gets credited on your post." })}
-                </p>
-              )}
             </div>
 
             {/* Track list */}
@@ -424,7 +423,7 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
                           aria-label={isPlaying ? t('audioPost.pause') : t('audioPost.play')}
                           className="relative flex-shrink-0 w-11 h-11 overflow-hidden rounded-lg bg-white/10"
                         >
-                          <SoundArt src={track.artwork} className="absolute inset-0 h-full w-full" />
+                          <SoundArt bare src={track.artwork} className="absolute inset-0 h-full w-full" />
                           <span className={cn('absolute inset-0 grid place-items-center bg-black/35 text-white', track.artwork ? '' : 'bg-transparent')}>
                             {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
                           </span>
@@ -470,14 +469,15 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
   );
 }
 
-function SoundArt({ src, className }: { src?: string; className?: string }) {
+/** `bare` leaves the note icon out: a list row draws its play button in that spot. */
+function SoundArt({ src, className, bare }: { src?: string; className?: string; bare?: boolean }) {
   const [failed, setFailed] = useState(false);
   const url = src && !failed ? outsideImage(src) : undefined;
   return url ? (
     <img src={url} alt="" loading="lazy" onError={() => setFailed(true)} className={cn('object-cover', className)} />
   ) : (
     <span className={cn('grid place-items-center bg-white/10 text-white/60', className)}>
-      <Music className="h-5 w-5" />
+      {bare ? null : <Music className="h-5 w-5" />}
     </span>
   );
 }
