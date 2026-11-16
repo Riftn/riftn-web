@@ -68,7 +68,7 @@ export const BroadcastShell = ({ preview, children, footnote }: ShellProps) => (
             </table>
           </Section>
           <Img src={TV} width="520" alt="" style={tv} />
-          <Text style={ticker}>░▒▓&nbsp; YOU WILL OWN EVERYTHING AND BE HAPPY &nbsp;▓▒░</Text>
+          <Text style={ticker}>YOU WILL OWN EVERYTHING AND BE HAPPY</Text>
           <Section style={inner}>{children}</Section>
           <Section style={foot}>
             <table width="100%" cellPadding={0} cellSpacing={0} role="presentation">
