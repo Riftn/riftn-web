@@ -1,3 +1,4 @@
+import { rateLimitByIp } from "../_shared/auth.ts";
 /**
  * Alchemy Token Discovery Edge Function
  * ======================================
@@ -33,6 +34,10 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Each call spends keyed Alchemy requests on a wallet the caller names.
+  const limited = await rateLimitByIp(req, 'alchemy-tokens', { limit: 600, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
+
   try {
     const ALCHEMY_API_KEY = Deno.env.get('ALCHEMY_API_KEY');
     if (!ALCHEMY_API_KEY) {
@@ -40,7 +45,7 @@ Deno.serve(async (req) => {
     }
 
     const { walletAddress, chainId = 8453 } = await req.json();
-    if (!walletAddress) {
+    if (!walletAddress || typeof walletAddress !== 'string' || !/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
       return new Response(JSON.stringify({ error: 'walletAddress required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

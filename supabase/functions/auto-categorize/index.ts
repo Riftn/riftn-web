@@ -209,12 +209,11 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const backfill = body?.backfill === true;
 
-    if (backfill) {
-      // The only mode that can spend money in bulk, so it needs the key that
-      // nothing in a browser has.
-      const auth = req.headers.get('Authorization') ?? '';
-      if (!auth.includes(SERVICE_KEY)) return json({ error: 'backfill requires the service key' }, 401);
-    }
+    // Every caller is one of Riftn's own functions (the transcriber and its
+    // sweeper), and each sends the service key. Nothing in a browser has it,
+    // so nobody outside can pick a post and have the model paid to read it.
+    const auth = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+    if (!SERVICE_KEY || auth !== SERVICE_KEY) return json({ error: 'service key required' }, 401);
 
     const available = await allowedCategories();
     if (!available.length) return json({ error: 'no categories are defined' }, 409);

@@ -1021,6 +1021,27 @@ serve(async (req) => {
     const verifiedWallet = !isPrivileged && presentedToken ? await resolveDeHubAddress(presentedToken) : null;
     const isVerifiedUser = isPrivileged || !!verifiedWallet;
 
+    // Whose saved memories this conversation may read and add to. The wallet
+    // in `userContext` is typed by the caller, so on its own it would let
+    // anyone pull another account's memories into an answer, or plant new
+    // ones there. It counts only when the token presented belongs to it;
+    // Riftn's own services are taken at their word.
+    const claimedWallet = typeof userContext?.walletAddress === 'string' ? userContext.walletAddress.toLowerCase() : '';
+    const memoryWallet = !claimedWallet ? null
+      : isPrivileged ? claimedWallet
+      : verifiedWallet && verifiedWallet.toLowerCase() === claimedWallet ? claimedWallet
+      : null;
+
+    // A conversation is made of what the user said and what the assistant
+    // answered. Any other role in the list (a second system prompt, a tool
+    // result) is the caller writing the assistant's instructions for it, so
+    // it is read as something the user said. Riftn's own services are exempt.
+    if (!isPrivileged && Array.isArray(messages)) {
+      for (const m of messages as Array<{ role: string }>) {
+        if (m && m.role !== 'assistant') m.role = 'user';
+      }
+    }
+
     if (!isPrivileged) {
       const limited = await rateLimitByIp(req, 'general-ai-chat', {
         limit: verifiedWallet ? 80 : 20,
@@ -1261,7 +1282,7 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
     // Fetch platform-wide data and user memories in parallel
     const [platformContext, userMemories] = await Promise.all([
       fetchPlatformContext(),
-      userContext?.walletAddress ? loadUserMemories(userContext.walletAddress) : Promise.resolve(''),
+      memoryWallet ? loadUserMemories(memoryWallet) : Promise.resolve(''),
     ]);
 
     // Build user context info if provided
@@ -1780,11 +1801,11 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
             controller.close();
 
             // Fire-and-forget: extract memories
-            if (userContext?.walletAddress && messages.length >= 3 && fullContent) {
+            if (memoryWallet && messages.length >= 3 && fullContent) {
               const userMsgs = messages
                 .filter((m: Message) => m.role === 'user')
                 .map((m: Message) => typeof m.content === 'string' ? m.content : (m.content as any)?.find((c: any) => c.type === 'text')?.text || '');
-              extractAndSaveMemories(userContext.walletAddress, userMsgs, fullContent).catch(e =>
+              extractAndSaveMemories(memoryWallet, userMsgs, fullContent).catch(e =>
                 console.error('[Memory] Background extraction error:', e)
               );
             }
@@ -1821,11 +1842,11 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
     const aiResponse = data.choices?.[0]?.message?.content || 'That came back empty on my side. Ask me again and it should go through.';
 
     // Fire-and-forget: extract memories from this conversation
-    if (userContext?.walletAddress && messages.length >= 3) {
+    if (memoryWallet && messages.length >= 3) {
       const userMsgs = messages
         .filter((m: Message) => m.role === 'user')
         .map((m: Message) => typeof m.content === 'string' ? m.content : (m.content as any)?.find((c: any) => c.type === 'text')?.text || '');
-      extractAndSaveMemories(userContext.walletAddress, userMsgs, aiResponse).catch(e => 
+      extractAndSaveMemories(memoryWallet, userMsgs, aiResponse).catch(e => 
         console.error('[Memory] Background extraction error:', e)
       );
     }

@@ -2611,12 +2611,15 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
           <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
             {/* A profile-reel slide that is not a video (text, photo, comic)
                 has nothing to play, so it keeps only the options button. */}
-            {!currentShort?.reelPost && <>
-            {document.pictureInPictureEnabled && !currentShort?.imageUrls?.length && !infoActive && <button
+            {(isMobile || !currentShort?.reelPost) && <>
+            {/* On phones these buttons stay on every post, so the row does not
+                reshuffle from slide to slide; where one cannot work it says so. */}
+            {document.pictureInPictureEnabled && !infoActive && (isMobile || !currentShort?.imageUrls?.length) && <button
               className={VIEWER_CONTROL}
               aria-label={_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
               onClick={(event) => {
                 event.stopPropagation();
+                if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
                 const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
                 if (player) void player.requestPictureInPicture().catch(() => {});
               }}
@@ -2641,9 +2644,10 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             </button>
 
             {/* Full screen: a wide video also turns sideways where the browser allows it. */}
-            {!currentShort?.imageUrls?.length && <button
+            {(isMobile || !currentShort?.imageUrls?.length) && <button
               onClick={(event) => {
                 event.stopPropagation();
+                if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
                 toggleFullscreen();
               }}
               className={VIEWER_CONTROL}
@@ -2688,11 +2692,11 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
           {/* Clean stage: open the info stage, from just under the video. */}
           {cleanWide && !infoActive && <button
             onClick={(event) => { event.stopPropagation(); chooseInfoStage(true); }}
-            className={cn(VIEWER_CONTROL, 'absolute right-4 z-20')}
+            className="absolute right-4 z-20 w-10 h-10 flex items-center justify-center text-foreground"
             style={{ top: `calc(50% + ${Math.round(wideCardHeight / 2) + 12}px)`, touchAction: 'manipulation' }}
             aria-label={_copy("copy.f5c9bd131486", { defaultValue: "Show more" })}
           >
-            <Plus className="w-5 h-5 text-white" />
+            <Plus className="w-6 h-6" />
           </button>}
         </motion.div>
       )}

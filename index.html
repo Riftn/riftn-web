@@ -182,6 +182,15 @@
               window.addEventListener('wheel', function (e) {
                 if (e.deltaY > 0) unfrost();
               }, { passive: true, capture: true });
+              // A click anywhere outside the panel (a feed tab, the side menu)
+              // means the visitor is off to use the app: clear the frost so
+              // what they went to see is not left blurred. Clicks inside the
+              // panel keep it, since reading the panel is the point.
+              window.addEventListener('click', function (e) {
+                var t = e.target;
+                if (t && t.closest && t.closest('.dehub-intro')) return;
+                unfrost();
+              }, { capture: true });
             }
           }
         } catch (e) { /* never block boot */ }

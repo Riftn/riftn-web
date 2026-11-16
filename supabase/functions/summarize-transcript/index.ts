@@ -173,8 +173,15 @@ Deno.serve(async (req) => {
     if (!row || row.status !== 'ready') {
       return json({ overview: null, summary: null, chapters: [] });
     }
+    // The summary of a members-only or private transcript is as private as
+    // its words. The table's read rule decides who sees it; this handler
+    // reads with the service key, so for anyone but Riftn's own services it
+    // does the work and keeps the answer to itself. The apps read the stored
+    // summary from the table and do nothing with this response.
+    const reveal = row.visibility === 'public' || (!!serviceKey && bearer === serviceKey);
+    const withheld = { overview: null, summary: null, chapters: [] };
     if (row.summary && !force) {
-      return json({ overview: row.summary, summary: row.summary, chapters: row.chapters ?? [] });
+      return json(reveal ? { overview: row.summary, summary: row.summary, chapters: row.chapters ?? [] } : withheld);
     }
 
     const segments: Segment[] = Array.isArray(row.segments) ? row.segments : [];
@@ -222,7 +229,7 @@ Deno.serve(async (req) => {
       if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(clips);
     }
 
-    return json({ overview, summary: overview, chapters });
+    return json(reveal ? { overview, summary: overview, chapters } : withheld);
   } catch (e: any) {
     console.error('summarize-transcript error', e);
     return json({ error: e?.message ?? String(e) }, 500);
