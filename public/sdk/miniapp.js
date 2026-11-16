@@ -46,11 +46,18 @@
     });
   }
 
+  // The pages allowed to answer as the host: Riftn itself, its previews, and a
+  // developer's own machine. Any other site can frame a mini app, and whatever
+  // it posts must not be read as an answer from Riftn.
+  var HOST_ORIGIN =
+    /^https:\/\/(?:(?:[a-z0-9-]+\.)*(?:riftn\.com|dehub\.(?:io|net))|(?:[a-z0-9-]+--)?7d59b29a-7055-4e27-94fd-0c2253be10ad(?:-dev)?\.(?:lovable\.app|lovableproject(?:-dev)?\.com)|(?:preview--)?cosmic-echo-hero\.lovable\.app)$|^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\]|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})(?::\d+)?$/;
+
   function receive(event) {
     var data = event.data;
-    // On the web only the parent frame is dehub. In the app, only native code
-    // can deliver a message, and it arrives as a string.
-    if (!native && event.source !== window.parent) return;
+    // On the web only the parent frame is dehub, and only when that frame is
+    // one of our own pages. In the app, only native code can deliver a
+    // message, and it arrives as a string.
+    if (!native && (event.source !== window.parent || !HOST_ORIGIN.test(event.origin))) return;
     if (typeof data === 'string') {
       try { data = JSON.parse(data); } catch (e) { return; }
     }
