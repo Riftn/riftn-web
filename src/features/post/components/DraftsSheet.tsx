@@ -99,8 +99,10 @@ export function DraftsSheet({
         className="max-h-[90dvh] overflow-hidden flex flex-col px-4 pb-6"
       >
         <DrawerHeader className="relative pb-4 border-b border-white/10 shrink-0 px-0">
+          {/* Close and Save are the same height and sit the same distance from
+              the top as from their side, so each reads as tucked into its corner. */}
           <div className="flex items-center justify-between">
-            <button onClick={onClose} className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors">
+            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-white/10 transition-colors">
               <X className="w-5 h-5 text-zinc-400" />
             </button>
             <DrawerTitle className="text-white font-semibold absolute left-1/2 -translate-x-1/2">
@@ -110,7 +112,7 @@ export function DraftsSheet({
               onClick={handleSave}
               disabled={!canSave}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
+                "flex h-8 items-center gap-1.5 px-3 rounded-xl text-xs font-medium transition-all",
                 canSave
                   ? "bg-white/10 text-white border border-white/20 hover:bg-white/20"
                   : "bg-white/5 text-zinc-500 border border-white/10 cursor-not-allowed"
