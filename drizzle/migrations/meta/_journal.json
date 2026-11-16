@@ -8,6 +8,13 @@
       "when": 1793593953597,
       "tag": "0000_create_builder_prefs_and_message_cost",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794833702662,
+      "tag": "0001_clip_buckets_no_listing",
+      "breakpoints": true
     }
   ]
 }
