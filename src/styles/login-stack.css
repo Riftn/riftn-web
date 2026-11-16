@@ -150,9 +150,9 @@ html[data-theme="osaka"] .login-stack__logo {
   display: block;
   width: 210px;
   aspect-ratio: 720 / 213;
-  /* Old TV: soft scan lines (fade in and out like a tube, no hard edge) and a soft band rolling down, inside the letters only. */
+  /* Old TV: soft scan lines (fade in and out like a tube, no hard edge) rolling upward and a soft band rolling down, inside the letters only. */
   background:
-    repeating-linear-gradient(180deg, transparent 0, var(--ls-tv-logo-line) 1px, transparent 2px),
+    linear-gradient(180deg, transparent, var(--ls-tv-logo-line), transparent) 0 0 / 100% var(--ls-tv-pitch),
     linear-gradient(180deg, transparent, var(--ls-tv-logo-band), transparent) 0 -40px / 100% 26px no-repeat,
     linear-gradient(180deg, #fff, color-mix(in srgb, var(--ls-neon) 35%, #fff));
   animation: ls-tv-band 4.5s linear infinite;
@@ -161,17 +161,18 @@ html[data-theme="osaka"] .login-stack__logo {
 }
 /* Old TV flicker on the logo and headline together: short, small dips, never fades out. */
 .login-stack__title {
-  --ls-tv-logo-line: rgba(0, 0, 0, 0.13);
+  --ls-tv-pitch: 3px;
+  --ls-tv-logo-line: rgba(0, 0, 0, 0.26);
   --ls-tv-logo-band: rgba(255, 255, 255, 0.12);
-  --ls-tv-line: rgba(0, 0, 0, 0.17);
+  --ls-tv-line: rgba(0, 0, 0, 0.3);
   --ls-tv-band: rgba(255, 255, 255, 0.18);
   animation: ls-tv-flicker 3.6s steps(1) infinite;
 }
 html[data-theme="light"] .login-stack__title,
 html[data-system-tone="light"] .login-stack__title {
-  --ls-tv-logo-line: rgba(255, 255, 255, 0.14);
+  --ls-tv-logo-line: rgba(255, 255, 255, 0.26);
   --ls-tv-logo-band: rgba(255, 255, 255, 0.1);
-  --ls-tv-line: rgba(255, 255, 255, 0.18);
+  --ls-tv-line: rgba(255, 255, 255, 0.3);
   --ls-tv-band: rgba(255, 255, 255, 0.18);
 }
 @keyframes ls-tv-flicker {
@@ -189,9 +190,10 @@ html[data-system-tone="light"] .login-stack__title {
   86% { opacity: 0.92; transform: translateX(-0.5px); }
   87% { opacity: 1; transform: none; }
 }
+/* The scan lines roll upward without a pause (a whole number of lines per loop, so it never jumps) while the band drifts down. */
 @keyframes ls-tv-band {
   from { background-position: 0 0, 0 -40px, 0 0; }
-  to { background-position: 0 0, 0 110px, 0 0; }
+  to { background-position: 0 calc(var(--ls-tv-pitch) * -18), 0 110px, 0 0; }
 }
 .login-stack__headline {
   position: relative;
@@ -221,7 +223,7 @@ html[data-theme="osaka"] .login-stack__headline { --ls-sign: #ffc2e0; --ls-sign-
 .login-stack__headline {
   --ls-tv-fill: var(--ls-sign);
   background:
-    repeating-linear-gradient(180deg, transparent 0, var(--ls-tv-line) 1px, transparent 2px),
+    linear-gradient(180deg, transparent, var(--ls-tv-line), transparent) 0 0 / 100% var(--ls-tv-pitch),
     linear-gradient(180deg, transparent, var(--ls-tv-band), transparent) 0 -40px / 100% 26px no-repeat,
     linear-gradient(var(--ls-tv-fill), var(--ls-tv-fill));
   -webkit-background-clip: text;
@@ -347,7 +349,7 @@ html[data-system-tone="light"] .login-stack__logo {
 html[data-theme="light"] .login-stack__logo-mark,
 html[data-system-tone="light"] .login-stack__logo-mark {
   background:
-    repeating-linear-gradient(180deg, transparent 0, var(--ls-tv-logo-line) 1px, transparent 2px),
+    linear-gradient(180deg, transparent, var(--ls-tv-logo-line), transparent) 0 0 / 100% var(--ls-tv-pitch),
     linear-gradient(180deg, transparent, var(--ls-tv-logo-band), transparent) 0 -40px / 100% 26px no-repeat,
     #0b0b0d;
 }
