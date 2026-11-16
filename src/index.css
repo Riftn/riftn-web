@@ -60,7 +60,7 @@
 }
 
 /* Wide photos in Shorts letterbox on plain white in light themes (black otherwise). */
-:is(html[data-theme="light"], html[data-system-tone="light"]) [data-shorts-photo-slide] {
+:is(html[data-theme="light"], html[data-system-tone="light"]) :is([data-shorts-photo-slide], [data-shorts-clean-slide]) {
   background-color: #fff;
 }
 
