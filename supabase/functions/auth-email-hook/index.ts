@@ -16,9 +16,9 @@ const corsHeaders = {
 
 // Configuration
 const SITE_NAME = "Riftn"
-const SENDER_DOMAIN = "notify.dehub.io"
+const SENDER_DOMAIN = "notify.riftn.com"
 const ROOT_DOMAIN = "riftn.com"
-const FROM_DOMAIN = "dehub.io"
+const FROM_DOMAIN = "riftn.com"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
 // Rewrite the backend-hosted confirmation URL into a branded dehub.io link.
