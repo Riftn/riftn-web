@@ -17,6 +17,7 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Loader2, RotateCcw, Pin, CornerDownRight, SmilePlus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreReactionsButton } from "@/components/app/chat/MoreReactionsButton";
+import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import Eye from "@/components/ui/cut-icons/visibility";
 import Languages from "@/components/ui/cut-icons/language";
 import Pencil from "@/components/ui/cut-icons/edit";
@@ -497,6 +498,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // A mouse has no hold, and right-click only opened for the host, your own
   // lines or another language, so everyone else could not reply or react.
   const [reactFor, setReactFor] = useState<string | null>(null);
+  // Your own line whose "who reacted" list is open.
+  const [reactorsFor, setReactorsFor] = useState<string | null>(null);
   const canReply = isAuthenticated && !isOffline && !bannedHere && !muted;
   const heldMsg = held?.msg;
   const heldTranslate = heldMsg ? translateHandles.current.get(heldMsg.id) : undefined;
@@ -770,7 +773,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                             <button
                               key={emoji}
                               type="button"
-                              onClick={() => toggleReaction(msg, emoji)}
+                              data-chat-reaction-chip
+                              onClick={() => (isMine(msg) ? setReactorsFor(msg.id) : toggleReaction(msg, emoji))}
                               className={cn(
                                 'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] leading-none text-white',
                                 mine ? 'bg-sky-400/25 ring-1 ring-sky-400/60' : 'bg-black/30 ring-1 ring-white/10',
@@ -951,6 +955,14 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           )}
         </div>,
         document.body,
+      )}
+
+      {reactorsFor && (
+        <ChatReactorsDrawer
+          messageId={reactorsFor}
+          reactions={chatMessages.find((m) => m.id === reactorsFor)?.reactions}
+          onClose={() => setReactorsFor(null)}
+        />
       )}
 
       <ChatHoldSheet
