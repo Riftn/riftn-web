@@ -29,9 +29,13 @@ const BUSY = '[data-skeleton], .theme-skeleton, [data-dehub-loader], .dehub-load
  *
  * The wrapper div is always there, so letting go never remounts the page.
  */
-export function CopyGate({ skeleton: Skeleton, children, skeletonShown }: {
+export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly }: {
   skeleton: ComponentType;
   children: ReactNode;
+  /** Wait for the words only, and cut to the page with no dissolve. For home:
+   *  its welcome panel is already painted from index.html and the feed draws
+   *  its own placeholders, so covering the page again would blink both. */
+  copyOnly?: boolean;
   /** Set by the route's Suspense fallback: the skeleton was already on screen. */
   skeletonShown?: MutableRefObject<boolean>;
 }) {
@@ -47,8 +51,8 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown }: {
     checked.current = true;
     const copy = takePendingCopy();
     // Its own loader on screen, or a first request still out.
-    const busy = () => !!content.current?.querySelector(BUSY) || queries.isFetching({ predicate: (q) => q.state.data === undefined }) > 0;
-    const wasShown = !!skeletonShown?.current;
+    const busy = () => !copyOnly && (!!content.current?.querySelector(BUSY) || queries.isFetching({ predicate: (q) => q.state.data === undefined }) > 0);
+    const wasShown = !copyOnly && !!skeletonShown?.current;
     if (!copy && !busy()) {
       // Ready at once. After a skeleton, still dissolve rather than cut.
       if (!wasShown) return;
@@ -67,6 +71,7 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown }: {
       if (!alive) return;
       window.clearTimeout(timer);
       cancelAnimationFrame(frame);
+      if (copyOnly) { finish(); return; }
       setPhase('reveal');
       timer = window.setTimeout(finish, REVEAL_MS);
     };
@@ -93,7 +98,7 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown }: {
     if (copy) settle(copy);
     frame = requestAnimationFrame(check);
     return () => { alive = false; window.clearTimeout(timer); cancelAnimationFrame(frame); };
-  }, [skeletonShown, queries]);
+  }, [skeletonShown, queries, copyOnly]);
 
   const hold = phase === 'hold';
   const covered = phase !== 'idle';

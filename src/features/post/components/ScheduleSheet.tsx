@@ -13,7 +13,7 @@ import { getFansOnline } from '@/lib/api/dehub/scheduled';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
-export type ScheduleKind = 'post' | 'live' | 'stage';
+export type ScheduleKind = 'post' | 'live' | 'stage' | 'message';
 
 interface ScheduleSheetProps {
   isOpen: boolean;
@@ -61,7 +61,8 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
   const fans = useQuery({
     queryKey: ['fans-online', walletAddress],
     queryFn: getFansOnline,
-    enabled: isOpen && !!walletAddress,
+    // A message goes to one person, so when the followers are online says nothing.
+    enabled: isOpen && !!walletAddress && kind !== 'message',
     staleTime: 30 * 60_000,
     retry: false,
   });
@@ -110,12 +111,14 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
         : { id: 'soon', label: t('whenSheet.inAnHour', { defaultValue: 'In an hour' }), at: firstSlot(Math.max(minimumMinutes, 60)) },
       { id: 'tomorrow', label: t('whenSheet.tomorrow', { defaultValue: 'Tomorrow' }), at: atMinutes(addDays(today, 1), 9 * 60) },
       { id: 'weekend', label: friday.toLocaleDateString(locale, { weekday: 'long' }), at: friday },
-      best
+      kind === 'message'
+        ? { id: 'monday', label: nextWeekday(1).toLocaleDateString(locale, { weekday: 'long' }), at: atMinutes(nextWeekday(1), 9 * 60) }
+        : best
         ? { id: 'prime', label: t('whenSheet.bestTime', { defaultValue: 'Best time' }), at: prime, prime: true }
         : { id: 'prime', label: t('whenSheet.primeTime', { defaultValue: 'Prime time' }), at: prime, prime: true },
     ];
     return list;
-  }, [today.getTime(), earliest, locale, minimumMinutes, t, fansGrid]);
+  }, [today.getTime(), earliest, locale, minimumMinutes, t, fansGrid, kind]);
 
   const timeLabel = (d: Date) => d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
   const dayLabel = (d: Date) => (sameDay(d, today)
@@ -129,6 +132,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
     } catch { return ''; }
   })();
 
+  const stepBy = kind === 'message' ? 5 : STEP;
   const step = (delta: number) => {
     const next = atMinutes(day, minutes + delta);
     setDay(startOfDay(next));
@@ -206,8 +210,8 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
                   onClick={() => choose(pick.at)}
                   className="!h-auto !flex-col !items-start !justify-center !gap-0.5 !rounded-[10px] !px-3 !py-2.5 text-left disabled:opacity-40"
                 >
-                  <span className="flex items-center gap-1 text-sm font-semibold">{pick.prime && <Sparkles className="h-3.5 w-3.5" />}{pick.label}</span>
-                  <span className="text-xs font-medium opacity-70">{pick.id === 'weekend' ? `${pick.at.toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · ${timeLabel(pick.at)}` : pick.id === 'prime' ? `${dayLabel(pick.at)} · ${timeLabel(pick.at)}` : timeLabel(pick.at)}</span>
+                  <span className="flex items-center gap-1 text-sm font-semibold">{'prime' in pick && pick.prime && <Sparkles className="h-3.5 w-3.5" />}{pick.label}</span>
+                  <span className="text-xs font-medium opacity-70">{pick.id === 'weekend' || pick.id === 'monday' ? `${pick.at.toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · ${timeLabel(pick.at)}` : pick.id === 'prime' ? `${dayLabel(pick.at)} · ${timeLabel(pick.at)}` : timeLabel(pick.at)}</span>
                 </button>
               );
             })}
@@ -294,11 +298,11 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
           </div>
 
           <div className="flex items-center justify-center gap-5 text-white">
-            <button type="button" data-kit-button="quiet" onClick={() => step(-STEP)} aria-label={t('whenSheet.earlier', { defaultValue: '15 minutes earlier' })} className="!h-10 !w-10 !rounded-full !p-0">
+            <button type="button" data-kit-button="quiet" onClick={() => step(-stepBy)} aria-label={kind === 'message' ? t('whenSheet.earlierShort', { defaultValue: 'Earlier' }) : t('whenSheet.earlier', { defaultValue: '15 minutes earlier' })} className="!h-10 !w-10 !rounded-full !p-0">
               <Minus className="h-4 w-4" />
             </button>
             <span className="min-w-[7.5rem] text-center text-[28px] font-extrabold tabular-nums tracking-tight">{timeLabel(selectedAt)}</span>
-            <button type="button" data-kit-button="quiet" onClick={() => step(STEP)} aria-label={t('whenSheet.later', { defaultValue: '15 minutes later' })} className="!h-10 !w-10 !rounded-full !p-0">
+            <button type="button" data-kit-button="quiet" onClick={() => step(stepBy)} aria-label={kind === 'message' ? t('whenSheet.laterShort', { defaultValue: 'Later' }) : t('whenSheet.later', { defaultValue: '15 minutes later' })} className="!h-10 !w-10 !rounded-full !p-0">
               <Plus className="h-4 w-4" />
             </button>
           </div>
@@ -325,7 +329,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
                 {t('whenSheet.remove', { defaultValue: 'Remove schedule' })}
               </button>
             )}
-            {!moving && (
+            {!moving && kind !== 'message' && (
               <Link to="/app/planned" onClick={onClose} className="mx-auto py-1.5 text-[12px] text-white/55 hover:text-white">
                 {t('planned.seeAll', { defaultValue: 'See everything you have planned' })}
               </Link>

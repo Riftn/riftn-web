@@ -541,6 +541,20 @@ export function onReValidateMessage(cb: (data: ReValidateMessageData) => void): 
   return addPersistentListener('ReValidateMessage', cb as AnyFn);
 }
 
+export interface ScheduledDmUpdate {
+  _id: string;
+  dmId: string;
+  status: 'sent' | 'failed';
+  messageId?: string;
+  failureCode?: string;
+  failureReason?: string;
+}
+
+/** One of your scheduled messages was just sent, or could not be. */
+export function onScheduledDmUpdate(cb: (data: ScheduledDmUpdate) => void): () => void {
+  return addPersistentListener('scheduledMessageUpdate', cb as AnyFn);
+}
+
 export function onDmError(cb: (err: DmSocketError) => void): () => void {
   const socket = getDmSocket();
   socket.on('error', cb);

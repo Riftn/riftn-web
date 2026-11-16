@@ -20329,6 +20329,8 @@
     "orPickDay": "Ya da bir gün seç",
     "earlier": "15 dakika önce",
     "later": "15 dakika sonra",
+    "earlierShort": "Daha erken",
+    "laterShort": "Daha geç",
     "tooSoonMin": "Şu andan en az {{count}} dakika sonrası için bir zaman seç.",
     "tooSoon": "Gelecekte bir zaman seç.",
     "zone": "Senin saatin ({{zone}}). Diğerleri kendi saatlerinde görür.",
@@ -20710,5 +20712,29 @@
     "gone": "Bu mesaj artık burada değil",
     "theirMessages": "Onların mesajları",
     "seeTheirMessages": "Mesajlarını gör"
+  },
+  "dmSchedule": {
+    "button": "Mesajı zamanla",
+    "title": "Zamanlanmış mesajlar",
+    "whenTitle": "Ne zaman gönderilsin?",
+    "waiting": "{{n}} zamanlandı",
+    "next": "sıradaki {{when}}",
+    "failedCount": "{{n}} gönderilemedi",
+    "view": "Görüntüle",
+    "notSent": "Gönderilmedi",
+    "emptyTitle": "Zamanlanmış bir şey yok",
+    "emptyBody": "Bir mesaj yaz, sonra ne zaman gönderileceğini seçmek için saate dokun.",
+    "edit": "Düzenle",
+    "editLabel": "Mesajı düzenle",
+    "changeTime": "Saati değiştir",
+    "sendNow": "Şimdi gönder",
+    "deleted": "Zamanlanmış mesaj silindi",
+    "unreadable": "Başka bir cihazda yazıldı. Yine de gönderilecek.",
+    "footnote": "Saatler senin saat dilimine göredir. Bir mesaj gönderilene kadar kimse görmez.",
+    "footnoteNamed": "Saatler senin saat dilimine göredir. {{name}} bir mesajı ancak gönderildiğinde görür.",
+    "textOnly": "Şimdilik yalnızca metin mesajları zamanlanabilir.",
+    "scheduledToast": "{{when}} için zamanlandı",
+    "failedToast": "Zamanlanmış bir mesaj gönderilemedi",
+    "error": "Olmadı. Tekrar dene."
   }
 }

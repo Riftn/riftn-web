@@ -1292,7 +1292,7 @@ export default function HomePage() {
       <div data-feed-swallow-bounds data-feed-welcome-bounds={location.pathname === '/' ? '' : undefined}>
       <div ref={swallowContentRef} data-feed-swallow-shell>
       <FeedSwallowMotion>
-      {location.pathname === '/' && <HomeIntro />}
+      {location.pathname === '/' && <HomeIntro tab={activeTab} />}
 
       {/* Feed Content - Pull-to-refresh only works within this container */}
       <div 

@@ -14,6 +14,7 @@ import Paperclip from "@/components/ui/cut-icons/attach";
 import Send from "@/components/ui/cut-icons/send";
 import X from "@/components/ui/cut-icons/close";
 import Gem from "@/components/ui/cut-icons/diamond";
+import Clock from "@/components/ui/cut-icons/clock";
 
 import { EmojiGifPicker } from './EmojiGifPicker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -65,6 +66,14 @@ interface ChatInputProps {
   autoFocus?: boolean;
   onSendMessage: (args: ChatInputSendArgs) => Promise<boolean>;
   onTipClick?: () => void;
+  /**
+   * The clock beside the tip gem: send this message later. Handed what is
+   * typed and a way to empty the box once it has been scheduled. Left out,
+   * there is no clock (Public Chat, groups, paid chats).
+   */
+  onScheduleClick?: (draft: { text: string; hasAttachment: boolean; clear: () => void }) => void;
+  /** Messages already waiting in this chat; puts a dot on the clock. */
+  scheduledCount?: number;
   /** Opens the create-poll drawer. */
   onPollClick?: () => void;
   /** Externally disable the send button (e.g. insufficient fee balance) */
@@ -125,7 +134,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTipClick, onPollClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -912,6 +921,34 @@ export function ChatInput({ onSendMessage, onTipClick, onPollClick, sendDisabled
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{_copy("copy.3dd188029374", { defaultValue: "Send a tip" })}</TooltipContent>
+            </Tooltip>
+          )}
+
+          {onScheduleClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  data-chat-tool="schedule"
+                  aria-label={_copy("dmSchedule.button", { defaultValue: "Schedule message" })}
+                  className="relative h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                  // Keeps the caret (and the phone keyboard) where it is.
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onScheduleClick({
+                    text: message.trim(),
+                    hasAttachment: !!(studioItems.length || imageFile || docFile || audioPreview),
+                    clear: () => { setMessage.complete(message, ''); resetComposerHeight(); },
+                  })}
+                >
+                  <Clock className="w-5 h-5" />
+                  {scheduledCount > 0 && (
+                    <span aria-hidden className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-current" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{_copy("dmSchedule.button", { defaultValue: "Schedule message" })}</TooltipContent>
             </Tooltip>
           )}
 
