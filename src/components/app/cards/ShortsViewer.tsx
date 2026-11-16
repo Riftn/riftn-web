@@ -446,7 +446,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // re-arms itself, and neither is true of this one.
   const [autoHidden, setAutoHidden] = useState(false);
   const [isTimelineSeeking, setIsTimelineSeeking] = useState(false);
-  const beginTimelineSeek = useCallback(() => setIsTimelineSeeking(true), []);
+  // A scrub is attention: it brings rested chrome back with it.
+  const beginTimelineSeek = useCallback(() => { setIsTimelineSeeking(true); setAutoHidden(false); }, []);
   const endTimelineSeek = useCallback(() => setIsTimelineSeeking(false), []);
   const [playbackRate, setPlaybackRate] = useState(() => getVideoPreferences().playbackRate);
   
@@ -562,6 +563,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // one changes identity every render, and React would then detach and re-attach
   // the ref — setting this back to null and round-tripping forever.
   const [videoContainer, setVideoContainer] = useState<HTMLDivElement | null>(null);
+  // The scrubber's slot in the phone stack, as state for the same reason.
+  const [seekSlot, setSeekSlot] = useState<HTMLDivElement | null>(null);
   const attachVideoContainer = useCallback((node: HTMLDivElement | null) => {
     fullscreenTargetRef.current = node;
     setVideoContainer(node);
@@ -1727,6 +1730,9 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // The phone's creator row, caption and action row. Over the picture it is
   // pinned to the bottom of the screen; in the info stage the same block
   // heads the sheet under the video.
+  // Chrome that rests after a few seconds of play. The info stage's sheet
+  // never rested, and the scrubber's row is left out on purpose.
+  const autoFade = (inInfo: boolean) => cn("transition-opacity duration-[250ms] ease-out", !inInfo && autoHidden && "opacity-0");
   const phoneStack = (inInfo: boolean) => (
       <div className={inInfo ? "relative flex-shrink-0 pt-3 pb-3" : "absolute inset-x-0 bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none"}>
                 {/* Creator Info & Description */}
@@ -1734,7 +1740,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   // Hidden chrome is opacity-0, which still takes taps — kill
                   // pointer events too so a restore tap can't hit an invisible
                   // avatar / follow button on its way in.
-                  className={cn("px-4 pointer-events-auto", !isDescriptionExpanded && "touch-none", (showComments || chromeInert) && "pointer-events-none")}
+                  className={cn("px-4 pointer-events-auto", autoFade(inInfo), !isDescriptionExpanded && "touch-none", (showComments || chromeInert) && "pointer-events-none")}
                   onTouchStart={handleOverlayGestureTouchStart}
                   onTouchEnd={handleOverlayGestureTouchEnd}
                   onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
@@ -1770,6 +1776,10 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   
                   {/* Title + description - tap to expand/collapse */}
                   <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
+                  {/* On a short phone the plain stage has no room for the caption
+                      between the video card and the scrubber; it is one tap away
+                      in the info stage. */}
+                  <div className={cn(cleanWide && !inInfo && "[@media(max-height:700px)]:hidden")}>
                   <ShortCaption
                     key={currentShort.id}
                     short={currentShort}
@@ -1777,15 +1787,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     expanded={isDescriptionExpanded}
                     onToggleExpanded={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                   />
+                  </div>
                   <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
                 </div>
 
+                {/* It steps aside during a scrub: the frame preview and its time
+                    float just above the scrubber, which is where this row is. */}
                 {/* Action bar — horizontal row evenly spread across the bottom,
                     matching the feed post card action bar (like at far right). */}
                 <div
                   data-shorts-actions
                   data-on-media
-                  className={cn("mt-3 px-4 flex items-center justify-between pointer-events-auto", (showComments || chromeInert) && "pointer-events-none")}
+                  className={cn("mt-3 px-4 flex items-center justify-between pointer-events-auto", autoFade(inInfo), isTimelineSeeking && "opacity-0", (showComments || chromeInert) && "pointer-events-none")}
                   onTouchStart={handleOverlayGestureTouchStart}
                   onTouchEnd={handleOverlayGestureTouchEnd}
                   onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
@@ -1866,6 +1879,94 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(thumbCount)}</span>
                     </motion.button>
                   </span>
+                </div>
+
+                {/* The scrubber. The active slide draws itself in here, touch
+                    area included (see `seekLayer` on VideoSlide); a slide with
+                    nothing to play leaves it empty and it takes no room. */}
+                <div
+                  ref={setSeekSlot}
+                  data-shorts-seek-slot
+                  className={cn("relative z-10 mx-4 mt-1 h-11 empty:hidden pointer-events-auto", (showComments || chromeInert) && "pointer-events-none")}
+                />
+
+                {/* The player's buttons, on the bottom row under the scrubber. */}
+                <div
+                  data-shorts-tools
+                  data-on-media
+                  className={cn("px-4 flex items-center justify-between pointer-events-auto", autoFade(inInfo), (showComments || chromeInert) && "pointer-events-none")}
+                  onTouchStart={handleOverlayGestureTouchStart}
+                  onTouchEnd={handleOverlayGestureTouchEnd}
+                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
+                >
+                  {/* A profile-reel slide that is not a video (text, photo, comic)
+                      has nothing to play, so it keeps only the options button. */}
+                  {(isMobile || !currentShort?.reelPost) && <>
+                  {/* On phones these buttons stay on every post, so the row does not
+                      reshuffle from slide to slide; where one cannot work it says so. */}
+                  {document.pictureInPictureEnabled && <button
+                    className={VIEWER_CONTROL}
+                    aria-label={_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
+                      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
+                      if (player) void player.requestPictureInPicture().catch(() => {});
+                    }}
+                  ><PictureInPicture2 className="w-5 h-5" /></button>}
+                  {/* Playback speed */}
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as any);
+                      const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
+                      // Apply to the current slide before rerendering its neighbours.
+                      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
+                      if (player) player.playbackRate = nextRate;
+                      setPlaybackRate(nextRate);
+                      vpSetPlaybackRate(nextRate, currentShort?.creatorId);
+                    }}
+                    className={cn(VIEWER_CONTROL, 'min-w-[40px] px-1.5')}
+                    style={{ touchAction: 'manipulation' }}
+                    aria-label={_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}
+                  >
+                    <span className="text-white text-[11px] font-bold leading-none">{formatRate(playbackRate)}x</span>
+                  </button>
+
+                  {/* Full screen: a wide video also turns sideways where the browser allows it. */}
+                  {(isMobile || !currentShort?.imageUrls?.length) && <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
+                      toggleFullscreen();
+                    }}
+                    className={VIEWER_CONTROL}
+                    style={{ touchAction: 'manipulation' }}
+                    aria-label={isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+                  >
+                    {isFullscreen ? <Minimize className="w-5 h-5 text-white" /> : <Maximize className="w-5 h-5 text-white" />}
+                  </button>}
+
+                  {/* Mute button */}
+                  <button
+                    onClick={toggleMute}
+                    className={VIEWER_CONTROL}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5 text-white" />
+                    ) : (
+                      <Volume2 className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                  </>}
+
+                  {/* More options button */}
+                  <button
+                    onClick={() => setShareSheetOpen(true)}
+                    className={VIEWER_CONTROL}
+                  >
+                    <MoreHorizontal className="w-5 h-5 text-white" />
+                  </button>
                 </div>
                 </div>
   );
@@ -2048,6 +2149,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       // bar's gradient; the neighbours keep theirs in place,
                       // where nothing can see it anyway.
                       progressLayer={isActive ? videoContainer : null}
+                      seekLayer={isActive && isMobile && !overlaysHidden && !showComments ? seekSlot : null}
                       // Buffer the current slide + the next one so a swipe lands
                       // on an already-loaded video. The previous slide (offset
                       // -1) is almost always still in the browser cache from
@@ -2361,9 +2463,12 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   outside the centre restores through handleVideoTap. */}
 
               {/* Animated overlay container */}
+              {/* Only a deliberate clear fades the whole layer. The timed fade
+                  is applied piece by piece (`autoFade`), so the scrubber stays
+                  up, as the progress line always has, while the rest rests. */}
               <motion.div
                 className="absolute inset-0 z-10 pointer-events-none"
-                animate={{ opacity: (chromeHidden || showComments) ? 0 : 1 }}
+                animate={{ opacity: (overlaysHidden || showComments) ? 0 : 1 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
               >
                 {/* An open caption dims the video so it reads properly. A tap on
@@ -2384,7 +2489,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 </AnimatePresence>
 
                 {/* Bottom gradient overlay - fades from transparent to black */}
-                {!infoActive && <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />}
+                {!infoActive && <div className={cn("absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none transition-opacity duration-[250ms] ease-out", autoHidden && "opacity-0")} />}
                 
                 {/* Bottom overlay stack — creator info + description, with the
                     action bar below as the bottommost element (feed-card style
@@ -2607,87 +2712,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           
-          {/* Right side controls */}
-          <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
-            {/* A profile-reel slide that is not a video (text, photo, comic)
-                has nothing to play, so it keeps only the options button. */}
-            {(isMobile || !currentShort?.reelPost) && <>
-            {/* On phones these buttons stay on every post, so the row does not
-                reshuffle from slide to slide; where one cannot work it says so. */}
-            {document.pictureInPictureEnabled && !infoActive && (isMobile || !currentShort?.imageUrls?.length) && <button
-              className={VIEWER_CONTROL}
-              aria-label={_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
-                const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
-                if (player) void player.requestPictureInPicture().catch(() => {});
-              }}
-            ><PictureInPicture2 className="w-5 h-5" /></button>}
-            {/* Playback speed */}
-            <button
-              onClick={(event) => {
-                event.stopPropagation();
-                const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as any);
-                const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
-                // Apply to the current slide before rerendering its neighbours.
-                const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
-                if (player) player.playbackRate = nextRate;
-                setPlaybackRate(nextRate);
-                vpSetPlaybackRate(nextRate, currentShort?.creatorId);
-              }}
-              className={cn(VIEWER_CONTROL, 'min-w-[40px] px-1.5')}
-              style={{ touchAction: 'manipulation' }}
-              aria-label={_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}
-            >
-              <span className="text-white text-[11px] font-bold leading-none">{formatRate(playbackRate)}x</span>
-            </button>
-
-            {/* Full screen: a wide video also turns sideways where the browser allows it. */}
-            {(isMobile || !currentShort?.imageUrls?.length) && <button
-              onClick={(event) => {
-                event.stopPropagation();
-                if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
-                toggleFullscreen();
-              }}
-              className={VIEWER_CONTROL}
-              style={{ touchAction: 'manipulation' }}
-              aria-label={isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
-            >
-              {isFullscreen ? <Minimize className="w-5 h-5 text-white" /> : <Maximize className="w-5 h-5 text-white" />}
-            </button>}
-
-            {/* Mute button */}
-            <button
-              onClick={toggleMute}
-              className={VIEWER_CONTROL}
-            >
-              {isMuted ? (
-                <VolumeX className="w-5 h-5 text-white" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-white" />
-              )}
-            </button>
-            </>}
-
-            {/* More options button */}
-            <button
-              onClick={() => setShareSheetOpen(true)}
-              className={VIEWER_CONTROL}
-            >
-              <MoreHorizontal className="w-5 h-5 text-white" />
-            </button>
-
-            {/* Info stage: back to the plain stage. */}
-            {infoActive && <button
-              onClick={(event) => { event.stopPropagation(); chooseInfoStage(false); }}
-              className={VIEWER_CONTROL}
-              style={{ touchAction: 'manipulation' }}
-              aria-label={_copy("copy.94ea9b1d33a0", { defaultValue: "Show less" })}
-            >
-              <Minus className="w-5 h-5 text-white" />
-            </button>}
-          </div>
+          {/* The player's own buttons live in the bottom stack now (see
+              `phoneStack`). Only the way back to the plain stage stays up here,
+              across from Back. */}
+          {/* Info stage: back to the plain stage. */}
+          {infoActive && <button
+            onClick={(event) => { event.stopPropagation(); chooseInfoStage(false); }}
+            className={cn(VIEWER_CONTROL, 'absolute top-4 right-4 z-20')}
+            style={{ touchAction: 'manipulation' }}
+            aria-label={_copy("copy.94ea9b1d33a0", { defaultValue: "Show less" })}
+          >
+            <Minus className="w-5 h-5 text-white" />
+          </button>}
 
           {/* Clean stage: open the info stage, from just under the video. */}
           {cleanWide && !infoActive && <button
