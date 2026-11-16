@@ -9,7 +9,7 @@
  * - Skeleton loaders on first visit while lazy components load
  */
 
-import React, { Suspense, useState, useEffect, useMemo, useRef, useContext, useDeferredValue, memo, type ReactNode } from 'react';
+import React, { Suspense, useState, useEffect, useLayoutEffect, useMemo, useRef, useContext, useDeferredValue, memo, type ComponentType, type MutableRefObject, type ReactNode } from 'react';
 import { useLocation, useParams, UNSAFE_LocationContext, UNSAFE_RouteContext } from 'react-router-dom';
 import { BUY_PATHS } from '@/lib/buy-route';
 import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
@@ -35,6 +35,7 @@ import {
   GenericPageSkeleton as GenericPageSkeletonDesktop,
   withPhonePill,
 } from './PageSkeletons';
+import { withPageBones } from './PageBones';
 
 // Phones draw every page pill page's loading state as its real (empty) top
 // pill, so the pill holds still between pages; desktop keeps each layout.
@@ -100,11 +101,11 @@ const CACHED_PAGES: CachedPageConfig[] = [
   // reads the path to pick the active tab), so the same cached instance backs
   // all three — no duplicate mount.
   { key: 'home', path: ['/', '/app', '/videos', '/images', '/shorts'], component: HomePage, skeleton: FeedSkeleton },
-  { key: 'explore', path: ['/app/explore', '/explore'], component: ExplorePage, skeleton: ExploreSkeleton },
+  { key: 'explore', path: ['/app/explore', '/explore'], component: ExplorePage, skeleton: withPageBones('explore', ExploreSkeleton) },
   { key: 'notifications', path: ['/app/notifications', '/notifications'], component: NotificationsPage, skeleton: NotificationsSkeleton },
   { key: 'messages', path: ['/app/messages', '/messages'], component: MessagesPage, skeleton: MessagesSkeleton },
-  { key: 'assistant', path: ['/app/assistant', '/assistant'], component: AssistantPage, skeleton: GenericPageSkeleton },
-  { key: 'leaderboard', path: ['/app/leaderboard', '/leaderboard'], component: LeaderboardPage, skeleton: LeaderboardSkeleton },
+  { key: 'assistant', path: ['/app/assistant', '/assistant'], component: AssistantPage, skeleton: withPageBones('assistant', GenericPageSkeleton) },
+  { key: 'leaderboard', path: ['/app/leaderboard', '/leaderboard'], component: LeaderboardPage, skeleton: withPageBones('leaderboard', LeaderboardSkeleton) },
   { key: 'bookmarks', path: ['/app/bookmarks', '/bookmarks'], component: BookmarksPage, skeleton: BookmarksSkeleton },
   { key: 'settings', path: ['/app/settings', '/settings'], component: SettingsPage, skeleton: SettingsSkeleton },
   { key: 'command-centre', path: ['/app/command-centre', '/command-centre'], component: CommandCentrePage, skeleton: GenericPageSkeleton },
@@ -116,32 +117,32 @@ const CACHED_PAGES: CachedPageConfig[] = [
   // the /:username catch-all and rendered an empty profile. `wallet` is the one
   // exception — a real account holds that handle, so /wallet stays a profile.
   // Music, Requests and Affiliate draw their own headers, not the page pill.
-  { key: 'music', path: ['/app/music', '/music'], component: MusicPage, skeleton: GridSkeletonDesktop },
-  { key: 'stages', path: ['/app/stages', '/stages'], component: StagesPage, skeleton: GenericPageSkeleton },
-  { key: 'tv', path: ['/app/tv', '/tv'], component: TVPage, skeleton: GridSkeleton },
-  { key: 'buy', path: BUY_PATHS, component: BuyCoinsPage, skeleton: GenericPageSkeleton },
-  { key: 'agents', path: ['/app/agents', '/agents'], component: AgentsPage, skeleton: GenericPageSkeleton },
-  { key: 'features', path: ['/app/features', '/features'], component: FeaturesPage, skeleton: FeaturesSkeletonDesktop },
-  { key: 'governance', path: ['/app/governance', '/governance'], component: GovernancePage, skeleton: FeaturesSkeleton },
-  { key: 'dao', path: ['/app/dao', '/dao'], component: DaoPage, skeleton: FeaturesSkeleton },
-  { key: 'careers', path: ['/app/jobs', '/jobs'], component: CareersPage, skeleton: GenericPageSkeleton },
-  { key: 'glossary', path: ['/app/glossary', '/glossary'], component: GlossaryPage, skeleton: GenericPageSkeleton },
-  { key: 'stats', path: ['/stats', '/app/stats'], component: StatsPage, skeleton: GenericPageSkeleton },
+  { key: 'music', path: ['/app/music', '/music'], component: MusicPage, skeleton: withPageBones('music', GridSkeletonDesktop) },
+  { key: 'stages', path: ['/app/stages', '/stages'], component: StagesPage, skeleton: withPageBones('stages', GenericPageSkeleton) },
+  { key: 'tv', path: ['/app/tv', '/tv'], component: TVPage, skeleton: withPageBones('tv', GridSkeleton) },
+  { key: 'buy', path: BUY_PATHS, component: BuyCoinsPage, skeleton: withPageBones('buy', GenericPageSkeleton) },
+  { key: 'agents', path: ['/app/agents', '/agents'], component: AgentsPage, skeleton: withPageBones('agents', GenericPageSkeleton) },
+  { key: 'features', path: ['/app/features', '/features'], component: FeaturesPage, skeleton: withPageBones('features', FeaturesSkeletonDesktop) },
+  { key: 'governance', path: ['/app/governance', '/governance'], component: GovernancePage, skeleton: withPageBones('governance', FeaturesSkeleton) },
+  { key: 'dao', path: ['/app/dao', '/dao'], component: DaoPage, skeleton: withPageBones('dao', FeaturesSkeleton) },
+  { key: 'careers', path: ['/app/jobs', '/jobs'], component: CareersPage, skeleton: withPageBones('careers', GenericPageSkeleton) },
+  { key: 'glossary', path: ['/app/glossary', '/glossary'], component: GlossaryPage, skeleton: withPageBones('glossary', GenericPageSkeleton) },
+  { key: 'stats', path: ['/stats', '/app/stats'], component: StatsPage, skeleton: withPageBones('stats', GenericPageSkeleton) },
   { key: 'live-studio', path: ['/live-studio', '/app/live-studio'], component: LiveStudioPage, skeleton: GenericPageSkeleton },
   { key: 'planned', path: ['/app/planned', '/planned'], component: PlannedPage, skeleton: GenericPageSkeleton },
-  { key: 'feedback', path: ['/feedback', '/app/feedback'], component: FeedbackPage, skeleton: GenericPageSkeleton },
-  { key: 'stake', path: ['/app/stake', '/stake'], component: StakingPage, skeleton: GenericPageSkeleton },
-  { key: 'bridge', path: ['/app/bridge', '/bridge'], component: BridgePage, skeleton: GenericPageSkeleton },
-  { key: 'top-100', path: ['/app/top-100', '/top-100'], component: Top100CryptosPage, skeleton: LeaderboardSkeleton },
-  { key: 'communities', path: ['/app/communities', '/communities'], component: CommunitiesPage, skeleton: GenericPageSkeleton },
-  { key: 'events', path: ['/app/events', '/events'], component: EventsPage, skeleton: GenericPageSkeleton },
-  { key: 'fractions', path: ['/app/fractions', '/fractions'], component: FractionsPage, skeleton: GridSkeleton },
-  { key: 'usernames', path: ['/app/usernames', '/usernames'], component: UsernamesPage, skeleton: GridSkeleton },
-  { key: 'accounts', path: ['/app/accounts', '/accounts'], component: AccountsPage, skeleton: GridSkeleton },
-  { key: 'work', path: ['/app/work', '/work'], component: WorkPage, skeleton: GenericPageSkeleton },
+  { key: 'feedback', path: ['/feedback', '/app/feedback'], component: FeedbackPage, skeleton: withPageBones('feedback', GenericPageSkeleton) },
+  { key: 'stake', path: ['/app/stake', '/stake'], component: StakingPage, skeleton: withPageBones('stake', GenericPageSkeleton) },
+  { key: 'bridge', path: ['/app/bridge', '/bridge'], component: BridgePage, skeleton: withPageBones('bridge', GenericPageSkeleton) },
+  { key: 'top-100', path: ['/app/top-100', '/top-100'], component: Top100CryptosPage, skeleton: withPageBones('top-100', LeaderboardSkeleton) },
+  { key: 'communities', path: ['/app/communities', '/communities'], component: CommunitiesPage, skeleton: withPageBones('communities', GenericPageSkeleton) },
+  { key: 'events', path: ['/app/events', '/events'], component: EventsPage, skeleton: withPageBones('events', GenericPageSkeleton) },
+  { key: 'fractions', path: ['/app/fractions', '/fractions'], component: FractionsPage, skeleton: withPageBones('fractions', GridSkeleton) },
+  { key: 'usernames', path: ['/app/usernames', '/usernames'], component: UsernamesPage, skeleton: withPageBones('usernames', GridSkeleton) },
+  { key: 'accounts', path: ['/app/accounts', '/accounts'], component: AccountsPage, skeleton: withPageBones('accounts', GridSkeleton) },
+  { key: 'work', path: ['/app/work', '/work'], component: WorkPage, skeleton: withPageBones('work', GenericPageSkeleton) },
   { key: 'affiliate', path: ['/app/affiliate', '/affiliate'], component: AffiliatePage, skeleton: GenericPageSkeletonDesktop },
-  { key: 'ads', path: ['/app/ads', '/ads'], component: AdsPage, skeleton: GenericPageSkeleton },
-  { key: 'arcade', path: ['/arcade', '/app/arcade'], component: ArcadePage, skeleton: GridSkeleton },
+  { key: 'ads', path: ['/app/ads', '/ads'], component: AdsPage, skeleton: withPageBones('ads', GenericPageSkeleton) },
+  { key: 'arcade', path: ['/arcade', '/app/arcade'], component: ArcadePage, skeleton: withPageBones('arcade', GridSkeleton) },
   { key: 'profile', path: ['/app/profile', '/profile'], component: ProfilePage, skeleton: SeededProfileSkeleton },
 ];
 
@@ -174,6 +175,12 @@ const HeldRoute = memo(function HeldRoute({ live, children }: { live: boolean; c
   );
 });
 
+/** The route's Suspense fallback; notes that the skeleton has been seen. */
+function FallbackSkeleton({ shown, skeleton: Skeleton }: { shown: MutableRefObject<boolean>; skeleton: ComponentType }) {
+  useLayoutEffect(() => { shown.current = true; }, [shown]);
+  return <Skeleton />;
+}
+
 /** Wrapper that shows skeleton on first Suspense load */
 const CachedPage = memo(function CachedPage({
   config,
@@ -196,6 +203,10 @@ const CachedPage = memo(function CachedPage({
   const SkeletonComponent = config.skeleton;
   // Show/hide must not re-render the page itself.
   const page = useMemo(() => <Component />, [Component]);
+  // Whether the skeleton was on screen before the page: the gate then
+  // dissolves it into the page instead of cutting.
+  const skeletonShown = useRef(false);
+  const fallback = useMemo(() => <FallbackSkeleton shown={skeletonShown} skeleton={SkeletonComponent} />, [SkeletonComponent]);
   const { isCollapsed } = useSidebarCollapse();
 
   // Apply top spacing in collapsed mode for all pages except home (which handles it internally)
@@ -256,11 +267,11 @@ const CachedPage = memo(function CachedPage({
           one) must not white-screen the whole app. resetToken=pathname lets a
           transient fault self-heal on the next navigation. */}
       <ErrorBoundary compact resetKey={resetToken} label={config.key}>
-        <Suspense fallback={<SkeletonComponent />}>
+        <Suspense fallback={fallback}>
           {/* Only the active page may write document metadata — see the context. */}
           <RetainedPostActivityContext.Provider value={retainedPostKey ?? null}>
             <CachedPageActiveContext.Provider value={contextActive}>
-              <HeldRoute live={shouldStayVisible}><CopyGate skeleton={SkeletonComponent}>{page}</CopyGate></HeldRoute>
+              <HeldRoute live={shouldStayVisible}><CopyGate skeleton={SkeletonComponent} skeletonShown={skeletonShown}>{page}</CopyGate></HeldRoute>
             </CachedPageActiveContext.Provider>
           </RetainedPostActivityContext.Provider>
         </Suspense>
