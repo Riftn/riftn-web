@@ -52,7 +52,9 @@ No wallet keys are exported and the connector cannot sign a transfer or mint.
 Generation and publication require a request UUID. The account and request ID
 reserve one operation before contacting the service. A retry with changed content
 is refused; an ambiguous response is retained rather than starting another paid
-job. Status lookup accepts only a job ID previously stored for the same account,
+job. A retry with the same request ID does not consume another daily write slot.
+An agent identity is resolved before a daily slot is counted. Status lookup
+accepts only a job ID previously stored for the same account,
 and uses its recorded provider ticket. It makes one request and starts no watcher.
 Paid outputs use the existing journal/library recovery; starter images are saved
 with the same private library upload protocol. Save failures are reported using

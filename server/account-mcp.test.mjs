@@ -109,15 +109,38 @@ test('post drafts stay private to the connected account and can be edited or del
   const one = await connect(f, { scope: 'dehub:read dehub:social' });
   const two = await connect(f, { scope: 'dehub:read dehub:social' }, 'two');
   const draft_id = '9dbdd100-45bc-4a9c-a8c2-9ea19a933002';
-  const save = await (await rpc(f, 'dehub_save_draft', { draft_id, content: 'First' }, one.access_token)).json();
+  const save = await (await rpc(f, 'dehub_save_draft', { draft_id, content: 'First', title: 'Keep this title', category: 'Music' }, one.access_token)).json();
   assert.equal(save.result.structuredContent.content, 'First');
   await rpc(f, 'dehub_save_draft', { draft_id, content: 'Edited' }, one.access_token);
   const own = await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json();
   const other = await (await rpc(f, 'dehub_drafts', {}, two.access_token)).json();
   assert.equal(own.result.structuredContent.drafts[0].content, 'Edited');
+  assert.equal(own.result.structuredContent.drafts[0].title, 'Keep this title');
+  assert.equal(own.result.structuredContent.drafts[0].category, 'Music');
   assert.deepEqual(other.result.structuredContent.drafts, []);
   await rpc(f, 'dehub_delete_draft', { draft_id }, one.access_token);
   assert.deepEqual((await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json()).result.structuredContent.drafts, []);
+});
+test('a post retry keeps its result without spending a second daily slot', async () => {
+  let created = 0;
+  const f = fixture(async (url) => {
+    if (url.endsWith('/user_mint')) { created++; return Response.json({ result: { createdTokenId: '42' } }); }
+    throw new Error(`Unexpected upstream request: ${url}`);
+  });
+  const c = await connect(f, { scope: 'dehub:social' });
+  const { DAILY_LIMITS } = await import('./account-mcp.js');
+  const before = DAILY_LIMITS.post;
+  DAILY_LIMITS.post = 1;
+  try {
+    const args = { request_id: jobId, content: 'One post' };
+    const first = await (await rpc(f, 'dehub_create_post', args, c.access_token)).json();
+    const retry = await (await rpc(f, 'dehub_create_post', args, c.access_token)).json();
+    assert.equal(first.result.structuredContent.token_id, '42');
+    assert.equal(retry.result.structuredContent.token_id, '42');
+    assert.equal(created, 1);
+    const next = await (await rpc(f, 'dehub_create_post', { request_id: '9dbdd100-45bc-4a9c-a8c2-9ea19a933003', content: 'Another' }, c.access_token)).json();
+    assert.match(next.result.structuredContent.error, /Daily limit/);
+  } finally { DAILY_LIMITS.post = before; }
 });
 test('a connected account can publish an inline chat image without an external URL', async () => {
   let upload;
@@ -359,6 +382,7 @@ test('acting as an agent needs the agents permission and a server-issued session
   assert.deepEqual(sessions, ['Bearer one']);
   const stranger = await (await rpc(f, 'dehub_follow', { target_wallet: B, action: 'follow', as_agent: 'stranger' }, full.access_token)).json();
   assert.equal(stranger.result.isError, true);
+  assert.equal(f.store.data.get(`rate:day:follow:${A}`)?.value, 1);
   // The tool input can never pick a wallet to act as.
   assert.equal((await callAccountTool('dehub_follow', { target_wallet: B, action: 'follow', as_agent: B, wallet: C }, { token: 'one', scopes: SCOPES })).isError, true);
 });
