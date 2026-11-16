@@ -18933,5 +18933,35 @@
   "githubLink": {
     "verified": "Tasdiqlanmýş",
     "disconnect": "Baglan"
+  },
+  "chatSearch": {
+    "placeholder": "Söwda habarlaryny ýa-da adamlary gözden geçiriň",
+    "placeholderPerson": "{{name}}'nynyň habarlaryny gözden geçiriň",
+    "close": "Gözden geçirişi ýap",
+    "removePerson": "Hamma üçin gözden geçiriň",
+    "clear": "Tizlik",
+    "signInTitle": "Söhbeti gözden geçirmek üçin giriş edin",
+    "voice": "Ses habary",
+    "photo": "Fotograf",
+    "peopleHere": "Bu söhbetdeki adamlar",
+    "recent": "Soňky gözden geçirişler",
+    "hint": "Bir sözi ýa-da ady giriziň.",
+    "failed": "Gözden geçirişi ýüklenip bilmedi",
+    "people": "Adamlar",
+    "messages": "Habarlar",
+    "seeCount_one": "{{count}} habaryny gör",
+    "seeCount_other": "{{count}} habarlaryny gör",
+    "messagesCount_one": "{{count}} habary",
+    "messagesCount_other": "{{count}} habarları",
+    "results_one": "{{count}} netijä",
+    "results_other": "{{count}} netije",
+    "backToResults": "Netijelere gaýtadan gaýdyp",
+    "position": "{{current}} / {{total}}",
+    "older": "Eski netije",
+    "newer": "Täze netije",
+    "latest": "Soňky",
+    "gone": "Bu habar indi ýok",
+    "theirMessages": "Onuň habarları",
+    "seeTheirMessages": "Onuň habarlaryny gör"
   }
 }

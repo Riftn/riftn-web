@@ -18872,5 +18872,30 @@
     "unavailable": "GitHub वेरिफिकेशन जल्द ही आ जाई छई!",
     "connect": "गिटहब से जुड़ें",
     "disconnect": "गिटहब से अलग करें"
+  },
+  "chatSearch": {
+    "placeholder": "संदेश या लोग खोजें",
+    "placeholderPerson": "सर्च {{name}} के संदेश",
+    "close": "खोज बंद करीं",
+    "removePerson": "सबके खोज",
+    "clear": "साफ़",
+    "signInTitle": "चैट खोजे खातिर साइन इन करीं",
+    "photo": "इमेज में देखावल फोटो",
+    "peopleHere": "ई चैट में लोग",
+    "recent": "Latest संग्राहलय",
+    "hint": "एक शब्द या नाम टाइप करें।",
+    "failed": "खोज लोड नहीं हो सकल",
+    "people": "मानवा जन्तवो जगति",
+    "messages": "संदेश",
+    "seeCount_one": "उनकर {{count}} संदेश देखीं",
+    "seeCount_other": "उन्हें {{count}} संदेश देखीं",
+    "messagesCount_one": "{{count}} संदेश",
+    "backToResults": "परिणाम पर वापस",
+    "older": "पुरान परिणाम",
+    "newer": "नवीन परिणाम",
+    "latest": "नवीनतम",
+    "gone": "ई संदेश अब यहाँ नहीं बा",
+    "theirMessages": "उनकर संदेश",
+    "seeTheirMessages": "उनकर संदेश देखीं"
   }
 }
