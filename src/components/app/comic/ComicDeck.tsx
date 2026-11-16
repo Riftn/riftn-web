@@ -163,7 +163,10 @@ export const ComicDeck = memo(function ComicDeck({ images, captions, description
 
   const onPointerDown = (e: React.PointerEvent) => {
     drag.current = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId, sideways: false };
-    lean(e.clientX, e.clientY);
+    setWarm(true);
+    // A finger may be starting a page scroll; the card only leans once the
+    // drag turns sideways, so scrolling past a comic leaves it still.
+    if (e.pointerType === 'mouse') lean(e.clientX, e.clientY);
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const d = drag.current;
@@ -181,7 +184,7 @@ export const ComicDeck = memo(function ComicDeck({ images, captions, description
       const edge = (dx > 0 && index === 0) || (dx < 0 && index === total - 1);
       sim.current.tdx = edge ? dx / 4 : dx;
     }
-    lean(e.clientX, e.clientY);
+    if (d.sideways || e.pointerType === 'mouse') lean(e.clientX, e.clientY);
   };
   const onPointerUp = (e: React.PointerEvent) => {
     const d = drag.current;
@@ -246,6 +249,17 @@ export const ComicDeck = memo(function ComicDeck({ images, captions, description
     io.observe(el);
     return () => io.disconnect();
   }, [animated, reading]);
+
+  // Warm the pages either side, so turning a page never shows an empty frame.
+  // A feed card waits for the first touch, so scrolling by loads nothing extra.
+  const [warm, setWarm] = useState(false);
+  useEffect(() => {
+    if (index === 0 && !full && !warm) return;
+    for (const i of [index + 1, index - 1]) {
+      const src = i >= 0 && i < total ? cdnImage(images[i], { width: 720 }) : '';
+      if (src) { const img = new Image(); img.decoding = 'async'; img.src = src; }
+    }
+  }, [index, images, total, full, warm]);
 
   const behind = useMemo(() => [index + 1, index + 2].filter(i => i < total), [index, total]);
 
@@ -325,6 +339,7 @@ export const ComicDeck = memo(function ComicDeck({ images, captions, description
           className="comic-card cursor-pointer outline-none"
           style={{ touchAction: 'pan-y' }}
           onPointerDown={onPointerDown}
+          onPointerEnter={() => setWarm(true)}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerCancel}
@@ -343,8 +358,8 @@ export const ComicDeck = memo(function ComicDeck({ images, captions, description
                   src={cdnImage(images[index], { width: 720 })}
                   alt={alt}
                   draggable={false}
-                  loading={aboveFold && index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
+                  loading={index > 0 || aboveFold ? 'eager' : 'lazy'}
+                  decoding={index > 0 ? 'sync' : 'async'}
                 />
                 {alt ? <span className="comic-alt">ALT</span> : null}
               </div>
@@ -368,8 +383,6 @@ export const ComicDeck = memo(function ComicDeck({ images, captions, description
         </div>
       </div>
 
-      {/* Preload the next page so the deal is instant. */}
-      {index + 1 < total ? <link rel="prefetch" as="image" href={cdnImage(images[index + 1], { width: 720 })} /> : null}
 
       {full && total > 1 ? (
         <div className="relative mt-7 h-12 w-full max-w-[360px]" role="tablist" aria-label={t('comic.pages', { defaultValue: 'Pages' })}>
