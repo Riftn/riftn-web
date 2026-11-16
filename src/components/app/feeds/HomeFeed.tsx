@@ -452,6 +452,13 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
     const timeAgo = pinnedPost.createdAt ? formatTimeAgo(pinnedPost.createdAt) : _translateCopy("copy.66f53417d3b7", { defaultValue: "Just now" });
     
     const nftPostType = pinnedPost.postType || 'video';
+
+  // An audio post has an audioUrl and no videoUrl, so it fell through to the
+  // text branch below and showed only its caption. The feed's own mapper
+  // already builds the playable audio card.
+  if (nftPostType === 'audio' || nftPostType === 'feed-audio') {
+    return { type: 'video', data: mapToVideoItem(pinnedPost, 0) };
+  }
     
     if (nftPostType === 'image' || (pinnedPost.imageUrls && pinnedPost.imageUrls.length > 0 && !pinnedPost.videoUrl)) {
       const imageUrls = buildFeedImageUrls(pinnedPost.imageUrls, undefined, (pinnedPost as { imageSizes?: unknown }).imageSizes);
