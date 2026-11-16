@@ -4552,7 +4552,7 @@ th{color:#fff;font-weight:700}
 // spent a hop or a duplicate on every page.
 const PRERENDER_HEADER = `<header class="dh-head"><a href="${APP_URL}/"><img src="${APP_URL}/dehub-header-logo.png" alt="Riftn" width="270" height="81"></a><a class="dh-open" href="${APP_URL}/explore">Open Riftn</a></header><main class="dh-main">`;
 
-const PRERENDER_FOOTER = `</main><footer class="dh-foot">Riftn | open source, user owned and censorship resistant media.<br><a href="${APP_URL}/docs">Docs</a> · <a href="${APP_URL}/docs/blog">Blog</a> · <a href="${APP_URL}/explore">Explore</a></footer>`;
+const PRERENDER_FOOTER = `</main><footer class="dh-foot">Riftn (formerly DeHub) | open source, user owned and censorship resistant media.<br><a href="${APP_URL}/docs">Docs</a> · <a href="${APP_URL}/docs/blog">Blog</a> · <a href="${APP_URL}/explore">Explore</a></footer>`;
 
 /**
  * The other half of the problem: every builder in this file, and the ssr-seo

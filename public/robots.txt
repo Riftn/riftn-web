@@ -28,6 +28,7 @@ User-agent: Webzio-Extended
 User-agent: Scrapy
 Allow: /$
 Allow: /llms.txt
+Allow: /llms-full.txt
 Allow: /rss.xml
 Allow: /docs
 Allow: /guides/

@@ -338,7 +338,7 @@ export const blogPosts: BlogPost[] = [
   createPost("Q2 2021", 2021, 2, 4, "Implemented basic governance voting mechanism", "A Voice for All: Riftn's Basic Governance Voting Arrives"),
   createPost("Q2 2021", 2021, 2, 5, "Smart contract security issue discovered", "Navigating Challenges: Addressing a V1 Smart Contract Security Issue"),
   // Q3 2021
-  createPost("Q3 2021", 2021, 3, 0, "Rebranded to Riftn", "A New Era: The Rebranding to Riftn"),
+  createPost("Q3 2021", 2021, 3, 0, "Rebranded to DeHub", "A New Era: The Rebranding to DeHub"),
   createPost("Q3 2021", 2021, 3, 1, "Started full app rebuild using React Native for better cross-platform support", "Building for All: App Rebuild with React Native"),
   createPost("Q3 2021", 2021, 3, 2, "Airdropped all holders automatically", "Rewarding Loyalty: Automatic Airdrop for All Holders"),
   createPost("Q3 2021", 2021, 3, 3, "Addressed security vulnerabilities from v1 with full Certik Audit", "Fortifying Our Walls: V1 Security Hardened with Certik Audit"),
@@ -379,7 +379,7 @@ export const blogPosts: BlogPost[] = [
   createPost("Q1 2023", 2023, 1, 0, "Alpha launch of complete d'app integrating all ecosystem components", "The Vision Unfolds: Alpha Launch of Riftn's Integrated D'App"),
   createPost("Q1 2023", 2023, 1, 1, "Released tokenised uploads with onchain ad revenue sharing (creators earning 90%)", "Creator Economy Reimagined: Tokenized Uploads & 90% Ad Revenue Share"),
   createPost("Q1 2023", 2023, 1, 2, "Commenced advanced analytics dashboard for creators", "Insights for Creators: Advanced Analytics Dashboard Development Begins"),
-  createPost("Q1 2023", 2023, 1, 3, "Recommenced trading of Riftn v2 on Gate.io", "Back in Action: Riftn V2 Trading Resumes on Gate.io"),
+  createPost("Q1 2023", 2023, 1, 3, "Recommenced trading of DeHub v2 on Gate.io", "Back in Action: DeHub V2 Trading Resumes on Gate.io"),
   // Q2 2023
   createPost("Q2 2023", 2023, 2, 0, "Won most innovative company award at UK's Corporate Livewire, competing against 900+ companies in a vote based system backed by Sony, Samsung and other industry giants.", "Innovation Recognized: Riftn Wins Corporate Livewire Award"),
   createPost("Q2 2023", 2023, 2, 1, "Featured in major tech publications including TechCrunch and VentureBeat", "In the Spotlight: Riftn Featured in TechCrunch and VentureBeat"),
