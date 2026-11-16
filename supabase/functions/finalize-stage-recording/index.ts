@@ -146,6 +146,10 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (stageErr || !stage) throw new Error('stage not found');
     if (!stage.recording_url) throw new Error('no recording available');
+    // The host writes this URL. Only a file in our own public storage is read.
+    if (!stage.recording_url.startsWith(`${SUPABASE_URL}/storage/v1/object/public/`) || stage.recording_url.includes('..')) {
+      throw new Error('no recording available');
+    }
 
     const transcribe = async () => {
       if (!thenTranscribe) return;
