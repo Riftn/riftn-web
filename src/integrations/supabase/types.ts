@@ -1661,6 +1661,150 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_buy_alerts_20261114: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          community_id: string | null
+          content: string | null
+          created_at: string | null
+          display_name: string | null
+          edited_at: string | null
+          id: string | null
+          image_url: string | null
+          message_type: string | null
+          pinned_at: string | null
+          pinned_by: string | null
+          reactions: Json | null
+          reply_to_id: string | null
+          username: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          community_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          edited_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          message_type?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          community_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          edited_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          message_type?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      backup_communities_20261115: {
+        Row: {
+          avatar_url: string | null
+          backed_up_at: string | null
+          banner_url: string | null
+          created_at: string | null
+          creator_wallet_address: string | null
+          default_permissions: Json | null
+          description: string | null
+          entry_price: number | null
+          holder_gate_chain_id: number | null
+          holder_gate_decimals: number | null
+          holder_gate_min: number | null
+          holder_gate_symbol: string | null
+          holder_gate_token: string | null
+          id: string | null
+          is_private: boolean | null
+          kind: string | null
+          member_count: number | null
+          name: string | null
+          rules: Json | null
+          slow_mode_seconds: number | null
+          slug: string | null
+          ticker_chain_id: string | null
+          ticker_contract_address: string | null
+          ticker_pair_address: string | null
+          ticker_symbol: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          backed_up_at?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          creator_wallet_address?: string | null
+          default_permissions?: Json | null
+          description?: string | null
+          entry_price?: number | null
+          holder_gate_chain_id?: number | null
+          holder_gate_decimals?: number | null
+          holder_gate_min?: number | null
+          holder_gate_symbol?: string | null
+          holder_gate_token?: string | null
+          id?: string | null
+          is_private?: boolean | null
+          kind?: string | null
+          member_count?: number | null
+          name?: string | null
+          rules?: Json | null
+          slow_mode_seconds?: number | null
+          slug?: string | null
+          ticker_chain_id?: string | null
+          ticker_contract_address?: string | null
+          ticker_pair_address?: string | null
+          ticker_symbol?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          backed_up_at?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          creator_wallet_address?: string | null
+          default_permissions?: Json | null
+          description?: string | null
+          entry_price?: number | null
+          holder_gate_chain_id?: number | null
+          holder_gate_decimals?: number | null
+          holder_gate_min?: number | null
+          holder_gate_symbol?: string | null
+          holder_gate_token?: string | null
+          id?: string | null
+          is_private?: boolean | null
+          kind?: string | null
+          member_count?: number | null
+          name?: string | null
+          rules?: Json | null
+          slow_mode_seconds?: number | null
+          slug?: string | null
+          ticker_chain_id?: string | null
+          ticker_contract_address?: string | null
+          ticker_pair_address?: string | null
+          ticker_symbol?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       builder_files: {
         Row: {
           content: string
@@ -4431,6 +4575,7 @@ export type Database = {
           status: string
           status_note: string | null
           title: string
+          title_auto: boolean
           updated_at: string
           vote_count: number
         }
@@ -4451,6 +4596,7 @@ export type Database = {
           status?: string
           status_note?: string | null
           title: string
+          title_auto?: boolean
           updated_at?: string
           vote_count?: number
         }
@@ -4471,6 +4617,7 @@ export type Database = {
           status?: string
           status_note?: string | null
           title?: string
+          title_auto?: boolean
           updated_at?: string
           vote_count?: number
         }
@@ -9895,6 +10042,10 @@ export type Database = {
         Args: { p_dhb: number; p_tx_hash: string; p_wallet: string }
         Returns: number
       }
+      apply_feature_request_auto_title: {
+        Args: { p_expected: string; p_id: string; p_title: string }
+        Returns: boolean
+      }
       attach_feature_request_device_info: {
         Args: { p_id: string; p_info: Json }
         Returns: boolean
@@ -10854,6 +11005,7 @@ export type Database = {
           status: string
           status_note: string | null
           title: string
+          title_auto: boolean
           updated_at: string
           vote_count: number
         }
