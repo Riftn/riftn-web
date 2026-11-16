@@ -55,10 +55,39 @@ serve(async (req) => {
     // Fetch recent chat history for context
     const { data: recent } = await admin
       .from("community_chat_messages")
-      .select("display_name, username, content, message_type")
+      .select("display_name, username, content, message_type, created_at")
       .eq("community_id", communityId)
       .order("created_at", { ascending: false })
       .limit(15);
+
+    // The AI Admin only ever answers a question somebody actually put to it
+    // in this chat. The app saves the member's "/admin ..." line first and
+    // calls here second, so that line has to be there: recent, and not yet
+    // answered. Without it this endpoint would post under the admin's name
+    // for anyone who called it, in any community, with nothing in the chat
+    // to show who asked.
+    const wanted = prompt.trim();
+    const cutoff = Date.now() - 3 * 60_000;
+    let answeredSince = false;
+    let question: { display_name?: string | null; username?: string | null } | null = null;
+    let fallback: typeof question = null;
+    for (const m of recent || []) {
+      if (Date.parse(m.created_at) < cutoff) break;
+      if (m.message_type === "admin_response") { answeredSince = true; continue; }
+      if (m.message_type !== "text") continue;
+      const asked = /^\/admin\b\s*(.*)$/is.exec(String(m.content ?? "").trim());
+      if (!asked) continue;
+      if (asked[1].trim() === wanted) { question = m; break; }
+      if (!answeredSince && !fallback) fallback = m;
+    }
+    question = question ?? fallback;
+    if (!question) {
+      return new Response(JSON.stringify({ error: "Ask the AI Admin with /admin in the chat." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const asker = String(question.display_name || question.username || askerName || "Member").slice(0, 60);
 
     const history = (recent || [])
       .reverse()
@@ -87,7 +116,7 @@ A member asked you the following with /admin. Reply directly to them.`;
       model: "google/gemini-3-flash-preview",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `${askerName ? askerName + ": " : ""}${prompt}` },
+        { role: "user", content: `${asker}: ${prompt.slice(0, 2000)}` },
       ],
     }, { label: "community-admin-chat" });
 

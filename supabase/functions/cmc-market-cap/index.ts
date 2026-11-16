@@ -1,3 +1,4 @@
+import { rateLimitByIp } from "../_shared/auth.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -100,6 +101,11 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Metered CoinMarketCap lookups for a symbol the caller picked: sized for a
+  // busy feed of ticker cards, closed to a script in a loop.
+  const limited = await rateLimitByIp(req, 'cmc-market-cap', { limit: 3000, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
 
   try {
     const CMC_API_KEY = Deno.env.get('CMC_API_KEY');

@@ -1,3 +1,4 @@
+import { isOwnOrigin } from "../_shared/own-origins.ts";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { AI_PLANS, AI_PLAN_POLICY_VERSION, aiPlanPriceMatches } from "../_shared/ai-plans.ts";
 
@@ -39,20 +40,14 @@ async function resolveOrCreateCustomer(
   if (options.email) {
     const existing = await stripe.customers.list({
       email: options.email,
-      limit: 1,
+      limit: 10,
     });
-    if (existing.data.length) {
-      const customer = existing.data[0];
-      if (
-        options.userId &&
-        customer.metadata?.userId !== options.userId
-      ) {
-        await stripe.customers.update(customer.id, {
-          metadata: { ...customer.metadata, userId: options.userId },
-        });
-      }
-      return customer.id;
-    }
+    // An email is typed by whoever is checking out, so it proves nothing
+    // about who they are. A customer found by email is reused only when it
+    // already belongs to this account; it is never re-labelled to a new one,
+    // which would hand its billing record to anyone who knew the address.
+    const owned = existing.data.find((c) => options.userId && c.metadata?.userId === options.userId);
+    if (owned) return owned.id;
   }
   const created = await stripe.customers.create({
     ...(options.email && { email: options.email }),
@@ -139,7 +134,9 @@ Deno.serve(async (req) => {
         },
       );
     }
-    if (!returnUrl || !/^https?:\/\//.test(returnUrl)) {
+    // Stripe sends the buyer here afterwards, so it has to be one of our own
+    // pages: any other address would turn checkout into a redirect service.
+    if (!returnUrl || typeof returnUrl !== "string" || !/^https?:\/\//.test(returnUrl) || !isOwnOrigin(returnUrl)) {
       return new Response(JSON.stringify({ error: "Invalid returnUrl" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

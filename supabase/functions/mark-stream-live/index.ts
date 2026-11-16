@@ -60,9 +60,22 @@ Deno.serve(async (req) => {
     // just began.
     const existing = await supabase
       .from("live_stream_sessions")
-      .select("started_at")
+      .select("started_at, address, heartbeat_at")
       .eq("token_id", String(tokenId))
       .maybeSingle();
+
+    // A stream that is on air under one account cannot be re-marked under
+    // another: the write below replaces `address`, so without this any signed
+    // in caller could put their own name on somebody else's broadcast. A row
+    // whose pulse stopped (three missed heartbeats) is nobody's any more.
+    const holder = String(existing.data?.address ?? "").toLowerCase();
+    const pulse = Date.parse(existing.data?.heartbeat_at ?? existing.data?.started_at ?? "");
+    if (holder && holder !== walletAddress && Number.isFinite(pulse) && Date.now() - pulse < 3 * 60_000) {
+      return new Response(
+        JSON.stringify({ error: "This stream is live under another account." }),
+        { status: 403, headers: corsHeaders }
+      );
+    }
 
     const { error } = await supabase.from("live_stream_sessions").upsert(
       {

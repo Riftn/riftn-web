@@ -29,6 +29,13 @@ function json(status: number, body: Record<string, unknown>): Response {
   })
 }
 
+/** Enough of an address to follow one sign-in through the logs, not enough to read it. */
+function maskEmail(value: unknown): string {
+  const [name, domain] = String(value ?? '').split('@');
+  if (!name || !domain) return '(none)';
+  return `${name.slice(0, 1)}***@${domain}`;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return json(405, { error: 'Method not allowed' })
@@ -67,7 +74,7 @@ Deno.serve(async (req) => {
   })
 
   if (!created.error && created.data?.user) {
-    console.log('email-link-provision: created identity', { email })
+    console.log('email-link-provision: created identity', { email: maskEmail(email) })
     return json(200, { userId: created.data.user.id, existed: false })
   }
 
@@ -76,7 +83,7 @@ Deno.serve(async (req) => {
     console.error('email-link-provision: createUser failed', {
       message: created.error?.message,
       status: created.error?.status,
-      email,
+      email: maskEmail(email),
     })
     return json(502, { error: 'Provisioning failed' })
   }
@@ -100,10 +107,10 @@ Deno.serve(async (req) => {
   }
 
   if (!foundId) {
-    console.error('email-link-provision: identity claimed but not found', { email })
+    console.error('email-link-provision: identity claimed but not found', { email: maskEmail(email) })
     return json(502, { error: 'Provisioning failed' })
   }
 
-  console.log('email-link-provision: resolved existing identity', { email })
+  console.log('email-link-provision: resolved existing identity', { email: maskEmail(email) })
   return json(200, { userId: foundId, existed: true })
 })
