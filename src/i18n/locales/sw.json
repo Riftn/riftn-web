@@ -8167,7 +8167,12 @@
     "failedDesc": "Simu haikuweza kukamilika. Angalia muunganisho wako na ujaribu tena.",
     "close": "Funga",
     "callbackRequest": "Ombi la kupigiwa simu",
-    "tryAgain": "Jaribu tena"
+    "tryAgain": "Jaribu tena",
+    "ended": "Simu imekatishwa",
+    "declined": "Simu imekataliwa",
+    "noAnswer": "Hakuna jibu",
+    "missed": "Simu uliyokosa",
+    "callBack": "Piga simu tena"
   },
   "badgeAscension": {
     "reached": "Umefikia {{tier}}",

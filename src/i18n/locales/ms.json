@@ -8433,7 +8433,12 @@
     "failedDesc": "Panggilan tidak dapat diselesaikan. Semak sambungan anda dan cuba lagi.",
     "close": "Tutup",
     "callbackRequest": "Permohonan panggilan balik",
-    "tryAgain": "Cuba lagi"
+    "tryAgain": "Cuba lagi",
+    "ended": "Panggilan berakhir",
+    "declined": "Panggilan ditolak",
+    "noAnswer": "Tiada jawapan",
+    "missed": "Panggilan tidak dijawab",
+    "callBack": "Hubungi semula"
   },
   "badgeAscension": {
     "reached": "Anda telah menghubungi {{tier}}",

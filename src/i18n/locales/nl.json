@@ -9196,7 +9196,12 @@
     "failedDesc": "Het gesprek kon niet worden voltooid. Controleer je verbinding en probeer het opnieuw.",
     "close": "Sluiten",
     "callbackRequest": "Terugbelverzoek",
-    "tryAgain": "Opnieuw proberen"
+    "tryAgain": "Opnieuw proberen",
+    "ended": "Gesprek beëindigd",
+    "declined": "Oproep geweigerd",
+    "noAnswer": "Geen antwoord",
+    "missed": "Gemist gesprek",
+    "callBack": "Terugbellen"
   },
   "badgeAscension": {
     "reached": "Je hebt {{tier}} bereikt",

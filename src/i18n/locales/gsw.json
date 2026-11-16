@@ -8158,7 +8158,12 @@
     "failedDesc": "De Abruf konnt nid abgschlossen werde. Prüef dini Verbindig und versuchs nomol.",
     "close": "Schliesse",
     "callbackRequest": "Rückrüef-Aaforderig",
-    "tryAgain": "Versuchs nomol"
+    "tryAgain": "Versuchs nomol",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "Du hesch {{tier}} erreicht",

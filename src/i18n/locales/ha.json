@@ -8118,7 +8118,12 @@
     "failedDesc": "Ba za a iya kammala kiran ba. Duba haɗin ku kuma sake gwadawa.",
     "close": "Kusa",
     "callbackRequest": "Callback bukatar",
-    "tryAgain": "Gwada kuma"
+    "tryAgain": "Gwada kuma",
+    "ended": "An ƙare kiran",
+    "declined": "An ƙi karɓar kiran",
+    "noAnswer": "Babu amsa",
+    "missed": "Kiran da ba a amsa ba",
+    "callBack": "A sake kira"
   },
   "badgeAscension": {
     "reached": "Kun isa {{tier}}",

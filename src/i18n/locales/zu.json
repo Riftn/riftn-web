@@ -8168,7 +8168,12 @@
     "failedDesc": "Ucingo alukwazanga ukuqedwa. Hlola ukuxhumana kwakho bese uzama futhi.",
     "close": "Vala",
     "callbackRequest": "Isicelo sokubuyiselwa ucingo",
-    "tryAgain": "Zama futhi"
+    "tryAgain": "Zama futhi",
+    "ended": "Ucingo luphelile",
+    "declined": "Ucingo lwenqatshiwe",
+    "noAnswer": "Akuphendulwanga",
+    "missed": "Ucingo olungaphendulwanga",
+    "callBack": "Shayela emuva"
   },
   "badgeAscension": {
     "reached": "Ufinyelele ku- {{tier}}",

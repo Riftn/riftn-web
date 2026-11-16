@@ -8184,7 +8184,12 @@
     "failedDesc": "Chay waqyakuyqa manan tukusqachu karqan. T'inkisqaykita qhaway hinaspa wakmanta kallpachakuy.",
     "close": "Wichqay",
     "callbackRequest": "Llamada mañakuy",
-    "tryAgain": "Hukmanta kallpachakuy"
+    "tryAgain": "Hukmanta kallpachakuy",
+    "ended": "Call ended → Llamada qhipa",
+    "declined": "Call declined → Llamada rikhurqay",
+    "noAnswer": "No answer → Mana rikhuykuy",
+    "missed": "Missed call → Llamada qhipa",
+    "callBack": "Call back → Llamada rimaykuy"
   },
   "badgeAscension": {
     "reached": "{{tier}} nisqaman chayarqanki.",

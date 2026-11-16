@@ -8166,7 +8166,12 @@
     "failedDesc": "Waamichi xumuramuu hin dandeenye. Walitti hidhamiinsa kee ilaalii irra deebi'ii yaali.",
     "close": "Cufuu",
     "callbackRequest": "Gaaffii deebi'ee bilbiluu",
-    "tryAgain": "Ammas yaalaa"
+    "tryAgain": "Ammas yaalaa",
+    "ended": "Bilbilli xumurame",
+    "declined": "Bilbilli ni dide",
+    "noAnswer": "Deebii hin qabu",
+    "missed": "Bilbila darbe",
+    "callBack": "Bilbila deebi'aa"
   },
   "badgeAscension": {
     "reached": "{{tier}} bira geesse.",

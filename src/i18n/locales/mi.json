@@ -8154,7 +8154,12 @@
     "failedDesc": "Kaore e taea te whakaoti i te karanga. Tirohia tō hononga, me te tamata ano.",
     "close": "Tata",
     "callbackRequest": "Whakapā mai",
-    "tryAgain": "Whakamātauria ano"
+    "tryAgain": "Whakamātauria ano",
+    "ended": "Kua mutu te waea",
+    "declined": "Kua whakakāhoretia te waea",
+    "noAnswer": "Kāore he whakautu",
+    "missed": "Wātea te waea",
+    "callBack": "Whakahoki waea"
   },
   "badgeAscension": {
     "reached": "Kua tae mai koe {{tier}}",

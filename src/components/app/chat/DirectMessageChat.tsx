@@ -13,7 +13,7 @@ import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, Phone, CornerUpRight, FileText, Unlock, SmilePlus } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, SmilePlus } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -125,6 +125,7 @@ import { useCallActions } from '@/contexts/CallContext';
 import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { formatUnreadCount } from '@/lib/unread-count';
 import { isDmCallNotice } from '@/lib/dm-call-notice';
+import { CallNoteCard } from './calls/CallNoteCard';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
@@ -465,9 +466,12 @@ const MessageBubble = memo(function MessageBubble({
   onRetrySend,
   onDiscardSend,
   cozy,
+  callPeerAddress,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
+  /** The other person in a one-to-one chat, so a call card can call them back. */
+  callPeerAddress?: string;
   /** Set in the cozy layout: where this bubble sits in its sender's run. */
   cozy?: CozyGroupPos;
   highlightText?: string;
@@ -664,13 +668,12 @@ const MessageBubble = memo(function MessageBubble({
   if (isCallMessage) {
     return (
       <div id={`dm-msg-${message._id}`} className="flex justify-center py-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 text-xs">
-          <Phone className="w-3 h-3 text-zinc-400 flex-shrink-0" />
-          <span>{message.content}</span>
-          <span className="text-zinc-500 text-[10px] ml-0.5">
-            · {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-          </span>
-        </div>
+        <CallNoteCard
+          content={message.content}
+          time={formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+          isOwn={isOwnMessage}
+          peerAddress={callPeerAddress}
+        />
       </div>
     );
   }
@@ -2827,6 +2830,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onRemoveReaction={(messageId, emoji) => { void removeReaction(messageId, emoji).catch(() => toast.error(_copy("copy.b5145e1c11a3", { defaultValue: "Could not remove reaction." }))); }}
                 onRetrySend={handleRetrySend}
                 onDiscardSend={handleDiscardSend}
+                callPeerAddress={isGroupChat ? undefined : otherUser?.address}
               />
               </Fragment>
             )});

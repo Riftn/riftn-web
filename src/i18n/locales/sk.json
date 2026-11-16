@@ -8287,7 +8287,12 @@
     "failedDesc": "Hovor sa nepodarilo dokončiť. Skontrolujte pripojenie a skúste to znova.",
     "close": "Zatvoriť",
     "callbackRequest": "Žiadosť o spätné volanie",
-    "tryAgain": "Skúsiť znova"
+    "tryAgain": "Skúsiť znova",
+    "ended": "Hovor sa skončil",
+    "declined": "Hovor bol odmietnutý",
+    "noAnswer": "Žiadna odpoveď",
+    "missed": "Zmeškaný hovor",
+    "callBack": "Zavolať späť"
   },
   "badgeAscension": {
     "reached": "Dosiahli ste {{tier}}",

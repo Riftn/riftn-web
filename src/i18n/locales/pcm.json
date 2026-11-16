@@ -7342,7 +7342,12 @@
     "failedTitle": "Call failed",
     "close": "Close",
     "callbackRequest": "Callback request",
-    "tryAgain": "Try am again"
+    "tryAgain": "Try am again",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "Na you get {{tier}}",

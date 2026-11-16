@@ -8214,7 +8214,12 @@
     "failedDesc": "Połączenie nie mogło zostać zakończone. Sprawdź połączenie i spróbuj ponownie.",
     "close": "Zamknij",
     "callbackRequest": "Prośba o oddzwonienie",
-    "tryAgain": "Spróbuj ponownie"
+    "tryAgain": "Spróbuj ponownie",
+    "ended": "Rozmowa zakończona",
+    "declined": "Odrzucone połączenie",
+    "noAnswer": "Brak odpowiedzi",
+    "missed": "Nieodebrane połączenie",
+    "callBack": "Oddzwoń"
   },
   "badgeAscension": {
     "reached": "Osiągnięto {{tier}}",

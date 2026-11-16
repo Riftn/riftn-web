@@ -8180,7 +8180,12 @@
     "failedDesc": "Opkaldet kunne ikke gennemføres. Kontroller din forbindelse, og prøv igen.",
     "close": "Luk",
     "callbackRequest": "Anmodning om tilbagekald",
-    "tryAgain": "Prøv igen"
+    "tryAgain": "Prøv igen",
+    "ended": "Opkaldet er afsluttet",
+    "declined": "Opkaldet blev afvist",
+    "noAnswer": "Intet svar",
+    "missed": "Ubesvaret opkald",
+    "callBack": "Ring tilbage"
   },
   "badgeAscension": {
     "reached": "Du nåede {{tier}}",

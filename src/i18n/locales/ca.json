@@ -8179,7 +8179,12 @@
     "failedDesc": "No s'ha pogut completar la trucada. Comprova la connexió i torna-ho a provar.",
     "close": "Tanca",
     "callbackRequest": "Sol·licitud de devolució de truc",
-    "tryAgain": "Torna-ho a provar"
+    "tryAgain": "Torna-ho a provar",
+    "ended": "S'ha finalitzat la trucada",
+    "declined": "S'ha rebutjat la trucada",
+    "noAnswer": "Sense resposta",
+    "missed": "Trucada perduda",
+    "callBack": "Torna a trucar"
   },
   "badgeAscension": {
     "reached": "Has arribat a {{tier}}",

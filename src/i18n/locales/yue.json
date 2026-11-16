@@ -8132,7 +8132,12 @@
     "failedDesc": "個電話打唔通。檢查你嘅連線，然後試多一次。",
     "close": "閂",
     "callbackRequest": "回調要求",
-    "tryAgain": "再試多次"
+    "tryAgain": "再試多次",
+    "ended": "通話結束咗",
+    "declined": "來電被拒絕",
+    "noAnswer": "冇答案",
+    "missed": "錯過咗嘅電話",
+    "callBack": "打返去"
   },
   "badgeAscension": {
     "reached": "你去到 {{tier}}",

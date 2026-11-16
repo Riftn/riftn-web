@@ -8280,7 +8280,12 @@
     "failedDesc": "通話を完了できませんでした。 接続を確認して、もう一度お試しください。",
     "close": "閉じる",
     "callbackRequest": "折り返しの電話リクエスト",
-    "tryAgain": "もう一度お試しください"
+    "tryAgain": "もう一度お試しください",
+    "ended": "通話が終了しました",
+    "declined": "通話が拒否されました",
+    "noAnswer": "答えなし",
+    "missed": "不在着信",
+    "callBack": "折り返し電話してください"
   },
   "badgeAscension": {
     "reached": "{{tier}}に到達しました",

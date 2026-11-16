@@ -8275,7 +8275,12 @@
     "failedDesc": "Die oproep kon nie voltooi word nie. Kontroleer jou verbinding en probeer weer.",
     "close": "Sluit",
     "callbackRequest": "Terugbelversoek",
-    "tryAgain": "Probeer weer"
+    "tryAgain": "Probeer weer",
+    "ended": "Oproep beëindig",
+    "declined": "Oproep geweier",
+    "noAnswer": "Geen antwoord",
+    "missed": "Gemiste oproep",
+    "callBack": "Bel terug"
   },
   "badgeAscension": {
     "reached": "Jy bereik {{tier}}",

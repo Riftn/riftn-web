@@ -8177,7 +8177,12 @@
     "failedDesc": "Puhelua ei voitu suorittaa. Tarkista yhteys ja yritä uudelleen.",
     "close": "Sulje",
     "callbackRequest": "Takaisinsoittopyyntö",
-    "tryAgain": "Yritä uudelleen"
+    "tryAgain": "Yritä uudelleen",
+    "ended": "Puhelu päättynyt",
+    "declined": "Puhelu hylätty",
+    "noAnswer": "Ei vastausta",
+    "missed": "Vastaamaton puhelu",
+    "callBack": "Soita takaisin"
   },
   "badgeAscension": {
     "reached": "Saavutit tason {{tier}}",

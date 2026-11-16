@@ -7989,7 +7989,12 @@
     "failedDesc": "ไม่สามารถทำการโทรให้สำเร็จได้ ตรวจสอบการเชื่อมต่อของคุณและลองอีกครั้ง",
     "close": "ปิด",
     "callbackRequest": "คำขอเรียกกลับ",
-    "tryAgain": "ลองอีกครั้ง"
+    "tryAgain": "ลองอีกครั้ง",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "คุณได้ถึง {{tier}}",

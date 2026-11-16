@@ -8439,7 +8439,12 @@
     "failedDesc": "Bang nehat temamkirin. Girêdana xwe kontrol bike û dîsa biceribîne.",
     "close": "Bigire",
     "callbackRequest": "Daxwaza vegerandina bangê",
-    "tryAgain": "Dîsa biceribîne"
+    "tryAgain": "Dîsa biceribîne",
+    "ended": "Dawiya telefonê",
+    "declined": "Telefonê red kir",
+    "noAnswer": "Bê bersiv",
+    "missed": "Telefonê winda",
+    "callBack": "Vegere telefonê"
   },
   "badgeAscension": {
     "reached": "Tu gihîştî {{tier}}",

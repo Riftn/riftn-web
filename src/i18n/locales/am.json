@@ -8183,7 +8183,12 @@
     "failedDesc": "ጥሪው ሊጠናቀቅ አልቻለም ። የእርስዎን ግንኙነት ያረጋግጡ እና እንደገና ይሞክሩ.",
     "close": "ዝጋ",
     "callbackRequest": "የጥሪ ተመላሽ ጥያቄ",
-    "tryAgain": "እንደገና ሞክር"
+    "tryAgain": "እንደገና ሞክር",
+    "ended": "ጥሪው ተቋርጧል",
+    "declined": "ጥሪው ተቀባይነት አላገኘም",
+    "noAnswer": "ምላሽ የለም",
+    "missed": "ያልተመለሰ ጥሪ",
+    "callBack": "ተመልሰው ይደውሉ"
   },
   "badgeAscension": {
     "reached": "እርስዎ ደርሰዋል {{tier}}",

@@ -7875,7 +7875,12 @@
     "failedDesc": "ما قدرنا نكمل الاتصال. شوف الاتصال بتاعك وحاول تاني.",
     "close": "أغلق",
     "callbackRequest": "طلب رد اتصال",
-    "tryAgain": "حاول تاني"
+    "tryAgain": "حاول تاني",
+    "ended": "تم الانتهاء من المكالمة",
+    "declined": "تم رفض المكالمة",
+    "noAnswer": "ما جاوب",
+    "missed": "مكالمة ضائعة",
+    "callBack": "ارجع المكالمة"
   },
   "badgeAscension": {
     "reached": "وصلت {{tier}}",

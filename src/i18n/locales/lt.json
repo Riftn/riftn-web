@@ -8179,7 +8179,12 @@
     "failedDesc": "Skambučio nepavyko atlikti. Patikrinkite savo ryšį ir bandykite dar kartą.",
     "close": "Uždaryti",
     "callbackRequest": "Grįžtamojo skambučio prašymas",
-    "tryAgain": "Bandyti dar kartą"
+    "tryAgain": "Bandyti dar kartą",
+    "ended": "Skambutis baigtas",
+    "declined": "Skambutis atmestas",
+    "noAnswer": "Neatsiliepė",
+    "missed": "Praleistas skambutis",
+    "callBack": "Perskambinti"
   },
   "badgeAscension": {
     "reached": "Pasiekėte {{tier}}",
