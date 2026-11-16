@@ -44,6 +44,9 @@ function RailFollowButton({ video, walletAddress, onLogin }: { video: VideoItem;
         if (!walletAddress) { onLogin(); return; }
         toggleFollow(following, { name: video.channel || video.creatorUsername || undefined });
       }}
+      // The theme repaints dark buttons as grey glass, which made Follow look
+      // the same as Following. This keeps it dark with its thin white border.
+      data-keep-dark={following ? undefined : ''}
       className={following
         ? 'h-10 w-full rounded-xl border border-white/[0.14] bg-white/[0.06] text-[13.5px] font-bold text-white/85 transition-colors hover:bg-white/[0.1]'
         : 'h-10 w-full rounded-xl border border-white/30 bg-black/50 text-[13.5px] font-bold text-white transition-colors hover:border-white/50 hover:bg-white/[0.06]'}
