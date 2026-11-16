@@ -7,7 +7,7 @@
 // (x-email-link-secret header) — not a Supabase JWT, so verify_jwt is off in
 // config.toml. The code was already generated, hashed and rate-limited in the
 // backend's Mongo; this function is only the delivery leg, sent as
-// noreply@notify.dehub.io.
+// noreply@riftn.com.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts'
 

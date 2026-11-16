@@ -18,7 +18,7 @@ interface NotificationEmailProps {
   heading: string
   /** The same sentence the in-app row carries, verbatim. */
   body: string
-  /** Absolute dehub.io URL the row would open. */
+  /** Absolute riftn.com URL the row would open. */
   actionUrl: string
 }
 
