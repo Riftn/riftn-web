@@ -45,8 +45,8 @@ export function ChatPinStrip({ conversations, selectedId, optionsFor, onOpen }: 
                   <span
                     data-count-badge
                     className={cn(
-                      'absolute -right-0.5 -top-0.5 flex items-center justify-center rounded-full bg-white text-[10px] font-bold leading-none text-zinc-950',
-                      unread > 0 ? 'h-[18px] min-w-[18px] px-1' : 'h-3 w-3',
+                      'absolute -right-0.5 -top-0.5 flex items-center justify-center bg-white text-[10px] font-bold leading-none text-zinc-950',
+                      unread > 0 ? 'h-[18px] min-w-[18px] rounded-[6px] px-1' : 'h-3 w-3 rounded-[4px]',
                     )}
                   >
                     {unread > 0 ? (unread > 99 ? '99+' : unread) : null}

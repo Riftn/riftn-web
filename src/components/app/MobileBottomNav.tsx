@@ -468,8 +468,8 @@ export function MobileBottomNav() {
                         className={glyphClass}
                       />
                     )}
-                    {badge > 0 && (
-                      <span data-unread-chip className={cn(item.label === 'Messages' && 'max-md:hidden', "absolute -top-1.5 -right-2.5 min-w-[16px] h-[16px] px-[3px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none whitespace-nowrap")}>
+                    {badge > 0 && item.label !== 'Messages' && (
+                      <span data-unread-chip className={cn("absolute -top-1.5 -right-2.5 min-w-[16px] h-[16px] px-[3px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none whitespace-nowrap")}>
                         {badge > 99 ? '99+' : badge}
                       </span>
                     )}
