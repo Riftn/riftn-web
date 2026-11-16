@@ -1713,6 +1713,11 @@
     "tipTokens": "{{amount}} token",
     "tokenAmount": "{{amount}} token",
     "custom": {
+      "featureShippedLiked": "Request yam don complete: “{{title}}” 🎉",
+      "featureQueued": "Yout request “{{title}}” i dey wait to be build.",
+      "governanceVotedPassed": "Proposal yusay vote pass: “{{title}}”",
+      "governancePassed": "Yas! Proposal \"{{title}}\" pass wey 🎉",
+      "governanceRejected": "Proposal yu write, ‘{{title}}’, no pass wey.",
       "featureLikeNamed": "{{name}} like yu feature request “{{title}}”",
       "featureLike": "{{name}} like yu feature request",
       "featureCommentNamed": "{{name}} don kamkpepia feature request {{title}}.",
