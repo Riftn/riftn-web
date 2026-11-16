@@ -1,29 +1,66 @@
 .messages-nav-glyph {
-  position: relative; display: inline-flex; overflow: visible;
-  --messages-letter: #ff6874;
-  --messages-letter-line: rgb(255 255 255 / .7);
+  position: relative; display: inline-flex; flex: none; overflow: visible;
+  --messages-red: #ff6874;
+  --messages-rim: .9;
 }
-html:is([data-theme='light'], [data-system-tone='light']) .messages-nav-glyph { --messages-letter: #dc3545; }
-.messages-nav-glyph__letter {
-  display: none; position: absolute; inset: 0; width: 100%; height: 100%;
-  overflow: visible; pointer-events: none;
+html:is([data-theme='light'], [data-system-tone='light']) .messages-nav-glyph { --messages-red: #dc3545; --messages-rim: .55; }
+.messages-nav-glyph__swing { position: relative; display: inline-flex; transform-origin: 50% 5%; }
+.messages-nav-glyph__layer, .messages-nav-glyph__rim, .messages-nav-glyph__hot {
+  position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none;
 }
-.messages-nav-glyph__card {
-  transform-box: view-box;
-  transform: translateY(-2.6px);
-  animation: messages-letter-peek 3.9s cubic-bezier(.3,.7,.3,1) both;
+:is(.messages-nav-glyph__rim, .messages-nav-glyph__hot) { opacity: 0; }
+:is(.messages-nav-glyph__rim, .messages-nav-glyph__hot) svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.messages-nav-glyph__rim { filter: blur(1px); transform: scale(1.07); }
+.messages-nav-glyph__wave {
+  opacity: 0; transform-box: view-box; transform-origin: 50% 50%;
+  --messages-direction: -1; --messages-delay: 0ms;
 }
-/* Phone bottom bar always; the desktop sidebar opts in with data-always. */
-@media (max-width: 767px) { .messages-nav-glyph__letter { display: block; } }
-.messages-nav-glyph[data-always='true'] .messages-nav-glyph__letter { display: block; }
-@keyframes messages-letter-peek {
-  0% { transform: translateY(6px); }
-  9% { transform: translateY(-5px); }
-  20% { transform: translateY(0); }
-  42% { transform: translateY(-5px); }
-  53% { transform: translateY(0); }
-  75% { transform: translateY(-5px); }
-  88%, 100% { transform: translateY(-2.6px); }
+.messages-nav-glyph__wave[data-side='1'] { --messages-direction: 1; --messages-delay: 104ms; }
+.messages-nav-glyph__wave[data-echo='1'] { --messages-delay: 325ms; }
+.messages-nav-glyph__wave[data-side='1'][data-echo='1'] { --messages-delay: 429ms; }
+.messages-nav-glyph__slip { opacity: 0; transform-box: fill-box; transform-origin: center; }
+
+.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__swing { animation: messages-envelope-swing var(--messages-cycle) ease-in-out infinite; }
+.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__rim { animation: messages-envelope-rim var(--messages-cycle) ease-out infinite; }
+.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__hot { animation: messages-envelope-hot var(--messages-cycle) ease-in-out infinite; }
+.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__wave {
+  animation: messages-envelope-ripple var(--messages-cycle) cubic-bezier(.2,.5,.3,1) infinite;
+  animation-delay: var(--messages-delay);
 }
-html.reduce-motion .messages-nav-glyph__card { animation: none; }
-@media (prefers-reduced-motion: reduce) { .messages-nav-glyph__card { animation: none !important; } }
+.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__slip { animation: messages-envelope-slip var(--messages-cycle) cubic-bezier(.2,.6,.3,1) infinite; }
+.messages-nav-glyph[data-running='false'] :is(.messages-nav-glyph__swing, .messages-nav-glyph__rim, .messages-nav-glyph__hot, .messages-nav-glyph__wave, .messages-nav-glyph__slip) { animation-play-state: paused; }
+
+@keyframes messages-envelope-swing {
+  0%, 42%, 100% { transform: rotate(0deg); }
+  5% { transform: rotate(var(--messages-swing)); }
+  12% { transform: rotate(calc(var(--messages-swing) * -.77)); }
+  18% { transform: rotate(calc(var(--messages-swing) * .54)); }
+  25% { transform: rotate(calc(var(--messages-swing) * -.31)); }
+  31% { transform: rotate(calc(var(--messages-swing) * .15)); }
+}
+@keyframes messages-envelope-rim {
+  0%, 46%, 100% { opacity: 0; }
+  5% { opacity: var(--messages-rim); }
+  26% { opacity: calc(var(--messages-rim) * .8); }
+}
+@keyframes messages-envelope-hot {
+  0%, 48%, 100% { opacity: 0; }
+  5%, 28% { opacity: 1; }
+}
+@keyframes messages-envelope-ripple {
+  0% { opacity: 0; transform: translateX(0) scaleY(.94); }
+  8% { opacity: var(--messages-opacity); }
+  40%, 100% { opacity: 0; transform: translateX(calc(var(--messages-direction) * var(--messages-reach))) scaleY(1.12); }
+}
+@keyframes messages-envelope-slip {
+  0% { opacity: 0; transform: translate(0, 7px) rotate(0deg) scale(.7); }
+  3%, 22% { opacity: 1; }
+  34%, 100% { opacity: 0; transform: translate(var(--slip-x), var(--slip-y)) rotate(var(--slip-rotate)) scale(1); }
+}
+/* No motion: the envelope simply stays red while something is unread. */
+html.reduce-motion .messages-nav-glyph :is(.messages-nav-glyph__swing, .messages-nav-glyph__rim, .messages-nav-glyph__wave, .messages-nav-glyph__slip, .messages-nav-glyph__hot) { animation: none; }
+html.reduce-motion .messages-nav-glyph[data-unread='true'] .messages-nav-glyph__hot { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .messages-nav-glyph :is(.messages-nav-glyph__swing, .messages-nav-glyph__rim, .messages-nav-glyph__wave, .messages-nav-glyph__slip, .messages-nav-glyph__hot) { animation: none !important; }
+  .messages-nav-glyph[data-unread='true'] .messages-nav-glyph__hot { opacity: 1; }
+}

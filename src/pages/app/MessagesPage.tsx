@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import { AppState } from '@/components/app/AppState';
@@ -198,19 +199,13 @@ export function ConversationItem({
           {pref && isMuted(pref) && <BellOff data-chat-row-muted aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-zinc-500" />}
           {pref?.pinnedAt && <Pin data-chat-row-pinned aria-hidden="true" className="h-3.5 w-3.5 shrink-0 rotate-45 text-zinc-500" />}
           {pref?.markedUnread && !(conversation.unreadCount > 0) && (
-            <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className="ml-1 h-2.5 w-2.5 shrink-0 rounded-full bg-white" />
+            <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className="ml-1 h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white" />
           )}
           {/* Count rides in the name row rather than welded to the avatar corner,
               matching the mobile app. White-on-near-black instead of red-500:
               the palette has no colour in it, and Osaka/Jungle still repaint
               this through [data-count-badge]. */}
-          {conversation.unreadCount > 0 && (
-            <div data-count-badge className="ml-0.5 min-w-[18px] h-[18px] px-1.5 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-zinc-950 text-[10px] font-bold leading-none tabular-nums">
-                {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
-              </span>
-            </div>
-          )}
+          <UnreadCountChip count={conversation.unreadCount} className="ml-0.5" />
         </div>
         {draft ? (
           <p className="text-sm truncate text-white">
