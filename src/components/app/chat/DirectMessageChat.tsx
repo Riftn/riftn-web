@@ -74,6 +74,9 @@ import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImag
 import { AppState } from '@/components/app/AppState';
 import { DmTipDialog } from './DmTipDialog';
 import { DmPollDialog } from './DmPollDialog';
+import { ScheduledMessagesDrawer, ScheduledStrip, scheduledDmKey, useScheduledDms, useWhenLabel } from './ScheduledMessages';
+import { ScheduleSheet } from '@/features/post/components/ScheduleSheet';
+import { scheduleDm } from '@/lib/api/dehub/dm-scheduled';
 import { PollCard } from '@/components/app/cards/PollCard';
 import { DmFeeInfoBanner } from './DmFeeInfoBanner';
 import { DmSafetyBanner } from './DmSafetyBanner';
@@ -1499,6 +1502,42 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : _copy("copy.b512d97e7cbf", { defaultValue: "User" }));
   const profileLink = otherUser?.username ? `/${otherUser.username}` : otherUser?.address ? `/${otherUser.address}` : '#';
 
+  // ── Scheduled messages ────────────────────────────────────────────────
+  // One-to-one chats that already exist and are free to message. A paid chat
+  // needs its fee paid at the moment of sending, which a later send cannot do.
+  const canSchedule = !isGroupChat && !feeRequired && !accountBanned
+    && !resolvedConversationId.startsWith('new_') && !/^0x[0-9a-fA-F]{40}$/i.test(resolvedConversationId);
+  const scheduled = useScheduledDms(canSchedule ? resolvedConversationId : null, otherUser?.address);
+  const whenLabel = useWhenLabel();
+  const [showScheduled, setShowScheduled] = useState(false);
+  const [scheduleDraft, setScheduleDraft] = useState<{ text: string; clear: () => void } | null>(null);
+  const handleScheduleClick = ({ text, hasAttachment, clear }: { text: string; hasAttachment: boolean; clear: () => void }) => {
+    if (hasAttachment) {
+      toast(tr('dmSchedule.textOnly', { defaultValue: 'Only text messages can be scheduled for now.' }));
+      return;
+    }
+    // Nothing typed: the clock shows what is already waiting.
+    if (!text) { setShowScheduled(true); return; }
+    setScheduleDraft({ text, clear });
+  };
+  const confirmSchedule = async (date: Date | null) => {
+    const draft = scheduleDraft;
+    if (!date || !draft) return;
+    try {
+      // Sealed for this chat now, the same as a message sent by hand.
+      const wire = await prepareOutgoing(otherUser?.address, draft.text);
+      await scheduleDm({ dmId: resolvedConversationId, content: wire.content, sendAt: date, replyTo: replyTarget?._id });
+      draft.clear();
+      if (replyTarget) setReplyTarget.complete(replyTarget, null);
+      queryClient.invalidateQueries({ queryKey: scheduledDmKey(resolvedConversationId) });
+      toast.success(tr('dmSchedule.scheduledToast', { defaultValue: 'Scheduled for {{when}}', when: whenLabel(date) }), {
+        action: { label: tr('dmSchedule.view', { defaultValue: 'View' }), onClick: () => setShowScheduled(true) },
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tr('dmSchedule.error', { defaultValue: 'That did not work. Try again.' }));
+    }
+  };
+
   // createAndStart — get/create conversation + dmFee
   const createAndStart = useCreateAndStart();
 
@@ -2881,7 +2920,12 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
       {/* Chat Input — disabled send when insufficient balance; hidden while
           the thread is locked, since anything typed would go out in the clear */}
+      {!showLockedState && canSchedule && (
+        <ScheduledStrip items={scheduled.items} onOpen={() => setShowScheduled(true)} />
+      )}
       {!showLockedState && <ChatInput
+        onScheduleClick={canSchedule ? handleScheduleClick : undefined}
+        scheduledCount={scheduled.items.length}
         autoFocus={focusComposer}
         initialText={initialComposerText}
         draftKey={draftScope}
@@ -2965,6 +3009,29 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         conversationId={resolvedConversationId}
         minAmount={planMinTip}
       />
+
+      {canSchedule && (
+        <>
+          <ScheduleSheet
+            isOpen={!!scheduleDraft}
+            onClose={() => setScheduleDraft(null)}
+            scheduledDate={null}
+            onSchedule={confirmSchedule}
+            kind="message"
+            moving
+            title={tr('dmSchedule.whenTitle', { defaultValue: 'Send when?' })}
+          />
+          <ScheduledMessagesDrawer
+            open={showScheduled}
+            onOpenChange={setShowScheduled}
+            dmId={resolvedConversationId}
+            peerAddress={otherUser?.address}
+            peerName={displayName}
+            items={scheduled.items}
+            isLoading={scheduled.isLoading}
+          />
+        </>
+      )}
 
       <DmPollDialog
         open={showPollDialog}

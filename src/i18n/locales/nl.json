@@ -20578,6 +20578,8 @@
     "orPickDay": "Of kies een dag",
     "earlier": "15 minuten eerder",
     "later": "15 minuten later",
+    "earlierShort": "Eerder",
+    "laterShort": "Later",
     "tooSoonMin": "Kies een tijd minstens {{count}} minuten vanaf nu.",
     "tooSoon": "Kies een tijd in de toekomst.",
     "zone": "Jouw tijd ({{zone}}). Anderen zien het in hun eigen tijd.",
@@ -20959,5 +20961,29 @@
     "gone": "Dat bericht is hier niet meer",
     "theirMessages": "Hun berichten",
     "seeTheirMessages": "Zie hun berichten"
+  },
+  "dmSchedule": {
+    "button": "Bericht inplannen",
+    "title": "Geplande berichten",
+    "whenTitle": "Wanneer versturen?",
+    "waiting": "{{n}} gepland",
+    "next": "volgende {{when}}",
+    "failedCount": "{{n}} niet verstuurd",
+    "view": "Bekijken",
+    "notSent": "Niet verstuurd",
+    "emptyTitle": "Niets gepland",
+    "emptyBody": "Schrijf een bericht en tik op de klok om te kiezen wanneer het wordt verstuurd.",
+    "edit": "Bewerken",
+    "editLabel": "Bericht bewerken",
+    "changeTime": "Tijd wijzigen",
+    "sendNow": "Nu versturen",
+    "deleted": "Gepland bericht verwijderd",
+    "unreadable": "Geschreven op een ander apparaat. Het wordt nog steeds verstuurd.",
+    "footnote": "Tijden zijn in jouw tijdzone. Niemand ziet een bericht voordat het is verstuurd.",
+    "footnoteNamed": "Tijden zijn in jouw tijdzone. {{name}} ziet een bericht pas als het is verstuurd.",
+    "textOnly": "Voorlopig kunnen alleen tekstberichten worden ingepland.",
+    "scheduledToast": "Gepland voor {{when}}",
+    "failedToast": "Een gepland bericht kon niet worden verstuurd",
+    "error": "Dat is niet gelukt. Probeer het opnieuw."
   }
 }

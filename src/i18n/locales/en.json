@@ -20229,6 +20229,8 @@
     "orPickDay": "Or pick a day",
     "earlier": "15 minutes earlier",
     "later": "15 minutes later",
+    "earlierShort": "Earlier",
+    "laterShort": "Later",
     "tooSoonMin": "Pick a time at least {{count}} minutes from now.",
     "tooSoon": "Pick a time in the future.",
     "zone": "Your time ({{zone}}). Everyone else sees it in their own time.",
@@ -20605,5 +20607,29 @@
     "gone": "That message is no longer here",
     "theirMessages": "Their messages",
     "seeTheirMessages": "See their messages"
+  },
+  "dmSchedule": {
+    "button": "Schedule message",
+    "title": "Scheduled messages",
+    "whenTitle": "Send when?",
+    "waiting": "{{n}} scheduled",
+    "next": "next {{when}}",
+    "failedCount": "{{n}} not sent",
+    "view": "View",
+    "notSent": "Not sent",
+    "emptyTitle": "Nothing scheduled",
+    "emptyBody": "Write a message, then tap the clock to pick when it is sent.",
+    "edit": "Edit",
+    "editLabel": "Edit message",
+    "changeTime": "Change time",
+    "sendNow": "Send now",
+    "deleted": "Scheduled message deleted",
+    "unreadable": "Written on another device. It will still be sent.",
+    "footnote": "Times are in your time zone. Nobody sees a message until it is sent.",
+    "footnoteNamed": "Times are in your time zone. {{name}} only sees a message once it is sent.",
+    "textOnly": "Only text messages can be scheduled for now.",
+    "scheduledToast": "Scheduled for {{when}}",
+    "failedToast": "A scheduled message could not be sent",
+    "error": "That did not work. Try again."
   }
 }
