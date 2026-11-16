@@ -1769,6 +1769,13 @@
     "tipTokens": "{{amount}} àmi-ìṣẹ́",
     "tokenAmount": "{{amount}} àmi-ìṣẹ́",
     "custom": {
+      "featureShipped": "{{title}} ti ṣe ẹni to gbọ ni ẹka",
+      "featureShippedLiked": "Ọrọ ẹni to ti ṣe ẹni to ṣe ẹka “{{title}}” ti ṣe",
+      "featureQueued": "Àwọn ìdánilọrùn \"{{title}}\" jẹ́ àgbéjáde láti ṣe àgbéjáde.",
+      "governanceVotedPassed": "Ọrọ ẹni to ti ṣe ẹni to ṣe ẹka “{{title}}” ti ṣe",
+      "governanceVotedRejected": "Ọrọ ẹni to ti ṣe ẹni to gbọ ṣe ẹni to ṣe ẹka: “{{title}}”",
+      "governancePassed": "Ọrọ ẹni to ti ṣe ẹni to ṣe ẹka “{{title}}” ti ṣe ẹni to ṣe ẹka 🎉",
+      "governanceRejected": "Ọrọ ẹni to ti ṣe ẹni to gbọ ni ẹni to ṣe ẹka “{{title}}”",
       "featureLikeNamed": "{{name}} fẹ́ràn ìbéèrè àkóónú rẹ \"{{title}}\"",
       "featureLike": "{{name}} fẹ́ ìbéèrè ẹ̀yà-ara rẹ",
       "featureCommentNamed": "{{name}} comment on your feature request \"{{title}}\"",
