@@ -109,3 +109,12 @@ html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(
 html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-feed-tab-btn] > span.text-\[10px\] {
   color: var(--ink-muted, #444) !important;
 }
+
+/* The destructive key is pale red glass with a near-white label, drawn for
+   dark pages. On a light page the label takes a deep red so it reads. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-button-variant='destructive']:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *),
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-button-variant='destructive']:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *) :is(span, svg) {
+  color: #b91c1c !important;
+}
