@@ -389,7 +389,7 @@ export const useCall = (): UseCallReturn => {
     visualActivity.setCall(false, false);
     void disposeMedia(media); void markEnded(call);
     };
-  }, [userAddress, clearTimers, disposeMedia, markEnded, publishCall]);
+  }, [userAddress, clearTimers, disposeMedia, markEnded, publishCall, dismissCallSummary]);
   useEffect(() => {
     const media = mediaRef.current;
     if (!media || media.closed || isMinimized) return;
