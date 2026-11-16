@@ -20333,6 +20333,8 @@
     "orPickDay": "Ou choisis un jour",
     "earlier": "15 minutes plus tôt",
     "later": "15 minutes plus tard",
+    "earlierShort": "Plus tôt",
+    "laterShort": "Plus tard",
     "tooSoonMin": "Choisis une heure dans au moins {{count}} minutes.",
     "tooSoon": "Choisis une heure à venir.",
     "zone": "Ton heure ({{zone}}). Les autres la voient à leur heure.",
@@ -20714,5 +20716,29 @@
     "gone": "Ce message n'est plus là",
     "theirMessages": "Leurs messages",
     "seeTheirMessages": "Voir leurs messages"
+  },
+  "dmSchedule": {
+    "button": "Programmer le message",
+    "title": "Messages programmés",
+    "whenTitle": "Envoyer quand ?",
+    "waiting": "{{n}} programmés",
+    "next": "prochain {{when}}",
+    "failedCount": "{{n}} non envoyés",
+    "view": "Voir",
+    "notSent": "Non envoyé",
+    "emptyTitle": "Rien de programmé",
+    "emptyBody": "Écrivez un message, puis touchez l'horloge pour choisir quand il part.",
+    "edit": "Modifier",
+    "editLabel": "Modifier le message",
+    "changeTime": "Changer l'heure",
+    "sendNow": "Envoyer maintenant",
+    "deleted": "Message programmé supprimé",
+    "unreadable": "Écrit sur un autre appareil. Il sera quand même envoyé.",
+    "footnote": "Les heures sont dans votre fuseau horaire. Personne ne voit un message avant son envoi.",
+    "footnoteNamed": "Les heures sont dans votre fuseau horaire. {{name}} ne voit un message qu'une fois envoyé.",
+    "textOnly": "Seuls les messages texte peuvent être programmés pour l'instant.",
+    "scheduledToast": "Programmé pour {{when}}",
+    "failedToast": "Un message programmé n'a pas pu être envoyé",
+    "error": "Ça n'a pas marché. Réessayez."
   }
 }

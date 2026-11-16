@@ -20329,6 +20329,8 @@
     "orPickDay": "O elige un día",
     "earlier": "15 minutos antes",
     "later": "15 minutos después",
+    "earlierShort": "Antes",
+    "laterShort": "Después",
     "tooSoonMin": "Elige una hora al menos {{count}} minutos desde ahora.",
     "tooSoon": "Elige una hora futura.",
     "zone": "Tu hora ({{zone}}). Los demás la ven en su propia hora.",
@@ -20710,5 +20712,29 @@
     "gone": "Ese mensaje ya no está aquí",
     "theirMessages": "Sus mensajes",
     "seeTheirMessages": "Ver sus mensajes"
+  },
+  "dmSchedule": {
+    "button": "Programar mensaje",
+    "title": "Mensajes programados",
+    "whenTitle": "¿Cuándo enviarlo?",
+    "waiting": "{{n}} programados",
+    "next": "el próximo {{when}}",
+    "failedCount": "{{n}} sin enviar",
+    "view": "Ver",
+    "notSent": "No enviado",
+    "emptyTitle": "Nada programado",
+    "emptyBody": "Escribe un mensaje y toca el reloj para elegir cuándo se envía.",
+    "edit": "Editar",
+    "editLabel": "Editar mensaje",
+    "changeTime": "Cambiar hora",
+    "sendNow": "Enviar ahora",
+    "deleted": "Mensaje programado eliminado",
+    "unreadable": "Escrito en otro dispositivo. Se enviará igualmente.",
+    "footnote": "Las horas están en tu zona horaria. Nadie ve un mensaje hasta que se envía.",
+    "footnoteNamed": "Las horas están en tu zona horaria. {{name}} solo ve un mensaje cuando se envía.",
+    "textOnly": "Por ahora solo se pueden programar mensajes de texto.",
+    "scheduledToast": "Programado para {{when}}",
+    "failedToast": "No se pudo enviar un mensaje programado",
+    "error": "No ha funcionado. Inténtalo de nuevo."
   }
 }

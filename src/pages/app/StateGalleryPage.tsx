@@ -69,6 +69,8 @@ import { TipWall, TipChip } from '@/components/app/comments/TipWall';
 import type { Comment as GalleryComment } from '@/lib/comment-mapper';
 import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
 import { ScheduleSheet, type ScheduleKind } from '@/features/post/components/ScheduleSheet';
+import { ChatInput } from '@/components/app/chat/ChatInput';
+import { ScheduledMessagesDrawer, ScheduledStrip, type ScheduledDmView } from '@/components/app/chat/ScheduledMessages';
 import { FeedTabBarSkeleton } from '@/components/app/PageSkeletons';
 import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
 import { STREAMER_BADGE_IDS, badgeMaterial, streamerBadgeSvg } from '@/lib/streamer-badge-art';
@@ -1268,11 +1270,59 @@ function WhenSheetGallery() {
     <section data-page-bento data-when-sheet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">{t('whenSheet.title', { defaultValue: 'When?' })}</h2>
       <div className="flex flex-wrap gap-2">
-        {(['post', 'live', 'stage'] as const).map(k => (
+        {(['post', 'live', 'stage', 'message'] as const).map(k => (
           <button key={k} type="button" data-kit-button="quiet" data-when-open={k} onClick={() => setKind(k)}>{k}</button>
         ))}
       </div>
       <ScheduleSheet isOpen={!!kind} onClose={() => setKind(null)} scheduledDate={null} onSchedule={() => {}} kind={kind ?? 'post'} minimumMinutes={kind === 'live' ? 30 : 0} />
+    </section>
+  );
+}
+
+/** Schedule a DM: the clock beside the tip gem, the strip above the composer, and the list. */
+function ScheduledDmGallery() {
+  const { t } = useTranslation();
+  const at = (hours: number) => new Date(Date.now() + hours * 3_600_000).toISOString();
+  const row = (id: string, text: string, hours: number, extra: Partial<ScheduledDmView> = {}): ScheduledDmView => ({
+    _id: id, dmId: 'gallery', content: text, text, unreadable: false, replyTo: null, sendAt: at(hours), timeZone: null,
+    status: 'scheduled', failureCode: null, failureReason: null, createdAt: null, ...extra,
+  });
+  const [items, setItems] = useState<ScheduledDmView[]>(() => [
+    row('a', 'Morning! Are we still on for lunch today?', 20),
+    row('b', 'Happy birthday 🎉 hope it is a great one', 70),
+    row('c', 'Sent you the files', -1, { status: 'failed', failureCode: 'BLOCKED', failureReason: 'You cannot message this user.' }),
+  ]);
+  const [list, setList] = useState(false);
+  const [draft, setDraft] = useState<{ text: string; clear: () => void } | null>(null);
+  return (
+    <section data-page-bento data-scheduled-dm-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('dmSchedule.title', { defaultValue: 'Scheduled messages' })}</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="mx-auto max-w-[640px] overflow-hidden rounded-2xl border border-white/10">
+          <ScheduledStrip items={items} onOpen={() => setList(true)} />
+          <ChatInput
+            onSendMessage={async () => true}
+            onTipClick={() => {}}
+            onPollClick={() => {}}
+            scheduledCount={items.length}
+            onScheduleClick={({ text, clear }) => (text ? setDraft({ text, clear }) : setList(true))}
+          />
+        </div>
+        <ScheduleSheet
+          isOpen={!!draft}
+          onClose={() => setDraft(null)}
+          scheduledDate={null}
+          onSchedule={(date) => {
+            if (!date || !draft) return;
+            setItems(prev => [...prev, row(String(Date.now()), draft.text, (date.getTime() - Date.now()) / 3_600_000)].sort((x, y) => x.sendAt.localeCompare(y.sendAt)));
+            draft.clear();
+          }}
+          kind="message"
+          moving
+          title={t('dmSchedule.whenTitle', { defaultValue: 'Send when?' })}
+        />
+        <ScheduledMessagesDrawer open={list} onOpenChange={setList} dmId="gallery" peerName="Ava" items={items} />
+      </AuthContext.Provider>
     </section>
   );
 }
@@ -1899,6 +1949,7 @@ export default function StateGalleryPage() {
         <MintChainGallery />
         <CoinPayGallery />
         <WhenSheetGallery />
+        <ScheduledDmGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
         <ToastsGallery />
         <TooltipsGallery />
