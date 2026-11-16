@@ -2170,7 +2170,18 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
     onUndoSingleTap: isImmersive ? handlePlayClick : undefined,
   });
 
-  // Text opens the same destination immediately; links and "See more" keep
+  const captionRef = useRef<HTMLDivElement>(null);
+  // Gated, warned and live posts keep the card's own destination, which owns
+  // their unlock and reveal steps.
+  const openCaptionPost = () => {
+    if (isPPVLocked || contentWarning.hidden || liveFeedPreview || video.isAudio) { openPost(); return; }
+    if (showBountyDrawer || showPPVDrawer || showLockedDrawer || wasDrawerJustDismissed()) return;
+    cacheVideoForNavigation(queryClient, video);
+    noteProfileFeedOpen(profileFeed, video.id);
+    navigate(`/app/post/${video.articleSlug || video.id}`, { state: { fromFeed: true } });
+  };
+
+  // A tap on the text opens the post page; links and "See more" keep
   // their own actions.
   const captionTapGestures = useTapGestures({
     singleTapOnly: !isImmersive,
@@ -2183,7 +2194,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       if ((event.target as HTMLElement | null)?.closest?.('button, a, input, textarea, [role="button"]')) return;
       const selection = window.getSelection();
       if (selection && selection.toString().length > 0) return;
-      openPost();
+      // A cut-off caption opens the rest of its text first; the next tap
+      // opens the post page. Only the picture goes straight to the player.
+      const more = captionRef.current?.querySelector<HTMLButtonElement>('[data-caption-more]');
+      if (more) { more.click(); return; }
+      openCaptionPost();
     },
   });
 
@@ -3426,7 +3441,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           </div>
         )}
         {video.duetOf && <DuetCredit duetOf={video.duetOf} className="mb-1.5" />}
-        <div className="relative" data-card-caption={(video.title || ownDescription) && !/https?:\/\/|0x[0-9a-fA-F]{40}/.test(`${video.title ?? ''} ${ownDescription ?? ''}`) ? '' : undefined} data-no-navigate {...captionTapGestures} onClick={(event) => event.stopPropagation()}>
+        <div ref={captionRef} className="relative" data-card-caption={(video.title || ownDescription) && !/https?:\/\/|0x[0-9a-fA-F]{40}/.test(`${video.title ?? ''} ${ownDescription ?? ''}`) ? '' : undefined} data-no-navigate {...captionTapGestures} onClick={(event) => event.stopPropagation()}>
         {!hideActions && !isContentGated && <TapReactionBurst postId={video.id} />}
         <SharedTranslationProvider>
           {(() => {

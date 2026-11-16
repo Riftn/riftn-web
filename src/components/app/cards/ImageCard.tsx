@@ -733,6 +733,9 @@ function FeedDescription({
       if ((event.target as HTMLElement | null)?.closest?.('button, a, input, textarea, [role="button"]')) return;
       const selection = window.getSelection();
       if (selection && selection.toString().length > 0) return;
+      // A cut-off caption opens the rest of its text first; the next tap opens the post.
+      const more = (event.target as HTMLElement | null)?.closest?.('[data-no-navigate]')?.querySelector<HTMLButtonElement>('[data-caption-more]');
+      if (more) { more.click(); return; }
       onOpen?.();
     },
   });
