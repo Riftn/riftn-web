@@ -19,6 +19,8 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown, UserCheck, Loader2, Globe, RotateCcw } from "lucide-react";
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
+import Plus from "@/components/ui/cut-icons/add";
+import Minus from "@/components/ui/cut-icons/minus";
 import Volume2 from "@/components/ui/cut-icons/volume";
 import ArrowLeft from "@/components/ui/cut-icons/back";
 import VolumeX from "@/components/ui/cut-icons/mute";
@@ -517,6 +519,24 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     : theme === 'system' || theme === 'minimal' || theme === 'light' ? 'clean' as const
     : theme === 'osaka' || theme === 'glass' ? 'floor' as const
     : 'glow' as const;
+  // Info stage: a wide video on the clean stage can sit at the top of the
+  // screen with its caption, actions and comments laid out underneath. The +
+  // under the video opens it, the button opposite Back closes it, and the
+  // choice is kept for the next wide video.
+  const [infoStage, setInfoStage] = useState(() => {
+    try { return localStorage.getItem('dehub.shorts.infoStage') === '1'; } catch { return false; }
+  });
+  const chooseInfoStage = useCallback((open: boolean) => {
+    setInfoStage(open);
+    try { localStorage.setItem('dehub.shorts.infoStage', open ? '1' : '0'); } catch { /* Private mode. */ }
+  }, []);
+  const [slideRatio, setSlideRatio] = useState<{ id: string | number; ratio: number } | null>(null);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 390));
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   const commentsViewport = useVisualViewportBox(isMobile && showComments);
 
   /**
@@ -668,6 +688,14 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // views) applies to it, so those get no id while it is on screen.
   const isLiveSlide = !!currentShort?.live;
   const postId = isLiveSlide ? undefined : currentShort?.id;
+  // A wide video held upright on the clean stage: the only place the info
+  // stage and its + button exist.
+  const wideRatio = slideRatio && currentShort && slideRatio.id === currentShort.id && slideRatio.ratio > 1.1 ? slideRatio.ratio : 0;
+  const cleanWide = isMobile && phoneStage === 'clean' && wideRatio > 0 && !isLiveSlide && !currentShort?.imageUrls?.length && !isFullscreen;
+  const wideCardHeight = cleanWide ? (viewportWidth - 24) / wideRatio : 0;
+  const infoActive = cleanWide && infoStage;
+  // Room for the top buttons, the card, and a little air under it.
+  const infoHeight = Math.round(56 + wideCardHeight + 12);
   const downloadVideo = useVideoDownload();
   const downloadGate = useMatureGate(currentShort?.contentRating);
   const isOwnShort = !!walletAddress && currentShort?.creatorId?.toLowerCase() === walletAddress.toLowerCase();
@@ -1696,6 +1724,152 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // set, which is why the frost appeared for some users and not others on the
   // same build. From <body> nothing can cut the root. It also frees the fixed
   // positioning and the z-[60] from any ancestor stacking context.
+  // The phone's creator row, caption and action row. Over the picture it is
+  // pinned to the bottom of the screen; in the info stage the same block
+  // heads the sheet under the video.
+  const phoneStack = (inInfo: boolean) => (
+      <div className={inInfo ? "relative flex-shrink-0 pt-3 pb-3" : "absolute inset-x-0 bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none"}>
+                {/* Creator Info & Description */}
+                <div
+                  // Hidden chrome is opacity-0, which still takes taps — kill
+                  // pointer events too so a restore tap can't hit an invisible
+                  // avatar / follow button on its way in.
+                  className={cn("px-4 pointer-events-auto", !isDescriptionExpanded && "touch-none", (showComments || chromeInert) && "pointer-events-none")}
+                  onTouchStart={handleOverlayGestureTouchStart}
+                  onTouchEnd={handleOverlayGestureTouchEnd}
+                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
+                >
+                  {/* Creator info row */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <button
+                      onClick={() => handleNavigateToProfile()}
+                      className="flex-shrink-0"
+                    >
+                      <Avatar className="w-12 h-12 rounded-xl" key={currentShort.avatar || currentShort.id}>
+                        <AvatarImage src={currentShort.avatar} alt={currentShort.creatorUsername || currentShort.username} className="rounded-xl" />
+                        <AvatarFallback data-keep-dark className="bg-zinc-700 text-white font-medium rounded-xl">{(currentShort.creatorUsername || currentShort.username)[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </button>
+                    <button
+                      onClick={() => handleNavigateToProfile()}
+                      className="flex flex-col items-start text-left min-w-0"
+                    >
+                      {currentShort.displayName && (
+                        <BadgedName
+                          lookupId={currentShort.creatorUsername || currentShort.creatorId || currentShort.username}
+                          username={currentShort.creatorUsername || currentShort.username}
+                          className="text-white font-semibold text-base [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] leading-tight"
+                          wrapperClassName="text-base leading-tight"
+                        >
+                          {currentShort.displayName}
+                        </BadgedName>
+                      )}
+                      <span className="text-white/70 text-sm [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] truncate leading-tight">@{currentShort.creatorUsername || currentShort.username}</span>
+                    </button>
+                  </div>
+                  
+                  {/* Title + description - tap to expand/collapse */}
+                  <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
+                  <ShortCaption
+                    key={currentShort.id}
+                    short={currentShort}
+                    variant="tap"
+                    expanded={isDescriptionExpanded}
+                    onToggleExpanded={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  />
+                  <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
+                </div>
+
+                {/* Action bar — horizontal row evenly spread across the bottom,
+                    matching the feed post card action bar (like at far right). */}
+                <div
+                  data-shorts-actions
+                  data-on-media
+                  className={cn("mt-3 px-4 flex items-center justify-between pointer-events-auto", (showComments || chromeInert) && "pointer-events-none")}
+                  onTouchStart={handleOverlayGestureTouchStart}
+                  onTouchEnd={handleOverlayGestureTouchEnd}
+                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
+                >
+                  {/* Views */}
+                  <div className="flex items-center gap-1">
+                    <Eye className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{currentShort.views || '0'}</span>
+                  </div>
+
+                  {/* Tip */}
+                  <button
+                    onClick={() => setShowTipModal(true)}
+                    className="flex items-center gap-1"
+                    aria-label={_copy("copy.a4245a3c4f56", { defaultValue: "Tip" })}
+                  >
+                    <Gem className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(tipCount)}</span>
+                  </button>
+
+                  {/* Share */}
+                  <button
+                    onClick={() => setShareSheetOpen(true)}
+                    className="flex items-center gap-1"
+                    aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
+                  >
+                    <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
+                  </button>
+
+                  {/* Comments */}
+                  <button
+                    onClick={() => setShowComments(true)}
+                    className="flex items-center gap-1"
+                    aria-label={_copy("copy.355f79f29d7d", { defaultValue: "Comments" })}
+                  >
+                    <MessageSquare className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(currentShort.comments || 0)}</span>
+                  </button>
+
+                  {/* Like — furthest right for easy thumb reach, like feed cards */}
+                  <span className="relative flex items-center" {...likeTray.areaProps}>
+                    <ReactionPicker
+                      open={likeTray.open}
+                      current={myReaction}
+                      counts={localReactionCounts}
+                      onSelect={(reaction) => { likeTray.close(); handleReaction(reaction); }}
+                      onClose={likeTray.close}
+                      align="right"
+                      onShowInfo={canViewReactionInfo ? showReactionInfo : undefined}
+                    />
+                    <motion.button
+                      onClick={() => {
+                        // The click that ends a hold must not also cast a like.
+                        if (likeTray.consumePress()) return;
+                        handleVote();
+                      }}
+                      {...likeTray.buttonProps}
+                      disabled={isVoting}
+                      /* Same halo the tray puts on your pick — see ActionBar. */
+                      className="flex items-center gap-1 select-none touch-none"
+                      animate={justVoted ? { scale: [1, 1.3, 1] } : {}}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      aria-label={myReaction ? _copy("copy.a3156ed263d2", { defaultValue: "{{value1}} — hold to change your reaction", value1: reactionMeta(myReaction).label }) : _copy("copy.12b91b0ac5dd", { defaultValue: "{{value1}} — hold to react", value1: reactionMeta(reactionForThumbTap(myReaction, localReactionCounts)).label })}
+                      aria-haspopup="menu"
+                      aria-expanded={likeTray.open}
+                    >
+                      {leadReaction && !thumbDown ? (
+                        <span data-engaged-glyph className="w-5 h-5 flex items-center justify-center text-[1.05rem] leading-none drop-shadow-lg" aria-hidden="true">
+                          <ReactionEmoji reaction={leadReaction} animate={leadReaction === myReaction} />
+                        </span>
+                      ) : (
+                        <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(
+                          "w-5 h-5 drop-shadow-lg",
+                          thumbMine ? "fill-white text-white" : "text-white"
+                        )} />
+                      )}
+                      <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(thumbCount)}</span>
+                    </motion.button>
+                  </span>
+                </div>
+                </div>
+  );
+
   return createPortal(
     <motion.div
       ref={containerRef}
@@ -1801,7 +1975,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 : "shrink-0 h-full aspect-[9/16] w-auto max-w-[calc(100vw-8rem)] bg-zinc-900 rounded-none"
           )}
           // Comments get 75%: at half height the sheet held barely two comments.
-          animate={isMobile ? { height: showComments ? '25%' : '100%' } : undefined}
+          animate={isMobile ? { height: showComments ? '25%' : infoActive ? infoHeight : '100%' } : undefined}
           transition={SMOOTH_TRANSITION}
           onPointerDownCapture={() => { holdOwnsGesture.current = false; }}
           onPointerCancelCapture={() => { mini.cancel(); resetDragOffset(); endTimelineSeek(); }}
@@ -1867,6 +2041,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       showPlayIndicator={isActive ? showPlayIndicator : null}
                       letterbox
                       phoneStage={phoneStage}
+                      stageInsetTop={infoActive && !showComments ? 44 : 0}
+                      onRatio={isActive ? (ratio: number) => setSlideRatio({ id: short.id, ratio }) : undefined}
                       isFullscreen={isFullscreen}
                       // Only the playing short draws a bar over the action
                       // bar's gradient; the neighbours keep theirs in place,
@@ -2208,157 +2384,47 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 </AnimatePresence>
 
                 {/* Bottom gradient overlay - fades from transparent to black */}
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
+                {!infoActive && <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />}
                 
                 {/* Bottom overlay stack — creator info + description, with the
                     action bar below as the bottommost element (feed-card style
                     horizontal row instead of the old side rail). The wrapper is
                     pointer-events-none and carries the bottom padding, so the
                     strip under the action row stays free for the timeline seek. */}
-                <div className="absolute inset-x-0 bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
-                {/* Creator Info & Description */}
-                <div
-                  // Hidden chrome is opacity-0, which still takes taps — kill
-                  // pointer events too so a restore tap can't hit an invisible
-                  // avatar / follow button on its way in.
-                  className={cn("px-4 pointer-events-auto", !isDescriptionExpanded && "touch-none", (showComments || chromeInert) && "pointer-events-none")}
-                  onTouchStart={handleOverlayGestureTouchStart}
-                  onTouchEnd={handleOverlayGestureTouchEnd}
-                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
-                >
-                  {/* Creator info row */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <button
-                      onClick={() => handleNavigateToProfile()}
-                      className="flex-shrink-0"
-                    >
-                      <Avatar className="w-12 h-12 rounded-xl" key={currentShort.avatar || currentShort.id}>
-                        <AvatarImage src={currentShort.avatar} alt={currentShort.creatorUsername || currentShort.username} className="rounded-xl" />
-                        <AvatarFallback data-keep-dark className="bg-zinc-700 text-white font-medium rounded-xl">{(currentShort.creatorUsername || currentShort.username)[0]?.toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    </button>
-                    <button
-                      onClick={() => handleNavigateToProfile()}
-                      className="flex flex-col items-start text-left min-w-0"
-                    >
-                      {currentShort.displayName && (
-                        <BadgedName
-                          lookupId={currentShort.creatorUsername || currentShort.creatorId || currentShort.username}
-                          username={currentShort.creatorUsername || currentShort.username}
-                          className="text-white font-semibold text-base [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] leading-tight"
-                          wrapperClassName="text-base leading-tight"
-                        >
-                          {currentShort.displayName}
-                        </BadgedName>
-                      )}
-                      <span className="text-white/70 text-sm [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] truncate leading-tight">@{currentShort.creatorUsername || currentShort.username}</span>
-                    </button>
-                  </div>
-                  
-                  {/* Title + description - tap to expand/collapse */}
-                  <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
-                  <ShortCaption
-                    key={currentShort.id}
-                    short={currentShort}
-                    variant="tap"
-                    expanded={isDescriptionExpanded}
-                    onToggleExpanded={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                  />
-                  <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
-                </div>
-
-                {/* Action bar — horizontal row evenly spread across the bottom,
-                    matching the feed post card action bar (like at far right). */}
-                <div
-                  data-shorts-actions
-                  data-on-media
-                  className={cn("mt-3 px-4 flex items-center justify-between pointer-events-auto", (showComments || chromeInert) && "pointer-events-none")}
-                  onTouchStart={handleOverlayGestureTouchStart}
-                  onTouchEnd={handleOverlayGestureTouchEnd}
-                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
-                >
-                  {/* Views */}
-                  <div className="flex items-center gap-1">
-                    <Eye className="w-5 h-5 text-white drop-shadow-lg" />
-                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{currentShort.views || '0'}</span>
-                  </div>
-
-                  {/* Tip */}
-                  <button
-                    onClick={() => setShowTipModal(true)}
-                    className="flex items-center gap-1"
-                    aria-label={_copy("copy.a4245a3c4f56", { defaultValue: "Tip" })}
-                  >
-                    <Gem className="w-5 h-5 text-white drop-shadow-lg" />
-                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(tipCount)}</span>
-                  </button>
-
-                  {/* Share */}
-                  <button
-                    onClick={() => setShareSheetOpen(true)}
-                    className="flex items-center gap-1"
-                    aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
-                  >
-                    <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
-                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
-                  </button>
-
-                  {/* Comments */}
-                  <button
-                    onClick={() => setShowComments(true)}
-                    className="flex items-center gap-1"
-                    aria-label={_copy("copy.355f79f29d7d", { defaultValue: "Comments" })}
-                  >
-                    <MessageSquare className="w-5 h-5 text-white drop-shadow-lg" />
-                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(currentShort.comments || 0)}</span>
-                  </button>
-
-                  {/* Like — furthest right for easy thumb reach, like feed cards */}
-                  <span className="relative flex items-center" {...likeTray.areaProps}>
-                    <ReactionPicker
-                      open={likeTray.open}
-                      current={myReaction}
-                      counts={localReactionCounts}
-                      onSelect={(reaction) => { likeTray.close(); handleReaction(reaction); }}
-                      onClose={likeTray.close}
-                      align="right"
-                      onShowInfo={canViewReactionInfo ? showReactionInfo : undefined}
-                    />
-                    <motion.button
-                      onClick={() => {
-                        // The click that ends a hold must not also cast a like.
-                        if (likeTray.consumePress()) return;
-                        handleVote();
-                      }}
-                      {...likeTray.buttonProps}
-                      disabled={isVoting}
-                      /* Same halo the tray puts on your pick — see ActionBar. */
-                      className="flex items-center gap-1 select-none touch-none"
-                      animate={justVoted ? { scale: [1, 1.3, 1] } : {}}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      aria-label={myReaction ? _copy("copy.a3156ed263d2", { defaultValue: "{{value1}} — hold to change your reaction", value1: reactionMeta(myReaction).label }) : _copy("copy.12b91b0ac5dd", { defaultValue: "{{value1}} — hold to react", value1: reactionMeta(reactionForThumbTap(myReaction, localReactionCounts)).label })}
-                      aria-haspopup="menu"
-                      aria-expanded={likeTray.open}
-                    >
-                      {leadReaction && !thumbDown ? (
-                        <span data-engaged-glyph className="w-5 h-5 flex items-center justify-center text-[1.05rem] leading-none drop-shadow-lg" aria-hidden="true">
-                          <ReactionEmoji reaction={leadReaction} animate={leadReaction === myReaction} />
-                        </span>
-                      ) : (
-                        <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(
-                          "w-5 h-5 drop-shadow-lg",
-                          thumbMine ? "fill-white text-white" : "text-white"
-                        )} />
-                      )}
-                      <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(thumbCount)}</span>
-                    </motion.button>
-                  </span>
-                </div>
-                </div>
+                {!infoActive && phoneStack(false)}
               </motion.div>
             </>
           )}
         </motion.div>
+
+        {/* Info stage sheet: the stack and the comments under a wide video. */}
+        {infoActive && !showComments && postId && (
+          <motion.div
+            key={`info-stage-${currentShort.id}`}
+            data-shorts-panel
+            data-shorts-info
+            data-shorts-scrollable
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={SMOOTH_TRANSITION}
+            className="absolute inset-x-0 bottom-0 z-[5] flex flex-col overflow-hidden bg-black"
+            style={{ top: infoHeight }}
+          >
+            {phoneStack(true)}
+            <div
+              className="flex-1 min-h-0 border-t border-white/[0.08] px-1 pb-[env(safe-area-inset-bottom)] [&>div]:h-full [&>div]:min-h-0 [&>div]:max-h-none [&>div]:mt-0 [&>div]:p-0"
+              style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+            >
+              <CommentsSection
+                key={currentShort.id}
+                tokenId={currentShort.id}
+                onClose={() => {}}
+                initialTab={commentsInitialTab}
+                embedded
+              />
+            </div>
+          </motion.div>
+        )}
 
         {/* Mobile split comments panel - fills the bottom half when comments are
             open, with the shrunken video pinned above (Instagram-style).
@@ -2546,7 +2612,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             {/* A profile-reel slide that is not a video (text, photo, comic)
                 has nothing to play, so it keeps only the options button. */}
             {!currentShort?.reelPost && <>
-            {document.pictureInPictureEnabled && !currentShort?.imageUrls?.length && <button
+            {document.pictureInPictureEnabled && !currentShort?.imageUrls?.length && !infoActive && <button
               className={VIEWER_CONTROL}
               aria-label={_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
               onClick={(event) => {
@@ -2607,7 +2673,27 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             >
               <MoreHorizontal className="w-5 h-5 text-white" />
             </button>
+
+            {/* Info stage: back to the plain stage. */}
+            {infoActive && <button
+              onClick={(event) => { event.stopPropagation(); chooseInfoStage(false); }}
+              className={VIEWER_CONTROL}
+              style={{ touchAction: 'manipulation' }}
+              aria-label={_copy("copy.94ea9b1d33a0", { defaultValue: "Show less" })}
+            >
+              <Minus className="w-5 h-5 text-white" />
+            </button>}
           </div>
+
+          {/* Clean stage: open the info stage, from just under the video. */}
+          {cleanWide && !infoActive && <button
+            onClick={(event) => { event.stopPropagation(); chooseInfoStage(true); }}
+            className={cn(VIEWER_CONTROL, 'absolute right-4 z-20')}
+            style={{ top: `calc(50% + ${Math.round(wideCardHeight / 2) + 12}px)`, touchAction: 'manipulation' }}
+            aria-label={_copy("copy.f5c9bd131486", { defaultValue: "Show more" })}
+          >
+            <Plus className="w-5 h-5 text-white" />
+          </button>}
         </motion.div>
       )}
 
