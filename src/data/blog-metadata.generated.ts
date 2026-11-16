@@ -2013,12 +2013,12 @@ export const blogPostsMetadata: BlogPost[] = [
   },
   {
     "id": "dehub-milestone-42-back-in-action-dehub",
-    "title": "Back in Action: Riftn V2 Trading Resumes on Gate.io",
+    "title": "Back in Action: DeHub V2 Trading Resumes on Gate.io",
     "slug": "back-in-action-dehub-v2-trading-resumes-on-gateio",
     "excerpt": "Trading resumed on Gate.io after the v2 relaunch. Ten months later we left voluntarily, both decisions are in this archive.",
     "content": "",
     "bannerImage": "/media/milestone-gate-resume-banner-manrope.jpg",
-    "bannerImageAlt": "Riftn Q1 2023 update: Back in Action: Riftn V2 Trading Resumes on Gate.io",
+    "bannerImageAlt": "Riftn Q1 2023 update: Back in Action: DeHub V2 Trading Resumes on Gate.io",
     "author": {
       "name": "Riftn Team"
     },
@@ -2033,8 +2033,8 @@ export const blogPostsMetadata: BlogPost[] = [
     "readingTime": 4,
     "featured": false,
     "status": "published",
-    "seoTitle": "Back in Action: Riftn V2 Trading Resumes on Gate.io | Riftn 2023 Roadmap",
-    "seoDescription": "Official update on Riftn's Q1 2023 progress: Recommenced trading of Riftn v2 on Gate.io. Discover the impact of this finance milestone on our journey."
+    "seoTitle": "Back in Action: DeHub V2 Trading Resumes on Gate.io | Riftn 2023 Roadmap",
+    "seoDescription": "Official update on Riftn's Q1 2023 progress: Recommenced trading of DeHub v2 on Gate.io. Discover the impact of this finance milestone on our journey."
   },
   {
     "id": "dehub-milestone-41-insights-for-creator",
@@ -2785,12 +2785,12 @@ export const blogPostsMetadata: BlogPost[] = [
   },
   {
     "id": "dehub-milestone-11-a-new-era-the-rebran",
-    "title": "A New Era: The Rebranding to Riftn",
+    "title": "A New Era: The Rebranding to DeHub",
     "slug": "a-new-era-the-rebranding-to-dehub",
     "excerpt": "A rename is usually cosmetic. This one was an argument about what we were building, settled in public.",
     "content": "",
     "bannerImage": "/media/milestone-rebrand-banner-manrope.jpg",
-    "bannerImageAlt": "Riftn Q3 2021 update: A New Era: The Rebranding to Riftn",
+    "bannerImageAlt": "Riftn Q3 2021 update: A New Era: The Rebranding to DeHub",
     "author": {
       "name": "Riftn Team"
     },
@@ -2805,8 +2805,8 @@ export const blogPostsMetadata: BlogPost[] = [
     "readingTime": 4,
     "featured": false,
     "status": "published",
-    "seoTitle": "A New Era: The Rebranding to Riftn | Riftn 2021 Roadmap",
-    "seoDescription": "Official update on Riftn's Q3 2021 progress: Rebranded to Riftn. Discover the impact of this strategy milestone on our journey."
+    "seoTitle": "A New Era: The Rebranding to DeHub | Riftn 2021 Roadmap",
+    "seoDescription": "Official update on Riftn's Q3 2021 progress: Rebranded to DeHub. Discover the impact of this strategy milestone on our journey."
   },
   {
     "id": "dehub-milestone-10-navigating-challenge",

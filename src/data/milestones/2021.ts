@@ -122,7 +122,7 @@ And be clear with yourself about what a pool commits you to. Once there is a mar
   'a-new-era-the-rebranding-to-dehub---a-dehub-milestone-from-q3-2021': {
     excerpt:
       'A rename is usually cosmetic. This one was an argument about what we were building, settled in public.',
-    content: `We rebranded to Riftn in Q3 2021.
+    content: `We rebranded to DeHub in Q3 2021. (DeHub became Riftn in November 2026.)
 
 Renames in this industry are usually a bad sign, a project changing its name after a failed launch, or chasing whichever narrative is paying that quarter. Ours was neither, but it is fair to be suspicious of the category, so it is worth being specific about what changed and why.
 
