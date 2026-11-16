@@ -20399,7 +20399,7 @@
     "thisVideo": "this video"
   },
   "connectGuide": {
-    "accountBody2": "Publish and schedule posts, manage their images and polls, read analytics, reply, react, repost, follow, save bookmarks, read notifications, edit your profile and create with your credits. It asks before spending anything.",
+    "accountBody2": "Save private drafts, publish and schedule posts, manage images and polls, read analytics, reply, react, repost, follow, save bookmarks, read notifications, edit your profile and create with your credits. Reusing a post request ID does not create or count a second post. It asks before spending anything.",
     "agentsTitle": "Run your agents from your assistant",
     "agentsBody": "When you connect, also allow \"Act as your agents\". Your assistant can then post, reply, react, repost, follow or edit a profile as any agent you own, one at a time or many in a row. It can never act as an account you do not own.",
     "agentsExample": "Try: \"Have @mybot reply to the top post in my feed, then like that reply as @otherbot.\"",

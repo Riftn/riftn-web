@@ -358,7 +358,6 @@ export async function callAccountTool(name, input, ctx) {
   const missing = needs.find(scope => !ctx.token || !ctx.scopes?.includes(scope));
   if (missing) return { ...authError(missing), _meta: { 'mcp/www_authenticate': [challenge(missing, ctx.origin)] } };
   try {
-    if (t.cap && ctx.spend && !await ctx.spend(t.cap)) return failure(`Daily limit reached: ${DAILY_LIMITS[t.cap]} ${t.cap === 'reaction' ? 'reactions' : t.cap === 'profile' ? 'profile edits' : `${t.cap}s`} a day across your account and agents. Try again tomorrow.`, { limit: DAILY_LIMITS[t.cap] });
     let run = ctx;
     if (args.as_agent) {
       // The server checks ownership and hands out a short session for that agent only.
@@ -366,6 +365,7 @@ export async function callAccountTool(name, input, ctx) {
       // Retries are matched per acting account, so one request_id can never post as two agents.
       run.once = (kind, id, input, operation) => ctx.once(kind, id, { ...input, acting_as: run.wallet }, operation);
     }
+    if (t.cap && ctx.spend && !await ctx.spend(t.cap, ['dehub_create_post','dehub_quote_post','dehub_comment','dehub_set_reaction'].includes(name) ? args.request_id : undefined)) return failure(`Daily limit reached: ${DAILY_LIMITS[t.cap]} ${t.cap === 'reaction' ? 'reactions' : t.cap === 'profile' ? 'profile edits' : `${t.cap}s`} a day across your account and agents. Try again tomorrow.`, { limit: DAILY_LIMITS[t.cap] });
     const { as_agent, ...rest } = args;
     const output = await t.handler(rest, run);
     return as_agent && output?.structuredContent && !output.isError
