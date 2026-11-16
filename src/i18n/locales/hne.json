@@ -18945,5 +18945,33 @@
     "followers": "फॉलोअर",
     "subscribers": "सब्सक्राइबर",
     "mentioned": "जेकर नाम लिखे गइस"
+  },
+  "chatSearch": {
+    "placeholder": "संदेश या मनखे खोजव",
+    "placeholderPerson": "Search {{name}} के संदेश",
+    "close": "खोज बंद करव",
+    "removePerson": "सबो मन ला खोज",
+    "clear": "साफ़",
+    "signInTitle": "चैट खोजे बर साइन इन करव",
+    "voice": "आवाज़ संदेश",
+    "photo": "फोटू",
+    "peopleHere": "इस चैट में मनखे",
+    "recent": "हाल के खोज",
+    "hint": "एक शब्द या नाम टाइप करो.",
+    "failed": "खोज लोड नहीं हो सकिस",
+    "people": "मनखे",
+    "messages": "संदेस",
+    "seeCount_one": "उनकर {{count}} संदेश देखव",
+    "seeCount_other": "उनके {{count}} संदेश देखव",
+    "messagesCount_one": "{{count}} संदेश",
+    "messagesCount_other": "{{count}} संदेश",
+    "results_other": "{{count}} परिणाम",
+    "backToResults": "परिणाम म वापस",
+    "older": "पुराना परिणाम",
+    "newer": "नवा नतीजा",
+    "latest": "नवीनतम",
+    "gone": "वो संदेश अब इहाँ नइ हे",
+    "theirMessages": "उनकर संदेश",
+    "seeTheirMessages": "उनकर संदेश देखव"
   }
 }

@@ -213,6 +213,8 @@ function deduplicateMessages(msgs: SupabaseLiveChatMessage[]): SupabaseLiveChatM
  * MAX_LIVECHAT_MESSAGES (input is sorted oldest→newest) plus any pinned ones.
  */
 const MAX_LIVECHAT_MESSAGES = 300;
+/** Lines read either side of a search result when it is opened in context. */
+const AROUND_WINDOW = 40;
 
 /**
  * How long arrivals are pooled before one render. One frame's worth: below
@@ -332,7 +334,11 @@ export function mergeIncoming(
  */
 const MAX_CACHED_ROOMS = 8;
 const liveChatMessagesCache = new Map<string, SupabaseLiveChatMessage[]>();
+/** Rooms whose list is a window into old history (opened from search), not the live tail. */
+const roomsReadingHistory = new Set<string>();
 function cacheRoomMessages(roomId: string, msgs: SupabaseLiveChatMessage[]) {
+  // A window into old history is not what the room should reopen on.
+  if (roomsReadingHistory.has(roomId)) return;
   if (liveChatMessagesCache.has(roomId)) {
     liveChatMessagesCache.delete(roomId);
   } else if (liveChatMessagesCache.size >= MAX_CACHED_ROOMS) {
@@ -436,9 +442,15 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
   authRef.current = isAuthenticated;
   /** History the reader scrolled back for is kept whole, not trimmed to 300. */
   const capFor = () => (olderPagesRef.current > 0 ? Number.MAX_SAFE_INTEGER : MAX_LIVECHAT_MESSAGES);
+  /** Newer lines exist past the newest one held: the list is a window into old history. */
+  const [hasNewer, setHasNewer] = useState(false);
+  const hasNewerRef = useRef(false);
+  const loadingNewerRef = useRef(false);
 
   const fetchMessages = useCallback(async (showLoading = false) => {
     if (!roomId) return;
+    // Reading old history: the newest window would land far below a gap.
+    if (hasNewerRef.current) return;
     if (showLoading) setIsLoading(true);
     try {
       let apiMessages: LiveChatMessage[];
@@ -515,11 +527,77 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
     }
   }, [roomId, pageSize]);
 
+  /**
+   * Open the room on one line, wherever it is in the history (a search
+   * result). If the line is not among those held, the list becomes the window
+   * around it; `loadNewer` then reads forward until it meets the live tail.
+   */
+  const jumpTo = useCallback(async (messageId: string): Promise<boolean> => {
+    if (!roomId || !pageSize) return false;
+    if (messagesRef.current.some((m) => m.id === messageId)) return true;
+    try {
+      const page = await getLiveChatMessagePage(roomId, { limit: AROUND_WINDOW, around: messageId, signedIn: authRef.current });
+      if (page.signInRequired) {
+        setSignInWall(true);
+        return false;
+      }
+      const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));
+      if (!mapped.some((m) => m.id === messageId)) return false;
+      olderPagesRef.current = Math.max(olderPagesRef.current, 1);
+      hasNewerRef.current = page.hasNewer;
+      if (page.hasNewer) roomsReadingHistory.add(roomId);
+      setHasNewer(page.hasNewer);
+      setHasOlder(page.hasMore);
+      setMessages(deduplicateMessages(mapped));
+      return true;
+    } catch (err) {
+      console.error('[LiveChat] jump to message failed:', err);
+      return false;
+    }
+  }, [roomId, pageSize]);
+
+  /** The next page forward while reading old history. */
+  const loadNewer = useCallback(async () => {
+    if (!roomId || !pageSize || loadingNewerRef.current || !hasNewerRef.current) return;
+    const held = messagesRef.current;
+    let newest: SupabaseLiveChatMessage | undefined;
+    for (let i = held.length - 1; i >= 0 && !newest; i -= 1) if (!held[i].id.startsWith('temp-')) newest = held[i];
+    if (!newest) return;
+    loadingNewerRef.current = true;
+    try {
+      const page = await getLiveChatMessagePage(roomId, { limit: pageSize, after: newest.id, signedIn: authRef.current });
+      const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));
+      const more = page.hasMore && mapped.length > 0;
+      hasNewerRef.current = more;
+      if (!more) roomsReadingHistory.delete(roomId);
+      setHasNewer(more);
+      if (mapped.length) setMessages((prev) => deduplicateMessages([...prev, ...mapped]));
+    } catch (err) {
+      console.error('[LiveChat] newer page failed:', err);
+    } finally {
+      loadingNewerRef.current = false;
+    }
+  }, [roomId, pageSize]);
+
+  /** Leave old history and reopen the room on its newest lines. */
+  const backToLatest = useCallback(async () => {
+    if (!roomId) return;
+    hasNewerRef.current = false;
+    roomsReadingHistory.delete(roomId);
+    setHasNewer(false);
+    olderPagesRef.current = 0;
+    setMessages([]);
+    await fetchMessages(true);
+  }, [roomId, fetchMessages]);
+
   // A new room starts at its newest page again.
   useEffect(() => {
     olderPagesRef.current = 0;
+    hasNewerRef.current = false;
     setHasOlder(false);
+    setHasNewer(false);
     setSignInWall(false);
+    return () => { if (roomId) roomsReadingHistory.delete(roomId); };
   }, [roomId]);
 
   // Signing in lifts the wall; the older pages are open again.
@@ -534,7 +612,7 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
    * busy room keeps its scrollback while the gap check runs.
    */
   const catchUp = useCallback(async () => {
-    if (!roomId) return;
+    if (!roomId || hasNewerRef.current) return;
     try {
       const apiMessages = await fetchApiMessages(roomId, { limit: 50 });
       if (!apiMessages.length) return;
@@ -675,6 +753,8 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
       flushHandle = null;
       if (pending.length === 0) return;
       const batch = pending.splice(0, pending.length);
+      // Reading old history: new lines join once the reader is back at the tail.
+      if (hasNewerRef.current) return;
       setMessages((prev) => {
         const next = mergeIncoming(prev, batch, capFor());
         cacheRoomMessages(roomId, next);
@@ -1081,6 +1161,7 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
     refetch: () => fetchMessages(false),
     hasOlder, loadingOlder, loadOlder, signInWall,
+    hasNewer, jumpTo, loadNewer, backToLatest,
   };
 }
 

@@ -18866,5 +18866,32 @@
     "unavailable": "GitHub ምክልኻል ብቐርቦ ክመጽእ ኣሎ።",
     "connect": "GitHub ተገናኺ",
     "disconnect": "ተላላይ"
+  },
+  "chatSearch": {
+    "placeholder": "ምስል ወይ ሰብ ፈልግ",
+    "placeholderPerson": "ኣብ {{name}} ዝሓለፈ መልዕኽቶችን ፈልግ",
+    "close": "ፍለጥ ዝጋ",
+    "removePerson": "ሰብ ሁሉን ፈልግ",
+    "clear": "ትንምህረት",
+    "signInTitle": "ኣቐምቲ ንምርካብ ቻት",
+    "photo": "ስእሊ",
+    "peopleHere": "ሰብዓት በዚህ ቻት",
+    "recent": "ዝተረጋገጸ ፈለገት",
+    "hint": "ንቃዕ ወይ ስም ይትዕትይ",
+    "failed": "መፈለጊያ ኣይተኣትረን",
+    "people": "ሰብት",
+    "messages": "መልዕኽቶች",
+    "seeCount_one": "ንዓት ዝተሰርየ ዕትወት ይመልከቱ {{count}}",
+    "seeCount_other": "ንዓቶም ዝተረጋገጸ {{count}} ሓበሬታዎች",
+    "messagesCount_one": "{{count}} መልዕክት",
+    "messagesCount_other": "{{count}} መልዕኽቶች",
+    "results_one": "{{count}} ውጤት",
+    "backToResults": "ደግሞ ወደ ውጤቶች",
+    "position": "{{current}} ናብ {{total}}",
+    "newer": "ነበረበረ",
+    "latest": "ናይ ዝተረጋገጸ",
+    "gone": "ዝተረጋገጸ መልዕክት ኣይተረጋገጠን እዩ",
+    "theirMessages": "ናብ ናይ ሓበሬታት",
+    "seeTheirMessages": "ንተደርስ ሓበሬታት ኣብ እንተዘይተወስደ"
   }
 }

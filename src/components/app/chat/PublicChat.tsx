@@ -1,9 +1,8 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from "@/hooks/use-draft-state";
-import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw } from "lucide-react";
+import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw, ChevronsDown } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
 import Languages from "@/components/ui/cut-icons/language";
@@ -12,7 +11,6 @@ import ArrowLeft from "@/components/ui/cut-icons/back";
 import Settings from "@/components/ui/cut-icons/settings";
 import MessageCircle from "@/components/ui/cut-icons/messages";
 import Search from "@/components/ui/cut-icons/search";
-import X from "@/components/ui/cut-icons/close";
 
 import { LiveChatOnlineCount } from './LiveChatOnlineCount';
 import { ChatTextSizeButton } from './ChatTextSizeButton';
@@ -41,7 +39,9 @@ import { useAssistantReplies, useAssistantReplyEngine } from '@/hooks/use-assist
 import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { AppState } from '@/components/app/AppState';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
-import { useFocusChatMessage } from '@/hooks/use-focus-chat-message';
+import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
+import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson } from './ChatSearch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,9 +124,14 @@ export function PublicChat({ onBack }: PublicChatProps) {
     openLoginModal({ path: '/chat?chat=public' });
   }, [openLoginModal]);
 
-  // Search state
+  // Search: one box for words and people. `list` shows what it found, `chat`
+  // shows the room on the result that was opened.
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useSurfaceDraft("components/app/chat/PublicChat.tsx:searchQuery", '');
+  const [searchText, setSearchText] = useState('');
+  const [searchPerson, setSearchPerson] = useState<ChatSearchPerson | null>(null);
+  const [searchView, setSearchView] = useState<'list' | 'chat'>('list');
+  const [activeHit, setActiveHit] = useState(-1);
+  const [jumping, setJumping] = useState(false);
 
   // Reply state
 
@@ -153,7 +158,9 @@ export function PublicChat({ onBack }: PublicChatProps) {
     messages: apiMessages, isLoading: messagesLoading, isBanned,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage, refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,
+    hasNewer, jumpTo, loadNewer, backToLatest,
   } = useLiveChatMessages(selectedRoomId, { pageSize: CHAT_PAGE_SIZE });
+  const search = useChatSearch(selectedRoomId, isSearchOpen && isAuthenticated, searchText, searchPerson?.address ?? null);
 
   // Fetch full room details
   const { room: roomDetails } = useLiveChatRoomDetails(selectedRoomId);
@@ -198,13 +205,18 @@ export function PublicChat({ onBack }: PublicChatProps) {
   useAssistantReplyEngine(apiMessages);
   const localAssistantReplies = useAssistantReplies();
 
-  // Filter messages based on search query and merge buy alerts
+  // The room's lines with buy alerts and local assistant replies folded in
   const filteredMessages = useMemo(() => {
     // Buy alerts sit beside the history that is loaded, never further back:
     // a trade from months ago must not stack up above the first page.
     const oldestLoaded = messages.length ? messages[0].timestamp.getTime() : Date.now();
+    // Reading old history (a search result): nothing newer than the window either.
+    const newestLoaded = hasNewer && messages.length ? messages[messages.length - 1].timestamp.getTime() : Infinity;
     const buyAlertMessages: Message[] = buyAlerts
-      .filter((alert) => new Date(alert.created_at).getTime() >= oldestLoaded)
+      .filter((alert) => {
+        const at = new Date(alert.created_at).getTime();
+        return at >= oldestLoaded && at <= newestLoaded;
+      })
       .map((alert) => ({
       id: `buy-alert-${alert.id}`,
       userId: 'buy-bot',
@@ -224,28 +236,80 @@ export function PublicChat({ onBack }: PublicChatProps) {
       replyTo: r.replyToName ? { id: '', content: '', senderName: r.replyToName } : undefined,
     }));
 
-    const allMessages = [...messages, ...buyAlertMessages, ...localAssistantMessages].sort(
+    return [...messages, ...buyAlertMessages, ...(hasNewer ? [] : localAssistantMessages)].sort(
       (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
     );
+  }, [messages, buyAlerts, localAssistantReplies, hasNewer]);
 
-    if (!searchQuery.trim()) return allMessages;
-    const q = searchQuery.toLowerCase();
-    return allMessages.filter(
-      m => m.content.toLowerCase().includes(q) || m.userName.toLowerCase().includes(q)
-    );
-  }, [messages, buyAlerts, localAssistantReplies, searchQuery]);
+  const openSearch = useCallback((person?: ChatSearchPerson) => {
+    setSearchPerson(person ?? null);
+    setSearchText('');
+    setSearchView('list');
+    setActiveHit(-1);
+    setIsSearchOpen(true);
+    // With a person already chosen their messages are the answer; otherwise
+    // the box is waiting to be typed in.
+    if (!person) setTimeout(() => searchInputRef.current?.focus(), 100);
+  }, []);
+  const closeSearch = useCallback(() => {
+    setIsSearchOpen(false);
+    setSearchText('');
+    setSearchPerson(null);
+    setSearchView('list');
+    setActiveHit(-1);
+  }, []);
+  const showSearchList = isSearchOpen && searchView === 'list';
 
-  // Toggle search
-  const handleToggleSearch = useCallback(() => {
-    setIsSearchOpen(prev => {
-      if (!prev) {
-        setTimeout(() => searchInputRef.current?.focus(), 100);
-      } else {
-        setSearchQuery.complete(searchQuery, '');
+  /** Bring a line into view once it is on the page, and flash it. */
+  const stopFocus = useRef<(() => void) | undefined>(undefined);
+  const focusRow = useCallback((id: string) => {
+    stopFocus.current?.();
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      const el = document.getElementById(chatMessageDomId(id));
+      if (el) {
+        window.clearInterval(timer);
+        stopFocus.current = bringIntoViewAndFlash(el);
+      } else if (Date.now() - started > 4000) {
+        window.clearInterval(timer);
       }
-      return !prev;
-    });
-  }, [setSearchQuery, searchQuery]);
+    }, 80);
+    stopFocus.current = () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => () => stopFocus.current?.(), []);
+
+  /** Open the chat on one search result, reading the next page of results if it is not loaded yet. */
+  const openResult = useCallback(async (index: number) => {
+    if (index < 0 || jumping) return;
+    let hit = search.results[index];
+    if (!hit && search.hasMore) {
+      setJumping(true);
+      const more = await search.loadMore();
+      hit = more[index - search.results.length];
+    }
+    if (!hit) { setJumping(false); return; }
+    rememberChatSearch(searchText);
+    searchInputRef.current?.blur();
+    followLatest.current = false;
+    setActiveHit(index);
+    setSearchView('chat');
+    setJumping(true);
+    const found = await jumpTo(hit.id);
+    setJumping(false);
+    if (found) focusRow(hit.id);
+    else toast.error(_copy('chatSearch.gone', { defaultValue: 'That message is no longer here' }));
+  }, [jumping, search, searchText, jumpTo, focusRow, _copy]);
+
+  /** Back to the newest lines after reading old history. */
+  const goToLatest = useCallback(async () => {
+    followLatest.current = true;
+    await backToLatest();
+  }, [backToLatest]);
+
+  const handleSeeMessages = useCallback((message: Message) => {
+    if (!isAuthenticated) { promptSignIn(); return; }
+    openSearch({ address: message.userId, name: message.userName, username: message.userHandle, avatarUrl: message.userAvatar });
+  }, [isAuthenticated, promptSignIn, openSearch]);
 
   const handleTranslateAll = useCallback(() => {
     if (isAllTranslated) {
@@ -264,10 +328,10 @@ export function PublicChat({ onBack }: PublicChatProps) {
   const olderAnchor = useRef<{ height: number; top: number } | null>(null);
   const requestOlder = useCallback(() => {
     const el = scrollContainerRef.current;
-    if (!el || !hasOlder || loadingOlder || signInWall || searchQuery.trim()) return;
+    if (!el || !hasOlder || loadingOlder || signInWall) return;
     olderAnchor.current = { height: el.scrollHeight, top: el.scrollTop };
     void loadOlder();
-  }, [hasOlder, loadingOlder, signInWall, searchQuery, loadOlder]);
+  }, [hasOlder, loadingOlder, signInWall, loadOlder]);
   useLayoutEffect(() => {
     const el = scrollContainerRef.current;
     const anchor = olderAnchor.current;
@@ -321,6 +385,8 @@ export function PublicChat({ onBack }: PublicChatProps) {
     // Signed out: the typed line stays in the box while they sign in.
     if (!isAuthenticated) { promptSignIn(); return false; }
     if (!selectedRoomId) return false;
+    // Reading old history: a new line belongs at the end, so go there first.
+    if (hasNewer) await goToLatest();
     const replyToId = replyTo?.id;
     try {
       if (args.type === 'media' && args.mediaFile) {
@@ -408,6 +474,17 @@ export function PublicChat({ onBack }: PublicChatProps) {
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
       {/* Header */}
+      {isSearchOpen ? (
+        <ChatSearchBar
+          inputRef={searchInputRef}
+          text={searchText}
+          person={searchPerson}
+          onText={(value) => { setSearchText(value); setSearchView('list'); setActiveHit(-1); }}
+          onClearPerson={() => { setSearchPerson(null); setSearchView('list'); setActiveHit(-1); searchInputRef.current?.focus(); }}
+          onFocusList={() => setSearchView('list')}
+          onClose={closeSearch}
+        />
+      ) : (
       <div data-chat-header className="flex items-center justify-between gap-2 p-4 border-b border-white/[0.07]">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button
@@ -458,8 +535,9 @@ export function PublicChat({ onBack }: PublicChatProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 ${isSearchOpen ? 'text-white bg-zinc-700' : 'text-zinc-400 hover:text-white'}`}
-                onClick={handleToggleSearch}
+                className="h-8 w-8 text-zinc-400 hover:text-white"
+                data-chat-search-open
+                onClick={() => openSearch()}
               >
                 <Search className="w-4 h-4" />
               </Button>
@@ -498,31 +576,6 @@ export function PublicChat({ onBack }: PublicChatProps) {
           )}
         </div>
       </div>
-
-      {/* Search bar */}
-      {isSearchOpen && (
-        <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-800 bg-zinc-800/50">
-          <Search className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder={t('publicChat.searchPlaceholder')}
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-500 outline-none"
-          />
-          {searchQuery && (
-            <span className="text-xs text-zinc-400 flex-shrink-0">
-              {t('publicChat.resultsCount', { count: filteredMessages.length })}
-            </span>
-          )}
-          <button
-            onClick={handleToggleSearch}
-            className="text-zinc-500 hover:text-white flex-shrink-0"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
       )}
 
       {/* Messages Area */}
@@ -532,11 +585,14 @@ export function PublicChat({ onBack }: PublicChatProps) {
           ref={scrollContainerRef}
           onScroll={(event) => {
             const el = event.currentTarget;
-            followLatest.current = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
+            const fromEnd = el.scrollHeight - el.clientHeight - el.scrollTop;
+            // In old history the end of the list is not the newest line yet.
+            followLatest.current = !hasNewer && fromEnd < 120;
             if (el.scrollTop < LOAD_OLDER_AT) requestOlder();
+            if (hasNewer && fromEnd < LOAD_OLDER_AT) void loadNewer();
           }}
           onPointerDown={dismissKeyboard}
-          className="absolute inset-0 chat-text-zone overflow-y-auto py-2"
+          className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 ${showSearchList ? 'invisible' : ''}`}
         >
           {roomsError ? (
             <AppState
@@ -564,11 +620,9 @@ export function PublicChat({ onBack }: PublicChatProps) {
             </>
           ) : messages.length === 0 ? (
             <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.39e31bf6b245", { defaultValue: "Be the first to say something." })} size="section" className="h-full" />
-          ) : filteredMessages.length === 0 && searchQuery ? (
-            <AppState icon="search" title={t('publicChat.noResults')} description={_copy("copy.2e6d79de50dc", { defaultValue: "Try a different search." })} kind="search-empty" size="compact" className="h-full" />
           ) : (
             <>
-            {signInWall && !searchQuery ? (
+            {signInWall ? (
               <div data-chat-sign-in-wall className="mx-4 my-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4 text-center">
                 <p className="text-sm font-semibold text-white">{_copy("copy.27c26a5a38b3", { defaultValue: "Sign in to see older messages" })}</p>
                 <p className="mt-1 text-xs text-zinc-400">{_copy("copy.674e70bcd915", { defaultValue: "The full chat history is open to everyone with an account." })}</p>
@@ -576,7 +630,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
                   {_copy("copy.bfd402b2f6f3", { defaultValue: "Sign in" })}
                 </Button>
               </div>
-            ) : !hasOlder && !messagesLoading && !searchQuery && messages.length > 0 ? (
+            ) : !hasOlder && !messagesLoading && messages.length > 0 ? (
               <p data-chat-history-start className="py-3 text-center text-[11px] text-zinc-500">
                 {_copy("copy.feaf753f6557", { defaultValue: "Start of the chat" })}
               </p>
@@ -614,6 +668,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
                 onReply={isAuthenticated ? handleReply : undefined}
                 onRetrySend={retrySend}
                 onDiscardSend={discardSend}
+                onSeeMessages={handleSeeMessages}
                 holdFrame
                 replying={!!replyTo && replyTo.id === message.id}
               />
@@ -623,7 +678,48 @@ export function PublicChat({ onBack }: PublicChatProps) {
           )}
           <div ref={bottomRef} />
         </div>
-        {loadingOlder && (
+        {isSearchOpen && searchView === 'chat' && search.results[activeHit] ? (
+          // The opened result stays marked after its arrival flash fades.
+          <style>{`#${chatMessageDomId(search.results[activeHit].id)}{background:rgba(255,213,74,0.14);box-shadow:inset 3px 0 0 rgba(255,213,74,0.9)}`}</style>
+        ) : null}
+        {showSearchList && (
+          <ChatSearchPanel
+            text={searchText}
+            person={searchPerson}
+            search={search}
+            signedIn={isAuthenticated}
+            activeId={search.results[activeHit]?.id ?? null}
+            onSignIn={promptSignIn}
+            onPickPerson={(person) => { setSearchPerson(person); setSearchText(''); setActiveHit(-1); }}
+            onPickText={(value) => { setSearchText(value); searchInputRef.current?.focus(); }}
+            onOpenResult={openResult}
+          />
+        )}
+        {isSearchOpen && searchView === 'chat' && activeHit >= 0 && (
+          <ChatSearchPill
+            position={activeHit + 1}
+            total={Math.max(search.total ?? 0, search.results.length)}
+            busy={jumping}
+            canOlder={activeHit + 1 < search.results.length || search.hasMore}
+            canNewer={activeHit > 0}
+            onList={() => setSearchView('list')}
+            onOlder={() => void openResult(activeHit + 1)}
+            onNewer={() => void openResult(activeHit - 1)}
+          />
+        )}
+        {hasNewer && !showSearchList && (
+          <button
+            type="button"
+            data-chat-latest
+            onClick={() => void goToLatest()}
+            className="absolute right-3 z-10 flex h-9 items-center gap-1.5 rounded-full bg-white pl-3 pr-2.5 text-xs font-semibold text-black shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
+            style={{ bottom: isSearchOpen ? '3.75rem' : '0.75rem' }}
+          >
+            {_copy('chatSearch.latest', { defaultValue: 'Latest' })}
+            <ChevronsDown className="h-4 w-4" />
+          </button>
+        )}
+        {loadingOlder && !showSearchList && (
           <div data-chat-loading-older className="pointer-events-none absolute inset-x-0 top-2 flex justify-center">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/50 backdrop-blur">
               <Loader2 className="h-4 w-4 animate-spin text-white/80" />
@@ -634,7 +730,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
       </SharedTranslationContext.Provider>
       
       {/* Input Area */}
-      <div className="relative">
+      <div className={isSearchOpen ? 'hidden' : 'relative'}>
         <ChatInput
         voiceMaxDuration={29}
           onSendMessage={handleSendMessage}

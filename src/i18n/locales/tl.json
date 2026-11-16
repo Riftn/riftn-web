@@ -19216,5 +19216,35 @@
   "notification": {
     "noNotifications": "Walang mga abiso",
     "loadMore": "Mag-load ng higit pa"
+  },
+  "chatSearch": {
+    "placeholder": "Maghanap ng mga mensahe o tao",
+    "placeholderPerson": "Maghanap ng mga mensahe ni {{name}}",
+    "close": "Isara ang paghahanap",
+    "removePerson": "Maghanap sa lahat",
+    "clear": "Burahin",
+    "signInTitle": "Mag-sign in para hanapin ang chat",
+    "voice": "Mensahe sa boses",
+    "photo": "Larawan",
+    "peopleHere": "Mga tao sa chat na ito",
+    "recent": "Mga kamakailang paghahanap",
+    "hint": "I-type ang isang salita o pangalan.",
+    "failed": "Hindi ma-load ang paghahanap",
+    "people": "Mga tao",
+    "messages": "Mga mensahe",
+    "seeCount_one": "Tingnan ang mensahe ni {{count}}",
+    "seeCount_other": "Tingnan ang mga mensahe ni {{count}}",
+    "messagesCount_one": "Mensahe ni {{count}}",
+    "messagesCount_other": "Mga mensahe ni {{count}}",
+    "results_one": "Resulta ng {{count}}",
+    "results_other": "Mga resulta ng {{count}}",
+    "backToResults": "Bumalik sa mga resulta",
+    "position": "{{current}} ng {{total}}",
+    "older": "Mas lumang resulta",
+    "newer": "Mas bagong resulta",
+    "latest": "Pinakabagong",
+    "gone": "Ang mensaheng iyon ay hindi na narito",
+    "theirMessages": "Ang kanilang mga mensahe",
+    "seeTheirMessages": "Tingnan ang kanilang mga mensahe"
   }
 }
