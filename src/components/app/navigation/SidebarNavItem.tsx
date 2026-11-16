@@ -284,7 +284,7 @@ function SidebarNavItemInner({
     >
       {glassIndicator}
       {showAvatar ? (
-        <Avatar className={cn(
+        <Avatar data-own-avatar className={cn(
           "relative z-10 flex-shrink-0 rounded-xl",
           isDesktop ? "w-9 h-9" : "w-10 h-10"
         )}>
