@@ -8,7 +8,7 @@
  * the top comments and a comment box. Comments load only for a video
  * that has some; follow state loads only for a signed-in viewer.
  */
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,10 @@ import { getNFTCommentPage, postComment } from '@/lib/api/dehub/comments';
 import { isFollowing as checkIsFollowing } from '@/lib/api/dehub';
 import { useFollow } from '@/hooks/use-follow';
 import type { VideoItem } from '@/types/feed.types';
+
+// The full comments panel, the one Shorts shows beside a video. It loads only
+// when a viewer goes to write, so a feed of long videos stays light.
+const CommentsSection = lazy(() => import('@/components/app/cards/CommentsSection').then((m) => ({ default: m.CommentsSection })));
 
 function RailFollowButton({ video, walletAddress, onLogin }: { video: VideoItem; walletAddress?: string | null; onLogin: () => void }) {
   const { t } = useTranslation();
@@ -55,7 +59,7 @@ function RailFollowButton({ video, walletAddress, onLogin }: { video: VideoItem;
  * type, Enter posts and Shift+Enter adds a line. Posting refreshes the
  * panel's comments and the full comments list.
  */
-function RailCommentBox({ tokenId, walletAddress, onLogin, onPosted }: { tokenId: string; walletAddress?: string | null; onLogin: () => void; onPosted: () => void }) {
+function RailCommentBox({ tokenId, walletAddress, onLogin, onPosted, onExpand }: { tokenId: string; walletAddress?: string | null; onLogin: () => void; onPosted: () => void; onExpand: () => void }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [text, setText] = useState('');
@@ -99,7 +103,7 @@ function RailCommentBox({ tokenId, walletAddress, onLogin, onPosted }: { tokenId
         value={text}
         disabled={sending}
         placeholder={t('comments.composerPlaceholder', 'Add a comment...')}
-        onFocus={() => { if (!walletAddress) { ref.current?.blur(); onLogin(); } }}
+        onFocus={() => { if (!walletAddress) { ref.current?.blur(); onLogin(); return; } onExpand(); }}
         onChange={(event) => { setText(event.target.value); fit(); }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -134,6 +138,20 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
   const description = (video.description ?? '').trim();
   const tokenId = video.id;
   const [posted, setPosted] = useState(0);
+  // Going to write swaps the preview for the full comments panel, so the box
+  // here has everything the comments section's composer has.
+  const [writing, setWriting] = useState(false);
+  const railRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!writing) return;
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const box = railRef.current?.querySelector<HTMLTextAreaElement>('[data-comment-composer] textarea');
+      if (box) { box.focus(); window.clearInterval(timer); }
+      else if (++tries > 40) window.clearInterval(timer);
+    }, 50);
+    return () => window.clearInterval(timer);
+  }, [writing]);
   const count = (Number(video.commentCount ?? 0) || 0) + posted;
   const { data } = useQuery({
     queryKey: ['wide-rail-comments', tokenId],
@@ -145,6 +163,7 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
 
   return (
     <aside
+      ref={railRef}
       data-wide-rail
       data-no-navigate
       className="flex min-w-[260px] flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-white/[0.12] bg-black/40 text-white backdrop-blur-[24px] backdrop-saturate-[160%] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
@@ -159,33 +178,56 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
 
       <div className="mx-4 h-px bg-white/[0.08]" />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
-        <button
-          type="button"
-          onClick={(event) => { event.stopPropagation(); onOpenComments(); }}
-          className="flex items-baseline justify-between gap-2 text-left text-white/60 transition-colors hover:text-white"
+      {writing ? (
+        // The same panel and composer as the comments section: attachments,
+        // GIFs and emoji, voice notes, mentions, replies and reactions.
+        <div
+          data-wide-rail-comments
+          className="min-h-0 flex-1 px-2 pb-2 [&>div]:h-full [&>div]:min-h-0 [&>div]:max-h-none [&>div]:mt-0 [&>div]:p-0"
+          onClick={(event) => event.stopPropagation()}
         >
-          <span className="text-[11px] font-semibold uppercase tracking-[0.1em]">{t('wideVideo.comments', 'Comments')}</span>
-          {count > 0 && <span className="text-[12px] tabular-nums">{count}</span>}
-        </button>
-        {rows.map((row) => {
-          const name = row.writor?.displayName || row.writor?.username || '';
-          return (
-            <div key={row.id} className="flex min-w-0 gap-2.5 text-[13.5px] leading-snug">
-              <Avatar className="h-7 w-7 shrink-0 rounded-full">
-                {row.writor?.avatarUrl && <AvatarImage src={row.writor.avatarUrl} className="rounded-full" />}
-                <AvatarFallback className="rounded-full bg-zinc-700 text-[10px] text-white">{name[0]?.toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <p className="line-clamp-3 min-w-0 break-words"><b className="mr-1 font-bold">{name}</b>{row.content}</p>
-            </div>
-          );
-        })}
-        {count === 0 && <p className="text-[13px] text-white/60">{t('wideVideo.noComments', 'No comments yet')}</p>}
-      </div>
+          <Suspense fallback={null}>
+            <CommentsSection
+              tokenId={tokenId}
+              onClose={() => setWriting(false)}
+              embedded
+              commentsDisabled={!!(video as { commentsDisabled?: boolean }).commentsDisabled}
+              replyPolicy={video.replyPolicy}
+              forKids={!!video.forKids}
+            />
+          </Suspense>
+        </div>
+      ) : (
+        <>
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
+            <button
+              type="button"
+              onClick={(event) => { event.stopPropagation(); onOpenComments(); }}
+              className="flex items-baseline justify-between gap-2 text-left text-white/60 transition-colors hover:text-white"
+            >
+              <span className="text-[11px] font-semibold uppercase tracking-[0.1em]">{t('wideVideo.comments', 'Comments')}</span>
+              {count > 0 && <span className="text-[12px] tabular-nums">{count}</span>}
+            </button>
+            {rows.map((row) => {
+              const name = row.writor?.displayName || row.writor?.username || '';
+              return (
+                <div key={row.id} className="flex min-w-0 gap-2.5 text-[13.5px] leading-snug">
+                  <Avatar className="h-7 w-7 shrink-0 rounded-full">
+                    {row.writor?.avatarUrl && <AvatarImage src={row.writor.avatarUrl} className="rounded-full" />}
+                    <AvatarFallback className="rounded-full bg-zinc-700 text-[10px] text-white">{name[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <p className="line-clamp-3 min-w-0 break-words"><b className="mr-1 font-bold">{name}</b>{row.content}</p>
+                </div>
+              );
+            })}
+            {count === 0 && <p className="text-[13px] text-white/60">{t('wideVideo.noComments', 'No comments yet')}</p>}
+          </div>
 
-      <div className="p-4 pt-0">
-        <RailCommentBox tokenId={tokenId} walletAddress={walletAddress} onLogin={onLogin} onPosted={() => setPosted((n) => n + 1)} />
-      </div>
+          <div className="p-4 pt-0">
+            <RailCommentBox tokenId={tokenId} walletAddress={walletAddress} onLogin={onLogin} onPosted={() => setPosted((n) => n + 1)} onExpand={() => setWriting(true)} />
+          </div>
+        </>
+      )}
     </aside>
   );
 }
