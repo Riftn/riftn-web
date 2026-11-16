@@ -70,7 +70,7 @@ serve(async (req) => {
     const cutoff = Date.now() - 3 * 60_000;
     let answeredSince = false;
     let question: { display_name?: string | null; username?: string | null } | null = null;
-    let fallback: typeof question = null;
+    let fallback: { display_name?: string | null; username?: string | null } | null = null;
     for (const m of recent || []) {
       if (Date.parse(m.created_at) < cutoff) break;
       if (m.message_type === "admin_response") { answeredSince = true; continue; }
