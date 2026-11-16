@@ -4,7 +4,7 @@
 // ticket for a signed-in user. Authenticated with the SUPPORT_TICKET_SECRET
 // shared secret (x-support-secret header) — not a Supabase JWT, so verify_jwt
 // is off in config.toml. The mail is sent through Lovable's managed email API
-// as noreply@notify.dehub.io.
+// as noreply@riftn.com.
 //
 // The recipient is fixed by the template. Everything in the body comes from a
 // user talking to a chatbot, so an addressable `to` field would turn a leaked
