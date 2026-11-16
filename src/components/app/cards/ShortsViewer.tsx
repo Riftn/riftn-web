@@ -505,6 +505,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // visibleIndices.
   const [pointerPinnedIndex, setPointerPinnedIndex] = useState<number | null>(null);
   const isMobile = useIsMobile();
+  // A phone stays a phone when it is turned sideways, where it is wider than
+  // the phone layout's breakpoint.
+  const [isTouchPhone] = useState(() => typeof window !== 'undefined'
+    && window.matchMedia('(pointer: coarse)').matches
+    && Math.min(window.screen.width, window.screen.height) < 768);
+  // Around a video that does not fill a phone screen: the plain backdrop on
+  // System and Minimal, a mirrored floor on Osaka and Glass, and light from
+  // the picture on the other immersive themes.
+  const phoneStage = !(isMobile || isTouchPhone) ? undefined
+    : theme === 'system' || theme === 'minimal' || theme === 'light' ? 'clean' as const
+    : theme === 'osaka' || theme === 'glass' ? 'floor' as const
+    : 'glow' as const;
   const commentsViewport = useVisualViewportBox(isMobile && showComments);
 
   /**
@@ -544,6 +556,57 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     allowSimulated: true,
   });
   const mini = useInAppVideoMini(containerRef, currentIndex, !isFullscreen && !showComments, isMobile);
+
+  /**
+   * Phones: a wide video and the way the phone is held.
+   *
+   * Turning the phone sideways plays a wide video full screen, and turning it
+   * back upright leaves again. Going full screen from the button turns the
+   * picture sideways where the browser can (Android), so nobody has to unlock
+   * rotation first. A tall video is left alone: sideways it would only shrink.
+   */
+  const fullscreenStateRef = useRef({ isFullscreen, toggleFullscreen, currentIndex });
+  fullscreenStateRef.current = { isFullscreen, toggleFullscreen, currentIndex };
+  const turnedIntoFullscreenRef = useRef(false);
+  const currentVideoIsWide = useCallback(() => {
+    const player = containerRef.current?.querySelector<HTMLVideoElement>(
+      `[data-shorts-slide="${fullscreenStateRef.current.currentIndex}"] [data-shorts-picture] video`,
+    );
+    return !!player && player.videoWidth > player.videoHeight * 1.1;
+  }, []);
+  useEffect(() => {
+    if (!isTouchPhone) return;
+    const sideways = window.matchMedia('(orientation: landscape)');
+    const onTurn = () => {
+      const state = fullscreenStateRef.current;
+      if (sideways.matches) {
+        if (!state.isFullscreen && currentVideoIsWide()) {
+          turnedIntoFullscreenRef.current = true;
+          state.toggleFullscreen();
+        }
+      } else if (turnedIntoFullscreenRef.current) {
+        turnedIntoFullscreenRef.current = false;
+        if (state.isFullscreen) state.toggleFullscreen();
+      }
+    };
+    sideways.addEventListener('change', onTurn);
+    return () => sideways.removeEventListener('change', onTurn);
+  }, [isTouchPhone, currentVideoIsWide]);
+  useEffect(() => {
+    if (!isTouchPhone) return;
+    const orientation = window.screen?.orientation as (ScreenOrientation & { lock?: (o: string) => Promise<void> }) | undefined;
+    if (!isFullscreen) {
+      turnedIntoFullscreenRef.current = false;
+      return;
+    }
+    // Only real fullscreen can hold the screen sideways; it is refused
+    // everywhere else, and the picture then simply follows the phone.
+    if (!document.fullscreenElement || !currentVideoIsWide()) return;
+    void orientation?.lock?.('landscape').catch(() => {});
+    return () => {
+      try { orientation?.unlock?.(); } catch { /* Not locked. */ }
+    };
+  }, [isFullscreen, isTouchPhone, currentVideoIsWide]);
   // The whole viewer follows a drag-to-leave on phones: right from the left
   // edge, or down on the first short. The page underneath shows as it goes.
   const leaveX = useMotionValue(0);
@@ -1803,6 +1866,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       onSeekEnd={endTimelineSeek}
                       showPlayIndicator={isActive ? showPlayIndicator : null}
                       letterbox
+                      phoneStage={phoneStage}
                       isFullscreen={isFullscreen}
                       // Only the playing short draws a bar over the action
                       // bar's gradient; the neighbours keep theirs in place,
@@ -2509,6 +2573,19 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             >
               <span className="text-white text-[11px] font-bold leading-none">{formatRate(playbackRate)}x</span>
             </button>
+
+            {/* Full screen: a wide video also turns sideways where the browser allows it. */}
+            {!currentShort?.imageUrls?.length && <button
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleFullscreen();
+              }}
+              className={VIEWER_CONTROL}
+              style={{ touchAction: 'manipulation' }}
+              aria-label={isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+            >
+              {isFullscreen ? <Minimize className="w-5 h-5 text-white" /> : <Maximize className="w-5 h-5 text-white" />}
+            </button>}
 
             {/* Mute button */}
             <button
