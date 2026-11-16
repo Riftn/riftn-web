@@ -13,7 +13,7 @@
  */
 import { memo } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import CutCoins from '@/components/ui/cut-icons/coins';
+import dehubCoin from '@/assets/dehub-coin.png';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import type { Comment } from '@/lib/comment-mapper';
@@ -47,11 +47,7 @@ function shortAmount(tip: { amount: number; symbol: string }): string {
 
 /** The gold coin: Riftn's mark struck into a gold disc. */
 export function GoldCoin({ className }: { className?: string }) {
-  return (
-    <span className={cn('dh-gold-coin', className)} aria-hidden>
-      <CutCoins className="dh-gold-coin-mark" />
-    </span>
-  );
+  return <img src={dehubCoin} className={cn('dh-gold-coin', className)} alt="" aria-hidden />;
 }
 
 export function TipChip({ tip, className }: { tip: { amount: number; symbol: string }; className?: string }) {

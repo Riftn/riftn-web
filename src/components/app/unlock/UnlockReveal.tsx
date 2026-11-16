@@ -7,6 +7,7 @@
  * Foil peel. Reduced motion gets a plain fade.
  */
 import { useEffect, useRef, type ReactNode } from 'react';
+import dehubCoin from '@/assets/dehub-coin.png';
 import './unlock-reveal.css';
 
 import type { UnlockRevealKind } from './unlock-reveal-kind';
@@ -32,6 +33,8 @@ function burst(from: DOMRect) {
   const css = getComputedStyle(document.documentElement);
   const accent = css.getPropertyValue('--primary').trim();
   const cols = ['#ffd36b', '#ffffff', accent ? `hsl(${accent})` : '#b48cff', '#ff7ad9'];
+  const coinImage = new Image();
+  coinImage.src = dehubCoin;
   const ox = from.left + from.width / 2, oy = from.top + from.height / 2;
   const P = Array.from({ length: 70 }, (_, i) => {
     const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.3, sp = 4 + Math.random() * 7;
@@ -48,9 +51,7 @@ function burst(from: DOMRect) {
       ctx.save(); ctx.globalAlpha = fade; ctx.translate(p.x, p.y); ctx.rotate(p.r);
       if (p.coin) {
         ctx.scale(Math.abs(Math.cos(p.fl)) + 0.15, 1);
-        const g = ctx.createRadialGradient(-2, -2, 1, 0, 0, 7);
-        g.addColorStop(0, '#fff6c7'); g.addColorStop(0.5, '#ffd36b'); g.addColorStop(1, '#b7790f');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 6.28); ctx.fill();
+        if (coinImage.complete && coinImage.naturalWidth) ctx.drawImage(coinImage, -6, -6, 12, 12);
       } else {
         ctx.scale(1, Math.cos(p.fl)); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
       }
@@ -94,7 +95,7 @@ export function UnlockReveal({ kind, cover, onDone }: UnlockRevealProps) {
         <div className="ur-lock">
           <div className="ur-ring" />
           {[20, 65, 110, 155, 200, 245, 290, 335].map(a => <i key={a} className="ur-spark" style={{ ['--a' as string]: `${a}deg` }} />)}
-          <div className="ur-coinface"><i>D</i></div>
+          <div className="ur-coinface"><img src={dehubCoin} alt="" /></div>
           <svg viewBox="0 0 30 36">
             <path className="ur-shk" d="M8 17V10a7 7 0 0 1 14 0v7" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
             <rect x="3" y="16" width="24" height="18" rx="4" fill="rgb(255 255 255 / .18)" stroke="#fff" strokeWidth="2.4" />
