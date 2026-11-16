@@ -42,7 +42,7 @@ function RailFollowButton({ video, walletAddress, onLogin }: { video: VideoItem;
       }}
       className={following
         ? 'h-10 w-full rounded-xl border border-white/[0.14] bg-white/[0.06] text-[13.5px] font-bold text-white/85 transition-colors hover:bg-white/[0.1]'
-        : 'h-10 w-full rounded-xl bg-gradient-to-b from-white to-[#c9cbd0] text-[13.5px] font-bold text-zinc-900 shadow-[inset_0_1px_0_#fff,0_1px_2px_rgba(0,0,0,0.4)] transition-[filter] hover:brightness-105'}
+        : 'h-10 w-full rounded-xl border border-white/30 bg-black/50 text-[13.5px] font-bold text-white transition-colors hover:border-white/50 hover:bg-white/[0.06]'}
     >
       {following ? t('wideVideo.following', 'Following') : t('wideVideo.follow', 'Follow')}
     </button>
