@@ -14,9 +14,9 @@ describe('Glass route surfaces', () => {
     expect(glass).toContain('[data-stage-body]');
   });
 
-  it('keeps Shorts side panels and both comment layouts on the same material', () => {
+  it('keeps Shorts side panels, the info sheet and both comment layouts on the same material', () => {
     const shorts = read('src/components/app/cards/ShortsViewer.tsx');
-    expect(shorts.match(/data-shorts-panel/g)).toHaveLength(4);
+    expect(shorts.match(/data-shorts-panel/g)).toHaveLength(5);
     expect(shorts).toContain("theme === 'glass' && !isMobile && <GlassBackground />");
     expect(glass).toContain('[data-shorts-panel]');
     expect(glass).toContain('[data-shorts-viewer] { backdrop-filter:none; }');

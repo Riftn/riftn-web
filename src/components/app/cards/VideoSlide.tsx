@@ -73,6 +73,10 @@ interface VideoSlideProps {
    * (desktop), the blurred cover fill stays.
    */
   phoneStage?: 'glow' | 'clean' | 'floor';
+  /** Space kept clear above the picture (the info stage's top buttons). */
+  stageInsetTop?: number;
+  /** The video's width over its height, once known. */
+  onRatio?: (ratio: number) => void;
   /**
    * Buffering hint for the underlying <video>. The viewer sets this to `'auto'`
    * for the active slide *and the next one* so the neighbour is already buffered
@@ -128,6 +132,8 @@ const VideoSlideBody = memo(function VideoSlideBody({
   showPlayIndicator,
   letterbox = false,
   phoneStage,
+  stageInsetTop = 0,
+  onRatio,
   preload,
   isFullscreen = false,
   progressLayer = null,
@@ -313,6 +319,10 @@ const VideoSlideBody = memo(function VideoSlideBody({
       return `linear-gradient(to bottom, transparent ${bar}, #000 calc(${bar} + 18px), #000 calc(100cqh - ${bar} - 18px), transparent calc(100cqh - ${bar}))`;
     })()
     : null;
+  const onRatioRef = useRef(onRatio);
+  onRatioRef.current = onRatio;
+  const reportsRatio = !!onRatio;
+  useEffect(() => { if (videoRatio > 0 && reportsRatio) onRatioRef.current?.(videoRatio); }, [videoRatio, reportsRatio]);
   const pinch = usePinchZoom(!!phoneStage && !isPhotoSlide, onHoldChange);
   // Before the handoff assigns `src`, so a refreshed signature resumes in place.
   useResumeAcrossRefresh(videoRef, playableSrc || undefined);
@@ -576,7 +586,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
           ladder, off pointer events. Desktop used to bind a competing onClick
           for centre-double-tap fullscreen; fullscreen kept its button and gave
           the gesture up, because one gesture cannot mean two things. */}
-      <div data-shorts-media-slot className="absolute inset-0 z-[2]" style={cardClip || glowFeather ? { containerType: 'size' } : undefined} {...tapGestures} {...side.handlers} {...pinch.handlers}>
+      <div data-shorts-media-slot className="absolute inset-0 z-[2]" style={cardClip || glowFeather ? { containerType: 'size', top: stageInsetTop || undefined } : undefined} {...tapGestures} {...side.handlers} {...pinch.handlers}>
         {/* A hold's speed-up shows nothing: the picture speeding up is the
             feedback. A double-tap jump shows a soft count on its side. */}
         {side.seekFlash && (
