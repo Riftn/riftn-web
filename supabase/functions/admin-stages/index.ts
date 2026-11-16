@@ -326,11 +326,20 @@ async function setListenCount(id: string, body: any) {
  * already gone (or whose URL predates the current bucket layout) must not
  * block taking the stage down, so a failure here is logged, not thrown.
  */
-async function removeRecordingObject(recordingUrl: string): Promise<void> {
-  const path = recordingUrl.split(`/${RECORDINGS_BUCKET}/`)[1];
-  if (!path) return;
+async function removeRecordingObject(recordingUrl: string, stageId: string): Promise<void> {
+  const raw = recordingUrl.split(`/${RECORDINGS_BUCKET}/`)[1]?.split(/[?#]/)[0];
+  if (!raw) return;
+  let path: string;
   try {
-    await rest(`/storage/v1/object/${RECORDINGS_BUCKET}/${decodeURIComponent(path)}`, {
+    path = decodeURIComponent(raw);
+  } catch {
+    return;
+  }
+  // A stage's audio lives in its own folder. The URL on the row is written by
+  // the host, so anything pointing outside that folder is not ours to remove.
+  if (!path.startsWith(`${stageId}/`) || path.split("/").includes("..")) return;
+  try {
+    await rest(`/storage/v1/object/${RECORDINGS_BUCKET}/${path}`, {
       method: "DELETE",
     });
   } catch (e) {
@@ -349,7 +358,7 @@ async function deleteRecording(id: string) {
     return { success: true, message: "Stage has no recording", stage };
   }
 
-  await removeRecordingObject(stage.recording_url);
+  await removeRecordingObject(stage.recording_url, stage.id);
 
   const response = await rest(`/rest/v1/audio_spaces?id=eq.${encodeURIComponent(stage.id)}`, {
     method: "PATCH",
@@ -366,7 +375,7 @@ async function deleteStage(id: string) {
 
   // Storage first: the row is what tells us where the file is, so deleting it
   // in the other order strands the recording in the bucket forever.
-  if (stage.recording_url) await removeRecordingObject(stage.recording_url);
+  if (stage.recording_url) await removeRecordingObject(stage.recording_url, stage.id);
 
   await rest(`/rest/v1/audio_spaces?id=eq.${encodeURIComponent(stage.id)}`, { method: "DELETE" });
 
