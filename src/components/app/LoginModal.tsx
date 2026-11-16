@@ -43,6 +43,8 @@ import riftnWordmark from '@/assets/riftn-wordmark-flat-white.png';
 import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
 import { beginAuthTrace, readAuthTrace } from '@/lib/auth-trace';
 import { createLogger } from '@/lib/logger';
+import { setSignInSheetState } from '@/lib/sign-in-handoff';
+import '@/components/app/login/sign-in-handoff.css';
 import '@/styles/welcome-flow.css';
 
 const flowLog = createLogger('LoginFlow');
@@ -213,6 +215,12 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     if (!open) return;
     flowLog.trace?.('screen-view', { screen: step, surface: 'login-sheet', intent: loginIntent });
   }, [open, step, loginIntent]);
+  const sheetWaiting = step === 'resuming' || step === 'wallet-signing';
+  const [sheetId] = useState(() => Symbol('login-sheet'));
+  useLayoutEffect(() => {
+    setSignInSheetState(sheetId, !open ? 'closed' : sheetWaiting ? 'waiting' : 'open');
+    return () => setSignInSheetState(sheetId, null);
+  }, [sheetId, open, sheetWaiting]);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' && window.innerWidth < 768,
   );
@@ -307,14 +315,20 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const stackSheet = isMobile && loginIntent !== 'add-profile';
   // The sign-in code step lives on the same clip wall as the sign-in options:
   // it is the last beat of signing in, not a separate screen.
-  const stackLayout = loginIntent !== 'add-profile' && (isInlineLoginStep(step) || step === 'two-factor');
+  // The wait for the session is not a screen of its own: the sheet keeps the
+  // layout it had and dims, and SignInHandoff carries the rest.
+  const waitingForSession = step === 'resuming' || step === 'wallet-signing';
+  const stackLayout = loginIntent !== 'add-profile' && (isInlineLoginStep(step) || step === 'two-factor' || waitingForSession);
 
   // Only the sign-in options hold their space; it stays blank (the real list
   // replaces it). Every other step is a wait or a form the user has already
   // been told about, so it gets the site loader, the mark the resume uses.
   const fallback = step === 'main'
     ? <LoginBodySkeleton layout={stackLayout ? 'stack' : undefined} />
+    : waitingForSession
+    ? <div className={stackLayout ? 'h-[250px]' : 'h-[180px]'} aria-hidden />
     : <DeHubPageLoader size={56} minHeight="180px" />;
+  const veil = <div className="signin-handoff-veil" data-on={open && waitingForSession ? '' : undefined} aria-hidden />;
 
   const termsNotice = (
     <Trans
@@ -387,11 +401,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           <img src={isMobile ? dehubLogo : riftnWordmark} alt="Riftn" className={isMobile ? "h-8" : "h-7"} />
         </div>
         {usesDesktopUnlockPanel ? (
-          <DialogTitle className="text-base font-medium text-white mt-4 text-center">
+          <DialogTitle className={waitingForSession ? "sr-only" : "text-base font-medium text-white mt-4 text-center"}>
             {titleText}
           </DialogTitle>
         ) : (
-          <DrawerTitle className="text-base font-medium text-white mt-4 text-center">
+          <DrawerTitle className={waitingForSession ? "sr-only" : "text-base font-medium text-white mt-4 text-center"}>
             {titleText}
           </DrawerTitle>
         )}
@@ -444,6 +458,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           overlayClassName="z-[2147483645] login-modal-overlay bg-black/40 backdrop-blur-xl"
         >
           {sheetBody}
+          {veil}
         </DialogContent>
       </Dialog>
     );
@@ -471,6 +486,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
         overlayClassName="z-[2147483645] login-modal-overlay backdrop-blur-xl md:bg-black/40"
       >
         {sheetBody}
+          {veil}
       </DrawerContent>
     </Drawer>
   );

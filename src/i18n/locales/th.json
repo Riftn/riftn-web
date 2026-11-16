@@ -19022,5 +19022,35 @@
   },
   "footer": {
     "copyright": "ลิขสิทธิ์ © 2024 บริษัทของคุณ"
+  },
+  "chatSearch": {
+    "placeholder": "ค้นหาข้อความหรือคน",
+    "placeholderPerson": "ค้นหาข้อความของ {{name}}",
+    "close": "ปิดการค้นหา",
+    "removePerson": "ค้นหาทุกคน",
+    "clear": "ล้าง",
+    "signInTitle": "เข้าสู่ระบบเพื่อค้นหาการสนทนา",
+    "voice": "ข้อความเสียง",
+    "photo": "รูปภาพ",
+    "peopleHere": "คนในห้องสนทนานี้",
+    "recent": "การค้นหาเมื่อเร็ว ๆ นี้",
+    "hint": "พิมพ์คำหรือชื่อ",
+    "failed": "ไม่สามารถโหลดการค้นหาได้",
+    "people": "คน",
+    "messages": "ข้อความ",
+    "seeCount_one": "ดูข้อความของ {{count}}",
+    "seeCount_other": "ดูข้อความของ {{count}}",
+    "messagesCount_one": "ข้อความของ {{count}}",
+    "messagesCount_other": "ข้อความของ {{count}}",
+    "results_one": "ผลลัพธ์ของ {{count}}",
+    "results_other": "ผลลัพธ์ของ {{count}}",
+    "backToResults": "กลับไปยังผลลัพธ์",
+    "position": "{{current}} จาก {{total}}",
+    "older": "ผลลัพธ์เก่า",
+    "newer": "ผลลัพธ์ใหม่",
+    "latest": "ล่าสุด",
+    "gone": "ข้อความนั้นไม่อยู่ที่นี่อีกต่อไป",
+    "theirMessages": "ข้อความของพวกเขา",
+    "seeTheirMessages": "ดูข้อความของพวกเขา"
   }
 }

@@ -19544,5 +19544,35 @@
     "footer": {
       "allRightsReserved": "Всі права захищені"
     }
+  },
+  "chatSearch": {
+    "placeholder": "Пошук повідомлень або людей",
+    "placeholderPerson": "Пошук повідомлень {{name}}",
+    "close": "Закрити пошук",
+    "removePerson": "Пошук усіх",
+    "clear": "Очистити",
+    "signInTitle": "Увійти, щоб шукати чат",
+    "voice": "Голосове повідомлення",
+    "photo": "Фото",
+    "peopleHere": "Люди у цьому чаті",
+    "recent": "Нещодавні пошуки",
+    "hint": "Введіть слово або ім'я.",
+    "failed": "Пошук не вдалося завантажити",
+    "people": "Люди",
+    "messages": "Повідомлення",
+    "seeCount_one": "Подивитися їх повідомлення {{count}}",
+    "seeCount_other": "Подивитися їх повідомлення {{count}}",
+    "messagesCount_one": "Повідомлення {{count}}",
+    "messagesCount_other": "Повідомлення {{count}}",
+    "results_one": "Результат {{count}}",
+    "results_other": "Результати {{count}}",
+    "backToResults": "Повернутися до результатів",
+    "position": "{{current}} з {{total}}",
+    "older": "Старший результат",
+    "newer": "Новіший результат",
+    "latest": "Останній",
+    "gone": "Це повідомлення більше не тут",
+    "theirMessages": "Їх повідомлення",
+    "seeTheirMessages": "Подивитися їх повідомлення"
   }
 }

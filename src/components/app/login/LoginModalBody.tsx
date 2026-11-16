@@ -1175,9 +1175,13 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
           resume itself, and a wallet step reached a beat before the identity
           id lands (which used to render an empty sheet). Same mark as the
           route loader, so the login flow doesn't invent its own idiom. */}
-      {(step === 'resuming' || step === 'wallet-signing' || (step.startsWith('wallet-') && !supabaseUserId)) && (
+      {step === 'resuming' || step === 'wallet-signing' ? (
+        // The wait for the session shows nothing of its own: the sheet dims and
+        // SignInHandoff holds the picture frame over it. Only the space is kept.
+        <div className={layout === 'stack' ? 'h-[250px]' : 'h-[180px]'} aria-hidden />
+      ) : step.startsWith('wallet-') && !supabaseUserId ? (
         <DeHubPageLoader size={56} minHeight="180px" />
-      )}
+      ) : null}
     </>
   );
 }

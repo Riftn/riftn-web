@@ -202,8 +202,10 @@ async function loadLiveChatMessages(
 
 export interface LiveChatMessagePage {
   messages: LiveChatMessage[];
-  /** Older lines exist past this page. */
+  /** Older lines exist past this page (reading forward with `after`: newer ones). */
   hasMore: boolean;
+  /** Reading around one line: newer lines exist past this window. */
+  hasNewer: boolean;
   /** Signed out and past the history a guest may read: show the sign-in wall. */
   signInRequired: boolean;
 }
@@ -211,18 +213,21 @@ export interface LiveChatMessagePage {
 /**
  * One page of a room's history, newest first from the server, with whether
  * older lines exist and whether a signed-out reader has hit the wall.
+ * `around` reads the window either side of one line; `after` reads forward.
  * Signed in, the session is refreshed first, so a lapsed token is not read as
  * a guest and walled.
  */
 export async function getLiveChatMessagePage(
   roomId: string,
-  params: { limit: number; before?: string; signedIn?: boolean },
+  params: { limit: number; before?: string; after?: string; around?: string; signedIn?: boolean },
 ): Promise<LiveChatMessagePage> {
   const queryParams: Record<string, string | number | undefined> = {
     limit: Math.min(params.limit, 100),
     roomId,
   };
   if (params.before) queryParams.before = params.before;
+  if (params.after) queryParams.after = params.after;
+  if (params.around) queryParams.around = params.around;
   const r = await apiCall<Record<string, unknown>>('/api/livechat/messages', {
     params: queryParams,
     requiresAuth: !!params.signedIn,
@@ -232,6 +237,49 @@ export async function getLiveChatMessagePage(
   return {
     messages,
     hasMore: !!body?.hasMore && messages.length > 0,
+    hasNewer: !!body?.hasNewer && messages.length > 0,
+    signInRequired: !!body?.signInRequired,
+  };
+}
+
+/** Someone who has spoken in a room, as the chat search lists them. */
+export interface LiveChatSearchPerson {
+  address: string;
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  messageCount: number;
+}
+
+export interface LiveChatSearchPage {
+  messages: LiveChatMessage[];
+  people: LiveChatSearchPerson[];
+  hasMore: boolean;
+  /** How many lines match in all. Only the first page carries it. */
+  total: number | null;
+  signInRequired: boolean;
+}
+
+/**
+ * Search a room's whole history by words (`q`), by who said it (`from`), or
+ * both. Newest first; `before` reads the next page.
+ */
+export async function searchLiveChat(
+  roomId: string,
+  params: { q?: string; from?: string; before?: string; limit?: number },
+): Promise<LiveChatSearchPage> {
+  const queryParams: Record<string, string | number | undefined> = { roomId, limit: params.limit ?? 30 };
+  if (params.q) queryParams.q = params.q;
+  if (params.from) queryParams.from = params.from;
+  if (params.before) queryParams.before = params.before;
+  const r = await apiCall<Record<string, unknown>>('/api/livechat/search', { params: queryParams, requiresAuth: true });
+  const body = (r && typeof r === 'object' && 'result' in r && r.result && typeof r.result === 'object' ? r.result : r) as Record<string, unknown>;
+  const messages = Array.isArray(body?.messages) ? (body.messages as LiveChatMessage[]) : [];
+  return {
+    messages,
+    people: Array.isArray(body?.people) ? (body.people as LiveChatSearchPerson[]) : [],
+    hasMore: !!body?.hasMore && messages.length > 0,
+    total: typeof body?.total === 'number' ? body.total : null,
     signInRequired: !!body?.signInRequired,
   };
 }
