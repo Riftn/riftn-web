@@ -49,7 +49,11 @@ export function FeedCaptionExpander({ children, preview, textKey, className, lin
   const isPhone = useIsMobile();
   const [open, setOpen] = useState(false);
   const verdictKey = textKey ? `${lines}|${isPhone ? 'p' : 'd'}|${textKey}` : null;
-  const [overflows, setOverflows] = useState(() => (verdictKey ? overflowVerdicts.get(verdictKey) ?? false : false));
+  // null until measured, so an unmeasured caption is not mistaken for one that fits.
+  const [overflows, setOverflows] = useState<boolean | null>(() => (verdictKey ? overflowVerdicts.get(verdictKey) ?? null : null));
+  // The squeezed preview fits without "Show more", so squeezing saves nothing
+  // and there is no button to get the blank lines back: show it as written.
+  const showFull = !open && overflows === false && preview != null;
   const [fadeTop, setFadeTop] = useState(false);
   const [fadeBottom, setFadeBottom] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -59,7 +63,7 @@ export function FeedCaptionExpander({ children, preview, textKey, className, lin
   // Does the closed caption run past three lines? ResizeObserver rather than
   // reading scrollHeight on every render keeps the feed free of forced layout.
   useEffect(() => {
-    if (open) return;
+    if (open || showFull) return;
     const el = clampRef.current;
     if (!el) return;
     const measure = () => {
@@ -77,10 +81,13 @@ export function FeedCaptionExpander({ children, preview, textKey, className, lin
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [open, textKey, verdictKey]);
+  }, [open, showFull, textKey, verdictKey]);
 
-  // A new text (translation) closes the box again.
-  useEffect(() => { setOpen(false); }, [textKey]);
+  // A new text (translation) closes the box again and is measured afresh.
+  useEffect(() => {
+    setOpen(false);
+    setOverflows(verdictKey ? overflowVerdicts.get(verdictKey) ?? null : null);
+  }, [textKey, verdictKey]);
 
   const updateFades = useCallback(() => {
     const el = boxRef.current;
@@ -136,9 +143,9 @@ export function FeedCaptionExpander({ children, preview, textKey, className, lin
       <div
         ref={clampRef}
         className="overflow-hidden"
-        style={{ display: '-webkit-box', WebkitLineClamp: lines, WebkitBoxOrient: 'vertical' }}
+        style={showFull ? undefined : { display: '-webkit-box', WebkitLineClamp: lines, WebkitBoxOrient: 'vertical' }}
       >
-        {preview ?? children}
+        {showFull ? children : preview ?? children}
       </div>
       {overflows && (
         <button

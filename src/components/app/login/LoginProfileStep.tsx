@@ -410,7 +410,9 @@ export function LoginProfileStep() {
     // brand-new account set its wallet password, and a document navigation
     // tears down the whole JS context. That used to drop the just-unlocked
     // key, so the first post asked for the password all over again.
-    if (window.location.pathname !== '/app') navigate('/app');
+    // Signing up from /chat stays in the chat: that is where they asked to be.
+    const here = window.location.pathname;
+    if (here !== '/app' && here !== '/chat') navigate('/app');
   };
 
   const next = async () => {

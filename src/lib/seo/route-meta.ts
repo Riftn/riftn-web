@@ -15,6 +15,19 @@ export const SITE_URL = 'https://riftn.com';
 export const SHARE_IMAGE = `${SITE_URL}/og/riftn-share.png`;
 
 /**
+ * The worker's OG_CARD_REV. X, Facebook, LinkedIn and Telegram cache a share
+ * image by its URL, so a card re-rendered under the same address keeps showing
+ * the old art. Every /og/*.jpg card is shared with this version on it.
+ */
+export const OG_CARD_REV = '5';
+
+/** A /og/ route card with the current version on it; any other image as given. */
+export function versionedShareImage(image: string): string {
+  const m = /^((?:https:\/\/riftn\.com)?\/og\/[a-z0-9-]+\.jpg)(?:\?v=[^#&]*)?$/.exec(image);
+  return m ? `${m[1]}?v=${OG_CARD_REV}` : image;
+}
+
+/**
  * Route keys whose /app/<key> twin the worker collapses onto the bare /<key>:
  * SSR_STATIC_ROUTES, SECTION_PAGES and MARKETING_PAGES. Pages in all three are
  * rendered with a canonical of `/${key}`, so the app must say the same.

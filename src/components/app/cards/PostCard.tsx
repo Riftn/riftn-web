@@ -347,6 +347,9 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
       // Our wrapper blocks the compatibility click, not its own pointer tap.
       // Keep nested quotes and controls excluded after the tap timer resolves.
       if (excluded && excluded !== bodyNavigationRef.current) return;
+      // A cut-off body opens the rest of its text first; the next tap opens the post.
+      const more = bodyNavigationRef.current?.querySelector<HTMLButtonElement>('[data-caption-more]');
+      if (more) { more.click(); return; }
       // Already on this post's own page: another push only adds a Back step.
       const path = window.location.pathname;
       if (path === `/app/post/${post.id}` || path === postOwnPath(post) || (post.newPostId && path === `/newpost/${post.newPostId}`)) return;

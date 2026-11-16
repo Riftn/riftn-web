@@ -757,6 +757,8 @@ return () => rail.removeEventListener('wheel', onWheel);
           setLoginModalOpen={setLoginModalOpen}
           ShareOptions={ShareOptions}
           showFollowersFollowing={data.showFollowersFollowing}
+          showFollowersList={data.showFollowersList}
+          showFollowingList={data.showFollowingList}
           hideFollowerCounts={data.hideFollowerCounts}
           setFollowListType={setFollowListType}
           setFollowListDrawerOpen={setFollowListDrawerOpen}
@@ -925,6 +927,8 @@ return () => rail.removeEventListener('wheel', onWheel);
               isPending={data.isPending}
               isViewingOwnProfile={data.isViewingOwnProfile}
               isContentFiltered={data.isContentFiltered}
+              canReorderGrid={data.canReorderGrid}
+              onGridReordered={() => data.setContentSort('custom')}
               contentQuery={data.contentQuery}
               optimisticPosts={data.optimisticPosts}
               isLoadingPlans={data.isLoadingPlans}

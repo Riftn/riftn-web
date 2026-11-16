@@ -41,6 +41,7 @@ import "./styles/live-audience.css";
 import "./styles/system-immersive.css";
 import "./styles/system-light.css";
 import "./styles/system-rim.css";
+import "./styles/side-icon-tiles.css";
 import "./styles/light-desktop-panels.css";
 import "./styles/text-readability.css";
 import "./styles/light-contrast.css";

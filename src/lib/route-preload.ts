@@ -26,6 +26,7 @@ const PRELOADERS: Record<string, Preloader | Preloader[]> = {
   '/app/profile': () => import('@/pages/app/ProfilePage'),
   '/app/notifications': () => import('@/pages/app/NotificationsPage'),
   '/app/messages': () => import('@/pages/app/MessagesPage'),
+  '/chat': () => import('@/pages/app/FullScreenChatPage'),
   '/app/assistant': () => import('@/pages/app/AssistantPage'),
   '/assistant': () => import('@/pages/app/AssistantPage'),
   '/app/leaderboard': () => import('@/pages/app/LeaderboardPage'),

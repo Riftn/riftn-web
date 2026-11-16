@@ -200,6 +200,42 @@ async function loadLiveChatMessages(
   }
 }
 
+export interface LiveChatMessagePage {
+  messages: LiveChatMessage[];
+  /** Older lines exist past this page. */
+  hasMore: boolean;
+  /** Signed out and past the history a guest may read: show the sign-in wall. */
+  signInRequired: boolean;
+}
+
+/**
+ * One page of a room's history, newest first from the server, with whether
+ * older lines exist and whether a signed-out reader has hit the wall.
+ * Signed in, the session is refreshed first, so a lapsed token is not read as
+ * a guest and walled.
+ */
+export async function getLiveChatMessagePage(
+  roomId: string,
+  params: { limit: number; before?: string; signedIn?: boolean },
+): Promise<LiveChatMessagePage> {
+  const queryParams: Record<string, string | number | undefined> = {
+    limit: Math.min(params.limit, 100),
+    roomId,
+  };
+  if (params.before) queryParams.before = params.before;
+  const r = await apiCall<Record<string, unknown>>('/api/livechat/messages', {
+    params: queryParams,
+    requiresAuth: !!params.signedIn,
+  });
+  const body = (r && typeof r === 'object' && 'result' in r && r.result && typeof r.result === 'object' ? r.result : r) as Record<string, unknown>;
+  const messages = Array.isArray(body?.messages) ? (body.messages as LiveChatMessage[]) : [];
+  return {
+    messages,
+    hasMore: !!body?.hasMore && messages.length > 0,
+    signInRequired: !!body?.signInRequired,
+  };
+}
+
 /**
  * GET /api/livechat/user/{address}
  */

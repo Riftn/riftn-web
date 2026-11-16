@@ -3,7 +3,7 @@
 // Called server-to-server by the NestJS backend when an admin invite is
 // created. Authenticated with the ADMIN_INVITE_EMAIL_SECRET shared secret
 // (x-invite-secret header) — not a Supabase JWT, so verify_jwt is off in
-// config.toml. Sent as noreply@notify.dehub.io.
+// config.toml. Sent as noreply@riftn.com.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts'
 

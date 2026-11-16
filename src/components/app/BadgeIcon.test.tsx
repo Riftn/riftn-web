@@ -57,6 +57,15 @@ describe('badge hover playback', () => {
     expect(set).toContain('crab');
     expect(image.getAttribute('loading')).toBeNull();
   });
+  it('paints the still inside the box that rests on the baseline', () => {
+    badgeTier = 'Crab';
+    render(<BadgeIcon />);
+    const still = document.querySelector<HTMLElement>('[data-badge-still]')!;
+    expect(still.style.position).toBe('absolute');
+    expect(still.parentElement).toBe(screen.getByRole('button'));
+    expect(screen.getByRole('img').className).toContain('opacity-0');
+  });
+
   it('sizes the idle image from its own transparent bounds', () => {
     badgeTier = 'Crab';
     render(<BadgeIcon />);

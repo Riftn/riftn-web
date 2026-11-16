@@ -22,7 +22,9 @@ function viewer(overrides: Record<string, unknown> = {}) {
     setDragOffset: vi.fn(), resetDragOffset: vi.fn(), setOverlaysHidden: vi.fn(), setAutoHidden: vi.fn(),
     mini: { drag: vi.fn(() => false), finish: vi.fn(() => false), cancel: vi.fn() },
     goToNext: vi.fn(), goToPrev: vi.fn(), currentIndex: 3, holdOwnsGesture: { current: false },
-    leaveY: motionValue(), animate: vi.fn(), leaveViewer: vi.fn(), DISMISS_SPRING: {}, commitsDismiss, ...overrides,
+    leaveY: motionValue(), animate: vi.fn(), leaveViewer: vi.fn(), DISMISS_SPRING: {}, commitsDismiss,
+    shorts: { length: 10 }, PEEK_START_PX: 8, startPeek: vi.fn(), stopPeek: vi.fn(), promotePeek: vi.fn(),
+    minimizedRef: { current: false }, transitioningRef: { current: false }, ...overrides,
   };
   const callbacks = source.slice(source.indexOf('  const isRestoreDrag ='), source.indexOf('  // Toggle play/pause'));
   const code = ts.transpileModule(callbacks + '\n({ handleDrag, handleDragEnd })', {
@@ -189,5 +191,31 @@ describe('video tap zones', () => {
     v.handleVideoTap({ clientX: 40, clientY: 150 });
     v.undoVideoTap();
     expect(v.setOverlaysHidden).toHaveBeenLastCalledWith(false);
+  });
+
+  it('starts the short a drag heads for and hands it over on a page flick', () => {
+    const v = viewer({ overlaysHidden: false });
+    v.handleDrag({ type: 'pointermove' }, drag(500, -60));
+    expect(v.startPeek).toHaveBeenCalledWith(4);
+    v.handleDragEnd({ type: 'pointerup' }, drag(500, -120));
+    expect(v.promotePeek).toHaveBeenCalledWith(4);
+    expect(v.goToNext).toHaveBeenCalled();
+  });
+
+  it('peeks the previous short on a drag down and stops a peek that does not page', () => {
+    const v = viewer({ overlaysHidden: false });
+    v.handleDrag({ type: 'pointermove' }, drag(300, 40));
+    expect(v.startPeek).toHaveBeenCalledWith(2);
+    v.handleDragEnd({ type: 'pointerup' }, { point: { x: 150, y: 310 }, offset: { x: 0, y: 10 }, velocity: { x: 0, y: 0 } });
+    expect(v.promotePeek).not.toHaveBeenCalled();
+    expect(v.stopPeek).toHaveBeenCalled();
+    expect(v.goToPrev).not.toHaveBeenCalled();
+  });
+
+  it('never hands a peek over while comments hold the pager', () => {
+    const v = viewer({ overlaysHidden: false, showComments: true });
+    v.handleDragEnd({ type: 'pointerup' }, drag(500, -120));
+    expect(v.promotePeek).not.toHaveBeenCalled();
+    expect(v.stopPeek).toHaveBeenCalled();
   });
 });

@@ -10,7 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BARE_CANONICAL_KEYS, HUB_ROUTE_META, canonicalPath, canonicalUrl } from '@/lib/seo/route-meta';
+import { BARE_CANONICAL_KEYS, HUB_ROUTE_META, OG_CARD_REV, canonicalPath, canonicalUrl, versionedShareImage } from '@/lib/seo/route-meta';
 
 const ROOT = resolve(__dirname, '../..');
 const WORKER = readFileSync(resolve(ROOT, 'CLOUDFLARE_WORKER_SEO.js'), 'utf8');
@@ -148,5 +148,32 @@ describe('hub head strings match the worker', () => {
     expect(explore).toContain(`t('explore.seoDescription')`);
     // The home H1 was reused on /videos and /shorts.
     expect(home).not.toContain('Your Decentralized Social Feed');
+  });
+});
+
+/**
+ * Share images are cached by URL on X, Facebook, LinkedIn and Telegram. The
+ * SPA shell's card sat at an unversioned /og/home.jpg, which was DeHub art
+ * until the rebrand, so every page served the shell (anything the worker does
+ * not prerender, like /dehub.io) still unfurled with the old DeHub card.
+ */
+describe('share card versions', () => {
+  it('the app uses the worker card revision', () => {
+    expect(WORKER).toContain(`const OG_CARD_REV = '${OG_CARD_REV}';`);
+  });
+
+  it('the SPA shell names its share card with the current revision', () => {
+    const shell = readFileSync(resolve(ROOT, 'index.html'), 'utf8');
+    const images = [...shell.matchAll(/<meta (?:property="og:image"|name="twitter:image") content="([^"]+)"/g)].map((m) => m[1]);
+    expect(images.length).toBe(2);
+    for (const image of images) expect(image).toBe(versionedShareImage(image.replace(/\?.*$/, '')));
+    for (const image of images) expect(image).toContain(`?v=${OG_CARD_REV}`);
+  });
+
+  it('versions /og/ route cards and leaves other images alone', () => {
+    expect(versionedShareImage('/og/arcade.jpg')).toBe(`/og/arcade.jpg?v=${OG_CARD_REV}`);
+    expect(versionedShareImage('https://riftn.com/og/home.jpg?v=1')).toBe(`https://riftn.com/og/home.jpg?v=${OG_CARD_REV}`);
+    expect(versionedShareImage('https://riftn.com/og/riftn-share.png')).toBe('https://riftn.com/og/riftn-share.png');
+    expect(versionedShareImage('https://cdn.example.com/og/a.jpg')).toBe('https://cdn.example.com/og/a.jpg');
   });
 });

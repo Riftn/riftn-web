@@ -43,6 +43,8 @@ const BULK_FOLLOW_CONCURRENCY = 4;
 const BULK_FOLLOW_BATCH_SIZE = 50;
 
 type SortOption = 'newest' | 'earliest';
+/** @riftn: every member follows it, so its list opens on the earliest members. */
+const OFFICIAL_ACCOUNT_ADDRESS = '0x06da979225262715ed57449d0573329a1e685140';
 const SORT_LABEL_KEYS: Record<SortOption, string> = {
   newest: 'follow.sortNewest',
   earliest: 'follow.sortEarliest',
@@ -274,7 +276,10 @@ export function FollowersListDrawer({
   const followOverrides = useFollowOverrides();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const defaultSort: SortOption =
+    listType === 'followers' && profileAddress?.toLowerCase() === OFFICIAL_ACCOUNT_ADDRESS ? 'earliest' : 'newest';
+  const [sortOption, setSortOption] = useState<SortOption>(defaultSort);
+  useEffect(() => { setSortOption(defaultSort); }, [defaultSort]);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("components/app/profile/FollowersListDrawer.tsx:searchQuery", '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFollowBackAll, setShowFollowBackAll] = useState(false);
@@ -541,7 +546,7 @@ export function FollowersListDrawer({
       setTotalCount(null);
       setSearchQuery.initialize('');
       setDebouncedSearch('');
-      setSortOption('newest');
+      setSortOption(defaultSort);
       followBackStreakRef.current = 0;
       setShowFollowBackAll(false);
       setIsFollowingBackAll(false);
@@ -553,7 +558,7 @@ export function FollowersListDrawer({
       setBulkFollowProgress({ completed: 0, total: 0 });
       followingSetRef.current = null;
     }
-  }, [open, setSearchQuery]);
+  }, [open, setSearchQuery, defaultSort]);
 
   const toggleSort = () => {
     setSortOption(prev => prev === 'newest' ? 'earliest' : 'newest');

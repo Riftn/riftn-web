@@ -81,6 +81,13 @@ describe('postSitemapXml', () => {
     ]);
   });
 
+  it('lists a post at its readable link when it has one, since the number redirects there', () => {
+    expect(locs(postSitemapXml([
+      { tokenId: 7001, slug: 'gm-mofos', name: REAL_CAPTION },
+      { tokenId: 7002, slug: 'Not A Slug', name: REAL_CAPTION },
+    ]))).toEqual(['https://riftn.com/app/post/gm-mofos', 'https://riftn.com/app/post/7002']);
+  });
+
   it('de-duplicates on id, so one post cannot be submitted twice', () => {
     const xml = postSitemapXml([
       { tokenId: 41, name: REAL_CAPTION },

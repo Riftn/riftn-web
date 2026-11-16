@@ -37,6 +37,7 @@ import { ProfileEmptyState } from '@/components/app/profile/ProfileEmptyState';
 import { AppState } from '@/components/app/AppState';
 import { ProfileImageGrid } from '@/components/app/profile/ProfileImageGrid';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
+import { useProfileGridMove } from '@/hooks/use-profile-grid-move';
 import { PostBgLayer, postBgHostProps, useProfilePostBg } from '@/components/app/profile/PostBackground';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useProfileViewMode } from '@/lib/profile-view-mode';
@@ -44,6 +45,7 @@ import { getUserComments, getNFTInfo, getMediaUrl, editComment, deleteComment } 
 import type { DeHubNFT } from '@/lib/api/dehub';
 import { useUserPins } from '@/hooks/use-pins';
 import { useProfileDislikes } from '@/hooks/use-profile-dislikes';
+import { useProfileLikes } from '@/hooks/use-profile-likes';
 import { mapNFTToFeedItem } from '@/lib/nft-to-feed-item';
 import { usePublicPlaylists, usePublicPlaylistItems } from '@/hooks/use-bookmark-folders';
 import type { PublicPlaylist } from '@/lib/api/dehub';
@@ -187,6 +189,10 @@ interface ProfileTabContentProps {
   isViewingOwnProfile: boolean | undefined;
   /** A sort or search from the channel toolbar is narrowing what's shown. */
   isContentFiltered?: boolean;
+  /** Own profile, showing the order a drag would change: tiles carry a grip. */
+  canReorderGrid?: boolean;
+  /** A drag on the grid saved a new order. */
+  onGridReordered?: () => void;
   /** The content query behind the tab lists, so an opened post can continue it. */
   contentQuery?: ProfileFeedQuery;
   // Optimistic
@@ -220,6 +226,8 @@ export function ProfileTabContent({
   isPending,
   isViewingOwnProfile,
   isContentFiltered = false,
+  canReorderGrid = false,
+  onGridReordered,
   contentQuery,
   optimisticPosts,
   isLoadingPlans,
@@ -301,6 +309,8 @@ export function ProfileTabContent({
           optimisticPosts={optimisticPosts}
           isLoading={showLoading}
           isContentFiltered={isContentFiltered}
+          reorderAddress={canReorderGrid ? profileAddress : undefined}
+          onReordered={onGridReordered}
         />
       </TabPanel>
 
@@ -445,6 +455,11 @@ export function ProfileTabContent({
         <PlaylistsTabPanel profileAddress={profileAddress} isOwnProfile={!!isViewingOwnProfile} />
       </TabPanel>
 
+      {/* LIKES TAB — private unless the owner made it public */}
+      <TabPanel activeTab={activeTab} visitedTabs={visitedTabs.current} tab="likes">
+        <ReactionsTabPanel kind="likes" profileAddress={profileAddress} isOwnProfile={!!isViewingOwnProfile} />
+      </TabPanel>
+
       {/* DISLIKES TAB — private unless the owner made it public */}
       <TabPanel activeTab={activeTab} visitedTabs={visitedTabs.current} tab="dislikes">
         <DislikesTabPanel profileAddress={profileAddress} isOwnProfile={!!isViewingOwnProfile} />
@@ -473,15 +488,21 @@ function HomeTabPanel({
   optimisticPosts,
   isLoading,
   isContentFiltered = false,
+  reorderAddress,
+  onReordered,
 }: {
   ALL_CONTENT: ProfileContentItem[];
   isViewingOwnProfile: boolean | undefined;
   optimisticPosts: OptimisticPost[];
   isLoading: boolean;
   isContentFiltered?: boolean;
+  /** The owner's wallet when tiles can be dragged into a new order. */
+  reorderAddress?: string;
+  onReordered?: () => void;
 }) {
   const { t: _copy } = _useCopy();
   const viewMode = useProfileViewMode();
+  const moveTile = useProfileGridMove(reorderAddress, onReordered);
   const postBg = useProfilePostBg();
   const hasOptimisticPosts = isViewingOwnProfile && optimisticPosts.length > 0;
 
@@ -505,7 +526,7 @@ function HomeTabPanel({
       ...filteredOptimisticPosts.map((op) => ({ key: `op-${op.id}`, type: op.type, data: op.data, isOptimistic: true }) as MixedGridEntry),
       ...ALL_CONTENT.map((item) => ({ key: `${item.isRepost ? 'rp-' : ''}${item.data.id}`, type: item.type, data: item.data, isPinned: item.isPinned, isRepost: item.isRepost }) as MixedGridEntry),
     ];
-    return <ProfileMixedGrid entries={entries} />;
+    return <ProfileMixedGrid entries={entries} onMove={moveTile} />;
   }
 
   return (
@@ -1009,8 +1030,18 @@ function PlaylistPostsPanel({
  * feeds; undoing the dislike here (tap the 👎 thumb) brings a post back.
  */
 function DislikesTabPanel({ profileAddress, isOwnProfile }: { profileAddress: string; isOwnProfile: boolean }) {
+  return <ReactionsTabPanel kind="dislikes" profileAddress={profileAddress} isOwnProfile={isOwnProfile} />;
+}
+
+/**
+ * Posts this account liked or disliked, newest first. Both are private unless
+ * the owner made them public; the API answers 403 otherwise.
+ */
+function ReactionsTabPanel({ kind, profileAddress, isOwnProfile }: { kind: 'likes' | 'dislikes'; profileAddress: string; isOwnProfile: boolean }) {
   const { t } = useTranslation();
-  const query = useProfileDislikes(profileAddress, true);
+  const likesQuery = useProfileLikes(profileAddress, kind === 'likes');
+  const dislikesQuery = useProfileDislikes(profileAddress, kind === 'dislikes');
+  const query = kind === 'likes' ? likesQuery : dislikesQuery;
   const items = (query.data?.pages ?? []).flatMap((page) => page.items).map(mapNFTToFeedItem);
 
   if (query.isLoading) {
@@ -1022,25 +1053,25 @@ function DislikesTabPanel({ profileAddress, isOwnProfile }: { profileAddress: st
   }
 
   if (query.isError) {
-    return <AppState icon="lock" title={t('profile.dislikes.privateTitle')} description={t('profile.dislikes.privateDesc')} size="section" />;
+    return <AppState icon="lock" title={(kind === 'likes' ? t('profile.likedPosts.privateTitle') : t('profile.dislikes.privateTitle'))} description={(kind === 'likes' ? t('profile.likedPosts.privateDesc') : t('profile.dislikes.privateDesc'))} size="section" />;
   }
 
   if (items.length === 0) {
     return (
       <AppState
         icon="posts"
-        title={t('profile.dislikes.emptyTitle')}
-        description={isOwnProfile ? t('profile.dislikes.emptyOwn') : t('profile.dislikes.emptyOther')}
+        title={(kind === 'likes' ? t('profile.likedPosts.emptyTitle') : t('profile.dislikes.emptyTitle'))}
+        description={isOwnProfile ? (kind === 'likes' ? t('profile.likedPosts.emptyOwn') : t('profile.dislikes.emptyOwn')) : (kind === 'likes' ? t('profile.likedPosts.emptyOther') : t('profile.dislikes.emptyOther'))}
         size="section"
       />
     );
   }
 
   return (
-    <div className="space-y-3" data-profile-dislikes>
+    <div className="space-y-3" data-profile-reactions={kind}>
       {items.map((item) => (
         <div
-          key={`dislike-${item.id}`}
+          key={`${kind}-${item.id}`}
           data-feed-item
           data-cinematic={item.type === 'video' ? 'video' : item.type === 'image' ? 'image' : 'post'}
           className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3"
@@ -1062,7 +1093,7 @@ function DislikesTabPanel({ profileAddress, isOwnProfile }: { profileAddress: st
             disabled={query.isFetchingNextPage}
             className="h-9 rounded-lg bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white text-xs"
           >
-            {query.isFetchingNextPage ? <Loader2 className="w-4 h-4 animate-spin" /> : t('profile.dislikes.loadMore')}
+            {query.isFetchingNextPage ? <Loader2 className="w-4 h-4 animate-spin" /> : (kind === 'likes' ? t('profile.likedPosts.loadMore') : t('profile.dislikes.loadMore'))}
           </Button>
         </div>
       )}

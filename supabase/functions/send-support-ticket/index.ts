@@ -4,7 +4,7 @@
 // ticket for a signed-in user. Authenticated with the SUPPORT_TICKET_SECRET
 // shared secret (x-support-secret header) — not a Supabase JWT, so verify_jwt
 // is off in config.toml. The mail is sent through Lovable's managed email API
-// as noreply@notify.dehub.io.
+// as noreply@riftn.com.
 //
 // The recipient is fixed by the template. Everything in the body comes from a
 // user talking to a chatbot, so an addressable `to` field would turn a leaked
@@ -13,7 +13,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts'
 
-const SUPPORT_INBOX = 'dev@dehub.io'
+const SUPPORT_INBOX = 'dev@riftn.com'
 
 // Caps mirror the backend's own, so a request that somehow skips them cannot
 // send an unbounded payload.

@@ -26,6 +26,10 @@ import { formatViews } from '@/lib/feed-utils';
 import { getFollowList } from '@/lib/api/dehub';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 
+import '@/styles/live-now-glass.css';
+import { BadgedName } from '@/components/app/BadgedName';
+import type { BadgeLock } from '@/lib/staking-badges';
+import { parseBadgeLock } from '@/lib/staking-badges';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
 import type { SpaceParticipant } from '@/types/audio-spaces.types';
 
@@ -43,6 +47,13 @@ export interface LiveNowItem {
   /** Someone you follow hosts it, streams it, or is in it. */
   followed: boolean;
   size: number;
+  /** A frame of the broadcast when the stream has one; Stages never do. */
+  cover?: string | null;
+  /** Name shown before the badge; the handle when there is none. */
+  displayName?: string | null;
+  /** Staking badge, when the payload carries it (streams). Stages look it up by wallet. */
+  badgeBalance?: number | null;
+  badgeLock?: BadgeLock | null;
 }
 
 export function LiveNowBar() {
@@ -130,6 +141,10 @@ export function LiveNowBar() {
           count: stream.watching ?? '',
           followed: isFollowed(stream.creatorId),
           size: watching ?? 0,
+          cover: stream.thumbnail || null,
+          displayName: (raw as any).account?.displayName || null,
+          badgeBalance: stream.creatorBadgeBalance ?? null,
+          badgeLock: (raw as any).account?.hideBadgeAndBalance ? null : parseBadgeLock((raw as any).account?.badgeLock),
         });
       });
     });
@@ -171,12 +186,20 @@ export function LiveNowBar() {
   );
 }
 
-/** The single row. Exported so the state gallery can draw it without data. */
+/**
+ * The single row. Exported so the state gallery can draw it without data.
+ *
+ * Frosted glass over the broadcast itself: the live picture (or the host's
+ * face when there is no picture) sits blurred behind the row, a small still
+ * on the left carries the face on its corner, and one soft dot breathes by
+ * the count. No ping, no red rings.
+ */
 export function LiveNowRow({ items, onOpen, onSeeAll }: { items: LiveNowItem[]; onOpen: (item: LiveNowItem) => void; onSeeAll: () => void }) {
   const { t } = useTranslation();
   const single = items.length === 1 ? items[0] : null;
-  const names = items.slice(0, 2).map(handleOf);
-  const rest = items.length - names.length;
+  const named = items.slice(0, 2);
+  const rest = items.length - named.length;
+  const backdrop = items.slice(0, 3);
 
   return (
     <div className="flex flex-col gap-2 mb-2">
@@ -184,51 +207,105 @@ export function LiveNowRow({ items, onOpen, onSeeAll }: { items: LiveNowItem[]; 
         type="button"
         data-live-now-bar
         onClick={() => (single ? onOpen(single) : onSeeAll())}
-        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/[0.05] backdrop-blur-sm border border-white/[0.08] hover:bg-white/[0.08] transition-all group"
+        className="relative isolate w-full flex items-center gap-3 px-3 py-2 min-h-[52px] rounded-2xl overflow-hidden border border-white/[0.1] text-left group"
       >
-        <span className="relative flex h-2 w-2 mx-1.5 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-        </span>
-
-        <div className="flex -space-x-1 shrink-0">
-          {items.slice(0, 4).map(item => (
-            <LiveRipple key={`${item.kind}-${item.id}`} live size="sm" className="rounded-lg">
-              <LiveFace item={item} />
-            </LiveRipple>
+        <span data-live-now-glass aria-hidden>
+          {backdrop.map(item => (
+            <span key={`${item.kind}-${item.id}`} style={{ backgroundImage: cssUrl(pictureOf(item)) }} />
           ))}
-        </div>
-
-        <div className="flex-1 min-w-0 text-left">
-          <p className="text-xs text-white/90 truncate">
-            <span className="font-medium">{single ? single.title : t('stages.liveNow', { defaultValue: 'Live now' })}</span>
-          </p>
-          <p className="text-[11px] text-white/50 truncate">
-            {single ? (
-              single.kind === 'stage' ? (
-                <>{t('stages.hostedBy', { defaultValue: 'Hosted by' })} <span className="text-white/70">{handleOf(single)}</span></>
-              ) : (
-                <span className="text-white/70">{handleOf(single)}</span>
-              )
-            ) : (
-              <>
-                <span className="text-white/70">{names.join(', ')}</span>
-                {rest > 0 && ` +${rest}`}
-              </>
-            )}
-          </p>
-        </div>
+        </span>
+        <span data-live-now-veil aria-hidden />
 
         {single ? (
-          <LiveCount item={single} />
+          <LiveStill item={single} />
         ) : (
-          <span className="shrink-0 text-[11px] font-medium text-white/60 group-hover:text-white/80">
-            {t('stages.seeAll', { defaultValue: 'See all' })} ›
+          <span data-live-now-fan className="relative shrink-0 w-[70px] h-9">
+            {items.slice(0, 3).reverse().map(item => (
+              <LiveStill key={`${item.kind}-${item.id}`} item={item} small />
+            ))}
           </span>
         )}
+
+        <div className="relative flex-1 min-w-0">
+          <p className="text-[13px] text-white/95 font-semibold truncate">
+            {single ? single.title : t('stages.liveNow', { defaultValue: 'Live now' })}
+          </p>
+          <div className="flex items-baseline gap-1 min-w-0 text-[11.5px] text-white/60 whitespace-nowrap overflow-hidden">
+            {single ? (
+              <>
+                {single.kind === 'stage' && <span className="shrink-0">{t('stages.hostedBy', { defaultValue: 'Hosted by' })}</span>}
+                <NameWithBadge item={single} className="text-white/85 font-medium" />
+                {single.displayName && <span className="truncate min-w-0 text-white/50">{handleOf(single)}</span>}
+              </>
+            ) : (
+              <>
+                {named.map((item, i) => (
+                  <span key={`${item.kind}-${item.id}`} className="inline-flex items-baseline min-w-0">
+                    <NameWithBadge item={item} className="text-white/80" />
+                    {i < named.length - 1 && <span>,</span>}
+                  </span>
+                ))}
+                {rest > 0 && <span className="shrink-0">+{rest}</span>}
+              </>
+            )}
+          </div>
+        </div>
+
+        <span className="relative flex items-center gap-1.5 shrink-0 text-[11.5px] font-semibold text-white/85">
+          <span data-live-now-dot aria-hidden />
+          {single ? (
+            single.count ? (
+              single.kind === 'stage'
+                ? t('liveAudience.hereCount', { formatted: single.count, defaultValue: '{{formatted}} here' })
+                : t('liveAudience.watchingCount', { formatted: single.count, defaultValue: '{{formatted}} watching' })
+            ) : (
+              t('stages.liveBadge', { defaultValue: 'LIVE' })
+            )
+          ) : (
+            <>{t('stages.seeAll', { defaultValue: 'See all' })} ›</>
+          )}
+        </span>
       </button>
     </div>
   );
+}
+
+/** Small 16:9 frame: the broadcast still with the face on its corner, or the face alone in soft focus. */
+function LiveStill({ item, small = false }: { item: LiveNowItem; small?: boolean }) {
+  const [broken, setBroken] = useState(false);
+  const cover = !broken ? item.cover : null;
+  return (
+    <span data-live-now-still={small ? 'fan' : 'single'} className="relative shrink-0">
+      {cover ? (
+        <img src={cover} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} data-live-now-frame />
+      ) : (
+        <span data-live-now-frame data-live-now-faceframe style={{ backgroundImage: cssUrl(faceUrlOf(item)) }}>
+          {!small && <LiveFace item={item} className="w-6 h-6 rounded-md" />}
+        </span>
+      )}
+      {cover && !small && (
+        <span data-live-now-corner>
+          <LiveFace item={item} className="w-5 h-5 rounded-md" />
+        </span>
+      )}
+    </span>
+  );
+}
+
+function cssUrl(url: string | undefined): string | undefined {
+  return url ? `url("${url.replace(/"/g, '%22')}")` : undefined;
+}
+
+/** What the glass shows: the broadcast when there is a picture, else the host's face. */
+function pictureOf(item: LiveNowItem): string | undefined {
+  return item.cover || faceUrlOf(item);
+}
+
+function faceUrlOf(item: LiveNowItem): string | undefined {
+  if (item.kind === 'stage') {
+    return (item.avatar ? buildAvatarUrl(item.wallet, item.avatar) : undefined) || buildAvatarCdnFallbackUrl(item.wallet, item.avatar ?? undefined) || undefined;
+  }
+  return item.avatar || undefined;
 }
 
 /** The sheet's list: every Stage and stream, one row each. */
@@ -254,15 +331,31 @@ export function LiveNowList({ items, onOpen }: { items: LiveNowItem[]; onOpen: (
           </LiveRipple>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[13px] font-medium text-white/90 truncate">{item.title}</p>
-            <p className="text-[11px] text-white/50 truncate">
-              {item.kind === 'stage' && <>{t('stages.hostedBy', { defaultValue: 'Hosted by' })} </>}
-              <span className="text-white/70">{handleOf(item)}</span>
-            </p>
+            <div className="flex items-baseline gap-1 min-w-0 text-[11px] text-white/50 whitespace-nowrap overflow-hidden">
+              {item.kind === 'stage' && <span className="shrink-0">{t('stages.hostedBy', { defaultValue: 'Hosted by' })}</span>}
+              <NameWithBadge item={item} className="text-white/75" />
+              {item.displayName && <span className="truncate min-w-0">{handleOf(item)}</span>}
+            </div>
           </div>
           <LiveCount item={item} />
         </button>
       ))}
     </div>
+  );
+}
+
+/** Display name (or handle) with the person's staking badge right after it. */
+function NameWithBadge({ item, className }: { item: LiveNowItem; className?: string }) {
+  return (
+    <BadgedName
+      badgeBalance={item.badgeBalance ?? undefined}
+      badgeLock={item.badgeLock ?? undefined}
+      lookupId={item.badgeBalance == null ? item.username || item.wallet : undefined}
+      username={item.username}
+      className={className}
+    >
+      {item.displayName || handleOf(item)}
+    </BadgedName>
   );
 }
 

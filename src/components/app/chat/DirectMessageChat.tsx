@@ -8,12 +8,12 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * Full-screen 1:1 direct message chat view.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo, useReducer, memo, Fragment, type ReactNode } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useReducer, memo, Fragment, type ReactNode } from 'react';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, Phone, CornerUpRight, FileText, Unlock, SmilePlus } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, SmilePlus } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -57,6 +57,8 @@ import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
 import { useMessages, useSendMessage, useDeleteConversation, useCreateAndStart, messagesKeys, registerOpenConversation, createTransientBlobUrl, peerAddressForConversation, failedSendRetry, discardFailedSend } from '@/hooks/use-messages';
 import { SendStatus } from './SendStatus';
+import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
+import { findUnreadAnchor, type UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDmSettings } from '@/hooks/use-dm-settings';
 import { useBannedAccount } from '@/hooks/use-banned-account';
@@ -123,6 +125,7 @@ import { useCallActions } from '@/contexts/CallContext';
 import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { formatUnreadCount } from '@/lib/unread-count';
 import { isDmCallNotice } from '@/lib/dm-call-notice';
+import { CallNoteCard } from './calls/CallNoteCard';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
@@ -463,9 +466,12 @@ const MessageBubble = memo(function MessageBubble({
   onRetrySend,
   onDiscardSend,
   cozy,
+  callPeerAddress,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
+  /** The other person in a one-to-one chat, so a call card can call them back. */
+  callPeerAddress?: string;
   /** Set in the cozy layout: where this bubble sits in its sender's run. */
   cozy?: CozyGroupPos;
   highlightText?: string;
@@ -662,13 +668,12 @@ const MessageBubble = memo(function MessageBubble({
   if (isCallMessage) {
     return (
       <div id={`dm-msg-${message._id}`} className="flex justify-center py-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 text-xs">
-          <Phone className="w-3 h-3 text-zinc-400 flex-shrink-0" />
-          <span>{message.content}</span>
-          <span className="text-zinc-500 text-[10px] ml-0.5">
-            · {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-          </span>
-        </div>
+        <CallNoteCard
+          content={message.content}
+          time={formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+          isOwn={isOwnMessage}
+          peerAddress={callPeerAddress}
+        />
       </div>
     );
   }
@@ -1309,6 +1314,16 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const bottomRef = useRef<HTMLDivElement>(null);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
+  // "Unread messages" marker: fixed at open, before the read receipt clears
+  // the flags. The conversation's count is read here, on the first render,
+  // because opening the chat zeroes it in the list cache right after.
+  const unreadAtOpenRef = useRef(conversation.unreadCount ?? 0);
+  const [unreadAnchor, setUnreadAnchor] = useState<UnreadAnchor | null>(null);
+  // Once the marker has been on screen the jump button stops pointing at it.
+  const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
+  const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
+  const [unreadBelow, setUnreadBelow] = useState(0);
+  const unreadPlacedRef = useRef(false);
   // The _id of the message that was last when this effect last ran, so an
   // append can be told apart from prepended history.
   const prevLastMessageIdRef = useRef<string | null>(null);
@@ -1701,15 +1716,91 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   // Emit markAsRead (socket) + scroll on initial load
   useEffect(() => {
     if (isInitialMount.current && messages.length > 0) {
+      const ownAddress = walletAddress?.toLowerCase();
+      const ownId = user?._id;
+      const anchor = findUnreadAnchor(
+        messages.map((m) => {
+          const a = m.sender?.address?.toLowerCase();
+          const id = m.sender?._id;
+          return {
+            id: m._id,
+            own: m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId),
+            isRead: m.isRead,
+            skip: !!m.isDeleted || !!m.undecryptable || m._id.startsWith('temp-'),
+          };
+        }),
+        unreadAtOpenRef.current,
+      );
       // Scroll ONLY this container — scrollIntoView scrolls every ancestor,
       // dragging the page itself down and parking dead space under composer.
+      // With unread lines the layout effect below opens on the marker instead.
       const container = scrollContainerRef.current;
-      if (container) container.scrollTop = container.scrollHeight;
+      if (anchor) setUnreadAnchor(anchor);
+      else if (container) container.scrollTop = container.scrollHeight;
       isInitialMount.current = false;
       prevLastMessageIdRef.current = messages[messages.length - 1]?._id ?? null;
       markAsRead();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length, markAsRead]);
+
+  /** Top of the unread marker relative to the visible top of the thread, or null. */
+  const unreadMarkerOffset = useCallback((): number | null => {
+    const container = scrollContainerRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return null;
+    return marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+  }, []);
+
+  /** How many unread lines sit below the fold, and whether the marker is above it. */
+  const refreshUnreadJump = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !unreadAnchor) return;
+    const box = container.getBoundingClientRect();
+    let below = 0;
+    for (const id of unreadAnchor.ids) {
+      const el = container.querySelector<HTMLElement>(`[id="dm-msg-${id}"]`);
+      if (el && el.getBoundingClientRect().top > box.bottom - 4) below++;
+    }
+    setUnreadBelow(below);
+    const marker = container.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!marker) { setUnreadMarkerAbove(false); return; }
+    const r = marker.getBoundingClientRect();
+    const above = r.bottom < box.top;
+    setUnreadMarkerAbove(above);
+    if (!above && r.top < box.bottom) setUnreadMarkerSeen(true);
+  }, [unreadAnchor]);
+
+  // Open on the marker: it lands just under the top edge with the unread lines
+  // below it. Few enough to fit and the clamp leaves you at the newest line.
+  useLayoutEffect(() => {
+    if (!unreadAnchor || unreadPlacedRef.current) return;
+    const container = scrollContainerRef.current;
+    const offset = unreadMarkerOffset();
+    if (!container || offset === null) return;
+    unreadPlacedRef.current = true;
+    container.scrollTop = Math.max(0, container.scrollTop + offset - 8);
+    refreshUnreadJump();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unreadAnchor, unreadMarkerOffset]);
+
+  const unreadJumpFrame = useRef(0);
+  const scheduleUnreadJump = useCallback(() => {
+    if (!unreadAnchor || unreadJumpFrame.current) return;
+    unreadJumpFrame.current = requestAnimationFrame(() => {
+      unreadJumpFrame.current = 0;
+      refreshUnreadJump();
+    });
+  }, [unreadAnchor, refreshUnreadJump]);
+  useEffect(() => () => cancelAnimationFrame(unreadJumpFrame.current), []);
+
+  const jumpToUnreadMarker = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const offset = unreadMarkerOffset();
+    if (!container || offset === null) return;
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - 8), behavior: 'smooth' });
+    setUnreadMarkerSeen(true);
+  }, [unreadMarkerOffset]);
 
   // Re-emit markAsRead when conversation is focused/visible
   useEffect(() => {
@@ -2029,6 +2120,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
     setShowJumpToLatest(distanceFromBottom > 100);
     if (distanceFromBottom < 50) setNewMessageCount(0);
+    scheduleUnreadJump();
 
     if (container.scrollTop < 100 && hasNextPage && !isFetchingNextPage) {
       const previousHeight = container.scrollHeight;
@@ -2044,7 +2136,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         });
       });
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, scheduleUnreadJump]);
 
   const scrollToBottom = () => {
     // Container-scoped — scrollIntoView would drag the page down with it.
@@ -2383,7 +2475,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     <div data-page-bento data-bento-flat className="h-full flex flex-col overflow-hidden relative">
       {/* Header. The shell carries no fill now, so the bar is separated by a
           hairline instead of sitting on its own slightly-lighter slab. */}
-      <div className={`flex items-center justify-between border-b border-white/[0.07] ${dock ? 'px-3 py-2' : 'px-4 py-3'}`}>
+      <div data-chat-header className={`flex items-center justify-between border-b border-white/[0.07] ${dock ? 'px-3 py-2' : 'px-4 py-3'}`}>
         <div className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
           {!dock && (
             <Button
@@ -2708,10 +2800,14 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               const dayPill = cozy && (!prevMsg || cozyDayKey(prevMsg.createdAt) !== cozyDayKey(message.createdAt))
                 ? <CozyDayPill iso={message.createdAt} />
                 : null;
+              const unreadMarker = !searchLower && unreadAnchor?.id === message._id
+                ? <UnreadMarker count={unreadAnchor.count} />
+                : null;
 
               return (
               <Fragment key={message.clientKey ?? message._id}>
               {dayPill}
+              {unreadMarker}
               <MessageBubble
                 message={message}
                 isOwnMessage={isOwnMessage}
@@ -2734,6 +2830,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onRemoveReaction={(messageId, emoji) => { void removeReaction(messageId, emoji).catch(() => toast.error(_copy("copy.b5145e1c11a3", { defaultValue: "Could not remove reaction." }))); }}
                 onRetrySend={handleRetrySend}
                 onDiscardSend={handleDiscardSend}
+                callPeerAddress={isGroupChat ? undefined : otherUser?.address}
               />
               </Fragment>
             )});
@@ -2744,21 +2841,21 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         </div>
       )}
 
-      {/* Jump to latest */}
-      {(showJumpToLatest || newMessageCount > 0) && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
-          <Button
-            onClick={scrollToBottom}
-            className="bg-zinc-800 hover:bg-zinc-700 text-white rounded-full shadow-lg relative"
-            size="sm"
-          >
-            <ArrowDown className="w-4 h-4 mr-1" />
-            {newMessageCount > 0
-              ? _copy("copy.72dede4d0387", { defaultValue: "New messages: {{value1}}", value1: formatUnreadCount(newMessageCount), value2: newMessageCount > 1 ? 's' : '' })
-              : _copy("copy.867524581f01", { defaultValue: "Jump to latest" })}
-          </Button>
-        </div>
-      )}
+      {/* Jump control: up to the unread marker until it has been seen, then
+          down to the newest line. The count is unread lines still below. */}
+      {(() => {
+        const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
+        const count = unreadBelow + newMessageCount;
+        if (!(up || showJumpToLatest || newMessageCount > 0)) return null;
+        return (
+          <UnreadJumpButton
+            up={up}
+            count={count}
+            onClick={up ? jumpToUnreadMarker : scrollToBottom}
+            className="absolute bottom-20 right-4 z-10"
+          />
+        );
+      })()}
 
       {/* Init error banner — shown when createAndStart timed out for a new conversation */}
       {initError && isVirtualConv && (

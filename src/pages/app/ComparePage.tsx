@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import { PageBody, PageIsland, PageSection, PageEmpty, KitButton } from '@/components/app/page-kit/PageKit';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CATEGORIES, FEATURES, PLATFORMS, COMPETITOR_REVIEWED_ON, SOURCES, STATUS_LABELS, entryFor, featureTotals, filterFeatures, markFor, type ComparisonFeature, type Mark, type PlatformId } from '@/data/platform-comparison';
+import { CATEGORIES, FEATURES, PLATFORMS, COMPETITOR_REVIEWED_ON, UPDATES_REVIEWED_ON, SOURCES, STATUS_LABELS, entryFor, featureTotals, filterFeatures, markFor, type ComparisonFeature, type Mark, type PlatformId } from '@/data/platform-comparison';
 import { BRAND_MARKS } from '@/data/platform-comparison-marks';
 import { cn } from '@/lib/utils';
 
@@ -222,7 +222,7 @@ export default function ComparePage() {
               <p>{copy('rivalMethod', 'How the list was built: we went through each platform’s own help centre, creator, premium, ads and developer pages and listed what they offer, then ticked every platform, Riftn included, against the whole list. Riftn gets a cross wherever it lacks something. Rival rows link to the help page they came from.')}</p>
               <p>{copy('matrixMethod', 'A tick means the platform documents the feature, sometimes with conditions such as eligibility or region. A half circle means it is only available through a separate app or has been announced. A cross means their docs say it is not offered. A dot means we could not find it in their official docs, which is not proof it is missing. Tap any feature for the details and sources.')}</p>
               <p>{copy('parity', 'Riftn web, Android and iOS capabilities differ. The iOS app does not offer crypto purchases or reward actions.')}</p>
-              <p>{copy('peerReviewDate', 'Competitor documentation reviewed:')} {COMPETITOR_REVIEWED_ON}</p>
+              <p>{copy('peerReviewDate', 'Competitor documentation reviewed:')} {COMPETITOR_REVIEWED_ON} · {copy('updatedOn', 'updated')} {UPDATES_REVIEWED_ON}</p>
               <a href="/feedback" className="inline-block underline underline-offset-4">{copy('correction', 'Suggest a correction')}</a>
             </div>
           </details>

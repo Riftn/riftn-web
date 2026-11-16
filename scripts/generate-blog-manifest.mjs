@@ -420,8 +420,8 @@ const rss = `<?xml version="1.0" encoding="UTF-8"?>
     <atom:link href="${APP_URL}/rss.xml" rel="self" type="application/rss+xml"/>
     <language>en-US</language>
     <copyright>Copyright ${new Date(sorted[0]?.publishedAt || Date.now()).getFullYear()} Riftn</copyright>
-    <managingEditor>team@dehub.io (Riftn Team)</managingEditor>
-    <webMaster>team@dehub.io (Riftn Team)</webMaster>
+    <managingEditor>dev@riftn.com (Riftn Team)</managingEditor>
+    <webMaster>dev@riftn.com (Riftn Team)</webMaster>
     <lastBuildDate>${rfc822(sorted[0]?.publishedAt || Date.now())}</lastBuildDate>
 ${items}
   </channel>

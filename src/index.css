@@ -60,7 +60,7 @@
 }
 
 /* Wide photos in Shorts letterbox on plain white in light themes (black otherwise). */
-:is(html[data-theme="light"], html[data-system-tone="light"]) [data-shorts-photo-slide] {
+:is(html[data-theme="light"], html[data-system-tone="light"]) :is([data-shorts-photo-slide], [data-shorts-clean-slide]) {
   background-color: #fff;
 }
 
@@ -784,9 +784,19 @@ html[data-feed-loading] [data-feed-welcome-bounds] :is(
   [data-feed-swallow-content]
 ) {
   transform: none !important;
-  translate: none !important;
   clip-path: none !important;
   overflow: visible !important;
+}
+/* `translate` gets its own rule ON PURPOSE. In one block with `transform:
+   none`, the CSS minifier folds the pair into `transform: translate(0,0)` —
+   a real transform, so every wrapper became a stacking context again and the
+   welcome card went under the frost with everything else. Different selector,
+   so the two can't be merged. */
+html[data-feed-loading] [data-feed-welcome-bounds] :is(
+  [data-feed-swallow-cut],
+  [data-feed-swallow-motion]
+) {
+  translate: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7293,4 +7303,16 @@ html:is([data-theme="light"], [data-system-tone="light"]) [data-notice-gate] but
   border-color: transparent !important;
   border-radius: 9999px !important;
   box-shadow: none !important;
+}
+
+/* Chat unread marker + jump capsule on paper. The capsule takes the theme's
+   own control look there; only the arrow's inner disc (white wash) and the
+   marker's hairlines (white fade) need a grey to show on paper. */
+html[data-theme="light"] [data-chat-jump] [data-jump-orb],
+html[data-system-tone="light"] [data-chat-jump] [data-jump-orb] {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+html[data-theme="light"] [data-chat-unread-marker] [data-unread-hairline],
+html[data-system-tone="light"] [data-chat-unread-marker] [data-unread-hairline] {
+  --tw-gradient-to: rgba(0, 0, 0, 0.22) var(--tw-gradient-to-position) !important;
 }

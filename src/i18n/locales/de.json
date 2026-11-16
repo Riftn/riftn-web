@@ -608,6 +608,14 @@
     "showOnlineDesc": "Personen, denen Sie eine Nachricht senden, sehen einen grünen Punkt neben Ihrem Namen, während Sie Riftn verwenden",
     "showDislikes": "Meine Dislikes allen zeigen",
     "showDislikesDesc": "Jeder kann den Tab „Dislikes“ in deinem Profil öffnen. Wenn das aus ist, siehst nur du ihn.",
+    "showLikes": "Meine Likes allen zeigen",
+    "showLikesDesc": "Jeder kann den Likes-Tab in deinem Profil öffnen. Standardmäßig aus, also siehst nur du, was dir gefallen hat.",
+    "showFollowersList": "Zeigen, wer mir folgt",
+    "showFollowersListDesc": "Jeder kann deine Follower-Liste öffnen. Wenn das aus ist, siehst nur du sie.",
+    "showFollowingList": "Zeigen, wem ich folge",
+    "showFollowingListDesc": "Jeder kann die Liste der Personen öffnen, denen du folgst. Wenn das aus ist, siehst nur du sie.",
+    "showFollowCounts": "Meine Follower-Zahlen zeigen",
+    "showFollowCountsDesc": "Zeigt, wie viele Follower du hast und wie vielen Personen du folgst. Ausschalten blendet auch beide Listen aus.",
     "smartReplies": "Antwortvorschläge",
     "smartRepliesDesc": "Erstellt zwei Antworten, die du im Chat antippen kannst. Das × an den Vorschlägen schaltet sie ab.",
     "title": "Einstellungen",
@@ -2076,12 +2084,12 @@
     "loadFailed": "Konnte Anfragen nicht laden."
   },
   "auth": {
-    "loginRequired": "Anmeldung erforderlich",
     "accountDeleted": "Dieses Konto wurde gelöscht. Du kannst dich mit einem neuen Konto wieder registrieren.",
     "accountDeletedHours_one": "Dieses Konto wurde gelöscht. In etwa {{count}} Stunde kannst du dich mit derselben E-Mail oder Telefonnummer wieder registrieren.",
     "accountDeletedHours_other": "Dieses Konto wurde gelöscht. In etwa {{count}} Stunden kannst du dich mit derselben E-Mail oder Telefonnummer wieder registrieren.",
     "accountDeletedDays_one": "Dieses Konto wurde gelöscht. In etwa {{count}} Tag kannst du dich mit derselben E-Mail oder Telefonnummer wieder registrieren.",
-    "accountDeletedDays_other": "Dieses Konto wurde gelöscht. In etwa {{count}} Tagen kannst du dich mit derselben E-Mail oder Telefonnummer wieder registrieren."
+    "accountDeletedDays_other": "Dieses Konto wurde gelöscht. In etwa {{count}} Tagen kannst du dich mit derselben E-Mail oder Telefonnummer wieder registrieren.",
+    "loginRequired": "Anmeldung erforderlich"
   },
   "messages": {
     "reply": "Antworten",
@@ -2236,11 +2244,20 @@
     "tabs": {
       "playlists": "Playlisten",
       "dislikes": "Abneigungen",
+      "likes": "Likes",
       "articles": "Artikel"
     },
     "articles": {
       "emptyTitle": "Noch keine Artikel",
       "emptySubtitle": "Artikel erscheinen hier"
+    },
+    "likedPosts": {
+      "emptyTitle": "Noch keine Likes",
+      "emptyOwn": "Beiträge, die dir gefallen, erscheinen hier. Nur du siehst sie, außer du schaltest in den Einstellungen Meine Likes allen zeigen ein.",
+      "emptyOther": "Noch nichts geliked.",
+      "privateTitle": "Likes sind privat",
+      "privateDesc": "Dieses Konto behält seine Likes für sich.",
+      "loadMore": "Mehr laden"
     },
     "dislikes": {
       "emptyTitle": "Noch keine Dislikes",
@@ -2263,15 +2280,12 @@
     "sortMostViewed": "Meist angesehen",
     "sortLikes": "Gefällt mir",
     "sortMostLiked": "Am meisten gemocht",
-    "searchThisChannel": "Diesen Kanal durchsuchen",
-    "searchResultCount": "1 Ergebnis für \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} Ergebnisse für \"{{query}}\"",
     "sortCustom": "Eigene Reihenfolge",
     "sortCustomShort": "Eigene",
     "arrangeButton": "Beiträge anordnen",
     "arrange": {
       "title": "Ordne deine Beiträge",
-      "hint": "Ziehe deine Beiträge in die gewünschte Reihenfolge. Besucher sehen diese Reihenfolge zuerst.",
+      "hint": "Halte einen Beitrag gedrückt und ziehe ihn an seinen neuen Platz. Besucher sehen diese Reihenfolge zuerst.",
       "drag": "Zum Verschieben ziehen",
       "toTop": "Ganz nach oben",
       "save": "Reihenfolge speichern",
@@ -2282,7 +2296,10 @@
       "saveFailed": "Deine Reihenfolge konnte nicht gespeichert werden. Bitte versuche es erneut.",
       "loadFailed": "Deine Beiträge konnten nicht geladen werden. Schließe dies und versuche es erneut.",
       "empty": "Noch nichts zum Anordnen. Poste zuerst etwas."
-    }
+    },
+    "searchThisChannel": "Diesen Kanal durchsuchen",
+    "searchResultCount": "1 Ergebnis für \"{{query}}\"",
+    "searchResultCountPlural": "{{count}} Ergebnisse für \"{{query}}\""
   },
   "tv": {
     "seoTitle": "Live TV: Kostenlose Kanäle aus der ganzen Welt",
@@ -7571,7 +7588,7 @@
     "ambWant5": "Frühere Erfahrungen mit Markenbotschaftern, Influencern oder Community-Management sind ein Bonus",
     "ambassadorCompensation": "Markenbotschafter erhalten ein <b> verhandelbares Monatsgehalt </b>, das regelmäßig gezahlt wird. Je nach Kampagnenleistung, Benutzeranmeldungen und Meilensteinen für das Community-Wachstum können zusätzliche Boni gewährt werden. Du erhältst außerdem exklusive Riftn-Merch, frühzeitigen Zugriff auf Funktionen und Token-Zuweisungen, wenn das Ökosystem wächst.",
     "applyAsAmbassador": "Als Markenbotschafter bewerben",
-    "noRoleFits": "Sie sehen keine Rolle, die passt? Kontaktieren Sie uns unter <mail>dev@dehub.io</mail> — wir sind immer auf der Suche nach talentierten Mitarbeitern."
+    "noRoleFits": "Sie sehen keine Rolle, die passt? Kontaktieren Sie uns unter <mail>dev@riftn.com</mail> — wir sind immer auf der Suche nach talentierten Mitarbeitern."
   },
   "depin": {
     "seoTitle": "DePin | Community-basierte Medieninfrastruktur | Riftn",
@@ -8293,7 +8310,12 @@
     "failedDesc": "Der Anruf konnte nicht abgeschlossen werden. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
     "close": "Schließen",
     "callbackRequest": "Rückrufanfrage",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "ended": "Anruf beendet",
+    "declined": "Anruf abgelehnt",
+    "noAnswer": "Keine Antwort",
+    "missed": "Verpasster Anruf",
+    "callBack": "Zurückrufen"
   },
   "badgeAscension": {
     "reached": "Du hast {{tier}} erreicht",
@@ -15932,6 +15954,19 @@
     "dd3bfd98b141": "Das sieht nicht wie eine Webadresse aus.",
     "62b242593656": "Link hinzufügen",
     "76d311c4cef6": "Hinzufügen von Sound",
+    "c0963b7d9c5d": "Kostenlose Bibliothek",
+    "55b1ec6f0360": "Wählen Sie den Abschnitt aus",
+    "284b838e96e5": "Wo der Abschnitt beginnt",
+    "46b0e30a32b0": "Ganzes Lied",
+    "3a84120779c5": "Schieben, um den Abschnitt auszuwählen",
+    "1cb1b494ee3b": "Der Abschnitt passt zu Ihrem Video ({{value1}}).",
+    "0418db35eb35": "Diesen Sound verwenden",
+    "ecb30523a48a": "Songs und Künstler suchen",
+    "cbade2afaee2": "Diese Woche im Trend auf Audius. Kostenlos nutzbar, der Künstler wird in Ihrem Beitrag genannt.",
+    "d2e45b7406fc": "Musik aus der Public Domain und von Creative Commons von Wikimedia Commons. Der Künstler wird in deinem Beitrag genannt.",
+    "d0c1a3684775": "Die Songs wurden nicht geladen. Versuchen Sie es gleich noch einmal.",
+    "55fd43d20da5": "Ton entfernen",
+    "d14064f80f52": "Sound hinzufügen",
     "db66c92fd9e0": "Suche nach Sounds...",
     "af6ed946e090": "Trim Video",
     "1c0eba609c44": "Auswahl des Trim-Bereichs",
@@ -16276,7 +16311,7 @@
     "0ec80d3905a0": "Riftn-Karrieren — Dezentrale soziale Medien, zensurresistent und Redefreiheit",
     "a2dd3acadb1c": "Erika Mustermann",
     "93100fc44c0a": "@nutzername",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Melden Sie sich an, um auf Ihr Wallet zuzugreifen und Ihr Geld zu verwalten.",
     "a2364c207356": "Befehl: Ihr Dashboard und Ihre Brieftasche",
     "d97180b4753f": "Ihre Kommandozentrale auf Riftn. Verwalten Sie Ihr Wallet, verfolgen Sie Guthaben und überwachen Sie Ihr Konto in einem Dashboard.",
@@ -16587,7 +16622,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "In der Rubrik",
     "ee1c1eecf1b6": "Riftn wurde von einigen der größten und vertrauenswürdigsten Veröffentlichungen der Welt behandelt. Hier sind die Artikel, die unsere Mission, die Medienlandschaft zu demokratisieren, in den Fokus rücken.",
@@ -16859,6 +16894,9 @@
     "bcc015afda01": "Bitte eine Nachricht eingeben",
     "3c53e332cf13": "Kann keine Konversation mit diesem Benutzer starten",
     "8e51a80a4d7d": "Neue Nachricht",
+    "27c26a5a38b3": "Anmelden, um ältere Nachrichten zu sehen.",
+    "674e70bcd915": "Das gesamte Chatverlauf ist für alle mit einem Account zugänglich.",
+    "feaf753f6557": "Anfang des Chats",
     "7a523e7dc8a3": "Anmeldung zum Moderieren",
     "29a7e1c24c92": "Translate alle",
     "90395d452a30": "Anon",

@@ -8,9 +8,9 @@ HTTPS callbacks and the MCP resource bound to `https://riftn.com/mcp`.
 
 | Scope | Account controls |
 | --- | --- |
-| `dehub:read` | Connected identity, own posts, followers/following, notifications, bookmarks, generation status, private Creator library and your agents' new member welcomes |
+| `dehub:read` | Connected identity, MCP drafts, own posts, scheduled posts, post analytics, audience activity, polls, followers/following, notifications, bookmarks, generation status, private Creator library and your agents' new member welcomes |
 | `dehub:profile` | Username, display name, bio, avatar, banner and profile privacy |
-| `dehub:social` | Publish ordinary posts, comments/replies, reactions, follow/unfollow, bookmarks, notification read state and switching your agents to welcome new members |
+| `dehub:social` | Save or delete MCP drafts, publish and schedule posts, publish ordinary quotes, edit or delete owned posts, manage their visibility, media, polls and covers, comment/reply, react, follow/unfollow, bookmark, mark notifications read and switch your agents to welcome new members |
 | `dehub:generate` | Images, video, audio and 3D through the existing Creator endpoints |
 
 `dehub_features` describes supported chat controls and links to app surfaces for
@@ -61,6 +61,18 @@ with the same private library upload protocol. Save failures are reported using
 Profile/post media inputs accept only HTTPS DeHub CDN or storage URLs. Downloads
 reject redirects, enforce MIME type and stream size limits. Output links can
 expire and can be refreshed from the account's Creator library.
+For an image already available inside a chat, `dehub_create_post` also accepts
+`image_data_url` as a PNG, JPEG or WebP data URL up to 4 MB when the MCP client
+can provide the image bytes. This is sent directly to the existing post upload
+route and is never retained as a connector draft.
+
+The account connector now supports multi-image publication, scheduling and
+rescheduling, post edits and deletion, visibility and reply rules, post analytics,
+poll creation and voting, image and cover replacement, and ordinary quote posts.
+These actions use the same account and ownership checks as the web and mobile
+post controls. MCP drafts are private to the connected account and expire 180
+days after the last edit. They are separate from local drafts in the web and
+mobile composers.
 
 ## Deployment and app registration
 

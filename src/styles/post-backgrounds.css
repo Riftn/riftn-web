@@ -39,6 +39,19 @@ html [data-pbg] :is(.text-white, .text-zinc-50, .text-zinc-100, .text-zinc-200, 
 html [data-pbg] :is([class*='text-white/'], .text-zinc-300, .text-zinc-400, .text-zinc-500, .text-zinc-600, .text-muted-foreground) {
   color: var(--pbg-sub) !important;
 }
+/* The light site themes repaint white utility text as ink with id-weight
+   selectors (index.css, system-light.css), and the post meta and action rows
+   carry their own id-weight grey. Both outrank the two rules above, which left
+   ink on a dark backdrop. Same two colours, stated at a weight that holds.
+   A child with a fill of its own (the avatar initial) keeps the page's ink. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) [data-pbg] :is(.text-white, .text-zinc-50, .text-zinc-100, .text-zinc-200, .text-foreground, h3, p):not([class*='bg-zinc-'], [class*='bg-white'], [class*='bg-black']) {
+  color: var(--pbg-ink) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) [data-pbg] :is([class*='text-white/'], .text-zinc-300, .text-zinc-400, .text-zinc-500, .text-zinc-600, .text-muted-foreground):not([class*='bg-zinc-'], [class*='bg-white'], [class*='bg-black']),
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) [data-pbg] [data-post-metadata] > :is(span:not([class*='bg-']), button:not(.text-red-400)) *,
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) [data-pbg] [data-feed-actions] button:not(:is([data-engaged], [data-tipped], :hover)) > :is(svg, span) {
+  color: var(--pbg-sub) !important;
+}
 html [data-pbg] { text-shadow: none; }
 html [data-pbg][data-pbg-kind='moving'][data-pbg-tone='dark'] :is(h3, p, .text-white, [class*='text-white/']) {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);

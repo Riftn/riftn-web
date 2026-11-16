@@ -1,3 +1,6 @@
+import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { SoundtrackControl } from '@/components/app/cards/SoundtrackControl';
+import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
@@ -142,6 +145,7 @@ import { ConversationItem } from '@/pages/app/MessagesPage';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
@@ -384,6 +388,23 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Unread marker + jump button</h3>
+      <div data-unread-jump-gallery className="grid gap-3 sm:grid-cols-2">
+        {[{ up: true, count: 3 }, { up: false, count: 2 }].map(({ up, count }) => (
+          <div key={String(up)} className="relative h-[26rem] overflow-hidden rounded-2xl border border-white/10">
+            <div data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 pb-4">
+              {thread.map(({ m, mine, first, last, day }) => (
+                <div key={m._id}>
+                  {day && <CozyDayPill iso={m.createdAt} />}
+                  {m._id === 'c' && <UnreadMarker count={3} />}
+                  <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} />
+                </div>
+              ))}
+            </div>
+            <UnreadJumpButton up={up} count={count} onClick={noop} className="absolute bottom-4 right-4 z-10" />
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -409,6 +430,43 @@ function FollowCardsGallery() {
           ))}
         </div>
       </div>
+    </section>
+  );
+}
+
+/** ?sounds=1 — free songs: the picker (list or &soundstep=part) and the credit on posts. */
+function SoundsGallery({ step, library }: { step: string | null; library: string | null }) {
+  const [open, setOpen] = useState(true);
+  const song = 'https://api.audius.co/v1/tracks/ZlwB7/stream?app_name=Riftn';
+  const credited = withSoundWindow(song, { start: 42, end: 72 }, {
+    source: 'audius', license: 'Audius Open Music License',
+    licenseUrl: 'https://audius.org/open-music-license.pdf', page: 'https://audius.co/arly/instrumental-chill',
+  });
+  const picked: SoundCandidate = {
+    key: 'audius:ZlwB7', library: 'audius', url: song, title: 'Instrumental chill', creator: 'Arly',
+    tokenId: '0', duration: 138, pageUrl: 'https://audius.co/arly/instrumental-chill',
+    license: 'Audius Open Music License', licenseUrl: 'https://audius.org/open-music-license.pdf',
+  };
+  const idle = { playing: false, loading: false, error: false, toggle: () => setOpen(true) };
+  return (
+    <section data-sounds-gallery className="mb-5 space-y-4 rounded-2xl border border-white/10 bg-background/80 p-4">
+      <h2 className="text-lg font-semibold">Free songs</h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <SoundtrackControl title="Instrumental chill" creator="Arly" url={credited} layout="inline" {...idle} />
+        <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-white/10 px-3 py-1.5 text-xs">Open picker</button>
+      </div>
+      <div className="relative h-40 max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-fuchsia-700 to-sky-700">
+        <div className="absolute inset-x-0 bottom-0">
+          <SoundtrackControl title="Instrumental chill" creator="Arly" url={credited} {...idle} playing />
+        </div>
+      </div>
+      <SoundPicker
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onSelect={() => {}}
+        initialPicked={step === 'part' ? picked : undefined}
+        initialLibrary={library === 'riftn' || library === 'commons' ? library : 'audius'}
+      />
     </section>
   );
 }
@@ -622,9 +680,9 @@ const SAMPLE_DISLIKED_REACTIONS: ReactionCounts = { like: 2, love: 1, dislike: 9
  * the post — the thumb wears their 👎, since there is no thumbs-down button.
  */
 const SAMPLE_LIVE_NOW: LiveNowItem[] = [
-  { kind: 'stream', id: '1', title: 'Late night beat making', wallet: '0xmaya', username: 'maya', avatar: null, count: '214', followed: true, size: 214 },
+  { kind: 'stream', id: '1', title: 'Late night beat making', wallet: '0xmaya', username: 'maya', avatar: galleryAvatar, count: '214', followed: true, size: 214, cover: pillArtA, displayName: 'Maya', badgeBalance: 140000 },
   { kind: 'stage', id: '2', title: 'DHB weekly AMA', wallet: '0xdehub', username: 'dehub', avatar: null, count: '88', followed: true, size: 88 },
-  { kind: 'stream', id: '3', title: 'Ranked grind to Diamond', wallet: '0xkai', username: 'kai', avatar: null, count: '41', followed: false, size: 41 },
+  { kind: 'stream', id: '3', title: 'Ranked grind to Diamond', wallet: '0xkai', username: 'kai', avatar: null, count: '41', followed: false, size: 41, cover: pillArtB, displayName: 'Kai', badgeBalance: 2500000 },
   { kind: 'stage', id: '4', title: 'Builders hangout', wallet: '0xsora', username: 'sora', avatar: null, count: '12', followed: false, size: 12 },
   { kind: 'stream', id: '5', title: 'Painting a city at dusk', wallet: '0xjun', username: 'jun', avatar: null, count: '9', followed: false, size: 9 },
 ];
@@ -1671,6 +1729,7 @@ export default function StateGalleryPage() {
 
         {params.get('predictions') === '1' && <PredictionGallery />}
         {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
@@ -1709,6 +1768,7 @@ export default function StateGalleryPage() {
         <TextTilesGallery />
         <ArticleTilesGallery initialLook={params.get('atile')} initiallyOpen={params.get('sheet') === 'article-tile'} />
         <GridCardsGallery />
+        <GridReorderGallery />
 
         <PollGallery />
         <LockedChatGallery />
@@ -2264,6 +2324,39 @@ function seedGridCards(qc: ReturnType<typeof useQueryClient>) {
   qc.setQueryData(['store-listing', PILL_LISTING], { id: PILL_LISTING, store_id: PILL_STORE, title: 'A3 print: Rain City', price: 25, images: [pillAbs(pillArtB)], stores: { name: 'Marco prints' } });
   for (const preview of GALLERY_SPOTIFY_PREVIEWS) qc.setQueryData(['grid-link-preview', preview.url], preview);
   qc.setQueryData(['single-post', '5162'], { tokenId: 5162, name: 'Ready to rock', description: '', minterDisplayName: 'Riftn', imageUrls: [pillAbs(pillArtE)], postType: 'feed-images' });
+}
+
+/** Own profile grid: a grip in each tile's corner moves it. Drops reorder this list only. */
+function GridReorderGallery() {
+  const [entries, setEntries] = useState<MixedGridEntry[]>(() => [
+    pillVideo('gr-video', 'Night ride through the city', pillArtB),
+    pillText('9201', 'gm. shipping all day again'),
+    pillImage('gr-photo-a', pillArtF),
+    pillVideo('gr-short', 'POV: first ride', pillArtC, { isShort: true, views: '12.4K' }),
+    pillImage('gr-photo-b', pillArtA),
+    pillText('9202', 'Own everything you post'),
+    pillImage('gr-photo-c', pillArtD),
+    pillVideo('gr-video-b', 'Rooftop set, full hour', pillArtE, { duration: '58:10', views: '880' }),
+    pillImage('gr-photo-d', pillArtC),
+  ] as unknown as MixedGridEntry[]);
+  const onMove = async (movedId: string, beforeIds: string[]) => {
+    setEntries((current) => {
+      const moved = current.find((entry) => entry.data.id === movedId);
+      if (!moved) return current;
+      const rest = current.filter((entry) => entry !== moved);
+      const at = beforeIds.length ? rest.findIndex((entry) => entry.data.id === beforeIds[0]) + 1 : 0;
+      rest.splice(at, 0, moved);
+      return rest;
+    });
+  };
+  return (
+    <section data-page-bento data-grid-reorder-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: move a post by its grip</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[720px]"><ProfileMixedGrid entries={entries} onMove={onMove} /></div>
+      </AuthContext.Provider>
+    </section>
+  );
 }
 
 /** Profile grid posts that carry a card: each tile is a small copy of its card (GridCardTile). */

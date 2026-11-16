@@ -87,6 +87,7 @@ scripts/*
 !scripts/edge-route-recovery.mjs
 !scripts/standby-switch.mjs
 !scripts/indexnow-submit.mjs
+!scripts/carry-retired-assets.mjs
 !scripts/patch-vaul-scroll.mjs
 !scripts/patch-radix-focus-guards.mjs
 !scripts/patch-remove-scroll-bar.mjs

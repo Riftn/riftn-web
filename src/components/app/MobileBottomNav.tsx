@@ -418,7 +418,7 @@ export function MobileBottomNav() {
                   : item.path === LIVE_CHAT_PATH
                     ? inPublicChat
                     : item.label === 'Messages'
-                      ? location.pathname.startsWith(item.path) && !inPublicChat
+                      ? (location.pathname.startsWith(item.path) || location.pathname === '/chat') && !inPublicChat
                       : location.pathname.startsWith(item.path);
               const badge = item.label === 'Messages'
                 ? messagesUnread

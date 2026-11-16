@@ -3,12 +3,13 @@ import { useCall } from '@/contexts/CallContext';
 
 const VoiceCallModal = lazy(() => import('./VoiceCallModal'));
 const VideoCallModal = lazy(() => import('./VideoCallModal'));
+const CallEndedScreen = lazy(() => import('./CallEndedScreen'));
 const CallMiniPlayer = lazy(() => import('./CallMiniPlayer').then(m => ({ default: m.CallMiniPlayer })));
 
 /** Keep incoming coordination mounted; download call surfaces only for a call. */
 export function CallModalsHost() {
-  const { currentCall, isMinimized } = useCall();
-  if (!currentCall) return null;
+  const { currentCall, isMinimized, callSummary } = useCall();
+  if (!currentCall) return callSummary ? <Suspense fallback={null}><CallEndedScreen /></Suspense> : null;
   return <Suspense fallback={null}>
     {isMinimized ? <CallMiniPlayer /> : currentCall.call_type === 'video' ? <VideoCallModal /> : <VoiceCallModal />}
   </Suspense>;

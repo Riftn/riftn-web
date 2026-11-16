@@ -38,6 +38,34 @@ export function parseVisibility(raw?: unknown): { showFollowersFollowing: boolea
   }
 }
 
+/** Per-list switches in customs. Absent means the list is shown. */
+export const FOLLOWERS_LIST_VISIBILITY_KEY = 'followersListVisibility';
+export const FOLLOWING_LIST_VISIBILITY_KEY = 'followingListVisibility';
+/** Absent means private: everyone's likes start hidden. */
+export const LIKES_VISIBILITY_KEY = 'likesVisibility';
+
+export function likesArePublic(customs: Record<string, unknown> | null | undefined): boolean {
+  return customs?.[LIKES_VISIBILITY_KEY] === 'public';
+}
+
+/**
+ * Which follow lists a visitor may open. The coarse followVisibility mode
+ * ('counts-only' / 'hidden') still hides both; on top of that each list can be
+ * hidden on its own. The API enforces the same rules.
+ */
+export function parseFollowLists(customs: Record<string, unknown> | null | undefined): {
+  showFollowersList: boolean;
+  showFollowingList: boolean;
+  hideFollowerCounts: boolean;
+} {
+  const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(customs?.followVisibility);
+  return {
+    showFollowersList: showFollowersFollowing && customs?.[FOLLOWERS_LIST_VISIBILITY_KEY] !== 'hidden',
+    showFollowingList: showFollowersFollowing && customs?.[FOLLOWING_LIST_VISIBILITY_KEY] !== 'hidden',
+    hideFollowerCounts,
+  };
+}
+
 /**
  * Hook to manage the current user's privacy settings via the Riftn API customs field.
  */
@@ -66,6 +94,7 @@ export function usePrivacySettings() {
 
   const customs = profile?.customs;
   const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(customs?.followVisibility);
+  const { showFollowersList, showFollowingList } = parseFollowLists(customs as Record<string, unknown> | undefined);
   const isPrivate = profile?.isPrivate === true;
   const hideBadgeAndBalance = profile?.hideBadgeAndBalance === true;
   const aiScraping = getAiScrapingPreference(customs);
@@ -82,10 +111,38 @@ export function usePrivacySettings() {
       ai_scraping?: AiScrapingPreference;
       show_online?: boolean;
       show_dislikes?: boolean;
+      show_followers_list?: boolean;
+      show_following_list?: boolean;
+      show_follower_counts?: boolean;
+      show_likes?: boolean;
     }) => {
+      let listUpdates: Record<string, string> = {};
       if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
 
       const profileUpdate: Record<string, any> = {};
+
+      // The per-list switches. They rewrite followVisibility and hideFollowers
+      // too, so older apps that only know those keep matching what the API serves.
+      if (
+        updates.show_followers_list !== undefined ||
+        updates.show_following_list !== undefined ||
+        updates.show_follower_counts !== undefined
+      ) {
+        let followers = updates.show_followers_list ?? showFollowersList;
+        let following = updates.show_following_list ?? showFollowingList;
+        let counts = updates.show_follower_counts ?? !hideFollowerCounts;
+        // Hiding the numbers hides the lists; opening a list brings the numbers back.
+        if (updates.show_follower_counts === false) { followers = false; following = false; }
+        if (updates.show_followers_list || updates.show_following_list) counts = true;
+        updates.show_followers_following = undefined;
+        updates.hide_follower_counts = undefined;
+        profileUpdate.hideFollowers = !counts || (!followers && !following);
+        listUpdates = {
+          [FOLLOWERS_LIST_VISIBILITY_KEY]: followers ? 'public' : 'hidden',
+          [FOLLOWING_LIST_VISIBILITY_KEY]: following ? 'public' : 'hidden',
+          followVisibility: !counts ? 'hidden' : followers || following ? 'public' : 'counts-only',
+        };
+      }
 
       // Use direct API fields for hideFollowers and isPrivate
       if (updates.hide_follower_counts !== undefined || updates.show_followers_following !== undefined) {
@@ -102,7 +159,7 @@ export function usePrivacySettings() {
       }
 
       // Keep customs for follow visibility granularity and default post visibility
-      const customsUpdates: Record<string, string> = {};
+      const customsUpdates: Record<string, string> = { ...listUpdates };
       if (updates.show_followers_following !== undefined || updates.hide_follower_counts !== undefined) {
         let visibility: FollowVisibility;
         if (updates.hide_follower_counts) {
@@ -122,6 +179,9 @@ export function usePrivacySettings() {
       }
       if (updates.show_dislikes !== undefined) {
         customsUpdates[DISLIKES_VISIBILITY_KEY] = updates.show_dislikes ? 'public' : 'private';
+      }
+      if (updates.show_likes !== undefined) {
+        customsUpdates[LIKES_VISIBILITY_KEY] = updates.show_likes ? 'public' : 'private';
       }
 
       let mergedCustoms: Record<string, string> | undefined;
@@ -164,6 +224,10 @@ export function usePrivacySettings() {
     ai_scraping?: AiScrapingPreference;
     show_online?: boolean;
     show_dislikes?: boolean;
+    show_followers_list?: boolean;
+    show_following_list?: boolean;
+    show_follower_counts?: boolean;
+    show_likes?: boolean;
   }) => {
     updateMutation.mutate(updates);
   };
@@ -178,6 +242,9 @@ export function usePrivacySettings() {
     aiScraping,
     showOnline,
     showDislikes: dislikesArePublic(customs as Record<string, unknown> | undefined),
+    showFollowersList,
+    showFollowingList,
+    showLikes: likesArePublic(customs as Record<string, unknown> | undefined),
     defaultPostVisibility: (customs?.defaultPostVisibility as 'public' | 'private') ?? 'public',
     defaultProfileTab: parseDefaultProfileTab(customs?.defaultProfileTab),
     updateSettings,

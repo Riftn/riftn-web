@@ -1,5 +1,6 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { bindSoundWindow, soundTimeFor } from '@/lib/sound-window';
 import { claimHandoffAudio, getHandoffAudio, isHandoffAudioActive, releaseHandoffAudio, setHandoffAudio, subscribeHandoffAudio } from '@/lib/audio-handoff';
 
 interface UseSyncedAudioOptions {
@@ -24,6 +25,7 @@ export function useSyncedAudio({ mediaKey, soundtrackUrl, isPlaying, isMuted, vo
       const el = new Audio();
       el.preload = 'none';
       el.src = soundtrackUrl;
+      bindSoundWindow(el);
       setHandoffAudio(key, token.current, { el, source: null, analyser: null });
     }
     const unsubscribe = subscribeHandoffAudio(key, () => refresh(version => version + 1));
@@ -44,10 +46,11 @@ export function useSyncedAudio({ mediaKey, soundtrackUrl, isPlaying, isMuted, vo
     audio.playbackRate = video.playbackRate;
     video.muted = true;
     if (!video.paused) {
-      if (Math.abs(audio.currentTime - video.currentTime) > 0.3) audio.currentTime = video.currentTime;
+      const target = soundTimeFor(soundtrackUrl, video.currentTime);
+      if (Math.abs(audio.currentTime - target) > 0.3) audio.currentTime = target;
       if (audio.paused) audio.play().catch(() => {});
     } else audio.pause();
-  }, [active, key, isPlaying, isMuted, volume, videoRef]);
+  }, [active, key, isPlaying, isMuted, volume, videoRef, soundtrackUrl]);
   useEffect(() => {
     const video = videoRef.current;
     const audio = getHandoffAudio(key, token.current)?.el;
@@ -56,13 +59,15 @@ export function useSyncedAudio({ mediaKey, soundtrackUrl, isPlaying, isMuted, vo
     const sync = () => {
       if (!owns()) return;
       audio.playbackRate = video.playbackRate;
-      if (Math.abs(audio.currentTime - video.currentTime) > 0.3) audio.currentTime = video.currentTime;
+      // A post can use one part of the song; the part loops under the video.
+      const target = soundTimeFor(soundtrackUrl, video.currentTime);
+      if (Math.abs(audio.currentTime - target) > 0.3) audio.currentTime = target;
     };
     const pause = () => { if (owns()) audio.pause(); };
     const play = () => { if (owns() && !video.paused && audio.paused) { sync(); audio.play().catch(() => {}); } };
     const events = { seeked: sync, timeupdate: sync, ratechange: sync, waiting: pause, pause, ended: pause, playing: play };
     Object.entries(events).forEach(([name, callback]) => video.addEventListener(name, callback));
     return () => Object.entries(events).forEach(([name, callback]) => video.removeEventListener(name, callback));
-  }, [active, key, videoRef]);
+  }, [active, key, videoRef, soundtrackUrl]);
   return { hasSoundtrack: !!soundtrackUrl };
 }

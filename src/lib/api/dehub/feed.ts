@@ -284,6 +284,21 @@ export async function getDislikedPosts(
   });
 }
 
+/**
+ * Posts an account liked, newest first (the profile Likes tab). The API answers
+ * 403 for someone else's likes unless they made them public
+ * (customs.likesVisibility = 'public'). Likes are private by default.
+ */
+export async function getProfileLikes(
+  address: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }> {
+  return apiCall<{ result: DeHubNFT[]; pagination?: any }>("/api/liked_posts", {
+    params: { address: address.toLowerCase(), page, limit },
+  });
+}
+
 export async function getWatchHistory(
   page: number = 0,
   limit: number = 20,

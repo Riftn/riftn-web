@@ -6721,7 +6721,7 @@
     "ambWant4": "Self-move person wey can plan and do campaign by demself, no need for boss to tell dem eva.",
     "ambWant5": "Previous ambassador experience na bonus",
     "applyAsAmbassador": "Apply as Ambassador",
-    "noRoleFits": "Don't see a role dat fit? Come talk to us on <mail>dev@dehub.io</mail> — we dey look for people wey dey smart all time."
+    "noRoleFits": "Don't see a role dat fit? Come talk to us on <mail>dev@riftn.com</mail> — we dey look for people wey dey smart all time."
   },
   "depin": {
     "seoTitle": "DePin | Community-Powered Media Infrastructure | Riftn",
@@ -7342,7 +7342,12 @@
     "failedTitle": "Call failed",
     "close": "Close",
     "callbackRequest": "Callback request",
-    "tryAgain": "Try am again"
+    "tryAgain": "Try am again",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "Na you get {{tier}}",
@@ -13885,6 +13890,13 @@
     "dd3bfd98b141": "Dey no look like website address wey dey.",
     "62b242593656": "Add a link",
     "76d311c4cef6": "Add Sound",
+    "c0963b7d9c5d": "Free library",
+    "46b0e30a32b0": "Whole song",
+    "0418db35eb35": "I no understand wetin you mean.",
+    "cbade2afaee2": "Trending dis week for Audius. Free to use, di artist go get credit for your post.",
+    "d0c1a3684775": "Songs no load. Try am again for small time.",
+    "55fd43d20da5": "Remove sound",
+    "d14064f80f52": "Add sound",
     "db66c92fd9e0": "Search sounds...",
     "af6ed946e090": "Trim Video",
     "1c0eba609c44": "Select trim range",
@@ -14133,7 +14145,7 @@
     "55075065cfc5": "Join de team dey build future of decentralize media. Come check open job at Riftn and help make Web3 social better.",
     "a2dd3acadb1c": "Jane Smith",
     "93100fc44c0a": "@username",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0ec53894d032": "Hot",
     "87f6885f02a4": "Riftn Creator Flow: Visual AI Pipelines",
     "88f1cc09ba80": "Wetin you dey do? You wan build pipeline wey go dey run multiple prompt, reference, image and video models for one canvas. You fit create reusable generation flows, run dem for one payment, and share am with link.",
@@ -14374,7 +14386,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Featured In",
     "ee1c1eecf1b6": "Riftn don dey get attention for some of di biggest and most trusted papa publications for dis world. See wetin dem dey write about our mission to democratise media.",
@@ -14590,6 +14602,7 @@
     "4c674e467017": "You no fit join di group",
     "bcc015afda01": "Abeg type message",
     "8e51a80a4d7d": "New Message",
+    "674e70bcd915": "Na full chat history dey open for everybody wey dey have account.",
     "7a523e7dc8a3": "Sign in make you fit moderate",
     "29a7e1c24c92": "Translate all",
     "90395d452a30": "Person wey no get name",

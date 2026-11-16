@@ -36,7 +36,9 @@ import {
 } from '@/lib/public-chat-alerts';
 import { NAV_ORDER_PREF_KEYS, sanitiseNavOrder, useNavOrder, writeNavOrder, type NavOrderSurface } from '@/lib/nav-order';
 
-const PREF_KEY = 'videoChannelSpeeds';
+// Renamed when the old pinned speeds were cleared (video-preferences
+// RATE_SCOPE 3), so the account copy of that map cannot bring them back.
+const PREF_KEY = 'videoChannelSpeeds3';
 const GROUPS_KEY = 'followGroups';
 const AD_LOAD_KEY = 'adLoad';
 const FEED_VIDEO_SHAPE_KEY = 'feedVideoShape';

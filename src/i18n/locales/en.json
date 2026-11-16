@@ -780,6 +780,14 @@
     "showOnlineDesc": "People you message see a green dot next to your name while you're using Riftn",
     "showDislikes": "Show my dislikes to everyone",
     "showDislikesDesc": "Anyone can open the Dislikes tab on your profile. When this is off, only you can see it.",
+    "showLikes": "Show my likes to everyone",
+    "showLikesDesc": "Anyone can open the Likes tab on your profile. Off by default, so only you can see what you liked.",
+    "showFollowersList": "Show who follows me",
+    "showFollowersListDesc": "Let anyone open your followers list. When this is off, only you can see it.",
+    "showFollowingList": "Show who I follow",
+    "showFollowingListDesc": "Let anyone open the list of people you follow. When this is off, only you can see it.",
+    "showFollowCounts": "Show my follower numbers",
+    "showFollowCountsDesc": "Show how many followers you have and how many people you follow. Turning this off also hides both lists.",
     "smartReplies": "Suggested replies",
     "smartRepliesDesc": "Draft two replies you can tap in a chat. The × on the suggestions turns this off.",
     "title": "Settings",
@@ -2476,11 +2484,20 @@
     "tabs": {
       "playlists": "Playlists",
       "dislikes": "Dislikes",
+      "likes": "Likes",
       "articles": "Articles"
     },
     "articles": {
       "emptyTitle": "No articles yet",
       "emptySubtitle": "Articles will appear here"
+    },
+    "likedPosts": {
+      "emptyTitle": "No likes yet",
+      "emptyOwn": "Posts you like show up here. Only you can see them unless you turn on Show my likes in Settings.",
+      "emptyOther": "Nothing liked yet.",
+      "privateTitle": "Likes are private",
+      "privateDesc": "This account keeps its likes to itself.",
+      "loadMore": "Load more"
     },
     "dislikes": {
       "emptyTitle": "No dislikes yet",
@@ -2508,7 +2525,7 @@
     "arrangeButton": "Arrange posts",
     "arrange": {
       "title": "Arrange your posts",
-      "hint": "Drag your posts into the order you want. Visitors see this order first.",
+      "hint": "Hold a post and drag it to its new place. Visitors see this order first.",
       "drag": "Drag to move",
       "toTop": "Move to top",
       "save": "Save order",
@@ -8180,7 +8197,7 @@
     "ambWant5": "Previous ambassador, influencer, or community management experience is a bonus",
     "ambassadorCompensation": "Brand Ambassadors receive a <b>negotiable monthly salary</b> paid consistently. Additional bonuses may be awarded based on campaign performance, user sign-ups, and community growth milestones. You'll also receive exclusive Riftn merch, early feature access, and token allocations as the ecosystem grows.",
     "applyAsAmbassador": "Apply as Brand Ambassador",
-    "noRoleFits": "Don't see a role that fits? Reach out to us on <mail>dev@dehub.io</mail> — we're always looking for talented people."
+    "noRoleFits": "Don't see a role that fits? Reach out to us on <mail>dev@riftn.com</mail> — we're always looking for talented people."
   },
   "depin": {
     "seoTitle": "DePin | Community-Powered Media Infrastructure | Riftn",
@@ -8942,7 +8959,12 @@
     "failedDesc": "The call could not be completed. Check your connection and try again.",
     "close": "Close",
     "callbackRequest": "Callback request",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "You reached {{tier}}",
@@ -16847,6 +16869,19 @@
     "dd3bfd98b141": "That does not look like a web address.",
     "62b242593656": " Add a link",
     "76d311c4cef6": "Add Sound",
+    "c0963b7d9c5d": "Free library",
+    "55b1ec6f0360": "Pick the part",
+    "284b838e96e5": "Where the part starts",
+    "46b0e30a32b0": "Whole song",
+    "3a84120779c5": "Slide to pick the part",
+    "1cb1b494ee3b": "The part matches your video ({{value1}}).",
+    "0418db35eb35": "Use this sound",
+    "ecb30523a48a": "Search songs and artists",
+    "cbade2afaee2": "Trending this week on Audius. Free to use, the artist gets credited on your post.",
+    "d2e45b7406fc": "Public domain and Creative Commons music from Wikimedia Commons. The artist gets credited on your post.",
+    "d0c1a3684775": "Songs didn't load. Try again in a moment.",
+    "55fd43d20da5": "Remove sound",
+    "d14064f80f52": "Add sound",
     "db66c92fd9e0": "Search sounds...",
     "af6ed946e090": "Trim Video",
     "1c0eba609c44": "Select trim range",
@@ -17202,7 +17237,7 @@
     "0ec80d3905a0": "Riftn Careers — Decentralised Social Media, Censorship Resistant & Freedom of Speech",
     "a2dd3acadb1c": "Jane Smith",
     "93100fc44c0a": "@username",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Log in to access your wallet and manage your funds.",
     "a2364c207356": "Command: Your Dashboard & Wallet",
     "d97180b4753f": "Your command centre on Riftn. Manage your wallet, track balances, and oversee your account in one dashboard.",
@@ -17514,7 +17549,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Featured In",
     "ee1c1eecf1b6": "Riftn has been covered by some of the world's biggest and most trusted publications. Here are the articles putting a spotlight on our mission to democratise media.",
@@ -17786,6 +17821,9 @@
     "bcc015afda01": "Please enter a message",
     "3c53e332cf13": "Unable to start conversation with this user",
     "8e51a80a4d7d": "New Message",
+    "27c26a5a38b3": "Sign in to see older messages",
+    "674e70bcd915": "The full chat history is open to everyone with an account.",
+    "feaf753f6557": "Start of the chat",
     "7a523e7dc8a3": "Sign in to moderate",
     "29a7e1c24c92": "Translate all",
     "90395d452a30": "Anon",
@@ -20358,7 +20396,7 @@
     "thisVideo": "this video"
   },
   "connectGuide": {
-    "accountBody2": "Post, reply, react, repost, follow, save bookmarks, read notifications, edit your profile and create images, video and music with your credits. It asks before spending anything.",
+    "accountBody2": "Publish and schedule posts, manage their images and polls, read analytics, reply, react, repost, follow, save bookmarks, read notifications, edit your profile and create with your credits. It asks before spending anything.",
     "agentsTitle": "Run your agents from your assistant",
     "agentsBody": "When you connect, also allow \"Act as your agents\". Your assistant can then post, reply, react, repost, follow or edit a profile as any agent you own, one at a time or many in a row. It can never act as an account you do not own.",
     "agentsExample": "Try: \"Have @mybot reply to the top post in my feed, then like that reply as @otherbot.\"",

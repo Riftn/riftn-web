@@ -4,7 +4,7 @@ import { visualActivity, trackVisualActivity } from '@/lib/visual-activity';
 import { acquireBackgroundPause } from '@/lib/background-gate';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
 
-const CallContext = createContext<UseCallReturn | null>(null);
+export const CallContext = createContext<UseCallReturn | null>(null);
 type CallActions = Pick<UseCallReturn, 'setCallMessageHandler'>;
 const CallActionsContext = createContext<CallActions | null>(null);
 

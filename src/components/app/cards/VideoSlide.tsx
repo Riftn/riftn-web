@@ -25,6 +25,8 @@ import { motion } from 'framer-motion';
 import type { ShortVideo } from '@/types/feed.types';
 import { cn } from '@/lib/utils';
 import { useResolvedThumbnail } from '@/lib/thumbnail-fallback';
+import { ShortsLiveGlow } from '@/components/app/video/ShortsLiveGlow';
+import { usePinchZoom } from '@/hooks/use-pinch-zoom';
 import { useTapGestures } from '@/hooks/use-tap-gestures';
 import { useShortsSideGestures } from '@/hooks/use-shorts-side-gestures';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +38,7 @@ import { useHandoffVideo } from '@/hooks/use-handoff-video';
 import { AuthContext } from '@/contexts/AuthContext';
 import { isVideoAccessExpiring, useResumeAcrossRefresh, useVideoAccess } from '@/lib/api/dehub/video-access';
 import { useMediaLooping } from '@/lib/video-preferences';
+import { bindSoundWindow } from '@/lib/sound-window';
 
 interface VideoSlideProps {
   short: ShortVideo;
@@ -62,6 +65,18 @@ interface VideoSlideProps {
    * by `object-cover`. Mobile stays full-bleed (phone-native) and leaves this off.
    */
   letterbox?: boolean;
+  /**
+   * Phones only. What surrounds a video that does not fill the screen: 'glow'
+   * is light drawn from the playing picture (ShortsLiveGlow), 'floor' is its
+   * mirror image underneath, 'clean' is the plain theme backdrop with the
+   * picture as a rounded card. Left unset
+   * (desktop), the blurred cover fill stays.
+   */
+  phoneStage?: 'glow' | 'clean' | 'floor';
+  /** Space kept clear above the picture (the info stage's top buttons). */
+  stageInsetTop?: number;
+  /** The video's width over its height, once known. */
+  onRatio?: (ratio: number) => void;
   /**
    * Buffering hint for the underlying <video>. The viewer sets this to `'auto'`
    * for the active slide *and the next one* so the neighbour is already buffered
@@ -116,6 +131,9 @@ const VideoSlideBody = memo(function VideoSlideBody({
   onSeekEnd,
   showPlayIndicator,
   letterbox = false,
+  phoneStage,
+  stageInsetTop = 0,
+  onRatio,
   preload,
   isFullscreen = false,
   progressLayer = null,
@@ -137,11 +155,17 @@ const VideoSlideBody = memo(function VideoSlideBody({
   // a slide that has left the active position can never restart itself.
   const isActiveRef = useRef(isActive);
   isActiveRef.current = isActive;
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
   // Shorts thumbnails may live at shorts/{id}.jpg instead of the mapped
   // images/{id}.jpg — resolve to whichever exists so the poster isn't a 403.
   const thumbnail = useResolvedThumbnail(short.thumbnail);
   const [videoAspect, setVideoAspect] = useState<'portrait' | 'landscape' | 'square'>('portrait');
+  const [videoRatio, setVideoRatio] = useState(0);
   const playableSrc = short.soundtrackUrl || (playbackSrc !== undefined ? playbackSrc || undefined : short.videoUrl);
+  // A photo short plays its song in this element: keep it to the part the
+  // poster picked.
+  useEffect(() => { if (short.soundtrackUrl) bindSoundWindow(videoRef.current); }, [short.soundtrackUrl]);
   // A short that mounts off screen (the next one) starts its ladder on the
   // lowest rung, so its first segment is small and lands before the swipe;
   // the player steps up once it plays.
@@ -205,6 +229,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
       const { videoWidth, videoHeight } = videoRef.current;
       if (videoWidth && videoHeight) {
         const ratio = videoWidth / videoHeight;
+        setVideoRatio(ratio);
         if (ratio > 1.1) {
           setVideoAspect('landscape');
         } else if (ratio < 0.9) {
@@ -222,9 +247,15 @@ const VideoSlideBody = memo(function VideoSlideBody({
     if (!video) return;
     if (isActive) {
       if (video.ended) video.currentTime = 0;
+      // A short the viewer started silently while it was dragged in keeps
+      // playing from where it is, with sound if the viewer has it on.
+      delete video.dataset.shortsPeek;
+      video.muted = isMutedRef.current;
       void requestVideoPlayback(video).catch(() => {});
-    } else video.pause();
+    } else if (!video.dataset.shortsPeek) video.pause();
     return () => {
+      // Becoming the active short is not a reason to stop it.
+      if (!isActive && video.dataset.shortsPeek) return;
       releaseAfterPictureInPicture(video, () => video.pause());
     };
   }, [isActive, transcodingStatus]);
@@ -232,7 +263,10 @@ const VideoSlideBody = memo(function VideoSlideBody({
   const handlePlay = useCallback(() => {
     // Safari can complete an older play() request after pause(). Treat React's
     // active slide as the authority and immediately silence that stale start.
-    if (!isActiveRef.current && !isVideoInPictureInPicture(videoRef.current)) videoRef.current?.pause();
+    // The short a drag is heading for plays ahead of becoming active
+    // (ShortsViewer's peek); that start is wanted.
+    const video = videoRef.current;
+    if (!isActiveRef.current && !video?.dataset.shortsPeek && !isVideoInPictureInPicture(video)) video?.pause();
   }, []);
 
   // Update muted state
@@ -242,9 +276,12 @@ const VideoSlideBody = memo(function VideoSlideBody({
     }
   }, [isMuted]);
 
-  // Update playback rate
+  // Update playback rate. The default rate is set too: loading a source (the
+  // HLS ladder attaching after the handoff) puts playbackRate back to the
+  // default, which left the button reading 1.5x over a video playing at 1x.
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.defaultPlaybackRate = playbackRate;
       videoRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
@@ -265,6 +302,28 @@ const VideoSlideBody = memo(function VideoSlideBody({
   const fitWhole = letterbox || videoAspect !== 'portrait';
   // Photo slides sit on a plain theme backdrop: tall photos fill the screen, wide ones letterbox.
   const isPhotoSlide = !!short.imageUrls?.length;
+  const glowStage = (phoneStage === 'glow' || phoneStage === 'floor') && fitWhole && !isPhotoSlide;
+  const cleanStage = phoneStage === 'clean' && fitWhole && !isPhotoSlide;
+  // Clean stage: the picture is a rounded card with a little room at the
+  // sides. Cut on the slot's inner box, so taps above and below the picture
+  // still reach the slot. Only once the shape is known and it is a wide clip
+  // held upright; turned sideways or full screen it runs edge to edge.
+  const cardClip = cleanStage && !isFullscreen && videoRatio > 1.1
+    ? `inset(max(0px, calc((100cqh - (100cqw - 24px) / ${videoRatio.toFixed(4)}) / 2)) 12px round 16px)`
+    : null;
+  // Glow: the top and bottom few pixels of the picture melt into the light
+  // around it, so there is no line where the video ends.
+  const glowFeather = phoneStage === 'glow' && glowStage && !isFullscreen && videoRatio > 0
+    ? (() => {
+      const bar = `max(0px, calc((100cqh - 100cqw / ${videoRatio.toFixed(4)}) / 2))`;
+      return `linear-gradient(to bottom, transparent ${bar}, #000 calc(${bar} + 18px), #000 calc(100cqh - ${bar} - 18px), transparent calc(100cqh - ${bar}))`;
+    })()
+    : null;
+  const onRatioRef = useRef(onRatio);
+  onRatioRef.current = onRatio;
+  const reportsRatio = !!onRatio;
+  useEffect(() => { if (videoRatio > 0 && reportsRatio) onRatioRef.current?.(videoRatio); }, [videoRatio, reportsRatio]);
+  const pinch = usePinchZoom(!!phoneStage && !isPhotoSlide, onHoldChange);
   // Before the handoff assigns `src`, so a refreshed signature resumes in place.
   useResumeAcrossRefresh(videoRef, playableSrc || undefined);
   const { attachSlot } = useHandoffVideo({
@@ -283,13 +342,18 @@ const VideoSlideBody = memo(function VideoSlideBody({
     className: `shorts-inline-video pointer-events-none w-full h-full ${fitWhole || isFullscreen ? 'object-contain' : 'object-cover'} transition-none`,
     onTimeUpdate: handleTimeUpdate,
     onLoadedMetadata: handleLoadedMetadata,
-    onPlaybackChange: (playing) => { if (playing) handlePlay(); },
+    onPlaybackChange: (playing) => {
+      const video = videoRef.current;
+      if (playing && video && video.playbackRate !== playbackRate) video.playbackRate = playbackRate;
+      if (playing) handlePlay();
+    },
     onAdopt: (video) => {
       video.controls = false;
       video.setAttribute('controlsList', 'nofullscreen noremoteplayback nodownload');
       video.disableRemotePlayback = true;
       video.muted = isMuted;
       video.loop = isLooping;
+      video.defaultPlaybackRate = playbackRate;
       video.playbackRate = playbackRate;
       handleLoadedMetadata();
     },
@@ -493,7 +557,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
   // each slide, and a transformed ancestor makes `fixed` resolve against that
   // wrapper rather than the viewport.
   return (
-    <div data-shorts-picture data-keep-dark data-shorts-photo-slide={isPhotoSlide || undefined} className="absolute inset-0 bg-black" style={{ willChange: 'transform' }}>
+    <div data-shorts-picture data-keep-dark data-shorts-photo-slide={isPhotoSlide || undefined} data-shorts-clean-slide={cleanStage || undefined} className="absolute inset-0 bg-black" style={{ willChange: 'transform' }}>
       {/* Liquid glass fill behind letterboxed / non-portrait videos.
           One filtered layer plus a plain tint. It used to be a blurred layer
           with a second backdrop-blur pass stacked on it — blurring what was
@@ -501,7 +565,8 @@ const VideoSlideBody = memo(function VideoSlideBody({
           on every frame the player resized (comments opening/closing) or
           moved, which is where those transitions lost frames. The two blur
           and saturate passes are folded into the one filter. */}
-      {fitWhole && thumbnail && !isPhotoSlide && (
+      {glowStage && <ShortsLiveGlow videoRef={videoRef} thumbnail={thumbnail} live={isActive} look={phoneStage === 'floor' ? 'floor' : 'glow'} />}
+      {fitWhole && thumbnail && !isPhotoSlide && !phoneStage && (
         <>
           <div
             className="absolute inset-0 z-0"
@@ -521,7 +586,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
           ladder, off pointer events. Desktop used to bind a competing onClick
           for centre-double-tap fullscreen; fullscreen kept its button and gave
           the gesture up, because one gesture cannot mean two things. */}
-      <div data-shorts-media-slot className="absolute inset-0 z-[2]" {...tapGestures} {...side.handlers}>
+      <div data-shorts-media-slot className="absolute inset-0 z-[2]" style={cardClip || glowFeather ? { containerType: 'size', top: stageInsetTop || undefined } : undefined} {...tapGestures} {...side.handlers} {...pinch.handlers}>
         {/* A hold's speed-up shows nothing: the picture speeding up is the
             feedback. A double-tap jump shows a soft count on its side. */}
         {side.seekFlash && (
@@ -573,7 +638,13 @@ const VideoSlideBody = memo(function VideoSlideBody({
             </div>
           </div>
         ) : (short.videoUrl || short.soundtrackUrl) ? (
-          <div ref={attachSlot} className="w-full h-full" />
+          <div ref={pinch.targetRef} className="w-full h-full">
+            <div
+              ref={attachSlot}
+              className={cn('w-full h-full', cardClip && 'px-3')}
+              style={cardClip ? { clipPath: cardClip } : glowFeather ? { maskImage: glowFeather, WebkitMaskImage: glowFeather } : undefined}
+            />
+          </div>
         ) : (
           <div data-keep-dark className="w-full h-full flex items-center justify-center bg-zinc-900">
             <img 

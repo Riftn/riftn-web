@@ -112,6 +112,7 @@ const Dapp = () => {
     { id: 'explore', label: t('dapp.tocExplore') },
     { id: 'badges', label: t('dapp.tocBadges') },
     { id: 'tipping', label: t('dapp.tocTipping') },
+    { id: 'tips-follows-groups', label: t('dapp.tocSocialOwned') },
     { id: 'governance', label: t('dapp.tocGovernance') },
     { id: 'governance-new', label: t('dapp.tocGovernanceNew') },
     { id: 'dao-treasury', label: t('dapp.tocDao') },
@@ -121,6 +122,7 @@ const Dapp = () => {
     { id: 'subscriptions', label: t('dapp.subscriptionsTitle') },
     { id: 'messages', label: t('dapp.messagesTitle') },
     { id: 'messages-new', label: t('dapp.tocMessagesNew') },
+    { id: 'chat-page', label: t('dapp.tocChatPage') },
     { id: 'superpowers', label: t('dapp.superPowersTitle') },
     { id: 'fees', label: t('dapp.tocFees') },
     { id: 'communities', label: t('dapp.communitiesTitle') },
@@ -136,13 +138,16 @@ const Dapp = () => {
     { id: 'exchange', label: t('dapp.tocExchange') },
     { id: 'marketplaces', label: t('dapp.tocMarkets') },
     { id: 'work', label: t('dapp.tocBounties') },
-    { id: 'stores', label: t('dapp.storesTitle') },
     { id: 'sharing', label: t('dapp.tocSharing') },
     { id: 'affiliate', label: t('dapp.affiliateTitle') },
     { id: 'ai-suite', label: t('dapp.tocAi') },
     { id: 'creator-studio', label: t('dapp.tocStudio') },
     { id: 'creator-tools', label: t('dapp.tocCreatorTools') },
     { id: 'editor-additions', label: t('dapp.tocEditorAdditions') },
+    { id: 'remix', label: t('dapp.tocRemix') },
+    { id: 'post-tools', label: t('dapp.tocPostTools') },
+    { id: 'post-sound', label: t('dapp.tocPostSound') },
+    { id: 'pay-any-coin', label: t('dapp.tocPayAnyCoin') },
     { id: 'converter', label: t('dapp.tocConverter') },
     { id: 'mini-apps', label: t('dapp.tocMiniApps') },
     { id: 'arcade', label: t('dapp.tocArcade') },
@@ -152,12 +157,15 @@ const Dapp = () => {
     { id: 'advertising', label: t('dapp.tocAds') },
     { id: 'feature-requests', label: t('dapp.tocRequests') },
     { id: 'connect', label: t('dapp.tocConnect') },
+    { id: 'mcp', label: t('dapp.tocMcpOpen') },
     { id: 'notifications', label: t('dapp.tocNotifications') },
     { id: 'notifications-new', label: t('dapp.tocNotificationsNew') },
+    { id: 'account-controls', label: t('dapp.tocAccountControls') },
     { id: 'kids-mode', label: t('dapp.tocKids') },
     { id: 'themes', label: t('dapp.tocThemes') },
     { id: 'settings', label: t('dapp.tocSettings') },
     { id: 'get-the-app', label: t('dapp.tocApps') },
+    { id: 'watch-anywhere', label: t('dapp.tocWatchAnywhere') },
     { id: 'more', label: t('dapp.tocMore') },
   ];
 
@@ -982,6 +990,17 @@ const Dapp = () => {
           <TippingFlowchart />
         </section>
 
+        <GuideSection
+          id="tips-follows-groups"
+          title="dapp.socialOwnedTitle"
+          paras={['dapp.socialOwnedDesc']}
+          bullets={[
+            ['dapp.socialOwnedB1', 'dapp.socialOwnedB1Desc'],
+            ['dapp.socialOwnedB2', 'dapp.socialOwnedB2Desc'],
+            ['dapp.socialOwnedB3', 'dapp.socialOwnedB3Desc']
+          ]}
+        />
+
         <section id="governance" className="scroll-mt-32">
           <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.mineTitle')}</h2>
           <h3 className="text-xl font-medium text-foreground mb-3 font-exo">{t('dapp.mineSubtitle')}</h3>
@@ -1718,6 +1737,19 @@ const Dapp = () => {
             ]}
           />
 
+        <GuideSection
+          id="chat-page"
+          title="dapp.chatPageTitle"
+          paras={['dapp.chatPageDesc']}
+          bullets={[
+            ['dapp.chatPageB1', 'dapp.chatPageB1Desc'],
+            ['dapp.chatPageB2', 'dapp.chatPageB2Desc'],
+            ['dapp.chatPageB3', 'dapp.chatPageB3Desc'],
+            ['dapp.chatPageB4', 'dapp.chatPageB4Desc'],
+            ['dapp.chatPageB5', 'dapp.chatPageB5Desc']
+          ]}
+        />
+
 <section id="superpowers" className="mt-12 scroll-mt-32">
             <h2 className="text-3xl font-bold text-foreground mb-6 font-exo">{t('dapp.superPowersTitle')}</h2>
 
@@ -2085,7 +2117,7 @@ const Dapp = () => {
 <GuideSection
           id="exchange"
           title="dapp.exchangeTitle"
-          paras={['dapp.exchangeDesc']}
+          paras={['dapp.exchangePaused', 'dapp.exchangeDesc']}
           bullets={[['dapp.exchangeB1', 'dapp.exchangeB1Desc'], ['dapp.exchangeB2', 'dapp.exchangeB2Desc'], ['dapp.exchangeB3', 'dapp.exchangeB3Desc']]}
         />
 
@@ -2113,18 +2145,6 @@ const Dapp = () => {
             <li><strong>{t('dapp.workB5')}</strong> {t('dapp.workB5Desc')}</li>
             <li><strong>{t('dapp.workB6')}</strong> {t('dapp.workB6Desc')}</li>
             <li><strong>{t('dapp.workB7')}</strong> {t('dapp.workB7Desc')}</li>
-          </ul>
-        </section>
-
-        <section id="stores" className="scroll-mt-32">
-          <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.storesTitle')}</h2>
-          <p className="text-foreground/80 leading-relaxed mb-4 font-exo">{t('dapp.storesDesc')}</p>
-          <Shot src="/media/docs-stores.png" alt={t('dapp.altStores')} />
-          <ul className="list-disc list-inside text-foreground/80 space-y-2 mb-4 font-exo">
-            <li><strong>{t('dapp.storesB1')}</strong> {t('dapp.storesB1Desc')}</li>
-            <li><strong>{t('dapp.storesB2')}</strong> {t('dapp.storesB2Desc')}</li>
-            <li><strong>{t('dapp.storesB3')}</strong> {t('dapp.storesB3Desc')}</li>
-            <li><strong>{t('dapp.storesB4')}</strong> {t('dapp.storesB4Desc')}</li>
           </ul>
         </section>
 
@@ -2226,6 +2246,54 @@ const Dapp = () => {
   ]}
 />
 
+        <GuideSection
+          id="remix"
+          title="dapp.remixTitle"
+          paras={['dapp.remixDesc']}
+          bullets={[
+            ['dapp.remixB1', 'dapp.remixB1Desc'],
+            ['dapp.remixB2', 'dapp.remixB2Desc'],
+            ['dapp.remixB3', 'dapp.remixB3Desc']
+          ]}
+        />
+
+        <GuideSection
+          id="post-tools"
+          title="dapp.postToolsTitle"
+          paras={['dapp.postToolsDesc']}
+          bullets={[
+            ['dapp.postToolsB1', 'dapp.postToolsB1Desc'],
+            ['dapp.postToolsB2', 'dapp.postToolsB2Desc'],
+            ['dapp.postToolsB3', 'dapp.postToolsB3Desc'],
+            ['dapp.postToolsB4', 'dapp.postToolsB4Desc'],
+            ['dapp.postToolsB5', 'dapp.postToolsB5Desc'],
+            ['dapp.postToolsB6', 'dapp.postToolsB6Desc'],
+            ['dapp.postToolsB7', 'dapp.postToolsB7Desc'],
+            ['dapp.postToolsB8', 'dapp.postToolsB8Desc']
+          ]}
+        />
+
+        <GuideSection
+          id="post-sound"
+          title="dapp.postSoundTitle"
+          paras={['dapp.postSoundDesc']}
+          bullets={[
+            ['dapp.postSoundB1', 'dapp.postSoundB1Desc'],
+            ['dapp.postSoundB2', 'dapp.postSoundB2Desc']
+          ]}
+        />
+
+        <GuideSection
+          id="pay-any-coin"
+          title="dapp.payAnyCoinTitle"
+          paras={['dapp.payAnyCoinDesc']}
+          bullets={[
+            ['dapp.payAnyCoinB1', 'dapp.payAnyCoinB1Desc'],
+            ['dapp.payAnyCoinB2', 'dapp.payAnyCoinB2Desc'],
+            ['dapp.payAnyCoinB3', 'dapp.payAnyCoinB3Desc']
+          ]}
+        />
+
 <GuideSection
           id="converter"
           title="dapp.converterTitle"
@@ -2299,6 +2367,17 @@ const Dapp = () => {
           <Shot src="/media/docs-connect.png" alt={t('dapp.altConnect')} />
         </section>
 
+        <GuideSection
+          id="mcp"
+          title="dapp.mcpOpenTitle"
+          paras={['dapp.mcpOpenDesc']}
+          bullets={[
+            ['dapp.mcpOpenB1', 'dapp.mcpOpenB1Desc'],
+            ['dapp.mcpOpenB2', 'dapp.mcpOpenB2Desc'],
+            ['dapp.mcpOpenB3', 'dapp.mcpOpenB3Desc']
+          ]}
+        />
+
         <section id="notifications" className="scroll-mt-32">
           <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.notificationsTitle')}</h2>
           <p className="text-foreground/80 leading-relaxed mb-4 font-exo">{t('dapp.notificationsDesc')}</p>
@@ -2321,6 +2400,19 @@ const Dapp = () => {
             ['dapp.notificationsNewB2', 'dapp.notificationsNewB2Desc'],
             ['dapp.notificationsNewB3', 'dapp.notificationsNewB3Desc'],
             ['dapp.notificationsNewB4', 'dapp.notificationsNewB4Desc']
+          ]}
+        />
+
+        <GuideSection
+          id="account-controls"
+          title="dapp.accountControlsTitle"
+          paras={['dapp.accountControlsDesc']}
+          bullets={[
+            ['dapp.accountControlsB1', 'dapp.accountControlsB1Desc'],
+            ['dapp.accountControlsB2', 'dapp.accountControlsB2Desc'],
+            ['dapp.accountControlsB3', 'dapp.accountControlsB3Desc'],
+            ['dapp.accountControlsB4', 'dapp.accountControlsB4Desc'],
+            ['dapp.accountControlsB5', 'dapp.accountControlsB5Desc']
           ]}
         />
 
@@ -2360,6 +2452,18 @@ const Dapp = () => {
             <li><strong>{t('dapp.appsB3')}</strong> {t('dapp.appsB3Desc')}</li>
           </ul>
         </section>
+
+        <GuideSection
+          id="watch-anywhere"
+          title="dapp.watchAnywhereTitle"
+          paras={['dapp.watchAnywhereDesc']}
+          bullets={[
+            ['dapp.watchAnywhereB1', 'dapp.watchAnywhereB1Desc'],
+            ['dapp.watchAnywhereB2', 'dapp.watchAnywhereB2Desc'],
+            ['dapp.watchAnywhereB3', 'dapp.watchAnywhereB3Desc'],
+            ['dapp.watchAnywhereB4', 'dapp.watchAnywhereB4Desc']
+          ]}
+        />
 
         <section id="more" className="scroll-mt-32">
           <h2 className="text-2xl font-semibold text-foreground mb-4 font-exo">{t('dapp.moreTitle')}</h2>

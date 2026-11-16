@@ -30,7 +30,7 @@ interface UseMentionReturn {
 }
 
 // Extract @mention query from text at cursor position
-function extractMentionQuery(text: string, cursorPos: number): { query: string; startIndex: number } | null {
+export function extractMentionQuery(text: string, cursorPos: number): { query: string; startIndex: number } | null {
   // Look backwards from cursor for @
   let startIndex = -1;
   
@@ -51,6 +51,10 @@ function extractMentionQuery(text: string, cursorPos: number): { query: string; 
   
   if (startIndex === -1) return null;
   
+  // The @ has to start a word. One in the middle of a word is an email
+  // address (name@example.com), not a tag.
+  if (startIndex > 0 && !/\s/.test(text[startIndex - 1])) return null;
+  
   // Extract query (characters after @)
   const query = text.substring(startIndex + 1, cursorPos);
   
@@ -63,6 +67,22 @@ function extractMentionQuery(text: string, cursorPos: number): { query: string; 
   return { query, startIndex };
 }
 
+// True when `next` is `previous` with one run of characters taken out, which
+// is what a backspace, a held backspace or a cut leaves behind. A composer
+// that was emptied after sending and then typed into again is not a deletion,
+// even though the new text is shorter than the last one seen.
+export function isDeletion(previous: string, next: string): boolean {
+  if (next.length >= previous.length) return false;
+  let prefix = 0;
+  while (prefix < next.length && previous[prefix] === next[prefix]) prefix++;
+  let suffix = 0;
+  while (
+    suffix < next.length - prefix &&
+    previous[previous.length - 1 - suffix] === next[next.length - 1 - suffix]
+  ) suffix++;
+  return prefix + suffix === next.length;
+}
+
 export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): UseMentionReturn {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -70,6 +90,9 @@ export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): Us
   const [selectedIndex, setSelectedIndex] = useState(0);
   const mentionStartRef = useRef<number>(-1);
   const textRef = useRef<string>('');
+  // Set while the person is deleting: the list stays shut until they type
+  // a new character.
+  const deletingRef = useRef(false);
 
   // Calculate dropdown position — always directly above the @ symbol
   const updatePosition = useCallback(() => {
@@ -132,7 +155,21 @@ export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): Us
 
   // Handle text input changes
   const handleInput = useCallback((text: string, cursorPosition?: number) => {
+    const previous = textRef.current;
     textRef.current = text;
+    
+    // Deleting never opens the list, and shuts it if it was open. It comes
+    // back with the next character typed. A repeat of the same text (some
+    // phone keyboards send one) changes nothing.
+    if (isDeletion(previous, text)) deletingRef.current = true;
+    else if (text !== previous) deletingRef.current = false;
+    
+    if (deletingRef.current) {
+      setIsOpen(false);
+      setQuery('');
+      mentionStartRef.current = -1;
+      return;
+    }
     
     // Get cursor position
     let cursorPos = cursorPosition;

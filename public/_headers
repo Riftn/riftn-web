@@ -29,6 +29,11 @@
 /version.json
   Cache-Control: no-store
 
+# Which code files each deploy carries over from earlier deploys (see
+# scripts/carry-retired-assets.mjs). Read by the next deploy, never cached.
+/deploy-assets.json
+  Cache-Control: no-store
+
 # Hashed build chunks are content-addressed — cache for a year. Without this
 # every repeat visit revalidates each chunk (this was lost in the Cloudflare
 # migration and live assets served max-age=0).

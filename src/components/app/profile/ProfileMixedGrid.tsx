@@ -15,7 +15,8 @@
  * @module components/app/profile/ProfileMixedGrid
  */
 
-import { memo, useEffect, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { warmPostPage } from '@/lib/preload-post-page';
 import { cdnImage, deviceWidth } from '@/lib/media-url';
 import { useTranslation } from 'react-i18next';
@@ -55,6 +56,19 @@ export interface MixedGridEntry {
 
 interface ProfileMixedGridProps {
   entries: MixedGridEntry[];
+  /**
+   * Own profile: each of the owner's posts carries a grip in its bottom right
+   * corner. Hold the grip and slide the tile to a new place; `before` lists
+   * the posts now ahead of it, nearest first. The tile's own tap and hold are as before.
+   */
+  onMove?: (movedId: string, beforeIds: string[]) => Promise<void>;
+}
+
+/** The one key that changed place between two orders of the same keys. */
+function movedKey(prev: string[], next: string[]): string | null {
+  const i = prev.findIndex((key, index) => key !== next[index]);
+  if (i < 0) return null;
+  return next[i + 1] === prev[i] ? next[i] : prev[i];
 }
 
 /** Bar heights for a song tile — stable per post so a re-render never reshuffles them. */
@@ -106,8 +120,47 @@ function Badge({ children, label }: { children: ReactNode; label: string }) {
   );
 }
 
-export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: ProfileMixedGridProps) {
+export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove }: ProfileMixedGridProps) {
   const { t } = useTranslation();
+
+  // Pinned tiles, reposts and posts still uploading have no place in the order.
+  const movable = useCallback((entry: MixedGridEntry) => !!onMove && !entry.isPinned && !entry.isRepost && !entry.isOptimistic && entry.type !== 'proposal', [onMove]);
+  const keys = useMemo(() => entries.map((entry) => entry.key), [entries]);
+  // The dropped order, shown until the saved one comes back from the server.
+  const [dropped, setDropped] = useState<string[] | null>(null);
+  const shownKeys = useMemo(() => {
+    if (!dropped) return keys;
+    const known = new Set(keys);
+    const placed = new Set(dropped);
+    return [...dropped.filter((key) => known.has(key)), ...keys.filter((key) => !placed.has(key))];
+  }, [dropped, keys]);
+  const onCommit = useCallback((next: string[]) => {
+    const key = movedKey(shownKeys, next);
+    if (!key || !onMove) return;
+    const byKey = new Map(entries.map((entry) => [entry.key, entry]));
+    const before: string[] = [];
+    for (let i = next.indexOf(key) - 1; i >= 0; i -= 1) {
+      const entry = byKey.get(next[i]);
+      if (entry && movable(entry)) before.push(entry.data.id);
+    }
+    const moved = byKey.get(key);
+    if (!moved) return;
+    setDropped(next);
+    void onMove(moved.data.id, before).finally(() => setDropped(null));
+  }, [shownKeys, entries, movable, onMove]);
+  const reorder = useDragReorder({ ids: shownKeys, onCommit, disabled: !onMove || !!dropped, handle: true, holdMs: 160, liftScale: 1.05 });
+  const shown = useMemo(() => {
+    const byKey = new Map(entries.map((entry) => [entry.key, entry]));
+    return reorder.order.map((key) => byKey.get(key)).filter((entry): entry is MixedGridEntry => !!entry);
+  }, [entries, reorder.order]);
+  /** Spread on a tile so it can slide; `grip` goes inside the ones that move. */
+  const tileProps = (entry: MixedGridEntry) => (onMove ? { ...reorder.itemProps(entry.key), 'data-grip': movable(entry) ? '' : undefined } : {});
+  const grip = (entry: MixedGridEntry) => (movable(entry) ? (
+    <span className="pmg-grip" role="button" aria-label={t('profile.arrange.drag', 'Drag to move')} title={t('profile.arrange.drag', 'Drag to move')} {...reorder.handleProps(entry.key)}>
+      <span className="pmg-grip-chip" aria-hidden><i /><i /><i /><i /><i /><i /></span>
+    </span>
+  ) : null);
+
   const postBg = useProfilePostBg();
   const articleLook = useProfileArticleTile();
   const navigate = useNavigate();
@@ -148,7 +201,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
   return (
     <>
       <div data-profile-mixed-grid className="pmg-grid">
-        {entries.map((entry, index) => {
+        {shown.map((entry, index) => {
           const pinChip = entry.isPinned ? (
             <span className="pmg-chip pmg-chip--pin"><Pin className="pmg-chip-icon" />{t('profile.pinnedShort', 'Pinned')}</span>
           ) : entry.isRepost ? (
@@ -173,6 +226,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
             return (
               <button
                 key={entry.key}
+                {...tileProps(entry)}
                 type="button"
                 data-tile="photo"
                 className="pmg-tile"
@@ -185,6 +239,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
                 {multi && <Badge label={t('profile.multiPhoto', 'Photos')}><Images /></Badge>}
                 {post.isPPV && <span className="pmg-lock"><Lock /></span>}
                 {pinChip ?? (mediaKind && <GridKindPill kind={mediaKind} />)}
+                {grip(entry)}
               </button>
             );
           }
@@ -198,7 +253,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
             if (video.isAudio) {
               const cover = video.thumbnail;
               return (
-                <button key={entry.key} type="button" data-tile="audio" className="pmg-tile pmg-audio" disabled={entry.isOptimistic} onClick={() => openPost(video.id, video.articleSlug, entry)} aria-label={video.title}>
+                <button key={entry.key} {...tileProps(entry)} type="button" data-tile="audio" className="pmg-tile pmg-audio" disabled={entry.isOptimistic} onClick={() => openPost(video.id, video.articleSlug, entry)} aria-label={video.title}>
                   {cover ? <span className="pmg-audio-blur" style={{ backgroundImage: `url(${cover})` }} /> : <span className="pmg-audio-blur pmg-audio-blur--empty" />}
                   <span className="pmg-audio-cover" style={cover ? { backgroundImage: `url(${cover})` } : undefined}>{!cover && <Music />}</span>
                   <Badge label={t('profile.tabs.songs', 'Audio')}><Music /></Badge>
@@ -207,12 +262,13 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
                   </span>
                   <span className="pmg-audio-title">{video.title}</span>
                   {pinChip}
+                  {grip(entry)}
                 </button>
               );
             }
 
             return (
-              <button key={entry.key} type="button" data-tile={isLive ? 'live' : 'video'} className={isLive ? 'pmg-tile pmg-live' : 'pmg-tile'} disabled={entry.isOptimistic} onClick={() => openPost(video.id, video.articleSlug, entry)} aria-label={video.title}>
+              <button key={entry.key} {...tileProps(entry)} type="button" data-tile={isLive ? 'live' : 'video'} className={isLive ? 'pmg-tile pmg-live' : 'pmg-tile'} disabled={entry.isOptimistic} onClick={() => openPost(video.id, video.articleSlug, entry)} aria-label={video.title}>
                 {video.thumbnail ? <img src={tileImage(video.thumbnail)} alt="" loading={eager ? 'eager' : 'lazy'} decoding="async" className={locked ? 'pmg-img pmg-img--locked' : 'pmg-img'} /> : <span className="pmg-img pmg-img--empty" />}
                 <span className="pmg-shade" />
                 {isLive ? (
@@ -226,6 +282,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
                 {!!video.views && video.views !== '0' && <span className="pmg-views">{video.views}</span>}
                 {locked && <span className="pmg-lock"><Lock /></span>}
                 {!isLive && (pinChip ?? (mediaKind && <GridKindPill kind={mediaKind} />))}
+                {grip(entry)}
               </button>
             );
           }
@@ -243,6 +300,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
             return (
               <button
                 key={entry.key}
+                {...tileProps(entry)}
                 type="button"
                 data-tile="article"
                 data-article-tile={articleLook}
@@ -261,6 +319,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
                 />
                 {articleLook === 'cover' && <Badge label={t('profile.tabs.articles', 'Article')}><Blog /></Badge>}
                 {pinChip}
+                {grip(entry)}
               </button>
             );
           }
@@ -284,17 +343,19 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries }: Prof
           );
           if (card) {
             return (
-              <button key={entry.key} type="button" data-tile="text" data-card={card.kind} className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80) || post.title || t('profile.tabs.posts', 'Post')}>
+              <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" data-card={card.kind} className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80) || post.title || t('profile.tabs.posts', 'Post')}>
                 <GridCardFace card={card} tokenId={tokenId} quotedPost={post.quotedPost} words={words} chip={pinChip ?? undefined} fallback={poster(<GridKindPill kind={card.kind} inline />)} />
+                {grip(entry)}
               </button>
             );
           }
           return (
-            <button key={entry.key} type="button" data-tile="text" className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80)} data-soft={postBgVariant(post.id, 3)} {...(entry.isRepost ? {} : postBgHostProps(postBg))}>
+            <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80)} data-soft={postBgVariant(post.id, 3)} {...(entry.isRepost ? {} : postBgHostProps(postBg))}>
               {!entry.isRepost && <PostBgLayer bg={postBg} seed={post.id} />}
               {locked || entry.isOptimistic || tokenId <= 0
                 ? poster()
                 : <GridPollProbe tokenId={tokenId} words={words} chip={pinChip ?? undefined} poster={poster()} fallback={poster(<GridKindPill kind="poll" inline />)} />}
+              {grip(entry)}
             </button>
           );
         })}

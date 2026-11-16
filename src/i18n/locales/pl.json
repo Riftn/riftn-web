@@ -548,6 +548,14 @@
     "showOnlineDesc": "Osoby, do których piszesz, widzą zieloną kropkę obok Twojego imienia podczas korzystania z Riftn",
     "showDislikes": "Pokazuj wszystkim moje łapki w dół",
     "showDislikesDesc": "Każdy może otworzyć kartę „Nie lubię” na twoim profilu. Gdy to jest wyłączone, widzisz ją tylko ty.",
+    "showLikes": "Pokazuj moje polubienia wszystkim",
+    "showLikesDesc": "Każdy może otworzyć kartę Polubienia na twoim profilu. Domyślnie wyłączone, więc tylko ty widzisz, co polubiłeś.",
+    "showFollowersList": "Pokazuj, kto mnie obserwuje",
+    "showFollowersListDesc": "Pozwól każdemu otworzyć listę twoich obserwujących. Gdy wyłączone, widzisz ją tylko ty.",
+    "showFollowingList": "Pokazuj, kogo obserwuję",
+    "showFollowingListDesc": "Pozwól każdemu otworzyć listę osób, które obserwujesz. Gdy wyłączone, widzisz ją tylko ty.",
+    "showFollowCounts": "Pokazuj liczby obserwujących",
+    "showFollowCountsDesc": "Pokazuje, ilu masz obserwujących i ile osób obserwujesz. Wyłączenie ukrywa też obie listy.",
     "smartReplies": "Sugerowane odpowiedzi",
     "smartRepliesDesc": "Przygotowuje dwie odpowiedzi, które możesz dotknąć na czacie. × przy sugestiach je wyłącza.",
     "title": "Ustawienia",
@@ -2167,11 +2175,20 @@
     "tabs": {
       "playlists": "Playlisty",
       "dislikes": "Nie lubię",
+      "likes": "Polubienia",
       "articles": "Artykuły"
     },
     "articles": {
       "emptyTitle": "Brak artykułów",
       "emptySubtitle": "Tutaj pojawią się artykuły"
+    },
+    "likedPosts": {
+      "emptyTitle": "Brak polubień",
+      "emptyOwn": "Posty, które polubisz, pojawią się tutaj. Widzisz je tylko ty, chyba że włączysz Pokazuj moje polubienia wszystkim w Ustawieniach.",
+      "emptyOther": "Jeszcze nic nie polubiono.",
+      "privateTitle": "Polubienia są prywatne",
+      "privateDesc": "To konto zachowuje swoje polubienia dla siebie.",
+      "loadMore": "Wczytaj więcej"
     },
     "dislikes": {
       "emptyTitle": "Brak łapek w dół",
@@ -7476,7 +7493,7 @@
     "ambWant5": "Wcześniejsze doświadczenie jako ambasador, influencer lub w zarządzaniu społecznością to dodatkowy atut",
     "ambassadorCompensation": "Ambasadorowie Marki otrzymują <b>negocjowaną miesięczną pensję</b> wypłacaną regularnie. Dodatkowe bonusy mogą być przyznawane na podstawie wydajności kampanii, rejestracji użytkowników i kamieni milowych wzrostu społeczności. Otrzymasz również ekskluzywne towary Riftn, wczesny dostęp do funkcji i alokacje tokenów wraz z rozwojem ekosystemu.",
     "applyAsAmbassador": "Aplikuj jako Ambasador Marki",
-    "noRoleFits": "Nie widzisz roli, która by Ci pasowała? Skontaktuj się z nami na <mail>dev@dehub.io</mail> — zawsze szukamy utalentowanych osób."
+    "noRoleFits": "Nie widzisz roli, która by Ci pasowała? Skontaktuj się z nami na <mail>dev@riftn.com</mail> — zawsze szukamy utalentowanych osób."
   },
   "depin": {
     "seoTitle": "DePin | Infrastruktura Mediów Napędzana Społecznością | Riftn",
@@ -8197,7 +8214,12 @@
     "failedDesc": "Połączenie nie mogło zostać zakończone. Sprawdź połączenie i spróbuj ponownie.",
     "close": "Zamknij",
     "callbackRequest": "Prośba o oddzwonienie",
-    "tryAgain": "Spróbuj ponownie"
+    "tryAgain": "Spróbuj ponownie",
+    "ended": "Rozmowa zakończona",
+    "declined": "Odrzucone połączenie",
+    "noAnswer": "Brak odpowiedzi",
+    "missed": "Nieodebrane połączenie",
+    "callBack": "Oddzwoń"
   },
   "badgeAscension": {
     "reached": "Osiągnięto {{tier}}",
@@ -15902,6 +15924,19 @@
     "dd3bfd98b141": "To nie wygląda na adres URL.",
     "62b242593656": "Dodaj odniesienie",
     "76d311c4cef6": "Dodaj dźwięk",
+    "c0963b7d9c5d": "Darmowa biblioteka",
+    "55b1ec6f0360": "Wybierz fragment",
+    "284b838e96e5": "Gdzie zaczyna się fragment",
+    "46b0e30a32b0": "Cała piosenka",
+    "3a84120779c5": "Przesuń, aby wybrać fragment",
+    "1cb1b494ee3b": "Fragment pasuje do twojego wideo ({{value1}}).",
+    "0418db35eb35": "Użyj tego dźwięku",
+    "ecb30523a48a": "Wyszukaj piosenki i artystów",
+    "cbade2afaee2": "Trendy tego tygodnia na Audius. Darmowe do użycia, artysta zostaje wymieniony w twoim poście.",
+    "d2e45b7406fc": "Muzyka z domeny publicznej i na licencji Creative Commons z Wikimedia Commons. Artysta zostaje wymieniony w twoim poście.",
+    "d0c1a3684775": "Nie udało się załadować piosenek. Spróbuj ponownie za chwilę.",
+    "55fd43d20da5": "Usuń dźwięk",
+    "d14064f80f52": "Dodaj dźwięk",
     "db66c92fd9e0": "Szukaj dźwięków...",
     "af6ed946e090": "Przytnij film",
     "1c0eba609c44": "Wybierz zakres przycinania",
@@ -16248,7 +16283,7 @@
     "0ec80d3905a0": "Riftn Kariera — Dezcentralizowane Media Społeczne, Niezależne od Cenzury & Wolność Wypowiedzi",
     "a2dd3acadb1c": "Jan Kowalski",
     "93100fc44c0a": "@nazwaużytkownika",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Zaloguj się, aby uzyskać dostęp do swojego portfela i zarządzać swoimi funduszami.",
     "a2364c207356": "Komenda: Twój Panel Sterowania & Portfel",
     "d97180b4753f": "Twoje centrum sterowania na Riftn. Zarządzaj portfelem, śledź saldo i nadzoruj swoje konto w jednym panelu.",
@@ -16560,7 +16595,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Wydano w",
     "ee1c1eecf1b6": "Riftn został opisany przez niektóre z największe i najbardziej zaufane publikacje na świecie. Poniżej znajdują się artykuły, które podkreślają naszą misję demokratyzacji mediów.",
@@ -16832,6 +16867,9 @@
     "bcc015afda01": "Wprowadź wiadomość",
     "3c53e332cf13": "Nie można rozpocząć rozmowy z tym użytkownikiem",
     "8e51a80a4d7d": "Nowa wiadomość",
+    "27c26a5a38b3": "Zaloguj się, aby zobaczyć starsze wiadomości",
+    "674e70bcd915": "Pełna historia czatu jest dostępna dla każdego, kto posiada konto.",
+    "feaf753f6557": "Początek czatu",
     "7a523e7dc8a3": "Zaloguj się, aby moderować",
     "29a7e1c24c92": "Przetłumacz wszystko",
     "90395d452a30": "Anonimowy",

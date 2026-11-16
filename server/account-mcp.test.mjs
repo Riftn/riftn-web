@@ -89,6 +89,48 @@ test('OAuth metadata and tool descriptors are explicit about account scopes and 
   }
   assert.equal(accountTools.find(t => t.name === 'dehub_update_profile').descriptor.annotations.destructiveHint, true);
 });
+test('expanded post controls declare the right access and reject untrusted input', async () => {
+  for (const name of ['dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_reschedule_post','dehub_create_poll','dehub_vote_poll','dehub_add_post_images']) {
+    const entry = accountTools.find(tool => tool.name === name);
+    assert.equal(entry.scope, 'dehub:social', name);
+    assert.equal(entry.descriptor.inputSchema.additionalProperties, false, name);
+  }
+  for (const name of ['dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_fans_online']) {
+    assert.equal(accountTools.find(tool => tool.name === name).scope, 'dehub:read', name);
+  }
+  assert.equal(accountTools.find(tool => tool.name === 'dehub_poll').scope, null);
+  const invalid = await callAccountTool('dehub_reschedule_post', { token_id: '42', scheduled_at: 'yesterday' }, { token: 'one', scopes: SCOPES });
+  assert.equal(invalid.isError, true);
+  const wrongScope = await callAccountTool('dehub_delete_post', { token_id: '42' }, { token: 'one', scopes: ['dehub:read'] });
+  assert.equal(wrongScope.isError, true);
+});
+test('post drafts stay private to the connected account and can be edited or deleted', async () => {
+  const f = fixture();
+  const one = await connect(f, { scope: 'dehub:read dehub:social' });
+  const two = await connect(f, { scope: 'dehub:read dehub:social' }, 'two');
+  const draft_id = '9dbdd100-45bc-4a9c-a8c2-9ea19a933002';
+  const save = await (await rpc(f, 'dehub_save_draft', { draft_id, content: 'First' }, one.access_token)).json();
+  assert.equal(save.result.structuredContent.content, 'First');
+  await rpc(f, 'dehub_save_draft', { draft_id, content: 'Edited' }, one.access_token);
+  const own = await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json();
+  const other = await (await rpc(f, 'dehub_drafts', {}, two.access_token)).json();
+  assert.equal(own.result.structuredContent.drafts[0].content, 'Edited');
+  assert.deepEqual(other.result.structuredContent.drafts, []);
+  await rpc(f, 'dehub_delete_draft', { draft_id }, one.access_token);
+  assert.deepEqual((await (await rpc(f, 'dehub_drafts', {}, one.access_token)).json()).result.structuredContent.drafts, []);
+});
+test('a connected account can publish an inline chat image without an external URL', async () => {
+  let upload;
+  const f = fixture(async (url, init) => {
+    if (url.endsWith('/user_mint')) { upload = init.body; return Response.json({ result: { createdTokenId: '42' } }); }
+    throw new Error(`Unexpected upstream request: ${url}`);
+  });
+  const connected = await connect(f, { scope: 'dehub:social' });
+  const result = await (await rpc(f, 'dehub_create_post', { request_id: jobId, content: 'Image post', image_data_url: 'data:image/png;base64,iVBORw0KGgo=', media_type: 'image' }, connected.access_token)).json();
+  assert.equal(result.result.structuredContent.token_id, '42');
+  assert.equal(upload.get('postType'), 'feed-images');
+  assert.equal(upload.get('file').type, 'image/png');
+});
 test('opening /mcp in a browser lands on the connect guide; chat apps still get the MCP reply', async () => {
   const f = fixture();
   const page = await f.service.fetch(req('/mcp', 'GET', undefined, { Accept: 'text/html,application/xhtml+xml' }));

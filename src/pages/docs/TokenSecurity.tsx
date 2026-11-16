@@ -36,7 +36,7 @@ const TokenSecurity = () => {
               <div>
                 <h4 className="font-semibold text-foreground mb-1">{t('tokenSecurity.bugBounty')}</h4>
                 <p className="text-muted-foreground">
-                  <a href="mailto:tech@dehub.net" className="text-primary hover:text-primary/80 underline">{_copy("copy.886e533d7364", { defaultValue: "tech@dehub.net" })}</a>
+                  <a href="mailto:dev@riftn.com" className="text-primary hover:text-primary/80 underline">{_copy("copy.886e533d7364", { defaultValue: "dev@riftn.com" })}</a>
                 </p>
               </div>
             </div>

@@ -1,6 +1,8 @@
 # Riftn welcomes search engines, link previews and AI assistants that send
 # people here (ChatGPT search, Claude search, Perplexity and the like).
-# Crawlers that only collect pages to train AI models are not allowed.
+# Crawlers that only collect pages to train AI models may read what Riftn
+# publishes about itself (home, docs, guides, blog, llms.txt) and nothing
+# that members post.
 
 User-agent: GPTBot
 User-agent: CCBot
@@ -24,6 +26,12 @@ User-agent: cohere-ai
 User-agent: cohere-training-data-crawler
 User-agent: Webzio-Extended
 User-agent: Scrapy
+Allow: /$
+Allow: /llms.txt
+Allow: /rss.xml
+Allow: /docs
+Allow: /guides/
+Allow: /blog
 Disallow: /
 
 User-agent: *

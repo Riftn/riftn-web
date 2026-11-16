@@ -780,6 +780,14 @@
     "showOnlineDesc": "Las personas a las que envías mensajes ven un punto verde junto a tu nombre mientras usas Riftn",
     "showDislikes": "Mostrar mis «no me gusta» a todos",
     "showDislikesDesc": "Cualquiera puede abrir la pestaña «No me gusta» de tu perfil. Si está desactivado, solo tú puedes verla.",
+    "showLikes": "Mostrar mis me gusta a todos",
+    "showLikesDesc": "Cualquiera puede abrir la pestaña Me gusta de tu perfil. Desactivado por defecto, así que solo tú ves lo que te gustó.",
+    "showFollowersList": "Mostrar quién me sigue",
+    "showFollowersListDesc": "Deja que cualquiera abra tu lista de seguidores. Si está desactivado, solo tú puedes verla.",
+    "showFollowingList": "Mostrar a quién sigo",
+    "showFollowingListDesc": "Deja que cualquiera abra la lista de personas que sigues. Si está desactivado, solo tú puedes verla.",
+    "showFollowCounts": "Mostrar mis números de seguidores",
+    "showFollowCountsDesc": "Muestra cuántos seguidores tienes y a cuántas personas sigues. Al desactivarlo también se ocultan ambas listas.",
     "smartReplies": "Respuestas sugeridas",
     "smartRepliesDesc": "Redacta dos respuestas que puedes tocar en un chat. La × de las sugerencias lo desactiva.",
     "title": "Ajustes",
@@ -2281,12 +2289,12 @@
     "loadFailed": "No se pudieron cargar las solicitudes"
   },
   "auth": {
-    "loginRequired": "Inicio de sesión requerido",
     "accountDeleted": "Esta cuenta fue eliminada. Puedes registrarte de nuevo con una cuenta nueva.",
     "accountDeletedHours_one": "Esta cuenta fue eliminada. Podrás registrarte de nuevo con el mismo correo o teléfono en aproximadamente {{count}} hora.",
     "accountDeletedHours_other": "Esta cuenta fue eliminada. Podrás registrarte de nuevo con el mismo correo o teléfono en aproximadamente {{count}} horas.",
     "accountDeletedDays_one": "Esta cuenta fue eliminada. Podrás registrarte de nuevo con el mismo correo o teléfono en aproximadamente {{count}} día.",
-    "accountDeletedDays_other": "Esta cuenta fue eliminada. Podrás registrarte de nuevo con el mismo correo o teléfono en aproximadamente {{count}} días."
+    "accountDeletedDays_other": "Esta cuenta fue eliminada. Podrás registrarte de nuevo con el mismo correo o teléfono en aproximadamente {{count}} días.",
+    "loginRequired": "Inicio de sesión requerido"
   },
   "messages": {
     "newDrawer": {
@@ -2476,11 +2484,20 @@
     "tabs": {
       "playlists": "Listas de reproducción",
       "dislikes": "No me gusta",
+      "likes": "Me gusta",
       "articles": "Artículos"
     },
     "articles": {
       "emptyTitle": "Aún no hay artículos",
       "emptySubtitle": "Los artículos aparecerán aquí"
+    },
+    "likedPosts": {
+      "emptyTitle": "Aún no hay me gusta",
+      "emptyOwn": "Las publicaciones que te gustan aparecen aquí. Solo tú puedes verlas, salvo que actives Mostrar mis me gusta en Ajustes.",
+      "emptyOther": "Aún no le ha gustado nada.",
+      "privateTitle": "Los me gusta son privados",
+      "privateDesc": "Esta cuenta mantiene sus me gusta en privado.",
+      "loadMore": "Cargar más"
     },
     "dislikes": {
       "emptyTitle": "Aún no hay «no me gusta»",
@@ -2503,15 +2520,12 @@
     "sortMostViewed": "Más vistos",
     "sortLikes": "Me gusta",
     "sortMostLiked": "Más favoritos",
-    "searchThisChannel": "Buscar en este canal",
-    "searchResultCount": "1 resultado para \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} resultados para \"{{query}}\"",
     "sortCustom": "Orden personalizado",
     "sortCustomShort": "Personalizado",
     "arrangeButton": "Ordenar publicaciones",
     "arrange": {
       "title": "Ordena tus publicaciones",
-      "hint": "Arrastra tus publicaciones al orden que quieras. Los visitantes verán este orden primero.",
+      "hint": "Mantén pulsada una publicación y arrástrala a su nuevo lugar. Los visitantes ven este orden primero.",
       "drag": "Arrastra para mover",
       "toTop": "Mover arriba del todo",
       "save": "Guardar orden",
@@ -2522,7 +2536,10 @@
       "saveFailed": "No se pudo guardar tu orden. Inténtalo de nuevo.",
       "loadFailed": "No se pudieron cargar tus publicaciones. Cierra esto e inténtalo de nuevo.",
       "empty": "Aún no hay nada que ordenar. Publica algo primero."
-    }
+    },
+    "searchThisChannel": "Buscar en este canal",
+    "searchResultCount": "1 resultado para \"{{query}}\"",
+    "searchResultCountPlural": "{{count}} resultados para \"{{query}}\""
   },
   "tv": {
     "seoTitle": "TV en directo: Canales gratuitos de todo el mundo",
@@ -8227,7 +8244,7 @@
     "ambWant5": "Haber sido embajador, influencer o gestor de comunidad es un punto a favor",
     "ambassadorCompensation": "Los embajadores de marca reciben un <b>salario mensual negociable</b> de forma constante. Puede haber bonos adicionales según el rendimiento de las campañas, las altas de usuarios y los hitos de crecimiento de la comunidad. También recibirás merchandising exclusivo de Riftn, acceso anticipado a funciones y asignaciones de tokens a medida que crece el ecosistema.",
     "applyAsAmbassador": "Solicitar como embajador de marca",
-    "noRoleFits": "¿No ves un puesto que encaje? Escríbenos a <mail>dev@dehub.io</mail>: siempre estamos buscando gente con talento."
+    "noRoleFits": "¿No ves un puesto que encaje? Escríbenos a <mail>dev@riftn.com</mail>: siempre estamos buscando gente con talento."
   },
   "depin": {
     "seoTitle": "DePin | Infraestructura de medios impulsada por la comunidad | Riftn",
@@ -8989,7 +9006,12 @@
     "failedDesc": "No se ha podido completar la llamada. Comprueba tu conexión e inténtalo de nuevo.",
     "close": "Cerrar",
     "callbackRequest": "Solicitud de devolución de llamada",
-    "tryAgain": "Inténtalo de nuevo"
+    "tryAgain": "Inténtalo de nuevo",
+    "ended": "Llamada terminada",
+    "declined": "Llamada rechazada",
+    "noAnswer": "Sin respuesta",
+    "missed": "Llamada perdida",
+    "callBack": "Devolver la llamada"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",
@@ -16922,6 +16944,19 @@
     "dd3bfd98b141": "Eso no parece una dirección web.",
     "62b242593656": " Agregar un enlace",
     "76d311c4cef6": "Añadir sonido",
+    "c0963b7d9c5d": "Biblioteca gratuita",
+    "55b1ec6f0360": "Elige la parte",
+    "284b838e96e5": "Dónde empieza la parte",
+    "46b0e30a32b0": "Canción completa",
+    "3a84120779c5": "Desliza para elegir la parte",
+    "1cb1b494ee3b": "La parte coincide con tu vídeo ({{value1}}).",
+    "0418db35eb35": "Usar este sonido",
+    "ecb30523a48a": "Buscar canciones y artistas",
+    "cbade2afaee2": "Tendencias de esta semana en Audius. De uso gratuito. Se mencionará al artista en tu publicación.",
+    "d2e45b7406fc": "Música de dominio público y Creative Commons de Wikimedia Commons. Se mencionará al artista en tu publicación.",
+    "d0c1a3684775": "Las canciones no se han cargado. Inténtalo de nuevo en un momento.",
+    "55fd43d20da5": "Eliminar sonido",
+    "d14064f80f52": "Añadir sonido",
     "db66c92fd9e0": "Buscar sonidos...",
     "af6ed946e090": "Recortar Video",
     "1c0eba609c44": "Seleccionar rango de recorte",
@@ -17277,7 +17312,7 @@
     "0ec80d3905a0": "Riftn Careers: redes sociales descentralizadas, resistencia a la censura y libertad de expresión",
     "a2dd3acadb1c": "Juana Pérez",
     "93100fc44c0a": "@usuario",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Inicia sesión para acceder a tu monedero y gestionar tus fondos.",
     "a2364c207356": "Comando: Su panel de control y billetera",
     "d97180b4753f": "Tu centro de mando en Riftn. Gestiona tu monedero, realiza un seguimiento de los saldos y supervisa tu cuenta en un solo panel.",
@@ -17589,7 +17624,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Destacado en",
     "ee1c1eecf1b6": "Riftn ha sido cubierto por algunas de las publicaciones más grandes y confiables del mundo. Aquí están los artículos que ponen el foco en nuestra misión de democratizar los medios.",
@@ -17861,6 +17896,9 @@
     "bcc015afda01": "Por favor ingrese un mensaje",
     "3c53e332cf13": "No se puede iniciar conversación con este usuario",
     "8e51a80a4d7d": "Mensaje nuevo",
+    "27c26a5a38b3": "Inicia sesión para ver mensajes antiguos",
+    "674e70bcd915": "El historial completo de chat está abierto para todos los usuarios con cuenta.",
+    "feaf753f6557": "Inicio del chat",
     "7a523e7dc8a3": "Inicia sesión para moderar",
     "29a7e1c24c92": "Traducir todo",
     "90395d452a30": "Anónimo",

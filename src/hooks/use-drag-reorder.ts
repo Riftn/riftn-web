@@ -39,6 +39,12 @@ interface Options {
   liftScale?: number;
   /** A single row (the bottom bar): the item slides along it, never off it. */
   axis?: 'x';
+  /**
+   * Items lift only from their own grip (`handleProps`), never from a press on
+   * the item itself, so the item keeps its tap, its hold and the page's scroll.
+   * A finger on the grip lifts on a short hold or as soon as it moves.
+   */
+  handle?: boolean;
 }
 
 interface DragState {
@@ -100,7 +106,7 @@ function scrollParent(el: HTMLElement | null): HTMLElement | null {
   return null;
 }
 
-export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, liftScale = 1.06, axis }: Options) {
+export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, liftScale = 1.06, axis, handle = false }: Options) {
   const [liveOrder, setLiveOrder] = useState<string[] | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   /** True while a drop or reset glide is still running. */
@@ -403,6 +409,9 @@ export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, 
       if (!d.started) {
         if (d.pointerType === 'mouse') {
           if (moved > MOUSE_SLOP) begin();
+        } else if (handle) {
+          // The grip never scrolls the page, so a finger moving on it is the drag.
+          if (moved > MOUSE_SLOP) begin();
         } else if (moved > TOUCH_SLOP) {
           // Moved before the hold finished: that's a scroll, not a drag.
           finish(false);
@@ -445,7 +454,7 @@ export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, 
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('keydown', onKey);
     };
-  }, [begin, finish, hitTest, place]);
+  }, [begin, finish, hitTest, place, handle]);
 
   useEffect(() => () => finish(false), [finish]);
 
@@ -491,9 +500,9 @@ export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, 
     ref: refFor(id),
     'data-reorder-item': id,
     'data-reorder-dragging': draggingId === id ? 'true' : undefined,
-    'data-no-swipe': true,
+    'data-no-swipe': handle ? undefined : true,
     draggable: false,
-    onPointerDown: (e: React.PointerEvent) => onPointerDown(id, e),
+    onPointerDown: handle ? undefined : (e: React.PointerEvent) => onPointerDown(id, e),
     onClickCapture: (e: React.MouseEvent) => {
       if (swallowClick.current) {
         e.preventDefault();
@@ -506,7 +515,19 @@ export function useDragReorder({ ids, onCommit, disabled = false, holdMs = 380, 
     },
     onDragStart: (e: React.DragEvent) => e.preventDefault(),
     style: { WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties,
-  }), [draggingId, onPointerDown, refFor]);
+  }), [draggingId, onPointerDown, refFor, handle]);
 
-  return { order, draggingId, settling, animateNextChange, itemProps };
+  /** With `handle`: spread onto the grip inside each item. */
+  const handleProps = useCallback((id: string) => ({
+    'data-reorder-handle': id,
+    'data-no-swipe': true,
+    draggable: false,
+    // Kept from the item around it: a press here is neither its tap nor its hold.
+    onPointerDown: (e: React.PointerEvent) => { e.stopPropagation(); onPointerDown(id, e); },
+    onClick: (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); },
+    onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); },
+    style: { touchAction: 'none', WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties,
+  }), [onPointerDown]);
+
+  return { order, draggingId, settling, animateNextChange, itemProps, handleProps };
 }

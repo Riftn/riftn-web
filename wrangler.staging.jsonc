@@ -9,6 +9,11 @@
     { "name": "RL_FEDERATION_READS", "namespace_id": "1203", "simple": { "limit": 300, "period": 60 } }
   ],
   "compatibility_date": "2026-07-18",
+  // Runs before every deploy, from GitHub Actions and from Cloudflare's own
+  // build on each merge alike: copies the code files the live site serves
+  // today back into dist so tabs opened before this deploy keep working
+  // (scripts/carry-retired-assets.mjs). Skipped outside CI (wrangler dev).
+  "build": { "command": "node scripts/carry-retired-assets.mjs https://staging.dehub.io dist" },
   // Staging twin of wrangler.jsonc: same worker, same SPA assets, one host.
   //
   // staging.dehub.io is the ONLY usable staging hostname. api.dehub.io answers

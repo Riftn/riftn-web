@@ -6,6 +6,7 @@ import {
   getLiveChatRooms,
   getLiveChatRoom,
   getLiveChatMessages as fetchApiMessages,
+  getLiveChatMessagePage,
   getLiveChatUserProfile,
   getLiveChatOnlineCount,
   type LiveChatRoom,
@@ -264,9 +265,9 @@ function claimPending(
   });
   return { rows, claimed };
 }
-function capMessages(msgs: SupabaseLiveChatMessage[]): SupabaseLiveChatMessage[] {
-  if (msgs.length <= MAX_LIVECHAT_MESSAGES) return msgs;
-  const cut = msgs.length - MAX_LIVECHAT_MESSAGES;
+function capMessages(msgs: SupabaseLiveChatMessage[], cap = MAX_LIVECHAT_MESSAGES): SupabaseLiveChatMessage[] {
+  if (msgs.length <= cap) return msgs;
+  const cut = msgs.length - cap;
   const pinnedOverflow = msgs.slice(0, cut).filter((m) => m.is_pinned);
   return [...pinnedOverflow, ...msgs.slice(cut)];
 }
@@ -290,6 +291,7 @@ function capMessages(msgs: SupabaseLiveChatMessage[]): SupabaseLiveChatMessage[]
 export function mergeIncoming(
   prev: SupabaseLiveChatMessage[],
   batch: SupabaseLiveChatMessage[],
+  cap = MAX_LIVECHAT_MESSAGES,
 ): SupabaseLiveChatMessage[] {
   if (batch.length === 0) return prev;
 
@@ -319,7 +321,7 @@ export function mergeIncoming(
       break;
     }
   }
-  return capMessages(ordered ? merged : deduplicateMessages(merged));
+  return capMessages(ordered ? merged : deduplicateMessages(merged), cap);
 }
 
 /**
@@ -381,7 +383,17 @@ export function socketMsgToLocal(msg: unknown, roomId: string): SupabaseLiveChat
 /**
  * Livechat messages hook.
  */
-export function useLiveChatMessages(roomId: string | null) {
+export interface LiveChatPagingOptions {
+  /**
+   * Page the history: open on the newest `pageSize` lines and fetch older ones
+   * with `loadOlder` as the reader scrolls up. Left off, the hook reads one
+   * window of the newest lines, as the side chat and stream chats do.
+   */
+  pageSize?: number;
+}
+
+export function useLiveChatMessages(roomId: string | null, options: LiveChatPagingOptions = {}) {
+  const pageSize = options.pageSize;
   const { t: _copy } = _useCopy();
   const [messages, setMessages] = useState<SupabaseLiveChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -409,11 +421,36 @@ export function useLiveChatMessages(roomId: string | null) {
   /** What each pending line asked for, so a failed one can go again as it was. */
   const pendingSendsRef = useRef(new Map<string, [string, 'text' | 'image' | 'gif' | 'audio', string | undefined, string | undefined, string | undefined, number | undefined]>());
 
+  // ── Paging (pageSize only) ──
+  /** Older lines exist on the server past the oldest one held. */
+  const [hasOlder, setHasOlder] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  /** Signed out and at the end of what a guest may read. */
+  const [signInWall, setSignInWall] = useState(false);
+  /** Older pages fetched since the room opened. Past 0 nothing is capped. */
+  const olderPagesRef = useRef(0);
+  const loadingOlderRef = useRef(false);
+  const hasOlderRef = useRef(false);
+  hasOlderRef.current = hasOlder;
+  const authRef = useRef(isAuthenticated);
+  authRef.current = isAuthenticated;
+  /** History the reader scrolled back for is kept whole, not trimmed to 300. */
+  const capFor = () => (olderPagesRef.current > 0 ? Number.MAX_SAFE_INTEGER : MAX_LIVECHAT_MESSAGES);
+
   const fetchMessages = useCallback(async (showLoading = false) => {
     if (!roomId) return;
     if (showLoading) setIsLoading(true);
     try {
-      const apiMessages = await fetchApiMessages(roomId, { limit: 200 });
+      let apiMessages: LiveChatMessage[];
+      if (pageSize) {
+        const page = await getLiveChatMessagePage(roomId, { limit: pageSize, signedIn: authRef.current });
+        apiMessages = page.messages;
+        // Only the opening read decides; a refresh keeps the scrollback state.
+        if (olderPagesRef.current === 0) setHasOlder(page.hasMore);
+        if (page.signInRequired) setSignInWall(true);
+      } else {
+        apiMessages = await fetchApiMessages(roomId, { limit: 200 });
+      }
       const mapped = apiMessages.map((m) => apiMsgToLocal(m, roomId));
       setMessages((prev) => {
         // Confirmed copies take over their pending line's client key; lines
@@ -422,7 +459,13 @@ export function useLiveChatMessages(roomId: string | null) {
         const known = new Map(prev.filter((m) => m.client_key).map((m) => [m.id, m.client_key!]));
         const keyedRows = rows.map((m) => (!m.client_key && known.has(m.id) ? { ...m, client_key: known.get(m.id) } : m));
         const keepOptimistic = prev.filter((m) => m.id.startsWith('temp-') && !claimed.has(m.id));
-        const next = capMessages(deduplicateMessages([...keyedRows, ...keepOptimistic]));
+        // Scrolled-back history older than this window stays: a refresh after
+        // a reconnect must not throw away the pages the reader loaded.
+        const oldestFetched = mapped.length ? Math.min(...mapped.map((m) => new Date(m.created_at).getTime())) : Infinity;
+        const keepOlder = olderPagesRef.current > 0
+          ? prev.filter((m) => !m.id.startsWith('temp-') && new Date(m.created_at).getTime() < oldestFetched)
+          : [];
+        const next = capMessages(deduplicateMessages([...keepOlder, ...keyedRows, ...keepOptimistic]), capFor());
         cacheRoomMessages(roomId, next);
         return next;
       });
@@ -431,7 +474,60 @@ export function useLiveChatMessages(roomId: string | null) {
     } finally {
       setIsLoading(false);
     }
+  }, [roomId, pageSize]);
+
+  /**
+   * The next page back. Signed out, one page past the opening one is all a
+   * guest reads; after that the reader gets the sign-in wall instead (the
+   * server enforces the same depth).
+   */
+  const loadOlder = useCallback(async () => {
+    if (!roomId || !pageSize || loadingOlderRef.current || !hasOlderRef.current) return;
+    if (!authRef.current && olderPagesRef.current >= 1) {
+      setSignInWall(true);
+      return;
+    }
+    const oldest = messagesRef.current.find((m) => !m.id.startsWith('temp-'));
+    if (!oldest) return;
+    loadingOlderRef.current = true;
+    setLoadingOlder(true);
+    try {
+      const page = await getLiveChatMessagePage(roomId, { limit: pageSize, before: oldest.id, signedIn: authRef.current });
+      if (page.signInRequired) {
+        setSignInWall(true);
+        setHasOlder(false);
+        return;
+      }
+      olderPagesRef.current += 1;
+      const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));
+      setHasOlder(page.hasMore);
+      if (!mapped.length) return;
+      setMessages((prev) => {
+        const next = deduplicateMessages([...mapped, ...prev]);
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    } catch (err) {
+      console.error('[LiveChat] older page failed:', err);
+    } finally {
+      loadingOlderRef.current = false;
+      setLoadingOlder(false);
+    }
+  }, [roomId, pageSize]);
+
+  // A new room starts at its newest page again.
+  useEffect(() => {
+    olderPagesRef.current = 0;
+    setHasOlder(false);
+    setSignInWall(false);
   }, [roomId]);
+
+  // Signing in lifts the wall; the older pages are open again.
+  useEffect(() => {
+    if (!isAuthenticated || !signInWall) return;
+    setSignInWall(false);
+    setHasOlder(true);
+  }, [isAuthenticated, signInWall]);
 
   /**
    * Fold the room's newest lines in without replacing what is on screen, so a
@@ -447,7 +543,7 @@ export function useLiveChatMessages(roomId: string | null) {
         const known = new Set(prev.map((m) => m.id));
         const fresh = mapped.filter((m) => !known.has(m.id));
         if (!fresh.length) return prev;
-        const next = mergeIncoming(prev, fresh);
+        const next = mergeIncoming(prev, fresh, capFor());
         cacheRoomMessages(roomId, next);
         return next;
       });
@@ -580,7 +676,7 @@ export function useLiveChatMessages(roomId: string | null) {
       if (pending.length === 0) return;
       const batch = pending.splice(0, pending.length);
       setMessages((prev) => {
-        const next = mergeIncoming(prev, batch);
+        const next = mergeIncoming(prev, batch, capFor());
         cacheRoomMessages(roomId, next);
         return next;
       });
@@ -984,6 +1080,7 @@ export function useLiveChatMessages(roomId: string | null) {
     messages, isLoading, isSending, isConnected, isBanned, isModerator, mutedUntil,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
     refetch: () => fetchMessages(false),
+    hasOlder, loadingOlder, loadOlder, signInWall,
   };
 }
 

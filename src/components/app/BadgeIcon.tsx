@@ -13,7 +13,7 @@ import { openBadgeShowcase, preloadBadgeShowcase } from '@/lib/badge-showcase';
 import { badgeHoverArt } from '@/lib/badge-hover-art';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useInlineBadgeFont } from '@/hooks/use-inline-badge-font';
-import { badgePosterSit } from '@/lib/badge-poster-bounds';
+import { badgePosterSit, badgeTierScale } from '@/lib/badge-poster-bounds';
 import { badgeSmallSrcSet, warmBadgeStills } from '@/lib/badge-small-art';
 
 function BadgeAnimation({ src, style, onError }: { src: string; style: CSSProperties; onError: () => void }) {
@@ -73,6 +73,10 @@ const BADGE_SIT: Record<string, number> = {
   "Blue Whale": 115, "Megalodon": 114,
 };
 
+// The gold seal ends in a thin point, so it rests on the same quarter-width
+// line as the tiers: the lowest row a quarter as wide as the seal.
+const GOLD_SIT = 117;
+
 function badgeNameFromAssetUrl(url: string | null): string | undefined {
   if (!url) return undefined;
   let decodedUrl = url;
@@ -117,15 +121,16 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
   const bounds = gold ? { left: 1, top: 1, right: 127, bottom: 123 } : optics ?? { left: 0, top: 0, right: 128, bottom: 128 };
   const artworkHeight = bounds.bottom - bounds.top;
   // Each tier's optical resting line (its body, not a dangling claw or tail tip).
-  const sitRow = gold ? bounds.bottom : !visualName ? bounds.bottom
+  const sitRow = gold ? GOLD_SIT : !visualName ? bounds.bottom
     : (originalStill || !art ? BADGE_SIT[visualName] : badgePosterSit[visualName]) ?? bounds.bottom;
   const sit = Math.min(1, Math.max(0, (sitRow - bounds.top) / artworkHeight));
   // Full artwork height: 1.27x the adjacent font's cap height (cap height,
   // +10%, +10% on 2026-11-04, +5% on 2026-11-05). Every tier's measured bounds
   // scale from this one number. The box ends on the tier's resting line, so
   // that line sits on the name's baseline and thin tips overshoot just below.
-  const baseCap = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('height', '1cap') ? '1.27cap' : '0.93em';
-  const cap = visualName === 'Megalodon' ? `calc(${baseCap} * 1.069)` : baseCap;
+  const tierScale = badgeTierScale[visualName ?? ''] ?? 1;
+  const cap = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('height', '1cap')
+    ? `${1.27 * tierScale}cap` : `${0.93 * tierScale}em`;
   const opticalStyle: CSSProperties = {
     width: `calc(${(bounds.right - bounds.left) / artworkHeight} * ${cap})`,
     height: `calc(${sit} * ${cap})`,
@@ -155,6 +160,42 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
 
   if (!url) return null;
   const poster = originalStill ? url : art?.poster ?? url;
+  // The name's glyphs and this box's edges both land on whole device pixels.
+  // An overflowing <img> rounds its own edges instead, so its resting line
+  // drifted up to a pixel above or below the name from one row to the next.
+  // The still is painted as the box's background, cut at the resting line, so
+  // that line shares the baseline's pixel row at every size and scroll offset.
+  // A second slice below the box paints the tips that hang under the line.
+  const smallSet = gold ? undefined : badgeSmallSrcSet(visualName);
+  const stillImage = smallSet
+    ? `-webkit-image-set(${smallSet.split(', ').map((entry) => {
+        const [source, density] = entry.split(' ');
+        return `url("${source}") ${density}`;
+      }).join(', ')})`
+    : `url("${poster.replace(/"/g, '%22')}")`;
+  const artworkWidth = bounds.right - bounds.left;
+  const bodyRows = sit * artworkHeight;
+  const tipRows = artworkHeight - bodyRows;
+  const slice = (start: number, rows: number) => (rows >= 128 ? 0 : (start / (128 - rows)) * 100);
+  const stillStyle: CSSProperties | null = bodyRows > 0 ? {
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: stillImage,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${(128 / artworkWidth) * 100}% ${(128 / bodyRows) * 100}%`,
+    backgroundPosition: `${slice(bounds.left, artworkWidth)}% ${slice(bounds.top, bodyRows)}%`,
+  } : null;
+  const tipStyle: CSSProperties | null = stillStyle && tipRows > 0 ? {
+    position: 'absolute',
+    left: 0,
+    top: '100%',
+    width: '100%',
+    height: `${(tipRows / bodyRows) * 100}%`,
+    backgroundImage: stillImage,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${(128 / artworkWidth) * 100}% ${(128 / tipRows) * 100}%`,
+    backgroundPosition: `${slice(bounds.left, artworkWidth)}% ${slice(bounds.top + bodyRows, tipRows)}%`,
+  } : null;
 
   return (
     <Tooltip>
@@ -189,6 +230,11 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
         >
           {playing && <BadgeAnimation key={art.animation} src={art.animation} style={imageStyleFor(art.posterBounds)}
             onError={() => setFailedAnimation(art.animation)} />}
+          {stillStyle && (
+            <span aria-hidden data-badge-still style={stillStyle} className="pointer-events-none peer-data-[ready=true]:opacity-0">
+              {tipStyle && <span style={tipStyle} />}
+            </span>
+          )}
           <img
             style={imageStyle}
             data-badge-icon
@@ -198,7 +244,7 @@ export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, cl
             width={16}
             height={16}
             decoding="sync"
-            className="relative block w-full h-full rounded-none bg-transparent object-contain peer-data-[ready=true]:opacity-0"
+            className={`relative block w-full h-full rounded-none bg-transparent object-contain ${stillStyle ? 'opacity-0' : 'peer-data-[ready=true]:opacity-0'}`}
           />
         </span>
       </TooltipTrigger>

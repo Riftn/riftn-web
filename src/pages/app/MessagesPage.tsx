@@ -17,10 +17,9 @@ import Search from "@/components/ui/cut-icons/search";
 import Plus from "@/components/ui/cut-icons/add";
 import MessageCircle from "@/components/ui/cut-icons/message-envelope";
 import Fullscreen from "@/components/ui/cut-icons/fullscreen";
-import ExitFullscreen from "@/components/ui/cut-icons/exit-fullscreen";
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
-import { ChatIconButton, ChatListTop, ChatMeDock } from '@/components/app/chat/FullScreenChatChrome';
+import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
 import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
@@ -65,6 +64,7 @@ import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
+import { ChatSearchDiscover } from '@/components/app/chat/ChatSearchDiscover';
 import { useUserCommunities } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
 
@@ -239,6 +239,8 @@ export function ConversationItem({
  */
 // Settings open inside the full-screen chat (computers) rather than leaving it.
 const EmbeddedSettings = lazy(() => import('@/pages/app/SettingsPage'));
+// Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
+const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
 
 export default function MessagesPage({ fullscreen = false }: { fullscreen?: boolean } = {}) {
   const { t: _copy } = _useCopy();
@@ -289,7 +291,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
   const groupChats = chatsFromMemberships(myMemberships).filter(c =>
     !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  const { isAuthenticated, walletAddress } = useAuth();
+  const { isAuthenticated, walletAddress, isLoading: authLoading, openLoginModal } = useAuth();
+  const guest = !authLoading && !isAuthenticated;
 
   // Subscribe to DM realtime updates only when on messages page
   useDMRealtime();
@@ -304,7 +307,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const createConversation = useCreateConversation();
 
+  // Signed out on a computer, the public room is open beside the list rather
+  // than an empty "Pick a chat" pane: it is the one chat they can read.
+  useEffect(() => {
+    if (fullscreen && guest && !phonePill) setShowPublicChat(true);
+  }, [fullscreen, guest, phonePill]);
+
   const openNewMessage = useCallback(() => {
+    if (guest) { openLoginModal({ path: '/chat?chat=public' }); return; }
     const phone = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
     if (!phone) {
       setShowMessageSelector(true);
@@ -313,7 +323,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     // Inside the tap, so iOS lets the keyboard come up with the drawer.
     newMessageDrawerRef.current?.primeKeyboard();
     setShowNewMessageDrawer(true);
-  }, []);
+  }, [guest, openLoginModal]);
 
   /**
    * A person picked in the drawer: open the chat in place right away (a thread
@@ -448,8 +458,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     (user: DeHubUser) => !existingAddresses.has(user.address?.toLowerCase())
   );
 
+  // A search that matches none of your chats shows who and what does match,
+  // instead of a blank list.
+  const searchDiscover = !guest && !isLoading && !isError && !showArchived
+    && searchQuery.trim().length >= 2 && debouncedSearchQuery.trim() === searchQuery.trim()
+    && listedConversations.length === 0 && groupChats.length === 0;
+
   /** Handle clicking a user search result — always create conversation and open chat */
   const handleSelectSearchUser = (user: DeHubUser) => {
+    if (guest) { openLoginModal({ path: '/chat?chat=public' }); return; }
     const dmSettingsObj = (() => {
       const raw = (user as any).dmSettings || (user as any).dmSetting;
       return Array.isArray(raw) ? raw[0] : raw;
@@ -733,17 +750,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     ? { top: vvOffsetTop, height: vvHeight, bottom: 'auto' }
     : undefined;
 
-  // Block access for unauthenticated users
-  if (!isAuthenticated) {
-    const gate = (
-      <AuthGate description={_copy("copy.b38dabfa0639", { defaultValue: "Log in to access your messages and chat with others." })} />
-    );
-    return fullscreen ? (
-      <div id="app-root" data-fullscreen-chat className="fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-black text-white">
-        {chatSeo}
-        <div className="m-auto w-full max-w-md p-4">{gate}</div>
-      </div>
-    ) : gate;
+  // riftn.com/chat signed out is the same page everyone else gets, with the
+  // public room readable: sending, reacting, starting a chat or scrolling past
+  // its one page of history opens the sign-in sheet in place.
+  // Block access for unauthenticated users everywhere else.
+  if (!isAuthenticated && !fullscreen) {
+    return <AuthGate description={_copy("copy.b38dabfa0639", { defaultValue: "Log in to access your messages and chat with others." })} />;
   }
 
   // If Public Chat is open, show full-screen chat
@@ -836,6 +848,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const fullscreenTop = fullscreen && !phonePill ? (
     <ChatListTop
       title={_copy('fullscreenChat.title', { defaultValue: 'Chat' })}
+      searchLabel={_copy('fullscreenChat.search', { defaultValue: 'Search chats' })}
+      searchValue={searchQuery}
+      onClearSearch={() => setSearchQuery('')}
+      onOpenSettings={() => setShowSettings(true)}
       search={(
         <input
           type="text"
@@ -857,14 +873,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </ChatIconButton>
         </>
       )}
-      actions={(
-        <>
-          <ChatTextSizeButton className="rounded-full" />
-          <ChatIconButton label={_copy('fullscreenChat.exit', { defaultValue: 'Leave full screen' })} onClick={() => navigate('/app/messages')} data-chat-exit-fullscreen="">
-            <ExitFullscreen />
-          </ChatIconButton>
-        </>
-      )}
+      actions={<ChatTextSizeButton className="rounded-full" />}
     />
   ) : null;
 
@@ -882,18 +891,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
             title={fullscreen ? _copy('fullscreenChat.title', { defaultValue: 'Chat' }) : t('messages.title')}
             actions={fullscreen ? (
+              // Only phones reach this header (computers get fullscreenTop).
+              // A phone has no full screen to leave, so the spare square is
+              // the + : sign in when signed out, the new chat drawer when in.
               <>
                 <ChatTextSizeButton />
-                <button
-                  type="button"
-                  data-kit-square
-                  data-chat-exit-fullscreen
-                  onClick={() => navigate('/app/messages')}
-                  aria-label={_copy('fullscreenChat.exit', { defaultValue: 'Leave full screen' })}
-                  title={_copy('fullscreenChat.exit', { defaultValue: 'Leave full screen' })}
-                >
-                  <ExitFullscreen className="h-[18px] w-[18px]" />
-                </button>
+                <IslandAction label={_copy("copy.4787aa7e2d5c", { defaultValue: "Start new conversation" })} onClick={openNewMessage}>
+                  <Plus />
+                </IslandAction>
               </>
             ) : phonePill ? (
               // Phones: search waits in the drawer behind the pill's search
@@ -926,7 +931,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 >
                   <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
                 </button>
-                {!(phonePill && !fullscreen) && (
+                {!phonePill && (
                   <button
                     type="button"
                     data-messages-search-action
@@ -956,7 +961,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </PageIsland>)}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-24' : fullscreen ? 'pt-3 pb-4' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1011,7 +1016,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
 
             {/* Empty state */}
-            {!isLoading && !isError && !searchQuery.trim() && visibleConversations.length === 0 && (
+            {!guest && !isLoading && !isError && !searchQuery.trim() && visibleConversations.length === 0 && (
               <AppState
                 icon="messages"
                 title={t('messages.noConversationsYet', 'No conversations yet')}
@@ -1063,8 +1068,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </button>
             )}
 
+            {searchDiscover && (
+              <ChatSearchDiscover
+                query={searchQuery}
+                users={newUserResults}
+                usersLoading={isSearchingUsers}
+                onMessageUser={handleSelectSearchUser}
+                onNewChat={openNewMessage}
+                onNewGroup={() => setNewChatKind('group')}
+              />
+            )}
+
             {/* User search results (people not in existing conversations) */}
-            {searchQuery.trim().length >= 2 && newUserResults.length > 0 && (
+            {!searchDiscover && searchQuery.trim().length >= 2 && newUserResults.length > 0 && (
               <>
                 <div className="px-4 py-2 mt-2">
                   <p className="text-zinc-500 text-xs uppercase tracking-wider font-medium">{_copy("copy.4787aa7e2d5c", { defaultValue: "Start new conversation" })}</p>
@@ -1122,12 +1138,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             )}
 
             {/* Searching indicator */}
-            {searchQuery.trim().length >= 2 && isSearchingUsers && (
+            {!searchDiscover && searchQuery.trim().length >= 2 && isSearchingUsers && (
               <div className="flex items-center justify-center gap-2 py-4 text-zinc-500 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.3084651a3386", { defaultValue: "Searching users..." })}</div>
             )}
           </div>
-          {fullscreen && !phonePill && <ChatMeDock onOpenSettings={() => setShowSettings(true)} />}
         </div>
       </div>
   );
@@ -1179,7 +1194,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
         chat={settingsPane ?? publicChatPane ?? dmPane}
-        list={<>{chatSeo}{listColumn}{dialogs}</>}
+        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
       />
     );
   }

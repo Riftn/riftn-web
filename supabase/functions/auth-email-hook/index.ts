@@ -16,12 +16,12 @@ const corsHeaders = {
 
 // Configuration
 const SITE_NAME = "Riftn"
-const SENDER_DOMAIN = "notify.dehub.io"
+const SENDER_DOMAIN = "notify.riftn.com"
 const ROOT_DOMAIN = "riftn.com"
-const FROM_DOMAIN = "dehub.io"
+const FROM_DOMAIN = "riftn.com"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
-// Rewrite the backend-hosted confirmation URL into a branded dehub.io link.
+// Rewrite the backend-hosted confirmation URL into a branded riftn.com link.
 // The auth payload gives the long one-time token inside `data.url` as
 // `?token=...&type=...`, not always as `token_hash`. We pass that value to the
 // app as `token_hash` so /auth/confirm can call verifyOtp() client-side.

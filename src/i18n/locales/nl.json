@@ -780,6 +780,14 @@
     "showOnlineDesc": "Mensen die je een bericht stuurt, zien een groene stip naast je naam terwijl je Riftn gebruikt",
     "showDislikes": "Mijn dislikes aan iedereen tonen",
     "showDislikesDesc": "Iedereen kan het tabblad Dislikes op je profiel openen. Staat dit uit, dan zie alleen jij het.",
+    "showLikes": "Mijn likes aan iedereen tonen",
+    "showLikesDesc": "Iedereen kan het tabblad Likes op je profiel openen. Standaard uit, dus alleen jij ziet wat je leuk vond.",
+    "showFollowersList": "Tonen wie mij volgt",
+    "showFollowersListDesc": "Laat iedereen je volgerslijst openen. Als dit uit staat, kun alleen jij die zien.",
+    "showFollowingList": "Tonen wie ik volg",
+    "showFollowingListDesc": "Laat iedereen de lijst openen van mensen die je volgt. Als dit uit staat, kun alleen jij die zien.",
+    "showFollowCounts": "Mijn volgersaantallen tonen",
+    "showFollowCountsDesc": "Toont hoeveel volgers je hebt en hoeveel mensen je volgt. Uitzetten verbergt ook beide lijsten.",
     "smartReplies": "Voorgestelde antwoorden",
     "smartRepliesDesc": "Stelt twee antwoorden op die je in een chat kunt aantikken. De × bij de suggesties zet dit uit.",
     "title": "Instellingen",
@@ -2471,12 +2479,12 @@
     "loadFailed": "Kon verzoeken niet laden"
   },
   "auth": {
-    "loginRequired": "Inloggen vereist",
     "accountDeleted": "Dit account is verwijderd. Je kunt je opnieuw aanmelden met een nieuw account.",
     "accountDeletedHours_one": "Dit account is verwijderd. Over ongeveer {{count}} uur kun je je opnieuw aanmelden met hetzelfde e-mailadres of telefoonnummer.",
     "accountDeletedHours_other": "Dit account is verwijderd. Over ongeveer {{count}} uur kun je je opnieuw aanmelden met hetzelfde e-mailadres of telefoonnummer.",
     "accountDeletedDays_one": "Dit account is verwijderd. Over ongeveer {{count}} dag kun je je opnieuw aanmelden met hetzelfde e-mailadres of telefoonnummer.",
-    "accountDeletedDays_other": "Dit account is verwijderd. Over ongeveer {{count}} dagen kun je je opnieuw aanmelden met hetzelfde e-mailadres of telefoonnummer."
+    "accountDeletedDays_other": "Dit account is verwijderd. Over ongeveer {{count}} dagen kun je je opnieuw aanmelden met hetzelfde e-mailadres of telefoonnummer.",
+    "loginRequired": "Inloggen vereist"
   },
   "messages": {
     "newDrawer": {
@@ -2666,11 +2674,20 @@
     "tabs": {
       "playlists": "Afspeellijsten",
       "dislikes": "Dislikes",
+      "likes": "Likes",
       "articles": "Artikelen"
     },
     "articles": {
       "emptyTitle": "Nog geen artikelen",
       "emptySubtitle": "Artikelen verschijnen hier"
+    },
+    "likedPosts": {
+      "emptyTitle": "Nog geen likes",
+      "emptyOwn": "Berichten die je leuk vindt verschijnen hier. Alleen jij ziet ze, tenzij je Mijn likes aan iedereen tonen aanzet in Instellingen.",
+      "emptyOther": "Nog niets geliket.",
+      "privateTitle": "Likes zijn privé",
+      "privateDesc": "Dit account houdt zijn likes voor zichzelf.",
+      "loadMore": "Meer laden"
     },
     "dislikes": {
       "emptyTitle": "Nog geen dislikes",
@@ -2693,15 +2710,12 @@
     "sortMostViewed": "Meest bekeken",
     "sortLikes": "Likes",
     "sortMostLiked": "Meest geliked",
-    "searchThisChannel": "Zoeken in dit kanaal",
-    "searchResultCount": "1 result voor \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} resultaten voor \"{{query}}\"",
     "sortCustom": "Eigen volgorde",
     "sortCustomShort": "Eigen",
     "arrangeButton": "Berichten ordenen",
     "arrange": {
       "title": "Orden je berichten",
-      "hint": "Sleep je berichten in de volgorde die je wilt. Bezoekers zien deze volgorde als eerste.",
+      "hint": "Houd een bericht vast en sleep het naar zijn nieuwe plek. Bezoekers zien deze volgorde eerst.",
       "drag": "Sleep om te verplaatsen",
       "toTop": "Naar boven verplaatsen",
       "save": "Volgorde opslaan",
@@ -2712,7 +2726,10 @@
       "saveFailed": "Je volgorde kon niet worden opgeslagen. Probeer het opnieuw.",
       "loadFailed": "Je berichten konden niet worden geladen. Sluit dit en probeer het opnieuw.",
       "empty": "Er valt nog niets te ordenen. Plaats eerst iets."
-    }
+    },
+    "searchThisChannel": "Zoeken in dit kanaal",
+    "searchResultCount": "1 result voor \"{{query}}\"",
+    "searchResultCountPlural": "{{count}} resultaten voor \"{{query}}\""
   },
   "tv": {
     "seoTitle": "Live TV: Gratis kanalen van over de hele wereld",
@@ -8417,7 +8434,7 @@
     "ambWant5": "Eerdere ambassadeur-, influencer- of community management-ervaring is een pluspunt",
     "ambassadorCompensation": "Brand Ambassadors ontvangen een <b>onderhandelbaar maandelijks salaris</b> dat consistent wordt uitbetaald. Aanvullende bonussen kunnen worden toegekend op basis van campagneprestaties, gebruikersregistraties en groei van de community. Je ontvangt ook exclusieve Riftn-merchandise, vroege toegang tot functies en token-toewijzingen naarmate het ecosysteem groeit.",
     "applyAsAmbassador": "Solliciteer als Brand Ambassador",
-    "noRoleFits": "Zie je geen rol die bij je past? Neem contact met ons op via <mail>dev@dehub.io</mail> — we zoeken altijd naar getalenteerde mensen."
+    "noRoleFits": "Zie je geen rol die bij je past? Neem contact met ons op via <mail>dev@riftn.com</mail> — we zoeken altijd naar getalenteerde mensen."
   },
   "depin": {
     "seoTitle": "DePin | Door de gemeenschap aangedreven media-infrastructuur | Riftn",
@@ -9179,7 +9196,12 @@
     "failedDesc": "Het gesprek kon niet worden voltooid. Controleer je verbinding en probeer het opnieuw.",
     "close": "Sluiten",
     "callbackRequest": "Terugbelverzoek",
-    "tryAgain": "Opnieuw proberen"
+    "tryAgain": "Opnieuw proberen",
+    "ended": "Gesprek beëindigd",
+    "declined": "Oproep geweigerd",
+    "noAnswer": "Geen antwoord",
+    "missed": "Gemist gesprek",
+    "callBack": "Terugbellen"
   },
   "badgeAscension": {
     "reached": "Je hebt {{tier}} bereikt",
@@ -17171,6 +17193,19 @@
     "dd3bfd98b141": "Dat lijkt geen webadres te zijn.",
     "62b242593656": " Link toevoegen",
     "76d311c4cef6": "Geluid toevoegen",
+    "c0963b7d9c5d": "Gratis bibliotheek",
+    "55b1ec6f0360": "Kies het gedeelte",
+    "284b838e96e5": "Waar het gedeelte begint",
+    "46b0e30a32b0": "Hele nummer",
+    "3a84120779c5": "Schuif om het fragment te kiezen",
+    "1cb1b494ee3b": "Het fragment komt overeen met je video ({{value1}}).",
+    "0418db35eb35": "Gebruik dit geluid",
+    "ecb30523a48a": "Zoek naar nummers en artiesten",
+    "cbade2afaee2": "Deze week populair op Audius. Gratis te gebruiken, de artiest wordt vermeld in je post.",
+    "d2e45b7406fc": "Muziek in het publieke domein en onder Creative Commons van Wikimedia Commons. De artiest wordt vermeld in je bericht.",
+    "d0c1a3684775": "Nummers zijn niet geladen. Probeer het zo meteen nog eens.",
+    "55fd43d20da5": "Geluid verwijderen",
+    "d14064f80f52": "Geluid toevoegen",
     "db66c92fd9e0": "Geluiden zoeken...",
     "af6ed946e090": "Video bijsnijden",
     "1c0eba609c44": "Selecteer trimbereik",
@@ -17526,7 +17561,7 @@
     "0ec80d3905a0": "Riftn Careers — Gedecentraliseerde sociale media, bestand tegen censuur en vrijheid van meningsuiting",
     "a2dd3acadb1c": "Jan Jansen",
     "93100fc44c0a": "@gebruikersnaam",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Log in om toegang te krijgen tot uw portemonnee en uw geld te beheren.",
     "a2364c207356": "Command: Je Dashboard & Portemonnee",
     "d97180b4753f": "Je commandocentrum op Riftn. Beheer je portemonnee, houd saldi bij en houd toezicht op je account in één dashboard.",
@@ -17838,7 +17873,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Uitgelicht in",
     "ee1c1eecf1b6": "Riftn is gedekt door enkele van's werelds grootste en meest vertrouwde publicaties. Hier zijn de artikelen die onze missie om de media te democratiseren in de schijnwerpers zetten.",
@@ -18110,6 +18145,9 @@
     "bcc015afda01": "Voer een bericht in",
     "3c53e332cf13": "Kan geen gesprek starten met deze gebruiker",
     "8e51a80a4d7d": "Nieuw bericht",
+    "27c26a5a38b3": "Aanmelden om oude berichten te zien",
+    "674e70bcd915": "De volledige chatgeschiedenis is openbaar voor iedereen met een account.",
+    "feaf753f6557": "Begin van de chat",
     "7a523e7dc8a3": "Log in om te modereren",
     "29a7e1c24c92": "Alles vertalen",
     "90395d452a30": "Anonymous",

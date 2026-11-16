@@ -608,6 +608,14 @@
     "showOnlineDesc": "Orang yang Anda kirimi pesan melihat titik hijau di samping nama Anda saat Anda menggunakan Riftn",
     "showDislikes": "Tampilkan tidak sukaku ke semua orang",
     "showDislikesDesc": "Siapa pun bisa membuka tab Tidak Suka di profilmu. Jika nonaktif, hanya kamu yang bisa melihatnya.",
+    "showLikes": "Tampilkan suka saya ke semua orang",
+    "showLikesDesc": "Siapa pun bisa membuka tab Suka di profilmu. Mati secara bawaan, jadi hanya kamu yang melihat apa yang kamu sukai.",
+    "showFollowersList": "Tampilkan siapa yang mengikuti saya",
+    "showFollowersListDesc": "Izinkan siapa pun membuka daftar pengikutmu. Jika mati, hanya kamu yang bisa melihatnya.",
+    "showFollowingList": "Tampilkan siapa yang saya ikuti",
+    "showFollowingListDesc": "Izinkan siapa pun membuka daftar orang yang kamu ikuti. Jika mati, hanya kamu yang bisa melihatnya.",
+    "showFollowCounts": "Tampilkan jumlah pengikut saya",
+    "showFollowCountsDesc": "Menampilkan berapa pengikutmu dan berapa orang yang kamu ikuti. Mematikannya juga menyembunyikan kedua daftar.",
     "smartReplies": "Balasan yang disarankan",
     "smartRepliesDesc": "Menyusun dua balasan yang bisa kamu ketuk di obrolan. Tanda × pada saran akan mematikannya.",
     "title": "Pengaturan",
@@ -2227,11 +2235,20 @@
     "tabs": {
       "playlists": "Daftar Putar",
       "dislikes": "Tidak Suka",
+      "likes": "Suka",
       "articles": "Artikel"
     },
     "articles": {
       "emptyTitle": "Belum ada artikel",
       "emptySubtitle": "Artikel akan muncul di sini"
+    },
+    "likedPosts": {
+      "emptyTitle": "Belum ada suka",
+      "emptyOwn": "Postingan yang kamu sukai muncul di sini. Hanya kamu yang bisa melihatnya kecuali kamu menyalakan Tampilkan suka saya di Pengaturan.",
+      "emptyOther": "Belum ada yang disukai.",
+      "privateTitle": "Suka bersifat pribadi",
+      "privateDesc": "Akun ini menyimpan sukanya untuk dirinya sendiri.",
+      "loadMore": "Muat lebih banyak"
     },
     "dislikes": {
       "emptyTitle": "Belum ada tidak suka",
@@ -7547,7 +7564,7 @@
     "ambWant5": "Pengalaman jadi ambassador, influencer, atau pengelola komunitas jadi nilai tambah",
     "ambassadorCompensation": "Brand Ambassador menerima <b>gaji bulanan yang bisa dinegosiasikan</b> secara rutin. Bonus tambahan bisa diberikan berdasarkan performa kampanye, pendaftaran pengguna, dan tonggak pertumbuhan komunitas. Kamu juga mendapat merchandise Riftn eksklusif, akses awal ke fitur baru, dan alokasi token seiring ekosistem berkembang.",
     "applyAsAmbassador": "Lamar sebagai Brand Ambassador",
-    "noRoleFits": "Belum menemukan posisi yang cocok? Hubungi kami di <mail>dev@dehub.io</mail> — kami selalu mencari orang berbakat."
+    "noRoleFits": "Belum menemukan posisi yang cocok? Hubungi kami di <mail>dev@riftn.com</mail> — kami selalu mencari orang berbakat."
   },
   "depin": {
     "seoTitle": "DePin | Infrastruktur media bertenaga komunitas | Riftn",
@@ -8269,7 +8286,12 @@
     "failedDesc": "Panggilan tidak dapat diselesaikan. Periksa koneksi Anda dan coba lagi.",
     "close": "Tutup",
     "callbackRequest": "Permintaan panggilan balik",
-    "tryAgain": "Coba lagi"
+    "tryAgain": "Coba lagi",
+    "ended": "Panggilan berakhir",
+    "declined": "Panggilan ditolak",
+    "noAnswer": "Tidak ada jawaban",
+    "missed": "Panggilan terlewat",
+    "callBack": "Balas panggilan"
   },
   "badgeAscension": {
     "reached": "Anda menghubungi {{tier}}",
@@ -15910,6 +15932,19 @@
     "dd3bfd98b141": "Itu tidak tampak seperti alamat web.",
     "62b242593656": "Tambah tautan",
     "76d311c4cef6": "Tambah Suara",
+    "c0963b7d9c5d": "Perpustakaan gratis",
+    "55b1ec6f0360": "Pilih bagian",
+    "284b838e96e5": "Di mana bagian dimulai",
+    "46b0e30a32b0": "Seluruh lagu",
+    "3a84120779c5": "Geser untuk memilih bagian",
+    "1cb1b494ee3b": "Bagian tersebut cocok dengan video Anda ({{value1}}).",
+    "0418db35eb35": "Gunakan suara ini",
+    "ecb30523a48a": "Cari lagu dan artis",
+    "cbade2afaee2": "Tren minggu ini di Audius. Gratis digunakan, artis akan dikreditkan di postingan Anda.",
+    "d2e45b7406fc": "Domain publik dan musik Creative Commons dari Wikimedia Commons. Artis akan dikreditkan di postingan Anda.",
+    "d0c1a3684775": "Lagu tidak dimuat. Coba lagi sebentar lagi.",
+    "55fd43d20da5": "Hapus suara",
+    "d14064f80f52": "Tambahkan suara",
     "db66c92fd9e0": "Cari suara...",
     "af6ed946e090": "Trim Video",
     "1c0eba609c44": "Pilih rentang potong",
@@ -16256,7 +16291,7 @@
     "0ec80d3905a0": "Karir Riftn — Media Sosial Dekentralisasi, Tidak Terkendali dan Kebebasan Berbicara",
     "a2dd3acadb1c": "Budi Santoso",
     "93100fc44c0a": "@namapengguna",
-    "4001b1e9d20e": "dev@dehub.io",
+    "4001b1e9d20e": "dev@riftn.com",
     "0b215a003c68": "Masuk untuk mengakses dompet dan mengelola dana Anda.",
     "a2364c207356": "Command: Dashboard & Dompet Anda",
     "d97180b4753f": "Pusat perintah Anda di Riftn. Kelola dompet, track saldo, dan atur akun Anda dalam satu dashboard.",
@@ -16568,7 +16603,7 @@
     "97f2d908b7dc": "@noble/ciphers",
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
-    "886e533d7364": "tech@dehub.net",
+    "886e533d7364": "dev@riftn.com",
     "e8921bdee214": "@riftn_com",
     "dbc2def4603a": "Ditampilkan di",
     "ee1c1eecf1b6": "Riftn telah ditutupi oleh beberapa publikasi terbesar dan paling dipercaya di dunia. Berikut adalah artikel yang menyoroti misi kami untuk mendemokratisasi media.",
@@ -16840,6 +16875,9 @@
     "bcc015afda01": "Silakan masukkan pesan",
     "3c53e332cf13": "Tidak dapat memulai percakapan dengan pengguna ini",
     "8e51a80a4d7d": "Pesan Baru",
+    "27c26a5a38b3": "Masuk untuk melihat pesan yang lebih lama",
+    "674e70bcd915": "Riwayat obrolan lengkap terbuka untuk siapa saja yang memiliki akun.",
+    "feaf753f6557": "Awal obrolan",
     "7a523e7dc8a3": "Masuk untuk memoderasi",
     "29a7e1c24c92": "Terjemahkan semua",
     "90395d452a30": "Anon",
