@@ -18113,5 +18113,28 @@
     "unavailable": "GitHub کی تائید (Verification) بالکل تیز آئی رہی ہے۔",
     "connect": "GitHub جوڑیں",
     "disconnect": "ٹوٹ جانا"
+  },
+  "chatSearch": {
+    "placeholder": "پیغام یا لوگاں دی تلاش",
+    "placeholderPerson": "تلاش کریں {{name}} کے پیغامات",
+    "close": "تلاش بند کرو",
+    "removePerson": "ہر کوئی تلاش کرو",
+    "clear": "صاف",
+    "signInTitle": "چٹ تلاش کرن لئی سائن ان کرو",
+    "peopleHere": "لوک این چٹ وچ",
+    "recent": "حالیہ تلاشیں",
+    "hint": "کچھ لفظ یا نام لکھو",
+    "failed": "سرچ لوڈ نہ تھی",
+    "people": "لوک",
+    "messages": "پیغام",
+    "seeCount_one": "انہاں دا {{count}} پیغام دیکھو",
+    "seeCount_other": "انہاں دے {{count}} پیغام دیکھو",
+    "messagesCount_one": "{{count}} پیغام",
+    "backToResults": "پہلے کے نتیجوں پر واپس چل جائیں",
+    "newer": "نئے نتیجہ",
+    "latest": "آخری",
+    "gone": "اس پیغام ابھی وہاں نہیں ہے",
+    "theirMessages": "انہاں دیاں پیغامات",
+    "seeTheirMessages": "انہاں دے پیغام دیکھو"
   }
 }

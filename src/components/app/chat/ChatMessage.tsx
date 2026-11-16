@@ -4,6 +4,7 @@ import { useDraftState } from '@/hooks/use-draft-state';
 import { useState, useCallback, useRef, memo } from 'react';
 import { toast } from 'sonner';
 import Copy from '@/components/ui/cut-icons/copy';
+import SearchIcon from '@/components/ui/cut-icons/search';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
@@ -43,6 +44,7 @@ import {
 import { VoiceWaveformPlayer } from './VoiceWaveformPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
 import { MoreReactionsButton } from './MoreReactionsButton';
+import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 
@@ -119,6 +121,8 @@ interface ChatMessageProps {
   /** Resend / drop one of your own lines that failed, by its client key. */
   onRetrySend?: (clientKey: string) => void;
   onDiscardSend?: (clientKey: string) => void;
+  /** Open the room's search on everything this line's sender has said. */
+  onSeeMessages?: (message: Message) => void;
   /** Live chat on phones: frame the held line, and outline the line being answered. */
   holdFrame?: boolean;
   replying?: boolean;
@@ -154,13 +158,17 @@ function ReactionBar({
   onReact,
   onRemoveReaction,
   messageId,
+  ownLine,
 }: {
   reactions: ReactionData;
   currentUserAddress?: string;
   onReact?: (messageId: string, emoji: string) => void;
   onRemoveReaction?: (messageId: string, emoji: string) => void;
   messageId: string;
+  /** Your own line: a reaction opens the list of who left it. */
+  ownLine?: boolean;
 }) {
+  const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
 
@@ -173,8 +181,11 @@ function ReactionBar({
         return (
           <button
             key={emoji}
+            data-chat-reaction-chip
             onClick={() => {
-              if (myReaction) {
+              if (ownLine) {
+                setShowWho(true);
+              } else if (myReaction) {
                 onRemoveReaction?.(messageId, emoji);
               } else {
                 onReact?.(messageId, emoji);
@@ -187,7 +198,7 @@ function ReactionBar({
             }`}
           >
             <span className="inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
-            {myReaction ? (
+            {myReaction && !ownLine ? (
               <>
                 <span className="text-[10px] group-hover/reaction:hidden">{addresses.length}</span>
                 <X className="w-3 h-3 hidden group-hover/reaction:block text-white" />
@@ -198,6 +209,7 @@ function ReactionBar({
           </button>
         );
       })}
+      {showWho && <ChatReactorsDrawer messageId={messageId} reactions={reactions} onClose={() => setShowWho(false)} />}
     </div>
   );
 }
@@ -218,6 +230,7 @@ export const ChatMessage = memo(function ChatMessage({
   onReply,
   onRetrySend,
   onDiscardSend,
+  onSeeMessages,
   holdFrame,
   replying,
 }: ChatMessageProps) {
@@ -336,6 +349,7 @@ export const ChatMessage = memo(function ChatMessage({
       ? { key: 'original', icon: <Languages />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
       : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: handleTranslate },
   );
+  if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
   if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing });
   if ((canDelete || showActions) && onDelete) holdActions.push({ key: 'delete', destructive: true, secondary: true, icon: <Trash2 />, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
   if (showActions && !isMine && onBan) holdActions.push({ key: 'ban', destructive: true, secondary: true, icon: <ShieldBan />, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
@@ -478,6 +492,21 @@ export const ChatMessage = memo(function ChatMessage({
                   </div>
                 </PopoverContent>
               </Popover>
+            )}
+
+            {onSeeMessages && !message.sendState && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onSeeMessages(message)}
+                    aria-label={_copy('chatSearch.seeTheirMessages', { defaultValue: 'See their messages' })}
+                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
+                  >
+                    <SearchIcon className="w-3.5 h-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{_copy('chatSearch.seeTheirMessages', { defaultValue: 'See their messages' })}</TooltipContent>
+              </Tooltip>
             )}
 
             {/* Your own message — edit and remove, no moderator rights needed */}
@@ -673,6 +702,7 @@ export const ChatMessage = memo(function ChatMessage({
             currentUserAddress={currentUserAddress}
             onReact={onReact}
             onRemoveReaction={onRemoveReaction}
+            ownLine={isMine}
             messageId={message.id}
           />
         )}

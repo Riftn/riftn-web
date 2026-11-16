@@ -1,3 +1,4 @@
+import { SignInWaitFrame } from "@/components/app/login/SignInWaitFrame";
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useEffect, useRef, useState } from "react";
@@ -117,18 +118,18 @@ export default function AuthConfirm() {
     })();
   }, [params, navigate]);
 
+  if (state === "verifying") {
+    return <SignInWaitFrame label={_copy("copy.afc99407f777", { defaultValue: "Signing you in…" })} />;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[hsl(var(--paper,0_0%_100%))]">
       <div className="max-w-md w-full text-center space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {state === "verifying" ? _copy("copy.afc99407f777", { defaultValue: "Signing you in…" }) : _copy("copy.c43eaf46d577", { defaultValue: "Link problem" })}
+          {_copy("copy.c43eaf46d577", { defaultValue: "Link problem" })}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {state === "verifying"
-            ? _copy("copy.59aa2927dbb9", { defaultValue: "Hang tight while we verify your Riftn link." })
-            : error}
-        </p>
-        {state === "error" && (
+        <p className="text-sm text-muted-foreground">{error}</p>
+        {(
           <button
             onClick={() => navigate("/app")}
             className="inline-flex items-center rounded-xl px-4 py-2 text-sm font-medium bg-foreground text-background"

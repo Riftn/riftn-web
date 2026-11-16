@@ -18957,5 +18957,33 @@
     "unavailable": "GitHub tasdiqlash kelish kelayaq.",
     "connect": "GitHub نى باغلا",
     "disconnect": "قۇرالۇش"
+  },
+  "chatSearch": {
+    "placeholder": "ئۇچۇر ياكى كىشىلەرنى ئىزدە",
+    "placeholderPerson": "Search {{name}}'s messages",
+    "close": "ئىزدەشنى تاقاش",
+    "removePerson": "ھەممىنى ئىزدە",
+    "clear": "ئېنىقلاش",
+    "signInTitle": "چاتنى ئىزدەش ئۈچۈن كىرىڭ",
+    "photo": "سۈرەت",
+    "recent": "ئاخىرلىق قارىشلار",
+    "hint": "ئىسم",
+    "failed": "ئىزدىشىپ كۆرۈش مۇمكىن بولمىدى",
+    "people": "كىشىلەر",
+    "messages": "ئۇچۇرلار",
+    "seeCount_one": "ئۇلارنىڭ {{count}} ئۇچۇرىنى كۆرۈڭ",
+    "seeCount_other": "ئۇلارنىڭ {{count}} ئۇچۇرلىرىنى كۆرۈڭ",
+    "messagesCount_one": "{{count}} message",
+    "messagesCount_other": "{{count}} ئۇچۇرلار",
+    "results_one": "{{count}} نەتىجە",
+    "results_other": "{{count}} results",
+    "backToResults": "نەتىجىگە قايتىش",
+    "position": "{{current}} of {{total}}",
+    "older": "ئۆتكەن نەتىجە",
+    "newer": "يېڭى نەتىجە",
+    "latest": "ئەڭ يېڭى",
+    "gone": "بۇ ئۇچۇر يەنە يوق",
+    "theirMessages": "ئۇلارنىڭ ئۇچۇرلىرى",
+    "seeTheirMessages": "ئۇلارنىڭ ئۇچۇرلىرىنى كۆرۈڭ"
   }
 }

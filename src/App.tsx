@@ -37,6 +37,7 @@ import { AppLayout } from "./components/app/AppLayout";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
 import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
 import { AfterSignIn } from "@/components/app/AfterSignIn";
+import { SignInHandoff } from "@/components/app/login/SignInHandoff";
 import { getTwoFactorPrompt, useTwoFactorPrompt } from "@/lib/two-factor-login";
 import React, { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
@@ -558,6 +559,7 @@ function AppContent() {
       <GiveawayPrizeModal />
       <ConnectLinkedWalletModal />
       <LoginSheetHost />
+      <SignInHandoff />
       <AfterSignIn />
       {isAuthenticated && <Suspense fallback={null}><DmUnreadBridge /></Suspense>}
       <Suspense fallback={<PageLoader />}>

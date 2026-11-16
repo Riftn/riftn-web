@@ -62,6 +62,7 @@ import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
+import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -77,6 +78,9 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
  * The cards navigate in-app (see `DehubLinkEmbed`), so opening one keeps the
  * panel and the socket alive instead of reloading the page.
  */
+/** Lines the side chat opens on, and reads back per press of Load older. */
+const SIDE_CHAT_PAGE = 30;
+
 function SidebarMessageBody({ content }: { content: string }) {
   const { links, displayText } = useDehubLinks(content);
   return (
@@ -123,13 +127,17 @@ function SidebarReactions({
   onReact,
   onRemoveReaction,
   messageId,
+  ownLine,
 }: {
   reactions: ReactionData;
   currentUserAddress?: string;
   onReact: (id: string, emoji: string) => void;
   onRemoveReaction: (id: string, emoji: string) => void;
   messageId: string;
+  /** Your own line: a reaction opens the list of who left it. */
+  ownLine?: boolean;
 }) {
+  const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
 
@@ -142,7 +150,8 @@ function SidebarReactions({
         return (
           <button
             key={emoji}
-            onClick={() => mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
+            data-chat-reaction-chip
+            onClick={() => ownLine ? setShowWho(true) : mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
             className={`group/reaction inline-flex items-center gap-0.5 text-[10px] px-0.5 py-0.5 transition-colors ${
               mine
                 ? 'text-white'
@@ -150,7 +159,7 @@ function SidebarReactions({
             }`}
           >
             <span className="text-xs inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
-            {mine ? (
+            {mine && !ownLine ? (
               <>
                 <span className="group-hover/reaction:hidden">{addresses.length}</span>
                 <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
@@ -161,6 +170,7 @@ function SidebarReactions({
           </button>
         );
       })}
+      {showWho && <ChatReactorsDrawer messageId={messageId} reactions={reactions} onClose={() => setShowWho(false)} />}
     </div>
   );
 }
@@ -227,7 +237,10 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     }
   }, [newMessage]);
 
-  const { messages, isLoading: messagesLoading, isSending, send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage } = useLiveChatMessages(roomId);
+  const {
+    messages, isLoading: messagesLoading, isSending, send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
+    hasOlder, loadingOlder, loadOlder: loadOlderPage, signInWall,
+  } = useLiveChatMessages(roomId, { pageSize: SIDE_CHAT_PAGE });
   const { onlineCount } = useLiveChatPresence(roomId);
 
   // Buy alerts
@@ -248,7 +261,10 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const mergedItems: MergedItem[] = useMemo(() => {
     const items: MergedItem[] = [
       ...messages.map((m) => ({ type: 'message' as const, data: m })),
-      ...(buyBotHidden ? [] : buyAlerts.map((a) => ({ type: 'buy_alert' as const, data: a }))),
+      // Buy alerts sit beside the history that is loaded, never further back.
+      ...(buyBotHidden ? [] : buyAlerts
+        .filter((a) => !messages.length || a.created_at >= messages[0].created_at)
+        .map((a) => ({ type: 'buy_alert' as const, data: a }))),
       ...localAssistantReplies.map((a) => ({ type: 'assistant' as const, data: a })),
     ];
     const tsOf = (it: MergedItem) =>
@@ -259,19 +275,31 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
 
   // The rail is only 400px tall. Mount recent rows first so old link previews,
   // badges and media do not compete with the feed at startup.
-  const [visibleCount, setVisibleCount] = useState(30);
+  const [visibleCount, setVisibleCount] = useState(SIDE_CHAT_PAGE);
   const olderAnchor = useRef<{ top: number; height: number } | null>(null);
+  /** Set while older rows are being added above, so the list does not jump to the newest line. */
+  const addingOlder = useRef(false);
   const visibleItems = mergedItems.slice(-visibleCount);
-  const loadOlder = () => {
+  const hiddenLoaded = mergedItems.length > visibleCount;
+  // Rows already loaded are shown first; after that each press reads the next
+  // page of history from the server, all the way back to the first message.
+  const loadOlder = async () => {
+    if (addingOlder.current) return;
     const el = scrollContainerRef.current;
     if (el) olderAnchor.current = { top: el.scrollTop, height: el.scrollHeight };
-    setVisibleCount(count => count + 30);
+    addingOlder.current = true;
+    if (!hiddenLoaded) await loadOlderPage();
+    setVisibleCount(count => count + SIDE_CHAT_PAGE);
   };
   useLayoutEffect(() => {
     const el = scrollContainerRef.current;
     const anchor = olderAnchor.current;
     if (el && anchor) el.scrollTop = anchor.top + el.scrollHeight - anchor.height;
     olderAnchor.current = null;
+    // Released after this commit's other effects have run, so none of them
+    // reads the longer list as a new message and jumps to the bottom.
+    const release = window.setTimeout(() => { addingOlder.current = false; }, 60);
+    return () => window.clearTimeout(release);
   }, [visibleCount]);
 
   // Scroll to bottom (jump, not animated). For initial load we retry a few times
@@ -309,14 +337,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   // browsers can reset a hidden scroll container to the top. The tab owner
   // knows exactly when Chat becomes visible, so re-anchor on every activation.
   useLayoutEffect(() => {
-    if (!isActive || mergedItems.length === 0) return;
+    if (!isActive || mergedItems.length === 0 || addingOlder.current) return;
     didInitialScrollRef.current = true;
     scrollToBottom(true);
   }, [isActive, mergedItems.length, scrollToBottom]);
 
   // When subsequent new messages arrive, smooth-scroll to bottom.
   useEffect(() => {
-    if (!didInitialScrollRef.current) return;
+    if (!didInitialScrollRef.current || addingOlder.current) return;
     if (mergedItems.length > 0) {
       scrollToBottom();
     }
@@ -429,10 +457,20 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
         <div ref={scrollContainerRef} className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2">
-          {!isLoading && mergedItems.length > visibleCount && (
-            <button type="button" onClick={loadOlder} className="w-full py-2 text-xs text-zinc-400 hover:text-white">
+          {!isLoading && (hiddenLoaded || hasOlder) && !signInWall && (
+            <button type="button" data-side-chat-older onClick={loadOlder} disabled={loadingOlder} className="w-full py-2 text-xs text-zinc-400 hover:text-white disabled:opacity-60">
               {_copy("copy.f17671d83db0", { defaultValue: "Load older messages" })}
             </button>
+          )}
+          {!isLoading && !hiddenLoaded && signInWall && (
+            <button type="button" data-side-chat-sign-in onClick={() => openLoginModal()} className="w-full py-2 text-xs text-zinc-400 hover:text-white">
+              {_copy("copy.27c26a5a38b3", { defaultValue: "Sign in to see older messages" })}
+            </button>
+          )}
+          {!isLoading && !hiddenLoaded && !hasOlder && !signInWall && messages.length > 0 && (
+            <p data-side-chat-start className="py-2 text-center text-[11px] text-zinc-500">
+              {_copy("copy.feaf753f6557", { defaultValue: "Start of the chat" })}
+            </p>
           )}
           {isLoading ? (
             <>
@@ -638,6 +676,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           onReact={addReaction}
                           onRemoveReaction={removeReaction}
                           messageId={msg.id}
+                          ownLine={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()}
                         />
                       )}
                     </div>

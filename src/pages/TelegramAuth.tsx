@@ -1,3 +1,4 @@
+import { SignInWaitFrame } from "@/components/app/login/SignInWaitFrame";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -140,6 +141,10 @@ export default function TelegramAuth() {
     }
     window.location.replace(next);
   }, [params]);
+
+  if (!failed) {
+    return <SignInWaitFrame label={_copy("copy.afc99407f777", { defaultValue: "Signing you in…" })} />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[hsl(var(--paper,0_0%_100%))]">
