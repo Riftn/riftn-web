@@ -5,13 +5,12 @@
  * src/data/page-bones.json, which scripts/page-bones.mjs writes by opening the
  * real pages, so a placeholder cannot drift into a shape its page never has.
  *
- * The data is its own small chunk, fetched when the browser is first idle (or
- * by the first placeholder that needs it). Until it lands, on a cold deep
- * link, the page's older placeholder shows.
+ * This file and its data are one lazy chunk (see PageBonesLoader).
  */
 import { useContext, useMemo, useSyncExternalStore, type ComponentType, type CSSProperties } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 import { PhonePillSkeleton } from './PageSkeletons';
+import bones from '@/data/page-bones.json';
 import '@/styles/skeleton.css';
 
 type Size = 'phone' | 'tablet' | 'desktop' | 'wide';
@@ -19,23 +18,7 @@ type Size = 'phone' | 'tablet' | 'desktop' | 'wide';
 type Entry = [number, number, number, string];
 type BonesData = Record<string, Partial<Record<Size, Entry>>>;
 
-let data: BonesData | null = null;
-const waiting = new Set<() => void>();
-let asked = false;
-/** Asked for by the first placeholder that needs it, or once the browser is idle, whichever is first. */
-function loadBones() {
-  if (asked) return;
-  asked = true;
-  void import('@/data/page-bones.json')
-    .then((m) => { data = (m.default ?? m) as unknown as BonesData; waiting.forEach((cb) => cb()); })
-    .catch(() => { asked = false; });
-}
-if (typeof window !== 'undefined') {
-  const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-  if (idle) idle(loadBones, { timeout: 4000 }); else window.setTimeout(loadBones, 2500);
-}
-
-const subscribeData = (cb: () => void) => { waiting.add(cb); return () => { waiting.delete(cb); }; };
+const data = bones as unknown as BonesData;
 
 const SIZE_QUERIES: [Size, string][] = [
   ['phone', '(max-width: 600px)'],
@@ -85,20 +68,14 @@ function shapes(raw: string) {
  */
 const VISITOR_ONLY = new Set(['agents', 'ads']);
 
-export function hasPageBones(page: string): boolean {
-  return !!data?.[page];
-}
-
 export function PageBones({ page, fallback: Fallback }: { page: string; fallback: ComponentType }) {
-  loadBones();
-  const ready = useSyncExternalStore(subscribeData, () => data, () => null);
   const size = useSyncExternalStore(subscribeSize, currentSize, () => 'desktop' as Size);
   const entry = useMemo(() => {
-    const sizes = ready?.[page];
+    const sizes = data[page];
     if (!sizes) return null;
     for (const s of FALLBACKS[size]) if (sizes[s]) return sizes[s]!;
     return null;
-  }, [ready, page, size]);
+  }, [page, size]);
   const delay = useMemo(shinePhase, []);
   const signedIn = !!useContext(AuthContext)?.isAuthenticated;
   if (!entry || (signedIn && VISITOR_ONLY.has(page))) return <Fallback />;
@@ -113,13 +90,4 @@ export function PageBones({ page, fallback: Fallback }: { page: string; fallback
       ))}
     </div>
   );
-}
-
-/** A cached page's placeholder: its measured bones, or `fallback` until they exist. */
-export function withPageBones(page: string, fallback: ComponentType): ComponentType {
-  function BonesSkeleton() {
-    return <PageBones page={page} fallback={fallback} />;
-  }
-  BonesSkeleton.displayName = `PageBones(${page})`;
-  return BonesSkeleton;
 }

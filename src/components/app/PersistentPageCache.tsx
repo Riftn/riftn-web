@@ -35,7 +35,7 @@ import {
   GenericPageSkeleton as GenericPageSkeletonDesktop,
   withPhonePill,
 } from './PageSkeletons';
-import { withPageBones } from './PageBones';
+import { withPageBones } from './PageBonesLoader';
 
 // Phones draw every page pill page's loading state as its real (empty) top
 // pill, so the pill holds still between pages; desktop keeps each layout.
