@@ -159,8 +159,12 @@ Deno.serve(async (req) => {
       };
       if (Number(body.amount) > 0) patch.payout_amount = Number(body.amount);
 
-      const { error } = await supabase.from('work_submissions').update(patch).eq('id', body.submission_id);
+      // The submission has to belong to the job named with it, so a payout
+      // cannot be filed against one job and counted on another.
+      const { data: marked, error } = await supabase.from('work_submissions').update(patch)
+        .eq('id', body.submission_id).eq('job_id', body.job_id).select('id');
       if (error) throw error;
+      if (!marked?.length) return jsonResponse({ error: 'That submission is not part of this job.' }, 404);
       await syncJobTotals(supabase, body.job_id);
       return jsonResponse({ ok: true });
     }

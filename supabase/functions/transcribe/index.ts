@@ -518,6 +518,22 @@ Deno.serve(async (req) => {
     const force = body?.force === true && bearer === SERVICE_KEY;
     const timeline: TimelineWindow[] = Array.isArray(body?.timeline) ? body.timeline : [];
 
+    // What goes back to the caller. The table's own read rule decides who may
+    // see a members-only or private transcript, and this handler reads with
+    // the service key, so answering with the whole row would hand the text to
+    // anyone who asked here instead of there. Only the progress of the job
+    // leaves for a transcript that is not public; both apps read the text
+    // from the table and use this answer for nothing but its status.
+    const internal = bearer === SERVICE_KEY;
+    const outward = (row: any) => {
+      if (!row || internal) return row;
+      if (String(row.visibility ?? 'public') === 'public') return row;
+      return {
+        source_kind: row.source_kind, source_ref: row.source_ref, status: row.status,
+        visibility: row.visibility, attempts: row.attempts, error: row.error, updated_at: row.updated_at,
+      };
+    };
+
     const db = admin();
     const { data: existing, error: readError } = await db
       .from('transcripts')
@@ -530,20 +546,20 @@ Deno.serve(async (req) => {
     if (readError) throw new Error(`could not read the transcript row: ${readError.message}`);
 
     if (action !== 'start') {
-      return json(existing ?? { status: 'absent', source_kind: target.kind, source_ref: target.ref });
+      return json(outward(existing) ?? { status: 'absent', source_kind: target.kind, source_ref: target.ref });
     }
 
     if (existing) {
       const row = existing as any;
-      if (row.status === 'ready' && !force) return json(row);
+      if (row.status === 'ready' && !force) return json(outward(row));
       // Both engines have already listened. Repeating silence burns credits.
-      if (row.status === 'empty' && row.provider === 'elevenlabs' && !force) return json(row);
-      if (row.status === 'processing' && !force && !isRetryable(row)) return json(row);
+      if (row.status === 'empty' && row.provider === 'elevenlabs' && !force) return json(outward(row));
+      if (row.status === 'processing' && !force && !isRetryable(row)) return json(outward(row));
       if ((row.status === 'failed' || row.status === 'empty') && !force && row.attempts >= MAX_ATTEMPTS) {
-        return json(row);
+        return json(outward(row));
       }
       if ((row.status === 'failed' || row.status === 'pending') && !force && !isRetryable(row)) {
-        return json(row);
+        return json(outward(row));
       }
     }
 
@@ -685,7 +701,7 @@ Deno.serve(async (req) => {
       .eq('source_ref', target.ref)
       .maybeSingle();
 
-    return json(fresh ?? { status: 'processing' });
+    return json(outward(fresh) ?? { status: 'processing' });
   } catch (e: any) {
     console.error('transcribe error', e);
     return json({ error: String(e?.message ?? e) }, 500);

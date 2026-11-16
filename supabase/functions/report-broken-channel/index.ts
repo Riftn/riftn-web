@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { callerIp, checkRateLimit } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,6 +49,23 @@ Deno.serve(async (req) => {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
+      );
+    }
+
+    // Three reports switch a channel off for everyone, so one visitor must not
+    // be able to supply all three. Each address counts once a day per channel,
+    // and only a handful of channels an hour. A repeat is answered as if it
+    // had been taken, with the count unchanged, so a player that reports on
+    // every failed load sees nothing different.
+    const ip = callerIp(req);
+    const once = await checkRateLimit(supabase, `ip:${ip}:${channel_id}`, "report-broken-channel-once", { limit: 1, windowMs: 24 * 60 * 60 * 1000 });
+    const hourly = once.allowed
+      ? await checkRateLimit(supabase, `ip:${ip}`, "report-broken-channel", { limit: 20, windowMs: 60 * 60 * 1000 })
+      : once;
+    if (!hourly.allowed) {
+      return new Response(
+        JSON.stringify({ channel_id, broken_reports: channel.broken_reports || 0, deactivated: channel.is_active === false }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 

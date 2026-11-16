@@ -194,6 +194,9 @@ export default function ArcadeGamePage() {
     const onMessage = (e: MessageEvent) => {
       const d = e.data as { source?: string; type?: string; text?: string } | null;
       if (!d || d.source !== source) return;
+      // Only the game's own frame may speak here: the `source` name in the
+      // payload is something any page holding this window could write.
+      if (e.source !== frameRef.current?.contentWindow) return;
       if (d.type === 'ready') setReady(true);
       else if (d.type === 'error') setFault(d.text ?? 'unknown');
       // Unknown types are tolerated rather than asserted on, so a stale

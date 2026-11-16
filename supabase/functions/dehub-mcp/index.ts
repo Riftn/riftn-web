@@ -1,3 +1,4 @@
+import { fetchPublic } from "../_shared/public-fetch.ts";
 import { Hono } from "hono";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
@@ -1060,7 +1061,7 @@ function buildServer(apiKey: string | null, req: Request, registry?: Map<string,
 
       if (media_url) {
         try {
-          const mediaResponse = await fetch(media_url);
+          const mediaResponse = await fetchPublic(media_url);
           if (!mediaResponse.ok) {
             return fail(`Could not download media from ${media_url} (HTTP ${mediaResponse.status}).`);
           }
@@ -1072,7 +1073,7 @@ function buildServer(apiKey: string | null, req: Request, registry?: Map<string,
           formData.append("file", file);
           formData.append("media_type", isVideo ? "video" : "image");
           if (isVideo && thumbnail_url) {
-            const thumbnailResponse = await fetch(thumbnail_url);
+            const thumbnailResponse = await fetchPublic(thumbnail_url);
             if (!thumbnailResponse.ok) return fail(`Could not download video thumbnail (HTTP ${thumbnailResponse.status}).`);
             const thumbnailBlob = await thumbnailResponse.blob();
             if (!thumbnailBlob.type.startsWith("image/")) return fail("Video thumbnail must be an image.");
@@ -1430,7 +1431,7 @@ function buildServer(apiKey: string | null, req: Request, registry?: Map<string,
         if (uploaded) { formData.append(field, uploaded); continue; }
         if (!url) continue;
         try {
-          const imageResponse = await fetch(url);
+          const imageResponse = await fetchPublic(url);
           if (!imageResponse.ok) {
             return fail(`Could not download ${field} from ${url} (HTTP ${imageResponse.status}).`);
           }

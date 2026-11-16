@@ -450,6 +450,9 @@ export default function ArcadeChessOnlinePage() {
     const onMessage = (event: MessageEvent) => {
       const data = event.data as { source?: string; type?: string; [key: string]: unknown } | null;
       if (!data || data.source !== GAME_SOURCE) return;
+      // Only the board's own frame may speak here: the `source` name in the
+      // payload is something any page holding this window could write.
+      if (event.source !== frameRef.current?.contentWindow) return;
 
       if (data.type === 'bridge-ready') {
         setFrameReady(true);
