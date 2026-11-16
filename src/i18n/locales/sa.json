@@ -8023,7 +8023,12 @@
     "failedDesc": "आवाहनं न समाप्तम् । भवतः सम्पर्कं दृष्ट्वा पुनः प्रयच्छतु ।",
     "close": "समाप्यताम्",
     "callbackRequest": "Callback request",
-    "tryAgain": "पुनः प्रयच्छतु"
+    "tryAgain": "पुनः प्रयच्छतु",
+    "ended": "कॉल समाप्त",
+    "declined": "अपहारित कार्य",
+    "noAnswer": "नो अँस्वर",
+    "missed": "अपह्वान न कृतः",
+    "callBack": "पुनः संवाद करो"
   },
   "badgeAscension": {
     "reached": "भवतः अभिप्रायः {{tier}}",

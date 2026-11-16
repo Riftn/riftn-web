@@ -8101,7 +8101,12 @@
     "failedDesc": "Ìkéde náà kò lè parí. Ṣàyẹ̀wò ìsopọ̀ rẹ kí o sì gbìyànjú lẹ́ẹ̀kan síi.",
     "close": "Pa",
     "callbackRequest": "Ibere ipe pada",
-    "tryAgain": "Gbiyanju lẹẹkansi"
+    "tryAgain": "Gbiyanju lẹẹkansi",
+    "ended": "Ìpè náà ti parí",
+    "declined": "Wọ́n kọ ìpè náà",
+    "noAnswer": "Kò sí ìdáhùn",
+    "missed": "Ìpè tí a kò gba",
+    "callBack": "Pe pada"
   },
   "badgeAscension": {
     "reached": "O dé {{tier}}",

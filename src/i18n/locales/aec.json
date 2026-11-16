@@ -7981,7 +7981,10 @@
     "failedDesc": "الاتصال ما اكتملش. تفقد الاتصال بتاعك وحاول تاني.",
     "close": "إغلاق",
     "callbackRequest": "طلب رد اتصال",
-    "tryAgain": "حاول تاني"
+    "tryAgain": "حاول تاني",
+    "declined": "المكالمة رُفضت",
+    "missed": "رنة فايتاني",
+    "callBack": "إتصال عودة"
   },
   "badgeAscension": {
     "reached": "وصلت {{tier}}",

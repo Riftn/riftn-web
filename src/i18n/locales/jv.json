@@ -8118,7 +8118,12 @@
     "failedDesc": "Panggilan ora bisa rampung. Priksa sambungan mu lan coba maneh.",
     "close": "Tutup",
     "callbackRequest": "Panjalukan callback",
-    "tryAgain": "Coba maneh"
+    "tryAgain": "Coba maneh",
+    "ended": "Panggilan wis rampung",
+    "declined": "Panggilan ditolak",
+    "noAnswer": "Ora ana jawaban",
+    "missed": "Kasus panggilan telpon ora diresponsi",
+    "callBack": "Ngono ngono"
   },
   "badgeAscension": {
     "reached": "Sampeyan tekan {{tier}}",

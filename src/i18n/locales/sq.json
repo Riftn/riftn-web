@@ -8175,7 +8175,12 @@
     "failedDesc": "Thirrja nuk mund të përfundonte. Kontrollo lidhjen dhe provo përsëri.",
     "close": "Mbyll",
     "callbackRequest": "Kërkesë për kthimin e thirrjes",
-    "tryAgain": "Provo përsëri"
+    "tryAgain": "Provo përsëri",
+    "ended": "Telefonata përfundoi",
+    "declined": "Telefonata u refuzua",
+    "noAnswer": "Nuk u përgjigj",
+    "missed": "Telefonatë e humbur",
+    "callBack": "Telefononi përsëri"
   },
   "badgeAscension": {
     "reached": "Arrite në {{tier}}",

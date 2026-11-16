@@ -8175,7 +8175,12 @@
     "failedDesc": "Apelul nu a putut fi finalizat. Verifică-ți conexiunea și încearcă din nou.",
     "close": "Închide",
     "callbackRequest": "Cerere de apel invers",
-    "tryAgain": "Încearcă din nou"
+    "tryAgain": "Încearcă din nou",
+    "ended": "Call ended",
+    "declined": "Apel respins",
+    "noAnswer": "Niciun răspuns",
+    "missed": "Apel ratat",
+    "callBack": "Sună înapoi"
   },
   "badgeAscension": {
     "reached": "Ai ajuns la {{tier}}",

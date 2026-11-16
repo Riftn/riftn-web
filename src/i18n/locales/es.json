@@ -9006,7 +9006,12 @@
     "failedDesc": "No se ha podido completar la llamada. Comprueba tu conexión e inténtalo de nuevo.",
     "close": "Cerrar",
     "callbackRequest": "Solicitud de devolución de llamada",
-    "tryAgain": "Inténtalo de nuevo"
+    "tryAgain": "Inténtalo de nuevo",
+    "ended": "Llamada terminada",
+    "declined": "Llamada rechazada",
+    "noAnswer": "Sin respuesta",
+    "missed": "Llamada perdida",
+    "callBack": "Devolver la llamada"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",

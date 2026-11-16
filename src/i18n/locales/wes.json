@@ -7632,7 +7632,12 @@
     "failedDesc": "Call no go complete. Check connection yu, try again.",
     "close": "Klos",
     "callbackRequest": "Callback request",
-    "tryAgain": "Tray agen"
+    "tryAgain": "Tray agen",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "You don reach {{tier}}",

@@ -8291,7 +8291,12 @@
     "failedDesc": "Không thể hoàn thành cuộc gọi. Kiểm tra kết nối của bạn và thử lại.",
     "close": "Đóng",
     "callbackRequest": "Yêu cầu gọi lại",
-    "tryAgain": "Thử lại"
+    "tryAgain": "Thử lại",
+    "ended": "Đã kết thúc cuộc gọi",
+    "declined": "Đã từ chối cuộc gọi",
+    "noAnswer": "Không trả lời",
+    "missed": "Cuộc gọi nhỡ",
+    "callBack": "Gọi lại"
   },
   "badgeAscension": {
     "reached": "Bạn đã đến {{tier}}",

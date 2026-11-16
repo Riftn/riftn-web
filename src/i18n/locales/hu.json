@@ -8179,7 +8179,12 @@
     "failedDesc": "A hívást nem sikerült befejezni. Ellenőrizd a kapcsolatot, és próbálkozz újra.",
     "close": "Bezárás",
     "callbackRequest": "Visszahívási kérés",
-    "tryAgain": "Próbálkozz újra"
+    "tryAgain": "Próbálkozz újra",
+    "ended": "Hívás véget ért",
+    "declined": "Hívás elutasítva",
+    "noAnswer": "Nincs válasz",
+    "missed": "Elmaradt hívás",
+    "callBack": "Visszahívás"
   },
   "badgeAscension": {
     "reached": "Elérted a következő számot:{{tier}}",

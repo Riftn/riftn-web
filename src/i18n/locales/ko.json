@@ -8281,7 +8281,12 @@
     "failedDesc": "통화를 완료할 수 없습니다. 연결을 확인하고 다시 시도하세요.",
     "close": "닫기",
     "callbackRequest": "전화 회신 요청",
-    "tryAgain": "다시 시도하기"
+    "tryAgain": "다시 시도하기",
+    "ended": "통화 종료",
+    "declined": "통화 거절됨",
+    "noAnswer": "응답 없음",
+    "missed": "부재중 전화",
+    "callBack": "다시 걸기"
   },
   "badgeAscension": {
     "reached": "{{tier}} 에 도달했습니다",

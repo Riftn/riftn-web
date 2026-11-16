@@ -8310,7 +8310,12 @@
     "failedDesc": "Der Anruf konnte nicht abgeschlossen werden. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
     "close": "Schließen",
     "callbackRequest": "Rückrufanfrage",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "ended": "Anruf beendet",
+    "declined": "Anruf abgelehnt",
+    "noAnswer": "Keine Antwort",
+    "missed": "Verpasster Anruf",
+    "callBack": "Zurückrufen"
   },
   "badgeAscension": {
     "reached": "Du hast {{tier}} erreicht",

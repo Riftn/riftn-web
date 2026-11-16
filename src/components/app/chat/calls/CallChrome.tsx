@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronDown, type LucideIcon } from 'lucide-react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getAccountSummaries } from '@/lib/api/dehub/users';
-import { cn } from '@/lib/utils';
+import '@/styles/call-stage.css';
 
 /**
- * The shared chrome for the voice and video call surfaces.
+ * The shared chrome for every call surface: ringing, connecting, in-call and
+ * ended all happen on one stage.
  *
- * A call now takes the whole viewport instead of a bottom drawer: the drawer
- * could be swiped away mid-call, and on a phone it left the controls floating
- * over a live page. What stays ours is the palette — no green accept and no red
- * hang-up anywhere, because the design system keeps both off every surface. The
- * one high-contrast control is the solid foreground fill, and which action gets
- * it depends on the screen: accept while ringing, end once the call is up.
- *
- * Round buttons are the single exception to our rounded-square button recipe,
- * and only here: an in-call control follows the platform's phone convention.
- * Avatars stay rounded squares.
+ * The stage is mounted beside the app shell, so it carries its own palette
+ * (styles/call-stage.css) instead of the shell's colour tokens, and each theme
+ * restyles it there, down to the pulse around the avatar while a call rings.
+ * What stays ours on every theme: no green accept and no red hang-up. The one
+ * strong control is the solid fill, and which action gets it depends on the
+ * step: accept while ringing, end once the call is up.
  */
 
 export function shortenAddress(address: string): string {
@@ -65,76 +61,106 @@ export function usePeerIdentity(peerAddress: string): PeerIdentity {
   return identity;
 }
 
-export function CallSurface({
-  children,
+export function peerInitial(name: string): string {
+  return name.replace(/^@/, '').slice(0, 1).toUpperCase() || '?';
+}
+
+/**
+ * The stage itself. On a phone it fills the screen; from tablet width up it is
+ * a call window over the dimmed app. Behind the content sits the other
+ * person's picture, blurred and tinted by the theme, or their camera once a
+ * video call is live (`remote`).
+ */
+export function CallStage({
+  peer,
+  video = false,
+  live = false,
+  remote,
   onMinimize,
   minimizeLabel,
+  children,
 }: {
+  peer: PeerIdentity;
+  video?: boolean;
+  /** Remote video is on screen: chrome switches to its over-video treatment. */
+  live?: boolean;
+  remote?: React.ReactNode;
+  onMinimize?: () => void;
+  minimizeLabel?: string;
   children: React.ReactNode;
-  onMinimize: () => void;
-  minimizeLabel: string;
 }) {
   return (
-    <div className="fixed inset-0 z-[120] flex flex-col bg-background">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(180deg, hsl(var(--muted)/0.55) 0%, hsl(var(--background)) 55%, hsl(var(--background)) 100%)',
-        }}
-      />
-      <button
-        type="button"
-        onClick={onMinimize}
-        aria-label={minimizeLabel}
-        title={minimizeLabel}
-        className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-foreground/5 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
-      >
-        <ChevronDown className="h-5 w-5" />
-      </button>
-      <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
+    <div className="call-stage" data-video={video ? 'true' : 'false'} data-live={live ? 'true' : 'false'} role="dialog" aria-modal="true" aria-label={peer.name}>
+      <div className="call-stage__scrim hidden md:block" />
+      <div className="call-stage__win">
+        {live && remote ? (
+          <div className="call-stage__remote">{remote}</div>
+        ) : (
+          <>
+            {peer.avatarUrl ? <div className="call-stage__backdrop" style={{ backgroundImage: `url("${peer.avatarUrl}")` }} /> : null}
+            <div className="call-stage__tint" />
+          </>
+        )}
+        {onMinimize ? (
+          <button type="button" className="call-stage__min" onClick={onMinimize} aria-label={minimizeLabel} title={minimizeLabel}>
+            <ChevronDown className="h-5 w-5" />
+          </button>
+        ) : null}
+        {children}
+      </div>
     </div>
   );
 }
 
+/** Who is on the other end, and where the call has got to. `ringing` turns on the theme's pulse. */
 export function CallIdentity({
   kindIcon: KindIcon,
   kindLabel,
-  name,
+  peer,
   status,
-  avatarUrl,
+  ringing = false,
+  children,
 }: {
-  kindIcon: LucideIcon;
+  kindIcon: React.ComponentType<{ className?: string }>;
   kindLabel: string;
-  name: string;
+  peer: PeerIdentity;
   status: React.ReactNode;
-  avatarUrl: string | null;
+  ringing?: boolean;
+  children?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 text-center">
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+    <div className="call-stage__id">
+      <div className="call-stage__kind">
         <KindIcon className="h-3.5 w-3.5" />
         <span>{kindLabel}</span>
       </div>
-      <p className="max-w-[90vw] truncate text-3xl font-bold tracking-tight text-foreground">
-        {name}
-      </p>
-      <p className="text-[15px] tabular-nums text-muted-foreground">{status}</p>
-      <div className="mt-7 rounded-[20px] border border-border/60 bg-foreground/5 p-1">
-        <Avatar className="h-28 w-28 rounded-2xl">
-          {avatarUrl ? <AvatarImage src={avatarUrl} alt={name} className="rounded-2xl object-cover" /> : null}
-          <AvatarFallback className="rounded-2xl text-2xl">
-            {name.replace(/^@/, '').slice(0, 1).toUpperCase() || '?'}
-          </AvatarFallback>
-        </Avatar>
+      <p className="call-stage__name">{peer.name}</p>
+      <p className="call-stage__status" aria-live="polite">{status}</p>
+      <div className={`call-stage__avatar${ringing ? ' call-rings' : ''}`}>
+        {peer.avatarUrl
+          ? <img src={peer.avatarUrl} alt="" />
+          : <span>{peerInitial(peer.name)}</span>}
       </div>
+      {children}
     </div>
+  );
+}
+
+/** Voice bars. They only say "the line is open"; they do not meter the audio. */
+export function CallWave({ paused = false, bars = 12 }: { paused?: boolean; bars?: number }) {
+  const heights = [8, 16, 11, 22, 9, 19, 13, 22, 10, 17, 8, 14];
+  return (
+    <span className="call-wave" data-paused={paused ? 'true' : 'false'} aria-hidden>
+      {heights.slice(0, bars).map((height, index) => (
+        <i key={index} style={{ height, animationDelay: `${-index * 0.13}s` }} />
+      ))}
+    </span>
   );
 }
 
 /**
  * One round control with its label underneath. `active` inverts it to the solid
- * fill — the same treatment the primary action gets — so a muted mic reads at a
+ * fill, the same treatment the primary action gets, so a muted mic reads at a
  * glance without reaching for a colour we do not have.
  */
 export function CallControl({
@@ -143,42 +169,64 @@ export function CallControl({
   onClick,
   active,
   primary,
+  disabled,
+  compact,
 }: {
-  icon: LucideIcon;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   label: string;
   onClick: () => void;
   active?: boolean;
   primary?: boolean;
+  disabled?: boolean;
+  /** Icon only, for the minimised pill. */
+  compact?: boolean;
 }) {
-  const solid = primary || active;
+  const button = (
+    <button
+      type="button"
+      className="call-btn"
+      data-solid={primary || active ? 'true' : 'false'}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={compact ? label : undefined}
+      aria-pressed={active ? true : undefined}
+    >
+      <Icon className={compact ? 'h-4 w-4' : 'h-6 w-6'} />
+    </button>
+  );
+  if (compact) return button;
   return (
-    <div className="flex w-1/3 flex-col items-center gap-2.5 sm:w-auto sm:min-w-[92px]">
-      <button
-        type="button"
-        onClick={onClick}
-        aria-label={label}
-        aria-pressed={active ? true : undefined}
-        className={cn(
-          'flex h-[68px] w-[68px] items-center justify-center rounded-full transition-colors',
-          solid
-            ? 'bg-foreground text-background hover:bg-foreground/90'
-            : 'border border-border/60 bg-foreground/10 text-foreground hover:bg-foreground/20',
-        )}
-      >
-        <Icon className="h-6 w-6" />
-      </button>
-      <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
+    <div className="call-ctl">
+      {button}
+      <span>{label}</span>
     </div>
   );
 }
 
-/** The glass slab the controls sit in, welded to the bottom of the surface. */
-export function CallControlPanel({ children }: { children: React.ReactNode }) {
+/** The glass dock the round controls sit in. */
+export function CallDock({ children }: { children: React.ReactNode }) {
+  return <div className="call-dock">{children}</div>;
+}
+
+/** A wide labelled button: accept, decline, call back. `solid` marks the one to press. */
+export function CallPill({
+  icon: Icon,
+  label,
+  onClick,
+  solid,
+  quiet,
+}: {
+  icon?: LucideIcon | React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  solid?: boolean;
+  quiet?: boolean;
+}) {
   return (
-    <div className="px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-      <div className="mx-auto flex w-full max-w-md flex-wrap items-start justify-center gap-y-5 rounded-[32px] border border-border/60 bg-foreground/[0.06] px-3 py-6 backdrop-blur-xl sm:gap-x-2">
-        {children}
-      </div>
-    </div>
+    <button type="button" className="call-pill" data-solid={solid ? 'true' : 'false'} data-quiet={quiet ? 'true' : 'false'} onClick={onClick}>
+      {Icon ? <Icon className={quiet ? 'h-4 w-4' : 'h-5 w-5'} /> : null}
+      <span>{label}</span>
+    </button>
   );
 }

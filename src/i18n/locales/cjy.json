@@ -8145,7 +8145,12 @@
     "failedDesc": "无法完成通话。检查您的连接并重试。",
     "close": "关闭",
     "callbackRequest": "回拨请求",
-    "tryAgain": "重试"
+    "tryAgain": "重试",
+    "ended": "通话结束",
+    "declined": "通话被拒",
+    "noAnswer": "无人接听",
+    "missed": "未接来电",
+    "callBack": "回拨"
   },
   "badgeAscension": {
     "reached": "你到达了 {{tier}}",

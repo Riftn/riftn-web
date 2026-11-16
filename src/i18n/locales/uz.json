@@ -8165,7 +8165,12 @@
     "failedDesc": "Qo'ng'iroqni yakunlab bo'lmadi. Internet aloqangizni tekshiring va qaytadan urinib ko'ring.",
     "close": "Yopish",
     "callbackRequest": "Qayta qo'ng'iroq qilish so'rovi",
-    "tryAgain": "Qayta urinish"
+    "tryAgain": "Qayta urinish",
+    "ended": "Qo'ng'iroq tugadi",
+    "declined": "Qo'ng'iroq rad etildi",
+    "noAnswer": "Javob yo'q",
+    "missed": "Qo'ng'iroq o'tkazib yuborildi",
+    "callBack": "Qayta qo'ng'iroq qiling"
   },
   "badgeAscension": {
     "reached": "Siz {{tier}} ga yetdingiz",

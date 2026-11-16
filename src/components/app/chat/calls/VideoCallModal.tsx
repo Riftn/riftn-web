@@ -1,21 +1,20 @@
 import React from 'react';
 import { CallDuration } from './CallDuration';
-import { Phone, PhoneOff, RotateCcw } from "lucide-react";
-import MicOff from "@/components/ui/cut-icons/mic-off";
-import Video from "@/components/ui/cut-icons/video";
-import VideoOff from "@/components/ui/cut-icons/video-off";
-
-import Mic from "@/components/ui/cut-icons/mic";
-
+import { PhoneOff, RotateCcw, MessageCircle } from 'lucide-react';
+import MicOff from '@/components/ui/cut-icons/mic-off';
+import Video from '@/components/ui/cut-icons/video';
+import VideoOff from '@/components/ui/cut-icons/video-off';
+import Mic from '@/components/ui/cut-icons/mic';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
+import { openDmDock } from '@/hooks/use-dm-dock';
 import {
-  CallSurface,
+  CallStage,
   CallIdentity,
   CallControl,
-  CallControlPanel,
+  CallDock,
+  CallPill,
   usePeerIdentity,
 } from './CallChrome';
 
@@ -24,6 +23,7 @@ const VideoCallModal: React.FC = () => {
   const {
     isCallActive,
     isIncoming,
+    isRinging,
     currentCall,
     peerAddress,
     isConnecting,
@@ -55,66 +55,67 @@ const VideoCallModal: React.FC = () => {
 
   const statusText = isIncoming
     ? t('calls.incoming')
-    : isConnecting
-      ? t('calls.connecting')
-      : <CallDuration fallback={t('calls.connected')} />;
+    : isRinging
+      ? t('calls.calling')
+      : isConnecting
+        ? t('calls.connecting')
+        : <CallDuration fallback={t('calls.connected')} />;
+
+  const messageInstead = () => {
+    const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
+    endCall();
+    openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
+  };
 
   return (
-    <CallSurface onMinimize={minimizeCall} minimizeLabel={t('calls.minimize')}>
-      {/* Remote video fills the surface once the call is up; before that this is
-          the ringing screen and shows who is on the other end. */}
+    <CallStage
+      peer={peer}
+      video
+      live={isCallActive}
+      remote={<div ref={attachRemoteVideo} />}
+      onMinimize={isIncoming ? undefined : minimizeCall}
+      minimizeLabel={t('calls.minimize')}
+    >
       {isCallActive ? (
-        <div
-          ref={attachRemoteVideo}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-start px-6 pt-20">
-          <CallIdentity
-            kindIcon={Video}
-            kindLabel={t('calls.videoCall')}
-            name={peer.name}
-            status={statusText}
-            avatarUrl={peer.avatarUrl}
-          />
-        </div>
-      )}
-
-      {/* Local preview */}
-      <div
-        className={cn(
-          'absolute left-4 top-16 h-40 w-28 overflow-hidden rounded-2xl border border-border/60 bg-muted',
-          !isCallActive && 'bottom-auto',
-        )}
-      >
-        <div
-            ref={attachLocalVideo}
-          className={cn('h-full w-full object-cover', isCameraOff && 'hidden')}
-        />
-        {isCameraOff && (
-          <div className="flex h-full w-full items-center justify-center">
-            <VideoOff className="h-5 w-5 text-muted-foreground" />
+        // Name and length ride over the remote video once it is up.
+        <div className="call-stage__top">
+          <div className="call-stage__chip">
+            <span>{peer.name}</span>
+            <span>{statusText}</span>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <CallIdentity
+          kindIcon={Video}
+          kindLabel={t('calls.videoCall')}
+          peer={peer}
+          status={statusText}
+          ringing={isIncoming || isRinging}
+        />
+      )}
 
-      {/* Name + duration ride over the remote video once it is up */}
-      {isCallActive && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-col items-center gap-0.5 bg-gradient-to-b from-background/85 to-transparent px-5 pb-8 pt-5">
-          <p className="max-w-[80vw] truncate text-lg font-semibold text-foreground">{peer.name}</p>
-          <p className="text-[13px] tabular-nums text-muted-foreground">{statusText}</p>
+      {/* Your own camera. Hidden on an incoming call until you accept: there is no track yet. */}
+      {!isIncoming && (
+        <div className="call-stage__self">
+          <div ref={attachLocalVideo} className={isCameraOff ? 'hidden' : undefined} />
+          {isCameraOff && (
+            <div className="call-stage__self-off">
+              <VideoOff className="h-5 w-5" />
+            </div>
+          )}
         </div>
       )}
 
-      <div className={cn('mt-auto', isCallActive && 'relative z-10')}>
-        <CallControlPanel>
-          {isIncoming ? (
-            <>
-              <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
-              <CallControl icon={Phone} label={t('calls.accept')} onClick={acceptCall} primary />
-            </>
-          ) : (
-            <>
+      <div className="call-stage__foot">
+        {isIncoming ? (
+          <div className="call-row">
+            <CallPill icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
+            <CallPill icon={Video} label={t('calls.accept')} onClick={acceptCall} solid />
+          </div>
+        ) : (
+          <>
+            {isRinging ? <CallPill icon={MessageCircle} label={t('messages.message')} onClick={messageInstead} quiet /> : null}
+            <CallDock>
               <CallControl
                 icon={isMuted ? MicOff : Mic}
                 label={isMuted ? t('calls.unmute') : t('calls.mute')}
@@ -128,12 +129,12 @@ const VideoCallModal: React.FC = () => {
                 active={isCameraOff}
               />
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
-              <CallControl icon={PhoneOff} label={t('calls.end')} onClick={endCall} primary />
-            </>
-          )}
-        </CallControlPanel>
+              <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
+            </CallDock>
+          </>
+        )}
       </div>
-    </CallSurface>
+    </CallStage>
   );
 };
 

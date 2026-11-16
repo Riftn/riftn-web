@@ -7991,7 +7991,12 @@
     "failedDesc": "无法完成通话。检查你的连接并重试。",
     "close": "关闭",
     "callbackRequest": "回拨请求",
-    "tryAgain": "重试"
+    "tryAgain": "重试",
+    "ended": "通话结束",
+    "declined": "电话被拒",
+    "noAnswer": "无答案",
+    "missed": "漏接电话",
+    "callBack": "回电"
   },
   "badgeAscension": {
     "reached": "你到达了 {{tier}}",

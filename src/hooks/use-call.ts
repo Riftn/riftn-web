@@ -15,7 +15,17 @@ export interface CallSession {
   status: 'ringing' | 'connected' | 'ended'; call_type: 'audio' | 'video';
   signaling_data?: any; created_at: string;
 }
+/** How a call finished, kept briefly so the stage can say so and offer a way back. */
+export type CallOutcome = 'ended' | 'declined' | 'no_answer' | 'missed';
+export interface CallSummary {
+  peerAddress: string; callType: 'audio' | 'video'; outcome: CallOutcome;
+  /** Formatted length of a call that connected; null for one that never did. */
+  duration: string | null;
+}
 export interface UseCallReturn {
+  /** The caller's side while the other phone is still ringing. */
+  isRinging: boolean;
+  callSummary: CallSummary | null; dismissCallSummary: () => void;
   isCallActive: boolean; isIncoming: boolean; currentCall: CallSession | null;
   isConnecting: boolean; isMuted: boolean; isCameraOff: boolean; isUserOffline: boolean;
   callFailureReason: 'user_offline' | 'technical_error' | null;
@@ -49,6 +59,13 @@ export const useCall = (): UseCallReturn => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [callStartedAt, setCallStartedAt] = useState<number | null>(null);
   const [mediaRevision, setMediaRevision] = useState(0);
+  const [callSummary, setCallSummary] = useState<CallSummary | null>(null);
+  const summaryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dismissCallSummary = useCallback(() => {
+    if (summaryTimerRef.current) clearTimeout(summaryTimerRef.current);
+    summaryTimerRef.current = null;
+    setCallSummary(null);
+  }, []);
   const currentCallRef = useRef<CallSession | null>(null);
   const startedAtRef = useRef<number | null>(null);
   const generationRef = useRef(0);
@@ -98,7 +115,7 @@ export const useCall = (): UseCallReturn => {
     // Retry leaving if a pending join completed after the first teardown.
     try { await media.client?.leave(); } catch {}
   }, []);
-  const endCall = useCallback(async () => {
+  const finishCall = useCallback(async (reason?: Exclude<CallOutcome, 'ended'>) => {
     const call = currentCallRef.current;
     const startedAt = startedAtRef.current;
     generationRef.current += 1;
@@ -116,8 +133,30 @@ export const useCall = (): UseCallReturn => {
     if (call && startedAt != null) {
       callMessageHandlerRef.current?.(`📞 ${call.call_type === 'video' ? 'Video' : 'Voice'} call ended · ${formatCallDuration(startedAt)}`);
     }
+    const outcome: CallOutcome | null = startedAt != null ? 'ended' : reason ?? null;
+    if (call && outcome) {
+      const mine = call.caller_address.toLowerCase() === userAddress?.toLowerCase();
+      if (summaryTimerRef.current) clearTimeout(summaryTimerRef.current);
+      setCallSummary({
+        peerAddress: mine ? call.recipient_address : call.caller_address,
+        callType: call.call_type, outcome,
+        duration: startedAt != null ? formatCallDuration(startedAt) : null,
+      });
+      summaryTimerRef.current = setTimeout(() => { summaryTimerRef.current = null; setCallSummary(null); }, 6000);
+    }
     await Promise.all([disposeMedia(media), markEnded(call)]);
-  }, [publishCall, clearTimers, disposeMedia, markEnded]);
+  }, [publishCall, clearTimers, disposeMedia, markEnded, userAddress]);
+  const endCall = useCallback(() => finishCall(), [finishCall]);
+  /** The far side closed the call. Before anyone answered, that is a decline (ours) or a missed call (theirs). */
+  const remoteClosed = useCallback(() => {
+    const call = currentCallRef.current;
+    if (!call) return;
+    if (startedAtRef.current != null || call.status !== 'ringing' || joiningRef.current) { void finishCall(); return; }
+    if (call.caller_address.toLowerCase() === userAddress?.toLowerCase()) {
+      callMessageHandlerRef.current?.(call.call_type === 'video' ? '📵 Video call declined' : '📵 Voice call declined');
+      void finishCall('declined');
+    } else void finishCall('missed');
+  }, [finishCall, userAddress]);
 
   const joinAgoraChannel = useCallback(async (call: CallSession, generation: number): Promise<boolean> => {
     const current = () => generationRef.current === generation && currentCallRef.current?.id === call.id;
@@ -203,6 +242,7 @@ export const useCall = (): UseCallReturn => {
 
   const startCall = useCallback(async (recipientAddress: string, callType: 'audio' | 'video' = 'audio') => {
     if (!userAddress || currentCallRef.current) return;
+    dismissCallSummary();
     const generation = ++generationRef.current;
     const pending: CallSession = {
       id: 'pending', caller_address: userAddress.toLowerCase(), recipient_address: recipientAddress.toLowerCase(),
@@ -234,7 +274,7 @@ export const useCall = (): UseCallReturn => {
           if (generationRef.current !== generation || startedAtRef.current != null) return;
           setCallFailureReason('user_offline'); setIsUserOffline(true);
           callMessageHandlerRef.current?.(callType === 'video' ? '📵 Missed video call' : '📵 Missed voice call');
-          void endCall();
+          void finishCall('no_answer');
         }, 30_000);
       }
       let checking = false;
@@ -244,7 +284,7 @@ export const useCall = (): UseCallReturn => {
         try {
           const { data: status } = await callClient.from('call_sessions').select('status').eq('id', call.id).single();
           if (generationRef.current !== generation) return;
-          if (status?.status === 'ended') void endCall();
+          if (status?.status === 'ended') remoteClosed();
           else if (status?.status === 'connected') {
             publishCall({ ...currentCallRef.current!, status: 'connected' });
             if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
@@ -258,7 +298,7 @@ export const useCall = (): UseCallReturn => {
         console.warn('Call start failed', error); setCallFailureReason('technical_error'); await endCall();
       }
     }
-  }, [userAddress, callClient, publishCall, markEnded, joinAgoraChannel, endCall]);
+  }, [userAddress, callClient, publishCall, markEnded, joinAgoraChannel, endCall, finishCall, remoteClosed, dismissCallSummary]);
 
   const acceptCall = useCallback(async () => {
     const call = currentCallRef.current;
@@ -298,7 +338,7 @@ export const useCall = (): UseCallReturn => {
       visualActivity.setCall(true, true);
       const ringGeneration = generationRef.current;
       callTimeoutRef.current = setTimeout(() => {
-        if (generationRef.current === ringGeneration && !joiningRef.current) void endCall();
+        if (generationRef.current === ringGeneration && !joiningRef.current) void finishCall('missed');
       }, Math.max(0, 45_000 - age));
     } finally {
       if (ringCheckRef.current === request) {
@@ -306,16 +346,18 @@ export const useCall = (): UseCallReturn => {
         if (request.recover && generationRef.current === generation) void checkRef.current();
       }
     }
-  }, [userAddress, callClient, publishCall, endCall]);
+  }, [userAddress, callClient, publishCall, finishCall]);
   const checkRef = useRef(checkForCalls);
   checkRef.current = checkForCalls;
+  const remoteClosedRef = useRef(remoteClosed);
+  remoteClosedRef.current = remoteClosed;
   useEffect(() => {
     if (!userAddress) return;
     const channel = supabase.channel(`call:${userAddress.toLowerCase()}`, { config: { private: true } })
       .on('broadcast', { event: 'call' }, (message: { payload?: Pick<CallSession, 'id' | 'status'> }) => {
         const ping = message.payload;
         if (ping?.status === 'ringing') void checkRef.current(true);
-        else if (ping?.status === 'ended' && currentCallRef.current?.id === ping.id) void endCall();
+        else if (ping?.status === 'ended' && currentCallRef.current?.id === ping.id) remoteClosedRef.current();
       }).subscribe(status => { if (status === 'SUBSCRIBED') void checkRef.current(); });
     const poll = () => { if (document.visibilityState !== 'hidden') void checkRef.current(); };
     const interval = setInterval(poll, 15_000);
@@ -328,9 +370,10 @@ export const useCall = (): UseCallReturn => {
       window.removeEventListener('online', poll);
       void supabase.removeChannel(channel);
     };
-  }, [userAddress, endCall]);
+  }, [userAddress]);
   useEffect(() => {
     publishCall(null);
+    dismissCallSummary();
     startedAtRef.current = null;
     joiningRef.current = false;
     setCallStartedAt(null); setIsCallActive(false); setIsIncoming(false); setIsConnecting(false);
@@ -346,7 +389,7 @@ export const useCall = (): UseCallReturn => {
     visualActivity.setCall(false, false);
     void disposeMedia(media); void markEnded(call);
     };
-  }, [userAddress, clearTimers, disposeMedia, markEnded, publishCall]);
+  }, [userAddress, clearTimers, disposeMedia, markEnded, publishCall, dismissCallSummary]);
   useEffect(() => {
     const media = mediaRef.current;
     if (!media || media.closed || isMinimized) return;
@@ -390,12 +433,15 @@ export const useCall = (): UseCallReturn => {
   const peerAddress = currentCall
     ? currentCall.caller_address.toLowerCase() === userAddress?.toLowerCase()
       ? currentCall.recipient_address : currentCall.caller_address : '';
+  const isRinging = !!currentCall && isConnecting && !isCallActive && currentCall.status === 'ringing'
+    && currentCall.caller_address.toLowerCase() === userAddress?.toLowerCase();
   return useMemo(() => ({
+    isRinging, callSummary, dismissCallSummary,
     isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
     attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
-  }), [isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
+  }), [isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);
 };

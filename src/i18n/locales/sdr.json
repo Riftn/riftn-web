@@ -7847,7 +7847,12 @@
     "failedDesc": "कॉल पूरा नइ भइल। अपन कनेक्शन चेक करऽ अउर फिर से कोशिश करऽ।",
     "close": "बंद करऽ",
     "callbackRequest": "कॉलबैक रिक्वेस्ट",
-    "tryAgain": "फिर से कोशिश करऽ"
+    "tryAgain": "फिर से कोशिश करऽ",
+    "ended": "फोन कटला",
+    "declined": "Call ke kat dewar gelak",
+    "noAnswer": "कोनो जवाब",
+    "missed": "मिस्ड कॉल",
+    "callBack": "कॉल बैक"
   },
   "badgeAscension": {
     "reached": "आप {{tier}} पर पहुंच गए",

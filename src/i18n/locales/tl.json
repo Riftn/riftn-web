@@ -8216,7 +8216,12 @@
     "failedDesc": "Hindi makumpleto ang tawag. Suriin ang iyong koneksyon at subukang muli.",
     "close": "Isara",
     "callbackRequest": "Kahilingan sa callback",
-    "tryAgain": "Subukan muli"
+    "tryAgain": "Subukan muli",
+    "ended": "Natapos na ang tawag",
+    "declined": "Tinanggihan ang tawag",
+    "noAnswer": "Walang sumasagot",
+    "missed": "Hindi nasagot na tawag",
+    "callBack": "Tumawag ulit"
   },
   "badgeAscension": {
     "reached": "Naabot mo ang {{tier}}",

@@ -8182,7 +8182,12 @@
     "failedDesc": "Hovor se nepodařilo dokončit. Zkontrolujte připojení a zkuste to znovu.",
     "close": "Zavřít",
     "callbackRequest": "Žádost o zpětné volání",
-    "tryAgain": "Zkusit znovu"
+    "tryAgain": "Zkusit znovu",
+    "ended": "Hovor ukončen",
+    "declined": "Hovor byl odmítnut",
+    "noAnswer": "Žádná odpověď",
+    "missed": "Zmeškaný hovor",
+    "callBack": "Zavolat zpět"
   },
   "badgeAscension": {
     "reached": "Dovolali jste se na {{tier}}",

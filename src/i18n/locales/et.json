@@ -8177,7 +8177,12 @@
     "failedDesc": "Kõnet ei saanud lõpule viia. Kontrolli ühendust ja proovi uuesti.",
     "close": "Sulge",
     "callbackRequest": "Tagasihelistamise taotlus",
-    "tryAgain": "Proovi uuesti"
+    "tryAgain": "Proovi uuesti",
+    "ended": "Kõne lõppes",
+    "declined": "Kõnest keelduti",
+    "noAnswer": "Vastamata",
+    "missed": "Vastamata kõne",
+    "callBack": "Helista tagasi"
   },
   "badgeAscension": {
     "reached": "Saavutasid taseme {{tier}}",

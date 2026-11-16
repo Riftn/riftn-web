@@ -8169,7 +8169,12 @@
     "failedDesc": "Zəngi tamamlamaq mümkün olmadı. Bağlantınızı yoxlayın və yenidən cəhd edin.",
     "close": "Bağla",
     "callbackRequest": "Geri zəng sorğusu",
-    "tryAgain": "Yenidən cəhd et"
+    "tryAgain": "Yenidən cəhd et",
+    "ended": "Zəng başa çatdı",
+    "declined": "Zəngdən imtina edildi",
+    "noAnswer": "Cavab yoxdur",
+    "missed": "Cavabsız zəng",
+    "callBack": "Geri zəng et"
   },
   "badgeAscension": {
     "reached": "Siz {{tier}}-ı əldə etdiniz",

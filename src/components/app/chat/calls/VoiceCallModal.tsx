@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { CallDuration } from './CallDuration';
-import { Phone, PhoneOff } from "lucide-react";
-import MicOff from "@/components/ui/cut-icons/mic-off";
-import Volume2 from "@/components/ui/cut-icons/volume";
-
-import Mic from "@/components/ui/cut-icons/mic";
-
+import { Phone, PhoneOff, MessageCircle } from 'lucide-react';
+import MicOff from '@/components/ui/cut-icons/mic-off';
+import Volume2 from '@/components/ui/cut-icons/volume';
+import Mic from '@/components/ui/cut-icons/mic';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
+import { openDmDock } from '@/hooks/use-dm-dock';
 import {
-  CallSurface,
+  CallStage,
   CallIdentity,
   CallControl,
-  CallControlPanel,
+  CallDock,
+  CallPill,
+  CallWave,
   usePeerIdentity,
 } from './CallChrome';
 
@@ -20,6 +21,7 @@ const VoiceCallModal: React.FC = () => {
   const {
     isCallActive,
     isIncoming,
+    isRinging,
     currentCall,
     peerAddress,
     isConnecting,
@@ -57,12 +59,20 @@ const VoiceCallModal: React.FC = () => {
 
   const statusText = isIncoming
     ? t('calls.incoming')
-    : isConnecting
-      ? t('calls.connecting')
-      : <CallDuration fallback={t('calls.connected')} />;
+    : isRinging
+      ? t('calls.calling')
+      : isConnecting
+        ? t('calls.connecting')
+        : <CallDuration fallback={t('calls.connected')} />;
+
+  const messageInstead = () => {
+    const username = peer.name.startsWith('@') ? peer.name.slice(1) : undefined;
+    endCall();
+    openDmDock({ address: peerAddress, username, avatarUrl: peer.avatarUrl ?? undefined });
+  };
 
   return (
-    <CallSurface onMinimize={minimizeCall} minimizeLabel={t('calls.minimize')}>
+    <CallStage peer={peer} onMinimize={isIncoming ? undefined : minimizeCall} minimizeLabel={t('calls.minimize')}>
       <audio
         ref={remoteAudioRef}
         autoPlay
@@ -72,56 +82,58 @@ const VoiceCallModal: React.FC = () => {
         onAbort={() => setAudioNeedsInteraction(true)}
       />
 
-      <div
-        className="flex min-h-0 flex-1 flex-col items-center justify-start px-6 pt-20"
-        onClick={handleUserInteraction}
-      >
+      <div onClick={handleUserInteraction}>
         <CallIdentity
           kindIcon={Phone}
           kindLabel={t('calls.voiceCall')}
-          name={peer.name}
+          peer={peer}
           status={statusText}
-          avatarUrl={peer.avatarUrl}
-        />
-
-        {audioNeedsInteraction && (
-          <div className="mt-6 flex items-center gap-2 rounded-xl border border-border/60 bg-foreground/5 px-3 py-2">
-            <Volume2 className="h-4 w-4 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">{t('calls.tapToEnableAudio')}</p>
-          </div>
-        )}
+          ringing={isIncoming || isRinging}
+        >
+          {isCallActive ? <CallWave paused={isMuted} /> : null}
+        </CallIdentity>
       </div>
 
-      <CallControlPanel>
+      <div className="call-stage__foot">
+        {audioNeedsInteraction && (
+          <button type="button" className="call-stage__hint" onClick={handleUserInteraction}>
+            <Volume2 className="h-4 w-4" />
+            <span>{t('calls.tapToEnableAudio')}</span>
+          </button>
+        )}
         {isIncoming ? (
-          <>
-            <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
-            <CallControl
+          <div className="call-row">
+            <CallPill icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
+            <CallPill
               icon={Phone}
               label={t('calls.accept')}
               onClick={() => {
                 acceptCall();
                 handleUserInteraction();
               }}
-              primary
+              solid
             />
-          </>
+          </div>
         ) : (
           <>
-            <CallControl
-              icon={isMuted ? MicOff : Mic}
-              label={isMuted ? t('calls.unmute') : t('calls.mute')}
-              onClick={() => {
-                toggleMute();
-                handleUserInteraction();
-              }}
-              active={isMuted}
-            />
-            <CallControl icon={PhoneOff} label={t('calls.end')} onClick={endCall} primary />
+            {isRinging ? <CallPill icon={MessageCircle} label={t('messages.message')} onClick={messageInstead} quiet /> : null}
+            <CallDock>
+              <CallControl
+                icon={isMuted ? MicOff : Mic}
+                label={isMuted ? t('calls.unmute') : t('calls.mute')}
+                onClick={() => {
+                  toggleMute();
+                  handleUserInteraction();
+                }}
+                active={isMuted}
+                disabled={!isCallActive}
+              />
+              <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
+            </CallDock>
           </>
         )}
-      </CallControlPanel>
-    </CallSurface>
+      </div>
+    </CallStage>
   );
 };
 

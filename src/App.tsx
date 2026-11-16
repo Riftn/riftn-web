@@ -148,6 +148,8 @@ const JungleBackground = React.lazy(() =>
 const JungleGameLauncher = React.lazy(() =>
   import("@/components/app/jungle/JungleGameLauncher").then(m => ({ default: m.JungleGameLauncher }))
 );
+// The call stage's own corner of the state gallery (?calls=ringing).
+const CallStageGallery = React.lazy(() => import("@/pages/app/CallStageGallery"));
 const StateGalleryPage = (import.meta.env.DEV || window.location.hostname === 'staging.dehub.io')
   ? React.lazy(() => import("@/pages/app/StateGalleryPage"))
   : null;
@@ -1104,7 +1106,7 @@ const App = () => (
                       </ErrorBoundary>
                       <NativeTitleTooltips />
                       <Suspense fallback={<PageLoader />}>
-                        <StateGalleryPage />
+                        {new URLSearchParams(window.location.search).has('calls') ? <CallStageGallery /> : <StateGalleryPage />}
                       </Suspense>
                     </TooltipProvider>
                   </ThemePreviewProvider>

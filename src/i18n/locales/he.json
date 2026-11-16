@@ -8171,7 +8171,12 @@
     "failedDesc": "לא ניתן היה להשלים את השיחה. יש לבדוק את החיבור ולנסות שוב.",
     "close": "סגירה",
     "callbackRequest": "בקשת התקשרות חוזרת",
-    "tryAgain": "ניסיון חוזר"
+    "tryAgain": "ניסיון חוזר",
+    "ended": "השיחה הסתיימה",
+    "declined": "השיחה נדחתה",
+    "noAnswer": "אין מענה",
+    "missed": "שיחה שלא נענתה",
+    "callBack": "חיוג חוזר"
   },
   "badgeAscension": {
     "reached": "הגעת אל {{tier}}",

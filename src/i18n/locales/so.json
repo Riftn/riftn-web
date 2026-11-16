@@ -8102,7 +8102,12 @@
     "failedDesc": "Wicitaanka lama dhammaystiri karo. Hubi xiriirkaaga oo isku day mar kale.",
     "close": "Xir",
     "callbackRequest": "Codsiga dib u celinta",
-    "tryAgain": "Isku day mar kale"
+    "tryAgain": "Isku day mar kale",
+    "ended": "Wicitaanku wuu dhammaaday",
+    "declined": "Wicitaanka waa la diiday",
+    "noAnswer": "Jawaab ma jirin",
+    "missed": "Wicitaan la seegay",
+    "callBack": "Dib u soo wac"
   },
   "badgeAscension": {
     "reached": "Waxaad gaadhay {{tier}}",

@@ -8286,7 +8286,12 @@
     "failedDesc": "Panggilan tidak dapat diselesaikan. Periksa koneksi Anda dan coba lagi.",
     "close": "Tutup",
     "callbackRequest": "Permintaan panggilan balik",
-    "tryAgain": "Coba lagi"
+    "tryAgain": "Coba lagi",
+    "ended": "Panggilan berakhir",
+    "declined": "Panggilan ditolak",
+    "noAnswer": "Tidak ada jawaban",
+    "missed": "Panggilan terlewat",
+    "callBack": "Balas panggilan"
   },
   "badgeAscension": {
     "reached": "Anda menghubungi {{tier}}",

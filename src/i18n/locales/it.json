@@ -8283,7 +8283,12 @@
     "failedDesc": "Impossibile completare la chiamata. Controlla la connessione e riprova.",
     "close": "Chiudi",
     "callbackRequest": "Richiesta di richiamata",
-    "tryAgain": "Riprova"
+    "tryAgain": "Riprova",
+    "ended": "Chiamata terminata",
+    "declined": "Chiamata rifiutata",
+    "noAnswer": "Nessuna risposta",
+    "missed": "Chiamata persa",
+    "callBack": "Richiamare"
   },
   "badgeAscension": {
     "reached": "Hai raggiunto {{tier}}",

@@ -8180,7 +8180,12 @@
     "failedDesc": "Poziv se nije mogao dovršiti. Provjeri vezu i pokušaj ponovno.",
     "close": "Zatvori",
     "callbackRequest": "Zahtjev za povratni poziv",
-    "tryAgain": "Pokušajte ponovno"
+    "tryAgain": "Pokušajte ponovno",
+    "ended": "Poziv završen",
+    "declined": "Poziv odbijen",
+    "noAnswer": "Nema odgovora",
+    "missed": "Propuseni poziv",
+    "callBack": "Pozovi nazad"
   },
   "badgeAscension": {
     "reached": "Dosegli ste {{tier}}",

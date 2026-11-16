@@ -9006,7 +9006,12 @@
     "failedDesc": "Çağrı tamamlanamadı. Bağlantınızı kontrol edin ve tekrar deneyin.",
     "close": "Kapat",
     "callbackRequest": "Geri arama isteği",
-    "tryAgain": "Tekrar deneyin"
+    "tryAgain": "Tekrar deneyin",
+    "ended": "Arama sona erdi",
+    "declined": "Arama reddedildi",
+    "noAnswer": "Cevap yok",
+    "missed": "Cevapsız arama",
+    "callBack": "Geri ara"
   },
   "badgeAscension": {
     "reached": "{{tier}} seviyesine ulaştınız",

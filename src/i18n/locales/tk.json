@@ -8096,7 +8096,12 @@
     "failedDesc": "Dur, aýyplama haty taýýar däl. Siz öz baglanyşygyňyzy barlap, ýene-de synap görüň.",
     "close": "Ýap",
     "callbackRequest": "Çakylyk gaýtargy soragy",
-    "tryAgain": "Gaýtalaň"
+    "tryAgain": "Gaýtalaň",
+    "ended": "Gepleşik tamamlandy",
+    "declined": "Jaň ret edildi",
+    "noAnswer": "Jogap ýok",
+    "missed": "Gözden ýitiren jaňyňyz",
+    "callBack": "Gaýtadan jaň ediň"
   },
   "badgeAscension": {
     "reached": "{{tier}}",

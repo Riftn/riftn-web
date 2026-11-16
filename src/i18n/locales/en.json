@@ -8959,7 +8959,12 @@
     "failedDesc": "The call could not be completed. Check your connection and try again.",
     "close": "Close",
     "callbackRequest": "Callback request",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "ended": "Call ended",
+    "declined": "Call declined",
+    "noAnswer": "No answer",
+    "missed": "Missed call",
+    "callBack": "Call back"
   },
   "badgeAscension": {
     "reached": "You reached {{tier}}",

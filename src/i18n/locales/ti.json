@@ -8075,7 +8075,12 @@
     "failedDesc": "ኣብዚ ጉዳይ'ዚ ፡ መፍትሒታት ክዝርዝሩ ኣይከኣሉን ። ነቲ ርክብካ መርምሮ ፡ መሊስካ ፈትኖ ።",
     "close": "ምዕጻው",
     "callbackRequest": "ናይ ጻውዒት ሕቶ",
-    "tryAgain": "እንደገና ፈትኖ"
+    "tryAgain": "እንደገና ፈትኖ",
+    "ended": "ጻውዒት ተዛዚሙ",
+    "declined": "እቲ ጻውዒት ተነጺጉ",
+    "noAnswer": "መልሲ የለን",
+    "missed": "ዝጠፍአ ጻውዒት",
+    "callBack": "ዳግማይ ደውል"
   },
   "badgeAscension": {
     "reached": "ናብ {{tier}}",

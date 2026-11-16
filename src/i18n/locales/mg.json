@@ -8175,7 +8175,12 @@
     "failedDesc": "Tsy azo atao mihitsy ny antso. Hamarino ny fifandraisanao dia andramo indray.",
     "close": "AKAIKY",
     "callbackRequest": "Antso an-tariby",
-    "tryAgain": "Andramo indray"
+    "tryAgain": "Andramo indray",
+    "ended": "Tapitra ny antso",
+    "declined": "Nolavina ny antso",
+    "noAnswer": "Tsy namaly",
+    "missed": "Antso tsy voaray",
+    "callBack": "Miantso indray"
   },
   "badgeAscension": {
     "reached": "Tonga {{tier}}",

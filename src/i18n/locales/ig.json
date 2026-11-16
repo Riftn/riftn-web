@@ -8122,7 +8122,12 @@
     "failedDesc": "Enweghi ike mezue oku ahụ. Lelee njikọ gị ma nwaa ọzọ.",
     "close": "Mechie",
     "callbackRequest": "Kpọtụrụ arịrịọ",
-    "tryAgain": "Gbalịa ọzọ"
+    "tryAgain": "Gbalịa ọzọ",
+    "ended": "Ọchụgwụ gasịrị",
+    "declined": "Ọchịchịrịrị",
+    "noAnswer": "Igbo: No answer",
+    "missed": "Ozi a na-egbu ozi",
+    "callBack": "Otu n'ụzọ"
   },
   "badgeAscension": {
     "reached": "Ị ruru {{tier}}",

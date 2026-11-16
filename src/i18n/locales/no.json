@@ -8179,7 +8179,12 @@
     "failedDesc": "Samtalen kunne ikke fullføres. Sjekk forbindelsen din og prøv på nytt.",
     "close": "Lukk",
     "callbackRequest": "Tilbakeringingsforespørsel",
-    "tryAgain": "Prøv igjen"
+    "tryAgain": "Prøv igjen",
+    "ended": "Samtalen avsluttet",
+    "declined": "Anrop avvist",
+    "noAnswer": "Ikke noe svar",
+    "missed": "Tapt anrop",
+    "callBack": "Ring tilbake"
   },
   "badgeAscension": {
     "reached": "Du nådde {{tier}}",

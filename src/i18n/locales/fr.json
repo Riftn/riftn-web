@@ -9010,7 +9010,12 @@
     "failedDesc": "L'appel n'a pas pu être terminé. Vérifiez votre connexion et réessayez.",
     "close": "Fermer",
     "callbackRequest": "Demande de rappel",
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "ended": "Appel terminé",
+    "declined": "Appel refusé",
+    "noAnswer": "Pas de réponse",
+    "missed": "Appel manqué",
+    "callBack": "Rappeler"
   },
   "badgeAscension": {
     "reached": "Vous avez atteint {{tier}}",

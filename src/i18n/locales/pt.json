@@ -8865,7 +8865,12 @@
     "failedDesc": "Não foi possível concluir a chamada. Verifique a sua ligação e tente novamente.",
     "close": "Fechar",
     "callbackRequest": "Solicitação de retorno de chamada",
-    "tryAgain": "Tentar novamente"
+    "tryAgain": "Tentar novamente",
+    "ended": "Chamada encerrada",
+    "declined": "Chamada recusada",
+    "noAnswer": "Sem resposta",
+    "missed": "Chamada perdida",
+    "callBack": "Retornar chamada"
   },
   "badgeAscension": {
     "reached": "Atingiu {{tier}}",

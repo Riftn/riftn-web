@@ -8179,7 +8179,12 @@
     "failedDesc": "Zvanu nevarēja pabeigt. Pārbaudiet savienojumu un mēģiniet vēlreiz.",
     "close": "Aizvērt",
     "callbackRequest": "Atzvanīšanas pieprasījums",
-    "tryAgain": "Mēģināt vēlreiz"
+    "tryAgain": "Mēģināt vēlreiz",
+    "ended": "Zvans beidzies",
+    "declined": "Zvans noraidīts",
+    "noAnswer": "Bez atbildes",
+    "missed": "Neatbildēts zvans",
+    "callBack": "Pārzvanīt"
   },
   "badgeAscension": {
     "reached": "Jūs sasniedzāt {{tier}}",
