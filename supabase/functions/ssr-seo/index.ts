@@ -167,6 +167,22 @@ function getExtension(path: string): string {
     return match[1].toLowerCase();
 }
 
+/**
+ * The page address our edge worker hands over. It ends up in the canonical tag
+ * and in the hop back to the app, so it has to be one of our own pages.
+ */
+function ownPageUrl(raw: string | null): string {
+    if (!raw || raw.length > 2048) return "";
+    try {
+        const u = new URL(raw);
+        if (u.protocol !== "https:" || u.username || u.password || u.port) return "";
+        if (!/(?:^|\.)(?:riftn\.com|dehub\.(?:io|net))$/.test(u.hostname)) return "";
+        return u.toString().replace(/[<>"'`\\]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+    } catch {
+        return "";
+    }
+}
+
 function ensureAbsoluteUrl(url: string): string {
     if (!url) return DEHUB_LOGO;
     if (url.startsWith("http")) return url;
@@ -432,8 +448,9 @@ serve(async (req) => {
         const functionBaseUrl = IMAGE_PROXY_BASE;
 
         let fullPath = url.searchParams.get("path") || "/";
-        const originalUrl = url.searchParams.get("original_url");
-        const canonicalUrl = originalUrl || `${APP_URL}${fullPath}`;
+        const canonicalUrl = ownPageUrl(url.searchParams.get("original_url"))
+            || ownPageUrl(`${APP_URL}/${fullPath.replace(/^[\/\\]+/, "")}`)
+            || APP_URL;
 
         let cleanPath = fullPath.split("?")[0];
         if (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);

@@ -1,4 +1,6 @@
 import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
+import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { SoundtrackControl } from '@/components/app/cards/SoundtrackControl';
 import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
@@ -390,6 +392,16 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Messages icon ringing + unread number</h3>
+      <div data-messages-ring-gallery className="flex flex-wrap items-center gap-5 rounded-2xl border border-white/10 p-5">
+        {[0, 1, 3, 8, 20].map(count => (
+          <div key={count} className="flex flex-col items-center gap-3 text-xs text-zinc-400">
+            <MessagesNavGlyph unread={count} className="h-6 w-6 text-white" />
+            <UnreadCountChip count={count} />
+            <span>{count} unread</span>
+          </div>
+        ))}
+      </div>
       <h3 className="text-sm font-semibold">Unread marker + jump button</h3>
       <div data-unread-jump-gallery className="grid gap-3 sm:grid-cols-2">
         {[{ up: true, count: 3 }, { up: false, count: 2 }].map(({ up, count }) => (

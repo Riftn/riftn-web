@@ -2,7 +2,7 @@
 
 > Riftn (riftn.com), formerly DeHub (dehub.io), is an open source, user-owned and censorship-resistant social network and mobile app, in development since 2021. Posts can be minted on-chain, creators keep their audience and up to 99% of their revenue, and its token, $RIFT, replaces the old DHB token for tips, watch-to-earn rewards, staking and governance. $RIFT is not trading yet. Not to be confused with DePaul University's DeHUB portal or Rowan's DEHub.
 
-Every link below is a public page that renders without an account. The app's signed-in screens (messages, wallet, notifications, settings) are private and not listed. Machine-readable API access for assistants is described in [skill.md](https://riftn.com/skill.md).
+Every link below is a public page that renders without an account. The app's signed-in screens (messages, wallet, notifications, settings) are private and not listed. Machine-readable API access for assistants is described in [skill.md](https://riftn.com/skill.md). The full text of the FAQ and every guide below is in [llms-full.txt](https://riftn.com/llms-full.txt).
 
 ## Key facts
 

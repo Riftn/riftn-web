@@ -1,0 +1,35 @@
+.unread-count-chip { position: relative; isolation: isolate; --chip-red: #ff6874; animation: unread-chip-ring 1.5s both; }
+html:is([data-theme='light'], [data-system-tone='light']) .unread-count-chip { --chip-red: #dc3545; }
+.unread-count-chip::before, .unread-count-chip::after {
+  content: ''; position: absolute; border-radius: inherit; background: var(--chip-red); opacity: 0; pointer-events: none;
+}
+.unread-count-chip::before { inset: -1.5px; filter: blur(2px); z-index: -1; animation: unread-chip-rim 1.5s ease-out both; }
+.unread-count-chip::after { inset: 0; animation: unread-chip-hot 1.5s ease-in-out both; }
+.unread-count-chip__number { position: relative; z-index: 1; animation: unread-chip-number 1.5s ease-in-out both; }
+.unread-count-chip i {
+  position: absolute; top: 1px; bottom: 1px; width: 6px; border-radius: 50%; border: 0 solid var(--chip-red); opacity: 0;
+  pointer-events: none; --chip-direction: -1; left: -5px; border-left-width: 1.3px;
+  animation: unread-chip-wave 1s cubic-bezier(.2,.5,.3,1) both;
+}
+.unread-count-chip i[data-side='1'] { --chip-direction: 1; left: auto; right: -5px; border-left-width: 0; border-right-width: 1.3px; }
+.unread-count-chip i[data-echo='1'] { animation-delay: .14s; }
+@keyframes unread-chip-ring {
+  0%, 62%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  24% { transform: rotate(-10deg); }
+  38% { transform: rotate(6deg); }
+  52% { transform: rotate(-3deg); }
+}
+@keyframes unread-chip-rim { 0%, 100% { opacity: 0; } 10% { opacity: .9; } 60% { opacity: .7; } }
+@keyframes unread-chip-hot { 0%, 100% { opacity: 0; } 10%, 62% { opacity: 1; } }
+@keyframes unread-chip-number { 10%, 62% { color: #fff; } }
+@keyframes unread-chip-wave {
+  0% { opacity: 0; transform: translateX(0) scaleY(.9); }
+  15% { opacity: .8; }
+  100% { opacity: 0; transform: translateX(calc(var(--chip-direction) * 7px)) scaleY(1.15); }
+}
+html.reduce-motion .unread-count-chip, html.reduce-motion .unread-count-chip :is(i, .unread-count-chip__number),
+html.reduce-motion .unread-count-chip::before, html.reduce-motion .unread-count-chip::after { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .unread-count-chip, .unread-count-chip :is(i, .unread-count-chip__number), .unread-count-chip::before, .unread-count-chip::after { animation: none !important; }
+}

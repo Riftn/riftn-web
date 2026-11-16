@@ -33,7 +33,6 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { getDocsForcedTheme } from '@/lib/docs-theme';
-import dehubCoinIcon from '@/assets/dehub-coin.png';
 import { mediaImage } from '@/lib/media-url';
 import { scrollDocumentToSmooth } from '@/lib/document-scroll';
 
@@ -213,8 +212,7 @@ const getMenuItems = (t: (key: string) => string) => [{
   }, {
     title: t('nav.token'),
     path: '/docs/token',
-    icon: dehubCoinIcon,
-    isImage: true,
+    iconComponent: Coins,
     hasSubmenu: true,
     submenuItems: [{
       title: t('nav.overview'),

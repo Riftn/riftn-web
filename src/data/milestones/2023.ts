@@ -110,7 +110,7 @@ That principle is the one thing from this project we would defend hardest, becau
   'back-in-action-dehub-v2-trading-resumes-on-gateio---a-dehub-milestone-from-q1-2023': {
     excerpt:
       'Trading resumed on Gate.io after the v2 relaunch. Ten months later we left voluntarily, both decisions are in this archive.',
-    content: `Riftn v2 trading resumed on Gate.io in Q1 2023.
+    content: `DeHub v2 trading resumed on Gate.io in Q1 2023.
 
 ### What it took to get here
 

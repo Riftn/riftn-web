@@ -18,6 +18,7 @@ import { isVideoInPictureInPicture, releaseAfterPictureInPicture } from '@/lib/p
 const ShortsPhotoPager = lazy(() => import('./ShortsPhotoPager').then(m => ({ default: m.ShortsPhotoPager })));
 import { createPortal } from 'react-dom';
 import { Loader2 } from "lucide-react";
+import { formatDuration } from '@/lib/feed-utils';
 import Play from "@/components/ui/cut-icons/play";
 import Pause from "@/components/ui/cut-icons/pause";
 
@@ -103,6 +104,14 @@ interface VideoSlideProps {
    */
   progressLayer?: HTMLElement | null;
   /**
+   * A slot in the viewer's bottom stack that takes the whole scrubber, touch
+   * area and all. On phones the line on the frame's bottom edge sits inside
+   * the strip iOS keeps for its own home gesture, so a drag there switched
+   * apps instead of seeking. In the slot it is clear of that strip, a finger
+   * tall, and grows a glass lens under the finger.
+   */
+  seekLayer?: HTMLElement | null;
+  /**
    * What to play instead of `short.videoUrl`: a signed URL for a gated short,
    * `null` while it is fetched or when the viewer is refused one.
    */
@@ -137,6 +146,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
   preload,
   isFullscreen = false,
   progressLayer = null,
+  seekLayer = null,
   playbackSrc,
   onPlaybackFailed,
   sideGestures = false,
@@ -179,6 +189,8 @@ const VideoSlideBody = memo(function VideoSlideBody({
   }, [playbackPhase, onPlaybackFailed]);
   const [progress, setProgress] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  // A finger is down on the scrubber, before it has moved enough to seek.
+  const [seekPressed, setSeekPressed] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
   /**
@@ -421,6 +433,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
       // NB: do NOT capture / stop the event here — a vertical swipe that starts
       // in this strip must still reach the carousel drag layer to navigate.
       gestureRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId, mode: 'pending' };
+      setSeekPressed(true);
     };
 
     const onMove = (e: PointerEvent) => {
@@ -452,6 +465,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
     const onUp = (e: PointerEvent) => {
       const g = gestureRef.current;
       gestureRef.current = null;
+      setSeekPressed(false);
 
       if (g && g.mode === 'seek') {
         stopAll(e);
@@ -479,12 +493,22 @@ const VideoSlideBody = memo(function VideoSlideBody({
       const g = gestureRef.current;
       if (g && g.id !== e.pointerId) return; // a different finger — leave the scrub alone
       gestureRef.current = null;
+      setSeekPressed(false);
       endSeek(e);
+    };
+
+    // A press that leaves the scrubber without ever becoming a seek.
+    const releasePress = (e: PointerEvent) => {
+      const g = gestureRef.current;
+      if (!g || g.id !== e.pointerId || g.mode === 'seek') return;
+      gestureRef.current = null;
+      setSeekPressed(false);
     };
 
     const cancelSeek = () => {
       const g = gestureRef.current;
       gestureRef.current = null;
+      setSeekPressed(false);
       if (!isSeekingRef.current) return;
       isSeekingRef.current = false;
       setIsSeeking(false);
@@ -494,6 +518,19 @@ const VideoSlideBody = memo(function VideoSlideBody({
       }
     };
 
+    // Capture can be taken away while the finger is still down: the carousel
+    // lets go of the pointer when a scrub switches its drag off, and that
+    // release lands on this element. A lift or a cancel clears the gesture
+    // before this fires, so one still in flight here means the finger is
+    // down: take the pointer back, and give up only if that is refused.
+    const keepCapture = (e: PointerEvent) => {
+      const g = gestureRef.current;
+      if (isSeekingRef.current && g && g.id === e.pointerId && g.mode === 'seek') {
+        try { bar.setPointerCapture(g.id); return; } catch { /* the pointer is gone */ }
+      }
+      cancelSeek();
+    };
+
     // Swallow the ghost click that follows a scrub.
     const blockClick = (e: Event) => { e.stopPropagation(); e.stopImmediatePropagation(); };
 
@@ -501,11 +538,13 @@ const VideoSlideBody = memo(function VideoSlideBody({
     bar.addEventListener('pointermove', onMove, { capture: true });
     bar.addEventListener('pointerup', onUp, { capture: true });
     bar.addEventListener('pointercancel', onUp, { capture: true });
-    bar.addEventListener('lostpointercapture', cancelSeek);
+    bar.addEventListener('lostpointercapture', keepCapture);
     window.addEventListener('blur', cancelSeek);
     bar.addEventListener('click', blockClick, { capture: true });
     window.addEventListener('pointerup', windowFailsafe);
     window.addEventListener('pointercancel', windowFailsafe);
+    window.addEventListener('pointerup', releasePress);
+    window.addEventListener('pointercancel', releasePress);
 
     return () => {
       bar.removeEventListener('pointerdown', onDown, { capture: true });
@@ -513,13 +552,16 @@ const VideoSlideBody = memo(function VideoSlideBody({
       bar.removeEventListener('pointerup', onUp, { capture: true });
       bar.removeEventListener('pointercancel', onUp, { capture: true });
       cancelSeek();
-      bar.removeEventListener('lostpointercapture', cancelSeek);
+      bar.removeEventListener('lostpointercapture', keepCapture);
       window.removeEventListener('blur', cancelSeek);
       bar.removeEventListener('click', blockClick, { capture: true });
       window.removeEventListener('pointerup', windowFailsafe);
       window.removeEventListener('pointercancel', windowFailsafe);
+      window.removeEventListener('pointerup', releasePress);
+      window.removeEventListener('pointercancel', releasePress);
     };
-  }, [seekToPosition, onSeekStart, onSeekEnd]);
+    // `seekLayer` moves the touch area to another element, so listen there.
+  }, [seekToPosition, onSeekStart, onSeekEnd, seekLayer]);
 
   // Show the video whole (never cropped) whenever it isn't a perfect fit for the
   // frame: always in `letterbox` mode (desktop), otherwise only for non-portrait.
@@ -548,6 +590,60 @@ const VideoSlideBody = memo(function VideoSlideBody({
         visible={isSeeking}
         armed={isActive}
       />
+    </div>
+  );
+
+  // The scrubber as it is drawn in the viewer's bottom stack: a rounded line
+  // with a dot, which swells into a glass lens while a finger is on it. The
+  // lens shows the line under it enlarged, the way the app's drag toggles do.
+  const fraction = Math.min(1, Math.max(0, progress));
+  const lensUp = isSeeking || seekPressed;
+  const slotScrubber = (
+    <div
+      ref={seekLayer ? progressBarRef : undefined}
+      data-no-swipe
+      data-no-pull
+      data-shorts-scrubber
+      data-seeking={lensUp || undefined}
+      className="absolute inset-0 cursor-pointer touch-none select-none"
+    >
+      <div className={cn(
+        // The grey hairline keeps the unplayed part visible on the white plain stage.
+        "absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-white/30 shadow-[0_0_0_1px_rgba(128,128,128,0.3)] transition-[height] duration-200",
+        lensUp ? "h-2.5" : "h-1.5",
+      )}>
+        <div className="absolute inset-0 origin-left bg-white" style={{ transform: `scaleX(${fraction})` }} />
+      </div>
+      <div
+        className={cn(
+          "pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full transition-[width,height,background-color,box-shadow] duration-200 ease-[cubic-bezier(0.3,1.5,0.5,1)] motion-reduce:transition-none",
+          lensUp
+            ? "h-9 w-[62px] border border-white/60 bg-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_26px_rgba(0,0,0,0.45)] [backdrop-filter:blur(2px)_saturate(1.9)_brightness(1.25)] [-webkit-backdrop-filter:blur(2px)_saturate(1.9)_brightness(1.25)]"
+            : "h-3.5 w-3.5 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.5)]",
+        )}
+        style={{ left: `${fraction * 100}%` }}
+      >
+        {lensUp && <>
+          <span className="absolute inset-x-1.5 top-1/2 h-[15px] -translate-y-1/2 rounded-full" style={{ background: 'linear-gradient(90deg, #fff 50%, rgba(255,255,255,0.4) 50%)' }} />
+          <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/55 via-transparent to-white/15" />
+        </>}
+      </div>
+      <StoryboardPreview
+        storyboard={short.storyboard}
+        fraction={progress}
+        duration={isSeeking ? videoRef.current?.duration || 0 : 0}
+        visible={isSeeking}
+        armed={isActive}
+      />
+      {isSeeking && !short.storyboard && !!videoRef.current?.duration && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-full mb-1 -translate-x-1/2 rounded bg-black/60 px-1.5 py-0.5 text-xs font-medium tabular-nums text-white"
+          style={{ left: `clamp(20px, ${fraction * 100}%, calc(100% - 20px))` }}
+        >
+          {formatDuration(Math.floor(fraction * videoRef.current.duration))}
+        </span>
+      )}
     </div>
   );
 
@@ -702,16 +798,18 @@ const VideoSlideBody = memo(function VideoSlideBody({
       {/* Bottom 15% seek zone. The bar it draws goes out to `progressLayer`
           when there is one, so the action bar's gradient cannot sit on top of
           it — see the prop. The zone itself never moves. */}
-      <div
-        ref={progressBarRef}
-        data-no-swipe
-        data-no-pull
-        className="absolute bottom-0 left-0 right-0 z-20 cursor-pointer touch-none select-none"
-        style={{ height: '15%' }}
-      >
-        {!progressLayer && progressBar}
-      </div>
-      {progressLayer && createPortal(progressBar, progressLayer)}
+      {seekLayer ? createPortal(slotScrubber, seekLayer) : <>
+        <div
+          ref={progressBarRef}
+          data-no-swipe
+          data-no-pull
+          className="absolute bottom-0 left-0 right-0 z-20 cursor-pointer touch-none select-none"
+          style={{ height: '15%' }}
+        >
+          {!progressLayer && progressBar}
+        </div>
+        {progressLayer && createPortal(progressBar, progressLayer)}
+      </>}
     </div>
   );
 });

@@ -153,12 +153,12 @@ function SidebarNavItemInner({
 
   const showAvatar = avatarUrl !== undefined;
   const isNotifications = item.path === '/app/notifications' || item.path === '/notifications';
-  // Desktop Messages shows the red letter peeking out of the envelope instead of a count chip.
+  // Desktop Messages rings the envelope like the bell instead of showing a count chip.
   const isDesktopMessages = isDesktop && item.path === '/app/messages';
   const navIcon = (className: string) => isNotifications ? (
     <NotificationBell unread={notificationCount} size={isDesktop ? 20 : 22} />
   ) : isDesktopMessages ? (
-    <MessagesNavGlyph unread={notificationCount ?? 0} always className={className} />
+    <MessagesNavGlyph unread={notificationCount ?? 0} className={className} />
   ) : isDesktop && item.path === '/app/assistant' ? (
     <AssistantNavIcon className={className} />
   ) : !isDesktop && item.path !== '/app/messages' && item.themedIcon ? (
