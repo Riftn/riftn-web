@@ -240,6 +240,7 @@ export function ProfileHeader({
                 <button 
                   data-keep-dark
                   data-pull-through
+                  data-own-avatar={isViewingOwnProfile ? '' : undefined}
                   className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-zinc-900 backdrop-blur-none p-0.5 cursor-pointer disabled:cursor-default"
                   onClick={() => profile.avatarUrl && setFullscreenImage(profile.avatarUrl)}
                   disabled={!profile.avatarUrl}
