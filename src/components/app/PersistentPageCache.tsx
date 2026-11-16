@@ -271,7 +271,7 @@ const CachedPage = memo(function CachedPage({
           {/* Only the active page may write document metadata — see the context. */}
           <RetainedPostActivityContext.Provider value={retainedPostKey ?? null}>
             <CachedPageActiveContext.Provider value={contextActive}>
-              <HeldRoute live={shouldStayVisible}><CopyGate skeleton={SkeletonComponent} skeletonShown={skeletonShown}>{page}</CopyGate></HeldRoute>
+              <HeldRoute live={shouldStayVisible}><CopyGate skeleton={SkeletonComponent} skeletonShown={skeletonShown} copyOnly={config.key === 'home'}>{page}</CopyGate></HeldRoute>
             </CachedPageActiveContext.Provider>
           </RetainedPostActivityContext.Provider>
         </Suspense>

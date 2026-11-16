@@ -51,7 +51,17 @@ import { HomeIntroPanel, SLIDES, SLIDE_MS } from '@/components/app/home-intro/Ho
 
 const DISMISS_KEY = 'dehub.homeIntroDismissed';
 
-export function HomeIntro() {
+/** Same teardown as the boot script's own unfrost (index.html). */
+function liftIntroFrost() {
+  const root = document.documentElement;
+  if (root.dataset.feedLoading !== 'on') return;
+  root.dataset.feedLoading = 'off';
+  window.setTimeout(() => {
+    if (root.dataset.feedLoading === 'off') delete root.dataset.feedLoading;
+  }, 1300);
+}
+
+export function HomeIntro({ tab }: { tab?: string } = {}) {
   const { isAuthenticated, openLoginModal } = useAuth();
   const [dismissed, setDismissed] = useState(() => {
     try {
@@ -78,6 +88,10 @@ export function HomeIntro() {
     return () => window.clearInterval(t);
   }, [show]);
 
+  // The frost points at this panel. Once the panel is gone without being
+  // closed (signing in), it would only blur what the visitor came to see.
+  useEffect(() => { if (!show) liftIntroFrost(); }, [show]);
+
   const dismiss = useCallback(() => {
     setDismissed(true);
     try {
@@ -92,14 +106,18 @@ export function HomeIntro() {
        unfrost: flip to 'off' for the 1.2s transition in index.css, then remove
        the attribute — the sheet is a full-viewport backdrop-filter, so it has
        to stop existing rather than merely go clear. */
-    const root = document.documentElement;
-    if (root.dataset.feedLoading === 'on') {
-      root.dataset.feedLoading = 'off';
-      window.setTimeout(() => {
-        if (root.dataset.feedLoading === 'off') delete root.dataset.feedLoading;
-      }, 1300);
-    }
+    liftIntroFrost();
   }, []);
+
+  // Picking another feed tab (Shorts, Images…) without closing the panel is a
+  // request to see that feed, and the panel sits on top of it. Treat it as a
+  // close. Only a change counts, so the first paint always matches index.html.
+  const firstTab = useRef(tab);
+  useEffect(() => {
+    if (tab === firstTab.current) return;
+    firstTab.current = undefined;
+    if (tab && tab !== 'home') dismiss();
+  }, [tab, dismiss]);
 
   const goTo = useCallback((i: number) => {
     descriptionOpen.current = false;
