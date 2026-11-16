@@ -1,0 +1,19 @@
+name: Boot path snapshot
+
+on:
+  push:
+    branches: [feat/gold-coin-guilloche-web]
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/boot-path-report.mjs --update
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boot-path-baseline
+          path: scripts/boot-path-baseline.json
