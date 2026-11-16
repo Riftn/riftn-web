@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimit } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -811,6 +812,22 @@ Deno.serve(async (req) => {
     const activeSorts: SortMode[] = filterSorts
       ? ALL_SORT_MODES.filter((s) => filterSorts!.includes(s))
       : [...ALL_SORT_MODES];
+
+    // The schedule calls this with the publishable key, so anyone else can
+    // too. A run rewrites the cached boards and reads the chain, so the same
+    // job is taken at most twice a minute and all jobs together twenty times;
+    // anything past that is told it was skipped and costs nothing. The
+    // scheduled calls sit far inside both numbers.
+    const jobKey = `${mode}|${activePeriods.join(",")}|${activeSorts.join(",")}`;
+    const sameJob = await checkRateLimit(supabase, `job:${jobKey}`, "refresh-leaderboard-cache", { limit: 2, windowMs: 60_000 });
+    const anyJob = sameJob.allowed
+      ? await checkRateLimit(supabase, "all", "refresh-leaderboard-cache-total", { limit: 20, windowMs: 60_000 })
+      : sameJob;
+    if (!anyJob.allowed) {
+      return new Response(JSON.stringify({ skipped: "throttled" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // ================================================================
     // LIGHT MODE: recompute period caches from cached 'all' boards,

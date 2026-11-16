@@ -3,6 +3,7 @@
 // and Riftn branding. Default format = PNG (required by most platforms).
 // Use ?format=svg for lightweight previews.
 
+import { fetchPublic } from "../_shared/public-fetch.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { encode as encodeB64 } from "https://deno.land/std@0.190.0/encoding/base64.ts";
 import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
@@ -40,6 +41,7 @@ async function loadFonts(): Promise<Uint8Array[]> {
   return out;
 }
 
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-wallet-address, x-dehub-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-request-id, prefer",
@@ -52,7 +54,9 @@ async function fetchWithTimeout(url: string, ms = 3500): Promise<Response | null
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), ms);
-    const r = await fetch(url, { signal: ctrl.signal, redirect: "follow" });
+    // The banner address arrives in the query string, so it is fetched as a
+    // stranger's URL: public web addresses only, on every redirect hop.
+    const r = await fetchPublic(url, { signal: ctrl.signal });
     clearTimeout(t);
     return r;
   } catch {

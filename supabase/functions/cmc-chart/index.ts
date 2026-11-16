@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { rateLimitByIp } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +20,11 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Every call here is a metered CoinMarketCap request for a symbol the
+  // caller picked, so one address gets a browsing-sized allowance and no more.
+  const limited = await rateLimitByIp(req, 'cmc-chart', { limit: 1200, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
 
   try {
     const apiKey = Deno.env.get('CMC_API_KEY');
@@ -41,7 +47,7 @@ serve(async (req) => {
     }
 
     const clean = normalizeSymbol(rawSymbol);
-    if (!clean) {
+    if (!clean || clean.length > 20 || days > 3650) {
       return new Response(JSON.stringify({ error: 'Invalid symbol format' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
