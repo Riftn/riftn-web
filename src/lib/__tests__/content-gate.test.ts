@@ -23,6 +23,10 @@ import {
   isSubscriberPlanBuyable,
   subscriberPlanPrice,
   cheapestSubscriberPlan,
+  cheapestSubscriberQuote,
+  subscriberPlanQuote,
+  formatSubscriberPrice,
+  formatSubscriberUsd,
   type SubscriberPlan,
 } from '../content-gate';
 
@@ -113,5 +117,44 @@ describe('isHoldGated', () => {
     expect(isHoldGated(true, 0)).toBe(false);
     expect(isHoldGated(true, '250')).toBe(true);
     expect(isHoldGated(false, 250)).toBe(false);
+  });
+});
+
+describe('subscriberPlanQuote', () => {
+  const usdPlan = { isPublished: true, chains: [{ chainId: 8453, price: 0.01, currency: 'USDT', isPublished: true }] };
+  const dhbPlan = { isPublished: true, chains: [{ chainId: 8453, price: 25, isPublished: true }] };
+
+  it('reads a $0.01 USDT plan as 10 tokens, not 0', () => {
+    expect(subscriberPlanQuote(usdPlan)).toEqual({ tokens: 10, usd: 0.01 });
+    expect(formatSubscriberPrice(subscriberPlanQuote(usdPlan)!.tokens)).toBe('10');
+  });
+
+  it('values a DHB plan in dollars at the pre-listing rate', () => {
+    expect(subscriberPlanQuote(dhbPlan)).toEqual({ tokens: 25, usd: 0.025 });
+  });
+
+  it('picks the cheapest plan in dollars across currencies', () => {
+    // 25 DHB is $0.025, cheaper than $0.05 even though 25 > 0.05.
+    const pricier = { ...usdPlan, chains: [{ ...usdPlan.chains[0], price: 0.05 }] };
+    expect(cheapestSubscriberQuote([pricier, dhbPlan])).toEqual({ tokens: 25, usd: 0.025 });
+  });
+
+  it('has no quote for a plan without a price', () => {
+    expect(subscriberPlanQuote({ isPublished: true, chains: [] })).toBeUndefined();
+  });
+});
+
+describe('formatSubscriberUsd', () => {
+  it('shows cents', () => {
+    expect(formatSubscriberUsd(0.01)).toBe('$0.01');
+    expect(formatSubscriberUsd(4.5)).toBe('$4.50');
+  });
+  it('floors tiny values at <$0.01', () => {
+    expect(formatSubscriberUsd(0.004)).toBe('<$0.01');
+    expect(formatSubscriberUsd(0.00001)).toBe('<$0.01');
+  });
+  it('shows nothing for zero or junk', () => {
+    expect(formatSubscriberUsd(0)).toBe('');
+    expect(formatSubscriberUsd(NaN)).toBe('');
   });
 });
