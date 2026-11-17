@@ -285,15 +285,23 @@ export function SwipeableRow({ actions, children, className }: SwipeableRowProps
               close();
               action.onSelect();
             }}
-            className={cn(
-              'shrink-0 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold text-white',
-              'data-[armed]:brightness-110',
-              action.className ?? 'bg-zinc-700',
-            )}
+            // Every action is the same shape: a rounded key inset in its slot
+            // (Minimal and Minimal Light square it, as they square everything).
+            // The fill sits on the inner key, not the button, so a theme's
+            // control styling for grey buttons cannot round Block alone.
+            className="shrink-0 flex p-1 text-[11px] font-semibold text-white data-[armed]:brightness-110"
             style={{ width: ACTION_WIDTH }}
           >
-            {action.icon}
-            <span className="px-1 truncate">{action.label}</span>
+            <span
+              data-swipe-action-key
+              className={cn(
+                'flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl',
+                action.className ?? 'bg-zinc-700',
+              )}
+            >
+              {action.icon}
+              <span className="max-w-full px-1 truncate">{action.label}</span>
+            </span>
           </button>
         ))}
         </div>
