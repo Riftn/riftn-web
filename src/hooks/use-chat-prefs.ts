@@ -19,6 +19,7 @@ function applyPatch(prev: ChatPref | undefined, id: string, patch: ChatPrefPatch
     ...(patch.pinned !== undefined ? { pinnedAt: patch.pinned ? now : null } : {}),
     ...(patch.archived !== undefined ? { archivedAt: patch.archived ? now : null, ...(patch.archived ? { pinnedAt: null } : {}) } : {}),
     ...(patch.unread !== undefined ? { markedUnread: patch.unread } : {}),
+    ...(patch.listed !== undefined ? { listedAt: patch.listed ? now : null } : {}),
     ...(patch.mutedUntil !== undefined ? { mutedUntil: patch.mutedUntil === 'forever' ? FOREVER : patch.mutedUntil } : {}),
   };
 }

@@ -26,5 +26,7 @@ describe('community kinds', () => {
       { communities: null },
     ] as any;
     expect(chatsFromMemberships(rows).map(c => c.id)).toEqual(['c', 'b']);
+    // A community chat joins once the member chose Show in Chats.
+    expect(chatsFromMemberships(rows, id => id === 'a').map(c => c.id)).toEqual(['a', 'c', 'b']);
   });
 });

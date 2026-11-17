@@ -23,7 +23,7 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
-import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
+import { roomChatId, type ChatPref } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Archive, BellOff, Pin, ChevronLeft, Check } from 'lucide-react';
 import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
@@ -68,7 +68,7 @@ import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/Ne
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
 import { ChatSearchDiscover } from '@/components/app/chat/ChatSearchDiscover';
-import { useUserCommunities } from '@/hooks/use-communities';
+import { useUserCommunities, type Community } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
 
 /**
@@ -254,6 +254,8 @@ export function ConversationItem({
  */
 // Settings open inside the full-screen chat (computers) rather than leaving it.
 const EmbeddedSettings = lazy(() => import('@/pages/app/SettingsPage'));
+// Group, channel and community chats: the community chat itself, loaded on first open.
+const RoomChatPane = lazy(() => import('@/components/app/chat/RoomChatPane').then(m => ({ default: m.RoomChatPane })));
 // Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
 const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
 
@@ -263,10 +265,13 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
   const [showPublicChat, setShowPublicChat] = useState(false);
+  // A group, channel or community chat open in place (same chat as the
+  // community page's Chat tab).
+  const [selectedRoom, setSelectedRoom] = useState<Community | null>(null);
   // A conversation open on mobile reclaims the bottom-nav zone as well as the
   // header zone: the reply strip (orb flanked by two drafts) lives in that
   // band until the composer takes focus and the keyboard takes it instead.
-  const chatOpen = !!selectedConversation || showPublicChat;
+  const chatOpen = !!selectedConversation || showPublicChat || !!selectedRoom;
   // The inbox scrolls behind the floating nav. Reserve its clearance inside
   // the list, so a viewport-height gap cannot paint a strip behind the pill.
   const keyboardOpen = useKeyboardOpen();
@@ -304,7 +309,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // input fired 2 network requests per KEYSTROKE (each prefix a fresh cache
   // key). Debounce to one request pair per pause in typing.
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
-  const groupChats = chatsFromMemberships(myMemberships).filter(c =>
+  // Your own pins, archives, mutes, "marked unread" and Show in Chats, for DMs
+  // and for group/channel/community chats alike.
+  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
+  const groupChats = chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).filter(c =>
     !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
   const { isAuthenticated, walletAddress, isLoading: authLoading, openLoginModal } = useAuth();
   const guest = !authLoading && !isAuthenticated;
@@ -425,7 +433,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // "marked unread", plus the right-click menu on every row.
   const richList = fullscreen && !phonePill;
   const clearHistory = useClearChatHistory();
-  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
   const [showArchived, setShowArchived] = useState(false);
   // The last request was accepted or deleted: nothing left to show here.
   const noRequestsLeft = requestConversations.length === 0;
@@ -433,8 +440,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const [showSettings, setShowSettings] = useState(false);
   // Opening any chat puts settings away.
   useEffect(() => {
-    if (selectedConversation || showPublicChat) setShowSettings(false);
-  }, [selectedConversation, showPublicChat]);
+    if (selectedConversation || showPublicChat || selectedRoom) setShowSettings(false);
+  }, [selectedConversation, showPublicChat, selectedRoom]);
   const [clearTarget, setClearTarget] = useState<DeHubConversation | null>(null);
   const lastActivity = (c: DeHubConversation) => c.lastMessage?.createdAt || c.updatedAt;
   const archivedConversations = richList
@@ -451,6 +458,36 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       : visibleConversations
           .filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)))
           .sort((a, b) => pinnedAt(b) - pinnedAt(a));
+  // Group, channel and community chats share the same settings, keyed by
+  // community id: archived ones move under Archived chats, pinned ones go first.
+  const roomPref = (c: { id: string }) => chatPrefs.get(roomChatId(c.id));
+  const roomPinnedAt = (c: { id: string }) => {
+    const at = roomPref(c)?.pinnedAt;
+    return at ? new Date(at).getTime() : 0;
+  };
+  const archivedRooms = richList ? groupChats.filter(c => isArchived(roomPref(c))) : [];
+  const listedRooms = !richList
+    ? groupChats
+    : showArchived
+      ? archivedRooms
+      : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
+  const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
+    pref: roomPref(c),
+    hasUnread: false,
+    // Group pushes come from the community side and do not read this yet.
+    canMute: false,
+    onPref: (patch) => updateChatPref(roomChatId(c.id), patch),
+    onHideFromList: c.kind !== 'group' && c.kind !== 'channel'
+      ? () => updateChatPref(roomChatId(c.id), { listed: false, pinned: false })
+      : undefined,
+  });
+  const openRoomChat = (c: (typeof groupChats)[number]) => {
+    if (roomPref(c)?.markedUnread) updateChatPref(roomChatId(c.id), { unread: false });
+    setSelectedConversation(null);
+    setShowPublicChat(false);
+    setSelectedRoom(c);
+  };
+  const archivedCount = archivedConversations.length + archivedRooms.length;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
   const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
@@ -781,7 +818,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     }
     setSelectedConversation(null);
     setShowPublicChat(false);
+    setSelectedRoom(null);
   }, [navigate]);
+  // Opening a DM or the public chat puts an open group chat away.
+  useEffect(() => {
+    if (selectedConversation || showPublicChat) setSelectedRoom(null);
+  }, [selectedConversation, showPublicChat]);
   useEffect(() => {
     if (!hasVirtualSelected || !isMessagesRouteActive) return;
     // Poll at 1.5s for first 30s, then 5s
@@ -914,6 +956,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       </div>
     </div>
   ) : null;
+
+  const roomPane = fullscreen && selectedRoom ? (
+    <div className="h-full overflow-hidden pt-1">
+      <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+    </div>
+  ) : null;
+  if (selectedRoom && !fullscreen) {
+    return (
+      <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+        <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+      </div>
+    );
+  }
 
   const dmPane = fullscreen && selectedConversation && !showPublicChat ? (
     <DirectMessageChat
@@ -1106,9 +1161,22 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </button>
 
             {/* Groups and channels you are in */}
-            {groupChats.map((chat) => (
-              <GroupChatRow key={chat.id} community={chat} onClick={() => navigate(`/app/communities/${chat.slug}?tab=chat`)} />
-            ))}
+            {listedRooms.map((chat) => {
+              const row = (
+                <GroupChatRow
+                  key={chat.id}
+                  community={chat}
+                  pref={richList ? roomPref(chat) : undefined}
+                  selected={fullscreen && selectedRoom?.id === chat.id}
+                  onClick={() => openRoomChat(chat)}
+                />
+              );
+              return richList ? (
+                <ChatRowContextMenu key={chat.id} {...roomOptionsFor(chat)}>
+                  <div data-chat-row data-pinned={roomPinnedAt(chat) > 0 ? '' : undefined}>{row}</div>
+                </ChatRowContextMenu>
+              ) : row;
+            })}
             </>)}
 
             {/* Loading State */}
@@ -1180,7 +1248,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 </ChatRowContextMenu>
               ) : row;
             })}
-            {richList && !showArchived && archivedConversations.length > 0 && !searchQuery.trim() && (
+            {richList && !showArchived && archivedCount > 0 && !searchQuery.trim() && (
               <button
                 type="button"
                 data-chat-archive-open
@@ -1189,7 +1257,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               >
                 <Archive className="h-[18px] w-[18px]" />
                 <span className="flex-1">{_copy('chatMenu.archivedChats', { defaultValue: 'Archived chats' })}</span>
-                <span className="tabular-nums">{archivedConversations.length}</span>
+                <span className="tabular-nums">{archivedCount}</span>
               </button>
             )}
 
@@ -1329,7 +1397,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       <FullScreenChatShell
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
-        chat={settingsPane ?? publicChatPane ?? dmPane}
+        chat={settingsPane ?? publicChatPane ?? roomPane ?? dmPane}
         list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
       />
     );
