@@ -25,7 +25,8 @@ import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/c
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
 import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Archive, BellOff, Pin, ChevronLeft } from 'lucide-react';
+import { Archive, BellOff, Pin, ChevronLeft, Check } from 'lucide-react';
+import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
@@ -54,7 +55,7 @@ import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { showUndoToast } from '@/components/ui/undo-toast';
 import { scheduleDelete, undoDelete, usePendingDeletes, UNDO_WINDOW_MS } from '@/lib/undoable-delete';
 import { useKeyboardOpen, useVisualViewportBox } from '@/hooks/use-keyboard-open';
-import { emitSendMessage } from '@/lib/api/dehub/dm-socket';
+import { emitSendMessage, waitForDmSocket } from '@/lib/api/dehub/dm-socket';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import chatBubbleIcon from '@/assets/icons/chat-bubble.webp';
 import messagesBubbleIcon from '@/assets/icons/messages-3d-icon.webp';
@@ -112,14 +113,19 @@ export function ConversationItem({
   onDelete,
   onBlock,
   pref,
+  selecting = false,
+  checked = false,
 }: {
   conversation: DeHubConversation;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   isSelected: boolean;
   onDelete: (conversation: DeHubConversation) => void;
   onBlock: (conversation: DeHubConversation) => void;
   /** Your own pin / mute / marked-unread for this chat (full-screen chat). */
   pref?: ChatPref;
+  /** Picking several chats: each row shows a tick circle and a click toggles it. */
+  selecting?: boolean;
+  checked?: boolean;
 }) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
@@ -165,10 +171,23 @@ export function ConversationItem({
       onClick={onClick}
       data-chat-list-row
       data-selected={isSelected ? '' : undefined}
+      data-bulk-checked={selecting ? (checked ? 'true' : 'false') : undefined}
+      aria-pressed={selecting ? checked : undefined}
       className={`w-full flex items-center gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left ${
-        isSelected ? 'bg-white/[0.07]' : ''
+        (selecting ? checked : isSelected) ? 'bg-white/[0.07]' : ''
       }`}
     >
+      {selecting && (
+        <span
+          data-bulk-tick
+          aria-hidden="true"
+          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+            checked ? 'border-white bg-white text-black' : 'border-white/30 text-transparent'
+          }`}
+        >
+          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+        </span>
+      )}
       <LiveRipple ids={[otherUser?.address, otherUser?.username]} className="relative rounded-lg">
         <Avatar className="w-12 h-12">
           {avatarUrl && <AvatarImage src={avatarUrl} />}
@@ -450,7 +469,89 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onBlock: () => handleBlockConversationUser(conv),
       onClearHistory: () => setClearTarget(conv),
       onDelete: () => handleDeleteConversation(conv),
+      onSelectMany: () => setBulkIds(new Set([conv.id])),
     };
+  };
+
+  // Picking several chats at once: right-click a chat and choose Select (or
+  // Ctrl/Cmd-click one), then click others. null = not picking.
+  const [bulkIds, setBulkIds] = useState<Set<string> | null>(null);
+  const toggleBulk = (id: string) => setBulkIds(prev => {
+    const next = new Set(prev ?? []);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  // Leaving the list (archive, requests, phone layout) or Esc ends picking.
+  useEffect(() => { if (!richList) setBulkIds(null); }, [richList]);
+  useEffect(() => { setBulkIds(null); }, [showArchived, inRequests]);
+  const picking = bulkIds !== null;
+  useEffect(() => {
+    if (!picking) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setBulkIds(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [picking]);
+  // Only chats still on screen count (one may have been deleted meanwhile).
+  const bulkChats = picking ? liveConversations.filter(c => bulkIds.has(c.id)) : [];
+  const bulkAllUnread = bulkChats.length > 0 && bulkChats.every(c => c.unreadCount > 0 || !!chatPrefs.get(c.id)?.markedUnread);
+  const bulkToggleUnread = () => {
+    const unread = !bulkAllUnread;
+    for (const c of bulkChats) updateChatPref(c.id, { unread });
+    setBulkIds(null);
+  };
+  const bulkDelete = () => {
+    const ids = bulkChats.map(c => c.id);
+    if (!ids.length) return;
+    setSelectedConversation(prev => (prev && ids.includes(prev.id) ? null : prev));
+    for (const id of ids) {
+      scheduleDelete(id, () =>
+        deleteConversationMutation.mutate(id, {
+          onError: () => toast.error(t('messages.deleteConversationFailed')),
+        }),
+      );
+    }
+    showUndoToast(
+      ids.length === 1
+        ? t('toasts.conversation_deleted')
+        : _copy('chatBulk.deleted', { defaultValue: '{{count}} chats deleted', count: ids.length }),
+      {
+        id: `dm-bulk-delete-${ids.join(',')}`,
+        duration: UNDO_WINDOW_MS,
+        undoLabel: t('common.undo'),
+        closeLabel: t('common.close'),
+        onUndo: () => ids.forEach(id => undoDelete(id)),
+      },
+    );
+    setBulkIds(null);
+  };
+  // One message, sent to each picked chat as its own normal (encrypted where
+  // possible) message. Resolves with how many it reached.
+  const bulkReply = async (text: string): Promise<number> => {
+    const targets = bulkChats.filter(c => (c.otherUser || c.participants?.[0])?.address);
+    let ok = 0;
+    try {
+      await waitForDmSocket();
+    } catch {
+      toast.error(_copy('chatBulk.offline', { defaultValue: 'Not connected. Try again in a moment.' }));
+      return 0;
+    }
+    const results = await Promise.allSettled(targets.map(async (c) => {
+      const peer = (c.otherUser || c.participants?.[0])?.address;
+      const wire = await prepareOutgoing(peer, text);
+      await emitSendMessage({ dmId: c.id, content: wire.content, type: 'msg' });
+    }));
+    ok = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.length - ok;
+    if (failed === 0) {
+      toast.success(_copy('chatBulk.sent', { defaultValue: 'Sent to {{count}} chats', count: ok }));
+      setBulkIds(null);
+    } else if (ok > 0) {
+      toast.error(_copy('chatBulk.partSent', { defaultValue: 'Sent to {{ok}} of {{total}} chats', ok, total: results.length }));
+      setBulkIds(null);
+    } else {
+      toast.error(_copy('chatBulk.notSent', { defaultValue: 'Could not send. Try again.' }));
+    }
+    return ok;
   };
   const openConversation = (conv: DeHubConversation) => {
     setShowPublicChat(false);
@@ -1060,7 +1161,13 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <ConversationItem
                   key={conv.id}
                   conversation={conv}
-                  onClick={() => openConversation(conv)}
+                  onClick={(e) => {
+                    if (picking) { toggleBulk(conv.id); return; }
+                    if (richList && (e.metaKey || e.ctrlKey)) { e.preventDefault(); setBulkIds(new Set([conv.id])); return; }
+                    openConversation(conv);
+                  }}
+                  selecting={picking}
+                  checked={!!bulkIds?.has(conv.id)}
                   isSelected={selectedConversation?.id === conv.id}
                   onDelete={handleDeleteConversation}
                   onBlock={handleBlockConversationUser}
@@ -1161,6 +1268,17 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.3084651a3386", { defaultValue: "Searching users..." })}</div>
             )}
           </div>
+          {picking && (
+            <BulkChatBar
+              count={bulkChats.length}
+              chatIds={bulkChats.map(c => c.id)}
+              allUnread={bulkAllUnread}
+              onToggleUnread={bulkToggleUnread}
+              onDelete={bulkDelete}
+              onReply={bulkReply}
+              onCancel={() => setBulkIds(null)}
+            />
+          )}
         </div>
       </div>
   );
