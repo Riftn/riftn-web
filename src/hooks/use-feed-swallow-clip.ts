@@ -274,6 +274,8 @@ export function useFeedSwallowClip(
       themeObserver.disconnect(); pageObserver?.disconnect(); resizeObserver.disconnect();
       if (frame !== null) cancelAnimationFrame(frame);
       clearAnimation(); writeShift(null); clipTarget.style.clipPath = ''; el.style.clipPath = ''; delete el.dataset.feedSwallowDriver;
+      if (cutLayer) { cutLayer.style.paddingBottom = ''; cutLayer.style.marginBottom = ''; }
+      el.style.display = originalDisplay;
       if (bounds) bounds.style.overflow = originalOverflow;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
