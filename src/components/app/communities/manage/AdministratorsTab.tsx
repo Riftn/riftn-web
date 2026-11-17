@@ -59,9 +59,12 @@ function Avatar({ url }: { url?: string }) {
   );
 }
 
-function OwnerRow({ member }: { member: CommunityMember }) {
+function OwnerRow({ member, identity }: { member: CommunityMember; identity?: CandidateIdentity }) {
   const { t } = useTranslation();
-  const { data: profile } = useDeHubProfile({ userId: member.wallet_address });
+  const { data: fetched } = useDeHubProfile({ userId: identity ? undefined : member.wallet_address });
+  const profile = identity
+    ? { name: identity.name, handle: identity.username, avatarUrl: identity.avatarUrl, badgeBalance: identity.badgeBalance }
+    : fetched;
   const displayName = profile?.name || shortAddress(member.wallet_address);
 
   return (
@@ -89,12 +92,17 @@ function OwnerRow({ member }: { member: CommunityMember }) {
 function AdminRow({
   member,
   onManage,
+  identity,
 }: {
   member: CommunityMember;
   onManage: ((member: CommunityMember) => void) | null;
+  identity?: CandidateIdentity;
 }) {
   const { t } = useTranslation();
-  const { data: profile } = useDeHubProfile({ userId: member.wallet_address });
+  const { data: fetched } = useDeHubProfile({ userId: identity ? undefined : member.wallet_address });
+  const profile = identity
+    ? { name: identity.name, handle: identity.username, avatarUrl: identity.avatarUrl, badgeBalance: identity.badgeBalance }
+    : fetched;
 
   const displayName = profile?.name || shortAddress(member.wallet_address);
   const badge = member.custom_title?.trim() || t('communities.manage.adminBadge', { defaultValue: 'Admin' });
@@ -188,7 +196,7 @@ function CandidateRow({
       <CardHeader
         className="pb-0 pr-1"
         username={displayName}
-        handle={identity?.username || shortAddress(member.wallet_address)}
+        handle={identity?.username}
         avatarSeed={identity?.avatarUrl || ''}
         contentType="post"
         creatorId={member.wallet_address}
@@ -237,6 +245,11 @@ export function AdministratorsTab({ community, membership }: AdministratorsTabPr
     () => (canAddAdmins ? plainMembers.slice(0, SEARCH_POOL) : []),
     [canAddAdmins, plainMembers],
   );
+  // Owner and admins ride the same batch call, so their rows fill in with it.
+  const lookup = useMemo<CommunityMember[]>(
+    () => [...(owner ? [owner] : []), ...admins, ...pool],
+    [owner, admins, pool],
+  );
 
   const query = debouncedSearch.trim().toLowerCase();
 
@@ -244,9 +257,9 @@ export function AdministratorsTab({ community, membership }: AdministratorsTabPr
   // loaded as soon as the tab opens: the list shows people, never bare wallets,
   // and typing a name or @handle filters straight away.
   const { data: profileSummaries = [], isLoading: profilesLoading } = useQuery({
-    queryKey: ['community-admin-candidate-profiles', community.id, pool.map(member => member.wallet_address).join(',')],
-    queryFn: () => getAccountSummaries(pool.map(member => member.wallet_address)),
-    enabled: pool.length > 0,
+    queryKey: ['community-admin-candidate-profiles', community.id, lookup.map(member => member.wallet_address).join(',')],
+    queryFn: () => getAccountSummaries(lookup.map(member => member.wallet_address)),
+    enabled: lookup.length > 0,
     staleTime: 5 * 60_000,
     retry: 1,
   });
@@ -285,7 +298,7 @@ export function AdministratorsTab({ community, membership }: AdministratorsTabPr
         </h3>
         <div className="rounded-xl border border-white/10 bg-white/[0.04] p-1.5">
           {owner ? (
-            <OwnerRow member={owner} />
+            <OwnerRow member={owner} identity={profiles.get(owner.wallet_address.toLowerCase())} />
           ) : (
             <p className="text-center text-zinc-500 text-sm py-4">
               {isLoading
@@ -316,7 +329,12 @@ export function AdministratorsTab({ community, membership }: AdministratorsTabPr
             )
           ) : (
             admins.map((admin) => (
-              <AdminRow key={admin.id} member={admin} onManage={canManageAdmin ? openFor : null} />
+              <AdminRow
+                key={admin.id}
+                member={admin}
+                identity={profiles.get(admin.wallet_address.toLowerCase())}
+                onManage={canManageAdmin ? openFor : null}
+              />
             ))
           )}
         </div>
