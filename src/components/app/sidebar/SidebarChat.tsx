@@ -5,6 +5,7 @@ import CornerDownRight from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useDraft } from '@/hooks/use-draft';
+import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2 } from "lucide-react";
@@ -342,6 +343,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     scrollToBottom(true);
   }, [isActive, mergedItems.length, scrollToBottom]);
 
+  // Rows keep growing after they land (images, reply quotes, reactions), so
+  // keep the newest line fully in view while the reader is at the bottom.
+  const followLatest = useRef(true);
+  useStickToBottom(scrollContainerRef, () => followLatest.current && !addingOlder.current && !olderAnchor.current, isActive);
+
   // When subsequent new messages arrive, smooth-scroll to bottom.
   useEffect(() => {
     if (!didInitialScrollRef.current || addingOlder.current) return;
@@ -456,7 +462,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     <div data-sidebar-chat className="flex flex-col h-full pl-px">
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
-        <div ref={scrollContainerRef} className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2">
+        <div
+          ref={scrollContainerRef}
+          onScroll={(event) => {
+            const el = event.currentTarget;
+            followLatest.current = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
+          }}
+          className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2"
+        >
           {!isLoading && (hiddenLoaded || hasOlder) && !signInWall && (
             <button type="button" data-side-chat-older onClick={loadOlder} disabled={loadingOlder} className="w-full py-2 text-xs text-zinc-400 hover:text-white disabled:opacity-60">
               {_copy("copy.f17671d83db0", { defaultValue: "Load older messages" })}
