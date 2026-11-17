@@ -30,3 +30,20 @@ describe('swipe actions on transparent theme rows', () => {
     expect(action.disabled).toBe(true);
   });
 });
+
+describe('swipe action shape', () => {
+  it('draws every action as the same rounded key, the fill on the key not the slot', () => {
+    const { container } = render(<SwipeableRow actions={[
+      { key: 'block', label: 'Block', icon: null, onSelect: vi.fn(), className: 'bg-zinc-700' },
+      { key: 'delete', label: 'Delete', icon: null, onSelect: vi.fn(), className: 'bg-red-600', destructive: true },
+    ]}><button>Conversation</button></SwipeableRow>);
+    const keys = container.querySelectorAll('[data-swipe-actions] > button > [data-swipe-action-key]');
+    expect(keys).toHaveLength(2);
+    for (const key of keys) expect(key.className).toContain('rounded-xl');
+    expect(keys[0].className).toContain('bg-zinc-700');
+    expect(keys[1].className).toContain('bg-red-600');
+    for (const button of container.querySelectorAll('[data-swipe-actions] > button')) {
+      expect(button.className).not.toMatch(/(?:^|\s)bg-/);
+    }
+  });
+});
