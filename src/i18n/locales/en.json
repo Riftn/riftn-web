@@ -3312,6 +3312,16 @@
     "confirmWithCost": "Mint on {{chain}} · {{cost}}",
     "notAvailable": "Minting on this chain is not available yet."
   },
+  "postEditHistory": {
+    "title": "Edit history",
+    "edited_one": "Edited once",
+    "edited_other": "Edited {{count}} times",
+    "lastEdit": "Last edit {{time}}",
+    "original": "Original",
+    "editN": "Edit {{n}}",
+    "now": "Now",
+    "showChanges": "Show what changed"
+  },
   "postInfo": {
     "title": "Post Info",
     "tokenId": "Token ID",

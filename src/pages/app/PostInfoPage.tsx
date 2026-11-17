@@ -57,6 +57,7 @@ import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { usePPVPurchaseCount } from '@/hooks/use-ppv-purchase-count';
 import { TranscriptSection } from '@/components/app/post-info/TranscriptSection';
 import { PostReactorsSection } from '@/components/app/post-info/PostReactorsSection';
+import { PostEditHistoryLine } from '@/components/app/post-info/PostEditHistory';
 import { SEOHead } from '@/components/SEOHead';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 
@@ -852,6 +853,7 @@ export default function PostInfoPage() {
               {nftInfo.description && (
                 <p className="text-sm text-white/70">{nftInfo.description}</p>
               )}
+              {nftInfo.tokenId != null && <PostEditHistoryLine tokenId={nftInfo.tokenId} />}
             </section>
           )}
 
@@ -921,6 +923,7 @@ export default function PostInfoPage() {
           currentShopLinks={(nftInfo as any).shopLinks}
           onSuccess={(edited) => {
             applyOptimisticEdit(queryClient, nftInfo.tokenId, edited);
+            queryClient.invalidateQueries({ queryKey: ['post-edit-history', String(nftInfo.tokenId)] });
           }}
         />
       )}

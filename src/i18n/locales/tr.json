@@ -3312,6 +3312,16 @@
     "confirmWithCost": "{{chain}}{{cost}}' de nane",
     "notAvailable": "Bu zincirde para basma henüz mevcut değil."
   },
+  "postEditHistory": {
+    "title": "Düzenleme geçmişi",
+    "edited_one": "Bir kez düzenlendi",
+    "edited_other": "{{count}} kez düzenlendi",
+    "lastEdit": "Son düzenleme {{time}}",
+    "original": "Orijinal",
+    "editN": "Düzenleme {{n}}",
+    "now": "Şimdi",
+    "showChanges": "Neyin değiştiğini göster"
+  },
   "postInfo": {
     "title": "Gönderi Bilgisi",
     "tokenId": "Token Kimliği",

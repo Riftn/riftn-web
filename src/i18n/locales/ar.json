@@ -3328,6 +3328,20 @@
     "confirmWithCost": "النعناع على {{chain}}·{{cost}}",
     "notAvailable": "لا يتوفر سك العملة على هذه السلسلة حتى الآن."
   },
+  "postEditHistory": {
+    "title": "سجل التعديلات",
+    "edited_zero": "لم يُعدَّل",
+    "edited_one": "عُدِّل مرة واحدة",
+    "edited_two": "عُدِّل مرتين",
+    "edited_few": "عُدِّل {{count}} مرات",
+    "edited_many": "عُدِّل {{count}} مرة",
+    "edited_other": "عُدِّل {{count}} مرة",
+    "lastEdit": "آخر تعديل {{time}}",
+    "original": "الأصل",
+    "editN": "التعديل {{n}}",
+    "now": "الآن",
+    "showChanges": "إظهار ما تغيّر"
+  },
   "postInfo": {
     "title": "معلومات المنشور",
     "tokenId": "معرّف التوكن",
