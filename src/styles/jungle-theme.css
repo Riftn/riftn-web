@@ -391,7 +391,10 @@ html[data-theme='jungle'] [data-vaul-overlay] {
    nothing else.
    ========================================================================== */
 
-html[data-theme='jungle'] :is([data-notification-row], [data-poll-card], [data-comments-section]) {
+/* An empty comments section (no comments, no composer: signed out on a
+   post nobody has answered) is only its padding. Painted, it drew an 8px
+   dark plank under the post. It takes the material once it holds anything. */
+html[data-theme='jungle'] :is([data-notification-row], [data-poll-card], [data-comments-section]:has(:not(div, [data-comment-search]))) {
   border-radius: var(--jungle-r-card) !important;
   border-color: transparent !important;
   background: var(--jungle-grain-soft), rgb(var(--jungle-bark) / var(--glass-thin)) !important;

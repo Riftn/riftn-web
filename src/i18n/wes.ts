@@ -94,6 +94,18 @@ export const wes = {
   overview: {
     disclaimerTitle: 'Important Notice',
     disclaimerText: 'Riftn tokens dey work as utility tokens inside we ecosystem and e no be investment tool.',
+    title: 'Riftn: Old internet dey break. New land dey rise.',
+    heading1: 'The name',
+    paragraph1: 'Riftn na di ultimate disruptiom event. Na short for rifting, di geological process wey dey rip di earth\'s crust apart, unleash violent volcanic eruptions and form new seas, land and life. Every rift break somtin old and build somtin new. Our name carry dat idea: disruptiom create.',
+    heading2: 'The problem',
+    heading3: 'What we build',
+    heading4: 'Built on request',
+    heading5: 'Zero crypto friction',
+    heading6: 'Why we exist',
+    paragraph6: 'Gamerz, streemers, and devolopas, fed up wit kain censorship and mainstrem brainwash, launch am protokol in 2021 under FTV name. At lauch, e get over $4M in revini. We shar $1M wit tokn holders, put $1M in devolopment and five-year roadmap runwey, and spend $2M in BNB buy bak and burn am own tokn. Verify every numba on blockchain and on our stats paje. FTV become DeHub, and in November 2026, DeHub become Riftn. Same team, same fight, biga misyon. New Riftn tokn go launch soon. No dey trade yet.',
+    heading7: 'The invitation',
+    paragraph7: 'New lan dey no get landlord. Klem ya own before pipo draw map. Den go explore teknoloji, tokun an app wey dey drive rift.',
+    statsLink: 'Stat bilong stat page.',
   },
   dapp: {
     accountsB1Desc: 'Google, Apple or Telegram, one tap, wi go create wallet fo yu an wi go sponsor gas fo di first post.',

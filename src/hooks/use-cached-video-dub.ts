@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { dubLanguage, hasCachedDubLanguage } from '@/lib/cached-dub-languages';
+import { ownKeyHeaders } from '@/lib/api/dehub/own-key-headers';
 
 type CachedDub = { status: string; audioUrl?: string };
 const PROVIDER = 'chatterbox-multilingual-v3';
@@ -30,7 +31,7 @@ export function useCachedVideoDub(transcriptId: string | null, language: string 
       };
       const cached = await read();
       if (cached?.status === 'ready') return settle(cached);
-      const { data, error } = await supabase.functions.invoke('auto-dub', { body: { action: 'request', transcriptId, lang } });
+      const { data, error } = await supabase.functions.invoke('auto-dub', { headers: ownKeyHeaders(), body: { action: 'request', transcriptId, lang } });
       if (error) return settle({ status: 'unavailable' });
       return settle({ status: data?.status ?? 'unavailable', audioUrl: data?.status === 'ready' ? data.audioUrl : undefined });
     },
