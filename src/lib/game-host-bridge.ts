@@ -788,6 +788,10 @@ export function useGameHostBridge(
       // popup opener or a page the game mounted in a nested frame can post the
       // same payload, and `post` mints as the signed-in wallet.
       if (event.source !== frame.current?.contentWindow) return;
+      // Our games are served from this site: an opaque frame posts as "null",
+      // a first-party one (allow-same-origin) as this origin. Nothing else is
+      // one of our games.
+      if (event.origin !== 'null' && event.origin !== window.location.origin) return;
 
       if (data.type === 'navigate') {
         const to = typeof data.to === 'string' ? data.to : '';

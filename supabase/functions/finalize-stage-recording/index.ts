@@ -128,7 +128,10 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const stageId: string | undefined = body?.stageId;
-    const force = !!body?.force;
+    // Redoing a finished recording is for our own services only; listeners
+    // repair a stage once and every later call returns the stored copy.
+    const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+    const force = !!body?.force && !!SERVICE_KEY && bearer === SERVICE_KEY;
     // The caller usually wants transcription to follow. It is chained here so
     // the transcriber always reads the finalized object, and it runs whether or
     // not the repair worked — a stage that cannot be remuxed must still get its

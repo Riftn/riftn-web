@@ -184,6 +184,11 @@ Deno.serve(async (req) => {
       return json(reveal ? { overview: row.summary, summary: row.summary, chapters: row.chapters ?? [] } : withheld);
     }
 
+    // A members-only or private recording is summarised by our own services
+    // right after it is transcribed. Nobody else gets to spend a model call on
+    // words they are not allowed to read.
+    if (!reveal) return json(withheld);
+
     const segments: Segment[] = Array.isArray(row.segments) ? row.segments : [];
     const fullText = String(row.full_text ?? '').trim();
     if (!fullText) {

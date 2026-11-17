@@ -89,9 +89,11 @@ export interface ManifestCheck {
 }
 
 export async function checkManifest(url: string): Promise<ManifestCheck> {
+  const session = getAuthToken();
+  if (!session) return { ok: false, errors: [], warnings: [], error: _translateCopy('copy.d7fb3bcaac80', { defaultValue: 'The check failed.' }) };
   const res = await fetch(`${FUNCTIONS_URL}/miniapp-registry`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-dehub-token': session },
     body: JSON.stringify({ action: 'validate', url }),
   });
   const body = await res.json().catch(() => ({}));

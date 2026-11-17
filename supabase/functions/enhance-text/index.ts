@@ -48,6 +48,15 @@ serve(async (req) => {
   const limited = await rateLimitByIp(req, 'enhance-text', { limit: 60, windowMs: 60 * 60 * 1000 });
   if (limited) return limited;
 
+  // Every button that calls this (post, comment and chat composers, the
+  // creator prompt box) sits behind sign-in, and both apps send the session.
+  const wallet = await optionalWallet(req);
+  if (!wallet) {
+    return new Response(JSON.stringify({ error: 'Sign in to use this.' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const { text, mode = 'spellcheck', style } = await req.json();
     
@@ -105,7 +114,7 @@ serve(async (req) => {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: text }
       ],
-    }, { label: 'enhance-text', ownKeyWallet: await optionalWallet(req) });
+    }, { label: 'enhance-text', ownKeyWallet: wallet });
 
     if (!response.ok) {
       if (response.headers.get('x-own-key-error')) return response;
