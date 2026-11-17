@@ -117,6 +117,18 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
     }
   }, [community.id, community.slug, updateMutation, t]);
 
+  const handleMediaRemove = useCallback(async (type: 'avatar' | 'banner') => {
+    setUploading(type);
+    try {
+      await updateMutation.mutateAsync({
+        id: community.id,
+        [type === 'avatar' ? 'avatar_url' : 'banner_url']: null,
+      });
+    } finally {
+      setUploading(null);
+    }
+  }, [community.id, updateMutation]);
+
   const handlePinToggle = () => {
     if (isPinned) {
       unpinMutation.mutate(community.id);
@@ -153,6 +165,18 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Camera className="w-6 h-6 text-white" />
             </div>
+          )}
+          {canEdit && uploading !== 'banner' && (
+            <button
+              type="button"
+              data-community-banner-remove
+              onClick={e => { e.stopPropagation(); void handleMediaRemove('banner'); }}
+              aria-label={t('common.remove', { defaultValue: 'Remove' })}
+              title={t('common.remove', { defaultValue: 'Remove' })}
+              className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/70 border border-white/20 flex items-center justify-center text-white sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           )}
           {uploading === 'banner' && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -226,6 +250,18 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
                 }}
               />
             </>
+          )}
+          {canEdit && !!community.avatar_url && uploading !== 'avatar' && (
+            <button
+              type="button"
+              data-community-avatar-remove
+              onClick={e => { e.stopPropagation(); void handleMediaRemove('avatar'); }}
+              aria-label={t('common.remove', { defaultValue: 'Remove' })}
+              title={t('common.remove', { defaultValue: 'Remove' })}
+              className="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full bg-black/70 border border-white/20 flex items-center justify-center text-white sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+            >
+              <X className="w-3 h-3" />
+            </button>
           )}
           {uploading === 'avatar' && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
