@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import type { DeHubConversation } from '@/lib/api/dehub';
 
@@ -17,6 +17,7 @@ vi.mock('@/hooks/use-messages', () => ({
   useDeleteConversation: () => ({}),
   messagesKeys: { messages: (id: string) => ['dm', id], conversations: () => ['dm'] },
 }));
+const layout = vi.hoisted(() => ({ phone: false }));
 const prefs = vi.hoisted(() => ({ update: vi.fn() }));
 vi.mock('@/hooks/use-chat-prefs', () => ({ useChatPrefs: () => ({ byId: new Map(), update: prefs.update }), useClearChatHistory: () => vi.fn(), isArchived: () => false, isMuted: () => false }));
 vi.mock('@/hooks/use-public-chat-unread', () => ({ usePublicChatUnreadCount: () => 0, usePublicChatReading: vi.fn() }));
@@ -39,7 +40,7 @@ vi.mock('@/components/app/chat/NewMessageDrawer', () => ({ NewMessageDrawer: () 
 vi.mock('@/components/app/page-kit/PageKit', () => ({
   PageIsland: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   IslandAction: () => null,
-  usePhonePill: () => false,
+  usePhonePill: () => layout.phone,
 }));
 vi.mock('@/components/app/war/WarHudIcon', () => ({ BrandIcon: () => null }));
 vi.mock('@/components/app/AppState', () => ({ AppState: () => null }));
@@ -135,5 +136,45 @@ describe('picking several chats on a computer', () => {
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
     fireEvent.keyDown(window, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('toolbar')).toBeNull());
+  });
+});
+
+describe('picking several chats on a phone', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    layout.phone = true;
+    // Fake timers also run the app's scroll watchdog, which asks jsdom for a
+    // hit-test it does not have.
+    if (!document.elementFromPoint) document.elementFromPoint = () => null;
+    source.conversations = [chat('a', 'Aaron'), chat('b', 'Bea'), chat('c', 'Cleo')];
+  });
+  afterEach(() => { layout.phone = false; vi.useRealTimers(); });
+
+  const hold = (el: HTMLElement) => {
+    // jsdom has no PointerEvent; a MouseEvent carrying the pointer fields stands in.
+    const down = new MouseEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 });
+    Object.assign(down, { pointerType: 'touch', isPrimary: true, pointerId: 1 });
+    fireEvent(el, down);
+    act(() => { vi.advanceTimersByTime(600); });
+    fireEvent(el, Object.assign(new MouseEvent('pointerup', { bubbles: true }), { pointerType: 'touch', pointerId: 1 }));
+    fireEvent.click(el);
+  };
+
+  it('holding a chat starts picking without opening it, then taps add more', () => {
+    vi.useFakeTimers();
+    render(page());
+    hold(row('Aaron'));
+    expect(screen.getByRole('toolbar')).toBeInTheDocument();
+    expect(screen.queryByText('Back to messages')).toBeNull();
+    fireEvent.click(row('Cleo'));
+    expect(document.querySelectorAll('[data-bulk-checked="true"]')).toHaveLength(2);
+    fireEvent.click(document.querySelector('[data-chat-bulk-delete]')!);
+    expect(del.scheduleDelete.mock.calls.map(c => c[0])).toEqual(['a', 'c']);
+  });
+
+  it('a quick tap still opens the chat', () => {
+    render(page());
+    fireEvent.click(row('Bea'));
+    expect(screen.queryByRole('toolbar')).toBeNull();
   });
 });

@@ -8,7 +8,7 @@ import { messagesKeys } from '@/hooks/use-messages';
 
 /*
  * The bar at the foot of the chat list while chats are selected (right-click
- * a chat, Select, then click others). Acts on every selected chat at once:
+ * a chat and Select, or hold one on a phone, then tap others). Acts on every selected chat at once:
  * mark unread (or read), delete, or send one reply to all of them.
  */
 
@@ -25,11 +25,14 @@ export interface BulkChatBarProps {
   onCancel: () => void;
   /** How many of the selected can be deleted (DMs; group and community chats are left, not deleted). Defaults to count. */
   deletableCount?: number;
+  /** Phone layout: says "Tap" and sits above the bottom nav. */
+  touch?: boolean;
+  className?: string;
 }
 
-const BTN = 'flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-2 text-[13px] font-semibold text-zinc-100 transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-40 [&>svg]:h-4 [&>svg]:w-4';
+const BTN = 'flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-2 text-[13px] font-semibold text-zinc-100 transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-40 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0';
 
-export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelete, onReply, onCancel, deletableCount = count }: BulkChatBarProps) {
+export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelete, onReply, onCancel, deletableCount = count, touch = false, className }: BulkChatBarProps) {
   const { t } = useTranslation();
   const [replyOpen, setReplyOpen] = useState(false);
   const none = count === 0;
@@ -50,12 +53,14 @@ export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelet
         data-chat-bulk-bar
         role="toolbar"
         aria-label={t('chatBulk.toolbar', 'Selected chats')}
-        className="mx-2 mb-2 mt-1 shrink-0 rounded-2xl border border-white/10 bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-xl"
+        className={cn('mx-2 mb-2 mt-1 shrink-0 rounded-2xl border border-white/10 bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-xl', className)}
       >
         <div className="flex items-center gap-1 px-1 pb-1">
           <span data-chat-bulk-count className="mr-auto pl-1 text-[13px] font-semibold tabular-nums text-white">
             {none
-              ? t('chatBulk.pick', { defaultValue: 'Click chats to select them' })
+              ? touch
+                ? t('chatBulk.pickTouch', { defaultValue: 'Tap chats to select them' })
+                : t('chatBulk.pick', { defaultValue: 'Click chats to select them' })
               : t('chatBulk.selected', { defaultValue: '{{count}} selected', count })}
           </span>
           <button type="button" data-chat-bulk-cancel onClick={onCancel} className={cn(BTN, 'h-8 px-2 text-zinc-400')} aria-label={t('chatBulk.cancel', 'Cancel')} title={t('chatBulk.cancel', 'Cancel')}>

@@ -148,6 +148,7 @@ import followCoverEllaverse from '@/assets/banners/agent-ellaverse.png';
 import followCoverLuna from '@/assets/banners/agent-xluna.png';
 import { FollowCoverCard } from '@/components/app/FollowCoverCard';
 import { ConversationItem } from '@/pages/app/MessagesPage';
+import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
@@ -1341,6 +1342,35 @@ function ScheduledDmGallery() {
   );
 }
 
+/** Messages on a phone: hold a chat to pick it, tap others, then act on all of them. */
+function ChatBulkGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const names = ['Ava', 'Noah', 'Kai', 'Mina', 'Theo'];
+  const rows = names.map((name, i) => {
+    const user = { address: `0x77777777777777777777777777777777777777${70 + i}`, username: name.toLowerCase(), displayName: name } as DeHubUser;
+    return {
+      id: `gallery-bulk-${i}`,
+      participants: [user],
+      otherUser: user,
+      unreadCount: i === 1 ? 2 : 0,
+      createdAt: now,
+      updatedAt: now,
+      lastMessage: { id: `gallery-bulk-msg-${i}`, conversationId: `gallery-bulk-${i}`, sender: user, content: ['See you at eight then', 'Sent the files over', 'Loved your last video!', 'Are you open to a collab?', 'gm'][i], createdAt: now } as DeHubDMMessage,
+    };
+  });
+  const picked = new Set([1, 2]);
+  const noop = () => {};
+  return (
+    <section data-page-bento data-chat-bulk-gallery className="mb-5 max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]">
+      <h2 className="px-4 pt-4 text-sm font-semibold">Messages: picking chats on a phone</h2>
+      {rows.map((c, i) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} selecting checked={picked.has(i)} />
+      ))}
+      <BulkChatBar count={picked.size} chatIds={[]} allUnread={false} onToggleUnread={noop} onDelete={noop} onReply={async () => 0} onCancel={noop} touch />
+    </section>
+  );
+}
+
 function MessageRequestsGallery() {
   const { t } = useTranslation();
   const person = (name: string, text: string, unread: number) => (
@@ -2021,6 +2051,7 @@ export default function StateGalleryPage() {
         <WhenSheetGallery />
         <ScheduledDmGallery />
         <MessageRequestsGallery />
+        <ChatBulkGallery />
         <PostEditHistoryGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
         <ToastsGallery />
