@@ -688,11 +688,13 @@ interface ExpandableDescriptionProps {
   clampLines?: 2 | 3 | 4;
   /** The poster closed the market card for this post. */
   hideAssetCards?: boolean;
+  /** Links whose preview card the poster closed. */
+  hiddenLinkPreviews?: string[];
 }
 
 const CLAMP_CLASS = { 2: 'line-clamp-2', 3: 'line-clamp-3', 4: 'line-clamp-4' } as const;
 
-function ExpandableDescription({ description: rawDescription, isImmersive, clampLines = 4, hideAssetCards }: ExpandableDescriptionProps) {
+function ExpandableDescription({ description: rawDescription, isImmersive, clampLines = 4, hideAssetCards, hiddenLinkPreviews }: ExpandableDescriptionProps) {
   const { t: _copy } = _useCopy();
   // Unify \r\n → \n only. Blank lines and spacing stay exactly as typed.
   const normalized = rawDescription.replace(/\r\n/g, '\n').trim();
@@ -732,7 +734,7 @@ function ExpandableDescription({ description: rawDescription, isImmersive, clamp
           </FeedCaptionExpander>
         ) : null}
         <DehubLinkEmbeds links={dehubLinks} />
-        <FeedLinkPreviews text={normalized} />
+        <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
         <AssetRefCards refs={assetRefs} />
       </div>
     );
@@ -750,7 +752,7 @@ function ExpandableDescription({ description: rawDescription, isImmersive, clamp
           />
         ) : null}
         <DehubLinkEmbeds links={dehubLinks} />
-        <FeedLinkPreviews text={normalized} />
+        <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
         <AssetRefCards refs={assetRefs} />
       </>
     );
@@ -772,7 +774,7 @@ function ExpandableDescription({ description: rawDescription, isImmersive, clamp
         ) : null}
       </div>
       <DehubLinkEmbeds links={dehubLinks} />
-      <FeedLinkPreviews text={normalized} />
+      <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
       <AssetRefCards refs={assetRefs} />
       {needsExpansion && !isExpanded && (
         <button
@@ -3492,6 +3494,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     isImmersive={isImmersive || !!stage || tabletPortrait}
                     clampLines={stage ? (shownTitle ? 2 : 3) : 4}
                     hideAssetCards={video.hideAssetCards}
+                    hiddenLinkPreviews={video.hiddenLinkPreviews}
                   />
                 )}
                 </>)}

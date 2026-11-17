@@ -41,14 +41,15 @@ export interface TextCard {
   url?: string;
 }
 
-export function textCardOf(post: { content?: string; title?: string; isQuotePost?: boolean; quotedPost?: unknown }): TextCard | null {
+export function textCardOf(post: { content?: string; title?: string; isQuotePost?: boolean; quotedPost?: unknown; hiddenLinkPreviews?: string[] }): TextCard | null {
   if (post.isQuotePost && post.quotedPost) return { kind: 'quote' };
   const text = post.content || post.title || '';
   for (const link of findDehubLinks(text)) {
     const kind = LINK_KIND[link.kind];
     if (kind) return { kind, link };
   }
-  const urls = extractUrlsFromText(text).filter((u) => !parseDehubLink(u));
+  // Not a link whose preview the poster closed: that post shows no card.
+  const urls = extractUrlsFromText(text).filter((u) => !parseDehubLink(u) && !post.hiddenLinkPreviews?.includes(u));
   // A song plays right in the tile, so it wins over any other outside link.
   const song = urls.find((u) => parseSpotifyLink(u));
   if (song) return { kind: 'spotify', url: song };

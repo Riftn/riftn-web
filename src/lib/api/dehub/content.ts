@@ -134,6 +134,8 @@ export interface MintPostParams {
   comicBorder?: string;
   /** The poster closed the market card for the $TICKER / address in the text. Only sent when true. */
   hideAssetCards?: boolean;
+  /** Links in the text whose preview card the poster closed, so no surface draws one. */
+  hiddenLinkPreviews?: string[];
   /** Content warning: one line shown in place of the post until a viewer opens it. */
   spoilerText?: string;
   /** Who may quote it. Only sent when it is not the default, anyone. */
@@ -297,6 +299,10 @@ export async function mintPost(
 
   if (params.hideAssetCards) {
     formData.append('hideAssetCards', 'true');
+  }
+
+  if (params.hiddenLinkPreviews?.length) {
+    formData.append('hiddenLinkPreviews', JSON.stringify(params.hiddenLinkPreviews));
   }
 
   if (params.layout === 'comic') {

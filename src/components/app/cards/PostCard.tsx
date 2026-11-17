@@ -833,7 +833,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
 
         {/* OG previews for outside links. Skipped when an entity card is already
             showing: two stacked cards for one line of text is noise. */}
-        {post.content && dehubLinks.length === 0 && <FeedLinkPreviews text={post.content} />}
+        {post.content && dehubLinks.length === 0 && <FeedLinkPreviews text={post.content} hidden={post.hiddenLinkPreviews} />}
         </>
         )}
         </div>
