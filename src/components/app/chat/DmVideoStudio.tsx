@@ -173,7 +173,10 @@ export function DmMediaStudio({
   postTimer,
   music,
   onUploadCover,
+  onReplace,
 }: {
+  /** Posts: swap the video for another one from the device. */
+  onReplace?: () => void;
   /** Posts: how long the whole post stays up (seconds), or null for always. */
   postTimer?: { value: number | null; onChange: (s: number | null) => void };
   /** Posts: the music video switch. */
@@ -348,14 +351,27 @@ export function DmMediaStudio({
           <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold tabular-nums">
             {isVideo && kept != null ? `${formatClock(kept)} · ` : ''}{formatAttachmentSize(file.size)}
           </span>
-          <button
-            type="button"
-            onClick={() => onRemoveItem(active)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white hover:bg-white/10"
-            aria-label={_copy('copy.595b066a8838', { defaultValue: 'Remove attachment' })}
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onReplace && (
+              <button
+                type="button"
+                onClick={onReplace}
+                className="flex h-9 items-center gap-1.5 rounded-full border border-white/25 bg-white/5 px-3 text-xs font-semibold text-white hover:bg-white/10"
+                aria-label={_copy('post.media.replaceVideo', { defaultValue: 'Change video' })}
+              >
+                <Upload className="h-4 w-4" />
+                {_copy('dmVideo.replace', { defaultValue: 'Replace' })}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onRemoveItem(active)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white hover:bg-white/10"
+              aria-label={_copy('copy.595b066a8838', { defaultValue: 'Remove attachment' })}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex min-h-0 flex-1 items-center justify-center px-3 py-3">
