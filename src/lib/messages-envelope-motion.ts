@@ -1,25 +1,128 @@
 /** Shared with mobile. One slip per unread message, and the ring grows from a
- *  gentle beat at 1 unread to full strength at MESSAGE_SLIP_MAX. */
+ *  gentle beat at 1 unread to full strength at MESSAGE_SLIP_MAX. Each slip
+ *  pops out of the envelope's top edge like a little worm, wriggling up and
+ *  out to its own side before it tumbles back down. */
 export const MESSAGE_SLIP_MAX = 20;
 
-export interface MessageSlip { dx: number; dy: number; rotate: number; delayMs: number }
+/** One point on a slip's trip, in the icon's 32-unit viewBox, measured from
+ *  the envelope's centre. `t` runs 0..1 over the slip's life. */
+export interface WormFrame { t: number; x: number; y: number; rotate: number; sx: number; sy: number; opacity: number }
+/** `tail` holds one track per body dot (see MESSAGE_SLIP_TAIL), same `t`s. */
+export interface MessageSlip { delayMs: number; lifeMs: number; frames: WormFrame[]; tail: WormFrame[][] }
+
+/** Little dots that trail a slip like a worm's body, following the exact
+ *  wiggle it took: how far back along its path (viewBox units), their radius,
+ *  and how strong they show. */
+export const MESSAGE_SLIP_TAIL = [
+  { gap: 4.6, radius: 1.9, opacity: .9 },
+  { gap: 7.6, radius: 1.6, opacity: .75 },
+  { gap: 10.3, radius: 1.3, opacity: .6 },
+] as const;
+
+const FRAME_COUNT = 24;
+const round = (value: number) => Math.round(value * 100) / 100;
+/** Same numbers every time for the same slip, so a new message adds a worm
+ *  without reshuffling the ones already crawling. */
+const seeded = (index: number, salt: number) => {
+  const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+  return value - Math.floor(value);
+};
+
+function wormPath(index: number, intensity: number) {
+  // Every slip pops out of the envelope's top edge from its own spot along
+  // it, flies up and out to its own side, slows, then falls back down past the
+  // envelope like it was thrown: a little upward kick, then gravity. The golden
+  // ratio hops each new slip to a fresh lean, so a pile of them fans out.
+  const spread = index === 0 ? -.3 : ((index * .618034 + seeded(index, 1) * .2) % 1) * 2 - 1;
+  // Nobody goes dead straight up and drops back in: lean at least a little.
+  const lean = Math.sign(spread || 1) * (.3 + .7 * Math.abs(spread));
+  const startX = (lean * .55 + (seeded(index, 7) - .5) * .4) * 9;
+  const reach = lean * (22 + 14 * seeded(index, 2)) * (.85 + .2 * intensity);
+  const peak = (15 + 9 * seeded(index, 8)) * (.85 + .2 * intensity);
+  const peakAt = .3 + .08 * seeded(index, 9);
+  const gravity = peak / (peakAt * peakAt);
+  const waves = 1.6 + seeded(index, 3);
+  const amplitude = 1.9 + 1.3 * seeded(index, 4);
+  const twist = seeded(index, 5) * Math.PI * 2;
+  const point = (t: number) => {
+    // Starts just inside the envelope (y -6 from its centre, the top edge is
+    // at -11) and is clipped until it clears the edge.
+    const x = startX + reach * t;
+    const y = -6 - 2 * gravity * peakAt * t + gravity * t * t;
+    // Wriggle across the way it is flying.
+    const vx = reach;
+    const vy = -2 * gravity * peakAt + 2 * gravity * t;
+    const speed = Math.hypot(vx, vy) || 1;
+    const sway = amplitude * Math.min(1, t * 3) * Math.sin(Math.PI * 2 * waves * t + twist);
+    return { x: x - vy / speed * sway, y: y + vx / speed * sway };
+  };
+  const dirX = lean;
+  // Distance travelled along the wiggle, so the body dots can sit a fixed
+  // length behind the head however fast it is going.
+  const SAMPLES = 240;
+  const arc: { s: number; x: number; y: number }[] = [];
+  for (let k = 0, s = 0, last = point(0); k <= SAMPLES; k++) {
+    const here = point(k / SAMPLES);
+    s += Math.hypot(here.x - last.x, here.y - last.y);
+    arc.push({ s, ...here });
+    last = here;
+  }
+  const at = (s: number) => {
+    let k = 0;
+    while (k < SAMPLES && arc[k + 1].s < s) k++;
+    const a = arc[k];
+    const b = arc[Math.min(SAMPLES, k + 1)];
+    const f = b.s > a.s ? Math.min(1, Math.max(0, (s - a.s) / (b.s - a.s))) : 0;
+    return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
+  };
+  const tail: WormFrame[][] = MESSAGE_SLIP_TAIL.map(() => []);
+  // Keep the slip's letter line on top: worms heading left turn round.
+  const flip = dirX < 0 ? 180 : 0;
+  const frames: WormFrame[] = [];
+  let previous = 0;
+  for (let step = 0; step <= FRAME_COUNT; step++) {
+    const t = step / FRAME_COUNT;
+    const here = point(t);
+    const ahead = point(Math.min(1, t + .01));
+    const behind = point(Math.max(0, t - .01));
+    let rotate = Math.atan2(ahead.y - behind.y, ahead.x - behind.x) * 180 / Math.PI + flip;
+    // Unwrap so the slip never spins the long way round between frames.
+    while (rotate - previous > 180) rotate -= 360;
+    while (rotate - previous < -180) rotate += 360;
+    previous = rotate;
+    const grow = t < .18 ? .45 + .55 * t / .18 : t > .75 ? 1 - .25 * (t - .75) / .25 : 1;
+    // Inchworm squish: stretch along the way it's going, then bunch up.
+    const squish = 1 + .26 * Math.sin(Math.PI * 4 * waves * t + twist);
+    const opacity = t < .06 ? round(t / .06) : t > .7 ? round(1 - (t - .7) / .3) : 1;
+    frames.push({
+      t: round(t), x: round(here.x), y: round(here.y), rotate: Math.round(rotate),
+      sx: round(grow * squish), sy: round(grow / Math.sqrt(squish)), opacity,
+    });
+    const travelled = arc[Math.round(t * SAMPLES)].s;
+    MESSAGE_SLIP_TAIL.forEach((dot, k) => {
+      // The body squishes with the head: gaps shrink as it bunches up.
+      const back = travelled - dot.gap * grow / Math.sqrt(squish);
+      const spot = at(back);
+      tail[k].push({
+        t: round(t), x: round(spot.x), y: round(spot.y), rotate: 0, sx: round(grow), sy: round(grow),
+        opacity: back <= 0 ? 0 : round(opacity * Math.min(1, back / 2)),
+      });
+    });
+  }
+  return { frames, tail, lifeMs: 1500 + 600 * seeded(index, 6) };
+}
 
 export function messagesEnvelopeMotion(count: number) {
   const unread = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
   const shown = Math.min(unread, MESSAGE_SLIP_MAX);
   const intensity = unread === 0 ? 0 : 0.78 + 0.62 * (shown - 1) / (MESSAGE_SLIP_MAX - 1);
+  const cycleMs = Math.round(3400 / Math.sqrt(Math.max(1, intensity)));
   const slips: MessageSlip[] = [];
   for (let i = 0; i < shown; i++) {
-    // Fan out over the top of the envelope; launch order hops around the fan.
-    const angle = (shown === 1 ? 0 : -64 + 128 * i / (shown - 1)) * Math.PI / 180;
-    const distance = (16 + 3.5 * ((i * 5) % 3)) * (0.8 + 0.25 * intensity);
-    const order = (i * (shown % 7 ? 7 : 3)) % shown;
-    slips.push({
-      dx: Math.round(Math.sin(angle) * distance * 10) / 10,
-      dy: Math.round((-Math.cos(angle) * distance - 3) * 10) / 10,
-      rotate: Math.round(angle * 38 + (i % 2 ? 9 : -9)),
-      delayMs: Math.round(100 + order * Math.min(220, 1000 / shown)),
-    });
+    const { frames, tail, lifeMs } = wormPath(i, intensity);
+    const delayMs = Math.round(90 + i * Math.min(110, 600 / shown));
+    // Every worm is home before the next ring starts.
+    slips.push({ frames, tail, delayMs, lifeMs: Math.round(Math.min(lifeMs, cycleMs * .9 - delayMs)) });
   }
   return {
     unread,
@@ -27,7 +130,7 @@ export function messagesEnvelopeMotion(count: number) {
     swing: 13 * intensity,
     opacity: Math.min(1, 0.2 + 0.5 * intensity),
     reach: Math.min(12, 8 * intensity),
-    cycleMs: Math.round(3400 / Math.sqrt(Math.max(1, intensity))),
+    cycleMs,
     slips,
   };
 }
@@ -40,3 +143,6 @@ export const ENVELOPE_SIDE_RIPPLE_PATHS = [
 
 export const ENVELOPE_BODY_PATH = 'M4 5H20.2Q28 5 28 12.8V27H11.8Q4 27 4 19.2Z M6.6 7.6V19.2Q6.6 24.4 11.8 24.4H25.4V12.8Q25.4 7.6 20.2 7.6Z';
 export const ENVELOPE_FLAP_PATH = 'M6 8L16 16.6L26 8';
+/** Everywhere around the icon except the envelope's own box (32-unit viewBox,
+ *  even-odd), so slips only show once they are out of the envelope. */
+export const SLIP_WINDOW_PATH = 'M-40 -60H72V80H-40Z M4 5.2H28V27H4Z';

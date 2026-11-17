@@ -27,7 +27,10 @@ html:is([data-theme='light'], [data-system-tone='light']) .messages-nav-glyph { 
   animation: messages-envelope-ripple var(--messages-cycle) cubic-bezier(.2,.5,.3,1) infinite;
   animation-delay: var(--messages-delay);
 }
-.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__slip { animation: messages-envelope-slip var(--messages-cycle) cubic-bezier(.2,.6,.3,1) infinite; }
+.messages-nav-glyph[data-unread='true'] .messages-nav-glyph__slip {
+  /* The name comes from the per-slip keyframes the component writes. */
+  animation-duration: var(--messages-cycle); animation-timing-function: linear; animation-iteration-count: infinite;
+}
 .messages-nav-glyph[data-running='false'] :is(.messages-nav-glyph__swing, .messages-nav-glyph__rim, .messages-nav-glyph__hot, .messages-nav-glyph__wave, .messages-nav-glyph__slip) { animation-play-state: paused; }
 
 @keyframes messages-envelope-swing {
@@ -52,14 +55,12 @@ html:is([data-theme='light'], [data-system-tone='light']) .messages-nav-glyph { 
   8% { opacity: var(--messages-opacity); }
   40%, 100% { opacity: 0; transform: translateX(calc(var(--messages-direction) * var(--messages-reach))) scaleY(1.12); }
 }
-@keyframes messages-envelope-slip {
-  0% { opacity: 0; transform: translate(0, 7px) rotate(0deg) scale(.7); }
-  3%, 22% { opacity: 1; }
-  34%, 100% { opacity: 0; transform: translate(var(--slip-x), var(--slip-y)) rotate(var(--slip-rotate)) scale(1); }
-}
+
 /* No motion: the envelope simply stays red while something is unread. */
 html.reduce-motion .messages-nav-glyph :is(.messages-nav-glyph__swing, .messages-nav-glyph__rim, .messages-nav-glyph__wave, .messages-nav-glyph__slip, .messages-nav-glyph__hot) { animation: none; }
 html.reduce-motion .messages-nav-glyph[data-unread='true'] .messages-nav-glyph__hot { opacity: 1; }
+/* Each slip names its keyframes inline, so turning them off needs to win over that. */
+html.reduce-motion .messages-nav-glyph .messages-nav-glyph__slip { animation-name: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .messages-nav-glyph :is(.messages-nav-glyph__swing, .messages-nav-glyph__rim, .messages-nav-glyph__wave, .messages-nav-glyph__slip, .messages-nav-glyph__hot) { animation: none !important; }
   .messages-nav-glyph[data-unread='true'] .messages-nav-glyph__hot { opacity: 1; }
