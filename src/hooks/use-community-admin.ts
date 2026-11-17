@@ -287,7 +287,7 @@ export function adminErrorMessage(error: unknown, fallback: string): string {
   }
   const flood = raw.match(/automod_flood:(\d+)/);
   if (flood) {
-    return _translateCopy('communities.automod.flood', { defaultValue: 'You\'re sending too fast. Wait {{value1}}s and try again.', value1: flood[1] });
+    return _translateCopy('communities.automod.floodError', { defaultValue: 'You\'re sending too fast. Wait {{value1}}s and try again.', value1: flood[1] });
   }
   if (raw.includes('message_type_reserved')) {
     return _translateCopy('communities.automod.reserved', { defaultValue: 'That kind of message can only come from the group\'s bots.' });
