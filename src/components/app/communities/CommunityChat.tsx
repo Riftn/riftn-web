@@ -20,7 +20,7 @@ import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
 import { markCommunityChatSeen, COMMUNITY_CHAT_SEEN_INTERVAL_MS } from '@/lib/community-chat-notify';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff } from "lucide-react";
+import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff, ImagePlus } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
@@ -39,7 +39,8 @@ import { VoiceRecorder } from '../chat/VoiceRecorder';
 import { voiceRecordingFile } from '@/lib/voice-recording';
 import { VoiceWaveformPlayer } from '../chat/VoiceWaveformPlayer';
 import { supabase } from '@/integrations/supabase/client';
-import { getAuthToken } from '@/lib/api/dehub';
+import { getAuthToken, uploadChatImage } from '@/lib/api/dehub';
+import { PUBLIC_CHAT_IMAGE_TYPES, PUBLIC_CHAT_IMAGE_MAX_SIZE } from '@/lib/public-chat-media';
 import { toast } from 'sonner';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -706,6 +707,51 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   };
 
+  // Photos, same rules as Public Chat (JPG, PNG, GIF, WebP up to 10MB). The
+  // typed line goes along as the caption.
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const handleImageFile = async (file: File) => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (slowModeRemaining > 0 || imageUploading) return;
+    const type = (file.type || '').toLowerCase();
+    if (!(PUBLIC_CHAT_IMAGE_TYPES as readonly string[]).includes(type)) {
+      toast.error(t('communities.chat.imageType', { defaultValue: 'Send a photo: JPG, PNG, GIF or WebP.' }));
+      return;
+    }
+    if (file.size > PUBLIC_CHAT_IMAGE_MAX_SIZE) {
+      toast.error(t('communities.chat.imageSize', { defaultValue: 'Image must be less than 10MB' }));
+      return;
+    }
+    const caption = newMessage.trim();
+    const replyToId = replyTo?.id;
+    setImageUploading(true);
+    try {
+      const { url } = await uploadChatImage(file);
+      await sendMessage(caption, 'image', url, replyToId, {
+        username: profileData?.handle || undefined,
+        displayName: profileData?.name || undefined,
+        avatarUrl: profileData?.avatarUrl || undefined,
+        badgeBalance: user?.badgeBalance || undefined,
+      });
+      if (caption) setNewMessage.complete(newMessage, '');
+      setReplyTo.complete(replyTo, null);
+      startSlowModeCountdown();
+    } catch (err: any) {
+      console.error('[CommunityChat] Image send failed:', err);
+      toast.error(err?.message || t('communities.chat.imageFailed', { defaultValue: 'Failed to send photo' }));
+    } finally {
+      setImageUploading(false);
+    }
+  };
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (!canSendMedia) return;
+    const file = Array.from(e.clipboardData?.files || []).find(f => f.type.startsWith('image/'));
+    if (!file) return;
+    e.preventDefault();
+    void handleImageFile(file);
+  };
+
   const handleVoiceRecordingComplete = useCallback(async (blob: Blob, _duration: number) => {
     if (!isAuthenticated) { openLoginModal(); return; }
     const toastId = 'community-voice-upload';
@@ -1033,6 +1079,15 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                         </span>
                         {msg.message_type === 'gif' && (msg.image_url || msg.content) ? (
                           <img src={outsideImage(msg.image_url || msg.content)} alt="GIF" className="max-w-[280px] max-h-32 rounded mt-0.5" loading="lazy" />
+                        ) : msg.message_type === 'image' && msg.image_url ? (
+                          <div className="mt-1" data-community-chat-image>
+                            <a href={msg.image_url} target="_blank" rel="noopener noreferrer" className="block w-fit">
+                              <img src={msg.image_url} alt={msg.content || t('communities.chat.photo', { defaultValue: 'Photo' })} className="max-w-[280px] max-h-72 rounded-lg object-cover" loading="lazy" />
+                            </a>
+                            {!!msg.content && (
+                              <p className="text-sm text-zinc-200 mt-1 whitespace-pre-wrap break-words">{msg.content}</p>
+                            )}
+                          </div>
                         ) : msg.message_type === 'voice' && msg.image_url ? (
                           <div className="mt-1">
                             <VoiceWaveformPlayer src={msg.image_url} />
@@ -1306,6 +1361,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                   });
                 }}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 maxLength={500}
                 className="chat-text-input min-h-[36px] max-h-32 resize-none text-sm bg-transparent border-none text-white placeholder:text-zinc-500 p-0 pt-1 pr-12 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.35]"
                 rows={1}
@@ -1343,6 +1399,30 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 </Button>
                 {canSendMedia && (
                   <>
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept={PUBLIC_CHAT_IMAGE_TYPES.join(',')}
+                      className="hidden"
+                      data-community-chat-image-input
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = '';
+                        if (file) void handleImageFile(file);
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      data-community-chat-attach
+                      onClick={() => { if (!isAuthenticated) { openLoginModal(); return; } imageInputRef.current?.click(); }}
+                      disabled={imageUploading || slowModeRemaining > 0}
+                      className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                      title={t('communities.chat.sendPhoto', { defaultValue: 'Send a photo' })}
+                      aria-label={t('communities.chat.sendPhoto', { defaultValue: 'Send a photo' })}
+                    >
+                      {imageUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
+                    </Button>
                     <EmojiGifPicker
                       onEmojiSelect={handleEmojiSelect}
                       onGifSelect={handleGifSelect}
