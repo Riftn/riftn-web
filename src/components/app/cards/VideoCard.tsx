@@ -222,6 +222,7 @@ import { KeywordFilterGate } from './KeywordFilterGate';
 import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
 import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
+import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
 
 /**
  * How far a touch may travel and still count as a tap on the player. Matches the
@@ -1909,7 +1910,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // two glass pills, and only where there is room beside it.
   const isDesktopViewport = useIsDesktopViewport();
   const wideVideoMode = useWideVideoMode();
-  const wideViewport = isDesktopViewport && !isPhone;
+  const inMasonryColumn = useInMasonryColumn();
+  const wideViewport = isDesktopViewport && !isPhone && !inMasonryColumn;
   const wideEligible = wideViewport && !isFullscreen && !video.isAudio && !stage && !hideActions
     && !(video.isLivePost && video.isLiveNow) && (desktopFeedHug || (isImmersive && !showComments));
   const wideAmbient = wideEligible && wideVideoMode === 'ambient';

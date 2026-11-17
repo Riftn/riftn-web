@@ -108,6 +108,7 @@ import { useRetainedPostPinned } from '@/lib/retained-post-surface';
 import { openBrainrotFeed } from '@/lib/brainrot-feed';
 import { FEED_IMAGE_MAX_HEIGHT } from '@/lib/feed-image-layout';
 import { useWideVideoMode, WIDE_RAILS_MAX_ASPECT, type WideVideoMode } from '@/lib/wide-video-mode';
+import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
 import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 import { WideVideoPanel } from '@/components/app/video/WideVideoRails';
 import type { VideoItem } from '@/types/feed.types';
@@ -1012,7 +1013,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   // single tall photo too: desktop feed card and post page only.
   const isDesktopViewport = useIsDesktopViewport();
   const wideVideoMode = useWideVideoMode();
-  const widePhoto = isDesktopViewport && !isPhone && !stage && images.length === 1 && layout !== 'comic' && wideVideoMode !== 'standard'
+  const inMasonryColumn = useInMasonryColumn();
+  const widePhoto = isDesktopViewport && !isPhone && !inMasonryColumn && !stage && images.length === 1 && layout !== 'comic' && wideVideoMode !== 'standard'
     ? wideVideoMode : undefined;
   const [singlePhotoRatio] = useGalleryAspects(widePhoto ? images : NO_IMAGES, !!widePhoto);
   const widePhotoRails = widePhoto === 'rails' && !!singlePhotoRatio && singlePhotoRatio < WIDE_RAILS_MAX_ASPECT;

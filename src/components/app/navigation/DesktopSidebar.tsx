@@ -19,7 +19,6 @@ import X from "@/components/ui/cut-icons/close";
 import { NAV_ITEMS } from '@/constants/app.constants';
 import type { NavItem } from '@/types/app.types';
 import { SidebarNavItem } from './SidebarNavItem';
-import { CrumblingLogo } from './CrumblingLogo';
 import { filterNavItems, exploreSearchHref } from './nav-search';
 import { navItemId } from './nav-item-id';
 import { applyNavOrder } from '@/lib/nav-order';
@@ -465,7 +464,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
         // light/minimal strip that padding from [data-side-panel] (index.css),
         // so collapsed it measured 36px there vs 44px everywhere else.
         "hidden lg:flex sticky top-0 h-screen px-2 pb-2 flex-col overflow-hidden items-stretch transition-[width,padding] duration-500 ease-in-out motion-reduce:transition-none z-0 isolate will-change-[width]",
-        isCollapsed ? "w-[60px] pt-[16.5px]" : "w-[60px] pt-[2px] lg:w-[231px] lg:px-[18px] lg:pt-0 lg:-mt-[3px]"
+        isCollapsed ? "w-[68px] pt-[16.5px]" : "w-[68px] pt-[2px] lg:w-[231px] lg:px-[18px] lg:pt-0 lg:-mt-[3px]"
       )}>
         {/* Logo & Coin Balance */}
         <div className={cn("relative z-10 flex items-center justify-between w-full", isCollapsed ? "mb-[14px]" : "mb-[14px] lg:mb-[15px]")}>
@@ -497,30 +496,15 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                 // and ran off to the right instead, putting the toggle outside
                 // the nav panel's column entirely. 22 + 4 + 18 = 44 fits exactly,
                 // so the pair sits on the panel's own centre line.
-                renderCompactLogo ? "w-[22px] h-[24px]" : "w-[135px] h-[42px]"
+                renderCompactLogo ? "w-[24px] h-[24px]" : "w-[135px] h-[42px]"
               )}
             >
-              {!renderCompactLogo ? <RiftnWordmark light={isLightTheme} /> : <CrumblingLogo still={isWarTheme ? (
-                <>
-                  <img
-                    src={dehubLogoCompact}
-                    alt="dehub"
-                    className={cn("h-[22px] w-[22px]", !renderCompactLogo && "hidden")}
-                    decoding="async"
-                  />
-                  <img
-                    src={riftnWordmarkWhite}
-                    alt="Riftn"
-                    className={cn("h-[40.6px] w-[135px] relative -top-[3px]", renderCompactLogo && "hidden")}
-                    decoding="async"
-                  />
-                </>
-              ) : undefined}>{isWarTheme ? (
+              {!renderCompactLogo ? <RiftnWordmark light={isLightTheme} /> : isWarTheme ? (
                 <>
                   <WarLogo
                     src={dehubLogoCompact}
-                    alt="dehub"
-                    className={cn("h-[22px] w-[22px]", !renderCompactLogo && "hidden")}
+                    alt="Riftn"
+                    className={cn("h-[20px] w-[24px] object-contain", !renderCompactLogo && "hidden")}
                   />
                   <WarLogo
                     src={riftnWordmarkWhite}
@@ -533,8 +517,8 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                   <img
                     src={isLightTheme ? dehubMarkBlack : dehubLogoCompact}
                     data-logo-ink={isLightTheme || undefined}
-                    alt="dehub"
-                    className={cn("h-[22px] w-[22px] object-contain", !renderCompactLogo && "hidden")}
+                    alt="Riftn"
+                    className={cn("h-[20px] w-[24px] object-contain", !renderCompactLogo && "hidden")}
                     decoding="async"
                   />
                   <img
@@ -546,7 +530,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                     onError={() => setRenderCompactLogo(true)}
                   />
                 </>
-              )}</CrumblingLogo>}
+              )}
             </button>
             {isCollapsed && (
               <button
@@ -591,7 +575,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
             aria-hidden={!showSearch}
           >
             <div className="overflow-hidden">
-              <div className={cn("p-1 pb-0", !isCollapsed && "lg:px-2.5 lg:pt-2.5")}>
+              <div className={cn(isCollapsed ? "p-2 pb-0" : "p-1 pb-0 lg:px-2.5 lg:pt-2.5")}>
                 {isCollapsed ? (
                   <button
                     type="button"
@@ -677,8 +661,11 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
               // relative: the containing block the active-row glass below is
               // positioned against, and the offsetParent its coordinates are
               // measured from. The two have to be the same box.
-              "relative p-1 flex flex-col overflow-y-auto overscroll-contain overflow-x-hidden scrollbar-invisible flex-1 min-h-0",
-              !isCollapsed && "lg:p-2.5"
+              // Collapsed, the panel keeps 8px round its 36px icons: the same
+              // as the gap between them, so the column reads as one even grid
+              // instead of icons jammed against a 4px edge.
+              "relative flex flex-col overflow-y-auto overscroll-contain overflow-x-hidden scrollbar-invisible flex-1 min-h-0",
+              isCollapsed ? "p-2" : "p-1 lg:p-2.5"
             )}
           >
           {/* Active glass overlay indicator — an absolute child of the scroll

@@ -63,6 +63,14 @@ export function useVideoFullscreen(
   }, []);
   // Restore before React removes its children, including on route changes.
   useLayoutEffect(() => () => { cancelPending(); restoreInline(); }, [cancelPending, restoreInline]);
+  // A gated or loading stream can mount its video after the first render, so
+  // the element is re-read each render, but the listeners are only re-bound
+  // when it actually changes: rebinding five listeners on every render of a
+  // 4,000-line card (timeupdate, hover, progress) was steady churn while playing.
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
+  useLayoutEffect(() => {
+    if (videoRef.current !== videoEl) setVideoEl(videoRef.current);
+  });
   useEffect(() => {
     const onFullscreenChange = () => {
       const active = document.fullscreenElement || (document as any).webkitFullscreenElement;
@@ -71,7 +79,7 @@ export function useVideoFullscreen(
       if (!own) restoreInline();
       setIsFullscreen(own);
     };
-    const video = videoRef.current;
+    const video = videoEl;
     const onIOSFullscreen = () => { cancelPending(); setIsFullscreen(true); };
     const onIOSExit = () => { cancelPending(); restoreInline(); setIsFullscreen(false); };
     const onKeyDown = (event: KeyboardEvent) => {
@@ -91,7 +99,7 @@ export function useVideoFullscreen(
       video?.removeEventListener('webkitbeginfullscreen', onIOSFullscreen);
       video?.removeEventListener('webkitendfullscreen', onIOSExit);
     };
-  }); // A gated or loading stream can mount its video after the first render.
+  }, [videoEl, containerRef, videoRef, cancelPending, restoreInline]);
   const toggleFullscreen = useCallback(() => {
     const video = videoRef.current as any;
     const container = containerRef.current as any;
@@ -122,8 +130,23 @@ export function useVideoFullscreen(
       const request = container.requestFullscreen || container.webkitRequestFullscreen;
       if (request) {
         const result = request.call(container);
-        result?.catch?.(activateSimulated);
-        timer.current = setTimeout(activateSimulated, 300);
+        if (result && typeof result.then === 'function') {
+          // The promise settles once the browser has finished (or refused) the
+          // switch. A fixed timer used to race it: on a desktop whose window
+          // animation runs past 300ms (macOS spaces, big monitors) the overlay
+          // fallback fired while the real fullscreen was still landing, lifted
+          // the frame to <body> mid-switch and knocked the browser straight back
+          // out, so the player flickered, jumped and often had to be clicked twice.
+          // Per spec it resolves after `fullscreenchange`, so an empty
+          // fullscreenElement on resolve is a WebView that said yes and did
+          // nothing (SafePal) — the overlay takes over then, not on a guess.
+          // The long timer only covers a promise that never settles.
+          result.then(activateSimulated, activateSimulated);
+          timer.current = setTimeout(activateSimulated, 1500);
+        } else {
+          // Legacy WebKit returns nothing and fires no error on refusal.
+          timer.current = setTimeout(activateSimulated, 1000);
+        }
         return;
       }
     } catch { /* Synchronous rejection uses the same fallback. */ }

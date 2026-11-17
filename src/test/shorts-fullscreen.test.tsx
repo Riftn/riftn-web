@@ -129,6 +129,35 @@ describe('useVideoFullscreen', () => {
     vi.useRealTimers();
   });
 
+  it('waits for a slow real fullscreen instead of racing it with the overlay', async () => {
+    // Desktop window animations can take well over 300ms. The overlay used to
+    // fire on a fixed timer mid-switch, lift the frame and knock the browser
+    // back out of fullscreen.
+    vi.useFakeTimers();
+    const container = document.createElement('div');
+    let land!: () => void;
+    (container as any).requestFullscreen = vi.fn(() => new Promise<void>((resolve) => { land = resolve; }));
+    document.body.appendChild(container);
+    const { videoRef, containerRef } = refs(container);
+
+    const { result } = renderHook(() => useVideoFullscreen(videoRef, containerRef, { escapeAncestors: true }));
+    act(() => result.current.toggleFullscreen());
+    await act(async () => { vi.advanceTimersByTime(700); });
+    expect(result.current.isFullscreen).toBe(false);
+    expect(container.getAttribute('data-media-fullscreen')).toBeNull();
+
+    Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => container });
+    await act(async () => {
+      document.dispatchEvent(new Event('fullscreenchange'));
+      land();
+    });
+    expect(result.current.isFullscreen).toBe(true);
+    expect(container.getAttribute('data-media-fullscreen')).toBeNull();
+    delete (document as any).fullscreenElement;
+    container.remove();
+    vi.useRealTimers();
+  });
+
   it('falls back to simulated fullscreen when the API is absent entirely', () => {
     const container = document.createElement('div');
     const { videoRef, containerRef } = refs(container);
