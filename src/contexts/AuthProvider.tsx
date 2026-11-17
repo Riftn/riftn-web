@@ -2719,6 +2719,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         provider: supaProvider as any,
         options: {
           redirectTo: window.location.origin + window.location.pathname,
+          // Google otherwise signs straight back into whichever account the
+          // browser last used, so after signing out there is no way to pick
+          // a different email. Always show its account chooser.
+          ...(supaProvider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}),
         },
       });
       if (error) throw error;
