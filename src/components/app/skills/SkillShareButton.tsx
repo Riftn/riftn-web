@@ -16,10 +16,10 @@ export function SkillShareButton({ slug }: { slug: string }) {
         type="button"
         className="flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-lg"
         onClick={() => { if (!isAuthenticated) { openLoginModal(); return; } setOpen(true); }}
-        aria-label={t('common.share')}
+        aria-label={t('postOptions.share')}
       >
         <Share className="w-3.5 h-3.5" />
-        {t('common.share')}
+        {t('postOptions.share')}
       </button>
       {open && <Suspense fallback={null}>
         <PostModal isOpen={open} onClose={() => setOpen(false)} initialText={dehubLinkFor.skill(slug)} />
