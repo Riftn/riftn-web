@@ -17,6 +17,7 @@
 //                                         the worker reporting a finished job
 import { admin, corsHeaders, json, normalizeLang, parseTarget, DEHUB_CDN_BASE } from '../_shared/transcripts.ts';
 import { rateLimitByIp } from '../_shared/auth.ts';
+import { optionalWallet } from '../_shared/byok.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -254,7 +255,7 @@ async function sweep(db: any, worker: WorkerConfig) {
 
 /* ─────────────────────────────── request ────────────────────────────────── */
 
-async function request(db: any, body: any, worker: WorkerConfig) {
+async function request(db: any, body: any, worker: WorkerConfig, signedIn: boolean) {
   const lang = String(body?.lang ?? '').trim().toLowerCase().replace(/_/g, '-');
   if (!/^[a-z]{2}(-[a-z0-9]{2,8}){0,2}$/.test(lang) || lang.length > 16 || !DUB_LANGS.includes(lang.split('-')[0])) return json({ error: 'unsupported dub language' }, 400);
 
@@ -274,6 +275,15 @@ async function request(db: any, body: any, worker: WorkerConfig) {
   if (Number(t.duration_seconds ?? 0) > (t.source_kind === 'stage' ? 7200 : MAX_REQUEST_SECONDS)) return json({ ok: true, status: 'too-long' });
 
   if (!worker.configured) return json({ ok: true, status: 'unavailable' });
+  // Starting a render spends GPU time. Anyone can hear a dub that is already
+  // made; only a signed-in viewer can ask for a new one. Players speak the
+  // words on-device in the meantime.
+  if (!signedIn) {
+    const { data: made } = await db.from('video_dubs').select('status, audio_url, provider')
+      .eq('transcript_id', t.id).eq('language', lang).maybeSingle();
+    if (made?.status === 'ready' && made.provider === PROVIDER) return json({ ok: true, status: 'ready', audioUrl: made.audio_url });
+    return json({ ok: true, status: made?.status === 'processing' ? 'processing' : 'unavailable' });
+  }
   await db.from('video_dubs')
     .upsert({ transcript_id: t.id, language: lang }, { onConflict: 'transcript_id,language', ignoreDuplicates: true });
   const { data: row } = await db
@@ -334,7 +344,9 @@ Deno.serve(async (req) => {
     if (action === 'request') {
       const limited = await rateLimitByIp(req, 'auto-dub', { limit: 60, windowMs: 60 * 60 * 1000 });
       if (limited) return limited;
-      return await request(db, body, worker);
+      const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+      const signedIn = (!!SERVICE_KEY && bearer === SERVICE_KEY) || !!(await optionalWallet(req));
+      return await request(db, body, worker, signedIn);
     }
     if (action === 'complete') return await complete(db, body, worker);
     if (req.headers.get('authorization') !== `Bearer ${SERVICE_KEY}`) return json({ error: 'forbidden' }, 403);

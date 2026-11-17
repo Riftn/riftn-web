@@ -2,9 +2,9 @@
 // /creator/flow. Ported from HeliosGen's /api/assistant route (MIT) onto the
 // same AI gateway enhance-text already uses; the system prompt is theirs.
 //
-// Unauthenticated on purpose: crafting a prompt costs a fraction of a cent and
-// the canvas works signed-out (guest mode). Abuse control is the per-IP limit,
-// the same as enhance-text. Generation itself still needs a wallet and DHB.
+// Signed-in only, like enhance-text: every call is a metered model call, so
+// the caller's Riftn token is checked before anything is sent upstream. The
+// per-IP limit stays as a second brake.
 //
 // Streams as SSE when `stream: true`: `data: {"delta":"…"}` per token, then
 // `data: [DONE]`. Non-streaming callers get `{ text }`.
@@ -88,6 +88,9 @@ Deno.serve(async (req) => {
   const limited = await rateLimitByIp(req, "creator_prompt_assistant", { limit: 90, windowMs: 60 * 60 * 1000 });
   if (limited) return limited;
 
+  const wallet = await optionalWallet(req);
+  if (!wallet) return json({ error: "Sign in to use this." }, 401);
+
   if (!Deno.env.get("GEMINI_API_KEY") && !Deno.env.get("LOVABLE_API_KEY")) {
     return json({ error: "AI service not configured" }, 500);
   }
@@ -124,7 +127,7 @@ Deno.serve(async (req) => {
 
   const upstream = await aiChat(
     { model, messages, stream, max_tokens: 1024 },
-    { label: "creator-prompt-assistant", ownKeyWallet: await optionalWallet(req) },
+    { label: "creator-prompt-assistant", ownKeyWallet: wallet },
   );
 
   if (!upstream.ok) {

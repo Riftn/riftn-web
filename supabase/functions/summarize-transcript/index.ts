@@ -18,6 +18,7 @@ import {
   type Target,
 } from '../_shared/transcripts.ts';
 import { aiChat } from '../_shared/ai-chat.ts';
+import { optionalWallet } from '../_shared/byok.ts';
 
 const AI_KEY = Deno.env.get('GEMINI_API_KEY') ?? Deno.env.get('LOVABLE_API_KEY');
 const FAL_KEY = Deno.env.get('FAL_KEY');
@@ -188,6 +189,11 @@ Deno.serve(async (req) => {
     // right after it is transcribed. Nobody else gets to spend a model call on
     // words they are not allowed to read.
     if (!reveal) return json(withheld);
+    // Writing a new summary is a model call. Our own services (the transcriber
+    // kicks this right after a transcript is ready) and signed-in viewers can
+    // start one; anyone else reads what is stored.
+    const isService = !!serviceKey && bearer === serviceKey;
+    if (!isService && !(await optionalWallet(req))) return json({ overview: row.summary ?? null, summary: row.summary ?? null, chapters: row.chapters ?? [] });
 
     const segments: Segment[] = Array.isArray(row.segments) ? row.segments : [];
     const fullText = String(row.full_text ?? '').trim();

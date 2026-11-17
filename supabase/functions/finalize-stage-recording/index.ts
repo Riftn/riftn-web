@@ -149,8 +149,11 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (stageErr || !stage) throw new Error('stage not found');
     if (!stage.recording_url) throw new Error('no recording available');
-    // The host writes this URL. Only a file in our own public storage is read.
-    if (!stage.recording_url.startsWith(`${SUPABASE_URL}/storage/v1/object/public/`) || stage.recording_url.includes('..')) {
+    // The host writes this URL. Only a file in this stage's own recording
+    // folder is read, so a stage can never be pointed at someone else's file.
+    if (typeof stageId !== 'string' || !/^[0-9a-f-]{36}$/i.test(stageId)
+      || !stage.recording_url.startsWith(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${stageId}/`)
+      || stage.recording_url.includes('..')) {
       throw new Error('no recording available');
     }
 
