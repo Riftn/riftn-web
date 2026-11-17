@@ -123,6 +123,41 @@ serve(async (req) => {
   // for get_user_id_by_phone to find it next time; it just never signs in.
   const syntheticEmail = `p${phone.replace(/[^0-9]/g, "")}@phone.dehub.internal`;
 
+  // An account that already has its own email (Google, Apple, email sign-up)
+  // keeps it, and keeps its password: sign it in with a one-time link for that
+  // email instead of rewriting either.
+  if (existingUserId) {
+    const { data: existing } = await supabaseAdmin.auth.admin.getUserById(existingUserId);
+    const ownEmail = existing?.user?.email;
+    if (ownEmail && !ownEmail.endsWith("@phone.dehub.internal")) {
+      const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: "magiclink",
+        email: ownEmail,
+      });
+      const tokenHash = link?.properties?.hashed_token;
+      if (linkError || !tokenHash) {
+        console.error("verify-phone-otp: generateLink failed", linkError);
+        return errorResponse("Sign-in failed. Please try again.");
+      }
+      const linkClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        auth: { persistSession: false },
+      });
+      const { data: linked, error: verifyError } = await linkClient.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: "magiclink",
+      });
+      if (verifyError || !linked?.session) {
+        console.error("verify-phone-otp: link sign-in failed", verifyError);
+        return errorResponse("Sign-in failed. Please try again.");
+      }
+      console.log("verify-phone-otp: signed in", { to: maskPhone(phone) });
+      return new Response(JSON.stringify({ session: linked.session }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   if (existingUserId) {
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingUserId, {
       password: oneShotPassword,
