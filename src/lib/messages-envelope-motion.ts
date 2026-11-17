@@ -1,8 +1,8 @@
 /** Shared with mobile. One slip per unread message, and the ring grows from a
  *  gentle beat at 1 unread to full strength at MESSAGE_SLIP_MAX. Each slip
  *  pops out of the envelope's top edge like a little worm, wriggling up and
- *  out to its own side before it tumbles back down. A few unread only peek
- *  out of the top and drop back in; the full fling is kept for a big pile. */
+ *  out to its own side, fading away as it starts to fall. A few unread only
+ *  peek out of the top; the bigger fling is kept for a big pile. */
 export const MESSAGE_SLIP_MAX = 20;
 
 /** 0 at 1 unread, 1 at MESSAGE_SLIP_MAX. Eased so 1 to 3 stay small and the
@@ -15,17 +15,7 @@ export function messageSlipSize(count: number) {
 /** One point on a slip's trip, in the icon's 32-unit viewBox, measured from
  *  the envelope's centre. `t` runs 0..1 over the slip's life. */
 export interface WormFrame { t: number; x: number; y: number; rotate: number; sx: number; sy: number; opacity: number }
-/** `tail` holds one track per body dot (see MESSAGE_SLIP_TAIL), same `t`s. */
-export interface MessageSlip { delayMs: number; lifeMs: number; frames: WormFrame[]; tail: WormFrame[][] }
-
-/** Little dots that trail a slip like a worm's body, following the exact
- *  wiggle it took: how far back along its path (viewBox units), their radius,
- *  and how strong they show. */
-export const MESSAGE_SLIP_TAIL = [
-  { gap: 4.6, radius: 1.9, opacity: .9 },
-  { gap: 7.6, radius: 1.6, opacity: .75 },
-  { gap: 10.3, radius: 1.3, opacity: .6 },
-] as const;
+export interface MessageSlip { delayMs: number; lifeMs: number; frames: WormFrame[] }
 
 const FRAME_COUNT = 24;
 const round = (value: number) => Math.round(value * 100) / 100;
@@ -68,59 +58,36 @@ function wormPath(index: number, intensity: number, size: number) {
     return { x: x - vy / speed * sway, y: y + vx / speed * sway };
   };
   const dirX = lean;
-  // Distance travelled along the wiggle, so the body dots can sit a fixed
-  // length behind the head however fast it is going.
-  const SAMPLES = 240;
-  const arc: { s: number; x: number; y: number }[] = [];
-  for (let k = 0, s = 0, last = point(0); k <= SAMPLES; k++) {
-    const here = point(k / SAMPLES);
-    s += Math.hypot(here.x - last.x, here.y - last.y);
-    arc.push({ s, ...here });
-    last = here;
-  }
-  const at = (s: number) => {
-    let k = 0;
-    while (k < SAMPLES && arc[k + 1].s < s) k++;
-    const a = arc[k];
-    const b = arc[Math.min(SAMPLES, k + 1)];
-    const f = b.s > a.s ? Math.min(1, Math.max(0, (s - a.s) / (b.s - a.s))) : 0;
-    return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f };
-  };
-  const tail: WormFrame[][] = MESSAGE_SLIP_TAIL.map(() => []);
   // Keep the slip's letter line on top: worms heading left turn round.
   const flip = dirX < 0 ? 180 : 0;
+  // A few unread fade out just as they start to drop. The fall gets longer
+  // as the pile grows, building up to the full tumble at MESSAGE_SLIP_MAX.
+  const end = Math.min(1, peakAt + .14 + (.86 - peakAt) * size * size);
   const frames: WormFrame[] = [];
   let previous = 0;
   for (let step = 0; step <= FRAME_COUNT; step++) {
     const t = step / FRAME_COUNT;
-    const here = point(t);
-    const ahead = point(Math.min(1, t + .01));
-    const behind = point(Math.max(0, t - .01));
+    const u = t * end;
+    const here = point(u);
+    const ahead = point(Math.min(1, u + .01));
+    const behind = point(Math.max(0, u - .01));
     let rotate = Math.atan2(ahead.y - behind.y, ahead.x - behind.x) * 180 / Math.PI + flip;
     // Unwrap so the slip never spins the long way round between frames.
     while (rotate - previous > 180) rotate -= 360;
     while (rotate - previous < -180) rotate += 360;
     previous = rotate;
-    const grow = t < .18 ? .45 + .55 * t / .18 : t > .75 ? 1 - .25 * (t - .75) / .25 : 1;
-    // Inchworm squish: stretch along the way it's going, then bunch up.
-    const squish = 1 + .26 * Math.sin(Math.PI * 4 * waves * t + twist);
-    const opacity = t < .06 ? round(t / .06) : t > .7 ? round(1 - (t - .7) / .3) : 1;
+    const grow = u < .12 ? .55 + .45 * u / .12 : t > .6 ? 1 - .2 * (t - .6) / .4 : 1;
+    // A light inchworm squish: stretch along the way it's going, then bunch up.
+    const squish = 1 + .12 * Math.sin(Math.PI * 4 * waves * u + twist);
+    // Fades from the top of the arc so it is gone as it starts to fall.
+    const fadeFrom = Math.min(peakAt, end - .1) / end;
+    const opacity = u < .05 ? round(u / .05) : t > fadeFrom ? round(1 - (t - fadeFrom) / (1 - fadeFrom)) : 1;
     frames.push({
       t: round(t), x: round(here.x), y: round(here.y), rotate: Math.round(rotate),
       sx: round(grow * squish), sy: round(grow / Math.sqrt(squish)), opacity,
     });
-    const travelled = arc[Math.round(t * SAMPLES)].s;
-    MESSAGE_SLIP_TAIL.forEach((dot, k) => {
-      // The body squishes with the head: gaps shrink as it bunches up.
-      const back = travelled - dot.gap * grow / Math.sqrt(squish);
-      const spot = at(back);
-      tail[k].push({
-        t: round(t), x: round(spot.x), y: round(spot.y), rotate: 0, sx: round(grow), sy: round(grow),
-        opacity: back <= 0 ? 0 : round(opacity * Math.min(1, back / 2)),
-      });
-    });
   }
-  return { frames, tail, lifeMs: 1100 + (400 + 600 * seeded(index, 6)) * size };
+  return { frames, lifeMs: Math.round((1100 + (400 + 600 * seeded(index, 6)) * size) * end) };
 }
 
 export function messagesEnvelopeMotion(count: number) {
@@ -132,10 +99,10 @@ export function messagesEnvelopeMotion(count: number) {
   const cycleMs = Math.round(3400 / Math.sqrt(Math.max(.6, intensity)));
   const slips: MessageSlip[] = [];
   for (let i = 0; i < shown; i++) {
-    const { frames, tail, lifeMs } = wormPath(i, intensity, size);
+    const { frames, lifeMs } = wormPath(i, intensity, size);
     const delayMs = Math.round(90 + i * Math.min(110, 600 / shown));
     // Every worm is home before the next ring starts.
-    slips.push({ frames, tail, delayMs, lifeMs: Math.round(Math.min(lifeMs, cycleMs * .9 - delayMs)) });
+    slips.push({ frames, delayMs, lifeMs: Math.round(Math.min(lifeMs, cycleMs * .9 - delayMs)) });
   }
   return {
     unread,
