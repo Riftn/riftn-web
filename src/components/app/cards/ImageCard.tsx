@@ -708,9 +708,12 @@ function FeedDescription({
   onOpen,
   stage = false,
   hideAssetCards = false,
+  hiddenLinkPreviews,
 }: { 
   /** The poster closed the market card for this post. */
   hideAssetCards?: boolean;
+  /** Links whose preview card the poster closed. */
+  hiddenLinkPreviews?: string[];
   onOpen?: () => void;
   /** Phone post page: a shorter clamp (about three lines) with "more". */
   stage?: boolean;
@@ -845,7 +848,7 @@ function FeedDescription({
         </div>
       )}
       <DehubLinkEmbeds links={dehubLinks} />
-      <FeedLinkPreviews text={linkSource} />
+      <FeedLinkPreviews text={linkSource} hidden={hiddenLinkPreviews} />
       <AssetRefCards refs={assetRefs} />
     </div>
   );
@@ -1613,6 +1616,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
           title={post.title} 
           description={post.description}
           hideAssetCards={post.hideAssetCards}
+          hiddenLinkPreviews={post.hiddenLinkPreviews}
           isTranslated={isTranslated}
           translatedText={translatedText}
           stage={!!stage}

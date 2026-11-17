@@ -100,6 +100,8 @@ export interface UnifiedFeedItem {
   comicBorder?: string;
   /** The poster closed the market card for the $TICKER / address in the text, so no surface draws one. */
   hideAssetCards?: boolean;
+  /** Links in the text whose preview card the poster closed, so no surface draws one. */
+  hiddenLinkPreviews?: string[];
   /** Content warning: the post opens collapsed behind this one line. */
   spoilerText?: string;
   /** Who may quote it; absent means anyone. */
@@ -357,6 +359,7 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     mediaCaptions: item.mediaCaptions,
     comicBorder: item.comicBorder,
     hideAssetCards: item.hideAssetCards,
+    hiddenLinkPreviews: item.hiddenLinkPreviews,
     spoilerText: item.spoilerText,
     quotePolicy: item.quotePolicy,
     visibility: item.visibility,
@@ -462,6 +465,7 @@ function mapImagePost(item: UnifiedFeedItem, index: number): ImagePost {
     mediaCaptions: item.mediaCaptions,
     comicBorder: item.comicBorder,
     hideAssetCards: item.hideAssetCards,
+    hiddenLinkPreviews: item.hiddenLinkPreviews,
     spoilerText: item.spoilerText,
     quotePolicy: item.quotePolicy,
     visibility: item.visibility,
@@ -539,6 +543,7 @@ function mapTextPost(item: UnifiedFeedItem, index: number): TextPost {
     mediaCaptions: item.mediaCaptions,
     comicBorder: item.comicBorder,
     hideAssetCards: item.hideAssetCards,
+    hiddenLinkPreviews: item.hiddenLinkPreviews,
     spoilerText: item.spoilerText,
     quotePolicy: item.quotePolicy,
     visibility: item.visibility,

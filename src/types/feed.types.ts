@@ -56,6 +56,8 @@ export interface BaseFeedItem {
   comicBorder?: string;
   /** The poster closed the market card for the $TICKER / address in the text, so no surface draws one. */
   hideAssetCards?: boolean;
+  /** Links in the text whose preview card the poster closed, so no surface draws one. */
+  hiddenLinkPreviews?: string[];
   /** Content warning: the post opens collapsed behind this one line. */
   spoilerText?: string;
   /** Who may quote it; absent means anyone. */

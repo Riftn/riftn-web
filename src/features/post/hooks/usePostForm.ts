@@ -61,6 +61,7 @@ import type { DeHubNFT, PostVisibility, QuotePolicy, ReplyPolicy } from '@/lib/a
 import type { PostChainId } from '@/components/app/ChainSelector';
 import { normalizeCategoryList } from '@/lib/category-names';
 import { trackFirstPost } from '@/lib/analytics';
+import { extractUrlsFromText } from '@/lib/api/link-preview';
 
 // Title switch preference. The old key was also written whenever Article or
 // Comic was picked, which left the title stuck on for plain posts; the new
@@ -378,6 +379,9 @@ export function usePostForm(
   const [comicBorder, setComicBorder] = useState<ComicBorder | null>(null);
   // The poster closed the $TICKER / address card, so the post goes out without one.
   const [hideAssetCards, setHideAssetCards] = useState(false);
+  // The links whose preview card the poster closed with its X. Goes out with
+  // the post, so the feed draws no card for them either.
+  const [hiddenLinkPreviews, setHiddenLinkPreviews] = useState<string[]>([]);
   /** 'comic' when the Comic tab is open: photos post as collector cards. */
   const [postLayout, setPostLayout] = useState<'comic' | null>(null);
   // Who may quote the post. Anyone, unless the creator narrows it.
@@ -1283,6 +1287,7 @@ export function usePostForm(
     setPoll.complete(poll, null);
     setContentWarning(null);
     setHideAssetCards(false);
+    setHiddenLinkPreviews([]);
     setPostLayout(null);
     setComicBorder(null);
     setQuotePolicy('public');
@@ -2045,6 +2050,12 @@ export function usePostForm(
           : undefined,
         spoilerText: contentWarning?.trim() || undefined,
         hideAssetCards: hideAssetCards || undefined,
+        // Only the closed links still in the text: one deleted since needs no flag.
+        hiddenLinkPreviews: (() => {
+          const inText = new Set(extractUrlsFromText(text));
+          const closed = hiddenLinkPreviews.filter((url) => inText.has(url));
+          return closed.length ? closed : undefined;
+        })(),
         // Self-destructing video post: the server deletes it when time is up.
         destruct: media[0]?.type === 'video' && !liveMode && !isQuoting ? media[0].destructSeconds ?? undefined : undefined,
         // A comic: the photos show as collector cards, a caption per page.
@@ -2888,7 +2899,7 @@ export function usePostForm(
     effectiveShouldMint, mintFee, isMature, isForKids,
     selectedCategory, shopLinks, shopListingIds, myPlanIds,
     postQuota?.outstandingDhb, refreshPostQuota, onLiveStreamReady,
-    isQuoting, quotedPost, contentWarning, hideAssetCards, postLayout, comicBorder, quotePolicy, replyPolicy, visibility, stitchPolicy,
+    isQuoting, quotedPost, contentWarning, hideAssetCards, hiddenLinkPreviews, postLayout, comicBorder, quotePolicy, replyPolicy, visibility, stitchPolicy,
     , _copy
   ]);
 
@@ -2923,6 +2934,7 @@ export function usePostForm(
       poll,
       contentWarning,
       hideAssetCards,
+      hiddenLinkPreviews,
       postLayout,
       comicBorder,
       quotePolicy,
@@ -2970,6 +2982,7 @@ export function usePostForm(
       setPoll,
       setContentWarning,
       setHideAssetCards,
+      setHiddenLinkPreviews,
       setQuotePolicy,
       setStitchPolicy,
       setReplyPolicy,

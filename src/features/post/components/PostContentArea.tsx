@@ -66,6 +66,8 @@ interface PostContentAreaProps {
   /** The poster closed the market card; the post goes out without one. */
   hideAssetCards?: boolean;
   onHideAssetCardsChange?: (hidden: boolean) => void;
+  hiddenLinkPreviews?: string[];
+  onHiddenLinkPreviewsChange?: (urls: string[]) => void;
   liveMode: LiveMode;
   canPost: boolean;
   destinations: string[];
@@ -174,6 +176,8 @@ export function PostContentArea({
   onContentWarningChange,
   hideAssetCards,
   onHideAssetCardsChange,
+  hiddenLinkPreviews,
+  onHiddenLinkPreviewsChange,
   liveMode,
   canPost,
   destinations,
@@ -717,6 +721,8 @@ export function PostContentArea({
             text={text} 
             hideAssetCards={hideAssetCards}
             onHideAssetCardsChange={onHideAssetCardsChange}
+            hiddenUrls={hiddenLinkPreviews}
+            onHiddenUrlsChange={onHiddenLinkPreviewsChange}
             onRemoveCommunityLink={() => {
               // Remove community URL from text
               const cleaned = text.replace(/https?:\/\/[^\s]*\/app\/communities\/[a-zA-Z0-9_-]+/g, '').trim();
