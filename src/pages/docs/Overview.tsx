@@ -1,6 +1,11 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Shield, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const SECTIONS = [1, 2, 3, 4, 5, 6, 7] as const;
+/** The section that quotes launch revenue links to the stats page so readers can check it. */
+const STATS_SECTION = 6;
 
 const Overview = () => {
   const { t } = useLanguage();
@@ -19,25 +24,26 @@ const Overview = () => {
 
       {/* Main Content */}
       <div className="bg-card rounded-2xl border border-border p-8">
-        <div className="prose prose-slate dark:prose-invert max-w-none">
-          <p className="text-lg leading-relaxed text-foreground/80 mb-6">
-            {t('overview.paragraph1')}
-          </p>
-          <p className="text-lg leading-relaxed text-foreground/80 mb-6">
-            {t('overview.paragraph2')}
-          </p>
-          <p className="text-lg leading-relaxed text-foreground/80 mb-6">
-            {t('overview.paragraph3')}
-          </p>
-          <p className="text-lg leading-relaxed text-foreground/80 mb-6">
-            {t('overview.paragraph4')}
-          </p>
-          <p className="text-lg leading-relaxed text-foreground/80 mb-6">
-            {t('overview.paragraph5')}
-          </p>
-          <p className="text-lg leading-relaxed text-foreground/80 mb-8">
-            {t('overview.paragraph6')}
-          </p>
+        <div className="max-w-none space-y-8">
+          {SECTIONS.map((n) => (
+            <section key={n}>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                {t(`overview.heading${n}`)}
+              </h2>
+              <p className="text-lg leading-relaxed text-foreground/80">
+                {t(`overview.paragraph${n}`)}
+              </p>
+              {n === STATS_SECTION && (
+                <Link
+                  to="/stats"
+                  className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-foreground underline underline-offset-4 hover:opacity-80"
+                >
+                  {t('overview.statsLink')}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
+            </section>
+          ))}
         </div>
       </div>
 

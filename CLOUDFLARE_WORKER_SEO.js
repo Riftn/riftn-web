@@ -409,7 +409,7 @@ const GUIDE_PAGES = {
 // dehub-docs-content.txt. Bots used to get the raw SPA shell (homepage meta,
 // no canonical) for the entire /docs section.
 const DOCS_PAGES = {
-  'overview': { title: 'Riftn Docs | Overview', description: 'What Riftn is and how the user-owned, censorship-resistant media platform works: on-chain content, DePIN infrastructure and creator monetization.' },
+  'overview': { title: 'Riftn Abstract: The Social Media Protocol You Own', description: 'Riftn is the open source, user-owned social media protocol. What the name means, what we build, our story since 2021 and why anyone can request features.' },
   'dapps': { title: "Riftn dApps: The Complete Ecosystem", description: "Riftn's decentralized apps: streaming, feed, messaging, communities, wallet and more, how they fit together in one user-owned ecosystem." },
   'games': { title: 'Riftn Games: Play & Win On-Chain', description: "Riftn's gaming arm: the arcade and Last Chad Standing, the MMA battle-royale fighter built with top UFC stars." },
   'token/overview': { title: 'Currency Overview | Riftn Docs', description: 'How Riftn tokens work in-app: tipping, unlocking content, rewards, AI credits, profit share and the $0.001 in-app peg.' },

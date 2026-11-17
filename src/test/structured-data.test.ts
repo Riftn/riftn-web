@@ -156,7 +156,7 @@ describe('edge-rendered pages', () => {
     expect(article.image).toBe('https://riftn.com/og/docs-overview.jpg?v=5');
     expect(article.author).toMatchObject({ '@type': 'Organization', name: 'Riftn' });
     expectValidTrail(body, 'https://riftn.com/docs/overview');
-    expect(breadcrumb(body)!.itemListElement.map((i) => i.name)).toEqual(['Riftn', 'Docs', 'Riftn Docs | Overview'.replace(/ (?:—|\|) Riftn( Docs)?$/, '')]);
+    expect(breadcrumb(body)!.itemListElement.map((i) => i.name)).toEqual(['Riftn', 'Docs', 'Riftn Abstract: The Social Media Protocol You Own'.replace(/ (?:—|\|) Riftn( Docs)?$/, '')]);
   });
 
   it('gives a standalone guide an image, an author and a trail', async () => {
