@@ -18,6 +18,17 @@ export type CommunityKind = 'community' | 'group' | 'channel';
 
 type KindColumns = { kind?: string | null; entry_price?: number | string | null };
 
+/**
+ * The official Riftn community. Its chat is Public Chat: the Chat tab opens the
+ * public room, it never shows in Messages as a second entry, and it has no
+ * Add to Messages button (Public Chat is already at the top of Messages).
+ */
+export const RIFTN_COMMUNITY_ID = '03826b47-f2ff-4707-b76c-818791a9b632';
+
+export function isPublicChatCommunity(communityId: string | null | undefined): boolean {
+  return communityId === RIFTN_COMMUNITY_ID;
+}
+
 export function communityKindOf(community: (Partial<Community> & KindColumns) | null | undefined): CommunityKind {
   const kind = community?.kind;
   return kind === 'group' || kind === 'channel' ? kind : 'community';
@@ -37,7 +48,7 @@ export function chatsFromMemberships<T extends { communities?: (Community & Kind
 ): (Community & KindColumns)[] {
   return (rows ?? [])
     .map(row => row.communities)
-    .filter((c): c is Community & KindColumns => !!c && (communityKindOf(c) !== 'community' || isListed(c.id)))
+    .filter((c): c is Community & KindColumns => !!c && !isPublicChatCommunity(c.id) && (communityKindOf(c) !== 'community' || isListed(c.id)))
     .sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')));
 }
 
