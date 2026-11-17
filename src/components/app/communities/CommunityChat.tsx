@@ -204,9 +204,11 @@ interface CommunityChatProps {
   /** Joins the community: the "join to chat" bar calls it. */
   onJoin?: () => void;
   joining?: boolean;
+  /** Fill the parent's height (the chat opened inside Chat) instead of the community tab's fixed size. */
+  fill?: boolean;
 }
 
-export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining }: CommunityChatProps) {
+export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
   const { t: _copy } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/communities/CommunityChat.tsx:newMessage", '', communityId);
   const [replyTo, setReplyTo] = useDraftState<CommunityChatMessage | null>(`community:${communityId}:reply`, null);
@@ -753,7 +755,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
   const originalSignal = 0;
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 340px)', minHeight: '300px' }}>
+    <div data-room-chat={fill ? 'pane' : 'tab'} className={fill ? 'flex h-full min-h-0 flex-col' : 'flex flex-col'} style={fill ? undefined : { height: 'calc(100vh - 340px)', minHeight: '300px' }}>
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">

@@ -68,7 +68,7 @@ import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/Ne
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
 import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
 import { ChatSearchDiscover } from '@/components/app/chat/ChatSearchDiscover';
-import { useUserCommunities } from '@/hooks/use-communities';
+import { useUserCommunities, type Community } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
 
 /**
@@ -254,6 +254,8 @@ export function ConversationItem({
  */
 // Settings open inside the full-screen chat (computers) rather than leaving it.
 const EmbeddedSettings = lazy(() => import('@/pages/app/SettingsPage'));
+// Group, channel and community chats: the community chat itself, loaded on first open.
+const RoomChatPane = lazy(() => import('@/components/app/chat/RoomChatPane').then(m => ({ default: m.RoomChatPane })));
 // Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
 const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
 
@@ -263,10 +265,13 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<DeHubConversation | null>(null);
   const [showPublicChat, setShowPublicChat] = useState(false);
+  // A group, channel or community chat open in place (same chat as the
+  // community page's Chat tab).
+  const [selectedRoom, setSelectedRoom] = useState<Community | null>(null);
   // A conversation open on mobile reclaims the bottom-nav zone as well as the
   // header zone: the reply strip (orb flanked by two drafts) lives in that
   // band until the composer takes focus and the keyboard takes it instead.
-  const chatOpen = !!selectedConversation || showPublicChat;
+  const chatOpen = !!selectedConversation || showPublicChat || !!selectedRoom;
   // The inbox scrolls behind the floating nav. Reserve its clearance inside
   // the list, so a viewport-height gap cannot paint a strip behind the pill.
   const keyboardOpen = useKeyboardOpen();
@@ -435,8 +440,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const [showSettings, setShowSettings] = useState(false);
   // Opening any chat puts settings away.
   useEffect(() => {
-    if (selectedConversation || showPublicChat) setShowSettings(false);
-  }, [selectedConversation, showPublicChat]);
+    if (selectedConversation || showPublicChat || selectedRoom) setShowSettings(false);
+  }, [selectedConversation, showPublicChat, selectedRoom]);
   const [clearTarget, setClearTarget] = useState<DeHubConversation | null>(null);
   const lastActivity = (c: DeHubConversation) => c.lastMessage?.createdAt || c.updatedAt;
   const archivedConversations = richList
@@ -478,7 +483,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   });
   const openRoomChat = (c: (typeof groupChats)[number]) => {
     if (roomPref(c)?.markedUnread) updateChatPref(roomChatId(c.id), { unread: false });
-    navigate(`/app/communities/${c.slug}?tab=chat`);
+    setSelectedConversation(null);
+    setShowPublicChat(false);
+    setSelectedRoom(c);
   };
   const archivedCount = archivedConversations.length + archivedRooms.length;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
@@ -811,7 +818,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     }
     setSelectedConversation(null);
     setShowPublicChat(false);
+    setSelectedRoom(null);
   }, [navigate]);
+  // Opening a DM or the public chat puts an open group chat away.
+  useEffect(() => {
+    if (selectedConversation || showPublicChat) setSelectedRoom(null);
+  }, [selectedConversation, showPublicChat]);
   useEffect(() => {
     if (!hasVirtualSelected || !isMessagesRouteActive) return;
     // Poll at 1.5s for first 30s, then 5s
@@ -944,6 +956,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       </div>
     </div>
   ) : null;
+
+  const roomPane = fullscreen && selectedRoom ? (
+    <div className="h-full overflow-hidden pt-1">
+      <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+    </div>
+  ) : null;
+  if (selectedRoom && !fullscreen) {
+    return (
+      <div style={keyboardStyle} className={`${mobileChatHeight} lg:h-[calc(100dvh-32px)] pt-1 pb-0 sm:pt-1 sm:pb-3 lg:pt-2 overflow-hidden`}>
+        <Suspense fallback={null}><RoomChatPane key={selectedRoom.id} community={selectedRoom} onBack={closeChat} /></Suspense>
+      </div>
+    );
+  }
 
   const dmPane = fullscreen && selectedConversation && !showPublicChat ? (
     <DirectMessageChat
@@ -1142,6 +1167,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   key={chat.id}
                   community={chat}
                   pref={richList ? roomPref(chat) : undefined}
+                  selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => openRoomChat(chat)}
                 />
               );
@@ -1371,7 +1397,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       <FullScreenChatShell
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
-        chat={settingsPane ?? publicChatPane ?? dmPane}
+        chat={settingsPane ?? publicChatPane ?? roomPane ?? dmPane}
         list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
       />
     );

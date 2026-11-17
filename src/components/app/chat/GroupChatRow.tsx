@@ -14,7 +14,7 @@ import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import dehubCoin from '@/assets/dehub-coin.png';
 
-export function GroupChatRow({ community, onClick, pref }: { community: Community; onClick: () => void; pref?: ChatPref }) {
+export function GroupChatRow({ community, onClick, pref, selected }: { community: Community; onClick: () => void; pref?: ChatPref; selected?: boolean }) {
   const { t } = useTranslation();
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
@@ -33,7 +33,8 @@ export function GroupChatRow({ community, onClick, pref }: { community: Communit
       onClick={onClick}
       data-group-chat-row={kind}
       data-room-chat-id={community.id}
-      className="w-full flex items-center gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left"
+      data-selected={selected ? '' : undefined}
+      className={`w-full flex items-center gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left ${selected ? 'bg-white/[0.06]' : ''}`}
     >
       <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-white/[0.08] flex items-center justify-center">
         {community.avatar_url
