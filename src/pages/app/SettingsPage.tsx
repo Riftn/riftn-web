@@ -1939,14 +1939,6 @@ function PrivacySettings() {
             />
           )}
           <SettingToggle
-            icon={Globe}
-            anchor="public-profile"
-            title={t('settings.publicProfile')}
-            description={t('settings.publicProfileDesc')}
-            defaultChecked
-            comingSoon
-          />
-          <SettingToggle
             icon={Users}
             anchor="show-followers-list"
             title={t('settings.showFollowersList')}
@@ -1972,14 +1964,6 @@ function PrivacySettings() {
             defaultChecked={!hideFollowerCounts}
             onCheckedChange={(checked) => updateSettings({ show_follower_counts: checked })}
             disabled={isUpdating || isLoading}
-          />
-          <SettingToggle
-            icon={Globe}
-            anchor="search-indexing"
-            title={t('settings.searchEngineIndexing')}
-            description={t('settings.searchEngineIndexingDesc')}
-            defaultChecked
-            comingSoon
           />
         </div>
       </div>
@@ -2898,14 +2882,6 @@ function ContentSettings() {
               disabled={saving}
               options={SUPPORTED_CHAINS.map(chain => ({ value: String(chain.id), label: chain.name }))}
             />}
-          />
-          <SettingToggle
-            icon={FileText}
-            anchor="auto-save-drafts"
-            title={t('settings.autoSaveDrafts')}
-            description={t('settings.autoSaveDraftsDesc')}
-            defaultChecked
-            comingSoon
           />
         </div>
       </div>

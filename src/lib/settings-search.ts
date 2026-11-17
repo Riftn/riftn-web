@@ -110,9 +110,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'privacy', anchor: 'show-following-list', label: 'Show who I follow', labelKey: 'settings.showFollowingList', keywords: 'following list hide private who i follow' },
   { tab: 'privacy', anchor: 'show-dislikes', label: 'Show my dislikes to everyone', labelKey: 'settings.showDislikes', keywords: 'dislikes thumbs down disliked posts profile tab public private' },
   { tab: 'privacy', anchor: 'new-member', label: 'Show me as a new member', labelKey: 'settings.showAsNewMember', keywords: 'new member badge welcome' },
-  { tab: 'privacy', anchor: 'public-profile', label: 'Public Profile', labelKey: 'settings.publicProfile' },
   { tab: 'privacy', anchor: 'follow-visibility', label: 'Show my follower numbers', labelKey: 'settings.showFollowCounts', keywords: 'followers following hide counts numbers visibility' },
-  { tab: 'privacy', anchor: 'search-indexing', label: 'Search Engine Indexing', labelKey: 'settings.searchEngineIndexing', keywords: 'google seo index' },
   { tab: 'privacy', anchor: 'default-post-visibility', label: 'Default Post Visibility', labelKey: 'settings.defaultPostVisibility', keywords: 'public private posts' },
   { tab: 'privacy', anchor: 'ai-scraping', label: 'Allow AI training', labelKey: 'settings.aiScraping.label', keywords: 'ai scraping training llm crawler bot noai' },
   { tab: 'privacy', anchor: 'two-factor', label: 'Two-Factor Auth', labelKey: 'settings.twoFactorAuth', keywords: '2fa mfa authenticator security' },
@@ -128,7 +126,6 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
 
   // Content
   { tab: 'content', anchor: 'posting-chain', label: 'Posting chain', labelKey: 'settings.postingChain', keywords: 'post mint blockchain network base bnb ethereum solana database' },
-  { tab: 'content', anchor: 'auto-save-drafts', label: 'Auto-Save Drafts', labelKey: 'settings.autoSaveDrafts', keywords: 'drafts save' },
   { tab: 'content', anchor: 'mature-content', label: 'Show Mature Content', labelKey: 'settings.matureContent', keywords: 'nsfw adult sensitive explicit filter' },
   { tab: 'content', anchor: 'hide-watched', label: 'Hide watched videos', labelKey: 'settings.hideWatched', keywords: 'seen history feed' },
   { tab: 'content', anchor: 'skip-segments', label: 'Skip sponsors and intros', labelKey: 'settings.skipSegments', keywords: 'sponsorblock ads intro' },

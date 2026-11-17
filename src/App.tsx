@@ -26,7 +26,6 @@ import { ViewingPreferencesSync } from "@/components/app/ViewingPreferencesSync"
 import { AccountLanguageSync } from "@/components/app/AccountLanguageSync";
 import { FeedDefaultsSync } from "@/components/app/FeedDefaultsSync";
 import { useAuth, useLoginSheet } from "@/contexts/AuthContext";
-import { usePreloadIcons } from "@/hooks/use-preload-icons";
 import { useNotificationClickRouting } from "@/hooks/use-notification-click-routing";
 import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
@@ -516,7 +515,6 @@ function AppContent() {
   useEffect(() => {
     if (!authLoading && !isAuthenticated) scheduleLoginPrefetch();
   }, [authLoading, isAuthenticated]);
-  usePreloadIcons();
   // Views are recorded by <PageViewTracker /> above <Routes>; this only
   // attaches the signed-in address to them.
   usePageViewAddress(walletAddress);
