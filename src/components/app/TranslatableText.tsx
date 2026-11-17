@@ -25,6 +25,7 @@ import Languages from "@/components/ui/cut-icons/language";
 import { supabase } from '@/integrations/supabase/client';
 import { autoTranslateEnabled, setAutoTranslateEnabled, subscribeAutoTranslate } from '@/lib/auto-translate-setting';
 import { chatLineIsForeign } from '@/lib/chat-language-hint';
+import { takeAutoTranslateSlot } from '@/lib/auto-translate-budget';
 import { useUserLanguage, LANGUAGE_NAMES } from '@/hooks/use-user-language';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
 import { clientNavigate } from '@/lib/client-navigate';
@@ -1097,6 +1098,10 @@ export function useTranslation(
 
     return queueAutoTranslate(() => {
       if (autoDoneRef.current === key || !autoTranslateEnabled()) return Promise.resolve();
+      // Each device gets a set number of unasked-for translations an hour
+      // (lib/auto-translate-budget). Past it, the text stays as written and the
+      // Translate control still works.
+      if (!takeAutoTranslateSlot()) return Promise.resolve();
       autoDoneRef.current = key;
       return translateRef.current();
     });

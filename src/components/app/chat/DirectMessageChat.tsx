@@ -645,11 +645,12 @@ const MessageBubble = memo(function MessageBubble({
     isTooShort,
     handleTranslate,
     handleShowOriginal,
-    // Direct messages stay on-demand. Auto-translating would ship every private
-    // message a user receives to a third-party translator without them asking,
-    // and the free tier is a shared translation memory. The translate control is
-    // still here for anyone who wants it.
-  } = useTranslation(textContent, false);
+    // Messages you receive translate themselves, the same way room chats do:
+    // 'chat' rules, so slang and names stay as typed and only lines that plainly
+    // read as another language change. Sent as private text (never a training
+    // tier), and the Auto-translate setting turns it off. Your own messages
+    // stay as you wrote them.
+  } = useTranslation(textContent, isOwnMessage ? false : 'chat');
   const { t: tr } = useI18n();
 
   // A contract address or a $TICKER in a plain message cards up the same way it
@@ -960,13 +961,11 @@ const MessageBubble = memo(function MessageBubble({
                       onClick={() => onOpenImage?.(getMediaUrl(primaryMediaUrl)!)}
                     />
                     )}
-                    {/* Driven by the same opted-out hook as a text message, not
-                        by <TranslatableText>. That component calls
-                        useTranslation(text) with auto defaulting to true, so
-                        rendering the caption through it sent private DM captions
-                        to the translator on mount — around the deliberate
-                        auto=false above. textContent is message.content here:
-                        isPostShare can only be true for msgType 'msg'. */}
+                    {/* Driven by the same hook as a text message, not by
+                        <TranslatableText>, so a caption follows the chat rules
+                        above instead of the post rules. textContent is
+                        message.content here: isPostShare can only be true for
+                        msgType 'msg'. */}
                     {message.content && (
                       <p dir="auto" className="text-sm mt-1 break-words whitespace-pre-wrap text-left">
                         {renderChatTextWithLinks(isTranslated ? translatedText : message.content)}
