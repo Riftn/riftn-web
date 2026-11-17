@@ -143,6 +143,9 @@ describe('picking several chats on a phone', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     layout.phone = true;
+    // Fake timers also run the app's scroll watchdog, which asks jsdom for a
+    // hit-test it does not have.
+    if (!document.elementFromPoint) document.elementFromPoint = () => null;
     source.conversations = [chat('a', 'Aaron'), chat('b', 'Bea'), chat('c', 'Cleo')];
   });
   afterEach(() => { layout.phone = false; vi.useRealTimers(); });
