@@ -294,6 +294,10 @@ export function SwipeableRow({ actions, children, className }: SwipeableRowProps
           >
             <span
               data-swipe-action-key
+              // Solid colour keys with white labels in the light themes too,
+              // as in Mail: the light inversion turned Block into a paper key
+              // with no edge and put ink on red Delete.
+              data-keep-dark
               className={cn(
                 'flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl',
                 action.className ?? 'bg-zinc-700',
