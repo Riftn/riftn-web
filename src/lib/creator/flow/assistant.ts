@@ -2,7 +2,7 @@
  * Creator Flow — client for the creator-prompt-assistant edge function.
  * =====================================================================
  * Streams tokens from the assistant persona (the prompt-crafter persona).
- * Works signed out; the function is IP-limited rather than wallet-gated.
+ * Needs a signed-in account: the function checks the Riftn token it sends.
  */
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { ownKeyHeaders } from '@/lib/api/dehub/own-key-headers';

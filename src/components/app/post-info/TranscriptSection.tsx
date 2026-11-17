@@ -8,7 +8,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * the overview, the chapters, a search across the lines, and a jump to any
  * timestamp.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AppState } from '@/components/app/AppState';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ import ThumbsUp from "@/components/ui/cut-icons/like";
 import { useVideoTranscript } from '@/hooks/use-video-transcript';
 import type { TranscriptSegment } from '@/hooks/use-transcript';
 import { useAuth } from '@/contexts/AuthContext';
+import { ownKeyHeaders } from '@/lib/api/dehub/own-key-headers';
 import {
   applyCorrections,
   useCorrectionActions,
@@ -222,6 +223,7 @@ export function TranscriptSection({ tokenId, durationSeconds, onSeek }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useSurfaceDraft("components/app/post-info/TranscriptSection.tsx:query", '');
   const [overviewLoading, setOverviewLoading] = useState(false);
+  const overviewAsked = useRef<string | null>(null);
 
   const { transcript, status, inFlight, canRetry, start, isLoading } =
     useVideoTranscript(tokenId, open);
@@ -249,10 +251,12 @@ export function TranscriptSection({ tokenId, durationSeconds, onSeek }: Props) {
     if (!open || status !== 'ready' || !transcript) return;
     if (overview || overviewLoading) return;
     if (transcript.summary_status === 'skipped' || transcript.summary_status === 'failed') return;
+    if (overviewAsked.current === String(tokenId)) return;
+    overviewAsked.current = String(tokenId);
     let cancelled = false;
     setOverviewLoading(true);
     supabase.functions
-      .invoke('summarize-transcript', { body: { kind: 'video', ref: String(tokenId) } })
+      .invoke('summarize-transcript', { headers: ownKeyHeaders(), body: { kind: 'video', ref: String(tokenId) } })
       .finally(() => { if (!cancelled) setOverviewLoading(false); });
     return () => { cancelled = true; };
   }, [open, status, transcript, overview, overviewLoading, tokenId]);
