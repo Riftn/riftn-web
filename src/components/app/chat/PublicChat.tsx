@@ -41,6 +41,7 @@ import { AppState } from '@/components/app/AppState';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
 import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson } from './ChatSearch';
 import {
   DropdownMenu,
@@ -359,6 +360,9 @@ export function PublicChat({ onBack }: PublicChatProps) {
       followedRoom.current = selectedRoomId;
     }
   }, [filteredMessages.length, selectedRoomId]);
+  // Rows keep growing after they land (images, replies, reactions), so stay
+  // pinned to the very bottom through those too, not just on new rows.
+  useStickToBottom(scrollContainerRef, () => followLatest.current && !olderAnchor.current);
 
   const handleReply = useCallback((message: Message) => {
     setReplyTo(message);
