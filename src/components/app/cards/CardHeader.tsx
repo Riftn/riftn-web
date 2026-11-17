@@ -22,6 +22,7 @@ import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import { ProfileHoverCard } from '@/components/app/ProfileHoverCard';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 import type { ContentType } from '@/types/feed.types';
@@ -67,6 +68,8 @@ interface CardHeaderProps {
    * back to the live ladder for that balance.
    */
   badgeLock?: BadgeLock | null;
+  /** Extra classes on the outer row, for lists that reuse the feed's identity line. */
+  className?: string;
 }
 
 /**
@@ -96,6 +99,7 @@ export function CardHeader({
   badgeBalance,
   badgeLookupId,
   badgeLock,
+  className,
 }: CardHeaderProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -153,7 +157,7 @@ export function CardHeader({
   return (
     // One gap under the name row for every post type, so photos, videos,
     // lives and text all start their media at the same height.
-    <div className="flex items-center gap-3 pr-3 flex-1 min-w-0 pb-3">
+    <div className={cn('flex items-center gap-3 pr-3 flex-1 min-w-0 pb-3', className)}>
       <ProfileHoverCard
         creatorId={creatorId}
         creatorUsername={creatorUsername}
