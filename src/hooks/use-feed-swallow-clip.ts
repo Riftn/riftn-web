@@ -104,8 +104,13 @@ export function useFeedSwallowClip(
       cutLayer.style.overflow = y === null ? '' : 'clip';
       motion.style.translate = y === null ? '' : `0 ${(-y).toFixed(2)}px`;
       const lift = y !== null && y < 0 ? -y : 0;
-      cutLayer.style.paddingBottom = lift ? `${lift.toFixed(2)}px` : '';
-      cutLayer.style.marginBottom = lift ? `${(-lift).toFixed(2)}px` : '';
+      if (lift) {
+        cutLayer.style.paddingBottom = `${lift.toFixed(2)}px`;
+        cutLayer.style.marginBottom = `${(-lift).toFixed(2)}px`;
+      } else {
+        cutLayer.style.removeProperty('padding-bottom');
+        cutLayer.style.removeProperty('margin-bottom');
+      }
       el.style.display = lift ? 'flow-root' : originalDisplay;
     };
     const writeClip = (clip: string, target = el, shiftY: number | null = null) => {
@@ -274,7 +279,7 @@ export function useFeedSwallowClip(
       themeObserver.disconnect(); pageObserver?.disconnect(); resizeObserver.disconnect();
       if (frame !== null) cancelAnimationFrame(frame);
       clearAnimation(); writeShift(null); clipTarget.style.clipPath = ''; el.style.clipPath = ''; delete el.dataset.feedSwallowDriver;
-      if (cutLayer) { cutLayer.style.paddingBottom = ''; cutLayer.style.marginBottom = ''; }
+      cutLayer?.style.removeProperty('padding-bottom'); cutLayer?.style.removeProperty('margin-bottom');
       el.style.display = originalDisplay;
       if (bounds) bounds.style.overflow = originalOverflow;
     };
