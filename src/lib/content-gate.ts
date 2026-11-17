@@ -1,5 +1,3 @@
-import { DHB_PRELISTING_USD } from './subscription-pricing';
-
 /**
  * Hold-gate resolution.
  * =====================
@@ -114,6 +112,8 @@ export interface SubscriberPlanQuote {
   usd: number;
 }
 
+/** Mirrors DHB_PRELISTING_USD in lib/subscription-pricing; kept local so this file stays import-free (cards' tests mock react-i18next). */
+const DHB_PRELISTING_USD = 0.001;
 const USD_CURRENCIES = new Set(['USD', 'USDT', 'USDC']);
 
 export function subscriberPlanQuote(
