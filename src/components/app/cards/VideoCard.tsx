@@ -3132,7 +3132,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               fraction={currentTime / (duration || 1)}
               duration={duration}
               visible={scrubbing}
-              armed={showControls}
+              // Fetch the sheet as soon as the video plays. Waiting for the
+              // controls meant a phone's line scrubber, which shows them only
+              // when the scrub starts, began the download mid-gesture and a
+              // quick scrub ended before any frame arrived.
+              armed={showControls || isPlaying}
             />
 
             <div data-video-button-row className="flex items-center justify-between gap-1 px-2">

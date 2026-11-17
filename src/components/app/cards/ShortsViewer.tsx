@@ -19,8 +19,6 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown, UserCheck, Loader2, Globe, RotateCcw } from "lucide-react";
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
-import Plus from "@/components/ui/cut-icons/add";
-import Minus from "@/components/ui/cut-icons/minus";
 import Volume2 from "@/components/ui/cut-icons/volume";
 import ArrowLeft from "@/components/ui/cut-icons/back";
 import VolumeX from "@/components/ui/cut-icons/mute";
@@ -520,24 +518,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     : theme === 'system' || theme === 'minimal' || theme === 'light' ? 'clean' as const
     : theme === 'osaka' || theme === 'glass' ? 'floor' as const
     : 'glow' as const;
-  // Info stage: a wide video on the clean stage can sit at the top of the
-  // screen with its caption, actions and comments laid out underneath. The +
-  // under the video opens it, the button opposite Back closes it, and the
-  // choice is kept for the next wide video.
-  const [infoStage, setInfoStage] = useState(() => {
-    try { return localStorage.getItem('dehub.shorts.infoStage') === '1'; } catch { return false; }
-  });
-  const chooseInfoStage = useCallback((open: boolean) => {
-    setInfoStage(open);
-    try { localStorage.setItem('dehub.shorts.infoStage', open ? '1' : '0'); } catch { /* Private mode. */ }
-  }, []);
   const [slideRatio, setSlideRatio] = useState<{ id: string | number; ratio: number } | null>(null);
-  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 390));
-  useEffect(() => {
-    const onResize = () => setViewportWidth(window.innerWidth);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
   const commentsViewport = useVisualViewportBox(isMobile && showComments);
 
   /**
@@ -691,14 +672,9 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // views) applies to it, so those get no id while it is on screen.
   const isLiveSlide = !!currentShort?.live;
   const postId = isLiveSlide ? undefined : currentShort?.id;
-  // A wide video held upright on the clean stage: the only place the info
-  // stage and its + button exist.
+  // A wide video held upright on the clean stage.
   const wideRatio = slideRatio && currentShort && slideRatio.id === currentShort.id && slideRatio.ratio > 1.1 ? slideRatio.ratio : 0;
   const cleanWide = isMobile && phoneStage === 'clean' && wideRatio > 0 && !isLiveSlide && !currentShort?.imageUrls?.length && !isFullscreen;
-  const wideCardHeight = cleanWide ? (viewportWidth - 24) / wideRatio : 0;
-  const infoActive = cleanWide && infoStage;
-  // Room for the top buttons, the card, and a little air under it.
-  const infoHeight = Math.round(56 + wideCardHeight + 12);
   const downloadVideo = useVideoDownload();
   const downloadGate = useMatureGate(currentShort?.contentRating);
   const isOwnShort = !!walletAddress && currentShort?.creatorId?.toLowerCase() === walletAddress.toLowerCase();
@@ -2078,7 +2054,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 : "shrink-0 h-full aspect-[9/16] w-auto max-w-[calc(100vw-8rem)] bg-zinc-900 rounded-none"
           )}
           // Comments get 75%: at half height the sheet held barely two comments.
-          animate={isMobile ? { height: showComments ? '25%' : infoActive ? infoHeight : '100%' } : undefined}
+          animate={isMobile ? { height: showComments ? '25%' : '100%' } : undefined}
           transition={SMOOTH_TRANSITION}
           onPointerDownCapture={() => { holdOwnsGesture.current = false; }}
           onPointerCancelCapture={() => { mini.cancel(); resetDragOffset(); endTimelineSeek(); }}
@@ -2144,7 +2120,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       showPlayIndicator={isActive ? showPlayIndicator : null}
                       letterbox
                       phoneStage={phoneStage}
-                      stageInsetTop={infoActive && !showComments ? 44 : 0}
+                      stageInsetTop={0}
                       onRatio={isActive ? (ratio: number) => setSlideRatio({ id: short.id, ratio }) : undefined}
                       isFullscreen={isFullscreen}
                       // Only the playing short draws a bar over the action
@@ -2491,47 +2467,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 </AnimatePresence>
 
                 {/* Bottom gradient overlay - fades from transparent to black */}
-                {!infoActive && <div className={cn("absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none transition-opacity duration-[250ms] ease-out", autoHidden && "opacity-0")} />}
+                {<div className={cn("absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none transition-opacity duration-[250ms] ease-out", autoHidden && "opacity-0")} />}
                 
                 {/* Bottom overlay stack — creator info + description, with the
                     action bar below as the bottommost element (feed-card style
                     horizontal row instead of the old side rail). The wrapper is
                     pointer-events-none and carries the bottom padding, so the
                     strip under the action row stays free for the timeline seek. */}
-                {!infoActive && phoneStack(false)}
+                {phoneStack(false)}
               </motion.div>
             </>
           )}
         </motion.div>
-
-        {/* Info stage sheet: the stack and the comments under a wide video. */}
-        {infoActive && !showComments && postId && (
-          <motion.div
-            key={`info-stage-${currentShort.id}`}
-            data-shorts-panel
-            data-shorts-info
-            data-shorts-scrollable
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={SMOOTH_TRANSITION}
-            className="absolute inset-x-0 bottom-0 z-[5] flex flex-col overflow-hidden bg-black"
-            style={{ top: infoHeight }}
-          >
-            {phoneStack(true)}
-            <div
-              className="flex-1 min-h-0 border-t border-white/[0.08] px-1 pb-[env(safe-area-inset-bottom)] [&>div]:h-full [&>div]:min-h-0 [&>div]:max-h-none [&>div]:mt-0 [&>div]:p-0"
-              style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
-            >
-              <CommentsSection
-                key={currentShort.id}
-                tokenId={currentShort.id}
-                onClose={() => {}}
-                initialTab={commentsInitialTab}
-                embedded
-              />
-            </div>
-          </motion.div>
-        )}
 
         {/* Mobile split comments panel - fills the bottom half when comments are
             open, with the shrunken video pinned above (Instagram-style).
@@ -2714,28 +2661,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           
-          {/* The player's own buttons live in the bottom stack now (see
-              `phoneStack`). Only the way back to the plain stage stays up here,
-              across from Back. */}
-          {/* Info stage: back to the plain stage. */}
-          {infoActive && <button
-            onClick={(event) => { event.stopPropagation(); chooseInfoStage(false); }}
-            className={cn(VIEWER_CONTROL, 'absolute top-4 right-4 z-20')}
-            style={{ touchAction: 'manipulation' }}
-            aria-label={_copy("copy.94ea9b1d33a0", { defaultValue: "Show less" })}
-          >
-            <Minus className="w-5 h-5 text-white" />
-          </button>}
-
-          {/* Clean stage: open the info stage, from just under the video. */}
-          {cleanWide && !infoActive && <button
-            onClick={(event) => { event.stopPropagation(); chooseInfoStage(true); }}
-            className="absolute right-4 z-20 w-10 h-10 flex items-center justify-center text-foreground"
-            style={{ top: `calc(50% + ${Math.round(wideCardHeight / 2) + 12}px)`, touchAction: 'manipulation' }}
-            aria-label={_copy("copy.f5c9bd131486", { defaultValue: "Show more" })}
-          >
-            <Plus className="w-6 h-6" />
-          </button>}
+          {/* The player's own buttons live in the bottom stack (see `phoneStack`). */}
         </motion.div>
       )}
 
