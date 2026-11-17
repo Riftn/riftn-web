@@ -39,7 +39,8 @@ export type DehubLinkKind =
   | 'film'
   | 'bounty'
   | 'app'
-  | 'proposal';
+  | 'proposal'
+  | 'skill';
 
 export interface DehubLinkMatch {
   kind: DehubLinkKind;
@@ -75,6 +76,7 @@ export interface DehubLinkMatch {
   appSlug?: string;
   /** `/app/governance/<n>` or the legacy `/app/governance/<uuid>` — a governance proposal. */
   proposalId?: string;
+  skillSlug?: string;
 }
 
 // ── Hosts ───────────────────────────────────────────────────────────────────
@@ -190,6 +192,13 @@ export function parseDehubLink(input: string): DehubLinkMatch | null {
   // nowhere because every regex hard-coded the /app prefix.
   const scoped = segments[0] === 'app' ? segments.slice(1) : segments;
   const isAppScoped = segments[0] === 'app';
+
+  if (isAppScoped && scoped.length === 1 && scoped[0] === 'assistant') {
+    const skillSlug = new URLSearchParams(search).get('skill');
+    return skillSlug && /^[a-z0-9-]{1,80}$/.test(skillSlug)
+      ? { ...base, kind: 'skill', skillSlug }
+      : null;
+  }
 
   // ── /app/post/:tokenId, /app/video/:tokenId ──
   if (isAppScoped && (scoped[0] === 'post' || scoped[0] === 'video') && scoped[1]) {
@@ -420,6 +429,7 @@ export function shareOrigin(): string {
 }
 
 export const dehubLinkFor = {
+  skill: (slug: string) => `${shareOrigin()}/app/assistant?skill=${encodeURIComponent(slug)}`,
   post: (tokenId: string | number) => `${shareOrigin()}/app/post/${tokenId}`,
   /** An article's readable URL — /app/post/<first-ten-words-of-the-title>. */
   article: (slug: string) => `${shareOrigin()}/app/post/${slug}`,
@@ -473,5 +483,6 @@ export function proposalPath(proposal: string | { id: string; proposal_number?: 
 
 /** Human label for a link kind — used by share sheets and fallback chips. */
 export function dehubLinkLabel(kind: DehubLinkKind | 'link'): string {
+  if (kind === 'skill') return i18n.t('skills.skills');
   return i18n.t(`dehubLinks.kind.${kind}`);
 }
