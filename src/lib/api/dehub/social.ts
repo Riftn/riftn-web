@@ -575,73 +575,13 @@ export async function getPostReposters(
 ): Promise<{ items: FollowListItem[]; pagination?: any }> {
   const tokenIdString = String(tokenId);
 
-  // Try known endpoint variants first
-  const attempts: Array<{ endpoint: string; params?: Record<string, string | number> }> = [
-    { endpoint: '/api/reposts', params: { tokenId: tokenIdString, page, limit } },
-    { endpoint: `/api/nft/${tokenIdString}/reposts`, params: { page, limit } },
-    { endpoint: `/api/reposts/${tokenIdString}`, params: { page, limit } },
-    { endpoint: '/api/reposters', params: { tokenId: tokenIdString, page, limit } },
-  ];
-
-  for (const attempt of attempts) {
-    try {
-      const response = await apiCall<any>(attempt.endpoint, { params: attempt.params });
-      const parsed = extractRepostersFromPayload(response);
-      if (parsed.items.length > 0) {
-        return parsed;
-      }
-    } catch {
-      // silently try next endpoint shape
-    }
-  }
-
-  // Fallback: some deployments expose reposter details in nft_info
-  try {
-    const nftInfo = await apiCall<any>(`/api/nft_info/${tokenIdString}`);
-    const parsed = extractRepostersFromPayload(nftInfo);
-    if (parsed.items.length > 0) {
-      return parsed;
-    }
-  } catch {
-    // continue to notification fallback
-  }
-
-  // Final fallback: infer from notifications for this token (owner view)
-  try {
-    const notificationsResponse = await apiCall<any>('/api/notification', {
-      params: { page: 1, limit: Math.max(100, limit), category: 'engagement' },
-      requiresAuth: true,
-    });
-
-    const notifications = notificationsResponse && typeof notificationsResponse === 'object' && 'result' in notificationsResponse
-      ? notificationsResponse.result
-      : notificationsResponse;
-
-    if (Array.isArray(notifications)) {
-      const inferred = notifications
-        .filter((n: any) => String(n?.tokenId ?? '') === tokenIdString)
-        .filter((n: any) => {
-          const type = String(n?.type ?? '').toLowerCase();
-          const content = String(n?.content ?? '').toLowerCase();
-          return type.includes('repost') || content.includes('repost');
-        })
-        .map((n: any) => normalizeReposter({
-          address: n?.actorAddress || n?.actor?.address,
-          username: n?.actorUsername || n?.actor?.username,
-          displayName: n?.actor?.displayName || n?.actorUsername,
-          avatarImageUrl: n?.actorAvatar || n?.actor?.avatarImageUrl || n?.actor?.avatarUrl,
-        }));
-
-      const deduped = dedupeReposters(inferred);
-      if (deduped.length > 0) {
-        return { items: deduped };
-      }
-    }
-  } catch {
-    // no-op
-  }
-
-  return { items: [] };
+  // GET /api/repost/users lists the accounts that reposted a post.
+  // (/api/reposts is the opposite: the posts one account reposted.)
+  const response = await apiCall<any>('/api/repost/users', {
+    params: { tokenId: tokenIdString, page, limit },
+  });
+  const parsed = extractRepostersFromPayload(response);
+  return { items: parsed.items, pagination: response?.pagination ?? parsed.pagination };
 }
 
 export async function repostPost(tokenId: number): Promise<{ result: boolean }> {

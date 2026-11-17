@@ -12,8 +12,7 @@ interface ProfileEmptyStateProps {
 
 /**
  * Empty-state card for profile tabs.
- * Icons are preloaded at module level (use-preload-icons.ts),
- * so we render immediately — no loading gate needed.
+ * Renders immediately — no loading gate.
  */
 export function ProfileEmptyState({ iconSrc, iconAlt, title, subtitle, iconClassName }: ProfileEmptyStateProps) {
   const icon = resolveThemeIconKey(iconSrc) ?? 'profile';

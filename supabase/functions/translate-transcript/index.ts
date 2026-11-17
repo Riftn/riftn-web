@@ -27,6 +27,7 @@ import {
 } from '../_shared/transcripts.ts';
 import { languageNameFor } from '../_shared/language-names.ts';
 import { aiChat } from '../_shared/ai-chat.ts';
+import { rateLimitByIp } from '../_shared/auth.ts';
 
 const FAL_KEY = Deno.env.get('FAL_KEY');
 
@@ -38,6 +39,26 @@ const CHUNK_SIZE = 60;
 const CHUNK_MAX_CHARS = 4000;
 /** A translation row nobody finished. Long enough not to race a live run. */
 const STALE_TRANSLATION_MS = 10 * 60 * 1000;
+/** How long a failed language waits before it is tried again. */
+const FAILED_RETRY_MS = 2 * 60 * 1000;
+/** How long a caller that needs the lines waits on a run already in progress. */
+const WAIT_FOR_RUN_MS = 25 * 1000;
+
+async function waitForTranslation(db: ReturnType<typeof admin>, transcriptId: string, lang: string) {
+  const until = Date.now() + WAIT_FOR_RUN_MS;
+  while (Date.now() < until) {
+    await new Promise((r) => setTimeout(r, 1500));
+    const { data } = await db
+      .from('transcript_translations')
+      .select('status, segments')
+      .eq('transcript_id', transcriptId)
+      .eq('language', lang)
+      .maybeSingle();
+    if (data?.status === 'ready') return data;
+    if (!data || data.status === 'failed') return null;
+  }
+  return null;
+}
 
 interface Chapter { title?: string; start?: number; end?: number }
 
@@ -275,8 +296,21 @@ Deno.serve(async (req) => {
       // that nothing would otherwise retry — the drawer only re-invokes when
       // the row is missing or failed.
       const age = Date.now() - new Date(existing.updated_at).getTime();
-      if (age < STALE_TRANSLATION_MS && !wantBody) {
-        return json({ ok: true, status: 'processing' });
+      if (age < STALE_TRANSLATION_MS) {
+        if (!wantBody) return json({ ok: true, status: 'processing' });
+        // A caller that reads the body waits for the run already going rather
+        // than starting a second one on the same lines.
+        const done = await waitForTranslation(db, row.id, langCode);
+        if (done) return json({ segments: done.segments ?? [], cached: true });
+        return json({ segments, cached: false, pending: true });
+      }
+    }
+    if (existing?.status === 'failed') {
+      // Give a failed language a short rest before the next attempt, so a
+      // provider outage is not hit again on every open of the drawer.
+      const age = Date.now() - new Date(existing.updated_at).getTime();
+      if (age < FAILED_RETRY_MS) {
+        return json(wantBody ? { segments, cached: false, degraded: true } : { ok: false, status: 'failed' });
       }
     }
 
@@ -301,6 +335,9 @@ Deno.serve(async (req) => {
           : { ok: true, status: 'ready', cached: true, sameAsSource: true },
       );
     }
+
+    const limited = await rateLimitByIp(req, 'translate-transcript', { limit: 60, windowMs: 60 * 60 * 1000 });
+    if (limited) return limited;
 
     await db.from('transcript_translations').upsert({
       transcript_id: row.id,

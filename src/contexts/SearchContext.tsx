@@ -218,7 +218,7 @@ const createSearchIndex = (): SearchIndex[] => {
       id: 'advertiser-dashboard',
       title: 'Advertiser Dashboard',
       content: 'Advertiser dashboard for managing campaigns, analytics, budget management, ad performance, campaign creation, ROI tracking',
-      path: '/docs/advertiser-dashboard',
+      path: '/ads',
       category: 'Main',
       type: 'page',
       keywords: ['advertiser', 'dashboard', 'campaign', 'analytics', 'budget', 'performance', 'roi']

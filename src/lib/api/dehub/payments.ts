@@ -132,14 +132,6 @@ export async function createCheckout(_body: Record<string, unknown>): Promise<Ch
   return rejectCardPayment();
 }
 
-export async function createDPayTicket(body: Record<string, unknown>): Promise<{ result: unknown }> {
-  return apiCall<{ result: unknown }>("/api/dpay/tk", {
-    method: "POST",
-    body,
-    requiresAuth: true,
-  });
-}
-
 export async function createOnrampSession(body: Record<string, unknown>): Promise<{ result: unknown }> {
   return apiCall<{ result: unknown }>("/api/dpay/create-onramp-session", {
     method: "POST",
