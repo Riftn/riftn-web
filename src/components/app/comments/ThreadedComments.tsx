@@ -20,7 +20,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation as useI18n } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, Square } from "lucide-react";
-import Send from "@/components/ui/cut-icons/send";
 import X from "@/components/ui/cut-icons/close";
 import Paperclip from '@/components/ui/cut-icons/attach';
 import Mic from "@/components/ui/cut-icons/mic";
@@ -576,69 +575,101 @@ export function ThreadedComments<C extends ThreadedComment>({
         <button
           type="button"
           onClick={() => openLoginModal()}
-          className="w-full h-8 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white text-xs transition-colors"
+          className="w-full h-10 rounded-xl bg-white/[0.08] border border-white/[0.12] text-zinc-400 hover:text-white text-xs transition-colors"
         >
           {labels.signInToComment}
         </button>
       ) : (
-        <form onSubmit={handleSubmit} className="relative flex items-end gap-2">
-          {media && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={COMMENT_ATTACH_ACCEPT}
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = '';
-                  if (file) void attachFile(file);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => { if (!isAuthenticated) { openLoginModal(); return; } fileInputRef.current?.click(); }}
-                disabled={uploading || recording || !!attachment}
-                className="w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-30 transition-opacity"
-                aria-label={t('comments.attachMedia')}
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
-            </>
-          )}
-          <Textarea
-            ref={inputRef}
-            value={text}
-            onChange={(e) => {
-              const val = e.target.value;
-              setText(val);
-              mention.handleInput(val, e.target.selectionStart ?? val.length);
-            }}
-            onPaste={media ? (e) => {
-              const file = firstAttachableFile(e.clipboardData?.files);
-              if (file && !attachment) { e.preventDefault(); void attachFile(file); }
-            } : undefined}
-            onKeyDown={(e) => {
-              if (mention.isOpen) {
-                const handled = mention.handleKeyDown(e);
-                if (handled) {
-                  if (e.key === 'Enter' || e.key === 'Tab') {
-                    e.preventDefault();
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const liveResults = (window as any).__mentionResults || [];
-                    if (liveResults[mention.selectedIndex]) {
-                      mention.handleSelect(liveResults[mention.selectedIndex]);
+        <form onSubmit={handleSubmit} className="relative">
+          {/* One bar, same as the post composer: text on the left, attach / emoji /
+              voice / Post inside it on the right, every control the same 32px. */}
+          <div className="flex min-h-10 w-full min-w-0 items-end gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.08] py-[3px] pl-3 pr-[3px] backdrop-blur-xl">
+            <Textarea
+              ref={inputRef}
+              value={text}
+              onChange={(e) => {
+                const val = e.target.value;
+                setText(val);
+                mention.handleInput(val, e.target.selectionStart ?? val.length);
+              }}
+              onPaste={media ? (e) => {
+                const file = firstAttachableFile(e.clipboardData?.files);
+                if (file && !attachment) { e.preventDefault(); void attachFile(file); }
+              } : undefined}
+              onKeyDown={(e) => {
+                if (mention.isOpen) {
+                  const handled = mention.handleKeyDown(e);
+                  if (handled) {
+                    if (e.key === 'Enter' || e.key === 'Tab') {
+                      e.preventDefault();
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const liveResults = (window as any).__mentionResults || [];
+                      if (liveResults[mention.selectedIndex]) {
+                        mention.handleSelect(liveResults[mention.selectedIndex]);
+                      }
                     }
+                    return;
                   }
-                  return;
                 }
-              }
-            }}
-            placeholder={replyTo ? labels.writeReply : labels.addComment}
-            maxLength={500}
-            rows={1}
-            className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 rounded-xl text-xs min-h-8 max-h-[140px] resize-none py-2"
-          />
+              }}
+              placeholder={replyTo ? labels.writeReply : labels.addComment}
+              maxLength={500}
+              rows={1}
+              className="h-8 min-h-8 max-h-[140px] min-w-0 flex-1 resize-none rounded-none border-0 bg-transparent px-0 py-1.5 text-sm leading-5 text-white shadow-none placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+            {media && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={COMMENT_ATTACH_ACCEPT}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file) void attachFile(file);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => { if (!isAuthenticated) { openLoginModal(); return; } fileInputRef.current?.click(); }}
+                  disabled={uploading || recording || !!attachment}
+                  className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] text-zinc-400 hover:text-white disabled:opacity-30 transition-colors"
+                  aria-label={t('comments.attachMedia')}
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
+                <EmojiGifPicker
+                  onEmojiSelect={(emoji) => setText((current) => (current + emoji).slice(0, 500))}
+                  onGifSelect={(gifUrl) => {
+                    if (!isAuthenticated) { openLoginModal(); return; }
+                    setAttachment({ url: gifUrl, type: 'gif', preview: gifUrl });
+                  }}
+                  triggerClassName="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+                  iconClassName="w-4 h-4"
+                />
+                <button
+                  type="button"
+                  onClick={() => { if (recording) stopRecording(); else void startRecording(); }}
+                  disabled={uploading || (!recording && !!attachment)}
+                  className={cn(
+                    'w-8 h-8 shrink-0 flex items-center justify-center rounded-lg border backdrop-blur-xl disabled:opacity-30 transition-colors',
+                    recording ? 'bg-red-500/80 border-red-400/60 text-white' : 'bg-white/[0.08] border-white/[0.12] text-zinc-400 hover:text-red-400',
+                  )}
+                  aria-label={recording ? t('comments.stopRecording') : t('comments.recordVoiceNote')}
+                >
+                  {recording ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
+                </button>
+              </>
+            )}
+            <button
+              type="submit"
+              disabled={!canSend}
+              className="h-8 min-w-8 shrink-0 flex items-center justify-center px-2.5 rounded-lg text-xs font-medium text-white bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)] hover:from-white/30 hover:via-white/15 hover:to-white/10 disabled:opacity-30 transition-colors"
+            >
+              {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : t('comments.post')}
+            </button>
+          </div>
           <UserMentionDropdown
             query={mention.query}
             isOpen={mention.isOpen}
@@ -648,40 +679,6 @@ export function ThreadedComments<C extends ThreadedComment>({
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          {media && (
-            <EmojiGifPicker
-              onEmojiSelect={(emoji) => setText((current) => (current + emoji).slice(0, 500))}
-              onGifSelect={(gifUrl) => {
-                if (!isAuthenticated) { openLoginModal(); return; }
-                setAttachment({ url: gifUrl, type: 'gif', preview: gifUrl });
-              }}
-              triggerClassName="w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white"
-              iconClassName="w-4 h-4"
-            />
-          )}
-          {media && !text.trim() && !attachment ? (
-            <button
-              type="button"
-              onClick={() => { if (recording) stopRecording(); else void startRecording(); }}
-              disabled={uploading}
-              className={cn(
-                'w-8 h-8 shrink-0 flex items-center justify-center rounded-xl border text-white disabled:opacity-30 transition-colors',
-                recording ? 'bg-red-500/80 border-red-400/60' : 'bg-white/5 border-white/10',
-              )}
-              aria-label={recording ? t('comments.stopRecording') : t('comments.recordVoiceNote')}
-            >
-              {recording ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-4 h-4" />}
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={!canSend}
-              className="w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 text-white disabled:opacity-30 transition-opacity"
-              aria-label={t('comments.post')}
-            >
-              {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-            </button>
-          )}
         </form>
       )}
 
