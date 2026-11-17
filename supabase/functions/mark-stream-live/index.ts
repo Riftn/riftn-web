@@ -19,6 +19,26 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
+/**
+ * Who made a post: the lowercase wallet, null when the API says there is no
+ * such post, or "" when the API could not be asked (a heartbeat must not take
+ * a broadcast down over a blip, so that case falls back to the holder check).
+ */
+async function postMinter(tokenId: string): Promise<string | null> {
+  if (!/^\d{1,20}$/.test(tokenId)) return null;
+  try {
+    const res = await fetch(`https://api.dehub.io/api/nft_info/${tokenId}`, { signal: AbortSignal.timeout(6000) });
+    if (res.status === 404) return null;
+    if (!res.ok) return "";
+    const data = await res.json().catch(() => null);
+    if (data?.error && !data?.result) return /not found/i.test(String(data.error)) ? null : "";
+    const minter = (data?.result ?? data)?.minter;
+    return typeof minter === "string" && minter ? minter.toLowerCase() : "";
+  } catch {
+    return "";
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -45,6 +65,21 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "tokenId is required" }),
         { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Only the account that made the live post can mark it live.
+    const minter = await postMinter(String(tokenId));
+    if (minter === null) {
+      return new Response(
+        JSON.stringify({ error: "That stream was not found." }),
+        { status: 404, headers: corsHeaders }
+      );
+    }
+    if (minter && minter !== walletAddress) {
+      return new Response(
+        JSON.stringify({ error: "That stream is not yours." }),
+        { status: 403, headers: corsHeaders }
       );
     }
 

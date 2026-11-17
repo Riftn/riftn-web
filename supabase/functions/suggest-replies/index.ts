@@ -101,6 +101,14 @@ serve(async (req) => {
   const limited = await rateLimitByIp(req, 'suggest-replies', { limit: 120, windowMs: 60 * 60 * 1000 });
   if (limited) return limited;
 
+  // Reply ideas only exist inside a conversation, and messages need sign-in.
+  const wallet = await optionalWallet(req);
+  if (!wallet) {
+    return new Response(JSON.stringify({ error: 'Sign in to use this.' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const body = await req.json();
     const turns = sanitiseTurns(body?.thread);
@@ -166,7 +174,7 @@ serve(async (req) => {
     }, {
       expectToolCall: 'return_suggestions',
       label: 'suggest-replies',
-      ownKeyWallet: await optionalWallet(req),
+      ownKeyWallet: wallet,
     });
 
     if (!response.ok) {
