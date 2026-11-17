@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { isDhbBuyAlert } from '@/components/app/chat/BuyAlertCard';
 
 export interface BuyAlertMessage {
   id: string;
@@ -28,8 +29,14 @@ function readAlerts(): Promise<BuyAlertMessage[] | null> {
       .select('id, content, created_at, message_type')
       .eq('message_type', 'buy_alert')
       .order('created_at', { ascending: false })
-      .limit(50),
-  ).then(({ data, error }) => (!error && data ? ([...data] as BuyAlertMessage[]).reverse() : null));
+      // Every group with a linked token now gets its own buy alerts; the
+      // platform chat only shows the platform token's.
+      .limit(200),
+  ).then(({ data, error }) =>
+    !error && data
+      ? ([...data] as BuyAlertMessage[]).filter((a) => isDhbBuyAlert(a.content)).slice(0, 50).reverse()
+      : null,
+  );
   const entry = { at: Date.now(), rows };
   read = entry;
   void rows.then((r) => { if (!r && read === entry) read = null; });
@@ -70,6 +77,7 @@ export function useBuyAlerts() {
         },
         (payload) => {
           const newAlert = payload.new as BuyAlertMessage;
+          if (!isDhbBuyAlert(newAlert.content)) return;
           setAlerts((prev) => {
             if (prev.some((a) => a.id === newAlert.id)) return prev;
             // Keep last 50

@@ -9,7 +9,7 @@
 
 import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Shield, ScrollText, AlertTriangle, type LucideIcon } from "lucide-react";
+import { Shield, ScrollText, AlertTriangle, Bot, type LucideIcon } from "lucide-react";
 import Users from "@/components/ui/cut-icons/communities";
 import Link2 from "@/components/ui/cut-icons/link";
 import History from "@/components/ui/cut-icons/history";
@@ -35,6 +35,7 @@ import { InviteLinksTab } from './InviteLinksTab';
 import { RecentActionsTab } from './RecentActionsTab';
 import { PermissionsTab } from './PermissionsTab';
 import { RulesTab } from './RulesTab';
+import { AutoModTab } from './AutoModTab';
 import { DangerZone } from './DangerZone';
 import { HoldersTab } from './HoldersTab';
 import Coins from '@/components/ui/cut-icons/coins';
@@ -50,6 +51,7 @@ type ManageTabValue =
   | 'admins'
   | 'members'
   | 'permissions'
+  | 'automod'
   | 'invites'
   | 'rules'
   | 'holders'
@@ -104,6 +106,14 @@ export function CommunityManageSheet({
         label: t('communities.manage.tabPermissions', { defaultValue: 'Permissions' }),
         icon: SlidersHorizontal,
         render: () => <PermissionsTab community={community} membership={membership} />,
+      });
+    }
+    if (abilities.isOwner || abilities.isAdmin) {
+      list.push({
+        value: 'automod',
+        label: t('communities.manage.tabAutoMod', { defaultValue: 'Auto-mod & bots' }),
+        icon: Bot,
+        render: () => <AutoModTab community={community} membership={membership} />,
       });
     }
     if (abilities.can('invite_users')) {

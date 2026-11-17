@@ -275,6 +275,24 @@ export function adminErrorMessage(error: unknown, fallback: string): string {
     return _translateCopy('communities.entry.txUsed', { defaultValue: 'That payment was already used to join.' });
   }
 
+  // Group auto-mod (community_chat_automod trigger).
+  if (raw.includes('automod_banned_word')) {
+    return _translateCopy('communities.automod.bannedWord', { defaultValue: 'That message has a word this group doesn\'t allow.' });
+  }
+  if (raw.includes('automod_links')) {
+    return _translateCopy('communities.automod.links', { defaultValue: 'Links aren\'t allowed in this group.' });
+  }
+  if (raw.includes('automod_repeat')) {
+    return _translateCopy('communities.automod.repeat', { defaultValue: 'You just sent that. Try saying something new.' });
+  }
+  const flood = raw.match(/automod_flood:(\d+)/);
+  if (flood) {
+    return _translateCopy('communities.automod.flood', { defaultValue: 'You\'re sending too fast. Wait {{value1}}s and try again.', value1: flood[1] });
+  }
+  if (raw.includes('message_type_reserved')) {
+    return _translateCopy('communities.automod.reserved', { defaultValue: 'That kind of message can only come from the group\'s bots.' });
+  }
+
   const slow = raw.match(/slow_mode_active:(\d+)/);
   if (slow) {
     const seconds = Number(slow[1]);
@@ -743,3 +761,64 @@ export const SLOW_MODE_OPTIONS = [
   { get label() { return _translateCopy("copy.8d616d350961", { defaultValue: "15 min" }); }, seconds: 900 },
   { get label() { return _translateCopy("copy.f8b8883f0c9d", { defaultValue: "1 hour" }); }, seconds: 3600 },
 ] as const;
+
+// ─── Auto-mod and buy bot ────────────────────────────────────────────────────
+
+export interface GroupAutoModSettings {
+  enabled: boolean;
+  banned_words: string[];
+  block_links: boolean;
+  flood_enabled: boolean;
+  flood_max: number;
+  flood_seconds: number;
+  block_repeats: boolean;
+}
+
+export interface GroupBuyBotSettings {
+  enabled: boolean;
+  min_usd: number;
+}
+
+export interface GroupBotSettings {
+  automod: GroupAutoModSettings;
+  buy_bot: GroupBuyBotSettings;
+  token: {
+    symbol: string | null;
+    chain_id: string | null;
+    address: string | null;
+    pair: string | null;
+    /** A linked EVM token with a v2/v3 pool the bot can watch. */
+    supported: boolean;
+  };
+}
+
+export interface GroupBotSettingsPatch {
+  automod?: Partial<GroupAutoModSettings>;
+  buy_bot?: Partial<GroupBuyBotSettings>;
+}
+
+/** Owner/admin only; the RPC refuses everyone else. */
+export function useGroupBotSettings(communityId: string | undefined, enabled = true) {
+  const { walletAddress } = useAuth();
+  return useQuery({
+    queryKey: ['communities', 'bot-settings', communityId, walletAddress?.toLowerCase()],
+    enabled: !!communityId && !!walletAddress && enabled,
+    queryFn: () =>
+      callRpc<GroupBotSettings>('community_get_bot_settings', { _community_id: communityId }, walletAddress),
+    staleTime: 30_000,
+  });
+}
+
+export function useUpdateGroupBotSettings() {
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ communityId, patch }: { communityId: string; patch: GroupBotSettingsPatch }) =>
+      callRpc<GroupBotSettings>('community_update_bot_settings', { _community_id: communityId, _patch: patch }, walletAddress),
+    onSuccess: (updated, { communityId }) => {
+      qc.setQueryData(['communities', 'bot-settings', communityId, walletAddress?.toLowerCase()], updated);
+      qc.invalidateQueries({ queryKey: ['communities', 'admin-log', communityId] });
+    },
+    onError: (error) => toast.error(adminErrorMessage(error, _translateCopy('communities.automod.saveFailed', { defaultValue: 'Couldn\'t save. Try again.' }))),
+  });
+}

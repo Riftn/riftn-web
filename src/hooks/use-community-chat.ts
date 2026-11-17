@@ -415,7 +415,7 @@ export function useCommunityChat(
 
     if (error) {
       console.error('[CommunityChat] Edit error:', error);
-      toast.error(_copy("copy.da8e926af644", { defaultValue: "Failed to edit message" }));
+      toast.error(adminErrorMessage(error, _copy("copy.da8e926af644", { defaultValue: "Failed to edit message" })));
       queryClient.invalidateQueries({ queryKey: messagesKey });
       return false;
     }
