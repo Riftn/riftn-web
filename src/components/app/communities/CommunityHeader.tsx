@@ -2,10 +2,10 @@ import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
 import { holderGateOf } from '@/hooks/use-holder-gate';
 import { HolderGateChip } from './HolderGateChip';
 import { CommunityKindChip } from './CommunityKindChip';
-import { entryPriceOf } from '@/lib/community-kinds';
+import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { useRef, useState, useCallback } from 'react';
-import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock } from "lucide-react";
+import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus } from "lucide-react";
 import Users from "@/components/ui/cut-icons/communities";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 import Camera from "@/components/ui/cut-icons/camera";
@@ -32,6 +32,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { dehubLinkFor } from '@/lib/dehub-links';
 import { toast } from 'sonner';
+import { useChatPrefs } from '@/hooks/use-chat-prefs';
+import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { useTranslation } from 'react-i18next';
 import { DescriptionWithLinks } from './DescriptionWithLinks';
 import { storageImage, deviceWidth, isMdUp } from '@/lib/media-url';
@@ -129,6 +131,11 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
   const hasBanner = !!community.banner_url;
   const buttonBase = 'rounded-xl gap-1.5 h-9 px-3 bg-white/10 border border-white/20 text-white hover:bg-white/15';
   const joinPrimary = !isOwner && !isMember && !isPendingMember;
+  // Optional: a member can put this community's chat in their Messages list.
+  // Groups and channels are always there, so they get no button.
+  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
+  const canAddToMessages = !!walletAddress && (isMember || isOwner) && communityKindOf(community) === 'community';
+  const inMessages = !!chatPrefs.get(roomChatId(community.id))?.listedAt;
 
   return (
     <div className="px-3 pt-3 pb-4 relative">
@@ -397,6 +404,24 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
             >
               {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
               {isPinned ? t('communities.unpin') : t('communities.pin')}
+            </Button>
+          )}
+          {canAddToMessages && (
+            <Button
+              size="sm"
+              variant="ghost"
+              data-show-in-chats={inMessages ? 'on' : 'off'}
+              aria-pressed={inMessages}
+              onClick={() => updateChatPref(roomChatId(community.id), inMessages ? { listed: false, pinned: false } : { listed: true })}
+              className={buttonBase}
+              title={inMessages
+                ? t('communities.inMessagesHint', { defaultValue: "This community's chat is in your Messages. Tap to take it out." })
+                : t('communities.addToMessagesHint', { defaultValue: "Show this community's chat in your Messages, next to your DMs and groups" })}
+            >
+              {inMessages ? <Check className="w-3.5 h-3.5" /> : <MessageSquarePlus className="w-3.5 h-3.5" />}
+              {inMessages
+                ? t('communities.inMessages', { defaultValue: 'In Messages' })
+                : t('communities.addToMessages', { defaultValue: 'Add to Messages' })}
             </Button>
           )}
           {canManage && (

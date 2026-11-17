@@ -128,7 +128,7 @@ function ChatOptionItems({ kit, h }: { kit: Kit; h: ChatOptionsHandlers }) {
       </Item>
       {h.onHideFromList && (
         <Item className={ROW} onSelect={h.onHideFromList}>
-          <EyeOff />{t('chatMenu.hideFromChats', 'Remove from Chats')}
+          <EyeOff />{t('chatMenu.hideFromMessages', 'Remove from Messages')}
         </Item>
       )}
       {h.onBlock && (
