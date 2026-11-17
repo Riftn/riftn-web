@@ -41,12 +41,11 @@ import { isTokenUnlocked, markTokenUnlocked } from '@/lib/unlocked-tokens-store'
 import {
   isHoldGated,
   isSubscriberGated,
-  cheapestSubscriberPlan,
-  subscriberPlanPrice,
-  formatSubscriberPrice,
+  cheapestSubscriberQuote,
   type SubscriberPlan,
 } from '@/lib/content-gate';
 import { GatePreview } from './GatePreview';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
 import { UnlockReveal } from '@/components/app/unlock/UnlockReveal';
 import { nextUnlockRevealKind, type UnlockRevealKind } from '@/components/app/unlock/unlock-reveal-kind';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -147,7 +146,7 @@ export function GatedMedia({ gate, preview, className, children }: GatedMediaPro
     );
   }
 
-  const cheapestPlanPrice = subscriberPlanPrice(cheapestSubscriberPlan(gate.subscriberPlans));
+  const cheapestQuote = cheapestSubscriberQuote(gate.subscriberPlans);
 
   /** Every gate is the same tile: blurred poster, glass icon, two lines, one tap. */
   const panel = (
@@ -161,6 +160,8 @@ export function GatedMedia({ gate, preview, className, children }: GatedMediaPro
       <button
         type="button"
         data-no-navigate
+        data-gate-overlay
+        data-keep-dark
         className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-center px-6"
         onClick={(e) => {
           // Cards navigate on click; opening the sheet must not open the post.
@@ -168,7 +169,7 @@ export function GatedMedia({ gate, preview, className, children }: GatedMediaPro
           onOpen();
         }}
       >
-        <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+        <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
           {icon}
         </div>
         <p className="text-white font-semibold text-sm mb-1 flex items-center justify-center gap-1 flex-wrap">{heading}</p>
@@ -213,9 +214,8 @@ export function GatedMedia({ gate, preview, className, children }: GatedMediaPro
         panel(
           <Star className="h-7 w-7 text-white" />,
           _copy("copy.109ddfc1cc4a", { defaultValue: "Subscribers only" }),
-          cheapestPlanPrice !== undefined ? (
-            <>{_copy("copy.8b2ebd182d8e", { defaultValue: "Subscribe from" })}<DhbAmount amount={formatSubscriberPrice(cheapestPlanPrice)} iconClassName="h-3.5 w-3.5" />
-            </>
+          cheapestQuote ? (
+            <SubscribeFromPrice quote={cheapestQuote} />
           ) : gate.creatorName ? (
             _copy("copy.855f365abafc", { defaultValue: "Subscribe to {{value1}}", value1: gate.creatorName })
           ) : (

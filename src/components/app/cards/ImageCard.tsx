@@ -114,7 +114,8 @@ import { WideVideoPanel } from '@/components/app/video/WideVideoRails';
 import type { VideoItem } from '@/types/feed.types';
 import { chainVerticalWheel } from '@/lib/chain-vertical-wheel';
 import { downloadMedia, imageDownloadName } from '@/lib/download-media';
-import { isHoldGated, isSubscriberGated, cheapestSubscriberPlan, subscriberPlanPrice } from '@/lib/content-gate';
+import { isHoldGated, isSubscriberGated, cheapestSubscriberQuote } from '@/lib/content-gate';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
 
 /** Lazy: only comic posts load the collector cards. */
 const ComicDeckLazy = lazy(() => import('@/components/app/comic/ComicDeck').then(m => ({ default: m.ComicDeck })));
@@ -961,7 +962,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   // Cheapest plan a reader can actually buy. The price lives on the plan's
   // chain entry, not on `plan.price` — that field does not exist on this
   // payload, and reading it gave NaN, which formatCompact renders as "0".
-  const cheapestPlanPrice = subscriberPlanPrice(cheapestSubscriberPlan(post.subscriberPlans));
+  const cheapestQuote = cheapestSubscriberQuote(post.subscriberPlans);
   const isComboLocked = isPPV && isLocked;
   // Independent of the monetisation gates above: a post can be both mature and
   // pay-per-view, and the creator's own post is warned about too — the warning
@@ -1381,6 +1382,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 decoding={aboveFold ? 'sync' : 'async'}
               />
               <div 
+                data-gate-overlay
+                data-keep-dark
                 className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
                 onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
@@ -1421,6 +1424,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 decoding={aboveFold ? 'sync' : 'async'}
               />
               <div 
+                data-gate-overlay
+                data-keep-dark
                 className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
                 onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
@@ -1432,7 +1437,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowPPVDrawer(true); }
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                   <Ticket className="h-7 w-7 text-white" />
                 </div>
                 <p className="text-white font-semibold text-sm mb-1">{_copy("copy.48e072480fc5", { defaultValue: "Pay-Per-View Content" })}</p>
@@ -1458,6 +1463,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 decoding={aboveFold ? 'sync' : 'async'}
               />
               <div
+                data-gate-overlay
+                data-keep-dark
                 className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setShowSubDrawer(true); }}
                 onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
@@ -1469,14 +1476,13 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowSubDrawer(true); }
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                   <Star className="h-7 w-7 text-white" />
                 </div>
                 <p className="text-white font-semibold text-sm mb-1">{_copy("copy.109ddfc1cc4a", { defaultValue: "Subscribers only" })}</p>
                 <p className="text-white/70 text-xs">
-                  {cheapestPlanPrice !== undefined ? (
-                    <>{_copy("copy.c2947d66723d", { defaultValue: "Subscribe from " })}<DhbAmount amount={formatCompact(cheapestPlanPrice)} />
-                    </>
+                  {cheapestQuote ? (
+                    <SubscribeFromPrice quote={cheapestQuote} />
                   ) : (
                     _copy("copy.855f365abafc", { defaultValue: "Subscribe to {{value1}}", value1: post.username })
                   )}
@@ -1498,6 +1504,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 decoding={aboveFold ? 'sync' : 'async'}
               />
               <div
+                data-gate-overlay
+                data-keep-dark
                 className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); setShowLockedDrawer(true); }}
                 onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
@@ -1509,7 +1517,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowLockedDrawer(true); }
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                   <Lock className="h-7 w-7 text-white" />
                 </div>
                 <p className="text-white font-semibold text-sm mb-1">{_copy("copy.490f4babbf34", { defaultValue: "Holdings Required" })}</p>

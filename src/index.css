@@ -4320,6 +4320,17 @@ html[data-system-tone="light"] [data-bottom-nav] .border-white\/30 {
 /* Login modal light-mode overrides live above (~L1351). Do NOT reintroduce
    dark-glass styling here — the modal must be paper/ink on light theme. */
 
+/* Paywall tiles (subscribers only, pay per view, holdings) sit on a darkened,
+   blurred preview of the media, so their copy and icons stay white on paper
+   themes too. Without this the light theme turned them ink-on-dark and the
+   price line under "Subscribers only" all but vanished. */
+html[data-theme="light"] [data-gate-overlay],
+html[data-theme="light"] [data-gate-overlay] *,
+html[data-system-tone="light"] [data-gate-overlay],
+html[data-system-tone="light"] [data-gate-overlay] * {
+  color: #ffffff !important;
+}
+
 /* Staking badge artwork keeps its native tier colours in every theme. */
 /* Video hover playback controls: chips have a translucent black background,
    so their icons and text must stay white on light mode (otherwise .text-white
