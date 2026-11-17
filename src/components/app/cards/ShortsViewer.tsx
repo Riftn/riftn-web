@@ -1459,6 +1459,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     const touch = e.touches[0];
     const edge = swipeDirection < 0 ? window.innerWidth - touch.clientX : touch.clientX;
     if (edge < 0 || edge > EDGE_SWIPE_ZONE_PX) return;
+    // The scrubber starts inside the edge zone: a drag that begins on it seeks.
+    if ((e.target as Element | null)?.closest?.("[data-shorts-scrubber],[data-no-swipe]")) return;
     const now = performance.now();
     edgeSwipe.current = { id: touch.identifier, x: touch.clientX, y: touch.clientY, at: now, claimed: false, lastX: touch.clientX, lastAt: now, velocity: 0 };
   };
@@ -1887,7 +1889,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 <div
                   ref={setSeekSlot}
                   data-shorts-seek-slot
-                  className={cn("relative z-10 mx-4 mt-1 h-11 empty:hidden pointer-events-auto", (showComments || chromeInert) && "pointer-events-none")}
+                  className={cn("relative z-10 mx-4 mt-1 h-11 empty:hidden pointer-events-auto", autoFade(inInfo), (showComments || chromeInert) && "pointer-events-none")}
                 />
 
                 {/* The player's buttons, on the bottom row under the scrubber. */}
