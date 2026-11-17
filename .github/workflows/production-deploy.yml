@@ -67,13 +67,19 @@ jobs:
         env:
           EXPECTED_REVISION: ${{ inputs.revision }}
         run: |
-          curl --fail --silent --show-error "https://riftn.com/version.json?commit=$EXPECTED_REVISION" --output /tmp/production-version.json
-          node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          const version = JSON.parse(fs.readFileSync('/tmp/production-version.json', 'utf8'));
-          if (version.id !== process.env.EXPECTED_REVISION.slice(0, 8)) throw new Error('Production serves a different commit: ' + JSON.stringify(version));
-          console.log('Production serves ' + process.env.EXPECTED_REVISION);
-          JS
+          # Cloudflare takes a few seconds to roll a new version out to every
+          # edge, so the first read can still see the previous commit. Poll for
+          # up to two minutes before calling it a failed deploy.
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error "https://riftn.com/version.json?commit=$EXPECTED_REVISION&try=$attempt" --output /tmp/production-version.json \
+              && node -e 'const v=JSON.parse(require("fs").readFileSync("/tmp/production-version.json","utf8")); process.exit(v.id===process.env.EXPECTED_REVISION.slice(0,8)?0:1)'; then
+              echo "Production serves $EXPECTED_REVISION"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Production serves a different commit: $(cat /tmp/production-version.json 2>/dev/null)"
+          exit 1
       - name: Ping search engines about changed pages
         continue-on-error: true
         run: node scripts/indexnow-submit.mjs dist/sitemap-static.xml --previous /tmp/live-sitemap-static.xml
