@@ -51,7 +51,7 @@ import { useMention } from '@/hooks/use-mention';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
-import dehubLogo from '@/assets/dehub-logo-white.png';
+import dehubLogo from '@/assets/riftn-logo-white.png';
 import dehubLogoCompact from '@/assets/dehub-logo-compact.png';
 import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
 import aiSparkleIcon from '@/assets/icons/ai-sparkle-icon.png';
@@ -165,7 +165,8 @@ function buildDeHubBrandPrompt(userRequest: string): string {
 - Palette: STRICTLY monochrome. Black and charcoal grounds, brushed-steel and polished-chrome greys, cool off-whites, pure white highlights. NO colour hues at all — no red, orange, yellow, magenta, purple, green, blue, teal — and no neon or tinted ambient glow. Any ambient tint must read as cool near-white, under 10% saturation.
 - Ground: never flat black. Silk / brushed texture with a soft radial vignette, faint starfield dust, and a very faint dotted lattice that rakes across the frame — strongest at the upper-left light catch, gone by the lower-right.
 - Hero: ONE large photoreal chrome or black-metal object matched to the subject matter, lit from the upper-left, radial white glow behind it, deep drop shadow, bleeding off the RIGHT and BOTTOM edges of the frame. Never centred and contained, never clipped at the top, never a generic coin unless the subject really is money.
-- Chrome furniture: mono "// type =" annotation stamps and a "//dehub.io" mark in the corners. Any box around them is four short CORNER BRACKETS (crop marks), never a dashed or solid rectangle.
+- Logo placement: the plain white Riftn logo sits bottom-left, straight on the art with only a soft dark halo. No pill, no white box, no black logo on white.
+- Chrome furniture: a mono "// type =" annotation stamp top-right and a QR bottom-right. Any box around them is four short CORNER BRACKETS (crop marks), never a dashed or solid rectangle. No "//dehub.io" mark; the only site is riftn.com.
 - Typography if any: use the Exo / Exo 2 typeface family (geometric technical sans-serif) for ALL rendered text — Light/Regular for body and links, Medium/SemiBold for headings, Bold only for short display words. Display headlines are UPPERCASE with a horizontal grey-to-white sweep across the whole block, brightest nearest the hero's light. Pure white, generous letter-spacing. Never Inter, Poppins, DM Sans, serifs, or script. Fallbacks: Eurostile, Michroma, Rajdhani. No emoji. No generic AI clichés.
 
 OFFICIAL RIFTN LINKS (render ONLY if the user explicitly asks for socials, links, website, QR, or contact info — otherwise omit entirely):
@@ -173,7 +174,7 @@ OFFICIAL RIFTN LINKS (render ONLY if the user explicitly asks for socials, links
 - X / Twitter: x.com/riftn_com
 - Telegram (main): t.me/riftn_com
 - Discord: discord.gg/dehub
-- Regional Telegrams: Turkish t.me/Dehub_Turkish · Arabic t.me/Dehub_Arabic · Hindi t.me/dehub_hindi · China t.me/dehub_china · Indonesia t.me/dehub_indonesia · Germany t.me/dehub_dach · Vietnam t.me/dehub_vietnam · Philippines t.me/DeHub_Philippines
+- Regional Telegrams: Turkish t.me/Riftn_Turkish · Arabic t.me/Riftn_Arabic · Hindi t.me/riftn_hindi · China t.me/riftn_china · Indonesia t.me/riftn_indonesia · Germany t.me/riftn_dach · Vietnam t.me/riftn_vietnam · Philippines t.me/Riftn_Philippines
 When rendering links: pure white, Exo / Exo 2 (Light or Regular), small size, bottom of composition, generous letter-spacing, no icons unless requested. Only include the specific links the user asked for (socials means X + Telegram + Discord + Website; website means just riftn.com).
 
 USER REQUEST: ${userRequest}`;
@@ -184,10 +185,10 @@ function isCreativeLogoRequest(message: string): boolean {
   const lower = message.toLowerCase();
   // If it's just asking to see/show the logo without creative context, return false
   const simpleShowPatterns = [
-    /^show\s*(me\s*)?(the\s*)?(dehub|ftv|your|official|brand|company)?\s*logo\.?$/,
-    /^(dehub|ftv)\s*logo\.?$/,
-    /^(the\s*)?(dehub|ftv|official)\s*logo\.?$/,
-    /^display\s*(the\s*)?(dehub|ftv)?\s*logo\.?$/
+    /^show\s*(me\s*)?(the\s*)?(riftn|dehub|ftv|your|official|brand|company)?\s*logo\.?$/,
+    /^(riftn|dehub|ftv)\s*logo\.?$/,
+    /^(the\s*)?(riftn|dehub|ftv|official)\s*logo\.?$/,
+    /^display\s*(the\s*)?(riftn|dehub|ftv)?\s*logo\.?$/
   ];
   
   if (simpleShowPatterns.some(pattern => pattern.test(lower.trim()))) {

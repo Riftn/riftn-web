@@ -1,11 +1,11 @@
 ---
 name: dehub-poster
-description: Generate Riftn (formerly DeHub) posters, social images, blog and guide banners, share images and OG cards in the official "SM Template 2.0" monochrome chrome style with the white Riftn logo in the bottom corner. Use for every new article or guide banner, and on requests like "riftn banner", "dehub poster", "social image", "blog banner", "announcement graphic".
+description: Generate RIFTN posters, social images, blog and guide banners, share images and OG cards in the official "SM Template 2.0" monochrome chrome style with the white Riftn logo in the bottom corner. Use for every new article or guide banner, and on requests like "riftn banner", "dehub poster", "social image", "blog banner", "announcement graphic".
 ---
 
-# DeHub Poster & Content Generator (SM Template 2.0)
+# RIFTN Poster & Content Generator (SM Template 2.0)
 
-Use this skill whenever the user asks for a DeHub-branded image: posters, social cards, announcements, banners, blog art, OG cards, thumbnails.
+Use this skill whenever the user asks for a RIFTN-branded image (old "DeHub poster" requests included): posters, social cards, announcements, banners, blog art, OG cards, thumbnails.
 
 **The house style is SM Template 2.0** — the same design language as the blog banners, the per-route OG cards and the @riftn_com social posts. It is a *deterministic code render*, not a diffusion picture. Read `assets/reference/sm-template-2-landscape.jpg` and `assets/reference/sm-template-2-portrait.jpg` before generating anything: that is what "on brand" means here, and every rule below exists to reproduce it.
 
@@ -13,13 +13,13 @@ Use this skill whenever the user asks for a DeHub-branded image: posters, social
 
 | | when | how |
 |---|---|---|
-| **`template`** — the default | any DeHub banner/poster/social/OG request with no attached image and no cinematic archetype named | server-side SM Template 2.0 render. Deterministic, **free**, seconds. |
+| **`template`** — the default | any RIFTN banner/poster/social/OG request with no attached image and no cinematic archetype named | server-side SM Template 2.0 render. Deterministic, **free**, seconds. |
 | **`scene`** — the exception | the user picked a cinematic archetype (Apple Keynote, A24, sci-fi key art…), attached a source image to edit, or explicitly asked for a photoreal/3D scene | Nano Banana 2 diffusion, two-step (scene → logo composite). Costs credits. |
 
-**Default to `template`.** A vague brief ("make a DeHub poster", "announcement graphic", "content for X") is a template request — do NOT invent a cinematic monolith scene for it. The Poster Studio's `detectStyle()` already returns `dehub-template` unless the prompt names an archetype; respect that default instead of talking the user out of it.
+**Default to `template`.** A vague brief ("make a RIFTN poster", "announcement graphic", "content for X") is a template request — do NOT invent a cinematic monolith scene for it. The Poster Studio's `detectStyle()` already returns `dehub-template` unless the prompt names an archetype; respect that default instead of talking the user out of it.
 
 Where it runs:
-- Server twin: `supabase/functions/_shared/dehub-template-banner.ts` (SVG + resvg-wasm, assets from `dehub.io/brand-kit/` = web copy of `public/brand-kit/`).
+- Server twin: `supabase/functions/_shared/dehub-template-banner.ts` (SVG + resvg-wasm, assets from `riftn.com/brand-kit/` = web copy of `public/brand-kit/`).
 - Routing: `supabase/functions/generate-image/index.ts`, the `useTemplate` line.
 - Client: `src/components/app/assistant/PosterConfigDialog.tsx` (web) / `components/Assistant/PosterConfigSheet.tsx` (mobile) → `bannerRenderer: 'template' | 'scene'`.
 - Local generator and the canonical source of the look: the banner kit's `style-v2.mjs` / `compose-social.mjs`.
@@ -56,7 +56,7 @@ Everything here is what the renderer already does. Describe it accurately when b
 **HUD chrome.**
 - **Boxes are NOT dashed rectangles. They are four CORNER BRACKETS** — one short L-shaped mark at each corner, middles of the edges completely empty, like crop marks. A repeating dash pattern is the classic wrong answer: it looks technical, it survives a glance, and it is visibly not the brand. Arm length is fixed (~15px h / 12px v at 1920), never a percentage, so every box's brackets match regardless of box size. Stroke ~46% white over a near-black fill at ~.80 alpha — at ~.42 the marks compute darker than bright chrome behind them and vanish.
 - Top-right: **two-line** tag — `// type =` dim on line 1, the value on line 2.
-- Bottom-left: the **plain white Riftn logo** (`public/brand-kit/brand/riftn-logo-white.png`) with a soft dark halo under it. **No pill, no white box, no black logo on white.** This is the same corner logo every Riftn share image uses (post, profile and page cards since PR #3990). The old white DEHUB pill is retired.
+- Bottom-left: the **plain white Riftn logo** (`public/brand-kit/brand/riftn-logo-white.png`) with a soft dark halo under it. **No pill, no white box, no black logo on white.** This is the same corner logo every Riftn share image uses (post, profile and page cards since PR #3990). The old white pill with the black DeHub logo is retired; never use it.
 - No `//dehub.io` box any more; the QR (`brand/qr-riftn.png`) carries the link.
 - Bottom-right: QR, no border, **but on a dark backing plate** — the hero bleeds under it and white QR modules on polished chrome will not scan.
 
@@ -113,24 +113,24 @@ If the spec call fails there is a zero-AI heuristic fallback, so a dead model ke
 
 Logos live in this skill's `assets/` folder:
 
-- `assets/dehub-logo-primary.png` — primary wordmark (default)
-- `assets/dehub-logo-alternative.png` — alternative wordmark (variety / dense compositions)
+- `assets/riftn-logo-white.png` — the white RIFTN logo, the only logo to use
+- `assets/dehub-logo-primary.png` / `assets/dehub-logo-alternative.png` — retired DeHub wordmarks, kept for history only. Never put them on a poster.
 
-Both are **white-on-transparent** and must always appear white or near-white. Never recolor, gradient-fill, heavily shadow, distort, paraphrase, redraw, or let a model invent alternate DeHub lettering.
+Both are **white-on-transparent** and must always appear white or near-white. Never recolor, gradient-fill, heavily shadow, distort, paraphrase, redraw, or let a model invent alternate RIFTN lettering.
 
-The template renderer draws the wordmark from `public/brand-kit/brand/`; its icons and silk textures come from `public/brand-kit/icons/` and `public/brand-kit/bg/`. If kit assets change, `public/brand-kit` must be regenerated — the edge function fetches it over HTTP from `dehub.io/brand-kit/`.
+The template renderer draws the wordmark from `public/brand-kit/brand/`; its icons and silk textures come from `public/brand-kit/icons/` and `public/brand-kit/bg/`. If kit assets change, `public/brand-kit` must be regenerated — the edge function fetches it over HTTP from `riftn.com/brand-kit/`.
 
 ### Production app / social share image logo rules
 
-When working inside the DeHub app codebase, **never generate, redraw, approximate, or substitute the DeHub logo**. Use the real project files:
+When working inside the RIFTN app codebase, **never generate, redraw, approximate, or substitute the RIFTN logo**. Use the real project files:
 
-- `src/assets/dehub-logo-white.png` — official full wordmark. Headers, social cards, guide hero lockups, anywhere the brand name must be visible.
+- `src/assets/riftn-logo-white.png` — official white RIFTN logo. Posters, social cards, guide hero lockups, anywhere the brand name must be visible. (`src/assets/dehub-logo-white.png` is the retired DeHub wordmark; never use it on new work.)
 - `src/assets/dehub-logo.png` / `src/assets/dehub-logo-center.png` — official standalone icon mark, for compact badges or icon slots only.
 - `src/assets/dehub-logo-primary.png.asset.json` and `src/assets/dehub-logo-icon.png.asset.json` — CDN pointer versions when a CDN URL is needed.
 
-For integrations, compose partner logos **beside** the official DeHub assets. For ChatGPT/OpenAI and Claude/Anthropic use the real assets (`src/assets/ai-logos/openai.png`, `src/assets/ai-logos/anthropic.png`) — never text placeholders, fake glyphs, coloured dots, or AI approximations.
+For integrations, compose partner logos **beside** the official RIFTN assets. For ChatGPT/OpenAI and Claude/Anthropic use the real assets (`src/assets/ai-logos/openai.png`, `src/assets/ai-logos/anthropic.png`) — never text placeholders, fake glyphs, coloured dots, or AI approximations.
 
-OG/share images for the app are built by compositing real PNG assets in code or by the template renderer. Do not ask an image model to draw the DeHub logo; a generated DeHub mark is invalid even when it looks close.
+OG/share images for the app are built by compositing real PNG assets in code or by the template renderer. Do not ask an image model to draw the RIFTN logo; a generated RIFTN mark is invalid even when it looks close.
 
 ## The scene path (fallback only)
 
@@ -146,18 +146,18 @@ Use this **only** when the user picked a cinematic archetype, attached an image,
 - **Abstract** — liquid mercury frozen mid-splash, smoked-glass helix, a ribbon of brushed steel curling through space, silver shards suspended weightlessly
 - **Human presence (rare, silhouette only)** — a lone silhouette in a chrome corridor. Never a face, never a full character.
 
-**Theme translation — monochrome by default.** Whatever theme is named (Christmas, summer, airdrop, Halloween, Valentine's, hackathon, milestone), translate it into DeHub's *material* vocabulary, never its stereotypical palette: Christmas → silver frost on obsidian, never red/green/gold. Summer → chrome sun disc over a mirror-black lake, never orange/yellow. Halloween → matte obsidian skull on a silver plinth, never orange/purple. Airdrop → silver capsules through charcoal fog, never confetti. Valentine's → mirrored chrome hearts, never red/pink. Milestone number → sculpted in polished chrome, never gold. Rule of thumb: gold → chrome, red → obsidian with a silver rim, green → brushed dark steel with a cool white glow, warm light → cool near-white. If the user explicitly requests a colour, allow it only as a restrained accent and keep the wordmark white and the scene mostly black, silver, chrome, glass.
+**Theme translation — monochrome by default.** Whatever theme is named (Christmas, summer, airdrop, Halloween, Valentine's, hackathon, milestone), translate it into RIFTN's *material* vocabulary, never its stereotypical palette: Christmas → silver frost on obsidian, never red/green/gold. Summer → chrome sun disc over a mirror-black lake, never orange/yellow. Halloween → matte obsidian skull on a silver plinth, never orange/purple. Airdrop → silver capsules through charcoal fog, never confetti. Valentine's → mirrored chrome hearts, never red/pink. Milestone number → sculpted in polished chrome, never gold. Rule of thumb: gold → chrome, red → obsidian with a silver rim, green → brushed dark steel with a cool white glow, warm light → cool near-white. If the user explicitly requests a colour, allow it only as a restrained accent and keep the wordmark white and the scene mostly black, silver, chrome, glass.
 
 **The wordmark is PART of the scene, not stuck on top.** Step 1 must build a **physical logo host** into the composition — a specific object designed to hold the wordmark, matched to the scene's lighting, perspective and material — and leave its face perfectly BLANK. Step 2 composites the real PNG into that surface. Hosts: engraved into obsidian · milled into brushed steel · backlit through smoked glass · projected as light onto mist · etched into a chrome monolith face · cast as shadow on black marble · embossed on mercury · frosted into glass. A scene with no such surface is invalid — regenerate it rather than compositing onto empty space.
 
-**Zero logo hallucinations.** The scene model must never draw or approximate the logo, write "DeHub", add fake letters, extra icons or placeholder glyphs. Warped letters, misspellings, duplicate logos or invented marks in the final output = discard and regenerate.
+**Zero logo hallucinations.** The scene model must never draw or approximate the logo, write "RIFTN" or "DeHub", add fake letters, extra icons or placeholder glyphs. Warped letters, misspellings, duplicate logos or invented marks in the final output = discard and regenerate.
 
 **Scaffold** — dense and specific, 100–160 words:
 
 ```
 [SPECIFIC SUBJECT with material — e.g. "a monolithic obsidian pavilion floating over a mirror-black lake"] rendered in strict monochrome — blacks, charcoals, silvers, chromes, cool off-whites only. Cinematic key light from [DIRECTION] with soft rim light and deep shadow falloff. Background: [SPECIFIC textured backdrop — e.g. "volumetric charcoal mist with faint silver-white light shafts", "black marble with subtle grey veining"] — NEVER flat black.
 
-The scene is composed around a physical DeHub logo host. Built into the composition at [POSITION], a [LOGO SURFACE — e.g. "polished obsidian slab with a subtly recessed rectangular panel", "brushed-aluminium plaque catching the key light", "backlit smoked-glass panel with soft internal glow"] sized for a wordmark lockup roughly [SIZE — e.g. "40% of the scene width"]. This panel's face is currently perfectly BLANK and clean — do NOT draw a logo, the word DeHub, letters, glyphs, placeholder marks, icons, or text on it. Match its perspective, lighting and material to the scene.
+The scene is composed around a physical RIFTN logo host. Built into the composition at [POSITION], a [LOGO SURFACE — e.g. "polished obsidian slab with a subtly recessed rectangular panel", "brushed-aluminium plaque catching the key light", "backlit smoked-glass panel with soft internal glow"] sized for a wordmark lockup roughly [SIZE — e.g. "40% of the scene width"]. This panel's face is currently perfectly BLANK and clean — do NOT draw a logo, the word RIFTN, letters, glyphs, placeholder marks, icons, or text on it. Match its perspective, lighting and material to the scene.
 
 Materials throughout: liquid glass, frosted crystal, polished chrome, subtle caustics, subsurface scattering. Premium product-photography feel — Apple keynote meets A24 poster. Absolutely NO colour hues unless explicitly requested: no red, orange, yellow, magenta, purple, green, blue, teal. Any glow must be cool near-white (saturation under 10%). No lens flares, no rainbow, no neon. Shot on Hasselblad, 85mm, f/2.8, ultra-sharp, 4k, gallery quality.
 ```
@@ -172,13 +172,13 @@ Dimensions: 1024×1024 square default; 1536×1024 poster/banner; 1024×1536 stor
 
 Include these only if the user explicitly asks for socials, website, links, contact or QR. Otherwise omit — the template already carries the Riftn QR.
 
-- **Website**: `dehub.io`
+- **Website**: `riftn.com`
 - **X / Twitter**: `x.com/riftn_com`
 - **Telegram (main)**: `t.me/riftn_com`
 - **Discord**: `discord.gg/dehub`
-- **Regional Telegrams**: Turkish `t.me/Dehub_Turkish` · Arabic `t.me/Dehub_Arabic` · Hindi `t.me/dehub_hindi` · China `t.me/dehub_china` · Indonesia `t.me/dehub_indonesia` · Germany `t.me/dehub_dach` · Vietnam `t.me/dehub_vietnam` · Philippines `t.me/DeHub_Philippines`
+- **Regional Telegrams**: Turkish `t.me/Riftn_Turkish` · Arabic `t.me/Riftn_Arabic` · Hindi `t.me/riftn_hindi` · China `t.me/riftn_china` · Indonesia `t.me/riftn_indonesia` · Germany `t.me/riftn_dach` · Vietnam `t.me/riftn_vietnam` · Philippines `t.me/Riftn_Philippines`
 
-Rendering rules: pure white, Exo / Exo 2 Light or Regular, small, along the bottom, generous letter-spacing, no coloured icons. Only the links actually asked for — "with socials" = X + Telegram + Discord + Website; "with website" = just `dehub.io`. Never invent or shorten handles.
+Rendering rules: pure white, Exo / Exo 2 Light or Regular, small, along the bottom, generous letter-spacing, no coloured icons. Only the links actually asked for — "with socials" = X + Telegram + Discord + Website; "with website" = just `riftn.com`. Never invent or shorten handles.
 
 ## Caption voice (when the image ships as a social post)
 
@@ -188,7 +188,7 @@ The graphic is half the post. Match @riftn_com or it reads as an ad:
 - **No `$DHB` shilling.** Say "tokens", "contracts", "coin purchase". Save the cashtag for when the contract genuinely is the news. No price, TA, or moon talk, ever.
 - Sentence case. Short lines with a **blank line between nearly every sentence**. 3–5 lines typical.
 - **One leading emoji as a category badge**: 🚨 contract/urgent · 📢📣 announcement · 🎙️ Stages · ⚡️ speed/shipping · ✅ shipped · 🌌 house emoji.
-- Links are **bare paths, no protocol**, on their own final line: `dehub.io/apk`.
+- Links are **bare paths, no protocol**, on their own final line: `riftn.com/apk`.
 - Two registers — the manifesto (anti-censorship, aphoristic, parallel triads) and the shipping log (dated, ✅-bulleted, names versions, admits friction). Pick one; don't blend.
 - Recurring lines: "open source and user owned since 2021", "censorship resistant & permissionless", "legacy social media", "Community first - Always", "creators deserve better".
 - **Reddit is exempt from all of the above** — a banner + link there gets the account buried. Text post, admit a tradeoff, ask a question, no image.
@@ -207,11 +207,11 @@ If the render returns 503 `TEMPLATE_RENDER_FAILED`, that is a server fault, not 
 
 ## Don'ts
 
-- **Don't reach for diffusion on a vague brief.** "Make a DeHub poster" is the template's job. Inventing a cinematic monolith scene is the single most common way to ship something off-brand and bill for it.
+- **Don't reach for diffusion on a vague brief.** "Make a RIFTN poster" is the template's job. Inventing a cinematic monolith scene is the single most common way to ship something off-brand and bill for it.
 - **Don't use any colour.** No status pills, no live-green dot, no neon ambient glow, no tinted light. Monochrome only — blacks, greys, silvers, chromes, whites. If a swatch has a nameable hue, it's wrong.
 - **Don't draw HUD boxes as dashed rectangles.** Four corner brackets, empty edge middles.
 - **Don't break the two alignment rules** — one left gutter, one bottom inset shared by the logo and the QR.
-- **Don't put the logo in a white pill** or use the black DeHub mark. White Riftn logo, bottom corner, nothing behind it but the halo.
+- **Don't put the logo in a white pill** or use the black DeHub mark. White RIFTN logo, bottom corner, nothing behind it but the halo.
 - **Don't let the hero be contained.** It bleeds off the right and bottom. A hero that merely kisses the edge reads as a mistake.
 - **Don't put the QR on bare chrome.** It needs its dark backing plate or it will not scan.
 - **Don't ship a flat pure-black background** on the scene path. Texture, gradient, atmospheric depth, or a real material. Flat #000 is the #1 failure mode there.
