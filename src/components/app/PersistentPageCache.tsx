@@ -15,7 +15,7 @@ import { BUY_PATHS } from '@/lib/buy-route';
 import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { CopyGate } from './CopyGate';
+import { CopyGate, SkeletonAppear } from './CopyGate';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { RetainedPostActivityContext } from '@/lib/retained-post-surface';
 import HomePage from '@/pages/app/HomePage';
@@ -175,10 +175,11 @@ const HeldRoute = memo(function HeldRoute({ live, children }: { live: boolean; c
   );
 });
 
-/** The route's Suspense fallback; notes that the skeleton has been seen. */
-function FallbackSkeleton({ shown, skeleton: Skeleton }: { shown: MutableRefObject<boolean>; skeleton: ComponentType }) {
-  useLayoutEffect(() => { shown.current = true; }, [shown]);
-  return <Skeleton />;
+/** The route's Suspense fallback; notes when its placeholder started to show. */
+function FallbackSkeleton({ shown, skeleton: Skeleton }: { shown: MutableRefObject<number>; skeleton: ComponentType }) {
+  const [since] = useState(() => shown.current || performance.now());
+  useLayoutEffect(() => { if (!shown.current) shown.current = since; }, [shown, since]);
+  return <SkeletonAppear since={since}><Skeleton /></SkeletonAppear>;
 }
 
 /** Wrapper that shows skeleton on first Suspense load */
@@ -203,9 +204,9 @@ const CachedPage = memo(function CachedPage({
   const SkeletonComponent = config.skeleton;
   // Show/hide must not re-render the page itself.
   const page = useMemo(() => <Component />, [Component]);
-  // Whether the skeleton was on screen before the page: the gate then
-  // dissolves it into the page instead of cutting.
-  const skeletonShown = useRef(false);
+  // When the skeleton went up before the page (0 = never): the gate then
+  // dissolves it into the page instead of cutting, once it has been seen.
+  const skeletonShown = useRef(0);
   const fallback = useMemo(() => <FallbackSkeleton shown={skeletonShown} skeleton={SkeletonComponent} />, [SkeletonComponent]);
   const { isCollapsed } = useSidebarCollapse();
 
