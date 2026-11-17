@@ -19,6 +19,13 @@ describe('wallet challenge protocol', () => {
   it('accepts the server protocol fixture without relying on the device clock', () => {
     expect(validateWalletChallenge(proof, address, 8453, 'login-web')).toBe(proof);
   });
+  it('accepts the Riftn wording the API now hands out', () => {
+    const riftn = { ...proof, message: proof.message.replace(/dehub\.io/g, 'riftn.com') };
+    expect(riftn.message.startsWith('riftn.com requests wallet verification.')).toBe(true);
+    expect(validateWalletChallenge(riftn, address, 8453, 'login-web')).toBe(riftn);
+    const mixed = { ...proof, message: proof.message.replace('URI: https://dehub.io', 'URI: https://riftn.com') };
+    expect(() => validateWalletChallenge(mixed, address, 8453, 'login-web')).toThrow();
+  });
   it('refuses a different address, chain, operation, nonce or message', () => {
     for (const changed of [
       { address: '0x' + '22'.repeat(20) }, { chainId: 1 },

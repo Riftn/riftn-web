@@ -4,7 +4,7 @@ import { translateCopy as _translateCopy } from '@/i18n/copy';
 export async function fetchWalletChallenge(address: string, chainId: number, purpose: WalletProofPurpose): Promise<WalletChallenge> {
     const response = await requestSession('/api/auth/wallet-challenge', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: address.toLowerCase(), chainId, purpose }),
+      body: JSON.stringify({ address: address.toLowerCase(), chainId, purpose, brand: 'riftn' }),
     });
     if (!response.ok) throw new Error(_translateCopy('copy.2015edac19e5', { defaultValue: 'Could not start wallet verification. Please try again.' }));
     return validateWalletChallenge(await response.json(), address, chainId, purpose);
@@ -25,10 +25,13 @@ export function validateWalletChallenge(value: WalletChallenge, address: string,
     || !Number.isSafeInteger(value.timestamp) || value.timestamp <= 0 || value.timestamp > 8_640_000_000_000 - 600) {
     throw new Error(_translateCopy('copy.ed28e276e275', { defaultValue: 'Invalid wallet verification request' }));
   }
-  const expected = [
-    'dehub.io requests wallet verification.',
+  // The API answers in Riftn's name when asked (brand: 'riftn'); a server that
+  // predates the rename still answers in DeHub's. Either text is accepted,
+  // nothing else.
+  const expected = (host: string) => [
+    host + ' requests wallet verification.',
     '',
-    'URI: https://dehub.io',
+    'URI: https://' + host,
     'Version: 2',
     'Address: ' + value.address,
     'Chain ID: ' + chainId,
@@ -39,7 +42,7 @@ export function validateWalletChallenge(value: WalletChallenge, address: string,
     '',
     'This request is single-use. It does not authorize a blockchain transaction.',
   ].join('\n');
-  if (value.message !== expected) throw new Error(_translateCopy('copy.efcb7683c740', { defaultValue: 'Invalid wallet verification message' }));
+  if (value.message !== expected('riftn.com') && value.message !== expected('dehub.io')) throw new Error(_translateCopy('copy.efcb7683c740', { defaultValue: 'Invalid wallet verification message' }));
   return value;
 }
 
