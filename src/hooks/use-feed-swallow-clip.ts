@@ -86,6 +86,14 @@ export function useFeedSwallowClip(
     // overflow, and its content is shifted back up by the same distance.
     // `translate` composes with the animated `transform`s on both layers, and
     // neither overflow nor translate starts a backdrop root.
+    //
+    // A negative shift (the cut line sits ABOVE the content, as on a profile,
+    // whose tab bar pins near the top while its grid starts far below) lifts
+    // the layer, so its own bottom edge rose by the same distance and clipped
+    // the grid away on phones. The layer grows downward by that distance with
+    // a matching negative margin, and the driver becomes a flow root so the
+    // margin cannot collapse through it: layout height is unchanged.
+    const originalDisplay = el.style.display;
     const writeShift = (y: number | null) => {
       if (!cutLayer || !motion) return;
       const value = y === null ? '' : `0 ${y.toFixed(2)}px`;
@@ -95,6 +103,10 @@ export function useFeedSwallowClip(
       cutLayer.style.translate = value;
       cutLayer.style.overflow = y === null ? '' : 'clip';
       motion.style.translate = y === null ? '' : `0 ${(-y).toFixed(2)}px`;
+      const lift = y !== null && y < 0 ? -y : 0;
+      cutLayer.style.paddingBottom = lift ? `${lift.toFixed(2)}px` : '';
+      cutLayer.style.marginBottom = lift ? `${(-lift).toFixed(2)}px` : '';
+      el.style.display = lift ? 'flow-root' : originalDisplay;
     };
     const writeClip = (clip: string, target = el, shiftY: number | null = null) => {
       if (shiftY === null) writeShift(null);
