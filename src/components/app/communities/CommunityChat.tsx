@@ -20,7 +20,7 @@ import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
 import { markCommunityChatSeen, COMMUNITY_CHAT_SEEN_INTERVAL_MS } from '@/lib/community-chat-notify';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff } from "lucide-react";
+import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff, MessageSquarePlus } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
@@ -45,6 +45,8 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
+import { useChatPrefs } from '@/hooks/use-chat-prefs';
+import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { AppState } from '@/components/app/AppState';
@@ -739,6 +741,12 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         : t('communities.chat.pinnedMedia', { defaultValue: 'Media' })))
     : '';
 
+  // Groups and channels are always in the Chat list; a community's chat joins
+  // it when the member asks. Same per-person settings as every other chat.
+  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
+  const canListInChats = isAuthenticated && isMember && communityKindOf(community) === 'community';
+  const listedInChats = !!chatPrefs.get(roomChatId(communityId))?.listedAt;
+
   // Members get a message box at the bottom: the phone bottom bar stands down.
   useHoldBottomNav(active && isMember);
   const translateSignal = 0;
@@ -749,6 +757,23 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
+          {canListInChats && !showSearch && (
+            <button
+              type="button"
+              data-show-in-chats={listedInChats ? 'on' : 'off'}
+              aria-pressed={listedInChats}
+              onClick={() => updateChatPref(roomChatId(communityId), listedInChats ? { listed: false, pinned: false } : { listed: true })}
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] transition-colors ${listedInChats ? 'text-white bg-white/[0.08]' : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'}`}
+              title={listedInChats
+                ? _copy('communities.chat.inChatsHint', { defaultValue: 'This chat is in your Chat list. Tap to take it out.' })
+                : _copy('communities.chat.showInChatsHint', { defaultValue: 'Show this chat in your Chat list with your DMs and groups' })}
+            >
+              <MessageSquarePlus className="w-3.5 h-3.5" />
+              {listedInChats
+                ? _copy('communities.chat.inChats', { defaultValue: 'In Chats' })
+                : _copy('communities.chat.showInChats', { defaultValue: 'Show in Chats' })}
+            </button>
+          )}
           {showSearch ? (
             <div data-search-surface className="flex items-center gap-1.5 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
               <Search className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />

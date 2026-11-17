@@ -23,7 +23,7 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
-import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
+import { roomChatId, type ChatPref } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Archive, BellOff, Pin, ChevronLeft, Check } from 'lucide-react';
 import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
@@ -304,7 +304,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // input fired 2 network requests per KEYSTROKE (each prefix a fresh cache
   // key). Debounce to one request pair per pause in typing.
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
-  const groupChats = chatsFromMemberships(myMemberships).filter(c =>
+  // Your own pins, archives, mutes, "marked unread" and Show in Chats, for DMs
+  // and for group/channel/community chats alike.
+  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
+  const groupChats = chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).filter(c =>
     !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
   const { isAuthenticated, walletAddress, isLoading: authLoading, openLoginModal } = useAuth();
   const guest = !authLoading && !isAuthenticated;
@@ -425,7 +428,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // "marked unread", plus the right-click menu on every row.
   const richList = fullscreen && !phonePill;
   const clearHistory = useClearChatHistory();
-  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
   const [showArchived, setShowArchived] = useState(false);
   // The last request was accepted or deleted: nothing left to show here.
   const noRequestsLeft = requestConversations.length === 0;
@@ -451,6 +453,34 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       : visibleConversations
           .filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)))
           .sort((a, b) => pinnedAt(b) - pinnedAt(a));
+  // Group, channel and community chats share the same settings, keyed by
+  // community id: archived ones move under Archived chats, pinned ones go first.
+  const roomPref = (c: { id: string }) => chatPrefs.get(roomChatId(c.id));
+  const roomPinnedAt = (c: { id: string }) => {
+    const at = roomPref(c)?.pinnedAt;
+    return at ? new Date(at).getTime() : 0;
+  };
+  const archivedRooms = richList ? groupChats.filter(c => isArchived(roomPref(c))) : [];
+  const listedRooms = !richList
+    ? groupChats
+    : showArchived
+      ? archivedRooms
+      : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
+  const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
+    pref: roomPref(c),
+    hasUnread: false,
+    // Group pushes come from the community side and do not read this yet.
+    canMute: false,
+    onPref: (patch) => updateChatPref(roomChatId(c.id), patch),
+    onHideFromList: c.kind !== 'group' && c.kind !== 'channel'
+      ? () => updateChatPref(roomChatId(c.id), { listed: false, pinned: false })
+      : undefined,
+  });
+  const openRoomChat = (c: (typeof groupChats)[number]) => {
+    if (roomPref(c)?.markedUnread) updateChatPref(roomChatId(c.id), { unread: false });
+    navigate(`/app/communities/${c.slug}?tab=chat`);
+  };
+  const archivedCount = archivedConversations.length + archivedRooms.length;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
   const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
@@ -1106,9 +1136,21 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </button>
 
             {/* Groups and channels you are in */}
-            {groupChats.map((chat) => (
-              <GroupChatRow key={chat.id} community={chat} onClick={() => navigate(`/app/communities/${chat.slug}?tab=chat`)} />
-            ))}
+            {listedRooms.map((chat) => {
+              const row = (
+                <GroupChatRow
+                  key={chat.id}
+                  community={chat}
+                  pref={richList ? roomPref(chat) : undefined}
+                  onClick={() => openRoomChat(chat)}
+                />
+              );
+              return richList ? (
+                <ChatRowContextMenu key={chat.id} {...roomOptionsFor(chat)}>
+                  <div data-chat-row data-pinned={roomPinnedAt(chat) > 0 ? '' : undefined}>{row}</div>
+                </ChatRowContextMenu>
+              ) : row;
+            })}
             </>)}
 
             {/* Loading State */}
@@ -1180,7 +1222,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 </ChatRowContextMenu>
               ) : row;
             })}
-            {richList && !showArchived && archivedConversations.length > 0 && !searchQuery.trim() && (
+            {richList && !showArchived && archivedCount > 0 && !searchQuery.trim() && (
               <button
                 type="button"
                 data-chat-archive-open
@@ -1189,7 +1231,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               >
                 <Archive className="h-[18px] w-[18px]" />
                 <span className="flex-1">{_copy('chatMenu.archivedChats', { defaultValue: 'Archived chats' })}</span>
-                <span className="tabular-nums">{archivedConversations.length}</span>
+                <span className="tabular-nums">{archivedCount}</span>
               </button>
             )}
 

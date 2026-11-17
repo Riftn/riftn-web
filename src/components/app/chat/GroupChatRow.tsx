@@ -1,8 +1,11 @@
 /**
- * A group or channel in the Messages list. Tapping it opens its chat.
+ * A group, channel or community chat in the Messages list. Tapping it opens
+ * its chat. All three are communities underneath and share one row.
  */
 
 import { useTranslation } from 'react-i18next';
+import { Pin } from 'lucide-react';
+import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
 import Lock from '@/components/ui/cut-icons/privacy';
@@ -11,14 +14,17 @@ import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import dehubCoin from '@/assets/dehub-coin.png';
 
-export function GroupChatRow({ community, onClick }: { community: Community; onClick: () => void }) {
+export function GroupChatRow({ community, onClick, pref }: { community: Community; onClick: () => void; pref?: ChatPref }) {
   const { t } = useTranslation();
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
   const price = entryPriceOf(community);
+  const members = { count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() };
   const subtitle = kind === 'channel'
-    ? t('communities.newChat.channelRow', { defaultValue: 'Channel · {{formattedCount}} members', count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() })
-    : t('communities.newChat.groupRow', { defaultValue: 'Group · {{formattedCount}} members', count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() });
+    ? t('communities.newChat.channelRow', { defaultValue: 'Channel · {{formattedCount}} members', ...members })
+    : kind === 'group'
+      ? t('communities.newChat.groupRow', { defaultValue: 'Group · {{formattedCount}} members', ...members })
+      : t('communities.newChat.communityRow', { defaultValue: 'Community · {{formattedCount}} members', ...members });
 
   return (
     <button
@@ -26,6 +32,7 @@ export function GroupChatRow({ community, onClick }: { community: Community; onC
       type="button"
       onClick={onClick}
       data-group-chat-row={kind}
+      data-room-chat-id={community.id}
       className="w-full flex items-center gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left"
     >
       <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-white/[0.08] flex items-center justify-center">
@@ -38,6 +45,10 @@ export function GroupChatRow({ community, onClick }: { community: Community; onC
           <KindIcon className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
           <span className="truncate">{community.name}</span>
           {community.is_private && <Lock className="w-3 h-3 shrink-0 text-zinc-500" />}
+          {pref?.pinnedAt && <Pin data-chat-row-pinned aria-hidden="true" className="ml-auto h-3.5 w-3.5 shrink-0 rotate-45 text-zinc-500" />}
+          {pref?.markedUnread && (
+            <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className={`${pref?.pinnedAt ? 'ml-1' : 'ml-auto'} h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white`} />
+          )}
         </span>
         <p className="text-zinc-500 text-sm truncate flex items-center gap-1">
           {subtitle}

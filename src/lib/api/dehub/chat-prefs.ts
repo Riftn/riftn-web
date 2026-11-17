@@ -7,6 +7,16 @@ export interface ChatPref {
   archivedAt: string | null;
   mutedUntil: string | null;
   markedUnread: boolean;
+  /** Group/community chats: shown in the Chat list since then. */
+  listedAt?: string | null;
+}
+
+/**
+ * Group, channel and community chats are communities underneath. Their
+ * settings live beside the DM ones under this id.
+ */
+export function roomChatId(communityId: string): string {
+  return `community:${communityId.toLowerCase()}`;
 }
 
 export interface ChatPrefPatch {
@@ -17,6 +27,8 @@ export interface ChatPrefPatch {
   mutedUntil?: string | null;
   /** Accept a message request (one way). */
   accepted?: true;
+  /** Group/community chats: show in the Chat list. */
+  listed?: boolean;
 }
 
 export async function getChatPrefs(): Promise<ChatPref[]> {
@@ -25,7 +37,7 @@ export async function getChatPrefs(): Promise<ChatPref[]> {
 }
 
 export async function setChatPref(conversationId: string, patch: ChatPrefPatch): Promise<ChatPref> {
-  const res = await apiCall<{ result: ChatPref }>(`/api/dm/chat-prefs/${conversationId}`, {
+  const res = await apiCall<{ result: ChatPref }>(`/api/dm/chat-prefs/${encodeURIComponent(conversationId)}`, {
     method: 'POST',
     body: patch as Record<string, unknown>,
     requiresAuth: true,
