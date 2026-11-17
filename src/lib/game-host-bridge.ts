@@ -89,7 +89,7 @@ import { mintPost, quotePostCharge } from '@/lib/api/dehub';
 // The trade relay signs with the same helpers every spend surface in the app
 // uses, so a swap from the room is a swap from anywhere else.
 import { BASE_CHAIN_ID, ROBINHOOD_CHAIN_ID } from '@/lib/contracts/dhb-token';
-import { AbiCoder, Interface, keccak256 } from 'ethers';
+import { AbiCoder, Interface, formatEther, formatUnits, keccak256 } from 'ethers';
 import {
   approveERC20,
   ensureSignerOnChain,
@@ -164,6 +164,11 @@ export interface GameHostOptions {
   address?: string | null;
   /** Open the real composer with this text in it. */
   onCompose?: (text: string) => void;
+  /**
+   * Ask the person before a trade is sent. Defaults to the browser's own
+   * confirm box. Resolve false to cancel.
+   */
+  confirmTrade?: (summary: string) => boolean | Promise<boolean>;
 }
 
 /**
@@ -622,11 +627,32 @@ async function tradeV4(
   );
 }
 
+const erc20MetaInterface = new Interface([
+  'function decimals() view returns (uint8)',
+  'function symbol() view returns (string)',
+]);
+
+async function tradeSummary(side: string, token: string, amountIn: bigint, chainId: number): Promise<string> {
+  const where = chainId === BASE_CHAIN_ID ? 'Base' : 'Robinhood Chain';
+  const symbol = await readContract<string>(token, erc20MetaInterface, 'symbol', [], chainId as ChainId)
+    .then((v) => String(v).slice(0, 16))
+    .catch(() => `${token.slice(0, 6)}…${token.slice(-4)}`);
+  if (side === 'buy') return `Buy ${symbol} with ${formatEther(amountIn)} ETH on ${where}?`;
+  const decimals = await readContract<bigint>(token, erc20MetaInterface, 'decimals', [], chainId as ChainId)
+    .then(Number)
+    .catch(() => 18);
+  return `Sell ${formatUnits(amountIn, decimals)} ${symbol} for ETH on ${where}?`;
+}
+
+const confirmInBrowser = (summary: string) =>
+  typeof window !== 'undefined' && typeof window.confirm === 'function' ? window.confirm(summary) : false;
+
 async function relayTrade(
   to: MessageEventSource | null,
   data: GameHostMessage,
   address: string | null | undefined,
   currentAddress: () => string | null | undefined,
+  confirm: (summary: string) => boolean | Promise<boolean> = confirmInBrowser,
 ): Promise<void> {
   const key = typeof data.key === 'string' ? data.key.slice(0, 64) : '';
   const say = (ok: boolean, extra: Record<string, unknown> = {}) => {
@@ -649,6 +675,12 @@ async function relayTrade(
   const v4 = data.v4 !== undefined ? v4KeyFrom(data.v4) : null;
   if (data.v4 !== undefined && !v4) return say(false, { reason: 'bad request' });
   if (!chain || !token || (!fee && !v4) || !amountIn || !minOut || !side) return say(false, { reason: 'bad request' });
+
+  // The person approves every trade here, in the host, with the amount the
+  // host is about to send. A game can ask for a trade but cannot place one.
+  const summary = await tradeSummary(side, token, amountIn, chainId);
+  const approved = await Promise.resolve(confirm(summary)).catch(() => false);
+  if (!approved) return say(false, { reason: 'cancelled' });
 
   // Nothing is built until something can sign on THIS chain. Reads here are
   // chain-correct on their own, so without this a trade priced against
@@ -821,7 +853,13 @@ export function useGameHostBridge(
         // the classic double-buy, and the frame already disarms its button.
         if (tradeBusy.current) return;
         tradeBusy.current = true;
-        void relayTrade(event.source, data, opts.current?.address, () => opts.current?.address).finally(() => {
+        void relayTrade(
+          event.source,
+          data,
+          opts.current?.address,
+          () => opts.current?.address,
+          opts.current?.confirmTrade,
+        ).finally(() => {
           tradeBusy.current = false;
         });
         return;
