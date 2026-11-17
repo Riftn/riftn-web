@@ -6,7 +6,7 @@ afterEach(() => {
   cleanup(); document.body.innerHTML = ''; delete document.documentElement.dataset.theme; vi.unstubAllGlobals();
 });
 
-function fixture(timeline = false) {
+function fixture(timeline = false, contentTop = -100) {
   const callbacks: FrameRequestCallback[] = [];
   vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => { callbacks.push(callback); return callbacks.length; }));
   vi.stubGlobal('cancelAnimationFrame', vi.fn());
@@ -26,7 +26,7 @@ function fixture(timeline = false) {
   const motion = document.createElement('div'); motion.dataset.feedSwallowMotion = '';
   const inverseNavLayer = document.createElement('div'); inverseNavLayer.dataset.feedSwallowContent = '';
   motion.append(inverseNavLayer); cutLayer.append(motion); content.append(cutLayer); bounds.append(content);
-  content.getBoundingClientRect = () => ({ top: -100, left: 0, width: 390, height: 12000 } as DOMRect);
+  content.getBoundingClientRect = () => ({ top: contentTop, left: 0, width: 390, height: 12000 } as DOMRect);
   cutLayer.getBoundingClientRect = content.getBoundingClientRect;
   document.body.append(outer, bounds);
   const root = document.scrollingElement || document.documentElement;
@@ -73,6 +73,8 @@ it('lets the scroll timeline own fast scrolling and cancels it on unmount', () =
   expect(cutLayer.style.translate).toBe('0 112.00px');
   expect(cutLayer.style.overflow).toBe('clip');
   expect((cutLayer.firstElementChild as HTMLElement).style.translate).toBe('0 -112.00px');
+  expect(cutLayer.style.paddingBottom).toBe('');
+  expect(content.style.display).toBe('');
   act(() => window.dispatchEvent(new Event('scroll')));
   expect(callbacks).toHaveLength(0);
   hook.unmount();
@@ -80,4 +82,19 @@ it('lets the scroll timeline own fast scrolling and cancels it on unmount', () =
   expect(cutLayer.style.overflow).toBe('');
   expect(cancel).toHaveBeenCalledTimes(2);
   expect(content.dataset.feedSwallowDriver).toBeUndefined();
+});
+
+it('keeps content that starts below the cut line, as a profile grid does', () => {
+  // The tab bar pins near the top while the grid starts far below it, so the
+  // layer lifts by a negative shift. It must grow by the same distance, or its
+  // own bottom edge clips the grid away.
+  const { content, cutLayer, hook } = fixture(true, 500);
+  expect(cutLayer.style.translate).toBe('0 -488.00px');
+  expect(cutLayer.style.paddingBottom).toBe('488.00px');
+  expect(cutLayer.style.marginBottom).toBe('-488.00px');
+  expect(content.style.display).toBe('flow-root');
+  hook.unmount();
+  expect(cutLayer.style.paddingBottom).toBe('');
+  expect(cutLayer.style.marginBottom).toBe('');
+  expect(content.style.display).toBe('');
 });
