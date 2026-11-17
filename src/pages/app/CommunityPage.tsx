@@ -17,7 +17,7 @@ import { useCommunity, useCommunityMembers, useIsCommunityMember, useJoinCommuni
 import { useCommunityAbilities, isEffectivelyActive, isActivelyBanned } from '@/hooks/use-community-admin';
 import { CommunityManageSheet } from '@/components/app/communities/manage/CommunityManageSheet';
 import { holderGateOf, holderGateMessage, runHolderCheck } from '@/hooks/use-holder-gate';
-import { communityKindOf, entryPriceOf, payCommunityEntry } from '@/lib/community-kinds';
+import { communityKindOf, entryPriceOf, isPublicChatCommunity, payCommunityEntry } from '@/lib/community-kinds';
 import { adminErrorMessage } from '@/hooks/use-community-admin';
 import { CommunityHeader } from '@/components/app/communities/CommunityHeader';
 import { CommunityFeed } from '@/components/app/communities/CommunityFeed';
@@ -25,6 +25,7 @@ import { AddExistingPost } from '@/components/app/communities/AddExistingPost';
 import { CommunityMembers } from '@/components/app/communities/CommunityMembers';
 import { CommunityAbout } from '@/components/app/communities/CommunityAbout';
 import { CommunityChat } from '@/components/app/communities/CommunityChat';
+import { PublicChat } from '@/components/app/chat/PublicChat';
 import { CommunityEvents } from '@/components/app/communities/CommunityEvents';
 import { CommunityTabEmptyState, type CommunityTab } from '@/components/app/communities/CommunityTabEmptyState';
 import { cn } from '@/lib/utils';
@@ -255,6 +256,12 @@ export default function CommunityPage() {
             </div>
             {visitedTabs.has('chat') && (
               <div className={tab === 'chat' ? '' : 'hidden'}>
+                {isPublicChatCommunity(community.id) ? (
+                  // The official Riftn community's chat is Public Chat.
+                  <div data-community-public-chat style={{ height: 'calc(100vh - 340px)', minHeight: '300px' }}>
+                    <PublicChat embedded onBack={() => activateTab('posts')} />
+                  </div>
+                ) : (
                 <CommunityChat
                   active={tab === 'chat'}
                   communityId={community.id}
@@ -264,6 +271,7 @@ export default function CommunityPage() {
                   onJoin={handleJoinLeave}
                   joining={joinMutation.isPending || checkingHolder}
                 />
+                )}
               </div>
             )}
             {visitedTabs.has('events') && (

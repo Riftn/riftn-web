@@ -2,7 +2,7 @@ import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
 import { holderGateOf } from '@/hooks/use-holder-gate';
 import { HolderGateChip } from './HolderGateChip';
 import { CommunityKindChip } from './CommunityKindChip';
-import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
+import { communityKindOf, isPublicChatCommunity, entryPriceOf } from '@/lib/community-kinds';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { useRef, useState, useCallback } from 'react';
 import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus } from "lucide-react";
@@ -134,7 +134,7 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
   // Optional: a member can put this community's chat in their Messages list.
   // Groups and channels are always there, so they get no button.
   const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
-  const canAddToMessages = !!walletAddress && (isMember || isOwner) && communityKindOf(community) === 'community';
+  const canAddToMessages = !!walletAddress && (isMember || isOwner) && communityKindOf(community) === 'community' && !isPublicChatCommunity(community.id);
   const inMessages = !!chatPrefs.get(roomChatId(community.id))?.listedAt;
 
   return (

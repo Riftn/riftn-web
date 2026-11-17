@@ -52,6 +52,8 @@ import {
 
 interface PublicChatProps {
   onBack: () => void;
+  /** Shown inside another page (the Riftn community's Chat tab): no back button. */
+  embedded?: boolean;
 }
 
 /** Map Supabase livechat message to local ChatMessage format */
@@ -109,7 +111,7 @@ const CHAT_PAGE_SIZE = 20;
 /** How close to the top (px) the next older page is fetched. */
 const LOAD_OLDER_AT = 240;
 
-export function PublicChat({ onBack }: PublicChatProps) {
+export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // A mention notification names the line that tagged the reader.
   useFocusChatMessage();
   const { t: _copy } = _useCopy();
@@ -491,6 +493,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
       ) : (
       <div data-chat-header className="flex items-center justify-between gap-2 p-4 border-b border-white/[0.07]">
         <div className="flex min-w-0 flex-1 items-center gap-3">
+          {!embedded && (
           <Button
             variant="ghost"
             size="icon"
@@ -500,6 +503,7 @@ export function PublicChat({ onBack }: PublicChatProps) {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
+          )}
           
           <div className="min-w-0">
             <h2 className="font-bold text-white truncate">{roomName}</h2>
