@@ -2075,6 +2075,13 @@ export const ig = {
     doCollectItem3: 'Ihe ị na-ebipụta — posts, comments, uploads na metadata gburugburu ha — otú ọ nwere ike na-eje ozi ndị ị bipụtara ya.',
     doCollectItem4: 'Ihe ngwaahịa kwesịrị ịgba ọsọ: echiche na njikọ aka na-agụta na posts, na a ngwaọrụ identifier na-edebe a nnọkọ attributable otú i nwere ike ịhụ na ịkagbu gị onwe gị nọ n \'ọrụ sessions.',
     doCollectItem6: 'Nchọpụta mgbe ihe mebiri, ya mere enwere ike idozi ya.',
+    googleDataTitle: 'Data onye ọrụ Google',
+    googleDataText: 'Ọ bụrụ na i jiri Google banye, Riftn na-arịọ Google naanị maka profaịlụ gị bụ isi: aha gị, adreesị ozi-e gị na foto profaịlụ gị (openid, email na profaịlụ scopes). Anyị anaghị arịọ ihe ọ bụla ọzọ site na Akaụntụ Google gị.',
+    googleDataItem1: 'Otu anyị si eji ya: iji mepụta ma banye gị na akaụntụ Riftn gị, iji mejupụta aha ngosi gị na avatar gị, na ịkpọtụrụ gị gbasara akaụntụ gị. Ọ dịghị ihe ọzọ.',
+    googleDataItem2: 'Otu anyị si echekwa ya: na sava akaụntụ anyị na n\'aka onye na-enye anyị nkwado nnabata, echekwara ya nke ọma mgbe ọ na-aga na mgbe ọ nọ n\'ebe nchekwa, ruo mgbe akaụntụ gị dị.',
+    googleDataItem3: 'Onye anyị na ya na-ekerịta ya: ọ dịghị onye. A naghị ere ya, a naghị eji ya eme mgbasa ozi, a naghịkwa eji ya azụlite ụdị AI.',
+    googleDataItem4: 'Ihu ya: hichapụ akaụntụ gị na Ntọala (Settings), ma ọ bụ ziga ozi-e na dev@riftn.com, a ga-ewepụkwa data Google anyị nwere. Ị nwekwara ike iwepụ ohere Riftn nwere n\'oge ọ bụla na myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Ojiji Riftn na-eji ozi enwetara site na Google APIs na-agbaso Iwu Data Onye Ọrụ Google API Services, gụnyere ihe achọrọ maka Ojiji Nwere Oke (Limited Use).',
   },
   contact: {
     title: 'Kpọtụrụ Anyị',

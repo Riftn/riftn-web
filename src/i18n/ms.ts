@@ -1979,6 +1979,13 @@ export const ms = {
     importantNoticeText: 'Riftn beroperasi sebagai protokol terdesentralisasi. Walaupun kami berusaha untuk melindungi privasi pengguna, sifat terdesentralisasi bermaksud bahawa interaksi mungkin dapat dilihat pada rantaian blok awam. Pengguna bertanggungjawab untuk memahami implikasi privasi interaksi rantai blok mereka.',
     dataSovereigntyItem5: 'Anda memilih apakah sistem AI boleh melatih pada kerjaan Anda. Ia dibenarkan kecuali Anda mematikan ia di Pengaturcaraan, dan pilihan Anda dipaparkan kepada crawler pada halaman yang dikawal oleh kami',
     dataSovereigntyItem6: 'Anda boleh menghapus akaun sendiri dari Pengaturcaraan; profil, muat naik dan media yang disimpan, termasuk salinan cadangan, dihapuskan',
+    googleDataTitle: 'Data pengguna Google',
+    googleDataText: 'Jika anda log masuk dengan Google, Riftn hanya meminta profil asas anda daripada Google: nama, alamat e-mel dan gambar profil anda (skop openid, e-mel dan profil). Kami tidak meminta apa-apa lagi daripada Akaun Google anda.',
+    googleDataItem1: 'Cara kami menggunakannya: untuk mencipta dan melog masuk anda ke akaun Riftn anda, untuk mengisi nama paparan dan avatar anda, serta untuk menghubungi anda mengenai akaun anda. Tiada yang lain.',
+    googleDataItem2: 'Cara kami menyimpannya: pada pelayan akaun kami dan dalam pembekal pengesahan kami, disulitkan semasa dalam transit dan semasa dalam simpanan, selagi akaun anda wujud.',
+    googleDataItem3: 'Dengan siapa kami berkongsinya: tiada sesiapa. Ia tidak dijual, tidak digunakan untuk pengiklanan, dan tidak digunakan untuk melatih model AI.',
+    googleDataItem4: 'Memadamkannya: padamkan akaun anda dalam Tetapan, atau e-mel dev@riftn.com, dan data Google yang kami pegang akan dialih keluar. Anda juga boleh membatalkan akses Riftn pada bila-bila masa di myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Penggunaan maklumat yang diterima daripada API Google oleh Riftn mematuhi Dasar Data Pengguna Perkhidmatan API Google, termasuk keperluan Penggunaan Terhad.',
   },
   contact: {
     title: 'Hubungi',

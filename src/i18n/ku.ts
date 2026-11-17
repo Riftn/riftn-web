@@ -2459,6 +2459,12 @@ export const ku = {
     contactNote: 'Ev Polîtîkaya Nepenîtiyê dibe ku bi pêvajoyên rêveberiya civakê were nûvekirin.',
     importantNotice: 'Hişyariya Girîng',
     importantNoticeText: 'Riftn wekî protokolekê nenavendî kar dike. Têkiliyên we dibe ku li ser blockchainên gelemperî xuya bibin.',
+    googleDataText: 'Heke hûn bi Google têkevin, Riftn ji Google tenê profîla we ya bingehîn dixwaze: navê we, navnîşana e-nameyê û wêneya profîlê (openid, email û profile scopes). Em ji hesabê we yê Google tiştekî din naxwazin.',
+    googleDataItem1: 'Em çawa bikar tînin: ji bo afirandin û têketina hesabê we yê Riftn, ji bo dagirtina navê we yê xuyayî û avatarê we, û ji bo têkiliyê bi we re derbarê hesabê we de. Tiştekî din na.',
+    googleDataItem2: 'Em çawa wê hiltînin: li ser serverên hesabê me û di pêşkêşkarê me yê nasnameyê de, di dema veguhastinê û di rewşa rawestayî de şîfrekirî, heya ku hesabê we hebe.',
+    googleDataItem3: 'Kî em wê parve bikin: tu kes. Ew firotinê ne, ne ji bo reklamê tê bikar anîn, û ne ji bo fêrkirina modelên AI tê bikar anîn.',
+    googleDataItem4: 'Jêbirin: hesabê xwe di Mîhengan de jê bibe, an jî ji dev@riftn.com re e-nameyekê bişîne, û daneyên Google yên ku em digirin dê werin jêbirin. Her weha hûn dikarin di her kêliyê de li myaccount.google.com/permissions gihîştina Riftn betal bikin.',
+    googleDataLimitedUse: 'Bikaranîna Riftn ya agahdariyên ku ji API-yên Google hatine wergirtin, li gorî Siyaseta Daneyên Bikarhêner a Karûbarên API-ya Google-ê ye, tevî hewcedariyên Bikaranîna Sînorkirî.',
   },
   contact: {
     title: 'Bi Me re Têkilî Deynin',

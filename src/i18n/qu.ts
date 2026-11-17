@@ -2282,6 +2282,13 @@ export const qu = {
     lastUpdatedDate: '29 Sitwa killa 2026',
     thirdPartyItem9Prefix: 'Crypto nisqawan rantiy chanta pagay:',
     thirdPartyItem9: 'MoonPay ETH chanta USDC nisqata cardwan rantikun, chanta NEAR Intents, deBridge chanta decentralised exchanges crypto nisqaykita tikranku; sapa mayqin pagayta qhawanku',
+    googleDataTitle: 'Google rantiqpa willaynin',
+    googleDataText: 'Google kaqwan yaykunkichik chayqa, Riftn Googlemanta kay qallariy willayllaykitam mañakun: sutiykita, correo electrónico direccionniykita, hinallataq perfilniykipi rikukuq rikch\'ayniykita (openid, email, hinallataq profile scopes nisqakuna). Google cuenta nisqaykimantaqa manam imatapas huktaqa mañakuykuchu.',
+    googleDataItem1: 'Imapaqmi llamk\'achiyku: Riftn cuenta nisqaykita ruwanaykupaq, yaykunaykipaq, sutiykita hinallataq rikch\'ayniykita hunt\'achinaykupaq, hinallataq cuenta nisqaykimanta willanaykupaq. Manam imapaqpas hukpaqqa.',
+    googleDataItem2: 'Imaynatam waqaychayku: cuenta servidorniykupim hinallataq autenticación quqniykupim, purichkaptinpas hinallataq waqaychasqa kachkaptinpas cifrado nisqawan, cuenta nisqayki kachkaptinqa.',
+    googleDataItem3: 'Pikunawanmi rakinakuyku: piwanpas manam. Manam rantikuykuchu, manam publicidadpaq llamk\'achiykuchu, nitaqmi AI modelokunata yachachinapaqpas llamk\'achiykuchu.',
+    googleDataItem4: 'Qulluy: cuenta nisqaykita Settings nisqapi qulluy, utaq dev@riftn.com nisqaman qillqamuy, chaymi Googlemanta willaykuna chaskisqaykuqa chinkachisqa kanqa. Riftn nisqap yaykuynintaqa maypachapas qulluyta atinkim myaccount.google.com/permissions nisqapi.',
+    googleDataLimitedUse: 'Google API nisqakunamanta chaskisqayku willaykunata Riftn llamk\'achisqanqa Google API Services User Data Policy nisqaman hinam, chaypim kachkan Limited Use nisqapa mañakuyninkunapas.',
   },
   contact: {
     title: "Ñuqaykuwan t'inkikuy",

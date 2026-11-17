@@ -2282,6 +2282,13 @@ export const pl = {
     thirdPartyItem10: 'Gdy łączysz inne konta społecznościowe, posty, które zdecydujesz się wysłać, są dostarczane na te platformy za pośrednictwem usługi księgowania, a do Farcaster za pośrednictwem zatwierdzonego przez Ciebie sygnatariusza',
     dataSovereigntyItem5: 'Ty decydujesz, czy systemy sztucznej inteligencji mogą szkolić się w Twojej pracy. Jest to dozwolone, chyba że wyłączysz je w Ustawieniach, a Twój wybór zostanie opublikowany dla robotów na stronach, które kontrolujemy',
     dataSovereigntyItem6: 'Możesz usunąć swoje konto samodzielnie w Ustawieniach; Twój profil, przesłane pliki i zapisane nośniki, w tym kopie zapasowe, zostaną usunięte',
+    googleDataTitle: 'Dane użytkowników Google',
+    googleDataText: 'Jeśli zalogujesz się za pomocą Google, Riftn poprosi Google tylko o Twoje podstawowe dane profilowe: imię, adres e-mail i zdjęcie profilowe (skopie openid, email i profil). Nie prosimy o nic więcej z Twojego Konta Google.',
+    googleDataItem1: 'Abyśmy mogli go używać: do utworzenia i zalogowania się do Twojego konta Riftn, do wypełnienia Twojego imienia wyświetlanego i awatara, oraz do kontaktu z Tobą w sprawie Twojego konta. Nic więcej.',
+    googleDataItem2: 'Zapisujemy je na naszych serwerach konta i w naszym dostawcy autoryzacji, zaszyfrowane w transporcie i w stanie spoczynku, tak długo, jak istnieje Twoje konto.',
+    googleDataItem3: 'Kto z nim dzieli się: nikt. Nie jest on sprzedawany, nie jest wykorzystywany do reklam i nie jest wykorzystywany do szkolenia modeli AI.',
+    googleDataItem4: 'Usuwanie konta: usunąć konto w ustawieniach, lub wysłać e-mail na adres dev@riftn.com, a dane Google, które przechowujemy, zostaną usunięte. Możesz również odwołać uprawnienia Riftn w dowolnym momencie na stronie myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Użycie przez Riftn informacji uzyskanych z Google API przestrzega zasad polityki danych użytkowników usług Google, w tym wymagań dotyczących ograniczonego użycia.',
   },
   contact: {
     title: 'Skontaktuj się',

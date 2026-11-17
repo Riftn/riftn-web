@@ -2102,6 +2102,13 @@ export const hr = {
     doCollectItem3: 'Što objavljuješ — postovi, komentari, uploadovi i metadata oko njih — tako da se može servirati ljudima kojima si ih objavio.',
     doCollectItem4: 'Što je potrebno za rad proizvoda: brojevi pregleda i angažmana na postovima, te identifikator uređaja koji održava sesiju pripisivu tako da možeš vidjeti i poništiti svoje aktivne sesije.',
     doCollectItem6: 'Dijagnostika kada nešto ne radi, tako da se može popraviti.',
+    googleDataTitle: 'Podaci korisnika Googlea',
+    googleDataText: 'Ako se prijavite s Googleom, Riftn traži od Googlea samo osnovni profil: vaše ime, e‑mail adresu i profilnu sliku (openid, email i profile domene). Ne tražimo ništa drugo od vašeg Google računa.',
+    googleDataItem1: 'Kako ga koristimo: za stvaranje i prijavu na vaš Riftn račun, za popunjavanje prikaznog imena i avatara te za kontaktiranje vas u vezi vašeg računa. Ništa drugo.',
+    googleDataItem2: 'Kako ga pohranjujemo: na našim poslužiteljima računa i kod našeg pružatelja autentifikacije, šifrirano u prijenosu i u mirovanju, sve dok vaš račun postoji.',
+    googleDataItem3: 'S kim ga dijelimo: nitko. Ne prodajemo ga, ne koristimo ga za oglašavanje i ne koristimo ga za treniranje AI modela.',
+    googleDataItem4: 'Brisanje: obrišite svoj račun u Postavkama, ili pošaljite e‑mail na dev@riftn.com, i podaci Googlea koje posjedujemo bit će uklonjeni. Također možete opozvati Riftnov pristup u bilo kojem trenutku na myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftnovo korištenje informacija primljenih od Google API‑a pridržava se Google API Services User Data Policy, uključujući zahtjeve Limited Use.',
   },
   contact: {
     title: 'Kontaktirajte nas',

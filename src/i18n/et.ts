@@ -1979,6 +1979,13 @@ export const et = {
     thirdPartyItem7Prefix: 'Tarvitamine:',
     thirdPartyItem7: 'Cloudflare teenindab ja hoiab kaadrit ja selle media.',
     thirdPartyItem8Prefix: 'AI & Tõlkimine:',
+    googleDataTitle: 'Google\'i kasutajaandmed',
+    googleDataText: 'Kui logite sisse Google\'iga, küsib Riftn Google\'ilt ainult teie põhiprofiili: teie nime, e-posti aadressi ja profiilipilti (openid, email ja profile ulatust). Me ei küsi teie Google\'i kontolt midagi muud.',
+    googleDataItem1: 'Kuidas me seda kasutame: teie Riftni konto loomiseks ja sellesse sisselogimiseks, teie kuvatava nime ja avatari täitmiseks ning teiega teie konto asjus ühenduse võtmiseks. Mitte millekski muuks.',
+    googleDataItem2: 'Kuidas me seda hoiustame: meie kontoserverites ja meie autentimisteenuse pakkuja juures, krüpteerituna edastamisel ja säilitamisel, seni kuni teie konto on olemas.',
+    googleDataItem3: 'Kellega me seda jagame: mitte kellegagi. Seda ei müüda, ei kasutata reklaamimiseks ega tehisintellekti mudelite treenimiseks.',
+    googleDataItem4: 'Kustutamine: kustutage oma konto seadetes või saatke e-kiri aadressile dev@riftn.com ja meie valduses olevad Google\'i andmed eemaldatakse. Samuti saate igal ajal tühistada Riftni juurdepääsu aadressil myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftn\'i poolt Google\'i API-dest saadud teabe kasutamine vastab Google API teenuste kasutajaandmete eeskirjadele, sealhulgas piiratud kasutuse nõuetele.',
   },
   contact: {
     title: 'Kontakteeru meiega',

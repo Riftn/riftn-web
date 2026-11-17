@@ -2102,6 +2102,13 @@ export const hu = {
     thirdPartyItem7Prefix: 'Kézbesítés:',
     thirdPartyItem7: 'A Cloudflare a webhelyet és annak adathordozóit szolgálja ki és tárolja',
     thirdPartyItem8Prefix: 'AI & Fordítás:',
+    googleDataTitle: 'Google felhasználói adatok',
+    googleDataText: 'Ha bejelentkezel a Google-lal, a Riftn csak az alapvető profiladataidat kéri el a Google-tól: a nevedet, az e-mail címedet és a profilképedet (az openid, email és profile hatóköröket). Semmi mást nem kérünk a Google-fiókodból.',
+    googleDataItem1: 'Így használjuk: a Riftn-fiókod létrehozásához és a bejelentkezéshez, a megjelenített neved és avatarod kitöltéséhez, valamint a fiókoddal kapcsolatos kapcsolatfelvételhez. Semmi máshoz.',
+    googleDataItem2: 'A mennyiben tároljuk: a számlánk szerverein és az autentikációs szolgáltatóinkban, titkosítva a továbbítás során és a pihenés során, addig, amíg a számlád létezik.',
+    googleDataItem3: 'Senkivel sem osztjuk meg. Nem áruljuk el, nem használjuk reklámra, és nem használjuk az AI modellek kiképzésére.',
+    googleDataItem4: 'Törlés: törölje a fiókját a Beállításokban, vagy küldjön e-mailt a dev@riftn.com címre, és a Riftn által tartott Google-adatokat törlik.  A Riftn hozzáférését bármikor megvonhatja a myaccount.google.com/permissions oldalon.',
+    googleDataLimitedUse: 'A Riftn a Google API-kból kapott információinak használata a Google API Services felhasználói adatvédelmi szabályzatnak, beleértve a korlátozott felhasználási követelményeket, megfelel.',
   },
   contact: {
     title: 'Lépjen kapcsolatba velünk',

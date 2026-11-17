@@ -2131,6 +2131,13 @@ export const om = {
     whatWeDoCollect: 'Waan Walitti Qabnu:',
     doCollectItem4: 'Waan oomishni hojjechuu qabu: ilaaluu fi hirmaannaan maxxansa irratti lakkaa&#39;ama, fi adda baastuu meeshaa kan turtii tokko madda akka ta&#39;u godhu akka ati turtii sochii mataa keetii arguu fi haquu dandeessuuf.',
     doCollectItem6: 'Dhiibbaa yeroo waan tokko kufe, kanaaf sirreessuu danda\'amu.',
+    googleDataTitle: 'Odeeffannoo fayyadamaa Google',
+    googleDataText: 'Yoo Google fayyadamtanii seentan, Riftn Google irraa kan gaafatu odeeffannoo gubbaa qofa: maqaa keessan, teessoo imeelii fi suuraa profaayilii keessan (openid, email fi profile scopes). Kana malee waan biraa akkaawuntii Google keessan irraa hin gaafannu.',
+    googleDataItem1: 'Akkaataa itti fayyadamnu: akkaawuntii Riftn keessan uumuufi ittiin seenuuf, maqaa agarsiiftuu fi avataara keessan guutuuf, akkasumas akkaawuntii keessan ilaalchisee isin quunnachuuf. Kana malee homaa miti.',
+    googleDataItem2: 'Akkaataa itti kuufnu: sarvaroota akkaawuntii keenya irratti fi dhiyeessaa mirkaneessaa keenya keessatti, yeroo darbuu fi yeroo boqonnaa irratti kan enkireepti ta\'e, hanga akkaawuntiin keessan jiruutti.',
+    googleDataItem3: 'Namoota itti qoodnu: eenyuun iyyuu miti. Hin gurguramu, beeksisaaf hin oolu, akkasumas moodeelota AI leenjisuuf hin oolu.',
+    googleDataItem4: 'Haquu: akkaawuntii keessan Settings keessatti haquu dandeessu, ykn dev@riftn.com irratti imeelii erguu dandeessu, yeroo sanatti odeeffannoon Google nuti qabnu ni haqama. Akkasumas yeroo barbaaddan hundatti mirga Riftn qabu myaccount.google.com/permissions irratti haquu dandeessu.',
+    googleDataLimitedUse: 'Fayyadamni Riftn odeeffannoo Google API irraa argatuu, Imaammata Odeeffannoo Fayyadamaa Tajaajila Google API, kanneen keessatti gaaffiiwwan Fayyadama Murtaa\'aa (Limited Use) dabalatee, hordofa.',
   },
   contact: {
     title: 'Nu Quunnamaa',

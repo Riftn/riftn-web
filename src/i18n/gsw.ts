@@ -2145,6 +2145,13 @@ export const gsw = {
     thirdPartyItem6Prefix: 'Streaming & Räume:',
     thirdPartyItem7Prefix: 'Lieferung:',
     thirdPartyItem7: 'Cloudflare bedient und cachet die Website samt deren Medien.',
+    googleDataTitle: 'Google-Userdaten',
+    googleDataText: 'Wenn du dich mit Google anmeldest, fragt Riftn bei Google nur nach deinem grundlegenden Profil: deinem Name, deiner E-Mail-Adresse und deinem Profilbild (openid, E-Mail- und Profilberechtigungen). Wir fragen nichts anderes von deinem Google-Konto ab.',
+    googleDataItem1: 'Wie wir es verwenden: um ein und auszumelden, um deinen Anzeigename und dein Avatar zu füllen und um dich über dein Konto zu kontaktieren. Nichts anderes.',
+    googleDataItem2: 'Wie wir es speichern: auf unseren Servern und bei unserem Authentifizierungsanbieter, verschlüsselt im Transit und im Ruhezustand, solange dein Konto existiert.',
+    googleDataItem3: 'Wer wir es teilen: niemand. Es wird nicht verkauft, nicht für Werbung verwendet und nicht verwendet, um AI-Modelle zu trainieren.',
+    googleDataItem4: 'Löschen: Lösche dein Konto in Einstellungen oder sende eine E-Mail an dev@riftn.com, und die Google-Daten, die wir speichern, werden entfernt. Du kannst auch die Zugriffsrechte von Riftn jederzeit auf myaccount.google.com/permissions widerrufen.',
+    googleDataLimitedUse: 'Riftns Verwendung von Informationen, die von Google-APIs erhalten wurden, entspricht der Google-API-Dienste-Nutzungsrichtlinie, einschließlich der Limited Use-Anforderungen.',
   },
   contact: {
     title: 'Kontaktiere Sie üs',

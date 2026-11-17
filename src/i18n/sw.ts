@@ -2268,6 +2268,13 @@ export const sw = {
     dataSovereigntyItem6: 'Unaweza kufuta akaunti yako mwenyewe kwenye Mipangilio; wasifu wako, upakiaji na vyombo vya habari vilivyohifadhiwa, ikiwemo nakala mbadala, vimefutwa',
     dataSovereigntyItem2: 'Ujumbe wako wa moja kwa moja umesimbwa kwa njia fiche, kwa hivyo hakuna mtu katika Riftn anayeweza kuusoma',
     whatWeDontCollect: 'Kile Hatukusanyi:',
+    googleDataTitle: 'Data ya mtumiaji wa Google',
+    googleDataText: 'Ukijisajili na Google, Riftn huomba Google maelezo yako ya msingi pekee: jina lako, anwani ya barua pepe na picha ya wasifu (openid, email na profile scopes). Hatuombi kitu kingine chochote kutoka kwa Akaunti yako ya Google.',
+    googleDataItem1: 'Jinsi tunavyoitumia: ili kutengeneza na kukuingiza kwenye akaunti yako ya Riftn, kujaza jina lako la kuonyesha na avatar, na kuwasiliana nawe kuhusu akaunti yako. Hakuna kingine.',
+    googleDataItem2: 'Jinsi tunavyoihifadhi: kwenye seva zetu za akaunti na kwa mtoa huduma wetu wa uthibitishaji, ikiwa imesimbwa kwa njia fiche wakati wa kusafirishwa na inapohifadhiwa, kwa muda wote ambao akaunti yako ipo.',
+    googleDataItem3: 'Tunashiriki na nani: na mtu yeyote. Haiuzwi, haitumiki kwa utangazaji, na haitumiki kufunza miundo ya AI.',
+    googleDataItem4: 'Kuifuta: futa akaunti yako katika Mipangilio (Settings), au tuma barua pepe kwa dev@riftn.com, na data ya Google tunayoshikilia itaondolewa. Unaweza pia kubatilisha ufikiaji wa Riftn wakati wowote katika myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Matumizi ya Riftn ya taarifa zilizopokelewa kutoka kwa API za Google yanazingatia Sera ya Data ya Mtumiaji ya Huduma za API za Google, ikijumuisha mahitaji ya Matumizi Yaliyopunguzwa (Limited Use).',
   },
   contact: {
     title: 'Wasiliana',

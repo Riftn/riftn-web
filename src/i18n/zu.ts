@@ -2146,6 +2146,13 @@ export const zu = {
     thirdPartyItem9: 'I-MoonPay ithengisa i-ETH ne-USDC ngekhadi, futhi EDUZE kwe-Intents, i-deBridge kanye nokushintshaniswa okuhlukanisiwe kuguqula i-crypto oyikhokhayo; ngayinye ibona inkokhelo eyisingathayo',
     effectiveDate: '02 Disemba 2024',
     thirdPartyItem6: 'Inkulumo la Riftn lincelwe kwenye video, na Livepeer kuweza kufikisha kama kufikisha, na Agora inaendelea na makongamano ya audio ya kuendelea',
+    googleDataTitle: 'Idatha yomsebenzisi we-Google',
+    googleDataText: 'Uma usayina ngemva kwe-Google, i-Riftn icela i-Google kuphela ngephrofayela yakho yisisekelo: igama lakho, ikheli le-imeyili kanye nesithombe sephrofayela (i-openid, i-imeyili kanye nezibopho zephrofayela). Asiceli lutho olunye ku-akhawunti yakho ye-Google.',
+    googleDataItem1: 'Sisebenzisa kanjani: ukuze sakhe futhi usayine ku-akhawunti yakho ye-Riftn, ukuze sigcwalise igama lakho lokubonisa kanye ne-avatar, futhi ukuze sixhumane nawe mayelana ne-akhawunti yakho. Akukho lutho olunye.',
+    googleDataItem2: 'Siyigcina kanjani: ezinsizeni zethu ze-akhawunti kanye nenkonzo yethu yokuvikela, igcinwe engozini futhi ekugcineni, isikhathi eside esikhona i-akhawunti yakho.',
+    googleDataItem3: 'Sabelana ngayo nani: akekho. Ayithengiswa, ayisetshenziswa ukuxhumana, futhi ayisetshenziswa ukuqeqesha amamodeli e-AI.',
+    googleDataItem4: 'Ukuyisusa: susa i-akhawunti yakho ku-Settings, noma thumela i-imeyili ku-dev@riftn.com, futhi idatha ye-Google esiyibamba isuswa. Ungakwazi futhi ukucima ukufinyelela kwe-Riftn nganoma yisiphi isikhathi ku-myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Ukusetshenziswa kolwazi olutholakala ku-Google APIs kwe-Riftn kuhambisana ne-Policy ye-Google API Services User Data, kuhlanganisa nezidingo zokusetshenziswa okulinganiselwe.',
   },
   contact: {
     title: 'Xhumana Nathi',

@@ -2451,6 +2451,13 @@ export const az = {
     thirdPartyItem10: 'Digər sosial hesablara qoşulduğunuz zaman göndərməyi seçdiyiniz ismarıclar poçt xidməti vasitəsilə həmin platformalara və təsdiq etdiyiniz imzalayıcı vasitəsilə Farcaster-ə çatdırılır',
     dataSovereigntyItem5: 'AI sistemlərinin işinizdə məşq edə bilib-bilməyəcəyini seçirsiniz. Parametrlərdə söndürmədiyiniz müddətcə icazə verilir və seçiminiz nəzarət etdiyimiz səhifələrdə tarayıcılara dərc edilir',
     dataSovereigntyItem6: 'Hesabınızı Parametrlərdən özünüz silə bilərsiniz; ehtiyat nüsxələr də daxil olmaqla profiliniz, yükləmələr və saxlanılan KİV-lər silinir',
+    googleDataTitle: 'Google istifadəçi məlumatları',
+    googleDataText: 'Əgər Google ilə daxil olsanız, Riftn yalnız əsas profiliniz üçün Google‑dan soruşur: adınız, e‑poçt ünvanınız və profil şəkiliniz (openid, email və profile icazələri). Google Hesabınızdan başqa heç nə istəmirik.',
+    googleDataItem1: 'Biz necə istifadə edirik: Riftn hesabınızı yaratmaq və daxil olmaq, göstərilən adınızı və avatarınızı doldurmaq, və hesabınızla bağlı sizinlə əlaqə saxlamaq üçün. Başqa heç nə.',
+    googleDataItem2: 'Biz necə saxlayırıq: hesab serverlərimizdə və kimlik doğrulama təminatçımızda, ötürülərkən və saxlanarkən şifrələnmiş şəkildə, hesabınız mövcud olduğu müddətcə.',
+    googleDataItem3: 'Kimlərlə paylaşırıq: heç kimlə. Satılmır, reklam üçün istifadə edilmir və AI modellərinin təlimi üçün istifadə edilmir.',
+    googleDataItem4: 'Silinməsi: Parametrlərdə hesabınızı silin, ya da dev@riftn.com ünvanına e‑poçt göndərin, və saxladığımız Google məlumatları silinir. Həmçinin Riftn‑in girişini istənilən vaxt myaccount.google.com/permissions ünvanında ləğv edə bilərsiniz.',
+    googleDataLimitedUse: 'Riftn‑in Google API‑lərindən alınan məlumatların istifadəsi Google API Xidmətləri İstifadəçi Məlumatları Siyasətinə, o cümlədən Məhdud İstifadə tələblərinə uyğun gəlir.',
   },
   contact: {
     title: 'Əlaqə',

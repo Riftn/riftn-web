@@ -2146,6 +2146,13 @@ export const af = {
     thirdPartyItem10: 'Wanneer jy ander sosiale rekeninge koppel, word die plasings wat jy kies om te stuur, aan daardie platforms gelewer deur middel van \'n plasingsdiens, en aan Farcaster deur \'n ondertekenaar wat jy goedkeur.',
     dataSovereigntyItem5: 'Jy kies of AI-stelsels op jou werk kan oefen. Dit word toegelaat, tensy jy dit afskakel in Instellings, en jou keuse word gepubliseer aan kruipers op die bladsye wat ons beheer',
     dataSovereigntyItem6: 'Jy kan jou rekening self uit Instellings verwyder; Jou profiel, oplaaie en gestoorde media, insluitend rugsteunkopieë, word uitgevee',
+    googleDataTitle: 'Google-gebruikersdata',
+    googleDataText: 'As jy met Google aanteken, vra Riftn Google slegs vir jou basiese profiel: jou naam, e-posadres en profielfoto (die openid-, e-pos- en profielomvang). Ons vra niks anders van jou Google-rekening nie.',
+    googleDataItem1: 'Hoe ons dit gebruik: om jou Riftn-rekening te skep en jou daarin aan te meld, om jou vertoonnaam en avatar in te vul, en om jou oor jou rekening te kontak. Niks anders nie.',
+    googleDataItem2: 'Hoe ons dit stoor: op ons rekeningbedieners en by ons verifikasieverskaffer, geënkripteer tydens oordrag en wanneer dit gestoor is, solank jou rekening bestaan.',
+    googleDataItem3: 'Met wie ons dit deel: met niemand nie. Dit word nie verkoop nie, nie vir advertensies gebruik nie en nie gebruik om KI-modelle op te lei nie.',
+    googleDataItem4: 'Om dit te verwyder: Verwyder jou rekening in Instellings, of stuur \'n e-pos aan dev@riftn.com, en die Google-data wat ons hou, sal verwyder word. Jy kan ook Riftn se toegang te eniger tyd herroep by myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftn se gebruik van inligting wat van Google-API\'s ontvang is, voldoen aan die Gebruikersdata-beleid vir Google-API-dienste, insluitend die vereistes vir beperkte gebruik.',
   },
   contact: {
     title: 'Kontak Ons',

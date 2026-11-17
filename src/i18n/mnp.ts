@@ -2133,6 +2133,13 @@ export const mnp = {
     contentModeration: '内容管理和治理',
     communityGovernance: '社区治理：',
     communityGovernanceText: '内容管理通过去中心化的社区治理机制进行：',
+    googleDataTitle: 'Google 使用者資料',
+    googleDataText: '如果您使用Google登录，Riftn只向Google请求您的基本资料：您的姓名、电子邮件地址和头像（openid、电子邮件和资料范围）。我们从您的Google账户中请求了什么都没有。',
+    googleDataItem1: '如何使用它：用于创建和登录您的 Riftn 帐户、填写您的显示名称和头像，以及与您的帐户有关的联系。没有其他用途。',
+    googleDataItem2: '我們將其存儲在我們的帳戶伺服器和驗證提供者中，傳輸和靜止加密，直到您的帳戶存在。',
+    googleDataItem3: '我们分享它的人：没有人。它不是出售的，不用于广告，不用于训练AI模型。',
+    googleDataItem4: '删除它：在设置中删除您的账户，或者发送邮件到 dev@riftn.com，Google 我们持有的数据将被删除。您也可以随时在 myaccount.google.com/permissions 中撤销 Riftn 的访问权限。',
+    googleDataLimitedUse: 'Riftn 使用来自 Google API 的信息遵守 Google API 服务用户数据政策，包括有限使用要求。',
   },
   contact: {
     discord: 'Discord',

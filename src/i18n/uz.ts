@@ -2146,6 +2146,13 @@ export const uz = {
     thirdPartyItem10: 'Siz boshqa ijtimoiy hisoblar bilan ulanishda tanlangan postlaringizni bu xizmatlar orqali boshqa platformalarga yuboriladi, Farcasterga esa siz tasdiqlagan imzovchi orqali yetkaziladi.',
     dataSovereigntyItem5: 'Siz sun&#39;iy intellekt tizimlari sizning ishingiz bo&#39;yicha mashq qilishi mumkinligini tanlaysiz. Bunga ruxsat beriladi, agar siz uni Sozlamalarda o&#39;chirib qo&#39;ysangiz va tanlovingiz biz boshqaradigan sahifalardagi brauzerlarda e&#39;lon qilinmasa.',
     dataSovereigntyItem6: 'Hisobingizni Sozlamalar orqali o&#39;zingiz o&#39;chirib tashlashingiz mumkin; profilingiz, yuklamalaringiz va saqlangan media fayllaringiz, jumladan, zaxira nusxalaringiz o&#39;chiriladi',
+    googleDataTitle: 'Google foydalanuvchi ma\'lumotlari',
+    googleDataText: 'Agar siz Google orqali tizimga kirsangiz, Riftn Google\'dan faqat asosiy profilingizni: ismingiz, elektron pochta manzilingiz va profil rasmingizni (openid, email va profile doiralari) so\'raydi. Biz Google hisobingizdan boshqa hech narsa so\'ramaymiz.',
+    googleDataItem1: 'Biz undan qanday foydalanamiz: Riftn hisobingizni yaratish va tizimga kirishingiz uchun, ko\'rsatiladigan ismingiz va avataringizni to\'ldirish hamda hisobingiz bo\'yicha siz bilan bog\'lanish uchun. Boshqa hech narsa uchun emas.',
+    googleDataItem2: 'Biz uni qanday saqlaymiz: hisob serverlarimizda va autentifikatsiya provayderimizda, uzatish va saqlash jarayonida shifrlangan holda, hisobingiz mavjud bo\'lgan muddat davomida.',
+    googleDataItem3: 'Biz uni kim bilan baham ko\'ramiz: hech kim bilan. U sotilmaydi, reklama uchun ishlatilmaydi va sun\'iy intellekt modellarini o\'qitish uchun foydalanilmaydi.',
+    googleDataItem4: 'O\'chirish: hisobingizni Sozlamalar (Settings) bo\'limidan o\'chiring yoki dev@riftn.com manziliga elektron pochta yuboring, shunda bizdagi Google ma\'lumotlaringiz o\'chiriladi. Shuningdek, istalgan vaqtda myaccount.google.com/permissions sahifasi orqali Riftn\'ning kirish huquqini bekor qilishingiz mumkin.',
+    googleDataLimitedUse: 'Riftn\'ning Google API\'laridan olingan ma\'lumotlardan foydalanishi Google API xizmatlari foydalanuvchi ma\'lumotlari siyosatiga, shu jumladan Cheklangan foydalanish (Limited Use) talablariga muvofiq amalga oshiriladi.',
   },
   contact: {
     title: 'Biz bilan bog&#39;lanish',

@@ -2098,6 +2098,11 @@ export const yo = {
     thirdPartyItem8: 'Ọ̀rọ̀ àti àwọn àkóónú tí o fi ránṣẹ́ sí ẹ̀dá, ìtumọ̀, àkọlé tàbí ẹ̀dà ohùn ni a ń gbé lọ sí ọ̀dọ̀ olùpèsè tí ó ń ṣiṣẹ́ rẹ̀, fún ìbéèrè yẹn nìkan. Ọ̀rọ̀ àṣírí — àwọn ìránṣẹ́, àwọn ìdáhùn àti àwọn ìjíròrò olùrànlọ́wọ́ — ni a kò ní fi ránṣẹ́ sí olùpèsè tí ètò ọ̀fẹ́ rẹ̀ ń kọ́ ẹ̀kọ́ láti inú ohun tí ó gbà.',
     thirdPartyItem9: 'MoonPay ń ta ETH àti USDC nípasẹ̀ káàdì, àti NEAR Intents, deBridge àti àwọn pàṣípààrọ̀ tí kò ní àárín (decentralised exchanges) ń yí owó kríptò tí o fi ń sanwó padà; ọ̀kọ̀ọ̀kan wọn ń rí ìsànwó tí ó ń ṣàkóso',
     dataSovereigntyItem4: 'Àpòówó àti àwọn kọ́kọ́rọ́ rẹ wà lábẹ́ ìṣàkóso rẹ nìkan',
+    googleDataTitle: 'Àwọn àyànlágbà Google',
+    googleDataItem1: 'Bí a ṣe ń lò ó: láti ṣẹ̀dá àti láti wọlé sínú àkúdù Riftn rẹ, láti kún orúkọ ìfihàn àti àwòrán àkúdù rẹ, àti láti kàn sí ọ nípa àkúdù rẹ. Kò sí ohun mìíràn.',
+    googleDataItem2: 'Bí a ṣe ń tọ́jú rẹ̀: lórí àwọn ẹ̀rọ ìwọ̀n-ìṣirò àkántì wa àti nínú olùpèsè ìdánilójú wa, tí a fi àmì ìdánimọ̀ ṣọ́ nígbà tí ó wà lójú ọ̀nà àti nígbà tí ó wà ní ìsinmi, fún bí àkántì rẹ ṣe wà pẹ́ tó.',
+    googleDataItem3: 'Àwọn tí a ń pín in fún: kò sí ẹnikẹ́ni. A kò tà á, a kò lò ó fún ìpolówó ọjà, bẹ́ẹ̀ ni a kò sì lò ó láti kọ́ àwọn ètò ẹ̀rọ ọlọ́gbọ́n (AI models).',
+    googleDataLimitedUse: 'Àgbéjáde Riftn láti ọpọlọpọn àwọn àkọọlẹ láti Google APIs jẹ́ pẹ̀lú àwọn ìdánimọ Google API Services User Data Policy, àti àwọn ìdánimọ Limited Use.',
   },
   contact: {
     title: 'Kan si Wa',

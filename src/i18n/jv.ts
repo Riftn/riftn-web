@@ -2145,6 +2145,13 @@ export const jv = {
     governanceItem1: 'Voting komunitas nemtokake kebijakan konten',
     legalCompliance: 'Kepatuhan Hukum:',
     thirdPartyItem2Prefix: 'Jaringan Blockchain:',
+    googleDataTitle: 'Data pangguna Google',
+    googleDataText: 'Yen sampeyan mlebu nganggo Google, Riftn mung njaluk profil dhasar sampeyan menyang Google: jeneng, alamat email, lan gambar profil sampeyan (ruang lingkup openid, email, lan profil). Kita ora njaluk liyane saka Akun Google sampeyan.',
+    googleDataItem1: 'Cara kita nggunakake: kanggo nggawe lan mlebu menyang akun Riftn sampeyan, kanggo ngisi jeneng tampilan lan avatar sampeyan, lan kanggo ngubungi sampeyan babagan akun sampeyan. Ora ana liyane.',
+    googleDataItem2: 'Cara kita nyimpen: ing server akun kita lan ing panyedhiya otentikasi kita, dienkripsi nalika dikirim lan nalika disimpen, salami akun sampeyan isih ana.',
+    googleDataItem3: 'Sapa sing kita ajak nuduhake: ora ana sapa-sapa. Data iki ora didol, ora digunakake kanggo pariwara, lan ora digunakake kanggo nglatih model AI.',
+    googleDataItem4: 'Mbusak data: busak akun sampeyan ing Setelan, utawa email menyang dev@riftn.com, lan data Google sing kita simpen bakal dibusak. Sampeyan uga bisa mbatalake akses Riftn kapan wae ing myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Panggunaan informasi sing ditampa saka API Google dening Riftn netepi Kebijakan Data Pangguna Layanan API Google, kalebu syarat Panggunaan Winates (Limited Use).',
   },
   contact: {
     arabic: 'Basa Arab',

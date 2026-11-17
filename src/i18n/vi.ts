@@ -2110,6 +2110,13 @@ export const vi = {
     thirdPartyItem8: 'Văn bản và phương tiện bạn gửi đến một tính năng tạo, dịch, chú thích hoặc lồng tiếng được chuyển cho nhà cung cấp đang chạy tính năng đó, chỉ dành cho yêu cầu đó. Văn bản riêng tư — tin nhắn, trả lời và trò chuyện trợ lý — không bao giờ được gửi đến nhà cung cấp có cấp độ miễn phí đào tạo về những gì họ nhận được.',
     dataSovereigntyItem5: 'Bạn chọn liệu các hệ thống AI có thể đào tạo về công việc của bạn hay không. Nó được phép trừ khi bạn tắt nó trong Cài đặt và lựa chọn của bạn được xuất bản cho trình thu thập thông tin trên các trang mà chúng tôi kiểm soát',
     dataSovereigntyItem6: 'Bạn có thể tự xóa tài khoản của mình khỏi Cài đặt; hồ sơ, nội dung tải lên và nội dung đa phương tiện được lưu trữ của bạn, bao gồm cả bản sao lưu, sẽ bị xóa',
+    googleDataTitle: 'Dữ liệu người dùng của Google',
+    googleDataText: 'Nếu bạn đăng nhập bằng Google, Riftn chỉ yêu cầu Google cung cấp hồ sơ cơ bản của bạn: tên, địa chỉ email và ảnh đại diện (các phạm vi openid, email và profile). Chúng tôi không yêu cầu bất kỳ thông tin nào khác từ Tài khoản Google của bạn.',
+    googleDataItem1: 'Cách chúng tôi sử dụng thông tin đó: để tạo và đăng nhập vào tài khoản Riftn của bạn, để điền tên hiển thị và ảnh đại diện của bạn, và để liên hệ với bạn về tài khoản của bạn. Không gì khác cả.',
+    googleDataItem2: 'Cách chúng tôi lưu trữ dữ liệu: trên các máy chủ tài khoản của chúng tôi và tại nhà cung cấp dịch vụ xác thực, được mã hóa trong quá trình truyền tải và lưu trữ, trong suốt thời gian tài khoản của bạn tồn tại.',
+    googleDataItem3: 'Chúng tôi chia sẻ thông tin đó với ai: không ai cả. Thông tin đó không bị bán, không được sử dụng cho mục đích quảng cáo và không được sử dụng để huấn luyện các mô hình AI.',
+    googleDataItem4: 'Xóa nó: xóa tài khoản của bạn trong Cài đặt, hoặc gửi email đến dev@riftn.com, và dữ liệu Google mà chúng tôi nắm giữ sẽ bị xóa. Bạn cũng có thể hủy cấp quyền truy cập của Riftn bất cứ lúc nào tại myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftn sử dụng thông tin nhận được từ Google APIs tuân thủ Chính sách dữ liệu người dùng của Google API, bao gồm các yêu cầu sử dụng hạn chế.',
   },
   contact: {
     title: 'Liên hệ với chúng tôi',

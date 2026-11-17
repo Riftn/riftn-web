@@ -2268,6 +2268,13 @@ export const sv = {
     thirdPartyItem10: 'När du ansluter andra sociala konton levereras de inlägg du väljer att skicka till dessa plattformar via en publiceringstjänst, och till Farcaster via en undertecknare godkänner du',
     dataSovereigntyItem5: 'Du väljer om AI-system får träna på ditt arbete. Det är tillåtet om du inte stänger av det i Inställningar, och ditt val publiceras för krypdon på de sidor vi kontrollerar.',
     dataSovereigntyItem6: 'Du kan ta bort ditt konto själv under Inställningar; ditt profil, uppdrag och sparad media, inklusive säkerhetskopior, raderas.',
+    googleDataTitle: 'Google-användardata',
+    googleDataText: 'Om du loggar in med Google begär Riftn bara ditt grundläggande profil från Google: ditt namn, e-postadress och profilbild (openid, e-post och profil-scoper). Vi begär ingenting annat från ditt Google-konto.',
+    googleDataItem1: 'Hur vi använder det: för att skapa och logga in dig på din Riftn-konto, för att fylla i ditt displaynamn och avatar och för att kontakta dig om ditt konto. Inget annat.',
+    googleDataItem2: 'Hur vi lagrar den: på våra kontoservrar och hos vår autentiseringsleverantör, krypterad under överföring och vid lagring, så länge ditt konto existerar.',
+    googleDataItem3: 'Vilka vi delar det med: ingen. Det säljs inte, används inte för reklam och används inte för att träna AI-modeller.',
+    googleDataItem4: 'Radera det: radera ditt konto i Inställningar, eller mejla dev@riftn.com, så tas Google-datan vi innehar bort. Du kan även när som helst återkalla Riftns åtkomst på myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftn\'s användning av information som tas emot från Google API:er följer Google API Services User Data Policy, inklusive kraven för begränsad användning (Limited Use).',
   },
   contact: {
     title: 'Kontakt',

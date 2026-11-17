@@ -2145,6 +2145,12 @@ export const mi = {
     thirdPartyItem10Prefix: 'Tuku-maha:',
     dataSovereigntyItem5: 'Ka kōwhiri koe mēnā ka taea e ngā pūnaha AI te whakangungu i runga i tō mahi. E whakaaetia ana kia kore koe e whakaweto i roto i ngā Tautuhinga, ā, ka whakaputaina tō kōwhiringa ki ngā ngokingoki i runga i ngā whārangi e whakahaerehia ana e mātou',
     dataSovereigntyItem6: 'Ka taea e koe te muku i tō pūkete māu anō mai i ngā Tautuhinga; ka mukua tō kōtaha, ngā tukunga me ngā pāpāho kua tiakina, tae atu ki ngā kape tārua',
+    googleDataText: 'Ki te whakauruhia ki Google, e whakawhitia a Riftn ki Google ngā tātou kōrero whakapapa tūturu: tōu ingoa, pukapuka pūtea, me tōu pukapuka whakaahua (openid, pūtea, me te whakaahua o te pukapuka). E hoki ana mātou ki te kōrero whakapapa tūturu o tōu Pūtea Google.',
+    googleDataItem1: 'Ka whakamahi tēnei: hei whakaputaina i tētahi pūrongo hou mō tētahi pukapuka Riftn, hei whakaputaina i a koe ki tōu pukapuka Riftn, hei whakaputaina i tōu ingoa whakaputa me tōu whakaahua, me whakaputaina atu ki a koe mō tō pukapuka. Kāore he tētahi atu.',
+    googleDataItem2: 'Ka tūturu i tēnei: i ngā pūtea o tā mātau, me i te kaiwhakawātea whakapānga, he whakapakari whakamātao i te huarere, me i te huarere, mō te rā o tō pukapuka whakapānga.',
+    googleDataItem3: 'Ko wai mātou e whakawhitiwhiti ai: kāore he tangata. Hei hoko, hei whakapau kōrero, kāore hei whakapau kōrero mō ngā rōpū AI.',
+    googleDataItem4: 'Te muku: mukua tō pūkete ki ngā Tautuhinga, īmēra rānei ki dev@riftn.com, ā, ka mukua ngā raraunga Google e pupuri nei mātou. Ka taea hoki e koe te whakakore i te urunga a Riftn i ngā wā katoa ki myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Ko te whakamahinga a Riftn i ngā pārongo i whiwhi mai i ngā Google API e hāngai ana ki te Kaupapa Here Raraunga Kaiwhakamahi o ngā Ratonga Google API, tae atu ki ngā whakaritenga Whakamahinga iti (Limited Use).',
   },
   contact: {
     title: 'Whakapā mai ki a mātou',
