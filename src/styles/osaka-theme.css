@@ -769,7 +769,9 @@ html[data-theme='osaka']
    and nothing else.
    ========================================================================== */
 
-html[data-theme='osaka'] :is([data-notification-row], [data-poll-card], [data-comments-section]) {
+/* Empty comments section: no wash, or it reads as a stray slate strip (see
+   jungle-theme.css). */
+html[data-theme='osaka'] :is([data-notification-row], [data-poll-card], [data-comments-section]:has(:not(div, [data-comment-search]))) {
   border-radius: var(--osaka-r-card) !important;
   border-color: transparent !important;
   background: rgb(var(--osaka-slate) / 0.5) !important;
