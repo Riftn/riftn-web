@@ -20725,6 +20725,17 @@
     "theirMessages": "Onların mesajları",
     "seeTheirMessages": "Mesajlarını gör"
   },
+  "dmRequests": {
+    "title": "İstekler",
+    "hint": "Takip etmediğin kişilerden gelen mesajlar. Birini kabul et, yanıtla veya takip et; sohbet gelen kutuna taşınır.",
+    "rowHint": "Takip etmediğin kişilerden {{n}} mesaj",
+    "banner": "{{name}} adlı kişiyi takip etmiyorsun. Bu sohbeti gelen kutuna taşımak için kabul et ya da doğrudan yanıtla.",
+    "accept": "Kabul et",
+    "delete": "Sil",
+    "block": "Engelle",
+    "accepted": "Gelen kutuna taşındı",
+    "acceptFailed": "Kabul edilemedi, tekrar dene"
+  },
   "dmSchedule": {
     "button": "Mesajı zamanla",
     "title": "Zamanlanmış mesajlar",

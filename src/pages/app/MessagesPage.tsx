@@ -26,6 +26,7 @@ import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/
 import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Archive, BellOff, Pin, ChevronLeft } from 'lucide-react';
+import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -377,7 +378,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     });
   }, [deleteConversationMutation, t]);
 
-  const visibleConversations = (conversations || []).filter(c => !pendingDeletes.has(c.id));
+  const liveConversations = (conversations || []).filter(c => !pendingDeletes.has(c.id));
+  // First messages from people you don't follow wait under Requests. A search
+  // looks through both, so a request is never unfindable.
+  const [showRequests, setShowRequests] = useState(false);
+  const requestConversations = liveConversations.filter(c => c.isRequest);
+  const requestUnread = requestConversations.reduce((n, c) => n + (c.unreadCount || 0), 0);
+  const inRequests = showRequests && !searchQuery.trim();
+  const visibleConversations = searchQuery.trim()
+    ? liveConversations
+    : showRequests
+      ? requestConversations
+      : liveConversations.filter(c => !c.isRequest);
 
   const handleBlockConversationUser = useCallback(async (conv: DeHubConversation) => {
     const user = conv.otherUser || conv.participants?.[0];
@@ -396,6 +408,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const clearHistory = useClearChatHistory();
   const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
   const [showArchived, setShowArchived] = useState(false);
+  // The last request was accepted or deleted: nothing left to show here.
+  const noRequestsLeft = requestConversations.length === 0;
+  useEffect(() => { if (noRequestsLeft) setShowRequests(false); }, [noRequestsLeft]);
   const [showSettings, setShowSettings] = useState(false);
   // Opening any chat puts settings away.
   useEffect(() => {
@@ -418,7 +433,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           .filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)))
           .sort((a, b) => pinnedAt(b) - pinnedAt(a));
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
-  const pinStrip = richList && fullscreen && !phonePill && !showArchived && !searchQuery.trim()
+  const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
     : [];
   const chatOptionsFor = (conv: DeHubConversation): ChatOptionsHandlers => {
@@ -964,6 +979,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               onOpen={openConversation}
             />
             {/* Public Chat (pinned) */}
+            {!inRequests && (<>
             <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row
@@ -992,6 +1008,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             {groupChats.map((chat) => (
               <GroupChatRow key={chat.id} community={chat} onClick={() => navigate(`/app/communities/${chat.slug}?tab=chat`)} />
             ))}
+            </>)}
 
             {/* Loading State */}
             {isLoading && <ConversationsSkeleton />}
@@ -1011,13 +1028,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
 
             {/* Empty state */}
-            {!guest && !isLoading && !isError && !searchQuery.trim() && visibleConversations.length === 0 && (
+            {!guest && !isLoading && !isError && !searchQuery.trim() && liveConversations.length === 0 && (
               <AppState
                 icon="messages"
                 title={t('messages.noConversationsYet', 'No conversations yet')}
                 description={_copy("copy.31dfdb14602d", { defaultValue: "Start a conversation and it will appear here." })}
                 size="drawer"
               />
+            )}
+
+            {/* Message requests: people you don't follow */}
+            {inRequests && <MessageRequestsHeader onBack={() => setShowRequests(false)} />}
+            {!inRequests && !showArchived && !searchQuery.trim() && !isLoading && !isError && requestConversations.length > 0 && (
+              <MessageRequestsRow count={requestConversations.length} unread={requestUnread} onClick={() => setShowRequests(true)} />
             )}
 
             {/* Conversations */}

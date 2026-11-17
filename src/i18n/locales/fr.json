@@ -20729,6 +20729,17 @@
     "theirMessages": "Leurs messages",
     "seeTheirMessages": "Voir leurs messages"
   },
+  "dmRequests": {
+    "title": "Demandes",
+    "hint": "Messages de personnes que vous ne suivez pas. Acceptez, répondez ou suivez-les et la discussion passe dans votre boîte de réception.",
+    "rowHint": "{{n}} de personnes que vous ne suivez pas",
+    "banner": "Vous ne suivez pas {{name}}. Acceptez pour déplacer cette discussion dans votre boîte de réception, ou répondez simplement.",
+    "accept": "Accepter",
+    "delete": "Supprimer",
+    "block": "Bloquer",
+    "accepted": "Déplacé dans votre boîte de réception",
+    "acceptFailed": "Impossible d'accepter, réessayez"
+  },
   "dmSchedule": {
     "button": "Programmer le message",
     "title": "Messages programmés",

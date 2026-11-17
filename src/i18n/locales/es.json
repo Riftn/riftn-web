@@ -20725,6 +20725,17 @@
     "theirMessages": "Sus mensajes",
     "seeTheirMessages": "Ver sus mensajes"
   },
+  "dmRequests": {
+    "title": "Solicitudes",
+    "hint": "Mensajes de personas a las que no sigues. Acepta uno, responde o síguelas y el chat pasa a tu bandeja.",
+    "rowHint": "{{n}} de personas a las que no sigues",
+    "banner": "No sigues a {{name}}. Acepta para mover este chat a tu bandeja, o simplemente responde.",
+    "accept": "Aceptar",
+    "delete": "Eliminar",
+    "block": "Bloquear",
+    "accepted": "Movido a tu bandeja",
+    "acceptFailed": "No se pudo aceptar, inténtalo de nuevo"
+  },
   "dmSchedule": {
     "button": "Programar mensaje",
     "title": "Mensajes programados",

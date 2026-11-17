@@ -80,6 +80,7 @@ import { scheduleDm } from '@/lib/api/dehub/dm-scheduled';
 import { PollCard } from '@/components/app/cards/PollCard';
 import { DmFeeInfoBanner } from './DmFeeInfoBanner';
 import { DmSafetyBanner } from './DmSafetyBanner';
+import { MessageRequestBar } from './MessageRequestBar';
 import { LockedMediaBubble } from './LockedMediaBubble';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -2736,6 +2737,14 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       )}
 
       <DmSafetyBanner peer={otherUser as any} />
+      {!isBlocked && (
+        <MessageRequestBar
+          conversationId={conversation.id}
+          name={displayName}
+          onDelete={() => setShowDeleteDialog(true)}
+          onBlock={handleToggleBlock}
+        />
+      )}
 
       {/* Messages */}
       {isLoading ? (
