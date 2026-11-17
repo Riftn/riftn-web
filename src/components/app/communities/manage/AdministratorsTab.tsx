@@ -5,9 +5,9 @@ import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
  * Telegram's "Administrators" screen: who owns the community, who moderates it
  * and with which rights, plus a search box for promoting somebody new.
  *
- * Names and handles live behind a per-wallet profile call, so searching by name
- * has to warm those profiles first — the fan-out only fires once the operator
- * actually types, and only over a bounded slice of the member list.
+ * Promote candidates are drawn like the feed draws people (avatar, name, badge,
+ * @handle), from one batch account lookup over a bounded slice of the member
+ * list. The same lookup lets the search match names and @handles.
  */
 
 import { useMemo, useState } from 'react';
@@ -23,8 +23,12 @@ import { Input } from '@/components/ui/input';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useCommunityMembers, type Community, type CommunityMember } from '@/hooks/use-communities';
 import { useCommunityAbilities, ADMIN_RIGHTS } from '@/hooks/use-community-admin';
-import { useDeHubProfile, mapUserToProfile, type ProfileData } from '@/hooks/use-dehub-profile';
-import { getAccountSummaries } from '@/lib/api/dehub';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { getAccountSummaries, type AccountSummary } from '@/lib/api/dehub';
+import { buildAvatarUrl, deviceWidth } from '@/lib/media-url';
+import { parseBadgeLock } from '@/lib/staking-badge-rules';
+import type { BadgeLock } from '@/lib/staking-badges';
+import { CardHeader } from '@/components/app/cards/CardHeader';
 import { BadgedName } from '@/components/app/BadgedName';
 import { AppState } from '@/components/app/AppState';
 import { AdminRightsDialog } from './AdminRightsDialog';
@@ -142,34 +146,56 @@ function AdminRow({
   );
 }
 
+/** What the feed needs to draw one person, from the batch account lookup. */
+interface CandidateIdentity {
+  name: string;
+  username?: string;
+  avatarUrl?: string;
+  badgeBalance?: number;
+  badgeLock: BadgeLock | null;
+}
+
+function toIdentity(summary: AccountSummary): CandidateIdentity {
+  const username = summary.username?.trim() || undefined;
+  const avatarPath = summary.avatarImageUrl || undefined;
+  return {
+    name: summary.displayName?.trim() || username || shortAddress(summary.address),
+    username,
+    avatarUrl: avatarPath ? buildAvatarUrl(summary.address, avatarPath, deviceWidth(36)) : undefined,
+    badgeBalance: summary.badgeBalance ?? undefined,
+    badgeLock: parseBadgeLock(summary.badgeLock),
+  };
+}
+
+/**
+ * One member who can be promoted, drawn with the feed's own identity line
+ * (avatar, name, badge, @handle) so the picker reads like the feed does.
+ */
 function CandidateRow({
   member,
   onPromote,
-  profile,
+  identity,
 }: {
   member: CommunityMember;
   onPromote: (member: CommunityMember) => void;
-  profile?: ProfileData | null;
+  identity?: CandidateIdentity;
 }) {
   const { t } = useTranslation();
-  const displayName = profile?.name || shortAddress(member.wallet_address);
+  const displayName = identity?.name || shortAddress(member.wallet_address);
 
   return (
-    <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.06] transition-colors">
-      <Avatar url={profile?.avatarUrl} />
-      <div className="flex-1 min-w-0">
-        <BadgedName
-          badgeBalance={profile?.badgeBalance}
-          username={profile?.handle}
-          className="text-white font-medium text-sm"
-          wrapperClassName="flex"
-        >
-          {displayName}
-        </BadgedName>
-        <span className="text-zinc-500 text-xs truncate block">
-          {profile?.handle || shortAddress(member.wallet_address)}
-        </span>
-      </div>
+    <div className="flex items-center gap-2 p-2.5 rounded-xl hover:bg-white/[0.06] transition-colors">
+      <CardHeader
+        className="pb-0 pr-1"
+        username={displayName}
+        handle={identity?.username || shortAddress(member.wallet_address)}
+        avatarSeed={identity?.avatarUrl || ''}
+        contentType="post"
+        creatorId={member.wallet_address}
+        creatorUsername={identity?.username}
+        badgeBalance={identity?.badgeBalance ?? 0}
+        badgeLock={identity?.badgeLock}
+      />
       <Button
         size="sm"
         variant="ghost"
@@ -214,24 +240,28 @@ export function AdministratorsTab({ community, membership }: AdministratorsTabPr
 
   const query = debouncedSearch.trim().toLowerCase();
 
-  const { data: profileSummaries = [], isLoading: searching } = useQuery({
+  // Names, handles, pictures and badges for the whole pool in one batch call,
+  // loaded as soon as the tab opens: the list shows people, never bare wallets,
+  // and typing a name or @handle filters straight away.
+  const { data: profileSummaries = [], isLoading: profilesLoading } = useQuery({
     queryKey: ['community-admin-candidate-profiles', community.id, pool.map(member => member.wallet_address).join(',')],
     queryFn: () => getAccountSummaries(pool.map(member => member.wallet_address)),
-    enabled: query.length > 0 && pool.length > 0,
+    enabled: pool.length > 0,
     staleTime: 5 * 60_000,
     retry: 1,
   });
   const profiles = useMemo(() => new Map(profileSummaries.map(summary => [
     summary.address.toLowerCase(),
-    mapUserToProfile(summary as any),
+    toIdentity(summary),
   ])), [profileSummaries]);
+  const searching = query.length > 0 && profilesLoading;
 
   const candidates: CommunityMember[] = [];
   for (let i = 0; i < pool.length && candidates.length < MAX_RESULTS; i++) {
     const member = pool[i];
     if (query) {
       const profile = profiles.get(member.wallet_address.toLowerCase());
-      const haystack = [member.wallet_address, profile?.name ?? '', profile?.handle ?? '']
+      const haystack = [member.wallet_address, profile?.name ?? '', profile?.username ?? '', profile?.username ? `@${profile.username}` : '']
         .join(' ')
         .toLowerCase();
       if (!haystack.includes(query)) continue;
@@ -333,7 +363,7 @@ export function AdministratorsTab({ community, membership }: AdministratorsTabPr
                 <CandidateRow
                   key={member.id}
                   member={member}
-                  profile={profiles.get(member.wallet_address.toLowerCase())}
+                  identity={profiles.get(member.wallet_address.toLowerCase())}
                   onPromote={openFor}
                 />
               ))
