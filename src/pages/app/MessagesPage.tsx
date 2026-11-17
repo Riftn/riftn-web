@@ -25,8 +25,9 @@ import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/c
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
 import { roomChatId, type ChatPref } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Archive, BellOff, Pin, ChevronLeft, Check } from 'lucide-react';
+import { Archive, BellOff, Pin, ChevronLeft } from 'lucide-react';
 import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
+import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
@@ -117,6 +118,7 @@ export function ConversationItem({
   pref,
   selecting = false,
   checked = false,
+  onLongPress,
 }: {
   conversation: DeHubConversation;
   onClick: (e: React.MouseEvent) => void;
@@ -128,8 +130,11 @@ export function ConversationItem({
   /** Picking several chats: each row shows a tick circle and a click toggles it. */
   selecting?: boolean;
   checked?: boolean;
+  /** Phones: holding the row starts picking (or toggles it while picking). */
+  onLongPress?: () => void;
 }) {
   const { t: _copy } = _useCopy();
+  const hold = useRowLongPress(onLongPress);
   const { t } = useTranslation();
   const otherUser = conversation.otherUser || conversation.participants?.[0];
   const avatarUrl = buildAvatarUrl(otherUser?.address || '', otherUser?.avatarImageUrl || otherUser?.avatarUrl);
@@ -170,7 +175,8 @@ export function ConversationItem({
       ]}
     >
     <button
-      onClick={onClick}
+      onClick={(e) => { if (hold.consumeClick()) return; onClick(e); }}
+      {...hold.handlers}
       data-chat-list-row
       data-selected={isSelected ? '' : undefined}
       data-bulk-checked={selecting ? (checked ? 'true' : 'false') : undefined}
@@ -183,11 +189,12 @@ export function ConversationItem({
         <span
           data-bulk-tick
           aria-hidden="true"
+          style={checked ? { background: 'hsl(var(--foreground))', borderColor: 'hsl(var(--foreground))' } : undefined}
           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
-            checked ? 'border-white bg-white text-black' : 'border-white/30 text-transparent'
+            checked ? '' : 'border-white/30 text-transparent'
           }`}
         >
-          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          {checked && <span className="block h-[6px] w-[10px] -translate-y-px -rotate-45 border-b-2 border-l-2" style={{ borderColor: 'hsl(var(--background))' }} />}
         </span>
       )}
       <LiveRipple ids={[otherUser?.address, otherUser?.username]} className="relative rounded-lg">
@@ -519,10 +526,16 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
   });
-  // Leaving the list (archive, requests, phone layout) or Esc ends picking.
-  useEffect(() => { if (!richList) setBulkIds(null); }, [richList]);
+  // Switching layout, archive or requests, or Esc, ends picking. On phones a
+  // hold on a chat starts it (there is no right-click there).
+  useEffect(() => { setBulkIds(null); }, [richList]);
   useEffect(() => { setBulkIds(null); }, [showArchived, inRequests]);
   const picking = bulkIds !== null;
+  const holdToPick = (id: string) => (picking ? toggleBulk(id) : setBulkIds(new Set([id])));
+  // The phone list does not pin, archive or show mutes, but a chat you marked
+  // unread (here or on another device) still shows its marker.
+  const unreadOnly = (p: ChatPref | undefined): ChatPref | undefined =>
+    p?.markedUnread ? { ...p, pinnedAt: null, mutedUntil: null } : undefined;
   useEffect(() => {
     if (!picking) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setBulkIds(null); };
@@ -1186,7 +1199,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <GroupChatRow
                   key={chat.id}
                   community={chat}
-                  pref={richList ? roomPref(chat) : undefined}
+                  pref={richList ? roomPref(chat) : unreadOnly(roomPref(chat))}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
                     if (picking) { toggleBulk(roomChatId(chat.id)); return; }
@@ -1194,6 +1207,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   }}
                   selecting={picking}
                   checked={!!bulkIds?.has(roomChatId(chat.id))}
+                  onLongPress={richList ? undefined : () => holdToPick(roomChatId(chat.id))}
                 />
               );
               return richList ? (
@@ -1264,7 +1278,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   isSelected={selectedConversation?.id === conv.id}
                   onDelete={handleDeleteConversation}
                   onBlock={handleBlockConversationUser}
-                  pref={richList ? chatPrefs.get(conv.id) : undefined}
+                  pref={richList ? chatPrefs.get(conv.id) : unreadOnly(chatPrefs.get(conv.id))}
+                  onLongPress={richList ? undefined : () => holdToPick(conv.id)}
                 />
               );
               return richList ? (
@@ -1371,6 +1386,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               onDelete={bulkDelete}
               onReply={bulkReply}
               onCancel={() => setBulkIds(null)}
+              touch={!richList}
+              // Phones: on /chat the bar takes the bottom menu's place while
+              // picking; on /messages it sits above the app's floating menu.
+              className={richList ? undefined : phonePill ? 'mb-[calc(env(safe-area-inset-bottom)+8px)]' : 'mb-[84px] lg:mb-2'}
             />
           )}
         </div>
@@ -1424,7 +1443,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         style={shellKeyboardStyle}
         chatOpen={chatOpen}
         chat={settingsPane ?? publicChatPane ?? roomPane ?? dmPane}
-        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
+        list={<>{chatSeo}{listColumn}{dialogs}{phonePill && !chatOpen && !picking && <Suspense fallback={null}><MobileBottomNav /></Suspense>}</>}
       />
     );
   }

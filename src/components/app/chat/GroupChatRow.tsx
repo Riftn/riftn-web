@@ -4,8 +4,9 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { BellOff, Check, Pin } from 'lucide-react';
+import { BellOff, Pin } from 'lucide-react';
 import { isMuted } from '@/hooks/use-chat-prefs';
+import { useRowLongPress } from '@/hooks/use-row-long-press';
 import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
@@ -15,7 +16,7 @@ import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import dehubCoin from '@/assets/dehub-coin.png';
 
-export function GroupChatRow({ community, onClick, pref, selected, selecting = false, checked = false }: {
+export function GroupChatRow({ community, onClick, pref, selected, selecting = false, checked = false, onLongPress }: {
   community: Community;
   onClick: () => void;
   pref?: ChatPref;
@@ -23,8 +24,11 @@ export function GroupChatRow({ community, onClick, pref, selected, selecting = f
   /** Picking several chats (right-click, Select): the row shows a tick. */
   selecting?: boolean;
   checked?: boolean;
+  /** Phones: holding the row starts picking (or toggles it while picking). */
+  onLongPress?: () => void;
 }) {
   const { t } = useTranslation();
+  const hold = useRowLongPress(onLongPress);
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
   const price = entryPriceOf(community);
@@ -39,7 +43,8 @@ export function GroupChatRow({ community, onClick, pref, selected, selecting = f
     <button
       data-chat-list-row
       type="button"
-      onClick={onClick}
+      onClick={() => { if (hold.consumeClick()) return; onClick(); }}
+      {...hold.handlers}
       data-group-chat-row={kind}
       data-room-chat-id={community.id}
       data-selected={selected ? '' : undefined}
@@ -51,11 +56,12 @@ export function GroupChatRow({ community, onClick, pref, selected, selecting = f
         <span
           data-bulk-tick
           aria-hidden="true"
+          style={checked ? { background: 'hsl(var(--foreground))', borderColor: 'hsl(var(--foreground))' } : undefined}
           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
-            checked ? 'border-white bg-white text-black' : 'border-white/30 text-transparent'
+            checked ? '' : 'border-white/30 text-transparent'
           }`}
         >
-          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          {checked && <span className="block h-[6px] w-[10px] -translate-y-px -rotate-45 border-b-2 border-l-2" style={{ borderColor: 'hsl(var(--background))' }} />}
         </span>
       )}
       <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-white/[0.08] flex items-center justify-center">
