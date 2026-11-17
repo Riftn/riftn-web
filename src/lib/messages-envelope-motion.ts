@@ -1,8 +1,16 @@
 /** Shared with mobile. One slip per unread message, and the ring grows from a
  *  gentle beat at 1 unread to full strength at MESSAGE_SLIP_MAX. Each slip
  *  pops out of the envelope's top edge like a little worm, wriggling up and
- *  out to its own side before it tumbles back down. */
+ *  out to its own side before it tumbles back down. A few unread only peek
+ *  out of the top and drop back in; the full fling is kept for a big pile. */
 export const MESSAGE_SLIP_MAX = 20;
+
+/** 0 at 1 unread, 1 at MESSAGE_SLIP_MAX. Eased so 1 to 3 stay small and the
+ *  big throws only arrive once the pile really grows. */
+export function messageSlipSize(count: number) {
+  const shown = Math.min(MESSAGE_SLIP_MAX, Math.max(1, Math.floor(count)));
+  return Math.pow((shown - 1) / (MESSAGE_SLIP_MAX - 1), 0.8);
+}
 
 /** One point on a slip's trip, in the icon's 32-unit viewBox, measured from
  *  the envelope's centre. `t` runs 0..1 over the slip's life. */
@@ -28,7 +36,7 @@ const seeded = (index: number, salt: number) => {
   return value - Math.floor(value);
 };
 
-function wormPath(index: number, intensity: number) {
+function wormPath(index: number, intensity: number, size: number) {
   // Every slip pops out of the envelope's top edge from its own spot along
   // it, flies up and out to its own side, slows, then falls back down past the
   // envelope like it was thrown: a little upward kick, then gravity. The golden
@@ -37,12 +45,15 @@ function wormPath(index: number, intensity: number) {
   // Nobody goes dead straight up and drops back in: lean at least a little.
   const lean = Math.sign(spread || 1) * (.3 + .7 * Math.abs(spread));
   const startX = (lean * .55 + (seeded(index, 7) - .5) * .4) * 9;
-  const reach = lean * (22 + 14 * seeded(index, 2)) * (.85 + .2 * intensity);
-  const peak = (15 + 9 * seeded(index, 8)) * (.85 + .2 * intensity);
+  // How far out it flies grows with the pile: one unread only peeks a slip
+  // just clear of the top edge (about 10 units up, a few to the side).
+  const reach = lean * (22 + 14 * seeded(index, 2)) * (.85 + .2 * intensity) * (.2 + .8 * size);
+  const fullPeak = (15 + 9 * seeded(index, 8)) * (.85 + .2 * intensity);
+  const peak = 10 + (fullPeak - 10) * size;
   const peakAt = .3 + .08 * seeded(index, 9);
   const gravity = peak / (peakAt * peakAt);
   const waves = 1.6 + seeded(index, 3);
-  const amplitude = 1.9 + 1.3 * seeded(index, 4);
+  const amplitude = (1.9 + 1.3 * seeded(index, 4)) * (.45 + .55 * size);
   const twist = seeded(index, 5) * Math.PI * 2;
   const point = (t: number) => {
     // Starts just inside the envelope (y -6 from its centre, the top edge is
@@ -109,17 +120,19 @@ function wormPath(index: number, intensity: number) {
       });
     });
   }
-  return { frames, tail, lifeMs: 1500 + 600 * seeded(index, 6) };
+  return { frames, tail, lifeMs: 1100 + (400 + 600 * seeded(index, 6)) * size };
 }
 
 export function messagesEnvelopeMotion(count: number) {
   const unread = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
   const shown = Math.min(unread, MESSAGE_SLIP_MAX);
-  const intensity = unread === 0 ? 0 : 0.78 + 0.62 * (shown - 1) / (MESSAGE_SLIP_MAX - 1);
-  const cycleMs = Math.round(3400 / Math.sqrt(Math.max(1, intensity)));
+  const size = messageSlipSize(shown);
+  // A soft nudge at 1 unread (about 4 degrees of swing), full ring at the cap.
+  const intensity = unread === 0 ? 0 : 0.32 + 1.08 * size;
+  const cycleMs = Math.round(3400 / Math.sqrt(Math.max(.6, intensity)));
   const slips: MessageSlip[] = [];
   for (let i = 0; i < shown; i++) {
-    const { frames, tail, lifeMs } = wormPath(i, intensity);
+    const { frames, tail, lifeMs } = wormPath(i, intensity, size);
     const delayMs = Math.round(90 + i * Math.min(110, 600 / shown));
     // Every worm is home before the next ring starts.
     slips.push({ frames, tail, delayMs, lifeMs: Math.round(Math.min(lifeMs, cycleMs * .9 - delayMs)) });
