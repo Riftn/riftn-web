@@ -64,6 +64,12 @@ const PrivacyPolicy = () => {
         </div>
       </Section>
 
+      <Section title={t('privacyPolicy.googleDataTitle')}>
+        <p>{t('privacyPolicy.googleDataText')}</p>
+        <ItemList items={Array.from({ length: 4 }, (_, i) => t(`privacyPolicy.googleDataItem${i + 1}`))} />
+        <p className="font-semibold text-foreground">{t('privacyPolicy.googleDataLimitedUse')}</p>
+      </Section>
+
       <Section title={t('privacyPolicy.contentModeration')} icon={<Users className="w-5 h-5" />}>
         <div className="space-y-3">
           <h3 className="font-semibold text-foreground">{t('privacyPolicy.communityGovernance')}</h3>
