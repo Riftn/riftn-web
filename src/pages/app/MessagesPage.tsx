@@ -70,6 +70,8 @@ import { ChatPinStrip } from '@/components/app/chat/ChatPinStrip';
 import { ChatSearchDiscover } from '@/components/app/chat/ChatSearchDiscover';
 import { useUserCommunities, type Community } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
+import { insertCommunityChatMessage } from '@/lib/community-chat-send';
+import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 
 /**
  * The other person's name with their badge sitting on its baseline, the same
@@ -314,7 +316,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
   const groupChats = chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).filter(c =>
     !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  const { isAuthenticated, walletAddress, isLoading: authLoading, openLoginModal } = useAuth();
+  const { isAuthenticated, walletAddress, user, isLoading: authLoading, openLoginModal } = useAuth();
   const guest = !authLoading && !isAuthenticated;
 
   // Subscribe to DM realtime updates only when on messages page
@@ -474,12 +476,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
     pref: roomPref(c),
     hasUnread: false,
-    // Group pushes come from the community side and do not read this yet.
-    canMute: false,
     onPref: (patch) => updateChatPref(roomChatId(c.id), patch),
     onHideFromList: c.kind !== 'group' && c.kind !== 'channel'
       ? () => updateChatPref(roomChatId(c.id), { listed: false, pinned: false })
       : undefined,
+    onSelectMany: () => setBulkIds(new Set([roomChatId(c.id)])),
   });
   const openRoomChat = (c: (typeof groupChats)[number]) => {
     if (roomPref(c)?.markedUnread) updateChatPref(roomChatId(c.id), { unread: false });
@@ -530,10 +531,16 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   }, [picking]);
   // Only chats still on screen count (one may have been deleted meanwhile).
   const bulkChats = picking ? liveConversations.filter(c => bulkIds.has(c.id)) : [];
-  const bulkAllUnread = bulkChats.length > 0 && bulkChats.every(c => c.unreadCount > 0 || !!chatPrefs.get(c.id)?.markedUnread);
+  // Group, channel and community chats picked alongside (keyed by their settings id).
+  const bulkRooms = picking ? groupChats.filter(c => bulkIds.has(roomChatId(c.id))) : [];
+  const bulkCount = bulkChats.length + bulkRooms.length;
+  const bulkAllUnread = bulkCount > 0
+    && bulkChats.every(c => c.unreadCount > 0 || !!chatPrefs.get(c.id)?.markedUnread)
+    && bulkRooms.every(c => !!roomPref(c)?.markedUnread);
   const bulkToggleUnread = () => {
     const unread = !bulkAllUnread;
     for (const c of bulkChats) updateChatPref(c.id, { unread });
+    for (const c of bulkRooms) updateChatPref(roomChatId(c.id), { unread });
     setBulkIds(null);
   };
   const bulkDelete = () => {
@@ -567,16 +574,29 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     const targets = bulkChats.filter(c => (c.otherUser || c.participants?.[0])?.address);
     let ok = 0;
     try {
-      await waitForDmSocket();
+      if (targets.length) await waitForDmSocket();
     } catch {
       toast.error(_copy('chatBulk.offline', { defaultValue: 'Not connected. Try again in a moment.' }));
       return 0;
     }
-    const results = await Promise.allSettled(targets.map(async (c) => {
-      const peer = (c.otherUser || c.participants?.[0])?.address;
-      const wire = await prepareOutgoing(peer, text);
-      await emitSendMessage({ dmId: c.id, content: wire.content, type: 'msg' });
-    }));
+    const me = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
+    const results = await Promise.allSettled([
+      ...targets.map(async (c) => {
+        const peer = (c.otherUser || c.participants?.[0])?.address;
+        const wire = await prepareOutgoing(peer, text);
+        await emitSendMessage({ dmId: c.id, content: wire.content, type: 'msg' });
+      }),
+      // Group and community chats get it as a normal line in the room.
+      ...bulkRooms.map(async (c) => {
+        if (!walletAddress) throw new Error('signed out');
+        const { data, error } = await insertCommunityChatMessage<{ id: string }>({
+          communityId: c.id, walletAddress, content: text,
+          sender: { username: me?.username, displayName: me?.displayName, avatarUrl: me?.avatarImageUrl ?? me?.avatarUrl },
+        });
+        if (error) throw error;
+        if (data?.id) void reportCommunityChatMessage(c.id, data.id, walletAddress);
+      }),
+    ]);
     ok = results.filter(r => r.status === 'fulfilled').length;
     const failed = results.length - ok;
     if (failed === 0) {
@@ -1168,7 +1188,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   community={chat}
                   pref={richList ? roomPref(chat) : undefined}
                   selected={fullscreen && selectedRoom?.id === chat.id}
-                  onClick={() => openRoomChat(chat)}
+                  onClick={() => {
+                    if (picking) { toggleBulk(roomChatId(chat.id)); return; }
+                    openRoomChat(chat);
+                  }}
+                  selecting={picking}
+                  checked={!!bulkIds?.has(roomChatId(chat.id))}
                 />
               );
               return richList ? (
@@ -1338,7 +1363,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </div>
           {picking && (
             <BulkChatBar
-              count={bulkChats.length}
+              count={bulkCount}
+              deletableCount={bulkChats.length}
               chatIds={bulkChats.map(c => c.id)}
               allUnread={bulkAllUnread}
               onToggleUnread={bulkToggleUnread}

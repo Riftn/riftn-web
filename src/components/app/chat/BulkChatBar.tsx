@@ -23,11 +23,13 @@ export interface BulkChatBarProps {
   /** Resolves with how many chats the reply reached. */
   onReply: (text: string) => Promise<number>;
   onCancel: () => void;
+  /** How many of the selected can be deleted (DMs; group and community chats are left, not deleted). Defaults to count. */
+  deletableCount?: number;
 }
 
 const BTN = 'flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-2 text-[13px] font-semibold text-zinc-100 transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-40 [&>svg]:h-4 [&>svg]:w-4';
 
-export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelete, onReply, onCancel }: BulkChatBarProps) {
+export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelete, onReply, onCancel, deletableCount = count }: BulkChatBarProps) {
   const { t } = useTranslation();
   const [replyOpen, setReplyOpen] = useState(false);
   const none = count === 0;
@@ -68,7 +70,7 @@ export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelet
           <button type="button" data-chat-bulk-reply disabled={none} onClick={() => setReplyOpen(true)} className={BTN}>
             <Reply />{t('chatBulk.reply', 'Reply')}
           </button>
-          <button type="button" data-chat-bulk-delete disabled={none} onClick={onDelete} className={cn(BTN, 'text-red-400 hover:text-red-300')}>
+          <button type="button" data-chat-bulk-delete disabled={none || deletableCount === 0} onClick={onDelete} className={cn(BTN, 'text-red-400 hover:text-red-300')}>
             <Trash2 />{t('chatBulk.delete', 'Delete')}
           </button>
         </div>

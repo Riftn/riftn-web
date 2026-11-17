@@ -20,7 +20,7 @@ import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
 import { markCommunityChatSeen, COMMUNITY_CHAT_SEEN_INTERVAL_MS } from '@/lib/community-chat-notify';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff, MessageSquarePlus } from "lucide-react";
+import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
@@ -45,8 +45,8 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
-import { useChatPrefs } from '@/hooks/use-chat-prefs';
-import { roomChatId } from '@/lib/api/dehub/chat-prefs';
+import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson, type ChatSearchSource } from '@/components/app/chat/ChatSearch';
+import { searchCommunityChat } from '@/lib/community-chat-search';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { AppState } from '@/components/app/AppState';
@@ -502,6 +502,50 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   }, [showMessage, messages.length, searchQuery, setSearchQuery, t]);
 
+  // Search: the shared chat search (public chat's), reading this chat's table.
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchText, setSearchText] = useState('');
+  const [searchPerson, setSearchPerson] = useState<ChatSearchPerson | null>(null);
+  const [searchView, setSearchView] = useState<'list' | 'chat'>('list');
+  const [activeHit, setActiveHit] = useState(-1);
+  const [jumping, setJumping] = useState(false);
+  const searchReadable = isAuthenticated || !community.is_private;
+  const searchSource = useCallback<ChatSearchSource>(
+    (roomId, params) => searchCommunityChat(roomId, params, walletAddress),
+    [walletAddress],
+  );
+  const search = useChatSearch(communityId, showSearch && searchReadable, searchText, searchPerson?.address ?? null, searchSource);
+  const showSearchList = showSearch && searchView === 'list';
+  const openSearch = useCallback(() => {
+    setShowSearch(true);
+    setSearchView('list');
+    setTimeout(() => searchInputRef.current?.focus(), 100);
+  }, []);
+  const closeSearch = useCallback(() => {
+    setShowSearch(false);
+    setSearchText('');
+    setSearchPerson(null);
+    setSearchView('list');
+    setActiveHit(-1);
+  }, []);
+  const openResult = useCallback(async (index: number) => {
+    if (index < 0 || jumping) return;
+    let hit = search.results[index];
+    if (!hit && search.hasMore) {
+      setJumping(true);
+      const more = await search.loadMore();
+      hit = more[index - search.results.length];
+    }
+    if (!hit) { setJumping(false); return; }
+    rememberChatSearch(searchText);
+    searchInputRef.current?.blur();
+    setActiveHit(index);
+    setSearchView('chat');
+    setJumping(true);
+    await jumpToMessage(hit.id);
+    setJumping(false);
+  }, [jumping, search, searchText, jumpToMessage]);
+
   useEffect(() => {
     const pending = pendingJumpRef.current;
     if (!pending) return;
@@ -743,12 +787,6 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         : t('communities.chat.pinnedMedia', { defaultValue: 'Media' })))
     : '';
 
-  // Groups and channels are always in the Chat list; a community's chat joins
-  // it when the member asks. Same per-person settings as every other chat.
-  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
-  const canListInChats = isAuthenticated && isMember && communityKindOf(community) === 'community';
-  const listedInChats = !!chatPrefs.get(roomChatId(communityId))?.listedAt;
-
   // Members get a message box at the bottom: the phone bottom bar stands down.
   useHoldBottomNav(active && isMember);
   const translateSignal = 0;
@@ -759,44 +797,22 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
-          {canListInChats && !showSearch && (
-            <button
-              type="button"
-              data-show-in-chats={listedInChats ? 'on' : 'off'}
-              aria-pressed={listedInChats}
-              onClick={() => updateChatPref(roomChatId(communityId), listedInChats ? { listed: false, pinned: false } : { listed: true })}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] transition-colors ${listedInChats ? 'text-white bg-white/[0.08]' : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'}`}
-              title={listedInChats
-                ? _copy('communities.chat.inChatsHint', { defaultValue: 'This chat is in your Chat list. Tap to take it out.' })
-                : _copy('communities.chat.showInChatsHint', { defaultValue: 'Show this chat in your Chat list with your DMs and groups' })}
-            >
-              <MessageSquarePlus className="w-3.5 h-3.5" />
-              {listedInChats
-                ? _copy('communities.chat.inChats', { defaultValue: 'In Chats' })
-                : _copy('communities.chat.showInChats', { defaultValue: 'Show in Chats' })}
-            </button>
-          )}
           {showSearch ? (
-            <div data-search-surface className="flex items-center gap-1.5 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-              <Search className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-              <input
-                autoFocus
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('communities.searchMessages', 'Search messages')}
-                className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-zinc-500"
+            <div className="flex-1 min-w-0">
+              <ChatSearchBar
+                inputRef={searchInputRef}
+                text={searchText}
+                person={searchPerson}
+                onText={(value) => { setSearchText(value); setSearchView('list'); setActiveHit(-1); }}
+                onClearPerson={() => { setSearchPerson(null); setSearchView('list'); setActiveHit(-1); searchInputRef.current?.focus(); }}
+                onFocusList={() => setSearchView('list')}
+                onClose={closeSearch}
               />
-              <button
-                onClick={() => { setSearchQuery.complete(searchQuery, ''); setShowSearch(false); }}
-                className="p-0.5 text-zinc-500 hover:text-white"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
             </div>
           ) : (
             <button
-              onClick={() => setShowSearch(true)}
+              data-community-chat-search
+              onClick={openSearch}
               className="ml-auto flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
             >
               <Search className="w-3.5 h-3.5" />
@@ -806,7 +822,33 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         </div>
         {/* Messages area */}
         <div className="relative flex-1">
-          <div ref={scrollRef} onScroll={handleScroll} className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2">
+          {/* The same search as the public chat: people, words, and stepping through results. */}
+          {showSearchList && (
+            <ChatSearchPanel
+              text={searchText}
+              person={searchPerson}
+              search={search}
+              signedIn={searchReadable}
+              activeId={search.results[activeHit]?.id ?? null}
+              onSignIn={() => openLoginModal()}
+              onPickPerson={(person) => { setSearchPerson(person); setSearchText(''); setActiveHit(-1); }}
+              onPickText={(value) => { setSearchText(value); searchInputRef.current?.focus(); }}
+              onOpenResult={openResult}
+            />
+          )}
+          {showSearch && searchView === 'chat' && activeHit >= 0 && (
+            <ChatSearchPill
+              position={activeHit + 1}
+              total={Math.max(search.total ?? 0, search.results.length)}
+              busy={jumping}
+              canOlder={activeHit + 1 < search.results.length || search.hasMore}
+              canNewer={activeHit > 0}
+              onList={() => setSearchView('list')}
+              onOlder={() => void openResult(activeHit + 1)}
+              onNewer={() => void openResult(activeHit - 1)}
+            />
+          )}
+          <div ref={scrollRef} onScroll={handleScroll} className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2 ${showSearchList ? 'invisible' : ''}`}>
             {historyError && (
               <button onClick={() => void refreshHistory()} className="mx-3 px-3 py-2 text-sm" role="alert">
                 {t('common.failedToLoad')} — {t('common.retry')}
