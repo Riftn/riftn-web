@@ -3312,6 +3312,16 @@
     "confirmWithCost": "Menta en {{chain}} · {{cost}}",
     "notAvailable": "La acuñación en esta cadena aún no está disponible."
   },
+  "postEditHistory": {
+    "title": "Historial de ediciones",
+    "edited_one": "Editado una vez",
+    "edited_other": "Editado {{count}} veces",
+    "lastEdit": "Última edición {{time}}",
+    "original": "Original",
+    "editN": "Edición {{n}}",
+    "now": "Ahora",
+    "showChanges": "Mostrar qué cambió"
+  },
   "postInfo": {
     "title": "Info del Post",
     "tokenId": "Id. de token",

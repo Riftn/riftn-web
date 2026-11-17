@@ -3316,6 +3316,16 @@
     "confirmWithCost": "Menthe sur {{chain}} · {{cost}}",
     "notAvailable": "La frappe sur cette chaîne n'est pas encore disponible."
   },
+  "postEditHistory": {
+    "title": "Historique des modifications",
+    "edited_one": "Modifié une fois",
+    "edited_other": "Modifié {{count}} fois",
+    "lastEdit": "Dernière modification {{time}}",
+    "original": "Original",
+    "editN": "Modification {{n}}",
+    "now": "Maintenant",
+    "showChanges": "Afficher les changements"
+  },
   "postInfo": {
     "title": "Info du Post",
     "tokenId": "Identifiant du jeton",

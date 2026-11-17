@@ -73,6 +73,7 @@ import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/pa
 import { ScheduleSheet, type ScheduleKind } from '@/features/post/components/ScheduleSheet';
 import { ChatInput } from '@/components/app/chat/ChatInput';
 import { MessageRequestBarView, MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
+import { PostEditHistoryLineView, PostEditHistoryViewer } from '@/components/app/post-info/PostEditHistory';
 import { ScheduledMessagesDrawer, ScheduledStrip, type ScheduledDmView } from '@/components/app/chat/ScheduledMessages';
 import { FeedTabBarSkeleton } from '@/components/app/PageSkeletons';
 import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
@@ -1376,6 +1377,34 @@ function MessageRequestsGallery() {
   );
 }
 
+const EDIT_HISTORY_SAMPLE = [
+  { name: 'Morning run', description: '5 km before work. Legs are done.', at: '2026-11-14T07:02:00Z', current: false },
+  { name: 'Morning run', description: '6 km before work. Legs are done.', at: '2026-11-14T07:10:00Z', current: false },
+  { name: 'Sunrise run by the harbour', description: '6 km before work. Legs are done.', at: '2026-11-14T09:41:00Z', current: false },
+  { name: 'Sunrise run by the harbour', description: '6 km before work. Legs are done but the view was worth it.', at: '2026-11-17T04:15:00Z', current: true },
+];
+
+function PostEditHistoryGallery() {
+  const { t } = useTranslation();
+  const now = EDIT_HISTORY_SAMPLE[EDIT_HISTORY_SAMPLE.length - 1];
+  return (
+    <section data-page-bento data-post-edit-history-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('postEditHistory.title', { defaultValue: 'Edit history' })}</h2>
+      <div className="mx-auto grid max-w-[760px] gap-3 md:grid-cols-2">
+        <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.content')}</h2>
+          <p className="text-white font-medium mb-2">{now.name}</p>
+          <p className="text-sm text-white/70">{now.description}</p>
+          <PostEditHistoryLineView editCount={3} versions={EDIT_HISTORY_SAMPLE} />
+        </section>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <PostEditHistoryViewer versions={EDIT_HISTORY_SAMPLE} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ToastsGallery() {
   const { t } = useTranslation();
   const showUpdate = () => {
@@ -2000,6 +2029,7 @@ export default function StateGalleryPage() {
         <WhenSheetGallery />
         <ScheduledDmGallery />
         <MessageRequestsGallery />
+        <PostEditHistoryGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
         <ToastsGallery />
         <TooltipsGallery />

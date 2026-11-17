@@ -3502,6 +3502,16 @@
     "confirmWithCost": "Munt op {{chain}} · {{cost}}",
     "notAvailable": "Munt op deze ketting is nog niet beschikbaar."
   },
+  "postEditHistory": {
+    "title": "Bewerkingsgeschiedenis",
+    "edited_one": "Eén keer bewerkt",
+    "edited_other": "{{count}} keer bewerkt",
+    "lastEdit": "Laatst bewerkt {{time}}",
+    "original": "Origineel",
+    "editN": "Bewerking {{n}}",
+    "now": "Nu",
+    "showChanges": "Laat zien wat er is veranderd"
+  },
   "postInfo": {
     "title": "Berichtinfo",
     "tokenId": "Token-ID",
