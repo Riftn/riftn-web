@@ -94,6 +94,16 @@ export const pcm = {
   overview: {
     disclaimerTitle: 'Important Notice',
     disclaimerText: 'Riftn tokens dey serve as utility tokens inside our ecosystem, like in-game currencies, and no be investment vehicles.',
+    title: 'Riftn: Di old internet dey crack. New ground dey rise.',
+    heading1: 'The name',
+    heading2: 'The problem',
+    paragraph2: 'Two decades ago, small-small companies fence the internet. Na dem get your audience, your reach, and your money. One policy change fit wipe everything comot. Creators wey get million followers dey vanish overnight, even when dem no break any rule. Wetin be their mistake? Na to build house for land wey dem rent.',
+    heading3: 'What we build',
+    heading4: 'Built on request',
+    heading5: 'Zero crypto friction',
+    paragraph5: 'No seed phrase. No gas fee. No wallet setup. Sign in wit Google, Apple, email or phone, and Riftn create your wallet instantly. E get feel like you dey use am before. Underneath, blockchain dey keep record of everything.',
+    heading6: 'Why we exist',
+    heading7: 'The invitation',
   },
   dapp: {
     accountsB1Desc: 'Google, Apple or Telegram, one tap, we go create wallet for you and we go sponsor gas from di first post.',
