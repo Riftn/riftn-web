@@ -118,30 +118,32 @@ export function ScheduledStrip({ items, onOpen }: { items: ScheduledDmView[]; on
   const failed = items.filter(r => r.status === 'failed').length;
   const waiting = items.filter(r => r.status === 'scheduled');
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      data-scheduled-strip
-      className="flex w-full items-center gap-2 border-t border-white/10 bg-white/5 px-4 py-2 text-left text-xs text-zinc-300 transition-colors hover:bg-white/10"
-    >
-      <Clock className="h-3.5 w-3.5 flex-shrink-0 text-current" />
-      <span className="min-w-0 flex-1 truncate">
-        {waiting.length > 0 && (
-          <span className="font-semibold text-white">
-            {t('dmSchedule.waiting', { defaultValue: '{{n}} scheduled', n: waiting.length })}
-          </span>
-        )}
-        {failed > 0 && (
-          <span className="font-semibold text-amber-400">
-            {waiting.length > 0 ? ' · ' : ''}{t('dmSchedule.failedCount', { defaultValue: '{{n}} not sent', n: failed })}
-          </span>
-        )}
-        {waiting.length > 0 && (
-          <span className="text-zinc-400">{' · '}{t('dmSchedule.next', { defaultValue: 'next {{when}}', when: whenLabel(waiting[0].sendAt) })}</span>
-        )}
-      </span>
-      <span className="flex-shrink-0 font-semibold text-white">{t('dmSchedule.view', { defaultValue: 'View' })}</span>
-    </button>
+    <div className="shrink-0 px-3 py-2 lg:pl-4">
+      <button
+        type="button"
+        onClick={onOpen}
+        data-scheduled-strip
+        className="flex w-full items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-2 pl-3 pr-2 text-left text-xs text-zinc-300 transition-colors hover:bg-white/10"
+      >
+        <Clock className="h-3.5 w-3.5 flex-shrink-0 text-current" />
+        <span className="min-w-0 flex-1 truncate">
+          {waiting.length > 0 && (
+            <span className="font-semibold text-white">
+              {t('dmSchedule.waiting', { defaultValue: '{{n}} scheduled', n: waiting.length })}
+            </span>
+          )}
+          {failed > 0 && (
+            <span className="font-semibold text-amber-400">
+              {waiting.length > 0 ? ' · ' : ''}{t('dmSchedule.failedCount', { defaultValue: '{{n}} not sent', n: failed })}
+            </span>
+          )}
+          {waiting.length > 0 && (
+            <span className="text-zinc-400">{' · '}{t('dmSchedule.next', { defaultValue: 'next {{when}}', when: whenLabel(waiting[0].sendAt) })}</span>
+          )}
+        </span>
+        <span className="flex-shrink-0 rounded-lg bg-white/10 px-2 py-1 font-semibold text-white">{t('dmSchedule.view', { defaultValue: 'View' })}</span>
+      </button>
+    </div>
   );
 }
 
@@ -301,7 +303,7 @@ export function ScheduledMessagesDrawer({ open, onOpenChange, dmId, peerAddress,
                           onClick={() => run(row._id, () => cancelScheduledDm(row._id), t('dmSchedule.deleted', { defaultValue: 'Scheduled message deleted' }))}
                           aria-label={t('common.delete', { defaultValue: 'Delete' })}
                           title={t('common.delete', { defaultValue: 'Delete' })}
-                          className="!ml-auto !h-8 !w-8 !px-0"
+                          className="!ml-auto !h-8 !w-8 !justify-center !px-0 hover:!text-red-400"
                         >
                           <Trash className="h-3.5 w-3.5" />
                         </button>

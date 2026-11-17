@@ -2049,6 +2049,17 @@
     "tipTokens": "{{amount}} عملة",
     "tokenAmount": "{{amount}} عملة",
     "custom": {
+      "featureCommentLikeNamed": "أعجب {{name}} بتعليقك على \"{{title}}\"",
+      "featureCommentLike": "أعجب {{name}} بتعليقك على طلب",
+      "governanceCommentLikeNamed": "أعجب {{name}} بتعليقك على الاقتراح \"{{title}}\"",
+      "governanceCommentLike": "أعجب {{name}} بتعليقك على اقتراح",
+      "featureShipped": "تم إكمال طلبك \"{{title}}\" 🎉",
+      "featureShippedLiked": "تم إكمال طلب أعجبك: \"{{title}}\" 🎉",
+      "featureQueued": "تم وضع طلبك \"{{title}}\" في قائمة الانتظار ليتم إنشاؤه",
+      "governanceVotedPassed": "تمت الموافقة على اقتراح صوتّ عليه: \"{{title}}\"",
+      "governanceVotedRejected": "لم يتم تمرير الاقتراح الذي صوتّ عليه: \"{{title}}\"",
+      "governancePassed": "تمت الموافقة على اقتراحك \"{{title}}\" 🎉",
+      "governanceRejected": "لم يتم قبول اقتراحك \"{{title}}\"",
       "featureLikeNamed": "{{name}} أعجبته طلبتك الخاص “{{title}}”",
       "featureLike": "{{name}} أعجبته طلبتك الخاص",
       "featureCommentNamed": "{{name}} ترك تعليق على طلبتك الخاص “{{title}}”",
@@ -3316,6 +3327,20 @@
     "confirm": "النعناع على {{chain}}",
     "confirmWithCost": "النعناع على {{chain}}·{{cost}}",
     "notAvailable": "لا يتوفر سك العملة على هذه السلسلة حتى الآن."
+  },
+  "postEditHistory": {
+    "title": "سجل التعديلات",
+    "edited_zero": "لم يُعدَّل",
+    "edited_one": "عُدِّل مرة واحدة",
+    "edited_two": "عُدِّل مرتين",
+    "edited_few": "عُدِّل {{count}} مرات",
+    "edited_many": "عُدِّل {{count}} مرة",
+    "edited_other": "عُدِّل {{count}} مرة",
+    "lastEdit": "آخر تعديل {{time}}",
+    "original": "الأصل",
+    "editN": "التعديل {{n}}",
+    "now": "الآن",
+    "showChanges": "إظهار ما تغيّر"
   },
   "postInfo": {
     "title": "معلومات المنشور",
@@ -20737,6 +20762,17 @@
     "gone": "لم تعد هذه الرسالة موجودة هنا",
     "theirMessages": "رسائلهم",
     "seeTheirMessages": "عرض رسائلهم"
+  },
+  "dmRequests": {
+    "title": "الطلبات",
+    "hint": "رسائل من أشخاص لا تتابعهم. اقبل الطلب أو رد أو تابعهم لتنتقل المحادثة إلى صندوق الوارد.",
+    "rowHint": "{{n}} من أشخاص لا تتابعهم",
+    "banner": "أنت لا تتابع {{name}}. اقبل لنقل هذه المحادثة إلى صندوق الوارد، أو رد مباشرة.",
+    "accept": "قبول",
+    "delete": "حذف",
+    "block": "حظر",
+    "accepted": "تم النقل إلى صندوق الوارد",
+    "acceptFailed": "تعذر القبول، حاول مرة أخرى"
   },
   "dmSchedule": {
     "button": "جدولة الرسالة",

@@ -2049,6 +2049,17 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "featureCommentLikeNamed": "A {{name}} le ha gustado su comentario sobre «{{title}}»",
+      "featureCommentLike": "A {{name}} le ha gustado su comentario sobre una solicitud",
+      "governanceCommentLikeNamed": "A {{name}} le ha gustado su comentario sobre la propuesta «{{title}}»",
+      "governanceCommentLike": "A {{name}} le ha gustado su comentario sobre una propuesta",
+      "featureShipped": "Su solicitud «{{title}}» se ha completado 🎉",
+      "featureShippedLiked": "Se ha completado una solicitud que le gustó: «{{title}}» 🎉",
+      "featureQueued": "Su solicitud «{{title}}» está en cola para su creación",
+      "governanceVotedPassed": "Se ha aprobado una propuesta en la que votó: «{{title}}»",
+      "governanceVotedRejected": "Una propuesta por la que votó no ha sido aprobada: «{{title}}»",
+      "governancePassed": "Su propuesta «{{title}}» se ha aprobado 🎉",
+      "governanceRejected": "Tu propuesta «{{title}}» no se ha aprobado",
       "featureLikeNamed": "{{name}} te gustó tu solicitud de función “{{title}}”",
       "featureLike": "{{name}} te gustó tu solicitud de función",
       "featureCommentNamed": "{{name}} comentó en tu solicitud de función “{{title}}”",
@@ -3300,6 +3311,16 @@
     "confirm": "Menta en {{chain}}",
     "confirmWithCost": "Menta en {{chain}} · {{cost}}",
     "notAvailable": "La acuñación en esta cadena aún no está disponible."
+  },
+  "postEditHistory": {
+    "title": "Historial de ediciones",
+    "edited_one": "Editado una vez",
+    "edited_other": "Editado {{count}} veces",
+    "lastEdit": "Última edición {{time}}",
+    "original": "Original",
+    "editN": "Edición {{n}}",
+    "now": "Ahora",
+    "showChanges": "Mostrar qué cambió"
   },
   "postInfo": {
     "title": "Info del Post",
@@ -20713,6 +20734,17 @@
     "gone": "Ese mensaje ya no está aquí",
     "theirMessages": "Sus mensajes",
     "seeTheirMessages": "Ver sus mensajes"
+  },
+  "dmRequests": {
+    "title": "Solicitudes",
+    "hint": "Mensajes de personas a las que no sigues. Acepta uno, responde o síguelas y el chat pasa a tu bandeja.",
+    "rowHint": "{{n}} de personas a las que no sigues",
+    "banner": "No sigues a {{name}}. Acepta para mover este chat a tu bandeja, o simplemente responde.",
+    "accept": "Aceptar",
+    "delete": "Eliminar",
+    "block": "Bloquear",
+    "accepted": "Movido a tu bandeja",
+    "acceptFailed": "No se pudo aceptar, inténtalo de nuevo"
   },
   "dmSchedule": {
     "button": "Programar mensaje",

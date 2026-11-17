@@ -47,7 +47,8 @@ export class AccountMcpAuth {
       const now = new Date().toISOString();
       const index = drafts.findIndex(draft => draft.id === input.id);
       if (index < 0 && drafts.length >= 20) throw new Error('Draft limit reached. Delete a draft before saving another.');
-      const draft = { id: input.id, title: input.title || '', content: input.content, category: input.category || 'General', updated_at: now };
+      const prior = index >= 0 ? drafts[index] : null;
+      const draft = { id: input.id, title: input.title ?? prior?.title ?? '', content: input.content, category: input.category ?? prior?.category ?? 'General', updated_at: now };
       if (index >= 0) drafts[index] = draft; else drafts.push(draft);
       await tx.put(key, record(drafts, 180 * DAY));
       return draft;
@@ -67,6 +68,20 @@ export class AccountMcpAuth {
       if (previous >= limit) return false;
       const current = await tx.get(`rate:${key}`);
       await tx.put(`rate:${key}`, { value: previous + 1, expires: current?.expires > Date.now() ? current.expires : Date.now() + window });
+      return true;
+    });
+  }
+  async spend(wallet, kind, requestId) {
+    return this.store.transaction(async tx => {
+      const chargedKey = requestId ? `charged:${wallet}:${kind}:${requestId}` : null;
+      if (chargedKey && live(await tx.get(chargedKey))) return true;
+      const key = `rate:day:${kind}:${wallet}`;
+      const current = await tx.get(key);
+      const count = live(current) || 0;
+      if (count >= DAILY_LIMITS[kind]) return false;
+      const expires = current?.expires > Date.now() ? current.expires : Date.now() + DAY;
+      await tx.put(key, { value: count + 1, expires });
+      if (chargedKey) await tx.put(chargedKey, record(true, DAY));
       return true;
     });
   }
@@ -400,10 +415,13 @@ export class AccountMcpAuth {
       let grant;
       const origin = originOf(url);
       try { grant = await this.bearer(request); } catch { return json({ error: 'Link your Riftn account again.' }, 401, { 'WWW-Authenticate': challenge('dehub:read', origin) }); }
+      const declaredLength = Number(request.headers.get('Content-Length'));
+      if (Number.isFinite(declaredLength) && declaredLength > (grant ? 5_700_000 : 65536)) return json({ error: 'Request is too large.' }, 413);
       const raw = await request.text();
       if (raw.length > (grant ? 5_700_000 : 65536)) return json({ error: 'Request is too large.' }, 413);
       let rpc;
       try { rpc = JSON.parse(raw); } catch { return json({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Invalid JSON' } }, 400); }
+      if (raw.length > 65536 && !(grant && rpc?.method === 'tools/call' && rpc.params?.name === 'dehub_create_post' && typeof rpc.params?.arguments?.image_data_url === 'string')) return json({ error: 'Large requests are only accepted for inline post images.' }, 413);
       if (!rpc || Array.isArray(rpc) || rpc.jsonrpc !== '2.0' || typeof rpc.method !== 'string') return json({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Invalid JSON-RPC request' } }, 400);
       if (rpc.method.startsWith('notifications/') && rpc.id === undefined) return new Response(null, { status: 202 });
       const reply = value => json({ jsonrpc: '2.0', id: rpc.id ?? null, result: value });
@@ -416,7 +434,7 @@ export class AccountMcpAuth {
       if (!await this.budget(`tools:${grant?.wallet || await hash(clientIp(request))}`, grant ? 120 : 60)) return reply(fail('Rate limit reached. Please wait a minute.'));
       const ctx = { fetch: this.fetcher, token: grant?.token || '', wallet: grant?.wallet, scopes: grant?.scopes || [], origin,
         once: (kind, id, args, operation) => this.once(grant.wallet, kind, id, args, operation),
-        spend: kind => this.budget(`day:${kind}:${grant.wallet}`, DAILY_LIMITS[kind], DAY),
+        spend: (kind, requestId) => this.spend(grant.wallet, kind, requestId),
         agent: name => this.agentSession(grant, name),
         drafts: (action, input) => this.drafts(grant.wallet, action, input),
         generate: args => this.generate(args, ctx), generationStatus: id => this.generationStatus(id, ctx) };

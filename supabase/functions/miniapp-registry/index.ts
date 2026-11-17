@@ -534,6 +534,10 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({}));
     const url = typeof body?.url === "string" ? body.url.slice(0, 2048) : "";
     if (body?.action === "validate" && url) {
+      // The checker fetches the address it is given, so it is for signed-in
+      // developers, not for anyone who wants this server to knock on a host.
+      const auth = await requireDeHubAuth(req);
+      if (!auth.ok) return auth.response;
       const r = await inspect(url);
       return jsonResponse(r.body, r.status);
     }

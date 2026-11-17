@@ -2049,6 +2049,17 @@
     "tipTokens": "{{amount}} jeton",
     "tokenAmount": "{{amount}} jeton",
     "custom": {
+      "featureCommentLikeNamed": "{{name}}, “{{title}}” üzerindeki yorumunuzu beğendi",
+      "featureCommentLike": "{{name}}, bir istek üzerindeki yorumunuzu beğendi",
+      "governanceCommentLikeNamed": "{{name}}, “{{title}}” teklifi üzerindeki yorumunuzu beğendi",
+      "governanceCommentLike": "{{name}}, bir teklif üzerindeki yorumunuzu beğendi",
+      "featureShipped": "“{{title}}” isteğiniz tamamlandı 🎉",
+      "featureShippedLiked": "Beğendiğiniz bir istek tamamlandı: “{{title}}” 🎉",
+      "featureQueued": "“{{title}}” isteğiniz oluşturulmak üzere sıraya alındı",
+      "governanceVotedPassed": "Oyladığınız bir teklif kabul edildi: “{{title}}”",
+      "governanceVotedRejected": "Oyladığınız bir teklif kabul edilmedi: “{{title}}”",
+      "governancePassed": "“{{title}}” teklifiniz kabul edildi 🎉",
+      "governanceRejected": "“{{title}}” teklifiniz kabul edilmedi",
       "featureLikeNamed": "{{name}} beğendiğiniz özelleştirme talebinizi “{{title}}”",
       "featureLike": "{{name}} beğendiğiniz özelleştirme talebi",
       "featureCommentNamed": "{{name}} özelleştirme talebiniz “{{title}}” üzerine yorum yaptı",
@@ -3300,6 +3311,16 @@
     "confirm": "Mint on {{chain}}",
     "confirmWithCost": "{{chain}}{{cost}}' de nane",
     "notAvailable": "Bu zincirde para basma henüz mevcut değil."
+  },
+  "postEditHistory": {
+    "title": "Düzenleme geçmişi",
+    "edited_one": "Bir kez düzenlendi",
+    "edited_other": "{{count}} kez düzenlendi",
+    "lastEdit": "Son düzenleme {{time}}",
+    "original": "Orijinal",
+    "editN": "Düzenleme {{n}}",
+    "now": "Şimdi",
+    "showChanges": "Neyin değiştiğini göster"
   },
   "postInfo": {
     "title": "Gönderi Bilgisi",
@@ -20713,6 +20734,17 @@
     "gone": "Bu mesaj artık burada değil",
     "theirMessages": "Onların mesajları",
     "seeTheirMessages": "Mesajlarını gör"
+  },
+  "dmRequests": {
+    "title": "İstekler",
+    "hint": "Takip etmediğin kişilerden gelen mesajlar. Birini kabul et, yanıtla veya takip et; sohbet gelen kutuna taşınır.",
+    "rowHint": "Takip etmediğin kişilerden {{n}} mesaj",
+    "banner": "{{name}} adlı kişiyi takip etmiyorsun. Bu sohbeti gelen kutuna taşımak için kabul et ya da doğrudan yanıtla.",
+    "accept": "Kabul et",
+    "delete": "Sil",
+    "block": "Engelle",
+    "accepted": "Gelen kutuna taşındı",
+    "acceptFailed": "Kabul edilemedi, tekrar dene"
   },
   "dmSchedule": {
     "button": "Mesajı zamanla",

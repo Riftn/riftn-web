@@ -15,6 +15,8 @@ export interface ChatPrefPatch {
   unread?: boolean;
   /** ISO time, 'forever', or null to unmute. */
   mutedUntil?: string | null;
+  /** Accept a message request (one way). */
+  accepted?: true;
 }
 
 export async function getChatPrefs(): Promise<ChatPref[]> {

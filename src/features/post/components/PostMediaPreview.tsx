@@ -1087,118 +1087,27 @@ export function PostMediaPreview({
                         <span className="pointer-events-none absolute inset-0 rounded-2xl" style={{ background: vignetteBackground(m.videoEdits!.adjust!.vignette) }} />
                       )}
 
-                      {/* Play/Pause overlay */}
+                      {/* One button. Tapping the video opens the same edit screen people
+                          see when they first add it: cover, trim, crop, looks, timer, alt
+                          text, music, change video and remove all live there. */}
                       {!processingVideos.has(index) && (
                         <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const video = videoRefs.current.get(index);
-                            if (!video) return;
-                            
-                            if (playingVideoIndex === index) {
-                              video.pause();
-                              setPlayingVideoIndex(null);
-                            } else {
-                              videoRefs.current.forEach((v, i) => {
-                                if (i !== index) v.pause();
-                              });
-                              video.play();
-                              setPlayingVideoIndex(index);
-                            }
-                          }}
-                          onDoubleClick={(e) => {
-                            e.stopPropagation();
-                            const video = videoRefs.current.get(index);
-                            const currentTime = video?.currentTime || 0;
-                            if (video) video.pause();
-                            setPlayingVideoIndex(null);
-                            setFullscreenPreview({ 
-                              index, 
-                              src: m.preview, 
-                              type: 'video',
-                              filterSettings: m.filterSettings,
-                              cropSettings: m.cropSettings,
-                              currentTime
-                            });
-                          }}
-                          className="absolute inset-0 flex items-center justify-center group cursor-pointer"
+                          data-video-edit-tile
+                          onClick={(e) => { e.stopPropagation(); openVideoEdit(index); }}
+                          className="absolute inset-0 flex cursor-pointer items-end justify-center pb-2.5 focus-visible:outline-none"
+                          aria-label={_copy("post.media.editVideo", { defaultValue: "Edit video" })}
                         >
-                          <div className={`w-12 h-12 rounded-xl bg-black/60 flex items-center justify-center transition-opacity ${
-                            playingVideoIndex === index ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
-                          }`}>
-                            {playingVideoIndex === index ? (
-                              <Pause className="w-6 h-6 text-white" />
-                            ) : (
-                              <Play className="w-6 h-6 text-white fill-white" />
-                            )}
-                          </div>
+                          <span data-keep-dark className="dh-edit-glass flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-white">
+                            <Pencil className="h-3.5 w-3.5" />
+                            {m.trimStart !== undefined && m.trimEnd !== undefined
+                              ? `${Math.floor((m.trimEnd - m.trimStart) / 60)}:${String(Math.floor((m.trimEnd - m.trimStart) % 60)).padStart(2, '0')}`
+                              : (m.videoEdits || m.destructSeconds || m.description || m.isMusicVideo)
+                                ? _copy("post.media.edited", { defaultValue: "Edited" })
+                                : _copy("post.media.edit", { defaultValue: "Edit" })}
+                          </span>
                         </button>
                       )}
-                      
-                      {/* Top left: Replace and Edit. Everything else lives in the editor. */}
-                      <div className="absolute top-2 left-2 flex items-center gap-1.5">
-                        {onReplaceVideo && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); videoReplaceInputRef.current?.click(); }}
-                                className="flex items-center justify-center w-7 h-7 rounded-xl text-white transition-all duration-300 hover:scale-105
-                                  bg-black/60 backdrop-blur-xl border border-white/20
-                                  hover:bg-black/70 hover:border-white/40"
-                                aria-label={_copy("post.media.replaceVideo", { defaultValue: "Change video" })}
-                              >
-                                <Upload className="w-3 h-3 text-white" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>{_copy("post.media.replaceVideo", { defaultValue: "Change video" })}</TooltipContent>
-                          </Tooltip>
-                        )}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              aria-label={_copy("post.media.editVideo", { defaultValue: "Edit video" })}
-                              onClick={(e) => { e.stopPropagation(); openVideoEdit(index); }}
-                              className="flex h-7 items-center justify-center gap-1 rounded-xl px-2 text-xs font-semibold text-white transition-all duration-300 hover:scale-105
-                                bg-black/60 backdrop-blur-xl border border-white/20
-                                hover:bg-black/70 hover:border-white/40"
-                            >
-                              <Pencil className="w-3 h-3 text-white" />
-                              {videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).aspect >= 1 && _copy("post.media.edit", { defaultValue: "Edit" })}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>{_copy("post.media.editVideoHint", { defaultValue: "Cover, trim, looks, timer, alt text and more" })}</TooltipContent>
-                        </Tooltip>
-                      </div>
-
-                      {/* Duration badge */}
-                      {m.duration && (
-                        <div data-keep-dark className="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded text-xs text-white pointer-events-none">
-                          {m.trimStart !== undefined && m.trimEnd !== undefined
-                            ? `${Math.floor((m.trimEnd - m.trimStart) / 60)}:${String(Math.floor((m.trimEnd - m.trimStart) % 60)).padStart(2, '0')} ${_copy("post.trim.trimmed", { defaultValue: "trimmed" })}`
-                            : `${Math.floor(m.duration / 60)}:${String(Math.floor(m.duration % 60)).padStart(2, '0')}`}
-                          {m.duration < 90 && m.trimStart === undefined && <span className="ml-1 text-emerald-400">{_copy("copy.ff5d20bd706f", { defaultValue: "• Short" })}</span>}
-                        </div>
-                      )}
-                      
-                      {/* What the editor set, at a glance. */}
-                      {(m.destructSeconds || m.isMusicVideo || m.description) && (
-                        <div data-keep-dark className="pointer-events-none absolute bottom-2 right-2 flex items-center gap-1">
-                          {m.isMusicVideo && <span className="flex h-5 w-5 items-center justify-center rounded-md bg-black/70"><Music className="h-3 w-3 text-white" /></span>}
-                          {m.description && <span className="rounded-md bg-black/70 px-1 text-[9px] font-bold leading-5 text-white">ALT</span>}
-                          {m.destructSeconds ? <span className="rounded-md bg-black/70 px-1.5 text-[10px] font-semibold leading-5 text-white">{postDestructShort(m.destructSeconds)}</span> : null}
-                        </div>
-                      )}
-
-                      {/* Remove button */}
-                      <button
-                        onClick={() => onRemove(index)}
-                        className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black rounded-xl transition-colors"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
                     </div>
 
                     <DraftVideoProgress draft={draftVideo} />
@@ -1297,6 +1206,7 @@ export function PostMediaPreview({
           postTimer={onUpdateMedia ? { value: videoEdit.timer, onChange: (t) => setVideoEdit((v) => (v ? { ...v, timer: t } : v)) } : undefined}
           music={onUpdateMedia ? { on: videoEdit.music, onChange: (on) => setVideoEdit((v) => (v ? { ...v, music: on } : v)) } : undefined}
           onUploadCover={onAddThumbnail ? () => coverInputRef.current?.click() : undefined}
+          onReplace={onReplaceVideo ? () => { setVideoEdit(null); videoReplaceInputRef.current?.click(); } : undefined}
         />
       )}
 

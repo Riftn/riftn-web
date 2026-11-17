@@ -2239,6 +2239,17 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "featureCommentLikeNamed": "{{name}} vond je reactie op “{{title}}”",
+      "featureCommentLike": "{{name}} vond je reactie op een verzoek",
+      "governanceCommentLikeNamed": "{{name}} vond je reactie op voorstel “{{title}}”",
+      "governanceCommentLike": "{{name}} vond je reactie op een voorstel",
+      "featureShipped": "Je verzoek “{{title}}” is voltooid 🎉",
+      "featureShippedLiked": "Een verzoek dat je leuk vond is voltooid: “{{title}}” 🎉",
+      "featureQueued": "Je verzoek “{{title}}” staat in de wachtrij om gebouwd te worden",
+      "governanceVotedPassed": "Een voorstel waarop je hebt gestemd is aangenomen: “{{title}}”",
+      "governanceVotedRejected": "Een voorstel waarop je hebt gestemd is niet aangenomen: “{{title}}”",
+      "governancePassed": "Je voorstel “{{title}}” is aangenomen 🎉",
+      "governanceRejected": "Je voorstel “{{title}}” is niet aangenomen",
       "featureLikeNamed": "{{name}} heeft uw featureverzoek “{{title}}” gelikt",
       "featureLike": "{{name}} heeft uw featureverzoek gelikt",
       "featureCommentNamed": "{{name}} heeft gereageerd op uw featureverzoek “{{title}}”",
@@ -3490,6 +3501,16 @@
     "confirm": "Munt op {{chain}}",
     "confirmWithCost": "Munt op {{chain}} · {{cost}}",
     "notAvailable": "Munt op deze ketting is nog niet beschikbaar."
+  },
+  "postEditHistory": {
+    "title": "Bewerkingsgeschiedenis",
+    "edited_one": "Eén keer bewerkt",
+    "edited_other": "{{count}} keer bewerkt",
+    "lastEdit": "Laatst bewerkt {{time}}",
+    "original": "Origineel",
+    "editN": "Bewerking {{n}}",
+    "now": "Nu",
+    "showChanges": "Laat zien wat er is veranderd"
   },
   "postInfo": {
     "title": "Berichtinfo",
@@ -20962,6 +20983,17 @@
     "gone": "Dat bericht is hier niet meer",
     "theirMessages": "Hun berichten",
     "seeTheirMessages": "Zie hun berichten"
+  },
+  "dmRequests": {
+    "title": "Verzoeken",
+    "hint": "Berichten van mensen die je niet volgt. Accepteer er een, antwoord of volg ze en de chat gaat naar je inbox.",
+    "rowHint": "{{n}} van mensen die je niet volgt",
+    "banner": "Je volgt {{name}} niet. Accepteer om deze chat naar je inbox te verplaatsen, of antwoord gewoon.",
+    "accept": "Accepteren",
+    "delete": "Verwijderen",
+    "block": "Blokkeren",
+    "accepted": "Verplaatst naar je inbox",
+    "acceptFailed": "Accepteren mislukt, probeer het opnieuw"
   },
   "dmSchedule": {
     "button": "Bericht inplannen",

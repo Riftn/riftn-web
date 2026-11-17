@@ -69,12 +69,12 @@ Deno.serve(async (req) => {
       // A dub id used to be the whole credential: hold one, get the audio. It
       // is now checked against the wallet that started the job.
       //
-      // A job with no row is one that began before this shipped. Those are
-      // allowed through rather than stranded — the money for them is already
-      // spent — and they age out as they finish. Every new dub gets a row, so
-      // this is a grace period, not a standing hole.
+      // A dub with no owner row is not handed out: the grace period for jobs
+      // that started before dub_jobs existed is long over, and an id alone
+      // must never be enough to collect somebody's audio.
       const owner = await dubOwner(dubbingId);
-      if (owner && owner !== charged.wallet) {
+      if (owner === undefined) return errorResponse('Could not check that dub. Try again.', 503);
+      if (owner !== charged.wallet) {
         return errorResponse('That dub is not available to you.', 403);
       }
 
@@ -176,13 +176,10 @@ Deno.serve(async (req) => {
 });
 
 /**
- * The wallet that started a dub, or null if nothing has claimed it.
- *
- * Null covers two cases that are treated the same on purpose: a job from before
- * dub_jobs existed, and a job whose claim did not land. Both are allowed
- * through, because refusing would strand a dub that has already been paid for.
+ * The wallet that started a dub, null if nothing has claimed it, or undefined
+ * when the lookup itself failed.
  */
-async function dubOwner(dubbingId: string): Promise<string | null> {
+async function dubOwner(dubbingId: string): Promise<string | null | undefined> {
   const { data, error } = await serviceClient()
     .from('dub_jobs')
     .select('wallet_address')
@@ -191,7 +188,7 @@ async function dubOwner(dubbingId: string): Promise<string | null> {
 
   if (error) {
     console.error('[elevenlabs-dub] owner lookup failed:', error);
-    return null;
+    return undefined;
   }
   const wallet = data?.wallet_address;
   return wallet ? String(wallet).toLowerCase() : null;
@@ -208,8 +205,13 @@ async function dubOwner(dubbingId: string): Promise<string | null> {
  * was before any of this.
  */
 async function claimDub(dubbingId: string, wallet: string): Promise<void> {
-  const { error } = await serviceClient()
-    .from('dub_jobs')
-    .insert({ dubbing_id: dubbingId, wallet_address: wallet });
-  if (error) console.error('[elevenlabs-dub] could not claim job:', error);
+  // The claim is now the only way back to the audio, so a blip gets a retry.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { error } = await serviceClient()
+      .from('dub_jobs')
+      .insert({ dubbing_id: dubbingId, wallet_address: wallet });
+    if (!error || error.code === '23505') return;
+    console.error('[elevenlabs-dub] could not claim job:', error);
+    await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+  }
 }

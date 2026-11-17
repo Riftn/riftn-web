@@ -1754,6 +1754,11 @@
     "tipTokens": "{{amount}} ቶክን",
     "tokenAmount": "{{amount}} ቶክን",
     "custom": {
+      "governanceCommentLike": "{{name}} ዝወደደ ኣብ ሓተታ ሓብርካ",
+      "featureShippedLiked": "ንተደርስ ዝተወደደ ተመልከት ተጠናቀተ: “{{title}}” 🎉",
+      "featureQueued": "የእርስዎ ጥያቄ “{{title}}” በማስተካከያ ላይ ነው",
+      "governancePassed": "ንብረትካ “{{title}}” ይብል ይደርስ 🎉",
+      "governanceRejected": "ኣብ ዕቅድካ “{{title}}” ኣይተረኽበን",
       "featureLike": "{{name}} ነቲ ናይ ባህሪ ሕቶኻ ኣፍቂሩ",
       "featureComment": "{{name}} ኣብቲ ዝሓተትካዮ ባህሪ ርኢቶ ሂቡ",
       "featureReplyNamed": "{{name}} ኣብ “{{title}}” መሊሱልካ",

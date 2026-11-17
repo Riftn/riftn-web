@@ -1679,6 +1679,10 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "featureShipped": "Your request “{{title}}” don complete 🎉",
+      "featureShippedLiked": "One request wey you like don complete: “{{title}}” 🎉",
+      "governanceVotedPassed": "One proposal wey you vote on pass: “{{title}}”",
+      "governanceVotedRejected": "One proposal you vote on no pass: “{{title}}”",
       "featureComment": "{{name}} don talk am for your request",
       "featureReplyNamed": "{{name}} reply you for “{{title}}”",
       "featureReply": "{{name}} reply your comment",

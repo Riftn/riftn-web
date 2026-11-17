@@ -618,6 +618,26 @@ export async function editPost(
   });
 }
 
+export interface PostVersion {
+  name: string;
+  description: string;
+  /** When this version went up. */
+  at: string | null;
+  current: boolean;
+}
+
+export interface PostEditHistory {
+  editCount: number;
+  /** Oldest first, ending with the post as it reads now. Empty when never edited. */
+  versions: PostVersion[];
+}
+
+/** Earlier versions of a post's title and text. Visible to whoever can see the post. */
+export async function getPostEditHistory(tokenId: number | string): Promise<PostEditHistory> {
+  const res = await apiCall<{ data?: Partial<PostEditHistory> }>(`/api/nft/${tokenId}/edit-history`);
+  return { editCount: res?.data?.editCount ?? 0, versions: res?.data?.versions ?? [] };
+}
+
 export interface ReplaceVideoResponse {
   result: boolean;
   data?: { tokenId: number; status: string; message?: string };

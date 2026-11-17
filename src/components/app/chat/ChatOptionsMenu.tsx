@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Archive, ArchiveRestore, Bell, BellOff, Eraser, Hand, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, Hand, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
 import * as Ctx from '@/components/ui/context-menu';
 import * as Drop from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,7 @@ import { isMuted } from '@/hooks/use-chat-prefs';
 /*
  * One chat's options, in the same order whether you right-click it in the
  * chat list or press the three dots at the top of an open chat:
- * Open in new window, Archive, Pin, Mute (for how long), Mark as unread,
+ * Select (right-click only), Open in new window, Archive, Pin, Mute (for how long), Mark as unread,
  * Block, Clear history, Delete chat.
  */
 
@@ -24,6 +24,8 @@ export interface ChatOptionsHandlers {
   onBlock: () => void;
   onClearHistory: () => void;
   onDelete: () => void;
+  /** Start picking several chats at once (right-click menu only). */
+  onSelectMany?: () => void;
 }
 
 type Kit = {
@@ -70,6 +72,12 @@ function ChatOptionItems({ kit, h }: { kit: Kit; h: ChatOptionsHandlers }) {
 
   return (
     <>
+      {h.onSelectMany && (
+        <Item className={ROW} onSelect={h.onSelectMany}>
+          <CheckCircle2 />{t('chatMenu.select', 'Select')}
+        </Item>
+      )}
+      {h.onSelectMany && !h.onOpenWindow && <Separator className="my-1 h-px bg-white/10" />}
       {h.onOpenWindow && (
         <>
           <Item className={ROW} onSelect={h.onOpenWindow}>
@@ -139,6 +147,6 @@ export function ChatRowContextMenu({ children, ...h }: ChatOptionsHandlers & { c
 }
 
 /** The same options inside an open chat's three-dot menu. */
-export function ChatOptionsDropdownItems(h: ChatOptionsHandlers) {
+export function ChatOptionsDropdownItems({ onSelectMany: _s, ...h }: ChatOptionsHandlers) {
   return <ChatOptionItems kit={DROPDOWN} h={h} />;
 }

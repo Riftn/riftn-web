@@ -2049,6 +2049,17 @@
     "tipTokens": "{{amount}} jetons",
     "tokenAmount": "{{amount}} jetons",
     "custom": {
+      "featureCommentLikeNamed": "{{name}} a aimé votre commentaire sur « {{title}} »",
+      "featureCommentLike": "{{name}} a aimé votre commentaire sur une demande",
+      "governanceCommentLikeNamed": "{{name}} a aimé votre commentaire sur la proposition « {{title}} »",
+      "governanceCommentLike": "{{name}} a aimé votre commentaire sur une proposition",
+      "featureShipped": "Votre demande « {{title}} » a été complétée 🎉",
+      "featureShippedLiked": "Une demande que vous avez aimée a été complétée : « {{title}} » 🎉",
+      "featureQueued": "Votre demande « {{title}} » est en file d’attente pour être construite",
+      "governanceVotedPassed": "Une proposition sur laquelle vous avez voté a été adoptée : « {{title}} »",
+      "governanceVotedRejected": "Une proposition sur laquelle vous avez voté n’a pas été adoptée : « {{title}} »",
+      "governancePassed": "Votre proposition « {{title}} » a été adoptée 🎉",
+      "governanceRejected": "Votre proposition « {{title}} » n’a pas été adoptée",
       "featureLikeNamed": "{{name}} a aimé votre demande de fonctionnalité « {{title}} »",
       "featureLike": "{{name}} a aimé votre demande de fonctionnalité",
       "featureCommentNamed": "{{name}} a commenté votre demande de fonctionnalité « {{title}} »",
@@ -3304,6 +3315,16 @@
     "confirm": "Menthe le {{chain}}",
     "confirmWithCost": "Menthe sur {{chain}} · {{cost}}",
     "notAvailable": "La frappe sur cette chaîne n'est pas encore disponible."
+  },
+  "postEditHistory": {
+    "title": "Historique des modifications",
+    "edited_one": "Modifié une fois",
+    "edited_other": "Modifié {{count}} fois",
+    "lastEdit": "Dernière modification {{time}}",
+    "original": "Original",
+    "editN": "Modification {{n}}",
+    "now": "Maintenant",
+    "showChanges": "Afficher les changements"
   },
   "postInfo": {
     "title": "Info du Post",
@@ -20717,6 +20738,17 @@
     "gone": "Ce message n'est plus là",
     "theirMessages": "Leurs messages",
     "seeTheirMessages": "Voir leurs messages"
+  },
+  "dmRequests": {
+    "title": "Demandes",
+    "hint": "Messages de personnes que vous ne suivez pas. Acceptez, répondez ou suivez-les et la discussion passe dans votre boîte de réception.",
+    "rowHint": "{{n}} de personnes que vous ne suivez pas",
+    "banner": "Vous ne suivez pas {{name}}. Acceptez pour déplacer cette discussion dans votre boîte de réception, ou répondez simplement.",
+    "accept": "Accepter",
+    "delete": "Supprimer",
+    "block": "Bloquer",
+    "accepted": "Déplacé dans votre boîte de réception",
+    "acceptFailed": "Impossible d'accepter, réessayez"
   },
   "dmSchedule": {
     "button": "Programmer le message",

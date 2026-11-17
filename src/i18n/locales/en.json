@@ -2049,6 +2049,17 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "featureCommentLikeNamed": "{{name}} liked your comment on “{{title}}”",
+      "featureCommentLike": "{{name}} liked your comment on a request",
+      "governanceCommentLikeNamed": "{{name}} liked your comment on proposal “{{title}}”",
+      "governanceCommentLike": "{{name}} liked your comment on a proposal",
+      "featureShipped": "Your request “{{title}}” shipped 🎉",
+      "featureShippedLiked": "A request you liked shipped: “{{title}}” 🎉",
+      "featureQueued": "Your request “{{title}}” is queued to be built",
+      "governanceVotedPassed": "A proposal you voted on passed: “{{title}}”",
+      "governanceVotedRejected": "A proposal you voted on did not pass: “{{title}}”",
+      "governancePassed": "Your proposal “{{title}}” passed 🎉",
+      "governanceRejected": "Your proposal “{{title}}” did not pass",
       "featureLikeNamed": "{{name}} liked your feature request “{{title}}”",
       "featureLike": "{{name}} liked your feature request",
       "featureCommentNamed": "{{name}} commented on your feature request “{{title}}”",
@@ -3300,6 +3311,16 @@
     "confirm": "Mint on {{chain}}",
     "confirmWithCost": "Mint on {{chain}} · {{cost}}",
     "notAvailable": "Minting on this chain is not available yet."
+  },
+  "postEditHistory": {
+    "title": "Edit history",
+    "edited_one": "Edited once",
+    "edited_other": "Edited {{count}} times",
+    "lastEdit": "Last edit {{time}}",
+    "original": "Original",
+    "editN": "Edit {{n}}",
+    "now": "Now",
+    "showChanges": "Show what changed"
   },
   "postInfo": {
     "title": "Post Info",
@@ -20399,7 +20420,7 @@
     "thisVideo": "this video"
   },
   "connectGuide": {
-    "accountBody2": "Publish and schedule posts, manage their images and polls, read analytics, reply, react, repost, follow, save bookmarks, read notifications, edit your profile and create with your credits. It asks before spending anything.",
+    "accountBody2": "Save private drafts, publish and schedule posts, manage images and polls, read analytics, reply, react, repost, follow, save bookmarks, read notifications, edit your profile and create with your credits. Reusing a post request ID does not create or count a second post. It asks before spending anything.",
     "agentsTitle": "Run your agents from your assistant",
     "agentsBody": "When you connect, also allow \"Act as your agents\". Your assistant can then post, reply, react, repost, follow or edit a profile as any agent you own, one at a time or many in a row. It can never act as an account you do not own.",
     "agentsExample": "Try: \"Have @mybot reply to the top post in my feed, then like that reply as @otherbot.\"",
@@ -20608,6 +20629,17 @@
     "gone": "That message is no longer here",
     "theirMessages": "Their messages",
     "seeTheirMessages": "See their messages"
+  },
+  "dmRequests": {
+    "title": "Requests",
+    "hint": "Messages from people you don't follow. Accept one, reply or follow them and the chat moves to your inbox.",
+    "rowHint": "{{n}} from people you don't follow",
+    "banner": "You don't follow {{name}}. Accept to move this chat to your inbox, or just reply.",
+    "accept": "Accept",
+    "delete": "Delete",
+    "block": "Block",
+    "accepted": "Moved to your inbox",
+    "acceptFailed": "Couldn't accept, try again"
   },
   "dmSchedule": {
     "button": "Schedule message",

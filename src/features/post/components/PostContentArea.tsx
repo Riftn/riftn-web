@@ -513,7 +513,9 @@ export function PostContentArea({
               >
                 <Save className="w-4 h-4 text-white" />
                 {drafts.length > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-white text-black text-[10px] font-bold flex items-center justify-center">
+                  // Forced black: the theme turns everything inside a button to the
+                  // button's light ink, which left the number white on its white dot.
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-white !text-black text-[10px] font-bold flex items-center justify-center">
                     {drafts.length > 9 ? '9+' : drafts.length}
                   </span>
                 )}

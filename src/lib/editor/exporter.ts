@@ -295,6 +295,14 @@ function audioBufferSliceToInterleaved(
   return out;
 }
 
+/** Muxers need a length on every video chunk; fill one in when the encoder left it empty. */
+export function withDuration(chunk: EncodedVideoChunk, duration: number): EncodedVideoChunk {
+  if (typeof chunk.duration === "number" && Number.isFinite(chunk.duration) && chunk.duration >= 0) return chunk;
+  const data = new Uint8Array(chunk.byteLength);
+  chunk.copyTo(data);
+  return new EncodedVideoChunk({ type: chunk.type, timestamp: chunk.timestamp, duration, data });
+}
+
 export async function exportProject(opts: ExportOptions): Promise<ExportResult> {
   if (opts.format === "gif") return exportGif(opts);
   if (!isExportSupported()) {
@@ -356,6 +364,7 @@ export async function exportProject(opts: ExportOptions): Promise<ExportResult> 
     target: { buffer: ArrayBuffer };
   };
 
+  const frameDuration = Math.round(1_000_000 / fps);
   if (format === "mp4") {
     const { Muxer, ArrayBufferTarget } = await import("mp4-muxer");
     const target = new ArrayBufferTarget();
@@ -370,7 +379,7 @@ export async function exportProject(opts: ExportOptions): Promise<ExportResult> 
     const fixVideoChunk = videoDecoderConfigFixer({ codec: videoCodec, muxerCodec: videoMuxerCodec, width, height });
     muxer = {
       addVideoChunk: (c, meta) => {
-        const fixed = fixVideoChunk(c, meta);
+        const fixed = fixVideoChunk(withDuration(c, frameDuration), meta);
         m.addVideoChunk(fixed.chunk, fixed.meta);
       },
       // A partial audio config (no description) would wipe the AAC config the muxer prefills.
@@ -392,7 +401,7 @@ export async function exportProject(opts: ExportOptions): Promise<ExportResult> 
         : {}),
     });
     muxer = {
-      addVideoChunk: (c, meta) => m.addVideoChunk(c, meta),
+      addVideoChunk: (c, meta) => m.addVideoChunk(withDuration(c, frameDuration), meta),
       addAudioChunk: haveAudio ? (c, meta) => m.addAudioChunk(c, meta) : undefined,
       finalize: () => m.finalize(),
       target,
@@ -469,7 +478,9 @@ export async function exportProject(opts: ExportOptions): Promise<ExportResult> 
 
     if (localTime >= contentDuration) drawBrandOutro(ctx, width, height, localTime - contentDuration, username, logo, artwork);
 
-    const frame = new VideoFrame(canvas, { timestamp: Math.round((f / fps) * 1_000_000) });
+    // Chrome leaves the encoded chunk's duration empty when the frame has none,
+    // and the MP4 muxer rejects every such chunk, so the download never finishes.
+    const frame = new VideoFrame(canvas, { timestamp: Math.round((f / fps) * 1_000_000), duration: frameDuration });
     const keyFrame = f % Math.max(1, Math.round(fps * 2)) === 0;
     try { videoEncoder.encode(frame, { keyFrame }); } finally { frame.close(); }
     await waitForEncoderCapacity(videoEncoder, 8, checkEncoding);
