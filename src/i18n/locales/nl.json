@@ -20974,6 +20974,17 @@
     "theirMessages": "Hun berichten",
     "seeTheirMessages": "Zie hun berichten"
   },
+  "dmRequests": {
+    "title": "Verzoeken",
+    "hint": "Berichten van mensen die je niet volgt. Accepteer er een, antwoord of volg ze en de chat gaat naar je inbox.",
+    "rowHint": "{{n}} van mensen die je niet volgt",
+    "banner": "Je volgt {{name}} niet. Accepteer om deze chat naar je inbox te verplaatsen, of antwoord gewoon.",
+    "accept": "Accepteren",
+    "delete": "Verwijderen",
+    "block": "Blokkeren",
+    "accepted": "Verplaatst naar je inbox",
+    "acceptFailed": "Accepteren mislukt, probeer het opnieuw"
+  },
   "dmSchedule": {
     "button": "Bericht inplannen",
     "title": "Geplande berichten",

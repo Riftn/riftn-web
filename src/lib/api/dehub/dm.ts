@@ -36,6 +36,8 @@ export interface DeHubConversation {
   groupInfo?: GroupInfo;
   isGroup?: boolean;
   isBlocked?: boolean;
+  /** A first message from someone you don't follow: listed under Requests, not the inbox. */
+  isRequest?: boolean;
   dmFee?: DmFee;
   pinnedMessages?: string[];
 }
@@ -301,6 +303,7 @@ function mapApiConversationToDeHub(item: any, myAddress: string): DeHubConversat
     updatedAt: item.updatedAt || item.lastMessageAt || new Date().toISOString(),
     isGroup: item.isGroup || false,
     isBlocked: item.isBlocked || false,
+    isRequest: item.isRequest === true,
     groupInfo: item.groupInfo,
     dmFee: item.dmFee,
     pinnedMessages: Array.isArray(item.pinnedMessages) ? item.pinnedMessages : [],

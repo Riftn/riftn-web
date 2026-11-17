@@ -20620,6 +20620,17 @@
     "theirMessages": "Their messages",
     "seeTheirMessages": "See their messages"
   },
+  "dmRequests": {
+    "title": "Requests",
+    "hint": "Messages from people you don't follow. Accept one, reply or follow them and the chat moves to your inbox.",
+    "rowHint": "{{n}} from people you don't follow",
+    "banner": "You don't follow {{name}}. Accept to move this chat to your inbox, or just reply.",
+    "accept": "Accept",
+    "delete": "Delete",
+    "block": "Block",
+    "accepted": "Moved to your inbox",
+    "acceptFailed": "Couldn't accept, try again"
+  },
   "dmSchedule": {
     "button": "Schedule message",
     "title": "Scheduled messages",

@@ -60,6 +60,7 @@ import { decryptFromPeer, decryptMessageInPlace, loadIdentity, onIdentityChange,
 import { openMediaPlaintext } from '@/lib/dm-e2ee/media-message';
 import { messageHistoryItems, mergeMessageHead, needsMessageHistoryRecovery, nextMessagePage, markRecentlySent, isRecentlySent, type MessageHistory } from '@/lib/dm-head';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { setChatPref } from '@/lib/api/dehub/chat-prefs';
 import { lockDhbForUsd } from '@/lib/dm-lock-price';
 
 /**
@@ -1289,7 +1290,23 @@ export function useUserSearchForDM(query: string) {
 
 export function useTotalUnreadCount() {
   const { conversations } = useConversations();
-  return conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
+  // Message requests wait in their own list and never light the nav badge.
+  return conversations.reduce((sum, conv) => sum + (conv.isRequest ? 0 : conv.unreadCount || 0), 0);
+}
+
+/** Accept a message request: the chat moves from Requests to the inbox. */
+export function useAcceptMessageRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => setChatPref(conversationId, { accepted: true }),
+    onMutate: async (conversationId: string) => {
+      await queryClient.cancelQueries({ queryKey: messagesKeys.conversations() });
+      queryClient.setQueriesData<DeHubConversation[]>({ queryKey: messagesKeys.conversations() }, (old) =>
+        Array.isArray(old) ? old.map((c) => (c.id === conversationId ? { ...c, isRequest: false } : c)) : old,
+      );
+    },
+    onSettled: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
 }
 
 // ─── Block / Unblock ──────────────────────────────────────────────────────────
