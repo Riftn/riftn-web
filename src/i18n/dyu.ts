@@ -2199,6 +2199,13 @@ export const dyu = {
     thirdPartyItem6Prefix: 'Fɛɛn minw be se ka kɛ ni jii ye, u be se ka kɛ ni jii ye',
     thirdPartyItem7Prefix: 'A ka fɔta ye nin ye:',
     thirdPartyItem8Prefix: 'Bibulu bayɛlɛmani:',
+    googleDataTitle: 'Google user data',
+    googleDataText: 'Ni i bɛ bɔ Google kan, Riftn bɛ Google ɲininga i ka kɔnɔko fɔlɔ dɔrɔn de la: i tɔgɔ, i ka imɛli adirɛsi ani i ka kɔnɔko ladali (openid, email ani profile scopes). An tɛ fɛn wɛrɛ ɲininga i ka Google kɔntu la.',
+    googleDataItem1: 'An ka a kɛ cogo min na: walasa ka i ka Riftn kɔntu daminɛ ani ka i don a kɔnɔ, ka i tɔgɔ ani i ka foto bila a kɔnɔ, ani ka kuma ni i ye i ka kɔntu koo la. Fɛn wɛrɛ si tɛ.',
+    googleDataItem2: 'An ka a kɔnɔta cogo min: an ka kɔntɔ sɛrɛvɛriw ani an ka sɛbɛnni kɔntɔ kɛrɛnkɛrɛnnenw fɛ, a bɛ kɔnɔta ni a bɛ kɔnɔta, a bɛ kɔnɔta ni a bɛ kɔnɔta, fo i ka kɔntɔ ka kɛ yen.',
+    googleDataItem3: 'An bɛ a jira mɔgɔ min na: mɔgɔ si tɛ. A tɛ feere, a tɛ baara kɛ ni kɛwalew ye, ani a tɛ baara kɛ ka AI modelw kalan.',
+    googleDataItem4: 'A bɔli: i ka kɔntu bɔ i ka Settings, walima i ka seere dev@riftn.com ma, ani Google kɔnɔko minnu bɛ an bolo, olu bɛ bɔ. I bɛ se ka Riftn ka sɔrɔyɔrɔ bɔ tuma o tuma myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftn ka kɔnɔko min sɔrɔ Google API fɛ, o bɛ tugu Google API Services User Data Policy kan, o kɔnɔ, Limited Use ka sariya minnu bɛ yen, olu bɛɛ bɛ tugu.',
   },
   contact: {
     title: 'Aw ye an sɔrɔ',

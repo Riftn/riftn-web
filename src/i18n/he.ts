@@ -2118,6 +2118,13 @@ export const he = {
     thirdPartyItem7Prefix: 'משלוח:',
     thirdPartyItem7: 'Cloudflare משרתת ומטמנת את האתר ואת המדיה שלו',
     thirdPartyItem8Prefix: 'בינה מלאכותית ותרגום:',
+    googleDataTitle: 'נתוני משתמש של Google',
+    googleDataText: 'אם תתחבר באמצעות Google, Riftn תבקש מ-Google רק את הפרופיל הבסיסי שלך: השם שלך, כתובת האימייל ותמונת הפרופיל (היקפי ה-openid, ה-email וה-profile). אנחנו לא מבקשים שום דבר אחר מחשבון ה-Google שלך.',
+    googleDataItem1: 'איך אנחנו משתמשים בזה: כדי ליצור את חשבון ה-Riftn שלך ולחבר אותך אליו, כדי למלא את שם התצוגה והאוואטר שלך, וכדי ליצור איתך קשר בנוגע לחשבון שלך. שום דבר מעבר לזה.',
+    googleDataItem2: 'איך אנחנו מאחסנים את זה: בשרתי החשבונות שלנו ובספק האימות שלנו, מוצפן במעבר ובמנוחה, כל עוד החשבון שלך קיים.',
+    googleDataItem3: 'עם מי אנחנו משתפים את זה: עם אף אחד. המידע לא נמכר, לא משמש לפרסום ולא משמש לאימון מודלים של בינה מלאכותית.',
+    googleDataItem4: 'מחיקת המידע: מחק את החשבון שלך בהגדרות, או שלח אימייל ל-dev@riftn.com, ונתוני ה-Google שאנו מחזיקים יוסרו. באפשרותך גם לבטל את הגישה של Riftn בכל עת בכתובת myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'השימוש של Riftn במידע שהתקבל מ-Google APIs עומד במדיניות נתוני המשתמש של Google API Services, כולל דרישות השימוש המוגבל (Limited Use).',
   },
   contact: {
     title: 'צור קשר',

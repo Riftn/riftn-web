@@ -2179,6 +2179,13 @@ export const ja = {
     thirdPartyItem7Prefix: '納品：',
     thirdPartyItem7: 'Cloudflareは、サイトとそのメディアを提供し、キャッシュします',
     thirdPartyItem8Prefix: 'AIと翻訳：',
+    googleDataTitle: 'Google ユーザーデータ',
+    googleDataText: 'Googleでサインインすると、RiftnはGoogleに対して基本的なプロフィール情報のみを要求します：名前、メールアドレス、プロフィール画像（openid、email、profile スコープ）。Googleアカウントからはそれ以外の情報は一切求めません。',
+    googleDataItem1: 'Riftnアカウントを作成し、サインインするために使用します。また、表示名とアバターを入力するために使用し、またアカウントに関するあなたに連絡するために使用します。何も他に。',
+    googleDataItem2: 'アカウントサーバーと認証プロバイダーに保存します。 また、トランザクション中および保存中は暗号化されます。アカウントが存在する限り、保存されます。',
+    googleDataItem3: '共有先：なし。販売、広告への利用、AIモデルの学習への利用は一切行われません。',
+    googleDataItem4: '削除方法：設定からアカウントを削除するか、dev@riftn.com までメールでご連絡いただければ、当社が保持するGoogleデータは削除されます。また、myaccount.google.com/permissions からいつでもRiftnのアクセス権を取り消すことができます。',
+    googleDataLimitedUse: 'RiftnによるGoogle APIから受け取った情報の使用は、限定使用要件（Limited Use requirements）を含むGoogle APIサービスユーザーデータポリシーを遵守しています。',
   },
   contact: {
     title: 'お問い合わせ',

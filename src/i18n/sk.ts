@@ -2268,6 +2268,13 @@ export const sk = {
     thirdPartyItem10: 'Keď pripojíte ďalšie sociálne účty, výberové príspevky, ktoré chcete odoslať, sa odosielajú na tieto platformy cez službu na publikovanie a na Farcaster cez podpisovateľa, ktorého schválite.',
     dataSovereigntyItem5: 'Vy rozhodujete, či môžu AI systémy na vašej práci treniť. Je povolené, ak ho nevyberiete v Nastaveniach, a vaša voľba sa publikuje na stránkach, ktoré kontrolujeme.',
     dataSovereigntyItem6: 'Svoj účet môžete odstrániť sami v Nastaveniach. Váš profil, nahraté súbory a uložené médiá vrátane záložných kópií sa vymažú.',
+    googleDataTitle: 'Používateľské údaje Google',
+    googleDataText: 'Ak sa prihlásite pomocou Google, Riftn od Googlu vyžaduje iba váš základný profil: vaše meno, e-mailovú adresu a profilový obrázok (rozsahy openid, email a profile). Od vášho účtu Google nežiadame nič iné.',
+    googleDataItem1: 'Ako ich používame: na vytvorenie a prihlásenie do vášho účtu Riftn, na vyplnenie vášho zobrazovaného mena a avatara a na kontaktovanie ohľadom vášho účtu. Nič iné.',
+    googleDataItem2: 'Ako ich uchovávame: na našich serveroch účtov a u nášho poskytovateľa autentifikácie, šifrované počas prenosu aj v pokoji, tak dlho, ako existuje váš účet.',
+    googleDataItem3: 'S kým ich zdieľame: s nikým. Nepredávajú sa, nepoužívajú sa na reklamu a nepoužívajú sa na trénovanie modelov AI.',
+    googleDataItem4: 'Ich vymazanie: vymažte svoj účet v Nastaveniach alebo pošlite e-mail na dev@riftn.com a údaje Google, ktoré uchovávame, budú odstránené. Prístup Riftn môžete kedykoľvek odvolať aj na stránke myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Používanie informácií získaných z rozhraní Google API službou Riftn je v súlade s pravidlami pre používateľské údaje služieb Google API (Google API Services User Data Policy), vrátane požiadaviek na obmedzené použitie (Limited Use requirements).',
   },
   contact: {
     title: 'Kontakt',

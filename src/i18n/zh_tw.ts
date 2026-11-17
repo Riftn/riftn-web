@@ -2145,6 +2145,13 @@ export const zh_tw = {
     whatWeDoCollect: '我们收集的内容：',
     doCollectItem4: '产品需要运行的内容：帖子中的浏览和互动计数，以及一个设备标识符，以便您可以看到和撤销自己的活动会话。',
     whatWeDontCollect: '我们不收集的内容：',
+    googleDataTitle: 'Google 用户数据',
+    googleDataText: '如果您使用Google登录，Riftn只向Google请求您的基本资料：您的姓名、电子邮件地址和头像（openid、电子邮件和资料范围）。我们从您的Google帐户中请求了什么都没有。',
+    googleDataItem1: '如何使用它：用于创建和登录您的Riftn账户、填写您的显示名称和头像，以及与您的账户有关的联系。没有其他用途。',
+    googleDataItem2: '我们将其存储在我们的账户服务器和身份验证提供商中，使用加密传输和加密存储，直到您的账户存在。',
+    googleDataItem3: '我们将其与谁分享：没有人。它不是出售的、用于广告的，也不是用于训练AI模型的。',
+    googleDataItem4: '删除它：在设置中删除您的账户，或者发送邮件到 dev@riftn.com，Google 我们持有的数据会被删除。您也可以在任何时候在 myaccount.google.com/permissions 中撤销 Riftn 的访问权限。',
+    googleDataLimitedUse: 'Riftn 使用从 Google API 接收的信息遵守 Google API 服务用户数据政策，包括有限使用要求。',
   },
   contact: {
     discord: 'Discord',

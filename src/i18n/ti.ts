@@ -2146,6 +2146,13 @@ export const ti = {
     thirdPartyItem6: 'Riftn ናይ ባዕሉ ናይ ህያው ቪድዮ ሒዙ ፡ Livepeer ከም ዕንወት ኮይኑ ፡ Agora ድማ ናይ ህያው ናይ ድምጺ ክፍሊታት ሒዙ',
     thirdPartyItem8: 'ንትውልዲ ፡ ንትርጉም ፡ ንትርጉም ወይ ንትርጉም እትልእኮ ጽሑፍን መራኸቢ ብዙሓን ፡ ነቲ ዚመርሖ ወሃቢ ፡ ነዚ ሕቶ እዚ ጥራይ እዩ ዚሓልፍ ። ናይ ውልቀ-ሰብ ጽሑፍ — መልእኽታት ፣ መልሲታትን ሓጋዚ ቻትታትን — ናብ ሓደ ብነጻ ደረጃ ዝሰልጥን ወሃቢ ብዛዕባ እቲ ዝቕበልዎ ኣይልእኽን እዩ ።',
     thirdPartyItem9: 'MoonPay ETHን USDCን ብካርድ ይሽየጥ ፡ ኣብ ጥቓ Intents ፡ deBridgeን ምቁራጽ ልውውጥን ድማ ነቲ እትኸፍሎ crypto ይልውጦ ፡ ነፍሲ ወከፍ ድማ ነቲ ዚኸፍሎ ክፍሊት ይርኢ',
+    googleDataTitle: 'ናይ Google ተጠቃሚ ሓበሬታ',
+    googleDataText: 'ብGoogle እንተ ኣቲኹም፡ Riftn ካብ Google ዝሓትት መሰረታዊ ፕሮፋይልኩም ጥራይ እዩ፡ ስምኩም፡ ኢሜይል ኣድራሻኹም፡ ከምኡውን ስእሊ ፕሮፋይልኩም (openid, email ከምኡውን profile scopes)። ካብቲ ናይ Google ኣካውንትኩም ካልእ ዝኾነ ነገር ኣይንሓትትን።',
+    googleDataItem1: 'ከመይ ንጥቀመሉ፡ ንምፍጣርን ናብ ናይ Riftn ኣካውንትኩም ንምእታውን፡ ንምምላእ ናይ መርኣዪ ስምኩምን ኣቫታርኩምን፡ ከምኡውን ብዛዕባ ኣካውንትኩም ንምርካብኩም። ካልእ ምንም የለን።',
+    googleDataItem2: 'ከመይ ነቐምጦ፡ ኣብ ናይ ኣካውንት ሰርቨራትናን ኣብ ናይ ኣውተንቲኬሽን ኣቕራቢናን፡ ኣብ ግዜ ምጉዓዝን ኣብ ዕረፍትን ብኢንክሪፕሽን ተሓልዩ፡ ክሳብ ኣካውንትኩም ዘሎ።',
+    googleDataItem3: 'ምስ መን ነካፍሎ፡ ምስ ዝኾነ ሰብ ኣይነካፍልን። ኣይሽየጥን፡ ንማልቲሜዲያ ማልቲሜዲያ ኣይውዕልን፡ ከምኡውን ንምስልጣን ናይ AI ሞዴላት ኣይውዕልን።',
+    googleDataItem4: 'ምስራዙ፡ ኣካውንትኩም ኣብ Settings ሰርዙ፡ ወይ ናብ dev@riftn.com ኢሜይል ግበሩ፡ ሽዑ እቲ ንሕና ንሕዞ ናይ Google ሓበሬታ ይስረዝ። ከምኡውን ናይ Riftn መእተዊ ፍቓድ ኣብ ዝኾነ ግዜ ኣብ myaccount.google.com/permissions ክትሰርዙ ትኽእሉ ኢኹም።',
+    googleDataLimitedUse: 'Riftn ካብ Google APIs ዝረኽቦ ሓበሬታ ንናይ Google API Services User Data Policy ይእዘዝ፡ እዚ ድማ ነቲ Limited Use ዝብል ረቛሒታት ዘጠቓለለ እዩ።',
   },
   contact: {
     title: 'ምሳና ተዘራረብ',

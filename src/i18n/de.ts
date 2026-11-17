@@ -2205,6 +2205,13 @@ export const de = {
     thirdPartyItem7Prefix: 'Lieferung:',
     thirdPartyItem7: 'Cloudflare bedient und speichert die Website und ihre Medien',
     thirdPartyItem8Prefix: 'KI & Übersetzung:',
+    googleDataTitle: 'Google-Nutzerdaten',
+    googleDataText: 'Wenn du dich mit Google anmeldest, fragt Riftn Google nur nach deinem Basisprofil: deinem Namen, deiner E-Mail-Adresse und deinem Profilbild (die Scopes openid, email und profile). Wir fragen nichts anderes von deinem Google-Konto ab.',
+    googleDataItem1: 'Wie wir sie verwenden: um dein Riftn-Konto zu erstellen und dich anzumelden, um deinen Anzeigenamen und Avatar auszufüllen und um dich bezüglich deines Kontos zu kontaktieren. Sonst nichts.',
+    googleDataItem2: 'Wie wir sie speichern: auf unseren Kontoservern und bei unserem Authentifizierungsanbieter, verschlüsselt bei der Übertragung und im Ruhezustand, solange dein Konto existiert.',
+    googleDataItem3: 'Mit wem wir sie teilen: mit niemandem. Sie werden nicht verkauft, nicht für Werbung verwendet und nicht zum Training von KI-Modellen genutzt.',
+    googleDataItem4: 'Löschung: Lösche dein Konto in den Einstellungen oder sende eine E-Mail an dev@riftn.com, dann werden die Google-Daten, die wir speichern, entfernt. Du kannst den Zugriff von Riftn auch jederzeit unter myaccount.google.com/permissions widerrufen.',
+    googleDataLimitedUse: 'Die Nutzung von Informationen, die Riftn von Google-APIs erhält, entspricht der Google API Services User Data Policy, einschließlich der Anforderungen zur eingeschränkten Nutzung (Limited Use).',
   },
   contact: {
     title: 'Kontaktieren Sie uns',

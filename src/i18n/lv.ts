@@ -1979,6 +1979,13 @@ export const lv = {
     contactNote: 'Šo privātuma politiku var atjaunināt, izmantojot kopienas pārvaldības procesus. Par būtiskām izmaiņām tiks paziņots, izmantojot mūsu oficiālos kanālus.',
     importantNotice: 'Svarīgs paziņojums',
     importantNoticeText: 'Riftn darbojas kā decentralizēts protokols. Lai gan mēs cenšamies aizsargāt lietotāju privātumu, decentralizētais raksturs nozīmē, ka mijiedarbība var būt redzama publiskajās blokķēdēs. Lietotāji ir atbildīgi par to, lai izprastu savas blokķēdes mijiedarbības ietekmi uz privātumu.',
+    googleDataTitle: 'Google lietotāja dati',
+    googleDataText: 'Ja pierakstāties ar Google, Riftn no Google pieprasa tikai jūsu pamata profilu: jūsu vārdu, e-pasta adresi un profila attēlu (openid, email un profile tvērumus). Mēs no jūsu Google konta nepieprasām neko citu.',
+    googleDataItem1: 'Kā mēs to izmantojam: lai izveidotu jūsu Riftn kontu un pierakstītu jūs tajā, lai aizpildītu jūsu parādāmo vārdu un iemiesojumu, kā arī lai sazinātos ar jums par jūsu kontu. Neko citu.',
+    googleDataItem2: 'Kā mēs to glabājam: mūsu kontu serveros un pie mūsu autentifikācijas nodrošinātāja, šifrētu pārsūtīšanas laikā un dīkstāvē, tik ilgi, kamēr pastāv jūsu konts.',
+    googleDataItem3: 'Ar ko mēs to kopīgojam: ne ar vienu. Tas netiek pārdots, netiek izmantots reklāmai un netiek izmantots AI modeļu apmācībai.',
+    googleDataItem4: 'Dzēšana: izdzēsiet savu kontu sadaļā Iestatījumi vai rakstiet uz dev@riftn.com, un mūsu rīcībā esošie Google dati tiks noņemti. Varat arī jebkurā laikā atsaukt Riftn piekļuvi vietnē myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftn informācijas izmantošana, kas saņemta no Google API, atbilst Google API pakalpojumu lietotāja datu politikai, tostarp ierobežotas izmantošanas prasībām.',
   },
   contact: {
     title: 'Kontakti',

@@ -2146,6 +2146,13 @@ export const yue = {
     thirdPartyItem10: '當你連接其他社交帳戶時，你選擇的帖文會透過發佈服務傳送到其他平台，並透過你批准的簽署者傳送到 Farcaster。',
     dataSovereigntyItem5: '你可以選擇人工智能系統係咪可以喺你嘅工作上進行訓練。除非你喺「設定」閂咗佢，而且你嘅選擇會喺我哋控制嘅網頁上面發佈畀爬蟲程式，否則就可以使用',
     dataSovereigntyItem6: '你可以自己喺「設定」刪除你嘅帳戶；你嘅個人檔案、上載同埋儲存咗嘅媒體，包括備份副本，都會被清除',
+    googleDataTitle: 'Google 用戶資料',
+    googleDataText: '如果你用 Google 登入 Riftn，Riftn 只要求 Google 取得你基本的檔案：你的姓名、電子郵件地址和檔案照片（openid、email 和 profile scopes）。 我們要求 Riftn 的 Google 帳戶什麼都沒有。',
+    googleDataItem1: '我們如何用它：用它來創建和登入你的 Riftn 帳戶，填入你的顯示名稱和頭像，和聯繫你關於你的帳戶。什麼都沒有。',
+    googleDataItem2: '我們如何儲存它：儲存在我們的帳戶伺服器和驗證提供者，傳輸和儲存加密，直到你的帳戶存在。',
+    googleDataItem3: '我們與誰分享它：無人。它不被賣出，不用於廣告，不用於訓練 AI 模型。',
+    googleDataItem4: '刪除它：刪除你的帳戶在設定中，或者發送電子郵件到 dev@riftn.com，Google 資料我們持有的被刪除。 你也可以在任何時間在 myaccount.google.com/permissions 中撤銷 Riftn 的權限。',
+    googleDataLimitedUse: 'Riftn 對 Google API 的資訊使用遵守 Google API Services User Data Policy，包括 Limited Use 要求。',
   },
   contact: {
     title: '聯絡我哋',

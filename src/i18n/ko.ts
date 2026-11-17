@@ -2166,6 +2166,13 @@ export const ko = {
     thirdPartyItem7Prefix: '배송:',
     thirdPartyItem7: 'Cloudflare는 사이트와 해당 미디어를 제공하고 캐시합니다',
     thirdPartyItem8Prefix: 'AI 및 번역:',
+    googleDataTitle: 'Google 사용자 데이터',
+    googleDataText: 'Google로 로그인하면 Riftn은 귀하의 기본 프로필(이름, 이메일 주소, 프로필 사진, 즉 openid, email, profile 범위)만 Google에 요청합니다. 그 외에 귀하의 Google 계정에서 요청하는 정보는 없습니다.',
+    googleDataItem1: '사용 목적: Riftn 계정 생성 및 로그인, 표시 이름과 아바타 설정, 계정 관련 연락을 위해서만 사용합니다. 그 외의 용도로는 사용하지 않습니다.',
+    googleDataItem2: '저장 방식: 계정이 존재하는 동안 전송 중 및 저장 시 암호화된 상태로 당사의 계정 서버와 인증 제공업체에 저장됩니다.',
+    googleDataItem3: '공유 대상: 누구와도 공유하지 않습니다. 판매하거나 광고에 사용하지 않으며, AI 모델 학습에도 사용하지 않습니다.',
+    googleDataItem4: '데이터 삭제: 설정에서 계정을 삭제하거나 dev@riftn.com으로 이메일을 보내시면 당사가 보유한 Google 데이터가 삭제됩니다. 또한 myaccount.google.com/permissions에서 언제든지 Riftn의 액세스 권한을 취소할 수 있습니다.',
+    googleDataLimitedUse: 'Google API로부터 받은 정보에 대한 Riftn의 사용은 제한적 사용(Limited Use) 요구 사항을 포함한 Google API 서비스 사용자 데이터 정책을 준수합니다.',
   },
   contact: {
     title: '문의하기',

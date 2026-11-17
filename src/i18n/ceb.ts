@@ -2150,6 +2150,13 @@ export const ceb = {
     thirdPartyItem8Prefix: 'AI & Paghubad:',
     thirdPartyItem6Prefix: 'Streaming & Rooms:',
     thirdPartyItem10Prefix: 'Multi-posting:',
+    googleDataTitle: 'Google user data',
+    googleDataText: 'Kung mag-sign in ka gamit ang Google, ang Riftn nangayo lang sa Google sa imong basic profile: ang imong pangalan, email address ug profile picture (ang openid, email ug profile scopes). Wala kami nangayo pa ug lain gikan sa imong Google Account.',
+    googleDataItem1: 'Unsaon namo paggamit niini: aron makahimo ug mag-sign in ka sa imong Riftn account, aron pun-on ang imong display name ug avatar, ug aron makig-istorya kanimo bahin sa imong account. Wala pa ug lain.',
+    googleDataItem2: 'Unsaon namo pag-imbak niini: sa among account servers ug sa among authentication provider, encrypted sa pagbiyahe ug sa pag-imbak, sulod sa panahon nga magpabilin ang imong account.',
+    googleDataItem3: 'Kinsa namo pagahimoon og pag-share niini: walay bisan kinsa. Dili kini ibaligya, dili gamiton para sa advertising, ug dili gamiton aron matudluan ang AI models.',
+    googleDataItem4: 'Pag-delete niini: delete ang imong account sa Settings, o mag-email sa dev@riftn.com, ug ang Google data nga among gihuptan i-remove. Mahimo usab nimo i-revoke ang access sa Riftn bisan unsang oras sa myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Ang paggamit sa Riftn sa impormasyon nga nadawat gikan sa Google APIs mosunod sa Google API Services User Data Policy, lakip ang Limited Use requirements.',
   },
   contact: {
     title: 'Kontaka Kami',

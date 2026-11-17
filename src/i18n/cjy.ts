@@ -2125,6 +2125,13 @@ export const cjy = {
     thirdPartyItem6Prefix: '流媒体与直播间：',
     thirdPartyItem7Prefix: '交付',
     thirdPartyItem7: 'Cloudflare 为网站及其媒体提供服务并进行缓存。',
+    googleDataTitle: 'Google 用户数据',
+    googleDataText: '如果您使用 Google 登录，Riftn 仅向 Google 请求您的基本资料：您的姓名、电子邮件地址和个人资料图片（openid、email 和 profile 权限）。我们不会从您的 Google 帐户获取任何其他信息。',
+    googleDataItem1: '咱介么用它：用来创建并登录你的 Riftn 账户，用来填你的显示名和头像，还有用来联系你关于你账户的事。没别的了。',
+    googleDataItem2: '咱咋个存法：存到咱的账户服务器和验证服务商那儿，传输和存储过程都加密，只要你账户还在，就一直存着。',
+    googleDataItem3: '我拉跟谁分享：谁也不给。不卖，不拿去搞广告，也不拿去训练AI模型。',
+    googleDataItem4: '删除它：在设置中删除您的账户，或发送电子邮件至 dev@riftn.com，我们持有的 Google 数据将被删除。您也可以随时在 myaccount.google.com/permissions 撤销 Riftn 的访问权限。',
+    googleDataLimitedUse: 'Riftn 对从 Google API 接收到的信息的使用，遵循 Google API 服务用户数据政策，包括“有限使用”（Limited Use）要求。',
   },
   contact: {
     title: '联系咱',

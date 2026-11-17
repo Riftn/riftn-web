@@ -2240,6 +2240,13 @@ export const zh = {
     thirdPartyItem10: '当你连接其他社交账号时，你选择的帖子会通过发帖服务发送到这些平台，而到 Farcaster 则是通过你批准的签名者发送。',
     dataSovereigntyItem5: '您选择AI系统是否可以训练您的作品。除非您在设置中切换它，否则允许它，且您的选择将发布到我们控制的页面上的爬虫',
     dataSovereigntyItem6: '您可以从设置中删除自己的账户；您的个人资料，上传和存储的媒体，包括备份副本，都会被清除',
+    googleDataTitle: 'Google 用户数据',
+    googleDataText: '如果您使用 Google 账号登录，Riftn 仅会向 Google 请求您的基本资料：您的姓名、电子邮件地址和头像（openid、email 和 profile 范围）。我们不会向您的 Google 账号索取任何其他信息。',
+    googleDataItem1: '我们如何使用这些信息：用于创建您的 Riftn 账号并为您登录，用于填充您的显示名称和头像，以及就您的账号相关事宜与您联系。绝无其他用途。',
+    googleDataItem2: '我们如何存储这些信息：存储在我们的账号服务器和身份验证提供商处，在传输和静态存储时均经过加密，存储期限为您账号存续期间。',
+    googleDataItem3: '我们与谁共享这些信息：不与任何人共享。这些信息不会被出售，不会用于广告，也不会用于训练 AI 模型。',
+    googleDataItem4: '删除信息：您可以在“设置”中删除您的账号，或发送电子邮件至 dev@riftn.com，我们所持有的 Google 数据即会被删除。您也可以随时在 myaccount.google.com/permissions 撤销 Riftn 的访问权限。',
+    googleDataLimitedUse: 'Riftn 对从 Google API 获取的信息的使用遵循《Google API 服务用户数据政策》，包括“有限使用”（Limited Use）要求。',
   },
   contact: {
     discord: 'Discord',

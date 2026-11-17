@@ -2103,6 +2103,8 @@ export const pcm = {
     thirdPartyItem9: 'MoonPay sell ETH and USDC by card, and NEAR Intents, deBridge and decentralized exchange dey convert crypto you pay for; each one dey see payment dey handle for dem.',
     thirdPartyItem10Prefix: 'Multi-posting:',
     thirdPartyItem10: 'When you link other social accounts, de post you pick for send go reach dem platforms through posting service, and to Farcaster, dem go reach through a signer you say "okay" for.',
+    googleDataTitle: 'Google user data',
+    googleDataItem2: 'How we dey store am: for our account servers and inside our authentication provider, we dey encrypt am as e dey travel and when e dey rest, for as long as your account still dey.',
   },
   contact: {
     discordDesc: 'Link up wit us for Discord',

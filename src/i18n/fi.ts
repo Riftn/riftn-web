@@ -2142,6 +2142,13 @@ export const fi = {
     thirdPartyItem7Prefix: 'Toimitus:',
     thirdPartyItem7: 'Cloudflare palvelee ja tallentaa välimuistiin sivuston ja sen median',
     thirdPartyItem8Prefix: 'Tekoäly ja käännös:',
+    googleDataTitle: 'Google-käyttäjän tiedot',
+    googleDataText: 'Kun kirjaudut sisään Googlella, Riftn pyytää Googlelta vain perustietojasi: nimesi, sähköpostiosoitteesi ja profiilikuvasi (openid-, email- ja profile-laajuudet). Emme pyydä Google-tililtäsi mitään muuta.',
+    googleDataItem1: 'Miten käytämme sitä: luodaksemme Riftn-tilisi ja kirjautuaksemme sisään, täyttääksemme näyttönimesi ja avatarisi sekä ottaaksemme sinuun yhteyttä tiliisi liittyvissä asioissa. Ei mitään muuta.',
+    googleDataItem2: 'Miten säilytämme sitä: tili-palvelimillamme ja tunnistautumispalveluntarjoajallamme, salattuna siirron aikana ja levossa, niin kauan kuin tilisi on olemassa.',
+    googleDataItem3: 'Kenelle jaamme sen: emme kenellekään. Sitä ei myydä, sitä ei käytetä mainontaan eikä sitä käytetä tekoälymallien kouluttamiseen.',
+    googleDataItem4: 'Poistamalla sen: poista tilisi Asetuksista, tai lähetä sähköpostia dev@riftn.com, ja Google‑tiedot, joita me pidämme, poistetaan. Voit myös peruuttaa Riftnin pääsyn milloin tahansa osoitteessa myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftnin Google-rajapinnoilta saaman tiedon käyttö noudattaa Google API Services User Data Policy -käytäntöä, mukaan lukien Limited Use -vaatimukset.',
   },
   contact: {
     title: 'Ota yhteyttä',

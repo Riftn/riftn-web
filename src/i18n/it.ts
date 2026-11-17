@@ -2179,6 +2179,13 @@ export const it = {
     thirdPartyItem6Prefix: 'Streaming e camere:',
     thirdPartyItem7Prefix: 'Consegna:',
     thirdPartyItem7: 'Cloudflare serve e memorizza nella cache il sito e i suoi media.',
+    googleDataTitle: 'Dati utente Google',
+    googleDataText: 'Se accedi con Google, Riftn richiede a Google solo il tuo profilo di base: nome, indirizzo email e immagine del profilo (gli scope openid, email e profile). Non chiediamo nient\'altro dal tuo account Google.',
+    googleDataItem1: 'Come li utilizziamo: per creare il tuo account Riftn e consentirti l\'accesso, per compilare il tuo nome visualizzato e l\'avatar, e per contattarti in merito al tuo account. Nient\'altro.',
+    googleDataItem2: 'Come li conserviamo: sui nostri server account e presso il nostro provider di autenticazione, crittografati durante il transito e a riposo, per tutto il tempo in cui il tuo account esiste.',
+    googleDataItem3: 'Con chi li condividiamo: con nessuno. Non vengono venduti, non vengono utilizzati per scopi pubblicitari e non vengono utilizzati per addestrare modelli di IA.',
+    googleDataItem4: 'Eliminazione: elimina il tuo account nelle Impostazioni, oppure invia un\'email a dev@riftn.com, e i dati Google in nostro possesso verranno rimossi. Puoi anche revocare l\'accesso di Riftn in qualsiasi momento su myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'L\'utilizzo da parte di Riftn delle informazioni ricevute dalle API di Google è conforme alla Google API Services User Data Policy, inclusi i requisiti di Limited Use.',
   },
   contact: {
     title: 'Contattaci',

@@ -2116,6 +2116,13 @@ export const cs = {
     thirdPartyItem7Prefix: 'Doručení:',
     thirdPartyItem7: 'Cloudflare slouží a ukládá stránky a jejich média',
     thirdPartyItem8Prefix: 'Umělá inteligence a překlad:',
+    googleDataTitle: 'Uživatelská data Google',
+    googleDataText: 'Pokud se přihlásíte pomocí Googlu, Riftn od Googlu vyžaduje pouze váš základní profil: jméno, e-mailovou adresu a profilový obrázek (rozsahy openid, email a profile). Nic jiného z vašeho účtu Google nepožadujeme.',
+    googleDataItem1: 'Jak je využíváme: k vytvoření a přihlášení k vašemu účtu Riftn, k vyplnění vašeho zobrazovaného jména a avatara a ke kontaktování ohledně vašeho účtu. Nic jiného.',
+    googleDataItem2: 'Jak je ukládáme: na našich účtových serverech a u našeho poskytovatele autentizace, šifrovaně při přenosu i v klidovém stavu, po celou dobu existence vašeho účtu.',
+    googleDataItem3: 'S kým je sdílíme: s nikým. Nejsou prodávána, nejsou používána k reklamním účelům a nejsou používána k trénování modelů umělé inteligence.',
+    googleDataItem4: 'Smazání: smažte svůj účet v Nastavení nebo napište na dev@riftn.com a námi držená data od Googlu budou odstraněna. Přístup Riftn můžete také kdykoli odvolat na adrese myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Využívání informací získaných z rozhraní Google API aplikací Riftn se řídí Zásadami pro uživatelská data služeb Google API, včetně požadavků na omezené použití (Limited Use).',
   },
   contact: {
     title: 'Kontaktujte Nás',

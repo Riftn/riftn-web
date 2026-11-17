@@ -1979,6 +1979,13 @@ export const no = {
     contactNote: 'Denne personvernerklæringen kan bli oppdatert gjennom fellesskapets styringsprosesser. Vesentlige endringer vil bli kommunisert gjennom våre offisielle kanaler.',
     importantNotice: 'Viktig merknad',
     importantNoticeText: 'Riftn fungerer som en desentralisert protokoll. Selv om vi streber etter å beskytte brukernes personvern, betyr den desentraliserte naturen at interaksjoner kan være synlige på offentlige blokkjeder. Brukere er ansvarlige for å forstå personvernkonsekvensene av sine blokkjedeinteraksjoner.',
+    googleDataTitle: 'Google-brukerdata',
+    googleDataText: 'Hvis du logger inn med Google, spør Riftn bare etter din grundleggende profil: navn, epostadresse og profilbilde (openid, epost og profilområde). Vi spør etter ingenting annet fra din Google-konto.',
+    googleDataItem1: 'Hva vi bruker det til: til å opprette og logge deg inn på din Riftn-konto, til å fylle inn ditt visningsnavn og profilbilde, og til å kontakte deg om din konto. Ingenting annet.',
+    googleDataItem2: 'Hva vi lagrer det: på våre konto-servere og i vår autentiseringsleverandør, kryptert i overføring og i hvile, så lenge kontoen eksisterer.',
+    googleDataItem3: 'Hvem vi deler det med: ingen. Det selges ikke, brukes ikke til annonsering, og brukes ikke til å trene AI-modeller.',
+    googleDataItem4: 'Slette det: slett kontoen i Innstillinger, eller send en epost til dev@riftn.com, og det Google-data vi holder på er fjernet. Du kan også tilbakekalle Riftns tilgang på enhver tid på myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftns bruk av informasjon fra Google-API-er følger Google API Services User Data Policy, inkludert Limited Use-kravene.',
   },
   contact: {
     title: 'Kontakt',

@@ -2146,6 +2146,13 @@ export const tl = {
     thirdPartyItem10Prefix: 'Multi-posting:',
     dataSovereigntyItem5: 'Ikaw ang pipili kung papayagan ang mga AI system na mag-train gamit ang iyong gawa. Pinapayagan ito maliban na lang kung i-off mo ito sa Settings, at ang iyong pinili ay ipa-publish sa mga crawler sa mga pahinang kontrolado namin',
     dataSovereigntyItem6: 'Maaari mong burahin ang iyong account nang mag-isa mula sa Settings; ang iyong profile, mga upload, at nakaimbak na media, kabilang ang mga backup copy, ay mabubura',
+    googleDataTitle: 'Mga datos ng mga gumagamit ng Google',
+    googleDataText: 'Kapag mag-sign in ka sa pamamagitan ng Google, ang Riftn ay nag-aalok lamang sa Google ng mga impormasyon sa iyong profile na pangunahin: ang iyong pangalan, email address at larawan ng profile (ang mga *scope* ng openid, email at profile). Hindi namin inaalok ang anumang iba pa mula sa iyong Google Account.',
+    googleDataItem1: 'Kamusta ito ay ginagamit: upang lumikha at mag-sign in sa iyong account sa Riftn, upang itakda ang iyong pangalan at avatar sa display, at upang makipag-ugnay sa iyo tungkol sa iyong account. Walang ibang bagay.',
+    googleDataItem2: 'Kung paano namin ito iniimbak: sa aming mga account server at sa aming authentication provider, naka-encrypt habang ipinapadala at habang nakaimbak, hangga\'t umiiral ang iyong account.',
+    googleDataItem3: 'Kanino namin ito ibinabahagi: wala. Hindi ito ibinebenta, hindi ginagamit para sa advertising, at hindi ginagamit para sanayin ang mga AI model.',
+    googleDataItem4: 'Pagbura nito: burahin ang iyong account sa Settings, o mag-email sa dev@riftn.com, at mabubura ang data mo sa Google na hawak namin. Maaari mo ring bawiin ang access ng Riftn anumang oras sa myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Ang paggamit ng Riftn sa impormasyong natanggap mula sa Google APIs ay sumusunod sa Google API Services User Data Policy, kabilang ang mga kinakailangan sa Limited Use.',
   },
   contact: {
     title: 'Makipag - ugnayan sa Amin',

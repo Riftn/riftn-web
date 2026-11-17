@@ -2111,6 +2111,13 @@ export const bho = {
     thirdPartyItem7Prefix: 'उपलब्ध करावल गइलः',
     thirdPartyItem7: 'पन्ना जेवन "टेम्पलेटःCountry data the site and its media" से जुड़ल बा',
     thirdPartyItem8Prefix: 'अनुबाद कइल गइलः',
+    googleDataTitle: 'Google के उपयोगकर्ता डेटा',
+    googleDataText: 'अगर रउआ Google से साइन इन करेलें, त Riftn Google से खाली रउआ बुनियादी प्रोफ़ाइल माँगता: रउआ नाम, ईमेल पता आ प्रोफ़ाइल चित्र (openid, email आ profile scopes). हमनीं रउआ Google अकाउंट से कुछो अउरी ना माँगतानी।',
+    googleDataItem1: 'हमनीं एकरा के कइसे इस्तेमाल करेलें: रउआ Riftn अकाउंट बनावे आ साइन इन करे खातिर, रउआ डिस्प्ले नाम आ अवतार भरे खातिर, आ रउआ के अकाउंट के बारे में संपर्क करे खातिर। कुछो अउरी ना।',
+    googleDataItem2: 'हमनीं एकरा के कइसे स्टोर करेलें: हमरा अकाउंट सर्वर पर आ हमरा ऑथेंटिकेशन प्रोवाइडर में, ट्रांज़िट आ रेस्ट में एन्क्रिप्टेड, जब तक रउआ अकाउंट मौजूद बा।',
+    googleDataItem3: 'किसे के साथ हम एकरा के बाँटतानी: कवनो ना। एकरा के ना बेचल जाला, ना विज्ञापन खातिर इस्तेमाल होखेला, आ ना AI मॉडल ट्रेन करे खातिर इस्तेमाल होखेला।',
+    googleDataItem4: 'इसे हटावे के तरीका: Settings में रउआ अकाउंट हटाईं, या dev@riftn.com पर ईमेल भेजीं, आ Google डेटा जवन हमनीं पास बा, हट जाई। रउआ कउनो भी समय myaccount.google.com/permissions पर जाके Riftn के एक्सेस रिवोक भी कर सकत बानी।',
+    googleDataLimitedUse: 'Riftn के Google APIs से मिली जानकारी के इस्तेमाल Google API Services User Data Policy के अनुसार बा, जवन Limited Use आवश्यकतासभ के पालन करेला।',
   },
   contact: {
     title: 'हमनी से संपर्क करीं',
