@@ -1,8 +1,9 @@
-import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { LucideProps } from 'lucide-react';
 import MessageEnvelope from '@/components/ui/cut-icons/message-envelope';
 import {
-  ENVELOPE_BODY_PATH, ENVELOPE_FLAP_PATH, ENVELOPE_SIDE_RIPPLE_PATHS, messagesEnvelopeMotion,
+  ENVELOPE_BODY_PATH, ENVELOPE_FLAP_PATH, ENVELOPE_SIDE_RIPPLE_PATHS, MESSAGE_SLIP_TAIL, SLIP_WINDOW_PATH, messagesEnvelopeMotion,
+  type MessageSlip, type WormFrame,
 } from '@/lib/messages-envelope-motion';
 import './messages-nav-glyph.css';
 
@@ -15,15 +16,33 @@ function RedEnvelope() {
   );
 }
 
+/** One @keyframes rule per slip: hidden for most of the ring, then a wriggly
+ *  trip that starts at its launch moment, so every ring replays it in step. */
+function slipKeyframes(name: string, slip: MessageSlip, frames: WormFrame[], cycleMs: number) {
+  const at = (t: number) => Math.min(100, (slip.delayMs + t * slip.lifeMs) / cycleMs * 100).toFixed(2);
+  const stops = frames.map(f => `${at(f.t)}%{opacity:${f.opacity};transform:translate(${f.x}px,${f.y}px) rotate(${f.rotate}deg) scale(${f.sx},${f.sy})}`);
+  const first = frames[0];
+  const last = frames[frames.length - 1];
+  return `@keyframes ${name}{0%{opacity:0;transform:translate(${first.x}px,${first.y}px) scale(.4)}${stops.join('')}`
+    + `${Math.min(100, Number(at(1)) + .01).toFixed(2)}%,100%{opacity:0;transform:translate(${last.x}px,${last.y}px) scale(.6)}}`;
+}
+
 /**
  * Messages icon for the bottom bar and the side panel. Unread messages ring it
  * on the same beat as the notification bell: it swings, glows red, sends lines
- * off both sides and throws one red slip out of the top per unread message
- * (up to 20). More unread means a harder, faster ring.
+ * off both sides and one red slip per unread message (up to 20) wriggles out
+ * of its top edge like a little worm, flies up and out to its own side, then
+ * tumbles back down. More unread
+ * means a harder, faster ring.
  */
 export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & { unread: number }) {
-  const clipId = `messages-slips-${useId().replace(/:/g, '')}`;
-  const profile = messagesEnvelopeMotion(unread);
+  const glyphId = `messages-slips-${useId().replace(/:/g, '')}`;
+  const profile = useMemo(() => messagesEnvelopeMotion(unread), [unread]);
+  const keyframes = useMemo(() => profile.slips.map((slip, index) => {
+    const name = `${glyphId}-${profile.unread}-${index}`;
+    const body = slip.tail.map((track, k) => slipKeyframes(`${name}-${k}`, slip, track, profile.cycleMs));
+    return slipKeyframes(name, slip, slip.frames, profile.cycleMs) + body.join('');
+  }).join(''), [glyphId, profile]);
   const ref = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   const [foreground, setForeground] = useState(() => !document.hidden);
@@ -56,19 +75,28 @@ export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & 
       data-unread={ringing} data-unread-count={profile.unread} data-running={visible && foreground}>
       <span key={run} className="messages-nav-glyph__swing">
         {ringing && <span className="messages-nav-glyph__rim"><RedEnvelope /></span>}
+        {ringing && <style>{keyframes}</style>}
         {ringing && (
           <svg className="messages-nav-glyph__layer" viewBox="0 0 32 32" aria-hidden="true">
-            <clipPath id={clipId}><rect x="-14" y="-36" width="60" height="41.2" /></clipPath>
-            <g clipPath={`url(#${clipId})`}>
-              {profile.slips.map((slip, index) => (
-                <g key={index} className="messages-nav-glyph__slip" data-testid="messages-slip" style={{
-                  '--slip-x': `${slip.dx}px`, '--slip-y': `${slip.dy}px`, '--slip-rotate': `${slip.rotate}deg`,
-                  animationDelay: `${slip.delayMs}ms`,
-                } as CSSProperties}>
-                  <rect x="12.2" y="1.5" width="7.6" height="5.6" rx="1" fill="var(--messages-red)" />
-                  <rect x="13.6" y="3" width="4.8" height="1" rx=".5" fill="rgb(255 255 255 / .8)" />
+            {/* Slips are hidden while inside the envelope, so each one appears
+                as it pops out of the top edge and again as it falls past. */}
+            <clipPath id={glyphId}><path clipRule="evenodd" d={SLIP_WINDOW_PATH} /></clipPath>
+            <g clipPath={`url(#${glyphId})`}>
+            {profile.slips.map((slip, index) => {
+              const animationName = `${glyphId}-${profile.unread}-${index}`;
+              return (
+                <g key={index}>
+                  {MESSAGE_SLIP_TAIL.map((dot, k) => (
+                    <circle key={dot.gap} className="messages-nav-glyph__slip" cx="16" cy="16" r={dot.radius}
+                      fill="var(--messages-red)" fillOpacity={dot.opacity} style={{ animationName: `${animationName}-${k}` }} />
+                  ))}
+                  <g className="messages-nav-glyph__slip" data-testid="messages-slip" style={{ animationName }}>
+                    <rect x="12.2" y="13.2" width="7.6" height="5.6" rx="1" fill="var(--messages-red)" />
+                    <rect x="13.6" y="14.7" width="4.8" height="1" rx=".5" fill="rgb(255 255 255 / .8)" />
+                  </g>
                 </g>
-              ))}
+              );
+            })}
             </g>
           </svg>
         )}
