@@ -1736,7 +1736,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // never rested, and the scrubber's row is left out on purpose.
   const autoFade = (inInfo: boolean) => cn("transition-opacity duration-[250ms] ease-out", !inInfo && autoHidden && "opacity-0");
   const phoneStack = (inInfo: boolean) => (
-      <div className={inInfo ? "relative flex-shrink-0 pt-3 pb-3" : "absolute inset-x-0 bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none"}>
+      <div className={inInfo ? "relative flex-shrink-0 pt-3 pb-3" : "absolute inset-x-0 bottom-0 pb-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.5rem))] pointer-events-none"}>
                 {/* Creator Info & Description */}
                 <div
                   // Hidden chrome is opacity-0, which still takes taps — kill
@@ -1806,7 +1806,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
                 >
                   {/* Views */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex min-w-10 items-center justify-center gap-1">
                     <Eye className="w-5 h-5 text-white drop-shadow-lg" />
                     <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{currentShort.views || '0'}</span>
                   </div>
@@ -1814,7 +1814,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   {/* Tip */}
                   <button
                     onClick={() => setShowTipModal(true)}
-                    className="flex items-center gap-1"
+                    className="flex min-w-10 items-center justify-center gap-1"
                     aria-label={_copy("copy.a4245a3c4f56", { defaultValue: "Tip" })}
                   >
                     <Gem className="w-5 h-5 text-white drop-shadow-lg" />
@@ -1824,7 +1824,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   {/* Share */}
                   <button
                     onClick={() => setShareSheetOpen(true)}
-                    className="flex items-center gap-1"
+                    className="flex min-w-10 items-center justify-center gap-1"
                     aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
                   >
                     <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
@@ -1834,7 +1834,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   {/* Comments */}
                   <button
                     onClick={() => setShowComments(true)}
-                    className="flex items-center gap-1"
+                    className="flex min-w-10 items-center justify-center gap-1"
                     aria-label={_copy("copy.355f79f29d7d", { defaultValue: "Comments" })}
                   >
                     <MessageSquare className="w-5 h-5 text-white drop-shadow-lg" />
@@ -1861,7 +1861,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       {...likeTray.buttonProps}
                       disabled={isVoting}
                       /* Same halo the tray puts on your pick — see ActionBar. */
-                      className="flex items-center gap-1 select-none touch-none"
+                      className="flex min-w-10 items-center justify-center gap-1 select-none touch-none"
                       animate={justVoted ? { scale: [1, 1.3, 1] } : {}}
                       transition={{ duration: 0.3, ease: "easeOut" }}
                       aria-label={myReaction ? _copy("copy.a3156ed263d2", { defaultValue: "{{value1}} — hold to change your reaction", value1: reactionMeta(myReaction).label }) : _copy("copy.12b91b0ac5dd", { defaultValue: "{{value1}} — hold to react", value1: reactionMeta(reactionForThumbTap(myReaction, localReactionCounts)).label })}

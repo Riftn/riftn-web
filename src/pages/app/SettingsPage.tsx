@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, useCallback, useMemo, type CSSProperties }
 import { DhbCoin } from '@/components/app/DhbAmount';
 import { cn } from '@/lib/utils';
 import { useDragTabIndicator } from '@/hooks/use-drag-tab-indicator';
-import { IslandAction, PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { IslandAction, PageBody, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -369,6 +369,60 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
     isDraggingRef: settingsIsDraggingRef,
   });
 
+  const phonePill = usePhonePill();
+  const settingsTabRow = (
+    <>
+      {/* Tab Icons. Ten of them no longer fit a phone-width bento, so the
+          row scrolls (same layer/scroller split as Bookmarks and Music: the
+          layer clips x so the indicator is not painted past the edge, the
+          row scrolls and reports scroll so the indicator follows). */}
+      <div ref={settingsTabLayerRef} className="relative overflow-x-clip overflow-y-visible">
+        <GlassIndicator ref={settingsIndicatorRef} rect={settingsTabRect} enableTransition={!isSettingsDragging} />
+        {settingsTabRect.ready && (
+          <div
+            className="absolute z-30 cursor-grab active:cursor-grabbing"
+            style={{
+              transform: `translate(${settingsTabRect.x}px, ${settingsTabRect.y}px)`,
+              width: settingsTabRect.width,
+              height: settingsTabRect.height,
+            }}
+            onPointerDown={handleSettingsDragStart}
+            onPointerMove={handleSettingsDragMove}
+            onPointerUp={handleSettingsDragEnd}
+            onPointerCancel={handleSettingsDragEnd}
+          />
+        )}
+        <div role="tablist" className="relative z-20 flex gap-[6px] overflow-x-auto scrollbar-hide sm:gap-2" onScroll={onSettingsTabScroll}>
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.value}
+                aria-label={t(tab.label)}
+                ref={(el) => {
+                  setSettingsTabRef(tab.value)(el);
+                  settingsTabPositions.current[tab.value] = el;
+                }}
+                onClick={() => setActiveTab(tab.value)}
+                className={`relative z-40 shrink-0 p-[11px] sm:p-3 rounded-xl transition-colors ${
+                  activeTab === tab.value
+                    ? 'text-white'
+                    : 'text-zinc-500 hover:text-white'
+                }`}
+                title={t(tab.label)}
+              >
+                <Icon className="relative z-10 w-[18px] h-[18px] sm:w-5 sm:h-5" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+
   // Block access for unauthenticated users (AuthGate handles loading state internally)
   if (!isAuthenticated) {
     return (
@@ -474,55 +528,13 @@ export default function SettingsPage({ initialTab }: { initialTab?: string } = {
           )}
         </div>
 
-        {/* Tab Icons. Ten of them no longer fit a phone-width bento, so the
-            row scrolls (same layer/scroller split as Bookmarks and Music: the
-            layer clips x so the indicator is not painted past the edge, the
-            row scrolls and reports scroll so the indicator follows). */}
-        <div ref={settingsTabLayerRef} className="relative overflow-x-clip overflow-y-visible">
-          <GlassIndicator ref={settingsIndicatorRef} rect={settingsTabRect} enableTransition={!isSettingsDragging} />
-          {settingsTabRect.ready && (
-            <div
-              className="absolute z-30 cursor-grab active:cursor-grabbing"
-              style={{
-                transform: `translate(${settingsTabRect.x}px, ${settingsTabRect.y}px)`,
-                width: settingsTabRect.width,
-                height: settingsTabRect.height,
-              }}
-              onPointerDown={handleSettingsDragStart}
-              onPointerMove={handleSettingsDragMove}
-              onPointerUp={handleSettingsDragEnd}
-              onPointerCancel={handleSettingsDragEnd}
-            />
-          )}
-          <div role="tablist" className="relative z-20 flex gap-[6px] overflow-x-auto scrollbar-hide sm:gap-2" onScroll={onSettingsTabScroll}>
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab.value}
-                  aria-label={t(tab.label)}
-                  ref={(el) => {
-                    setSettingsTabRef(tab.value)(el);
-                    settingsTabPositions.current[tab.value] = el;
-                  }}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={`relative z-40 shrink-0 p-[11px] sm:p-3 rounded-xl transition-colors ${
-                    activeTab === tab.value
-                      ? 'text-white'
-                      : 'text-zinc-500 hover:text-white'
-                  }`}
-                  title={t(tab.label)}
-                >
-                  <Icon className="relative z-10 w-[18px] h-[18px] sm:w-5 sm:h-5" />
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {!phonePill && settingsTabRow}
       </PageIsland>
+
+      {/* Phones: the island folds into a pill whose extra rows only show
+          while its search is open, which left the tab row out of reach and
+          Settings looking like just Profile. The row sits under the pill. */}
+      {phonePill && <div data-settings-phone-tabs className="px-2 pb-2">{settingsTabRow}</div>}
 
       {/* Content — scrolls under the anchored header and is swallowed at its
           top edge (clip logic in PageBody). */}
