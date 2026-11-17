@@ -344,6 +344,7 @@ function onTouchMove(e: TouchEvent) {
 
   window.clearTimeout(settleTimer);
   settleTimer = window.setTimeout(() => {
+    if (typeof document === 'undefined') return;
     if (getDocumentScrollTop() !== startScroll) return; // it scrolled, late — a stutter, not a freeze
     if (overlayIsOpen()) return; // something opened under the finger and is holding the page on purpose
 
@@ -396,7 +397,7 @@ function onWheel(e: WheelEvent) {
   // a verdict. Normal scrolling, even when delayed, cancels the report below.
   wheelTimer = window.setTimeout(() => {
     wheelTimer = 0;
-    if (document.visibilityState !== 'visible' || overlayIsOpen()) return;
+    if (typeof document === 'undefined' || document.visibilityState !== 'visible' || overlayIsOpen()) return;
     if (getDocumentScrollTop() !== startScroll || !couldHaveScrolled(-deltaY)) return;
     checkBodyState();
     report('A wheel gesture did not move the page', {
@@ -461,7 +462,8 @@ function queueTouchScrollRecovery(): void {
   if (typeof window === 'undefined') return;
   window.clearTimeout(settleAfterCloseTimer);
   settleAfterCloseTimer = window.setTimeout(() => {
-    if (document.visibilityState !== 'visible') return;
+    // The page can be gone by the time this fires (a test tearing down jsdom).
+    if (typeof document === 'undefined' || document.visibilityState !== 'visible') return;
     if (touchActive || Date.now() - lastDocumentScrollAt < SETTLE_MS) {
       queueTouchScrollRecovery();
       return;
