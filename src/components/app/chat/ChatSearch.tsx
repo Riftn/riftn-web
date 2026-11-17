@@ -302,28 +302,6 @@ export function ChatSearchPanel({ text, person, search, signedIn, activeId, onSi
     >
       {idle ? (
         <>
-          {search.people.length ? (
-            <>
-              <SectionLabel>{_copy('chatSearch.peopleHere', { defaultValue: 'People in this chat' })}</SectionLabel>
-              <div data-chat-search-faces className="flex gap-1 overflow-x-auto px-3 pb-1">
-                {search.people.map((p) => (
-                  <button
-                    key={p.address}
-                    type="button"
-                    onClick={() => onPickPerson(p)}
-                    className="flex w-16 flex-shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2 hover:bg-white/[0.05]"
-                  >
-                    <Face person={p} className="h-11 w-11" />
-                    <span className="w-full truncate text-center text-[11px] text-zinc-300">{p.name.split(' ')[0]}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : waiting ? (
-            <div className="flex gap-3 px-4 pt-4">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-11 w-11 rounded-lg bg-zinc-800" />)}
-            </div>
-          ) : null}
           {recent.length ? (
             <>
               <SectionLabel>{_copy('chatSearch.recent', { defaultValue: 'Recent searches' })}</SectionLabel>
@@ -339,6 +317,38 @@ export function ChatSearchPanel({ text, person, search, signedIn, activeId, onSi
                 </button>
               ))}
             </>
+          ) : null}
+          {search.people.length ? (
+            <>
+              <SectionLabel count={search.people.length}>{_copy('chatSearch.peopleHere', { defaultValue: 'People in this chat' })}</SectionLabel>
+              {search.people.map((p) => (
+                <button
+                  key={p.address}
+                  type="button"
+                  data-chat-search-person
+                  onClick={() => onPickPerson(p)}
+                  className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-white/[0.05]"
+                >
+                  <Face person={p} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-white">{p.name}</span>
+                    <span className="block truncate text-xs text-zinc-400">
+                      {_copy('chatSearch.messagesCount', { defaultValue: '{{count}} messages', count: p.messageCount ?? 0 })}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </>
+          ) : waiting ? (
+            [...Array(6)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2">
+                <Skeleton className="h-8 w-8 flex-shrink-0 rounded-lg bg-zinc-800" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-28 bg-zinc-800" />
+                  <Skeleton className="h-3 w-16 bg-zinc-800" />
+                </div>
+              </div>
+            ))
           ) : null}
           {!search.people.length && !recent.length && !waiting ? (
             <p className="px-6 pt-10 text-center text-sm text-zinc-500">{_copy('chatSearch.hint', { defaultValue: 'Type a word or a name.' })}</p>
