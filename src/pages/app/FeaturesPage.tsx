@@ -48,6 +48,7 @@ import { ActionBar } from '@/components/app/cards/ActionBar';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { buildAvatarUrl, storageImage } from '@/lib/media-url';
+import { dehubLinkFor } from '@/lib/dehub-links';
 import { useProfileAvatar } from '@/hooks/use-profile-avatar-cache';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { supabase } from '@/integrations/supabase/client';
@@ -668,6 +669,10 @@ function FeatureCard({
         <div className="pt-1">
           <ActionBar
             postId={feature.id}
+            // A request is not a post: share its own board link, and drop the
+            // bookmark / pin / info buttons, which only know /app/post/<id>.
+            shareUrl={dehubLinkFor.featureRequest(feature.id)}
+            hideUtility
             className="p-0"
             onComment={() => setShowComments(prev => !prev)}
             onLike={handleLike}
@@ -1027,7 +1032,9 @@ export default function FeaturesPage() {
   // the active category, or pages down the infinite scroll — so it is fetched
   // by id and rendered on its own, then removed from whichever list would
   // otherwise show it twice.
-  const focusedRequestId = searchParams.get('request');
+  // Notifications link ?request=<id>; the share buttons on web and in the app
+  // hand out ?feature=<id>. Either one pins the card.
+  const focusedRequestId = searchParams.get('request') ?? searchParams.get('feature');
   const { data: focusedRequest } = useFeatureRequest(focusedRequestId);
   const focusedCommentId = searchParams.get('comment');
   // A comment link implies the thread should be open, whether or not the row

@@ -16,7 +16,7 @@ import { QuietPostLoading } from '@/components/app/QuietPostLoading';
  * @module pages/app/SinglePostPage
  */
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getVoteCache } from '@/lib/vote-cache';
 import { scrollDocumentTo } from '@/lib/document-scroll';
 import { cn } from '@/lib/utils';
@@ -756,9 +756,11 @@ function postSeoUrl(id?: string, articleSlug?: string): string {
   return canonicalUrl(`/app/post/${articleSlug || id}`);
 }
 
+const FEATURE_REQUEST_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** A post id is a tokenId (digits) or a stream ObjectId; anything else with a letter is an article slug. */
 function isArticleSlugParam(value?: string): value is string {
-  return !!value && !/^\d+$/.test(value) && !/^[a-f\d]{24}$/i.test(value) && /^[a-z0-9][a-z0-9-]*$/i.test(value) && /[a-z]/i.test(value);
+  return !!value && !/^\d+$/.test(value) && !/^[a-f\d]{24}$/i.test(value) && !FEATURE_REQUEST_ID.test(value) && /^[a-z0-9][a-z0-9-]*$/i.test(value) && /[a-z]/i.test(value);
 }
 
 /**
@@ -813,6 +815,14 @@ export default function SinglePostPage(props: SinglePostPageProps = {}) {
   const slug = !props.overrideId && isArticleSlugParam(postId) ? postId : undefined;
   const slugQuery = useSlugTokenId(slug);
   const focusCommentId = commentId || commentFromSearch(search);
+
+  // The Requests board once shared its cards as /app/post/<request id>. Posts
+  // are numbers or slugs, never UUIDs, so open the request on the board.
+  if (!props.overrideId && postId && FEATURE_REQUEST_ID.test(postId)) {
+    const params = new URLSearchParams(search);
+    params.delete('feature');
+    return <Navigate replace to={`/app/features?feature=${encodeURIComponent(postId)}${params.size ? `&${params}` : ''}`} />;
+  }
 
   if (slug && slugQuery.isLoading) {
     return (
