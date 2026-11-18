@@ -402,6 +402,7 @@ function MessageMenuGallery() {
             showActions
             onTogglePin={noop}
             onBan={noop}
+            moderators={[others[0]]}
           />
         ))}
       </div>
