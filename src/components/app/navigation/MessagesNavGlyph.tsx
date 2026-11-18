@@ -5,6 +5,7 @@ import {
   ENVELOPE_BODY_PATH, ENVELOPE_FLAP_PATH, ENVELOPE_SIDE_RIPPLE_PATHS, SLIP_WINDOW_PATH, messagesEnvelopeMotion,
   type MessageSlip, type WormFrame,
 } from '@/lib/messages-envelope-motion';
+import { formatNotificationCount, useShowMessagesCount } from '@/lib/notification-count-pref';
 import './messages-nav-glyph.css';
 
 function RedEnvelope() {
@@ -37,6 +38,7 @@ function slipKeyframes(name: string, slip: MessageSlip, frames: WormFrame[], cyc
 export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & { unread: number }) {
   const glyphId = `messages-slips-${useId().replace(/:/g, '')}`;
   const profile = useMemo(() => messagesEnvelopeMotion(unread), [unread]);
+  const showCount = useShowMessagesCount();
   const keyframes = useMemo(() => profile.slips.map((slip, index) => {
     const name = `${glyphId}-${profile.unread}-${index}`;
     return slipKeyframes(name, slip, slip.frames, profile.cycleMs);
@@ -105,6 +107,11 @@ export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & 
           </svg>
         )}
       </span>
+      {showCount && unread > 0 && (
+        <span className="messages-nav-glyph__count" data-testid="messages-nav-count">
+          {formatNotificationCount(unread)}
+        </span>
+      )}
     </span>
   );
 }

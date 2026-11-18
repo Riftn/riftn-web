@@ -18,6 +18,15 @@ html:is([data-theme='light'], [data-system-tone='light']) .messages-nav-glyph { 
 .messages-nav-glyph__wave[data-side='1'] { --messages-direction: 1; --messages-delay: 104ms; }
 .messages-nav-glyph__wave[data-echo='1'] { --messages-delay: 325ms; }
 .messages-nav-glyph__wave[data-side='1'][data-echo='1'] { --messages-delay: 429ms; }
+.messages-nav-glyph__count {
+  position: absolute; top: -45%; right: -60%;
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
+  background: var(--messages-red); color: #fff;
+  font-size: 10px; font-weight: 700; line-height: 16px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35);
+  pointer-events: none; z-index: 1;
+}
 .messages-nav-glyph__slip { opacity: 0; transform-box: fill-box; transform-origin: center; }
 
 .messages-nav-glyph[data-unread='true'] .messages-nav-glyph__swing { animation: messages-envelope-swing var(--messages-cycle) ease-in-out infinite; }

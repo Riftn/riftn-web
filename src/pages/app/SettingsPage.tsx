@@ -50,7 +50,7 @@ import Pause from "@/components/ui/cut-icons/pause";
 import SettingsIcon from "@/components/ui/cut-icons/settings";
 import User from "@/components/ui/cut-icons/profile";
 import Bell from "@/components/ui/cut-icons/alerts";
-import { setShowNotificationCount, useShowNotificationCount } from "@/lib/notification-count-pref";
+import { setShowMessagesCount, setShowNotificationCount, useShowMessagesCount, useShowNotificationCount } from "@/lib/notification-count-pref";
 import ThumbsUp from "@/components/ui/cut-icons/like";
 import MessageSquare from "@/components/ui/cut-icons/messages";
 import MessageCircle from "@/components/ui/cut-icons/messages";
@@ -1500,6 +1500,7 @@ function NotificationSettings() {
           </div>
           {/* Off by default: the bell's glow is the standard look. */}
           <NotificationCountRow />
+          <MessagesCountRow />
         </div>
       </div>
 
@@ -3209,6 +3210,22 @@ function NotificationCountRow() {
       description={t('settings.notificationShowCountDesc', 'See how many notifications are unread instead of just the glow')}
       defaultChecked={on}
       onCheckedChange={setShowNotificationCount}
+    />
+  );
+}
+
+/** Same switch for the Messages envelope, off by default. */
+function MessagesCountRow() {
+  const { t } = useTranslation();
+  const on = useShowMessagesCount();
+  return (
+    <SettingToggle
+      icon={MessageSquare}
+      anchor="messages-show-count"
+      title={t('settings.messagesShowCount', 'Show the number on Messages')}
+      description={t('settings.messagesShowCountDesc', 'See how many messages are unread instead of just the glow')}
+      defaultChecked={on}
+      onCheckedChange={setShowMessagesCount}
     />
   );
 }
