@@ -104,6 +104,32 @@ export interface DeHubNotification {
    * NotificationsPage.
    */
   metadata?: NotificationMetadata;
+  /**
+   * The comment this row is about, whole: rows of the comment, reply, mention
+   * and comment-like types carry it when the comment still stands. The list
+   * shows it in full with Reply / Like / Tip; `commentPreview` is the fallback.
+   */
+  comment?: NotificationComment;
+}
+
+export interface NotificationComment {
+  id: number | string;
+  tokenId?: number;
+  address?: string;
+  parentId?: number | null;
+  content?: string;
+  imageUrl?: string;
+  gifUrl?: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  likeCount?: number;
+  dislikeCount?: number;
+  replyCount?: number;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  myReaction?: string | null;
+  createdAt?: string;
 }
 
 /** Only the keys the client reads; the server sends more. */
@@ -167,6 +193,7 @@ interface RawNotification {
   commentPreview?: string;
   parentCommentId?: number;
   metadata?: NotificationMetadata;
+  comment?: NotificationComment;
 }
 
 interface NotificationsApiResponse {
