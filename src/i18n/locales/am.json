@@ -2212,7 +2212,8 @@
       "total": "ጠቅላላ ተደራሽነት",
       "breakdownTitle": "ይህ ተደራሽነት ከየት እንደመጣ",
       "dehubFollowers": "Riftn ተከታዮች",
-      "verified": "ማህበራዊ ቆጠራዎች የሚመነጩት ከፈጣሪው ከተገናኙ መለያዎች ነው ።"
+      "verified": "ማህበራዊ ቆጠራዎች የሚመነጩት ከፈጣሪው ከተገናኙ መለያዎች ነው ።",
+      "selfReported": "የማኅበራዊ መከታተያ ቁጥሮች በፈጣሪ ይካተታሉ ።"
     },
     "loginDescription": "መገለጫህን ለማየትና ለማስተዳደር ግባ።",
     "replyThread": {

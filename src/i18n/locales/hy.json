@@ -2215,7 +2215,8 @@
       "total": "Հասանելիության ընդհանուր գումարը",
       "breakdownTitle": "Որտեղից է գալիս այս հասանելիությունը",
       "dehubFollowers": "ԴեՀյուբի հետևորդներ",
-      "verified": "Սոցիալական հաշվարկները գալիս են ստեղծողի հետ կապ ունեցող հաշիվներից ։"
+      "verified": "Սոցիալական հաշվարկները գալիս են ստեղծողի հետ կապ ունեցող հաշիվներից ։",
+      "selfReported": "Սոցիալական հետևորդների թիվը մուտքագրվում է հեղինակի կողմից:"
     },
     "loginDescription": "Moutq gortsuhr dzer andznagrouytse teselou ev kargatselou hamar.",
     "replyThread": {

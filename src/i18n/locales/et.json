@@ -2213,7 +2213,8 @@
       "total": "Koguhaare",
       "breakdownTitle": "Kust see haare pärineb",
       "dehubFollowers": "Riftni jälgijad",
-      "verified": "Sotsiaalsed arvud pärinevad looja ühendatud kontodelt."
+      "verified": "Sotsiaalsed arvud pärinevad looja ühendatud kontodelt.",
+      "selfReported": "Sotsiaalsete jälgijate arvu sisestab looja."
     },
     "loginDescription": "Logi sisse, et vaadata ja hallata oma profiili.",
     "replyThread": {

@@ -2281,7 +2281,8 @@
       "total": "총 도달 범위",
       "breakdownTitle": "도달 범위의 출처",
       "dehubFollowers": "Riftn 팔로워",
-      "verified": "소셜 수치는 크리에이터가 연결한 계정에서 가져옵니다."
+      "verified": "소셜 수치는 크리에이터가 연결한 계정에서 가져옵니다.",
+      "selfReported": "소셜 팔로워 수는 크리에이터가 입력합니다."
     },
     "loginDescription": "로그인하여 프로필을 관리하세요.",
     "replyThread": {

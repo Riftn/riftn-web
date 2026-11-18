@@ -2202,7 +2202,8 @@
       "total": "Llapan chayay",
       "breakdownTitle": "Maymantataq kay chayay hamun",
       "dehubFollowers": "Riftn qatiqninkuna",
-      "verified": "Social yupaykuna hamun yupaykunamanta kamaq tinkisqa."
+      "verified": "Social yupaykuna hamun yupaykunamanta kamaq tinkisqa.",
+      "selfReported": "Social qatiq yupaykunataqa kamaqmi yaykuchin."
     },
     "loginDescription": "Yaykuy riqsichiykita qhawanaykipaq kamachiynaykipaq.",
     "replyThread": {

@@ -2212,7 +2212,8 @@
       "total": "Abast total",
       "breakdownTitle": "D'on ve aquest abast",
       "dehubFollowers": "Seguidors de Riftn",
-      "verified": "Els recomptes de xarxes socials provenen dels comptes que el creador ha connectat."
+      "verified": "Els recomptes de xarxes socials provenen dels comptes que el creador ha connectat.",
+      "selfReported": "El creador introdueix els recomptes de seguidors socials."
     },
     "loginDescription": "Inicia sessió per veure i gestionar el teu perfil.",
     "replyThread": {

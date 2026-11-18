@@ -2292,7 +2292,8 @@
       "total": "Tổng phạm vi tiếp cận",
       "breakdownTitle": "Phạm vi tiếp cận này đến từ đâu",
       "dehubFollowers": "Người theo dõi Riftn",
-      "verified": "Số liệu mạng xã hội lấy từ các tài khoản nhà sáng tạo đã kết nối."
+      "verified": "Số liệu mạng xã hội lấy từ các tài khoản nhà sáng tạo đã kết nối.",
+      "selfReported": "Người sáng tạo nhập số lượng người theo dõi trên mạng xã hội."
     },
     "loginDescription": "Đăng nhập để xem và quản lý hồ sơ của bạn.",
     "replyThread": {

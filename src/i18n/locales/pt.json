@@ -2345,7 +2345,8 @@
       "total": "Alcance total",
       "breakdownTitle": "De onde vem esse alcance",
       "dehubFollowers": "Seguidores do Riftn",
-      "verified": "Os números sociais vêm de contas que o criador conectou."
+      "verified": "Os números sociais vêm de contas que o criador conectou.",
+      "selfReported": "As contagens de seguidores nas redes sociais são inseridas pelo criador."
     },
     "loginDescription": "Faça login para ver e gerenciar seu perfil.",
     "replyThread": {

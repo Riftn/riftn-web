@@ -2209,7 +2209,8 @@
       "total": "Ingqikithi yokufinyelela",
       "breakdownTitle": "Loku kufinyelela kuvela kuphi",
       "dehubFollowers": "Abalandeli be-Riftn",
-      "verified": "Izibalo zomphakathi zivela kuma-akhawunti axhunywe umsunguli."
+      "verified": "Izibalo zomphakathi zivela kuma-akhawunti axhunywe umsunguli.",
+      "selfReported": "Izibalo zabalandeli zomphakathi zifakwa umsunguli."
     },
     "loginDescription": "Ngena ukubona nokuphatha iphrofayela yakho.",
     "replyThread": {

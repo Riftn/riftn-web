@@ -2224,7 +2224,8 @@
       "total": "TONTOLO IREO",
       "breakdownTitle": "Avy aiza no nihavian'izany",
       "dehubFollowers": "Mpanara-dia an'i Riftn",
-      "verified": "Ny fanisana ara-tsosialy dia avy amin'ny kaonty mifandray amin'ny mpamorona."
+      "verified": "Ny fanisana ara-tsosialy dia avy amin'ny kaonty mifandray amin'ny mpamorona.",
+      "selfReported": "Ny fandrindrana ara-tsosialy dia nampidirina tamin'ny mpamorona."
     },
     "loginDescription": "Midira mba hahitana sy hitantanana ny mombamombanao.",
     "replyThread": {

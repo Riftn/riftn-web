@@ -2208,7 +2208,8 @@
       "total": "Total räckvidd",
       "breakdownTitle": "Varifrån denna räckvidd kommer",
       "dehubFollowers": "Riftn-följare",
-      "verified": "Sociala räkningar kommer från konton som kreatören anslutit."
+      "verified": "Sociala räkningar kommer från konton som kreatören anslutit.",
+      "selfReported": "Antal följare i sociala medier anges av kreatören."
     },
     "loginDescription": "Logga in för att visa och hantera din profil.",
     "replyThread": {
