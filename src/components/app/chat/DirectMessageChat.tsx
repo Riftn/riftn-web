@@ -56,6 +56,7 @@ import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetR
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
+import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useMessages, useSendMessage, useDeleteConversation, useCreateAndStart, messagesKeys, registerOpenConversation, createTransientBlobUrl, peerAddressForConversation, failedSendRetry, discardFailedSend } from '@/hooks/use-messages';
 import { SendStatus } from './SendStatus';
 import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
@@ -722,6 +723,8 @@ const MessageBubble = memo(function MessageBubble({
     );
   };
   const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
+  // Translate also translates every message above this one that still needs it.
+  const translateUp = useTranslateUp('dm', message._id, message.createdAt, canTranslate && !isTranslated && !isTranslating, handleTranslate);
   const menuActions: MessageMenuAction[] = [];
   const holdActions: ChatHoldAction[] = [];
   if (menuable && message.msgType !== 'tip') {
@@ -756,7 +759,7 @@ const MessageBubble = memo(function MessageBubble({
       holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
     }
     if (canTranslate) {
-      const go = isTranslated ? handleShowOriginal : handleTranslate;
+      const go = isTranslated ? handleShowOriginal : translateUp;
       menuActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go, hint: 'T' });
       holdActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go });
     }
@@ -1349,7 +1352,7 @@ const MessageBubble = memo(function MessageBubble({
             (message.msgType === 'msg' || (message.msgType === 'media' && !!message.content)) && (
             <button
               type="button"
-              onClick={isTranslated ? handleShowOriginal : handleTranslate}
+              onClick={isTranslated ? handleShowOriginal : translateUp}
               disabled={isTranslating}
               className="inline-flex items-center gap-0.5 p-1.5 -m-1 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-50"
               title={isTranslated ? _copy("copy.16194a69c43d", { defaultValue: "Show original" }) : _copy("copy.8fe147696fbf", { defaultValue: "Translate" })}
