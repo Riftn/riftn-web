@@ -60,6 +60,8 @@ import { useMessages, useSendMessage, useDeleteConversation, useCreateAndStart, 
 import { SendStatus } from './SendStatus';
 import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
 import { findUnreadAnchor, type UnreadAnchor } from '@/lib/chat-unread-anchor';
+import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
+import { useChatReadPosition } from '@/hooks/use-chat-read-position';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDmSettings } from '@/hooks/use-dm-settings';
 import { useBannedAccount } from '@/hooks/use-banned-account';
@@ -1399,6 +1401,11 @@ function useDmPin(conversationId: string, address: string | undefined, conversat
   return { pinnedMessageId, pinMessage, unpinMessage };
 }
 
+/** History pages (30 lines each) a chat may pull in at open to reach where you left off. */
+const MAX_READ_SPOT_PAGES = 10;
+/** Room above the unread line when a chat opens on it, so the sticky day pill doesn't cover it. */
+const UNREAD_MARKER_TOP_GAP = 48;
+
 export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, options }: DirectMessageChatProps) {
   const { t: _copy } = _useCopy();
   const { user, walletAddress, openLoginModal } = useAuth();
@@ -1805,6 +1812,16 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const messagesRef = useRef(messages);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
+  // Where you left off (server-saved, same on every device). Real chats only:
+  // a chat that is still being created has nothing to come back to.
+  const readChatId = /^[0-9a-f]{24}$/i.test(resolvedConversationId || '') ? resolvedConversationId : null;
+  const readSpot = useChatReadPosition(readChatId);
+  // History pages pulled in at open to reach the spot (30 lines a page).
+  const readSpotPagesRef = useRef(0);
+  // Saving starts once the chat has been placed, so the jump to the bottom on
+  // open never counts as having read everything.
+  const readTrackingRef = useRef(false);
+
   const pinnedMessage = pinnedMessageId ? messages.find(m => m._id === pinnedMessageId) ?? null : null;
 
   /**
@@ -1866,34 +1883,95 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   // Emit markAsRead (socket) + scroll on initial load
   useEffect(() => {
-    if (isInitialMount.current && messages.length > 0) {
+    if (isInitialMount.current && messages.length > 0 && readSpot.ready) {
       const ownAddress = walletAddress?.toLowerCase();
       const ownId = user?._id;
-      const anchor = findUnreadAnchor(
-        messages.map((m) => {
-          const a = m.sender?.address?.toLowerCase();
-          const id = m.sender?._id;
-          return {
-            id: m._id,
-            own: m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId),
-            isRead: m.isRead,
-            skip: !!m.isDeleted || !!m.undecryptable || m._id.startsWith('temp-'),
-          };
-        }),
-        unreadAtOpenRef.current,
-      );
+      const lines = messages.map((m) => {
+        const a = m.sender?.address?.toLowerCase();
+        const id = m.sender?._id;
+        return {
+          id: m._id,
+          own: m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId),
+          isRead: m.isRead,
+          at: m.createdAt,
+          skip: !!m.isDeleted || !!m.undecryptable || m._id.startsWith('temp-'),
+        };
+      });
+      let anchor: UnreadAnchor | null = null;
+      if (readSpot.opening) {
+        // Open on the line after where you left off, wherever that is.
+        const found = anchorFromReadSpot(lines, readSpot.opening, !!hasNextPage);
+        if (found.kind === 'older') {
+          if (readSpotPagesRef.current < MAX_READ_SPOT_PAGES) {
+            if (!isFetchingNextPage) {
+              readSpotPagesRef.current += 1;
+              void fetchNextPage();
+            }
+            return;
+          }
+          // Too far back to pull in at once: open on the oldest loaded unread line.
+          const theirs = lines.filter((l) => !l.own && !l.skip);
+          if (theirs.length) anchor = { id: theirs[0].id, ids: theirs.map((l) => l.id), count: Math.max(theirs.length, unreadAtOpenRef.current) };
+        } else if (found.kind === 'anchor') {
+          anchor = found.anchor;
+        }
+      } else {
+        // No spot saved yet for this chat: fall back to the read flags.
+        anchor = findUnreadAnchor(lines, unreadAtOpenRef.current);
+      }
       // Scroll ONLY this container — scrollIntoView scrolls every ancestor,
       // dragging the page itself down and parking dead space under composer.
       // With unread lines the layout effect below opens on the marker instead.
       const container = scrollContainerRef.current;
-      if (anchor) setUnreadAnchor(anchor);
-      else if (container) container.scrollTop = container.scrollHeight;
+      if (anchor) {
+        setUnreadAnchor(anchor);
+        // The marker normally places itself at once; never leave saving off.
+        window.setTimeout(() => { readTrackingRef.current = true; }, 1500);
+      } else {
+        if (container) container.scrollTop = container.scrollHeight;
+        readTrackingRef.current = true;
+      }
       isInitialMount.current = false;
       prevLastMessageIdRef.current = messages[messages.length - 1]?._id ?? null;
       markAsRead();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length, markAsRead]);
+  }, [messages.length, markAsRead, readSpot.ready, isFetchingNextPage]);
+
+  /** Saves the newest line that is on screen as where you left off. */
+  const reportReadSpot = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !readTrackingRef.current || !readChatId) return;
+    const list = messagesRef.current;
+    const ids: string[] = [];
+    for (let i = list.length - 1; i >= 0; i--) {
+      const m = list[i];
+      if (!m._id.startsWith('temp-') && m.createdAt) ids.push(m._id);
+    }
+    const id = newestLineOnScreen(container, ids, (x) => container.querySelector<HTMLElement>(`[id="dm-msg-${x}"]`));
+    if (!id) return;
+    const line = list.find((m) => m._id === id);
+    if (line?.createdAt) readSpot.report(line._id, line.createdAt);
+  }, [readChatId, readSpot.report]);
+  const readReportFrame = useRef(0);
+  const scheduleReadReport = useCallback(() => {
+    if (readReportFrame.current) return;
+    readReportFrame.current = requestAnimationFrame(() => {
+      readReportFrame.current = 0;
+      reportReadSpot();
+    });
+  }, [reportReadSpot]);
+  useEffect(() => () => cancelAnimationFrame(readReportFrame.current), []);
+  // New lines landing while you sit at the bottom are read as they arrive.
+  useEffect(() => {
+    const timer = window.setTimeout(scheduleReadReport, 400);
+    return () => window.clearTimeout(timer);
+  }, [messages, scheduleReadReport]);
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') scheduleReadReport(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [scheduleReadReport]);
 
   /** Top of the unread marker relative to the visible top of the thread, or null. */
   const unreadMarkerOffset = useCallback((): number | null => {
@@ -1930,8 +2008,10 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const offset = unreadMarkerOffset();
     if (!container || offset === null) return;
     unreadPlacedRef.current = true;
-    container.scrollTop = Math.max(0, container.scrollTop + offset - 8);
+    container.scrollTop = Math.max(0, container.scrollTop + offset - UNREAD_MARKER_TOP_GAP);
     refreshUnreadJump();
+    readTrackingRef.current = true;
+    scheduleReadReport();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadAnchor, unreadMarkerOffset]);
 
@@ -1949,7 +2029,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const container = scrollContainerRef.current;
     const offset = unreadMarkerOffset();
     if (!container || offset === null) return;
-    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - 8), behavior: 'smooth' });
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - UNREAD_MARKER_TOP_GAP), behavior: 'smooth' });
     setUnreadMarkerSeen(true);
   }, [unreadMarkerOffset]);
 
@@ -2394,6 +2474,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     setShowJumpToLatest(distanceFromBottom > 100);
     if (distanceFromBottom < 50) setNewMessageCount(0);
     scheduleUnreadJump();
+    scheduleReadReport();
 
     if (container.scrollTop < 100 && hasNextPage && !isFetchingNextPage) {
       const previousHeight = container.scrollHeight;
@@ -2409,7 +2490,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         });
       });
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, scheduleUnreadJump]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, scheduleUnreadJump, scheduleReadReport]);
 
   const scrollToBottom = () => {
     // Container-scoped — scrollIntoView would drag the page down with it.
