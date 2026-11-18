@@ -7346,3 +7346,15 @@ html[data-theme="light"] [data-chat-unread-marker] [data-unread-hairline],
 html[data-system-tone="light"] [data-chat-unread-marker] [data-unread-hairline] {
   --tw-gradient-to: rgba(0, 0, 0, 0.22) var(--tw-gradient-to-position) !important;
 }
+
+/* Chat MOD chip: the quiet grey chip the app's live chat uses, on every
+   theme, in place of the old green one. */
+[data-chat-mod-badge] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+}
+html[data-theme="light"] [data-chat-mod-badge],
+html[data-system-tone="light"] [data-chat-mod-badge] {
+  background: rgba(9, 9, 11, 0.08);
+  color: #3f3f46;
+}

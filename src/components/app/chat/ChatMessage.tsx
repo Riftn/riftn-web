@@ -145,8 +145,10 @@ function ModeratorBadge({ address, moderators }: { address: string; moderators?:
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold bg-emerald-400/10 rounded px-1 py-0.5">
-          <ShieldCheck className="w-3 h-3" />{_copy("copy.a4d1abed0b2b", { defaultValue: "MOD" })}</span>
+        {/* Same quiet grey chip as the app's live chat (see index.css
+            [data-chat-mod-badge]); one look for every theme. */}
+        <span data-chat-mod-badge className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold leading-none">
+          {_copy("copy.a4d1abed0b2b", { defaultValue: "MOD" })}</span>
       </TooltipTrigger>
       <TooltipContent>{_copy("copy.6748ec8b7668", { defaultValue: "Moderator" })}</TooltipContent>
     </Tooltip>
