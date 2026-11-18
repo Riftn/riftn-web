@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 // raw / 1.7 MB gz, downloaded by every organic /guides/* visitor.
 import { en } from '@/i18n/en';
 import appI18n, { loadLanguage, preferredLanguage } from '@/i18n';
+import { applyResolvedLanguage } from '@/lib/user-language-store';
 
 export type Language = 'en' | 'ar' | 'zh' | 'zh_tw' | 'tr' | 'es' | 'de' | 'fr' | 'bn' | 'ru' | 'pt' | 'hi' | 'ja' | 'ko' | 'id' | 'it' | 'nl' | 'pl' | 'vi' | 'th' | 'uk' | 'sw' | 'ms' | 'fa' | 'ta' | 'ur' | 'tl' | 'ro' | 'cs' | 'el' | 'hu' | 'gsw' | 'hr' | 'sv' | 'no' | 'da' | 'fi' | 'he' | 'zu' | 'qu' | 'ht' | 'yo' | 'am' | 'ig' | 'ha' | 'ka' | 'uz' | 'kk' | 'om' | 'my' | 'si' | 'be' | 'km' | 'ne' | 'pa' | 'te' | 'mr' | 'sr' | 'bg' | 'sk' | 'lo' | 'cjy' | 'aec' | 'mag' | 'skr' | 'hne' | 'acm' | 'tts' | 'acw' | 'ctg' | 'dcc' | 'dyu' | 'sck' | 'wes' | 'syl' | 'ajp' | 'ayn' | 'mnp' | 'pbt' | 'rkt' | 'mn' | 'bo' | 'lv' | 'et' | 'lt' | 'mi' | 'ca' | 'az' | 'ku' | 'jv' | 'so' | 'af' | 'kn' | 'yue' | 'wuu' | 'ti' | 'bho' | 'arz' | 'apd' | 'ary' | 'pcm' | 'ceb' | 'ml' | 'sd';
 
@@ -264,6 +265,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.setItem('docs-language', lang);
       localStorage.setItem('user-preferred-language', lang);
     } catch { /* The current visit still uses the selected language. */ }
+    applyResolvedLanguage(lang);
     void loadLanguage(lang).then(ok => { if (ok && request === selection.current) void appI18n.changeLanguage(lang); });
   }, []);
 

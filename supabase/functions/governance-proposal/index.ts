@@ -16,6 +16,9 @@
 // A proposal may carry one image or video, uploaded by the browser to the
 // public `feature-media` bucket under the author's own wallet folder. Only a
 // URL in that folder is accepted.
+//
+// A proposal is a yes/no vote unless it lists `options`: two to six answers,
+// and each voter then picks one of them (see governance-vote).
 
 import { handleCorsPreflight, jsonResponse, guardPaidEndpoint, serviceClient } from "../_shared/auth.ts";
 import { claimDhbPayment } from "../_shared/dhb-transfer.ts";
@@ -23,6 +26,31 @@ import { resolveVoteWeight } from "../_shared/badge-weight.ts";
 
 const PROPOSAL_FEE_DHB = 10000;
 const VOTING_WINDOW_DAYS = 7;
+const MIN_OPTIONS = 2;
+const MAX_OPTIONS = 6;
+const MAX_OPTION_LENGTH = 80;
+
+/**
+ * The answers of a multiple choice proposal, or null for a yes/no one.
+ * Returns a string when the list is unusable, to be sent back as the reason.
+ */
+function parseOptions(raw: unknown): string[] | null | string {
+  if (raw === undefined || raw === null) return null;
+  if (!Array.isArray(raw)) return "Answers must be a list.";
+  const options = raw.map((value) => (typeof value === "string" ? value.trim().replace(/\s+/g, " ") : ""));
+  if (options.length === 0) return null;
+  if (options.length < MIN_OPTIONS || options.length > MAX_OPTIONS) {
+    return `A multiple choice proposal needs ${MIN_OPTIONS} to ${MAX_OPTIONS} answers.`;
+  }
+  if (options.some((option) => !option)) return "Every answer needs some text.";
+  if (options.some((option) => option.length > MAX_OPTION_LENGTH)) {
+    return `Answers can be up to ${MAX_OPTION_LENGTH} characters.`;
+  }
+  if (new Set(options.map((option) => option.toLowerCase())).size !== options.length) {
+    return "Two answers are the same. Make each one different.";
+  }
+  return options;
+}
 
 Deno.serve(async (req) => {
   const preflight = handleCorsPreflight(req);
@@ -34,7 +62,14 @@ Deno.serve(async (req) => {
   if (!auth.ok) return auth.response;
   const wallet = auth.wallet;
 
-  let body: { title?: unknown; description?: unknown; txHash?: unknown; mediaUrl?: unknown; mediaType?: unknown };
+  let body: {
+    title?: unknown;
+    description?: unknown;
+    txHash?: unknown;
+    mediaUrl?: unknown;
+    mediaType?: unknown;
+    options?: unknown;
+  };
   try {
     body = await req.json();
   } catch {
@@ -49,6 +84,10 @@ Deno.serve(async (req) => {
   if (!description || description.length > 5000) {
     return jsonResponse({ error: "A description of up to 5000 characters is required." }, 400);
   }
+
+  // Checked before any fee is claimed, so a bad answer list never costs DHB.
+  const options = parseOptions(body.options);
+  if (typeof options === "string") return jsonResponse({ error: options }, 400);
 
   const mediaUrl = typeof body.mediaUrl === "string" ? body.mediaUrl.trim() : "";
   const mediaType = body.mediaType === "image" || body.mediaType === "video" ? body.mediaType : null;
@@ -105,6 +144,10 @@ Deno.serve(async (req) => {
     row.media_url = mediaUrl;
     row.media_type = mediaType;
   }
+  if (options) {
+    row.options = options;
+    row.option_tallies = options.map(() => ({ weight: 0, voters: 0 }));
+  }
 
   const insert = (values: Record<string, unknown>) =>
     supabase.from("governance_proposals").insert(values).select().single();
@@ -113,6 +156,13 @@ Deno.serve(async (req) => {
 
   // Media columns not migrated yet: keep the proposal, drop the attachment.
   const code = (error as { code?: string } | null)?.code;
+  // A multiple choice proposal without its answers would turn into a yes/no
+  // vote nobody asked for, so that one is refused instead of trimmed.
+  if (error && options && (code === "PGRST204" || code === "42703")) {
+    return jsonResponse({
+      error: "Multiple choice isn't available yet. Your draft is kept, try again in a few minutes.",
+    }, 503);
+  }
   if (error && mediaUrl && (code === "PGRST204" || code === "42703")) {
     delete row.media_url;
     delete row.media_type;

@@ -61,6 +61,8 @@ import {
 import { ProposalDiscussion } from '@/components/app/governance/ProposalDiscussion';
 import { useProposalShare } from '@/components/app/governance/useProposalShare';
 import { ProposalMedia } from '@/components/app/governance/ProposalMedia';
+import { ProposalOptions, isMultipleChoice } from '@/components/app/governance/ProposalOptions';
+import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
 import { z } from 'zod';
 
 type PageTab = 'proposals' | 'passed' | 'rejected';
@@ -84,7 +86,9 @@ function formatTimeAgo(dateStr: string, t: (key: string, opts?: any) => string):
 function GovernanceCard({
   proposal,
   currentVote,
+  currentOption,
   onVote,
+  onVoteOption,
   voteDisabled,
   userBadgeBalance,
   username,
@@ -92,7 +96,10 @@ function GovernanceCard({
 }: {
   proposal: GovernanceProposal;
   currentVote: number | undefined;
+  /** The viewer's answer on a multiple choice proposal. */
+  currentOption?: number | null;
   onVote: (proposalId: string, voteType: 1 | -1, currentVote: number | undefined) => void;
+  onVoteOption?: (proposalId: string, optionIndex: number) => void;
   voteDisabled: boolean;
   userBadgeBalance: number | undefined;
   username: string | null | undefined;
@@ -135,6 +142,7 @@ function GovernanceCard({
   // The window can run out before the cron pass flips the row, so the buttons
   // read the clock rather than only the status.
   const votingClosed = isVotingClosed(proposal);
+  const multiple = isMultipleChoice(proposal);
 
   return (
     <div
@@ -176,8 +184,15 @@ function GovernanceCard({
           <TranslatableText publicContent text={proposal.description} className="text-zinc-400 text-sm leading-relaxed" as="p" hideControls />
           <ProposalMedia url={proposal.media_url} type={proposal.media_type} alt={proposal.title} />
 
-        {/* Vote ratio bar */}
-        {(() => {
+        {/* Answers on a multiple choice proposal, the for/against bar otherwise */}
+        {multiple ? (
+          <ProposalOptions
+            proposal={proposal}
+            myOption={currentOption}
+            onVote={onVoteOption ? (i) => onVoteOption(proposal.id, i) : undefined}
+            disabled={voteDisabled || votingClosed}
+          />
+        ) : (() => {
           const total = (proposal.like_count ?? 0) + (proposal.dislike_count ?? 0);
           const forPct = total > 0 ? Math.round(((proposal.like_count ?? 0) / total) * 100) : 50;
           const againstPct = 100 - forPct;
@@ -219,6 +234,7 @@ function GovernanceCard({
             commentCount={proposal.comment_count}
             voteWeight={userWeight}
             disabled={voteDisabled || votingClosed}
+            hideVotes={multiple}
             {...share.actionBarProps}
           />
           {share.quoteComposer}
@@ -301,6 +317,9 @@ function SubmitProposalDrawer({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Yes/no stays the default; multiple choice lists two to six answers.
+  const [answerType, setAnswerType] = useSurfaceDraft<'yesno' | 'multiple'>("pages/app/GovernancePage.tsx:answerType", 'yesno');
+  const [options, setOptions] = useSurfaceDraft<string[]>("pages/app/GovernancePage.tsx:options", ['', '']);
   const { walletAddress } = useAuth();
   const { weight: selfWeight } = useSelfVoteWeight();
 
@@ -326,22 +345,34 @@ function SubmitProposalDrawer({
 
   const handleSubmit = () => {
     const result = proposalSchema.safeParse({ title, description });
+    const fieldErrors: Record<string, string> = {};
     if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
       for (const issue of result.error.issues) {
         fieldErrors[issue.path[0] as string] = issue.message;
       }
+    }
+    const answers = answerType === 'multiple' ? options.map((o) => o.trim().replace(/\s+/g, ' ')) : null;
+    if (answers) {
+      if (answers.some((o) => !o)) {
+        fieldErrors.options = t('governance.optionsEmpty', 'Fill in every answer, or remove the empty one.');
+      } else if (new Set(answers.map((o) => o.toLowerCase())).size !== answers.length) {
+        fieldErrors.options = t('governance.optionsDuplicate', 'Two answers are the same. Make each one different.');
+      }
+    }
+    if (!result.success || Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
       return;
     }
     setErrors({});
     submitMutation.mutate(
-      { title: result.data.title, description: result.data.description, media },
+      { title: result.data.title, description: result.data.description, media, options: answers },
       {
         onSuccess: () => {
           setTitle.complete(title, '');
           setDescription.complete(description, '');
           setMedia.complete(media, null);
+          setAnswerType.complete(answerType, 'yesno');
+          setOptions.complete(options, ['', '']);
           onOpenChange(false);
         },
       }
@@ -395,6 +426,14 @@ function SubmitProposalDrawer({
               <span className="text-zinc-500 text-[11px] ml-auto">{description.length}/1000</span>
             </div>
           </div>
+
+          <ProposalAnswersEditor
+            answerType={answerType}
+            onAnswerTypeChange={setAnswerType}
+            options={options}
+            onOptionsChange={setOptions}
+            error={errors.options}
+          />
 
           <div>
             <input
@@ -657,6 +696,28 @@ export default function GovernancePage() {
     [isAuthenticated, openLoginModal, voteMutation, selfWeight, selfBadge, selfLent, explainCannotVote]
   );
 
+  const handleVoteOption = useCallback(
+    (proposalId: string, optionIndex: number) => {
+      if (!isAuthenticated) {
+        openLoginModal();
+        return;
+      }
+      if (selfWeight === 0) {
+        explainCannotVote(selfLent);
+        return;
+      }
+      voteMutation.mutate({
+        proposalId,
+        voteType: 1,
+        currentVote: userVotes?.[proposalId]?.type,
+        voteWeight: selfWeight,
+        badgeName: selfBadge,
+        optionIndex,
+      });
+    },
+    [isAuthenticated, openLoginModal, voteMutation, selfWeight, selfBadge, selfLent, explainCannotVote, userVotes]
+  );
+
   const handleSubmitClick = () => {
     if (!isAuthenticated) {
       openLoginModal();
@@ -749,7 +810,9 @@ export default function GovernancePage() {
                   key={proposal.id}
                   proposal={proposal}
                   currentVote={userVotes?.[proposal.id]?.type}
+                  currentOption={userVotes?.[proposal.id]?.option}
                   onVote={handleVote}
+                  onVoteOption={handleVoteOption}
                   voteDisabled={voteMutation.isPending}
                   userBadgeBalance={userBadgeBalance}
                   username={username}
@@ -790,7 +853,9 @@ export default function GovernancePage() {
                   key={proposal.id}
                   proposal={proposal}
                   currentVote={userVotes?.[proposal.id]?.type}
+                  currentOption={userVotes?.[proposal.id]?.option}
                   onVote={handleVote}
+                  onVoteOption={handleVoteOption}
                   voteDisabled
                   userBadgeBalance={userBadgeBalance}
                   username={username}
@@ -816,7 +881,9 @@ export default function GovernancePage() {
                   key={proposal.id}
                   proposal={proposal}
                   currentVote={userVotes?.[proposal.id]?.type}
+                  currentOption={userVotes?.[proposal.id]?.option}
                   onVote={handleVote}
+                  onVoteOption={handleVoteOption}
                   voteDisabled
                   userBadgeBalance={userBadgeBalance}
                   username={username}

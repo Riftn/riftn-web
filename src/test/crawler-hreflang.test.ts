@@ -335,9 +335,10 @@ describe('wiring', () => {
     }
   });
 
-  it('the app honours ?hl= on arrival and keeps it', () => {
+  it('the app honours ?hl= on arrival without saving it as the preference', () => {
     expect(I18N_INDEX).toContain("get('hl')");
-    expect(I18N_INDEX).toContain('localStorage.setItem(STORAGE_KEY, urlLang)');
+    expect(I18N_INDEX).toContain('if (urlLang) defaultLang = urlLang;');
+    expect(I18N_INDEX).not.toContain('localStorage.setItem(STORAGE_KEY, urlLang)');
     expect(I18N_INDEX).toMatch(/let defaultLang = savedLang \|\| browserLang;/);
   });
 });

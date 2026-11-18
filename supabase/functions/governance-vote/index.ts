@@ -14,6 +14,10 @@
 // Writes go through the service role because the vote table no longer grants
 // INSERT/UPDATE/DELETE to anyone else. Tallies stay where they were: the
 // `on_governance_vote_change` trigger re-sums the table after every write.
+//
+// A multiple choice proposal (one with `options`) takes `optionIndex` instead
+// of a side: the answer picked, 0-based. It is stored as a vote_type 1 row
+// with that index, and picking the same answer again withdraws it.
 
 import { handleCorsPreflight, jsonResponse, guardPaidEndpoint, serviceClient } from "../_shared/auth.ts";
 import { resolveVoteWeight } from "../_shared/badge-weight.ts";
@@ -30,7 +34,7 @@ Deno.serve(async (req) => {
   if (!auth.ok) return auth.response;
   const wallet = auth.wallet;
 
-  let body: { proposalId?: unknown; voteType?: unknown };
+  let body: { proposalId?: unknown; voteType?: unknown; optionIndex?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -40,7 +44,11 @@ Deno.serve(async (req) => {
   const proposalId = typeof body.proposalId === "string" ? body.proposalId : "";
   const voteType = body.voteType;
   if (!/^[0-9a-f-]{36}$/i.test(proposalId)) return jsonResponse({ error: "A proposal id is required." }, 400);
-  if (voteType !== 1 && voteType !== -1 && voteType !== 0) {
+  const optionIndex = body.optionIndex === undefined || body.optionIndex === null ? null : body.optionIndex;
+  if (optionIndex !== null && (typeof optionIndex !== "number" || !Number.isInteger(optionIndex) || optionIndex < 0)) {
+    return jsonResponse({ error: "optionIndex must be a whole number." }, 400);
+  }
+  if (optionIndex === null && voteType !== 1 && voteType !== -1 && voteType !== 0) {
     return jsonResponse({ error: "voteType must be 1, -1 or 0." }, 400);
   }
 
@@ -48,7 +56,7 @@ Deno.serve(async (req) => {
 
   const { data: proposal, error: lookupError } = await supabase
     .from("governance_proposals")
-    .select("id, status, voting_ends_at")
+    .select("*")
     .eq("id", proposalId)
     .maybeSingle();
   if (lookupError) {
@@ -64,18 +72,35 @@ Deno.serve(async (req) => {
     || (proposal.voting_ends_at ? Date.parse(proposal.voting_ends_at) <= Date.now() : false);
   if (closed) return jsonResponse({ error: "Voting on this proposal has closed." }, 409);
 
+  const options: string[] | null = Array.isArray(proposal.options) && proposal.options.length > 0
+    ? proposal.options
+    : null;
+  if (options) {
+    if (optionIndex === null && voteType !== 0) {
+      return jsonResponse({ error: "Pick one of the answers to vote." }, 400);
+    }
+    if (optionIndex !== null && optionIndex >= options.length) {
+      return jsonResponse({ error: "That answer isn't on this proposal." }, 400);
+    }
+  } else if (optionIndex !== null) {
+    return jsonResponse({ error: "This proposal is a yes or no vote." }, 400);
+  }
+
   // Clicking the side you already voted for withdraws the vote. That toggle is
   // decided here, against the stored row, rather than from the client's idea
   // of its own current vote — which is a render behind and, when it was wrong,
   // turned a withdrawal into a re-vote.
   const { data: existing } = await supabase
     .from("governance_votes")
-    .select("vote_type")
+    .select(options ? "vote_type, option_index" : "vote_type")
     .eq("proposal_id", proposalId)
     .eq("wallet_address", wallet)
     .maybeSingle();
 
-  const withdrawing = voteType === 0 || existing?.vote_type === voteType;
+  const withdrawing = options
+    ? voteType === 0 || optionIndex === null
+      || (existing as { option_index?: number | null } | null)?.option_index === optionIndex
+    : voteType === 0 || existing?.vote_type === voteType;
 
   if (withdrawing) {
     const { error } = await supabase
@@ -107,9 +132,11 @@ Deno.serve(async (req) => {
       {
         proposal_id: proposalId,
         wallet_address: wallet,
-        vote_type: voteType,
+        vote_type: options ? 1 : voteType,
         vote_weight: weight,
         badge_name: badgeName,
+        // Only on multiple choice rows, so yes/no votes never touch the column.
+        ...(options ? { option_index: optionIndex } : {}),
       },
       { onConflict: "proposal_id,wallet_address" },
     );
@@ -118,5 +145,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Could not record that vote." }, 500);
   }
 
-  return jsonResponse({ success: true, action: "voted", weight, badgeName });
+  return jsonResponse({
+    success: true,
+    action: "voted",
+    weight,
+    badgeName,
+    ...(options ? { optionIndex } : {}),
+  });
 });

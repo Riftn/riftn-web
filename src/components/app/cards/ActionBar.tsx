@@ -142,6 +142,12 @@ interface ActionBarProps {
    * has no row to write for them.
    */
   disableReactions?: boolean;
+  /**
+   * Hide the thumbs entirely. A multiple choice governance proposal votes
+   * through its own answer list, so a like/dislike pair beside it would be a
+   * second, meaningless vote.
+   */
+  hideVotes?: boolean;
   /** Hide the dislike button (e.g., for images) */
   hideDislike?: boolean;
   /** Like count to display */
@@ -376,6 +382,7 @@ export function ActionBar({
   myReaction: initialMyReaction = null,
   reactionCounts: initialReactionCounts = null,
   disableReactions = false,
+  hideVotes = false,
   hideDislike = false,
   likeCount,
   dislikeCount,
@@ -1023,7 +1030,7 @@ export function ActionBar({
           governance proposals and feature requests vote through their own
           onLike/onDislike. On a post, 👎 is the last item of the thumbs-up's
           tray instead. */}
-      {!hideDislike && !compact && !reactionsEnabled && (
+      {!hideVotes && !hideDislike && !compact && !reactionsEnabled && (
         <span className={cn("relative flex items-center gap-0.5", isVoting && "opacity-50")}>
           <motion.button
             onClick={() => handleVote(false)}
@@ -1090,6 +1097,7 @@ export function ActionBar({
           your own posts the tray ends in an ⓘ that opens the breakdown of who
           reacted what; the count itself is inert text, since who reacted is
           not public. The wrapper is `relative` so the tray anchors to it. */}
+      {!hideVotes && (
       <span
         className={cn("relative flex items-center gap-0.5", isVoting && "opacity-50")}
         {...likeTray.areaProps}
@@ -1162,6 +1170,7 @@ export function ActionBar({
           )}
         </motion.button>
       </span>
+      )}
     </>
   );
 

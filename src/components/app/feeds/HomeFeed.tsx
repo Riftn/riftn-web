@@ -607,6 +607,9 @@ function nftToFeedItem(pinnedPost: any): FeedItemType {
     }
 }
 
+/** Time away from the tab after which the feed at the top is fetched again on return. */
+const FEED_RESUME_REFRESH_MS = 5 * 60_000;
+
 export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters = false, pinnedPostId, filtersPortalRef, chipsPortalRef }: HomeFeedProps) {
   const { t: _copy } = _useCopy();
   const navigate = useNavigate();
@@ -1175,6 +1178,39 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
     // window.scrollTo is a no-op here — body is the scrolling element.
     scrollDocumentTo(0);
   }, [queryClient, singleFeed, latestNewAt]);
+
+  // Back on the tab after a while away: the list still held what it fetched
+  // before the phone was put down, and nothing asked again (refetchOnWindowFocus
+  // is off), so a tab left open overnight came back to last night's feed at the
+  // top. A reader at the top gets the current feed; one who had scrolled down
+  // keeps their place and gets the new-posts chip from the head poll.
+  const resumeRef = useRef({ isHomeActive, refetch: () => { void singleFeed.refetch(); } });
+  resumeRef.current.isHomeActive = isHomeActive;
+  resumeRef.current.refetch = () => { void singleFeed.refetch(); };
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    let hiddenAt = document.visibilityState === 'hidden' ? Date.now() : 0;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        if (!hiddenAt) hiddenAt = Date.now();
+        return;
+      }
+      if (!hiddenAt) return;
+      const away = Date.now() - hiddenAt;
+      hiddenAt = 0;
+      if (away < FEED_RESUME_REFRESH_MS || !resumeRef.current.isHomeActive) return;
+      const top = Math.max(window.scrollY || 0, document.body?.scrollTop || 0, document.documentElement?.scrollTop || 0);
+      if (top > 100) return;
+      queryClient.setQueriesData({ queryKey: ['unified-feed'] }, (old: any) =>
+        old?.pages?.length > 1
+          ? { ...old, pages: old.pages.slice(0, 1), pageParams: old.pageParams.slice(0, 1) }
+          : old
+      );
+      resumeRef.current.refetch();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [queryClient]);
 
   // Classics feed no longer needed (trending removed)
   const classicsFeed = { data: undefined } as any;
