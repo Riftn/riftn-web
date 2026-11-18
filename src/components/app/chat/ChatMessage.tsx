@@ -8,9 +8,9 @@ import SearchIcon from '@/components/ui/cut-icons/search';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from './message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { ShieldBan, MoreVertical, Loader2, RotateCcw, SmilePlus, CornerDownRight } from "lucide-react";
+import { ShieldBan, Loader2, RotateCcw, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import Languages from "@/components/ui/cut-icons/language";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -32,20 +32,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { VoiceWaveformPlayer } from './VoiceWaveformPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
-import { MoreReactionsButton } from './MoreReactionsButton';
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
@@ -258,7 +246,6 @@ export const ChatMessage = memo(function ChatMessage({
   const { t: _copy } = _useCopy();
   const navigate = useStableNavigate();
   const queryClient = useQueryClient();
-  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useDraftState(`chat:edit:${message.id}`, message.content);
@@ -328,7 +315,6 @@ export const ChatMessage = memo(function ChatMessage({
     } else {
       onReact?.(message.id, emoji);
     }
-    setEmojiPickerOpen(false);
   }, [message.id, message.reactions, currentUserAddress, onReact, onRemoveReaction]);
 
   const isClickable = !!message.userHandle;
@@ -491,143 +477,10 @@ export const ChatMessage = memo(function ChatMessage({
           </span>
           <ModeratorBadge address={message.userId} moderators={moderators} />
 
-          {/* Action buttons - visible on hover */}
-          <div data-chat-hover-actions className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-            {/* Reply button */}
-            {onReply && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onReply(message)}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <Reply className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Reaction picker */}
-            {onReact && (
-              <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <PopoverTrigger asChild>
-                      <button className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50">
-                        <SmilePlus className="w-3.5 h-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>{_copy("copy.01fad993ff61", { defaultValue: "React" })}</TooltipContent>
-                </Tooltip>
-                <PopoverContent
-                  side="top"
-                  align="end"
-                  className="w-auto p-1.5 bg-zinc-800 border-zinc-700 rounded-xl"
-                >
-                  <div className="flex gap-0.5">
-                    {QUICK_CHAT_REACTIONS.map((emoji) => {
-                      const isActive = currentUserAddress && message.reactions?.[emoji]?.some(
-                        (a) => a.toLowerCase() === currentUserAddress.toLowerCase()
-                      );
-                      return (
-                        <button
-                          key={emoji}
-                          onClick={() => handleQuickReact(emoji)}
-                          className={`w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-colors ${
-                            isActive ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'
-                          }`}
-                        >
-                          {emoji}
-                        </button>
-                      );
-                    })}
-                    <MoreReactionsButton
-                      onPick={handleQuickReact}
-                      reactions={message.reactions}
-                      viewerAddress={currentUserAddress}
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-
-            {onSeeMessages && !message.sendState && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onSeeMessages(message)}
-                    aria-label={_copy('chatSearch.seeTheirMessages', { defaultValue: 'See their messages' })}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <SearchIcon className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy('chatSearch.seeTheirMessages', { defaultValue: 'See their messages' })}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Your own message — edit and remove, no moderator rights needed */}
-            {canEdit && !isEditing && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={startEditing}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}</TooltipContent>
-              </Tooltip>
-            )}
-            {canDelete && !showActions && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onDelete?.(message.id)}
-                    className="p-1 text-zinc-500 hover:text-red-400 transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Mod actions */}
-            {showActions && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50">
-                    <MoreVertical className="w-3.5 h-3.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[140px]">
-                  {onDelete && (
-                    <DropdownMenuItem
-                      onClick={() => onDelete(message.id)}
-                      className="text-red-400 rounded-lg cursor-pointer focus:bg-transparent focus:text-red-300 gap-2"
-                    >
-                      <Trash2 className="w-4 h-4" />{_copy("copy.43e94c3cb95e", { defaultValue: "Delete Message" })}</DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => onBan?.(message.userId, message.userName)}
-                    className="text-red-400 rounded-lg cursor-pointer focus:bg-transparent focus:text-red-300 gap-2"
-                  >
-                    <ShieldBan className="w-4 h-4" />{_copy("copy.b77b03efec27", { defaultValue: "Ban User" })}</DropdownMenuItem>
-                  {onUnban && (
-                    <DropdownMenuItem
-                      onClick={() => onUnban(message.userId, message.userName)}
-                      className="text-emerald-400 rounded-lg cursor-pointer focus:bg-transparent focus:text-emerald-300 gap-2"
-                    >
-                      <ShieldCheck className="w-4 h-4" />{_copy("copy.7da3f7886c54", { defaultValue: "Unban User" })}</DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
+          {/* Everything lives in the message menu (right-click, or this "..." for keyboard). */}
+          {canHold && !isEditing && (
+            <MessageMoreButton className="ml-auto self-center" onOpen={menuPoint.openAt} />
+          )}
         </div>
         
         {message.type === 'text' && isEditing && (
