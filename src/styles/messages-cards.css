@@ -107,20 +107,29 @@
   }
   [data-msg-cards] [data-msg-cards-tab-count][data-quiet] { background: var(--mc-soft); color: inherit; }
 
-  /* The list: cards with gaps, lined up with the pill's edges. */
+  /* The list: cards 16px apart, lined up with the pill's edges, both 24px
+     in from the panel (the B concept's spacing). The rows live in
+     [data-chat-list-body] (the pull-to-refresh wrapper), so the gap sits there. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
   [data-msg-cards] [data-chat-list-scroll] {
+    padding: 18px 24px 16px !important;
+  }
+  [data-msg-cards] [data-chat-list-body] {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 10px 12px 12px !important;
+    gap: 16px;
   }
   [data-msg-cards][data-msg-cards-picking] [data-chat-list-scroll] { padding-bottom: 96px !important; }
-  [data-msg-cards] [data-chat-list-scroll] > :is(p, div:not([data-chat-row]):not(:has([data-chat-list-row]))) { flex-shrink: 0; }
+  [data-msg-cards] [data-chat-list-body] > * { flex-shrink: 0; }
+  [data-msg-cards] [data-chat-list-body] > :empty { display: none; }
   [data-msg-cards] [data-chat-list-scroll] .overflow-hidden:has(> .flex > .w-full > [data-chat-list-row]) { border-radius: 18px; }
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-requests-back], [data-chat-list-scroll] > button) {
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-requests-back], [data-chat-list-body] > button) {
     position: relative;
-    min-height: 68px;
-    padding: 12px 14px 12px 12px !important;
+    min-height: 88px;
+    padding: 14px 16px 14px 14px !important;
     gap: 12px !important;
     border: 0 !important;
     border-radius: 18px !important;
@@ -131,7 +140,7 @@
     transition: box-shadow 150ms ease, transform 150ms ease;
   }
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] [data-chat-requests-back] { min-height: 48px; }
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-scroll] > button):hover {
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button):hover {
     box-shadow: var(--mc-rim), inset 0 0 0 100px var(--mc-hover) !important;
   }
   /* Something new in this chat: a lit bar on the card's left edge. */
