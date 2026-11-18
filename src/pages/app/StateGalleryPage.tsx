@@ -7,14 +7,14 @@ import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/Ne
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
 import PersonalKeys from '@/components/PersonalKeys';
-import { ProfilePostBgContext, PostBgPicker, usePostBgHold } from '@/components/app/profile/PostBackground';
+import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import type { ArticleTileLook } from '@/lib/article-tile';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
 import { PostCard as GalleryPostCard } from '@/components/app/cards/PostCard';
 import { ContentWarningGate } from '@/components/app/cards/ContentWarningGate';
 import { AuthorThread } from '@/components/app/cards/AuthorThread';
-import { postBgById } from '@/lib/post-backgrounds';
+import { postBgById, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import type { TextPost as GalleryTextPost } from '@/types/feed.types';
 import type { ProviderKeyRow } from '@/lib/api/dehub/provider-keys';
 import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
@@ -402,6 +402,7 @@ function MessageMenuGallery() {
             showActions
             onTogglePin={noop}
             onBan={noop}
+            moderators={[others[0]]}
           />
         ))}
       </div>
@@ -2039,6 +2040,7 @@ export default function StateGalleryPage() {
         <StreamerArtworkGallery />
 
         <PinnedProfileGallery />
+        <ProfileImageMenuGallery />
         <ContentWarningGallery />
         <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
         <TextTilesGallery />
@@ -2495,9 +2497,8 @@ function ContentWarningGallery() {
 
 /** Profile text-post backgrounds: the owner's hold-to-pick picker, phone grid tiles and a desktop card. */
 function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: string | null; initiallyOpen: boolean }) {
-  const [bgId, setBgId] = useState<string | null>(postBgById(initialBg)?.id ?? 'aurora');
+  const [bg, setBg] = useState<PostBg | null>(postBgById(initialBg) ?? postBgById('aurora'));
   const [open, setOpen] = useState(initiallyOpen);
-  const bg = postBgById(bgId);
   const hold = usePostBgHold(true, () => setOpen(true));
   const postHold = usePostBgHold(true, () => setOpen(true), '[data-pbg-text]');
   const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
@@ -2521,8 +2522,8 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
             <div data-post-bg-phone-grid><ProfileMixedGrid entries={entries} /></div>
             <div data-post-bg-desktop className="space-y-3">
               {GALLERY_TEXT_POSTS.slice(0, 2).map((post) => (
-                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" data-pbg-text="" data-pbg={bg?.id} data-pbg-tone={bg?.tone} data-pbg-kind={bg?.kind}>
-                  {bg && <span aria-hidden className={`pbg pbg-${bg.id}`} />}
+                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" {...postBgHostProps(bg)}>
+                  <PostBgLayer bg={bg} seed={post.id} />
                   <GalleryPostCard post={post} />
                 </div>
               ))}
@@ -2537,7 +2538,11 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
           avatarUrl={galleryAvatar}
           sampleText={GALLERY_TEXT_POSTS[0].content}
           onCancel={() => setOpen(false)}
-          onSave={(id) => { setBgId(id); setOpen(false); }}
+          onSave={({ id, colors, file }) => {
+            const def = postBgById(id);
+            setBg(!def ? null : def.kind === 'photo' ? (file ? { ...def, image: URL.createObjectURL(file) } : null) : withPostBgColors(def, colors));
+            setOpen(false);
+          }}
         />
       </AuthContext.Provider>
     </section>
@@ -2734,6 +2739,49 @@ function PinnedProfileGallery() {
             isAuthenticated={false}
             badgeUrl={null}
             isFollowing
+            isPending={false}
+            isTargetPrivate={false}
+            isFollowLoading={false}
+            handleFollow={noop}
+            handleUnfollow={noop}
+            isSubscribed={false}
+            hasPlans={false}
+            setFullscreenImage={noop}
+            setActiveTab={noop}
+            shareSheetOpen={false}
+            setShareSheetOpen={noop}
+            setLoginModalOpen={noop}
+            ShareOptions={() => null}
+            showFollowersFollowing
+            hideFollowerCounts={false}
+            setFollowListType={noop}
+            setFollowListDrawerOpen={noop}
+            translatedBio={null}
+            setTranslatedBio={noop}
+          />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/**
+ * The owner's own header: right-click (or hold) the picture or banner for
+ * Change, Paste, Copy, Delete. Nothing saves here (no signed-in user).
+ */
+function ProfileImageMenuGallery() {
+  return (
+    <section data-page-bento data-profile-image-menu-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile picture and banner menu</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[680px]">
+          <ProfileHeader
+            profile={GALLERY_PROFILE}
+            apiProfile={GALLERY_PROFILE}
+            isViewingOwnProfile
+            isAuthenticated
+            badgeUrl={null}
+            isFollowing={false}
             isPending={false}
             isTargetPrivate={false}
             isFollowLoading={false}

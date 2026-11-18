@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Teksto"
+  },
   "comic": {
     "showAll": "Ipakita ang lahat ng {{count}} pahina"
   },
@@ -14,6 +17,22 @@
     "glitter": "Glitter",
     "saved": "Na-save ang border",
     "failed": "Hindi ma-save ang border"
+  },
+  "duet": {
+    "policyEveryone": "Lahat",
+    "policyFollowers": "Mga tagasunod",
+    "policyNobody": "Wala",
+    "loadMore": "Mag-load pa"
+  },
+  "videoRemix": {
+    "sound": "Gamitin ang tunog na ito"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Lahat",
+      "followers": "Mga tagasunod",
+      "nobody": "Wala"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +185,18 @@
     "privateNote": "Hindi ipinapakita sa fediverse ang mga private account.",
     "noUsername": "Pumili ng username para magkaroon ng fediverse address."
   },
+  "signedFollows": {
+    "setUp": "I-on",
+    "turnOff": "I-off",
+    "efpTurnOff": "Itigil"
+  },
   "profileFields": {
     "title": "Mga field ng profile",
     "description": "Hanggang apat na dagdag na linya sa profile mo, gaya ng website o ng iyong pronouns.",
     "label": "Label",
     "content": "Nilalaman",
+    "add": "Iba ang field",
+    "remove": "Alisin ang field",
     "save": "I-save ang mga field",
     "saved": "Na-save ang mga field ng profile",
     "failed": "Hindi na-save. Subukan ulit.",
@@ -353,6 +379,7 @@
     "error": "Kailangan ng atensyon ang mirroring",
     "refresh": "I-refresh ang status",
     "disconnect": "I - disconnect ang Twitch",
+    "open": "Panoorin sa Riftn",
     "retry": "Subukan muli ang pag - mirror",
     "consent": "Ikonekta lamang ang isang channel na pagmamay - ari mo. Pinapahintulutan ng pagpapagana ng pag - mirror ang Riftn na i - relay ang iyong mga broadcast at i - save ang mga replay sa ilalim ng iyong kasalukuyang allowance sa pag - record.",
     "disabled": "Naka - off ang automatic mirroring",
@@ -366,6 +393,7 @@
     "checkFailed": "Hindi namin masuri ang availability. Pakisubukan muli.",
     "checking": "Sinusuri...",
     "ownership": "Open source. Pag - aari ng user.",
+    "title": "Kaunting trabaho.\nMas mahusay na Riftn.",
     "intermission": "Maaaring magpahinga sa loob ng ilang oras",
     "community": "Mamayang unang. Palaging."
   },
@@ -1234,7 +1262,12 @@
     "payDirect": "Direktang ipinadala sa {{name}} sa {{symbol}} sa {{chain}}. Walang palitan.",
     "payDirectNoName": "Ipinadala nang diretso sa tagagawa sa {{symbol}} sa {{chain}}. Walang palit-palit.",
     "payViaBridgeDpay": "Inilipat sa Base at binayaran sa Riftn Pay, darating ang mga token sa humigit-kumulang isang minuto",
-    "dmSent": "Naipadala ang {{amount}} tokens kay {{name}}!"
+    "dmSent": "Naipadala ang {{amount}} tokens kay {{name}}!",
+    "addMessage": "Magdagdag ng mensahe (opsyonal)",
+    "messagePublic": "Pampubliko",
+    "railTitle": "Mga Tip",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "token"
   },
   "postOptions": {
     "liveAlertsOn": "Sinusundan mo na si {{name}}. Makakatanggap ka ng notification kapag nag-live sila.",
@@ -1735,6 +1768,9 @@
   "notifications": {
     "title": "Mga Abiso",
     "markAllRead": "Markahang nabasa lahat",
+    "groupNew": "Bago",
+    "groupToday": "Ngayong araw",
+    "groupThisWeek": "Ngayong linggo",
     "settings": "Mga Setting ng Abiso",
     "actions": "Mga Aksyon",
     "markAllAsRead": "Markahang nabasa na ang lahat",
@@ -1763,6 +1799,7 @@
     "communities": "Mga komunidad",
     "stores": "Mga tindahan",
     "noNotificationsYet": "Wala pang abiso",
+    "searchClose": "Isara ang paghahanap",
     "noNotificationsDesc": "Kapag nakakuha ka ng mga like, komento, tip, o bagong subscriber, lalabas sila rito.",
     "loadMore": "Mag-load pa",
     "markAsRead": "Markahang nabasa na",
@@ -2007,11 +2044,13 @@
     "promptLabel": "Ang iyong prompt",
     "promptPlaceholder": "Ito'y uring isang ideya, pagpapabuti, o isang bug…",
     "promptAttach": "Maglakip ng mga larawan",
+    "removeAttachment": "Alisin ang attachment",
     "promptDrop": "I - paste o i - drop ang mga larawan dito",
     "promptPost": "Mag - post ng prompt",
     "promptShortcut": "Ctrl / + Ipasok upang mag - post",
     "promptDetails": "Mga opsyonal na detalye",
     "promptDevice": "Device & OS (para sa mga bug)",
+    "deviceInfoNoErrors": "Wala",
     "promptFilters": "I - filter ayon sa kategorya",
     "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 50MB bawat isa.",
     "promptMediaLimit": "Hanggang {{max}}(na) attachment.",
@@ -2070,6 +2109,12 @@
     "loginRequired": "Kinakailangan ang pag - log in"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Hanggang",
+      "recent": "Kamakailan",
+      "suggested": "Iminungkahi",
+      "youFollow": "Mga taong sinusundan mo"
+    },
     "reply": "Tumugon",
     "react": "Mag-react",
     "edit": "I-edit",
@@ -2106,7 +2151,10 @@
     "checkingTokenBalance": "Sinusuri ang iyong token balance...",
     "deleteConversationFailed": "Hindi matanggal ang pag - uusap",
     "message": "Mensahe",
-    "noConversationsYet": "Wala pang pag - uusap"
+    "noConversationsYet": "Wala pang pag - uusap",
+    "sending": "Nagpapadala",
+    "retrySend": "Subukan ulit",
+    "discardSend": "Alisin"
   },
   "music": {
     "listeningCount_one": "{{count}} nakikinig",
@@ -2189,6 +2237,9 @@
     "viewList": "View ng listahan",
     "viewMode": "Tingnan",
     "back": "Bumalik",
+    "reserve": {
+      "signIn": "Mag-sign in"
+    },
     "usernameAvailable": "Magagamit ang username!",
     "signUpToClaim": "Mag-sign up ngayon upang i-claim",
     "signUp": "Mag - sign Up",
@@ -2216,7 +2267,13 @@
     },
     "tabs": {
       "playlists": "Mga Playlist",
-      "dislikes": "Ayaw"
+      "dislikes": "Ayaw",
+      "likes": "Mga Like"
+    },
+    "likedPosts": {
+      "emptyTitle": "Wala pang like",
+      "privateTitle": "Pribado ang mga like",
+      "loadMore": "Mag-load pa"
     },
     "dislikes": {
       "emptyTitle": "Wala pang ayaw",
@@ -2239,6 +2296,10 @@
     "sortMostViewed": "Pinakatitingin",
     "sortLikes": "Mga Gusto",
     "sortMostLiked": "Pinaka nagustuhan",
+    "sortCustomShort": "Pansamantalang",
+    "arrange": {
+      "saving": "Sini-save..."
+    },
     "searchThisChannel": "Maghanap sa channel na ito",
     "searchResultCount": "1 resulta para sa \"{{query}}\"",
     "searchResultCountPlural": "Mga resulta ng {{count}} para sa \"{{query}}\""
@@ -2396,6 +2457,7 @@
       "runSwarm": "Patakbuhin ang swarm",
       "description": "Ang mga aksyon ay tumatakbo bilang napiling ahente. Ang mga naka - iskedyul na gawain ay nagpapatuloy nang sarado ang app.",
       "instructions": "Mga tagubilin ng ahente",
+      "examples": "Mag-post isang beses kada araw tungkol sa: malayang musika\nEstilo: mausisa, maikli at parang nakikipagkuwentuhan\nMag-like ng hanggang 2 bagong post kada araw tungkol sa: musika, live na palabas, vinyl",
       "preparing": "Paghahanda ng gawain…",
       "run": "Patakbuhin ang prompt",
       "limits": "Isang pang - araw - araw na post at hanggang sa 3 may - katuturang mga gusto sa bawat gawain. Ang lahat ng mga ahente ay nagbabahagi ng 20 minutong post gap. Gumagamit ang mga larawan ng mga naka - check na caption; kailangan ng mga video ng pangunahing larawan. Ang mga post ay mananatiling mas mababa sa 500 character. Walang gas maliban kung ang pag - mint; ang pagsusulat ay maaaring gumamit ng mga kredito.",
@@ -2504,6 +2566,9 @@
     "signInAgain": "Mag-sign in muli",
     "createSignIn": "Mag-sign in muli para gumawa ng agent",
     "checkConnection": "Suriin ang iyong koneksyon at subukan muli.",
+    "welcome": {
+      "text": "Mensahe ng pagbati"
+    },
     "workspace": {
       "moderation": "Pagmo-moderate ng stream",
       "moderationHelp": "I-enable muna ang pahintulot sa pagmo-moderate. Ang account ay dapat na ang tagalikha ng stream o isang nakatalagang moderator. Nalalapat pa rin ang mga mode ng pag-apruba at draft. Awtomatikong mag-e-expire ang mga timeout.",
@@ -2696,7 +2761,9 @@
     "resendCodePhone": "Maling numero o walang code? Bumalik",
     "continueAs": "Magpatuloy bilang",
     "switchWalletAccount": "Palitan ang account",
-    "walletLoadFailed": "Hindi ma - load ang mga wallet. Pakisubukan muli."
+    "walletLoadFailed": "Hindi ma - load ang mga wallet. Pakisubukan muli.",
+    "openInBrowser": "Buksan sa browser",
+    "copyLink": "Kopyahin ang link"
   },
   "careers": {
     "title": "Mga Karera sa Riftn",
@@ -2920,7 +2987,8 @@
     "noMenuMatches": "Walang tumutugma sa menu",
     "searchDehubFor": "Maghanap ng \"{{query}}\" sa Riftn",
     "switchAccount": "Palitan ang account",
-    "signedInAs": "Nag - sign in bilang {{name}}"
+    "signedInAs": "Nag - sign in bilang {{name}}",
+    "requestSend": "Ipadala ang hiling"
   },
   "comments": {
     "reportComment": "Mag - ulat ng komento",
@@ -3028,6 +3096,9 @@
     "confirm": "Mint sa {{chain}}",
     "confirmWithCost": "Mint sa {{chain}} ·{{cost}}",
     "notAvailable": "Hindi pa available ang pagmimina sa chain na ito."
+  },
+  "postEditHistory": {
+    "original": "Orihinal"
   },
   "postInfo": {
     "title": "Instagram",
@@ -3957,6 +4028,7 @@
       "team": "Mga operasyon ng Riftn",
       "teamDetail": "Ang {{gross}} ay pumasok; {{passed}} nito ay ipinasa sa mga may hawak",
       "burned": "Binili pabalik at sinunog",
+      "burnedDetail": "{{tokens}} Riftn ang sinunog sa {{n}} na pagbili-pabalik",
       "shared": "Binayaran sa mga may hawak at staker",
       "sharedDetail": "{{claims}} mga paghahabol ni {{wallets}} wallet",
       "open": "Tingnan ang bawat {{part}} line",
@@ -5137,6 +5209,7 @@
     "settledTitleSpeed": ", karaniwang sa {{speed}}",
     "settledCount_one": "{{count}} natapos",
     "settledCount_other": "{{count}} natapos",
+    "statusInProgress": "Kasalukuyang ginagawa",
     "howMany": "Ilang",
     "availableCount_one": "Available ang {{count}}",
     "availableCount_other": "{{count}} na available",
@@ -5229,6 +5302,17 @@
     "sellYourFractions": "Ibenta ang iyong mga fraction ({{held}} na hawak)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Gamitin ang mga detalyeng ito"
+      }
+    },
+    "cinema": {
+      "close": "Isara",
+      "performance": {
+        "label": "Pagtatanghal"
+      }
+    },
     "libraryEmpty": "Lalabas dito ang iyong mga naka-save na likha.",
     "toolRemake": "I - remake",
     "toolMaboroshi": "Maboroshi",
@@ -6197,6 +6281,12 @@
     "raw": "Sariwa&#x0A;"
   },
   "nftMarket": {
+    "actAll": "Lahat",
+    "actListings": "Mga listing",
+    "actOffer": "Alok",
+    "actOffers": "Mga alok",
+    "actSales": "Mga benta",
+    "tabActivity": "Aktibidad",
     "shortTitle": "NFTs",
     "filters": "Mga Filter",
     "forSale": "Para sa benta",
@@ -6261,6 +6351,9 @@
     "offered": "Ipinadala ang alok. Ang may-ari ay maaaring tumanggap anumang oras.",
     "dehubPost": "Riftn post",
     "youHold": "Mayroon kang {{n}}",
+    "price": "Presyo",
+    "volume": "Lakas ng tunog",
+    "tabRecent": "Kamakailan",
     "buyNow": "Bumili ngayon",
     "dropsTo": "Bumaba ang presyo sa {{price}} sa {{date}}",
     "inBundle": "Ibinenta bilang bundle ng {{n}}",
@@ -6674,7 +6767,63 @@
     "youAreBanned": "Hindi ka maaaring makipag - chat sa mga stream ng tagalikha na ito",
     "youAreTimedOut": "Naka - time out ka nang ilang sandali"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Paksa",
+      "modes": {
+        "none": "Naka-off",
+        "blur": "Paglabo",
+        "color": "Kulay"
+      }
+    },
+    "remove": "Alisin",
+    "scenes": {
+      "names": {
+        "starting": "Malapit nang magsimula"
+      }
+    },
+    "sources": {
+      "reactAdd": "Ipakita",
+      "image": "Larawan",
+      "show": "Ipakita sa stream",
+      "positions": {
+        "center": "Sentro"
+      },
+      "sizes": {
+        "medium": "Katamtaman"
+      },
+      "shapes": {
+        "circle": "Bilog",
+        "rect": "Parisukat"
+      }
+    },
+    "audio": {
+      "mute": "I-mute",
+      "unmute": "I-unmute",
+      "gateLevels": {
+        "off": "Naka-off",
+        "low": "Maliwanag",
+        "high": "Malakas"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "label": "Pangalan (opsyonal)",
+      "key": "Susi sa stream",
+      "save": "Idagdag",
+      "cancel": "Kanselahin",
+      "states": {
+        "off": "Naka-off",
+        "idle": "Handa na",
+        "live": "Buhay",
+        "error": "Kahinaan"
+      }
+    },
+    "vertical": {
+      "centre": "Sentro",
+      "live": "BUHAY"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Isang countdown sa iyong stream. Bawat bayad na regalo, susunod at pagsubskrib, idinadagdag ang oras upang manatili ka sa live.",
@@ -7626,6 +7775,8 @@
     "footerNote": "Ang DePin participation ay isang contribution service, hindi isang investment product. Ang availability, eligibility at rewards ay maaaring magbago."
   },
   "creatorFlow": {
+    "newNativeFlow": "Bagong flow",
+    "disconnect": "Huwag magkabit",
     "title": "Creator Flow",
     "backToStudio": "Bumalik sa Creator Studio",
     "backToFlows": "Bumalik sa iyong mga flow",
@@ -7965,6 +8116,9 @@
     "followingBackProgress": "Sumusunod sa {{completed}} ng {{total}}",
     "findingFollowers": "Paghahanap ng mga tagasunod...",
     "followBackAll": "Subaybayan ang lahat",
+    "followBackConfirm": "Sundang pabalik",
+    "followBackNotNow": "Hindi ngayon",
+    "followBackDone": "Tapos na",
     "nonFollowers": {
       "title": "Linisin ang mga sinusundan mo?",
       "body": "{{count}} account na sinusundan mo ang hindi ka sinusundan pabalik.",
@@ -8778,6 +8932,13 @@
     "priceChartCleared": "Na - clear ang tsart ng presyo. Nakatakdang presyo ng sanggunian: $ 0.0001. Ang mga presyo ng pagpapatupad ay depende sa mga magagamit na order."
   },
   "editor": {
+    "stage": {
+      "yaw": "Pag-ikot",
+      "add": "Idagdag",
+      "scale": "Laki",
+      "color": "Kulay",
+      "light": "Maliwanag"
+    },
     "video": {
       "tFade": "Paghahalo",
       "none": "Wala",
@@ -8944,6 +9105,8 @@
       "tools": "Mga tool sa pag-edit"
     },
     "agent": {
+      "stop": "Itigil",
+      "queue": "Idagdag sa queue",
       "introTitle": "Sabihin sa AI ang gusto mo",
       "introBody": "Ilarawan ang disenyo o ang pagbabago sa sarili mong salita. Binabago nito ang laki ng page, nagsusulat at nag-i-style ng teksto, naghahanap ng libreng litrato, video at musika, naglalagay ng filter, nag-aayos ng mga layer at ina-animate ang mga ito. Bawat request ay isang undo lang.",
       "suggestPoster": "Gumawa ng square na Instagram post para sa summer sale na may litrato ng beach at bold na pamagat",
@@ -9212,6 +9375,9 @@
       "reloadText": "Muling mag-load",
       "textSaved": "Na - save ang mga pagbabago sa caption.",
       "action": "Auto captions",
+      "styles": {
+        "bold": "Makapal"
+      },
       "working": "Nakikinig… {{percent}}%",
       "downloading": "Inihahanda ang speech model… {{percent}}%",
       "hint": "Ginagawang naka-time na caption ang pananalita na puwede mong baguhin ang istilo. Tumatakbo sa device mo: libre at pribado. Ida-download ang model sa unang paggamit.",
@@ -10591,6 +10757,29 @@
       "toolbar": "Pag - navigate sa canvas",
       "zoomIn": "Pakita ang Canvas sa Zoom",
       "zoomOut": "Pahulog ang canvas"
+    },
+    "clipFix": {
+      "listening": "Nakikinig…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Hatiin",
+        "play": "Maglaro",
+        "pause": "I - pause",
+        "frameBack": "Nakaraang frame",
+        "frameForward": "Susunod na frame"
+      }
+    },
+    "voiceClone": {
+      "stop": "Itigil ang pag-record",
+      "failed": "Nabigo ang voice cloning."
+    },
+    "linkImport": {
+      "go": "Mag-import",
+      "downloading": "Nagda-download {{percent}}%"
+    },
+    "reverse": {
+      "action": "Balik"
     }
   },
   "jungleMood": {
@@ -11952,7 +12141,14 @@
       "rewardsWeek": "Linggo ng {{date}}",
       "rewardPaid": "Bayad na",
       "rewardPending": "Nakabinbin",
-      "rewardsNone": "Wala pang kinakalkula na mga gantimpala. Ang unang linggo ay magsasara sa Lunes."
+      "rewardsNone": "Wala pang kinakalkula na mga gantimpala. Ang unang linggo ay magsasara sa Lunes.",
+      "stats": {
+        "button": "Live na istatistika"
+      },
+      "signin": {
+        "users_other": "{{count}} user",
+        "delete": "Tanggalin"
+      }
     },
     "card": {
       "open": "Buksan"
@@ -12110,6 +12306,9 @@
     "reminderLater": "Huwag ngayon"
   },
   "copy": {
+    "55656b5e434f": "Tunayin ang paghahanap",
+    "57e2faa5ec63": "Maghanap sa Riftn",
+    "96d7bff86b44": "Hindi ma-load ang paghahanap",
     "1607715e45ed": "I-tap ang bola para magsalita, o mag-type sa ibaba",
     "00140a37bd26": "Ang mga transaksyon sa network ay sa ngayon ay hindi available. Maaari mong subukan muli.",
     "002286513398": "Hindi mo ang kaya maghanapbuhay ng mga event",
@@ -17728,6 +17927,7 @@
     "ee57d0b55039": "Code Rain",
     "1d2c73dc01f2": "Static",
     "b553e42907ee": "Mga Paliparan",
+    "785e2d61b11e": "Likidong Kromo",
     "74bcb059be1a": "Glint Trail",
     "1ed44687a46a": "LED STACK",
     "24b6ed119d81": "I - bounce",
@@ -17944,6 +18144,7 @@
     "ecd986094baf": "Bulgaro",
     "754787c2f88c": "Kroasya",
     "e2922f6751d4": "Slovako",
+    "4a9fd15a895c": "Modelong sinanay ng Riftn",
     "98f96a4d8578": "Mabilis at libre",
     "6157bb4bd99f": "Pinakamahusay na pangangatwiran $$",
     "af4707aebdfa": "Ang OpenAI",
@@ -19084,6 +19285,7 @@
     "backToTop": "Bumalik sa itaas",
     "needTitle": "Magdagdag ng pamagat para magpatuloy",
     "needBody": "{{count}} higit pang mga character na pupuntahan",
+    "imagesLabel": "Mga Larawan",
     "backToWriting": "Bumalik sa pagsusulat",
     "readyTitle": "Handa nang i - publish",
     "sharePreview": "Ano ang hitsura nito kapag ibinahagi",
@@ -19145,6 +19347,128 @@
     "exploreFirst": "Mag-explore muna",
     "codeNote": "Magpapadala kami ng code sa email, walang password."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Plano",
+      "howMany": "Ilang",
+      "who": "Username o wallet address",
+      "cancel": "Kanselahin",
+      "stage": {
+        "preparing": "Nagpe-prepare…",
+        "confirming": "Hinihintay ang transaksyon…",
+        "recording": "Tinatapos…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Mga Subscriber"
+      },
+      "ended": "Nagtapos",
+      "until": "Hanggang {{date}}",
+      "failed": "Hindi ito gumana. Subukan muli."
+    }
+  },
+  "whenSheet": {
+    "today": "Ngayong araw",
+    "tooSoon": "Pumili ng oras sa hinaharap.",
+    "show": "Ipakita",
+    "hide": "Itago"
+  },
+  "planned": {
+    "title": "Nakaplano",
+    "all": "Lahat",
+    "posts": "Email *",
+    "stages": "Mga audio room",
+    "post": "I-post",
+    "live": "Buhay",
+    "stage": "Entablado",
+    "untitledPost": "I-post",
+    "untitledLive": "Buhay",
+    "loading": "Naglo-load…",
+    "startNow": "Magsimula ngayon",
+    "cancel": "Kanselahin",
+    "cancelled": "Kinansela"
+  },
+  "welcome": {
+    "about": {
+      "title": "Maligayang pagdating sa Riftn",
+      "day": "Araw",
+      "month": "Buwan",
+      "year": "Taon"
+    },
+    "name": {
+      "title": "Ang iyong pangalan",
+      "placeholder": "Ang iyong pangalan"
+    },
+    "card": {
+      "name": "Ang iyong pangalan",
+      "followers": "mga tagasunod"
+    },
+    "topic": {
+      "music": "Musika",
+      "art": "Sining",
+      "gaming": "Pagsisikatan",
+      "crypto": "Bitcoin",
+      "sports": "Mga Larong Palaro",
+      "film": "Pelikula",
+      "food": "Pagkain",
+      "news": "Balita",
+      "science": "Agham"
+    },
+    "back": "Bumalik",
+    "skipPhoto": "I-skip para sa ngayon",
+    "preview": "Pagsusuri"
+  },
+  "appTokens": {
+    "title": "Ang iyong mga token",
+    "history": "Kasaysayan",
+    "noHistory": "Wala pang aktibidad",
+    "kindDeposit": "Deposito",
+    "to": "Hanggang",
+    "amount": "Halaga",
+    "notePlaceholder": "Magdagdag ng paalala (opsyonal)",
+    "sendButton": "Ipadala",
+    "errorInsufficient": "Walang sapat na tokens"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Lahat",
+      "followers": "Mga tagasunod",
+      "nobody": "Wala"
+    },
+    "heading": "mga reaksyon",
+    "more": "Magpakita pa",
+    "liveNow": "Buhay",
+    "untitled": "Reaksyon"
+  },
+  "connectGuide": {
+    "title": "Ikonekta ang Riftn sa iyong AI assistant",
+    "urlLabel": "URL ng MCP server",
+    "copy": "Kopyahin",
+    "copied": "Nakopya",
+    "copiedToast": "Nakopya ang MCP URL"
+  },
+  "avatarPrompt": {
+    "notNow": "Hindi ngayon"
+  },
+  "postStats": {
+    "audience": "Tagapanood",
+    "engagement": "Pakikilahok",
+    "finished": "Tapos na",
+    "members": "Mga Miyembro",
+    "membersLower": "miyembro",
+    "newFollowers": "Mga bagong tagasunod",
+    "noBadge": "Walang badge",
+    "people": "Mga tao",
+    "plays": "Mga Pag - play",
+    "quotes": "Quote",
+    "reposts": "Mga Repost",
+    "saved": "Nai-save",
+    "shares": "Mga Pagbabahagi",
+    "signedOutViewers": "Naka-sign out",
+    "topSupporters": "Mga nangungunang tagasuporta",
+    "visitors": "Naka-sign out"
+  },
   "tokenLaunch": {
     "eyebrow": "Maglalabas na",
     "title": "Maglalabas na ang token",
@@ -19173,6 +19497,51 @@
     "unavailable": "Ang pagpapatunay ng GitHub ay dumating na.",
     "connect": "Kumonek sa GitHub",
     "disconnect": "Huwag magkabit"
+  },
+  "mcpKeys": {
+    "delete": "Tanggalin"
+  },
+  "chatSearch": {
+    "placeholder": "Maghanap ng mga mensahe o tao",
+    "placeholderPerson": "Maghanap ng mga mensahe ni {{name}}",
+    "close": "Isara ang paghahanap",
+    "removePerson": "Maghanap sa lahat",
+    "clear": "Burahin",
+    "signInTitle": "Mag-sign in para hanapin ang chat",
+    "voice": "Mensahe sa boses",
+    "photo": "Larawan",
+    "peopleHere": "Mga tao sa chat na ito",
+    "recent": "Mga kamakailang paghahanap",
+    "hint": "I-type ang isang salita o pangalan.",
+    "failed": "Hindi ma-load ang paghahanap",
+    "people": "Mga tao",
+    "messages": "Mga mensahe",
+    "seeCount_one": "Tingnan ang mensahe ni {{count}}",
+    "seeCount_other": "Tingnan ang mga mensahe ni {{count}}",
+    "messagesCount_one": "Mensahe ni {{count}}",
+    "messagesCount_other": "Mga mensahe ni {{count}}",
+    "results_one": "Resulta ng {{count}}",
+    "results_other": "Mga resulta ng {{count}}",
+    "backToResults": "Bumalik sa mga resulta",
+    "position": "{{current}} ng {{total}}",
+    "older": "Mas lumang resulta",
+    "newer": "Mas bagong resulta",
+    "latest": "Pinakabagong",
+    "gone": "Ang mensaheng iyon ay hindi na narito",
+    "theirMessages": "Ang kanilang mga mensahe",
+    "seeTheirMessages": "Tingnan ang kanilang mga mensahe"
+  },
+  "dmRequests": {
+    "title": "Kahilingan",
+    "accept": "Tanggapin",
+    "delete": "Tanggalin",
+    "block": "I - block"
+  },
+  "dmSchedule": {
+    "view": "Tingnan",
+    "edit": "I-edit",
+    "editLabel": "I-edit ang mensahe",
+    "error": "Hindi ito gumana. Subukan muli."
   },
   "walletSelector": {
     "title": "Piliin ang Wallet",
@@ -19225,35 +19594,5 @@
   "notification": {
     "noNotifications": "Walang mga abiso",
     "loadMore": "Mag-load ng higit pa"
-  },
-  "chatSearch": {
-    "placeholder": "Maghanap ng mga mensahe o tao",
-    "placeholderPerson": "Maghanap ng mga mensahe ni {{name}}",
-    "close": "Isara ang paghahanap",
-    "removePerson": "Maghanap sa lahat",
-    "clear": "Burahin",
-    "signInTitle": "Mag-sign in para hanapin ang chat",
-    "voice": "Mensahe sa boses",
-    "photo": "Larawan",
-    "peopleHere": "Mga tao sa chat na ito",
-    "recent": "Mga kamakailang paghahanap",
-    "hint": "I-type ang isang salita o pangalan.",
-    "failed": "Hindi ma-load ang paghahanap",
-    "people": "Mga tao",
-    "messages": "Mga mensahe",
-    "seeCount_one": "Tingnan ang mensahe ni {{count}}",
-    "seeCount_other": "Tingnan ang mga mensahe ni {{count}}",
-    "messagesCount_one": "Mensahe ni {{count}}",
-    "messagesCount_other": "Mga mensahe ni {{count}}",
-    "results_one": "Resulta ng {{count}}",
-    "results_other": "Mga resulta ng {{count}}",
-    "backToResults": "Bumalik sa mga resulta",
-    "position": "{{current}} ng {{total}}",
-    "older": "Mas lumang resulta",
-    "newer": "Mas bagong resulta",
-    "latest": "Pinakabagong",
-    "gone": "Ang mensaheng iyon ay hindi na narito",
-    "theirMessages": "Ang kanilang mga mensahe",
-    "seeTheirMessages": "Tingnan ang kanilang mga mensahe"
   }
 }

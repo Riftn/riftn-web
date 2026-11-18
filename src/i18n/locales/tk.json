@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Tekst"
+  },
   "comic": {
     "showAll": "Ähli {{count}} sahypany görkez"
   },
@@ -14,6 +17,23 @@
     "glitter": "Ýalpyldy",
     "saved": "Serhet ýatda saklandy",
     "failed": "Serhedi ýatda saklap bolmady"
+  },
+  "duet": {
+    "policyEveryone": "Hemmeler",
+    "policyFollowers": "Yzarlaýjylar",
+    "policyNobody": "Hiç kim",
+    "loadMore": "Has köp ýükle",
+    "video": "Wideo"
+  },
+  "videoRemix": {
+    "sound": "Bu sesi ulanyň"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Hemmeler",
+      "followers": "Yzarlaýjylar",
+      "nobody": "Hiç kim"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +186,18 @@
     "privateNote": "Şahsy hasaplar fediwersde görkezilmeýär.",
     "noUsername": "Fediwers salgysyny almak üçin ulanyjy adyny saýlaň."
   },
+  "signedFollows": {
+    "setUp": "Açyň",
+    "turnOff": "Öçür",
+    "efpTurnOff": "Bes et"
+  },
   "profileFields": {
     "title": "Profil meýdanlary",
     "description": "Profiliňizde dört goşmaça setire çenli, meselem web sahypa ýa-da çalyşmalaryňyz.",
     "label": "Bellik",
     "content": "Mazmun",
+    "add": "Meýdan goş",
+    "remove": "Meýdany aýyr",
     "save": "Meýdanlary ýatda sakla",
     "saved": "Profil meýdanlary ýatda saklandy",
     "failed": "Ýatda saklanmady. Gaýtadan synanyşyň.",
@@ -339,6 +366,7 @@
     "account": "Halk tarapyndan seretmek üçin hiç hili hasabat gerek däl. Riftn hesabyňyzy öz profilyňyzy dolandyrmak we içerik ýaratmak ýa-da çap etmek üçin baglaň.",
     "step": "Hesabyň häkimiýetleri üçin https://riftn.com/mcp-i OAuth baglaýjy hökmünde goşyň, Riftn-a girip, rugsatlary barlamagyň öň ýanynda barlaň.",
     "profilePrompt": "Riftn bio-yma täzelik beriň: Täze ýaradyjy filmler we aýdym- sazlary ýaratýar.",
+    "generatePrompt": "Maňa Riftn-yň surat modellerini görkez we portreti döretmezden öň onuň bahasyny aýt.",
     "libraryPrompt": "Riftn Ýaradyjy kitaphanamda iň soňky esbaplary görkeziň."
   },
   "twitchMirror": {
@@ -354,6 +382,7 @@
     "refresh": "Durumy Täzele",
     "disconnect": "Twitch-i aýyr",
     "open": "Riftn-da seret",
+    "retry": "Aýnalamany gaýtadan synanyş",
     "consent": "Men diňe bir kanala goşulmak isleýärin. Riftn-a öz serişdelerini ýaýratmaga we gaýtalamalary saklamaga rugsat berýär.",
     "disabled": "Awtomatik aýna söndürildi",
     "failed": "Twitch aýna gün tertibini üýtgetip bilmedi. Gaýtalaň"
@@ -366,12 +395,14 @@
     "checkFailed": "Biz barlygy barlap bilmedik. Gaýtalaň",
     "checking": "Təftiş ediliyor...",
     "ownership": "Açyk esbap. Ulanjy eýesi.",
+    "title": "Biraz iş.\nHas gowy Riftn.",
     "intermission": "Wagtyň geçmegi bilen offline",
     "community": "Birinjiden, hemişe."
   },
   "viralTemplates": {
     "title": "Biziñ ýeni viral anýnýzý tapýňyz.",
     "intro": "Mysal üçin, bir täsir ýa-da häsiýet saýlaň. Fotoňy goşup, ony özüňe çek.",
+    "browse": "Ähli {{count}} şablona göz aýla",
     "featured": "Öwrenmäge gaýdyp gel",
     "useNamed": "{{name}}ullan",
     "preview": "Oynat {{name}} preview",
@@ -404,11 +435,13 @@
     "browse": "Ähli 180 görnüşleri barlaň",
     "choose": "{{name}}synanyň",
     "previous": "Öňki görkeşler",
+    "next": "Indiki görnüşler",
     "plushie": "Plushie alnyp barylýar",
     "anime": "Anime häkimi.",
     "chrome": "Çykyş kromy",
     "crochet": "Ýanýoldaşym",
-    "crystal": "Kristal Garawul"
+    "crystal": "Kristal Garawul",
+    "clay": "Gilden keşp"
   },
   "quickActions": {
     "title": "Sahypa saýlamalary",
@@ -1172,9 +1205,15 @@
     "stagePay": "{{symbol}} bilen Riftn Pay-e tölenýär…",
     "stageDelivering": "Riftn Pay siziň tokenleriňizi iberýär…",
     "payViaDpay": "Riftn Pay-e töleg, tokenler 30 sekunt töweregi geler",
+    "payDirect": "{{chain}} ulgamynda {{symbol}} bilen göni {{name}} ugradylýar. Çalyşyk ýok.",
     "payDirectNoName": "{{symbol}}on{{chain}}. No swap.",
     "payViaBridgeDpay": "Base-e geçirildi we Riftn Pay-e töleg, tokenler bir minut töweregi geler",
-    "dmSent": "{{name}}-a {{amount}} tokenler iberildi!"
+    "dmSent": "{{name}}-a {{amount}} tokenler iberildi!",
+    "addMessage": "Bir habar goş (oýlanyp görüň)",
+    "messagePublic": "Açyk",
+    "railTitle": "Maslahatlar",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "tokenlar"
   },
   "postOptions": {
     "liveAlertsOn": "Indi {{name}} yzarlaýarsyňyz. Göni ýaýlyma çykanda habarnama alarsyňyz.",
@@ -1675,6 +1714,9 @@
   "notifications": {
     "title": "Bildirişler",
     "markAllRead": "Ählisini okaldy diýip bellemek",
+    "groupNew": "Täze",
+    "groupToday": "Bu gün",
+    "groupThisWeek": "Bu hepde",
     "settings": "Bildiriş sazlamalary",
     "actions": "Hereketler",
     "markAllAsRead": "Ählisini okaldy diýip bellemek",
@@ -1703,6 +1745,7 @@
     "communities": "Jemgyýetler",
     "stores": "Dükanlar",
     "noNotificationsYet": "Entek bildiriş ýok",
+    "searchClose": "Gözlegi ýap",
     "noNotificationsDesc": "Halan, teswir, sylag ýa-da täze ýazylyjy alanyňyzda bu ýerde görüner.",
     "loadMore": "Has köp ýükle",
     "markAsRead": "Okaldy diýip bellemek",
@@ -1775,13 +1818,19 @@
       "featureLikeNamed": "{{name}} Özgürligiňiziň haýyşyny halaýarsyňyz {{title}}",
       "featureLike": "{{name}} Özgürligiňiziň haýyşyny halaýarsyňyz",
       "featureCommentNamed": "{{name}} özellik soraga jogap berdi {{title}}",
+      "featureComment": "{{name}} siziň funksiýa haýyşyňyza teswir ýazdy",
+      "featureReplyNamed": "{{name}} size “{{title}}” barada jogap berdi",
       "featureReply": "{{name}} teswiryňize jogap berdi",
       "featureMentionNamed": "{{name}} sizi “{{title}}”da atadı.",
+      "featureMention": "{{name}} sizi funksiýa haýyşynda agzady",
       "featureNewNamed": "{{name}} “{{title}}” ýerinde bir yeni talap açdy.",
       "featureNew": "{{name}} ýaly bir ylyk goraýyrdy.",
       "featureActivityNamed": "{{name}} “{{title}}”-yň ýaly",
       "featureActivity": "{{name}}gördü.",
+      "governanceVoteNamed": "{{name}} siziň “{{title}}” teklibiňize ses berdi",
+      "governanceVote": "{{name}} siziň teklibiňize ses berdi",
       "governanceCommentNamed": "{{name}} Siziň teklibiňiz barada pikir alyşdyňyz{{title}}",
+      "governanceComment": "{{name}} siziň teklibiňize teswir ýazdy",
       "governanceReplyNamed": "{{name}} size teklipde jogap berdi {{title}}",
       "governanceReply": "{{name}} teklipe ýazan teswiriňize jogap berdi",
       "storeOrderNamed": "{{name}} siziň “{{title}}” sanawyňyzy satyn aldy",
@@ -1936,11 +1985,13 @@
     "promptLabel": "Siznin sözünüz",
     "promptPlaceholder": "Ideya, gelişme yada bug’ı taswir et…",
     "promptAttach": "Resimleri yukarı",
+    "removeAttachment": "Baglaýyşy Çykar",
     "promptDrop": "Resimleri burda yapıştırýp yukarı",
     "promptPost": "Sözni yollap",
     "promptShortcut": "Ctrl / ⌘ + Enterga yollap",
     "promptDetails": "Zorunlu deýerler",
     "promptDevice": "Cihaz & OS (buglar ýçin)",
+    "deviceInfoNoErrors": "Hiç biri",
     "promptFilters": "Kategoriyaga göre filtrele",
     "promptMediaError": "Her birini 20MB-dan kichik resimler yada video sec",
     "promptMediaLimit": "En az {{max}} yukarı",
@@ -1999,6 +2050,12 @@
     "loginRequired": "Girmek talap edilýär"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Bu",
+      "recent": "Soňky",
+      "suggested": "Maslahat berlen",
+      "youFollow": "Siziň yzarlaýan adamlaryňyz"
+    },
     "reply": "Jogap ber",
     "react": "Reaksiýa bildir",
     "edit": "Üýtget",
@@ -2035,7 +2092,10 @@
     "checkingTokenBalance": "Token balansyňyzy barlaýarys...",
     "deleteConversationFailed": "Söhbetden çykyp bilmedim",
     "message": "Hat",
-    "noConversationsYet": "Hiç hili jedelleşme"
+    "noConversationsYet": "Hiç hili jedelleşme",
+    "sending": "Gönderer",
+    "retrySend": "Gaýtadan synanyş",
+    "discardSend": "Aýyr"
   },
   "music": {
     "listeningCount_one": "{{count}} dinleýär",
@@ -2118,6 +2178,9 @@
     "viewList": "Sarygyň görünüşi",
     "viewMode": "Görnüş",
     "back": "Yza",
+    "reserve": {
+      "signIn": "Hasaba giriň"
+    },
     "usernameAvailable": "Ulanyjy ady boş!",
     "signUpToClaim": "Hasaba duruň we alyň",
     "signUp": "Hasaba durmak",
@@ -2145,7 +2208,13 @@
     },
     "tabs": {
       "playlists": "Çykyşlar",
-      "dislikes": "Gowy görme"
+      "dislikes": "Gowy görme",
+      "likes": "Halanlar"
+    },
+    "likedPosts": {
+      "emptyTitle": "Heniz halama ýok",
+      "privateTitle": "Halamalar gizlin",
+      "loadMore": "Has köp ýükle"
     },
     "dislikes": {
       "emptyTitle": "Hiç hili ýigrenç ýok",
@@ -2168,6 +2237,10 @@
     "sortMostViewed": "Görülenleriň köpüsi",
     "sortLikes": "Gowylar",
     "sortMostLiked": "Men ony gowy görýärin",
+    "sortCustomShort": "Adaty",
+    "arrange": {
+      "saving": "Saklanýar..."
+    },
     "searchThisChannel": "Bu kanala seret",
     "searchResultCount": "\"{{query}}\" üçin 1 netije",
     "searchResultCountPlural": "{{count}} \"{{query}}\" üçin netijeler"
@@ -2319,6 +2392,8 @@
       "swarmMember": "{{index}} of {{total}}",
       "runSwarm": "Swarmy işlediň",
       "description": "Ähli hereketler saýlanan wekili hökmünde hereket edýär. Öwrenilen işleriň dowamynda, ulag ýapyldy.",
+      "instructions": "Agent görkezmeleri",
+      "examples": "Günde bir gezek şu barada ýazgy goý: garaşsyz aýdym-saz\nStil: bilesigeliji, gysga we söhbetdeşlik äheňinde\nGünde iň köp 2 sany täze ýazgyny hala, mowzuklary: aýdym-saz, janly konsertler, winil plastinkalar",
       "preparing": "Tərbiýe göreki iş…",
       "run": "Tizden ylga",
       "limits": "Bir gündelik iş we her bir iş üçin 3 sany ýerlikli söýgi. Ähli işgärler 20 minutlyk post gapyny paýlaşýarlar. Fotolar seretilen baştutanlary ulanýar; videolar örtük suratyna mätäç. Postlar 500-den gowrak harytdan aşak galýar. Ýa-da, ony ýalaňaçlyk bilen etmeli däl.",
@@ -2326,6 +2401,7 @@
       "list": "Vazifeler",
       "refresh": "Täzeleşdir",
       "loading": "Ýolbaşçylyk işleri...",
+      "meta": "@{{agent}} · {{status}} · Işlenen: {{total}}",
       "next": "Indiki ylgaw: {{time}}",
       "pause": "Galanlar",
       "resume": "Garawul diňi",
@@ -2426,6 +2502,9 @@
     "signInAgain": "Täzeden giriň",
     "createSignIn": "Agent döretmek üçin täzeden giriň",
     "checkConnection": "Baglanyşygyňyzy barlaň we täzeden synanyşyň.",
+    "welcome": {
+      "text": "Hoş geldiňiz haty"
+    },
     "workspace": {
       "moderation": "Akymy moderirlemek",
       "moderationHelp": "Ilki bilen moderirleme rugsadyny işjeňleşdiriň. Hasap eýýäm akymy dörediji ýa-da bellenen moderator bolmaly. Tassyklama we garalama düzgünleri henizem güýjünde galýar. Wagt çäklendirmeleri awtomatiki ýagdaýda tamamlanýar.",
@@ -2618,7 +2697,9 @@
     "resendCodePhone": "Ýalan nömre ýa-da kod ýokmy?",
     "continueAs": "Öňki ýaly dowam ediň",
     "switchWalletAccount": "Saýlany üýtget",
-    "walletLoadFailed": "Men çuwallary gaýtaryp bilmedim. Gaýtalaň"
+    "walletLoadFailed": "Men çuwallary gaýtaryp bilmedim. Gaýtalaň",
+    "openInBrowser": "Brauzerde aç",
+    "copyLink": "Salgyny göçüriň"
   },
   "careers": {
     "title": "Riftn-daky işler",
@@ -2842,7 +2923,8 @@
     "noMenuMatches": "Menýuda gabat gelýän zat ýok",
     "searchDehubFor": "Riftn-da “{{query}}” gözle",
     "switchAccount": "Saýlany üýtget",
-    "signedInAs": "{{name}} ýaly ýazylan"
+    "signedInAs": "{{name}} ýaly ýazylan",
+    "requestSend": "Haýyş ibermek"
   },
   "comments": {
     "reportComment": "Komentary habar beriň",
@@ -2950,6 +3032,9 @@
     "confirm": "Mint on {{chain}}",
     "confirmWithCost": "{{chain}} {{cost}}",
     "notAvailable": "Häzirki ýaly, bu mekdebiň açylmagy barada hiç hili habar berilmedi."
+  },
+  "postEditHistory": {
+    "original": "Asyl"
   },
   "postInfo": {
     "title": "Ýazgy maglumaty",
@@ -4915,6 +5000,7 @@
     "filterTrending": "Trendler",
     "filterGraduated": "Mugallym",
     "filterMine": "Meniňki",
+    "searchPlaceholder": "Tiker, at, dörediji gözläň",
     "loadFailed": "Men pullary gaýtaryp bilmedim.",
     "retry": "Täzeleşdir",
     "noCoins": "Häzir pul ýok.",
@@ -5060,6 +5146,7 @@
     "settledTitleSpeed": "Adatça {{speed}}",
     "settledCount_one": "{{count}} tamamlandy",
     "settledCount_other": "{{count}} tamamlandy",
+    "statusInProgress": "Dowam edýär",
     "howMany": "Näçe",
     "availableCount_one": "{{count}} bar",
     "availableCount_other": "{{count}} bar",
@@ -5152,6 +5239,17 @@
     "sellYourFractions": "Fraksiyalarýnýzý sat ({{held}} saklanýan)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Geliň, jikme-jiklere se"
+      }
+    },
+    "cinema": {
+      "close": "Ýap",
+      "performance": {
+        "label": "Öndürijilik"
+      }
+    },
     "libraryEmpty": "Saklanan döredilenleriňiz şu ýerde peýda bolar.",
     "toolRemake": "Täzeleşdir",
     "toolMaboroshiDesc": "Karakterleri we esbaplary üýtget, bir düzgüni barlaň, soňra öz aslynda ses bilen eksport ediň.",
@@ -5270,6 +5368,7 @@
     "presetExtraIridescentGlassName": "Bir buz",
     "presetExtraIridescentGlassHint": "Pearlescent şöhleli heýkel şekilleri",
     "presetExtraTopographicWavesName": "Topografiýa tolkunlary",
+    "presetExtraTopographicWavesHint": "Qatlama kontur çyzyklary aýlanma formalaryna öwrülýär",
     "presetExtraWovenPaperName": "Kagyzy",
     "presetExtraWovenPaperHint": "Ýuwaş ýapraklar we ýuwaş ýapraklar",
     "presetExtraLiquidMetalName": "Metaly ýagyş",
@@ -5361,6 +5460,7 @@
     "presetOpenOrchardPortraitName": "Orchard portreti",
     "presetOpenOrchardPortraitHint": "Mərkəzî format filmi yumşaq bağ bahçə işıqlarında",
     "presetOpenRecordingStudioName": "Seretme stúdiýasy",
+    "presetOpenRecordingStudioHint": "Tungsten işygy bilen izometrik çal kesimi",
     "presetOpenPoppyStillLifeName": "Ýaşaýyşdan lezzet al",
     "presetOpenPoppyStillLifeHint": "Garawul diňi we Garawul diňi",
     "presetOpenMidnightAlleyName": "Günortaly gyzynyň yollary.",
@@ -5369,6 +5469,7 @@
     "presetOpenCraftsmanPortraitHint": "Garawul diňi we Garawul diňi",
     "presetOpenSaltPondsName": "Tuz çukurlary",
     "presetOpenSaltPondsHint": "Aýda görüňde gülgün ve öküzgülgün geometrik şekiller.",
+    "presetOpenWatchBlueprintName": "Gözleg smueta",
     "presetOpenWatchBlueprintHint": "Ýyly kagyzyň üstünde kalkulatory",
     "presetOpenOvergrownHouseName": "Öňki öý",
     "presetOpenOvergrownHouseHint": "Ýaltakly ýagtylyk astyndaky uly formatly gurluşyk",
@@ -5608,6 +5709,7 @@
     "designThreeVoices": "Üç oýun yaratýýýn",
     "saving": "Saklanýýor",
     "saveAndUseVoice": "Bu oýunni saklaýan ve ýsýlanýýn",
+    "presetNeedsImage": "{{name}} birikdirilen surat gerek. Ilki biler birini birikdiriň.",
     "presets": "Standartlar",
     "clearPreset": "Standartni temizleýin",
     "presetAria": "{{name}} preset {{hint}}",
@@ -5639,6 +5741,7 @@
     "presetPosterTypeHint": "Okunýan görkezme görnüşi bilen düzüm",
     "presetThumbnailPunchName": "Çakyrmaç çakyrmaç",
     "presetThumbnailPunchHint": "200px giňliginde okamak",
+    "presetFlatIllustrationName": "Tekiz illýustrasiýa",
     "presetFlatIllustrationHint": "Vektor nusgasynyň nusgasy",
     "presetMacroTextureName": "Makro Texture",
     "presetMacroTextureHint": "Ýapraklar we teksturalar",
@@ -5855,6 +5958,7 @@
     "presetVhsGlitchName": "VHS Glitch",
     "presetVhsGlitchHint": "Retro tapy bozulmagy we renkli gan",
     "presetProductShowcaseName": "Ürün Gösterişi",
+    "presetProductShowcaseHint": "Arassalaşdyrylan, polirlenilen önüm hero şutu",
     "presetTryOnName": "Virtual synalýan",
     "presetTryOnHint": "Bir nusga goşmaça zady geýýär",
     "presetYtSplitName": "Öňki /Öňki",
@@ -6101,6 +6205,12 @@
     "raw": "Çig"
   },
   "nftMarket": {
+    "actAll": "Ehli",
+    "actListings": "Bildirişler",
+    "actOffer": "Teklip",
+    "actOffers": "Teklipler",
+    "actSales": "Satışlar",
+    "tabActivity": "Işjeňlik",
     "shortTitle": "NFT'ler",
     "filters": "Süzgüçler",
     "forSale": "Satışta",
@@ -6165,6 +6275,9 @@
     "offered": "Teklip iberildi. Eýesi muny islendik wagt kabul edip biler.",
     "dehubPost": "Riftn postu",
     "youHold": "Siz {{n}} deň eýesiniz",
+    "price": "Baha",
+    "volume": "Ses güýji",
+    "tabRecent": "Soňky",
     "buyNow": "Indi satyn al",
     "dropsTo": "Baha {{date}} çenli {{price}} çenli azaldy",
     "inBundle": "{{n}} bundasy hökmünde satyldy",
@@ -6573,7 +6686,67 @@
     "youAreBanned": "Bu yaradıcının stream'lerinde sohbet edemezsiniz.",
     "youAreTimedOut": "Anlık olarak timeout oldunuz."
   },
+  "studioDeck": {
+    "background": {
+      "title": "Fon",
+      "modes": {
+        "none": "Öçük",
+        "blur": "Bulaşyklyk",
+        "color": "Reng"
+      }
+    },
+    "remove": "Aýyr",
+    "scenes": {
+      "countdown": "Saýlan",
+      "minutes": "{{count}} dakika",
+      "names": {
+        "starting": "Ýakynda başlar"
+      }
+    },
+    "sources": {
+      "reactAdd": "Görkez",
+      "image": "Resim",
+      "camera": "Kamera",
+      "show": "Garawul diňi we Garawul diňi",
+      "positions": {
+        "center": "Merkezi"
+      },
+      "sizes": {
+        "medium": "Orta"
+      },
+      "shapes": {
+        "circle": "Tegelek",
+        "rect": "Kwadrat"
+      }
+    },
+    "audio": {
+      "mute": "Sesini öçür",
+      "unmute": "Sesini aç",
+      "gateLevels": {
+        "off": "Öçük",
+        "low": "Ýagty",
+        "high": "Güýçli"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platforma",
+      "label": "Kalkülot (fakultativ)",
+      "key": "Akym açary",
+      "save": "Goş",
+      "cancel": "Gaýd Et",
+      "states": {
+        "off": "Öçük",
+        "idle": "Taýýar",
+        "live": "Göni",
+        "error": "Ýalňyşlyk"
+      }
+    },
+    "vertical": {
+      "centre": "Merkezi",
+      "live": "GÖNI"
+    },
     "subathon": {
       "title": "Subaton",
       "intro": "Siziň akyşyňyzda bir hasabat. Her bir sowgat, yzygiderli we ýazylan sowgat wagtyňy artdyrýar, şonuň üçin otagyň ýaşaýşyny sakla.",
@@ -7525,6 +7698,8 @@
     "footerNote": "DePin-de gatnaşmak bir goşmaça hyzmatdyr, bir seretme mahsuly däl. Ulylyk, ukyp we sylaglar üýtgeşik bolup biler."
   },
   "creatorFlow": {
+    "newNativeFlow": "Täze akym",
+    "disconnect": "Baglan",
     "title": "Dörediji akymy",
     "backToStudio": "Dörediji studiýasyna dolan",
     "backToFlows": "Akymlaryňa dolan",
@@ -7864,7 +8039,15 @@
     "followBackAllFailed": "Hiç kimi yzyna yzarlap bolmady",
     "followingBackProgress": "{{total}} adamdan {{completed}}-sini yzyna yzarlamak",
     "findingFollowers": "Yzarlaýjylar gözlenýär...",
-    "followBackAll": "Hemmesini yzyna yzarla"
+    "followBackAll": "Hemmesini yzyna yzarla",
+    "followBackConfirm": "Yzarlaýyşyňyzy yzyna alyň",
+    "followBackNotNow": "Häzir däl",
+    "followBackDone": "Tamam",
+    "nonFollowers": {
+      "notNow": "Häzir däl",
+      "cancel": "Gaýd Et",
+      "close": "Ýap"
+    }
   },
   "reactionInfo": {
     "title": "Reaksiýalar",
@@ -8660,6 +8843,14 @@
     "priceChartCleared": "Baha tertibi arassalandy. Kesgitlenen salgylanma bahasy: $0.0001. Ýerine ýetiriş bahalary elýeterli sargytlara baglydyr."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Aýlanma",
+      "add": "Goş",
+      "scale": "Ölçek",
+      "color": "Reňk",
+      "light": "Ýagty"
+    },
     "video": {
       "tFade": "Garyşyp geçiş",
       "none": "Ýok",
@@ -8826,6 +9017,8 @@
       "tools": "Redaktor gurallary"
     },
     "agent": {
+      "stop": "Bes et",
+      "queue": "Kueuege goş",
       "introTitle": "AI-a näme isleýändigiňizi aýdyň",
       "introBody": "Dizaýny ýa-da üýtgeşmäni öz sözleriňiz bilen düşündiriň. Ol sahypanyň ölçegini üýtgedýär, tekst ýazýar we bezeýär, mugt suratlary, wideolary we sazy tapýar, süzgüçleri ulanýar, gatlaklary tertipleýär we olary hereketlendirýär. Her haýyş bir ädimde yzyna gaýtarylýar.",
       "suggestPoster": "Kenar suraty we galyň sözbaşy bilen tomusky arzanladyş üçin inedördül Instagram posty döret",
@@ -9094,6 +9287,9 @@
       "reloadText": "Subtitrleri täzeden ýükle",
       "textSaved": "Subtitr üýtgetmeleri ýatda saklandy.",
       "action": "Awtomatik subtitrler",
+      "styles": {
+        "bold": "Galyň"
+      },
       "working": "Diňleýär… {{percent}}%",
       "downloading": "Gürleýiş modeli taýýarlanýar… {{percent}}%",
       "hint": "Gürleýşi wagta laýyk subtitrlere öwürýär, olaryň stilini üýtgedip bilersiňiz. Enjamyňyzda işleýär: mugt we şahsy. Ilkinji ulanylanda model ýüklenýär.",
@@ -9250,6 +9446,7 @@
     },
     "videoTemplates": {
       "heading": "Başlanýan videolar",
+      "format": "Video formaty",
       "useFormat": "{{aspect}} video formatyny ulan",
       "duration": "{{seconds}}s",
       "hint": "Format saýlaň, sözleriňizi düzediş ediň we öz klipleriňizi goşyň.",
@@ -10472,6 +10669,29 @@
       "toolbar": "Kanvast navigasiya",
       "zoomIn": "Kanvastı artıq",
       "zoomOut": "Kanvastı azaldır"
+    },
+    "clipFix": {
+      "listening": "Ol şeýle diýdi:"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Böl",
+        "play": "Oynat",
+        "pause": "Galanlar",
+        "frameBack": "Önən frame",
+        "frameForward": "Sonrakı frame"
+      }
+    },
+    "voiceClone": {
+      "stop": "Ýazgyny duruzmak",
+      "failed": "Səs klonlama uğursuz oldu."
+    },
+    "linkImport": {
+      "go": "Import et",
+      "downloading": "Göçürülýär {{percent}}%"
+    },
+    "reverse": {
+      "action": "Tersine"
     }
   },
   "jungleMood": {
@@ -10628,18 +10848,22 @@
     "translateButtonDesc": "Postuň tekstini, bio-maglumatlary we teswirleri özüňize laýyk dile terjime edýär. Programma brauzeriňiziň dilini awtomatiki kesgitleýär ýa-da ony Sazlamalar bölüminden el bilen belläp bilersiňiz.",
     "showOriginal": "Asyl nusgasyny görkez",
     "showOriginalDesc": "Terjime edilenden soň, ony basyp, içerigiň aslynda diline dolan.",
+    "imagePost": "Surat Postu",
     "imagePostDesc": "Bir ýa-da birnäçe suratlary içeren post. Resimler bir token ID bilen NFT hökmünde zähmet zähmetinde saklanýar.",
+    "videoPost": "Video Postu",
     "videoPostDesc": "Bir postda video möçarekatlar möçarekatyna görä: publis, privat we pay-per-view (PPV).",
     "liveStream": "Ýaşaýyş akymy",
     "liveStreamDesc": "Real wagtly telegepleşik. seredýänler seretip, pikir alyşyp, seretgiçini tapyp bilerler. Akmalar HLS tehnologiýasyny ulanýarlar.",
     "story": "Tarih",
     "storyDesc": "24 sagatdan soň gutarýan gysga videolar Olar öz taryhyny görmek üçin öýde ulanýan avatar ýüzükini basyň.",
     "audio": "Ses",
+    "audioDesc": "Wizual tolkunyň pleýeri bilen ses postu. Döredijiler musika, podkast ýa-da ses ýazgylaryny ýükläp bilerler.",
     "audioSpace": "Sesli Boşluk",
     "audioSpaceDesc": "Ulyjalar gepleşip, diňläp we ellerini galdyryp, gürrüňdeşlige gatnaşyp bilerler.",
     "public": "Halk",
     "publicDesc": "Bu hemmeleriň gözüniň alnynda. Her kes jemagat işlerine seredip, ony halaýar we oňa jogap berip biler.",
     "private": "Özge",
+    "privateDesc": "Siz diňe özüňize görünýän içgiler bilen meşgullanýarsyňyz. Özge ýerler başga ulanýanlardan we jemagat iýmitinden gizlenýär.",
     "ppv": "Garawul diňi (Garawul diňi)",
     "subscriberOnly": "Diňe Saýlan",
     "subscriberOnlyDesc": "Ýaradyjynyň kanalasyna ýazylan ulanýanlar üçin çäkli içerik.",
@@ -11747,7 +11971,15 @@
       "rewardsWeek": "{{date}}hepdesi",
       "rewardPaid": "Ödeme",
       "rewardPending": "Garaşmak",
-      "rewardsNone": "Öňki sylaglar henizem hasaplanmady. Birinji hepde duşenbe güni ýapylýar."
+      "rewardsNone": "Öňki sylaglar henizem hasaplanmady. Birinji hepde duşenbe güni ýapylýar.",
+      "stats": {
+        "button": "Göni statistika"
+      },
+      "signin": {
+        "users_one": "{{count}} ulanyjy",
+        "users_other": "{{count}} ulanyjylar",
+        "delete": "Poz"
+      }
     },
     "card": {
       "open": "Aç"
@@ -11879,6 +12111,7 @@
     "phraseOtherDevice": "Riftn-y açyň. Siz bu pulçuny ilkinji gezek tapdyňyz. Siz hem öz açaryňyzy bu ýerde gaýd edip bilersiňiz.",
     "tabPrivateKey": "Şahsy Açar",
     "phraseLoadFailed": "Siz öz gaýtargylama jümlesini tapyp bilmediňiz. Ony barlamak üçin gaýtalap görüň ýa-da Riftn-y öz esasy guralyňyzda açyň.",
+    "noPhrase": "Bu şahsy açar ulanyp saklandy, şonuň üçin Riftn-yň aç-açan sözleri ýok. Şol bir şahsy açary saklaň.",
     "keyWarning": "Bileň bu anahtar beriňde her kesiňiz sizniň puluňyzny kontrol ede biler. Güvenli yerde saklaýap, asla paylaşmayýn.",
     "introTitle": "Çuwallaryňyzy gaýtaryp beriň.",
     "introBody": "Eger siz telefonuny ýa-da paroluny ýitirseňiz, pul pulyňyzy yzyna getirýän 12 söz 30 saniyelik 3 set tutmagy gaýtalap görüň.",
@@ -11902,6 +12135,9 @@
     "reminderLater": "Häzir däl"
   },
   "copy": {
+    "55656b5e434f": "Araýyý yýkymak",
+    "57e2faa5ec63": "Riftn-da gözle",
+    "96d7bff86b44": "Gözden geçirişi ýüklenip bilmedi",
     "1607715e45ed": "Gürlemek üçin topa basyň ýa-da aşakda ýazyň",
     "00140a37bd26": "Tizimdeki işlemler geçici olarak qullanılmamaktadır. Lütfen tekrar dene.",
     "002286513398": "Sizin bu olayları idare etmegiz için yetkiniz yoxdur",
@@ -15961,6 +16197,7 @@
     "afc99407f777": "Bu barada senem gol çekmeli...",
     "dac3d679946e": "Riftn-da POVR mahabat kampaniýalaryny işe giriň: tassyklanan nyşan eýelerine gönükdirilen we tölegleri tokenler arkaly amala aşyrylýan \"görüş we dereje\" (proof-of-view-and-rank) mahabaty.",
     "b7c8b1eb6338": "Siziň hasabatyňyz: $",
+    "6d980563c3da": "Reklamalardan we dörediji goldawyndan gelen girdeji, token şerti garaşýar.",
     "c2bb07748c24": "POVR bilen synalýan belge eýeleri — görgi we derejede reklama subutnamalary. Öňki kampaniýany döretmek üçin pulçugyňyzy baglaň.",
     "661f23a8550b": "Riftn Affiliate: 20% + 5% gaýtalap",
     "ac2b28aec04a": "Siz filiala girmek üçin Riftn hesabyna mätäç.",
@@ -18864,6 +19101,7 @@
     "backToTop": "Üstüne dönmek",
     "needTitle": "Başlık ekleyin devam etmek için",
     "needBody": "{{count}} karakter kaldı",
+    "imagesLabel": "Suratlar",
     "backToWriting": "Yazmaya hazırlanmak",
     "readyTitle": "Hazır mısın yayınlamak için",
     "sharePreview": "Paylaşıldığında görünen görünüm",
@@ -18924,6 +19162,130 @@
     "exploreFirst": "Öňürti barlaň",
     "codeNote": "Biz size kody iberýäris, hiç hili parol gerek däl."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Meýilnama",
+      "howMany": "Näçe",
+      "who": "Ulanyjy ady ýa-da gapjyk salgysy",
+      "whoPlaceholder": "@ulanyjyady",
+      "cancel": "Gaýd Et",
+      "stage": {
+        "preparing": "Taýýarlyk görýär...",
+        "confirming": "Amala garaşylýar…",
+        "recording": "Tamamlanýar…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Ýazylanlar"
+      },
+      "ended": "Gutardy",
+      "until": "{{date}} çenli",
+      "failed": "Ol ýene-de şeýle dolanyp gelýär."
+    }
+  },
+  "whenSheet": {
+    "today": "Bu gün",
+    "tooSoon": "Gelejekde wagt saýlaň.",
+    "show": "Görkez",
+    "hide": "Gizle"
+  },
+  "planned": {
+    "title": "Meýilleşdirilen",
+    "all": "Ehli",
+    "posts": "Ýazgylar",
+    "stages": "Ses otaglary",
+    "post": "Ýazgy",
+    "live": "Göni",
+    "stage": "Sazana",
+    "untitledPost": "Ýazgy",
+    "untitledLive": "Göni",
+    "loading": "Ýüklenýär…",
+    "startNow": "Häzir başla",
+    "cancel": "Gaýd Et",
+    "cancelled": "Gaýd edilen"
+  },
+  "welcome": {
+    "about": {
+      "title": "Riftn-a hoş geldiňiz",
+      "day": "Gün",
+      "month": "Aý",
+      "year": "Ýyl"
+    },
+    "name": {
+      "title": "Ady",
+      "placeholder": "Ady"
+    },
+    "card": {
+      "name": "Ady",
+      "followers": "şägirtler"
+    },
+    "topic": {
+      "music": "Aýdym-saz",
+      "art": "Sungat",
+      "gaming": "Oýunlar",
+      "crypto": "Kripto",
+      "sports": "Sport",
+      "comedy": "Komediýa",
+      "podcast": "Podkastlar",
+      "food": "Iýmit",
+      "news": "Habarlar",
+      "science": "Ylym"
+    },
+    "back": "Yza",
+    "skipPhoto": "Şu wagtdan başlap",
+    "preview": "Koʻrish"
+  },
+  "appTokens": {
+    "title": "Siziň tokenleriňiz",
+    "history": "Taryh",
+    "noHistory": "Hiç bir hereket",
+    "kindDeposit": "Serişde goşmak",
+    "to": "Bu",
+    "amount": "Mukdar",
+    "notePlaceholder": "Bellik goş (hökman däl)",
+    "sendButton": "Iberiň",
+    "errorInsufficient": "Tokenlar ýeterlik däl"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Hemmeler",
+      "followers": "Yzarlaýjylar",
+      "nobody": "Hiç kim"
+    },
+    "heading": "Reaksiýalar",
+    "more": "Has köpräk görkez",
+    "liveNow": "Göni",
+    "untitled": "Reaksiýa"
+  },
+  "connectGuide": {
+    "title": "Riftn-y emeli aň kömekçiňize birikdiriň",
+    "urlLabel": "MCP serwer URL-i",
+    "copy": "Göçür",
+    "copied": "Göçürildi",
+    "copiedToast": "MCP URL göçürildi"
+  },
+  "avatarPrompt": {
+    "notNow": "Häzir däl"
+  },
+  "postStats": {
+    "audience": "Saýlanlar",
+    "engagement": "Ýerine ýetiriş",
+    "finished": "Tamamlandy",
+    "members": "Agzalar",
+    "membersLower": "agzalar",
+    "newFollowers": "Täze şägirtler",
+    "noBadge": "Ýagşylyk ýok",
+    "people": "Adamlar",
+    "plays": "Oýunlar",
+    "quotes": "Sitata",
+    "reposts": "Gaýtadan ýazgylar",
+    "saved": "Saklanan",
+    "shares": "Paýlaşmalar",
+    "signedOutViewers": "Çykdyňyz",
+    "topSupporters": "Ýolbaşçylyk maslahaty",
+    "visitors": "Çykdyňyz"
+  },
   "tokenLaunch": {
     "eyebrow": "Tezden çykyş",
     "title": "Token tezden çykyş",
@@ -18944,6 +19306,10 @@
   "githubLink": {
     "verified": "Tasdiqlanmýş",
     "disconnect": "Baglan"
+  },
+  "mcpKeys": {
+    "delete": "Poz",
+    "shortProfile": "Profil"
   },
   "chatSearch": {
     "placeholder": "Söwda habarlaryny ýa-da adamlary gözden geçiriň",
@@ -18974,5 +19340,17 @@
     "gone": "Bu habar indi ýok",
     "theirMessages": "Onuň habarları",
     "seeTheirMessages": "Onuň habarlaryny gör"
+  },
+  "dmRequests": {
+    "title": "Haýyşlar",
+    "accept": "Kabul et",
+    "delete": "Poz",
+    "block": "Blokirlemek"
+  },
+  "dmSchedule": {
+    "view": "Görmek",
+    "edit": "Tahrirlash",
+    "editLabel": "Haty Editle",
+    "error": "Ol ýene-de şeýle dolanyp gelýär."
   }
 }

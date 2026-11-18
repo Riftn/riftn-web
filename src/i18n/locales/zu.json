@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Umbhalo"
+  },
   "comic": {
     "showAll": "Bonisa wonke amakhasi angu-{{count}}"
   },
@@ -14,6 +17,23 @@
     "glitter": "Okucwazimulayo",
     "saved": "Umngcele ulondoloziwe",
     "failed": "Ayikwazanga ukulondoloza umngcele"
+  },
+  "duet": {
+    "policyEveryone": "Wonke umuntu",
+    "policyFollowers": "Abalandeli",
+    "policyNobody": "Akekho",
+    "loadMore": "Layisha okwengeziwe",
+    "video": "Ividiyo"
+  },
+  "videoRemix": {
+    "sound": "Sebenzisa lesi sinton"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Wonke umuntu",
+      "followers": "Abalandeli",
+      "nobody": "Akekho"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +186,18 @@
     "privateNote": "Ama-akhawunti ayimfihlo awaboniswa ku-fediverse.",
     "noUsername": "Khetha igama lomsebenzisi ukuze uthole ikheli le-fediverse."
   },
+  "signedFollows": {
+    "setUp": "Vula",
+    "turnOff": "Vala",
+    "efpTurnOff": "Yeka"
+  },
   "profileFields": {
     "title": "Izinkambu zephrofayela",
     "description": "Kufika emigqeni emine eyengeziwe kuphrofayela yakho, njengewebhusayithi noma izabizwana zakho.",
     "label": "Ilebula",
     "content": "Okuqukethwe",
+    "add": "Engeza insimu",
+    "remove": "Susa insimu",
     "save": "Londoloza izinkambu",
     "saved": "Izinkambu zephrofayela zilondoloziwe",
     "failed": "Akulondolozwanga. Zama futhi.",
@@ -353,6 +380,7 @@
     "live": "Phila ku-Riftn",
     "error": "Ukubukisa kudinga ukunakekelwa",
     "refresh": "Vuselela isimo",
+    "disconnect": "Nqamula i-Twitch",
     "open": "Buka ku-Riftn",
     "retry": "Zama futhi ukubonisa izibuko",
     "consent": "Xhuma kuphela ishaneli ongumnikazi wayo. Ukuvumela izibuko kugunyaza i-Riftn ukuba idlulisele ukusakaza kwakho futhi igcine ama-replay ngaphansi kwesibonelelo sakho sokurekhoda esikhona.",
@@ -361,10 +389,13 @@
   },
   "maintenance": {
     "brand": "I-Riftn",
+    "mode": "Imodi yokulungisa",
     "description": "Senza ukulungiswa. Sicela uphinde uhlole maduzane.",
     "retry": "Zama futhi",
     "checkFailed": "Asikwazanga ukuhlola ukutholakala. Sicela uzame futhi.",
     "checking": "Iyahlola...",
+    "ownership": "Umthombo ovulekile. Ngokwabasebenzisi.",
+    "title": "Umsebenzi omncane.\nI-Riftn engcono.",
     "intermission": "Ungaxhunyiwe ku-inthanethi okwesikhashana",
     "community": "Umphakathi kuqala. Njalo."
   },
@@ -1190,7 +1221,12 @@
     "payDirect": "Kuthunyelelwe ngqo ku-{{name}} ku-{{symbol}} ngo-{{chain}}. Akukho ukushintsha.",
     "payDirectNoName": "Kuthunyelelwe ngqo kumuntu owakhe umuntu ku-{{symbol}} ngo-{{chain}}. Akukho ukushintsha.",
     "payViaBridgeDpay": "Kuhanjiswe ku-Base futhi kukhokhelwe ku-Riftn Pay, amathokheni afika cishe emaminithini ayi-1",
-    "dmSent": "Kuthunyelwe u-{{amount}} tokens ku-{{name}}!"
+    "dmSent": "Kuthunyelwe u-{{amount}} tokens ku-{{name}}!",
+    "addMessage": "Engeza umyalezo (okukhethwa)",
+    "messagePublic": "Umphakathi",
+    "railTitle": "Amathiphu",
+    "railTotal": "Amathokheni angu-{{amount}}",
+    "tokensUnit": "amathokheni"
   },
   "postOptions": {
     "liveAlertsOn": "Manje uyamlandela u-{{name}}. Uzothola isaziso uma beqala ukusakaza bukhoma.",
@@ -1692,6 +1728,9 @@
   "notifications": {
     "title": "Zaziso",
     "markAllRead": "Phawula konke njengokufundiwe",
+    "groupNew": "Okusha",
+    "groupToday": "Namhlanje",
+    "groupThisWeek": "Leli viki",
     "settings": "Izilungiselelo Zezaziso",
     "actions": "Izenzo",
     "markAllAsRead": "Phawula konke njengokufundiwe",
@@ -1720,6 +1759,7 @@
     "communities": "Imiphakathi",
     "stores": "Izitolo",
     "noNotificationsYet": "Azikho izaziso okwamanje",
+    "searchClose": "Vala ukusesha",
     "noNotificationsDesc": "Uma uthola ukuthanda, amazwana, amathiphu noma ababhaliseli abasha, kuzovela lapha.",
     "loadMore": "Layisha okwengeziwe",
     "markAsRead": "Phawula njengokufundiwe",
@@ -1955,11 +1995,13 @@
     "promptLabel": "Umcabango wakho",
     "promptPlaceholder": "Chaza umcabango, ukuthuthukiswa, noma iphutha…",
     "promptAttach": "Namathisela izithombe",
+    "removeAttachment": "Susa okunamathiselwe",
     "promptDrop": "Phakela noma wubeka izithombe lapha",
     "promptPost": "Phakela umcabango",
     "promptShortcut": "Ctrl / ⌘ + Enter ukuze uphakele",
     "promptDetails": "Imininingwane eyengeziwe",
     "promptDevice": "Isixwayiso & OS (amaphutha)",
+    "deviceInfoNoErrors": "Akukho",
     "promptFilters": "Sifuna ngesigaba",
     "promptMediaError": "Khetha izithombe noma amavidiyo angaphansi kuka-50MB ngakunye.",
     "promptMediaLimit": "Kuze kube ngu-{{max}} okwengezwe.",
@@ -2018,6 +2060,12 @@
     "loginRequired": "Ukungena kuyadingeka"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Ku",
+      "recent": "Kwamuva",
+      "suggested": "Kunconyiwe",
+      "youFollow": "Abantu obalandelayo"
+    },
     "reply": "Phendula",
     "react": "Sabela",
     "edit": "Hlela",
@@ -2054,7 +2102,10 @@
     "checkingTokenBalance": "Kuhlolwa isilinganiso sama-token akho...",
     "deleteConversationFailed": "Ayikwazanga ukususa ingxoxo",
     "message": "Umlayezo",
-    "noConversationsYet": "Azikho izingxoxo okwamanje"
+    "noConversationsYet": "Azikho izingxoxo okwamanje",
+    "sending": "Iyathumela",
+    "retrySend": "Zama futhi",
+    "discardSend": "Susa"
   },
   "music": {
     "listeningCount_one": "{{count}} ukulalela",
@@ -2137,6 +2188,9 @@
     "viewList": "Ukubukwa kohlu",
     "viewMode": "Buka",
     "back": "Emuva",
+    "reserve": {
+      "signIn": "Ngena ngemvume"
+    },
     "usernameAvailable": "Igama lomsebenzisi liyatholakala!",
     "signUpToClaim": "Bhalisa namhlanje ukufuna",
     "signUp": "Bhalisa",
@@ -2164,7 +2218,13 @@
     },
     "tabs": {
       "playlists": "Uhlu lokudlalwayo",
-      "dislikes": "Okungathandiwe"
+      "dislikes": "Okungathandiwe",
+      "likes": "Okuthandwayo"
+    },
+    "likedPosts": {
+      "emptyTitle": "Akukho ukuthandwa okwamanje",
+      "privateTitle": "Ukuthandwa kuyimfihlo",
+      "loadMore": "Layisha okwengeziwe"
     },
     "dislikes": {
       "emptyTitle": "Akukho okungathandiwe okwamanje",
@@ -2187,6 +2247,10 @@
     "sortMostViewed": "Okubukwe kakhulu",
     "sortLikes": "Okuthanda",
     "sortMostLiked": "Okuthanda kakhulu",
+    "sortCustomShort": "Yesigubhu",
+    "arrange": {
+      "saving": "Iyalondoloza..."
+    },
     "searchThisChannel": "Sesha le channel",
     "searchResultCount": "Umphumela 1 we-\"{{query}}\"",
     "searchResultCountPlural": "{{count}} imiphumela ye-\"{{query}}\""
@@ -2343,6 +2407,7 @@
       "runSwarm": "Qalisa i-swarm",
       "description": "Izenzo ziqhutshwa njenge-ejenti ekhethiwe. Imisebenzi eshejuliwe iyaqhubeka nge-app ivaliwe.",
       "instructions": "Iziqondiso ze-ejenti",
+      "examples": "Thumela kanye ngosuku ngalokhu: umculo ozimele\nIsitayela: ilukuluku, okufushane nokuxoxa\nThanda okuthunyelwe kwakamuva okufika ku-2 ngosuku mayelana nalokhu: umculo, imibukiso ebukhoma, i-vinyl",
       "preparing": "Ilungiselela umsebenzi…",
       "run": "Qalisa umyalo",
       "limits": "Iphosti eyodwa yansuku zonke nokuthandwa okufika ku-3 okufanelekile ngomsebenzi ngamunye. Wonke ama-ejenti abelana ngegebe lephosti lemizuzu engu-20. Izithombe zisebenzisa izincazelo ezihloliwe; amavidiyo adinga isithombe sendlu. Amaphosti ahlala ngaphansi kwezinhlamvu ezingu-500. Ayikho igesi ngaphandle kwalapho kudwetshwa; ukubhala kungasebenzisa amakhredithi.",
@@ -2350,6 +2415,7 @@
       "list": "Imisebenzi",
       "refresh": "Vuselela",
       "loading": "Ilayisha imisebenzi…",
+      "meta": "@{{agent}} · {{status}} · Okucutshunguliwe: {{total}}",
       "next": "Ukugijima okulandelayo: {{time}}",
       "pause": "Misa okwesikhashana",
       "resume": "Qhubeka",
@@ -2450,6 +2516,9 @@
     "signInAgain": "Ngena futhi",
     "createSignIn": "Ngena futhi ukuze udale i-ejensi",
     "checkConnection": "Hlola ukuxhumana kwakho bese uzama futhi.",
+    "welcome": {
+      "text": "Umlayezo wokwamukela"
+    },
     "workspace": {
       "moderation": "Ukuphathwa kokusakaza",
       "moderationHelp": "Qala ngokuvula imvume yokuphatha. I-akhawunti kumele kakade ibe ngumdali wokusakaza noma umphathi owabelwe. Izindlela zokugunyaza nezedrafti zisasebenza. Ukumiswa kwesikhashana kuyaphela ngokuzenzakalelayo.",
@@ -2642,7 +2711,9 @@
     "resendCodePhone": "Inombolo engalungile noma ayikho ikhodi? Buya emuva",
     "continueAs": "Qhubeka njengo",
     "switchWalletAccount": "Shintsha i-akhawunti",
-    "walletLoadFailed": "Ayikwazanga ukuloada ama-wallet. Ngiyakucela uzame futhi."
+    "walletLoadFailed": "Ayikwazanga ukuloada ama-wallet. Ngiyakucela uzame futhi.",
+    "openInBrowser": "Vula kusiphequluli",
+    "copyLink": "Kopisha isixhumanisi"
   },
   "careers": {
     "title": "Imisebenzi ku-Riftn",
@@ -2896,7 +2967,8 @@
     "noMenuMatches": "Akukho okufanayo kumenyu",
     "searchDehubFor": "Sesha \"{{query}}\" ku-Riftn",
     "switchAccount": "Shintsha i-akhawunti",
-    "signedInAs": "Ungene njengo {{name}}"
+    "signedInAs": "Ungene njengo {{name}}",
+    "requestSend": "Thumela isicelo"
   },
   "comments": {
     "reportComment": "Bika ukuphawula",
@@ -3005,6 +3077,9 @@
     "confirm": "Iminti ku- {{chain}}",
     "confirmWithCost": "Iminti ku- {{chain}} · {{cost}}",
     "notAvailable": "Ukuphawula kulolu chungechunge akutholakali okwamanje."
+  },
+  "postEditHistory": {
+    "original": "Okwangempela"
   },
   "postInfo": {
     "title": "Ulwazi Lokuthunyelwe",
@@ -5114,6 +5189,7 @@
     "settledTitleSpeed": ", ngokuvamile ku- {{speed}}",
     "settledCount_one": "{{count}} ixazululiwe",
     "settledCount_other": "{{count}} ixazululiwe",
+    "statusInProgress": "Kuyaqhubeka",
     "howMany": "Bangaki",
     "availableCount_one": "{{count}} iyatholakala",
     "availableCount_other": "{{count}} iyatholakala",
@@ -5205,6 +5281,17 @@
     "sellYourFractions": "Thengisa izingxenyana zakho ({{held}} held)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Sebenzisa le mininingwane"
+      }
+    },
+    "cinema": {
+      "close": "Vala",
+      "performance": {
+        "label": "Ukusebenza"
+      }
+    },
     "libraryEmpty": "Okwenziwe okulondolozile kuzovela lapha.",
     "toolRemake": "Yenza kabusha",
     "toolMaboroshi": "I-Maboroshi",
@@ -6170,6 +6257,11 @@
     "raw": "Okungavuthiwe"
   },
   "nftMarket": {
+    "actAll": "Konke",
+    "actListings": "Izinhlu",
+    "actOffers": "Izinikelo",
+    "actSales": "Ukuthengiswa",
+    "tabActivity": "Umsebenzi",
     "shortTitle": "I-NFTs",
     "filters": "Izihlungi",
     "forSale": "Ukuthengiswa",
@@ -6234,6 +6326,9 @@
     "offered": "Isindebele sithumelwe. Umuntu onayo angayamukela nganoma nini.",
     "dehubPost": "Riftn post",
     "youHold": "Unazo {{n}}",
+    "price": "Intengo",
+    "volume": "Ivolumu",
+    "tabRecent": "Kwamuva",
     "buyNow": "Thenga manje",
     "dropsTo": "Intengo iyehla iye {{price}} ngo {{date}}",
     "inBundle": "Uthengiswe njengengxenye ye {{n}}",
@@ -6645,7 +6740,68 @@
     "youAreBanned": "Awukwazi ukuxoxa ekusakazweni kwalo msunguli",
     "youAreTimedOut": "Uphelelwe isikhathi okwesikhashana"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Ingemuva",
+      "modes": {
+        "none": "Cishiwe",
+        "blur": "Ukufiphala",
+        "color": "Umbala"
+      }
+    },
+    "remove": "Susa",
+    "scenes": {
+      "countdown": "Ukubala",
+      "minutes": "{{count}} imiz",
+      "names": {
+        "starting": "Liqala maduze"
+      }
+    },
+    "sources": {
+      "reactAdd": "Bonisa",
+      "image": "Isithombe",
+      "camera": "Ikhamera",
+      "show": "Bonisa ku-stream",
+      "loop": "I-loop",
+      "positions": {
+        "center": "Phakathi nendawo"
+      },
+      "sizes": {
+        "medium": "Phakathi"
+      },
+      "shapes": {
+        "circle": "Indilinga",
+        "rect": "Isikwele"
+      }
+    },
+    "audio": {
+      "mute": "Thulisa",
+      "unmute": "Susa ukuthulisa",
+      "gateLevels": {
+        "off": "Cishiwe",
+        "low": "Ukukhanya",
+        "high": "Kuqinile"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Ipulatifomu",
+      "label": "Igama (okukhethwa kukho)",
+      "key": "Ushuthu lokusakaza",
+      "save": "Engeza",
+      "cancel": "Khansela",
+      "states": {
+        "off": "Cishiwe",
+        "idle": "Kulungile",
+        "live": "Bukhoma",
+        "error": "Iphutha"
+      }
+    },
+    "vertical": {
+      "centre": "Phakathi nendawo",
+      "live": "BUKHOMA"
+    },
     "subathon": {
       "title": "I-subathon",
       "intro": "Ukubala okushiyela kumtshali wakho. Umholo ngamunye okhokhelwe, ukulandela kanye nokulandelela okukhokhele kwengeza isikhathi, ngakho igumbi likugcina uphilile.",
@@ -7597,6 +7753,8 @@
     "footerNote": "Ukubamba iqhaza kwe-DePin kuyisevisi yomnikelo, hhayi umkhiqizo wokutshala imali. Ukutholakala, ukufaneleka nemiklomelo kungashintsha."
   },
   "creatorFlow": {
+    "newNativeFlow": "Umthwalo omutsha",
+    "disconnect": "Nqamula ukuxhumana",
     "title": "Umthwalo Womuntu Osenza",
     "backToStudio": "Buya ku-Creator Studio",
     "backToFlows": "Buya kumikhulu yakho",
@@ -7936,7 +8094,15 @@
     "followBackAllFailed": "Ayikwazanga ukulandela noma ubani emuva",
     "followingBackProgress": "Ukulandela emuva {{completed}} of {{total}}",
     "findingFollowers": "Kuthola abalandeli...",
-    "followBackAll": "Landela konke"
+    "followBackAll": "Landela konke",
+    "followBackConfirm": "Landela emuva",
+    "followBackNotNow": "Hhayi manje",
+    "followBackDone": "Kwenziwe",
+    "nonFollowers": {
+      "notNow": "Hhayi manje",
+      "cancel": "Khansela",
+      "close": "Vala"
+    }
   },
   "reactionInfo": {
     "title": "Ukusabela",
@@ -8732,6 +8898,14 @@
     "priceChartCleared": "Ishadi lenani lisusiwe. Inani lereferensi elingaguquki: $ 0.0001. Amanani okubulawa ancike kuma-oda atholakalayo."
   },
   "editor": {
+    "stage": {
+      "camera": "Ikhamera",
+      "yaw": "Ukujikeleza",
+      "add": "Engeza",
+      "scale": "Usayizi",
+      "color": "Umbala",
+      "light": "Ukukhanya"
+    },
     "video": {
       "tFade": "Ukuxubana",
       "none": "Lutho",
@@ -8898,6 +9072,8 @@
       "tools": "Amathuluzi omhleli"
     },
     "agent": {
+      "stop": "Yeka",
+      "queue": "Engeza ekuqaleni",
       "introTitle": "Tshela i-AI ukuthi ufunani",
       "introBody": "Chaza umklamo noma ushintsho ngamazwi akho. Ishintsha usayizi wekhasi, ibhale futhi ihlobise umbhalo, ithola izithombe, amavidiyo nomculo wamahhala, isebenzisa izihlungi, ihlele izendlalelo futhi izenze zinyakaze. Isicelo ngasinye sihlehliswa ngesinyathelo esisodwa.",
       "suggestPoster": "Yenza okuthunyelwe kwe-Instagram okuyisikwele kokudayiswa kwasehlobo nesithombe solwandle nesihloko esigqamile",
@@ -9166,6 +9342,10 @@
       "reloadText": "Faka kabusha ichasi",
       "textSaved": "Izichasi zisindisiwe.",
       "action": "Imibhalo engezansi ezenzakalelayo",
+      "styles": {
+        "bold": "Inesibindi",
+        "serif": "I-Serif"
+      },
       "working": "Kuyalalelwa… {{percent}}%",
       "downloading": "Kulungiswa imodeli yenkulumo… {{percent}}%",
       "hint": "Iguqula inkulumo ibe yimibhalo engezansi enesikhathi ongashintsha isitayela sayo. Isebenza kudivayisi yakho: mahhala futhi iyimfihlo. Ukusetshenziswa kokuqala kulanda imodeli.",
@@ -10545,6 +10725,29 @@
       "toolbar": "Ukunavigeyitha kwe-canvas",
       "zoomIn": "Sondeza i-canvas",
       "zoomOut": "Sondeza i-canvas ngaphandle"
+    },
+    "clipFix": {
+      "listening": "Ukulalela..."
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Hlukanisa",
+        "play": "Dlala",
+        "pause": "Misa okwesikhashana",
+        "frameBack": "Uhlelo lwangaphambilini",
+        "frameForward": "Uhlelo olulandelayo"
+      }
+    },
+    "voiceClone": {
+      "stop": "Misa ukuqopha",
+      "failed": "Ukulingisa izwi kuhlulekile."
+    },
+    "linkImport": {
+      "go": "Ngenisa",
+      "downloading": "Iyalanda {{percent}}%"
+    },
+    "reverse": {
+      "action": "Ukuhlehlisa"
     }
   },
   "jungleMood": {
@@ -10773,6 +10976,7 @@
     "featureRequestsDesc": "Phakamisa izici ezintsha bese uvota emibonweni yomphakathi. Izicelo ezithandwayo zibekwa kuqala ekuthuthukisweni.",
     "upvote": "Ukuvota",
     "upvoteDesc": "Votela isiphakamiso sokubusa noma isicelo sesici. Isiza ukuphawula ukusekelwa komphakathi.",
+    "downvote": "Vota phansi",
     "downvoteDesc": "Vota ngokumelene nesiphakamiso sokubusa noma isicelo sesici. Kusiza ukukhombisa ukuphikiswa komphakathi.",
     "stakingBadge": "Amabheji Okunamathela",
     "leaderboardRanking": "Isikhundla Sebhodi Yabaholi",
@@ -11827,7 +12031,15 @@
       "rewardsWeek": "Iviki lika- {{date}}",
       "rewardPaid": "Kukhokhiwe",
       "rewardPending": "Kusalindiwe",
-      "rewardsNone": "Ayikho imivuzo ebaliwe okwamanje. Iviki lokuqala liyavalwa ngoMsombuluko."
+      "rewardsNone": "Ayikho imivuzo ebaliwe okwamanje. Iviki lokuqala liyavalwa ngoMsombuluko.",
+      "stats": {
+        "button": "Izibalo ezibukhoma"
+      },
+      "signin": {
+        "users_one": "umsebenzisi we-{{count}}",
+        "users_other": "abasebenzisi be-{{count}}",
+        "delete": "Susa"
+      }
     },
     "card": {
       "open": "Vula"
@@ -11984,6 +12196,9 @@
     "reminderLater": "Hhayi manje"
   },
   "copy": {
+    "55656b5e434f": "Vala ukusesha",
+    "57e2faa5ec63": "Sesha i-Riftn",
+    "96d7bff86b44": "Isesha asikwazanga ukulayisha",
     "1607715e45ed": "Thepha ibhola ukuze ukhulume, noma uthayiphe ngezansi",
     "00140a37bd26": "Izinhloko zokuphila kwenye ukhawulezi ukhulunywekele. Funa ukwaziwe kwenye yena.",
     "002286513398": "Awunayo imvume yokumenenja imicimbi",
@@ -18007,6 +18222,7 @@
     "d4d4c7619589": "{{value1}} likes",
     "4b545391239a": "Izindleko Zesithombe ({{value1}} × ${{value2}})",
     "de7a520d250e": "Qedela ukukhokha lapha. I- {{value1}} yakho ihlala ivuliwe ngemuva kwale drawer.",
+    "6aad3f5a25b5": "Khuluma ngo-@{{value1}}",
     "5e0cb5ae157b": "Isithombe {{value1}}",
     "cd9939b6aa1a": "Shintsha isithombe {{value1}}",
     "89fb9227db8c": "{{value1}} ebhodini Lesitolo",
@@ -18981,6 +19197,7 @@
     "backToTop": "Buyela phezulu",
     "needTitle": "Faka isihloko ukuze uqhubeke",
     "needBody": "{{count}} Izinhlamvu ezengeziwe okufanele zihambe",
+    "imagesLabel": "Zithombe",
     "backToWriting": "Back to writing",
     "readyTitle": "Ready to publish",
     "sharePreview": "Kubukeka kanjani uma kwabelwana ngakho",
@@ -19042,6 +19259,132 @@
     "exploreFirst": "Tafuta kwanza",
     "codeNote": "Tunapata ujumbe wa barua pepe, hakuna jina la kudhani."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Uhlelo",
+      "howMany": "Zingaki",
+      "who": "Igama lomsebenzisi noma ikheli lesikhwama",
+      "whoPlaceholder": "@igamalomsebenzisi",
+      "cancel": "Khansela",
+      "stage": {
+        "preparing": "Kulungiselelwa…",
+        "confirming": "Ilinde ukuthengiselana…",
+        "recording": "Iyaqeda…"
+      }
+    },
+    "badges": {
+      "emoji": "I-Emoji",
+      "audience": {
+        "subscribers": "Ababhaliseli"
+      },
+      "ended": "Kuphelile",
+      "until": "Kuze kube ngu-{{date}}",
+      "failed": "Lokho akuzange kusebenze. Phinda uzame."
+    }
+  },
+  "whenSheet": {
+    "today": "Namhlanje",
+    "tooSoon": "Khetha isikhathi esizayo.",
+    "show": "Bonisa",
+    "hide": "Fihla"
+  },
+  "planned": {
+    "title": "Kuhlelwe",
+    "all": "Konke",
+    "posts": "Okuthunyelwe",
+    "stages": "Amagumbi omsindo",
+    "post": "Thumela",
+    "live": "Bukhoma",
+    "stage": "Isigcawu",
+    "untitledPost": "Thumela",
+    "untitledLive": "Bukhoma",
+    "loading": "Iyalayisha…",
+    "startNow": "Qala manje",
+    "cancel": "Khansela",
+    "cancelled": "Ikhanseliwe"
+  },
+  "welcome": {
+    "about": {
+      "title": "Uyemukelwa ku-Riftn",
+      "day": "Usuku",
+      "month": "Inyanga",
+      "year": "Unyaka"
+    },
+    "name": {
+      "title": "Igama lakho",
+      "placeholder": "Igama lakho"
+    },
+    "card": {
+      "name": "Igama lakho",
+      "followers": "abalandeli"
+    },
+    "topic": {
+      "music": "Umculo",
+      "art": "Ubuciko",
+      "gaming": "Imidlalo",
+      "crypto": "I-Crypto",
+      "sports": "Ezemidlalo",
+      "comedy": "Amahlaya",
+      "film": "Ifilimu",
+      "podcast": "Iphodikhasti",
+      "food": "Ukudla",
+      "news": "Izindaba",
+      "science": "Isayensi"
+    },
+    "back": "Emuva",
+    "skipPhoto": "Yeqa okwamanje",
+    "preview": "Buka kuqala"
+  },
+  "appTokens": {
+    "title": "Amathokheni akho",
+    "history": "Umlando",
+    "noHistory": "Awukho umsebenzi okwamanje",
+    "kindDeposit": "Faka imali",
+    "to": "Ku",
+    "amount": "Inani",
+    "notePlaceholder": "Engeza inothi (ongakhetha)",
+    "sendButton": "Thumela",
+    "errorInsufficient": "Awekho amathokheni anele"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Wonke umuntu",
+      "followers": "Abalandeli",
+      "nobody": "Akekho"
+    },
+    "heading": "Ukusabela",
+    "more": "Bonisa okwengeziwe",
+    "liveNow": "Bukhoma",
+    "untitled": "Ukusabela"
+  },
+  "connectGuide": {
+    "title": "Xhuma i-Riftn nomsizi wakho we-AI",
+    "urlLabel": "I-URL yeseva ye-MCP",
+    "copy": "Kopisha",
+    "copied": "Kukopishiwe",
+    "copiedToast": "I-URL ye-MCP ikopishiwe"
+  },
+  "avatarPrompt": {
+    "notNow": "Hhayi manje"
+  },
+  "postStats": {
+    "audience": "Izethameli",
+    "engagement": "Ukuzibandakanya",
+    "finished": "Kuphelile",
+    "members": "Amalungu",
+    "membersLower": "amalungu",
+    "newFollowers": "Abalandeli abasha",
+    "noBadge": "Alikho ibheji",
+    "people": "Abantu",
+    "plays": "Imidlalo",
+    "quotes": "Izingcaphuno",
+    "reposts": "Okuthunywe kabusha",
+    "saved": "Kugciniwe",
+    "shares": "Ukwabelana",
+    "signedOutViewers": "Uphumile",
+    "topSupporters": "Abasekeli abahamba phambili",
+    "visitors": "Uphumile"
+  },
   "tokenLaunch": {
     "eyebrow": "Kuyeza maduzane",
     "title": "Ukwethulwa kwethokheni maduzane",
@@ -19070,6 +19413,10 @@
     "unavailable": "Ukuqinisekiswa kwe-GitHub kuza maduzane.",
     "connect": "Xhuma i-GitHub",
     "disconnect": "Ndisulule"
+  },
+  "mcpKeys": {
+    "delete": "Susa",
+    "shortProfile": "Iphrofayela"
   },
   "chatSearch": {
     "placeholder": "Sesha imilayezo noma abantu",
@@ -19100,5 +19447,17 @@
     "gone": "Lomlayezo awusekhona",
     "theirMessages": "Imilayezo yabo",
     "seeTheirMessages": "Bheka imilayezo yabo"
+  },
+  "dmRequests": {
+    "title": "Zicelo",
+    "accept": "Yamukela",
+    "delete": "Susa",
+    "block": "Vimba"
+  },
+  "dmSchedule": {
+    "view": "Buka",
+    "edit": "Hlela",
+    "editLabel": "Lungisa umyalezo",
+    "error": "Lokho akuzange kusebenze. Phinda uzame."
   }
 }

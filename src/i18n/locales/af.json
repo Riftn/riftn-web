@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Teks"
+  },
   "comic": {
     "showAll": "Wys al {{count}} bladsye"
   },
@@ -14,6 +17,23 @@
     "glitter": "Glitter",
     "saved": "Rand gestoor",
     "failed": "Kon nie die rand stoor nie"
+  },
+  "duet": {
+    "policyEveryone": "Almal",
+    "policyFollowers": "Volgers",
+    "policyNobody": "Niemand",
+    "loadMore": "Laai meer",
+    "video": "Agterground"
+  },
+  "videoRemix": {
+    "sound": "Gebruik hierdie klank"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Almal",
+      "followers": "Volgers",
+      "nobody": "Niemand"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +186,18 @@
     "privateNote": "Privaat rekeninge word nie op die fediverse gewys nie.",
     "noUsername": "Kies 'n gebruikersnaam om 'n fediverse-adres te kry."
   },
+  "signedFollows": {
+    "setUp": "Skakel aan",
+    "turnOff": "Draai af",
+    "efpTurnOff": "Stop."
+  },
   "profileFields": {
     "title": "Profielvelde",
     "description": "Tot vier ekstra reëls op jou profiel, soos 'n webwerf of jou voornaamwoorde.",
     "label": "Etiket",
     "content": "Inhoud",
+    "add": "Voeg veld by",
+    "remove": "Verwyder veld",
     "save": "Stoor velde",
     "saved": "Profielvelde gestoor",
     "failed": "Dit is nie gestoor nie. Probeer weer.",
@@ -368,6 +395,7 @@
     "checkFailed": "Ons kon nie die beskikbaarheid nagaan nie. Probeer asseblief weer.",
     "checking": "Kontroleer tans...",
     "ownership": "Oopbron. Gebruiker besit.",
+    "title": "'n Bietjie werk.\n'n Beter Riftn.",
     "intermission": "Tydelik vanlyn",
     "community": "Gemeenskap eerste. Altyd."
   },
@@ -1257,7 +1285,10 @@
     "payDirect": "Gestuur reguit na {{name}} in {{symbol}} op {{chain}}. Geen omruil.",
     "payDirectNoName": "Gestuur reguit na die skepper in {{symbol}} op {{chain}}. Geen omruil.",
     "payViaBridgeDpay": "Verskuif na Base en betaal aan Riftn Pay, tokens arriveer in ongeveer 'n minuut",
-    "dmSent": "{{amount}} tokens aan {{name}} gestuur!"
+    "dmSent": "{{amount}} tokens aan {{name}} gestuur!",
+    "addMessage": "Voeg 'n boodskap (opsioneel)",
+    "messagePublic": "Publiek",
+    "railTitle": "Wenke"
   },
   "postOptions": {
     "liveAlertsOn": "Jy volg nou {{name}}. Jy sal 'n kennisgewing kry wanneer hulle regstreeks gaan.",
@@ -1766,6 +1797,9 @@
   "notifications": {
     "title": "Kennisgewings",
     "markAllRead": "Merk alles gelees",
+    "groupNew": "Nuut",
+    "groupToday": "Vandag",
+    "groupThisWeek": "Hierdie week",
     "settings": "Kennisgewinginstellings",
     "actions": "Aksies",
     "markAllAsRead": "Merk alles as gelees",
@@ -1794,6 +1828,7 @@
     "communities": "Gemeenskappe",
     "stores": "Winkels",
     "noNotificationsYet": "Nog geen kennisgewings nie",
+    "searchClose": "Maak soektog toe",
     "noNotificationsDesc": "Wanneer jy laaiks, kommentaar, fooitjies of nuwe intekenare kry, sal dit hier verskyn.",
     "loadMore": "Laai meer",
     "markAsRead": "Merk as gelees",
@@ -2047,11 +2082,13 @@
     "promptLabel": "Jou vra",
     "promptPlaceholder": "Beskryf 'n idee, verbetering of fout...",
     "promptAttach": "Heg beelde aan",
+    "removeAttachment": "Verwyder aanhegsel",
     "promptDrop": "Afbeeldings kan hier geplaas word.",
     "promptPost": "Plaas vinnige",
     "promptShortcut": "Ctrl /+ Voer in om te plaas",
     "promptDetails": "Opsionele besonderhede",
     "promptDevice": "Toestel OS (vir foute)",
+    "deviceInfoNoErrors": "Geen",
     "promptFilters": "Kategorie filter",
     "promptMediaError": "Kies afbeeldings of videos onder 50MB elk.",
     "promptMediaLimit": "Tot {{max}} aanhangsels.",
@@ -2110,6 +2147,12 @@
     "loginRequired": "Meld aan wat nodig is"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Aan",
+      "recent": "Onlangs",
+      "suggested": "Voorgestel",
+      "youFollow": "Mense wat jy volg"
+    },
     "reply": "Antwoord",
     "react": "Reageer",
     "edit": "Wysig",
@@ -2233,6 +2276,9 @@
     "viewList": "Lysaansig",
     "viewMode": "Besigtig",
     "back": "Terug",
+    "reserve": {
+      "signIn": "Meld aan"
+    },
     "usernameAvailable": "Gebruikersnaam beskikbaar!",
     "signUpToClaim": "Teken vandag in om te eis",
     "signUp": "Registreer",
@@ -2260,7 +2306,13 @@
     },
     "tabs": {
       "playlists": "Speellyste",
-      "dislikes": "Dinge wat nie hou nie"
+      "dislikes": "Dinge wat nie hou nie",
+      "likes": "Laaiks"
+    },
+    "likedPosts": {
+      "emptyTitle": "Nog geen laaiks nie",
+      "privateTitle": "Laaiks is privaat",
+      "loadMore": "Laai meer"
     },
     "dislikes": {
       "emptyTitle": "Nog geen dislikes nie",
@@ -2283,6 +2335,10 @@
     "sortMostViewed": "Meeste bekeken",
     "sortLikes": "Hou van",
     "sortMostLiked": "Meeste gehou",
+    "sortCustomShort": "Pasmaak",
+    "arrange": {
+      "saving": "Stoor tans..."
+    },
     "searchThisChannel": "Deursoek hierdie kanaal",
     "searchResultCount": "1 gevolg vir \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultate vir \"{{query}}\"",
@@ -2446,6 +2502,7 @@
       "runSwarm": "Loop swarm",
       "description": "Aksies loop as die gekose agent. Beplande taaklysse voortgaan met die app gesluit.",
       "instructions": "Agentinstruksies",
+      "examples": "Plaas een keer per dag oor: onafhanklike musiek\nStyl: nuuskierig, bondig en geselserig\nHou van hoogstens 2 onlangse plasings per dag oor: musiek, lewendige vertonings, viniel",
       "preparing": "Voorbereiding taak...",
       "run": "Hardloop vinnig",
       "limits": "Een daaglikse pos en tot 3 relevante voorkeure per taak. Alle agente deel 'n postgaping van 20 minute. Foto's gebruik gekontroleerde onderskrifte; video's benodig 'n omslagbeeld. Posters die minder dan 500 karakters bevatten. Geen gas nie, tensy dit gemyn word; skryf mag krediete gebruik.",
@@ -2453,6 +2510,7 @@
       "list": "Take",
       "refresh": "Verfris",
       "loading": "Laai taakke aan…",
+      "meta": "@{{agent}} · {{status}} · Verwerk: {{total}}",
       "next": "Volgende hardloop: {{time}}",
       "pause": "Pouseer",
       "resume": "Voortgaan",
@@ -2553,6 +2611,9 @@
     "signInAgain": "Meld weer aan",
     "createSignIn": "Meld weer aan om 'n agent te skep",
     "checkConnection": "Kontroleer jou verbinding en probeer weer.",
+    "welcome": {
+      "text": "Welkomsboodskap"
+    },
     "workspace": {
       "moderation": "Stroommoderasie",
       "moderationHelp": "Aktiveer eers die moderasietoestemming. Die rekening moet reeds die stroomskepper of 'n toegewysde moderator wees. Goedkeurings- en konsepmodusse geld steeds. Tydelike uitsluitings verval outomaties.",
@@ -2745,7 +2806,9 @@
     "resendCodePhone": "Verkeerde nommer of geen kode? Gaan terug",
     "continueAs": "Voortgaan as",
     "switchWalletAccount": "Wissel rekening",
-    "walletLoadFailed": "Kon nie beursies laai nie. Probeer asseblief weer."
+    "walletLoadFailed": "Kon nie beursies laai nie. Probeer asseblief weer.",
+    "openInBrowser": "Maak in blaaier oop",
+    "copyLink": "Kopieer skakel"
   },
   "careers": {
     "title": "Loopbane",
@@ -2973,7 +3036,8 @@
     "noMenuMatches": "Niks in die kieslys pas nie",
     "searchDehubFor": "Soek “{{query}}” op Riftn",
     "switchAccount": "Wissel rekening",
-    "signedInAs": "Geteken as {{name}}"
+    "signedInAs": "Geteken as {{name}}",
+    "requestSend": "Stuur versoek"
   },
   "comments": {
     "reportComment": "Rapporteer kommentaar",
@@ -3082,6 +3146,9 @@
     "confirm": "Munt op {{chain}}",
     "confirmWithCost": "Munt op {{chain}} · {{cost}}",
     "notAvailable": "Mining op hierdie ketting is nog nie beskikbaar nie."
+  },
+  "postEditHistory": {
+    "original": "Oorspronklik"
   },
   "postInfo": {
     "title": "Plaas inligting",
@@ -5194,6 +5261,7 @@
     "settledTitleSpeed": ", tipies in {{speed}}",
     "settledCount_one": "{{count}} geskik",
     "settledCount_other": "{{count}} geskik",
+    "statusInProgress": "Aan die gang",
     "howMany": "Hoeveel",
     "availableCount_one": "{{count}} beskikbaar",
     "availableCount_other": "{{count}} beskikbaar",
@@ -5286,6 +5354,17 @@
     "sellYourFractions": "Verkoop jou fraksies ({{held}} gehou)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Gebruik hierdie besonderhede"
+      }
+    },
+    "cinema": {
+      "close": "Maak toe",
+      "performance": {
+        "label": "Opvoering"
+      }
+    },
     "libraryEmpty": "Jou gestoorde generasies sal hier verskyn.",
     "toolRemake": "Herstel",
     "toolMaboroshi": "Maboroshi",
@@ -6256,6 +6335,12 @@
     "raw": "Rou"
   },
   "nftMarket": {
+    "actAll": "Alle",
+    "actListings": "Advertensies",
+    "actOffer": "Aanbod",
+    "actOffers": "Aanbiedinge",
+    "actSales": "Verkope",
+    "tabActivity": "Aktiwiteit",
     "shortTitle": "NFT's",
     "filters": "Filters",
     "forSale": "Te koop",
@@ -6320,6 +6405,8 @@
     "offered": "Aanbod gestuur. Die houer kan dit enige tyd aanvaar.",
     "dehubPost": "Riftn-pos",
     "youHold": "Jy hou {{n}}",
+    "price": "Prys",
+    "tabRecent": "Onlangs",
     "buyNow": "Koop nou",
     "dropsTo": "Prys daal tot {{price}} teen {{date}}",
     "inBundle": "Verkoop as ’n bundel van {{n}}",
@@ -6733,7 +6820,64 @@
     "youAreBanned": "Jy kan nie in hierdie skepper se streams praat nie",
     "youAreTimedOut": "Jy is vir ’n oomblik tyd uit"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Agtergrond",
+      "modes": {
+        "none": "Af",
+        "blur": "Vervaag",
+        "color": "Kleur"
+      }
+    },
+    "remove": "Verwyder",
+    "scenes": {
+      "countdown": "Aftelling",
+      "names": {
+        "starting": "Begin binnekort"
+      }
+    },
+    "sources": {
+      "reactAdd": "Wys",
+      "image": "Beeld",
+      "camera": "Kamera",
+      "show": "Wys op stroom",
+      "loop": "Lus",
+      "positions": {
+        "center": "Sentrum"
+      },
+      "shapes": {
+        "circle": "Sirkel",
+        "rect": "Vierkant"
+      }
+    },
+    "audio": {
+      "mute": "Demp",
+      "unmute": "Ontdemp",
+      "gateLevels": {
+        "off": "Af",
+        "low": "Lig",
+        "high": "Sterk"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "PlatinumName",
+      "label": "Naam (opsioneel)",
+      "key": "Stroom sleutel",
+      "save": "Voeg by",
+      "cancel": "Afskiet",
+      "states": {
+        "off": "Af",
+        "idle": "Gereed",
+        "live": "Regstreeks",
+        "error": "Fout"
+      }
+    },
+    "vertical": {
+      "centre": "Sentrum",
+      "live": "LEWENDIG"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "'n Aftelling op jou stroom. Elke betaalde geskenk, volg en intekening voeg tyd by, sodat die kamer jou lewendig hou.",
@@ -7686,6 +7830,8 @@
     "footerNote": "DePin-deelname is 'n bydraediens, nie 'n beleggingsproduk nie. Beskikbaarheid, geskiktheid en belonings mag verander."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nuwe vloei",
+    "disconnect": "Ontkoppel",
     "title": "Skepperstroom",
     "backToStudio": "Terug na Skepperstudio",
     "backToFlows": "Terug na jou strome",
@@ -8026,6 +8172,9 @@
     "followingBackProgress": "Volg terug {{completed}} van {{total}}",
     "findingFollowers": "Vind navolgers...",
     "followBackAll": "Volg almal terug",
+    "followBackConfirm": "Volg terug",
+    "followBackNotNow": "Nie nou nie",
+    "followBackDone": "Klaar",
     "nonFollowers": {
       "title": "Skoonmaak van wie jy volg?",
       "body": "{{count}} rekeninge wat jy volg, volg jou nie terug nie.",
@@ -8868,6 +9017,14 @@
     "priceChartCleared": "Prys grafiek skoongemaak. Vaste verwysingsprys: $ 0.0001. Uitvoeringspryse hang af van beskikbare bestellings."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Rotasie",
+      "add": "Voeg by",
+      "scale": "Grootte",
+      "color": "Kleur",
+      "light": "Lig"
+    },
     "video": {
       "tFade": "Oorvloei",
       "none": "Geen",
@@ -9034,6 +9191,8 @@
       "tools": "Redigeerderhulpmiddels"
     },
     "agent": {
+      "stop": "Stop.",
+      "queue": "Voeg by tou",
       "introTitle": "Sê vir die AI wat jy wil hê",
       "introBody": "Beskryf die ontwerp of die verandering in jou eie woorde. Dit verander die bladgrootte, skryf en stileer teks, vind gratis foto's, video's en musiek, pas filters toe, rangskik lae en animeer hulle. Elke versoek is een ontdoen-stap.",
       "suggestPoster": "Maak 'n vierkantige Instagram-plasing vir 'n someruitverkoping met 'n strandfoto en 'n vet titel",
@@ -9302,6 +9461,9 @@
       "reloadText": "Herlaai beskrywing",
       "textSaved": "Omskrywings verander.",
       "action": "Outo-onderskrifte",
+      "styles": {
+        "bold": "Vetdruk"
+      },
       "working": "Luister tans… {{percent}}%",
       "downloading": "Maak die spraakmodel gereed… {{percent}}%",
       "hint": "Verander spraak in getimede onderskrifte wat jy kan herstileer. Loop op jou toestel: gratis en privaat. Die eerste gebruik laai die model af.",
@@ -9310,6 +9472,7 @@
       "failed": "Kon nie onderskrifte vir hierdie snit skep nie.",
       "targetLanguage": "Opskrif taal",
       "translateCount": "Vertaal {{count}} onderskrifte",
+      "translationDone": "{{count}} onderskrifte vertaal",
       "translationFailed": "Onderskrif vertaling gevaal. Jou onderskrifte is onveranderd.",
       "lockedTranslation": "Ontsluit geslote onderskrifte om dit in te sluit."
     },
@@ -10680,6 +10843,29 @@
       "toolbar": "Doek navigasie",
       "zoomIn": "Zoem doek in",
       "zoomOut": "Zoem doek uit"
+    },
+    "clipFix": {
+      "listening": "Luister…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Verdeel",
+        "play": "Speel",
+        "pause": "Pouseer",
+        "frameBack": "Vorige raam",
+        "frameForward": "Volgende raam"
+      }
+    },
+    "voiceClone": {
+      "stop": "Hou op om op te neem",
+      "failed": "Stemkloning misluk."
+    },
+    "linkImport": {
+      "go": "Voer in",
+      "downloading": "Aflaai {{percent}}%"
+    },
+    "reverse": {
+      "action": "Omgekeerde"
     }
   },
   "jungleMood": {
@@ -11985,7 +12171,15 @@
       "rewardsWeek": "Week van {{date}}",
       "rewardPaid": "Betaal",
       "rewardPending": "Hangende",
-      "rewardsNone": "Geen belonings is nog bereken nie. Die eerste week sluit Maandag."
+      "rewardsNone": "Geen belonings is nog bereken nie. Die eerste week sluit Maandag.",
+      "stats": {
+        "button": "Regstreekse statistiek"
+      },
+      "signin": {
+        "users_one": "{{count}} gebruiker",
+        "users_other": "{{count}} gebruikers",
+        "delete": "Vee uit"
+      }
     },
     "card": {
       "open": "Oop"
@@ -12143,6 +12337,9 @@
     "reminderLater": "Nie nou nie"
   },
   "copy": {
+    "55656b5e434f": "Maak soektog toe",
+    "57e2faa5ec63": "Soek Riftn",
+    "96d7bff86b44": "Soektog kon nie laai nie",
     "1607715e45ed": "Tik op die bal om te praat, of tik hieronder",
     "00140a37bd26": "Transaksies op die netwerk is tydelik nie beskikbaar nie. Probeer asseblief weer.",
     "002286513398": "Jy het nie toestemming om gebeure te bestuur nie",
@@ -19154,6 +19351,7 @@
     "backToTop": "Terug na bo",
     "needTitle": "Voeg 'n titel by om voort te gaan",
     "needBody": "{{count}} meer karakters om te gaan",
+    "imagesLabel": "Prente",
     "backToWriting": "Terug na skryf",
     "readyTitle": "Gereed om te publiseer",
     "sharePreview": "Hoe dit lyk wanneer gedeel",
@@ -19215,6 +19413,129 @@
     "exploreFirst": "Verken eers",
     "codeNote": "Ons stuur vir jou 'n kode, geen wagwoord nodig nie."
   },
+  "liveHype": {
+    "gift": {
+      "howMany": "Hoeveel",
+      "who": "Gebruikersnaam of beursieadres",
+      "whoPlaceholder": "@gebruikersnaam",
+      "cancel": "Afskiet",
+      "stage": {
+        "preparing": "Besig om voor te berei…",
+        "confirming": "Wag vir die transaksie…",
+        "recording": "Rond af…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Intekenare"
+      },
+      "ended": "Verstryk",
+      "until": "Tot {{date}}",
+      "failed": "Dit het nie gewerk nie. Probeer weer."
+    }
+  },
+  "whenSheet": {
+    "today": "Vandag",
+    "tooSoon": "Kies 'n tyd in die toekoms.",
+    "show": "Wys",
+    "hide": "Versteek"
+  },
+  "planned": {
+    "title": "Beplan",
+    "all": "Alle",
+    "posts": "Plasings",
+    "stages": "Oudiokamers",
+    "post": "Ná",
+    "live": "Regstreeks",
+    "stage": "Stadium",
+    "untitledPost": "Ná",
+    "untitledLive": "Regstreeks",
+    "loading": "Laai…",
+    "startNow": "Begin nou",
+    "cancel": "Afskiet",
+    "cancelled": "Gekanselleer"
+  },
+  "welcome": {
+    "about": {
+      "title": "Welkom by Riftn",
+      "day": "Dag",
+      "month": "Maand",
+      "year": "Jaar"
+    },
+    "name": {
+      "title": "Jou naam",
+      "placeholder": "Jou naam"
+    },
+    "card": {
+      "name": "Jou naam",
+      "followers": "volgers"
+    },
+    "topic": {
+      "music": "Musiek",
+      "art": "Kuns",
+      "gaming": "Speletjies",
+      "crypto": "Kripto",
+      "sports": "Sport",
+      "comedy": "Komedië",
+      "podcast": "Podsending",
+      "food": "Voedsel",
+      "news": "Nuus",
+      "science": "Wetenskap"
+    },
+    "back": "Terug",
+    "skipPhoto": "Spoor later op",
+    "preview": "Voorskou"
+  },
+  "appTokens": {
+    "title": "Jou tokens",
+    "history": "Geskiedenis",
+    "noHistory": "Nog geen aktiwiteit nie",
+    "kindDeposit": "Deposito",
+    "to": "Aan",
+    "amount": "Bedrag",
+    "notePlaceholder": "Voeg ’n nota by (opsioneel)",
+    "sendButton": "Stuur",
+    "errorInsufficient": "Nie genoeg tokens nie"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Almal",
+      "followers": "Volgers",
+      "nobody": "Niemand"
+    },
+    "heading": "Reaksies",
+    "more": "Meer wys",
+    "liveNow": "Regstreeks",
+    "untitled": "Reaksie"
+  },
+  "connectGuide": {
+    "title": "Koppel Riftn aan jou KI-assistent",
+    "urlLabel": "MCP-bediener-URL",
+    "copy": "Kopieer",
+    "copied": "Gekopieer",
+    "copiedToast": "MCP-URL gekopieer"
+  },
+  "avatarPrompt": {
+    "notNow": "Nie nou nie"
+  },
+  "postStats": {
+    "audience": "Gehoor",
+    "engagement": "Betrokkenheid",
+    "finished": "Klaar",
+    "members": "Lede",
+    "membersLower": "lede",
+    "newFollowers": "Nuwe volgelinge",
+    "noBadge": "Geen kentekens nie",
+    "people": "Mense",
+    "plays": "Speel",
+    "quotes": "aanhalings",
+    "reposts": "Herplasings",
+    "saved": "Gered",
+    "shares": "Deel",
+    "signedOutViewers": "Afgemeld",
+    "topSupporters": "Top ondersteuners",
+    "visitors": "Afgemeld"
+  },
   "tokenLaunch": {
     "eyebrow": "Binnekort beskikbaar",
     "title": "Token word binnekort geloods",
@@ -19243,6 +19564,53 @@
     "unavailable": "GitHub is soon.",
     "connect": "Verbind met GitHub",
     "disconnect": "Ontkoppel"
+  },
+  "mcpKeys": {
+    "delete": "Vee uit",
+    "shortProfile": "Profiel"
+  },
+  "chatSearch": {
+    "placeholder": "Soek boodskappe of mense",
+    "placeholderPerson": "Soek {{name}} se boodskappe",
+    "close": "Maak soektog toe",
+    "removePerson": "Soek almal",
+    "clear": "Vee uit",
+    "signInTitle": "Meld aan om die gesels te deursoek",
+    "voice": "Stem-boodskap",
+    "photo": "Foto",
+    "peopleHere": "Mense in hierdie gesels",
+    "recent": "Onlangse soektogte",
+    "hint": "Tik 'n woord of 'n naam in.",
+    "failed": "Soektog kon nie laai nie",
+    "people": "Mense",
+    "messages": "Boodskappe",
+    "seeCount_one": "Sien hul {{count}} boodskap",
+    "seeCount_other": "Sien hul {{count}} boodskappe",
+    "messagesCount_one": "{{count}} boodskap",
+    "messagesCount_other": "{{count}} boodskappe",
+    "results_one": "{{count}} resultaat",
+    "results_other": "{{count}} resultate",
+    "backToResults": "Terug na resultate",
+    "position": "{{current}} van {{total}}",
+    "older": "Ouer resultaat",
+    "newer": "Nuwer resultaat",
+    "latest": "Meeste onlangse",
+    "gone": "Daardie boodskap is nie meer hier nie",
+    "theirMessages": "Hulle boodskappe",
+    "seeTheirMessages": "Sien hul boodskappe"
+  },
+  "dmRequests": {
+    "title": "Versoeke",
+    "accept": "Aanvaar",
+    "delete": "Vee uit",
+    "block": "Blokkeer"
+  },
+  "dmSchedule": {
+    "view": "Kyk",
+    "notSent": "Nie gestuur nie",
+    "edit": "Redigeer",
+    "editLabel": "Redigeer boodskap",
+    "error": "Dit het nie gewerk nie. Probeer weer."
   },
   "footer": {
     "company": "Maatskappy",
@@ -19277,35 +19645,5 @@
     "description": "Skep iets nuuts.",
     "newProject": "Nuwe projek",
     "newPost": "Nuwe plasing"
-  },
-  "chatSearch": {
-    "placeholder": "Soek boodskappe of mense",
-    "placeholderPerson": "Soek {{name}} se boodskappe",
-    "close": "Maak soektog toe",
-    "removePerson": "Soek almal",
-    "clear": "Vee uit",
-    "signInTitle": "Meld aan om die gesels te deursoek",
-    "voice": "Stem-boodskap",
-    "photo": "Foto",
-    "peopleHere": "Mense in hierdie gesels",
-    "recent": "Onlangse soektogte",
-    "hint": "Tik 'n woord of 'n naam in.",
-    "failed": "Soektog kon nie laai nie",
-    "people": "Mense",
-    "messages": "Boodskappe",
-    "seeCount_one": "Sien hul {{count}} boodskap",
-    "seeCount_other": "Sien hul {{count}} boodskappe",
-    "messagesCount_one": "{{count}} boodskap",
-    "messagesCount_other": "{{count}} boodskappe",
-    "results_one": "{{count}} resultaat",
-    "results_other": "{{count}} resultate",
-    "backToResults": "Terug na resultate",
-    "position": "{{current}} van {{total}}",
-    "older": "Ouer resultaat",
-    "newer": "Nuwer resultaat",
-    "latest": "Meeste onlangse",
-    "gone": "Daardie boodskap is nie meer hier nie",
-    "theirMessages": "Hulle boodskappe",
-    "seeTheirMessages": "Sien hul boodskappe"
   }
 }

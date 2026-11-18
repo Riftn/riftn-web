@@ -31,7 +31,7 @@ export function MessageSelectBar({ count, ownCount, onCopy, onForward, onDelete,
       data-msg-select-bar
       role="toolbar"
       aria-label={t('msgSelect.toolbar', 'Selected messages')}
-      className="mx-2 mb-[calc(env(safe-area-inset-bottom)+8px)] mt-1 shrink-0 rounded-2xl border border-white/10 bg-zinc-900/95 p-1.5 shadow-2xl backdrop-blur-xl lg:mb-2"
+      className="mx-2 mb-[calc(env(safe-area-inset-bottom)+8px)] mt-1 shrink-0 rounded-2xl border border-white/10 bg-zinc-900/95 p-1.5 shadow-[0_2px_8px_-4px_rgb(0_0_0/0.2)] backdrop-blur-xl lg:mb-2"
     >
       <div className="flex items-center gap-1 px-1 pb-1">
         <span data-msg-select-count className="mr-auto pl-1 text-[13px] font-semibold tabular-nums text-white">

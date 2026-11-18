@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Teks"
+  },
   "comic": {
     "showAll": "Tunjukkan semua {{count}} halaman"
   },
@@ -14,6 +17,22 @@
     "glitter": "Gemerlap",
     "saved": "Bingkai disimpan",
     "failed": "Tidak dapat menyimpan bingkai"
+  },
+  "duet": {
+    "policyEveryone": "Semua orang",
+    "policyFollowers": "Pengikut",
+    "policyNobody": "Tiada siapa",
+    "loadMore": "Muatkan lagi"
+  },
+  "videoRemix": {
+    "sound": "Gunakan bunyi ini"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Semua orang",
+      "followers": "Pengikut",
+      "nobody": "Tiada siapa"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +185,18 @@
     "privateNote": "Akaun peribadi tidak dipaparkan di fediverse.",
     "noUsername": "Pilih nama pengguna untuk mendapatkan alamat fediverse."
   },
+  "signedFollows": {
+    "setUp": "Hidupkan",
+    "turnOff": "Matikan",
+    "efpTurnOff": "Hentikan"
+  },
   "profileFields": {
     "title": "Medan profil",
     "description": "Sehingga empat baris tambahan pada profil anda, seperti laman web atau kata ganti nama anda.",
     "label": "Label",
     "content": "Kandungan",
+    "add": "Tambah medan",
+    "remove": "Buang medan",
     "save": "Simpan medan",
     "saved": "Medan profil disimpan",
     "failed": "Tidak disimpan. Cuba lagi.",
@@ -368,6 +394,7 @@
     "checkFailed": "Kami tidak dapat menyemak ketersediaan. Sila cuba lagi.",
     "checking": "Sedang menyemak...",
     "ownership": "Sumber terbuka. Dimiliki pengguna.",
+    "title": "Sedikit kerja.\nRiftn yang lebih baik.",
     "intermission": "Di luar talian buat sementara waktu",
     "community": "Komuniti dahulu. Sentiasa."
   },
@@ -1452,7 +1479,12 @@
     "payDirect": "Hantar langsung ke {{name}} di {{symbol}} pada {{chain}}. Tiada gantian.",
     "payDirectNoName": "Hantar langsung ke kreator di {{symbol}} pada {{chain}}. Tiada gantian.",
     "payViaBridgeDpay": "Dipindahkan ke Base dan dibayar kepada Riftn Pay, token tiba dalam masa kira-kira seminit",
-    "dmSent": "{{amount}} token dihantar kepada {{name}}!"
+    "dmSent": "{{amount}} token dihantar kepada {{name}}!",
+    "addMessage": "Tambah pesanan (pilihan)",
+    "messagePublic": "Awam",
+    "railTitle": "Petua",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "token"
   },
   "postOptions": {
     "liveAlertsOn": "Anda kini mengikuti {{name}}. Anda akan menerima pemberitahuan apabila mereka bersiaran langsung.",
@@ -1553,6 +1585,8 @@
     "madeForKidsConfirmComments": "Hanya Mod Kanak-kanak boleh memberi komen mengenainya. Anda masih boleh membalasnya sendiri.",
     "madeForKidsConfirmYes": "Ya, ia untuk kanak-kanak",
     "markMadeForKids": "Tandakan sebagai dibuat untuk kanak-kanak",
+    "madeForKidsOnDesc": "Ditunjukkan kepada kanak-kanak dalam Mod Kanak-kanak dan tiada dalam suapan biasa. Hanya Mod Kanak-kanak boleh mengulas.",
+    "madeForKidsOffDesc": "Menunjukkan siaran ini kepada kanak-kanak yang menggunakan Mod Kanak-kanak dan mengeluarkannya daripada suapan biasa.",
     "madeForKidsBlockedByMature": "Hantaran bertanda matang juga tidak boleh disiarkan untuk kanak-kanak.",
     "audience": "Khalayak",
     "currency": "Mata Wang",
@@ -1951,6 +1985,9 @@
   "notifications": {
     "title": "Pemberitahuan",
     "markAllRead": "Tandakan semua dibaca",
+    "groupNew": "Baharu",
+    "groupToday": "Hari ini",
+    "groupThisWeek": "Minggu ini",
     "settings": "Tetapan Pemberitahuan",
     "actions": "Tindakan",
     "markAllAsRead": "Tandakan semua sebagai dibaca",
@@ -1979,6 +2016,7 @@
     "communities": "Komuniti",
     "stores": "Kedai",
     "noNotificationsYet": "Belum ada pemberitahuan",
+    "searchClose": "Tutup carian",
     "noNotificationsDesc": "Apabila anda menerima suka, komen, tip, atau pelanggan baharu, ia akan muncul di sini.",
     "loadMore": "Muat lagi",
     "markAsRead": "Tandakan sebagai dibaca",
@@ -2218,11 +2256,13 @@
     "promptLabel": "Promp anda",
     "promptPlaceholder": "Laporkan idea, penambahbaikan, atau kecacatan…",
     "promptAttach": "Lampirkan imej",
+    "removeAttachment": "Buang lampiran",
     "promptDrop": "Tampal atau lepaskan imej di sini",
     "promptPost": "Siarkan gesaan",
     "promptShortcut": "Ctrl / ⌘ + Masukkan untuk menyiarkan",
     "promptDetails": "Butiran pilihan",
     "promptDevice": "Peranti & OS (untuk pepijat)",
+    "deviceInfoNoErrors": "Tiada",
     "promptFilters": "Tapis mengikut kategori",
     "promptMediaError": "Pilih imej atau video di bawah 50MB setiap satu.",
     "promptMediaLimit": "Sehingga {{max}} lampiran.",
@@ -2281,6 +2321,12 @@
     "loginRequired": "Log masuk diperlukan"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Kepada",
+      "recent": "Terkini",
+      "suggested": "Cadangan",
+      "youFollow": "Orang yang anda ikuti"
+    },
     "reply": "Balas",
     "react": "Reaksi",
     "edit": "Sunting",
@@ -2317,7 +2363,10 @@
     "checkingTokenBalance": "Memeriksa baki token anda...",
     "deleteConversationFailed": "Tidak dapat menghapuskan perbualan",
     "message": "Mesej",
-    "noConversationsYet": "Belum ada perbualan"
+    "noConversationsYet": "Belum ada perbualan",
+    "sending": "Menghantar",
+    "retrySend": "Cuba semula",
+    "discardSend": "Alih keluar"
   },
   "music": {
     "listeningCount_one": "{{count}} mendengar",
@@ -2400,6 +2449,9 @@
     "viewList": "Paparan senarai",
     "viewMode": "Lihat",
     "back": "Kembali",
+    "reserve": {
+      "signIn": "Daftar masuk"
+    },
     "usernameAvailable": "Nama pengguna tersedia!",
     "signUpToClaim": "Daftar hari ini untuk menuntut",
     "signUp": "Daftar Masuk",
@@ -2427,7 +2479,13 @@
     },
     "tabs": {
       "playlists": "Senarai main",
-      "dislikes": "Tidak Suka"
+      "dislikes": "Tidak Suka",
+      "likes": "Suka"
+    },
+    "likedPosts": {
+      "emptyTitle": "Tiada suka lagi",
+      "privateTitle": "Suka adalah peribadi",
+      "loadMore": "Muatkan lagi"
     },
     "dislikes": {
       "emptyTitle": "Belum ada tidak suka",
@@ -2450,6 +2508,10 @@
     "sortMostViewed": "Paling banyak dilihat",
     "sortLikes": "Suka",
     "sortMostLiked": "Paling disukai",
+    "sortCustomShort": "Tersuai",
+    "arrange": {
+      "saving": "Menyimpan..."
+    },
     "searchThisChannel": "Cari saluran ini",
     "searchResultCount": "1 hasil carian untuk \"{{query}}\"",
     "searchResultCountPlural": "{{count}} hasil carian untuk \"{{query}}\""
@@ -2607,6 +2669,7 @@
       "runSwarm": "Jalankan gerombolan",
       "description": "Tindakan dijalankan sebagai ejen yang dipilih. Tugas berjadual diteruskan dengan aplikasi ditutup.",
       "instructions": "Arahan ejen",
+      "examples": "Siarkan sekali sehari tentang: muzik indie\nGaya: ingin tahu, ringkas dan santai\nSukai sehingga 2 siaran terkini sehari tentang: muzik, persembahan langsung, piring hitam",
       "preparing": "Menyediakan tugas...",
       "run": "Jalankan prom",
       "limits": "Satu hantaran harian dan sehingga 3 suka yang berkaitan bagi setiap tugas. Semua ejen berkongsi jurang pos selama 20 minit. Gambar menggunakan kapsyen yang disemak; video memerlukan imej muka depan. Hantaran kekal di bawah 500 aksara. Tiada gas kecuali mencetak; penulisan boleh menggunakan kredit.",
@@ -2715,6 +2778,9 @@
     "signInAgain": "Log masuk semula",
     "createSignIn": "Log masuk semula untuk mencipta ejen",
     "checkConnection": "Semak sambungan anda dan cuba lagi.",
+    "welcome": {
+      "text": "Mesej alu-aluan"
+    },
     "workspace": {
       "moderation": "Moderasi strim",
       "moderationHelp": "Dayakan kebenaran moderasi terlebih dahulu. Akaun mestilah sudah menjadi pencipta strim atau moderator yang ditugaskan. Mod kelulusan dan mod draf masih terpakai. Sekatan sementara tamat secara automatik.",
@@ -2907,7 +2973,9 @@
     "resendCodePhone": "Nombor salah atau tiada kod? Kembali",
     "continueAs": "Teruskan sebagai",
     "switchWalletAccount": "Pindah akaun",
-    "walletLoadFailed": "Tidak dapat memuat dompet. Sila cuba lagi."
+    "walletLoadFailed": "Tidak dapat memuat dompet. Sila cuba lagi.",
+    "openInBrowser": "Buka dalam pelayar",
+    "copyLink": "Salin pautan"
   },
   "careers": {
     "title": "Kerjaya di Riftn",
@@ -3131,7 +3199,8 @@
     "noMenuMatches": "Tiada yang sepadan dalam menu",
     "searchDehubFor": "Cari \"{{query}}\" di Riftn",
     "switchAccount": "Tukar akaun",
-    "signedInAs": "Ditandatangani sebagai {{name}}"
+    "signedInAs": "Ditandatangani sebagai {{name}}",
+    "requestSend": "Hantar permohonan"
   },
   "comments": {
     "reportComment": "Laporkan komen",
@@ -3151,6 +3220,7 @@
     "pinnedToast": "Disematkan di bahagian atas siaran ini",
     "unpinnedToast": "Sematan dibuang",
     "pinFailed": "Komen itu tidak dapat disematkan",
+    "kidsOnlyThread": "Siaran ini untuk kanak-kanak. Hanya Mod Kanak-kanak boleh mengulas.",
     "sortRecent": "Terkini",
     "sortOldest": "Terlama",
     "sortLiked": "Popular",
@@ -3239,6 +3309,9 @@
     "confirm": "Mint pada {{chain}}",
     "confirmWithCost": "Mint pada {{chain}} · {{cost}}",
     "notAvailable": "Percetakan pada rantai ini belum tersedia lagi."
+  },
+  "postEditHistory": {
+    "original": "Asal"
   },
   "postInfo": {
     "title": "Info Pos",
@@ -5351,6 +5424,7 @@
     "settledTitleSpeed": ", biasanya dalam {{speed}}",
     "settledCount_one": "{{count}} diselesaikan",
     "settledCount_other": "{{count}} diselesaikan",
+    "statusInProgress": "Sedang berjalan",
     "howMany": "Berapa banyak",
     "availableCount_one": "{{count}} tersedia",
     "availableCount_other": "{{count}} tersedia",
@@ -5443,6 +5517,17 @@
     "sellYourFractions": "Jual pecahan anda ({{held}} dipegang)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Gunakan butiran ini"
+      }
+    },
+    "cinema": {
+      "close": "Tutup",
+      "performance": {
+        "label": "Prestasi"
+      }
+    },
     "libraryEmpty": "Hasil janaan anda yang disimpan akan dipaparkan di sini.",
     "toolRemake": "Buat semula",
     "toolMaboroshi": "Maboroshi",
@@ -6414,6 +6499,12 @@
     "raw": "Ba_ris"
   },
   "nftMarket": {
+    "actAll": "Semua",
+    "actListings": "Iklan",
+    "actOffer": "Tawaran",
+    "actOffers": "Tawaran",
+    "actSales": "Penjualan",
+    "tabActivity": "Aktiviti",
     "shortTitle": "NFTs",
     "filters": "Penapis",
     "forSale": "Untuk dijual",
@@ -6478,6 +6569,9 @@
     "offered": "Tawaran dihantar. Pemegang boleh menerimanya bila-bila masa.",
     "dehubPost": "Riftn pos",
     "youHold": "Anda memegang {{n}}",
+    "price": "Harga",
+    "volume": "Kelantangan",
+    "tabRecent": "Terkini",
     "buyNow": "Beli sekarang",
     "dropsTo": "Harga turun kepada {{price}} pada {{date}}",
     "inBundle": "Dijual sebagai bundel {{n}}",
@@ -6891,7 +6985,66 @@
     "youAreBanned": "Anda tidak boleh bertukar dalam aliran-aliran pengeluar ini",
     "youAreTimedOut": "Anda sedang waktu habis untuk seketika"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Latar belakang",
+      "modes": {
+        "none": "Lumpuh",
+        "blur": "Kabur",
+        "color": "Warna"
+      }
+    },
+    "remove": "Alih keluar",
+    "scenes": {
+      "countdown": "Kiraan mengundur",
+      "names": {
+        "starting": "Bermula tidak lama lagi"
+      }
+    },
+    "sources": {
+      "reactAdd": "Tunjukkan",
+      "image": "Imej",
+      "camera": "Kamera",
+      "show": "Tunjukkan pada strim",
+      "loop": "Gelung",
+      "positions": {
+        "center": "Tengahkan"
+      },
+      "sizes": {
+        "medium": "Sederhana"
+      },
+      "shapes": {
+        "circle": "Bulatan",
+        "rect": "Segi empat sama"
+      }
+    },
+    "audio": {
+      "mute": "Bisukan",
+      "unmute": "Nyahbisu",
+      "gateLevels": {
+        "off": "Lumpuh",
+        "low": "Cahaya",
+        "high": "Kuat"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "label": "Nama (pilihan)",
+      "key": "Kunci strim",
+      "save": "Tambah",
+      "cancel": "Batal",
+      "states": {
+        "off": "Lumpuh",
+        "idle": "Sedia",
+        "live": "Langsung",
+        "error": "Ralat"
+      }
+    },
+    "vertical": {
+      "centre": "Tengahkan",
+      "live": "LANGSUNG"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Penghitung mundur di siaran anda. Setiap hadiah bayaran, pengikut dan langganan menambah masa, jadi bilik akan mempertahankan anda tetap siaran.",
@@ -7844,6 +7997,8 @@
     "footerNote": "Penyertaan DePin adalah perkhidmatan sumbangan, bukan produk pelaburan. Ketersediaan, kelayakan dan ganjaran mungkin berubah."
   },
   "creatorFlow": {
+    "newNativeFlow": "Aliran baharu",
+    "disconnect": "Putuskan sambungan",
     "title": "Aliran Pencipta",
     "backToStudio": "Kembali ke Studio Pencipta",
     "backToFlows": "Kembali ke aliran anda",
@@ -8184,6 +8339,9 @@
     "followingBackProgress": "Mengikuti {{completed}} dari {{total}}",
     "findingFollowers": "Mencari pengikut...",
     "followBackAll": "Mengikuti semua orang",
+    "followBackConfirm": "Ikuti balas",
+    "followBackNotNow": "Tidak sekarang",
+    "followBackDone": "Selesai",
     "nonFollowers": {
       "title": "Bersihkan siapa yang anda ikuti?",
       "body": "{{count}} akaun yang anda ikuti tidak mengikut anda kembali.",
@@ -8997,6 +9155,14 @@
     "priceChartCleared": "Graf harga dibersihkan. Harga rujukan tetap: $0.0001. Harga pelaksanaan bergantung pada pesanan yang tersedia."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Putaran",
+      "add": "Tambah",
+      "scale": "Saiz",
+      "color": "Warna",
+      "light": "Cahaya"
+    },
     "video": {
       "tFade": "Larut silang",
       "none": "Tiada",
@@ -9163,6 +9329,8 @@
       "tools": "Alat editor"
     },
     "agent": {
+      "stop": "Hentikan",
+      "queue": "Tambah ke antrian",
       "introTitle": "Beritahu AI apa yang anda mahu",
       "introBody": "Terangkan reka bentuk atau perubahan dengan kata-kata anda sendiri. Ia mengubah saiz halaman, menulis dan menggayakan teks, mencari foto, video dan muzik percuma, menggunakan penapis, menyusun lapisan dan menganimasikannya. Setiap permintaan boleh dibuat asal sekali gus.",
       "suggestPoster": "Buat hantaran Instagram segi empat sama untuk jualan musim panas dengan foto pantai dan tajuk tebal",
@@ -9431,6 +9599,9 @@
       "reloadText": "Muat semula teks penjelasan",
       "textSaved": "Perubahan teks penjelasan disimpan.",
       "action": "Kapsyen automatik",
+      "styles": {
+        "bold": "Tebal"
+      },
       "working": "Mendengar… {{percent}}%",
       "downloading": "Menyediakan model pertuturan… {{percent}}%",
       "hint": "Menukar pertuturan kepada kapsyen bermasa yang boleh anda gayakan semula. Berjalan pada peranti anda: percuma dan peribadi. Penggunaan pertama akan memuat turun model.",
@@ -10810,6 +10981,29 @@
       "toolbar": "Navigasi kanvas",
       "zoomIn": "Zum kanvas ke dalam",
       "zoomOut": "Zum keluar kanvas"
+    },
+    "clipFix": {
+      "listening": "Mendengarkan…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Pisah",
+        "play": "Main",
+        "pause": "Jeda",
+        "frameBack": "Bingkai sebelumnya",
+        "frameForward": "Bingkai seterusnya"
+      }
+    },
+    "voiceClone": {
+      "stop": "Hentikan rakaman",
+      "failed": "Klonan suara gagal."
+    },
+    "linkImport": {
+      "go": "Mengimport",
+      "downloading": "Memuat turun {{percent}}%"
+    },
+    "reverse": {
+      "action": "Songsang"
     }
   },
   "jungleMood": {
@@ -12093,7 +12287,15 @@
       "rewardsWeek": "Minggu {{date}}",
       "rewardPaid": "Dibayar",
       "rewardPending": "Menunggu",
-      "rewardsNone": "Belum ada ganjaran yang dikira. Minggu pertama ditutup pada hari Isnin."
+      "rewardsNone": "Belum ada ganjaran yang dikira. Minggu pertama ditutup pada hari Isnin.",
+      "stats": {
+        "button": "Statistik langsung"
+      },
+      "signin": {
+        "users_one": "{{count}} pengguna",
+        "users_other": "{{count}} pengguna",
+        "delete": "Padam"
+      }
     },
     "card": {
       "open": "Buka"
@@ -12251,6 +12453,9 @@
     "reminderLater": "Bukan sekarang"
   },
   "copy": {
+    "55656b5e434f": "Tutup carian",
+    "57e2faa5ec63": "Cari di Riftn",
+    "96d7bff86b44": "Carian tidak dapat dimuatkan",
     "1607715e45ed": "Ketik bola untuk bercakap, atau taip di bawah",
     "00140a37bd26": "Tranzaksi di rangkaian itu sementara tidak tersedia. Sila cuba lagi.",
     "002286513398": "Anda tidak mempunyai izin untuk menguruskan acara-acara",
@@ -19252,6 +19457,7 @@
     "backToTop": "Kembali ke atas",
     "needTitle": "Tambah tajuk untuk meneruskan",
     "needBody": "{{count}} lebih banyak aksara lagi",
+    "imagesLabel": "Imej",
     "backToWriting": "Kembali ke penulisan",
     "readyTitle": "Sedia untuk disiarkan",
     "sharePreview": "Bagaimana ia kelihatan apabila dikongsi",
@@ -19313,12 +19519,136 @@
     "exploreFirst": "Teroka dahulu",
     "codeNote": "Kami e-melkan kod kepada anda, tanpa kata laluan."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Pelan",
+      "howMany": "Berapa banyak",
+      "who": "Nama pengguna atau alamat dompet",
+      "whoPlaceholder": "@namapengguna",
+      "cancel": "Batal",
+      "stage": {
+        "preparing": "Menyediakan…",
+        "confirming": "Menunggu transaksi…",
+        "recording": "Menyelesaikan…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Pelanggan"
+      },
+      "ended": "Tamat",
+      "until": "Sehingga {{date}}",
+      "failed": "Itu tidak berjaya. Cuba lagi."
+    }
+  },
+  "whenSheet": {
+    "today": "Hari ini",
+    "tooSoon": "Pilih masa di masa hadapan.",
+    "show": "Tunjukkan",
+    "hide": "Sembunyikan"
+  },
+  "planned": {
+    "title": "Dirancang",
+    "all": "Semua",
+    "posts": "Catatan",
+    "stages": "Bilik audio",
+    "post": "Pos",
+    "live": "Langsung",
+    "stage": "Pentas",
+    "untitledPost": "Pos",
+    "untitledLive": "Langsung",
+    "loading": "Memuatkan…",
+    "startNow": "Mulakan sekarang",
+    "cancel": "Batal",
+    "cancelled": "Dibatalkan"
+  },
+  "welcome": {
+    "about": {
+      "title": "Selamat datang ke Riftn",
+      "day": "Hari",
+      "month": "Bulan",
+      "year": "Tahun"
+    },
+    "name": {
+      "title": "Nama anda",
+      "placeholder": "Nama anda"
+    },
+    "card": {
+      "name": "Nama anda",
+      "followers": "pengikut"
+    },
+    "topic": {
+      "music": "Muzik",
+      "art": "Seni",
+      "gaming": "Permainan",
+      "crypto": "Kripto",
+      "sports": "Sukan",
+      "comedy": "Komedi",
+      "film": "Filem",
+      "food": "Makanan",
+      "news": "Berita",
+      "science": "Sains"
+    },
+    "back": "Kembali",
+    "skipPhoto": "Langkau buat masa ini",
+    "preview": "Siaran awal"
+  },
+  "appTokens": {
+    "title": "Token Anda",
+    "history": "Sejarah",
+    "noHistory": "Belum ada aktiviti",
+    "to": "Kepada",
+    "amount": "Jumlah",
+    "notePlaceholder": "Tambah nota (pilihan)",
+    "sendButton": "Hantar",
+    "errorInsufficient": "Token tidak mencukupi"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Semua orang",
+      "followers": "Pengikut",
+      "nobody": "Tiada siapa"
+    },
+    "heading": "Tindak balas",
+    "more": "Lihat lebih banyak",
+    "liveNow": "Langsung",
+    "untitled": "Tindak balas"
+  },
+  "connectGuide": {
+    "title": "Sambungkan Riftn kepada pembantu AI anda",
+    "urlLabel": "URL pelayan MCP",
+    "copy": "Salin",
+    "copied": "Disalin",
+    "copiedToast": "URL MCP disalin"
+  },
+  "avatarPrompt": {
+    "notNow": "Tidak sekarang"
+  },
+  "postStats": {
+    "audience": "Khalayak",
+    "engagement": "Penglibatan",
+    "finished": "Selesai",
+    "members": "Ahli",
+    "membersLower": "ahli",
+    "newFollowers": "Pengikut baharu",
+    "noBadge": "Tiada lencana",
+    "people": "Orang",
+    "plays": "Main",
+    "quotes": "Petikan",
+    "reposts": "Siaran Ulang",
+    "saved": "Disimpan",
+    "shares": "Kongsi",
+    "signedOutViewers": "Log keluar",
+    "topSupporters": "Penyokong utama",
+    "visitors": "Log keluar"
+  },
   "tokenLaunch": {
     "eyebrow": "Segera akan datang",
     "title": "Token pelancaran akan segera",
     "body": "Belanjaan ditutup sementara token baru sedang disediakan. Dapatkan e-mel segera apabila ia dilancarkan.",
     "notifyMe": "Beritahu saya",
     "sendTo": "Kami akan menghantar e-mel kepada {{email}}.",
+    "emailLabel": "Emel",
     "invalidEmail": "Masukkan email yang sah.",
     "joinedTitle": "Anda ada dalam senarai.",
     "joinedBody": "Kami akan menghantar email kepada {{email}} apabila token dilancarkan.",
@@ -19339,6 +19669,10 @@
     "unavailable": "Pengesahan GitHub akan datang tidak lama lagi.",
     "connect": "Sambungkan GitHub",
     "disconnect": "Putuskan sambungan"
+  },
+  "mcpKeys": {
+    "delete": "Padam",
+    "shortProfile": "Profil"
   },
   "chatSearch": {
     "placeholder": "Cari mesej atau orang",
@@ -19369,5 +19703,17 @@
     "gone": "Mesej itu tidak lagi di sini",
     "theirMessages": "Mesej mereka",
     "seeTheirMessages": "Lihat mesej mereka"
+  },
+  "dmRequests": {
+    "title": "Permintaan",
+    "accept": "Terima",
+    "delete": "Padam",
+    "block": "Sekat"
+  },
+  "dmSchedule": {
+    "view": "Tonton",
+    "edit": "Kemaskini",
+    "editLabel": "Edit mesej",
+    "error": "Itu tidak berjaya. Cuba lagi."
   }
 }

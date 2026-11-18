@@ -12,7 +12,9 @@ import { slideOut } from '@/hooks/use-sheet-flick-close';
  * Used with vaul's `handleOnly`, so this is the drawer's only drag:
  *
  * - Part open, any vertical drag moves the sheet: up to fill the screen, down
- *   to close. The list does not scroll until the sheet is full.
+ *   to close. Up past full, the same drag carries on as the list's scroll
+ *   (and a flick keeps it gliding), so a swipe up on a part-open sheet reads
+ *   as scrolling the list instead of doing nothing past the sheet's top.
  * - Full, the list scrolls as usual. A pull down only moves the sheet when
  *   the list was already at the top when the finger went down and was not
  *   still gliding from a fling, so a swipe that scrolls back up and reaches
@@ -58,6 +60,25 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
   let expanded = !snap;
   let offset = 0;
   let samples: Sample[] = [];
+  // Part open and dragged up past full: the rest of the drag scrolls the list.
+  let handedOff = false;
+  let glide = 0;
+  const stopGlide = () => { cancelAnimationFrame(glide); glide = 0; };
+  /** A flick that ends a handed-off drag keeps the list moving and slows down. */
+  const glideList = (speed: number) => {
+    let v = speed; // px/ms, up the list
+    let last = performance.now();
+    const step = (now: number) => {
+      const dt = Math.min(48, now - last);
+      last = now;
+      const before = scroller.scrollTop;
+      scroller.scrollTop = before + v * dt;
+      v *= Math.pow(0.95, dt / 16);
+      if (Math.abs(v) < 0.02 || scroller.scrollTop === before) { glide = 0; return; }
+      glide = requestAnimationFrame(step);
+    };
+    glide = requestAnimationFrame(step);
+  };
 
   const partOpen = () => (snap ? Math.round(window.innerHeight * PART_OPEN_DROP) : 0);
   const base = () => (expanded ? 0 : partOpen());
@@ -108,6 +129,8 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
       mode = 'off';
       return;
     }
+    stopGlide();
+    handedOff = false;
     const target = e.target as Element | null;
     atTop = scroller.scrollTop <= 0 && performance.now() - lastScrollAt > SCROLL_SETTLE_MS;
     const blocked = !!target?.closest?.('[data-vaul-no-drag], input, textarea, select, [contenteditable="true"]');
@@ -142,8 +165,16 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
     }
     if (e.cancelable) e.preventDefault();
     let y = base() + (t.clientY - startY);
-    // Past full, it gives a little and stops.
-    if (y < 0) y = y / 4;
+    if (y < 0 && snap && !expanded) {
+      // Part open and pushed up past full: the sheet stays full and the list
+      // scrolls with the rest of the finger's travel.
+      handedOff = true;
+      scroller.scrollTop = -y;
+      y = 0;
+    } else if (y < 0) {
+      // Past full, it gives a little and stops.
+      y = y / 4;
+    }
     offset = y;
     samples.push({ t: e.timeStamp, y: t.clientY });
     while (samples.length > 2 && e.timeStamp - samples[0].t > SPEED_WINDOW_MS) samples.shift();
@@ -160,6 +191,11 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
     const idle = e.timeStamp - last.t;
     const speed = idle > 60 ? 0 : (last.y - first.y) / Math.max(1, last.t - first.t);
     const mid = partOpen();
+    if (handedOff && scroller.scrollTop > 0) {
+      settle(true);
+      if (speed < -FLICK_SPEED) glideList(-speed);
+      return;
+    }
     const visible = Math.max(1, (sheet.offsetHeight || window.innerHeight) - mid);
     const belowMid = offset - mid;
     const shut = belowMid >= visible * CLOSE_SHARE || (belowMid >= FLICK_MIN_PULL && speed >= FLICK_SPEED);
@@ -214,6 +250,7 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
   sheet.addEventListener('touchend', onEnd);
   sheet.addEventListener('touchcancel', onCancel);
   return () => {
+    stopGlide();
     scrim?.removeEventListener('click', onScrimTap);
     sheet.removeEventListener('focusin', onFocusIn);
     scroller.removeEventListener('scroll', onScroll);

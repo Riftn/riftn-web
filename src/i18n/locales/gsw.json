@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Tekscht"
+  },
   "comic": {
     "showAll": "Alli {{count}} Siite zeige"
   },
@@ -14,6 +17,22 @@
     "glitter": "Glitzer",
     "saved": "Rahme gspeicheret",
     "failed": "Rahme het nöd chöne gspeicheret wärde"
+  },
+  "duet": {
+    "policyEveryone": "Alli",
+    "policyFollowers": "Follower",
+    "policyNobody": "Niemer",
+    "loadMore": "Meh lade"
+  },
+  "videoRemix": {
+    "sound": "Benutz dä Sound"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Alli",
+      "followers": "Follower",
+      "nobody": "Niemer"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,16 +185,24 @@
     "privateNote": "Privati Konte wärded im Fediverse nöd zeigt.",
     "noUsername": "Wähl en Benutzername, zum e Fediverse-Adrässe übercho."
   },
+  "signedFollows": {
+    "setUp": "Aktiviere",
+    "turnOff": "Ausschalten",
+    "efpTurnOff": "Stoppe"
+  },
   "profileFields": {
     "title": "Profilfälder",
     "description": "Bis zu vier zuesätzlichi Ziile i dim Profil, wie e Websiite oder dini Pronome.",
     "label": "Bezeichnig",
     "content": "Inhalt",
+    "add": "Add Feld",
+    "remove": "Entferne Feld",
     "save": "Fälder speichere",
     "saved": "Profilfälder gspeicheret",
     "failed": "Das isch nöd gspeicheret worde. Probier's nomal.",
     "verified": "Bestätigte Link",
     "verifyHint": "Zum en Link bestätige, füeg das uf dere Siite ii und speicher nomal: {{snippet}}",
+    "descriptionPresets": "Website, Pronomen oder anderes hinzufügen. Links werden mit deinen Socials angezeigt.",
     "type": "Feldtyp",
     "needsLabel": "Gebt jedem benutzerdefinierten Feld einen Label",
     "placeholderLink": "yoursite.com",
@@ -354,7 +381,9 @@
     "refresh": "Aktualisiere den Status",
     "disconnect": "Disconnect Twitch",
     "open": "Schau auf Riftn.",
+    "retry": "Spiegelung erneut versuchen",
     "consent": "Verbinde nur einen Kanal, den du besitz. Aktivieren von Mirroring erlaubt Riftn, deine Übertragungen weiterzuleiten und Aufzeichnungen unter deinem bestehenden Speicherlimit zu speichern.",
+    "disabled": "Automatische Spiegelung ist ausgeschaltet",
     "failed": "Kann Twitch-Spiegelung nich aktualisiert werden. Bitte versuche es noochmäl."
   },
   "maintenance": {
@@ -365,12 +394,14 @@
     "checkFailed": "Wir händen kenne d Verfüebarkeit überprüft. Bitte probiere es erneut.",
     "checking": "Überprüfe...",
     "ownership": "Offene Quelle. Benutzerbesitz.",
+    "title": "Es bitzeli Arbet.\nEs bessers Riftn.",
     "intermission": "Zuwendig",
     "community": "Gemeinschaft vor allem. Immer."
   },
   "viralTemplates": {
     "title": "Find de nächste virale Minute.",
     "intro": "Schau dir ein Beispiel an. Wähl einen Effekt oder eine Figur aus. Füg dein Foto hinzu und mach’s dir eigen.",
+    "browse": "Alle {{count}} Vorlagen ansehen",
     "featured": "Zurück zu den Hauptschlagzeilen",
     "useNamed": "Use {{name}}",
     "preview": "Spiel {{name}} Vorschau",
@@ -380,6 +411,7 @@
     "effects": "Effekte",
     "characters": "Charaktere",
     "dance": "Tänze",
+    "sports": "Sport",
     "products": "Produkte",
     "seasonal": "Saisonale",
     "results": "{{count}} Vorlagen",
@@ -1178,7 +1210,12 @@
     "payDirect": "Gschickt direkt zu {{name}} in {{symbol}} am {{chain}}. Kein Tausch.",
     "payDirectNoName": "Gschickt direkt an de {{symbol}} uf {{chain}}. Kei Umschlag.",
     "payViaBridgeDpay": "A Base g'schobe und a Riftn Pay bezahlt, Tokens chummet i ca. e Minute",
-    "dmSent": "{{amount}} Tokens a {{name}} gschickt!"
+    "dmSent": "{{amount}} Tokens a {{name}} gschickt!",
+    "addMessage": "Bis bald!",
+    "messagePublic": "Öffentlech",
+    "railTitle": "Trinkgelder",
+    "railTotal": "{{amount}} Tokens",
+    "tokensUnit": "Tokens"
   },
   "postOptions": {
     "liveAlertsOn": "Du folgsch jetzt {{name}}. Du überchunnsch e Benachrichtigung, wenn s live gaht.",
@@ -1679,6 +1716,9 @@
   "notifications": {
     "title": "Nochrichtä",
     "markAllRead": "Alli als gläse markiere",
+    "groupNew": "Neu",
+    "groupToday": "Hüt",
+    "groupThisWeek": "Die Wuche",
     "settings": "Nochrichtä-Istelligä",
     "actions": "Aktione",
     "markAllAsRead": "Alli als gläse markiere",
@@ -1707,6 +1747,7 @@
     "communities": "Communitys",
     "stores": "Läde",
     "noNotificationsYet": "No kei Nochrichtä",
+    "searchClose": "Suechi schliesse",
     "noNotificationsDesc": "Wenn du Likes, Kommentär, Trinkgäld oder neui Abonnente bechunnsch, erschiined si da.",
     "loadMore": "Meh lade",
     "markAsRead": "Als gläse markiere",
@@ -1939,14 +1980,20 @@
     "queued": "In Warteschleef",
     "promptPageTitle": "Aafrage",
     "promptSubtitle": "Bau Riftn mit einer Prompt.",
+    "promptNew": "Neue Eingabeaufforderung",
     "promptSearch": "Suchprompte",
     "promptHeading": "Was bauten wir nächstes Mal?",
+    "promptHint": "Beschreiben Sie es. Fügen Sie einen Screenshot hinzu. Machen Sie es möglich.",
+    "promptLabel": "Ihre Aufforderung",
     "promptPlaceholder": "Een Idee, Verbesserung oder Bug…",
+    "promptAttach": "Bilder anhängen",
+    "removeAttachment": "Uusnäh",
     "promptDrop": "Bilder oder Abbildungen hier posten",
     "promptPost": "Kein Text vorliegt.",
     "promptShortcut": "Drücke Strg + Eingabe um zu posten.",
     "promptDetails": "Zuwendungen",
     "promptDevice": "Gerät & Betriebssystem (zur Fehlermeldung)",
+    "deviceInfoNoErrors": "Keini",
     "promptFilters": "Filter durch Kategorie",
     "promptMediaError": "Wähle Bilder oder Videos, die jeweils weniger als 50 MB wiegen.",
     "promptMediaLimit": "Bis zu {{max}} Dateianhänge.",
@@ -2005,6 +2052,12 @@
     "loginRequired": "Aamäldig erforderlich"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Bis",
+      "recent": "Neuschti",
+      "suggested": "Vorgeschlage",
+      "youFollow": "Lüüt, wo du ne folgsch"
+    },
     "reply": "Antworte",
     "react": "Reagiere",
     "edit": "Bearbeite",
@@ -2041,7 +2094,10 @@
     "checkingTokenBalance": "Dini Token-Guthabe wird prüfe...",
     "deleteConversationFailed": "Han d'Konversation nöd chönne lösche",
     "message": "Botschaft",
-    "noConversationsYet": "Keini Gspräche noch."
+    "noConversationsYet": "Keini Gspräche noch.",
+    "sending": "Wird gesendet",
+    "retrySend": "Nomol probiere",
+    "discardSend": "Entferne"
   },
   "music": {
     "listeningCount_one": "{{count}} Zuhörende",
@@ -2124,6 +2180,9 @@
     "viewList": "Listä Ansicht",
     "viewMode": "Blick",
     "back": "Zrugg",
+    "reserve": {
+      "signIn": "Zuechmäldig"
+    },
     "usernameAvailable": "Benutzername verfüegbar!",
     "signUpToClaim": "Mäld di aa zum",
     "signUp": "Aamälde",
@@ -2151,7 +2210,13 @@
     },
     "tabs": {
       "playlists": "Playlistä",
-      "dislikes": "Abstimmungen"
+      "dislikes": "Abstimmungen",
+      "likes": "Gfäut-mir"
+    },
+    "likedPosts": {
+      "emptyTitle": "No kei Likes",
+      "privateTitle": "Likes sind privat",
+      "loadMore": "Meh lade"
     },
     "dislikes": {
       "emptyTitle": "Noch kenne ni abgstimmte",
@@ -2174,6 +2239,10 @@
     "sortMostViewed": "Meistangesehen",
     "sortLikes": "Gfäut-mir",
     "sortMostLiked": "Meist geliked",
+    "sortCustomShort": "Benutzerdefiniert",
+    "arrange": {
+      "saving": "Spycheret..."
+    },
     "searchThisChannel": "Suche in diesem Kanal",
     "searchResultCount": "1 Ergebnis für \"{{query}}\"",
     "searchResultCountPlural": "{{count}} Ergebnisse für \"{{query}}\""
@@ -2330,6 +2399,8 @@
       "swarmMember": "Schwarmagent {{index}} von {{total}}",
       "runSwarm": "Schwarm ausführen",
       "description": "Aktionen werden vom ausgewählten Agenten ausgeführt. Geplante Aufgaben laufen weiter, auch wenn die App geschlossen ist.",
+      "instructions": "Anweisungen für den Agenten",
+      "examples": "Eimal am Tag poschte über: unabhängigi Musig\nStil: gwundrig, churz und im Plauderton\nBis zu 2 aktuelli Biiträg am Tag like über: Musig, Live-Shows, Vinyl",
       "preparing": "Vorbereitung der Aufgabe…",
       "run": "Prompt ausführen",
       "limits": "Ei daily Post und bis zu 3 passende Likes pro Aufgabe. Alle Agenten hunn a 20-Minuten-Post-Lücke. Fotos hunn a kontrollierte Caption; Videos braucha a Coverbild. Posts bleiba unter 500 Zeichen. Kein Gas, ausser beim Minten; Schreiben darf Credits benützen.",
@@ -2344,7 +2415,10 @@
       "skip": "Überspringe nicht bestätigte Aktion und setze fort",
       "hideActivity": "Versteck Aktivität",
       "activity": "Aktuelle Aktivität",
+      "loadingActivity": "Aktivität wird geladen...",
       "viewPost": "Schau dir den Post an.",
+      "emptyActivity": "Noch keine Aktionen.",
+      "latestActivity": "Zeigt die letzten 100 Aktionen an.",
       "queued": "Aufgabe in Warteschlange",
       "action": "Aktion",
       "follow": "Folgen",
@@ -2435,6 +2509,9 @@
     "signInAgain": "Nomal amälde",
     "createSignIn": "Mäld di nomal a, zum en Agent erstelle",
     "checkConnection": "Prüef dini Verbindig und probier s nomal.",
+    "welcome": {
+      "text": "Willkommensnachricht"
+    },
     "workspace": {
       "moderation": "Stream-Moderation",
       "participant": "Teilnehmer-Wallet",
@@ -2626,7 +2703,9 @@
     "resendCodePhone": "Falschi Nummere oder kai Nummere? Zrugg",
     "continueAs": "Weiter mit",
     "switchWalletAccount": "Konto wechseln",
-    "walletLoadFailed": "Köönnte Wallets nid läde. Bitte probiere wider."
+    "walletLoadFailed": "Köönnte Wallets nid läde. Bitte probiere wider.",
+    "openInBrowser": "Im Browser öffne",
+    "copyLink": "Link kopiere"
   },
   "careers": {
     "title": "Stellene bi Riftn",
@@ -2880,7 +2959,8 @@
     "noMenuMatches": "Nüt im Menü passt",
     "searchDehubFor": "Uf Riftn noch \"{{query}}\" sueche",
     "switchAccount": "Wechseln Sie zum anderen Konto",
-    "signedInAs": "Gloggt as {{name}}"
+    "signedInAs": "Gloggt as {{name}}",
+    "requestSend": "Bitä schicke"
   },
   "comments": {
     "reportComment": "Kommentar melde",
@@ -3371,10 +3451,14 @@
     },
     "existingPost": {
       "add": "Druf a post uf eme bestehende Post.",
+      "hint": "Behalte den ursprünglichen Beitrag, Likes und Aufrufe bei.",
+      "placeholder": "Riftn-Beitragslink oder Beitrags-ID",
       "adding": "Zu deämme…",
+      "added": "Beitrag zur Community hinzugefügt",
       "remove": "Us de Community entfärne",
       "more": "Läd meh Poste.",
       "failed": "Kann die Gemeinschaftsposts nich aktualisiert gsi. Versuchs no wieder.",
+      "invalidLink": "Füge einen Riftn-Beitrag-Link oder eine Beitrags-ID ein.",
       "unavailable": "Disser Post is net verfügbar.",
       "signIn": "Logg dich nochmals ein, um die Community-Beiträge zu verwalten."
     },
@@ -5093,6 +5177,7 @@
     "settledTitleSpeed": ", meistens in {{speed}}",
     "settledCount_one": "{{count}} abgewickelt",
     "settledCount_other": "{{count}} abgewickelt",
+    "statusInProgress": "Am Loufe",
     "howMany": "Wie viele",
     "availableCount_one": "{{count}} verfügbar",
     "availableCount_other": "{{count}} verfügbar",
@@ -5185,6 +5270,17 @@
     "sellYourFractions": "Verkauf deine Anteile ({{held}} gehalten)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Nutze diese Details"
+      }
+    },
+    "cinema": {
+      "close": "Schliesse",
+      "performance": {
+        "label": "Leischtig"
+      }
+    },
     "libraryEmpty": "Dini gspeicherete Generierige erschiined da.",
     "toolRemake": "Uusgeeignet",
     "toolMaboroshi": "Maboroshi",
@@ -5439,6 +5535,7 @@
     "presetOpenUnderwaterSurfaceHint": "Bläschen und gebrochene Sonnenlicht unter Wasser",
     "presetOpenViaductTrainName": "Viadukt-Zug",
     "presetOpenViaductTrainHint": "Staatiig breite Häus mit leuchtende Fenstere und langbrennerische Tiefe",
+    "presetOpenTowerTiltName": "Turmneigung",
     "presetOpenTowerTiltHint": "Langsamer Abwärtsneigungsgang in eine bewölkte Stadt",
     "whatToCreate": "Was erstellen?",
     "startCreatingWith": "Erstelle mit {{model}}",
@@ -5878,6 +5975,7 @@
     "presetBulletTimeHint": "Froher Moment mit Kameraumrundung",
     "presetFpvDiveName": "FPV Dive",
     "presetFpvDiveHint": "Drohnenflug, der durch die Szene taucht und sich windet",
+    "presetEarthZoomOutName": "Erde herauszoomen",
     "presetEarthZoomOutHint": "Rückzug von der Figur bis ins All",
     "presetWhipPanName": "Whip Pan",
     "presetWhipPanHint": "Schnelle, verwischte Panoramabewegung bis zur Enthüllung",
@@ -5899,9 +5997,11 @@
     "presetTryOnHint": "Ein Model trägt das angehängte Teil",
     "presetYtSplitName": "Before / After Thumbnail",
     "presetYtSplitHint": "Split-Screen-Thumbnail, das eine Geschichte erzählt",
+    "presetSocialCarouselName": "Karussellrutsche",
     "presetSocialCarouselHint": "Ei Slide vo en swipbar Post",
     "presetAdHeadlineName": "Headline-Werbung",
     "presetAdHeadlineHint": "Grossi Anspruch, Produkt ganz vorne im Fokus",
+    "presetAdBulletsName": "Benefit Bullets-Anzeige",
     "presetAdBulletsHint": "Produkt mit drei kurze Vorteilshinweise",
     "presetAdUsVsThemName": "Mir vs Si Ad",
     "presetAdUsVsThemHint": "Seite an Seite Vergleich mit einem Konkurrenten",
@@ -5914,11 +6014,13 @@
     "presetLogoMarkHint": "Einfach, fettes Logo uf em eifache Hintergrund",
     "presetClay3dName": "Clay Render",
     "presetClay3dHint": "Süess, weiche 3D Claymation-Optik",
+    "presetAnimeStillName": "Anime-Still",
     "presetAnimeStillHint": "Frame vo eme handgezeichnete Anime-Film",
     "presetPixelArtName": "Pixelkunst",
     "presetPixelArtHint": "Retro 16-Bit-Spiel-Szene",
     "presetGroupEffects": "Effekte",
     "presetGroupAds": "Werbung",
+    "presetGroupBrand": "Marke",
     "create": "Erstelle",
     "createFreeLeft": "Gratis · no {{count}}",
     "priceFree": "Gratis",
@@ -6140,6 +6242,12 @@
     "raw": "Raw"
   },
   "nftMarket": {
+    "actAll": "Alli",
+    "actListings": "Aagebot",
+    "actOffer": "Angebot",
+    "actOffers": "Aagebot",
+    "actSales": "Verkäufe",
+    "tabActivity": "Aktivität",
     "shortTitle": "NFTs",
     "filters": "Filter",
     "forSale": "Zum Verkauf",
@@ -6204,6 +6312,9 @@
     "offered": "Angebot verschickt. De Inhaber chan es jederziit akzeptiere.",
     "dehubPost": "Riftn Post",
     "youHold": "Du hesch {{n}}",
+    "price": "Priis",
+    "volume": "Luutstärchi",
+    "tabRecent": "Neuschti",
     "buyNow": "Jetz chaufe",
     "dropsTo": "Prys fällt uf {{price}} bis {{date}}",
     "inBundle": "Verchauft as Bündel vo {{n}}",
@@ -6617,7 +6728,65 @@
     "youAreBanned": "Du kannst in diesen Streams von der Creator:in nicht chatten.",
     "youAreTimedOut": "Du bist für einen Moment zeitlimitiert."
   },
+  "studioDeck": {
+    "background": {
+      "title": "Hintergrund",
+      "modes": {
+        "none": "Aus",
+        "blur": "Unschärfi",
+        "color": "Farbe"
+      }
+    },
+    "remove": "Entferne",
+    "scenes": {
+      "countdown": "Zähle runter",
+      "names": {
+        "starting": "Fangt gly a"
+      }
+    },
+    "sources": {
+      "reactAdd": "Zeige",
+      "image": "Bild",
+      "camera": "Kamera",
+      "show": "Show on Stream",
+      "loop": "Wiederholung",
+      "positions": {
+        "center": "Zentrum"
+      },
+      "sizes": {
+        "medium": "Mittel"
+      },
+      "shapes": {
+        "circle": "Kreis",
+        "rect": "Quadrat"
+      }
+    },
+    "audio": {
+      "mute": "Stummschalte",
+      "unmute": "Ufhebe",
+      "gateLevels": {
+        "off": "Aus",
+        "low": "Hell",
+        "high": "Stark"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Plattform",
+      "key": "Stream-Schlüssel",
+      "save": "Dazue",
+      "cancel": "Abbrechen",
+      "states": {
+        "off": "Aus",
+        "idle": "Parat",
+        "live": "Lebe",
+        "error": "Fehler"
+      }
+    },
+    "vertical": {
+      "centre": "Zentrum"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Eini Countdown auf deim Stream. Jeder bezahlte Gift, Follow und Abo gäbt Zeit, so bleibt’s Room live.",
@@ -7570,6 +7739,8 @@
     "footerNote": "DePin-Beteiligung isch e Service-Leistung, no e Investitionsprodukt. Verfügbarkeit, Berechtigung und Belohnungen künne sich ändere."
   },
   "creatorFlow": {
+    "newNativeFlow": "Neuer Flow",
+    "disconnect": "Trenne ab",
     "title": "Creator Flow",
     "backToStudio": "Zrugg zum Creator Studio",
     "backToFlows": "Zrugg zu dim Flows",
@@ -7909,6 +8080,9 @@
     "followingBackProgress": "Folge nach {{completed}} von {{total}}",
     "findingFollowers": "Folgendi Follower sammle...",
     "followBackAll": "Folge mir zurück",
+    "followBackConfirm": "Folge zrugg",
+    "followBackNotNow": "Jetzt nöd",
+    "followBackDone": "Fertig",
     "nonFollowers": {
       "title": "Wäri du folge säuberä?",
       "body": "{{count}} Accounts, wo du folgsch, folge dir nöd zrugg.",
@@ -8722,6 +8896,14 @@
     "priceChartCleared": "Preischart gschwärzt. Fixe Referenzpreis: 0,0001 $. Ausführungspreise hängen von den verfügbaren Bestellungen ab."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Umdreie",
+      "add": "Dazue",
+      "scale": "Grösse",
+      "color": "Farb",
+      "light": "Hell"
+    },
     "video": {
       "tFade": "Überbländig",
       "none": "Kei",
@@ -8888,6 +9070,8 @@
       "tools": "Editor-Wärchzüüg"
     },
     "agent": {
+      "stop": "Stoppe",
+      "queue": "Zur Warteschlange hinzufüge",
       "introTitle": "Säg de AI, was du wotsch",
       "introBody": "Beschrieb d'Gstaltig oder d'Änderig i dine eigete Wort. Si passt d'Gröössi vo de Siite aa, schriibt und gstaltet Text, findet gratis Fotis, Videos und Musig, wändet Filter aa, ordnet Ebene und animiert si. Jedi Aafrog isch ei Rückgängig.",
       "suggestPoster": "Mach en quadratische Instagram-Post für en Summerusverchauf mit emne Strandfoti und emne fette Titel",
@@ -9156,6 +9340,10 @@
       "reloadText": "Ufregrell!",
       "textSaved": "Ändere Bildunterschriften gespeichert.",
       "action": "Automatischi Untertitel",
+      "styles": {
+        "bold": "Fett",
+        "serif": "Schriften"
+      },
       "working": "Lost zue… {{percent}} %",
       "downloading": "Sprachmodell wird parat gmacht… {{percent}} %",
       "hint": "Macht us Sprooch zytlich abgstimmti Untertitel, wo du chasch gstalte. Lauft uf dim Grät: gratis und privat. S erschte Mal wird s Modell abeglade.",
@@ -9286,13 +9474,17 @@
       "chatCaptionsMissing": "Das Video het momentan kei Untertitel. Frag nomol ohni \"using current captions\", zum es transkribiere.",
       "chatLimit": "Benütz e ene Video bis zu 10 Minute und e chlii Highlightbudget vo 15, 30 oder 60 Sekunde.",
       "title": "Höhepunkte",
+      "find": "Highlights finden",
       "privacy": "Video blibbt auf deinem Gerät. De Spraach isch hier umgeschriibet; de Transkripttext wird fürs Highlight-Ranking verschickt. Check jede Sekund vor, dass du a separate Edit erstellscht.",
       "focus": "Bevorzugtes Thema (optional)",
+      "useCaptions": "Verwenden Sie aktuelle Untertitel",
       "captionHint": "Nur Reden, wo die aktuelle Untertitelung mitmacht, wird berücksichtigt.",
       "ranking": "Findä nützliche Momente…",
       "none": "Kei nützlichs Gespäch gefunden. Probier’s mit einem andern Thema oder Video.",
+      "create": "Erstellen Sie eine Highlight-Bearbeitung",
       "created": "Highlightiert editiert und gespeichert. Das originale Projekt bleibt erhalten.",
       "changed": "De Quellprojekt is ändert worde. Such die Highlights no wieder.",
+      "limit": "Verwenden Sie bis zu 10 Minuten Quellrede. Ein sehr langer ununterbrochener Transkript muss zuerst aufgeteilt werden.",
       "projectTitle": "{{title}} — Highlights",
       "reviewTitle": "Highlights verfynere",
       "reviewPlaceholder": "Bleib nur die Backup-Tipps, oder entferne Moment 2…",
@@ -10531,6 +10723,29 @@
       "toolbar": "Bildschirmnavigazioon",
       "zoomIn": "Canvas zoome rein",
       "zoomOut": "Canvas zoome raus"
+    },
+    "clipFix": {
+      "listening": "Abspielen…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Teile",
+        "play": "Spiele",
+        "pause": "Pausiere",
+        "frameBack": "Vorheriger Rahmen",
+        "frameForward": "Nächster Rahmen"
+      }
+    },
+    "voiceClone": {
+      "stop": "Ufnahm stoppe",
+      "failed": "Stimme-Cloning isch nid gschlunge."
+    },
+    "linkImport": {
+      "go": "Importiere",
+      "downloading": "Wird abelade {{percent}}%"
+    },
+    "reverse": {
+      "action": "Umkehren"
     }
   },
   "jungleMood": {
@@ -10656,6 +10871,7 @@
     "leaderboardRankingDesc": "User werded nach de ganzem Riftn Token-Bilanz (Wallet + gestaket über alli Chän) rangiert. Rangliste werded periodisch aktualisiert und verfolge 1-Tag- und 1-Woche-Änderige. Du chasch au nach gschicktem Trinkgeld, empfangnem Trinkgeld, Follower, Likes oder Abonnente sortiere.",
     "sections": {
       "postInteractions": "Postinteraktione",
+      "translation": "Übersetzen",
       "contentTypes": "Inhaltstypen",
       "visibility": "Sichtbarkeit & Zugriff",
       "postInfo": "Post-Info-Seite",
@@ -10688,6 +10904,9 @@
     "showOriginalDesc": "Nachdem du übersetzt hast, klicke hier, um zurück zum Originalinhalt zu gelangen.",
     "imagePost": "Bild-Post",
     "imagePostDesc": "E Post mit einem oder mehrem Bild. Die Bilde sünd auf der Blockchain als NFTs mit einem einzigartigem Token-ID gespeichert.",
+    "videoPost": "Video-Beitrag",
+    "videoPostDesc": "Ein Beitrag, der ein Video enthält. Videos können auf öffentlich, privat oder pay-per-view (PPV) gesetzt werden.",
+    "liveStream": "Live-Stream",
     "liveStreamDesc": "Echtzeit-Stream. Zuschauende können zuschauen, kommentieren und dem Streamer Trinkgeld geben. Streams nutzen Low-Latency-HLS-Technologie.",
     "story": "Gschicht",
     "storyDesc": "Kürzer Video-Content, wo der Inhalt nach 24 Stunden abläuft. Tippe auf das Avatar-Ring auf deiner Home-Feed, um die Story vom Nutzer anzusehen.",
@@ -10700,6 +10919,7 @@
     "private": "Privat",
     "privateDesc": "Nur für dich sichtbar. Private Beiträge sind für andere Nutzer und die öffentliche Timeline unsichtbar.",
     "ppv": "Pay-Per-View (PPV)",
+    "subscriberOnly": "Nur Abonnenten",
     "subscriberOnlyDesc": "Inhalt nur für Nutzer:innen, die dem Kanal des Erschaffers abonniert sinne.",
     "postInfoPage": "Biitragsinformation",
     "postInfoPageDesc": "E en detaillierte Übersicht über jedes Posting, mit deenen on-chain-Daten, Engagement-Statistiken, Eigentümeranteilen und Erstellerinformationen. Zugriff über das \"ⓘ\" -Symbol bei jedem Posting.",
@@ -10757,13 +10977,17 @@
     "downvote": "Downvote",
     "downvoteDesc": "Stimm ab gegen einen Governance-Vorschlag oder eine Feature-Anfrage. Hilft, die Ablehnung der Community zu signalisieren.",
     "stakingBadge": "Staking-Badges",
+    "leaderboardRanking": "Rangliste",
     "delta": "Ranking Delta (↑↓)",
     "deltaDesc": "Der grüne oder rote Pfeil neben einem Leaderboard-Eintrag zeigt, wie sich das Konto eines Users über die ausgewählte Zeitspanne (1 Tag, 1 Woche usw.) verändert hat.",
     "tokenId": "Token-ID",
     "edit": "Bitrag bearbeite",
     "editDesc": "Du kannst deini Aartikel oder deini Post nume deini eigeti Chreft ändern.",
     "delete": "Lösch di Post.",
+    "deleteDesc": "Entfernen Sie dauerhaft einen Beitrag aus dem Feed. Der On-Chain-Datensatz bleibt erhalten, der Inhalt wird jedoch nicht mehr angezeigt.",
+    "pin": "Stiftpfosten",
     "pinDesc": "Fixier a Posting an d’Topp vun de Profil, so dass die Besuche es als Erstes sähä.",
+    "viewOnExplorer": "Auf Explorer anzeigen",
     "viewOnExplorerDesc": "Öffnet den Blockchain-Explorer (BaseScan), um die on-chain-Transaktionsdetails für einen Post oder eine Übertragung zu sehen.",
     "title": "Wörterbüechi",
     "subtitle": "Lern, was jede Ikone und Funktion bedeute"
@@ -11803,7 +12027,15 @@
       "rewardsWeek": "Woche vo {{date}}",
       "rewardPaid": "Zahlt",
       "rewardPending": "Hängig",
-      "rewardsNone": "No Belohnungen wurden bis anhin berechnet. Die erste Woche schliessst am Montag ab."
+      "rewardsNone": "No Belohnungen wurden bis anhin berechnet. Die erste Woche schliessst am Montag ab.",
+      "stats": {
+        "button": "Live-Statistike"
+      },
+      "signin": {
+        "users_one": "{{count}} User",
+        "users_other": "{{count}} Users",
+        "delete": "Lösche"
+      }
     },
     "card": {
       "open": "Öffne"
@@ -11960,6 +12192,9 @@
     "reminderLater": "Nöd jetzt"
   },
   "copy": {
+    "55656b5e434f": "Suche schliessen",
+    "57e2faa5ec63": "Riftn durchsueche",
+    "96d7bff86b44": "Suäch het nöd chli Lade",
     "1607715e45ed": "Tipp uf d Kugle zum Rede, oder schrib unde",
     "00140a37bd26": "Transaktione auf dem Netzwerk sind momentan nicht verfügbar. Bitte versuche es erneut.",
     "002286513398": "Du hast keine Berechtigung, Events zu verwalten.",
@@ -14298,6 +14533,7 @@
     "f12cc90aad82": "Klicks ·",
     "6e85ceceef57": "Spare Budget",
     "cf363753c3a6": "Kreativität",
+    "6000c051c5df": "Anzeigen zur Creator-Unterstützung",
     "24ebcff14226": "Lütet de Läsere de Schöpfer durch 30 Sekunde de Video zue. De Schöpfer erhält de Umsatzanteil; de Läsere zahlt nichts. Ersetzt e ene Video vo mindestens 30 Sekunde.",
     "3475a5f878fd": "Gspürige Brieftasche",
     "bcd6cfdbf8d4": "Zielgruppe für die Follower von bestimmten Kreatoren (Wallet-Adressen) ansprechen. Die Zielgruppe wird materialisiert, wenn deine Kampagne genehmigt wird.",
@@ -17649,7 +17885,9 @@
     "34d52e35bd31": "Falschinformation",
     "50ea9e32e19c": "Top 50",
     "925917aad5b0": "Gottis Aag",
+    "f0052e2e699b": "Königsgambit",
     "71b386d38529": "Strassenschläger",
+    "d9bac180ccc1": "Chartopie",
     "a151f2e912fe": "Abos",
     "965b516df3ba": "Kei ni was",
     "6144d0791f06": "Versuch e chli e anderi Suchanfrage, oder lös e das Formular leer, um alles zuegänglich zu machen",
@@ -18898,6 +19136,7 @@
     "backToTop": "Zurück zur Oberfläche",
     "needTitle": "Titel: \"Die neue App für die Schweizer Gemeinschaft\"",
     "needBody": "{{count}} mehr Charaktere übrig",
+    "imagesLabel": "Bilder",
     "backToWriting": "Zurück zum Schreiben",
     "readyTitle": "Bereit für die Veröffentlichung",
     "sharePreview": "Wie es aussieht, wenn es gedeilt wird",
@@ -18959,6 +19198,126 @@
     "exploreFirst": "Erst erkunden",
     "codeNote": "Wir schicken dir per E-Mail einen Code, kein Passwort nötig."
   },
+  "liveHype": {
+    "gift": {
+      "howMany": "Wie vill",
+      "who": "Benutzername oder Wallet-Adrässe",
+      "whoPlaceholder": "@benutzername",
+      "cancel": "Abbrechen",
+      "stage": {
+        "preparing": "Wird vorbereitet…",
+        "confirming": "Warte uf d Transaktion…",
+        "recording": "Wird abgschlosse…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Abonnente"
+      },
+      "ended": "Verbi",
+      "until": "Bis {{date}}",
+      "failed": "Das het nid funktioniert. Versuchs nomol."
+    }
+  },
+  "whenSheet": {
+    "today": "Hüt",
+    "tooSoon": "Wähl en Zytpunkt i de Zuekunft.",
+    "show": "Zeige",
+    "hide": "Verstecke"
+  },
+  "planned": {
+    "title": "Geplant",
+    "all": "Alli",
+    "posts": "Biträg",
+    "stages": "Audio-Rüüm",
+    "post": "Poste",
+    "live": "Lebe",
+    "stage": "Bühni",
+    "untitledPost": "Poste",
+    "untitledLive": "Lebe",
+    "loading": "Lade…",
+    "startNow": "Jetz starte",
+    "cancel": "Abbrechen",
+    "cancelled": "Storniert"
+  },
+  "welcome": {
+    "about": {
+      "title": "Willkomme bi Riftn",
+      "day": "Tag",
+      "month": "Monet",
+      "year": "Jahr"
+    },
+    "name": {
+      "title": "Deini Name",
+      "placeholder": "Deini Name"
+    },
+    "card": {
+      "name": "Deini Name",
+      "followers": "Follower"
+    },
+    "topic": {
+      "music": "Musig",
+      "art": "Kunscht",
+      "crypto": "Krypto",
+      "sports": "Sport",
+      "comedy": "Komödie",
+      "food": "Essen",
+      "news": "Nachrichten",
+      "science": "Wissenschaft"
+    },
+    "back": "Zrugg",
+    "skipPhoto": "Skip fürs Moment.",
+    "preview": "Vorschau"
+  },
+  "appTokens": {
+    "title": "Dini Tokens",
+    "history": "Verlauf",
+    "noHistory": "Noch kei Aktivität",
+    "kindDeposit": "Iizahle",
+    "to": "Bis",
+    "amount": "Betrag",
+    "notePlaceholder": "Notiz dezuetue (optional)",
+    "sendButton": "Schicke",
+    "errorInsufficient": "Nöd gnueg Tokens"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Alli",
+      "followers": "Follower",
+      "nobody": "Niemer"
+    },
+    "heading": "Reaktionen",
+    "more": "Mehr zeigen",
+    "liveNow": "Lebe",
+    "untitled": "Reaktion"
+  },
+  "connectGuide": {
+    "title": "Verbinde Riftn mit deinem KI-Assistenten",
+    "urlLabel": "MCP-Server-URL",
+    "copy": "Kopiere",
+    "copied": "Kopiert",
+    "copiedToast": "MCP-URL kopiert"
+  },
+  "avatarPrompt": {
+    "notNow": "Jetzt nöd"
+  },
+  "postStats": {
+    "audience": "Zuegl",
+    "engagement": "Interaktion",
+    "finished": "Fertig",
+    "members": "Mitglieder",
+    "membersLower": "Mitglieder",
+    "newFollowers": "Jemand folgt mir",
+    "noBadge": "Kein Badge",
+    "people": "Lüt",
+    "plays": "Wiedergaben",
+    "quotes": "Zitat",
+    "saved": "Gspeicheret",
+    "shares": "Teile",
+    "signedOutViewers": "Abgmeldet",
+    "topSupporters": "Top-Unterstützer",
+    "visitors": "Abgmeldet"
+  },
   "tokenLaunch": {
     "eyebrow": "Chùò chùò",
     "title": "Token wird bald lanciert",
@@ -18987,6 +19346,10 @@
     "unavailable": "GitHub-Verifizierung ist bald verfügbar. Konnte GitHub nicht verbinden. Versuche es erneut.",
     "connect": "Verifiziertes GitHub-Konto",
     "disconnect": "GitHub verbinden"
+  },
+  "mcpKeys": {
+    "delete": "Lösche",
+    "shortProfile": "Profiu"
   },
   "chatSearch": {
     "placeholder": "Suäch Nachrichtä oder Lüüt",
@@ -19017,5 +19380,17 @@
     "gone": "Die Nachricht isch nümme da",
     "theirMessages": "Ihri Nachrichtä",
     "seeTheirMessages": "Gseh ihri Nachrichtä"
+  },
+  "dmRequests": {
+    "title": "Aafrage",
+    "accept": "Annehmen",
+    "delete": "Lösche",
+    "block": "Blockiere"
+  },
+  "dmSchedule": {
+    "view": "Aaluege",
+    "edit": "Ändere",
+    "editLabel": "Nachricht bearbeite",
+    "error": "Das het nid funktioniert. Versuchs nomol."
   }
 }

@@ -632,7 +632,7 @@ function notificationContentWithActorBadge(content: React.ReactNode, notificatio
   const name = actor.displayName || actor.username || notification.actorUsername;
   const at = name ? content.indexOf(name) : -1;
   if (at < 0 || /\w/.test(content.charAt(at - 1)) || /\w/.test(content.charAt(at + name.length))) return content;
-  return <>{content.slice(0, at)}{name}<BadgeIcon badgeBalance={actor.badgeBalance} badgeLock={actor.badgeLock} username={actor.username} />{content.slice(at + name.length)}</>;
+  return <>{content.slice(0, at)}{name}{'\u2009'}<BadgeIcon badgeBalance={actor.badgeBalance} badgeLock={actor.badgeLock} username={actor.username} />{content.slice(at + name.length)}</>;
 }
 
 function getNotificationContent(
@@ -1431,7 +1431,7 @@ const NotificationItem = memo(function NotificationItem({
       data-feed-row
       data-unread={isUnreadRow ? '' : undefined}
       style={style}
-      className="relative flex items-start gap-3 py-3 pl-[18px] pr-4 transition-colors duration-300 cursor-pointer"
+      className="relative flex items-start gap-3 rounded-2xl py-3 pl-[18px] pr-4 transition-colors duration-300 cursor-pointer"
     >
       {/* Unread is a solid dot, not a filled block. It doubles as the
           per-row "mark as read" control the old round button gave. */}

@@ -15,6 +15,22 @@
     "saved": "Border don save",
     "failed": "We no fit save di border"
   },
+  "duet": {
+    "policyEveryone": "Everybody",
+    "policyFollowers": "Follower Dem",
+    "policyNobody": "Nobody",
+    "loadMore": "Bring more"
+  },
+  "videoRemix": {
+    "sound": "I no understand wetin you mean."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Everybody",
+      "followers": "Follower Dem",
+      "nobody": "Nobody"
+    }
+  },
   "dehubAppPage": {
     "android": "Android",
     "appStore": "Download for iOS",
@@ -165,11 +181,16 @@
     "privateNote": "Private accounts no dey show for fediverse.",
     "noUsername": "Choose username make you get fediverse address."
   },
+  "signedFollows": {
+    "setUp": "Turn am on"
+  },
   "profileFields": {
     "title": "Profile fields",
     "description": "Up to four extra lines for your profile, like website or your pronouns.",
     "label": "Label",
     "content": "Content",
+    "add": "Wey you go add field?",
+    "remove": "I no understand wetin you dey talk.",
     "save": "Save fields",
     "saved": "Profile fields don save",
     "failed": "E no save. Try again.",
@@ -318,32 +339,48 @@
     "stillCounting": "Still counting: gifts can take a minute to confirm."
   },
   "accountConnect": {
+    "title": "Connect di Riftn account wey be your own",
+    "read": "See your account, posts, notifications and wetin dey your Creator library",
+    "profile": "Change your profile, pictures and privacy settings",
+    "social": "Publish post and comment, follow people and keep bookmarks",
+    "generate": "Generate media with your credits, payments wey don confirm or free images wey you qualify for",
     "signIn": "Sign in to Riftn",
     "allow": "Allow connection",
     "deny": "Cancel am",
     "manage": "Manage account connections",
     "empty": "No active account connection wey dey.",
     "disconnect": "Disconnect",
-    "failed": "Can no complete connection. Try sign in again."
+    "failed": "Can no complete connection. Try sign in again.",
+    "what": "Browse posts and profiles wey dey public. If you connect your account with OAuth, you fit manage your profile and privacy, publish posts and comments, follow people, read notifications, save bookmarks and generate images, video, audio and 3D assets. Generation dey follow di payment rules wey Riftn already get.",
+    "account": "You no need account to browse wetin dey public. Link your Riftn account make you fit manage your profile, create and publish content.",
+    "profilePrompt": "Change my Riftn bio to: Independent creator wey dey make films and music.",
+    "generatePrompt": "Show me Riftn image models and tell me di price for one portrait before you generate am.",
+    "libraryPrompt": "Show me di latest assets wey dey my Riftn Creator library."
   },
   "twitchMirror": {
     "title": "Twitch mirroring",
+    "intro": "Stream for Twitch like you dey do before. Your broadcast fit show for Riftn by imself, no extra streaming tools.",
     "unavailable": "Twitch mirroring no go come yet.",
     "connect": "Connect Twitch",
     "auto": "Automatically mirror my Twitch streams",
+    "waiting": "E don ready for your next Twitch broadcast",
+    "starting": "We dey connect di live video",
     "live": "Live on Riftn",
     "error": "Mirroring needs attention",
     "refresh": "Update status",
     "disconnect": "Disconnect Twitch.",
     "open": "Watch on Riftn",
     "retry": "Mirroring retry.",
-    "consent": "Connect only a channel you own. Turn on mirroring so Riftn can send your broadcast and save replay for you under your recording limit."
+    "consent": "Connect only a channel you own. Turn on mirroring so Riftn can send your broadcast and save replay for you under your recording limit.",
+    "disabled": "Automatic mirroring dey off",
+    "failed": "We no fit update Twitch mirroring. Abeg try again."
   },
   "maintenance": {
     "brand": "Riftn",
     "mode": "Maintenance mode",
     "description": "Wetin we dey do maintenance. Pls check back later.",
     "retry": "Try am again",
+    "checkFailed": "We no fit check if e dey available. Abeg try again.",
     "checking": "Na true?",
     "ownership": "Open source. User owned.",
     "title": "Wok small. Better Riftn.",
@@ -351,10 +388,14 @@
     "community": "Community first. Always."
   },
   "viralTemplates": {
+    "title": "Find di next tin wey go make you blow.",
+    "intro": "Watch one example. Pick effect or character. Add your photo and make am your own.",
+    "browse": "Check all {{count}} templates",
     "featured": "Back to featured",
     "useNamed": "Use {{name}}",
     "preview": "Play {{name}} preview",
     "previewUnavailable": "Preview unavailable",
+    "search": "Search di effects, characters and dances wey dey",
     "all": "All",
     "effects": "Effects",
     "characters": "Characters",
@@ -365,11 +406,20 @@
     "results": "{{count}} templates",
     "empty": "No match oga. Try search again or pick different category.",
     "more": "Show more tins",
+    "source": "Example videos come from",
+    "ready": "You don select {{name}}. Add one photo to make 5-second video. Di framing go follow your photo.",
+    "chooseFirst": "Choose effect before you generate.",
     "back": "Back to templates",
     "close": "Close templates",
-    "eyebrow": "{{count}} video templates"
+    "eyebrow": "{{count}} video templates",
+    "use": "Use dis template",
+    "motion": "Copy dis movement",
+    "motionReady": "You don select {{name}}. Add your photo make e do di movement for dis clip."
   },
   "maboroshiShowcase": {
+    "title": "Na your scene. Na different you.",
+    "intro": "180 character looks, from soft plush reach liquid chrome.",
+    "inspiration": "Na inspiration for di look. Upload your own character reference wey match.",
     "browse": "Wetin you mean by \"Explore all 180 looks\"? Na which kind thing be dat?",
     "choose": "Try {{name}}",
     "previous": "Previous looks",
@@ -383,17 +433,21 @@
   },
   "quickActions": {
     "title": "Page options",
+    "hint": "Hold anywhere wey no already get hold action to open dis options.",
     "question": "E go wrong wey? Page dis one no dey work wey? Or something else?",
     "placeholder": "Wetin dey worry you?",
     "refresh": "Refresh page",
     "logout": "Comot",
     "publicNotice": "Yousey report and any screenshot go dey appear for public bug board. Check dem screenshot before send.",
     "deviceNotice": "Page, device, model (if available), and app or browser details go wey wey automatic for you.",
+    "capturing": "We dey capture dis page…",
     "screenshot": "Screenshot preview",
     "removeScreenshot": "Remove screenshot",
+    "noScreenshot": "Automatic screenshot no dey available. You fit still send your report.",
     "attachScreenshot": "Attach a screenshot",
     "send": "Send bug report",
-    "signIn": "Sign in to send"
+    "signIn": "Sign in to send",
+    "failed": "Something no work well. Your message don save; abeg try again."
   },
   "errors": {
     "sponsorshipUnavailable": "Free transaction don pause for our side, no be your wallet get problem. Abeg try again small time.",
@@ -815,10 +869,13 @@
       "account": "Na only notice about my account"
     },
     "smsNotificationsDesc": "Get dem ones dat count as SMS.",
+    "smsNotificationsDescReady": "E dey go {{phone}} — {{dhb}} tokens for each one, about {{count}} remain",
+    "smsNotificationsLocked": "Unlock am with {{dhb}} tokens (${{usd}}) credit",
     "smsNotificationsNeedsNumber": "Add phone number and verify am to start",
     "smsNotificationsEmpty": "Credit don finish — top up make text message continue to dey come",
     "smsUnavailable": "Text notification no dey available now",
     "smsUnlockAction": "Unlock text notifications",
+    "smsDialogIntro": "To send text dey cost money, so dis channel dey run on credit wey you go top up with Riftn tokens.",
     "smsUnlockPrice": "{{dhb}} tokens (${{usd}}) go unlock text and become your first balance.",
     "smsUnlockExplainer": "Wetin no dey expire. Credit go spend one message one time, and only for dem notification you already turn on.",
     "smsPricesHeading": "How much one message cost",
@@ -838,6 +895,7 @@
     "smsUnlocked": "Text notifications don open",
     "smsBalance": "{{dhb}} tokens left (${{usd}})",
     "smsBalanceMessages": "Like {{count}} more messages remain",
+    "smsTopUp": "Add {{dhb}} tokens",
     "smsNumberLabel": "Phone number",
     "smsSendCode": "Text me code",
     "smsCodeSent": "Kòd yin don dey. Na {{price}} token.",
@@ -861,6 +919,7 @@
     "badgeDelegationRaisesOnlyTier": "The badge wey you borrow dem must high pass the one wey dem don already earn.",
     "badgeDelegationPickTier": "Badge wey you wan borrow person",
     "badgeDelegationTakeBack": "Take back any time you want — the slot go free one day later.",
+    "badgeDelegationNoBadge": "Delegation slots dey come with staking badge. Stake Riftn tokens to earn one.",
     "badgeDelegationPlaceholder": "Username abi wallet address",
     "badgeDelegationLend": "Lend",
     "badgeDelegationFull": "All di slots dey in use. End one below, or climb one tier make you get another.",
@@ -1008,6 +1067,7 @@
     "hideWatched": "Hide watched videos",
     "channelSpeed": "Playback speed per channel",
     "channelSpeedNone": "Change di speed when you dey watch person and e go stay like dat for dia videos.",
+    "channelSpeedCount": "{{count}} channel(s) dey play for dem own speed.",
     "channelSpeedCleared": "Channel speeds reset",
     "reset": "Reset",
     "skipSegmentsDesc": "Jump past sections wey people dey mark as sponsor read, intro or outro. Every skip fit be undone.",
@@ -1102,14 +1162,21 @@
     "payQuoting": "E dey find best price…",
     "payQuote": "≈ {{amount}} {{symbol}} for {{chain}}",
     "payViaBridge": "Swap to Riftn tokens for Uniswap, arrive for ~{{seconds}}s",
+    "payViaSwap": "E don swap to Riftn tokens for Uniswap",
     "stageApprove": "E dey approve {{symbol}}…",
     "stageBridge": "E dey send {{symbol}} from {{chain}}…",
     "stageArriving": "E dey land for Base, e no dey pass few seconds…",
+    "stageSwap": "We dey buy Riftn tokens for Uniswap…",
     "payFailed": "Wey no dey convert {{symbol}} to Riftn tokens.",
     "stagePay": "E dey pay Riftn Pay with {{symbol}}…",
+    "stageDelivering": "Riftn Pay dey send your tokens…",
+    "payViaDpay": "E don pay to Riftn Pay, tokens go land in about 30s",
     "payDirect": "Wen dey send am straight to {{name}} for {{symbol}} on {{chain}}. No swap.",
     "payDirectNoName": "Wen dey send am straight to de creator for {{symbol}} on {{chain}}. No swap.",
-    "dmSent": "Don send {{amount}} tokens give {{name}}!"
+    "payViaBridgeDpay": "E don move go Base and pay to Riftn Pay, tokens go land in about one minute",
+    "dmSent": "Don send {{amount}} tokens give {{name}}!",
+    "addMessage": "Wen yu wan add message, yu go do am.",
+    "messagePublic": "Everybody"
   },
   "postOptions": {
     "liveAlertsOn": "You don dey follow {{name}} now. You go get notification when dem go live.",
@@ -1218,6 +1285,7 @@
     "price": "Price",
     "ppvDhbInfo": "Paiment dey for Riftn tokens for Base chain.",
     "ppvUsdInfo": "Payments dey in USD",
+    "ppvStableInfo": "Buyers dey pay for {{symbol}}, and e go straight to you",
     "setupBounty": "Arrange Bounty",
     "viewersToReward": "Viewer dem wey go collect reward",
     "numberOfViewers": "Number of viewer dem",
@@ -1382,7 +1450,9 @@
     "recentTransactions": "Transaction wey just happen",
     "viewAll": "See all",
     "noTransactionsYet": "No transaction dey yet",
+    "txPurchased": "You buy {{amount}} tokens",
     "txSold": "You sell {{amount}} tokunbo",
+    "txTransfer": "{{amount}} tokens transfer",
     "txPpvUnlock": "PPV unlock — {{amount}} tokens",
     "txPpvSale": "PPV sale — {{amount}} tokens",
     "txTipSent": "You tip {{name}} {{amount}} tokunbo",
@@ -1472,6 +1542,7 @@
     "refundAddress": "Address wey refund go enter for {{chain}}",
     "sendFromWallet": "Send {{amount}} {{symbol}} from my wallet",
     "walletSendSubmitted": "E don go. Your ETH go land for Base in few minutes.",
+    "earningsComparisonNote": "Di competitor figures na estimates from industry ranges wey dem publish, no be payouts wey we measure — real RPM dey change well well based on niche, di country of di audience and watch time, so edit each rate make e match wetin you dey really earn. Di Riftn figure na your real tip income wey we convert with di live token price, and e no include subscriptions, PPV and store sales. We add di views from your latest 100 posts.",
     "txGeneric": "{{type}} — {{amount}} tokens",
     "tokenAmountLabel": "tokens amount",
     "loginDescription": "Log in make you fit access your wallet and manage your money."
@@ -1534,7 +1605,8 @@
     "solanaAddressHint": "Na only SOL and SPL tokens",
     "evmAddressCopied": "EVM address don copy",
     "solanaAddressCopied": "Solana address don copy",
-    "receiveEvm": "Base · BNB · ETH"
+    "receiveEvm": "Base · BNB · ETH",
+    "solanaSendUnavailable": "You never fit send for Solana for now"
   },
   "bookmarks": {
     "title": "Bookmarks",
@@ -1593,6 +1665,8 @@
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",
+    "groupToday": "Dis day",
+    "groupThisWeek": "Dis week",
     "settings": "Notification settings",
     "actions": "Actions",
     "markAllAsRead": "Mark all as don read",
@@ -1682,6 +1756,9 @@
       "featureShippedLiked": "One request wey you like don complete: “{{title}}” 🎉",
       "governanceVotedPassed": "One proposal wey you vote on pass: “{{title}}”",
       "governanceVotedRejected": "One proposal you vote on no pass: “{{title}}”",
+      "featureLikeNamed": "{{name}} don like your feature request “{{title}}”",
+      "featureLike": "{{name}} don like your feature request",
+      "featureCommentNamed": "{{name}} don comment for your feature request “{{title}}”",
       "featureComment": "{{name}} don talk am for your request",
       "featureReplyNamed": "{{name}} reply you for “{{title}}”",
       "featureReply": "{{name}} reply your comment",
@@ -1845,11 +1922,13 @@
     "promptLabel": "Your prompt",
     "promptPlaceholder": "Na idea be say, make we get beta way to track progress for coding projects.",
     "promptAttach": "Attach images",
+    "removeAttachment": "Comot attachment",
     "promptDrop": "Wen yu wan post pikin, yu go click \"Paste image\" or \"Drop image\" wey dey top of screen.",
     "promptPost": "Post prompt",
     "promptShortcut": "Kontrol + / ⌘ + Enter don post.",
     "promptDetails": "Optional details",
     "promptDevice": "Device & OS (for bug)",
+    "deviceInfoNoErrors": "Nothing",
     "promptFilters": "Filter by category",
     "promptMediaError": "Choose image or video wey dey less than 50MB.",
     "promptMediaLimit": "Up to {{max}} attachments.",
@@ -1908,6 +1987,10 @@
     "loginRequired": "Login dey required"
   },
   "messages": {
+    "newDrawer": {
+      "recent": "New",
+      "youFollow": "People wey you dey follow"
+    },
     "reply": "Reply am",
     "react": "Show feeling",
     "edit": "Edit Am",
@@ -1942,7 +2025,9 @@
     "customTipMin": "Custom tip (min {{amount}} tokens)",
     "deleteConversationFailed": "We no fit delete the conversation",
     "message": "Message",
-    "noConversationsYet": "No conversation dey yet"
+    "noConversationsYet": "No conversation dey yet",
+    "retrySend": "Try again",
+    "discardSend": "Comot am"
   },
   "music": {
     "listeningCount_one": "{{count}} dey listen",
@@ -2019,6 +2104,7 @@
     },
     "viewGrid": "Grid view",
     "viewList": "List view",
+    "viewMode": "View Am",
     "back": "Go back",
     "usernameAvailable": "Username dey available!",
     "signUpToClaim": "Sign up today make you claim am",
@@ -2046,7 +2132,13 @@
     },
     "tabs": {
       "playlists": "Playlists",
-      "dislikes": "No like"
+      "dislikes": "No like",
+      "likes": "Like Dem"
+    },
+    "likedPosts": {
+      "emptyTitle": "Nobody never like am yet",
+      "privateTitle": "Likes na private",
+      "loadMore": "Bring more"
     },
     "dislikes": {
       "emptyTitle": "No dislikes yet",
@@ -2068,10 +2160,16 @@
     "sortViews": "Views",
     "sortMostViewed": "Most viewed",
     "sortLikes": "Like",
-    "sortMostLiked": "Most liked"
+    "sortMostLiked": "Most liked",
+    "sortCustomShort": "Your own",
+    "arrange": {
+      "saving": "E dey save..."
+    },
+    "searchThisChannel": "Search inside dis channel"
   },
   "tv": {
     "filterAll": "All",
+    "resultsFor": "Wetin we find for \"{{query}}\"",
     "channelCount_one": "({{count}} channel)",
     "channelCount_other": "({{count}} channels)",
     "loadFailed": "Fail wey go load channel no dey.",
@@ -2093,6 +2191,7 @@
     "amountUsd": "Amount (USD)",
     "customAmount": "Your own amount",
     "minPurchase": "Minimum purchase na $5",
+    "minDhbPurchase": "Di smallest token wey you fit buy na $0.50",
     "youPay": "Wetin you go pay",
     "youReceive": "You go receive (estimate)",
     "statusDelivered": "Tokens don land for your wallet!",
@@ -2146,6 +2245,7 @@
       "viewPost": "See post",
       "title": "Alive",
       "help": "Let dis agent dey live for itself. E keep own time, post, like, reply in own voice, and sleep at night.",
+      "starting": "E dey set up im character…",
       "awake": "Awake in {{home}}",
       "asleep": "Asleep in {{home}}",
       "next": "next check {{time}}",
@@ -2164,6 +2264,7 @@
       "edit": "Chop profile",
       "avatar": "Avatar",
       "banner": "Banner",
+      "imageHelp": "JPG, PNG, WebP or GIF, each one no pass 5 MB.",
       "saved": "Profile save wey"
     },
     "tasks": {
@@ -2197,11 +2298,15 @@
       "noActivity": "No activity recorded.",
       "noTasks": "No task dey for dis agent yet.",
       "swarmHelp": "One prompt, one work. Big targets dey split between agents; posts dey rotate for dem one by one.",
+      "swarmMember": "Swarm agent {{index}} out of {{total}}",
       "runSwarm": "Run swarm",
       "description": "Action dey run as agent wey you select. Task wey you schedule go continue even when app don close.",
       "instructions": "Na wetin agent go do?",
+      "examples": "Post one time every day about: independent music\nStyle: curious, short and e dey yarn like friend\nLike up to 2 new posts every day about: music, live shows, vinyl",
       "preparing": "Wen dey prepare task.",
       "run": "Run!",
+      "limits": "One post every day and up to 3 likes wey make sense for each task. All agents dey share one 20-minute gap between posts. Photos dey use captions wey don check; videos need cover image. Posts no go pass 500 characters. No gas unless you dey mint; writing fit use credits.",
+      "createFirst": "Create agent for down here make you fit give am work.",
       "list": "Tasks",
       "refresh": "Refresh",
       "loading": "Loading tasks…",
@@ -2255,7 +2360,8 @@
         "reply": "Reply",
         "replyStyle": "Replies should sound like a conversation. Dey suppose dey be short, concise and easy to understand. Dey suppose dey get de point across quickly. No need to dey long-winded or use big grammar. Just get straight to de point.",
         "replyPlaceholder": "Wen u dey feel warm, na short u go wear. Ask real question wen u fit.",
-        "help": "View wey dey count for each post, total view of post. A point wey end later, still dey pick new post until am end. Reply dey write from each post text and skip your own agent post."
+        "help": "View wey dey count for each post, total view of post. A point wey end later, still dey pick new post until am end. Reply dey write from each post text and skip your own agent post.",
+        "invalid": "Pick start time wey dey before di end, and di end no go pass 31 days from now."
       }
     },
     "title": "AI Agents",
@@ -2268,6 +2374,8 @@
     "agentName": "Agent Name",
     "agentUsername": "Username",
     "agentDisplayName": "Display name",
+    "agentDisplayNamePlaceholder": "How dis agent go show for Riftn",
+    "capacity": "{{used}} out of {{limit}} agents · {{badge}}",
     "noBadge": "No badge",
     "agentNamePlaceholder": "my-cool-agent",
     "agentDescription": "Description",
@@ -2477,7 +2585,9 @@
     "verifying": "Verifying…",
     "phonePlaceholder": "+1 415 555 2671",
     "continueAs": "Continue as",
-    "switchWalletAccount": "Switch account"
+    "switchWalletAccount": "Switch account",
+    "openInBrowser": "Open am for browser",
+    "copyLink": "Copy Link"
   },
   "careers": {
     "title": "Work for Riftn",
@@ -2552,7 +2662,9 @@
     "title": "DAO Treasury",
     "subtitle": "One wallet, community dey fund am, na vote dey spend am",
     "contribute": "Contribute",
+    "contributeIntro": "Send Riftn tokens from your wallet go di treasury. Every token wey you add dey increase your share of di pool, and your share na di weight wey your vote go carry when di DAO dey decide how dem go spend am.",
     "amountLabel": "Amount (tokens)",
+    "youHold": "You dey hold {{amount}} tokens",
     "irreversible": "Contribution na transfer on-chain. E no fit reverse or withdraw.",
     "switchChain": "Switch your wallet go {{chains}} make you fit contribute.",
     "sendAmount": "Send {{amount}} tokens",
@@ -2565,6 +2677,7 @@
     "treasuryAddress": "Treasury address",
     "copyAddress": "Copy address",
     "addressCopied": "Address don copy",
+    "sendAnyWallet": "Anybody fit send Riftn tokens here from any wallet or exchange. Transfers for Base and BNB dey count for your share.",
     "loadFailed": "We no fit read the treasury now. Try again small time.",
     "yourPower": "Your power",
     "yourContribution": "{{amount}} tokens contributed",
@@ -3168,6 +3281,8 @@
     "chatTab": "Chat",
     "followerInvites": {
       "title": "Invite followers",
+      "detail": "Pick reach 50 followers for each batch. We go skip DMs wey dem pay for or wey dem close. Check di chat for sends wey never confirm before you try again.",
+      "note": "Add small note for your invite (if you want)",
       "selectAll": "Choose dis page",
       "clear": "Clear am",
       "previous": "Previous",
@@ -3175,15 +3290,20 @@
       "empty": "No body dey follow dis page.",
       "send": "Send invitations ({{count}})",
       "sending": "Sending invitations…",
-      "summary": "Sent: {{sent}} · Skipped: {{skipped}} · Check chat: {{review}} · Failed: {{failed}}"
+      "summary": "Sent: {{sent}} · Skipped: {{skipped}} · Check chat: {{review}} · Failed: {{failed}}",
+      "error": "Invitations no fit send. Check your connection and your sign-in, then try again."
     },
     "existingPost": {
       "add": "Add existing post",
+      "hint": "E go keep di original post, likes and views.",
+      "placeholder": "Riftn post link or di post ID",
       "adding": "Adding…",
+      "added": "Post don enter di community",
       "remove": "Comot am from di community",
       "more": "Load more posts join",
       "failed": "No fit update community post. Try again.",
-      "unavailable": "Dis post no dey available."
+      "unavailable": "Dis post no dey available.",
+      "signIn": "Sign in again make you fit manage community posts."
     },
     "title": "Communities",
     "create": "Create",
@@ -3295,6 +3415,7 @@
       "dismissAdminBody": "{{name}} go keep membership, but lose every right wey dey do administrator for {{community}}.",
       "cancel": "Cancel am",
       "ownerBadge": "Oga",
+      "rightsSummary": "{{granted}} out of {{total}} rights",
       "promoteMember": "Promote {{name}}",
       "ownerSection": "Oga",
       "loading": "E dey load…",
@@ -3317,6 +3438,7 @@
       "transferSelect": "Make owner",
       "transferOwnership": "Transfer ownership",
       "loadingMembers": "Loading members…",
+      "noTransferCandidates": "No other active member dey wey you fit hand dis community give.",
       "deleteCommunity": "Delete community",
       "transferConfirmAction": "Transfer ownership",
       "deleteConfirmTitle": "Delete {{name}}?",
@@ -3398,6 +3520,7 @@
       "defaultMemberPermissionsHint": "Applies to everybodi wey no dey get admin role.",
       "slowMode": "Slow mode",
       "slowModeOff": "Members fit go send message without delay.",
+      "slowModeOn": "Members fit send one message every {{label}}. Dis rule no touch admins.",
       "recentActions": {
         "permanently": "permanently",
         "reason": "Reason: {{reason}}",
@@ -3405,7 +3528,8 @@
         "filterLabel": "Filter actions",
         "emptyTitle": "No recent actions",
         "emptyFilter": "No dey happen like dat yet.",
-        "empty": "Moderation action go show up like dey happen."
+        "empty": "Moderation action go show up like dey happen.",
+        "showMore": "See more ({{value}})"
       },
       "banTitle": "Ban {{name}} comot",
       "muteTitle": "Mute {{name}} for now",
@@ -3430,6 +3554,7 @@
       "saveRules": "Save di rules"
     },
     "invite": {
+      "revoked": "Dem don cancel dis invite link.",
       "expired": "Invite link don expire.",
       "exhausted": "Invite link don land reach am limit of members.",
       "notFound": "Dis invite link no dey valid.",
@@ -3651,6 +3776,7 @@
       "chartMonthly": "Revenue na cost per day, average for month.",
       "chartDaily": "Revenu wey dey come in and cost wey dey go for day.",
       "inTitle": "Wetin dey cause money come?",
+      "inEmpty": "No money never enter for dis period",
       "inQuiet": "Nothin yet for dis window.",
       "outTitle": "Where it goes",
       "outEmpty": "No cost for dis window yet.",
@@ -3689,12 +3815,16 @@
     },
     "taxSplit": {
       "title": "Wetin dey happen to revenue",
+      "intro": "Revenue from before don fund operations, token buybacks and rewards for holders and stakers. Di amounts dey show for dollars, for di value wey dem get for each payment date. Open each part to see im original currencies and every transaction.",
       "team": "Riftn operations.",
       "teamDetail": "{{gross}} don come; {{passed}} of am dey go to holders",
       "burned": "Buy back and burn",
+      "burnedDetail": "{{tokens}} Riftn don burn for {{n}} buybacks",
+      "shared": "Wetin we pay holders and stakers",
       "sharedDetail": "{{claims}} claim wey {{wallets}} wallets dey make",
       "open": "Wata see every line wey get {{part}}",
       "see": "See every line",
+      "footnote": "Na only di operating funds wey we keep dey count as revenue for top. We dey record buybacks and shared rewards separately. You fit check every amount and original currency for di ledger.",
       "grossFootnote": "Revenue wey dey top dey include BNB wey dey share wit holders and stakers. Dis payments dey distributed, no be say dem dey retain am by Riftn. Buybacks dey separate. Every amount and original currency dey inspect for ledger."
     },
     "taxLedger": {
@@ -3965,6 +4095,7 @@
     "signIn": "Sign in",
     "loading": "E dey load…",
     "historySubtitle": "Every bounty you post or dey work for, including dem finish ones.",
+    "connectTitle": "Make you connect your wallet",
     "connectBody": "Connect make you see di bounties wey you don post or work on.",
     "connectCta": "Connect wallet",
     "historyTabsLabel": "Bounty history",
@@ -4188,7 +4319,8 @@
     "fillRequired": "Abeg fill all required fields",
     "viewStore": "View store",
     "store": "Store",
-    "listing": "Listing"
+    "listing": "Listing",
+    "shopAllowanceUsed": "You don use {{allowance}} of {{allowance}}. Stake more Riftn tokens for higher badge and another slot."
   },
   "stages": {
     "allStages": "All Audio room dem",
@@ -4250,6 +4382,7 @@
     "viewStage": "View stage",
     "recordingPlayback": "Play di stage recording back",
     "stopAndCloseLabel": "Stop am and close the player",
+    "stopAndClose": "Stop and close.",
     "stageRecording": "Stage recording",
     "coverTooLarge": "Cover no suppose pass 8 MB",
     "coverUploadFailed": "Cover image no upload — we dey schedule am without am",
@@ -4722,6 +4855,7 @@
     "settledTitleSpeed": ", usually inside {{speed}}",
     "settledCount_one": "{{count}} don settle",
     "settledCount_other": "{{count}} don settle",
+    "statusInProgress": "Dey happen",
     "howMany": "How many",
     "availableCount_one": "{{count}} dey available",
     "availableCount_other": "{{count}} dey available",
@@ -4736,8 +4870,11 @@
     "paying": "Dey pay…",
     "ownListing": "Na your own listing be this",
     "signInToBuy": "Sign in make you buy",
+    "buyForTotal": "Buy {{quantity}}, e go cost {{total}}",
     "signInFirst": "Abeg sign in first",
     "cannotOfferOwn": "You no go make offer for yourself like dat.",
+    "offerSubmitted_one": "Your offer don go for {{count}} fraction, {{price}} tokens for each one",
+    "offerSubmitted_other": "Your offer don go for {{count}} fractions, {{price}} tokens for each one",
     "offerSubmitFailed": "Offer no fit go",
     "makeAnOffer": "Make Offer",
     "makeAnOfferAction": "Make offer",
@@ -4788,6 +4925,8 @@
     "listingInProgress": "Dey list…",
     "listNFractions_one": "List {{count}} fraction",
     "listNFractions_other": "List {{count}} fraction dem",
+    "listedToast_one": "You don list {{count}} fraction, {{price}} tokens for each one",
+    "listedToast_other": "You don list {{count}} fractions, {{price}} tokens for each one",
     "overdueBy": "e don late by {{span}}",
     "timeLeft": "{{span}} remain",
     "postCounterparty": "Post #{{id}} · {{address}}",
@@ -4807,53 +4946,89 @@
     "needsYouHold": "Wan go for {{needed}}, you dey hold {{held}}"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Use dis details"
+      }
+    },
+    "cinema": {
+      "close": "Close Am"
+    },
     "libraryEmpty": "Your saved generations go show for here.",
     "toolRemake": "Remake am.",
     "toolMaboroshi": "Maboroshi",
+    "toolMaboroshiDesc": "Change characters and objects, check di draft, then export with your original soundtrack.",
     "editorImportedToLibrary": "E design dey change after import. Result save for you in your media library.",
     "presetExtraGlassCausticsName": "Glass caustics",
     "presetExtraGlassCausticsHint": "Sunlight bends through clear glass",
     "presetExtraRainyProductName": "Rainy product",
+    "presetExtraRainyProductHint": "Water drops and dramatic light from side",
     "presetExtraJewelleryVelvetName": "Jewelries for velvet",
     "presetExtraJewelleryVelvetHint": "Precise metal highlights on deep velvet.",
     "presetExtraCosmeticFloatingName": "Cosmetics wey dey float.",
+    "presetExtraCosmeticFloatingHint": "Clean beauty arrangement wey dey hang for air",
     "presetExtraFruitOnIceName": "Fruit on ice",
     "presetExtraFruitOnIceHint": "Fresh fruit inside translucent ice",
     "presetExtraPerfumeDunesName": "Perfume dunes",
+    "presetExtraPerfumeDunesHint": "Warm sand and shadow of sculpted bottle",
     "presetExtraFoodOverheadName": "Food overhead",
+    "presetExtraFoodOverheadHint": "Table wey get plenty colour, arranged from top",
     "presetExtraDrinkSplashRingName": "Splash ring",
+    "presetExtraDrinkSplashRingHint": "Liquid crown wey freeze round drink",
     "presetExtraCeramicPedestalName": "Ceramic pedestal",
+    "presetExtraCeramicPedestalHint": "Sculpture objects and quiet soft light",
     "presetExtraSneakerDetailName": "Sneaker detail",
+    "presetExtraSneakerDetailHint": "Fabric, stitching and di texture of di sole",
     "presetExtraLinenStillLifeName": "Linen still life",
+    "presetExtraLinenStillLifeHint": "Quiet product styling inside natural fabric",
     "presetExtraBakeryWindowName": "Bakery window",
+    "presetExtraBakeryWindowHint": "Golden pastry detail for morning light",
     "presetExtraSplitLightPortraitName": "Split light",
     "presetExtraSplitLightPortraitHint": "One bright face edge, one soft shadow",
     "presetExtraWindowRainPortraitName": "Rainy window portrait",
+    "presetExtraWindowRainPortraitHint": "Rain drops for window and quiet reflection",
     "presetExtraSunsetRimPortraitName": "Sunset rim",
+    "presetExtraSunsetRimPortraitHint": "Warm light dey outline hair and shoulders",
     "presetExtraFreckleBeautyName": "Freckle close-up",
     "presetExtraFreckleBeautyHint": "Skin wey dey natural, soft and beautiful",
     "presetExtraGelLightBeautyName": "Gel light beauty",
+    "presetExtraGelLightBeautyHint": "Amber and violet studio light",
     "presetExtraAthleteFreezeName": "Athlete freeze",
     "presetExtraAthleteFreezeHint": "Moment wey dey make you feel say na real sporting moment.",
     "presetExtraStreetFlashName": "Street flash",
+    "presetExtraStreetFlashHint": "Direct flash and city energy wey natural",
     "presetExtraDuotonePortraitName": "Duotone portrait",
+    "presetExtraDuotonePortraitHint": "Graphic photo print wey get two colours",
     "presetExtraRisoPrintName": "Risograph print",
+    "presetExtraRisoPrintHint": "Two inks, paper grain and layers wey no too align",
     "presetExtraScreenprintPosterName": "Screenprint poster",
+    "presetExtraScreenprintPosterHint": "Strong shapes and three flat ink colours",
     "presetExtraCyanotypeStudyName": "Cyanotype study",
+    "presetExtraCyanotypeStudyHint": "White plant silhouettes for blue background",
     "presetExtraLinocutSceneName": "Linocut scene",
+    "presetExtraLinocutSceneHint": "Black marks wey dem carve for warm paper",
     "presetExtraPaperQuillingName": "Paper quilling",
     "presetExtraPaperQuillingHint": "Curled paper strips create raised forms",
     "presetExtraLayeredPaperName": "Layered paper",
+    "presetExtraLayeredPaperHint": "Depth of cut paper with soft shadows",
     "presetExtraStitchedFeltName": "Stitched felt",
+    "presetExtraStitchedFeltHint": "Soft fabric shapes and stitching wey you fit see",
     "presetExtraStainedGlassName": "Stained glass",
+    "presetExtraStainedGlassHint": "Coloured glass wey dey shine and lead lines",
     "presetExtraBotanicalPlateName": "Botanical plate",
+    "presetExtraBotanicalPlateHint": "Fine study of plant with specimen details",
     "presetExtraWoodcutLandscapeName": "Woodcut landscape",
+    "presetExtraWoodcutLandscapeHint": "Landscape wey get layers inside carved tonal bands",
     "presetExtraIsometricMapName": "Map wey dey draw with straight lines wey no dey represent real-life distances.",
+    "presetExtraIsometricMapHint": "Small neighbourhood wey you fit read well",
     "presetExtraStepsInfographicName": "Step infographic",
     "presetExtraStepsInfographicHint": "Three clear step wey dey connect together.",
     "presetExtraOrigamiBuildingName": "Architektura Origami",
+    "presetExtraOrigamiBuildingHint": "Buildings of folded paper with sharp folds",
     "presetExtraEmbroideredPatchName": "Pamela weavu",
+    "presetExtraEmbroideredPatchHint": "Thread wey thick and fabric border wey dem stitch",
     "presetExtraNoirHotelName": "Noir hotel",
+    "presetExtraNoirHotelHint": "Black and white hallway frame wey get tension",
     "presetExtraScifiCargoName": "Cargo bay",
     "presetExtraScifiCargoHint": "Functional science-fiction set detail",
     "presetExtraFantasyMarketName": "Fantasy market",
@@ -4863,23 +5038,33 @@
     "presetExtraRetroFutureLoungeName": "Retro-future lounge",
     "presetExtraRetroFutureLoungeHint": "Seventies shapes for interior wey dey speculative.",
     "presetExtraArcticExpeditionName": "Arctic expedition",
+    "presetExtraArcticExpeditionHint": "Big cold place and small human silhouette",
     "presetExtraMiniatureCityName": "Miniature city",
     "presetExtraMiniatureCityHint": "E city wey dem dey create wit tilt-shift depth",
     "presetExtraSilentFilmFrameName": "Fim silen fram",
+    "presetExtraSilentFilmFrameHint": "Old-school black and white and stage-like framing",
     "presetExtraBusinessCardName": "Karta Bisnes",
     "presetExtraBusinessCardHint": "Kọọlẹ identiti print na stock wey dey textured.",
     "presetExtraBookJacketName": "Kapai",
     "presetExtraBookJacketHint": "Kọmiti front na visible spine",
     "presetExtraVinylSleeveName": "Sleeve of vinyl",
+    "presetExtraVinylSleeveHint": "Album artwork wey di record dey show small",
     "presetExtraCanWrapName": "Can label",
+    "presetExtraCanWrapHint": "Brand design wey wrap round drink can",
     "presetExtraCosmeticBoxName": "Cosmetic box",
+    "presetExtraCosmeticBoxHint": "Carton and bottle wey dey together as one brand system",
     "presetExtraCafeMenuName": "Cafe menu",
     "presetExtraCafeMenuHint": "Menu wey person fit read well-well for correct paper",
     "presetExtraPodcastCoverName": "Podcast cover",
+    "presetExtraPodcastCoverHint": "Square artwork wey you fit read even when e small",
     "presetExtraEventFlyerName": "Event flyer",
+    "presetExtraEventFlyerHint": "Event title wey clear and bold main image",
     "presetExtraPlaylistCoverName": "Playlist cover",
+    "presetExtraPlaylistCoverHint": "One image wey get mood with simple writing",
     "presetExtraVerticalStoryName": "Vertical story",
+    "presetExtraVerticalStoryHint": "Space for one short announcement and image",
     "presetExtraTravelPostcardName": "Travel postcard",
+    "presetExtraTravelPostcardHint": "Destination wey dey call you, with printed texture",
     "presetExtraSportsPosterName": "Sports poster",
     "presetExtraSportsPosterHint": "Muvment wey dey dynamic and clear hierarchy of poster.",
     "presetExtraIridescentGlassName": "Iridescent glass",
@@ -4889,9 +5074,13 @@
     "presetExtraWovenPaperName": "Woven paper",
     "presetExtraWovenPaperHint": "Strips wey dey interlace, shadows wey dey soft.",
     "presetExtraLiquidMetalName": "Liquid metal",
+    "presetExtraLiquidMetalHint": "Chrome shapes wey dey flow with clean reflections",
     "presetExtraPrismShadowsName": "Prism shadows",
+    "presetExtraPrismShadowsHint": "Rainbow light and simple geometry",
     "presetExtraMossMicroWorldName": "Moss micro-world",
+    "presetExtraMossMicroWorldHint": "Small small natural things for macro scale",
     "presetExtraRackFocusName": "Rack focus",
+    "presetExtraRackFocusHint": "Focus dey shift from front go di subject",
     "presetExtraSideTruckName": "Sideways truck",
     "presetExtraSideTruckHint": "Muvie watin dey happen for side, but na side watin dey move.",
     "presetExtraPedestalRiseName": "Pedestal rise",
@@ -4899,27 +5088,39 @@
     "presetExtraLowFollowName": "Low follow",
     "presetExtraLowFollowHint": "Ground-level tracking beside moving feet",
     "presetExtraOverShoulderFollowName": "Over-shoulder follow",
+    "presetExtraOverShoulderFollowHint": "Close follow from behind shoulder through real place",
     "presetExtraDoorwayRevealName": "Doorway reveal",
+    "presetExtraDoorwayRevealHint": "Dark doorway dey open enter bright scene",
     "presetExtraReflectionSlideName": "Reflection slide",
+    "presetExtraReflectionSlideHint": "Camera move dey show subject and im reflection",
     "presetExtraOverheadQuarterTurnName": "Overhead quarter-turn",
+    "presetExtraOverheadQuarterTurnHint": "Slow quarter-turn from top round one layout",
     "presetExtraGentleDutchRollName": "Dutch roll",
+    "presetExtraGentleDutchRollHint": "Small controlled roll dey add tension to scene wey no dey move",
     "presetExtraMacroFocusSweepName": "Macro focus sweep",
+    "presetExtraMacroFocusSweepHint": "Focus dey move across fine details",
     "presetExtraPaperUnfoldName": "Paper unfolds",
+    "presetExtraPaperUnfoldHint": "Folded paper dey open become sculpted subject",
     "presetExtraCrystalGrowthName": "Crystal growth",
+    "presetExtraCrystalGrowthHint": "Crystal shapes wey get faces dey grow from one steady point",
     "presetExtraWaterFreezeName": "Water freezes",
     "presetExtraWaterFreezeHint": "Liquid motion settles into clear ice",
     "presetExtraRibbonWrapName": "Ribbon wrap",
+    "presetExtraRibbonWrapHint": "One ribbon wey dey flow dey wrap round di subject",
     "presetExtraGlitterTrailName": "Glitter trail",
     "presetExtraGlitterTrailHint": "Motion light dey leave brief particle trail",
     "presetExtraLightPaintName": "Light painting",
+    "presetExtraLightPaintHint": "Line wey dey shine dey draw one simple shape",
     "presetExtraShadowDanceName": "Shadow dance",
     "presetExtraShadowDanceHint": "Shadow don dey stretch as light dey move",
     "presetExtraDustReassemblyName": "Dust reassembly",
     "presetExtraDustReassemblyHint": "Fine particles assemble into one solid object",
     "presetExtraPortalIrisName": "Portal iris",
+    "presetExtraPortalIrisHint": "Round opening dey show another place",
     "presetExtraNeonPulseName": "Neon pulse",
     "presetExtraNeonPulseHint": "Pulse yute dey soft, dey move for edge wey dey shine.",
     "presetExtraBottlePourName": "Bottle pour",
+    "presetExtraBottlePourHint": "One slow pour wey di liquid dey flow like real",
     "presetExtraPerfumeMistName": "Perfume mist",
     "presetExtraPerfumeMistHint": "Spray wey dey backlit, show fine droplets.",
     "presetExtraWatchReflectionName": "Watch reflection",
@@ -4931,33 +5132,55 @@
     "presetExtraTeaSteepName": "Tea steep",
     "presetExtraTeaSteepHint": "Warm colour spreads through clear water",
     "presetExtraShoeLacePullName": "Laces tighten",
+    "presetExtraShoeLacePullHint": "One lace pull wey dem do on purpose, for close-up",
     "presetExtraCeramicGlazePourName": "Glaze pour",
+    "presetExtraCeramicGlazePourHint": "Thick glaze dey flow over ceramic shape wey bend",
     "presetExtraQuietLoopSceneName": "Quiet ambient loop",
+    "presetExtraQuietLoopSceneHint": "Small motion wey dey repeat for calm place",
     "presetExtraDeskSatisfyingName": "Desk reset",
+    "presetExtraDeskSatisfyingHint": "One neat placement wey you see from top",
     "presetExtraOutfitDetailWalkName": "Outfit detail walk",
+    "presetExtraOutfitDetailWalkHint": "Close shot of waka wey show natural fabric",
     "presetExtraFoodFinishName": "Finishing touch",
+    "presetExtraFoodFinishHint": "One garnish land on top food wey don ready",
     "presetExtraFogLanternName": "Fog lantern",
     "presetExtraFogLanternHint": "Warm light emerges through drifting mist",
     "presetExtraCityTramPassName": "City tram passes",
+    "presetExtraCityTramPassHint": "Tram wey light dey cross calm evening frame",
     "presetExtraPortraitBreathName": "Portrait breath",
+    "presetExtraPortraitBreathHint": "Small breathing dey make reference portrait move",
     "presetExtraLandscapeBreezeName": "Landscape breeze",
+    "presetExtraLandscapeBreezeHint": "Leaves dey move small small for photo wey you supply",
     "presetExtraProductLightSweepName": "Product light sweep",
+    "presetExtraProductLightSweepHint": "Soft light wey dey move across reference product",
     "presetExtraIllustrationParallaxName": "Illustration parallax",
+    "presetExtraIllustrationParallaxHint": "Small depth from illustration wey you supply",
     "presetExtraArchitectureLightChangeName": "Architecture light change",
+    "presetExtraArchitectureLightChangeHint": "Soft clouds dey change di light for reference scene",
     "presetExtraPetSmallMotionName": "Pet small motion",
+    "presetExtraPetSmallMotionHint": "Eye blink and ear movement for pet portrait",
     "presetOpenOrchardPortraitName": "Orchard portrait",
     "presetOpenOrchardPortraitHint": "Film 35mm for soft orchard light",
     "presetOpenRecordingStudioName": "Recording studio",
+    "presetOpenRecordingStudioHint": "Isometric clay cutaway wey get tungsten light",
     "presetOpenPoppyStillLifeName": "Poppy still life",
+    "presetOpenPoppyStillLifeHint": "Editorial objects with hard shadows from noon sun",
     "presetOpenMidnightAlleyName": "Midnight alley",
+    "presetOpenMidnightAlleyHint": "Sodium lamps and 35mm reflections wey wet",
     "presetOpenCraftsmanPortraitName": "Craftsman portrait",
+    "presetOpenCraftsmanPortraitHint": "Portrait with one softbox for black backdrop",
     "presetOpenSaltPondsName": "Salt ponds",
+    "presetOpenSaltPondsHint": "Pink and ochre geometry wey you see from top",
     "presetOpenWatchBlueprintName": "Watch blueprint",
+    "presetOpenWatchBlueprintHint": "Technical cutaway for warm paper",
     "presetOpenOvergrownHouseName": "Overgrown house",
     "presetOpenOvergrownHouseHint": "Large-format architecture under overcast light",
     "presetOpenEspressoSteamName": "Espresso steam",
+    "presetOpenEspressoSteamHint": "Ceramic product detail with steam wey dey curl and light for edge",
     "presetOpenSkiLodgeName": "Seventies lodge",
+    "presetOpenSkiLodgeHint": "Wood, orange wool and winter sun wey dey low",
     "presetOpenDoughCloseupName": "Dough close-up",
+    "presetOpenDoughCloseupHint": "Hands wey window light dey shine on, with soft colours",
     "presetOpenDesertStarsName": "Desert stars",
     "presetOpenDesertStarsHint": "Star trails wey dey shine for white dome, na long time dey expose.",
     "presetOpenForestAerialName": "Forest aerial",
@@ -4965,17 +5188,22 @@
     "presetOpenInkBloomName": "Ink bloom",
     "presetOpenInkBloomHint": "Motion at very slow speed, with light shining from behind.",
     "presetOpenMarketTrackingName": "Market tracking",
+    "presetOpenMarketTrackingHint": "Neon street shot wey dem hold for hand, with rain for di lens",
     "presetOpenLateNightDinerName": "Late-night diner",
     "presetOpenLateNightDinerHint": "Kamera don lock, rain dey fall, and sign dey flicker",
     "presetOpenSculptorPushName": "Sculptor push-in",
     "presetOpenSculptorPushHint": "Slow push toward window-lit craft detail",
     "presetOpenLighthouseOrbitName": "Lighthouse orbit",
+    "presetOpenLighthouseOrbitHint": "Drone dey go round with grey waves and sea spray",
     "presetOpenCanyonTimelapseName": "Canyon timelapse",
+    "presetOpenCanyonTimelapseHint": "Cloud shadows from golden hour reach evening",
     "presetOpenGreenhouseWalkName": "Greenhouse walk",
     "presetOpenGreenhouseWalkHint": "Steadicam reveal through dusty light shafts",
     "presetOpenRecordWhipPanHint": "Fast tungsten-lit pan with heavy motion blur.",
     "presetOpenUnderwaterSurfaceHint": "Bubbles wey dey shine for water, wetin dey happen when sunlight scatter for water.",
+    "presetOpenViaductTrainHint": "Wide shot wey no move, with windows wey light and long-lens depth",
     "presetOpenTowerTiltName": "Tower don dey tilt.",
+    "presetOpenTowerTiltHint": "Slow tilt go down enter city wey cloud cover",
     "whatToCreate": "What to create",
     "countRunning_one": "{{count}} running",
     "countRunning_other": "{{count}} running",
@@ -5122,6 +5350,7 @@
     "presets": "Presets",
     "clearPreset": "Clear preset",
     "presetAria": "{{name}} preset. {{hint}}",
+    "presetPlaceholder": "{{name}}: describe di subject, for example \"{{sample}}\"",
     "presetGroupAbstract": "Abstract",
     "presetGroupCamera": "Camera",
     "presetGroupCharacters": "Characters",
@@ -5141,9 +5370,11 @@
     "presetStudioProductName": "Studio Product",
     "presetStudioProductHint": "Clean commercial product shot",
     "presetCinematicStillName": "Cinematic Still",
+    "presetCinematicStillHint": "Framing and colour grade like film still",
     "presetEditorialPortraitName": "Editọrial Portrait",
     "presetEditorialPortraitHint": "Magazine-grade portrait lighting",
     "presetPosterTypeName": "Poster Type",
+    "presetPosterTypeHint": "Layout with big writing wey you fit read",
     "presetThumbnailPunchName": "Thumbnail Punch",
     "presetThumbnailPunchHint": "Reads at 200px wide",
     "presetFlatIllustrationName": "Flat Illustration",
@@ -5310,22 +5541,29 @@
     "presetTvSpotHint": "Polished broadcast-style commercial",
     "priceTokensUsd": "{{amount}} tokens · USD {{usd}}",
     "presetCrashZoomName": "Crash Zoom",
+    "presetCrashZoomHint": "Fast zoom-in for dramatic moment",
     "presetDollyZoomName": "Dolly Zoom",
     "presetDollyZoomHint": "Vertigo effect: background stretches, subject holds",
     "presetBulletTimeName": "Bullet Time",
     "presetBulletTimeHint": "Moment wey camera dey snap, camera dey rotate round.",
     "presetFpvDiveName": "FPV Dive",
     "presetFpvDiveHint": "Dron don dive and weave through di scene.",
+    "presetEarthZoomOutName": "Zoom Out from Earth",
+    "presetEarthZoomOutHint": "Pull back from di subject reach space",
     "presetWhipPanName": "Whip Pan",
+    "presetWhipPanHint": "Fast blurred pan enter di reveal",
     "presetDisintegrateName": "Disintegrate",
     "presetDisintegrateHint": "Subject breaks apart into drifting particles",
     "presetLevitateName": "Levitate",
+    "presetLevitateHint": "Subject dey float slowly comot from ground",
     "presetExplodedViewName": "Exploded View",
     "presetExplodedViewHint": "Product splits into floating parts",
     "presetMeltName": "Melt",
     "presetMeltHint": "Subject melts down like hot wax",
     "presetSetAblazeName": "Set Ablaze",
+    "presetSetAblazeHint": "Fire catch and swallow di subject",
     "presetVhsGlitchName": "VHS Glitch",
+    "presetVhsGlitchHint": "Old tape distortion and colour wey dey bleed",
     "presetProductShowcaseName": "Product Showcase",
     "presetProductShowcaseHint": "Clean, polished product hero shot",
     "presetTryOnName": "Virtual Try-On",
@@ -5333,15 +5571,21 @@
     "presetYtSplitName": "Before / After Thumbnail",
     "presetYtSplitHint": "Thumbnail wey dey split-screen, tell am story.",
     "presetSocialCarouselName": "Carousel Slide",
+    "presetSocialCarouselHint": "One slide of post wey you fit swipe",
     "presetAdHeadlineName": "Headline Ad",
+    "presetAdHeadlineHint": "Big claim, product dey front and centre",
     "presetAdBulletsName": "Benefit Bullets Ad",
+    "presetAdBulletsHint": "Product with three short points wey show im benefit",
     "presetAdUsVsThemName": "Us vs Them Ad",
+    "presetAdUsVsThemHint": "Comparison side by side with di competitor",
     "presetMerchMockupName": "Merch Mockup",
+    "presetMerchMockupHint": "Your design for T-shirt, hoodie or cap",
     "presetPackagingName": "Packaging",
     "presetPackagingHint": "Design shot of box, bottle or bag wey dem take shoot for studio.",
     "presetStorefrontSignName": "Storefront Sign",
     "presetStorefrontSignHint": "Signs wey you dey see for outside, na wetin dey carry your brand.",
     "presetLogoMarkName": "Logo Mark",
+    "presetLogoMarkHint": "Simple, bold logo for plain background",
     "presetClay3dName": "Clay Render",
     "presetClay3dHint": "Cute soft 3D claymation look",
     "presetAnimeStillName": "Anime Still",
@@ -5444,6 +5688,7 @@
     "parallelGenerations": "Generate plenty at once: up to {{videos}} videos, {{images}} images",
     "topUpAnyTime": "Top up anytime with your own Riftn tokens",
     "publishStraightToDehub": "Post straight to Riftn",
+    "earlyAccess": "You go first use di advanced AI features",
     "unlimitedMarketplace": "Access to marketplace wey no get limit",
     "seedanceFullAccess": "{{model}} — Full access",
     "membersRange": "{{min}} reach {{max}} members for one shared workspace",
@@ -5554,6 +5799,7 @@
     "raw": "Raw"
   },
   "nftMarket": {
+    "tabActivity": "Wetin dey happen",
     "shortTitle": "NFTs",
     "filters": "Filters",
     "forSale": "For sale",
@@ -5602,9 +5848,11 @@
     "cancelled": "Cancelled",
     "dehubPost": "Riftn post",
     "youHold": "You hold {{n}}",
+    "tabRecent": "New",
     "buyNow": "Buy now",
     "inBundle": "Sold as a bundle of {{n}}",
     "buy": "Buy",
+    "listForSale": "Put for sale",
     "priceAlert": "Price alert",
     "offers": "Offers",
     "anyInCollection": "Any in collection",
@@ -5682,6 +5930,7 @@
     "askingPrice": "Price wey dem dey ask",
     "paidStraightToSeller": "≈ ${{usd}} · e go straight to di seller, Riftn no dey collect any cut",
     "yourHandleChanges": "Your handle go change",
+    "payingWithDhbOn": "You dey pay with Riftn tokens for {{chain}}",
     "yourOwnListing": "Na your own listing be dis. Manage am from di Sell tab.",
     "confirmInWallet": "Confirm am for your wallet…",
     "confirmingOnChain": "E dey confam for on-chain…",
@@ -5801,6 +6050,7 @@
     "thisWallet": "This wallet",
     "receivingWalletAddress": "Receiving wallet address",
     "receivingWalletHint": "Account go come for empty wallet dat already sign in Riftn at least one time. Sign in once wit fresh wallet, den copy address wey fit here.",
+    "payingWithDhbOn": "You dey pay with Riftn tokens for {{chain}}",
     "yourOwnListing": "Na your own listing be dis. Manage am from di Sell tab.",
     "confirmInWallet": "Confirm am for your wallet…",
     "signInToBuy": "Sign in make you buy",
@@ -5918,6 +6168,7 @@
     "inactive": "Inactive",
     "daysLeft_one": "{{count}}d left",
     "daysLeft_other": "{{count}}d left",
+    "legacyPlanMigrates": "If you save, dis old plan wey dem price for tokens go move to dollar pricing for di pre-listing rate.",
     "tokenAmount": "{{amount}} tokens",
     "preListingTokenAmount": "Pre-listing token amount",
     "tokenQuoteUnavailable": "Live token quote unavailable",
@@ -5933,10 +6184,15 @@
   },
   "liveOverlay": {
     "someone": "Somebody",
+    "newFollower": "New follower don land: {{name}}",
+    "newSubscriber": "New subscriber don land: {{name}}",
+    "subscribedTo": "{{name}} don subscribe to {{plan}}",
+    "shared": "{{name}} don share di stream",
     "joined": "{{name}} joined",
     "goalReached": "Goal reach!",
     "followersUnit": "followers",
     "topSupporters": "Top supporters",
+    "tipped": "{{name}} don send gift",
     "chatPreview": "Chat messages appear here",
     "wheelLanded": "{{name}} spun: {{result}}",
     "subathon": "Subathon",
@@ -5974,7 +6230,37 @@
     "youAreBanned": "Wahala! You no go chat inside dis creator's stream.",
     "youAreTimedOut": "You are timed out for a moment"
   },
+  "studioDeck": {
+    "background": {
+      "modes": {
+        "none": "Nothing"
+      }
+    },
+    "remove": "Comot am",
+    "scenes": {
+      "names": {
+        "starting": "E go soon start"
+      }
+    },
+    "audio": {
+      "mute": "Off di sound",
+      "unmute": "On di sound",
+      "gateLevels": {
+        "off": "Nothing",
+        "high": "E strong"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "cancel": "Cancel am",
+      "states": {
+        "off": "Nothing",
+        "idle": "E don ready",
+        "live": "Dei",
+        "error": "Wahala"
+      }
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "A countdown on your stream. Every paid gift, follow and subscription adds time, so the room keeps you live.",
@@ -6041,7 +6327,11 @@
       }
     },
     "title": "Live Studio",
+    "subtitle": "Alerts and widget dem for your streams",
+    "intro": "Everything wey you add here go show on top your streams for every viewer for di Riftn app — whether you go live from your phone, di browser, capture card or encoder.",
     "open": "Open Live Studio",
+    "settingsLinkTitle": "Alerts and widget dem",
+    "settingsLinkBody": "Tip alerts, goals and more on top your streams, wey you go set up for Live Studio.",
     "preview": "Preview",
     "landscape": "Landscape",
     "portrait": "Portrait",
@@ -6052,6 +6342,7 @@
     "visible": "Show on stream",
     "remove": "Remove widget",
     "settings": "Settings",
+    "selectHint": "Select widget to change am.",
     "noSettings": "Dis widget no dey have na thing for you set up.",
     "test": "Test alerts",
     "testHint": "Test alerts dey play here and no dey anywhere else. Viewers no dey see dem.",
@@ -6059,16 +6350,31 @@
     "testFailed": "Dat test alert no send. Try am again in small time.",
     "save": "Save",
     "saving": "E dey save…",
+    "saved": "E don save. Your stream go show di new layout sharp sharp.",
+    "saveFailed": "We no fit save. Check your connection and try again.",
     "unsaved": "Unsaved changes",
     "loadFailed": "Wetin go dey for your widget no load? Press 'refresh' page again for try again.",
+    "limit": "You don reach di limit of 40 widgets.",
     "obs": {
+      "title": "Use am with OBS",
       "connected": "OBS connected",
+      "notConnected": "OBS never connect",
+      "showIn": "Show your widget dem",
+      "inApp": "Inside di Riftn app",
+      "inAppHint": "Every viewer app go draw dem on top your stream. E dey work from your phone, di browser, capture card or OBS, and e no go cost you anything.",
       "inVideo": "In my video (OBS)",
       "inVideoHint": "OBS dey burn am for your picture, so e dey for your replays and anywhere wey dem dey watch your stream.",
       "warnDoubles": "Yah OBS overlay of you connect, but widgets of you set wey dey show for Riftn app too, so viewers see every alert twice.",
+      "switchToVideo": "Show dem inside my video instead",
       "link": "Browser source link",
+      "step1": "For OBS, add Browser source and paste dis link.",
+      "step2": "Set di width to 1920 and di height to 1080, or 1080 by 1920 for vertical stream.",
+      "step3": "After update, right-click di source and choose Refresh cache of current page.",
       "copy": "Copy link",
       "copyFailed": "I no fit copy. Select di link and copy am yourself.",
+      "rotate": "Make new link",
+      "rotateConfirm": "Make new link? Di old one go stop to work sharp sharp, so you go need paste di new one inside OBS.",
+      "rotated": "New link don ready. Paste am inside OBS.",
       "rotateFailed": "No go make new link. Try again after a while.",
       "pageTitle": "Riftn stream overlay",
       "diagLink": "Link",
@@ -6112,7 +6418,20 @@
     },
     "hints": {
       "tip_alert": "Celebrate every tip, e size according to e tier",
+      "follow_alert": "E dey show every new follower",
+      "subscribe_alert": "E dey show every new subscriber",
+      "share_alert": "E dey show when person share your stream",
       "join_alert": "Welcomes each viewer as they arrive",
+      "goal_bar": "E dey track tips or followers as dem dey go reach target",
+      "top_supporters": "Di people wey tip you pass for dis stream",
+      "viewer_count": "How many people dey watch",
+      "text": "One line of text or lower third",
+      "frame": "Border wey go round your stream",
+      "stream_timer": "E dey show how long you don dey broadcast",
+      "reaction_counter": "E dey count every reaction wey your broadcast get",
+      "event_feed": "Di latest gifts, followers, subscribers and people wey dey share your broadcast",
+      "chat_box": "E dey show your broadcast chat messages for screen",
+      "ticker": "One line of your own text wey dey scroll pass for screen",
       "rule_alert": "Where your rules' alerts appear",
       "poll": "Your live poll, with a vote button for every option",
       "spin_wheel": "Where the wheels in your rules spin",
@@ -6127,6 +6446,8 @@
       "banner": "Banner",
       "minAmount": "Smallest tip wey you fit show (tokens)",
       "showStreak": "Show the weekly streak",
+      "showMessage": "Show di tip message",
+      "confirmedOnly": "Only when di payment don confirm",
       "confirmedOnlyHint": "Wait a few seconds for the chain, so a tip dat no go be paid never go show up.",
       "duration": "Seconds on screen",
       "metric": "Counts",
@@ -6615,6 +6936,7 @@
     "lookingForCreatorPlans": "You dey find Creator Studio AI plans?",
     "seeCreatorPricing": "See Creator Studio pricing",
     "adFreeLabel": "Ad-free feed",
+    "adFreeDetail": "No promoted post, no upgrade banner at all",
     "backgroundLabel": "Background playback",
     "backgroundDetail": "Audio and video go dey play even when screen off",
     "badgeLabel": "Animated Extra badge",
@@ -6649,6 +6971,7 @@
     "skyHighAiDetail": "5,000 Assistant messages, 1,500 images, 5 minutes of AI video every month",
     "unlimitedPeeksLabel": "Unlimited sneak peeks",
     "unlimitedPeeksDetail": "Peep inside every gated feed, no monthly limit",
+    "allThemesLabel": "All di themes + early access",
     "allThemesDetail": "Every custom theme, you go first use di theme builder",
     "proProfileInsightsLabel": "Pro profile insights",
     "proProfileInsightsDetail": "Full history of visitors, where dem come from and trends",
@@ -6713,6 +7036,7 @@
     "submitFailed": "E no submit. Abeg try again.",
     "ambassadorTitle": "Brand Ambassador",
     "ambassadorSubtitle": "Community and Evangelism",
+    "ambassadorAbout": "As Riftn Brand Ambassador you be di face and voice of di platform for your community.",
     "ambResp2": "Go active inside Riftn community on dem app — post, comment, and dey dey interact wit other people.",
     "ambResp3": "Represent Riftn for real-life events",
     "ambResp4": "Bring new users come di platform through your network",
@@ -7098,6 +7422,8 @@
     "everyoneFollowedBack": "M chọrọ follow back everybodi.",
     "followedBackAll": "Follow am back everybody",
     "findingFollowers": "Finding followers...",
+    "followBackNotNow": "No be now",
+    "followBackDone": "Don finish",
     "nonFollowers": {
       "notNow": "Not now",
       "confirmTitle": "Unfollow {{count}} accounts?",
@@ -7460,6 +7786,7 @@
   "nearBuy": {
     "otherCurrencies": "Oda currencies",
     "title": "Pay wit crypto",
+    "description": "Choose di token wey you go use pay. Collect Riftn tokens for your wallet.",
     "dhbAmount": "Riftn token amount",
     "search": "Find token, network or contract",
     "noMatches": "No token wey match.",
@@ -7476,6 +7803,7 @@
     "gasReserve": "E don include ${{amount}} for network gas.",
     "swapEstimate": "About {{minutes}} min after your payment confirm.",
     "estimateUnknown": "Time dey depend on payment network.",
+    "confirmationTime": "Network confirmations and token delivery dey add time. Dis na estimate, no be countdown.",
     "finalQuote": "Check di final amount before you pay.",
     "getQuote": "Continue",
     "paymentAction": "Continue",
@@ -7495,6 +7823,7 @@
     "history": "Your purchases",
     "startAnother": "Go back to payment options",
     "refundReceipt": "Where refund go land: {{address}}",
+    "destination": "Where di tokens dey go for Base: {{address}}",
     "viewDelivery": "View token transfer",
     "purchaseId": "Copy purchase ID: {{id}}",
     "phase_awaiting": "E dey wait for your payment",
@@ -7508,6 +7837,7 @@
     "phase_deliveryDelayed": "Token delivery delayed",
     "detail_deliveryDelayed": "Payment don settle, but token delivery need try again. Keep dis purchase ID and contact Riftn support if e no complete. No pay again.",
     "phase_gasPending": "Tokens delivered · gas pending",
+    "detail_gasPending": "Your token transfer don confirm. Di separate ETH gas transfer still dey wait or e dey try again.",
     "phase_delivered": "Purchase don complete",
     "detail_delivered": "Yor Riftn tokens don land for your Base wallet.",
     "phase_refunded": "Dem don refund di payment",
@@ -7613,6 +7943,7 @@
         "body": "Choose name wey people go recognise and add profile picture, so your posts go look like say na you post dem."
       },
       "wallet": {
+        "title": "See your wallet and wetin Riftn tokens be",
         "body": "Wallet you dey exist and hold Riftn token. Take look at wetin dey inside am and where am come from."
       },
       "feed": {
@@ -8038,6 +8369,7 @@
       "tools": "Editor tools"
     },
     "agent": {
+      "queue": "Put am for queue",
       "introTitle": "Tell AI wetin you want",
       "introBody": "Talk the design or the change for your own words. E go resize the page, write and style text, find free photo, video and music, put filter, arrange layer and make dem move. Every request na one undo.",
       "suggestPoster": "Make square Instagram post for summer sale wey get beach photo and bold title",
@@ -8295,6 +8627,7 @@
       "findText": "Find in captions (search caption)",
       "replaceText": "Replace with (replace)",
       "matchCase": "Match case (match case)",
+      "replaceCount": "Replace am for {{total}} captions",
       "emptyText": "Empty caption (empty caption)",
       "noTextMatches": "No editable captions match. Import captions or change your search. (no caption fit match. Import caption or change search)",
       "previousText": "Previous (previous)",
@@ -8305,6 +8638,9 @@
       "reloadText": "Reload caption (reload caption)",
       "textSaved": "Caption changes saved. (caption save complete)",
       "action": "Auto captions",
+      "styles": {
+        "bold": "Make am bold"
+      },
       "working": "E dey listen… {{percent}}%",
       "downloading": "E dey ready di speech model… {{percent}}%",
       "hint": "E go turn talk to captions wey follow time, and you fit change how dem look. E dey run for your device: free and private. Di first time go download di model.",
@@ -8426,6 +8762,7 @@
       "visual": "Video better moments",
       "visualPrivacy": "Send selected frames make we analyse wetin dey show.",
       "chatSuggest": "I don't see a video provided.",
+      "chatFound": "We find {{count}} moments. Preview dem, fine-tune di selection, then create separate edit.",
       "chatHint": "Wetin you wan keep or remove?",
       "chatExit": "Back to editing",
       "chatSelectVideo": "Select one visible, unlocked video first.",
@@ -8433,18 +8770,26 @@
       "chatLimit": "Use video wey go last up to 10 minutes and budget for highlight wey go last 15, 30 or 60 seconds.",
       "title": "Highlights",
       "find": "Find highlights",
+      "privacy": "Video go stay for your device. Na here we go transcribe di speech; we go send di transcript text for highlight ranking. Check every moment before you create separate edit.",
       "focus": "Preferred topic (optional)",
       "useCaptions": "Use current captions",
       "captionHint": "Na only tori wey dey inside caption go dey consider.",
       "ranking": "Finding useful moments…",
+      "none": "We no find any talk moment wey useful. Try another topic or video.",
       "create": "Create highlight edit",
+      "created": "Highlight edit don save. Di original project still dey.",
+      "changed": "Di source project don change. Find highlights again.",
+      "limit": "Use reach 10 minutes of source speech. You must first split transcript wey long well well and no get break.",
       "projectTitle": "{{title}} — Highlights",
       "reviewTitle": "Refine highlights",
+      "reviewPlaceholder": "Keep only di backup tips, or comot moment 2…",
+      "reviewResult": "You don select {{count}} out of {{total}} moments. Check dem before you create di edit.",
       "reviewFailed": "Can't update selection. Your previous picks still dey selected.",
       "undoSelection": "Undo selection"
     },
     "videoMatte": {
       "frames": "Removing background · {{completed}} / {{total}} frames",
+      "hint": "E dey run for dis device. First trim am reach {{seconds}} source seconds or less; di first run go download di model.",
       "restore": "Restore background",
       "cancel": "Cancel am"
     },
@@ -8460,25 +8805,40 @@
         "tips": "Three tips",
         "tutorial": "Quick tutorial",
         "countdown": "Countdown",
+        "mythFact": "Na lie or na true",
         "product": "Product reveal",
         "announcement": "Announcement",
         "story": "Story arc",
         "quote": "Quote reel"
       },
       "copy": {
+        "question": "Di big question wey you get",
+        "answer": "Di answer na dis",
         "tryIt": "Try it today",
         "smallChange": "One small change",
         "before": "Before",
         "after": "After",
+        "difference": "See di difference",
         "threeTips": "Three useful tips",
+        "tipOne": "Your first advice",
+        "tipTwo": "Your second advice",
+        "tipThree": "Your third advice",
         "tryOne": "Try one today",
+        "threeSteps": "Make am for three steps",
         "getReady": "Get ready",
+        "mainStep": "Do di main step",
+        "checkResult": "Check wetin come out",
         "yourTurn": "Your turn",
+        "topFive": "Di top five",
+        "fifthPick": "Di fifth one wey you pick",
+        "fourthPick": "Di fourth one wey you pick",
         "thirdPick": "Wen you dey choose your third pick, make sure say you don dey focus.",
         "secondPick": "I no understand wetin \"Your second pick\" mean.",
         "bestPick": "You be number one.",
         "favourite": "Wen you dey ask me say which one be my favourite, I no get favourite.",
+        "myth": "Di popular myth",
         "fact": "Truth wey dey useful",
+        "newFavourite": "Meet di new one wey you go love pass",
         "productName": "Product name",
         "lookCloser": "Waka come closer.",
         "comingSoon": "Something new don come",
@@ -8493,6 +8853,15 @@
         "answerHint": "Explain it for me like I no dey school, one clear sentence.",
         "nextHint": "Give viewers one simple next step.",
         "hookHint": "Make am worth watch.",
+        "beforeHint": "Show where you start from.",
+        "afterHint": "Show wetin come out.",
+        "saveHint": "Give viewers reason to save dis one.",
+        "tipHint": "Add di detail wey go make am useful.",
+        "pickHint": "Talk why dis pick deserve im place.",
+        "mythHint": "Write di belief wey you wan challenge.",
+        "productHint": "Show one reason wey go make person love am.",
+        "announcementHint": "Add di name, date or detail.",
+        "turnHint": "Show di moment wey tins change.",
         "authorHint": "Mkpuru mma"
       }
     },
@@ -8500,7 +8869,8 @@
       "receive": "Gbam, receive changes.",
       "hint": "Wen yor save changes, dem dey apply for now. Local edits don dey keep, na Undo don dey ready.",
       "received": "Wahala don happen, receive version {{revision}}.",
-      "upToDate": "Already up to date."
+      "upToDate": "Already up to date.",
+      "protectedUndo": "Old local edits dey cover shared changes. Undo go keep di shared changes safe."
     },
     "live": {
       "stopEdits": "Stop live edits",
@@ -8512,11 +8882,14 @@
       "receiving": "Receiving live edits",
       "paused": "Live edits paused",
       "retryRecovery": "Retry recovery",
-      "personalCopy": "Waka copy personal."
+      "personalCopy": "Waka copy personal.",
+      "privateHint": "Presence alone no dey share any edit. Share edits live dey upload new sources privately. Save to cloud dey keep version wey go last forever."
     },
     "assembly": {
       "matchConsent": "Wepa clips and fotos don match your prompt.",
       "matchScenes": "Wetin you dey look for? Scenes wey match?",
+      "noMatch": "We no see any scene wey match. Try another topic or selection.",
+      "matchLimit": "Pick reach 10 clips or photos. Videos must dey between one second and 10 minutes long.",
       "matchDuration": "Video don short pass am, shorten duration or choose more media.",
       "matchFailed": "Scene matching no dey available. Your selected clips and timings don dey remain unchanged. You fit review dem manually.",
       "reviewManually": "Review clips manually."
@@ -9644,6 +10017,23 @@
       "toolbar": "How to waka for canvas",
       "zoomIn": "Zoom di canvas in",
       "zoomOut": "Zoom di canvas out"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Cut am",
+        "frameBack": "Previous frame (na)",
+        "frameForward": "Next frame (na)"
+      }
+    },
+    "voiceClone": {
+      "stop": "Stop di recording"
+    },
+    "linkImport": {
+      "go": "Bring am",
+      "downloading": "Dey download {{percent}}%"
+    },
+    "reverse": {
+      "action": "Reverse am"
     }
   },
   "jungleMood": {
@@ -9688,6 +10078,7 @@
   "easyTrade": {
     "chooseTitle": "How you wan trade?",
     "easyTitle": "Easy trade",
+    "easyHint": "Sell your Riftn tokens with small taps. We go pick di best way to fill am.",
     "exchangeTitle": "Exchange",
     "exchangeHint": "Full order book, chart and limit order dem.",
     "stepOf": "Step {{step}} for {{total}}",
@@ -9699,6 +10090,7 @@
     "quoteFailed": "We no fit get market rate. Try again.",
     "priceTitle": "What price?",
     "marketRate": "Market rate",
+    "marketRateHint": "Sell now for about ${{price}} each token, around {{usdc}} USDC for total.",
     "myPrice": "Set my price",
     "myPriceHint": "Price per token na $0.0001",
     "enterPrice": "Put one price.",
@@ -9718,6 +10110,7 @@
     "doneTitle": "All done",
     "doneInstant": "Sold {{amount}} tokens",
     "doneInstantHint": "About {{usdc}} USDC dey come your wallet.",
+    "doneList": "Don list {{amount}} tokens for ${{price}}",
     "doneListHint": "E go sell by itself when market reach your price. Manage am for Exchange.",
     "openExchange": "Open Exchange",
     "done": "Don finish",
@@ -9726,6 +10119,7 @@
     "aiPlaceholder": "Sell half my tokens for 6 kobo.",
     "aiSend": "Send to AI",
     "aiHint": "Talk wetin you want for plain words. AI go fill everything, you go just press Confirm.",
+    "aiBuyOnly": "Easy trade na to sell tokens. If you wan buy tokens, open Exchange.",
     "aiNeedAmount": "Wetin you wan sell?",
     "aiFailed": "AI no fit set am. Try talk am another way, or fill am for down.",
     "cancelled": "You don cancel am. Nothing sell."
@@ -9749,11 +10143,15 @@
     "ownershipBarDesc": "Progress bar for Post Info page wey dey show how many of di 1,000 fraction di creator still hold and how many don share comot or sell.",
     "tokenIdDesc": "Special on-chain ID wey post dey get when dem mint am as NFT for blockchain. Minting no be by force, so post wey dem never mint no get Token ID yet.",
     "tokenIdInfoDesc": "Di special on-chain ID wey post dey get once dem mint am as NFT. E dey show for top of di Post Info page for post wey dem don mint.",
+    "tipDesc": "Send Riftn tokens straight to content creator as reward for dem content. We dey record tips on-chain.",
     "ppvDesc": "Premium kontent wey require payment for Riftn tokun tokun to unlock. Kreatas set di price and dem dey earn revenue from each view.",
     "totalTipsDesc": "Show de total amount of tip dat post dey earn from viewer, show on Post Info page.",
     "dhbToken": "Riftn Tokens",
+    "walletDesc": "Your on-chain wallet wey dey hold your Riftn tokens and other crypto assets. E connect through Web3Auth so you fit enter am easy.",
+    "stakingDesc": "Lock your Riftn tokens to earn rewards as time dey go. Tokens wey you stake go also give you more voting power for governance.",
     "governanceDesc": "Waaka for an’ vote for proposals dat go shape dis platform. Your vote power go dey like how many Riftn token you dey hold.",
     "badgeRequires": "Requires {{amount}} tokens · {{fee}}% platform fee",
+    "leaderboardRankingDesc": "We dey rank users by total Riftn token balance (wallet + staked across all chains). Rankings dey update from time to time and dey track 1-day and 1-week changes. You fit also sort by tips wey dem send, tips wey dem receive, followers, likes, or subscribers.",
     "sections": {
       "postInteractions": "Post Interactions",
       "translation": "Translation",
@@ -9773,18 +10171,25 @@
     "thumbsDown": "Thumbs Down (Dislike)",
     "thumbsDownDesc": "Wa show you no like or no agree wey post dey do. Na dis feedback go help make content recommendation better.",
     "comment": "Comment",
+    "commentDesc": "E go open di comment section wey you fit reply post, join discussions, and yarn with other users.",
     "share": "Share",
+    "shareDesc": "Share post for outside with link, or copy di post URL to your clipboard make you send am give other people.",
     "bookmark": "Bookmark",
+    "bookmarkDesc": "Save post for your bookmarks for later. See all di posts wey you save for Bookmarks page for di sidebar.",
     "tip": "Tip",
     "report": "Report",
+    "reportDesc": "Flag content wey no correct or wey fit harm people make dem review am. Reports dey help keep di community safe.",
     "moreOptions": "More Options (⋯)",
     "moreOptionsDesc": "Open extra actions like edit, delete, or report post.",
     "translateButton": "Translate Button",
     "showOriginal": "Show Original",
+    "showOriginalDesc": "After e don translate, tap dis one make e go back to di original language of di content.",
     "imagePost": "Image Post",
     "imagePostDesc": "Post wey contain one or more picture. Picture dey store on-chain as NFTs wey have unique Token ID.",
     "videoPost": "Video Post",
+    "videoPostDesc": "Post wey get video inside. You fit set videos to public, private, or pay-per-view (PPV).",
     "liveStream": "Live Stream",
+    "liveStreamDesc": "Broadcast wey dey happen live. Viewers fit watch, comment, and tip di streamer. Streams dey use low-latency HLS technology.",
     "story": "Story",
     "audio": "Audio",
     "audioDesc": "Audio post wey you fit upload music, podcast, or voice recording.",
@@ -9793,8 +10198,10 @@
     "public": "Public",
     "publicDesc": "Everybodi go see am. Anybody fit view, like, and comment for public post.",
     "private": "Private",
+    "privateDesc": "Na only you fit see dis content. Private posts dey hide from other users and from di public feed.",
     "ppv": "Pay-Per-View (PPV)",
     "subscriberOnly": "Subscriber Only",
+    "subscriberOnlyDesc": "Content wey na only users wey don subscribe to di creator channel fit see.",
     "postInfoPage": "Post Info",
     "tokenIdInfo": "Token ID",
     "txHash": "Transaction Hash",
@@ -9816,11 +10223,13 @@
     "makeOfferDesc": "Wetin you dey sell? Na fraction of post you get? I go give you 0.5 naira for am.",
     "wallet": "Wallet",
     "swap": "Swap",
+    "swapDesc": "Change one token to another one direct inside di app. Swaps dey happen on-chain through decentralized exchanges.",
     "staking": "Staking",
     "txHashDesc": "A special name or code for any transaction happen on blockchain. Click wey for see full details on blockchain search page.",
     "followers": "Followers / Following",
     "followersDesc": "Follow pipo wey dey post, you go see dem post for your feed. Your follower count dey show for your profile.",
     "notifications": "Notifications",
+    "notificationsDesc": "Alerts for likes, comments, tips, follows, and other activity wey concern your account.",
     "dm": "Direct messages",
     "dmDesc": "Mesenger pribat wey dey available for mobile app, web go dey come soon.",
     "mention": "Mentions (@)",
@@ -9828,28 +10237,38 @@
     "homeFeed": "Home Feed",
     "homeFeedDesc": "Feed wey you dey see post from pipo wey you dey follow and trending content.",
     "explore": "Explore",
+    "exploreDesc": "Find new content and users. Browse by category: videos, images, live streams, and plenty more.",
     "leaderboard": "Leaderboard",
     "leaderboardDesc": "Ranks of top users by balance, tips wey dem dey send, tips wey dem dey receive, followers, and more. Updated periodically.",
     "assistant": "AI Assistant",
+    "assistantDesc": "AI chat assistant wey fit answer questions, generate images, create videos, and help you with di platform features.",
     "settings": "Settings",
+    "settingsDesc": "Manage wetin you like for your account, language, privacy settings, and how e go look.",
     "governance": "Rul Dem",
     "featureRequests": "Feature Requests",
     "featureRequestsDesc": "Wey go happen if we get new features? Community go vote am, wetin dem dey request, na wetin we go prioritize.",
     "upvote": "Upvote",
     "upvoteDesc": "Vote for dis governance proposal or feature request. Help am show community support.",
     "downvote": "Downvote",
+    "downvoteDesc": "Vote against governance proposal or feature request. E dey help show sey di community no gree.",
     "stakingBadge": "Staking Badges",
     "leaderboardRanking": "Leaderboard Ranking",
     "delta": "Ranking Delta (▲▼)",
+    "deltaDesc": "Di green or red arrow wey dey near leaderboard entry dey show how much user balance don change inside di time wey you select (1 day, 1 week, etc.).",
     "tokenId": "Token ID",
     "edit": "Edit Post",
+    "editDesc": "Change di title or description of post wey you create. Na only di original creator fit edit dia posts.",
     "delete": "Delete Post",
+    "deleteDesc": "Comot post from di feed forever. Di on-chain record go still dey but di content no go show again.",
     "pin": "Pin Post",
+    "pinDesc": "Pin post for top of your profile make visitors see am first.",
     "viewOnExplorer": "View on Explorer",
+    "viewOnExplorerDesc": "E go open di blockchain explorer (BaseScan) make you see di on-chain transaction details for one post or transfer.",
     "title": "Glossary",
     "subtitle": "Learn wetin every icon and feature mean"
   },
   "tipFunding": {
+    "noRoute": "No Uniswap route to Riftn tokens for dis token now",
     "lowLiquidity": "Uniswap no get enough liquidity for payment wey big reach this right now",
     "dpayNoAmount": "Riftn Pay no return any payment amount",
     "dpayDelayed": "Riftn Pay don pay, dem dey send token. Token go land for your wallet soon, send again once dem arrive.",
@@ -9963,6 +10382,7 @@
   },
   "postComposer": {
     "paymentConfirmingDescription": "Wetin you dey transfer, we go confirm payment shortly.",
+    "transferIncomplete": "Di token transfer no complete. We go ask you again before your next post wey you go pay for.",
     "getTokens": "Get Tokens"
   },
   "tokenErrors": {
@@ -10062,24 +10482,36 @@
     "sections": {
       "getting-started": {
         "title": "Getting Started",
+        "intro": "Five ways dey to enter Riftn and none of dem need make you don get wallet before: Google, Apple, code wey we send to your email, code wey we send by SMS, or wallet wey you already get wey you connect. Everything except di wallet way go create non-custodial wallet for you for background — na you hold di keys, and Riftn dey pay di gas so you fit post, tip and collect without you buy any native token at all.",
         "steps": {
+          "1": "Visit riftn.com — di home feed na di front page, so you fit look around before you sign in.",
+          "2": "Click 'Sign In'. You go see Google and Apple, fields for email address or phone number, and 'Connect Wallet' if you don get wallet before.",
           "3": "Wen yu use Google or Apple, complete provider's flow. Wen yu use email or SMS, enter code wey dey arrive.",
-          "4": "Wallet don create and secure for you wen you sign-in for the first time. When you connect your own wallet, you go need just one sign to prove your address."
+          "4": "Wallet don create and secure for you wen you sign-in for the first time. When you connect your own wallet, you go need just one sign to prove your address.",
+          "5": "Pick username. Na wetin people go see, and e be your riftn.com/<username> profile link too.",
+          "6": "You don enter. Check di feed, set up your profile, and start to post."
         },
         "tips": {
-          "2": "Come back to yor legacy Riftn account? Sign in wit yor email or phone number wey use am before, migration go find am for yor."
+          "1": "Social, email and SMS sign-ins no dey pay gas at all — Riftn dey pay am. Connected wallets dey pay dem own ETH or BNB.",
+          "2": "Come back to yor legacy Riftn account? Sign in wit yor email or phone number wey use am before, migration go find am for yor.",
+          "3": "You fit keep plenty accounts for one device and switch between dem for Settings → Profile."
         }
       },
       "home-feed": {
         "title": "Home Feed",
+        "intro": "Di home feed na where you go see posts from people wey you follow and content wey dey trend. E get tabs for different content types and different ways to sort.",
         "steps": {
           "1": "Go find /app - dis na your home feed.",
+          "2": "Use di tabs for top to filter by content type: Home (everything), Videos, Images, Shorts, Music, or Live streams.",
           "3": "Swip left/right for mobile, see more option.",
+          "4": "Use di filter/sort button (top-right of di feed) to change how e dey sort: Hot, New, or Top.",
+          "5": "Pull am down to refresh di feed for phone.",
           "6": "Kpochap down to load more post wey dey come up automatically (infinite scroll).",
           "7": "Tor gba layout switcher, gba Grid na Feed view."
         },
         "tips": {
           "1": "Grid view na good fit for browse image quickly.",
+          "2": "Di 'Home' tab dey show all content types mix together.",
           "3": "Live tab shows currently active live streams."
         }
       },
@@ -10089,19 +10521,36 @@
         "steps": {
           "1": "Klik di 'Post' button for inside sidebar (desktop) or + button (mobile).",
           "2": "Wen you type your text for me, I go translate am to Nigerian Pidgin.",
+          "3": "To add image or video, click di media icon and choose file.",
+          "4": "To record voice note, click di microphone icon.",
+          "5": "To add GIF, click di GIF icon and search for one.",
+          "6": "Use #hashtags to put your post for category (like #crypto, #defi).",
+          "7": "Use $cashtags to talk about tokens (like $RIFT, $ETH).",
+          "8": "Use @mentions to tag other users (like @username).",
           "9": "Klik 'Post' don publish. Your post don show for feed immediately."
         },
         "tips": {
-          "1": "Posts support markdown-style formatting."
+          "1": "Posts support markdown-style formatting.",
+          "2": "You fit quote-post: click di repost icon for any post and choose 'Quote'.",
+          "3": "Categories (hashtags) dey show for di 'Talk of the Town' leaderboard."
         }
       },
       "interacting-with-posts": {
+        "title": "Wetin You Fit Do with Posts",
         "intro": "Engage wit am by voting, comment, tip, bookmark, share, and translate.",
         "steps": {
           "1": "Upvote or downvote post wey you like or no like using arrow icon wey dey left side of post.",
-          "7": "Pikin, use 'Translate Image' button don lande AI-translated version of text for image post."
+          "2": "Click di comment icon to open di comment section and drop reply.",
+          "3": "Click di gem/tip icon to send tip for Riftn tokens to di person wey make di post.",
+          "4": "Click di bookmark icon to save post for later.",
+          "5": "Click di share icon to copy di post link or share am outside.",
+          "6": "Click di translate button (globe icon) for any post to translate di text to your language.",
+          "7": "Pikin, use 'Translate Image' button don lande AI-translated version of text for image post.",
+          "8": "Click any post to open am for full-screen single-post view."
         },
         "tips": {
+          "1": "Tips dey go straight to di creator wallet for Riftn tokens.",
+          "2": "You fit set tip amount with di quick-select buttons or put your own amount.",
           "3": "Bookmarked posts dey fit see for sidebar page of bookmarks."
         }
       },
@@ -10109,7 +10558,10 @@
         "title": "Explore & Search",
         "intro": "Dey discover new kontent and pipo wey dey use di platform through explore paje and powerful search functionality.",
         "steps": {
+          "1": "Go /app/explore from di sidebar.",
+          "2": "Use di search bar for top to search for users, posts, or content.",
           "3": "Wetin you dey look for?",
+          "4": "Check di topics and categories wey dey trend for di explore page.",
           "5": "Klik on topik wey dey trend to see all post wey relate.",
           "6": "Klik on a user for visit am for dia profile."
         },
@@ -10123,10 +10575,16 @@
         "intro": "Your profile dey show your posts, followers, wey dem dey follow you, and your wallet information.",
         "steps": {
           "1": "Klik your poto or 'Profile' for view your profile.",
+          "2": "Click 'Edit Profile' make you update your display name, bio, and avatar.",
           "3": "Upload poto by click am for edit mode.",
           "4": "Wata followers you get, and wata pipo you dey follow.",
+          "5": "Check your own posts, media, and content wey you like through di profile tabs.",
           "6": "Kopi wallet address you by click am for copy icon wey dey beside am.",
           "7": "Go visit pipo profile by click am for dia username or avatar anywhere for platform."
+        },
+        "tips": {
+          "1": "Your username na only you get am, and e dey show for your profile URL (riftn.com/@username).",
+          "2": "Privacy settings dey let you control who fit see how many followers you get."
         }
       },
       "messages": {
@@ -10137,6 +10595,7 @@
           "2": "Klik di compose button to start new konversayshon.",
           "3": "Gbona for user wey you want to message, enter username.",
           "4": "Writ am and send am.",
+          "5": "See your old conversations for di messages list.",
           "6": "Klik on konversayshun to kontiniu chat."
         },
         "tips": {
@@ -10146,8 +10605,13 @@
       },
       "ai-assistant": {
         "title": "AI Assistant",
+        "intro": "Chat with di AI assistant wey dey inside Riftn make e help you, give you information, and do creative work with you.",
         "steps": {
+          "1": "Click 'Assistant' for di sidebar to open di AI chat.",
           "2": "Wetin you wan me translate?",
+          "3": "Di AI fit help you with crypto information, questions about di platform, and general knowledge.",
+          "4": "Start new conversation: click di new chat button.",
+          "5": "See your old conversations for di sidebar of di assistant page.",
           "6": "Wetin you wan do?"
         },
         "tips": {
@@ -10163,46 +10627,71 @@
           "1": "Klik bell icon or 'Notifications' for sidebar.",
           "2": "Wata notifications wata wata.",
           "3": "Klik on notifishun to navigate to di related kontent.",
+          "4": "Notifications dey include: new followers, votes for post, comments, tips, and mentions.",
           "5": "Notifications wey no dey read, dem dey highlighted — dem mark as read wen dem dey view."
         },
         "tips": {
-          "1": "Notification badge dey show number of unread notifications."
+          "1": "Notification badge dey show number of unread notifications.",
+          "2": "Tip notifications dey show how many tokens you receive."
         }
       },
       "wallet": {
         "title": "Wallet",
+        "intro": "See your Riftn token balances across plenty chains, check staking deposits, and manage your assets.",
         "steps": {
           "1": "Klik 'Wallet' for inside sidebar to open wallet paja.",
-          "2": "Wata balance of token you get for all blockchain wey support."
+          "2": "Wata balance of token you get for all blockchain wey support.",
+          "3": "See di breakdown for each chain: Ethereum, Base, BNB Chain, and others.",
+          "4": "Check your staking deposits and di rewards wey you get.",
+          "5": "Click 'Refresh Scan' make your balances update from di on-chain data.",
+          "6": "Copy your wallet address make you fit receive tokens from other people."
+        },
+        "tips": {
+          "1": "Balances dey update by demself, but you fit force refresh anytime.",
+          "2": "Di wallet dey show both liquid (wey you fit use) and staked balances."
         }
       },
       "staking": {
         "title": "Staking",
+        "intro": "Stake your Riftn tokens to earn rewards and increase your voting power for governance.",
         "steps": {
+          "1": "Go di 'Staking' page from di sidebar.",
+          "2": "Put how many tokens you wan stake.",
           "3": "Choose chain wey you dey want stake.",
-          "4": "Confirm transaction for your wallet (wallet outside) or e dey auto-execute (when you use your social media account to login)."
+          "4": "Confirm transaction for your wallet (wallet outside) or e dey auto-execute (when you use your social media account to login).",
+          "5": "See how much you don stake and any rewards wey dey wait.",
+          "6": "To unstake, put di amount and confirm di unstaking transaction."
         },
         "tips": {
+          "1": "Staking dey increase your vote weight for governance proposals.",
           "2": "Sosial-login users no need gas to stake — e no dey need gas.",
           "3": "You fit go stake for multiple chain simultaneously."
         }
       },
       "leaderboard": {
         "title": "Leaderboard",
+        "intro": "See who dey top! Di leaderboard dey rank users by balance, how much dem spend every day, and topics wey dey trend.",
         "steps": {
+          "1": "Go di 'Leaderboard' page from di sidebar.",
+          "2": "Switch between di tabs: Balance, Daily Spent, and Talk of the Town.",
           "3": "Balance tab ranks users by their total token holdings.",
           "4": "Daily Spent tab show who dey dey active for tip for last 24 hours.",
           "5": "Talk of di Town dey show am for top most-discussed topics/categories.",
+          "6": "Click any user to visit dem profile.",
           "7": "Leaderboard dey update periodically for inside day."
         },
         "tips": {
-          "1": "Daily rankings reset every 24 hours."
+          "1": "Daily rankings reset every 24 hours.",
+          "2": "Talk of the Town dey track one-word categories from hashtags."
         }
       },
       "command-centre": {
         "title": "Command Centre",
+        "intro": "Dashboard wey dey show your main numbers and wetin dey happen for di platform, all for one look.",
         "steps": {
           "1": "Klik 'Command Centre' for inside sidebar.",
+          "2": "See your profile summary, including how many posts, followers, and engagement you get.",
+          "3": "See wetin you don do recently and di topics wey dey trend.",
           "4": "Wata quick link don dey available for features wey you dey use often."
         },
         "tips": {
@@ -10211,9 +10700,14 @@
       },
       "governance": {
         "title": "Rul Dem",
+        "intro": "Join hand for how di platform dey run: create proposals and vote on community decisions.",
         "steps": {
+          "1": "Go 'Governance' from di sidebar.",
           "2": "Browse active proposals wey people submit.",
-          "5": "Leav comment for proposals to discuss with community."
+          "3": "Click any proposal to read im full description and discussion.",
+          "4": "Vote on proposals with di thumbs up/down buttons — how heavy your vote be depend on how many Riftn tokens you don stake.",
+          "5": "Leav comment for proposals to discuss with community.",
+          "6": "Submit your own proposal: click di 'Create Proposal' button."
         },
         "tips": {
           "1": "Power of voting be determine by number of tokens you dey stake.",
@@ -10225,16 +10719,19 @@
         "title": "Bookmarks",
         "intro": "Save post wey you dey read for your bookmark, so you fit access am later.",
         "steps": {
+          "1": "Click di bookmark icon for any post to save am.",
           "2": "Go navigate to 'Bookmarks' for sidebar to see all save post.",
           "3": "Klik on am for di bookmarked post to view am full.",
           "4": "Torop ame remove bookmark by click am again."
         },
         "tips": {
-          "1": "You go save post, na only you go see am."
+          "1": "You go save post, na only you go see am.",
+          "2": "No limit dey for how many posts you fit bookmark."
         }
       },
       "settings": {
         "title": "Settings",
+        "intro": "Arrange your Riftn experience how you like am with language, privacy, and display preferences.",
         "steps": {
           "1": "Klik 'Settings' for inside sidebar.",
           "2": "Wààt kwa?",
@@ -10249,11 +10746,14 @@
       },
       "posting-allowance": {
         "title": "Na 1000 naira be your daily posting allowance.",
+        "intro": "To post dey free every day up to one allowance wey dey grow with your staking badge. Everybody dey start with ten text posts and one gigabyte of video, images and audio every day. If you pass any of dem, you go pay for di rest of dat day with Riftn tokens — only for di part wey pass.",
         "steps": {
           "1": "Wen yu dey post as normal, for inside allowance, noting dey charge yu and noting dey ask yu.",
           "2": "Text post na separate pool, so one day wey you dey upload video, all ten text post go still dey free.",
           "3": "Wen post go pass, app go price am first and check if your wallet fit cover am before e go upload.",
-          "4": "Post go publish exactly as e dey inside di allowance — publishing no dey wait for payment."
+          "4": "Post go publish exactly as e dey inside di allowance — publishing no dey wait for payment.",
+          "5": "Den you go approve one transfer for dat post only, and e go settle for whichever one between Base and BNB Chain wey get enough Riftn tokens.",
+          "6": "Both pools dey reset for midnight UTC."
         },
         "tips": {
           "1": "Oversize na pro-rata: 200 MB pass your allowance dey cost 200 MB, no be whole gigabyte.",
@@ -10264,9 +10764,14 @@
       },
       "reactions-and-safety": {
         "title": "Reactions, Muting & Mature Content",
+        "intro": "Nine reactions dey behind di like button, plus some controls to decide wetin you go see and who fit reach you.",
         "steps": {
+          "1": "Hold di thumbs-up for any post to open di reaction tray: like, love, respect, hot, lol, sad, cry, dislike and poo.",
+          "2": "Di seven good ones dey count for di post like total; dislike and poo dey count against am.",
+          "3": "Your reaction weight depend on your staking badge, so badge holder reaction dey move di count pass one vote.",
           "4": "Tap am for post header, mute author, dem go drop out of your feed for good.",
-          "5": "Kreator dem mark dia own post wey dem dey say na mature, wetin dem dey write, naa go dey off public home feed."
+          "5": "Kreator dem mark dia own post wey dem dey say na mature, wetin dem dey write, naa go dey off public home feed.",
+          "6": "To see mature posts everywhere, on 'Show mature content' for Settings."
         },
         "tips": {
           "1": "Post wey mature dey still dey visible for creator's profile and to people wey dey follow am.",
@@ -10280,66 +10785,107 @@
         "steps": {
           "1": "Open 'Stages' for see wetin dey live now and wetin dey schedule.",
           "2": "Tap live stage join listener, or set reminder for scheduled one, and get notify wen e start.",
+          "3": "Start your own from di same page — you fit go live straight from di browser, no OBS, no stream key.",
+          "4": "As host, bring speakers come stage, mute dem or remove dem, share your screen, and control di soundboard.",
+          "5": "Listeners dey send live reactions and dey talk for di room chat without dem come stage.",
           "6": "Every stage record, and di recording play back afta from di card wey am dey."
         },
         "tips": {
+          "1": "Live subtitles dey caption every speaker and translate am into any language wey you dey read for.",
           "2": "Live dubbing go speak am for the room, loud pass, for host own voice, wey dem clone, dem charge am by minute for Riftn tokens.",
+          "3": "Hosts fit put radio station on air or play dem own music clips between conversations.",
           "4": "Mini-player dey keep room dey go for corner while you browse rest of app."
         }
       },
       "communities": {
         "title": "Communities & Events",
+        "intro": "Communities na spaces wey members dey run, with dem own feed, members and activity. Events dey add programmes wey get time on top of dem.",
         "steps": {
-          "1": "Goto \"Communities\" for sidebar, browse public ones."
+          "1": "Goto \"Communities\" for sidebar, browse public ones.",
+          "2": "Join with one tap. New activity go show as unread badge for di navigation.",
+          "3": "Post, discuss, run polls and send tip inside di community own feed.",
+          "4": "Community owners dey control dem own space and fit give other people admin power.",
+          "5": "Open 'Events' for programmes wey dem don schedule, with full page for each event wey you fit follow live."
         },
         "tips": {
+          "1": "Community chat dey support @mentions and @here, so one post fit reach everybody for di room.",
           "2": "Invite link dey give you power to bring pipo straight into community."
         }
       },
       "arcade": {
         "title": "Arcade",
+        "intro": "Five games dey play inside Riftn for one browser tab — you no need install anything, you no need buy anything.",
         "steps": {
+          "1": "Open 'Arcade' for di sidebar.",
           "2": "Wey you go choose game? Na King's Gambit, Claude of Duty, Jungle Trail, Street Slayer or Chartopia?",
+          "3": "Play am for di tab. King's Gambit and Street Slayer dey keep leaderboard.",
           "4": "Chartopia dey run for VR headset through WebXR."
+        },
+        "tips": {
+          "1": "Two of dem dey hide inside di appearance themes — set di app to War to see Claude of Duty, or Jungle to see Jungle Trail.",
+          "2": "Every game get im own share card, so if you post link to any of dem, e go show well anywhere you post am."
         }
       },
       "bounties-stores": {
         "title": "Bounties & Stores",
+        "intro": "Two ways dey to make money from di platform: post bounty or claim one, or open store make you sell give your audience.",
         "steps": {
+          "1": "Open 'Bounties' to see open work, and filter am by category or currency.",
           "2": "Klaim one, do am, and submit am, anyone fit be hunter, no application dey.",
+          "3": "Post your own bounty with short brief and reward for Riftn tokens or USDC. Di reward go enter escrow di moment you post am.",
+          "4": "Open 'Stores' to set up your store wey get im own page, branding and listings.",
           "5": "Pota wey go sell for money, go dey for Riftn token, na wallet wey go dey inside app go dey handle na money, no need for any outside payment system."
         },
         "tips": {
-          "2": "Dispute flow settle wahala wey dey come from delivery, so escrow always resolve fairly."
+          "1": "Bounties dey arranged into Social Media, Clipping and Contracts.",
+          "2": "Dispute flow settle wahala wey dey come from delivery, so escrow always resolve fairly.",
+          "3": "Creators dey use bounties grow community — shares, clips and reactions na all correct tasks."
         }
       },
       "creator-studio": {
         "title": "Creator Studio & Editor",
+        "intro": "Creator Studio dey make images, video, music, voice and 3D models from prompt, and e go pass dem give editor — including full multi-track video editor wey dey run for browser.",
         "steps": {
           "1": "Wetin you wan create for Creator Studio?",
           "2": "Server go show you price before e start work, so you see wetin you go pay before you pay am.",
           "3": "Render de render dey continue for shared queue while you dey browse am.",
+          "4": "Arrange wetin come out for di Canva-style editor, or open di video editor for real timeline wey get cutting, layering and export.",
           "5": "Wetin you dey look for?"
         },
         "tips": {
           "1": "Librari of free asset stock dey sit alongside Studio, for anything you no wan generate.",
+          "2": "You go pay for generation with Riftn tokens from your wallet — you go sign one transfer for each job, and we go show you di price before you pay.",
           "3": "Pipo wey dey use am plenty, dem fit take Ultra, Team or Scale plan, wey go send allowance for token for wallet dem dey every month."
         }
       },
       "buying-dhb": {
         "title": "Buying Tokens",
+        "intro": "Buy Riftn tokens straight inside di app with di swap wey dey inside am.",
         "steps": {
+          "1": "Go di 'Buy' page from di sidebar.",
           "2": "Swap token.",
           "3": "Wey you want spend money or how many tokunbo you want receive?",
           "4": "Wetin you dey review? Exchange rate and output wey dey estimate?",
+          "5": "Click di settings gear icon to change slippage tolerance (default na 1%).",
+          "6": "Confirm di swap transaction.",
           "7": "Riftn tokens go dey for your wallet once transaction complete."
+        },
+        "tips": {
+          "1": "Higher slippage tolerance = e go likely go through, but di price fit worse.",
+          "2": "Always check di exchange rate before you confirm.",
+          "3": "You fit set your own slippage for di settings panel."
         }
       },
       "bridge": {
         "title": "Bridge",
         "intro": "Waka your Riftn tokens for different blockchain wey support through cross-chain bridge.",
         "steps": {
+          "1": "Go di 'Bridge' page from di sidebar.",
           "2": "Wetin you mean by \"source chain\"?",
+          "3": "Choose di destination chain (where you wan send dem go).",
+          "4": "Put how many tokens you wan bridge.",
+          "5": "Check di bridge fee and how long e fit take before e reach.",
+          "6": "Confirm di bridge transaction.",
           "7": "Di team go send di tokens for di destination chain, usually inside 1-5 working days."
         },
         "tips": {
@@ -10350,7 +10896,10 @@
       },
       "music-tv": {
         "title": "Music & TV",
+        "intro": "Enjoy media content straight inside Riftn — stream music and watch live TV channels.",
         "steps": {
+          "1": "Go 'Music' from di sidebar to check and play music posts.",
+          "2": "Go 'TV' to enter live TV channels.",
           "3": "Browse chanel by kategory or kontri.",
           "4": "Klik on one channel to begin watch am.",
           "5": "Tor do am, use player controls to adjust volume and play back.",
@@ -10364,8 +10913,17 @@
       "post-info": {
         "title": "Post Info & Fractions",
         "intro": "Post wey get minted na NFT wey dey split into 1,000 pieces. Post Info page show data wey dey on-chain, stats of engagement, breakdown of ownership, and give you chance to trade pieces of any post — on post wey no get minted, e go offer to mint instead.",
+        "steps": {
+          "1": "Tap di 'ⓘ' icon for any post to open im Post Info page.",
+          "2": "For top you go see di Token ID (di unique on-chain ID) and di transaction hash — click di hash to see am for di block explorer.",
+          "3": "Under am, engagement stats dey show total likes, dislikes, views, comments, and tips wey di post receive.",
+          "4": "Di Holders section dey show progress bar of how many of di 1,000 fractions di creator still get, plus list of everybody wey hold fraction with dem balances and percentages.",
+          "5": "If di post na pay-per-view (PPV), you go see di price, currency, and how many users don buy access.",
+          "6": "Post owners fit change visibility (Public, Unlisted, or Private) and edit di title/description straight from dis page."
+        },
         "tips": {
           "1": "Oga don create new post, e start with am hold all 1,000 fractions (100% ownership).",
+          "2": "Di transaction hash dey link to BaseScan or BscScan, depending on di chain.",
           "3": "Post wey no dey list no go show for feed, but you fit still access am through link direct."
         }
       },
@@ -10387,17 +10945,24 @@
           "7": "Yours fractions now dey show for oga—other people can buy dem or make back offer."
         },
         "tips": {
-          "2": "Listing can be cancel before any person buy."
+          "2": "Listing can be cancel before any person buy.",
+          "3": "As creator, if you sell fractions, your fans fit co-own your content."
         }
       },
       "minting-posts": {
         "title": "Minting Posts (Creating NFTs)",
+        "intro": "Minting no be by force. Post go publish off-chain di moment you send am — no wallet, no signature, no gas — and you fit mint am as NFT anytime you want, either as you dey write am or later from di post itself.",
         "steps": {
           "1": "Klik di 'Post' button for inside sidebar (desktop) or + button (mobile).",
           "2": "Wetin you wan write?",
-          "4": "Publishing no dey wait for chain: post go feed don, whether you like am or no."
+          "3": "Leave 'Mint post' off to publish off-chain, or on am to mint as you dey publish.",
+          "4": "Publishing no dey wait for chain: post go feed don, whether you like am or no.",
+          "5": "To mint later, open di post 'ⓘ' info page and use di Mint action there.",
+          "6": "Once e don mint, di post go get Token ID and transaction hash wey you fit check on-chain, and you go hold all di 1,000 fractions of am."
         },
         "tips": {
+          "1": "Social, email and SMS sign-ins no dey pay any gas — Riftn dey pay di minting fees.",
+          "2": "People wey dey use external wallet need ETH for Base or BNB for BNB Chain for gas.",
           "3": "Minting na wetin dey make post dey tradeable and dey carry royalty. Unminted post still dey earn tips and views.",
           "4": "Record on-chain na permanent, even if post don dey deleted from feed."
         }
@@ -10406,9 +10971,13 @@
         "title": "Glossary",
         "intro": "Glossari ya Crypto na Terminology ya Platform wey go help you navigate Web3.",
         "steps": {
-          "1": "Goto 'Glossary' from sidebar."
+          "1": "Goto 'Glossary' from sidebar.",
+          "2": "Check di terms from A to Z or use search to find di particular term wey you want.",
+          "3": "Click any term to see im full meaning and explanation.",
+          "4": "Di terms cover crypto tins, DeFi words, and Riftn own features."
         },
         "tips": {
+          "1": "E good well well for people wey just dey start crypto and Web3.",
           "2": "Glossary dey always dey update with new terms."
         }
       }
@@ -10600,10 +11169,12 @@
       "close": "Close di app",
       "backToStore": "Go back to Apps",
       "notFound": "Dis app no dey in Riftn App Store, or dem remove it for now.",
+      "badUrl": "Dat address no fit open as mini app. E must start with https://, or e be localhost address for developer mode.",
       "readyTimeout": "Dis app no call \"dehub.ready()\" for wey, for dat reason, splash screen go hide after 8 seconds."
     },
     "signIn": {
       "title": "Sign in to {{name}}?",
+      "body": "Dis app go get your Riftn wallet address and one sign-in token wey only work for dis app. E no go get access to your wallet, your money or your Riftn account.",
       "cancel": "No be now",
       "confirm": "Sign in"
     },
@@ -10620,7 +11191,9 @@
       "noMatch": "No app fit dem search.",
       "yourApps": "Your apps",
       "notificationsOn": "Notifications on",
-      "remove": "Comot am"
+      "remove": "Comot am",
+      "removed": "E don comot. E no go notify you again.",
+      "rising": "New ones wey dey rise"
     },
     "dev": {
       "backToStore": "Go back to Apps",
@@ -10658,7 +11231,13 @@
       "rewardsWeek": "Week of {{date}}",
       "rewardPaid": "Dem don pay",
       "rewardPending": "E dey wait",
-      "rewardsNone": "No reward dey finish calculate yet. First week close on Monday."
+      "rewardsNone": "No reward dey finish calculate yet. First week close on Monday.",
+      "stats": {
+        "button": "Live stats"
+      },
+      "signin": {
+        "delete": "Delete Am"
+      }
     },
     "card": {
       "open": "Open"
@@ -10681,10 +11260,12 @@
     "pay": {
       "title": "Pay {{name}}?",
       "body": "tokens go direct to app's wallet, {{wallet}}. Payment no go reverse.",
-      "confirm": "Pay {{amount}} tokens"
+      "confirm": "Pay {{amount}} tokens",
+      "sent": "You don pay {{amount}} tokens to {{name}}."
     },
     "add": {
       "title": "Add {{name}}?",
+      "body": "E go show under Your apps and e fit send you notifications. You fit remove am anytime from di Apps page.",
       "confirm": "Add app"
     }
   },
@@ -10770,13 +11351,25 @@
   },
   "walletBackup": {
     "backedUpOn": "Backed up {{date}}",
+    "phraseUnavailable": "Di recovery phrase no dey available from dis sign-in. Use your first login or device to check for am. You fit still back up your private key.",
+    "phraseMismatch": "Dis backup belong to another wallet. Sign in with your first login to see di correct backup.",
+    "backupDescription": "Save your recovery phrase or private key so you fit bring back your wallet.",
+    "phraseOtherDevice": "Open Riftn for di device wey you first use secure dis wallet to see im recovery phrase. You fit also back up your private key here.",
     "tabPrivateKey": "Private key",
+    "phraseLoadFailed": "We no fit load your recovery phrase. Try again to check for am, or open Riftn for di device wey you first use.",
+    "noPhrase": "Dem save dis wallet with private key, so Riftn no get recovery phrase to show. Back up dis key so you fit bring back di same wallet.",
     "keyWarning": "Na anyone wey get dis key go fit control your wallet. Save am for safe place and never share am.",
+    "introTitle": "You wan back up your wallet?",
+    "introBody": "12 words wey go bring your wallet back if you lose your phone or forget your password. E go take 30 seconds.",
     "saveNow": "Save now",
+    "skipForNow": "Leave am for now",
     "checkPrompt": "Quick check: tap word #{{n}}",
     "checkWrong": "Na so you go dey?",
     "showAgain": "Show my words again",
     "skipCheck": "Skip check",
+    "warnOwns": "Anybody wey get dis words, na dem own your wallet.",
+    "warnNeverAsk": "Riftn no go ever ask you for dem.",
+    "warnPaper": "Write dem for paper, no be for screenshot or notes app.",
     "hideWords": "Hide words",
     "revealWords": "Tap to reveal",
     "copied": "Kopied. Clipboard don clear for 30 seconds.",
@@ -10788,6 +11381,7 @@
     "reminderLater": "No be now"
   },
   "copy": {
+    "96d7bff86b44": "Search no fit load.",
     "1607715e45ed": "Tap di ball make you talk, or type for down",
     "002286513398": "You no get permission to manage events",
     "002d8f205c6a": "Rejected {{value1}}'s follow request",
@@ -11060,6 +11654,7 @@
     "30ecb796cc14": "Dubbing session closed.",
     "312baa1e9c78": "Na dem no dey liquidity for dis pair/amount",
     "31405b373d83": "Member muted indefinitely",
+    "31696badc2ca": "Review no fit submit",
     "31d03cbfa55b": "Stage recording",
     "31d2d3c8c358": "Jula",
     "31d619c4fc45": "Waka inside rainforest wey dem build di moment you land.",
@@ -11568,6 +12163,7 @@
     "82b1fa7e2a09": "P/E",
     "8335e4c92c40": "Echo",
     "8430e6a7cb5c": "Session expired — restoring…",
+    "843991d1d9b3": "Review no fit post",
     "843c489421f4": "Catalan",
     "84b7e19c6085": "Solana mint data wey server send no complete. Abeg try again.",
     "84e0ad815b9c": "SECTOR {{value1}}",
@@ -11607,6 +12203,7 @@
     "8a6bfcf09ebb": "Stake tokens, earn rewards",
     "8a7dab8cbe5b": "No dey need you buy anyfing for enter Riftn prize draw. Just follow dem instructions wey dey give for you.",
     "8aa30b32cb98": "Wahala, no compress, for edit.",
+    "8ae18739e3f7_other": "Send Signal Flare give {{value1}} people",
     "8aff5108a050": "Yes!",
     "8b3ca201a335": "Connect wallet make you change dis",
     "8b4f83e9c989": "Title no suppose pass 100 characters",
@@ -12022,6 +12619,7 @@
     "cf9f7729c86c": "Invite no dey",
     "cfce761befa8": "Request failed",
     "cff6a12bbd2a": "⏱️ 10s duration gives smoother motion arcs",
+    "d03f11ec43c6": "No sponsor video dey now. You fit still send token tip.",
     "d04b32e3ec44": "Withdrawal no confirm",
     "d0a5eff9cf29": "I no understand wetin you mean by \"Invalid code\".",
     "d0a91a881f01": "Arabic, Sa'idi Spoken",
@@ -12258,6 +12856,7 @@
     "f302f0ea1db5": "Rock",
     "f31a396d38f6": "Hide who you be",
     "f364d8da5b94": "Server no dey respond.",
+    "f3749b3c1a06": "Dispute no fit open",
     "f3809982d30a": "Wallet no dey connect wit dis tokens address.",
     "f39991f4a6d7": "No fit load dis purchase. Abeg try again.",
     "f3a63bfd3d49": "Wallet address change as di session dey refresh. Abeg sign in again.",
@@ -12975,6 +13574,7 @@
     "ddcfdfe02311": "Total views",
     "29aa7a49aa25": "across",
     "e8468d49b505": "posts",
+    "9f9c6f0d0963": "Di RPM wey you get for Riftn",
     "1d097df795ff": "for every 1,000 views",
     "43fb11b48038": "typical",
     "4caa918bf60d": "per 1,000",
@@ -13130,6 +13730,7 @@
     "6b2fd69ca13a": "All",
     "a11c0b1d6445": "Imej dey charge now, dem generate independently. If one fail, di oda go dey run.",
     "27c7325ba6f7": "This costs",
+    "3d717322f7c9": " and you dey hold ",
     "49286f33b674": "Generating...",
     "89272ebc9f3e": "THE TRAIL",
     "11768394db4e": "Waka go jungle",
@@ -13278,6 +13879,7 @@
     "22b880b2bbf8": "Loading plans...",
     "e357d396871d": "Star",
     "ba89e1b6dd81": "Subscriber Content",
+    "732f4d852708": "Make Your First Plan",
     "3e1e7128307d": "Add Plan",
     "50a8089f73e2": "A plan only sell once it go on chain. Before dat, nobody can join you, and when new post come, subscribers still dey off.",
     "d1dc938ce4f1": "No subscription plan dey",
@@ -13389,6 +13991,7 @@
     "8835fb41f314": "Di subscription network",
     "cf0ee3547a4e": "E dey come",
     "9c9784982542": "(USD)",
+    "7ca71250e224": "Watch for 30 seconds. Di sponsor dey pay di creator revenue share; you no go pay anything.",
     "9d30ec3ee603": "Sponsored by",
     "1b7660d74f2c": "/ 30 seconds verified · Creator share $",
     "95193e92b3fb": "Cancel ad",
@@ -13423,6 +14026,7 @@
     "cd8d844d2c3d": "No match",
     "8121de8a51c5": "Dis account wallet:",
     "df417b8a7c3a": "Na go connect different one no go affect your session — we go just ask you go switch.",
+    "5a05d2f89a04": "Make you connect your wallet",
     "af3548ef59b2": "Logging out…",
     "cd0daccd08be": "older profiles",
     "f31abdb86129": "Link wey go join dis email. Different sign-in go create different profile before dem link login method.",
@@ -14627,6 +15231,7 @@
     "38f955e2de14": "PPV Unlock",
     "b8779512c128": "Coin Sale",
     "dde8bef78cbb": "Transfer",
+    "feca5a4a9d1f": "Dem must approve new members before dem fit join.",
     "3abbf3c472a7": "Anybody fit join for instant.",
     "2c7bc98141ec": "I no understand wetin you dey ask.",
     "587a94f0de38": "Community invite",
@@ -14698,6 +15303,7 @@
     "e7e72948c5d5": "Send Report",
     "ea574034aa5a": "No people found",
     "0600175af842": "Open chat",
+    "8e4b97ca7c6e": "Send Signal Flare give everybody",
     "412ae55409b3": "Dis account no dey receive tip now wey private balance mode dey on.",
     "babd987b2954": "Could not confirm if recipient's privacy setting is okay. No tip go dey.",
     "a074b23fd5f3": "Needs an attached image (need picture to animate)",
@@ -14936,6 +15542,7 @@
     "d3381af6ba42": "Payment don check, refresh submission for am confirmed?",
     "be61c03c480e": "Submission don reject.",
     "e3df893ed812": "Review don post.",
+    "ef16819dcd3e": "Dispute don open — admin go review am",
     "f48586c2a5a1": "Dispute don settle.",
     "db42881e01a7": "Job marked complete",
     "ce737095f636": "List don update.",
@@ -15039,6 +15646,7 @@
     "b48875b564b2": "Store create!",
     "c2e1e173fbc9": "Listing created!",
     "494f351679ab": "Store updated!",
+    "b83e2b791732": "E don enter di stream",
     "12ccad25eaea": "Plan don create and publish",
     "b3d0998cd00a": "Mak una join us, one more viewer don agree, na live go start.",
     "4118fb4fed0e": "Removed",
@@ -15221,6 +15829,7 @@
     "2da0741cd536": "🎙️ Stages",
     "a0b9c4ce5f29": "📻 Riftn Radio",
     "e169e0f5f7cd": "📺 TV & Console Apps",
+    "03bbf31aa251": "🎬 Video Editor wey dey inside Browser",
     "5e0be69e7d7d": "💌 Tipped DMs",
     "ebd7731d3536": "🔒 E2E Encryption",
     "fc56fd22af80": "🎥 Voice & Video Calls",
@@ -15329,6 +15938,7 @@
     "1bf7f16a433b": "4-20 min",
     "cbc7e1eaa8b3": "20+ min",
     "68f6e3b28a32": "next generation",
+    "00d9b35a823e": "Start to make money sharp sharp, nobody go ever pursue you comot for platform, keep reach 99% of di revenue and create free, no censorship or platform manipulation.",
     "06d287d1588b": "No bias or",
     "64cfc8b92063": "Autoriti sentralizd.",
     "85330dcbaadd": "No algorithm wey favor one side of argument. Everyone dey get equal voice and fair treatment.",
@@ -15407,7 +16017,10 @@
     "34e108c0896d": "Display",
     "be91940b79f4": "Support",
     "a78cebc44214": "Help Center",
+    "9cc9f71c23f2": "Explore live spatial-intelligence globe and, if you like, put one version of yourself wey no too exact on purpose among di Riftn community.",
+    "a61d44ba33d5": "Di mama of all arenas. Trade like time traveller with plenty screens. Enjoy live feeds from Binance, Dexscreener or anything wey you want, from videos to browser tabs and everything for middle.",
     "7a56c707abec": "Side-scrolling fight am for road wey dey shine like neon light: choose one of three fighters, den punch, kick and throw your way through everything wey block go send for you.",
+    "81631a8fce75": "Chess wey get army behind every piece. Three rigged civilisations dey march, strike and fall across marble board for four battlegrounds, with three engine strengths.",
     "7242e3ca17b3": "Game wey no dey ship art, every mesh, texture, weapon and sound na for JavaScript dey generate on your machine while level dey load.",
     "96b3207d2940": "Waka through forest rain, na hundred thousand plant, wey dey grow for machine, as you arrive. Weather and day cycle, dey dey work, na wetin you go see.",
     "c205924de0fe": "Documentation",
@@ -15440,8 +16053,11 @@
     "71470134ff19": "Nationalist",
     "cca21847e6f7": "Communist",
     "a7248eeb45eb": "Normal",
+    "3356505b6f4d": "Full songs wey get lyrics & vocals",
+    "fab618372ef2": "Fast music, e good well for instrumentals",
     "1edd473d8b41": "Ultra-realistic dialogue & speech",
     "48e13842b229": "Professional background removal",
+    "1429fb35f906": "AI upscaling wey dey add detail",
     "a335fa862609": "Fast 4x upscale",
     "358036e013da": "Speech transcription & translation",
     "36d88ed6cc91": "Music Generation",
@@ -15494,10 +16110,17 @@
     "7a403d743104": "Wetin you dey look for? Brand image generation wey fast?",
     "cdb1f3a5c747": "Latest, highest quality.",
     "e7f08f1acc2a": "Imeji generation AI",
+    "674c9031cb7a": "Text and diagrams wey pass di rest",
     "6e8213cac3d3": "Fast, photoreal, very versatile.",
     "85cad149b522": "Kontrol precise na transformations.",
     "a52e8253b78b": "Wetin you dey talk?",
     "b3de46c00525": "Edit wia context, style transfer.",
+    "8f7918a80c26": "Steps and guidance wey you fit adjust make you control am well",
+    "7f05ce754d0e": "Drafts wey dey come almost one time, for di lowest price for here",
+    "b9bc1ba02125": "Illustration and layout wey reach brand level",
+    "0f2a22d8a443": "Real SVG logos and icons",
+    "b5893515b61f": "Di strongest typography for poster",
+    "fc6ec390be63": "Di cheapest all-rounder wey strong",
     "0459220de3f8": "Expressive, high-contrast, bold",
     "fff1c1ce5e17": "Best all-round mesh, text or image.",
     "5f39eb0d1c20": "Tencent, sharp geometry from one image.",
@@ -15516,13 +16139,17 @@
     "ee76a220959c": "BiteDansi kineema wit native audio",
     "c5a1d3b9268d": "Latest ByteDance model, superior quality & audio",
     "f4a56d3cb00f": "Faster generation, slightly lower quality",
+    "8e831aaaa051": "Google top model, e look real well well, with audio",
     "d593de2ed999": "Veo see, one-fourth of di price",
     "e2741c299499": "Multi-shot, audio sync, long takes",
     "b50840a8facb": "Same model, lighter render tier",
+    "ea5e0b780f7b": "Motion wey dey flow and e dey follow prompt well well, no audio",
     "c1cc166082bf": "Fizik wey dey natural na em wey dey relate with emotion wey human being dey feel for face.",
     "970971377727": "Quicker, cheaper Hailuo",
+    "cc65f4a45ebf": "Characters dey stay di same, with audio wey match",
     "a525541f3e90": "Open-weight, stylised and experimental.",
     "18ecea8f32e4": "Dreamy Luma aesthetic, budget tier",
+    "b19b2e83cbb1": "Motion wey get style and wey lean to anime",
     "d2847c1435c7": "Cheapest per second, fast drafts",
     "75c47aa81c26": "No effect",
     "4ec0665185ea": "Deep, disguised — hacker vibes",
@@ -15963,6 +16590,7 @@
     "f6b9549bd36a": "Cloud sync fail for {{name}}. Keep am for dis device.",
     "de36a8b9fcb2": "Import no succeed, {{name}}.",
     "d37c41c3cc8c": "Waka waka! Enter name pattern na starting number:",
+    "1bb930d87555": "Select di unlocked foreground layers for dis page",
     "c9094421bf9f": "Rename up to 100 layers at a time.",
     "12fd4323a3ae": "Naam patan must produce visible layer name.",
     "b5d136e3145a": "Wetin you dey look for? Size matching?",
@@ -16336,9 +16964,12 @@
     "comments": "Comments",
     "share": "Share",
     "backToTop": "Go back to top",
+    "needBody": "{{count}} characters still remain",
+    "imagesLabel": "Foto Dem",
     "backToWriting": "Back to writing",
     "readyTitle": "Ready to publish",
     "sharePreview": "Wen yu share am.",
+    "noCoverShare": "Cover never dey. Links go show without picture.",
     "summaryPlaceholder": "Wetin you dey look for?",
     "summaryLabel": "Summary · show am for feed and link preview",
     "publishing": "E dey publish…",
@@ -16350,10 +16981,12 @@
     "changeCover": "Change cover",
     "removeCover": "Remove cover",
     "addCover": "Add a cover",
+    "coverHint": "E dey sit for top of your article and na di picture wey people go see when dem share am",
     "titlePlaceholder": "Title",
     "previewEmpty": "Na so be so.",
     "titleLabel": "Article title",
     "formatting": "Formatting",
+    "bodyPlaceholder": "Tell your story. Select text and use di bar for top for headings, bold, quotes and lists.",
     "bodyLabel": "Article body",
     "wordCount": "{{count}} words"
   },
@@ -16394,6 +17027,92 @@
     "exploreFirst": "Explore first",
     "codeNote": "We go email you code, you no need password."
   },
+  "liveHype": {
+    "gift": {
+      "who": "Username abi wallet address",
+      "cancel": "Cancel am",
+      "stage": {
+        "preparing": "E dey prepare…",
+        "confirming": "Dey wait for di transaction…",
+        "recording": "Dey finish am…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Abonnés"
+      },
+      "ended": "E don end",
+      "until": "Reach {{date}}",
+      "failed": "E no work. Try again."
+    }
+  },
+  "whenSheet": {
+    "today": "Dis day",
+    "tooSoon": "Pick time wey never reach."
+  },
+  "planned": {
+    "title": "Dem don plan am",
+    "posts": "Post Dem",
+    "stages": "Audio room dem",
+    "post": "Post Am",
+    "live": "Dei",
+    "stage": "Stadi",
+    "untitledPost": "Post Am",
+    "untitledLive": "Dei",
+    "loading": "E dey load…",
+    "cancel": "Cancel am",
+    "cancelled": "Dem cancel am"
+  },
+  "welcome": {
+    "about": {
+      "title": "You don land Riftn, welcome",
+      "day": "Afternoon"
+    },
+    "name": {
+      "title": "Mkpuru mma",
+      "placeholder": "Mkpuru mma"
+    },
+    "card": {
+      "name": "Mkpuru mma"
+    },
+    "topic": {
+      "film": "Fim"
+    },
+    "back": "Go back",
+    "skipPhoto": "Leave am for now"
+  },
+  "appTokens": {
+    "kindDeposit": "Put Money",
+    "notePlaceholder": "Add small note (if you want)",
+    "sendButton": "Send am",
+    "errorInsufficient": "Na token dey low."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Everybody",
+      "followers": "Follower Dem",
+      "nobody": "Nobody"
+    },
+    "heading": "Likes",
+    "more": "Show more tins",
+    "liveNow": "Dei"
+  },
+  "connectGuide": {
+    "title": "Connect Riftn to your AI helper",
+    "copied": "E don copy",
+    "copiedToast": "MCP URL don copy"
+  },
+  "avatarPrompt": {
+    "notNow": "No be now"
+  },
+  "postStats": {
+    "finished": "Don finish",
+    "members": "Di members",
+    "people": "Pipo",
+    "saved": "E don save",
+    "signedOutViewers": "You don sign out",
+    "visitors": "You don sign out"
+  },
   "tokenLaunch": {
     "eyebrow": "Coming soon",
     "title": "Token launching soon",
@@ -16415,6 +17134,9 @@
     "failed": "Couldn't connect GitHub. Try again.",
     "connect": "Connect GitHub",
     "disconnect": "Disconnect"
+  },
+  "mcpKeys": {
+    "delete": "Delete Am"
   },
   "chatSearch": {
     "placeholderPerson": "Search {{name}}'s messages",
@@ -16442,5 +17164,15 @@
     "gone": "Message no dey again.",
     "theirMessages": "Their messages",
     "seeTheirMessages": "See their messages"
+  },
+  "dmRequests": {
+    "title": "Request Dem",
+    "accept": "Pick",
+    "delete": "Delete Am"
+  },
+  "dmSchedule": {
+    "view": "View Am",
+    "edit": "Edit am",
+    "error": "E no work. Try again."
   }
 }

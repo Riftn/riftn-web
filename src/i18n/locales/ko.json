@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "텍스트"
+  },
   "comic": {
     "showAll": "{{count}}페이지 모두 보기"
   },
@@ -14,6 +17,23 @@
     "glitter": "글리터",
     "saved": "테두리를 저장했어요",
     "failed": "테두리를 저장하지 못했어요"
+  },
+  "duet": {
+    "policyEveryone": "전체 공개",
+    "policyFollowers": "팔로워",
+    "policyNobody": "아무도",
+    "loadMore": "더 보기",
+    "video": "비디오"
+  },
+  "videoRemix": {
+    "sound": "이 사운드 사용"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "전체 공개",
+      "followers": "팔로워",
+      "nobody": "아무도"
+    }
   },
   "dehubAppPage": {
     "android": "안드로이드",
@@ -166,11 +186,18 @@
     "privateNote": "비공개 계정은 연합우주에 표시되지 않아요.",
     "noUsername": "연합우주 주소를 받으려면 사용자 이름을 정하세요."
   },
+  "signedFollows": {
+    "setUp": "켜기",
+    "turnOff": "비활성화",
+    "efpTurnOff": "중지"
+  },
   "profileFields": {
     "title": "프로필 항목",
     "description": "프로필에 웹사이트나 대명사 같은 줄을 최대 4개까지 추가해요.",
     "label": "라벨",
     "content": "내용",
+    "add": "필드 추가",
+    "remove": "필드 삭제",
     "save": "항목 저장",
     "saved": "프로필 항목을 저장했어요",
     "failed": "저장하지 못했어요. 다시 시도해 주세요.",
@@ -367,6 +394,7 @@
     "checkFailed": "접근할 수 없습니다. 다시 시도해 주세요.",
     "checking": "확인 중...",
     "ownership": "오픈 소스. 사용자 소유.",
+    "title": "잠시 손보는 중.\n더 나은 Riftn를 위해.",
     "intermission": "일시적으로 오프라인 상태",
     "community": "커뮤니티가 최우선입니다. 항상."
   },
@@ -1260,7 +1288,12 @@
     "payDirect": "{{chain}}의 {{symbol}}(으)로 {{name}}님에게 바로 전송됩니다. 스왑 없음.",
     "payDirectNoName": "{{chain}}의 {{symbol}}(으)로 크리에이터에게 바로 전송됩니다. 스왑 없음.",
     "payViaBridgeDpay": "Base로 이동하여 Riftn Pay로 결제됨, 토큰은 약 1분 후에 도착",
-    "dmSent": "{{name}}님에게 {{amount}} DHB를 보냈어요!"
+    "dmSent": "{{name}}님에게 {{amount}} DHB를 보냈어요!",
+    "addMessage": "메시지 추가 (선택 사항)",
+    "messagePublic": "공개",
+    "railTitle": "팁",
+    "railTotal": "{{amount}} 토큰",
+    "tokensUnit": "토큰"
   },
   "postOptions": {
     "liveAlertsOn": "이제 {{name}}님을 팔로우합니다. 라이브를 시작하면 알림을 받게 됩니다.",
@@ -1793,6 +1826,7 @@
     "communities": "커뮤니티",
     "stores": "스토어",
     "noNotificationsYet": "아직 알림 없음",
+    "searchClose": "검색 닫기",
     "noNotificationsDesc": "좋아요, 댓글, 팁 또는 새 구독자가 생기면 여기에 표시됩니다.",
     "loadMore": "더 보기",
     "markAsRead": "읽음 처리",
@@ -2032,11 +2066,13 @@
     "promptLabel": "당신의 요청",
     "promptPlaceholder": "개선 아이디어, 버그 설명...",
     "promptAttach": "이미지 첨부",
+    "removeAttachment": "첨부 파일 제거",
     "promptDrop": "이미지 첨부하거나 드롭하세요",
     "promptPost": "게시",
     "promptShortcut": "Ctrl / ⌘ + Enter를 눌러 게시",
     "promptDetails": "선택적 세부 정보",
     "promptDevice": "장치 및 OS (버그에 대한)",
+    "deviceInfoNoErrors": "없음",
     "promptFilters": "분류별 필터",
     "promptMediaError": "50MB 이하의 이미지 또는 비디오 선택",
     "promptMediaLimit": "{{max}}까지의 첨부 가능",
@@ -2095,6 +2131,12 @@
     "loginRequired": "로그인 필요"
   },
   "messages": {
+    "newDrawer": {
+      "to": "종료",
+      "recent": "최근",
+      "suggested": "추천",
+      "youFollow": "내가 팔로우하는 사람"
+    },
     "reply": "답글",
     "react": "반응",
     "edit": "편집",
@@ -2131,7 +2173,10 @@
     "checkingTokenBalance": "토큰 잔액 확인 중...",
     "deleteConversationFailed": "대화를 삭제할 수 없습니다",
     "message": "메시지",
-    "noConversationsYet": "아직 대화가 없습니다"
+    "noConversationsYet": "아직 대화가 없습니다",
+    "sending": "전송 중",
+    "retrySend": "다시 시도",
+    "discardSend": "삭제"
   },
   "music": {
     "listeningCount_one": "{{count}}명 청취 중",
@@ -2215,6 +2260,9 @@
     "viewList": "목록 보기",
     "viewMode": "보기",
     "back": "뒤로",
+    "reserve": {
+      "signIn": "로그인"
+    },
     "usernameAvailable": "사용 가능한 사용자명!",
     "signUpToClaim": "가입하여 획득",
     "signUp": "가입",
@@ -2279,6 +2327,10 @@
     "sortMostViewed": "가장 많이 본 영상",
     "sortLikes": "좋아요",
     "sortMostLiked": "가장 많이 좋아요",
+    "sortCustomShort": "커스텀",
+    "arrange": {
+      "saving": "저장 중..."
+    },
     "searchThisChannel": "채널 검색",
     "searchResultCount": "1 개 결과 {{query}}",
     "searchResultCountPlural": "{{count}} 개 결과 {{query}}"
@@ -2436,6 +2488,7 @@
       "runSwarm": "떼 지어 달리기",
       "description": "작업이 선택한 에이전트로 실행됩니다. 예약된 작업은 앱이 종료된 후에도 계속됩니다.",
       "instructions": "상담원 지침",
+      "examples": "하루 한 번 게시할 주제: 인디 음악\n스타일: 호기심 많고 간결하며 대화하듯\n하루 최대 2개의 최근 게시물에 좋아요를 누를 주제: 음악, 라이브 공연, LP",
       "preparing": "작업 준비 중...",
       "run": "프롬프트 실행",
       "limits": "작업당 일일 게시물 1개 및 관련 좋아요 최대 3개. 모든 상담원이 20분간의 게시물 간격을 공유합니다. 사진은 선택한 캡션을 사용하며, 동영상에는 커버 이미지가 필요합니다. 포스트는 500자 미만으로 유지됩니다. 주조하지 않는 한 가스는 사용할 수 없습니다. 글쓰기는 크레딧을 사용할 수 있습니다.",
@@ -2544,6 +2597,9 @@
     "signInAgain": "다시 로그인",
     "createSignIn": "에이전트를 만들려면 다시 로그인하세요",
     "checkConnection": "연결을 확인하고 다시 시도하세요.",
+    "welcome": {
+      "text": "환영 메시지"
+    },
     "workspace": {
       "moderation": "스트림 관리",
       "moderationHelp": "먼저 관리 권한을 활성화하세요. 계정이 이미 스트림 제작자이거나 지정된 관리자여야 합니다. 승인 및 초안 모드는 계속 적용됩니다. 타임아웃은 자동으로 만료됩니다.",
@@ -2740,7 +2796,9 @@
     "resendCodePhone": "번호가 틀렸거나 코드가 없나요? 다시 가기",
     "continueAs": "계정 Switch",
     "switchWalletAccount": "계정 Switch",
-    "walletLoadFailed": "지갑을 불러올 수 없습니다. 다시 시도해 주세요."
+    "walletLoadFailed": "지갑을 불러올 수 없습니다. 다시 시도해 주세요.",
+    "openInBrowser": "브라우저에서 열기",
+    "copyLink": "링크 복사"
   },
   "careers": {
     "title": "Riftn 채용",
@@ -3082,6 +3140,9 @@
     "confirm": "{{chain}} 에 민트",
     "confirmWithCost": "조폐국 {{chain}} · {{cost}}",
     "notAvailable": "이 체인에서 주조는 아직 사용할 수 없습니다."
+  },
+  "postEditHistory": {
+    "original": "원본"
   },
   "postInfo": {
     "title": "게시물 정보",
@@ -5193,6 +5254,7 @@
     "settledTitleSpeed": ", 일반적으로 {{speed}}",
     "settledCount_one": "{{count}} 결제됨",
     "settledCount_other": "{{count}} 결제됨",
+    "statusInProgress": "진행 중",
     "howMany": "얼마나 많은",
     "availableCount_one": "{{count}} 사용 가능",
     "availableCount_other": "{{count}} 사용 가능",
@@ -5285,6 +5347,17 @@
     "sellYourFractions": "분수 판매 ({{held}} 보유)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "다음 세부정보를 사용하세요."
+      }
+    },
+    "cinema": {
+      "close": "닫기",
+      "performance": {
+        "label": "성능"
+      }
+    },
     "libraryEmpty": "저장한 생성물이 여기에 표시됩니다.",
     "toolRemake": "재생",
     "toolMaboroshi": "마보로시",
@@ -6256,6 +6329,13 @@
     "raw": "생고기"
   },
   "nftMarket": {
+    "actAll": "전체",
+    "actListings": "등록 상품",
+    "actOffer": "제안",
+    "actOffers": "제안",
+    "actSales": "판매",
+    "tabActivity": "활동",
+    "shortTitle": "NFT",
     "filters": "필터",
     "forSale": "판매 중",
     "openToOffers": "제안 수락 가능",
@@ -6319,6 +6399,9 @@
     "offered": "제출 완료되었습니다. 수신자는 언제든지 수락할 수 있습니다.",
     "dehubPost": "Riftn 게시물",
     "youHold": "당신은 {{n}}을(를) 가지고 있습니다.",
+    "price": "가격",
+    "volume": "볼륨",
+    "tabRecent": "최근",
     "buyNow": "지금 구매하세요",
     "dropsTo": "가격이 {{price}}에서 {{date}}로 하락",
     "inBundle": "{{n}}으로 판매됩니다.",
@@ -6731,7 +6814,70 @@
     "youAreBanned": "이 크리에이터의 스트림에서는 채팅할 수 없습니다.",
     "youAreTimedOut": "시간이 얼마 남지 않았습니다"
   },
+  "studioDeck": {
+    "background": {
+      "title": "배경",
+      "modes": {
+        "none": "끔",
+        "blur": "흐림",
+        "color": "색상"
+      }
+    },
+    "remove": "삭제",
+    "scenes": {
+      "countdown": "카운트다운",
+      "minutes": "{{count}}분",
+      "names": {
+        "starting": "곧 시작됩니다"
+      }
+    },
+    "sources": {
+      "reactAdd": "표시",
+      "image": "이미지",
+      "camera": "카메라",
+      "show": "스트림에 표시",
+      "loop": "루프",
+      "positions": {
+        "center": "센터"
+      },
+      "sizes": {
+        "small": "작게",
+        "medium": "보통",
+        "large": "크게"
+      },
+      "shapes": {
+        "circle": "원",
+        "rect": "정사각형"
+      }
+    },
+    "audio": {
+      "mute": "뮤트",
+      "unmute": "뮤트 해제",
+      "gateLevels": {
+        "off": "끔",
+        "low": "라이트",
+        "high": "강함"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "플랫폼",
+      "label": "(선택) 이름",
+      "key": "스트림 키",
+      "save": "추가",
+      "cancel": "취소",
+      "states": {
+        "off": "끔",
+        "idle": "준비 완료",
+        "live": "라이브",
+        "error": "오류"
+      }
+    },
+    "vertical": {
+      "centre": "센터",
+      "live": "라이브"
+    },
     "subathon": {
       "title": "수바톤",
       "intro": "스트리밍 중 카운트다운이 진행됩니다. 모든 유료 선물, 팔로우, 구독이 시간 추가로 연결되니 방이 당신을 유지해줍니다.",
@@ -7684,6 +7830,8 @@
     "footerNote": "DePin 참여는 투자 상품이 아닌 기부 서비스입니다. 이용 가능 여부, 자격 및 보너스는 변경될 수 있습니다."
   },
   "creatorFlow": {
+    "newNativeFlow": "새 플로우",
+    "disconnect": "분리",
     "title": "크리에이터 플로우",
     "backToStudio": "Creator Studio로 돌아가기",
     "backToFlows": "플로우로 돌아가기",
@@ -8846,6 +8994,14 @@
     "priceChartCleared": "가격 차트가 초기화되었습니다. 고정 참조 가격: $0.0001. 사용 가능한 주문에 따라 실행 가격이 결정됩니다."
   },
   "editor": {
+    "stage": {
+      "camera": "카메라",
+      "yaw": "회전",
+      "add": "추가",
+      "scale": "크기",
+      "color": "색상",
+      "light": "라이트"
+    },
     "video": {
       "tFade": "크로스 디졸브",
       "none": "없음",
@@ -9012,6 +9168,8 @@
       "tools": "편집 도구"
     },
     "agent": {
+      "stop": "중지",
+      "queue": "대기열에 추가",
       "introTitle": "AI에게 원하는 것을 말해 보세요",
       "introBody": "디자인이나 변경 사항을 편하게 설명하세요. 페이지 크기 조정, 텍스트 작성과 스타일 지정, 무료 사진·동영상·음악 찾기, 필터 적용, 레이어 정리와 애니메이션까지 해 줍니다. 요청마다 실행 취소 한 번으로 되돌릴 수 있습니다.",
       "suggestPoster": "해변 사진과 굵은 제목으로 여름 세일용 정사각형 인스타그램 게시물 만들어 줘",
@@ -9280,6 +9438,10 @@
       "reloadText": "자막 다시 불러오기",
       "textSaved": "자막 변경 사항이 저장되었습니다.",
       "action": "자동 자막",
+      "styles": {
+        "bold": "굵게",
+        "serif": "세리프"
+      },
       "working": "듣는 중… {{percent}}%",
       "downloading": "음성 모델 준비 중… {{percent}}%",
       "hint": "음성을 스타일을 바꿀 수 있는 타이밍 자막으로 변환합니다. 기기에서 실행되어 무료이며 비공개입니다. 처음 사용할 때 모델을 다운로드합니다.",
@@ -10659,6 +10821,29 @@
       "toolbar": "캔버스 내비게이션",
       "zoomIn": "캔버스 확대/축소",
       "zoomOut": "캔버스 축소"
+    },
+    "clipFix": {
+      "listening": "듣는 중…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "분할",
+        "play": "재생",
+        "pause": "일시 중지",
+        "frameBack": "이전 프레임",
+        "frameForward": "다음 프레임"
+      }
+    },
+    "voiceClone": {
+      "stop": "녹음 중지",
+      "failed": "음성 클로닝이 실패했습니다."
+    },
+    "linkImport": {
+      "go": "가져오기",
+      "downloading": "다운로드 중 {{percent}}%"
+    },
+    "reverse": {
+      "action": "거꾸로"
     }
   },
   "jungleMood": {
@@ -10826,10 +11011,12 @@
     "audio": "오디오",
     "audioDesc": "오디오 포스트와 시각적 파형 플레이어. 제작자는 음악, 팟캐스트, 또는 음성 녹음을 업로드할 수 있습니다.",
     "audioSpace": "오디오 공간",
+    "audioSpaceDesc": "사용자가 말하고, 듣고, 손을 들어 대화에 참여할 수 있는 라이브 오디오 룸입니다.",
     "public": "공개",
     "publicDesc": "모든 사람이 볼 수 있고, 좋아요, 댓글을 달 수 있는 공공 게시물입니다.",
     "private": "비공개",
     "privateDesc": "콘텐츠는 본인만 볼 수 있습니다. 비공개 게시물은 다른 사용자와 공개 피드에서 숨겨집니다.",
+    "ppv": "유료 시청(PPV)",
     "subscriberOnly": "구독자만",
     "subscriberOnlyDesc": "크리에이터의 채널을 구독한 사용자만 볼 수 있는 콘텐츠입니다.",
     "postInfoPage": "게시물 정보",
@@ -10868,6 +11055,7 @@
     "dm": "다이렉트 메시지",
     "dmDesc": "사용자 간의 비공개 메시지. 현재 모바일 앱에서 이용 가능하며 웹 지원도 곧 제공될 예정입니다.",
     "mention": "멘션 (@)",
+    "mentionDesc": "@ 다음에 사용자 이름을 입력하여 포스트나 댓글에 다른 사용자를 태그하세요. 상대방에게 알림이 전송됩니다.",
     "homeFeed": "홈 피드",
     "homeFeedDesc": "내가 팔로우하는 사람들의 게시물과 트렌드 콘텐츠를 보여주는 메인 피드.",
     "explore": "둘러보기",
@@ -11955,7 +12143,15 @@
       "rewardsWeek": "{{date}} 주",
       "rewardPaid": "지불 완료",
       "rewardPending": "대기",
-      "rewardsNone": "아직 보상이 계산되지 않았습니다. 첫 주는 월요일에 마감됩니다."
+      "rewardsNone": "아직 보상이 계산되지 않았습니다. 첫 주는 월요일에 마감됩니다.",
+      "stats": {
+        "button": "실시간 통계"
+      },
+      "signin": {
+        "users_one": "{{count}} 명의 사용자",
+        "users_other": "{{count}} 명의 사용자",
+        "delete": "삭제"
+      }
     },
     "card": {
       "open": "열기"
@@ -12112,6 +12308,9 @@
     "reminderLater": "나중에"
   },
   "copy": {
+    "55656b5e434f": "검색 닫기",
+    "57e2faa5ec63": "Riftn 검색",
+    "96d7bff86b44": "검색을 불러올 수 없습니다",
     "1607715e45ed": "공을 탭해서 말하거나 아래에 입력하세요",
     "00140a37bd26": "해당 네트워크의 거래를 일시적으로 사용할 수 없습니다. 다시 시도해주세요.",
     "002286513398": "이벤트를 관리할 권한이 없습니다",
@@ -19036,6 +19235,7 @@
     "backToTop": "맨 위로 이동",
     "needTitle": "계속하려면 제목을 추가하세요.",
     "needBody": "{{count}} 자 남음",
+    "imagesLabel": "이미지",
     "backToWriting": "글쓰기로 돌아가기",
     "readyTitle": "등록 준비 완료",
     "sharePreview": "공유 시 화면",
@@ -19097,12 +19297,140 @@
     "exploreFirst": "먼저 둘러보기",
     "codeNote": "이메일로 코드를 보내드려요. 비밀번호는 필요 없어요."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "플랜",
+      "howMany": "얼마나 많은",
+      "who": "사용자 이름 또는 지갑 주소",
+      "whoPlaceholder": "@사용자이름",
+      "cancel": "취소",
+      "stage": {
+        "preparing": "준비 중…",
+        "confirming": "거래를 기다리는 중…",
+        "recording": "마무리 중…"
+      }
+    },
+    "badges": {
+      "emoji": "이모티콘",
+      "audience": {
+        "subscribers": "구독자"
+      },
+      "ended": "종료됨",
+      "until": "{{date}}까지",
+      "failed": "실패했습니다. 다시 시도하세요."
+    }
+  },
+  "whenSheet": {
+    "today": "오늘",
+    "earlierShort": "이전",
+    "tooSoon": "미래의 시간을 선택하세요.",
+    "show": "표시",
+    "hide": "숨기기"
+  },
+  "planned": {
+    "title": "계획됨",
+    "all": "전체",
+    "posts": "게시물",
+    "stages": "오디오 룸",
+    "post": "게시물",
+    "live": "라이브",
+    "stage": "스테이지",
+    "untitledPost": "게시물",
+    "untitledLive": "라이브",
+    "loading": "로딩 중…",
+    "startNow": "지금 시작",
+    "cancel": "취소",
+    "cancelled": "취소됨"
+  },
+  "welcome": {
+    "about": {
+      "title": "Riftn에 오신 것을 환영합니다",
+      "day": "일",
+      "month": "월",
+      "year": "년"
+    },
+    "name": {
+      "title": "이름",
+      "placeholder": "이름"
+    },
+    "card": {
+      "name": "이름",
+      "followers": "팔로워"
+    },
+    "topic": {
+      "music": "음악",
+      "art": "아트",
+      "gaming": "게임",
+      "crypto": "암호화폐",
+      "sports": "스포츠",
+      "comedy": "코미디",
+      "film": "필름",
+      "podcast": "팟캐스트",
+      "food": "음식",
+      "news": "뉴스",
+      "science": "과학"
+    },
+    "back": "뒤로",
+    "skipPhoto": "나중에 하기",
+    "preview": "미리보기"
+  },
+  "appTokens": {
+    "title": "내 토큰",
+    "history": "기록",
+    "noHistory": "아직 활동 없음",
+    "kindDeposit": "입금",
+    "to": "종료",
+    "amount": "금액",
+    "notePlaceholder": "메모 추가 (선택)",
+    "sendButton": "전송",
+    "errorInsufficient": "토큰 부족"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "전체 공개",
+      "followers": "팔로워",
+      "nobody": "아무도"
+    },
+    "heading": "리액션",
+    "more": "더 보기",
+    "liveNow": "라이브",
+    "untitled": "반응"
+  },
+  "connectGuide": {
+    "title": "Riftn를 AI 어시스턴트에 연결하세요",
+    "urlLabel": "MCP 서버 URL",
+    "copy": "복사",
+    "copied": "복사됨",
+    "copiedToast": "MCP URL이 복사되었습니다"
+  },
+  "avatarPrompt": {
+    "notNow": "나중에"
+  },
+  "postStats": {
+    "audience": "대상 그룹",
+    "engagement": "참여",
+    "finished": "종료됨",
+    "members": "멤버",
+    "membersLower": "멤버",
+    "newFollowers": "새 팔로워",
+    "noBadge": "배지 없음",
+    "people": "사람",
+    "plays": "재생",
+    "quotes": "인용",
+    "reposts": "리포스트",
+    "saved": "저장됨",
+    "shares": "공유",
+    "signedOutViewers": "로그아웃됨",
+    "topSupporters": "최고의 서포터",
+    "visitors": "로그아웃됨"
+  },
   "halloween": {
     "title": "해피 할로윈",
     "otherThemes": "무서운 건 별로인가요? 다른 테마를 찾아보세요:",
     "enter": "던전 입장"
   },
   "tokenLaunch": {
+    "eyebrow": "출시 예정",
     "body": "구매는 새로운 토큰이 준비될 때까지 일시적으로 중단되었습니다. 출시 즉시 이메일을 통해 알림을 받으세요.",
     "notifyMe": "알림해 주세요",
     "sendTo": "{{email}}에게 이메일을 보낼 것입니다.",
@@ -19128,6 +19456,10 @@
     "unavailable": "GitHub 인증이 곧 제공될 예정입니다.",
     "connect": "GitHub에 연결하세요",
     "disconnect": "분리"
+  },
+  "mcpKeys": {
+    "delete": "삭제",
+    "shortProfile": "프로필"
   },
   "chatSearch": {
     "placeholder": "검색 메시지 또는 사람",
@@ -19157,5 +19489,17 @@
     "gone": "그 메시지는 더 이상 없습니다",
     "theirMessages": "그들의 메시지",
     "seeTheirMessages": "그들의 메시지 보기"
+  },
+  "dmRequests": {
+    "title": "요청",
+    "accept": "수락",
+    "delete": "삭제",
+    "block": "차단"
+  },
+  "dmSchedule": {
+    "view": "보기",
+    "edit": "편집",
+    "editLabel": "메시지 수정하기",
+    "error": "실패했습니다. 다시 시도하세요."
   }
 }

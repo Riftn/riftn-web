@@ -7147,7 +7147,16 @@ html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notifications-drawer][data-expanded] {
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* No handle, so the pill's sticky strip is the top of the sheet. Rows
+/* The bell drawer's grab bar sits in the pill's top inset, and below the
+   status bar once the sheet fills the screen. */
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer] [data-bell-handle] {
+  top: 3px;
+  transition: top 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer][data-expanded] [data-bell-handle] {
+  top: calc(env(safe-area-inset-top, 0px) + 3px);
+}
+/* The pill's sticky strip is the top of the sheet. Rows
    scrolling up past the pill blur out there instead of showing sharp in the
    gap above it and beside it, fading off just under the pill. Behind the
    pill (z-index -1 inside its sticky wrapper). */
@@ -7345,4 +7354,16 @@ html[data-system-tone="light"] [data-chat-jump] [data-jump-orb] {
 html[data-theme="light"] [data-chat-unread-marker] [data-unread-hairline],
 html[data-system-tone="light"] [data-chat-unread-marker] [data-unread-hairline] {
   --tw-gradient-to: rgba(0, 0, 0, 0.22) var(--tw-gradient-to-position) !important;
+}
+
+/* Chat MOD chip: the quiet grey chip the app's live chat uses, on every
+   theme, in place of the old green one. */
+[data-chat-mod-badge] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+}
+html[data-theme="light"] [data-chat-mod-badge],
+html[data-system-tone="light"] [data-chat-mod-badge] {
+  background: rgba(9, 9, 11, 0.08);
+  color: #3f3f46;
 }

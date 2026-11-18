@@ -1,6 +1,17 @@
 {
+  "textFeed": {},
   "comic": {
     "showAll": "सब {{count}} पन्ना देखाव"
+  },
+  "comicBorder": {},
+  "duet": {
+    "video": "वीडियो"
+  },
+  "videoRemix": {
+    "sound": "ए साउंड उपयोग करू"
+  },
+  "remixLinks": {
+    "policy": {}
   },
   "dehubAppPage": {
     "android": "Android",
@@ -97,7 +108,18 @@
     "startStreaming": "स्ट्रीमिंग शुरू करीं",
     "whyTitle": "Riftn पर काहे स्ट्रीम करीं"
   },
+  "desktopWordmark": {},
+  "mastodonApps": {
+    "cancel": "रद्द करव",
+    "copied": "कॉपी हो गइल"
+  },
+  "fediverse": {},
+  "signedFollows": {
+    "setUp": "चालू कर",
+    "turnOff": "बंद कर"
+  },
   "profileFields": {
+    "remove": "assistant",
     "descriptionPresets": "वेबसाइट, सर्वनाम या कुछ और भी जोड़ो। लिंक आपके सोशल के साथ दिखाते हैं।",
     "needsLabel": "हर कस्टम फील्ड को एक लेबल दो",
     "placeholderLink": "yoursite.com",
@@ -115,6 +137,13 @@
       "customOption": "कस्टम लेबल"
     }
   },
+  "followedTags": {},
+  "notificationFilters": {},
+  "keywordFilters": {},
+  "postVisibility": {},
+  "replyPolicy": {},
+  "quotePolicy": {},
+  "contentWarning": {},
   "altText": {
     "badge": "ALT"
   },
@@ -215,6 +244,7 @@
   "quickActions": {
     "title": "Page options",
     "question": "Hemde nêwe bişe çiyê?",
+    "placeholder": "সমস্যাটি বিবৃত করুন একটি ছোট মেসেজে",
     "refresh": "Refresh page",
     "screenshot": "Screenshot preview",
     "removeScreenshot": "Screenshot ke hatao",
@@ -222,17 +252,16 @@
     "send": "बग रिपोर्ट भेजें"
   },
   "nav": {
+    "launchpad": "लॉन्चपैड",
     "findWords": {
       "getTheApp": "डाउनलोड करो एप, एंड्रॉइड, आईफोन, मोबाइल एप, इंस्टॉल, एपीके, डेस्कटॉप एप, कंप्यूटर पर इंस्टॉल, विंडोज, मैक"
     },
     "reorderHint": "किसी भी आइकन को दबाकर रखें और खींचकर क्रम बदलें",
     "reorderReset": "assistant",
-    "prompt": "ପ୍ରମ୍ପ୍ଟ",
-    "buyDhb": "টোকেন কিনেন",
-    "launchpad": "लॉन्चपैड",
     "reorderResetLong": "मेन्यू ऑर्डर रीसेट करें",
     "home": "होम",
     "explore": "खोजें",
+    "prompt": "ପ୍ରମ୍ପ୍ଟ",
     "notifications": "सूचनाएँ",
     "messages": "संदेश",
     "assistant": "सहायक",
@@ -262,6 +291,7 @@
     "stats": "लाइव आँकड़े",
     "events": "कार्यक्रम",
     "liveTv": "लाइव टीवी",
+    "buyDhb": "টোকেন কিনেন",
     "bridge": "ब्रिज",
     "top100": "टॉप 100",
     "agents": "AI एजेंट",
@@ -285,6 +315,7 @@
     "seeAll": "सब देखा",
     "scroll": "Scroll"
   },
+  "explore": {},
   "settings": {
     "sessionsRevokedMany": "{{count}} cihazlar kapatıldı",
     "showOnline": "Nga u shfaq kur jam online",
@@ -294,6 +325,7 @@
     "browserNotificationsTabOnlyDesc": "चालू है, लेकिन केवल जब Riftn टैब में खुला हो",
     "browserNotificationsBlockedOsTitle": "आपका सिस्टम इस ब्राउज़र के लिए सूचनाओं को ब्लॉक कर रहा है",
     "browserNotificationsBlockedOsHint": "सदस्यता ठीक है - आपका ऑपरेटिंग सिस्टम इस ब्राउज़र से कुछ भी प्रदर्शित करने से इनकार कर रहा है। अपने सिस्टम सूचना सेटिंग्स में अपने ब्राउज़र के लिए सूचनाएं चालू करें, फिर इसे बंद और फिर से चालू करें।",
+    "aiScraping": {},
     "desktopApp": "डेस्कटॉप एप",
     "desktopAppDesc": "रिफ़्टन को इस कंप्यूटर पर इंस्टॉल करो। यह अपनी खुद की विंडो में खुलता है और खुद को अपडेट करता है।",
     "desktopAppInstall": "इंस्टॉल",
@@ -311,24 +343,30 @@
     "publicChatAlertsOnDesc": "Busy time ek saath ek alert mein aayega",
     "publicChatAlertsRate": "Zyada se zyada",
     "publicChatAlertsRateOption": "{{count}} ghante mein",
+    "publicChatAlertsRateHint": "Jab room isse zyada busy ho to kuch nahi khoega — messages hold ho jayenge aur agli alert mein saath mein aayenge.",
     "emailNotificationsAddAddress": "ईमेल पता जोड़ें",
+    "smsScope": {},
     "smsNotificationsDescReady": "{{phone}} ko bheja gaya — {{dhb}} tokens prati, lagbhag {{count}} bacha hai",
     "smsNotificationsLocked": "{{dhb}} tokens (${{usd}}) credit se unlock karen",
     "smsManage": "अपने क्रेडिट और नंबर को प्रबंधित करें",
     "smsDialogIntro": "Text bhejane mein paisa lagta hai, isliye yeh channel aapke Riftn tokens mein top-up kiye gaye credit par chalta hai.",
     "smsUnlockPrice": "{{dhb}} tokens (${{usd}}) text unlock karta hai aur aapka pehla balance ban jata hai.",
     "smsPricePerMessage": "{{dhb}} tokens (${{usd}})",
+    "smsBand": {},
     "smsDepositAction": "Send {{dhb}} tokens",
     "smsChainUnsupported": "Riftn tokens us network par nahi bhej sakte hain.",
     "smsBalance": "{{dhb}} tokens left (${{usd}})",
     "smsTopUp": "{{dhb}} tokens top-up karen",
     "smsCodeSent": "Code bhej diya gaya. Ismein {{price}} tokens lage.",
     "badgeDelegationNoBadge": "Delegation slots ke saath staking badge aata hai. Ek kamane ke liye Riftn tokens stake karen.",
+    "streamKey": {},
     "usernamesDesc": "आपके स्वामित्व वाले नाम",
     "usernamesCount_one": "{{count}} username",
     "usernamesCount_other": "{{count}} usernames",
     "notifyTipsDesc": "Jab koi aapko Riftn tokens mein tip bhejta hai",
     "messageFeeDesc": "Mujhe message karne ke liye Riftn tokens mein minimum tip ki zaroorat hai",
+    "cancel": "रद्द करव",
+    "solanaCopy": "সোলানা ঠিকানা কপি করো",
     "sessionsLoadFailed": "सत्र लोड करने में विफल",
     "sessionRevoked": "डिवाइस साइन आउट हो गया",
     "sessionRevokeFailed": "उस डिवाइस को साइन आउट नहीं कर सके",
@@ -337,6 +375,7 @@
     "activeSessions": "सक्रिय सत्र",
     "activeSessionsDesc": "डिवाइस वर्तमान में आपके खाते में साइन इन हैं।",
     "noSessions": "कोई सक्रिय सत्र नहीं मिला।",
+    "thisDevice": "এই ডিভাইস",
     "signOutDevice": "डिवाइस साइन आउट करें",
     "signOutAllOthers": "अन्य सभी डिवाइस साइन आउट करें",
     "signOutDeviceTitle": "डिवाइस लॉगआउट करें?",
@@ -399,6 +438,10 @@
     "socialFollowersPending": "Takipçi sayısının güncellenmesi"
   },
   "common": {
+    "mute": "आवाज बंद करा",
+    "unmute": "आवाज चालू करा",
+    "somethingWentWrong": "कुछ गड़बड़ होय गेलक",
+    "copied": "कॉपी हो गइल",
     "apply": "Uygula"
   },
   "tip": {
@@ -437,7 +480,8 @@
     "payViaDpay": "Riftn Pay ko bhugtan kiya gaya, tokens lagbhag 30s mein aa jayenge",
     "payDirect": "{{name}}'ya {{symbol}}'da {{chain}}'de gönderiliyor. Değişim yok.",
     "payDirectNoName": "{{symbol}}'ya {{chain}}'de gönderiliyor. Değişim yok.",
-    "payViaBridgeDpay": "Base par move kiya gaya aur Riftn Pay ko bhugtan kiya gaya, tokens lagbhag ek minute mein aa jayenge"
+    "payViaBridgeDpay": "Base par move kiya gaya aur Riftn Pay ko bhugtan kiya gaya, tokens lagbhag ek minute mein aa jayenge",
+    "addMessage": "एक संदेश जोड़ें (वैकल्पिक)"
   },
   "postOptions": {
     "aiOverview": "AI özet",
@@ -481,6 +525,8 @@
     "videoGenPaymentKept": "{{amount}} tokenınız kullanılmadı. Hesabınızda kalır ve otomatik olarak sonraki nesliniz için kullanılır, bu nedenle tekrar denerseniz, iki kez ödeme isteyeceğiniz anlamına gelmez.",
     "payingTokens": "{{amount}} tokens ka bhugtan kar raha hoon..."
   },
+  "publicChat": {},
+  "aiChat": {},
   "commandCentre": {
     "totalDhbBalance": "Total token balance",
     "txPurchased": "Aapne {{amount}} tokens kharide",
@@ -491,6 +537,7 @@
     "txTipSent": "Aapne {{name}} tokens {{amount}} ko tip kiya",
     "txTipReceived": "{{name}} ne aapko {{amount}} tokens tip kiye",
     "transferDhb": "Transfer tokens",
+    "tokenOnChainTo": "{{symbol}} {{chain}}dan {{dest}}a geçti",
     "refundAddress": "{{chain}} पर रिफंड एड्रेस",
     "refundAddressHint": "अगर स्वैप पूरा नहीं हो सकता, तो आपका {{symbol}} यहाँ वापस भेज दिया जाता है।",
     "loadingMore": "On-chain aktivite yükleniyor…"
@@ -506,8 +553,17 @@
     "solanaSendUnavailable": "Solana'da gönderme henüz kullanıma sunulmadı",
     "solanaSendUnavailableHint": "Phantom'ı doğrudan kullanın, bu bakiyeyi taşıyın."
   },
+  "bookmarks": {
+    "playlist": {}
+  },
   "notifications": {
+    "likes": "प्रतिक्रियाएं",
+    "searchClose": "खोज बंद करें",
+    "likedPost": "{{name}} आपके पोस्ट पर प्रतिक्रिया दी",
     "badgeLent": "{{name}} आपको उनका {{tier}} बैज दिया",
+    "badgeTierUp": "बधाई हो! अब आप {{tier}} हैं 🎉",
+    "badgeTierDown": "ध्यान दें: अब आपका बैज {{tier}} है",
+    "badgeTierLost": "ध्यान दें: अब आपके पास बैज नहीं है",
     "badgeTakenBack": "{{name}} आपको उनका {{tier}} बैज देना बंद कर दिया",
     "badgeHandedBack": "{{name}} आपको दिया गया {{tier}} बैज वापस कर दिया",
     "badgeLoanLapsed": "{{name}} अब आपको उनका {{tier}} बैज नहीं दे सकता",
@@ -541,6 +597,7 @@
       "featureCommentNamed": "{{name}}, “{{title}}” adlı özellik talebinize yorum yaptı",
       "featureComment": "{{name}}, özellik talebinize yorum yaptı",
       "featureReplyNamed": "{{name}}, size “{{title}}” adlı mesajı cevapladı",
+      "featureReply": "{{name}} तोर कमेंट पर जवाब देलक",
       "featureMentionNamed": "{{name}} आपको \"{{title}}\" पर mention किया",
       "featureMention": "{{name}} आपको एक feature request पर mention किया",
       "governanceVoteNamed": "{{name}} आपके proposal \"{{title}}\" पर vote किया",
@@ -567,14 +624,14 @@
       "bountyAppliedNamed": "{{name}} आपके bounty \"{{title}}\" के लिए apply किया",
       "bountyApplied": "{{name}} आपके bounty के लिए apply किया",
       "bountySubmitted": "{{name}} आपके bounty पर काम submit किया"
-    },
-    "badgeTierUp": "बधाई हो! अब आप {{tier}} हैं 🎉",
-    "badgeTierDown": "ध्यान दें: अब आपका बैज {{tier}} है",
-    "badgeTierLost": "ध्यान दें: अब आपके पास बैज नहीं है"
+    }
   },
   "leaderboard": {
-    "balanceTooLow": "Balance too low ({{balance}} tokens)"
+    "addedToLeaderboard": "Siz eklenmisiniz! Bakiye: {{balance}} tokenlar",
+    "balanceTooLow": "Balance too low ({{balance}} tokens)",
+    "you": "(आप)"
   },
+  "dhbListing": {},
   "explorePage": {
     "ppv": "PPV",
     "followBack": "Follow Back"
@@ -590,11 +647,17 @@
     "promptAttach": "Images attach करें",
     "promptDrop": "यहां images paste या drop करें",
     "promptDetails": "Ziwaranê ji bo wateyên xwe yên rastîn.",
+    "deviceInfoNoErrors": "कोई नहीं",
     "promptAttachment": "{{number}}",
     "uiUx": "UI/UX",
     "loadFailed": "रिक्वेस्ट लोड नहीं हो पायो"
   },
+  "auth": {},
   "messages": {
+    "newDrawer": {
+      "suggested": "Suggest"
+    },
+    "edit": "Düzenle",
     "forward": "आगे भेजा",
     "pin": "पिन करा",
     "encrypted": "এন্ড-টু-এন্ড এনক্রিপ্টেড",
@@ -627,13 +690,19 @@
     "chartVideos": "Music videos",
     "videoCharts": "Music Video Charts",
     "mostViewed": "En çok görüntülenenler",
+    "trendingWeek": "Bu hafta trendler",
     "newest": "Yeni olanlar",
     "videoChartOrder": "Müzik videosu listesi sıralaması",
     "quality": "Kualiti",
     "votes": "Oylar",
     "plays": "Oynatışlar",
-    "shareStation": "Share station"
+    "liveRadio": "Canlı radyo",
+    "listenLive": "Canlı dinle",
+    "nextStation": "Sonraki istasyon",
+    "shareStation": "Share station",
+    "linkCopied": "Bağlantı kopyalandı"
   },
+  "notFound": {},
   "profile": {
     "gridCard": {
       "stage": "मंच",
@@ -664,6 +733,10 @@
     },
     "viewGrid": "ग्रिड व्यू",
     "viewList": "सूची दृश्य",
+    "reserve": {
+      "signIn": "साइन इन"
+    },
+    "offerSubmitted": "{{amount}} size {{handle}} tokenlar için teklif etti",
     "reach": {
       "total": "कुल पहुंच",
       "breakdownTitle": "यह पहुंच कहां से आती है",
@@ -673,29 +746,28 @@
       "postUnavailable": "E post nae milal",
       "commentUnavailable": "E comment abhi nae milal"
     },
-    "dislikes": {
-      "emptyTitle": "Beğenilmeyenler yok"
+    "tabs": {
+      "dislikes": "Beğenilmeyenler"
     },
+    "likedPosts": {},
+    "dislikes": {
+      "emptyTitle": "Beğenilmeyenler yok",
+      "emptyOwn": "Beğenilmeyenleri görüntülemek için beğenilerinizi bırakın ve burada görün. Beğeniyi kaldırarak gönderiyi geri getirin.",
+      "emptyOther": "Hiç beğenilmeyen gönderi yok.",
+      "privateTitle": "Beğenilmeyenler gizlidir",
+      "privateDesc": "ई अकाउंट आपन नापसंद के आपन तक सीमित राखेला।"
+    },
+    "offerWorthNow": "{{amount}} टोकन वर्तमान दर पर",
+    "offerCommitsNothing": "ऑफर करने में कोई खर्च नहीं है और कोई टोकन नहीं लगता है। आप तभी भुगतान करते हैं जब मालिक स्वीकार करता है।",
     "links": "लिंक",
     "sortMostViewed": "En çok görüntülenenler",
     "sortMostLiked": "En çok beğenilenler",
-    "searchThisChannel": "Bu kanalı arayın",
-    "posts": "پوسٹ",
-    "replies": "جواب",
-    "media": "میڈیا",
-    "likes": "پسند",
-    "follow": "فالو کرو",
-    "unfollow": "ان فالو",
-    "editProfile": "پروفائل ایڈٹ کرو",
-    "shareProfile": "پروفائل شیئر کرو",
-    "blockUser": "بلاک کرو",
-    "reportUser": "رپورٹ کرو",
-    "muteUser": "میوٹ کرو",
-    "subscribe": "سبسکرائب کرو",
-    "subscribed": "سبسکرائب کیا",
-    "tip": "ٹِپ"
+    "arrange": {},
+    "searchThisChannel": "Bu kanalı arayın"
   },
+  "tv": {},
   "buyCoins": {
+    "minDhbPurchase": "न्यूनतम टोकन खरीद $0.50 है",
     "feeNote": "Card fee ~3.6% आर 0.5% network reserve ये निकल जाय। Reserve आपको ETH के रूप में भेजा जाय गैस के लिए।",
     "statusAwaitingPayment": "Checkout tab में payment पूरा करो...",
     "statusConfirming": "Payment confirm होने का इंतजार...",
@@ -720,6 +792,9 @@
       "kind": {
         "error": "Ibintu byagenze nabi"
       }
+    },
+    "profile": {
+      "banner": "बैनर"
     },
     "tasks": {
       "title": "assistant does not have the capability to give tasks to agents.",
@@ -747,6 +822,7 @@
       "noActivity": "Koi gatividhi darj nahi ki gayi",
       "noTasks": "Is agent ke liye abhi tak koi kaam nahi hai.",
       "runSwarm": "Swarm chalao",
+      "description": "কর্মগুলো নির্বাচিত এজেন্ট দ্বারা চলতে থাকে। স্কেডুলড টাস্কগুলো অ্যাপ বন্ধ হলেও চলতে থাকে।",
       "preparing": "Preparing task…",
       "run": "Run prompt",
       "list": "Tasks",
@@ -754,6 +830,7 @@
       "next": "{{time}}",
       "resume": "बायोडाटा",
       "emptyActivity": "ᱵᱟᱝᱜᱟᱲᱤ",
+      "action": "কর্ম",
       "window": {
         "authorAll": "All creators",
         "authorChoose": "Choose creator",
@@ -763,6 +840,10 @@
         "last1h": "Last hour",
         "last30d": "Last 30 days",
         "allTime": "All time",
+        "dislike": "नापसंद",
+        "author": "लेखक (वैकल्पिक)",
+        "category": "कैटेगरी (वैकल्पिक)",
+        "authorPlaceholder": "@यूजरनेम या वॉलेट",
         "categoryPlaceholder": "Exact category name",
         "filterHelp": "Sab posts ke liye filter ke khali chhor de. Jab dono set rahela, tab dono ke match kare ke pari. Purana reaction sab rahela; ulta reaction chune se u badal jaela.",
         "write": "Write instructions",
@@ -779,94 +860,21 @@
     "signInAgain": "फिर से साइन इन करा",
     "createSignIn": "एजेंट बनाएक लागिन फिर से साइन इन करा",
     "checkConnection": "आपन कनेक्शन जाँच करा आउर फिर से कोसिस करा।",
+    "welcome": {
+      "text": "स्वागत संदेश"
+    },
     "workspace": {
-      "moderationHelp": "پہلے ماڈریشن کی اجازت چالو کرو۔ اکاؤنٹ پہلے سے اسٹریم بنانے والا یا طے کیا ہوا ماڈریٹر ہونا چاہیے۔ منظوری اور ڈرافٹ موڈ تب بھی لاگو رہیں گے۔ ٹائم آؤٹ اپنے آپ ختم ہو جاتا ہے۔",
-      "webhook": "Discord الرٹ ویب ہک (اختیاری)",
-      "reversalHelp": "واپس لینے سے پوسٹ چھپ جاتی ہے، تبصرے ہمیشہ کے لیے مٹ جاتے ہیں، رد عمل اور پروفائل کا متن واپس آ جاتا ہے، یا نیا فالو ہٹ جاتا ہے۔ ویوز، پہنچ چکے نوٹیفکیشن، مِنٹ ہوئے لین دین، پروفائل تصویر اور ختم ہو چکے ٹائم آؤٹ نہیں مٹ سکتے۔ چھپی ہوئی پوسٹ اپنی دکھنے کی سیٹنگ سے پھر سے واپس لائی جا سکتی ہے۔",
-      "voice": "آواز اور لہجہ",
-      "knowledge": "حوالے کا مواد",
-      "blocked": "بلاک کیے گئے موضوع، کوما سے الگ کرو",
-      "saved": "سیٹنگ محفوظ ہو گئی۔",
-      "title": "ایجنٹ ورک اسپیس",
-      "library": "ٹیمپلیٹ اور ٹاسک بلڈر",
-      "subject": "موضوع یا جواب کا انداز",
-      "empty": "ابھی تک کوئی ملتی سرگرمی نہیں۔",
-      "approve": "منظور کرو اور چلاؤ",
-      "growthResult": "{{followers}} فالوئر · {{following}} فالو کیے",
-      "runs": "{{runs}} حالیہ رن · {{completed}} پورے ہوئے · {{failed}} فیل ہوئے",
-      "count": {
-        "pending": "دیکھنے کے واسطے ڈرافٹ",
-        "succeeded": "حالیہ کامیابی",
-        "scheduled": "طے شدہ ٹاسک",
-        "active": "فعال ایجنٹ"
-      },
-      "builder": {
-        "curate": "متعلقہ پوسٹ پسند کرو",
-        "post": "ایک پوسٹ لکھو",
-        "news": "خبر پر رد عمل دو",
-        "reply": "تازہ پوسٹ کا جواب دو"
-      },
-      "news": {
-        "technology": "ٹیکنالوجی",
-        "sport": "کھیل",
-        "science": "سائنس",
-        "world": "دنیا",
-        "culture": "ثقافت"
-      },
-      "agent": "ایجنٹ",
-      "filter": "سرگرمی فلٹر کرو",
-      "moderation": "اسٹریم ماڈریشن",
-      "streamId": "اسٹریم پوسٹ ID",
-      "participant": "شریک کا بٹوا",
-      "participantHint": "شریک کا بٹوا (0x…)",
-      "timeout": "ٹائم آؤٹ سیکنڈ",
-      "submitTimeout": "ٹائم آؤٹ لگاؤ",
-      "handled": "درخواست نپٹ گئی۔ آڈٹ لاگ دیکھو۔",
-      "webhookHelp": "منظوری کی درخواست اور کام فیل ہونے پر ایک عام الرٹ جاتا ہے، گھنٹے میں زیادہ سے زیادہ ایک بار۔ ڈرافٹ کا متن یا بٹوا کی تفصیل نہیں بھیجی جاتی۔ بند کرنے کے واسطے خالی چھوڑ دو؛ پہنچنے کا نتیجہ آڈٹ لاگ میں دکھے گا۔",
-      "confirmCorrection": "یہ شائع ہوئی سرگرمی کو بدل دے گا۔ مٹایا ہوا تبصرہ واپس نہیں آ سکتا۔",
-      "correction": "درستی",
-      "alert": "الرٹ",
-      "shared": "شیئر کیا ہوا",
-      "controls": "آواز، اجازت اور خبریں",
-      "scope": "یہ کنٹرول طے شدہ ٹاسک، خود مختار زندگی اور جڑے ہوئے اسسٹنٹ پر لاگو ہوتے ہیں۔ ڈرافٹ تب تک پرائیویٹ رہتے ہیں جب تک تم منظور نہ کرو۔",
-      "liveNews": "خود مختار زندگی کے دوران تازہ خبروں پر رد عمل دو",
-      "newsHelp": "زیادہ سے زیادہ تین موضوع چنو۔ پچھلے 24 گھنٹے کی پبلشر رپورٹ 15 منٹ تک کیش رہتی ہے۔ خبر پر رد عمل میں ذریعہ کا لنک رہتا ہے؛ جو خبر نہیں ملی یا پرانی ہے وہ چھوڑ دی جاتی ہے۔",
-      "sample": "سرگرمی اور الرٹ میں تازہ 100 کارروائیاں اور 200 ٹاسک آتے ہیں۔ یہ گنتی شروع سے اب تک کا کل جوڑ یا بلنگ کا استعمال نہیں ہے۔",
-      "growth": "بڑھت کی رپورٹ لو",
-      "baseline": "پہلا اسنیپ شاٹ؛ ملانے کے واسطے بعد میں ایک اور لو۔",
-      "useBuilder": "یہ ہدایات استعمال کرو",
-      "planValidated": "پلان کی تصدیق ہو گئی",
-      "builderHelp": "ایک ٹیمپلیٹ چنو، کارروائی، سامعین اور شیڈول بتاؤ، پھر چلانے سے پہلے آزما کے دیکھو۔ شیئر کیے ہوئے ٹیمپلیٹ ان کے لکھنے والوں کی ہدایات ہیں، جانچی ہوئی صلاحیت نہیں۔",
-      "simulate": "پلان آزماؤ",
-      "allowed": "اجازت ہے",
-      "templateName": "ٹیمپلیٹ کا نام",
-      "share": "یہ ٹیمپلیٹ ایجنٹ چلانے والے دوسرے لوگوں کے ساتھ شیئر کرو",
-      "saveTemplate": "ٹیمپلیٹ محفوظ کرو",
-      "templateSaved": "ٹیمپلیٹ محفوظ ہو گیا۔",
-      "history": "ڈرافٹ ان باکس اور آڈٹ لاگ",
-      "reject": "نامنظور کرو",
-      "growthChange": "فالوئر میں بدلاؤ: {{time}} سے {{count}}",
-      "autonomous": "خود مختار",
-      "approval": "پہلے منظور کرو",
-      "draft": "صرف ڈرافٹ",
-      "cadence": {
-        "once": "ایک بار",
-        "daily": "روزانہ",
-        "twice": "دن میں دو بار"
-      },
-      "dehub_post_create": "پوسٹ شائع کرو",
-      "dehub_comment": "جواب دو اور تبصرہ کرو",
-      "dehub_vote": "پوسٹ پر رد عمل دو",
-      "dehub_follow": "اکاؤنٹ فالو کرو",
-      "dehub_update_profile": "پروفائل بدلو",
-      "dehub_stream_timeout": "اسٹریم چیٹ کی ماڈریشن کرو",
-      "alerts": "دھیان دینا ہے",
-      "action": "کارروائی",
-      "schedule": "شیڈول"
+      "count": {},
+      "builder": {},
+      "news": {},
+      "cadence": {}
     }
   },
+  "hero": {},
+  "creators": {},
   "loginModal": {
     "invalidImportSecret": "Kərək bir sər key ya da seed frəzəni daxil edin.",
+    "walletConnectedAs": "जुड़ गया",
     "magicLinkSentTo": "आम्हे एक जादू लिंक पठवले",
     "magicLinkWaiting": "कोनो भी डिवाइसमे ईमेल खोलो आने बटन दबाओ — तुम यहां आपोआप साइन इन हो जाओगे, आने जिस डिवाइसमे तुम लिंक खोलले हो उस पर भी।",
     "waitingForLink": "तुम्हारे पुष्टि करे के लिए प्रतीक्षा करत आछो…",
@@ -878,20 +886,27 @@
     "codeSentTo": "भेजले गए 6-अंकीय कोड दर्ज करो",
     "resendCodePhone": "गलत नंबर या कोड नहीं? वापस जाओ",
     "continueAs": "इस रूप में जारी रखो",
-    "walletLoadFailed": "वॉलेट लोड नहीं कर सके। कृपया फिर से कोशिश करो।"
+    "walletLoadFailed": "वॉलेट लोड नहीं कर सके। कृपया फिर से कोशिश करो।",
+    "openInBrowser": "ब्राउज़र में खोला"
   },
   "careers": {
     "instagram": "Instagram",
     "linkedin": "LinkedIn"
   },
   "dao": {
+    "contributeIntro": "अपने वॉलेट से खजाने में Riftn टोकन भेजें। आप जितना अधिक टोकन जोड़ेंगे, पूल में आपकी हिस्सेदारी उतनी ही बढ़ेगी, और जब DAO यह तय करेगा कि इसे कैसे खर्च किया जाए तो आपके वोट का वजन आपकी हिस्सेदारी से तय होगा।",
     "amountLabel": "Amount (tokens)",
+    "youHold": "आपके पास {{amount}} टोकन हैं",
     "sendAmount": "Send {{amount}} tokens",
+    "sentDesc": "{{amount}} टोकन {{chain}} को ट्रेजरी में भेजे गए। ब्लॉक इंडेक्स होने पर आपका शेयर अपडेट हो जाएगा।",
+    "sendAnyWallet": "कोई भी किसी भी वॉलेट या एक्सचेंज से डीहब टोकन यहां भेज सकता है। बेस और বিএনबी पर ट्रांसफर आपके शेयर में गिने जाते हैं।",
     "yourContribution": "{{amount}} tokens contributed",
+    "pooledTotal": "{{amount}} टोकन पूल किए गए",
     "votingClosed": "मतदान बंद हो गया",
     "paymentUnderReview": "भुगतान समीक्षा के अंतर्गत",
     "acceptedAwaitingPayment": "स्वीकृत · भुगतान की प्रतीक्षा में",
     "voteWithdrawn": "वोट वापस लिया गया",
+    "voteRecorded": "वोट दर्ज भइल",
     "voteFailed": "वोट रिकॉर्ड नहीं कर सके",
     "status": {
       "accepted": "Accepted"
@@ -899,14 +914,18 @@
   },
   "governance": {
     "addMedia": "फोटो या वीडियो जोड़ें",
+    "badgeHoldersOnly": "सिर्फ बैज होल्डर खातिर",
     "decidedInTabs": "निर्णय लिए गए प्रस्ताव 'पास' और 'रिजेक्टेड' टैब में हैं।",
     "freeForBadgeHolders": "बैज धारकों के लिए मुफ्त। आप जैसे-जैसे टाइप करते हैं, आपका ड्राफ्ट सेव होता जाता है।",
     "mediaTypeInvalid": "एक फोटो या वीडियो चुनें।",
     "noOpenProposals": "Abhi koi proposal khula nai hai",
     "uploadFailed": "अपलोड विफल रहा",
     "uploadFailedDetail": "{{message}}",
+    "holdTokensToVote": "वोट करने के लिए डीहब टोकन रखें",
+    "mustHoldTokens": "गवर्नेंस प्रस्तावों पर वोट करने के लिए आपके पास डीहब टोकन होने चाहिए।",
     "forLabel": "पक्ष में",
     "againstLabel": "विरोध में",
+    "discussion": {},
     "closesInDays": "{{count}}d बाकी",
     "closesInHours": "{{count}}h बाकी",
     "closesInMinutes": "{{count}}m बाकी",
@@ -917,7 +936,11 @@
   },
   "comments": {
     "showAll": "Nang show ko tanan nga mga komento",
-    "kidsOnlyThread": "ई पोस्ट बच्चन के लिए छै। सिर्फ किड्स मोड ई पर कमेंट कर सकत छै।"
+    "kidsOnlyThread": "ई पोस्ट बच्चन के लिए छै। सिर्फ किड्स मोड ई पर कमेंट कर सकत छै।",
+    "share": "शेयर कर",
+    "linkCopied": "Bağlantı kopyalandı",
+    "editFailed": "Uređivanje komentara nije uspelo",
+    "anonymousLikes_other": "{{count}} अनाम बैज धारकों से पसंद"
   },
   "mintChain": {
     "title": "Mint post",
@@ -931,6 +954,7 @@
     "priceUnavailable": "Price unavailable",
     "confirm": "Mint on {{chain}}"
   },
+  "postEditHistory": {},
   "postInfo": {
     "unavailable": "उपलब्ध नखे",
     "ownersUnavailable": "अभी मौजूदा मालिक मनके पढ़ल नी जाय सकेला।",
@@ -942,14 +966,21 @@
     "visibilityUpdated": "Visibility update ho gaya",
     "visibilityFailed": "Visibility update nahi ho saka"
   },
+  "profileOptions": {},
   "toasts": {
     "reactionTip": "आउर रिएक्सन ले लाइक बटन में माउस ले जाऊ या दबाय के रखू",
     "wallet_unlocked": "Wallet खुल गेल",
     "reported_for_moderation": "बैज धारकों द्वारा विकेंद्रीकृत मॉडरेशन के लिए रिपोर्ट किया गया",
     "no_dhb_balance": "No token balance",
+    "no_dhb_tokens_either_chain": "आपके पास दोनों चेन पर डीहब टोकन नहीं हैं।",
+    "dhb_found_on_both_chains": "दोनों चेन पर टोकन मिले",
     "staking_dhb": "Staking tokens...",
+    "dhb_token_not_configured": "{{chain}} के लिए डीहब टोकन कॉन्फ़िगर नहीं किया गया है।",
+    "dhb_staked_on_chain": "{{chain}} पर {{amount}} टोकन स्टेक किए गए हैं।",
+    "turn_on": "चालू कर",
     "push_display_failed_body": "ई ब्राउजर एक नोटिफिकेशन डिस्प्ले नहीं कर सकल, तो कोनो भी तुमा तक नहीं पहुंच रहल। तुमार सिस्टम सेटिंग्स कारण नहीं हे — ब्राउजर आपे ही फेलियर रिपोर्ट करल।",
     "push_tab_only_body": "ई ब्राउजर बैकग्राउंड नोटिफिकेशन के लिए रजिस्टर नहीं होत, तो Riftn बंद रहत समय कुछु नहीं पहुंचत।",
+    "not_now": "এখন নোয়ায়",
     "image_too_large_tier": "तस्वीर बहुत बड़ी है — तुम्हारे {{tier}} स्तर की दुकानें {{limit}} MB तक की तस्वीरें रखती हैं",
     "image_too_large_untiered": "तस्वीर बहुत बड़ी है — तस्वीरें {{limit}} MB तक संग्रहीत की जाती हैं",
     "waiting_for_wallet": "तुमार वॉलेट का इंतजार करत हवे",
@@ -985,8 +1016,10 @@
       "pinnedGif": "GIF",
       "jumpToPinned": "पिन्ड संदेश पर कूदें",
       "slowModeWait": "Slow mode — wait {{time}}",
+      "send": "भेजें",
       "deleteMessageTitle": "ई संदेश हटाव?",
-      "deleteMessageBody": "ई बात उलट नहीं हो सकै."
+      "deleteMessageBody": "ई बात उलट नहीं हो सकै.",
+      "cancel": "रद्द करव"
     },
     "activitySearch": "Search activity...",
     "activityNew": "{{total}} new",
@@ -1012,10 +1045,12 @@
       "typeNameToConfirm": "{{name}}",
       "invites": {
         "chipExhausted": "सीमा पहुँच गेल",
+        "copied": "Bağlantı kopyalandı",
         "joined": "{{n}} jojaye",
         "expiredWhen": "{{when}}",
         "expires": "समाप्त होवे {{when}}",
         "revokeBody": "Kimiye ki linki bu hala var ise linki kullanamayacaklar. Artık katılanlar üye kalacaklar.",
+        "cancel": "रद्द करव",
         "expiryNever": "Nevir",
         "limitNone": "Nanawatīn.",
         "namePlaceholder": "Twitteri drop",
@@ -1094,13 +1129,32 @@
     "suggestion4": "ଟେକ୍ ଫାଉଣ୍ଡର୍ ସବୁ ଆର୍ ଷ୍ଟାର୍ଟଅପ୍ ସବୁ",
     "suggestion5": "ଫୁଟ୍‌ବଲ୍‌ର୍ ଭଲ୍ ସର୍ତେ ସବୁ"
   },
+  "arcade": {},
   "stats": {
+    "community": {
+      "title": "समुदाय",
+      "active": "চালু নিবন্ধিত ব্যবহারকারী",
+      "newMembers": "নয়া সদস্য",
+      "chartMembers": "সময়ের সাথে সদস্য",
+      "chartActive": "চালু নিবন্ধিত ব্যবহারকারী"
+    },
     "range": {
+      "3d": "3 दिन",
+      "7d": "৭ দিন",
+      "30d": "৩০ দিন",
       "1y": "1 साल"
     },
+    "unavailable": {},
+    "tile": {},
+    "chart": {},
+    "countries": {},
+    "browsers": {},
+    "edge": {},
     "proof": {
-      "ray": "Cloudflare ray ID"
+      "ray": "Cloudflare ray ID",
+      "copied": "कॉपी हो गइल"
     },
+    "definitions": {},
     "feedback": {
       "title": "फिडबैक",
       "intro": "Riftn के साथ कुछ समय से उपयोग कर रहे हैं? हमें बताएं कि यह कैसा रहा है। अच्छा, बुरा या विशिष्ट — सब कुछ पढ़ा जाता है। यदि आप हमें आपको उद्धृत करने के लिए खुश हैं, तो बॉक्स को टिक करें और हम इसे पोस्ट, वीडियो या साइट पर उपयोग कर सकते हैं।",
@@ -1158,6 +1212,7 @@
     }
   },
   "superpowers": {
+    "stakeDhb": "टोकन स्टेक कर",
     "actsPost": "Ek post pe amal karta hai. Chunne ke liye tap karein.",
     "actsGift": "Ek tohfa — yeh kisi aur ki post pe aata hai. Chunne ke liye tap karein.",
     "actsComment": "Kisi aur ke thread mein aapke comment pe amal karta hai. Chunne ke liye tap karein.",
@@ -1175,7 +1230,31 @@
     "noStages": "Aapka koi bhi Stage abhi live ya scheduled nahi hai.",
     "noFlaresLeft": "Is cycle mein koi Signal Flare nahi bacha hai",
     "spentFor": "{{power}} {{minutes}} minute ke liye chal raha hai",
-    "goldenHourStarted": "د سرو زرو ساعت د {{minutes}} دقیقو لپاره روان دی — هر څه چې تاسو اوس پوسټ کوئ دوه چنده حساب کیږي"
+    "teamUp": {
+      "title": "দল বানাও",
+      "subtitle": "তোমার ওয়ালেটের শক্তি আরও সাতজনের সাথে মিলাও। মোট যে ব্যাজ খোলে, সবাই সেইটা পরে।",
+      "signInPrompt": "দল বানাইতে বা যোগ দিবার জন্য সাইন ইন করো। কোনো ব্যাজ লাগে না।",
+      "signIn": "साइन इन",
+      "pooled": "{{amount}} टोकन पूल किए गए",
+      "noBadgeYet": "এখনো কোনো ব্যাজ নাই",
+      "removeBody": "{{team}} থাকি {{name}}-ক সরাইবেন?",
+      "removeFailed": "সেই সদস্যক সরানো গেল না",
+      "leave": "দল ছাড়ো",
+      "leaveBody": "{{name}} ছাড়িবেন?",
+      "left": "তুমি দল ছাড়ি দিলা",
+      "leaveFailed": "সেই দল ছাড়া গেল না",
+      "make": "দল বানাও",
+      "makeHint": "তুমি মালিক হবা। দলের নাম প্রকাশ্য।",
+      "namePlaceholder": "দলের নাম",
+      "created": "দল বানানো হইল",
+      "createFailed": "সেই দল বানানো গেল না",
+      "join": "দলত যোগ দেও",
+      "joinHint": "একবারে খালি একটা দলতে থাকির পারবেন।",
+      "searchPlaceholder": "দল খুঁজো",
+      "none": "কোনো দল পাওয়া গেল না।",
+      "joined": "{{name}}-ত যোগ দিলা",
+      "joinFailed": "সেই দলত যোগ দেওয়া গেল না"
+    }
   },
   "work": {
     "integrity": {
@@ -1211,8 +1290,12 @@
       "viewSource": "View count source",
       "viewSourceUrl": "View count source URL"
     },
+    "subtitle": "एक बाउंटी पोस्ट करें या एक खोजें। Riftn टोकन या USDC में भुगतान किया गया।",
+    "myBounties": "हमर इनाम",
+    "emptyFilteredHistory": "ई फिल्टर से कोनो इनाम नी मिलेला।",
     "typeShill": "Shill",
     "typeShillShort": "Shill",
+    "statusCancelled": "रद्द कएलक",
     "statusRejected": "rejected",
     "statusAwarded": "awarded",
     "statusPaid": "paid",
@@ -1227,19 +1310,60 @@
     "maxUnitsPlaceholder": "100",
     "backToBounties": "Back to Bounties",
     "backToBounty": "Back to bounty",
+    "editTitle": "इनाम बदला",
+    "typeLockedNote": "{{type}} · पोस्ट करे कर बाद इनाम कर किसिम नी बदले पारबा।",
+    "cancel": "रद्द करव",
+    "saving": "सहेजल जाथे…",
+    "lockedFunded": "एस्क्रो पहिले से ऑन-चेन में पइसा से भरल हे, से सरत मन बंद हें।",
+    "lockedApplied": "लोग पहिले से आवेदन करला या काम जमा करला, से सरत मन बंद हें।",
+    "lockedUnderway": "ई इनाम पहिले से चलत हे, से सरत मन बंद हें।",
+    "signInToEdit": "आपन पोस्ट करल इनाम बदले ले साइन इन करा।",
+    "onlyPosterCanEdit": "खाली पोस्ट करे वाला ई इनाम के बदले पारी।",
+    "statusNotEditable": "{{status}} हालत वाला इनाम के अब नी बदले पारबा।",
+    "signIn": "साइन इन",
+    "historySubtitle": "हर इनाम जेके तोंय पोस्ट करला या जे में काम करला, पूरा होवल मन के मिलाय के।",
+    "connectTitle": "आपन वॉलेट जोड़ा",
+    "connectBody": "आपन पोस्ट करल या काम करल इनाम देखे ले जोड़ा।",
+    "connectCta": "वॉलेट जोड़ा",
+    "tabPosted": "हमर पोस्ट करल",
+    "tabWorked": "जे में काम करली",
+    "searchByTitle": "नाम से खोजा…",
+    "allStatuses": "सब हालत",
+    "loadFailed": "तोहर इनाम लोड नी होवे पारलक।",
+    "emptyPosted": "तोंय अभी तक कोनो इनाम पोस्ट नी करला।",
+    "emptyWorked": "तोंय अभी तक कोनो इनाम में काम जमा नी करला।",
     "browseBounties": "Browse bounties",
     "escrowTx": "Escrow tx",
+    "notEscrowedOnChain": "ऑन-चेन एस्क्रो में नखे",
     "untitledBounty": "Untitled bounty",
     "payoutTx": "Payout tx",
+    "acceptedNotSent": "मान लेवल गेलक — पइसा अभी तक नी भेजल गेलक।",
     "edit": "Düzenle",
     "escrowFunded": "Escrow funded",
     "apply": "Uygula",
     "rejectedReason": "Rejected: {{reason}}",
+    "approveOnly": "खाली मंजूर करा",
     "payAmount": "Pay {{amount}}",
+    "adminsOnly": "खाली एडमिन मन ले",
+    "adminsOnlyBody": "ई वॉलेट पंच मन कर सूची में नखे। झगड़ा निपटाय ले, एके ऐप कर कॉन्स्टेंट फाइल में पंच कॉन्स्टेंट में जोड़ा:",
+    "disputesIntroEscrowed": "एस्क्रो में रखल पइसा के काम करे वाला आउर पोस्ट करे वाला कर बीच बांटा। ऑन-चेन कॉल आउर डेटाबेस कर हालत कर अपडेट एके संगे होवेला।",
     "disputesIntroLedger": "Record how each dispute was settled. No bounty is escrowed on-chain, so the split below is the written decision — tick \"pay the worker now\" to send their share from your own wallet as part of resolving.",
+    "noDisputes": "कोनो खुला झगड़ा नखे 🎉",
+    "untitled": "बिना नाम",
+    "openedBy": "खोले वाला",
+    "unreleased": "{{amount}} {{currency}} नी छोड़ल गेलक",
     "onchainId": "on-chain id: {{id}}",
     "notEscrowed": "not escrowed",
-    "addressPlaceholder": "0x…"
+    "paying": "पइसा देवल जाथे",
+    "workerAddress": "काम करे वाला कर पता",
+    "addressPlaceholder": "0x…",
+    "workerAmount": "काम करे वाला कर रकम ({{currency}})",
+    "posterRefund": "पोस्ट करे वाला के वापसी ({{currency}})",
+    "sendToWorker": "काम करे वाला के {{amount}} {{currency}} भेजा",
+    "fromYourWalletNow": " — तोहर वॉलेट ले, अभी, निपटारा कर हिस्सा बतौर।",
+    "disputeTotal": "कुल: {{total}} / {{remaining}} {{currency}}",
+    "resolveAndPay": "निपटावा आउर पइसा दा",
+    "resolve": "निपटावा"
   },
   "stores": {
     "podToggle": "प्रिंट-ऑन-डिमांड आइटम",
@@ -1261,6 +1385,8 @@
     "sortPriceDesc": "Price: High → Low",
     "priceRange": "Price Range (USD)",
     "min": "Min",
+    "reset": "रीसेट",
+    "done": "हो गेल",
     "soldOut": "SOLD OUT",
     "unknownStore": "Unknown Store",
     "shareStore": "Share store",
@@ -1268,6 +1394,7 @@
     "tabMyListings": "My Listings",
     "selectStore": "Select store",
     "earned": "earned",
+    "orderCancelled": "रद्द कएलक",
     "storeNameLabel": "Store Name *",
     "createStore": "Create Store",
     "uploadFailedWith": "Upload failed: {{message}}",
@@ -1277,6 +1404,7 @@
     "messageSeller": "Message Seller",
     "notePlaceholder": "Any special requests...",
     "buyNow": "Buy Now",
+    "confirmingPayment": "পেমেন্ট নিশ্চিত হইতেছে…",
     "soldOutButton": "Sold Out",
     "createListing": "Create Listing",
     "editListing": "Edit Listing",
@@ -1288,6 +1416,7 @@
     "condLikeNew": "Like New",
     "digitalItem": "Digital Item",
     "listingUpdated": "Listing updated!",
+    "cancel": "रद्द करव",
     "sellerResponse": "Seller Response",
     "fullNamePlaceholder": "John Doe",
     "street": "Street Address *",
@@ -1298,13 +1427,27 @@
     "country": "Country *"
   },
   "stages": {
+    "upcoming": "Gelecek",
+    "cancel": "रद्द करव",
     "end": "End",
     "seoHeading": "Riftn Stages, Live Audio Rooms, Decentralised & Censorship Resistant",
     "stageDeleted": "Stage deleted",
     "resume": "बायोडाटा",
     "ended": "समाप्त",
     "liveNowBadge": "LIVE NOW",
+    "stopAndClose": "रोक और बंद",
+    "linkCopied": "Bağlantı kopyalandı",
+    "descriptionLabel": "বিবরণ (ঐচ্ছিক)",
+    "yourStageTitle": "तुमच्या स्टेजचे शीर्षक",
+    "removeCover": "कव्हर ग्राफिक काढा",
+    "addGraphic": "ग्राफिक जोडा",
+    "uploadingCover": "कव्हर अपलोड करत आहे...",
+    "scheduleStage": "स्टेज शेड्यूल करा",
+    "frontRowFailed": "फर्स्ट रो घेता आली नाही",
+    "minimize": "लहान करा",
+    "goLiveNow": "आता लाईव्ह व्हा",
     "back": "वापस",
+    "goLive": "लाईव्ह जा",
     "youAreSharing": "तूँ अपन स्क्रीन बाँट रहल हँ",
     "screenShare": "Screen share",
     "fullscreen": "Fullscreen",
@@ -1320,14 +1463,20 @@
     "perMinute": "{{price}}/min",
     "notNow": "Not now",
     "paying": "Paying…",
+    "pay": "भुक्तानी गर्नुहोस्",
+    "transcript": "প্রতিলিপি",
     "transcriptUnavailable": "Transcript unavailable",
     "transcriptUnavailableWith": "Transcript unavailable: {{error}}",
+    "translationFailed": "অনুবাদ ব্যর্থ হইল। আরেক ভাষা চেষ্টা করেন।",
     "detectedLanguage": "{{language}}",
     "shareStageLink": "स्टेज लिंक शेयर करो",
+    "transcribing": "প্রতিলিপি হইতেছে — একটু সময় লাগির পারে",
+    "transcribeFailed": "প্রতিলিপি শুরু করা গেল না",
     "couldNotUpdatePrivacy": "गोपनीयता अपडेट नहीं हो सकी",
     "tuningIn": "Tuning in…",
     "streamDropped": "Stream dropped — pick another",
     "stopped": "Stopped",
+    "next": "अगला",
     "monitor": "Monitor",
     "stations": "Stations",
     "myMusic": "My music",
@@ -1337,8 +1486,11 @@
     "addMusic": "Add music",
     "yourMusic": "Your music",
     "unknownStation": "Unknown station",
+    "textToSpeech": "টেক্সট-টু-স্পিক",
     "listenersWillHear": "दुसर भाषा के सुनइया लोग तोहर बात सुनथिन।",
     "record": "Rekord",
+    "discardRecording": "রেকর্ডিং বাদ দেন",
+    "autoEnd": {},
     "deleteRecordingFailed": "रिकॉर्डिंग डिलीट नहीं हो सकल",
     "deleteStageFailed": "स्टेज डिलीट नहीं हो सकल"
   },
@@ -1347,6 +1499,7 @@
     "last14Days": "पिछला 14 दिन",
     "campaigns": "अभियान",
     "creditATransaction": "ट्रांजेक्शन क्रेडिट करो",
+    "cancel": "रद्द करव",
     "adsBalanceTopUp": "विज्ञापन बैलेंस टॉप-अप",
     "verifyingOnChain": "ऑन-चेन वेरिफाई हो रहल...",
     "topUpFailed": "टॉप-अप असफल।",
@@ -1357,11 +1510,15 @@
     "leaveAsDraft": "ड्राफ्ट के रूप में छोड़ो",
     "stepCreative": "क्रिएटिव",
     "stepAudience": "दर्शक",
+    "stepReview": "समीक्षा",
     "yourBrand": "तुमार ब्रांड",
     "toppedUpAndSubmitted": "बैलेंस टॉप अप हो गेल — कैंपेन रिव्यू के लिए सबमिट हो गेल",
     "draftTopUpFromCampaigns": "ड्राफ्ट के रूप में सेव हो गेल — टॉप अप करो और कैंपेन से सबमिट करो",
     "objectiveAwareness": "ब्रांड जागरूकता",
+    "format": "ফরম্যাট",
+    "headline": "শিরোনাম",
     "ctaLink": "CTA link",
+    "langRussian": "Venäjä",
     "langTurkish": "Turki",
     "contentCategoriesHint": "मिलते-जुलते कंटेंट के पास प्लेसमेंट पसंद करो।",
     "followersOfCreators": "क्रिएटर के फॉलोअर"
@@ -1371,27 +1528,136 @@
   },
   "fractions": {
     "title": "फ़्रैक्शन",
+    "perUpload": "हर अपलोड में 1000",
+    "tabBrowse": "देखा",
+    "tabPortfolio": "पोर्टफोलियो",
+    "tabPortfolioCount": "पोर्टफोलियो ({{count}})",
+    "tabActivity": "गतिविधि",
+    "postNumber": "पोस्ट #{{id}}",
+    "justNow": "अभी-अभी",
+    "minutesAgo_one": "{{count}} मिनट पहिले",
+    "minutesAgo_other": "{{count}} मिनट पहिले",
+    "hoursAgo_one": "{{count}} घंटा पहिले",
+    "hoursAgo_other": "{{count}} घंटा पहिले",
+    "daysAgo_one": "{{count}} दिन पहिले",
+    "daysAgo_other": "{{count}} दिन पहिले",
+    "statusSettled": "निपट गेलक",
+    "statusAwaitingFractions": "फ़्रैक्शन कर इंतजार",
+    "statusAwaitingPayment": "भुगतान कर इंतजार",
+    "fractionCount_one": "{{count}} फ़्रैक्शन",
+    "fractionCount_other": "{{count}} फ़्रैक्शन",
+    "fractionCountDot_one": "{{count}} फ़्रैक्शन ·",
+    "fractionCountDot_other": "{{count}} फ़्रैक्शन ·",
+    "trades": "सौदा",
+    "volume": "वॉल्यूम",
+    "avgPerFraction": "औसत / फ़्रैक्शन",
+    "nothingTradedYet": "अभी तक कोनो सौदा नी होय हे",
+    "sortNewest": "सबले नावा",
+    "sortCheapest": "सबले सस्ता",
+    "sortPriciest": "सबले महंगा",
+    "sortBiggestStake": "सबले बड़ हिस्सा",
+    "searchPlaceholder": "पोस्ट, क्रिएटर या पोस्ट नंबर खोजा",
+    "listingsFloor_one": "{{count}} लिस्टिंग · सबले कम दाम",
+    "listingsFloor_other": "{{count}} लिस्टिंग · सबले कम दाम",
+    "perFraction": "हर फ़्रैक्शन",
+    "noSearchMatch": "ई खोज से कुछो नी मिललक",
+    "noneForSale": "अभी कोनो फ़्रैक्शन बिक्री ले नखे",
+    "startTheMarketHint": "मिंट होल पोस्ट 1000 फ़्रैक्शन होवेला — बाजार चालू करे ले आपन कुछ फ़्रैक्शन लिस्ट करा।",
+    "yours": "तोहर",
     "perFractionShort": "/ fraction",
     "forShareOfPost": "पोस्ट का {{pct}}% के लिए",
+    "pctOfPost": "पोस्ट कर {{pct}}%",
     "overdueTitle_one": "{{count}} past the settlement deadline",
     "overdueTitle_other": "{{count}} ट्रेड सेटलमेंट डेडलाइन के बाद",
     "lateCount_one": "{{count}} late",
     "lateCount_other": "{{count}} late",
+    "newSellerTitle": "ई बेचेवाला अभी तक एको फ़्रैक्शन सौदा पूरा नी करे हे",
+    "newSeller": "नावा बेचेवाला",
+    "settledTitle_one": "{{count}} निपटल सौदा",
+    "settledTitle_other": "{{count}} निपटल सौदा",
+    "settledTitleSpeed": ", अकसर {{speed}} में",
+    "howMany": "केतना",
+    "availableCount_one": "{{count}} उपलब्ध",
+    "availableCount_other": "{{count}} उपलब्ध",
+    "seller": "बेचेवाला",
+    "pricePerFraction": "हर फ़्रैक्शन कर दाम",
+    "shareOfPost": "पोस्ट में हिस्सा",
+    "total": "कुल",
+    "sellerOnlyHolds_one": "बेचेवाला लग अभी खाली {{count}} फ़्रैक्शन हे — गिनती कम करा या दोसर लिस्टिंग चुना।",
+    "sellerOnlyHolds_other": "बेचेवाला लग अभी खाली {{count}} फ़्रैक्शन हे — गिनती कम करा या दोसर लिस्टिंग चुना।",
+    "paying": "भुगतान होवत हे…",
+    "ownListing": "ई तोहर आपन लिस्टिंग हेके",
+    "signInToBuy": "किने ले साइन इन करा",
+    "buyForTotal": "{{total}} में {{quantity}} किना",
+    "signInFirst": "पहिले साइन इन करा",
+    "cannotOfferOwn": "तोंय आपन फ़्रैक्शन में ऑफर नी कइर सकबा",
+    "offerSubmitFailed": "ऑफर नी भेजाएल",
+    "makeAnOffer": "ऑफर करा",
+    "makeAnOfferAction": "ऑफर करा",
+    "numberOfFractions": "फ़्रैक्शन कर गिनती",
+    "totalOfferValue": "ऑफर कर कुल दाम",
+    "offerVisibleNote": "तोहर ऑफर सब होल्डर के दिखी। ऊमन एके मान सकयना या मना कइर सकयना।",
     "submitting": "सबमिट हो रहल...",
+    "submitOffer": "ऑफर भेजा",
+    "settled": "निपट गेलक",
+    "payAction": "भुक्तानी गर्नुहोस्",
+    "sell": "बेचा",
+    "signInToSee": "आपन फ़्रैक्शन देखे ले साइन इन करा",
+    "yourFractions": "तोहर फ़्रैक्शन",
+    "acrossPosts_one": "{{count}} पोस्ट में",
     "acrossPosts_other": "{{count}} पोस्ट सभ में",
     "deletedPosts": "हटाए गए पोस्ट ({{count}})",
+    "noneHeldYet": "तोहर लग अभी कोनो फ़्रैक्शन नखे",
+    "listedForSale": "बिक्री ले लिस्ट",
+    "priceEach": "{{price}} हर एक",
     "listingCancelled": "Listing cancel bhail",
+    "cancelFailed": "रद्द नी होलक",
+    "cancel": "रद्द करा",
+    "offersYouMade": "तोहर करल ऑफर",
+    "offerWithdrawn": "ऑफर वापस लेल गेलक",
     "withdrawFailed": "विड्रॉ असफल",
+    "withdraw": "वापस लेवा",
+    "offersForYourFractions": "तोहर फ़्रैक्शन ले ऑफर",
     "review": "रिव्यू",
+    "noFractionsYet": "अभी कोनो फ़्रैक्शन नखे",
+    "profileEmptyOwn": "मिंट होल पोस्ट 1000 फ़्रैक्शन होवेला। आपन कोनो पोस्ट मिंट करा, नहीं तो जे पोस्ट में भरोसा हे ओकर में हिस्सा किना।",
+    "browseTheMarket": "बाजार देखा",
+    "sellFractions": "फ़्रैक्शन बेचा",
+    "balanceReadFailed": "अभी तोहर फ़्रैक्शन बैलेंस नी पढ़ाएल। एके बंद कइर के फिर कोसिस करा — बैलेंस बिना लिस्ट करले ऊ फ़्रैक्शन बिक सकेला जे अब तोहर लग नखे।",
+    "dontHoldAnyOfPost": "तोहर लग ई पोस्ट कर कोनो फ़्रैक्शन नखे।",
+    "allAlreadyListed_one": "तोहर {{count}} फ़्रैक्शन पहिले से लिस्ट हे।",
+    "allAlreadyListed_other": "तोहर सब {{count}} फ़्रैक्शन पहिले से लिस्ट हे।",
     "alsoAlreadyListed_one": "· {{count}} पहले से लिस्ट हो गेल",
     "alsoAlreadyListed_other": "· {{count}} पहले से लिस्ट हो गेल",
+    "all": "सब",
     "matchFloor": "मैच फ्लोर · {{price}}",
+    "youReceive": "तोंय पाबा",
+    "listingFreeNote": "लिस्ट करेक फ्री हे। जब कोनो किनी, तोके फ़्रैक्शन भेजे ले कहल जाई — तोहर लग 24 घंटा हे, आउर तोहर डिलीवरी रिकॉर्ड तोहर हर लिस्टिंग में दिखेला।",
+    "listingInProgress": "लिस्ट होवत हे…",
+    "listNFractions_one": "{{count}} फ़्रैक्शन लिस्ट करा",
+    "listNFractions_other": "{{count}} फ़्रैक्शन लिस्ट करा",
     "listedToast_other": "{{count}}  टोकन प्रति  {{price}}  टोकन सूचीबद्ध",
+    "overdueBy": "{{span}} देरी",
+    "timeLeft": "{{span}} बाकी",
     "postCounterparty": "Post #{{id}} · {{address}}",
+    "openTrades": "खुलल सौदा",
+    "sendFractions": "फ़्रैक्शन भेजा",
+    "payNow": "अभी भुगतान करा",
     "waitingOnSeller": "विक्रेता का इंतजार",
-    "you": "(you)"
+    "waitingOnBuyer": "किनेवाला कर इंतजार",
+    "forSaleTab": "Bikri ke liye",
+    "you": "(you)",
+    "reject": "मना करा"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Ye details ke istemal kare"
+      }
+    },
+    "cinema": {
+      "performance": {}
+    },
     "toolMaboroshi": "Maboroshi",
     "toolMaboroshiDesc": "Character aur object ke badlu, draft review karu, tab apna original soundtrack ke sath export karu.",
     "editorAssetUnsupported": "3D modeli timeline'a girmeyecektir. Modeli indirmelisiniz.",
@@ -1406,12 +1672,34 @@
     "presetExtraFoodOverheadName": "Upar se khana",
     "presetExtraFoodOverheadHint": "Upar se ek rang-birang table",
     "presetExtraDrinkSplashRingName": "Ḱḫḫḫ",
+    "presetExtraDrinkSplashRingHint": "জল স্নিগ্ধ একটি পানীয়ের চারণ",
+    "presetExtraCeramicPedestalName": "সারামিক পাদদলন",
+    "presetExtraCeramicPedestalHint": "শিল্পী বস্তু এবং শান্ত স্বরধ্বনি আলো",
+    "presetExtraSneakerDetailName": "স্নিকার বিবরণ",
+    "presetExtraSneakerDetailHint": "কাপড়, স্টিচিং এবং সোল টেক্সচার",
+    "presetExtraLinenStillLifeName": "লিনেন শান্ত জীবন",
     "presetExtraLinenStillLifeHint": "प्राकृतिक कपड़ा में शांत प्रोडक्ट स्टाइलिंग",
     "presetExtraBakeryWindowName": "Bakery window",
+    "presetExtraBakeryWindowHint": "সকালের আলোতে সোনালি পেস্ট্রি বিবরণ",
+    "presetExtraSplitLightPortraitName": "ভাগ আলো",
+    "presetExtraSplitLightPortraitHint": "একটি আলোকিত মুখ প্রান্ত, একটি মেঘলা ছায়া",
+    "presetExtraWindowRainPortraitName": "বৃষ্টির জানালা প্রতিকৃতি",
     "presetExtraWindowRainPortraitHint": "Ḫırdırma pencereler ve sükûnetli bir düşünceler dalgası",
+    "presetExtraSunsetRimPortraitName": "সূর্যাস্তের পরিধি",
+    "presetExtraSunsetRimPortraitHint": "গরম আলো ঘুম এবং কাঁধ বিন্যাস করে",
+    "presetExtraFreckleBeautyName": "ফ্রেকল কাছে",
+    "presetExtraFreckleBeautyHint": "প্রাকৃতিক ত্বক এবং শান্ত সৌন্দর্য আলো",
     "presetExtraGelLightBeautyName": "Gel light beauty",
     "presetExtraGelLightBeautyHint": "Amber va Violet studioyê xatirê",
+    "presetExtraAthleteFreezeName": "অ্যাথলেট ফ্রিজ",
+    "presetExtraAthleteFreezeHint": "একটি ক্রিস্প স্পোর্টিং মুহূর্ত সঙ্গে আসল ওজন",
+    "presetExtraStreetFlashName": "স্ট্রিট ফ্ল্যাশ",
+    "presetExtraStreetFlashHint": "সরাসরি ফ্ল্যাশ এবং ক্যান্ডিড শহর শক্তি",
+    "presetExtraDuotonePortraitName": "ডুটোন প্রতিকৃতি",
+    "presetExtraDuotonePortraitHint": "একটি গ্রাফিক দুই-রঙের ফটোগ্রাফিক প্রিন্ট",
+    "presetExtraRisoPrintName": "রিসোগ্রাফ প্রিন্ট",
     "presetExtraRisoPrintHint": "Dua ink, kagaz grain aur offset layers",
+    "presetExtraScreenprintPosterName": "স্ক্রীনপ্রিন্ট পোস্টার",
     "presetExtraScreenprintPosterHint": "मोटा आकार अऊ तीन चपटा स्याही रंग",
     "presetExtraCyanotypeStudyName": "Cyanotip stüdyosu",
     "presetExtraCyanotypeStudyHint": "Kalaçan çiçek silüetleri mavi arka plan",
@@ -1451,15 +1739,23 @@
     "presetExtraCafeMenuHint": "Natural kagaj upar padhe jaay aisan menu hierarchy",
     "presetExtraPodcastCoverHint": "Chok chhota size mein dikhe aisan chokor artwork",
     "presetExtraVerticalStoryHint": "ᱵᱟᱹᱨᱤᱭᱟᱹ ᱵᱟᱹᱨᱤᱭᱟᱹ",
+    "presetExtraTravelPostcardHint": "আমন্ত্রিত একটি গন্তব্য সাবলেখন প্রক্রিয়া",
+    "presetExtraSportsPosterName": "খেলার পোস্টার",
+    "presetExtraSportsPosterHint": "আকর্ষণীয় আচরণ এবং স্পষ্ট পোস্টার ক্রমবর্ধমান",
     "presetExtraIridescentGlassName": "Iridescent glass",
     "presetExtraIridescentGlassHint": "Pearlescent transparent sculptural forms",
     "presetExtraTopographicWavesName": "Topographic waves",
     "presetExtraTopographicWavesHint": "Layered contour lines become rolling forms",
     "presetExtraWovenPaperName": "Woven paper",
+    "presetExtraWovenPaperHint": "প্রতিসম ট্রিপ এবং স্পর্শক মানসিক ছায়া",
     "presetExtraLiquidMetalName": "Liquid metal",
+    "presetExtraLiquidMetalHint": "ফ্লুইড ক্রোম আকার সাথে শুদ্ধ প্রতিফলন",
     "presetExtraPrismShadowsName": "Prism shadows",
+    "presetExtraPrismShadowsHint": "স্পেকট্রাল আলো এবং নিয়ন্ত্রিত জ্যামিতি",
     "presetExtraMossMicroWorldName": "Moss micro-world",
+    "presetExtraMossMicroWorldHint": "ছোট প্রাকৃতিক আকার ম্যাক্রো স্কেলে",
     "presetExtraRackFocusName": "Rack focus",
+    "presetExtraRackFocusHint": "ফোকাস স্থান থেকে সামনের বিষয়বস্তু",
     "presetExtraSideTruckName": "Sideways truck",
     "presetExtraSideTruckHint": "एक सीधा पार्श्व चाल समांतर दृष्टि के साथ",
     "presetExtraPedestalRiseName": "Pedestal rise",
@@ -1467,7 +1763,9 @@
     "presetExtraLowFollowName": "Low follow",
     "presetExtraLowFollowHint": "Ground-level tracking beside moving feet",
     "presetExtraOverShoulderFollowName": "Over-shoulder follow",
+    "presetExtraOverShoulderFollowHint": "একটি আত্মীয় ফলো একটি রিয়েল স্পেস দ্বারা",
     "presetExtraDoorwayRevealName": "Doorway reveal",
+    "presetExtraDoorwayRevealHint": "একটি কালো থ্রেশহোল্ড উন্মোচন করে একটি আলোকিত স্কেন",
     "presetExtraReflectionSlideName": "Reflection slide",
     "presetExtraReflectionSlideHint": "एक कैमरा मूव से विषय और प्रतिबिंब दिखता है",
     "presetExtraOverheadQuarterTurnName": "Overhead quarter-turn",
@@ -1480,7 +1778,10 @@
     "presetExtraShadowDanceName": "छाया नाच",
     "presetExtraShadowDanceHint": "Ek asli parchhai lambat jala jab ujiyar badhele",
     "presetExtraDustReassemblyHint": "Ḫezanin yekta ṣedâ-yi mukemmâle birle gelir.",
+    "presetExtraNeonPulseHint": "একটি নরম পুলস আলোকিত পরিসীমার মধ্য দিয়ে ভ্রমণ করে",
     "presetExtraBottlePourName": "Bottle pûr",
+    "presetExtraBottlePourHint": "একটি ধীর প্রবাহ সহ বিশ্বাসযোগ্য তরল প্রবাহ",
+    "presetExtraPerfumeMistHint": "একটি পিছনে আলোকিত স্প্রে ফোটা ফোটা ছোট ছোট বিন্দু",
     "presetExtraWatchReflectionHint": "Ekta jhalak metal karigari ke dekhaye",
     "presetExtraChocolateBreakName": "Chocolate bhange",
     "presetExtraChocolateBreakHint": "Ekta safa snap textured bhitar ke dekhaye",
@@ -1550,16 +1851,28 @@
     "presetOpenCanyonTimelapseHint": "Golden hour se sandhya tak badal ke parchhai",
     "presetOpenRecordWhipPanHint": "Tungsten light mein tez pan shot, bhari motion blur ke sath",
     "presetOpenViaductTrainName": "Viadukt treni",
+    "presetOpenViaductTrainHint": "স্ট্যাটিক উইড সাথে আলোকিত জানালা এবং দীর্ঘ-লেন্স গভীরতা",
+    "generate": "বানাও",
+    "style": "স্টাইল",
+    "styleNone": "कोई नहीं",
     "imageUnit": "image",
+    "yourBalance": "তোমার ব্যালেন্স",
+    "processing": "प्रसंस्करण",
+    "payAction": "भुक्तानी गर्नुहोस्",
     "insufficientDhb": "पर्याप्त टोकन नहीं",
     "dhbPriceFailed": "टोकन मूल्य प्राप्त करने में विफल",
     "dhbPriceFallback": "टोकन मूल्य प्राप्त करने में विफल। फ़ॉलबैक का उपयोग किया जा रहा है।",
     "audioTaskSfxLabel": "ध्वनि प्रभाव",
     "audioTaskTranscribeLabel": "Transcribe",
+    "nothingGeneratedYet": "এখনও কিছু তৈরি হয়নি",
+    "cancelled": "रद्द कएलक",
     "somethingWentWrong": "Ibintu byagenze nabi",
+    "transcript": "প্রতিলিপি",
+    "editInTimeline": "Timeline mein edit karu",
     "voiceDesignFailed": "आवाज़ डिजाइन असफल भइल",
     "play": "खेल",
     "take": "Take {{number}}",
+    "presetGroupSound": "ध्वनि",
     "presetAdEnergeticName": "Ad Read",
     "presetSfxAmbienceName": "Ambians Bed",
     "presetMusicLofiName": "Lo-fi Bed",
@@ -1679,28 +1992,63 @@
   "pricing": {
     "monthly": "मासिक",
     "upToDiscount": "up to −{{pct}}%",
+    "percentOff": "{{pct}}% की छूट",
+    "featured": "विशेष",
+    "bestValue": "सर्वश्रेष्ठ मूल्य",
+    "headlineCreator": "AI निर्माण के साथ शुरुआत करने के लिए",
+    "headlineUltra": "AI प्रोजेक्ट बनाने वाले क्रिएटर्स के लिए",
     "headlineTeam": "Baray xanagaha iyo kooxaha yaryar si ay si dhakhso leh u abuuraan",
+    "headlineScale": "बढ़ती क्रिएटिव टीमों के लिए डिज़ाइन किया गया",
     "dhbPerMonth": "{{amount}}  टोकन/माह, आपके वॉलेट में भेजा गया",
     "dhbPerSeat": "{{amount}}  टोकन प्रति सीट/माह, आपके वॉलेट में भेजा गया",
+    "equivalence": "= {{videos}} {{videoModel}} वीडियो · {{images}} {{imageModel}} इमेज",
     "realDhbSpendAnywhere": "आपके वॉलेट में वास्तविक Riftn टोकन — कहीं भी खर्च करें, वे कभी समाप्त नहीं होते",
     "realDhbNeverExpires": "आपके वॉलेट में वास्तविक Riftn टोकन — वे कभी समाप्त नहीं होते",
+    "pooledNeverExpires": "वर्कस्पेस में पूल किया गया — कभी समाप्त नहीं होता",
+    "perMonthBilledAnnually": "प्रति माह, वार्षिक बिलिंग",
+    "perSeatBilledAnnually": "प्रति सीट/माह, वार्षिक बिलिंग",
     "perSeatMonthly": "प्रति सीट/महीना",
+    "savings": "मासिक की तुलना में ${{amount}} बचाएं",
+    "seats_one": "{{count}} सीट",
+    "seats_other": "{{count}} सीटें",
     "ctaGet": "Le {{plan}}",
+    "ctaChangeCommitment": "प्रतिबद्धता बदलें",
+    "groupIncluded": "शामिल",
+    "groupSeedance20": "सीडेंस 2.0",
+    "groupWorkspace": "वर्कस्पेस और सहयोग",
+    "groupAnalytics": "एनालिटिक्स और सहायता",
+    "groupAdmin": "व्यवस्थापक और नियंत्रण",
+    "groupSecurity": "सुरक्षा और अनुपालन",
+    "accessAllModels": "सभी मॉडल और सुविधाओं तक पहुंच",
+    "accessAllFeatures": "सभी सुविधाओं और मॉडलों तक पहुंच",
+    "accessAllSeedance": "सभी सीडेंस मॉडलों तक पहुंच",
+    "accessSeedance20": "सीडेंस 2.0 तक पहुंच",
+    "accessSupercomputer": "सुपरकंप्यूटर तक पहुंच",
+    "parallelGenerations": "समानांतर जनरेशन: {{videos}} वीडियो, {{images}} इमेज तक",
     "topUpAnyTime": "अपने स्वयं के Riftn टोकन से कभी भी टॉप अप करें",
+    "publishStraightToDehub": "सीधे डीहब पर प्रकाशित करें",
     "sharedDhbPool": "साझा टोकन पूल",
     "sso": "SSO"
   },
   "videoLooks": {
+    "on": "चालू",
     "vhs": "VHS"
   },
   "skills": {
+    "cancel": "रद्द करव",
+    "edit": "Düzenle",
+    "featured": "विशेष",
     "systemInstructionsRequired": "System instructions *",
     "nameRequired": "Name *",
     "kindImageShort": "image",
+    "filterFeatured": "विशेष",
+    "showAll": "सभी दिखाएं",
     "raw": "Raw"
   },
   "nftMarket": {
+    "actOffer": "ऑफर",
     "shortTitle": "NFTs",
+    "forSale": "Bikri ke liye",
     "mintedCount": "{{n}}",
     "showAll": "Show all",
     "seoTitle": "NFT Market: BNB ve Base'de NFT'ler satın sat | Riftn",
@@ -1760,7 +2108,10 @@
     "turnOnAlert": "Turn on alert",
     "fixedPrice": "Fixed price",
     "priceDrop": "Price drops over time",
-    "lasts": "Lasts"
+    "lasts": "Lasts",
+    "spotlightNew": "अभी मिंट किया गया",
+    "buyFor": "{{price}} के लिए खरीदें",
+    "signInToTradeCta": "व्यापार करने के लिए साइन इन करें"
   },
   "usernames": {
     "seoTitle": "Username Marketplace | Riftn",
@@ -1773,6 +2124,9 @@
     "shortOfDhbPaidOn": "आपके पास टोकन की कमी है — इसका भुगतान {{chain}}  पर किया जाएगा",
     "confirmingOnChain": "On-chain me confirm karat ha.",
     "transferGuarantee": "हैंडल केवल Riftn द्वारा आपकी टोकन हस्तांतरण को श्रृंखला से वापस पढ़ने के बाद ही चलता है। यदि यह नहीं कर सकता है, तो भुगतान बिक्री के विरुद्ध दर्ज किया जाता है ताकि विक्रेता आपको वापस कर सके।",
+    "priceUpdated": "Dam badal gelay. Rakam pah ani parat kharedi kara.",
+    "tokensPaidToSeller": "Plaćeno izravno prodavatelju",
+    "offerStatus": {},
     "sellingWornName": "हे तुमच्या प्रोफाइलचे हँडल आहे. ते विकल्यास तुम्ही दुसऱ्या नावाने ओळखले जाल.",
     "sellingHeldName": "हे नाव तुमच्या मालकीचे आहे पण तुम्ही ते वापरत नाही. ते विकल्यास तुमच्या प्रोफाइलमध्ये बदल होणार नाही.",
     "saleFinalWarningHeld": "विक्री अंतिम आणि त्वरित आहे. तुमचे स्वतःचे हँडल आणि तुमच्या प्रोफाइलवरील सर्वकाही जसे आहे तसे राहील — फक्त हे नाव बदलेल.",
@@ -1815,11 +2169,11 @@
     "transferGuarantee": "आपको पूरा खाता मिलता है — हैंडल, पोस्ट, अनुयायी, टिप्स इतिहास और बैज अधिकार। विक्रेता अपना वॉलेट और उसमें सब कुछ रखता है। हस्तांतरण केवल Riftn द्वारा आपकी टोकन भुगतान को श्रृंखला से वापस पढ़ने के बाद ही चलता है; यदि यह बाधित होता है, तो खरीद को फिर से शुरू करने से यह फिर से शुरू हो जाता है।"
   },
   "stories": {
+    "goLive": "लाईव्ह जा",
+    "video": "वीडियो",
+    "startLivestream": "লাইভস্ট্রিম শুরু করেন",
     "addText": "Add Text",
-    "likesCount_one": "{{value}} like",
-    "title": "کہانیاں",
-    "viewStory": "کہانی دیکھو",
-    "noStories": "ابھی تک کوئی کہانی نہیں"
+    "likesCount_one": "{{value}} like"
   },
   "subscriptions": {
     "subscribersOnly": "सदस्य मात्र",
@@ -1951,7 +2305,31 @@
     "youAreBanned": "आप इस क्रिएटर की स्ट्रीम्स में चैट नहीं कर सकते।",
     "youAreTimedOut": "आप थोड़ी देर के लिए टाइम आउट हैं।"
   },
+  "studioDeck": {
+    "background": {
+      "modes": {}
+    },
+    "scenes": {
+      "countdown": "उलटा गिनती",
+      "minutes": "{{count}} मिनट",
+      "names": {}
+    },
+    "sources": {
+      "camera": "कैमरा",
+      "show": "स्ट्रीम पर दिखाओ",
+      "positions": {},
+      "sizes": {},
+      "shapes": {}
+    },
+    "audio": {
+      "gateLevels": {}
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "states": {}
+    },
+    "vertical": {},
     "subathon": {
       "title": "सुबाथन",
       "intro": "आपकी स्ट्रीम पर एक उलटी गिनती। हर सशुल्क गिफ़्ट, फ़ॉलो और सब्सक्रिप्शन में समय लगता है, इसलिए कमरा आपको ज़िंदा रखता है।",
@@ -2006,6 +2384,9 @@
       }
     },
     "title": "Live Studio",
+    "visible": "स्ट्रीम पर दिखाओ",
+    "testMessage": "Tohre stream mein tip message aisan dikhela",
+    "saving": "बचत…",
     "saveFailed": "सेव न हो पाय। अपन कनेक्शन देखी आ फेर कोशिश कर।",
     "unsaved": "बिना सेव कएल बदलाव",
     "loadFailed": "विजेट लोड न हो पाय। पेज रिफ्रेश करि फेर कोशिश कर।",
@@ -2117,6 +2498,7 @@
       "enabled": "पर नियम",
       "remove": "नियम मिटाएँ",
       "save": "नियम सेव करें",
+      "when": "कब",
       "then": "फिर",
       "command": "कमांड",
       "audience": "इसे कौन बंद कर सकता है",
@@ -2158,6 +2540,7 @@
         "webhook": "वेबहुक पर भेजें",
         "wheel": "एक पहिया घुमाएँ"
       },
+      "summary": {},
       "presets": {
         "blank": "Blank rule",
         "readChat": "चैट ज़ोर से पढ़ें",
@@ -2224,11 +2607,41 @@
   },
   "live": {
     "shop": "दुकान",
+    "shopThisStream": "এই স্ট্রিম থাকি কিনেন",
     "buyNow": "एखन किन ले",
+    "lastOne": "শেষটা",
+    "stockLeft_one": "{{count}} बचल है",
+    "stockLeft_other": "{{count}} बचल है",
     "air": "Air",
+    "gettingPrice": "দাম আনা হইতেছে…",
     "transfersPaused": "टोकन हस्तांतरण रोक दिए गए हैं",
+    "notePlaceholder": "মাপ, রং, আর যা কিছু…",
+    "confirmingPayment": "পেমেন্ট নিশ্চিত হইতেছে…",
+    "products": "सामान-सुमन",
     "progress": {
-      "xp": "{{xp}} XP"
+      "xp": "{{xp}} XP",
+      "card": {
+        "first-light": {},
+        "marathon": {},
+        "night-owl": {},
+        "regular": {},
+        "iron-streak": {},
+        "crowd": {},
+        "century": {},
+        "legend": {},
+        "ignition": {},
+        "on-air": {},
+        "storyteller": {},
+        "broadcaster": {},
+        "centurion": {},
+        "enduring": {},
+        "circle": {},
+        "arena": {},
+        "headliner": {},
+        "cornerstone": {},
+        "veteran": {},
+        "icon": {}
+      }
     }
   },
   "goLive": {
@@ -2283,6 +2696,15 @@
     "keepStreaming": "स्ट्रीमिंग जारी रखें"
   },
   "events": {
+    "filterUpcoming": "Gelecek",
+    "loadFailed": "ইভেন্ট লোড করা গেল না",
+    "noPast": "কোনো আগের ইভেন্ট নাই",
+    "goingCount_one": "{{count}} জন যাইবে",
+    "goingCount_other": "{{count}} জন যাইবে",
+    "interestedCount_one": "{{count}} জন আগ্রহী",
+    "interestedCount_other": "{{count}} জন আগ্রহী",
+    "going": "যাইম",
+    "interested": "আগ্রহী",
     "coverImage": "कवर इमेज",
     "eventName": "Event Name *",
     "youAreCreator": "Tu es le créateur",
@@ -2292,28 +2714,53 @@
     "voiceNoteSent": "Voice note sent!"
   },
   "referral": {
+    "stats": {},
+    "copied": "कॉपी हो गइल",
+    "share": "शेयर कर",
     "moreDestinations": "शुरू करने की और जगहें"
   },
   "premium": {
     "seoTitle": "Riftn Extra: Premium Membership",
+    "connectWalletToSubscribe": "সাবস্ক্রাইব করির জন্যে তোমার ওয়ালেট যুক্ত করেন",
     "bestValue": "Best value",
     "openApp": "Open app →",
     "introducing": "Riftn Premium पेश छ",
     "heroLineOne": "Less noise.",
     "heroLineTwo": "More you.",
+    "heroBlurb": "विज्ञापन-रहित Riftn, पृष्ठभूमिमा प्लेब्याक, प्रिमियम ब्याज, र थप AI — महिनाको केही डलरमा।",
     "getDehubExtra": "Get Riftn Extra",
     "comparePlans": "Compare plans",
+    "alreadyTopStaker": "पहिले नै शीर्ष-स्तरको स्टेककर्ता हुनुहुन्छ?",
     "itsOnUs": "It's on us.",
     "perMonth": "/ month",
+    "extraTagline": "एकल प्रयोगकर्ताहरूका लागि जसले पूर्ण Riftn चाहन्छन्, सफा।",
+    "freeForTop7": "शीर्ष ७ स्टेकङ टियरका लागि निःशुल्क",
     "getExtra": "Get Extra",
+    "familyTagline": "तपाईं र तपाईंले रोजेका ५ जनासम्मका लागि प्रिमियम।",
+    "freeForTop4": "शीर्ष ४ स्टेकङ टियरका लागि निःशुल्क",
+    "familyIncludes": "सबै कुरा अतिरिक्तमा, ५ @प्रयोगकर्ता नामसम्मका लागि। प्रत्येक सिटले आफ्नै कोटा पाउँछ।",
     "getFamily": "Get Family",
+    "xlTagline": "सबै फाइदाहरू एसिडमा। स्टुडियो, DAO र पावर प्रयोगकर्ताहरूका लागि।",
+    "freeForTop2": "शीर्ष २ स्टेकङ टियरका लागि निःशुल्क",
     "firstFiftyOnly": "First 50 subscribers only",
     "cashback": "100% टोकन कैशबैक — आप हर महीने सदस्यता लेते समय $50 Riftn टोकन वापस पाएं।",
+    "xlIncludes": "सबै कुरा परिवारमा, २० @प्रयोगकर्ता नामसम्म विस्तार गरिएको अधिकतम AI र बूस्टहरू सहित।",
     "getExtraLarge": "Get Extra Large",
+    "stakerThankYou": "हाम्रा स्टेककर्ताहरूलाई धन्यवाद",
     "stakeGetPremium": "टोकन स्टेक करें। प्रीमियम प्राप्त करें।",
+    "stakeBlurb": "शीर्ष ७ स्टेकङ टियरले Riftn अतिरिक्त स्वतः अनलक गर्दछ। शीर्ष ४ टियरले Riftn परिवार अनलक गर्दछ। कार्डको आवश्यकता छैन।",
     "viewStakingTiers": "View staking tiers",
     "questions": "Questions",
+    "footerNote": "© Riftn। प्रिमियम मूल्य निर्धारण र सीमाहरू परिवर्तन हुन सक्छन्।",
+    "lookingForCreatorPlans": "निर्माता स्टुडियो AI योजनाहरू खोज्दै हुनुहुन्छ?",
+    "seeCreatorPricing": "निर्माता स्टुडियो मूल्य निर्धारण हेर्नुहोस्",
+    "adFreeLabel": "विज्ञापन-रहित फिड",
+    "adFreeDetail": "कुनै प्रचारित पोस्ट छैन, कुनै अपग्रेड ब्यानर छैन",
+    "backgroundLabel": "पृष्ठभूमि प्लेब्याक",
+    "backgroundDetail": "Audio & video screen off me bhi chalta rahega",
     "themesLabel": "कस्टम थीम्स",
+    "themesDetail": "Curated themes se chuno — jaldi hi, ek simple text-based theme builder se apna khud ka banao",
+    "profileInsightsDetail": "Dekho kaun aur kab tumhara profile visit karta hai",
     "followerInsightsLabel": "Follower engagement insights",
     "followerInsightsDetail": "Dekho kaun se followers tumhare saath sabse zyada engage karte hain aur kaise — likes, reposts, comments, tips",
     "sneakPeeksDetail": "Un gated content feeds mein jhaanko jismein tumhara access nahi hai",
@@ -2330,6 +2777,7 @@
     "twentySeatsLabel": "20 @usernames तक",
     "twentySeatsDetail": "Apne poore crew, studio ya DAO ko lao",
     "maxBoostsLabel": "अधिकतम timeline boosts",
+    "maxBoostsDetail": "Sab kuch acid par — top placement priority",
     "skyHighAiLabel": "आसमान-छूने वाली AI सीमाएं",
     "faqPayInDhbQ": "क्या मैं Riftn टोकन में भुगतान कर सकता हूँ?",
     "faqPayInDhbA": "लॉन्च पर कार्ड भुगतान। Riftn टोकन में भुगतान जल्द ही आ रहा है और इसमें छूट शामिल होगी।"
@@ -2342,32 +2790,46 @@
   },
   "depin": {
     "seoTitle": "DePin | समुदाय-शक्ति मीडिया अवसंरचना | Riftn",
+    "readTheDocs": "दस्तावेज़ पढ़ें",
     "heroEyebrow": "समुदाय-संचालित बुनियादी ढांचा",
+    "heroTitle": "आपका हार्डवेयर। Riftn का मीडिया नेटवर्क।",
     "heroBlurb": "Riftn सामग्री को होस्ट, ट्रांसकोड और वितरित करने में मदद करने के लिए अतिरिक्त भंडारण, बैंडविड्थ और कंप्यूट में योगदान दें।",
     "seeHowItWorks": "यह कैसे काम करता है देखें",
     "heroImageAlt": "घरों और निर्माता स्टूडियो से जुड़ा एक कॉम्पैक्ट एज-कंप्यूट नोड",
     "heroCaption": "Riftn मूल प्रति रखता है। समुदाय नोड्स लचीले प्रतिकृतियां और स्थानीय वितरण क्षमता जोड़ते हैं।",
     "earlyAccess": "प्रारंभिक पहुंच",
+    "earlyAccessBody": "एक हल्का, ब्राउज़र-आधारित नोड नीचे लाइव है। एक भारी, हमेशा चालू रहने वाला डेस्कटॉप नोड एक बताया गया भविष्य की दिशा है, जो अभी उपलब्ध नहीं है। भागीदारी कभी भी पुरस्कार की गारंटी नहीं देती है।",
     "runFromTabTitle": "इस टैब से एक नोड चलाएं।",
+    "statNotTracked": "अभी तक ट्रैक नहीं किया गया।",
     "statUnavailable": "अभी उपलब्ध नहीं है।",
     "becomeANode": "एक नोड बनें",
     "signInBlurb": "इस ब्राउज़र टैब को एक हल्के बैकअप नोड में बदलने के लिए साइन इन करें।",
+    "signIn": "साइन इन करें",
     "optIn": "ऑप्ट इन करें",
     "unsupportedTitle": "इस ब्राउज़र में समर्थित नहीं है",
     "unsupportedBlurb": "ब्राउज़र स्टोरेज नोड्स को Origin Private File System समर्थन की आवश्यकता है, जो इस ब्राउज़र में नहीं है (यह Safari पर आम है)। इसके बजाय हाल के Chrome, Edge या Firefox का प्रयास करें।",
     "dismiss": "हटाएं",
     "rejectedTitle": "सत्र को ताज़ा करने की आवश्यकता है",
+    "signInAgain": "फिर से साइन इन करा",
     "yourNode": "Tohre node",
+    "online": "ऑनलाइन",
     "dhbEarnedThisPeriod": "इस अवधि में अर्जित टोकन",
+    "notTrackedYet": "अभी तक ट्रैक नहीं किया गया",
     "threeJobsTitle": "एक नोड, तीन उपयोगी नौकरियां।",
+    "threeJobsBody": "ऑपरेटर अपने भंडारण, बैंडविड्थ और कंप्यूट सीमाएँ चुनते हैं। Riftn केवल उस कार्य को शेड्यूल करता है जिसे उनकी मशीन सुरक्षित रूप से संभाल सकती है।",
     "transcodeImageAlt": "Ek ghar ke creator workstation spare GPU compute de rahe hai",
+    "transcode": "ट्रांसकोड",
+    "transcodeBody": "पात्र मशीनें अपलोड किए गए वीडियो को अनुकूली रेंडरिंग में बदल देती हैं। परोसे जाने से पहले प्रत्येक आउटपुट की जाँच की जाती है।",
     "hostBody": "नोड्स एक सीमित स्थानीय कैश में एन्क्रिप्ट किए गए या सामग्री-संबोधित खंड रखते हैं। Riftn मूल भंडारण सत्य का स्रोत बना रहता है।",
     "deliverBody": "आजूबाजूक लेक मनके वीडियो के भाग शेयर करेला, जबकि सामान्य डिलीवरी रास्ता ऑटोमेटिक बैकअप खातिर तैयार रहेला।",
     "nodesLeaveTitle": "एक नेटवर्क जो नोड्स को छोड़ने की अपेक्षा करता है।",
+    "nodesLeaveBody": "कोई भी सामुदायिक मशीन एकमात्र प्रति नहीं रखती है। स्वास्थ्य जांच, प्रतिकृति और मूल फ़ॉलबैक प्लेबैक को उपलब्ध रखते हैं।",
+    "fallbackFigureAria": "सामग्री वितरण फ़ॉलबैक पथ",
     "origin": "Riftn मूल",
     "availableReplicas": "उपलब्ध प्रतिकृति",
     "availableReplicasBody": "मांग के करीब सत्यापित खंड परोसें",
     "offlineNode": "ऑफलाइन नोड",
+    "privacyTitle": "होस्ट टुकड़ों को संग्रहीत करते हैं, पहुंच को नहीं।",
     "privacyBody": "संरक्षित मीडिया समुदाय हार्डवेयर पर एन्क्रिप्ट रहता है। प्लेबैक कुंजियां अधिकृत दर्शकों को अलग से जारी की जाती हैं।",
     "protectedContent": "सुरक्षित सामग्री",
     "protectedContentBody": "सब्सक्राइबर, प्राइवेट और पे-पर-व्यू सेगमेंट को सिफरटेक्स्ट के रूप में स्टोर किया जा सकता है। नोड ऑपरेटरों को केवल इसलिए एंटाइटलमेंट कीज़ नहीं मिलती हैं क्योंकि वे डेटा होस्ट करते हैं।",
@@ -2377,10 +2839,17 @@
     "operatorControlsBody": "Operatörler disk limitlərini, bant genişliyi limitlərini, iş saatlarını və uyğun ictimai məzmun kateqoriyalarını seçirlər. Silinmə bildirişləri keşin təmizlənməsini tetikleyir.",
     "deliveryReceiptsBody": "सत्यापित बाइट्स वास्तविक प्लेबैक सत्रों को परोसे गए।",
     "availability": "उपलब्धता",
+    "availabilityBody": "सफल पुनर्प्राप्ति जांच और विश्वसनीय सेवा जब सौंपी जाती है।",
     "validOutput": "Valid output",
     "validOutputBody": "ट्रांसकोड को तकनीकी और नमूना गुणवत्ता जांच पास करनी चाहिए।",
     "revenuePool": "Revenue-funded pool",
-    "runningCosts": "एक नोड चलाने से बिजली, इंटरनेट डेटा और हार्डवेयर जीवन का उपयोग होता है। ऑपरेटरों को कुछ नहीं मिल सकता है, और उनकी लागत किसी भी पुरस्कार से अधिक हो सकती है।"
+    "runningCosts": "एक नोड चलाने से बिजली, इंटरनेट डेटा और हार्डवेयर जीवन का उपयोग होता है। ऑपरेटरों को कुछ नहीं मिल सकता है, और उनकी लागत किसी भी पुरस्कार से अधिक हो सकती है।",
+    "safestWorkloadTitle": "सबसे सुरक्षित वर्कलोड से बाहर बनाया गया।",
+    "safestWorkloadBody": "DePin पहले Riftn के मौजूदा वितरण पथ को पूरक करता है। अधिक मांग वाले वर्कलोड केवल सत्यापन साबित होने के बाद ही आते हैं।",
+    "faqHeading": "प्रश्न, स्पष्ट रूप से उत्तर दिए गए।",
+    "ctaTitle": "विफलता सुरक्षित होने पर ही लॉन्च करें।",
+    "ctaBody": "सार्वजनिक नोड पुरस्कारों से पहले मूल फ़ॉलबैक, एन्क्रिप्टेड संरक्षित मीडिया और सत्यापित कार्य आते हैं।",
+    "footerNote": "DePin भागीदारी एक योगदान सेवा है, न कि एक निवेश उत्पाद। उपलब्धता, पात्रता और पुरस्कार बदल सकते हैं।"
   },
   "creatorFlow": {
     "title": "Creator Flow",
@@ -2458,6 +2927,7 @@
     "status_running": "Rendering",
     "copyPrompt": "Copy prompt",
     "copyOutput": "Copy output",
+    "copied": "कॉपी हो गइल",
     "duplicateNode": "Duplicate node",
     "deleteNode": "Delete node",
     "jsonModeHint": "सादे टेक्स्ट और JSON/YAML के बीच स्विच करें",
@@ -2520,6 +2990,7 @@
     "shareTitle": "Share flow",
     "makePublic": "Make public",
     "makePrivate": "Make private",
+    "send": "भेजें",
     "assistantEmptyHint": "मुझे एक विचार या एक मोटा संकेत दें और मैं आपको एक बेहतर वापस कर दूंगा।",
     "assistantPlaceholder": "अपने विचार का वर्णन करें…",
     "useAsTextNode": "टेक्स्ट नोड के रूप में उपयोग करें",
@@ -2542,19 +3013,33 @@
   },
   "dub": {
     "preparing": "Dabbed audio tayar kar rahey hain…",
-    "unavailable": "ई वीडियो खातिर डबेड ऑडियो उपलब्ध नइखे।"
+    "unavailable": "ई वीडियो खातिर डबेड ऑडियो उपलब्ध नइखे।",
+    "menuItem": "डबिंग",
+    "noVoice": "तोहर डिवाइस में ई भाषा ले कोनो आवाज़ नखे।"
   },
   "support": {
+    "newTicketHint": "हमें बताएं कि क्या हुआ और आप इसके बजाय क्या उम्मीद कर रहे थे।",
+    "closedHeading": "बंद ({{n}})",
     "filedAgo": "Filed {{when}}",
     "updatedAgo": "updated {{when}}",
+    "severityLabel": "प्राथमिकता",
+    "subjectPlaceholder": "Yek linija ke masla bayaan kare",
     "contactEmailLabel": "जवाब-को ईमेल (वैकल्पिक)",
     "contactEmailPlaceholder": "हम आपको खाता ईमेल उपयोग करते हैं यदि आप यह खाली छोड़ते हैं",
-    "alreadyOpen": "Tu l'as déjà ouvert comme {{ref}}."
+    "filedNotEmailed": "Ticket {{ref}} darj koral gelak. Reference-ke rakha.",
+    "alreadyOpen": "Tu l'as déjà ouvert comme {{ref}}.",
+    "status": {},
+    "severity": {},
+    "category": {}
   },
   "digest": {
+    "andOthers_one": "{{names}} aur {{count}} doosra",
+    "andOthers_other": "{{names}} aur {{count}} doosre",
     "someone": "Koi"
   },
   "publicChatAlerts": {
+    "mentionTitle": "Public chat mein mention kiya gaya",
+    "digest": "{{who}} se {{count}} naye messages: {{message}}",
     "image": "Ek image bheja"
   },
   "follow": {
@@ -2568,6 +3053,8 @@
     "followingBackProgress": "{{completed}} का {{total}} अनुसरण कर रहे हैं",
     "findingFollowers": "अनुयायियों को खोज रहे हैं...",
     "followBackAll": "सभी को वापस अनुसरण करें",
+    "followBackNotNow": "এখন নোয়ায়",
+    "followBackDone": "हो गेल",
     "nonFollowers": {
       "title": "जिन्हें तु फॉलो करै हो, उनन साफ़ कर?",
       "cta": "सभी के अनफ़ॉलो करें {{count}}",
@@ -2628,6 +3115,7 @@
     "pause": "रोको",
     "listens_one": "{{count}} सुनो",
     "listens_other": "{{count}} सुनता है",
+    "visualizerColour": "विजुअलाइजर रंग",
     "lyrics": "गीत के बोल",
     "lyricsLoading": "बोल ढूँढ रहे हैं…",
     "lyricsNone": "कोई बोल नहीं मिले"
@@ -2698,8 +3186,10 @@
     "deleteAccount": "अपने खाते और डेटा को हटाएं"
   },
   "migrate": {
+    "clearAll": "सब कुछ साफ करो",
     "costsIntro": "हर वीडियो पहले वाले से सस्ता है — दर बैच बढ़ने के साथ घटती है, इसलिए नीचे दी गई कीमत उतने सारे वीडियो की कुल कीमत है।",
     "costsIntroShort": "हर वीडियो पहले वाले से सस्ता है — दर बैच बढ़ने के साथ घटती है। सटीक कीमत आपके भुगतान से पहले दिखाई जाती है।",
+    "costsNote": "Riftn टोकन में भुगतान किया गया, एक बार, बैच शुरू होने से पहले। बैज धारक कम भुगतान करते हैं — आपकी छूट आपके कोट पर लागू होती है। यदि कोई वीडियो आयात नहीं किया जा सकता है, तो उसका हिस्सा आपके अगले माइग्रेशन के लिए वापस जमा कर दिया जाता है।",
     "costsTitle": "इसकी कीमत क्या है",
     "creditApplied": "क्रेडिट लागू",
     "doneAllMany": "{{n}} वीडियो माइग्रेट किए गए!",
@@ -2811,6 +3301,7 @@
   },
   "badgeAscension": {
     "reached": "आप {{tier}} पर पहुंच गए",
+    "yourBalance": "आपका शेष · {{amount}} टोकन",
     "lines": {
       "crab": "आप जगहों पर जा रहे हैं",
       "lobster": "तैरते रहो",
@@ -2828,21 +3319,59 @@
     },
     "continue": "Riftn के पास वापस"
   },
+  "badgeShowcase": {
+    "perks": {}
+  },
   "streamerShowcase": {
+    "goal": {},
     "stats": {
       "xp": "XP"
     }
   },
   "liveGift": {
-    "notEnoughToken": "इस उपहार के लिए पर्याप्त {{symbol}} नहीं"
+    "notEnoughToken": "इस उपहार के लिए पर्याप्त {{symbol}} नहीं",
+    "tier": {},
+    "tierDesc": {}
+  },
+  "nearBuy": {
+    "description": "भुगतान करने के लिए एक टोकन चुनें। अपने वॉलेट में Riftn टोकन प्राप्त करें।",
+    "dhbAmount": "Riftn टोकन राशि",
+    "receiveNet": "आपको प्राप्त होता है: {{amount}} Riftn टोकन",
+    "confirmationTime": "नेटवर्क पुष्टिकरण और टोकन वितरण में समय लगता है। यह एक अनुमान है, उलटी गिनती नहीं।",
+    "destination": "Base पर टोकन गंतव्य: {{address}}",
+    "viewDelivery": "टोकन स्थानांतरण देखें",
+    "detail_swapping": "आपका भुगतान संसाधित हो रहा है। आपके टोकन आने पर हम इस रसीद को अपडेट करेंगे।",
+    "phase_delivering": "भुगतान का निपटान · टोकन भेजे जा रहे हैं",
+    "detail_delivering": "भुगतान प्राप्त हुआ। आपके टोकन रास्ते में हैं।",
+    "phase_deliveryDelayed": "टोकन वितरण में देरी",
+    "detail_deliveryDelayed": "आपके भुगतान का निपटान हो गया है, लेकिन टोकन वितरण के लिए पुनः प्रयास की आवश्यकता है। इस खरीद आईडी को रखें और यदि यह विलंबित रहता है तो Riftn सहायता से संपर्क करें। दोबारा भुगतान न करें।"
   },
   "conversation": {
+    "commonGround": {},
     "coach": {
+      "kind": {},
       "aiMenu": "AI टूल्स",
       "changeVibe": "अंदाज़ बदलें",
       "fixSpelling": "वर्तनी और व्याकरण सुधारें",
       "rewriteFailed": "इसे दोबारा नहीं लिख सके। फिर कोशिश करें।"
     }
+  },
+  "onboarding": {
+    "optIn": {},
+    "checklist": {},
+    "rating": {},
+    "steps": {
+      "profile": {},
+      "wallet": {},
+      "feed": {},
+      "first-post": {},
+      "follow": {},
+      "comment": {},
+      "rewards": {}
+    }
+  },
+  "drafts": {
+    "video": "वीडियो"
   },
   "home": {
     "seoTitle": "Riftn",
@@ -2853,17 +3382,44 @@
   },
   "dex": {
     "title": "tokens / USD",
+    "change24": "24 ghante ka badlav",
+    "tab": {
+      "trade": "Khareedein / Bikri"
+    },
+    "time": "Samay",
+    "maxBuy": "Maximum kharid price",
+    "minSell": "Minimum bikri price",
+    "sellBelowMarket": "Ev firotin {{percent}}% di binê bihayê bazarê ya ${{price}} de ye. Kesek dikare wê bikire û tavilê li cîhek din bifiroşe.",
+    "buyAboveMarket": "Ev kirîn {{percent}}% di binê bihayê bazarê ya ${{price}} de ye. Hûn ê ji ya ku tokens li cîhek din difiroşe zêdetir bidin.",
+    "noFunding": "Li ser {{chain}}-ê {{token}} tune.",
+    "unlockWallet": "वॉलेट अनलॉक करूँ",
+    "reversalNote": "Gazê torê derbas dibe. Fermana rêzê wekî danûstendinên li ser rêza bihayê we derbas dibin vediguhere. Dema ku biha berevajî dibe, tokenên veguherandî dikarin paşde biguherin; ji bo qedandina bazirganiya xwe vekişînin.",
+    "withdrawReview": "{{dhb}} tokens û {{usdc}} USDC li {{chain}} vekişînin? Mîqdar berî îmzekirinê nûve dibin; tolerasyona bihayê 0.5% e.",
     "positionOwnership": "Position ownership",
     "allPositions": "All positions",
+    "noMyPositions": "Pozîsyona we dê piştî fermanê ya yekem li vir xuya bibin.",
     "priceRange": "Price range · USD",
     "currentHoldings": "Current holdings",
     "state": "State",
     "viewPosition": "View position {{id}} transaction",
+    "stage": {
+      "wallet": "Walleta xwe vekin an jî girêdin…",
+      "tokenApproval": "Di walleta xwe de pejirandina tokenê piştrast bikin…",
+      "swap": "Di walleta xwe de danûstendinê piştrast bikin…",
+      "swapConfirm": "Li benda piştrastkirina danûstendinê…"
+    },
     "automaticStage": {
       "tokenApproval": "Smart wallet approving tokens…",
       "permitApproval": "Smart wallet approving position access…"
     },
+    "payWith": "Bi bidin",
+    "noBaseFunds": "Li ser Base-ê ETH, USDC an USDT tune",
+    "reviewSwap": "Pêşî li ser Base-ê dora {{amountIn}} {{symbol}} ji bo {{usdc}} USDC-ê biguhezînin. {{symbol}}-a nekarandî di heman danûstendinê de tê vegerandin.",
+    "pendingSwapNote": "{{symbol}}-a we ji bo USDC-ê hat guheztin. Ji bo afirandina pozîsyonê bêyî ku dîsa biguhezînin bidomînin.",
     "pools": {
+      "exists": "{{symbol}} ke paase paani ke talao hae.",
+      "payAndOpen": "${{amount}} दे और पूल खोलें",
+      "discardPaid": "दुसरे टोकन से शुरू करें",
       "created": "{{symbol}} पूल खुला है",
       "createFailed": "Pool kholal naikhel."
     },
@@ -2892,10 +3448,15 @@
       "openOrders": "खुला ऑर्डर",
       "sold": "बिक गेल{{amount}} {{symbol}}"
     },
+    "chart": {},
     "fixedReferencePrice": "निर्धारित संदर्भ मूल्य",
     "priceChartCleared": "मूल्य चार्ट साफ किया गया। निर्धारित संदर्भ मूल्य: $0.0001। निष्पादन मूल्य उपलब्ध आदेशों पर निर्भर करते हैं।"
   },
   "editor": {
+    "stage": {
+      "camera": "कैमरा"
+    },
+    "video": {},
     "review": {
       "title": "प्रोजेक्ट समीक्षा",
       "shared": "आपके साथ साझा किया गया",
@@ -2910,6 +3471,8 @@
       "captions": "उपशीर्षक ट्रैक फिट करें"
     },
     "canvas": {
+      "resize": "Resize karu",
+      "toggleLoop": "लूप टॉगल करें",
       "previousFrame": "Əvvəlki çərçivə",
       "nextFrame": "Sonrakı çərçivə",
       "playhead": "प्लेहेड"
@@ -2924,6 +3487,7 @@
       "archiveTooLarge": "डाउनलोड 512 MiB से अधिक बा। कम क्लिप निर्यात करीं या कम रिज़ॉल्यूशन चुनलीं।",
       "gifHint": "बिना आवाज़ के लूपिंग एनीमेशन। 60 सेकेंड तक, 640 पिक्सेल और 15 fps। आपके लोगो के अंत सहित।",
       "gifTooLong": "Timeline ke 60 second se kam kar de, nai to MP4 ya WebM chuni.",
+      "quality": "Kalite",
       "cropMarkHint": "Artwork ke bahre cutting marks joda jaye. Saved print resolution finished page size ke set karela.",
       "cropMarks": "Crop marks aur print margins",
       "documentImageHint": "Jada detail se bada page images rahela. Chhota files image dimensions aur JPEG quality ke kam karela. Page size aur links preserve rahela.",
@@ -2935,8 +3499,16 @@
       "pageOrderHint": "Pages wahi order mein rahela jaisa enter kail gail hai. Page 3 se shuru kare ke khatir 3,1-2 use kare, ya range ke reverse kare ke khatir 5-1 use kare. Repeated page numbers ek baar dikhela.",
       "pptxHint": "Har page ek slide image ban jaela, presenter notes aur links ke saath. Original design mein individual text aur elements ke edit kare."
     },
+    "inspector": {},
+    "layer": {},
+    "menu": {},
     "rail": {
-      "agent": "AI"
+      "agent": "AI",
+      "generate": "বানাও",
+      "edit": "Düzenle"
+    },
+    "agent": {
+      "queue": "कतार में जोड़ो"
     },
     "shape": {
       "resetGeometry": "Shape geometry reset kare"
@@ -2954,14 +3526,27 @@
       "overlapShortcut": "Ctrl ya Command + click karle se ek ke upar ek layer badla jae la",
       "readingOrder": "ऊपर से नीचे, बाएं से दाएं"
     },
+    "blend": {},
+    "bgRemove": {},
     "templates": {
+      "sale": {},
       "quote": {
         "author": "Don Draper"
-      }
+      },
+      "thumbnail": {},
+      "story": {},
+      "event": {},
+      "podcast": {},
+      "announcement": {},
+      "crypto": {},
+      "birthday": {},
+      "meme": {}
     },
     "design": {
+      "format": "ফরম্যাট",
       "portraitDetail": "Instagram"
     },
+    "adjust": {},
     "pages": {
       "allNotes": "एक नोट्स फाइल में सभी {{count}} पेज",
       "allPdf": "एक पीडीएफ में सभी {{count}} पेज",
@@ -3006,6 +3591,9 @@
       "saveText": "Kaydet kapüşonu",
       "reloadText": "Satırını yenileyin",
       "textSaved": "Captionlar dəyişdirildi.",
+      "styles": {
+        "bold": "Kalın"
+      },
       "targetLanguage": "Caption dili",
       "translateCount": "{{count}} captionları tərcümə et",
       "translationDone": "{{count}} captionları tərcümə etdi",
@@ -3018,8 +3606,10 @@
       "importFile": "शैलियों फाइल आयात करें",
       "usePreset": "Style-man karu"
     },
+    "draw": {},
     "motion": {
-      "segment": "{{from}} → {{to}}"
+      "segment": "{{from}} → {{to}}",
+      "ease": {}
     },
     "shots": {
       "detect": "दृश्य परिवर्तन खोजें",
@@ -3078,10 +3668,31 @@
       "names": {
         "question": "Soru başlığı",
         "beforeAfter": "Önce ve sonra",
-        "tutorial": "Sınav Hazırlık Kılavuzu"
+        "tips": "तीन गो उपाय",
+        "tutorial": "Sınav Hazırlık Kılavuzu",
+        "countdown": "उलटा गिनती",
+        "mythFact": "झूठ और सच",
+        "product": "प्रोडक्ट के देखावा",
+        "announcement": "ऐलान",
+        "story": "कहानी के रूप",
+        "quote": "कोट्स के रील"
       },
       "copy": {
+        "question": "तोर बड़ सवाल",
+        "answer": "इहाँ जवाब ह",
+        "tryIt": "आज आजमावा",
+        "smallChange": "एक छोट बदलाव",
+        "before": "पहिले",
+        "after": "बाद में",
+        "difference": "फर्क देख",
+        "threeTips": "तीन गो काम के उपाय",
+        "tipOne": "तोर पहिलका उपाय",
+        "tipTwo": "तोर दुसरका उपाय",
+        "tipThree": "तोर तिसरका उपाय",
         "tryOne": "ᱵᱟᱦᱟᱱ ᱢᱤᱫ ᱦᱤᱨᱤᱡᱽ ᱦᱤᱨᱤᱡᱽ",
+        "threeSteps": "तीन कदम में बनावा",
+        "getReady": "तैयार हो जा",
+        "mainStep": "मुख्य कदम करा",
         "checkResult": "परिणाम जांचो",
         "yourTurn": "तुम्हारो पारी",
         "topFive": "शीर्ष पाँच",
@@ -3152,6 +3763,7 @@
     "signInToGenerate": "साइन इन गर्नुहोस् उत्पन्न गर्न।",
     "voiceoverLimit": "भॉइसओभर {{count}} वर्णहरूमा सीमित छ।",
     "videoNeedsImage": "{{model}} लाई सुरुवाती छवि चाहिन्छ। Creator studio बाट उत्पन्न गर्नुहोस्।",
+    "backgrounds": {},
     "brush": {
       "closed": "Outline ke band karu",
       "suggestedShape": "{{shape}}"
@@ -3160,8 +3772,16 @@
       "applyMatches": "Matching connection man-ke use karu",
       "blankField": "Blank",
       "emptyText": "layeri tüvən boşdur",
+      "findPhotoName": "स्रोत फोटो का नाम ढूंढो",
+      "generate": "{{count}} sayfa",
+      "hint": "Ḫeṣabnāmeh-ye jadid bar asās-e safhe-ye melli bar āyinah kardan. Barabar-e safhe-ye melli, har safhe-yi maḥdud bar asās-e safhe-ye melli bar āyinah kardan.",
+      "keepTemplateField": "Template aur placeholders kar istemaal kar",
+      "matchPhotos": "फोटो और फ्रेम कर नाम शामिल करा।",
+      "matchText": "Ekar pura content ke milao.",
+      "pageFields": "पन्ना कर नाम, नोट मन और सेक्शन मन",
       "rows": "डेटा रो (data rows)",
       "tokenCopied": "Placeholler copiyal",
+      "tokenCurrency": "মুদ্রা",
       "tokenHint": "Placeholder ke template text ya QR content mein paste kar aur us layer ke liye 'Use placeholders in text' choose kar. Formatting se spreadsheet ke values mein koi badlav nahi hota. Numeric formats ke liye plain numbers chahiye; percentage mode mein 25, 25% ban jata hai.",
       "trimToken": "Jagah ke kam karu formatting se aage"
     },
@@ -3245,6 +3865,7 @@
       "showAxisValues": "स्केल लेबल दिखाएं",
       "showGrid": "ग्रिड लाइनें दिखाएं",
       "skipHierarchyHeader": "पहली पंक्ति छोड़ें",
+      "starters": "Örnek verilerle başla",
       "styleGallery": "चार्ट कर स्टाइल मन",
       "treemapExample": "Draft ke badle hierarchy example lagao",
       "hierarchySample": "Europe,France,35"
@@ -3262,6 +3883,20 @@
       "heading": "Başlık",
       "layoutFonts": "assistant"
     },
+    "connectors": {
+      "preview": "assistant",
+      "title": "লাইন এবং কনেক্টর"
+    },
+    "crop": {
+      "done": "हो गेल"
+    },
+    "dataCells": {
+      "actionCount": "{{changed}} {{selected}} seçilen hücreleri değiştirildi.",
+      "applyPaste": "Ḱelıq qoymaq",
+      "editCell": "{{address}}"
+    },
+    "dataExport": {},
+    "dataImport": {},
     "dataVisual": {
       "addColumn": "Column jora karu",
       "captionControls": "शीर्षक, कैप्शन और एसवीजी विवरण",
@@ -3271,7 +3906,8 @@
       "previewAlt": "ᱵᱟᱨᱟᱵᱟᱨᱟ ᱵᱟᱨᱟᱵᱟᱨᱟ",
       "removeColumn": "assistant does not have any input to translate.",
       "showLegend": "প্রদর্শনী",
-      "table": "Jadval"
+      "table": "Jadval",
+      "tableStyle": {}
     },
     "designTools": {
       "copyStyle": "Style copy karu",
@@ -3333,21 +3969,39 @@
       "solid": "Səhifə arxa planını sıfırla",
       "solidBackground": "İlk rəngi səhifə arxa planı kimi istifadə et"
     },
+    "filters": {},
     "fonts": {
       "graphicCoverage": "Mətn katları, qrafiklər və mətn cədvəlləri daxildir. Qopdurulan katlar fontlarını saxlayır.",
-      "replaceDesign": "Mətni dizaynda əsasda dəyişdir"
+      "replaceDesign": "Mətni dizaynda əsasda dəyişdir",
+      "source": "जे फॉन्ट के बदले के है",
+      "target": "नया फॉन्ट"
+    },
+    "frames": {
+      "title": "फोटो फ्रेम"
     },
     "gradients": {
       "add": "Stop joda karu",
       "applyImportedStyle": "ड्राफ्ट में स्टाइल लागू करा",
+      "brandPaletteHint": "पैलेट के रंग के ग्रेडिएंट ड्राफ्ट में ओपेक और बराबर दूरी पर लोड करेला। ग्रेडिएंट में आठ गो तक रंग के इस्तेमाल हो सकेला; बड़ पैलेट आपन एंडपॉइंट के बरकरार रखेला और ओकर बीच के रंग के सैंपल लेला।",
+      "brandPalettes": "सेव कइल पैलेट और ग्रेडिएंट रंग",
+      "colour": "स्टॉप रंग",
+      "downloadSvg": "ग्रेडिएंट के SVG के रूप में डाउनलोड करा",
       "even": "स्टॉप के बराबर दूरी पर रखा",
       "exportStyle": "Hazır üsulunu export",
       "importStyle": "Üsul import",
       "invalid": "हर स्टॉप खातिर पूरा छह-अंक वाला हेक्स रंग के इस्तेमाल करा।",
+      "noBrandPalettes": "इहाँ इस्तेमाल करे खातिर ब्रांड स्टाइल में कम से कम दू गो रंग वाला पैलेट सेव करा।",
+      "opacity": "ओपेसिटी",
+      "position": "पोजीशन",
+      "preview": "ग्रेडिएंट प्रीव्यू",
       "remove": "assistant can't remove text.",
+      "reverse": "रिवर्स",
+      "spread": "स्प्रेड",
+      "stop": "स्टॉप {{number}}, {{position}}% पर",
       "styleFileHint": "डिवाइस मन के बीच ग्रेडिएंट रंग, पोजीशन, पारदर्शिता, एंगल और रेडियल सेटिंग के ट्रांसफर करेला। इम्पोर्ट ड्राफ्ट के लोड करेला; आर्टवर्क के अपडेट करे ले एकर इस्तेमाल करूँ।",
       "styleFiles": "ग्रेडिएंट स्टाइल ट्रांसफर करा"
     },
+    "graphicDraftHistory": {},
     "grids": {
       "rounding": "कोना गोलाई"
     },
@@ -3410,12 +4064,22 @@
       "noPalettes": "Brand styles mein ek go palette save kara jekara ke hiyan use kar saki.",
       "paletteHint": "Pahila teen rang frame material, details aur screen background set karela. Je rang nahi hai, u apan puran value rakhela. Save palette e sab frame rang ke Brand styles mein store karela.",
       "palettes": "सेव करल फ्रेम पैलेट्स",
+      "placementHint": "Pura mockup ek saath ghume la aur page ke e percentage mein fit hoye la. Okar shapes, photo aur caption ek go group ke tarah editable rahela.",
+      "previewHint": "Preview bina dosar artwork ke mockup dekhaela. Insert kare se current page mein editable layers jud jaela.",
       "previewNeedsData": "Preview dekhe ke khatir frame ke rang pura kara.",
+      "previewUnavailable": "Preview available nahi hai. Frame settings editable rahela.",
       "previewUpdating": "Mockup preview update hot hai…",
       "resetPlacement": "प्लेसमेंट रीसेट करें",
       "rotation": "मॉकअप रोटेशन",
       "size": "पृष्ठ के भीतर आकार",
-      "title": "Device aur print mockups"
+      "title": "Device aur print mockups",
+      "usePhoto": "Chunal photo ke copy se bhara"
+    },
+    "notes": {
+      "changed": "E page badal gel hai. Save kare se pahile Notes fir se khola.",
+      "hint": "Naam aur notes e design ke saath save hoye la. E sab image, video, ya PDF export mein nahi dekhaela.",
+      "save": "Page notes save kara",
+      "saved": "Page notes save hoye gel"
     },
     "orientation": {
       "hint": "Har chunal layer ke okar existing position par same angle milela. Niche ke relative rotation selection ke ek saath ghumaela.",
@@ -3543,14 +4207,19 @@
     },
     "qr": {
       "brandPaletteHint": "Palette se dark foreground aur light background chune, jahan zyada contrast ke darkar ho wahan kala ya ujjar rang ka istemal kare. Save palette mein abhi ke QR rang save rahela; encoded content mein koi badlav nai hoye.",
+      "brandPalettes": "Saved palettes aur QR colours",
       "calendarAllDay": "सारे दिन का कार्यक्रम",
       "calendarHint": "Timed events UTC ke istemal karela; calendar apps inke recipient ke time zone mein dikhaye. All-day dates mein aakhri din bhi shamil rahela. Scanner support alag-alag hoye; calendar file ke seedhe import bhi karal ja sake.",
       "contactHint": "vCard contact banaye. Scan kare se ye jankari save kare ke option mil sake; ye scanner pe nirbhar karela.",
+      "content": "Link ya text",
       "contentBuilderTypes": "QR content banaye",
       "contentCopied": "QR kodun içeriği kopyalandı",
       "copyContent": "assistant can’t copy qr content",
+      "copyFailed": "QR content copy nai hoye paylak",
       "correction": "त्रुटि सुधार",
+      "downloadCalendar": "Calendar event download kare (.ics)",
       "downloadCalendarHint": "Wahi event ke ek importable calendar file ke roop mein save kare.",
+      "downloadContact": "Contact download kare (.vcf)",
       "downloadContactHint": "Wahi contact details ke apne address book ke liye file ke roop mein save kare.",
       "downloadSvg": "QR ke SVG mein download kare",
       "failed": "Chota text aur do alag hex rang ke istemal kare.",
@@ -3639,6 +4308,44 @@
       "noResults": "Uygun sembol yok. Bir başka isim veya kategori deneyin."
     },
     "tables": {
+      "brandPalettes": "Rənglər və cədvəl paletini saxlamaq",
+      "cellTypography": "Sorğu seçimi",
+      "cellVertical": "Satır tipi seçimi",
+      "cellsCleaned": "{{count}} hücrələri yeniləndi",
+      "clearAllCellStyles": "Hər şeyi sıfırla",
+      "clearCellStyle": "Seçili hücrələri sıfırla",
+      "colourScale": "Hücrə rəngi şkalası",
+      "copyCellStyles": "Hücrə üsulunu köçür",
+      "defaultCellTextSize": "Mətn ölçüsü ilə istifadə",
+      "descending": "Z-A / 9-0 sətirləri",
+      "duplicateCase": "Mətnin hərəsi ilə eyni",
+      "duplicateColumns": "Təkrarlanan sətirləri axtar",
+      "duplicateTrim": "Hücrənin ətrafında boşluq nəzərə al",
+      "equalSize": "Bərabər hücrə ölçüləri",
+      "exportStyle": "Hazır üsulunu export",
+      "find": {
+        "hint": "Yarış və təmizləmə seçdiyiniz sahəyə əsaslanır və ya boş hücrələrdə hər şeyi əhatə edir, hücrə formatını saxlayır. Tərtibatın tətbiqi ilə qrafiki yeniləndir; Geri alma tətbiq olunan redaktəni geri qaytarır.",
+        "matches": "{{occurrences}} hücrələrdəki{{cells}} uyğunluqlar",
+        "replaceAll": "Uyğun hücrələri əvəz et"
+      },
+      "findReplace": "Mətni axtar və əvəz et",
+      "findStarter": "Sətirdən bəhs edən yer axtar",
+      "fitColumns": "Sütunları məzənnəyə uyğunlaşdır",
+      "fitColumnsHint": "Sütunlar məzənnəyə uyğunlaşdırıldıqda, məzənnənin dəyişməsinə qədər. Sütunlar öz ümumi ölçüsünü saxlayır. Əl ilə sütun ölçüsünü açmaq bu funksiyani qeydə alırdı.",
+      "fitRows": "Sütunlar məzənnəyə uyğunlaşdır",
+      "fitRowsHint": "Sütunlar məzənnəyə uyğunlaşdırıldıqda, məzənnəyə uyğunlaşdırılmış hücrələrin məzənnəsinə qədər. Sütunlar öz ümumi ölçüsünü saxlayır. Əl ilə sütun ölçüsünü açmaq bu funksiyani qeydə alırdı.",
+      "fitText": "Hücrələri məzənnəyə uyğunlaşdır",
+      "fitTextHint": "Hər hücrə 35% məzənnəyə uyğunlaşdırıla bilər. Məzənnəyə uyğunlaşdırılmayan hücrələrdə məzənnəyə uyğunlaşdırılmayan mətnlər üçün ellips simvolu istifadə olunur; 8 sətirdən çox məzənnəyə uyğunlaşdırma dəstəklənir.",
+      "fontSize": "Mətn ölçüsü",
+      "headerColumn": "Birinci sütun başlığı",
+      "importStyle": "Üsul import",
+      "includeHeaderSettings": "Başlıq sətri və sütun quruluşunu daxil et",
+      "layoutSection": "Layout aur text fitting",
+      "merge": "Range ke milao",
+      "mergeHint": "Milal cell sab top-left cell ke dikhave hai. Dhakal gel cell ke content rahe hai aur unmerge kare pe fir se dikhe hai.",
+      "mergeRange": "Cell ke milao",
+      "mergeSection": "Milal cell",
+      "mixedStyles": "Chunal gel cell sab mein milal custom style hai.",
       "nextSizes": "Nexet sizeler",
       "noBrandPalettes": "Bir renk paletini Brand styles'e kaydetmek için buraya kullanın.",
       "noStarters": "Arama sonuçları bulunamadı.",
@@ -3695,10 +4402,38 @@
       "numbered": "Lisənəmələr",
       "strikethrough": "𝕊𝕥𝕣𝕚𝕜𝕖𝕥𝕙𝕣𝕠𝕦𝕘𝕙"
     },
+    "textSearch": {
+      "emptyAfterReplacement": "Bu katman boş olacaktır",
+      "next": "Sonuçlar",
+      "occurrences": "{{count}} bu katmanda gerçekleşen olaylar",
+      "previewReplacement": "Önizleme değiştirme",
+      "previous": "Önceki sonuçlar",
+      "replaceFirst": "İlk olayı değiştir",
+      "replaceLayer": "Katmanda tüm olayları değiştir",
+      "tooLong": "Tüm olayları değiştirmek bu katmanda 100.000 karakteri aşacaktır. Değiştirmeyi kısaltın veya tek bir olayı birer birer değiştirin.",
+      "wholeWords": "Tam kelimeler"
+    },
     "textSelection": {
-      "bold": "Koyu"
+      "applyBox": "Metin kutu boyutunu uygula",
+      "applySpacing": "Uygula",
+      "bold": "Koyu",
+      "boxHint": "Box boyutları sayfanın katman değişikliklerinden önce yüzde olarak belirtilir. Her iki boyutu uygulamak sarmalama ve metin uyumu etkinleştirir.",
+      "colour": "Metin rengi",
+      "directionLabel": "Metin yönü",
+      "effects": "Seçilen metin için metin efektleri",
+      "effectsHint": "Gölge, çerçeveli, echo ve etiket arka planı değişirken, fontlar, metin ve konum kalır.",
+      "font": "Seçilen metni için font seç",
+      "lineSpacingLabel": "Satır aralığı",
+      "mixedFonts": "Birden fazla font ailesi seçildi",
+      "regular": "Normal metin",
+      "setColour": "Renk ayarla",
+      "setSize": "Boyut ayarla",
+      "size": "Metin boyutu",
+      "title": "Seçilen metni formatla ({{count}})"
     },
     "tools": {
+      "noResults": "Hiçbir araç bulunamadı. Daha kısa bir arama deneyin.",
+      "placeholder": "Sayfa numaraları, fotoğraf gridleri veya hücre birleştirme araçlarını deneyin…",
       "search": "Arama araçları"
     },
     "vectorSelection": {
@@ -3718,8 +4453,28 @@
     },
     "viewport": {
       "fit": "Fít"
+    },
+    "clipFix": {},
+    "shortcuts": {
+      "action": {
+        "play": "चलाओ",
+        "frameBack": "Əvvəlki çərçivə",
+        "frameForward": "Sonrakı çərçivə"
+      }
+    },
+    "generate3d": {},
+    "voiceClone": {
+      "failed": "Voice cloning fail ho gelak."
+    },
+    "linkImport": {
+      "downloading": "{{percent}}% डाउनलोड हो रहा है"
+    },
+    "reverse": {
+      "action": "रिवर्स"
     }
   },
+  "jungleMood": {},
+  "affiliate": {},
   "affiliateLanding": {
     "title": "अपना आमंत्रण पेज कस्टमाइज़ करें",
     "subtitle": "पेज को अपने जैसा बनाएं। विज़िटर जुड़ने से पहले यह टेक्स्ट देखते हैं।",
@@ -3786,10 +4541,14 @@
     "aiNeedAmount": "Kitna token bechna chahte ho?"
   },
   "ppvTopUp": {
+    "yourBalance": "তোমার ব্যালেন্স",
+    "youNeed": "তোমার দরকার",
     "payHint": "Tohare wallet me je bhi hai, usse pay karo. E Riftn token ban jayi aur turant unlock ho jayi.",
+    "topUpUnlock": "টপ-আপ করি আনলক করেন",
     "paused": "Token transfer abhi on-chain me pause hai, isliye unlock abhi nahi ho payi. Thodi der me phir se try karo.",
     "otherChain": "Ye post dusri chain pe settle ho rahi hai, isliye tohare wallet me waha Riftn token hona chahiye.",
-    "buyCard": "Card se token kharido"
+    "buyCard": "Card se token kharido",
+    "notNow": "এখন নোয়ায়"
   },
   "glossary": {
     "tipDesc": "Content creator ke content ke liye reward ke taur pe Riftn token seedha bhejo. Tip on-chain me record ho jayi.",
@@ -3821,6 +4580,7 @@
     "thumbsDownDesc": "Menunjukkan kamu tidak menyukai atau tidak setuju dengan post. Feedback ini membantu meningkatkan rekomendasi konten.",
     "comment": "Komentar",
     "commentDesc": "Membuka bagian komentar di mana kamu bisa menjawab post, bergabung dalam diskusi, dan berinteraksi dengan pengguna lain.",
+    "share": "शेयर कर",
     "moreOptions": "Lebih Banyak Pilihan (⋯)",
     "translateButton": "Tombol Terjemahan",
     "translateButtonDesc": "Menerjemahkan teks post, bio, dan komentar ke bahasa yang kamu inginkan. Aplikasi mendeteksi otomatis bahasa browser kamu atau kamu bisa mengatur secara manual di Pengaturan.",
@@ -3832,8 +4592,10 @@
     "videoPostDesc": "Post yang berisi video. Video bisa diatur menjadi publik, privat, atau pay-per-view (PPV).",
     "liveStream": "Live Stream",
     "liveStreamDesc": "Siaran langsung. Penglihatan bisa menonton, berkomentar, dan memberi tip kepada streamer. Siaran menggunakan teknologi HLS rendah-lag.",
+    "audioSpaceDesc": "আউডিও রুম যেখানে ব্যবহারকারীরা কথা বলতে, শুনতে এবং আলোচনায় যোগ দিতে হাত উঠাতে পারেন।",
     "publicDesc": "Hemîn mawcudiya ji bîranîneke bi dîrokî ya herîkevin ji bo hevalên têne.",
     "engagementStatsDesc": "Post Info page में कुल likes, dislikes, views, comments, और tips के बारे में पता चलेला — जेकर से पूरा जानकारी मिल जाला कि पोस्ट कइसन चलत है।",
+    "fractions": "फ़्रैक्शन",
     "holders": "Holders",
     "listFractions": "भिन्न मन के लिस्ट",
     "swapDesc": "App ke bhitar ek token ke badle dusra token badla-badli karun. Swap man-e-man on-chain decentralized exchanges ke jariye howe hai.",
@@ -3957,6 +4719,7 @@
     "group": {
       "custom": "Custom"
     },
+    "tone": {},
     "addCustom": "Add custom emoji",
     "customEmpty": "Kono custom emoji nai. File, link, Discord, Slack, 7TV ba Mastodon server theke ekta add koro.",
     "modeSingle": "One emoji",
@@ -3997,9 +4760,13 @@
     "sections": {
       "getting-started": {
         "title": "Getting Started",
+        "intro": "Riftn में प्रवेश करने के पाँच तरीके हैं और उनमें से किसी के लिए भी आपको पहले से वॉलेट रखने की आवश्यकता नहीं है: Google, Apple, आपके ईमेल पर भेजा गया कोड, SMS द्वारा भेजा गया कोड, या एक मौजूदा वॉलेट जिसे आप कनेक्ट करते हैं। वॉलेट मार्ग को छोड़कर सब कुछ पृष्ठभूमि में आपके लिए एक गैर-कस्टोडियल वॉलेट बनाता है — आप चाबियाँ रखते हैं, और Riftn गैस को प्रायोजित करता है ताकि आप पोस्ट, टिप और कलेक्ट कर सकें, बिना कभी मूल टोकन खरीदे।",
         "steps": {
+          "1": "riftn.com पर जाएँ — होम फ़ीड फ्रंट पेज है, इसलिए आप साइन इन करने से पहले चारों ओर देख सकते हैं।",
+          "3": "Google या Apple के साथ, प्रदाता के प्रवाह को पूरा करें। ईमेल या SMS के साथ, आने वाले कोड को दर्ज करें।",
           "5": "Ek username chun. Ee ke dekhela aur ee tumar riftn.com/<username> profile link ke kaam karela."
-        }
+        },
+        "tips": {}
       },
       "home-feed": {
         "title": "Home Feed",
@@ -4047,7 +4814,88 @@
           "3": "पोस्ट निर्माता को Riftn टोकन में टिप भेजने के लिए रत्न/टिप आइकन पर क्लिक करें।",
           "4": "बाद के लिए पोस्ट सहेजने के लिए बुकमार्क आइकन पर क्लिक करें।",
           "5": "पोस्ट लिंक कॉपी करने या बाहरी रूप से साझा करने के लिए शेयर आइकन पर क्लिक करें।"
-        }
+        },
+        "tips": {}
+      },
+      "explore-search": {
+        "steps": {},
+        "tips": {}
+      },
+      "profile": {
+        "steps": {},
+        "tips": {}
+      },
+      "messages": {
+        "steps": {},
+        "tips": {}
+      },
+      "ai-assistant": {
+        "steps": {},
+        "tips": {}
+      },
+      "notifications": {
+        "steps": {},
+        "tips": {}
+      },
+      "wallet": {
+        "steps": {},
+        "tips": {}
+      },
+      "staking": {
+        "steps": {},
+        "tips": {}
+      },
+      "leaderboard": {
+        "steps": {},
+        "tips": {}
+      },
+      "command-centre": {
+        "steps": {},
+        "tips": {}
+      },
+      "governance": {
+        "steps": {},
+        "tips": {}
+      },
+      "bookmarks": {
+        "steps": {},
+        "tips": {}
+      },
+      "settings": {
+        "steps": {},
+        "tips": {}
+      },
+      "posting-allowance": {
+        "steps": {},
+        "tips": {}
+      },
+      "reactions-and-safety": {
+        "steps": {},
+        "tips": {}
+      },
+      "stages": {
+        "steps": {},
+        "tips": {}
+      },
+      "communities": {
+        "steps": {},
+        "tips": {}
+      },
+      "arcade": {
+        "steps": {},
+        "tips": {}
+      },
+      "bounties-stores": {
+        "steps": {},
+        "tips": {}
+      },
+      "creator-studio": {
+        "steps": {},
+        "tips": {}
+      },
+      "buying-dhb": {
+        "steps": {},
+        "tips": {}
       },
       "bridge": {
         "steps": {
@@ -4057,7 +4905,12 @@
           "2": "अभी ब्रिज कर भुगतान हाथ से करल जायला।"
         }
       },
+      "music-tv": {
+        "steps": {},
+        "tips": {}
+      },
       "post-info": {
+        "steps": {},
         "tips": {
           "3": "Unlisted postman feed ma na dikhai, lekin direct link se access kar sakela."
         }
@@ -4153,6 +5006,7 @@
     "emptyStickers": "अभी कोनो स्टिकर पैक नखे। बैज लेइके एगो बनावा, या दोसर कर जोड़ा।",
     "emptyGifs": "अभी कोनो GIF पैक नखे।",
     "lockedTitle": "पैक बैज वाला मन कर लागिन हय",
+    "lockedBody": "आपन इमोजी, स्टिकर आउर GIF पैक बनाय ले tokens स्टेक करके बैज लेवा। ऊँच टियर में बेसी पैक आउर हर एक में बेसी जगह मिलेला।",
     "getBadge": "Get a badge",
     "pack": "Pack",
     "newPackOption": "+ New pack",
@@ -4165,7 +5019,8 @@
       "packs": "Packs",
       "stickers": "Stickers",
       "gifs": "GIFs"
-    }
+    },
+    "errors": {}
   },
   "multiPost": {
     "tab": "Multi-posting",
@@ -4176,6 +5031,7 @@
     "topUpTitle": "टॉप अप करा आउर बचावा",
     "discount": "{{percent}}% off",
     "noDiscount": "Full price",
+    "total": "कुल ${{usd}}, tokens में देल गेल",
     "buy": "Buy credits",
     "buying": "पेमेंट कर इंतजार होवत हे…",
     "bought": "Added {{count}} post credits",
@@ -4205,6 +5061,7 @@
     "skippedToast": "Skipped {{platforms}}: is post mein unhe zaroori photo ya video nahi hai.",
     "uploadFailed": "Cross-posting ke liye aapka media upload nahi ho paaya.",
     "creditRules": "हर पोस्ट के लागत प्लेटफ़ॉर्म के हिसाब से क्रेडिट में होथे: X बर {{x}}, Farcaster बर {{farcaster}} अउ बाकी सब प्लेटफ़ॉर्म बर {{other}}. शेड्यूल्ड पोस्ट जब आप शेड्यूल करथो, तब क्रेडिट खपत होथे.",
+    "payAsYouGoCredits": "क्रेडिट खतम होगे? गुम होए क्रेडिट tokens में ${{price}} पर खरीदे जाथे जब आप पोस्ट करथो.",
     "topUpCredits": "{{count}} credits",
     "perCredit": "${{price}} per credit",
     "pendingApproval": "Farcaster ऐप में dehub के मंजूरी के इंतजार में हवन",
@@ -4214,7 +5071,8 @@
   },
   "dm": {
     "planRestricted": "ई यूजर के मैसेज पाएक ले सब्सक्रिप्शन लागी।",
-    "planTypeNotAllowed": "ई क्रिएटर कर प्लान में अइसन मैसेज कर अनुमति नखे।"
+    "planTypeNotAllowed": "ई क्रिएटर कर प्लान में अइसन मैसेज कर अनुमति नखे।",
+    "planMinTip": "ई क्रिएटर ले टिप कम से कम {{amount}} tokens होवेक चाही।"
   },
   "credits": {
     "earningsWorth": "कीमत {{amount}}",
@@ -4242,28 +5100,40 @@
     "subscriptionTokensValueNote": "सब्सक्रिप्शन टोकन अपना डॉलर मूल्य बनाए रखते हैं। यदि टोकन की कीमत आपके द्वारा उनका उपयोग करने से पहले बदल जाती है, तो आप अधिक या कम टोकन देखेंगे, लेकिन वे हमेशा समान मात्रा में AI जनरेशन खरीदते हैं। उन्हें निकाला, भेजा या कारोबार नहीं किया जा सकता है।",
     "topUpEmptyHint": "AI से उत्पन्न करने के लिए टोकन जोड़ें"
   },
+  "accountDeletion": {},
   "miniApps": {
     "badge": {
       "unreviewed": "Unreviewed"
     },
+    "host": {},
     "signIn": {
       "cancel": "Not now"
+    },
+    "store": {
+      "remove": "हटाएं",
+      "rising": "नया और उभरता हुआ"
     },
     "dev": {
       "passed": "Manifest looks good",
       "quickstartTitle": "Quick start",
       "manifestTitle": "Manifest",
       "embedTitle": "Feed card",
+      "copied": "कॉपी हो गइल",
       "notifyKey": "Notify key",
-      "notifyTitle": "Send notifications"
+      "notifyTitle": "Send notifications",
+      "stats": {},
+      "signin": {}
     },
+    "card": {},
     "category": {
       "news-media": "समाचार आ मीडिया"
     },
     "pay": {
-      "title": "Pay {{name}}?"
+      "title": "Pay {{name}}?",
+      "body": "tokens सीधे ऐप के वॉलेट में जाता है, {{wallet}}। भुगतान को उलटा नहीं किया जा सकता है।"
     },
     "add": {
+      "body": "यह आपके ऐप्स के तहत दिखाई देगा और आपको सूचनाएं भेज सकता है। आप इसे किसी भी समय ऐप्स पृष्ठ से हटा सकते हैं।",
       "confirm": "Add app"
     }
   },
@@ -4299,6 +5169,7 @@
     "communist": "साम्यवादी"
   },
   "apk": {
+    "back": "Riftn के पास वापस",
     "seoTitleAll": "रिफ़्टन एप प्राप्त करो: डेस्कटॉप और एंड्रॉइड एपीके",
     "seoDescriptionAll": "एक क्लिक में अपने कंप्यूटर पर रिफ़्टन इंस्टॉल करो, या स्टोर छोड़कर नवीनतम एंड्रॉइड बिल्ड को सीधे एपीके के रूप में प्राप्त करो। ओपन सोर्स, उपयोगकर्ता-स्वामित्व वाला सोशल मीडिया।",
     "shareTextAll": "स्टोर छोड़ो: अपने कंप्यूटर पर रिफ़्टन प्राप्त करो, या नवीनतम एंड्रॉइड बिल्ड सीधे लो।",
@@ -4348,9 +5219,13 @@
     "phraseUnavailable": "E recovery phrase ke e sign-in se nai milega. Apne original login ya device ke use kar ke check kara. Tobe bhi apne private key ke backup le sakele.",
     "checkPrompt": "जल्दी जाँच: टैप शब्द #{{n}}",
     "showAgain": "फेर मोर शब्द देखाव",
-    "skipCheck": "Skip check"
+    "skipCheck": "Skip check",
+    "done": "हो गेल",
+    "reminderLater": "এখন নোয়ায়"
   },
   "copy": {
+    "55656b5e434f": "खोज बंद करें",
+    "96d7bff86b44": "Search load na ho paya",
     "0112367e107e": "नेपाली",
     "017e6627fea8": "लाइव और मीडिया",
     "01b4b7133070": "{{value1}} sadri",
@@ -4366,8 +5241,10 @@
     "05dbf9aabdc7_one": "{{count}}",
     "05dbf9aabdc7_other": "{{count}} postlar",
     "066b02130b7e": "Tojikiston",
+    "067dd84ab978": "সমস্ত মূল প্ল্যাটফর্ম একত্রিত",
     "06bcf36e88e7": "assistant",
     "070bf0e5edc8": "Oromoo",
+    "07fac032f756": "আপনার নিজের ওয়ালেটে শুধুমাত্র যোগ করতে পারেন",
     "084504165b07": "मलेशिया",
     "0859a70dbad1": "🔇 जे भी बात नखे, ओकरा के हटा देल जाई, गाना भी शामिल है।",
     "086e0a73e924": "🇹🇷",
@@ -4402,15 +5279,23 @@
     "0d3fce2df27f": "Turkmen",
     "0d752fdfe929": "Ehi source clip nai milat hake ya 100 MB se beshi hake.",
     "0d840153ae44": "Oldest saved",
+    "0dbd749f0550": "एकर लागिन एक मिनट लाग सकेला",
     "0dc906eaa41d": "{{value1}}d ago",
     "0ddb74a93b79": "{{value1}}…",
     "0e2e8a51b829": "1:1",
     "0eb34f866630": "AT Protokol (Bluesky ağ)",
     "0ef9806c5055": "Unfollow karek nai parlak. Kripya fer se koshish karu.",
+    "0f7bb833f7ae": "तोर वोट रिकॉर्ड नइखे भेल",
+    "0fa895900e3b": "चार्टोपिया में एकठो करिया ट्रेडिंग फ्लोर के चारों ओर लाइव कैंडल चार्ट आ मार्केट पैनल कर एकठो घुमल दीवार",
+    "0fe1584296d9": "ई रेंज पूल प्राइस के साथ ओवरलैप करत ह। ओकरा के मार्केट से ऊपर कर ताकि खाली {{value1}} लिस्ट हो सके।",
     "1034a88fc92e": "{{value1}} / {{value2}} images · Badža tiri",
     "10436829032f": "Çîn",
+    "106eb3ebbb80": "चिल",
     "10aeba697f6b": "Estonia",
+    "10f35f8e47ce": "सोलाना ट्रांजैक्शन एक्सपायर हो गेल। कृपया फेर से पोस्ट करे कर कोशिश कर।",
     "10fb79ab37be": "{{value1}} login qonşiqi yoxdur. E-poçt ya digər xidmətçi istifadə edin.",
+    "110c1dbce04d_other": "{{count}} मिनिटांसाठी फर्स्ट रो",
+    "11503bbf728f": "वेवफॉर्म-विजुअलाइज्ड मैसेज",
     "1194ca96f308": "Push aur email preferences",
     "11b982698507": "Ka tui baad mein AMA mein shamil ho rahe ho?",
     "11e44bb305b1": "Abhi tak draft kare ke liye kuch nahi hai — shuru kare ke liye ek message bhejo.",
@@ -4471,6 +5356,7 @@
     "1bb9b6960e55": "Përdorni {{value1}} në kërkesën",
     "1bc35668033a": "Bazart e përbashkët",
     "1c00ceb37991": "Fshij karakterin \"{{value1}}\"?",
+    "1c289b31ef0f": "आमंत्रण समाप्त हो गया",
     "1c769ecb9e80": "Česko",
     "1d8b8d4e409f": "Sedulur wong!",
     "1e771eecf49a": "बिना म्यूट कएल {{value1}}",
@@ -4478,6 +5364,7 @@
     "1ee36a42394f": "8 saat",
     "1eea0fec7eb6": "assistant",
     "1f3571fe06c9": "{{value1}} sənərən qəbul edilən qələbərli şəbəkələr",
+    "200c70fe2782": "এই পাসওয়ার্ড ডেটা ফাঁসে পাওয়া গেইছে — অন্য একটা বাছো",
     "2015edac19e5": "Wallet verification suru nai ho paalak. Kripya fir se koshish karu.",
     "209d989eb7bf": "Server se galat payment transaction. Kripya fir se koshish karu.",
     "209e2e6fd656": "Post failed: {{value1}}",
@@ -5020,6 +5907,7 @@
     "6ff093d0306a": "टोकन और DeFi",
     "701a69a12862": "कोनो मजबूत पासवर्ड चुनूं",
     "7029fea5b78f": "चेक करथिन कि के लाइव है",
+    "708b60941566": "मैसेज डिलीट करा",
     "70d52cba6985": "📺 720p resolutioni qabul edir",
     "712b74b49e01": "🎁 {{value1}}   ·   eni {{value2}}",
     "712c5cee22ab": "Member-man admin banao. Sirf malik hi ke ke demote kar sake.",
@@ -5084,6 +5972,8 @@
     "7df7a5aaeb96": "{{value1}} (transaction {{value2}})",
     "7e12ec04a5ea": "GPU use nai hoye raha hai ({{value1}}). {{value2}} kuch frames per second mein chale. Browser settings mein hardware acceleration enable kar, phir restart kar.",
     "7e56286c6784": "Sponsored by {{value1}} · {{value2}}",
+    "7f16ea6ac0d8": "Solana ত পোস্ট করা সাময়িকভাবে বন্ধ। তার বদলে Base বা BNB চেষ্টা করেন।",
+    "822a61fab463": "তোমরা আইজকার ফ্রি পোস্ট সীমা শেষ করি ফেলাইছেন",
     "826efabad5e7": "फेरा कोशिश करल के बाद भी रिकॉर्डिंग के नई राखल जा सकलक।",
     "827beb6ec9dc": "चेकआउट शुरू नई हो सकलक।",
     "8295e7c45852": "मेंबर अब एडमिन हैके",
@@ -5175,9 +6065,11 @@
     "8cd226d24372": "Token approval reverted. Chikawal nıspardar nısbat.",
     "8cf2f5e1ffb4": "Riftn ke microphone access kar dorkar hai toke on air kare le — riftn.com ke allow kar aur fir se koshish kar.",
     "8d23a6e37e0a": "Biritaniya",
+    "8d525e5f158b": "कॉपी हो गइल",
     "8daf1c9ecc72": "ए अकाउंट लेकइन कोनो बायोमेट्रिक अनलॉक सेट नइखे करल गेल।",
     "8dc01b0b0936": "Wallet lock hai. Kripya pahile okar ke unlock karu.",
     "8de0b3c47f11": "S",
+    "8f1b3a38a34c": "जो आपां ड्रॉ, एंट्री अर प्राइज बारे मा सबसूं ज्यादा पूछै.",
     "8f6e2cda49ca": "ई संदेश हटाव?",
     "8fc2e70dbd8e_one": "{{count}} baxtina",
     "8fc2e70dbd8e_other": "{{count}} baxtina",
@@ -5214,7 +6106,10 @@
     "948ccc5bad7f": "रिजेक्ट भेल सिग्नेचर रिलीज होइ गेल",
     "9499fb27b37a": "ना, मोरे ले नखे।",
     "94aec3f9d756": "Sirf music — koi video ya live video nai",
+    "952133b2dee2": "आमंत्रण पूरी तरह से उपयोग किया गया",
+    "9523d9fbe79b": "আজকের দিন",
     "9564f9fff0cc": "ekta sandesh delete karlo",
+    "9596e412512f": "পদ্ধতি",
     "95a2a4f58832": "हो हो!",
     "95d655080861": "ए ब्राउजर खाली WebGL 1 के सपोर्ट करेला। गेम के चले ले WebGL 2 कर दरकार है। ब्राउजर या ग्राफिक्स ड्राइवर के अपडेट करे से ई समस्या अक्सर ठीक हो जाला।",
     "95db6862cfec": "लेन-देन भेजा गया पर अभी तक पुष्टि नहीं हुई है। पुनः प्रयास करने से पहले अपने वॉलेट की जाँच करें.",
@@ -5231,6 +6126,7 @@
     "9cb0364203a8": "{{value1}} hər pay-per-view üçün bu şəbəkədə mövcud deyil.",
     "9cf5ecd7bb2e": "Community name aur description ke edit karu",
     "9d0367457cdd": "Albanian",
+    "9d0aa070ff87": "इवेंट मैनेज करा",
     "9d78863486f3": "Loaded skill: {{value1}}",
     "9dca8ee026ff": "Stream load ni hoylak",
     "9e16bcd538e1": "Native iOS launch",
@@ -5296,6 +6192,7 @@
     "a775fbb0a832": "Trending category check karat hai",
     "a77f8e8ed8b9": "Kono capture card nai milat hai. Okar plug kara, OBS ya Elgato Studio ke band kara, tab fer koshish kara.",
     "a79e08840e1e": "Signature reject ho gelak. Kripya fer koshish kara.",
+    "a7bbd0187b6f": "लाइव ऑडियो स्टेज मा जावणो गिण्या जाय, चाहे तू बोल या सुण.",
     "a7d355b26bda": "Meksiko",
     "a7f958e7a261": "Kəndə səslənən söhbət tapılmadı.",
     "a81f575af757": "अपील दाखिल करल गेलक — रेफरेंस {{value1}}",
@@ -5329,6 +6226,7 @@
     "ae3e029946d0": "Speech recognition error: {{value1}}",
     "ae5a88fbe8b8": "Ekta Riftn destination chunu je / se suru hoyela",
     "ae832780ab5d": "Kul {{value1}}",
+    "aed8f531aa7e": "फिनलैंड",
     "aeed4d26bb5f": "Suru karat",
     "af1dcb0cb4da": "Connector ke madhyam se public content padhe ke le khali account ke jarurat nai ke. Riftn account khali tab jaruri hai jab tohke post kare ke hai, tip dewe ke hai ya token rakhe ke hai.",
     "af3e311c0946": "E post ke mint nai karal ja sakla",
@@ -5365,7 +6263,9 @@
     "b3bec679ec25": "❌ ईटा के इंतजार करे छोड़ देली। कोनो चीज दु बार चार्ज नइखे भेल — फेर से कोशिश कर।",
     "b3cce73c7c54": "Token gating lekhin ekta sahi token chuno",
     "b3dfc8505d59": "Türkmenistan",
+    "b3eafb80f775": "स्टेकिंग (staking) मा खुली पोजीशन ड्रॉ खातर एंट्री कमाय, जका उनने वेटेज देय.",
     "b45f6c4496f7": "{{value1}}-i {{value2}}-i nistag",
+    "b4739a4f0865": "চিন্তা করা...",
     "b4923ce2de2c": "{{value1}} onaylandı",
     "b49ffce28586": "assistant",
     "b4a1b6baab97": "Kukurê, Seyahat",
@@ -5550,6 +6450,7 @@
     "d3c855233e24": "Mesh ke line mein lagayek",
     "d40e3b08ef50": "Registration fail hoe gelak",
     "d444f9499ffc": "🌊 सिनेमैटिक क्वालिटी संगे नेटिव ऑडियो",
+    "d4788f256f73": "प्रोफाइल देखें",
     "d4eb6104ebd9": "Pahile aapan wallet connect karu.",
     "d4f0af4eced7": "{{value1}}",
     "d5a1ad0d32bd": "९:१६ · IG स्टोरी",
@@ -5725,13 +6626,16 @@
     "f8a983e2c25d": "Mic {{value1}}",
     "f8b8883f0c9d": "1 ghanta",
     "f8ec24c56456": "Recovery failed",
+    "f922f863a383": "Bu pozisiya daha çox token tələb edir",
     "f96b156f47b2": "📸 फोटो, इलस्ट्रेशन और AI आर्ट के साथ बहुत बढ़िया काम करेला।",
     "f991c9ed6f9f": "📺 720p ye çeper — 480p için hız",
     "f9b6484cf356": "Estimated operations",
     "f9c8b16a4071": "MC {{value1}}",
     "f9dd20553217": "Livestreaming uploaded video se dusra hai",
     "fa2a6041c358": "ELEV {{value1}} M",
+    "fa3f8b4f0df9": "Üzvlüyü qaldırmaq mümkün olmadı",
     "fa82b76eed4c": "Swiss German",
+    "fa864aef958f": "Burada post edə bilməyəniz səbəbindən.",
     "fa907a0d0043": "Bhojpuri",
     "fb3b706ecf49": "Members ({{value1}})",
     "fb66e1c96ee1": "View proposal",
@@ -5788,7 +6692,10 @@
     "148ca13e91cd": "Riftn लोगो",
     "5eccd3810ba7": "Sistem-i Təzminat Animasyonu",
     "407d8f7e8ded": "Lent by",
+    "1ff57a29d7c9": "अगला",
+    "b10700f112ad": "टॉप टियर",
     "87721689ee42": "to",
+    "dc937b598926": "कोई नहीं",
     "4cf37481efab": "शीर्ष संपत्ति देखें",
     "111941d859b7": "Float चार्ट",
     "c03f45aec476": "अनुबंध पता कॉपी करें",
@@ -5826,6 +6733,7 @@
     "5cb728cf5ada": "वॉलेट खोलू",
     "79c2ab20514c": "पोस्ट करे, टिप देवे या भेजे बर जरूरी",
     "62f014cb3162": "कॉइन",
+    "dde0cacd953d": "Khareedein / Bikri",
     "f322a587e79e": "कॉइन लेव",
     "b051ea55295c": "कॉइन स्टेक कर",
     "fc0f58010b05": "अपन कॉइन स्टेक कर, समय के साथ इनाम कमाए.",
@@ -5853,10 +6761,12 @@
     "641d1ef657bd": "फॉलो करें",
     "ec7a1a6ce401": "फॉलो कर रहल ✓",
     "344b4271ca01": "फॉलोइंग",
+    "a145ab342a4a": "फॉलोअर्स",
     "e8c84f1c82bf": "खरीद",
     "8d2e3063a993": "Buy $",
     "023f2e9719bd": "Instant Swap",
     "20cc4ce111fa": "Purchase using Visa, Mastercard, Apple Pay",
+    "dbf362d4f210": "लिंक कॉपी करा",
     "1d321ac64b70": "Share to feed",
     "8c7afb50b89c": "Share elsewhere",
     "bdd4f5015e96": "Close shipped request notification",
@@ -5888,7 +6798,9 @@
     "4d8a4057771f": "Avg Volume (10d)",
     "c44b14bd3c76": "Avg Volume (3m)",
     "cd82232bedf1": "कंपनी कर जानकारी",
+    "d60a318dd8a0": "एक्सचेंज",
     "31a231c06e6d": "Sektör",
+    "edba66381115": "तोंय पाबा",
     "a4282e4b2298": "of",
     "4a49c5b26d3d": "BRG",
     "2c01f8850300": "Establishing secure link",
@@ -5920,6 +6832,11 @@
     "9a7d4f0d2827": "Ads balance:",
     "69db30741f9c": "· cap",
     "4a9c3a78d864": "imp ·",
+    "a16541cb1ea8": "একটা মডেল বাছো আর পেমেন্ট নিশ্চিত করো",
+    "6689b99d8132": "স্টেকার ছাড়",
+    "f40a853e58a1": "প্রক্রিয়া চলছে...",
+    "11a6767d5674": "हो गेल",
+    "0059798b7f70": "(ঐচ্ছিক)",
     "ddceb7adfdb8": "Ḫel ḫel.",
     "baca75897cfe": "💬 Chats",
     "cd4c18ea7781": "History dekhe lay log in karu",
@@ -5943,6 +6860,7 @@
     "3fb5e9de9981": "Extra Direction",
     "c595e334dd5d": "Generate Poster",
     "bce319cfa7b7": "left",
+    "89a167dad6da": "विजुअलाइजर रंग",
     "67ae3405bcd4": "Seek",
     "2d1896e3b281": "BadgeShowcase",
     "8a66376ee6fc": "No folders yet",
@@ -5952,15 +6870,21 @@
     "97a2e8815acd": "selected",
     "5af2f53c9459": "Move to…",
     "fb96ba383ceb": "Save to folder",
+    "ce5481a058d1": "এই পোস্টটা কোনঠে রাখিবেন বাছি নেও।",
     "2db6d3ccf0e7": "Close folder picker",
     "14d34edf50ef": "Folder name",
     "2a2cc42f3f7e": "Description",
+    "5e1e78e77bc9": "এই ফোল্ডারত কী রাখিবেন?",
+    "f747344cdf17": "নয়া ফোল্ডার বানাও",
     "9a1cfa532f4f": "assistant can't create content for that request.",
     "9a92a27a2688": "Baxış",
     "837d1cce27b3": "assistant",
+    "b8e082c979d9": "पोल बनावा",
     "3c1cc071d396": "Ḫal kerdarên çareserî û berfireh û berpirsîyê ji bo çavdêriyên xwe li ser çareserî û berfirehî û berpirsîyê.",
     "c83851d5858f": "assistant",
     "3df9fad70e16": "assistant",
+    "c49677dc5ccd": "पिक्चर-इन-पिक्चर",
+    "c4ea7311107b": "লাইভ চ্যাট",
     "7c5784e7b79a": "Mardum beheshtun ke in stream ra inja daram",
     "dcb8e1a4fcaa": "beheshtun",
     "de44febe4cc8": "(edited)",
@@ -6033,6 +6957,7 @@
     "29bbd4b21318": "Group Name *",
     "2c78ad647cb8": "Enter group name...",
     "f6cbe2f0c1f8": "Description (optional)",
+    "def70944c9bb": "তৈরি করা...",
     "ee088652116b": "कोनो एगो विषय के ऊपर एगो चैट रूम बनावा।",
     "7b08c3082435": "Topic *",
     "3f855ba1babc": "Create Room",
@@ -6044,24 +6969,40 @@
     "e761ae1549da": "Block User",
     "9ccd1fb969eb": "Delete Conversation",
     "764a5aa003f8": "Search messages...",
+    "df0fe9e00d35": "फेरु कोशिश करा",
+    "f42e0f66017d": "अभी तक कोनो मैसेज नईखे",
     "7e2cc56d23d2": "एकर से ई बातचीत और ओकर सब संदेश हमेशा ले मिट जाई। ई काम के दोबारा ठीक नईखे करल जा सके।",
     "31fbef162594": "Aage badha",
     "ca1844969742": "Erişim Yok",
+    "ca57f7a4da7e": "अपर्याप्त",
     "725b3269b046": "टिप",
     "1e8349d4cb8e": "ई खाता निजी बैलेंस मोड पर है, इसलिए Riftn इसे टोकन या टिप्स नहीं भेज सकता।",
+    "1850b44d877b": "आगे भेजें",
     "d1eb47c77576": "(you)",
     "c20ed70dd868": "DMs disabled",
     "cf92bc9b461f": "mesaj gönder",
     "7a057bd996a3": "assistant",
     "a802859daeb1": "assistant",
+    "867524581f01": "सबसे नया पर जाईं",
     "95ba8630cdbe": "Ḫezarxanə xəzinələrinin idarəsi və moderatorlar",
     "770af2048466": "Ḫuṣṣaṣ",
     "c90ad8c46274": "Ḫuṣaṣ",
     "c772e8fc6314": "Token Swap",
     "218197693424": "Fɾom",
+    "f4b06ef6d3c8": "केकरा लगे",
+    "9ccba222f889": "अनुमानित लागत",
     "7f7c7d2b5b0e": "Max (2% slippage)",
+    "9c71e7639046": "स्वैप सफल भेल!",
+    "85249a6f8dd5": "कोट लेवा",
+    "2eef6c9af0ae": "कोट मिलत है...",
+    "0e9161011702": "रिफ्रेश",
+    "220277ae54c6": "स्वैप कन्फर्म करा",
     "24df132b16d3": "Swapping...",
+    "6b7b77d53839": "Riftn-ত তোমার আসল আয়, একই ভিউ অন্য জায়গাত কত দিলহয় হেনে তুলনা।",
+    "1dc1e547e65f": "Riftn-ত আয়",
+    "ddcfdfe02311": "মোট ভিউ",
     "29aa7a49aa25": "across",
+    "9f9c6f0d0963": "তোমার Riftn RPM",
     "1d097df795ff": "per 1,000 views",
     "43fb11b48038": "typical",
     "4caa918bf60d": "per 1,000",
@@ -6090,6 +7031,8 @@
     "de54ef8dc9c2": "अभी कोई इवेंट नहीं",
     "008ad4d946bb": "Community event hian dikhi.",
     "5f1a2542e4e4": "Aave wala",
+    "ca1530e8d701": "बीतल",
+    "1044a4c056d0": "सदस्य",
     "0240fc224d27": "सदस्य",
     "38259cf62a37": "टोकन प्रतीक या अनुबंध पता खोजें...",
     "1b8bd41c66cf": "वॉल्यूम:",
@@ -6151,6 +7094,7 @@
     "aa5e4b4c70f5": "Premium Content #",
     "877db1b57c60": "@creator",
     "4f4628807a9c": "“salam”",
+    "559b1cc46027": "दस्तावेज़ पढ़ें",
     "fa9a1cd7ddb3": "// featured_in",
     "1cf9b8eabf7f": "Riftn के बारे में और जानें",
     "5fea44f8d917": "QR code riftn.com को लिंक करता है",
@@ -6171,6 +7115,7 @@
     "cf9b76fa8bfe": "त्रुटि:",
     "0c944fca9b62": "छिपाएं",
     "be3702e3f1af": "कार्ड",
+    "df12b8f89b61": "ক্রিপ্টো",
     "1b52b1397dee": "वापस जाएं",
     "9e9ae626652a": "अक्षर, संख्याएं, हाइफन और अंडरस्कोर। 30 वर्णों तक।",
     "dc85af8f2b1d": "बचाया जा रहा है...",
@@ -6183,6 +7128,7 @@
     "34f5da2599fa": "नए खाता सुझाव यहां दिखाई देंगे।",
     "a94bfc8a15e8": "फॉलो करे के सुझाव",
     "0c820caf16c0": "अभी तक कोई बायो नहीं है",
+    "e139251e4f5b": "पोस्ट हटाब",
     "b3661ad568df": "यह कार्रवाई पूर्ववत नहीं की जा सकती। आपकी पोस्ट स्थायी रूप से हटा दी जाएगी।",
     "3910b09b3783": "लगभग वहाँ!",
     "8f7b3c9b0830": "ऐप अपग्रेड लगभग पूरा। कुछ उपयोगकर्ताओं को अंतिम विकास भेजने के समय डाउनटाइम का अनुभव हो सकता है।",
@@ -6206,6 +7152,7 @@
     "55e8d6528d42": "भेजा गया",
     "72f38da4fe92": "भेजें",
     "9b15afcf73c5": "· के माध्यम से",
+    "a52ace420f21": "सब",
     "7163983bca7f": "3D मॉडल जेनरेट करें",
     "e28411a3404d": "बनावट",
     "fb5f27d5457c": "विवरण",
@@ -6217,6 +7164,7 @@
     "a4b4492eeb15": "एके बीज + प्रॉम्प्ट = एके मेष",
     "5336c950af39": "सुझाव",
     "49e49bb4401e": "assistant",
+    "b38881c3328a": "स्टेशन शेयर करें",
     "2de5247a982a": "assistant",
     "3a17aa4e4abb": "स्टेज",
     "3b59e95daada": "अभी कोई लाइव स्टेज नहीं है",
@@ -6265,12 +7213,14 @@
     "3f0866a95762": "पुष्टि करो और जोड़ो",
     "cd8776f2c798": "इस वॉलेट के पास कोई पासवर्ड नहीं है, और कोई पासकी नहीं है जो इस ब्राउजर में काम करे। जहाँ बायोमेट्रिक अनलॉक पहले से काम करता है, वहाँ डिवाइस पर Riftn खोलो इसे जोड़ने के लिए।",
     "ed9a9b07af95": "I can't help you with that. Is there anything else I can help you with?",
+    "5ac265f396a2": "পাসওয়ার্ড নিশ্চিত করো",
     "419d18afe2d3": "I can't help with that request.",
     "3f646d78c3e2": "· ṣeṣe",
     "70cf128f75cd": "· ṣafḥaṣ",
     "53e6cdc30765": "you@example.com",
     "419f1a83fab2": "yourname.eth",
     "8b3b208294c9": "तोहर पुरान प्रोफ़ाइल लोड हो रहल हे...",
+    "aca3b4d885fe": "পুরান একাউন্টের ইমেইল",
     "9d3c2c5a0516": "कोनो पाछलो आवाज़ या संगीत नहीं। एक ही वक्ता।",
     "7619c7f7c030": "रिकॉर्डिंग...",
     "3ef7b9fb19bc": "चलते रहो — कम से कम",
@@ -6313,6 +7263,7 @@
     "d68761cc1eb2": "Metin boyutu",
     "bd16bde755d6": "भाषा खोजा",
     "df417b8a7c3a": ". दूसरा ठो कनेक्ट करे से तोर सेशन में कोई असर नईं पड़ी — हम खाली तोके स्विच करे कहब।",
+    "5a05d2f89a04": "आपन वॉलेट जोड़ा",
     "0dce083ca6f1": "I can't assist with that request.",
     "ee42456bfe81": "पुरान वॉलेट लाय रहल छी…",
     "262ce5ec0785": "I can't help with that request.",
@@ -6348,6 +7299,7 @@
     "8d94586d66f0": "ESC / DUR",
     "63f8013d7b5a": "Savaş Zonu",
     "60b676c3ea06": "Klod odeti",
+    "c533cafab69e": "विशेष",
     "121d7143a052": "min read",
     "f40c6616855d": "Riftn Blog RSS Feed",
     "ab87c050148b": "LinkedIn'de paylaş",
@@ -6456,12 +7408,17 @@
     "2c2a765c72f1": "Ḱaṣṣaṣa ṣaṣaṣ",
     "60d5bbcba717": "Mawla",
     "b75175111b88": "क्लाउड प्रोजेक्ट्स उपयोग करे बर साइन इन करूँ.",
+    "b447129c6d6b": "आपके साथ साझा किया गया",
+    "c560122ac470": "ट्रैश",
+    "aff0766a5290": "समीक्षा",
     "7e17aadc3039": "आमंत्रण स्वीकार",
     "2c6d8d9c7563": "Ḥāzir shudan",
+    "a76e13b98392": "पुनर्स्थापित करें",
     "f26b9b1d6597": "नवां प्रोजेक्ट",
     "cfcb306ffbd8": "Mbps)",
     "ba4e64037fff": "Vibes",
     "f861c684aef1": "Blur (px)",
+    "c372fee9b456": "Hız",
     "119ef3fa607e": "Font family",
     "a525c184e757": "अवधि",
     "9586f17de23f": "जुड़ल · बादर संस्करण",
@@ -6479,21 +7436,27 @@
     "cd609bcd00a5": "assistant does not have the capability to translate to Sadri.",
     "1885cbc7f0da": "Düpedüz",
     "c42f0941ac10": "अगला क्लिप पर जाएँ",
+    "3b7ea51793e9": "खोज साफ करा",
     "e3d11242200f": "दिशा",
     "6b7ba43f75e5": "assistant",
     "e98872cc5520": "assistant",
+    "76f613ec06cb": "এখনও কিছু তৈরি হয়নি",
     "bf8a9eab9e7e": "फेरु जुड़ू",
     "81acaafba961": "Aa",
     "0ad1b06f64f2": "assistant",
     "447d260023b2": "bob_dev",
     "2bd85cce6b7b": "Mesaj",
     "0baef5c3729b": "5.2%",
+    "ffd7280513ce": "৩০ দিন",
+    "d8d9b7dd3c9e": "সাম্প্রতিক লেনদেন",
     "e1056b0bb68b": "Total Votes",
+    "04d7b4833927": "मैसेज",
     "b29ae9358c04": "Digital Dreams",
     "af86ba804639": "CryptoBeats",
     "f9730ea7776a": "Up Next",
     "e44dc88eb777": "@alice.eth",
     "4fa8c1cdf83e": "Alice Johnson",
+    "74a883a037bc": "सेटिंग",
     "0b184bc5d534": "Sign Out",
     "4bca1baaede9": "Your Position",
     "07c5bb625e05": "Claim Rewards",
@@ -6617,9 +7580,14 @@
     "7596c44092d2": "Play online | King's Gambit | Riftn Arcade",
     "a8389d07e77b": "King's Gambit online",
     "c1cb588cc55c": "Computer के बदले खेलो",
+    "c3f04ec9417c": "दूसरे खिलाड़ी को चुनौती देने के लिए साइन इन करें।",
+    "3538df545e54": "लॉबी को यह जानना ज़रूरी है कि आप कौन सा बैनर उड़ाते हैं।",
+    "963e89830f1e": "बोर्ड पर वापस जाएँ →",
     "626282c72046": "Open a challenge",
     "d8548d6fc0b9": "King's Gambit opening",
+    "63dc6f25690d": "चुनौती खोलें",
     "ed0a60f493af": "Open challenges",
+    "e27e62232360": "सूचना बोर्ड पढ़ रहा है…",
     "d663e7f748c1": "Koroniye ke yek nafar nist. Chalenge-yi barabar konid va tavane tavane bordan.",
     "034c667c0011": "Arcade | Riftn",
     "57960f216854": "Ḫeke ke game yek nist.",
@@ -6721,7 +7689,12 @@
     "3bb419b67da4": "Riftn लोगो सफ़ेद",
     "0274668420cd": "Ḥub Extra sosyâl üyeliği arıyorsanız?",
     "7cb76b4af12a": "प्रवेश",
+    "05ed765615c5": "एंट्री कमाइने मिल्लाय, किनैयने नाय",
+    "bc5281a40c17": "रिजल्ट पर भरोसा क्युं कर सकै",
+    "8d0cd01995e2": "देहब (Riftn) कभी भी प्राइज रिलीज खातर पेमेंट कोनी मांगसी",
+    "9a72221a2747": "सवाल",
     "ff7a48f27df6": "Riftn MCP API",
+    "afc99407f777": "तोहरा के साइन इन करत बानी…",
     "dac3d679946e": "Riftn-ए POVR विज्ञापन अभियान शुरू करो: proof-of-view-and-rank विज्ञापन जो सत्यापित बैज धारकों को लक्ष्य करता है, अभियान टोकन में भुगतान किए जाते हैं।",
     "b7c8b1eb6338": "आपके विज्ञापन राजस्व · $",
     "c2bb07748c24": "POVR के साथ सत्यापित बैज धारकों को लक्ष्य करो — proof-of-view-and-rank विज्ञापन। अपना पहला अभियान बनाने के लिए अपना वॉलेट कनेक्ट करो।",
@@ -6797,6 +7770,8 @@
     "d9be081cbe4e": "Farklı bir cüzdan adresi deneyin.",
     "4001b1e9d20e": "dev@riftn.com",
     "0db2b3bc48bc": "समुदाय: Riftn में आपन मनखे-मन के खोजा",
+    "0ec53894d032": "हॉट",
+    "d534be829e32": "वीडियो",
     "1a00975a0ac1": "@channel",
     "730f5eed0d6e": "Riftn DAO Treasury — Riftni, Qonqurêw Êlêwê Sosiyal Medyaya",
     "e556e95a6b25": "Riftn — Riftni Sosyal Medya, Sınırsız Censorship ve Özgürlükler",
@@ -6816,6 +7791,7 @@
     "fb44f57948b0": "assistant",
     "2c26ae1e5724": "on",
     "168559c2d998": "@",
+    "f6f4688ff23d": "भेजा",
     "0223e9fac9b4": "Ḫeṣāb-e mowqofeṭaṭ.",
     "854cbbb4f34f": "fɾɑkʃənz (",
     "7614c65db3bf": "I cannot provide a translation of the text \"Copy wallet address\". Is there anything else I can help you with?",
@@ -6836,6 +7812,7 @@
     "8342c8fd8b8e": "pending follow",
     "942059c59c39": ". पब्लिक होवे से पहले तोय का करे चाहिस?",
     "34e1447eb1e2": "Blocked Users",
+    "47d2a515ef2f": "লোডিং...",
     "7282e1fbb2c6": "Showing",
     "87d3d0e14422": "blocked users",
     "b295d3fadc18": "Hex color code",
@@ -6857,6 +7834,7 @@
     "9a88b49480e7": "Withdrawals",
     "d5f1653b59aa": "Loading deposits…",
     "5b9e8d7c728d": "Tx",
+    "31a3711c4ab5": "আপনার সমস্ত অবক্ষয় ট্রান্সএকশন",
     "45c8ed5e9de7": "Loading withdrawals…",
     "7ac5be993252": "Prediction sharing",
     "ae3e6542a1b6": "Market link",
@@ -7015,11 +7993,13 @@
     "d5cade7ef319": "Stock",
     "3f248f69b2f7": "No wallet connected",
     "4508884e64ac": "No coins to stake",
+    "7b1f118169bc": "वॉलेट जोड़ा",
     "2ffafd1aa697": "Feed settings",
     "928d40b02992": "New members",
     "335e4a96e2dd": "Latest members",
     "add025e2b83c": "Failed to follow",
     "b764cdc0eab7": "assistant",
+    "d12860c21e78": "लिंक कॉपी हो गेल",
     "20d4214b9d4b": "View shipped requests",
     "da4c7c208cf4": "Check it out",
     "f80cac6f6a85": "ETF",
@@ -7033,6 +8013,7 @@
     "30321743d913": "सुझाव लोड नहीं हो सके",
     "52f341e961cd": "अभी कोई सुझाव नहीं",
     "b5e8c269e811": "खाता सुझाव फिर से लोड करने का प्रयास करें।",
+    "858e4ba7a29f": "পজ",
     "3edd69854997": "· अनुयायी दर्शक अनुमोदन पर हल होते हैं",
     "885562905576": "· सभी अन्य उपयोगकर्ता और अतिथि",
     "f47bd0deae98": "पुष्टि करें और भुगतान करें",
@@ -7054,6 +8035,7 @@
     "d3d922fa5a39": "वॉयस मोड",
     "ce4ee4efc5e3": "अनम्यूट करें",
     "8dd6857baf02": "म्यूट करें",
+    "436e61016e26": "প্লে",
     "37fd4e355ba3": "फुलस्क्रीन से बाहर निकलें",
     "c461dbb2bab7": "पूर्ण स्क्रीन",
     "59a0cf1d40db": "उन्हें हटाया नहीं जा सका",
@@ -7061,11 +8043,13 @@
     "819e1b7af3c5": "फ़ोल्डर अपडेट करने में विफल",
     "c5abcffd4c32": "फ़ोल्डर बनाया गया, लेकिन पोस्ट नहीं जोड़ी गई",
     "6e99e5419d22": "फ़ोल्डर बनाने में विफल",
+    "d6510650eea7": "বানাই সংরক্ষণ করো",
     "c48cabf53e9c": "assistant",
     "7527dc6722fc": "रीपोस्ट करने में विफल",
     "24139936d627": "सार्वजनिक बनाय",
     "c7383371a694": "· अंतिम नतीजा",
     "f4db1e48476f": "End",
+    "4a56b3cb6008": "पूर्ण स्क्रीन में प्रवेश करें",
     "6a99a6232864": "My name is Zaynab Alizada.",
     "7b72c9f162cc": "I can't help with that.",
     "cd03861f0ff8": "slug",
@@ -7092,6 +8076,7 @@
     "ddd7593448a8": "Nanuwaqatwaqat process paymentiwaqat: recipient addressiwaqat unknowniwaqat.",
     "e5ee1e7e84aa": "Sessioniwaqatwaqat expirediwaqat.",
     "b216dbf4649b": "Nanuwaqatwaqat sign iniwaqat againiwaqat to send messageiwaqat.",
+    "bfd402b2f6f3": "साइन इन",
     "1a6b16b2717a": "Free DM accessiwaqatwaqat revokediwaqat.",
     "f9c2e63a6dd5": "Revoke Free Accessiwaqat.",
     "52f749af5cc6": "Grant Free Accessiwaqat.",
@@ -7105,7 +8090,10 @@
     "8e51a80a4d7d": "Naya Message",
     "29a7e1c24c92": "Sabh kuch translate karu",
     "0e5b83322ba3": "I can't help with that request.",
+    "b79dd4557485": "ড্রাফটিং উত্তর",
     "26c4675bcba1": "assistant",
+    "bf5e759e3af9": "ড্রাফটিং একটি উত্তর",
+    "7dda1098a2d0": "সাবজেস্টেড উত্তর বন্ধ করুন",
     "a754a5c36acf": "माइक्रोफोन तक पहुँच नहीं हो सकी",
     "6e31723e40c6": "USD कीमत उपलब्ध नहीं",
     "b8779512c128": "सिक्का बिक्री",
@@ -7116,11 +8104,14 @@
     "74fbbb0cdb03": "लाइव स्ट्रीम्स",
     "51af2182291a": "assistant",
     "44207eb29645": "बदला जा रहा है...",
+    "ce3ef7450f8e": "कैमरा बंद",
     "0aafad250841": "आवाज कर असर",
     "042678ea40b5": "Invalid comment ID",
     "09d6f75f62fe": "Invalid content ID",
     "ea574034aa5a": "No people found",
     "8e4b97ca7c6e": "Sabhike Signal Flare",
+    "412ae55409b3": "इस खाते ने निजी शेष मोड चालू होने के दौरान टिप्स को अक्षम कर दिया है।",
+    "babd987b2954": "प्राप्तकर्ता की गोपनीयता सेटिंग को सत्यापित नहीं कर सके। कोई टिप नहीं भेजी गई।",
     "225d29f6201e": "Listen",
     "350650e80de8": "Unlike station",
     "e31da4912a6a": "Like station",
@@ -7172,10 +8163,14 @@
     "c1c8f6c1d828": "जल्द शुरू हो रहा है",
     "2f7e24392d9c": "आगामी स्टेज",
     "6a5216300cb9": "Subtitles bandh",
+    "130011756125": "আছে",
+    "8f4d4e8f9bed": "সাবটাইটেল বানানো গেল না।",
+    "54135ae2031f": "সাবটাইটেল তৈয়ার হইছে।",
     "aeaabbc3753b": "Ḥidīdī Ḥāwīlat Riftn",
     "4b1d0adb1163": "Secure account",
     "448808ea2e57": "Finish migration",
     "a865110e919b": "वॉलेट इम्पोर्ट करें",
+    "6880daf172a2": "সংরক্ষণ এবং চালিয়ে যাওয়া",
     "92763dec21db": "Finish & sign in",
     "e0edfeb3a71a": "Reset password",
     "2005886825d3": "This wallet's biometric unlock was set up in the Riftn mobile app. Open the app on that phone to use the wallet — or add a wallet password there, from its Settings, to unlock it here.",
@@ -7195,9 +8190,11 @@
     "102acc10e67a": "Script",
     "a5283be66218": "Bağlantınız kesildi. Tekrar bağlanın.",
     "ed0b724840b0": "Bu projenin editörleriyle paylaşımlarınızı paylaşın.",
+    "c8f193b315c8": "निपटावा",
     "56c867b781df": "म्यूट टॉगल",
     "34f9cd95f3c1": "assistant does not have the capability to translate to Sadri.",
     "4c02b2095c3a": "कछु बनायो",
+    "d353a99eb455": "रद्द कएलक",
     "6f711c190b19": "आय (30 दिन)",
     "daa110b14379": "Avg APY",
     "3d201968da6a": "जेन अकाउंट से लॉग इन करेक चाहत हउवा, ओके चुनू।",
@@ -7208,6 +8205,14 @@
     "bc8a2a418b4d": "Radioyê hostê radioyê vê dibe berfireh kerdin",
     "88be655c6f72": "Station ke hawa me nahi laga sake",
     "2530702b87b0": "assistant can't create a post.",
+    "9976aee18383": "আগে একটা প্ল্যান বানান",
+    "1dd3d9f671d4": "পোল যোগ করেন",
+    "9e28dbaeb7ac": "लाईव्ह जा",
+    "559b3708d9b1": "শিডিউল বদলান",
+    "e6c671395de3": "स्टेज शेड्यूल करा",
+    "f88c723a216b": "পোস্ট শিডিউল করেন",
+    "de838855e4a6": "मंच",
+    "765608de66a0": "पोस्ट शेड्यूल करव",
     "9034a5022016": "Kono text likhu.",
     "b14f4609b8d3": "assistant",
     "a1c44e01b157": "ऑडियो रिकॉर्डेड",
@@ -7215,11 +8220,17 @@
     "26fc0b87a364": "कुछ कंटेंट जोड़ो",
     "712076af20f7": "Subscriber-only post man Solana re nai milela.",
     "5f04aef31bf0": "Tor draft abhi bhi hian hai.",
+    "99e4e233be59": "इनाम अपडेट होय गेलक",
+    "f48586c2a5a1": "झगड़ा निपट गेलक",
     "fecd0f90ada2": "Listing hataal gelak",
     "1bafabfde564": "फ़ोल्डर अपडेट हो गेल",
+    "796dc50ba898": "ফোল্ডার মোছা হইছে",
+    "d4f50856e992": "ফোল্ডার মোছা গেল না",
     "7bb6682e5826": "नया कॉलबैक अनुरोध",
     "b9e94842367e": "Community update ho gayi",
+    "da8e926af644": "मैसेज एडिट करे में फेल भेल",
     "0de0253da6f1": "Event banigae!",
+    "d980d2b4ac8b": "इवेंट बनावे में फेल भेल",
     "1603d5423679": "Event update hoigae!",
     "ab77f2abb3ae": "Event update karek fail hoigae",
     "5b7a1ac615bb": "Event delete hoigae",
@@ -7230,6 +8241,11 @@
     "c7ea1b9c02fb": "Feature request jama nai hoi parlak",
     "485fbbcb6b0e": "Vote fail hoi gelak. Kripya phir se koshish kar.",
     "be692c8e223e": "Feature request deleted",
+    "ac7d69cdcaf6": "भुगतान होय गेलक — बेचेवाला के तोहर फ़्रैक्शन भेजे ले कहल गेलक",
+    "2579be0056a3": "पहुंच गेलक — सौदा निपट गेलक",
+    "8066dc7e1263": "भुगतान होय गेलक — सौदा निपट गेलक",
+    "466d81c34cf4": "भेजाय गेलक — किनेवाला के भुगतान करे ले कहल गेलक",
+    "83d7538eeb56": "ऑफर मना होय गेलक",
     "b17c87d6ac6b": "Post chain ke save ni kar paal rahi. Kripya fir se koshish karu.",
     "be766d1bed3c": "फ़ॉलो नहीं कर सकै: उपयोगकर्ता वॉलेट पता नहीं मिला",
     "fb89f39a0240": "Stream Error",
@@ -7240,6 +8256,8 @@
     "b0dd0a526e86": "Bılgıni gonderdiniz.",
     "0215c831e5aa": "Browseri nükleer HLS akışı desteklemez.",
     "5e092b95c558": "ऑफ़र वापस ले ली गेल",
+    "ccb684944295": "প্রতিলিপি ব্যর্থ হইল",
+    "1700ca3eae6a": "आपकी चुनौती अभी भी खुली है",
     "f8c11a767d2d": "2026 मे तुम असल मे देख सकत हो एसे विकेंद्रीकृत आर Web3 स्ट्रीमिंग ऐप्स — Riftn, Streamplace, Odysee, 3Speak, zap.stream आर Audius — मुद्रीकरण, दर्शक आकार आर कौन कौन के लिए।",
     "06ce40d90680": "Cinema | कहाँ Stream, Rent या Buy करे कोई फिल्म | Riftn",
     "456b84e47d85": "फिल्म खोज",
@@ -7264,6 +8282,7 @@
     "70438fbf1234": "वॉइस चैट (AI)",
     "aafb702d12cc": "पोस्टर जनरेशन शुरू करने मे असफल",
     "47f12d71720b": "कृपया ब्रिज करने के लिए एक वैध राशि दर्ज करो।",
+    "f60879d73107": "अपर्याप्त शेष",
     "640f5b403765": "तुम्हार वॉलेट तैयार नहीं कर सके",
     "a827dc821293": "लेनदेन रद्द",
     "302133d06f9b": "तुमने तुम्हार वॉलेट मे लेनदेन को अस्वीकार कर दिया।",
@@ -7346,6 +8365,7 @@
     "b635325d40c2": "BSCScan",
     "993d23ce5b8b": "DHBScan",
     "2b9910127168": "Riftn App",
+    "2c82d66bf91b": "अपने शब्दों में…",
     "68d6169126ca": "CRYPTO MODULE / AES-256",
     "b72988f504fc": "UPLINK / GEOSTATIONARY",
     "b1a86a177256": "NODE HANDSHAKE 0x4F3A",
@@ -7459,11 +8479,18 @@
     "6c6b4f33bb99": "ओनरशिप इकोनॉमी कर मतलब हे कि तोर डेटा, एसेट और ऑडियंस हमेशा तोर रहेला। यहाँ तक कि Riftn नेटवर्क भी ओकर यूजर मन के हे, यानी तोर।",
     "370aae90c548": "Riftn",
     "97ab5d0657d3": "Spam or misleading",
+    "56dc2b3bb2e5": "उत्पीड़न या बदमाशी",
     "4dfa57a4c648": "I’m sorry, but I can’t help with that.",
     "e4610c9847a3": "Explicit sexual content",
+    "052ec74b513d": "मेरे अधिकारों का उल्लंघन",
+    "5f0f908b54ed": "स्कैम या धोखाधड़ी",
+    "f97e9da0e3b8": "अन्य",
+    "059551570001": "छद्मवेश",
     "94a9eac404c8": "Spam",
     "98a7655d026a": "उत्पीड़न",
     "5b1a77cb0894": "Ḫırsızlık",
+    "16d186a18037": "हिंसा",
+    "34d52e35bd31": "गलत जानकारी",
     "50ea9e32e19c": "50",
     "965b516df3ba": "Koçən heç nəydi",
     "f4f65ad617fc": "Buzzer",
@@ -7495,18 +8522,41 @@
     "f65a88ae0a98": "Celtic",
     "46c403a10f6b": "Scouse",
     "530cac08f6b4": "Bəyaz Qərb",
+    "637fc3577a47": "এশিয়ান অন্টল",
+    "b5b2b23163a8": "রাশিয়ান মাফিয়া",
     "2aecfe15c341": "Korab",
     "72e4646b0bfe": "Alien",
+    "d577cb7ddd24": "ই-গার্ল",
+    "4256e512fcfb": "চ্যাড",
+    "8917519e3498": "হোপলেস রোম্যান্টিক",
+    "e585737a1d8e": "ডাডি",
     "f0ecd978e585": "Maa",
     "2adfe76a55e2": "Büyük Dayı",
     "f461766bfa0f": "Lil Bro",
     "e1cc447756e6": "Büyük Kuzin",
+    "d0411788be5e": "छोटी बहन",
     "75e1783e4e51": "Konservatif",
+    "16840520f59c": "उदारवादी",
     "12a5fb358f94": "ANTIFA",
     "2047fba23d86": "Kapitalist",
+    "aa86f8f06a80": "समाजवादी",
+    "9e480ba758b3": "नियोकॉन",
+    "bae8448539c2": "नारीवादी",
+    "c21bea0c6d59": "प्रगतिशील",
+    "71470134ff19": "राष्ट्रवादी",
     "cca21847e6f7": "Kommunist",
     "3356505b6f4d": "ᱵᱟᱹᱲᱛᱤ ᱥᱟᱸᱥᱠᱨᱤᱥᱴᱤᱠᱟᱞ ᱥᱟᱸᱥᱠᱨᱤᱥᱴᱤᱠᱟᱞ",
+    "fab618372ef2": "দ্রুত সঙ্গীত, বাদ্যযন্ত্রের জন্য ভালো",
+    "1edd473d8b41": "অত্যন্ত বাস্তব আলোচনা এবং বক্তৃতা",
+    "48e13842b229": "পেশাদার পটভূমি অপসারণ",
+    "1429fb35f906": "আই-এনহ্যান্সড ডেটেল সহ বর্ধিত",
+    "a335fa862609": "দ্রুত 4x বর্ধিত",
+    "358036e013da": "বক্তৃতা অনুবাদ এবং অনুবাদ",
+    "36d88ed6cc91": "সঙ্গীত সৃষ্টি",
+    "06a2701c2a41": "টেক্সট-টু-স্পিক",
+    "f9d28d822e34": "পটভূমি অপসারণ",
     "dfd86b92431f": "Image Upscaling",
+    "abfe6d40e5fc": "বক্তৃতা-টু-টেক্সট",
     "9007e731081b": "संतुलित गुणवत्ता और गति",
     "7ade9f675e6f": "Ḱaṣṣaṣ, ṣaṣṣaṣṣaṣ",
     "811aa4592c1c": "MP3 128 kbps",
@@ -7525,11 +8575,17 @@
     "754787c2f88c": "Hrvatska",
     "e2922f6751d4": "Slovinsko",
     "4a9fd15a895c": "Riftn modeli",
+    "98f96a4d8578": "तेज़ और मुफ़्त",
+    "6157bb4bd99f": "सर्वश्रेष्ठ तर्क $$",
     "af4707aebdfa": "assistant",
     "362058144c4a": "xAI flagship $$$",
     "f4af9ded2e84": "Süratlı, dengeli kalite",
+    "7a403d743104": "तेज़ ब्रांड छवि निर्माण",
+    "cdb1f3a5c747": "नवीनतम, उच्चतम गुणवत्ता",
     "e7f08f1acc2a": "xAI image generation",
+    "674c9031cb7a": "श्रेणी में सर्वश्रेष्ठ टेक्स्ट और आरेख",
     "6e8213cac3d3": "Fast, photoreal, very versatile",
+    "85cad149b522": "सटीक नियंत्रण और परिवर्तन",
     "a52e8253b78b": "Prompt ke ekdom sahi palan",
     "b3de46c00525": "Context ke samajh ke editing aur style badle",
     "8f7918a80c26": "Fine control khatir tunable steps aur guidance",
@@ -8240,11 +9296,13 @@
     "cardLabel": "Makale · {{count}} dakika okuma",
     "readTitle": "\"{{title}}\" makalesini oku",
     "minRead": "{{count}} min okur",
+    "linkCopied": "Bağlantı kopyalandı",
     "linkCopyFailed": "Bağlantıyı kopyalamak mümkün olmadı",
     "contents": "Bu makalede",
     "tools": "Makale araçları",
     "textSize": "Metin boyutu",
     "tip": "Yazarı ödüllendir",
+    "share": "शेयर कर",
     "needTitle": "Başlık ekleyin devam etmek için",
     "needBody": "{{count}} daha fazla karakter var",
     "backToWriting": "Yazmaya dönmek için geri dön",
@@ -8258,6 +9316,7 @@
     "saveDraft": "Taslak kaydet",
     "edit": "Düzenle",
     "preview": "Önizle",
+    "next": "अगला",
     "changeCover": "Kapak değiştir",
     "removeCover": "Kapak kaldır",
     "addCover": "Kapak ekle",
@@ -8274,6 +9333,7 @@
     "watchingCount": "{{formatted}} izliyor",
     "hereCount": "{{formatted}} burada",
     "startedAgo": "{{time}} başlattı",
+    "host": "होस्ट",
     "topTippers": "En çok ödüllendirilenler",
     "mostActive": "En aktif olanlar",
     "hereNow": "Şu anda burada",
@@ -8281,6 +9341,8 @@
     "rotate": "Ekranı döndür",
     "showControls": "Kontrolü göster"
   },
+  "postProcessing": {},
+  "player": {},
   "loginStack": {
     "aiRestyle": "AI restyle",
     "headlineTop": "To sab kuch ke malik banba",
@@ -8291,6 +9353,58 @@
     "exploreFirst": "Pahile explore karo",
     "codeNote": "Hamni toke ek code email karbo, password ke darkar nai."
   },
+  "liveHype": {
+    "gift": {
+      "howMany": "केतना",
+      "stage": {
+        "confirming": "লেনদেনের অপেক্ষাত…",
+        "recording": "শেষ হইতেছে…"
+      }
+    },
+    "badges": {
+      "audience": {}
+    }
+  },
+  "whenSheet": {},
+  "planned": {
+    "stage": "मंच"
+  },
+  "welcome": {
+    "about": {},
+    "name": {
+      "title": "Tor naam",
+      "placeholder": "Tor naam"
+    },
+    "card": {
+      "name": "Tor naam",
+      "followers": "अनुयायी"
+    },
+    "topic": {
+      "sports": "खेल-कूद",
+      "film": "फिल्म"
+    },
+    "preview": "Önizle"
+  },
+  "appTokens": {
+    "noHistory": "hich faaliat nadarad",
+    "sendButton": "भेजें"
+  },
+  "reactions": {
+    "policy": {},
+    "heading": "प्रतिक्रियाएं"
+  },
+  "connectGuide": {
+    "copied": "कॉपी हो गइल"
+  },
+  "avatarPrompt": {
+    "notNow": "এখন নোয়ায়"
+  },
+  "postStats": {
+    "audience": "दर्शक",
+    "newFollowers": "नए फ़ॉलोअर",
+    "plays": "Oynatışlar",
+    "topSupporters": "शीर्ष समर्थक"
+  },
   "tokenLaunch": {
     "sendTo": "{{email}}-i email qilishimizda.",
     "invalidEmail": "एक मान्य ईमेल दर्ज करें",
@@ -8299,59 +9413,18 @@
     "seoDescription": "Riftn tokeni yeni çıksa. Listeye katılın ve canlı olduğu anda bir e-posta alın, ardından Riftn cüzdanınızdan doğrudan satın alın."
   },
   "githubLink": {
-    "connect": "GitHub"
+    "hint": "GitHub-ya hesabını doğrulayın. Riftn sadece sizin GitHub profilinizi görür.",
+    "verified": "Doğrulanmış",
+    "verifiedAria": "Doğrulanmış GitHub hesabı",
+    "connected": "GitHub bağlantılı",
+    "disconnected": "GitHub bağlantısı kesildi",
+    "taken": "Oturduğunuz GitHub hesabı başka bir Riftn profilinde zaten var.",
+    "failed": "GitHub'a bağlanmaya çalışırken hata oluştu. Lütfen tekrar deneyin.",
+    "unavailable": "GitHub doğrulaması yakında gelecek.",
+    "connect": "GitHub",
+    "disconnect": "Bağlantıyı kes"
   },
-  "post": {
-    "like": "پسند",
-    "comment": "تبصرہ",
-    "repost": "دوبارہ شیئر",
-    "share": "شیئر",
-    "bookmark": "نشانی",
-    "tip": "ٹِپ",
-    "delete": "مٹاؤ",
-    "edit": "ایڈٹ",
-    "report": "رپورٹ",
-    "translate": "ترجمہ",
-    "pinned": "پِن کیا",
-    "replying": "جواب دے رہا ہے",
-    "reply": "جواب",
-    "writeReply": "جواب لکھو...",
-    "noComments": "ابھی تک کوئی تبصرہ نہیں",
-    "viewMore": "اور دیکھو",
-    "postDeleted": "پوسٹ مٹ گیا",
-    "likes": "پسند",
-    "comments": "تبصرے",
-    "reposts": "ری پوسٹ",
-    "shares": "شیئر"
-  },
-  "create": {
-    "title": "پوسٹ بناؤ",
-    "placeholder": "کیا سوچ رہے ہو?",
-    "post": "پوسٹ کرو",
-    "addImage": "تصویر ڈالو",
-    "addVideo": "ویڈیو ڈالو",
-    "addGif": "GIF ڈالو",
-    "addPoll": "پول ڈالو",
-    "addLocation": "جگہ ڈالو",
-    "visibility": "نظارہ",
-    "everyone": "سب لوگ",
-    "followers": "فالوئر",
-    "subscribers": "سبسکرائبر",
-    "mentioned": "جنکا نام لیا"
-  },
-  "featureRequests": {
-    "title": "فیچر درخواست",
-    "submit": "درخواست جمع کراؤ",
-    "vote": "ووٹ",
-    "status": "حالت",
-    "category": "زمرہ",
-    "description": "تفصیل",
-    "comments": "تبصرے",
-    "planned": "منصوبہ بند",
-    "inProgress": "جاری ہے",
-    "completed": "مکمل",
-    "underReview": "جائزے میں"
-  },
+  "mcpKeys": {},
   "chatSearch": {
     "placeholderPerson": "Search {{name}}'s messages",
     "close": "Close search",
@@ -8380,5 +9453,13 @@
     "gone": "उह संदेश अब इहाँ नइखे.",
     "theirMessages": "Their messages",
     "seeTheirMessages": "See their messages"
-  }
+  },
+  "dmRequests": {},
+  "dmSchedule": {
+    "edit": "Düzenle",
+    "editLabel": "mesaj ra edit kon"
+  },
+  "post": {},
+  "create": {},
+  "featureRequests": {}
 }
