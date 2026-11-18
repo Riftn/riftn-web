@@ -1,6 +1,5 @@
 import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
-import SmilePlus from "@/components/ui/cut-icons/packs";
 import CornerDownRight from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
@@ -10,8 +9,6 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2 } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
-import Pencil from "@/components/ui/cut-icons/edit";
-import Trash2 from "@/components/ui/cut-icons/delete";
 
 import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
@@ -24,8 +21,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
 import { TranslatableText, replaceLinksWithEmoji, SharedTranslationContext } from '../TranslatableText';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { EmojiGifPicker } from '../chat/EmojiGifPicker';
 import { formatTimeAgo } from '@/lib/feed-utils';
@@ -62,10 +57,9 @@ import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLink
 import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
-import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from '@/components/app/chat/message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from '@/components/app/chat/message-menu-kit';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -733,95 +727,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                         />
                       )}
                     </div>
-                    {/* Hover action buttons */}
-                    {isAuthenticated && (
-                      <div data-sidebar-chat-actions className="pointer-events-none absolute right-0 top-0 z-10 flex items-center gap-0.5 rounded-l-md bg-zinc-900/90 pl-1 opacity-0 backdrop-blur-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => setReplyTo(msg)}
-                              aria-label={_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}
-                              className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded"
-                            >
-                              <Reply className="w-3 h-3" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">{_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}</TooltipContent>
-                        </Tooltip>
-                        {walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase() && (
-                          <>
-                            {/* Text only: rewording an image or a voice note
-                                changes what people think they are looking at. */}
-                            {(!msg.message_type || msg.message_type === 'text') && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={() => { setEditingId(msg.id); setEditInitial(msg.content || ''); }}
-                                    aria-label={_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}
-                                    className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded"
-                                  >
-                                    <Pencil className="w-3 h-3" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">{_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}</TooltipContent>
-                              </Tooltip>
-                            )}
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => void deleteMessage(msg.id)}
-                                  aria-label={_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}
-                                  className="p-0.5 text-zinc-500 hover:text-red-400 transition-colors rounded"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</TooltipContent>
-                            </Tooltip>
-                          </>
-                        )}
-                        <Popover>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <PopoverTrigger asChild>
-                                <button aria-label={_copy("copy.01fad993ff61", { defaultValue: "React" })} className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded">
-                                  <SmilePlus className="w-3 h-3" />
-                                </button>
-                              </PopoverTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">{_copy("copy.01fad993ff61", { defaultValue: "React" })}</TooltipContent>
-                          </Tooltip>
-                          <PopoverContent
-                            side="top"
-                            align="end"
-                            className="w-auto p-1 bg-zinc-800 border-zinc-700 rounded-xl"
-                          >
-                            <div className="flex gap-0.5">
-                              {QUICK_CHAT_REACTIONS.map((emoji) => {
-                                const isActive = walletAddress && msg.reactions?.[emoji]?.some(
-                                  (a) => a.toLowerCase() === walletAddress.toLowerCase()
-                                );
-                                return (
-                                  <button
-                                    key={emoji}
-                                    onClick={() => handleReact(msg.id, emoji)}
-                                    className={`w-7 h-7 flex items-center justify-center text-sm rounded-lg transition-colors ${
-                                      isActive ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'
-                                    }`}
-                                  >
-                                    {emoji}
-                                  </button>
-                                );
-                              })}
-                              <MoreReactionsButton
-                                className="w-7 h-7"
-                                onPick={(emoji) => handleReact(msg.id, emoji)}
-                                reactions={msg.reactions}
-                                viewerAddress={walletAddress}
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                    {/* Every action lives in the line's menu (right-click, or this
+                        "..." on hover for keyboard users). */}
+                    {editingId !== msg.id && !(msg.client_key && msg.send_state === 'failed') && (
+                      <div data-sidebar-chat-actions className="pointer-events-none absolute right-0 top-0 z-10 rounded-l-md bg-zinc-900/90 pl-0.5 opacity-0 backdrop-blur-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+                        <MessageMoreButton
+                          className="h-5 w-5"
+                          onOpen={(point) => { setMenuMsg(msg); menuPoint.openAt(point); }}
+                        />
                       </div>
                     )}
                   </div>

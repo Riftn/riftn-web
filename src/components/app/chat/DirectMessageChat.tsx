@@ -13,13 +13,12 @@ import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, LockOpen, SmilePlus, CheckCircle2 } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
 import Gift from "@/components/ui/cut-icons/gifts";
 import Languages from "@/components/ui/cut-icons/language";
-import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
 import Lock from "@/components/ui/cut-icons/privacy";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -129,7 +128,7 @@ import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from './message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -137,10 +136,8 @@ import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { formatUnreadCount } from '@/lib/unread-count';
 import { isDmCallNotice } from '@/lib/dm-call-notice';
 import { CallNoteCard } from './calls/CallNoteCard';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
-import { MoreReactionsButton } from './MoreReactionsButton';
 
 interface DirectMessageChatProps {
   conversation: DeHubConversation;
@@ -643,7 +640,6 @@ const MessageBubble = memo(function MessageBubble({
     try { if (await onSaveEdit(message._id, draftText) && setDraftText.complete(draftText, '')) onCancelEdit?.(); }
     finally { editPending.current = false; setIsSavingEdit(false); }
   };
-  const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
   useEffect(() => {
     if (isEditing) setDraftText.initialize(message.content || '');
   }, [isEditing, message.content, setDraftText]);
@@ -1205,108 +1201,11 @@ const MessageBubble = memo(function MessageBubble({
           </div>
         )}
 
-          {!selecting && !message.isDeleted && !isUnsent && message.msgType !== 'tip' && !isEditing && (onReply || onReact || onPin || onForward || downloadTarget || (onEdit && canEdit) || pickable) && (
-            <div
-              className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? 'right-full mr-1' : 'left-full ml-1'} flex items-center gap-1 transition-all opacity-0 group-hover:opacity-100 z-10`}
-            >
-              {pickable && (
-                <button
-                  type="button"
-                  data-msg-select-start
-                  onClick={() => onStartPick?.(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={_copy('msgSelect.select', { defaultValue: 'Select' })}
-                  aria-label={_copy('msgSelect.select', { defaultValue: 'Select' })}
-                >
-                  <CheckCircle2 className="w-3 h-3" />
-                </button>
-              )}
-              {onReply && (
-                <button
-                  type="button"
-                  onClick={() => onReply(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.reply')}
-                >
-                  <Reply className="w-3 h-3" />
-                </button>
-              )}
-              {onReact && (
-                <Popover open={reactionPickerOpen} onOpenChange={setReactionPickerOpen}>
-                  <PopoverTrigger asChild>
-                    <button type="button" className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white" title={tr('messages.react')}>
-                      <SmilePlus className="w-3 h-3" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="top" align={isOwnMessage ? 'start' : 'end'} className="w-auto p-1.5 bg-zinc-800 border-zinc-700 rounded-xl">
-                    <div className="flex gap-0.5">
-                      {QUICK_CHAT_REACTIONS.map((emoji) => {
-                        const mine = currentUserAddress && message.reactions?.[emoji]?.some(address => address.toLowerCase() === currentUserAddress.toLowerCase());
-                        return (
-                          <button type="button" key={emoji} onClick={() => {
-                            if (mine) onRemoveReaction?.(message._id, emoji);
-                            else onReact(message._id, emoji);
-                            setReactionPickerOpen(false);
-                          }} className={`w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-colors ${mine ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'}`}>
-                            {emoji}
-                          </button>
-                        );
-                      })}
-                      <MoreReactionsButton
-                        reactions={message.reactions}
-                        viewerAddress={currentUserAddress}
-                        onPick={(emoji) => {
-                          const mine = currentUserAddress && message.reactions?.[emoji]?.some(address => address.toLowerCase() === currentUserAddress.toLowerCase());
-                          if (mine) onRemoveReaction?.(message._id, emoji);
-                          else onReact(message._id, emoji);
-                          setReactionPickerOpen(false);
-                        }}
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-              {onEdit && canEdit && (
-                <button
-                  type="button"
-                  onClick={() => onEdit(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.edit')}
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
-              )}
-              {downloadTarget && (
-                <button
-                  type="button"
-                  onClick={() => void handleDownloadMedia()}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={_copy("copy.d6eafe823591", { defaultValue: "Download" })}
-                  aria-label={_copy("copy.d6eafe823591", { defaultValue: "Download" })}
-                >
-                  <Download className="w-3 h-3" />
-                </button>
-              )}
-              {onForward && (
-                <button
-                  type="button"
-                  onClick={() => onForward(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.forward')}
-                >
-                  <CornerUpRight className="w-3 h-3" />
-                </button>
-              )}
-              {onPin && (
-                <button
-                  type="button"
-                  onClick={() => onPin(message._id)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.pin')}
-                >
-                  <Pin className="w-3 h-3" />
-                </button>
-              )}
+          {/* Every action lives in the message menu: right-click, a hold on a
+              phone, or this one "..." for keyboard and mouse users. */}
+          {!selecting && menuable && message.msgType !== 'tip' && (
+            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? 'right-full mr-1' : 'left-full ml-1'} z-10`}>
+              <MessageMoreButton onOpen={menuPoint.openAt} />
             </div>
           )}
         </div>
