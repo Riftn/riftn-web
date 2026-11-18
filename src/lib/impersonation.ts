@@ -163,13 +163,16 @@ type StaffName = {
 
 const STAFF_NAMES: StaffName[] = [
   { label: 'Mal', names: ['maldoteth', 'maldot', 'maleth'], firstName: 'mal', owners: ['0x9324840523a5d17dd12a2f11a9472e5a199c1937'], ownerUsernames: ['maldoteth'] },
-  { label: 'Riftn', names: ['dehub', 'riftn'], owners: ['0x06da979225262715ed57449d0573329a1e685140'], ownerUsernames: ['riftn', 'd'] },
+  // The brand: someone simply called Riftn, or a fan account, is fine. Only a team
+  // word around it ("Riftn Support", "riftn_admin", "Riftn Team") reads as staff.
+  // The old DeHub name is not protected any more.
+  { label: 'Riftn', names: [], firstName: 'riftn', owners: ['0x06da979225262715ed57449d0573329a1e685140'], ownerUsernames: ['riftn', 'd'] },
 ];
 
 /** Words that claim a team role. */
 const CLAIM_WORDS = [
   'cofounder', 'founder', 'official', 'support', 'helpdesk', 'moderator', 'security',
-  'admin', 'team', 'staff', 'real', 'ceo', 'mod', 'help', 'dehub', 'riftn',
+  'admin', 'team', 'staff', 'real', 'ceo', 'mod', 'help', 'service', 'customer', 'care', 'riftn',
 ];
 /** Harmless padding: "Its Mal" or "Mal Dev" is still just someone called Mal. */
 const FILLER_WORDS = ['the', 'iam', 'its', 'eth', 'dot', 'dev', 'app', 'hq'];
@@ -200,14 +203,24 @@ function nameCores(folded: string, words: string[] = ROLE_WORDS): string[] {
 
 /**
  * Who this account is dressed up as, or null. The owning wallet, or whoever
- * holds the owner username, never gets flagged. Plenty of people are called
- * Mal, so the plain first name is not flagged here; the API refuses it only
- * together with Mal's own photo.
+ * holds the owner username, never gets flagged, and neither does a verified
+ * or official account. Plenty of people are called Mal, and plenty of people
+ * put Riftn in their name, so a plain "Mal" or "Riftn" is not flagged here:
+ * only with a team word around it (support, admin, team, official...).
  */
 export function staffImpersonated(
-  user: { address?: string | null; displayName?: string | null; username?: string | null } | null | undefined,
+  user: {
+    address?: string | null;
+    displayName?: string | null;
+    username?: string | null;
+    isVerified?: boolean | null;
+    verified?: boolean | null;
+    isOfficial?: boolean | null;
+  } | null | undefined,
 ): string | null {
   if (!user) return null;
+  // Verified and official accounts are never called fakes.
+  if (user.isVerified || user.verified || user.isOfficial) return null;
   const address = (user.address ?? '').toLowerCase();
   const handle = (user.username ?? '').trim().replace(/^@+/, '').toLowerCase();
   for (const raw of [user.displayName, user.username]) {
