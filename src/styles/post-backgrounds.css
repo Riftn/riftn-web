@@ -53,37 +53,48 @@ html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_
   color: var(--pbg-sub) !important;
 }
 html [data-pbg] { text-shadow: none; }
-html [data-pbg][data-pbg-kind='moving'][data-pbg-tone='dark'] :is(h3, p, .text-white, [class*='text-white/']) {
+html [data-pbg]:is([data-pbg-kind='moving'], [data-pbg-kind='photo'])[data-pbg-tone='dark'] :is(h3, p, .text-white, [class*='text-white/']) {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
 }
 html [data-pbg] [data-profile-mixed-grid] .pmg-meta,
 html [data-profile-mixed-grid] [data-pbg] .pmg-meta { color: var(--pbg-sub); }
 html [data-profile-mixed-grid] .pmg-poster[data-pbg] { color: var(--pbg-ink); box-shadow: none; background: transparent; }
 
+/* Every backdrop draws from three colours set inline by PostBgLayer
+   (--c1 base, --c2 accent, --c3 second accent), so each one comes in any
+   colourway. Moving ones get three extra <i> layers to draw on, and size
+   their shapes in container units (cqmin) so a 56px swatch, a grid tile and
+   a full-screen reel all read the same. Nothing flashes: every brightness
+   change takes 2s or longer, well under three flashes a second. */
+.pbg { container-type: size; --c1: #0b0b0f; --c2: #ffffff; --c3: #8b7cff; }
+.pbg > i { position: absolute; pointer-events: none; }
+.pbg > i::before, .pbg > i::after { content: ''; position: absolute; pointer-events: none; }
+
 /* ---------- Still ---------- */
-.pbg-ink { background: radial-gradient(120% 80% at 8% 0%, #2f4380 0, transparent 60%), radial-gradient(90% 80% at 100% 100%, #155566 0, transparent 62%), #0d1324; }
+.pbg-ink { background: radial-gradient(120% 80% at 8% 0%, var(--c2) 0, transparent 60%), radial-gradient(90% 80% at 100% 100%, var(--c3) 0, transparent 62%), var(--c1); }
 .pbg-news {
-  background-color: #e7e5e0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-color: var(--c1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.pbg-split { background: linear-gradient(128deg, #b5370b 0 47%, #4a1a8f 47% 100%); }
+.pbg-news::before { inset: 0; background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--c2) 5%, transparent) 0 1px, transparent 1px 22px); }
+.pbg-split { background: linear-gradient(128deg, var(--c1) 0 47%, var(--c2) 47% 100%); }
 .pbg-blue {
-  background-color: #0a3871;
-  background-image: linear-gradient(rgba(255,255,255,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.13) 1px, transparent 1px), linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-color: var(--c1);
+  background-image: linear-gradient(color-mix(in srgb, var(--c2) 14%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--c2) 14%, transparent) 1px, transparent 1px), linear-gradient(color-mix(in srgb, var(--c2) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--c2) 5%, transparent) 1px, transparent 1px);
   background-size: 48px 48px, 48px 48px, 12px 12px, 12px 12px;
 }
 .pbg-terra {
-  background-color: #ecebe7;
-  background-image: radial-gradient(circle at 20% 30%, #e0795c 0 3px, transparent 3.5px), radial-gradient(circle at 70% 60%, #3f7f74 0 2.5px, transparent 3px), radial-gradient(circle at 45% 85%, #d8b04a 0 4px, transparent 4.5px), radial-gradient(circle at 85% 15%, #2c2c34 0 2px, transparent 2.5px), radial-gradient(circle at 10% 75%, #9db6c9 0 5px, transparent 5.5px);
+  background-color: var(--c1);
+  background-image: radial-gradient(circle at 20% 30%, var(--c2) 0 3px, transparent 3.5px), radial-gradient(circle at 70% 60%, var(--c3) 0 2.5px, transparent 3px), radial-gradient(circle at 45% 85%, color-mix(in srgb, var(--c2) 50%, var(--c3)) 0 4px, transparent 4.5px), radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--c1) 30%, #2c2c34) 0 2px, transparent 2.5px), radial-gradient(circle at 10% 75%, color-mix(in srgb, var(--c3) 45%, var(--c1)) 0 5px, transparent 5.5px);
   background-size: 57px 49px, 43px 61px, 71px 53px, 37px 41px, 89px 77px;
 }
-.pbg-terra::before { inset: 0; background: linear-gradient(180deg, rgba(236,235,231,0) 0, rgba(236,235,231,.78) 25%, rgba(236,235,231,.78) 78%, rgba(236,235,231,0) 100%); }
-.pbg-half { background: #0f0f12; }
-.pbg-half::before { inset: 0; background-image: radial-gradient(circle, #ff3f84 1.7px, transparent 2px); background-size: 10px 10px; -webkit-mask-image: linear-gradient(200deg, #000 0, transparent 62%); mask-image: linear-gradient(200deg, #000 0, transparent 62%); }
-.pbg-topo { background-color: #1f2e24; background-image: repeating-radial-gradient(circle at 18% 120%, transparent 0 16px, rgba(220,255,225,.10) 16px 17px), repeating-radial-gradient(circle at 110% -10%, transparent 0 22px, rgba(220,255,225,.07) 22px 23px); }
-.pbg-velvet { background: radial-gradient(140% 100% at 50% 0%, #7c1733 0, #2b0610 72%); }
+.pbg-terra::before { inset: 0; background: linear-gradient(180deg, transparent 0, color-mix(in srgb, var(--c1) 78%, transparent) 25%, color-mix(in srgb, var(--c1) 78%, transparent) 78%, transparent 100%); }
+.pbg-half { background: var(--c1); }
+.pbg-half::before { inset: 0; background-image: radial-gradient(circle, var(--c2) 1.7px, transparent 2px); background-size: 10px 10px; -webkit-mask-image: linear-gradient(200deg, #000 0, transparent 62%); mask-image: linear-gradient(200deg, #000 0, transparent 62%); }
+.pbg-topo { background-color: var(--c1); background-image: repeating-radial-gradient(circle at 18% 120%, transparent 0 16px, color-mix(in srgb, var(--c2) 11%, transparent) 16px 17px), repeating-radial-gradient(circle at 110% -10%, transparent 0 22px, color-mix(in srgb, var(--c2) 7%, transparent) 22px 23px); }
+.pbg-velvet { background: radial-gradient(140% 100% at 50% 0%, var(--c2) 0, var(--c1) 72%); }
 .pbg-velvet::before { inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.07) 45%, transparent 60%); }
-.pbg-sorbet { background: linear-gradient(150deg, #ffd8c2 0, #ffc4d9 52%, #d9cbff 100%); }
+.pbg-sorbet { background: linear-gradient(150deg, var(--c1) 0, var(--c2) 52%, var(--c3) 100%); }
 /* Profile Echo: a soft blur of the profile picture (--pbg-art, set by PostBgLayer), turned a different way per post. */
 .pbg-echo { background: #1c2028; }
 .pbg-echo::before { inset: -30%; background: var(--pbg-art, radial-gradient(40% 40% at 30% 30%, #e9b36b, transparent 70%), radial-gradient(45% 45% at 75% 35%, #3fb6a8, transparent 70%), radial-gradient(50% 50% at 55% 80%, #b0486e, transparent 70%), #2a2f3a) center / cover; filter: blur(18px) saturate(1.25); }
@@ -100,73 +111,256 @@ html [data-profile-mixed-grid] .pmg-poster[data-pbg] { color: var(--pbg-ink); bo
 .pbg-cards[data-pbg-n='5'] { background: linear-gradient(150deg, #ff7a18, #d6336c); }
 .pbg-cards[data-pbg-n='6'] { background: linear-gradient(150deg, #1f6feb, #22c1c3); }
 .pbg-cards[data-pbg-n='7'] { background: linear-gradient(150deg, #6d3bd2, #e0508f); }
-/* Pattern Deck: dots, lines or rings fading across a dark card, with a thin light line on top. */
-.pbg-deck { background: #0c0d10; box-shadow: inset 0 2px 0 rgba(174,191,206,.7); }
-.pbg-deck::before { inset: 0; opacity: .18; background: radial-gradient(circle, #fff 1px, transparent 1.4px) 0 0 / 9px 9px; -webkit-mask-image: linear-gradient(200deg, #000, transparent 75%); mask-image: linear-gradient(200deg, #000, transparent 75%); }
-.pbg-deck:is([data-pbg-n='1'], [data-pbg-n='4'], [data-pbg-n='7'])::before { background: repeating-linear-gradient(135deg, #fff 0 1px, transparent 1px 8px); -webkit-mask-image: linear-gradient(160deg, transparent 20%, #000); mask-image: linear-gradient(160deg, transparent 20%, #000); }
-.pbg-deck:is([data-pbg-n='2'], [data-pbg-n='5'])::before { background: repeating-radial-gradient(circle at 100% 0%, #fff 0 1px, transparent 1px 11px); -webkit-mask-image: linear-gradient(220deg, #000, transparent 80%); mask-image: linear-gradient(220deg, #000, transparent 80%); }
+/* Pattern Deck: dots, lines or rings fading across a card, with a thin line on top. */
+.pbg-deck { background: var(--c1); box-shadow: inset 0 2px 0 color-mix(in srgb, var(--c2) 70%, transparent); }
+.pbg-deck::before { inset: 0; opacity: .2; background: radial-gradient(circle, var(--c2) 1px, transparent 1.4px) 0 0 / 9px 9px; -webkit-mask-image: linear-gradient(200deg, #000, transparent 75%); mask-image: linear-gradient(200deg, #000, transparent 75%); }
+.pbg-deck:is([data-pbg-n='1'], [data-pbg-n='4'], [data-pbg-n='7'])::before { background: repeating-linear-gradient(135deg, var(--c2) 0 1px, transparent 1px 8px); -webkit-mask-image: linear-gradient(160deg, transparent 20%, #000); mask-image: linear-gradient(160deg, transparent 20%, #000); }
+.pbg-deck:is([data-pbg-n='2'], [data-pbg-n='5'])::before { background: repeating-radial-gradient(circle at 100% 0%, var(--c2) 0 1px, transparent 1px 11px); -webkit-mask-image: linear-gradient(220deg, #000, transparent 80%); mask-image: linear-gradient(220deg, #000, transparent 80%); }
 .pbg-carbon {
-  background-color: #141414;
-  background-image: linear-gradient(27deg, #0e0e0e 5px, transparent 5px), linear-gradient(207deg, #0e0e0e 5px, transparent 5px), linear-gradient(27deg, #1d1d1d 5px, transparent 5px), linear-gradient(207deg, #1d1d1d 5px, transparent 5px), linear-gradient(90deg, #191919 10px, transparent 10px), linear-gradient(#1c1c1c 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #232323 75%, #232323);
+  background-color: var(--c1);
+  background-image: linear-gradient(27deg, var(--c3) 5px, transparent 5px), linear-gradient(207deg, var(--c3) 5px, transparent 5px), linear-gradient(27deg, var(--c2) 5px, transparent 5px), linear-gradient(207deg, var(--c2) 5px, transparent 5px), linear-gradient(90deg, color-mix(in srgb, var(--c1) 50%, var(--c2)) 10px, transparent 10px), linear-gradient(var(--c2) 25%, color-mix(in srgb, var(--c1) 40%, var(--c2)) 25%, color-mix(in srgb, var(--c1) 40%, var(--c2)) 50%, transparent 50%, transparent 75%, color-mix(in srgb, var(--c2) 70%, #fff 6%) 75%, color-mix(in srgb, var(--c2) 70%, #fff 6%));
   background-position: 0 5px, 10px 0, 0 10px, 10px 5px, 0 0, 0 0;
   background-size: 20px 20px;
 }
 .pbg-carbon::before { inset: 0; background: linear-gradient(160deg, rgba(255,255,255,.10), transparent 40%, transparent 70%, rgba(255,255,255,.05)); }
 
+/* Your photo or GIF, with a scrim so the words always read. */
+.pbg-photo { background: #111 var(--pbg-img, none) center / cover no-repeat; }
+.pbg-photo::after { inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.22) 40%, rgba(0,0,0,.5)); }
+
 /* ---------- Moving ---------- */
-.pbg-aurora { background: #06111e; }
-.pbg-aurora::before { inset: -40%; background: radial-gradient(40% 35% at 30% 40%, rgba(40,230,170,.55), transparent 70%), radial-gradient(35% 30% at 70% 55%, rgba(110,90,255,.55), transparent 70%), radial-gradient(30% 25% at 50% 75%, rgba(20,160,255,.45), transparent 70%); filter: blur(18px); animation: pbg-drift 22s ease-in-out infinite alternate; }
-.pbg-aurora::after { inset: 0; background: linear-gradient(180deg, rgba(6,17,30,.15), rgba(6,17,30,.45)); }
-@keyframes pbg-drift { 0% { transform: translate3d(-6%, -4%, 0) rotate(0); } 100% { transform: translate3d(6%, 5%, 0) rotate(12deg); } }
 
-.pbg-lava { background: #24072a; }
-.pbg-lava::before { width: 70%; aspect-ratio: 1; left: -10%; top: -20%; border-radius: 50%; background: radial-gradient(circle, #ff5f6d, transparent 68%); filter: blur(10px); animation: pbg-blob-a 16s ease-in-out infinite alternate; }
-.pbg-lava::after { width: 60%; aspect-ratio: 1; right: -12%; bottom: -25%; border-radius: 50%; background: radial-gradient(circle, #ffb347, transparent 68%); filter: blur(10px); animation: pbg-blob-b 19s ease-in-out infinite alternate; }
-@keyframes pbg-blob-a { to { transform: translate3d(55%, 45%, 0) scale(1.15); } }
-@keyframes pbg-blob-b { to { transform: translate3d(-60%, -50%, 0) scale(.9); } }
+/* Aurora: three curtains sway and stretch at their own pace over a faint star sky. */
+.pbg-aurora { background: radial-gradient(130% 70% at 50% 115%, color-mix(in srgb, var(--c2) 22%, var(--c1)), var(--c1) 70%); }
+.pbg-aurora > i:nth-child(1) { inset: 0; opacity: .55; background-image: radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 68% 12%, #fff, transparent), radial-gradient(1.2px 1.2px at 84% 30%, #fff, transparent), radial-gradient(1px 1px at 32% 8%, #fff, transparent), radial-gradient(1px 1px at 48% 26%, #fff, transparent); }
+.pbg-aurora::before, .pbg-aurora::after, .pbg-aurora > i:nth-child(2) { inset: -25% -45%; transform-origin: 50% 100%; mix-blend-mode: screen; }
+.pbg-aurora::before { background: radial-gradient(9% 52% at 32% 46%, color-mix(in srgb, var(--c2) 75%, transparent), transparent 72%), radial-gradient(6% 42% at 47% 38%, color-mix(in srgb, var(--c2) 55%, transparent), transparent 72%), radial-gradient(11% 58% at 70% 50%, color-mix(in srgb, var(--c2) 45%, transparent), transparent 72%); animation: pbg-aur-a 19s ease-in-out infinite alternate; }
+.pbg-aurora::after { background: radial-gradient(8% 48% at 40% 40%, color-mix(in srgb, var(--c3) 70%, transparent), transparent 72%), radial-gradient(12% 55% at 62% 44%, color-mix(in srgb, var(--c3) 50%, transparent), transparent 72%); animation: pbg-aur-b 27s ease-in-out infinite alternate; }
+.pbg-aurora > i:nth-child(2) { background: radial-gradient(22% 30% at 50% 62%, color-mix(in srgb, color-mix(in srgb, var(--c2) 50%, var(--c3)) 40%, transparent), transparent 75%); animation: pbg-aur-c 23s ease-in-out infinite alternate; }
+.pbg-aurora > i:nth-child(3) { inset: 0; background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--c1) 55%, transparent)); }
+@keyframes pbg-aur-a { 0% { transform: translate3d(-9%, 0, 0) skewX(-14deg) scaleY(.88); } 50% { transform: translate3d(3%, -4%, 0) skewX(8deg) scaleY(1.08); } 100% { transform: translate3d(10%, 1%, 0) skewX(-5deg) scaleY(.96); } }
+@keyframes pbg-aur-b { 0% { transform: translate3d(8%, 2%, 0) skewX(10deg) scaleY(1.04); } 50% { transform: translate3d(-4%, -3%, 0) skewX(-9deg) scaleY(.9); } 100% { transform: translate3d(-10%, 0, 0) skewX(6deg) scaleY(1.1); } }
+@keyframes pbg-aur-c { 0% { transform: translate3d(-6%, 3%, 0) scale(.9); } 100% { transform: translate3d(7%, -4%, 0) scale(1.15); } }
 
-.pbg-stars { background: radial-gradient(120% 90% at 50% 120%, #1a2350, #03050d 70%); }
-.pbg-stars::before, .pbg-stars::after { left: 0; right: 0; top: 0; height: 200%; background-image: radial-gradient(1.2px 1.2px at 12px 18px, #fff, transparent), radial-gradient(1px 1px at 70px 90px, #cfd8ff, transparent), radial-gradient(1.5px 1.5px at 130px 40px, #fff, transparent), radial-gradient(1px 1px at 180px 140px, #fff, transparent), radial-gradient(1px 1px at 40px 160px, #b8c6ff, transparent); background-size: 200px 200px; animation: pbg-rise 60s linear infinite; }
-.pbg-stars::after { background-size: 120px 120px; opacity: .5; animation-duration: 38s; }
-@keyframes pbg-rise { to { transform: translate3d(0, -50%, 0); } }
+/* Lava Lamp: four glossy blobs rise and sink at different speeds behind a glass highlight. */
+.pbg-lava { background: radial-gradient(90% 60% at 50% 110%, color-mix(in srgb, var(--c2) 35%, var(--c1)), var(--c1) 70%); }
+.pbg-lava::before, .pbg-lava::after, .pbg-lava > i:nth-child(1), .pbg-lava > i:nth-child(2) { aspect-ratio: 1; border-radius: 50%; }
+.pbg-lava::before { width: 62cqmin; left: 6%; top: 55%; background: radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--c2) 60%, #fff), var(--c2) 32%, color-mix(in srgb, var(--c2) 45%, transparent) 58%, transparent 70%); animation: pbg-lava-a 17s ease-in-out infinite alternate; }
+.pbg-lava::after { width: 52cqmin; right: 2%; top: -12%; background: radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--c3) 60%, #fff), var(--c3) 32%, color-mix(in srgb, var(--c3) 45%, transparent) 58%, transparent 70%); animation: pbg-lava-b 23s ease-in-out infinite alternate; }
+.pbg-lava > i:nth-child(1) { width: 30cqmin; left: 52%; top: 70%; background: radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--c2) 55%, #fff), var(--c2) 34%, transparent 70%); animation: pbg-lava-c 13s ease-in-out infinite alternate; }
+.pbg-lava > i:nth-child(2) { width: 24cqmin; left: 18%; top: 4%; background: radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--c3) 55%, #fff), var(--c3) 34%, transparent 70%); animation: pbg-lava-d 29s ease-in-out infinite alternate; }
+.pbg-lava > i:nth-child(3) { inset: 0; background: linear-gradient(100deg, transparent 8%, rgba(255,255,255,.08) 14%, transparent 22%, transparent 78%, rgba(255,255,255,.05) 86%, transparent 92%); }
+@keyframes pbg-lava-a { 0% { transform: translate3d(0, 0, 0) scale(1, .94); } 50% { transform: translate3d(12%, -48%, 0) scale(.92, 1.08); } 100% { transform: translate3d(-4%, -92%, 0) scale(1.06, .96); } }
+@keyframes pbg-lava-b { 0% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(-18%, 60%, 0) scale(1.1, .92); } 100% { transform: translate3d(-6%, 118%, 0) scale(.9, 1.06); } }
+@keyframes pbg-lava-c { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-40%, -190%, 0) scale(1.2); } }
+@keyframes pbg-lava-d { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(120%, 260%, 0) scale(.85); } }
 
-.pbg-rain { background: linear-gradient(180deg, #1f2d3d, #0e1620); }
-.pbg-rain::before { left: 0; right: 0; top: -100%; height: 200%; background-image: repeating-linear-gradient(100deg, transparent 0 22px, rgba(190,220,255,.16) 22px 23px, transparent 23px 47px); animation: pbg-fall 3.2s linear infinite; }
-.pbg-rain::after { inset: 0; background: radial-gradient(60% 50% at 75% 20%, rgba(255,200,120,.22), transparent 70%); }
-@keyframes pbg-fall { to { transform: translate3d(0, 50%, 0); } }
+/* Starfield: two star layers drift up at different depths and twinkle; now and then a shooting star. */
+.pbg-stars { background: radial-gradient(120% 80% at 50% 120%, var(--c2), var(--c1) 70%); }
+.pbg-stars::before, .pbg-stars::after { left: 0; right: 0; top: 0; }
+.pbg-stars::before { height: calc(100% + 110px); background-image: radial-gradient(1.4px 1.4px at 14px 22px, var(--c3) 50%, transparent), radial-gradient(1.2px 1.2px at 76px 94px, var(--c3) 50%, transparent), radial-gradient(1.6px 1.6px at 92px 40px, var(--c3) 50%, transparent), radial-gradient(1.2px 1.2px at 40px 78px, var(--c3) 50%, transparent), radial-gradient(1px 1px at 104px 6px, var(--c3) 50%, transparent), radial-gradient(1.2px 1.2px at 58px 52px, var(--c3) 50%, transparent), radial-gradient(1px 1px at 26px 100px, var(--c3) 50%, transparent); background-size: 110px 110px; opacity: .8; animation: pbg-up-110 30s linear infinite; }
+.pbg-stars::after { height: calc(100% + 240px); background-image: radial-gradient(2.2px 2.2px at 30px 50px, var(--c3) 45%, transparent), radial-gradient(2px 2px at 170px 150px, var(--c3) 45%, transparent), radial-gradient(2.6px 2.6px at 110px 210px, var(--c3) 45%, transparent), radial-gradient(1.8px 1.8px at 200px 30px, var(--c3) 45%, transparent); background-size: 240px 240px; animation: pbg-up-240 34s linear infinite, pbg-twinkle 4.5s ease-in-out infinite alternate; }
+.pbg-stars > i:nth-child(1) { inset: -20%; background: radial-gradient(35% 25% at 30% 35%, color-mix(in srgb, var(--c2) 35%, transparent), transparent 70%), radial-gradient(30% 22% at 72% 60%, color-mix(in srgb, var(--c2) 25%, transparent), transparent 70%); animation: pbg-aur-c 31s ease-in-out infinite alternate; }
+.pbg-stars > i:nth-child(2) { width: 32cqmin; height: 1.5px; right: 8%; top: 14%; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--c3)); transform-origin: 100% 50%; opacity: 0; animation: pbg-shoot 11s ease-out infinite 3s; }
+@keyframes pbg-shoot { 0% { opacity: 0; transform: rotate(-24deg) translate3d(0, 0, 0) scaleX(.2); } 2% { opacity: .9; } 8% { opacity: 0; transform: rotate(-24deg) translate3d(-90cqmin, 0, 0) scaleX(1); } 100% { opacity: 0; transform: rotate(-24deg) translate3d(-90cqmin, 0, 0); } }
+@keyframes pbg-twinkle { from { opacity: .55; } to { opacity: 1; } }
+@keyframes pbg-up-110 { to { transform: translate3d(0, -110px, 0); } }
+@keyframes pbg-up-240 { to { transform: translate3d(0, -240px, 0); } }
 
-.pbg-drive { background: linear-gradient(180deg, #120a2b 0, #3a0e4f 58%, #ff4d8d 59%, #2a0b3c 61%); }
-.pbg-drive::before { left: -50%; right: -50%; bottom: -40%; height: 85%; background-image: linear-gradient(rgba(255,90,200,.55) 2px, transparent 2px), linear-gradient(90deg, rgba(255,90,200,.55) 2px, transparent 2px); background-size: 40px 40px; transform-origin: 50% 0; transform: perspective(220px) rotateX(64deg); animation: pbg-road 2.4s linear infinite; -webkit-mask-image: linear-gradient(180deg, transparent, #000 35%); mask-image: linear-gradient(180deg, transparent, #000 35%); }
-@keyframes pbg-road { from { transform: perspective(220px) rotateX(64deg) translate3d(0, 0, 0); } to { transform: perspective(220px) rotateX(64deg) translate3d(0, 40px, 0); } }
-.pbg-drive::after { width: 120px; height: 120px; left: calc(50% - 60px); top: 18%; border-radius: 50%; background: linear-gradient(180deg, #ffd36b, #ff5f8f); opacity: .3; }
+/* Rain on Glass: soft city lights behind two sheets of slanted rain and beads on the pane. */
+.pbg-rain { background: linear-gradient(180deg, color-mix(in srgb, var(--c1) 70%, var(--c3) 12%), var(--c1)); }
+.pbg-rain > i:nth-child(1) { inset: 0; background: radial-gradient(14cqmin 14cqmin at 22% 70%, color-mix(in srgb, var(--c2) 40%, transparent), transparent 70%), radial-gradient(10cqmin 10cqmin at 70% 24%, color-mix(in srgb, var(--c2) 45%, transparent), transparent 70%), radial-gradient(18cqmin 18cqmin at 84% 76%, color-mix(in srgb, var(--c3) 25%, transparent), transparent 70%), radial-gradient(8cqmin 8cqmin at 44% 40%, color-mix(in srgb, var(--c2) 30%, transparent), transparent 70%); animation: pbg-glow 6s ease-in-out infinite alternate; }
+.pbg-rain::before, .pbg-rain::after { left: -30%; right: -30%; top: -40%; bottom: -40%; }
+.pbg-rain::before { background-image: radial-gradient(.9px 18px at 10px 20px, color-mix(in srgb, var(--c3) 45%, transparent), transparent), radial-gradient(.9px 14px at 34px 70px, color-mix(in srgb, var(--c3) 40%, transparent), transparent), radial-gradient(.9px 20px at 58px 40px, color-mix(in srgb, var(--c3) 35%, transparent), transparent), radial-gradient(.9px 12px at 76px 96px, color-mix(in srgb, var(--c3) 40%, transparent), transparent); background-size: 90px 120px; animation: pbg-rain-a 1.1s linear infinite; }
+.pbg-rain::after { opacity: .6; background-image: radial-gradient(.8px 10px at 14px 10px, color-mix(in srgb, var(--c3) 40%, transparent), transparent), radial-gradient(.8px 9px at 44px 50px, color-mix(in srgb, var(--c3) 35%, transparent), transparent); background-size: 60px 80px; animation: pbg-rain-b 1.7s linear infinite; }
+.pbg-rain > i:nth-child(2) { inset: 0; background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35) 0 .8px, transparent 1.6px), radial-gradient(circle, transparent 0 2px, rgba(255,255,255,.12) 2.4px, transparent 3.2px), radial-gradient(circle at 60% 40%, rgba(255,255,255,.28) 0 .6px, transparent 1.4px); background-size: 37px 43px, 53px 61px, 71px 29px; background-position: 4px 9px, 17px 30px, 40px 3px; opacity: .8; }
+.pbg-rain > i:nth-child(3) { inset: 0; background: linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--c1) 60%, transparent)); }
+@keyframes pbg-rain-a { from { transform: rotate(10deg) translate3d(0, -120px, 0); } to { transform: rotate(10deg) translate3d(0, 0, 0); } }
+@keyframes pbg-rain-b { from { transform: rotate(10deg) translate3d(0, -80px, 0); } to { transform: rotate(10deg) translate3d(0, 0, 0); } }
+@keyframes pbg-glow { from { opacity: .65; } to { opacity: 1; } }
 
-.pbg-breathe { background: #0b1a1d; }
-.pbg-breathe::before { inset: -20%; background: radial-gradient(45% 45% at 50% 55%, rgba(40,220,200,.55), transparent 72%); animation: pbg-breathe 7s ease-in-out infinite; }
-@keyframes pbg-breathe { 0%, 100% { transform: scale(.8); opacity: .55; } 50% { transform: scale(1.12); opacity: 1; } }
+/* Night Drive: striped sun on the horizon, mountains, and a neon grid rolling towards you. */
+.pbg-drive { background: linear-gradient(180deg, var(--c1) 0, color-mix(in srgb, var(--c1) 70%, var(--c2)) 58%, var(--c1) 58.2%); }
+.pbg-drive > i:nth-child(1) { width: 46cqmin; aspect-ratio: 1; left: 50%; bottom: 42%; translate: -50% 50%; border-radius: 50%; background: linear-gradient(180deg, var(--c3), var(--c2) 75%); -webkit-mask-image: linear-gradient(180deg, #000 48%, transparent 48% 52%, #000 52% 60%, transparent 60% 64%, #000 64% 71%, transparent 71% 75%, #000 75% 82%, transparent 82% 86%, #000 86%); mask-image: linear-gradient(180deg, #000 48%, transparent 48% 52%, #000 52% 60%, transparent 60% 64%, #000 64% 71%, transparent 71% 75%, #000 75% 82%, transparent 82% 86%, #000 86%); clip-path: inset(0 0 50% 0); box-shadow: 0 0 40px color-mix(in srgb, var(--c2) 60%, transparent); animation: pbg-sun 9s ease-in-out infinite alternate; }
+.pbg-drive > i:nth-child(2) { left: 0; right: 0; bottom: 42%; height: 16%; background: color-mix(in srgb, var(--c1) 85%, #000); clip-path: polygon(0 100%, 0 60%, 9% 30%, 17% 62%, 26% 18%, 35% 55%, 42% 40%, 50% 70%, 58% 36%, 66% 58%, 76% 10%, 86% 50%, 93% 34%, 100% 56%, 100% 100%); opacity: .9; }
+.pbg-drive::before { left: -60%; right: -60%; top: 58%; height: 100%; background-image: linear-gradient(color-mix(in srgb, var(--c2) 70%, transparent) 2px, transparent 2px), linear-gradient(90deg, color-mix(in srgb, var(--c2) 60%, transparent) 2px, transparent 2px); background-size: 44px 44px; transform-origin: 50% 0; animation: pbg-road 1.6s linear infinite; -webkit-mask-image: linear-gradient(180deg, transparent, #000 25%); mask-image: linear-gradient(180deg, transparent, #000 25%); }
+.pbg-drive::after { left: 0; right: 0; top: calc(58% - 1px); height: 2px; background: var(--c2); box-shadow: 0 0 12px 2px var(--c2); }
+.pbg-drive > i:nth-child(3) { inset: 0 0 50% 0; background-image: radial-gradient(1px 1px at 20% 20%, #fff, transparent), radial-gradient(1px 1px at 70% 12%, #fff, transparent), radial-gradient(1px 1px at 85% 34%, #fff, transparent), radial-gradient(1px 1px at 40% 8%, #fff, transparent); opacity: .5; }
+@keyframes pbg-road { from { transform: perspective(160px) rotateX(62deg) translate3d(0, 0, 0); } to { transform: perspective(160px) rotateX(62deg) translate3d(0, 44px, 0); } }
+@keyframes pbg-sun { from { filter: brightness(.92); } to { filter: brightness(1.08); } }
 
-.pbg-spin { background: #0d0d12; }
-.pbg-spin::before { width: 150vmax; height: 150vmax; left: 50%; top: 50%; translate: -50% -50%; background: conic-gradient(from 0deg, #ff6b6b, #ffd166, #06d6a0, #4cc9f0, #7b61ff, #ff6b6b); animation: pbg-spin 36s linear infinite; }
-.pbg-spin::after { inset: 0; background: rgba(10,10,16,.55); }
-@keyframes pbg-spin { to { transform: rotate(1turn); } }
+/* Breathe: two glows swell in and out of step, with soft rings riding the breath. */
+.pbg-breathe { background: var(--c1); }
+.pbg-breathe::before, .pbg-breathe::after { width: 120cqmin; aspect-ratio: 1; left: 50%; top: 50%; margin: -60cqmin 0 0 -60cqmin; border-radius: 50%; }
+.pbg-breathe::before { background: radial-gradient(circle, color-mix(in srgb, var(--c2) 60%, transparent), transparent 62%); animation: pbg-breathe 9s ease-in-out infinite; }
+.pbg-breathe::after { background: radial-gradient(circle at 60% 40%, color-mix(in srgb, var(--c3) 45%, transparent), transparent 55%); animation: pbg-breathe 9s ease-in-out infinite -4.5s; }
+.pbg-breathe > i:nth-child(1) { width: 140cqmin; aspect-ratio: 1; left: 50%; top: 50%; margin: -70cqmin 0 0 -70cqmin; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 7cqmin, color-mix(in srgb, var(--c2) 14%, transparent) 7cqmin calc(7cqmin + 1px)); -webkit-mask-image: radial-gradient(circle, #000 20%, transparent 60%); mask-image: radial-gradient(circle, #000 20%, transparent 60%); animation: pbg-breathe 9s ease-in-out infinite; }
+@keyframes pbg-breathe { 0%, 100% { transform: scale(.78); opacity: .5; } 50% { transform: scale(1.12); opacity: 1; } }
 
-.pbg-tide { background: linear-gradient(180deg, #0a3a50, #05202e); }
-.pbg-tide::before, .pbg-tide::after { left: 0; bottom: 0; width: 200%; height: 46%; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath d='M0 30 Q50 0 100 30 T200 30 T300 30 T400 30 V60 H0Z' fill='%2350d1ff' fill-opacity='.22'/%3E%3C/svg%3E") repeat-x 0 0 / 50% 100%; animation: pbg-wave 14s linear infinite; }
-.pbg-tide::after { height: 34%; opacity: .9; animation-duration: 9s; animation-direction: reverse; }
-@keyframes pbg-wave { to { transform: translate3d(-50%, 0, 0); } }
+/* Prism Spin: two colour wheels turn against each other under frosted glass. */
+.pbg-spin { background: var(--c1); }
+.pbg-spin::before, .pbg-spin > i:nth-child(1) { width: 170cqmax; aspect-ratio: 1; left: 50%; top: 50%; margin: -85cqmax 0 0 -85cqmax; border-radius: 50%; }
+.pbg-spin::before { filter: blur(40px) saturate(1.3); background: conic-gradient(from 0deg, var(--c2), color-mix(in srgb, var(--c2) 50%, var(--c3)), var(--c3), color-mix(in srgb, var(--c3) 60%, #fff), color-mix(in srgb, var(--c2) 70%, var(--c1)), var(--c2)); animation: pbg-turn 40s linear infinite; }
+.pbg-spin > i:nth-child(1) { opacity: .55; mix-blend-mode: screen; filter: blur(40px); background: conic-gradient(from 90deg, transparent, var(--c3), transparent 30%, var(--c2), transparent 60%, color-mix(in srgb, var(--c3) 50%, #fff), transparent); animation: pbg-turn 26s linear infinite reverse; }
+.pbg-spin::after { inset: 0; background: radial-gradient(80% 70% at 50% 50%, color-mix(in srgb, var(--c1) 20%, transparent), color-mix(in srgb, var(--c1) 65%, transparent)); }
+.pbg-spin > i:nth-child(3) { inset: 0; background: radial-gradient(38cqmin 38cqmin at 50% 50%, color-mix(in srgb, color-mix(in srgb, var(--c2) 40%, #fff) 55%, transparent), transparent 70%); animation: pbg-glow 6s ease-in-out infinite alternate; }
+.pbg-spin > i:nth-child(2) { inset: -20%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.12) 50%, transparent 60%); animation: pbg-sweep 8s ease-in-out infinite; }
+@keyframes pbg-turn { to { transform: rotate(1turn); } }
+@keyframes pbg-sweep { 0% { transform: translate3d(-70%, 0, 0); } 60%, 100% { transform: translate3d(70%, 0, 0); } }
 
-.pbg-ember { background: radial-gradient(120% 80% at 50% 120%, #5a1a06, #140804 70%); }
-.pbg-ember::before { left: 0; right: 0; top: 0; height: 200%; background-image: radial-gradient(2px 2px at 20px 30px, #ffb35c, transparent), radial-gradient(1.5px 1.5px at 90px 110px, #ff7a3d, transparent), radial-gradient(2.5px 2.5px at 150px 60px, #ffd18a, transparent), radial-gradient(1.5px 1.5px at 60px 170px, #ff9446, transparent); background-size: 180px 180px; animation: pbg-rise 18s linear infinite; -webkit-mask-image: linear-gradient(0deg, #000 20%, transparent 85%); mask-image: linear-gradient(0deg, #000 20%, transparent 85%); }
+/* Tide: three rolling swells at different speeds under a moon and its shimmer. */
+.pbg-tide { background: linear-gradient(180deg, color-mix(in srgb, var(--c1) 80%, var(--c2)), var(--c1) 65%); }
+.pbg-tide > i:nth-child(1) { width: 26cqmin; aspect-ratio: 1; right: 14%; top: 10%; border-radius: 50%; background: radial-gradient(circle, var(--c3) 0 30%, color-mix(in srgb, var(--c3) 30%, transparent) 34%, transparent 70%); }
+.pbg-tide > i:nth-child(2) { width: 10cqmin; right: calc(14% + 8cqmin); top: 30%; bottom: 0; background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--c3) 22%, transparent) 0 1.5px, transparent 1.5px 6px); -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, #000, transparent); mask-image: radial-gradient(50% 50% at 50% 50%, #000, transparent); animation: pbg-glow 3.4s ease-in-out infinite alternate; }
+.pbg-tide::before, .pbg-tide::after, .pbg-tide > i:nth-child(3) {
+  left: 0; bottom: 0; width: calc(100% + 240px);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 60' preserveAspectRatio='none'%3E%3Cpath d='M0 22 C40 4 80 4 120 22 S200 40 240 22 V60 H0Z'/%3E%3C/svg%3E") 0 0 / 240px 100% repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 60' preserveAspectRatio='none'%3E%3Cpath d='M0 22 C40 4 80 4 120 22 S200 40 240 22 V60 H0Z'/%3E%3C/svg%3E") 0 0 / 240px 100% repeat-x;
+}
+.pbg-tide::before { height: 52%; background: linear-gradient(180deg, color-mix(in srgb, var(--c2) 26%, transparent), color-mix(in srgb, var(--c2) 8%, transparent)); animation: pbg-swell 13s linear infinite; }
+.pbg-tide::after { height: 40%; background: linear-gradient(180deg, color-mix(in srgb, var(--c2) 34%, transparent), color-mix(in srgb, var(--c1) 60%, transparent)); animation: pbg-swell 9s linear infinite reverse; }
+.pbg-tide > i:nth-child(3) { height: 26%; background: linear-gradient(180deg, color-mix(in srgb, var(--c3) 45%, transparent) 0 3%, color-mix(in srgb, var(--c2) 40%, var(--c1)) 10%, var(--c1)); animation: pbg-swell 6.5s linear infinite; }
+@keyframes pbg-swell { to { transform: translate3d(-240px, 0, 0); } }
 
-.pbg-holo { background: #ece8ff; }
-.pbg-holo::before { top: 0; bottom: 0; left: 0; width: 300%; background: linear-gradient(100deg, #ffd6e8, #d6f0ff, #e6ffd6, #fff2c7, #e9d6ff, #ffd6e8, #d6f0ff, #e6ffd6, #fff2c7, #e9d6ff, #ffd6e8); animation: pbg-foil 14s ease-in-out infinite alternate; }
+/* Embers: sparks rise and sway off a slow-breathing fire glow. */
+.pbg-ember { background: radial-gradient(130% 80% at 50% 125%, color-mix(in srgb, var(--c2) 60%, var(--c1)), var(--c1) 72%); }
+.pbg-ember > i:nth-child(1) { left: -10%; right: -10%; bottom: -20%; height: 60%; background: radial-gradient(50% 60% at 50% 100%, color-mix(in srgb, var(--c2) 55%, transparent), transparent 75%); animation: pbg-glow 2.8s ease-in-out infinite alternate; }
+.pbg-ember::before, .pbg-ember::after { left: 0; right: 0; top: 0; -webkit-mask-image: linear-gradient(0deg, #000 25%, transparent 90%); mask-image: linear-gradient(0deg, #000 25%, transparent 90%); }
+.pbg-ember::before { height: calc(100% + 160px); background-image: radial-gradient(2.6px 2.6px at 20px 30px, var(--c3) 55%, transparent), radial-gradient(2.2px 2.2px at 90px 110px, var(--c2) 55%, transparent), radial-gradient(3px 3px at 140px 60px, var(--c3) 55%, transparent), radial-gradient(2px 2px at 60px 140px, var(--c2) 55%, transparent), radial-gradient(2px 2px at 110px 20px, var(--c3) 55%, transparent), radial-gradient(2.4px 2.4px at 40px 90px, var(--c2) 55%, transparent), radial-gradient(1.8px 1.8px at 150px 130px, var(--c3) 55%, transparent); background-size: 160px 160px; filter: drop-shadow(0 0 3px var(--c2)); animation: pbg-rise-sway-160 8s linear infinite; }
+.pbg-ember::after { height: calc(100% + 230px); background-image: radial-gradient(3.4px 3.4px at 40px 50px, var(--c3) 40%, transparent), radial-gradient(2.8px 2.8px at 170px 170px, var(--c2) 40%, transparent), radial-gradient(3px 3px at 120px 100px, var(--c3) 40%, transparent); background-size: 230px 230px; animation: pbg-rise-sway-230 12s linear infinite; }
+@keyframes pbg-rise-sway-160 { 0% { transform: translate3d(0, 0, 0); } 25% { transform: translate3d(5px, -40px, 0); } 50% { transform: translate3d(-3px, -80px, 0); } 75% { transform: translate3d(4px, -120px, 0); } 100% { transform: translate3d(0, -160px, 0); } }
+@keyframes pbg-rise-sway-230 { 0% { transform: translate3d(0, 0, 0); } 33% { transform: translate3d(-7px, -77px, 0); } 66% { transform: translate3d(6px, -153px, 0); } 100% { transform: translate3d(0, -230px, 0); } }
+
+/* Holo Foil: the foil slides under two sheens and a sparkle that glints slowly. */
+.pbg-holo { background: var(--c1); }
+.pbg-holo::before { top: 0; bottom: 0; left: 0; width: 300%; background: linear-gradient(100deg, var(--c1), var(--c2), var(--c3), color-mix(in srgb, var(--c1) 50%, #fff2c7), color-mix(in srgb, var(--c3) 40%, #e9d6ff), var(--c1), var(--c2), var(--c3), color-mix(in srgb, var(--c1) 50%, #fff2c7), color-mix(in srgb, var(--c3) 40%, #e9d6ff), var(--c1)); animation: pbg-foil 14s ease-in-out infinite alternate; }
 .pbg-holo::after { inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.55), transparent 40%, rgba(255,255,255,.35) 70%, transparent); }
+.pbg-holo > i:nth-child(1) { inset: 0; background-image: radial-gradient(1px 1px at 12px 14px, #fff, transparent), radial-gradient(1.4px 1.4px at 44px 38px, #fff, transparent), radial-gradient(1px 1px at 70px 8px, #fff, transparent); background-size: 84px 52px; mix-blend-mode: soft-light; animation: pbg-twinkle 3s ease-in-out infinite alternate; }
+.pbg-holo > i:nth-child(2) { inset: -30%; background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.4) 50%, transparent 58%); animation: pbg-sweep 7s ease-in-out infinite; }
 @keyframes pbg-foil { to { transform: translate3d(-66.66%, 0, 0); } }
 
+/* Rift: a bright tear in the dark that breathes light and sheds sparks. */
+.pbg-rift { background: radial-gradient(60% 80% at 50% 50%, color-mix(in srgb, var(--c3) 16%, var(--c1)), var(--c1) 70%); }
+.pbg-rift::before { width: 90cqmin; left: 50%; margin-left: -45cqmin; top: -10%; bottom: -10%; background: radial-gradient(28% 50% at 50% 50%, color-mix(in srgb, var(--c3) 75%, transparent), color-mix(in srgb, var(--c3) 20%, transparent) 60%, transparent 80%); animation: pbg-rift-glow 6s ease-in-out infinite alternate; }
+.pbg-rift > i:nth-child(1) { width: 9cqmin; left: 50%; margin-left: -4.5cqmin; top: -6%; bottom: -6%; background: linear-gradient(90deg, transparent, var(--c3) 30%, var(--c2) 48% 52%, var(--c3) 70%, transparent); clip-path: polygon(48% 0, 62% 12%, 44% 26%, 64% 41%, 40% 57%, 60% 72%, 46% 86%, 56% 100%, 50% 100%, 38% 86%, 52% 72%, 32% 57%, 56% 41%, 36% 26%, 54% 12%, 42% 0); transform: rotate(6deg); filter: drop-shadow(0 0 6px var(--c3)); }
+.pbg-rift > i:nth-child(2) { width: 3cqmin; left: 50%; margin-left: -1.5cqmin; top: -6%; bottom: -6%; background: var(--c2); clip-path: polygon(48% 0, 62% 12%, 44% 26%, 64% 41%, 40% 57%, 60% 72%, 46% 86%, 56% 100%, 50% 100%, 38% 86%, 52% 72%, 32% 57%, 56% 41%, 36% 26%, 54% 12%, 42% 0); transform: rotate(6deg); animation: pbg-glow 3s ease-in-out infinite alternate; }
+.pbg-rift::after { left: 0; right: 0; top: 0; height: calc(100% + 140px); background-image: radial-gradient(1.2px 1.2px at 20px 30px, var(--c2), transparent), radial-gradient(1px 1px at 90px 100px, var(--c3), transparent), radial-gradient(1.4px 1.4px at 60px 70px, var(--c2), transparent); background-size: 140px 140px; -webkit-mask-image: radial-gradient(30% 50% at 50% 50%, #000, transparent); mask-image: radial-gradient(30% 50% at 50% 50%, #000, transparent); animation: pbg-up-140 9s linear infinite; }
+@keyframes pbg-rift-glow { from { transform: scaleX(.8); opacity: .7; } to { transform: scaleX(1.2); opacity: 1; } }
+@keyframes pbg-up-140 { to { transform: translate3d(0, -140px, 0); } }
+
+/* Liquid Chrome: polished bands of metal flow and fold into each other. */
+.pbg-chrome { background: var(--c1); }
+.pbg-chrome::before, .pbg-chrome::after { inset: -60%; }
+.pbg-chrome::before { background: repeating-linear-gradient(118deg, var(--c1) 0, var(--c3) 5%, var(--c2) 8%, color-mix(in srgb, var(--c3) 60%, var(--c1)) 11%, var(--c1) 17%, color-mix(in srgb, var(--c3) 40%, var(--c1)) 22%, var(--c1) 26%); animation: pbg-chrome-a 16s ease-in-out infinite alternate; }
+.pbg-chrome::after { opacity: .5; mix-blend-mode: screen; background: repeating-linear-gradient(62deg, transparent 0, color-mix(in srgb, var(--c2) 70%, transparent) 4%, transparent 9%, transparent 19%); animation: pbg-chrome-b 21s ease-in-out infinite alternate; }
+.pbg-chrome > i:nth-child(1) { inset: -30%; background: radial-gradient(40% 30% at 50% 50%, rgba(255,255,255,.22), transparent 70%); animation: pbg-aur-c 12s ease-in-out infinite alternate; }
+.pbg-chrome > i:nth-child(2) { inset: 0; background: radial-gradient(120% 100% at 50% 50%, transparent 50%, color-mix(in srgb, var(--c1) 70%, transparent)); }
+@keyframes pbg-chrome-a { 0% { transform: translate3d(-8%, -4%, 0) rotate(-4deg) skewX(-10deg); } 100% { transform: translate3d(8%, 5%, 0) rotate(5deg) skewX(12deg); } }
+@keyframes pbg-chrome-b { 0% { transform: translate3d(6%, 4%, 0) rotate(3deg) skewY(8deg); } 100% { transform: translate3d(-7%, -5%, 0) rotate(-6deg) skewY(-10deg); } }
+
+/* Mesh: four soft colour pools drift around each other, with fine grain so it never bands. */
+.pbg-mesh { background: var(--c1); }
+.pbg-mesh::before, .pbg-mesh::after, .pbg-mesh > i:nth-child(1), .pbg-mesh > i:nth-child(2) { width: 120cqmax; aspect-ratio: 1; border-radius: 50%; left: 50%; top: 50%; margin: -60cqmax 0 0 -60cqmax; }
+.pbg-mesh::before { background: radial-gradient(circle, var(--c2), transparent 45%); animation: pbg-orbit-a 21s ease-in-out infinite; }
+.pbg-mesh::after { background: radial-gradient(circle, var(--c3), transparent 45%); animation: pbg-orbit-b 27s ease-in-out infinite; }
+.pbg-mesh > i:nth-child(1) { background: radial-gradient(circle, color-mix(in srgb, var(--c2) 50%, var(--c3)), transparent 40%); opacity: .8; animation: pbg-orbit-c 33s ease-in-out infinite; }
+.pbg-mesh > i:nth-child(2) { width: 70cqmax; margin: -35cqmax 0 0 -35cqmax; background: radial-gradient(circle, color-mix(in srgb, var(--c2) 60%, #fff), transparent 45%); opacity: .45; animation: pbg-orbit-a 17s ease-in-out infinite reverse; }
+.pbg-mesh > i:nth-child(3) { inset: 0; opacity: .12; mix-blend-mode: overlay; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+@keyframes pbg-orbit-a { 0%, 100% { transform: translate3d(-28%, -22%, 0); } 25% { transform: translate3d(24%, -26%, 0); } 50% { transform: translate3d(26%, 20%, 0); } 75% { transform: translate3d(-22%, 24%, 0); } }
+@keyframes pbg-orbit-b { 0%, 100% { transform: translate3d(26%, 24%, 0); } 25% { transform: translate3d(-24%, 20%, 0); } 50% { transform: translate3d(-26%, -22%, 0); } 75% { transform: translate3d(22%, -26%, 0); } }
+@keyframes pbg-orbit-c { 0%, 100% { transform: translate3d(0, 30%, 0) scale(.9); } 50% { transform: translate3d(0, -30%, 0) scale(1.1); } }
+
+/* Film Grain: warm light leaks drift across a dark frame with moving grain. */
+.pbg-grain { background: var(--c1); }
+.pbg-grain::before { width: 110cqmax; aspect-ratio: 1; left: -55cqmax; top: -20%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c2) 70%, transparent), transparent 55%); animation: pbg-leak-a 14s ease-in-out infinite alternate; }
+.pbg-grain::after { width: 90cqmax; aspect-ratio: 1; right: -45cqmax; bottom: -30%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c3) 60%, transparent), transparent 55%); animation: pbg-leak-b 19s ease-in-out infinite alternate; }
+.pbg-grain > i:nth-child(1) { inset: -50%; opacity: .2; mix-blend-mode: overlay; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: pbg-grain .9s steps(5) infinite; }
+.pbg-grain > i:nth-child(2) { inset: 0; background: radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.55)); }
+@keyframes pbg-leak-a { from { transform: translate3d(0, 0, 0) scale(.9); } to { transform: translate3d(40%, 20%, 0) scale(1.15); } }
+@keyframes pbg-leak-b { from { transform: translate3d(0, 0, 0) scale(1.1); } to { transform: translate3d(-35%, -25%, 0) scale(.9); } }
+@keyframes pbg-grain { 0% { transform: translate3d(0, 0, 0); } 20% { transform: translate3d(-7%, 4%, 0); } 40% { transform: translate3d(5%, -6%, 0); } 60% { transform: translate3d(-3%, 8%, 0); } 80% { transform: translate3d(8%, 2%, 0); } 100% { transform: translate3d(0, 0, 0); } }
+
+/* Orbit: thin rings, each with its own moon, turning at their own speed. */
+.pbg-orbit { background: radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--c2) 10%, var(--c1)), var(--c1) 70%); }
+.pbg-orbit::before { width: 14cqmin; aspect-ratio: 1; left: 50%; top: 50%; margin: -7cqmin 0 0 -7cqmin; border-radius: 50%; background: radial-gradient(circle, var(--c2) 0 18%, color-mix(in srgb, var(--c2) 30%, transparent) 24%, transparent 70%); animation: pbg-breathe 8s ease-in-out infinite; }
+.pbg-orbit > i { left: 50%; top: 50%; aspect-ratio: 1; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--c2) 22%, transparent); }
+.pbg-orbit > i::after { width: 2.6cqmin; aspect-ratio: 1; min-width: 4px; left: 50%; top: 0; translate: -50% -50%; border-radius: 50%; background: var(--c3); box-shadow: 0 0 8px var(--c3); }
+.pbg-orbit > i:nth-child(1) { width: 40cqmin; margin: -20cqmin 0 0 -20cqmin; animation: pbg-turn 14s linear infinite; }
+.pbg-orbit > i:nth-child(2) { width: 68cqmin; margin: -34cqmin 0 0 -34cqmin; animation: pbg-turn 26s linear infinite reverse; }
+.pbg-orbit > i:nth-child(3) { width: 96cqmin; margin: -48cqmin 0 0 -48cqmin; animation: pbg-turn 44s linear infinite; }
+.pbg-orbit > i:nth-child(2)::after { width: 1.8cqmin; }
+.pbg-orbit > i:nth-child(3)::after { width: 3.4cqmin; }
+.pbg-orbit::after { inset: 0; background-image: radial-gradient(1px 1px at 14% 20%, var(--c2), transparent), radial-gradient(1px 1px at 82% 16%, var(--c2), transparent), radial-gradient(1px 1px at 70% 86%, var(--c2), transparent), radial-gradient(1px 1px at 20% 80%, var(--c2), transparent); opacity: .4; }
+
+/* Ripple: rings spread out from one point like a drop landing in still water. */
+.pbg-ripple { background: radial-gradient(90% 70% at 50% 60%, color-mix(in srgb, var(--c2) 12%, var(--c1)), var(--c1) 70%); }
+.pbg-ripple::before, .pbg-ripple > i { width: 150cqmax; aspect-ratio: 1; left: 50%; top: 60%; margin: -75cqmax 0 0 -75cqmax; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--c2) 60%, transparent); box-shadow: 0 0 18px color-mix(in srgb, var(--c2) 20%, transparent), inset 0 0 18px color-mix(in srgb, var(--c2) 15%, transparent); transform: scale(0); opacity: 0; animation: pbg-ripple 10s cubic-bezier(.2, .6, .4, 1) infinite; }
+.pbg-ripple > i:nth-child(1) { animation-delay: -2.5s; }
+.pbg-ripple > i:nth-child(2) { animation-delay: -5s; }
+.pbg-ripple > i:nth-child(3) { animation-delay: -7.5s; }
+.pbg-ripple::after { width: 8cqmin; aspect-ratio: 1; left: 50%; top: 60%; margin: -4cqmin 0 0 -4cqmin; border-radius: 50%; background: radial-gradient(circle, var(--c3), transparent 70%); animation: pbg-glow 2.5s ease-in-out infinite alternate; }
+@keyframes pbg-ripple { 0% { transform: scale(.02); opacity: 0; } 8% { opacity: .9; } 100% { transform: scale(1); opacity: 0; } }
+
+/* Dot Wave: a calm dot grid with a band of light washing across it. */
+.pbg-dotwave { background: var(--c1); }
+.pbg-dotwave::before { inset: 0; background: radial-gradient(circle, color-mix(in srgb, var(--c2) 22%, transparent) 1.1px, transparent 1.6px) 0 0 / 14px 14px; }
+.pbg-dotwave > i:nth-child(1), .pbg-dotwave > i:nth-child(2) { inset: 0; -webkit-mask-image: linear-gradient(100deg, transparent 30%, #000 50%, transparent 70%); mask-image: linear-gradient(100deg, transparent 30%, #000 50%, transparent 70%); }
+.pbg-dotwave > i:nth-child(1) { animation: pbg-band 7s ease-in-out infinite; }
+.pbg-dotwave > i:nth-child(1)::before { inset: 0; background: radial-gradient(circle, var(--c2) 1.4px, transparent 2px) 0 0 / 14px 14px; animation: pbg-band-back 7s ease-in-out infinite; }
+.pbg-dotwave > i:nth-child(2) { animation: pbg-band 11s ease-in-out infinite -4s; }
+.pbg-dotwave > i:nth-child(2)::before { inset: 0; background: radial-gradient(circle, var(--c3) 2px, color-mix(in srgb, var(--c3) 30%, transparent) 3px, transparent 4px) 0 0 / 14px 14px; animation: pbg-band-back 11s ease-in-out infinite -4s; }
+.pbg-dotwave::after { inset: 0; background: radial-gradient(100% 80% at 50% 50%, transparent 50%, color-mix(in srgb, var(--c1) 80%, transparent)); }
+@keyframes pbg-band { from { transform: translate3d(-100%, 0, 0); } to { transform: translate3d(100%, 0, 0); } }
+@keyframes pbg-band-back { from { transform: translate3d(100%, 0, 0); } to { transform: translate3d(-100%, 0, 0); } }
+
+/* CRT: an old tube screen glow, scanlines, and a slow rolling bar. No flicker. */
+.pbg-scan { background: radial-gradient(90% 80% at 50% 50%, color-mix(in srgb, var(--c2) 16%, var(--c1)), var(--c1) 75%); }
+.pbg-scan::before { inset: 0; background: repeating-linear-gradient(180deg, rgba(0,0,0,.32) 0 1px, transparent 1px 3px); }
+.pbg-scan > i:nth-child(1) { inset: 0; opacity: .07; background: repeating-linear-gradient(90deg, #ff3b3b 0 1px, #3bff6b 1px 2px, #3b8bff 2px 3px); }
+.pbg-scan::after { left: 0; right: 0; top: -30%; height: 30%; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--c3) 12%, transparent), transparent); animation: pbg-roll 7s linear infinite; }
+.pbg-scan > i:nth-child(2) { inset: 18% 14%; border-radius: 40%; background: radial-gradient(closest-side, color-mix(in srgb, var(--c2) 14%, transparent), transparent); animation: pbg-glow 5s ease-in-out infinite alternate; }
+.pbg-scan > i:nth-child(3) { inset: 0; border-radius: inherit; box-shadow: inset 0 0 40px rgba(0,0,0,.75), inset 0 0 0 1px color-mix(in srgb, var(--c2) 8%, transparent); }
+@keyframes pbg-roll { to { transform: translate3d(0, 430%, 0); } }
+
+/* Silk: soft folds of fabric slide over each other with a moving sheen. */
+.pbg-silk { background: linear-gradient(160deg, var(--c1), color-mix(in srgb, var(--c1) 70%, var(--c3))); }
+.pbg-silk::before, .pbg-silk::after, .pbg-silk > i:nth-child(1) { inset: -50%; }
+.pbg-silk::before { background: linear-gradient(115deg, transparent 20%, color-mix(in srgb, var(--c3) 70%, transparent) 30%, color-mix(in srgb, var(--c2) 50%, transparent) 36%, color-mix(in srgb, var(--c3) 60%, transparent) 42%, transparent 55%); animation: pbg-silk-a 15s ease-in-out infinite alternate; }
+.pbg-silk::after { background: linear-gradient(130deg, transparent 45%, color-mix(in srgb, var(--c3) 50%, transparent) 54%, color-mix(in srgb, var(--c2) 40%, transparent) 59%, color-mix(in srgb, var(--c3) 45%, transparent) 64%, transparent 74%); animation: pbg-silk-b 19s ease-in-out infinite alternate; }
+.pbg-silk > i:nth-child(1) { background: linear-gradient(100deg, transparent 10%, color-mix(in srgb, var(--c1) 70%, transparent) 22%, transparent 34%); animation: pbg-silk-a 23s ease-in-out infinite alternate-reverse; }
+.pbg-silk > i:nth-child(2) { inset: -20%; background: linear-gradient(115deg, transparent 44%, color-mix(in srgb, var(--c2) 22%, transparent) 50%, transparent 56%); animation: pbg-sweep 9s ease-in-out infinite; }
+@keyframes pbg-silk-a { 0% { transform: translate3d(-12%, -6%, 0) rotate(-3deg) scaleY(1); } 100% { transform: translate3d(10%, 6%, 0) rotate(4deg) scaleY(1.2); } }
+@keyframes pbg-silk-b { 0% { transform: translate3d(10%, 4%, 0) rotate(3deg) scaleX(1.1); } 100% { transform: translate3d(-12%, -8%, 0) rotate(-5deg) scaleX(.95); } }
+
+/* Bokeh: out-of-focus lights float up at three depths. */
+.pbg-bokeh { background: radial-gradient(120% 90% at 50% 100%, color-mix(in srgb, var(--c2) 14%, var(--c1)), var(--c1) 70%); }
+.pbg-bokeh::before, .pbg-bokeh::after, .pbg-bokeh > i:nth-child(1) { left: 0; right: 0; top: 0; }
+.pbg-bokeh::before { height: calc(100% + 260px); background-image: radial-gradient(circle at 60px 70px, color-mix(in srgb, var(--c2) 26%, transparent) 0 22px, color-mix(in srgb, var(--c2) 40%, transparent) 25px, transparent 27px), radial-gradient(circle at 200px 190px, color-mix(in srgb, var(--c3) 22%, transparent) 0 30px, color-mix(in srgb, var(--c3) 34%, transparent) 33px, transparent 35px); background-size: 260px 260px; animation: pbg-up-260 26s linear infinite; }
+.pbg-bokeh::after { height: calc(100% + 180px); background-image: radial-gradient(circle at 40px 40px, color-mix(in srgb, var(--c3) 30%, transparent) 0 12px, transparent 14px), radial-gradient(circle at 130px 120px, color-mix(in srgb, var(--c2) 32%, transparent) 0 10px, transparent 12px); background-size: 180px 180px; animation: pbg-up-180 17s linear infinite; }
+.pbg-bokeh > i:nth-child(1) { height: calc(100% + 120px); background-image: radial-gradient(circle at 30px 80px, color-mix(in srgb, var(--c2) 60%, transparent) 0 3px, transparent 5px), radial-gradient(circle at 90px 20px, color-mix(in srgb, var(--c3) 60%, transparent) 0 2px, transparent 4px); background-size: 120px 120px; animation: pbg-up-120 11s linear infinite; }
+.pbg-bokeh > i:nth-child(2) { inset: 0; background: radial-gradient(100% 80% at 50% 50%, transparent 50%, color-mix(in srgb, var(--c1) 70%, transparent)); }
+@keyframes pbg-up-260 { to { transform: translate3d(0, -260px, 0); } }
+@keyframes pbg-up-180 { to { transform: translate3d(0, -180px, 0); } }
+@keyframes pbg-up-120 { to { transform: translate3d(0, -120px, 0); } }
+
+/* Snowfall: flakes drift down at three depths over a cold mist. */
+.pbg-snow { background: linear-gradient(180deg, var(--c1), color-mix(in srgb, var(--c1) 75%, var(--c3))); }
+.pbg-snow::before, .pbg-snow::after, .pbg-snow > i:nth-child(1) { left: 0; right: 0; bottom: 0; }
+.pbg-snow::before { height: calc(100% + 120px); background-image: radial-gradient(1.4px 1.4px at 20px 30px, var(--c2) 50%, transparent), radial-gradient(1.2px 1.2px at 80px 90px, var(--c2) 50%, transparent), radial-gradient(1.6px 1.6px at 50px 10px, var(--c2) 50%, transparent), radial-gradient(1.2px 1.2px at 100px 50px, var(--c2) 50%, transparent), radial-gradient(1.4px 1.4px at 10px 100px, var(--c2) 50%, transparent); background-size: 120px 120px; opacity: .7; animation: pbg-fall-sway-120 12s linear infinite; }
+.pbg-snow::after { height: calc(100% + 180px); background-image: radial-gradient(2.4px 2.4px at 40px 50px, var(--c2) 50%, transparent), radial-gradient(2.2px 2.2px at 140px 130px, var(--c2) 50%, transparent), radial-gradient(2px 2px at 100px 20px, var(--c2) 50%, transparent), radial-gradient(2.2px 2.2px at 20px 150px, var(--c2) 50%, transparent); background-size: 180px 180px; opacity: .85; animation: pbg-fall-sway-180 10s linear infinite; }
+.pbg-snow > i:nth-child(1) { height: calc(100% + 260px); background-image: radial-gradient(3.2px 3.2px at 70px 60px, var(--c2), transparent), radial-gradient(2.6px 2.6px at 200px 190px, color-mix(in srgb, var(--c2) 80%, transparent), transparent); background-size: 260px 260px; animation: pbg-fall-sway-260 9s linear infinite; }
+.pbg-snow > i:nth-child(2) { left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--c3) 22%, transparent)); }
+@keyframes pbg-fall-sway-120 { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(6px, 60px, 0); } 100% { transform: translate3d(0, 120px, 0); } }
+@keyframes pbg-fall-sway-180 { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-9px, 90px, 0); } 100% { transform: translate3d(0, 180px, 0); } }
+@keyframes pbg-fall-sway-260 { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(12px, 130px, 0); } 100% { transform: translate3d(0, 260px, 0); } }
+
 /* Off screen, battery saver, or reduce motion: hold still. */
-.pbg[data-pbg-off]::before, .pbg[data-pbg-off]::after { animation-play-state: paused; }
-.pbg[data-pbg-still]::before, .pbg[data-pbg-still]::after { animation: none !important; }
+.pbg[data-pbg-off]::before, .pbg[data-pbg-off]::after, .pbg[data-pbg-off] > i, .pbg[data-pbg-off] > i::before, .pbg[data-pbg-off] > i::after { animation-play-state: paused; }
+.pbg[data-pbg-still]::before, .pbg[data-pbg-still]::after, .pbg[data-pbg-still] > i, .pbg[data-pbg-still] > i::before, .pbg[data-pbg-still] > i::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .pbg::before, .pbg::after { animation: none !important; }
+  .pbg::before, .pbg::after, .pbg > i, .pbg > i::before, .pbg > i::after { animation: none !important; }
+  .pbg-ripple::before, .pbg-ripple > i { transform: scale(.5); opacity: .5; }
+  .pbg-stars > i:nth-child(2) { display: none; }
 }
 
 /* ---------- Picker ---------- */
@@ -183,8 +377,9 @@ html [data-profile-mixed-grid] .pmg-poster[data-pbg] { color: var(--pbg-ink); bo
 .pbg-picker-panel {
   position: relative;
   display: grid;
-  grid-template-rows: auto 1fr auto auto auto;
-  gap: 14px;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
   width: 100%;
   height: 100%;
   padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
@@ -195,7 +390,7 @@ html [data-profile-mixed-grid] .pmg-poster[data-pbg] { color: var(--pbg-ink); bo
 }
 @media (min-width: 640px) {
   .pbg-picker { place-items: center; }
-  .pbg-picker-panel { width: min(440px, 92vw); height: min(720px, 90vh); border-radius: 24px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
+  .pbg-picker-panel { width: min(460px, 92vw); height: min(800px, 92vh); border-radius: 24px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
 }
 @keyframes pbg-slide-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pbg-picker-panel { animation: none; } }
@@ -232,8 +427,30 @@ html:is([data-theme='light'], [data-system-tone='light']) .pbg-picker-btn--done 
 .pbg-tile { flex: 0 0 56px; scroll-snap-align: center; display: grid; gap: 4px; justify-items: center; background: none; border: 0; padding: 0; color: inherit; font-size: 10.5px; font-weight: 700; cursor: pointer; }
 .pbg-tile-swatch { position: relative; isolation: isolate; overflow: hidden; width: 56px; height: 56px; border-radius: 14px; border: 2px solid transparent; }
 .pbg-tile-swatch--none { border: 2px dashed currentColor; opacity: 0.55; }
-.pbg-tile[aria-checked='true'] .pbg-tile-swatch { border-color: #8b7cff; box-shadow: 0 0 0 2px #8b7cff; }
+.pbg-tile[aria-checked='true'] .pbg-tile-swatch { border-color: currentColor; box-shadow: 0 0 0 2px currentColor; opacity: 1; }
 .pbg-tile-label { max-width: 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pbg-tile-swatch--add { display: grid; place-items: center; border: 2px dashed currentColor; opacity: .7; }
+
+/* Colourways for the backdrop in the preview, and your own three colours. */
+.pbg-colors { display: grid; gap: 10px; justify-items: center; min-height: 34px; }
+.pbg-color-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pbg-color { width: 34px; height: 34px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(127,127,127,.4); transition: transform .15s ease, box-shadow .15s ease; }
+.pbg-color[aria-checked='true'] { box-shadow: 0 0 0 2px #0b0b0f, 0 0 0 4px currentColor; transform: scale(1.06); }
+html:is([data-theme='light'], [data-system-tone='light']) .pbg-color[aria-checked='true'] { box-shadow: 0 0 0 2px #f4f4f6, 0 0 0 4px currentColor; }
+.pbg-color--own { display: grid; place-items: center; color: inherit; background: conic-gradient(#ff5f6d, #ffd166, #06d6a0, #4cc9f0, #7b61ff, #ff5f6d); }
+.pbg-color--own svg { color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+.pbg-own { display: flex; gap: 22px; justify-content: center; }
+.pbg-own-well { display: grid; justify-items: center; gap: 4px; font-size: 11px; font-weight: 700; opacity: .9; cursor: pointer; }
+.pbg-own-dot { position: relative; width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(127,127,127,.5), 0 2px 8px rgba(0,0,0,.3); overflow: hidden; }
+.pbg-own-dot input { position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px); opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.pbg-photo-row { display: grid; gap: 6px; justify-items: center; }
+.pbg-photo-error { font-size: 12px; color: #ff6b6b; }
+.pbg-chips { display: flex; gap: 8px; justify-content: center; }
+.pbg-chip { border: 1px solid rgba(127,127,127,.35); background: transparent; color: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.pbg-chip[aria-pressed='true'] { background: rgba(127,127,127,.28); }
+.pbg-chip--solid { background: #fff; color: #0b0b0f; border-color: #fff; padding: 9px 16px; font-size: 13.5px; }
+html:is([data-theme='light'], [data-system-tone='light']) .pbg-chip--solid { background: #111; color: #fff; border-color: #111; }
+@media (max-height: 700px) { .pbg-preview { min-height: 150px; } .pbg-picker-hint { display: none; } }
 .pbg-picker-hint { text-align: center; font-size: 12px; opacity: 0.6; margin: 0; }
 
 /* Hold ring on the owner's header */

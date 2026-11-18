@@ -37,7 +37,7 @@ import type { TextPost, ImagePost, VideoItem } from '@/types/feed.types';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
 import { openBrainrotFeed } from '@/lib/brainrot-feed';
 import { PostBgLayer, postBgHostProps, useProfilePostBg } from './PostBackground';
-import { postBgVariant } from '@/lib/post-backgrounds';
+import { postBgToken, postBgVariant } from '@/lib/post-backgrounds';
 import { ArticleTileFace, useProfileArticleTile } from './ArticleTile';
 import { articleReadMinutes } from '@/lib/article-tile';
 import { GridCardFace, GridKindPill, GridPollProbe } from './GridCardTile';
@@ -189,7 +189,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
     // the reel would have to page back through the whole history to find it.
     if (entry.isPinned && !entries.some((other) => !other.isPinned && !other.isRepost && other.data.id === entry.data.id)) return false;
     noteProfileFeedOpen(profileFeed, id);
-    openBrainrotFeed(id, undefined, { bgId: postBg?.id ?? null });
+    openBrainrotFeed(id, undefined, { bgId: postBgToken(postBg) });
     return true;
   };
   const openPost = (id: string, slug?: string, entry?: MixedGridEntry) => {
