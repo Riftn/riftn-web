@@ -140,6 +140,12 @@ import { CallNoteCard } from './calls/CallNoteCard';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
 
+// Picking messages: only the ticked rows are shaded, the rest stay clear and
+// only hint on hover. Mixed from the text colour rather than bg-white/..., which
+// light themes repaint grey on every row whatever its state.
+const PICKED_ROW = 'bg-[color-mix(in_srgb,currentColor_8%,transparent)]';
+const PICKABLE_ROW = 'hover:bg-[color-mix(in_srgb,currentColor_4%,transparent)]';
+
 interface DirectMessageChatProps {
   conversation: DeHubConversation;
   onBack: () => void;
@@ -856,7 +862,7 @@ const MessageBubble = memo(function MessageBubble({
         if (selecting) { e.preventDefault(); e.stopPropagation(); onTogglePick?.(message); return; }
         if (e.metaKey || e.ctrlKey || e.shiftKey) { e.preventDefault(); e.stopPropagation(); onStartPick?.(message); }
       }}
-      className={`flex ${cozy ? `gap-2 items-end ${cozy.first ? 'pt-2' : 'pt-0.5'} ${cozy.last ? 'pb-1' : 'pb-0'}` : 'gap-3 py-2'} ${isOwnMessage ? 'flex-row-reverse' : ''} group relative rounded-lg transition-colors ${selecting && pickable ? `cursor-pointer select-none ${picked ? 'bg-white/[0.07]' : 'hover:bg-white/[0.03]'}` : ''}`}
+      className={`flex ${cozy ? `gap-2 items-end ${cozy.first ? 'pt-2' : 'pt-0.5'} ${cozy.last ? 'pb-1' : 'pb-0'}` : 'gap-3 py-2'} ${isOwnMessage ? 'flex-row-reverse' : ''} group relative rounded-lg transition-colors ${selecting && pickable ? `my-0.5 cursor-pointer select-none ${picked ? PICKED_ROW : PICKABLE_ROW}` : ''}`}
     >
       {selecting && pickable && (
         <span className={`flex ${isOwnMessage ? 'order-last mr-auto pr-1' : 'pr-1'} self-center`}><MessagePickTick checked={picked} /></span>
@@ -2750,7 +2756,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               size="icon"
               onClick={onBack}
               data-swipe-back
-              className="text-white hover:bg-zinc-800"
+              className="text-white hover:bg-[color-mix(in_srgb,currentColor_10%,transparent)]"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
