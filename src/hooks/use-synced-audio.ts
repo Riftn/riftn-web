@@ -1,6 +1,7 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
-import { bindSoundWindow, soundTimeFor } from '@/lib/sound-window';
+import { bindSoundWindow, mixGain, soundMix, soundTimeFor } from '@/lib/sound-window';
+import { applyVideoVolume, setSongMixGain } from '@/lib/dub-volume';
 import { claimHandoffAudio, getHandoffAudio, isHandoffAudioActive, releaseHandoffAudio, setHandoffAudio, subscribeHandoffAudio } from '@/lib/audio-handoff';
 
 interface UseSyncedAudioOptions {
@@ -41,16 +42,27 @@ export function useSyncedAudio({ mediaKey, soundtrackUrl, isPlaying, isMuted, vo
     const audio = getHandoffAudio(key, token.current)?.el;
     const video = videoRef.current;
     if (!active || !audio || !video) return;
-    audio.muted = isMuted;
-    audio.volume = volume;
+    // The poster sets how loud the song and the video's own sound are;
+    // old posts carry no levels and play the song alone.
+    const mix = soundMix(soundtrackUrl);
+    audio.muted = isMuted || mix.song === 0;
+    audio.volume = Math.max(0, Math.min(1, volume)) * mixGain(mix.song);
     audio.playbackRate = video.playbackRate;
-    video.muted = true;
+    setSongMixGain(video, mixGain(mix.video));
+    applyVideoVolume(video, volume);
+    video.muted = isMuted || mix.video === 0;
     if (!video.paused) {
       const target = soundTimeFor(soundtrackUrl, video.currentTime);
       if (Math.abs(audio.currentTime - target) > 0.3) audio.currentTime = target;
       if (audio.paused) audio.play().catch(() => {});
     } else audio.pause();
   }, [active, key, isPlaying, isMuted, volume, videoRef, soundtrackUrl]);
+  // Once the song lets go, the video's own sound is back at full level.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!active || !video) return;
+    return () => { setSongMixGain(video, null); };
+  }, [active, videoRef]);
   useEffect(() => {
     const video = videoRef.current;
     const audio = getHandoffAudio(key, token.current)?.el;

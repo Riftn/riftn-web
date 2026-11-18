@@ -42,3 +42,26 @@ it('keeps the same soundtrack and playback choices while the video changes surfa
   expect(audio.currentTime).toBe(12);
   expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(plays);
 });
+
+it('plays the song and the video sound at the levels the poster set', () => {
+  const url = 'https://example.com/mix.mp3#sv=80&vv=40';
+  function Mixed({ video }: { video: HTMLVideoElement }) {
+    const ref = useRef(video);
+    useSyncedAudio({ mediaKey: 'mix-post', soundtrackUrl: url, isPlaying: true, isMuted: false, volume: 1, videoRef: ref });
+    return null;
+  }
+  const video = document.createElement('video');
+  Object.defineProperty(video, 'paused', { configurable: true, value: false });
+  render(<Mixed video={video} />);
+  const audio = handoffAudioFor(`synced:mix-post:${url}`)!;
+  expect(audio.volume).toBeCloseTo(0.64);
+  expect(video.muted).toBe(false);
+  expect(video.volume).toBeCloseTo(0.16);
+});
+
+it('keeps the video silent under a song on posts without levels', () => {
+  const video = document.createElement('video');
+  Object.defineProperty(video, 'paused', { configurable: true, value: false });
+  render(<Surface video={video} />);
+  expect(video.muted).toBe(true);
+});
