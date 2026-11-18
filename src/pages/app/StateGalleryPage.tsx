@@ -2039,6 +2039,7 @@ export default function StateGalleryPage() {
         <StreamerArtworkGallery />
 
         <PinnedProfileGallery />
+        <ProfileImageMenuGallery />
         <ContentWarningGallery />
         <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
         <TextTilesGallery />
@@ -2734,6 +2735,49 @@ function PinnedProfileGallery() {
             isAuthenticated={false}
             badgeUrl={null}
             isFollowing
+            isPending={false}
+            isTargetPrivate={false}
+            isFollowLoading={false}
+            handleFollow={noop}
+            handleUnfollow={noop}
+            isSubscribed={false}
+            hasPlans={false}
+            setFullscreenImage={noop}
+            setActiveTab={noop}
+            shareSheetOpen={false}
+            setShareSheetOpen={noop}
+            setLoginModalOpen={noop}
+            ShareOptions={() => null}
+            showFollowersFollowing
+            hideFollowerCounts={false}
+            setFollowListType={noop}
+            setFollowListDrawerOpen={noop}
+            translatedBio={null}
+            setTranslatedBio={noop}
+          />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/**
+ * The owner's own header: right-click (or hold) the picture or banner for
+ * Change, Paste, Copy, Delete. Nothing saves here (no signed-in user).
+ */
+function ProfileImageMenuGallery() {
+  return (
+    <section data-page-bento data-profile-image-menu-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile picture and banner menu</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[680px]">
+          <ProfileHeader
+            profile={GALLERY_PROFILE}
+            apiProfile={GALLERY_PROFILE}
+            isViewingOwnProfile
+            isAuthenticated
+            badgeUrl={null}
+            isFollowing={false}
             isPending={false}
             isTargetPrivate={false}
             isFollowLoading={false}

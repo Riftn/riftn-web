@@ -92,6 +92,8 @@ export function usePostBgHold(enabled: boolean, onOpen: () => void, selector?: s
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (!enabled || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    // The profile picture and banner have their own hold menu.
+    if ((e.target as Element).closest?.('[data-profile-image-target]')) return;
     const host = hostRef.current;
     if (!host) return;
     if (selector) {

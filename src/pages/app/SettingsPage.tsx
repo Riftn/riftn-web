@@ -95,6 +95,7 @@ import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { updateProfile, getAccountInfo, type UpdateProfileData, type DeHubUser } from '@/lib/api/dehub';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
+import { useProfileImageMenu } from '@/components/app/profile/useProfileImageMenu';
 import { getBlockListPaginated, unblockUser as apiUnblockUser, type BlockedUser, checkUsernameAvailability } from '@/lib/api/dehub';
 import { isReservedUsername } from '@/lib/reserved-usernames';
 import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
@@ -621,6 +622,9 @@ function ProfileSettings() {
   const [coverPreview, setCoverPreview] = useState<string | undefined>();
   const [avatarFile, setAvatarFile] = useState<File | undefined>();
   const [coverFile, setCoverFile] = useState<File | undefined>();
+  // Delete from the picture / banner menu: cleared on screen now, on Save for real.
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+  const [removeCover, setRemoveCover] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const debouncedUsername = useDebouncedValue(username, 300);
@@ -751,7 +755,9 @@ function ProfileSettings() {
     telegramLink !== originalValues.telegramLink ||
     facebookLink !== originalValues.facebookLink ||
     !!avatarFile ||
-    !!coverFile;
+    !!coverFile ||
+    removeAvatar ||
+    removeCover;
 
   // A changed username must be positively cleared before Save unlocks. The old
   // gate was `usernameAvailable !== false`, which passes while it is still null
@@ -817,6 +823,21 @@ function ProfileSettings() {
 
       setAvatarFile(undefined);
       setCoverFile(undefined);
+      setRemoveAvatar(false);
+      setRemoveCover(false);
+      if (variables.removeAvatar || variables.removeCover) {
+        if (authUser?.address) bumpProfileImageVersion(authUser.address);
+        const own = authUser?.address?.toLowerCase();
+        queryClient.setQueriesData<ProfileData>({ queryKey: ['dehub-profile'] }, (old) => {
+          if (!old || old.walletAddress?.toLowerCase() !== own) return old;
+          return {
+            ...old,
+            ...(variables.removeAvatar ? { avatarUrl: undefined } : {}),
+            ...(variables.removeCover ? { coverUrl: undefined } : {}),
+          };
+        });
+        queryClient.invalidateQueries({ queryKey: ['profile-avatar'] });
+      }
 
       // Reset file inputs so re-selecting the same file triggers onChange
       if (avatarInputRef.current) avatarInputRef.current.value = '';
@@ -905,6 +926,7 @@ function ProfileSettings() {
         return;
       }
       setAvatarFile(file);
+      setRemoveAvatar(false);
       setAvatarPreview(prev => swapBlobPreview(prev, file));
     }
   };
@@ -917,10 +939,48 @@ function ProfileSettings() {
         return;
       }
       setCoverFile(file);
+      setRemoveCover(false);
       setCoverPreview(prev => swapBlobPreview(prev, file));
     }
   };
   
+  // Right-click / hold menu and Ctrl/Cmd+V paste on the banner and picture.
+  // Same as picking a file: shown at once, saved with Save.
+  const setPickedCover = (file: File) => {
+    setCoverFile(file);
+    setRemoveCover(false);
+    setCoverPreview(prev => swapBlobPreview(prev, file));
+  };
+  const setPickedAvatar = (file: File) => {
+    setAvatarFile(file);
+    setRemoveAvatar(false);
+    setAvatarPreview(prev => swapBlobPreview(prev, file));
+  };
+  const coverMenu = useProfileImageMenu({
+    kind: 'cover',
+    canEdit: true,
+    imageUrl: coverPreview,
+    hasImage: !!coverPreview,
+    onFile: setPickedCover,
+    onRemove: () => {
+      setCoverFile(undefined);
+      setRemoveCover(true);
+      setCoverPreview(prev => { if (prev?.startsWith('blob:')) { try { URL.revokeObjectURL(prev); } catch { /* noop */ } } return undefined; });
+    },
+  });
+  const avatarMenu = useProfileImageMenu({
+    kind: 'avatar',
+    canEdit: true,
+    imageUrl: avatarPreview,
+    hasImage: !!avatarPreview,
+    onFile: setPickedAvatar,
+    onRemove: () => {
+      setAvatarFile(undefined);
+      setRemoveAvatar(true);
+      setAvatarPreview(prev => { if (prev?.startsWith('blob:')) { try { URL.revokeObjectURL(prev); } catch { /* noop */ } } return undefined; });
+    },
+  });
+
   const handleSave = () => {
     if (usernameAvailable === false) {
       toast.error(
@@ -957,6 +1017,8 @@ function ProfileSettings() {
     data.facebookLink = facebookLink;
     if (avatarFile) data.avatarImg = avatarFile;
     if (coverFile) data.coverImg = coverFile;
+    if (removeAvatar && !avatarFile) data.removeAvatar = true;
+    if (removeCover && !coverFile) data.removeCover = true;
     
     updateMutation.mutate(data, { onSuccess: () => {
         if (data.displayName !== undefined) setDisplayName.complete(displayName, displayName);
@@ -1008,21 +1070,7 @@ function ProfileSettings() {
         data-setting-anchor="cover-image"
         data-keep-dark
         className="relative aspect-[3/1] bg-zinc-800 rounded-xl overflow-hidden group"
-        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const file = e.dataTransfer?.files?.[0];
-          if (file && file.type.startsWith('image/')) {
-            if (file.size > 10 * 1024 * 1024) {
-              toast.error(t('settings.imageTooLarge10'));
-              return;
-            }
-            setCoverFile(file);
-            setCoverPreview(prev => swapBlobPreview(prev, file));
-          }
-        }}
+        {...coverMenu.targetProps}
       >
         {coverPreview && (
           <img src={coverPreview} alt={_copy("copy.fa8d84566676", { defaultValue: "Cover" })} className="w-full h-full object-cover" />
@@ -1048,27 +1096,14 @@ function ProfileSettings() {
           className="hidden"
           onChange={handleCoverChange}
         />
+        {coverMenu.menu}
       </div>
 
       {/* Profile Picture */}
       <div data-setting-anchor="profile-picture" className="flex items-center gap-4 -mt-10">
-        <div 
-          className="relative"
-          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const file = e.dataTransfer?.files?.[0];
-            if (file && file.type.startsWith('image/')) {
-              if (file.size > 5 * 1024 * 1024) {
-                toast.error(t('settings.imageTooLarge5'));
-                return;
-              }
-              setAvatarFile(file);
-              setAvatarPreview(prev => swapBlobPreview(prev, file));
-            }
-          }}
+        <div
+          className="relative rounded-xl"
+          {...avatarMenu.targetProps}
         >
           <Avatar className="w-20 h-20 border-4 border-zinc-900">
             <AvatarImage src={avatarPreview} />
@@ -1091,6 +1126,7 @@ function ProfileSettings() {
             className="hidden"
             onChange={handleAvatarChange}
           />
+          {avatarMenu.menu}
         </div>
         <div>
           <h3 className="font-medium text-white">{t('settings.profilePicture')}</h3>

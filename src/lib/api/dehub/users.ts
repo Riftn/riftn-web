@@ -156,6 +156,9 @@ export interface UpdateProfileData {
   dmSettings?: { disables?: string[]; minTipDhb?: number };
   avatarImg?: File;
   coverImg?: File;
+  /** Clear the profile picture / banner (ignored when a new file is sent with it). */
+  removeAvatar?: boolean;
+  removeCover?: boolean;
 }
 
 export async function updateProfile(data: UpdateProfileData): Promise<{ result: boolean }> {
@@ -205,6 +208,9 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
     formData.append("coverImg", data.coverImg);
     console.log('[updateProfile] Attaching coverImg:', data.coverImg.name, data.coverImg.size, data.coverImg.type);
   }
+
+  if (data.removeAvatar && !data.avatarImg) formData.append("removeAvatar", "true");
+  if (data.removeCover && !data.coverImg) formData.append("removeCover", "true");
 
   // Log all FormData keys being sent
   const keys: string[] = [];
