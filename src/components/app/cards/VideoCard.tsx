@@ -59,7 +59,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import { ListPlus, Clock, Zap, Ticket, Star, Loader2, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
-import { SoundCreditLink } from './SoundCreditLink';
+import { soundFromPost } from '@/lib/soundtrack';
+import { useOptionalGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { AltTextBadge } from './AltTextBadge';
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
@@ -891,6 +892,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const queryClient = useQueryClient();
   const profileFeed = useProfileFeedContext();
   const { walletAddress, openLoginModal } = useAuth();
+  const dropZone = useOptionalGlobalDropZone();
   const { selfReaction, sendLiveReaction } = useLiveReaction(video.liveStreamId, !!video.isLivePost && !!video.isLiveNow);
   // Deep Current is the one power spent on somebody ELSE's post, so it is
   // the one row that belongs in this half of the menu. `status.powers` is
@@ -2922,15 +2924,25 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           </div>
         )}
 
-        {/* Soundtrack badge — like TikTok "♪ Song Name" */}
-        {hasSoundtrack && video.soundtrackTitle && (
-          <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 bg-black/40 backdrop-blur-[16px] px-2 py-1 rounded-lg border border-white/10 max-w-[60%]">
+        {/* The post's song. Tapping it starts a new post with the same song. */}
+        {hasSoundtrack && video.soundtrackTitle && video.soundtrackUrl && (
+          <button
+            type="button"
+            data-no-navigate
+            data-keep-dark
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!walletAddress) { openLoginModal(); return; }
+              dropZone?.openPostModalWithSound(soundFromPost(video.soundtrackUrl!, video.soundtrackTitle!, video.soundtrackCreator));
+            }}
+            aria-label={`${_copy("copy.0418db35eb35", { defaultValue: "Use this sound" })}: ${video.soundtrackTitle}`}
+            className="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 bg-black/40 backdrop-blur-[16px] px-2 py-1 rounded-lg border border-white/10 max-w-[60%] text-left transition-colors hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
             <Music className="w-3 h-3 text-white flex-shrink-0" />
             <span className="text-white text-[10px] truncate">
               {video.soundtrackTitle}{video.soundtrackCreator ? ` — ${video.soundtrackCreator}` : ''}
             </span>
-            <SoundCreditLink url={video.soundtrackUrl} creator={video.soundtrackCreator} variant="short" className="shrink-0 text-[10px] text-white/70" />
-          </div>
+          </button>
         )}
         
         {onBack && !stage && !video.isAudio && !isFullscreen && (controlsVisible || isContentGated) && (

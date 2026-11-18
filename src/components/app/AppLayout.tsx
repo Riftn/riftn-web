@@ -207,7 +207,7 @@ function RetainedPostOverlay({ entry }: { entry: RetainedPostEntry }) {
 function AppLayoutContent({ children }: AppLayoutContentProps) {
   const { t: _copy } = _useCopy();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isPostModalOpen, closePostModal, pendingFiles, clearPendingFiles, initialText, clearInitialText, initialCategory, clearInitialCategory, openPostModal } = useGlobalDropZone();
+  const { isPostModalOpen, closePostModal, pendingFiles, clearPendingFiles, initialText, clearInitialText, initialCategory, clearInitialCategory, initialSound, clearInitialSound, openPostModal } = useGlobalDropZone();
 
   // A post written somewhere on this origin that has no composer of its own —
   // today that is Trenchstar opened straight at /trenchstar-game/, where the
@@ -671,11 +671,12 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
         <Suspense fallback={null}>
           <PostModal
             isOpen={isPostModalOpen}
-            onClose={() => { closePostModal(); clearInitialText(); clearInitialCategory(); }}
+            onClose={() => { closePostModal(); clearInitialText(); clearInitialCategory(); clearInitialSound(); }}
             initialFiles={pendingFiles}
             onFilesProcessed={clearPendingFiles}
             initialText={initialText}
             initialCategory={initialCategory}
+            initialSound={initialSound}
           />
         </Suspense>
       )}
