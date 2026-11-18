@@ -50,6 +50,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { getMediaUrl, getAccountInfo, type DeHubConversation, type DeHubUser } from '@/lib/api/dehub';
 import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { formatDistanceToNow } from 'date-fns';
+import { formatTimeAgo } from '@/lib/feed-utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BadgedName } from '@/components/app/BadgedName';
 import { useDMRealtime } from '@/hooks/use-dm-realtime';
@@ -123,6 +124,7 @@ export function ConversationItem({
   selecting = false,
   checked = false,
   onLongPress,
+  compactTime = false,
 }: {
   conversation: DeHubConversation;
   onClick: (e: React.MouseEvent) => void;
@@ -136,6 +138,8 @@ export function ConversationItem({
   checked?: boolean;
   /** Phones: holding the row starts picking (or toggles it while picking). */
   onLongPress?: () => void;
+  /** Computers' card inbox: short times (4m, 2h, 3d). */
+  compactTime?: boolean;
 }) {
   const { t: _copy } = _useCopy();
   const hold = useRowLongPress(onLongPress);
@@ -149,8 +153,10 @@ export function ConversationItem({
   const lastMessagePreview = conversation.lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
     : conversation.lastMessage?.content || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
-  const lastMessageTime = conversation.lastMessage?.createdAt 
-    ? formatDistanceToNow(new Date(conversation.lastMessage.createdAt), { addSuffix: false })
+  const lastMessageTime = conversation.lastMessage?.createdAt
+    ? (compactTime
+      ? formatTimeAgo(conversation.lastMessage.createdAt)
+      : formatDistanceToNow(new Date(conversation.lastMessage.createdAt), { addSuffix: false }))
     : '';
 
   // An unsent message left in this thread's composer. Shown in place of the
@@ -1355,7 +1361,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <RefreshCw className="h-[18px] w-[18px]" style={{ transform: 'rotate(calc(var(--chat-pull-p, 0) * 300deg)) scale(calc(0.7 + var(--chat-pull-p, 0) * 0.3))' }} />
               </div>
             </div>
-            <div ref={chatPullRef}>
+            <div ref={chatPullRef} data-chat-list-body>
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1477,6 +1483,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   onBlock={handleBlockConversationUser}
                   pref={richList ? chatPrefs.get(conv.id) : unreadOnly(chatPrefs.get(conv.id))}
                   onLongPress={richList ? undefined : () => holdToPick(conv.id)}
+                  compactTime={deskCards}
                 />
               );
               return richList ? (
