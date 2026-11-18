@@ -483,14 +483,17 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick,
   onStartPick,
   onDelete,
+  canDeleteAny = false,
   canPin = true,
   isPinned = false,
   onUnpin,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
-  /** Delete one of your own messages (asks first). */
+  /** Delete one message for everyone (asks first). Your own, or any in a one-to-one chat. */
   onDelete?: (message: DmMessage) => void;
+  /** One-to-one chat: either person can delete the other's messages too, like Telegram. */
+  canDeleteAny?: boolean;
   /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
   canPin?: boolean;
   isPinned?: boolean;
@@ -765,12 +768,13 @@ const MessageBubble = memo(function MessageBubble({
       menuActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
       holdActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
     }
-    if (isOwnMessage && onDelete) {
+    const canDeleteThis = !!onDelete && (isOwnMessage || canDeleteAny);
+    if (canDeleteThis && onDelete) {
       menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
       holdActions.push({ key: 'delete', secondary: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
     }
     if (pickable) {
-      menuActions.push({ key: 'select', divided: !(isOwnMessage && onDelete), icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
+      menuActions.push({ key: 'select', divided: !canDeleteThis, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
       holdActions.push({ key: 'select', secondary: true, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message) });
     }
   }
@@ -2412,7 +2416,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
     [pickedMsgs, messages],
   );
-  const pickedOwn = useMemo(() => pickedList.filter(isMineMsg), [pickedList, isMineMsg]);
+  // What Delete removes: your own picks, or in a one-to-one chat any pick (not tips).
+  const pickedOwn = useMemo(
+    () => pickedList.filter((m) => isMineMsg(m) || (!isGroupChat && m.msgType !== 'tip')),
+    [pickedList, isMineMsg, isGroupChat],
+  );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
   const togglePick = useCallback((m: DmMessage) => {
     setPickedMsgs((prev) => {
@@ -3210,6 +3218,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onTogglePick={togglePick}
                 onStartPick={startPick}
                 onDelete={setConfirmDeleteOne}
+                canDeleteAny={!isGroupChat}
                 canPin={canPinHere}
                 isPinned={pinnedMessageId === message._id}
                 onUnpin={handleUnpinMessage}
@@ -3281,7 +3290,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">{_copy('msgMenu.deleteOneTitle', { defaultValue: 'Delete this message?' })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{_copy('msgMenu.deleteOneBody', { defaultValue: 'It will be removed for everyone in this chat.' })}</AlertDialogDescription>
+            <AlertDialogDescription className="text-zinc-400">{isGroupChat
+              ? _copy('msgMenu.deleteOneBody', { defaultValue: 'It will be removed for everyone in this chat.' })
+              : _copy('msgMenu.deleteForBothBody', { defaultValue: 'It will be removed for both of you.' })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
@@ -3293,7 +3304,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">{_copy('msgSelect.deleteTitle', { defaultValue: 'Delete {{count}} messages?', count: pickedOwn.length })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{_copy('msgSelect.deleteBody', { defaultValue: 'They will be removed for everyone in this chat.' })}</AlertDialogDescription>
+            <AlertDialogDescription className="text-zinc-400">{isGroupChat
+              ? _copy('msgSelect.deleteBody', { defaultValue: 'They will be removed for everyone in this chat.' })
+              : _copy('msgSelect.deleteForBothBody', { defaultValue: 'They will be removed for both of you.' })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>

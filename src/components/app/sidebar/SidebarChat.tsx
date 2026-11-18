@@ -64,6 +64,8 @@ import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
+import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from '@/components/app/chat/message-menu-kit';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -456,10 +458,48 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     }
   }, [isAuthenticated, walletAddress, messages, addReaction, removeReaction]);
 
+  // Right-click a line: the same message menu as the full chat, with who reacted.
+  const menuPoint = useMenuPoint();
+  const [menuMsg, setMenuMsg] = useState<SupabaseLiveChatMessage | null>(null);
+  const openLineMenu = (e: React.MouseEvent<HTMLDivElement>, msg: SupabaseLiveChatMessage) => {
+    if (msg.client_key && msg.send_state === 'failed') return;
+    if (keepBrowserMenu(e.target as Element, e.currentTarget)) return;
+    e.preventDefault();
+    setMenuMsg(msg);
+    menuPoint.openAt({ x: e.clientX, y: e.clientY });
+  };
+  const menuMine = menuMsg && walletAddress
+    ? Object.entries(menuMsg.reactions ?? {}).filter(([, who]) => who.some((a) => a.toLowerCase() === walletAddress.toLowerCase())).map(([emoji]) => emoji)
+    : [];
+  const menuActions: MessageMenuAction[] = [];
+  if (menuMsg) {
+    const own = !!walletAddress && menuMsg.sender_address?.toLowerCase() === walletAddress.toLowerCase();
+    if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
+    if (own && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content || ''); }, hint: 'E' });
+    if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({
+      key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
+  }
+  const lineMenu = menuPoint.mounted && menuMsg ? (
+    <MessageMenu
+      point={menuPoint.point}
+      onClose={menuPoint.close}
+      quickReactions={QUICK_CHAT_REACTIONS}
+      mine={menuMine}
+      onReact={(emoji) => handleReact(menuMsg.id, emoji)}
+      actions={menuActions}
+      reactors={menuMsg.reactions ? { reactions: menuMsg.reactions, remoteMessageId: menuMsg.id } : null}
+      meta={messageMenuMeta(menuMsg.created_at, menuMsg.is_edited)}
+    />
+  ) : null;
+
   const isLoading = roomsLoading || messagesLoading;
 
   return (
     <div data-sidebar-chat className="flex flex-col h-full pl-px">
+      {lineMenu}
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
         <div
@@ -597,7 +637,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 navigate(`/${handle}`);
               } : undefined;
               return (
-                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-continued={continued || undefined} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
                   {/* Reply indicator – click to scroll to original */}
                   {msg.reply_to && (
                     <button
