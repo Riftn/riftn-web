@@ -11,9 +11,6 @@ import '@/styles/login-stack.css';
 
 type ClipName = typeof LOGIN_CLIP_IDS[number];
 
-/** Any of these counts as the tap that lets a blocked clip start. */
-const GESTURES = ['pointerdown', 'touchend', 'keydown'] as const;
-
 /**
  * Loads and plays only while on screen. A tile builds no <video> at all (no
  * element, no clip, no poster) until it is actually in view, so opening the
@@ -26,8 +23,12 @@ const GESTURES = ['pointerdown', 'touchend', 'keydown'] as const;
  * Clips play for everyone. Reduced motion only stops the lanes drifting
  * (login-stack.css): it used to swap every clip for its still frame, which is
  * what people with Reduce Motion or Windows' "Animation effects" off saw.
- * When the browser refuses to start a clip on its own (iPhone Low Power Mode),
- * the first tap or key press anywhere starts it.
+ * The wall is decoration behind the sign-in form, never a player: a clip only
+ * shows once it is actually playing, it never takes taps, and when the
+ * browser refuses to start it on its own (iPhone Low Power Mode, in-app
+ * browsers) the tile keeps its still. Starting clips on the next tap used to
+ * pop them open full screen in in-app browsers and leave play buttons on the
+ * paused ones.
  */
 /**
  * The wordmark mask and each tile's still go first; clips only start
@@ -81,7 +82,6 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
   const [ready, setReady] = useState(false);
   const [stillIn, setStillIn] = useState(false);
   const [logoIn, setLogoIn] = useState(false);
-  const visibleRef = useRef(false);
   const stillCounted = useRef(false);
   const settleStill = () => {
     if (!stillCounted.current) return;
@@ -113,7 +113,14 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
     return () => io.disconnect();
   }, []);
   useEffect(() => {
-    visibleRef.current = visible;
+    const video = ref.current as (HTMLVideoElement & { webkitExitFullscreen?: () => void }) | null;
+    if (!video || !mountVideo) return;
+    // Some in-app browsers open a clip full screen even with playsInline: close it and keep the still.
+    const close = () => { video.webkitExitFullscreen?.(); video.pause(); };
+    video.addEventListener('webkitbeginfullscreen', close);
+    return () => video.removeEventListener('webkitbeginfullscreen', close);
+  }, [mountVideo]);
+  useEffect(() => {
     const video = ref.current;
     if (!video || !mountVideo) return;
     // React does not reflect `muted` as an attribute, and Safari refuses to
@@ -121,22 +128,11 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
     video.muted = true;
     if (!visible) { video.pause(); return; }
     let cancelled = false;
-    let retry: (() => void) | null = null;
-    const stopRetry = () => {
-      if (!retry) return;
-      for (const type of GESTURES) document.removeEventListener(type, retry, true);
-      retry = null;
-    };
     // Older engines (and jsdom) return nothing from play() rather than a promise.
-    video.play()?.catch?.((error: unknown) => {
-      if (cancelled || (error as { name?: string })?.name !== 'NotAllowedError') return;
-      retry = () => {
-        stopRetry();
-        if (visibleRef.current) void video.play()?.catch?.(() => {});
-      };
-      for (const type of GESTURES) document.addEventListener(type, retry, { capture: true, passive: true });
+    video.play()?.catch?.(() => {
+      if (!cancelled) setReady(false);
     });
-    return () => { cancelled = true; stopRetry(); };
+    return () => { cancelled = true; };
   }, [mountVideo, visible]);
   return (
     <div
@@ -159,10 +155,16 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
           ref={ref}
           src={`/login-stack/${name}.mp4`}
           poster={`/login-stack/${name}.jpg`}
-          onLoadedData={() => setReady(true)}
+          onPlaying={() => setReady(true)}
+          onPause={() => setReady(false)}
           muted
           loop
           playsInline
+          webkit-playsinline="true"
+          controls={false}
+          disablePictureInPicture
+          disableRemotePlayback
+          x-webkit-airplay="deny"
           preload="metadata"
           aria-hidden="true"
           tabIndex={-1}
