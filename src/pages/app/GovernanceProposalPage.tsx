@@ -28,6 +28,7 @@ import { DeHubPageLoader } from '@/components/app/DeHubLoader';
 import { ProposalVerdictLabel, verdictOf, votingTimeLeft, isVotingClosed } from '@/components/app/governance/ProposalVerdict';
 import { ProposalDiscussion } from '@/components/app/governance/ProposalDiscussion';
 import { ProposalMedia } from '@/components/app/governance/ProposalMedia';
+import { ProposalOptions, isMultipleChoice } from '@/components/app/governance/ProposalOptions';
 import { useProposalRepost } from '@/hooks/use-proposal-repost';
 import { dehubLinkFor, proposalPath } from '@/lib/dehub-links';
 
@@ -111,6 +112,7 @@ export default function GovernanceProposalPage() {
   }, [focusedCommentId, proposal]);
 
   const currentVote = userVotes?.[proposalId ?? '']?.type;
+  const currentOption = userVotes?.[proposalId ?? '']?.option;
 
   const authorAddress = proposal?.author_wallet_address ?? '';
   const cachedAvatar = useProfileAvatar(authorAddress || undefined);
@@ -122,6 +124,16 @@ export default function GovernanceProposalPage() {
       if (!proposalId) return;
       if (userWeight === 0) { explainCannotVote(userLent); return; }
       voteMutation.mutate({ proposalId, voteType, currentVote, voteWeight: userWeight, badgeName: userBadge });
+    },
+    [isAuthenticated, openLoginModal, proposalId, currentVote, voteMutation, userWeight, userBadge, userLent, explainCannotVote]
+  );
+
+  const handleVoteOption = useCallback(
+    (optionIndex: number) => {
+      if (!isAuthenticated) { openLoginModal(); return; }
+      if (!proposalId) return;
+      if (userWeight === 0) { explainCannotVote(userLent); return; }
+      voteMutation.mutate({ proposalId, voteType: 1, currentVote, voteWeight: userWeight, badgeName: userBadge, optionIndex });
     },
     [isAuthenticated, openLoginModal, proposalId, currentVote, voteMutation, userWeight, userBadge, userLent, explainCannotVote]
   );
@@ -163,6 +175,7 @@ export default function GovernanceProposalPage() {
 
   const verdict = verdictOf(proposal);
   const timeLeft = votingTimeLeft(proposal, t);
+  const multiple = isMultipleChoice(proposal);
 
   return (
     <div className="min-h-screen max-w-2xl mx-auto">
@@ -209,7 +222,16 @@ export default function GovernanceProposalPage() {
         <TranslatableText publicContent text={proposal.description} className="text-zinc-400 text-sm leading-relaxed mb-4" as="p" />
         <ProposalMedia url={proposal.media_url} type={proposal.media_type} alt={proposal.title} className="mb-4" />
 
-        {/* Vote ratio bar */}
+        {/* Answers on a multiple choice proposal, the for/against bar otherwise */}
+        {multiple ? (
+          <ProposalOptions
+            proposal={proposal}
+            myOption={currentOption}
+            onVote={handleVoteOption}
+            disabled={voteMutation.isPending || isVotingClosed(proposal)}
+            className="mb-3"
+          />
+        ) : (
         <div className="space-y-1 mb-3">
           <div className="flex justify-between text-[10px]">
             <span className="text-emerald-400 font-medium">{forPct}% {t('governance.forLabel')}</span>
@@ -226,6 +248,7 @@ export default function GovernanceProposalPage() {
             )}
           </div>
         </div>
+        )}
 
         <ActionBar
           postId={proposal.id}
@@ -240,6 +263,7 @@ export default function GovernanceProposalPage() {
           commentCount={proposal.comment_count}
           voteWeight={userWeight}
           disabled={voteMutation.isPending || isVotingClosed(proposal)}
+          hideVotes={multiple}
           shareUrl={proposalUrl}
           onRepost={handleRepost}
           onQuote={handleQuote}

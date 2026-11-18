@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import Governance from '@/components/ui/cut-icons/governance';
 import { useGovernanceProposal } from '@/hooks/use-governance-proposal';
 import { ProposalVerdictLabel, verdictOf, votingTimeLeft } from '@/components/app/governance/ProposalVerdict';
+import { ProposalOptions, isMultipleChoice } from '@/components/app/governance/ProposalOptions';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { proposalPath } from '@/lib/dehub-links';
 
@@ -88,6 +89,9 @@ export function ProposalLinkEmbed({ proposalId, path, fallback = null }: Proposa
         {proposal.description && (
           <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-zinc-400">{proposal.description}</p>
         )}
+        {isMultipleChoice(proposal) ? (
+          <ProposalOptions proposal={proposal} myOption={null} compact className="mt-2.5" />
+        ) : (
         <div className="mt-2.5 space-y-1">
           <div className="flex justify-between text-[10px]">
             <span className="font-medium text-emerald-400">{forPct}% {t('governance.forLabel', 'For')}</span>
@@ -104,6 +108,7 @@ export function ProposalLinkEmbed({ proposalId, path, fallback = null }: Proposa
             )}
           </div>
         </div>
+        )}
         <div className="mt-2 flex items-center gap-1.5 text-[11px] text-zinc-500">
           {avatar && <img src={avatar} alt="" className="h-4 w-4 rounded-full object-cover" />}
           <span className="truncate">{author}</span>
