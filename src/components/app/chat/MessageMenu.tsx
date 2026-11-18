@@ -209,7 +209,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           className="flex flex-col gap-1.5"
         >
           {showEmoji && view === 'main' && (
-            <div className="flex items-center gap-0.5 self-stretch rounded-full px-1.5 py-1" data-msg-menu-surface data-msg-menu-emoji>
+            <div className="flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 pr-2.5" data-msg-menu-surface data-msg-menu-emoji>
               {quickReactions!.slice(0, 6).map((emoji, i) => (
                 <motion.button
                   key={emoji}
@@ -232,8 +232,9 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   type="button"
                   onClick={() => setView('emoji')}
                   aria-label={t('emojiPicker.moreReactions')}
-                  className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full transition-transform hover:scale-110"
+                  className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full opacity-60 transition-[opacity,transform] hover:opacity-100 active:scale-95 active:opacity-100 [&>svg]:transition-[stroke-width] hover:[&>svg]:stroke-[2.75] active:[&>svg]:stroke-[2.75]"
                   data-msg-menu-chip
+                  data-msg-menu-more
                 >
                   <ChevronDown className="h-4 w-4" />
                 </button>
