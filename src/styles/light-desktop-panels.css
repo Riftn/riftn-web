@@ -139,4 +139,10 @@
   html[data-system-tone='light'] [data-msg-cards] [data-msg-cards-tab][aria-selected='true']::after {
     display: none;
   }
+
+  /* Messages: the header pill's top lines up with the search bar in the right
+     rail (6px from the top), not 8px lower. */
+  html[data-system-tone='light'] [data-msg-cards] {
+    margin-top: -8px;
+  }
 }
