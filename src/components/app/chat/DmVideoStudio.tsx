@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload } from 'lucide-react';
+import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload, Gauge } from 'lucide-react';
 import { ADJUST_RANGES, DEFAULT_ADJUST, STUDIO_LOOKS, studioColorMatrix, type StudioAdjust, type StudioAdjustKey } from '@/features/post/lib/studioColor';
-import { POST_DESTRUCT_CHOICES, postDestructLabel, svgMatrixValues, vignetteBackground } from '@/features/post/lib/video-edits';
+import { POST_DESTRUCT_CHOICES, VIDEO_SPEEDS, postDestructLabel, svgMatrixValues, vignetteBackground } from '@/features/post/lib/video-edits';
 import { VIDEO_CROP_RATIOS, cropRatioValue, dragCropRect, fitCropRect, isFullCrop, type CropHandle, type CropRatioId, type VideoCropRect } from '@/features/post/lib/video-crop';
 import X from '@/components/ui/cut-icons/close';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
@@ -20,7 +20,7 @@ import { DmVideoFrame } from './DmVideo';
 import { LockPriceControl } from './LockPriceControl';
 import { LOCK_DEFAULT_USD, formatLockUsd } from '@/lib/dm-lock-price';
 
-export type Tab = 'cover' | 'trim' | 'crop' | 'mirror' | 'rotate' | 'looks' | 'adjust' | 'hide' | 'timer' | 'expire' | 'alt' | 'music';
+export type Tab = 'cover' | 'trim' | 'crop' | 'speed' | 'mirror' | 'rotate' | 'looks' | 'adjust' | 'hide' | 'timer' | 'expire' | 'alt' | 'music';
 const ADJUST_ORDER: StudioAdjustKey[] = ['light', 'contrast', 'warmth', 'tint', 'colour', 'fade', 'vignette'];
 const FRAME_COUNT = 10;
 const MIN_KEEP = 1;
@@ -269,6 +269,8 @@ export function DmMediaStudio({
   const end = options.trimEnd ?? dur;
   const kept = keptDuration(options, dur);
   const set = (patch: Partial<DmVideoOptions>) => onOptionsChange({ ...options, ...patch });
+  // Preview the picked speed (post composer only).
+  useEffect(() => { const v = videoRef.current; if (v) v.playbackRate = options.speed ?? 1; }, [options.speed]);
 
   const timeAt = (clientX: number) => {
     const r = stripRef.current?.getBoundingClientRect();
@@ -299,6 +301,7 @@ export function DmMediaStudio({
     { key: 'cover', label: _copy('dmVideo.cover', { defaultValue: 'Cover' }), icon: ImageIcon },
     { key: 'trim', label: _copy('dmVideo.trim', { defaultValue: 'Trim' }), icon: Scissors },
     { key: 'crop', label: _copy('copy.studio.crop', { defaultValue: 'Crop' }), icon: Crop },
+    { key: 'speed', label: _copy('editor.video.speed', { defaultValue: 'Speed' }), icon: Gauge },
     { key: 'mirror', label: _copy('dmVideo.mirror', { defaultValue: 'Mirror' }), icon: FlipHorizontal2 },
     { key: 'rotate', label: _copy('dmVideo.rotate', { defaultValue: 'Rotate' }), icon: RotateCw },
     { key: 'looks', label: _copy('copy.studio.looks', { defaultValue: 'Looks' }), icon: Palette },
@@ -650,6 +653,20 @@ export function DmMediaStudio({
                     className={cn('flex-1 py-2 text-xs font-semibold text-zinc-400', !!options.mirror === m && 'bg-white text-black')}
                   >
                     {m ? _copy('dmVideo.mirrored', { defaultValue: 'Mirrored' }) : _copy('dmVideo.original', { defaultValue: 'Original' })}
+                  </button>
+                ))}
+              </div>
+            )}
+            {tab === 'speed' && (
+              <div className="flex overflow-hidden rounded-full border border-white/15">
+                {VIDEO_SPEEDS.map((sp) => (
+                  <button
+                    key={sp}
+                    type="button"
+                    onClick={() => set({ speed: sp === 1 ? undefined : sp })}
+                    className={cn('flex-1 py-2 text-xs font-semibold tabular-nums text-zinc-400', (options.speed ?? 1) === sp && 'bg-white text-black')}
+                  >
+                    {sp}×
                   </button>
                 ))}
               </div>

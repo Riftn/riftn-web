@@ -16,6 +16,8 @@ export interface DmVideoOptions {
   mirror?: boolean;
   rotate?: QuarterTurn;
   hidden?: 'reveal';
+  /** Post composer only: speed the server bakes into the file. Never sent with a DM. */
+  speed?: number;
 }
 
 const num = (v: unknown): number | undefined =>
