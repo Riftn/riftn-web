@@ -23,7 +23,7 @@
     "faq": {
       "a1": "係。 Riftn 可以喺 Google Play 同 App Store 免費下載，亦可以喺 riftn.com 嘅瀏覽器入面免費使用。",
       "a2": "Android 手機透過 Google Play 或者直接 APK 下載， iPhone 透過 App Store ，同埋任何現代桌面或者手機瀏覽器喺 riftn.com 。",
-      "a3": "係。最新嘅 Android 版本由 Riftn 喺 dehub . io/apk 發佈，可以直接下載 APK 版本，適用於 Android 8以上版本。",
+      "a3": "係。最新嘅 Android 版本由 Riftn 喺 riftn.com/apk 發佈，可以直接下載 APK 版本，適用於 Android 8以上版本。",
       "a4": "發佈到按時間順序嘅資訊提供、直播或者睇直播、透過端對端加密向朋友發送訊息、加入同埋運作社群、喺內置多鏈錢包入面保留代幣，同埋賺取觀看獎賞。",
       "q1": "Riftn 應用程式係咪免費？",
       "q2": "Riftn 喺邊啲裝置上面運行？",
@@ -1025,8 +1025,8 @@
     "ensLinked": "連結咗 — 你嘅個人檔案而家喺 {{url}}",
     "ensUnlinked": "移除咗 — 你嘅用戶名冇變",
     "ensHandle": "ENS 名稱",
-    "ensLinkedDesc": "你都喺 dehub . io / {{name}}",
-    "ensHandleDesc": "證明你有個 .eth 名，亦都可以喺 dehub . io / 你個名 . eth 度聯絡到。你個用戶名唔會改變。",
+    "ensLinkedDesc": "你都喺 riftn.com / {{name}}",
+    "ensHandleDesc": "證明你有個 .eth 名，亦都可以喺 riftn.com / 你個名 . eth 度聯絡到。你個用戶名唔會改變。",
     "ensRemove": "去除",
     "ensCheck": "檢查",
     "ensResolvesTo": "{{name}} 點到 {{address}}",
@@ -3810,7 +3810,7 @@
       "startTerm": "歷史",
       "start": "——「全部時間」係指 Cloudflare 仲保留緊嘅每一日，今日即係由 riftn.com 搬去 Cloudflare 嗰日 {{date}} 起計 {{days}} 日。之前冇邊緣數據可以顯示，舊嘅日子亦會隨住 Cloudflare 過期而消失。",
       "estimatedTerm": "估計日子",
-      "estimated": "— 自從 {{date}} 開始， dehub . io 已經透過中繼伺服器提供服務，所以直接去唔到 Cloudflare 嘅網絡仍然會載入網站。然後 Cloudflare 會將大部分訪客視為中繼嘅一個地址，而佢嘅獨特計數就會崩潰。對於嗰啲日子，圖表會顯示測量到嘅頁面瀏覽量乘以前 {{days}} 日嘅典型訪客每頁瀏覽量比率（ {{ratio}} % ）。 頁面瀏覽量同請求仍然會直接測量，而 Cloudflare 嘅未被觸及嘅計數就喺上面連結嘅原始回應入面。"
+      "estimated": "— 自從 {{date}} 開始， riftn.com 已經透過中繼伺服器提供服務，所以直接去唔到 Cloudflare 嘅網絡仍然會載入網站。然後 Cloudflare 會將大部分訪客視為中繼嘅一個地址，而佢嘅獨特計數就會崩潰。對於嗰啲日子，圖表會顯示測量到嘅頁面瀏覽量乘以前 {{days}} 日嘅典型訪客每頁瀏覽量比率（ {{ratio}} % ）。 頁面瀏覽量同請求仍然會直接測量，而 Cloudflare 嘅未被觸及嘅計數就喺上面連結嘅原始回應入面。"
     },
     "feedback": {
       "title": "反應",
@@ -7449,7 +7449,7 @@
     "ambWant5": "有過大使、影響者或者社區管理經驗係一個好處",
     "ambassadorCompensation": "品牌大使會收到一個 <b> 可談判嘅月薪 </b> 一貫噉畀。可能會根據廣告系列嘅成效、用戶註冊同埋社群增長里程碑而獲得額外嘅獎金。隨住生態系統嘅發展，你亦都會收到獨家嘅 Riftn 商品、早期功能存取權同埋代幣分配。",
     "applyAsAmbassador": "申請做品牌大使",
-    "noRoleFits": "睇唔到啱嘅角色？喺 <mail> dev @ dehub . io </mail> 同我哋聯絡 — 我哋一直都搵緊有才華嘅人。"
+    "noRoleFits": "睇唔到啱嘅角色？喺 <mail> dev @ riftn.com </mail> 同我哋聯絡 — 我哋一直都搵緊有才華嘅人。"
   },
   "depin": {
     "seoTitle": "德潘 |社區驅動嘅媒體基礎設施 |去中心",

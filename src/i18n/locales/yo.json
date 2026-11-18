@@ -4716,7 +4716,7 @@
     "deleteStageFailed": "Kò ṣeé ṣe láti pa ìpele náà rẹ́"
   },
   "ads": {
-    "seoTitle": "Olùdarí ìpolówó ọjà_DeHub",
+    "seoTitle": "Olùdarí ìpolówó ọjà | Riftn",
     "adsManager": "Olùdarí ìpolówó ọjà",
     "newCampaign": "Ìpolongo tuntun",
     "tabOverview": "Àkíyèsí",
@@ -5011,7 +5011,7 @@
     "createFailed": "Ó kùnà láti ṣẹ̀dá"
   },
   "fractions": {
-    "seoTitle": "Fractions_DeHub",
+    "seoTitle": "Fractions | Riftn",
     "seoDescription": "Ra kí o sì ta àwọn ìpín ìfìwéránṣẹ́ Riftn. Ìfìwéránṣẹ́ tí a ti mint jẹ́ ìpín 1000 lórí chain, ní apá kan fídíò, orin, tàbí àwòrán kí o sì ṣòwò rẹ̀ ní àmì.",
     "title": "Ìpín",
     "perUpload": "1000 fún gbígbé",
@@ -6210,7 +6210,7 @@
     "signInToTradeCta": "Wọlé láti ṣe ìfipádì"
   },
   "usernames": {
-    "seoTitle": "Orukọ Olumulo_DeHub",
+    "seoTitle": "Orukọ Olumulo | Riftn",
     "seoDescription": "Ra àti ta àwọn orúkọ oníṣe Riftn pẹ̀lú àmì. Ṣàwárí ní ṣókí, ní nọ́mbà àti àwọn ọwọ́ ìpilẹ̀ṣẹ̀ fún ìta, tàbí kí o ṣe àkójọ àwọn tìrẹ, ìfowópamọ́ náà máa ń ṣẹlẹ̀ ní pópó nígbà tí ìsanwó bá ti mọ́.",
     "title": "Àwọn Orúkọ Olùmúlò",
     "subtitle": "Ọwọ fun tita, ti a san ni USD",
@@ -7416,7 +7416,7 @@
     "noRoleFits": "Ṣé o kò rí ipa tí ó bá a mu? Bá wa sọ̀rọ̀ lórí <mail> dev@riftn.com</mail> — a máa ń wá àwọn ènìyàn tó ní ẹ̀bùn."
   },
   "depin": {
-    "seoTitle": "DePin | Ohun-èlò-èlò-ayárabíàsá alágbára-ayé_DeHub",
+    "seoTitle": "DePin | Ohun-èlò-èlò-ayárabíàsá alágbára-ayé | Riftn",
     "seoDescription": "Riftn DePin jẹ́ kí àwọn ènìyàn ṣe àfikún ìpamọ́, àfiránṣẹ́ àfiránṣẹ́ àti ìṣirò láti ran olùgbé, transcode àti pípèsè ìròyìn nípasẹ̀ nẹ́tìwọ̀n tí ó lágbára.",
     "navAria": "Ìrìn-àjò DePin",
     "dehubHome": "Riftn ile",
@@ -18957,7 +18957,7 @@
     "joinedBodyNoEmail": "A máa fi ímeèlì ránṣẹ́ sí ọ nígbà tí àfihàn náà bá bẹ̀rẹ̀.",
     "failed": "Mi ò lè fi ìyẹn pamọ́. Gbìyànjú lẹ́ẹ̀kan síi.",
     "privacy": "Mo kàn máa ń sọ fún ọ nípa ìfilọ́lẹ̀ náà.",
-    "seoTitle": "Àmì ìfilọ̀ láìpẹ́_DeHub",
+    "seoTitle": "Àmì ìfilọ̀ láìpẹ́ | Riftn",
     "seoDescription": "Àmì tuntun Riftn yóò jáde láìpẹ́. Darapọ̀ mọ́ àtòjọ náà kí o sì gba ímeèlì kan ní àsìkò tí ó bá lọ sí ayé, kí o sì ra tààrà láti inú àpamọ́ Riftn rẹ."
   },
   "githubLink": {

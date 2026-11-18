@@ -2126,7 +2126,7 @@ export const ti = {
     blockchainConsiderationsItem3: 'ቅድሚ ግብረ-ግብሪ ምግባርካ ናይ ግላዊነት ሳዕቤናት ኣስተንትነ',
     contactUpdates: 'ርክብን ዝዘመኑን',
     contactText: 'ብዛዕባ እዚ ናይ ግላዊነት ፖሊሲ ወይ ብዛዕባ ናይ ግላዊነት ልምዲና ሕቶታት ፡',
-    contactItem1: 'Www.dehub.net ኢሜል ግበር ወይ ኣብ ውሽጢ እቲ መተግበሪ ኣብ ማሕበረሰብ ቻት ሕተቶ',
+    contactItem1: 'riftn.com ኢሜል ግበር ወይ ኣብ ውሽጢ እቲ መተግበሪ ኣብ ማሕበረሰብ ቻት ሕተቶ',
     contactItem2: 'ኣብ ዘተታት ምምሕዳር ተሳትፎ',
     contactItem3: 'ብዳኦ ኣቢልካ ሓሳባት ኣቕርብ',
     contactNote: 'እዚ ናይ ግላዊነት ፖሊሲ እዚ ብማሕበረሰብ ኣመራርሓታት ክሕደስ ይኽእል እዩ ። እቲ ናይ ቁሳቁስ ለውጢ ብወግዒ ቻነላትና ክግለጽ እዩ ።',

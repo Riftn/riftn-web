@@ -1523,7 +1523,7 @@ export const nl = {
     introDesc: 'Inzet om toegang te krijgen tot verschillende clubniveaus, de verbeterde functies in alle d\'apps en uw rekenkracht of opslagruimte te bieden met weinig als een mobiel om uw deel van de protocolinkomsten te minen.',
     introDesc2: 'Aangezien verdere toewijzingen nu dynamisch zullen zijn, afhankelijk van protocolvergoedingen, zullen aanduidingen op elk moment onderworpen zijn aan vereisten om ervoor te zorgen dat de protocolbehoeften te allen tijde op de voorgrond staan. Het stakingsprotocol wordt binnenkort ook geüpgraded met release op Base.',
     technicals: 'Technicals',
-    technicalsDesc1: 'Lid worden van clubs ontgrendelt ook de onderstaande badges die worden weergegeven op je dehub.io-profiel, opmerkingen, uploads en live chat-communicatie.',
+    technicalsDesc1: 'Lid worden van clubs ontgrendelt ook de onderstaande badges die worden weergegeven op je riftn.com-profiel, opmerkingen, uploads en live chat-communicatie.',
     technicalsDesc2: 'Naast de voordelen voor het aantal ingezette Riftn-tokens, zijn er ook drie vooraf gedefinieerde niveaus bepaald door de inzetduur die gebruikersbeloningen definiëren.',
     tier1: 'Niveau 1',
     tier1Rewards: '25% beloningen',

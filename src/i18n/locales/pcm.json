@@ -27,7 +27,6 @@
       "a4": "Post for feed wey dey arrange by time, go live or watch live streams, send message give your friends with end-to-end encryption, join and run communities, keep tokens for di multi-chain wallet wey dey inside, and collect reward because you watch.",
       "q1": "Di Riftn app free?",
       "q2": "Which devices Riftn dey work for?",
-      "q3": "You fit install Riftn for Android without Google Play. You fit download am from website of Riftn, https://dehub.app, and install am manually.",
       "q4": "You fit do many tins for inside Riftn app. You fit join communities, connect wit' pipo wey dey share same interest, share your own content, join discussions, and even create your own groups."
     },
     "faqTitle": "Frequently asked questions",
@@ -3184,7 +3183,6 @@
       "remove": "Comot am from di community",
       "more": "Load more posts join",
       "failed": "No fit update community post. Try again.",
-      "invalidLink": "https://dehub.com/post/123456",
       "unavailable": "Dis post no dey available."
     },
     "title": "Communities",

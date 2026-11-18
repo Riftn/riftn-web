@@ -22,7 +22,7 @@
     "downloadTitle": "Riftn-u endirin",
     "faq": {
       "a1": "Bəli. Riftn-ı Google Play və App Store-dan endirmək və riftn.com saytındakı brauzerdə istifadə etmək pulsuzdur.",
-      "a2": "Google Play və ya birbaşa APK yükləmə, App Store vasitəsilə iPhone və dehub.io-da istənilən müasir masaüstü və ya mobil brauzer vasitəsilə Android telefonlar.",
+      "a2": "Google Play və ya birbaşa APK yükləmə, App Store vasitəsilə iPhone və riftn.com-da istənilən müasir masaüstü və ya mobil brauzer vasitəsilə Android telefonlar.",
       "a3": "Bəli. Ən son Android qurğusu Riftn tərəfindən Android 8 və daha yuxarı versiyalar üçün riftn.com/apk saytında birbaşa APK endirilməsi kimi dərc edilir.",
       "a4": "Xronoloji lentə yerləşdirin, canlı yayımları izləyin və ya izləyin, ucu-bucağı olmayan şifrələmə ilə dostlara mesaj yazın, icmalara qoşulun və onları idarə edin, daxili çox zəncirli cüzdanda işarələr saxlayın və izlədiyiniz üçün mükafatlar qazanın.",
       "q1": "Riftn tətbiqi pulsuzdur?",
@@ -94,9 +94,9 @@
     "inviteLink": "Dəvət linkinizi əldə edin",
     "moreGuides": "TikTok-dan gəlirsiniz? <tiktok> oxuyun Birləşmiş Krallığın yaradıcı təlimatı TikTok-dan çıxmaq üçün </tiktok> və <live> Web3 canlı yayım: mərkəzləşmiş Twitch alternativ</live>.",
     "proof": {
-      "label1": "deHub canlı yayımında eyni vaxtda izləyicilər",
+      "label1": "Riftn canlı yayımında eyni vaxtda izləyicilər",
       "label2": "axın xidmətləri üzrə iş vaxtı",
-      "label3": "deHub-un öz CDN-də qlobal gecikmə",
+      "label3": "Riftn-un öz CDN-də qlobal gecikmə",
       "value3": "Alt-200ms"
     },
     "reasons": {
@@ -3799,7 +3799,7 @@
       "copy": "Kopyala",
       "openEndpoint": "/api/stats aç",
       "openRaw": "Cloudflare-in toxunulmamış cavabı",
-      "edge": "dehub.io-ya gələn hər sorğu serverlərimizə çatmazdan əvvəl Cloudflare-dən keçir. Bu saylar həmin trafikin Cloudflare-in öz toplamıdır — panelimizin göstərdiyi eyni rəqəmlər. Onları brauzerinizdəki skript toplamır, ona görə bu səhifədə heç nə onları şişirdə bilməz və izləyiciləri bloklamaq onları dəyişmir.",
+      "edge": "riftn.com-ya gələn hər sorğu serverlərimizə çatmazdan əvvəl Cloudflare-dən keçir. Bu saylar həmin trafikin Cloudflare-in öz toplamıdır — panelimizin göstərdiyi eyni rəqəmlər. Onları brauzerinizdəki skript toplamır, ona görə bu səhifədə heç nə onları şişirdə bilməz və izləyiciləri bloklamaq onları dəyişmir.",
       "live": "Səhifə onları canlı oxuyur. /stats yükləndikdə son nöqtəmiz çağırılır, o an Cloudflare Analytics API-yə sorğu verir və cavabı 60 saniyə keşləyir.",
       "limits": "Bunun göstərdiyi və göstərmədiyi: rəqəmlərin tətbiq kodumuzdan deyil, Cloudflare toplamasından gəldiyini və burada dərc olunan sorğunun işləyən sorğu olduğunu görə bilərsiniz. Bu, etimadsız-yoxlanıla bilən deyil — API tokeni bizdədir və Cloudflare zonanın analitikasına ictimai oxu təklif etmir. Öz Cloudflare zonası olan hər kəs eyni sorğunu işlədib formanı təsdiqləyə bilər."
     },
@@ -3820,7 +3820,7 @@
       "breakdownTerm": "Ölkələr və brauzerlər",
       "breakdown": "— seçdiyiniz aralığı izləyir, amma yalnız {{max}} gün geriyə, gündəlik bölgü bu qədər saxlanılır. Daha uzun aralıqlarda diaqram ölkə siyahısından daha çox vaxtı əhatə edir.",
       "startTerm": "Tarixçə",
-      "start": "— «bütün dövr» Cloudflare-in hələ saxladığı hər günü bildirir, bu gün dehub.io-nun Cloudflare-ə keçdiyi {{date}} tarixindən {{days}} gün. Daha əvvəlki kənar məlumat yoxdur və köhnə günlər Cloudflare onların müddətini bitirdikcə düşür.",
+      "start": "— «bütün dövr» Cloudflare-in hələ saxladığı hər günü bildirir, bu gün riftn.com-nun Cloudflare-ə keçdiyi {{date}} tarixindən {{days}} gün. Daha əvvəlki kənar məlumat yoxdur və köhnə günlər Cloudflare onların müddətini bitirdikcə düşür.",
       "estimatedTerm": "Təxmini günlər",
       "estimated": "— {{date}} olduğundan, riftn.com birbaşa Cloudflare-a çata bilməyən şəbəkələrin hələ də saytı yükləməsi üçün rele serveri vasitəsilə xidmət göstərir. Cloudflare daha sonra əksər ziyarətçiləri relenin bir ünvanı kimi görür və onun unikal sayı dağılır. Diaqramda həmin günlər üçün ölçülmüş səhifə görünüşləri {{days}} gün əvvəl ({{ratio}}%) tipik ziyarətçilərə -per-səhifə baxış nisbətinə vurulur. Səhifəyə baxışlar və sorğular hələ də birbaşa ölçülür və Cloudflare-nin toxunulmaz sayı yuxarıda əlaqələndirilmiş xam cavabdadır."
     },
@@ -14702,7 +14702,7 @@
     "43fb11b48038": "tipik",
     "4caa918bf60d": "hər 1000 nəfər üçün",
     "6bdf24e0e55f": "DIRNAQ $",
-    "0435a318b3b4": "deHub-da",
+    "0435a318b3b4": "Riftn-da",
     "600d1c6e47ab": "Nömrələriniz deyil? Hər hansı baxış sayını sınayın",
     "ea68771a3994": "Nişan",
     "dfdd39a6da39": "Bu dövr üçün məlumat yoxdur",
