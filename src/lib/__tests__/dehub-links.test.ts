@@ -129,7 +129,7 @@ describe('findDehubLinks /cinema', () => {
 
   it('does not read the hub page as a profile called "cinema"', () => {
     const m = parseDehubLink('https://riftn.com/cinema');
-    expect(m).toBeNull();
+    expect(m).toMatchObject({ kind: 'page', pagePath: '/cinema' });
   });
 
   it('rejects a type segment that is not film or series', () => {
@@ -183,9 +183,10 @@ describe('findDehubLinks /bounty and legacy /work', () => {
   });
 
   it('does not card the board or its app pages as entities', () => {
-    expect(parseDehubLink('https://riftn.com/work')).toBeNull();
+    // Not bounties: the board and its own pages card as pages.
+    expect(parseDehubLink('https://riftn.com/work')?.kind).toBe('page');
     expect(parseDehubLink('https://riftn.com/work/post')).toBeNull();
-    expect(parseDehubLink('https://riftn.com/work/history')).toBeNull();
+    expect(parseDehubLink('https://riftn.com/work/history')?.kind).toBe('page');
   });
 
   it('does not read the bare board as a profile called "work"', () => {
@@ -193,7 +194,7 @@ describe('findDehubLinks /bounty and legacy /work', () => {
     // with no id, so without RESERVED_ROOT_SEGMENTS entries they would parse as
     // usernames instead of falling through.
     expect(parseDehubLink('https://riftn.com/bounty')).toBeNull();
-    expect(parseDehubLink('https://riftn.com/work')).toBeNull();
+    expect(parseDehubLink('https://riftn.com/work')?.kind).toBe('page');
   });
 
   it('rejects a non-numeric bounty id and a too-short work key', () => {
@@ -223,7 +224,7 @@ describe('governance proposal links', () => {
   });
 
   it('leaves the board, bad ids and foreign hosts alone', () => {
-    expect(parseDehubLink('https://riftn.com/app/governance')).toBeNull();
+    expect(parseDehubLink('https://riftn.com/app/governance')).toMatchObject({ kind: 'page', pagePath: '/governance' });
     expect(parseDehubLink('https://riftn.com/app/governance/abc')).toBeNull();
     expect(parseDehubLink(`https://evil.example/app/governance/${id}`)).toBeNull();
   });
@@ -244,5 +245,30 @@ describe('governance proposal links', () => {
 
   it('finds a proposal link in post text', () => {
     expect(findDehubLinks(`worth a vote https://riftn.com/app/governance/${id}`).map((l) => l.kind)).toEqual(['proposal']);
+  });
+});
+
+describe('feature request and page links', () => {
+  const id = '9cea24f0-1234-4abc-8def-0123456789ab';
+
+  it('cards a Requests share link as that request', () => {
+    expect(parseDehubLink(`https://riftn.com/features?feature=${id}`)).toMatchObject({ kind: 'featureRequest', featureRequestId: id });
+    expect(parseDehubLink(`https://riftn.com/app/features?request=${id}`)).toMatchObject({ kind: 'featureRequest', featureRequestId: id });
+  });
+
+  it('cards the bare board, and our other pages, as pages', () => {
+    expect(parseDehubLink('https://riftn.com/features')).toMatchObject({ kind: 'page', pagePath: '/features' });
+    expect(parseDehubLink('riftn.com/app/leaderboard')).toMatchObject({ kind: 'page', pagePath: '/app/leaderboard' });
+    expect(parseDehubLink('https://riftn.com/shorts')).toMatchObject({ kind: 'page', pagePath: '/shorts' });
+    expect(parseDehubLink('https://riftn.com/app/top-100/')).toMatchObject({ kind: 'page', pagePath: '/app/top-100' });
+    expect(parseDehubLink('https://riftn.com/arcade/kings-gambit')).toMatchObject({ kind: 'page', pagePath: '/arcade/kings-gambit' });
+    expect(parseDehubLink('https://riftn.com/packs/starter')).toMatchObject({ kind: 'page', pagePath: '/packs/starter', path: '/packs/starter' });
+  });
+
+  it('leaves unknown paths, bare paths and other hosts alone', () => {
+    expect(parseDehubLink('https://riftn.com/app/not-a-page')).toBeNull();
+    expect(parseDehubLink('/app/leaderboard')).toBeNull();
+    expect(parseDehubLink('https://evil.example/app/leaderboard')).toBeNull();
+    expect(parseDehubLink('https://riftn.com/robots.txt')).toBeNull();
   });
 });

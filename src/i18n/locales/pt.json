@@ -119,12 +119,16 @@
       "profile": "perfil",
       "proposal": "proposta",
       "stage": "etapa",
-      "store": "loja"
+      "store": "loja",
+      "featureRequest": "pedido",
+      "page": "página"
     },
     "recipientChat": "conversa",
     "recipientUser": "utilizador",
     "sendFailed": "Falha ao enviar {{item}}",
-    "sentTo": "{{item}} enviado para {{name}}"
+    "sentTo": "{{item}} enviado para {{name}}",
+    "openPage": "Abrir página",
+    "viewRequest": "Ver pedido"
   },
   "stageCover": {
     "admitOne": "ADMITIR UM",
@@ -20528,5 +20532,16 @@
     "edit": "Editar",
     "editLabel": "Editar mensagem",
     "error": "Isso não funcionou. Tente novamente."
+  },
+  "mentionLinks": {
+    "communities": "Comunidades",
+    "pages": "Páginas",
+    "people": "Pessoas",
+    "linkTo": "Vincular {{name}}",
+    "empty": "Nada encontrado",
+    "hint": "Digite para encontrar pessoas, comunidades e páginas",
+    "members": " membros",
+    "placeholder": "Buscar pessoas, comunidades, páginas...",
+    "title": "Mencionar ou vincular"
   }
 }

@@ -74,12 +74,16 @@
       "profile": "profilo",
       "proposal": "proposta",
       "stage": "fase",
-      "store": "negozio"
+      "store": "negozio",
+      "featureRequest": "richiesta",
+      "page": "pagina"
     },
     "recipientChat": "chat",
     "recipientUser": "utente",
     "sendFailed": "Impossibile inviare {{item}}",
-    "sentTo": "{{item}} inviata a {{name}}"
+    "sentTo": "{{item}} inviata a {{name}}",
+    "openPage": "Apri pagina",
+    "viewRequest": "Vedi richiesta"
   },
   "stageCover": {
     "admitOne": "AMMETTINE UNO",
@@ -19578,5 +19582,16 @@
     "edit": "Modifica",
     "editLabel": "Modifica messaggio",
     "error": "Non ha funzionato. Riprova."
+  },
+  "mentionLinks": {
+    "communities": "Community",
+    "pages": "Pagine",
+    "people": "Persone",
+    "linkTo": "Collega {{name}}",
+    "empty": "Nessun risultato",
+    "hint": "Scrivi per trovare persone, community e pagine",
+    "members": " membri",
+    "placeholder": "Cerca persone, community, pagine...",
+    "title": "Menziona o collega"
   }
 }

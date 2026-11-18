@@ -38,6 +38,8 @@ import { useDraft } from '@/hooks/use-draft';
 import { useLiveViewerActions } from '@/components/app/live/live-viewer-actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { replaceLinksWithEmoji, renderTextWithLinks } from '@/components/app/TranslatableText';
+import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { stripDehubLinkMatches } from '@/lib/dehub-links';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { useTranslation as useTextTranslation } from '@/components/app/TranslatableText';
 import { useLiveChatMessages } from '@/hooks/use-livechat';
@@ -137,11 +139,23 @@ function TranslatableChatMsg({ content, onHandle }: { content: string; onHandle:
   }, [onHandle, isTooShort, isTranslated, handleTranslate, handleShowOriginal]);
   useEffect(() => () => onHandle(null), [onHandle]);
 
+  // Links to our own things (a community, a request, a page) show as cards
+  // under the line, and the text drops the URL the card stands for.
+  const { links, displayText } = useDehubLinks(content);
+  const shownText = isTranslated ? stripDehubLinkMatches(translatedText, links) : displayText;
+
   return (
     <div>
-      <p className="text-sm text-zinc-300 break-words whitespace-pre-wrap">
-        {renderTextWithLinks(isTranslated ? translatedText : content)}
-      </p>
+      {shownText.trim() && (
+        <p className="text-sm text-zinc-300 break-words whitespace-pre-wrap">
+          {renderTextWithLinks(shownText)}
+        </p>
+      )}
+      {links.length > 0 && (
+        <div data-live-chat-cards className="max-w-[320px]">
+          <DehubLinkEmbeds links={links} compact />
+        </div>
+      )}
       {!isTooShort && (isTranslateLoading || isTranslated || translateError) && (
         <div className="flex items-center gap-1 mt-0.5">
           {isTranslateLoading ? (

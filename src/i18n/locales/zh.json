@@ -75,12 +75,16 @@
       "profile": "个人资料",
       "proposal": "提案",
       "stage": "阶段",
-      "store": "商店"
+      "store": "商店",
+      "featureRequest": "请求",
+      "page": "页面"
     },
     "recipientChat": "聊天",
     "recipientUser": "用户",
     "sendFailed": "发送{{item}}失败",
-    "sentTo": "{{item}}已发送至{{name}}"
+    "sentTo": "{{item}}已发送至{{name}}",
+    "openPage": "打开页面",
+    "viewRequest": "查看请求"
   },
   "stageCover": {
     "admitOne": "承认一个",
@@ -19461,5 +19465,16 @@
     "edit": "编辑",
     "editLabel": "编辑消息",
     "error": "无效。请重试。"
+  },
+  "mentionLinks": {
+    "communities": "社区",
+    "pages": "页面",
+    "people": "用户",
+    "linkTo": "链接 {{name}}",
+    "empty": "未找到任何内容",
+    "hint": "输入以查找用户、社区和页面",
+    "members": " 名成员",
+    "placeholder": "搜索用户、社区、页面...",
+    "title": "提及或链接"
   }
 }
