@@ -133,6 +133,8 @@ export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile,
         ref: (el: HTMLElement | null) => { boxRef.current = el; },
         'data-profile-image-target': kind,
         'data-drag-over': dragOver ? '' : undefined,
+        // The page-wide "drop to create post" steps aside over the picture.
+        'data-drop-attach': canEdit ? '' : undefined,
         'aria-haspopup': 'menu' as const,
         title: canEdit
           ? t('profileImage.hint', 'Right-click for options, or paste an image to replace it')
