@@ -1211,6 +1211,7 @@
     "payDirectNoName": "Gschickt direkt an de {{symbol}} uf {{chain}}. Kei Umschlag.",
     "payViaBridgeDpay": "A Base g'schobe und a Riftn Pay bezahlt, Tokens chummet i ca. e Minute",
     "dmSent": "{{amount}} Tokens a {{name}} gschickt!",
+    "addMessage": "Bis bald!",
     "messagePublic": "Öffentlech",
     "railTitle": "Trinkgelder",
     "railTotal": "{{amount}} Tokens",
@@ -2213,6 +2214,8 @@
       "likes": "Gfäut-mir"
     },
     "likedPosts": {
+      "emptyTitle": "No kei Likes",
+      "privateTitle": "Likes sind privat",
       "loadMore": "Meh lade"
     },
     "dislikes": {
@@ -2237,6 +2240,9 @@
     "sortLikes": "Gfäut-mir",
     "sortMostLiked": "Meist geliked",
     "sortCustomShort": "Benutzerdefiniert",
+    "arrange": {
+      "saving": "Spycheret..."
+    },
     "searchThisChannel": "Suche in diesem Kanal",
     "searchResultCount": "1 Ergebnis für \"{{query}}\"",
     "searchResultCountPlural": "{{count}} Ergebnisse für \"{{query}}\""
@@ -6238,7 +6244,9 @@
   "nftMarket": {
     "actAll": "Alli",
     "actListings": "Aagebot",
+    "actOffer": "Angebot",
     "actOffers": "Aagebot",
+    "actSales": "Verkäufe",
     "tabActivity": "Aktivität",
     "shortTitle": "NFTs",
     "filters": "Filter",
@@ -6741,8 +6749,12 @@
       "image": "Bild",
       "camera": "Kamera",
       "show": "Show on Stream",
+      "loop": "Wiederholung",
       "positions": {
         "center": "Zentrum"
+      },
+      "sizes": {
+        "medium": "Mittel"
       },
       "shapes": {
         "circle": "Kreis",
@@ -7727,6 +7739,7 @@
     "footerNote": "DePin-Beteiligung isch e Service-Leistung, no e Investitionsprodukt. Verfügbarkeit, Berechtigung und Belohnungen künne sich ändere."
   },
   "creatorFlow": {
+    "newNativeFlow": "Neuer Flow",
     "disconnect": "Trenne ab",
     "title": "Creator Flow",
     "backToStudio": "Zrugg zum Creator Studio",
@@ -9328,7 +9341,8 @@
       "textSaved": "Ändere Bildunterschriften gespeichert.",
       "action": "Automatischi Untertitel",
       "styles": {
-        "bold": "Fett"
+        "bold": "Fett",
+        "serif": "Schriften"
       },
       "working": "Lost zue… {{percent}} %",
       "downloading": "Sprachmodell wird parat gmacht… {{percent}} %",
@@ -10710,6 +10724,9 @@
       "zoomIn": "Canvas zoome rein",
       "zoomOut": "Canvas zoome raus"
     },
+    "clipFix": {
+      "listening": "Abspielen…"
+    },
     "shortcuts": {
       "action": {
         "split": "Teile",
@@ -10720,7 +10737,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Ufnahm stoppe"
+      "stop": "Ufnahm stoppe",
+      "failed": "Stimme-Cloning isch nid gschlunge."
     },
     "linkImport": {
       "go": "Importiere",
@@ -19242,6 +19260,8 @@
       "art": "Kunscht",
       "crypto": "Krypto",
       "sports": "Sport",
+      "comedy": "Komödie",
+      "food": "Essen",
       "news": "Nachrichten",
       "science": "Wissenschaft"
     },
@@ -19252,6 +19272,7 @@
   "appTokens": {
     "title": "Dini Tokens",
     "history": "Verlauf",
+    "noHistory": "Noch kei Aktivität",
     "kindDeposit": "Iizahle",
     "to": "Bis",
     "amount": "Betrag",
@@ -19281,6 +19302,7 @@
     "notNow": "Jetzt nöd"
   },
   "postStats": {
+    "audience": "Zuegl",
     "engagement": "Interaktion",
     "finished": "Fertig",
     "members": "Mitglieder",
@@ -19368,6 +19390,7 @@
   "dmSchedule": {
     "view": "Aaluege",
     "edit": "Ändere",
+    "editLabel": "Nachricht bearbeite",
     "error": "Das het nid funktioniert. Versuchs nomol."
   }
 }

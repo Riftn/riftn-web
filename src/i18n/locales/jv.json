@@ -1204,6 +1204,7 @@
     "payDirectNoName": "Kasih langsung ke sang pencipta di {{symbol}} di {{chain}}. Gak bakal tukar.",
     "payViaBridgeDpay": "Dipindhah menyang Base lan dibayar menyang Riftn Pay, token teka kira-kira sak menit",
     "dmSent": "Ngirim {{amount}} token menyang {{name}}!",
+    "addMessage": "Tambahkan pesan (opsional)",
     "messagePublic": "Umum",
     "railTitle": "Tip",
     "railTotal": "{{amount}} token",
@@ -2206,6 +2207,8 @@
       "likes": "Seneng"
     },
     "likedPosts": {
+      "emptyTitle": "Durung ana sing seneng",
+      "privateTitle": "Dhaftar seneng iku pribadi",
       "loadMore": "Muat Luwih Akeh"
     },
     "dislikes": {
@@ -2230,6 +2233,9 @@
     "sortLikes": "Suka",
     "sortMostLiked": "Paling akeh disukai",
     "sortCustomShort": "Kustom",
+    "arrange": {
+      "saving": "Nyimpen..."
+    },
     "searchThisChannel": "Telusuri saluran iki",
     "searchResultCount": "1 asil kanggo \"{{query}}\"",
     "searchResultCountPlural": "{{count}} asil kanggo \"{{query}}\""
@@ -6200,6 +6206,7 @@
     "actAll": "Semua",
     "actListings": "Daftar",
     "actOffers": "Tawaran",
+    "actSales": "Penjualan",
     "tabActivity": "Aktivitas",
     "shortTitle": "NFTs",
     "filters": "Filters",
@@ -6704,6 +6711,9 @@
       "show": "Tampilake ing stream",
       "positions": {
         "center": "Kénéka"
+      },
+      "sizes": {
+        "medium": "Sedheng"
       },
       "shapes": {
         "circle": "Bunderan",
@@ -7586,7 +7596,6 @@
     "dehubHome": "Rumah Riftn",
     "navHowItWorks": "Kanggo ngerti kanggo ngarso",
     "navPrivacy": "Privasi",
-    "navFaq": "Pitakon sing kerep ditakokake",
     "openDehub": "Buka Riftn",
     "readTheDocs": "Baca dokumentasi",
     "heroEyebrow": "Infrastruktur berbasis komunitas",
@@ -7690,6 +7699,7 @@
     "footerNote": "Partisipasi DePin minangka layanan kontribusi, dudu produk investasi. Kasedhiyan, kelayakan, lan hadiah bisa diganti."
   },
   "creatorFlow": {
+    "newNativeFlow": "Alur anyar",
     "disconnect": "Mlebu",
     "title": "Alur Kreator",
     "backToStudio": "Bali menyang Studio Kreator",
@@ -10671,6 +10681,9 @@
       "zoomIn": "Zoomin canvas",
       "zoomOut": "Zoout canvas"
     },
+    "clipFix": {
+      "listening": "Menganggo..."
+    },
     "shortcuts": {
       "action": {
         "split": "Pisah",
@@ -10681,7 +10694,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Mandeg Rekam"
+      "stop": "Mandeg Rekam",
+      "failed": "Gagal kloning suara"
     },
     "linkImport": {
       "go": "Impor",
@@ -16021,7 +16035,6 @@
     "23cc49836f60": "Nglairaké Riftn",
     "ce39b97c0f94": "Nglairaké saka browser, ponsel, utawa OBS, karo voice changers, sound effects lan wujud kamera inggih. Tips langsung ngalir ing dompetmu sawisé diirim — ora ana ambang batas pengikut, ora ana siklus pembayaran, lan ora kudu nggunakaké dompet kanggo nggunakaké.",
     "efc85ecfd402": "Bukak Riftn",
-    "dbc468a14b60": "Pitakon sing kerep ditakokake",
     "1e5b36078e37": "Panduan terkait",
     "95f48da59b9a": "Platform media sosial decentralized paling apik ing 2026",
     "89ec0bb81771": "Bioskop",
@@ -19103,7 +19116,9 @@
       "gaming": "Game",
       "crypto": "Kripto",
       "sports": "Olahraga",
+      "comedy": "Komedi",
       "podcast": "Pandhawa Swara",
+      "food": "Panganan",
       "news": "Berita",
       "science": "Sains"
     },
@@ -19114,6 +19129,7 @@
   "appTokens": {
     "title": "Token sampeyan",
     "history": "Riwayat",
+    "noHistory": "Durung ana aktivitas",
     "kindDeposit": "Tambah Dana",
     "to": "Tos",
     "amount": "Jumlah",

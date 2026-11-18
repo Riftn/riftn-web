@@ -1223,6 +1223,7 @@
     "payDirectNoName": "Пададзены адразу стваральніку у {{symbol}} на {{chain}}. Без замены.",
     "payViaBridgeDpay": "Пераведзена ў Base і аплачана ў Riftn Pay, токены прыбудуць прыкладна праз хвіліну",
     "dmSent": "Адпраўлена {{amount}} токены карыстальніку {{name}}!",
+    "addMessage": "Дадаць паведамленне (неабавязкова)",
     "messagePublic": "Публічна",
     "railTitle": "Парады",
     "railTotal": "{{amount}} токенаў",
@@ -2238,6 +2239,8 @@
       "likes": "Лайкі"
     },
     "likedPosts": {
+      "emptyTitle": "Пакуль няма лайкаў",
+      "privateTitle": "Лайкі схаваныя",
       "loadMore": "Загрузіць яшчэ"
     },
     "dislikes": {
@@ -2262,6 +2265,9 @@
     "sortLikes": "Прыкметы",
     "sortMostLiked": "Найбольшая папулярнасць",
     "sortCustomShort": "Прыстасаваныя",
+    "arrange": {
+      "saving": "Захаванне..."
+    },
     "searchThisChannel": "Пошук у гэтым канале",
     "searchResultCount": "1 вынік для \"{{query}}\"",
     "searchResultCountPlural": "{{count}} вынікаў для \"{{query}}\""
@@ -6246,7 +6252,9 @@
   "nftMarket": {
     "actAll": "Усе",
     "actListings": "Аб'явы",
+    "actOffer": "Прапановы",
     "actOffers": "Прапановы",
+    "actSales": "Продажы",
     "tabActivity": "Актыўнасць",
     "shortTitle": "NFT",
     "filters": "Фільтры",
@@ -6753,8 +6761,12 @@
       "image": "Малюнак",
       "camera": "Камера",
       "show": "Паказаць на стрымінге",
+      "loop": "Цыкл",
       "positions": {
         "center": "Цэнтраваць"
+      },
+      "sizes": {
+        "medium": "Сярэдняя"
       },
       "shapes": {
         "circle": "Круг",
@@ -7741,6 +7753,7 @@
     "footerNote": "Удзел DePin - гэта сэрвіс ўнеску, а не інвестыцыйны прадукт. Даступнасць, прыдатнасць і награды могуць змяніцца."
   },
   "creatorFlow": {
+    "newNativeFlow": "Новы паток",
     "disconnect": "Адключыць",
     "title": "Стваральнік патоку",
     "backToStudio": "Вернуцца да Creator Studio",
@@ -9343,7 +9356,8 @@
       "textSaved": "Змены надпісаў захаваныя.",
       "action": "Аўтасубтытры",
       "styles": {
-        "bold": "Цяжкі шрыфт"
+        "bold": "Цяжкі шрыфт",
+        "serif": "Серфінг"
       },
       "working": "Слухаем… {{percent}}%",
       "downloading": "Рыхтуем мадэль маўлення… {{percent}}%",
@@ -10724,6 +10738,9 @@
       "zoomIn": "Палатно маштабавання ў",
       "zoomOut": "Палатно павелічэння"
     },
+    "clipFix": {
+      "listening": "Слухаю…"
+    },
     "shortcuts": {
       "action": {
         "split": "Падзяліць",
@@ -10734,7 +10751,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Спыніць запіс"
+      "stop": "Спыніць запіс",
+      "failed": "Азвучка не ўдалася."
     },
     "linkImport": {
       "go": "Імпартаваць",
@@ -19259,8 +19277,10 @@
       "gaming": "Азартныя гульні",
       "crypto": "Крыпта",
       "sports": "Спорт",
+      "comedy": "Камедыя",
       "film": "Фільм",
       "podcast": "Падкаст",
+      "food": "Праўда",
       "news": "Новыя навіны",
       "science": "Навука"
     },
@@ -19271,6 +19291,7 @@
   "appTokens": {
     "title": "Вашы токены",
     "history": "Гісторыя",
+    "noHistory": "Актыўнасці пакуль няма",
     "kindDeposit": "Папоўніць",
     "to": "Да",
     "amount": "Сума",
@@ -19300,6 +19321,7 @@
     "notNow": "Не зараз"
   },
   "postStats": {
+    "audience": "Аўдыторыя",
     "engagement": "Узаемадзеянне",
     "finished": "Завершана",
     "members": "Удзельнікі",
@@ -19388,6 +19410,7 @@
   "dmSchedule": {
     "view": "Прагляд",
     "edit": "Правка",
+    "editLabel": "Рэдагаваць паведамленне",
     "error": "Гэта не спрацавала. Паспрабуй яшчэ раз."
   },
   "spaces": {

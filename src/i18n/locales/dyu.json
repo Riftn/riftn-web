@@ -1206,6 +1206,7 @@
     "payDirectNoName": "A ci ka taga danbaga fɛ {{symbol}} on {{chain}}.",
     "payViaBridgeDpay": "O kɔ, a ye wari di a ma. A ye wari di a ma.",
     "dmSent": "{{amount}} o ye koo ɲuman ye. cira {{name}} ma!",
+    "addMessage": "N'i ye mɔgɔ dɔ weele ka na i ka soo, i ka kan ka taga n'a ye",
     "messagePublic": "Bɛɛ ye",
     "railTitle": "Bonyaw",
     "railTotal": "{{amount}} o ye koo ɲuman ye.",
@@ -2205,6 +2206,8 @@
       "likes": "Diyanyew"
     },
     "likedPosts": {
+      "emptyTitle": "Diyanye si tɛ yen fɔlɔ",
+      "privateTitle": "Diyanyew ye gundo ye",
       "loadMore": "Caman wɛrɛ lajɛ"
     },
     "dislikes": {
@@ -2229,6 +2232,9 @@
     "sortLikes": "Diyanyew",
     "sortMostLiked": "A ka di ne ye kosɔbɛ",
     "sortCustomShort": "Fɛɛn minw ka teli ka kɛ",
+    "arrange": {
+      "saving": "A bɛ mara..."
+    },
     "searchThisChannel": "Ka tɛmɛ o kan",
     "searchResultCount": "1 ka sɔrɔ \"{{query}}\""
   },
@@ -6158,6 +6164,7 @@
     "actAll": "Bɛɛ",
     "actListings": "Feeretaw",
     "actOffers": "Sɔrɔli fɛɛrɛw",
+    "actSales": "Sanni u ka feere",
     "tabActivity": "Kɛwaliw",
     "shortTitle": "NFTs",
     "filters": "Filters",
@@ -6640,8 +6647,12 @@
       "image": "O ye ɲɛyirali ye",
       "camera": "Kamara - kala lagaw ya",
       "show": "Ka to ka to ka filɛli kɛ",
+      "loop": "O ye n' ka miiriya ye.",
       "positions": {
         "center": "Cɛmancɛ"
+      },
+      "sizes": {
+        "medium": "Cɛmancɛ"
       },
       "shapes": {
         "circle": "Kori",
@@ -10605,6 +10616,9 @@
       "zoomIn": "O kɔ, a ye n' ka soow lɔ.",
       "zoomOut": "O kɔ, a ye sira di a ma."
     },
+    "clipFix": {
+      "listening": "A y'a fɔ ko:"
+    },
     "shortcuts": {
       "action": {
         "split": "A tila",
@@ -10618,7 +10632,8 @@
       "label": "Yodm 3D ka miiriya"
     },
     "voiceClone": {
-      "stop": "Kan mara jɔ"
+      "stop": "Kan mara jɔ",
+      "failed": "O kɔ, u y'a fɔ ko: \"Aw ye mɛnni kɛ ne fɛ."
     },
     "linkImport": {
       "go": "Ka don",
@@ -10739,7 +10754,6 @@
     "totalTipsDesc": "O la, a be se ka kɛ ko a ye ladili caaman sɔrɔ a ka site web kɔnɔ.",
     "listFractionsDesc": "N'i ye yɔrɔ dɔ ta, i be se k'o feere a sɔngɔ la (ka kɛɲɛ ni a ka fɔta ye). O kɔ, mɔgɔ wɛrɛw be se k'i ka yɔrɔ kofɔlenw san.",
     "dhbToken": "Riftn Tokens ka koo",
-    "dhbTokenDesc": "O ye Riftn ka tagamasiɲɛ ye. o ye koo ɲuman ye. ye Riftn ka tagamasiɲɛw tagamasiɲɛ ye. O ye ka baara kɛ ni kunnafoniw ye, ka baara kɛ ni kunnafoniw ye ani ka baara kɛ ni kunnafoniw ye.",
     "walletDesc": "I ka wari-bɔrɔ blockchain kan, min bɛ i ka Riftn tokɛnw ni kripto nafolo wɛrɛw mara. A bɛ siri Web3Auth fɛ walasa a donni ka nɔgɔya.",
     "stakingDesc": "I ka Riftn ka tagamasiɲɛw datugu walisa ka sara sɔrɔ wagati tɛmɛnin na. O b'a to i be se ka fanga sɔrɔ ka tɛmɛ fɔlɔ kan.",
     "governanceDesc": "O kama, a ka ɲi ka kuma ni mɔgɔ wɛrɛw ye. I ka vote fanga be bonya i ka Riftn ka siginindenw fɛ.",
@@ -13310,7 +13324,6 @@
     "9f83d1d03403": "O ⚡ ye fɛɛrɛ dɔ ye min be se k'a yira n'i ye miiriya dɔ kalan 3D kɔnɔ.",
     "9fc4fcabe3ce": "Jaabili tɛ",
     "9fca41678ade": "Max {{value1}} n'a ka ladili jaayaw",
-    "9fd0c1b98d0a": "Sariya min bɛ se ka kɛ, o ye {{value1}} o ye koo ɲuman ye. ye",
     "9ff2df0a6bb4": "Baara ɲinini tora ({{value1}}). A kɛlɛcɛ ka baara kura kɛ fɔlɔ ka a daminɛ tugun.",
     "a000e0071926": "Mini apps ani fɛɛrɛw lɔ",
     "a01190768ce6": "Platform stats kɔnɔna",
@@ -13513,7 +13526,6 @@
     "b9a8a19200c1": "Mɔgɔ minw be baara kɛ ni barisa ye, olu ka ɲi ka ladili ɲumanw di u ma.",
     "b9ad04e957c4": "{{value1}}tier hold {{value2}}. Add {{value3}} to add another.",
     "b9dd5e4e9c87": "{{value1}} tɛ wasa {{value2}} kan. {{value3}} {{value1}} bɛ aw ka wari bɔrɔ la; nin sarali bɛ {{value4}} {{value1}} de fɛ. Wari wɛrɛ walima hakɛ dɔgɔman sugandi.",
-    "ba0ad677202d": "O ye {{value1}}o ye koo ɲuman ye. ye nka o ye {{value2}}o ye koo ɲuman ye. ye",
     "ba2039a4cf69": "O ye jamana ye",
     "ba8fde9c4317": "O la, a tɛ se ka kɛ ko a ye fɛɛrɛ dɔ sɔrɔ min be se ka kɛ.",
     "baab4ef90c38": "O kɔ, n' ye n ka dɔnkiligafe kura dɔ lajɛ min be weele ko: \"Digital Art Collection\".",
@@ -15944,7 +15956,6 @@
     "23cc49836f60": "Go live on Riftn",
     "ce39b97c0f94": "Stream i ka browser, i ka phone walima OBS fɛ, ni kan-fɛnw, kan-fɛn-fɛnw ani camera looks bɛ kɔnɔ. Tips bɛ se i ka wallet kɔnɔ i bɛ olu san — follower threshold tɛ, payout cycle tɛ, ani wallet tɛ mɔgɔ fɛ ka daminɛ.",
     "efc85ecfd402": "Open Riftn",
-    "dbc468a14b60": "Ɲininkali minnu bɛ kɛ tuma caman",
     "1e5b36078e37": "Related guides",
     "95f48da59b9a": "Saan 2026 la, u bena tɛmɛ fɛɛrɛ ɲumanw fɛ ka mɔgɔw lasun ka kumaɲɔgɔnya kɛ ni ɲɔgɔn ye",
     "89ec0bb81771": "Sini ka koo",
@@ -18993,7 +19004,6 @@
     "orContinueWith": "walima ka tɛmɛ ni",
     "phone": "Foun foun fé",
     "email": "Email",
-    "fingerprint": "Fanga be mɔgɔ minw na, olu ka kan ka kɛ",
     "exploreFirst": "Fɔlɔ ka ɲinini kɛ",
     "codeNote": "An bɛ code ci i ma email fɛ, password tɛ ɲininka."
   },
@@ -19064,6 +19074,7 @@
       "sports": "Fɔli",
       "film": "Fim",
       "podcast": "A be se ka kɛ podcast ye",
+      "food": "Dunjɛn",
       "news": "Nwis",
       "science": "Lɔnniya"
     },
@@ -19074,6 +19085,7 @@
   "appTokens": {
     "title": "Awọn tokens rẹ",
     "history": "Tariku",
+    "noHistory": "Baara tɛ yen tugun",
     "kindDeposit": "Wari don",
     "to": "Ka",
     "amount": "Hakɛ",
@@ -19103,6 +19115,7 @@
     "notNow": "O ma kɛ halibi."
   },
   "postStats": {
+    "audience": "Mɔgɔ minw tun be lamɛnni kɛra",
     "engagement": "Jɛɲɔgɔnya",
     "finished": "A banna",
     "members": "Jɛkulu mɔgɔw",
@@ -19189,6 +19202,7 @@
   "dmSchedule": {
     "view": "A filɛ",
     "edit": "Yɛlɛma",
+    "editLabel": "Ladili labɛn",
     "error": "N'i ma siran, o be yɛlɛma ka kɛ ten."
   }
 }

@@ -1231,6 +1231,7 @@
     "payDirectNoName": "সরাসরি ক্রিয়াকলাপকারীকে পাঠানো হয় {{symbol}} এ পাঠানো হয় {{chain}}। কোন স্বাপ।",
     "payViaBridgeDpay": "Base-এ move করিয়া Riftn Pay-কে payment করা হইয়েচে, token প্রায় এক মিনিটের ভিতর আসিবো",
     "dmSent": "{{name}} রে {{amount}} টোকেন পাঠাই দিয়ে!",
+    "addMessage": "একটি মেসেজ যোগ করুন (বিকল্প)",
     "messagePublic": "পাবলিক",
     "railTitle": "টিপস",
     "railTotal": "{{amount}} টোকেন",
@@ -2272,6 +2273,8 @@
       "likes": "লাইক"
     },
     "likedPosts": {
+      "emptyTitle": "এহনো কোনো লাইক নাই",
+      "privateTitle": "লাইক প্রাইভেট",
       "loadMore": "আরো লোড কর"
     },
     "dislikes": {
@@ -2296,6 +2299,9 @@
     "sortLikes": "পছন্দ",
     "sortMostLiked": "মোস্ট লাইকড",
     "sortCustomShort": "কাস্টম",
+    "arrange": {
+      "saving": "সংরক্ষণ অর…"
+    },
     "searchThisChannel": "চ্যানেল খুঁজে পেতে",
     "searchResultCount": "১টি ফলাফল পাওয়া গেলো \"{{query}}\"",
     "searchResultCountPlural": "{{count}} রেজাল্ট পাওয়া গেছে \" {{query}}\"",
@@ -6225,7 +6231,9 @@
   "nftMarket": {
     "actAll": "সব",
     "actListings": "তালিকা",
+    "actOffer": "অফার",
     "actOffers": "অফার",
+    "actSales": "বিক্রয়",
     "tabActivity": "কার্যকলাপ",
     "shortTitle": "NFT",
     "filters": "ফিল্টার",
@@ -6713,8 +6721,12 @@
       "image": "ইমেজ",
       "camera": "ক্যামেরা",
       "show": "স্ট্রিমে দেখান",
+      "loop": "চক্র",
       "positions": {
         "center": "সেন্টার"
+      },
+      "sizes": {
+        "medium": "মাঝারি"
       },
       "shapes": {
         "circle": "বৃত্ত",
@@ -7684,6 +7696,7 @@
     "footerNote": "ডিপিন অংশগ্রহণ হচ্ছে একটি অবদান পরিষেবা, নন একটি বিনিয়োগ পণ্য। উপলব্ধতা, যোগ্যতা এবং পুরস্কার পরিবর্তন হতে পারে।"
   },
   "creatorFlow": {
+    "newNativeFlow": "নতুন flow",
     "disconnect": "ডিসকানেক্ট করুন",
     "title": "ক্রিয়েটর ফ্লো",
     "backToStudio": "Creator Studio এ ফিরুন",
@@ -9275,7 +9288,8 @@
       "textSaved": "ক্যাপশন পরিবর্তন সফল হয়ে গেলো।",
       "action": "অটো ক্যাপশন",
       "styles": {
-        "bold": "বোল্ড"
+        "bold": "বোল্ড",
+        "serif": "সেরিফ"
       },
       "working": "শুনছে… {{percent}}%",
       "downloading": "স্পিচ মডেল প্রস্তুত করা হচ্ছে… {{percent}}%",
@@ -10657,6 +10671,9 @@
       "zoomIn": "ক্যানভাস জুম ইন",
       "zoomOut": "ক্যানভাস জুম আউট"
     },
+    "clipFix": {
+      "listening": "শুনছি…"
+    },
     "shortcuts": {
       "action": {
         "split": "ভাগ গরো",
@@ -10670,7 +10687,8 @@
       "label": "৩ডি"
     },
     "voiceClone": {
-      "stop": "রেকর্ডিং বন্ধ করুন"
+      "stop": "রেকর্ডিং বন্ধ করুন",
+      "failed": "ভয়েস ক্লোনিং ব্যর্থ"
     },
     "linkImport": {
       "go": "আমদানি",
@@ -14563,6 +14581,7 @@
     "2d700ab23246": "পরিমাণ লিখুন",
     "1c5ccbd708df": "উপহার পাঠান",
     "1dffe3aad33c": "টোকেন কিনুন",
+    "0a12b92ce789": "এখনো কোন কামকাজ নাই",
     "9b8b53102e77": "বয়স্কর কনটেন্ট",
     "7bc2840ca04d": "দেখুন যেমন চাই",
     "813c8951972c": "(বন্ধ)",
@@ -14883,6 +14902,7 @@
     "df12b8f89b61": "ক্রিপ্টো",
     "24f52bfeb8a8": "মোট (ডলার)",
     "9e9ae626652a": "লেটার, নম্বর, ড্যাশ ও আন্ডারস্কোর। ম্যাক্সিমাম ৩০ টি অক্ষর।",
+    "dc85af8f2b1d": "সংরক্ষণ অর…",
     "08b6a3efc2b5": "Phantom",
     "8f1aa08d3a21": "টাইপ করুন খুঁজে পেতে ব্যবহারকারী",
     "3457098e7042": "তোমার পিছনে",
@@ -18815,8 +18835,10 @@
       "gaming": "গেমিং",
       "crypto": "ক্রিপ্টো",
       "sports": "খেলা",
+      "comedy": "কমেডি",
       "film": "চলচ্চিত্র",
       "podcast": "পডকাস্ট",
+      "food": "খাদ্য",
       "news": "নিউজ",
       "science": "বিজ্ঞান"
     },
@@ -18827,6 +18849,7 @@
   "appTokens": {
     "title": "আপনার টোকেন",
     "history": "ইতিহাস",
+    "noHistory": "এখনো কোন কামকাজ নাই",
     "kindDeposit": "জমা করো",
     "to": "তো",
     "amount": "পরিমাণ",
@@ -18856,6 +18879,7 @@
     "notNow": "এখন না।"
   },
   "postStats": {
+    "audience": "অডিয়েন্স",
     "engagement": "এনগেজমেন্ট",
     "finished": "শেষ",
     "members": "সদস্যরা",
@@ -18937,6 +18961,7 @@
   "dmSchedule": {
     "view": "দেখুন",
     "edit": "সম্পাদনা",
+    "editLabel": "সংশোধন করুন",
     "error": "এটি কাজ করেনি। আবার চেষ্টা করুন।"
   },
   "post": {

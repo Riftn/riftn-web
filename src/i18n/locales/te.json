@@ -1222,6 +1222,7 @@
     "payDirectNoName": "{{chain}}పై {{symbol}} రూపంలో నేరుగా క్రియేటర్‌కు పంపబడింది. మార్పిడి లేదు.",
     "payViaBridgeDpay": "Base కు తరలించబడింది మరియు Riftn Pay కు చెల్లించబడింది, tokens సుమారు ఒక నిమిషంలో వస్తాయి",
     "dmSent": "{{name}} కు {{amount}} టోకెన్లు పంపబడింది!",
+    "addMessage": "సమాచారం (ఎంపిక)",
     "messagePublic": "పబ్లిక్",
     "railTitle": "చిట్కాలు",
     "railTotal": "{{amount}} టోకెన్లు",
@@ -2220,6 +2221,8 @@
       "likes": "లైక్‌లు"
     },
     "likedPosts": {
+      "emptyTitle": "ఇంకా లైక్‌లు లేవు",
+      "privateTitle": "లైక్‌లు ప్రైవేట్",
       "loadMore": "మరిన్ని లోడ్ చేయి"
     },
     "dislikes": {
@@ -2244,6 +2247,9 @@
     "sortLikes": "ఇష్టాలు",
     "sortMostLiked": "ఎక్కువగా ఇష్టపడ్డారు",
     "sortCustomShort": "కస్టమ్",
+    "arrange": {
+      "saving": "సేవ్ అవుతోంది..."
+    },
     "searchThisChannel": "ఈ ఛానెల్ ‌ ను శోధించండి",
     "searchResultCount": "\"{{query}}\" కోసం 1 ఫలితం",
     "searchResultCountPlural": "{{count}} \"{{query}}\" కోసం ఫలితాలు"
@@ -6227,7 +6233,9 @@
   "nftMarket": {
     "actAll": "అన్నీ",
     "actListings": "జాబితాలు",
+    "actOffer": "ప్రతిపాదన",
     "actOffers": "ఆఫర్‌లు",
+    "actSales": "విక్రయాలు",
     "tabActivity": "కార్యాచరణ",
     "shortTitle": "ఎన్‌ఎఫ్‌టీలు (NFTs)",
     "filters": "ఫిల్టర్లు",
@@ -6727,8 +6735,12 @@
       "image": "చిత్రం",
       "camera": "కెమెరా",
       "show": "స్ట్రీమ్ ‌ లో చూపించండి",
+      "loop": "లూప్",
       "positions": {
         "center": "కేంద్రం"
+      },
+      "sizes": {
+        "medium": "మధ్యస్థం"
       },
       "shapes": {
         "circle": "వృత్తం",
@@ -7715,6 +7727,7 @@
     "footerNote": "DePin భాగస్వామ్యత కంట్రిబ్యూషన్ సేవ, పెట్టుబడి ఉత్పత్తి కాదు. లభ్యత, అర్హత మరియు రిోవార్డ్‌లు మారవచ్చు."
   },
   "creatorFlow": {
+    "newNativeFlow": "కొత్త ఫ్లో",
     "disconnect": "డిస్‌కనెక్ట్ చేయి",
     "title": "క్రియేటర్ ఫ్లో",
     "backToStudio": "క్రియేటర్ స్టూడియోకి తిరిగి వెళ్ళు",
@@ -9316,7 +9329,8 @@
       "textSaved": "క్యాప్షన్ మార్పులు సేవ్ చేయబడ్డాయి.",
       "action": "ఆటో క్యాప్షన్లు",
       "styles": {
-        "bold": "బోల్డ్"
+        "bold": "బోల్డ్",
+        "serif": "సెరిఫ్"
       },
       "working": "వింటోంది… {{percent}}%",
       "downloading": "స్పీచ్ మోడల్‌ను సిద్ధం చేస్తోంది… {{percent}}%",
@@ -10697,6 +10711,9 @@
       "zoomIn": "లో జూమ్ కాన్వాస్",
       "zoomOut": "జూమ్ కాన్వాస్ అవుట్"
     },
+    "clipFix": {
+      "listening": "వింటున్నాను…"
+    },
     "shortcuts": {
       "action": {
         "split": "విభజించు",
@@ -10707,7 +10724,8 @@
       }
     },
     "voiceClone": {
-      "stop": "రికార్డింగ్ ఆపు"
+      "stop": "రికార్డింగ్ ఆపు",
+      "failed": "వోయిస్ క్లోనింగ్ వైఫల్యం."
     },
     "linkImport": {
       "go": "దిగుమతి",
@@ -19258,8 +19276,10 @@
       "gaming": "గేమింగ్",
       "crypto": "క్రిప్టో",
       "sports": "క్రీడ",
+      "comedy": "కామెడీ",
       "film": "ఫిల్మ్",
       "podcast": "పోడ్ ‌ కాస్ట్",
+      "food": "ఆహారం",
       "news": "వార్తలు",
       "science": "విజ్ఞానశాస్త్రం"
     },
@@ -19270,6 +19290,7 @@
   "appTokens": {
     "title": "మీ టోకెన్లు",
     "history": "చరిత్ర",
+    "noHistory": "ఇంకా యాక్టివిటీ లేదు",
     "kindDeposit": "ఫండ్స్ జోడించు",
     "to": "వరకు",
     "amount": "మొత్తం",
@@ -19299,6 +19320,7 @@
     "notNow": "ఇప్పుడే కాదు"
   },
   "postStats": {
+    "audience": "ప్రేక్షకులు",
     "engagement": "ఎంగేజ్‌మెంట్",
     "finished": "ముగిసింది",
     "members": "సభ్యులు",
@@ -19386,6 +19408,7 @@
   "dmSchedule": {
     "view": "చూడు",
     "edit": "సవరించండి",
+    "editLabel": "సందేశాన్ని సవరించండి",
     "error": "అది పనిచేయలేదు. మళ్లీ ప్రయత్నించండి."
   }
 }

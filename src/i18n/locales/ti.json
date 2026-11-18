@@ -1208,6 +1208,7 @@
     "payDirectNoName": "ብ{{symbol}} ኣብ {{chain}} ብቐጥታ ናብቲ ፈጣሪ ይለኣኽ። ምልዋጥ የለን።",
     "payViaBridgeDpay": "ናብ መሰረታ ብምስጓምን ን Riftn Pay ብምኽፋል ፡ ምልክታት ኣብ ውሽጢ ሓደ ደቒቕ ይመጽእ",
     "dmSent": "{{amount}} ምልክታት ን{{name}} ተሰዲዱ!",
+    "addMessage": "መልእክት ያክሉ (ምርጫ)",
     "messagePublic": "ህዝባዊ",
     "railTitle": "ምኽሪ",
     "railTotal": "{{amount}} ቶክንስ",
@@ -2195,6 +2196,8 @@
       "likes": "ምቕባል"
     },
     "likedPosts": {
+      "emptyTitle": "ገና ምፍታው የለን",
+      "privateTitle": "ምፍታዋት ብሕታዊ እዮም",
       "loadMore": "ዝያዳ ጽዓን"
     },
     "dislikes": {
@@ -2219,6 +2222,9 @@
     "sortLikes": "ፍቕሪታት",
     "sortMostLiked": "ዝፈትዎ",
     "sortCustomShort": "ሙላዊ",
+    "arrange": {
+      "saving": "ይዕቀብ ኣሎ..."
+    },
     "searchThisChannel": "ነዚ ቻነል እዚ መርምር",
     "searchResultCount": "1 ውጽኢት \"{{query}}\""
   },
@@ -6178,7 +6184,9 @@
   "nftMarket": {
     "actAll": "ኩሉ",
     "actListings": "ዝርዝራት",
+    "actOffer": "ሀሳብ",
     "actOffers": "ቅርቡታት",
+    "actSales": "ሽያጭ",
     "tabActivity": "ንጥፈት",
     "shortTitle": "ንፍቲ አርቲፍሊክስ",
     "filters": "ስርዓት",
@@ -6663,8 +6671,12 @@
       "image": "ስእሊ",
       "camera": "ካሜራ",
       "show": "ኣብ ስትሪም ኣርኢ",
+      "loop": "ሉፕ",
       "positions": {
         "center": "ማእከል"
+      },
+      "sizes": {
+        "medium": "ማእከላይ"
       },
       "shapes": {
         "circle": "ክቢ",
@@ -7648,6 +7660,7 @@
     "footerNote": "ተሳትፎ DePin ናይ ኣበርክቶ ኣገልግሎት እምበር ናይ ኢንቨስትመንት ፍርያት ኣይኮነን ። ተደራሽነት ፡ ብቕዓትን ዓስቢን ኪቕየር ይኽእል እዩ ።"
   },
   "creatorFlow": {
+    "newNativeFlow": "ሓድሽ ፍሰት",
     "disconnect": "ምጥፋእ",
     "title": "ፈጣሪ ፍሰት",
     "backToStudio": "ተመሊስ ናብ ፈጣሪ ስቱዲዮ",
@@ -9247,7 +9260,8 @@
       "textSaved": "ናይ ምትዕርራይ ምትዕርራይ ።",
       "action": "ኣውቶማቲክ ንኡስ ጽሑፋት",
       "styles": {
-        "bold": "ቦልድ"
+        "bold": "ቦልድ",
+        "serif": "ሰርፊፍ"
       },
       "working": "ይሰምዕ ኣሎ… {{percent}}%",
       "downloading": "ሞዴል ዘረባ ይዳሎ ኣሎ… {{percent}}%",
@@ -10628,6 +10642,9 @@
       "zoomIn": "ካንቫስ ኣጉልሕ",
       "zoomOut": "ካንቫስ ኣንእስ"
     },
+    "clipFix": {
+      "listening": "ስማዕን ኣጽኒዕካን..."
+    },
     "shortcuts": {
       "action": {
         "split": "ምምቃል",
@@ -10638,7 +10655,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ምቕዳሕ ኣቋርጽ"
+      "stop": "ምቕዳሕ ኣቋርጽ",
+      "failed": "ናይ ድምጺ ምቕዳሕ (Voice cloning) ተሳኒዩ።"
     },
     "linkImport": {
       "go": "ኣእቱ",
@@ -19130,8 +19148,10 @@
       "gaming": "ጸወታ",
       "crypto": "ክሪፕቶ",
       "sports": "ስፖርት",
+      "comedy": "ኮሜዲ",
       "film": "ፊልም",
       "podcast": "ፖድካስት",
+      "food": "መግቢ",
       "news": "ዜና",
       "science": "ስነ ፍልጠት"
     },
@@ -19142,6 +19162,7 @@
   "appTokens": {
     "title": "ቶክንኩም",
     "history": "ታሪኽ",
+    "noHistory": "ክሳብ ሕጂ ዝኾነ ንጥፈት የለን ።",
     "kindDeposit": "ኣቐምጥ",
     "to": "ናብ",
     "amount": "መጠን",
@@ -19171,6 +19192,7 @@
     "notNow": "ሕጂ ኣይኮነን"
   },
   "postStats": {
+    "audience": "ተዓዘብቲ",
     "engagement": "ተሳትፎ",
     "finished": "ተወዲኡ",
     "members": "ኣባላት",
@@ -19258,6 +19280,7 @@
   "dmSchedule": {
     "view": "ርአ",
     "edit": "ኣዐሪ",
+    "editLabel": "መልእኽቲ ኣዐሪ",
     "error": "በጃኻ ኣይትጨነቕ ፡ ከም'ዚ... እንደገና ይዞር ኣሎ ።"
   }
 }

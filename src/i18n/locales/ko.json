@@ -1289,6 +1289,7 @@
     "payDirectNoName": "{{chain}}의 {{symbol}}(으)로 크리에이터에게 바로 전송됩니다. 스왑 없음.",
     "payViaBridgeDpay": "Base로 이동하여 Riftn Pay로 결제됨, 토큰은 약 1분 후에 도착",
     "dmSent": "{{name}}님에게 {{amount}} DHB를 보냈어요!",
+    "addMessage": "메시지 추가 (선택 사항)",
     "messagePublic": "공개",
     "railTitle": "팁",
     "railTotal": "{{amount}} 토큰",
@@ -2327,6 +2328,9 @@
     "sortLikes": "좋아요",
     "sortMostLiked": "가장 많이 좋아요",
     "sortCustomShort": "커스텀",
+    "arrange": {
+      "saving": "저장 중..."
+    },
     "searchThisChannel": "채널 검색",
     "searchResultCount": "1 개 결과 {{query}}",
     "searchResultCountPlural": "{{count}} 개 결과 {{query}}"
@@ -6327,7 +6331,9 @@
   "nftMarket": {
     "actAll": "전체",
     "actListings": "등록 상품",
+    "actOffer": "제안",
     "actOffers": "제안",
+    "actSales": "판매",
     "tabActivity": "활동",
     "shortTitle": "NFT",
     "filters": "필터",
@@ -6830,11 +6836,13 @@
       "image": "이미지",
       "camera": "카메라",
       "show": "스트림에 표시",
+      "loop": "루프",
       "positions": {
         "center": "센터"
       },
       "sizes": {
         "small": "작게",
+        "medium": "보통",
         "large": "크게"
       },
       "shapes": {
@@ -7822,6 +7830,7 @@
     "footerNote": "DePin 참여는 투자 상품이 아닌 기부 서비스입니다. 이용 가능 여부, 자격 및 보너스는 변경될 수 있습니다."
   },
   "creatorFlow": {
+    "newNativeFlow": "새 플로우",
     "disconnect": "분리",
     "title": "크리에이터 플로우",
     "backToStudio": "Creator Studio로 돌아가기",
@@ -9430,7 +9439,8 @@
       "textSaved": "자막 변경 사항이 저장되었습니다.",
       "action": "자동 자막",
       "styles": {
-        "bold": "굵게"
+        "bold": "굵게",
+        "serif": "세리프"
       },
       "working": "듣는 중… {{percent}}%",
       "downloading": "음성 모델 준비 중… {{percent}}%",
@@ -10812,6 +10822,9 @@
       "zoomIn": "캔버스 확대/축소",
       "zoomOut": "캔버스 축소"
     },
+    "clipFix": {
+      "listening": "듣는 중…"
+    },
     "shortcuts": {
       "action": {
         "split": "분할",
@@ -10822,7 +10835,8 @@
       }
     },
     "voiceClone": {
-      "stop": "녹음 중지"
+      "stop": "녹음 중지",
+      "failed": "음성 클로닝이 실패했습니다."
     },
     "linkImport": {
       "go": "가져오기",
@@ -19349,8 +19363,10 @@
       "gaming": "게임",
       "crypto": "암호화폐",
       "sports": "스포츠",
+      "comedy": "코미디",
       "film": "필름",
       "podcast": "팟캐스트",
+      "food": "음식",
       "news": "뉴스",
       "science": "과학"
     },
@@ -19361,6 +19377,7 @@
   "appTokens": {
     "title": "내 토큰",
     "history": "기록",
+    "noHistory": "아직 활동 없음",
     "kindDeposit": "입금",
     "to": "종료",
     "amount": "금액",
@@ -19390,6 +19407,7 @@
     "notNow": "나중에"
   },
   "postStats": {
+    "audience": "대상 그룹",
     "engagement": "참여",
     "finished": "종료됨",
     "members": "멤버",
@@ -19481,6 +19499,7 @@
   "dmSchedule": {
     "view": "보기",
     "edit": "편집",
+    "editLabel": "메시지 수정하기",
     "error": "실패했습니다. 다시 시도하세요."
   }
 }

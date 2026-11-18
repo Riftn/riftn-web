@@ -1209,6 +1209,7 @@
     "payDirectNoName": "Rasterast bi {{symbol}} li ser {{chain}} ji afirîner re tê şandin. Bê guhertin.",
     "payViaBridgeDpay": "Hat veguhastin bo Base û ji Riftn Pay re hat dayîn, token di nêzîkî xulekekê de digihîjin",
     "dmSent": "{{amount}} token ji {{name}} re hatin şandin!",
+    "addMessage": "Peyamekê zêde bike (vebijarkî)",
     "messagePublic": "Giştî",
     "railTitle": "Bexşîş",
     "railTotal": "{{amount}} token",
@@ -2208,6 +2209,8 @@
       "likes": "Ecibandin"
     },
     "likedPosts": {
+      "emptyTitle": "Hêj ecibandin tune",
+      "privateTitle": "Ecibandin taybet in",
       "loadMore": "Zêdetir bar bike"
     },
     "dislikes": {
@@ -2232,6 +2235,9 @@
     "sortLikes": "Ecibandin",
     "sortMostLiked": "Herî zêde ecibandî",
     "sortCustomShort": "Taybetkirî",
+    "arrange": {
+      "saving": "Tê tomarkirin..."
+    },
     "searchThisChannel": "Li vê kanalê bigere",
     "searchResultCount": "1 encam ji bo \"{{query}}\"",
     "searchResultCountPlural": "{{count}} encam ji bo \"{{query}}\""
@@ -6441,7 +6447,9 @@
   "nftMarket": {
     "actAll": "Hemû",
     "actListings": "Lîste",
+    "actOffer": "Ofiser",
     "actOffers": "Pêşniyar",
+    "actSales": "Firotîn",
     "tabActivity": "Çalakî",
     "shortTitle": "NFT",
     "filters": "Filtre",
@@ -6950,6 +6958,9 @@
       "loop": "Dubarekirin",
       "positions": {
         "center": "Navend"
+      },
+      "sizes": {
+        "medium": "Navîn"
       },
       "shapes": {
         "circle": "Çember",
@@ -7958,6 +7969,7 @@
     "footerNote": "Beşdariya DePin xizmeteke beşdariyê ye, ne berhemeke veberhênanê ye. Berdestî, mafdarî û xelat dikarin biguherin."
   },
   "creatorFlow": {
+    "newNativeFlow": "Herikîna nû",
     "disconnect": "Girêdanê qut bike",
     "title": "Herikîna Afirîneran",
     "backToStudio": "Vegere Stûdyoya Afirîneran",
@@ -10990,6 +11002,9 @@
       "zoomIn": "Kanvasê mezin bike",
       "zoomOut": "Kanvasê biçûk bike"
     },
+    "clipFix": {
+      "listening": "Guhdarî dike…"
+    },
     "shortcuts": {
       "action": {
         "split": "Parçe bike",
@@ -11000,7 +11015,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Tomarkirinê rawestîne"
+      "stop": "Tomarkirinê rawestîne",
+      "failed": "Klonkirina deng bi ser neket."
     },
     "linkImport": {
       "go": "Têxe",
@@ -13652,7 +13668,6 @@
     "930f3956e9cd": "Berî çêkirina pozîsyonekê, berîka ku ev bermayî tê de ye girê bide",
     "9321c1b7fd4e": "💾 Dengekî tomarkirî paşê li her cihê ku hilbijêrê dengan lê ye xuya dibe",
     "936ab77133ed": "USDC li ser Base têr nake",
-    "937040cd1003": "Mîrnişînên Erebî yên Yekbûyî",
     "9373bd6d5c3a": "{{value1}} Li şûna wê şîfreya berîka xwe bi kar bîne.",
     "93772dd837ca": "Dublaj li cem dabînker bi ser neket.",
     "93821eb7ce8c": "Piştrastkirina nasnameyê bi ser neket",
@@ -19168,6 +19183,7 @@
   },
   "whenSheet": {
     "today": "Îro",
+    "earlierShort": "Berê",
     "tooSoon": "Di pêşerojê de demek hilbijêre.",
     "show": "Nîşan bide",
     "hide": "Veşêre"
@@ -19208,7 +19224,9 @@
       "gaming": "Lîstik",
       "crypto": "Krîpto",
       "sports": "Werzîş",
+      "comedy": "Komedî",
       "film": "Fîlm",
+      "food": "Xwarin",
       "news": "Nûçe",
       "science": "Zanist"
     },
@@ -19219,6 +19237,7 @@
   "appTokens": {
     "title": "Tokenên te",
     "history": "Dîrok",
+    "noHistory": "Hîn çalakî tune",
     "kindDeposit": "Razîne",
     "to": "Heta",
     "amount": "Mîqdar",
@@ -19248,6 +19267,7 @@
     "notNow": "Nêzîkî"
   },
   "postStats": {
+    "audience": "Temaşevan",
     "engagement": "Beşdarî",
     "finished": "Qediya",
     "members": "Endam",
@@ -19329,6 +19349,7 @@
   "dmSchedule": {
     "view": "Bibîne",
     "edit": "Biguherîne",
+    "editLabel": "Peyamê biguherîne",
     "error": "Ew nexebitî. Dîsa biceribîne."
   }
 }

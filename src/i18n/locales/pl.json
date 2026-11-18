@@ -2271,6 +2271,9 @@
     "sortLikes": "Polubienia",
     "sortMostLiked": "Najbardziej lubiany",
     "sortCustomShort": "Niestandardowe",
+    "arrange": {
+      "saving": "Zapisywanie..."
+    },
     "searchThisChannel": "Wyszukaj na tym kanale",
     "searchResultCount": "1 wynik dla „{{query}}”",
     "searchResultCountPlural": "{{count}} wyniki dla {{query}}"
@@ -6260,7 +6263,9 @@
   "nftMarket": {
     "actAll": "Wszystkie",
     "actListings": "Ogłoszenia",
+    "actOffer": "Oferta",
     "actOffers": "Oferty",
+    "actSales": "Sprzedaż",
     "tabActivity": "Aktywność",
     "shortTitle": "NFT",
     "filters": "Filtry",
@@ -6763,11 +6768,13 @@
       "image": "Obraz",
       "camera": "Kamera",
       "show": "Pokaż w strumieniu",
+      "loop": "Pętla",
       "positions": {
         "center": "Środek"
       },
       "sizes": {
         "small": "Mały",
+        "medium": "Średnia",
         "large": "Duży"
       },
       "shapes": {
@@ -7755,6 +7762,7 @@
     "footerNote": "Uczestnictwo w DePin to usługa wkładu, a nie produkt inwestycyjny. Dostępność, uprawnienia i nagrody mogą się zmienić."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nowy przepływ",
     "disconnect": "Rozłącz",
     "title": "Creator Flow",
     "backToStudio": "Powrót do Creator Studio",
@@ -10744,6 +10752,9 @@
       "zoomIn": "Powiększ płótno",
       "zoomOut": "Pomniejsz płótno"
     },
+    "clipFix": {
+      "listening": "Słuchanie…"
+    },
     "shortcuts": {
       "action": {
         "split": "Podziel",
@@ -10754,7 +10765,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Zatrzymaj nagrywanie"
+      "stop": "Zatrzymaj nagrywanie",
+      "failed": "Klonowanie głosu nie powiodło się."
     },
     "linkImport": {
       "go": "Importuj",
@@ -19428,6 +19440,8 @@
       "gaming": "Gry",
       "crypto": "Krypto",
       "sports": "Sport",
+      "comedy": "Komedia",
+      "food": "Jedzenie",
       "news": "Wiadomości",
       "science": "Nauka"
     },
@@ -19438,6 +19452,7 @@
   "appTokens": {
     "title": "Twoje tokeny",
     "history": "Historia",
+    "noHistory": "Nie ma jeszcze aktywności",
     "kindDeposit": "Wpłać",
     "to": "Do",
     "amount": "Kwota",
@@ -19467,6 +19482,7 @@
     "notNow": "Nie teraz"
   },
   "postStats": {
+    "audience": "Odbiorcy",
     "engagement": "Zaangażowanie",
     "finished": "Zakończone",
     "members": "Członkowie",
@@ -19560,6 +19576,7 @@
   "dmSchedule": {
     "view": "Zobacz",
     "edit": "Edytuj",
+    "editLabel": "Edytuj wiadomość",
     "error": "To nie zadziałało. Spróbuj ponownie."
   }
 }

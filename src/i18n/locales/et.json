@@ -1223,6 +1223,7 @@
     "payDirectNoName": "Saadeti looja-le {{symbol}} teel {{chain}}. Vahetamist ei toimu.",
     "payViaBridgeDpay": "Liigutatud Base'i ja makstud Riftn Pay-le, märgid saabuvad umbes minuti pärast",
     "dmSent": "{{amount}} žetooni saadetud saajale {{name}}!",
+    "addMessage": "Lisa sõnum (valikuline)",
     "messagePublic": "Avalik",
     "railTitle": "Näpunäited",
     "railTotal": "{{amount}} märki",
@@ -2225,6 +2226,8 @@
       "likes": "Meeldimised"
     },
     "likedPosts": {
+      "emptyTitle": "Meeldimisi veel pole",
+      "privateTitle": "Meeldimised on privaatsed",
       "loadMore": "Laadi rohkem"
     },
     "dislikes": {
@@ -2249,6 +2252,9 @@
     "sortLikes": "Meeldib",
     "sortMostLiked": "Populaarseim",
     "sortCustomShort": "Kohandatud",
+    "arrange": {
+      "saving": "Salvestamine..."
+    },
     "searchThisChannel": "Otsi sellest kanalist",
     "searchResultCount": "1 tulemus päringule \"{{query}}\"",
     "searchResultCountPlural": "{{count}} tulemust otsingule „{{query}}“"
@@ -6236,7 +6242,9 @@
   "nftMarket": {
     "actAll": "Kõik",
     "actListings": "Kuulutused",
+    "actOffer": "Pakkumine",
     "actOffers": "Pakkumised",
+    "actSales": "Müük",
     "tabActivity": "Tegevus",
     "shortTitle": "NFTS",
     "filters": "Filtrid",
@@ -6739,8 +6747,12 @@
       "image": "Pilt",
       "camera": "Kaamera",
       "show": "Näita streamis",
+      "loop": "Silmus",
       "positions": {
         "center": "Keskel"
+      },
+      "sizes": {
+        "medium": "Keskmine"
       },
       "shapes": {
         "circle": "Ring",
@@ -7727,6 +7739,7 @@
     "footerNote": "DePin osalemine on panustamisteenuse, mitte investeerimistoote. Kättesaadavus, sobivus ja auhinnad võivad muutuda."
   },
   "creatorFlow": {
+    "newNativeFlow": "Uus voog",
     "disconnect": "Katkesta",
     "title": "Creator Flow",
     "backToStudio": "Tagasi Creator Studio'sse",
@@ -9329,7 +9342,8 @@
       "textSaved": "Pealdise muudatused on salvestatud.",
       "action": "Automaatsubtiitrid",
       "styles": {
-        "bold": "Tugev"
+        "bold": "Tugev",
+        "serif": "Kriips"
       },
       "working": "Kuulan… {{percent}}%",
       "downloading": "Kõnemudelit valmistatakse ette… {{percent}}%",
@@ -10711,6 +10725,9 @@
       "zoomIn": "Suumi lõuend sisse",
       "zoomOut": "Suumi lõuend välja"
     },
+    "clipFix": {
+      "listening": "Kuulamine..."
+    },
     "shortcuts": {
       "action": {
         "split": "Poolita",
@@ -10721,7 +10738,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Peata salvestamine"
+      "stop": "Peata salvestamine",
+      "failed": "Hääle kloonimine ebaõnnestus."
     },
     "linkImport": {
       "go": "Impordi",
@@ -19314,6 +19332,8 @@
       "gaming": "Mängimine",
       "crypto": "Krüpto",
       "sports": "Spordid",
+      "comedy": "Komöödia",
+      "food": "Toit",
       "news": "Uudised",
       "science": "Teadus"
     },
@@ -19324,6 +19344,7 @@
   "appTokens": {
     "title": "Teie märgid",
     "history": "Ajalugu",
+    "noHistory": "Tegevusi pole veel",
     "kindDeposit": "Lisa vahendeid",
     "to": "Kuni",
     "amount": "Summa",
@@ -19353,6 +19374,7 @@
     "notNow": "Mitte praegu"
   },
   "postStats": {
+    "audience": "Publik",
     "engagement": "Kaasamine",
     "finished": "Lõppenud",
     "members": "Liikmed",
@@ -19441,6 +19463,7 @@
   "dmSchedule": {
     "view": "Vaata",
     "edit": "Redigeeri",
+    "editLabel": "Muuda sõnumit",
     "error": "See ei õnnestunud. Proovi uuesti."
   }
 }

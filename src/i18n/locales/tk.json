@@ -1209,6 +1209,7 @@
     "payDirectNoName": "{{symbol}}on{{chain}}. No swap.",
     "payViaBridgeDpay": "Base-e geçirildi we Riftn Pay-e töleg, tokenler bir minut töweregi geler",
     "dmSent": "{{name}}-a {{amount}} tokenler iberildi!",
+    "addMessage": "Bir habar goş (oýlanyp görüň)",
     "messagePublic": "Açyk",
     "railTitle": "Maslahatlar",
     "railTotal": "{{amount}} token",
@@ -2211,6 +2212,8 @@
       "likes": "Halanlar"
     },
     "likedPosts": {
+      "emptyTitle": "Heniz halama ýok",
+      "privateTitle": "Halamalar gizlin",
       "loadMore": "Has köp ýükle"
     },
     "dislikes": {
@@ -2235,6 +2238,9 @@
     "sortLikes": "Gowylar",
     "sortMostLiked": "Men ony gowy görýärin",
     "sortCustomShort": "Adaty",
+    "arrange": {
+      "saving": "Saklanýar..."
+    },
     "searchThisChannel": "Bu kanala seret",
     "searchResultCount": "\"{{query}}\" üçin 1 netije",
     "searchResultCountPlural": "{{count}} \"{{query}}\" üçin netijeler"
@@ -6201,7 +6207,9 @@
   "nftMarket": {
     "actAll": "Ehli",
     "actListings": "Bildirişler",
+    "actOffer": "Teklip",
     "actOffers": "Teklipler",
+    "actSales": "Satışlar",
     "tabActivity": "Işjeňlik",
     "shortTitle": "NFT'ler",
     "filters": "Süzgüçler",
@@ -6702,6 +6710,9 @@
       "show": "Garawul diňi we Garawul diňi",
       "positions": {
         "center": "Merkezi"
+      },
+      "sizes": {
+        "medium": "Orta"
       },
       "shapes": {
         "circle": "Tegelek",
@@ -7687,6 +7698,7 @@
     "footerNote": "DePin-de gatnaşmak bir goşmaça hyzmatdyr, bir seretme mahsuly däl. Ulylyk, ukyp we sylaglar üýtgeşik bolup biler."
   },
   "creatorFlow": {
+    "newNativeFlow": "Täze akym",
     "disconnect": "Baglan",
     "title": "Dörediji akymy",
     "backToStudio": "Dörediji studiýasyna dolan",
@@ -10658,6 +10670,9 @@
       "zoomIn": "Kanvastı artıq",
       "zoomOut": "Kanvastı azaldır"
     },
+    "clipFix": {
+      "listening": "Ol şeýle diýdi:"
+    },
     "shortcuts": {
       "action": {
         "split": "Böl",
@@ -10668,7 +10683,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Ýazgyny duruzmak"
+      "stop": "Ýazgyny duruzmak",
+      "failed": "Səs klonlama uğursuz oldu."
     },
     "linkImport": {
       "go": "Import et",
@@ -19210,7 +19226,9 @@
       "gaming": "Oýunlar",
       "crypto": "Kripto",
       "sports": "Sport",
+      "comedy": "Komediýa",
       "podcast": "Podkastlar",
+      "food": "Iýmit",
       "news": "Habarlar",
       "science": "Ylym"
     },
@@ -19221,6 +19239,7 @@
   "appTokens": {
     "title": "Siziň tokenleriňiz",
     "history": "Taryh",
+    "noHistory": "Hiç bir hereket",
     "kindDeposit": "Serişde goşmak",
     "to": "Bu",
     "amount": "Mukdar",
@@ -19250,6 +19269,7 @@
     "notNow": "Häzir däl"
   },
   "postStats": {
+    "audience": "Saýlanlar",
     "engagement": "Ýerine ýetiriş",
     "finished": "Tamamlandy",
     "members": "Agzalar",
@@ -19330,6 +19350,7 @@
   "dmSchedule": {
     "view": "Görmek",
     "edit": "Tahrirlash",
+    "editLabel": "Haty Editle",
     "error": "Ol ýene-de şeýle dolanyp gelýär."
   }
 }

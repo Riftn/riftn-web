@@ -1210,6 +1210,7 @@
     "payDirectNoName": "Ezigara ya ozugbo na onye kere ya na {{symbol}} na {{chain}}. Enweghị mgbanwe.",
     "payViaBridgeDpay": "Ebugharịrị na Base ma kwụọ Riftn Pay, akara na-abịa na ihe dị ka otu nkeji",
     "dmSent": "E zigara {{name}} {{amount}} tokens!",
+    "addMessage": "Tinye ozi (nhọpụta)",
     "messagePublic": "Ọha",
     "railTitle": "Ndụmọdụ",
     "railTotal": "{{amount}} tokenịị",
@@ -2210,6 +2211,8 @@
       "likes": "Ịhụnanya"
     },
     "likedPosts": {
+      "emptyTitle": "Enweghị mmasị ugbu a",
+      "privateTitle": "Mmasị bụ nzuzo",
       "loadMore": "Bughachite ọzọ"
     },
     "dislikes": {
@@ -2234,6 +2237,9 @@
     "sortLikes": "Mmasị",
     "sortMostLiked": "Nke kacha nwee mmasị",
     "sortCustomShort": "Omenala",
+    "arrange": {
+      "saving": "Na-echekwa..."
+    },
     "searchThisChannel": "Chọọ ọwa a",
     "searchResultCount": "Nsonaazụ 1 maka \"{{query}}\"",
     "searchResultCountPlural": "Nsonaazụ {{count}} maka \"{{query}}\""
@@ -5999,31 +6005,13 @@
     "bentoTopUpCopy": "Zụta tokens site na kaadị ma ọ bụ obere akpa ego gị.",
     "exampleOutput": "Nlereanya mmepụta",
     "referenceInsert": "Nkọrọ {{tag}} nke ụlọ ụlọ",
-    "referenceLibrary": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ",
     "referenceUpload": "Budata",
-    "referenceSingle": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceHint": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ. Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ.",
-    "referenceOneClip": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceClipLength": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke MP4 ụlọ ụlọ nke MOV nke 3 ụlọ ụlọ nke 15 ụlọ ụlọ nke ụlọ ụlọ, ụlọ ụlọ nke 30 ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceFourImages": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceMultiModel": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke FLUX 3 Image",
-    "referenceNeedsClip": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceVideoModel": "Nkọrọ ụlọ ụlọ nke Character swap ụlọ ụlọ nke Copy motion nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceTooMany": "Ume ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ. Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceClipSeconds": "ụlọ ụlọ nke ụlọ ụlọ: {{seconds}}s",
-    "referenceUploadClip": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
     "characterSwap": "Character swap",
     "copyMotion": "Copy motion",
     "referenceSwapName": "Gbanwee mkpụrụedemede n 'ime klipu",
-    "referenceSwapHint": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceMotionName": "Copy motion nke ụlọ ụlọ nke ụlọ ụlọ",
-    "referenceMotionHint": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
     "referenceOutfitName": "Gbalịa a uwe na a clip",
-    "referenceOutfitHint": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
     "referenceProductName": "Tinye ngwaahịa gị n 'ime mkpachị",
-    "referenceProductHint": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
     "referenceComposeName": "Combine reference images",
-    "referenceComposeHint": "Nkọrọ ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ nke ụlọ ụlọ",
     "validation": {
       "cannotEditImage": "{{model}} enweghị ike idezi onyoonyoo agbakwunyere. Wepụ ya ma ọ bụ họrọ ụdị ọzọ.",
       "cannotUseReference": "{{model}} enweghị ike iji onyonyo ntụaka. Wepụ ya ma ọ bụ họrọ ụdị ọzọ.",
@@ -6201,7 +6189,9 @@
   "nftMarket": {
     "actAll": "Ha niile",
     "actListings": "Ndepụta",
+    "actOffer": "Nnukwu ọnụ ahịa",
     "actOffers": "Onyinye ọnụahịa",
+    "actSales": "Ahịa",
     "tabActivity": "Mmemme",
     "shortTitle": "NFTs",
     "filters": "Nchọgharị",
@@ -6708,6 +6698,9 @@
       "positions": {
         "center": "Center"
       },
+      "sizes": {
+        "medium": "Ọkara"
+      },
       "shapes": {
         "circle": "Okirikiri",
         "rect": "Akụkụ anọ"
@@ -6766,7 +6759,6 @@
     },
     "controls": {
       "title": "Njikwa ngwa ngwa",
-      "intro": "Maka n'etiti mgbasa ozi. Mgbanwe ọ bụla na-adịgide maka onye ọ bụla na-ekiri, na ngwa na na OBS, ruo mgbe ị gbanwere ya.",
       "alertsPaused": "Kwụsị alerts",
       "alertsPausedHint": "Enweghị onyinye, soro ma ọ bụ chịkwaa ịdọ aka ná ntị na ihuenyo. Counters, ihe mgbaru ọsọ na chat igbe na-aga n 'ihu.",
       "soundsMuted": "Mechie ụda ịdọ aka na ntị",
@@ -7690,6 +7682,7 @@
     "footerNote": "DePin itinye aka bụ ọrụ inye onyinye, ọ bụghị ngwaahịa itinye ego. Nnweta, iru eru na ụgwọ ọrụ nwere ike ịgbanwe."
   },
   "creatorFlow": {
+    "newNativeFlow": "Flow ọhụrụ",
     "disconnect": "Ọghọghọ",
     "title": "Onye Okike Flow",
     "backToStudio": "Lagho azụ na Creator Studio",
@@ -10674,6 +10667,9 @@
       "zoomIn": "Mkpochapụ Ọrụ Ọzọ",
       "zoomOut": "Zúùmù ákàrà pụọ"
     },
+    "clipFix": {
+      "listening": "Na-ege ntị..."
+    },
     "shortcuts": {
       "action": {
         "split": "Kewaa",
@@ -10684,7 +10680,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Kwụsị ndekọ"
+      "stop": "Kwụsị ndekọ",
+      "failed": "The cloning usoro bụ kụrụ afọ n 'ala."
     },
     "linkImport": {
       "go": "Bubata",
@@ -19236,7 +19233,9 @@
       "art": "Nka",
       "gaming": "Egwuregwu",
       "sports": "Egwuregwu",
+      "comedy": "Ihe ọchị",
       "film": "Igwe onye na ihe nkiri",
+      "food": "Nri",
       "news": "Akụkọ",
       "science": "Sayensị"
     },
@@ -19247,6 +19246,7 @@
   "appTokens": {
     "title": "Tokens gị",
     "history": "Akụkọ",
+    "noHistory": "Enweghị ọrụ ma",
     "kindDeposit": "Tụnye ego",
     "to": "Ka ọ bụ",
     "amount": "Ego",
@@ -19276,6 +19276,7 @@
     "notNow": "Ọ bụghị ugbu a"
   },
   "postStats": {
+    "audience": "Ndị na-ege ntị",
     "engagement": "Ntinye aka",
     "finished": "Emechaala",
     "members": "Ndị otu",
@@ -19364,6 +19365,7 @@
   "dmSchedule": {
     "view": "Hụ",
     "edit": "Gbanwee",
+    "editLabel": "Dezie ozi",
     "error": "Nke ahụ arụghị ọrụ. Gbalịa ọzọ."
   }
 }

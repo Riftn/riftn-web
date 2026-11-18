@@ -1224,6 +1224,7 @@
     "payDirectNoName": "Poslano direktno stvoritelju u {{symbol}} na {{chain}}. Bez zamjene.",
     "payViaBridgeDpay": "Premješteno na Base i plaćeno Riftn Payu, tokeni stižu za otprilike minutu",
     "dmSent": "Poslano {{amount}} tokena korisniku {{name}}!",
+    "addMessage": "Dodaj poruku (opcionalno)",
     "messagePublic": "Javno",
     "railTitle": "Napojnice",
     "railTotal": "{{amount}} tokena",
@@ -2226,6 +2227,8 @@
       "likes": "Sviđanja"
     },
     "likedPosts": {
+      "emptyTitle": "Još nema sviđanja",
+      "privateTitle": "Sviđanja su privatna",
       "loadMore": "Učitaj više"
     },
     "dislikes": {
@@ -2250,6 +2253,9 @@
     "sortLikes": "Sviđanja",
     "sortMostLiked": "Najviše sviđanja",
     "sortCustomShort": "Prilagođeno",
+    "arrange": {
+      "saving": "Spremanje..."
+    },
     "searchThisChannel": "Traži u ovom kanalu",
     "searchResultCount": "1 rezultat za \"{{query}}\"",
     "searchResultCountPlural": "{{count}} rezultata za \"{{query}}\""
@@ -6239,7 +6245,9 @@
   "nftMarket": {
     "actAll": "Sve",
     "actListings": "Oglasi",
+    "actOffer": "Nudimo",
     "actOffers": "Ponude",
+    "actSales": "Prodaje",
     "tabActivity": "Aktivnost",
     "shortTitle": "NFT-ovi",
     "filters": "Filtri",
@@ -6742,8 +6750,12 @@
       "image": "Slika",
       "camera": "Kamera",
       "show": "Prikaži na streamu",
+      "loop": "Petlja",
       "positions": {
         "center": "Centriraj"
+      },
+      "sizes": {
+        "medium": "Srednja"
       },
       "shapes": {
         "circle": "Krug",
@@ -7730,6 +7742,7 @@
     "footerNote": "DePin sudjelovanje je usluga doprinosa, a ne investicijski proizvod. Dostupnost, pravo na sudjelovanje i nagrade mogu se promijeniti."
   },
   "creatorFlow": {
+    "newNativeFlow": "Novi tok",
     "disconnect": "Razveži",
     "title": "Tok kreatora",
     "backToStudio": "Natrag u Studio kreatora",
@@ -10714,6 +10727,9 @@
       "zoomIn": "Platno za zumiranje",
       "zoomOut": "Umanjite podlogu za zumiranje"
     },
+    "clipFix": {
+      "listening": "Slušam…"
+    },
     "shortcuts": {
       "action": {
         "split": "Podijeli",
@@ -10724,7 +10740,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Zaustavi snimanje"
+      "stop": "Zaustavi snimanje",
+      "failed": "Kloning glasa nije uspio."
     },
     "linkImport": {
       "go": "Uvezi",
@@ -19314,6 +19331,8 @@
       "gaming": "Igre",
       "crypto": "Kripto",
       "sports": "Sport",
+      "comedy": "Komeda",
+      "food": "Hrana",
       "news": "Vijesti",
       "science": "Znanost"
     },
@@ -19324,6 +19343,7 @@
   "appTokens": {
     "title": "Vaši tokeni",
     "history": "Povijest",
+    "noHistory": "Još nema aktivnosti",
     "kindDeposit": "Uplati",
     "to": "Do",
     "amount": "Iznos",
@@ -19353,6 +19373,7 @@
     "notNow": "Ne sada"
   },
   "postStats": {
+    "audience": "Publika",
     "engagement": "Angažman",
     "finished": "Završeno",
     "members": "Članovi",
@@ -19441,6 +19462,7 @@
   "dmSchedule": {
     "view": "Pogledaj",
     "edit": "Uredi",
+    "editLabel": "Uredi poruku",
     "error": "To nije uspjelo. Pokušajte ponovno."
   }
 }

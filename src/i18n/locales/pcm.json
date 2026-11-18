@@ -1175,6 +1175,7 @@
     "payDirectNoName": "Wen dey send am straight to de creator for {{symbol}} on {{chain}}. No swap.",
     "payViaBridgeDpay": "E don move go Base and pay to Riftn Pay, tokens go land in about one minute",
     "dmSent": "Don send {{amount}} tokens give {{name}}!",
+    "addMessage": "Wen yu wan add message, yu go do am.",
     "messagePublic": "Everybody"
   },
   "postOptions": {
@@ -2135,6 +2136,8 @@
       "likes": "Like Dem"
     },
     "likedPosts": {
+      "emptyTitle": "Nobody never like am yet",
+      "privateTitle": "Likes na private",
       "loadMore": "Bring more"
     },
     "dislikes": {
@@ -2159,6 +2162,9 @@
     "sortLikes": "Like",
     "sortMostLiked": "Most liked",
     "sortCustomShort": "Your own",
+    "arrange": {
+      "saving": "E dey save..."
+    },
     "searchThisChannel": "Search inside dis channel"
   },
   "tv": {
@@ -7049,7 +7055,6 @@
     "dehubHome": "Riftn home",
     "navHowItWorks": "How e dey work",
     "navPrivacy": "Privacy",
-    "navFaq": "Question wey people dey ask",
     "openDehub": "Open Riftn",
     "readTheDocs": "Go read the docs",
     "heroEyebrow": "Community-powered infrastructure",
@@ -10026,6 +10031,9 @@
     "linkImport": {
       "go": "Bring am",
       "downloading": "Dey download {{percent}}%"
+    },
+    "reverse": {
+      "action": "Reverse am"
     }
   },
   "jungleMood": {
@@ -14572,7 +14580,6 @@
     "5b176be7069c": "Tips dey settle on-chain wey dey send, no need for payout cycle.",
     "23cc49836f60": "Go live on Riftn",
     "efc85ecfd402": "Open Riftn",
-    "dbc468a14b60": "Question wey people dey ask",
     "1e5b36078e37": "Related guides",
     "89ec0bb81771": "Cinema",
     "e85c840c1a0e": "Where you fit watch anything",

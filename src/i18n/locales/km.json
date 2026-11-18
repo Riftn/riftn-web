@@ -1210,6 +1210,7 @@
     "payDirectNoName": "ផ្ញើដោយផ្ទាល់ទៅអ្នកបង្កើតនៅក្នុង {{symbol}} on {{chain}} ។ គ្មានការផ្លាស់ប្តូរទេ ។",
     "payViaBridgeDpay": "បាន​ផ្លាស់​ទី​ទៅ Base ហើយ​បាន​បង់​ទៅ Riftn Pay នឹង​មក​ដល់​ក្នុង​ប្រហែល​មួយ​នាទី",
     "dmSent": "បានផ្ញើ {{amount}} តូខឹន ទៅ {{name}}!",
+    "addMessage": "បន្ថែមសារ (ស្ម័គ្រចិត្ត)",
     "messagePublic": "សាធារណៈ",
     "railTitle": "គន្លឹះ",
     "railTotal": "{{amount}} តូខឹន",
@@ -2223,6 +2224,8 @@
       "likes": "ចូលចិត្ត"
     },
     "likedPosts": {
+      "emptyTitle": "មិនទាន់មានការចូលចិត្តទេ",
+      "privateTitle": "ការចូលចិត្តគឺឯកជន",
       "loadMore": "ផ្ទុកបន្ថែម"
     },
     "dislikes": {
@@ -2247,6 +2250,9 @@
     "sortLikes": "ចូលចិត្ត",
     "sortMostLiked": "ចូលចិត្តច្រើនបំផុត",
     "sortCustomShort": "ផ្ទាល់ខ្លួន",
+    "arrange": {
+      "saving": "កំពុងរក្សាទុក..."
+    },
     "searchThisChannel": "ស្វែងរកឆានែលនេះ",
     "searchResultCount": "1 លទ្ធផលសម្រាប់ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} លទ្ធផលសម្រាប់ \"{{query}}\""
@@ -6223,7 +6229,9 @@
   "nftMarket": {
     "actAll": "ទាំងអស់",
     "actListings": "បញ្ជីលក់",
+    "actOffer": "ការផ្តល់ជូន",
     "actOffers": "ការផ្តល់ជូន",
+    "actSales": "ការលក់",
     "tabActivity": "សកម្មភាព",
     "shortTitle": "NFT",
     "filters": "តម្រង",
@@ -6729,8 +6737,12 @@
       "image": "រូបភាព",
       "camera": "កាមេរ៉ា",
       "show": "បង្ហាញនៅលើស្ទ្រីម",
+      "loop": "រង្វិលជុំ",
       "positions": {
         "center": "កណ្ដាល"
+      },
+      "sizes": {
+        "medium": "មធ្យម"
       },
       "shapes": {
         "circle": "រង្វង់",
@@ -7717,6 +7729,7 @@
     "footerNote": "ការចូលរួម DePin គឺជាសេវាកម្មរួមចំណែក មិនមែនជាផលិតផលវិនិយោគទេ។ ភាពអាចរកបាន សិទ្ធិទទួលបាន និងរង្វាន់អាចផ្លាស់ប្តូរបាន។"
   },
   "creatorFlow": {
+    "newNativeFlow": "លំហូរថ្មី",
     "disconnect": "ការបង្កើតការសម្រាប់",
     "title": "លំហូរអ្នកបង្កើត",
     "backToStudio": "ត្រឡប់ទៅ Creator Studio",
@@ -9319,7 +9332,8 @@
       "textSaved": "បាន រក្សាទុក ការ ផ្លាស់ប្ដូរ ចំណង ជើង & # 160; ។",
       "action": "អក្សររត់ស្វ័យប្រវត្តិ",
       "styles": {
-        "bold": "ដិត"
+        "bold": "ដិត",
+        "serif": "សំណាក់"
       },
       "working": "កំពុងស្ដាប់… {{percent}}%",
       "downloading": "កំពុងរៀបចំម៉ូដែលសំឡេង… {{percent}}%",
@@ -10698,6 +10712,9 @@
       "zoomIn": "ពង្រីកផ្ទាំងគំនូរចូល",
       "zoomOut": "បង្រួមផ្ទាំងគំនូរចេញ"
     },
+    "clipFix": {
+      "listening": "កំពុងស្តាប់..."
+    },
     "shortcuts": {
       "action": {
         "split": "កាត់ចែក",
@@ -10708,7 +10725,8 @@
       }
     },
     "voiceClone": {
-      "stop": "បញ្ឈប់ការថត"
+      "stop": "បញ្ឈប់ការថត",
+      "failed": "ការធ្វើក្លូនសំឡេងបានបរាជ័យ ។"
     },
     "linkImport": {
       "go": "នាំចូល",
@@ -19208,8 +19226,10 @@
       "gaming": "ការលេងហ្គេម",
       "crypto": "គ្រីបតូ",
       "sports": "កីឡា",
+      "comedy": "កំប្លែង",
       "film": "ភាពយន្ត",
       "podcast": "ផតខាស់",
+      "food": "អាហារ",
       "news": "ព័ត៌មាន",
       "science": "វិទ្យាសាស្ត្រ"
     },
@@ -19220,6 +19240,7 @@
   "appTokens": {
     "title": "Tokens របស់អ្នក",
     "history": "ប្រវត្តិ",
+    "noHistory": "មិនទាន់មានសកម្មភាពនៅឡើយទេ",
     "kindDeposit": "បន្ថែមថវិកា",
     "to": "ដល់",
     "amount": "ចំនួន",
@@ -19249,6 +19270,7 @@
     "notNow": "មិនឥឡូវនេះ"
   },
   "postStats": {
+    "audience": "ទស្សនិកជន",
     "engagement": "ការចូលរួម",
     "finished": "បញ្ចប់",
     "members": "សមាជិក",
@@ -19337,6 +19359,7 @@
   "dmSchedule": {
     "view": "មើល",
     "edit": "កែ",
+    "editLabel": "កែសម្រួលសារ",
     "error": "នោះមិនបានដំណើរការទេ ។ ព្យាយាមម្តងទៀត ។"
   },
   "spaces": {

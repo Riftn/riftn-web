@@ -1223,6 +1223,7 @@
     "payDirectNoName": "{{symbol}} માં {{chain}} પર ક્રિએટરને સીધો મોકલ્યો. કોઈ સ્વેપ નથી.",
     "payViaBridgeDpay": "Base પર ખસેડવામાં આવ્યું અને Riftn Pay ને ચૂકવેલ, ટોકન્સ લગભગ એક મિનિટમાં પહોંચશે",
     "dmSent": "{{name}}ને {{amount}} ટોકન્સ મોકલ્યા!",
+    "addMessage": "સંદેશ ઉમેરો (વૈકલ્પિક)",
     "messagePublic": "જાહેર",
     "railTitle": "ટિપ્સ",
     "railTotal": "{{amount}} ટોકન્સ",
@@ -2225,6 +2226,8 @@
       "likes": "લાઇક્સ"
     },
     "likedPosts": {
+      "emptyTitle": "હજુ સુધી કોઈ લાઇક નથી",
+      "privateTitle": "લાઇક્સ ખાનગી છે",
       "loadMore": "વધુ લોડ કરો"
     },
     "dislikes": {
@@ -2249,6 +2252,9 @@
     "sortLikes": "પ્રતિક્રિયા",
     "sortMostLiked": "સૌથી વધુ પ્રતિક્રિયાઓ",
     "sortCustomShort": "કસ્ટમ",
+    "arrange": {
+      "saving": "સાચવી રહ્યું છે..."
+    },
     "searchThisChannel": "આ ચેનલની શોધ કરો",
     "searchResultCount": "1 નતીજો માટે \"{{query}}\"",
     "searchResultCountPlural": "{{count}} નતીજો માટે \"{{query}}\""
@@ -6232,7 +6238,9 @@
   "nftMarket": {
     "actAll": "બધા",
     "actListings": "યાદીઓ",
+    "actOffer": "ઓફર",
     "actOffers": "ઑફર",
+    "actSales": "વેચાણ",
     "tabActivity": "પ્રવૃત્તિ",
     "shortTitle": "NFT",
     "filters": "ફિલ્ટર્સ",
@@ -6731,8 +6739,12 @@
       "image": "છબી",
       "camera": "કેમેરા",
       "show": "સ્ટ્રીમ પર બતાવો",
+      "loop": "લૂપ",
       "positions": {
         "center": "કેન્દ્ર"
+      },
+      "sizes": {
+        "medium": "મધ્યમ"
       },
       "shapes": {
         "circle": "વર્તુળ",
@@ -7719,6 +7731,7 @@
     "footerNote": "ડીપિનની ભાગીદારી એક યોગદાન સેવા છે, રોકાણનું ઉત્પાદન નથી. ઉપલબ્ધતા, પાત્રતા અને પુરસ્કારો બદલાઈ શકે છે."
   },
   "creatorFlow": {
+    "newNativeFlow": "નવો પ્રવાહ",
     "disconnect": "ડિસ્કનેક્ટ કરો",
     "title": "નિર્માતા પ્રવાહ",
     "backToStudio": "ક્રિએટર સ્ટુડિયો પર પાછા જાઓ",
@@ -9321,7 +9334,8 @@
       "textSaved": "કેપ્શન બદલાવાયા.",
       "action": "ઑટો કૅપ્શન",
       "styles": {
-        "bold": "બોલ્ડ"
+        "bold": "બોલ્ડ",
+        "serif": "સેરીફ"
       },
       "working": "સાંભળી રહ્યું છે… {{percent}}%",
       "downloading": "સ્પીચ મૉડલ તૈયાર થઈ રહ્યું છે… {{percent}}%",
@@ -10702,6 +10716,9 @@
       "zoomIn": "ઝૂમ કેનવાસ ઇન કરો",
       "zoomOut": "ઝૂમ કેનવાસ બહાર (ઉપરથી) કરો"
     },
+    "clipFix": {
+      "listening": "શ્રવણ કરવામાં છે…"
+    },
     "shortcuts": {
       "action": {
         "split": "વિભાજિત કરો",
@@ -10712,7 +10729,8 @@
       }
     },
     "voiceClone": {
-      "stop": "રેકોર્ડિંગ બંધ કરો"
+      "stop": "રેકોર્ડિંગ બંધ કરો",
+      "failed": "વોઇસ ક્લોનિંગ નિષ્ફળ રહ્યું."
     },
     "linkImport": {
       "go": "ઇમ્પોર્ટ",
@@ -19272,8 +19290,10 @@
       "gaming": "ગેમિંગ",
       "crypto": "ક્રિપ્ટો",
       "sports": "સ્પોર્ટ્સ",
+      "comedy": "કોમેડી",
       "film": "ફિલ્મ",
       "podcast": "પોડકાસ્ટ",
+      "food": "ખોરાક",
       "news": "સમાચાર",
       "science": "વિજ્ઞાન"
     },
@@ -19284,6 +19304,7 @@
   "appTokens": {
     "title": "તમારા ટોકન્સ",
     "history": "ઇતિહાસ",
+    "noHistory": "હજી સુધી કોઈ પ્રવૃત્તિ નથી",
     "kindDeposit": "ફંડ ઉમેરો",
     "to": "સુધારો",
     "amount": "રકમ",
@@ -19313,6 +19334,7 @@
     "notNow": "હમણાં નહીં"
   },
   "postStats": {
+    "audience": "પ્રેક્ષક",
     "engagement": "સગાઈ",
     "finished": "પૂર્ણ",
     "members": "સભ્યો",
@@ -19401,6 +19423,7 @@
   "dmSchedule": {
     "view": "જુઓ",
     "edit": "સંપાદિત કરો",
+    "editLabel": "સંદેશમાં ફેરફાર કરો",
     "error": "તે કામ કરતું નથી. ફરીથી પ્રયાસ કરો."
   }
 }

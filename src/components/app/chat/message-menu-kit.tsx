@@ -85,7 +85,7 @@ export function MessageMoreButton({ onOpen, className = '' }: {
         const r = e.currentTarget.getBoundingClientRect();
         onOpen({ x: Math.round(r.left), y: Math.round(r.bottom + 4) }, e.currentTarget);
       }}
-      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-zinc-500 opacity-0 transition-opacity hover:bg-white/10 hover:text-white focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 ${className}`}
+      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-zinc-500 opacity-0 transition-opacity hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)] hover:text-white focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 ${className}`}
     >
       <MoreHorizontal className="h-4 w-4" />
     </button>

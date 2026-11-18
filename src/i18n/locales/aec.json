@@ -1196,6 +1196,7 @@
     "payDirectNoName": "مباشرةً إلى المبدع في {{symbol}} على {{chain}}. لا تبادل.",
     "payViaBridgeDpay": "تم النقل إلى Base والدفع لـ Riftn Pay، الرموز ستصل في حوالي دقيقة",
     "dmSent": "اتبعت {{amount}} توكنز لـ {{name}}!",
+    "addMessage": "إضافة رسالة (اختياري)",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} رموز",
@@ -2192,6 +2193,8 @@
       "likes": "إعجابات"
     },
     "likedPosts": {
+      "emptyTitle": "مفيش إعجابات لسه",
+      "privateTitle": "الإعجابات خاصة",
       "loadMore": "حمّل أكتر"
     },
     "dislikes": {
@@ -2216,6 +2219,9 @@
     "sortLikes": "المحبوب",
     "sortMostLiked": "الأكثر إعجابًا",
     "sortCustomShort": "مخصص",
+    "arrange": {
+      "saving": "بيحفظ..."
+    },
     "searchThisChannel": "البحث في هذا القناة",
     "searchResultCount": "لا نتيجة ل\"{{query}}\"",
     "searchResultCountPlural": "نتائج {{count}} ل\"{{query}}\""
@@ -5563,6 +5569,7 @@
     "generationsRunning_one": "{{count}} جاي بتدور.",
     "generationsRunning_other": "{{count}} جيلين بتدوروا.",
     "nothingGeneratedYet": "ما شافناشش بعد",
+    "working": "يعمل",
     "stopWaitingConfirm": "ياكلو انت بتتنتظر هذا الرندر؟ ده مش هيعودلكش، بس ده مش هيتوقفش، بس مش هيعودلكش، وده مش هيعملش حاجة.",
     "cancelled": "مُلغى",
     "failed": "فشل",
@@ -5988,7 +5995,6 @@
     "basicAnalytics": "بيانات بسيطة",
     "detailedAnalytics": "بيانات تفصيلية",
     "prioritySupport": "دعم أولوية",
-    "sso": "تسجيل الدخول الموحد (SSO)",
     "adminSpendControl": "سيطرة إداريه على النفقات",
     "priorityQueue": "صف أولوية",
     "priorityQueueFast": "صف أولوية لسرعة معالجة المهام",
@@ -6106,7 +6112,9 @@
   "nftMarket": {
     "actAll": "الكل",
     "actListings": "الإعلانات",
+    "actOffer": "عرض",
     "actOffers": "العروض",
+    "actSales": "المبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "إن إف تيز",
     "filters": "فلاتر",
@@ -6613,8 +6621,12 @@
       "image": "صور",
       "camera": "الكاميرا",
       "show": "اعرض على البث",
+      "loop": "لوب",
       "positions": {
         "center": "المركز"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دايرة",
@@ -7584,6 +7596,7 @@
     "footerNote": "دِيبين مش مشاركه بتكون خدمة مساهمه، مفيش هيكونها منتج استثمار. توافرها، الأهلية، وجوائزها ممكن تتغير."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "فصل",
     "title": "خالِق فلو",
     "backToStudio": "الرجوع إلى Creator Studio",
@@ -9182,7 +9195,8 @@
       "textSaved": "تم حفظ التعليقات.",
       "action": "ترجمة تلقائية",
       "styles": {
-        "bold": "غامق"
+        "bold": "غامق",
+        "serif": "سيريف"
       },
       "working": "بيسمع… {{percent}}%",
       "downloading": "بنجهّز نموذج الكلام… {{percent}}%",
@@ -10564,6 +10578,9 @@
       "zoomIn": "تتسق الكانفاس (Shift+2)",
       "zoomOut": "صغّر مساحة الزووم"
     },
+    "clipFix": {
+      "listening": "بالتسميع…"
+    },
     "shortcuts": {
       "action": {
         "split": "تقسيم",
@@ -10574,7 +10591,8 @@
       }
     },
     "voiceClone": {
-      "stop": "وقّف التسجيل"
+      "stop": "وقّف التسجيل",
+      "failed": "فشل في نسخ الصوت"
     },
     "linkImport": {
       "go": "استورد",
@@ -18687,8 +18705,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "رياضة",
+      "comedy": "الكوميديا",
       "film": "فيلم",
       "podcast": "بودكاست",
+      "food": "أكل",
       "news": "أخبار",
       "science": "العلوم"
     },
@@ -18699,6 +18719,7 @@
   "appTokens": {
     "title": "التوكنز بتاعتك",
     "history": "السجل",
+    "noHistory": "لا يوجد نشاط حتى الآن",
     "kindDeposit": "إيداع",
     "to": "إلى",
     "amount": "المبلغ",
@@ -18728,6 +18749,7 @@
     "notNow": "مش دلوقتي"
   },
   "postStats": {
+    "audience": "الجمهوريه",
     "engagement": "التفاعل",
     "finished": "انتهى",
     "members": "الأعضاء",
@@ -18816,6 +18838,7 @@
   "dmSchedule": {
     "view": "شوف",
     "edit": "تعديل",
+    "editLabel": "تعديل الرسالة",
     "error": "ده ما اشتغلش. حاول مرة تانية."
   },
   "post": {

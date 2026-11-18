@@ -1223,6 +1223,7 @@
     "payDirectNoName": "سٹرائٹ سے بھیج دیا گیا ہے {{symbol}} کو {{chain}} پر۔ کوئی تبادلہ نہیں ہوا۔",
     "payViaBridgeDpay": "بیس پر منتقل کیا گیا اور Riftn Pay کو ادا کیا گیا، ٹوکنز تقریباً ایک منٹ میں پہنچ جائیں گے",
     "dmSent": "{{name}} کو {{amount}} ٹوکن بھیج دیے گئے!",
+    "addMessage": "پیغام شامل کریں (آپشنل)",
     "messagePublic": "عوامی",
     "railTitle": "ٹپس",
     "railTotal": "{{amount}} ٹکٹس",
@@ -2223,6 +2224,8 @@
       "likes": "پسندیدگیاں"
     },
     "likedPosts": {
+      "emptyTitle": "ابھی تک کوئی لائیک نہیں",
+      "privateTitle": "لائیکس نجی ہیں",
       "loadMore": "مزید لوڈ کریں"
     },
     "dislikes": {
@@ -2247,6 +2250,9 @@
     "sortLikes": "پسند",
     "sortMostLiked": "سب سے زیادہ پسند کیا گیا",
     "sortCustomShort": "کستم",
+    "arrange": {
+      "saving": "محفوظ ہو رہا ہے..."
+    },
     "searchThisChannel": "اس چینل میں تلاش کریں",
     "searchResultCount": "\"{{query}}\" کے لیے 1 نتیجہ",
     "searchResultCountPlural": "{{count}} نتائج کے لیے \"{{query}}\""
@@ -6236,7 +6242,9 @@
   "nftMarket": {
     "actAll": "تمام",
     "actListings": "اشتہارات",
+    "actOffer": "پیشکش",
     "actOffers": "پیشکشیں",
+    "actSales": "فروخت",
     "tabActivity": "سرگرمی",
     "shortTitle": "NFT",
     "filters": "فلٹرز",
@@ -6343,7 +6351,8 @@
     "buyFor": "خرید کے لیے {{price}}",
     "spotlight": "شعابہ",
     "spotlightBuyNote": "ایک ہی قدم میں این ایف ٹی اور ادائیگی کا تبادلہ ہوتا ہے۔",
-    "spotlightOfferNote": "ابھی نہیں درج ہوا ہے۔ پیشکش بھیج دیں اور مالک کو کسی بھی وقت قبول کرنے کی اجازت ہے۔"
+    "spotlightOfferNote": "ابھی نہیں درج ہوا ہے۔ پیشکش بھیج دیں اور مالک کو کسی بھی وقت قبول کرنے کی اجازت ہے۔",
+    "signInToTradeCta": "تجارت کے لیے سائن ان کریں"
   },
   "usernames": {
     "seoTitle": "صارف نام بازار | Riftn",
@@ -6735,8 +6744,12 @@
       "image": "تصویر",
       "camera": "کیمرہ",
       "show": "اسٹریم پر دکھائیں",
+      "loop": "لوپ",
       "positions": {
         "center": "مرکز"
+      },
+      "sizes": {
+        "medium": "درمیانہ"
       },
       "shapes": {
         "circle": "دائرہ",
@@ -7723,6 +7736,7 @@
     "footerNote": "DePin میں شرکت ایک شراکت کی سروس ہے، نہ کہ سرمایہ کاری کی مصنوعات۔ دستیابی، اہلیت اور انعامات بدل سکتے ہیں۔"
   },
   "creatorFlow": {
+    "newNativeFlow": "نیا flow",
     "disconnect": "منسلک ہونے سے منع کریں",
     "title": "خالق کا بہاؤ",
     "backToStudio": "Creator Studio کو واپس جائیں",
@@ -9311,7 +9325,8 @@
       "textSaved": "ٹائٹلز کی تبدیلیاں محفوظ ہوگئی ہیں۔",
       "action": "خودکار کیپشنز",
       "styles": {
-        "bold": "جرات مندانہ"
+        "bold": "جرات مندانہ",
+        "serif": "سریف"
       },
       "working": "سن رہے ہیں… {{percent}}%",
       "downloading": "اسپیچ ماڈل تیار ہو رہا ہے… {{percent}}%",
@@ -10692,6 +10707,9 @@
       "zoomIn": "کینوس کو ان میں زوم کر",
       "zoomOut": "کینوس کو باہر زوم کر"
     },
+    "clipFix": {
+      "listening": "سن رہے ہیں…"
+    },
     "shortcuts": {
       "action": {
         "split": "تقسیم کریں",
@@ -10702,7 +10720,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ریکارڈنگ روکیں"
+      "stop": "ریکارڈنگ روکیں",
+      "failed": "صوتی کلوننگ ناکام ہوگئی ۔"
     },
     "linkImport": {
       "go": "درآمد کریں",
@@ -19225,8 +19244,10 @@
       "gaming": "گیمنگ",
       "crypto": "کرپٹو",
       "sports": "کھیل",
+      "comedy": "کامڈی",
       "film": "فلم",
       "podcast": "پوڈ کاسٹ",
+      "food": "کھانا",
       "news": "خبریں",
       "science": "سائنس"
     },
@@ -19237,6 +19258,7 @@
   "appTokens": {
     "title": "آپ کے ٹوکنز",
     "history": "تاریخ",
+    "noHistory": "ابھی تک کوئی سرگرمی نہیں ہے",
     "kindDeposit": "رقم جمع کریں",
     "to": "تو",
     "amount": "رقم",
@@ -19266,6 +19288,7 @@
     "notNow": "ابھی نہیں"
   },
   "postStats": {
+    "audience": "سامعین",
     "engagement": "مصروفیات",
     "finished": "ختم",
     "members": "اراکین",
@@ -19349,6 +19372,7 @@
   "dmSchedule": {
     "view": "دیکھیں",
     "edit": "ترمیم کریں",
+    "editLabel": "پیغام میں ترمیم کریں",
     "error": "یہ کام نہیں آیا۔ دوبارہ کوشش کریں۔"
   }
 }

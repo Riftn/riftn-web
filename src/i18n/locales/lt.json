@@ -1225,6 +1225,7 @@
     "payDirectNoName": "Siunčiamas tiesiog kūrėjui per {{symbol}} su {{chain}}. Be keitimo.",
     "payViaBridgeDpay": "Perkelta į Base ir apmokėta Riftn Pay, žetonai atvyks maždaug per minutę",
     "dmSent": "{{name}} išsiųsta {{amount}} žetonų!",
+    "addMessage": "Pridėti žinutę (neprivaloma)",
     "messagePublic": "Viešas",
     "railTitle": "Patarimai",
     "railTotal": "{{amount}} ženklų",
@@ -2227,6 +2228,8 @@
       "likes": "Patinka"
     },
     "likedPosts": {
+      "emptyTitle": "Dar nėra patiktukų",
+      "privateTitle": "Patiktukai privatūs",
       "loadMore": "Įkelti daugiau"
     },
     "dislikes": {
@@ -2251,6 +2254,9 @@
     "sortLikes": "Prašymai",
     "sortMostLiked": "Daugiausiai palaikytas",
     "sortCustomShort": "Papildomas",
+    "arrange": {
+      "saving": "Išsaugoma..."
+    },
     "searchThisChannel": "Peržiūrėti šį kanalą",
     "searchResultCount": "1 rezultatas už \"{{query}}\"",
     "searchResultCountPlural": "{{count}} rezultatų už \"{{query}}\""
@@ -6239,7 +6245,9 @@
   "nftMarket": {
     "actAll": "Visi",
     "actListings": "Skelbimai",
+    "actOffer": "Siūloma",
     "actOffers": "Pasiūlymai",
+    "actSales": "Pardavimai",
     "tabActivity": "Veikla",
     "shortTitle": "NFTS",
     "filters": "Filtrai",
@@ -6742,8 +6750,12 @@
       "image": "Paveikslėlis",
       "camera": "Kamera",
       "show": "Rodyti transliacijoje",
+      "loop": "Ciklas",
       "positions": {
         "center": "Centras"
+      },
+      "sizes": {
+        "medium": "Vidutinė"
       },
       "shapes": {
         "circle": "Apskritimas",
@@ -7730,6 +7742,7 @@
     "footerNote": "DePin dalyvavimas yra paslaugų teikimas, o ne investicinis produktas. Prieinamumas, tinkamumas ir apdovanojimai gali keistis."
   },
   "creatorFlow": {
+    "newNativeFlow": "Naujas srautas",
     "disconnect": "Atsijungti",
     "title": "Kūrėjo srautas",
     "backToStudio": "Grįžti į Kūrėjo studiją",
@@ -9332,7 +9345,8 @@
       "textSaved": "Anotavimo keitimai išsaugoti.",
       "action": "Automatiniai subtitrai",
       "styles": {
-        "bold": "Paryškintas"
+        "bold": "Paryškintas",
+        "serif": "Šriftas"
       },
       "working": "Klausomasi… {{percent}} %",
       "downloading": "Ruošiamas kalbos modelis… {{percent}} %",
@@ -10714,6 +10728,9 @@
       "zoomIn": "Papildyti paveikslėlį",
       "zoomOut": "Papildyti paveikslėlį"
     },
+    "clipFix": {
+      "listening": "Klausomasi..."
+    },
     "shortcuts": {
       "action": {
         "split": "Padalyti",
@@ -10724,7 +10741,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Sustabdyti įrašymą"
+      "stop": "Sustabdyti įrašymą",
+      "failed": "Balsas klono nepavyko."
     },
     "linkImport": {
       "go": "Importuoti",
@@ -19310,8 +19328,10 @@
       "gaming": "Žaidimai",
       "crypto": "Kripto",
       "sports": "Sportas",
+      "comedy": "Komedija",
       "film": "Filmas",
       "podcast": "Tinklalaidė",
+      "food": "Maistas",
       "news": "Naujienos",
       "science": "Mokslas"
     },
@@ -19322,6 +19342,7 @@
   "appTokens": {
     "title": "Jūsų žetonai",
     "history": "Istorija",
+    "noHistory": "Veiklos dar nėra",
     "kindDeposit": "Įnešti",
     "to": "Iki",
     "amount": "Suma",
@@ -19351,6 +19372,7 @@
     "notNow": "Ne dabar"
   },
   "postStats": {
+    "audience": "Auditorija",
     "engagement": "Įsitraukimas",
     "finished": "Baigta",
     "members": "Nariai",
@@ -19439,6 +19461,7 @@
   "dmSchedule": {
     "view": "Žiūrėti",
     "edit": "Redaguoti",
+    "editLabel": "Redaguoti žinutę",
     "error": "Nepavyko. Bandykite dar kartą."
   }
 }

@@ -6674,7 +6674,9 @@
   "nftMarket": {
     "actAll": "Todos",
     "actListings": "Anúncios",
+    "actOffer": "Oferta",
     "actOffers": "Ofertas",
+    "actSales": "Vendas",
     "tabActivity": "Atividade",
     "shortTitle": "NFTs",
     "filters": "Filtros",
@@ -20523,6 +20525,7 @@
   "dmSchedule": {
     "view": "Ver",
     "edit": "Editar",
+    "editLabel": "Editar mensagem",
     "error": "Isso não funcionou. Tente novamente."
   }
 }

@@ -1243,6 +1243,7 @@
     "payDirectNoName": "সরাসরি সৃজকের কাছে {{symbol}} এ পাঠানো হয়েছে, সময় লাগে {{chain}}। কোনো রূপান্তর নেই",
     "payViaBridgeDpay": "Base এ স্থানান্তর করা হয়েছে এবং Riftn Pay এর কাছে প্রেরণ করা হয়েছে, টোকেন আনুমানিক এক মিনিটে আসবে",
     "dmSent": "{{name}}-ক {{amount}} টোকেনসমূহ পাঠানো হইছে!",
+    "addMessage": "আপনার একটি সম্পূর্ণ বিশ্বাসযোগ্য অনুবাদ প্রদান করার জন্য আমি একটি পেশাদার অনুবাদক।",
     "messagePublic": "সর্বজনীন",
     "railTitle": "টিপস",
     "railTotal": "{{amount}} টোকেন",
@@ -2333,6 +2334,8 @@
       "likes": "লাইক"
     },
     "likedPosts": {
+      "emptyTitle": "এলাও কোনো লাইক নাই",
+      "privateTitle": "লাইক গোপন",
       "loadMore": "আরও লোড করুন"
     },
     "dislikes": {
@@ -2357,6 +2360,9 @@
     "sortLikes": "পছন্দ",
     "sortMostLiked": "সবচেয়ে পছন্দের",
     "sortCustomShort": "কাস্টম",
+    "arrange": {
+      "saving": "সংরক্ষণ হইতেছে..."
+    },
     "searchThisChannel": "এই চ্যানেল খোঁজা",
     "searchResultCount": "1 রেজাল্ট পাওয়া গেছে \" {{query}}\"",
     "searchResultCountPlural": "{{count}} রেজাল্ট পেয়েছে {{query}}",
@@ -6253,7 +6259,9 @@
   "nftMarket": {
     "actAll": "সব",
     "actListings": "তালিকা",
+    "actOffer": "অফার",
     "actOffers": "অফার",
+    "actSales": "বিক্রয়",
     "tabActivity": "কার্যকলাপ",
     "shortTitle": "NFT",
     "filters": "ফিল্টার",
@@ -6741,8 +6749,12 @@
       "image": "ইমেজ",
       "camera": "ক্যামেরা",
       "show": "স্ট্রিমে দেখান",
+      "loop": "লুপ",
       "positions": {
         "center": "সেন্টার"
+      },
+      "sizes": {
+        "medium": "মাঝারি"
       },
       "shapes": {
         "circle": "গোল",
@@ -7729,6 +7741,7 @@
     "footerNote": "ডিপিন পার্টিসিপেশন একটি কন্ট্রিবিউশন সার্ভিস, নন ইনভেস্টমেন্ট প্রোডাক্ট। অ্যাভেলেবিলিটি, ইলিজিবিলিটি এবং রিওয়ার্ডস পরিবর্তন হতে পারে।"
   },
   "creatorFlow": {
+    "newNativeFlow": "নিউ ফ্লো",
     "disconnect": "ডিসকানেক্ট করুন",
     "title": "স্রষ্টা প্রবাহ",
     "backToStudio": "ক্রিয়েটর স্টুডিওতে ফিরে যান",
@@ -9299,7 +9312,8 @@
       "textSaved": "ক্যাপশন পরিবর্তন সফলভাবে সংরক্ষিত হয়ে গেল।",
       "action": "অটো ক্যাপশন",
       "styles": {
-        "bold": "সুবিধা"
+        "bold": "সুবিধা",
+        "serif": "সেরিফ"
       },
       "working": "শুনবার নাগছে… {{percent}}%",
       "downloading": "কথার মডেল রেডি হবার নাগছে… {{percent}}%",
@@ -10680,6 +10694,9 @@
       "zoomIn": "জুম ক্যানভাস ইন",
       "zoomOut": "জুম ক্যানভাস আউট"
     },
+    "clipFix": {
+      "listening": "শুনছি…"
+    },
     "shortcuts": {
       "action": {
         "split": "ভাগ করো",
@@ -10693,7 +10710,8 @@
       "label": "৩ডি"
     },
     "voiceClone": {
-      "stop": "রেকর্ডিং বন্ধ করুন"
+      "stop": "রেকর্ডিং বন্ধ করুন",
+      "failed": "ভয়েস ক্লোনিং ব্যর্থ হয়েছে।"
     },
     "linkImport": {
       "go": "আমদানি",
@@ -18826,8 +18844,10 @@
       "gaming": "গেমিং",
       "crypto": "ক্রিপ্টো",
       "sports": "খেলা",
+      "comedy": "কমেডি",
       "film": "ফিল্ম",
       "podcast": "পডকাস্ট",
+      "food": "ফুড",
       "news": "খবর",
       "science": "বিজ্ঞান"
     },
@@ -18838,6 +18858,7 @@
   "appTokens": {
     "title": "আপনার টোকেন",
     "history": "ইতিহাস",
+    "noHistory": "এখনও কোনো কার্যকলাপ নেই",
     "kindDeposit": "জমা করো",
     "to": "টু",
     "amount": "পরিমাণ",
@@ -18867,6 +18888,7 @@
     "notNow": "এখন নয়"
   },
   "postStats": {
+    "audience": "আডিয়েন্স",
     "engagement": "এনগেজমেন্ট",
     "finished": "শেষ",
     "members": "সদস্যরা",
@@ -18949,6 +18971,7 @@
   "dmSchedule": {
     "view": "দেখুন",
     "edit": "সম্পাদনা",
+    "editLabel": "পোস্টটা সম্পাদন করো।",
     "error": "এটি কাজ করেনি। আবার চেষ্টা করুন।"
   },
   "post": {

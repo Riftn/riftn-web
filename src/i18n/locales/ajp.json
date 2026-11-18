@@ -1204,6 +1204,7 @@
     "payDirectNoName": "مستقيمة ل{{symbol}} على {{chain}}. مش بتتتبادلش.",
     "payViaBridgeDpay": "تم النقل إلى Base والدفع إلى Riftn Pay، تصل الرموز في حوالي دقيقة",
     "dmSent": "انبعت {{amount}} توكنز لـ {{name}}!",
+    "addMessage": "إضافة رسالة (مُختار)",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} رموز",
@@ -1311,6 +1312,7 @@
     "madeForKidsOnDesc": "معروض للأطفال اللي بيستخدموا وضع الأطفال، وطالع من الفيدات العادية. بس وضع الأطفال اللي بيقدر يعلق.",
     "madeForKidsOffDesc": "بيعرض هالبوست للأطفال اللي بيستخدموا وضع الأطفال، وبيطلعه من الفيدات العادية.",
     "madeForKidsBlockedByMature": "البوست اللي معلم بأنه للبالغين ما بيقدر ينشر للأطفال كمان.",
+    "audience": "الجمهور",
     "currency": "العملة",
     "price": "السعر",
     "ppvDhbInfo": "المدفوعات برموز Riftn على سلسلة Base",
@@ -2201,6 +2203,8 @@
       "likes": "إعجابات"
     },
     "likedPosts": {
+      "emptyTitle": "ما في إعجابات لهلأ",
+      "privateTitle": "الإعجابات خاصة",
       "loadMore": "حمّل أكثر"
     },
     "dislikes": {
@@ -2225,6 +2229,9 @@
     "sortLikes": "المشجوع",
     "sortMostLiked": "الأكثر مشجوعة",
     "sortCustomShort": "مخصص",
+    "arrange": {
+      "saving": "عم يحفظ..."
+    },
     "searchThisChannel": "بحث في هذا القناة",
     "searchResultCount": "1 نتيجة ل\"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتيجة ل\"{{query}}\""
@@ -6038,7 +6045,6 @@
     "basicAnalytics": "التحليلات الأساسية",
     "detailedAnalytics": "التحليلات التفصيلية",
     "prioritySupport": "الدعم الأولي",
-    "sso": "تسجيل الدخول الموحد (SSO)",
     "adminSpendControl": "سيطرة على الإنفاق الإدارية",
     "priorityQueue": "الترتيب الأول",
     "priorityQueueFast": "كيوه أولوية ليصير المعالجه أسرع",
@@ -6137,7 +6143,9 @@
   "nftMarket": {
     "actAll": "كل",
     "actListings": "الإعلانات",
+    "actOffer": "عرض",
     "actOffers": "العروض",
+    "actSales": "مبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "NFT",
     "filters": "فلاتر",
@@ -6636,8 +6644,12 @@
       "image": "صورة",
       "camera": "الكاميرا",
       "show": "عرض على الستريم",
+      "loop": "دورة",
       "positions": {
         "center": "وِسَط"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دائرة",
@@ -7622,6 +7634,7 @@
     "footerNote": "شارك في DePin ما هو خدمة مساهمة، مش غير منتج استثمار. توافر، الأهلية، وجوائز ممكن تتغير."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "الغاء الاتصال",
     "title": "تدفق المبدع",
     "backToStudio": "العودة إلى Creator Studio",
@@ -10606,6 +10619,9 @@
       "zoomIn": "زووم إن للكانفاس",
       "zoomOut": "زووم آوت للكانفاس"
     },
+    "clipFix": {
+      "listening": "السماع..."
+    },
     "shortcuts": {
       "action": {
         "split": "تقسيم",
@@ -10616,7 +10632,8 @@
       }
     },
     "voiceClone": {
-      "stop": "وقّف التسجيل"
+      "stop": "وقّف التسجيل",
+      "failed": "فشل في التقليد الصوتي."
     },
     "linkImport": {
       "go": "استورد",
@@ -15241,6 +15258,7 @@
     "bb33dbdb2f21": "ما هيكون",
     "c37206676570": "في الموجه",
     "30fd40fd22fd": "الإطار الأخير",
+    "67763f91d586": "الإطار الأخير",
     "5152ac7a5f5b": "موسيقى / موسيقى تفاعلية (حتى 3)",
     "4116f98065fd": "فيديو",
     "d38bd93df9c5": "تجديد فيديو موجود (حتى 3)",
@@ -18881,8 +18899,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "رياضة",
+      "comedy": "الكوميديا",
       "film": "السينما",
       "podcast": "بودكاست",
+      "food": "التمويل",
       "news": "أخبار",
       "science": "العلوم"
     },
@@ -18893,6 +18913,7 @@
   "appTokens": {
     "title": "التوكن تبعك",
     "history": "السجل",
+    "noHistory": "لا يوجد نشاط بعد",
     "kindDeposit": "إيداع",
     "to": "إلى",
     "amount": "المبلغ",
@@ -18922,6 +18943,7 @@
     "notNow": "مش هلّق"
   },
   "postStats": {
+    "audience": "الجمهور",
     "engagement": "التفاعل",
     "finished": "انتهى",
     "members": "الأعضاء",
@@ -19010,6 +19032,7 @@
   "dmSchedule": {
     "view": "عرض",
     "edit": "تعديل",
+    "editLabel": "تحرير الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
   }
 }
