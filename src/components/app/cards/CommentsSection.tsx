@@ -61,7 +61,7 @@ import { POST_STAGE_COMPOSE_EVENT } from '@/components/app/post-stage/post-stage
 import { VoiceStripPlayer } from '../audio/VoiceStripPlayer';
 import { LiveMicBars } from '../audio/LiveMicBars';
 import { useFocusComment } from '@/lib/focus-comment';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import {
@@ -439,7 +439,7 @@ function caretOffsetAt(root: HTMLElement, x: number, y: number): number | null {
 /** The reactions a held comment offers on a phone: the common faces, then 👎. */
 const HOLD_REACTIONS: HoldReaction[] = ['like', 'love', 'hot', 'lol', 'hundred', 'sad', 'dislike'];
 
-const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, onShowLikers, onReact, onReply, onShare, onEdit, onDelete, onTip, permalink, tipTotal, viewerTipped, onUserPress, isReply, threadLineAbove, threadLineBelow, isOwnComment, isThreadEntry, onAnchor, onPin, highlighted, onReport }: CommentItemProps) {
+const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, onShowLikers, onReact, onReply, onShare, onEdit, onDelete, onTip, permalink, tipTotal, viewerTipped, onUserPress, isReply, threadLineAbove, threadLineBelow, isOwnComment, isThreadEntry, onAnchor, onPin, onReport }: CommentItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   // Bumps each time this viewer tips this comment, replaying the gem swirl.
   const [tipBurst, setTipBurst] = useState(0);
@@ -829,7 +829,7 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
               >
                 <TranslatableText publicContent
                   text={commentDisplayText}
-                  className={cn("text-zinc-300 text-base leading-6 break-words", highlighted && "reply-text-glow", isPending && "dh-sent-text-glow")}
+                  className={cn("text-zinc-300 text-base leading-6 break-words", isPending && "dh-sent-text-glow")}
                   as="p"
                   hideControls
                   auto={false}
@@ -2185,7 +2185,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
     const row = root.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
     if (!row) return;
     scrolledToFocusRef.current = focusCommentId;
-    bringIntoViewAndFlash(row);
+    bringIntoView(row);
   }, [focusCommentId, filteredGroupedComments]);
 
   /**

@@ -36,7 +36,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { UserMentionDropdown } from '@/components/app/mentions';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { EmojiGifPicker } from '@/components/app/chat/EmojiGifPicker';
 import { PostCommentRow, CommentCreatorContext } from '@/components/app/cards/CommentsSection';
 import { CommentLikersDrawer } from '@/components/app/cards/CommentLikersDrawer';
@@ -279,7 +279,7 @@ export function ThreadedComments<C extends ThreadedComment>({
     const row = listRef.current?.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
     if (!row) return;
     scrolledToRef.current = focusCommentId;
-    bringIntoViewAndFlash(row);
+    bringIntoView(row);
   }, [focusCommentId, threads, expanded]);
 
   useEffect(() => () => {
