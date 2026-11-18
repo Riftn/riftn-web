@@ -2156,7 +2156,8 @@
       "total": "Total reach",
       "breakdownTitle": "Wa dis reach come from?",
       "dehubFollowers": "Riftn followers",
-      "verified": "Social count de kom from account wey creator connect."
+      "verified": "Social count de kom from account wey creator connect.",
+      "selfReported": "Na the creator type the social follower numbers."
     },
     "loginDescription": "Log in for see and manage your profile.",
     "replyThread": {

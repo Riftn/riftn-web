@@ -2210,7 +2210,8 @@
       "total": "Teljes elérés",
       "breakdownTitle": "Honnan származik ez a hatókör?",
       "dehubFollowers": "Riftn követők",
-      "verified": "A közösségi adatok az alkotó által összekapcsolt fiókokból származnak."
+      "verified": "A közösségi adatok az alkotó által összekapcsolt fiókokból származnak.",
+      "selfReported": "A közösségi követők számát az alkotó adja meg."
     },
     "loginDescription": "Jelentkezzen be profiljának megtekintéséhez és kezeléséhez.",
     "replyThread": {

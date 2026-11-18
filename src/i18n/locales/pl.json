@@ -2224,7 +2224,8 @@
       "total": "Całkowity zasięg",
       "breakdownTitle": "Skąd się bierze ten zasięg",
       "dehubFollowers": "Obserwujący Riftn",
-      "verified": "Dane społecznościowe pochodzą z kont połączonych przez twórcę."
+      "verified": "Dane społecznościowe pochodzą z kont połączonych przez twórcę.",
+      "selfReported": "Liczby obserwujących społeczności są wprowadzane przez twórcę."
     },
     "loginDescription": "Zaloguj się, aby zobaczyć i zarządzać swoim profilem.",
     "replyThread": {

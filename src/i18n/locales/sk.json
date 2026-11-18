@@ -2273,7 +2273,8 @@
       "total": "Celkový dosah",
       "breakdownTitle": "Odkiaľ pochádza tento dosah",
       "dehubFollowers": "Sledovatelia Riftnu",
-      "verified": "Sociálne počty pochádzajú z účtov, ku ktorým je tvorca pripojený."
+      "verified": "Sociálne počty pochádzajú z účtov, ku ktorým je tvorca pripojený.",
+      "selfReported": "Počet sledovateľov na sociálnych sieťach zadáva tvorca."
     },
     "loginDescription": "Prihláste sa na zobrazenie a správu svojho profilu.",
     "replyThread": {

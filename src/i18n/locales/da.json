@@ -2212,7 +2212,8 @@
       "total": "Samlet rækkevidde",
       "breakdownTitle": "Hvor denne rækkevidde kommer fra",
       "dehubFollowers": "Riftn-følgere",
-      "verified": "Sociale optællinger kommer fra konti, som kreatøren har tilsluttet."
+      "verified": "Sociale optællinger kommer fra konti, som kreatøren har tilsluttet.",
+      "selfReported": "Antal følgere på sociale medier indtastes af kreatøren."
     },
     "loginDescription": "Log ind for at se og administrere profil.",
     "replyThread": {

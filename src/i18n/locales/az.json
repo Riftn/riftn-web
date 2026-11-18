@@ -2214,7 +2214,8 @@
       "total": "Ümumi əlaqə",
       "breakdownTitle": "Bu əlaqə haradan gəlir",
       "dehubFollowers": "Riftn izləyiciləri",
-      "verified": "Sosial saylar yaradanın qoşulduğu hesablardan gəlir."
+      "verified": "Sosial saylar yaradanın qoşulduğu hesablardan gəlir.",
+      "selfReported": "Sosial izləyici sayları yaradıcı şəxs tərəfindən daxil edilir."
     },
     "loginDescription": "Profilinizə baxmaq və idarə etmək üçün daxil olun.",
     "replyThread": {

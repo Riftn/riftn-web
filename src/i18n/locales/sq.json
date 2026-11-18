@@ -2214,7 +2214,8 @@
       "total": "Arritja totale",
       "breakdownTitle": "Nga vjen kjo arritje",
       "dehubFollowers": "Ndjekësit e Riftn",
-      "verified": "Llogaritë sociale vijnë nga llogaritë që ka lidhur krijuesi."
+      "verified": "Llogaritë sociale vijnë nga llogaritë që ka lidhur krijuesi.",
+      "selfReported": "Numrat e ndjekësve socialë futen nga krijuesi."
     },
     "loginDescription": "Hyni për të parë dhe menaxhuar profilin tuaj.",
     "replyThread": {

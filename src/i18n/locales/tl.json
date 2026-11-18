@@ -2258,7 +2258,8 @@
       "total": "Kabuuang maaabot",
       "breakdownTitle": "Saan nagmumula ang abot na ito",
       "dehubFollowers": "Mga tagasunod ng Riftn",
-      "verified": "Ang mga sosyal na bilang ay nagmumula sa mga account na konektado ng tagalikha."
+      "verified": "Ang mga sosyal na bilang ay nagmumula sa mga account na konektado ng tagalikha.",
+      "selfReported": "Ang mga bilang ng mga social follower ay ipinasok ng tagalikha."
     },
     "loginDescription": "Mag-log in upang makita at pamahalaan ang iyong profile.",
     "replyThread": {

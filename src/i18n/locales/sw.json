@@ -2212,7 +2212,8 @@
       "total": "Jumla ya ufikiaji",
       "breakdownTitle": "Ufikiaji huu unatoka wapi",
       "dehubFollowers": "Wafuasi wa Riftn",
-      "verified": "Hesabu za kijamii zinatokana na akaunti zilizounganishwa na mtengenezaji."
+      "verified": "Hesabu za kijamii zinatokana na akaunti zilizounganishwa na mtengenezaji.",
+      "selfReported": "Hesabu za wafuasi wa kijamii zimewekwa na muundaji."
     },
     "loginDescription": "Ingia ili kuona na kusimamia wasifu wako.",
     "replyThread": {

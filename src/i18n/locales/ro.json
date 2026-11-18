@@ -2211,7 +2211,8 @@
       "total": "Acoperire totală",
       "breakdownTitle": "De unde provine această acoperire",
       "dehubFollowers": "Urmăritori Riftn",
-      "verified": "Contorizările sociale provin din conturile pe care creatorul le-a conectat."
+      "verified": "Contorizările sociale provin din conturile pe care creatorul le-a conectat.",
+      "selfReported": "Numărul de urmăritori sociali este introdus de creator."
     },
     "loginDescription": "Conectează-te pentru a-ți vizualiza și gestiona profilul.",
     "replyThread": {

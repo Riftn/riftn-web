@@ -2485,7 +2485,8 @@
       "total": "Toplam erişim",
       "breakdownTitle": "Bu erişimin nereden geldiği",
       "dehubFollowers": "Riftn takipçileri",
-      "verified": "Sosyal sayılar içerik üreticisinin bağladığı hesaplardan gelir."
+      "verified": "Sosyal sayılar içerik üreticisinin bağladığı hesaplardan gelir.",
+      "selfReported": "Sosyal takipçi sayıları yaratıcı tarafından girilir."
     },
     "loginDescription": "Profilinizi görüntülemek ve yönetmek için giriş yapın.",
     "replyThread": {

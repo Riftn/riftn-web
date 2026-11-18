@@ -2297,7 +2297,8 @@
       "total": "Totale bereik",
       "breakdownTitle": "Waar hierdie reikwydte vandaan kom",
       "dehubFollowers": "Riftn-volgelinge",
-      "verified": "Sosiale tellings kom uit rekeninge wat die skepper verbind het."
+      "verified": "Sosiale tellings kom uit rekeninge wat die skepper verbind het.",
+      "selfReported": "Sosiale volgelinge tel word deur die skepper ingevoer."
     },
     "loginDescription": "Meld aan om jou profiel te sien en te bestuur.",
     "replyThread": {

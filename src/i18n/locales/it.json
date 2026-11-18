@@ -2283,7 +2283,8 @@
       "total": "Portata totale",
       "breakdownTitle": "Da dove proviene questa portata",
       "dehubFollowers": "Follower Riftn",
-      "verified": "I numeri social provengono dagli account collegati dal creator."
+      "verified": "I numeri social provengono dagli account collegati dal creator.",
+      "selfReported": "Il conteggio dei follower social viene inserito dal creator."
     },
     "loginDescription": "Accedi per visualizzare e gestire il tuo profilo.",
     "replyThread": {

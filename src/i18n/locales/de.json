@@ -2286,7 +2286,8 @@
       "total": "Gesamtreichweite",
       "breakdownTitle": "Woher diese Reichweite kommt",
       "dehubFollowers": "Riftn-Follower",
-      "verified": "Die Social-Zahlen stammen aus Konten, die der Creator verbunden hat."
+      "verified": "Die Social-Zahlen stammen aus Konten, die der Creator verbunden hat.",
+      "selfReported": "Die Anzahl der sozialen Follower wird vom Ersteller eingegeben."
     },
     "loginDescription": "Melde dich an, um dein Profil zu sehen und zu verwalten.",
     "replyThread": {

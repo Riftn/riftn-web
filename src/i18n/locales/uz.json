@@ -2225,7 +2225,8 @@
       "total": "Umumiy qamrov",
       "breakdownTitle": "Bu imkoniyat qayerdan keladi",
       "dehubFollowers": "Riftn izdoshlari",
-      "verified": "Ijtimoiy hisoblar yaratuvchi bog&#39;lagan akkauntlardan olinadi."
+      "verified": "Ijtimoiy hisoblar yaratuvchi bog&#39;lagan akkauntlardan olinadi.",
+      "selfReported": "Ijtimoiy tarmoqlardagi obunachilar soni yaratuvchi tomonidan kiritiladi."
     },
     "loginDescription": "Profilingizni koʻrish va boshqarish uchun kiring.",
     "replyThread": {
