@@ -20,6 +20,7 @@ vi.mock('@/hooks/use-messages', () => ({
 const layout = vi.hoisted(() => ({ phone: false }));
 const prefs = vi.hoisted(() => ({ update: vi.fn() }));
 vi.mock('@/hooks/use-chat-prefs', () => ({ useChatPrefs: () => ({ byId: new Map(), update: prefs.update }), useClearChatHistory: () => vi.fn(), isArchived: () => false, isMuted: () => false }));
+vi.mock('@/hooks/use-chat-tabs', () => ({ useChatTabs: () => ({ tabs: [{ id: 'all', name: 'All', emoji: '', builtin: true, hidden: false, chats: [] }], state: { tabs: [], order: ['all'], hidden: [] }, canAdd: true, create: vi.fn(), update: vi.fn(), remove: vi.fn(), toggleChat: vi.fn(), addChats: vi.fn(), setHidden: vi.fn(), reorder: vi.fn() }) }));
 vi.mock('@/hooks/use-public-chat-unread', () => ({ usePublicChatUnreadCount: () => 0, usePublicChatReading: vi.fn() }));
 vi.mock('@/hooks/use-dm-realtime', () => ({ useDMRealtime: vi.fn() }));
 vi.mock('@/hooks/use-draft', () => ({ useDraftText: () => '' }));
@@ -31,7 +32,7 @@ const sock = vi.hoisted(() => ({ emitSendMessage: vi.fn(async () => ({})), waitF
 vi.mock('@/lib/api/dehub/dm-socket', () => sock);
 vi.mock('@/lib/api/dehub/blocks', () => ({ blockUser: vi.fn() }));
 vi.mock('@/lib/dm-e2ee/keys', () => ({ prepareOutgoing: vi.fn(async (_peer: string, text: string) => ({ content: text, encrypted: false })) }));
-vi.mock('@/lib/media-url', () => ({ buildAvatarUrl: () => '', extractAvatarPath: () => '' }));
+vi.mock('@/lib/media-url', () => ({ buildAvatarUrl: () => '', extractAvatarPath: () => '', storageImage: () => '' }));
 vi.mock('@/components/app/chat', () => ({
   DirectMessageChat: ({ onBack }: { onBack: () => void }) => <button onClick={onBack}>Back to messages</button>,
   PublicChat: () => null, NewConversationModal: () => null, NewMessageSelector: () => null,

@@ -44,7 +44,10 @@ import { AuthGate } from '@/components/app/AuthGate';
 import { useConversations, useCreateConversation, useUserSearchForDM, useDeleteConversation } from '@/hooks/use-messages';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { getMediaUrl, getAccountInfo, type DeHubConversation, type DeHubUser } from '@/lib/api/dehub';
-import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { buildAvatarUrl, extractAvatarPath, storageImage } from '@/lib/media-url';
+import { useChatTabs } from '@/hooks/use-chat-tabs';
+import { CHAT_DRAG_TYPE, ChatTabBar, ChatTabDeleteConfirm, ChatTabEditor, ChatTabEmpty, ChatTabsManager, type TabCandidate } from '@/components/app/chat/ChatTabs';
+import { PUBLIC_CHAT_TAB_ID } from '@/lib/api/dehub/chat-tabs';
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BadgedName } from '@/components/app/BadgedName';
@@ -420,10 +423,34 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const [showRequests, setShowRequests] = useState(false);
   const requestConversations = liveConversations.filter(c => c.isRequest);
   const requestUnread = requestConversations.reduce((n, c) => n + (c.unreadCount || 0), 0);
-  const inRequests = showRequests && !searchQuery.trim();
+
+  /*
+   * Tabs above the list: All, Direct, Communities, Requests and the person's
+   * own tabs (saved to their account). A search always looks through
+   * everything, so the tabs step aside while one is typed.
+   */
+  const chatTabs = useChatTabs();
+  const [activeTabRaw, setActiveTabRaw] = useState<string>(() => {
+    try { return localStorage.getItem('riftn.chatTab') || 'all'; } catch { return 'all'; }
+  });
+  const setActiveTab = useCallback((id: string) => {
+    setActiveTabRaw(id);
+    try { localStorage.setItem('riftn.chatTab', id); } catch { /* private mode */ }
+  }, []);
+  const tabsOn = !guest && !searchQuery.trim();
+  const activeTabView = chatTabs.tabs.find(x => x.id === activeTabRaw && !x.hidden);
+  const activeTab = tabsOn && activeTabView ? activeTabView.id : 'all';
+  const customTab = activeTabView && !activeTabView.builtin && tabsOn ? activeTabView : null;
+  const requestsTabShown = !chatTabs.tabs.find(x => x.id === 'requests')?.hidden;
+  const [tabEditor, setTabEditor] = useState<{ id?: string; preset?: string[] } | null>(null);
+  const [tabManager, setTabManager] = useState(false);
+  const [tabDelete, setTabDelete] = useState<string | null>(null);
+
+  const requestsMode = showRequests || activeTab === 'requests';
+  const inRequests = requestsMode && !searchQuery.trim();
   const visibleConversations = searchQuery.trim()
     ? liveConversations
-    : showRequests
+    : requestsMode
       ? requestConversations
       : liveConversations.filter(c => !c.isRequest);
 
@@ -446,6 +473,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // The last request was accepted or deleted: nothing left to show here.
   const noRequestsLeft = requestConversations.length === 0;
   useEffect(() => { if (noRequestsLeft) setShowRequests(false); }, [noRequestsLeft]);
+  // The Requests tab hides itself once it is empty, so leave it for All.
+  useEffect(() => {
+    if (noRequestsLeft && !isLoading && activeTabRaw === 'requests') setActiveTab('all');
+  }, [noRequestsLeft, isLoading, activeTabRaw, setActiveTab]);
   const [showSettings, setShowSettings] = useState(false);
   // Opening any chat puts settings away.
   useEffect(() => {
@@ -480,6 +511,26 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     : showArchived
       ? archivedRooms
       : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
+  // "Add to tab" in a chat's menu.
+  const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => ({
+    tabs: chatTabs.tabs.filter(x => !x.builtin).map(x => ({ id: x.id, name: x.name, emoji: x.emoji, has: x.chats.includes(chatId) })),
+    onToggleTab: (tabId) => {
+      const tab = chatTabs.tabs.find(x => x.id === tabId);
+      if (!tab) return;
+      const had = tab.chats.includes(chatId);
+      void chatTabs.toggleChat(tabId, chatId);
+      toast.success(had
+        ? _copy('chatTabs.removedFrom', { defaultValue: 'Removed from {{name}}', name: tab.name })
+        : _copy('chatTabs.addedTo', { defaultValue: 'Added to {{name}}', name: tab.name }));
+    },
+    onNewTabWith: () => setTabEditor({ preset: [chatId] }),
+  });
+  // Which chats the open tab shows.
+  const convInTab = (c: DeHubConversation) =>
+    activeTab === 'communities' ? false : customTab ? customTab.chats.includes(c.id) : true;
+  const roomInTab = (c: { id: string }) =>
+    activeTab === 'direct' ? false : customTab ? customTab.chats.includes(roomChatId(c.id)) : true;
+  const publicInTab = activeTab === 'direct' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
   const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
     pref: roomPref(c),
     hasUnread: false,
@@ -488,6 +539,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       ? () => updateChatPref(roomChatId(c.id), { listed: false, pinned: false })
       : undefined,
     onSelectMany: () => setBulkIds(new Set([roomChatId(c.id)])),
+    ...tabMenuFor(roomChatId(c.id)),
   });
   const openRoomChat = (c: (typeof groupChats)[number]) => {
     if (roomPref(c)?.markedUnread) updateChatPref(roomChatId(c.id), { unread: false });
@@ -518,6 +570,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onClearHistory: () => setClearTarget(conv),
       onDelete: () => handleDeleteConversation(conv),
       onSelectMany: () => setBulkIds(new Set([conv.id])),
+      ...tabMenuFor(conv.id),
     };
   };
 
@@ -1076,6 +1129,125 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     );
   }
 
+  // Unread chats per tab, for the counts on the tab row.
+  const inboxConvs = liveConversations.filter(c => !c.isRequest);
+  const unreadOf = (c: DeHubConversation) => c.unreadCount || 0;
+  const tabUnread: Record<string, number> = {
+    all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
+    direct: inboxConvs.reduce((n, c) => n + unreadOf(c), 0),
+    communities: publicUnread,
+    requests: requestUnread,
+  };
+  for (const tab of chatTabs.tabs) {
+    if (tab.builtin) continue;
+    tabUnread[tab.id] = inboxConvs.filter(c => tab.chats.includes(c.id)).reduce((n, c) => n + unreadOf(c), 0)
+      + (tab.chats.includes(PUBLIC_CHAT_TAB_ID) ? publicUnread : 0);
+  }
+  // An empty Requests tab stays out of the row.
+  const tabRowTabs = requestConversations.length
+    ? chatTabs.tabs
+    : chatTabs.tabs.map(x => (x.id === 'requests' && activeTab !== 'requests' ? { ...x, hidden: true } : x));
+  // Every chat the tab editor can put in a tab.
+  const tabCandidates: TabCandidate[] = [
+    { id: PUBLIC_CHAT_TAB_ID, name: t('publicChat.title'), avatar: dehubLogo, kind: _copy('chatTabs.kindPublic', { defaultValue: 'Public' }) },
+    ...chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).map(c => ({
+      id: roomChatId(c.id),
+      name: c.name,
+      avatar: c.avatar_url ? storageImage(c.avatar_url, 80) : undefined,
+      kind: c.kind === 'channel' ? _copy('chatTabs.kindChannel', { defaultValue: 'Channel' })
+        : c.kind === 'group' ? _copy('chatTabs.kindGroup', { defaultValue: 'Group' })
+        : _copy('chatTabs.kindCommunity', { defaultValue: 'Community' }),
+    })),
+    ...inboxConvs.map(c => {
+      const u = c.otherUser || c.participants?.[0];
+      const name = c.isGroup ? (c as { name?: string }).name || 'Group' : (u?.displayName || (u as { display_name?: string } | undefined)?.display_name || u?.username || 'User');
+      return {
+        id: c.id,
+        name,
+        avatar: u?.address ? buildAvatarUrl(u.address, extractAvatarPath(u)) : undefined,
+        kind: _copy('chatTabs.kindDirect', { defaultValue: 'Direct' }),
+        round: true,
+      };
+    }),
+  ];
+  const tabBeingEdited = tabEditor?.id ? chatTabs.tabs.find(x => x.id === tabEditor.id) : undefined;
+  const moveCustomTab = (id: string, by: -1 | 1) => {
+    const ids = chatTabs.tabs.map(x => x.id);
+    const customIds = chatTabs.tabs.filter(x => !x.builtin).map(x => x.id);
+    const swapWith = customIds[customIds.indexOf(id) + by];
+    if (!swapWith) return;
+    const a = ids.indexOf(id), b = ids.indexOf(swapWith);
+    [ids[a], ids[b]] = [ids[b], ids[a]];
+    void chatTabs.reorder(ids);
+  };
+  const tabBar = tabsOn ? (
+    <ChatTabBar
+      tabs={tabRowTabs}
+      active={activeTab}
+      unread={tabUnread}
+      onSelect={(id) => { setShowArchived(false); setActiveTab(id); }}
+      onNew={() => setTabEditor({})}
+      onManage={() => setTabManager(true)}
+      onEdit={(id) => setTabEditor({ id })}
+      onMove={moveCustomTab}
+      onHide={(id) => { void chatTabs.setHidden(id, true); if (activeTab === id) setActiveTab('all'); }}
+      onDelete={(id) => setTabDelete(id)}
+      onDropChat={(tabId, chatId) => {
+        const tab = chatTabs.tabs.find(x => x.id === tabId);
+        if (!tab || tab.chats.includes(chatId)) return;
+        void chatTabs.addChats(tabId, [chatId]);
+        toast.success(_copy('chatTabs.addedTo', { defaultValue: 'Added to {{name}}', name: tab.name }));
+      }}
+    />
+  ) : null;
+  const tabSheets = (
+    <>
+      {tabEditor && (
+        <ChatTabEditor
+          initial={tabBeingEdited ? { id: tabBeingEdited.id, name: tabBeingEdited.name, emoji: tabBeingEdited.emoji, chats: tabBeingEdited.chats } : { name: '', emoji: '', chats: tabEditor.preset ?? [] }}
+          candidates={tabCandidates}
+          onClose={() => setTabEditor(null)}
+          onDelete={tabBeingEdited ? () => { setTabDelete(tabBeingEdited.id); setTabEditor(null); } : undefined}
+          onSave={(tab) => {
+            if (tabBeingEdited) {
+              void chatTabs.update(tabBeingEdited.id, tab);
+            } else {
+              if (!chatTabs.canAdd) { toast.error(_copy('chatTabs.tooMany', { defaultValue: 'You can have up to 10 tabs' })); return; }
+              const id = chatTabs.create(tab);
+              setActiveTab(id);
+            }
+            setTabEditor(null);
+          }}
+        />
+      )}
+      {tabManager && !tabEditor && !tabDelete && (
+        <ChatTabsManager
+          tabs={chatTabs.tabs}
+          canAdd={chatTabs.canAdd}
+          onReorder={(ids) => void chatTabs.reorder(ids)}
+          onHide={(id, hidden) => { void chatTabs.setHidden(id, hidden); if (hidden && activeTab === id) setActiveTab('all'); }}
+          onEdit={(id) => setTabEditor({ id })}
+          onDelete={(id) => setTabDelete(id)}
+          onNew={() => setTabEditor({})}
+          onClose={() => setTabManager(false)}
+        />
+      )}
+      {tabDelete && chatTabs.tabs.find(x => x.id === tabDelete) && (
+        <ChatTabDeleteConfirm
+          tab={chatTabs.tabs.find(x => x.id === tabDelete)!}
+          onClose={() => setTabDelete(null)}
+          onConfirm={() => {
+            const tab = chatTabs.tabs.find(x => x.id === tabDelete);
+            void chatTabs.remove(tabDelete);
+            if (activeTabRaw === tabDelete) setActiveTab('all');
+            setTabDelete(null);
+            if (tab) toast.success(_copy('chatTabs.deleted', { defaultValue: 'Deleted {{name}}', name: tab.name }));
+          }}
+        />
+      )}
+    </>
+  );
+
   // Computers only: phones keep the pill header they already have.
   const fullscreenTop = fullscreen && !phonePill ? (
     <ChatListTop
@@ -1216,6 +1388,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </div>
           </PageIsland>)}
 
+          {tabBar}
+          {tabSheets}
+
           {/* Conversation List */}
           <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             <ChatPinStrip
@@ -1226,7 +1401,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             />
             {/* Public Chat (pinned) */}
             {!inRequests && (<>
-            <button
+            {publicInTab && <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row
               data-selected={fullscreen && showPublicChat ? '' : undefined}
@@ -1248,10 +1423,10 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   {publicUnread > 99 ? '99+' : publicUnread}
                 </span>
               )}
-            </button>
+            </button>}
 
             {/* Groups and channels you are in */}
-            {listedRooms.map((chat) => {
+            {listedRooms.filter(roomInTab).map((chat) => {
               const row = (
                 <GroupChatRow
                   key={chat.id}
@@ -1269,7 +1444,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               );
               return richList ? (
                 <ChatRowContextMenu key={chat.id} {...roomOptionsFor(chat)}>
-                  <div data-chat-row data-pinned={roomPinnedAt(chat) > 0 ? '' : undefined}>{row}</div>
+                  <div data-chat-row data-pinned={roomPinnedAt(chat) > 0 ? '' : undefined} draggable onDragStart={(e) => e.dataTransfer.setData(CHAT_DRAG_TYPE, roomChatId(chat.id))}>{row}</div>
                 </ChatRowContextMenu>
               ) : <div key={chat.id} onContextMenu={rightClickPick(roomChatId(chat.id))}>{row}</div>;
             })}
@@ -1303,8 +1478,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             )}
 
             {/* Message requests: people you don't follow */}
-            {inRequests && <MessageRequestsHeader onBack={() => setShowRequests(false)} />}
-            {!inRequests && !showArchived && !searchQuery.trim() && !isLoading && !isError && requestConversations.length > 0 && (
+            {inRequests && <MessageRequestsHeader onBack={() => { setShowRequests(false); if (activeTab === 'requests') setActiveTab('all'); }} />}
+            {!inRequests && !showArchived && !searchQuery.trim() && !isLoading && !isError && requestConversations.length > 0 && (!tabsOn || !requestsTabShown) && (
               <MessageRequestsRow count={requestConversations.length} unread={requestUnread} onClick={() => setShowRequests(true)} />
             )}
 
@@ -1320,7 +1495,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 {_copy('chatMenu.archivedChats', { defaultValue: 'Archived chats' })}
               </button>
             )}
-            {!isLoading && !isError && listedConversations.map((conv) => {
+            {customTab && !isLoading && !isError && !showArchived
+              && !listedConversations.some(convInTab) && !listedRooms.some(roomInTab) && !publicInTab && (
+              <ChatTabEmpty tab={customTab} onAdd={() => setTabEditor({ id: customTab.id })} />
+            )}
+            {!isLoading && !isError && listedConversations.filter(convInTab).map((conv) => {
               const row = (
                 <ConversationItem
                   key={conv.id}
@@ -1341,11 +1520,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               );
               return richList ? (
                 <ChatRowContextMenu key={conv.id} {...chatOptionsFor(conv)}>
-                  <div data-chat-row data-pinned={pinnedAt(conv) > 0 ? '' : undefined}>{row}</div>
+                  <div data-chat-row data-pinned={pinnedAt(conv) > 0 ? '' : undefined} draggable onDragStart={(e) => e.dataTransfer.setData(CHAT_DRAG_TYPE, conv.id)}>{row}</div>
                 </ChatRowContextMenu>
               ) : <div key={conv.id} onContextMenu={rightClickPick(conv.id)}>{row}</div>;
             })}
-            {richList && !showArchived && archivedCount > 0 && !searchQuery.trim() && (
+            {richList && !showArchived && archivedCount > 0 && !searchQuery.trim() && activeTab === 'all' && (
               <button
                 type="button"
                 data-chat-archive-open
