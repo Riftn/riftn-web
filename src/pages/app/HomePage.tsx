@@ -18,7 +18,7 @@ import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTabIndicator } from '@/hooks/use-tab-indicator';
 import { useDragTabIndicator } from '@/hooks/use-drag-tab-indicator';
-import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
+import { GlassIndicator, glideOnTabClick } from '@/components/app/feeds/GlassIndicator';
 import { useSearchParams, useNavigationType, useLocation, useNavigate, useMatch } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import Settings2 from "@/components/ui/cut-icons/settings";
@@ -666,8 +666,10 @@ export default function HomePage() {
     // dismiss the overlay and take the user back to the feed on that tab —
     // otherwise the tab change happens underneath the overlay and looks broken.
     if (isPostOverlayActive) {
-      setEnableHomeTransition(true);
-      setTimeout(() => setEnableHomeTransition(false), 450);
+      if (glideOnTabClick()) {
+        setEnableHomeTransition(true);
+        setTimeout(() => setEnableHomeTransition(false), 450);
+      }
       setActiveTab(tabValue);
       resetFilters();
       navigate('/app', { replace: false });
@@ -685,9 +687,11 @@ export default function HomePage() {
       scrollDocumentToSmooth();
       if (!scrolledDown && isFeedSearchTab(tabValue)) openFeedSearch();
     } else {
-      setEnableHomeTransition(true);
-      // Auto-reset after animation completes to prevent stale transitions on page nav
-      setTimeout(() => setEnableHomeTransition(false), 450);
+      if (glideOnTabClick()) {
+        setEnableHomeTransition(true);
+        // Auto-reset after animation completes to prevent stale transitions on page nav
+        setTimeout(() => setEnableHomeTransition(false), 450);
+      }
       setActiveTab(tabValue);
       resetFilters();
     }
