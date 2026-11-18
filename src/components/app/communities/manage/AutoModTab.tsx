@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -33,7 +34,9 @@ export interface AutoModTabProps {
   membership: CommunityMember | null | undefined;
 }
 
-const MIN_USD_OPTIONS = [0, 10, 25, 50, 100, 250, 500, 1000, 5000];
+/** The buy bot never posts buys under $50; admins pick any size from there up. */
+const MIN_USD_FLOOR = 50;
+const MIN_USD_MAX = 1_000_000;
 const FLOOD_MAX_OPTIONS = [3, 5, 8, 10, 15, 20];
 const FLOOD_SECONDS_OPTIONS = [5, 10, 30, 60, 120, 300];
 
@@ -53,11 +56,17 @@ export function AutoModTab({ community }: AutoModTabProps) {
   const update = useUpdateGroupBotSettings();
   const [saving, setSaving] = useState<string | null>(null);
   const [wordsDraft, setWordsDraft] = useState('');
+  const [minDraft, setMinDraft] = useState('');
 
   const serverWords = (data?.automod.banned_words ?? []).join('\n');
   useEffect(() => {
     setWordsDraft(serverWords);
   }, [serverWords]);
+
+  const serverMin = data?.buy_bot.min_usd;
+  useEffect(() => {
+    if (serverMin != null) setMinDraft(String(Math.max(MIN_USD_FLOOR, serverMin)));
+  }, [serverMin]);
 
   const save = (key: string, patch: GroupBotSettingsPatch, done?: string) => {
     setSaving(key);
@@ -138,22 +147,26 @@ export function AutoModTab({ community }: AutoModTabProps) {
                 {t('communities.buyBot.minUsd', { defaultValue: 'Smallest buy to post' })}
               </span>
               {spin('bb-min')}
-              <Select
-                value={String(buyBot.min_usd)}
-                disabled={saving !== null || !buyBot.enabled}
-                onValueChange={(v) => save('bb-min', { buy_bot: { min_usd: Number(v) } })}
-              >
-                <SelectTrigger className="h-9 w-28 rounded-xl border-white/10 bg-white/[0.04] text-white text-sm">
-                  <SelectValue placeholder={`$${buyBot.min_usd}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  {[...new Set([...MIN_USD_OPTIONS, buyBot.min_usd])].sort((a, b) => a - b).map((usd) => (
-                    <SelectItem key={usd} value={String(usd)}>
-                      {usd === 0 ? t('communities.buyBot.any', { defaultValue: 'Any size' }) : `$${usd.toLocaleString('en-US')}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="relative w-28">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">$</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={MIN_USD_FLOOR}
+                  step={1}
+                  value={minDraft}
+                  disabled={saving !== null || !buyBot.enabled}
+                  aria-label={t('communities.buyBot.minUsd', { defaultValue: 'Smallest buy to post' })}
+                  className="h-9 rounded-xl border-white/10 bg-white/[0.04] pl-6 text-white text-sm"
+                  onChange={(e) => setMinDraft(e.target.value.replace(/[^\d]/g, ''))}
+                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                  onBlur={() => {
+                    const n = Math.min(MIN_USD_MAX, Math.max(MIN_USD_FLOOR, Math.round(Number(minDraft) || 0)));
+                    setMinDraft(String(n));
+                    if (n !== buyBot.min_usd) save('bb-min', { buy_bot: { min_usd: n } });
+                  }}
+                />
+              </div>
             </div>
           </>
         )}
