@@ -9,12 +9,13 @@ import { cn } from "@/lib/utils";
 import { OverlayOpenTracker } from "@/lib/overlay-open";
 import { guardOutsideDismiss } from "@/lib/overlay-dismiss";
 import { OverlayContentPresent, useOverlayLifetime } from '@/hooks/use-overlay-lifetime';
+import { OverlayExit, useOverlayExitRef } from '@/components/ui/overlay-exit';
 
 const Sheet = ({ onOpenChange, ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) => {
   const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange);
-  return <OverlayContentPresent.Provider value={lifetime.present}>
+  return <OverlayContentPresent.Provider value={lifetime.present}><OverlayExit present={lifetime.present}>
     <SheetPrimitive.Root {...props} open={lifetime.open} onOpenChange={lifetime.onChange} />
-  </OverlayContentPresent.Provider>;
+  </OverlayExit></OverlayContentPresent.Provider>;
 };
 
 const SheetTrigger = SheetPrimitive.Trigger;
@@ -34,7 +35,7 @@ const SheetOverlay = React.forwardRef<
       className,
     )}
     {...props}
-    ref={ref}
+    ref={useOverlayExitRef(ref)}
   />
 ));
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
@@ -68,6 +69,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
   ({ side = "right", className, children, onPointerDownOutside, ...props }, ref) => {
   const { t: _copy } = _useCopy();
     const present = React.useContext(OverlayContentPresent);
+    const surfaceRef = useOverlayExitRef(ref);
     if (!present) return null;
     return (
     <SheetPortal>
@@ -75,7 +77,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
       <OverlayOpenTracker />
       <SheetOverlay />
       <SheetPrimitive.Content
-        ref={ref}
+        ref={surfaceRef}
         className={cn(sheetVariants({ side }), className)}
         {...props}
         /* After the spread: another overlay's own clicks are not clicks off this

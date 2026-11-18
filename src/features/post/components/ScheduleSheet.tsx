@@ -164,8 +164,18 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent glass hideHandle column scrollable className="max-h-[92dvh] px-4 pb-2" data-when-sheet>
-        <DrawerHeader className="relative mx-auto w-full max-w-[440px] px-0 pb-3">
+      {/* Desktop: the sheet hugs its 440px of content with an even 24px all
+          round, centred in the column it opened from, instead of stretching
+          across the whole column. */}
+      <DrawerContent
+        glass
+        hideHandle
+        column
+        scrollable
+        className="max-h-[92dvh] px-4 pb-2 md:left-[calc(var(--app-main-left,0px)+(var(--app-main-width,100vw)-488px)/2)] md:w-[488px] md:px-6 md:pb-0"
+        data-when-sheet
+      >
+        <DrawerHeader className="relative mx-auto w-full max-w-[440px] px-0 pb-3 md:pt-4">
           <div className="flex items-center justify-between">
             <button type="button" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="-ml-2 rounded-xl p-2 transition-colors hover:bg-white/10">
               <X className="h-5 w-5 text-white/70" />
@@ -273,7 +283,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
 
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/50">{t('whenSheet.orPickDay', { defaultValue: 'Or pick a day' })}</p>
-            <div ref={stripRef} role="tablist" className="scrollbar-hide -mx-1 flex gap-1 overflow-x-auto px-1 pb-2">
+            <div ref={stripRef} role="tablist" className="scrollbar-hide -mx-1 flex gap-1 overflow-x-auto px-1 pb-2 [mask-image:linear-gradient(90deg,transparent,#000_12px,#000_calc(100%_-_28px),transparent)]">
               {days.map((d, i) => {
                 const active = i === dayIndex;
                 return (
@@ -320,7 +330,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
             {kindTip && <p>{kindTip}</p>}
           </div>
 
-          <div className="flex flex-col gap-2 pb-1">
+          <div className="flex flex-col gap-2 pb-1 md:pb-0">
             <button type="button" data-kit-button="primary" onClick={handleConfirm} disabled={!validTime} className="w-full">
               {confirmText}
             </button>

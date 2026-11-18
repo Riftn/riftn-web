@@ -5,12 +5,13 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { OverlayOpenTracker } from "@/lib/overlay-open";
 import { OverlayContentPresent, useOverlayLifetime } from '@/hooks/use-overlay-lifetime';
+import { OverlayExit, useOverlayExitRef } from '@/components/ui/overlay-exit';
 
 const AlertDialog = ({ onOpenChange, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) => {
   const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange);
-  return <OverlayContentPresent.Provider value={lifetime.present}>
+  return <OverlayContentPresent.Provider value={lifetime.present}><OverlayExit present={lifetime.present}>
     <AlertDialogPrimitive.Root {...props} open={lifetime.open} onOpenChange={lifetime.onChange} />
-  </OverlayContentPresent.Provider>;
+  </OverlayExit></OverlayContentPresent.Provider>;
 };
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
@@ -28,7 +29,7 @@ const AlertDialogOverlay = React.forwardRef<
       className,
     )}
     {...props}
-    ref={ref}
+    ref={useOverlayExitRef(ref)}
   />
 ));
 AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
@@ -38,6 +39,7 @@ const AlertDialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
 >(({ className, ...props }, ref) => {
   const present = React.useContext(OverlayContentPresent);
+  const surfaceRef = useOverlayExitRef(ref);
   if (!present) return null;
   return (
   <AlertDialogPortal>
@@ -45,7 +47,7 @@ const AlertDialogContent = React.forwardRef<
     <OverlayOpenTracker />
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
-      ref={ref}
+      ref={surfaceRef}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-2xl",
         className,
