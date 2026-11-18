@@ -2456,6 +2456,98 @@ export type Database = {
           },
         ]
       }
+      community_bot_settings: {
+        Row: {
+          automod: Json
+          buy_bot: Json
+          community_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          automod?: Json
+          buy_bot?: Json
+          community_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          automod?: Json
+          buy_bot?: Json
+          community_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_bot_settings_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: true
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_buy_bot_feeds: {
+        Row: {
+          chain_id: string
+          decimals: number | null
+          feed: string
+          head_block: number
+          last_block: number
+          last_error: string | null
+          market_cap: number | null
+          pair_address: string
+          price_at: string | null
+          price_request: number | null
+          price_usd: number | null
+          rpc_request: number | null
+          rpc_sent_at: string | null
+          rpc_to_block: number | null
+          symbol: string | null
+          token_address: string
+          updated_at: string
+        }
+        Insert: {
+          chain_id: string
+          decimals?: number | null
+          feed: string
+          head_block?: number
+          last_block?: number
+          last_error?: string | null
+          market_cap?: number | null
+          pair_address: string
+          price_at?: string | null
+          price_request?: number | null
+          price_usd?: number | null
+          rpc_request?: number | null
+          rpc_sent_at?: string | null
+          rpc_to_block?: number | null
+          symbol?: string | null
+          token_address: string
+          updated_at?: string
+        }
+        Update: {
+          chain_id?: string
+          decimals?: number | null
+          feed?: string
+          head_block?: number
+          last_block?: number
+          last_error?: string | null
+          market_cap?: number | null
+          pair_address?: string
+          price_at?: string | null
+          price_request?: number | null
+          price_usd?: number | null
+          rpc_request?: number | null
+          rpc_sent_at?: string | null
+          rpc_to_block?: number | null
+          symbol?: string | null
+          token_address?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       community_chat_messages: {
         Row: {
           avatar_url: string | null
@@ -4979,6 +5071,8 @@ export type Database = {
           like_count: number
           media_type: string | null
           media_url: string | null
+          option_tallies: Json | null
+          options: string[] | null
           proposal_number: number
           status: string
           title: string
@@ -4999,6 +5093,8 @@ export type Database = {
           like_count?: number
           media_type?: string | null
           media_url?: string | null
+          option_tallies?: Json | null
+          options?: string[] | null
           proposal_number?: number
           status?: string
           title: string
@@ -5019,6 +5115,8 @@ export type Database = {
           like_count?: number
           media_type?: string | null
           media_url?: string | null
+          option_tallies?: Json | null
+          options?: string[] | null
           proposal_number?: number
           status?: string
           title?: string
@@ -5033,6 +5131,7 @@ export type Database = {
           badge_name: string | null
           created_at: string
           id: string
+          option_index: number | null
           proposal_id: string
           vote_type: number
           vote_weight: number
@@ -5042,6 +5141,7 @@ export type Database = {
           badge_name?: string | null
           created_at?: string
           id?: string
+          option_index?: number | null
           proposal_id: string
           vote_type: number
           vote_weight?: number
@@ -5051,6 +5151,7 @@ export type Database = {
           badge_name?: string | null
           created_at?: string
           id?: string
+          option_index?: number | null
           proposal_id?: string
           vote_type?: number
           vote_weight?: number
@@ -10121,6 +10222,14 @@ export type Database = {
         Args: { _community_id: string; _perm: string }
         Returns: string
       }
+      community_automod_banned: {
+        Args: { _text: string; _words: Json }
+        Returns: string
+      }
+      community_automod_has_link: { Args: { _text: string }; Returns: boolean }
+      community_automod_resolve: { Args: { _raw: Json }; Returns: Json }
+      community_automod_runs: { Args: { _text: string }; Returns: string }
+      community_automod_words: { Args: { _text: string }; Returns: string }
       community_ban_member: {
         Args: {
           _community_id: string
@@ -10130,6 +10239,9 @@ export type Database = {
         }
         Returns: undefined
       }
+      community_buy_bot_resolve: { Args: { _raw: Json }; Returns: Json }
+      community_buy_bot_rpc: { Args: { _chain: string }; Returns: string }
+      community_buy_bot_tick: { Args: never; Returns: Json }
       community_chat_page_v1: {
         Args: {
           _anchor_id?: string
@@ -10191,6 +10303,11 @@ export type Database = {
         Returns: Json
       }
       community_entry_token: { Args: { _chain_id: number }; Returns: string }
+      community_get_bot_settings: {
+        Args: { _community_id: string }
+        Returns: Json
+      }
+      community_hex_to_numeric: { Args: { _hex: string }; Returns: number }
       community_holder_check_result: {
         Args: { _community_id: string }
         Returns: Json
@@ -10364,6 +10481,10 @@ export type Database = {
       community_unmute_member: {
         Args: { _community_id: string; _target: string }
         Returns: undefined
+      }
+      community_update_bot_settings: {
+        Args: { _community_id: string; _patch: Json }
+        Returns: Json
       }
       community_update_settings: {
         Args: { _community_id: string; _patch: Json }
