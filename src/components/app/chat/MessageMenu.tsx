@@ -209,8 +209,8 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           className="flex flex-col gap-1.5"
         >
           {showEmoji && view === 'main' && (
-            <div className="flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 pr-2.5" data-msg-menu-surface data-msg-menu-emoji>
-              {quickReactions!.slice(0, 6).map((emoji, i) => (
+            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-2.5' : 'pr-1.5'}`} data-msg-menu-surface data-msg-menu-emoji>
+              {quickReactions!.slice(0, allowMore ? 6 : 7).map((emoji, i) => (
                 <motion.button
                   key={emoji}
                   type="button"
@@ -221,7 +221,8 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   transition={{ delay: 0.02 + i * 0.022, type: 'spring', stiffness: 520, damping: 24 }}
                   whileHover={{ scale: 1.28, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-[22px] leading-none"
+                  // Seven fit the capsule when there is no chevron (comments: the six faces and 👎).
+                  className={`grid shrink-0 place-items-center rounded-full leading-none ${!allowMore && quickReactions!.length > 6 ? 'h-8 w-8 text-[20px]' : 'h-[34px] w-[34px] text-[22px]'}`}
                   data-msg-menu-chip={mine.includes(emoji) ? 'on' : ''}
                 >
                   {emoji}
