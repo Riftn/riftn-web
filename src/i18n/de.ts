@@ -1216,7 +1216,7 @@ export const de = {
     introDesc: 'Setzen Sie die erweiterten Funktionen über alle d \'apps hinweg ein, um auf verschiedene Clubstufen zuzugreifen und Ihre Rechenleistung oder Ihren Speicherplatz von wenig als Mobilgerät zur Verfügung zu stellen, um Ihren Anteil an den Protokolleinnahmen zu ermitteln.',
     introDesc2: 'Da die weiteren Zuweisungen nun dynamisch sein werden, abhängig von den Protokollgebühren, unterliegen die Bezeichnungen jederzeit den Anforderungen, um sicherzustellen, dass die Protokollanforderungen jederzeit im Vordergrund stehen. Das Staking-Protokoll wird derzeit auch mit der baldigen Veröffentlichung auf der Basis aktualisiert.',
     technicals: 'Technische Daten',
-    technicalsDesc1: 'Der Beitritt zu Clubs schaltet auch die folgenden Abzeichen frei, die in Ihrem dehub.io-Profil, Kommentaren, Uploads und Live-Chat-Kommunikation angezeigt werden.',
+    technicalsDesc1: 'Der Beitritt zu Clubs schaltet auch die folgenden Abzeichen frei, die in Ihrem riftn.com-Profil, Kommentaren, Uploads und Live-Chat-Kommunikation angezeigt werden.',
     technicalsDesc2: 'Neben den Vorteilen für die Anzahl der eingesetzten Riftn-Token gibt es auch drei vordefinierte Stufen, die durch die Einsatzdauer bestimmt werden und Benutzerbelohnungen definieren.',
     tier1: 'Stufe 1',
     tier1Rewards: '25 % Belohnungen',

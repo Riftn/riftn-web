@@ -1358,7 +1358,7 @@ export const ja = {
     diagramCoordinatorRole: 'タスク、暗号化+復号化',
     diagramDataFlowStart: 'データフローの開始',
     diagramMinersRole1: 'コンピューティングパワーを提供する',
-    diagramMinersRole2: 'deHubトークンと引き換えに',
+    diagramMinersRole2: 'Riftnトークンと引き換えに',
   },
   e2ee: {
     fetchDbDesc: 'Riftnが取得するデータ：encrypted_content + nonce + version',

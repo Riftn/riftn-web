@@ -6318,7 +6318,7 @@
     "cancelled": "Gekanselleer",
     "listed": "Gelys. Enigiemand kan dit nou koop.",
     "offered": "Aanbod gestuur. Die houer kan dit enige tyd aanvaar.",
-    "dehubPost": "DeHub-pos",
+    "dehubPost": "Riftn-pos",
     "youHold": "Jy hou {{n}}",
     "buyNow": "Koop nou",
     "dropsTo": "Prys daal tot {{price}} teen {{date}}",
@@ -11113,7 +11113,7 @@
       "stakedForVoting": "Ek stem saam, ek gooi my stem na middagete. Hoeveel Riftn-tokens het jy vir stemmag?"
     },
     "home": {
-      "stakedPost": "50k dehub aanbieding. APY lyk stewig op 12,4%. Langdurige mentaliteit. 💎🙌"
+      "stakedPost": "50k Riftn aanbieding. APY lyk stewig op 12,4%. Langdurige mentaliteit. 💎🙌"
     },
     "notifications": {
       "tippedYou": "getik jy {{amount}} tokens"
@@ -16635,7 +16635,6 @@
     "8731790030df": "@noble/kurwes",
     "e745d68f7240": "@noble/hasj",
     "886e533d7364": "dev@riftn.com",
-    "e8921bdee214": "@dehub_offisieel",
     "dbc2def4603a": "Verdere in",
     "ee1c1eecf1b6": "Riftn is deur sommige van die wêreld se grootste en meest betroubare publikasies gedekker. Hier is die artikels wat lig op ons missie om die media te demokratiseer.",
     "6ccae4bbf68d": "Die uitgewer het die oorspronklike verwyder; hierdie oop die Wayback Machine-kaptein.",

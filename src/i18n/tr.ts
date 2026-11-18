@@ -1308,7 +1308,7 @@ export const tr = {
     miniAppsB3: "Birini inşa et:",
     miniAppsB3Desc: "Herhangi bir web sitesi, bir komut dosyası etiketine sahip mini bir uygulama haline gelir. riftn.com/apps/dev manifestonuzu kontrol eder, feed kartınızı önizler ve uygulamayı kimse görmeden Riftn'da çalıştırır. Farcaster mini uygulamaları olduğu gibi çalışır.",
     miniAppsB4Desc: "Her uygulama doğrulanmış, incelenmemiş veya geliştirici önizlemesi olarak işaretlenir, böylece neyi açtığınızı bilirsiniz.",
-    arcadeDesc: "Arcade, tarayıcı sekmesinde Riftn'ın içinde çalışan bir oyun rafıdır. Kurulacak bir şey yok, satın alınacak bir şey yok, ayrı bir hesap yok: birini açın ve oynayın. Bugün altı oyun geliyor — King's Gambit, çevrimiçi bir Elo merdivenine sahip sinematik bir 3D satranç oyunu; Claude of Duty, seviye yüklendikçe makinenizdeki her ağı, dokuyu ve sesi üreten bir atıcı; Jungle Trail, prosedürel olarak oluşturulmuş bir yağmur ormanında birinci şahıs yürüyüşü; Street Slayer, yan kaydırma onları yendi deHub için; Chartopia, masa monitörlerinde canlı piyasa yayınları ve WebXR aracılığıyla bir VR modu ile yürüyebileceğiniz bir ticaret alanı; ve Riftn topluluğu arasında kendinizin yaklaşık bir versiyonunu yerleştirmeyi seçebileceğiniz canlı bir 3D küre olan God's Eye. Geliştiriciler kendi oyunlarını inceleme için gönderebilir.",
+    arcadeDesc: "Arcade, tarayıcı sekmesinde Riftn'ın içinde çalışan bir oyun rafıdır. Kurulacak bir şey yok, satın alınacak bir şey yok, ayrı bir hesap yok: birini açın ve oynayın. Bugün altı oyun geliyor — King's Gambit, çevrimiçi bir Elo merdivenine sahip sinematik bir 3D satranç oyunu; Claude of Duty, seviye yüklendikçe makinenizdeki her ağı, dokuyu ve sesi üreten bir atıcı; Jungle Trail, prosedürel olarak oluşturulmuş bir yağmur ormanında birinci şahıs yürüyüşü; Street Slayer, yan kaydırma onları yendi Riftn için; Chartopia, masa monitörlerinde canlı piyasa yayınları ve WebXR aracılığıyla bir VR modu ile yürüyebileceğiniz bir ticaret alanı; ve Riftn topluluğu arasında kendinizin yaklaşık bir versiyonunu yerleştirmeyi seçebileceğiniz canlı bir 3D küre olan God's Eye. Geliştiriciler kendi oyunlarını inceleme için gönderebilir.",
     settingsB2Desc: "Her temanın bir örneğini içeren tema seçici, rahat veya kompakt yoğunluk, karartılmış ışıklar, bir tema üzerinde bir vurgu rengi ve solak mod.",
     settingsB3Desc: "Yetişkin içeriğin görünüp görünmemesi, Çocuklar Modu, varsayılan gönderi görünürlüğü, otomatik oynatma ve sesli başlatma ayarı, metrelenmiş bağlantılar için veri tasarrufu modu.",
     settingsB6Desc: "Çatlarınızı ihraç edin, verilerinizi çıkartın, hesabınıza bağlı cihazları ve oturumları inceleyin, AI sistemlerinin çalışmalarınızla eğitilmesine izin verin (izinsiz değil, kapatana kadar izin verilir) ve hesabınızı silin.",
@@ -1692,7 +1692,7 @@ export const tr = {
     diagramCdn: "İçerik dağıtım ağı",
     diagramCoordinatorRole: "Görevlendirme, şifreleme + şifre çözme",
     diagramMinersRole1: "Bilgi işlem gücü sağlayan",
-    diagramMinersRole2: "deHub tokenleri karşılığında",
+    diagramMinersRole2: "Riftn tokenleri karşılığında",
     diagramDataFlowStart: "Veri akışının başlangıcı",
   },
   e2ee: {

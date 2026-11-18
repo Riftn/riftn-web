@@ -1055,7 +1055,6 @@ export const el = {
     whackTitle: 'Whack A Schifff',
     whackDesc: 'Χτυπήστε τον Peter Schiff στο κεφάλι κάθε φορά που ξεπροβάλλει.',
     gasTitle: 'Gas Guzzler',
-    gasDesc: 'Κρατήστε το ETH gas γεμάτο ενώ μαζεύετε dehub coins.',
     rocketTitle: 'Rocket Blaster',
     rocketDesc: 'Αποφύγετε τις ακτίνες laser στην αποστολή 100km πίσω στο φεγγάρι.',
     streetTitle: 'Street Slayer',

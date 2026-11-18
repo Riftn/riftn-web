@@ -1240,7 +1240,7 @@ export const sv = {
     introDesc: 'Satsa för att få tillgång till olika klubbnivåer de förbättrade funktionerna i alla d \'apps och ge din datorkraft eller lagringsutrymme från med lite som en mobil för att utvinna din andel av protokollintäkterna.',
     introDesc2: 'Eftersom ytterligare tilldelningar nu kommer att vara dynamiska, beroende på protokollavgifter, kommer beteckningar att vara föremål för krav när som helst för att säkerställa att protokollbehoven alltid ligger i framkant. Satsningsprotokollet uppgraderas också för närvarande med release på Base snart.',
     technicals: 'Tekniker',
-    technicalsDesc1: 'Att gå med i klubbar låser också upp nedanstående märken som visas på din dehub.io-profil, kommentarer, uppladdningar och livechattkommunikation.',
+    technicalsDesc1: 'Att gå med i klubbar låser också upp nedanstående märken som visas på din riftn.com-profil, kommentarer, uppladdningar och livechattkommunikation.',
     technicalsDesc2: 'Utöver förmånerna för mängden Riftn-tokens som satsas finns det också tre fördefinierade nivåer som bestäms av insatsvaraktighet som definierar användarbelöningar.',
     tier1: 'Nivå 1',
     tier1Rewards: '25% belöningar',

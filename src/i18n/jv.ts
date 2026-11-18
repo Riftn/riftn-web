@@ -1951,7 +1951,7 @@ export const jv = {
     rightsYouGrant: 'Hikmah Yang Kamu Berikan',
     licenseToOthersText: 'Kamu ngarani ngawon user lain ya iku ngarep akses lan ngelihatin kontenmu saka fitur-fitur platform iku, tapi iku ngawon hak monetisasi lan kepemilikan iku ngawon milikmu aja.',
     terminationByYouText: 'Kamu bisa nganggu Service ini kapan aja dhuwur nganggo cara nganggo walletmu dhuwur dadi nganggo platform ini.',
-    restrictionsByDeHub: 'Kebatasaan ngedeHub Riftn',
+    restrictionsByDeHub: 'Kebatasaan ngeRiftn Riftn',
     restrictionsItem4: 'Pengejaran isi oleh moderator yang ditunjuk karena melanggar aturan komunitas',
     disclaimerText: 'Riftn ngandhok ngawruh protocol sengkala. Kami ngelakuin platform "as is" lan ngawasihi warante. Karena ngandhok sengkala, kami gawe ngawasihi kestabilan lan ngawasihi data performance lan spesifik.',
     limitationOfLiability: 'Kebatasaan Tanggungjawab',

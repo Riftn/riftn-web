@@ -1339,7 +1339,7 @@ export const kk = {
     diagramCoordinatorRole: 'Тапсырма, шифрлау + шифрлау',
     diagramDataFlowStart: 'Деректер ағынының басталуы',
     diagramMinersRole1: 'Бұл есептеу қуатын қамтамасыз етеді',
-    diagramMinersRole2: 'deHub таңбашаларының орнына',
+    diagramMinersRole2: 'Riftn таңбашаларының орнына',
     costEfficiency: 'Шығын тиімділігі:',
   },
   e2ee: {
