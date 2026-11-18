@@ -90,7 +90,7 @@ export function NotificationsDrawer() {
         <DrawerDescription className="sr-only">{_copy("copy.efe4bbcc61b3", { defaultValue: "Your notifications" })}</DrawerDescription>
         {/* Shows the sheet drags down. Over the pill's own top inset, so it
             takes no room (index.css places it under the status bar when full). */}
-        <div data-bell-handle aria-hidden className="pointer-events-none absolute left-1/2 z-20 h-1 w-9 -translate-x-1/2 rounded-full bg-zinc-400/45" />
+        <div data-bell-handle aria-hidden className="pointer-events-none absolute left-1/2 z-[60] h-1 w-9 -translate-x-1/2 rounded-full" style={{ backgroundColor: 'rgba(161, 161, 170, 0.6)' }} />
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           <ErrorBoundary compact resetKey={String(open)} label={_copy("copy.788011833a5a", { defaultValue: "Notifications" })}>
             <Suspense fallback={<div role="status" className="p-4">{_copy("copy.eae12e0d3bab", { defaultValue: "Loading notifications…" })}</div>}>

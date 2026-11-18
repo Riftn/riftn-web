@@ -161,3 +161,10 @@ it('a quick shorter flick refreshes, and a pull during the spring-back carries o
   act(() => hook.handlers.onTouchMove(touch(0, 340)));
   expect(hook.pullDistance).toBeGreaterThan(mid);
 });
+it('starts on a row button inside a list that opts in with data-pull-through (Messages)', () => {
+  const list = document.createElement('div'); list.setAttribute('data-pull-through', '');
+  const row = document.createElement('button'); list.append(row); document.body.append(list);
+  pull(0, 180, row);
+  expect(hook.pullDistance).toBe(pullForDrag(180));
+  list.remove();
+});

@@ -1344,9 +1344,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </PageIsland>)}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll data-pull-through ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
             {/* Phones: pulled down from the top, the rows lower and a refresh
-                arrow turns in the gap; let go past its full turn to refresh. */}
+                arrow turns in the gap; let go past its full turn to refresh.
+                Every row is a button, so the list opts in with
+                data-pull-through (a pull may start on a row; the tap that
+                would follow a real pull is dropped). */}
             <div data-chat-pull-mark aria-hidden className="pointer-events-none sticky top-0 z-10 h-0">
               <div className="absolute inset-x-0 top-0 flex items-center justify-center overflow-hidden text-zinc-400" style={{ height: 'var(--chat-pull, 0px)', opacity: 'var(--chat-pull-o, 0)' }}>
                 <RefreshCw className="h-[18px] w-[18px]" style={{ transform: 'rotate(calc(var(--chat-pull-p, 0) * 300deg)) scale(calc(0.7 + var(--chat-pull-p, 0) * 0.3))' }} />
