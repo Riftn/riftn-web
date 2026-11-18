@@ -27,6 +27,7 @@ import { ChatLinkPreviews } from './ChatLinkPreviews';
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { useTranslation as useTextTranslation } from '../TranslatableText';
+import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
@@ -291,6 +292,14 @@ export const ChatMessage = memo(function ChatMessage({
     handleTranslate,
     handleShowOriginal,
   } = useTextTranslation(message.content, 'chat');
+  // Translate also translates every message above this one that still needs it.
+  const translateUp = useTranslateUp(
+    'room',
+    String(message.id),
+    message.timestamp,
+    !isTranslated && !isTranslateLoading && !isTooShort && !!message.content?.trim(),
+    handleTranslate,
+  );
 
   // Community chat used to card up community links and nothing else — a store
   // item or an event dropped into a channel arrived as a bare URL.
@@ -362,7 +371,7 @@ export const ChatMessage = memo(function ChatMessage({
   if (message.type === 'text' && message.content?.trim() && !isTooShort) holdActions.push(
     isTranslated
       ? { key: 'original', icon: <Languages />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
-      : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: handleTranslate },
+      : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp },
   );
   if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
   if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing });
@@ -391,7 +400,7 @@ export const ChatMessage = memo(function ChatMessage({
   if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
     isTranslated
       ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
-      : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: handleTranslate, hint: 'T' },
+      : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp, hint: 'T' },
   );
   if (onSeeMessages) menuActions.push({ key: 'their-messages', icon: menuIcons.search, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
   if ((canDelete || showActions) && onDelete) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
@@ -677,7 +686,7 @@ export const ChatMessage = memo(function ChatMessage({
                       <RotateCcw className="w-2.5 h-2.5" />
                     </button>
                   ) : (
-                    <button onClick={handleTranslate} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
                       <Languages className="w-3 h-3" />
                     </button>
                   )
@@ -720,7 +729,7 @@ export const ChatMessage = memo(function ChatMessage({
                     <RotateCcw className="w-2.5 h-2.5" />
                   </button>
                 ) : (
-                  <button onClick={handleTranslate} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
+                  <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
                     <Languages className="w-3 h-3" />
                   </button>
                 )
