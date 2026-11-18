@@ -7,6 +7,8 @@ import Copy from '@/components/ui/cut-icons/copy';
 import SearchIcon from '@/components/ui/cut-icons/search';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from './message-menu-kit';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { ShieldBan, MoreVertical, Loader2, RotateCcw, SmilePlus, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
@@ -99,6 +101,8 @@ export interface Message {
   replyTo?: ReplyToData;
   /** Rewritten after it was posted — labelled so nobody is quoted on words they replaced. */
   isEdited?: boolean;
+  /** A moderator pinned it for the room. */
+  isPinned?: boolean;
   /** Local only: the id your own line was first drawn under (kept as the React key). */
   clientKey?: string;
   /** Local only: your line is still going out, or failed to. */
@@ -126,6 +130,9 @@ interface ChatMessageProps {
   /** Live chat on phones: frame the held line, and outline the line being answered. */
   holdFrame?: boolean;
   replying?: boolean;
+  /** Moderators: pin or unpin this line for the room. */
+  onTogglePin?: (message: Message) => void;
+  isPinned?: boolean;
 }
 
 /** Inline moderator badge shown next to the username */
@@ -233,6 +240,8 @@ export const ChatMessage = memo(function ChatMessage({
   onSeeMessages,
   holdFrame,
   replying,
+  onTogglePin,
+  isPinned = false,
 }: ChatMessageProps) {
   // Your own line carries a small ring while it is going out; when it lands
   // the ring stops in its fixed box, so the line never shifts.
@@ -327,10 +336,14 @@ export const ChatMessage = memo(function ChatMessage({
   // text, so on an iPhone there was no way to reply or react at all.
   const rowRef = useRef<HTMLDivElement>(null);
   const [holdOpen, setHoldOpen] = useState(false);
+  // Right-click with a mouse: the menu opens where the pointer is.
+  const menuPoint = useMenuPoint();
   const canHold = !message.sendState;
-  const hold = useHoldMenu(() => {
-    if (!isTouchHold() || isEditing) return false;
-    setHoldOpen(true);
+  const hold = useHoldMenu((point, target) => {
+    if (isEditing) return false;
+    if (isTouchHold()) { setHoldOpen(true); return; }
+    if (keepBrowserMenu(target, rowRef.current)) return false;
+    menuPoint.openAt(point);
   }, canHold);
 
   const holdActions: ChatHoldAction[] = [];
@@ -360,6 +373,35 @@ export const ChatMessage = memo(function ChatMessage({
         .map(([emoji]) => emoji)
     : [];
 
+  // The same actions as the phone sheet, in Telegram's order, for the
+  // right-click menu on a computer.
+  const copyText = () => {
+    void navigator.clipboard?.writeText(message.content).then(
+      () => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })),
+      () => undefined,
+    );
+  };
+  const menuActions: MessageMenuAction[] = [];
+  if (onReply) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => onReply(message), hint: 'R' });
+  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing, hint: 'E' });
+  if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
+  if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
+  if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
+    isTranslated
+      ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
+      : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: handleTranslate, hint: 'T' },
+  );
+  if (onSeeMessages) menuActions.push({ key: 'their-messages', icon: menuIcons.search, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
+  if ((canDelete || showActions) && onDelete) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
+  if (showActions && !isMine && onBan) menuActions.push({ key: 'ban', divided: !((canDelete || showActions) && onDelete), destructive: true, icon: menuIcons.ban, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
+  if (showActions && !isMine && onUnban) menuActions.push({ key: 'unban', icon: menuIcons.unban, label: _copy('chatHold.unban', { defaultValue: 'Unban' }), onSelect: () => onUnban(message.userId, message.userName) });
+  if (showActions && onTogglePin) holdActions.splice(Math.min(1, holdActions.length), 0, {
+    key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin,
+    label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }),
+    onSelect: () => onTogglePin(message),
+  });
+  const reactors = message.reactions ? { reactions: message.reactions, remoteMessageId: message.id } : null;
+
   // The sheet sits beside the row, not in it: its taps would otherwise bubble
   // through React into the row's hold handlers.
   const holdSheet = (
@@ -372,14 +414,29 @@ export const ChatMessage = memo(function ChatMessage({
       onReact={handleQuickReact}
       actions={holdActions}
       frame={holdFrame}
+      reactors={reactors}
     />
   );
+  const menu = menuPoint.mounted ? (
+    <MessageMenu
+      point={menuPoint.point}
+      onClose={menuPoint.close}
+      quickReactions={onReact ? QUICK_CHAT_REACTIONS : null}
+      mine={mineReactions}
+      onReact={handleQuickReact}
+      actions={menuActions}
+      reactors={reactors}
+      meta={messageMenuMeta(message.timestamp, message.isEdited)}
+    />
+  ) : null;
 
   return (
     <>
     {holdSheet}
+    {menu}
     <div
       ref={rowRef}
+      data-msg-menu-open={menuPoint.point ? '' : undefined}
       id={`chat-msg-${message.id}`}
       data-chat-row
       data-chat-replying={replying || undefined}

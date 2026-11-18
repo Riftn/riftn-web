@@ -4,7 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Plus from '@/components/ui/cut-icons/add';
 import { EmojiPanel } from '@/components/app/emoji/EmojiPanel';
+import { ChevronRight } from 'lucide-react';
+import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { cn } from '@/lib/utils';
+import { reactionEntries, reactorCount, type ReactorsSource } from './ChatReactorsList';
+import { ChatReactorsDrawer } from './ChatReactorsDrawer';
+import { ReactorFaces } from './ReactorFaces';
 import '@/styles/chat-hold.css';
 
 export interface ChatHoldAction {
@@ -34,6 +39,8 @@ interface ChatHoldSheetProps {
   actions: ChatHoldAction[];
   /** Draw a soft frame around the held row (live chat). */
   frame?: boolean;
+  /** Who reacted: a row above the tiles that opens the people sheet. */
+  reactors?: ReactorsSource | null;
 }
 
 /** Phones with a finger, not a mouse. Desktop keeps hover buttons and the browser's own right-click. */
@@ -85,8 +92,15 @@ const KEEP = {
  * back and the keyboard dropped), and nothing here closes the sheet it sits
  * in.
  */
-export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine = [], onReact, allowMore = true, actions, frame = false }: ChatHoldSheetProps) {
+export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine = [], onReact, allowMore = true, actions, frame = false, reactors }: ChatHoldSheetProps) {
   const { t } = useTranslation();
+  // The people sheet outlives the hold sheet: a tap on the reactions row
+  // closes this one and opens that one.
+  const [who, setWho] = useState<ReactorsSource | null>(null);
+  // Mounted from the first open on, so it can slide away; never per row before that.
+  const [whoMounted, setWhoMounted] = useState(false);
+  useEffect(() => { if (who) setWhoMounted(true); }, [who]);
+  const reactorTotal = reactorCount(reactors?.reactions);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const pressedOff = useRef(false);
@@ -177,7 +191,15 @@ export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine
   };
 
   if (typeof document === 'undefined') return null;
-  return createPortal(
+  const whoDrawer = (
+    <ChatReactorsDrawer
+      messageId={who ? (who.remoteMessageId ?? 'local') : null}
+      local={!who?.remoteMessageId}
+      reactions={who?.reactions}
+      onClose={() => setWho(null)}
+    />
+  );
+  return (<>{(who || whoMounted) && whoDrawer}{createPortal(
     <AnimatePresence>
       {open && (
         <motion.div key="chat-hold" exit={{ opacity: 1 }} transition={SLIDE} data-chat-hold-layer data-no-navigate data-swipe-back-ignore {...KEEP}>
@@ -236,9 +258,29 @@ export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine
               )
             )}
 
+            {reactors && reactorTotal > 0 && !moreOpen && (
+              <button
+                type="button"
+                onClick={() => { setWho(reactors); close(); }}
+                data-chat-hold-reactors
+                className={cn('flex w-full items-center gap-2.5 rounded-2xl px-3.5 py-2.5 text-left text-[14px] font-semibold transition-transform active:scale-[0.98]', quickReactions && onReact ? 'mt-3.5' : 'mt-1')}
+              >
+                <span className="flex shrink-0 items-center gap-0.5">
+                  {reactionEntries(reactors.reactions).slice(0, 3).map(([emoji]) => (
+                    <InlineEmoji key={emoji} value={emoji} className="h-[18px] m-0" />
+                  ))}
+                </span>
+                <span className="min-w-0 flex-1 truncate">
+                  {t('msgMenu.reactions', { count: reactorTotal, defaultValue: reactorTotal === 1 ? '1 reaction' : '{{count}} reactions' })}
+                </span>
+                <ReactorFaces source={reactors} size={22} />
+                <ChevronRight className="h-4 w-4 shrink-0 opacity-50" />
+              </button>
+            )}
+
             {mainActions.length > 0 && !moreOpen && (
               <div
-                className={cn('grid gap-2', quickReactions && onReact ? 'pt-3.5' : 'pt-1')}
+                className={cn('grid gap-2', reactors && reactorTotal > 0 ? 'pt-2' : quickReactions && onReact ? 'pt-3.5' : 'pt-1')}
                 style={{ gridTemplateColumns: `repeat(${columns(mainActions.length)}, minmax(0, 1fr))` }}
               >
                 {mainActions.map((a) => (
@@ -280,5 +322,5 @@ export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine
       )}
     </AnimatePresence>,
     document.body,
-  );
+  )}</>);
 }
