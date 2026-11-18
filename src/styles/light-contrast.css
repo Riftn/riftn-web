@@ -139,3 +139,9 @@ html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(
   [role='menu'] [role='menuitem'][class*='focus:bg-white/'][data-highlighted] {
   background-color: #f0f1f3 !important;
 }
+
+/* System Light flattens feed rows edge to edge. The profile's list view shows
+   posts as separate cards, so there they keep their rounded corners. */
+html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-profile-list-view] [data-feed-item] {
+  border-radius: 0.75rem !important;
+}
