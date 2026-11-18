@@ -511,6 +511,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onOpenWindow: peer
         ? () => { window.open(`/chat?with=${encodeURIComponent(peer)}`, `riftn-chat-${conv.id}`, 'popup,width=520,height=780'); }
         : undefined,
+      onToggleEncryption: conv.isGroup
+        ? undefined
+        : () => updateChatPref(conv.id, { encrypted: !chatPrefs.get(conv.id)?.encryptedAt }),
       onBlock: () => handleBlockConversationUser(conv),
       onClearHistory: () => setClearTarget(conv),
       onDelete: () => handleDeleteConversation(conv),
