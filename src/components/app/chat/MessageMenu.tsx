@@ -35,6 +35,8 @@ export interface MessageMenuProps {
   reactors?: ReactorsSource | null;
   /** A muted line at the foot of the card, e.g. the full send time. */
   meta?: string | null;
+  /** What the menu is for, read out by screen readers. Defaults to "Message options". */
+  label?: string;
 }
 
 const MENU_W = 248;
@@ -59,7 +61,7 @@ const KEEP = {
  * Opens at the pointer, flips to stay on screen, grows from the corner nearest
  * the pointer. Arrow keys move through the actions, Enter picks, Esc closes.
  */
-export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta }: MessageMenuProps) {
+export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta, label }: MessageMenuProps) {
   const { t } = useTranslation();
   const open = !!point;
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -188,7 +190,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           key="msg-menu"
           ref={wrapRef}
           role="menu"
-          aria-label={t('chatHold.title', 'Message options')}
+          aria-label={label ?? t('chatHold.title', 'Message options')}
           data-msg-menu
           data-no-navigate
           {...KEEP}

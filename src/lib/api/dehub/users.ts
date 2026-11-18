@@ -156,6 +156,9 @@ export interface UpdateProfileData {
   dmSettings?: { disables?: string[]; minTipDhb?: number };
   avatarImg?: File;
   coverImg?: File;
+  /** Clear the profile picture / banner (ignored when a new file is sent with it). */
+  removeAvatar?: boolean;
+  removeCover?: boolean;
   /** The owner's own backdrop for their text posts; the server stores it and sets customs.postBg to 'photo'. */
   postBgImg?: File;
 }
@@ -208,6 +211,8 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
     console.log('[updateProfile] Attaching coverImg:', data.coverImg.name, data.coverImg.size, data.coverImg.type);
   }
 
+  if (data.removeAvatar && !data.avatarImg) formData.append("removeAvatar", "true");
+  if (data.removeCover && !data.coverImg) formData.append("removeCover", "true");
   if (data.postBgImg) formData.append("postBgImg", data.postBgImg);
 
   // Log all FormData keys being sent
