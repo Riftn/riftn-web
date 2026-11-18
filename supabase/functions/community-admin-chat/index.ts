@@ -48,7 +48,7 @@ serve(async (req) => {
     // Fetch community context
     const { data: community } = await admin
       .from("communities")
-      .select("name, description, category")
+      .select("name, description")
       .eq("id", communityId)
       .maybeSingle();
 
@@ -99,7 +99,6 @@ serve(async (req) => {
     const systemPrompt = `You are "AI Admin", the live AI moderator and helper for the "${community?.name || "this"}" community on Riftn (a decentralized social platform).
 
 Community description: ${community?.description || "(no description)"}
-Category: ${community?.category || "general"}
 
 Your role:
 - Answer questions live for community members in chat.

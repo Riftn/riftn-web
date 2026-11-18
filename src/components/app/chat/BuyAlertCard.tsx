@@ -23,6 +23,45 @@ export interface BuyAlertData {
   balanceChangePct: number;
   priceUsd: number;
   marketCapUsd: number | null;
+  /** Set by the per-group bot; older DHB-only alerts leave these out. */
+  symbol?: string;
+  chainId?: string;
+  tokenAddress?: string;
+  amount?: number;
+  usd?: number;
+}
+
+/** Block explorer per DexScreener chain id. */
+const EXPLORERS: Record<string, string> = {
+  base: 'https://basescan.org',
+  ethereum: 'https://etherscan.io',
+  bsc: 'https://bscscan.com',
+  arbitrum: 'https://arbiscan.io',
+  polygon: 'https://polygonscan.com',
+  optimism: 'https://optimistic.etherscan.io',
+  avalanche: 'https://snowtrace.io',
+};
+
+export function buyAlertExplorer(chainId: string | undefined): string {
+  return EXPLORERS[(chainId || 'base').toLowerCase()] ?? EXPLORERS.base;
+}
+
+/** True for the platform token's alerts (old rows carry no symbol). */
+export function isDhbBuyAlert(content: string): boolean {
+  try {
+    const symbol = (JSON.parse(content) as BuyAlertData)?.symbol;
+    return !symbol || symbol.toUpperCase() === 'DHB';
+  } catch {
+    return false;
+  }
+}
+
+export function fmtPrice(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return '$0';
+  if (n >= 1) return `$${n.toLocaleString('en-US', { maximumFractionDigits: 4 })}`;
+  // Keep about four significant digits for tiny prices.
+  const digits = Math.min(12, Math.max(2, 3 - Math.floor(Math.log10(n))));
+  return `$${n.toFixed(digits)}`;
 }
 
 export function fmt(n: number, decimals = 2): string {
@@ -51,8 +90,13 @@ export function BuyAlertCard({ content, timestamp, onHide }: BuyAlertCardProps) 
   try { data = JSON.parse(content); } catch { return null; }
   if (!data) return null;
 
-  const basescanUrl = `https://basescan.org/tx/${data.txHash}`;
-  const buyerUrl = `https://basescan.org/address/${data.buyerAddress}`;
+  const explorer = buyAlertExplorer(data.chainId);
+  const basescanUrl = `${explorer}/tx/${data.txHash}`;
+  const buyerUrl = `${explorer}/address/${data.buyerAddress}`;
+  const isDhb = !data.symbol || data.symbol.toUpperCase() === 'DHB';
+  const amount = data.amount ?? data.dhbAmount ?? 0;
+  const usd = data.usd ?? data.dhbUsd ?? 0;
+  const symbol = data.symbol ?? 'DHB';
 
   return (
     <div className="my-1.5">
@@ -80,8 +124,18 @@ export function BuyAlertCard({ content, timestamp, onHide }: BuyAlertCardProps) 
 
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center gap-1.5">
-              <img src={dehubCoin} alt={tokenLabel()} className="w-5 h-5" />
-              <span className="font-bold text-white text-sm tracking-wide">{_copy("copy.15d586130914", { defaultValue: "{{value1}} BUY", value1: fmtTokens(data.dhbAmount) })}</span>
+              {isDhb ? (
+                <img src={dehubCoin} alt={tokenLabel()} className="w-5 h-5" />
+              ) : (
+                <span className="w-5 h-5 rounded-full bg-white/15 text-white text-[10px] font-bold flex items-center justify-center">
+                  {symbol.slice(0, 1)}
+                </span>
+              )}
+              <span className="font-bold text-white text-sm tracking-wide">
+                {isDhb
+                  ? _copy("copy.15d586130914", { defaultValue: "{{value1}} BUY", value1: fmtTokens(amount) })
+                  : _copy("chat.buyAlert.title", { defaultValue: "{{amount}} ${{symbol}} BUY", amount: fmtTokens(amount), symbol })}
+              </span>
             </div>
             {onHide && !confirming && (
               <button
@@ -101,7 +155,7 @@ export function BuyAlertCard({ content, timestamp, onHide }: BuyAlertCardProps) 
               <span className="text-white font-semibold">
                 {data.ethSpent > 0
                   ? `${data.ethSpent.toFixed(4)} ETH`
-                  : fmt(data.dhbUsd)}
+                  : fmt(usd)}
                 {data.ethUsd > 0 && data.ethSpent > 0 && (
                   <span className="text-zinc-400 font-normal ml-1">({fmt(data.ethUsd)})</span>
                 )}
@@ -139,7 +193,7 @@ export function BuyAlertCard({ content, timestamp, onHide }: BuyAlertCardProps) 
               <span className="text-sm">💲</span>
               <span className="text-zinc-400">{_copy("copy.bfc89dd8228b", { defaultValue: "Price:" })}</span>
               <span className="text-white font-semibold">
-                ${data.priceUsd.toFixed(7)}
+                {fmtPrice(data.priceUsd)}
               </span>
             </div>
 
