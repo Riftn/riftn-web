@@ -1207,6 +1207,7 @@
     "payDirectNoName": "Qajeelatti uumaa {{symbol}} tti {{chain}} irratti ergameera. Jijjiirraan hin jiru.",
     "payViaBridgeDpay": "Basa irratti galamee Riftn Pay irratti galchi, meeshaaleen gara sa'aatii tokko keessatti argamu",
     "dmSent": "{{amount}} mallattoolee {{name}}-f ergame!",
+    "addMessage": "Ergaa dabalataa (dirqama)",
     "messagePublic": "Ummataa",
     "railTitle": "Kennaawwan",
     "railTotal": "{{amount}} tokkenoota",
@@ -2221,6 +2222,8 @@
       "likes": "Jaalala"
     },
     "likedPosts": {
+      "emptyTitle": "Ammaaf jaalalli hin jiru",
+      "privateTitle": "Jaalalli dhuunfaa dha",
       "loadMore": "Dabalataa fe'i"
     },
     "dislikes": {
@@ -2245,6 +2248,9 @@
     "sortLikes": "Jaalatame",
     "sortMostLiked": "Irra caalaan jaallataman",
     "sortCustomShort": "Aadaa (Custom)",
+    "arrange": {
+      "saving": "Olkaa'aa jira..."
+    },
     "searchThisChannel": "Kana keessatti barbaadi",
     "searchResultCount": "1 bu&#39;aa &quot;{{query}}&quot; jedhu.",
     "searchResultCountPlural": "{{count}} bu&#39;aa &quot;{{query}}&quot;"
@@ -6227,6 +6233,7 @@
     "actAll": "Hunda",
     "actListings": "Tarreeffamoota",
     "actOffers": "Dhiheessiiwwan",
+    "actSales": "Gurgurtaa",
     "tabActivity": "Sochii",
     "shortTitle": "NFTs",
     "filters": "Filannoo",
@@ -6735,8 +6742,12 @@
       "image": "Bifa",
       "camera": "Kaameeraa",
       "show": "Akka video irra mul'atu",
+      "loop": "Furgaasuu",
       "positions": {
         "center": "Giddugaleessi"
+      },
+      "sizes": {
+        "medium": "Giddu galeessa"
       },
       "shapes": {
         "circle": "Geengoo",
@@ -7619,7 +7630,6 @@
     "dehubHome": "Riftn mana",
     "navHowItWorks": "Akkaataa itti hojjetu",
     "navPrivacy": "Dhuunfummaa",
-    "navFaq": "Gaaffiiwwan yeroo baay'ee gaafataman",
     "openDehub": "Riftn banaa",
     "readTheDocs": "Docs dubbisaa",
     "heroEyebrow": "Bu’uuraalee misoomaa hawaasaan hojjetan",
@@ -7723,6 +7733,7 @@
     "footerNote": "Hirmaannaan DePin tajaajila gumaacha malee oomisha invastimantii miti. Argamuun, ulaagaa guutuu fi badhaasni jijjiiramuu danda’a."
   },
   "creatorFlow": {
+    "newNativeFlow": "Maalallii haaraa",
     "disconnect": "Addaan kuti",
     "title": "Creator Flow",
     "backToStudio": "Creator Studio irratti deebi'i",
@@ -10707,6 +10718,9 @@
       "zoomIn": "Canvas guddifadhu",
       "zoomOut": "Canvas xiqqeessi"
     },
+    "clipFix": {
+      "listening": "Dhaggeeffachuu…"
+    },
     "shortcuts": {
       "action": {
         "split": "Qoodi",
@@ -10717,7 +10731,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Waraabbii Dhaabi"
+      "stop": "Waraabbii Dhaabi",
+      "failed": "Sagalee fakkeessuun (Voice cloning) hin milkoofne."
     },
     "linkImport": {
       "go": "Galchi",
@@ -16072,7 +16087,6 @@
     "23cc49836f60": "Riftn irratti kallattiin darbaa",
     "ce39b97c0f94": "Browser keessan, bilbila keessan ykn OBS irraa, jijjiirraa sagalee, bu’aa sagalee fi bifa kaameraa keessaa ijaaramee dhageessisaa Gorsi akkuma ergamu boorsaa keessan keessa bu’a — ulaagaa hordoftootaa hin qabu, marsaa kaffaltii hin qabu, fi jalqabuuf boorsaa hin barbaachisu.",
     "efc85ecfd402": "Riftn banaa",
-    "dbc468a14b60": "Gaaffiiwwan yeroo baay'ee gaafataman",
     "1e5b36078e37": "Qajeelfamoota walqabatan",
     "95f48da59b9a": "Waltajjiiwwan miidiyaa hawaasaa giddugaleessa hin taane bara 2026 keessaa isa gaarii",
     "89ec0bb81771": "Sinimaa",
@@ -19235,8 +19249,10 @@
       "gaming": "Tapha taphachuu",
       "crypto": "Kiriiptoo",
       "sports": "Ispoortii",
+      "comedy": "Komeedii",
       "film": "Fiilmii",
       "podcast": "Poodkaastii",
+      "food": "Nyaata",
       "news": "Oduu",
       "science": "Saayinsii"
     },
@@ -19247,6 +19263,7 @@
   "appTokens": {
     "title": "Tookiin keessan",
     "history": "Seenaa",
+    "noHistory": "Ammatti sochiin hin jiru",
     "kindDeposit": "Maallaqaa Ida'i",
     "to": "Hanga",
     "amount": "Qabxii",
@@ -19276,6 +19293,7 @@
     "notNow": "Amma hin ta'in"
   },
   "postStats": {
+    "audience": "Dhaggeeffattoota",
     "engagement": "Walitti makamuu",
     "finished": "Xumure",
     "members": "Miseensota",
@@ -19359,6 +19377,7 @@
   "dmSchedule": {
     "view": "Ilaali",
     "edit": "Gulaaluu",
+    "editLabel": "Odeeffannoo jijjiire",
     "error": "Sun hin hojjenne. Ammas yaalaa."
   },
   "spaces": {

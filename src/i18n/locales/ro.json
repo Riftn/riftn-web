@@ -1222,6 +1222,7 @@
     "payDirectNoName": "Trimis direct creatorului în {{symbol}} pe {{chain}}. Fără schimb.",
     "payViaBridgeDpay": "Mutat pe Base și plătit către Riftn Pay, tokenurile ajung în aproximativ un minut",
     "dmSent": "Ați trimis {{amount}} tokenuri către {{name}}!",
+    "addMessage": "Adăugați un mesaj (optional)",
     "railTitle": "Sfaturi",
     "railTotal": "{{amount}} tokenuri",
     "tokensUnit": "tokenuri"
@@ -2223,6 +2224,8 @@
       "likes": "Aprecieri"
     },
     "likedPosts": {
+      "emptyTitle": "Nicio apreciere încă",
+      "privateTitle": "Aprecierile sunt private",
       "loadMore": "Încarcă mai multe"
     },
     "dislikes": {
@@ -2247,6 +2250,9 @@
     "sortLikes": "Aprecieri",
     "sortMostLiked": "Cele mai apreciate",
     "sortCustomShort": "Personalizat",
+    "arrange": {
+      "saving": "Se salvează..."
+    },
     "searchThisChannel": "Caută în acest canal",
     "searchResultCount": "1 rezultat pentru \"{{query}}\"",
     "searchResultCountPlural": "Rezultatele {{count}} pentru „{{query}}”"
@@ -6233,7 +6239,9 @@
   "nftMarket": {
     "actAll": "Toate",
     "actListings": "Anunțuri",
+    "actOffer": "Ofertă",
     "actOffers": "Oferte",
+    "actSales": "Vânzări",
     "tabActivity": "Activitate",
     "shortTitle": "NFTs",
     "filters": "Filtre",
@@ -6732,8 +6740,12 @@
       "image": "Imagine",
       "camera": "Cameră",
       "show": "Afișează în flux",
+      "loop": "Buclă",
       "positions": {
         "center": "Centru"
+      },
+      "sizes": {
+        "medium": "Medie"
       },
       "shapes": {
         "circle": "Cerc",
@@ -10704,6 +10716,9 @@
       "zoomIn": "Măriți pânza",
       "zoomOut": "Micșorați pânza"
     },
+    "clipFix": {
+      "listening": "Se ascultă…"
+    },
     "shortcuts": {
       "action": {
         "split": "Împarte",
@@ -10714,7 +10729,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Oprește înregistrarea"
+      "stop": "Oprește înregistrarea",
+      "failed": "Clonarea vocii a eșuat."
     },
     "linkImport": {
       "go": "Importă",
@@ -19307,6 +19323,8 @@
       "gaming": "Jocuri",
       "crypto": "Criptosporidium",
       "sports": "Sporturi",
+      "comedy": "Comedie",
+      "food": "Mâncare",
       "news": "Noutăți",
       "science": "Știință"
     },
@@ -19317,6 +19335,7 @@
   "appTokens": {
     "title": "Tokenurile tale",
     "history": "Istoric",
+    "noHistory": "Nicio activitate încă",
     "kindDeposit": "Depunere",
     "to": "Către",
     "amount": "Sumă",
@@ -19346,6 +19365,7 @@
     "notNow": "Nu acum"
   },
   "postStats": {
+    "audience": "Audiență",
     "engagement": "Angajament",
     "finished": "Încheiat",
     "members": "Membri",
@@ -19433,6 +19453,7 @@
   "dmSchedule": {
     "view": "Afișează",
     "edit": "Editează",
+    "editLabel": "Editează mesajul",
     "error": "Asta nu a funcționat. Încearcă din nou."
   },
   "footer": {

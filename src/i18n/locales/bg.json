@@ -1224,6 +1224,7 @@
     "payDirectNoName": "Изпратено директно до създателя в {{symbol}} на {{chain}}. Без обмяна.",
     "payViaBridgeDpay": "Преместени в Base и платени на Riftn Pay, токените пристигат след около минута",
     "dmSent": "Изпратени {{amount}} токена на {{name}}!",
+    "addMessage": "Добавете съобщение (необязателно)",
     "messagePublic": "Публично",
     "railTitle": "Съвети",
     "railTotal": "{{amount}} токена",
@@ -2225,6 +2226,8 @@
       "likes": "Харесвания"
     },
     "likedPosts": {
+      "emptyTitle": "Все още няма харесвания",
+      "privateTitle": "Харесванията са лични",
       "loadMore": "Зареди още"
     },
     "dislikes": {
@@ -2249,6 +2252,9 @@
     "sortLikes": "Лайковани",
     "sortMostLiked": "Най-лайковани",
     "sortCustomShort": "Персонализирано",
+    "arrange": {
+      "saving": "Запазва се..."
+    },
     "searchThisChannel": "Търси в този канал",
     "searchResultCount": "1 резултат за \"{{query}}\"",
     "searchResultCountPlural": "{{count}} резултата за \"{{query}}\""
@@ -6236,7 +6242,9 @@
   "nftMarket": {
     "actAll": "Всички",
     "actListings": "Обяви",
+    "actOffer": "Поръчка",
     "actOffers": "Оферти",
+    "actSales": "Продажби",
     "tabActivity": "Активност",
     "shortTitle": "NFT",
     "filters": "Филтри",
@@ -6740,8 +6748,12 @@
       "image": "Изображение",
       "camera": "Камера",
       "show": "Покажи в стрийма",
+      "loop": "Цикъл",
       "positions": {
         "center": "Центрирай"
+      },
+      "sizes": {
+        "medium": "Средно"
       },
       "shapes": {
         "circle": "Кръг",
@@ -7728,6 +7740,7 @@
     "footerNote": "DePin участието е услуга за вноска, а не инвестиционен продукт. Наличност, приемливост и награди могат да се променят."
   },
   "creatorFlow": {
+    "newNativeFlow": "Нов поток",
     "disconnect": "Отключи",
     "title": "Поток на твореца",
     "backToStudio": "Назад към студиото на творец",
@@ -9330,7 +9343,8 @@
       "textSaved": "Промените в подзаглавието са запазени.",
       "action": "Автоматични субтитри",
       "styles": {
-        "bold": "Тежко"
+        "bold": "Тежко",
+        "serif": "Сериф"
       },
       "working": "Слушане… {{percent}}%",
       "downloading": "Подготовка на модела за реч… {{percent}}%",
@@ -10711,6 +10725,9 @@
       "zoomIn": "Увеличаване на платното",
       "zoomOut": "Намаляване на платно"
     },
+    "clipFix": {
+      "listening": "Слушам…"
+    },
     "shortcuts": {
       "action": {
         "split": "Раздели",
@@ -10721,7 +10738,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Спри записа"
+      "stop": "Спри записа",
+      "failed": "Клониране на глас неуспешно."
     },
     "linkImport": {
       "go": "Импортирай",
@@ -19259,8 +19277,10 @@
       "gaming": "Гейминг",
       "crypto": "Крипто",
       "sports": "Състезания",
+      "comedy": "Комедия",
       "film": "Филм",
       "podcast": "Подкаст",
+      "food": "Храна",
       "news": "Новини",
       "science": "Наука"
     },
@@ -19271,6 +19291,7 @@
   "appTokens": {
     "title": "Вашите токени",
     "history": "История",
+    "noHistory": "Все още няма активност",
     "kindDeposit": "Добави средства",
     "to": "На",
     "amount": "Сума",
@@ -19300,6 +19321,7 @@
     "notNow": "Не сега"
   },
   "postStats": {
+    "audience": "Публика",
     "engagement": "Ангажираност",
     "finished": "Приключи",
     "members": "Членове",
@@ -19387,6 +19409,7 @@
   "dmSchedule": {
     "view": "Преглед",
     "edit": "Редактирай",
+    "editLabel": "Редактиране на съобщение",
     "error": "Това не проработи. Опитайте отново."
   }
 }

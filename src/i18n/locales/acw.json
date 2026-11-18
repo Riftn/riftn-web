@@ -1221,6 +1221,7 @@
     "payDirectNoName": "تم إرسالها مباشرة إلى المخترع في {{symbol}} في {{chain}}. بدون تبديل.",
     "payViaBridgeDpay": "تم النقل إلى Base وتم الدفع لـ Riftn Pay، الرموز توصل في حوالي دقيقة",
     "dmSent": "انرسل {{amount}} توكنز لـ {{name}}!",
+    "addMessage": "إضافة رسالة (اختياري)",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} رموز",
@@ -2213,6 +2214,8 @@
       "likes": "إعجابات"
     },
     "likedPosts": {
+      "emptyTitle": "ما فيه إعجابات لسه",
+      "privateTitle": "الإعجابات خاصة",
       "loadMore": "حمّل أكثر"
     },
     "dislikes": {
@@ -2237,6 +2240,9 @@
     "sortLikes": "الإعجابات",
     "sortMostLiked": "الأكثر شعبية",
     "sortCustomShort": "مخصص",
+    "arrange": {
+      "saving": "يحفظ..."
+    },
     "searchThisChannel": "بحث في القناة",
     "searchResultCount": "1 نتيجة لـ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتائج ل\"{{query}}\""
@@ -4772,6 +4778,7 @@
     "verifying": "فَاكِرْ...",
     "sending": "بعت...",
     "stepOf": "خطوة {{step}} من {{total}} — {{name}}",
+    "stepAudience": "الجمهور",
     "stepBudget": "بجيت",
     "stepReview": "مراجعة",
     "learnMore": "تعلم أكثر",
@@ -6006,7 +6013,6 @@
     "basicAnalytics": "Analytics بساسية",
     "detailedAnalytics": "Analytics مفصل",
     "prioritySupport": "Support أولوية",
-    "sso": "تسجيل الدخول الموحد (SSO)",
     "adminSpendControl": "Control على إنفاق admin",
     "priorityQueue": "طابور الأولوية",
     "priorityQueueFast": "Priority queue لسرعة معالجة المهام",
@@ -6112,7 +6118,9 @@
   "nftMarket": {
     "actAll": "الكل",
     "actListings": "الإعلانات",
+    "actOffer": "عرض",
     "actOffers": "العروض",
+    "actSales": "مبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "NFT",
     "filters": "فلاتر",
@@ -6603,8 +6611,12 @@
       "image": "صورة",
       "camera": "الكاميرا",
       "show": "اعرض على البث",
+      "loop": "الدوران",
       "positions": {
         "center": "مركز"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دائرة",
@@ -7571,6 +7583,7 @@
     "footerNote": "مشاركة ديبين هي خدمة المساهمة، وليست منتج استثماري. قد يتغير توافرها، مؤهلاتها ومكافئتها."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "الغاء الصلة",
     "title": "مُنشئ التدفق",
     "backToStudio": "العودة إلى Creator Studio",
@@ -9172,7 +9185,8 @@
       "textSaved": "تم حفظ تغييرات الرصيد",
       "action": "ترجمة تلقائية",
       "styles": {
-        "bold": "الخط العريض"
+        "bold": "الخط العريض",
+        "serif": "سيريف"
       },
       "working": "جاري الاستماع… {{percent}}%",
       "downloading": "جاري تجهيز نموذج الكلام… {{percent}}%",
@@ -10563,7 +10577,8 @@
       }
     },
     "voiceClone": {
-      "stop": "وقّف التسجيل"
+      "stop": "وقّف التسجيل",
+      "failed": "الكلون صوت فشل."
     },
     "linkImport": {
       "go": "استورد",
@@ -16835,6 +16850,7 @@
     "714c707e35bd": "تجميع",
     "b57c54362f70": "يستخدم صوتياتك مساحة تخزينك وينتهي مباشرة في الميديا.",
     "eb9f691bb8c2": "البرامج بتستمر بتشغل نفسها لما بتتعدّل فيها. النتائج النهائية بتظهر في تبويب \"الإنشاءات\"، جاهزة للضرب على خط الزمن.",
+    "a92f0449a9f7": "جاري العمل",
     "d353a99eb455": "تم الغاء",
     "031a8f0f659d": "فشل",
     "a80811cf6889": "المشاركات",
@@ -18743,8 +18759,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "الرياضة",
+      "comedy": "الكوميديا",
       "film": "السينما",
       "podcast": "بودكاست",
+      "food": "أكل",
       "news": "أخبار",
       "science": "العلوم"
     },
@@ -18755,6 +18773,7 @@
   "appTokens": {
     "title": "رموزك",
     "history": "السجل",
+    "noHistory": "لا يوجد نشاط بعد",
     "kindDeposit": "إيداع",
     "to": "إلى",
     "amount": "المبلغ",
@@ -18784,6 +18803,7 @@
     "notNow": "مو الآن"
   },
   "postStats": {
+    "audience": "الجمهور",
     "engagement": "التفاعل",
     "finished": "انتهى",
     "members": "الأعضاء",
@@ -18872,6 +18892,7 @@
   "dmSchedule": {
     "view": "عرض",
     "edit": "تعديل",
+    "editLabel": "تعديل الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
   }
 }

@@ -1288,6 +1288,7 @@
     "payDirectNoName": "Direkt an den Creator in {{symbol}} auf {{chain}} gesendet. Kein Swap.",
     "payViaBridgeDpay": "Auf Base verschoben und an Riftn Pay bezahlt, Token kommen in ca. einer Minute an",
     "dmSent": "{{amount}} Tokens an {{name}} gesendet!",
+    "addMessage": "Hinzufügen einer Nachricht (optional)",
     "messagePublic": "Öffentlich",
     "railTitle": "Trinkgelder",
     "railTotal": "{{amount}} Tokens",
@@ -6347,7 +6348,9 @@
   "nftMarket": {
     "actAll": "Alle",
     "actListings": "Angebote",
+    "actOffer": "Angebot",
     "actOffers": "Angebote",
+    "actSales": "Verkäufe",
     "tabActivity": "Aktivität",
     "shortTitle": "NFTs",
     "filters": "Filter",
@@ -6850,11 +6853,13 @@
       "image": "Bild",
       "camera": "Kamera",
       "show": "Im Stream anzeigen",
+      "loop": "Schleife",
       "positions": {
         "center": "Zentrieren"
       },
       "sizes": {
         "small": "Klein",
+        "medium": "Mittel",
         "large": "Groß"
       },
       "shapes": {
@@ -7839,6 +7844,7 @@
     "footerNote": "Die DePin-Beteiligung ist eine Beitragsleistung, kein Anlageprodukt. Verfügbarkeit, Berechtigung und Prämien können sich ändern."
   },
   "creatorFlow": {
+    "newNativeFlow": "Neuer Flow",
     "disconnect": "Trennen",
     "title": "Creator Flow",
     "backToStudio": "Zurück zu Creator Studio",
@@ -10829,6 +10835,9 @@
       "zoomIn": "Leinwand vergrößern",
       "zoomOut": "Bildschirm ausblenden"
     },
+    "clipFix": {
+      "listening": "Hört zu…"
+    },
     "shortcuts": {
       "action": {
         "split": "Teilen",
@@ -10839,7 +10848,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Aufnahme stoppen"
+      "stop": "Aufnahme stoppen",
+      "failed": "Stimmklonung fehlgeschlagen."
     },
     "linkImport": {
       "go": "Importieren",
@@ -19443,6 +19453,7 @@
       "art": "Kunst",
       "crypto": "Krypto",
       "sports": "Sport",
+      "food": "Lebensmittel",
       "news": "Nachrichten",
       "science": "Wissenschaft"
     },
@@ -19453,6 +19464,7 @@
   "appTokens": {
     "title": "Ihre Token",
     "history": "Verlauf",
+    "noHistory": "Noch keine Aktivität",
     "kindDeposit": "Einzahlen",
     "to": "Bis",
     "amount": "Betrag",
@@ -19482,6 +19494,7 @@
     "notNow": "Nicht jetzt"
   },
   "postStats": {
+    "audience": "Branche",
     "engagement": "Interaktion",
     "finished": "Beendet",
     "members": "Mitglieder",
@@ -19573,6 +19586,7 @@
     "view": "Ansehen",
     "notSent": "Nicht gesendet",
     "edit": "Bearbeiten",
+    "editLabel": "Nachricht bearbeiten",
     "error": "Das hat nicht funktioniert. Versuchen Sie es erneut."
   }
 }

@@ -1300,6 +1300,7 @@
     "payDirectNoName": "Gửi thẳng cho nhà sáng tạo bằng {{symbol}} trên {{chain}}. Không swap.",
     "payViaBridgeDpay": "Đã chuyển sang Base và thanh toán cho Riftn Pay, token sẽ nhận được trong khoảng một phút",
     "dmSent": "Đã gửi {{amount}} token cho {{name}}!",
+    "addMessage": "Thêm tin nhắn (không bắt buộc)",
     "messagePublic": "Công khai",
     "railTitle": "Tiền thưởng",
     "railTotal": "{{amount}} token",
@@ -2338,6 +2339,9 @@
     "sortLikes": "Lượt thích",
     "sortMostLiked": "Được thích nhiều nhất",
     "sortCustomShort": "Tùy chỉnh",
+    "arrange": {
+      "saving": "Đang lưu..."
+    },
     "searchThisChannel": "Tìm kiếm kênh này",
     "searchResultCount": "1 kết quả cho \"{{query}}\"",
     "searchResultCountPlural": "{{count}} kết quả cho \"{{query}}\""
@@ -6336,7 +6340,9 @@
   "nftMarket": {
     "actAll": "Tất cả",
     "actListings": "Tin đăng",
+    "actOffer": "Đề nghị",
     "actOffers": "Đề nghị",
+    "actSales": "Bán hàng",
     "tabActivity": "Hoạt động",
     "shortTitle": "NFT",
     "filters": "Filters",
@@ -6839,11 +6845,13 @@
       "image": "Hình ảnh",
       "camera": "Máy ảnh",
       "show": "Hiển thị trên phát trực tuyến",
+      "loop": "Vòng lặp",
       "positions": {
         "center": "Trung tâm"
       },
       "sizes": {
         "small": "Nhỏ",
+        "medium": "Trung bình",
         "large": "Lớn"
       },
       "shapes": {
@@ -7831,6 +7839,7 @@
     "footerNote": "Sự tham gia của DePin là một dịch vụ đóng góp, không phải là một sản phẩm đầu tư. Tình trạng còn phòng, tính đủ điều kiện và phần thưởng có thể thay đổi."
   },
   "creatorFlow": {
+    "newNativeFlow": "Flow mới",
     "disconnect": "Ngắt kết nối",
     "title": "Creator Flow",
     "backToStudio": "Quay lại Creator Studio",
@@ -10821,6 +10830,9 @@
       "zoomIn": "Thu Phóng Khung Vẽ",
       "zoomOut": "Thu Phóng Khung Vẽ"
     },
+    "clipFix": {
+      "listening": "Đang nghe…"
+    },
     "shortcuts": {
       "action": {
         "split": "Tách",
@@ -10831,7 +10843,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Dừng ghi âm"
+      "stop": "Dừng ghi âm",
+      "failed": "Đồng giọng nói thất bại."
     },
     "linkImport": {
       "go": "Nhập",
@@ -19509,7 +19522,9 @@
       "gaming": "Game",
       "crypto": "Tiền mã hoá",
       "sports": "Thể thao",
+      "comedy": "Phim hài",
       "film": "Phim",
+      "food": "Thực phẩm",
       "news": "Tin tức",
       "science": "Khoa học"
     },
@@ -19520,6 +19535,7 @@
   "appTokens": {
     "title": "Token của bạn",
     "history": "Lịch sử",
+    "noHistory": "Chưa có hoạt động nào",
     "kindDeposit": "Nạp tiền",
     "to": "Đến",
     "amount": "Số tiền",
@@ -19549,6 +19565,7 @@
     "notNow": "Để sau"
   },
   "postStats": {
+    "audience": "Đối tượng",
     "engagement": "Tương tác",
     "finished": "Đã kết thúc",
     "members": "Thành viên",
@@ -19642,6 +19659,7 @@
   "dmSchedule": {
     "view": "Xem",
     "edit": "Chỉnh sửa",
+    "editLabel": "Chỉnh sửa tin nhắn",
     "error": "Điều đó không hiệu quả. Hãy thử lại."
   }
 }

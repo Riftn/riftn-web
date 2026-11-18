@@ -1220,6 +1220,7 @@
     "payDirectNoName": "أرسل مباشرة إلى المبدع في {{symbol}} في {{chain}}. لا تبادل.",
     "payViaBridgeDpay": "تم النقل إلى Base والدفع إلى Riftn Pay، تصل الرموز في حوالي دقيقة",
     "dmSent": "اترسل {{amount}} توكنز لـ {{name}}!",
+    "addMessage": "اضف رسالة (اختياري)",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} توكنز",
@@ -2218,6 +2219,8 @@
       "likes": "إعجابات"
     },
     "likedPosts": {
+      "emptyTitle": "مافي إعجابات لسه",
+      "privateTitle": "الإعجابات خاصة",
       "loadMore": "حمّل أكتر"
     },
     "dislikes": {
@@ -2242,6 +2245,9 @@
     "sortLikes": "الإعجاب",
     "sortMostLiked": "الأكثر إعجاباً",
     "sortCustomShort": "الخصائص المخصصة",
+    "arrange": {
+      "saving": "بيحفظ..."
+    },
     "searchThisChannel": "بحث في هذا القناة",
     "searchResultCount": "1 نتيجة ل\"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتيجة ل\"{{query}}\""
@@ -5507,6 +5513,7 @@
     "usedAsEditReference": "لا يوجد نص لترجمته",
     "tool": "الأداة",
     "model": "النموذج",
+    "aspectRatio": "نسبة العرض إلى الارتفاع",
     "free": "فري",
     "fromPrice": "من ${{price}}",
     "delivery": "تسليم مجاني",
@@ -5547,6 +5554,7 @@
     "duration": "دُورَات",
     "secondsUnit": "ثواني",
     "secondUnit": "ثاني",
+    "resolution": "الدقة",
     "confirmPaymentToStart": "تاكد من الدفع ليبدأوا",
     "tips": "البقشيش",
     "length": "طول",
@@ -5572,6 +5580,7 @@
     "generationsFinished_one": "كل الأجيال اتنتهت. نتيجة {{count}} جاهزة.",
     "nothingGeneratedYet": "لا شيء تم إنشاؤه بعد",
     "nothingGeneratedHint": "اختر الإعداد، أكتب الموضوع، واضغط على \"Generate\". ستجمع النتائج هنا وتكون على بعد زر واحد من الخط الزمني.",
+    "working": "يعمل",
     "stopWaiting": "كف عن الانتظار",
     "stopWaitingConfirm": "يا ريت توقف عن الانتظار على هذا الرندر؟ ده ماعادش يكلفش ولا يوقفش، بس ما بيحصلش لكش نتيجة.",
     "cancelled": "تم الإلغاء",
@@ -5992,7 +6001,6 @@
     "basicAnalytics": "تحليلات أساسية",
     "detailedAnalytics": "تحليلات مفصلة",
     "prioritySupport": "دعم أولوية",
-    "sso": "تسجيل الدخول الموحد (SSO)",
     "adminSpendControl": "تحكم في إنفاق المسؤول",
     "priorityQueue": "طابور أولوية",
     "priorityQueueFast": "طابور أولوية لمعالجة أسرع للمهام",
@@ -6076,7 +6084,9 @@
   "nftMarket": {
     "actAll": "الكل",
     "actListings": "الإعلانات",
+    "actOffer": "عرض",
     "actOffers": "العروض",
+    "actSales": "المبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "NFT",
     "filters": "فلاتر",
@@ -6574,8 +6584,12 @@
       "image": "صورة",
       "camera": "الكاميرا",
       "show": "عرض على الستريم",
+      "loop": "لوب",
       "positions": {
         "center": "سنتري"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دائرة",
@@ -7545,6 +7559,7 @@
     "footerNote": "دِبِين (DePin) مش مشاركه بتكون خدمة تساهم بيها، مفيش هيكون منتج استثمار. توافرها، الأهلية، وجوائزها ممكن تتغير."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "فصل",
     "title": "مُنشئ التدفق",
     "backToStudio": "العودة إلى Creator Studio",
@@ -9147,7 +9162,8 @@
       "textSaved": "تم حفظ التعليقات.",
       "action": "ترجمة تلقائية",
       "styles": {
-        "bold": "غامق"
+        "bold": "غامق",
+        "serif": "الخط المسنن"
       },
       "working": "بسمع… {{percent}}%",
       "downloading": "بنجهّز نموذج الكلام… {{percent}}%",
@@ -10539,7 +10555,8 @@
       }
     },
     "voiceClone": {
-      "stop": "وقّف التسجيل"
+      "stop": "وقّف التسجيل",
+      "failed": "فشل في النسخ الصوتي"
     },
     "linkImport": {
       "go": "استورد",
@@ -18730,8 +18747,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "رياضة",
+      "comedy": "كوميديا",
       "film": "فيلم",
       "podcast": "بودكاست",
+      "food": "أكل",
       "news": "الاخبار",
       "science": "العلوم"
     },
@@ -18742,6 +18761,7 @@
   "appTokens": {
     "title": "التوكنز حقتك",
     "history": "السجل",
+    "noHistory": "لا يوجد نشاط بعد",
     "kindDeposit": "أضف رصيد",
     "to": "إلى",
     "amount": "المبلغ",
@@ -18771,6 +18791,7 @@
     "notNow": "ما الآن"
   },
   "postStats": {
+    "audience": "المشتركين",
     "engagement": "التفاعل",
     "finished": "انتهى",
     "members": "الأعضاء",
@@ -18858,6 +18879,7 @@
   "dmSchedule": {
     "view": "شاهد",
     "edit": "تعديل",
+    "editLabel": "تعديل الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
   }
 }

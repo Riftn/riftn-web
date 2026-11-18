@@ -1205,6 +1205,7 @@
     "payDirectNoName": "{{chain}} දින {{symbol}} හිදී නිර්මාතෘ වෙත කෙලින්ම යවන ලදී. හුවමාරුවක් නැත.",
     "payViaBridgeDpay": "Base වෙත ගෙන ගොස් Riftn Pay වෙත ගෙවන ලදි, ටෝකන් පැමිණෙන්නේ මිනිත්තුවකින් පමණ",
     "dmSent": "{{name}} වෙත ටෝකන් {{amount}} එවන ලදී!",
+    "addMessage": "පණිවිඩයක් එක් කරන්න (විකල්ප)",
     "messagePublic": "පොදු",
     "railTitle": "ඉඟි",
     "railTotal": "{{amount}} ටෝකන",
@@ -2217,6 +2218,8 @@
       "likes": "කැමැත්ත"
     },
     "likedPosts": {
+      "emptyTitle": "තවම කැමැත්තන් නැත",
+      "privateTitle": "කැමැත්තන් පෞද්ගලිකයි",
       "loadMore": "තවත් පූරණය"
     },
     "dislikes": {
@@ -2241,6 +2244,9 @@
     "sortLikes": "කැමති",
     "sortMostLiked": "වඩාත්ම කැමති",
     "sortCustomShort": "අභිරුචි",
+    "arrange": {
+      "saving": "සුරකිමින්..."
+    },
     "searchThisChannel": "මෙම නාලිකාව සොයන්න",
     "searchResultCount": "\"{{query}}\" සඳහා 1 ප්‍රතිඵලය",
     "searchResultCountPlural": "\"{{query}}\" සඳහා {{count}} ප් රති results ල"
@@ -5538,6 +5544,7 @@
     "tool": "මෙවලම",
     "model": "මාදිලිය",
     "searchModels": "ආකෘති සොයන්න...",
+    "aspectRatio": "දර්ශන අනුපාතය",
     "free": "නොමිලේ",
     "fromPrice": "සිට ${{price}}",
     "delivery": "බෙදාහැරීම",
@@ -6192,7 +6199,9 @@
   "nftMarket": {
     "actAll": "සියල්ල",
     "actListings": "ලැයිස්තුගත කිරීම්",
+    "actOffer": "ඉදිරිපත් කිරීම",
     "actOffers": "ඉදිරිපත් කිරීම්",
+    "actSales": "විකුණුම්",
     "tabActivity": "ක්‍රියාකාරකම්",
     "shortTitle": "NFT",
     "filters": "විල්ටර්",
@@ -6215,6 +6224,7 @@
     "sortNew": "නවතම",
     "sortLow": "අඩු මිල",
     "sortHigh": "ඉහලම මිල",
+    "signInTitle": "වෙළඳාම් කිරීමට ඉතුරු වන්න",
     "signInBody": "ඔබගේ පොරොන්දරය එකතු කර බෙදා වෙන්ද මෙන්න ඔබ තියන දේ විකින්න හා ඔබ තියන ඉල්ලීම් පරික්ෂා කරන්න.",
     "tabBrowse": "බ් ‍ රවුස් කරන්න",
     "tabSell": "විකුණුම්",
@@ -6691,8 +6701,12 @@
       "image": "රූපය",
       "camera": "කැමරාව",
       "show": "ප්‍රවාහයේ පෙන්වන්න",
+      "loop": "ලූප්",
       "positions": {
         "center": "මධ්‍යගත කරන්න"
+      },
+      "sizes": {
+        "medium": "මධ්‍යම"
       },
       "shapes": {
         "circle": "වෘත්තය",
@@ -7678,6 +7692,7 @@
     "footerNote": "DePin සහභාගීත්වය යනු ආයෝජන නිෂ්පාදනයක් නොව දායකත්ව සේවාවකි. ලබා ගත හැකි බව, සුදුසුකම් සහ ත්‍යාග වෙනස් විය හැකිය."
   },
   "creatorFlow": {
+    "newNativeFlow": "නව ප්‍රවාහය",
     "disconnect": "විසන්ධි කරන්න",
     "title": "නිර්මාතෘ ප්‍රවාහය",
     "backToStudio": "නිර්මාතෘ ස්ටුඩියෝ වෙත ආපසු",
@@ -7789,6 +7804,7 @@
     "frameCaptured": "{{seconds}}s හි රාමුව අල්ලා ගන්නා ලදී",
     "captureFailed": "මෙම වීඩියෝවෙන් රාමුවක් අල්ලා ගැනීමට නොහැකි විය.",
     "model": "මාදිලිය",
+    "aspectRatio": "දර්ශන අනුපාතය",
     "duration": "කාල සීමාව",
     "resolution": "විභේදනය",
     "generate": "උත්පාදනය කරන්න",
@@ -9278,7 +9294,8 @@
       "textSaved": "මාතෘකාව වෙනස් කිරීම් සුරකින ලදි.",
       "action": "ස්වයංක්‍රීය උපසිරැසි",
       "styles": {
-        "bold": "නිර්භීත"
+        "bold": "නිර්භීත",
+        "serif": "සෙරීෆ්"
       },
       "working": "සවන් දෙමින්… {{percent}}%",
       "downloading": "කථන මාදිලිය සූදානම් කරමින්… {{percent}}%",
@@ -10659,6 +10676,9 @@
       "zoomIn": "කැන්වස් විශාල කරන්න",
       "zoomOut": "කැන්වස් විශාලනය කරන්න"
     },
+    "clipFix": {
+      "listening": "සවන් දෙමින්…"
+    },
     "shortcuts": {
       "action": {
         "split": "බෙදන්න",
@@ -10669,7 +10689,8 @@
       }
     },
     "voiceClone": {
-      "stop": "පටිගත කිරීම නවත්වන්න"
+      "stop": "පටිගත කිරීම නවත්වන්න",
+      "failed": "කටහඬ ක්ලෝන කිරීම අසාර්ථක විය."
     },
     "linkImport": {
       "go": "ආයාත කරන්න",
@@ -19051,8 +19072,10 @@
       "gaming": "සූදු",
       "crypto": "ක්‍රිප්ටෝ",
       "sports": "ක්‍රීඩා",
+      "comedy": "ප්‍රහසන",
       "film": "චිත්‍රපටය",
       "podcast": "පොඩ්කාස්ට්",
+      "food": "ආහාර",
       "news": "පුවත්",
       "science": "විද්‍යාව"
     },
@@ -19063,6 +19086,7 @@
   "appTokens": {
     "title": "ඔබේ ටෝකන",
     "history": "ඉතිහාසය",
+    "noHistory": "තවම ක්‍රියාකාරකමක් නැත",
     "kindDeposit": "තැන්පතු",
     "to": "වෙත",
     "amount": "ප්‍රමාණය",
@@ -19092,6 +19116,7 @@
     "notNow": "දැන් නොවේ"
   },
   "postStats": {
+    "audience": "ප්‍රේක්ෂකයින්",
     "engagement": "යෙදවුම",
     "finished": "අවසන්",
     "members": "සාමාජිකයින්",
@@ -19172,6 +19197,7 @@
   "dmSchedule": {
     "view": "බලන්න",
     "edit": "සංස්කරණය කරන්න",
+    "editLabel": "පණිවිඩය සංස්කරණය කරන්න",
     "error": "එය ක්‍රියා කළේ නැත. නැවත උත්සාහ කරන්න."
   },
   "spaces": {

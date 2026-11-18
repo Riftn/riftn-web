@@ -1290,6 +1290,7 @@
     "payDirectNoName": "{{chain}}上の{{symbol}}でクリエイターに直接送られます。スワップなし。",
     "payViaBridgeDpay": "Baseに移動しRiftn Payに支払い済み、トークンは約1分で到着",
     "dmSent": "{{name}}に{{amount}} DHBを送りました！",
+    "addMessage": "メッセージを追加（任意）",
     "messagePublic": "公開",
     "railTitle": "チップ",
     "railTotal": "{{amount}} トークン",
@@ -2327,6 +2328,9 @@
     "sortLikes": "いいね",
     "sortMostLiked": "最もいいねされた",
     "sortCustomShort": "カスタム",
+    "arrange": {
+      "saving": "保存中..."
+    },
     "searchThisChannel": "このチャンネルを検索",
     "searchResultCount": "「{{query}}」の検索結果1件",
     "searchResultCountPlural": "「{{query}}」の検索結果{{count}}件"
@@ -6327,7 +6331,9 @@
   "nftMarket": {
     "actAll": "すべて",
     "actListings": "出品",
+    "actOffer": "オファー",
     "actOffers": "オファー",
+    "actSales": "セールス",
     "tabActivity": "アクティビティ",
     "shortTitle": "NFT",
     "filters": "フィルター",
@@ -6831,11 +6837,13 @@
       "image": "画像",
       "camera": "カメラ",
       "show": "ストリームで表示",
+      "loop": "ループ",
       "positions": {
         "center": "中央"
       },
       "sizes": {
         "small": "小",
+        "medium": "中",
         "large": "大"
       },
       "shapes": {
@@ -7823,6 +7831,7 @@
     "footerNote": "DePinへの参加は拠出サービスであり、投資商品ではありません。 利用可能状況、利用資格、特典は変更される場合があります。"
   },
   "creatorFlow": {
+    "newNativeFlow": "新しいフロー",
     "disconnect": "切断",
     "title": "クリエイターフロー",
     "backToStudio": "クリエイタースタジオに戻る",
@@ -9431,7 +9440,8 @@
       "textSaved": "字幕の変更を保存しました。",
       "action": "自動字幕",
       "styles": {
-        "bold": "太字"
+        "bold": "太字",
+        "serif": "セリフ"
       },
       "working": "聞き取り中… {{percent}}%",
       "downloading": "音声モデルを準備中… {{percent}}%",
@@ -10813,6 +10823,9 @@
       "zoomIn": "キャンバスを拡大する",
       "zoomOut": "キャンバスをズームアウトする"
     },
+    "clipFix": {
+      "listening": "聞き取り中…"
+    },
     "shortcuts": {
       "action": {
         "split": "分割",
@@ -10823,7 +10836,8 @@
       }
     },
     "voiceClone": {
-      "stop": "録音を停止"
+      "stop": "録音を停止",
+      "failed": "ボイスクローニングに失敗しました。"
     },
     "linkImport": {
       "go": "インポート",
@@ -19360,8 +19374,10 @@
       "gaming": "ゲーム",
       "crypto": "暗号通貨",
       "sports": "スポーツ",
+      "comedy": "コメディ",
       "film": "フィルム",
       "podcast": "ポッドキャスト",
+      "food": "食べ物",
       "news": "ニュース",
       "science": "科学"
     },
@@ -19372,6 +19388,7 @@
   "appTokens": {
     "title": "あなたのトークン",
     "history": "履歴",
+    "noHistory": "アクティビティはまだありません",
     "kindDeposit": "入金",
     "to": "終了",
     "amount": "金額",
@@ -19401,6 +19418,7 @@
     "notNow": "あとで"
   },
   "postStats": {
+    "audience": "オーディエンス",
     "engagement": "エンゲージメント",
     "finished": "終了",
     "members": "メンバー",
@@ -19494,6 +19512,7 @@
   "dmSchedule": {
     "view": "見る",
     "edit": "編集",
+    "editLabel": "メッセージを編集",
     "error": "うまくいきませんでした。もう一度やり直してください。"
   }
 }

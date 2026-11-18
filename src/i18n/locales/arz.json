@@ -1223,6 +1223,7 @@
     "payDirectNoName": "تم الإرسال مباشرة إلى منشئ المحتوى في {{symbol}} في {{chain}}. لا مبادلة.",
     "payViaBridgeDpay": "تم النقل إلى Base وتم الدفع إلى Riftn Pay، تصل الرموز في حوالي دقيقة",
     "dmSent": "اتبعت {{amount}} عملات رمزية لـ {{name}}!",
+    "addMessage": "إضافة رسالة (اختياري)",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} رموز",
@@ -2224,6 +2225,8 @@
       "likes": "لايكات"
     },
     "likedPosts": {
+      "emptyTitle": "مفيش لايكات لسه",
+      "privateTitle": "اللايكات خاصة",
       "loadMore": "حمّل أكتر"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "الإعجابات",
     "sortMostLiked": "الأكثر إعجابًا",
     "sortCustomShort": "مخصص",
+    "arrange": {
+      "saving": "بيتحفظ..."
+    },
     "searchThisChannel": "البحث في هذا القناة",
     "searchResultCount": "1 نتيجة لـ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتيجة لـ \"{{query}}\""
@@ -6233,7 +6239,9 @@
   "nftMarket": {
     "actAll": "الكل",
     "actListings": "الإعلانات",
+    "actOffer": "عرض",
     "actOffers": "العروض",
+    "actSales": "المبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "NFT",
     "filters": "عوامل التصفية",
@@ -6737,8 +6745,12 @@
       "image": "صورة",
       "camera": "الكاميرا",
       "show": "عرض على البث",
+      "loop": "حلقة",
       "positions": {
         "center": "مركز"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دائرة",
@@ -7724,6 +7736,7 @@
     "footerNote": "شارك في DePin هو خدمة مساهمة، وليس منتج استثمار. توافر الأهلية والمكافآت قد يتغير."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "قطع الاتصال",
     "title": "تدفق المنشئ",
     "backToStudio": "العودة إلى Creator Studio",
@@ -9326,7 +9339,8 @@
       "textSaved": "تم حفظ تغييرات التسمية التوضيحية.",
       "action": "ترجمة تلقائية",
       "styles": {
-        "bold": "غامق"
+        "bold": "غامق",
+        "serif": "الشريف"
       },
       "working": "بنسمع… {{percent}}%",
       "downloading": "بنجهز نموذج الكلام… {{percent}}%",
@@ -10708,6 +10722,9 @@
       "zoomIn": "توسيع الكانفاس",
       "zoomOut": "تصغير الكانفاس"
     },
+    "clipFix": {
+      "listening": "جارٍ الاستماع..."
+    },
     "shortcuts": {
       "action": {
         "split": "تقسيم",
@@ -10721,7 +10738,8 @@
       "label": "ثلاثي الأبعاد"
     },
     "voiceClone": {
-      "stop": "وقّف التسجيل"
+      "stop": "وقّف التسجيل",
+      "failed": "فشل في نسخ الصوت"
     },
     "linkImport": {
       "go": "استيراد",
@@ -19258,8 +19276,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "الرياضة",
+      "comedy": "كوميديا",
       "film": "السينما",
       "podcast": "بودكاست",
+      "food": "طَعَام",
       "news": "أخبار",
       "science": "العلوم"
     },
@@ -19270,6 +19290,7 @@
   "appTokens": {
     "title": "رموزك",
     "history": "السجل",
+    "noHistory": "لا يوجد نشاط حتى الآن",
     "kindDeposit": "إيداع",
     "to": "إلى",
     "amount": "المبلغ",
@@ -19299,6 +19320,7 @@
     "notNow": "ليس الآن"
   },
   "postStats": {
+    "audience": "الجمهور",
     "engagement": "التفاعل",
     "finished": "خلص",
     "members": "الأعضاء",
@@ -19385,6 +19407,7 @@
   "dmSchedule": {
     "view": "شاهد",
     "edit": "تعديل",
+    "editLabel": "تعديل الرسالة",
     "error": "لم ينجح ذلك. حاول مرة أخرى."
   }
 }

@@ -1222,6 +1222,7 @@
     "payDirectNoName": "Kuthunyelelwe ngqo kumuntu owakhe umuntu ku-{{symbol}} ngo-{{chain}}. Akukho ukushintsha.",
     "payViaBridgeDpay": "Kuhanjiswe ku-Base futhi kukhokhelwe ku-Riftn Pay, amathokheni afika cishe emaminithini ayi-1",
     "dmSent": "Kuthunyelwe u-{{amount}} tokens ku-{{name}}!",
+    "addMessage": "Engeza umyalezo (okukhethwa)",
     "messagePublic": "Umphakathi",
     "railTitle": "Amathiphu",
     "railTotal": "Amathokheni angu-{{amount}}",
@@ -2221,6 +2222,8 @@
       "likes": "Okuthandwayo"
     },
     "likedPosts": {
+      "emptyTitle": "Akukho ukuthandwa okwamanje",
+      "privateTitle": "Ukuthandwa kuyimfihlo",
       "loadMore": "Layisha okwengeziwe"
     },
     "dislikes": {
@@ -2245,6 +2248,9 @@
     "sortLikes": "Okuthanda",
     "sortMostLiked": "Okuthanda kakhulu",
     "sortCustomShort": "Yesigubhu",
+    "arrange": {
+      "saving": "Iyalondoloza..."
+    },
     "searchThisChannel": "Sesha le channel",
     "searchResultCount": "Umphumela 1 we-\"{{query}}\"",
     "searchResultCountPlural": "{{count}} imiphumela ye-\"{{query}}\""
@@ -6254,6 +6260,7 @@
     "actAll": "Konke",
     "actListings": "Izinhlu",
     "actOffers": "Izinikelo",
+    "actSales": "Ukuthengiswa",
     "tabActivity": "Umsebenzi",
     "shortTitle": "I-NFTs",
     "filters": "Izihlungi",
@@ -6755,8 +6762,12 @@
       "image": "Isithombe",
       "camera": "Ikhamera",
       "show": "Bonisa ku-stream",
+      "loop": "I-loop",
       "positions": {
         "center": "Phakathi nendawo"
+      },
+      "sizes": {
+        "medium": "Phakathi"
       },
       "shapes": {
         "circle": "Indilinga",
@@ -7742,6 +7753,7 @@
     "footerNote": "Ukubamba iqhaza kwe-DePin kuyisevisi yomnikelo, hhayi umkhiqizo wokutshala imali. Ukutholakala, ukufaneleka nemiklomelo kungashintsha."
   },
   "creatorFlow": {
+    "newNativeFlow": "Umthwalo omutsha",
     "disconnect": "Nqamula ukuxhumana",
     "title": "Umthwalo Womuntu Osenza",
     "backToStudio": "Buya ku-Creator Studio",
@@ -9331,7 +9343,8 @@
       "textSaved": "Izichasi zisindisiwe.",
       "action": "Imibhalo engezansi ezenzakalelayo",
       "styles": {
-        "bold": "Inesibindi"
+        "bold": "Inesibindi",
+        "serif": "I-Serif"
       },
       "working": "Kuyalalelwa… {{percent}}%",
       "downloading": "Kulungiswa imodeli yenkulumo… {{percent}}%",
@@ -10713,6 +10726,9 @@
       "zoomIn": "Sondeza i-canvas",
       "zoomOut": "Sondeza i-canvas ngaphandle"
     },
+    "clipFix": {
+      "listening": "Ukulalela..."
+    },
     "shortcuts": {
       "action": {
         "split": "Hlukanisa",
@@ -10723,7 +10739,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Misa ukuqopha"
+      "stop": "Misa ukuqopha",
+      "failed": "Ukulingisa izwi kuhlulekile."
     },
     "linkImport": {
       "go": "Ngenisa",
@@ -19307,8 +19324,10 @@
       "gaming": "Imidlalo",
       "crypto": "I-Crypto",
       "sports": "Ezemidlalo",
+      "comedy": "Amahlaya",
       "film": "Ifilimu",
       "podcast": "Iphodikhasti",
+      "food": "Ukudla",
       "news": "Izindaba",
       "science": "Isayensi"
     },
@@ -19319,6 +19338,7 @@
   "appTokens": {
     "title": "Amathokheni akho",
     "history": "Umlando",
+    "noHistory": "Awukho umsebenzi okwamanje",
     "kindDeposit": "Faka imali",
     "to": "Ku",
     "amount": "Inani",
@@ -19348,6 +19368,7 @@
     "notNow": "Hhayi manje"
   },
   "postStats": {
+    "audience": "Izethameli",
     "engagement": "Ukuzibandakanya",
     "finished": "Kuphelile",
     "members": "Amalungu",
@@ -19436,6 +19457,7 @@
   "dmSchedule": {
     "view": "Buka",
     "edit": "Hlela",
+    "editLabel": "Lungisa umyalezo",
     "error": "Lokho akuzange kusebenze. Phinda uzame."
   }
 }

@@ -1220,6 +1220,7 @@
     "payDirectNoName": "Skickades direkt till skaparen i {{symbol}} den {{chain}}. Ingen bytehandel.",
     "payViaBridgeDpay": "Flyttat till Base och betalat till Riftn Pay, tokens anländer om cirka en minut",
     "dmSent": "Skickade {{amount}} tokens till {{name}}!",
+    "addMessage": "Lägg till ett meddelande (valfritt)",
     "messagePublic": "Offentlig",
     "railTitle": "Dricks",
     "railTotal": "{{amount}} polletter"
@@ -2220,6 +2221,8 @@
       "likes": "Gillar"
     },
     "likedPosts": {
+      "emptyTitle": "Inga gillamarkeringar än",
+      "privateTitle": "Gillamarkeringar är privata",
       "loadMore": "Ladda fler"
     },
     "dislikes": {
@@ -2244,6 +2247,9 @@
     "sortLikes": "Gillar",
     "sortMostLiked": "Mest gillade",
     "sortCustomShort": "Anpassat",
+    "arrange": {
+      "saving": "Sparar..."
+    },
     "searchThisChannel": "Sök i den här kanalen",
     "searchResultCount": "1 resultat för \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultat för \"{{query}}\""
@@ -6231,7 +6237,9 @@
   "nftMarket": {
     "actAll": "Alla",
     "actListings": "Annonser",
+    "actOffer": "Bjuder",
     "actOffers": "Bud",
+    "actSales": "Försäljning",
     "tabActivity": "Aktivitet",
     "shortTitle": "NFTs",
     "filters": "Filter",
@@ -6732,6 +6740,7 @@
       "image": "Bild",
       "camera": "Kamera",
       "show": "Visa i strömmen",
+      "loop": "Slinga",
       "positions": {
         "center": "Centrera"
       },
@@ -7719,6 +7728,7 @@
     "footerNote": "DePin-deltagande är en bidragsservice, inte en investeringsprodukt. Tillgänglighet, behörighet och belöningar kan ändras."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nytt flöde",
     "disconnect": "Koppla från",
     "title": "Skaparflöde",
     "backToStudio": "Tillbaka till Skaparstudio",
@@ -10701,6 +10711,9 @@
       "zoomIn": "Zooma in arbetsytan",
       "zoomOut": "Zooma ut arbetsytan"
     },
+    "clipFix": {
+      "listening": "Lyssnar…"
+    },
     "shortcuts": {
       "action": {
         "split": "Dela",
@@ -10711,7 +10724,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Stoppa inspelning"
+      "stop": "Stoppa inspelning",
+      "failed": "Stimmen klonades inte."
     },
     "linkImport": {
       "go": "Importera",
@@ -19304,6 +19318,8 @@
       "gaming": "Spel",
       "crypto": "Krypto",
       "sports": "Sport",
+      "comedy": "Komedi",
+      "food": "Mat",
       "news": "Nyheter",
       "science": "Vetenskap"
     },
@@ -19314,6 +19330,7 @@
   "appTokens": {
     "title": "Dina tokens",
     "history": "Historik",
+    "noHistory": "Ingen aktivitet ännu",
     "kindDeposit": "Lägg till medel",
     "to": "Till",
     "amount": "Belopp",
@@ -19343,6 +19360,7 @@
     "notNow": "Inte nu"
   },
   "postStats": {
+    "audience": "Publik",
     "engagement": "Engagemang",
     "finished": "Avslutad",
     "members": "Medlemmar",
@@ -19431,6 +19449,7 @@
   "dmSchedule": {
     "view": "Titta",
     "edit": "Redigera",
+    "editLabel": "Redigera meddelande",
     "error": "Det fungerade inte. Försök igen."
   }
 }

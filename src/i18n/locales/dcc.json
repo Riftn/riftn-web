@@ -1199,6 +1199,7 @@
     "payDirectNoName": "{{symbol}} میں {{chain}} کو براہ راست تخلیق کار کو بھیجا گیا ۔ کوئی تبادلہ نہیں ۔",
     "payViaBridgeDpay": "बेस पर स्थानांतरित किया गया और Riftn Pay पर भुगतान किया गया, टोकन लगभग एक मिनट में पहुँचेंगे",
     "dmSent": "{{name}} کو {{amount}} ٹوکنز بھیج دیے!",
+    "addMessage": "ایک پیغام (اختیاری) جोडیں",
     "messagePublic": "پبلک",
     "railTitle": "ٹپس",
     "railTotal": "{{amount}} توکن",
@@ -2191,6 +2192,8 @@
       "likes": "لائک"
     },
     "likedPosts": {
+      "emptyTitle": "ابھی تک کوئی لائک نئیں",
+      "privateTitle": "لائکس پرائیویٹ ہیں",
       "loadMore": "اور لوڈ کرو"
     },
     "dislikes": {
@@ -2215,6 +2218,9 @@
     "sortLikes": "پسندیدہ",
     "sortMostLiked": "سب سے زیادہ پسند کیا گیا",
     "sortCustomShort": "کاسٹم",
+    "arrange": {
+      "saving": "محفوظ ہو رہا..."
+    },
     "searchThisChannel": "ڈیٹا کا ڈھونڈھنا",
     "searchResultCount": "1 نتیجہ {{query}}",
     "searchResultCountPlural": "{{count}} نتائج کے لیے \"{{query}}\""
@@ -6114,7 +6120,9 @@
   "nftMarket": {
     "actAll": "سب",
     "actListings": "اشتہار",
+    "actOffer": "آفر",
     "actOffers": "آفرس",
+    "actSales": "سیلز",
     "tabActivity": "سرگرمی",
     "shortTitle": "این ایف ٹیز",
     "filters": "فلٹرز",
@@ -6587,8 +6595,12 @@
       "image": "تصویر",
       "camera": "کیمرہ",
       "show": "اسٹریم پر دکھاؤ",
+      "loop": "لوپ",
       "positions": {
         "center": "سنتھر"
+      },
+      "sizes": {
+        "medium": "درمیانی"
       },
       "shapes": {
         "circle": "دائرہ",
@@ -7561,6 +7573,7 @@
     "footerNote": "دپین پارتسپیشن ایک سروس کا قیمتی حصہ ہے، نہ کہ ایک سرمایہ کاری کا پروڈکٹ۔ دستیابیت، پائلگیتھی اور انعامات بدل سکتے ہیں۔"
   },
   "creatorFlow": {
+    "newNativeFlow": "نئی فلو",
     "disconnect": "ڈسکونیکٹ",
     "title": "کریٹر فلو",
     "backToStudio": "بک ٹو کرییتور اسٹوڈیو",
@@ -7623,6 +7636,7 @@
     "nothingConnects": "اس ہینڈل سے کچھ بھی جوڑنے کے قابل نہیں ہے۔",
     "handleImage": "حوالہ تصویر",
     "handleImageUnsupported": "یہ Model کو کوئی ریفری انجن ہی نہیں لیتا",
+    "handleEndFrame": "ایند فریم",
     "handleReferenceImages": "ریفری انجن (4 تک)",
     "handleReferenceVideo": "حوالہ ویڈیو",
     "handleVideoOut": "ویدیو آؤٹپٹ",
@@ -9145,7 +9159,8 @@
       "textSaved": "ہیڈر ہیڈر سروس چیئرمن کے ساتھ ملاقات کے بعد، ہم نے ایک نئے ہیڈر ہیڈر سروس کے ڈیزائن کے بارے میں تبادلہ خیال کیا ہے۔",
       "action": "آٹو کیپشن",
       "styles": {
-        "bold": "بولڈ"
+        "bold": "بولڈ",
+        "serif": "سریف"
       },
       "working": "سن رئیں… {{percent}}%",
       "downloading": "بولی کا ماڈل تیار کر رئیں… {{percent}}%",
@@ -9401,6 +9416,7 @@
       "matchFailed": "منظر کی مماثلت دستیاب نہیں ہے ۔ آپ کے منتخب کردہ کلپس اور اوقات میں کوئی تبدیلی نہیں کی گئی ہے ۔ آپ دستی طور پر ان کا جائزہ لے سکتے ہیں ۔",
       "reviewManually": "کلپس کا دستی طور پر جائزہ لیں"
     },
+    "signInToGenerate": "جنریٹ کرنے کے لیے سائن ان کریں۔",
     "voiceoverLimit": "صوائٹ اوور کی حد {{count}} کارैकٹرز پر پہنچ جاتی ہے۔",
     "backgrounds": {
       "applyAll": "پیج کا پس منظر تمام پیجز پر کاپی کرے",
@@ -10524,6 +10540,9 @@
       "zoomIn": "کینوس کو زیادہ کرے",
       "zoomOut": "کینوس کو کم کرے"
     },
+    "clipFix": {
+      "listening": "سُننا کر رہے ہیں..."
+    },
     "shortcuts": {
       "action": {
         "split": "کاٹو",
@@ -10534,7 +10553,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ریکارڈنگ بند کرو"
+      "stop": "ریکارڈنگ بند کرو",
+      "failed": "واوس کلوننگ ناکام ہو گئی۔"
     },
     "linkImport": {
       "go": "امپورٹ",
@@ -18519,8 +18539,10 @@
       "gaming": "گیمنگ",
       "crypto": "کرپٹو",
       "sports": "کھیل",
+      "comedy": "کامیڈی",
       "film": "فلم",
       "podcast": "پوڈکاسٹ",
+      "food": "خوارہ",
       "news": "خبریں",
       "science": "سائنس"
     },
@@ -18531,6 +18553,7 @@
   "appTokens": {
     "title": "توقعات",
     "history": "تاریخ",
+    "noHistory": "ابھی تک کوئی سرگرمی نہیں",
     "kindDeposit": "جمع",
     "to": "تک",
     "amount": "رقم",
@@ -18560,6 +18583,7 @@
     "notNow": "ابھی نہیں"
   },
   "postStats": {
+    "audience": "آئڈینس",
     "engagement": "مصروفیات",
     "finished": "ختم",
     "members": "اراکین",

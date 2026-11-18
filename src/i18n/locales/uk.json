@@ -1588,6 +1588,7 @@
     "payDirectNoName": "Відправлено прямо до автора в {{symbol}} на {{chain}}. Без заміни.",
     "payViaBridgeDpay": "Переміщено до Base та оплачено до Riftn Pay, токени прибудуть приблизно через хвилину",
     "dmSent": "Надіслано {{amount}} токенів користувачу {{name}}!",
+    "addMessage": "Додайте повідомлення (необов 'язково)",
     "messagePublic": "Публічний",
     "railTitle": "Чаєві",
     "railTotal": "{{amount}} токенів",
@@ -2624,6 +2625,9 @@
     "sortLikes": "Вподобання",
     "sortMostLiked": "Найбільше сподобалося",
     "sortCustomShort": "Навички",
+    "arrange": {
+      "saving": "Збереження..."
+    },
     "searchThisChannel": "Пошук по цьому каналу",
     "searchResultCount": "1 результат для \"{{query}}\"",
     "searchResultCountPlural": "{{count}} результатів для \"{{query}}\""
@@ -6605,7 +6609,9 @@
   "nftMarket": {
     "actAll": "Усі",
     "actListings": "Оголошення",
+    "actOffer": "Пропозиція",
     "actOffers": "Пропозиції",
+    "actSales": "Продажі",
     "tabActivity": "Активність",
     "shortTitle": "NFT",
     "filters": "Фільтри",
@@ -7109,8 +7115,12 @@
       "image": "Зображення",
       "camera": "Камера",
       "show": "Показати в потоці",
+      "loop": "Петля",
       "positions": {
         "center": "Центр"
+      },
+      "sizes": {
+        "medium": "Середня"
       },
       "shapes": {
         "circle": "Коло",
@@ -8097,6 +8107,7 @@
     "footerNote": "Участь у DePin — це служба внеску, а не інвестиційний продукт. Доступність, придатність та винагороди можуть змінюватися."
   },
   "creatorFlow": {
+    "newNativeFlow": "Новий потік",
     "disconnect": "Відключити",
     "title": "Потік авторів",
     "backToStudio": "Повернутися до Creator Studio",
@@ -9705,7 +9716,8 @@
       "textSaved": "Збережені зміни підпису.",
       "action": "Автосубтитри",
       "styles": {
-        "bold": "Жирний"
+        "bold": "Жирний",
+        "serif": "Сериф"
       },
       "working": "Слухаю… {{percent}}%",
       "downloading": "Готуємо модель мовлення… {{percent}}%",
@@ -11087,6 +11099,9 @@
       "zoomIn": "Збільшити полотно",
       "zoomOut": "Зменшити полотно"
     },
+    "clipFix": {
+      "listening": "Прослуховування…"
+    },
     "shortcuts": {
       "action": {
         "split": "Розділити",
@@ -11097,7 +11112,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Зупинити запис"
+      "stop": "Зупинити запис",
+      "failed": "Помилка клонування голосу."
     },
     "linkImport": {
       "go": "Імпортувати",
@@ -19713,8 +19729,10 @@
       "gaming": "Ігри",
       "crypto": "Криптовалюта",
       "sports": "Спорт",
+      "comedy": "Комедія",
       "film": "Фільм",
       "podcast": "Подкаст",
+      "food": "Їжа",
       "news": "Новини",
       "science": "Наука"
     },
@@ -19725,6 +19743,7 @@
   "appTokens": {
     "title": "Ваші токени",
     "history": "Історія",
+    "noHistory": "Поки що немає активності",
     "kindDeposit": "Депозит",
     "to": "До",
     "amount": "Сума",
@@ -19754,6 +19773,7 @@
     "notNow": "Не зараз"
   },
   "postStats": {
+    "audience": "Аудиторія",
     "engagement": "Залучення",
     "finished": "Завершено",
     "members": "Учасники",
@@ -19847,6 +19867,7 @@
   "dmSchedule": {
     "view": "Переглянути",
     "edit": "Редагувати",
+    "editLabel": "Редагувати повідомлення",
     "error": "Це не спрацювало. Спробуйте ще раз."
   },
   "pages": {

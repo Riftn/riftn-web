@@ -1263,6 +1263,7 @@
     "payDirectNoName": "Ipinadala nang diretso sa tagagawa sa {{symbol}} sa {{chain}}. Walang palit-palit.",
     "payViaBridgeDpay": "Inilipat sa Base at binayaran sa Riftn Pay, darating ang mga token sa humigit-kumulang isang minuto",
     "dmSent": "Naipadala ang {{amount}} tokens kay {{name}}!",
+    "addMessage": "Magdagdag ng mensahe (opsyonal)",
     "messagePublic": "Pampubliko",
     "railTitle": "Mga Tip",
     "railTotal": "{{amount}} token",
@@ -2270,6 +2271,8 @@
       "likes": "Mga Like"
     },
     "likedPosts": {
+      "emptyTitle": "Wala pang like",
+      "privateTitle": "Pribado ang mga like",
       "loadMore": "Mag-load pa"
     },
     "dislikes": {
@@ -2294,6 +2297,9 @@
     "sortLikes": "Mga Gusto",
     "sortMostLiked": "Pinaka nagustuhan",
     "sortCustomShort": "Pansamantalang",
+    "arrange": {
+      "saving": "Sini-save..."
+    },
     "searchThisChannel": "Maghanap sa channel na ito",
     "searchResultCount": "1 resulta para sa \"{{query}}\"",
     "searchResultCountPlural": "Mga resulta ng {{count}} para sa \"{{query}}\""
@@ -6277,7 +6283,9 @@
   "nftMarket": {
     "actAll": "Lahat",
     "actListings": "Mga listing",
+    "actOffer": "Alok",
     "actOffers": "Mga alok",
+    "actSales": "Mga benta",
     "tabActivity": "Aktibidad",
     "shortTitle": "NFTs",
     "filters": "Mga Filter",
@@ -6780,6 +6788,9 @@
       "show": "Ipakita sa stream",
       "positions": {
         "center": "Sentro"
+      },
+      "sizes": {
+        "medium": "Katamtaman"
       },
       "shapes": {
         "circle": "Bilog",
@@ -7764,6 +7775,7 @@
     "footerNote": "Ang DePin participation ay isang contribution service, hindi isang investment product. Ang availability, eligibility at rewards ay maaaring magbago."
   },
   "creatorFlow": {
+    "newNativeFlow": "Bagong flow",
     "disconnect": "Huwag magkabit",
     "title": "Creator Flow",
     "backToStudio": "Bumalik sa Creator Studio",
@@ -10746,6 +10758,9 @@
       "zoomIn": "Pakita ang Canvas sa Zoom",
       "zoomOut": "Pahulog ang canvas"
     },
+    "clipFix": {
+      "listening": "Nakikinig…"
+    },
     "shortcuts": {
       "action": {
         "split": "Hatiin",
@@ -10756,7 +10771,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Itigil ang pag-record"
+      "stop": "Itigil ang pag-record",
+      "failed": "Nabigo ang voice cloning."
     },
     "linkImport": {
       "go": "Mag-import",
@@ -19395,6 +19411,7 @@
       "crypto": "Bitcoin",
       "sports": "Mga Larong Palaro",
       "film": "Pelikula",
+      "food": "Pagkain",
       "news": "Balita",
       "science": "Agham"
     },
@@ -19405,6 +19422,7 @@
   "appTokens": {
     "title": "Ang iyong mga token",
     "history": "Kasaysayan",
+    "noHistory": "Wala pang aktibidad",
     "kindDeposit": "Deposito",
     "to": "Hanggang",
     "amount": "Halaga",
@@ -19434,6 +19452,7 @@
     "notNow": "Hindi ngayon"
   },
   "postStats": {
+    "audience": "Tagapanood",
     "engagement": "Pakikilahok",
     "finished": "Tapos na",
     "members": "Mga Miyembro",
@@ -19521,6 +19540,7 @@
   "dmSchedule": {
     "view": "Tingnan",
     "edit": "I-edit",
+    "editLabel": "I-edit ang mensahe",
     "error": "Hindi ito gumana. Subukan muli."
   },
   "walletSelector": {

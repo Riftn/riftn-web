@@ -1222,6 +1222,7 @@
     "payDirectNoName": "Posláno tvůrci přímo v {{symbol}} dne {{chain}}. Žádná výměna.",
     "payViaBridgeDpay": "Přesunuto na Base a zaplaceno do Riftn Pay, tokeny dorazí přibližně za minutu",
     "dmSent": "Odesláno {{amount}} tokenů uživateli {{name}}!",
+    "addMessage": "Přidat zprávu (volitelné)",
     "messagePublic": "Veřejné",
     "railTitle": "Tipy",
     "railTotal": "{{amount}} tokenů",
@@ -2224,6 +2225,8 @@
       "likes": "Líbí se"
     },
     "likedPosts": {
+      "emptyTitle": "Zatím žádné lajky",
+      "privateTitle": "Lajky jsou soukromé",
       "loadMore": "Načíst více"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "Likey",
     "sortMostLiked": "Nejvíce oblíbené",
     "sortCustomShort": "Vlastní",
+    "arrange": {
+      "saving": "Ukládá se..."
+    },
     "searchThisChannel": "Hledejte tento kanál",
     "searchResultCount": "1 výsledek pro \"{{query}}\"",
     "searchResultCountPlural": "{{count}} výsledků pro \"{{query}}\""
@@ -6238,7 +6244,9 @@
   "nftMarket": {
     "actAll": "Vše",
     "actListings": "Inzeráty",
+    "actOffer": "Nabídka",
     "actOffers": "Nabídky",
+    "actSales": "Prodeje",
     "tabActivity": "Aktivita",
     "shortTitle": "NFTS",
     "filters": "Filtry",
@@ -6741,8 +6749,12 @@
       "image": "Obrázek",
       "camera": "Kamera",
       "show": "Zobrazit na přenosu",
+      "loop": "Smyčka",
       "positions": {
         "center": "Střed"
+      },
+      "sizes": {
+        "medium": "Střední"
       },
       "shapes": {
         "circle": "Kruh",
@@ -7729,6 +7741,7 @@
     "footerNote": "Účast v DePin je služba příspěvku, nikoli investiční produkt. Dostupnost, způsobilost a odměny se mohou změnit."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nový tok",
     "disconnect": "Odpojit",
     "title": "Creator Flow",
     "backToStudio": "Zpět do Creator Studio",
@@ -10713,6 +10726,9 @@
       "zoomIn": "Přiblížit plátno",
       "zoomOut": "Zobrazit na mapě v širší perspektivě"
     },
+    "clipFix": {
+      "listening": "Poslouchám…"
+    },
     "shortcuts": {
       "action": {
         "split": "Rozdělit",
@@ -10723,7 +10739,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Zastavit nahrávání"
+      "stop": "Zastavit nahrávání",
+      "failed": "Klónování hlasu selhalo."
     },
     "linkImport": {
       "go": "Importovat",
@@ -19314,6 +19331,8 @@
       "gaming": "Počítačové hry",
       "crypto": "Krypto",
       "sports": "Sport",
+      "comedy": "Komédie",
+      "food": "Jídlo",
       "news": "Novinky",
       "science": "Věda"
     },
@@ -19324,6 +19343,7 @@
   "appTokens": {
     "title": "Vaše tokeny",
     "history": "Historie",
+    "noHistory": "Zatím žádná aktivita",
     "kindDeposit": "Přidat prostředky",
     "to": "Do",
     "amount": "Částka",
@@ -19353,6 +19373,7 @@
     "notNow": "Teď ne"
   },
   "postStats": {
+    "audience": "Publikum",
     "engagement": "Zapojení",
     "finished": "Dokončeno",
     "members": "Členové",
@@ -19441,6 +19462,7 @@
   "dmSchedule": {
     "view": "Zobrazit",
     "edit": "Upravit",
+    "editLabel": "Upravit zprávu",
     "error": "To nefungovalo. Zkuste to znovu."
   }
 }

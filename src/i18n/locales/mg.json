@@ -1213,6 +1213,7 @@
     "payDirectNoName": "Nalefa nivantana tany amin'ny mpamorona ny {{symbol}} {{chain}}. No swap.",
     "payViaBridgeDpay": "Nifindra tany Base ary nalefa tamin'ny Riftn Pay, tonga ny mari-tsoratra ao anatin'ny iray minitra eo ho eo",
     "dmSent": "Nandefa {{amount}} tokens ho an'i {{name}}!",
+    "addMessage": "Ampidiro ny hafatra (azo atao)",
     "messagePublic": "Ho an'ny rehetra",
     "railTitle": "Torohevitra",
     "railTotal": "{{amount}} marika",
@@ -2236,6 +2237,8 @@
       "likes": "Tia"
     },
     "likedPosts": {
+      "emptyTitle": "Mbola tsy misy fankasitrahana",
+      "privateTitle": "Tsy ampahibemaso ny fankasitrahana",
       "loadMore": "Ampidiro betsaka kokoa"
     },
     "dislikes": {
@@ -2260,6 +2263,9 @@
     "sortLikes": "Tia",
     "sortMostLiked": "Tia be indrindra",
     "sortCustomShort": "Safidy:",
+    "arrange": {
+      "saving": "Eo am-pitahirizana..."
+    },
     "searchThisChannel": "Tadiavina ity channel ity",
     "searchResultCount": "1 valiny ho an'ny \"{{query}}\"",
     "searchResultCountPlural": "{{count}} valiny ho an'ny \"{{query}}\""
@@ -6243,6 +6249,7 @@
     "actAll": "Izy rehetra",
     "actListings": "Tolotra",
     "actOffers": "Tolotra",
+    "actSales": "Varotra",
     "tabActivity": "Hetsika",
     "shortTitle": "NFTs",
     "filters": "Sivana",
@@ -6744,8 +6751,12 @@
       "image": "Sary",
       "camera": "Fakantsary",
       "show": "Ipakita sa stream",
+      "loop": "Manome fitoerana",
       "positions": {
         "center": "Afovoany"
+      },
+      "sizes": {
+        "medium": "Salantsalany"
       },
       "shapes": {
         "circle": "Faribolana",
@@ -7731,6 +7742,7 @@
     "footerNote": "Pennyauctionwizards dia fandraisana anjara amin'ny fanompoana, fa tsy amin'ny fampiasam-bola ny vokatra. Ny vidiny, ny fahamendrehana ary ny fahafahana dia mety hiova."
   },
   "creatorFlow": {
+    "newNativeFlow": "New mikoriana",
     "disconnect": "Atsaharo",
     "title": "Mpamorona Flow",
     "backToStudio": "Miverina amin'ny Studio mpamorona",
@@ -10713,6 +10725,9 @@
       "zoomIn": "Zòma manalehibe",
       "zoomOut": "Zòma manakely"
     },
+    "clipFix": {
+      "listening": "Mihaino…"
+    },
     "shortcuts": {
       "action": {
         "split": "Zarao",
@@ -10726,7 +10741,8 @@
       "label": "3 D"
     },
     "voiceClone": {
-      "stop": "Ajanony ny firaketana"
+      "stop": "Ajanony ny firaketana",
+      "failed": "Tsy nahomby ny famoronana feo mitovy (voice cloning)."
     },
     "linkImport": {
       "go": "Mampiditra",
@@ -19305,8 +19321,10 @@
       "art": "Zavakanto",
       "gaming": "Lalao",
       "sports": "Fanatanjahan-tena",
+      "comedy": "Hetsika mampihomehy",
       "film": "Fimbo",
       "podcast": "Rakipeo",
+      "food": "Sakafo",
       "news": "Vaovao",
       "science": "Siansa"
     },
@@ -19317,6 +19335,7 @@
   "appTokens": {
     "title": "Ny token anao",
     "history": "Tantara",
+    "noHistory": "Tsy misy asa atao mbola",
     "kindDeposit": "Petra - bola",
     "to": "Mankany amin'ny",
     "amount": "Vola",
@@ -19346,6 +19365,7 @@
     "notNow": "Tsy izao"
   },
   "postStats": {
+    "audience": "Mpanjifa",
     "engagement": "Fandraisana anjara",
     "finished": "Vita",
     "members": "Mpikambana",
@@ -19432,6 +19452,7 @@
   "dmSchedule": {
     "view": "Jereo",
     "edit": "Fanovana",
+    "editLabel": "Hanova hafatra",
     "error": "Tsy nandeha izany. Andramo indray."
   },
   "createPost": {

@@ -1224,6 +1224,7 @@
     "payDirectNoName": "Lähetetty suoraan tekijälle {{symbol}} klo{{chain}}. Ei vaihtoa.",
     "payViaBridgeDpay": "Siirretty Baseen ja maksettu Riftn Paylle, tokenit saapuvat noin minuutissa",
     "dmSent": "Lähetettiin {{amount}} tokenia vastaanottajalle {{name}}!",
+    "addMessage": "Lisää viesti (valinnainen)",
     "messagePublic": "Julkinen",
     "railTitle": "Vinkit",
     "railTotal": "{{amount}} tokenia",
@@ -2226,6 +2227,8 @@
       "likes": "Tykkäykset"
     },
     "likedPosts": {
+      "emptyTitle": "Ei vielä tykkäyksiä",
+      "privateTitle": "Tykkäykset ovat yksityisiä",
       "loadMore": "Lataa lisää"
     },
     "dislikes": {
@@ -2250,6 +2253,9 @@
     "sortLikes": "Tykkäykset",
     "sortMostLiked": "Suosituimmat",
     "sortCustomShort": "Mukautettu",
+    "arrange": {
+      "saving": "Tallennetaan..."
+    },
     "searchThisChannel": "Etsi kanava",
     "searchResultCount": "1 tulosta \"{{query}}\"",
     "searchResultCountPlural": "{{count}} tulosta \"{{query}}\""
@@ -6239,7 +6245,9 @@
   "nftMarket": {
     "actAll": "Kaikki",
     "actListings": "Ilmoitukset",
+    "actOffer": "Tarjotaa",
     "actOffers": "Tarjoukset",
+    "actSales": "Myydyt",
     "tabActivity": "Toiminta",
     "shortTitle": "NFTS",
     "filters": "Suodattimet",
@@ -6742,8 +6750,12 @@
       "image": "Kuva",
       "camera": "Kamera",
       "show": "Näytä suoratoistossa",
+      "loop": "Silmukka",
       "positions": {
         "center": "Keskitä"
+      },
+      "sizes": {
+        "medium": "Keskitaso"
       },
       "shapes": {
         "circle": "Ympyrä",
@@ -7730,6 +7742,7 @@
     "footerNote": "DePin-osallistuminen on osallistumispalvelu, ei sijoitustuote. Saatavuus, kelpoisuus ja palkkiot voivat muuttua."
   },
   "creatorFlow": {
+    "newNativeFlow": "Uusi flow",
     "disconnect": "Katkaise yhteys",
     "title": "Creator Flow",
     "backToStudio": "Takaisin Creator Studioon",
@@ -10713,6 +10726,9 @@
       "zoomIn": "Zoom-ohjelman kannaksen suurennus",
       "zoomOut": "Loitonna kangasta"
     },
+    "clipFix": {
+      "listening": "Kuunnellaan…"
+    },
     "shortcuts": {
       "action": {
         "split": "Jaa",
@@ -10723,7 +10739,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Lopeta tallennus"
+      "stop": "Lopeta tallennus",
+      "failed": "Ääniklonaus epäonnistui."
     },
     "linkImport": {
       "go": "Tuo",
@@ -19311,7 +19328,9 @@
       "gaming": "Pelit",
       "crypto": "Krypto",
       "sports": "Urheilu",
+      "comedy": "Komedia",
       "film": "Elokuva",
+      "food": "Ruoka",
       "news": "Uutiset",
       "science": "Tiede"
     },
@@ -19322,6 +19341,7 @@
   "appTokens": {
     "title": "Omat tokenisi",
     "history": "Historia",
+    "noHistory": "Ei vielä aktiviteetteja",
     "kindDeposit": "Lisää varoja",
     "to": "Loppuu",
     "amount": "Summa",
@@ -19351,6 +19371,7 @@
     "notNow": "Ei nyt"
   },
   "postStats": {
+    "audience": "Yleisö",
     "engagement": "Sitoutuminen",
     "finished": "Päättynyt",
     "members": "Jäsenet",
@@ -19437,6 +19458,7 @@
   "dmSchedule": {
     "view": "Katso",
     "edit": "Muokkaa",
+    "editLabel": "Muokkaa viestiä",
     "error": "Se ei toiminut. Yritä uudelleen."
   }
 }

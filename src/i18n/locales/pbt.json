@@ -1209,6 +1209,7 @@
     "payDirectNoName": "په مستقیم ډول جوړونکي ته په {{symbol}} کې په {{chain}} کې واستول شو. هیڅ تبادله نشته.",
     "payViaBridgeDpay": "Base ته لیږدول شوي او Riftn Pay ته پیسې ورکړل شوې، ټوکنونه شاوخوا یوه دقیقه وروسته رسیږي",
     "dmSent": "{{name}} ته {{amount}} ټوکنونه ولېږل شول!",
+    "addMessage": "یو پیغام اضافه کړئ (اختیاري)",
     "messagePublic": "عامه",
     "railTitle": "ټیپس",
     "railTotal": "{{amount}} ټوکنونه",
@@ -2194,6 +2195,8 @@
       "likes": "خوښونې"
     },
     "likedPosts": {
+      "emptyTitle": "تر اوسه خوښې نشته",
+      "privateTitle": "خوښې شخصي دي",
       "loadMore": "نور لوډ کړئ"
     },
     "dislikes": {
@@ -2218,6 +2221,9 @@
     "sortLikes": "خوښ یې کړئ",
     "sortMostLiked": "تر ټولو ډیر خوښ شوی",
     "sortCustomShort": "خپل ډول",
+    "arrange": {
+      "saving": "خوندي کیږي..."
+    },
     "searchThisChannel": "له دې کانال څخه لیدنه وکړئ"
   },
   "tv": {
@@ -6161,6 +6167,7 @@
     "actAll": "ټول",
     "actListings": "لیستونه",
     "actOffers": "وړاندیزونه",
+    "actSales": "پلور",
     "tabActivity": "فعالیت",
     "shortTitle": "NFT",
     "filters": "فلټرونه",
@@ -6622,8 +6629,12 @@
       "image": "په انځور کې",
       "camera": "د کامرې",
       "show": "په لښکرګاه کې چاودنې وشوې",
+      "loop": "د لوپ په اړه",
       "positions": {
         "center": "مرکز"
+      },
+      "sizes": {
+        "medium": "منځنی"
       },
       "shapes": {
         "circle": "دایره",
@@ -7609,6 +7620,7 @@
     "footerNote": "د DePin ګډون د ونډې خدمت دی، نه د پانګوونې محصول. وړتیا، وړتیا او انعام ممکن بدل شي."
   },
   "creatorFlow": {
+    "newNativeFlow": "نوی جریان",
     "disconnect": "سره نښلوي",
     "title": "د خالق جریان",
     "backToStudio": "د خالق سټوډیو ته بیرته",
@@ -9209,7 +9221,8 @@
       "textSaved": "د سرلیک بدلونونه خوندي شول.",
       "action": "اتومات سرلیکونه",
       "styles": {
-        "bold": "په زړه پوری"
+        "bold": "په زړه پوری",
+        "serif": "په نه په خنده دار"
       },
       "working": "اورېدل کېږي… {{percent}}%",
       "downloading": "د خبرو ماډل چمتو کېږي… {{percent}}%",
@@ -10591,6 +10604,9 @@
       "zoomIn": "کینوس ته زوم کول",
       "zoomOut": "کینوس څخه زوم لرې کول"
     },
+    "clipFix": {
+      "listening": "د خبرو په اورېدو..."
+    },
     "shortcuts": {
       "action": {
         "split": "وېشل",
@@ -10604,7 +10620,8 @@
       "label": "په نه په 3D"
     },
     "voiceClone": {
-      "stop": "ضبط ودروئ"
+      "stop": "ضبط ودروئ",
+      "failed": "صوت دېرېدنه ناکام شوه."
     },
     "linkImport": {
       "go": "واردول",
@@ -19083,8 +19100,10 @@
       "gaming": "لوبې",
       "crypto": "کریپتو",
       "sports": "لوبې",
+      "comedy": "کومېډي",
       "film": "فلم",
       "podcast": "پوډکاسټ",
+      "food": "خواړه",
       "news": "خبرونه",
       "science": "ساینس"
     },
@@ -19095,6 +19114,7 @@
   "appTokens": {
     "title": "ستاسو ټوکنونه",
     "history": "تاریخ",
+    "noHistory": "لا تر اوسه پورې هیڅ فعالیت نه دی شوی",
     "kindDeposit": "جمع",
     "to": "د دې لپاره چې",
     "amount": "مقدار",
@@ -19124,6 +19144,7 @@
     "notNow": "اوس نه"
   },
   "postStats": {
+    "audience": "د مخکښو",
     "engagement": "ګډون",
     "finished": "پای ته ورسېد",
     "members": "غړي",
@@ -19204,6 +19225,7 @@
   "dmSchedule": {
     "view": "لیدل",
     "edit": "ایډیټ کړئ",
+    "editLabel": "پيامک سرکاري",
     "error": "دا کار نه کوي، بیا هڅه وکړئ."
   }
 }

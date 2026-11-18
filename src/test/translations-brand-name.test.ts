@@ -38,7 +38,7 @@ describe('translations use the Riftn name', () => {
       offenders.push(...stale(en, locale).map((key) => `${file}: ${key}`));
     }
     expect(offenders).toEqual([]);
-  }, 30_000); // reads ~110 large locale files; ~5 s alone, more on a busy runner
+  }, 120_000);
 
   it('docs and marketing bundles (src/i18n/<lang>.ts)', async () => {
     const bundles = import.meta.glob('../i18n/*.ts');

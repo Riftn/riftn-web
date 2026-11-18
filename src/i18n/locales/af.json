@@ -1286,6 +1286,7 @@
     "payDirectNoName": "Gestuur reguit na die skepper in {{symbol}} op {{chain}}. Geen omruil.",
     "payViaBridgeDpay": "Verskuif na Base en betaal aan Riftn Pay, tokens arriveer in ongeveer 'n minuut",
     "dmSent": "{{amount}} tokens aan {{name}} gestuur!",
+    "addMessage": "Voeg 'n boodskap (opsioneel)",
     "messagePublic": "Publiek",
     "railTitle": "Wenke"
   },
@@ -2309,6 +2310,8 @@
       "likes": "Laaiks"
     },
     "likedPosts": {
+      "emptyTitle": "Nog geen laaiks nie",
+      "privateTitle": "Laaiks is privaat",
       "loadMore": "Laai meer"
     },
     "dislikes": {
@@ -2333,6 +2336,9 @@
     "sortLikes": "Hou van",
     "sortMostLiked": "Meeste gehou",
     "sortCustomShort": "Pasmaak",
+    "arrange": {
+      "saving": "Stoor tans..."
+    },
     "searchThisChannel": "Deursoek hierdie kanaal",
     "searchResultCount": "1 gevolg vir \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultate vir \"{{query}}\"",
@@ -6331,7 +6337,9 @@
   "nftMarket": {
     "actAll": "Alle",
     "actListings": "Advertensies",
+    "actOffer": "Aanbod",
     "actOffers": "Aanbiedinge",
+    "actSales": "Verkope",
     "tabActivity": "Aktiwiteit",
     "shortTitle": "NFT's",
     "filters": "Filters",
@@ -6833,6 +6841,7 @@
       "image": "Beeld",
       "camera": "Kamera",
       "show": "Wys op stroom",
+      "loop": "Lus",
       "positions": {
         "center": "Sentrum"
       },
@@ -7821,6 +7830,7 @@
     "footerNote": "DePin-deelname is 'n bydraediens, nie 'n beleggingsproduk nie. Beskikbaarheid, geskiktheid en belonings mag verander."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nuwe vloei",
     "disconnect": "Ontkoppel",
     "title": "Skepperstroom",
     "backToStudio": "Terug na Skepperstudio",
@@ -10834,6 +10844,9 @@
       "zoomIn": "Zoem doek in",
       "zoomOut": "Zoem doek uit"
     },
+    "clipFix": {
+      "listening": "Luister…"
+    },
     "shortcuts": {
       "action": {
         "split": "Verdeel",
@@ -10844,7 +10857,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Hou op om op te neem"
+      "stop": "Hou op om op te neem",
+      "failed": "Stemkloning misluk."
     },
     "linkImport": {
       "go": "Voer in",
@@ -19462,7 +19476,9 @@
       "gaming": "Speletjies",
       "crypto": "Kripto",
       "sports": "Sport",
+      "comedy": "Komedië",
       "podcast": "Podsending",
+      "food": "Voedsel",
       "news": "Nuus",
       "science": "Wetenskap"
     },
@@ -19473,6 +19489,7 @@
   "appTokens": {
     "title": "Jou tokens",
     "history": "Geskiedenis",
+    "noHistory": "Nog geen aktiwiteit nie",
     "kindDeposit": "Deposito",
     "to": "Aan",
     "amount": "Bedrag",
@@ -19502,6 +19519,7 @@
     "notNow": "Nie nou nie"
   },
   "postStats": {
+    "audience": "Gehoor",
     "engagement": "Betrokkenheid",
     "finished": "Klaar",
     "members": "Lede",
@@ -19589,7 +19607,9 @@
   },
   "dmSchedule": {
     "view": "Kyk",
+    "notSent": "Nie gestuur nie",
     "edit": "Redigeer",
+    "editLabel": "Redigeer boodskap",
     "error": "Dit het nie gewerk nie. Probeer weer."
   },
   "footer": {

@@ -1222,6 +1222,7 @@
     "payDirectNoName": "Enviat directament al creador en {{symbol}} el {{chain}}. Sense intercanvi.",
     "payViaBridgeDpay": "Mogut a Base i pagat a Riftn Pay, les fitxes arriben en aproximadament un minut",
     "dmSent": "S'han enviat {{amount}} fitxes a {{name}}!",
+    "addMessage": "Afegeix un missatge (opcional)",
     "messagePublic": "Públic",
     "railTitle": "Consells",
     "railTotal": "{{amount}} fitxes",
@@ -2224,6 +2225,8 @@
       "likes": "M'agrada"
     },
     "likedPosts": {
+      "emptyTitle": "Encara no hi ha m'agrada",
+      "privateTitle": "Els m'agrada són privats",
       "loadMore": "Carregar més"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "Llikes",
     "sortMostLiked": "Més votat",
     "sortCustomShort": "Personalitzat",
+    "arrange": {
+      "saving": "Desant..."
+    },
     "searchThisChannel": "Cerca aquest canal",
     "searchResultCount": "1 resultat per \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultats per \"{{query}}\""
@@ -6233,7 +6239,9 @@
   "nftMarket": {
     "actAll": "Tots",
     "actListings": "Anuncis",
+    "actOffer": "Oferta",
     "actOffers": "Ofertes",
+    "actSales": "Vendes",
     "tabActivity": "Activitat",
     "shortTitle": "NFTS",
     "filters": "Filtres",
@@ -6736,6 +6744,10 @@
       "image": "Imatge",
       "camera": "Càmera",
       "show": "Mostra a la transmissió",
+      "loop": "Bucle",
+      "sizes": {
+        "medium": "Mitjana"
+      },
       "shapes": {
         "circle": "Cercle",
         "rect": "Quadrat"
@@ -7719,6 +7731,7 @@
     "footerNote": "La participació en DePin és un servei de contribució, no un producte d'inversió. La disponibilitat, l'elegibilitat i les recompenses poden canviar."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nou flux",
     "disconnect": "Desconnecta",
     "title": "Creator Flow",
     "backToStudio": "Tornar a Creator Studio",
@@ -10702,6 +10715,9 @@
       "zoomIn": "Zoom al canvas en",
       "zoomOut": "Redueix el llenç"
     },
+    "clipFix": {
+      "listening": "Escoltant…"
+    },
     "shortcuts": {
       "action": {
         "split": "Divideix",
@@ -10712,7 +10728,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Aturar gravació"
+      "stop": "Aturar gravació",
+      "failed": "La clonació de veu ha fallat."
     },
     "linkImport": {
       "go": "Importar",
@@ -19300,7 +19317,9 @@
       "gaming": "Jocs",
       "crypto": "Cripto",
       "sports": "Esports",
+      "comedy": "Comèdia",
       "film": "Pel·lícula",
+      "food": "Alimentació",
       "news": "Notícies",
       "science": "Ciències"
     },
@@ -19311,6 +19330,7 @@
   "appTokens": {
     "title": "Els teus tokens",
     "history": "Historial",
+    "noHistory": "Encara no hi ha activitat",
     "kindDeposit": "Dipositar",
     "to": "A",
     "amount": "Quantitat",
@@ -19340,6 +19360,7 @@
     "notNow": "Ara no"
   },
   "postStats": {
+    "audience": "Audiència",
     "engagement": "Interacció",
     "finished": "Finalitzat",
     "members": "Membres",
@@ -19428,6 +19449,7 @@
   "dmSchedule": {
     "view": "Veure",
     "edit": "Editar",
+    "editLabel": "Editar missatge",
     "error": "No ha funcionat. Torna-ho a provar."
   }
 }

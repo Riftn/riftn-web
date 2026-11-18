@@ -137,7 +137,7 @@ export const LANGUAGE_NAMES: Record<string, string> = {
   sck: 'Sadri (Nagpuri, written in Devanagari script)',
   ceb: 'Cebuano (Bisaya)',
   sd: 'Sindhi',
-  sdr: 'Sadri',
+  sdr: 'Sadri (written in Devanagari script)',
   skr: 'Saraiki',
   so: 'Somali',
   syl: 'Sylheti',
