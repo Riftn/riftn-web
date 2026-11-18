@@ -56,7 +56,7 @@ export function GroupChatRow({ community, onClick, pref, selected, selecting = f
         <span
           data-bulk-tick
           aria-hidden="true"
-          style={checked ? { background: 'hsl(var(--foreground))', borderColor: 'hsl(var(--foreground))' } : undefined}
+          style={checked ? { background: 'hsl(var(--foreground))', borderColor: 'hsl(var(--foreground))' } : { borderColor: 'hsl(var(--foreground) / 0.35)' }}
           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
             checked ? '' : 'border-white/30 text-transparent'
           }`}

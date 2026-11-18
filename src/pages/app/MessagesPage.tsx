@@ -5,7 +5,7 @@ import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import { AppState } from '@/components/app/AppState';
 import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
 import { DhbCoin } from '@/components/app/DhbAmount';
-import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -25,7 +25,7 @@ import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/c
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
 import { roomChatId, type ChatPref } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Archive, BellOff, Pin, ChevronLeft } from 'lucide-react';
+import { Archive, BellOff, Pin, ChevronLeft, ListChecks } from 'lucide-react';
 import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
@@ -189,7 +189,7 @@ export function ConversationItem({
         <span
           data-bulk-tick
           aria-hidden="true"
-          style={checked ? { background: 'hsl(var(--foreground))', borderColor: 'hsl(var(--foreground))' } : undefined}
+          style={checked ? { background: 'hsl(var(--foreground))', borderColor: 'hsl(var(--foreground))' } : { borderColor: 'hsl(var(--foreground) / 0.35)' }}
           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
             checked ? '' : 'border-white/30 text-transparent'
           }`}
@@ -532,6 +532,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   useEffect(() => { setBulkIds(null); }, [showArchived, inRequests]);
   const picking = bulkIds !== null;
   const holdToPick = (id: string) => (picking ? toggleBulk(id) : setBulkIds(new Set([id])));
+  /** The Select button in the list header: start picking with nothing ticked, or stop. */
+  const togglePicking = () => setBulkIds(prev => (prev ? null : new Set()));
+  /** Computers without the full-screen menu: a right-click on a row starts picking from it. */
+  const rightClickPick = (id: string) => (e: ReactMouseEvent) => {
+    if (richList || e.defaultPrevented) return;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches) return;
+    e.preventDefault();
+    holdToPick(id);
+  };
   // The phone list does not pin, archive or show mutes, but a chat you marked
   // unread (here or on another device) still shows its marker.
   const unreadOnly = (p: ChatPref | undefined): ChatPref | undefined =>
@@ -1085,6 +1094,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       )}
       searchActions={(
         <>
+          <ChatIconButton
+            label={_copy('chatBulk.select', { defaultValue: 'Select chats' })}
+            onClick={togglePicking}
+            className={picking ? 'bg-white/15 text-white' : undefined}
+            data-messages-search-action=""
+            data-chat-select-start=""
+          >
+            <ListChecks />
+          </ChatIconButton>
           <ChatIconButton label={_copy("copy.0e9161011702", { defaultValue: "Refresh" })} onClick={() => refetch()} data-messages-search-action="">
             <RefreshCw className={isRefetching ? 'animate-spin' : ''} />
           </ChatIconButton>
@@ -1135,11 +1153,26 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 placeholder={t('messages.searchConversations')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`pl-10 ${fullscreen ? 'pr-[68px]' : 'pr-[100px]'} bg-white/[0.06] border-0 text-white placeholder:text-zinc-500 rounded-lg`}
+                // Room for the buttons sitting inside the field (28px each).
+                style={{ paddingRight: 8 + 32 * (2 + (phonePill ? 0 : 1) + (fullscreen ? 0 : 1)) }}
+                className="pl-10 bg-white/[0.06] border-0 text-white placeholder:text-zinc-500 rounded-lg"
               />
               {/* Refresh and new message sit quietly inside the search field
                   instead of as island squares next to the title. */}
               <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
+                {/* Select: then click (or tap) chats to tick them for the bulk bar. */}
+                <button
+                  type="button"
+                  data-messages-search-action
+                  data-chat-select-start
+                  onClick={togglePicking}
+                  aria-pressed={picking}
+                  aria-label={_copy('chatBulk.select', { defaultValue: 'Select chats' })}
+                  title={_copy('chatBulk.select', { defaultValue: 'Select chats' })}
+                  className={`h-7 w-7 flex items-center justify-center rounded-md transition-colors ${picking ? 'bg-white/15 text-white' : 'text-zinc-500 hover:text-white'}`}
+                >
+                  <ListChecks className="h-4 w-4" />
+                </button>
                 <button
                   type="button"
                   data-messages-search-action
@@ -1235,7 +1268,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <ChatRowContextMenu key={chat.id} {...roomOptionsFor(chat)}>
                   <div data-chat-row data-pinned={roomPinnedAt(chat) > 0 ? '' : undefined}>{row}</div>
                 </ChatRowContextMenu>
-              ) : row;
+              ) : <div key={chat.id} onContextMenu={rightClickPick(roomChatId(chat.id))}>{row}</div>;
             })}
             </>)}
 
@@ -1291,7 +1324,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   conversation={conv}
                   onClick={(e) => {
                     if (picking) { toggleBulk(conv.id); return; }
-                    if (richList && (e.metaKey || e.ctrlKey)) { e.preventDefault(); setBulkIds(new Set([conv.id])); return; }
+                    if (e.metaKey || e.ctrlKey || e.shiftKey) { e.preventDefault(); setBulkIds(new Set([conv.id])); return; }
                     openConversation(conv);
                   }}
                   selecting={picking}
@@ -1307,7 +1340,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <ChatRowContextMenu key={conv.id} {...chatOptionsFor(conv)}>
                   <div data-chat-row data-pinned={pinnedAt(conv) > 0 ? '' : undefined}>{row}</div>
                 </ChatRowContextMenu>
-              ) : row;
+              ) : <div key={conv.id} onContextMenu={rightClickPick(conv.id)}>{row}</div>;
             })}
             {richList && !showArchived && archivedCount > 0 && !searchQuery.trim() && (
               <button
@@ -1407,7 +1440,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               onDelete={bulkDelete}
               onReply={bulkReply}
               onCancel={() => setBulkIds(null)}
-              touch={!richList}
+              touch={phonePill || (!richList && typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches)}
               // Phones: on /chat the bar takes the bottom menu's place while
               // picking; on /messages it sits above the app's floating menu.
               className={richList ? undefined : phonePill ? 'mb-[calc(env(safe-area-inset-bottom)+8px)]' : 'mb-[84px] lg:mb-2'}

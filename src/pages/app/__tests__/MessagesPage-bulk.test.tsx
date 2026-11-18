@@ -69,6 +69,9 @@ if (!g.DOMRect?.fromRect) {
   };
 }
 
+// jsdom has no elementFromPoint, which the scroll-freeze watchdog calls on a timer.
+if (typeof document.elementFromPoint !== 'function') document.elementFromPoint = () => null;
+
 const chat = (id: string, name: string): DeHubConversation => ({
   id, participants: [], unreadCount: 0,
   createdAt: '2026-11-17T10:00:00Z', updatedAt: '2026-11-17T10:00:00Z',
@@ -136,6 +139,50 @@ describe('picking several chats on a computer', () => {
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
     fireEvent.keyDown(window, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('toolbar')).toBeNull());
+  });
+});
+
+describe('picking several chats on the Messages page (computer, not full screen)', () => {
+  const messagesPage = () => (
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/app/messages']}><MessagesPage /></MemoryRouter>
+    </QueryClientProvider>
+  );
+  beforeEach(() => {
+    vi.clearAllMocks();
+    layout.phone = false;
+    source.conversations = [chat('a', 'Aaron'), chat('b', 'Bea'), chat('c', 'Cleo')];
+  });
+
+  it('the Select button starts picking, then left-clicks tick chats', async () => {
+    render(messagesPage());
+    fireEvent.click(document.querySelector('[data-chat-select-start]')!);
+    const bar = await screen.findByRole('toolbar');
+    expect(within(bar).getByText('chatBulk.pick')).toBeInTheDocument();
+    fireEvent.click(row('Aaron'));
+    fireEvent.click(row('Cleo'));
+    expect(document.querySelectorAll('[data-bulk-checked="true"]')).toHaveLength(2);
+    fireEvent.click(bar.querySelector('[data-chat-bulk-delete]')!);
+    expect(del.scheduleDelete.mock.calls.map(c => c[0])).toEqual(['a', 'c']);
+  });
+
+  it('the Select button again stops picking', async () => {
+    render(messagesPage());
+    const btn = document.querySelector('[data-chat-select-start]')!;
+    fireEvent.click(btn);
+    expect(screen.getByRole('toolbar')).toBeInTheDocument();
+    fireEvent.click(btn);
+    await waitFor(() => expect(screen.queryByRole('toolbar')).toBeNull());
+  });
+
+  it('right-click and Ctrl-click on a row start picking from it', async () => {
+    render(messagesPage());
+    fireEvent.contextMenu(row('Bea'));
+    expect(document.querySelectorAll('[data-bulk-checked="true"]')).toHaveLength(1);
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('toolbar')).toBeNull());
+    fireEvent.click(row('Aaron'), { ctrlKey: true });
+    expect(document.querySelectorAll('[data-bulk-checked="true"]')).toHaveLength(1);
   });
 });
 
