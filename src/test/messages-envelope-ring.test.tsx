@@ -43,6 +43,15 @@ describe('messages envelope ring', () => {
       expect(highest(count)).toBeLessThan(21);
     }
     expect(messagesEnvelopeMotion(1).swing).toBeLessThan(5);
+    // A few unread fade out as they start to drop, never falling past the
+    // envelope's top edge (y -11) while still showing.
+    for (const count of [1, 2, 3]) {
+      for (const slip of messagesEnvelopeMotion(count).slips) {
+        const peak = slip.frames.reduce((top, frame, k) => frame.y < slip.frames[top].y ? k : top, 0);
+        slip.frames.slice(peak).filter(frame => frame.opacity > .05)
+          .forEach(frame => expect(frame.y).toBeLessThan(-11));
+      }
+    }
     expect(farthest(20)).toBeGreaterThan(farthest(10));
     expect(farthest(10)).toBeGreaterThan(farthest(3));
   });

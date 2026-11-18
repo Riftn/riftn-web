@@ -2,9 +2,10 @@ import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 
 import type { LucideProps } from 'lucide-react';
 import MessageEnvelope from '@/components/ui/cut-icons/message-envelope';
 import {
-  ENVELOPE_BODY_PATH, ENVELOPE_FLAP_PATH, ENVELOPE_SIDE_RIPPLE_PATHS, MESSAGE_SLIP_TAIL, SLIP_WINDOW_PATH, messagesEnvelopeMotion,
+  ENVELOPE_BODY_PATH, ENVELOPE_FLAP_PATH, ENVELOPE_SIDE_RIPPLE_PATHS, SLIP_WINDOW_PATH, messagesEnvelopeMotion,
   type MessageSlip, type WormFrame,
 } from '@/lib/messages-envelope-motion';
+import { formatNotificationCount, useShowMessagesCount } from '@/lib/notification-count-pref';
 import './messages-nav-glyph.css';
 
 function RedEnvelope() {
@@ -31,17 +32,16 @@ function slipKeyframes(name: string, slip: MessageSlip, frames: WormFrame[], cyc
  * Messages icon for the bottom bar and the side panel. Unread messages ring it
  * on the same beat as the notification bell: it swings, glows red, sends lines
  * off both sides and one red slip per unread message (up to 20) wriggles out
- * of its top edge like a little worm, flies up and out to its own side, then
- * tumbles back down. More unread
- * means a harder, faster ring.
+ * of its top edge, flies up and out to its own side and fades as it falls.
+ * More unread means a harder, faster ring.
  */
 export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & { unread: number }) {
   const glyphId = `messages-slips-${useId().replace(/:/g, '')}`;
   const profile = useMemo(() => messagesEnvelopeMotion(unread), [unread]);
+  const showCount = useShowMessagesCount();
   const keyframes = useMemo(() => profile.slips.map((slip, index) => {
     const name = `${glyphId}-${profile.unread}-${index}`;
-    const body = slip.tail.map((track, k) => slipKeyframes(`${name}-${k}`, slip, track, profile.cycleMs));
-    return slipKeyframes(name, slip, slip.frames, profile.cycleMs) + body.join('');
+    return slipKeyframes(name, slip, slip.frames, profile.cycleMs);
   }).join(''), [glyphId, profile]);
   const ref = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
@@ -86,10 +86,6 @@ export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & 
               const animationName = `${glyphId}-${profile.unread}-${index}`;
               return (
                 <g key={index}>
-                  {MESSAGE_SLIP_TAIL.map((dot, k) => (
-                    <circle key={dot.gap} className="messages-nav-glyph__slip" cx="16" cy="16" r={dot.radius}
-                      fill="var(--messages-red)" fillOpacity={dot.opacity} style={{ animationName: `${animationName}-${k}` }} />
-                  ))}
                   <g className="messages-nav-glyph__slip" data-testid="messages-slip" style={{ animationName }}>
                     <rect x="12.2" y="13.2" width="7.6" height="5.6" rx="1" fill="var(--messages-red)" />
                     <rect x="13.6" y="14.7" width="4.8" height="1" rx=".5" fill="rgb(255 255 255 / .8)" />
@@ -111,6 +107,11 @@ export function MessagesNavGlyph({ unread, className, ...props }: LucideProps & 
           </svg>
         )}
       </span>
+      {showCount && unread > 0 && (
+        <span className="messages-nav-glyph__count" data-testid="messages-nav-count">
+          {formatNotificationCount(unread)}
+        </span>
+      )}
     </span>
   );
 }

@@ -12,9 +12,15 @@ let caller = '';
 // Reproduces the server fault: its auth guard overwrote the address in the
 // path with the caller's own, so every key lookup answered about the caller.
 let guardBug = false;
+// Chats with "Encrypt chat" on. Keyed by the peer's address here, which
+// stands in for the conversation id.
+let encryptedChats: string[] = [];
 
 vi.mock('@/lib/api/dehub/core', () => ({
   apiCall: vi.fn(async (endpoint: string, opts: any = {}) => {
+    if (endpoint === '/api/dm/chat-prefs') {
+      return { result: encryptedChats.map((conversationId) => ({ conversationId, encryptedAt: '2026-11-18T00:00:00.000Z' })) };
+    }
     if (endpoint === '/api/dm/e2ee-key' && opts.method === 'POST') {
       registry.set(caller, opts.body.publicKey);
       return { address: caller, publicKey: opts.body.publicKey };
@@ -69,6 +75,7 @@ describe('dm-e2ee client flow', () => {
   beforeEach(() => {
     registry.clear();
     localStorage.clear();
+    encryptedChats = [A, B, C];
     unloadIdentity();
   });
 
@@ -92,6 +99,17 @@ describe('dm-e2ee client flow', () => {
     await become(C);
     expect(await decryptFromPeer(A, sealedByB!)).toBeNull();
     expect(await decryptFromPeer(B, sealedByB!)).toBeNull();
+  });
+
+  it('sends plaintext unless Encrypt chat is on for that chat', async () => {
+    encryptedChats = [];
+    await become(A);
+    await become(B);
+    expect(await prepareOutgoing(A, 'hi from B')).toEqual({ content: 'hi from B', encrypted: false });
+    encryptedChats = [A];
+    unloadIdentity();
+    await become(B);
+    expect((await prepareOutgoing(A, 'hi from B')).encrypted).toBe(true);
   });
 
   it('falls back to plaintext for a peer without a published key', async () => {

@@ -43,6 +43,10 @@ const FilmLinkEmbed = lazy(() =>
   import('@/components/cinema/FilmLinkEmbed').then((m) => ({ default: m.FilmLinkEmbed }))
 );
 
+const SkillLinkEmbed = lazy(() =>
+  import('@/components/app/skills/SkillLinkEmbed').then(m => ({ default: m.SkillLinkEmbed }))
+);
+
 /**
  * Lazy for the same reason as FilmLinkEmbed: `useWorkJob` pulls in
  * `@/features/work/hooks/use-work`, which imports the on-chain contract stack
@@ -63,6 +67,7 @@ export function DehubLinkFallback({ link }: { link: DehubLinkMatch }) {
   const navigate = useNavigate();
   const viewLabel = (() => {
     switch (link.kind) {
+      case 'skill': return _copy('skills.useInAssistant');
       case 'post': return _copy("copy.fe9715bcd31d", { defaultValue: "View post" });
       case 'profile': return _copy("copy.d4788f256f73", { defaultValue: "View profile" });
       case 'community': return _copy("copy.1b46d5d1250d", { defaultValue: "View community" });
@@ -176,6 +181,8 @@ export function DehubLinkEmbed({ link, compact = false, className }: DehubLinkEm
   const fallback = <DehubLinkFallback link={link} />;
 
   switch (link.kind) {
+    case 'skill':
+      return <Suspense fallback={null}><SkillLinkEmbed slug={link.skillSlug!} path={link.path} fallback={fallback} /></Suspense>;
     case 'post':
       // The off-chain slug form carries no tokenId, and everything downstream
       // keys on one — resolve it first, then render the same card.

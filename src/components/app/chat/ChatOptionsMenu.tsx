@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, EyeOff, Hand, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, EyeOff, Hand, Lock, LockOpen, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
 import * as Ctx from '@/components/ui/context-menu';
 import * as Drop from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { isMuted } from '@/hooks/use-chat-prefs';
  * One chat's options, in the same order whether you right-click it in the
  * chat list or press the three dots at the top of an open chat:
  * Select (right-click only), Open in new window, Archive, Pin, Mute (for how long), Mark as unread,
- * Block, Clear history, Delete chat.
+ * Encrypt chat (DMs), Block, Clear history, Delete chat.
  */
 
 export interface ChatOptionsHandlers {
@@ -29,6 +29,8 @@ export interface ChatOptionsHandlers {
   canMute?: boolean;
   /** Community chats: take the chat back out of the Chat list. */
   onHideFromList?: () => void;
+  /** DMs only: turn end-to-end encryption on or off for this chat. */
+  onToggleEncryption?: () => void;
   /** Start picking several chats at once (right-click menu only). */
   onSelectMany?: () => void;
 }
@@ -126,6 +128,12 @@ function ChatOptionItems({ kit, h }: { kit: Kit; h: ChatOptionsHandlers }) {
         {unread ? <MessageCircle /> : <MessageCircleDashed />}
         {unread ? t('chatMenu.markRead', 'Mark as read') : t('chatMenu.markUnread', 'Mark as unread')}
       </Item>
+      {h.onToggleEncryption && (
+        <Item className={ROW} onSelect={h.onToggleEncryption}>
+          {h.pref?.encryptedAt ? <LockOpen /> : <Lock />}
+          {h.pref?.encryptedAt ? t('chatMenu.encryptOff', 'Turn off encryption') : t('chatMenu.encrypt', 'Encrypt chat')}
+        </Item>
+      )}
       {h.onHideFromList && (
         <Item className={ROW} onSelect={h.onHideFromList}>
           <EyeOff />{t('chatMenu.hideFromMessages', 'Remove from Messages')}

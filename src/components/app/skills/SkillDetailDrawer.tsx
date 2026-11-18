@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeleteSkill, type UserSkill } from '@/hooks/use-user-skills';
+import { SkillShareButton } from './SkillShareButton';
 
 interface Props {
   skill: UserSkill | null;
@@ -81,6 +82,7 @@ export function SkillDetailDrawer({ skill, open, onOpenChange, onEdit }: Props) 
           )}
           <div className="flex flex-wrap gap-2 pt-2">
             <LiquidGlassBubble2 onClick={handleUse} label={t('skills.useInAssistant')} width="170px" />
+            <SkillShareButton slug={skill.slug} />
             {isOwner && (
               <>
                 <Button variant="ghost" size="sm" onClick={() => { onEdit(skill); onOpenChange(false); }}>

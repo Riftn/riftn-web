@@ -16,7 +16,7 @@ import { QuietPostLoading } from '@/components/app/QuietPostLoading';
  * @module pages/app/SinglePostPage
  */
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getVoteCache } from '@/lib/vote-cache';
 import { scrollDocumentTo } from '@/lib/document-scroll';
 import { cn } from '@/lib/utils';
@@ -139,7 +139,11 @@ function getContentType(post: DeHubNFT): 'video' | 'image' | 'post' | 'live' {
 function toVideoItem(nft: DeHubNFT): VideoItem {
   const views = formatViews(resolveViewCount(nft)).replace(' views', '');
   const title = nft.title || nft.name || '';
-  const description = nft.description && nft.description !== title ? nft.description : undefined;
+  const rawDescription = nft.description && nft.description !== title ? nft.description : undefined;
+  // Videos can carry an attached sound as a [soundtrack:…] tag — play it, don't print it.
+  const soundtrack = parseSoundtrackTag(rawDescription);
+  const soundtrackTokenId = soundtrack.soundtrackUrl ? rawDescription?.match(/\[soundtrack:(\d+)/)?.[1] : undefined;
+  const description = rawDescription?.replace(/\[soundtrack:[^\]]*\]/g, '').trim() || undefined;
   const rawTimestamp = nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at;
   const timestamp = rawTimestamp && !/^(just now|\d+[smhdwy]|\d+mo)$/i.test(String(rawTimestamp).trim()) ? rawTimestamp : undefined;
 
@@ -200,6 +204,7 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     durationSeconds: typeof durationSeconds === 'number' ? durationSeconds : 0,
     title,
     description,
+    ...(isAudioPost ? {} : { ...soundtrack, soundtrackTokenId }),
     channel: nft.minterDisplayName || nft.minterUsername || nft.mintername || creatorObj?.display_name || creatorObj?.username || ownerObj?.username || 'Unknown',
     channelAvatar: avatar,
     verified: false,
@@ -353,7 +358,8 @@ function toTextPost(nft: DeHubNFT): TextPost {
   
   // Determine if the name is a meaningful title (matches feed normalization)
   const rawName = nft.name || '';
-  const rawDescription = nft.description || '';
+  // A sound only rides photos/videos; a stray tag (photo removed after adding a song) must not print.
+  const rawDescription = (nft.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
   const trimmedName = rawName.trim();
   const trimmedDesc = rawDescription.trim();
   const hasMeaningfulTitle = trimmedName.length > 0 
@@ -756,9 +762,11 @@ function postSeoUrl(id?: string, articleSlug?: string): string {
   return canonicalUrl(`/app/post/${articleSlug || id}`);
 }
 
+const FEATURE_REQUEST_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** A post id is a tokenId (digits) or a stream ObjectId; anything else with a letter is an article slug. */
 function isArticleSlugParam(value?: string): value is string {
-  return !!value && !/^\d+$/.test(value) && !/^[a-f\d]{24}$/i.test(value) && /^[a-z0-9][a-z0-9-]*$/i.test(value) && /[a-z]/i.test(value);
+  return !!value && !/^\d+$/.test(value) && !/^[a-f\d]{24}$/i.test(value) && !FEATURE_REQUEST_ID.test(value) && /^[a-z0-9][a-z0-9-]*$/i.test(value) && /[a-z]/i.test(value);
 }
 
 /**
@@ -813,6 +821,14 @@ export default function SinglePostPage(props: SinglePostPageProps = {}) {
   const slug = !props.overrideId && isArticleSlugParam(postId) ? postId : undefined;
   const slugQuery = useSlugTokenId(slug);
   const focusCommentId = commentId || commentFromSearch(search);
+
+  // The Requests board once shared its cards as /app/post/<request id>. Posts
+  // are numbers or slugs, never UUIDs, so open the request on the board.
+  if (!props.overrideId && postId && FEATURE_REQUEST_ID.test(postId)) {
+    const params = new URLSearchParams(search);
+    params.delete('feature');
+    return <Navigate replace to={`/app/features?feature=${encodeURIComponent(postId)}${params.size ? `&${params}` : ''}`} />;
+  }
 
   if (slug && slugQuery.isLoading) {
     return (

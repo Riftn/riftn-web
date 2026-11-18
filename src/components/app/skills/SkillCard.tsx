@@ -4,6 +4,7 @@ import Sparkles from "@/components/ui/cut-icons/assistant";
 import Trash2 from "@/components/ui/cut-icons/delete";
 
 import type { UserSkill } from '@/hooks/use-user-skills';
+import { SkillShareButton } from './SkillShareButton';
 
 interface Props {
   skill: UserSkill;
@@ -21,6 +22,7 @@ export function SkillCard({ skill, onClick, onDelete }: Props) {
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           onClick();
@@ -44,6 +46,7 @@ export function SkillCard({ skill, onClick, onDelete }: Props) {
         <div className="flex-1 flex items-center justify-center gap-1 h-9 bg-white/5 group-hover:bg-white/15 transition-colors text-[11px] font-semibold uppercase tracking-wider text-white">
           {t('skills.use')} <ArrowUpRight className="w-3.5 h-3.5" />
         </div>
+        <SkillShareButton slug={skill.slug} />
         {onDelete && (
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}

@@ -34,6 +34,14 @@ import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { duetOfPost } from '@/lib/duet';
 export { parseSoundtrackTag } from '@/lib/soundtrack';
 
+const stripSoundtrackTag = (text?: string | null) => text?.replace(/\[soundtrack:[^\]]*\]/g, '').trim() || undefined;
+// Videos can carry an attached sound as a [soundtrack:…] tag — play it, don't print it.
+function videoSoundtrack(text?: string | null) {
+  const soundtrack = parseSoundtrackTag(text);
+  if (!soundtrack.soundtrackUrl) return {};
+  return { ...soundtrack, soundtrackTokenId: text?.match(/\[soundtrack:(\d+)/)?.[1] };
+}
+
 // ===========================================================================
 // TYPES
 // ===========================================================================
@@ -308,8 +316,9 @@ function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
     isAudio: isAudioPost,
     duration: formatDuration(isAudioPost ? item.audioDuration : (item.videoDuration ?? replayDurationSec)),
     durationSeconds: (isAudioPost ? item.audioDuration : (item.videoDuration ?? replayDurationSec)) || 0,
-    title: displayPostTitle(item.name, item.description),
-    description: item.description,
+    title: displayPostTitle(item.name, stripSoundtrackTag(item.description)),
+    description: stripSoundtrackTag(item.description),
+    ...(isAudioPost ? {} : videoSoundtrack(item.description)),
     channel: item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" }),
     channelAvatar,
     verified: false,
@@ -491,7 +500,8 @@ function mapTextPost(item: UnifiedFeedItem, index: number): TextPost {
   
   // Determine if the name is a meaningful title (not empty/whitespace/placeholder)
   const rawName = item.name || '';
-  const rawDescription = item.description || '';
+  // A sound only rides photos/videos; a stray tag (photo removed after adding a song) must not print.
+  const rawDescription = (item.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
   const trimmedName = rawName.trim();
   const trimmedDesc = rawDescription.trim();
   // Title is meaningful only if it exists, differs from description, and isn't just the
