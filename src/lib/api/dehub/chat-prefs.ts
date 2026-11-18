@@ -9,6 +9,8 @@ export interface ChatPref {
   markedUnread: boolean;
   /** Group/community chats: shown in the Chat list since then. */
   listedAt?: string | null;
+  /** DMs: your messages in this chat are end-to-end encrypted since then. */
+  encryptedAt?: string | null;
 }
 
 /**
@@ -29,6 +31,8 @@ export interface ChatPrefPatch {
   accepted?: true;
   /** Group/community chats: show in the Chat list. */
   listed?: boolean;
+  /** DMs: end-to-end encrypt your messages in this chat. Off by default. */
+  encrypted?: boolean;
 }
 
 export async function getChatPrefs(): Promise<ChatPref[]> {

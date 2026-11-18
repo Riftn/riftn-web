@@ -13,6 +13,7 @@
  * placeholder.
  */
 import { apiCall } from '@/lib/api/dehub/core';
+import { clearEncryptedChats, wantsEncryptionTo } from './encrypt-choice';
 import {
   decryptText,
   deriveIdentityFromSignature,
@@ -134,6 +135,7 @@ export function loadIdentity(address: string): boolean {
 
 /** Forget the in-memory identity (sign-out). The stored copy stays for the next sign-in. */
 export function unloadIdentity() {
+  clearEncryptedChats();
   current = null;
   previousIdentities = [];
   historicalPublicKeys.clear();
@@ -311,6 +313,7 @@ export function canEncryptTo(peerAddress: string): boolean {
  */
 export async function canEncryptToPeer(peerAddress: string | null | undefined): Promise<boolean> {
   if (!peerAddress) return false;
+  if (!(await wantsEncryptionTo(peerAddress))) return false;
   return !!(await getSessionKey(peerAddress));
 }
 
@@ -330,8 +333,8 @@ export async function encryptForPeer(peerAddress: string, plaintext: string): Pr
 }
 
 /**
- * What goes on the wire for an outgoing text: the ciphertext when both sides
- * have keys, otherwise the plaintext unchanged (peer on an older build, peer
+ * What goes on the wire for an outgoing text: the ciphertext when the chat has
+ * "Encrypt chat" on and both sides have keys, otherwise the plaintext unchanged (peer on an older build, peer
  * without keys, the assistant bot, or our own identity not set up yet).
  */
 export async function prepareOutgoing(
@@ -339,6 +342,8 @@ export async function prepareOutgoing(
   plaintext: string,
 ): Promise<{ content: string; encrypted: boolean }> {
   if (!plaintext || !peerAddress) return { content: plaintext, encrypted: false };
+  // Encryption is per chat and off unless turned on (see encrypt-choice).
+  if (!(await wantsEncryptionTo(peerAddress))) return { content: plaintext, encrypted: false };
   const ct = await encryptForPeer(peerAddress, plaintext);
   return ct ? { content: ct, encrypted: true } : { content: plaintext, encrypted: false };
 }

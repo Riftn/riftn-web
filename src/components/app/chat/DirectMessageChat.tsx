@@ -13,7 +13,7 @@ import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, SmilePlus, CheckCircle2 } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, LockOpen, SmilePlus, CheckCircle2 } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -49,7 +49,8 @@ import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
-import { DmLockedState, DmUndecryptableRun } from './DmLockedState';
+import { DmUndecryptableRun } from './DmLockedState';
+import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
@@ -1729,10 +1730,21 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   // useCallback dep list would break the bubble-level memoization documented
   // above MessageBubble (every bubble's onSaveEdit prop would change identity
   // on every new message, not just the one being edited).
-  // No key yet and the thread holds lines only a key can open: show one
-  // unlock screen instead of the same "can't be opened" pill on every line.
-  const showLockedState = encryptionStatus !== 'ready'
+  // Encryption is per chat and off unless "Encrypt chat" is on. Nothing here
+  // asks for the wallet on its own: older encrypted lines collapse into one
+  // row each, and the banner offers Unlock for anyone who wants to read them.
+  const hasUndecryptable = encryptionStatus !== 'ready'
     && messages.some(m => m.undecryptable && !m.isDeleted);
+  const { byId: chatPrefsById, update: updateChatPref } = useChatPrefs();
+  const canToggleEncryption = !isGroupChat && /^[0-9a-f]{24}$/i.test(conversation.id || '');
+  const chatEncrypted = canToggleEncryption && !!chatPrefsById.get(conversation.id)?.encryptedAt;
+  const toggleEncryption = useCallback(() => {
+    const on = !chatEncrypted;
+    void updateChatPref(conversation.id, { encrypted: on });
+    if (on) toast.success(tr('messages.encrypted', { defaultValue: 'End-to-end encrypted' }));
+    // Turning it on is the deliberate moment to set up this device's key.
+    if (on && encryptionStatus !== 'ready') void retryEncryption();
+  }, [chatEncrypted, conversation.id, updateChatPref, tr, encryptionStatus, retryEncryption]);
 
   const messagesRef = useRef(messages);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
@@ -2746,6 +2758,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               <>
                 <ChatOptionsDropdownItems
                   {...options}
+                  onToggleEncryption={canToggleEncryption ? toggleEncryption : undefined}
                   isBlocked={isBlocked}
                   onBlock={handleToggleBlock}
                   onDelete={() => setShowDeleteDialog(true)}
@@ -2782,6 +2795,17 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               >
                 <Gift className="w-4 h-4 mr-2" />
                 {isFreeAccessGranted ? _copy("copy.f9c2e63a6dd5", { defaultValue: "Revoke Free Access" }) : _copy("copy.52f749af5cc6", { defaultValue: "Grant Free Access" })}
+              </DropdownMenuItem>
+            )}
+            {canToggleEncryption && (
+              <DropdownMenuItem
+                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+                onClick={toggleEncryption}
+              >
+                {chatEncrypted ? <LockOpen className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+                {chatEncrypted
+                  ? tr('chatMenu.encryptOff', { defaultValue: 'Turn off encryption' })
+                  : tr('chatMenu.encrypt', { defaultValue: 'Encrypt chat' })}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
@@ -2850,7 +2874,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
       {/* No key on this device. Says so, instead of quietly sending in the
           clear and rendering the other side's lines as unopenable. */}
-      {!showLockedState && (encryptionStatus === 'pending' || encryptionStatus === 'locked' || encryptionStatus === 'error') && (
+      {(chatEncrypted || hasUndecryptable) && (encryptionStatus === 'pending' || encryptionStatus === 'locked' || encryptionStatus === 'error') && (
         <div className="px-4 py-2 text-xs flex items-center gap-2 bg-white/5 text-zinc-300 border-b border-white/10">
           <Unlock className="w-3 h-3 flex-shrink-0 text-current" />
           <span role="status" className="flex-1">
@@ -2860,7 +2884,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 ? tr('messages.encryptionReconnect', { defaultValue: 'Reconnect your wallet to turn on encryption.' })
                 : encryptionStatus === 'error'
                   ? tr('messages.encryptionSetupFailed', { defaultValue: 'Encryption setup failed. Please try again.' })
-                  : tr('messages.encryptionOff')}
+                  : chatEncrypted
+                    ? tr('messages.encryptionOff')
+                    : tr('messages.lockedTitle', { defaultValue: 'Unlock to read your messages' })}
           </span>
           <button
             type="button"
@@ -2870,7 +2896,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           >
             {encryptionNeedsWalletConnection
               ? tr('messages.encryptionReconnectWallet', { defaultValue: 'Reconnect wallet' })
-              : tr('messages.encryptionTurnOn')}
+              : chatEncrypted
+                ? tr('messages.encryptionTurnOn')
+                : tr('messages.lockedUnlock', { defaultValue: 'Unlock wallet' })}
           </button>
         </div>
       )}
@@ -2895,13 +2923,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           <Button variant="glass" size="sm" onClick={() => refetchMessages()}>
             <RefreshCw className="w-3 h-3 mr-2" />{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
         </div>
-      ) : showLockedState ? (
-        <DmLockedState
-          status={encryptionStatus}
-          needsWalletConnection={encryptionNeedsWalletConnection}
-          peerName={displayName}
-          onUnlock={() => { void retryEncryption(); }}
-        />
       ) : (
         <div
           ref={scrollContainerRef}
@@ -3072,7 +3093,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
       {/* Chat Input — disabled send when insufficient balance; hidden while
           the thread is locked, since anything typed would go out in the clear */}
-      {!showLockedState && canSchedule && pickedMsgs === null && (
+      {canSchedule && pickedMsgs === null && (
         <ScheduledStrip items={scheduled.items} onOpen={() => setShowScheduled(true)} />
       )}
       {pickedMsgs !== null && (
@@ -3098,7 +3119,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {!showLockedState && pickedMsgs === null && <ChatInput
+      {pickedMsgs === null && <ChatInput
         onScheduleClick={canSchedule ? handleScheduleClick : undefined}
         scheduledCount={scheduled.items.length}
         autoFocus={focusComposer}
