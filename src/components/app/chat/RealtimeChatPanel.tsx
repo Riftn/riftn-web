@@ -46,6 +46,8 @@ import { RoomChatText } from './RoomChatText';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
 import { MoreReactionsButton } from './MoreReactionsButton';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu } from './message-menu-kit';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import Copy from '@/components/ui/cut-icons/copy';
 import { toast } from 'sonner';
@@ -316,13 +318,45 @@ export function RealtimeChatPanel({
   // Hold a line on a phone for the reaction + action sheet (hover buttons
   // never show on an iPhone tap). Desktop keeps the hover buttons.
   const [held, setHeld] = useState<{ msg: RealtimeChatMessage; el: HTMLElement } | null>(null);
-  const hold = useHoldMenu((_point, target) => {
-    if (!isTouchHold() || editingId) return false;
+  // Right-click with a mouse: the same actions, at the pointer.
+  const [menu, setMenu] = useState<{ msg: RealtimeChatMessage; el: HTMLElement; point: { x: number; y: number } } | null>(null);
+  const [menuMounted, setMenuMounted] = useState(false);
+  const hold = useHoldMenu((point, target) => {
+    if (editingId) return false;
     const el = target.closest<HTMLElement>('[data-rt-msg]');
     const msg = el ? messages.find((m) => m.id === el.dataset.rtMsg) : undefined;
     if (!el || !msg) return false;
-    setHeld({ msg, el });
+    if (isTouchHold()) { setHeld({ msg, el }); return; }
+    if (keepBrowserMenu(target, el)) return false;
+    setMenuMounted(true);
+    setMenu({ msg, el, point });
   });
+  useEffect(() => {
+    if (!menu) return;
+    menu.el.setAttribute('data-msg-menu-open', '');
+    return () => menu.el.removeAttribute('data-msg-menu-open');
+  }, [menu]);
+  const menuMsg = menu?.msg;
+  const menuMine = !!menuMsg && !!walletAddress && menuMsg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+  const menuActions: MessageMenuAction[] = [];
+  if (menuMsg) {
+    if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
+    if (menuMine && isAuthenticated) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content); }, hint: 'E' });
+    if (menuMsg.content?.trim()) menuActions.push({
+      key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if ((menuMine || canModerate) && isAuthenticated) menuActions.push({
+      key: 'delete', divided: true, destructive: true, icon: menuIcons.delete,
+      label: menuMine ? _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }) : _copy('copy.c3812fc4acb8', { defaultValue: 'Remove' }),
+      onSelect: () => { if (confirm(_copy('copy.8f6e2cda49ca', { defaultValue: 'Delete this message?' }))) onDelete(menuMsg.id); },
+    });
+  }
+  const menuMineReactions = menuMsg && walletAddress
+    ? Object.entries(menuMsg.reactions ?? {})
+        .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === walletAddress.toLowerCase()))
+        .map(([emoji]) => emoji)
+    : [];
   const heldMsg = held?.msg;
   const heldMine = !!heldMsg && !!walletAddress && heldMsg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
   const holdActions: ChatHoldAction[] = [];
@@ -580,7 +614,20 @@ export function RealtimeChatPanel({
         mine={heldMineReactions}
         onReact={(emoji) => { if (heldMsg) handleReact(heldMsg.id, emoji); }}
         actions={holdActions}
+        reactors={heldMsg?.reactions ? { reactions: heldMsg.reactions } : null}
       />
+      {menuMounted && (
+        <MessageMenu
+          point={menu?.point ?? null}
+          onClose={() => setMenu(null)}
+          quickReactions={isAuthenticated ? QUICK_CHAT_REACTIONS : null}
+          mine={menuMineReactions}
+          onReact={(emoji) => { if (menuMsg) handleReact(menuMsg.id, emoji); }}
+          actions={menuActions}
+          reactors={menuMsg?.reactions ? { reactions: menuMsg.reactions } : null}
+          meta={menuMsg ? messageMenuMeta(menuMsg.created_at) : null}
+        />
+      )}
 
       {/* Reply preview */}
       {replyTo && (

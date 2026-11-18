@@ -127,6 +127,9 @@ import {
 import { ForwardMessageDialog } from './ForwardMessageDialog';
 import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
+import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from './message-menu-kit';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -479,9 +482,19 @@ const MessageBubble = memo(function MessageBubble({
   picked = false,
   onTogglePick,
   onStartPick,
+  onDelete,
+  canPin = true,
+  isPinned = false,
+  onUnpin,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
+  /** Delete one of your own messages (asks first). */
+  onDelete?: (message: DmMessage) => void;
+  /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
+  canPin?: boolean;
+  isPinned?: boolean;
+  onUnpin?: () => void;
   /** Picking several messages: a click or tap toggles this one instead of acting on it. */
   selecting?: boolean;
   picked?: boolean;
@@ -516,7 +529,6 @@ const MessageBubble = memo(function MessageBubble({
   // that is where Retry and the spinner live.
   const cozyShowMeta = !cozy || cozy.last || message.sendState === 'failed' || message.sendState === 'sending';
   const pickable = !!onStartPick && !message.isDeleted && message.sendState !== 'sending' && message.sendState !== 'failed';
-  const hold = useRowLongPress(pickable ? () => (selecting ? onTogglePick?.(message) : onStartPick?.(message)) : undefined);
   const cozyShowAvatar = !cozy || cozy.last;
   // Payment-pending spinner: memo means no incidental re-renders, so the 90s
   // "give up waiting" fallback schedules its own re-render at the boundary
@@ -677,6 +689,121 @@ const MessageBubble = memo(function MessageBubble({
     1,
   );
 
+  /*
+   * The message menu: hold with a finger (the sheet), right-click with a
+   * mouse (the menu at the pointer). Same actions, Telegram's order. While
+   * picking several messages a hold or click ticks instead.
+   */
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [holdOpen, setHoldOpen] = useState(false);
+  const menuPoint = useMenuPoint();
+  const menuable = !message.isDeleted && !isUnsent && !isEditing && !isCallMessage;
+  const hold = useRowLongPress(pickable || menuable ? () => {
+    if (selecting) { if (pickable) onTogglePick?.(message); return; }
+    if (menuable) setHoldOpen(true);
+    else onStartPick?.(message);
+  } : undefined);
+  const viewer = currentUserAddress?.toLowerCase();
+  const myReactions = viewer
+    ? Object.entries(message.reactions ?? {}).filter(([, who]) => who?.some((a) => a.toLowerCase() === viewer)).map(([emoji]) => emoji)
+    : [];
+  const toggleReact = (emoji: string) => {
+    if (myReactions.includes(emoji)) onRemoveReaction?.(message._id, emoji);
+    else onReact?.(message._id, emoji);
+  };
+  const copyable = !message.undecryptable && !!(isPostShare ? message.content : textContent)?.trim();
+  const copyText = () => {
+    void navigator.clipboard?.writeText((message.content || '').trim()).then(
+      () => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })),
+      () => undefined,
+    );
+  };
+  const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
+  const menuActions: MessageMenuAction[] = [];
+  const holdActions: ChatHoldAction[] = [];
+  if (menuable && message.msgType !== 'tip') {
+    const L = {
+      reply: tr('messages.reply'),
+      edit: tr('messages.edit'),
+      pin: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : tr('messages.pin'),
+      copy: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }),
+      forward: tr('messages.forward'),
+      download: _copy('copy.d6eafe823591', { defaultValue: 'Download' }),
+      translate: isTranslated ? _copy('chatHold.showOriginal', { defaultValue: 'Original' }) : _copy('chatHold.translate', { defaultValue: 'Translate' }),
+      del: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }),
+      select: _copy('msgSelect.select', { defaultValue: 'Select' }),
+    };
+    const pinAction = canPin && (isPinned ? onUnpin : onPin)
+      ? () => (isPinned ? onUnpin?.() : onPin?.(message._id))
+      : null;
+    if (onReply) {
+      menuActions.push({ key: 'reply', icon: menuIcons.reply, label: L.reply, onSelect: () => onReply(message), hint: 'R' });
+      holdActions.push({ key: 'reply', prime: true, icon: menuIcons.reply, label: L.reply, onSelect: () => onReply(message) });
+    }
+    if (onEdit && canEdit) {
+      menuActions.push({ key: 'edit', icon: menuIcons.edit, label: L.edit, onSelect: () => onEdit(message), hint: 'E' });
+      holdActions.push({ key: 'edit', icon: menuIcons.edit, label: L.edit, onSelect: () => onEdit(message) });
+    }
+    if (pinAction) {
+      menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: L.pin, onSelect: pinAction, hint: 'P' });
+      holdActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: L.pin, onSelect: pinAction });
+    }
+    if (copyable) {
+      menuActions.push({ key: 'copy', icon: menuIcons.copy, label: L.copy, onSelect: copyText, hint: 'C' });
+      holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
+    }
+    if (canTranslate) {
+      const go = isTranslated ? handleShowOriginal : handleTranslate;
+      menuActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go, hint: 'T' });
+      holdActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go });
+    }
+    if (onForward) {
+      menuActions.push({ key: 'forward', icon: menuIcons.forward, label: L.forward, onSelect: () => onForward(message), hint: 'F' });
+      holdActions.push({ key: 'forward', icon: menuIcons.forward, label: L.forward, onSelect: () => onForward(message) });
+    }
+    if (downloadTarget) {
+      menuActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
+      holdActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
+    }
+    if (isOwnMessage && onDelete) {
+      menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
+      holdActions.push({ key: 'delete', secondary: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
+    }
+    if (pickable) {
+      menuActions.push({ key: 'select', divided: !(isOwnMessage && onDelete), icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
+      holdActions.push({ key: 'select', secondary: true, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message) });
+    }
+  }
+  const hasReactions = !!message.reactions && Object.values(message.reactions).some((who) => who?.length);
+  const reactors = hasReactions ? { reactions: message.reactions } : null;
+  const reactable = !!onReact && message.msgType !== 'tip';
+  const menus = menuable ? (
+    <>
+      <ChatHoldSheet
+        open={holdOpen}
+        onOpenChange={setHoldOpen}
+        anchor={holdOpen ? rowRef.current : null}
+        quickReactions={reactable ? QUICK_CHAT_REACTIONS.slice(0, 6) : null}
+        mine={myReactions}
+        onReact={toggleReact}
+        actions={holdActions}
+        reactors={reactors}
+      />
+      {menuPoint.mounted && (
+        <MessageMenu
+          point={menuPoint.point}
+          onClose={menuPoint.close}
+          quickReactions={reactable ? QUICK_CHAT_REACTIONS : null}
+          mine={myReactions}
+          onReact={toggleReact}
+          actions={menuActions}
+          reactors={reactors}
+          meta={messageMenuMeta(message.createdAt, !!(message as { isEdited?: boolean }).isEdited)}
+        />
+      )}
+    </>
+  ) : null;
+
   // A call notice: a centred pill, none of the bubble chrome.
   //
   // This return sits below every hook above deliberately. It used to sit right
@@ -700,12 +827,25 @@ const MessageBubble = memo(function MessageBubble({
   }
 
   return (
+    <>
+    {menus}
     <div
+      ref={rowRef}
       id={`dm-msg-${message._id}`}
+      data-chat-row
       data-cozy-first={cozy?.first ? '' : undefined}
       data-cozy-last={cozy?.last ? '' : undefined}
       data-msg-picked={selecting && pickable ? (picked ? 'true' : 'false') : undefined}
+      data-msg-menu-open={menuPoint.point ? '' : undefined}
       {...hold.handlers}
+      onContextMenu={(e) => {
+        hold.handlers.onContextMenu?.(e);
+        if (e.defaultPrevented || selecting || !menuable || isTouchHold()) return;
+        if (!e.currentTarget.contains(e.target as Node)) return;
+        if (keepBrowserMenu(e.target as Element, e.currentTarget)) return;
+        e.preventDefault();
+        menuPoint.openAt({ x: e.clientX, y: e.clientY });
+      }}
       onClickCapture={(e) => {
         if (hold.consumeClick()) { e.preventDefault(); e.stopPropagation(); return; }
         if (!pickable) return;
@@ -1245,6 +1385,7 @@ const MessageBubble = memo(function MessageBubble({
         )}
       </div>
     </div>
+    </>
   );
 });
 
@@ -1534,6 +1675,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   }, [conversation.id, resolvedConversationId]);
 
   const isGroupChat = conversation.isGroup || !!conversation.groupInfo;
+  // Pinning: either person in a one-to-one chat; in a group, whoever runs it.
+  const canPinHere = !isGroupChat
+    || (!!walletAddress && conversation.groupInfo?.creatorAddress?.toLowerCase() === walletAddress.toLowerCase());
 
   // Get the other participant
   const otherUser = conversation.otherUser ||
@@ -2234,6 +2378,28 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   // ─── Picking several messages (Select) ──────────────────────────────────────
   const [confirmPickDelete, setConfirmPickDelete] = useState(false);
+  // Delete from the message menu: one of your own, after a yes.
+  const [confirmDeleteOne, setConfirmDeleteOne] = useState<DmMessage | null>(null);
+  const deleteOne = useCallback(async () => {
+    const target = confirmDeleteOne;
+    setConfirmDeleteOne(null);
+    if (!target || !resolvedConversationId) return;
+    try {
+      await emitDeleteMessage(resolvedConversationId, target._id);
+      queryClient.setQueryData(messagesKeys.messages(resolvedConversationId), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) => (m._id === target._id ? { ...m, isDeleted: true, content: '' } : m)),
+          })),
+        };
+      });
+    } catch {
+      toast.error(_copy('msgMenu.deleteFailed', { defaultValue: 'Could not delete the message' }));
+    }
+  }, [confirmDeleteOne, resolvedConversationId, queryClient, _copy]);
   // Phones say "Tap", computers "Click".
   const coarsePointer = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
   const isMineMsg = useCallback((m: DmMessage) => {
@@ -3026,7 +3192,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                     confirmedTxHashes.current.has(message.paymentTxHash.toLowerCase()))
                 }
                 isEditing={editingMessageId === message._id}
-                onPin={handlePinMessage}
+                onPin={canPinHere ? handlePinMessage : undefined}
                 onForward={handleForward}
                 onReply={handleReply}
                 onEdit={handleStartEdit}
@@ -3043,6 +3209,10 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 picked={!!pickedMsgs?.has(message._id)}
                 onTogglePick={togglePick}
                 onStartPick={startPick}
+                onDelete={setConfirmDeleteOne}
+                canPin={canPinHere}
+                isPinned={pinnedMessageId === message._id}
+                onUnpin={handleUnpinMessage}
               />
               </Fragment>
             )});
@@ -3107,6 +3277,18 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           onCancel={() => setPickedMsgs(null)}
         />
       )}
+      <AlertDialog open={!!confirmDeleteOne} onOpenChange={(next) => { if (!next) setConfirmDeleteOne(null); }}>
+        <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">{_copy('msgMenu.deleteOneTitle', { defaultValue: 'Delete this message?' })}</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">{_copy('msgMenu.deleteOneBody', { defaultValue: 'It will be removed for everyone in this chat.' })}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
+            <AlertDialogAction data-msg-delete-one-confirm onClick={() => { void deleteOne(); }}>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog open={confirmPickDelete} onOpenChange={setConfirmPickDelete}>
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>

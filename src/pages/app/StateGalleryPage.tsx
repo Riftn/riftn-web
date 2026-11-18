@@ -156,6 +156,7 @@ import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
 import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
+import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
@@ -336,6 +337,78 @@ function NameBadgesGallery() {
  * bubbles, one avatar and one time line per run, a day pill, the wallpaper).
  * Laid out by hand from the real bubble, since the live chat needs a session.
  */
+/**
+ * Right-click (computer) or hold (phone) a message: quick reactions, the
+ * actions, and who reacted. Lines here carry reactions so the "N reactions"
+ * row shows; the people come from /api/account_info/batch (DMs) and
+ * /api/livechat/reactors (live chat).
+ */
+function MessageMenuGallery() {
+  const iso = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const ella = { _id: 'ella', address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' };
+  const others = ['0x7777777777777777777777777777777777777772', '0x7777777777777777777777777777777777777773', '0x7777777777777777777777777777777777777774'];
+  const msg = (id: string, mine: boolean, content: string, createdAt: string, reactions?: Record<string, string[]>): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: (mine ? me : ella) as DmMessage['sender'], author: mine ? 'me' : 'other', content,
+    msgType: 'msg', mediaUrls: [], voiceDuration: null, isRead: mine, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, createdAt, reactions,
+  } as unknown as DmMessage);
+  const thread = [
+    { m: msg('mm-a', false, 'the new intro is unreal, who made the music?', iso(30), { '🔥': [me.address, others[0]], '❤️': [others[1]] }), mine: false },
+    { m: msg('mm-b', true, 'a friend of mine, I will send you the full track tonight', iso(24), { '🙏': [ella.address], '💯': [ella.address, others[2]] }), mine: true },
+    { m: msg('mm-c', false, 'deal. pinning this so I remember', iso(20)), mine: false },
+  ];
+  const noop = () => {};
+  const live: LiveChatLineMessage[] = [
+    { id: 'mm-live-1', userId: others[0], userName: 'Luna', userHandle: 'xluna', content: 'gm chat, who is watching the stream tonight?', timestamp: new Date(Date.now() - 6 * 60_000), type: 'text', reactions: { '👍': [others[1], others[2], me.address], '🚀': [others[1]] } },
+    { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
+  ];
+  return (
+    <section data-msg-menu-gallery className="mb-5 space-y-3">
+      <h2 className="text-sm font-semibold">Message menu (right-click on a computer, hold on a phone)</h2>
+      <div data-msg-menu-dm className="flex h-[22rem] flex-col overflow-hidden rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-6">
+          {thread.map(({ m, mine }) => (
+            <DmMessageBubble
+              key={m._id}
+              message={m}
+              isOwnMessage={mine}
+              cozy={{ first: true, last: true }}
+              currentUserAddress={me.address}
+              onReply={noop}
+              onReact={noop}
+              onRemoveReaction={noop}
+              onForward={noop}
+              onPin={noop}
+              onEdit={noop}
+              onDelete={noop}
+              onStartPick={noop}
+              onTogglePick={noop}
+            />
+          ))}
+        </div>
+      </div>
+      <div data-msg-menu-live className="overflow-hidden rounded-2xl border border-white/10 py-2">
+        {live.map((line) => (
+          <LiveChatLine
+            key={line.id}
+            message={line}
+            currentUserAddress={me.address}
+            onReact={noop}
+            onRemoveReaction={noop}
+            onReply={noop}
+            onEdit={noop}
+            onDelete={noop}
+            showActions
+            onTogglePin={noop}
+            onBan={noop}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function FullScreenChatGallery() {
   const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
   const yesterday = (h: number) => { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(h, 12, 0, 0); return d.toISOString(); };
@@ -1960,6 +2033,7 @@ export default function StateGalleryPage() {
 
         <NameBadgesGallery />
         <FullScreenChatGallery />
+        <MessageMenuGallery />
         <FollowCardsGallery />
 
         <StreamerArtworkGallery />

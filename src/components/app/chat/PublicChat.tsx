@@ -22,7 +22,8 @@ import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { CreateTopicRoomModal } from './CreateTopicRoomModal';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
-import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, type LiveChatRoom } from '@/lib/api/dehub';
+import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
+import { Pin, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { validatePublicChatMedia } from '@/lib/public-chat-media';
@@ -74,6 +75,7 @@ function toLocalMessage(msg: SupabaseLiveChatMessage): Message {
     audioDuration: msg.audio_duration || undefined,
 
     isEdited: msg.is_edited,
+    isPinned: !!msg.is_pinned,
     clientKey: msg.client_key,
     sendState: msg.send_state,
     reactions: msg.reactions,
@@ -466,6 +468,36 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     void editMessage(messageId, content);
   }, [editMessage]);
 
+  /*
+   * Pinned line, Telegram style: a bar over the list, moderators pin and
+   * unpin from the message menu. The room details carry the server's pins;
+   * a pin made here shows straight away and the details are read again.
+   */
+  const [pinOverride, setPinOverride] = useState<{ id: string | null; message?: Message } | null>(null);
+  useEffect(() => { setPinOverride(null); }, [selectedRoomId]);
+  const serverPinned = useMemo(() => {
+    const list = (roomDetails?.pinnedMessages ?? []) as unknown[];
+    const last = list[list.length - 1] as { id?: string; _id?: string; content?: string } | string | undefined;
+    if (!last) return messages.find((m) => m.isPinned) ?? null;
+    const id = typeof last === 'string' ? last : (last.id || last._id || '');
+    return messages.find((m) => m.id === id) ?? (typeof last === 'string' ? null : { id, content: last.content || '' } as Message);
+  }, [roomDetails, messages]);
+  const pinnedMessage: Message | null = pinOverride
+    ? (pinOverride.id ? (messages.find((m) => m.id === pinOverride.id) ?? pinOverride.message ?? null) : null)
+    : serverPinned;
+  const handleTogglePin = useCallback(async (message: Message) => {
+    if (!selectedRoomId) return;
+    const unpin = pinnedMessage?.id === message.id;
+    try {
+      if (unpin) await unpinLiveChatMessage(selectedRoomId, message.id);
+      else await pinLiveChatMessage(selectedRoomId, message.id);
+      setPinOverride(unpin ? { id: null } : { id: message.id, message });
+      toast.success(unpin ? _copy('msgMenu.unpinned', { defaultValue: 'Message unpinned' }) : _copy('msgMenu.pinned', { defaultValue: 'Message pinned' }));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : _copy('msgMenu.pinFailed', { defaultValue: 'Could not pin the message' }));
+    }
+  }, [selectedRoomId, pinnedMessage, _copy]);
+
   // Merge list-level room data with the richer single-room details
   const enrichedRoom = roomDetails || selectedRoom;
   const isLoading = roomsLoading || (messagesLoading && apiMessages.length === 0);
@@ -586,6 +618,36 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       </div>
       )}
 
+      {pinnedMessage && !showSearchList && (
+        <div data-chat-pinned-bar className="mx-3 mt-2 flex items-center gap-2.5 rounded-2xl px-3 py-2">
+          <button
+            type="button"
+            onClick={() => { void jumpTo(pinnedMessage.id).then((found) => { if (found) focusRow(pinnedMessage.id); }); }}
+            className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+          >
+            <span data-chat-pinned-accent className="h-8 w-[3px] shrink-0 rounded-full" />
+            <span className="min-w-0 flex-1">
+              <span data-chat-pinned-label className="block text-[11px] font-semibold leading-tight">{_copy('copy.2aa60e3c77ee', { defaultValue: 'Pinned Message' })}</span>
+              <span className="block truncate text-[13px] leading-snug opacity-80">
+                {pinnedMessage.userName ? <span className="font-semibold">{pinnedMessage.userName}: </span> : null}
+                {pinnedMessage.content || _copy('copy.2bc85f36b3e4', { defaultValue: '📎 Media' })}
+              </span>
+            </span>
+            <Pin className="h-4 w-4 shrink-0 opacity-60" />
+          </button>
+          {isModerator && (
+            <button
+              type="button"
+              onClick={() => void handleTogglePin(pinnedMessage)}
+              aria-label={_copy('copy.ee3c71613054', { defaultValue: 'Unpin' })}
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full opacity-60 transition-opacity hover:opacity-100"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Messages Area */}
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => setTranslateSignal(s => s + 1), requestOriginal: () => setOriginalSignal(s => s + 1) }}>
       <div className="relative flex-1">
@@ -679,6 +741,8 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
                 onSeeMessages={handleSeeMessages}
                 holdFrame
                 replying={!!replyTo && replyTo.id === message.id}
+                onTogglePin={isModerator ? handleTogglePin : undefined}
+                isPinned={pinnedMessage?.id === message.id}
               />
               )
             ))}
