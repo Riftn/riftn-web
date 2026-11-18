@@ -4,6 +4,8 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import { AppState } from '@/components/app/AppState';
 import { IslandAction, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { PULL_REFRESH_THRESHOLD } from '@/lib/pill-pull-motion';
 import { DhbCoin } from '@/components/app/DhbAmount';
 import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
@@ -339,6 +341,26 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     refetch,
     isRefetching,
   } = useConversations(debouncedSearchQuery);
+
+  // Phones: pull the chat list down from its top to refresh it.
+  const chatListRef = useRef<HTMLDivElement>(null);
+  const chatPullRef = useRef<HTMLDivElement>(null);
+  const showChatPull = useCallback((distance: number) => {
+    const list = chatListRef.current;
+    if (!list) return;
+    list.style.setProperty('--chat-pull', `${Math.max(0, distance)}px`);
+    list.style.setProperty('--chat-pull-p', String(Math.min(1, Math.max(0, distance) / PULL_REFRESH_THRESHOLD)));
+    list.style.setProperty('--chat-pull-o', String(Math.min(1, Math.max(0, distance) / 28)));
+  }, []);
+  const chatPull = usePullToRefresh({
+    enabled: phonePill,
+    pullThreshold: PULL_REFRESH_THRESHOLD,
+    onRefresh: () => { void refetch(); },
+    isRefreshing: isRefetching,
+    containerRef: chatListRef,
+    motionRef: chatPullRef,
+    onMotion: showChatPull,
+  });
 
   const createConversation = useCreateConversation();
 
@@ -1322,7 +1344,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </PageIsland>)}
 
           {/* Conversation List */}
-          <div data-chat-list-scroll className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+          <div data-chat-list-scroll ref={chatListRef} {...chatPull.handlers} className={`flex-1 min-h-0 overflow-y-auto ${fullscreen && !phonePill ? 'pt-1 pb-3' : 'pt-3 pb-[76px] lg:pb-0'}`}>
+            {/* Phones: pulled down from the top, the rows lower and a refresh
+                arrow turns in the gap; let go past its full turn to refresh. */}
+            <div data-chat-pull-mark aria-hidden className="pointer-events-none sticky top-0 z-10 h-0">
+              <div className="absolute inset-x-0 top-0 flex items-center justify-center overflow-hidden text-zinc-400" style={{ height: 'var(--chat-pull, 0px)', opacity: 'var(--chat-pull-o, 0)' }}>
+                <RefreshCw className="h-[18px] w-[18px]" style={{ transform: 'rotate(calc(var(--chat-pull-p, 0) * 300deg)) scale(calc(0.7 + var(--chat-pull-p, 0) * 0.3))' }} />
+              </div>
+            </div>
+            <div ref={chatPullRef}>
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1539,6 +1569,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               <div className="flex items-center justify-center gap-2 py-4 text-zinc-500 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.3084651a3386", { defaultValue: "Searching users..." })}</div>
             )}
+            </div>
           </div>
           {picking && (
             <BulkChatBar

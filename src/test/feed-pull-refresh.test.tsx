@@ -146,3 +146,18 @@ it('draws back immediately and gradually while the fetch is still running', () =
   settle(); expect(hook.pullDistance).toBe(0);
   expect(refresh).toHaveBeenCalledTimes(1);
 });
+it('a quick shorter flick refreshes, and a pull during the spring-back carries on', () => {
+  act(() => hook.handlers.onTouchStart(touch(0, 0)));
+  act(() => { vi.advanceTimersByTime(20); hook.handlers.onTouchMove(touch(0, 40)); });
+  act(() => { vi.advanceTimersByTime(20); hook.handlers.onTouchMove(touch(0, 95)); });
+  act(() => hook.handlers.onTouchEnd());
+  expect(refresh).toHaveBeenCalledTimes(1);
+  // Grabbed again mid-return: no snap to the top, the pull continues.
+  act(() => vi.advanceTimersByTime(100));
+  const mid = hook.pullDistance;
+  expect(mid).toBeGreaterThan(0);
+  act(() => hook.handlers.onTouchStart(touch(0, 300)));
+  expect(hook.pullDistance).toBeCloseTo(mid, 3);
+  act(() => hook.handlers.onTouchMove(touch(0, 340)));
+  expect(hook.pullDistance).toBeGreaterThan(mid);
+});

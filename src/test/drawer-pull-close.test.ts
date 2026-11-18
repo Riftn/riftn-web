@@ -50,6 +50,15 @@ describe('notifications drawer drag (part open / full / close)', () => {
 
   const expand = () => gesture(scroller, 500, 6, -15, 16);
 
+  it('a swipe up past full on a part-open sheet scrolls the list', () => {
+    // jsdom keeps scrollTop as set; 20 steps of 15px = 300px, PART of it raises the sheet.
+    gesture(scroller, 600, 20, -15, 16);
+    expect(sheet.hasAttribute('data-expanded')).toBe(true);
+    expect(sheet.style.translate).toBe('0 0px');
+    expect(scroller.scrollTop).toBe(300 - PART);
+    expect(close).not.toHaveBeenCalled();
+  });
+
   it('opens part open, lowered by a fifth of the screen', () => {
     expect(sheet.style.translate).toBe(`0 ${PART}px`);
     expect(sheet.hasAttribute('data-expanded')).toBe(false);
