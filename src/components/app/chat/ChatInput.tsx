@@ -1151,7 +1151,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                   aria-label={_copy('copy.a4fe65264ef7', { defaultValue: 'Language' })}
                   value={translateTo}
                   onChange={(e) => chooseTranslateTo(e.target.value)}
-                  className="w-14 bg-white/10 text-white text-[11px] rounded-md px-1 py-1 border border-white/10 focus:outline-none"
+                  className="w-24 shrink-0 bg-white/10 text-white text-[11px] rounded-md px-1 py-1 border border-white/10 focus:outline-none"
                 >
                   {SUPPORTED_LANGUAGES.map(l => (
                     <option key={l.code} value={l.code} className="bg-zinc-900 text-white">{l.nativeName}</option>
