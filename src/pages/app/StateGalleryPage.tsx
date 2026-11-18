@@ -152,6 +152,7 @@ import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
@@ -395,6 +396,18 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
+      <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          {thread.map(({ m, mine, first, last, day }) => (
+            <div key={m._id}>
+              {day && <CozyDayPill iso={m.createdAt} />}
+              <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} selecting picked={['c', 'e', 'g'].includes(m._id)} onTogglePick={noop} onStartPick={noop} />
+            </div>
+          ))}
+        </div>
+        <MessageSelectBar count={3} ownCount={1} onCopy={noop} onForward={noop} onDelete={noop} onCancel={noop} />
+      </div>
       <h3 className="text-sm font-semibold">Messages icon ringing + unread number</h3>
       <div data-messages-ring-gallery className="flex flex-wrap items-center gap-5 rounded-2xl border border-white/10 p-5">
         {[0, 1, 3, 8, 20].map(count => (
