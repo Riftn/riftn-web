@@ -3,7 +3,7 @@ import LogIn from "@/components/ui/cut-icons/sign-in";
 import CornerDownLeft from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
-import React, { Suspense, lazy, useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { Suspense, lazy, useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { isHomePath } from '@/lib/home-path';
 import { useTranslation } from 'react-i18next';
@@ -194,7 +194,13 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
   // navQuery/isAuthenticated: filtering the list, or gaining/losing the
   // signed-in rows, moves the active row without resizing it or the container,
   // so neither the ResizeObserver below nor the scroll handler would notice.
-  useEffect(() => { updateIndicator(); }, [updateIndicator, isCollapsed, navQuery, isAuthenticated]);
+  //
+  // A layout effect, not a passive one: the glass has to land on the new row in
+  // the same paint that makes the row active. A passive effect ran after the
+  // page had painted, and with a heavy page mounting that could be most of a
+  // second later, so the old row kept the white-rimmed glass while the new row
+  // was already bold.
+  useLayoutEffect(() => { updateIndicator(); }, [updateIndicator, isCollapsed, navQuery, isAuthenticated]);
 
   // Collapse/expand runs as 500ms CSS transitions (aside width/padding, the
   // layout row's max-width), so the one-shot measurement above captures
@@ -408,7 +414,22 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
     () => liveRailOrder.map((id) => railById.get(id)).filter((item): item is NavItem => !!item),
     [liveRailOrder, railById],
   );
-  const isAIActive = location.pathname === '/app/assistant';
+  // The router renders a new page inside a transition, so location.pathname
+  // only changes once that page is ready (up to half a second on a cold page).
+  // The address bar changes on the click itself, so the rail follows that
+  // straight away and the clicked row lights up at once instead of the old row
+  // staying lit until the page arrives. Dropped as soon as the router catches up.
+  const [clickedPath, setClickedPath] = useState<string | null>(null);
+  useLayoutEffect(() => { setClickedPath(null); }, [location.pathname]);
+  const onRailClickCapture = useCallback(() => {
+    // After the click has run its handlers, which is when the address changed.
+    window.setTimeout(() => {
+      const path = window.location.pathname;
+      setClickedPath((prev) => (prev === path ? prev : path));
+    }, 0);
+  }, []);
+  const activePath = clickedPath ?? location.pathname;
+  const isAIActive = activePath === '/app/assistant';
 
   const runFullSearch = useCallback(() => {
     const query = navQuery.trim();
@@ -679,8 +700,11 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
               list, and updateIndicator bails when there is nothing to measure —
               which would otherwise leave the glass frozen over whatever row has
               since slid into that slot. */}
+          {/* A plain div placed straight on the row, not a spring: a spring
+              starts from the old row and is driven from the main thread, so
+              while the new page mounts it sat on the row just left. */}
           {indicatorRect.ready && activeItemEl && (
-            <motion.div
+            <div
               data-sidebar-active-indicator
               className={cn(
                 "pointer-events-none absolute left-0 top-0 z-0 bg-gradient-to-br from-white/20 via-white/10 to-white/5 border border-white/30",
@@ -689,19 +713,16 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                   : "shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]",
                 isCollapsed ? 'rounded-xl' : 'rounded-2xl'
               )}
-              initial={false}
-              animate={{
-                x: indicatorRect.x,
-                y: indicatorRect.y,
+              style={{
+                transform: `translate(${indicatorRect.x}px, ${indicatorRect.y}px)`,
                 width: indicatorRect.width,
                 height: indicatorRect.height,
               }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             />
           )}
           {/* Rows live one level in, so `space-y` never lands a stray margin on
               the absolutely-positioned glass above. */}
-          <div className={cn(
+          <div onClickCapture={onRailClickCapture} className={cn(
             "flex flex-col space-y-2 items-center",
             !isCollapsed && "lg:space-y-[2px] lg:items-stretch"
           )}>
@@ -739,10 +760,10 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
             const isHomeItem = item.path === '/app';
             const isActive = !item.external && !item.action && (
               isHomeItem
-                ? isHomePath(location.pathname)
+                ? isHomePath(activePath)
                 : item.path === '/app/profile'
-                  ? isOwnProfilePath(location.pathname)
-                  : location.pathname.startsWith(item.path)
+                  ? isOwnProfilePath(activePath)
+                  : activePath.startsWith(item.path)
             );
             const isProfileItem = item.label === 'Profile';
             const isNotificationsItem = item.label === 'Notifications';

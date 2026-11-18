@@ -1,6 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { openNotificationsDrawer } from '../NotificationsDrawer';
-import { memo, useRef, useEffect } from 'react';
+import { memo, useRef, useLayoutEffect } from 'react';
 import { StableLink } from './StableLink';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useTranslation } from 'react-i18next';
@@ -116,7 +116,9 @@ function SidebarNavItemInner({
   const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
   const desktopHoverClass = isLightTheme ? 'hover:font-semibold' : 'hover:bg-zinc-800/50';
 
-  useEffect(() => {
+  // Layout effect so the sidebar learns about the new active row before the
+  // browser paints it (see the indicator in DesktopSidebar).
+  useLayoutEffect(() => {
     const register = latest.current.registerActiveRef;
     if (isDesktop && isActive && hasRegister && register) {
       register(itemRef.current);
