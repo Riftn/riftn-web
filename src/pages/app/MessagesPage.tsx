@@ -1125,7 +1125,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Computers only: phones keep the pill header they already have.
   const fullscreenTop = fullscreen && !phonePill ? (
     <ChatListTop
-      title={_copy('fullscreenChat.title', { defaultValue: 'Chat' })}
+      title={_copy('settings.chat', { defaultValue: 'Chat' })}
       searchLabel={_copy('fullscreenChat.search', { defaultValue: 'Search chats' })}
       searchValue={searchQuery}
       onClearSearch={() => setSearchQuery('')}
@@ -1184,7 +1184,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       icon={<span data-msg-cards-glyph className="flex h-8 w-8 items-center justify-center text-white"><MessagesNavGlyph unread={dmUnread} className="h-[22px] w-[22px]" /></span>}
       title={picking
         ? _copy('chatBulk.selected', { defaultValue: '{{count}} selected', count: bulkCount })
-        : _copy('fullscreenChat.title', { defaultValue: 'Chat' })}
+        : _copy('settings.chat', { defaultValue: 'Chat' })}
       actions={(
         <>
           <button
@@ -1266,7 +1266,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           {fullscreenTop ?? deskTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
             icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
-            title={_copy('fullscreenChat.title', { defaultValue: 'Chat' })}
+            title={_copy('settings.chat', { defaultValue: 'Chat' })}
             actions={fullscreen ? (
               // Only phones reach this header (computers get fullscreenTop).
               // A phone has no full screen to leave, so the spare square is
