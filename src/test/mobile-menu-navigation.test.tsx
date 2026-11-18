@@ -54,7 +54,7 @@ describe('mobile menu dismissal', () => {
     counts.dm = 2;
     counts.publicChat = 3;
     mount();
-    const messages = screen.getByText('nav.messages').closest('a');
+    const messages = screen.getByText('settings.chat').closest('a');
     expect(messages?.querySelector('[data-menu-badge]')?.textContent).toBe('5');
   });
 

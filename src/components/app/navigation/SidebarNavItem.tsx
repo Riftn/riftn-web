@@ -29,7 +29,7 @@ import { MessagesNavGlyph } from './MessagesNavGlyph';
 // anywhere else in the app either.
 export const NAV_LABEL_KEYS: Record<string, string> = {
   Home: 'nav.home', Explore: 'nav.explore', Prompt: 'nav.prompt', Notifications: 'nav.notifications',
-  Messages: 'nav.messages', Assistant: 'nav.assistant', Leaderboard: 'nav.leaderboard',
+  Messages: 'settings.chat', Assistant: 'nav.assistant', Leaderboard: 'nav.leaderboard',
   Editor: 'creator.editor', Creator: 'commandCentre.creator',
   Bookmarks: 'nav.bookmarks', Settings: 'nav.settings', Profile: 'nav.profile', Blog: 'nav.blog',
   Feedback: 'stats.feedback.title', 'Command': 'nav.command', 'Command Centre': 'nav.commandCentre', Wallet: 'nav.wallet', Docs: 'nav.docs', 'Feature Requests': 'nav.featureRequests', Staking: 'nav.staking', SuperPowers: 'superpowers.title', Governance: 'nav.governance', DAO: 'nav.dao', Communities: 'nav.communities', Events: 'nav.events', Careers: 'nav.careers', Converter: 'nav.converter', Migrate: 'migrate.title', Fractions: 'fractions.title', Glossary: 'nav.glossary', Guide: 'nav.guide', Stats: 'nav.stats', Arcade: 'nav.arcade', Apps: 'miniApps.store.title',
