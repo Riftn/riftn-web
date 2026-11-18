@@ -1223,6 +1223,7 @@
     "payDirectNoName": "Sendt direkte til kreatøren i {{symbol}} den {{chain}}. Ingen swap.",
     "payViaBridgeDpay": "Flyttet til Base og betalt til Riftn Pay, tokens ankommer om ca. et minut",
     "dmSent": "Sendte {{amount}} tokens til {{name}}!",
+    "addMessage": "Indsend...",
     "messagePublic": "Offentlig",
     "railTitle": "Drikkepenge",
     "railTotal": "{{amount}}-tokens"
@@ -2224,6 +2225,8 @@
       "likes": "Synes godt om"
     },
     "likedPosts": {
+      "emptyTitle": "Ingen likes endnu",
+      "privateTitle": "Likes er private",
       "loadMore": "Indlæs mere"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "Synes godt om",
     "sortMostLiked": "Mest populære",
     "sortCustomShort": "Tilpasset",
+    "arrange": {
+      "saving": "Gemmer..."
+    },
     "searchThisChannel": "Søg i denne kanal",
     "searchResultCount": "1 resultat for \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultater for \"{{query}}\""
@@ -6238,7 +6244,9 @@
   "nftMarket": {
     "actAll": "Alle",
     "actListings": "Annoncer",
+    "actOffer": "Tilbud",
     "actOffers": "Bud",
+    "actSales": "Salg",
     "tabActivity": "Aktivitet",
     "shortTitle": "NFT'er",
     "filters": "Filtre",
@@ -6741,8 +6749,12 @@
       "image": "Billede",
       "camera": "Kamera",
       "show": "Vis på stream",
+      "loop": "Løkke",
       "positions": {
         "center": "Centrer"
+      },
+      "sizes": {
+        "medium": "Mellem"
       },
       "shapes": {
         "circle": "Cirkel",
@@ -7726,6 +7738,7 @@
     "footerNote": "DePin-deltagelse er en bidragsservice, ikke et investeringsprodukt. Tilgængelighed, berettigelse og belønninger kan ændres."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nyt flow",
     "disconnect": "Afbryd forbindelsen",
     "title": "Creator Flow",
     "backToStudio": "Tilbage til Creator Studio",
@@ -10707,6 +10720,9 @@
       "zoomIn": "Zoom canvas ind",
       "zoomOut": "Zoom canvas ud"
     },
+    "clipFix": {
+      "listening": "Lytter…"
+    },
     "shortcuts": {
       "action": {
         "split": "Opdel",
@@ -10717,7 +10733,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Stop optagelse"
+      "stop": "Stop optagelse",
+      "failed": "Stemmekloning mislykkedes."
     },
     "linkImport": {
       "go": "Importer",
@@ -19306,6 +19323,8 @@
       "gaming": "Spil",
       "crypto": "Krypto",
       "sports": "Sport",
+      "comedy": "Komedi",
+      "food": "Mad",
       "news": "Nyhed",
       "science": "Videnskab"
     },
@@ -19316,6 +19335,7 @@
   "appTokens": {
     "title": "Dine tokens",
     "history": "Historik",
+    "noHistory": "Ingen aktivitet endnu",
     "kindDeposit": "Tilføj midler",
     "to": "Til",
     "amount": "Beløb",
@@ -19343,6 +19363,7 @@
     "notNow": "Ikke nu"
   },
   "postStats": {
+    "audience": "Publikum",
     "finished": "Afsluttet",
     "members": "Medlemmer",
     "membersLower": "medlemmer",
@@ -19430,6 +19451,7 @@
   "dmSchedule": {
     "view": "Vis",
     "edit": "Redigér",
+    "editLabel": "Rediger besked",
     "error": "Det virkede ikke. Prøv igen."
   }
 }

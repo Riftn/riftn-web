@@ -232,6 +232,16 @@ export class ProfileLinkMismatchError extends Error {
  * @throws WalletNotLinkedError when there is no account to move (409), which is
  *   the ordinary answer for a genuinely new signup.
  */
+/** Extra checks for a wallet reset the person started themselves. */
+export interface RotateWalletOptions {
+  /** The account on screen. The API refuses to move any other account. */
+  expectedFromAddress?: string;
+  /** Code from the authenticator app, for accounts with two-step sign-in. */
+  twoFactorCode?: string;
+  /** Throw instead of carrying on when the move did not happen. */
+  strict?: boolean;
+}
+
 export async function rotateWallet(
   address: string,
   signature: string,
@@ -239,6 +249,7 @@ export async function rotateWallet(
   chainId: number,
   supabaseAccessToken: string,
   challengeId?: string,
+  options?: RotateWalletOptions,
 ): Promise<void> {
   const response = await fetch(`${DEHUB_API_BASE}/api/auth/rotate-wallet`, {
     method: 'POST',
@@ -259,6 +270,8 @@ export async function rotateWallet(
       // The endpoint accepts either; only the body form works cross-origin.
       supabaseAccessToken,
       ...(challengeId ? { challengeId } : {}),
+      ...(options?.expectedFromAddress ? { expectedFromAddress: options.expectedFromAddress.toLowerCase() } : {}),
+      ...(options?.twoFactorCode ? { twoFactorCode: options.twoFactorCode } : {}),
     }),
   });
 
@@ -268,10 +281,16 @@ export async function rotateWallet(
     if (code === 'WALLET_NOT_LINKED') {
       throw new WalletNotLinkedError((errorData.message as string) || undefined);
     }
-    // The move is done; the API only held back the session it would have
-    // handed out because the account uses two-step sign-in. The sign-in that
-    // follows asks for the code.
-    if (code === TWO_FACTOR_REQUIRED_CODE) return;
+    // The API refuses BEFORE moving anything when the account has two-step
+    // sign-in and no code came with the request. A reset started on purpose
+    // has to say so, so the screen can ask for the code; the automatic rescue
+    // keeps going and lets the sign-in that follows ask instead.
+    if (code === TWO_FACTOR_REQUIRED_CODE) {
+      if (!options?.strict) return;
+      throw Object.assign(new Error(
+        (errorData.message as string) || _translateCopy('resetWallet.twoFactor', { defaultValue: 'Enter the code from your authenticator app to move your account.' }),
+      ), { code, status: response.status });
+    }
     throw Object.assign(new Error(
       (errorData.message as string) || (errorData.error as string) || _translateCopy("copy.2877ceb92688", { defaultValue: "Could not move the account" }),
     ), { code, status: response.status });

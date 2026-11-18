@@ -1224,6 +1224,7 @@
     "payDirectNoName": "Yaratıcıya {{symbol}}-də {{chain}}-də doğrudan göndərildi. Deyişmə yoxdur.",
     "payViaBridgeDpay": "Base-ə köçürüldü və Riftn Pay-ə ödənildi, tokenlər təxminən bir dəqiqəyə gələcək",
     "dmSent": "{{amount}} tokenlər {{name}} üçün göndərildi!",
+    "addMessage": "Mesaj əlavə edin (qeyri-məcburi)",
     "messagePublic": "Açıq",
     "railTitle": "İpuçları",
     "railTotal": "{{amount}} token",
@@ -2226,6 +2227,8 @@
       "likes": "Bəyənmələr"
     },
     "likedPosts": {
+      "emptyTitle": "Hələ bəyənmə yoxdur",
+      "privateTitle": "Bəyənmələr gizlidir",
       "loadMore": "Daha çox yüklə"
     },
     "dislikes": {
@@ -2250,6 +2253,9 @@
     "sortLikes": "Bəyənir",
     "sortMostLiked": "Ən çox bəyənilənlər",
     "sortCustomShort": "Fərdi",
+    "arrange": {
+      "saving": "Yadda saxlanılır..."
+    },
     "searchThisChannel": "Bu kanalı axtarın",
     "searchResultCount": "\"{{query}}\" üçün 1 nəticə",
     "searchResultCountPlural": "{{count}} \"{{query}}\" üçün nəticələr"
@@ -6237,6 +6243,7 @@
     "actAll": "Hamısı",
     "actListings": "Elanlar",
     "actOffers": "Təkliflər",
+    "actSales": "Satışlar",
     "tabActivity": "Fəaliyyət",
     "shortTitle": "NFT-lər",
     "filters": "Filtrlər",
@@ -6740,8 +6747,12 @@
       "image": "Şəkil",
       "camera": "Kamera",
       "show": "Yayımda göstər",
+      "loop": "Döngə",
       "positions": {
         "center": "Mərkəzləşdir"
+      },
+      "sizes": {
+        "medium": "Orta"
       },
       "shapes": {
         "circle": "Dairə",
@@ -7728,6 +7739,7 @@
     "footerNote": "DePin iştirakı investisiya məhsulu deyil, töhfə xidmətidir. Əlçatanlıq, uyğunluq və mükafatlar dəyişə biləcəyi."
   },
   "creatorFlow": {
+    "newNativeFlow": "Yeni Axış",
     "disconnect": "Əlaqəni kəs",
     "title": "Creator Flow",
     "backToStudio": "Creator Studio'ya Geri Dön",
@@ -10710,6 +10722,9 @@
       "zoomIn": "Yaxınlaşdırıcı kətan",
       "zoomOut": "Kətanı yaxınlaşdırın"
     },
+    "clipFix": {
+      "listening": "Dinləyirəm…"
+    },
     "shortcuts": {
       "action": {
         "split": "Böl",
@@ -10720,7 +10735,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Yazmağı dayandır"
+      "stop": "Yazmağı dayandır",
+      "failed": "Səs klonu uğursuz oldu."
     },
     "linkImport": {
       "go": "İdxal Et",
@@ -19281,7 +19297,9 @@
       "gaming": "Oyun",
       "crypto": "Kripto",
       "sports": "Sportlar",
+      "comedy": "Komediya",
       "podcast": "Podkast",
+      "food": "Yemək",
       "news": "Xəbərlər",
       "science": "Elm"
     },
@@ -19292,6 +19310,7 @@
   "appTokens": {
     "title": "Sizin tokenləriniz",
     "history": "Tarixçə",
+    "noHistory": "Hələ heç bir fəaliyyət yoxdur",
     "kindDeposit": "Depozit",
     "to": "Kimə",
     "amount": "Məbləğ",
@@ -19321,6 +19340,7 @@
     "notNow": "İndi yox"
   },
   "postStats": {
+    "audience": "Auditoriya",
     "engagement": "İştirak",
     "finished": "Bitdi",
     "members": "Üzvlər",
@@ -19407,6 +19427,7 @@
   "dmSchedule": {
     "view": "Bax",
     "edit": "Redaktə et",
+    "editLabel": "Mesajı redaktə et",
     "error": "Bu alınmadı. Yenidən cəhd edin."
   }
 }

@@ -1221,6 +1221,7 @@
     "payDirectNoName": "Создательге жіберіледі {{symbol}}-ға {{chain}}-да. Қайта өңдеу жасауға тура келмейді.",
     "payViaBridgeDpay": "Base-қа ауыстырылды және Riftn Pay-ге төленді, токендер шамамен бір минуттан кейін келеді",
     "dmSent": "{{name}} пайдаланушысына {{amount}} токендер жіберілді!",
+    "addMessage": "Хабарлама қосу (міндетті емес)",
     "messagePublic": "Жария",
     "railTitle": "Шыңдар",
     "railTotal": "{{amount}} токен",
@@ -2240,6 +2241,8 @@
       "likes": "Ұнатулар"
     },
     "likedPosts": {
+      "emptyTitle": "Әлі ұнату жоқ",
+      "privateTitle": "Ұнатулар жабық",
       "loadMore": "Көбірек жүктеу"
     },
     "dislikes": {
@@ -2264,6 +2267,9 @@
     "sortLikes": "Ұнайды",
     "sortMostLiked": "Ең көп ұнатылды",
     "sortCustomShort": "Өзіндік",
+    "arrange": {
+      "saving": "Сақталуда..."
+    },
     "searchThisChannel": "Осы арнаны іздеу",
     "searchResultCount": "\"{{query}}\" үшін 1 нәтиже",
     "searchResultCountPlural": "\"{{query}}\" үшін {{count}} нәтижелері"
@@ -6247,7 +6253,9 @@
   "nftMarket": {
     "actAll": "Барлығы",
     "actListings": "Хабарландырулар",
+    "actOffer": "Жергізу",
     "actOffers": "Ұсыныстар",
+    "actSales": "Сатылымдар",
     "tabActivity": "Белсенділік",
     "shortTitle": "NFT",
     "filters": "Сүзгілер",
@@ -6758,8 +6766,12 @@
       "image": "Кескін",
       "camera": "Камера",
       "show": "Ағында көрсету",
+      "loop": "Цикл",
       "positions": {
         "center": "Ортасы"
+      },
+      "sizes": {
+        "medium": "Орташа"
       },
       "shapes": {
         "circle": "Шеңбер",
@@ -7746,6 +7758,7 @@
     "footerNote": "DePin қатысуы – бұл инвестициялық өнім емес, үлес қосу қызметі. Қолжетімділік, жарамдылық және сыйақылар өзгеруі мүмкін."
   },
   "creatorFlow": {
+    "newNativeFlow": "Жаңа ағын",
     "disconnect": "Қосылмау",
     "title": "Жасаушы ағын",
     "backToStudio": "Creator Studio-ге қайту",
@@ -9348,7 +9361,8 @@
       "textSaved": "Жазба өзгерістері сақталды.",
       "action": "Автоматты субтитрлер",
       "styles": {
-        "bold": "Қалың"
+        "bold": "Қалың",
+        "serif": "Сериф"
       },
       "working": "Тыңдап жатыр… {{percent}}%",
       "downloading": "Сөйлеу моделі дайындалуда… {{percent}}%",
@@ -10729,6 +10743,9 @@
       "zoomIn": "Кенепті ұлғайту",
       "zoomOut": "Кенепті ұлғайту"
     },
+    "clipFix": {
+      "listening": "Тыңдалуда..."
+    },
     "shortcuts": {
       "action": {
         "split": "Бөлу",
@@ -10739,7 +10756,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Жазуды тоқтату"
+      "stop": "Жазуды тоқтату",
+      "failed": "Дауысты клондау сәтсіз аяқталды."
     },
     "linkImport": {
       "go": "Импорттау",
@@ -19234,8 +19252,10 @@
       "gaming": "Ойындар",
       "crypto": "Крипто",
       "sports": "Спорт",
+      "comedy": "Комедия",
       "film": "Фильм",
       "podcast": "Подкаст",
+      "food": "Тамақ",
       "news": "Новости",
       "science": "Ғылым"
     },
@@ -19246,6 +19266,7 @@
   "appTokens": {
     "title": "Сіздің токендеріңіз",
     "history": "Тарих",
+    "noHistory": "Әлі әрекет жоқ",
     "kindDeposit": "Қаражат қосу",
     "to": "Кімге",
     "amount": "Сомасы",
@@ -19275,6 +19296,7 @@
     "notNow": "Қазір емес"
   },
   "postStats": {
+    "audience": "Аудитория",
     "engagement": "Қатысу",
     "finished": "Аяқталды",
     "members": "Мүшелер",
@@ -19358,6 +19380,7 @@
   "dmSchedule": {
     "view": "Қарау",
     "edit": "Өңдеу",
+    "editLabel": "Редактировать сообщение",
     "error": "Бұл нәтиже бермеді. Әрекетті қайталап көріңіз."
   },
   "spaces": {

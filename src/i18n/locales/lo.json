@@ -1208,6 +1208,7 @@
     "payDirectNoName": "ສົ່ງໂດຍກົງກັບຜູ້ສ້າງໃນ {{symbol}} on {{chain}} ບໍ່ມີການແລກປ່ຽນ.",
     "payViaBridgeDpay": "ຍ້າຍໄປ Base ແລະຈ່າຍໃຫ້ Riftn Pay, ໂທເຄັນມາຮອດໃນປະມານໜຶ່ງນາທີ",
     "dmSent": "ສົ່ງ {{amount}} ໂທເຄັນ ໃຫ້ {{name}} ແລ້ວ!",
+    "addMessage": "ເພີ່ມຂໍ້ຄວາມ (ບໍ່ຈໍາເປັນ)",
     "messagePublic": "ສາທາລະນະ",
     "railTitle": "ຄໍາແນະນໍາ",
     "railTotal": "{{amount}} ໂຕເຄັນ",
@@ -2207,6 +2208,8 @@
       "likes": "ມັກ"
     },
     "likedPosts": {
+      "emptyTitle": "ຍັງບໍ່ມີຄົນຖືກໃຈ",
+      "privateTitle": "ການຖືກໃຈເປັນສ່ວນຕົວ",
       "loadMore": "ໂຫຼດເພີ່ມ"
     },
     "dislikes": {
@@ -2231,6 +2234,9 @@
     "sortLikes": "ການກົດຖືກໃຈ",
     "sortMostLiked": "ມັກທີ່ສຸດ",
     "sortCustomShort": "ກຳນົດເອງ",
+    "arrange": {
+      "saving": "ກຳລັງບັນທຶກ..."
+    },
     "searchThisChannel": "ຄົ້ນຫາຊ່ອງນີ້",
     "searchResultCount": "1 ຜົນໄດ້ຮັບ ສໍາ ລັບ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} ຜົນ ສໍາ ເລັດ ສໍາ ລັບ \"{{query}}\""
@@ -6202,7 +6208,9 @@
   "nftMarket": {
     "actAll": "ທັງໝົດ",
     "actListings": "ລາຍການ",
+    "actOffer": "ຂໍ້ສະເໜີ",
     "actOffers": "ຂໍ້ສະເໜີ",
+    "actSales": "ການຂາຍ",
     "tabActivity": "ກິດຈະກຳ",
     "shortTitle": "NFT",
     "filters": "ກັ່ນຕອງ",
@@ -6699,8 +6707,12 @@
       "image": "ຮູບພາບ",
       "camera": "ກ້ອງຖ່າຍຮູບ",
       "show": "ສະແດງໃນສະຕຣີມ",
+      "loop": "ລວດ",
       "positions": {
         "center": "ສູນ"
+      },
+      "sizes": {
+        "medium": "ປານກາງ"
       },
       "shapes": {
         "circle": "ວົງມົນ",
@@ -7687,6 +7699,7 @@
     "footerNote": "ການເຂົ້າຮ່ວມ DePin ແມ່ນການບໍລິການປະກອບສ່ວນ, ບໍ່ແມ່ນຜະລິດຕະພັນການລົງທຶນ. ຄວາມພ້ອມ, ຄຸນສົມບັດ ແລະລາງວັນອາດຈະປ່ຽນແປງ."
   },
   "creatorFlow": {
+    "newNativeFlow": "ສ້າງ flow ໃໝ່",
     "disconnect": "ການອະທິບານ",
     "title": "ການໄຫຼຂອງຜູ້ສ້າງ",
     "backToStudio": "ກັບໄປ Creator Studio",
@@ -9287,7 +9300,8 @@
       "textSaved": "ບັນທຶກການປ່ຽນແປງຫົວຂໍ້.",
       "action": "ຄຳບັນຍາຍອັດຕະໂນມັດ",
       "styles": {
-        "bold": "ກ້າຫານ"
+        "bold": "ກ້າຫານ",
+        "serif": "ສະຖານ"
       },
       "working": "ກຳລັງຟັງ… {{percent}}%",
       "downloading": "ກຳລັງກຽມໂມເດລສຽງເວົ້າ… {{percent}}%",
@@ -10668,6 +10682,9 @@
       "zoomIn": "ຊູມຜືນຜ້າໃບເຂົ້າ",
       "zoomOut": "ຊູມຜືນຜ້າໃບອອກ"
     },
+    "clipFix": {
+      "listening": "ກຳລັງຟັງ..."
+    },
     "shortcuts": {
       "action": {
         "split": "ແຍກ",
@@ -10678,7 +10695,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ຢຸດການບັນທຶກ"
+      "stop": "ຢຸດການບັນທຶກ",
+      "failed": "ການກັ່ນຕອງສຽງບໍ່ສຳເລັດ."
     },
     "linkImport": {
       "go": "ນຳເຂົ້າ",
@@ -19129,8 +19147,10 @@
       "gaming": "ເກມ",
       "crypto": "ຄຣິບໂຕ",
       "sports": "ກິລາ",
+      "comedy": "ເລື່ອງຕະຫລົກ",
       "film": "ຮູບເງົາ",
       "podcast": "ປະເທດປະໂດກສາດ",
+      "food": "ອາຫານ",
       "news": "ຂ່າວ",
       "science": "ວິທະຍາສາດ"
     },
@@ -19141,6 +19161,7 @@
   "appTokens": {
     "title": "tokens ຂອງທ່ານ",
     "history": "ປະຫວັດ",
+    "noHistory": "ຍັງບໍ່ມີກິດຈະກຳເທື່ອ",
     "kindDeposit": "ຝາກ",
     "to": "ໄປ",
     "amount": "ຈຳນວນ",
@@ -19170,6 +19191,7 @@
     "notNow": "ບໍ່ແມ່ນຕອນນີ້"
   },
   "postStats": {
+    "audience": "ຜູ້ຊົມ",
     "engagement": "ການມີສ່ວນຮ່ວມ",
     "finished": "ສິ້ນສຸດ",
     "members": "ສະມາຊິກ",
@@ -19258,6 +19280,7 @@
   "dmSchedule": {
     "view": "ເບິ່ງ",
     "edit": "ແກ້ໄຂ",
+    "editLabel": "ແກ້ໄຂຂໍ້ຄວາມ",
     "error": "ນັ້ນບໍ່ໄດ້ຜົນ. ລອງໃໝ່ອີກຄັ້ງ."
   }
 }

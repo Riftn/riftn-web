@@ -1214,6 +1214,7 @@
     "payDirectNoName": "{{chain}} تي {{symbol}} ۾ سڌو تخليقڪار ڏانهن موڪليو ويو. ڪا مٽا سٽا ناهي.",
     "payViaBridgeDpay": "Base ڏانهن منتقل ڪيو ويو ۽ Riftn Pay ڏانهن ادا ڪيو ويو، ٽوڪن تقريبن هڪ منٽ ۾ اچن ٿا",
     "dmSent": "{{name}} کي {{amount}} ٽوڪن موڪليا ويا!",
+    "addMessage": "پيغام شامل ڪريو (اختياري)",
     "messagePublic": "عوامي",
     "railTitle": "ٽوٽڪا",
     "railTotal": "{{amount}} ٽوڪن",
@@ -2213,6 +2214,8 @@
       "likes": "لائيڪ"
     },
     "likedPosts": {
+      "emptyTitle": "اڃا ڪا پسند ناهي",
+      "privateTitle": "پسنديون نجي آهن",
       "loadMore": "وڌيڪ لوڊ ڪريو"
     },
     "dislikes": {
@@ -2237,6 +2240,9 @@
     "sortLikes": "پسند",
     "sortMostLiked": "سڀ کان وڌيڪ پسنديده",
     "sortCustomShort": "حسب ضرورت",
+    "arrange": {
+      "saving": "محفوظ ٿي رهيو آهي..."
+    },
     "searchThisChannel": "ڪنهن چينل کي ڏٺو",
     "searchResultCount": "1 \"{{query}}\" لاءِ نتيجو",
     "searchResultCountPlural": "{{count}} نتيجن لاءِ \"{{query}}\""
@@ -6213,7 +6219,9 @@
   "nftMarket": {
     "actAll": "سڀ",
     "actListings": "لسٽنگون",
+    "actOffer": "پیشنہہ",
     "actOffers": "آڇون",
+    "actSales": "ڪاروباري",
     "tabActivity": "سرگرمي",
     "shortTitle": "NFT",
     "filters": "فلٽر",
@@ -6673,8 +6681,12 @@
       "image": "تصوير",
       "camera": "ڪيمرا",
       "show": "وهڪرو تي ڏيکاريو",
+      "loop": "لوپ",
       "positions": {
         "center": "مرڪز"
+      },
+      "sizes": {
+        "medium": "وچولي"
       },
       "shapes": {
         "circle": "گول",
@@ -7661,6 +7673,7 @@
     "footerNote": "DePin شموليت هڪ تعاون جي خدمت آهي، سيڙپڪاري جي پيداوار نه. دستيابي، قابليت ۽ انعامات تبديل ٿي سگھن ٿا."
   },
   "creatorFlow": {
+    "newNativeFlow": "نئون فلو",
     "disconnect": "ڌار ڪريو",
     "title": "ڪريٽر فلو",
     "backToStudio": "ڪريٽر اسٽوڊيو ڏانهن واپس",
@@ -9261,7 +9274,8 @@
       "textSaved": "ڪيپٽن تبديليون محفوظ ڪيون.",
       "action": "خودڪار ڪيپشن",
       "styles": {
-        "bold": "زبردست"
+        "bold": "زبردست",
+        "serif": "ميرپورخاص"
       },
       "working": "ٻڌي رهيو آهي… {{percent}}%",
       "downloading": "ڳالهائڻ جو ماڊل تيار ٿي رهيو آهي… {{percent}}%",
@@ -10643,6 +10657,9 @@
       "zoomIn": "ڪينواس کي زوم ان ڪريو",
       "zoomOut": "زوم ڪئنوس آئوٽ"
     },
+    "clipFix": {
+      "listening": "ٻڌي رهيو آهي..."
+    },
     "shortcuts": {
       "action": {
         "split": "ورهايو",
@@ -10653,7 +10670,8 @@
       }
     },
     "voiceClone": {
-      "stop": "رڪارڊنگ بند ڪريو"
+      "stop": "رڪارڊنگ بند ڪريو",
+      "failed": "وائس ڪلوننگ ناڪام ٿي وئي."
     },
     "linkImport": {
       "go": "درآمد",
@@ -17807,7 +17825,6 @@
     "511a943d6125": "ڪرڪيٽ",
     "a9b7f3f14fe3": "ڪائونٽ ڊائون",
     "6e0290d62f6d": "ڪڪڪڪ",
-    "021aaa052282": "آه آه آه",
     "f3404466f096": "اي (انسان)",
     "ab7b9519e1a2": "آهو (دختر)",
     "d65768d34aa0": "بلوچستان",
@@ -19191,8 +19208,10 @@
       "gaming": "گيمنگ",
       "crypto": "ڪرپٽو",
       "sports": "رياضتون پائين",
+      "comedy": "مزاحيه",
       "film": "فلم",
       "podcast": "پوڊ ڪاسٽ",
+      "food": "کھانا",
       "news": "خبرون",
       "science": "سائنس"
     },
@@ -19203,6 +19222,7 @@
   "appTokens": {
     "title": "توهان جا ٽوڪن",
     "history": "تاريخ",
+    "noHistory": "اڃان تائين ڪابه سرگرمي ناهي",
     "kindDeposit": "فنڊ شامل ڪريو",
     "to": "ڏانهن",
     "amount": "رقم",
@@ -19232,6 +19252,7 @@
     "notNow": "هاڻي نه"
   },
   "postStats": {
+    "audience": "سامعين",
     "engagement": "مصروفيات",
     "finished": "پورو ٿيو",
     "members": "ميمبر",
@@ -19314,6 +19335,7 @@
   "dmSchedule": {
     "view": "ڏسو",
     "edit": "ترميم ڪريو",
+    "editLabel": "پيغام تبديل ڪريو",
     "error": "اهو ڪم نه ڪيو، ٻيهر ڪوشش ڪريو."
   }
 }

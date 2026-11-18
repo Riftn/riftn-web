@@ -1219,6 +1219,7 @@
     "payDirectNoName": "Aika kai tsaye zuwa ga mahalicci a {{symbol}} on {{chain}}. Babu swap.",
     "payViaBridgeDpay": "An motsa zuwa Base kuma an biya zuwa Riftn Pay, alamun zai isa cikin kimanin minti ɗaya",
     "dmSent": "An aika {{amount}} tokens ga {{name}}!",
+    "addMessage": "Kara sako (na zabi)",
     "messagePublic": "Jama'a",
     "railTitle": "Nasiha",
     "railTotal": "{{amount}} isassun",
@@ -2219,6 +2220,8 @@
       "likes": "So"
     },
     "likedPosts": {
+      "emptyTitle": "Babu so tukuna",
+      "privateTitle": "Masu so a ɓoye suke",
       "loadMore": "Ɗora ƙari"
     },
     "dislikes": {
@@ -2243,6 +2246,9 @@
     "sortLikes": "Sonawa",
     "sortMostLiked": "Mafi so",
     "sortCustomShort": "Musamman",
+    "arrange": {
+      "saving": "Ana ajiyewa..."
+    },
     "searchThisChannel": "Bincika wannan tashar",
     "searchResultCount": "1 sakamakon don \"{{query}}\"",
     "searchResultCountPlural": "{{count}} sakamakon don \"{{query}}\""
@@ -6202,7 +6208,9 @@
   "nftMarket": {
     "actAll": "Duka",
     "actListings": "Jeri",
+    "actOffer": "Tayin",
     "actOffers": "Tayi",
+    "actSales": "Siyarwa",
     "tabActivity": "Ayyuka",
     "shortTitle": "NFTs",
     "filters": "Filters",
@@ -6701,8 +6709,12 @@
       "image": "Hoto",
       "camera": "Kamara",
       "show": "Nuna a kan rafi",
+      "loop": "Madauki",
       "positions": {
         "center": "Tsakiya"
+      },
+      "sizes": {
+        "medium": "Matsakaici"
       },
       "shapes": {
         "circle": "Da'ira",
@@ -7687,6 +7699,7 @@
     "footerNote": "Halin shiga DePin sabis ne na bayarwa, ba samfurin saka jari ba. Samuwa, cancanta da ladan na iya canzawa."
   },
   "creatorFlow": {
+    "newNativeFlow": "Sabon wucewa",
     "disconnect": "Kashe haɗin kai",
     "title": "Creator Flow",
     "backToStudio": "Komawa zuwa Creator Studio",
@@ -10671,6 +10684,9 @@
       "zoomIn": "Zuƙowa kanbaf ciki",
       "zoomOut": "Zuƙowa kanbaf waje"
     },
+    "clipFix": {
+      "listening": "Sauraro..."
+    },
     "shortcuts": {
       "action": {
         "split": "Raba",
@@ -10681,7 +10697,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Dakatar da rikodin"
+      "stop": "Dakatar da rikodin",
+      "failed": "Muryar murya cloning bai yi nasara ba."
     },
     "linkImport": {
       "go": "Shigo da",
@@ -15996,7 +16013,6 @@
     "23cc49836f60": "Fara watsa shirye-shirye a Riftn",
     "ce39b97c0f94": "Watsa shirye-shirye daga burauzarka, wayarka, ko OBS, tare da masu canza murya, tasirin sauti, da kamannin kyamara da aka riga aka saka. Kyaututtuka suna sauka a cikin wallet ɗinka yayin da aka tura su — babu ƙayyadadden adadin mabiya, babu zagayowar lokacin biya, kuma ba a buƙatar wallet don farawa.",
     "efc85ecfd402": "Buɗe Riftn",
-    "dbc468a14b60": "Tambayoyin da ake yawan yi",
     "1e5b36078e37": "Jagororin da suka shafi wannan",
     "95f48da59b9a": "Mafi kyawun dandamalin sada zumunta na rarraba iko a 2026",
     "89ec0bb81771": "Fim",
@@ -19161,7 +19177,9 @@
       "gaming": "Wasanni",
       "crypto": "Kai tsakanin kai",
       "sports": "Wasanni",
+      "comedy": "Barkwanci",
       "film": "Fim",
+      "food": "Abinci",
       "news": "Labarai",
       "science": "Kimiyya"
     },
@@ -19172,6 +19190,7 @@
   "appTokens": {
     "title": "Tokens ɗinka",
     "history": "Tarihi",
+    "noHistory": "Babu wani aiki tukuna",
     "kindDeposit": "Ajiye kuɗi",
     "to": "Zuwa",
     "amount": "Adadi",
@@ -19201,6 +19220,7 @@
     "notNow": "Ba yanzu"
   },
   "postStats": {
+    "audience": "Masu sauraro",
     "engagement": "Haɗin gwiwa",
     "finished": "An gama",
     "members": "Mambobi",
@@ -19289,6 +19309,7 @@
   "dmSchedule": {
     "view": "Kalla",
     "edit": "Gyara",
+    "editLabel": "Shirya sako",
     "error": "Wannan bai yi aiki ba. sake gwadawa."
   }
 }

@@ -1223,6 +1223,7 @@
     "payDirectNoName": "Αποστέλλονται άμεσα στον δημιουργό στο {{symbol}} στο {{chain}}. geen ανταλλαγή.",
     "payViaBridgeDpay": "Μεταφέρθηκε στο Base και πληρώθηκε στο Riftn Pay, τα tokens φτάνουν σε περίπου ένα λεπτό",
     "dmSent": "Στάλθηκαν {{amount}} μάρκες στον/στην {{name}}!",
+    "addMessage": "Προσθέστε ένα μήνυμα (προαιρετικά)",
     "messagePublic": "Δημόσιο",
     "railTitle": "Συμβουλές",
     "railTotal": "{{amount}} μάρκες",
@@ -2223,6 +2224,8 @@
       "likes": "Μου αρέσει"
     },
     "likedPosts": {
+      "emptyTitle": "Δεν υπάρχουν likes ακόμη",
+      "privateTitle": "Τα likes είναι ιδιωτικά",
       "loadMore": "Φόρτωση περισσότερων"
     },
     "dislikes": {
@@ -2247,6 +2250,9 @@
     "sortLikes": "Αγαπημένα",
     "sortMostLiked": "Περισσότερα αγαπημένα",
     "sortCustomShort": "Προσαρμογή",
+    "arrange": {
+      "saving": "Αποθήκευση..."
+    },
     "searchThisChannel": "Αναζήτηση σε αυτό το κανάλι",
     "searchResultCount": "1 αποτελέσματα για \"{{query}}\"",
     "searchResultCountPlural": "{{count}} αποτελέσματα για \"{{query}}\""
@@ -6258,7 +6264,9 @@
   "nftMarket": {
     "actAll": "Όλα",
     "actListings": "Καταχωρίσεις",
+    "actOffer": "Προσφορά",
     "actOffers": "Προσφορές",
+    "actSales": "Πωλήσεις",
     "tabActivity": "Δραστηριότητα",
     "shortTitle": "NFT",
     "filters": "Φίλτρα",
@@ -6762,8 +6770,12 @@
       "image": "Εικόνα",
       "camera": "Κάμερα",
       "show": "Εμφάνιση σε ροή",
+      "loop": "Βρόχος",
       "positions": {
         "center": "Κέντρο"
+      },
+      "sizes": {
+        "medium": "Μεσαία"
       },
       "shapes": {
         "circle": "Κύκλος",
@@ -7750,6 +7762,7 @@
     "footerNote": "Η συμμετοχή DePin είναι υπηρεσία συνεισφοράς, όχι προϊόν επένδυσης. Η διαθεσιμότητα, η επιλεξιμότητα και οι αμοιβές μπορεί να αλλάξουν."
   },
   "creatorFlow": {
+    "newNativeFlow": "Νέα ροή",
     "disconnect": "Διακοπή",
     "title": "Ροή δημιουργού",
     "backToStudio": "Επιστροφή στο Creator Studio",
@@ -9352,7 +9365,8 @@
       "textSaved": "Οι αλλαγές λεζάντας αποθηκεύτηκαν.",
       "action": "Αυτόματοι υπότιτλοι",
       "styles": {
-        "bold": "Έντονα"
+        "bold": "Έντονα",
+        "serif": "Σερίφ"
       },
       "working": "Ακρόαση… {{percent}}%",
       "downloading": "Προετοιμασία μοντέλου ομιλίας… {{percent}}%",
@@ -10732,6 +10746,9 @@
       "zoomIn": "Μεγέθυνση καμβά σε",
       "zoomOut": "Σμίκρυνση καμβά"
     },
+    "clipFix": {
+      "listening": "Ακρόαση…"
+    },
     "shortcuts": {
       "action": {
         "split": "Διαίρεση",
@@ -10742,7 +10759,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Διακοπή εγγραφής"
+      "stop": "Διακοπή εγγραφής",
+      "failed": "Απέτυχε η κλοπή φωνής."
     },
     "linkImport": {
       "go": "Εισαγωγή",
@@ -19257,8 +19275,10 @@
       "gaming": "Παιχνίδια",
       "crypto": "Κρυπτο",
       "sports": "Αθλήματα",
+      "comedy": "Κωμωδία",
       "film": "Ταινία",
       "podcast": "Πόντσαστ",
+      "food": "Εσπερίδες",
       "news": "Ειδήσεις",
       "science": "Επιστήμη"
     },
@@ -19269,6 +19289,7 @@
   "appTokens": {
     "title": "Τα tokens σας",
     "history": "Ιστορικό",
+    "noHistory": "Καμία δραστηριότητα προς το παρόν",
     "kindDeposit": "Κατάθεση",
     "to": "Μέχρι",
     "amount": "Ποσό",
@@ -19298,6 +19319,7 @@
     "notNow": "Όχι τώρα"
   },
   "postStats": {
+    "audience": "Αudience",
     "engagement": "Εμπλοκή",
     "finished": "Ολοκληρώθηκε",
     "members": "Μέλη",
@@ -19386,6 +19408,7 @@
   "dmSchedule": {
     "view": "Προβολή",
     "edit": "Επεξεργασία",
+    "editLabel": "Επεξεργασία μηνύματος",
     "error": "Αυτό δεν λειτούργησε. Δοκιμάστε ξανά."
   }
 }

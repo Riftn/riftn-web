@@ -1208,6 +1208,7 @@
     "payDirectNoName": "直接发送给创作者在{{symbol}}上的{{chain}}。无交换。",
     "payViaBridgeDpay": "已移至 Base 并支付给 Riftn Pay，代币约一分钟后到账",
     "dmSent": "已给 {{name}} 发 {{amount}} 代幣！",
+    "addMessage": "新增訊息（選填）",
     "messagePublic": "公开",
     "railTitle": "打赏",
     "railTotal": "{{amount}} 代币",
@@ -2155,6 +2156,7 @@
       "profile": "个人资料",
       "film": "电影",
       "bounty": "赏金",
+      "short": "短",
       "comic": "连环画",
       "earn": "賺錢",
       "listens_one": "{{value}} 听",
@@ -2202,6 +2204,8 @@
       "likes": "赞"
     },
     "likedPosts": {
+      "emptyTitle": "还没有点赞",
+      "privateTitle": "点赞不公开",
       "loadMore": "加载更多"
     },
     "dislikes": {
@@ -2226,6 +2230,9 @@
     "sortLikes": "点赞",
     "sortMostLiked": "最多点赞",
     "sortCustomShort": "自定义",
+    "arrange": {
+      "saving": "存咧…"
+    },
     "searchThisChannel": "搜索频道",
     "searchResultCount": "1 个结果为“{{query}}”",
     "searchResultCountPlural": "{{count}} 个结果为“{{query}}”"
@@ -6105,6 +6112,7 @@
     "actAll": "全部",
     "actListings": "挂牌",
     "actOffers": "出价",
+    "actSales": "销售",
     "tabActivity": "动态",
     "shortTitle": "非同质化代币",
     "filters": "过滤器",
@@ -6597,8 +6605,12 @@
       "image": "圖片",
       "camera": "摄像头",
       "show": "直播中展示",
+      "loop": "迴圈",
       "positions": {
         "center": "中心"
+      },
+      "sizes": {
+        "medium": "中"
       },
       "shapes": {
         "circle": "圆形",
@@ -7576,6 +7588,7 @@
     "footerNote": "DePin 参与是一个贡献服务，而非投资产品。可用性、资格和奖励可能会变化。"
   },
   "creatorFlow": {
+    "newNativeFlow": "新建流程",
     "disconnect": "断开",
     "title": "创作者流程",
     "backToStudio": "返回创作者工作室",
@@ -9173,7 +9186,8 @@
       "textSaved": "字幕變更已儲存。",
       "action": "自动字幕",
       "styles": {
-        "bold": "加粗"
+        "bold": "加粗",
+        "serif": "书体"
       },
       "working": "正在听… {{percent}}%",
       "downloading": "正在准备语音模型… {{percent}}%",
@@ -10555,6 +10569,9 @@
       "zoomIn": "放大画布",
       "zoomOut": "缩小画布"
     },
+    "clipFix": {
+      "listening": "正在聆听…"
+    },
     "shortcuts": {
       "action": {
         "split": "分割",
@@ -10565,7 +10582,8 @@
       }
     },
     "voiceClone": {
-      "stop": "停止录音"
+      "stop": "停止录音",
+      "failed": "聲音克隆失敗。"
     },
     "linkImport": {
       "go": "导入",
@@ -18701,8 +18719,10 @@
       "gaming": "游戏",
       "crypto": "加密",
       "sports": "体育",
+      "comedy": "喜剧",
       "film": "电影",
       "podcast": "播客",
+      "food": "食物",
       "news": "新闻",
       "science": "科学"
     },
@@ -18713,6 +18733,7 @@
   "appTokens": {
     "title": "您的代币",
     "history": "历史",
+    "noHistory": "暂无活动",
     "kindDeposit": "存入",
     "to": "到",
     "amount": "金额",
@@ -18742,6 +18763,7 @@
     "notNow": "现在不"
   },
   "postStats": {
+    "audience": "觀眾",
     "engagement": "互动",
     "finished": "已结束",
     "members": "成员",
@@ -18827,6 +18849,7 @@
   "dmSchedule": {
     "view": "看",
     "edit": "编辑",
+    "editLabel": "编辑消息",
     "error": "那不起作用。请重试。"
   },
   "post": {

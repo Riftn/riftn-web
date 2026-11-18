@@ -1222,6 +1222,7 @@
     "payDirectNoName": "በቀጥታ ወደ ፈጣሪ ተልኳል {{symbol}} on {{chain}}. ምንም ስዋፕ.",
     "payViaBridgeDpay": "ወደ Base ተወስዷል እና ለRiftn ክፍያ ተከፍሏል፣ ቶከኖች በደቂቃ ውስጥ ይመጣሉ",
     "dmSent": "{{amount}} ቶከኖች ለ{{name}} ተልኳል!",
+    "addMessage": "መልእክት ያክሉ (ተራ)",
     "messagePublic": "ይፋ",
     "railTitle": "ጠቃሚ ምክሮች",
     "railTotal": "{{amount}} ቶከኖች",
@@ -2224,6 +2225,8 @@
       "likes": "ወደዶች"
     },
     "likedPosts": {
+      "emptyTitle": "እስካሁን መውደድ የለም",
+      "privateTitle": "መውደዶች የግል ናቸው",
       "loadMore": "ተጨማሪ ጫን"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "ውዴታዎች",
     "sortMostLiked": "በጣም የተወደዱ",
     "sortCustomShort": "ብጁ",
+    "arrange": {
+      "saving": "በማስቀመጥ ላይ..."
+    },
     "searchThisChannel": "ይህን ቻናል ፈልግ",
     "searchResultCount": "1 ውጤት ለ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} ውጤቶች ለ \"{{query}}\""
@@ -6256,7 +6262,9 @@
   "nftMarket": {
     "actAll": "ሁሉም",
     "actListings": "ዝርዝሮች",
+    "actOffer": "እቃ ይስጡ",
     "actOffers": "ቅናሾች",
+    "actSales": "ሽያጮች",
     "tabActivity": "እንቅስቃሴ",
     "shortTitle": "ኤንኤፍቲዎች",
     "filters": "ማጣሪያዎች",
@@ -6756,8 +6764,12 @@
       "image": "ምስል",
       "camera": "ካሜራ",
       "show": "በዥረት ላይ አሳይ",
+      "loop": "ሉፕ",
       "positions": {
         "center": "ማዕከል"
+      },
+      "sizes": {
+        "medium": "መካከለኛ"
       },
       "shapes": {
         "circle": "ክብ",
@@ -7742,6 +7754,7 @@
     "footerNote": "የዴፒን ተሳትፎ የበጎ አድራጎት አገልግሎት እንጂ የኢንቨስትመንት ምርት አይደለም ። ተገኝነት ፣ ብቁነት እና ሽልማቶች ሊለወጡ ይችላሉ ።"
   },
   "creatorFlow": {
+    "newNativeFlow": "አዲስ ፍሰት",
     "disconnect": "አይኮንድክትል።",
     "title": "የፈጣሪ ፍሰት",
     "backToStudio": "ወደ Creator Studio ተመለስ",
@@ -9343,7 +9356,8 @@
       "textSaved": "የመግለጫ ጽሁፍ ለውጦች ተቀምጠዋል።",
       "action": "ራስ-ሰር የግርጌ ጽሑፎች",
       "styles": {
-        "bold": "ቦልድ"
+        "bold": "ቦልድ",
+        "serif": "ሴሪፍ"
       },
       "working": "በማዳመጥ ላይ… {{percent}}%",
       "downloading": "የንግግር ሞዴሉን በማዘጋጀት ላይ… {{percent}}%",
@@ -10724,6 +10738,9 @@
       "zoomIn": "Zoom canvas ውስጥ",
       "zoomOut": "አስተዋጽ አስተማርቀበር ነዎስ።"
     },
+    "clipFix": {
+      "listening": "ማዳመጥ…"
+    },
     "shortcuts": {
       "action": {
         "split": "ክፈል",
@@ -10734,7 +10751,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ቅጂ አቁም"
+      "stop": "ቅጂ አቁም",
+      "failed": "የድምፅ ክሎኒንግ አልተሳካም።"
     },
     "linkImport": {
       "go": "አስገባ",
@@ -19282,6 +19300,7 @@
       "gaming": "ጨዋታ",
       "crypto": "ክሪፕቶ",
       "sports": "ስፖርት",
+      "comedy": "ኮሜዲ",
       "film": "ፊልም",
       "podcast": "ፖድካስት",
       "news": "ዜና",
@@ -19294,6 +19313,7 @@
   "appTokens": {
     "title": "የእርስዎ ቶከኖች",
     "history": "ታሪክ",
+    "noHistory": "እስካሁን ምንም እንቅስቃሴ የለም",
     "kindDeposit": "አስቀምጥ",
     "to": "ወደ",
     "amount": "መጠን",
@@ -19323,6 +19343,7 @@
     "notNow": "አሁን አይደለም"
   },
   "postStats": {
+    "audience": "ታዳሚዎች",
     "engagement": "ተሳትፎ",
     "finished": "ተጠናቋል",
     "members": "አባላት",
@@ -19411,6 +19432,7 @@
   "dmSchedule": {
     "view": "ተመልከት",
     "edit": "አርትዕ",
+    "editLabel": "መልዕክት አርትዕ",
     "error": "ያ አልሰራም እንደገና ሞክር ።"
   }
 }

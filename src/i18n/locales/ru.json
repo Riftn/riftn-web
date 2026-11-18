@@ -550,7 +550,6 @@
     "featureRequests": "Запросы",
     "staking": "Стейкинг",
     "governance": "Управление",
-    "dao": "Децентрализованная автономная организация",
     "careers": "Вакансии",
     "glossary": "Глоссарий",
     "arcade": "Аркада",
@@ -1290,6 +1289,7 @@
     "payDirectNoName": "Отправляется напрямую автору в {{symbol}} в сети {{chain}}. Без обмена.",
     "payViaBridgeDpay": "Переведено на Base и оплачено Riftn Pay, токены прибудут примерно через минуту",
     "dmSent": "Отправлено {{amount}} токенов пользователю {{name}}!",
+    "addMessage": "Добавить сообщение (по желанию)",
     "messagePublic": "Публичный",
     "railTitle": "Чаевые",
     "railTotal": "{{amount}} токенов",
@@ -2328,6 +2328,9 @@
     "sortLikes": "Лайки",
     "sortMostLiked": "Самые лайкнутые",
     "sortCustomShort": "Пользовательское",
+    "arrange": {
+      "saving": "Сохранение..."
+    },
     "searchThisChannel": "Поиск в канале",
     "searchResultCount": "1 результат для \"{{query}}\"",
     "searchResultCountPlural": "{{count}} результатов для \"{{query}}\""
@@ -6329,7 +6332,9 @@
   "nftMarket": {
     "actAll": "Все",
     "actListings": "Объявления",
+    "actOffer": "Предложение",
     "actOffers": "Предложения",
+    "actSales": "Продажи",
     "tabActivity": "Активность",
     "shortTitle": "NFT",
     "filters": "Фильтры",
@@ -6833,11 +6838,13 @@
       "image": "Изображение",
       "camera": "Камера",
       "show": "Показать в потоке",
+      "loop": "Петля",
       "positions": {
         "center": "Центр"
       },
       "sizes": {
         "small": "Мелкий",
+        "medium": "Среднее",
         "large": "Крупный"
       },
       "shapes": {
@@ -7825,6 +7832,7 @@
     "footerNote": "Участие в DePin — это служба вклада, а не инвестиционный продукт. Доступность, приемлемость и вознаграждения могут измениться."
   },
   "creatorFlow": {
+    "newNativeFlow": "Новый поток",
     "disconnect": "Отключить",
     "title": "Поток креаторов",
     "backToStudio": "Назад в Creator Studio",
@@ -9433,7 +9441,8 @@
       "textSaved": "Изменения заголовка сохранены.",
       "action": "Автосубтитры",
       "styles": {
-        "bold": "Жирный"
+        "bold": "Жирный",
+        "serif": "Сериф"
       },
       "working": "Слушаем… {{percent}}%",
       "downloading": "Готовим модель распознавания речи… {{percent}}%",
@@ -10814,6 +10823,9 @@
       "zoomIn": "Увеличить холст",
       "zoomOut": "Уменьшить масштаб холста"
     },
+    "clipFix": {
+      "listening": "Прослушивание…"
+    },
     "shortcuts": {
       "action": {
         "split": "Разрезать",
@@ -10824,7 +10836,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Остановить запись"
+      "stop": "Остановить запись",
+      "failed": "Клонирование голоса не удалось."
     },
     "linkImport": {
       "go": "Импорт",
@@ -19378,8 +19391,10 @@
       "gaming": "Игры",
       "crypto": "Крипто",
       "sports": "Спорт",
+      "comedy": "Комедия",
       "film": "Фильм",
       "podcast": "Подкаст",
+      "food": "Питание",
       "news": "Новости",
       "science": "Наука"
     },
@@ -19390,6 +19405,7 @@
   "appTokens": {
     "title": "Ваши токены",
     "history": "История",
+    "noHistory": "Активности пока нет",
     "kindDeposit": "Пополнить",
     "to": "До",
     "amount": "Сумма",
@@ -19419,6 +19435,7 @@
     "notNow": "Не сейчас"
   },
   "postStats": {
+    "audience": "Аудитория",
     "engagement": "Вовлечённость",
     "finished": "Завершено",
     "members": "Участники",
@@ -19512,6 +19529,7 @@
   "dmSchedule": {
     "view": "Смотреть",
     "edit": "Изменить",
+    "editLabel": "Редактировать сообщение",
     "error": "Это не сработало. Попробуйте еще раз."
   }
 }

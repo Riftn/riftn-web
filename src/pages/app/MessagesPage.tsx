@@ -472,9 +472,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Any computer: your own pins, archive, mutes and "marked unread", plus
   // the right-click menu on every row.
   const richList = !phonePill;
-  // Computers on /app/messages: every chat is its own glass card, with
-  // All / Unread / Groups / Requests / Archived tabs in the header pill.
-  const deskCards = !fullscreen && !phonePill;
+  // /app/messages: every chat is its own glass card, with All / Unread /
+  // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
+  // a row at the top of the list on phones.
+  const cards = !fullscreen;
+  const deskCards = cards && !phonePill;
+  const phoneCards = cards && phonePill;
   const [listTab, setListTab] = useState<'all' | 'unread' | 'groups'>('all');
   const clearHistory = useClearChatHistory();
   const [showArchived, setShowArchived] = useState(false);
@@ -534,9 +537,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Computer tabs: Unread keeps chats with something new (or marked unread),
   // Groups keeps group, channel and community chats only.
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread;
-  const tabFilter = deskCards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : 'all';
+  const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : 'all';
   const shownConversations = tabFilter === 'groups' ? [] : tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
-  const shownRooms = tabFilter === 'unread' ? listedRooms.filter(c => !!roomPref(c)?.markedUnread) : listedRooms;
+  // Computers: the first tab is "Messages", direct chats only; groups, channels,
+  // communities and Public Chat live under Groups.
+  const messagesTab = tabFilter === 'all' && deskCards && !searchQuery.trim() && !showArchived && !inRequests;
+  const shownRooms = messagesTab ? [] : tabFilter === 'unread' ? listedRooms.filter(c => !!roomPref(c)?.markedUnread) : listedRooms;
   const inboxUnreadChats = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)) && convHasUnread(c)).length
     + groupChats.filter(c => !isArchived(roomPref(c)) && !!roomPref(c)?.markedUnread).length;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
@@ -1122,7 +1128,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Computers only: phones keep the pill header they already have.
   const fullscreenTop = fullscreen && !phonePill ? (
     <ChatListTop
-      title={_copy('fullscreenChat.title', { defaultValue: 'Chat' })}
+      title={_copy('settings.chat', { defaultValue: 'Chat' })}
       searchLabel={_copy('fullscreenChat.search', { defaultValue: 'Search chats' })}
       searchValue={searchQuery}
       onClearSearch={() => setSearchQuery('')}
@@ -1170,7 +1176,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   };
   const activeTab = showArchived ? 'archived' : inRequests ? 'requests' : listTab;
   const deskTabs: { key: 'all' | 'unread' | 'groups' | 'requests' | 'archived'; label: string; count?: number }[] = [
-    { key: 'all', label: _copy('messagesTabs.all', { defaultValue: 'All' }) },
+    { key: 'all', label: _copy('nav.messages', { defaultValue: 'Messages' }) },
     { key: 'unread', label: _copy('messagesTabs.unread', { defaultValue: 'Unread' }), count: inboxUnreadChats },
     { key: 'groups', label: _copy('messagesTabs.groups', { defaultValue: 'Groups' }) },
     ...(requestConversations.length > 0 ? [{ key: 'requests' as const, label: _copy('dmRequests.title', { defaultValue: 'Requests' }), count: requestConversations.length }] : []),
@@ -1181,7 +1187,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       icon={<span data-msg-cards-glyph className="flex h-8 w-8 items-center justify-center text-white"><MessagesNavGlyph unread={dmUnread} className="h-[22px] w-[22px]" /></span>}
       title={picking
         ? _copy('chatBulk.selected', { defaultValue: '{{count}} selected', count: bulkCount })
-        : t('messages.title')}
+        : _copy('settings.chat', { defaultValue: 'Chat' })}
       actions={(
         <>
           <button
@@ -1258,12 +1264,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             [data-page-bento] hook stays: the Osaka and Jungle `#app-root` class
             nets exclude on it, and without it every bg-zinc-8/9 descendant in
             here becomes a frosted rectangle. */}
-        <div data-page-bento data-bento-flat data-msg-cards={deskCards ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
+        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
           {fullscreenTop ?? deskTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
             icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
-            title={fullscreen ? _copy('fullscreenChat.title', { defaultValue: 'Chat' }) : t('messages.title')}
+            title={_copy('settings.chat', { defaultValue: 'Chat' })}
             actions={fullscreen ? (
               // Only phones reach this header (computers get fullscreenTop).
               // A phone has no full screen to leave, so the spare square is
@@ -1362,6 +1368,16 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </div>
             </div>
             <div ref={chatPullRef} data-chat-list-body>
+            {phoneCards && !searchQuery.trim() && (
+              <div data-msg-cards-tabs data-msg-cards-phone-tabs role="tablist">
+                {deskTabs.map(tab => (
+                  <button key={tab.key} type="button" role="tab" data-msg-cards-tab aria-selected={activeTab === tab.key} onClick={() => pickTab(tab.key)}>
+                    {tab.label}
+                    {!!tab.count && <span data-msg-cards-tab-count>{tab.count > 99 ? '99+' : tab.count}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1370,7 +1386,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             />
             {/* Public Chat (pinned) */}
             {!inRequests && (<>
-            {(tabFilter === 'all' || (tabFilter === 'unread' && publicUnread > 0)) && !showArchived && (
+            {((tabFilter === 'all' && !messagesTab) || tabFilter === 'groups' || (tabFilter === 'unread' && publicUnread > 0)) && !showArchived && (
             <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row
@@ -1483,7 +1499,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   onBlock={handleBlockConversationUser}
                   pref={richList ? chatPrefs.get(conv.id) : unreadOnly(chatPrefs.get(conv.id))}
                   onLongPress={richList ? undefined : () => holdToPick(conv.id)}
-                  compactTime={deskCards}
+                  compactTime={cards}
                 />
               );
               return richList ? (

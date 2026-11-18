@@ -1243,6 +1243,7 @@
     "payDirectNoName": "Odoslané priamo tvorcovi o {{symbol}} dňa {{chain}}. Žiadna výmena.",
     "payViaBridgeDpay": "Presunuté na Base a zaplatené na Riftn Pay, tokeny dorazia približne za minútu",
     "dmSent": "Odoslané {{amount}} tokenov používateľovi {{name}}!",
+    "addMessage": "Pridať správu (nepovinné)",
     "messagePublic": "Verejné",
     "railTitle": "Tipy",
     "railTotal": "{{amount}} tokenov",
@@ -2285,6 +2286,8 @@
       "likes": "Páči sa mi"
     },
     "likedPosts": {
+      "emptyTitle": "Zatiaľ žiadne lajky",
+      "privateTitle": "Lajky sú súkromné",
       "loadMore": "Načítať viac"
     },
     "dislikes": {
@@ -2309,6 +2312,9 @@
     "sortLikes": "Páči sa mi to",
     "sortMostLiked": "Najobľúbenejšie",
     "sortCustomShort": "Vlastné",
+    "arrange": {
+      "saving": "Ukladá sa..."
+    },
     "searchThisChannel": "Hľadať v tomto kanáli",
     "searchResultCount": "1 výsledok pre „{{query}}“",
     "searchResultCountPlural": "{{count}} výsledky vyhľadávania „{{query}}“",
@@ -6342,7 +6348,9 @@
   "nftMarket": {
     "actAll": "Všetko",
     "actListings": "Inzeráty",
+    "actOffer": "Ponuka",
     "actOffers": "Ponuky",
+    "actSales": "Predaje",
     "tabActivity": "Aktivita",
     "shortTitle": "NFTs",
     "filters": "Filtráciu",
@@ -6848,8 +6856,12 @@
       "image": "Obrázok",
       "camera": "Fotoaparát",
       "show": "Zobraziť v streame",
+      "loop": "Slučka",
       "positions": {
         "center": "Stred"
+      },
+      "sizes": {
+        "medium": "Stredná"
       },
       "shapes": {
         "circle": "Kruh",
@@ -7836,6 +7848,7 @@
     "footerNote": "Účasť DePin je príspevková služba, nie investičný produkt. Dostupnosť, oprávnenosť a odmeny sa môžu zmeniť."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nový tok",
     "disconnect": "Odpojiť",
     "title": "Creator Flow",
     "backToStudio": "Späť do Creator Studia",
@@ -10820,6 +10833,9 @@
       "zoomIn": "Priblížiť plátno",
       "zoomOut": "Oddialiť plátno"
     },
+    "clipFix": {
+      "listening": "Poslúchanie…"
+    },
     "shortcuts": {
       "action": {
         "split": "Rozdeliť",
@@ -10830,7 +10846,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Zastaviť nahrávanie"
+      "stop": "Zastaviť nahrávanie",
+      "failed": "Zlyhalo hlasové klonovanie."
     },
     "linkImport": {
       "go": "Importovať",
@@ -19422,6 +19439,8 @@
       "gaming": "Hranie hier",
       "crypto": "Krypto",
       "sports": "Šport",
+      "comedy": "Komedia",
+      "food": "Jedlo",
       "news": "Novinky",
       "science": "Veda"
     },
@@ -19432,6 +19451,7 @@
   "appTokens": {
     "title": "Vaše tokeny",
     "history": "História",
+    "noHistory": "Zatiaľ žiadna aktivita",
     "kindDeposit": "Vklad",
     "to": "Do",
     "amount": "Čiastka",
@@ -19461,6 +19481,7 @@
     "notNow": "Teraz nie"
   },
   "postStats": {
+    "audience": "Cieľová skupina",
     "engagement": "Zapojenie",
     "finished": "Dokončené",
     "members": "Členovia",
@@ -19549,6 +19570,7 @@
   "dmSchedule": {
     "view": "Zobraziť",
     "edit": "Upraviť",
+    "editLabel": "Upraviť správu",
     "error": "To nefungovalo. Skúste znova."
   },
   "post": {

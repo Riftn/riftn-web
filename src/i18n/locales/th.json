@@ -1258,6 +1258,7 @@
     "payDirectNoName": "ส่งตรงไปยังผู้สร้างใน {{symbol}} ใน {{chain}} ไม่มีการสลับ",
     "payViaBridgeDpay": "ย้ายไปยัง Base และชำระเงินให้ Riftn Pay โทเค็นจะมาถึงในประมาณหนึ่งนาที",
     "dmSent": "ส่ง {{amount}} โทเค็น ให้ {{name}} แล้ว!",
+    "addMessage": "เพิ่มข้อความ (ไม่บังคับ)",
     "messagePublic": "สาธารณะ",
     "railTitle": "ทิป",
     "railTotal": "{{amount}} โทเค็น",
@@ -2290,6 +2291,9 @@
     "sortLikes": "ถูกใจ",
     "sortMostLiked": "ชอบมากที่สุด",
     "sortCustomShort": "กำหนดเอง",
+    "arrange": {
+      "saving": "กำลังบันทึก..."
+    },
     "searchThisChannel": "ค้นหาแชทนี้",
     "searchResultCount": "ผลการค้นหา 1 รายการสำหรับคำว่า \"{{query}}\"",
     "searchResultCountPlural": "{{count}} ผลลัพธ์สำหรับ {{query}}"
@@ -6266,7 +6270,9 @@
   "nftMarket": {
     "actAll": "ทั้งหมด",
     "actListings": "ประกาศ",
+    "actOffer": "เสนอราคา",
     "actOffers": "ข้อเสนอ",
+    "actSales": "ยอดขาย",
     "tabActivity": "กิจกรรม",
     "shortTitle": "NFT",
     "filters": "ฟิลเตอร์",
@@ -6762,8 +6768,12 @@
       "image": "รูปภาพ",
       "camera": "กล้อง",
       "show": "แสดงบนสตรีม",
+      "loop": "ลูป",
       "positions": {
         "center": "ศูนย์กลาง"
+      },
+      "sizes": {
+        "medium": "ปานกลาง"
       },
       "shapes": {
         "circle": "วงกลม",
@@ -7750,6 +7760,7 @@
     "footerNote": "การมีส่วนร่วมของ DePin เป็นบริการที่มีส่วนร่วมไม่ใช่ผลิตภัณฑ์การลงทุนความพร้อมใช้งานคุณสมบัติและรางวัลอาจมีการเปลี่ยนแปลง"
   },
   "creatorFlow": {
+    "newNativeFlow": "โฟลว์ใหม่",
     "disconnect": "ยกเลิกการเชื่อมต่อ",
     "title": "กระแสของครีเอเตอร์",
     "backToStudio": "กลับไปที่ Creator Studio",
@@ -9352,7 +9363,8 @@
       "textSaved": "บันทึกการเปลี่ยนแปลงคำบรรยายแล้ว",
       "action": "คำบรรยายอัตโนมัติ",
       "styles": {
-        "bold": "ตัวหนา"
+        "bold": "ตัวหนา",
+        "serif": "ซีเรฟ"
       },
       "working": "กำลังฟัง… {{percent}}%",
       "downloading": "กำลังเตรียมโมเดลเสียงพูด… {{percent}}%",
@@ -10734,6 +10746,9 @@
       "zoomIn": "ซูม Canvas เข้า",
       "zoomOut": "ซูมผ้าใบออก"
     },
+    "clipFix": {
+      "listening": "กำลังฟัง…"
+    },
     "shortcuts": {
       "action": {
         "split": "แยก",
@@ -10744,7 +10759,8 @@
       }
     },
     "voiceClone": {
-      "stop": "หยุดบันทึกเสียง"
+      "stop": "หยุดบันทึกเสียง",
+      "failed": "การบันทึกเสียงไม่สำเร็จ"
     },
     "linkImport": {
       "go": "นำเข้า",
@@ -15038,7 +15054,6 @@
     "ca1231ab640a": "เพิ่มเติม",
     "bd810aa1cb03": "การฟัง",
     "e4629246c285": "ไลฟ์สตรีม",
-    "bd9e3879bc60": "เพย์-เพอร์-วิว (Pay-per-view)",
     "0abbc4ecb2b0": "ค่าหัว",
     "ad91f5e4de4b": "มีรั้วรอบขอบชิด",
     "29a390f9237e": "ล้างทั้งหมด",
@@ -19259,8 +19274,10 @@
       "gaming": "เกม",
       "crypto": "คริปโต",
       "sports": "กีฬา",
+      "comedy": "การตลก",
       "film": "ภาพยนตร์",
       "podcast": "พอดคาสต์",
+      "food": "อาหาร",
       "news": "ข่าวสาร",
       "science": "วิทยาศาสตร์"
     },
@@ -19271,6 +19288,7 @@
   "appTokens": {
     "title": "โทเค็นของคุณ",
     "history": "ประวัติ",
+    "noHistory": "ยังไม่มีกิจกรรม",
     "kindDeposit": "ฝากเงิน",
     "to": "ถึง",
     "amount": "จำนวน",
@@ -19300,6 +19318,7 @@
     "notNow": "ไม่ตอนนี้"
   },
   "postStats": {
+    "audience": "ผู้ชม",
     "engagement": "การมีส่วนร่วม",
     "finished": "สิ้นสุดแล้ว",
     "members": "สมาชิก",
@@ -19388,6 +19407,7 @@
   "dmSchedule": {
     "view": "ดู",
     "edit": "แก้ไข",
+    "editLabel": "แก้ไขข้อความ",
     "error": "นั่นไม่ได้ผล ลองอีกครั้ง"
   },
   "footer": {

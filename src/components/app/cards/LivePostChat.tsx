@@ -10,7 +10,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * Uses the livechat_messages table with realtime subscriptions.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
@@ -322,6 +322,25 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       });
     }
   }, [messages.length]);
+
+  // The right-click menu opens at the pointer, flipped left or up when it
+  // would run past the window's edge.
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const [contextMenuPlace, setContextMenuPlace] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = contextMenuRef.current;
+    if (!contextMenuMsg || !el) { setContextMenuPlace(null); return; }
+    const EDGE = 10;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let left = contextMenuPos.x + w + EDGE > vw ? contextMenuPos.x - w : contextMenuPos.x;
+    let top = contextMenuPos.y + h + EDGE > vh && contextMenuPos.y - h - EDGE > 0 ? contextMenuPos.y - h : contextMenuPos.y;
+    left = Math.max(EDGE, Math.min(left, vw - w - EDGE));
+    top = Math.max(EDGE, Math.min(top, vh - h - EDGE));
+    setContextMenuPlace({ left, top });
+  }, [contextMenuMsg, contextMenuPos]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -884,9 +903,10 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           menu off screen. */}
       {contextMenuMsg && (canModerate || isMine(contextMenuMsg) || translateHandles.current.has(contextMenuMsg.id)) && createPortal(
         <div
+          ref={contextMenuRef}
           data-glass-menu
           className="fixed z-50 bg-zinc-800 border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px]"
-          style={{ top: contextMenuPos.y, left: contextMenuPos.x }}
+          style={{ top: contextMenuPlace?.top ?? contextMenuPos.y, left: contextMenuPlace?.left ?? contextMenuPos.x, visibility: contextMenuPlace ? undefined : 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
           {(() => {

@@ -1211,6 +1211,7 @@
     "payDirectNoName": "Yaratuvchiga {{symbol}}da {{chain}}da toqqa yuborildi. Almashtirish yoq.",
     "payViaBridgeDpay": "Base غا يۆتكىلىپ Riftn Pay غا پۇل تۆلەنگەن، توكېنلار تەخمىنەن بىر مىنۇتتا كېلىدۇ",
     "dmSent": "{{name}} گە {{amount}} نۆتىك پۇل ئەۋەتىلدى!",
+    "addMessage": "Qo'shish (ariza)",
     "messagePublic": "ئوممىۋى",
     "railTitle": "تىپ",
     "railTotal": "{{amount}} توكن",
@@ -2208,6 +2209,8 @@
       "likes": "ياقتۇرۇشلار"
     },
     "likedPosts": {
+      "emptyTitle": "تېخى ياقتۇرۇش يوق",
+      "privateTitle": "ياقتۇرۇشلار مەخپىي",
       "loadMore": "تېخىمۇ كۆپ يۈكلەش"
     },
     "dislikes": {
@@ -2232,6 +2235,9 @@
     "sortLikes": "ياقتۇرىش",
     "sortMostLiked": "ئەڭ ياقتۇرىدىغان",
     "sortCustomShort": "ئىختىيارىي",
+    "arrange": {
+      "saving": "ساقلىنىۋاتىدۇ..."
+    },
     "searchThisChannel": "بۇ قانالنى ئىزدەش پروگراممىسى",
     "searchResultCount": "«{{query}}» ئۈچۈن 1 نەتىجە"
   },
@@ -6201,7 +6207,9 @@
   "nftMarket": {
     "actAll": "ھەممىسى",
     "actListings": "تىزىملىكلەر",
+    "actOffer": "Taklif",
     "actOffers": "تەكلىپلەر",
+    "actSales": "سەپەتەلەر",
     "tabActivity": "پائالىيەت",
     "shortTitle": "NFTلار",
     "filters": "فیلترلار",
@@ -6707,6 +6715,9 @@
       "show": "ئېقىمنى كۆرسىتىش پروگراممىسى",
       "positions": {
         "center": "Markazlashtir"
+      },
+      "sizes": {
+        "medium": "ئوتتۇرا"
       },
       "shapes": {
         "circle": "چەمبەر",
@@ -7688,6 +7699,7 @@
     "footerNote": "دېپىنغا قاتنىشىش مەبلەغ سېلىش مەھسۇلاتى ئەمەس، تۆلەم مۇلازىمىتىدۇر. قوللىنىشچانلىقى، قابىلىيىتى ۋە مۇكاپاتلىرى ئۆزگەرشى مۇمكىن."
   },
   "creatorFlow": {
+    "newNativeFlow": "يېڭى ئېقىم",
     "disconnect": "قۇرالۇش",
     "title": "ئىجادكار ئېقىمى",
     "backToStudio": "ئىجادكار ستۇدىيىسىغا قايتىش",
@@ -10659,6 +10671,9 @@
       "zoomIn": "Zoom نى چوڭايتىش",
       "zoomOut": "چوڭايتىش كانۋاسىنى چىقىرىش"
     },
+    "clipFix": {
+      "listening": "Teshiklash..."
+    },
     "shortcuts": {
       "action": {
         "split": "بۆلۈش",
@@ -10669,7 +10684,8 @@
       }
     },
     "voiceClone": {
-      "stop": "خاتىرىلەشنى توختىتىش"
+      "stop": "خاتىرىلەشنى توختىتىش",
+      "failed": "Ses klonlash muvaffaqiyatsizlik bilan tugadi."
     },
     "linkImport": {
       "go": "ئەكىرىش",
@@ -19226,6 +19242,7 @@
       "crypto": "كرىپتو",
       "sports": "تەنتەربىيە",
       "film": "فىلىم",
+      "food": "يېمەكلىك",
       "news": "Habarlash",
       "science": "ئىلىم-پەن"
     },
@@ -19236,6 +19253,7 @@
   "appTokens": {
     "title": "سىزنىڭ تاۋار-مېلىڭىز",
     "history": "تارىخ",
+    "noHistory": "تېخىچە ھەرىكەت يوق",
     "kindDeposit": "پۇل قوشۇش",
     "to": "ئاخىرلىشىش",
     "amount": "سوممىسى",
@@ -19265,6 +19283,7 @@
     "notNow": "ھازىر ئەمەس"
   },
   "postStats": {
+    "audience": "Toshliqlar",
     "engagement": "جەلپ قىلىش",
     "finished": "ئاياغلاشتى",
     "members": "ئەزالار",
@@ -19348,6 +19367,7 @@
   "dmSchedule": {
     "view": "كۆرۈش",
     "edit": "تەھرىرلەش",
+    "editLabel": "ئۇچۇرنى تەھرىرلەش",
     "error": "بۇ ئۈنۈم بەرمىدى، قايتا سىناپ بېقىڭ."
   }
 }

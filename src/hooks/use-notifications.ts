@@ -42,7 +42,9 @@ export function prefetchNotificationsList(queryClient: QueryClient, types?: stri
   });
 }
 
-const PAGE_SIZE = 30;
+// 15 a page: the first paint is half the rows it was, and the next 15 load as
+// the reader nears the end (LoadMoreSentinel, 1.5 screens ahead).
+const PAGE_SIZE = 15;
 /** A list this fresh is shown as it is; older, it is shown and refreshed quietly behind. */
 const LIST_STALE_MS = 5 * 60 * 1000;
 /** Each tab's rows stay in memory this long after the page closes. */
@@ -111,9 +113,18 @@ export function useNotifications(
   });
 
   // Flatten pages into single array, filtering out any undefined items
-  const notifications = useMemo(() => query.data?.pages
-    .flatMap((page) => page?.items || [])
-    .filter((item): item is DeHubNotification => Boolean(item && item.id)) || [], [query.data]);
+  // A row can slide onto the next page while the reader scrolls (a new one
+  // pushes everything down), so a row already listed is not listed twice.
+  const notifications = useMemo(() => {
+    const seen = new Set<string>();
+    return (query.data?.pages ?? [])
+      .flatMap((page) => page?.items || [])
+      .filter((item): item is DeHubNotification => {
+        if (!item?.id || seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
+  }, [query.data]);
   const processedData = useRef<typeof query.data>();
   const initialized = useRef(false);
 

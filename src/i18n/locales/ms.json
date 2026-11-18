@@ -1480,6 +1480,7 @@
     "payDirectNoName": "Hantar langsung ke kreator di {{symbol}} pada {{chain}}. Tiada gantian.",
     "payViaBridgeDpay": "Dipindahkan ke Base dan dibayar kepada Riftn Pay, token tiba dalam masa kira-kira seminit",
     "dmSent": "{{amount}} token dihantar kepada {{name}}!",
+    "addMessage": "Tambah pesanan (pilihan)",
     "messagePublic": "Awam",
     "railTitle": "Petua",
     "railTotal": "{{amount}} token",
@@ -2482,6 +2483,8 @@
       "likes": "Suka"
     },
     "likedPosts": {
+      "emptyTitle": "Tiada suka lagi",
+      "privateTitle": "Suka adalah peribadi",
       "loadMore": "Muatkan lagi"
     },
     "dislikes": {
@@ -2506,6 +2509,9 @@
     "sortLikes": "Suka",
     "sortMostLiked": "Paling disukai",
     "sortCustomShort": "Tersuai",
+    "arrange": {
+      "saving": "Menyimpan..."
+    },
     "searchThisChannel": "Cari saluran ini",
     "searchResultCount": "1 hasil carian untuk \"{{query}}\"",
     "searchResultCountPlural": "{{count}} hasil carian untuk \"{{query}}\""
@@ -6495,7 +6501,9 @@
   "nftMarket": {
     "actAll": "Semua",
     "actListings": "Iklan",
+    "actOffer": "Tawaran",
     "actOffers": "Tawaran",
+    "actSales": "Penjualan",
     "tabActivity": "Aktiviti",
     "shortTitle": "NFTs",
     "filters": "Penapis",
@@ -6998,8 +7006,12 @@
       "image": "Imej",
       "camera": "Kamera",
       "show": "Tunjukkan pada strim",
+      "loop": "Gelung",
       "positions": {
         "center": "Tengahkan"
+      },
+      "sizes": {
+        "medium": "Sederhana"
       },
       "shapes": {
         "circle": "Bulatan",
@@ -7985,6 +7997,7 @@
     "footerNote": "Penyertaan DePin adalah perkhidmatan sumbangan, bukan produk pelaburan. Ketersediaan, kelayakan dan ganjaran mungkin berubah."
   },
   "creatorFlow": {
+    "newNativeFlow": "Aliran baharu",
     "disconnect": "Putuskan sambungan",
     "title": "Aliran Pencipta",
     "backToStudio": "Kembali ke Studio Pencipta",
@@ -10969,6 +10982,9 @@
       "zoomIn": "Zum kanvas ke dalam",
       "zoomOut": "Zum keluar kanvas"
     },
+    "clipFix": {
+      "listening": "Mendengarkan…"
+    },
     "shortcuts": {
       "action": {
         "split": "Pisah",
@@ -10979,7 +10995,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Hentikan rakaman"
+      "stop": "Hentikan rakaman",
+      "failed": "Klonan suara gagal."
     },
     "linkImport": {
       "go": "Mengimport",
@@ -19566,7 +19583,9 @@
       "gaming": "Permainan",
       "crypto": "Kripto",
       "sports": "Sukan",
+      "comedy": "Komedi",
       "film": "Filem",
+      "food": "Makanan",
       "news": "Berita",
       "science": "Sains"
     },
@@ -19577,6 +19596,7 @@
   "appTokens": {
     "title": "Token Anda",
     "history": "Sejarah",
+    "noHistory": "Belum ada aktiviti",
     "to": "Kepada",
     "amount": "Jumlah",
     "notePlaceholder": "Tambah nota (pilihan)",
@@ -19605,6 +19625,7 @@
     "notNow": "Tidak sekarang"
   },
   "postStats": {
+    "audience": "Khalayak",
     "engagement": "Penglibatan",
     "finished": "Selesai",
     "members": "Ahli",
@@ -19692,6 +19713,7 @@
   "dmSchedule": {
     "view": "Tonton",
     "edit": "Kemaskini",
+    "editLabel": "Edit mesej",
     "error": "Itu tidak berjaya. Cuba lagi."
   }
 }

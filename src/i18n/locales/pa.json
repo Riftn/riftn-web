@@ -1222,6 +1222,7 @@
     "payDirectNoName": "{{chain}} 'ਤੇ {{symbol}} ਵਿੱਚ ਸਿਰਜਣਹਾਰ ਨੂੰ ਸਿੱਧਾ ਭੇਜਿਆ ਗਿਆ. ਕੋਈ ਸਵੈਪ ਨਹੀਂ.",
     "payViaBridgeDpay": "Base 'ਤੇ ਭੇਜਿਆ ਗਿਆ ਅਤੇ Riftn Pay ਨੂੰ ਭੁਗਤਾਨ ਕੀਤਾ ਗਿਆ, ਟੋਕਨ ਲਗਭਗ ਇੱਕ ਮਿੰਟ ਵਿੱਚ ਪਹੁੰਚਦੇ ਹਨ",
     "dmSent": "{{name}} ਨੂੰ {{amount}} ਟੋਕਨ ਭੇਜੇ ਗਏ!",
+    "addMessage": "ਇਕ ਸੰਦੇਸ਼ (ਵਿਕਲਪਿਕ)",
     "messagePublic": "ਜਨਤਕ",
     "railTitle": "ਸੁਝਾਅ",
     "railTotal": "{{amount}} ਟੋਕਨ",
@@ -2224,6 +2225,8 @@
       "likes": "ਪਸੰਦ"
     },
     "likedPosts": {
+      "emptyTitle": "ਹਾਲੇ ਕੋਈ ਪਸੰਦ ਨਹੀਂ",
+      "privateTitle": "ਪਸੰਦਾਂ ਨਿੱਜੀ ਹਨ",
       "loadMore": "ਹੋਰ ਲੋਡ ਕਰੋ"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "ਪਸੰਦਾਂ",
     "sortMostLiked": "ਜ਼ਿਆਦਾਤਰ ਲਾਈਕ",
     "sortCustomShort": "ਕਸਟਮ",
+    "arrange": {
+      "saving": "ਸੰਭਾਲ ਰਿਹਾ ਹੈ..."
+    },
     "searchThisChannel": "ਇਸ ਚੈਨਲ ਨੂੰ ਖੋਜੋ",
     "searchResultCount": "\"{{query}}\" ਲਈ 1 ਨਤੀਜਾ",
     "searchResultCountPlural": "{{count}} ਨਤੀਜਿਆਂ ਲਈ \"{{query}}\""
@@ -6234,6 +6240,7 @@
     "actAll": "ਸਭ",
     "actListings": "ਸੂਚੀਆਂ",
     "actOffers": "ਪੇਸ਼ਕਸ਼ਾਂ",
+    "actSales": "ਵਿਕਰੀ",
     "tabActivity": "ਸਰਗਰਮੀ",
     "shortTitle": "NFT",
     "filters": "ਫਿਲਟਰ",
@@ -6733,8 +6740,12 @@
       "image": "ਚਿੱਤਰ",
       "camera": "ਕੈਮਰਾ",
       "show": "ਸਟਰੀਮ ਉੱਤੇ ਵੇਖੋ",
+      "loop": "ਲੂਪ",
       "positions": {
         "center": "ਕੇਂਦਰ"
+      },
+      "sizes": {
+        "medium": "ਮੱਧਮ"
       },
       "shapes": {
         "circle": "ਚੱਕਰ",
@@ -7721,6 +7732,7 @@
     "footerNote": "DePin ਭਾਗੀਦਾਰੀ ਇੱਕ ਯੋਗਦਾਨ ਸੇਵਾ ਹੈ, ਨਾ ਕਿ ਇੱਕ ਨਿਵੇਸ਼ ਉਤਪਾਦ. ਉਪਲਬਧਤਾ, ਯੋਗਤਾ ਅਤੇ ਇਨਾਮ ਬਦਲ ਸਕਦੇ ਹਨ."
   },
   "creatorFlow": {
+    "newNativeFlow": "ਨਵਾਂ ਪ੍ਰਵਾਹ",
     "disconnect": "ਡਿਸਕਨੈਕਟ ਕਰੋ",
     "title": "ਨਿਰਮਾਤਾ ਫਲੋ",
     "backToStudio": "ਸਿਰਜਣਹਾਰ ਸਟੂਡੀਓ 'ਤੇ ਵਾਪਸ ਜਾਓ",
@@ -9322,7 +9334,8 @@
       "textSaved": "ਕੈਪਸ਼ਨ ਬਦਲਾਅ ਸੇਵ ਕੀਤੇ ਗਏ।",
       "action": "ਆਟੋ ਕੈਪਸ਼ਨ",
       "styles": {
-        "bold": "ਭਾਰੀ"
+        "bold": "ਭਾਰੀ",
+        "serif": "ਸੈਰੀਫ"
       },
       "working": "ਸੁਣ ਰਹੇ ਹਾਂ… {{percent}}%",
       "downloading": "ਸਪੀਚ ਮਾਡਲ ਤਿਆਰ ਕਰ ਰਹੇ ਹਾਂ… {{percent}}%",
@@ -10704,6 +10717,9 @@
       "zoomIn": "ਜ਼ੂਮ ਕੈਨਵਸ ਇਨ",
       "zoomOut": "ਜ਼ੂਮ ਕੈਨਵਸ ਆਉਟ"
     },
+    "clipFix": {
+      "listening": "ਸੁਣਿਆ ਜਾ ਰਿਹਾ ਹੈ..."
+    },
     "shortcuts": {
       "action": {
         "split": "ਵੰਡੋ",
@@ -10714,7 +10730,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ਰਿਕਾਰਡਿੰਗ ਰੋਕੋ"
+      "stop": "ਰਿਕਾਰਡਿੰਗ ਰੋਕੋ",
+      "failed": "ਵਾਇਸ ਕਲੋਨਿੰਗ ਫੇਲ ਹੋ ਗਈ।"
     },
     "linkImport": {
       "go": "ਦਰਾਮਦ ਕਰੋ",
@@ -19266,8 +19283,10 @@
       "gaming": "ਗੇਮਿੰਗ",
       "crypto": "ਕ੍ਰਿਪਟੋ",
       "sports": "ਖੇਡਾਂ",
+      "comedy": "ਕਾਮੇਡੀ",
       "film": "ਫਿਲਮ",
       "podcast": "ਪੋਡਕਾਸਟ",
+      "food": "ਭੋਜਨ",
       "news": "ਖ਼ਬਰਾਂ",
       "science": "ਵਿਗਿਆਨ"
     },
@@ -19278,6 +19297,7 @@
   "appTokens": {
     "title": "ਤੁਹਾਡੇ ਟੋਕਨ",
     "history": "ਇਤਿਹਾਸ",
+    "noHistory": "ਅਜੇ ਤੱਕ ਕੋਈ ਗਤੀਵਿਧੀ ਨਹੀਂ ਹੈ",
     "kindDeposit": "ਰਕਮ ਜਮ੍ਹਾ ਕਰੋ",
     "to": "ਵੱਲ",
     "amount": "ਰਕਮ",
@@ -19307,6 +19327,7 @@
     "notNow": "ਹੁਣ ਨਹੀਂ"
   },
   "postStats": {
+    "audience": "ਅਡੀਓਸ",
     "engagement": "ਸੰਗ",
     "finished": "ਖ਼ਤਮ",
     "members": "ਮੈਂਬਰ",
@@ -19395,6 +19416,7 @@
   "dmSchedule": {
     "view": "ਦੇਖੋ",
     "edit": "ਸੋਧੋ",
+    "editLabel": "ਸੁਨੇਹਾ ਸੰਪਾਦਿਤ ਕਰੋ",
     "error": "ਇਹ ਕੰਮ ਨਹੀਂ ਕੀਤਾ । ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ।"
   }
 }

@@ -35,6 +35,8 @@ import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from '@/components/app/chat/ChatHoldSheet';
+import { MessageMenu } from '@/components/app/chat/MessageMenu';
+import { keepBrowserMenu, messageMenuMeta, useMenuPoint } from '@/components/app/chat/message-menu-kit';
 import { reactionMeta as holdReactionMeta, type PostReaction as HoldReaction } from '@/lib/reactions';
 import Languages from "@/components/ui/cut-icons/language";
 import Eye from "@/components/ui/cut-icons/visibility";
@@ -566,12 +568,16 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
   const [menuOpen, setMenuOpen] = useState(false);
   // On a phone the hold opens the same glass sheet as live chat: the comment
   // stays put and glows, the rest dims, reactions and actions in one sheet.
-  // A mouse right-click keeps the row's dropdown.
+  // A mouse right-click opens the chat message menu right where the pointer
+  // is (it used to open the share dropdown, which hangs off the share icon at
+  // the foot of the comment, nowhere near the click).
   const rowRef = useRef<HTMLDivElement>(null);
   const [holdOpen, setHoldOpen] = useState(false);
-  const hold = useHoldMenu(() => {
-    if (isTouchHold()) setHoldOpen(true);
-    else setMenuOpen(true);
+  const menuPoint = useMenuPoint();
+  const hold = useHoldMenu((point, target) => {
+    if (isTouchHold()) { setHoldOpen(true); return; }
+    if (keepBrowserMenu(target, rowRef.current)) return false;
+    menuPoint.openAt(point);
   }, !isEditing && !isPending);
   const commentUrl = () => viewerShareUrl(permalink
     ? permalink(comment.id)
@@ -612,9 +618,25 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
       }}
       actions={holdActions}
     />
+    {menuPoint.mounted && (
+      <MessageMenu
+        point={menuPoint.point}
+        onClose={menuPoint.close}
+        quickReactions={isOwnComment ? null : holdEmoji}
+        mine={mineEmoji}
+        allowMore={false}
+        onReact={(emoji) => {
+          const reaction = HOLD_REACTIONS.find((r) => holdReactionMeta(r).emoji === emoji);
+          if (reaction) onReact(comment.id, reaction);
+        }}
+        actions={holdActions.map(({ prime: _prime, secondary: _secondary, ...a }) => ({ ...a, divided: a.key === 'delete' || a.key === 'report' }))}
+        meta={messageMenuMeta(comment.createdAt)}
+      />
+    )}
     <motion.div
       ref={rowRef}
       data-chat-row="comment"
+      data-msg-menu-open={menuPoint.point ? '' : undefined}
       // A comment you just sent is already on screen under its placeholder id;
       // when the real id swaps in, the row remounts and must not fade in twice.
       initial={delivery?.status === 'posted' ? false : isPending ? { opacity: 0, y: 28, scale: 0.97 } : { opacity: 0, y: 10 }}
