@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Tekstas"
+  },
   "comic": {
     "showAll": "Rodyti visus {{count}} puslapius"
   },
@@ -14,6 +17,23 @@
     "glitter": "Blizgučiai",
     "saved": "Rėmelis išsaugotas",
     "failed": "Nepavyko išsaugoti rėmelio"
+  },
+  "duet": {
+    "policyEveryone": "Visi",
+    "policyFollowers": "Sekėjai",
+    "policyNobody": "Niekas",
+    "loadMore": "Įkelti daugiau",
+    "video": "Vaizdo įrašas"
+  },
+  "videoRemix": {
+    "sound": "Naudoti šį garsą"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Visi",
+      "followers": "Sekėjai",
+      "nobody": "Niekas"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +186,18 @@
     "privateNote": "Privačios paskyros fedivisatoje nerodomos.",
     "noUsername": "Pasirinkite vartotojo vardą, kad gautumėte fedivisatos adresą."
   },
+  "signedFollows": {
+    "setUp": "Įjungti",
+    "turnOff": "Išjungti",
+    "efpTurnOff": "Sustabdyti"
+  },
   "profileFields": {
     "title": "Profilio laukai",
     "description": "Iki keturių papildomų eilučių jūsų profilyje, pvz., svetainė ar jūsų įvardžiai.",
     "label": "Etiketė",
     "content": "Turinys",
+    "add": "Pridėti laukelį",
+    "remove": "Pašalinti laukelį",
     "save": "Išsaugoti laukus",
     "saved": "Profilio laukai išsaugoti",
     "failed": "Neišsaugota. Bandykite dar kartą.",
@@ -368,6 +395,7 @@
     "checkFailed": "Nepavyko patikrinti užimtumo. Bandykite dar kartą.",
     "checking": "Tikrinama...",
     "ownership": "Atviras kodas. Vartotojo nuosavybė.",
+    "title": "Šiek tiek darbo.\nGeresnis Riftn.",
     "intermission": "Laikinai neprisijungęs",
     "community": "Pirmiausia bendruomenė. Visada."
   },
@@ -1196,7 +1224,11 @@
     "payDirect": "Siunčiamas tiesiog į {{name}} per {{symbol}} su {{chain}}. Be keitimo.",
     "payDirectNoName": "Siunčiamas tiesiog kūrėjui per {{symbol}} su {{chain}}. Be keitimo.",
     "payViaBridgeDpay": "Perkelta į Base ir apmokėta Riftn Pay, žetonai atvyks maždaug per minutę",
-    "dmSent": "{{name}} išsiųsta {{amount}} žetonų!"
+    "dmSent": "{{name}} išsiųsta {{amount}} žetonų!",
+    "messagePublic": "Viešas",
+    "railTitle": "Patarimai",
+    "railTotal": "{{amount}} ženklų",
+    "tokensUnit": "ženklai"
   },
   "postOptions": {
     "liveAlertsOn": "Dabar sekate {{name}}. Gausite pranešimą, kai prasidės tiesioginė transliacija.",
@@ -1697,6 +1729,9 @@
   "notifications": {
     "title": "Pranešimai",
     "markAllRead": "Pažymėti viską kaip skaitytą",
+    "groupNew": "Nauja",
+    "groupToday": "Šiandien",
+    "groupThisWeek": "Šią savaitę",
     "settings": "Pranešimų nustatymai",
     "actions": "Veiksmai",
     "markAllAsRead": "Pažymėti viską kaip skaitytą",
@@ -1725,6 +1760,7 @@
     "communities": "Bendruomenės",
     "stores": "Parduotuvės",
     "noNotificationsYet": "Dar nėra pranešimų",
+    "searchClose": "Uždaryti paiešką",
     "noNotificationsDesc": "Kai gausite patinka, komentarus, arbatpinigius ar naujus prenumeratorius, jie bus rodomi čia.",
     "loadMore": "Įkelti daugiau",
     "markAsRead": "Pažymėti kaip skaitytą",
@@ -1964,11 +2000,13 @@
     "promptLabel": "Jūsų prašymas",
     "promptPlaceholder": "Aprašyk idėją, pagerinimą arba klaidą…",
     "promptAttach": "Prisijunk nuotraukas",
+    "removeAttachment": "Pašalinti priedą",
     "promptDrop": "Įkelk arba priskirkite nuotraukas čia",
     "promptPost": "Įvesti prašymą",
     "promptShortcut": "Ctrl / ⌘ + Enter nukreipsis prašymą",
     "promptDetails": "Prašymo aprašymas",
     "promptDevice": "Prietaisų & OS (klaidų atveju)",
+    "deviceInfoNoErrors": "Nėra",
     "promptFilters": "Rodyti pagal kategoriją",
     "promptMediaError": "Pasirinkite nuotraukas arba vaizdo įrašus iki 50 MB kiekio.",
     "promptMediaLimit": "Kol kas {{max}} pridėti failai.",
@@ -2027,6 +2065,12 @@
     "loginRequired": "Reikia prisijungti"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Iki",
+      "recent": "Naujausi",
+      "suggested": "Siūloma",
+      "youFollow": "Žmonės, kuriuos sekate"
+    },
     "reply": "Atsakyti",
     "react": "Reaguoti",
     "edit": "Redaguoti",
@@ -2063,7 +2107,10 @@
     "checkingTokenBalance": "Tikrinamas jūsų žetonų balansas...",
     "deleteConversationFailed": "Nepavyko ištrinti pokalbio",
     "message": "Pranešimas",
-    "noConversationsYet": "Šioje kanalą dar nėra nei vieno pokalbio"
+    "noConversationsYet": "Šioje kanalą dar nėra nei vieno pokalbio",
+    "sending": "Siunčiama",
+    "retrySend": "Bandyti dar kartą",
+    "discardSend": "Pašalinti"
   },
   "music": {
     "listeningCount_one": "{{count}} klausymasis",
@@ -2146,6 +2193,9 @@
     "viewList": "Sąrašo rodinys",
     "viewMode": "Peržiūrėti",
     "back": "Atgal",
+    "reserve": {
+      "signIn": "Prisijungti"
+    },
     "usernameAvailable": "Naudotojo vardas laisvas!",
     "signUpToClaim": "Užsiregistruokite šiandien, kad užsitikrintumėte",
     "signUp": "Registruotis",
@@ -2173,7 +2223,11 @@
     },
     "tabs": {
       "playlists": "Grojaraščiai",
-      "dislikes": "Nepatinka"
+      "dislikes": "Nepatinka",
+      "likes": "Patinka"
+    },
+    "likedPosts": {
+      "loadMore": "Įkelti daugiau"
     },
     "dislikes": {
       "emptyTitle": "Dar nėra teigiamų įvertinimų",
@@ -2196,6 +2250,7 @@
     "sortMostViewed": "Daugiausiai peržiūrėta",
     "sortLikes": "Prašymai",
     "sortMostLiked": "Daugiausiai palaikytas",
+    "sortCustomShort": "Papildomas",
     "searchThisChannel": "Peržiūrėti šį kanalą",
     "searchResultCount": "1 rezultatas už \"{{query}}\"",
     "searchResultCountPlural": "{{count}} rezultatų už \"{{query}}\""
@@ -2353,6 +2408,7 @@
       "runSwarm": "Vykdyti būriuką",
       "description": "Veiksmai vyksta kaip pasirinktas agentas. Programuojamos užduotys tęsiasi su aplikacija uždaręs.",
       "instructions": "Agento instrukcijos",
+      "examples": "Skelbk įrašą kartą per dieną apie: nepriklausomą muziką\nStilius: smalsus, glaustas ir pokalbio tono\nPažymėk „Patinka“ iki 2 naujausių įrašų per dieną apie: muziką, gyvus koncertus, vinilą",
       "preparing": "Ruošiama užduotis...",
       "run": "Vykdyti raginimą",
       "limits": "Vienas įrašas per dieną ir iki 3 atitinkamų paspaudimų „Patinka“ kiekvienai užduočiai. Visi agentai turi bendrą 20 minučių tarpą. Nuotraukose naudojamos pažymėtos antraštės; vaizdo įrašams reikia viršelio vaizdo. Įrašai lieka trumpesni nei 500 simbolių. Jokių dujų, išskyrus kaldinimą; rašymui gali būti naudojami kreditai.",
@@ -2461,6 +2517,9 @@
     "signInAgain": "Prisijungti iš naujo",
     "createSignIn": "Prisijunkite iš naujo, kad sukurtumėte agentą",
     "checkConnection": "Patikrinkite ryšį ir bandykite dar kartą.",
+    "welcome": {
+      "text": "Pasveikinimo žinutė"
+    },
     "workspace": {
       "moderation": "Transliacijos moderavimas",
       "moderationHelp": "Pirmiausia įjunkite moderavimo leidimą. Paskyra jau turi priklausyti transliacijos kūrėjui arba paskirtam moderatoriui. Patvirtinimo ir juodraščių režimai vis tiek taikomi. Laikini nutildymai baigiasi automatiškai.",
@@ -2653,7 +2712,9 @@
     "resendCodePhone": "Neteisingumas arba klaida su kodu. Grįžti",
     "continueAs": "Tęsti kaip",
     "switchWalletAccount": "Atsijungti",
-    "walletLoadFailed": "Neįmanoma įkelti sąskaitas. Prašome bandyti dar kartą."
+    "walletLoadFailed": "Neįmanoma įkelti sąskaitas. Prašome bandyti dar kartą.",
+    "openInBrowser": "Atidaryti naršyklėje",
+    "copyLink": "Nukopijuoti nuorodą"
   },
   "careers": {
     "title": "Karjera Riftn",
@@ -2877,7 +2938,8 @@
     "noMenuMatches": "Meniu niekas neatitinka",
     "searchDehubFor": "Ieškoti „{{query}}“ Riftn svetainėje",
     "switchAccount": "Keisti paskyrą",
-    "signedInAs": "Prisijungęs kaip {{name}}"
+    "signedInAs": "Prisijungęs kaip {{name}}",
+    "requestSend": "Siųsti prašymą"
   },
   "comments": {
     "reportComment": "Pranešti apie komentarą",
@@ -2986,6 +3048,9 @@
     "confirm": "Kalykla {{chain}}",
     "confirmWithCost": "Minėta {{chain}} · {{cost}}",
     "notAvailable": "Šios grandinės monetų kaldinti dar negalima."
+  },
+  "postEditHistory": {
+    "original": "Originalas"
   },
   "postInfo": {
     "title": "Įrašo informacija",
@@ -5098,6 +5163,7 @@
     "settledTitleSpeed": ", paprastai per {{speed}}",
     "settledCount_one": "{{count}} atsiskaityta",
     "settledCount_other": "{{count}} atsiskaitytos",
+    "statusInProgress": "Vykdoma",
     "howMany": "Kiek",
     "availableCount_one": "{{count}} prieinama",
     "availableCount_other": "{{count}} prieinamos",
@@ -5190,6 +5256,17 @@
     "sellYourFractions": "Parduokite savo trupmenas ({{held}} turima)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Naudoti šią informaciją"
+      }
+    },
+    "cinema": {
+      "close": "Uždaryti",
+      "performance": {
+        "label": "Našumas"
+      }
+    },
     "libraryEmpty": "Čia bus rodomi jūsų išsaugoti generavimai.",
     "toolRemake": "Perdaryti",
     "toolMaboroshi": "Maborošis",
@@ -6160,6 +6237,10 @@
     "raw": "briutas"
   },
   "nftMarket": {
+    "actAll": "Visi",
+    "actListings": "Skelbimai",
+    "actOffers": "Pasiūlymai",
+    "tabActivity": "Veikla",
     "shortTitle": "NFTS",
     "filters": "Filtrai",
     "forSale": "Parduodama",
@@ -6224,6 +6305,9 @@
     "offered": "Siūlymas išsiųstas. Eigulininkas galės jį priimti bet kada.",
     "dehubPost": "Riftn postas",
     "youHold": "Tu turi {{n}}",
+    "price": "Kaina",
+    "volume": "Garsumas",
+    "tabRecent": "Naujausi",
     "buyNow": "Įsigyti dabar",
     "dropsTo": "Kaina nukrenta iki {{price}} {{date}}.",
     "inBundle": "Parduota kaip paketas su {{n}}",
@@ -6637,7 +6721,63 @@
     "youAreBanned": "Negalite kalbėti šio kūrėjo transliacijose",
     "youAreTimedOut": "Jūs laiką užfiksuota akimirką"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Fonas",
+      "modes": {
+        "none": "Išjungtas",
+        "blur": "Suliejimas",
+        "color": "Spalva"
+      }
+    },
+    "remove": "Pašalinti",
+    "scenes": {
+      "countdown": "Atgalinis skaičiavimas",
+      "names": {
+        "starting": "Netrukus prasidės"
+      }
+    },
+    "sources": {
+      "reactAdd": "Rodyti",
+      "image": "Paveikslėlis",
+      "camera": "Kamera",
+      "show": "Rodyti transliacijoje",
+      "positions": {
+        "center": "Centras"
+      },
+      "shapes": {
+        "circle": "Apskritimas",
+        "rect": "Kvadratas"
+      }
+    },
+    "audio": {
+      "mute": "Nutildyti",
+      "unmute": "Atšaukti nutildymą",
+      "gateLevels": {
+        "off": "Išjungtas",
+        "low": "Šviesi",
+        "high": "Stiprus"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platforma",
+      "label": "Vardas (neprivaloma)",
+      "key": "Transliacijos raktas",
+      "save": "Pridėti",
+      "cancel": "Atšaukti",
+      "states": {
+        "off": "Išjungtas",
+        "idle": "Paruošta",
+        "live": "Tiesiogiai",
+        "error": "Klaida"
+      }
+    },
+    "vertical": {
+      "centre": "Centras",
+      "live": "TIESIOGIAI"
+    },
     "subathon": {
       "title": "Subatonas",
       "intro": "Skaitiklis tavo stream'e. Kiekvienas mokamas dovanas, seka ir abonementas prideda laiko, kad salė laikytų tave gyvą.",
@@ -7590,6 +7730,7 @@
     "footerNote": "DePin dalyvavimas yra paslaugų teikimas, o ne investicinis produktas. Prieinamumas, tinkamumas ir apdovanojimai gali keistis."
   },
   "creatorFlow": {
+    "disconnect": "Atsijungti",
     "title": "Kūrėjo srautas",
     "backToStudio": "Grįžti į Kūrėjo studiją",
     "backToFlows": "Grįžti į jūsų srautus",
@@ -7930,6 +8071,9 @@
     "followingBackProgress": "Atgal {{completed}} iš {{total}}",
     "findingFollowers": "Rasti sekėjusius",
     "followBackAll": "Sekti viską",
+    "followBackConfirm": "Sekti atgal",
+    "followBackNotNow": "Ne dabar",
+    "followBackDone": "Baigta",
     "nonFollowers": {
       "title": "Išvalyti, kuriuos sekate?",
       "body": "{{count}} paskyros, kurias sekate, neseka jus atgal.",
@@ -8743,6 +8887,14 @@
     "priceChartCleared": "Kainų schema išvalyta. Įstatytas nustatytas kainų rodiklis: $0,0001. Atliekamos kainos priklauso nuo prieinamų užsakymų."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Sukimas",
+      "add": "Pridėti",
+      "scale": "Dydis",
+      "color": "Spalva",
+      "light": "Šviesi"
+    },
     "video": {
       "tFade": "Persiliejimas",
       "none": "Nėra",
@@ -8909,6 +9061,8 @@
       "tools": "Redaktoriaus įrankiai"
     },
     "agent": {
+      "stop": "Sustabdyti",
+      "queue": "Pridėti į eilę",
       "introTitle": "Pasakykite DI, ko norite",
       "introBody": "Apibūdinkite dizainą ar pakeitimą savais žodžiais. Jis keičia puslapio dydį, rašo ir formatuoja tekstą, randa nemokamų nuotraukų, vaizdo įrašų ir muzikos, taiko filtrus, išdėsto sluoksnius ir juos animuoja. Kiekvieną užklausą galima atšaukti vienu veiksmu.",
       "suggestPoster": "Sukurk kvadratinį Instagram įrašą vasaros išpardavimui su paplūdimio nuotrauka ir ryškia antrašte",
@@ -9177,6 +9331,9 @@
       "reloadText": "Atnaujinti anotavimus",
       "textSaved": "Anotavimo keitimai išsaugoti.",
       "action": "Automatiniai subtitrai",
+      "styles": {
+        "bold": "Paryškintas"
+      },
       "working": "Klausomasi… {{percent}} %",
       "downloading": "Ruošiamas kalbos modelis… {{percent}} %",
       "hint": "Paverčia kalbą laiku susietais subtitrais, kurių stilių galite keisti. Veikia jūsų įrenginyje: nemokamai ir privačiai. Pirmą kartą atsisiunčiamas modelis.",
@@ -10556,6 +10713,25 @@
       "toolbar": "Paveikslėlio navigacija",
       "zoomIn": "Papildyti paveikslėlį",
       "zoomOut": "Papildyti paveikslėlį"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Padalyti",
+        "play": "Paleisti",
+        "pause": "Pristabdyti",
+        "frameBack": "Ankstesnis kadras",
+        "frameForward": "Kitas kadras"
+      }
+    },
+    "voiceClone": {
+      "stop": "Sustabdyti įrašymą"
+    },
+    "linkImport": {
+      "go": "Importuoti",
+      "downloading": "Atsiunčiama {{percent}}%"
+    },
+    "reverse": {
+      "action": "Atbulinė eiga"
     }
   },
   "jungleMood": {
@@ -11839,7 +12015,15 @@
       "rewardsWeek": "{{date}} savaitė",
       "rewardPaid": "Apmokėta",
       "rewardPending": "Laukiama",
-      "rewardsNone": "Atlygiai dar neapskaičiuoti. Pirmoji savaitė baigiasi pirmadienį."
+      "rewardsNone": "Atlygiai dar neapskaičiuoti. Pirmoji savaitė baigiasi pirmadienį.",
+      "stats": {
+        "button": "Statistika realiu laiku"
+      },
+      "signin": {
+        "users_one": "{{count}} vartotojas",
+        "users_other": "{{count}} vartotojai",
+        "delete": "Ištrinti"
+      }
     },
     "card": {
       "open": "Atidaryti"
@@ -11996,6 +12180,9 @@
     "reminderLater": "Ne dabar"
   },
   "copy": {
+    "55656b5e434f": "Uždaryti paiešką",
+    "57e2faa5ec63": "Ieškoti Riftn",
+    "96d7bff86b44": "Ieškimas negalėjo užkrovti",
     "1607715e45ed": "Bakstelėkite rutulį, kad kalbėtumėte, arba rašykite žemiau",
     "00140a37bd26": "Transakcijos šioje tinklo dalyje dabar nepasiekiamos. Bandykite vėl.",
     "002286513398": "Nėra teisių valdyti įvykius",
@@ -18996,6 +19183,7 @@
     "backToTop": "Grįžti į viršų",
     "needTitle": "Pridėti pavadinimą, kad tęstu",
     "needBody": "{{count}} dar liko simbolių",
+    "imagesLabel": "Nuotraukos",
     "backToWriting": "Grįžti prie rašymo",
     "readyTitle": "Paruošta skelbti",
     "sharePreview": "Kaip tai atrodo, kai dalijamasi",
@@ -19057,6 +19245,128 @@
     "exploreFirst": "Pirmiausia peržiūrėkite",
     "codeNote": "Siunčiame kodą el. paštu, slaptažodžio nereikia."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Planas",
+      "howMany": "Kiek",
+      "who": "Naudotojo vardas arba piniginės adresas",
+      "whoPlaceholder": "@naudotojovardas",
+      "cancel": "Atšaukti",
+      "stage": {
+        "preparing": "Ruošiama…",
+        "confirming": "Laukiama operacijos…",
+        "recording": "Užbaigiama…"
+      }
+    },
+    "badges": {
+      "emoji": "Jaustukai",
+      "audience": {
+        "subscribers": "Prenumeratoriai"
+      },
+      "ended": "Baigta",
+      "until": "Iki {{date}}",
+      "failed": "Nepavyko. Bandykite dar kartą."
+    }
+  },
+  "whenSheet": {
+    "today": "Šiandien",
+    "tooSoon": "Pasirinkite ateities laiką.",
+    "show": "Rodyti",
+    "hide": "Slėpti"
+  },
+  "planned": {
+    "title": "Planuojama",
+    "all": "Visi",
+    "posts": "Įrašai",
+    "stages": "Garso kambariai",
+    "post": "Įrašas",
+    "live": "Tiesiogiai",
+    "stage": "Scena",
+    "untitledPost": "Įrašas",
+    "untitledLive": "Tiesiogiai",
+    "loading": "Įkeliama…",
+    "startNow": "Pradėti dabar",
+    "cancel": "Atšaukti",
+    "cancelled": "Atšaukta"
+  },
+  "welcome": {
+    "about": {
+      "title": "Sveiki atvykę į Riftn",
+      "day": "Diena",
+      "month": "Mėnuo",
+      "year": "Metai"
+    },
+    "name": {
+      "title": "Jūsų vardas",
+      "placeholder": "Jūsų vardas"
+    },
+    "card": {
+      "name": "Jūsų vardas",
+      "followers": "sekėjai"
+    },
+    "topic": {
+      "music": "Muzika",
+      "art": "Menas",
+      "gaming": "Žaidimai",
+      "crypto": "Kripto",
+      "sports": "Sportas",
+      "film": "Filmas",
+      "podcast": "Tinklalaidė",
+      "news": "Naujienos",
+      "science": "Mokslas"
+    },
+    "back": "Atgal",
+    "skipPhoto": "Praleisti dabar",
+    "preview": "Peržiūra"
+  },
+  "appTokens": {
+    "title": "Jūsų žetonai",
+    "history": "Istorija",
+    "kindDeposit": "Įnešti",
+    "to": "Iki",
+    "amount": "Suma",
+    "notePlaceholder": "Pridėk žinutę (neprivaloma)",
+    "sendButton": "Siųsti",
+    "errorInsufficient": "Nepakanka ženklų"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Visi",
+      "followers": "Sekėjai",
+      "nobody": "Niekas"
+    },
+    "heading": "Reakcijos",
+    "more": "Rodyti daugiau",
+    "liveNow": "Tiesiogiai",
+    "untitled": "Reakcija"
+  },
+  "connectGuide": {
+    "title": "Prijunkite Riftn prie savo DI asistento",
+    "urlLabel": "MCP serverio URL",
+    "copy": "Kopijuoti",
+    "copied": "Nukopijuota",
+    "copiedToast": "MCP URL nukopijuotas"
+  },
+  "avatarPrompt": {
+    "notNow": "Ne dabar"
+  },
+  "postStats": {
+    "engagement": "Įsitraukimas",
+    "finished": "Baigta",
+    "members": "Nariai",
+    "membersLower": "nariai",
+    "newFollowers": "Nauji sekėjai",
+    "noBadge": "Nėra ženklelio",
+    "people": "Žmonės",
+    "plays": "Grojimai",
+    "quotes": "Citatos",
+    "reposts": "Pakartotiniai",
+    "saved": "Išsaugota",
+    "shares": "Dalijimai",
+    "signedOutViewers": "Atsijungta",
+    "topSupporters": "Geriausi rėmėjai",
+    "visitors": "Atsijungta"
+  },
   "tokenLaunch": {
     "eyebrow": "Atvyksta greitai",
     "title": "Tokenas pasirodys greitai",
@@ -19085,6 +19395,10 @@
     "unavailable": "Netrukus bus patvirtintas „GitHub“.",
     "connect": "Prijungti GitHub",
     "disconnect": "Atjungti"
+  },
+  "mcpKeys": {
+    "delete": "Ištrinti",
+    "shortProfile": "Profilis"
   },
   "chatSearch": {
     "placeholder": "Ieškoti pranešimų ar žmonių",
@@ -19115,5 +19429,16 @@
     "gone": "Tas pranešimas jau nebegali",
     "theirMessages": "Jų pranešimai",
     "seeTheirMessages": "Matyti jų pranešimus"
+  },
+  "dmRequests": {
+    "title": "Užklausos",
+    "accept": "Priimti",
+    "delete": "Ištrinti",
+    "block": "Blokuoti"
+  },
+  "dmSchedule": {
+    "view": "Žiūrėti",
+    "edit": "Redaguoti",
+    "error": "Nepavyko. Bandykite dar kartą."
   }
 }

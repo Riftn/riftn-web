@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Qillqa"
+  },
   "comic": {
     "showAll": "Llapan {{count}} rapikunata rikuchiy"
   },
@@ -14,6 +17,22 @@
     "glitter": "Lliphiq",
     "saved": "Patan waqaychasqa",
     "failed": "Mana patanta waqaychayta atikunchu"
+  },
+  "duet": {
+    "policyEveryone": "Llapanku",
+    "policyFollowers": "Qatiqkuna",
+    "policyNobody": "Mana pipas",
+    "loadMore": "Astawanta chaskiy"
+  },
+  "videoRemix": {
+    "sound": "Kay sonidu ruwachiy"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Llapanku",
+      "followers": "Qatiqkuna",
+      "nobody": "Mana pipas"
+    }
   },
   "dehubAppPage": {
     "android": "Android nisqa",
@@ -166,11 +185,18 @@
     "privateNote": "Sapan yupaykunaqa manam fediverse nisqapi rikukunchu.",
     "noUsername": "Fediverse tiyana suti kananpaq ruraq sutiyki akllay."
   },
+  "signedFollows": {
+    "setUp": "Kichay",
+    "turnOff": "Paskay",
+    "efpTurnOff": "Hark'ay"
+  },
   "profileFields": {
     "title": "Riqsichikuy t'aqakuna",
     "description": "Riqsichikuyniykipi tawa yapasqa siqikama, web nisqa utaq sutiq rantinkunapas.",
     "label": "Sutichay",
     "content": "Ukhu",
+    "add": "Llaqita yapay",
+    "remove": "Llaqita qichuy",
     "save": "T'aqakunata waqaychay",
     "saved": "Riqsichikuy t'aqakuna waqaychasqa",
     "failed": "Manam waqaychakurqanchu. Watiqmanta ruray.",
@@ -1187,7 +1213,11 @@
     "payDirect": "{{name}}-man {{symbol}}-pi {{chain}}-pi chiqanmanta kachasqa. Manam imatapas tikrachinchu.",
     "payDirectNoName": "Kamachiqman {{symbol}}-pi {{chain}}-pi chiqanmanta kachasqa. Manam imatapas tikrachinchu.",
     "payViaBridgeDpay": "Base ladoman pasasqa chaynataq Riftn Payman pagasqa, tokenkuna jamun huk minutopi hina",
-    "dmSent": "{{amount}} fichas nisqakuna {{name}}-man apachisqa!"
+    "dmSent": "{{amount}} fichas nisqakuna {{name}}-man apachisqa!",
+    "messagePublic": "Tukuypaq",
+    "railTitle": "Yanapaykuna",
+    "railTotal": "{{amount}} simikuna",
+    "tokensUnit": "simikuna"
   },
   "postOptions": {
     "liveAlertsOn": "Kunanqa {{name}}ta qatinkiña. Kawsaypi rikhurimuptin willakuyta chaskinki.",
@@ -1689,6 +1719,9 @@
   "notifications": {
     "title": "Willay",
     "markAllRead": "Llapanta ñawiriyta churay",
+    "groupNew": "Musuq",
+    "groupToday": "Kunan",
+    "groupThisWeek": "Kay simana",
     "settings": "Willay churanakuna",
     "actions": "Ruraykuna",
     "markAllAsRead": "Llapanta ñawiriyta churay",
@@ -1717,6 +1750,7 @@
     "communities": "Ayllukuna",
     "stores": "Qatu wasikuna",
     "noNotificationsYet": "Manaraj willaykuna kanchu",
+    "searchClose": "Maskayta wichqay",
     "noNotificationsDesc": "Gustakuykuna, rimaykuna, propinakuna utaq musuq suscriptorkuna chaskiptiyki, kaypi rikukunqa.",
     "loadMore": "Astawanta chaskiy",
     "markAsRead": "Ñawiriyta churay",
@@ -1953,11 +1987,13 @@
     "promptLabel": "Mañakuyniyki",
     "promptPlaceholder": "Yuyaychayta, allinchayta, utaq pantayta willay…",
     "promptAttach": "Rikch'akunata k'askachiy",
+    "removeAttachment": "K’askachiyta hurquy",
     "promptDrop": "Rikch'akunata kayman k'askachiy utaq churanayki",
     "promptPost": "Willayta kachay",
     "promptShortcut": "Ctrl / ⌘ + Enter kachananpaq",
     "promptDetails": "Aswan willakuykuna",
     "promptDevice": "Dispositivo & OS (pantasqakunapaq) .",
+    "deviceInfoNoErrors": "Mana mayqinpas",
     "promptFilters": "Katiguriyawan akllay",
     "promptMediaError": "Sapakama 50MB nisqamanta pisi siq’ikunata utaq videokunata akllay.",
     "promptMediaLimit": "{{max}} k'askachiykuna kama.",
@@ -2016,6 +2052,12 @@
     "loginRequired": "Yaykuy munakun"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Imaykama",
+      "recent": "Qayllapi",
+      "suggested": "Yuyaychasqa",
+      "youFollow": "Qatisqaykikuna"
+    },
     "reply": "Kutichiy",
     "react": "Kutichiy sunquwan",
     "edit": "Tikrachiy",
@@ -2052,7 +2094,10 @@
     "checkingTokenBalance": "Token saldoykita qhawaspa...",
     "deleteConversationFailed": "Mana rimanakuyta qulluyta atirqanchu",
     "message": "Qillqay",
-    "noConversationsYet": "Manaraq rimanakuykuna kanchu"
+    "noConversationsYet": "Manaraq rimanakuykuna kanchu",
+    "sending": "Kachay",
+    "retrySend": "Yapamanta ruway",
+    "discardSend": "Qichuy"
   },
   "music": {
     "listeningCount_one": "{{count}} uyarispa",
@@ -2135,6 +2180,9 @@
     "viewList": "Lista qhaway",
     "viewMode": "Qaway",
     "back": "Kutiy",
+    "reserve": {
+      "signIn": "Yaykuy"
+    },
     "usernameAvailable": "Runa suti tarikun!",
     "signUpToClaim": "Kunan qillqakuy chaskimunaykipaq",
     "signUp": "Qillqakuy",
@@ -2162,7 +2210,11 @@
     },
     "tabs": {
       "playlists": "Pukllay listakuna",
-      "dislikes": "Mana gustasqan"
+      "dislikes": "Mana gustasqan",
+      "likes": "Gustakuykuna"
+    },
+    "likedPosts": {
+      "loadMore": "Astawanta chaskiy"
     },
     "dislikes": {
       "emptyTitle": "Manaraqmi mana gustanchu",
@@ -2185,6 +2237,7 @@
     "sortMostViewed": "Aswan achka qhawasqa",
     "sortLikes": "Munasqakuna",
     "sortMostLiked": "Aswan achka munasqa",
+    "sortCustomShort": "Kustamuña",
     "searchThisChannel": "Kay kanalpi maskay",
     "searchResultCount": "1 taripay &quot;{{query}}&quot; nisqapaq.",
     "searchResultCountPlural": "{{count}} &quot;{{query}}&quot; nisqapaq taripaykuna."
@@ -2302,6 +2355,7 @@
     },
     "profile": {
       "edit": "Perfil nisqa llamk'apuy",
+      "avatar": "Rikch'ay (avatar)",
       "banner": "Bandera",
       "imageHelp": "JPG, PNG, WebP utaq GIF, sapakama 5 MBkama.",
       "saved": "Perfil waqaychasqa."
@@ -2450,6 +2504,9 @@
     "signInAgain": "Wakmanta yaykuy",
     "createSignIn": "Wakinta kamarinaykipaq wakmanta yaykuy",
     "checkConnection": "Tinkisqaykita qhaway, hinaspa wakmanta yachay.",
+    "welcome": {
+      "text": "Allin hamusqayki willay"
+    },
     "workspace": {
       "moderation": "Kawsaq rikuchiy kamachiy",
       "moderationHelp": "Ñawpaqta kamachiy permisota atichiy. Cuentaqa kawsaq rikuchiyta kamaqmi icha churasqa kamachiqmi kananña. Ñawpaqta ari niy chaymanta borradorlla ñankunaqa kunanpas ruwakunmi. Upallachiykunaqa kikillanmanta tukukun.",
@@ -2642,7 +2699,9 @@
     "resendCodePhone": "Mana allinchu number o mana code? Kutimuy",
     "continueAs": "Kayhina hina qatipay",
     "switchWalletAccount": "Cuentata tikray",
-    "walletLoadFailed": "Wallets-ta cargana mana atiychu. Sullayki yayamuy."
+    "walletLoadFailed": "Wallets-ta cargana mana atiychu. Sullayki yayamuy.",
+    "openInBrowser": "Buscadorpi kichay",
+    "copyLink": "Tariy"
   },
   "careers": {
     "title": "Llamkay Riftn-pi",
@@ -2896,7 +2955,8 @@
     "noMenuMatches": "Mana ima menú ukhupi tinkinchu",
     "searchDehubFor": "Riftn ukhupi \"{{query}}\" maskay",
     "switchAccount": "Cuenta cambiay",
-    "signedInAs": "Sesión-pi kaychu {{name}}"
+    "signedInAs": "Sesión-pi kaychu {{name}}",
+    "requestSend": "Mañakuy apachiy"
   },
   "comments": {
     "reportComment": "Commentario nisqamanta willakuy",
@@ -3005,6 +3065,9 @@
     "confirm": "Mint nisqapi {{chain}} nisqapi.",
     "confirmWithCost": "Mint nisqapi {{chain}} · {{cost}} nisqapi.",
     "notAvailable": "Kay cadena nisqapi minting nisqa manaraqmi kanchu."
+  },
+  "postEditHistory": {
+    "original": "Qallariy kaq"
   },
   "postInfo": {
     "title": "Post willay",
@@ -5116,6 +5179,7 @@
     "settledTitleSpeed": ", típicamente {{speed}} nisqapi.",
     "settledCount_one": "{{count}} allichasqa",
     "settledCount_other": "{{count}} allichasqa",
+    "statusInProgress": "Ruwaypi",
     "howMany": "Hayka",
     "availableCount_one": "{{count}} nisqapi tarikun",
     "availableCount_other": "{{count}} nisqapi tarikun",
@@ -5208,6 +5272,17 @@
     "sellYourFractions": "Fraccionesniykikunata rantiy ({{held}} hap'isqa) ."
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Kay willakuykunata llamk’achiy"
+      }
+    },
+    "cinema": {
+      "close": "Wisq'ay",
+      "performance": {
+        "label": "Ruray"
+      }
+    },
     "libraryEmpty": "Waqaychasqa ruwasqaykikuna kaypi rikhurinqa.",
     "toolRemake": "Remakena",
     "toolMaboroshi": "Maboroshi sutiyuq runa",
@@ -6181,6 +6256,10 @@
     "raw": "Kinranpa"
   },
   "nftMarket": {
+    "actAll": "Llapan",
+    "actListings": "Qatuykuna",
+    "actOffers": "Qukuykuna",
+    "tabActivity": "Ruray",
     "shortTitle": "NFTs",
     "filters": "Filtros",
     "forSale": "Rantiy",
@@ -6243,16 +6322,21 @@
     "cancelled": "Llakisqa",
     "offered": "Kamayuqkuna q'illaykamaykuna k'ancha k'ancha.",
     "dehubPost": "Riftn post",
+    "price": "Chanin",
+    "volume": "Uyariy kallpa",
+    "tabRecent": "Qayllapi",
     "buyNow": "Kamay k'ancha!",
     "dropsTo": "K'ancha k'ancha q'illaykuna k'ayninpi {{price}}, q'illaykuna k'ayninpi {{date}}.",
     "buy": "Kamay",
     "listForSale": "K'ancha k'ancha kallpay",
     "priceAlert": "K'ancha p'unchay",
     "signInToTrade": "Saq'isqa k'ancha q'illayman ch'aski, ch'aski, icha ch'aski k'ancha.",
+    "offers": "Qukuykuna",
     "accept": "Uyakuy",
     "yourListings": "Qamkunap listakuna",
     "recentSales": "Recienti katus",
     "alertUnder": "Ñuqanchikmi chaymi rikhuykuykitaqa chaymi rikhuykuykitaqa ({{symbol}}, optional)",
+    "back": "Kutiy",
     "endBelowStart": "Qallariy presyota abajochu kaynan",
     "lasts": "Llaquiy",
     "days": "{{n}} punchau",
@@ -6641,7 +6725,63 @@
     "youAreBanned": "Kay kamaqpa mayukunapiqa manam rimayta atiwaqchu",
     "youAreTimedOut": "Huk ratullapaqmi tiempoyki tukusqaña kanki"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Qhipa pampa",
+      "modes": {
+        "none": "Mana kallchay",
+        "blur": "Difuso",
+        "color": "Llinpi"
+      }
+    },
+    "remove": "Qichuy",
+    "scenes": {
+      "countdown": "Yupay qallariy",
+      "names": {
+        "starting": "Ñachá qallarinqa"
+      }
+    },
+    "sources": {
+      "reactAdd": "Rikuchiy",
+      "image": "Rikchay",
+      "camera": "Rikch'a hap'ina",
+      "show": "Mayupi rikuchiy",
+      "positions": {
+        "center": "Centros nisqakuna"
+      },
+      "shapes": {
+        "circle": "Muyu",
+        "rect": "Tawa k'uchu"
+      }
+    },
+    "audio": {
+      "mute": "Upallachiy",
+      "unmute": "Upallachiyta qichuy",
+      "gateLevels": {
+        "off": "Mana kallchay",
+        "low": "K'anchay",
+        "high": "Sinchi"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Kiti",
+      "label": "Suti (munasqa)",
+      "key": "Kuyuchiy kiy",
+      "save": "Yapay",
+      "cancel": "Sayachiy",
+      "states": {
+        "off": "Mana kallchay",
+        "idle": "Wakichisqa",
+        "live": "Kawsaq",
+        "error": "Stock label"
+      }
+    },
+    "vertical": {
+      "centre": "Centros nisqakuna",
+      "live": "KAWSAQ"
+    },
     "subathon": {
       "title": "Subatón nisqa",
       "intro": "Mayuykipi huk yupay kutichiy. Sapa pagasqa regalo, qatipay chaymanta suscripción pachata yapan, chayrayku cuarto kawsachisunki.",
@@ -7594,6 +7734,7 @@
     "footerNote": "DePin participación huk yanapakuy yanapakuymi, mana qullqi churay ruruchu. Disponibilidad, elegibilidad chaymanta premiokuna tikrakunman."
   },
   "creatorFlow": {
+    "disconnect": "T’aqanakuy",
     "title": "Ruwaypa Tariy",
     "backToStudio": "Ruwaqpa Kamachiy Wasiman Kutiy",
     "backToFlows": "Kutiy kawsaykikunaman",
@@ -7934,6 +8075,9 @@
     "followingBackProgress": "Kutiy {{completed}} {{total}} llaqtamanta",
     "findingFollowers": "Seguidorta maskhachkani...",
     "followBackAll": "Ama kutiy hantaq",
+    "followBackConfirm": "Qatiy kutita",
+    "followBackNotNow": "Mana chaymi",
+    "followBackDone": "Tukusqa",
     "nonFollowers": {
       "title": "¿Sumaq k'uchuykuykita?",
       "cta": "Tukuy {{count}} nisqaykuna chinkay",
@@ -8745,6 +8889,14 @@
     "priceChartCleared": "Presyu tabla pichqasqa. Presyu fijadu: $0.0001. Ejecucion presyukuna dependen ordenes disponibles."
   },
   "editor": {
+    "stage": {
+      "camera": "Rikch'a hap'ina",
+      "yaw": "Muyuy",
+      "add": "Yapay",
+      "scale": "Sayay",
+      "color": "Llimp'i",
+      "light": "K'anchay"
+    },
     "video": {
       "tFade": "Chaqrupakuy",
       "none": "Mana imapas",
@@ -8911,6 +9063,8 @@
       "tools": "Editorpa llamk'anankuna"
     },
     "agent": {
+      "stop": "Hark'ay",
+      "queue": "Coleqaman yapay",
       "introTitle": "AI-man willay imatachus munanki",
       "introBody": "Diseñota utaq tikrayta kikiykiq simiykiwan willay. Paginaq sayayninta tikran, qillqata qillqan hinaspa sumaqchan, mana qullqiyuq fotokunata, videokunata, takikunatapas maskan, filtrokunata churan, capakunata allichan hinaspa kuyuchin. Sapa mañakuyqa huk kutichiywanmi kutirin.",
       "suggestPoster": "Rupay mit'a rebajapaq tawa k'uchuyuq Instagram willakuyta ruway, qucha patapi fotowan, rakhu sutichaywan",
@@ -9179,6 +9333,9 @@
       "reloadText": "Qillqata yapamanta kachay",
       "textSaved": "Qillqa tikrasqakuna waqaychasqa.",
       "action": "Kikinmanta subtítulos",
+      "styles": {
+        "bold": "Yanacha"
+      },
       "working": "Uyarichkan… {{percent}}%",
       "downloading": "Rimay modelota wakichichkan… {{percent}}%",
       "hint": "Rimayta pachaman tupachisqa subtítulosman tikran, sumaqchayta atinki. Equipoykipi llamkan: qasilla, sapallayki. Ñawpaq kutipi modelota uraykachin.",
@@ -10558,6 +10715,28 @@
       "toolbar": "Llanapi puriy",
       "zoomIn": "Zoom lona nisqapi",
       "zoomOut": "Lonata hatunyachiy"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Rakiy",
+        "play": "Pukllay",
+        "pause": "Suyay",
+        "frameBack": "Ñawpaq siq'i",
+        "frameForward": "Qatiq siq'i"
+      }
+    },
+    "generate3d": {
+      "label": "3D nisqapi"
+    },
+    "voiceClone": {
+      "stop": "Grabay sayachiy"
+    },
+    "linkImport": {
+      "go": "Apamuy",
+      "downloading": "Descargay {{percent}}%"
+    },
+    "reverse": {
+      "action": "Qipaman"
     }
   },
   "jungleMood": {
@@ -11843,7 +12022,15 @@
       "rewardsWeek": "{{date}} nisqa semana.",
       "rewardPaid": "Huntachisqa",
       "rewardPending": "Kaqraq",
-      "rewardsNone": "Manaraqmi premiokuna yupasqachu. Ñawpaq semanaqa lunes p’unchaymi wisq’akun."
+      "rewardsNone": "Manaraqmi premiokuna yupasqachu. Ñawpaq semanaqa lunes p’unchaymi wisq’akun.",
+      "stats": {
+        "button": "Kawsaq yupaykuna"
+      },
+      "signin": {
+        "users_one": "{{count}} llamk'aq",
+        "users_other": "{{count}} llamk'aqkuna",
+        "delete": "Pichay"
+      }
     },
     "card": {
       "open": "Kichasqa"
@@ -12001,6 +12188,9 @@
     "reminderLater": "Kunan manam"
   },
   "copy": {
+    "55656b5e434f": "Maskayta wichqay",
+    "57e2faa5ec63": "Riftn ukhupi maskay",
+    "96d7bff86b44": "Maskayqa manam kachayta atirqanchu",
     "1607715e45ed": "Rimanapaq pelotata ñitiy, utaq uraypi qillqay",
     "00140a37bd26": "Chay llikapiqa qullqi kuyuykunaqa kachallaraqmi harkasqa kachkan. Ama hina kaspa, yapamanta haykuy.",
     "002286513398": "Manam saqisqachu kachkanki raymikunata kamachinaykipaq",
@@ -17571,6 +17761,7 @@
     "dd05b3bca137": "📰 Mikhuy Huñusqa",
     "269ad0d90f5a": "👥 Ayllu llaqtakuna",
     "50c8afc2eec1": "📸 Willakuykuna",
+    "365075d796de": "🎞️ Uchuy videokuna",
     "db9897e168fa": "📢 Achka Posting",
     "38fddb1a5217": "📡 K'ullana kawsaykuna",
     "3098854985e6": "🎬 Agregación de Streaming nisqa",
@@ -17594,6 +17785,7 @@
     "50d8d34a787b": "🛍️ Riftn Tiendas",
     "6ee5630c9dde": "🧩 Fracciones nisqa",
     "fb673c9c986e": "🧑 💻 Riftn Recompensas nisqa",
+    "2b13f4c55720": "💸 Kamaqkunaman qullqi quy",
     "1205929886b3": "👑 Riftn Extra nisqa",
     "24a657b7384e": "🤖 AI Yanapaq",
     "fea1030abae5": "🖼️ AI Imagen Gen",
@@ -18996,6 +19188,7 @@
     "backToTop": "Hanaqman kutiy",
     "needTitle": "Huk titulota yapay hinalla purinaykipaq",
     "needBody": "{{count}} aswan qillqakuna rinapaq",
+    "imagesLabel": "Siqi",
     "backToWriting": "Qillqayman kutiy",
     "readyTitle": "Kamuykuna k'aspiykiy",
     "sharePreview": "Imayna rikchakun rakisqa kaptin",
@@ -19057,6 +19250,128 @@
     "exploreFirst": "Ñawpaqta maskay",
     "codeNote": "Ch'iqichisqayki kodigota apachimusayki, manam pasword necesitakunchu."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Kamachiy",
+      "howMany": "Hayka",
+      "who": "Sutiyki utaq wallet direccion",
+      "whoPlaceholder": "@sutiyki",
+      "cancel": "Sayachiy",
+      "stage": {
+        "preparing": "Allichasqa...",
+        "confirming": "Rantikuyta suyachkan…",
+        "recording": "Tukuchichkan…"
+      }
+    },
+    "badges": {
+      "emoji": "Emoji nisqa",
+      "audience": {
+        "subscribers": "Suscriptorkuna"
+      },
+      "ended": "Tukukusqa",
+      "until": "{{date}}kama",
+      "failed": "Chayqa manan allinchu karqan. Hukmanta kallpachakuy."
+    }
+  },
+  "whenSheet": {
+    "today": "Kunan",
+    "tooSoon": "Paqarimuy pacha akllay.",
+    "show": "Rikuchiy",
+    "hide": "Pakay"
+  },
+  "planned": {
+    "title": "Yuyasqa",
+    "all": "Llapan",
+    "posts": "Churasqakuna",
+    "stages": "Rimanakuy wasikuna",
+    "post": "Churasqa",
+    "live": "Kawsaq",
+    "stage": "Pukllay",
+    "untitledPost": "Churasqa",
+    "untitledLive": "Kawsaq",
+    "loading": "Cargando...",
+    "startNow": "Kunan qallariy",
+    "cancel": "Sayachiy",
+    "cancelled": "Cancelado"
+  },
+  "welcome": {
+    "about": {
+      "title": "Riftnman jamuy",
+      "day": "P'unchaw",
+      "month": "Killa",
+      "year": "Wata"
+    },
+    "name": {
+      "title": "Sutiyki",
+      "placeholder": "Sutiyki"
+    },
+    "card": {
+      "name": "Sutiyki",
+      "followers": "qatiqninkuna"
+    },
+    "topic": {
+      "music": "Takiy",
+      "art": "Ruwana",
+      "gaming": "Pukllana",
+      "crypto": "Cripto nisqa",
+      "sports": "Pukllaykunamanta",
+      "film": "Siwi",
+      "podcast": "Kuyaychay",
+      "news": "Noticias",
+      "science": "Yachay"
+    },
+    "back": "Kutiy",
+    "skipPhoto": "Kunankamaqa saltay",
+    "preview": "Ñawpaqta qhaway"
+  },
+  "appTokens": {
+    "title": "Qanpa tokenniykikuna",
+    "history": "Kawsasqan",
+    "kindDeposit": "Qullqi churay",
+    "to": "Imaykama",
+    "amount": "Yupay",
+    "notePlaceholder": "Huk willayta yapay (munaspayki)",
+    "sendButton": "Apachiy",
+    "errorInsufficient": "Mana atiqchu simikunayuq"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Llapanku",
+      "followers": "Qatiqkuna",
+      "nobody": "Mana pipas"
+    },
+    "heading": "Reacciones nisqakuna",
+    "more": "Astawan qaway",
+    "liveNow": "Kawsaq",
+    "untitled": "Kuyay"
+  },
+  "connectGuide": {
+    "title": "Riftn-ta AI yanapaqniykiwan t'inkiy",
+    "urlLabel": "MCP servidorpa URL-nin",
+    "copy": "Qillqay",
+    "copied": "Copiasqa",
+    "copiedToast": "MCP URL-qa qillqasqañam"
+  },
+  "avatarPrompt": {
+    "notNow": "Mana chaymi"
+  },
+  "postStats": {
+    "engagement": "Tupanachiy",
+    "finished": "Tukusqa",
+    "members": "Runa",
+    "membersLower": "Runa",
+    "newFollowers": "Musuq qatiqninkuna",
+    "noBadge": "Mana badge",
+    "people": "Runakuna",
+    "plays": "Uyariykuna",
+    "quotes": "Citakuna",
+    "reposts": "Musuqmanta churay",
+    "saved": "Waqaychasqa",
+    "shares": "Rakiy",
+    "signedOutViewers": "Lloqsisqa",
+    "topSupporters": "Hatun yanapaqkuna",
+    "visitors": "Lloqsisqa"
+  },
   "tokenLaunch": {
     "eyebrow": "Chayamuchkanña",
     "title": "Token nisqayki chaskiytaqa",
@@ -19081,6 +19396,10 @@
     "failed": "Mana ch'aspaq GitHub. Kunti chaspaq.",
     "connect": "Kamuykuna GitHubnin ch'antaspa.",
     "disconnect": "T’aqanakuy"
+  },
+  "mcpKeys": {
+    "delete": "Pichay",
+    "shortProfile": "Riqsichiy"
   },
   "chatSearch": {
     "placeholder": "Willaykunata utaq runakunata maskay",
@@ -19111,5 +19430,16 @@
     "gone": "Chay willayqa manañam kaypichu kachkan",
     "theirMessages": "Paypa willayninkuna",
     "seeTheirMessages": "Paypa willayninkunata qaway"
+  },
+  "dmRequests": {
+    "title": "Mañakuy",
+    "accept": "Aceptay",
+    "delete": "Pichay",
+    "block": "Harkay"
+  },
+  "dmSchedule": {
+    "view": "Qhaway",
+    "edit": "Ruwapay",
+    "error": "Chayqa manan allinchu karqan. Hukmanta kallpachakuy."
   }
 }

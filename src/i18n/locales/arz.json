@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "نص"
+  },
   "comic": {
     "showAll": "عرض كل الصفحات الـ {{count}}"
   },
@@ -14,6 +17,23 @@
     "glitter": "بريق",
     "saved": "الإطار اتحفظ",
     "failed": "مقدرناش نحفظ الإطار"
+  },
+  "duet": {
+    "policyEveryone": "الكل",
+    "policyFollowers": "المتابعين",
+    "policyNobody": "محدش",
+    "loadMore": "حمّل أكتر",
+    "video": "فيديو"
+  },
+  "videoRemix": {
+    "sound": "استخدم هذا الصوت"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "الكل",
+      "followers": "المتابعين",
+      "nobody": "محدش"
+    }
   },
   "dehubAppPage": {
     "android": "أندرويد",
@@ -166,11 +186,18 @@
     "privateNote": "الحسابات الخاصة مش بتظهر على الفيديفيرس.",
     "noUsername": "اختار اسم مستخدم علشان يبقى عندك عنوان فيديفيرس."
   },
+  "signedFollows": {
+    "setUp": "شغل",
+    "turnOff": "إيقاف التشغيل",
+    "efpTurnOff": "إيقاف"
+  },
   "profileFields": {
     "title": "حقول الصفحة الشخصية",
     "description": "لحد أربع سطور زيادة في صفحتك، زي موقع أو ضمايرك.",
     "label": "العنوان",
     "content": "المحتوى",
+    "add": "إضافة حقل",
+    "remove": "إزالة الحقل",
     "save": "احفظ الحقول",
     "saved": "اتحفظت حقول الصفحة",
     "failed": "متحفظش. جرب تاني.",
@@ -367,6 +394,7 @@
     "checkFailed": "لا يمكننا التحقق من توافرها. حاول مرة أخرى.",
     "checking": "التحقق...",
     "ownership": "مفتوح المصدر. مملوك للمستخدم.",
+    "title": "نعمل قليلًا.\nليصبح Riftn أفضل.",
     "intermission": "غير متصل بالإنترنت مؤقتًا",
     "community": "المجتمع أولاً. دائماً."
   },
@@ -376,6 +404,7 @@
     "browse": "تصفح جميع {{count}} القوالب",
     "featured": "العودة إلى المميز",
     "useNamed": "استخدم {{name}}",
+    "preview": "تشغيل معاينة {{name}}",
     "previewUnavailable": "معاينة غير متاحة",
     "search": "تأثيرات البحث والشخصيات والرقصات",
     "all": "الكل",
@@ -1193,7 +1222,11 @@
     "payDirect": "تم الإرسال مباشرة إلى {{name}} في {{symbol}} في {{chain}}. لا يوجد تبديل.",
     "payDirectNoName": "تم الإرسال مباشرة إلى منشئ المحتوى في {{symbol}} في {{chain}}. لا مبادلة.",
     "payViaBridgeDpay": "تم النقل إلى Base وتم الدفع إلى Riftn Pay، تصل الرموز في حوالي دقيقة",
-    "dmSent": "اتبعت {{amount}} عملات رمزية لـ {{name}}!"
+    "dmSent": "اتبعت {{amount}} عملات رمزية لـ {{name}}!",
+    "messagePublic": "عام",
+    "railTitle": "الإكراميات",
+    "railTotal": "{{amount}} رموز",
+    "tokensUnit": "رموز"
   },
   "postOptions": {
     "liveAlertsOn": "بقيت بتتابع {{name}}. هيوصلك إشعار لما يعمل لايف.",
@@ -1694,6 +1727,9 @@
   "notifications": {
     "title": "الإشعارات",
     "markAllRead": "تحديد الكل كمقروء",
+    "groupNew": "جديد",
+    "groupToday": "النهاردة",
+    "groupThisWeek": "الأسبوع ده",
     "settings": "إعدادات الإشعارات",
     "actions": "إجراءات",
     "markAllAsRead": "تحديد الكل كمقروء",
@@ -1722,6 +1758,7 @@
     "communities": "الكوميونيتيز",
     "stores": "المحلات",
     "noNotificationsYet": "مفيش إشعارات لسه",
+    "searchClose": "إغلاق البحث",
     "noNotificationsDesc": "لما تحصل على لايكات، تعليقات، تيبات، أو مشتركين جداد هتظهر هنا.",
     "loadMore": "حمّل أكتر",
     "markAsRead": "تحديد كمقروء",
@@ -1961,10 +1998,13 @@
     "promptLabel": "مطالبتك",
     "promptPlaceholder": "صف فكرة أو تحسين أو خطأ...",
     "promptAttach": "إرفاق الصور",
+    "removeAttachment": "إزالة المرفق",
     "promptDrop": "لصق الصور أو إسقاطها هنا",
     "promptPost": "نشر المطالبة",
+    "promptShortcut": "Ctrl / ⌘ + Enter للنشر",
     "promptDetails": "تفاصيل اختيارية",
     "promptDevice": "الجهاز ونظام التشغيل (للأخطاء)",
+    "deviceInfoNoErrors": "لا شيء",
     "promptFilters": "حذف حسب الفئة",
     "promptMediaError": "اختر الصور أو مقاطع الفيديو التي يقل حجم كل منها عن 50 ميجابايت.",
     "promptMediaLimit": "ما يصل إلى {{max}} مرفقات.",
@@ -2023,6 +2063,12 @@
     "loginRequired": "مطلوب تسجيل دخول"
   },
   "messages": {
+    "newDrawer": {
+      "to": "إلى",
+      "recent": "حديث",
+      "suggested": "مقترح",
+      "youFollow": "اللي إنت متابعهم"
+    },
     "reply": "رد",
     "react": "تفاعل",
     "edit": "تعديل",
@@ -2059,7 +2105,10 @@
     "checkingTokenBalance": "جارٍ التحقق من رصيد الرمز المميز الخاص بك...",
     "deleteConversationFailed": "تعذّر حذف المحادثة",
     "message": "الرسالة",
-    "noConversationsYet": "لا توجد محادثات حتى الآن"
+    "noConversationsYet": "لا توجد محادثات حتى الآن",
+    "sending": "جاري الإرسال",
+    "retrySend": "جرب تاني",
+    "discardSend": "شيل"
   },
   "music": {
     "listeningCount_one": "{{count}} يستمع",
@@ -2141,6 +2190,9 @@
     "viewList": "عرض القائمة",
     "viewMode": "عرض",
     "back": "رجوع",
+    "reserve": {
+      "signIn": "تسجيل الدخول"
+    },
     "usernameAvailable": "اسم المستخدم متاح!",
     "signUpToClaim": "سجّل النهاردة عشان تاخده",
     "signUp": "سجّل",
@@ -2168,7 +2220,11 @@
     },
     "tabs": {
       "playlists": "قوائم التشغيل",
-      "dislikes": "عدم الإعجاب"
+      "dislikes": "عدم الإعجاب",
+      "likes": "لايكات"
+    },
+    "likedPosts": {
+      "loadMore": "حمّل أكتر"
     },
     "dislikes": {
       "emptyTitle": "لا يوجد عدم إعجاب حتى الآن",
@@ -2191,6 +2247,7 @@
     "sortMostViewed": "الأكثر مشاهدة",
     "sortLikes": "الإعجابات",
     "sortMostLiked": "الأكثر إعجابًا",
+    "sortCustomShort": "مخصص",
     "searchThisChannel": "البحث في هذا القناة",
     "searchResultCount": "1 نتيجة لـ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتيجة لـ \"{{query}}\""
@@ -2348,9 +2405,11 @@
       "runSwarm": "سرب الجري",
       "description": "تُجرى الأعمال بناءً على agent المحدد. تُستمر المهام المجدولة مع إغلاق التطبيق.",
       "instructions": "تعليمات الوكيل",
+      "examples": "تابع كل من نشر اليوم.\nأعجب بكل منشور خلال آخر 24 ساعة.\nانشر 3 مرات يوميًا عن الموسيقى المستقلة.",
       "preparing": "جارٍ إعداد المهمة...",
       "run": "تشغيل المطالبة",
       "limits": "منشور يومي واحد وما يصل إلى 3 إعجابات ذات صلة لكل مهمة. يشارك جميع الوكلاء فجوة بعد 20 دقيقة. تستخدم الصور التسميات التوضيحية المحددة ؛ تحتاج مقاطع الفيديو إلى صورة غلاف. تبقى المشاركات أقل من 500 حرف. لا يوجد غاز ما لم يتم سك العملة ؛ قد تستخدم الكتابة الأرصدة.",
+      "createFirst": "أنشئ وكيلًا أدناه لتكليفه بمهمة.",
       "list": "المهام",
       "refresh": "تجديد",
       "loading": "جارٍ تحميل المهام...",
@@ -2455,6 +2514,9 @@
     "signInAgain": "سجّل دخول تاني",
     "createSignIn": "سجّل دخول تاني عشان تعمل إيجنت",
     "checkConnection": "اتأكد من الاتصال وجرّب تاني.",
+    "welcome": {
+      "text": "رسالة الترحيب"
+    },
     "workspace": {
       "moderation": "الإشراف على البث",
       "moderationHelp": "فعّل صلاحية الإشراف الأول. لازم يكون الحساب أصلًا هو صاحب البث أو مشرف متعيّن. وضع الموافقة ووضع المسودات لسه شغالين. الكتم المؤقت بيخلص لوحده.",
@@ -2647,7 +2709,9 @@
     "resendCodePhone": "رقم خاطئ أو لا يوجد رمز ؟ ارجع",
     "continueAs": "كمل كـ",
     "switchWalletAccount": "تبديل الحساب",
-    "walletLoadFailed": "تعذر تحميل المحافظ. يُرجى إعادة المحاولة."
+    "walletLoadFailed": "تعذر تحميل المحافظ. يُرجى إعادة المحاولة.",
+    "openInBrowser": "افتح في المتصفح",
+    "copyLink": "نسخ الرابط"
   },
   "careers": {
     "title": "وظايف في Riftn",
@@ -2871,7 +2935,8 @@
     "noMenuMatches": "مفيش حاجة في القايمة مطابقة",
     "searchDehubFor": "دوّر على «{{query}}» في Riftn",
     "switchAccount": "تبديل الحساب",
-    "signedInAs": "تم تسجيل الدخول باسم {{name}}"
+    "signedInAs": "تم تسجيل الدخول باسم {{name}}",
+    "requestSend": "إرسال الطلب"
   },
   "comments": {
     "reportComment": "الإبلاغ عن التعليق",
@@ -2980,6 +3045,9 @@
     "confirm": "النعناع على {{chain}}",
     "confirmWithCost": "النعناع على {{chain}}·{{cost}}",
     "notAvailable": "لا يتوفر سك العملة على هذه السلسلة حتى الآن."
+  },
+  "postEditHistory": {
+    "original": "الأصلي"
   },
   "postInfo": {
     "title": "معلومات المنشور",
@@ -5089,6 +5157,7 @@
     "settledTitleSpeed": "، عادةً في {{speed}}",
     "settledCount_one": "تمت تسوية {{count}}",
     "settledCount_other": "تمت تسوية {{count}}",
+    "statusInProgress": "شغالة",
     "howMany": "كم عدد",
     "availableCount_one": "{{count}} متاح",
     "availableCount_other": "{{count}} متاح",
@@ -5181,6 +5250,17 @@
     "sellYourFractions": "بيع أجزاءك ({{held}} محفوظة)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "استخدم هذه التفاصيل"
+      }
+    },
+    "cinema": {
+      "close": "إغلاق",
+      "performance": {
+        "label": "الأداء"
+      }
+    },
     "libraryEmpty": "توليداتك المحفوظة هتظهر هنا.",
     "toolRemake": "إعادة إنتاج",
     "toolMaboroshi": "مابوروشي",
@@ -6151,6 +6231,11 @@
     "raw": "خام"
   },
   "nftMarket": {
+    "actAll": "الكل",
+    "actListings": "الإعلانات",
+    "actOffers": "العروض",
+    "tabActivity": "النشاط",
+    "shortTitle": "NFT",
     "filters": "عوامل التصفية",
     "forSale": "للبيع",
     "openToOffers": "مفتوح للعروض",
@@ -6214,6 +6299,9 @@
     "offered": "تم إرسال العرض. صاحب الـ NFT يقدر يقبله في أي وقت.",
     "dehubPost": "منشور Riftn",
     "youHold": "أنت معاك {{n}}",
+    "price": "السعر",
+    "volume": "مستوى الصوت",
+    "tabRecent": "حديث",
     "buyNow": "اشتري الآن",
     "dropsTo": "السعر نزل لـ {{price}} بـ {{date}}",
     "inBundle": "تم البيع كحزمة من {{n}}",
@@ -6627,7 +6715,64 @@
     "youAreBanned": "لا يمكنك التحدث في بثات هذا المبدع",
     "youAreTimedOut": "أنت متوقف مؤقتًا لوهلة"
   },
+  "studioDeck": {
+    "background": {
+      "title": "الخلفية",
+      "modes": {
+        "none": "معطّل",
+        "blur": "تمويه",
+        "color": "اللون"
+      }
+    },
+    "remove": "شيل",
+    "scenes": {
+      "countdown": "العد التنازلي",
+      "minutes": "{{count}} دقيقة",
+      "names": {
+        "starting": "هيبدأ قريب"
+      }
+    },
+    "sources": {
+      "reactAdd": "إظهار",
+      "image": "صورة",
+      "camera": "الكاميرا",
+      "show": "عرض على البث",
+      "positions": {
+        "center": "مركز"
+      },
+      "shapes": {
+        "circle": "دائرة",
+        "rect": "مربع"
+      }
+    },
+    "audio": {
+      "mute": "اكتم",
+      "unmute": "إلغاء الكتم",
+      "gateLevels": {
+        "off": "معطّل",
+        "low": "فاتح",
+        "high": "قوي"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "المنصة",
+      "label": "الاسم (اختياري)",
+      "key": "مفتاح البث",
+      "save": "إضافة",
+      "cancel": "إلغاء",
+      "states": {
+        "off": "معطّل",
+        "idle": "جاهز",
+        "live": "لايف",
+        "error": "خطأ"
+      }
+    },
+    "vertical": {
+      "centre": "مركز",
+      "live": "مباشر"
+    },
     "subathon": {
       "title": "ماراثون فرعي",
       "intro": "عد تنازلي على البث الخاص بك. تضيف كل هدية مدفوعة ومتابعة واشتراك وقتًا، لذلك تبقيك الغرفة على قيد الحياة.",
@@ -7579,6 +7724,7 @@
     "footerNote": "شارك في DePin هو خدمة مساهمة، وليس منتج استثمار. توافر الأهلية والمكافآت قد يتغير."
   },
   "creatorFlow": {
+    "disconnect": "قطع الاتصال",
     "title": "تدفق المنشئ",
     "backToStudio": "العودة إلى Creator Studio",
     "backToFlows": "العودة إلى تدفقاتك",
@@ -7919,6 +8065,9 @@
     "followingBackProgress": "متابعة {{completed}} من {{total}}",
     "findingFollowers": "جارٍ العثور على متابعين...",
     "followBackAll": "متابعة الكل مرة أخرى",
+    "followBackConfirm": "متابعة رد",
+    "followBackNotNow": "ليس الآن",
+    "followBackDone": "تم الإنتهاء",
     "nonFollowers": {
       "title": "قم بتنظيف من تتابع ؟",
       "body": "حسابات {{count}} التي تتابعها لا تتابعك مرة أخرى.",
@@ -8732,6 +8881,14 @@
     "priceChartCleared": "تم مسح مخطط الأسعار. السعر المرجعي الثابت: 0.0001 $. تعتمد أسعار التنفيذ على الطلبات المتاحة."
   },
   "editor": {
+    "stage": {
+      "camera": "الكاميرا",
+      "yaw": "الدوران",
+      "add": "إضافة",
+      "scale": "الحجم",
+      "color": "اللون",
+      "light": "فاتح"
+    },
     "video": {
       "tFade": "تلاشٍ متداخل",
       "none": "بدون",
@@ -8898,6 +9055,8 @@
       "tools": "أدوات المحرر"
     },
     "agent": {
+      "stop": "إيقاف",
+      "queue": "إضافة إلى الطابور",
       "introTitle": "قول للـ AI إنت عايز إيه",
       "introBody": "اوصف التصميم أو التغيير بكلامك. هيغيّر مقاس الصفحة، ويكتب النص وينسّقه، ويلاقي صور وفيديوهات ومزيكا مجانية، ويطبّق فلاتر، ويرتّب الطبقات ويحرّكها. كل طلب بيتلغي بخطوة تراجع واحدة.",
       "suggestPoster": "اعمل بوست إنستجرام مربع لتخفيضات الصيف فيه صورة بحر وعنوان عريض",
@@ -9166,6 +9325,9 @@
       "reloadText": "إعادة تحميل التسمية التوضيحية",
       "textSaved": "تم حفظ تغييرات التسمية التوضيحية.",
       "action": "ترجمة تلقائية",
+      "styles": {
+        "bold": "غامق"
+      },
       "working": "بنسمع… {{percent}}%",
       "downloading": "بنجهز نموذج الكلام… {{percent}}%",
       "hint": "بيحوّل الكلام لترجمة متوقّتة تقدر تغيّر شكلها. بيشتغل على جهازك: ببلاش وخصوصي. أول مرة هينزّل النموذج.",
@@ -10545,6 +10707,28 @@
       "toolbar": "تحرير الكانفاس",
       "zoomIn": "توسيع الكانفاس",
       "zoomOut": "تصغير الكانفاس"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "تقسيم",
+        "play": "تشغيل",
+        "pause": "إيقاف مؤقت",
+        "frameBack": "الإطار السابق",
+        "frameForward": "الإطار التالي"
+      }
+    },
+    "generate3d": {
+      "label": "ثلاثي الأبعاد"
+    },
+    "voiceClone": {
+      "stop": "وقّف التسجيل"
+    },
+    "linkImport": {
+      "go": "استيراد",
+      "downloading": "تحميل {{percent}}%"
+    },
+    "reverse": {
+      "action": "عكسي"
     }
   },
   "jungleMood": {
@@ -11828,7 +12012,15 @@
       "rewardsWeek": "أسبوع {{date}}",
       "rewardPaid": "مدفوع",
       "rewardPending": "معلق",
-      "rewardsNone": "لم يتم احتساب أي مكافآت حتى الآن. يغلق الأسبوع الأول يوم الاثنين."
+      "rewardsNone": "لم يتم احتساب أي مكافآت حتى الآن. يغلق الأسبوع الأول يوم الاثنين.",
+      "stats": {
+        "button": "إحصائيات لايف"
+      },
+      "signin": {
+        "users_one": "مستخدم {{count}}",
+        "users_other": "مستخدمون {{count}}",
+        "delete": "مسح"
+      }
     },
     "card": {
       "open": "فتح"
@@ -11986,6 +12178,9 @@
     "reminderLater": "لا الآن"
   },
   "copy": {
+    "55656b5e434f": "إغلاق البحث",
+    "57e2faa5ec63": "دور في Riftn",
+    "96d7bff86b44": "تعذّر تحميل البحث",
     "1607715e45ed": "دوس على الكورة علشان تتكلم، أو اكتب تحت",
     "00140a37bd26": "الترانزاكشنات على هذا الشبكة غير متاحة حاليًا. حاول مرة أخرى.",
     "002286513398": "ليس لديك إذن لإدارة الأحداث",
@@ -15589,6 +15784,7 @@
     "ba5cb1cce0d4": "حجز التعليق على الحساب، اختياري",
     "ab60ba3815e3": "حجز التعليق على الحساب · اختياري",
     "badd6941df17": "إرسال التعليق",
+    "00c90f4b707a": "النصوص المترجمة",
     "450683b66da4": "الملف SRT / VTT",
     "32afaa784333": "قسم",
     "aa93becb8b14": "الفيديو",
@@ -16055,6 +16251,7 @@
     "5601cb6b373b": "المحفظة الشريك:",
     "fc036ea0e9f0": "الرابط إلى صفحة معينة",
     "ae4410aa9943": "انسخ أي صفحة من Riftn — قسم الوثائق، أو جائزة، أو ملفك الشخصي. يبقى الرابط هذا يخصك، ثم يأخذهم مباشرة إلى هناك.",
+    "12a7c0529934": "/docs/الشروع في العمل",
     "9b44fb81d89e": "صفحة الوجهة",
     "085cd98e8e2e": "نسخ الرابط",
     "5887fc189c1b": "شريكك",
@@ -16398,6 +16595,7 @@
     "c603180499e7": "أفضل الأصول",
     "93c91c851e7a": "السعر",
     "03fba4e9f0e2": "الحجم (24 ساعة)",
+    "bf4151fc970f": "WORK_ADMIN_ARBUTER",
     "dbf990b4954b": "عدّل المكافأة التي نشرتها على Riftn.",
     "d329c3be85eb": "مكافآتي | Riftn",
     "3ee01181e096": "كل البونتي التي قمت بتقديمها أو العمل عليها على Riftn، مع عمليات الإيداع والتحويل المالية على الشبكة.",
@@ -16820,6 +17018,7 @@
     "ea574034aa5a": "لم يتم العثور على أشخاص",
     "47ca5ef7eac6": "البحث عن شخص ما لبدء محادثة.",
     "0600175af842": "فتح محادثة",
+    "8e4b97ca7c6e": "إشارة نارية للجميع",
     "412ae55409b3": "تم تعطيل الإكراميات في هذا الحساب أثناء تشغيل وضع الرصيد الخاص.",
     "babd987b2954": "لا يمكن تأكيد إعدادات الخصوصية للمستقبل. لم يتم إرسال أي تبرع.",
     "a074b23fd5f3": "يحتاج إلى صورة مرفقة",
@@ -18932,6 +19131,7 @@
     "backToTop": "إلى أعلى",
     "needTitle": "إضافة عنوان للمتابعة",
     "needBody": "{{count}} أحرف أخرى متبقية",
+    "imagesLabel": "صور",
     "backToWriting": "العودة إلى الكتابة",
     "readyTitle": "جاهز للنشر",
     "sharePreview": "كيف تبدو عند مشاركتها",
@@ -18993,7 +19193,130 @@
     "exploreFirst": "الاستكشاف أولاً",
     "codeNote": "نرسل إليك رمزًا بالبريد الإلكتروني، دون الحاجة إلى كلمة مرور."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "خطة",
+      "howMany": "كام",
+      "who": "اسم المستخدم أو عنوان المحفظة",
+      "whoPlaceholder": "@اسم_المستخدم",
+      "cancel": "إلغاء",
+      "stage": {
+        "preparing": "جارٍ التحضير…",
+        "confirming": "مستني المعاملة…",
+        "recording": "بيخلّص…"
+      }
+    },
+    "badges": {
+      "emoji": "الرموز التعبيرية",
+      "audience": {
+        "subscribers": "مشتركين"
+      },
+      "ended": "انتهى",
+      "until": "لحد {{date}}",
+      "failed": "لم ينجح ذلك. حاول مرة أخرى."
+    }
+  },
+  "whenSheet": {
+    "today": "النهاردة",
+    "tooSoon": "اختيار موعد في المستقبل.",
+    "show": "إظهار",
+    "hide": "إخفاء"
+  },
+  "planned": {
+    "title": "مخطط",
+    "all": "الكل",
+    "posts": "بوستات",
+    "stages": "الغرف الصوتية",
+    "post": "بوست",
+    "live": "لايف",
+    "stage": "ستيدج",
+    "untitledPost": "بوست",
+    "untitledLive": "لايف",
+    "loading": "جار التحميل…",
+    "startNow": "ابدأ دلوقتي",
+    "cancel": "إلغاء",
+    "cancelled": "تم الإلغاء"
+  },
+  "welcome": {
+    "about": {
+      "title": "مرحبًا بك في Riftn",
+      "day": "يوم",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "name": {
+      "title": "أنا",
+      "placeholder": "أنا"
+    },
+    "card": {
+      "name": "أنا",
+      "followers": "المتابعون"
+    },
+    "topic": {
+      "music": "موسيقى",
+      "art": "فن",
+      "gaming": "ألعاب",
+      "crypto": "كريبتو",
+      "sports": "الرياضة",
+      "film": "السينما",
+      "podcast": "بودكاست",
+      "news": "أخبار",
+      "science": "العلوم"
+    },
+    "back": "رجوع",
+    "skipPhoto": "تخطي في الوقت الحالي",
+    "preview": "معاينة"
+  },
+  "appTokens": {
+    "title": "رموزك",
+    "history": "السجل",
+    "kindDeposit": "إيداع",
+    "to": "إلى",
+    "amount": "المبلغ",
+    "notePlaceholder": "زوّد ملاحظة (اختياري)",
+    "sendButton": "إرسال",
+    "errorInsufficient": "لا توجد رموز كافية"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "الكل",
+      "followers": "المتابعين",
+      "nobody": "محدش"
+    },
+    "heading": "ردود الأفعال",
+    "more": "عرض المزيد",
+    "liveNow": "لايف",
+    "untitled": "الاستجابة"
+  },
+  "connectGuide": {
+    "title": "اربط Riftn بمساعد الذكاء الاصطناعي الخاص بك",
+    "urlLabel": "رابط خادم MCP",
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "copiedToast": "تم نسخ رابط MCP"
+  },
+  "avatarPrompt": {
+    "notNow": "ليس الآن"
+  },
+  "postStats": {
+    "engagement": "التفاعل",
+    "finished": "خلص",
+    "members": "الأعضاء",
+    "membersLower": "عضو",
+    "newFollowers": "المتابعون الجدد",
+    "noBadge": "لا شارة",
+    "people": "ناس",
+    "plays": "يلعب",
+    "quotes": "اقتباسات",
+    "reposts": "إعادة نشر",
+    "saved": "تم الحفظ",
+    "shares": "مشاركات",
+    "signedOutViewers": "اتسجل الخروج",
+    "topSupporters": "أفضل المؤيدين",
+    "visitors": "اتسجل الخروج"
+  },
   "tokenLaunch": {
+    "eyebrow": "قريبًا",
     "body": "شغل الشراء مغلق حاليًا بينما يتم استعداد السندات الجديدة. احصل على بريد إلكتروني في اللحظة التي ينطلق فيها.",
     "notifyMe": "إخبرني",
     "sendTo": "نحن سنرسل بريد إلكتروني ل{{email}}",
@@ -19018,6 +19341,10 @@
     "unavailable": "التحقق من GitHub قريبًا.",
     "connect": "اتصل بـ GitHub",
     "disconnect": "قطع الاتصال"
+  },
+  "mcpKeys": {
+    "delete": "مسح",
+    "shortProfile": "البروفايل"
   },
   "chatSearch": {
     "placeholder": "البحث في الرسائل أو الأشخاص",
@@ -19048,5 +19375,16 @@
     "gone": "لم تعد هذه الرسالة موجودة هنا",
     "theirMessages": "رسائلهم",
     "seeTheirMessages": "عرض رسائلهم"
+  },
+  "dmRequests": {
+    "title": "طلبات",
+    "accept": "قبول",
+    "delete": "مسح",
+    "block": "حظر"
+  },
+  "dmSchedule": {
+    "view": "شاهد",
+    "edit": "تعديل",
+    "error": "لم ينجح ذلك. حاول مرة أخرى."
   }
 }

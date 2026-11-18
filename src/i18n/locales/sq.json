@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Tekst"
+  },
   "comic": {
     "showAll": "Shfaq të gjitha {{count}} faqet"
   },
@@ -14,6 +17,22 @@
     "glitter": "Shkëlqim",
     "saved": "Korniza u ruajt",
     "failed": "Korniza nuk u ruajt"
+  },
+  "duet": {
+    "policyEveryone": "Të gjithë",
+    "policyFollowers": "Ndjekësit",
+    "policyNobody": "Askush",
+    "loadMore": "Ngarko më shumë"
+  },
+  "videoRemix": {
+    "sound": "Përdorni këtë zë"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Të gjithë",
+      "followers": "Ndjekësit",
+      "nobody": "Askush"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +185,18 @@
     "privateNote": "Llogaritë private nuk shfaqen në fediverse.",
     "noUsername": "Zgjidh një emër përdoruesi për të marrë një adresë fediverse."
   },
+  "signedFollows": {
+    "setUp": "Aktivizo",
+    "turnOff": "Çaktivizo",
+    "efpTurnOff": "Ndaloni"
+  },
   "profileFields": {
     "title": "Fushat e profilit",
     "description": "Deri në katër rreshta shtesë në profilin tënd, si një faqe interneti ose përemrat e tu.",
     "label": "Etiketa",
     "content": "Përmbajtja",
+    "add": "Shkarko fushën",
+    "remove": "Hap fushën",
     "save": "Ruaj fushat",
     "saved": "Fushat e profilit u ruajtën",
     "failed": "Nuk u ruajt. Provo përsëri.",
@@ -368,6 +394,7 @@
     "checkFailed": "Nuk mundëm të kontrolluem disponueshmërinë. Pritni të provoni përsëri.",
     "checking": "Po kontrollojmë...",
     "ownership": "Burim i hapur. Në pronësi të përdoruesit.",
+    "title": "Pak punë.\nNjë Riftn më i mirë.",
     "intermission": "I mësuar për momentin",
     "community": "Komuniteti i pari. Gjithmonë."
   },
@@ -1196,7 +1223,11 @@
     "payDirect": "Dërguar direkt në {{name}} në {{symbol}} në {{chain}}. Nuk ka shkëmbim.",
     "payDirectNoName": "Dërguar drejt e te krijuesi në {{symbol}} në {{chain}}. Nuk ka shkëmbim.",
     "payViaBridgeDpay": "Lëvizur në Base dhe paguar në Riftn Pay, tokenat mbërrijnë në rreth një minutë",
-    "dmSent": "U dërguan {{amount}} tokena te {{name}}!"
+    "dmSent": "U dërguan {{amount}} tokena te {{name}}!",
+    "messagePublic": "Publik",
+    "railTitle": "Këshilla",
+    "railTotal": "{{amount}} tokena",
+    "tokensUnit": "tokena"
   },
   "postOptions": {
     "liveAlertsOn": "Tani ndiqni {{name}}. Do të merrni një njoftim kur të nisë transmetimi live.",
@@ -1697,6 +1728,9 @@
   "notifications": {
     "title": "Njoftimet",
     "markAllRead": "Shëno të gjitha si të lexuara",
+    "groupNew": "Të reja",
+    "groupToday": "Sot",
+    "groupThisWeek": "Këtë javë",
     "settings": "Cilësimet e Njoftimeve",
     "actions": "Veprimet",
     "markAllAsRead": "Shëno të gjitha si të lexuara",
@@ -1725,6 +1759,7 @@
     "communities": "Komunitete",
     "stores": "Dyqane",
     "noNotificationsYet": "Nuk ka njoftime akoma",
+    "searchClose": "Mbyll kërkimin",
     "noNotificationsDesc": "Kur merrni pëlqime, komente, bakshishe, ose abonentë të rinj, do të shfaqen këtu.",
     "loadMore": "Ngarko më shumë",
     "markAsRead": "Shëno si të lexuar",
@@ -1964,11 +1999,13 @@
     "promptLabel": "Kërkesa jote",
     "promptPlaceholder": "Përshkruaj një ide, përmirësim ose defekt...",
     "promptAttach": "Bashkëngjit imazhet",
+    "removeAttachment": "Hiq dokumentin e bashkangjitur",
     "promptDrop": "Ngjit ose lësho imazhe këtu",
     "promptPost": "Kërkesë për postim",
     "promptShortcut": "Ctrl / + Shkruaj te postimi",
     "promptDetails": "Detajet me zgjedhje",
     "promptDevice": "Pajisja dhe sistemi operativ (për defektet)",
+    "deviceInfoNoErrors": "Asnjë",
     "promptFilters": "Filtro sipas kategorisë",
     "promptMediaError": "Zgjidh imazhe ose video nën 50MB secila.",
     "promptMediaLimit": "Deri në {{max}} attachments.",
@@ -2027,6 +2064,12 @@
     "loginRequired": "Kërkohet hyrja"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Deri",
+      "recent": "Të fundit",
+      "suggested": "Të sugjeruara",
+      "youFollow": "Njerëzit që ndjek"
+    },
     "reply": "Përgjigju",
     "react": "Reago",
     "edit": "Redakto",
@@ -2063,7 +2106,10 @@
     "checkingTokenBalance": "Duke kontrolluar bilancin tuaj të tokenave...",
     "deleteConversationFailed": "Biseda nuk mund të fshihej",
     "message": "Mesazhi",
-    "noConversationsYet": "Nuk ka ende biseda"
+    "noConversationsYet": "Nuk ka ende biseda",
+    "sending": "Transmetohet",
+    "retrySend": "Provo sërish",
+    "discardSend": "Hiq"
   },
   "music": {
     "listeningCount_one": "{{count}} duke dëgjuar",
@@ -2146,6 +2192,9 @@
     "viewList": "Pamja e listës",
     "viewMode": "Shfaq",
     "back": "Kthehu",
+    "reserve": {
+      "signIn": "Hyni"
+    },
     "usernameAvailable": "Emri i përdoruesit është i disponueshëm!",
     "signUpToClaim": "Regjistrohu sot për ta marrë",
     "signUp": "Regjistrohu",
@@ -2173,7 +2222,11 @@
     },
     "tabs": {
       "playlists": "Listat e luajtjes",
-      "dislikes": "Nuk të pëlqen"
+      "dislikes": "Nuk të pëlqen",
+      "likes": "Pëlqime"
+    },
+    "likedPosts": {
+      "loadMore": "Ngarko më shumë"
     },
     "dislikes": {
       "emptyTitle": "Nuk ka ende mospëlqime",
@@ -2196,6 +2249,7 @@
     "sortMostViewed": "Më të shikuarat",
     "sortLikes": "Pëlqime",
     "sortMostLiked": "Më të pëlqyerat",
+    "sortCustomShort": "Personalizuar",
     "searchThisChannel": "Kërko në këtë kanal",
     "searchResultCount": "1 rezultat për \"{{query}}\"",
     "searchResultCountPlural": "{{count}} rezultatet për \"{{query}}\""
@@ -2353,6 +2407,7 @@
       "runSwarm": "Zbërthe zbritjen",
       "description": "Veprimet kryhen si agjenti i zgjedhur. Detyrat e planifikuara vazhdojnë me aplikacionin e mbyllur.",
       "instructions": "Instrukcione për agentin",
+      "examples": "Posto një herë në ditë për: muzikë të pavarur\nStili: kureshtar, konciz dhe bisedor\nPëlqe deri në 2 postime të fundit në ditë për: muzikë, shfaqje të drejtpërdrejta, vinil",
       "preparing": "Po përgatitet detyra…",
       "run": "Ekzekuto menjëherë",
       "limits": "Një postim ditor dhe deri në 3 pëlqime përkatëse për detyrë. Të gjithë agjentët ndajnë një hapësirë postimi prej 20 minutash. Fotografitë përdorin diçiturat e kontrolluara; videot kanë nevojë për një imazh kopertine. Postimet qëndrojnë nën 500 karaktere. Nuk ka gaz përveç prerjes; shkrimi mund të përdorë kredite.",
@@ -2461,6 +2516,9 @@
     "signInAgain": "Hyni përsëri",
     "createSignIn": "Hyni përsëri për të krijuar një agjent",
     "checkConnection": "Kontrolloni lidhjen dhe provoni përsëri.",
+    "welcome": {
+      "text": "Mesazhi i mirëseardhjes"
+    },
     "workspace": {
       "moderation": "Moderimi i transmetimit",
       "moderationHelp": "Aktivizoni fillimisht lejen e moderimit. Llogaria duhet të jetë tashmë krijuesi i transmetimit ose një moderator i caktuar. Mënyrat e miratimit dhe të skicës vazhdojnë të zbatohen. Heshtjet e përkohshme skadojnë automatikisht.",
@@ -2653,7 +2711,9 @@
     "resendCodePhone": "Numër i gabuar apo pa kod? Kthehu prapa",
     "continueAs": "Vazhdo si",
     "switchWalletAccount": "Ndërro llogarinë",
-    "walletLoadFailed": "Nuk mund të ngarkohen kartelat. Pritni të provoni përsëri."
+    "walletLoadFailed": "Nuk mund të ngarkohen kartelat. Pritni të provoni përsëri.",
+    "openInBrowser": "Hap në shfletues",
+    "copyLink": "Kopjo lidhjen"
   },
   "careers": {
     "title": "Karriera në Riftn",
@@ -2877,7 +2937,8 @@
     "noMenuMatches": "Asgjë në meny nuk përputhet",
     "searchDehubFor": "Kërko „{{query}}” në Riftn",
     "switchAccount": "Hapni llogari",
-    "signedInAs": "Regjistruar në si {{name}}"
+    "signedInAs": "Regjistruar në si {{name}}",
+    "requestSend": "Dërgo kërkesë"
   },
   "comments": {
     "reportComment": "Raporto komentin",
@@ -2986,6 +3047,9 @@
     "confirm": "Mint në {{chain}}",
     "confirmWithCost": "Mint në {{chain}} · {{cost}}",
     "notAvailable": "Gjurmimi në këtë zinxhir nuk është ende i disponueshëm."
+  },
+  "postEditHistory": {
+    "original": "Origjinal"
   },
   "postInfo": {
     "title": "Informacione për postimin",
@@ -5098,6 +5162,7 @@
     "settledTitleSpeed": ", tipikisht në {{speed}}",
     "settledCount_one": "{{count}} vendosur",
     "settledCount_other": "{{count}} vendosur",
+    "statusInProgress": "Në vazhdim",
     "howMany": "Sa shumë",
     "availableCount_one": "{{count}} disponueshme",
     "availableCount_other": "{{count}} disponueshme",
@@ -5190,6 +5255,17 @@
     "sellYourFractions": "Shitni fraksionet tuaja ({{held}} mbeten)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Përdor këto detaje"
+      }
+    },
+    "cinema": {
+      "close": "Mbyll",
+      "performance": {
+        "label": "Performanca"
+      }
+    },
     "libraryEmpty": "Gjenerimet tuaja të ruajtura do të shfaqen këtu.",
     "toolRemake": "Përsëri",
     "toolMaboroshi": "Mbiemër i fshehtë",
@@ -6160,6 +6236,10 @@
     "raw": "I papërpunuar"
   },
   "nftMarket": {
+    "actAll": "Të gjitha",
+    "actListings": "Njoftimet",
+    "actOffers": "Oferta",
+    "tabActivity": "Aktiviteti",
     "shortTitle": "NFTs",
     "filters": "Filtrat",
     "forSale": "Për shitje",
@@ -6224,6 +6304,9 @@
     "offered": "Oferta u dërgua. Zotëruesi mund ta pranojë atë në çdo kohë.",
     "dehubPost": "Postimi Riftn",
     "youHold": "Ti zotëron {{n}}",
+    "price": "Çmimi",
+    "volume": "Volumi",
+    "tabRecent": "Të fundit",
     "buyNow": "Bli tani",
     "dropsTo": "Çmimi bie në {{price}} deri më {{date}}",
     "inBundle": "Shitje si paket {{n}}",
@@ -6635,7 +6718,63 @@
     "youAreBanned": "Unë nuk mund të shprehem në transmetimet e kësaj kreatore.",
     "youAreTimedOut": "Ju jeni kohëzuar për një moment."
   },
+  "studioDeck": {
+    "background": {
+      "title": "Sfondi",
+      "modes": {
+        "none": "Fikur",
+        "blur": "Turbullim",
+        "color": "Ngjyra"
+      }
+    },
+    "remove": "Hiq",
+    "scenes": {
+      "countdown": "Numërimi mbrapsht",
+      "names": {
+        "starting": "Fillon së shpejti"
+      }
+    },
+    "sources": {
+      "reactAdd": "Shfaq",
+      "image": "Imazhi",
+      "camera": "Kamera",
+      "show": "Shfaq në stream",
+      "positions": {
+        "center": "Qëndro"
+      },
+      "shapes": {
+        "circle": "Rreth",
+        "rect": "Katror"
+      }
+    },
+    "audio": {
+      "mute": "Hesht",
+      "unmute": "Hiq heshtjen",
+      "gateLevels": {
+        "off": "Fikur",
+        "low": "E ndritshme",
+        "high": "I fortë"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platforma",
+      "label": "Emri (optional)",
+      "key": "Çelësi i transmetimit",
+      "save": "Shto",
+      "cancel": "Anulo",
+      "states": {
+        "off": "Fikur",
+        "idle": "Gati",
+        "live": "Drejtpërdrejt",
+        "error": "Gabim"
+      }
+    },
+    "vertical": {
+      "centre": "Qëndro",
+      "live": "DREJTPËRDREJT"
+    },
     "subathon": {
       "title": "Nënaton",
       "intro": "Një countdown në streamin tuaj. Çdo donacion, follow dhe abonimi i paguar shton kohë, kështu që dhomëja të mbajë jetë të vërtetë.",
@@ -7587,6 +7726,7 @@
     "footerNote": "Përcaktimi i DePin është një shërbim kontributiv, jo një produkt investimi. Disponibiliteti, eligjibiliteti dhe çmimet mund të ndryshojnë."
   },
   "creatorFlow": {
+    "disconnect": "Shkëputu",
     "title": "Krijuesi i rrjedhës",
     "backToStudio": "Kthehu te Studioja e Krijuesit",
     "backToFlows": "Kthehu te rrjedhat e tua",
@@ -7926,6 +8066,9 @@
     "followingBackProgress": "Në vijim {{completed}} të {{total}}",
     "findingFollowers": "Gjetja e ndjekësve...",
     "followBackAll": "Ndiqi të gjitha",
+    "followBackConfirm": "Të ndjekë mbrapsht",
+    "followBackNotNow": "Jo tani",
+    "followBackDone": "U krye",
     "nonFollowers": {
       "title": "Pastroje këto që ndjek?",
       "body": "{{count}} llogaritë që ndjek nuk të ndjekin në kthim.",
@@ -8739,6 +8882,14 @@
     "priceChartCleared": "Grafiku i çmimeve u pastrua. Çmimi fiks i referencës: 0.0001 $. Çmimet e ekzekutimit varen nga porositë e disponueshme."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Rrotullimi",
+      "add": "Shto",
+      "scale": "Madhësia",
+      "color": "Ngjyrë",
+      "light": "E ndritshme"
+    },
     "video": {
       "tFade": "Shkrirje",
       "none": "Asnjë",
@@ -8905,6 +9056,8 @@
       "tools": "Veglat e redaktorit"
     },
     "agent": {
+      "stop": "Ndaloni",
+      "queue": "Shto në radhë",
       "introTitle": "Tregoji AI-së çfarë dëshiron",
       "introBody": "Përshkruaj dizajnin ose ndryshimin me fjalët e tua. Ndryshon madhësinë e faqes, shkruan dhe stilon tekstin, gjen foto, video dhe muzikë falas, aplikon filtra, rregullon shtresat dhe i animon ato. Çdo kërkesë zhbëhet me një hap.",
       "suggestPoster": "Bëj një postim katror për Instagram për uljet e verës me një foto plazhi dhe një titull të theksuar",
@@ -9173,6 +9326,9 @@
       "reloadText": "Ringarko diçiturën",
       "textSaved": "Ndryshimet e diçiturës u ruajtën.",
       "action": "Titra automatike",
+      "styles": {
+        "bold": "I guximshëm"
+      },
       "working": "Duke dëgjuar… {{percent}}%",
       "downloading": "Duke përgatitur modelin e të folurit… {{percent}}%",
       "hint": "E kthen të folurin në titra të sinkronizuara që mund t'i ristilosh. Punon në pajisjen tënde: falas dhe privat. Përdorimi i parë shkarkon modelin.",
@@ -9389,6 +9545,7 @@
         "hookHint": "Bëjeni hapjen të vlefshme për t 'u parë.",
         "beforeHint": "Trego se ku ke filluar.",
         "afterHint": "Shfaq rezultatin.",
+        "saveHint": "Jepu shikuesve një arsye ta ruajnë këtë.",
         "tipHint": "Shto detajet që e bëjnë të dobishëm.",
         "pickHint": "Thuaj pse kjo zgjedhje e meriton vendin e saj.",
         "mythHint": "Vendimi që doni të kundërvënë.",
@@ -10551,6 +10708,25 @@
       "toolbar": "Navigimi në kanvas",
       "zoomIn": "Fito në kanvas",
       "zoomOut": "Fito në kanvas"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Ndaj",
+        "play": "Luaj",
+        "pause": "Ndalo",
+        "frameBack": "Korniza e mëparshme",
+        "frameForward": "Korniza tjetër"
+      }
+    },
+    "voiceClone": {
+      "stop": "Ndalo regjistrimin"
+    },
+    "linkImport": {
+      "go": "Importo",
+      "downloading": "Po shkarkohet {{percent}}%"
+    },
+    "reverse": {
+      "action": "Rretho"
     }
   },
   "jungleMood": {
@@ -10720,6 +10896,7 @@
     "audioSpace": "Hapësirë audio",
     "audioSpaceDesc": "Një dhomë audio e drejtpërdrejtë ku përdoruesit mund të flasin, të dëgjojnë dhe të ngrenë dorën për t 'u bashkuar me bisedën.",
     "public": "Publike",
+    "publicDesc": "Përmbajtje e dukshme për të gjithë. Çdokush mund t'i shohë, t'i pëlqejë dhe t'i komentojë postimet publike.",
     "private": "Privat",
     "privateDesc": "Përmbajtja është e dukshme vetëm për ty. Postimet private fshihen nga përdoruesit e tjerë dhe burimi publik.",
     "ppv": "Paguaj-Për-Pamje (PPV)",
@@ -11833,7 +12010,15 @@
       "rewardsWeek": "Java e {{date}}",
       "rewardPaid": "Paguar",
       "rewardPending": "Në pritje",
-      "rewardsNone": "Nuk janë llogaritur ende shpërblime. Java e parë mbyllet të hënën."
+      "rewardsNone": "Nuk janë llogaritur ende shpërblime. Java e parë mbyllet të hënën.",
+      "stats": {
+        "button": "Statistika të drejtpërdrejta"
+      },
+      "signin": {
+        "users_one": "përdorues {{count}}",
+        "users_other": "përdorues {{count}}",
+        "delete": "Fshi"
+      }
     },
     "card": {
       "open": "Hap"
@@ -11991,6 +12176,9 @@
     "reminderLater": "S'është koha"
   },
   "copy": {
+    "55656b5e434f": "Mbyll kërkimin",
+    "57e2faa5ec63": "Kërko në Riftn",
+    "96d7bff86b44": "Kërkimi nuk u arrit të ngarkohej",
     "1607715e45ed": "Prek topin për të folur, ose shkruaj më poshtë",
     "00140a37bd26": "Transaksionet në rrjetin e këtë janë të përkohësisht jo të disponueshme. Ju lutemi, provoni përsëri.",
     "002286513398": "Ju nuk keni leje për të menaxhuar ngjarjet",
@@ -18994,6 +19182,7 @@
     "backToTop": "Kthehu në krye",
     "needTitle": "Për të vazhduar",
     "needBody": "{{count}} më shumë karaktere për të shkuar",
+    "imagesLabel": "Imazhe",
     "backToWriting": "Kthehu te shkrimi",
     "readyTitle": "Gati për t 'u publikuar",
     "sharePreview": "Si duket kur ndahet",
@@ -19055,6 +19244,126 @@
     "exploreFirst": "Eksploroni para",
     "codeNote": "Ne ju derdhim një kod, pa kërkim për fjalë kalim."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Plani",
+      "howMany": "Sa",
+      "who": "Emri i përdoruesit ose adresa e portofolit",
+      "whoPlaceholder": "@emripërdoruesit",
+      "cancel": "Anulo",
+      "stage": {
+        "preparing": "Duke u përgatitur…",
+        "confirming": "Në pritje të transaksionit…",
+        "recording": "Po përfundohet…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Abonentë"
+      },
+      "ended": "Mbaroi",
+      "until": "Deri më {{date}}",
+      "failed": "Kjo nuk funksionoi. Provo përsëri."
+    }
+  },
+  "whenSheet": {
+    "today": "Sot",
+    "tooSoon": "Zgjidhni një kohë në të ardhmen.",
+    "show": "Shfaq",
+    "hide": "Fshih"
+  },
+  "planned": {
+    "title": "Planifikuar",
+    "all": "Të gjitha",
+    "posts": "Postime",
+    "stages": "Dhoma audio",
+    "post": "Posto",
+    "live": "Drejtpërdrejt",
+    "stage": "Skenë",
+    "untitledPost": "Posto",
+    "untitledLive": "Drejtpërdrejt",
+    "loading": "Duke u ngarkuar…",
+    "startNow": "Nis tani",
+    "cancel": "Anulo",
+    "cancelled": "Anuluar"
+  },
+  "welcome": {
+    "about": {
+      "title": "Mirë se erdhët në Riftn",
+      "day": "Ditë",
+      "month": "Muaj",
+      "year": "Vit"
+    },
+    "name": {
+      "title": "Emri yt",
+      "placeholder": "Emri yt"
+    },
+    "card": {
+      "name": "Emri yt",
+      "followers": "ndjekësit"
+    },
+    "topic": {
+      "music": "Muzikë",
+      "gaming": "Lojëra",
+      "crypto": "Kripto",
+      "sports": "Sporteve",
+      "film": "Filmi",
+      "podcast": "Podkasti",
+      "news": "Lajme",
+      "science": "Shkencë"
+    },
+    "back": "Kthehu",
+    "skipPhoto": "Anashkalo për tani",
+    "preview": "Shfaq paraprakisht"
+  },
+  "appTokens": {
+    "title": "Tokenet tuaja",
+    "history": "Historia",
+    "kindDeposit": "Depozito",
+    "to": "Deri",
+    "amount": "Shuma",
+    "notePlaceholder": "Shto një shënim (opsionale)",
+    "sendButton": "Dërgoni",
+    "errorInsufficient": "Nuk ka tokena të mjaftueshëm"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Të gjithë",
+      "followers": "Ndjekësit",
+      "nobody": "Askush"
+    },
+    "heading": "Reagimet",
+    "more": "Shfaq më shumë",
+    "liveNow": "Drejtpërdrejt",
+    "untitled": "Reagimi"
+  },
+  "connectGuide": {
+    "title": "Lidhe Riftn me asistentin tënd të IA-së",
+    "urlLabel": "URL e serverit MCP",
+    "copy": "Kopjo",
+    "copied": "U kopjua",
+    "copiedToast": "URL e MCP-së u kopjua"
+  },
+  "avatarPrompt": {
+    "notNow": "Jo tani"
+  },
+  "postStats": {
+    "engagement": "Angazhim",
+    "finished": "Përfunduar",
+    "members": "Anëtarët",
+    "membersLower": "anëtarë",
+    "newFollowers": "Ndjekës të rinj",
+    "noBadge": "Nuk ka distinktiv",
+    "people": "Njerëz",
+    "plays": "Shfaqje",
+    "quotes": "Citime",
+    "reposts": "Ripostime",
+    "saved": "Ruajtur",
+    "shares": "Ndarje",
+    "signedOutViewers": "U çkyçët",
+    "topSupporters": "Mbështetësit më të mirë",
+    "visitors": "U çkyçët"
+  },
   "tokenLaunch": {
     "eyebrow": "Së shpejti",
     "title": "Tokeni po niset së shpejti",
@@ -19083,6 +19392,10 @@
     "unavailable": "Verifikimi i GitHub-it është në rrugën e pritjes.",
     "connect": "Kërkoni lidhjen me GitHub",
     "disconnect": "Ndalo lidhjen me GitHub"
+  },
+  "mcpKeys": {
+    "delete": "Fshi",
+    "shortProfile": "Profili"
   },
   "chatSearch": {
     "placeholder": "Kërkoni mesazhe ose njerëz",
@@ -19113,5 +19426,16 @@
     "gone": "Ky mesazh nuk është më këtu",
     "theirMessages": "Mesazhet e tyre",
     "seeTheirMessages": "Shihni mesazhet e tyre"
+  },
+  "dmRequests": {
+    "title": "Kërkesat",
+    "accept": "Prano",
+    "delete": "Fshi",
+    "block": "Blloko"
+  },
+  "dmSchedule": {
+    "view": "Shiko",
+    "edit": "Modifiko",
+    "error": "Kjo nuk funksionoi. Provo përsëri."
   }
 }
