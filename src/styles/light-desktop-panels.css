@@ -120,4 +120,29 @@
     [data-sidebar-fade] {
     background: linear-gradient(to top, #fbfbfc, rgb(251 251 252 / 0)) !important;
   }
+
+  /* Messages: the All / Unread / Groups tabs light up like the right rail's
+     tabs (Leaderboard, Chat ...): a lifted white pill, no Beam underline. */
+  html[data-system-tone='light'] [data-msg-cards] [data-msg-cards-tab] {
+    border-radius: 12px;
+  }
+
+  html[data-system-tone='light'] [data-msg-cards] [data-msg-cards-tab]:hover {
+    background: #f0f1f3;
+  }
+
+  html[data-system-tone='light'] [data-msg-cards] [data-msg-cards-tab][aria-selected='true'] {
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(17 17 17 / 0.08);
+  }
+
+  html[data-system-tone='light'] [data-msg-cards] [data-msg-cards-tab][aria-selected='true']::after {
+    display: none;
+  }
+
+  /* Messages: the header pill's top lines up with the search bar in the right
+     rail (6px from the top), not 8px lower. */
+  html[data-system-tone='light'] [data-msg-cards] {
+    margin-top: -8px;
+  }
 }
