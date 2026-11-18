@@ -101,4 +101,19 @@ describe('staffImpersonated', () => {
       expect(staffImpersonated({ address: STRANGER, displayName })).toBeNull();
     }
   });
+
+  it('flags only obvious fake Riftn support, admin or team accounts', () => {
+    for (const name of ['Riftn Support', 'riftn_support', 'riftnadmin', 'Riftn Team', 'Official Riftn', 'Riftn Help Desk', 'RIFTN MOD']) {
+      expect(staffImpersonated({ address: STRANGER, displayName: name })).toBe('Riftn');
+    }
+    expect(staffImpersonated({ address: STRANGER, username: 'riftn_admin' })).toBe('Riftn');
+  });
+
+  it('leaves DeHub names, Riftn fans and verified accounts alone', () => {
+    for (const name of ['dehu_b', 'DeHub', 'dehub_support', 'Riftn', 'riftn_fan', 'Rifter', 'Rifter Support', 'I love Riftn', 'The Riftn']) {
+      expect(staffImpersonated({ address: STRANGER, displayName: name, username: name })).toBeNull();
+    }
+    expect(staffImpersonated({ address: STRANGER, displayName: 'Riftn Support', isVerified: true })).toBeNull();
+    expect(staffImpersonated({ address: STRANGER, displayName: 'Riftn Team', username: 'riftn' })).toBeNull();
+  });
 });
