@@ -43,7 +43,7 @@ import { OnlineDot } from '@/components/app/chat/OnlineDot';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePublicChatReading, usePublicChatUnreadCount } from '@/hooks/use-public-chat-unread';
 import { AuthGate } from '@/components/app/AuthGate';
-import { useConversations, useCreateConversation, useUserSearchForDM, useDeleteConversation, useTotalUnreadCount } from '@/hooks/use-messages';
+import { useConversations, useCreateConversation, useUserSearchForDM, useDeleteConversation } from '@/hooks/use-messages';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { getMediaUrl, getAccountInfo, type DeHubConversation, type DeHubUser } from '@/lib/api/dehub';
 import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
@@ -1133,7 +1133,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     />
   ) : null;
 
-  const dmUnread = useTotalUnreadCount();
+  // Same total as the nav icon: requests never light it.
+  const dmUnread = liveConversations.reduce((sum, c) => sum + (c.isRequest ? 0 : c.unreadCount || 0), 0);
   const pickTab = (tab: 'all' | 'unread' | 'groups' | 'requests' | 'archived') => {
     setShowRequests(tab === 'requests');
     setShowArchived(tab === 'archived');
