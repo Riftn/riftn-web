@@ -2282,7 +2282,8 @@
       "total": "Total jangkauan",
       "breakdownTitle": "Dari mana jangkauan ini berasal",
       "dehubFollowers": "Pengikut Riftn",
-      "verified": "Angka sosial berasal dari akun yang dihubungkan kreator."
+      "verified": "Angka sosial berasal dari akun yang dihubungkan kreator.",
+      "selfReported": "Jumlah pengikut sosial dimasukkan oleh kreator."
     },
     "loginDescription": "Masuk untuk melihat dan mengelola profil Anda.",
     "replyThread": {

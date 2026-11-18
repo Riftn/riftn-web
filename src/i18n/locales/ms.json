@@ -2470,7 +2470,8 @@
       "total": "Jumlah capaian",
       "breakdownTitle": "Dari mana datangnya jangkauan ini",
       "dehubFollowers": "Pengikut Riftn",
-      "verified": "Nombor sosial datang dari akaun yang pengguna telah menyambung."
+      "verified": "Nombor sosial datang dari akaun yang pengguna telah menyambung.",
+      "selfReported": "Kiraan pengikut sosial dimasukkan oleh pengkarya."
     },
     "loginDescription": "Log masuk untuk melihat dan menguruskan profil anda.",
     "replyThread": {

@@ -2282,7 +2282,8 @@
       "total": "总覆盖率",
       "breakdownTitle": "这种影响力来自何处",
       "dehubFollowers": "Riftn关注者",
-      "verified": "社交数据来自创作者已连接的账号。"
+      "verified": "社交数据来自创作者已连接的账号。",
+      "selfReported": "社交关注者数量由创作者输入。"
     },
     "loginDescription": "登录以查看和管理您的个人资料。",
     "replyThread": {

@@ -2485,7 +2485,8 @@
       "total": "Alcance total",
       "breakdownTitle": "De dónde viene este alcance",
       "dehubFollowers": "Seguidores de Riftn",
-      "verified": "Los datos sociales provienen de cuentas que el creador conectó."
+      "verified": "Los datos sociales provienen de cuentas que el creador conectó.",
+      "selfReported": "El creador introduce el número de seguidores en redes sociales."
     },
     "loginDescription": "Inicia sesión para ver y gestionar tu perfil.",
     "replyThread": {

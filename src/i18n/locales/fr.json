@@ -2485,7 +2485,8 @@
       "total": "Portée totale",
       "breakdownTitle": "D'où vient cette portée",
       "dehubFollowers": "Abonnés Riftn",
-      "verified": "Les chiffres sociaux proviennent des comptes connectés par le créateur."
+      "verified": "Les chiffres sociaux proviennent des comptes connectés par le créateur.",
+      "selfReported": "Les comptes d'abonnés sociaux sont saisis par le créateur."
     },
     "loginDescription": "Connectez-vous pour voir et gérer votre profil.",
     "replyThread": {

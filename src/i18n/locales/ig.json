@@ -2198,7 +2198,8 @@
       "total": "Total iru",
       "breakdownTitle": "Ebee ka iru a si abịa",
       "dehubFollowers": "Riftn na-eso ụzọ",
-      "verified": "Onu ogugu ndi mmadu sitere na akaụntụ onye okike jikọtara."
+      "verified": "Onu ogugu ndi mmadu sitere na akaụntụ onye okike jikọtara.",
+      "selfReported": "Onye na-emepụta ihe na-abanye ọnụ ọgụgụ ndị na-eso ụzọ ọha."
     },
     "loginDescription": "Banye iji hụ ma jikwaa profaịlụ gị.",
     "replyThread": {

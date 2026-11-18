@@ -2213,7 +2213,8 @@
       "total": "Kopējā sasniedzamība",
       "breakdownTitle": "No kurienes nāk šī saziņa",
       "dehubFollowers": "Riftn sekotāji",
-      "verified": "Sociālo tīklu uzskaiti nodrošina konti, ar kuriem radītājs ir saistīts."
+      "verified": "Sociālo tīklu uzskaiti nodrošina konti, ar kuriem radītājs ir saistīts.",
+      "selfReported": "Sociālo sekotāju skaitu ievada veidotājs."
     },
     "loginDescription": "Piesakieties, lai skatītu un pārvaldītu savu profilu.",
     "replyThread": {

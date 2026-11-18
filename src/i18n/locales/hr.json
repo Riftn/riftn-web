@@ -2214,7 +2214,8 @@
       "total": "Ukupan doseg",
       "breakdownTitle": "Odakle dolazi taj doseg",
       "dehubFollowers": "Pratitelji na Riftnu",
-      "verified": "Broj računa na društvenim mrežama dolazi s računa koje je kreator povezao."
+      "verified": "Broj računa na društvenim mrežama dolazi s računa koje je kreator povezao.",
+      "selfReported": "Kreator unosi broj pratitelja na društvenim mrežama."
     },
     "loginDescription": "Prijavite se za pregled i upravljanje profilom.",
     "replyThread": {

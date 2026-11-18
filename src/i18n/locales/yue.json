@@ -2209,7 +2209,8 @@
       "total": "總觸及率",
       "breakdownTitle": "呢個觸及範圍嚟自邊度",
       "dehubFollowers": "Riftn 追蹤者",
-      "verified": "社交數據嚟自創作者連結嘅帳戶。"
+      "verified": "社交數據嚟自創作者連結嘅帳戶。",
+      "selfReported": "社交追蹤者數目係由創作者輸入。"
     },
     "loginDescription": "登入嚟睇同管理你嘅個人檔案。",
     "replyThread": {

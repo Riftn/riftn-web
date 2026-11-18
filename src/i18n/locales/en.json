@@ -2485,7 +2485,8 @@
       "total": "Total reach",
       "breakdownTitle": "Where this reach comes from",
       "dehubFollowers": "Riftn followers",
-      "verified": "Social counts come from accounts the creator connected."
+      "verified": "Social counts come from accounts the creator connected.",
+      "selfReported": "Social follower counts are entered by the creator."
     },
     "loginDescription": "Log in to view and manage your profile.",
     "replyThread": {

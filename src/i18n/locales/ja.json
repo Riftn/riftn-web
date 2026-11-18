@@ -2281,7 +2281,8 @@
       "total": "トータルリーチ",
       "breakdownTitle": "このリーチがどこから来たのか",
       "dehubFollowers": "Riftnフォロワー",
-      "verified": "ソーシャルの数値はクリエイターが連携したアカウントから取得しています。"
+      "verified": "ソーシャルの数値はクリエイターが連携したアカウントから取得しています。",
+      "selfReported": "ソーシャルフォロワー数は、クリエイターが入力します。"
     },
     "loginDescription": "ログインしてプロフィールを表示・管理。",
     "replyThread": {
