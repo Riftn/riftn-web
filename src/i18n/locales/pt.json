@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Texto"
+  },
   "comic": {
     "showAll": "Ver todas as {{count}} páginas"
   },
@@ -227,11 +230,18 @@
     "privateNote": "Contas privadas não aparecem no fediverso.",
     "noUsername": "Escolha um nome de usuário para ter um endereço no fediverso."
   },
+  "signedFollows": {
+    "setUp": "Ativar",
+    "turnOff": "Desligar",
+    "efpTurnOff": "Parar"
+  },
   "profileFields": {
     "title": "Campos do perfil",
     "description": "Até quatro linhas extras no seu perfil, como um site ou seus pronomes.",
     "label": "Rótulo",
     "content": "Conteúdo",
+    "add": "Adicionar campo",
+    "remove": "Remover campo",
     "save": "Salvar campos",
     "saved": "Campos do perfil salvos",
     "failed": "Não foi salvo. Tente de novo.",
@@ -429,6 +439,7 @@
     "checkFailed": "Não foi possível verificar a disponibilidade. Tente novamente.",
     "checking": "A verificar...",
     "ownership": "Código aberto. Propriedade do utilizador.",
+    "title": "Um pouco de trabalho.\nUm Riftn melhor.",
     "intermission": "Temporariamente offline",
     "community": "Comunidade em primeiro lugar. Sempre."
   },
@@ -1872,6 +1883,7 @@
     "communities": "Comunidades",
     "stores": "Lojas",
     "noNotificationsYet": "Sem notificações ainda",
+    "searchClose": "Fechar pesquisa",
     "noNotificationsDesc": "Quando receber curtidas, comentários, gorjetas ou inscritos, aparecerão aqui.",
     "loadMore": "Carregar mais",
     "markAsRead": "Marcar como lido",
@@ -2111,11 +2123,13 @@
     "promptLabel": "Sua solicitação",
     "promptPlaceholder": "Descreva uma ideia, uma melhoria ou um bug...",
     "promptAttach": "Anexe imagens",
+    "removeAttachment": "Remover anexo",
     "promptDrop": "Cole ou arraste imagens aqui",
     "promptPost": "Publicar prompt",
     "promptShortcut": "Ctrl / ļ + Enter para postar",
     "promptDetails": "Informações opcionais",
     "promptDevice": "Dispositivo e sistema operacional (para bugs)",
+    "deviceInfoNoErrors": "Nenhum",
     "promptFilters": "Filtrar por categoria",
     "promptMediaError": "Escolha imagens ou vídeos com menos de 50 MB cada.",
     "promptMediaLimit": "Até {{max}} anexos.",
@@ -2179,6 +2193,12 @@
     "loginRequired": "Login necessário"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Até",
+      "recent": "Recentes",
+      "suggested": "Sugestões",
+      "youFollow": "Pessoas que você segue"
+    },
     "reply": "Responder",
     "react": "Reagir",
     "edit": "Editar",
@@ -2215,7 +2235,10 @@
     "checkingTokenBalance": "Verificando seu saldo de tokens...",
     "deleteConversationFailed": "Não foi possível excluir a conversa",
     "message": "Mensagem",
-    "noConversationsYet": "Ainda não há conversas"
+    "noConversationsYet": "Ainda não há conversas",
+    "sending": "Enviando",
+    "retrySend": "Tentar novamente",
+    "discardSend": "Remover"
   },
   "music": {
     "listeningCount_one": "{{count}} ouvir",
@@ -2301,6 +2324,9 @@
     "mutualsOne": "{{count}} Mútuo:",
     "mutualsMany": "{{count}} Mútuos:",
     "back": "Voltar",
+    "reserve": {
+      "signIn": "Entrar"
+    },
     "usernameAvailable": "Nome disponível!",
     "signUpToClaim": "Cadastre-se para reivindicar",
     "signUp": "Cadastrar",
@@ -2539,6 +2565,7 @@
       "runSwarm": "Executar enxame",
       "description": "As ações são executadas como o agente selecionado. As tarefas agendadas continuam com a aplicação fechada.",
       "instructions": "Instruções do agente",
+      "examples": "Publicar uma vez por dia sobre: música independente\nEstilo: curioso, conciso e descontraído\nCurtir até 2 publicações recentes por dia sobre: música, shows ao vivo, vinil",
       "preparing": "Preparando tarefa…",
       "run": "Executar prompt",
       "limits": "Uma publicação diária e até 3 curtidas relevantes por tarefa. Todos os agentes compartilham uma lacuna de post de 20 minutos. As fotos usam legendas marcadas; os vídeos precisam de uma imagem de capa. Os posts ficam com menos de 500 caracteres. Sem gás, a menos que seja cunhado; a escrita pode usar créditos.",
@@ -3191,6 +3218,9 @@
     "stopRecording": "Parar",
     "replyPlaceholder": "Responder a @{{name}}...",
     "composerPlaceholder": "Digite aqui",
+    "threadParts": {
+      "save": "Salvar ordem"
+    },
     "attachImage": "Anexar imagem",
     "recordVoiceNote": "Gravar nota de voz",
     "post": "Publicar",
@@ -5328,6 +5358,7 @@
     "settledTitleSpeed": ", tipicamente em {{speed}}",
     "settledCount_one": "{{count}} liquidado",
     "settledCount_other": "{{count}} liquidado",
+    "statusInProgress": "Em curso",
     "howMany": "Quantos",
     "availableCount_one": "{{count}} disponível",
     "availableCount_other": "{{count}} disponível",
@@ -6641,6 +6672,10 @@
     "raw": "Raw"
   },
   "nftMarket": {
+    "actAll": "Todos",
+    "actListings": "Anúncios",
+    "actOffers": "Ofertas",
+    "tabActivity": "Atividade",
     "shortTitle": "NFTs",
     "filters": "Filtros",
     "forSale": "À venda",
@@ -6665,6 +6700,7 @@
     "dehubPosts": "Riftn posts",
     "signInTitle": "Faça login para negociar",
     "signInBody": "Conecte sua carteira para vender o que possui e acompanhe suas listas e ofertas.",
+    "tabBrowse": "Explorar",
     "tabSell": "Vender",
     "tabMine": "Meus pedidos",
     "tabSales": "Vendas",
@@ -6702,6 +6738,8 @@
     "offered": "Oferta enviada. O detentor pode aceitá-la a qualquer momento.",
     "dehubPost": "Postagem Riftn",
     "youHold": "Você possui {{n}}",
+    "price": "Preço",
+    "tabRecent": "Recentes",
     "buyNow": "Comprar agora",
     "dropsTo": "Preço cai para {{price}} em {{date}}",
     "inBundle": "Vendido como um pacote de {{n}}",
@@ -9887,6 +9925,7 @@
       "warmth": "Temperatura {{value}}",
       "tint": "Matiz {{value}}",
       "vignette": "Vinheta {{value}}%",
+      "halation": "Halação {{value}}%",
       "scanlines": "Linhas de digitalização {{value}}%",
       "auto": "Aprimorar automaticamente",
       "autoFailed": "Não foi possível analisar esta imagem."
@@ -12759,7 +12798,15 @@
       "rewardsWeek": "Semana de {{date}}",
       "rewardPaid": "Pago",
       "rewardPending": "Pendente",
-      "rewardsNone": "Nenhuma recompensa foi calculada ainda. A primeira semana termina na segunda-feira."
+      "rewardsNone": "Nenhuma recompensa foi calculada ainda. A primeira semana termina na segunda-feira.",
+      "stats": {
+        "button": "Estatísticas ao vivo"
+      },
+      "signin": {
+        "users_one": "usuário {{count}}",
+        "users_other": "usuários {{count}}",
+        "delete": "Excluir"
+      }
     },
     "card": {
       "open": "Abrir"
@@ -19963,6 +20010,7 @@
     "backToTop": "Voltar para o topo",
     "needTitle": "Adicionar título para continuar",
     "needBody": "{{count}} caracteres para ir",
+    "imagesLabel": "Imagens",
     "backToWriting": "Voltar a escrever",
     "readyTitle": "Pronto para publicar",
     "sharePreview": "Como fica quando compartilhado",
@@ -20109,6 +20157,7 @@
     "orPickDay": "Ou escolha um dia",
     "earlier": "15 minutos antes",
     "later": "15 minutos depois",
+    "earlierShort": "Anteriores",
     "tooSoonMin": "Escolha um horário com pelo menos {{count}} minutos a partir de agora.",
     "tooSoon": "Escolha um horário no futuro.",
     "zone": "Seu horário ({{zone}}). Todos os outros veem no horário deles.",
@@ -20431,6 +20480,10 @@
     "connect": "Conecte-se ao GitHub",
     "disconnect": "Desconectar"
   },
+  "mcpKeys": {
+    "delete": "Excluir",
+    "shortProfile": "Perfil"
+  },
   "chatSearch": {
     "placeholder": "Pesquisar mensagens ou pessoas",
     "placeholderPerson": "Pesquisar mensagens do {{name}}",
@@ -20460,5 +20513,16 @@
     "gone": "Essa mensagem não está mais aqui",
     "theirMessages": "Seus mensagens",
     "seeTheirMessages": "Ver suas mensagens"
+  },
+  "dmRequests": {
+    "title": "Solicitações",
+    "accept": "Aceitar",
+    "delete": "Excluir",
+    "block": "Bloquear"
+  },
+  "dmSchedule": {
+    "view": "Ver",
+    "edit": "Editar",
+    "error": "Isso não funcionou. Tente novamente."
   }
 }

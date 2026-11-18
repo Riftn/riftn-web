@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "ጽሑፍ"
+  },
   "comic": {
     "showAll": "ሁሉንም {{count}} ገጾች አሳይ"
   },
@@ -14,6 +17,23 @@
     "glitter": "ብልጭልጭ",
     "saved": "ጠርዝ ተቀምጧል",
     "failed": "ጠርዙን ማስቀመጥ አልተቻለም"
+  },
+  "duet": {
+    "policyEveryone": "ሁሉም",
+    "policyFollowers": "ተከታዮች",
+    "policyNobody": "ማንም",
+    "loadMore": "ተጨማሪ ጫን",
+    "video": "ቪዲዮ"
+  },
+  "videoRemix": {
+    "sound": "ይህን ድምጽ ይጠቀሙ"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "ሁሉም",
+      "followers": "ተከታዮች",
+      "nobody": "ማንም"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +186,18 @@
     "privateNote": "የግል መለያዎች በፌዲቨርስ ላይ አይታዩም።",
     "noUsername": "የፌዲቨርስ አድራሻ ለማግኘት የተጠቃሚ ስም ይምረጡ።"
   },
+  "signedFollows": {
+    "setUp": "አብራሪ",
+    "turnOff": "አጥፋ",
+    "efpTurnOff": "አቁም"
+  },
   "profileFields": {
     "title": "የመገለጫ መስኮች",
     "description": "በመገለጫዎ ላይ እስከ አራት ተጨማሪ መስመሮች፣ ለምሳሌ ድረ-ገጽ ወይም ተውላጠ ስሞችዎ።",
     "label": "መለያ",
     "content": "ይዘት",
+    "add": "መስክ ያክሉ",
+    "remove": "መስክ አስወግድ",
     "save": "መስኮችን አስቀምጥ",
     "saved": "የመገለጫ መስኮች ተቀምጠዋል",
     "failed": "አልተቀመጠም። እንደገና ይሞክሩ።",
@@ -366,6 +393,7 @@
     "checkFailed": "ተገኝነትን ማረጋገጥ አልቻልንም ። እባክዎ እንደገና ይሞክሩ ።",
     "checking": "በመፈተሽ ላይ...",
     "ownership": "ትንሽ አቀፍተኛ. የሰውንት አምኖች.",
+    "title": "ትንሽ ስራ።\nየተሻለ Riftn።",
     "intermission": "ከመስመር ውጭ ለጊዜው",
     "community": "ማህበረሰብ በመጀመሪያ. ሁልጊዜ."
   },
@@ -1193,7 +1221,11 @@
     "payDirect": "በቀጥታ ወደ {{name}} in {{symbol}} on {{chain}}. ምንም ስዋፕ.",
     "payDirectNoName": "በቀጥታ ወደ ፈጣሪ ተልኳል {{symbol}} on {{chain}}. ምንም ስዋፕ.",
     "payViaBridgeDpay": "ወደ Base ተወስዷል እና ለRiftn ክፍያ ተከፍሏል፣ ቶከኖች በደቂቃ ውስጥ ይመጣሉ",
-    "dmSent": "{{amount}} ቶከኖች ለ{{name}} ተልኳል!"
+    "dmSent": "{{amount}} ቶከኖች ለ{{name}} ተልኳል!",
+    "messagePublic": "ይፋ",
+    "railTitle": "ጠቃሚ ምክሮች",
+    "railTotal": "{{amount}} ቶከኖች",
+    "tokensUnit": "ቶከኖች"
   },
   "postOptions": {
     "liveAlertsOn": "አሁን {{name}}ን እየተከተሉ ነው። ቀጥታ ሲሆኑ ማሳወቂያ ይደርስዎታል።",
@@ -1694,6 +1726,9 @@
   "notifications": {
     "title": "ማሳወቂያዎች",
     "markAllRead": "ሁሉንም እንደተነበቡ ምልክት አድርግ",
+    "groupNew": "አዲስ",
+    "groupToday": "ዛሬ",
+    "groupThisWeek": "በዚህ ሳምንት",
     "settings": "የማሳወቂያ ቅንብሮች",
     "actions": "ድርጊቶች",
     "markAllAsRead": "ሁሉንም እንደተነበቡ ምልክት አድርግ",
@@ -1722,6 +1757,7 @@
     "communities": "ማህበረሰቦች",
     "stores": "መደብሮች",
     "noNotificationsYet": "ገና ማሳወቂያዎች የሉም",
+    "searchClose": "በይበል",
     "noNotificationsDesc": "ወደዶች፣ አስተያየቶች፣ ጥቆማዎች ወይም አዲስ ተመዝጋቢዎች ሲኖሩ እዚህ ይታያሉ።",
     "loadMore": "ተጨማሪ ጫን",
     "markAsRead": "እንደተነበበ ምልክት አድርግ",
@@ -1961,11 +1997,13 @@
     "promptLabel": "የእርስዎ ጥያቄ",
     "promptPlaceholder": "ሃሳብ፣ ማሻሻያ ወይም ስህተት (bug) ግለጽ…",
     "promptAttach": "ምስሎችን አያይዝ",
+    "removeAttachment": "አባሪ አስወግድ",
     "promptDrop": "ምስሎችን እዚህ ለጥፍ ወይም ጣል",
     "promptPost": "ጥያቄውን ለጥፍ",
     "promptShortcut": "ለመለጠፍ Ctrl / ⌘ + Enter",
     "promptDetails": "አማራጭ ዝርዝሮች",
     "promptDevice": "መሣሪያ እና ኦኤስ (ለሳንካዎች)",
+    "deviceInfoNoErrors": "ምንም",
     "promptFilters": "በምድብ አጣራ",
     "promptMediaError": "እያንዳንዳቸው ከ 50 ሜባ በታች ምስሎችን ወይም ቪዲዮዎችን ይምረጡ ።",
     "promptMediaLimit": "እስከ {{max}} አባሪዎች።",
@@ -2024,6 +2062,12 @@
     "loginRequired": "መግባት ያስፈልጋል"
   },
   "messages": {
+    "newDrawer": {
+      "to": "ወደ",
+      "recent": "የቅርብ",
+      "suggested": "የሚመከሩ",
+      "youFollow": "የሚከተሏቸው ሰዎች"
+    },
     "reply": "መልስ",
     "react": "ምላሽ ስጥ",
     "edit": "አርትዕ",
@@ -2060,7 +2104,10 @@
     "checkingTokenBalance": "የእርስዎን የቶከን ቀሪ ሂሳብ እየፈተሸ ነው...",
     "deleteConversationFailed": "ውይይቱን መሰረዝ አልተቻለም",
     "message": "መልዕክት",
-    "noConversationsYet": "እስካሁን ውይይት የለም"
+    "noConversationsYet": "እስካሁን ውይይት የለም",
+    "sending": "መላክ",
+    "retrySend": "እንደገና ሞክር",
+    "discardSend": "አስወግድ"
   },
   "music": {
     "listeningCount_one": "{{count}} ማዳመጥ",
@@ -2143,6 +2190,9 @@
     "viewList": "የዝርዝር እይታ",
     "viewMode": "ይመልከቱ",
     "back": "ተመለስ",
+    "reserve": {
+      "signIn": "ግባ"
+    },
     "usernameAvailable": "የተጠቃሚ ስም ይገኛል!",
     "signUpToClaim": "ለመያዝ ዛሬ ተመዝገብ",
     "signUp": "ተመዝገብ",
@@ -2170,7 +2220,11 @@
     },
     "tabs": {
       "playlists": "አጫዋች ዝርዝሮች",
-      "dislikes": "አይኮነው።"
+      "dislikes": "አይኮነው።",
+      "likes": "ወደዶች"
+    },
+    "likedPosts": {
+      "loadMore": "ተጨማሪ ጫን"
     },
     "dislikes": {
       "emptyTitle": "እስካሁን ድረስ ምንም አሻንጉሊቶች የሉም",
@@ -2193,6 +2247,7 @@
     "sortMostViewed": "በጣም የታየው",
     "sortLikes": "ውዴታዎች",
     "sortMostLiked": "በጣም የተወደዱ",
+    "sortCustomShort": "ብጁ",
     "searchThisChannel": "ይህን ቻናል ፈልግ",
     "searchResultCount": "1 ውጤት ለ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} ውጤቶች ለ \"{{query}}\""
@@ -2318,6 +2373,7 @@
     "tasks": {
       "privateTitle": "ወኪሎች በግል ቅድመ እይታ ውስጥ ናቸው",
       "privateBody": "ይህ አድርጉም አይነት ከ @maldoteth ለማስገባት ይሆን ነው።",
+      "title": "ለኤጀንት ተግባር ይስጡ",
       "mode": "ትርጉም እንደሚሆነው የትርጉም እንደሚሆነው",
       "oneAgent": "አንድ ወኪል",
       "swarm": "ስዋርም (Swarm)",
@@ -2349,6 +2405,7 @@
       "runSwarm": "ስዋርምን አሂድ",
       "description": "በተለይተዋልን አግንት እንዲደረጃ ተጠቀሙት በተለይተዋልን እንዲወሰዱ በአዲስ አስተዋጽን እንዲገባኝ በስለስ እንደሆኑ ነው።",
       "instructions": "ወኪል መመሪያዎች",
+      "examples": "በቀን አንድ ጊዜ ይለጥፉ ስለ፦ ኢንዲ ሙዚቃ\nዘይቤ፦ ጉጉት ያለው፣ አጭር እና ውይይታዊ\nበቀን እስከ 2 የቅርብ ጊዜ ልጥፎችን ይውደዱ ስለ፦ ሙዚቃ፣ የቀጥታ ትርኢቶች፣ ቪኒል",
       "preparing": "ተግባር በማዘጋጀት ላይ…",
       "run": "ትዕዛዙን ያሂዱ",
       "limits": "አንድ ዕለታዊ ልጥፍ እና በአንድ ተግባር እስከ 3 ተዛማጅ መውደዶች. ሁሉም ወኪሎች የ 20 ደቂቃ ልጥፍ ክፍተት ይጋራሉ ። ፎቶዎች የተረጋገጡ ካፕቶችን ይጠቀማሉ; ቪዲዮዎች የሽፋን ምስል ያስፈልጋቸዋል. ልጥፎች ከ 500 ቁምፊዎች በታች ይቆያሉ ። ካልሆነ በስተቀር ምንም ጋዝ; መጻፍ ክሬዲት ሊጠቀም ይችላል ።",
@@ -2356,6 +2413,7 @@
       "list": "ተግባራት",
       "refresh": "አድስ",
       "loading": "ተግባራትን በመጫን ላይ…",
+      "meta": "@{{agent}} · {{status}} · የተሰሩ፦ {{total}}",
       "next": "ቀጣይ ሩጫ: {{time}}",
       "pause": "አፍታ አቁም",
       "resume": "ቀጥል",
@@ -2456,6 +2514,9 @@
     "signInAgain": "እንደገና ይግቡ",
     "createSignIn": "ወኪል ለመፍጠር እንደገና ይግቡ",
     "checkConnection": "ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።",
+    "welcome": {
+      "text": "የእንኳን ደህና መጡ መልዕክት"
+    },
     "workspace": {
       "moderation": "የዥረት አስተዳደር",
       "moderationHelp": "መጀመሪያ የአስተዳደር ፈቃድን ያንቁ። መለያው ቀድሞውኑ የዥረቱ ፈጣሪ ወይም የተመደበ አስተዳዳሪ መሆን አለበት። የማጽደቅ እና የረቂቅ ሁነታዎች አሁንም ተፈጻሚ ይሆናሉ። ጊዜያዊ እገዳዎች በራስ-ሰር ያበቃሉ።",
@@ -2648,7 +2709,9 @@
     "resendCodePhone": "ስህተት ቁጥር ወይም ኮድ የለም? ተመለስ",
     "continueAs": "እንደ ቀጥል",
     "switchWalletAccount": "መለያ ቀይር",
-    "walletLoadFailed": "ዋሌቶችን ማስጫን አልተቻለም። እንደገና ይሞክሩ።"
+    "walletLoadFailed": "ዋሌቶችን ማስጫን አልተቻለም። እንደገና ይሞክሩ።",
+    "openInBrowser": "በአሳሽ ውስጥ ክፈት",
+    "copyLink": "አገናኝ ቅዳ"
   },
   "careers": {
     "title": "በRiftn ሥራ",
@@ -2902,7 +2965,8 @@
     "noMenuMatches": "በምናሌው ውስጥ ምንም አይዛመድም",
     "searchDehubFor": "በRiftn ላይ \"{{query}}\" ፈልግ",
     "switchAccount": "መለያ ቀይር",
-    "signedInAs": "እንደ {{name}} ተመዝግበዋል"
+    "signedInAs": "እንደ {{name}} ተመዝግበዋል",
+    "requestSend": "ጥያቄ ላክ"
   },
   "comments": {
     "reportComment": "አስተያየት ሪፖርት ያድርጉ",
@@ -3010,6 +3074,9 @@
     "priceUnavailable": "ዋጋ አይገኝም",
     "confirmWithCost": "በ {{chain}} {{cost}}",
     "notAvailable": "በዚህ ሰንሰለት ላይ መቀባት ገና አልተገኘም ።"
+  },
+  "postEditHistory": {
+    "original": "የመጀመሪያው"
   },
   "postInfo": {
     "title": "የልጥፍ መረጃ",
@@ -5117,6 +5184,7 @@
     "settledTitleSpeed": ", በተለምዶ በ {{speed}}",
     "settledCount_one": "{{count}} ተስተካክሏል",
     "settledCount_other": "{{count}} ተስተካክሏል",
+    "statusInProgress": "በሂደት ላይ",
     "howMany": "ስንቶች",
     "availableCount_one": "{{count}} ይገኛል",
     "availableCount_other": "{{count}} ይገኛል",
@@ -5209,6 +5277,17 @@
     "sellYourFractions": "ክፍልፍሎችዎን ይሽጡ ({{held}} የተያዘ)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "እነዚህን ዝርዝሮች ይጠቀሙ"
+      }
+    },
+    "cinema": {
+      "close": "ዝጋ",
+      "performance": {
+        "label": "አፈጻጸም"
+      }
+    },
     "libraryEmpty": "የተቀመጡ ፈጠራዎችዎ እዚህ ይታያሉ።",
     "toolRemake": "እንደገና ስራ",
     "toolMaboroshi": "ማቦሮሺ",
@@ -5419,6 +5498,7 @@
     "presetExtraPetSmallMotionHint": "በቤት እንስሳ ምስል ላይ የአይን ብልጭታ እና የጆሮ እንቅስቃሴ",
     "presetOpenOrchardPortraitName": "ኦርቻርድ ፎቶግራፍ",
     "presetOpenOrchardPortraitHint": "መካከለኛ ፎርማት ፊልም ለስላሳ ኦርቻርድ ብርሃን",
+    "presetOpenRecordingStudioName": "የምዝገባ ስቱዲዮ",
     "presetOpenRecordingStudioHint": "Tungsten ብርሃን ጋር Isometric የሸክላ መቁረጫ",
     "presetOpenPoppyStillLifeName": "Poppy አሁንም ሕይወት",
     "presetOpenPoppyStillLifeHint": "ከጠንካራ እኩለ ቀን ጥላዎች ጋር የኤዲቶሪያል እቃዎች",
@@ -5452,6 +5532,7 @@
     "presetOpenSculptorPushHint": "ወደ መስኮት-ብርሃን ክራፍት ዝርዝር ዘገምተኛ ግፊት",
     "presetOpenLighthouseOrbitName": "የብርሃን ቤት orbit",
     "presetOpenLighthouseOrbitHint": "Drone orbit ከግራጫ ሞገድ እና ከባህር መርጨት ጋር",
+    "presetOpenCanyonTimelapseName": "የሸለቆ ፈጣን ጊዜ ቀረጻ",
     "presetOpenCanyonTimelapseHint": "ከደመና ጥላዎች ከወርቅ ሰዓት እስከ ዱስክ",
     "presetOpenGreenhouseWalkName": "ግሪንሃውስ በእግር መጓዝ",
     "presetOpenGreenhouseWalkHint": "Steadicam በአቧራ ብርሃን ሻንጣዎች በኩል ይገለጣል",
@@ -5677,6 +5758,7 @@
     "placeholderImage": "የሚፈልጉትን ምስል ያብራሩ",
     "placeholder3d": "እቃውን ለሞዴል ያብራሩ ፣ ወይም ፎቶውን ያያይዙ",
     "placeholderVideo": "የሚፈልጉትን ጥይት ያብራሩ",
+    "presetGroupAbstract": "ረቂቅ",
     "presetGroupCamera": "ካሜራ",
     "presetGroupCharacters": "ገጸ-ባህሪያት",
     "presetGroupCommercial": "ንግድ",
@@ -5700,6 +5782,7 @@
     "presetEditorialPortraitHint": "መጽሔት-ደረጃ የስዕል መብራት",
     "presetPosterTypeName": "የፖስተር አይነት",
     "presetPosterTypeHint": "ሊነበብ ከሚችል የማሳያ አይነት ጋር አቀማመጥ",
+    "presetThumbnailPunchName": "ጎልቶ የሚታይ ድንክዬ",
     "presetThumbnailPunchHint": "በ 200px ስፋት ላይ ያንብቡ",
     "presetFlatIllustrationName": "ጠፍጣፋ ሥዕል",
     "presetFlatIllustrationHint": "Vector-style የምርት ስዕል",
@@ -6171,6 +6254,10 @@
     "raw": "ጥሬ"
   },
   "nftMarket": {
+    "actAll": "ሁሉም",
+    "actListings": "ዝርዝሮች",
+    "actOffers": "ቅናሾች",
+    "tabActivity": "እንቅስቃሴ",
     "shortTitle": "ኤንኤፍቲዎች",
     "filters": "ማጣሪያዎች",
     "forSale": "ለሽያጭ",
@@ -6234,6 +6321,9 @@
     "offered": "እቃ ተልኳል። ባለቤቱ በማንኛውም ጊዜ ሊቀበል ይችላል።",
     "dehubPost": "Riftn ልጥፍ",
     "youHold": "እርስዎ {{n}} አሉት",
+    "price": "ዋጋ",
+    "volume": "የድምፅ መጠን",
+    "tabRecent": "የቅርብ",
     "buyNow": "አሁን ይግዙ",
     "dropsTo": "ዋጋው ወደ {{price}} በ{{date}} ይቀንሳል",
     "inBundle": "እንደ {{n}} ጥቅል ተሽጧል",
@@ -6644,7 +6734,64 @@
     "youAreBanned": "በዚህ ፈጣሪ ጅረቶች ውስጥ መወያየት አይችሉም",
     "youAreTimedOut": "ለትንሽ ጊዜ ተዘጋጅተሃል"
   },
+  "studioDeck": {
+    "background": {
+      "title": "ዳራ",
+      "modes": {
+        "none": "አጥፋ",
+        "blur": "ብዥታ",
+        "color": "ቀለም"
+      }
+    },
+    "remove": "አስወግድ",
+    "scenes": {
+      "countdown": "ቆጠራ",
+      "minutes": "{{count}} ደቂቃ",
+      "names": {
+        "starting": "በቅርቡ ይጀምራል"
+      }
+    },
+    "sources": {
+      "reactAdd": "አሳይ",
+      "image": "ምስል",
+      "camera": "ካሜራ",
+      "show": "በዥረት ላይ አሳይ",
+      "positions": {
+        "center": "ማዕከል"
+      },
+      "shapes": {
+        "circle": "ክብ",
+        "rect": "ካሬ"
+      }
+    },
+    "audio": {
+      "mute": "ዝጋ",
+      "unmute": "ክፈት",
+      "gateLevels": {
+        "off": "አጥፋ",
+        "low": "ብርሃን",
+        "high": "ጠንካራ"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "መድረክ",
+      "label": "ስም (አማራጭ)",
+      "key": "የዥረት ቁልፍ",
+      "save": "አክል",
+      "cancel": "ሰርዝ",
+      "states": {
+        "off": "አጥፋ",
+        "idle": "ዝግጁ",
+        "live": "ቀጥታ",
+        "error": "ስህተት"
+      }
+    },
+    "vertical": {
+      "centre": "ማዕከል",
+      "live": "ቀጥታ"
+    },
     "subathon": {
       "title": "ሰብሃትን",
       "intro": "በእንደገና ላይ ያለ ቆጠራ። እያንዳንዱ የተከፈለ ስጦታ፣ ተከታይ እና ምዝገባ ጊዜ ይጨምራል፣ ስለዚህ ክፍሉ ሕያው ይቆያል።",
@@ -7595,6 +7742,7 @@
     "footerNote": "የዴፒን ተሳትፎ የበጎ አድራጎት አገልግሎት እንጂ የኢንቨስትመንት ምርት አይደለም ። ተገኝነት ፣ ብቁነት እና ሽልማቶች ሊለወጡ ይችላሉ ።"
   },
   "creatorFlow": {
+    "disconnect": "አይኮንድክትል።",
     "title": "የፈጣሪ ፍሰት",
     "backToStudio": "ወደ Creator Studio ተመለስ",
     "backToFlows": "ወደ ፍሰቶችህ ተመለስ",
@@ -7935,6 +8083,9 @@
     "followingBackProgress": "{{completed}} ከ {{total}} ተከትሎ ነው",
     "findingFollowers": "ተከታዮችን ማግኘት...",
     "followBackAll": "ሁሉንም ተከትል",
+    "followBackConfirm": "ተመልሶ መከተል",
+    "followBackNotNow": "አሁን አይደለም",
+    "followBackDone": "ተከናውኗል",
     "nonFollowers": {
       "title": "ማንን ትከተላለህ?",
       "cta": "ሁሉንም ይከተሉ {{count}}",
@@ -8747,6 +8898,14 @@
     "priceChartCleared": "ዋጋ ገበታ ተጠርጣሪ። ቋሚ ማጣቀሻ ዋጋ: $0.0001። ስሪት ዋጋዎች በሚገኙ ትዕዛዞች ላይ ይወሰናሉ።"
   },
   "editor": {
+    "stage": {
+      "camera": "ካሜራ",
+      "yaw": "ማሽከርከር",
+      "add": "አክል",
+      "scale": "መጠን",
+      "color": "ቀለም",
+      "light": "ብርሃን"
+    },
     "video": {
       "tFade": "ደብዝዞ መቀላቀል",
       "none": "ምንም",
@@ -8913,6 +9072,8 @@
       "tools": "የአርትዖት መሣሪያዎች"
     },
     "agent": {
+      "stop": "አቁም",
+      "queue": "ወደ ወረፋ ያክሉ",
       "introTitle": "የሚፈልጉትን ለAI ይንገሩት",
       "introBody": "ንድፉን ወይም ለውጡን በራስዎ ቃላት ይግለጹ። ገጹን መጠን ይቀይራል፣ ጽሑፍ ይጽፋል እና ያስውባል፣ ነጻ ፎቶዎችን፣ ቪዲዮዎችንና ሙዚቃን ያገኛል፣ ማጣሪያዎችን ይተገብራል፣ ንብርብሮችን ያደራጃል እና ያንቀሳቅሳል። እያንዳንዱ ጥያቄ በአንድ ጊዜ ይቀለበሳል።",
       "suggestPoster": "ለበጋ ቅናሽ የባህር ዳርቻ ፎቶ እና ደማቅ ርዕስ ያለው ካሬ የInstagram ልጥፍ ስራልኝ",
@@ -9181,6 +9342,9 @@
       "reloadText": "መግለጫ ጽሁፍን ያስቀምጡ",
       "textSaved": "የመግለጫ ጽሁፍ ለውጦች ተቀምጠዋል።",
       "action": "ራስ-ሰር የግርጌ ጽሑፎች",
+      "styles": {
+        "bold": "ቦልድ"
+      },
       "working": "በማዳመጥ ላይ… {{percent}}%",
       "downloading": "የንግግር ሞዴሉን በማዘጋጀት ላይ… {{percent}}%",
       "hint": "ንግግርን በጊዜ የተቀናጁ እና ቅጥ ሊቀየርላቸው የሚችሉ የግርጌ ጽሑፎች ያደርጋል። በመሣሪያዎ ላይ ይሰራል፦ ነጻ እና ግላዊ። የመጀመሪያው አጠቃቀም ሞዴሉን ያወርዳል።",
@@ -10559,6 +10723,25 @@
       "toolbar": "Canvas አሰሳ",
       "zoomIn": "Zoom canvas ውስጥ",
       "zoomOut": "አስተዋጽ አስተማርቀበር ነዎስ።"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "ክፈል",
+        "play": "አጫውት",
+        "pause": "እረፍት",
+        "frameBack": "የቀድሞው ክፈፍ",
+        "frameForward": "ቀጣይ ክፈፍ"
+      }
+    },
+    "voiceClone": {
+      "stop": "ቅጂ አቁም"
+    },
+    "linkImport": {
+      "go": "አስገባ",
+      "downloading": "ማውረድ {{percent}}%"
+    },
+    "reverse": {
+      "action": "ዳግም አስጀምር"
     }
   },
   "jungleMood": {
@@ -11833,7 +12016,15 @@
       "rewardsWeek": "ሳምንት {{date}}",
       "rewardPaid": "የተከፈለ",
       "rewardPending": "በመጠባበቅ ላይ",
-      "rewardsNone": "እስካሁን ድረስ ምንም ሽልማቶች አልተሰሩም ። የመጀመሪያው ሳምንት ሰኞ ይዘጋል ።"
+      "rewardsNone": "እስካሁን ድረስ ምንም ሽልማቶች አልተሰሩም ። የመጀመሪያው ሳምንት ሰኞ ይዘጋል ።",
+      "stats": {
+        "button": "ቀጥታ ስታቲስቲክስ"
+      },
+      "signin": {
+        "users_one": "{{count}} ተጠቃሚ",
+        "users_other": "{{count}} ተጠቃሚዎች",
+        "delete": "ሰርዝ"
+      }
     },
     "card": {
       "open": "ክፈት"
@@ -11989,6 +12180,9 @@
     "reminderLater": "አሁን አይደለም"
   },
   "copy": {
+    "55656b5e434f": "ፍለጋን ይዝጉ",
+    "57e2faa5ec63": "Riftn ይፈልጉ",
+    "96d7bff86b44": "ፍለጋው መጫን አልቻለም",
     "1607715e45ed": "ለመናገር ኳሱን ይንኩ፣ ወይም ከታች ይጻፉ",
     "00140a37bd26": "አዲስ አዲስ አስተዳደር በአገናኝነት ተቀምጣለሁላችሁ",
     "002286513398": "ክስተቶችን ለማስተዳደር ፈቃድ የለዎትም",
@@ -16164,6 +16358,7 @@
     "d534be829e32": "፟ቪዲዮ",
     "9ae6de224302": "ፈጠራ ይሁኑ",
     "a39091f6acf5": "በ Riftn ላይ ፈጣሪ ለመሆን ያመልክቱ, ክፍት ምንጭ ፣ ሳንሱር ተከላካይ የሚዲያ መድረክ ።",
+    "1a00975a0ac1": "@ሰርጥ",
     "b87b467906e6": "DAO ሀብት: Riftn ን ገንዘብ ያድርጉ እና ድምጽ ያግኙ",
     "02ce53459982": "የ Riftn DAO ግምጃ ቤት: አንድ የኪስ ቦርሳ ማንኛውም ሰው ምልክቶችን መላክ ይችላል. አስተዋፅኦ ያበረከተውን የቀጥታ ሚዛኑን ይመልከቱ ፣ እና ዳኦ እንዴት እንደሚያወጣ ሲወስን እያንዳንዱ ገንዳ አስተዋፅዖ ያለው ድርሻ ይይዛል ።",
     "730f5eed0d6e": "Riftn DAO ሀብት — ሙሉ በሙሉ ተበታተነ፣ ተጠቃሚ ባለቤት ማህበራዊ ሚዲያ",
@@ -18960,6 +19155,7 @@
     "backToTop": "ወደ ላይ ተመለስ",
     "needTitle": "ርዕስ ጨምር ለመቀጠል",
     "needBody": "{{count}} ተጨማሪ ቁምፊዎች ለመሄድ",
+    "imagesLabel": "ምስሎች",
     "backToWriting": "ወደ ጽሑፍ ተመለስ",
     "readyTitle": "ለማተም ዝግጁ",
     "sharePreview": "ሲጋራ እንዴት እንደሚመስል",
@@ -19021,6 +19217,128 @@
     "exploreFirst": "መጀመሪያ ያስሱ",
     "codeNote": "የይለፍ ቃል ሳያስፈልግ በኢሜይል ኮድ እንልክልዎታለን።"
   },
+  "liveHype": {
+    "gift": {
+      "plan": "ዕቅድ",
+      "howMany": "ስንት",
+      "who": "የተጠቃሚ ስም ወይም የቦርሳ አድራሻ",
+      "whoPlaceholder": "@የተጠቃሚ_ስም",
+      "cancel": "ሰርዝ",
+      "stage": {
+        "preparing": "በዝግጅት ላይ…",
+        "confirming": "ግብይቱን በመጠበቅ ላይ…",
+        "recording": "በማጠናቀቅ ላይ…"
+      }
+    },
+    "badges": {
+      "emoji": "ኢሞጂ",
+      "audience": {
+        "subscribers": "ተመዝጋቢዎች"
+      },
+      "ended": "አብቅቷል",
+      "until": "እስከ {{date}}",
+      "failed": "ያ አልሰራም እንደገና ሞክር ።"
+    }
+  },
+  "whenSheet": {
+    "today": "ዛሬ",
+    "tooSoon": "ለወደፊቱ ጊዜ ይምረጡ።",
+    "show": "አሳይ",
+    "hide": "ደብቅ"
+  },
+  "planned": {
+    "title": "የታቀደ",
+    "all": "ሁሉም",
+    "posts": "ልጥፎች",
+    "stages": "የድምፅ ክፍሎች",
+    "post": "ልጥፍ",
+    "live": "ቀጥታ",
+    "stage": "መድረክ",
+    "untitledPost": "ልጥፍ",
+    "untitledLive": "ቀጥታ",
+    "loading": "በመጫን ላይ…",
+    "startNow": "አሁን ጀምር",
+    "cancel": "ሰርዝ",
+    "cancelled": "ተሰርዟል"
+  },
+  "welcome": {
+    "about": {
+      "title": "ወደ Riftn እንኳን በደህና መጡ",
+      "day": "ቀን",
+      "month": "ወር",
+      "year": "ዓመት"
+    },
+    "name": {
+      "title": "ስምዎ",
+      "placeholder": "ስምዎ"
+    },
+    "card": {
+      "name": "ስምዎ",
+      "followers": "ተከታዮች"
+    },
+    "topic": {
+      "music": "ሙዚቃ",
+      "art": "ጥበብ",
+      "gaming": "ጨዋታ",
+      "crypto": "ክሪፕቶ",
+      "sports": "ስፖርት",
+      "film": "ፊልም",
+      "podcast": "ፖድካስት",
+      "news": "ዜና",
+      "science": "ሳይንስ"
+    },
+    "back": "ተመለስ",
+    "skipPhoto": "ለአሁኑ ይዝለሉ",
+    "preview": "ቅድመ እይታ"
+  },
+  "appTokens": {
+    "title": "የእርስዎ ቶከኖች",
+    "history": "ታሪክ",
+    "kindDeposit": "አስቀምጥ",
+    "to": "ወደ",
+    "amount": "መጠን",
+    "notePlaceholder": "ማስታወሻ ጨምር (አማራጭ)",
+    "sendButton": "ላክ",
+    "errorInsufficient": "በቂ ቶከኖች የሉም"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "ሁሉም",
+      "followers": "ተከታዮች",
+      "nobody": "ማንም"
+    },
+    "heading": "ምላሾች",
+    "more": "ተጨማሪ አሳይ",
+    "liveNow": "ቀጥታ",
+    "untitled": "ምላሽ"
+  },
+  "connectGuide": {
+    "title": "Riftnን ከAI ረዳትዎ ጋር ያገናኙ",
+    "urlLabel": "የMCP አገልጋይ URL",
+    "copy": "ቅዳ",
+    "copied": "ተቀድቷል",
+    "copiedToast": "የMCP URL ተቀድቷል"
+  },
+  "avatarPrompt": {
+    "notNow": "አሁን አይደለም"
+  },
+  "postStats": {
+    "engagement": "ተሳትፎ",
+    "finished": "ተጠናቋል",
+    "members": "አባላት",
+    "membersLower": "አባላት",
+    "newFollowers": "አዲስ ተከታዮች",
+    "noBadge": "ባጅ የለም",
+    "people": "ሰዎች",
+    "plays": "ፕሌይስ",
+    "quotes": "ጥቅሶች",
+    "reposts": "ድጋሚ ልጥፎች",
+    "saved": "ተቀምጧል",
+    "shares": "ሼር",
+    "signedOutViewers": "ወጥተዋል",
+    "topSupporters": "ከፍተኛ ደጋፊዎች",
+    "visitors": "ወጥተዋል"
+  },
   "tokenLaunch": {
     "eyebrow": "በቅርቡ ይደርሳል",
     "title": "ቶኬን በቅርቡ ይተራል",
@@ -19049,6 +19367,10 @@
     "unavailable": "GitHub ማረጋገጫ በቅርቡ ይመጣል ።",
     "connect": "GitHub ን ያገናኙ",
     "disconnect": "አገናኝን ያቋርጡ"
+  },
+  "mcpKeys": {
+    "delete": "ሰርዝ",
+    "shortProfile": "መገለጫ"
   },
   "chatSearch": {
     "placeholder": "መልዕክቶችን ወይም ሰዎችን ይፈልጉ",
@@ -19079,5 +19401,16 @@
     "gone": "ያ መልእክት ከአሁን በኋላ እዚህ የለም",
     "theirMessages": "የእነሱ መልዕክቶች",
     "seeTheirMessages": "የእነሱን መልዕክቶች ይመልከቱ"
+  },
+  "dmRequests": {
+    "title": "ጥያቄዎች",
+    "accept": "ተቀበል",
+    "delete": "ሰርዝ",
+    "block": "አግድ"
+  },
+  "dmSchedule": {
+    "view": "ተመልከት",
+    "edit": "አርትዕ",
+    "error": "ያ አልሰራም እንደገና ሞክር ።"
   }
 }

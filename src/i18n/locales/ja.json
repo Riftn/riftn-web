@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "テキスト"
+  },
   "comic": {
     "showAll": "全{{count}}ページを表示"
   },
@@ -14,6 +17,23 @@
     "glitter": "グリッター",
     "saved": "フチを保存しました",
     "failed": "フチを保存できませんでした"
+  },
+  "duet": {
+    "policyEveryone": "全員",
+    "policyFollowers": "フォロワー",
+    "policyNobody": "誰も",
+    "loadMore": "もっと読み込む",
+    "video": "ビデオ"
+  },
+  "videoRemix": {
+    "sound": "このサウンドを使用"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "全員",
+      "followers": "フォロワー",
+      "nobody": "誰も"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +186,18 @@
     "privateNote": "非公開アカウントは Fediverse に表示されません。",
     "noUsername": "Fediverse のアドレスを持つにはユーザー名を設定してください。"
   },
+  "signedFollows": {
+    "setUp": "オンにする",
+    "turnOff": "無効にする",
+    "efpTurnOff": "停止"
+  },
   "profileFields": {
     "title": "プロフィール項目",
     "description": "ウェブサイトや代名詞など、プロフィールに最大4行まで追加できます。",
     "label": "ラベル",
     "content": "内容",
+    "add": "フィールドを追加する",
+    "remove": "フィールドを削除する",
     "save": "項目を保存",
     "saved": "プロフィール項目を保存しました",
     "failed": "保存できませんでした。もう一度お試しください。",
@@ -367,6 +394,7 @@
     "checkFailed": "予約可能状況を確認できませんでした。もう一度お試しください。",
     "checking": "確認しています...",
     "ownership": "オープンソース。ユーザー所有。",
+    "title": "ちょっとしたメンテナンス。\nもっと良い Riftn へ。",
     "intermission": "一時的にオフライン",
     "community": "コミュニティ第一。常に。"
   },
@@ -1261,7 +1289,11 @@
     "payDirect": "{{chain}}上の{{symbol}}で{{name}}に直接送られます。スワップなし。",
     "payDirectNoName": "{{chain}}上の{{symbol}}でクリエイターに直接送られます。スワップなし。",
     "payViaBridgeDpay": "Baseに移動しRiftn Payに支払い済み、トークンは約1分で到着",
-    "dmSent": "{{name}}に{{amount}} DHBを送りました！"
+    "dmSent": "{{name}}に{{amount}} DHBを送りました！",
+    "messagePublic": "公開",
+    "railTitle": "チップ",
+    "railTotal": "{{amount}} トークン",
+    "tokensUnit": "トークン"
   },
   "postOptions": {
     "liveAlertsOn": "{{name}}さんをフォローしました。ライブ配信が始まると通知が届きます。",
@@ -1793,6 +1825,7 @@
     "communities": "コミュニティ",
     "stores": "ストア",
     "noNotificationsYet": "まだ通知がありません",
+    "searchClose": "検索を閉じる",
     "noNotificationsDesc": "いいね、コメント、チップ、新しい登録者があると、ここに表示されます。",
     "loadMore": "もっと読み込む",
     "markAsRead": "既読にする",
@@ -2032,11 +2065,13 @@
     "promptLabel": "あなたのプロンプト",
     "promptPlaceholder": "アイデア、改善点、バグの説明",
     "promptAttach": "画像をアップロード",
+    "removeAttachment": "添付ファイルを削除",
     "promptDrop": "画像をペーストまたはドロップしてください",
     "promptPost": "投稿",
     "promptShortcut": "Ctrl / ⌘ + Enterで投稿",
     "promptDetails": "オプション",
     "promptDevice": "デバイス＆OS（バグの場合）",
+    "deviceInfoNoErrors": "なし",
     "promptFilters": "カテゴリ別にフィルタリング",
     "promptMediaError": "50MB未満の画像または動画を選択してください。",
     "promptMediaLimit": "{{max}}個のアップロード可能",
@@ -2095,6 +2130,12 @@
     "loginRequired": "ログインが必要です"
   },
   "messages": {
+    "newDrawer": {
+      "to": "終了",
+      "recent": "最近",
+      "suggested": "おすすめ",
+      "youFollow": "あなたがフォローしている人"
+    },
     "reply": "返信",
     "react": "リアクション",
     "edit": "編集",
@@ -2131,7 +2172,10 @@
     "checkingTokenBalance": "トークン残高を確認しています...",
     "deleteConversationFailed": "会話を削除できませんでした",
     "message": "メッセージ",
-    "noConversationsYet": "まだ会話はありません。"
+    "noConversationsYet": "まだ会話はありません。",
+    "sending": "送信中",
+    "retrySend": "再試行",
+    "discardSend": "削除"
   },
   "music": {
     "listeningCount_one": "{{count}}リスニング",
@@ -2215,6 +2259,9 @@
     "viewList": "リストビュー",
     "viewMode": "表示",
     "back": "戻る",
+    "reserve": {
+      "signIn": "サインイン"
+    },
     "usernameAvailable": "ユーザー名が利用可能です！",
     "signUpToClaim": "登録して取得",
     "signUp": "登録",
@@ -2279,6 +2326,7 @@
     "sortMostViewed": "最も表示された",
     "sortLikes": "いいね",
     "sortMostLiked": "最もいいねされた",
+    "sortCustomShort": "カスタム",
     "searchThisChannel": "このチャンネルを検索",
     "searchResultCount": "「{{query}}」の検索結果1件",
     "searchResultCountPlural": "「{{query}}」の検索結果{{count}}件"
@@ -2329,6 +2377,7 @@
     "statusStillArriving": "支払いが完了しました。トークンはまだ途中です — すぐにあなたのウォレットを確認してください。",
     "paymentMethod": "支払い方法",
     "cardBank": "カード / 銀行",
+    "cardBankDesc": "Visa、Mastercard、Apple Pay",
     "fiatOnramp": "法定通貨入金",
     "fiatOnrampDesc": "法定通貨で直接購入",
     "buy": "{{symbol}}を購入",
@@ -2435,6 +2484,7 @@
       "runSwarm": "スワームを実行",
       "description": "アクションは、選択したエージェントとして実行されます。スケジュールされたタスクは、アプリが閉じられた状態で続行されます。",
       "instructions": "エージェントの指示",
+      "examples": "1日1回投稿するテーマ: インディーズ音楽\nスタイル: 好奇心旺盛で簡潔、会話調\n1日最大2件の最近の投稿に「いいね」するテーマ: 音楽、ライブ、レコード",
       "preparing": "タスクを準備しています…",
       "run": "プロンプトを実行",
       "limits": "1タスクにつき1日1投稿、関連するいいねは3件まで。全エージェントで20分間の投稿間隔を共有すること。写真は確認済みのキャプションを使用し、動画にはカバー画像が必要。投稿は500文字以内。ミント時以外はガス代不要。ライティングにはクレジットを使用可能。",
@@ -2443,6 +2493,7 @@
       "refresh": "更新",
       "loading": "読み込み中のタスク…",
       "meta": "@{{agent}}・{{status}}・処理済み：{{total}}",
+      "next": "次回の実行: {{time}}",
       "pause": "一時停止",
       "resume": "再開",
       "skip": "未確認のアクションをスキップして再開する",
@@ -2542,6 +2593,9 @@
     "signInAgain": "再度サインイン",
     "createSignIn": "エージェントを作成するには再度サインインしてください",
     "checkConnection": "接続を確認して、もう一度お試しください。",
+    "welcome": {
+      "text": "ウェルカムメッセージ"
+    },
     "workspace": {
       "moderation": "ストリームモデレーション",
       "moderationHelp": "先にモデレーション権限を有効にしてください。アカウントがすでにストリームの作成者または任命されたモデレーターである必要があります。承認モードと下書きモードは引き続き適用されます。タイムアウトは自動的に解除されます。",
@@ -2736,7 +2790,9 @@
     "resendCodePhone": "間違った番号やコードが送信されていません。戻る",
     "continueAs": "続ける",
     "switchWalletAccount": "アカウント切り替え",
-    "walletLoadFailed": "ウォレットの読み込みに失敗しました。再試行してください。"
+    "walletLoadFailed": "ウォレットの読み込みに失敗しました。再試行してください。",
+    "openInBrowser": "ブラウザで開く",
+    "copyLink": "リンクをコピー"
   },
   "careers": {
     "title": "Riftn で働く",
@@ -3079,6 +3135,9 @@
     "confirm": "{{chain}}に新品",
     "confirmWithCost": "{{chain}}に新品・{{cost}}",
     "notAvailable": "このチェーンでの鋳造はまだ利用できません。"
+  },
+  "postEditHistory": {
+    "original": "オリジナル"
   },
   "postInfo": {
     "title": "投稿情報",
@@ -5191,6 +5250,7 @@
     "settledTitleSpeed": "、通常は {{speed}}",
     "settledCount_one": "{{count}} 決済済み",
     "settledCount_other": "{{count}} 決済済み",
+    "statusInProgress": "進行中",
     "howMany": "いくつ",
     "availableCount_one": "{{count}} 利用可能",
     "availableCount_other": "{{count}} 利用可能",
@@ -5283,6 +5343,17 @@
     "sellYourFractions": "あなたの分数を売却してください({{held}}保有)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "これらの詳細を使用する"
+      }
+    },
+    "cinema": {
+      "close": "閉じる",
+      "performance": {
+        "label": "パフォーマンス"
+      }
+    },
     "libraryEmpty": "保存した生成物がここに表示されます。",
     "toolRemake": "リメイク",
     "toolMaboroshi": "幻想",
@@ -6254,6 +6325,11 @@
     "raw": "元画像"
   },
   "nftMarket": {
+    "actAll": "すべて",
+    "actListings": "出品",
+    "actOffers": "オファー",
+    "tabActivity": "アクティビティ",
+    "shortTitle": "NFT",
     "filters": "フィルター",
     "forSale": "販売中",
     "openToOffers": "オファーを受け付けています",
@@ -6317,6 +6393,9 @@
     "offered": "オファーを送信しました。保有者はいつでも受け入れることができます。",
     "dehubPost": "Riftnポスト",
     "youHold": "{{n}}を保有しています",
+    "price": "価格",
+    "volume": "音量",
+    "tabRecent": "最近",
     "buyNow": "今すぐ購入",
     "dropsTo": "価格は{{date}}までに{{price}}に下がります",
     "inBundle": "{{n}}のバンドルとして販売されました",
@@ -6730,7 +6809,68 @@
     "youAreBanned": "このクリエイターのストリームではチャットできません",
     "youAreTimedOut": "しばらくタイムアウトしました"
   },
+  "studioDeck": {
+    "background": {
+      "title": "背景",
+      "modes": {
+        "none": "オフ",
+        "blur": "ぼかし",
+        "color": "色"
+      }
+    },
+    "remove": "削除",
+    "scenes": {
+      "countdown": "カウントダウン",
+      "minutes": "{{count}}分",
+      "names": {
+        "starting": "まもなく開始"
+      }
+    },
+    "sources": {
+      "reactAdd": "表示",
+      "image": "画像",
+      "camera": "カメラ",
+      "show": "ストリームで表示",
+      "positions": {
+        "center": "中央"
+      },
+      "sizes": {
+        "small": "小",
+        "large": "大"
+      },
+      "shapes": {
+        "circle": "円",
+        "rect": "正方形"
+      }
+    },
+    "audio": {
+      "mute": "ミュート",
+      "unmute": "ミュート解除",
+      "gateLevels": {
+        "off": "オフ",
+        "low": "ライト",
+        "high": "強い"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "プラットフォーム",
+      "label": "名前（任意）",
+      "key": "ストリームキー",
+      "save": "追加",
+      "cancel": "キャンセル",
+      "states": {
+        "off": "オフ",
+        "idle": "準備完了",
+        "live": "ライブ",
+        "error": "エラー"
+      }
+    },
+    "vertical": {
+      "centre": "中央",
+      "live": "ライブ"
+    },
     "subathon": {
       "title": "サバソン",
       "intro": "ストリーム上のカウントダウン。すべての有料ギフト、フォロー、および購読が時間を追加するため、部屋はあなたを生放送で維持します。",
@@ -7683,6 +7823,7 @@
     "footerNote": "DePinへの参加は拠出サービスであり、投資商品ではありません。 利用可能状況、利用資格、特典は変更される場合があります。"
   },
   "creatorFlow": {
+    "disconnect": "切断",
     "title": "クリエイターフロー",
     "backToStudio": "クリエイタースタジオに戻る",
     "backToFlows": "フローに戻る",
@@ -8845,6 +8986,14 @@
     "priceChartCleared": "価格表をクリアしました。固定価格: $0.0001。実行価格は入札がある場合に依存します。"
   },
   "editor": {
+    "stage": {
+      "camera": "カメラ",
+      "yaw": "回転",
+      "add": "追加",
+      "scale": "サイズ",
+      "color": "カラー",
+      "light": "ライト"
+    },
     "video": {
       "tFade": "クロスディゾルブ",
       "none": "なし",
@@ -9011,6 +9160,8 @@
       "tools": "エディターツール"
     },
     "agent": {
+      "stop": "停止",
+      "queue": "キューに追加",
       "introTitle": "AIにやりたいことを伝えましょう",
       "introBody": "デザインや変更内容を自分の言葉で説明してください。ページのサイズ変更、テキストの作成とスタイル設定、無料の写真・動画・音楽の検索、フィルターの適用、レイヤーの配置とアニメーションを行います。各リクエストは1回の元に戻すで取り消せます。",
       "suggestPoster": "ビーチの写真と太字のタイトルで、夏のセール用の正方形のInstagram投稿を作って",
@@ -9279,6 +9430,9 @@
       "reloadText": "字幕を再読み込み",
       "textSaved": "字幕の変更を保存しました。",
       "action": "自動字幕",
+      "styles": {
+        "bold": "太字"
+      },
       "working": "聞き取り中… {{percent}}%",
       "downloading": "音声モデルを準備中… {{percent}}%",
       "hint": "音声をタイミング付きの字幕に変換し、スタイルを自由に変更できます。端末上で動作するため無料でプライベートです。初回利用時にモデルをダウンロードします。",
@@ -10658,6 +10812,25 @@
       "toolbar": "キャンバスナビゲーション",
       "zoomIn": "キャンバスを拡大する",
       "zoomOut": "キャンバスをズームアウトする"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "分割",
+        "play": "再生",
+        "pause": "一時停止",
+        "frameBack": "前のフレーム",
+        "frameForward": "次のフレーム"
+      }
+    },
+    "voiceClone": {
+      "stop": "録音を停止"
+    },
+    "linkImport": {
+      "go": "インポート",
+      "downloading": "ダウンロード中 {{percent}}%"
+    },
+    "reverse": {
+      "action": "リバース"
     }
   },
   "jungleMood": {
@@ -11958,7 +12131,15 @@
       "rewardsWeek": "{{date}}の週",
       "rewardPaid": "有料",
       "rewardPending": "保留",
-      "rewardsNone": "報酬はまだ計算されていません。最初の週は月曜日に終了します。"
+      "rewardsNone": "報酬はまだ計算されていません。最初の週は月曜日に終了します。",
+      "stats": {
+        "button": "ライブ統計"
+      },
+      "signin": {
+        "users_one": "{{count}} ユーザー",
+        "users_other": "{{count}} ユーザー",
+        "delete": "削除"
+      }
     },
     "card": {
       "open": "開く"
@@ -12115,6 +12296,9 @@
     "reminderLater": "今はしない"
   },
   "copy": {
+    "55656b5e434f": "検索を閉じる",
+    "57e2faa5ec63": "Riftn を検索",
+    "96d7bff86b44": "検索できませんでした",
     "1607715e45ed": "ボールをタップして話すか、下に入力してください",
     "00140a37bd26": "そのネットワーク上のトランザクションは一時的に利用できません。もう一度お試しください。",
     "002286513398": "イベントを管理する権限がありません",
@@ -17667,6 +17851,7 @@
     "5b560f273940": "デピン",
     "226d010f636d": "🛠️ デベロッパーSDK",
     "4f97987243b4": "🎯 広告スタック",
+    "748d190d59af": "📱 Apple の App Store",
     "104272ba3fd3": "✍️ ブログ",
     "58114cd29d10": "📅 イベント",
     "c6db0784ded4": "🥽 V/ARプロファイルハブ",
@@ -19047,6 +19232,7 @@
     "backToTop": "トップに戻る",
     "needTitle": "続行するにはタイトルを追加してください",
     "needBody": "残り{{count}}文字",
+    "imagesLabel": "画像",
     "backToWriting": "執筆に戻る",
     "readyTitle": "公開準備完了",
     "sharePreview": "共有時の外観",
@@ -19108,6 +19294,129 @@
     "exploreFirst": "先に見てみる",
     "codeNote": "メールでコードを送ります。パスワードは不要です。"
   },
+  "liveHype": {
+    "gift": {
+      "plan": "プラン",
+      "howMany": "いくつ",
+      "who": "ユーザー名またはウォレットアドレス",
+      "whoPlaceholder": "@ユーザー名",
+      "cancel": "キャンセル",
+      "stage": {
+        "preparing": "準備中…",
+        "confirming": "取引を待っています…",
+        "recording": "仕上げ中…"
+      }
+    },
+    "badges": {
+      "emoji": "絵文字",
+      "audience": {
+        "subscribers": "登録者"
+      },
+      "ended": "終了しました",
+      "until": "{{date}}まで",
+      "failed": "うまくいきませんでした。もう一度やり直してください。"
+    }
+  },
+  "whenSheet": {
+    "today": "今日",
+    "earlierShort": "それ以前",
+    "tooSoon": "将来の日時を選択してください。",
+    "show": "表示",
+    "hide": "非表示"
+  },
+  "planned": {
+    "title": "計画中",
+    "all": "すべて",
+    "posts": "投稿",
+    "stages": "音声ルーム",
+    "post": "投稿",
+    "live": "ライブ",
+    "stage": "ステージ",
+    "untitledPost": "投稿",
+    "untitledLive": "ライブ",
+    "loading": "読み込み中…",
+    "startNow": "今すぐ開始",
+    "cancel": "キャンセル",
+    "cancelled": "キャンセル済み"
+  },
+  "welcome": {
+    "about": {
+      "title": "Riftnへようこそ",
+      "day": "日",
+      "month": "月",
+      "year": "年"
+    },
+    "name": {
+      "title": "あなたの名前",
+      "placeholder": "あなたの名前"
+    },
+    "card": {
+      "name": "あなたの名前",
+      "followers": "フォロワー"
+    },
+    "topic": {
+      "music": "音楽",
+      "art": "アート",
+      "gaming": "ゲーム",
+      "crypto": "暗号通貨",
+      "sports": "スポーツ",
+      "film": "フィルム",
+      "podcast": "ポッドキャスト",
+      "news": "ニュース",
+      "science": "科学"
+    },
+    "back": "戻る",
+    "skipPhoto": "今はスキップ",
+    "preview": "プレビュー"
+  },
+  "appTokens": {
+    "title": "あなたのトークン",
+    "history": "履歴",
+    "kindDeposit": "入金",
+    "to": "終了",
+    "amount": "金額",
+    "notePlaceholder": "メモを追加（任意）",
+    "sendButton": "送信",
+    "errorInsufficient": "トークンが不足しています"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "全員",
+      "followers": "フォロワー",
+      "nobody": "誰も"
+    },
+    "heading": "リアクション",
+    "more": "さらに表示",
+    "liveNow": "ライブ",
+    "untitled": "反応"
+  },
+  "connectGuide": {
+    "title": "RiftnをAIアシスタントに接続",
+    "urlLabel": "MCPサーバーURL",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "copiedToast": "MCP URLをコピーしました"
+  },
+  "avatarPrompt": {
+    "notNow": "あとで"
+  },
+  "postStats": {
+    "engagement": "エンゲージメント",
+    "finished": "終了",
+    "members": "メンバー",
+    "membersLower": "メンバー",
+    "newFollowers": "新しいフォロワー",
+    "noBadge": "バッジなし",
+    "people": "ユーザー",
+    "plays": "プレイ",
+    "quotes": "引用",
+    "reposts": "リポスト",
+    "saved": "保存済み",
+    "shares": "シェア",
+    "signedOutViewers": "ログアウトしました",
+    "topSupporters": "トップサポーター",
+    "visitors": "ログアウトしました"
+  },
   "halloween": {
     "title": "ハッピーハロウィン",
     "otherThemes": "怖いのは苦手？他のテーマを選ぼう：",
@@ -19142,6 +19451,10 @@
     "connect": "GitHubを接続",
     "disconnect": "GitHubを切断"
   },
+  "mcpKeys": {
+    "delete": "削除",
+    "shortProfile": "プロフィール"
+  },
   "chatSearch": {
     "placeholder": "検索メッセージまたは人を検索",
     "placeholderPerson": "{{name}}のメッセージを検索",
@@ -19171,5 +19484,16 @@
     "gone": "そのメッセージはもうありません",
     "theirMessages": "彼らのメッセージ",
     "seeTheirMessages": "彼らのメッセージを見る"
+  },
+  "dmRequests": {
+    "title": "リクエスト",
+    "accept": "承認",
+    "delete": "削除",
+    "block": "ブロック"
+  },
+  "dmSchedule": {
+    "view": "見る",
+    "edit": "編集",
+    "error": "うまくいきませんでした。もう一度やり直してください。"
   }
 }

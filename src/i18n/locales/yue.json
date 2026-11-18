@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "文字"
+  },
   "comic": {
     "showAll": "顯示全部 {{count}} 頁"
   },
@@ -14,6 +17,23 @@
     "glitter": "閃粉",
     "saved": "已儲存邊框",
     "failed": "儲存唔到邊框"
+  },
+  "duet": {
+    "policyEveryone": "所有人",
+    "policyFollowers": "追蹤者",
+    "policyNobody": "冇人",
+    "loadMore": "載入更多",
+    "video": "視頻"
+  },
+  "videoRemix": {
+    "sound": "使用呢個音效"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "所有人",
+      "followers": "追蹤者",
+      "nobody": "冇人"
+    }
   },
   "dehubAppPage": {
     "android": "安卓",
@@ -166,17 +186,26 @@
     "privateNote": "私人帳戶唔會喺聯邦宇宙顯示。",
     "noUsername": "揀個用戶名就會有聯邦宇宙地址。"
   },
+  "signedFollows": {
+    "setUp": "開啟",
+    "turnOff": "關閉",
+    "efpTurnOff": "停止"
+  },
   "profileFields": {
     "title": "個人檔案欄位",
     "description": "喺個人檔案加最多四行，例如網站或者你嘅代名詞。",
     "label": "標籤",
     "content": "內容",
+    "add": "新增欄位",
+    "remove": "移除欄位",
     "save": "儲存欄位",
     "saved": "已儲存個人檔案欄位",
     "failed": "儲存唔到，請再試吓。",
     "verified": "已驗證連結",
     "verifyHint": "要驗證連結，請將呢段加入嗰個頁面，然後再儲存一次：{{snippet}}",
+    "descriptionPresets": "新增網站、代詞或其他內容。連結會與你的社交媒體一起顯示。",
     "type": "田地類型",
+    "needsLabel": "為每個自訂欄位設定標籤",
     "placeholderPronouns": "佢/佢",
     "placeholderLocation": "城市, 國家",
     "presets": {
@@ -185,6 +214,9 @@
       "portfolio": "作品集",
       "shop": "商店",
       "podcast": "播客",
+      "newsletter": "通訊",
+      "pronouns": "代詞",
+      "location": "位置",
       "custom": "習俗",
       "customOption": "自訂標籤"
     }
@@ -349,6 +381,7 @@
     "refresh": "刷新狀態",
     "disconnect": "斷開 Twitch 嘅連線",
     "open": "喺 Riftn 睇",
+    "retry": "重試同步轉播",
     "consent": "只連接你擁有嘅頻道。啟用鏡像功能會授權 Riftn 喺你現有嘅錄音津貼下轉播你嘅廣播同埋儲存重播。",
     "disabled": "自動鏡像閂咗",
     "failed": "更新唔到 Twitch 鏡像。唔該再試多次。"
@@ -370,6 +403,8 @@
     "intro": "睇下個例子。揀一個效果或者角色。加入你張相，令佢成為你嘅相。",
     "browse": "瀏覽所有 {{count}} 範本",
     "featured": "返去精選",
+    "useNamed": "用 {{name}}",
+    "preview": "播放 {{name}} 預覽",
     "previewUnavailable": "預覽唔可用",
     "search": "搜尋效果、角色同舞蹈",
     "all": "全部",
@@ -1186,7 +1221,11 @@
     "payDirect": "直接發送到{{name}}在{{symbol}}的{{chain}}。無需交換。",
     "payDirectNoName": "直接發送到創作者在{{symbol}}的{{chain}}。無需交換。",
     "payViaBridgeDpay": "已轉移到 Base 並支付給 Riftn Pay，代幣約一分鐘後到賬",
-    "dmSent": "已經傳送 {{amount}} 代幣 畀 {{name}}！"
+    "dmSent": "已經傳送 {{amount}} 代幣 畀 {{name}}！",
+    "messagePublic": "公開",
+    "railTitle": "打赏",
+    "railTotal": "{{amount}} 個代幣",
+    "tokensUnit": "代幣"
   },
   "postOptions": {
     "liveAlertsOn": "你而家追蹤緊{{name}}。佢開始直播嗰陣你會收到通知。",
@@ -1687,6 +1726,9 @@
   "notifications": {
     "title": "通知",
     "markAllRead": "全部標為已讀",
+    "groupNew": "最新",
+    "groupToday": "今日",
+    "groupThisWeek": "今個星期",
     "settings": "通知設定",
     "actions": "操作",
     "markAllAsRead": "全部標為已讀",
@@ -1715,6 +1757,7 @@
     "communities": "社群",
     "stores": "店舖",
     "noNotificationsYet": "暫時冇通知",
+    "searchClose": "關閉搜尋",
     "noNotificationsDesc": "當你收到讚好、留言、禮物或新訂閱者嘅時候會喺呢度顯示。",
     "loadMore": "載入更多",
     "markAsRead": "標為已讀",
@@ -1952,11 +1995,13 @@
     "promptLabel": "你嘅提示",
     "promptPlaceholder": "描述一個想法、改善點或錯誤…",
     "promptAttach": "附上圖片",
+    "removeAttachment": "移除附件",
     "promptDrop": "貼圖或拖放圖片於此",
     "promptPost": "帖子提示",
     "promptShortcut": "Ctrl / ⌘ + 輸入就可以發佈",
     "promptDetails": "可選嘅詳情",
     "promptDevice": "裝置同操作系統（針對錯誤）",
+    "deviceInfoNoErrors": "無",
     "promptFilters": "篩選分類",
     "promptMediaError": "揀每張50MB 以下嘅圖片或者影片。",
     "promptMediaLimit": "最多 {{max}} 附件。",
@@ -2015,6 +2060,12 @@
     "loginRequired": "需要登入"
   },
   "messages": {
+    "newDrawer": {
+      "to": "到",
+      "recent": "最近",
+      "suggested": "建議",
+      "youFollow": "你追蹤嘅人"
+    },
     "reply": "回覆",
     "react": "回應",
     "edit": "編輯",
@@ -2051,7 +2102,10 @@
     "checkingTokenBalance": "正在檢查你嘅代幣餘額...",
     "deleteConversationFailed": "刪除唔到對話",
     "message": "訊息",
-    "noConversationsYet": "仲未有對話"
+    "noConversationsYet": "仲未有對話",
+    "sending": "正在傳送",
+    "retrySend": "再試",
+    "discardSend": "移除"
   },
   "music": {
     "listeningCount_one": "{{count}} 聽緊",
@@ -2133,6 +2187,9 @@
     "viewList": "清單檢視",
     "viewMode": "風景",
     "back": "返回",
+    "reserve": {
+      "signIn": "登入"
+    },
     "usernameAvailable": "用戶名可用！",
     "signUpToClaim": "註冊嚟攞",
     "signUp": "註冊",
@@ -2160,7 +2217,11 @@
     },
     "tabs": {
       "playlists": "播放清單",
-      "dislikes": "不喜歡"
+      "dislikes": "不喜歡",
+      "likes": "讚好"
+    },
+    "likedPosts": {
+      "loadMore": "載入更多"
     },
     "dislikes": {
       "emptyTitle": "目前沒有不喜歡",
@@ -2183,6 +2244,7 @@
     "sortMostViewed": "最多人睇過",
     "sortLikes": "鍾意",
     "sortMostLiked": "最鍾意",
+    "sortCustomShort": "自訂",
     "searchThisChannel": "搜尋呢個頻道",
     "searchResultCount": "1 個結果為「 {{query}} 」",
     "searchResultCountPlural": "{{count}} 結果為「 {{query}} 」"
@@ -2291,6 +2353,8 @@
       "empty": "仲未有嘢。佢好快就會入住。",
       "kind": {
         "post": "發佈咗",
+        "comment": "已留言",
+        "reply": "已回覆",
         "like": "鍾意咗個帖子",
         "profile": "更新咗佢嘅個人檔案",
         "error": "咁樣唔好使喇"
@@ -2338,6 +2402,7 @@
       "runSwarm": "執行蜂擁",
       "description": "操作會以所選代理嘅身份執行。喺應用程式閂咗之後，預定嘅任務會繼續。",
       "instructions": "代理指示",
+      "examples": "每日發一次帖，講：獨立音樂\n風格：好奇、精簡、好似傾偈咁\n每日最多讚 2 個最近嘅帖，講：音樂、現場表演、黑膠",
       "preparing": "準備任務…",
       "run": "執行指令",
       "limits": "每日一個帖子，每個任務最多 3 個相關讚好。所有代理都有20分鐘嘅帖子間隔。相片用咗勾選嘅字幕；影片需要封面圖片。帖子嘅數量要少過500個字元。除非鑄造，否則冇氣體；寫作可能會用學分。",
@@ -2446,6 +2511,9 @@
     "signInAgain": "重新登入",
     "createSignIn": "重新登入先可以建立代理",
     "checkConnection": "檢查下你嘅連線，再試一次。",
+    "welcome": {
+      "text": "歡迎訊息"
+    },
     "workspace": {
       "moderation": "直播管理",
       "moderationHelp": "請先開啟管理權限。個帳戶必須已經係直播建立者或者獲指派嘅管理員。批准模式同草稿模式照樣適用。禁言會自動到期。",
@@ -2638,7 +2706,9 @@
     "resendCodePhone": "錯號碼定係冇碼？返去",
     "continueAs": "繼續做",
     "switchWalletAccount": "切換帳戶",
-    "walletLoadFailed": "載入唔到銀包。唔該再試多次。"
+    "walletLoadFailed": "載入唔到銀包。唔該再試多次。",
+    "openInBrowser": "喺瀏覽器度打開",
+    "copyLink": "複製連結"
   },
   "careers": {
     "title": "加入Riftn",
@@ -2862,7 +2932,8 @@
     "noMenuMatches": "選單入面冇匹配項",
     "searchDehubFor": "喺 Riftn 搜尋「{{query}}」",
     "switchAccount": "切換帳戶",
-    "signedInAs": "以 {{name}} 登入"
+    "signedInAs": "以 {{name}} 登入",
+    "requestSend": "發送申請"
   },
   "comments": {
     "reportComment": "舉報留言",
@@ -2971,6 +3042,9 @@
     "confirm": "薄荷上 {{chain}}",
     "confirmWithCost": "薄荷上 {{chain}} · {{cost}}",
     "notAvailable": "呢條鏈嘅鑄造仲未有得賣。"
+  },
+  "postEditHistory": {
+    "original": "原圖"
   },
   "postInfo": {
     "title": "帖子資訊",
@@ -3352,6 +3426,7 @@
       "error": "無法發送邀請。請檢查你的連線及登入狀態，再試一次。"
     },
     "existingPost": {
+      "add": "加入現有帖文",
       "hint": "保留原始帖子、讚好同睇數。",
       "placeholder": "Riftn 帖子連結或者帖子 ID",
       "adding": "加緊 …",
@@ -5081,6 +5156,7 @@
     "settledTitleSpeed": "，通常 {{speed}}",
     "settledCount_one": "{{count}} 已結算",
     "settledCount_other": "{{count}} 已結算",
+    "statusInProgress": "進行中",
     "howMany": "幾多個",
     "availableCount_one": "{{count}} 可用",
     "availableCount_other": "{{count}} 可用",
@@ -5173,6 +5249,17 @@
     "sellYourFractions": "出售你的分數 ({{held}} 持有)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "用呢啲詳情"
+      }
+    },
+    "cinema": {
+      "close": "關閉",
+      "performance": {
+        "label": "效能"
+      }
+    },
     "libraryEmpty": "你儲存咗嘅生成內容會喺度顯示。",
     "toolRemake": "重做",
     "toolMaboroshi": "馬波羅西",
@@ -5405,6 +5492,7 @@
     "presetOpenDoughCloseupHint": "窗口照明嘅手，有個靜音調色板",
     "presetOpenDesertStarsName": "沙漠之星",
     "presetOpenDesertStarsHint": "長曝光嘅星跡喺白色圓頂上面",
+    "presetOpenForestAerialName": "森林空中",
     "presetOpenForestAerialHint": "慢慢空中渡輪穿過黎明霧",
     "presetOpenInkBloomName": "墨水開花",
     "presetOpenInkBloomHint": "超慢速度嘅背光微距運動",
@@ -6145,6 +6233,11 @@
     "raw": "生"
   },
   "nftMarket": {
+    "actAll": "全部",
+    "actListings": "刊登",
+    "actOffers": "出價",
+    "tabActivity": "活動",
+    "shortTitle": "NFT",
     "filters": "篩選器",
     "forSale": "出售中",
     "openToOffers": "歡迎報價",
@@ -6174,7 +6267,10 @@
     "tabSell": "出售",
     "tabMine": "我的訂單",
     "tabSales": "銷售紀錄",
+    "statMinted": "鑄造",
+    "statForSale": "出售中",
     "sellYours": "賣你哋嘅！",
+    "sellYoursHint": "由你個錢包列出",
     "dropBadge": "價格下跌",
     "loadMore": "加多啲",
     "latestMints": "最新的糖果",
@@ -6183,6 +6279,7 @@
     "sellOne": "賣一個 NFT",
     "walletError": "無法讀取你嘅錢包",
     "tryAgain": "再試一次嘅時候，請稍後再試。",
+    "cancel": "取消",
     "noNftsBody": "Mint 一個 NFT 文章，或者切換鏈查看你還持有什麼。",
     "listing": "名單",
     "offer": "提供",
@@ -6192,10 +6289,14 @@
     "alertSaved": "警告啟動。咁會話知你有咗。",
     "bought": "已經買咗，喺你個錢包入面囉。",
     "sold": "已售出。款項已存入你的錢包。",
+    "cancelled": "取消咗",
     "listed": "列出。任何人都可以現在購買。",
     "offered": "報價已送出。持有人可以隨時接受。",
     "dehubPost": "Riftn 發帖",
     "youHold": "你持有 {{n}}",
+    "price": "價格",
+    "volume": "音量",
+    "tabRecent": "最近",
     "buyNow": "現在購買",
     "dropsTo": "價格將於 {{date}} 降至 {{price}}",
     "inBundle": "以 {{n}} 為一組出售",
@@ -6609,7 +6710,64 @@
     "youAreBanned": "你不能在這位創作者的直播間聊天。",
     "youAreTimedOut": "你暫時被時間限制。"
   },
+  "studioDeck": {
+    "background": {
+      "title": "背景",
+      "modes": {
+        "none": "关闭",
+        "blur": "模糊",
+        "color": "顏色"
+      }
+    },
+    "remove": "移除",
+    "scenes": {
+      "countdown": "倒數",
+      "minutes": "{{count}} 分鐘",
+      "names": {
+        "starting": "就快開始"
+      }
+    },
+    "sources": {
+      "reactAdd": "顯示",
+      "image": "形象",
+      "camera": "相機",
+      "show": "喺串流上面顯示",
+      "positions": {
+        "center": "中心"
+      },
+      "shapes": {
+        "circle": "圓形",
+        "rect": "正方形"
+      }
+    },
+    "audio": {
+      "mute": "靜音",
+      "unmute": "取消靜音",
+      "gateLevels": {
+        "off": "关闭",
+        "low": "淺色",
+        "high": "強"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "平台",
+      "label": "名稱（選填）",
+      "key": "直播金鑰",
+      "save": "加入",
+      "cancel": "取消",
+      "states": {
+        "off": "关闭",
+        "idle": "準備好",
+        "live": "直播",
+        "error": "错误"
+      }
+    },
+    "vertical": {
+      "centre": "中心",
+      "live": "直播"
+    },
     "subathon": {
       "title": "副馬拉松",
       "intro": "你直播間嘅倒數。每個付費禮物、追蹤及訂閱都會加時間，令直播間保持直播。",
@@ -7562,6 +7720,7 @@
     "footerNote": "DePin 參與係一個貢獻服務，而唔係一個投資產品。可用性、資格同獎賞可能會有變動。"
   },
   "creatorFlow": {
+    "disconnect": "斷開連線",
     "title": "創作者流程",
     "backToStudio": "返回創作者工作室",
     "backToFlows": "返回你的流程",
@@ -7901,7 +8060,15 @@
     "followBackAllFailed": "唔能夠跟返任何人",
     "followingBackProgress": "跟返{{completed}}個{{total}}",
     "findingFollowers": "搵返追蹤者...",
-    "followBackAll": "跟返所有人"
+    "followBackAll": "跟返所有人",
+    "followBackConfirm": "互相關注",
+    "followBackNotNow": "而家唔使",
+    "followBackDone": "完成",
+    "nonFollowers": {
+      "notNow": "而家唔使",
+      "cancel": "取消",
+      "close": "關閉"
+    }
   },
   "reactionInfo": {
     "title": "反應",
@@ -8083,6 +8250,7 @@
     "paying": "正在支付 {{amount}} 個代幣…",
     "pickCount": "已選擇 {{selected}} 個（共 {{total}} 個）。你個人檔案上已有嘅內容會被跳過，唔會重複收費。",
     "pickTitle": "揀選要帶過去嘅內容",
+    "placeholder": "youtube.com/@你, tiktok.com/@你, vimeo.com/你…",
     "progressDone": "已匯入 {{imported}} 個。",
     "progressDoneWithFailures": "已匯入 {{imported}} 個，{{failed}} 個匯入失敗。",
     "progressIdle": "批次中嘅每條影片都會喺呢度有自己嘅磚塊，咁你就可以睇到邊啲成功咗同埋重試邊啲失敗咗。暫時冇運行緊 — 下面嘅網格係示例。",
@@ -8696,6 +8864,14 @@
     "priceChartCleared": "價格表清空。參考價格：$0.0001。執行價格取決於有關的訂單。"
   },
   "editor": {
+    "stage": {
+      "camera": "相機",
+      "yaw": "旋轉",
+      "add": "加入",
+      "scale": "大小",
+      "color": "顏色",
+      "light": "淺色"
+    },
     "video": {
       "tFade": "交叉溶解",
       "none": "冇",
@@ -8862,6 +9038,8 @@
       "tools": "編輯工具"
     },
     "agent": {
+      "stop": "停止",
+      "queue": "加入隊列",
       "introTitle": "話畀 AI 知您想要乜",
       "introBody": "用自己嘅說話描述設計或者改動。佢可以調整頁面大小、撰寫同設計文字、搵免費相片、影片同音樂、套用濾鏡、排列圖層同加動畫。每個要求都可以一次復原。",
       "suggestPoster": "整一個正方形嘅 Instagram 帖，宣傳夏日減價，用沙灘相同粗體標題",
@@ -9119,6 +9297,7 @@
       "findText": "在字幕中搜尋",
       "replaceText": "用嚟換",
       "matchCase": "大小寫匹配",
+      "replaceCount": "喺 {{total}} 段字幕入面取代",
       "emptyText": "空白字幕",
       "noTextMatches": "無可編輯的字幕匹配。匯入字幕或改變搜尋。",
       "previousText": "前一格",
@@ -9129,6 +9308,9 @@
       "reloadText": "重新載入字幕",
       "textSaved": "字幕改變已經儲存。",
       "action": "自動字幕",
+      "styles": {
+        "bold": "粗體"
+      },
       "working": "聽緊… {{percent}}%",
       "downloading": "準備緊語音模型… {{percent}}%",
       "hint": "將講嘢轉做有時間嘅字幕，樣式隨你改。喺你部機度運行：免費又私隱。第一次用會下載模型。",
@@ -9294,6 +9476,7 @@
         "tips": "三個提示",
         "tutorial": "快速教學",
         "countdown": "倒數",
+        "mythFact": "神話同事實",
         "product": "產品透露",
         "announcement": "公佈",
         "story": "故事弧線",
@@ -9301,8 +9484,10 @@
       },
       "copy": {
         "question": "你嘅大問題",
+        "answer": "呢個係答案",
         "tryIt": "今日試下",
         "smallChange": "一個細微嘅改動",
+        "before": "之前",
         "after": "之後",
         "difference": "睇下個分別",
         "threeTips": "三個有用嘅提示",
@@ -9314,6 +9499,7 @@
         "getReady": "準備好",
         "mainStep": "做主要步驟",
         "checkResult": "檢查個結果",
+        "yourTurn": "輪到你喇",
         "topFive": "你嘅五大選擇",
         "fifthPick": "你嘅第五選擇",
         "fourthPick": "你嘅第四選擇",
@@ -9358,11 +9544,16 @@
       "protectedUndo": "舊版本地編輯會重疊共用變更。復原會保留共用嘅變更。"
     },
     "live": {
+      "stopEdits": "停止即時編輯",
+      "receiveEdits": "接收即時編輯",
       "shareEdits": "即時分享編輯內容",
       "waiting": "等緊你嘅編輯完成",
       "transferring": "轉移緊即時編輯 …",
+      "sharing": "分享緊即時編輯",
+      "receiving": "接收緊即時編輯",
       "paused": "即時編輯暫停咗",
       "retryRecovery": "重試復原",
+      "personalCopy": "儲存個人副本",
       "privateHint": "單單存在就唔會分享任何編輯。分享編輯即時上載新來源私下。儲存到雲端會保留永久版本。"
     },
     "assembly": {
@@ -10498,6 +10689,25 @@
       "toolbar": "畫布導航",
       "zoomIn": "放大畫布",
       "zoomOut": "縮小畫布"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "分割",
+        "play": "玩",
+        "pause": "暫停",
+        "frameBack": "上一幀",
+        "frameForward": "下一幀"
+      }
+    },
+    "voiceClone": {
+      "stop": "停止錄音"
+    },
+    "linkImport": {
+      "go": "匯入",
+      "downloading": "下載中 {{percent}}%"
+    },
+    "reverse": {
+      "action": "反轉"
     }
   },
   "jungleMood": {
@@ -10632,7 +10842,8 @@
       "social": "社會特徵",
       "navigation": "導航",
       "governance": "治理同社區",
-      "badges": "徽章同排名"
+      "badges": "徽章同排名",
+      "postActions": "後勤管理"
     },
     "thumbsUp": "竖起大拇指（讚）",
     "thumbsUpDesc": "顯示你鍾意或者同意某個帖子。提高帖子嘅互動分數，同埋幫助佢喺資訊提供入面排名更高。",
@@ -10654,6 +10865,7 @@
     "showOriginal": "顯示原創",
     "showOriginalDesc": "翻譯完之後，㩒一下呢個就可以還原返去內容嘅原始語言。",
     "imagePost": "圖片帖子",
+    "imagePostDesc": "包含一張或者多張圖片嘅帖子。圖像會以 NFT 嘅形式儲存喺鏈上面，並且有獨特嘅令牌 ID 。",
     "videoPost": "影片帖子",
     "videoPostDesc": "包含影片嘅帖子。影片可以設定為公開、私人或者按次付費（ PPV ）。",
     "liveStream": "直播",
@@ -10663,6 +10875,7 @@
     "audio": "音頻",
     "audioDesc": "有視覺波形播放器嘅音頻帖子。創作者可以上載音樂、播客或者錄音。",
     "audioSpace": "聲音空間",
+    "audioSpaceDesc": "一個即時音訊室，用戶可以喺嗰度講嘢、聽同埋舉手加入對話。",
     "public": "公眾",
     "publicDesc": "所有人都可以睇到嘅內容。任何人都可以睇返、讚好同埋留言公開嘅文章。",
     "private": "私人",
@@ -11780,7 +11993,15 @@
       "rewardsWeek": "一個星期 {{date}}",
       "rewardPaid": "畀咗錢",
       "rewardPending": "待定",
-      "rewardsNone": "仲未計到獎賞。第一個星期喺星期一結束。"
+      "rewardsNone": "仲未計到獎賞。第一個星期喺星期一結束。",
+      "stats": {
+        "button": "即時統計"
+      },
+      "signin": {
+        "users_one": "{{count}} 位用戶",
+        "users_other": "{{count}} 位用戶",
+        "delete": "刪除"
+      }
     },
     "card": {
       "open": "打開"
@@ -11937,6 +12158,9 @@
     "reminderLater": "而家唔得"
   },
   "copy": {
+    "55656b5e434f": "關閉搜尋",
+    "57e2faa5ec63": "搜尋 Riftn",
+    "96d7bff86b44": "搜尋無法載入",
     "1607715e45ed": "㩒一下個波就可以講嘢，或者喺下面打字",
     "00140a37bd26": "交易網絡暫時不可用。請再試一次。",
     "002286513398": "你無權管理事件",
@@ -16097,6 +16321,7 @@
     "d534be829e32": "視頻",
     "9ae6de224302": "成為創作者",
     "a39091f6acf5": "申請成為 Riftn 嘅創作者, 開源、抵禦審查嘅媒體平台。",
+    "1a00975a0ac1": "@ 頻道",
     "b87b467906e6": "DAO 財務: 資助 Riftn 並獲得發言權",
     "02ce53459982": "Riftn DAO 財務：任何人都可以將代幣發送到這個錢包。睇到現時餘額，睇到有冇人贊助，睇到DAO決定如何花錢時，每個贊助者佔有多少份額。",
     "730f5eed0d6e": "Riftn DAO 財務 — 分散式、用戶自主嘅社交媒體",
@@ -16345,6 +16570,7 @@
     "c603180499e7": "頂級資產",
     "93c91c851e7a": "價格",
     "03fba4e9f0e2": "音量（24小時）",
+    "bf4151fc970f": "工作管理仲裁器",
     "aaa197c64e1f": "src / 常數 / 應用程式 . 常數 . ts",
     "dbf990b4954b": "編輯你喺 Riftn 上面發佈嘅獎勵。",
     "d329c3be85eb": "我嘅獎勵 |去中心",
@@ -17508,6 +17734,7 @@
     "748d190d59af": "📱 蘋果應用程式商店",
     "104272ba3fd3": "✍ ️ 博客",
     "58114cd29d10": "📅 活動",
+    "c6db0784ded4": "🥽 V/AR 配置文件中心",
     "f72504445c27": "雙子座2.5快閃（快速聊天）",
     "0f1b798b83e6": "雙子座2.5 Pro （深度聊天）",
     "2ae64c94797c": "GPT-5（聊天）",
@@ -18889,6 +19116,7 @@
     "backToTop": "返去頂部",
     "needTitle": "加個標題嚟繼續",
     "needBody": "{{count}} 仲有好多字",
+    "imagesLabel": "圖片",
     "backToWriting": "返去寫作",
     "readyTitle": "準備好發佈",
     "sharePreview": "分享嗰陣嘅外觀",
@@ -18950,6 +19178,128 @@
     "exploreFirst": "先探索",
     "codeNote": "我們會以電子郵件發送一個代碼，無需密碼。"
   },
+  "liveHype": {
+    "gift": {
+      "plan": "計劃",
+      "howMany": "幾多份",
+      "who": "用戶名或錢包地址",
+      "whoPlaceholder": "@用戶名",
+      "cancel": "取消",
+      "stage": {
+        "preparing": "准备中…",
+        "confirming": "正在等待交易…",
+        "recording": "正在完成…"
+      }
+    },
+    "badges": {
+      "emoji": "表情符號",
+      "audience": {
+        "subscribers": "訂閱者"
+      },
+      "ended": "已結束",
+      "until": "直到 {{date}}",
+      "failed": "噉樣做唔到。再試多次。"
+    }
+  },
+  "whenSheet": {
+    "today": "今日",
+    "tooSoon": "選擇未來的時間。",
+    "show": "顯示",
+    "hide": "隱藏"
+  },
+  "planned": {
+    "title": "已規劃",
+    "all": "全部",
+    "posts": "帖文",
+    "stages": "語音房",
+    "post": "發佈",
+    "live": "直播",
+    "stage": "舞台",
+    "untitledPost": "發佈",
+    "untitledLive": "直播",
+    "loading": "載入中…",
+    "startNow": "而家開始",
+    "cancel": "取消",
+    "cancelled": "取消咗"
+  },
+  "welcome": {
+    "about": {
+      "title": "歡迎來到 Riftn",
+      "day": "日",
+      "month": "月",
+      "year": "年"
+    },
+    "name": {
+      "title": "我的名字",
+      "placeholder": "我的名字"
+    },
+    "card": {
+      "name": "我的名字",
+      "followers": "追隨者"
+    },
+    "topic": {
+      "music": "音樂",
+      "art": "藝術",
+      "gaming": "遊戲",
+      "crypto": "加密貨幣",
+      "sports": "運動",
+      "film": "電影",
+      "podcast": "網路廣播",
+      "news": "新聞",
+      "science": "科學"
+    },
+    "back": "返回",
+    "skipPhoto": "暫時跳過",
+    "preview": "預覽"
+  },
+  "appTokens": {
+    "title": "您的代幣",
+    "history": "歷史",
+    "kindDeposit": "增值",
+    "to": "到",
+    "amount": "金額",
+    "notePlaceholder": "加個備註（可以唔填）",
+    "sendButton": "發送",
+    "errorInsufficient": "代幣不足"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "所有人",
+      "followers": "追蹤者",
+      "nobody": "冇人"
+    },
+    "heading": "反應",
+    "more": "顯示更多",
+    "liveNow": "直播",
+    "untitled": "回應"
+  },
+  "connectGuide": {
+    "title": "將 Riftn 連接到你嘅 AI 助手",
+    "urlLabel": "MCP 伺服器 URL",
+    "copy": "複製",
+    "copied": "已複製",
+    "copiedToast": "已複製 MCP URL"
+  },
+  "avatarPrompt": {
+    "notNow": "而家唔使"
+  },
+  "postStats": {
+    "engagement": "互动",
+    "finished": "已結束",
+    "members": "成员",
+    "membersLower": "成员",
+    "newFollowers": "新追蹤者",
+    "noBadge": "無徽章",
+    "people": "用戶",
+    "plays": "睇過",
+    "quotes": "引用",
+    "reposts": "轉發",
+    "saved": "已儲存",
+    "shares": "分享",
+    "signedOutViewers": "已登出",
+    "topSupporters": "頂尖支持者",
+    "visitors": "已登出"
+  },
   "tokenLaunch": {
     "eyebrow": "就快嚟到",
     "title": "好快就會推出代幣",
@@ -18979,6 +19329,10 @@
     "connect": "連接 GitHub",
     "disconnect": "斷開 GitHub"
   },
+  "mcpKeys": {
+    "delete": "刪除",
+    "shortProfile": "個人檔案"
+  },
   "chatSearch": {
     "placeholder": "搜尋訊息或人",
     "placeholderPerson": "搜尋 {{name}} 嘅訊息",
@@ -19007,5 +19361,16 @@
     "gone": "嗰條訊息已經唔在這裡",
     "theirMessages": "佢哋嘅訊息",
     "seeTheirMessages": "查看佢哋嘅訊息"
+  },
+  "dmRequests": {
+    "title": "功能請求",
+    "accept": "接受",
+    "delete": "刪除",
+    "block": "封鎖"
+  },
+  "dmSchedule": {
+    "view": "觀看",
+    "edit": "編輯",
+    "error": "噉樣做唔到。再試多次。"
   }
 }

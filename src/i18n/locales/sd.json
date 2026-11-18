@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "ٽيڪسٽ"
+  },
   "comic": {
     "showAll": "سڀ {{count}} صفحا ڏيکاريو"
   },
@@ -14,6 +17,23 @@
     "glitter": "چمڪ",
     "saved": "حاشيو محفوظ ٿيو",
     "failed": "حاشيو محفوظ نه ٿي سگهيو"
+  },
+  "duet": {
+    "policyEveryone": "سڀ",
+    "policyFollowers": "فالوورز",
+    "policyNobody": "ڪو نه",
+    "loadMore": "وڌيڪ لوڊ ڪريو",
+    "video": "ويڊيو"
+  },
+  "videoRemix": {
+    "sound": "هي آواز استعمال ڪريو"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "سڀ",
+      "followers": "فالوورز",
+      "nobody": "ڪو نه"
+    }
   },
   "dehubAppPage": {
     "android": "اندروئيد",
@@ -166,11 +186,18 @@
     "privateNote": "خانگي کاتا فيڊيورس تي نه ڏيکاريا ويندا.",
     "noUsername": "فيڊيورس پتو حاصل ڪرڻ لاءِ يوزرنيم چونڊيو."
   },
+  "signedFollows": {
+    "setUp": "آن ڪريو",
+    "turnOff": "بند ڪريو",
+    "efpTurnOff": "بند ڪريو"
+  },
   "profileFields": {
     "title": "پروفائل جا خانا",
     "description": "توهان جي پروفائل تي چئن تائين اضافي سٽون، جهڙوڪ ويب سائيٽ يا توهان جا ضمير.",
     "label": "ليبل",
     "content": "مواد",
+    "add": "فيلڊ شامل ڪريو",
+    "remove": "فيلڊ ڊاهو",
     "save": "خانا محفوظ ڪريو",
     "saved": "پروفائل جا خانا محفوظ ٿيا",
     "failed": "محفوظ نه ٿيو. ٻيهر ڪوشش ڪريو.",
@@ -347,31 +374,42 @@
     "unavailable": "Twitch آئيني اڃا تائين دستياب ناهي.",
     "connect": "ڳنڍيو Twitch",
     "auto": "خودڪار طور تي منهنجي ٽوچ اسٽريمز کي آئيني ڪريو",
+    "waiting": "توهان جي ايندڙ Twitch نشريات لاءِ تيار",
+    "starting": "لائيو وڊيو ڳنڍي رهيا آهيون",
+    "live": "Riftn تي لائيو",
     "error": "آئيني ڌيان جي ضرورت آهي",
     "refresh": "حالت ريفريش ڪريو",
     "disconnect": "Twitch کي منقطع ڪريو",
+    "open": "Riftn تي ڏسو",
     "retry": "آئيني ڪرڻ جي ٻيهر ڪوشش ڪريو",
     "consent": "صرف هڪ چينل سان ڳنڍيو جيڪو توهان جو آهي. آئيني کي فعال ڪرڻ Riftn کي توهان جي نشريات کي رليز ڪرڻ ۽ توهان جي موجوده رڪارڊنگ الائونس تحت ريپليز محفوظ ڪرڻ جي اجازت ڏئي ٿو.",
-    "disabled": "خودڪار آئيني بند"
+    "disabled": "خودڪار آئيني بند",
+    "failed": "Twitch مررنگ اپڊيٽ نه ٿي سگهي. مهرباني ڪري ٻيهر ڪوشش ڪريو."
   },
   "maintenance": {
     "brand": "هالينڊ",
+    "mode": "مرمت وارو موڊ",
+    "description": "اسان مرمت جو ڪم ڪري رهيا آهيون. مهرباني ڪري ٿوري دير بعد ٻيهر ڏسو.",
     "retry": "ٻيهر ڪوشش ڪريو",
     "checkFailed": "اسان دستيابي جي چڪاس نه ڪري سگهياسين. مهرباني ڪري ٻيهر ڪوشش ڪريو.",
     "checking": "جاچ ڪري رهيو آهي...",
     "ownership": "کليل ذريعو. استعمال ڪندڙ جو مالڪ.",
+    "title": "ٿورو ڪم.\nبهتر Riftn.",
     "intermission": "عارضي طور تي آف لائن",
     "community": "ڪميونٽي پهريون. هميشه."
   },
   "viralTemplates": {
+    "title": "پنهنجو ايندڙ وائرل لمحو ڳوليو.",
     "intro": "هڪ مثال ڏسو. هڪ اثر يا ڪردار چونڊيو. پنھنجو فوٽو شامل ڪريو ۽ پنھنجو ٺاھيو.",
     "browse": "سڀ {{count}} ٽيمپليٽس براؤز ڪريو",
     "featured": "واپس خصوصي چلو",
+    "useNamed": "{{name}} استعمال ڪريو",
     "preview": "کيڏيو {{name}} پريو",
     "previewUnavailable": "ڏيک غير موجود",
     "search": "تلاش جا اثر، ڪردار ۽ ناچ",
     "all": "سڀ",
     "effects": "اثرات",
+    "characters": "ڪردار",
     "dance": "ڪوڪورڊ",
     "sports": "رياضتون پائين",
     "products": "پراڊڪٽس",
@@ -409,9 +447,11 @@
     "hint": "انهن آپشنز کي کولڻ لاءِ ڪنهن به اهڙي جاءِ تي دٻائي رکو جتي ڪو موجوده هولڊ ايڪشن نه هجي.",
     "question": "هن صفحي ۾ ڇا غلط آهي ؟",
     "placeholder": "هن مسئلي کي مختصر پيغام ۾ بيان ڪريو...",
+    "refresh": "صفحو ريفريش ڪريو",
     "logout": "لاگ آئوٽ ٿيو",
     "publicNotice": "توهان جي رپورٽ ۽ ڪنهن به اسڪرين شاٽ عوامي بگ بورڊ تي ظاهر ٿيندو. موڪلڻ کان اڳ اسڪرين شاٽ چيڪ ڪريو.",
     "deviceNotice": "صفحو، ڊوائيس، ماڊل جڏهن دستياب هجي، ۽ ايپ يا برائوزر جا تفصيل پاڻمرادو شامل ڪيا وڃن.",
+    "capturing": "هي صفحو ڪيپچر ٿي رهيو آهي…",
     "screenshot": "اسڪرين شاٽ جو ڏيک",
     "removeScreenshot": "اسڪرين شاٽ هٽايو",
     "noScreenshot": "خودڪار اسڪرين شاٽ دستياب ناهي. توهان اڃا تائين پنهنجي رپورٽ موڪلي سگهو ٿا.",
@@ -1170,8 +1210,14 @@
     "stagePay": "{{symbol}} سان Riftn Pay کي ادا ڪري رهيا آهيون…",
     "stageDelivering": "Riftn Pay توهان جا ٽوڪن موڪلي رهيو آهي…",
     "payViaDpay": "Riftn Pay ڏانهن ادا ڪيو ويو، ٽوڪن تقريبن 30s ۾ اچن ٿا",
+    "payDirect": "{{chain}} تي {{symbol}} ۾ سڌو {{name}} ڏانهن موڪليو ويو. ڪا مٽا سٽا ناهي.",
+    "payDirectNoName": "{{chain}} تي {{symbol}} ۾ سڌو تخليقڪار ڏانهن موڪليو ويو. ڪا مٽا سٽا ناهي.",
     "payViaBridgeDpay": "Base ڏانهن منتقل ڪيو ويو ۽ Riftn Pay ڏانهن ادا ڪيو ويو، ٽوڪن تقريبن هڪ منٽ ۾ اچن ٿا",
-    "dmSent": "{{name}} کي {{amount}} ٽوڪن موڪليا ويا!"
+    "dmSent": "{{name}} کي {{amount}} ٽوڪن موڪليا ويا!",
+    "messagePublic": "عوامي",
+    "railTitle": "ٽوٽڪا",
+    "railTotal": "{{amount}} ٽوڪن",
+    "tokensUnit": "ٽوڪن"
   },
   "postOptions": {
     "liveAlertsOn": "توهان هاڻي {{name}} کي فالو ڪري رهيا آهيو. جڏهن اهي لائيو ٿيندا ته توهان کي اطلاع ملندو.",
@@ -1671,6 +1717,9 @@
   "notifications": {
     "title": "اطلاعون",
     "markAllRead": "سڀ پڙهيل نشان ڪريو",
+    "groupNew": "نئون",
+    "groupToday": "اڄ",
+    "groupThisWeek": "هن هفتي",
     "settings": "اطلاع سيٽنگون",
     "actions": "ڪارروائيون",
     "markAllAsRead": "سڀ پڙهيل نشان ڪريو",
@@ -1699,6 +1748,7 @@
     "communities": "ڪميونٽيون",
     "stores": "دڪان",
     "noNotificationsYet": "اڃا اطلاعون ناهن",
+    "searchClose": "ڪڙڪو ڪريو",
     "noNotificationsDesc": "لائيڪ، رايا، ٽپ يا نوان سبسڪرپشن ملڻ تي هتي ڏسندا.",
     "loadMore": "وڌيڪ لوڊ ڪريو",
     "markAsRead": "پڙهيل نشان ڪريو",
@@ -1780,6 +1830,7 @@
       "featureNew": "{{name}} هڪ نئين درخواست پوسٽ ڪئي",
       "featureActivityNamed": "{{name}} تي تبصرو ڪيو “{{title}}",
       "featureActivity": "{{name}} هڪ درخواست تي تبصرو ڪيو",
+      "governanceVoteNamed": "{{name}} توهان جي تجويز “{{title}}” تي ووٽ ڏنو",
       "governanceVote": "{{name}} توهان جي تجويز تي ووٽ ڏنو",
       "governanceCommentNamed": "{{name}} نے آپ جي پيغام “{{title}}” تي تبصرہ ڪيو",
       "governanceComment": "{{name}} توهان جي تجويز تي تبصرو ڪيو",
@@ -1937,11 +1988,13 @@
     "promptLabel": "توهان جو پرامپٽ",
     "promptPlaceholder": "ڪو خيال، بهتري، يا بگ بيان ڪريو...",
     "promptAttach": "تصويرون ڳنڍيو",
+    "removeAttachment": "منسلڪ ختم ڪريو",
     "promptDrop": "تصويرون هتي پيسٽ ڪريو يا ڇڏيو",
     "promptPost": "پوسٽ پرامپٽ",
     "promptShortcut": "پوسٽ ڪرڻ لاءِ Ctrl / ⌘ + Enter",
     "promptDetails": "اختياري تفصيل",
     "promptDevice": "اوزار ۽ او ايس (بگ لاءِ)",
+    "deviceInfoNoErrors": "ڪو به نه",
     "promptFilters": "زمري موجب فلٽر ڪريو",
     "promptMediaError": "هر 50MB کان گهٽ تصويرون يا وڊيوز چونڊيو.",
     "promptMediaLimit": "وڌ ۾ وڌ {{max}} منسلڪات.",
@@ -2000,6 +2053,12 @@
     "loginRequired": "لاگ ان ضروري"
   },
   "messages": {
+    "newDrawer": {
+      "to": "ڏانهن",
+      "recent": "تازيون",
+      "suggested": "تجويز ڪيل",
+      "youFollow": "جن کي توهان فالو ڪريو ٿا"
+    },
     "reply": "جواب ڏيو",
     "react": "ري ايڪٽ ڪريو",
     "edit": "تدوين",
@@ -2036,7 +2095,10 @@
     "checkingTokenBalance": "توهان جي ٽوڪن بيلنس چيڪ ڪندي...",
     "deleteConversationFailed": "گفتگو کي ختم نه ٿو ڪري سگھجي",
     "message": "پيغام",
-    "noConversationsYet": "اڃا ڪا به گفتگو ناهي"
+    "noConversationsYet": "اڃا ڪا به گفتگو ناهي",
+    "sending": "موڪليندي",
+    "retrySend": "ٻيهر ڪوشش ڪريو",
+    "discardSend": "هٽايو"
   },
   "music": {
     "listeningCount_one": "{{count}} ٻڌو",
@@ -2097,6 +2159,7 @@
       "shared": "شيئر ڪيو ويو",
       "link": "لنڪ",
       "community": "ڪميونٽي",
+      "shop": "دڪان",
       "profile": "پروفائل",
       "film": "فلم",
       "bounty": "بانسري",
@@ -2116,6 +2179,9 @@
     "viewList": "لسٽ ڏيک",
     "viewMode": "ڏيک",
     "back": "واپس",
+    "reserve": {
+      "signIn": "سائن ان"
+    },
     "usernameAvailable": "يوزرنيم دستياب آهي!",
     "signUpToClaim": "حاصل ڪرڻ لاءِ سائن اپ ڪريو",
     "signUp": "سائن اپ",
@@ -2143,7 +2209,11 @@
     },
     "tabs": {
       "playlists": "پلي لسٽون",
-      "dislikes": "ناپسند (Dislikes)"
+      "dislikes": "ناپسند (Dislikes)",
+      "likes": "لائيڪ"
+    },
+    "likedPosts": {
+      "loadMore": "وڌيڪ لوڊ ڪريو"
     },
     "dislikes": {
       "emptyTitle": "اڃا تائين ڪو به ناپسند ناهي",
@@ -2166,6 +2236,7 @@
     "sortMostViewed": "گهڻو ڪري ڏٺو ويو",
     "sortLikes": "پسند",
     "sortMostLiked": "سڀ کان وڌيڪ پسنديده",
+    "sortCustomShort": "حسب ضرورت",
     "searchThisChannel": "ڪنهن چينل کي ڏٺو",
     "searchResultCount": "1 \"{{query}}\" لاءِ نتيجو",
     "searchResultCountPlural": "{{count}} نتيجن لاءِ \"{{query}}\""
@@ -2321,6 +2392,8 @@
       "swarmMember": "سوارم ايجنٽ {{index}} جو {{total}}",
       "runSwarm": "سوارم هلايو",
       "description": "ڪم ڪيل ايميجنٽ جي مطابق چلن ٿا. ڪيترن ئي وقت کي ڏنل ڪم ۾ ڪم ڪرڻ جو پروگرام جاري رهندو آهي.",
+      "instructions": "ايجنٽ لاءِ هدايتون",
+      "examples": "روزانو هڪ ڀيرو پوسٽ ڪريو، موضوع: آزاد موسيقي\nانداز: جستجو ڀريو، مختصر ۽ ڳالهه ٻولهه وارو\nروزانو 2 تائين تازيون پوسٽون پسند ڪريو، موضوع: موسيقي، لائيو شوز، ونائل",
       "preparing": "ڪم تيار ڪيو پيو وڃي...",
       "run": "رن پرمپرنٽ",
       "limits": "هڪ روزاني تحرير ۽ مٿي 3 لاڳاپيل پسند في ڪم. سڀ ايجنٽ 20 منٽ پوسٽ جو فرق حصيداري ڪندا آهن. فوٽوز چيڪ ٿيل ڪيپشن استعمال ڪندا آهن ؛ وڊيوز کي coverڪڻ واري تصوير جي ضرورت هوندي آهي. تحريرون 500 اکرن کان گهٽ رهن ٿيون. ڪو گئس جيستائين minting ؛ لکڻ ڪريڊٽ استعمال ڪري سگهون ٿا.",
@@ -2429,6 +2502,9 @@
     "signInAgain": "ٻيهر سائن ان ڪريو",
     "createSignIn": "ايجنٽ ٺاهڻ لاءِ ٻيهر سائن ان ڪريو",
     "checkConnection": "پنهنجو ڪنيڪشن چيڪ ڪريو ۽ ٻيهر ڪوشش ڪريو.",
+    "welcome": {
+      "text": "ڀليڪار پيغام"
+    },
     "workspace": {
       "moderation": "اسٽريم ماڊريشن",
       "moderationHelp": "پهرين ماڊريشن جي اجازت کي فعال ڪريو. اڪائونٽ اڳ ۾ ئي اسٽريم ٺاهيندڙ يا مقرر ڪيل ماڊريٽر هجڻ گهرجي. منظوري ۽ مسودي جا طريقا اڃا تائين لاڳو ٿين ٿا. ٽائيم آئوٽ پاڻمرادو ختم ٿي ويندا آهن.",
@@ -2621,7 +2697,9 @@
     "resendCodePhone": "غلط نمبر يا ڪو ڪوڊ ناهي ؟ واپس وڃو",
     "continueAs": "هن طور جاري رکو",
     "switchWalletAccount": "اڪائونٽ تبديل ڪريو",
-    "walletLoadFailed": "پرس لوڊ نه ڪري سگھيو. مهرباني ڪري ٻيهر ڪوشش ڪريو."
+    "walletLoadFailed": "پرس لوڊ نه ڪري سگھيو. مهرباني ڪري ٻيهر ڪوشش ڪريو.",
+    "openInBrowser": "برائوزر ۾ کوليو",
+    "copyLink": "لنڪ ڪاپي ڪريو"
   },
   "careers": {
     "title": "Riftn ۾ ڪيريئر",
@@ -2844,7 +2922,8 @@
     "noMenuMatches": "مينيو ۾ ڪجهه به نٿو ملي",
     "searchDehubFor": "Riftn تي \"{{query}}\" ڳوليو",
     "switchAccount": "کاتو مٽايو",
-    "signedInAs": "{{name}} جي طور تي سائن ان ٿيو"
+    "signedInAs": "{{name}} جي طور تي سائن ان ٿيو",
+    "requestSend": "درخواست موڪليو"
   },
   "comments": {
     "reportComment": "رپورٽ تبصرو",
@@ -2953,6 +3032,9 @@
     "confirm": "{{chain}} تي مينٽ",
     "confirmWithCost": "منٽ {{chain}} {{cost}}",
     "notAvailable": "هن زنجير تي منٽنگ اڃا تائين دستياب ناهي."
+  },
+  "postEditHistory": {
+    "original": "اصل"
   },
   "postInfo": {
     "title": "پوسٽ معلومات",
@@ -5064,6 +5146,7 @@
     "settledTitleSpeed": ", عام طور تي {{speed}} ۾",
     "settledCount_one": "{{count}} آباد ڪيو ويو",
     "settledCount_other": "{{count}} آباد ڪيو ويو",
+    "statusInProgress": "جاري",
     "howMany": "ڪيترا ته",
     "availableCount_one": "{{count}} دستياب",
     "availableCount_other": "{{count}} دستياب",
@@ -5156,6 +5239,17 @@
     "sellYourFractions": "توهان جا حصا وڪرو ڪريو ({{held}} منعقد ٿيل)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "اهي تفصيل استعمال ڪريو"
+      }
+    },
+    "cinema": {
+      "close": "بند ڪريو",
+      "performance": {
+        "label": "ڪارڪردگي"
+      }
+    },
     "libraryEmpty": "توهان جون محفوظ ڪيل جنريشنز هتي ظاهر ٿينديون.",
     "toolRemake": "ٻيهر ٺاهيو",
     "toolMaboroshi": "مابوروشي",
@@ -5239,6 +5333,7 @@
     "presetExtraFantasyMarketName": "فینٹسی مارکیٹ",
     "presetExtraFantasyMarketHint": "هڪ گرم مارڪيٽ ڪرافٽ ورلڊ تفصيل سان",
     "presetExtraWesternOutpostName": "مغربي آئوٽ پوسٽ",
+    "presetExtraWesternOutpostHint": "دھول کی دوری اور کم صحرا کی روشنی",
     "presetExtraRetroFutureLoungeName": "ريٽرو فيوچر لائونج",
     "presetExtraRetroFutureLoungeHint": "هڪ speculative اندروني ۾ ستر شڪلين",
     "presetExtraArcticExpeditionName": "آرڪٽڪ ايڪسپريشن",
@@ -5254,9 +5349,11 @@
     "presetExtraVinylSleeveName": "ونيل آستين",
     "presetExtraVinylSleeveHint": "البم آرٽ ورڪ هڪ رڪارڊ سان جزوي طور تي ظاهر ڪيو ويو آهي",
     "presetExtraCanWrapName": "ڪري سگھي ٿو ليبل",
+    "presetExtraCanWrapHint": "پيئڻ جي ڪين تي گھمندڙ سڃاڻپ",
     "presetExtraCosmeticBoxName": "ڪاسميٽڪ Box",
     "presetExtraCosmeticBoxHint": "هڪ carton ۽ هڪ اچان نظام جي طور تي بوتل",
     "presetExtraCafeMenuName": "ڪيفي مينيو",
+    "presetExtraCafeMenuHint": "قدرتي ڪاغذ تي پڙهڻ لائق مينيو جي درجي بندي",
     "presetExtraPodcastCoverName": "پوڊ ڪاسٽ جو احاطو",
     "presetExtraPodcastCoverHint": "اسڪوائر آرٽ ورڪ ننڍي سائيز تي پڙهڻ لائق",
     "presetExtraEventFlyerName": "واقعي جو پرواز ڪندڙ",
@@ -5271,6 +5368,7 @@
     "presetExtraSportsPosterHint": "متحرڪ حرڪت ۽ واضح پوسٽر هيئرڪ",
     "presetExtraIridescentGlassName": "آئريڊسنٽ گلاس",
     "presetExtraIridescentGlassHint": "Pearlescent شفاف مجسمي جي شڪل",
+    "presetExtraTopographicWavesName": "ٽاپوگرافڪ لهرون",
     "presetExtraTopographicWavesHint": "مٿانئس جھڙ ھجي contour سٽون رولنگ فارم بڻجي",
     "presetExtraWovenPaperName": "اڻيل ڪاغذ",
     "presetExtraWovenPaperHint": "Interlaced پٽي ۽ tactile نرم پاڇا",
@@ -5284,6 +5382,7 @@
     "presetExtraRackFocusHint": "ڪورس چڪر ڪنڊي کان موضوع ڏکڻ ۾ تبديل ٿي وڃي ٿو",
     "presetExtraSideTruckName": "سائڊ ويز ٽرڪ",
     "presetExtraSideTruckHint": "Parallax سان سڌو پاسي واري حرڪت",
+    "presetExtraPedestalRiseName": "پڊسٽل جو اُڀرڻ",
     "presetExtraPedestalRiseHint": "ڪئميرا tilting کان سواء عمودي اٿي",
     "presetExtraLowFollowName": "هيٺين جي تابعداري ڪريو",
     "presetExtraLowFollowHint": "گرائونڊ ليول ٽريڪنگ منتقل ٿيندڙ پيرن جي ڀرسان",
@@ -5306,6 +5405,7 @@
     "presetExtraWaterFreezeName": "پانی ٿڙجيندي آهي",
     "presetExtraWaterFreezeHint": "ڪنڊيءَ جو ڪچو اٽس ڪلير ۾ ڪنڊيءَ ۾ ڪنڊي ٿي وڃي ٿو",
     "presetExtraRibbonWrapName": "ڪپڙو رول",
+    "presetExtraRibbonWrapHint": "هڪ وهندڙ ربن موضوع جي چوڌاري ڦري ٿو",
     "presetExtraGlitterTrailName": "چمڪندڙ پيچرو",
     "presetExtraGlitterTrailHint": "هلندڙ روشني هڪ مختصر ذرات پيچرو ڇڏيندي آهي",
     "presetExtraLightPaintName": "هلڪو پينٽنگ",
@@ -5319,6 +5419,7 @@
     "presetExtraNeonPulseName": "نيئن نبض",
     "presetExtraNeonPulseHint": "هڪ نرم نبض روشن ڪنڊن ذريعي سفر ڪري ٿو",
     "presetExtraBottlePourName": "ڪارڪن",
+    "presetExtraBottlePourHint": "هڪ سست ڦالڻ قائل ڪندڙ مائع جي وهڪري سان",
     "presetExtraPerfumeMistName": "عطر جي خرابي",
     "presetExtraPerfumeMistHint": "هڪ واحد backlit سپرے نفيس بوندون ظاهر ڪري ٿو",
     "presetExtraWatchReflectionName": "واچ جي عڪاسي",
@@ -5347,9 +5448,11 @@
     "presetExtraCityTramPassHint": "هڪ ليٽ ٽرام هڪ پرسکون شام جي فريم کي پار ڪري ٿو",
     "presetExtraPortraitBreathName": "پورٽريٽ سانس",
     "presetExtraPortraitBreathHint": "ذيلي سانس هڪ حوالو پورٽريٽ کي متحرڪ ڪري ٿو",
+    "presetExtraLandscapeBreezeName": "منظرنامي جي هوا",
     "presetExtraLandscapeBreezeHint": "هڪ فراهم ڪيل تصوير ۾ نرم پٿر جي حرڪت",
     "presetExtraProductLightSweepName": "پيداوار لائيٽ سويپ",
     "presetExtraProductLightSweepHint": "هڪ حوالو پيداوار تي هڪ نرم هلندڙ نمايان",
+    "presetExtraIllustrationParallaxName": "تصويري پيرالاڪس",
     "presetExtraIllustrationParallaxHint": "فراهم ڪيل تصوير مان هڪ نفيس اونهائي",
     "presetExtraArchitectureLightChangeName": "آرڪيٽيڪچر لائيٽ تبديلي",
     "presetExtraArchitectureLightChangeHint": "نرم بادل هڪ ريفرنس منظر تي روشني تبديل ڪن ٿا",
@@ -5363,6 +5466,7 @@
     "presetOpenPoppyStillLifeHint": "سخت دوپہر جي ڇانو سان ايڊيٽوريل شيون",
     "presetOpenMidnightAlleyName": "آڌي رات جو گلي",
     "presetOpenMidnightAlleyHint": "سوڊيم لیمپ ۽ نم 35mm عڪاسي",
+    "presetOpenCraftsmanPortraitName": "ڪارگزار جو پورٽريٽ",
     "presetOpenCraftsmanPortraitHint": "ڪارو پس منظر تي سنگل سوفٽ باڪس پورٽريٽ",
     "presetOpenSaltPondsName": "نمڪين تلاءَ",
     "presetOpenSaltPondsHint": "مٿي کان گلابي ۽ ochre جاميٽري",
@@ -5376,6 +5480,8 @@
     "presetOpenSkiLodgeHint": "ڪاٺ، نارنگي اون ۽ گهٽ سياري جو سج",
     "presetOpenDoughCloseupName": "ويژگي هاي وي پي ان",
     "presetOpenDoughCloseupHint": "گونگي پيليٽ سان ونڊو لائٽ هٿ",
+    "presetOpenDesertStarsName": "ريگستاني تارا",
+    "presetOpenDesertStarsHint": "اڇي گنبد مٿان ڊگهي نمائش وارا تاري جا ٽريلس",
     "presetOpenForestAerialName": "جنگل فضائي",
     "presetOpenForestAerialHint": "سست فضائي ڊولي صبح جو دونھون ذريعي",
     "presetOpenInkBloomName": "انڪ بلوم",
@@ -5754,6 +5860,7 @@
     "toolVoiceAssistantDesc": "ہینڈس فری بنانا, سچنا اور شائع کرانا دے کنٹرولز.",
     "toolCreativeChat": "تخليقي چيٽ",
     "toolCreativeChatDesc": "کانسپٹس, کیپشنز, بریفز اور لانس پلنز دے بارے میں بات کروا.",
+    "toolCharacters": "ڪردار",
     "toolCharactersDesc": "ایمیج اور ویڈیو دے پرومپٹس دے بارے میں سےوا کردہ کاراکٹرز دے ریفرنس.",
     "toolVideoEditor": "وڊيو ايڊيٽر",
     "toolVideoEditorDesc": "ٹائملائن ایڈیٹنگ, لئرز, ٹیکسٹ, آڈیو اور براؤزر دے اکسپورٹ.",
@@ -6104,8 +6211,17 @@
     "raw": "راول"
   },
   "nftMarket": {
+    "actAll": "سڀ",
+    "actListings": "لسٽنگون",
+    "actOffers": "آڇون",
+    "tabActivity": "سرگرمي",
+    "shortTitle": "NFT",
+    "filters": "فلٽر",
+    "forSale": "وڪري لاءِ",
     "makeOffer": "آفر ڪريو",
+    "showAll": "سڀ ڏيکاريو",
     "dehubPostsName": "Riftn پوسٹ کرتی ہے",
+    "sortNew": "تازو",
     "dehubPosts": "ڪنڊيڪاڻي",
     "signInTitle": "ڪمپني ۾ لاگ ان ڪرڻ",
     "signInBody": "ڪمپيوٽر ۾ پھلڪو جوڙي ۽ ڪمپيوٽر ۾ موجود ڪمپيوٽر ۾ موجود ڏنل ڏيڻ لاءِ ڪم ڪري ۽ آپنے ليڊنگز ۽ آفريز کي ٽرڪ ڪري رکھي.",
@@ -6113,6 +6229,7 @@
     "tabSell": "ڪرائے",
     "tabMine": "ماڳ",
     "tabSales": "ڪاروباري",
+    "statForSale": "وڪري لاءِ",
     "sellYours": "اپنا فروخت کریں",
     "sellYoursHint": "اپنی والٹ سے لسٹ کریں",
     "bundleBadge": "بندل ×{{n}}",
@@ -6143,6 +6260,13 @@
     "cancelled": "رڈ کر دیا گیا۔",
     "listed": "فهرست ٿيل. ڪو به هاڻي خريد ڪري سگهي ٿو.",
     "offered": "پيشڪش موڪلي وئي. حاکم ڪنهن به وقت ان کي قبول ڪري سگهي ٿو.",
+    "dehubPost": "Riftn پوسٽ",
+    "price": "قيمت",
+    "volume": "آواز جي سطح",
+    "tabRecent": "تازيون",
+    "buyNow": "هينئر خريد ڪريو",
+    "buy": "خريد ڪريو",
+    "listForSale": "وڪري لاءِ رکو",
     "offers": "عرضات",
     "anyInCollection": "ڪنهن به ڪليڪشن ۾",
     "accept": "قبول ڪريو",
@@ -6150,6 +6274,7 @@
     "recentSales": "تازو سيلز",
     "notListed": "ابھي فروخت لاء نه آهي. آفر ڪريو ته هولڊر قبول ڪري سگهي ٿو.",
     "listBundle": "بنڈل جي طور تي فهرست ڪريو",
+    "back": "واپس",
     "lasts": "رہندو",
     "days": "{{n}} ڏينهن",
     "offerNote": "توهان جو {{symbol}} توهان جي والٹ ۾ رهندو آهي جيستائين holder قبول ڪري. ڪنهن به وقت منسوخ ڪريو.",
@@ -6526,7 +6651,64 @@
     "youAreBanned": "توهان هن خالق جي وهڪرو ۾ چيٽ نه ٿا ڪري سگهو",
     "youAreTimedOut": "تون هڪ لمحي لاء ٻاهر timed آهن"
   },
+  "studioDeck": {
+    "background": {
+      "title": "پس منظر",
+      "modes": {
+        "none": "بند",
+        "blur": "ڌنڌلاپڻ",
+        "color": "رنگ"
+      }
+    },
+    "remove": "هٽايو",
+    "scenes": {
+      "countdown": "ڪائونٽ ڊائون",
+      "minutes": "{{count}} منٽ",
+      "names": {
+        "starting": "جلد شروع ٿيندو"
+      }
+    },
+    "sources": {
+      "reactAdd": "ڏيکاريو",
+      "image": "تصوير",
+      "camera": "ڪيمرا",
+      "show": "وهڪرو تي ڏيکاريو",
+      "positions": {
+        "center": "مرڪز"
+      },
+      "shapes": {
+        "circle": "گول",
+        "rect": "چورس"
+      }
+    },
+    "audio": {
+      "mute": "ميوٽ ڪريو",
+      "unmute": "ان ميوٽ",
+      "gateLevels": {
+        "off": "بند",
+        "low": "لائيٽ",
+        "high": "مضبوط"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "پليٽ فارم",
+      "label": "نالو (اختياري)",
+      "key": "اسٽريم ڪي",
+      "save": "شامل ڪريو",
+      "cancel": "منسوخ ڪريو",
+      "states": {
+        "off": "بند",
+        "idle": "تيار",
+        "live": "لائيو",
+        "error": "غلطي"
+      }
+    },
+    "vertical": {
+      "centre": "مرڪز",
+      "live": "لائيو"
+    },
     "subathon": {
       "title": "ميرپورخاص",
       "intro": "توهان جي وهڪري تي هڪ ڳڻپ. هر ادا ڪيل تحفو، پيروي ۽ سبسڪرپشن وقت شامل ڪري ٿي، تنهن ڪري ڪمرو توهان کي زنده رکي ٿو.",
@@ -6607,7 +6789,9 @@
     "portrait": "پورٽريٽ",
     "stageLabel": "توھان جو وهڪرو",
     "layoutHint": "ان کي منتقل ڪرڻ لاءِ وجيٽ کي ڇڪيو ۽ ان جي ڪنڊ کي ٻيهر سائز ڪرڻ لاءِ ڇڪيو. لينڊ اسڪيپ ۽ پورٽريٽ وهڪرو هر هڪ پنهنجي ترتيب برقرار رکندو آهي.",
+    "widgets": "ویجٹس",
     "addWidget": "وجيٽ شامل ڪريو",
+    "empty": "اب تک کوئی ویجٹس نہیں ہیں۔ ایک ٹیپ الارٹ یا ایک مقصد شامل کرکے شروع کریں۔",
     "visible": "وهڪرو تي ڏيکاريو",
     "remove": "وجيٽ هٽايو",
     "settings": "ترتيبون",
@@ -6651,6 +6835,7 @@
       "diagLink": "ڳنڍڻو",
       "diagControl": "ٽيسٽ الرٽ",
       "diagStream": "وهڪرو",
+      "diagWidgets": "ویجٹس",
       "diagLastEvent": "آخري واقعو",
       "diagOk": "ڪم ڪرڻ",
       "diagDead": "ڪم نه ڪري رهيو آهي — لائيو اسٽوڊيو ۾ هڪ نئون لنڪ ٺاهيو",
@@ -6698,6 +6883,7 @@
       "viewer_count": "ڪيترا ماڻهو ڏسي رهيا آهن",
       "text": "متن جي هڪ لائن يا هڪ هيٺيون ٽيسرو",
       "frame": "توهان جي اسٽريم جي چوڌاري هڪ سرحد",
+      "stream_timer": "اس کا کیا ہے کہ آپ نے کتنا وقت بروڈکاسٹنگ کیا ہے",
       "reaction_counter": "شمار ڪري ٿو هر رد عمل توهان جي نشريات حاصل ڪري ٿي",
       "event_feed": "تازه ترين تحفا، پوئلڳ، رڪنيت حاصل ڪندڙ ۽ توهان جي نشريات کي حصيداري ڪرڻ وارا ماڻهو",
       "chat_box": "توهان جي نشريات جي چيٽ پيغامن کي اسڪرين تي ڏيکاري ٿو",
@@ -7475,6 +7661,7 @@
     "footerNote": "DePin شموليت هڪ تعاون جي خدمت آهي، سيڙپڪاري جي پيداوار نه. دستيابي، قابليت ۽ انعامات تبديل ٿي سگھن ٿا."
   },
   "creatorFlow": {
+    "disconnect": "ڌار ڪريو",
     "title": "ڪريٽر فلو",
     "backToStudio": "ڪريٽر اسٽوڊيو ڏانهن واپس",
     "backToFlows": "توهان جي فلو ڏانهن واپس",
@@ -7813,6 +8000,9 @@
     "followingBackProgress": "پٺيان پوئتي {{completed}} جو {{total}}",
     "findingFollowers": "پوئلڳ ڳولڻ...",
     "followBackAll": "جي تابعداري ڪريو واپس سڀ",
+    "followBackConfirm": "فالو بئڪ",
+    "followBackNotNow": "هاڻي نه",
+    "followBackDone": "مڪمل ٿيو",
     "nonFollowers": {
       "title": "ڪھڙو توهان جو پيروي ڪري ٿو صاف ڪريو؟",
       "body": "{{count}} اڪائونٽس جيڪي توهان پيروي ڪندا آهيو، توهان کي واپس پيروي نه ڪندا.",
@@ -8626,6 +8816,14 @@
     "priceChartCleared": "قيمت چارٽ صاف. مقرر حوالو قيمت: $ 0.0001. عملدرآمد جي قيمت دستياب آرڊر تي منحصر آهي."
   },
   "editor": {
+    "stage": {
+      "camera": "ڪيمرا",
+      "yaw": "روٽيشن",
+      "add": "شامل ڪريو",
+      "scale": "ماپ",
+      "color": "رنگ",
+      "light": "لائيٽ"
+    },
     "video": {
       "tFade": "ملي گم ٿيڻ",
       "none": "ڪجهه به نه",
@@ -8792,6 +8990,8 @@
       "tools": "ايڊيٽر ٽولز"
     },
     "agent": {
+      "stop": "بند ڪريو",
+      "queue": "قطار ۾ شامل ڪريو",
       "introTitle": "AI کي ٻڌايو ته توهان ڇا ٿا چاهيو",
       "introBody": "ڊيزائن يا تبديلي پنهنجن لفظن ۾ بيان ڪريو. اهو صفحي جي سائيز بدلائي ٿو، متن لکي ۽ سينگاري ٿو، مفت فوٽو، وڊيو ۽ موسيقي ڳولي ٿو، فلٽر لڳائي ٿو، پرتن کي ترتيب ڏئي ٿو ۽ انهن کي اينيميٽ ڪري ٿو. هر درخواست هڪ ئي واپسي سان رد ٿي سگهي ٿي.",
       "suggestPoster": "سمنڊ ڪناري جي فوٽو ۽ نمايان عنوان سان اونهاري جي سيل لاءِ چورس Instagram پوسٽ ٺاهيو",
@@ -9060,6 +9260,9 @@
       "reloadText": "عنوان ٻيهر لوڊ ڪريو",
       "textSaved": "ڪيپٽن تبديليون محفوظ ڪيون.",
       "action": "خودڪار ڪيپشن",
+      "styles": {
+        "bold": "زبردست"
+      },
       "working": "ٻڌي رهيو آهي… {{percent}}%",
       "downloading": "ڳالهائڻ جو ماڊل تيار ٿي رهيو آهي… {{percent}}%",
       "hint": "ڳالهائڻ کي وقت سان ٺهڪندڙ ڪيپشن ۾ بدلائي ٿو، جن جو انداز توهان بدلائي سگهو ٿا. توهان جي ڊوائيس تي هلي ٿو: مفت ۽ ذاتي. پهريون ڀيرو ماڊل ڊائونلوڊ ٿيندو.",
@@ -9218,6 +9421,7 @@
       "heading": "وڊيو اسٽارٽرز",
       "format": "وڊيو فارميٽ",
       "useFormat": "{{aspect}} وڊيو فارميٽ استعمال ڪريو",
+      "duration": "{{seconds}}س",
       "hint": "هڪ فارميٽ چونڊيو، لفظن کي ايڊٽ ڪريو، ۽ پنهنجا ڪلپس شامل ڪريو.",
       "names": {
         "question": "سوال جو هُڪ",
@@ -10438,6 +10642,25 @@
       "toolbar": "ڪئنوس نيويگيشن",
       "zoomIn": "ڪينواس کي زوم ان ڪريو",
       "zoomOut": "زوم ڪئنوس آئوٽ"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "ورهايو",
+        "play": "کيڏيو",
+        "pause": "پوئتي هٽايو",
+        "frameBack": "پويون فريم",
+        "frameForward": "اڳيون فريم"
+      }
+    },
+    "voiceClone": {
+      "stop": "رڪارڊنگ بند ڪريو"
+    },
+    "linkImport": {
+      "go": "درآمد",
+      "downloading": "{{percent}}% ڊائون لوڊ ڪري رهيو"
+    },
+    "reverse": {
+      "action": "ريورس (اُبتو)"
     }
   },
   "jungleMood": {
@@ -10611,6 +10834,7 @@
     "private": "پرائيويٽ",
     "privateDesc": "مواد صرف توهان کي ڏسڻ ۾ اچي ٿو. پرائيويٽ پوسٽون ٻين صارفن ۽ عوامي فيڊ کان لڪيل آهن.",
     "ppv": "ادا- في- نظر (PPV)",
+    "subscriberOnly": "صرف رڪنيت حاصل ڪندڙ",
     "subscriberOnlyDesc": "مواد انهن صارفن تائين محدود آهي جيڪي تخليقڪار جي چينل تي سبسڪرائب ڪيا آهن.",
     "postInfoPage": "پوسٽ معلومات",
     "tokenIdInfo": "ٽوڪن جي سڃاڻپ",
@@ -10642,6 +10866,7 @@
     "staking": "اسٽيڪنگ",
     "txHashDesc": "ڪنهن به آن چين ٽرانزيڪشن لاءِ هڪ منفرد سڃاڻپ ڪندڙ. هڪ blockchain explorer تي مڪمل برو تفصيل ڏسڻ لاء ان تي ڪلڪ ڪريو.",
     "followers": "پيروي ڪندڙ/ پيروي ڪندڙ",
+    "followersDesc": "توهان جي فيڊ ۾ انهن جون پوسٽون ڏسڻ لاءِ ٻين صارفن جي پيروي ڪريو. توھان جي پوئلڳن جي ڳڻپ توھان جي پروفائل تي ڏيکاريل آھي.",
     "notifications": "نوٽيفڪيشن",
     "notificationsDesc": "توهان جي اڪائونٽ سان لاڳاپيل پسند، تبصرا، تجويزون، پيروي، ۽ ٻين سرگرمين لاءِ الرٽ.",
     "dm": "سڌو پيغام",
@@ -10677,6 +10902,7 @@
     "pin": "پانڌيئڙن",
     "pinDesc": "توهان جي پروفائل جي چوٽي تي هڪ پوسٽ پن ڪريو ته جيئن سياح ان کي پهرين ڏسندا.",
     "viewOnExplorer": "Explorer تي ڏسو",
+    "viewOnExplorerDesc": "هڪ پوسٽ يا منتقلي لاء تي- سند برو تفصيل ڏسڻ لاء جي blockchain explorer (BaseScan) کوليو.",
     "title": "لغت",
     "subtitle": "هر آئڪن ۽ فيچر جو مطلب سکو"
   },
@@ -11715,7 +11941,15 @@
       "rewardsBody": "هر مهيني {{pool}}ٽوڪن ايپس جي وچ ۾ هڪ ئي اسڪور سان شيئر ڪيو ويندو آهي، هفتيوار حساب ڪيو ويندو آهي. قابليت حاصل ڪرڻ لاءِ، هڪ ايپ کي تصديق ٿيل مالڪ والٽ ۽ گهٽ ۾ گهٽ 3 واپسي ڪندڙ صارفن جي ضرورت آهي. Riftn طرفان انعامات مالڪ جي والٽ کي ادا ڪيا ويندا آهن.",
       "rewardPaid": "ادا ڪيل",
       "rewardPending": "منتظر",
-      "rewardsNone": "اڃان تائين ڪوبه انعام حساب نه ڪيو ويو آهي. پهريون هفتو سومر تي بند ٿي ويندو آهي."
+      "rewardsNone": "اڃان تائين ڪوبه انعام حساب نه ڪيو ويو آهي. پهريون هفتو سومر تي بند ٿي ويندو آهي.",
+      "stats": {
+        "button": "لائيو انگ اکر"
+      },
+      "signin": {
+        "users_one": "{{count}} صارف",
+        "users_other": "{{count}} صارف",
+        "delete": "ختم ڪريو"
+      }
     },
     "card": {
       "open": "کوليو"
@@ -11873,6 +12107,9 @@
     "reminderLater": "هينئر نه"
   },
   "copy": {
+    "55656b5e434f": "ڳولا بند ڪريو",
+    "57e2faa5ec63": "Riftn ۾ ڳوليو",
+    "96d7bff86b44": "سرچ لوڊ نه ٿي سگهي",
     "1607715e45ed": "ڳالهائڻ لاءِ بال تي ٽيپ ڪريو، يا هيٺ لکو",
     "00140a37bd26": "ان نيٽ ورڪ تي ٽرانزيڪشن عارضي طور تي دستياب ناهن. مهرباني ڪري ٻيهر ڪوشش ڪريو.",
     "002286513398": "توهان کي واقعن کي منظم ڪرڻ جي اجازت ناهي",
@@ -17511,6 +17748,7 @@
     "2a0817015729": "ريفريجريٽر",
     "f5d61ead3eef": "مختصر",
     "a731a58c4cf3": "Twitch",
+    "b19565a545ba": "انسٽاگرام ريلز",
     "4268168ace02": "اشتهاري آمدني",
     "314b92e83a11": "انعام",
     "0c0f9221e9fc": "PPV وڪرو",
@@ -17662,6 +17900,7 @@
     "811aa4592c1c": "ايم پي 3 128 ڪي بي پي ايس",
     "4812442f11c9": "ايم پي 3 192 ڪي بي پي ايس",
     "0d199b18375b": "WAV /پي سي ايم",
+    "ba118bf7fc9c": "انگريزي",
     "3411059cb8e0": "اسپيني ٻولي",
     "7458199fe97a": "فرانسيسي ٻولي",
     "a659b60d246d": "جريان شناسي",
@@ -17731,12 +17970,14 @@
     "ee76a220959c": "اصلي آڊيو سان بائيٽ ڊانس سينما",
     "c5a1d3b9268d": "تازه ترين ByteDance ماڊل، اعلي معيار & آڊيو",
     "f4a56d3cb00f": "وڌيڪ تيز نسل، ٿورڙي گهٽ معيار",
+    "8e831aaaa051": "گوگل پرچم بردار، آڊيو سان الٽرا ريئلسٽڪ",
     "d593de2ed999": "Veo دیکھو، قیمتی کا ایک چوتھا حصہ",
     "e2741c299499": "ملٽي شاٽ، آڊيو هم وقت سازي، ڊگهو وقت وٺندو آهي",
     "b50840a8facb": "ساڳيو ماڊل، لائٽر رينڊر ٽائر",
     "ea5e0b780f7b": "فلوڈ موشن اور ٹائٹ پروجمپٹ پریشن، کوئی آڈیو نہیں",
     "c1cc166082bf": "قدرتي فزڪس ۽ منهن جو جذبو",
     "970971377727": "تڪڙو، سستو Hailuo",
+    "cc65f4a45ebf": "هم وقت سازي آڊيو سان مطابقت رکندڙ ڪردار",
     "a525541f3e90": "اوپن وزن، طرز ۽ تجرباتي",
     "18ecea8f32e4": "ڈریمی لوما ایسٹھیٹکس، بجٹ ٹیر",
     "b19b2e83cbb1": "سٹائلڈ اور انیمے-لیکن موشن",
@@ -18823,6 +19064,7 @@
     "backToTop": "مٿي واپس",
     "needTitle": "جاري رکڻ لاءِ عنوان شامل ڪريو",
     "needBody": "{{count}} وڌيڪ اکر وڃڻ لاءِ",
+    "imagesLabel": "تصويرون",
     "backToWriting": "واپس تحرير چلو",
     "readyTitle": "اشاعت لاءِ تيار",
     "sharePreview": "اهو ڪيئن ڏسڻ ۾ اچي ٿو جڏهن شيئر ڪيو ويو آهي",
@@ -18884,7 +19126,131 @@
     "exploreFirst": "پهرين ڳولا ڪريو",
     "codeNote": "اسان توهان کي هڪ ڪوڊ اي ميل ڪندا آهيون، پاسورڊ جي ضرورت ناهي."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "منصوبابندي",
+      "howMany": "ڪيترا",
+      "who": "يوزرنيم يا والٽ ايڊريس",
+      "whoPlaceholder": "@يوزرنيم",
+      "cancel": "منسوخ ڪريو",
+      "stage": {
+        "preparing": "تياري ٿي رهي آهي…",
+        "confirming": "ٽرانزيڪشن جو انتظار…",
+        "recording": "مڪمل ٿي رهيو آهي…"
+      }
+    },
+    "badges": {
+      "emoji": "ايموجي",
+      "audience": {
+        "subscribers": "سبسڪرائبر"
+      },
+      "ended": "ختم ٿي ويو",
+      "until": "{{date}} تائين",
+      "failed": "اهو ڪم نه ڪيو، ٻيهر ڪوشش ڪريو."
+    }
+  },
+  "whenSheet": {
+    "today": "اڄ",
+    "tooSoon": "مستقبل ۾ هڪ وقت چونڊيو.",
+    "show": "ڏيکاريو",
+    "hide": "لڪايو"
+  },
+  "planned": {
+    "title": "منصوبابند",
+    "all": "سڀ",
+    "posts": "پوسٽون",
+    "stages": "آڊيو روم",
+    "post": "پوسٽ",
+    "live": "لائيو",
+    "stage": "اسٽيج",
+    "untitledPost": "پوسٽ",
+    "untitledLive": "لائيو",
+    "loading": "لوڊ ٿي رهيو آهي…",
+    "startNow": "هينئر شروع ڪريو",
+    "cancel": "منسوخ ڪريو",
+    "cancelled": "رد ٿيل"
+  },
+  "welcome": {
+    "about": {
+      "title": "Riftn ۾ ڀليڪار",
+      "day": "ڏينهن",
+      "month": "مهينو",
+      "year": "سال"
+    },
+    "name": {
+      "title": "توهان جو نالو",
+      "placeholder": "توهان جو نالو"
+    },
+    "card": {
+      "name": "توهان جو نالو",
+      "followers": "پوئلڳ"
+    },
+    "topic": {
+      "music": "موسيقي",
+      "art": "آرٽ",
+      "gaming": "گيمنگ",
+      "crypto": "ڪرپٽو",
+      "sports": "رياضتون پائين",
+      "film": "فلم",
+      "podcast": "پوڊ ڪاسٽ",
+      "news": "خبرون",
+      "science": "سائنس"
+    },
+    "back": "واپس",
+    "skipPhoto": "اب کے لیے چھوڑ دیں",
+    "preview": "ڏيک"
+  },
+  "appTokens": {
+    "title": "توهان جا ٽوڪن",
+    "history": "تاريخ",
+    "kindDeposit": "فنڊ شامل ڪريو",
+    "to": "ڏانهن",
+    "amount": "رقم",
+    "notePlaceholder": "نوٽ شامل ڪريو (اختياري)",
+    "sendButton": "موڪليو",
+    "errorInsufficient": "ڪافي ٽوڪن ناهن"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "سڀ",
+      "followers": "فالوورز",
+      "nobody": "ڪو نه"
+    },
+    "heading": "رد عمل",
+    "more": "وڌيڪ ڏيکاريو",
+    "liveNow": "لائيو",
+    "untitled": "رد عمل"
+  },
+  "connectGuide": {
+    "title": "Riftn کي پنهنجي AI مددگار سان ڳنڍيو",
+    "urlLabel": "MCP سرور URL",
+    "copy": "ڪاپي",
+    "copied": "ڪاپي ڪيو ويو",
+    "copiedToast": "MCP URL ڪاپي ٿي ويو"
+  },
+  "avatarPrompt": {
+    "notNow": "هاڻي نه"
+  },
+  "postStats": {
+    "engagement": "مصروفيات",
+    "finished": "پورو ٿيو",
+    "members": "ميمبر",
+    "membersLower": "ميمبر",
+    "newFollowers": "نوان پيروڪار",
+    "noBadge": "ڪو به بيج ناهي",
+    "people": "ماڻهو",
+    "plays": "ناٽڪ",
+    "quotes": "اقتباس",
+    "reposts": "ريپوسٽ",
+    "saved": "محفوظ ڪيل",
+    "shares": "شيئر",
+    "signedOutViewers": "سائن آئوٽ ٿيو",
+    "topSupporters": "مٿيون حامي",
+    "visitors": "سائن آئوٽ ٿيو"
+  },
   "tokenLaunch": {
+    "eyebrow": "جلدي اچي رهيو آهي",
+    "notifyMe": "مون کي ٻڌايو",
     "emailLabel": "ایمیل",
     "invalidEmail": "اچو هڪ صحيح اي ميل داخل ڪريو",
     "joinedBody": "اسان {{email}} کي اي ميل ڪندا سين جڏهن ٽوڪن لانچ ٿيندو.",
@@ -18904,6 +19270,10 @@
     "unavailable": "GitHub ورفيڪيشن پڻ اچڻ ۾ آهي.",
     "connect": "GitHub سان ڳنڍو",
     "disconnect": "ڌار ڪريو"
+  },
+  "mcpKeys": {
+    "delete": "ختم ڪريو",
+    "shortProfile": "پروفائيل"
   },
   "chatSearch": {
     "placeholder": "سرچ پيغام يا ماڻهو",
@@ -18934,5 +19304,16 @@
     "gone": "هو پيغام هاڻي هتي ناهي",
     "theirMessages": "انهن جا پيغام",
     "seeTheirMessages": "انهن جا پيغام ڏسو"
+  },
+  "dmRequests": {
+    "title": "فيچر درخواستون",
+    "accept": "قبول ڪريو",
+    "delete": "ختم ڪريو",
+    "block": "بلاڪ ڪريو"
+  },
+  "dmSchedule": {
+    "view": "ڏسو",
+    "edit": "ترميم ڪريو",
+    "error": "اهو ڪم نه ڪيو، ٻيهر ڪوشش ڪريو."
   }
 }
