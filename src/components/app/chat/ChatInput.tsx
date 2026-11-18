@@ -46,6 +46,7 @@ import { dragHasFiles } from '@/lib/comment-attachments';
 import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestructChoice } from '@/lib/dm-destruct';
 import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
+import { PhotoStudio, type StudioResult } from '@/features/post/components/PhotoStudio';
 
 /** Per-kind caps, matching the backend's DM limits. */
 const DM_MEDIA_LIMITS = { image: 10 * 1024 * 1024, video: 50 * 1024 * 1024, audio: 20 * 1024 * 1024 } as const;
@@ -158,6 +159,8 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   // imageFile holds a picked audio file; photos and videos go to the edit screen.
   // Photos and videos picked for the edit screen; it is open while any are here.
   const [studioItems, setStudioItems] = useState<DmStudioItem[]>([]);
+  // Index of the photo open in the full photo editor, or null.
+  const [photoEditAt, setPhotoEditAt] = useState<number | null>(null);
   const [studioActive, setStudioActive] = useState(0);
   const studioUrls = useRef<string[]>([]);
   // The edit screen opens on a pick; Confirm brings the picks back here as a
@@ -813,7 +816,31 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
         allowLock={allowLock}
         allowTimer={allowDocuments}
         onDropFiles={attachFiles}
+        onEditPhoto={(i) => { setStudioOpen(false); setPhotoEditAt(i); }}
       />
+      {photoEditAt != null && studioItems[photoEditAt] && (() => {
+        const it = studioItems[photoEditAt];
+        const back = () => { setPhotoEditAt(null); setStudioOpen(true); };
+        return (
+          <PhotoStudio
+            photos={[{ original: it.studioOriginal ?? it.file, edits: it.studioEdits }]}
+            startIndex={0}
+            startTab="crop"
+            onClose={back}
+            onDone={(results: StudioResult[]) => {
+              const r = results[0];
+              if (r) {
+                const url = URL.createObjectURL(r.file);
+                studioUrls.current.push(url);
+                URL.revokeObjectURL(it.url);
+                studioUrls.current = studioUrls.current.filter((u) => u !== it.url);
+                setStudioItems((prev) => prev.map((x, j) => (j === photoEditAt ? { ...x, file: r.file, url, studioOriginal: r.original, studioEdits: r.edits } : x)));
+              }
+              back();
+            }}
+          />
+        );
+      })()}
       {studioItems.length > 0 && (
         <div data-attach-preview="media" className="mb-2 flex items-center gap-2 overflow-x-auto pt-1.5 [scrollbar-width:none]">
           {studioItems.map((it, i) => (
