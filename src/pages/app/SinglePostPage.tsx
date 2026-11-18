@@ -358,7 +358,8 @@ function toTextPost(nft: DeHubNFT): TextPost {
   
   // Determine if the name is a meaningful title (matches feed normalization)
   const rawName = nft.name || '';
-  const rawDescription = nft.description || '';
+  // A sound only rides photos/videos; a stray tag (photo removed after adding a song) must not print.
+  const rawDescription = (nft.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
   const trimmedName = rawName.trim();
   const trimmedDesc = rawDescription.trim();
   const hasMeaningfulTitle = trimmedName.length > 0 

@@ -500,7 +500,8 @@ function mapTextPost(item: UnifiedFeedItem, index: number): TextPost {
   
   // Determine if the name is a meaningful title (not empty/whitespace/placeholder)
   const rawName = item.name || '';
-  const rawDescription = item.description || '';
+  // A sound only rides photos/videos; a stray tag (photo removed after adding a song) must not print.
+  const rawDescription = (item.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
   const trimmedName = rawName.trim();
   const trimmedDesc = rawDescription.trim();
   // Title is meaningful only if it exists, differs from description, and isn't just the
