@@ -63,8 +63,8 @@ import { ProfileFollowButton } from '@/components/app/profile/ProfileFollowButto
 import { UserAvatar } from '@/components/app/UserAvatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
-import { ProfilePostBgContext, ProfilePostBgArtContext, PostBgPicker, usePostBgHold } from '@/components/app/profile/PostBackground';
-import { mergePostBg, parsePostBg, postBgById } from '@/lib/post-backgrounds';
+import { ProfilePostBgContext, ProfilePostBgArtContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
+import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, mergePostBg, parsePostBg, postBgById, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
@@ -314,10 +314,12 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const [postBgOpen, setPostBgOpen] = useState(false);
   const [postBgSaving, setPostBgSaving] = useState(false);
-  const [postBgOverride, setPostBgOverride] = useState<{ owner: string; id: string | null } | null>(null);
+  const [postBgOverride, setPostBgOverride] = useState<{ owner: string; bg: PostBg | null } | null>(null);
   const postBg = postBgOverride && postBgOverride.owner === profileKey
-    ? postBgById(postBgOverride.id)
+    ? postBgOverride.bg
     : parsePostBg(data.apiProfile?.customs);
+  // The owner's own picture stays on the account even while another backdrop is on.
+  const postBgPhoto = postBg?.kind === 'photo' ? postBg.image ?? null : postBgImageUrl(data.apiProfile?.customs?.[POST_BG_IMAGE_KEY]);
   const openPostBg = useCallback(() => setPostBgOpen(true), []);
   const postBgHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBg);
   // Holding (or right-clicking) one of your own text posts opens it too.
@@ -326,14 +328,21 @@ export default function ProfilePage() {
     () => data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
     [data.PROFILE_POSTS],
   );
-  const savePostBg = useCallback(async (id: string | null) => {
+  const savePostBg = useCallback(async ({ id, colors, file }: PostBgSave) => {
     if (!profileKey) return;
-    if ((postBg?.id ?? null) === id) { setPostBgOpen(false); return; }
+    const def = postBgById(id);
+    const next: PostBg | null = !def
+      ? null
+      : def.kind === 'photo'
+        ? { ...def, image: file ? URL.createObjectURL(file) : postBgPhoto ?? undefined }
+        : withPostBgColors(def, colors);
+    const unchanged = !file && (postBg?.id ?? null) === (next?.id ?? null) && (postBg?.colors ?? []).join() === (next?.colors ?? []).join();
+    if (unchanged) { setPostBgOpen(false); return; }
     setPostBgSaving(true);
     try {
-      const customs = mergePostBg(data.apiProfile?.customs, id) as Record<string, string | number | boolean>;
-      await updateProfile({ customs });
-      setPostBgOverride({ owner: profileKey, id });
+      const customs = mergePostBg(data.apiProfile?.customs, { id, colors }) as Record<string, string | number | boolean>;
+      await updateProfile({ customs, ...(id === POST_BG_PHOTO_ID && file ? { postBgImg: file } : {}) });
+      setPostBgOverride({ owner: profileKey, bg: next });
       setPostBgOpen(false);
       void queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
     } catch {
@@ -341,7 +350,7 @@ export default function ProfilePage() {
     } finally {
       setPostBgSaving(false);
     }
-  }, [profileKey, postBg, data.apiProfile?.customs, queryClient, t]);
+  }, [profileKey, postBg, postBgPhoto, data.apiProfile?.customs, queryClient, t]);
 
   // How the owner's articles look as grid tiles (customs.articleTile). Holding
   // one of your own articles opens the picker, like text posts and backdrops.
@@ -959,6 +968,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           handle={data.profile.handle}
           avatarUrl={data.profile.avatarUrl}
           sampleText={postBgSample}
+          photoUrl={postBgPhoto}
           saving={postBgSaving}
           onCancel={() => setPostBgOpen(false)}
           onSave={savePostBg}

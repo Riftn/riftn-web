@@ -156,6 +156,8 @@ export interface UpdateProfileData {
   dmSettings?: { disables?: string[]; minTipDhb?: number };
   avatarImg?: File;
   coverImg?: File;
+  /** The owner's own backdrop for their text posts; the server stores it and sets customs.postBg to 'photo'. */
+  postBgImg?: File;
 }
 
 export async function updateProfile(data: UpdateProfileData): Promise<{ result: boolean }> {
@@ -205,6 +207,8 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
     formData.append("coverImg", data.coverImg);
     console.log('[updateProfile] Attaching coverImg:', data.coverImg.name, data.coverImg.size, data.coverImg.type);
   }
+
+  if (data.postBgImg) formData.append("postBgImg", data.postBgImg);
 
   // Log all FormData keys being sent
   const keys: string[] = [];
