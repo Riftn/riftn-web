@@ -42,6 +42,7 @@ import { showUndoToast } from '@/components/ui/undo-toast';
 import { showUpdateToast } from '@/components/app/NewVersionToast';
 import type { BuildVersion } from '@/lib/version-check';
 import { useSearchParams } from 'react-router-dom';
+import { NotificationRowsGallery } from '@/components/app/notifications/NotificationRowsGallery';
 import { transcriptKey } from '@/hooks/use-transcript';
 import { AppState } from '@/components/app/AppState';
 import { LiveRipple } from '@/components/app/LiveRipple';
@@ -2007,6 +2008,7 @@ export default function StateGalleryPage() {
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
+        {params.get('notifs') === '1' && <NotificationRowsGallery />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
 

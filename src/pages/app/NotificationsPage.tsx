@@ -12,6 +12,8 @@ import SearchIcon from '@/components/ui/cut-icons/search';
 import { useDrawerPullClose } from '@/hooks/use-drawer-pull-close';
 import { useTranslation } from 'react-i18next';
 import { AppealDrawer } from '@/components/app/notifications/AppealDrawer';
+import { NotificationCommentCard } from '@/components/app/notifications/NotificationCommentCard';
+import { notificationHasComment } from '@/lib/notification-comment';
 import { AtSign, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Filter as FilterIcon } from "lucide-react";
 import MessageSquareText from "@/components/ui/cut-icons/messages";
 import Users from "@/components/ui/cut-icons/communities";
@@ -169,7 +171,7 @@ let moduleAvatarCache = new Map<string, EnrichedAvatar>();
 const moduleEnrichedKeys = new Set<string>();
 
 // Bundled notification: wraps one or more raw notifications into a display group
-interface BundledNotification {
+export interface BundledNotification {
   /** The primary notification (most recent in the bundle) */
   primary: DeHubNotification;
   /** All notification IDs in this bundle */
@@ -1148,7 +1150,7 @@ function offscreenRowStyle(index: number): React.CSSProperties | undefined {
 // re-render used to re-run every row's per-render work (canonical-actor
 // building, date formatting). All props are kept referentially stable in the
 // parent (memoized bundles/list, useCallback onMarkAsRead, constant style).
-const NotificationItem = memo(function NotificationItem({
+export const NotificationItem = memo(function NotificationItem({
   notification,
   bundle,
   onMarkAsRead,
@@ -1566,8 +1568,22 @@ const NotificationItem = memo(function NotificationItem({
           <span data-feed-time className="text-[13px] text-zinc-500 whitespace-nowrap">{' · '}{formatTimeAgo(String(notification.createdAt))}</span>
         </p>
         
+        {/* The comment itself, whole, with Reply / Like / Tip right here. */}
+        {bundle.bundleType !== 'same-actor' && notificationHasComment(notification) && (
+          <>
+            {notification.tokenTitle && (notification.type === 'comment_reply' || notification.type === 'mention') && (
+              <p data-feed-quote className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{_copy("copy.2c26ae1e5724", { defaultValue: "on: " })}{notification.tokenTitle}
+              </p>
+            )}
+            <NotificationCommentCard
+              notification={notification}
+              onEngaged={() => { if (hasUnread) bundle.allIds.forEach(id => onMarkAsRead(id)); }}
+            />
+          </>
+        )}
+
         {/* Post preview snippet — for replies/mentions show the comment text, otherwise the post title */}
-        {bundle.bundleType !== 'same-actor' && (() => {
+        {bundle.bundleType !== 'same-actor' && !notificationHasComment(notification) && (() => {
           const commentPreview = (notification as any).commentPreview;
           const isReplyOrMention = notification.type === 'comment_reply' || notification.type === 'mention';
           // Strip leading @mention from comment preview
