@@ -1,0 +1,182 @@
+/* Computers, /app/messages: the inbox as glass cards (design B, 2026-11-18).
+   Every chat is its own card in the header pill's glass, 8px apart, no
+   divider lines. The pill carries Select, new chat, full screen, the search
+   and the All / Unread / Groups / Requests / Archived tabs. Phones and the
+   full-screen /chat page never get [data-msg-cards]. */
+@media (min-width: 1024px) {
+  [data-msg-cards] {
+    --mc-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 62%, white);
+    --mc-accent-ink: #fff;
+    --mc-soft: rgb(255 255 255 / 0.09);
+    --mc-hover: rgb(255 255 255 / 0.05);
+    --mc-card: linear-gradient(rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0)),
+      linear-gradient(var(--nav-glass, transparent), var(--nav-glass, transparent)),
+      var(--nav-glass-base, rgb(24 24 27 / 0.6));
+    --mc-rim: inset 0 0 0 1px rgb(255 255 255 / 0.14), inset 0 1px 0 rgb(255 255 255 / 0.22);
+  }
+  html[data-theme='system'] [data-msg-cards] {
+    --mc-accent: #fff;
+    --mc-accent-ink: #0b0b0c;
+    --mc-card: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03) 50%, rgb(255 255 255 / 0.02)), rgb(24 24 27 / 0.72);
+  }
+  html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-msg-cards] {
+    --mc-accent: #0b0b0c;
+    --mc-accent-ink: #fff;
+    --mc-soft: rgb(11 11 13 / 0.06);
+    --mc-hover: rgb(11 11 13 / 0.03);
+    --mc-card: rgb(250 250 252 / 0.85);
+    --mc-bar-fill: rgb(255 255 255 / 0.7);
+    --mc-rim: inset 0 0 0 0.5px rgb(11 11 13 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(11 11 13 / 0.04), 0 4px 12px -6px rgb(11 11 13 / 0.12);
+  }
+  html[data-theme='osaka'] [data-msg-cards] { --mc-accent: #ff6fb5; }
+  [data-msg-cards] { --mc-ink: #fff; }
+  html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-msg-cards] { --mc-ink: #0b0b0c; }
+
+  /* Header pill: even 10px padding, search corners follow the pill's. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] {
+    padding: 10px !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] > .min-h-9 { padding-left: 4px; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] > .mt-2\.5 { margin-top: 8px; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] > .mt-2\.5 > * + * { margin-top: 8px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-msg-cards-search] {
+    border-radius: 12px !important;
+    height: 40px !important;
+  }
+  [data-msg-cards] [data-msg-cards-glyph] .messages-nav-glyph { width: 22px; height: 22px; }
+  [data-msg-cards] [data-msg-cards-action] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    min-width: 32px;
+    padding: 0 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgb(161 161 170);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  [data-msg-cards] [data-msg-cards-action] svg { width: 16px; height: 16px; }
+  [data-msg-cards] [data-msg-cards-action]:hover { color: var(--mc-ink); background: var(--mc-hover); }
+  [data-msg-cards] [data-msg-cards-select],
+  [data-msg-cards] [data-msg-cards-select].is-on { color: var(--mc-ink); background: var(--mc-soft); }
+  [data-msg-cards] [data-msg-cards-select] svg { width: 15px; height: 15px; }
+
+  /* Tabs: the selected one is lit with the Beam underline. */
+  [data-msg-cards] [data-msg-cards-tab] {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgb(161 161 170);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  [data-msg-cards] [data-msg-cards-tab] svg { width: 14px; height: 14px; }
+  [data-msg-cards] [data-msg-cards-tab]:hover { color: var(--mc-ink); }
+  [data-msg-cards] [data-msg-cards-tab][aria-selected='true'] { color: var(--mc-ink); background: var(--mc-soft); }
+  [data-msg-cards] [data-msg-cards-tab][aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--mc-accent);
+    box-shadow: 0 0 10px var(--mc-accent);
+  }
+  [data-msg-cards] [data-msg-cards-tab-count] {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 6px;
+    background: var(--mc-accent);
+    color: var(--mc-accent-ink);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  [data-msg-cards] [data-msg-cards-tab-count][data-quiet] { background: var(--mc-soft); color: inherit; }
+
+  /* The list: cards with gaps, lined up with the pill's edges. */
+  [data-msg-cards] [data-chat-list-scroll] {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px 12px !important;
+  }
+  [data-msg-cards][data-msg-cards-picking] [data-chat-list-scroll] { padding-bottom: 96px !important; }
+  [data-msg-cards] [data-chat-list-scroll] > :is(p, div:not([data-chat-row]):not(:has([data-chat-list-row]))) { flex-shrink: 0; }
+  [data-msg-cards] [data-chat-list-scroll] .overflow-hidden:has(> .flex > .w-full > [data-chat-list-row]) { border-radius: 18px; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-requests-back], [data-chat-list-scroll] > button) {
+    position: relative;
+    min-height: 68px;
+    padding: 12px 14px 12px 12px !important;
+    gap: 12px !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: var(--mc-card) !important;
+    -webkit-backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    box-shadow: var(--mc-rim) !important;
+    transition: box-shadow 150ms ease, transform 150ms ease;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] [data-chat-requests-back] { min-height: 48px; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-scroll] > button):hover {
+    box-shadow: var(--mc-rim), inset 0 0 0 100px var(--mc-hover) !important;
+  }
+  /* Something new in this chat: a lit bar on the card's left edge. */
+  [data-msg-cards] [data-chat-list-row][data-unread]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 4px;
+    height: 28px;
+    margin-top: -14px;
+    border-radius: 0 3px 3px 0;
+    background: var(--mc-accent);
+    box-shadow: 0 0 10px var(--mc-accent);
+  }
+  /* Ticked while picking: the card rings in the theme colour. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] [data-chat-list-row][data-bulk-checked='true'] {
+    box-shadow: var(--mc-rim), inset 0 0 0 1.5px var(--mc-accent) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] :is(.w-12.h-12) {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] :is(.w-12.h-12) * { border-radius: 12px !important; }
+  [data-msg-cards] [data-chat-list-row] p { margin-top: 1px; }
+  [data-msg-cards] [data-chat-list-row] .tabular-nums { font-size: 12.5px; }
+  /* The tab is the way back from Requests. */
+  [data-msg-cards] [data-chat-requests-back] { display: none !important; }
+  [data-msg-cards] [data-chat-requests-hint] { padding: 0 4px; }
+
+  /* Picking: the actions float over the list in one glass bar. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-bulk-bar] {
+    position: absolute;
+    z-index: 20;
+    left: 50%;
+    bottom: 12px;
+    width: min(540px, calc(100% - 48px));
+    margin: 0 !important;
+    transform: translateX(-50%);
+    border-radius: 18px !important;
+    border: 0 !important;
+    background: var(--mc-card), var(--mc-bar-fill, rgb(12 12 16 / 0.62)) !important;
+    -webkit-backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    box-shadow: var(--mc-rim), 0 18px 40px -12px rgb(0 0 0 / 0.55) !important;
+  }
+}
