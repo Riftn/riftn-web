@@ -139,7 +139,11 @@ function getContentType(post: DeHubNFT): 'video' | 'image' | 'post' | 'live' {
 function toVideoItem(nft: DeHubNFT): VideoItem {
   const views = formatViews(resolveViewCount(nft)).replace(' views', '');
   const title = nft.title || nft.name || '';
-  const description = nft.description && nft.description !== title ? nft.description : undefined;
+  const rawDescription = nft.description && nft.description !== title ? nft.description : undefined;
+  // Videos can carry an attached sound as a [soundtrack:…] tag — play it, don't print it.
+  const soundtrack = parseSoundtrackTag(rawDescription);
+  const soundtrackTokenId = soundtrack.soundtrackUrl ? rawDescription?.match(/\[soundtrack:(\d+)/)?.[1] : undefined;
+  const description = rawDescription?.replace(/\[soundtrack:[^\]]*\]/g, '').trim() || undefined;
   const rawTimestamp = nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at;
   const timestamp = rawTimestamp && !/^(just now|\d+[smhdwy]|\d+mo)$/i.test(String(rawTimestamp).trim()) ? rawTimestamp : undefined;
 
@@ -200,6 +204,7 @@ function toVideoItem(nft: DeHubNFT): VideoItem {
     durationSeconds: typeof durationSeconds === 'number' ? durationSeconds : 0,
     title,
     description,
+    ...(isAudioPost ? {} : { ...soundtrack, soundtrackTokenId }),
     channel: nft.minterDisplayName || nft.minterUsername || nft.mintername || creatorObj?.display_name || creatorObj?.username || ownerObj?.username || 'Unknown',
     channelAvatar: avatar,
     verified: false,
