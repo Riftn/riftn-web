@@ -6019,20 +6019,8 @@ specificity animation declarations above.
   }
 }
 
-/* Notification targets keep the same row geometry and thread connectors. */
-@keyframes reply-text-glow {
-  from { text-shadow: 0 0 6px currentColor; }
-  to { text-shadow: none; }
-}
-.reply-text-glow {
-  animation: reply-text-glow 1600ms ease-out both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .reply-text-glow { animation: none; }
-}
-
-/* The row a notification opened, flashed once it has come to rest on screen
-   (lib/focus-scroll). Background only, so the row keeps its geometry and the
+/* A chat search hit, flashed once it has come to rest on screen
+   (lib/focus-scroll). Notification landings never flash. Background only, so the row keeps its geometry and the
    thread connectors stay put. */
 @keyframes focus-target-flash {
   0%, 35% { background-color: color-mix(in srgb, currentColor 14%, transparent); }

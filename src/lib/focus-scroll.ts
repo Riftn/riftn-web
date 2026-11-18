@@ -11,12 +11,18 @@
  *
  * So: centre it, watch the page for size changes and re-centre after each one,
  * and stop as soon as the reader scrolls, taps or types themselves, or after a
- * few seconds. The row flashes the first time it comes to rest on screen.
+ * few seconds.
+ *
+ * A notification landing (`bringIntoView`) snaps straight there and shows
+ * nothing else: the reader asked for that reply and it is in the middle of the
+ * screen, so a glow or a wash over it only gets in the way. Search hits in a
+ * chat (`bringIntoViewAndFlash`) still flash once at rest, since there the
+ * reader is stepping between several lines.
  *
  * @module lib/focus-scroll
  */
 
-const SETTLE_MS = 6000;
+const SETTLE_MS = 10000;
 const QUIET_MS = 450;
 const FLASH_CLASS = 'focus-target-flash';
 const FLASH_MS = 2200;
@@ -38,14 +44,29 @@ function flash(el: Element) {
 
 /**
  * Scrolls `el` to the middle of the screen and holds it there through layout
- * shifts. Returns a function that stops early.
+ * shifts, then flashes it once. Returns a function that stops early.
  */
 export function bringIntoViewAndFlash(el: Element): () => void {
+  return hold(el, true);
+}
+
+/**
+ * Puts `el` in the middle of the screen at once and holds it there while the
+ * page above it finishes loading (images, video, link previews). No glow, no
+ * wash, no glide. Returns a function that stops early.
+ */
+export function bringIntoView(el: Element): () => void {
+  return hold(el, false);
+}
+
+function hold(el: Element, withFlash: boolean): () => void {
   if (active.has(el)) return () => {};
   active.add(el);
 
-  const reduceMotion = typeof window.matchMedia === 'function'
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // No flash means a notification landing: snap, so the page opens already
+  // sitting on the reply instead of gliding to it.
+  const reduceMotion = !withFlash || (typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   let stopped = false;
   let quietTimer = 0;
   /** Where the row sat after the last correction, to spot one that did nothing. */
@@ -59,7 +80,7 @@ export function bringIntoViewAndFlash(el: Element): () => void {
     observer?.disconnect();
     for (const type of USER_EVENTS) window.removeEventListener(type, onUser, true);
     active.delete(el);
-    if (showFlash && !flashed && el.isConnected) flash(el);
+    if (withFlash && showFlash && !flashed && el.isConnected) flash(el);
   };
 
   // Flash once the row first stops moving for a beat. Keep watching after
@@ -68,6 +89,7 @@ export function bringIntoViewAndFlash(el: Element): () => void {
   let flashed = false;
   const armQuiet = () => {
     window.clearTimeout(quietTimer);
+    if (!withFlash) return;
     quietTimer = window.setTimeout(() => {
       if (flashed || stopped || !el.isConnected) return;
       flashed = true;

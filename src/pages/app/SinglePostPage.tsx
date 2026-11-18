@@ -91,7 +91,7 @@ import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
 import { usePostStagePhone } from '@/hooks/use-post-stage-phone';
 import { StageRelated } from '@/components/app/post-stage/StageRelated';
@@ -1179,8 +1179,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const isImagePost = contentType === 'image';
   const isTextPost = contentType === 'post' || contentType === null;
 
-  // Deep link to a thread entry: scroll it into view once the thread has
-  // rendered, and let the highlight ring live for a few seconds. The element
+  // Deep link to a thread entry or comment: put it in view once it has
+  // rendered, with no glow or wash, and hold it there while the post loads. The element
   // can lag the page by a fetch (the thread mounts with post data), so poll
   // briefly rather than giving up after one paint.
   useEffect(() => {
@@ -1190,7 +1190,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       if (cancelled) return;
       const el = document.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
       if (el) {
-        bringIntoViewAndFlash(el);
+        bringIntoView(el);
         return;
       }
       // The comments list mounts after the post and fetches on its own, so
