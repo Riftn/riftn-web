@@ -479,7 +479,8 @@
     "getTheApp": "ऐप पाबूँ",
     "connectAi": "AI कनेक्ट करूँ",
     "converter": "रूपांतरित करे वाला",
-    "affiliate": "एफिलिएट"
+    "affiliate": "एफिलिएट",
+    "dao": "डीएओ"
   },
   "feed": {
     "viewProfile": "{{name}} के प्रोफ़ाइल देखना",
