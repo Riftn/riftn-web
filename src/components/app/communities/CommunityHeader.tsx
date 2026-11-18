@@ -301,6 +301,20 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
               )}
             </div>
           )}
+          {community.slug && (
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(viewerShareUrl(dehubLinkFor.community(community.slug)));
+                trackShare('copy_link', { kind: 'community' });
+                toast.success(t('communities.linkCopied'));
+              }}
+              className="mt-0.5 max-w-full truncate text-sm text-zinc-400 hover:text-white transition-colors"
+              data-testid="community-handle"
+            >
+              riftn/{community.slug.toLowerCase()}
+            </button>
+          )}
         </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-1.5 [&>p]:mr-0">
