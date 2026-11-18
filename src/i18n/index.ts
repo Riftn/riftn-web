@@ -135,11 +135,12 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ky', name: 'Kyrgyz', nativeName: 'Кыргызча' },
 ];
 
-// ?hl=<code> is the URL a localised search result lands on: the crawler is
-// served that page in that language with an hreflang cluster (see
-// CLOUDFLARE_WORKER_SEO.js). Someone arriving on it asked for that language,
-// so for this visit it beats the saved preference, and it becomes the saved
-// preference so the next page keeps it after the router drops the parameter.
+// ?hl=<code> is the URL a localised search result (or a shared link) lands on:
+// the crawler is served that page in that language with an hreflang cluster
+// (see CLOUDFLARE_WORKER_SEO.js). It picks the language for this visit only.
+// It is NOT saved as the reader's preference: a link someone else shared must
+// not change the language every later visit opens in. Only an explicit pick in
+// a language menu saves one.
 const urlLang = (() => {
   try {
     const raw = (new URLSearchParams(window.location.search).get('hl') || '').toLowerCase();
@@ -148,14 +149,7 @@ const urlLang = (() => {
     return '';
   }
 })();
-if (urlLang) {
-  defaultLang = urlLang;
-  try {
-    localStorage.setItem(STORAGE_KEY, urlLang);
-  } catch {
-    /* private mode: the visit still gets the language, the next one will not */
-  }
-}
+if (urlLang) defaultLang = urlLang;
 
 // Dynamic import map for lazy loading locale files
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
