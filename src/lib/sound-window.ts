@@ -84,9 +84,66 @@ export function withSoundWindow(
     if (credit.licenseUrl) params.set('licUrl', credit.licenseUrl);
     if (credit.page) params.set('page', credit.page);
   }
+  // The poster's song / video sound levels outlive a new part or credit.
+  const old = fragment(url);
+  for (const key of ['sv', 'vv']) {
+    const value = old?.get(key);
+    if (value) params.set(key, value);
+  }
   const hash = params.toString();
   return hash ? `${base}#${hash}` : base;
 }
+
+/**
+ * How loud the song and the video's own sound play under a video post, each
+ * 0-1. Old posts carry neither key: the song replaces the video's sound.
+ * Stored as whole percents (`sv=80&vv=40`) in the same #fragment.
+ * The app reads the same keys (libs/soundWindow.ts).
+ */
+export interface SoundMix {
+  song: number;
+  video: number;
+}
+
+export const DEFAULT_SOUND_MIX: SoundMix = { song: 1, video: 0 };
+
+/** The quick picks under the two sliders. */
+export const SOUND_MIX_PRESETS = {
+  songOnly: { song: 1, video: 0 },
+  mix: { song: 0.8, video: 0.4 },
+  videoOnly: { song: 0, video: 1 },
+} as const satisfies Record<string, SoundMix>;
+
+const percent = (raw: string | null, fallback: number): number => {
+  if (raw == null || raw === '') return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) / 100 : fallback;
+};
+
+export function soundMix(url?: string | null): SoundMix {
+  const params = fragment(url);
+  if (!params) return { ...DEFAULT_SOUND_MIX };
+  return { song: percent(params.get('sv'), DEFAULT_SOUND_MIX.song), video: percent(params.get('vv'), DEFAULT_SOUND_MIX.video) };
+}
+
+/** `url` carrying `mix`; the default mix leaves the link as old posts had it. */
+export function withSoundMix(url: string, mix: SoundMix): string {
+  const hash = url.indexOf('#');
+  const base = hash < 0 ? url : url.slice(0, hash);
+  const params = new URLSearchParams(hash < 0 ? '' : url.slice(hash + 1));
+  const whole = (n: number) => String(Math.round(Math.max(0, Math.min(1, n)) * 100));
+  params.delete('sv');
+  params.delete('vv');
+  if (whole(mix.song) !== whole(DEFAULT_SOUND_MIX.song) || whole(mix.video) !== whole(DEFAULT_SOUND_MIX.video)) {
+    params.set('sv', whole(mix.song));
+    params.set('vv', whole(mix.video));
+  }
+  const next = params.toString();
+  return next ? `${base}#${next}` : base;
+}
+
+/** A level slider is linear to the finger; loudness is not. */
+export const mixGain = (level: number): number => Math.max(0, Math.min(1, level)) ** 2;
 
 /** Where the song should be when the video it plays under is at `mediaTime`. */
 export function soundTimeFor(url: string | null | undefined, mediaTime: number): number {
