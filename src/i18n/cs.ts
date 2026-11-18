@@ -1054,7 +1054,6 @@ export const cs = {
     whackTitle: 'Whack A Schifff',
     whackDesc: 'Praštěte Petera Schiffa po hlavě pokaždé, když se vynoří ze své krtičí díry.',
     gasTitle: 'Gas Guzzler',
-    gasDesc: 'Udržujte svůj ETH plyn doplněný při sbírání dehub mincí a vyhýbání se ostatním moon boys v jejich Lambech.',
     rocketTitle: 'Rocket Blaster',
     rocketDesc: 'Vyhýbejte se prokletým laserovým paprskům na své 100km misi zpět na Měsíc v tomto nekonečném blasteru.',
     streetTitle: 'Street Slayer',

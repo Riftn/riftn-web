@@ -21,8 +21,8 @@
     "downloadApk": "Android APK-ni indirmek.",
     "downloadTitle": "Downdownload Riftn",
     "faq": {
-      "a1": "Hawa. Riftn Google Play we App Store-dan pulsuz alnyp barylýar we dehub.io-da brauzerde pulsuz ulanylýar.",
-      "a2": "Android telefonlary Google Play ýa-da APK arkaly, iPhone App Store arkaly we dehub.io-da modern stol ýa-da mobil brauzer arkaly alnyp barylýar.",
+      "a1": "Hawa. Riftn Google Play we App Store-dan pulsuz alnyp barylýar we riftn.com-da brauzerde pulsuz ulanylýar.",
+      "a2": "Android telefonlary Google Play ýa-da APK arkaly, iPhone App Store arkaly we riftn.com-da modern stol ýa-da mobil brauzer arkaly alnyp barylýar.",
       "a3": "Hawa. Soňky Android gurluşygy Riftn tarapyndan riftn.com/apk, Android 8 we ondan ýokary üçin biriksiz APK-da çap edilýär.",
       "a4": "Hronologik lenta ýerleşdiriň, göni ýaýlyma çykyň ýa-da göni ýaýlymlary tomaşa ediň, dostlaryňyz bilen uçdan-ujyna şifrlenen hatlar arkaly habarlaşyň, jemgyýetlere goşulyň we olary dolandyryň, içerki köpzyncyrly (multi-chain) gapjygyňyzda tokenleri saklaň we tomaşa edeniňiz üçin sylaglar gazanyň.",
       "q1": "Riftn App pulsuzmy?",
@@ -94,9 +94,9 @@
     "inviteLink": "Çakylyk baglanyşygyňyzy goşyň",
     "moreGuides": "TikTok-dan gelenmi? UK-da <tiktok>Ýaradyjy görkezmesini okap, TikTok </tiktok> we <live>Web3direlýän serişdesini taşlaň: Twitch-iň merkezileşdirilen alternatiwi</live>.",
     "proof": {
-      "label1": "deHub Live Streamingde bir wagtda seredýänler",
+      "label1": "Riftn Live Streamingde bir wagtda seredýänler",
       "label2": "çykyş serişdeleriniň arasyndaky wagt",
-      "label3": "deHub 'yň öz CDN-de global latentlik",
+      "label3": "Riftn 'yň öz CDN-de global latentlik",
       "value3": "200ms"
     },
     "reasons": {
@@ -3767,7 +3767,7 @@
       "copy": "Göçür",
       "openEndpoint": "/api/stats aç",
       "openRaw": "Cloudflare-yň üýtgedilmedik jogaby",
-      "edge": "dehub.io-a gelen her bir haýyş serwerlerimize ýetmezden ozal Cloudflare-den geçýär. Bu sanlar şol traffigiň Cloudflare-yň öz jemlemesi — panelimizde görkezilýän şol sanlar. Olar brauzeriňizdäki skript tarapyndan ýygnalmaýar, şonuň üçin bu sahypadaky hiç zat olary ulaldyp bilmez, we yzarlaýjylary petiklemek olary üýtgetmeýär.",
+      "edge": "riftn.com-a gelen her bir haýyş serwerlerimize ýetmezden ozal Cloudflare-den geçýär. Bu sanlar şol traffigiň Cloudflare-yň öz jemlemesi — panelimizde görkezilýän şol sanlar. Olar brauzeriňizdäki skript tarapyndan ýygnalmaýar, şonuň üçin bu sahypadaky hiç zat olary ulaldyp bilmez, we yzarlaýjylary petiklemek olary üýtgetmeýär.",
       "live": "Sahypa olary göni okaýar. /stats ýüklenende biziň soňlanma nokadymyz çagyrylýar, ol şol pursat Cloudflare-yň Analitika API-sini soraýar we jogaby 60 sekunt keşleýär.",
       "limits": "Bu näme görkezýär, näme görkezmeýär: sanlaryň biziň programma koddan däl-de, Cloudflare-yň jemlemesinden gelýändigini, we şu ýerde çap edilen soragyň hut işleýän sorag bolandygyny özüňiz görüp bilersiňiz. Bu doly ynamsyz ulgam däl — API bellikini biz saklaýarys, we Cloudflare zolagyň analitikasyny hiç kime açyk okamaga bermeýär. Öz Cloudflare zolagy bolan islendik adam şol bir sorag ony ýerine ýetirip, şeklini tassyklap biler."
     },
@@ -14627,7 +14627,7 @@
     "43fb11b48038": "tipik",
     "4caa918bf60d": "her 1000 adam üçin",
     "6bdf24e0e55f": "RPM $",
-    "0435a318b3b4": "deHubda",
+    "0435a318b3b4": "Riftnda",
     "600d1c6e47ab": "Siziň sanlaryňyz dälmi? Siziň sanlaryňyzy synap görüň",
     "ea68771a3994": "Öwrenmek",
     "dfdd39a6da39": "Bu döwürde hiç hili maglumat ýok",

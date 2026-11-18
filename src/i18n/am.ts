@@ -1059,7 +1059,6 @@ export const am = {
     whackTitle: 'Whack A Schifff',
     whackDesc: 'ፒተር ሺፍን ጭንቅላቱ ላይ ይምቱ ነጥብ ለማስቆጠር ቦምቦችን ያስወግዱ!',
     gasTitle: 'Gas Guzzler',
-    gasDesc: 'ETH ጋዝዎን ሞልተው ያቆዩ dehub ሳንቲሞችን ሲሰበስቡ!',
     rocketTitle: 'Rocket Blaster',
     rocketDesc: 'ወደ ጨረቃ በሚሄዱበት 100km ተልዕኮ ላይ ያንን የተረገሙ ሌዘር ጨረሮችን ያስወግዱ',
     streetTitle: 'Street Slayer',

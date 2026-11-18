@@ -590,7 +590,7 @@ export const hu = {
     exchangeB1: 'Egyszerű kereskedés:',
     exchangeB1Desc: 'A pénztárca Kereskedés gombja Egyszerű kereskedést vagy teljes cserét kínál. Az Easy trade három lépésben értékesíti a Riftn tokeneket — összeg, ár, megerősítés. Az általa azonnal értékesített piaci áron vagy az alatt; fölötte a rendelésed megjelenik a könyvben. A kereskedést mondatként is beírhatja, és hagyhatja, hogy az AI kitöltse.',
     exchangeB2: 'Medencék bármilyen tokenhez:',
-    exchangeB2Desc: 'Bárki nyithat medencét egy alap, Ethereum, Robinhood Chain vagy Solana tokenért 100 $ -ért, deHub tokenekben fizetve. Minden medencének saját oldala van diagrammal, rendelési könyvvel és azonnali vásárlással és eladással, és az alkotó beállíthatja a képét.',
+    exchangeB2Desc: 'Bárki nyithat medencét egy alap, Ethereum, Robinhood Chain vagy Solana tokenért 100 $ -ért, Riftn tokenekben fizetve. Minden medencének saját oldala van diagrammal, rendelési könyvvel és azonnali vásárlással és eladással, és az alkotó beállíthatja a képét.',
     exchangeB3: 'Fizess úgy, ahogy szeretnél:',
     exchangeB3Desc: 'A vételi megbízás ETH-val, USDC-vel vagy USDT-vel fizethető. A BNB tulajdonosai egy koppintásos konverziót kapnak ETH-ra a Bázison.',
     tocMarkets: 'Piacterek',
