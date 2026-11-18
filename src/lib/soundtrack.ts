@@ -28,3 +28,10 @@ export function buildSoundtrackTag(sound: { tokenId: string; title: string; crea
   // Encode delimiters in metadata, leaving the optional URL as a single tail field.
   return `[soundtrack:${sound.tokenId}:${encodeURIComponent(sound.title)}:${encodeURIComponent(sound.creator)}${path ? `:${path.replace(/\]/g, '%5D')}` : ''}]`;
 }
+
+/** A post's song as the composer attaches it, for "use this sound". */
+export function soundFromPost(url: string, title: string, creator?: string): { url: string; title: string; creator: string; tokenId: string; source: 'audius' | 'commons' | 'riftn' } {
+  const src = /#.*\bsrc=(audius|commons)\b/.exec(url)?.[1] as 'audius' | 'commons' | undefined;
+  const tokenId = src ? '0' : /feed-audio\/(\d+)-audio\./.exec(url)?.[1] ?? '0';
+  return { url, title, creator: creator ?? '', tokenId, source: src ?? 'riftn' };
+}

@@ -9,7 +9,6 @@ import Play from "@/components/ui/cut-icons/play";
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { SoundCreditLink } from './SoundCreditLink';
-import { soundCredit } from '@/lib/sound-window';
 
 interface Props {
   title?: string;
@@ -193,13 +192,5 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
       {playing ? <Pause className="h-3.5 w-3.5 shrink-0 fill-current" aria-hidden="true" /> : !error && !loading && <Play className="h-3.5 w-3.5 shrink-0 fill-current" aria-hidden="true" />}
     </button>
   );
-  // A song from an outside library names its library next to the capsule;
-  // the link opens the song's page and its title holds the full credit.
-  if (layout !== 'inline' || !soundCredit(url)) return capsule;
-  return (
-    <span className="inline-flex max-w-full items-center gap-2">
-      {capsule}
-      <SoundCreditLink url={url} creator={creator} variant="short" className="shrink-0 text-[11px] font-medium text-white/70" />
-    </span>
-  );
+  return capsule;
 }

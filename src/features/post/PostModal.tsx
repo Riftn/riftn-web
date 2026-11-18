@@ -5,7 +5,7 @@ import { postTextLimit } from '@/lib/post-text-limit';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { usePostForm } from './hooks/usePostForm';
-import { usePostSound } from './hooks/usePostSound';
+import { usePostSound, type AttachedSound } from './hooks/usePostSound';
 import { buildSoundtrackTag } from '@/lib/soundtrack';
 import type { PollData, LiveStreamHandoff } from './types';
 import { PostContentArea } from './components/PostContentArea';
@@ -49,6 +49,8 @@ interface PostModalProps {
   onFilesProcessed?: () => void;
   initialText?: string;
   initialCategory?: string;
+  /** A post's song to start with, from tapping the song on that post. */
+  initialSound?: AttachedSound | null;
   initialPoll?: PollData | null;
   /** Open on the Livestream tab instead of Post. */
   initialLiveMode?: 'video';
@@ -61,7 +63,7 @@ interface PostModalProps {
   onPosted?: (tokenId: string) => void;
 }
 
-function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, initialText, initialCategory, initialPoll, initialLiveMode, draftScope, quotedPost, onPosted }: PostModalProps & { draftScope: string }) {
+function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, initialText, initialCategory, initialSound, initialPoll, initialLiveMode, draftScope, quotedPost, onPosted }: PostModalProps & { draftScope: string }) {
   const { t: _copy } = _useCopy();
   const isQuoting = !!quotedPost;
   const { style: keyboardStyle } = useKeyboardSafeSheet(isOpen);
@@ -133,6 +135,11 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
     }
   }, [state.poll, actions.setPoll]);
 
+
+  // Opened from a post's song: start with that song attached.
+  useEffect(() => {
+    if (isOpen && initialSound) selectSound(initialSound);
+  }, [isOpen, initialSound, selectSound]);
 
   // When opening from share (initialText provided), reset form first for a fresh start
   useEffect(() => {

@@ -1,10 +1,15 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 
 interface GlobalDropZoneContextType {
   isPostModalOpen: boolean;
   openPostModal: (initialText?: string, initialCategory?: string) => void;
   openPostModalWithFiles: (files: FileList, initialText?: string, initialCategory?: string) => void;
+  /** Open the composer with a post's song already attached ("use this sound"). */
+  openPostModalWithSound: (sound: AttachedSound) => void;
+  initialSound: AttachedSound | null;
+  clearInitialSound: () => void;
   closePostModal: () => void;
   pendingFiles: FileList | null;
   clearPendingFiles: () => void;
@@ -28,6 +33,14 @@ export function GlobalDropZoneProvider({ children }: { children: ReactNode }) {
 
   const [initialText, setInitialText] = useState('');
   const [initialCategory, setInitialCategory] = useState('');
+  const [initialSound, setInitialSound] = useState<AttachedSound | null>(null);
+
+  const openPostModalWithSound = useCallback((sound: AttachedSound) => {
+    setInitialSound(sound);
+    setIsPostModalOpen(true);
+  }, []);
+
+  const clearInitialSound = useCallback(() => setInitialSound(null), []);
 
   const openPostModal = useCallback((text?: string, category?: string) => {
     if (text) setInitialText(text);
@@ -152,6 +165,9 @@ export function GlobalDropZoneProvider({ children }: { children: ReactNode }) {
       isPostModalOpen, 
       openPostModal,
       openPostModalWithFiles,
+      openPostModalWithSound,
+      initialSound,
+      clearInitialSound,
       closePostModal, 
       pendingFiles, 
       clearPendingFiles,
