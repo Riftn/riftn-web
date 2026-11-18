@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import '@/styles/chat-hold.css';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, MessageCircleQuestion, FileText, Play, Lock, EyeOff, Timer, Plus } from "lucide-react";
+import { Loader2, Wand2, MessageCircleQuestion, FileText, Play, Lock, EyeOff, Timer, Plus, Languages } from "lucide-react";
 import Sparkles from "@/components/ui/cut-icons/assistant";
 import Reply from "@/components/ui/cut-icons/reply";
 import Paperclip from "@/components/ui/cut-icons/attach";
@@ -18,6 +18,9 @@ import Clock from "@/components/ui/cut-icons/clock";
 
 import { EmojiGifPicker } from './EmojiGifPicker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { SUPPORTED_LANGUAGES } from '@/i18n';
+
+const TRANSLATE_TO_KEY = 'riftn.chat.translateTo';
 
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
@@ -146,6 +149,10 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     if (initialText) setMessage(prev => (prev ? prev : initialText));
   }, [initialText, setMessage]);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [translateTo, setTranslateTo] = useState<string>(() => {
+    try { return localStorage.getItem(TRANSLATE_TO_KEY) || 'en'; } catch { return 'en'; }
+  });
+  const [isTranslating, setIsTranslating] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   // imageFile holds a picked audio file; photos and videos go to the edit screen.
@@ -597,6 +604,40 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     toast.success(_copy("copy.4951131f6346", { defaultValue: "Recording saved ({{value1}}s)", value1: duration }));
   };
 
+  // Rewrite what is typed in the chosen language before it is sent. The
+  // pick is remembered (same key as the app).
+  const handleTranslate = async (code: string = translateTo) => {
+    const draft = message.trim();
+    if (!draft || isTranslating) return;
+    setIsTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-text', {
+        body: { text: draft, targetLang: code },
+      });
+      const out: string | undefined = data?.translatedText;
+      if (error || !out) {
+        toast.error(_copy('copy.037091068590', { defaultValue: 'Translation failed' }));
+        return;
+      }
+      if (data?.sameLanguage || out.trim() === draft) {
+        const name = SUPPORTED_LANGUAGES.find(l => l.code === code)?.nativeName ?? code;
+        toast(`${_copy('copy.8fe147696fbf', { defaultValue: 'Translate' })} · ${name} ✓`);
+        return;
+      }
+      setMessage(out);
+    } catch {
+      toast.error(_copy('copy.037091068590', { defaultValue: 'Translation failed' }));
+    } finally {
+      setIsTranslating(false);
+      textareaRef.current?.focus();
+    }
+  };
+
+  const chooseTranslateTo = (code: string) => {
+    setTranslateTo(code);
+    try { localStorage.setItem(TRANSLATE_TO_KEY, code); } catch { /* private mode */ }
+  };
+
   const handleEnhanceText = async () => {
     if (!message.trim()) {
       toast.error(_copy("copy.7530edd4f509", { defaultValue: "Enter some text to enhance" }));
@@ -1020,9 +1061,9 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
-                    disabled={isEnhancing}
+                    disabled={isEnhancing || isTranslating}
                   >
-                    {isEnhancing ? (
+                    {isEnhancing || isTranslating ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <Sparkles className="w-5 h-5" />
@@ -1035,7 +1076,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
             <PopoverContent
               align="end"
               sideOffset={6}
-              className="w-48 p-1 bg-black/80 backdrop-blur-[24px] border border-white/10 text-white"
+              className="w-60 p-1 bg-black/80 backdrop-blur-[24px] border border-white/10 text-white"
             >
               <button
                 type="button"
@@ -1052,6 +1093,34 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                   <span className="text-[10px] text-zinc-500">{_copy("copy.0563e717bbdb", { defaultValue: "Fix spelling & grammar" })}</span>
                 </div>
               </button>
+              <div className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-sm hover:bg-white/10 transition-colors">
+                <button
+                  type="button"
+                  data-testid="chat-translate"
+                  onClick={(e) => {
+                    void handleTranslate();
+                    (e.currentTarget.closest('[data-radix-popper-content-wrapper]') as HTMLElement | null)?.blur();
+                  }}
+                  disabled={!message.trim()}
+                  className="flex items-center gap-2 min-w-0 flex-1 text-left disabled:opacity-50"
+                >
+                  <Languages className="w-4 h-4 text-zinc-300 flex-shrink-0" />
+                  <span className="flex flex-col min-w-0">
+                    <span>{_copy('copy.8fe147696fbf', { defaultValue: 'Translate' })}</span>
+                    <span className="text-[10px] text-zinc-500 truncate">{SUPPORTED_LANGUAGES.find(l => l.code === translateTo)?.nativeName ?? translateTo}</span>
+                  </span>
+                </button>
+                <select
+                  aria-label={_copy('copy.a4fe65264ef7', { defaultValue: 'Language' })}
+                  value={translateTo}
+                  onChange={(e) => chooseTranslateTo(e.target.value)}
+                  className="w-14 bg-white/10 text-white text-[11px] rounded-md px-1 py-1 border border-white/10 focus:outline-none"
+                >
+                  {SUPPORTED_LANGUAGES.map(l => (
+                    <option key={l.code} value={l.code} className="bg-zinc-900 text-white">{l.nativeName}</option>
+                  ))}
+                </select>
+              </div>
               <button
                 type="button"
                 onClick={() => handleAskAssistant()}
