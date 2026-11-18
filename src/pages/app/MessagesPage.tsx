@@ -724,6 +724,27 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     }
   }, [location.state]); // re-run when navigation state changes
 
+  // `?conversation=<id>` opens that chat: what a message notification links
+  // to. It used to stop at the list, so a tap on "X sent you a message" made
+  // you find X yourself. Keyed on the location as well as the query, so a
+  // second tap on the same chat's notification opens it again.
+  const pendingConversationIdRef = useRef<string | null>(null);
+  const [pendingConversationTrigger, setPendingConversationTrigger] = useState(0);
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get('conversation');
+    if (!id || !/^[A-Za-z0-9_-]{1,64}$/.test(id)) return;
+    pendingConversationIdRef.current = id;
+    setPendingConversationTrigger(prev => prev + 1);
+  }, [location.search, location.key]);
+  useEffect(() => {
+    const id = pendingConversationIdRef.current;
+    if (!id || !isAuthenticated || isLoading || !conversations) return;
+    pendingConversationIdRef.current = null;
+    const match = conversations.find(c => c.id === id);
+    if (match) openConversation(match);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, conversations, isLoading, pendingConversationTrigger]);
+
   // Process the pending DM once conversations have finished loading
   useEffect(() => {
     if (!pendingDmRef.current || !isAuthenticated || isLoading) return;
