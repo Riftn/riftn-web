@@ -2215,7 +2215,8 @@
       "total": "Bendras pasiekiamumas",
       "breakdownTitle": "Iš kur šis pasiekiamumas",
       "dehubFollowers": "„Riftn“ sekėjai",
-      "verified": "Socialinių tinklų skaičius gaunamas iš paskyrų, prie kurių kūrėjas prisijungė."
+      "verified": "Socialinių tinklų skaičius gaunamas iš paskyrų, prie kurių kūrėjas prisijungė.",
+      "selfReported": "Socialinių sekėjų skaičių įveda kūrėjas."
     },
     "loginDescription": "Prisijunkite, kad peržiūrėtumėte ir tvarkytumėte savo profilį.",
     "replyThread": {

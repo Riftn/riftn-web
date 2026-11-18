@@ -2214,7 +2214,8 @@
       "total": "Kokonaisulottuvuus",
       "breakdownTitle": "Mistä tämä REACH-järjestelmä on peräisin",
       "dehubFollowers": "Riftn-seuraajat",
-      "verified": "Sosiaaliset laskelmat tulevat tekijän yhdistämistä tileistä."
+      "verified": "Sosiaaliset laskelmat tulevat tekijän yhdistämistä tileistä.",
+      "selfReported": "Tekijä syöttää sosiaalisen seuraajamäärän."
     },
     "loginDescription": "Kirjaudu sisään nähdäksesi ja hallinnoidaksesi profiiliasi.",
     "replyThread": {

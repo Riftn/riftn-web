@@ -124,6 +124,7 @@ import { usePrivacySettings } from '@/hooks/use-privacy-settings';
 import { useNewMemberSelf } from '@/hooks/use-new-members';
 import { useWalletUnlockInterval, type WalletUnlockIntervalOption } from '@/hooks/use-wallet-unlock-interval';
 import { WalletRecoveryTools } from '@/components/app/settings/WalletRecoveryTools';
+import { ResetWalletSettings } from '@/components/app/settings/ResetWalletSettings';
 import { BiometricUnlockSettings } from '@/components/app/settings/BiometricUnlockSettings';
 import { EmailNotificationsSetting } from '@/components/app/settings/EmailNotificationsSetting';
 import { SmsNotificationsSetting } from '@/components/app/settings/SmsNotificationsSetting';
@@ -2139,6 +2140,9 @@ function PrivacySettings() {
           </div>
           <div data-setting-anchor="wallet-recovery">
             <WalletRecoveryTools />
+          </div>
+          <div data-setting-anchor="reset-wallet">
+            <ResetWalletSettings />
           </div>
         </div>
       </div>

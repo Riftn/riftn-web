@@ -91,7 +91,7 @@ import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
 import { usePostStagePhone } from '@/hooks/use-post-stage-phone';
 import { StageRelated } from '@/components/app/post-stage/StageRelated';
@@ -880,8 +880,13 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   // Desktop: closed until the comment button asks, same as a feed card.
   // Phone and tablet keep them open under the post.
+  // A notification link (?comment=<id>, or ?comments=1) opens them on desktop
+  // too: the reply it names lives in that list, and a closed list left the
+  // reader on the top of the post with nothing to land on. The card strips
+  // ?comments=1 from the address on mount, so it is read once, here.
   const desktopView = () => typeof window !== 'undefined' && window.innerWidth >= 1024;
-  const [showPageComments, setShowPageComments] = useState(() => !desktopView());
+  const askedForComments = useRef(new URLSearchParams(location.search).get('comments') === '1');
+  const [showPageComments, setShowPageComments] = useState(() => !desktopView() || !!focusCommentId || askedForComments.current);
   const [postOptions, setPostOptions] = useState<(() => void) | null>(null);
   const registerPostOptions = useCallback((open: (() => void) | null) => setPostOptions(() => open), []);
   const [pageCommentsInitialTab, setPageCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>();
@@ -889,9 +894,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setShowPageComments(!desktopView());
+    setShowPageComments(!desktopView() || !!focusCommentId || askedForComments.current);
+    askedForComments.current = false;
     setPageCommentsInitialTab(undefined);
-  }, [id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, focusCommentId]);
 
   const handleOpenPageComments = useCallback((tab?: 'replies' | 'quotes' | 'reposts' | 'search') => {
     setPageCommentsInitialTab(tab);
@@ -1179,8 +1186,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const isImagePost = contentType === 'image';
   const isTextPost = contentType === 'post' || contentType === null;
 
-  // Deep link to a thread entry: scroll it into view once the thread has
-  // rendered, and let the highlight ring live for a few seconds. The element
+  // Deep link to a thread entry or comment: put it in view once it has
+  // rendered, with no glow or wash, and hold it there while the post loads. The element
   // can lag the page by a fetch (the thread mounts with post data), so poll
   // briefly rather than giving up after one paint.
   useEffect(() => {
@@ -1190,7 +1197,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       if (cancelled) return;
       const el = document.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
       if (el) {
-        bringIntoViewAndFlash(el);
+        bringIntoView(el);
         return;
       }
       // The comments list mounts after the post and fetches on its own, so

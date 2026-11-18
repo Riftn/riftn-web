@@ -582,9 +582,10 @@ export function ProfileHeader({
                   )}
                 </div>
               )}
-              {/* Riftn followers plus the verified counts of the creator's
-                  connected socials. Absent until one carries a count. */}
-              <TotalReachPill wallet={apiProfile?.walletAddress ?? profile.walletAddress} followers={profile.followers} />
+              {/* Riftn followers plus the counts of the creator's linked
+                  socials (verified, else entered in the app). Absent until
+                  one carries a count. */}
+              <TotalReachPill wallet={apiProfile?.walletAddress ?? profile.walletAddress} followers={profile.followers} customs={profile.customs} />
               {/* The links ride at the end of the counts line and
                   only wrap below when the line is genuinely full. */}
               {linksOnCountsRow && (

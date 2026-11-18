@@ -74,12 +74,16 @@
       "profile": "tài khoản",
       "proposal": "gợi ý",
       "stage": "bàn diễn",
-      "store": "cửa hàng"
+      "store": "cửa hàng",
+      "featureRequest": "yêu cầu",
+      "page": "trang"
     },
     "recipientChat": "chat",
     "recipientUser": "người dùng",
     "sendFailed": "Không thể gửi {{item}}",
-    "sentTo": "{{item}} đã được gửi đến {{name}}"
+    "sentTo": "{{item}} đã được gửi đến {{name}}",
+    "openPage": "Mở trang",
+    "viewRequest": "Xem yêu cầu"
   },
   "stageCover": {
     "admitOne": "CHẤP NHẬN MỘT",
@@ -2292,7 +2296,8 @@
       "total": "Tổng phạm vi tiếp cận",
       "breakdownTitle": "Phạm vi tiếp cận này đến từ đâu",
       "dehubFollowers": "Người theo dõi Riftn",
-      "verified": "Số liệu mạng xã hội lấy từ các tài khoản nhà sáng tạo đã kết nối."
+      "verified": "Số liệu mạng xã hội lấy từ các tài khoản nhà sáng tạo đã kết nối.",
+      "selfReported": "Người sáng tạo nhập số lượng người theo dõi trên mạng xã hội."
     },
     "loginDescription": "Đăng nhập để xem và quản lý hồ sơ của bạn.",
     "replyThread": {
@@ -19661,5 +19666,16 @@
     "edit": "Chỉnh sửa",
     "editLabel": "Chỉnh sửa tin nhắn",
     "error": "Điều đó không hiệu quả. Hãy thử lại."
+  },
+  "mentionLinks": {
+    "communities": "Cộng đồng",
+    "pages": "Trang",
+    "people": "Mọi người",
+    "linkTo": "Liên kết {{name}}",
+    "empty": "Không tìm thấy gì",
+    "hint": "Nhập để tìm người, cộng đồng và trang",
+    "members": " thành viên",
+    "placeholder": "Tìm người, cộng đồng, trang...",
+    "title": "Nhắc đến hoặc liên kết"
   }
 }

@@ -2196,7 +2196,8 @@
       "total": "总触达",
       "breakdownTitle": "呢个触达从边度嚟",
       "dehubFollowers": "Riftn 关注者",
-      "verified": "社交數據來自創作者連接的帳戶。"
+      "verified": "社交數據來自創作者連接的帳戶。",
+      "selfReported": "社交关注数由创作者输入。"
     },
     "loginDescription": "登录来看搭管理侬个个人档案。",
     "replyThread": {

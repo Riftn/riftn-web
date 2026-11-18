@@ -126,12 +126,16 @@
       "profile": "perfil",
       "proposal": "propuesta",
       "stage": "etapa",
-      "store": "tienda"
+      "store": "tienda",
+      "featureRequest": "solicitud",
+      "page": "página"
     },
     "recipientChat": "chat",
     "recipientUser": "usuario",
     "sendFailed": "Error al enviar {{item}}",
-    "sentTo": "{{item}} enviado a {{name}}"
+    "sentTo": "{{item}} enviado a {{name}}",
+    "openPage": "Abrir página",
+    "viewRequest": "Ver solicitud"
   },
   "stageCover": {
     "admitOne": "ADMITIR UNO",
@@ -2485,7 +2489,8 @@
       "total": "Alcance total",
       "breakdownTitle": "De dónde viene este alcance",
       "dehubFollowers": "Seguidores de Riftn",
-      "verified": "Los datos sociales provienen de cuentas que el creador conectó."
+      "verified": "Los datos sociales provienen de cuentas que el creador conectó.",
+      "selfReported": "El creador introduce el número de seguidores en redes sociales."
     },
     "loginDescription": "Inicia sesión para ver y gestionar tu perfil.",
     "replyThread": {
@@ -20769,5 +20774,16 @@
     "scheduledToast": "Programado para {{when}}",
     "failedToast": "No se pudo enviar un mensaje programado",
     "error": "No ha funcionado. Inténtalo de nuevo."
+  },
+  "mentionLinks": {
+    "communities": "Comunidades",
+    "pages": "Páginas",
+    "people": "Personas",
+    "linkTo": "Enlazar {{name}}",
+    "empty": "No se encontró nada",
+    "hint": "Escribe para buscar personas, comunidades y páginas",
+    "members": " miembros",
+    "placeholder": "Buscar personas, comunidades, páginas...",
+    "title": "Mencionar o enlazar"
   }
 }

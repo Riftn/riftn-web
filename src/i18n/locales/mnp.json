@@ -2191,7 +2191,8 @@
       "total": "總觸及",
       "breakdownTitle": "此觸及來自何處",
       "dehubFollowers": "Riftn 追蹤者",
-      "verified": "社交计数来自创建者连接的账户。"
+      "verified": "社交计数来自创建者连接的账户。",
+      "selfReported": "社群追蹤者數量由創作者輸入。"
     },
     "loginDescription": "登录来查看和管理你其个人页。",
     "replyThread": {

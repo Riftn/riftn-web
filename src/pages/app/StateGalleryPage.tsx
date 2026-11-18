@@ -6,6 +6,7 @@ import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
+import { ResetWalletSettings, type ResetWalletReadiness } from '@/components/app/settings/ResetWalletSettings';
 import PersonalKeys from '@/components/PersonalKeys';
 import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
@@ -42,6 +43,7 @@ import { showUndoToast } from '@/components/ui/undo-toast';
 import { showUpdateToast } from '@/components/app/NewVersionToast';
 import type { BuildVersion } from '@/lib/version-check';
 import { useSearchParams } from 'react-router-dom';
+import { NotificationRowsGallery } from '@/components/app/notifications/NotificationRowsGallery';
 import { transcriptKey } from '@/hooks/use-transcript';
 import { AppState } from '@/components/app/AppState';
 import { LiveRipple } from '@/components/app/LiveRipple';
@@ -127,6 +129,9 @@ import { DraftVideoProgress } from '@/features/post/components/DraftVideoProgres
 import { PostProcessingPill } from '@/components/app/PostProcessingDock';
 import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { DehubLinkEmbeds } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { UserMentionDropdown } from '@/components/app/mentions';
+import { findDehubLinks } from '@/lib/dehub-links';
 import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
 import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
 import type { GovernanceProposal } from '@/hooks/use-governance';
@@ -2004,9 +2009,16 @@ export default function StateGalleryPage() {
 
         {params.get('predictions') === '1' && <PredictionGallery />}
         {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('resetwallet') && (
+          <section data-reset-wallet-gallery className="mb-5 max-w-xl">
+            <ResetWalletSettings preview={(['ready', 'no-login', 'signed-in-with-wallet', 'done'] as const).find((s) => s === params.get('resetwallet')) ?? ('ready' as ResetWalletReadiness)} />
+          </section>
+        )}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
+        {params.get('notifs') === '1' && <NotificationRowsGallery />}
+        {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
 
@@ -3007,6 +3019,70 @@ const GALLERY_PROPOSALS: GovernanceProposal[] = (() => {
       options: ['Creator tools', 'Token roadmap', 'Moderation'], option_tallies: [{ weight: 470, voters: 52 }, { weight: 230, voters: 28 }, { weight: 120, voters: 13 }] },
   ] as GovernanceProposal[];
 })();
+
+/**
+ * Links to our own things as cards (`?links=1`): a Requests board link, a
+ * community, and pages, the way a DM, a comment or a live chat line shows
+ * them. `&mention=lead` opens the @ list on that word, live.
+ */
+const GALLERY_REQUEST_ID = '00000000-0000-4000-8000-0000000000aa';
+const GALLERY_LINK_TEXT = [
+  `https://riftn.com/features?feature=${GALLERY_REQUEST_ID}`,
+  'https://riftn.com/app/communities/gallery-builders',
+  'https://riftn.com/app/leaderboard',
+  'https://riftn.com/shorts',
+  'https://riftn.com/arcade/kings-gambit',
+  'https://riftn.com/features',
+];
+
+function LinkCardsGallery({ mention }: { mention: string | null }) {
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState(0);
+  const [open, setOpen] = useState(!!mention);
+  useState(() => {
+    const now = new Date().toISOString();
+    queryClient.setQueryData(['feature-request', GALLERY_REQUEST_ID], {
+      id: GALLERY_REQUEST_ID, title: 'Tag communities and pages with @ in messages', status: 'in_progress',
+      description: 'Typing @ should find communities and pages too, and drop a link that opens in the app.',
+      category: 'new_feature', author_wallet_address: '0x1111111111111111111111111111111111111111',
+      author_username: 'marco_v', author_avatar: null, image_url: null, image_urls: null,
+      vote_count: 128, like_count: 128, dislike_count: 3, comment_count: 14, created_at: now, updated_at: now,
+    });
+    queryClient.setQueryData(['communities', 'slug', 'gallery-builders'], {
+      id: 'gallery-community', name: 'Riftn Builders', slug: 'gallery-builders',
+      description: 'Ship ideas, find testers, show what you made.', avatar_url: null, banner_url: null,
+      creator_wallet_address: '0x1111111111111111111111111111111111111111', is_private: false, member_count: 2480,
+      rules: [], ticker_symbol: null, ticker_contract_address: null, ticker_chain_id: null, ticker_pair_address: null,
+      slow_mode_seconds: 0, default_permissions: null, created_at: now, updated_at: now,
+    });
+  });
+  const pairs = [GALLERY_LINK_TEXT.slice(0, 2), GALLERY_LINK_TEXT.slice(2, 4), GALLERY_LINK_TEXT.slice(4, 6)];
+  return (
+    <section data-page-bento data-link-cards-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Link cards</h2>
+      <div className="grid gap-4 md:grid-cols-3">
+        {pairs.map((pair, i) => (
+          <div key={i} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-sm text-white/80">{i === 0 ? 'have a look at these' : i === 1 ? 'top of the board today' : 'play this one'}</p>
+            <DehubLinkEmbeds links={findDehubLinks(pair.join(' '))} compact />
+          </div>
+        ))}
+      </div>
+      <button type="button" data-open-mention onClick={() => setOpen(true)} className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-sm">
+        @ list
+      </button>
+      <UserMentionDropdown
+        query={mention || 'lead'}
+        isOpen={open}
+        position={{ top: 0, left: 0 }}
+        selectedIndex={selected}
+        onSelectedIndexChange={setSelected}
+        onSelect={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+      />
+    </section>
+  );
+}
 
 function ProposalCardGallery() {
   const { t } = useTranslation();

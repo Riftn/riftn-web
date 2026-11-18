@@ -111,6 +111,17 @@
     "seoDescription": "Get the Riftn app: open-source, user-owned social media with live streaming, encrypted messaging and watch-to-earn. Free on Google Play, the App Store and the web.",
     "seoTitle": "Riftn App | Download for Android, iPhone & Web"
   },
+  "mentionLinks": {
+    "communities": "Communities",
+    "empty": "Nothing found",
+    "hint": "Type to find people, communities and pages",
+    "linkTo": "Link {{name}}",
+    "members": " members",
+    "pages": "Pages",
+    "people": "People",
+    "placeholder": "Search people, communities, pages...",
+    "title": "Mention or link"
+  },
   "dehubLinks": {
     "copyLinkDetail": "Copy the {{item}} link to your clipboard",
     "kind": {
@@ -126,8 +137,12 @@
       "profile": "profile",
       "proposal": "proposal",
       "stage": "stage",
-      "store": "store"
+      "store": "store",
+      "featureRequest": "request",
+      "page": "page"
     },
+    "openPage": "Open page",
+    "viewRequest": "View request",
     "recipientChat": "chat",
     "recipientUser": "user",
     "sendFailed": "Failed to send {{item}}",
@@ -2485,7 +2500,8 @@
       "total": "Total reach",
       "breakdownTitle": "Where this reach comes from",
       "dehubFollowers": "Riftn followers",
-      "verified": "Social counts come from accounts the creator connected."
+      "verified": "Social counts come from accounts the creator connected.",
+      "selfReported": "Social follower counts are entered by the creator."
     },
     "loginDescription": "Log in to view and manage your profile.",
     "replyThread": {

@@ -75,12 +75,16 @@
       "profile": "プロフィール",
       "proposal": "提案",
       "stage": "ステージ",
-      "store": "店舗"
+      "store": "店舗",
+      "featureRequest": "リクエスト",
+      "page": "ページ"
     },
     "recipientChat": "チャット",
     "recipientUser": "ユーザー",
     "sendFailed": "{{item}}の送信に失敗しました",
-    "sentTo": "{{item}}さんが{{name}}に送信しました"
+    "sentTo": "{{item}}さんが{{name}}に送信しました",
+    "openPage": "ページを開く",
+    "viewRequest": "リクエストを見る"
   },
   "stageCover": {
     "admitOne": "1つ承認する",
@@ -2281,7 +2285,8 @@
       "total": "トータルリーチ",
       "breakdownTitle": "このリーチがどこから来たのか",
       "dehubFollowers": "Riftnフォロワー",
-      "verified": "ソーシャルの数値はクリエイターが連携したアカウントから取得しています。"
+      "verified": "ソーシャルの数値はクリエイターが連携したアカウントから取得しています。",
+      "selfReported": "ソーシャルフォロワー数は、クリエイターが入力します。"
     },
     "loginDescription": "ログインしてプロフィールを表示・管理。",
     "replyThread": {
@@ -19514,5 +19519,16 @@
     "edit": "編集",
     "editLabel": "メッセージを編集",
     "error": "うまくいきませんでした。もう一度やり直してください。"
+  },
+  "mentionLinks": {
+    "communities": "コミュニティ",
+    "pages": "ページ",
+    "people": "ユーザー",
+    "linkTo": "{{name}} をリンク",
+    "empty": "見つかりませんでした",
+    "hint": "入力してユーザー、コミュニティ、ページを検索",
+    "members": " メンバー",
+    "placeholder": "ユーザー、コミュニティ、ページを検索...",
+    "title": "メンションまたはリンク"
   }
 }

@@ -89,6 +89,8 @@ export interface AuthContextType {
    * survive; only on-chain assets stay at the old address.
    */
   replaceLostWallet: (password: string) => Promise<void>;
+  /** Settings → Reset wallet: move this account onto a new built-in wallet. */
+  resetWallet: (password: string, twoFactorCode?: string) => Promise<void>;
   /**
    * Become another profile saved on this device (Settings → Profile →
    * Profiles). Silent when that account's session can be restored from its

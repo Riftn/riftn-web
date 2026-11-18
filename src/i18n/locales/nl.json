@@ -126,12 +126,16 @@
       "profile": "profiel",
       "proposal": "voorstel",
       "stage": "fase",
-      "store": "winkel"
+      "store": "winkel",
+      "featureRequest": "verzoek",
+      "page": "pagina"
     },
     "recipientChat": "chat",
     "recipientUser": "gebruiker",
     "sendFailed": "Verstuurde {{item}} niet",
-    "sentTo": "{{item}} verzonden naar {{name}}"
+    "sentTo": "{{item}} verzonden naar {{name}}",
+    "openPage": "Pagina openen",
+    "viewRequest": "Verzoek bekijken"
   },
   "stageCover": {
     "admitOne": "GEEF ER EEN TOE",
@@ -2675,7 +2679,8 @@
       "total": "Totaal bereik",
       "breakdownTitle": "Waar dit bereik vandaan komt",
       "dehubFollowers": "Riftn-volgers",
-      "verified": "Sociale cijfers komen van accounts die de maker heeft gekoppeld."
+      "verified": "Sociale cijfers komen van accounts die de maker heeft gekoppeld.",
+      "selfReported": "Het aantal sociale volgers wordt ingevoerd door de maker."
     },
     "loginDescription": "Log in om je profiel te bekijken en beheren.",
     "replyThread": {
@@ -21018,5 +21023,16 @@
     "scheduledToast": "Gepland voor {{when}}",
     "failedToast": "Een gepland bericht kon niet worden verstuurd",
     "error": "Dat is niet gelukt. Probeer het opnieuw."
+  },
+  "mentionLinks": {
+    "communities": "Community’s",
+    "pages": "Pagina’s",
+    "people": "Mensen",
+    "linkTo": "{{name}} linken",
+    "empty": "Niets gevonden",
+    "hint": "Typ om mensen, community’s en pagina’s te vinden",
+    "members": " leden",
+    "placeholder": "Zoek mensen, community’s, pagina’s...",
+    "title": "Noemen of linken"
   }
 }

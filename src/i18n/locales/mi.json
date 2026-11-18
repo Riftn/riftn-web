@@ -2202,7 +2202,8 @@
       "total": "Te whaainga katoa",
       "breakdownTitle": "Ko te wahi i puta mai ai tenei whaainga",
       "dehubFollowers": "Ngā kaiwhaiwhai o Riftn",
-      "verified": "Ko ngā pūkete pāpori e puta mai ana i ngā pūkete e hono ana te kaihanga."
+      "verified": "Ko ngā pūkete pāpori e puta mai ana i ngā pūkete e hono ana te kaihanga.",
+      "selfReported": "Ko nga kaute whaiwhai pāpori e whakauruhia ana e te kaihanga."
     },
     "loginDescription": "Takiuru ki te tiro me te whakahaere i tō kōtaha.",
     "replyThread": {

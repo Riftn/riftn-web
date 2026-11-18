@@ -2198,7 +2198,8 @@
       "total": "总触达人数",
       "breakdownTitle": "触达人数来源",
       "dehubFollowers": "Riftn 关注者",
-      "verified": "社交计数来自创作者连接的账户。"
+      "verified": "社交计数来自创作者连接的账户。",
+      "selfReported": "社交关注者数量由创作者输入。"
     },
     "loginDescription": "登录来查看和管理你的资料。",
     "replyThread": {

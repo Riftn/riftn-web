@@ -126,12 +126,16 @@
       "profile": "profil",
       "proposal": "proposition",
       "stage": "étape",
-      "store": "magasin"
+      "store": "magasin",
+      "featureRequest": "demande",
+      "page": "page"
     },
     "recipientChat": "conversation",
     "recipientUser": "utilisateur",
     "sendFailed": "Échec de l'envoi de {{item}}",
-    "sentTo": "{{item}} envoyé à {{name}}"
+    "sentTo": "{{item}} envoyé à {{name}}",
+    "openPage": "Ouvrir la page",
+    "viewRequest": "Voir la demande"
   },
   "stageCover": {
     "admitOne": "ADMETTEZ-EN UN",
@@ -2485,7 +2489,8 @@
       "total": "Portée totale",
       "breakdownTitle": "D'où vient cette portée",
       "dehubFollowers": "Abonnés Riftn",
-      "verified": "Les chiffres sociaux proviennent des comptes connectés par le créateur."
+      "verified": "Les chiffres sociaux proviennent des comptes connectés par le créateur.",
+      "selfReported": "Les comptes d'abonnés sociaux sont saisis par le créateur."
     },
     "loginDescription": "Connectez-vous pour voir et gérer votre profil.",
     "replyThread": {
@@ -20773,5 +20778,16 @@
     "scheduledToast": "Programmé pour {{when}}",
     "failedToast": "Un message programmé n'a pas pu être envoyé",
     "error": "Ça n'a pas marché. Réessayez."
+  },
+  "mentionLinks": {
+    "communities": "Communautés",
+    "pages": "Pages",
+    "people": "Personnes",
+    "linkTo": "Lier {{name}}",
+    "empty": "Aucun résultat",
+    "hint": "Tapez pour trouver des personnes, des communautés et des pages",
+    "members": " membres",
+    "placeholder": "Rechercher personnes, communautés, pages...",
+    "title": "Mentionner ou lier"
   }
 }
