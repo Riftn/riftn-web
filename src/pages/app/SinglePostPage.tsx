@@ -880,8 +880,13 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   // Desktop: closed until the comment button asks, same as a feed card.
   // Phone and tablet keep them open under the post.
+  // A notification link (?comment=<id>, or ?comments=1) opens them on desktop
+  // too: the reply it names lives in that list, and a closed list left the
+  // reader on the top of the post with nothing to land on. The card strips
+  // ?comments=1 from the address on mount, so it is read once, here.
   const desktopView = () => typeof window !== 'undefined' && window.innerWidth >= 1024;
-  const [showPageComments, setShowPageComments] = useState(() => !desktopView());
+  const askedForComments = useRef(new URLSearchParams(location.search).get('comments') === '1');
+  const [showPageComments, setShowPageComments] = useState(() => !desktopView() || !!focusCommentId || askedForComments.current);
   const [postOptions, setPostOptions] = useState<(() => void) | null>(null);
   const registerPostOptions = useCallback((open: (() => void) | null) => setPostOptions(() => open), []);
   const [pageCommentsInitialTab, setPageCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>();
@@ -889,9 +894,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setShowPageComments(!desktopView());
+    setShowPageComments(!desktopView() || !!focusCommentId || askedForComments.current);
+    askedForComments.current = false;
     setPageCommentsInitialTab(undefined);
-  }, [id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, focusCommentId]);
 
   const handleOpenPageComments = useCallback((tab?: 'replies' | 'quotes' | 'reposts' | 'search') => {
     setPageCommentsInitialTab(tab);

@@ -103,14 +103,27 @@ function hold(el: Element, withFlash: boolean): () => void {
     return r.top + r.height / 2 - window.innerHeight / 2;
   };
 
+  // Total scrollable height of the page and every box the row sits in. When
+  // it grows (posts load under the comments), a scroll that was cut short at
+  // the bottom of the page can now go all the way.
+  const room = () => {
+    let total = document.documentElement.scrollHeight;
+    for (let node = el.parentElement; node; node = node.parentElement) total += node.scrollHeight;
+    return total;
+  };
+  let lastRoom = -1;
+
   const recentre = () => {
     if (stopped || !el.isConnected) return finish(false);
     const off = offCentre();
     // Close enough, or the page cannot scroll any further toward it: a call
-    // that moved nothing last time will move nothing now.
-    if (Math.abs(off) < 40 || Math.abs(off - lastOff) < 2) return;
+    // that moved nothing last time, with no more room since, will move
+    // nothing now.
+    if (Math.abs(off) < 40) return;
+    if (Math.abs(off - lastOff) < 2 && room() === lastRoom) return;
     centre(el, false);
     lastOff = offCentre();
+    lastRoom = room();
     armQuiet();
   };
 
