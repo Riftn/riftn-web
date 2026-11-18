@@ -5801,7 +5801,6 @@
     "nothingMatches": "Walang tumutugma sa “{{query}}”.",
     "decrease": "Bawasan ang {{field}}",
     "increase": "Dagdagan ang {{field}}",
-    "srHeading": "Email: info@dehub.com",
     "openApp": "Buksan ang Riftn app",
     "navExplore": "Tuklasin",
     "navImage": "Larawan",
@@ -6194,7 +6193,6 @@
     "noneCreatedYet": "Wala ka pang nalikha na mga kasanayan.",
     "noneYet": "Wala pang kasanayan.",
     "createTheFirst": "Gawin ang una",
-    "docsSeoTitle": "Email: info@dehub.com",
     "docsSeoDescription": "Dokumentasyon ng sanggunian para sa mga kasanayan sa AI assistant at prompt library ng Riftn.",
     "raw": "Sariwa&#x0A;"
   },

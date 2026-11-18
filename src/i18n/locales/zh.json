@@ -94,9 +94,9 @@
     "inviteLink": "获取邀请链接",
     "moreGuides": "来自TikTok ？阅读英国创作者<tiktok>离开TikTok </tiktok>和<live> Web3直播的指南：去中心化的Twitch替代品</live>。",
     "proof": {
-      "label1": "deHub直播的并发观众",
+      "label1": "Riftn直播的并发观众",
       "label2": "跨流媒体服务的正常运行时间",
-      "label3": "deHub自己的CDN上的全局延迟",
+      "label3": "Riftn自己的CDN上的全局延迟",
       "value3": "200毫秒以下"
     },
     "reasons": {

@@ -1414,7 +1414,7 @@ export const so = {
     diagramCdn: 'Shabakadda Bixinta Mawduucyada',
     diagramDataFlowStart: 'Bilowga socodka xogta',
     diagramMinersRole1: 'Taasi waxay bixisaa awoodda xisaabinta',
-    diagramMinersRole2: 'badiyadka to deHub tokens',
+    diagramMinersRole2: 'badiyadka to Riftn tokens',
     diagramCoordinatorRole: 'Tasking, encryption + decryption',
     mobileSpecs: 'CPU quad-core, 4GB RAM',
     pcSpecs: 'CPU 4-core, 8GB RAM, GPU',
@@ -1761,7 +1761,7 @@ export const so = {
       'Arrin amniga qandaraaska caqliga leh oo la ogaaday',
     ],
     q3_2021_items: [
-      'Badiyadka to deHub',
+      'Badiyadka to Riftn',
       'Bilaabeen app buuxa dib u dhiska iyadoo la isticmaalayo React Native for taageero iskutallaabta ka wanaagsan',
       'Airdropped dhammaan milkiilayaasha si otomaatig ah',
       'Naafada amniga ee lagu daray v1 oo leh Hantidhawrka Certik oo buuxa',

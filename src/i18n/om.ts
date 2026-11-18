@@ -1054,7 +1054,6 @@ export const om = {
     whackTitle: 'Whack A Schifff',
     whackDesc: "Peter Schiff mataa isaa irratti rukuti yeroo hundaa boolla mole isaa keessaa gadi ba'u qabxii kuusuuf boombiiwwan irraa of eegaa.",
     gasTitle: 'Gas Guzzler',
-    gasDesc: "Gaasii ETH kee guutaa osoo jirtuu coinii dehub walitti qabdaa fi muunbooyota biroo Lamboosiii isaaniin wal bira darbaa.",
     rocketTitle: 'Rocket Blaster',
     rocketDesc: "Hudhaa leezarii abaaramoo sana imalaa km 100 ji'atti deebi'uu kee irratti irraa of eeggadhu.",
     streetTitle: 'Street Slayer',
