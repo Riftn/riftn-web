@@ -1,4 +1,5 @@
 import { outsideImage } from '@/lib/outside-image';
+import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { useTranslation as _useCopy, Trans } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
@@ -703,6 +704,7 @@ const MessageBubble = memo(function MessageBubble({
    * picking several messages a hold or click ticks instead.
    */
   const rowRef = useRef<HTMLDivElement>(null);
+  useSwipeReply(rowRef, onReply ? () => onReply(message) : undefined, !selecting);
   const [holdOpen, setHoldOpen] = useState(false);
   const menuPoint = useMenuPoint();
   const menuable = !message.isDeleted && !isUnsent && !isEditing && !isCallMessage;

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Copy from '@/components/ui/cut-icons/copy';
 import SearchIcon from '@/components/ui/cut-icons/search';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
+import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
@@ -332,6 +333,7 @@ export const ChatMessage = memo(function ChatMessage({
   // shows the hover buttons on a tap and a long press there only selected the
   // text, so on an iPhone there was no way to reply or react at all.
   const rowRef = useRef<HTMLDivElement>(null);
+  useSwipeReply(rowRef, onReply ? () => onReply(message) : undefined);
   const [holdOpen, setHoldOpen] = useState(false);
   // Right-click with a mouse: the menu opens where the pointer is.
   const menuPoint = useMenuPoint();

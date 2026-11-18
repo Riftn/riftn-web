@@ -213,7 +213,7 @@ export function PostMediaPreview({
       music: !!m.isMusicVideo,
       item: {
         id: m.preview, file: m.file, url: m.preview, kind: 'video', duration: m.duration,
-        options: { trimStart: m.trimStart, trimEnd: m.trimEnd, mirror: e?.mirror, rotate: e?.rotate || undefined },
+        options: { trimStart: m.trimStart, trimEnd: m.trimEnd, mirror: e?.mirror, rotate: e?.rotate || undefined, speed: e?.speed },
         destruct: null, lockPrice: null,
         description: m.description ?? '',
         look: e?.look, strength: e?.strength, adjust: e?.adjust,
@@ -259,6 +259,7 @@ export function PostMediaPreview({
       adjust: item.adjust,
       crop: item.crop,
       cropRatio: item.crop ? item.cropRatio : undefined,
+      speed: o.speed && o.speed !== 1 ? o.speed : undefined,
     };
     const editsOn = hasVideoEdits(edits);
     const editsChanged = JSON.stringify(videoEditsMatrix(edits)) !== JSON.stringify(videoEditsMatrix(m?.videoEdits))
@@ -1199,7 +1200,7 @@ export function PostMediaPreview({
           onRemoveItem={() => { const i = videoEdit.index; setVideoEdit(null); onRemove(i); }}
           onClose={() => setVideoEdit(null)}
           onConfirm={() => { void confirmVideoEdit(); }}
-          onlyTabs={['cover', 'trim', 'crop', 'looks', 'adjust', 'expire', 'alt', 'music']}
+          onlyTabs={['cover', 'trim', 'crop', 'speed', 'looks', 'adjust', 'expire', 'alt', 'music']}
           allowAlt={!!onSetDescription}
           initialTab="cover"
           allowTimer={false}

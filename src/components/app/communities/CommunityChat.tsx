@@ -77,6 +77,8 @@ import { useCommunityChat, type CommunityChatMessage } from '@/hooks/use-communi
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { useCommunityAbilities } from '@/hooks/use-community-admin';
 import type { Community, CommunityMember } from '@/hooks/use-communities';
+import { MemberActionsDialog } from './manage/MemberActionsDialog';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { replaceLinksWithEmoji, TranslatableText, SharedTranslationContext } from '../TranslatableText';
@@ -304,6 +306,25 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
   const canDeleteAnyMessage = abilities.can('delete_messages');
   const canSendMedia = abilities.can('send_media');
   const canSendMessages = abilities.can('send_messages');
+  const canRestrictMembers = abilities.isOwner || abilities.can('restrict_members');
+  const [memberActions, setMemberActions] = useState<CommunityMember | null>(null);
+  const openMemberActions = useCallback(async (wallet: string, fallback?: () => void) => {
+    try {
+      const { data } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*')
+          .eq('community_id', community.id)
+          .eq('wallet_address', wallet.toLowerCase())
+          .maybeSingle(),
+        walletAddress,
+      );
+      const row = data as CommunityMember | null;
+      // Same rank rule as the dialog: never the owner, an admin only for the owner.
+      if (row && row.role !== 'owner' && (row.role !== 'admin' || abilities.isOwner)) { setMemberActions(row); return; }
+    } catch { /* fall through to the profile */ }
+    fallback?.();
+  }, [community.id, walletAddress, abilities.isOwner]);
 
   const {
     messages,
@@ -1160,7 +1181,12 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
                 const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
                 const handle = msg.username;
-                const goToProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                const openProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                // Owners and admins who may restrict members get the member's
+                // actions (mute, ban, remove) from a click on the name or face.
+                const canActHere = canRestrictMembers && !!msg.wallet_address
+                  && !(walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase());
+                const goToProfile = canActHere ? () => void openMemberActions(msg.wallet_address!, openProfile) : openProfile;
                 const isMine = !!walletAddress && msg.wallet_address?.toLowerCase() === walletAddress.toLowerCase();
                 const canDeleteThis = isMine || canDeleteAnyMessage;
                 const isPinned = !!msg.pinned_at;
@@ -1185,13 +1211,13 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                       </button>
                     )}
                     <div className="flex items-start gap-2">
-                      <button onClick={goToProfile} disabled={!handle} className={`flex-shrink-0 ${handle ? 'cursor-pointer' : 'cursor-default'}`}>
+                      <button onClick={goToProfile} disabled={!goToProfile} className={`flex-shrink-0 ${goToProfile ? 'cursor-pointer' : 'cursor-default'}`}>
                         <ChatAvatar src={avatarUrl} address={msg.wallet_address} name={name} />
                       </button>
                        <div className="min-w-0 flex-1">
                         <span className="inline-flex items-baseline gap-1.5">
                           <span className="inline-flex items-baseline gap-1 shrink min-w-0">
-                            <button onClick={goToProfile} disabled={!handle} className={`text-xs font-semibold text-white truncate ${handle ? 'hover:underline cursor-pointer' : 'cursor-default'}`}>
+                            <button onClick={goToProfile} disabled={!goToProfile} className={`text-xs font-semibold text-white truncate ${goToProfile ? 'hover:underline cursor-pointer' : 'cursor-default'}`}>
                               {name}
                             </button>
                             <BadgeIcon badgeBalance={(msg as any).badge_balance} username={msg.username} className="w-[1em] h-[1em]" />
@@ -1630,6 +1656,14 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <MemberActionsDialog
+        community={community}
+        membership={membership}
+        target={memberActions}
+        open={!!memberActions}
+        onOpenChange={(v) => { if (!v) setMemberActions(null); }}
+        onEditRights={() => setMemberActions(null)}
+      />
     </div>
   );
 }
