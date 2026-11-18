@@ -67,6 +67,7 @@ import { ActionBar } from '@/components/app/cards/ActionBar';
 import type { PostReaction, ReactionCounts } from '@/lib/reactions';
 import { ReactionEmoji } from '@/components/app/cards/ReactionEmoji';
 import { AuthContext, type AuthContextType } from '@/contexts/AuthContext';
+import { ThreadedComments, type ThreadedCommentsLabels } from '@/components/app/comments/ThreadedComments';
 import { TipWall, TipChip } from '@/components/app/comments/TipWall';
 import type { Comment as GalleryComment } from '@/lib/comment-mapper';
 import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
@@ -615,6 +616,41 @@ function AuthorThreadGallery() {
         </AuthContext.Provider>
       ))}
     </section>
+  );
+}
+
+// The Requests / proposal comment box, signed in, with an empty thread: type
+// into it to check long text uses the whole width and the buttons drop below.
+function ThreadedComposerGallery() {
+  const labels = useMemo<ThreadedCommentsLabels>(() => ({
+    addComment: 'Add a comment...', writeReply: 'Write a reply...', reply: 'Reply',
+    replyingTo: (name) => `Replying to ${name}`, edited: 'edited', empty: 'No comments yet',
+    showMoreReplies: (count) => `Show ${count} more replies`,
+  }), []);
+  const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
+  const noop = () => Promise.resolve();
+  return (
+    <AuthContext.Provider value={GALLERY_THREAD_AUTHOR_AUTH}>
+      <section data-threaded-composer-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+        <ThreadedComments
+          draftScope="gallery:threaded-composer"
+          threads={[]}
+          isLoading={false}
+          isError={false}
+          isFetching={false}
+          onRetry={() => {}}
+          entityAuthorAddress={GALLERY_THREAD_AUTHOR}
+          labels={labels}
+          busy={false}
+          submitting={false}
+          media={media}
+          onSubmit={noop}
+          onEdit={noop}
+          onDelete={() => {}}
+          onReact={() => {}}
+        />
+      </section>
+    </AuthContext.Provider>
   );
 }
 
@@ -1894,6 +1930,7 @@ export default function StateGalleryPage() {
         {params.get('spotify') === '1' && <SpotifyGallery />}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
+        {params.get('composer') === '1' && <ThreadedComposerGallery />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
 
