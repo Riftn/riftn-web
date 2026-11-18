@@ -1741,9 +1741,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const toggleEncryption = useCallback(() => {
     const on = !chatEncrypted;
     void updateChatPref(conversation.id, { encrypted: on });
-    toast.success(on
-      ? tr('messages.encryptOnToast', { defaultValue: 'Messages you send here are now end-to-end encrypted' })
-      : tr('messages.encryptOffToast', { defaultValue: 'Encryption is off for this chat' }));
+    if (on) toast.success(tr('messages.encrypted', { defaultValue: 'End-to-end encrypted' }));
     // Turning it on is the deliberate moment to set up this device's key.
     if (on && encryptionStatus !== 'ready') void retryEncryption();
   }, [chatEncrypted, conversation.id, updateChatPref, tr, encryptionStatus, retryEncryption]);
@@ -2888,7 +2886,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                   ? tr('messages.encryptionSetupFailed', { defaultValue: 'Encryption setup failed. Please try again.' })
                   : chatEncrypted
                     ? tr('messages.encryptionOff')
-                    : tr('messages.olderEncrypted', { defaultValue: 'Some older messages here are encrypted.' })}
+                    : tr('messages.lockedTitle', { defaultValue: 'Unlock to read your messages' })}
           </span>
           <button
             type="button"
@@ -2900,7 +2898,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               ? tr('messages.encryptionReconnectWallet', { defaultValue: 'Reconnect wallet' })
               : chatEncrypted
                 ? tr('messages.encryptionTurnOn')
-                : tr('messages.unlockToRead', { defaultValue: 'Unlock to read' })}
+                : tr('messages.lockedUnlock', { defaultValue: 'Unlock wallet' })}
           </button>
         </div>
       )}
