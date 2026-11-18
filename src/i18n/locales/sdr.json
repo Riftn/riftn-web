@@ -567,7 +567,10 @@
       "bountyAppliedNamed": "{{name}} आपके bounty \"{{title}}\" के लिए apply किया",
       "bountyApplied": "{{name}} आपके bounty के लिए apply किया",
       "bountySubmitted": "{{name}} आपके bounty पर काम submit किया"
-    }
+    },
+    "badgeTierUp": "बधाई हो! अब आप {{tier}} हैं 🎉",
+    "badgeTierDown": "ध्यान दें: अब आपका बैज {{tier}} है",
+    "badgeTierLost": "ध्यान दें: अब आपके पास बैज नहीं है"
   },
   "leaderboard": {
     "balanceTooLow": "Balance too low ({{balance}} tokens)"
