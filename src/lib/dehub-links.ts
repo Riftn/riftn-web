@@ -430,6 +430,8 @@ export function shareOrigin(): string {
 
 export const dehubLinkFor = {
   skill: (slug: string) => `${shareOrigin()}/app/assistant?skill=${encodeURIComponent(slug)}`,
+  /** One card on the Requests board. Requests are not posts: never /app/post/<id>. */
+  featureRequest: (id: string) => `${shareOrigin()}/features?feature=${encodeURIComponent(id)}`,
   post: (tokenId: string | number) => `${shareOrigin()}/app/post/${tokenId}`,
   /** An article's readable URL — /app/post/<first-ten-words-of-the-title>. */
   article: (slug: string) => `${shareOrigin()}/app/post/${slug}`,

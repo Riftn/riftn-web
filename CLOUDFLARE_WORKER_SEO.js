@@ -6670,6 +6670,18 @@ async function handleRequest(request, env, ctx) {
   const spaTarget = SPA_REDIRECTS[trimmedPath.toLowerCase()];
   if (spaTarget) return redirect301(`${APP_URL}${spaTarget}`);
 
+  // The Requests board shared its cards as /app/post/<request id>, which no
+  // post route can answer (posts are numbers or slugs, never UUIDs), so every
+  // one of those links showed Not Found. Send them to the request on the board,
+  // keeping ?ref= and anything else the link carried.
+  const requestAsPost = trimmedPath.match(/^\/(?:app\/)?posts?\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+  if (requestAsPost) {
+    const q = new URLSearchParams(url.search);
+    q.delete('feature');
+    const rest = q.toString();
+    return redirect301(`${APP_URL}/features?feature=${requestAsPost[1].toLowerCase()}${rest ? `&${rest}` : ''}`);
+  }
+
   // The NFT market moved into the Fractions page as its NFTs tab (App.tsx
   // NftsRedirect does the same in the SPA). Keep the query: shared NFT links
   // carry ?chain=&contract=&token=, and the old ?tab= becomes ?view=.
@@ -7426,7 +7438,8 @@ async function handleRequest(request, env, ctx) {
   // generic MARKETING_PAGES dispatch two blocks down so a resolvable id gets
   // its own card instead of the board's static one.
   if (sectionKey === 'features') {
-    const featureId = url.searchParams.get('feature');
+    // Share buttons hand out ?feature=<id>; notifications and comment links ?request=<id>.
+    const featureId = url.searchParams.get('feature') || url.searchParams.get('request');
     if (featureId && /^[0-9a-fA-F-]{8,}$/.test(featureId)) {
       const feature = await supabaseRow(
         `feature_requests?id=eq.${encodeURIComponent(featureId)}&select=*&limit=1`,
