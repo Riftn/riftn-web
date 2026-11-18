@@ -31,6 +31,7 @@ import { ProfileLinkEmbed } from '@/components/app/profile/ProfileLinkEmbed';
 import { SharedPostEmbed } from '@/components/app/chat/SharedPostEmbed';
 import { AppLinkEmbed } from '@/components/app/cards/AppLinkEmbed';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { PageLinkEmbed } from '@/components/app/links/PageLinkEmbed';
 
 /**
  * Lazy, unlike its siblings. This switchboard is on the boot path — every feed
@@ -41,6 +42,11 @@ import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed
  */
 const FilmLinkEmbed = lazy(() =>
   import('@/components/cinema/FilmLinkEmbed').then((m) => ({ default: m.FilmLinkEmbed }))
+);
+
+/** Lazy: the Requests hooks bring the board's whole data layer with them. */
+const FeatureRequestLinkEmbed = lazy(() =>
+  import('@/components/app/links/FeatureRequestLinkEmbed').then((m) => ({ default: m.FeatureRequestLinkEmbed }))
 );
 
 const SkillLinkEmbed = lazy(() =>
@@ -78,6 +84,8 @@ export function DehubLinkFallback({ link }: { link: DehubLinkMatch }) {
       case 'bounty': return _copy("copy.132977c8bc76", { defaultValue: "View bounty" });
       case 'app': return _copy("copy.34d0f5c1452f", { defaultValue: "View app" });
       case 'proposal': return _copy("copy.fb66e1c96ee1", { defaultValue: "View proposal" });
+      case 'featureRequest': return _copy('dehubLinks.viewRequest', { defaultValue: 'View request' });
+      case 'page': return _copy('dehubLinks.openPage', { defaultValue: 'Open page' });
     }
   })();
 
@@ -96,7 +104,7 @@ export function DehubLinkFallback({ link }: { link: DehubLinkMatch }) {
       </div>
       <div className="min-w-0">
         <p className="text-sm font-medium text-white truncate">{viewLabel}</p>
-        <p className="text-xs text-zinc-500 truncate">dehub.io{link.path}</p>
+        <p className="text-xs text-zinc-500 truncate">riftn.com{link.path}</p>
       </div>
     </button>
   );
@@ -244,6 +252,14 @@ export function DehubLinkEmbed({ link, compact = false, className }: DehubLinkEm
       return <AppLinkEmbed slug={link.appSlug!} path={link.path} fallback={fallback} />;
     case 'proposal':
       return <ProposalLinkEmbed proposalId={link.proposalId!} path={link.path} fallback={fallback} />;
+    case 'featureRequest':
+      return (
+        <Suspense fallback={null}>
+          <FeatureRequestLinkEmbed featureRequestId={link.featureRequestId!} path={link.path} fallback={fallback} />
+        </Suspense>
+      );
+    case 'page':
+      return <PageLinkEmbed pagePath={link.pagePath!} path={link.path} fallback={fallback} />;
     default:
       return fallback;
   }

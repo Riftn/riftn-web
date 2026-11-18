@@ -74,12 +74,16 @@
       "profile": "profil",
       "proposal": "Proposal",
       "stage": "panggung",
-      "store": "toko"
+      "store": "toko",
+      "featureRequest": "permintaan",
+      "page": "halaman"
     },
     "recipientChat": "chat",
     "recipientUser": "pengguna",
     "sendFailed": "Gagal mengirim {{item}}",
-    "sentTo": "{{item}} dikirim ke {{name}}"
+    "sentTo": "{{item}} dikirim ke {{name}}",
+    "openPage": "Buka halaman",
+    "viewRequest": "Lihat permintaan"
   },
   "stageCover": {
     "admitOne": "AKUI SATU",
@@ -19583,5 +19587,16 @@
     "edit": "Ubah",
     "editLabel": "Edit pesan",
     "error": "Itu tidak berhasil. Coba lagi."
+  },
+  "mentionLinks": {
+    "communities": "Komunitas",
+    "pages": "Halaman",
+    "people": "Orang",
+    "linkTo": "Tautkan {{name}}",
+    "empty": "Tidak ditemukan apa pun",
+    "hint": "Ketik untuk mencari orang, komunitas, dan halaman",
+    "members": " anggota",
+    "placeholder": "Cari orang, komunitas, halaman...",
+    "title": "Sebut atau tautkan"
   }
 }

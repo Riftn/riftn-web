@@ -126,12 +126,16 @@
       "profile": "profil",
       "proposal": "teklif",
       "stage": "aşama",
-      "store": "dükkan"
+      "store": "dükkan",
+      "featureRequest": "istek",
+      "page": "sayfa"
     },
     "recipientChat": "sohbet",
     "recipientUser": "kullanıcı",
     "sendFailed": "{{item}} gönderilemedi",
-    "sentTo": "{{item}},{{name}} adresine gönderildi"
+    "sentTo": "{{item}},{{name}} adresine gönderildi",
+    "openPage": "Sayfayı aç",
+    "viewRequest": "İsteği gör"
   },
   "stageCover": {
     "admitOne": "BİRİNİ KABUL ET",
@@ -20770,5 +20774,16 @@
     "scheduledToast": "{{when}} için zamanlandı",
     "failedToast": "Zamanlanmış bir mesaj gönderilemedi",
     "error": "Olmadı. Tekrar dene."
+  },
+  "mentionLinks": {
+    "communities": "Topluluklar",
+    "pages": "Sayfalar",
+    "people": "Kişiler",
+    "linkTo": "{{name}} bağlantısı ekle",
+    "empty": "Hiçbir şey bulunamadı",
+    "hint": "Kişi, topluluk ve sayfa bulmak için yazın",
+    "members": " üye",
+    "placeholder": "Kişi, topluluk, sayfa ara...",
+    "title": "Bahset veya bağlantı ver"
   }
 }

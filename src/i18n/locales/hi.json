@@ -75,12 +75,16 @@
       "profile": "प्रोफ़ाइल",
       "proposal": "प्रोपोजल",
       "stage": "स्टेज",
-      "store": "स्टोर"
+      "store": "स्टोर",
+      "featureRequest": "अनुरोध",
+      "page": "पेज"
     },
     "recipientChat": "चैट",
     "recipientUser": "यूज़र",
     "sendFailed": "{{item}} भेजने में विफल",
-    "sentTo": "{{item}} {{name}} को भेजा गया"
+    "sentTo": "{{item}} {{name}} को भेजा गया",
+    "openPage": "पेज खोलें",
+    "viewRequest": "अनुरोध देखें"
   },
   "stageCover": {
     "admitOne": "एक को स्वीकार करें",
@@ -19570,5 +19574,16 @@
     "edit": "संपादित करें",
     "editLabel": "मैसेज में बदलाव करें",
     "error": "यह काम नहीं आया। फिर से कोशिश करें।"
+  },
+  "mentionLinks": {
+    "communities": "कम्युनिटी",
+    "pages": "पेज",
+    "people": "लोग",
+    "linkTo": "{{name}} लिंक करें",
+    "empty": "कुछ नहीं मिला",
+    "hint": "लोग, कम्युनिटी और पेज खोजने के लिए टाइप करें",
+    "members": " सदस्य",
+    "placeholder": "लोग, कम्युनिटी, पेज खोजें...",
+    "title": "मेंशन या लिंक करें"
   }
 }

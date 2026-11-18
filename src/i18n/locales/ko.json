@@ -75,12 +75,16 @@
       "profile": "프로필",
       "proposal": "제안서",
       "stage": "스테이지",
-      "store": "상점"
+      "store": "상점",
+      "featureRequest": "요청",
+      "page": "페이지"
     },
     "recipientChat": "채팅",
     "recipientUser": "사용자",
     "sendFailed": "{{item}} 전송 실패",
-    "sentTo": "{{item}}가 {{name}}에게 전송됨"
+    "sentTo": "{{item}}가 {{name}}에게 전송됨",
+    "openPage": "페이지 열기",
+    "viewRequest": "요청 보기"
   },
   "stageCover": {
     "admitOne": "하나 인정",
@@ -19502,5 +19506,16 @@
     "edit": "편집",
     "editLabel": "메시지 수정하기",
     "error": "실패했습니다. 다시 시도하세요."
+  },
+  "mentionLinks": {
+    "communities": "커뮤니티",
+    "pages": "페이지",
+    "people": "사람",
+    "linkTo": "{{name}} 링크",
+    "empty": "찾을 수 없습니다",
+    "hint": "입력해서 사람, 커뮤니티, 페이지 찾기",
+    "members": "명",
+    "placeholder": "사람, 커뮤니티, 페이지 검색...",
+    "title": "멘션 또는 링크"
   }
 }

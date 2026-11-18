@@ -126,12 +126,16 @@
       "profile": "الملف الشخصي",
       "proposal": "اقتراح",
       "stage": "المرحلة",
-      "store": "المخزن"
+      "store": "المخزن",
+      "featureRequest": "طلب",
+      "page": "صفحة"
     },
     "recipientChat": "دردشة",
     "recipientUser": "مستخدم",
     "sendFailed": "تعذر إرسال {{item}}",
-    "sentTo": "تم إرسال {{item}} إلى {{name}}"
+    "sentTo": "تم إرسال {{item}} إلى {{name}}",
+    "openPage": "فتح الصفحة",
+    "viewRequest": "عرض الطلب"
   },
   "stageCover": {
     "admitOne": "اعترف بواحد",
@@ -20798,5 +20802,16 @@
     "scheduledToast": "تمت الجدولة في {{when}}",
     "failedToast": "تعذر إرسال رسالة مجدولة",
     "error": "لم ينجح ذلك. حاول مرة أخرى."
+  },
+  "mentionLinks": {
+    "communities": "المجتمعات",
+    "pages": "الصفحات",
+    "people": "الأشخاص",
+    "linkTo": "ربط {{name}}",
+    "empty": "لم يتم العثور على شيء",
+    "hint": "اكتب للعثور على أشخاص ومجتمعات وصفحات",
+    "members": " عضو",
+    "placeholder": "ابحث عن أشخاص ومجتمعات وصفحات...",
+    "title": "إشارة أو رابط"
   }
 }

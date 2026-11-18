@@ -74,12 +74,16 @@
       "profile": "tài khoản",
       "proposal": "gợi ý",
       "stage": "bàn diễn",
-      "store": "cửa hàng"
+      "store": "cửa hàng",
+      "featureRequest": "yêu cầu",
+      "page": "trang"
     },
     "recipientChat": "chat",
     "recipientUser": "người dùng",
     "sendFailed": "Không thể gửi {{item}}",
-    "sentTo": "{{item}} đã được gửi đến {{name}}"
+    "sentTo": "{{item}} đã được gửi đến {{name}}",
+    "openPage": "Mở trang",
+    "viewRequest": "Xem yêu cầu"
   },
   "stageCover": {
     "admitOne": "CHẤP NHẬN MỘT",
@@ -19662,5 +19666,16 @@
     "edit": "Chỉnh sửa",
     "editLabel": "Chỉnh sửa tin nhắn",
     "error": "Điều đó không hiệu quả. Hãy thử lại."
+  },
+  "mentionLinks": {
+    "communities": "Cộng đồng",
+    "pages": "Trang",
+    "people": "Mọi người",
+    "linkTo": "Liên kết {{name}}",
+    "empty": "Không tìm thấy gì",
+    "hint": "Nhập để tìm người, cộng đồng và trang",
+    "members": " thành viên",
+    "placeholder": "Tìm người, cộng đồng, trang...",
+    "title": "Nhắc đến hoặc liên kết"
   }
 }
