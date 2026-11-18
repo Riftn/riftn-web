@@ -105,8 +105,11 @@ export interface DmLock {
   /** DHB rate the server used for `price`. */
   dhbPriceUsd?: number;
   symbol: string;
-  kind: 'image' | 'video';
+  kind: 'image' | 'video' | 'file';
   previewUrl: string | null;
+  /** Locked files: shown on the card before paying. */
+  fileName?: string | null;
+  fileSize?: number | null;
   unlocked: boolean;
   mine?: boolean;
   /** False while the upload is still being processed. */

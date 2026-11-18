@@ -26,7 +26,7 @@ export const LOCK_MAX_PRICE = LOCK_MAX_USD;
 interface LockPriceControlProps {
   value: number | null;
   onChange: (price: number | null) => void;
-  kind: 'image' | 'video';
+  kind: 'image' | 'video' | 'file';
 }
 
 export function LockPriceControl({ value, onChange, kind }: LockPriceControlProps) {
@@ -68,7 +68,9 @@ export function LockPriceControl({ value, onChange, kind }: LockPriceControlProp
           ? t('dmPaidLock.lockOnUsd', { defaultValue: 'Locked · {{price}}', price: formatLockUsd(value) })
           : kind === 'video'
             ? t('dmPaidLock.lockVideo', 'Lock video')
-            : t('dmPaidLock.lockPhoto', 'Lock photo')}
+            : kind === 'file'
+              ? t('editor.layers.lock', 'Lock')
+              : t('dmPaidLock.lockPhoto', 'Lock photo')}
       </button>
       {on && (
         <>

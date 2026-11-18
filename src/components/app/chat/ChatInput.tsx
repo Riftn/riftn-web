@@ -47,6 +47,7 @@ import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestructChoice } from '@/lib/dm-destruct';
 import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
 import { PhotoStudio, type StudioResult } from '@/features/post/components/PhotoStudio';
+import { LockPriceControl } from './LockPriceControl';
 
 /** Per-kind caps, matching the backend's DM limits. */
 const DM_MEDIA_LIMITS = { image: 10 * 1024 * 1024, video: 50 * 1024 * 1024, audio: 20 * 1024 * 1024 } as const;
@@ -171,6 +172,8 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   const studioBase = useRef(0);
   const [dropHover, setDropHover] = useState(false);
   const [docFile, setDocFile] = useState<File | null>(null);
+  // A document can go out locked too: they pay to download it.
+  const [docLockPrice, setDocLockPrice] = useState<number | null>(null);
   const [audioPreview, setAudioPreview] = useState<{ file: File; blob: Blob; duration: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -390,6 +393,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
         content: message.trim(),
         type: 'media',
         mediaFile: docFile,
+        ...(allowLock && docLockPrice ? { lockPrice: docLockPrice } : {}),
       });
       if (!sent) return;
       clearDoc();
@@ -718,6 +722,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   // No object URL to revoke — a document has no preview to render.
   const clearDoc = () => {
     setDocFile(null);
+    setDocLockPrice(null);
   };
 
   const removeAudioPreview = () => setAudioPreview(null);
@@ -912,6 +917,11 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
           >
             <X className="w-3 h-3 text-white" />
           </button>
+        </div>
+      )}
+      {docFile && allowLock && (
+        <div className="mb-2">
+          <LockPriceControl value={docLockPrice} onChange={setDocLockPrice} kind="file" />
         </div>
       )}
 
