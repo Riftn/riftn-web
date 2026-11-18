@@ -254,6 +254,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       candidate = new URLSearchParams(window.location.search).get('hl')
         || localStorage.getItem('user-preferred-language') || candidate;
     } catch { /* Use the active app language when storage is unavailable. */ }
+    // The app has one Chinese pack, so a Taiwan or Hong Kong browser resolves to
+    // 'zh'. The docs ship Traditional Chinese: use it unless the reader picked a
+    // docs language themselves.
+    try {
+      if (candidate === 'zh' && !localStorage.getItem('docs-language')
+        && /^zh-(tw|hk|mo)\b|^zh-hant/i.test(navigator.language || '')) candidate = 'zh_tw';
+    } catch { /* Keep Simplified Chinese. */ }
     return languages.some(option => option.code === candidate) ? candidate as Language : 'en';
   });
 
@@ -303,7 +310,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     document.documentElement.setAttribute('dir', dir);
-    document.documentElement.setAttribute('lang', language);
+    document.documentElement.setAttribute('lang', language.replace('_', '-'));
   }, [language, dir]);
 
   const t = useCallback((key: string): any => {
