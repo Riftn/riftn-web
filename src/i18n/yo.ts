@@ -2183,7 +2183,7 @@ export const yo = {
     a17: 'O lè wọlé sí Riftn\'s d\'apps nípasẹ̀ pẹpẹ pàtàkì wa. Àwọn tí ó ní àfihàn Riftn máa ń rí àwọn ohun tí ó dára sí i àti àwọn ohun tí ó dára sí i ní gbogbo ìsinsìnyí àti ọjọ́ iwájú d\' Apps.',
     q18: 'Kí ni ètò ọ̀nà Riftn?',
     q19: 'Báwo ni mo ṣe lè kàn sí ẹgbẹ́ Riftn?',
-    a19: 'O le de ọdọ wa nipasẹ awọn ikanni osise wa: dev@riftn.com fun awọn ọrọ imọ-ẹrọ, tabi tẹle wa lori Twitter ati Instagram @dehub_osise fun awọn imudojuiwọn ati ilowosi agbegbe.',
+    a19: 'O le de ọdọ wa nipasẹ awọn ikanni osise wa: dev@riftn.com fun awọn ọrọ imọ-ẹrọ, tabi tẹle wa lori Twitter ati Instagram @riftn_com fun awọn imudojuiwọn ati ilowosi agbegbe.',
     q20: 'Ṣé àwọn àmì Riftn jẹ́ ìdókòwò?',
     a20: 'Rárá, àwọn àfihàn Riftn wà fún ìdí ìlò láàrin ètò-ayélujára Riftn, tí ó jọ nínú eré tàbí àwọn owó díjìnnì nínú ohun-èlò. Wọn kì í ṣe ohun èlò ìfowópamọ́ àti pé ọjà kò yí padà rárá.',
     a21: 'Riftn ń lo ètò ìdúróṣánṣán àwọn ohun tí ó wà láwùjọ níbi tí àwọn ọmọ ẹgbẹ́ ìlú ti lè kópa nínú ìṣàkóso àríyànjiyàn àti ìdúróṣánṣán àwọn ohun tí ó wà láwùjọ láti gba èrè nígbà tí wọ́n bá ń ṣe ìdúróṣánṣán àwọn pẹpẹ.',

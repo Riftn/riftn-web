@@ -1098,7 +1098,7 @@
     "ensLinked": "Đã liên kết — hồ sơ của bạn hiện ở {{url}}",
     "ensUnlinked": "Đã xóa — tên người dùng của bạn không thay đổi",
     "ensHandle": "Tên hệ thần kinh ruột",
-    "ensLinkedDesc": "Bạn cũng có thể truy cậpdehub.io/{{name}}",
+    "ensLinkedDesc": "Bạn cũng có thể truy cậpriftn.com/{{name}}",
     "ensHandleDesc": "Chứng minh bạn có tên .eth cũng có thể truy cập được tại riftn.com/yourname.eth. Tên người dùng của bạn không thay đổi.",
     "ensRemove": "Xóa",
     "ensCheck": "Kiểm tra",

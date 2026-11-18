@@ -3821,7 +3821,7 @@
       "copy": "K'askachiy",
       "openEndpoint": "/api/stats kichay",
       "openRaw": "Cloudflare-pa mana llamiykusqa kutichiynin",
-      "edge": "Sapa dehub.io-man mañakuyqa Cloudflare-ta pasanmi, servidorniykuman chayananpaq ñawpaqta. Kay yupaykunaqa Cloudflare kikin huñusqan tráficom — kikillan yupaykunam dashboard-niykupi rikhurin. Mana browser-niykipi script huñusqanchu, chayrayku kay p'anqapi imapas mana hatunchay atinmanchu, tracker-kunata harkaspapas mana t'ikranchu.",
+      "edge": "Sapa riftn.com-man mañakuyqa Cloudflare-ta pasanmi, servidorniykuman chayananpaq ñawpaqta. Kay yupaykunaqa Cloudflare kikin huñusqan tráficom — kikillan yupaykunam dashboard-niykupi rikhurin. Mana browser-niykipi script huñusqanchu, chayrayku kay p'anqapi imapas mana hatunchay atinmanchu, tracker-kunata harkaspapas mana t'ikranchu.",
       "live": "P'anqaqa kawsaqllatam ñawinchan. /stats kichaptiykiqa, ñuqaykupa endpoint-ninchikta waqyan, chaymi chay ratopi Cloudflare-pa Analytics API-nta tapun, kutichiytataq 60 segundo cache-pi waqaychan.",
       "limits": "Imatam kay rikuchin, imatam mana: rikuyta atinki yupaykuna Cloudflare huñusqanmanta hamusqanta, mana ñuqaykupa código-ninmantachu, hinaspa kaypi rikuchisqa tapuykuna kikillanmi llamk'an. Mana 'confianza mana necesitaq' hinachu — ñuqaykum API token-ta hap'ikuyku, Cloudflare-taq mana pipapas zona analíticanta qhawachinchu. Pipas kikin Cloudflare zonayuq kaqqa, kikin tapuyta ruwayta atin, hinaspa chay rikch'ayta takyachiy."
     },

@@ -3351,7 +3351,6 @@
       "remove": "Ka saar bulshada",
       "more": "Ku rar qoraallo dheeraad ah",
       "failed": "Ma cusbooneysiin karo qoraallada bulshada. isku day mar kale.",
-      "invalidLink": "https://dehub.net/123456",
       "unavailable": "Qoraalkani waa mid aan la heli karin.",
       "signIn": "Saxiix mar kale si aad u maamusho qoraallada bulshada."
     },
@@ -11044,7 +11043,7 @@
           "8": "Riix boost kasta si aad ugu furto shaashad buuxda oo hal boost ah."
         },
         "tips": {
-          "1": "Talooyinka si toos ah ayay ugu dhacaan jeebka abuuraha ee deHub tokens.",
+          "1": "Talooyinka si toos ah ayay ugu dhacaan jeebka abuuraha ee Riftn tokens.",
           "2": "Waxaad dejin kartaa qaddarka talada iyada oo loo marayo badhamada xulashada degdega ah ama waxaad geli kartaa qaddar gaar ah.",
           "3": "Boostada la keydiyay waxa laga heli karaa bogga Kaydka ee dhinaca."
         }

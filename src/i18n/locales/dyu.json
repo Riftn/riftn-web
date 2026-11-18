@@ -96,7 +96,6 @@
     "proof": {
       "label1": "lajɛbaga minnu bɛ yen waati kelen na Riftn kɛnɛ kan jirali la",
       "label2": "o kama, an ka ɲi ka to ka baara kɛ n'an ka telefɔniw ye.",
-      "label3": "deHub ka CDN yɛrɛ ka kan ka kɛ duniɲa kuru bɛɛ kɔnɔ",
       "value3": "Saan 2001 marisikalo tile fɔlɔ"
     },
     "reasons": {
@@ -3201,7 +3200,6 @@
     "not_connected": "Ma jɛnsɛn",
     "please_connect_wallet_first": "I ka waribon jɛnsɛn fɔlɔ.",
     "no_dhb_balance": "No token balance",
-    "no_dhb_tokens_either_chain": "I tɛ ni dehub tagamasiyɛnw ye jɔrɔkɔ fila kan",
     "dhb_found_on_both_chains": "O kɔ, a ye n' ka soow bɛɛ datugu.",
     "staking_dhb": "Staking tokens...",
     "confirming_transaction": "Cidenya dafalen bɛ ka kɛ...",
@@ -4507,7 +4505,6 @@
     "postAsIs": "I ka kan ka min kɛ, o filɛ nin ye:",
     "stopListening": "Aw be ban ka mɛnni kɛ",
     "listenIn": "Lisi min be sɔrɔ",
-    "joinSeoTitle": "Kala lagaw ya: dehub",
     "joiningStage": "Ka fara o kan, an ka kan ka taga ɲɔgɔn fɛ.",
     "endSpaceConfirm": "A laban, \"{{title}}\" bɔra kɛnɛ kan mɔgɔ bɛɛ fɛ.",
     "endForEveryone": "Yala o ye koo laban ye bɛɛ fɛ wa?",
@@ -4881,7 +4878,6 @@
     "povrPricingIntro": "An ka saratiw basiginin be saratiw kan, o b'a to an be se ka wari caaman sɔrɔ ka kɛɲɛ n'an lamɛnbagaw ka wari ye. O wari be se ka kɛ wari ye min be se ka kɛ wari ye."
   },
   "launchpad": {
-    "seoTitle": "Kala lagaw ya: dehub",
     "seoDescription": "I ka baara daminɛ Riftn ka site web kan: ka wari sɔrɔ ka ɲɛ wala ka i yɛrɛ ka baara daminɛ.",
     "srHeading": "Fanga be mɔgɔ minw na, olu ka kan ka kɛ ten.",
     "phaseBadge": "Fɔɔ ka taga se a daminɛ na, a ka ɲi ka kɛ ni miiriya ɲuman ye",
@@ -6069,7 +6065,6 @@
     "noneCreatedYet": "I ma lɔnniya sɔrɔ fɔlɔ.",
     "noneYet": "O tɛ se ka kɛ halibi.",
     "createTheFirst": "O ye koo fɔlɔ ye",
-    "docsSeoTitle": "Kala lagaw ya: dehub",
     "docsSeoDescription": "Riftn ka dɛmɛdɛmɛbaga ka lɔnniya ani a ka gafew kalancogo.",
     "raw": "O ye n' ka miiriya ye."
   },
@@ -11188,7 +11183,6 @@
       },
       "posting-allowance": {
         "title": "I ka loon o loon wari hakɛ",
-        "intro": "I ka batɛmu fɛ, i be se ka wari caaman sɔrɔ loon o loon. U bɛɛ be daminɛ ni lɛtɛrɛ 10 ye ani videwo, fotow ani kumakanw be se ka kɛ gigabyte kelen ye tile kɔnɔ. ka tɛmɛ kelen kan ani o loon tɔɔ bɛɛ sara dehub tagamasiyɛnw dɔrɔn lo kan min be tɛmɛ",
         "steps": {
           "1": "O kama, a tun man nɔgɔ ka wari caaman sɔrɔ.",
           "2": "O kama, n'i ye tile kelen kɛ ka videwo bila, i be se ka sɛbɛ tan bɛɛ bila a la.",
