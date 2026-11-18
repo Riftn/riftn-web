@@ -1224,6 +1224,7 @@
     "payDirectNoName": "به طور مستقیم به سازنده در {{symbol}} در {{chain}} ارسال می شود. هیچ تعویض وجود ندارد.",
     "payViaBridgeDpay": "به Base منتقل شد و به Riftn Pay پرداخت شد، توکن‌ها حدود یک دقیقه دیگر می‌رسند",
     "dmSent": "{{amount}} توکن‌ها برای {{name}} ارسال شد!",
+    "addMessage": "اضافه کردن پیام (اختیاری)",
     "messagePublic": "عمومی",
     "railTitle": "نکات",
     "railTotal": "{{amount}} توکن",
@@ -2226,6 +2227,8 @@
       "likes": "لایک‌ها"
     },
     "likedPosts": {
+      "emptyTitle": "هنوز لایکی نیست",
+      "privateTitle": "لایک‌ها خصوصی هستند",
       "loadMore": "بارگذاری بیشتر"
     },
     "dislikes": {
@@ -2250,6 +2253,9 @@
     "sortLikes": "لایک‌ها",
     "sortMostLiked": "بیشترین پسندیده",
     "sortCustomShort": "سفارشی",
+    "arrange": {
+      "saving": "در حال ذخیره..."
+    },
     "searchThisChannel": "جستجو در این کانال",
     "searchResultCount": "1 نتیجه برای \"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتیجه برای \"{{query}}\""
@@ -6270,7 +6276,9 @@
   "nftMarket": {
     "actAll": "همه",
     "actListings": "آگهی‌ها",
+    "actOffer": "پیشنهاد",
     "actOffers": "پیشنهادها",
+    "actSales": "فروش‌ها",
     "tabActivity": "فعالیت",
     "shortTitle": "NFT ها",
     "filters": "فیلترها",
@@ -6774,8 +6782,12 @@
       "image": "تصویر",
       "camera": "دوربین",
       "show": "نمایش در پخش زنده",
+      "loop": "حلقه",
       "positions": {
         "center": "مراکز"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دایره",
@@ -7761,6 +7773,7 @@
     "footerNote": "مشارکت DePin یک سرویس مشارکت است، نه یک محصول سرمایه‌گذاری. دسترس‌پذیری، واجد‌شرایط‌بودن و پاداش‌ها ممکن است تغییر کنند."
   },
   "creatorFlow": {
+    "newNativeFlow": "جریان جدید",
     "disconnect": "قطع ارتباط",
     "title": "جریان سازنده",
     "backToStudio": "بازگشت به استودیو سازنده",
@@ -9363,7 +9376,8 @@
       "textSaved": "تغییرات زیرنویس ذخیره شد.",
       "action": "زیرنویس خودکار",
       "styles": {
-        "bold": "فونت ضخیم"
+        "bold": "فونت ضخیم",
+        "serif": "سریف"
       },
       "working": "در حال گوش دادن… {{percent}}%",
       "downloading": "در حال آماده‌سازی مدل گفتار… {{percent}}%",
@@ -10745,6 +10759,9 @@
       "zoomIn": "بزرگنمایی بوم نقاشی",
       "zoomOut": "کوچک‌نمایی بوم نقاشی"
     },
+    "clipFix": {
+      "listening": "در حال شنیدن…"
+    },
     "shortcuts": {
       "action": {
         "split": "برش",
@@ -10758,7 +10775,8 @@
       "label": "سه بعدی"
     },
     "voiceClone": {
-      "stop": "توقف ضبط"
+      "stop": "توقف ضبط",
+      "failed": "کلون کردن صدا شکست خورد."
     },
     "linkImport": {
       "go": "وارد کردن",
@@ -19336,8 +19354,10 @@
       "gaming": "بازی",
       "crypto": "رمزارز",
       "sports": "ورزش",
+      "comedy": "کمدی",
       "film": "فیلم",
       "podcast": "پادکست",
+      "food": "غذا",
       "news": "اخبار",
       "science": "علم"
     },
@@ -19348,6 +19368,7 @@
   "appTokens": {
     "title": "توکن‌های شما",
     "history": "تاریخچه",
+    "noHistory": "هیچ فعالیتی انجام نشده است.",
     "kindDeposit": "واریز",
     "to": "به",
     "amount": "مبلغ",
@@ -19377,6 +19398,7 @@
     "notNow": "الان نه"
   },
   "postStats": {
+    "audience": "مخاطبین",
     "engagement": "تعامل",
     "finished": "پایان یافت",
     "members": "اعضا",
@@ -19465,6 +19487,7 @@
   "dmSchedule": {
     "view": "مشاهده",
     "edit": "ویرایش",
+    "editLabel": "ویرایش پیام",
     "error": "این کار نکرد. دوباره امتحان کنید."
   }
 }

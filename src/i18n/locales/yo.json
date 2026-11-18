@@ -1216,6 +1216,7 @@
     "payDirectNoName": "Fi ránṣẹ́ tààrà sí olùṣẹ̀dá ní {{symbol}} lórí {{chain}}. Kò sí pàṣípààrọ̀.",
     "payViaBridgeDpay": "A ti gbé lọ sí Base, a sì ti sanwo fún Riftn Pay, àwọn tokens yóò dé ní ìṣẹ́jú bí ìkan",
     "dmSent": "A ti fi {{amount}} àmì ránṣẹ́ sí {{name}}!",
+    "addMessage": "Fi àtẹ̀jísẹ́ kan kún un (bí ó bá wù ú)",
     "messagePublic": "Gbangba",
     "railTitle": "Awọn imọran",
     "railTotal": "{{amount}} awọn ami-ami",
@@ -2206,6 +2207,8 @@
       "likes": "Ìfẹ́ràn"
     },
     "likedPosts": {
+      "emptyTitle": "Kò sí ìfẹ́ràn síbẹ̀",
+      "privateTitle": "Àwọn ìfẹ́ràn jẹ́ àṣírí",
       "loadMore": "Rù síi"
     },
     "dislikes": {
@@ -2230,6 +2233,9 @@
     "sortLikes": "Àwọn ohun tí ó wù ú",
     "sortMostLiked": "Èyí tí ó wù ú jùlọ",
     "sortCustomShort": "Aṣa",
+    "arrange": {
+      "saving": "Ó ń fi pamọ́..."
+    },
     "searchThisChannel": "Ṣawari ikanni yii",
     "searchResultCount": "Àbájáde 1 fún \"{{query}}\"",
     "searchResultCountPlural": "{{count}} èsì fún \"{{query}}\""
@@ -6198,7 +6204,9 @@
   "nftMarket": {
     "actAll": "Gbogbo",
     "actListings": "Àwọn àkọsílẹ̀ ọjà",
+    "actOffer": "Ìbéèrè",
     "actOffers": "Àwọn ìfilọ̀",
+    "actSales": "Àwọn idijọ",
     "tabActivity": "Ìṣe",
     "shortTitle": "NFTs",
     "filters": "Àwọn Sàlẹ̀",
@@ -6699,6 +6707,9 @@
       "show": "Fihàn lórí ìṣẹ̀lẹ̀",
       "positions": {
         "center": "Àárín"
+      },
+      "sizes": {
+        "medium": "Ààrin"
       },
       "shapes": {
         "circle": "Àyíká",
@@ -7578,7 +7589,6 @@
     "dehubHome": "Riftn ile",
     "navHowItWorks": "Báwo ni ó ṣe ṣiṣẹ́",
     "navPrivacy": "Ìpamọ́ra",
-    "navFaq": "Àwọn ìbéèrè tí a máa ń béèrè",
     "openDehub": "Ṣii Riftn",
     "readTheDocs": "Ka àwọn ìwé-ìwé náà",
     "heroEyebrow": "Àwọn ìpèsè ìpèsè agbègbè",
@@ -7682,6 +7692,7 @@
     "footerNote": "Ikopa DePin jẹ iṣẹ iṣe, kii ṣe ọja idoko-owo. Wiwa, ẹtọ ati awọn ere le yipada."
   },
   "creatorFlow": {
+    "newNativeFlow": "Ise tuntun",
     "disconnect": "Pa isopọ mọ",
     "title": "Creator Flow",
     "backToStudio": "Padanu si Creator Studio",
@@ -10653,6 +10664,9 @@
       "zoomIn": "Kannada Zoom ninu",
       "zoomOut": "Ṣe ìfúnkánfásì kúrò"
     },
+    "clipFix": {
+      "listening": "Gbígbọ́..."
+    },
     "shortcuts": {
       "action": {
         "split": "Pín",
@@ -10663,7 +10677,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Dá ìgbàsílẹ̀ dúró"
+      "stop": "Dá ìgbàsílẹ̀ dúró",
+      "failed": "Ìfọkànbalẹ̀ ohùn kùnà."
     },
     "linkImport": {
       "go": "Gbe wọlé",
@@ -16058,7 +16073,6 @@
     "23cc49836f60": "Bẹ̀rẹ̀ ìgbéjáde lórí Riftn",
     "ce39b97c0f94": "Ṣe ìgbéjáde láti inú ẹrọ àwárí rẹ, tẹlifóònù rẹ tàbí OBS, pẹ̀lú àwọn ohun èlò láti yí ohùn padà, àwọn ipa ohùn àti àwọn àwòrán kámẹ́rà tí ó wà nínú rẹ̀. Àwọn ẹ̀bùn (tips) máa ń dé sínú àpò owó rẹ bí a ṣe ń rán wọn — kò sí ìwọ̀n àwọn ọmọlẹ́yìn, kò sí àkókò ìsànwó, kò sì sí àpò owó tí ó pọn dandan láti bẹ̀rẹ̀.",
     "efc85ecfd402": "Ṣí Riftn",
-    "dbc468a14b60": "Àwọn ìbéèrè tí a máa ń béèrè",
     "1e5b36078e37": "Àwọn ìtọ́sọ́nà tí ó jẹ mọ́",
     "95f48da59b9a": "Àwọn pẹpẹ àwùjọ tí kò wà lọ́wọ́ ẹnìkan (decentralized) tí ó dára jùlọ ní 2026",
     "89ec0bb81771": "Sinima",
@@ -19224,8 +19238,10 @@
       "gaming": "Eré",
       "crypto": "Owó ẹ̀yọ̀ àwòrán (Crypto)",
       "sports": "Eré ìdárayá",
+      "comedy": "Àwàdà",
       "film": "Fíìmù",
       "podcast": "Adarọ ese",
+      "food": "Oúnjẹ",
       "news": "Awọn iroyin",
       "science": "Sáyẹ́nsì"
     },
@@ -19236,6 +19252,7 @@
   "appTokens": {
     "title": "Awọn token rẹ",
     "history": "Ìtàn",
+    "noHistory": "Ko si iṣẹ kankan sibẹsibẹ",
     "kindDeposit": "Fi owó sí",
     "to": "Sí",
     "amount": "Iye",
@@ -19265,6 +19282,7 @@
     "notNow": "Kì í ṣe ní báyìí"
   },
   "postStats": {
+    "audience": "Àwọn olùgbọ́",
     "engagement": "Ifẹ",
     "finished": "Ti parí",
     "members": "Awọn ọmọ ẹgbẹ",
@@ -19353,6 +19371,7 @@
   "dmSchedule": {
     "view": "Wò",
     "edit": "Ṣatunkọ",
+    "editLabel": "Ṣàtúnṣe àtẹ̀jíṣẹ́",
     "error": "Ìyẹn kò ṣiṣẹ́. Gbìyànjú lẹ́ẹ̀kan síi."
   }
 }

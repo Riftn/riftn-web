@@ -1213,6 +1213,7 @@
     "payDirectNoName": "Мустақиман ба офаридандаи видео дар {{symbol}} дар {{chain}} фиристода шуд. Бе табдил.",
     "payViaBridgeDpay": "Ба Base интиқол дода шуд ва ба Riftn Pay пардохт шуд, токенҳо тақрибан дар як дақиқа меоянд",
     "dmSent": "{{amount}} нишонаҳо ба {{name}} фиристода шуд!",
+    "addMessage": "Соҳиби хабар (вақтӣ)",
     "messagePublic": "Оммавӣ",
     "railTitle": "Маслиҳатҳо",
     "railTotal": "{{amount}} токенӣ",
@@ -2212,6 +2213,8 @@
       "likes": "Писандҳо"
     },
     "likedPosts": {
+      "emptyTitle": "Ҳанӯз писанд нест",
+      "privateTitle": "Писандҳо махфӣ ҳастанд",
       "loadMore": "Бештар бор кардан"
     },
     "dislikes": {
@@ -2236,6 +2239,9 @@
     "sortLikes": "Писандҳо",
     "sortMostLiked": "Бештар маъқул аст",
     "sortCustomShort": "Фармоишӣ",
+    "arrange": {
+      "saving": "Дар ҳоли захира..."
+    },
     "searchThisChannel": "Мутобири канали инҷониб",
     "searchResultCount": "Натиҷаи 1 барои \"{{query}}\""
   },
@@ -6213,7 +6219,9 @@
   "nftMarket": {
     "actAll": "Ҳама",
     "actListings": "Эълонҳо",
+    "actOffer": "Пешниҳод",
     "actOffers": "Пешниҳодҳо",
+    "actSales": "Фурӯшҳо",
     "tabActivity": "Фаъолият",
     "shortTitle": "NFTs",
     "filters": "Филтрҳо",
@@ -6709,8 +6717,12 @@
       "image": "Тасвир",
       "camera": "Камера",
       "show": "Дар ҷараён нишон диҳед",
+      "loop": "Ҳалқа",
       "positions": {
         "center": "Марказ"
+      },
+      "sizes": {
+        "medium": "Миёна"
       },
       "shapes": {
         "circle": "Доира",
@@ -7695,6 +7707,7 @@
     "footerNote": "DePin ishtirok etish hissa xizmatidir, investitsiya mahsuloti emas. Mavjudlik, elchilik va mukofotlar oʻzgarishi mumkin."
   },
   "creatorFlow": {
+    "newNativeFlow": "Потоки нав",
     "disconnect": "Ҷудо кардан",
     "title": "Ҷараёни эҷодкор",
     "backToStudio": "Бозгашт ба Creator Studio",
@@ -10676,6 +10689,9 @@
       "zoomIn": "Калон кардани канвас",
       "zoomOut": "Хурд кардани канвас"
     },
+    "clipFix": {
+      "listening": "Гӯш кардан..."
+    },
     "shortcuts": {
       "action": {
         "split": "Ҷудо кардан",
@@ -10686,7 +10702,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Боздоштани сабт"
+      "stop": "Боздоштани сабт",
+      "failed": "Клонизатсияи овоз ноком шуд."
     },
     "linkImport": {
       "go": "Воридот",
@@ -19245,8 +19262,10 @@
       "gaming": "Бозиҳо",
       "crypto": "Крипто",
       "sports": "Варзишҳо",
+      "comedy": "Комедия",
       "film": "Филм",
       "podcast": "Покаст",
+      "food": "Ғизо",
       "news": "Хабарҳо",
       "science": "Илм"
     },
@@ -19257,6 +19276,7 @@
   "appTokens": {
     "title": "Токенҳои шумо",
     "history": "Таърих",
+    "noHistory": "Walang kasalukuyang aktib",
     "kindDeposit": "Илова кардани маблағ",
     "to": "Ба",
     "amount": "Маблағ",
@@ -19286,6 +19306,7 @@
     "notNow": "Ҳоло нест"
   },
   "postStats": {
+    "audience": "Аудитория",
     "engagement": "Ҷалбкунӣ",
     "finished": "Анҷом ёфт",
     "members": "Аъзоён",
@@ -19369,6 +19390,7 @@
   "dmSchedule": {
     "view": "Тамошо",
     "edit": "Таҳрир",
+    "editLabel": "Муҳаррири иттилоот",
     "error": "Ин кор накард. Бори дигар кӯшиш кунед."
   }
 }

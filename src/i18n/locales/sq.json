@@ -1224,6 +1224,7 @@
     "payDirectNoName": "Dërguar drejt e te krijuesi në {{symbol}} në {{chain}}. Nuk ka shkëmbim.",
     "payViaBridgeDpay": "Lëvizur në Base dhe paguar në Riftn Pay, tokenat mbërrijnë në rreth një minutë",
     "dmSent": "U dërguan {{amount}} tokena te {{name}}!",
+    "addMessage": "Shto një mesazh (me zgjedhje)",
     "messagePublic": "Publik",
     "railTitle": "Këshilla",
     "railTotal": "{{amount}} tokena",
@@ -2226,6 +2227,8 @@
       "likes": "Pëlqime"
     },
     "likedPosts": {
+      "emptyTitle": "Ende pa pëlqime",
+      "privateTitle": "Pëlqimet janë private",
       "loadMore": "Ngarko më shumë"
     },
     "dislikes": {
@@ -2250,6 +2253,9 @@
     "sortLikes": "Pëlqime",
     "sortMostLiked": "Më të pëlqyerat",
     "sortCustomShort": "Personalizuar",
+    "arrange": {
+      "saving": "Duke ruajtur..."
+    },
     "searchThisChannel": "Kërko në këtë kanal",
     "searchResultCount": "1 rezultat për \"{{query}}\"",
     "searchResultCountPlural": "{{count}} rezultatet për \"{{query}}\""
@@ -6238,7 +6244,9 @@
   "nftMarket": {
     "actAll": "Të gjitha",
     "actListings": "Njoftimet",
+    "actOffer": "Ofertë",
     "actOffers": "Oferta",
+    "actSales": "Shitjet",
     "tabActivity": "Aktiviteti",
     "shortTitle": "NFTs",
     "filters": "Filtrat",
@@ -6739,8 +6747,12 @@
       "image": "Imazhi",
       "camera": "Kamera",
       "show": "Shfaq në stream",
+      "loop": "Cikël",
       "positions": {
         "center": "Qëndro"
+      },
+      "sizes": {
+        "medium": "Mesatare"
       },
       "shapes": {
         "circle": "Rreth",
@@ -7726,6 +7738,7 @@
     "footerNote": "Përcaktimi i DePin është një shërbim kontributiv, jo një produkt investimi. Disponibiliteti, eligjibiliteti dhe çmimet mund të ndryshojnë."
   },
   "creatorFlow": {
+    "newNativeFlow": "Rrjedhë e re",
     "disconnect": "Shkëputu",
     "title": "Krijuesi i rrjedhës",
     "backToStudio": "Kthehu te Studioja e Krijuesit",
@@ -10709,6 +10722,9 @@
       "zoomIn": "Fito në kanvas",
       "zoomOut": "Fito në kanvas"
     },
+    "clipFix": {
+      "listening": "Ndërlind."
+    },
     "shortcuts": {
       "action": {
         "split": "Ndaj",
@@ -10719,7 +10735,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Ndalo regjistrimin"
+      "stop": "Ndalo regjistrimin",
+      "failed": "Klonimi i zërit dështoi."
     },
     "linkImport": {
       "go": "Importo",
@@ -19307,8 +19324,10 @@
       "gaming": "Lojëra",
       "crypto": "Kripto",
       "sports": "Sporteve",
+      "comedy": "Komedi",
       "film": "Filmi",
       "podcast": "Podkasti",
+      "food": "Buzëqeshje",
       "news": "Lajme",
       "science": "Shkencë"
     },
@@ -19319,6 +19338,7 @@
   "appTokens": {
     "title": "Tokenet tuaja",
     "history": "Historia",
+    "noHistory": "Nuk ka aktivitet ende",
     "kindDeposit": "Depozito",
     "to": "Deri",
     "amount": "Shuma",
@@ -19348,6 +19368,7 @@
     "notNow": "Jo tani"
   },
   "postStats": {
+    "audience": "Publik",
     "engagement": "Angazhim",
     "finished": "Përfunduar",
     "members": "Anëtarët",
@@ -19436,6 +19457,7 @@
   "dmSchedule": {
     "view": "Shiko",
     "edit": "Modifiko",
+    "editLabel": "Modifiko mesazhin",
     "error": "Kjo nuk funksionoi. Provo përsëri."
   }
 }

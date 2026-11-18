@@ -1222,6 +1222,7 @@
     "payDirectNoName": "נשלח ישירות למפתח ב{{symbol}} ב{{chain}}. לא ישנה.",
     "payViaBridgeDpay": "הועבר ל-Base ושולם ל-Riftn Pay, הטוקנים מגיעים בעוד כדקה",
     "dmSent": "נשלחו {{amount}} אסימונים ל-{{name}}!",
+    "addMessage": "הוסף הודעה (אופציונלי)",
     "messagePublic": "ציבורי",
     "railTitle": "טיפים",
     "railTotal": "{{amount}} אסימונים",
@@ -2221,6 +2222,8 @@
       "likes": "לייקים"
     },
     "likedPosts": {
+      "emptyTitle": "עדיין אין לייקים",
+      "privateTitle": "הלייקים פרטיים",
       "loadMore": "טען עוד"
     },
     "dislikes": {
@@ -2245,6 +2248,9 @@
     "sortLikes": "אהבות",
     "sortMostLiked": "המועדפים ביותר",
     "sortCustomShort": "מותאם",
+    "arrange": {
+      "saving": "שומר..."
+    },
     "searchThisChannel": "חפש בערוץ",
     "searchResultCount": "1 תוצאה ל\"{{query}}\"",
     "searchResultCountPlural": "{{count}} תוצאות ל\"{{query}}\""
@@ -6234,7 +6240,9 @@
   "nftMarket": {
     "actAll": "הכל",
     "actListings": "מודעות",
+    "actOffer": "הצעה",
     "actOffers": "הצעות",
+    "actSales": "מכירות",
     "tabActivity": "פעילות",
     "shortTitle": "NFTים",
     "filters": "מסננים",
@@ -6738,8 +6746,12 @@
       "image": "תמונה",
       "camera": "מצלמה",
       "show": "הצגה בזרם",
+      "loop": "לופ",
       "positions": {
         "center": "מרכז"
+      },
+      "sizes": {
+        "medium": "בינונית"
       },
       "shapes": {
         "circle": "עיגול",
@@ -7726,6 +7738,7 @@
     "footerNote": "ההשתתפות ב - DePin היא שירות תרומה, לא מוצר להשקעה. הזמינות, הזכאות והבונוסים עשויים להשתנות."
   },
   "creatorFlow": {
+    "newNativeFlow": "זרימה חדשה",
     "disconnect": "התנתקות",
     "title": "זרימת יוצר",
     "backToStudio": "חזרה לסטודיו היוצר",
@@ -9327,7 +9340,8 @@
       "textSaved": "שינויי התווים שנשמרו.",
       "action": "כתוביות אוטומטיות",
       "styles": {
-        "bold": "מודגש"
+        "bold": "מודגש",
+        "serif": "סריף"
       },
       "working": "מאזין… {{percent}}%",
       "downloading": "מכין את מודל הדיבור… {{percent}}%",
@@ -10709,6 +10723,9 @@
       "zoomIn": "בד התקרבות פנימה",
       "zoomOut": "הזום את הקנבס החוצה"
     },
+    "clipFix": {
+      "listening": "מאזין…"
+    },
     "shortcuts": {
       "action": {
         "split": "פיצול",
@@ -10722,7 +10739,8 @@
       "label": "תלת מימד"
     },
     "voiceClone": {
-      "stop": "עצור הקלטה"
+      "stop": "עצור הקלטה",
+      "failed": "הצלחתי להעתיק קול"
     },
     "linkImport": {
       "go": "ייבא",
@@ -19209,8 +19227,10 @@
       "gaming": "גיימינג",
       "crypto": "קריפטו",
       "sports": "ספורט",
+      "comedy": "קומדיה",
       "film": "סרט",
       "podcast": "פודקאסט",
+      "food": "אוכל",
       "news": "חדשות",
       "science": "מדע"
     },
@@ -19221,6 +19241,7 @@
   "appTokens": {
     "title": "האסימונים שלך",
     "history": "היסטוריה",
+    "noHistory": "עדיין אין פעילות",
     "kindDeposit": "הוסף כספים",
     "to": "לכבוד",
     "amount": "סכום",
@@ -19250,6 +19271,7 @@
     "notNow": "לא עכשיו"
   },
   "postStats": {
+    "audience": "אודיטוריה",
     "engagement": "מעורבות",
     "finished": "הסתיים",
     "members": "חברים",
@@ -19338,6 +19360,7 @@
   "dmSchedule": {
     "view": "צפה",
     "edit": "ערוך",
+    "editLabel": "ערוך הודעה",
     "error": "זה לא עבד. נסה שוב."
   }
 }

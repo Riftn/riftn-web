@@ -1220,6 +1220,7 @@
     "payDirectNoName": "{{chain}} da {{symbol}} ichida to&#39;g&#39;ridan-to&#39;g&#39;ri yaratuvchiga yuborildi. Almashtirish yo&#39;q.",
     "payViaBridgeDpay": "Base ga ko'chirildi va Riftn Pay ga to'landi, tokenlar taxminan bir daqiqada keladi",
     "dmSent": "{{name}} ga {{amount}} tokenlar yuborildi!",
+    "addMessage": "Xabar yozing (va shart emas).",
     "messagePublic": "Ommaviy",
     "railTitle": "Maslahatlar",
     "railTotal": "{{amount}} token",
@@ -2237,6 +2238,8 @@
       "likes": "Yoqtirishlar"
     },
     "likedPosts": {
+      "emptyTitle": "Hozircha layklar yoʻq",
+      "privateTitle": "Layklar yopiq",
       "loadMore": "Koʻproq yuklash"
     },
     "dislikes": {
@@ -2261,6 +2264,9 @@
     "sortLikes": "Yoqtirishlar",
     "sortMostLiked": "Eng ko&#39;p yoqdi",
     "sortCustomShort": "Maxsus",
+    "arrange": {
+      "saving": "Saqlanmoqda..."
+    },
     "searchThisChannel": "Ushbu kanalni qidirish",
     "searchResultCount": "&quot;{{query}}&quot; uchun 1 ta natija",
     "searchResultCountPlural": "{{count}} natijalari uchun \"{{query}}\""
@@ -6245,7 +6251,9 @@
   "nftMarket": {
     "actAll": "Hammasi",
     "actListings": "E'lonlar",
+    "actOffer": "Taklif qilish",
     "actOffers": "Takliflar",
+    "actSales": "Savdo",
     "tabActivity": "Faoliyat",
     "shortTitle": "NFTlar",
     "filters": "Filtrlar",
@@ -6754,8 +6762,12 @@
       "image": "Rasm",
       "camera": "Kamera",
       "show": "Strimda ko'rsatish",
+      "loop": "Davr",
       "positions": {
         "center": "Markazlashtir"
+      },
+      "sizes": {
+        "medium": "O'rtacha"
       },
       "shapes": {
         "circle": "Doira",
@@ -7741,6 +7753,7 @@
     "footerNote": "DePin ishtiroki investitsiya mahsuloti emas, balki hissa qo'shish xizmatidir. Mavjudligi, huquqlari va mukofotlari o'zgarishi mumkin."
   },
   "creatorFlow": {
+    "newNativeFlow": "Yangi oqim",
     "disconnect": "Uzish",
     "title": "Creator Flow",
     "backToStudio": "Creator Studio-ga qaytish",
@@ -10712,6 +10725,9 @@
       "zoomIn": "Tuvalni kattalashtirish",
       "zoomOut": "Kanvasni kattalashtirish"
     },
+    "clipFix": {
+      "listening": "Teshiklash…"
+    },
     "shortcuts": {
       "action": {
         "split": "Bo‘lish",
@@ -10722,7 +10738,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Yozishni toʻxtatish"
+      "stop": "Yozishni toʻxtatish",
+      "failed": "Ses klonlash muvaffaqiyatsizlik."
     },
     "linkImport": {
       "go": "Import qilish",
@@ -16103,7 +16120,6 @@
     "23cc49836f60": "Riftn da jonli efirga chiqing",
     "ce39b97c0f94": "Brauzeringizdan, telefoningizdan yoki OBS dan efirga chiqing, ovoz o'zgartirgichlar, tovush effektlari va kamera ko'rinishlari o'rnatilgan. Maslahatlar hamyon sifatida keladi — hech qanday kuzatuvchi chegarasi yo'q, hech qanday to'lov tsikli yo'q va boshlash uchun hamyon kerak emas.",
     "efc85ecfd402": "Riftn ni oching",
-    "dbc468a14b60": "Ko'p so'raladigan savollar",
     "1e5b36078e37": "Tegishli qo'llanmalar",
     "95f48da59b9a": "2026 yilda eng yaxshi markazlashtirilmagan ijtimoiy media platformalari",
     "89ec0bb81771": "Kino",
@@ -19193,7 +19209,9 @@
       "gaming": "Oʻyinlar",
       "crypto": "Kripto",
       "sports": "Sport",
+      "comedy": "Komediya",
       "podcast": "Podkast",
+      "food": "Oziq-ovqat",
       "news": "Yangiliklar",
       "science": "Fan"
     },
@@ -19204,6 +19222,7 @@
   "appTokens": {
     "title": "Sizning tokenlaringiz",
     "history": "Tarix",
+    "noHistory": "Topshiriqlar mavjud emas!",
     "kindDeposit": "Mablagʻ qoʻshish",
     "to": "Gacha",
     "amount": "Miqdori",
@@ -19233,6 +19252,7 @@
     "notNow": "Hozir emas"
   },
   "postStats": {
+    "audience": "Tomoshabin",
     "engagement": "Qiziqish",
     "finished": "Tugadi",
     "members": "A'zolar",
@@ -19319,6 +19339,7 @@
   "dmSchedule": {
     "view": "Koʻrish",
     "edit": "Tahrirlash",
+    "editLabel": "Xabarni tahrirlash",
     "error": "Bu ish bermadi. Qaytadan urinib ko'ring."
   },
   "spaces": {

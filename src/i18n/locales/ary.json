@@ -1223,6 +1223,7 @@
     "payDirectNoName": "تم الإرسال مباشرة إلى منشئ المحتوى في {{symbol}} في {{chain}}. لا مبادلة.",
     "payViaBridgeDpay": "تم النقل إلى Base والدفع إلى Riftn Pay، تصل الرموز في حوالي دقيقة",
     "dmSent": "تصيفطو {{amount}} عملات رمزية ل {{name}}!",
+    "addMessage": "اضف رسالة (اختياري)",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} رموز",
@@ -2225,6 +2226,8 @@
       "likes": "اللايكات"
     },
     "likedPosts": {
+      "emptyTitle": "مازال ما كاينين لايكات",
+      "privateTitle": "اللايكات خاصين",
       "loadMore": "حمل كثر"
     },
     "dislikes": {
@@ -2249,6 +2252,9 @@
     "sortLikes": "الإعجاب",
     "sortMostLiked": "الأكثر إعجاباً",
     "sortCustomShort": "مخصص",
+    "arrange": {
+      "saving": "كيتحفظ..."
+    },
     "searchThisChannel": "بحث في القناة",
     "searchResultCount": "1 نتيجة ل\"{{query}}\"",
     "searchResultCountPlural": "{{count}} نتيجة ل\"{{query}}\""
@@ -6252,7 +6258,9 @@
   "nftMarket": {
     "actAll": "الكل",
     "actListings": "الإعلانات",
+    "actOffer": "العرض",
     "actOffers": "العروض",
+    "actSales": "المبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "NFT",
     "filters": "عوامل التصفية",
@@ -6755,8 +6763,12 @@
       "image": "صورة",
       "camera": "الكاميرا",
       "show": "عرض على البث",
+      "loop": "حلقة",
       "positions": {
         "center": "مركز"
+      },
+      "sizes": {
+        "medium": "متوسطة"
       },
       "shapes": {
         "circle": "دايرة",
@@ -7739,6 +7751,7 @@
     "footerNote": "مشاركة DePin هي خدمة مساهمة، وليست منتجًا استثماريًا. قد يتغير التوفر والأهلية والمكافآت."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "تقطع",
     "title": "تدفق المنشئ",
     "backToStudio": "الرجوع إلى Creator Studio",
@@ -9340,7 +9353,8 @@
       "textSaved": "تم حفظ تغييرات العنوان.",
       "action": "ترجمة أوتوماتيكية",
       "styles": {
-        "bold": "الخطوط العريضة"
+        "bold": "الخطوط العريضة",
+        "serif": "الشريف"
       },
       "working": "كنسمعو… {{percent}}%",
       "downloading": "كنوجدو نموذج الكلام… {{percent}}%",
@@ -10722,6 +10736,9 @@
       "zoomIn": "تكبير اللوحة القماشية",
       "zoomOut": "تصغير اللوحة القماشية"
     },
+    "clipFix": {
+      "listening": "جارٍ الاستماع..."
+    },
     "shortcuts": {
       "action": {
         "split": "قطّع",
@@ -10735,7 +10752,8 @@
       "label": "ثلاثي الأبعاد"
     },
     "voiceClone": {
-      "stop": "وقف التسجيل"
+      "stop": "وقف التسجيل",
+      "failed": "فشل استنساخ الصوت."
     },
     "linkImport": {
       "go": "استيراد",
@@ -19283,8 +19301,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "الرياضة",
+      "comedy": "كوميديا",
       "film": "فيلم",
       "podcast": "بودكاست",
+      "food": "طعام",
       "news": "أخبار",
       "science": "العلوم"
     },
@@ -19295,6 +19315,7 @@
   "appTokens": {
     "title": "التوكنز ديالك",
     "history": "التاريخ",
+    "noHistory": "لا يوجد نشاط حتى الآن",
     "kindDeposit": "إيداع",
     "to": "إلى",
     "amount": "المبلغ",
@@ -19324,6 +19345,7 @@
     "notNow": "ليس الآن"
   },
   "postStats": {
+    "audience": "الجمهور",
     "engagement": "التفاعل",
     "finished": "سالا",
     "members": "الأعضاء",
@@ -19411,6 +19433,7 @@
   "dmSchedule": {
     "view": "شوف",
     "edit": "تعديل",
+    "editLabel": "تعديل الرسالة",
     "error": "لم ينجح ذلك. حاول مرة أخرى."
   }
 }

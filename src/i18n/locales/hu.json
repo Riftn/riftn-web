@@ -1223,6 +1223,7 @@
     "payDirectNoName": "Az alkotónak közvetlenül elküldve {{symbol}}-on {{chain}}-en. Nincs cserélt.",
     "payViaBridgeDpay": "Áthelyezve a Base-re és fizetve a Riftn Pay-nek, a tokenek kb. egy perc múlva érkeznek",
     "dmSent": "{{amount}} tokenek elküldve neki: {{name}}!",
+    "addMessage": "Üzenet hozzáadása (nem kötelező)",
     "messagePublic": "Nyilvános",
     "railTitle": "Tippek",
     "railTotal": "{{amount}} token",
@@ -2222,6 +2223,8 @@
       "likes": "Kedvelések"
     },
     "likedPosts": {
+      "emptyTitle": "Még nincsenek kedvelések",
+      "privateTitle": "A kedvelések privátak",
       "loadMore": "Több betöltése"
     },
     "dislikes": {
@@ -2246,6 +2249,9 @@
     "sortLikes": "Kedvelések",
     "sortMostLiked": "Leginkább kedveltek",
     "sortCustomShort": "Egyedi",
+    "arrange": {
+      "saving": "Mentés..."
+    },
     "searchThisChannel": "Keresd ezt a csatornát",
     "searchResultCount": "1 találat \"{{query}}\"-ra",
     "searchResultCountPlural": "{{count}} találat \"{{query}}\"-ra"
@@ -6238,7 +6244,9 @@
   "nftMarket": {
     "actAll": "Összes",
     "actListings": "Hirdetések",
+    "actOffer": "Ajánlat",
     "actOffers": "Ajánlatok",
+    "actSales": "Értékesítések",
     "tabActivity": "Tevékenység",
     "shortTitle": "NFT-k",
     "filters": "Szűrők",
@@ -6742,8 +6750,12 @@
       "image": "Kép",
       "camera": "Kamera",
       "show": "Megjelenítés az adatfolyamban",
+      "loop": "Hurok",
       "positions": {
         "center": "Középre helyez"
+      },
+      "sizes": {
+        "medium": "Közepes"
       },
       "shapes": {
         "circle": "Kör",
@@ -7729,6 +7741,7 @@
     "footerNote": "A DePin részvétel egy hozzájárulási szolgáltatás, nem egy befektetési termék. A rendelkezésre állás, a jogosultság és a jutalmak változhatnak."
   },
   "creatorFlow": {
+    "newNativeFlow": "Új folyamat",
     "disconnect": "Leválasztás",
     "title": "Creator Flow",
     "backToStudio": "Vissza a Creator Studióba",
@@ -10713,6 +10726,9 @@
       "zoomIn": "Vászon nagyítása",
       "zoomOut": "Vászon kicsinyítése"
     },
+    "clipFix": {
+      "listening": "Hallgatás folyamatban…"
+    },
     "shortcuts": {
       "action": {
         "split": "Vágás",
@@ -10723,7 +10739,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Felvétel leállítása"
+      "stop": "Felvétel leállítása",
+      "failed": "Hangklónzás sikertelen volt."
     },
     "linkImport": {
       "go": "Importálás",
@@ -19310,7 +19327,9 @@
       "gaming": "Játék",
       "crypto": "Kripto",
       "sports": "Sport",
+      "comedy": "Vígjáték",
       "podcast": "Podcasting",
+      "food": "Étkezés",
       "news": "Hírek",
       "science": "Tudomány"
     },
@@ -19321,6 +19340,7 @@
   "appTokens": {
     "title": "A te tokeneid",
     "history": "Előzmények",
+    "noHistory": "Még nincs tevékenység",
     "kindDeposit": "Feltöltés",
     "to": "Eddig",
     "amount": "Összeg",
@@ -19350,6 +19370,7 @@
     "notNow": "Most nem"
   },
   "postStats": {
+    "audience": "Közönség",
     "engagement": "Elköteleződés",
     "finished": "Befejeződött",
     "members": "Tagok",
@@ -19438,6 +19459,7 @@
   "dmSchedule": {
     "view": "Megtekintés",
     "edit": "Szerkesztés",
+    "editLabel": "Üzenet szerkesztése",
     "error": "Ez nem sikerült. Próbálkozz újra."
   }
 }

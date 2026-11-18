@@ -1214,6 +1214,7 @@
     "payDirectNoName": "Түзүүчүгө {{symbol}} де {{chain}} де түз жөнөтүлдү. Алмаштыруу жок.",
     "payViaBridgeDpay": "Base'га которулду жана Riftn Pay'ге төлөндү, токендер болжол менен бир мүнөттөн кийин келет",
     "dmSent": "{{name}} колдонуучусуна {{amount}} токендер жөнөтүлдү!",
+    "addMessage": "Билдирүү кошуу (милдеттүү эмес)",
     "messagePublic": "Ачык",
     "railTitle": "Кеңештер",
     "railTotal": "{{amount}} токен",
@@ -2215,6 +2216,8 @@
       "likes": "Жактыруулар"
     },
     "likedPosts": {
+      "emptyTitle": "Азырынча жактыруулар жок",
+      "privateTitle": "Жактыруулар жабык",
       "loadMore": "Дагы жүктөө"
     },
     "dislikes": {
@@ -2239,6 +2242,9 @@
     "sortLikes": "Жактыруу",
     "sortMostLiked": "Эң көп жактырылган",
     "sortCustomShort": "Көнүмүш",
+    "arrange": {
+      "saving": "Сакталууда..."
+    },
     "searchThisChannel": "Бул каналды издөө",
     "searchResultCount": "\"{{query}}\" үчүн 1 натыйжа",
     "searchResultCountPlural": "\"{{query}}\" үчүн {{count}} натыйжалары"
@@ -6228,7 +6234,9 @@
   "nftMarket": {
     "actAll": "Баарын",
     "actListings": "Жарыялар",
+    "actOffer": "Төлөпөлөгө оферта",
     "actOffers": "Сунуштар",
+    "actSales": "Сатылымдар",
     "tabActivity": "Аракеттер",
     "shortTitle": "NFT-лер",
     "filters": "Фильтрлер",
@@ -6732,8 +6740,12 @@
       "image": "Сүрөт",
       "camera": "Камера",
       "show": "Стремде көрсөтүү",
+      "loop": "Кирүү",
       "positions": {
         "center": "Борборлоштуруу"
+      },
+      "sizes": {
+        "medium": "Орто"
       },
       "shapes": {
         "circle": "Тегерек",
@@ -7720,6 +7732,7 @@
     "footerNote": "DePin катышуусу инвестициялык продукт эмес, кызмат көрсөтүү болуп саналат. Жеткиликтүүлүк, жарамдуулук жана сыйлыктар өзгөрүшү мүмкүн."
   },
   "creatorFlow": {
+    "newNativeFlow": "Жаңы flow",
     "disconnect": "Өчүрүү",
     "title": "Көрүңчүгү",
     "backToStudio": "Creator Studio-ге кайтуу",
@@ -10704,6 +10717,9 @@
       "zoomIn": "Undo-type",
       "zoomOut": "Undo-type"
     },
+    "clipFix": {
+      "listening": "Угулуп жатат..."
+    },
     "shortcuts": {
       "action": {
         "split": "Бөлүү",
@@ -10714,7 +10730,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Жаздырууну токтотуу"
+      "stop": "Жаздырууну токтотуу",
+      "failed": "Клонирование голоса не удалось."
     },
     "linkImport": {
       "go": "Импорттоо",
@@ -19291,8 +19308,10 @@
       "gaming": "Оюндар",
       "crypto": "Крипто",
       "sports": "Спорт",
+      "comedy": "Комедия",
       "film": "Фильм",
       "podcast": "Подкаст",
+      "food": "Тамак-аш",
       "news": "Жаңылыктар",
       "science": "Илим"
     },
@@ -19303,6 +19322,7 @@
   "appTokens": {
     "title": "Сиздин токендериңиз",
     "history": "Тарых",
+    "noHistory": "Активдүүлүк азырынча жок",
     "kindDeposit": "Каражат кошуу",
     "to": "Чечүү",
     "amount": "Сумма",
@@ -19332,6 +19352,7 @@
     "notNow": "Эми эмес"
   },
   "postStats": {
+    "audience": "Аудитория",
     "engagement": "Катышуу",
     "finished": "Аяктады",
     "members": "Мүчөлөрү",
@@ -19419,6 +19440,7 @@
   "dmSchedule": {
     "view": "Көрүү",
     "edit": "Оңдоо",
+    "editLabel": "Кабарды өзгөртүү",
     "error": "Бул иштебей калды. Кайра аракет кылып көрүңүз."
   }
 }

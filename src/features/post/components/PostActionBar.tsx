@@ -34,7 +34,8 @@ import { AI_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
 import { GoLiveModal } from '@/components/app/modals';
 import { EmojiGifPicker } from '@/components/app/chat/EmojiGifPicker';
 import type { LiveMode, LiveStreamHandoff } from '../types';
-import { clock, soundWindow } from '@/lib/sound-window';
+import { clock, soundMix, soundWindow, type SoundMix } from '@/lib/sound-window';
+import { SoundMixer } from './SoundMixer';
 import type { AttachedSound } from '../hooks/usePostSound';
 
 interface PostActionBarProps {
@@ -79,6 +80,8 @@ interface PostActionBarProps {
   onOpenSoundPicker?: () => void;
   attachedSound?: AttachedSound | null;
   onClearSound?: () => void;
+  /** Song / video sound levels; only offered on a video post. */
+  onSoundMixChange?: (mix: SoundMix) => void;
   onTogglePoll?: () => void;
   hasPoll?: boolean;
   /** Turn Comic mode on or off (photos post as collector cards). */
@@ -127,6 +130,7 @@ export function PostActionBar({
   onOpenSoundPicker,
   attachedSound,
   onClearSound,
+  onSoundMixChange,
   onTogglePoll,
   onToggleContentWarning,
   hasContentWarning,
@@ -392,6 +396,9 @@ export function PostActionBar({
               <X className="w-3.5 h-3.5 text-white/50" />
             </button>
           </div>
+          {hasVideo && onSoundMixChange && (
+            <SoundMixer className="mt-1.5" mix={soundMix(attachedSound.url)} onChange={onSoundMixChange} />
+          )}
         </div>
       ) : onOpenSoundPicker && !isLive && (hasImage || hasVideo) ? (
         <div className="px-4 py-1.5 border-t border-white/10">

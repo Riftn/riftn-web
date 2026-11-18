@@ -1205,6 +1205,7 @@
     "payDirectNoName": "ส่งตรงไปยังผู้สร้างใน {{symbol}} เมื่อวันที่ {{chain}} ไม่มีการแลกเปลี่ยน",
     "payViaBridgeDpay": "ย้ายไปยัง Base และชำระเงินให้ Riftn Pay โทเค็นจะมาถึงในประมาณหนึ่งนาที",
     "dmSent": "ส่ง {{amount}} เหรียญ ให้ {{name}} แล้ว!",
+    "addMessage": "เพิ่มคำสั่ง (ไม่จำเป็น)",
     "messagePublic": "สาธารณะ",
     "railTitle": "ทิป",
     "railTotal": "{{amount}} โทเค็น",
@@ -2152,6 +2153,7 @@
       "film": "หนัง",
       "bounty": "ค่าหัว",
       "proposal": "ข้อเสนอ",
+      "short": "ชอต",
       "comic": "การ์ตูน",
       "earn": "หาเงิน",
       "listening_one": "{{value}} กำลังฟังอยู่",
@@ -2201,6 +2203,8 @@
       "likes": "มัก"
     },
     "likedPosts": {
+      "emptyTitle": "ยังบ่มีการถูกใจ",
+      "privateTitle": "การถูกใจเป็นส่วนตัว",
       "loadMore": "โหลดเพิ่ม"
     },
     "dislikes": {
@@ -2225,6 +2229,9 @@
     "sortLikes": "ชอบ",
     "sortMostLiked": "ชอบมากที่สุด",
     "sortCustomShort": "กำหนดเอง",
+    "arrange": {
+      "saving": "กำลังบันทึก..."
+    },
     "searchThisChannel": "ค้นหาช่องนี้",
     "searchResultCount": "ผลการค้นหา 1 รายการสำหรับ \"{{query}}\"",
     "searchResultCountPlural": "{{count}} ผลการค้นหาสำหรับ \"{{query}}\""
@@ -6173,7 +6180,9 @@
   "nftMarket": {
     "actAll": "ทั้งหมด",
     "actListings": "รายการ",
+    "actOffer": "ข้อเสนอ",
     "actOffers": "ข้อเสนอ",
+    "actSales": "ยอดขาย",
     "tabActivity": "กิจกรรม",
     "shortTitle": "NFTs",
     "filters": "ตัวกรอง",
@@ -6661,8 +6670,12 @@
       "image": "ภาพ",
       "camera": "กล้อง",
       "show": "แสดงบนสตรีม",
+      "loop": "วนซ้ำ",
       "positions": {
         "center": "ศูนย์กลาง"
+      },
+      "sizes": {
+        "medium": "ปานกลาง"
       },
       "shapes": {
         "circle": "วงกลม",
@@ -7641,6 +7654,7 @@
     "footerNote": "DePin participation เป็นการบริการที่ให้บริการช่วยเหลือ ไม่ใช่ผลิตภัณฑ์การลงทุน คุณสมบัติ ความเหมาะสม และรางวัลอาจเปลี่ยนแปลงได้"
   },
   "creatorFlow": {
+    "newNativeFlow": "โฟลว์ใหม่",
     "disconnect": "ตัดการเชื่อมต่อ",
     "title": "สร้างสรรค์",
     "backToStudio": "กลับสู่สตูดิโอผู้สร้าง",
@@ -10609,6 +10623,9 @@
       "zoomIn": "การขยายภาพพื้นหลัก",
       "zoomOut": "การย่อภาพพื้นหลัก"
     },
+    "clipFix": {
+      "listening": "กำลังฟัง..."
+    },
     "shortcuts": {
       "action": {
         "split": "แยก",
@@ -10619,7 +10636,8 @@
       }
     },
     "voiceClone": {
-      "stop": "หยุดอัดเสียง"
+      "stop": "หยุดอัดเสียง",
+      "failed": "การบันทึกเสียงล้มเหลว"
     },
     "linkImport": {
       "go": "นำเข้า",
@@ -18867,8 +18885,10 @@
       "gaming": "เกม",
       "crypto": "คริปโต",
       "sports": "กีฬา",
+      "comedy": "การแสดงตลก",
       "film": "หนัง",
       "podcast": "พอดแคสต์",
+      "food": "อาหาร",
       "news": "ข่าว",
       "science": "วิทยาศาสตร์"
     },
@@ -18879,6 +18899,7 @@
   "appTokens": {
     "title": "โทเคนของคุณ",
     "history": "ประวัติ",
+    "noHistory": "ยังไม่มีกิจกรรม",
     "kindDeposit": "ฝาก",
     "to": "ถึง",
     "amount": "จำนวน",
@@ -18908,6 +18929,7 @@
     "notNow": "ไว้ก่อน"
   },
   "postStats": {
+    "audience": "กลุ่มเป้าหมาย",
     "engagement": "การมีส่วนร่วม",
     "finished": "เสร็จแล้ว",
     "members": "สมาชิก",
@@ -18990,6 +19012,7 @@
   "dmSchedule": {
     "view": "เบิ่ง",
     "edit": "แก้ไข",
+    "editLabel": "แก้ไขข้อความ",
     "error": "นั่นไม่ได้ผล ลองอีกครั้ง"
   }
 }

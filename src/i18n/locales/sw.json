@@ -1221,6 +1221,7 @@
     "payDirectNoName": "Ilitumwa moja kwa moja kwa mwumba katika {{symbol}} siku ya {{chain}}. Hakuna kubadilisha.",
     "payViaBridgeDpay": "Zilihamishwa kwenda Base na kulipwa kwa Riftn Pay, tokeni zitafika baada ya kama dakika moja",
     "dmSent": "Umetuma {{amount}} tokeni kwa {{name}}!",
+    "addMessage": "Weka ujumbe (hiari)",
     "messagePublic": "Umma",
     "railTitle": "Vidokezo",
     "railTotal": "{{amount}} tokeni",
@@ -2224,6 +2225,8 @@
       "likes": "Kupenda"
     },
     "likedPosts": {
+      "emptyTitle": "Hakuna vipendwa bado",
+      "privateTitle": "Vipendwa ni vya faragha",
       "loadMore": "Pakia zaidi"
     },
     "dislikes": {
@@ -2248,6 +2251,9 @@
     "sortLikes": "Kupenda",
     "sortMostLiked": "Kupendwa zaidi",
     "sortCustomShort": "Maalum",
+    "arrange": {
+      "saving": "Inahifadhi..."
+    },
     "searchThisChannel": "Tafuta katika kituo hiki",
     "searchResultCount": "Matokeo 1 kwa \"{{query}}\"",
     "searchResultCountPlural": "{{count}} matokeo ya \"{{query}}\""
@@ -6234,7 +6240,9 @@
   "nftMarket": {
     "actAll": "Zote",
     "actListings": "Matangazo",
+    "actOffer": "Tunawapa",
     "actOffers": "Ofa",
+    "actSales": "Mauzo",
     "tabActivity": "Shughuli",
     "shortTitle": "NFTs",
     "filters": "Filtari",
@@ -6260,6 +6268,7 @@
     "tabBrowse": "Kutafuta",
     "tabSell": "Kuuzia",
     "tabMine": "Maficha yangi yako",
+    "tabSales": "Mauzo",
     "statMinted": "Minted",
     "statForSale": "Kwa uuzaji",
     "sellYours": "Unapata kuuza",
@@ -6729,8 +6738,12 @@
       "image": "Picha",
       "camera": "Kamera",
       "show": "Onyesha kwenye mkondo",
+      "loop": "Kitanzi",
       "positions": {
         "center": "Kituo"
+      },
+      "sizes": {
+        "medium": "Kati"
       },
       "shapes": {
         "circle": "Duara",
@@ -7717,6 +7730,7 @@
     "footerNote": "Ushiriki wa DePin ni huduma ya mchango, si bidhaa ya uongezaji. Upatikanaji, ujumbe na gantimpesa zinaweza kubadilika."
   },
   "creatorFlow": {
+    "newNativeFlow": "Mtiririko mpya",
     "disconnect": "Ondoa",
     "title": "Mtiririko wa Muumba",
     "backToStudio": "Rudi kwenye Studio ya Muumba",
@@ -10701,6 +10715,9 @@
       "zoomIn": "Kuza turubai ndani",
       "zoomOut": "Zoom utafuta kwenye kanisa"
     },
+    "clipFix": {
+      "listening": "Inasikiliza…"
+    },
     "shortcuts": {
       "action": {
         "split": "Gawanya",
@@ -10711,7 +10728,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Acha kurekodi"
+      "stop": "Acha kurekodi",
+      "failed": "Ukubadilishaji wa sauti iliposhindwa."
     },
     "linkImport": {
       "go": "Ingiza",
@@ -16115,7 +16133,6 @@
     "23cc49836f60": "Nenda moja kwa moja kwenye Riftn",
     "ce39b97c0f94": "Mtiririko kutoka kwenye kivinjari chako, simu yako au OBS, huku kukiwa na vibadilisha sauti, sauti na kamera. Vidokezi vya ardhi kwenye mkoba wako vinapotumwa — hakuna kizingiti cha mfuasi, hakuna mzunguko wa kupokea malipo, na hakuna mkoba unaohitajika kuanza.",
     "efc85ecfd402": "Fungua Riftn",
-    "dbc468a14b60": "Maswali yanayoulizwa mara kwa mara",
     "1e5b36078e37": "Majadiliano ya kijamii ya kudumu yanayofaa zaidi ya 2026",
     "95f48da59b9a": "Sinema",
     "89ec0bb81771": "Iliyoanzishwa",
@@ -19304,8 +19321,10 @@
       "gaming": "Michezo",
       "crypto": "Kriptokurasa",
       "sports": "Michezo",
+      "comedy": "Uandishi wa kujifunza",
       "film": "Filamu",
       "podcast": "Podikasti",
+      "food": "Chakula",
       "news": "Habari",
       "science": "Sayansi"
     },
@@ -19316,6 +19335,7 @@
   "appTokens": {
     "title": "Tokeni zako",
     "history": "Historia",
+    "noHistory": "Hakuna shughuli bado",
     "kindDeposit": "Weka fedha",
     "to": "Kwa",
     "amount": "Kiasi",
@@ -19345,6 +19365,7 @@
     "notNow": "Sio sasa"
   },
   "postStats": {
+    "audience": "Hadhira",
     "engagement": "Ushirikishwaji",
     "finished": "Imekamilika",
     "members": "Wanachama",
@@ -19433,6 +19454,7 @@
   "dmSchedule": {
     "view": "Tazama",
     "edit": "Tafuta",
+    "editLabel": "Hariri ujumbe",
     "error": "Hiyo haikufanya kazi. Jaribu tena."
   }
 }

@@ -1213,6 +1213,7 @@
     "payDirectNoName": "Tukuna tika ki te kaihanga i {{symbol}} {{chain}}. Kaore he huringa.",
     "payViaBridgeDpay": "I neke ki Base, ā, i utua ki a Riftn Pay, ka tae mai ngā tohu i roto i te kotahi meneti",
     "dmSent": "Kua tukuna te {{amount}} tohu ki a {{name}}!",
+    "addMessage": "Tāpirihia he karere (kōwhiringa)",
     "messagePublic": "Tūmatanui",
     "railTitle": "Tōtō",
     "railTotal": "{{amount}} tohu",
@@ -2214,6 +2215,8 @@
       "likes": "Pai"
     },
     "likedPosts": {
+      "emptyTitle": "Kāore anō he pai",
+      "privateTitle": "He tūmataiti ngā pai",
       "loadMore": "Utaina anō"
     },
     "dislikes": {
@@ -2238,6 +2241,9 @@
     "sortLikes": "Ngā pai",
     "sortMostLiked": "I paingia nuitia",
     "sortCustomShort": "Āhuatanga",
+    "arrange": {
+      "saving": "E tiaki ana..."
+    },
     "searchThisChannel": "Rapua tēnei hongere",
     "searchResultCount": "1 hua mō \"{{query}}\"",
     "searchResultCountPlural": "{{count}} hua mō \"{{query}}\""
@@ -6223,7 +6229,9 @@
   "nftMarket": {
     "actAll": "Katoa",
     "actListings": "Ngā rārangi",
+    "actOffer": "Tūmau",
     "actOffers": "Ngā tāpaetanga",
+    "actSales": "Hokohoko",
     "tabActivity": "Mahi",
     "shortTitle": "NFTs",
     "filters": "Kōwhiringa",
@@ -6726,6 +6734,9 @@
       "show": "Whakaatu i te haere kaupapa",
       "positions": {
         "center": "Whakaritea ki waenganui"
+      },
+      "sizes": {
+        "medium": "Waenga"
       },
       "shapes": {
         "circle": "Porowhita",
@@ -7712,6 +7723,7 @@
     "footerNote": "Ko te whakauru DePin he ratonga takoha, ehara i te hua haumi. Ka taea te huri i te waatea, te tika me nga utu."
   },
   "creatorFlow": {
+    "newNativeFlow": "Rerenga hou",
     "disconnect": "Momotu",
     "title": "Creator Flow",
     "backToStudio": "Hoki ki te Creator Studio",
@@ -10696,6 +10708,9 @@
       "zoomIn": "Topa ki roto i te kānawehi",
       "zoomOut": "Topa ki waho o te kānawehi"
     },
+    "clipFix": {
+      "listening": "Whakarongo..."
+    },
     "shortcuts": {
       "action": {
         "split": "Wehe",
@@ -10706,7 +10721,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Whakatū hopukanga"
+      "stop": "Whakatū hopukanga",
+      "failed": "I rahua te tārua reo."
     },
     "linkImport": {
       "go": "Kawemai",
@@ -10830,7 +10846,6 @@
     "totalTipsDesc": "E whakaatu ana i te tapeke o ngā tohutohu kua whiwhi te pou mai i ngā kaimātakitaki, e whakaatuhia ana i te whārangi Mōhiohio Pou.",
     "listFractionsDesc": "Mēnā kei a koe ngā wāhanga o tētahi pou, ka taea e koe te whakarārangi hei hoko i te utu e whakatauhia ana e koe (i ngā tohu ia wāhanga). Ka taea e ētahi atu kaiwhakamahi te hoko i ō wāhanga kua whakarārangitia.",
     "dhbToken": "Tohu Riftn",
-    "dhbTokenDesc": "Ko te tohu whaihua taketake o Riftn. Ko te tohu te tohu tohu mō ngā tohu Riftn. Ka whakamahia mō te tohutohu, te utu-ia-tirohanga ihirangi, te pōti whakahaere, me te whakapūātanga.",
     "walletDesc": "Tō putea i runga i te mekameka e pupuri ana i ō tohu Riftn me ētahi atu rawa crypto. Ka honoa mā te Web3Auth mō te ngāwari o te uru.",
     "stakingDesc": "Raka ō tohu Riftn kia whiwhi ai koe i ngā utu i te wā. Ka nui ake hoki te mana pōti o ngā tohu kua whakapūātia i roto i te whakahaere.",
     "governanceDesc": "Tukua, pōtitia ngā tono e hanga ana i te papa. Ka whakataungia tō mana pōti e ō pupuri tohu Riftn.",
@@ -19257,8 +19272,10 @@
       "art": "Toi",
       "gaming": "Kēmu",
       "sports": "Ngā hākinakina",
+      "comedy": "Pukuhohe",
       "film": "Kiriata",
       "podcast": "Kōrero whakarongo",
+      "food": "Kai",
       "news": "Rongo",
       "science": "Pūtaiao"
     },
@@ -19269,6 +19286,7 @@
   "appTokens": {
     "title": "Ō tohu",
     "history": "Hītori",
+    "noHistory": "Kaore ano he mahi",
     "kindDeposit": "Tāpiri pūtea",
     "to": "Ki te",
     "amount": "Tapeke",
@@ -19298,6 +19316,7 @@
     "notNow": "Kāore i tēnei wā"
   },
   "postStats": {
+    "audience": "Whakarongo",
     "engagement": "Whakawhitiwhiti",
     "finished": "Kua mutu",
     "members": "Ngā mema",
@@ -19386,6 +19405,7 @@
   "dmSchedule": {
     "view": "Tirohia",
     "edit": "Whakatika",
+    "editLabel": "Whakahoutia te karere",
     "error": "Kaore i mahi. Whakamātauria ano."
   }
 }

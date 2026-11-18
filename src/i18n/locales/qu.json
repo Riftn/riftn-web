@@ -1214,6 +1214,7 @@
     "payDirectNoName": "Kamachiqman {{symbol}}-pi {{chain}}-pi chiqanmanta kachasqa. Manam imatapas tikrachinchu.",
     "payViaBridgeDpay": "Base ladoman pasasqa chaynataq Riftn Payman pagasqa, tokenkuna jamun huk minutopi hina",
     "dmSent": "{{amount}} fichas nisqakuna {{name}}-man apachisqa!",
+    "addMessage": "Mensajeta yapay (mana obligatorio)",
     "messagePublic": "Tukuypaq",
     "railTitle": "Yanapaykuna",
     "railTotal": "{{amount}} simikuna",
@@ -2214,6 +2215,8 @@
       "likes": "Gustakuykuna"
     },
     "likedPosts": {
+      "emptyTitle": "Manaraq munasqakuna kanchu",
+      "privateTitle": "Munasqakunaqa pakasqa",
       "loadMore": "Astawanta chaskiy"
     },
     "dislikes": {
@@ -2238,6 +2241,9 @@
     "sortLikes": "Munasqakuna",
     "sortMostLiked": "Aswan achka munasqa",
     "sortCustomShort": "Kustamuña",
+    "arrange": {
+      "saving": "Waqaychachkan..."
+    },
     "searchThisChannel": "Kay kanalpi maskay",
     "searchResultCount": "1 taripay &quot;{{query}}&quot; nisqapaq.",
     "searchResultCountPlural": "{{count}} &quot;{{query}}&quot; nisqapaq taripaykuna."
@@ -6258,7 +6264,9 @@
   "nftMarket": {
     "actAll": "Llapan",
     "actListings": "Qatuykuna",
+    "actOffer": "Tapuy",
     "actOffers": "Qukuykuna",
+    "actSales": "Qatiy",
     "tabActivity": "Ruray",
     "shortTitle": "NFTs",
     "filters": "Filtros",
@@ -6746,8 +6754,12 @@
       "image": "Rikchay",
       "camera": "Rikch'a hap'ina",
       "show": "Mayupi rikuchiy",
+      "loop": "Kutipayay",
       "positions": {
         "center": "Centros nisqakuna"
+      },
+      "sizes": {
+        "medium": "Chawpi"
       },
       "shapes": {
         "circle": "Muyu",
@@ -7734,6 +7746,7 @@
     "footerNote": "DePin participación huk yanapakuy yanapakuymi, mana qullqi churay ruruchu. Disponibilidad, elegibilidad chaymanta premiokuna tikrakunman."
   },
   "creatorFlow": {
+    "newNativeFlow": "Musuq Kawsay",
     "disconnect": "T’aqanakuy",
     "title": "Ruwaypa Tariy",
     "backToStudio": "Ruwaqpa Kamachiy Wasiman Kutiy",
@@ -10716,6 +10729,9 @@
       "zoomIn": "Zoom lona nisqapi",
       "zoomOut": "Lonata hatunyachiy"
     },
+    "clipFix": {
+      "listening": "Uyariy…"
+    },
     "shortcuts": {
       "action": {
         "split": "Rakiy",
@@ -10729,7 +10745,8 @@
       "label": "3D nisqapi"
     },
     "voiceClone": {
-      "stop": "Grabay sayachiy"
+      "stop": "Grabay sayachiy",
+      "failed": "Voice cloning nisqaqa manam atikunchu."
     },
     "linkImport": {
       "go": "Apamuy",
@@ -19315,8 +19332,10 @@
       "gaming": "Pukllana",
       "crypto": "Cripto nisqa",
       "sports": "Pukllaykunamanta",
+      "comedy": "Asikuy",
       "film": "Siwi",
       "podcast": "Kuyaychay",
+      "food": "Mikuy",
       "news": "Noticias",
       "science": "Yachay"
     },
@@ -19327,6 +19346,7 @@
   "appTokens": {
     "title": "Qanpa tokenniykikuna",
     "history": "Kawsasqan",
+    "noHistory": "Manaraqmi ima ruwaypas kanchu",
     "kindDeposit": "Qullqi churay",
     "to": "Imaykama",
     "amount": "Yupay",
@@ -19356,6 +19376,7 @@
     "notNow": "Mana chaymi"
   },
   "postStats": {
+    "audience": "Runakuna",
     "engagement": "Tupanachiy",
     "finished": "Tukusqa",
     "members": "Runa",
@@ -19440,6 +19461,7 @@
   "dmSchedule": {
     "view": "Qhaway",
     "edit": "Ruwapay",
+    "editLabel": "Willayta llamk&#39;apuy",
     "error": "Chayqa manan allinchu karqan. Hukmanta kallpachakuy."
   }
 }

@@ -1291,6 +1291,7 @@
     "payDirectNoName": "Inviato direttamente al creator in {{symbol}} su {{chain}}. Nessuno swap.",
     "payViaBridgeDpay": "Spostati su Base e pagati a Riftn Pay, i token arrivano in circa un minuto",
     "dmSent": "Inviati {{amount}} token a {{name}}!",
+    "addMessage": "Aggiungi un messaggio (facoltativo)",
     "messagePublic": "Pubblico",
     "railTitle": "Mance",
     "railTotal": "{{amount}} token",
@@ -2329,6 +2330,9 @@
     "sortLikes": "Mi piace",
     "sortMostLiked": "I più graditi",
     "sortCustomShort": "Personalizzato",
+    "arrange": {
+      "saving": "Salvataggio..."
+    },
     "searchThisChannel": "Cerca in questo canale",
     "searchResultCount": "1 risultato per \"{{query}}\"",
     "searchResultCountPlural": "{{count}} risultati per \"{{query}}\""
@@ -6327,7 +6331,9 @@
   "nftMarket": {
     "actAll": "Tutti",
     "actListings": "Annunci",
+    "actOffer": "Offerta",
     "actOffers": "Offerte",
+    "actSales": "Vendite",
     "tabActivity": "Attività",
     "shortTitle": "NFT",
     "filters": "Filtri",
@@ -6834,6 +6840,7 @@
       },
       "sizes": {
         "small": "Piccolo",
+        "medium": "Media",
         "large": "Grande"
       },
       "shapes": {
@@ -7821,6 +7828,7 @@
     "footerNote": "La partecipazione a DePin è un servizio di contribuzione, non un prodotto di investimento. La disponibilità, l'idoneità e le ricompense possono cambiare."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nuovo flusso",
     "disconnect": "Disconnetti",
     "title": "Flusso del creator",
     "backToStudio": "Torna a Creator Studio",
@@ -10811,6 +10819,9 @@
       "zoomIn": "Ingrandisci la tela",
       "zoomOut": "Zoom indietro sul canvas"
     },
+    "clipFix": {
+      "listening": "In ascolto…"
+    },
     "shortcuts": {
       "action": {
         "split": "Dividi",
@@ -10821,7 +10832,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Ferma registrazione"
+      "stop": "Ferma registrazione",
+      "failed": "Clonazione della voce fallita."
     },
     "linkImport": {
       "go": "Importa",
@@ -19427,6 +19439,8 @@
       "art": "Arte",
       "crypto": "Cripto",
       "sports": "Sport",
+      "comedy": "Commedia",
+      "food": "Cibo",
       "news": "Notizie",
       "science": "Scienze"
     },
@@ -19437,6 +19451,7 @@
   "appTokens": {
     "title": "I tuoi token",
     "history": "Cronologia",
+    "noHistory": "Ancora nessuna attività",
     "kindDeposit": "Deposita",
     "to": "A",
     "amount": "Importo",
@@ -19466,6 +19481,7 @@
     "notNow": "Non ora"
   },
   "postStats": {
+    "audience": "Pubblico",
     "engagement": "Interazioni",
     "finished": "Terminato",
     "members": "Membri",
@@ -19559,6 +19575,7 @@
   "dmSchedule": {
     "view": "Visualizza",
     "edit": "Modifica",
+    "editLabel": "Modifica messaggio",
     "error": "Non ha funzionato. Riprova."
   }
 }

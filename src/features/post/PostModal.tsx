@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { CrossPostPicker } from './components/CrossPostPicker';
 import { CameraCaptureModal } from './components/CameraCaptureModal';
 import { SoundPicker } from './components/SoundPicker';
+import { soundMix, withSoundMix } from '@/lib/sound-window';
 import { cn } from '@/lib/utils';
 import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
 import { afterNextFrame, useSheetFlickClose } from '@/hooks/use-sheet-flick-close';
@@ -514,6 +515,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onOpenSoundPicker={() => setSoundPickerOpen(true)}
         attachedSound={attachedSound}
         onClearSound={clearSound}
+        onSoundMixChange={(mix) => { if (attachedSound) selectSound({ ...attachedSound, url: withSoundMix(attachedSound.url, mix) }); }}
         onCloseModal={closeKeepingDraft}
         onTogglePoll={handleTogglePoll}
         hasPoll={!!state.poll}
@@ -602,7 +604,8 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       <SoundPicker
         isOpen={soundPickerOpen}
         onClose={() => setSoundPickerOpen(false)}
-        onSelect={selectSound}
+        // A new song keeps the levels the poster already set.
+        onSelect={(sound) => selectSound(attachedSound ? { ...sound, url: withSoundMix(sound.url, soundMix(attachedSound.url)) } : sound)}
         currentSound={attachedSound}
         clipSeconds={state.media.find(m => m.type === 'video')?.duration}
       />

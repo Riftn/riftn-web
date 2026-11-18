@@ -1222,6 +1222,7 @@
     "payDirectNoName": "იგზავნება პირდაპირ შემქმნელთან, {{symbol}}-ით, {{chain}} ქსელში. გაცვლის გარეშე.",
     "payViaBridgeDpay": "გადატანილია Base-ზე და გადახდილია Riftn Pay-ზე, ტოკენები მოვა დაახლოებით ერთ წუთში",
     "dmSent": "{{amount}} ტოკენები გაეგზავნა {{name}}-ს!",
+    "addMessage": "დაამატე შეტყობინება (არასავალდებულო)",
     "messagePublic": "საჯარო",
     "railTitle": "რჩევები",
     "railTotal": "{{amount}} ტოკენი",
@@ -2241,6 +2242,8 @@
       "likes": "მოწონებები"
     },
     "likedPosts": {
+      "emptyTitle": "მოწონებები ჯერ არ არის",
+      "privateTitle": "მოწონებები პირადია",
       "loadMore": "მეტის ჩატვირთვა"
     },
     "dislikes": {
@@ -2265,6 +2268,9 @@
     "sortLikes": "მოწონებები",
     "sortMostLiked": "ყველაზე მეტად გამოხმატხილებული",
     "sortCustomShort": "პირადი",
+    "arrange": {
+      "saving": "ინახება..."
+    },
     "searchThisChannel": "ამ არხის ძებნა",
     "searchResultCount": "1 შედეგი \"{{query}}\" -ზე",
     "searchResultCountPlural": "{{count}} შედეგები \"{{query}}\""
@@ -6247,7 +6253,9 @@
   "nftMarket": {
     "actAll": "ყველა",
     "actListings": "განცხადებები",
+    "actOffer": "შეთავაზება",
     "actOffers": "შეთავაზებები",
+    "actSales": "გაყიდვები",
     "tabActivity": "აქტივობა",
     "shortTitle": "NFT-ები",
     "filters": "ფილტრები",
@@ -6759,8 +6767,12 @@
       "image": "სურათი",
       "camera": "კამერა",
       "show": "ნაკადით ჩვენება",
+      "loop": "მარყუჟი",
       "positions": {
         "center": "ცენტრი"
+      },
+      "sizes": {
+        "medium": "საშუალო"
       },
       "shapes": {
         "circle": "წრე",
@@ -7747,6 +7759,7 @@
     "footerNote": "DePin მონაწილეობა არის წვლილის სერვისი, არა საინვესტიციო პროდუქტი. ხელმისაწვდომობა, დასაშვებობა და ჯილდოები შეიძლება შეიცვალოს."
   },
   "creatorFlow": {
+    "newNativeFlow": "ახალი ნაკადი",
     "disconnect": "კავშირის გაწყვეტა",
     "title": "შემქმნელის ნაკადი",
     "backToStudio": "დაბრუნება შემქმნელის სტუდიაში",
@@ -9348,7 +9361,8 @@
       "textSaved": "სუბტიტრების ცვლილებები შენახულია.",
       "action": "ავტომატური სუბტიტრები",
       "styles": {
-        "bold": "მუქი"
+        "bold": "მუქი",
+        "serif": "სახელი"
       },
       "working": "ვუსმენთ… {{percent}}%",
       "downloading": "მეტყველების მოდელს ვამზადებთ… {{percent}}%",
@@ -10729,6 +10743,9 @@
       "zoomIn": "გაადიდეთ ტილო",
       "zoomOut": "გაადიდეთ ტილო"
     },
+    "clipFix": {
+      "listening": "გისმენთ..."
+    },
     "shortcuts": {
       "action": {
         "split": "გაყოფა",
@@ -10739,7 +10756,8 @@
       }
     },
     "voiceClone": {
-      "stop": "ჩაწერის შეჩერება"
+      "stop": "ჩაწერის შეჩერება",
+      "failed": "გამოცემა ვოკალური კლონირების შეცდომით."
     },
     "linkImport": {
       "go": "იმპორტი",
@@ -19250,8 +19268,10 @@
       "gaming": "გეიმინგი",
       "crypto": "კრიპტო",
       "sports": "სპორტი",
+      "comedy": "კომედია",
       "film": "ფილმი",
       "podcast": "პოდკასტი",
+      "food": "საკვები",
       "news": "ახალი ამბები",
       "science": "მეცნიერება"
     },
@@ -19262,6 +19282,7 @@
   "appTokens": {
     "title": "შენი ტოკენები",
     "history": "ისტორია",
+    "noHistory": "აქტივობა ჯერ არ არის",
     "kindDeposit": "თანხის დამატება",
     "to": "მდე",
     "amount": "თანხა",
@@ -19291,6 +19312,7 @@
     "notNow": "ახლა არა"
   },
   "postStats": {
+    "audience": "სას audience",
     "engagement": "ჩართულობა",
     "finished": "დასრულდა",
     "members": "წევრები",
@@ -19379,6 +19401,7 @@
   "dmSchedule": {
     "view": "ნახვა",
     "edit": "რედაქტირება",
+    "editLabel": "შეტყობინების რედაქტირება",
     "error": "ამან არ გაამართლა. სცადეთ ხელახლა."
   },
   "spaces": {

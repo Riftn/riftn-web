@@ -1223,6 +1223,7 @@
     "payDirectNoName": "Pārsūtīts tieši creators {{symbol}} {{chain}}. Nav mainīšanas.",
     "payViaBridgeDpay": "Pārvietots uz Base un samaksāts Riftn Pay, žetoni ieradīsies apmēram minūtes laikā",
     "dmSent": "{{name}} nosūtīti {{amount}} žetoni!",
+    "addMessage": "Pievienot ziņojumu (izmantojama, ja nepieciešama)",
     "messagePublic": "Publisks",
     "railTitle": "Padomi",
     "railTotal": "{{amount}} žetoni",
@@ -2225,6 +2226,8 @@
       "likes": "Patīk"
     },
     "likedPosts": {
+      "emptyTitle": "Vēl nav patīk atzīmju",
+      "privateTitle": "Patīk atzīmes ir privātas",
       "loadMore": "Ielādēt vairāk"
     },
     "dislikes": {
@@ -2249,6 +2252,9 @@
     "sortLikes": "Līkumi",
     "sortMostLiked": "Visvairāk atbalstīti",
     "sortCustomShort": "Personīgais",
+    "arrange": {
+      "saving": "Saglabā..."
+    },
     "searchThisChannel": "Atrast šo kanālu",
     "searchResultCount": "1 rezultāts par \"{{query}}\"",
     "searchResultCountPlural": "{{count}} rezultāti par \"{{query}}\""
@@ -6238,7 +6244,9 @@
   "nftMarket": {
     "actAll": "Viss",
     "actListings": "Sludinājumi",
+    "actOffer": "Piedāvāt",
     "actOffers": "Piedāvājumi",
+    "actSales": "Pārdošana",
     "tabActivity": "Aktivitāte",
     "shortTitle": "NFTS",
     "filters": "Filtri",
@@ -6741,8 +6749,12 @@
       "image": "Attēls",
       "camera": "Kamera",
       "show": "Rādīt straumē",
+      "loop": "Cilpa",
       "positions": {
         "center": "Centrēt"
+      },
+      "sizes": {
+        "medium": "Vidēja"
       },
       "shapes": {
         "circle": "Aplis",
@@ -7729,6 +7741,7 @@
     "footerNote": "DePin dalība ir ieguldījumu pakalpojums, nevis ieguldījumu produkts. Pieejamība, piemērotība un atlīdzības var mainīties."
   },
   "creatorFlow": {
+    "newNativeFlow": "Jauna plūsma",
     "disconnect": "Atvienot",
     "title": "Radītāja plūsma",
     "backToStudio": "Atpakaļ uz Radītāja studiju",
@@ -10713,6 +10726,9 @@
       "zoomIn": "Tuvināt pamatni",
       "zoomOut": "Pārskatīt kanālu"
     },
+    "clipFix": {
+      "listening": "Klausīšanās..."
+    },
     "shortcuts": {
       "action": {
         "split": "Sadalīt",
@@ -10723,7 +10739,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Apturēt ierakstīšanu"
+      "stop": "Apturēt ierakstīšanu",
+      "failed": "Balss klonēšana neizdevās."
     },
     "linkImport": {
       "go": "Importēt",
@@ -19317,8 +19334,10 @@
       "art": "Māksla",
       "gaming": "Spēles",
       "crypto": "Kripto",
+      "comedy": "Komēdija",
       "film": "Filma",
       "podcast": "Aplāde",
+      "food": "Eta",
       "news": "Zīmes",
       "science": "Zinātne"
     },
@@ -19329,6 +19348,7 @@
   "appTokens": {
     "title": "Jūsu marķieri",
     "history": "Vēsture",
+    "noHistory": "Vēl nav aktivitāšu",
     "kindDeposit": "Pievienot līdzekļus",
     "to": "Līdz",
     "amount": "Summa",
@@ -19358,6 +19378,7 @@
     "notNow": "Tagad nav"
   },
   "postStats": {
+    "audience": "Auditorija",
     "engagement": "Iesaistīšanās",
     "finished": "Pabeigts",
     "members": "Dalībnieki",
@@ -19444,6 +19465,7 @@
   "dmSchedule": {
     "view": "Skatīt",
     "edit": "Rediģēt",
+    "editLabel": "Rediģēt ziņu",
     "error": "Tas neizdevās. Mēģiniet vēlreiz."
   }
 }

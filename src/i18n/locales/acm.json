@@ -1269,6 +1269,7 @@
     "payDirectNoName": "تم إرسالها مباشرة إلى المبدع في {{symbol}} في {{chain}}. لا تبادل.",
     "payViaBridgeDpay": "تم النقل إلى Base وتم الدفع إلى Riftn Pay، تصل الرموز في حوالي دقيقة",
     "dmSent": "انداز {{amount}} توكنز لـ {{name}}!",
+    "addMessage": "إرسال...",
     "messagePublic": "عام",
     "railTitle": "الإكراميات",
     "railTotal": "{{amount}} توكنز",
@@ -2268,6 +2269,8 @@
       "likes": "إعجابات"
     },
     "likedPosts": {
+      "emptyTitle": "ماكو إعجابات بعد",
+      "privateTitle": "الإعجابات خاصة",
       "loadMore": "حمّل أكثر"
     },
     "dislikes": {
@@ -2292,6 +2295,9 @@
     "sortLikes": "الإعجابات",
     "sortMostLiked": "الأكثر إعجاباً",
     "sortCustomShort": "لا يوجد نص لترجمته",
+    "arrange": {
+      "saving": "دا نحفظ..."
+    },
     "searchThisChannel": "بحث في القناة",
     "searchResultCount": "1 نتيجة ل\"{{query}}\"",
     "searchResultCountPlural": "نتائج \"{{query}}\" ل\"{{count}}\""
@@ -6054,7 +6060,6 @@
     "basicAnalytics": "تحليلات أساسية",
     "detailedAnalytics": "تحليلات مفصلة",
     "prioritySupport": "دعم ذو أولوية",
-    "sso": "تسجيل الدخول الموحد (SSO)",
     "adminSpendControl": "تحكم إداري بالإنفاق",
     "priorityQueue": "طابور ذو أولوية",
     "priorityQueueFast": "طابور ذو أولوية لمعالجة أسرع للمهام",
@@ -6170,7 +6175,9 @@
   "nftMarket": {
     "actAll": "الكل",
     "actListings": "الإعلانات",
+    "actOffer": "عرض",
     "actOffers": "العروض",
+    "actSales": "المبيعات",
     "tabActivity": "النشاط",
     "shortTitle": "NFT",
     "filters": "فلاتر",
@@ -6666,8 +6673,12 @@
       "image": "الصُوَر",
       "camera": "الكاميرا",
       "show": "عرض على تيكستك",
+      "loop": "دَائِرَة",
       "positions": {
         "center": "مركز"
+      },
+      "sizes": {
+        "medium": "متوسط"
       },
       "shapes": {
         "circle": "دائرة",
@@ -7636,6 +7647,7 @@
     "footerNote": "مشاركة DePin خدمة مساهمة، مو منتج استثماري. الإتاحة والأهلية والمكافآت ممكن تتغير."
   },
   "creatorFlow": {
+    "newNativeFlow": "تدفق جديد",
     "disconnect": "تقطع",
     "title": "مبدع التدفق",
     "backToStudio": "الرجوع إلى Creator Studio",
@@ -9232,7 +9244,8 @@
       "textSaved": "تم حفظ تعديل وصف الصورة.",
       "action": "ترجمة تلقائية",
       "styles": {
-        "bold": "غامق"
+        "bold": "غامق",
+        "serif": "الخط السيريفر"
       },
       "working": "ديسمع… {{percent}}%",
       "downloading": "دنجهّز نموذج الكلام… {{percent}}%",
@@ -10612,6 +10625,9 @@
       "zoomIn": "زيادة الحجم في القماش",
       "zoomOut": "زيادة الحجم في القماش"
     },
+    "clipFix": {
+      "listening": "بالتسميع…"
+    },
     "shortcuts": {
       "action": {
         "split": "تقسيم",
@@ -10622,7 +10638,8 @@
       }
     },
     "voiceClone": {
-      "stop": "وقّف التسجيل"
+      "stop": "وقّف التسجيل",
+      "failed": "فشل في التقليد الصوتي."
     },
     "linkImport": {
       "go": "استورد",
@@ -18766,8 +18783,10 @@
       "gaming": "ألعاب",
       "crypto": "كريبتو",
       "sports": "رياضة",
+      "comedy": "الكوميديا",
       "film": "فيلم",
       "podcast": "بودكاست",
+      "food": "طعام",
       "news": "أخبار",
       "science": "العلوم"
     },
@@ -18778,6 +18797,7 @@
   "appTokens": {
     "title": "توكناتك",
     "history": "السجل",
+    "noHistory": "لا يوجد نشاط بعد",
     "kindDeposit": "إيداع",
     "to": "إلى",
     "amount": "المبلغ",
@@ -18807,6 +18827,7 @@
     "notNow": "مو هسه"
   },
   "postStats": {
+    "audience": "الجمهور",
     "engagement": "التفاعل",
     "finished": "انتهى",
     "members": "الأعضاء",
@@ -18895,6 +18916,7 @@
   "dmSchedule": {
     "view": "عرض",
     "edit": "تعديل",
+    "editLabel": "تعديل الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
   }
 }

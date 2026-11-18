@@ -499,7 +499,6 @@
       "stores": "toko, toko daring, pasar, merchandise, beli, jual, produk, belanja",
       "fractions": "saham, kepemilikan, investasi, miliki postingan, NFT, koleksi, berdagang",
       "usernames": "nama pengguna, handle, nama, ganti nama saya, beli nama, jual nama",
-      "accounts": "beli akun, jual akun, akun dijual, pengikut, transfer akun",
       "apps": "toko aplikasi, aplikasi mini, buat aplikasi, pengembang, alat",
       "arcade": "permainan, game, main, catur, tembak-tembakan, seru",
       "glossary": "istilah, definisi, kamus, arti, apa itu",
@@ -1291,6 +1290,7 @@
     "payDirectNoName": "Dikirim langsung ke kreator dalam {{symbol}} di {{chain}}. Tanpa swap.",
     "payViaBridgeDpay": "Dipindahkan ke Base dan dibayar ke Riftn Pay, token tiba dalam waktu sekitar satu menit",
     "dmSent": "Terkirim {{amount}} token ke {{name}}!",
+    "addMessage": "Tambahkan pesan (opsional)",
     "messagePublic": "Publik",
     "railTitle": "Tip",
     "railTotal": "{{amount}} token",
@@ -2329,6 +2329,9 @@
     "sortLikes": "Suka",
     "sortMostLiked": "Paling disukai",
     "sortCustomShort": "Personalizado",
+    "arrange": {
+      "saving": "Menyimpan..."
+    },
     "searchThisChannel": "Cari saluran ini",
     "searchResultCount": "1 hasil untuk \"{{query}}\"",
     "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\""
@@ -6330,7 +6333,9 @@
   "nftMarket": {
     "actAll": "Semua",
     "actListings": "Iklan",
+    "actOffer": "Tawarkan",
     "actOffers": "Penawaran",
+    "actSales": "Penjualan",
     "tabActivity": "Aktivitas",
     "shortTitle": "Nft",
     "filters": "Filter",
@@ -6839,6 +6844,7 @@
       },
       "sizes": {
         "small": "Kecil",
+        "medium": "Sedang",
         "large": "Besar"
       },
       "shapes": {
@@ -7825,6 +7831,7 @@
     "footerNote": "Partisipasi DePin adalah layanan kontribusi, bukan produk investasi. Ketersediaan, kelayakan, dan imbalan dapat berubah."
   },
   "creatorFlow": {
+    "newNativeFlow": "Alur baru",
     "disconnect": "Putuskan",
     "title": "Alur Kreator",
     "backToStudio": "Kembali ke Studio Kreator",
@@ -10815,6 +10822,9 @@
       "zoomIn": "Perbesar kanvas di",
       "zoomOut": "Perbesar kanvas"
     },
+    "clipFix": {
+      "listening": "Mendengarkan…"
+    },
     "shortcuts": {
       "action": {
         "split": "Pisahkan",
@@ -10825,7 +10835,8 @@
       }
     },
     "voiceClone": {
-      "stop": "Berhenti merekam"
+      "stop": "Berhenti merekam",
+      "failed": "Klon suara gagal."
     },
     "linkImport": {
       "go": "Impor",
@@ -19435,6 +19446,8 @@
       "gaming": "Permainan",
       "crypto": "Kripto",
       "sports": "Olahraga",
+      "comedy": "Komedi",
+      "food": "Makanan",
       "news": "Berita",
       "science": "Sains"
     },
@@ -19445,6 +19458,7 @@
   "appTokens": {
     "title": "Token Anda",
     "history": "Riwayat",
+    "noHistory": "Belum ada aktivitas",
     "kindDeposit": "Setor",
     "to": "Sampai",
     "amount": "Jumlah",
@@ -19474,6 +19488,7 @@
     "notNow": "Nanti saja"
   },
   "postStats": {
+    "audience": "Audiens",
     "engagement": "Interaksi",
     "finished": "Selesai",
     "members": "Anggota",
@@ -19565,6 +19580,7 @@
   "dmSchedule": {
     "view": "Lihat",
     "edit": "Ubah",
+    "editLabel": "Edit pesan",
     "error": "Itu tidak berhasil. Coba lagi."
   }
 }
