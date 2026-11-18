@@ -126,6 +126,8 @@ import { DraftVideoProgress } from '@/features/post/components/DraftVideoProgres
 import { PostProcessingPill } from '@/components/app/PostProcessingDock';
 import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
+import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
 import type { GovernanceProposal } from '@/hooks/use-governance';
 import { GeneratedStageCover } from '@/components/app/stages/GeneratedStageCover';
 import { PastStageCard } from '@/components/app/stages/PastStageCard';
@@ -2840,12 +2842,21 @@ const GALLERY_PROPOSALS: GovernanceProposal[] = (() => {
     { ...base, id: '00000000-0000-4000-8000-000000000001', status: 'open', title: 'Add a creator fund paid from 1% of tips', description: 'Each month, 1% of all tips goes into a pool split between the ten most-watched new creators.', like_count: 4200, dislike_count: 1300, voting_ends_at: new Date(Date.now() + 3 * day).toISOString() },
     { ...base, id: '00000000-0000-4000-8000-000000000002', status: 'passed', title: 'Weekly community stage for governance Q&A', description: 'A recorded stage every Friday where proposers answer questions before votes close.', like_count: 9100, dislike_count: 700, voting_ends_at: new Date(Date.now() - day).toISOString() },
     { ...base, id: '00000000-0000-4000-8000-000000000003', status: 'rejected', title: 'Remove mature content from search', description: '', like_count: 900, dislike_count: 5600, voting_ends_at: new Date(Date.now() - day).toISOString() },
+    { ...base, id: '00000000-0000-4000-8000-000000000004', status: 'open', title: 'Which chain should the next token drop launch on?', description: 'Pick one. The winner gets the first drop next month.', like_count: 640, dislike_count: 0, voting_ends_at: new Date(Date.now() + 2 * day).toISOString(),
+      options: ['Base', 'BNB Chain', 'Ethereum', 'Solana'], option_tallies: [{ weight: 310, voters: 41 }, { weight: 180, voters: 22 }, { weight: 40, voters: 6 }, { weight: 110, voters: 15 }] },
+    { ...base, id: '00000000-0000-4000-8000-000000000005', status: 'passed', title: 'Theme for the December town hall', description: '', like_count: 820, dislike_count: 0, voting_ends_at: new Date(Date.now() - day).toISOString(),
+      options: ['Creator tools', 'Token roadmap', 'Moderation'], option_tallies: [{ weight: 470, voters: 52 }, { weight: 230, voters: 28 }, { weight: 120, voters: 13 }] },
   ] as GovernanceProposal[];
 })();
 
 function ProposalCardGallery() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // Multiple choice: the answer list as the board shows it, and the editor
+  // the propose drawer opens, both live so a theme check can click them.
+  const [myOption, setMyOption] = useState<number | null>(0);
+  const [answerType, setAnswerType] = useState<'yesno' | 'multiple'>('multiple');
+  const [answers, setAnswers] = useState<string[]>(['Base', 'BNB Chain', '']);
   // Seed before the cards mount so they render the samples, never fetch.
   useState(() => GALLERY_PROPOSALS.forEach((p) => queryClient.setQueryData(['governance-proposal', p.id], p)));
   return (
@@ -2855,6 +2866,28 @@ function ProposalCardGallery() {
         {GALLERY_PROPOSALS.map((p) => (
           <ProposalLinkEmbed key={p.id} proposalId={p.id} path="/app/state-gallery" />
         ))}
+      </div>
+      <div data-proposal-options-gallery className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <p className="mb-2 text-sm font-semibold text-white">{GALLERY_PROPOSALS[3].title}</p>
+          <ProposalOptions
+            proposal={GALLERY_PROPOSALS[3]}
+            myOption={myOption}
+            onVote={(i) => setMyOption((cur) => (cur === i ? null : i))}
+          />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <p className="mb-2 text-sm font-semibold text-white">{GALLERY_PROPOSALS[4].title}</p>
+          <ProposalOptions proposal={GALLERY_PROPOSALS[4]} myOption={1} disabled />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <ProposalAnswersEditor
+            answerType={answerType}
+            onAnswerTypeChange={setAnswerType}
+            options={answers}
+            onOptionsChange={setAnswers}
+          />
+        </div>
       </div>
     </section>
   );

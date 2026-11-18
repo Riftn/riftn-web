@@ -67,6 +67,21 @@ export interface GovernanceProposal {
   media_type?: 'image' | 'video' | null;
   /** Public short number, /app/governance/<n>. Absent until the migration lands. */
   proposal_number?: number | null;
+  /**
+   * The answers of a multiple choice proposal (2 to 6). Null or absent on a
+   * yes/no proposal, which is every proposal made before multiple choice.
+   */
+  options?: string[] | null;
+  /** Weighted result per answer, same order as `options`. Kept by a trigger. */
+  option_tallies?: { weight: number; voters: number }[] | null;
+}
+
+/** The viewer's vote on one proposal: the side, and on multiple choice the answer. */
+export interface GovernanceUserVote {
+  type: number;
+  weight: number;
+  /** The answer index on a multiple choice proposal. */
+  option?: number | null;
 }
 
 /** A proposal attachment, uploaded as soon as it is picked so a draft keeps it. */
@@ -300,12 +315,12 @@ export function useGovernanceUserVotes() {
       if (!walletAddress) return {};
       const { data, error } = await supabase
         .from('governance_votes')
-        .select('proposal_id, vote_type, vote_weight')
+        .select('*')
         .eq('wallet_address', walletAddress.toLowerCase());
       if (error) throw error;
-      const voteMap: Record<string, { type: number; weight: number }> = {};
-      for (const vote of data || []) {
-        voteMap[vote.proposal_id] = { type: vote.vote_type, weight: vote.vote_weight };
+      const voteMap: Record<string, GovernanceUserVote> = {};
+      for (const vote of (data || []) as { proposal_id: string; vote_type: number; vote_weight: number; option_index?: number | null }[]) {
+        voteMap[vote.proposal_id] = { type: vote.vote_type, weight: vote.vote_weight, option: vote.option_index ?? null };
       }
       return voteMap;
     },
@@ -373,6 +388,7 @@ async function submitWithPaidFee(
   description: string,
   txHash: string | null,
   media: ProposalMedia | null,
+  options: string[] | null,
 ): Promise<{ proposal: GovernanceProposal }> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= FEE_RETRY_DELAYS_MS.length; attempt++) {
@@ -382,6 +398,7 @@ async function submitWithPaidFee(
         description: description.trim(),
         ...(txHash ? { txHash } : {}),
         ...(media ? { mediaUrl: media.url, mediaType: media.type } : {}),
+        ...(options && options.length > 0 ? { options } : {}),
       });
     } catch (err) {
       lastError = err;
@@ -403,7 +420,13 @@ export function useSubmitGovernanceProposal() {
   const { weight: selfWeight } = useSelfVoteWeight();
 
   return useMutation({
-    mutationFn: async ({ title, description, media = null }: { title: string; description: string; media?: ProposalMedia | null }) => {
+    mutationFn: async ({ title, description, media = null, options = null }: {
+      title: string;
+      description: string;
+      media?: ProposalMedia | null;
+      /** Two to six answers for a multiple choice proposal; null for yes/no. */
+      options?: string[] | null;
+    }) => {
       if (!walletAddress) throw new Error('Not authenticated');
 
       // A fee already paid for this exact proposal is reused rather than paid
@@ -411,7 +434,7 @@ export function useSubmitGovernanceProposal() {
       // proposal did not — the retry below is the same call, not a new charge.
       const alreadyPaid = readProposalFee(title, description);
       if (alreadyPaid) {
-        const retried = await submitWithPaidFee(title, description, alreadyPaid, media);
+        const retried = await submitWithPaidFee(title, description, alreadyPaid, media, options);
         forgetProposalFee();
         return retried.proposal;
       }
@@ -421,7 +444,7 @@ export function useSubmitGovernanceProposal() {
       // the paid path below.
       if (selfWeight > 0) {
         try {
-          const free = await submitWithPaidFee(title, description, null, media);
+          const free = await submitWithPaidFee(title, description, null, media, options);
           return free.proposal;
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
@@ -465,7 +488,7 @@ export function useSubmitGovernanceProposal() {
       // The row is written by the edge function, not from here: the insert
       // this replaced had no idea a fee existed, so posting straight to
       // PostgREST created a free proposal.
-      const result = await submitWithPaidFee(title, description, feeTxHash, media);
+      const result = await submitWithPaidFee(title, description, feeTxHash, media, options);
       forgetProposalFee();
       return result.proposal;
     },
@@ -491,12 +514,14 @@ export function useVoteGovernanceProposal() {
   const explainCannotVote = useExplainCannotVote();
 
   return useMutation({
-    mutationFn: async ({ proposalId, voteType, voteWeight }: {
+    mutationFn: async ({ proposalId, voteType, voteWeight, optionIndex }: {
       proposalId: string;
       voteType: 1 | -1;
       currentVote: number | undefined;
       voteWeight: number;
       badgeName: string | null;
+      /** The answer picked on a multiple choice proposal (voteType is then 1). */
+      optionIndex?: number;
     }) => {
       if (!walletAddress) throw new Error('Not authenticated');
       if (voteWeight === 0) throw new Error('You must hold tokens to vote');
@@ -512,10 +537,10 @@ export function useVoteGovernanceProposal() {
       // because the optimistic update needs a number to move the bar by.
       return callGovernance<{ action: 'voted' | 'removed'; weight: number; badgeName: string | null }>(
         'governance-vote',
-        { proposalId, voteType },
+        optionIndex === undefined ? { proposalId, voteType } : { proposalId, voteType: 1, optionIndex },
       );
     },
-    onMutate: async ({ proposalId, voteType, voteWeight }) => {
+    onMutate: async ({ proposalId, voteType, voteWeight, optionIndex }) => {
       await queryClient.cancelQueries({ queryKey: ['governance-proposals'] });
       await queryClient.cancelQueries({ queryKey: ['governance-votes'] });
       await queryClient.cancelQueries({ queryKey: ['governance-proposal'] });
@@ -525,17 +550,22 @@ export function useVoteGovernanceProposal() {
       const previousDetail = queryClient.getQueryData(['governance-proposal', proposalId]);
 
       // Read ACTUAL current vote from cache (not the stale prop)
-      const cachedVotes = previousVotes as Record<string, { type: number; weight: number }> | undefined;
-      const actualCurrentVote = cachedVotes?.[proposalId]?.type;
-      const oldWeight = cachedVotes?.[proposalId]?.weight ?? voteWeight;
+      const cachedVotes = previousVotes as Record<string, GovernanceUserVote> | undefined;
+      const cached = cachedVotes?.[proposalId];
+      const actualCurrentVote = cached?.type;
+      const oldWeight = cached?.weight ?? voteWeight;
+      const multiple = optionIndex !== undefined;
+      // On multiple choice the same answer again is the withdrawal; on yes/no
+      // it is the same side again.
+      const removing = multiple ? cached?.option === optionIndex : actualCurrentVote === voteType;
 
       // Optimistic vote map update
-      queryClient.setQueryData(['governance-votes', walletAddress], (old: Record<string, { type: number; weight: number }> | undefined) => {
+      queryClient.setQueryData(['governance-votes', walletAddress], (old: Record<string, GovernanceUserVote> | undefined) => {
         const newVotes = { ...(old || {}) };
-        if (actualCurrentVote === voteType) {
+        if (removing) {
           delete newVotes[proposalId];
         } else {
-          newVotes[proposalId] = { type: voteType, weight: voteWeight };
+          newVotes[proposalId] = { type: multiple ? 1 : voteType, weight: voteWeight, option: multiple ? optionIndex : null };
         }
         return newVotes;
       });
@@ -543,7 +573,13 @@ export function useVoteGovernanceProposal() {
       // Compute deltas once
       let likeDelta = 0;
       let dislikeDelta = 0;
-      if (actualCurrentVote === voteType) {
+      if (multiple) {
+        // Every multiple choice vote is a vote_type 1 row: the total moves
+        // only when a vote is cast or taken back, not when it changes answer.
+        if (removing) likeDelta = -oldWeight;
+        else if (cached) likeDelta = voteWeight - oldWeight;
+        else likeDelta = voteWeight;
+      } else if (actualCurrentVote === voteType) {
         // Removing vote — use old weight
         if (voteType === 1) likeDelta = -oldWeight;
         else dislikeDelta = -oldWeight;
@@ -557,21 +593,37 @@ export function useVoteGovernanceProposal() {
         else dislikeDelta = voteWeight;
       }
 
+      const patch = (p: GovernanceProposal): GovernanceProposal => {
+        const next: GovernanceProposal = {
+          ...p,
+          vote_count: p.vote_count + likeDelta - dislikeDelta,
+          like_count: (p.like_count ?? 0) + likeDelta,
+          dislike_count: (p.dislike_count ?? 0) + dislikeDelta,
+        };
+        if (multiple && Array.isArray(p.options)) {
+          const tallies = p.options.map((_, i) => ({
+            weight: Number(p.option_tallies?.[i]?.weight) || 0,
+            voters: Number(p.option_tallies?.[i]?.voters) || 0,
+          }));
+          const from = cached?.option;
+          if (typeof from === 'number' && tallies[from]) {
+            tallies[from] = { weight: Math.max(0, tallies[from].weight - oldWeight), voters: Math.max(0, tallies[from].voters - 1) };
+          }
+          if (!removing && tallies[optionIndex]) {
+            tallies[optionIndex] = { weight: tallies[optionIndex].weight + voteWeight, voters: tallies[optionIndex].voters + 1 };
+          }
+          next.option_tallies = tallies;
+        }
+        return next;
+      };
+
       // Optimistic vote count update on list pages (weighted)
       queryClient.setQueriesData({ queryKey: ['governance-proposals'] }, (old: any) => {
         if (!old?.pages) return old;
         return {
           ...old,
           pages: old.pages.map((page: GovernanceProposal[]) =>
-            page.map((p) => {
-              if (p.id !== proposalId) return p;
-              return {
-                ...p,
-                vote_count: p.vote_count + likeDelta - dislikeDelta,
-                like_count: (p.like_count ?? 0) + likeDelta,
-                dislike_count: (p.dislike_count ?? 0) + dislikeDelta,
-              };
-            })
+            page.map((p) => (p.id === proposalId ? patch(p) : p))
           ),
         };
       });
@@ -579,12 +631,7 @@ export function useVoteGovernanceProposal() {
       // Optimistic update on detail page query
       queryClient.setQueryData(['governance-proposal', proposalId], (old: GovernanceProposal | undefined) => {
         if (!old) return old;
-        return {
-          ...old,
-          vote_count: old.vote_count + likeDelta - dislikeDelta,
-          like_count: (old.like_count ?? 0) + likeDelta,
-          dislike_count: (old.dislike_count ?? 0) + dislikeDelta,
-        };
+        return patch(old);
       });
 
       return { previousRequests, previousVotes, previousDetail, proposalId };
