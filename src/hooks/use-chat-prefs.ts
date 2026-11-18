@@ -1,11 +1,12 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { getChatPrefs, setChatPref, type ChatPref, type ChatPrefPatch } from '@/lib/api/dehub/chat-prefs';
 import { deleteConversation as clearConversationMessages } from '@/lib/api/dehub/dm';
-import { messagesKeys } from '@/hooks/use-messages';
+import { messagesKeys, peerAddressForConversation } from '@/hooks/use-messages';
+import { clearEncryptedChats, registerConversationPeerResolver, setEncryptedChats } from '@/lib/dm-e2ee/encrypt-choice';
 import type { DeHubConversation } from '@/lib/api/dehub';
 
 const KEY = ['dm-chat-prefs'] as const;
@@ -19,6 +20,8 @@ function applyPatch(prev: ChatPref | undefined, id: string, patch: ChatPrefPatch
     ...(patch.pinned !== undefined ? { pinnedAt: patch.pinned ? now : null } : {}),
     ...(patch.archived !== undefined ? { archivedAt: patch.archived ? now : null, ...(patch.archived ? { pinnedAt: null } : {}) } : {}),
     ...(patch.unread !== undefined ? { markedUnread: patch.unread } : {}),
+    ...(patch.listed !== undefined ? { listedAt: patch.listed ? now : null } : {}),
+    ...(patch.encrypted !== undefined ? { encryptedAt: patch.encrypted ? now : null } : {}),
     ...(patch.mutedUntil !== undefined ? { mutedUntil: patch.mutedUntil === 'forever' ? FOREVER : patch.mutedUntil } : {}),
   };
 }
@@ -29,7 +32,7 @@ function applyPatch(prev: ChatPref | undefined, id: string, patch: ChatPrefPatch
  * back if the save fails.
  */
 export function useChatPrefs() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, walletAddress } = useAuth();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data } = useQuery({
@@ -38,6 +41,15 @@ export function useChatPrefs() {
     enabled: isAuthenticated,
     staleTime: 60_000,
   });
+
+  // Sending reads "Encrypt chat" from here (see encrypt-choice).
+  useEffect(() => {
+    registerConversationPeerResolver((id) => peerAddressForConversation(queryClient, id, walletAddress));
+  }, [queryClient, walletAddress]);
+  useEffect(() => {
+    if (!isAuthenticated) clearEncryptedChats();
+    else if (data) setEncryptedChats(data);
+  }, [isAuthenticated, data]);
 
   const byId = useMemo(() => {
     const map = new Map<string, ChatPref>();
@@ -50,11 +62,13 @@ export function useChatPrefs() {
     const prev = before.find((p) => p.conversationId === id);
     const next = applyPatch(prev, id, patch);
     queryClient.setQueryData<ChatPref[]>(KEY, [...before.filter((p) => p.conversationId !== id), next]);
+    if (patch.encrypted !== undefined) setEncryptedChats(queryClient.getQueryData<ChatPref[]>(KEY));
     try {
       const saved = await setChatPref(id, patch);
       queryClient.setQueryData<ChatPref[]>(KEY, (cur = []) => [...cur.filter((p) => p.conversationId !== id), saved]);
     } catch {
       queryClient.setQueryData<ChatPref[]>(KEY, before);
+      setEncryptedChats(before);
       toast.error(t('chatMenu.saveFailed', "Couldn't save that, try again"));
     }
   }, [queryClient, t]);

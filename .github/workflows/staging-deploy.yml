@@ -59,10 +59,14 @@ jobs:
         if: ${{ !inputs.validate_only }}
         run: |
           EXPECTED="$(git rev-parse HEAD)"
-          curl --fail --silent --show-error "https://staging.dehub.io/version.json?commit=$EXPECTED" --output /tmp/staging-version.json
-          EXPECTED="$EXPECTED" node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          const version = JSON.parse(fs.readFileSync('/tmp/staging-version.json', 'utf8'));
-          if (version.id !== process.env.EXPECTED.slice(0, 8)) throw new Error('Staging serves a different commit: ' + JSON.stringify(version));
-          console.log('Staging serves ' + process.env.EXPECTED);
-          JS
+          # Same rollout lag as production: poll for up to two minutes.
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error "https://staging.dehub.io/version.json?commit=$EXPECTED&try=$attempt" --output /tmp/staging-version.json \
+              && EXPECTED="$EXPECTED" node -e 'const v=JSON.parse(require("fs").readFileSync("/tmp/staging-version.json","utf8")); process.exit(v.id===process.env.EXPECTED.slice(0,8)?0:1)'; then
+              echo "Staging serves $EXPECTED"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Staging serves a different commit: $(cat /tmp/staging-version.json 2>/dev/null)"
+          exit 1

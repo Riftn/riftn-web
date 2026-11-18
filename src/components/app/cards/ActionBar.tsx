@@ -57,6 +57,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEngagementWeight } from '@/hooks/use-engagement-weight';
 import { useLeftHanded } from '@/hooks/use-left-handed';
 import { PostUtilityButtons } from './PostUtilityButtons';
+import { useFoldUtility, UtilityOverflowButton } from './UtilityOverflow';
 import { dehubLinkFor } from '@/lib/dehub-links';
 // Lazy so the DM/socket graph doesn't ride in the feed chunk — only loads when a user shares.
 const ShareToDmModal = lazy(() =>
@@ -141,6 +142,12 @@ interface ActionBarProps {
    * has no row to write for them.
    */
   disableReactions?: boolean;
+  /**
+   * Hide the thumbs entirely. A multiple choice governance proposal votes
+   * through its own answer list, so a like/dislike pair beside it would be a
+   * second, meaningless vote.
+   */
+  hideVotes?: boolean;
   /** Hide the dislike button (e.g., for images) */
   hideDislike?: boolean;
   /** Like count to display */
@@ -375,6 +382,7 @@ export function ActionBar({
   myReaction: initialMyReaction = null,
   reactionCounts: initialReactionCounts = null,
   disableReactions = false,
+  hideVotes = false,
   hideDislike = false,
   likeCount,
   dislikeCount,
@@ -1022,7 +1030,7 @@ export function ActionBar({
           governance proposals and feature requests vote through their own
           onLike/onDislike. On a post, 👎 is the last item of the thumbs-up's
           tray instead. */}
-      {!hideDislike && !compact && !reactionsEnabled && (
+      {!hideVotes && !hideDislike && !compact && !reactionsEnabled && (
         <span className={cn("relative flex items-center gap-0.5", isVoting && "opacity-50")}>
           <motion.button
             onClick={() => handleVote(false)}
@@ -1089,6 +1097,7 @@ export function ActionBar({
           your own posts the tray ends in an ⓘ that opens the breakdown of who
           reacted what; the count itself is inert text, since who reacted is
           not public. The wrapper is `relative` so the tray anchors to it. */}
+      {!hideVotes && (
       <span
         className={cn("relative flex items-center gap-0.5", isVoting && "opacity-50")}
         {...likeTray.areaProps}
@@ -1161,6 +1170,7 @@ export function ActionBar({
           )}
         </motion.button>
       </span>
+      )}
     </>
   );
 
@@ -1222,6 +1232,21 @@ export function ActionBar({
     </>
   );
 
+  // Narrow cards fold bookmark / pin / info into one + button before the row
+  // would wrap and push the like button onto a line of its own.
+  const actionRowRef = useRef<HTMLDivElement>(null);
+  const foldUtility = useFoldUtility(actionRowRef, !compact && !hideUtility);
+  const utilityButtons = foldUtility
+    ? <UtilityOverflowButton postId={postId} tokenId={tokenId} isOwnPost={isOwnPost} />
+    : (
+      <PostUtilityButtons
+        postId={postId}
+        tokenId={tokenId}
+        isOwnPost={isOwnPost}
+        variant="inline"
+      />
+    );
+
   if (compact) {
     return (
       /* One row, sharing the composer's line: gift, share, thumb. The thumb
@@ -1245,7 +1270,7 @@ export function ActionBar({
       className
     )}>
       {utilityDesktopAnchor ? (
-        <div className={cn("flex flex-wrap items-center justify-between gap-y-2 gap-x-3", leftHanded ? "flex-row-reverse lg:pl-0.5" : "lg:pr-0.5")}>
+        <div ref={actionRowRef} className={cn("flex flex-wrap items-center justify-between gap-y-2 gap-x-3", leftHanded ? "flex-row-reverse lg:pl-0.5" : "lg:pr-0.5")}>
           {/* Counters end on bare digits while icons carry ~2px of built-in
               inset, so the trailing count read tighter to the card edge than
               the icons do to the side and bottom. lg:pr-0.5 nudges it in. */}
@@ -1257,12 +1282,7 @@ export function ActionBar({
               phones — the same place the app's card carries them. */}
           {!hideUtility && (
             <div className="flex items-center gap-4 shrink-0 order-last lg:order-none">
-              <PostUtilityButtons
-                postId={postId}
-                tokenId={tokenId}
-                isOwnPost={isOwnPost}
-                variant="inline"
-              />
+              {utilityButtons}
             </div>
           )}
           {/* display:contents so each engagement button is its own flex item
@@ -1273,7 +1293,7 @@ export function ActionBar({
           </div>
         </div>
       ) : (
-        <div className={cn(
+        <div ref={actionRowRef} className={cn(
           "flex flex-wrap items-center gap-y-2 gap-x-2 justify-between",
           // Same optical nudge as above: the trailing count is bare digits.
           leftHanded ? "flex-row-reverse pl-0.5" : "pr-0.5",
@@ -1288,12 +1308,7 @@ export function ActionBar({
               "contents",
               hideUtilityDesktop && "lg:hidden"
             )}>
-              <PostUtilityButtons
-                postId={postId}
-                tokenId={tokenId}
-                isOwnPost={isOwnPost}
-                variant="inline"
-              />
+              {utilityButtons}
             </div>
           )}
           <div className="contents">

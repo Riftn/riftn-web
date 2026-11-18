@@ -2268,6 +2268,13 @@ export const ro = {
     thirdPartyItem10Prefix: 'Multi-postare:',
     thirdPartyItem10: 'Când te conectezi cu alte conturi de rețele sociale, postările pe care le alegi să trimiți sunt livrate pe acele platforme printr-un serviciu de publicare, iar către Farcaster printr-un semnatar pe care îl aprobi.',
     dataSovereigntyItem5: 'Puteți alege dacă sistemele AI pot fi antrenate cu munca dvs. Aceasta este permisă până când o dezactivați în Setări, iar alegerea dvs. este publicată către crawlerele de pe paginile pe care le controlăm.',
+    googleDataTitle: 'Datele utilizatorului Google',
+    googleDataText: 'Dacă te autentifici cu Google, Riftn solicită de la Google doar profilul tău de bază: numele, adresa de e-mail și fotografia de profil (domeniile openid, email și profile). Nu solicităm nimic altceva din contul tău Google.',
+    googleDataItem1: 'Cum le folosim: pentru a crea și a te autentifica în contul tău Riftn, pentru a completa numele tău afișat și avatarul, și pentru a te contacta în legătură cu contul tău. Nimic altceva.',
+    googleDataItem2: 'Cum le stocăm: pe serverele noastre de cont și la furnizorul nostru de autentificare, criptate în tranzit și în repaus, atât timp cât contul tău există.',
+    googleDataItem3: 'Cu cine le partajăm: cu nimeni. Nu sunt vândute, nu sunt folosite pentru publicitate și nu sunt folosite pentru a antrena modele AI.',
+    googleDataItem4: 'Ștergerea acestora: șterge-ți contul din Setări sau trimite un e-mail la dev@riftn.com, iar datele Google pe care le deținem vor fi eliminate. De asemenea, poți revoca accesul Riftn în orice moment la myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Utilizarea de către Riftn a informațiilor primite de la API-urile Google respectă Politica privind datele utilizatorilor din serviciile API Google, inclusiv cerințele de utilizare limitată.',
   },
   contact: {
     hindi: 'Limba hindi',

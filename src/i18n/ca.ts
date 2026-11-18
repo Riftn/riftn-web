@@ -2150,6 +2150,13 @@ export const ca = {
     thirdPartyItem7Prefix: 'Entrega:',
     thirdPartyItem7: 'Cloudflare serveix i emmagatzema en cache el lloc web i els seus mitjans.',
     thirdPartyItem8Prefix: 'IA i Traducció:',
+    googleDataTitle: 'Dades d\'usuari de Google',
+    googleDataText: 'Si et connectes amb Google, Riftn sol·licita a Google només el teu perfil bàsic: el teu nom, adreça electrònica i foto de perfil (els escopos openid, email i profile). No demanem res més del teu compte de Google.',
+    googleDataItem1: 'Com l\'utilitzem: per crear i iniciar la sessió al teu compte de Riftn, per omplir el teu nom d\'aparició i avatar, i per contactar-te sobre el teu compte. Res més.',
+    googleDataItem2: 'Com el guardem: als nostres servidors de comptes i al nostre proveïdor d\'autenticació, encriptat en trànsit i en repos, durant tot el temps que el teu compte existeixi.',
+    googleDataItem3: 'Amb qui el compartim: ningú. No es ven, no s\'utilitza per a publicitat i no s\'utilitza per entrenar models d\'IA.',
+    googleDataItem4: 'Eliminació: elimina el teu compte a Configuració, o envia un correu a dev@riftn.com, i les dades de Google que tenim es suprimeixen. També pots revocar l\'accés de Riftn en qualsevol moment a myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'L\'ús de Riftn de la informació rebuda des de les API de Google segueix la Política d\'Ús de Dades d\'Usuari de Google API Services, incloent els requisits d\'Ús Limitat.',
   },
   contact: {
     title: 'Contacteu amb nosaltres',

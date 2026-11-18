@@ -2076,6 +2076,13 @@ export const wuu = {
     contactItem3: '提交提案通過 DAO',
     contactNote: '這個隱私政策可能會通過治理過程更新。重要變更會通過我們的官方渠道傳播',
     importantNotice: '重要通知',
+    googleDataTitle: 'Google 用戶資料',
+    googleDataText: '如果你用 Google 登入 Riftn，Riftn 只會要求你基本的檔案：你的名字、電子郵件地址和檔案照片（openid、email 和 profile scopes）。我們不會要求任何其他資料。',
+    googleDataItem1: '我們如何使用它：用來創建和登入你的 Riftn 帳戶、填入你的顯示名稱和頭像、以及關於你的帳戶的聯繫。沒有其他用途。',
+    googleDataItem2: '我們如何儲存它：在我們的帳戶伺服器和驗證提供者中，傳輸和儲存時加密，直到你的帳戶存在為止。',
+    googleDataItem3: '我們會與誰分享它：沒有任何人。它不被出售、不用於廣告、也不用於訓練 AI 模型。',
+    googleDataItem4: '刪除它：在設定中刪除你的帳戶，或發送電子郵件到 dev@riftn.com，Riftn 所持有的 Google 資料會被刪除。你也可以在任何時間點在 myaccount.google.com/permissions 中取消 Riftn 的存取權。',
+    googleDataLimitedUse: 'Riftn 對從 Google API 接收的資訊的使用遵守 Google API Services User Data Policy，包括 Limited Use 的要求。',
   },
   contact: {
     discord: 'Discord',

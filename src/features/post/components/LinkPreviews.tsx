@@ -20,6 +20,13 @@ interface LinkPreviewsProps {
    */
   hideAssetCards?: boolean;
   onHideAssetCardsChange?: (hidden: boolean) => void;
+  /**
+   * The outside links whose preview the poster closed. Owned by the composer
+   * for the same reason as `hideAssetCards`: the post goes out without those
+   * cards. Without a handler the X still works, for this draft only.
+   */
+  hiddenUrls?: string[];
+  onHiddenUrlsChange?: (urls: string[]) => void;
 }
 
 /**
@@ -57,12 +64,15 @@ function useSettledText(text: string): string {
   return settled;
 }
 
-export function LinkPreviews({ text: liveText, onRemoveCommunityLink, hideAssetCards, onHideAssetCardsChange }: LinkPreviewsProps) {
+export function LinkPreviews({ text: liveText, onRemoveCommunityLink, hideAssetCards, onHideAssetCardsChange, hiddenUrls, onHiddenUrlsChange }: LinkPreviewsProps) {
   const { t: _copy } = _useCopy();
   const text = useSettledText(liveText);
   const [previews, setPreviews] = useState<Map<string, LinkPreviewData>>(new Map());
   const [loading, setLoading] = useState<Set<string>>(new Set());
-  const [removedUrls, setRemovedUrls] = useState<Set<string>>(new Set());
+  const [localRemovedUrls, setLocalRemovedUrls] = useState<string[]>([]);
+  const removedList = hiddenUrls ?? localRemovedUrls;
+  const setRemovedList = onHiddenUrlsChange ?? setLocalRemovedUrls;
+  const removedUrls = useMemo(() => new Set(removedList), [removedList]);
   const [dismissedLinks, setDismissedLinks] = useState<Set<string>>(new Set());
   const fetchedUrls = useRef<Set<string>>(new Set());
 
@@ -124,7 +134,7 @@ export function LinkPreviews({ text: liveText, onRemoveCommunityLink, hideAssetC
   }, [text, removedUrls, previews]);
 
   const handleRemove = (url: string) => {
-    setRemovedUrls(prev => new Set(prev).add(url));
+    if (!removedUrls.has(url)) setRemovedList([...removedList, url]);
     setPreviews(prev => {
       const next = new Map(prev);
       next.delete(url);

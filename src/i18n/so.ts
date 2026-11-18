@@ -2267,6 +2267,13 @@ export const so = {
     dataSovereigntyItem6: 'Waxaad iska tirtiri kartaa koontadaada Settings; profile, uploads iyo warbaahinta kaydsan, oo ay ku jiraan nuqulada gurmad, waa la tirtiray',
     doCollectItem1: 'Aqoonsiga aad ku soo gashay — iimayl ama lambar telefoon haddii aad dooratay mid ka mid ah waddooyinkaas, aqoonsiga Google, Apple ama Telegram ay soo celiyaan haddii aad ku soo gashay hab bulsho, ama aqoonsiga dadweynaha ee passkey. Soo galitaanka boorsada (wallet) nama siiso wax aan ka ahayn cinwaankaaga dadweynaha.',
     thirdPartyItem10: 'Markaad ku xirto akoonnada kale ee bulshada, qoraallada aad doorato inaad dirto waxaa loo dhiibaa aaladahaas iyada oo loo marayo adeeg qoraal, iyo Farcaster iyada oo loo marayo saxiix aad oggolaatay',
+    googleDataTitle: 'Xogta isticmaalaha Google',
+    googleDataText: 'Haddii aad ku gasho Google, Riftn waxay Google ka codsataa oo kaliya macluumaadkaaga aasaasiga ah: magacaaga, cinwaanka iimaylka iyo sawirkaaga astaanta (openid, email iyo profile scopes). Wax kale kama codsanno Koontadaada Google.',
+    googleDataItem1: 'Sida aan u isticmaalno: si aan u abuurno oo aan kuu galinno koontadaada Riftn, si aan u buuxinno magacaaga iyo sawirkaaga, iyo si aan kuu soo gaarsiinno wixii ku saabsan koontadaada. Wax kale ma aha.',
+    googleDataItem2: 'Sida aan u kaydinno: server-yada koontadayada iyo bixiyaha xaqiijinta, oo sir ah inta lagu jiro gudbinta iyo marka la kaydiyo, inta ay koontadaadu jirto.',
+    googleDataItem3: 'Cidda aan la wadaagno: cidna. Laguma iibiyo, looma isticmaalo xayeysiis, loomana isticmaalo tababaridda moodellada AI.',
+    googleDataItem4: 'Tirtiridda: tirtir koontadaada qaybta Settings, ama iimayl u dir dev@riftn.com, xogta Google ee aan haynno waa laga saarayaa. Waxaad sidoo kale burin kartaa gelitaanka Riftn wakhti kasta adigoo tagaya myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Isticmaalka Riftn ee macluumaadka laga helo Google APIs waxay u hoggaansantaa Siyaasadda Xogta Isticmaalaha ee Adeegyada Google API, oo ay ku jiraan shuruudaha Isticmaalka Xaddidan.',
   },
   contact: {
     title: 'Xiriir',

@@ -58,6 +58,8 @@ html:is([data-theme="light"], [data-system-tone="light"]) { --skeleton-shine: rg
     animation-delay: var(--shine-delay, 0ms);
     will-change: transform;
   }
+  /* A page placeholder fades in only once a load has taken a moment (CopyGate SKELETON_APPEAR_MS). */
+  [data-skeleton-appear] { animation: skeleton-in .12s ease-out both; animation-delay: var(--appear-delay, 120ms); }
   [data-skeleton-reveal="out"] { animation: skeleton-out .32s ease-out both; }
   [data-skeleton-reveal="in"] { animation: skeleton-in .32s ease-out both; }
 }

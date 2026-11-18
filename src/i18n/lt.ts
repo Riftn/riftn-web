@@ -1979,6 +1979,13 @@ export const lt = {
     contactNote: 'Ši Privatumo politika gali būti atnaujinta vykdant bendruomenės valdymo procesus. Apie esminius pakeitimus bus pranešta mūsų oficialiais kanalais.',
     importantNotice: 'Svarbi pastaba',
     importantNoticeText: '„Riftn“ veikia kaip decentralizuotas protokolas. Nors siekiame apsaugoti naudotojų privatumą, decentralizuotas pobūdis reiškia, kad sąveika gali būti matoma viešosiose blokų grandinėse. Naudotojai yra atsakingi už tai, kad suprastų savo blokų grandinės sąveikos poveikį privatumui.',
+    googleDataTitle: '„Google“ vartotojo duomenys',
+    googleDataText: 'Jei prisijungiate naudodami „Google“, „Riftn“ iš „Google“ prašo tik jūsų pagrindinio profilio: vardo, el. pašto adreso ir profilio nuotraukos („openid“, „email“ ir „profile“ aprėptys). Iš jūsų „Google“ paskyros daugiau nieko neprašome.',
+    googleDataItem1: 'Kaip mes tai naudojame: kad sukurtume jūsų „Riftn“ paskyrą ir prijungtume jus prie jos, kad užpildytume jūsų rodomą vardą ir avatarą bei susisiektume su jumis dėl jūsų paskyros. Nieko daugiau.',
+    googleDataItem2: 'Kaip mes tai saugome: mūsų paskyrų serveriuose ir pas mūsų autentifikavimo paslaugų teikėją, užšifruotą perdavimo metu ir ramybės būsenoje, tol, kol egzistuoja jūsų paskyra.',
+    googleDataItem3: 'Su kuo mes tai bendriname: su niekuo. Duomenys nėra parduodami, nenaudojami reklamai ir nenaudojami dirbtinio intelekto modeliams mokyti.',
+    googleDataItem4: 'Duomenų ištrynimas: ištrinkite savo paskyrą nustatymuose arba parašykite el. laišką adresu dev@riftn.com, ir mūsų turimi „Google“ duomenys bus pašalinti. Taip pat bet kuriuo metu galite atšaukti „Riftn“ prieigą adresu myaccount.google.com/permissions.',
+    googleDataLimitedUse: '„Riftn“ naudojama informacija, gauta iš „Google“ API, atitinka „Google API Services“ vartotojo duomenų politiką, įskaitant riboto naudojimo reikalavimus.',
   },
   contact: {
     title: 'Susisiekite',

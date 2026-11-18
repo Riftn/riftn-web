@@ -96,6 +96,20 @@ html[data-system-tone="light"] .login-stack-corner {
   transition: opacity 450ms ease-out;
 }
 .login-stack__video.is-ready { opacity: 1; }
+/* The wall is decoration, not a player: no taps, no built-in play button or controls. */
+.login-stack__lanes,
+.login-stack__tile,
+.login-stack__video { pointer-events: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.login-stack__video::-webkit-media-controls,
+.login-stack__video::-webkit-media-controls-panel,
+.login-stack__video::-webkit-media-controls-enclosure,
+.login-stack__video::-webkit-media-controls-overlay-play-button,
+.login-stack__video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+  opacity: 0 !important;
+}
 .login-stack__ai {
   position: absolute;
   left: 8px;

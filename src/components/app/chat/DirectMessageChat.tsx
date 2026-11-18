@@ -13,7 +13,7 @@ import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, SmilePlus } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, LockOpen, SmilePlus, CheckCircle2 } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -49,7 +49,8 @@ import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
-import { DmLockedState, DmUndecryptableRun } from './DmLockedState';
+import { DmUndecryptableRun } from './DmLockedState';
+import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
@@ -115,6 +116,7 @@ import {
   emitReadReceipt,
   emitForwardMessage,
   emitEditMessage,
+  emitDeleteMessage,
   emitSendMessage,
   waitForDmSocket,
   onConversationDeleted,
@@ -123,6 +125,8 @@ import {
   onDmError,
 } from '@/lib/api/dehub/dm-socket';
 import { ForwardMessageDialog } from './ForwardMessageDialog';
+import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
+import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -471,9 +475,19 @@ const MessageBubble = memo(function MessageBubble({
   onDiscardSend,
   cozy,
   callPeerAddress,
+  selecting = false,
+  picked = false,
+  onTogglePick,
+  onStartPick,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
+  /** Picking several messages: a click or tap toggles this one instead of acting on it. */
+  selecting?: boolean;
+  picked?: boolean;
+  onTogglePick?: (message: DmMessage) => void;
+  /** Start picking with this message (Select on hover, Ctrl/Cmd-click, or a hold on a phone). */
+  onStartPick?: (message: DmMessage) => void;
   /** The other person in a one-to-one chat, so a call card can call them back. */
   callPeerAddress?: string;
   /** Set in the cozy layout: where this bubble sits in its sender's run. */
@@ -501,6 +515,8 @@ const MessageBubble = memo(function MessageBubble({
   // last bubble carries them. A failed or sending bubble keeps its line, since
   // that is where Retry and the spinner live.
   const cozyShowMeta = !cozy || cozy.last || message.sendState === 'failed' || message.sendState === 'sending';
+  const pickable = !!onStartPick && !message.isDeleted && message.sendState !== 'sending' && message.sendState !== 'failed';
+  const hold = useRowLongPress(pickable ? () => (selecting ? onTogglePick?.(message) : onStartPick?.(message)) : undefined);
   const cozyShowAvatar = !cozy || cozy.last;
   // Payment-pending spinner: memo means no incidental re-renders, so the 90s
   // "give up waiting" fallback schedules its own re-render at the boundary
@@ -645,11 +661,12 @@ const MessageBubble = memo(function MessageBubble({
     isTooShort,
     handleTranslate,
     handleShowOriginal,
-    // Direct messages stay on-demand. Auto-translating would ship every private
-    // message a user receives to a third-party translator without them asking,
-    // and the free tier is a shared translation memory. The translate control is
-    // still here for anyone who wants it.
-  } = useTranslation(textContent, false);
+    // Messages you receive translate themselves, the same way room chats do:
+    // 'chat' rules, so slang and names stay as typed and only lines that plainly
+    // read as another language change. Sent as private text (never a training
+    // tier), and the Auto-translate setting turns it off. Your own messages
+    // stay as you wrote them.
+  } = useTranslation(textContent, isOwnMessage ? false : 'chat');
   const { t: tr } = useI18n();
 
   // A contract address or a $TICKER in a plain message cards up the same way it
@@ -687,8 +704,20 @@ const MessageBubble = memo(function MessageBubble({
       id={`dm-msg-${message._id}`}
       data-cozy-first={cozy?.first ? '' : undefined}
       data-cozy-last={cozy?.last ? '' : undefined}
-      className={`flex ${cozy ? `gap-2 items-end ${cozy.first ? 'pt-2' : 'pt-0.5'} ${cozy.last ? 'pb-1' : 'pb-0'}` : 'gap-3 py-2'} ${isOwnMessage ? 'flex-row-reverse' : ''} group relative rounded-lg transition-colors`}
+      data-msg-picked={selecting && pickable ? (picked ? 'true' : 'false') : undefined}
+      {...hold.handlers}
+      onClickCapture={(e) => {
+        if (hold.consumeClick()) { e.preventDefault(); e.stopPropagation(); return; }
+        if (!pickable) return;
+        // Picking: a click anywhere on the row toggles it, never opens media or links.
+        if (selecting) { e.preventDefault(); e.stopPropagation(); onTogglePick?.(message); return; }
+        if (e.metaKey || e.ctrlKey || e.shiftKey) { e.preventDefault(); e.stopPropagation(); onStartPick?.(message); }
+      }}
+      className={`flex ${cozy ? `gap-2 items-end ${cozy.first ? 'pt-2' : 'pt-0.5'} ${cozy.last ? 'pb-1' : 'pb-0'}` : 'gap-3 py-2'} ${isOwnMessage ? 'flex-row-reverse' : ''} group relative rounded-lg transition-colors ${selecting && pickable ? `cursor-pointer select-none ${picked ? 'bg-white/[0.07]' : 'hover:bg-white/[0.03]'}` : ''}`}
     >
+      {selecting && pickable && (
+        <span className={`flex ${isOwnMessage ? 'order-last mr-auto pr-1' : 'pr-1'} self-center`}><MessagePickTick checked={picked} /></span>
+      )}
       {!isOwnMessage && !cozyShowAvatar && <div aria-hidden className="w-8 flex-shrink-0" />}
       {!isOwnMessage && cozyShowAvatar && (() => {
         const avatar = (
@@ -960,13 +989,11 @@ const MessageBubble = memo(function MessageBubble({
                       onClick={() => onOpenImage?.(getMediaUrl(primaryMediaUrl)!)}
                     />
                     )}
-                    {/* Driven by the same opted-out hook as a text message, not
-                        by <TranslatableText>. That component calls
-                        useTranslation(text) with auto defaulting to true, so
-                        rendering the caption through it sent private DM captions
-                        to the translator on mount — around the deliberate
-                        auto=false above. textContent is message.content here:
-                        isPostShare can only be true for msgType 'msg'. */}
+                    {/* Driven by the same hook as a text message, not by
+                        <TranslatableText>, so a caption follows the chat rules
+                        above instead of the post rules. textContent is
+                        message.content here: isPostShare can only be true for
+                        msgType 'msg'. */}
                     {message.content && (
                       <p dir="auto" className="text-sm mt-1 break-words whitespace-pre-wrap text-left">
                         {renderChatTextWithLinks(isTranslated ? translatedText : message.content)}
@@ -1034,10 +1061,22 @@ const MessageBubble = memo(function MessageBubble({
           </div>
         )}
 
-          {!message.isDeleted && !isUnsent && message.msgType !== 'tip' && !isEditing && (onReply || onReact || onPin || onForward || downloadTarget || (onEdit && canEdit)) && (
+          {!selecting && !message.isDeleted && !isUnsent && message.msgType !== 'tip' && !isEditing && (onReply || onReact || onPin || onForward || downloadTarget || (onEdit && canEdit) || pickable) && (
             <div
               className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? 'right-full mr-1' : 'left-full ml-1'} flex items-center gap-1 transition-all opacity-0 group-hover:opacity-100 z-10`}
             >
+              {pickable && (
+                <button
+                  type="button"
+                  data-msg-select-start
+                  onClick={() => onStartPick?.(message)}
+                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
+                  title={_copy('msgSelect.select', { defaultValue: 'Select' })}
+                  aria-label={_copy('msgSelect.select', { defaultValue: 'Select' })}
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                </button>
+              )}
               {onReply && (
                 <button
                   type="button"
@@ -1341,6 +1380,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const [searchQuery, setSearchQuery] = useSurfaceDraft("components/app/chat/DirectMessageChat.tsx:searchQuery", '');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [forwardMessageTarget, setForwardMessageTarget] = useState<DmMessage | null>(null);
+  // Several messages forwarded at once from the Select bar.
+  const [bulkForward, setBulkForward] = useState<DmMessage[] | null>(null);
+  // Picking several messages: Select on one (hover button, Ctrl/Cmd-click, or
+  // a hold on a phone), then click or tap others. null = not picking.
+  const [pickedMsgs, setPickedMsgs] = useState<Set<string> | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [dmGateChecked, setDmGateChecked] = useState(false);
@@ -1686,10 +1730,21 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   // useCallback dep list would break the bubble-level memoization documented
   // above MessageBubble (every bubble's onSaveEdit prop would change identity
   // on every new message, not just the one being edited).
-  // No key yet and the thread holds lines only a key can open: show one
-  // unlock screen instead of the same "can't be opened" pill on every line.
-  const showLockedState = encryptionStatus !== 'ready'
+  // Encryption is per chat and off unless "Encrypt chat" is on. Nothing here
+  // asks for the wallet on its own: older encrypted lines collapse into one
+  // row each, and the banner offers Unlock for anyone who wants to read them.
+  const hasUndecryptable = encryptionStatus !== 'ready'
     && messages.some(m => m.undecryptable && !m.isDeleted);
+  const { byId: chatPrefsById, update: updateChatPref } = useChatPrefs();
+  const canToggleEncryption = !isGroupChat && /^[0-9a-f]{24}$/i.test(conversation.id || '');
+  const chatEncrypted = canToggleEncryption && !!chatPrefsById.get(conversation.id)?.encryptedAt;
+  const toggleEncryption = useCallback(() => {
+    const on = !chatEncrypted;
+    void updateChatPref(conversation.id, { encrypted: on });
+    if (on) toast.success(tr('messages.encrypted', { defaultValue: 'End-to-end encrypted' }));
+    // Turning it on is the deliberate moment to set up this device's key.
+    if (on && encryptionStatus !== 'ready') void retryEncryption();
+  }, [chatEncrypted, conversation.id, updateChatPref, tr, encryptionStatus, retryEncryption]);
 
   const messagesRef = useRef(messages);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
@@ -2102,8 +2157,53 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     [queryClient, walletAddress, user?._id, _copy],
   );
 
+  /** Sends one message on to another chat; throws when it did not go. */
+  const forwardOne = useCallback(async (msg: DmMessage, targetConversationId: string) => {
+    if (msg.encMedia) {
+      await forwardEncryptedMedia(msg, msg.encMedia, targetConversationId);
+    } else if (msg.encrypted) {
+      // The server cannot re-encrypt for another conversation, so an
+      // encrypted line is re-sent from here: plaintext from the cache,
+      // encrypted again for the target's peer, citing the original.
+      if (msg.undecryptable) throw new Error(tr('messages.cannotDecrypt'));
+      const targetPeer = peerAddressForConversation(queryClient, targetConversationId, walletAddress);
+      const wire = await prepareOutgoing(targetPeer, msg.content);
+      await waitForDmSocket();
+      await emitSendMessage({
+        dmId: targetConversationId,
+        content: wire.content,
+        type: 'msg',
+        forwardedFrom: { messageId: msg._id },
+      });
+    } else {
+      await emitForwardMessage({ messageId: msg._id, targetDmId: targetConversationId });
+    }
+  }, [queryClient, walletAddress, tr, forwardEncryptedMedia]);
+
+  /** The Select bar's Forward: each picked message in thread order, one after another. */
+  const forwardMany = useCallback(async (list: DmMessage[], targetConversationId: string) => {
+    let ok = 0;
+    for (const msg of list) {
+      try { await forwardOne(msg, targetConversationId); ok++; } catch { /* counted below */ }
+    }
+    if (ok === list.length) {
+      toast.success(_copy('msgSelect.forwarded', { defaultValue: '{{count}} messages forwarded', count: ok }));
+    } else if (ok > 0) {
+      toast.error(_copy('msgSelect.partForwarded', { defaultValue: 'Forwarded {{ok}} of {{total}}', ok, total: list.length }));
+    } else {
+      toast.error(_copy("copy.60761edbfeb6", { defaultValue: "Could not forward the message." }));
+      return;
+    }
+    setBulkForward(null);
+    setPickedMsgs(null);
+  }, [forwardOne, _copy]);
+
   const handleForwardSelect = useCallback(
     async (targetConversationId: string) => {
+      if (bulkForward) {
+        await forwardMany(bulkForward, targetConversationId);
+        return;
+      }
       if (!forwardMessageTarget) return;
       /*
        * "Message forwarded" used to be raised on the line after the emit,
@@ -2116,32 +2216,12 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
        * back to this action, and closing it would strand the intent as well as
        * the message.
        */
+      if (forwardMessageTarget.encrypted && forwardMessageTarget.undecryptable) {
+        toast.error(tr('messages.cannotDecrypt'));
+        return;
+      }
       try {
-        if (forwardMessageTarget.encMedia) {
-          await forwardEncryptedMedia(forwardMessageTarget, forwardMessageTarget.encMedia, targetConversationId);
-        } else if (forwardMessageTarget.encrypted) {
-          // The server cannot re-encrypt for another conversation, so an
-          // encrypted line is re-sent from here: plaintext from the cache,
-          // encrypted again for the target's peer, citing the original.
-          if (forwardMessageTarget.undecryptable) {
-            toast.error(tr('messages.cannotDecrypt'));
-            return;
-          }
-          const targetPeer = peerAddressForConversation(queryClient, targetConversationId, walletAddress);
-          const wire = await prepareOutgoing(targetPeer, forwardMessageTarget.content);
-          await waitForDmSocket();
-          await emitSendMessage({
-            dmId: targetConversationId,
-            content: wire.content,
-            type: 'msg',
-            forwardedFrom: { messageId: forwardMessageTarget._id },
-          });
-        } else {
-          await emitForwardMessage({
-            messageId: forwardMessageTarget._id,
-            targetDmId: targetConversationId,
-          });
-        }
+        await forwardOne(forwardMessageTarget, targetConversationId);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : _copy("copy.60761edbfeb6", { defaultValue: "Could not forward the message." }));
         return;
@@ -2149,8 +2229,79 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       toast.success(_copy("copy.4b0ad27c8ac8", { defaultValue: "Message forwarded" }));
       setForwardMessageTarget(null);
     },
-    [forwardMessageTarget, queryClient, walletAddress, tr, _copy, forwardEncryptedMedia],
+    [forwardMessageTarget, bulkForward, tr, _copy, forwardOne, forwardMany],
   );
+
+  // ─── Picking several messages (Select) ──────────────────────────────────────
+  const [confirmPickDelete, setConfirmPickDelete] = useState(false);
+  // Phones say "Tap", computers "Click".
+  const coarsePointer = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
+  const isMineMsg = useCallback((m: DmMessage) => {
+    const a = m.sender?.address?.toLowerCase();
+    const own = walletAddress?.toLowerCase();
+    return m.author === 'me' || (!!a && !!own && a === own) || (!!m.sender?._id && !!user?._id && m.sender._id === user._id);
+  }, [walletAddress, user?._id]);
+  /** Picked messages in thread order (the set holds ids in click order). */
+  const pickedList = useMemo(
+    () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
+    [pickedMsgs, messages],
+  );
+  const pickedOwn = useMemo(() => pickedList.filter(isMineMsg), [pickedList, isMineMsg]);
+  const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
+  const togglePick = useCallback((m: DmMessage) => {
+    setPickedMsgs((prev) => {
+      const next = new Set(prev ?? []);
+      if (next.has(m._id)) next.delete(m._id); else next.add(m._id);
+      return next;
+    });
+  }, []);
+  // A different chat starts with nothing picked.
+  useEffect(() => { setPickedMsgs(null); }, [resolvedConversationId]);
+  // Esc leaves picking.
+  useEffect(() => {
+    if (!pickedMsgs) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPickedMsgs(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pickedMsgs]);
+  const copyPicked = useCallback(async () => {
+    const text = pickedList
+      .map((m) => (m.undecryptable ? '' : (m.content || '').trim()))
+      .filter(Boolean)
+      .join('\n');
+    if (!text) { toast.error(_copy('msgSelect.nothingToCopy', { defaultValue: 'Nothing to copy in the picked messages' })); return; }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(_copy('msgSelect.copied', { defaultValue: 'Copied {{count}} messages', count: pickedList.length }));
+      setPickedMsgs(null);
+    } catch {
+      toast.error(_copy('msgSelect.copyFailed', { defaultValue: 'Could not copy' }));
+    }
+  }, [pickedList, _copy]);
+  const deletePicked = useCallback(async () => {
+    setConfirmPickDelete(false);
+    if (!resolvedConversationId || pickedOwn.length === 0) return;
+    const results = await Promise.allSettled(pickedOwn.map((m) => emitDeleteMessage(resolvedConversationId, m._id)));
+    const gone = new Set(pickedOwn.filter((_, i) => results[i].status === 'fulfilled').map((m) => m._id));
+    if (gone.size) {
+      queryClient.setQueryData(messagesKeys.messages(resolvedConversationId), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) => (gone.has(m._id) ? { ...m, isDeleted: true, content: '' } : m)),
+          })),
+        };
+      });
+    }
+    if (gone.size === pickedOwn.length) {
+      toast.success(_copy('msgSelect.deleted', { defaultValue: 'Deleted {{count}} messages', count: gone.size }));
+      setPickedMsgs(null);
+    } else {
+      toast.error(_copy('msgSelect.partDeleted', { defaultValue: 'Deleted {{ok}} of {{total}}', ok: gone.size, total: pickedOwn.length }));
+    }
+  }, [resolvedConversationId, pickedOwn, queryClient, _copy]);
 
   // Handle scroll
   const handleScroll = useCallback(() => {
@@ -2607,6 +2758,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               <>
                 <ChatOptionsDropdownItems
                   {...options}
+                  onToggleEncryption={canToggleEncryption ? toggleEncryption : undefined}
                   isBlocked={isBlocked}
                   onBlock={handleToggleBlock}
                   onDelete={() => setShowDeleteDialog(true)}
@@ -2643,6 +2795,17 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               >
                 <Gift className="w-4 h-4 mr-2" />
                 {isFreeAccessGranted ? _copy("copy.f9c2e63a6dd5", { defaultValue: "Revoke Free Access" }) : _copy("copy.52f749af5cc6", { defaultValue: "Grant Free Access" })}
+              </DropdownMenuItem>
+            )}
+            {canToggleEncryption && (
+              <DropdownMenuItem
+                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+                onClick={toggleEncryption}
+              >
+                {chatEncrypted ? <LockOpen className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+                {chatEncrypted
+                  ? tr('chatMenu.encryptOff', { defaultValue: 'Turn off encryption' })
+                  : tr('chatMenu.encrypt', { defaultValue: 'Encrypt chat' })}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
@@ -2711,7 +2874,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
       {/* No key on this device. Says so, instead of quietly sending in the
           clear and rendering the other side's lines as unopenable. */}
-      {!showLockedState && (encryptionStatus === 'pending' || encryptionStatus === 'locked' || encryptionStatus === 'error') && (
+      {(chatEncrypted || hasUndecryptable) && (encryptionStatus === 'pending' || encryptionStatus === 'locked' || encryptionStatus === 'error') && (
         <div className="px-4 py-2 text-xs flex items-center gap-2 bg-white/5 text-zinc-300 border-b border-white/10">
           <Unlock className="w-3 h-3 flex-shrink-0 text-current" />
           <span role="status" className="flex-1">
@@ -2721,7 +2884,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 ? tr('messages.encryptionReconnect', { defaultValue: 'Reconnect your wallet to turn on encryption.' })
                 : encryptionStatus === 'error'
                   ? tr('messages.encryptionSetupFailed', { defaultValue: 'Encryption setup failed. Please try again.' })
-                  : tr('messages.encryptionOff')}
+                  : chatEncrypted
+                    ? tr('messages.encryptionOff')
+                    : tr('messages.lockedTitle', { defaultValue: 'Unlock to read your messages' })}
           </span>
           <button
             type="button"
@@ -2731,7 +2896,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           >
             {encryptionNeedsWalletConnection
               ? tr('messages.encryptionReconnectWallet', { defaultValue: 'Reconnect wallet' })
-              : tr('messages.encryptionTurnOn')}
+              : chatEncrypted
+                ? tr('messages.encryptionTurnOn')
+                : tr('messages.lockedUnlock', { defaultValue: 'Unlock wallet' })}
           </button>
         </div>
       )}
@@ -2756,13 +2923,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           <Button variant="glass" size="sm" onClick={() => refetchMessages()}>
             <RefreshCw className="w-3 h-3 mr-2" />{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
         </div>
-      ) : showLockedState ? (
-        <DmLockedState
-          status={encryptionStatus}
-          needsWalletConnection={encryptionNeedsWalletConnection}
-          peerName={displayName}
-          onUnlock={() => { void retryEncryption(); }}
-        />
       ) : (
         <div
           ref={scrollContainerRef}
@@ -2879,6 +3039,10 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onRetrySend={handleRetrySend}
                 onDiscardSend={handleDiscardSend}
                 callPeerAddress={isGroupChat ? undefined : otherUser?.address}
+                selecting={pickedMsgs !== null}
+                picked={!!pickedMsgs?.has(message._id)}
+                onTogglePick={togglePick}
+                onStartPick={startPick}
               />
               </Fragment>
             )});
@@ -2929,10 +3093,33 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
       {/* Chat Input — disabled send when insufficient balance; hidden while
           the thread is locked, since anything typed would go out in the clear */}
-      {!showLockedState && canSchedule && (
+      {canSchedule && pickedMsgs === null && (
         <ScheduledStrip items={scheduled.items} onOpen={() => setShowScheduled(true)} />
       )}
-      {!showLockedState && <ChatInput
+      {pickedMsgs !== null && (
+        <MessageSelectBar
+          count={pickedList.length}
+          ownCount={pickedOwn.length}
+          touch={coarsePointer}
+          onCopy={() => { void copyPicked(); }}
+          onForward={() => setBulkForward(pickedList)}
+          onDelete={() => setConfirmPickDelete(true)}
+          onCancel={() => setPickedMsgs(null)}
+        />
+      )}
+      <AlertDialog open={confirmPickDelete} onOpenChange={setConfirmPickDelete}>
+        <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">{_copy('msgSelect.deleteTitle', { defaultValue: 'Delete {{count}} messages?', count: pickedOwn.length })}</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">{_copy('msgSelect.deleteBody', { defaultValue: 'They will be removed for everyone in this chat.' })}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
+            <AlertDialogAction data-msg-select-delete-confirm onClick={() => { void deletePicked(); }}>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {pickedMsgs === null && <ChatInput
         onScheduleClick={canSchedule ? handleScheduleClick : undefined}
         scheduledCount={scheduled.items.length}
         autoFocus={focusComposer}
@@ -3070,8 +3257,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
       {/* Forward message picker */}
       <ForwardMessageDialog
-        open={!!forwardMessageTarget}
-        onOpenChange={(open) => { if (!open) setForwardMessageTarget(null); }}
+        open={!!forwardMessageTarget || !!bulkForward}
+        onOpenChange={(open) => { if (!open) { setForwardMessageTarget(null); setBulkForward(null); } }}
         onSelect={handleForwardSelect}
         excludeConversationId={resolvedConversationId}
       />

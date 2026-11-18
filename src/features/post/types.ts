@@ -98,6 +98,8 @@ export interface PostFormState {
   contentWarning: string | null;
   /** The poster closed the market card, so the post carries none. */
   hideAssetCards: boolean;
+  /** The links whose preview card the poster closed, so the post shows none for them. */
+  hiddenLinkPreviews: string[];
   /** Who may quote the post. */
   quotePolicy: import('@/lib/api/dehub/types').QuotePolicy;
   /** Who may reply to the post. */
@@ -138,6 +140,7 @@ export interface PostFormActions {
   setContentWarning: (value: string | null) => void;
   setComicBorder: (border: ComicBorder | null) => void;
   setHideAssetCards: (value: boolean) => void;
+  setHiddenLinkPreviews: (value: string[]) => void;
   setQuotePolicy: (value: import('@/lib/api/dehub/types').QuotePolicy) => void;
   setStitchPolicy: (value: import('@/lib/remix-links').RemixPolicy | null) => void;
   setReplyPolicy: (value: import('@/lib/api/dehub/types').ReplyPolicy) => void;

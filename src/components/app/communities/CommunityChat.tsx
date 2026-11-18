@@ -20,7 +20,7 @@ import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
 import { markCommunityChatSeen, COMMUNITY_CHAT_SEEN_INTERVAL_MS } from '@/lib/community-chat-notify';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff } from "lucide-react";
+import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff, ImagePlus } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
@@ -39,12 +39,15 @@ import { VoiceRecorder } from '../chat/VoiceRecorder';
 import { voiceRecordingFile } from '@/lib/voice-recording';
 import { VoiceWaveformPlayer } from '../chat/VoiceWaveformPlayer';
 import { supabase } from '@/integrations/supabase/client';
-import { getAuthToken } from '@/lib/api/dehub';
+import { getAuthToken, uploadChatImage } from '@/lib/api/dehub';
+import { PUBLIC_CHAT_IMAGE_TYPES, PUBLIC_CHAT_IMAGE_MAX_SIZE } from '@/lib/public-chat-media';
 import { toast } from 'sonner';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
+import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson, type ChatSearchSource } from '@/components/app/chat/ChatSearch';
+import { searchCommunityChat } from '@/lib/community-chat-search';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { AppState } from '@/components/app/AppState';
@@ -202,9 +205,11 @@ interface CommunityChatProps {
   /** Joins the community: the "join to chat" bar calls it. */
   onJoin?: () => void;
   joining?: boolean;
+  /** Fill the parent's height (the chat opened inside Chat) instead of the community tab's fixed size. */
+  fill?: boolean;
 }
 
-export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining }: CommunityChatProps) {
+export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
   const { t: _copy } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/communities/CommunityChat.tsx:newMessage", '', communityId);
   const [replyTo, setReplyTo] = useDraftState<CommunityChatMessage | null>(`community:${communityId}:reply`, null);
@@ -498,6 +503,50 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   }, [showMessage, messages.length, searchQuery, setSearchQuery, t]);
 
+  // Search: the shared chat search (public chat's), reading this chat's table.
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchText, setSearchText] = useState('');
+  const [searchPerson, setSearchPerson] = useState<ChatSearchPerson | null>(null);
+  const [searchView, setSearchView] = useState<'list' | 'chat'>('list');
+  const [activeHit, setActiveHit] = useState(-1);
+  const [jumping, setJumping] = useState(false);
+  const searchReadable = isAuthenticated || !community.is_private;
+  const searchSource = useCallback<ChatSearchSource>(
+    (roomId, params) => searchCommunityChat(roomId, params, walletAddress),
+    [walletAddress],
+  );
+  const search = useChatSearch(communityId, showSearch && searchReadable, searchText, searchPerson?.address ?? null, searchSource);
+  const showSearchList = showSearch && searchView === 'list';
+  const openSearch = useCallback(() => {
+    setShowSearch(true);
+    setSearchView('list');
+    setTimeout(() => searchInputRef.current?.focus(), 100);
+  }, []);
+  const closeSearch = useCallback(() => {
+    setShowSearch(false);
+    setSearchText('');
+    setSearchPerson(null);
+    setSearchView('list');
+    setActiveHit(-1);
+  }, []);
+  const openResult = useCallback(async (index: number) => {
+    if (index < 0 || jumping) return;
+    let hit = search.results[index];
+    if (!hit && search.hasMore) {
+      setJumping(true);
+      const more = await search.loadMore();
+      hit = more[index - search.results.length];
+    }
+    if (!hit) { setJumping(false); return; }
+    rememberChatSearch(searchText);
+    searchInputRef.current?.blur();
+    setActiveHit(index);
+    setSearchView('chat');
+    setJumping(true);
+    await jumpToMessage(hit.id);
+    setJumping(false);
+  }, [jumping, search, searchText, jumpToMessage]);
+
   useEffect(() => {
     const pending = pendingJumpRef.current;
     if (!pending) return;
@@ -658,6 +707,51 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   };
 
+  // Photos, same rules as Public Chat (JPG, PNG, GIF, WebP up to 10MB). The
+  // typed line goes along as the caption.
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const handleImageFile = async (file: File) => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (slowModeRemaining > 0 || imageUploading) return;
+    const type = (file.type || '').toLowerCase();
+    if (!(PUBLIC_CHAT_IMAGE_TYPES as readonly string[]).includes(type)) {
+      toast.error(t('communities.chat.imageType', { defaultValue: 'Send a photo: JPG, PNG, GIF or WebP.' }));
+      return;
+    }
+    if (file.size > PUBLIC_CHAT_IMAGE_MAX_SIZE) {
+      toast.error(t('communities.chat.imageSize', { defaultValue: 'Image must be less than 10MB' }));
+      return;
+    }
+    const caption = newMessage.trim();
+    const replyToId = replyTo?.id;
+    setImageUploading(true);
+    try {
+      const { url } = await uploadChatImage(file);
+      await sendMessage(caption, 'image', url, replyToId, {
+        username: profileData?.handle || undefined,
+        displayName: profileData?.name || undefined,
+        avatarUrl: profileData?.avatarUrl || undefined,
+        badgeBalance: user?.badgeBalance || undefined,
+      });
+      if (caption) setNewMessage.complete(newMessage, '');
+      setReplyTo.complete(replyTo, null);
+      startSlowModeCountdown();
+    } catch (err: any) {
+      console.error('[CommunityChat] Image send failed:', err);
+      toast.error(err?.message || t('communities.chat.imageFailed', { defaultValue: 'Failed to send photo' }));
+    } finally {
+      setImageUploading(false);
+    }
+  };
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (!canSendMedia) return;
+    const file = Array.from(e.clipboardData?.files || []).find(f => f.type.startsWith('image/'));
+    if (!file) return;
+    e.preventDefault();
+    void handleImageFile(file);
+  };
+
   const handleVoiceRecordingComplete = useCallback(async (blob: Blob, _duration: number) => {
     if (!isAuthenticated) { openLoginModal(); return; }
     const toastId = 'community-voice-upload';
@@ -745,31 +839,26 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
   const originalSignal = 0;
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 340px)', minHeight: '300px' }}>
+    <div data-room-chat={fill ? 'pane' : 'tab'} className={fill ? 'flex h-full min-h-0 flex-col' : 'flex flex-col'} style={fill ? undefined : { height: 'calc(100vh - 340px)', minHeight: '300px' }}>
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
           {showSearch ? (
-            <div data-search-surface className="flex items-center gap-1.5 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5">
-              <Search className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-              <input
-                autoFocus
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('communities.searchMessages', 'Search messages')}
-                className="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder:text-zinc-500"
+            <div className="flex-1 min-w-0">
+              <ChatSearchBar
+                inputRef={searchInputRef}
+                text={searchText}
+                person={searchPerson}
+                onText={(value) => { setSearchText(value); setSearchView('list'); setActiveHit(-1); }}
+                onClearPerson={() => { setSearchPerson(null); setSearchView('list'); setActiveHit(-1); searchInputRef.current?.focus(); }}
+                onFocusList={() => setSearchView('list')}
+                onClose={closeSearch}
               />
-              <button
-                onClick={() => { setSearchQuery.complete(searchQuery, ''); setShowSearch(false); }}
-                className="p-0.5 text-zinc-500 hover:text-white"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
             </div>
           ) : (
             <button
-              onClick={() => setShowSearch(true)}
+              data-community-chat-search
+              onClick={openSearch}
               className="ml-auto flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
             >
               <Search className="w-3.5 h-3.5" />
@@ -779,7 +868,33 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         </div>
         {/* Messages area */}
         <div className="relative flex-1">
-          <div ref={scrollRef} onScroll={handleScroll} className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2">
+          {/* The same search as the public chat: people, words, and stepping through results. */}
+          {showSearchList && (
+            <ChatSearchPanel
+              text={searchText}
+              person={searchPerson}
+              search={search}
+              signedIn={searchReadable}
+              activeId={search.results[activeHit]?.id ?? null}
+              onSignIn={() => openLoginModal()}
+              onPickPerson={(person) => { setSearchPerson(person); setSearchText(''); setActiveHit(-1); }}
+              onPickText={(value) => { setSearchText(value); searchInputRef.current?.focus(); }}
+              onOpenResult={openResult}
+            />
+          )}
+          {showSearch && searchView === 'chat' && activeHit >= 0 && (
+            <ChatSearchPill
+              position={activeHit + 1}
+              total={Math.max(search.total ?? 0, search.results.length)}
+              busy={jumping}
+              canOlder={activeHit + 1 < search.results.length || search.hasMore}
+              canNewer={activeHit > 0}
+              onList={() => setSearchView('list')}
+              onOlder={() => void openResult(activeHit + 1)}
+              onNewer={() => void openResult(activeHit - 1)}
+            />
+          )}
+          <div ref={scrollRef} onScroll={handleScroll} className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2 ${showSearchList ? 'invisible' : ''}`}>
             {historyError && (
               <button onClick={() => void refreshHistory()} className="mx-3 px-3 py-2 text-sm" role="alert">
                 {t('common.failedToLoad')} — {t('common.retry')}
@@ -964,6 +1079,15 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                         </span>
                         {msg.message_type === 'gif' && (msg.image_url || msg.content) ? (
                           <img src={outsideImage(msg.image_url || msg.content)} alt="GIF" className="max-w-[280px] max-h-32 rounded mt-0.5" loading="lazy" />
+                        ) : msg.message_type === 'image' && msg.image_url ? (
+                          <div className="mt-1" data-community-chat-image>
+                            <a href={msg.image_url} target="_blank" rel="noopener noreferrer" className="block w-fit">
+                              <img src={msg.image_url} alt={msg.content || t('communities.chat.photo', { defaultValue: 'Photo' })} className="max-w-[280px] max-h-72 rounded-lg object-cover" loading="lazy" />
+                            </a>
+                            {!!msg.content && (
+                              <p className="text-sm text-zinc-200 mt-1 whitespace-pre-wrap break-words">{msg.content}</p>
+                            )}
+                          </div>
                         ) : msg.message_type === 'voice' && msg.image_url ? (
                           <div className="mt-1">
                             <VoiceWaveformPlayer src={msg.image_url} />
@@ -1237,6 +1361,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                   });
                 }}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 maxLength={500}
                 className="chat-text-input min-h-[36px] max-h-32 resize-none text-sm bg-transparent border-none text-white placeholder:text-zinc-500 p-0 pt-1 pr-12 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.35]"
                 rows={1}
@@ -1274,6 +1399,30 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 </Button>
                 {canSendMedia && (
                   <>
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept={PUBLIC_CHAT_IMAGE_TYPES.join(',')}
+                      className="hidden"
+                      data-community-chat-image-input
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = '';
+                        if (file) void handleImageFile(file);
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      data-community-chat-attach
+                      onClick={() => { if (!isAuthenticated) { openLoginModal(); return; } imageInputRef.current?.click(); }}
+                      disabled={imageUploading || slowModeRemaining > 0}
+                      className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                      title={t('communities.chat.sendPhoto', { defaultValue: 'Send a photo' })}
+                      aria-label={t('communities.chat.sendPhoto', { defaultValue: 'Send a photo' })}
+                    >
+                      {imageUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
+                    </Button>
                     <EmojiGifPicker
                       onEmojiSelect={handleEmojiSelect}
                       onGifSelect={handleGifSelect}

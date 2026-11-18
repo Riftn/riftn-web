@@ -126,6 +126,8 @@ import { DraftVideoProgress } from '@/features/post/components/DraftVideoProgres
 import { PostProcessingPill } from '@/components/app/PostProcessingDock';
 import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
+import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
 import type { GovernanceProposal } from '@/hooks/use-governance';
 import { GeneratedStageCover } from '@/components/app/stages/GeneratedStageCover';
 import { PastStageCard } from '@/components/app/stages/PastStageCard';
@@ -148,9 +150,11 @@ import followCoverEllaverse from '@/assets/banners/agent-ellaverse.png';
 import followCoverLuna from '@/assets/banners/agent-xluna.png';
 import { FollowCoverCard } from '@/components/app/FollowCoverCard';
 import { ConversationItem } from '@/pages/app/MessagesPage';
+import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
@@ -394,6 +398,18 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
+      <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          {thread.map(({ m, mine, first, last, day }) => (
+            <div key={m._id}>
+              {day && <CozyDayPill iso={m.createdAt} />}
+              <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} selecting picked={['c', 'e', 'g'].includes(m._id)} onTogglePick={noop} onStartPick={noop} />
+            </div>
+          ))}
+        </div>
+        <MessageSelectBar count={3} ownCount={1} onCopy={noop} onForward={noop} onDelete={noop} onCancel={noop} />
+      </div>
       <h3 className="text-sm font-semibold">Messages icon ringing + unread number</h3>
       <div data-messages-ring-gallery className="flex flex-wrap items-center gap-5 rounded-2xl border border-white/10 p-5">
         {[0, 1, 3, 8, 20].map(count => (
@@ -1341,6 +1357,35 @@ function ScheduledDmGallery() {
   );
 }
 
+/** Messages on a phone: hold a chat to pick it, tap others, then act on all of them. */
+function ChatBulkGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const names = ['Ava', 'Noah', 'Kai', 'Mina', 'Theo'];
+  const rows = names.map((name, i) => {
+    const user = { address: `0x77777777777777777777777777777777777777${70 + i}`, username: name.toLowerCase(), displayName: name } as DeHubUser;
+    return {
+      id: `gallery-bulk-${i}`,
+      participants: [user],
+      otherUser: user,
+      unreadCount: i === 1 ? 2 : 0,
+      createdAt: now,
+      updatedAt: now,
+      lastMessage: { id: `gallery-bulk-msg-${i}`, conversationId: `gallery-bulk-${i}`, sender: user, content: ['See you at eight then', 'Sent the files over', 'Loved your last video!', 'Are you open to a collab?', 'gm'][i], createdAt: now } as DeHubDMMessage,
+    };
+  });
+  const picked = new Set([1, 2]);
+  const noop = () => {};
+  return (
+    <section data-page-bento data-chat-bulk-gallery className="mb-5 max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]">
+      <h2 className="px-4 pt-4 text-sm font-semibold">Messages: picking chats on a phone</h2>
+      {rows.map((c, i) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} selecting checked={picked.has(i)} />
+      ))}
+      <BulkChatBar count={picked.size} chatIds={[]} allUnread={false} onToggleUnread={noop} onDelete={noop} onReply={async () => 0} onCancel={noop} touch />
+    </section>
+  );
+}
+
 function MessageRequestsGallery() {
   const { t } = useTranslation();
   const person = (name: string, text: string, unread: number) => (
@@ -1638,10 +1683,6 @@ function PostStatsGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   const [seeded] = useState(() => {
     queryClient.setQueryData(['post-stats', '777'], SAMPLE_POST_STATS);
     queryClient.setQueryData(['post-stats-best-times'], SAMPLE_BEST_TIMES);
-    // The % on the view button: ahead of usual, behind, and about the same.
-    queryClient.setQueryData(['post-vs-usual', '777'], { pct: 42, people: 1240, usual: 873 });
-    queryClient.setQueryData(['post-vs-usual', '778'], { pct: -18, people: 716, usual: 873 });
-    queryClient.setQueryData(['post-vs-usual', '779'], { pct: 3, people: 899, usual: 873 });
     return true;
   });
   const [open, setOpen] = useState(initiallyOpen);
@@ -1649,11 +1690,7 @@ function PostStatsGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   return (
     <section data-post-stats-gallery className="mb-5 max-w-xl">
       <h2 className="mb-3 text-sm font-semibold">Post stats</h2>
-      <div className="flex flex-col gap-2" data-post-vs-usual-gallery>
-        <PostMetadata timestamp="2d" viewCount="1.2K" tokenId="777" isOwnPost />
-        <PostMetadata timestamp="3d" viewCount="716" tokenId="778" isOwnPost />
-        <PostMetadata timestamp="5d" viewCount="899" tokenId="779" isOwnPost />
-      </div>
+      <PostMetadata timestamp="2d" viewCount="1.2K" tokenId="777" isOwnPost />
       <Button className="mt-3" onClick={() => setOpen(true)}>Quick Peek</Button>
       <PostStatsSheet open={open} onOpenChange={setOpen} tokenId="777" />
       <div className="mt-4" data-post-stats-gallery-panel>
@@ -2029,6 +2066,7 @@ export default function StateGalleryPage() {
         <WhenSheetGallery />
         <ScheduledDmGallery />
         <MessageRequestsGallery />
+        <ChatBulkGallery />
         <PostEditHistoryGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
         <ToastsGallery />
@@ -2804,12 +2842,21 @@ const GALLERY_PROPOSALS: GovernanceProposal[] = (() => {
     { ...base, id: '00000000-0000-4000-8000-000000000001', status: 'open', title: 'Add a creator fund paid from 1% of tips', description: 'Each month, 1% of all tips goes into a pool split between the ten most-watched new creators.', like_count: 4200, dislike_count: 1300, voting_ends_at: new Date(Date.now() + 3 * day).toISOString() },
     { ...base, id: '00000000-0000-4000-8000-000000000002', status: 'passed', title: 'Weekly community stage for governance Q&A', description: 'A recorded stage every Friday where proposers answer questions before votes close.', like_count: 9100, dislike_count: 700, voting_ends_at: new Date(Date.now() - day).toISOString() },
     { ...base, id: '00000000-0000-4000-8000-000000000003', status: 'rejected', title: 'Remove mature content from search', description: '', like_count: 900, dislike_count: 5600, voting_ends_at: new Date(Date.now() - day).toISOString() },
+    { ...base, id: '00000000-0000-4000-8000-000000000004', status: 'open', title: 'Which chain should the next token drop launch on?', description: 'Pick one. The winner gets the first drop next month.', like_count: 640, dislike_count: 0, voting_ends_at: new Date(Date.now() + 2 * day).toISOString(),
+      options: ['Base', 'BNB Chain', 'Ethereum', 'Solana'], option_tallies: [{ weight: 310, voters: 41 }, { weight: 180, voters: 22 }, { weight: 40, voters: 6 }, { weight: 110, voters: 15 }] },
+    { ...base, id: '00000000-0000-4000-8000-000000000005', status: 'passed', title: 'Theme for the December town hall', description: '', like_count: 820, dislike_count: 0, voting_ends_at: new Date(Date.now() - day).toISOString(),
+      options: ['Creator tools', 'Token roadmap', 'Moderation'], option_tallies: [{ weight: 470, voters: 52 }, { weight: 230, voters: 28 }, { weight: 120, voters: 13 }] },
   ] as GovernanceProposal[];
 })();
 
 function ProposalCardGallery() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // Multiple choice: the answer list as the board shows it, and the editor
+  // the propose drawer opens, both live so a theme check can click them.
+  const [myOption, setMyOption] = useState<number | null>(0);
+  const [answerType, setAnswerType] = useState<'yesno' | 'multiple'>('multiple');
+  const [answers, setAnswers] = useState<string[]>(['Base', 'BNB Chain', '']);
   // Seed before the cards mount so they render the samples, never fetch.
   useState(() => GALLERY_PROPOSALS.forEach((p) => queryClient.setQueryData(['governance-proposal', p.id], p)));
   return (
@@ -2819,6 +2866,28 @@ function ProposalCardGallery() {
         {GALLERY_PROPOSALS.map((p) => (
           <ProposalLinkEmbed key={p.id} proposalId={p.id} path="/app/state-gallery" />
         ))}
+      </div>
+      <div data-proposal-options-gallery className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <p className="mb-2 text-sm font-semibold text-white">{GALLERY_PROPOSALS[3].title}</p>
+          <ProposalOptions
+            proposal={GALLERY_PROPOSALS[3]}
+            myOption={myOption}
+            onVote={(i) => setMyOption((cur) => (cur === i ? null : i))}
+          />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <p className="mb-2 text-sm font-semibold text-white">{GALLERY_PROPOSALS[4].title}</p>
+          <ProposalOptions proposal={GALLERY_PROPOSALS[4]} myOption={1} disabled />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <ProposalAnswersEditor
+            answerType={answerType}
+            onAnswerTypeChange={setAnswerType}
+            options={answers}
+            onOptionsChange={setAnswers}
+          />
+        </div>
       </div>
     </section>
   );

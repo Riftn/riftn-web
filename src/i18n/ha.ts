@@ -2093,6 +2093,13 @@ export const ha = {
     whatWeDoCollect: 'Abin da muke tattarawa:',
     doCollectItem4: 'Abin da samfurin yake buƙatar gudu: dubawa da haɗin kai ya ƙidaya a kan posts, da kuma mai gano na\'urar da ke riƙe da zaman da za a iya danganta shi don ku iya gani da kuma soke zaman ku na aiki.',
     doCollectItem6: 'Bincike lokacin da wani abu ya karya, don haka za\'a iya gyara shi.',
+    googleDataTitle: 'Bayanin bayanan mai amfani na Google',
+    googleDataText: 'Idan ka shiga tare da Google, Riftn yana tambayar Google ne kawai don bayanan martabarka na asali: sunanka, adireshin imel da hoton martaba (openid, imel da kuma scopes na profile). Ba mu tambayar komai daga asusunka na Google ba.',
+    googleDataItem1: 'Yadda muke amfani da shi: don ƙirƙira da shigar da kai cikin asusunka na Riftn, don cike sunanka na nuni da hoton avatar, da kuma tuntuɓarka game da asusunka. Babu wani abu kuma.',
+    googleDataItem2: 'Yadda muke adana shi: a kan sabar asusunmu da kuma wurin bayar da ingantaccen bayani, wanda aka ɓoye yayin watsawa da kuma lokacin da aka ajiye, muddin asusunka yana nan.',
+    googleDataItem3: 'Wanda muke rabawa da shi: babu kowa. Ba a sayar da shi, ba a amfani da shi don talla, kuma ba a amfani da shi don horar da samfuran AI.',
+    googleDataItem4: 'Goge shi: goge asusunka a cikin Saituna (Settings), ko aika imel zuwa dev@riftn.com, kuma za a cire bayanan Google da muke riƙe. Hakanan zaka iya soke damar shiga ta Riftn a kowane lokaci a myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Amfanin da Riftn ke yi da bayanan da aka karɓa daga Google APIs yana bin Manufar Bayanan Mai Amfani na Ayyukan Google API, gami da buƙatun Amfani da aka iyakance (Limited Use).',
   },
   contact: {
     title: 'Tuntube Mu',

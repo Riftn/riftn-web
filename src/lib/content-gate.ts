@@ -27,6 +27,8 @@ export interface SubscriberPlanChain {
   chainId?: number;
   token?: string;
   price?: number;
+  /** "USDT" on plans priced in dollars; absent or "DHB" on token-priced ones. */
+  currency?: string;
   isPublished?: boolean;
   status?: boolean;
 }
@@ -96,19 +98,71 @@ export function formatSubscriberPrice(price: number | undefined): string {
 }
 
 /**
+ * What a plan costs, in both units the gate shows: tokens on the first line and
+ * dollars under it.
+ *
+ * Plans made since the USD switch are priced in USDT ("$0.01") and paid in DHB
+ * at the fixed pre-listing rate, so the token figure is the dollar price over
+ * that rate (0.01 / 0.001 = 10). Older plans are priced in DHB directly. The
+ * gate used to print the raw dollar figure through a whole-number formatter
+ * next to the DHB coin, which turned "$0.01" into "Subscribe from 0".
+ */
+export interface SubscriberPlanQuote {
+  tokens: number;
+  usd: number;
+}
+
+/** Mirrors DHB_PRELISTING_USD in lib/subscription-pricing; kept local so this file stays import-free (cards' tests mock react-i18next). */
+const DHB_PRELISTING_USD = 0.001;
+const USD_CURRENCIES = new Set(['USD', 'USDT', 'USDC']);
+
+export function subscriberPlanQuote(
+  plan: SubscriberPlan | undefined,
+): SubscriberPlanQuote | undefined {
+  const price = subscriberPlanPrice(plan);
+  if (price === undefined || !Number.isFinite(price) || price <= 0) return undefined;
+  const currency = (primarySubscriberPlanChain(plan as SubscriberPlan)?.currency || 'DHB').toUpperCase();
+  if (USD_CURRENCIES.has(currency)) {
+    return { tokens: price / DHB_PRELISTING_USD, usd: price };
+  }
+  return { tokens: price, usd: price * DHB_PRELISTING_USD };
+}
+
+/** Dollar line under the token price. Anything under a cent reads "<$0.01". */
+export function formatSubscriberUsd(usd: number | undefined): string {
+  const n = Number(usd);
+  if (!Number.isFinite(n) || n <= 0) return '';
+  if (n < 0.01) return '<$0.01';
+  return n.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
  * The cheapest plan a reader could actually buy to get in. Unbuyable plans are
  * skipped because naming their price is an invitation to a disabled button.
+ * Compared in dollars, so a USDT plan and a DHB plan rank correctly.
  */
 export function cheapestSubscriberPlan(
   plans: SubscriberPlan[] | undefined | null,
 ): SubscriberPlan | undefined {
   const priced = (plans || [])
     .filter(isSubscriberPlanBuyable)
-    .filter((p) => subscriberPlanPrice(p) !== undefined);
+    .filter((p) => subscriberPlanQuote(p) !== undefined);
   if (!priced.length) return undefined;
   return priced.reduce((a, b) =>
-    (subscriberPlanPrice(b) as number) < (subscriberPlanPrice(a) as number) ? b : a,
+    (subscriberPlanQuote(b) as SubscriberPlanQuote).usd < (subscriberPlanQuote(a) as SubscriberPlanQuote).usd ? b : a,
   );
+}
+
+/** The quote for the cheapest buyable plan, or undefined when none has a price. */
+export function cheapestSubscriberQuote(
+  plans: SubscriberPlan[] | undefined | null,
+): SubscriberPlanQuote | undefined {
+  return subscriberPlanQuote(cheapestSubscriberPlan(plans));
 }
 
 /**

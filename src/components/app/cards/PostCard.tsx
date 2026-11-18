@@ -89,7 +89,8 @@ import { useMuteAuthor } from '@/hooks/use-mute-author';
 import { useTapGestures } from '@/hooks/use-tap-gestures';
 import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
 import { VerifyUnlockButton } from './VerifyUnlockButton';
-import { isHoldGated, isSubscriberGated, cheapestSubscriberPlan, subscriberPlanPrice, formatSubscriberPrice } from '@/lib/content-gate';
+import { isHoldGated, isSubscriberGated, cheapestSubscriberQuote } from '@/lib/content-gate';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
 import { isTokenUnlocked, markTokenUnlocked } from '@/lib/unlocked-tokens-store';
 import {
   Drawer,
@@ -261,7 +262,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
   // Cheapest plan a reader can actually buy. The price lives on the plan's
   // chain entry, not on `plan.price` — that field does not exist on this
   // payload, and reading it gave NaN, which formatCompact renders as "0".
-  const cheapestPlanPrice = subscriberPlanPrice(cheapestSubscriberPlan(post.subscriberPlans));
+  const cheapestQuote = cheapestSubscriberQuote(post.subscriberPlans);
 
   const formatCompact = (num: number | null | undefined): string => {
     const n = Number(num);
@@ -739,12 +740,14 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
                 {isSubGated && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setShowSubDrawer(true); }}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/15 rounded-full px-3.5 py-1.5 transition-colors w-fit"
+                    className={cn(
+                      "flex items-center gap-1.5 text-sm font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/15 px-3.5 py-1.5 transition-colors w-fit",
+                      cheapestQuote ? "rounded-2xl" : "rounded-full",
+                    )}
                   >
                     <Star className="w-3.5 h-3.5" />
-                    {cheapestPlanPrice !== undefined ? (
-                      <>{_copy("copy.c2947d66723d", { defaultValue: "Subscribe from " })}<DhbAmount amount={formatSubscriberPrice(cheapestPlanPrice)} />
-                      </>
+                    {cheapestQuote ? (
+                      <SubscribeFromPrice quote={cheapestQuote} align="start" iconClassName="h-4 w-4" />
                     ) : (
                       _copy("copy.0ad5874f8903", { defaultValue: "Subscribe to read" })
                     )}
@@ -830,7 +833,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
 
         {/* OG previews for outside links. Skipped when an entity card is already
             showing: two stacked cards for one line of text is noise. */}
-        {post.content && dehubLinks.length === 0 && <FeedLinkPreviews text={post.content} />}
+        {post.content && dehubLinks.length === 0 && <FeedLinkPreviews text={post.content} hidden={post.hiddenLinkPreviews} />}
         </>
         )}
         </div>

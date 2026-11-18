@@ -2282,6 +2282,13 @@ export const pt = {
     dataSovereigntyItem5: 'Você escolhe se os sistemas de IA podem treinar o seu trabalho. É permitido, a menos que o desative nas Definições e a sua escolha seja publicada nos rastreadores nas páginas que controlamos',
     dataSovereigntyItem6: 'Pode eliminar a sua conta nas Definições; o seu perfil, carregamentos e multimédia armazenada, incluindo cópias de segurança, são apagados',
     governanceItem3: 'Processos de votação transparentes e em cadeia',
+    googleDataTitle: 'Dados de usuário do Google',
+    googleDataText: 'Se você entrar com o Google, o Riftn solicita ao Google apenas o seu perfil básico: seu nome, endereço de e-mail e foto de perfil (os escopos openid, email e profile). Não solicitamos nada mais da sua Conta do Google.',
+    googleDataItem1: 'Como usamos: para criar e conectar você à sua conta Riftn, para preencher seu nome de exibição e avatar, e para entrar em contato com você sobre sua conta. Nada mais.',
+    googleDataItem2: 'Como armazenamos: em nossos servidores de conta e em nosso provedor de autenticação, criptografado em trânsito e em repouso, enquanto sua conta existir.',
+    googleDataItem3: 'Com quem compartilhamos: com ninguém. Não é vendido, não é usado para publicidade e não é usado para treinar modelos de IA.',
+    googleDataItem4: 'Exclusão: exclua sua conta em Configurações ou envie um e-mail para dev@riftn.com, e os dados do Google que mantemos serão removidos. Você também pode revogar o acesso do Riftn a qualquer momento em myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'O uso pelo Riftn de informações recebidas das APIs do Google segue a Política de Dados do Usuário de Serviços de API do Google, incluindo os requisitos de Uso Limitado.',
   },
   contact: {
     hindi: 'Híndi',

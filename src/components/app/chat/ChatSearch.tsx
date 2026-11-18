@@ -73,8 +73,14 @@ interface SearchState {
 
 const EMPTY: SearchState = { results: [], people: [], total: null, hasMore: false, loading: false, loadingMore: false, failed: false };
 
+/** Where a chat's search reads from: the public chat's API by default, a community chat's own table otherwise. */
+export type ChatSearchSource = (
+  roomId: string,
+  params: { q?: string; from?: string; before?: string },
+) => Promise<{ messages: LiveChatMessage[]; people: LiveChatSearchPerson[]; total: number | null; hasMore: boolean }>;
+
 /** The room's matches for what is in the box, re-read as it changes. */
-export function useChatSearch(roomId: string | null, enabled: boolean, text: string, from: string | null) {
+export function useChatSearch(roomId: string | null, enabled: boolean, text: string, from: string | null, source: ChatSearchSource = searchLiveChat) {
   const [state, setState] = useState<SearchState>(EMPTY);
   const run = useRef(0);
   const q = text.trim();
@@ -90,7 +96,7 @@ export function useChatSearch(roomId: string | null, enabled: boolean, text: str
     // Typing waits a beat; opening the box or picking a person does not.
     const timer = window.setTimeout(async () => {
       try {
-        const page = await searchLiveChat(roomId, { q, from: from ?? undefined });
+        const page = await source(roomId, { q, from: from ?? undefined });
         if (run.current !== mine) return;
         setState({
           results: page.messages,
@@ -106,7 +112,7 @@ export function useChatSearch(roomId: string | null, enabled: boolean, text: str
       }
     }, q ? 260 : 0);
     return () => window.clearTimeout(timer);
-  }, [enabled, roomId, q, from]);
+  }, [enabled, roomId, q, from, source]);
 
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -117,7 +123,7 @@ export function useChatSearch(roomId: string | null, enabled: boolean, text: str
     const mine = run.current;
     setState((s) => ({ ...s, loadingMore: true }));
     try {
-      const page = await searchLiveChat(roomId, { q, from: from ?? undefined, before: last.id });
+      const page = await source(roomId, { q, from: from ?? undefined, before: last.id });
       if (run.current !== mine) return [];
       setState((s) => ({ ...s, results: [...s.results, ...page.messages], hasMore: page.hasMore, loadingMore: false }));
       return page.messages;
@@ -125,7 +131,7 @@ export function useChatSearch(roomId: string | null, enabled: boolean, text: str
       if (run.current === mine) setState((s) => ({ ...s, loadingMore: false }));
       return [];
     }
-  }, [roomId, q, from]);
+  }, [roomId, q, from, source]);
 
   return { ...state, loadMore };
 }

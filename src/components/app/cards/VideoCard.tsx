@@ -158,7 +158,8 @@ import { warmPostPage } from '@/lib/preload-post-page';
 import { repostPost } from '@/lib/api/dehub';
 import { useSyncedAudio } from '@/hooks/use-synced-audio';
 import { handoffAudioFor } from '@/lib/audio-handoff';
-import { isHoldGated, isSubscriberGated, cheapestSubscriberPlan, subscriberPlanPrice } from '@/lib/content-gate';
+import { isHoldGated, isSubscriberGated, cheapestSubscriberQuote } from '@/lib/content-gate';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
 import { isVideoAccessExpiring, useResumeAcrossRefresh, useVideoAccess, videoNeedsAccess } from '@/lib/api/dehub/video-access';
 
 /** Lazy: PlanCard reaches the subscription contracts, and this card boots. */
@@ -222,6 +223,7 @@ import { KeywordFilterGate } from './KeywordFilterGate';
 import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
 import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
+import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
 
 /**
  * How far a touch may travel and still count as a tap on the player. Matches the
@@ -686,11 +688,13 @@ interface ExpandableDescriptionProps {
   clampLines?: 2 | 3 | 4;
   /** The poster closed the market card for this post. */
   hideAssetCards?: boolean;
+  /** Links whose preview card the poster closed. */
+  hiddenLinkPreviews?: string[];
 }
 
 const CLAMP_CLASS = { 2: 'line-clamp-2', 3: 'line-clamp-3', 4: 'line-clamp-4' } as const;
 
-function ExpandableDescription({ description: rawDescription, isImmersive, clampLines = 4, hideAssetCards }: ExpandableDescriptionProps) {
+function ExpandableDescription({ description: rawDescription, isImmersive, clampLines = 4, hideAssetCards, hiddenLinkPreviews }: ExpandableDescriptionProps) {
   const { t: _copy } = _useCopy();
   // Unify \r\n → \n only. Blank lines and spacing stay exactly as typed.
   const normalized = rawDescription.replace(/\r\n/g, '\n').trim();
@@ -730,7 +734,7 @@ function ExpandableDescription({ description: rawDescription, isImmersive, clamp
           </FeedCaptionExpander>
         ) : null}
         <DehubLinkEmbeds links={dehubLinks} />
-        <FeedLinkPreviews text={normalized} />
+        <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
         <AssetRefCards refs={assetRefs} />
       </div>
     );
@@ -748,7 +752,7 @@ function ExpandableDescription({ description: rawDescription, isImmersive, clamp
           />
         ) : null}
         <DehubLinkEmbeds links={dehubLinks} />
-        <FeedLinkPreviews text={normalized} />
+        <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
         <AssetRefCards refs={assetRefs} />
       </>
     );
@@ -770,7 +774,7 @@ function ExpandableDescription({ description: rawDescription, isImmersive, clamp
         ) : null}
       </div>
       <DehubLinkEmbeds links={dehubLinks} />
-      <FeedLinkPreviews text={normalized} />
+      <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
       <AssetRefCards refs={assetRefs} />
       {needsExpansion && !isExpanded && (
         <button
@@ -1371,7 +1375,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // Cheapest plan a reader can actually buy. The price lives on the plan's
   // chain entry, not on `plan.price` — that field does not exist on this
   // payload, and reading it gave NaN, which formatCompact renders as "0".
-  const cheapestPlanPrice = subscriberPlanPrice(cheapestSubscriberPlan(video.subscriberPlans));
+  const cheapestQuote = cheapestSubscriberQuote(video.subscriberPlans);
   const isComboLocked = isPPVLocked && isHoldingsLocked;
   // Independent of the monetisation gates above: a post can be both mature and
   // pay-per-view, and the creator's own post is warned about too — the warning
@@ -1909,7 +1913,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // two glass pills, and only where there is room beside it.
   const isDesktopViewport = useIsDesktopViewport();
   const wideVideoMode = useWideVideoMode();
-  const wideViewport = isDesktopViewport && !isPhone;
+  const inMasonryColumn = useInMasonryColumn();
+  const wideViewport = isDesktopViewport && !isPhone && !inMasonryColumn;
   const wideEligible = wideViewport && !isFullscreen && !video.isAudio && !stage && !hideActions
     && !(video.isLivePost && video.isLiveNow) && (desktopFeedHug || (isImmersive && !showComments));
   const wideAmbient = wideEligible && wideVideoMode === 'ambient';
@@ -2619,7 +2624,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           <>
             <GatePreview src={thumbnail} className="w-full h-full object-cover rounded-lg" />
             <div 
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
               onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
               onTouchEnd={(e) => {
@@ -2651,7 +2658,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           <>
             <GatePreview src={thumbnail} className="w-full h-full object-cover" />
             <div 
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
               onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
               onTouchEnd={(e) => {
@@ -2664,7 +2673,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowPPVDrawer(true); }
               }}
             >
-              <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                 <Ticket className="h-7 w-7 text-white" />
               </div>
               <p className="text-white font-semibold text-sm mb-1">{t('drawers.ppvTitle')}</p>
@@ -2680,7 +2689,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 gate below, which anyone can satisfy by buying tokens. */}
             <GatePreview src={thumbnail} className="w-full h-full object-cover" />
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setShowSubDrawer(true); }}
               onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
               onTouchEnd={(e) => {
@@ -2693,14 +2704,13 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowSubDrawer(true); }
               }}
             >
-              <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                 <Star className="h-7 w-7 text-white" />
               </div>
               <p className="text-white font-semibold text-sm mb-1">{_copy("copy.109ddfc1cc4a", { defaultValue: "Subscribers only" })}</p>
               <p className="text-white/70 text-xs">
-                {cheapestPlanPrice !== undefined ? (
-                  <>{_copy("copy.c2947d66723d", { defaultValue: "Subscribe from " })}<DhbAmount amount={formatCompact(cheapestPlanPrice)} />
-                  </>
+                {cheapestQuote ? (
+                  <SubscribeFromPrice quote={cheapestQuote} />
                 ) : (
                   _copy("copy.855f365abafc", { defaultValue: "Subscribe to {{value1}}", value1: video.channel })
                 )}
@@ -2711,7 +2721,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           <>
             <GatePreview src={thumbnail} className="w-full h-full object-cover" />
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setShowLockedDrawer(true); }}
               onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
               onTouchEnd={(e) => {
@@ -2724,7 +2736,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowLockedDrawer(true); }
               }}
             >
-              <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                 <Lock className="h-7 w-7 text-white" />
               </div>
               <p className="text-white font-semibold text-sm mb-1">{_copy("copy.490f4babbf34", { defaultValue: "Holdings Required" })}</p>
@@ -2736,7 +2748,9 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           <>
             <GatePreview src={thumbnail} className="w-full h-full object-cover" />
             <div 
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
               onClick={(e) => { e.stopPropagation(); setShowBountyDrawer(true); }}
               onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
               onTouchEnd={(e) => {
@@ -2749,7 +2763,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowBountyDrawer(true); }
               }}
             >
-              <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
                 <Gift className="h-7 w-7 text-white" />
               </div>
               <p className="text-white font-semibold text-sm mb-1">{t('drawers.bountyTitle')}</p>
@@ -2901,7 +2915,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             {/* The centre control already draws a play glyph; a second one
                 here stacked two triangles on top of each other. */}
             {!showCenterPlay && (
-              <div className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center">
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center">
                 <Play className="w-7 h-7 text-white fill-current ml-1" />
               </div>
             )}
@@ -3118,7 +3132,11 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               fraction={currentTime / (duration || 1)}
               duration={duration}
               visible={scrubbing}
-              armed={showControls}
+              // Fetch the sheet as soon as the video plays. Waiting for the
+              // controls meant a phone's line scrubber, which shows them only
+              // when the scrub starts, began the download mid-gesture and a
+              // quick scrub ended before any frame arrived.
+              armed={showControls || isPlaying}
             />
 
             <div data-video-button-row className="flex items-center justify-between gap-1 px-2">
@@ -3480,6 +3498,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                     isImmersive={isImmersive || !!stage || tabletPortrait}
                     clampLines={stage ? (shownTitle ? 2 : 3) : 4}
                     hideAssetCards={video.hideAssetCards}
+                    hiddenLinkPreviews={video.hiddenLinkPreviews}
                   />
                 )}
                 </>)}

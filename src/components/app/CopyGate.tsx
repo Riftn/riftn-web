@@ -1,16 +1,44 @@
-import { useLayoutEffect, useRef, useState, type ComponentType, type MutableRefObject, type ReactNode } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useLayoutEffect, useRef, useState, type ComponentType, type CSSProperties, type MutableRefObject, type ReactNode } from 'react';
+import { useQueryClient, type Query } from '@tanstack/react-query';
 import { takePendingCopy } from '@/i18n';
 
 /** Longest a fresh page waits behind its skeleton for its text. */
 export const COPY_HOLD_CAP_MS = 1500;
-/** Longest a fresh page waits behind its skeleton for its first data. */
-export const SETTLE_HOLD_CAP_MS = 1200;
+/** Longest a fresh page waits behind its skeleton for its first data (same as the app). */
+export const SETTLE_HOLD_CAP_MS = 900;
 /** The dissolve from skeleton to page (skeleton.css `skeleton-out` / `skeleton-in`). */
 export const REVEAL_MS = 320;
+/**
+ * A placeholder fades in only after this long (skeleton.css
+ * `[data-skeleton-appear]`). A page that is ready sooner goes straight from
+ * nothing to the page: no grey flash, no dissolve.
+ */
+export const SKELETON_APPEAR_MS = 120;
 
 /** Anything a page draws while its own first data is still on the way. */
 const BUSY = '[data-skeleton], .theme-skeleton, [data-dehub-loader], .dehub-loader-mark, [data-page-loading]';
+
+/** A loader the visitor would see on the first screen; one further down the page holds nothing. */
+function loaderInView(root: HTMLElement | null): boolean {
+  if (!root) return false;
+  const bottom = window.innerHeight;
+  for (const el of root.querySelectorAll(BUSY)) {
+    const r = el.getBoundingClientRect();
+    if ((r.width > 0 || r.height > 0) && r.top < bottom && r.bottom > 0) return true;
+  }
+  return false;
+}
+
+/**
+ * The one wrapper every page placeholder is drawn in. It fades in after
+ * SKELETON_APPEAR_MS counted from `since`, so a placeholder that takes over
+ * from another one (Suspense fallback -> gate) carries on instead of starting
+ * again.
+ */
+export function SkeletonAppear({ since, children }: { since: number; children: ReactNode }) {
+  const [delay] = useState(() => Math.round(since + SKELETON_APPEAR_MS - performance.now()));
+  return <div data-skeleton-appear style={{ '--appear-delay': `${delay}ms` } as CSSProperties}>{children}</div>;
+}
 
 /**
  * Holds a freshly mounted page behind its skeleton until it is ready to be
@@ -36,11 +64,13 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
    *  its welcome panel is already painted from index.html and the feed draws
    *  its own placeholders, so covering the page again would blink both. */
   copyOnly?: boolean;
-  /** Set by the route's Suspense fallback: the skeleton was already on screen. */
-  skeletonShown?: MutableRefObject<boolean>;
+  /** Set by the route's Suspense fallback: when its placeholder mounted (0 = never). */
+  skeletonShown?: MutableRefObject<number>;
 }) {
   const [phase, setPhase] = useState<'idle' | 'hold' | 'reveal'>('idle');
   const checked = useRef(false);
+  /** When the placeholder started counting towards showing. */
+  const since = useRef(0);
   const content = useRef<HTMLDivElement | null>(null);
   const queries = useQueryClient();
 
@@ -50,12 +80,18 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
     if (checked.current) return;
     checked.current = true;
     const copy = takePendingCopy();
-    // Its own loader on screen, or a first request still out.
-    const busy = () => !copyOnly && (!!content.current?.querySelector(BUSY) || queries.isFetching({ predicate: (q) => q.state.data === undefined }) > 0);
-    const wasShown = !copyOnly && !!skeletonShown?.current;
+    const mountedAt = skeletonShown?.current || 0;
+    since.current = mountedAt || performance.now();
+    // Only a placeholder that has actually faded in is worth dissolving.
+    const seen = () => !copyOnly && performance.now() >= since.current + SKELETON_APPEAR_MS;
+    // Requests already out before this page mounted belong to something else.
+    const earlier = new Set<Query>(queries.getQueryCache().findAll({ fetchStatus: 'fetching' }));
+    // Its own loader on the first screen, or a first request of its own still out.
+    const busy = () => !copyOnly && (loaderInView(content.current)
+      || queries.isFetching({ predicate: (q) => q.state.data === undefined && !earlier.has(q) }) > 0);
     if (!copy && !busy()) {
-      // Ready at once. After a skeleton, still dissolve rather than cut.
-      if (!wasShown) return;
+      // Ready at once. After a skeleton that was seen, dissolve rather than cut.
+      if (!mountedAt || !seen()) return;
       setPhase('reveal');
       const done = window.setTimeout(() => setPhase('idle'), REVEAL_MS);
       return () => window.clearTimeout(done);
@@ -71,7 +107,7 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
       if (!alive) return;
       window.clearTimeout(timer);
       cancelAnimationFrame(frame);
-      if (copyOnly) { finish(); return; }
+      if (!seen()) { finish(); return; }
       setPhase('reveal');
       timer = window.setTimeout(finish, REVEAL_MS);
     };
@@ -111,7 +147,8 @@ export function CopyGate({ skeleton: Skeleton, children, skeletonShown, copyOnly
       {covered && (
         <div data-skeleton-reveal={phase === 'reveal' ? 'out' : undefined}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none' }}>
-          <Skeleton />
+          {/* Home keeps its placeholder up at once, exactly as before (index.html painted it). */}
+          {copyOnly ? <Skeleton /> : <SkeletonAppear since={since.current}><Skeleton /></SkeletonAppear>}
         </div>
       )}
     </div>

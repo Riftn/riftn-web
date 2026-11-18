@@ -16,6 +16,7 @@ import { adminErrorMessage } from '@/hooks/use-community-admin';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { notifyCommunityMentions } from '@/lib/community-mention-notify';
 import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { toast } from 'sonner';
 import { useCommunityChatHistory } from './use-community-chat-history';
 import { updateCommunityChatCache, type CommunityChatHistory, type CommunityChatCursor, type CommunityChatPage } from '@/lib/community-chat-history';
@@ -283,34 +284,10 @@ export function useCommunityChat(
       }]);
     }
 
-    const msg = {
-      community_id: communityId,
-      wallet_address: walletAddress.toLowerCase(),
-      username: userProfile?.username || null,
-      display_name: userProfile?.displayName || null,
-      avatar_url: userProfile?.avatarUrl || null,
-      badge_balance: userProfile?.badgeBalance || null,
-      content,
-      message_type: messageType,
-      image_url: imageUrl || null,
-      reply_to_id: replyToId || null,
-      reactions: {},
-    };
-
-    let inserted: unknown = null;
-    let error: any = null;
-    try {
-      ({ data: inserted, error } = await withWalletHeader(
-        supabase
-          .from('community_chat_messages')
-          .insert(msg as any)
-          .select('*')
-          .single(),
-        walletAddress
-      ));
-    } catch (thrown) {
-      error = thrown;
-    }
+    // Stored through the one shared send path (the chat list's reply-to-all uses it too).
+    const { data: inserted, error } = await insertCommunityChatMessage({
+      communityId, walletAddress, content, messageType, imageUrl, replyToId, sender: userProfile,
+    });
 
     if (error) {
       // The line stays where it was sent, marked "Not sent" with Retry.
@@ -438,7 +415,7 @@ export function useCommunityChat(
 
     if (error) {
       console.error('[CommunityChat] Edit error:', error);
-      toast.error(_copy("copy.da8e926af644", { defaultValue: "Failed to edit message" }));
+      toast.error(adminErrorMessage(error, _copy("copy.da8e926af644", { defaultValue: "Failed to edit message" })));
       queryClient.invalidateQueries({ queryKey: messagesKey });
       return false;
     }

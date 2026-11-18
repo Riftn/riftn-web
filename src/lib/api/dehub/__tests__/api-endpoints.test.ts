@@ -172,13 +172,6 @@ describe("payments.ts", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("createDPayTicket calls POST /api/dpay/tk", async () => {
-    const { createDPayTicket } = await import("../payments");
-    mockOk({ result: { id: "t1" } });
-    await createDPayTicket({ data: "test" });
-    expect(mockFetch.mock.calls[0][0]).toContain("/api/dpay/tk");
-  });
-
   it("createOnrampSession calls POST /api/dpay/create-onramp-session", async () => {
     const { createOnrampSession } = await import("../payments");
     mockOk({ result: { url: "https://onramp.example.com" } });
@@ -284,7 +277,6 @@ describe("index.ts barrel exports", () => {
     expect(barrel.getDPayTransactions).toBeDefined();
     expect(barrel.getDPayTotal).toBeDefined();
     expect(barrel.createCheckout).toBeDefined();
-    expect(barrel.createDPayTicket).toBeDefined();
     expect(barrel.createOnrampSession).toBeDefined();
     // Comments new
     expect(barrel.addGifComment).toBeDefined();

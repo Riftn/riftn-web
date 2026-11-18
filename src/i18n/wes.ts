@@ -1970,6 +1970,10 @@ export const wes = {
     dataCollection: 'Data Collection & Storage',
     whatWeDoCollect: 'What We Collect:',
     thirdPartyServices: 'Third-Party Services',
+    googleDataTitle: 'Google user data',
+    googleDataItem1: 'Wen yu use am, na to kreee account Riftn, to sign yu in, to fill display name na avatar, na to kontak yu bout account yu. Nimmo.',
+    googleDataItem3: 'Wen we share am, no one. Na no dey sell am, no dey use am for advert, and no dey use am train AI model.',
+    googleDataLimitedUse: 'Riftn use infor from Google API follow Google API Services User Data Policy, including Limited Use requirement.',
   },
   contact: {
     discordDesc: 'Link up wit wi fo Discord',

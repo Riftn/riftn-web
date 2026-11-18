@@ -2102,6 +2102,13 @@ export const id = {
     doCollectItem3: 'Apa yang Anda publikasikan — pos, komentar, unggahan, dan metadata di sekitarnya — sehingga dapat disajikan kepada orang yang Anda publikasikan.',
     doCollectItem4: 'Apa yang perlu dijalankan produk: jumlah tampilan dan keterlibatan pada postingan, dan pengidentifikasi perangkat yang membuat sesi dapat diatribusikan sehingga Anda dapat melihat dan mencabut sesi aktif Anda sendiri.',
     doCollectItem6: 'Diagnostik ketika ada yang rusak, sehingga bisa diperbaiki.',
+    googleDataTitle: 'Data Pengguna Google',
+    googleDataText: 'Jika Anda masuk dengan Google, Riftn hanya meminta profil dasar Anda: nama, alamat email, dan foto profil (openid, email, dan skop profil). Kami tidak meminta apa pun lain dari Akun Google Anda.',
+    googleDataItem1: 'Bagaimana kami menggunakan itu: untuk membuat dan masuk ke akun Riftn Anda, untuk mengisi nama tampilan dan avatar Anda, dan untuk menghubungi Anda tentang akun Anda. Tidak ada yang lain.',
+    googleDataItem2: 'Bagaimana kami menyimpannya: di server akun kami dan di penyedia autentikasi kami, dienkripsi dalam perjalanan dan di tempat istirahat, selama akun Anda ada.',
+    googleDataItem3: 'Siapa kami bagikan dengan: tidak ada. Tidak dijual, tidak digunakan untuk iklan, dan tidak digunakan untuk melatih model AI.',
+    googleDataItem4: 'Menghapusnya: hapus akun di Pengaturan, atau email dev@riftn.com, dan data Google yang kami simpan dihapus. Anda juga dapat membatalkan akses Riftn kapan saja di myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Penggunaan Riftn atas informasi yang diterima dari Google APIs mengikuti Kebijakan Data Pengguna Layanan API Google, termasuk persyaratan Penggunaan Terbatas.',
   },
   contact: {
     title: 'Hubungi Kami',

@@ -2129,6 +2129,13 @@ export const da = {
     thirdPartyItem7Prefix: 'Levering:',
     thirdPartyItem7: 'Cloudflare betjener og cachelagrer webstedet og dets medier',
     thirdPartyItem8Prefix: 'AI og oversættelse:',
+    googleDataTitle: 'Google-brugerdata',
+    googleDataText: 'Hvis du logger ind med Google, beder Riftn kun Google om din grundlæggende profil: dit navn, din e-mailadresse og dit profilbillede (openid-, email- og profile-scopes). Vi beder ikke om andet fra din Google-konto.',
+    googleDataItem1: 'Hvordan vi bruger det: til at oprette og logge dig ind på din Riftn-konto, til at udfylde dit viste navn og avatar, og til at kontakte dig vedrørende din konto. Intet andet.',
+    googleDataItem2: 'Hvordan vi opbevarer det: på vores kontoservere og hos vores godkendelsesudbyder, krypteret under transport og ved lagring, så længe din konto eksisterer.',
+    googleDataItem3: 'Hvem vi deler det med: ingen. Det bliver ikke solgt, ikke brugt til reklamer og ikke brugt til at træne AI-modeller.',
+    googleDataItem4: 'Sletning af det: slet din konto under Indstillinger, eller send en e-mail til dev@riftn.com, så bliver de Google-data, vi opbevarer, fjernet. Du kan også til enhver tid tilbagekalde Riftns adgang på myaccount.google.com/permissions.',
+    googleDataLimitedUse: 'Riftns brug af information modtaget fra Google API\'er overholder Google API Services User Data Policy, herunder kravene om begrænset brug (Limited Use).',
   },
   contact: {
     title: 'Kontakt os',

@@ -23,11 +23,16 @@ import { parseSpotifyLink } from '@/lib/spotify';
 
 interface FeedLinkPreviewsProps {
   text: string;
+  /** The post's `hiddenLinkPreviews`: links whose card the poster closed. */
+  hidden?: string[];
 }
 
-/** Outside links only — Riftn links are rendered as entity cards instead. */
-function externalUrls(text: string): string[] {
-  return extractUrlsFromText(text).filter((url) => !parseDehubLink(url));
+/**
+ * Outside links only — Riftn links are rendered as entity cards instead — and
+ * none the poster closed the preview for.
+ */
+function externalUrls(text: string, hidden?: string[]): string[] {
+  return extractUrlsFromText(text).filter((url) => !parseDehubLink(url) && !hidden?.includes(url));
 }
 
 function knownPreviews(url: string | undefined): Map<string, LinkPreviewData> {
@@ -35,8 +40,8 @@ function knownPreviews(url: string | undefined): Map<string, LinkPreviewData> {
   return known ? new Map([[url!, known]]) : new Map();
 }
 
-export function FeedLinkPreviews({ text }: FeedLinkPreviewsProps) {
-  const url = externalUrls(text)[0];
+export function FeedLinkPreviews({ text, hidden }: FeedLinkPreviewsProps) {
+  const url = externalUrls(text, hidden)[0];
   // A link this session already read comes back at full size on the first
   // paint, with no entrance animation: feed cards unmount far off screen and
   // mount again on the way back, and a skeleton that grew into the card moved
@@ -80,7 +85,7 @@ export function FeedLinkPreviews({ text }: FeedLinkPreviewsProps) {
     return () => { cancelled = true; };
   }, [url, refreshes]);
 
-  const urls = externalUrls(text);
+  const urls = externalUrls(text, hidden);
   if (urls.length === 0) return null;
 
   const visiblePreviews = [...previews.values()];
