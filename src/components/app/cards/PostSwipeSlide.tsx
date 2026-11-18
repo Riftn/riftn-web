@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import type { ShortVideo } from '@/types/feed.types';
 import { PostBgLayer, postBgHostProps } from '@/components/app/profile/PostBackground';
-import { postBgById } from '@/lib/post-backgrounds';
+import { postBgFromToken } from '@/lib/post-backgrounds';
 import { closeBrainrotFeed } from '@/lib/brainrot-feed';
 import { cn } from '@/lib/utils';
 import { createLinkScanRegex, renderTextWithLinks, splitLeadingUrlBoundary } from '@/components/app/TranslatableText';
@@ -85,7 +85,7 @@ function TextPoster({ short }: { short: ShortVideo }) {
   const post = short.reelPost!;
   const words = useMemo(() => posterText(post.text || ''), [post.text]);
   const body = useMemo(() => renderTextWithLinks(words), [words]);
-  const bg = postBgById(post.bgId);
+  const bg = postBgFromToken(post.bgId);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
