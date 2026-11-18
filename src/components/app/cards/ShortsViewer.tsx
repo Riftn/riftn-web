@@ -9,7 +9,7 @@ import { useMatureGate } from "./MatureContentGate";
  * Uses Framer Motion for smooth translateY animations.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, useId, lazy, Suspense } from 'react';
 import {
   claimMediaSession,
   releaseMediaSession,
@@ -48,6 +48,10 @@ import Bookmark from "@/components/ui/cut-icons/save";
 import Share2 from "@/components/ui/cut-icons/feedshare";
 import Send from "@/components/ui/cut-icons/send";
 import Gem from "@/components/ui/cut-icons/diamond";
+import Gift from "@/components/ui/cut-icons/gifts";
+import { Zap } from "lucide-react";
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useSuperpowers } from '@/hooks/use-superpowers';
 
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useTranslation as useContentTranslation, splitTranslatedTitleAndBody } from '../TranslatableText';
@@ -390,6 +394,11 @@ const PEEK_START_PX = 8;
  * visibly different shades. Both are built from this now — position and the
  * hidden state are all either is allowed to add.
  */
+// Same lazy chunk the feed card uses: fetched on the tap that opens it.
+const BoostModal = lazy(() =>
+  import('../modals/BoostModal').then((m) => ({ default: m.BoostModal }))
+);
+
 const CORNER_CONTROL =
   `absolute top-3 z-10 ${VIEWER_CONTROL} transition-opacity duration-300`;
 
@@ -435,6 +444,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   const [shareToDmOpen, setShareToDmOpen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showBoostModal, setShowBoostModal] = useState(false);
   const [visibility, setVisibility] = useState<TokenVisibility>('public');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -678,6 +688,14 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   const downloadVideo = useVideoDownload();
   const downloadGate = useMatureGate(currentShort?.contentRating);
   const isOwnShort = !!walletAddress && currentShort?.creatorId?.toLowerCase() === walletAddress.toLowerCase();
+  // Boost, as on the feed card: the owner boosts their own post, and anyone
+  // holding Deep Current can gift one to somebody else's.
+  const { data: superpowerStatus } = useSuperpowers(!!walletAddress);
+  const canGiftBoost = !!superpowerStatus?.powers.some(
+    p => p.key === 'deep_current' && p.unlocked && p.available,
+  );
+  const boostTokenId = parseInt(currentShort?.id ?? '', 10) || undefined;
+  const canBoostCurrent = !!boostTokenId && !isLiveSlide;
 
   // Swiping to another creator picks up that creator's pinned rate, the same
   // way opening one of their videos does. Creators with none keep the global.
@@ -1938,6 +1956,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   </button>
                   </>}
 
+                  {/* The owner's Boost bolt, beside options as on the feed card. */}
+                  {isOwnShort && canBoostCurrent && (
+                    <button
+                      onClick={(event) => { event.stopPropagation(); setShowBoostModal(true); }}
+                      className={VIEWER_CONTROL}
+                      aria-label={t('postOptions.boostPost')}
+                      data-viewer-boost
+                    >
+                      <Zap className="w-5 h-5 text-white" />
+                    </button>
+                  )}
+
                   {/* More options button */}
                   <button
                     onClick={() => setShareSheetOpen(true)}
@@ -2174,6 +2204,25 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
               >
                 <MoreHorizontal className="w-5 h-5" />
               </button>
+
+              {/* The owner's Boost bolt, left of options (which ends 9.25rem in). */}
+              {isOwnShort && canBoostCurrent && (
+                <button
+                  onClick={() => {
+                    if (isFullscreen) toggleFullscreen();
+                    setShowBoostModal(true);
+                  }}
+                  className={cn(
+                    CORNER_CONTROL,
+                    "right-[9.75rem]",
+                    chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                  )}
+                  aria-label={t('postOptions.boostPost')}
+                  data-viewer-boost
+                >
+                  <Zap className="w-5 h-5" />
+                </button>
+              )}
 
               <button
                 onClick={toggleFullscreen}
@@ -2793,9 +2842,25 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
               >
                 <Ban className="w-5 h-5" />{_copy("copy.eb326e0e85cf", { defaultValue: " Block Creator" })}</button>
             )}
+            {!isOwnShort && canGiftBoost && canBoostCurrent && (
+              <button
+                onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
+              </button>
+            )}
             {isOwnShort && (
               <>
                 <div className="border-t border-white/10 my-1" />
+                {canBoostCurrent && (
+                  <button
+                    onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <ThemedIcon icon="superpowers" alt="" className="w-5 h-5 object-contain" /> {t('postOptions.boostPost')}
+                  </button>
+                )}
                 <button
                   onClick={async () => {
                     const next: TokenVisibility = visibility === 'public' ? 'private' : 'public';
@@ -2830,6 +2895,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
         tokenId={currentShort?.id}
         context="post"
       />
+
+      {/* Boost Modal — mounted only while open. */}
+      {showBoostModal && (
+        <Suspense fallback={null}>
+          <BoostModal
+            open={showBoostModal}
+            onOpenChange={setShowBoostModal}
+            tokenId={boostTokenId}
+            postTitle={currentShort?.title ?? ''}
+          />
+        </Suspense>
+      )}
 
       {/* Report Modal */}
       <ReportModal
