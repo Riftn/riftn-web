@@ -80,7 +80,7 @@ export function NotificationsDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen} handleOnly animatedExit>
       {/* Phone only (the bell routes to the page on desktop). A glass sheet
-          with no handle and no close button. It opens lowered by a fifth of
+          with a small grab bar and no close button. It opens lowered by a fifth of
           the screen, so the page above shows it is a drawer; dragging it up
           fills the screen, and pulling down (from the top of the list) steps
           back and then closes it (useDrawerPullClose). Rows scrolling up under
@@ -88,6 +88,9 @@ export function NotificationsDrawer() {
       <DrawerContent ref={sheetRef} glass overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', translate: '0 20vh' }}>
         <DrawerTitle className="sr-only">{_copy("copy.788011833a5a", { defaultValue: "Notifications" })}</DrawerTitle>
         <DrawerDescription className="sr-only">{_copy("copy.efe4bbcc61b3", { defaultValue: "Your notifications" })}</DrawerDescription>
+        {/* Shows the sheet drags down. Over the pill's own top inset, so it
+            takes no room (index.css places it under the status bar when full). */}
+        <div data-bell-handle aria-hidden className="pointer-events-none absolute left-1/2 z-20 h-1 w-9 -translate-x-1/2 rounded-full bg-zinc-400/45" />
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           <ErrorBoundary compact resetKey={String(open)} label={_copy("copy.788011833a5a", { defaultValue: "Notifications" })}>
             <Suspense fallback={<div role="status" className="p-4">{_copy("copy.eae12e0d3bab", { defaultValue: "Loading notifications…" })}</div>}>

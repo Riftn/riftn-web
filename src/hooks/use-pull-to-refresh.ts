@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject, type TouchEvent, type MouseEvent } from 'react';
-import { PULL_CANCEL_MS, PULL_RETURN_MS, pullForDrag, pullSpringProgress } from '@/lib/pill-pull-motion';
+import { PULL_CANCEL_MS, PULL_RETURN_MS, dragForPull, pullForDrag, pullShouldRefresh, pullSpringProgress } from '@/lib/pill-pull-motion';
 
 interface UsePullToRefreshOptions {
   /** Opt in on the phone feed; other surfaces retain their existing behaviour. */
@@ -21,6 +21,8 @@ export function usePullToRefresh({ enabled = false, pullThreshold = 80, onRefres
   const frame = useRef(0);
   const returning = useRef(false);
   const suppressClickUntil = useRef(0);
+  // Last two finger samples, for the release speed (a quick flick refreshes too).
+  const samples = useRef<{ t: number; y: number }[]>([]);
   const animation = useRef<Animation | null>(null);
   const motion = useRef({ motionRef, onMotion });
   motion.current = { motionRef, onMotion };
@@ -68,13 +70,17 @@ export function usePullToRefresh({ enabled = false, pullThreshold = 80, onRefres
     };
     frame.current = requestAnimationFrame(tick);
   }, [reset, publish]);
+  // A refresh that starts while a finger is pulling (a background one) used to
+  // yank the pull away under the finger; the pull now carries on and only
+  // skips starting a second refresh.
   useEffect(() => {
     if (!enabled) reset();
-    else if (isRefreshing && start.current) springBack();
-  }, [enabled, isRefreshing, reset, springBack]);
+  }, [enabled, reset]);
   useEffect(() => () => { cancelAnimationFrame(frame.current); animation.current?.cancel(); }, []);
   const begin = useCallback((x: number, y: number, target: EventTarget | null) => {
-    if (!enabled || isRefreshing || returning.current || !(target instanceof Element)) return;
+    // Never refused for a running refresh or a spring-back still settling:
+    // those made a pull do nothing at all, which read as a dead screen.
+    if (!enabled || !(target instanceof Element)) return;
     // Big tappable art (a profile cover or photo) opts in with data-pull-through,
     // so a pull can start on it; the click that follows a real pull is dropped.
     const control = target.closest('button, a, input, textarea, select, [role="slider"], [data-no-pull], [data-feed-filter-panel]');
@@ -85,22 +91,43 @@ export function usePullToRefresh({ enabled = false, pullThreshold = 80, onRefres
     let node: Element | null = target;
     while (node) { if (node.scrollTop > 0) return; node = node.parentElement; }
     if (containerRef?.current && !containerRef.current.contains(target)) return;
-    start.current = { x, y };
+    // Grabbed while springing back: stop the return and carry on from where
+    // the list is, instead of snapping it to the top under the finger.
+    let carried = 0;
+    if (returning.current) {
+      cancelAnimationFrame(frame.current);
+      animation.current?.cancel(); animation.current = null;
+      returning.current = false;
+      carried = dragForPull(distance.current);
+    } else {
+      distance.current = 0;
+    }
+    start.current = { x, y: y - carried };
+    samples.current = [{ t: performance.now(), y }];
     if (!motion.current.onMotion) setIsPulling(true);
-    publish(0, true);
-  }, [enabled, isRefreshing, containerRef, publish]);
+    publish(distance.current, true);
+  }, [enabled, containerRef, publish]);
   const move = useCallback((x: number, y: number) => {
     const origin = start.current;
     if (!origin) return;
     const dx = x - origin.x, dy = y - origin.y;
     if (Math.abs(dx) > Math.max(12, Math.abs(dy))) { reset(); return; }
     distance.current = pullForDrag(dy);
+    const now = performance.now();
+    samples.current.push({ t: now, y });
+    while (samples.current.length > 2 && now - samples.current[0].t > 100) samples.current.shift();
     publish(distance.current, true);
   }, [reset, publish]);
   const finish = useCallback(() => {
     if (!start.current) return;
     if (distance.current > 8) suppressClickUntil.current = performance.now() + 450;
-    const refresh = start.current !== null && distance.current >= pullThreshold;
+    const list = samples.current;
+    const first = list[0], last = list[list.length - 1];
+    const now = performance.now();
+    // px/s as the finger left; a pause before letting go is no flick.
+    const span = first && last ? last.t - first.t : 0;
+    const speed = span >= 8 && now - last.t < 60 ? ((last.y - first.y) / span) * 1000 : 0;
+    const refresh = start.current !== null && pullShouldRefresh(distance.current, speed, pullThreshold);
     springBack(refresh ? PULL_RETURN_MS : PULL_CANCEL_MS);
     if (refresh && !isRefreshing) onRefresh();
   }, [springBack, pullThreshold, isRefreshing, onRefresh]);
