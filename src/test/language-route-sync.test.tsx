@@ -1,6 +1,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { createInstance } from 'i18next';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -13,7 +13,8 @@ function Location() { const location = useLocation(); return <output data-testid
 async function mount(url: string) {
   const instance = createInstance();
   await instance.use(initReactI18next).init({ lng: 'en', fallbackLng: 'en', resources: { en: { translation: {} }, fr: { translation: {} }, tr: { translation: {} } } });
-  render(<I18nextProvider i18n={instance}><MemoryRouter initialEntries={[url]}><LanguageRouteSync /><Location /></MemoryRouter></I18nextProvider>);
+  window.history.replaceState(null, '', url);
+  render(<I18nextProvider i18n={instance}><BrowserRouter><LanguageRouteSync /><Location /></BrowserRouter></I18nextProvider>);
   return instance;
 }
 beforeEach(() => { loadLanguage.mockReset().mockResolvedValue(true); localStorage.clear(); });
@@ -22,7 +23,8 @@ describe('public language URLs', () => {
     const instance = await mount('/docs?ref=guide&hl=tr#intro');
     await waitFor(() => expect(instance.language).toBe('tr'));
     expect(screen.getByTestId('url').textContent).toBe('/docs?ref=guide&hl=tr#intro');
-    expect(localStorage.getItem('user-preferred-language')).toBe('tr');
+    // A shared link picks the language for the visit; it is not saved.
+    expect(localStorage.getItem('user-preferred-language')).toBeNull();
     await act(async () => { await instance.changeLanguage('fr'); });
     await waitFor(() => expect(screen.getByTestId('url').textContent).toBe('/docs?ref=guide&hl=fr#intro'));
   });
@@ -35,5 +37,22 @@ describe('public language URLs', () => {
     await waitFor(() => expect(screen.getByTestId('url').textContent).toBe('/docs?hl=fr'));
     await act(async () => { finish(true); await pending; });
     expect(instance.language).toBe('fr');
+  });
+  it('keeps the language the reader picks after arriving on a ?hl= link', async () => {
+    const instance = await mount('/docs?hl=tr');
+    await waitFor(() => expect(instance.language).toBe('tr'));
+    await act(async () => { await instance.changeLanguage('en'); });
+    await waitFor(() => expect(screen.getByTestId('url').textContent).toBe('/docs'));
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+    expect(instance.language).toBe('en');
+    expect(window.location.search).toBe('');
+  });
+  it('applies a newly opened ?hl= link again after the reader left the last one', async () => {
+    const instance = await mount('/docs?hl=tr');
+    await waitFor(() => expect(instance.language).toBe('tr'));
+    await act(async () => { await instance.changeLanguage('en'); });
+    await waitFor(() => expect(screen.getByTestId('url').textContent).toBe('/docs'));
+    await act(async () => { window.history.pushState(null, '', '/docs?hl=fr'); window.dispatchEvent(new PopStateEvent('popstate')); });
+    await waitFor(() => expect(instance.language).toBe('fr'));
   });
 });
