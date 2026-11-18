@@ -6,6 +6,7 @@ import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
+import { ResetWalletSettings, type ResetWalletReadiness } from '@/components/app/settings/ResetWalletSettings';
 import PersonalKeys from '@/components/PersonalKeys';
 import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
@@ -2005,6 +2006,11 @@ export default function StateGalleryPage() {
 
         {params.get('predictions') === '1' && <PredictionGallery />}
         {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('resetwallet') && (
+          <section data-reset-wallet-gallery className="mb-5 max-w-xl">
+            <ResetWalletSettings preview={(['ready', 'no-login', 'signed-in-with-wallet', 'done'] as const).find((s) => s === params.get('resetwallet')) ?? ('ready' as ResetWalletReadiness)} />
+          </section>
+        )}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}

@@ -464,6 +464,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const driftedLinkRef = useRef<string | null>(null);
   const pendingReplacementRef = useRef<{ userId: string; oldAddress: string; secret: string } | null>(null);
   const requiredWalletRotationRef = useRef(false);
+  // Set only while Settings → Reset wallet runs: the move it asks for must
+  // happen or the whole reset stops, and it may only move the account on
+  // screen. Null for every automatic rescue.
+  const resetRotationRef = useRef<{ expectedFromAddress: string; twoFactorCode?: string } | null>(null);
   // Hydrated from storage rather than left null until some login flow happens
   // to run. This is the identity that OWNS the wallet row, and it is needed on
   // an ordinary page load where no login is in progress: BiometricUnlockSettings
@@ -2425,8 +2429,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (proof.address !== address.toLowerCase()) throw new AuthCopyError(_translateCopy("copy.d14ddd22f876", { defaultValue: "Wallet changed during recovery. Please try again." }));
         return proof;
       };
+      const reset = resetRotationRef.current;
       await submitWalletProof(await sign(), sign, proof =>
-        rotateWallet(address, proof.signature, proof.timestamp, chainId, accessToken, proof.challengeId));
+        rotateWallet(address, proof.signature, proof.timestamp, chainId, accessToken, proof.challengeId,
+          reset ? { ...reset, strict: true } : undefined));
       authLogger.warn('Moved account onto the wallet this browser holds', {
         from: linked,
         to: address,
@@ -2443,6 +2449,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       // An intentional renewal must keep the existing profile. A failed
       // rotation remains retryable with the same newly encrypted wallet.
+      // A reset from Settings has nothing to fall back to: signing in without
+      // the move would land on a blank account, so stop whatever the reason.
+      if (resetRotationRef.current) throw e;
       if (requiredWalletRotationRef.current && !(e instanceof WalletNotLinkedError)) throw e;
     }
   };
@@ -2454,7 +2463,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!eoaProvider) throw new AuthCopyError(_translateCopy("copy.8dc01b0b0936", { defaultValue: "Wallet is locked. Please unlock it first." }));
     const ownerAddress = await addressFromProvider(eoaProvider);
     const pending = supabaseUserId ? await getPendingWalletReplacement(supabaseUserId, ownerAddress) : null;
-    requiredWalletRotationRef.current = !!pending;
+    requiredWalletRotationRef.current = !!pending || !!resetRotationRef.current;
     if (pending) driftedLinkRef.current = pending.oldAddress;
 
     let aaProvider: any = null;
@@ -2550,7 +2559,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * address, and old message ciphertext still needs its original decryption
    * keys. The old encrypted wallet records are archived, never discarded.
    */
-  const replaceLostWallet = async (password: string) => {
+  const replaceLostWallet = async (password: string, userId: string | null = supabaseUserId) => {
+    const supabaseUserId = userId;
     if (!supabaseUserId) throw new AuthCopyError(_translateCopy("copy.491fc91cd76e", { defaultValue: "Not signed in" }));
     const toastId = 'auth-replace-wallet';
     setIsConnecting(true);
@@ -2600,6 +2610,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw err;
     } finally {
       setIsConnecting(false);
+    }
+  };
+
+  /**
+   * Settings → Reset wallet: move the account on screen onto a brand-new
+   * built-in wallet, from inside a live session.
+   *
+   * For two kinds of people. One has a built-in wallet they no longer trust or
+   * can no longer open — that is replaceLostWallet, the same path the unlock
+   * sheet offers. The other signed up with an outside wallet (SafePal,
+   * MetaMask) whose key leaked: there is no built-in wallet row to replace, so
+   * a fresh one is saved for their login and the account is moved onto it.
+   *
+   * Either way the proof of WHO is the account's own email or Google login
+   * (the Supabase session), never a signature from the old wallet, since a
+   * leaked key can sign as well as its owner can. resetRotationRef makes the
+   * move strict (no silent fallback to a new blank account) and pins it to the
+   * account on screen, so a different login lingering in this browser can
+   * never move someone else's profile.
+   */
+  const resetWallet = async (password: string, twoFactorCode?: string) => {
+    const fromAddress = walletAddress;
+    if (!fromAddress) throw new AuthCopyError(_translateCopy("copy.491fc91cd76e", { defaultValue: "Not signed in" }));
+    const { data } = await supabase.auth.getSession();
+    const uid = data?.session?.user?.id ?? null;
+    if (!uid) {
+      throw Object.assign(new AuthCopyError(i18n.t('resetWallet.needsLogin', { defaultValue: "Sign in with this account's email or Google first, then try again." })), { code: 'RESET_NEEDS_LOGIN' });
+    }
+
+    resetRotationRef.current = { expectedFromAddress: fromAddress, twoFactorCode: twoFactorCode?.trim() || undefined };
+    try {
+      const { generateMnemonic12, deriveFromSecret } = await import('@/lib/wallet-core/derive');
+      const existing = await fetchWallet(uid);
+      const retry = pendingReplacementRef.current;
+      // A second press after a refused move (a missing two-step code, a
+      // dropped connection) must reuse the wallet the first press already
+      // saved, not archive it and mint another.
+      const ownRetry = !!existing && !!retry && retry.userId === uid &&
+        retry.oldAddress.toLowerCase() === fromAddress.toLowerCase() &&
+        deriveFromSecret(retry.secret).ethAddress.toLowerCase() === existing.ethAddress.toLowerCase();
+
+      if (existing && !ownRetry) {
+        await replaceLostWallet(password, uid);
+        return;
+      }
+
+      const toastId = 'auth-reset-wallet';
+      setIsConnecting(true);
+      try {
+        let pending = retry;
+        if (!ownRetry) {
+          pending = { userId: uid, oldAddress: fromAddress, secret: generateMnemonic12() };
+          pendingReplacementRef.current = pending;
+        }
+        const derived = deriveFromSecret(pending!.secret);
+        if (!ownRetry) {
+          const encrypted = await (await import('@/lib/wallet-core/crypto')).encryptString(derived.secret, password);
+          await saveWallet(uid, derived.ethAddress, encrypted);
+        }
+        clearPasskeyCache();
+        lockWallet();
+        driftedLinkRef.current = fromAddress;
+        await activateWalletKey(derived.ethPrivateKey);
+        await signAndAuthenticateSmartWallet(toastId);
+        pendingReplacementRef.current = null;
+        setWalletPhase('none');
+        toast.success(_copy("copy.ea29e65c1577", { defaultValue: "New wallet ready — your account came with it" }), { id: toastId });
+      } catch (err) {
+        driftedLinkRef.current = null;
+        toast.dismiss(toastId);
+        throw err;
+      } finally {
+        setIsConnecting(false);
+      }
+    } finally {
+      resetRotationRef.current = null;
     }
   };
 
@@ -3260,6 +3346,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     driftedLinkRef.current = null;
     pendingReplacementRef.current = null;
     requiredWalletRotationRef.current = false;
+    resetRotationRef.current = null;
 
     // Read the identity off storage before any of it is cleared below, so an
     // explicit sign-out can drop that account from this device's profile list.
@@ -3461,6 +3548,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     exportPrivateKey,
     exportPrivateKeyWithBiometrics,
     replaceLostWallet,
+    resetWallet,
     switchToProfile,
     disconnect,
     refreshUser,
