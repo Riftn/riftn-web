@@ -1,5 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
+import { dblClickReply } from '@/lib/dblclick-reply';
 /**
  * RealtimeChatPanel
  * =================
@@ -415,7 +416,7 @@ export function RealtimeChatPanel({
                 const isMine = !!walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
 
                 return (
-                  <div key={msg.id} className="group relative" data-chat-row data-rt-msg={msg.id}>
+                  <div key={msg.id} className="group relative" data-chat-row data-rt-msg={msg.id} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))}>
                     {msg.reply_to && (
                       <div className="flex items-center gap-1 text-[10px] text-zinc-500 ml-9 mb-0.5">
                         <CornerDownRight className="w-2.5 h-2.5" />

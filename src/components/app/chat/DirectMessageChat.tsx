@@ -1,5 +1,6 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useSwipeReply } from '@/hooks/use-swipe-reply';
+import { dblClickReply } from '@/lib/dblclick-reply';
 import { useTranslation as _useCopy, Trans } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
@@ -844,6 +845,7 @@ const MessageBubble = memo(function MessageBubble({
     {menus}
     <div
       ref={rowRef}
+      onDoubleClick={(e) => dblClickReply(e, !selecting && onReply && (() => onReply(message)))}
       id={`dm-msg-${message._id}`}
       data-chat-row
       data-cozy-first={cozy?.first ? '' : undefined}

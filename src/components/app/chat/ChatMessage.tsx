@@ -7,6 +7,7 @@ import Copy from '@/components/ui/cut-icons/copy';
 import SearchIcon from '@/components/ui/cut-icons/search';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import { useSwipeReply } from '@/hooks/use-swipe-reply';
+import { dblClickReply } from '@/lib/dblclick-reply';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
@@ -435,6 +436,7 @@ export const ChatMessage = memo(function ChatMessage({
     {menu}
     <div
       ref={rowRef}
+      onDoubleClick={(e) => dblClickReply(e, !isEditing && onReply && (() => onReply(message)))}
       data-msg-menu-open={menuPoint.point ? '' : undefined}
       id={`chat-msg-${message.id}`}
       data-chat-row
