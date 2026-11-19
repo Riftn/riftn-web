@@ -3164,7 +3164,9 @@
     "replyPlaceholder": "Antworte @{{name}}...",
     "composerPlaceholder": "Hier tippen",
     "threadParts": {
-      "save": "Reihenfolge speichern"
+      "save": "Reihenfolge speichern",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten"
     },
     "attachImage": "Bild anhängen",
     "recordVoiceNote": "Sprachnotiz aufnehmen",
@@ -6208,6 +6210,12 @@
       "needsImageToWork": "{{model}} benötigt ein Bild, von dem aus gearbeitet werden kann. Bringen Sie zuerst einen an.",
       "speechLimit": "Das sind {{length}} Zeichen. Das Limit beträgt {{limit}}.",
       "musicTrackLength": "{{count}}s Track"
+    },
+    "gallery": {
+      "send": "Senden",
+      "notifications": {
+        "generation_reply": "{{name}} hat auf deinen Kommentar geantwortet"
+      }
     }
   },
   "pricing": {
@@ -11987,7 +11995,7 @@
   "multiPost": {
     "tab": "Multi-Posting",
     "title": "Multi-Posting",
-    "intro": "Poste gleichzeitig auf X, YouTube, Instagram, TikTok und mehr mit dehub. Verbinde deine Konten einmal und wähle dann aus, wohin jeder Beitrag gesendet wird.",
+    "intro": "Poste gleichzeitig auf X, YouTube, Instagram, TikTok und mehr mit Riftn. Verbinde deine Konten einmal und wähle dann aus, wohin jeder Beitrag gesendet wird.",
     "creditsHeading": "Post-Credits",
     "credits": "{{count}} Post-Credits",
     "topUpTitle": "Aufladen und sparen",
@@ -12035,7 +12043,10 @@
   "dm": {
     "planRestricted": "Dieser Nutzer setzt ein Abo voraus, um Nachrichten zu erhalten.",
     "planTypeNotAllowed": "Der Plan dieses Creators erlaubt diese Art von Nachricht nicht.",
-    "planMinTip": "Das Trinkgeld für diesen Creator muss mindestens {{amount}} Tokens betragen."
+    "planMinTip": "Das Trinkgeld für diesen Creator muss mindestens {{amount}} Tokens betragen.",
+    "shareGroups": "Gruppen",
+    "shareKindGroup": "Gruppe",
+    "shareKindChannel": "Kanal"
   },
   "credits": {
     "earningsWorth": "Wert {{amount}}",

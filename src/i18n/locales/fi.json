@@ -80,7 +80,8 @@
       "profile": "profiili",
       "proposal": "ehdotus",
       "stage": "vaihe",
-      "store": "kauppa"
+      "store": "kauppa",
+      "featureRequest": "pyyntö"
     },
     "recipientChat": "keskustelu",
     "recipientUser": "käyttäjä",
@@ -521,7 +522,11 @@
     "getTheApp": "Hanki sovellus",
     "connectAi": "Yhdistä tekoäly",
     "converter": "Muunnin",
-    "affiliate": "Kumppanuus"
+    "affiliate": "Kumppanuus",
+    "groups": {
+      "create": "Luo",
+      "discover": "Löydä"
+    }
   },
   "feed": {
     "viewProfile": "Näytä henkilön {{name}} profiili",
@@ -1146,7 +1151,8 @@
     "socialConnectedShort": "Yhdistetty",
     "socialConnectFailed": "Ei voitu yhdistää kohteeseen {{platform}}. Yritä uudelleen.",
     "socialVerifiedFollowers": "{{value}} seuraajaa",
-    "socialFollowersPending": "Alitulostimien määrän päivitys"
+    "socialFollowersPending": "Alitulostimien määrän päivitys",
+    "menuLayoutFolders": "Kansiot"
   },
   "common": {
     "confirm": "Vahvista",
@@ -3046,7 +3052,11 @@
     "likersEmptyTitle": "Ei vielä tykkäyksiä",
     "likersEmptyBody": "Tämän kommentin tykkäykset näkyvät täällä.",
     "anonymousLikes_one": "{{count}} tykkäys nimettömältä merkin haltijalta",
-    "anonymousLikes_other": "{{count}} tykkäystä nimettömiltä merkkien haltijoilta"
+    "anonymousLikes_other": "{{count}} tykkäystä nimettömiltä merkkien haltijoilta",
+    "threadParts": {
+      "moveUp": "Siirrä ylös",
+      "moveDown": "Siirrä alas"
+    }
   },
   "mintChain": {
     "title": "Mintunpylväs",
@@ -6082,6 +6092,12 @@
       "needsImageToWork": "{{model}} tarvitsee kuvan, josta työskennellä. Kiinnitä yksi ensin.",
       "speechLimit": "Se on {{length}} merkkiä. Raja on {{limit}}.",
       "musicTrackLength": "{{count}}s kappale"
+    },
+    "gallery": {
+      "send": "Lähetä",
+      "notifications": {
+        "generation_reply": "{{name}} vastasi kommenttiisi"
+      }
     }
   },
   "pricing": {
@@ -11855,7 +11871,7 @@
   "multiPost": {
     "tab": "Monijulkaisu",
     "title": "Monijulkaisu",
-    "intro": "Julkaise X:ään, YouTubeen, Instagramiin, TikTokiin ja muihin samanaikaisesti dehubin avulla. Yhdistä tilisi kerran ja valitse, minne kukin julkaisu menee.",
+    "intro": "Julkaise X:ään, YouTubeen, Instagramiin, TikTokiin ja muihin samanaikaisesti Riftnin avulla. Yhdistä tilisi kerran ja valitse, minne kukin julkaisu menee.",
     "creditsHeading": "Julkaisupisteet",
     "credits": "{{count}} julkaisupistettä",
     "topUpTitle": "Lisää ja säästä",
@@ -11903,7 +11919,9 @@
   "dm": {
     "planRestricted": "Tämä käyttäjä vaatii tilauksen viestien vastaanottamiseen.",
     "planTypeNotAllowed": "Tämän tekijän paketti ei salli tämäntyyppistä viestiä.",
-    "planMinTip": "Tipin tälle tekijälle on oltava vähintään {{amount}} tokenia."
+    "planMinTip": "Tipin tälle tekijälle on oltava vähintään {{amount}} tokenia.",
+    "shareKindGroup": "Ryhmittele",
+    "shareKindCommunity": "Yhteisö"
   },
   "credits": {
     "earningsWorth": "Arvo {{amount}}",
@@ -19469,5 +19487,10 @@
     "edit": "Muokkaa",
     "editLabel": "Muokkaa viestiä",
     "error": "Se ei toiminut. Yritä uudelleen."
+  },
+  "mentionLinks": {
+    "communities": "Yhteisöt",
+    "pages": "Sivut",
+    "people": "Ihmiset"
   }
 }

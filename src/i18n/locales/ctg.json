@@ -81,7 +81,8 @@
       "profile": "প্রোফাইল",
       "proposal": "প্রস্তাব",
       "stage": "স্টেজ",
-      "store": "স্টোর"
+      "store": "স্টোর",
+      "featureRequest": "চাহিদা"
     },
     "recipientChat": "চ্যাট",
     "recipientUser": "ব্যবহারকারী",
@@ -517,7 +518,12 @@
     "getTheApp": "অ্যাপ লন",
     "connectAi": "AI সংযুক্ত গরন",
     "converter": "কনভার্টার",
-    "affiliate": "অ্যাফিলিয়েট"
+    "affiliate": "অ্যাফিলিয়েট",
+    "groups": {
+      "create": "বানাও",
+      "discover": "হইজন",
+      "riftn": "ডিহাব"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} এর প্রোফাইল দেখুন",
@@ -1134,7 +1140,9 @@
     "showFollowers": "ফলোয়ার/ফলোইং দেখাও",
     "hideFollowerCounts": "ফলোয়ার সংখ্যা লুকাও",
     "followersOnly": "শুধু ফলোয়ার",
-    "subscribersOnly": "শুধু সাবস্ক্রাইবার"
+    "subscribersOnly": "শুধু সাবস্ক্রাইবার",
+    "activeSessions": "সক্রিয় সেশন",
+    "menuLayoutFolders": "ফোল্ডার"
   },
   "common": {
     "confirm": "নিশ্চিত গরো",
@@ -3110,7 +3118,11 @@
     "likersEmptyTitle": "এহনো কোনো লাইক নাই",
     "likersEmptyBody": "এই কমেন্টর লাইক ইখানে দেখা যাইবো।",
     "anonymousLikes_one": "অ্যানোনিমাস ব্যাজ হোল্ডারত্তুন {{count}} লাইক",
-    "anonymousLikes_other": "অ্যানোনিমাস ব্যাজ হোল্ডারত্তুন {{count}} লাইক"
+    "anonymousLikes_other": "অ্যানোনিমাস ব্যাজ হোল্ডারত্তুন {{count}} লাইক",
+    "threadParts": {
+      "moveUp": "উপরে সরান",
+      "moveDown": "নীচে সরান"
+    }
   },
   "mintChain": {
     "title": "মিন্ট পোস্ট",
@@ -6070,6 +6082,12 @@
       "needsImageToWork": "{{model}} একটি ছবি প্রয়োজন। একটি যুক্ত করুন।",
       "speechLimit": "এটি হল {{length}} চরিত্র। সীমিত হল {{limit}}।",
       "musicTrackLength": "{{count}} এর ট্র্যাক"
+    },
+    "gallery": {
+      "send": "পাঠান",
+      "notifications": {
+        "generation_reply": "{{name}} তোঁয়ার মন্তব্যত জবাব দিছে"
+      }
     }
   },
   "pricing": {
@@ -11798,7 +11816,7 @@
   "multiPost": {
     "tab": "মাল্টি-পোস্টিং",
     "title": "মাল্টি-পোস্টিং",
-    "intro": "একই সময়ে X, YouTube, Instagram, TikTok এবং আরও অনেক জায়গায় পোস্ট করুন dehub দিয়ে। আপনার অ্যাকাউন্টগুলো একবার কানেক্ট করুন, তারপর বেছে নিন কোন পোস্ট কোথায় যাবে।",
+    "intro": "একই সময়ে X, YouTube, Instagram, TikTok এবং আরও অনেক জায়গায় পোস্ট করুন Riftn দিয়ে। আপনার অ্যাকাউন্টগুলো একবার কানেক্ট করুন, তারপর বেছে নিন কোন পোস্ট কোথায় যাবে।",
     "creditsHeading": "পোস্ট ক্রেডিট",
     "credits": "{{count}} পোস্ট ক্রেডিট",
     "topUpTitle": "টপ আপ করুন আর সেভ করুন",
@@ -11846,7 +11864,9 @@
   "dm": {
     "planRestricted": "এই ইউজারে মেসেজ পাইবার লাই সাবস্ক্রিপশন লাগে।",
     "planTypeNotAllowed": "এই ক্রিয়েটরর প্ল্যানে এই রকম মেসেজ চলে না।",
-    "planMinTip": "এই ক্রিয়েটরর লাই টিপ কমপক্ষে {{amount}} টোকেন অইত অইবো।"
+    "planMinTip": "এই ক্রিয়েটরর লাই টিপ কমপক্ষে {{amount}} টোকেন অইত অইবো।",
+    "shareKindGroup": "গ্রুপ করুন",
+    "shareKindCommunity": "কমিউনিটি"
   },
   "credits": {
     "earningsWorth": "ওয়ার্থ {{amount}}",
@@ -19021,5 +19041,10 @@
     "inProgress": "চলতাছে",
     "completed": "সম্পূর্ণ",
     "underReview": "পর্যালোচনায়"
+  },
+  "mentionLinks": {
+    "communities": "কমিউনিটি",
+    "pages": "পেইজগিন",
+    "people": "মানুষ"
   }
 }

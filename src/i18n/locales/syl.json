@@ -81,7 +81,8 @@
       "profile": "প্রোফাইল",
       "proposal": "প্রস্তাব",
       "stage": "পর্যায়",
-      "store": "দোকান"
+      "store": "দোকান",
+      "featureRequest": "রিকোয়েস্ট"
     },
     "recipientChat": "চ্যাট",
     "recipientUser": "আপনি",
@@ -519,7 +520,12 @@
     "getTheApp": "অ্যাপ নামাউক্কা",
     "connectAi": "AI সংযুক্ত করউক্কা",
     "converter": "কনভার্টার",
-    "affiliate": "অ্যাফিলিয়েট"
+    "affiliate": "অ্যাফিলিয়েট",
+    "groups": {
+      "create": "বানাও",
+      "discover": "খুঁজউক্কা",
+      "riftn": "ডেহুব"
+    }
   },
   "feed": {
     "viewProfile": "{{name}}'র প্রোফাইল দেখ",
@@ -1124,7 +1130,12 @@
     "showFollowers": "ফলোয়ার/ফলোইং দেখাও",
     "hideFollowerCounts": "ফলোয়ার সংখ্যা লুকাও",
     "followersOnly": "শুধু ফলোয়ার",
-    "subscribersOnly": "শুধু সাবস্ক্রাইবার"
+    "subscribersOnly": "শুধু সাবস্ক্রাইবার",
+    "deleteAccountData": "অ্যাকাউন্ট / ডেটা মুছুন",
+    "hideWatched": "দেখা ভিডিও লুকাও",
+    "channelSpeed": "প্রতি চ্যানেলর প্লেব্যাক স্পিড",
+    "skipSegments": "স্পনসর আর ইন্ট্রো বাদ দেও",
+    "menuLayoutFolders": "ফোল্ডার"
   },
   "common": {
     "confirm": "নিশ্চিত করো",
@@ -6069,6 +6080,12 @@
       "needsImageToWork": "{{model}} একটি ছবি থেকে কাজ করতে পারে না। একটি ছবি আঁকুন।",
       "speechLimit": "এটি হল {{length}} চরিত্র। সীমানা হল {{limit}}।",
       "musicTrackLength": "{{count}} এর ট্র্যাক"
+    },
+    "gallery": {
+      "send": "পাঠান",
+      "notifications": {
+        "generation_reply": "{{name}} তোমার মন্তব্যর জবাব দিসে"
+      }
     }
   },
   "pricing": {
@@ -11814,7 +11831,9 @@
   "dm": {
     "planRestricted": "এই ইউজারোর মেসেজ পাওয়ার লাগি সাবস্ক্রিপশন লাগে।",
     "planTypeNotAllowed": "এই ক্রিয়েটরর প্ল্যানে এই রকম মেসেজ চলে না।",
-    "planMinTip": "এই ক্রিয়েটরর লাগি টিপ কমপক্ষে {{amount}} টোকেন অওয়া লাগবো।"
+    "planMinTip": "এই ক্রিয়েটরর লাগি টিপ কমপক্ষে {{amount}} টোকেন অওয়া লাগবো।",
+    "shareKindGroup": "গ্রুপ করুন",
+    "shareKindCommunity": "কমিউনিটি"
   },
   "credits": {
     "earningsWorth": "মূল্য {{amount}}",
@@ -18856,5 +18875,10 @@
     "inProgress": "চলতাসে",
     "completed": "শেষ অইসে",
     "underReview": "পর্যালোচনায়"
+  },
+  "mentionLinks": {
+    "communities": "কমিউনিটি",
+    "pages": "পেজগুলা",
+    "people": "মানুষ"
   }
 }

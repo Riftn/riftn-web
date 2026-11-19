@@ -12698,7 +12698,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as dehub. Connect your accounts once, then pick where each post goes.",
+    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as Riftn. Connect your accounts once, then pick where each post goes.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up and save",
@@ -12744,6 +12744,11 @@
     "skippedOtherToast": "Skipped {{platforms}}: they couldn't take this post."
   },
   "dm": {
+    "shareGroups": "Groups",
+    "shareKindGroup": "Group",
+    "shareKindChannel": "Channel",
+    "shareKindCommunity": "Community",
+    "reportMessage": "Report message",
     "planRestricted": "This user requires a subscription to receive messages.",
     "planTypeNotAllowed": "This creator's plan doesn't allow this kind of message.",
     "planMinTip": "Tip must be at least {{amount}} tokens for this creator."

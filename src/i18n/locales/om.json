@@ -81,7 +81,8 @@
       "profile": "ibsama",
       "proposal": "dhiyeessii",
       "stage": "waltajjii",
-      "store": "kuusuu"
+      "store": "kuusuu",
+      "featureRequest": "gaaffii"
     },
     "recipientChat": "chat",
     "recipientUser": "fayyadamticha",
@@ -517,7 +518,12 @@
     "getTheApp": "Aappilikeeshinii argadhu",
     "connectAi": "AI walqunnamsiisi",
     "converter": "Jijjiirraa",
-    "affiliate": "Michuu"
+    "affiliate": "Michuu",
+    "groups": {
+      "create": "Uumi",
+      "discover": "Argadhu",
+      "riftn": "Riftn jedhamuun beekama"
+    }
   },
   "feed": {
     "viewProfile": "{{name}}'s profile ilaali",
@@ -1127,7 +1133,8 @@
     "socialConnectedShort": "Walitti hidhame",
     "socialConnectFailed": "{{platform}} walitti hidhuu hin dandeenye. Maaloo irra yaali.",
     "socialVerifiedFollowers": "{{value}} hordoftoota",
-    "socialFollowersPending": "Lakkoofsa hordoftootaa haaromsuu"
+    "socialFollowersPending": "Lakkoofsa hordoftootaa haaromsuu",
+    "menuLayoutFolders": "Foolderoota"
   },
   "common": {
     "confirm": "Mirkaneessuu",
@@ -3039,7 +3046,11 @@
     "likersEmptyTitle": "Ammaaf jaalalli hin jiru",
     "likersEmptyBody": "Jaalalli yaada kanaa asitti mul'ata.",
     "anonymousLikes_one": "Qabataa baajii maqaa hin qabne irraa jaalala {{count}}",
-    "anonymousLikes_other": "Qabattoota baajii maqaa hin qabne irraa jaalala {{count}}"
+    "anonymousLikes_other": "Qabattoota baajii maqaa hin qabne irraa jaalala {{count}}",
+    "threadParts": {
+      "moveUp": "Ol geessuu",
+      "moveDown": "Gadi geessuu"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6066,6 +6077,12 @@
       "needsImageToWork": "{{model}} fakkii hojjechuu danda'uuf barbaada. Jalqaba fakkii maali.",
       "speechLimit": "Kun {{length}} arfiilee dha. Daangaan {{limit}} dha.",
       "musicTrackLength": "{{count}}s tarkaanfii"
+    },
+    "gallery": {
+      "send": "Ergaa",
+      "notifications": {
+        "generation_reply": "{{name}} yaada keessaniif deebii kenneera"
+      }
     }
   },
   "pricing": {
@@ -7737,7 +7754,8 @@
     "faqInstallNeededA": "Lakki Guutummaatti caancala keessatti kuusaa naannoo biraawzari keessanii fayyadamuun hojjeta. Caancala cufuun noodi kee dhaabbata; tajaajilli duubaa fi install hin jiru.",
     "ctaTitle": "Yeroo kufaatiin nageenya qabu qofa eegaluu.",
     "ctaBody": "Kufaatiin ka'umsaa, miidiyaaleen eegumsa qaban icciitii ta'anii fi hojiin mirkanaa'e badhaasa noodiin ummataa dura dhufu.",
-    "footerNote": "Hirmaannaan DePin tajaajila gumaacha malee oomisha invastimantii miti. Argamuun, ulaagaa guutuu fi badhaasni jijjiiramuu danda’a."
+    "footerNote": "Hirmaannaan DePin tajaajila gumaacha malee oomisha invastimantii miti. Argamuun, ulaagaa guutuu fi badhaasni jijjiiramuu danda’a.",
+    "navFaq": "Gaaffiiwwan yeroo baay'ee gaafataman"
   },
   "creatorFlow": {
     "newNativeFlow": "Maalallii haaraa",
@@ -11847,7 +11865,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "X, YouTube, Instagram, TikTok fi kanneen biroo irratti isumaan dehub. Walqunnamtii kee yeroo tokkoon walitti qabi, achii booddee guyyaa kamittiin kamittii akka deemuu filadhu.",
+    "intro": "X, YouTube, Instagram, TikTok fi kanneen biroo irratti isumaan Riftn. Walqunnamtii kee yeroo tokkoon walitti qabi, achii booddee guyyaa kamittiin kamittii akka deemuu filadhu.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up fi save",
@@ -11895,7 +11913,9 @@
   "dm": {
     "planRestricted": "Fayyadamaan kun ergaa fudhachuuf maallaqa galmee barbaada.",
     "planTypeNotAllowed": "Karoorri uumaa kanaa gosa ergaa kanaa hin hayyamu.",
-    "planMinTip": "Tip uumaa kanaaf yoo xiqqaate {{amount}} mallattoolee ta'uu qaba."
+    "planMinTip": "Tip uumaa kanaaf yoo xiqqaate {{amount}} mallattoolee ta'uu qaba.",
+    "shareKindGroup": "Walitti qabi",
+    "shareKindCommunity": "Hawaasa"
   },
   "credits": {
     "earningsWorth": "Gatii {{amount}} .",
@@ -19110,7 +19130,8 @@
     "127053546dd4": "Faayila kana buufachuu hin dandeenye",
     "d14896aa4bf8": "Manni kitaabaa bilisaa fe&#39;uu hin dandeenye. Walitti hidhamiinsa kee ilaalii irra deebi&#39;ii yaali.",
     "953e708b2287": "Dhaloonni sagalee fashalaa&#39;e.",
-    "4a52cdd6ac72": "Laayiyeroota kana dacha&#39;uu hin dandeenye"
+    "4a52cdd6ac72": "Laayiyeroota kana dacha&#39;uu hin dandeenye",
+    "dbc468a14b60": "Gaaffiiwwan yeroo baay'ee gaafataman"
   },
   "articles": {
     "cardLabel": "Article · {{count}} min read",
@@ -19412,5 +19433,10 @@
     "backToBlog": "Biloogiitti deebi'i",
     "sharePost": "Barreeffama qoodi",
     "relatedPosts": "Barreeffamoota Walqabatan"
+  },
+  "mentionLinks": {
+    "communities": "Hawaasota",
+    "pages": "Fuulota",
+    "people": "Namoota"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "प्रोफ़ाइल",
       "proposal": "प्रस्ताव",
       "stage": "स्टेज",
-      "store": "स्टोर"
+      "store": "स्टोर",
+      "featureRequest": "अर्ज"
     },
     "recipientChat": "चैट, गले लगाना,",
     "recipientUser": "यूज़र",
@@ -521,7 +522,12 @@
     "getTheApp": "ऐप पाबूँ",
     "connectAi": "AI कनेक्ट करूँ",
     "converter": "रूपांतरित करे वाला",
-    "affiliate": "एफिलिएट"
+    "affiliate": "एफिलिएट",
+    "groups": {
+      "create": "बनाओ",
+      "discover": "खोजूँ",
+      "riftn": "डीहब"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} के प्रोफ़ाइल देखना",
@@ -1129,7 +1135,8 @@
     "socialConnected": "{{platform}} कनेक्टेड",
     "socialConnectedShort": "जुड़े हई",
     "socialVerifiedFollowers": "{{value}} अनुयायी",
-    "socialFollowersPending": "कैलक्यूलेटर अपडेट"
+    "socialFollowersPending": "कैलक्यूलेटर अपडेट",
+    "menuLayoutFolders": "फोल्डर"
   },
   "common": {
     "confirm": "कंफर्म",
@@ -3020,7 +3027,11 @@
     "likersEmptyTitle": "अभी तक कोनो पसंद ना",
     "likersEmptyBody": "ई टिप्पणी पर पसंद इहाँ देखाई देत.",
     "anonymousLikes_one": "गुमनाम बैज धारक से {{count}} पसंद",
-    "anonymousLikes_other": "गुमनाम बैज धारक सब से {{count}} पसंद"
+    "anonymousLikes_other": "गुमनाम बैज धारक सब से {{count}} पसंद",
+    "threadParts": {
+      "moveUp": "अग्रिम बढ़ाएँ",
+      "moveDown": "पीछे बढ़ाएँ"
+    }
   },
   "mintChain": {
     "title": "पोस्ट कैलक्यूलेटर",
@@ -6021,7 +6032,13 @@
     "referenceProductName": "क्लिपमा तपाईको उत्पादन राख्नुहोस्",
     "referenceProductHint": "मूल दृश्य राखी मुख्य उत्पादन प्रतिस्थापन गर्नुहोस्",
     "referenceComposeName": "संदर्भ छवि संयुक्त गर्नुहोस्",
-    "referenceComposeHint": "बहु छविहरूबाट चरित्र, वस्तु र सेटिङहरू एक संरचना मा ल्याउनुहोस्"
+    "referenceComposeHint": "बहु छविहरूबाट चरित्र, वस्तु र सेटिङहरू एक संरचना मा ल्याउनुहोस्",
+    "gallery": {
+      "send": "भेजीं",
+      "notifications": {
+        "generation_reply": "{{name}} तोहर टिप्पणी पर रिप्लाई कइलक"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "प्रत्येक कार्य के लिए योजना तैयार करे",
@@ -11758,7 +11775,7 @@
   "multiPost": {
     "tab": "एक साथ कई पोस्ट",
     "title": "एक साथ कई पोस्ट",
-    "intro": "X, YouTube, Instagram, TikTok और अन्य पर dehub की तरह एक साथ पोस्ट करें। अपने खातों को एक बार कनेक्ट करें, फिर चुनें कि प्रत्येक पोस्ट कहाँ जाती है।",
+    "intro": "X, YouTube, Instagram, TikTok और अन्य पर Riftn की तरह एक साथ पोस्ट करें। अपने खातों को एक बार कनेक्ट करें, फिर चुनें कि प्रत्येक पोस्ट कहाँ जाती है।",
     "creditsHeading": "पोस्ट क्रेडिट",
     "credits": "{{count}} पोस्ट क्रेडिट",
     "topUpTitle": "टॉप अप करें और बचाएं",
@@ -11806,7 +11823,9 @@
   "dm": {
     "planRestricted": "ई यूजर के संदेस पावे लेल सब्सक्रिप्सन चाही।",
     "planTypeNotAllowed": "ई क्रिएटर के प्लान में अइसन संदेस के अनुमति नञ हे।",
-    "planMinTip": "ई क्रिएटर लेल टिप कम सँ कम {{amount}} टोकन होए के चाही।"
+    "planMinTip": "ई क्रिएटर लेल टिप कम सँ कम {{amount}} टोकन होए के चाही।",
+    "shareKindGroup": "समूह",
+    "shareKindCommunity": "समुदाय"
   },
   "credits": {
     "earningsWorth": "कीमत {{amount}}",
@@ -19262,5 +19281,10 @@
     "edit": "संपादित कर",
     "editLabel": "एगो सन्देश",
     "error": "किरपा करके, फिकिर नयँ करथिन, ई अइसीं... फेर से घुम्मब करऽ हइ ।"
+  },
+  "mentionLinks": {
+    "communities": "समुदाय",
+    "pages": "पन्ना",
+    "people": "लोग"
   }
 }

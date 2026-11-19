@@ -81,7 +81,8 @@
       "profile": "پروفائل",
       "proposal": "تجویز",
       "stage": "ستیج",
-      "store": "دُکّاں"
+      "store": "دُکّاں",
+      "featureRequest": "ڈھانک"
     },
     "recipientChat": "چیٹ",
     "recipientUser": "آپ",
@@ -519,7 +520,12 @@
     "getTheApp": "ایپ لو",
     "connectAi": "AI جوڑو",
     "converter": "کنورٹر",
-    "affiliate": "ایفیلی ایٹ"
+    "affiliate": "ایفیلی ایٹ",
+    "groups": {
+      "create": "بناؤ",
+      "discover": "ڈھونڈو",
+      "riftn": "ڈےہب"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} के अनुयायियों की संख्या",
@@ -1119,7 +1125,9 @@
     "socialConnected": "{{platform}} جڑ گیا",
     "socialConnectedShort": "منسلک",
     "socialConnectFailed": "نہیں جُڑ سکیا {{platform}}۔ پھر سے کوشش کیجئے۔",
-    "socialFollowersPending": "اعداد و شمار اپ ڈیٹ ہو رہا ہے"
+    "socialFollowersPending": "اعداد و شمار اپ ڈیٹ ہو رہا ہے",
+    "deleteAccountData": "اکاؤنٹ / ڈیٹا حذف کریں",
+    "menuLayoutFolders": "فولڈر"
   },
   "common": {
     "confirm": "توثیق کریں",
@@ -3002,7 +3010,11 @@
     "likersEmptyTitle": "ابھی تک کوئی لائک نئیں",
     "likersEmptyBody": "اس تبصرے کے لائکس یہاں دکھیں گے۔",
     "anonymousLikes_one": "گمنام بیج والے سے {{count}} لائک",
-    "anonymousLikes_other": "گمنام بیج والوں سے {{count}} لائکس"
+    "anonymousLikes_other": "گمنام بیج والوں سے {{count}} لائکس",
+    "threadParts": {
+      "moveUp": "اُپری جانب",
+      "moveDown": "ہٹاؤ"
+    }
   },
   "mintChain": {
     "title": "منٹ پوسٹ",
@@ -5960,6 +5972,12 @@
       "needsImageToWork": "{{model}} کو کام کرنی کے لئے ایک تصویر چاہیے۔ پہلے آپ ایک لگا دیں۔",
       "speechLimit": "یہ {{length}} کاراکٹر ہے۔ حد {{limit}} ہے۔",
       "musicTrackLength": "{{count}}س ٹریک"
+    },
+    "gallery": {
+      "send": "بھیجیں",
+      "notifications": {
+        "generation_reply": "{{name}} نے تمہارے تبصرے پہ ریپلائی کیا"
+      }
     }
   },
   "pricing": {
@@ -11616,7 +11634,7 @@
   "multiPost": {
     "tab": "ملٹی پوسٹنگ",
     "title": "ملٹی پوسٹنگ",
-    "intro": "dehub کے ساتھ ہی X، YouTube، Instagram، TikTok اور باقی جگہوں پو ایک ساتھ پوسٹ کرو۔ اپنے اکاؤنٹ ایک بار جوڑ لو، پھر ہر پوسٹ کاں جانا سو چن لو۔",
+    "intro": "Riftn کے ساتھ ہی X، YouTube، Instagram، TikTok اور باقی جگہوں پو ایک ساتھ پوسٹ کرو۔ اپنے اکاؤنٹ ایک بار جوڑ لو، پھر ہر پوسٹ کاں جانا سو چن لو۔",
     "creditsHeading": "پوسٹ کریڈٹ",
     "credits": "{{count}} پوسٹ کریڈٹ",
     "topUpTitle": "ٹاپ اپ کرو اور بچت کرو",
@@ -11664,7 +11682,9 @@
   "dm": {
     "planRestricted": "اس یوزر کو پیغامات لینے کے لیے سبسکرپشن چاہیے۔",
     "planTypeNotAllowed": "اس کریئیٹر کے پلان میں اس قسم کا پیغام اجازت نہیں۔",
-    "planMinTip": "اس کریئیٹر کے لیے ٹپ کم از کم {{amount}} ٹوکنز ہونا چاہیے۔"
+    "planMinTip": "اس کریئیٹر کے لیے ٹپ کم از کم {{amount}} ٹوکنز ہونا چاہیے۔",
+    "shareKindGroup": "گروپ",
+    "shareKindCommunity": "کامونٹی"
   },
   "credits": {
     "earningsWorth": "कीमत {{amount}}",
@@ -18675,5 +18695,10 @@
     "view": "دیکھو",
     "edit": "ترمیم",
     "error": "यह काम नहीं आया। फिर से कोशिश करें।"
+  },
+  "mentionLinks": {
+    "communities": "کمیونٹیز",
+    "pages": "صفحے",
+    "people": "لوگ"
   }
 }

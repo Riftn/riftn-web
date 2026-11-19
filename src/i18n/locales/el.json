@@ -81,7 +81,8 @@
       "profile": "προφίλ",
       "proposal": "πρόταση",
       "stage": "στάδιο",
-      "store": "κατάστημα"
+      "store": "κατάστημα",
+      "featureRequest": "Αιτήσεις"
     },
     "recipientChat": "συνομιλία",
     "recipientUser": "χρήστης",
@@ -521,7 +522,12 @@
     "getTheApp": "Κατεβάστε την εφαρμογή",
     "connectAi": "Σύνδεση AI",
     "converter": "Μετατροπέας",
-    "affiliate": "Συνεργάτες"
+    "affiliate": "Συνεργάτες",
+    "groups": {
+      "create": "Δημιουργία",
+      "discover": "Ανακάλυψη",
+      "riftn": "Δε Χιούμπ"
+    }
   },
   "feed": {
     "viewProfile": "Προβολή προφίλ του/της {{name}}",
@@ -1145,7 +1151,8 @@
     "socialConnectedShort": "Συνδεδεμένο",
     "socialConnectFailed": "Δεν ήταν δυνατή η σύνδεση {{platform}}. Προσπαθήστε ξανά.",
     "socialVerifiedFollowers": "{{value}} ακόλουθοι",
-    "socialFollowersPending": "Ενημέρωση αριθμού ακολούθων"
+    "socialFollowersPending": "Ενημέρωση αριθμού ακολούθων",
+    "menuLayoutFolders": "Φάκελοι"
   },
   "common": {
     "confirm": "Επιβεβαίωση",
@@ -3072,7 +3079,11 @@
     "likersEmptyTitle": "Δεν υπάρχουν likes ακόμη",
     "likersEmptyBody": "Τα likes σε αυτό το σχόλιο θα εμφανίζονται εδώ.",
     "anonymousLikes_one": "{{count}} like από ανώνυμο κάτοχο κονκάρδας",
-    "anonymousLikes_other": "{{count}} likes από ανώνυμους κατόχους κονκάρδας"
+    "anonymousLikes_other": "{{count}} likes από ανώνυμους κατόχους κονκάρδας",
+    "threadParts": {
+      "moveUp": "Μετακίνηση προς τα πάνω",
+      "moveDown": "Μετακίνηση προς τα κάτω"
+    }
   },
   "mintChain": {
     "title": "Ανάρτηση μέντας",
@@ -6104,6 +6115,12 @@
       "needsImageToWork": "Οχρήστης {{model}} χρειάζεται μια εικόνα για να δουλέψει. Επισυνάψτε ένα πρώτα.",
       "speechLimit": "Αυτοί είναι {{length}} χαρακτήρες. Το όριο είναι {{limit}}.",
       "musicTrackLength": "{{count}}s κομμάτι"
+    },
+    "gallery": {
+      "send": "Αποστολή",
+      "notifications": {
+        "generation_reply": "Ο/Η {{name}} απάντησε στο σχόλιό σας"
+      }
     }
   },
   "pricing": {
@@ -11875,7 +11892,7 @@
   "multiPost": {
     "tab": "Πολλαπλές δημοσιεύσεις",
     "title": "Πολλαπλές δημοσιεύσεις",
-    "intro": "Δημοσιεύστε στο X, YouTube, Instagram, TikTok και άλλα ταυτόχρονα με το dehub. Συνδέστε τους λογαριασμούς σας μία φορά, στη συνέχεια επιλέξτε πού θα πάει κάθε δημοσίευση.",
+    "intro": "Δημοσιεύστε στο X, YouTube, Instagram, TikTok και άλλα ταυτόχρονα με το Riftn. Συνδέστε τους λογαριασμούς σας μία φορά, στη συνέχεια επιλέξτε πού θα πάει κάθε δημοσίευση.",
     "creditsHeading": "Πιστώσεις δημοσίευσης",
     "credits": "{{count}} πιστώσεις δημοσίευσης",
     "topUpTitle": "Ανεφοδιασμός και εξοικονόμηση",
@@ -11923,7 +11940,9 @@
   "dm": {
     "planRestricted": "Αυτός ο χρήστης απαιτεί συνδρομή για να λαμβάνει μηνύματα.",
     "planTypeNotAllowed": "Το πρόγραμμα αυτού του δημιουργού δεν επιτρέπει αυτό το είδος μηνύματος.",
-    "planMinTip": "Το φιλοδώρημα πρέπει να είναι τουλάχιστον {{amount}} μάρκες για αυτόν τον δημιουργό."
+    "planMinTip": "Το φιλοδώρημα πρέπει να είναι τουλάχιστον {{amount}} μάρκες για αυτόν τον δημιουργό.",
+    "shareKindGroup": "Ομαδοποίηση",
+    "shareKindCommunity": "Κοινότητα"
   },
   "credits": {
     "earningsWorth": "Αξία {{amount}}",
@@ -19419,5 +19438,10 @@
     "edit": "Επεξεργασία",
     "editLabel": "Επεξεργασία μηνύματος",
     "error": "Αυτό δεν λειτούργησε. Δοκιμάστε ξανά."
+  },
+  "mentionLinks": {
+    "communities": "Κοινότητες",
+    "pages": "Σελίδες",
+    "people": "Άτομα"
   }
 }

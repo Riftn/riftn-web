@@ -78,7 +78,8 @@
       "profile": "profil",
       "proposal": "propozice",
       "stage": "scéna",
-      "store": "obchod"
+      "store": "obchod",
+      "featureRequest": "požadavek"
     },
     "recipientChat": "chat",
     "recipientUser": "uživatel",
@@ -519,7 +520,11 @@
     "getTheApp": "Stáhnout aplikaci",
     "connectAi": "Připojit AI",
     "converter": "Konvertor",
-    "affiliate": "Partnerský program"
+    "affiliate": "Partnerský program",
+    "groups": {
+      "create": "Vytvořit",
+      "discover": "Objevovat"
+    }
   },
   "feed": {
     "viewProfile": "Zobrazit profil uživatele {{name}}",
@@ -1144,7 +1149,8 @@
     "socialConnectedShort": "Připojeno",
     "socialConnectFailed": "Nepodařilo se připojit {{platform}}. Zkuste to prosím znovu.",
     "socialVerifiedFollowers": "{{value}} sledujících",
-    "socialFollowersPending": "Aktualizace počtu sledujících"
+    "socialFollowersPending": "Aktualizace počtu sledujících",
+    "menuLayoutFolders": "Složky"
   },
   "common": {
     "confirm": "Potvrdit",
@@ -3048,7 +3054,11 @@
     "likersEmptyTitle": "Zatím žádné lajky",
     "likersEmptyBody": "Lajky tohoto komentáře se zobrazí zde.",
     "anonymousLikes_one": "{{count}} lajk od anonymního držitele odznaku",
-    "anonymousLikes_other": "{{count}} lajků od anonymních držitelů odznaků"
+    "anonymousLikes_other": "{{count}} lajků od anonymních držitelů odznaků",
+    "threadParts": {
+      "moveUp": "Posunout nahoru",
+      "moveDown": "Posunout dolů"
+    }
   },
   "mintChain": {
     "title": "Příspěvek mincovny",
@@ -6081,6 +6091,12 @@
       "needsImageToWork": "{{model}} potřebuje obrázek, ze kterého bude fungovat. Nejprve jeden připojte.",
       "speechLimit": "To je {{length}} znaků. Limit je {{limit}}.",
       "musicTrackLength": "{{count}}s stopa"
+    },
+    "gallery": {
+      "send": "Odeslat",
+      "notifications": {
+        "generation_reply": "{{name}} odpověděl na váš komentář"
+      }
     }
   },
   "pricing": {
@@ -11854,7 +11870,7 @@
   "multiPost": {
     "tab": "Více příspěvků",
     "title": "Více příspěvků",
-    "intro": "Publikujte na X, YouTube, Instagram, TikTok a další současně s dehub. Připojte své účty jednou a poté vyberte, kam každý příspěvek půjde.",
+    "intro": "Publikujte na X, YouTube, Instagram, TikTok a další současně s Riftn. Připojte své účty jednou a poté vyberte, kam každý příspěvek půjde.",
     "creditsHeading": "Kredity za příspěvky",
     "credits": "{{count}} kreditů za příspěvky",
     "topUpTitle": "Doplňte a ušetřete",
@@ -11902,7 +11918,9 @@
   "dm": {
     "planRestricted": "Tento uživatel vyžaduje předplatné pro příjem zpráv.",
     "planTypeNotAllowed": "Plán tohoto tvůrce tento typ zprávy nepovoluje.",
-    "planMinTip": "Spropitné pro tohoto tvůrce musí být alespoň {{amount}} tokenů."
+    "planMinTip": "Spropitné pro tohoto tvůrce musí být alespoň {{amount}} tokenů.",
+    "shareKindGroup": "Seskupit",
+    "shareKindCommunity": "Komunita"
   },
   "credits": {
     "earningsWorth": "V hodnotě {{amount}}",
@@ -19473,5 +19491,10 @@
     "edit": "Upravit",
     "editLabel": "Upravit zprávu",
     "error": "To nefungovalo. Zkuste to znovu."
+  },
+  "mentionLinks": {
+    "communities": "Komunity",
+    "pages": "Stránky",
+    "people": "Lidé"
   }
 }

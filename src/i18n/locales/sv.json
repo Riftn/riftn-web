@@ -77,7 +77,8 @@
       "profile": "profil",
       "proposal": "förslag",
       "stage": "scen",
-      "store": "butik"
+      "store": "butik",
+      "featureRequest": "begäran"
     },
     "recipientChat": "chatt",
     "recipientUser": "användare",
@@ -518,7 +519,11 @@
     "getTheApp": "Hämta appen",
     "connectAi": "Anslut AI",
     "converter": "Omvandlare",
-    "affiliate": "Partner"
+    "affiliate": "Partner",
+    "groups": {
+      "create": "Skapa",
+      "discover": "Upptäck"
+    }
   },
   "feed": {
     "viewProfile": "Visa profilen för {{name}}",
@@ -1142,7 +1147,8 @@
     "socialConnectedShort": "Ansluten",
     "socialConnectFailed": "Det gick inte att ansluta {{platform}}. Vänligen försök igen.",
     "socialVerifiedFollowers": "{{value}} följare",
-    "socialFollowersPending": "Antal följare uppdateras"
+    "socialFollowersPending": "Antal följare uppdateras",
+    "menuLayoutFolders": "Mappar"
   },
   "common": {
     "confirm": "Bekräfta",
@@ -3043,7 +3049,11 @@
     "likersEmptyTitle": "Inga gillamarkeringar än",
     "likersEmptyBody": "Gillamarkeringar på den här kommentaren visas här.",
     "anonymousLikes_one": "{{count}} gillamarkering från anonym märkesinnehavare",
-    "anonymousLikes_other": "{{count}} gillamarkeringar från anonyma märkesinnehavare"
+    "anonymousLikes_other": "{{count}} gillamarkeringar från anonyma märkesinnehavare",
+    "threadParts": {
+      "moveUp": "Flytta upp",
+      "moveDown": "Flytta ner"
+    }
   },
   "mintChain": {
     "title": "Mynta inlägg",
@@ -6074,6 +6084,12 @@
       "needsImageToWork": "{{model}} behöver en bild att arbeta från. Bifoga en först.",
       "speechLimit": "Det är {{length}} tecken. Gränsen är {{limit}}.",
       "musicTrackLength": "{{count}}s spår"
+    },
+    "gallery": {
+      "send": "Skicka",
+      "notifications": {
+        "generation_reply": "{{name}} svarade på din kommentar"
+      }
     }
   },
   "pricing": {
@@ -11840,7 +11856,7 @@
   "multiPost": {
     "tab": "Multi-postning",
     "title": "Multi-postning",
-    "intro": "Posta till X, YouTube, Instagram, TikTok och mer samtidigt som dehub. Anslut dina konton en gång, välj sedan var varje inlägg går.",
+    "intro": "Posta till X, YouTube, Instagram, TikTok och mer samtidigt som Riftn. Anslut dina konton en gång, välj sedan var varje inlägg går.",
     "creditsHeading": "Postkrediter",
     "credits": "{{count}} postkrediter",
     "topUpTitle": "Ladda upp och spara",
@@ -11888,7 +11904,9 @@
   "dm": {
     "planRestricted": "Den här användaren kräver en prenumeration för att ta emot meddelanden.",
     "planTypeNotAllowed": "Den här skaparens plan tillåter inte den här typen av meddelande.",
-    "planMinTip": "Dricksen måste vara minst {{amount}} tokens för den här skaparen."
+    "planMinTip": "Dricksen måste vara minst {{amount}} tokens för den här skaparen.",
+    "shareKindGroup": "Gruppera",
+    "shareKindCommunity": "Gemenskap"
   },
   "credits": {
     "earningsWorth": "Värt {{amount}}",
@@ -19460,5 +19478,10 @@
     "edit": "Redigera",
     "editLabel": "Redigera meddelande",
     "error": "Det fungerade inte. Försök igen."
+  },
+  "mentionLinks": {
+    "communities": "Gemenskaper",
+    "pages": "Sidor",
+    "people": "Personer"
   }
 }

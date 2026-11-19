@@ -80,7 +80,8 @@
       "profile": "wasifu",
       "proposal": "pendekezo",
       "stage": "sahifa",
-      "store": "duka"
+      "store": "duka",
+      "featureRequest": "ombi"
     },
     "recipientChat": "gumzo",
     "recipientUser": "mtumiaji",
@@ -519,7 +520,11 @@
     "getTheApp": "Pata Programu",
     "connectAi": "Unganisha AI",
     "converter": "Kigeuzi",
-    "affiliate": "Ushirika"
+    "affiliate": "Ushirika",
+    "groups": {
+      "create": "Unda",
+      "discover": "Gundua"
+    }
   },
   "feed": {
     "viewProfile": "Angalia wasifu wa {{name}}",
@@ -1143,7 +1148,8 @@
     "socialConnectedShort": "Imeunganishwa",
     "socialConnectFailed": "Imeshindwa kuunganisha {{platform}}. Tafadhali jaribu tena.",
     "socialVerifiedFollowers": "{{value}} wafuasi",
-    "socialFollowersPending": "Kusasisha idadi ya wafuasi"
+    "socialFollowersPending": "Kusasisha idadi ya wafuasi",
+    "menuLayoutFolders": "Folda"
   },
   "common": {
     "confirm": "Thibitisha",
@@ -3043,7 +3049,11 @@
     "likersEmptyTitle": "Hakuna vipendwa bado",
     "likersEmptyBody": "Vipendwa vya maoni haya vitaonekana hapa.",
     "anonymousLikes_one": "Kipendwa {{count}} kutoka kwa mmiliki wa beji asiyejulikana",
-    "anonymousLikes_other": "Vipendwa {{count}} kutoka kwa wamiliki wa beji wasiojulikana"
+    "anonymousLikes_other": "Vipendwa {{count}} kutoka kwa wamiliki wa beji wasiojulikana",
+    "threadParts": {
+      "moveUp": "Waeleze mifumo ya kawaida",
+      "moveDown": "Nenda chini"
+    }
   },
   "mintChain": {
     "title": "Chapisho la sinia",
@@ -6077,6 +6087,12 @@
       "needsImageToWork": "{{model}} inahitaji picha ya kufanyia kazi. Ambatisha moja kwanza.",
       "speechLimit": "Hii ni {{length}} tarakimu. Kikomo ni {{limit}}.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "Tuma",
+      "notifications": {
+        "generation_reply": "{{name}} amejibu maoni yako"
+      }
     }
   },
   "pricing": {
@@ -11844,7 +11860,7 @@
   "multiPost": {
     "tab": "Chapisho nyingi",
     "title": "Chapisho nyingi",
-    "intro": "Chapisha kwenye X, YouTube, Instagram, TikTok na zaidi kwa wakati mmoja ukitumia dehub. Unganisha akaunti zako mara moja, kisha uchague ni wapi kila chapisho litaenda.",
+    "intro": "Chapisha kwenye X, YouTube, Instagram, TikTok na zaidi kwa wakati mmoja ukitumia Riftn. Unganisha akaunti zako mara moja, kisha uchague ni wapi kila chapisho litaenda.",
     "creditsHeading": "Mikopo ya chapisho",
     "credits": "{{count}} mikopo ya chapisho",
     "topUpTitle": "Ongeza na uhifadhi",
@@ -11892,7 +11908,9 @@
   "dm": {
     "planRestricted": "Mtumiaji huyu anahitaji usajili ili kupokea ujumbe.",
     "planTypeNotAllowed": "Mpango wa mtayarishi huyu hauruhusu aina hii ya ujumbe.",
-    "planMinTip": "Bakshishi kwa mtayarishi huyu lazima iwe angalau {{amount}} tokeni."
+    "planMinTip": "Bakshishi kwa mtayarishi huyu lazima iwe angalau {{amount}} tokeni.",
+    "shareKindGroup": "Gawa",
+    "shareKindCommunity": "Jumuiya"
   },
   "credits": {
     "earningsWorth": "Thamani {{amount}}",
@@ -19184,7 +19202,8 @@
     "127053546dd4": "Haikupata taarifa hii ya kudumu",
     "d14896aa4bf8": "Librayi ya kujitegemea haikupata. Tafuta uhusiano wako na jaribu tena.",
     "953e708b2287": "Uundaji wa sauti ulipaswa.",
-    "4a52cdd6ac72": "Haikupata uchapishaji wa masanduku haya"
+    "4a52cdd6ac72": "Haikupata uchapishaji wa masanduku haya",
+    "dbc468a14b60": "Maswali yanayoulizwa mara kwa mara"
   },
   "articles": {
     "cardLabel": "Tukio · {{count}} min read",
@@ -19465,5 +19484,10 @@
     "edit": "Tafuta",
     "editLabel": "Hariri ujumbe",
     "error": "Hiyo haikufanya kazi. Jaribu tena."
+  },
+  "mentionLinks": {
+    "communities": "Jamii",
+    "pages": "Kurasa",
+    "people": "Watu"
   }
 }

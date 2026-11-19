@@ -81,7 +81,8 @@
       "profile": "प्रोफाइल",
       "proposal": "प्रस्ताव",
       "stage": "चरण",
-      "store": "दुकान"
+      "store": "दुकान",
+      "featureRequest": "अनुरोध"
     },
     "recipientChat": "कुराकानी",
     "recipientUser": "प्रयोगकर्ता",
@@ -521,7 +522,11 @@
     "getTheApp": "एप प्राप्त गर्नुहोस्",
     "connectAi": "AI जोड्नुहोस्",
     "converter": "रूपान्तरणकर्ता",
-    "affiliate": "एफिलिएट"
+    "affiliate": "एफिलिएट",
+    "groups": {
+      "create": "सिर्जना",
+      "discover": "पत्ता लगाउनुहोस्"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} को प्रोफाइल हेर्नुहोस्",
@@ -1143,7 +1148,8 @@
     "socialConnectedShort": "जडान भयो",
     "socialConnectFailed": "{{platform}} जडान गर्न सकिएन । कृपया फेरि प्रयास गर्नुहोस् ।",
     "socialVerifiedFollowers": "{{value}} अनुयायीहरू",
-    "socialFollowersPending": "अनुयायी गणना अद्यावधिक गर्दै"
+    "socialFollowersPending": "अनुयायी गणना अद्यावधिक गर्दै",
+    "menuLayoutFolders": "फोल्डरहरू"
   },
   "common": {
     "confirm": "पुष्टि गर्नुहोस्",
@@ -3056,7 +3062,11 @@
     "likersEmptyTitle": "अझै लाइक छैन",
     "likersEmptyBody": "यो टिप्पणीका लाइकहरू यहाँ देखिनेछन्।",
     "anonymousLikes_one": "गुमनाम ब्याज होल्डरबाट {{count}} लाइक",
-    "anonymousLikes_other": "गुमनाम ब्याज होल्डरहरूबाट {{count}} लाइक"
+    "anonymousLikes_other": "गुमनाम ब्याज होल्डरहरूबाट {{count}} लाइक",
+    "threadParts": {
+      "moveUp": "माथि सार्नुहोस्",
+      "moveDown": "तल सार्नुहोस्"
+    }
   },
   "mintChain": {
     "title": "मिन्ट पोस्ट",
@@ -6086,6 +6096,12 @@
       "needsImageToWork": "{{model}} लाई काम गर्नको लागि एउटा तस्बिर चाहिन्छ । पहिले एउटा जोड्नुहोस् ।",
       "speechLimit": "त्यो {{length}} क्यारेक्टर हो । सीमा {{limit}} हो ।",
       "musicTrackLength": "{{count}}s ट्रयाक"
+    },
+    "gallery": {
+      "send": "पठाउनुहोस्",
+      "notifications": {
+        "generation_reply": "{{name}} ले तपाईंको टिप्पणीमा जवाफ दिनुभयो"
+      }
     }
   },
   "pricing": {
@@ -11859,7 +11875,7 @@
   "multiPost": {
     "tab": "बहु-पोस्टिङ",
     "title": "बहु-पोस्टिङ",
-    "intro": "X, YouTube, Instagram, TikTok र थपमा एकैसाथ पोस्ट गर्नुहोस् dehub को साथ। आफ्नो खाताहरू एक पटक जडान गर्नुहोस्, त्यसपछि छान्नुहोस् प्रत्येक पोस्ट कहाँ जान्छ।",
+    "intro": "X, YouTube, Instagram, TikTok र थपमा एकैसाथ पोस्ट गर्नुहोस् Riftn को साथ। आफ्नो खाताहरू एक पटक जडान गर्नुहोस्, त्यसपछि छान्नुहोस् प्रत्येक पोस्ट कहाँ जान्छ।",
     "creditsHeading": "पोस्ट क्रेडिटहरू",
     "credits": "{{count}} पोस्ट क्रेडिटहरू",
     "topUpTitle": "टप अप गर्नुहोस् र बचत गर्नुहोस्",
@@ -11907,7 +11923,9 @@
   "dm": {
     "planRestricted": "यो प्रयोगकर्तालाई सन्देश प्राप्त गर्न सदस्यता आवश्यक छ।",
     "planTypeNotAllowed": "यो क्रिएटरको योजनाले यस प्रकारको सन्देश अनुमति दिँदैन।",
-    "planMinTip": "यो क्रिएटरका लागि टिप कम्तीमा {{amount}} टोकन हुनुपर्छ।"
+    "planMinTip": "यो क्रिएटरका लागि टिप कम्तीमा {{amount}} टोकन हुनुपर्छ।",
+    "shareKindGroup": "समूह बनाउनुहोस्",
+    "shareKindCommunity": "समुदाय"
   },
   "credits": {
     "earningsWorth": "मूल्य {{amount}}",
@@ -19167,7 +19185,9 @@
     "127053546dd4": "यो फाइल डाउनलोड गर्न सकिएन",
     "d14896aa4bf8": "नि:शुल्क लाइब्रेरी लोड गर्न सकिएन । आफ्नो जडान जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस् ।",
     "953e708b2287": "भ्वाइस जेनरेशन असफल भयो ।",
-    "4a52cdd6ac72": "यी तहहरू नक्कल गर्न सकेन"
+    "4a52cdd6ac72": "यी तहहरू नक्कल गर्न सकेन",
+    "a8283ade3185": "पूर्वस्थितिमा फर्काउनुहोस्",
+    "dbc468a14b60": "बारम्बार सोधिने प्रश्नहरू"
   },
   "articles": {
     "cardLabel": "लेख · {{count}} मिनेट पढियो",
@@ -19466,5 +19486,10 @@
     "backToBlog": "ब्लगमा फर्कनुहोस्",
     "sharePost": "पोस्ट साझा गर्नुहोस्",
     "relatedPosts": "सम्बन्धित पोस्टहरू"
+  },
+  "mentionLinks": {
+    "communities": "समुदायहरू",
+    "pages": "पृष्ठहरू",
+    "people": "मानिसहरू"
   }
 }

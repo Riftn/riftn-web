@@ -80,7 +80,8 @@
       "profile": "profil",
       "proposal": "Propozim",
       "stage": "skenë",
-      "store": "dega"
+      "store": "dega",
+      "featureRequest": "kërkesa"
     },
     "recipientChat": "Chat",
     "recipientUser": "Përdorues",
@@ -521,7 +522,11 @@
     "getTheApp": "Merr aplikacionin",
     "connectAi": "Lidh IA-në",
     "converter": "KONVERTER",
-    "affiliate": "Bashkëpunëtor"
+    "affiliate": "Bashkëpunëtor",
+    "groups": {
+      "create": "Krijo",
+      "discover": "Zbulo"
+    }
   },
   "feed": {
     "viewProfile": "Shfaq profilin e {{name}}",
@@ -1144,7 +1149,8 @@
     "socialConnectedShort": "Lidhur",
     "socialConnectFailed": "Nuk mund të lidhej {{platform}}. Provo përsëri.",
     "socialVerifiedFollowers": "{{value}} ndjekësit",
-    "socialFollowersPending": "Numërimi i ndjekësve po përditësohet"
+    "socialFollowersPending": "Numërimi i ndjekësve po përditësohet",
+    "menuLayoutFolders": "Dosjet"
   },
   "common": {
     "confirm": "Konfirmo",
@@ -3044,7 +3050,11 @@
     "likersEmptyTitle": "Ende pa pëlqime",
     "likersEmptyBody": "Pëlqimet e këtij komenti do të shfaqen këtu.",
     "anonymousLikes_one": "{{count}} pëlqim nga një mbajtës anonim distinktivi",
-    "anonymousLikes_other": "{{count}} pëlqime nga mbajtës anonimë distinktivësh"
+    "anonymousLikes_other": "{{count}} pëlqime nga mbajtës anonimë distinktivësh",
+    "threadParts": {
+      "moveUp": "Lëviz lart",
+      "moveDown": "Lëviz poshtë"
+    }
   },
   "mintChain": {
     "title": "Postimi i monedhës",
@@ -6079,6 +6089,12 @@
       "needsImageToWork": "{{model}} ka nevojë për një imazh për të punuar. Bashkangjitni një më parë.",
       "speechLimit": "Kjo është {{length}} karaktere. Kufiri është {{limit}}.",
       "musicTrackLength": "{{count}}s pista"
+    },
+    "gallery": {
+      "send": "Dërgoni",
+      "notifications": {
+        "generation_reply": "{{name}} iu përgjigj komentit tuaj"
+      }
     }
   },
   "pricing": {
@@ -11849,7 +11865,7 @@
   "multiPost": {
     "tab": "Postim i shumëfishtë",
     "title": "Postim i shumëfishtë",
-    "intro": "Postoni në X, YouTube, Instagram, TikTok dhe më shumë në të njëjtën kohë me dehub. Lidhni llogaritë tuaja një herë, pastaj zgjidhni ku shkon çdo postim.",
+    "intro": "Postoni në X, YouTube, Instagram, TikTok dhe më shumë në të njëjtën kohë me Riftn. Lidhni llogaritë tuaja një herë, pastaj zgjidhni ku shkon çdo postim.",
     "creditsHeading": "Kredite për postim",
     "credits": "{{count}} kredite për postim",
     "topUpTitle": "Rregulloni dhe kurseni",
@@ -11897,7 +11913,9 @@
   "dm": {
     "planRestricted": "Ky përdorues kërkon abonim për të marrë mesazhe.",
     "planTypeNotAllowed": "Plani i këtij krijuesi nuk e lejon këtë lloj mesazhi.",
-    "planMinTip": "Bakshishi për këtë krijues duhet të jetë të paktën {{amount}} tokena."
+    "planMinTip": "Bakshishi për këtë krijues duhet të jetë të paktën {{amount}} tokena.",
+    "shareKindGroup": "GRUPI",
+    "shareKindCommunity": "Komunitet"
   },
   "credits": {
     "earningsWorth": "Vlen {{amount}}",
@@ -19466,5 +19484,10 @@
     "edit": "Modifiko",
     "editLabel": "Modifiko mesazhin",
     "error": "Kjo nuk funksionoi. Provo përsëri."
+  },
+  "mentionLinks": {
+    "communities": "Komunitete",
+    "pages": "Faqet",
+    "people": "Njerëz"
   }
 }

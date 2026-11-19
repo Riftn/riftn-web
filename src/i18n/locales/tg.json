@@ -81,7 +81,8 @@
       "profile": "Сифати шахс",
       "proposal": "пешниҳод",
       "stage": "марҳила",
-      "store": "мағоза"
+      "store": "мағоза",
+      "featureRequest": "дархост"
     },
     "recipientChat": "чат",
     "recipientUser": "gumagamit",
@@ -522,7 +523,12 @@
     "getTheApp": "Гирифтани барнома",
     "connectAi": "Пайвасти AI",
     "converter": "Табдилдиҳанда",
-    "affiliate": "Шарик"
+    "affiliate": "Шарик",
+    "groups": {
+      "create": "Эҷод",
+      "discover": "Кашф кардан",
+      "riftn": "ДеЮуб"
+    }
   },
   "feed": {
     "viewProfile": "Намоиши профили {{name}}",
@@ -1133,7 +1139,8 @@
     "socialConnectedShort": "Пайвастшуда",
     "socialConnectFailed": "{{platform}} -ро пайваст карда натавонист. Лутфан дубора кӯшиш кунед.",
     "socialVerifiedFollowers": "{{value}} пайравон",
-    "socialFollowersPending": "Шумораи пайравон навсозӣ мешавад"
+    "socialFollowersPending": "Шумораи пайравон навсозӣ мешавад",
+    "menuLayoutFolders": "Папкаҳо"
   },
   "common": {
     "confirm": "Тасдиқ",
@@ -3027,7 +3034,11 @@
     "likersEmptyTitle": "Ҳанӯз писанд нест",
     "likersEmptyBody": "Писандҳои ин шарҳ дар ин ҷо пайдо мешаванд.",
     "anonymousLikes_one": "{{count}} писанд аз дорандаи нишони беном",
-    "anonymousLikes_other": "{{count}} писанд аз дорандагони нишони беном"
+    "anonymousLikes_other": "{{count}} писанд аз дорандагони нишони беном",
+    "threadParts": {
+      "moveUp": "Ба боло",
+      "moveDown": "Ilipat sa ibaba"
+    }
   },
   "mintChain": {
     "title": "Почтаи майда",
@@ -6055,6 +6066,12 @@
       "needsImageToAnimate": "{{model}}info: whatsthis Якеро аввал илова кунед.",
       "needsImageToWork": "{{model}} kailangan ng isang imahe upang gumana mula sa. Якеро аввал илова кунед.",
       "speechLimit": "{{length}} аломатҳо. Маҳдудият {{limit}}."
+    },
+    "gallery": {
+      "send": "Фиристодан",
+      "notifications": {
+        "generation_reply": "{{name}} ба шарҳи шумо ҷавоб дод"
+      }
     }
   },
   "pricing": {
@@ -11815,7 +11832,7 @@
   "multiPost": {
     "tab": "Мулти-постинг",
     "title": "Мулти-постинг",
-    "intro": "Пост кунед ба X, YouTube, Instagram, TikTok ва дигарҳо дар ҳамзамон бо dehub. Ҳисобҳои худро як маротиба пайваст кунед, пас интихоб кунед ки ҳар як пост кудайи мешавад.",
+    "intro": "Пост кунед ба X, YouTube, Instagram, TikTok ва дигарҳо дар ҳамзамон бо Riftn. Ҳисобҳои худро як маротиба пайваст кунед, пас интихоб кунед ки ҳар як пост кудайи мешавад.",
     "creditsHeading": "Кредитҳои пост",
     "credits": "{{count}} кредитҳои пост",
     "topUpTitle": "Тасвири баланд кунед ва захира кунед",
@@ -11863,7 +11880,9 @@
   "dm": {
     "planRestricted": "Ин корбар барои гирифтани паёмҳо обуна талаб мекунад.",
     "planTypeNotAllowed": "Нақшаи ин эҷодкор ин навъи паёмро иҷозат намедиҳад.",
-    "planMinTip": "Чойпулӣ барои ин эҷодкор бояд на камтар аз {{amount}} нишонаҳо бошад."
+    "planMinTip": "Чойпулӣ барои ин эҷодкор бояд на камтар аз {{amount}} нишонаҳо бошад.",
+    "shareKindGroup": "Гуруҳбандӣ кардан",
+    "shareKindCommunity": "Ҷомеа"
   },
   "credits": {
     "earningsWorth": "Арзиш {{amount}}",
@@ -19399,5 +19418,10 @@
     "edit": "Таҳрир",
     "editLabel": "Муҳаррири иттилоот",
     "error": "Ин кор накард. Бори дигар кӯшиш кунед."
+  },
+  "mentionLinks": {
+    "communities": "Ҷамоатҳо",
+    "pages": "Саҳифаҳо",
+    "people": "Одамон"
   }
 }

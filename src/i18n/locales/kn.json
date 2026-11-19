@@ -81,7 +81,8 @@
       "profile": "ಪ್ರೊಫೈಲ್",
       "proposal": "ಪ್ರಸ್ತಾವನೆ",
       "stage": "ಹಂತ",
-      "store": "ಅಂಗಡಿ"
+      "store": "ಅಂಗಡಿ",
+      "featureRequest": "ವಿನಂತಿ"
     },
     "recipientChat": "ಚಾಟ್",
     "recipientUser": "ಬಳಕೆದಾರ",
@@ -522,7 +523,12 @@
     "getTheApp": "ಆ್ಯಪ್ ಪಡೆಯಿರಿ",
     "connectAi": "AI ಸಂಪರ್ಕಿಸಿ",
     "converter": "ಪರಿವರ್ತಕ",
-    "affiliate": "ಅಫಿಲಿಯೇಟ್"
+    "affiliate": "ಅಫಿಲಿಯೇಟ್",
+    "groups": {
+      "create": "ರಚಿಸಿ",
+      "discover": "ಅನ್ವೇಷಿಸಿ",
+      "riftn": "ದೆಹುಬ್"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} ರ ಪ್ರೊಫೈಲ್ ಅನ್ನು ವೀಕ್ಷಿಸಿ",
@@ -1132,7 +1138,8 @@
     "socialConnectedShort": "ಸಂಪರ್ಕಿಸಲಾಗಿದೆ",
     "socialConnectFailed": "{{platform}}ಅನ್ನು ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "socialVerifiedFollowers": "{{value}} ಅನುಯಾಯಿಗಳು",
-    "socialFollowersPending": "ಅನುಯಾಯಿಗಳ ಎಣಿಕೆ ನವೀಕರಣ"
+    "socialFollowersPending": "ಅನುಯಾಯಿಗಳ ಎಣಿಕೆ ನವೀಕರಣ",
+    "menuLayoutFolders": "ಫೋಲ್ಡರ್‌ಗಳು"
   },
   "common": {
     "confirm": "ದೃಢೀಕರಿಸಿ",
@@ -3030,7 +3037,11 @@
     "likersEmptyTitle": "ಇನ್ನೂ ಲೈಕ್‌ಗಳಿಲ್ಲ",
     "likersEmptyBody": "ಈ ಕಾಮೆಂಟ್‌ನ ಲೈಕ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
     "anonymousLikes_one": "ಅನಾಮಧೇಯ ಬ್ಯಾಡ್ಜ್ ಹೋಲ್ಡರ್‌ನಿಂದ {{count}} ಲೈಕ್",
-    "anonymousLikes_other": "ಅನಾಮಧೇಯ ಬ್ಯಾಡ್ಜ್ ಹೋಲ್ಡರ್‌ಗಳಿಂದ {{count}} ಲೈಕ್‌ಗಳು"
+    "anonymousLikes_other": "ಅನಾಮಧೇಯ ಬ್ಯಾಡ್ಜ್ ಹೋಲ್ಡರ್‌ಗಳಿಂದ {{count}} ಲೈಕ್‌ಗಳು",
+    "threadParts": {
+      "moveUp": "ಮೇಲಕ್ಕೆ ಸರಿಸಿ",
+      "moveDown": "ಕೆಳಗೆ ಚಲಿಸಿ"
+    }
   },
   "mintChain": {
     "title": "ಮಿಂಟ್ ಪೋಸ್ಟ್",
@@ -6060,6 +6071,12 @@
       "needsImageToAnimate": "{{model}} ಅನಿಮೇಟ್ ಮಾಡಲು ಇಮೇಜ್ ಅಗತ್ಯವಿದೆ. ಮೊದಲು ಒಂದನ್ನು ಲಗತ್ತಿಸಿ.",
       "speechLimit": "ಅದು {{length}} ಅಕ್ಷರಗಳು. ಮಿತಿ {{limit}}.",
       "musicTrackLength": "{{count}}s ಟ್ರ್ಯಾಕ್"
+    },
+    "gallery": {
+      "send": "ಕಳುಹಿಸಿ",
+      "notifications": {
+        "generation_reply": "{{name}} ನಿಮ್ಮ ಕಾಮೆಂಟ್‌ಗೆ ಉತ್ತರಿಸಿದ್ದಾರೆ"
+      }
     }
   },
   "pricing": {
@@ -11835,7 +11852,7 @@
   "multiPost": {
     "tab": "ಬಹು-ಪೋಸ್ಟಿಂಗ್",
     "title": "ಬಹು-ಪೋಸ್ಟಿಂಗ್",
-    "intro": "X, YouTube, Instagram, TikTok ಮತ್ತು ಹೆಚ್ಚಿನವುಗಳಿಗೆ ಏಕಕಾಲದಲ್ಲಿ dehub ನಿಂದ ಪೋಸ್ಟ್ ಮಾಡಿ. ನಿಮ್ಮ ಖಾತೆಗಳನ್ನು ಒಮ್ಮೆ ಸಂಪರ್ಕಿಸಿ, ನಂತರ ಪ್ರತಿ ಪೋಸ್ಟ್ ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತದೆ ಎಂಬುದನ್ನು ಆರಿಸಿ.",
+    "intro": "X, YouTube, Instagram, TikTok ಮತ್ತು ಹೆಚ್ಚಿನವುಗಳಿಗೆ ಏಕಕಾಲದಲ್ಲಿ Riftn ನಿಂದ ಪೋಸ್ಟ್ ಮಾಡಿ. ನಿಮ್ಮ ಖಾತೆಗಳನ್ನು ಒಮ್ಮೆ ಸಂಪರ್ಕಿಸಿ, ನಂತರ ಪ್ರತಿ ಪೋಸ್ಟ್ ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತದೆ ಎಂಬುದನ್ನು ಆರಿಸಿ.",
     "creditsHeading": "ಪೋಸ್ಟ್ ಕ್ರೆಡಿಟ್‌ಗಳು",
     "credits": "{{count}} ಪೋಸ್ಟ್ ಕ್ರೆಡಿಟ್‌ಗಳು",
     "topUpTitle": "ಟಾಪ್ ಅಪ್ ಮಾಡಿ ಮತ್ತು ಉಳಿಸಿ",
@@ -11883,7 +11900,9 @@
   "dm": {
     "planRestricted": "ಈ ಬಳಕೆದಾರರಿಗೆ ಸಂದೇಶಗಳನ್ನು ಪಡೆಯಲು ಚಂದಾದಾರಿಕೆ ಅಗತ್ಯವಿದೆ.",
     "planTypeNotAllowed": "ಈ ಕ್ರಿಯೇಟರ್‌ನ ಪ್ಲಾನ್ ಈ ರೀತಿಯ ಸಂದೇಶವನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ.",
-    "planMinTip": "ಈ ಕ್ರಿಯೇಟರ್‌ಗೆ ಟಿಪ್ ಕನಿಷ್ಠ {{amount}} ಟೋಕನ್‌ಗಳು ಇರಬೇಕು."
+    "planMinTip": "ಈ ಕ್ರಿಯೇಟರ್‌ಗೆ ಟಿಪ್ ಕನಿಷ್ಠ {{amount}} ಟೋಕನ್‌ಗಳು ಇರಬೇಕು.",
+    "shareKindGroup": "ಗುಂಪು",
+    "shareKindCommunity": "ಸಮುದಾಯ"
   },
   "credits": {
     "earningsWorth": "ಮೌಲ್ಯ {{amount}}",
@@ -19408,5 +19427,10 @@
     "edit": "ಸಂಪಾದಿಸಿ",
     "editLabel": "ಸಂದೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
     "error": "ಅದು ಕೆಲಸ ಮಾಡಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+  },
+  "mentionLinks": {
+    "communities": "ಸಮುದಾಯಗಳು",
+    "pages": "ಪುಟಗಳು",
+    "people": "ಜನರು"
   }
 }

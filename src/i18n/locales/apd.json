@@ -81,7 +81,8 @@
       "profile": "بروفايل",
       "proposal": "الاقتراح",
       "stage": "ستيج",
-      "store": "المتجر"
+      "store": "المتجر",
+      "featureRequest": "مطلوب"
     },
     "recipientChat": "دردشة",
     "recipientUser": "المستخدم",
@@ -520,7 +521,12 @@
     "getTheApp": "حمّل التطبيق",
     "connectAi": "ربط AI",
     "converter": "محول",
-    "affiliate": "التسويق بالعمولة"
+    "affiliate": "التسويق بالعمولة",
+    "groups": {
+      "create": "أنشئ",
+      "discover": "اكتشف",
+      "riftn": "دي هوب"
+    }
   },
   "feed": {
     "viewProfile": "شوف بروفايل {{name}}",
@@ -1140,7 +1146,8 @@
     "socialConnectedShort": "متصل",
     "socialConnectFailed": "لم يتم ربط {{platform}}. حاول مرة أخرى.",
     "socialVerifiedFollowers": "{{value}} متابع",
-    "socialFollowersPending": "تحديث عدد المتابعين"
+    "socialFollowersPending": "تحديث عدد المتابعين",
+    "menuLayoutFolders": "المجلدات"
   },
   "common": {
     "confirm": "تأكيد",
@@ -3035,7 +3042,11 @@
     "likersEmptyTitle": "مافي إعجابات لسه",
     "likersEmptyBody": "الإعجابات على التعليق دا حتظهر هنا.",
     "anonymousLikes_one": "{{count}} إعجاب من حامل شارة مجهول",
-    "anonymousLikes_other": "{{count}} إعجابات من حاملين شارات مجهولين"
+    "anonymousLikes_other": "{{count}} إعجابات من حاملين شارات مجهولين",
+    "threadParts": {
+      "moveUp": "تحرك للأعلى",
+      "moveDown": "هبوط"
+    }
   },
   "mintChain": {
     "title": "معلومات المقال",
@@ -4775,7 +4786,8 @@
       "description": "لم يتحدث أحد في \"{{title}}\" لمدة 30 دقيقة، لذلك تم إغلاقها."
     },
     "deleteRecordingFailed": "مفيشش يمكن حذف التسجيل",
-    "deleteStageFailed": "مفيشش يمكن حذف المرحلة"
+    "deleteStageFailed": "مفيشش يمكن حذف المرحلة",
+    "aiVoice": "صوت ذكاء اصطناعي"
   },
   "ads": {
     "seoTitle": "مدير الإعلانات | Riftn",
@@ -5955,7 +5967,13 @@
       "speechLimit": "ذالك {{length}} صفة. حد حد {{limit}}."
     },
     "bannerCopy": "بدء الحملات الإبداعية بشكل أسرع مع أدوات Riftn AI",
-    "closeBanner": "ختم لوحة المبدعين"
+    "closeBanner": "ختم لوحة المبدعين",
+    "gallery": {
+      "send": "ابعت",
+      "notifications": {
+        "generation_reply": "{{name}} رد على تعليقك"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "خطط لكل عملية عمل",
@@ -6015,7 +6033,8 @@
     "indemnification": "تضامن أو تعويض",
     "noTraining": "لا تدريب على بياناتك",
     "soc2": "أمان SOC 2 (قريباً)",
-    "aiEducator": "معلم الذكاء الاصطناعي ودعم Slack"
+    "aiEducator": "معلم الذكاء الاصطناعي ودعم Slack",
+    "sso": "تسجيل الدخول الموحد (SSO)"
   },
   "videoLooks": {
     "button": "مظاهر الكاميرا",
@@ -11713,7 +11732,9 @@
   "dm": {
     "planRestricted": "المستخدم ده بحتاج اشتراك عشان يستلم رسائل.",
     "planTypeNotAllowed": "خطة المنشئ ده ما بتسمح بالنوع ده من الرسائل.",
-    "planMinTip": "الإكرامية لازم تكون على الأقل {{amount}} توكنز للمنشئ ده."
+    "planMinTip": "الإكرامية لازم تكون على الأقل {{amount}} توكنز للمنشئ ده.",
+    "shareKindGroup": "تجميع",
+    "shareKindCommunity": "المجتمع"
   },
   "credits": {
     "earningsWorth": "القيمة {{amount}}",
@@ -18888,5 +18909,10 @@
     "edit": "تعديل",
     "editLabel": "تعديل الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
+  },
+  "mentionLinks": {
+    "communities": "المجتمعات",
+    "pages": "الصفحات",
+    "people": "ناس"
   }
 }
