@@ -1196,7 +1196,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                   <div
                     key={msg.client_key ?? msg.id}
                     ref={(node) => { messageRefs.current[msg.id] = node; }}
-                    className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
+                    className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isMine ? 'bg-white/5 py-1' : ''} ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
                   >
                     {msg.reply_to && (
                       <button

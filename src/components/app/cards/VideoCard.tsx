@@ -3090,7 +3090,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 {isMuted ? <MediaControlIcon icon={VolumeX} /> : <MediaControlIcon icon={Volume2} />}
               </button>
               {volumeOpen && (
-                <div className="absolute top-full right-0 pt-1.5" onClick={(e) => e.stopPropagation()}>
+                <div data-volume-pop className="absolute top-full right-0 pt-1.5" onClick={(e) => e.stopPropagation()}>
                   <div className="h-[104px] w-8 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] rounded-xl border border-white/10 flex items-center justify-center">
                     <input
                       type="range"
@@ -3183,7 +3183,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 {isMuted ? <MediaControlIcon icon={VolumeX} plain={splitControls} /> : <MediaControlIcon icon={Volume2} plain={splitControls} />}
               </button>
               {volumeOpen && (
-                <div className="absolute bottom-full left-0 pb-1.5" onClick={(e) => e.stopPropagation()}>
+                <div data-volume-pop className="absolute bottom-full left-0 pb-1.5" onClick={(e) => e.stopPropagation()}>
                   <div className="h-[104px] w-8 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] rounded-xl border border-white/10 flex items-center justify-center">
                     <input
                       type="range"
