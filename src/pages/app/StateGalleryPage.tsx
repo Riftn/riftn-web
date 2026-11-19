@@ -2733,7 +2733,7 @@ function FormatIconsGallery() {
       <div data-format-icons-key className="mt-4 grid max-w-[360px] grid-cols-4 gap-2 text-[10px]">
         {FORMAT_KINDS.map((kind) => (
           <div key={kind} className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] p-2">
-            <FormatGlyph kind={kind} className="h-6 w-6 [&_.fmt-wash]:opacity-30" />
+            <FormatGlyph kind={kind} className="h-6 w-6 [&_.fmt-wash]:opacity-0" />
             <span className="opacity-70">{kind === 'sharedPost' ? 'shared' : kind}</span>
           </div>
         ))}

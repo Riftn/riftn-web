@@ -87,29 +87,6 @@ html[data-theme='hazy'] [data-profile-mixed-grid] {
   pointer-events: none;
 }
 
-/* One badge spot for every type that isn't a plain photo. */
-[data-profile-mixed-grid] .pmg-badge {
-  position: absolute;
-  top: 0.6em;
-  right: 0.6em;
-  width: 2.5em;
-  height: 2.5em;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(8px) saturate(1.4);
-  -webkit-backdrop-filter: blur(8px) saturate(1.4);
-}
-[data-profile-mixed-grid] .pmg-badge svg { width: 1.55em; height: 1.55em; }
-[data-profile-mixed-grid] .pmg-poster .pmg-badge {
-  color: var(--pmg-ink);
-  background: var(--pmg-glass);
-  border-color: var(--pmg-glass-line);
-}
-
 [data-profile-mixed-grid] .pmg-chip {
   position: absolute;
   top: 0.6em;
@@ -397,20 +374,7 @@ html[data-theme='osaka'] [data-profile-mixed-grid] .pmg-adrop-cap { color: #ff6f
 /* ── Card tiles (GridCardTile) ───────────────────────────────────────────
    A post that carries a card in the feed (stage, event, poll, quote, link,
    community, shop, profile) is a small copy of that card here: picture on
-   top, name under it, a pill top-left saying what it is. */
-[data-profile-mixed-grid] .pmg-chip--kind {
-  white-space: nowrap;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(8px) saturate(1.4);
-  -webkit-backdrop-filter: blur(8px) saturate(1.4);
-}
-[data-profile-mixed-grid] .pmg-poster .pmg-chip--inline { background: var(--pmg-glass); color: var(--pmg-ink); border-color: var(--pmg-glass-line); }
-[data-profile-mixed-grid] .pmg-chip--inline { position: static; align-self: flex-start; }
-[data-profile-mixed-grid] .pmg-chip--kind-live,
-[data-profile-mixed-grid] .pmg-poster .pmg-chip--kind-live { background: var(--pmg-live); color: #fff; border-color: transparent; }
-[data-profile-mixed-grid] .pmg-kind-dot { width: 0.5em; height: 0.5em; border-radius: 50%; background: #fff; animation: pmg-pulse 1.4s ease-in-out infinite; }
+   top, name under it, its format icon top right. */
 
 [data-profile-mixed-grid] .pmg-mini { position: absolute; inset: 0; display: flex; flex-direction: column; color: var(--pmg-ink); text-align: left; }
 [data-profile-mixed-grid] .pmg-mini > .pmg-chip { position: absolute; top: 0.6em; left: 0.6em; z-index: 1; }
@@ -438,8 +402,7 @@ html[data-theme='osaka'] [data-profile-mixed-grid] .pmg-adrop-cap { color: #ff6f
 [data-profile-mixed-grid] .pmg-mini-quoted b { flex: none; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 [data-profile-mixed-grid] .pmg-mini-quoted span { color: var(--pmg-sub); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 [data-profile-mixed-grid] .pmg-mini-quoted img ~ span { -webkit-line-clamp: 1; }
-@media (prefers-reduced-motion: reduce) { [data-profile-mixed-grid] .pmg-kind-dot { animation: none; } }
-
+@media (prefers-reduced-motion: reduce) { [data-profile-mixed-grid] .pmg-fmt-dot { animation: none; } }
 /* ── Soft Light: a plain text post with no chosen backdrop ───────────────
    A gentle glow in the theme's colours, a fine grain and a faded quote mark.
    The glow sits in one of three corners (data-soft, from the post id) so a
@@ -515,45 +478,12 @@ html[data-theme='war'] [data-profile-mixed-grid] { --pmg-soft-a: #4fe3e0; --pmg-
   animation: pmg-pulse 1.4s ease-in-out infinite;
 }
 
-/* A · Line: the glyph alone, no plate. */
-[data-fmt-look='a'] .pmg-fmt { width: 2.3em; height: 2.3em; }
-[data-fmt-look='a'] .pmg-fmt-glyph { width: 1.95em; height: 1.95em; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6)); }
-[data-fmt-look='a'] .fmt-wash { opacity: 0; }
-[data-fmt-look='a'] .pmg-poster .pmg-fmt { color: var(--pmg-ink); }
-[data-fmt-look='a'] .pmg-poster .pmg-fmt-glyph { filter: none; }
-[data-fmt-look='a'] .pmg-mini:has(> .pmg-mini-cover) > .pmg-fmt { color: #fff; }
-[data-fmt-look='a'] .pmg-mini:has(> .pmg-mini-cover) > .pmg-fmt .pmg-fmt-glyph { filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6)); }
-
-/* B · Glass stamp: duotone glyph on a frosted rounded square. */
-[data-fmt-look='b'] .pmg-fmt {
-  width: 2.6em;
-  height: 2.6em;
-  border-radius: 0.8em;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px) saturate(1.5);
-  -webkit-backdrop-filter: blur(8px) saturate(1.5);
-}
-[data-fmt-look='b'] .pmg-fmt-glyph { width: 1.5em; height: 1.5em; }
-[data-fmt-look='b'] .fmt-wash { opacity: 0.32; }
-[data-fmt-look='b'] .pmg-poster .pmg-fmt { color: var(--pmg-ink); background: var(--pmg-glass); border-color: var(--pmg-glass-line); }
-[data-fmt-look='b'] .pmg-mini:has(> .pmg-mini-cover) > .pmg-fmt { color: #fff; background: rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.24); }
-html[data-theme='osaka'] [data-fmt-look='b'] .pmg-fmt { border-color: rgba(255, 111, 181, 0.5); color: #ffd1e8; }
-
-/* C · Corner fold: the tile's top-right corner folds down and the glyph sits on the flap. */
-[data-fmt-look='c'] .pmg-fmt {
-  top: 0;
-  right: 0;
-  width: 4.4em;
-  height: 4.4em;
-  place-items: end start;
-  padding: 0 0 0.55em 0.55em;
-  color: var(--pmg-solid-ink);
-  background: linear-gradient(225deg, transparent 50%, var(--pmg-solid) 50%);
-  border-bottom-left-radius: 0.45em;
-  filter: drop-shadow(-1.5px 1.5px 2px rgba(0, 0, 0, 0.4));
-}
-[data-fmt-look='c'] .pmg-fmt-glyph { width: 1.45em; height: 1.45em; stroke-width: 2.1; }
-[data-fmt-look='c'] .fmt-wash { opacity: 0.22; }
-[data-fmt-look='c'] .pmg-fmt-dot { top: auto; right: auto; bottom: 2.2em; left: 2.2em; }
+/* The glyph alone, no plate: a soft shadow keeps it readable on any picture. */
+[data-profile-mixed-grid] .pmg-fmt { width: 2.3em; height: 2.3em; }
+[data-profile-mixed-grid] .pmg-fmt-glyph { width: 1.95em; height: 1.95em; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6)); }
+[data-profile-mixed-grid] .fmt-wash { opacity: 0; }
+[data-profile-mixed-grid] .pmg-poster .pmg-fmt { color: var(--pmg-ink); }
+[data-profile-mixed-grid] .pmg-poster .pmg-fmt-glyph { filter: none; }
+/* A card tile with a picture on top: the icon sits on the picture. */
+[data-profile-mixed-grid] .pmg-mini:has(> .pmg-mini-cover > :is(img, div)) > .pmg-fmt { color: #fff; }
+[data-profile-mixed-grid] .pmg-mini:has(> .pmg-mini-cover > :is(img, div)) > .pmg-fmt .pmg-fmt-glyph { filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6)); }

@@ -90,8 +90,8 @@ function TypeBadge({ item }: { item: UnifiedFeedItem }) {
     : null;
   if (!kind) return null;
   return (
-    <span className="pointer-events-none absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-[7px] border border-white/25 bg-black/30 text-white backdrop-blur-md [&_.fmt-wash]:opacity-30">
-      <FormatGlyph kind={kind} className="h-3.5 w-3.5" />
+    <span className="pointer-events-none absolute right-1.5 top-1.5 text-white [&_.fmt-wash]:opacity-0">
+      <FormatGlyph kind={kind} className="h-[18px] w-[18px] drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.6)]" />
     </span>
   );
 }

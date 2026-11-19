@@ -6,8 +6,8 @@
  * a video shows its length and views, a song is a square cover over its own
  * blur with a waveform, a text post becomes a poster of its own words, an
  * article shows its cover and title, a live stream wears a solid red LIVE
- * chip. Anything that isn't a plain photo carries one small glass badge in the
- * same top-right spot saying what it is.
+ * chip. Every tile carries its format's own icon (FormatMark) in the same
+ * top-right spot.
  *
  * A tile opens the profile reel: this creator's posts one by one, full screen,
  * from the tapped one (lib/profile-reel). A repost opens its own post page. Desktop keeps the feed cards — this is only mounted below `md`.
@@ -39,9 +39,6 @@ import { GridCardFace, GridPollProbe } from './GridCardTile';
 import { FormatMark } from './FormatMark';
 import { mediaCardOf, textCardOf, wordsWithoutLinks, type GridCardKind } from '@/lib/grid-card';
 import './profile-mixed-grid.css';
-
-/** Concept switch (local only): ?fmt=a|b|c. */
-const FMT_LOOK = typeof window === 'undefined' ? 'b' : new URLSearchParams(window.location.search).get('fmt') || 'b';
 
 /** One cell's worth of content. Optimistic posts arrive in the same shape. */
 export interface MixedGridEntry {
@@ -192,7 +189,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
 
   return (
     <>
-      <div data-profile-mixed-grid data-fmt-look={FMT_LOOK} className="pmg-grid">
+      <div data-profile-mixed-grid className="pmg-grid">
         {shown.map((entry, index) => {
           const pinChip = entry.isPinned ? (
             <span className="pmg-chip pmg-chip--pin"><Pin className="pmg-chip-icon" />{t('profile.pinnedShort', 'Pinned')}</span>

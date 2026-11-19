@@ -8,8 +8,8 @@
  *
  * Every glyph is our own: 24-unit square, round line ends, one detail that
  * tells it apart (the photo's viewfinder corners, the short's swipe-up
- * chevron, the comic's slanted gutter). Parts marked `fill` take the duotone
- * wash in the glass look.
+ * chevron, the comic's slanted gutter). The `wash` part is a duotone fill
+ * that the grid leaves off; other surfaces can turn it on.
  *
  * @module components/app/profile/FormatMark
  */
@@ -255,7 +255,7 @@ const GLYPHS: Record<FormatKind, { wash?: ReactNode; lines: ReactNode }> = {
 };
 
 const LABEL: Record<FormatKind, [string, string]> = {
-  photo: ['profile.format.photo', 'Photo'],
+  photo: ['profile.tabs.images', 'Image'],
   photos: ['profile.multiPhoto', 'Photos'],
   video: ['profile.tabs.videos', 'Video'],
   short: ['profile.gridCard.short', 'Short'],
@@ -278,7 +278,7 @@ const LABEL: Record<FormatKind, [string, string]> = {
   bounty: ['profile.gridCard.bounty', 'Bounty'],
   app: ['profile.gridCard.app', 'App'],
   proposal: ['profile.gridCard.proposal', 'Proposal'],
-  spotify: ['profile.gridCard.spotify', 'Spotify'],
+  spotify: ['', 'Spotify'],
 };
 
 /** Just the glyph, for places that draw their own frame. */
@@ -297,7 +297,7 @@ export function FormatGlyph({ kind, className }: { kind: FormatKind; className?:
 export function FormatMark({ kind, live, className }: { kind: FormatKind; live?: boolean; className?: string }) {
   const { t } = useTranslation();
   const [key, label] = LABEL[kind];
-  const name = live ? t('profile.gridCard.liveStage', 'Live stage') : t(key, label);
+  const name = live ? t('profile.gridCard.liveStage', 'Live stage') : key ? t(key, label) : label;
   return (
     <span className={`pmg-fmt pmg-fmt--${kind}${live ? ' pmg-fmt--live' : ''}${className ? ` ${className}` : ''}`} role="img" aria-label={name} title={name}>
       <FormatGlyph kind={kind} className="pmg-fmt-glyph" />
