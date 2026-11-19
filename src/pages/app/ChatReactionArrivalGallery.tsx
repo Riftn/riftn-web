@@ -70,7 +70,7 @@ const noop = () => {};
 
 function Panel({ label, tag, children }: { label: string; tag: string; children: React.ReactNode }) {
   return (
-    <div data-reaction-film={tag} className="flex h-[27rem] min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 md:h-[26.5rem]">
+    <div data-reaction-film={tag} className="flex h-[27rem] min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 md:h-[30rem]">
       <div className="border-b border-white/10 px-4 py-2 text-xs font-semibold text-zinc-400">{label}</div>
       <div data-chat-wallpaper className="chat-text-zone flex min-h-0 flex-1 flex-col justify-end overflow-hidden px-3 pb-4 pt-3">{children}</div>
     </div>
