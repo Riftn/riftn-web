@@ -40,7 +40,7 @@ export function ChatIconButton({ label, onClick, children, className, ...rest }:
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:text-white [&>svg]:h-[17px] [&>svg]:w-[17px]',
+        'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-[color,transform] duration-150 hover:scale-110 hover:text-white [&>svg]:h-[17px] [&>svg]:w-[17px]',
         className,
       )}
       {...rest}
@@ -174,7 +174,7 @@ function ChatMeMenu({ onOpenSettings }: { onOpenSettings?: () => void }) {
         aria-label={joinLabel}
         title={joinLabel}
         onClick={() => auth.openLoginModal({ path: '/chat?chat=public' })}
-        className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-80"
+        className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-[filter,transform] duration-150 hover:scale-110 hover:brightness-125"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-700 text-white">
           <Plus className="h-[18px] w-[18px]" />
@@ -201,7 +201,7 @@ function ChatMeMenu({ onOpenSettings }: { onOpenSettings?: () => void }) {
           data-fsc-me
           aria-label={profileLabel}
           title={profileLabel}
-          className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-opacity hover:opacity-80"
+          className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-[filter,transform] duration-150 hover:scale-110 hover:brightness-125"
         >
           <Avatar className="h-8 w-8 rounded-lg">
             {avatarSrc && <AvatarImage src={avatarSrc} alt="" className="rounded-lg object-cover" />}

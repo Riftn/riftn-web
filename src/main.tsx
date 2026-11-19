@@ -19,6 +19,7 @@ import { installImageOriginFallback } from "./lib/image-origin-fallback";
 import { installWalletSessionFetch } from "./lib/wallet-session";
 import { installRecentErrorBuffer } from "./lib/device-info";
 import { installTranslatorDomGuard } from "./i18n/translator-dom-guard";
+import { finishMultipostPopup } from "./lib/multipost-popup";
 import "./lib/toast-i18n-interceptor";
 // NOTE: auth-toast translations are no longer imported here — English lives in
 // locales/en.json and other languages are merged lazily by loadLanguage()
@@ -55,6 +56,8 @@ import "./styles/notifications-feed.css";
 // use. Their cascade order (after index.css) is preserved because a dynamic
 // stylesheet link is appended at the end of <head>.
 
+// A multi-post sign-in window started from the composer reports back and closes.
+finishMultipostPopup();
 installSupabaseInterceptor();
 // Serve original images on networks that cannot reach the dehub.io transforms.
 installImageOriginFallback();

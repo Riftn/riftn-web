@@ -2238,6 +2238,25 @@ export function usePostForm(
         throw new Error('Invalid signature data from backend - missing v, r, or s');
       }
 
+      // The poll rides on the post, whatever else the post carries (photos,
+      // a video, a quote). Its clock starts when the post goes out.
+      const attachPoll = async (startsAt: number) => {
+        if (!poll || !pollIsValid) return;
+        try {
+          const validOptions = poll.options.filter(o => o.text.trim()).map(o => o.text.trim());
+          const expiresAt = new Date(startsAt + (poll.duration ?? 24) * 3600 * 1000).toISOString();
+          await createPoll({
+            tokenId: typeof mintResponse.createdTokenId === 'string' ? parseInt(mintResponse.createdTokenId, 10) : mintResponse.createdTokenId,
+            question: poll.question.trim(),
+            options: validOptions,
+            expiresAt,
+            isMultipleChoice: poll.isMultipleChoice ?? false,
+          });
+        } catch (pollErr) {
+          console.warn('[Mint] Poll creation failed:', pollErr);
+        }
+      };
+
       // Scheduled: the server parked the token at status 'scheduled' and the
       // cron publishes it later — skip the chain step entirely. Gate on the
       // RESPONSE, not the picker: a date the server rejected (e.g. already in
@@ -2245,6 +2264,8 @@ export function usePostForm(
       // for it would be a lie.
       if (mintResponse.scheduled) {
         const when = mintResponse.scheduledAt ? new Date(mintResponse.scheduledAt) : scheduledDate;
+        // The poll goes on now; its clock starts at the scheduled time.
+        await attachPoll(when ? when.getTime() : Date.now());
         toast.success(when ? _copy("copy.ef58a8022edc", { defaultValue: "Post scheduled for {{value1}}", value1: when.toLocaleString() }) : _copy("copy.0ae4cb6e00b3", { defaultValue: "Post scheduled for later" }), { id: 'mint-progress' });
         resetForm();
         onClose();
@@ -2667,21 +2688,7 @@ export function usePostForm(
         addOptimisticPost({ id: optimisticId, type: 'post', data: textPost, createdAt: new Date() });
       }
       
-      if (poll && pollIsValid) {
-        try {
-          const validOptions = poll.options.filter(o => o.text.trim()).map(o => o.text.trim());
-          const expiresAt = new Date(Date.now() + (poll.duration ?? 24) * 3600 * 1000).toISOString();
-          await createPoll({
-            tokenId: typeof mintResponse.createdTokenId === 'string' ? parseInt(mintResponse.createdTokenId, 10) : mintResponse.createdTokenId,
-            question: poll.question.trim(),
-            options: validOptions,
-            expiresAt,
-            isMultipleChoice: poll.isMultipleChoice ?? false,
-          });
-        } catch (pollErr) {
-          console.warn('[Mint] Poll creation failed:', pollErr);
-        }
-      }
+      await attachPoll(Date.now());
 
       resetForm();
 

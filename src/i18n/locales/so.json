@@ -6,7 +6,11 @@
     "videoSize": "Muuqaalkani wuxuu ka weyn yahay {{n}} MB. Dooro mid ka yar."
   },
   "textFeed": {
-    "tab": "Qoraal"
+    "tab": "Qoraal",
+    "errorTitle": "Qoraallada lama soo dejin karin",
+    "errorBody": "Isku day inaad mar kale soo dejiso feed-ka qoraalka.",
+    "emptyTitle": "Weli qoraallo ma jiraan",
+    "emptyBody": "Qoraallada halkan ayay ka soo muuqan doonaan."
   },
   "comic": {
     "showAll": "Muuji dhammaan {{count}} bog"
@@ -29,16 +33,62 @@
     "policyFollowers": "Kuwa ku raaca",
     "policyNobody": "Qofna",
     "loadMore": "Wax kale soo dejiso",
-    "video": "Fiidiyowga"
+    "video": "Fiidiyowga",
+    "with": "Duet la jira @{{username}}",
+    "withOriginal": "Duet · eeg asalka",
+    "unavailable": "Fiidiyowgan hadda looma heli karo duet.",
+    "allowLabel": "Oggolow duet",
+    "allowDescription": "Cidda duet ku duubi karta fiidiyowyadaada dhinaciisa. Waxaad sidoo kale ku beddeli kartaa qoraal kasta.",
+    "settingsSection": "Duet",
+    "policyDefault": "Dejinta akoonka",
+    "saveFailed": "Lama kaydin karin. Isku day mar kale.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duet",
+    "pageHeading": "Duet",
+    "pageTitle": "Duet-yada {{title}} ee @{{creator}}",
+    "pageTitleNoCreator": "Duet-yada {{title}}",
+    "pageDescription": "Ka daawo duet kasta oo fiidiyowgan ah Riftn, ama duub midkaaga oo dhinac-dhinac ah.",
+    "empty": "Weli duet ma jiro. Fur xulashooyinka fiidiyowga oo dooro Remix → Duet si aad u samayso kan ugu horreeya.",
+    "notFound": "Fiidiyowgan lama heli karo.",
+    "notFoundTitle": "Fiidiyowga lama helin | Riftn",
+    "browseShorts": "Daawo Shorts"
   },
   "videoRemix": {
-    "sound": "Isticmaal codkan"
+    "sound": "Isticmaal codkan",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Shaashad cagaar ah",
+    "stitch": "Stitch",
+    "selectSource": "Fur xulashooyinka fiidiyowga oo dooro Remix si aad u bilowdo."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Qof walba",
       "followers": "Kuwa ku raaca",
-      "nobody": "Qofna"
+      "nobody": "Qofna",
+      "default": "Caadigayga"
+    },
+    "shareFailed": "Hadiyaddaadii waa la diray, laakiin qaybta abuuraha asalka ah ma gudbin.",
+    "notify": {
+      "duet": "{{name}} ayaa duet la sameeyay fiidiyowgaaga",
+      "stitch": "{{name}} ayaa stitch ka sameeyay fiidiyowgaaga",
+      "react": "{{name}} ayaa ka falceliyay fiidiyowgaaga",
+      "reactLive": "{{name}} ayaa si toos ah uga falcelinaya fiidiyowgaaga"
+    },
+    "linkFailed": "Qoraalkaagu wuu baxay, laakiin laguma xidhi karin fiidiyowga asalka ah.",
+    "settingsHeading": "Remix",
+    "stitch": {
+      "allow": "Oggolow stitch",
+      "allowDesc": "Cidda ilaa 5 ilbiriqsi oo fiidiyowyadaada ah ku isticmaali karta kuwooda. Waxaad sidoo kale ku beddeli kartaa qoraal kasta.",
+      "saveFailed": "Dejinta stitch lama kaydin karin. Isku day mar kale.",
+      "settingFailed": "Qoraalkaagu wuu baxay, laakiin dejinta stitch-ka lama kaydin. Ka beddel Wax ka beddel qoraalka.",
+      "from": "Stitch laga sameeyay {{name}}",
+      "count_one": "{{count}} Stitch",
+      "count_other": "{{count}} Stitch",
+      "listTitle": "Stitch-yada",
+      "listFailed": "Stitch-yada lama soo dejin karin. Isku day mar kale.",
+      "listEmpty": "Weli stitch ma jiro.",
+      "unavailable": "Fiidiyowgan hadda looma heli karo stitch."
     }
   },
   "dehubAppPage": {
@@ -64,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Ku fur Riftn browser-kaaga",
     "seoDescription": "Hel barnaamijka Riftn: baraha bulshada ee il-furan, ay leeyihiin isticmaalayaashu, oo leh baahin toos ah, fariimo sir ah iyo daawasho-si-aad-u-kasbato. Bilaash ugu hel Google Play, App Store iyo shabakadda.",
-    "seoTitle": "Riftn App | Soo dejiso Android, iPhone & Web"
+    "seoTitle": "Riftn App | Soo dejiso Android, iPhone & Web",
+    "learnMore": "Ma rabtaa sawirka oo dhan? <guide>Waa maxay Riftn?</guide> ayaa si qoto dheer u sharxaya madasha."
   },
   "dehubLinks": {
     "copyLinkDetail": "Nuqul ka samee xiriiriyaha {{item}} si aad ugu kaydiso sabuuraddaada",
@@ -81,12 +132,16 @@
       "profile": "astaanta isticmaalaha",
       "proposal": "soo jeedin",
       "stage": "masraxa",
-      "store": "dukaan"
+      "store": "dukaan",
+      "featureRequest": "codsi",
+      "page": "bog"
     },
     "recipientChat": "sheekaysi",
     "recipientUser": "isticmaale",
     "sendFailed": "Diritaankii {{item}} wuu guuldarraystay",
-    "sentTo": "{{item}} ayaa loo diray {{name}}"
+    "sentTo": "{{item}} ayaa loo diray {{name}}",
+    "openPage": "Fur bogga",
+    "viewRequest": "Eeg codsiga"
   },
   "stageCover": {
     "admitOne": "Qaado mid ka mid ah",
@@ -195,7 +250,24 @@
   "signedFollows": {
     "setUp": "Daar",
     "turnOff": "Dami",
-    "efpTurnOff": "Jooji"
+    "efpTurnOff": "Jooji",
+    "title": "Kuwa aad raacdo, onchain",
+    "description": "Walletkaagu wuxuu saxeexaa cidda aad raacdo, maalin kastana liiska waxaa lagu shaabadeeyaa Base. App kasta wuu ka heli karaa kuwa aad raacdo walletkaaga, xitaa Riftn la'aanteed.",
+    "on": "Wuu shidan yahay qalabkan",
+    "off": "Wuu dansan yahay qalabkan",
+    "turnedOn": "Kuwa aad raacdo hadda waxaa saxeexa walletkaaga",
+    "turnedOff": "Waa laga damiyay qalabkan",
+    "failed": "Walletkaagu ma saxeexin. Isku day mar kale.",
+    "hiddenNote": "Liisaska raacitaanka qarsoon iyo akoonnada gaarka ah lagama darin liiska guud.",
+    "efpOn": "Waxaa loo koobiyeeyay EFP · {{count}} raacid",
+    "efpOff": "Sidoo kale saar EFP",
+    "efpTurnOn": "Ku dar EFP",
+    "efpDone": "Kuwa aad raacdo waxay u socdaan EFP",
+    "efpStopped": "Koobiga EFP waa la joojiyay. Liisku adiga ayuu kuu harayaa.",
+    "efpHasList": "Horey ayaad u leedahay liis EFP. Riftn weli ma buuxin karo kaas.",
+    "efpNoGas": "Walletkaagu wuxuu u baahan yahay ETH yar oo Base ah tan.",
+    "efpFailed": "Taasi ma gudbin. Isku day mar kale.",
+    "efpNote": "EFP waa liis raacid ah oo apps kale akhriyaan (efp.app). Waa bilaash walletkaaga Riftn; walletyada kale waxay bixiyaan dhawr senti Base. Liisku adigaa iska leh."
   },
   "profileFields": {
     "title": "Meelaha astaanta",
@@ -224,7 +296,9 @@
       "location": "Goobta",
       "custom": "Custom",
       "customOption": "Calaamad Custom"
-    }
+    },
+    "add": "Ku dar goob",
+    "remove": "Ka saar goobta"
   },
   "followedTags": {
     "follow": "Raac #{{tag}}",
@@ -371,7 +445,8 @@
     "step": "Xakamaynta koontada, ku dar https://riftn.com/mcp sida isku xiraha OAuth, ku qor Riftn oo dib u eeg rukhsadaha ka hor intaadan u oggolaan marin.",
     "profilePrompt": "Update my Riftn bio to: Abuuraha Madaxa Banaan samaynta filimada iyo muusikada.",
     "generatePrompt": "Muuji moodooyinka sawirka Riftn oo soo xigo sawir ka hor inta aan la soo saarin.",
-    "libraryPrompt": "Muuji hantidii ugu dambeysay maktabadayda Riftn Creator."
+    "libraryPrompt": "Muuji hantidii ugu dambeysay maktabadayda Riftn Creator.",
+    "agents": "Qor, ka jawaab, falcelin, dib u daabac, raac oo wax ka beddel profile-yada adigoo ah agent-yada aad leedahay"
   },
   "twitchMirror": {
     "title": "Muraayadaha Twitch",
@@ -472,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "soo dejiso app-ka, Android, iPhone, app mobil, rakib, APK, app desktop, rakib kombiyuutarka, Windows, Mac"
+      "getTheApp": "soo dejiso app-ka, Android, iPhone, app mobil, rakib, APK, app desktop, rakib kombiyuutarka, Windows, Mac",
+      "home": "quudin, jadwalka, qoraallada ugu dambeeyay, adiga kuu gaar ah, kuwa aad raacdo, bogga hore",
+      "profile": "boggayga, akoonkayga, qoraalladayda, sawirka astaanta, taariikh nololeed, kuwa i raaca",
+      "explore": "raadi, soo hel, hel, hadda caan ah, caan, hashtag, dad, abuurayaal",
+      "prompt": "AI, samee, sawir AI, muuqaal AI, sameeye sawir, qoraal ilaa sawir, farshaxan AI",
+      "editor": "tafatire muuqaal, tafatir muuqaal, gooy, jar, qoraallada muuqaalka, qoraal hoosaad, saameyno",
+      "creator": "abuur, istuudiyo, qalabka AI, sawir, muuqaal, muusig, cod dul saar, 3D",
+      "converter": "soo gali muuqaal, soo deji, YouTube, TikTok, Instagram, beddel",
+      "migrate": "u wareeji kanaalkayga, soo gali kanaal, soo gelin badan, kanaalka YouTube",
+      "notifications": "digniino, dhaqdhaqaaq, xusid, jawaabo, jeclaysi, gambaleel",
+      "messages": "DM, fariimo toos ah, sheeko, sanduuqa fariimaha, wada hadallo, fariin gaar ah",
+      "communities": "kooxo, bulsho, qolal, naadiyo, golayaal, xubno",
+      "assistant": "AI, chatbot, weydii, caawimo, sheeko AI, su'aalo",
+      "settings": "doorashooyin, akoon, qarsoodi, amni, furaha sirta, luqad, muuqaal, habka mugdiga, la xannibay, tirtir akoonka",
+      "leaderboard": "kala sarreyn, darajo, abuurayaasha ugu sarreeya, isticmaalayaasha ugu sarreeya, dhibco, buundooyin",
+      "bookmarks": "la keydiyay, kuwa la jecel yahay, daawo goor dambe, akhri goor dambe, qoraallada la keydiyay, maktabad",
+      "command": "dashboard, falanqayn, lacagta la kasbaday, dakhli, aragtiyo, maamulid, tirakoobkayga",
+      "wallet": "haraaga, lacag, maal, tokens, crypto, dhigasho, ka bixin, dir, hel, bixi",
+      "events": "kalandar, jadwal, kulan, soo socda, tigidhyo, AMA",
+      "stages": "qolal cod, sheeko cod ah, spaces, cod toos ah, hadal, podcast",
+      "featureRequests": "dhis, dhisayaal, fikrado, soo jeedin, soo sheeg cillad, cilladaha, hagaajin, khariidadda horumarka, cod bixi, liiska rabitaanka, horumari",
+      "feedback": "dib u eegis, qiimayn, sahan, ra'yi, cabasho, bixi jawaab celin",
+      "staking": "stake, dhigasho, soo galid, abaalmarino, kasbo, wadaagga faa'iidada, calaamad, heerar, dulsaar",
+      "superpowers": "kor u qaad, xayeysii, dheefo, awoodo, dheefaha calaamadda, gaarsiin, casriyeyn",
+      "governance": "cod, codbixin, soo jeedinno, ra'yi ururin, warqadda codbixinta, go'aan",
+      "dao": "khasnad, deeq, tabaruc, sanduuqa bulshada, ka qayb qaado, deeqo",
+      "bounties": "shaqo, shaqooyin, hawlo, shaqo yar, shaqo madax bannaan, shaqaalaysii, kasbo lacag, shaqo mushahar leh",
+      "myBounties": "abaalmarinadayda, shaqooyinkayga, taariikh, lacag bixinno, shaqo la dhammeeyay",
+      "affiliate": "gudbin, casuum saaxiibo, casuum, komishan, la-hawlgale, kasbo",
+      "careers": "shaqooyin, shaqaalaysiin, nala shaqee, ku biir kooxda, codso, boosas bannaan",
+      "stores": "dukaan, bakhaar, suuq, alaab astaan, iibso, iibi, badeecooyin, wax iibsi",
+      "fractions": "saamiyo, lahaansho, maalgashi, lahow qoraal, NFT, NFTs, alaab la ururiyo, ganacsi",
+      "usernames": "magaca isticmaalaha, handle, magac, beddel magacayga, iibso magac, iibi magac",
+      "accounts": "iibso akoon, iibi akoon, akoonno iib ah, kuwa raaca, u wareeji akoon",
+      "apps": "dukaanka apps, apps yaryar, dhis app, horumariyayaal, qalab",
+      "arcade": "ciyaaro, ciyaar, ka ciyaar, ciyaaraha, jes, toogasho, madadaalo",
+      "glossary": "ereyo, qeexitaanno, qaamuus, macne, waa maxay",
+      "compare": "isbarbardhig, is barbar dhig, ka soo horjeeda, beddelaad, YouTube, X, TikTok",
+      "guide": "bilow, sida loo sameeyo, casharro, caawimo, baro, bilowga, waan ku cusubahay",
+      "stats": "tirakoob, falanqayn, tirooyin, jaantusyo, qiime, sahay, haystayaasha",
+      "docs": "dukumentiyo, caawimo, API, whitepaper, horumariyayaal, buug tilmaan",
+      "blog": "war, maqaallo, cusbooneysiin, ogeysiisyo, maxaa cusub",
+      "videos": "daawo, muuqaallo, gabalo, muuqaallo dhaadheer",
+      "shorts": "reels, muuqaallo gaagaaban, muuqaallo taagan, jiid",
+      "music": "cod, heeso, raadad, dhegeyso, raadiyo, liiska heesaha",
+      "liveTv": "TV, baahin, baahin toos ah, toos, sii deyn, kanaallo, daawo toos",
+      "buyTokens": "iibso tokens, iibsasho, ku shubo, kaar, kaarka deynta, lacag caadi ah",
+      "bridge": "silsilado kala duwan, u wareeji tokens, silsilado, u gudbi silsilado kale",
+      "top100": "100-ka ugu sarreeya, coins, lacagaha crypto, qiimaha suuqa, qiimayaal",
+      "agents": "wakiillo AI, wakiillo, bots, otomaatig, shakhsiyaad",
+      "advertising": "xayeysiis, xayeysiisyo, olole, xayeysii, kafaala, suuq-geyn",
+      "premium": "rukumid, casriyeyn, pro, xubinnimo, xayeysiis la'aan, ka xor ah xayeysiis",
+      "pricing": "qorshayaal, kharash, qiime, imisa, rukumid",
+      "creators": "barnaamijka abuurayaasha, safiirro, la-hawlgalayaal, iska diiwaangeli abuure ahaan, lacag ka samee",
+      "connectAi": "MCP, ChatGPT, Claude, API, isku xirid, ku xir AI",
+      "packs": "emoji, istikar, GIFs, xirmooyinka emoji, xirmooyinka istikarka, emoji gaar ah",
+      "publicChat": "sheeko, sheeko caalami ah, qolka sheekada, hoolka, hadal, sheekada bulshada",
+      "planned": "la qorsheeyay, jadwal, qoraallada la qorsheeyay, saf, goor dambe",
+      "liveStudio": "toos u bax, baahi, baahin toos ah, OBS, overlays, digniino, widgets",
+      "launchpad": "soo saar token, samee coin, abuur coin, meme coin, bonding curve, token ka dhig"
     },
     "reorderHint": "Qabso oo jiido icon kasta si ay dib u abaabulaan",
     "reorderReset": "Dib u deji",
@@ -520,7 +654,14 @@
     "getTheApp": "Soo deji abka",
     "connectAi": "Ku xir AI",
     "converter": "Converter",
-    "affiliate": "Iskaashi"
+    "affiliate": "Iskaashi",
+    "groups": {
+      "create": "Samee",
+      "discover": "Sahan",
+      "main": "Guud",
+      "money": "Lacag",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Eeg astaanta {{name}}",
@@ -1133,7 +1274,50 @@
     "socialConnectedShort": "Isku xira",
     "socialConnectFailed": "Ma xiri karo {{platform}}. Fadlan isku day mar kale.",
     "socialVerifiedFollowers": "{{value}} kuwa raacsan",
-    "socialFollowersPending": "Dib u cusbooneysiinta tirinta raacaha"
+    "socialFollowersPending": "Dib u cusbooneysiinta tirinta raacaha",
+    "menuLayoutFolders": "Foolarada",
+    "chatCards": "Wada-sheekaysiyada sida kaadhadh",
+    "chatCardsDesc": "Wada-sheekaysi kasta kaadh u gaar ah. Dami si aad u hesho liis caadi ah oo xariiq u dhexeeyo.",
+    "chatDeleteChoice": "Marka aad tirtirto fariin",
+    "chatDeleteChoiceDesc": "Weydii mar kasta, ama had iyo jeer tirtir adiga keliya ama qof kasta oo wada-sheekaysiga ku jira.",
+    "chatDeleteAsk": "Weydii mar kasta",
+    "chatDeleteMe": "Ii tirtir aniga",
+    "chatDeleteMeDesc": "Wuu ka baxayaa wada-sheekaysigaaga, kuwa kale weli way arkaan",
+    "chatDeleteEveryone": "U tirtir qof kasta",
+    "chatDeleteEveryoneDesc": "Marka aad kartid. Fariinta qof kale ee koox ku jirta adiga keliya ayay kaa baxdaa",
+    "postLanding": "Kadib marka aad qorto",
+    "postLandingDesc": "Sida qoraalkaaga cusub ugu soo dego feed-kaaga",
+    "postLandingGhost": "Meel madhan",
+    "postLandingGhostDesc": "Feed-kaagu meel ayuu bannaynayaa, qoraalkaaguna si tartiib ah ayuu u soo muuqanayaa",
+    "postLandingMorph": "Isbeddel",
+    "postLandingMorphDesc": "Qoraha ayaa u yaraanaya qoraalkaaga",
+    "postLandingPill": "Kiniin ilaa kaadh",
+    "postLandingPillDesc": "Baarka soo-gelinta ayaa u furmaya qoraalkaaga marka uu baxo",
+    "postLandingDrop": "Soo dhac",
+    "postLandingDropDesc": "Qoraalkaagu wuxuu ka soo dhacayaa xagga sare isagoo boodboodaya",
+    "showLikes": "Tus qof kasta waxyaabaha aan jeclaaday",
+    "showLikesDesc": "Qof kasta wuu furi karaa tabka Likes ee profile-kaaga. Caadi ahaan waa dansan yahay, adiga keliya ayaa arka waxaad jeclaatay.",
+    "showFollowersList": "Tus cidda i raacda",
+    "showFollowersListDesc": "U oggolow qof kasta inuu furo liiska kuwa ku raaca. Marka uu dansan yahay, adiga keliya ayaa arki kara.",
+    "showFollowingList": "Tus cidda aan raaco",
+    "showFollowingListDesc": "U oggolow qof kasta inuu furo liiska dadka aad raacdo. Marka uu dansan yahay, adiga keliya ayaa arki kara.",
+    "showFollowCounts": "Tus tirada kuwa i raaca",
+    "showFollowCountsDesc": "Tus inta qof ee ku raacda iyo inta qof ee aad raacdo. Damintu waxay sidoo kale qarinaysaa labada liis.",
+    "defaultProfileView": "Qaabka qoraallada profile-ka",
+    "defaultProfileViewDesc": "Qoraalladaada u tus shabakad ama liis marka dadku furaan profile-kaaga",
+    "readerProfileView": "U fur profile-yada kale sida",
+    "readerProfileViewDesc": "Dooro shabakad ama liis profile kasta oo aad furto, ama ilaali doorashada qof kasta",
+    "readerProfileViewOwner": "Doorashada qof kasta",
+    "tipsOffNote": "Hadiyadaha iyo dirista adiga laguu soo diro way dansan yihiin inta tani shidan tahay. Dami si laguu siiyo hadiyad mar kale.",
+    "menuLayout": "Qaabka menu-ga",
+    "menuLayoutDesc": "Sida menu-gu u kooxeeyo boggiisa",
+    "menuLayoutTabs": "Tabab",
+    "menuLayoutTabsDesc": "Hal koox markiiba, oo leh astaamo waaweyn",
+    "menuLayoutSections": "Qaybo",
+    "menuLayoutSectionsDesc": "Bog kasta hal mar, oo ku hoos jira cinwaannada kooxaha",
+    "menuLayoutFoldersDesc": "Boggaga ugu muhiimsan, kadibna gal koox kasta",
+    "publicChatInBar": "Sheekaysiga Guud ee barta hoose",
+    "publicChatInBarDesc": "Hal taabasho ku gal Sheekaysiga Guud adigoo ka imanaya barta hoose ee shaashadda"
   },
   "common": {
     "confirm": "Xaqiiji",
@@ -1223,7 +1407,14 @@
     "messagePublic": "Dadweyne",
     "railTitle": "Talooyin",
     "railTotal": "{{amount}} calaamado",
-    "tokensUnit": "calaamado"
+    "tokensUnit": "calaamado",
+    "messagePlaceholder": "Wax ku qor hadiyaddaada",
+    "messagePrivate": "Kaliya {{name}}",
+    "theCreator": "abuuraha",
+    "messageWallNote": "Waxay ka muuqanaysaa darbiga hadiyadaha marka hadiyaddu gudubto.",
+    "sendWithMessage": "Ku dir fariin",
+    "messageFailed": "Fariintaada lama dari karin. Wax hadiyad ah lama dirin.",
+    "wallLabel": "Fariimaha hadiyadaha"
   },
   "postOptions": {
     "liveAlertsOn": "Hadda waxaad raacaysaa {{name}}. Waxaad heli doontaa ogeysiis marka ay toos u baahiyaan.",
@@ -1263,7 +1454,14 @@
     "giftBoost": "Hadiyad kor u qaadis ah",
     "markSection": "Qaybaha la boodi karo",
     "copyFailed": "Lama koobiyi karin xiriirka",
-    "share": "La wadaag"
+    "share": "La wadaag",
+    "refreshLinkPreview": "Cusboonaysii horudhaca xiriirka",
+    "linkPreviewRefreshed": "Horudhaca xiriirka waa la cusboonaysiiyay",
+    "linkPreviewRefreshFailed": "Goobtaas lama gaari karin. Mar dambe isku day.",
+    "castToTv": "Ku daar TV-ga",
+    "castStarted": "Wuxuu ka socdaa TV-gaaga",
+    "castUnsupported": "Browser-kan ma gudbin karo. Ka fur Riftn Chrome ama Safari si aad ugu daarto TV-gaaga.",
+    "castFailed": "TV-ga lama gaari karin. Hubi inuu ku jiro isla Wi-Fi-ga oo mar kale isku day."
   },
   "filters": {
     "sort": "Kala sooc",
@@ -1866,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} ayaa shaqo u soo gudbiyay abaalmarintaada “{{title}}”",
       "bountySubmitted": "{{name}} ayaa shaqo u soo gudbiyay abaalmarintaada",
       "sentNotification": "{{name}} ayaa kuu soo diray ogeysiis"
-    }
+    },
+    "groupEarlier": "Hore",
+    "searchPlaceholder": "Raadi ogeysiisyada",
+    "searchEmpty": "Ogeysiis u dhigma ma jiro"
   },
   "leaderboard": {
     "title": "Hogaamiyaha",
@@ -1911,7 +2112,13 @@
     "loadingBoard": "Liiska hogaamiyayaasha waa la soo dejinayaa…",
     "amountTokens": "{{amount}} calaamado",
     "directReferrals": "{{count}} toos",
-    "secondaryReferrals": "{{count}} labaad"
+    "secondaryReferrals": "{{count}} labaad",
+    "ogChallenge": "Tartanka OG",
+    "ogHolders_one": "{{count}} haystaha OG",
+    "ogHolders_other": "{{count}} haystayaal OG",
+    "ogChallengeTitle": "Soo celi haystayaasha OG",
+    "ogChallengeBody": "Casuun dadka weli haysta DHB. Markay ku soo biiraan xiriiriyaha martiqaadkaaga oo ay DHB-gooda ku hayaan walletkooda Riftn, halkan adiga ayay kuu tirsanayaan.",
+    "ogChallengeCta": "Hel xiriiriyaha martiqaadkaaga"
   },
   "dhbListing": {
     "title": "Liiska token-ka dhawaan!",
@@ -2054,17 +2261,39 @@
     "shipping": "Waa la dhisayaa",
     "noShippingYet": "Waxba socda ma jiraan",
     "shippingAppearHere": "Codsiyada la dhisayo halkan ayay ka soo muuqan doonaan.",
-    "loadFailed": "Ma buuxin karo codsiyada"
+    "loadFailed": "Ma buuxin karo codsiyada",
+    "editMedia": "Sawirro iyo fiidiyowyo",
+    "editAddMedia": "Ku dar sawir ama fiidiyow",
+    "deviceInfoNote": "Macluumaadka qalabka waa lagu lifaaqay si ay naga caawiso hagaajinta khaladaadka.",
+    "deviceInfo": "Macluumaadka qalabka",
+    "deviceInfoOwners": "Milkiilayaasha guddiga keliya ayaa arka tan",
+    "deviceInfoError": "Macluumaadka qalabka lama soo dejin karin",
+    "deviceInfoNone": "Codsigan ma laha macluumaad qalab",
+    "deviceInfoErrors": "Khaladaadkii dhowaa"
   },
   "auth": {
-    "loginRequired": "Soo galitaan waa loo baahan yahay"
+    "loginRequired": "Soo galitaan waa loo baahan yahay",
+    "accountDeleted": "Akoonkan waa la tirtiray. Waxaad mar kale isu diiwaangelin kartaa akoon cusub ahaan.",
+    "accountDeletedHours_one": "Akoonkan waa la tirtiray. Waxaad mar kale isku diiwaangelin kartaa isla iimaylka ama taleefanka qiyaastii {{count}} saac kadib.",
+    "accountDeletedHours_other": "Akoonkan waa la tirtiray. Waxaad mar kale isku diiwaangelin kartaa isla iimaylka ama taleefanka qiyaastii {{count}} saacadood kadib.",
+    "accountDeletedDays_one": "Akoonkan waa la tirtiray. Waxaad mar kale isku diiwaangelin kartaa isla iimaylka ama taleefanka qiyaastii {{count}} maalin kadib.",
+    "accountDeletedDays_other": "Akoonkan waa la tirtiray. Waxaad mar kale isku diiwaangelin kartaa isla iimaylka ama taleefanka qiyaastii {{count}} maalmood kadib."
   },
   "messages": {
     "newDrawer": {
       "to": "Si",
       "recent": "Dhowaan",
       "suggested": "La soo jeediyay",
-      "youFollow": "Dadka aad raacdo"
+      "youFollow": "Dadka aad raacdo",
+      "placeholder": "Magac ama @username",
+      "chattedBefore": "Waad wada sheekaysataan",
+      "mutual": "Wadaag",
+      "dmsOff": "DM waa dansan yahay",
+      "keepTyping": "Sii qor si aad u raadiso qof kasta",
+      "noOne": "Qofna lama helin",
+      "tryUsername": "Isku day @username-kooda saxda ah",
+      "sayHi": "Qof salaan",
+      "typeAny": "Qor magac kasta ama @username"
     },
     "reply": "Jawaab",
     "react": "Falceli",
@@ -2105,7 +2334,8 @@
     "noConversationsYet": "Weli wax wada hadal ah ma jiro",
     "sending": "Dirista",
     "retrySend": "Isku day mar kale",
-    "discardSend": "Ka saar"
+    "discardSend": "Ka saar",
+    "notSent": "Lama dirin"
   },
   "music": {
     "listeningCount_one": "{{count}} maqsood",
@@ -2189,7 +2419,22 @@
     "viewMode": "Eeg",
     "back": "Dib",
     "reserve": {
-      "signIn": "Soo gal"
+      "signIn": "Soo gal",
+      "available": "Magacan waa bannaan yahay",
+      "held": "Adiga ayaa laguu hayaa",
+      "ended": "Haynta way dhammaatay",
+      "busy": "Waa la xafidayaa",
+      "availableBody": "riftn.com/{{name}} hadda waa bannaan yahay. Xafid oo waan kuu haynaynaa hal daqiiqo inta aad is diiwaangelinayso.",
+      "heldBody": "Qof kale ma qaadan karo @{{name}} ilaa saacaddu dhammaato. Dhammee diiwaangelinta si aad u haysato.",
+      "endedBody": "Daqiiqaddaadii way dhammaatay, sidaa darteed @{{name}} mar kale waa u furan yahay qof walba. Weli waa bannaan yahay.",
+      "busyBody": "Qof ayaa hadda isu diiwaangelinaya @{{name}}. Haddii uusan dhammeyn, wuu bannaanaanayaa marka saacaddu dhammaato.",
+      "finish": "Dhammee diiwaangelinta",
+      "again": "Mar kale xafid",
+      "cta": "Hadda xafid",
+      "letGo": "Iska daa",
+      "haveAccount": "Akoon ma leedahay?",
+      "seoTitle": "@{{name}} waa ka bannaan yahay Riftn",
+      "seoDescription": "Qofna weli ma haysto riftn.com/{{name}}. Xafid oo is diiwaangeli si uu kuu noqdo."
     },
     "usernameAvailable": "Magaca isticmaalaha waa la heli karaa!",
     "signUpToClaim": "Maanta isdiiwaangeli si aad u hesho",
@@ -2220,12 +2465,16 @@
     "tabs": {
       "playlists": "Liisaska ciyaarta",
       "dislikes": "Aan la jeclaysan",
-      "likes": "Jeclaansho"
+      "likes": "Jeclaansho",
+      "articles": "Maqaallo"
     },
     "likedPosts": {
       "emptyTitle": "Weli jeclaansho ma jirto",
       "privateTitle": "Jeclaanshaha waa qarsoodi",
-      "loadMore": "Wax kale soo dejiso"
+      "loadMore": "Wax kale soo dejiso",
+      "emptyOwn": "Qoraallada aad jeclaato halkan ayay ka muuqdaan. Adiga kaliya ayaa arki kara ilaa aad Settings ka shido Tus jeclaysigayga.",
+      "emptyOther": "Weli waxba lama jeclaan.",
+      "privateDesc": "Akoonkani jeclaysigiisa wuu qariyaa."
     },
     "dislikes": {
       "emptyTitle": "Weli ma jiraan wax aan la jeclaysan",
@@ -2250,9 +2499,31 @@
     "sortMostLiked": "Inta badan la jecelyahay",
     "sortCustomShort": "Gaar ah",
     "arrange": {
-      "saving": "Waa la keydinayaa..."
+      "saving": "Waa la keydinayaa...",
+      "title": "Habee qoraalladaada",
+      "hint": "Qabo qoraal oo u jiid meeshiisa cusub. Booqdayaashu habkan ayay marka hore arkaan.",
+      "drag": "Jiid si aad u dhaqaajiso",
+      "toTop": "U dhaqaaji xagga sare",
+      "save": "Keydi habaynta",
+      "saved": "Habayntaada waa la keydiyay",
+      "reset": "Waa lagu celiyay kuwa ugu cusub marka hore",
+      "resetDone": "Waa lagu celiyay kuwa ugu cusub marka hore",
+      "saveFailed": "Habayntaada lama keydin karin. Fadlan mar kale isku day.",
+      "loadFailed": "Qoraalladaada lama soo dejin karin. Xir tan oo mar kale isku day.",
+      "empty": "Weli wax la habeeyo ma jiro. Marka hore wax soo dhig."
     },
-    "searchThisChannel": "Raadi kanaalkan"
+    "searchThisChannel": "Raadi kanaalkan",
+    "unavailable": "Bogga lama heli karo",
+    "mutualsOne": "{{count}} Saaxiib wadaag ah:",
+    "mutualsMany": "{{count}} Saaxiibo wadaag ah:",
+    "articles": {
+      "emptyTitle": "Weli maqaallo ma jiraan",
+      "emptySubtitle": "Maqaalladu halkan ayay ka muuqan doonaan"
+    },
+    "sortCustom": "Habayn gaar ah",
+    "arrangeButton": "Habee qoraallada",
+    "searchResultCount": "1 natiijo oo ku saabsan \"{{query}}\"",
+    "searchResultCountPlural": "{{count}} natiijo oo ku saabsan \"{{query}}\""
   },
   "tv": {
     "seoTitle": "Telefishanka tooska ah: Khaanadaha bilaashka ah ee ka imanaya adduunka oo dhan",
@@ -2274,7 +2545,8 @@
     "retryCount_one": "Dib u noqosho ({{count}} bidix)",
     "retryCount_other": "Dib u noqosho ({{count}} bidix)",
     "liveChat": "Wada sheekaysiga tooska ah",
-    "title": "TV"
+    "title": "TV",
+    "srHeading": "Riftn Live TV — Baraha Bulshada ee Aan Dhexe Ahayn, Ka Adkaysta Faafreebka & Xorriyadda Hadalka"
   },
   "buyCoins": {
     "title": "Iibso Lacag",
@@ -2516,7 +2788,26 @@
     "createSignIn": "Mar kale gal si aad u abuurto wakiil",
     "checkConnection": "Hubi xiriirkaaga oo isku day mar kale.",
     "welcome": {
-      "text": "Fariinta soo dhawaynta"
+      "text": "Fariinta soo dhawaynta",
+      "title": "Soo dhawee xubnaha cusub",
+      "help": "Agent-kani wuxuu raacaa iyo/ama fariin u diraa dadka hadda ku biiray Riftn, dhawr maalintii.",
+      "follow": "Raac xubnaha cusub",
+      "message": "Fariin u dir xubnaha cusub",
+      "textHelp": "{name} wuxuu noqonayaa @username-kooda. Xiriiriyeyaal ma jiraan. Hal mar ayaa qof kasta loo diraa.",
+      "saveText": "Kaydi fariinta",
+      "perDay": "Dad maalintii",
+      "fewer": "Ka yar maalintii",
+      "more": "Ka badan maalintii",
+      "today": "Maanta: {{follows}} la raacay · {{messages}} fariin loo diray",
+      "limits": "Weligiis isla qofka laba jeer. Wuu ka boodaa qof kasta oo ku xannibay ama ku aamusiiyay, damiyay fariimaha cusub ama ka dhuuntay Xubnaha cusub.",
+      "showLog": "Eeg cidda uu soo dhaweeyay",
+      "hideLog": "Qari soo dhawaynta",
+      "empty": "Weli qofna. Xubnaha cusub halkan ayay ka soo muuqdaan marka ay ku biiraan.",
+      "followed": "La raacay",
+      "messaged": "Fariin loo diray",
+      "skipped": "Laga booday",
+      "failed": "Lama gaadhi karin",
+      "defaultText": "Haye {name}, ku soo dhawoow Riftn! 👋"
     },
     "workspace": {
       "moderation": "Maamulidda baahinta",
@@ -2712,7 +3003,15 @@
     "switchWalletAccount": "Beddel koontada",
     "walletLoadFailed": "Ma cusbi karo boorsooyinka. Fadlan isku day mar kale.",
     "openInBrowser": "Ku fur biraawsarka",
-    "copyLink": "Koobi linkiga"
+    "copyLink": "Koobi linkiga",
+    "bringLoginOver": "Ma ku isticmaashay Riftn dehub.io? <bring>Soo wareeji gelitaankaaga</bring>",
+    "didYouMean": "Ma waxaad ula jeeddaa {{email}}?",
+    "profileMovedTitle": "Boggaagii waa la wareejiyay",
+    "migrateWrongLogin": "Gelitaankaasi wuxuu furay boorso kale, sidaa darteed waxba isma beddelin. Boggaagii hore waxaa lagu sameeyay {{login}}. Isticmaal kaas si aad dib ugu soo celiso.",
+    "googleInAppTitle": "Google laguma geli karo gudaha {{app}}",
+    "googleInAppTitleUnnamed": "Google laguma geli karo gudaha app-kan",
+    "googleInAppBody": "Ka fur Riftn browser-kaaga si aad u isticmaasho Google, ama halkan ku gal iimayl.",
+    "tryAnyway": "Si kastaba isku day"
   },
   "careers": {
     "title": "Shaqooyinka Riftn",
@@ -2915,7 +3214,8 @@
     "voteFailedHoldTokens": "Codbixintu way fashilantay. Waa inaad haysataa Riftn tokens si aad u codeyso.",
     "closesInHours": "{{count}}h tagay",
     "closesInMinutes": "{{count}}m tagay",
-    "loadFailed": "Suurtagal ma aha in la soo bandhigo waraaqaha."
+    "loadFailed": "Suurtagal ma aha in la soo bandhigo waraaqaha.",
+    "closesInDays": "{{count}} maalmood ayaa haray"
   },
   "sidebar": {
     "talkOfTheTown": "Sheekada Magaalada",
@@ -2936,7 +3236,16 @@
     "searchDehubFor": "Ka raadi \"{{query}}\" Riftn",
     "switchAccount": "Beddel koontada",
     "signedInAs": "Saxeexay sida {{name}}",
-    "requestSend": "U dir codsi"
+    "requestSend": "U dir codsi",
+    "requestPrompt": "Weli halkan ma joogo? U dir codsi ahaan",
+    "requestPromptShort": "Weli halkan ma joogo?",
+    "requestDraftMenu": "Ku dar {{query}} Riftn",
+    "requestDraftSettings": "Dejin loogu talagalay {{query}}",
+    "requestPostsTo": "Waxay galaysaa Codsiyada",
+    "requestHint": "Waxay Codsiyada ku galaysaa magacaaga. Waan ku ogeysiin doonnaa marka la soo saaro.",
+    "requestSent": "Waxaa loo diray Codsiyada",
+    "requestSentHint": "Waan ku ogeysiin doonnaa marka la soo saaro.",
+    "requestSeeIt": "Ka eeg Codsiyada"
   },
   "comments": {
     "reportComment": "Faallo ka soo sheeg",
@@ -3029,7 +3338,23 @@
     "likersEmptyTitle": "Weli jeclaansho ma jirto",
     "likersEmptyBody": "Jeclaanshaha faalladan halkan ayay ka muuqan doonaan.",
     "anonymousLikes_one": "{{count}} jeclaansho oo ka timid haystaha calaamad qarsoon",
-    "anonymousLikes_other": "{{count}} jeclaansho oo ka yimid haystayaasha calaamado qarsoon"
+    "anonymousLikes_other": "{{count}} jeclaansho oo ka yimid haystayaasha calaamado qarsoon",
+    "threadParts": {
+      "moveUp": "Kor u qaad",
+      "moveDown": "Hoos u dhaqaaq",
+      "reorder": "Dib u habee",
+      "reorderHint": "Jiid qaybaha, ama isticmaal fallaadhaha, kadibna keydi.",
+      "save": "Keydi habaynta",
+      "saved": "Habaynta silsiladda waa la keydiyay",
+      "saveFailed": "Habaynta lama keydin karin. Mar kale isku day.",
+      "dragPart": "Jiid si aad u dhaqaajiso qaybta {{n}}",
+      "addPart": "Ku dar silsiladda",
+      "addPlaceholder": "Ku dar silsiladdaada...",
+      "label": "Silsilad · {{count}} qaybood"
+    },
+    "attachMedia": "Ku lifaaq sawir, muuqaal ama cod",
+    "attachUnsupported": "Ku lifaaq sawir, muuqaal ama fayl cod ah.",
+    "attachTooLarge": "Faylkaasi wuxuu dhaafay xadka {{size}} MB."
   },
   "mintChain": {
     "title": "MINT POST",
@@ -3043,10 +3368,18 @@
     "paidFromWalletPlain": "Lacag laga bixiyay boorsadaada",
     "priceUnavailable": "Qiimaha aan la heli karin",
     "confirm": "Mint ee {{chain}}",
-    "notAvailable": "Minting on silsiladdan weli lama heli karo."
+    "notAvailable": "Minting on silsiladdan weli lama heli karo.",
+    "confirmWithCost": "Mint ku samee {{chain}} · {{cost}}"
   },
   "postEditHistory": {
-    "original": "Asal"
+    "original": "Asal",
+    "title": "Taariikhda wax ka beddelka",
+    "edited_one": "Hal mar ayaa wax laga beddelay",
+    "edited_other": "{{count}} jeer ayaa wax laga beddelay",
+    "lastEdit": "Beddelkii ugu dambeeyay {{time}}",
+    "editN": "Beddel {{n}}",
+    "now": "Hadda",
+    "showChanges": "Tus waxa isbeddelay"
   },
   "postInfo": {
     "title": "Macluumaadka qoraalka",
@@ -3341,7 +3674,10 @@
     "waiting_for_wallet": "Sugitaanka boorsadaada",
     "waiting_for_wallet_desc": "Furan {{wallet}} oo ogolow saxiixa — codsiga ayaa halkaas laga sugayaa.",
     "your_wallet": "boorsadaada",
-    "max_available_on_chain": "Ugu badnaan la heli karo: {{amount}} tokens on {{chain}}"
+    "max_available_on_chain": "Ugu badnaan la heli karo: {{amount}} tokens on {{chain}}",
+    "not_available_for_this_post": "Lagama heli karo qoraalkan",
+    "turn_back_on_desktop_notifications": "Dib ma u shiddaa ogeysiisyada desktop-ka?",
+    "notifications_moved_to_riftn": "Waxaan u guurnay riftn.com, sidaa darteed browser-kaagu mar kale wuxuu u baahan yahay oggolaanshahaaga si uu halkan ugu muujiyo jawaabaha, hadiyadaha iyo DM-yada."
   },
   "staking": {
     "title": "Dhigaal",
@@ -3437,7 +3773,8 @@
       "more": "Ku rar qoraallo dheeraad ah",
       "failed": "Ma cusbooneysiin karo qoraallada bulshada. isku day mar kale.",
       "unavailable": "Qoraalkani waa mid aan la heli karin.",
-      "signIn": "Saxiix mar kale si aad u maamusho qoraallada bulshada."
+      "signIn": "Saxiix mar kale si aad u maamusho qoraallada bulshada.",
+      "invalidLink": "Dheji xiriiriyaha qoraal Riftn ama aqoonsiga qoraalka."
     },
     "title": "Bulshooyinka",
     "create": "Samee",
@@ -3628,7 +3965,8 @@
         "listTitle": "Martiqaad xiriiriyeyaasha",
         "loading": "Soo dejinta xiriiriyeyaasha martigelinta…",
         "emptyTitle": "Weli ma jiraan wax xiriir ah oo martiqaad ah",
-        "empty": "Abuur mid si toos ah dadka loogu casuumo."
+        "empty": "Abuur mid si toos ah dadka loogu casuumo.",
+        "revokeTitle": "Ka noqo {{name}}?"
       },
       "roleOwner": "Milkiilaha",
       "roleAdmin": "Maareeyaha",
@@ -3705,7 +4043,8 @@
       "moveDown": "Hoos u dhaqaaq",
       "removeRule": "Ka saar xeerka",
       "addRule": "Ku dar xeer",
-      "saveRules": "Keydso xeerarka"
+      "saveRules": "Keydso xeerarka",
+      "transferConfirmBody": "{{name}} wuxuu noqonayaa milkiilaha {{community}}. Waxaa laguu dejinayaa maamule leh xuquuq kasta, tanna dib looma celin karo."
     },
     "invite": {
       "revoked": "Xiriirkan martigelinta ayaa la joojiyay.",
@@ -3966,7 +4305,8 @@
       "footnote": "Gelitaanka on-chain isku xira macaamilka laftiisa. Bixinta kaarka iyo qaansheegashada qorshaynta ma laha diiwaanka dadweynaha, sidaa darteed waxay u muuqdaan inay yihiin wadarta maalin kasta iyo inta lacag bixin ee ay sameeyeen. Qiyaasaha ku jira USD waxay isticmaalaan qiimaha maalinta taariikhda iyo qiimaha maanta ee lacag bixinta tooska ah ee calaamado, sida lagu sharaxay “Waxa la tiriyaa”.",
       "missing": "Ma aha in this ledger hadda maxaa yeelay, waxaa laga yaabaa in aan la akhriyi karin: {{sources}}.",
       "open": "Eeg mid kasta {{source}} gelitaanka",
-      "paymentOne": "1 bixinta maalintaas"
+      "paymentOne": "1 bixinta maalintaas",
+      "raw": "JSON cayriin ah"
     },
     "taxSplit": {
       "title": "Halka dakhliga uu aaday",
@@ -4800,7 +5140,11 @@
       "description": "Qofna kama hadlin \"{{title}}\" 30 daqiiqo, sidaas darteed waa la xiray."
     },
     "deleteRecordingFailed": "Ma tirtiri karo duubista",
-    "deleteStageFailed": "Ma tirtiri karo marxaladda"
+    "deleteStageFailed": "Ma tirtiri karo marxaladda",
+    "couldNotCopyLink": "Xiriiriyaha lama koobiyeyn karin",
+    "minutesShort": "{{count}} daq",
+    "openingComposer": "Waxaa la furayaa qoraha oo leh xigashadaada",
+    "tuningIn": "Waa lagu xidhmayaa…"
   },
   "ads": {
     "seoTitle": "Maareeyaha Xayeysiinta | Riftn",
@@ -4988,7 +5332,9 @@
     "sentTokensNotCredited": "Ma u soo dirtay Riftn tokens kaydka xayaysiisyada laakiin ma lagu darin? Ku dheji hash-ka macaamilka — waxaan ku xaqiijinaynaa on-chain.",
     "targetByTokenHoldings": "Ujeedo ku salaysan Riftn token holdings la xaqiijiyay. Waxaad bixinaysaa CPM-ka heer kasta oo kaliya marka heerkaas uu arko xayaysiiskaaga. Ka tag madhan si aad u gaadho qof kasta.",
     "stakersHint": "Isticmaalayaasha leh taariikhda staking ee Riftn token",
-    "povrPricingIntro": "Nidaamkayaga qiimaynta ee heer-heerka tooska ah wuxuu hubiyaa kharashaadka xayaysiinta oo cadaalad ah oo la ballaarin karo iyadoo lagu salaynayo qiimaha dhagaystayaasha. Qiimaha waxaa lagu qiimeeyaa USD si fudud oo loo maamulo, si kastaba ha ahaatee lacag-bixinta waxaa lagu dalban doonaa Riftn tokens marka la fulinayo."
+    "povrPricingIntro": "Nidaamkayaga qiimaynta ee heer-heerka tooska ah wuxuu hubiyaa kharashaadka xayaysiinta oo cadaalad ah oo la ballaarin karo iyadoo lagu salaynayo qiimaha dhagaystayaasha. Qiimaha waxaa lagu qiimeeyaa USD si fudud oo loo maamulo, si kastaba ha ahaatee lacag-bixinta waxaa lagu dalban doonaa Riftn tokens marka la fulinayo.",
+    "noTopUpsYet": "Weli lacag ku shubid ma jirto.",
+    "estClicks": "Gujinnada la qiyaasay (0.8% CTR)"
   },
   "launchpad": {
     "seoTitle": "Launchpad | Riftn",
@@ -5239,18 +5585,167 @@
     "buy": "Iibso",
     "reject": "Diid",
     "needsYouHold": "Baahida {{needed}}, waxaad haysataa {{held}}",
-    "sellYourFractions": "Iibso jajabkaaga ({{held}} held)"
+    "sellYourFractions": "Iibso jajabkaaga ({{held}} held)",
+    "nftsSubtitle": "NFT kasta, beddelasho hal tallaabo ah",
+    "buyersTab": "Iibsadayaasha",
+    "soldOfListing": "La iibiyay {{sold}} oo ka mid ah {{total}}",
+    "noBuyersYet": "Weli qofna ma iibsan qaybo qoraalkan ah",
+    "fromYou": "adiga kaa yimid",
+    "statusOverdue": "Daahay"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Isticmaal faahfaahintan"
+        "use": "Isticmaal faahfaahintan",
+        "url": "URL-ka bogga alaabta",
+        "action": "Akhri bogga alaabta",
+        "loading": "Bogga waa la akhrinayaa…",
+        "hint": "Ka soo dejiso qoraal bog alaab oo dadweyne ah. Dib u eeg faahfaahinta ka hor intaadan isticmaalin; sawirrada alaabta si gaar ah ugu lifaaq istuudiyaha.",
+        "source": "Isha la soo dejiyay",
+        "review": "Dooro alaab aad u koobiyeyso tilmaantaada la beddeli karo. Cinwaankaaga, codkaaga iyo midabada summaddaada isma beddelayaan.",
+        "errors": {
+          "signIn": "Gal si aad u soo dejiso bog alaab.",
+          "url": "Isticmaal URL alaab HTTPS ah oo dadweyne ah.",
+          "empty": "Lama helin faahfaahin alaab oo la isticmaali karo. Gacanta ku dar.",
+          "busy": "Soo dejinno aad u badan ayaa socda. Isku day wax yar kadib.",
+          "unavailable": "Boggan lama soo dejin karin. Gacanta ku dar faahfaahinta alaabta.",
+          "failed": "Soo dejintu way fashilantay. Tilmaantaada waa la kaydiyay; isku day mar kale ama gacanta ku gali faahfaahinta."
+        }
+      },
+      "return": "Ku noqo qabyada istuudiyaha",
+      "title": "Tilmaanta ololaha",
+      "intro": "Sharax alaabtaada iyo summaddaada, kadibna diyaari qaabab xayeysiis oo ku habboon.",
+      "saved": "Tilmaantaada waxaa lagu kaydiyay qalabkan akoonkan.",
+      "preview": "Diyaari qaababka",
+      "clear": "Nadiifi tilmaanta",
+      "required": "Ku dar magaca alaabta iyo sharaxaad si aad u diyaariso qaababka.",
+      "variants": "Qaababka ololaha",
+      "reviewHint": "Dib u eeg moodelka, qiimaha iyo tixraaca alaabta ee istuudiyaha ka hor abuurista. Qaab kasta waa abuuris gaar ah.",
+      "open": "Ku dib u eeg istuudiyaha",
+      "fields": {
+        "product": "Magaca alaabta (waa loo baahan yahay)",
+        "description": "Xaqiiqooyinka alaabta (waa loo baahan yahay)",
+        "brand": "Magaca summadda",
+        "audience": "Dhegaystayaasha la beegsanayo",
+        "benefit": "Faa'iidada ugu muhiimsan",
+        "voice": "Codka summadda",
+        "palette": "Midabada summadda",
+        "headline": "Cinwaanka la oggolaaday",
+        "cta": "Baaqa ficilka"
+      },
+      "formats": {
+        "square": "Xayeysiis laba jibbaaran",
+        "portrait": "Xayeysiis taagan",
+        "story": "Sawir story",
+        "video": "Fiidiyow taagan"
       }
     },
     "cinema": {
       "close": "Xir",
       "performance": {
-        "label": "Waxqabadka"
+        "label": "Waxqabadka",
+        "0": "Farxad leh",
+        "1": "Murugo leh",
+        "2": "Walwal leh",
+        "3": "Kalsooni leh",
+        "4": "Yaab leh",
+        "5": "Is-celin leh",
+        "6": "Ciyaar leh"
+      },
+      "title": "Hagidda shineemada",
+      "hint": "Hag qaabka muuqaalka sawirkaaga ama fiidiyowgaaga xiga. Natiijooyinku way kala duwan yihiin moodelka.",
+      "none": "Hagid ma jirto",
+      "reset": "Nadiifi hagidda",
+      "camera": {
+        "label": "Muuqaalka kamaradda",
+        "0": "Shineemo dijitaal ah",
+        "1": "Filim 35mm",
+        "2": "Filim 16mm",
+        "3": "Qaab weyn",
+        "4": "Camcorder qadiimi ah"
+      },
+      "lens": {
+        "label": "Muuqaalka muraayadda",
+        "0": "Kurin ah",
+        "1": "Anamorphic",
+        "2": "Muraayad jilicsan oo qadiimi ah",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Dhererka focal-ka",
+        "0": "18mm ballaadhan",
+        "1": "24mm ballaadhan",
+        "2": "35mm dabiici ah",
+        "3": "50mm caadi ah",
+        "4": "85mm portrait",
+        "5": "135mm telephoto"
+      },
+      "aperture": {
+        "label": "Qoto-dheerida goobta",
+        "0": "f/1.4 aad u gaaban",
+        "1": "f/2.8 gaaban",
+        "2": "f/5.6 dhexdhexaad",
+        "3": "f/11 diiradda qoto dheer"
+      },
+      "movement": {
+        "label": "Dhaqdhaqaaqa kamaradda",
+        "0": "Saddex-lugood go'an",
+        "1": "Dolly tartiib ah oo gudaha u socda",
+        "2": "Dolly tartiib ah oo dibadda u socda",
+        "3": "Raacid dhinac ah",
+        "4": "Ku wareeg mawduuca",
+        "5": "Gacanta lagu hayo",
+        "6": "Kor u kac crane",
+        "7": "Pan tartiib ah"
+      },
+      "lighting": {
+        "label": "Iftiinka",
+        "0": "Iftiin maalmeed jilicsan",
+        "1": "Saacadda dahabiga ah",
+        "2": "Chiaroscuro mugdi ah",
+        "3": "Istuudiyo iftiin badan",
+        "4": "Nalal neon ah",
+        "5": "Hadh iftiin gadaal ah",
+        "6": "Daruuro faafsan"
+      },
+      "tempo": {
+        "label": "Xawaaraha muuqaalka",
+        "0": "Hal muuqaal oo joogto ah",
+        "1": "Ficil deggan oo aan degdeg lahayn",
+        "2": "Ficil firfircoon oo xoog leh",
+        "3": "Ficil qasan oo xamaasad leh"
+      },
+      "era": {
+        "label": "Xilliga",
+        "0": "1920-meeyadii",
+        "1": "1950-meeyadii",
+        "2": "1960-meeyadii",
+        "3": "1970-meeyadii",
+        "4": "1980-meeyadii",
+        "5": "1990-meeyadii",
+        "6": "Maanta",
+        "7": "Mustaqbalka dhow"
+      },
+      "genre": {
+        "label": "Nooca",
+        "0": "Dokumentari",
+        "1": "Riwaayad",
+        "2": "Film noir",
+        "3": "Khayaal saynis",
+        "4": "Khayaal",
+        "5": "Majaajillo jacayl",
+        "6": "Xiise",
+        "7": "Galbeedka"
+      },
+      "palette": {
+        "label": "Midabada",
+        "0": "Cambar diirran",
+        "1": "Buluug qabow",
+        "2": "Midabo dhulka oo daciif ah",
+        "3": "Pastel",
+        "4": "Madow-cad farqi weyn leh",
+        "5": "Midabo aasaasi ah oo qoyan"
       }
     },
     "libraryEmpty": "Waxyaabihii aad abuurtay ee la kaydiyay halkan ayay ka muuqan doonaan.",
@@ -6012,8 +6507,160 @@
       "cannotUseReference": "{{model}} ma isticmaali karo sawir tixraac ah. Ka saar ama soo qaado qaab kale.",
       "needsImageToAnimate": "{{model}} wuxuu u baahan yahay sawir si uu u noolaado. Ku lifaaq mid ka mid ah marka hore.",
       "needsImageToWork": "{{model}} wuxuu u baahan yahay sawir si uu uga shaqeeyo. Ku lifaaq mid ka mid ah marka hore.",
-      "speechLimit": "Waa {{length}} characters. Xadka waa {{limit}}."
-    }
+      "speechLimit": "Waa {{length}} characters. Xadka waa {{limit}}.",
+      "musicTrackLength": "Hees {{count}}s ah"
+    },
+    "gallery": {
+      "send": "Dir",
+      "notifications": {
+        "generation_reply": "{{name}} ayaa jawaabay faalladaada",
+        "generation_like": "{{name}} ayaa ka falceliyay abuuristaada",
+        "generation_comment_like": "{{name}} ayaa ka falceliyay faalladaada",
+        "generation_comment": "{{name}} ayaa faallo ka bixiyay abuuristaada"
+      },
+      "browse": "Daawo waxyaabaha la abuuray",
+      "create": "Abuur",
+      "fullscreen": "Ku eeg shaashad buuxda",
+      "missing": "Abuuristan lama heli karo."
+    },
+    "avatarTitle": "Sawir hadlaya",
+    "avatarRequirements": "Sawir PNG ah oo laba jibbaaran, 512–2048 pixel, ilaa 5 MB. Mono 24 kHz 16-bit PCM WAV, 5–30 ilbiriqsi. Qaybta ugu dambeysa ee ilbiriqsiga waxaa lagu buuxiyaa aamusnaan.",
+    "avatarPortrait": "Dooro sawirka PNG",
+    "avatarAudio": "Dooro hadalka WAV",
+    "avatarPermission": "Waxaan haystaa oggolaansho aan ku dhaqaajiyo sawirkan oo aan ku isticmaalo codkan.",
+    "avatarQuote": "{{seconds}} ilbiriqsi oo ay ku jirto aamusnaan · {{amount}} token",
+    "avatarPrepare": "Diyaari oo dib u eeg qiimaha",
+    "batchFlowLimit": "Liiska Flow waa buuxsamay. Ka saar Flow aan la isticmaalin ka hor intaadan abuurin dufcad kale.",
+    "batchReviewCampaign": "Dib u eeg dufcadda ololaha ee Flow",
+    "batchReviewFilmImages": "Dib u eeg dufcadda sawirrada storyboard-ka",
+    "batchReviewFilmVideos": "Dib u eeg dufcadda qaybaha filimka",
+    "batchReviewHint": "Wuxuu furaa Flow kale oo la kaydiyay. Dib u eeg shay kasta iyo qiimaha oo dhan ka hor intaadan bixin. Waxyaabaha la dhammeeyay iyo lacag-bixintii asalka ahayd waa la hayaa si loo soo celiyo. Tixraacyada waxaa loo koobiyeeyaa maktabaddaada gaarka ah; isticmaalka kaydinta iyo shabakadda ayaa khuseeya.",
+    "batchInvalid": "Dhammee shay kasta ka hor intaadan diyaarin dufcad ah 1–12 sawir ama qaybo.",
+    "batchReferenceLimit": "Dufcaddani waxay taageertaa hal tixraac sawir shay kasta. Ka saar tixraacyada dheeraadka ah ama shaygaas si gaar ah u diyaari.",
+    "batchVideoSettings": "Dufcaddan, qaybuhu waxay u baahan yihiin muddo dhan oo ah 4–15 ilbiriqsi iyo saami 16:9, 9:16 ama 1:1.",
+    "batchMissingReference": "Tixraac ayaa maqan, aan la taageerin ama ka weyn 25 MB. Ku soo celi tifaftiraha ka hor intaadan diyaarin dufcadda.",
+    "batchOwnerChanged": "Akoonka ama qabyada ayaa isbeddelay. Dufcaddan ku dib u fur akoonkeedii asalka ahaa.",
+    "batchConflict": "Dufcadda la kaydiyay kuma eka sawirkeedii asalka ahaa.",
+    "audioExportFormat": "Qaabka dhoofinta",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Ku lifaaq hal qayb asal ah si aad u dheerayso.",
+    "extensionSeconds": "+{{seconds}}s muuqaal cusub",
+    "extensionHelp": "Wuxuu kuu soo celiyaa qaybtaadii asalka ahayd oo ay ku dheer yihiin qiyaastii afar ilbiriqsi oo cusub. Natiijada waxaa loo beddelaa ilaa 720p 24 fps. Cod cusub ayaa loo abuuraa dheeraynta.",
+    "extensionForward": "Ku dar qiyaastii afar ilbiriqsi qaybtaada asalka ah kadib",
+    "extensionBackward": "Ku dar qiyaastii afar ilbiriqsi qaybtaada asalka ah ka hor",
+    "expandDescription": "Abuur xuduudo sawir oo cusub. Amar Ingiriisi ah oo ikhtiyaari ah; hal sawir asal ah.",
+    "relightDescription": "Iftiin cusub sii hal sawir adigoo raacaya sharaxaadda iftiinka iyo asalka.",
+    "expandPromptHint": "Ku lifaaq hal sawir oo dooro saamigiisa cusub. Amarka Ingiriisiga waa ikhtiyaari.",
+    "expandEnglishOnly": "Moodelkan ballaadhinta wuxuu aqbalaa amarro Ingiriisi ah. Amarka banneey si toos ah loo ballaadhiyo.",
+    "expandNeedsImage": "Ku lifaaq sawir si aad u ballaadhiso.",
+    "learn": {
+      "title": "Casharrada abuuraha",
+      "intro": "Casharro gaagaaban, hubin aqoon iyo layli la beddeli karo mid kasta. Horumarka waxaa lagu kaydiyaa qalabkan akoonkaaga.",
+      "back": "Ku noqo Creator",
+      "lessons": "Casharro",
+      "progress": "{{completed}} ka mid ah {{total}} hubinta aqoonta ayaa la gudbay",
+      "check": "Hubi jawaabta",
+      "correct": "Hubinta aqoonta waa la gudbay",
+      "retry": "Isku day mar kale. Dib u eeg casharka kore.",
+      "exerciseTitle": "Layli wax qabad ah",
+      "exerciseHint": "Ku fur tusaale la beddeli karo goobta shaqada ee istuudiyahaaga. Furitaanka qabyada waa bilaash; abuuristu waxay u baahan tahay dib u eegistaada iyo qiimeyn u gaar ah. Wax ka beddel tusaalaha ka hor abuurista.",
+      "openExercise": "Fur qabyada laylinta",
+      "closeExercise": "Xidh laylinta",
+      "brief": {
+        "title": "Qor tilmaan muuqaal oo cad",
+        "body1": "Sharax mawduuc la taaban karo, ficilkiisa iyo goobta. Ku dar qaabeynta ama dhaqdhaqaaqa kamaradda marka ay caawiso muuqaalka. Fikradaha aan khusayn u kaydi qabyo kale.",
+        "body2": "Tilmaamaha iftiinka, muraayadda iyo qaabka ayaa hagaya moodelka. Ma dammaanad qaadayaan dhaqanka kamaradda dhabta ah ama sawir sax ah. Hal qayb markiiba beddel si aad u barbardhigto dib u eegisyada.",
+        "body3": "Ka hor abuurista, dib u eeg moodelka la doortay, lifaaqyada la taageero, cabbirrada iyo qiimaha. Hay qabyadii asalka ahayd si aad ugu noqon karto.",
+        "question": "Tilmaantee ayaa ugu fudud in dib loo eego?",
+        "answer0": "Mawduuc, ficil iyo goob cad",
+        "answer1": "Magaca moodelka keliya",
+        "answer2": "Liis qaabab is burinaya",
+        "exercise": "Jalamad dhoobo ah oo saaran miis alwaax ah oo daaqad ag yaal. Iftiin subax oo jilicsan, qaabeyn dhexe, asal fudud. Jalamadda ka dhig mawduuca cad."
+      },
+      "continuity": {
+        "title": "Qorshee muuqaallada oo dib u eeg isku xidhnaanta",
+        "body1": "Isticmaal guddiga Film ee tifaftiraha si aad u kaydiso tilmaan iyo muuqaallo habaysan. Diyaari frame ama qayb kasta si gaar ah, dib u eeg qiimeyntiisa, oo dooro natiijo la aqbalay.",
+        "body2": "Ku lifaaq oo keliya tixraacyada uu aqbalo moodelka aad dooratay. Dib u isticmaalka tixraac wuxuu hagi karaa muuqaalka; ma tababaro aqoonsi mana dammaanad qaado isku ekaansho. Jilayaasha iyo codadku way kala duwanaan karaan abuurisyada.",
+        "body3": "Hay muuqaallada guuleystay oo ku ururi timeline-ka. Dib u eeg dhaqdhaqaaqa, wejiyada, wada-hadalka iyo kala-guurka ka hor dhoofinta.",
+        "question": "Maxaa taageera isku xidhnaanta muuqaallada?",
+        "answer0": "Amarro badan oo aan isku xidhnayn",
+        "answer1": "Tixraacyo la oggolaaday iyo qoraallo muuqaal oo dib loo eegay",
+        "answer2": "In loo qaato in aqoonsiga jilaha la dammaanad qaaday",
+        "exercise": "Muuqaal ballaadhan oo musaafir keligiis ah oo gaadhaya xeeb deggan qorrax soo baxa. Dhaqdhaqaaq kamarad oo tartiib hore ugu socda, jawi deggan. Hal muuqaal oo joogto ah."
+      },
+      "campaign": {
+        "title": "Isticmaal xaqiiqooyinka alaabta ee la oggolaaday",
+        "body1": "Ku bilow xaqiiqooyin alaab oo aad xaqiijin karto. Dib u eeg xogta la soo dejiyay ka hor intaadan isticmaalin. Si cad u qor cinwaanka iyo baaqa ficilka; ha samayn qiimo, dib u eegis ama sheegasho waxqabad oo been ah.",
+        "body2": "Isticmaal noocyada ololaha ee la kaydiyay si aad isugu hayso qoraallada la wadaago iyo hook-yada, qoraallada, luqadaha iyo qaababka gaarka ah. Diyaari hal shay oo dib loo eegay markiiba oo ku hubi qiimeyntiisa istuudiyaha.",
+        "body3": "Dib u eeg qoraalka muuqda, muuqaalka alaabta iyo sheegasho kasta oo la hadlay ee natiijada. Amar ma aha caddayn saxnaanta alaabta ama waxqabadka suuqgeynta.",
+        "question": "Goorma ayaa sheegasho alaab la gelin karaa?",
+        "answer0": "Mar kasta oo ay u ekaato mid lagu qanci karo",
+        "answer1": "Kadib marka la sameeyo dib u eegis shan xiddigood oo been ah",
+        "answer2": "Marka ay ka timaado xaqiiqooyin alaab oo la oggolaaday",
+        "exercise": "Samee xayeysiis alaab oo taagan oo loogu talagalay shaah caleen dhan ah oo lagu iibiyo daasad dib loo isticmaali karo. Cinwaanka la oggolaaday: Make time for tea. CTA la oggolaaday: Explore the collection. Isticmaal xaqiiqooyinkan keliya; ha samayn qiimo dhimis, dib u eegis ama sheegasho caafimaad oo been ah."
+      }
+    },
+    "campaignPlanTitle": "Noocyada iyo qaybaha ololaha",
+    "campaignPlanIntro": "Kaydi ilaa 12 nooc ama qaybood. Mid kasta wuxuu furaa istuudiyaha dib u eegis iyo qiimeyn u gaar ah. Qoraallada la wadaago waxay hagaan isku xidhnaanta; muuqaalka alaabta, jilayaasha iyo codadku way kala duwanaan karaan abuurisyada.",
+    "campaignTitle": "Magaca ololaha ama taxanaha",
+    "campaignContinuity": "Qoraallada jilaha, codka iyo qaabka la wadaago",
+    "campaignVariantTitle": "Magaca nooca ama qaybta",
+    "campaignHook": "Hook-ga furitaanka",
+    "campaignLanguage": "Luqadda natiijada",
+    "campaignScript": "Qoraal ama taxane muuqaal oo la oggolaaday",
+    "campaignAdd": "Ku dar nooc ama qayb",
+    "campaignClear": "Nadiifi qorshaha",
+    "campaignFormat": "Qaabka natiijada",
+    "audioInvalidResponse": "Adeegga codka wuxuu soo celiyay natiijo khaldan.",
+    "audioResultTooLarge": "Natiijada codka waa madhan tahay ama way ka badan tahay 128 MB.",
+    "batchPaymentHelp": "Sawir kasta oo la gudbiyo si gaar ah ayaa lacag loogu qaadaa. Haddii dufcad istaagto, token-nada aan la isticmaalin ee lacag-bixinteeda si toos ah ayaa loogu isticmaalaa abuuris dambe oo ay daboosho.",
+    "invalidSeed": "Seed-ku waa inuu noqdaa tiro dhan oo u dhexeysa 0 ilaa 2147483647.",
+    "libraryFavorites": "Kuwa la jecel yahay",
+    "libraryFavoriteAdd": "Ku dar kuwa la jecel yahay",
+    "libraryFavoriteRemove": "Ka saar kuwa la jecel yahay",
+    "presetExtraPrismShadowsName": "Hadhka prism-ka",
+    "presetExtraMossMicroWorldName": "Adduunka yar ee moss-ka",
+    "presetExtraShoeLacePullName": "Xadhkaha ayaa adkaanaya",
+    "presetExtraFogLanternName": "Fanuus ceeryaamo",
+    "firstFrameToAnimate": "Frame-ka koowaad ee la dhaqaajinayo",
+    "audioTaskDialoguePlaceholder": "Alice: Waa inaan tagnaa.\nBob: [qosol] Adigaa hormara.",
+    "presetThumbnailPunchName": "Thumbnail Xoog leh",
+    "presetGamePropName": "Qalab Ciyaar",
+    "presetStylisedCollectibleName": "Shay La Ururiyo oo Qurxoon",
+    "presetHardSurfaceHint": "Mishiin lagu sameeyay, looxyo leh, farsamo",
+    "presetEnvironmentAssetName": "Qayb Deegaan",
+    "presetAdEnergeticName": "Akhris Xayeysiis",
+    "presetMusicLofiName": "Gogol Lo-fi",
+    "presetMusicUpbeatName": "Xayeysiis Firfircoon",
+    "toolImageGenerator": "Abuuraha Sawirka",
+    "toolImageEdit": "Tafatirka Sawirka",
+    "priceOwnKey": "Furahaaga",
+    "referenceInsert": "Geli {{tag}} amarka",
+    "referenceLibrary": "Maktabadda",
+    "referenceSingle": "Isticmaal hal sawir si aad dib ugu dhisto shayga.",
+    "referenceHint": "Taabo magaca shay si aad ugu tixraacdo amarkaaga. Ku dar ilaa afar sawir iyo hal qayb.",
+    "referenceOneClip": "Ku lifaaq hal qayb tixraac ah.",
+    "referenceClipLength": "Isticmaal qayb MP4 ama MOV ah oo u dhexeysa 3 iyo 15 ilbiriqsi beddelasho, ama ilaa 30 ilbiriqsi dhaqdhaqaaq.",
+    "referenceFourImages": "Ku lifaaq ilaa afar sawir tixraac ah.",
+    "referenceMultiModel": "Dooro moodel taageera sawirro badan, sida FLUX 3 Image.",
+    "referenceNeedsClip": "Ku lifaaq sawirka jilahaaga iyo qaybta tixraaca.",
+    "referenceVideoModel": "Dooro Beddel jilaha ama Koobi dhaqdhaqaaqa si aad u isticmaasho qayb.",
+    "referenceTooMany": "Moodelkani ma isticmaali karo dhammaan sawirrada la lifaaqay. Ka saar kuwa dheeraadka ah ama dooro moodel kale.",
+    "referenceClipSeconds": "Dhererka qaybta: {{seconds}}s",
+    "referenceUploadClip": "Soo geli qaybta tixraaca",
+    "characterSwap": "Beddel jilaha",
+    "copyMotion": "Koobi dhaqdhaqaaqa",
+    "referenceSwapName": "Jilaha ku beddel qayb",
+    "referenceSwapHint": "Beddel qof adigoo ilaalinaya muuqaalka iyo dhaqdhaqaaqa asalka ah.",
+    "referenceMotionName": "Dhaqdhaqaaqa u koobi jilahaaga",
+    "referenceMotionHint": "Dhaqaaji sawir jile adigoo isticmaalaya ficillada iyo muujinta qayb.",
+    "referenceOutfitName": "Ku tijaabi dhar qayb",
+    "referenceOutfitHint": "Beddel dharka adigoo ilaalinaya wejiga, dhaqdhaqaaqa iyo asalka.",
+    "referenceProductName": "Alaabtaada dhig qayb",
+    "referenceProductHint": "Beddel alaabta muuqata oo ilaali muuqaalka asalka ah.",
+    "referenceComposeName": "Isku dar sawirrada tixraaca",
+    "referenceComposeHint": "Jilayaal, walxo iyo goobo ka keen sawirro badan oo hal halabuur ka dhig."
   },
   "pricing": {
     "plansForEveryWorkflow": "Qorshayaasha socodka shaqada kasta",
@@ -6179,7 +6826,9 @@
     "createTheFirst": "Samee kan ugu horreeya",
     "docsSeoTitle": "Tilmaamaha Xirfadaha AI | Riftn",
     "docsSeoDescription": "Dukumiintiyada tixraaca ee xirfadaha caawiyaha ee Riftn ee AI iyo maktabadda degdegga ah.",
-    "raw": "Ceerigaabo"
+    "raw": "Ceerigaabo",
+    "browseAllSkills": "Daawo dhammaan xirfadaha",
+    "docsLoadFailed": "# Khalad\nDukumentiyada xirfadda lama soo dejin karin."
   },
   "nftMarket": {
     "actAll": "Dhammaan",
@@ -6291,7 +6940,34 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT-ga iyo lacagtu way isbarbardhigaan hal tallaabo.",
     "spotlightOfferNote": "Liiska lama saarin. Diri offer oo qaatahu waxaa yeelan karaa inuu aqbalo waqti kasta.",
-    "signInToTradeCta": "Gal si aad u galafsato"
+    "signInToTradeCta": "Gal si aad u galafsato",
+    "actCollectionOffer": "Dalab ururin",
+    "actListed": "La soo bandhigay",
+    "actOffer": "Dalab",
+    "actSale": "Iib",
+    "buyAll": "Iibso dhammaan",
+    "buySeveral": "Iibso dhawr",
+    "cartBought": "La iibsaday {{n}}. Hadda waxay ku jiraan walletkaaga.",
+    "cartCount": "{{n}} gaadhiga ku jira",
+    "cartFull": "Ilaa 20 markiiba",
+    "cartOneCoin": "Hal chain iyo hal coin gaadhi kasta. Nadiifi si aad u beddesho.",
+    "cartOwn": "Kaasi adigaa leh",
+    "cartPick": "Taabo si aad ugu darto gaadhiga",
+    "forSaleHere": "Halkan waa iib",
+    "noActivity": "Weli waxba halkan ma jiraan",
+    "emptyBody": "Noqo kan ugu horreeya. Soo bandhig NFT walletkaaga ka yimid, qof kasta oo Riftn ku jirana wuu iibsan karaa.",
+    "walletError": "Walletkaaga lama akhrin karin",
+    "tryAgain": "Isku day mar kale wax yar kadib.",
+    "noNftsBody": "Qoraal u samee NFT, ama beddel chain-ka si aad u aragto waxa kale ee aad haysato.",
+    "noOrders": "Ma jiraan iib furan ama dalabyo",
+    "alertSaved": "Digniintu waa shidan tahay. Waan kuu sheegi doonnaa marka mid la soo bandhigo.",
+    "volShort": "Mug",
+    "salesCount": "{{n}} la iibiyay",
+    "bestOffer": "Dalabka ugu fiican",
+    "fromOpenSea": "Ururinta ugu sarreysa OpenSea",
+    "buyHere": "Halkan ka iibso",
+    "openSeaNote": "Waxaa lagu soo bandhigay OpenSea. Iibiyaha si toos ah ayaad ugu bixinaysaa Seaport; Riftn kharash kuma darto.",
+    "viewOnOpenSea": "Ka eeg OpenSea"
   },
   "usernames": {
     "seoTitle": "Magaca Isticmaalaha Suuqa | Riftn",
@@ -6412,7 +7088,11 @@
     "addedToYourUsernames": "Waxaa lagu darayaa magacyadaada isticmaale",
     "boughtNameGoesToVault": "Waxaad ahaan doontaa @{{current}}. @{{handle}} wuxuu galayaa magacyadaada isticmaale, waadna u beddeli kartaa wakhti kasta oo aad rabto.",
     "youAreNow": "Hadda waxaad tahay @{{handle}}",
-    "boughtToVaultToast": "@{{handle}} hadda wuxuu ku jiraa magacyadaada isticmaale"
+    "boughtToVaultToast": "@{{handle}} hadda wuxuu ku jiraa magacyadaada isticmaale",
+    "exactAvailable": "<handle>@{{handle}}</handle> lama qaadan. Si bilaash ah u qaado <settings>Dejinta → Profile</settings> — wax la iibsado ma jiraan.",
+    "exactTaken": "<handle>@{{handle}}</handle> waxaa leh qof aan soo bandhigin. Waad <profile>weydiin kartaa</profile>.",
+    "exactReserved": "<handle>@{{handle}}</handle> waa waddo Riftn ah, sidaa darteed qofna ma haysan karo mana iibin karo.",
+    "staleListingWarning": "Iibkan waxaa loogu talagalay <handle>@{{listed}}</handle>, laakiin hadda waxaad tahay @{{current}}. Ma iibsami doono ilaa aad dib ugu soo bandhigto magacaaga hadda — cusboonaysiinta kore ayaa taas samaynaysa."
   },
   "accounts": {
     "seoTitle": "Suuqa Koontada | Riftn",
@@ -6509,7 +7189,9 @@
     "addComment": "Ku dar faallo...",
     "delete": "Tirtir",
     "sortRecent": "Ugu Dambeeyay",
-    "sortOldest": "Da 'da ugu weyn"
+    "sortOldest": "Da 'da ugu weyn",
+    "likesCount_one": "{{value}} jeclaysi",
+    "likesCount_other": "{{value}} jeclaysi"
   },
   "subscriptions": {
     "subscribersOnly": "Kaliya Diiwaangeliyayaasha",
@@ -6640,7 +7322,18 @@
       "votes_other": "{{count}} cod",
       "howToVote_one": "Nooca {{command}} iyo lambar ku jira sheekaysiga si aad u codeyso · {{count}} codka",
       "howToVote_other": "Qor {{command}} iyo tiro buug ku yidh si aad codka siiso · {{count}} cod"
-    }
+    },
+    "eyebrow": {
+      "follow": "Raace cusub",
+      "subscribe": "Rukumaysane cusub",
+      "subscribedTo": "Wuu rukumaystay · {{plan}}",
+      "gifted_one": "Hadiyad ahaan sub u bixiyay",
+      "gifted_other": "Hadiyad ahaan {{count}} sub u bixiyay",
+      "share": "Wuu wadaagay tooska",
+      "join": "Hadda ayuu ku soo biiray"
+    },
+    "giftedSubs_one": "{{name}} ayaa hadiyad ahaan sub bixiyay!",
+    "giftedSubs_other": "{{name}} ayaa hadiyad ahaan {{count}} sub bixiyay!"
   },
   "liveChatModeration": {
     "timeout1m": "Waqtiga 1-daqiiqo",
@@ -6661,14 +7354,40 @@
       "modes": {
         "none": "Dami",
         "blur": "Mugdi",
-        "color": "Midab"
-      }
+        "color": "Midab",
+        "image": "Sawir"
+      },
+      "failed": "Ka saarista asalka kuma bilaabmi karin qalabkan.",
+      "hint": "Wuxuu ku shaqeeyaa qalabkaaga. Markii ugu horreysay dhawr ilbiriqsi ayay qaadataa in la soo dejiyo."
     },
     "remove": "Ka saar",
     "scenes": {
       "countdown": "Xisaabinta",
       "names": {
-        "starting": "Dhawaan ayuu bilaabmayaa"
+        "starting": "Dhawaan ayuu bilaabmayaa",
+        "chatting": "Sheekaysi keliya",
+        "gameplay": "Ciyaar",
+        "brb": "Hadda ayaan soo laabanayaa",
+        "ending": "Tooskii wuu dhammaanayaa"
+      },
+      "title": "Muuqaallo",
+      "edit": "Wax ka beddel {{name}}",
+      "subtitle": "Xariiqda labaad (ikhtiyaari)",
+      "picture": "Sawir",
+      "noCountdown": "Tirin-dhimis ma jirto",
+      "minutes": "{{count}} daq",
+      "muteMic": "Aamusi mic-gayga inta tani shidan tahay",
+      "hints": {
+        "starting": "Kaadh leh tirin-dhimis",
+        "chatting": "Kamaradda shaashad buuxda",
+        "gameplay": "Shaashad iyo kamaraddaada",
+        "brb": "Kaadh, mic-ga waa aamusan yahay",
+        "ending": "Kaadh mahadnaq"
+      },
+      "subtitles": {
+        "starting": "Tooskii wuxuu bilaabmayaa",
+        "brb": "Wax yar kadib ayaan soo laabanayaa",
+        "ending": "Waad ku mahadsan tahay daawashada"
       }
     },
     "sources": {
@@ -6677,15 +7396,38 @@
       "camera": "Kaamirada",
       "show": "Muuji qulqulka",
       "positions": {
-        "center": "Dhexda"
+        "center": "Dhexda",
+        "top-left": "Bidix sare",
+        "top-right": "Midig sare",
+        "bottom-left": "Bidix hoose",
+        "bottom-right": "Midig hoose"
       },
       "sizes": {
-        "medium": "Dhexe"
+        "medium": "Dhexe",
+        "small": "Yar",
+        "large": "Weyn"
       },
       "shapes": {
         "circle": "Goobo",
-        "rect": "Labajibbaaran"
-      }
+        "rect": "Labajibbaaran",
+        "rounded": "Wareegsan"
+      },
+      "title": "Ilaha",
+      "addImage": "Sawir ama astaan",
+      "addCamera": "Kamarad labaad",
+      "addClip": "Qayb fiidiyow",
+      "addReaction": "Ka falceli fiidiyow",
+      "reactPlaceholder": "Dheji xiriiriyaha fiidiyow Riftn",
+      "reactInvalid": "Dheji xiriiriyaha fiidiyow Riftn ah.",
+      "reactNotLive": "Marka hore toos u bax, kadibna ku dar fiidiyowga.",
+      "reactNoBubble": "Kamaraddaadu halkan laba jeer ma furmi karto. Beddel cabbirka fiidiyowga si wejigaagu shaashadda ugu jiro.",
+      "failed": "Ishaas lama dari karin.",
+      "empty": "Ku dar astaan, kamarad labaad ama qayb fiidiyow tooskaaga dushiisa.",
+      "hint": "Ilaha waxaa lagu sawiraa sawirkaaga dushiisa daawade kasta iyo madal kasta.",
+      "clip": "Qayb",
+      "restart": "Dib u bilow",
+      "play": "Daar ama jooji",
+      "loop": "Ku celceli"
     },
     "audio": {
       "mute": "Aamusi",
@@ -6694,7 +7436,27 @@
         "off": "Dami",
         "low": "Iftiinka",
         "high": "Xoogan"
-      }
+      },
+      "title": "Isku-darka codka",
+      "unavailable": "Browser-kan ma isku dari karo codka, sidaa darteed mic-gaagu sidiisa ayuu u baxayaa.",
+      "channels": {
+        "mic": "Mic",
+        "game": "Ciyaar / tab",
+        "clip": "Qayb fiidiyow"
+      },
+      "absent": {
+        "mic": "Makarafoon ma jiro",
+        "game": "Wadaag shaashad cod leh ama isticmaal kaadh qabasho",
+        "clip": "Ku dar qayb fiidiyow Ilaha"
+      },
+      "gate": "Albaabka buuqa",
+      "gateHint": "Wuxuu aamusiyaa mic-gaaga inta u dhaxaysa erayada si gujinta kiiboodhka iyo marawaxadaha aysan toos u gelin."
+    },
+    "imageTooLarge": "Sawirkaasi aad buu u weyn yahay. Isku day mid ka yar.",
+    "widgets": {
+      "title": "Tus widget-yada fiidiyowgayga",
+      "hint": "Digniinaha, baararka hadafka iyo wada-sheekaysiga waxaa lagu sawiraa tooskaaga, sidaa darteed daawadayaasha Twitch, YouTube iyo madal kasta oo kale ayaa arka.",
+      "failed": "Lama beddeli karin meesha widget-yadaadu ka muuqdaan. Isku day mar kale."
     }
   },
   "liveStudio": {
@@ -6708,12 +7470,32 @@
         "off": "Dami",
         "idle": "Diyaar",
         "live": "Toos",
-        "error": "Khalad"
-      }
+        "error": "Khalad",
+        "connecting": "Waa la xidhayaa"
+      },
+      "title": "Meelaha multistream-ka",
+      "intro": "Hal mar toos uga bax Riftn, tooskaagana waxaan u gudbinaynaa madal kasta oo halkan ka shidan, bilaash. Wuxuu bilaabmaa dhawr ilbiriqsi gudahood marka aad toos u baxdo.",
+      "add": "Ku dar meel",
+      "empty": "Weli meelo ma jiraan. Ku dar Twitch, YouTube, Kick ama server RTMP kasta.",
+      "server": "URL-ka server-ka",
+      "findKey": "Hel server-ka iyo furaha {{name}}",
+      "customHint": "Dheji server-ka RTMP iyo furaha ay madashaadu ku siiso.",
+      "keyNote": "Furahaaga waxaa lagu kaydiyaa si sir ah server-kayaga mar dambe lama tusi doono.",
+      "added": "{{name}} waa lagu daray",
+      "saveFailed": "Meesha lama kaydin karin",
+      "toggle": "U toos u gudbi meeshan"
     },
     "vertical": {
       "centre": "Dhexda",
-      "live": "TOOS"
+      "live": "TOOS",
+      "title": "Muuqaal taagan",
+      "intro": "Taleefannadu waxay tooskaaga ku daawadaan feed-ka taagan. Jiid sanduuqa si aad u doorato qaybta sawirkaaga ay arkaan.",
+      "enabled": "Tooskayga ku tus feed-ka taagan",
+      "zoom": "Weyneyn",
+      "frame": "Sawirkaaga jiifa",
+      "box": "Waxa taleefannadu arkaan",
+      "hint": "Jiid sanduuqa, ama isticmaal furayaasha fallaadha. Kaydi si aad ugu dabaqdo tooskaaga.",
+      "watch": "Daawo {{name}} toos"
     },
     "subathon": {
       "title": "Subathon",
@@ -6875,7 +7657,8 @@
       "subathon_timer": "Waqtiga Subathon",
       "points_board": "Daawadayaasha Daacadnimada ah",
       "streamer_level": "Heerka Streamer",
-      "tip_jar": "Jar hadiyad ah"
+      "tip_jar": "Jar hadiyad ah",
+      "hype_train": "Tareenka hype-ka"
     },
     "hints": {
       "tip_alert": "Waxay u dabaaldegtaa talooyin kasta, oo si weyn loo cabbiray heerarkeeda",
@@ -6899,7 +7682,8 @@
       "subathon_timer": "Xisaabinta hadiyadaha, raacitaanka iyo isdiiwaangelinta ayaa dib u riixaya",
       "points_board": "Daawadayaashaada ugu sareeya by dhibcood ka daawashada iyo hibada",
       "streamer_level": "Heerkaaga qulqulka iyo isbuuclaha, laga soo bilaabo astaantaada",
-      "tip_jar": "Dheriga oo buuxiya sida hadiyadaha la bixiyo ay u soo galaan"
+      "tip_jar": "Dheriga oo buuxiya sida hadiyadaha la bixiyo ay u soo galaan",
+      "hype_train": "Wuxuu tusaa tareenka hype-ka inta uu socdo: saddex hadiyadood ama rukumaysi shan daqiiqo gudahood ayaa bilaaba."
     },
     "fields": {
       "style": "Qaabka",
@@ -7080,7 +7864,8 @@
         "word-timeout_one": "Waqtiga ka baxay {{target}} for {{count}} labaad for \"{{word}}\"",
         "word-timeout_other": "Waqtiga ka baxay {{target}} for {{count}} seconds for \"{{word}}\""
       }
-    }
+    },
+    "seoTitle": "Live Studio: Digniinaha Tooska, Hadafyada iyo Daboolka | Riftn"
   },
   "live": {
     "chatJoined": "ayaa ku biiray",
@@ -7285,7 +8070,10 @@
     "endStreamConfirmBody": "Broadcast-kaaga wuu joogsadaa qof kasta oo eegaya oo lama soo celinayo.",
     "keepStreaming": "Stream-ka sii wad",
     "encoderPermanentHint": "Furahan waligiis isma beddelo. Deji encoder-kaaga hal mar — marka xigta kaliya riix Ka bilow halkaas oo Riftn ayaa kuu abuuraya boostada.",
-    "notEnoughTokensForBounty": "Kama filna tokens. Waxaad u baahan tahay {{need}} tokens laakiin waxaad haysataa {{have}}."
+    "notEnoughTokensForBounty": "Kama filna tokens. Waxaad u baahan tahay {{need}} tokens laakiin waxaad haysataa {{have}}.",
+    "screenInAppHint": "App-ka Riftn gudihiisa",
+    "screenInAppNote": "Biraawsarada taleefanku uma oggola website kasta inuu wadaago shaashaddaada. Taa beddelkeeda ka tag live app-ka Riftn, kadibna taabo Wadaag shaashadda.",
+    "screenInAppCta": "Hel app-ka Riftn"
   },
   "events": {
     "seoTitle": "Dhacdooyinka: Kulamada & Dhacdooyinka Bulshada ee Riftn",
@@ -7552,7 +8340,8 @@
     "ambWant5": "Danjire hore, saameyn, ama waayo-aragnimo maareynta bulshada waa gunno",
     "ambassadorCompensation": "Safiirada Brand waxay helayaan <b> mushahar bille ah oo la wada xaajoon karo </b> si joogto ah loo bixiyay. Gunooyin dheeraad ah ayaa la bixin karaa iyadoo lagu saleynayo waxqabadka ololaha, saxiixyada isticmaaleyaasha, iyo milestones kobaca bulshada. Waxaad sidoo kale heli doontaa alaabada Riftn ee gaarka ah, marin u helka fasalka hore, iyo qoondeynta calaamadda marka nidaamka deegaanka uu sii kordho.",
     "applyAsAmbassador": "Codso sida Safiirka Brand",
-    "noRoleFits": "Miyaadan arkayn doorka ku habboon? Nala soo xiriir <mail> dev@riftn.com </mail> — waxaan had iyo jeer raadineynaa dad karti leh."
+    "noRoleFits": "Miyaadan arkayn doorka ku habboon? Nala soo xiriir <mail> dev@riftn.com </mail> — waxaan had iyo jeer raadineynaa dad karti leh.",
+    "bdmCompensation": "Doorkan wuxuu bixiyaa <b>mushahar aasaasi ah oo laga wada xaajoon karo</b> iyo <b>qaab komishan OTE ah oo aan xad lahayn</b> oo si toos ah ugu xidhan iskaashiyada aad keento. Kuwa ugu wanaagsan waxay leeyihiin awood dakhli oo aan xad lahayn."
   },
   "depin": {
     "seoTitle": "DePin | Kaabayaasha Warbaahinta Bulshada ku shaqeeya | Riftn",
@@ -7659,7 +8448,10 @@
     "faqInstallNeededA": "Maya. Waxay si buuxda ugu shaqeysaa tab adoo adeegsanaya keydinta maxalliga ah ee biraawsarkaaga. Xiritaanka tabku wuxuu joojinayaa node-kaaga; ma jiro adeeg asal ah iyo rakibid.",
     "ctaTitle": "Bilaabida kaliya marka guuldaradu ay ammaan tahay.",
     "ctaBody": "Asalka fallback, warbaahinta la ilaaliyo encrypted iyo shaqada la xaqiijiyay yimaado ka hor abaalmarinta node dadweynaha.",
-    "footerNote": "Ka-qaybgalka DePin waa adeeg tabaruc ah, ma aha badeecad maalgashi. Helitaanka, u-qalmitaanka iyo abaalmarinta way isbeddeli karaan."
+    "footerNote": "Ka-qaybgalka DePin waa adeeg tabaruc ah, ma aha badeecad maalgashi. Helitaanka, u-qalmitaanka iyo abaalmarinta way isbeddeli karaan.",
+    "navAria": "Hagidda DePin",
+    "seeHowItWorks": "Eeg sida uu u shaqeeyo",
+    "transcode": "Transcode"
   },
   "creatorFlow": {
     "newNativeFlow": "Qulqulad cusub",
@@ -7871,7 +8663,45 @@
     "foldersInFolder_other": "Galka {{count}}",
     "foldersNoItems": "Waxba kuma jiraan galkan weli",
     "foldersNoItemsHint": "Fur natiijo oo dooro \"Ku dar galka\" si aad halkan ugu kaydiso.",
-    "skippedUpstreamFailed": "Waxa uu ku guuldareystay in uu ku guuldareysto guul darradii hore. Kharashkiisu wuxuu ku jiraa dheelitirkaaga."
+    "skippedUpstreamFailed": "Waxa uu ku guuldareystay in uu ku guuldareysto guul darradii hore. Kharashkiisu wuxuu ku jiraa dheelitirkaaga.",
+    "signInForAudioLibrary": "Gal si aad u furto maktabaddaada codka gaarka ah ee la kaydiyay.",
+    "audioLibraryFailed": "Codkaaga la kaydiyay lama soo dejin karin. Isku day mar kale.",
+    "retryFreeTask": "Isku day hawsha bilaashka ah mar kale",
+    "previewSavedMedia": "Hor-eeg warbaahinta la kaydiyay",
+    "audioSavePending": "Codku waa diyaar, laakiin kaydinta maktabaddiisa gaarka ah way sugaysaa. Sii wad si aad u qaadato.",
+    "confirmInterruptedRetry": "Isku day mar kale hawsha codka ama caawiyaha ee go'day. Natiijadeedii hore lama yaqaan, isku dayga mar kalena wuxuu ku celin karaa shaqo. Lacag-bixinta jirta iyo aqoonsiyada shaqooyinka la bixiyay dib ayaa loo isticmaali doonaa.",
+    "freeResultUnknown": "Jawaabta hawsha bilaashka ah way go'day. Si toos ah dib looma gudbin doono. Dooro Isku day hawsha bilaashka ah mar kale, kadibna sii wad; lacag-bixintaada iyo shaqooyinka kale waa la hayaa.",
+    "formAuthor": "Wax ka beddel flow-ga",
+    "formAuthorHint": "Dhis flow leh gelinno nooc leh. Halkan ku kaydi, ama ku habee canvas-ka webka.",
+    "chooseSavedMedia": "Dooro warbaahin la kaydiyay",
+    "formInput": "Gelin: {{handle}}",
+    "reviewRun": "Dib u eeg socodsiinta",
+    "resumeRun": "Sii wad socodsiintii la kaydiyay",
+    "confirmPrice": "Wadarta: {{price}} token",
+    "recoveryHint": "Tixraacyada shaqada iyo lacag-bixinta waxaa lagu kaydiyay qalabkan. Sii wad shaqada go'day ka hor intaadan bilaabin socodsiin kale.",
+    "newRun": "Bilow socodsiin kale",
+    "loadMoreMedia": "Soo deji warbaahin dheeraad ah",
+    "invalidGraph": "Hubi xidhiidhada: gelin kasta waxay u baahan tahay il ku habboon, garaafkuna ma yeelan karo wareegyo.",
+    "unsupportedNode": "Node-kan weli kuma shaqayn karo foomka asalka ah. Flow-gan u isticmaal canvas-ka webka.",
+    "missingPrompt": "Ku xidh node qoraal ah oo leh amar.",
+    "invalidSettings": "Dejintan ma taageero moodelka la doortay.",
+    "missingCapturedFrame": "Ku qabo frame canvas-ka webka ka hor intaadan fiidiyowgan u isticmaalin gelin sawir.",
+    "missingSavedMedia": "Warbaahinta isha ee la kaydiyay way maqan tahay ama akoonkan uma furna.",
+    "quoteFailed": "Flow-gan qiimo looma samayn karin. Isku day mar kale.",
+    "recoverBeforeEdit": "Sii wad socodsiinta la kaydiyay ka hor intaadan beddelin garaafkeeda ama bilaabin socodsiin kale.",
+    "runAlreadyComplete": "Socodsiintan waa dhammaatay. Dooro Bilow socodsiin kale si aad mar kale u abuurto.",
+    "recoveryCorrupt": "Diiwaanka soo celinta ee la kaydiyay lama akhrin karin. Hay flow-gan oo la xidhiidh taageerada ka hor intaadan mar kale bixin.",
+    "paidUnavailable": "Halkan waad ku qori kartaa oo ku kaydin kartaa flow-yada. Socodsiinta lacagta leh laguma heli karo dukaankan.",
+    "planChanged": "Flow-gu wuu isbeddelay qiimeynta kadib. Dib u eeg socodsiinta mar kale.",
+    "connectOwnerWallet": "Ku xidh walletka leh flow-gan.",
+    "runFailed": "Node-ku ma dhammayn karin. Tixraaca shaqadiisa ee la kaydiyay waa la hayaa si loo soo celiyo.",
+    "recoveryPending": "Render-ku weli wuu sugayaa. Sii wad socodsiintan si aad u qaadato.",
+    "nodeAudioGen": "Abuuraha codka",
+    "nodeAudioGenDesc": "Hadal, saameynta codka, qoraal-u-beddelid iyo kala-saarista codka",
+    "nodeAudioInput": "Cod la kaydiyay",
+    "nodeAudioInputDesc": "Isticmaal cod gaar ah oo maktabaddaada ka yimid",
+    "audioVoiceId": "Aqoonsiga codka",
+    "audioSeconds": "Dhererka codka ilbiriqsiyo"
   },
   "videoPlayer": {
     "volume": "Codka",
@@ -8024,7 +8854,13 @@
       "doneAll": "Ka tagay {{done}} akoonnada aan kuu raacin.",
       "doneSome": "Ka tagay {{done}} akoonnada. {{failed}} ma la tagi karo.",
       "doneToast": "Ka tagay {{done}} akoonnada aan kuu raacin."
-    }
+    },
+    "followBackConfirmTitle_one": "Dib ma u raacdaa {{count}} qof?",
+    "followBackConfirmTitle_other": "Dib ma u raacdaa {{count}} qof?",
+    "followBackConfirmBody": "Horey ayay kuu raacaan. Akoonnada gaarka ah waxay helayaan codsi raacid.",
+    "followedBackCount_one": "Dib waad u raacday {{count}} qof",
+    "followedBackCount_other": "Dib waad u raacday {{count}} qof",
+    "followBackDoneBody": "Dhammaantood waxaad ka heli kartaa Kuwa aad raacdo."
   },
   "reactionInfo": {
     "title": "Falcelinta",
@@ -8826,7 +9662,28 @@
       "add": "Ku dar",
       "scale": "Cabbirka",
       "color": "Midab",
-      "light": "Iftiinka"
+      "light": "Iftiinka",
+      "create": "Ku dar masrax 3D ah",
+      "title": "Masraxa muuqaalka 3D",
+      "hint": "Ku qorshee muuqaal kubbado iyo sanduuqyo. Kamaradda, meelaynta iyo saddex nal goobeed oo madax-bannaan ayaa beddela frame-ka la sameeyay.",
+      "preview": "Hor-eegga muuqaalka la sameeyay",
+      "error": "Frame-ka lama diyaarin karin. Hubi tixraacyada muuqaalkaaga oo isku day mar kale.",
+      "elevation": "Joogga",
+      "distance": "Masaafada",
+      "fov": "Goobta aragga",
+      "object": "Shay",
+      "sphere": "Kubbad",
+      "box": "Sanduuq",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Ka saar shayga",
+      "intensity": "Xoogga",
+      "diffusion": "Faafinta",
+      "saving": "Frame-ka waa la diyaarinayaa…",
+      "useFrame": "U isticmaal frame-ka la sameeyay tixraac muuqaal",
+      "frameHint": "Wuxuu sameeyaa PNG 320 × 180 ah oo ku daraa tixraacyada muuqaalkan. Dib u eeg xadka tixraaca iyo qiimeynta moodelka ka hor abuurista.",
+      "frameName": "Frame-ka masraxa muuqaalka"
     },
     "video": {
       "tFade": "Isku-dhex-milmid",
@@ -8921,7 +9778,9 @@
       "pptx": "Bandhigga PowerPoint",
       "pptxHint": "Bog kasta wuxuu noqdaa hal sawir slide ah, oo leh qoraallo soo bandhigaya iyo xiriiriyeyaasha. Wax ka bedel qoraalka shakhsi ahaaneed iyo walxaha ku jira naqshadda asalka ah.",
       "section": "Qeybta la magacaabay",
-      "transparent": "Asalka waalidka ee loo yaqaan 'Transparent background'"
+      "transparent": "Asalka waalidka ee loo yaqaan 'Transparent background'",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Wuxuu soo dejiyaa ZIP leh timeline-kaaga oo ah FCPXML iyo Premiere XML iyo fayl kasta oo warbaahin ah, si aad tafatirka ugu dhammayso Premiere Pro, Final Cut Pro ama DaVinci Resolve. Qoraalku wuxuu noqdaa calaamado; saameynta waxay ku hadhaan Riftn."
     },
     "inspector": {
       "selectHint": "Xulo lakab ku yaal canvas-ka ama gows ku yaal jadwalka.",
@@ -9015,7 +9874,45 @@
       "failed": "AI-ga hadda ma samayn karo taas. Isku day mar kale wax yar kadib.",
       "changes": "Isbeddellada la sameeyay: {{count}}",
       "undo": "Ka noqo",
-      "openGenerator": "Dib u eeg oo samee"
+      "openGenerator": "Dib u eeg oo samee",
+      "stopped": "Waa la joojiyay. Wax kale lama beddelin.",
+      "queued": "{{count}} safka ku jira",
+      "restore": "Ku soo celi halkan",
+      "restoreHint": "Mashruuca ku celi sidii uu ahaa fariintan ka hor. Undo ayaa soo celisa.",
+      "restored": "Mashruuca waxaa lagu celiyay sidii uu ahaa fariintaas ka hor. Taabo undo si aad u soo celiso nooca cusub.",
+      "rewrite": "Codsigayga ka dhig mid cad",
+      "rewriteFailed": "Taas dib looma qori karin. Qoraalkaagu isma beddelin.",
+      "feedback": "Tani ma ku caawisay?",
+      "good": "Jawaab wanaagsan",
+      "bad": "Jawaab xun",
+      "retryPrefix": "Taasi sax ma ahayn. Taa beddelkeeda, ",
+      "recipesTitle": "Habab",
+      "recipe": {
+        "podcastClip": {
+          "label": "Qayb podcast",
+          "prompt": "Hel daqiiqadda 30-ilbiriqsi ee ugu xoogga badan, u jar, ku dar qoraal-hoosaadyo Word Pop oo ka dhig 9:16."
+        },
+        "talkingHead": {
+          "label": "Qof hadlaya oo nadiif ah",
+          "prompt": "Jar hakadyada dhaadheer, ku dar qoraal-hoosaadyo Classic, oo sii muuqaal diirran oo khafiif ah."
+        },
+        "productPromo": {
+          "label": "Xayeysiis alaab",
+          "prompt": "Samee xayeysiis 15-ilbiriqsi ah: cinwaan xoog leh bilowga, kala-guurka Zoom in ee u dhexeeya qaybaha, qoraal-hoosaadyo Bold iyo muusig firfircoon."
+        },
+        "hypeReel": {
+          "label": "Reel hype ah",
+          "prompt": "Qaybaha u jar garaaca muusigga, isticmaal kala-guurka Fly up iyo muuqaalka Technicolor."
+        },
+        "retroEdit": {
+          "label": "Tafatir qadiimi ah",
+          "prompt": "Qayb kasta sii muuqaalka VHS, ku dar cinwaan serif weyn, oo isticmaal kala-guurka Fade."
+        },
+        "tutorial": {
+          "label": "Casharro",
+          "prompt": "Ku dar cinwaan tallaabo kasta, qoraal-hoosaadyo Boxed, oo daqiiqadda muhiimka ah u gaabi 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Leydi",
@@ -9190,7 +10087,9 @@
       "tint": "Midab-dhex {{value}}",
       "vignette": "Madoobaynta geesaha {{value}}%",
       "auto": "Hagaajin toos ah",
-      "autoFailed": "Sawirkan lama falanqayn karin."
+      "autoFailed": "Sawirkan lama falanqayn karin.",
+      "halation": "Halation {{value}}%",
+      "scanlines": "Xariiqyada iskaanka {{value}}%"
     },
     "pages": {
       "add": "Ku dar bog",
@@ -9265,7 +10164,15 @@
       "textSaved": "Isbeddelladii qoraalka hoose waa la kaydiyay.",
       "action": "Qoraal toos ah",
       "styles": {
-        "bold": "Xarfaha adag"
+        "bold": "Xarfaha adag",
+        "classic": "Classic",
+        "boxed": "Boxed",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Stacked",
+        "serif": "Serif",
+        "bubble": "Bubble"
       },
       "working": "Waa la dhageysanayaa… {{percent}}%",
       "downloading": "Moodeelka hadalka waa la diyaarinayaa… {{percent}}%",
@@ -9277,7 +10184,8 @@
       "translateCount": "Turjum {{count}} qoraallada hoose",
       "translationDone": "{{count}} qoraallada hoose waa la turjumay",
       "translationFailed": "Turjumaaddii qoraalka hoose way guuldarraysatay. Qoraalladaada hoose waxba iskama beddelin.",
-      "lockedTranslation": "Fur qoraallada hoose ee qufulan si aad ugu dartid."
+      "lockedTranslation": "Fur qoraallada hoose ee qufulan si aad ugu dartid.",
+      "style": "Qaabka qoraal-hoosaadka"
     },
     "multi": {
       "selected": "{{count}} lakab ayaa la xulay",
@@ -9314,7 +10222,10 @@
       "saveNewPreset": "Kaydi mid cusub",
       "saveStyles": "Keydso qaababka leh naqshadeynta",
       "stylesSaved": "Qaababka Brand badbaadiyey la design this",
-      "usePreset": "Isticmaal qaababka"
+      "usePreset": "Isticmaal qaababka",
+      "dehubApplied": "Summadda Riftn waxaa lagu dabaqay {{count}} lakab.",
+      "dehubApply": "Isticmaal summadda Riftn",
+      "dehubHint": "Midabada rasmiga ah ee Riftn, farta Exo iyo Inter, iyo astaanta Riftn, hal gujin."
     },
     "draw": {
       "heading": "Sawir",
@@ -10648,7 +11559,23 @@
       "zoomOut": "Shiraaca fogee"
     },
     "clipFix": {
-      "listening": "Dhageysiga…"
+      "listening": "Dhageysiga…",
+      "detach": "Kala saar codka",
+      "detached": "Codka waxaa loo raray qayb u gaar ah",
+      "detachFailed": "Codka qaybtan lama kala saari karin",
+      "removeBars": "Ka saar baararka madow",
+      "scanning": "Frame-yada waa la hubinayaa…",
+      "noBars": "Baarar madow lama helin",
+      "barsRemoved": "Baararka madow waa la jaray",
+      "barsFailed": "Fiidiyowgan looma hubin karin baarar madow",
+      "reframe": "Dib u qaabeyn toos ah",
+      "reframeHint": "Fiidiyowgu horey ayuu ugu habboon yahay qaabka boggan",
+      "reframed": "Dib ayaa loo qaabeeyay si uu u raaco ficilka",
+      "reframeFailed": "Fiidiyowgan dib looma qaabeyn karin",
+      "retakes": "Ka saar dib-u-duubyada",
+      "noRetakes": "Dib-u-duub lama helin",
+      "retakesRemoved": "Waa laga saaray {{count}} dib-u-duub, waxaa la hayay kii ugu dambeeyay",
+      "retakesFailed": "Dib-u-duubyada lagama saari karin qaybtan"
     },
     "shortcuts": {
       "action": {
@@ -10656,18 +11583,109 @@
         "play": "Ciyaar",
         "pause": "Jooji",
         "frameBack": "Qaabka ka horreeya",
-        "frameForward": "Qaabka xiga"
-      }
+        "frameForward": "Qaabka xiga",
+        "back": "Dib 1 ilbiriqsi",
+        "rippleDelete": "Tirtir qaybta",
+        "liftDelete": "Tirtir qaybta",
+        "start": "Tag bilowga",
+        "end": "Tag dhammaadka"
+      },
+      "preset": "Qaabka kiiboodhka",
+      "presetHint": "Isticmaal furayaasha timeline-ka ee tifaftiraha aad taqaan. Gaaban-wadayaasha Riftn way u shaqeeyaan wax kasta oo kale."
     },
     "voiceClone": {
-      "stop": "Jooji duubista"
+      "stop": "Jooji duubista",
+      "pickerLabel": "Koobi codkaaga",
+      "pickerDetail": "Cod-dhaafin codkaaga ah",
+      "title": "Koobi codkaaga",
+      "description": "Is duub ama dooro qayb adigoo hadlaya. Hal mar ayaad bixinaysaa, codkaaguna adigaa iska leh cod-dhaafin kasta.",
+      "defaultName": "Codkayga",
+      "record": "Duub tusaale (30 ilbiriqsi ilaa 2 daqiiqo)",
+      "fromMedia": "Ama isticmaal qayb Media ka timid",
+      "recorded": "Duubistaada",
+      "sample": "Tusaale: {{name}}",
+      "hint": "Hadal cad oo aan muusig lahayn ayaa ugu fiican.",
+      "noMic": "Makarafoonka lama isticmaali karin.",
+      "sampleFailed": "Codka qaybtaas lama akhrin karin.",
+      "pay": "Koobi {{amount}} token",
+      "useFree": "Koobi (horey waa loo bixiyay)",
+      "owned": "Codkaaga “{{name}}” horey ayaa loo diyaariyay. Ka dooro liiska codadka.",
+      "useOwned": "Isticmaal codkayga",
+      "ready": "“{{name}}” wuxuu diyaar u yahay cod-dhaafin.",
+      "failed": "Koobiga codka wuu fashilmay.",
+      "paidFailed": "Lacag-bixintaada waa la kaydiyay. Mar kale fur tan, isku dayga xigaana waa bilaash.",
+      "consent": "Koobi codkaaga keliya, ama mid aad oggolaansho u haysato."
     },
     "linkImport": {
       "go": "Soo dejiso",
-      "downloading": "Soo dejinta {{percent}}%"
+      "downloading": "Soo dejinta {{percent}}%",
+      "open": "Ka soo deji xiriiriye",
+      "placeholder": "Dheji xiriiriye YouTube, TikTok ama mid kale",
+      "rights": "Fiidiyowgan anigaa leh ama waxaan haystaa oggolaansho aan isticmaalo",
+      "audioOnly": "Cod keliya",
+      "queued": "Safka ayuu ku jiraa…",
+      "waiting": "Goobta ayaa la sugayaa, dhowaan ayaa mar kale la isku dayi doonaa…",
+      "adding": "Waxaa lagu darayaa Media…",
+      "added": "Waa la soo dejiyay oo lagu daray timeline-ka.",
+      "failed": "Xiriiriyahaas lama soo dejin karin."
     },
     "reverse": {
-      "action": "Dib u noqoshada"
+      "action": "Dib u noqoshada",
+      "working": "Waa la rogayaa {{percent}}%",
+      "done": "Qaybta waa la rogay.",
+      "failed": "Qaybtan lama rogi karin.",
+      "unsupported": "Browser-kan ma rogi karo fiidiyow. Isku day Chrome ama Edge.",
+      "tooLong": "Qaybaha ilaa {{seconds}} ilbiriqsi ah ayaa la rogi karaa."
+    },
+    "film": {
+      "repairRefs": "Ka saar xidhiidhada warbaahinta maqan",
+      "title": "Mashruuca filimka",
+      "intro": "Ku qorshee muuqaallada tixraacyo sawir oo dib loo isticmaali karo. Tilmaantaada, habka muuqaallada iyo natiijooyinka la doortay waxay la kaydsamaan mashruucan.",
+      "create": "Samee qorshe filim",
+      "name": "Magaca filimka",
+      "brief": "Tilmaanta filimka",
+      "sharedReferences": "Tixraacyo sawir oo la wadaago (ilaa 4)",
+      "shot": "Muuqaal",
+      "addShot": "Ku dar muuqaal",
+      "shotName": "Magaca muuqaalka",
+      "action": "Ficilka iyo halabuurka muuqaalka",
+      "seconds": "Ilbiriqsiyada fiidiyowga la codsaday",
+      "shotReferences": "Tixraacyo sawir oo dheeraad ah (xadka guud 4)",
+      "frame": "Diyaari frame",
+      "video": "Diyaari fiidiyow",
+      "review": "Dib u eeg moodelka, tixraacyada, muddada fiidiyowga iyo qiimaha istuudiyaha ka hor abuurista.",
+      "result": "Natiijada muuqaalka la aqbalay",
+      "noResult": "Natiijo lama dooran",
+      "resultHint": "Ka dooro sawir ama fiidiyow la aqbalay Uploads. Xidhiidhkiisu wuxuu la kaydsamaa muuqaalkan; isticmaal timeline-ka si aad u ururiso filimka.",
+      "earlier": "U guuri hore",
+      "later": "U guuri dambe",
+      "remove": "Ka saar muuqaalka",
+      "issue": "Hubi sharaxaadda muuqaalka iyo warbaahinta tixraaca, kadibna isku day mar kale. Mashruuca furan ku hay haddii aan la kaydin karin.",
+      "searchMedia": "Ku raadi warbaahinta magac",
+      "refreshMedia": "Cusboonaysii warbaahinta"
+    },
+    "speakers": {
+      "find": "Hel kuwa hadlaya",
+      "name": "Hadlaha {{number}}",
+      "onlyOne": "Hal hadle oo keliya ayaa la helay.",
+      "failed": "Kuwa hadlaya lama helin.",
+      "kept": "Waxaa la hayay {{name}} keliya.",
+      "editFailed": "Tafatirkaasi kuma habboonayn qaybtan.",
+      "split": "Waxaa loo kala qaybiyay {{count}} muuqaal hadle.",
+      "keepOnly": "Hay keliya",
+      "splitAction": "Jar mar kasta oo hadluhu isbeddelo"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Sharax shayga 3D ee aad rabto",
+      "queued": "Shaygaaga 3D waa la dhisayaa. Wuxuu ku soo degayaa tabka Generations.",
+      "note": "Walxaha 3D waxay Media ku yimaadaan qayb gaaban oo wareegaysa oo asal muuqda leh."
+    },
+    "behind": {
+      "action": "Qoraal qofka gadaashiisa ah",
+      "working": "Qofka waa la jarayaa…",
+      "done": "Qoraalka iyo qoraal-hoosaadyadu hadda waxay ku jiraan qofka gadaashiisa.",
+      "failed": "Qoraalka lama dhigi karin qofka gadaashiisa."
     }
   },
   "jungleMood": {
@@ -10911,7 +11929,8 @@
     "viewOnExplorer": "Mooxatka aad u qabto",
     "viewOnExplorerDesc": "Furo sahamiyaha blockchain (BaseScan) si aad u aragto faahfaahinta macaamilka on-chain for boostada ama wareejinta.",
     "title": "Liiska Erayada Cusub",
-    "subtitle": "Baro waxa astaan kasta iyo astaan kasta macnaheedu yahay"
+    "subtitle": "Baro waxa astaan kasta iyo astaan kasta macnaheedu yahay",
+    "delta": "Isbeddelka Darajada (▲▼)"
   },
   "tipFunding": {
     "noRoute": "No Wadada Uniswap ee calaamadaha Riftn ee calaamaddan hadda",
@@ -11069,7 +12088,9 @@
     "tokenAmount": "{{amount}} calaamadaha",
     "assistant": {
       "question1": "Home Wararka Maanta Maxaa ka jira in Ra 'iisul Wasaare Kheyre uu ka qeyb galayo shirka Dhuusamareeb?",
-      "question2": "Haa, haddii aan ku shubo 10,000 calaamadaha 90 maalmood"
+      "question2": "Haa, haddii aan ku shubo 10,000 calaamadaha 90 maalmood",
+      "answer1": "APY-ga staking-ka hadda ee token-nada Riftn waa 12.4% muddo xidhitaan 30 maalmood ah. Waa kan faahfaahintu:\n\n• Xidhitaan 7 maalmood: 8.2% APY\n• Xidhitaan 30 maalmood: 12.4% APY\n• Xidhitaan 90 maalmood: 18.7% APY\n\nMa rabtaa inaan kaa caawiyo xisaabinta dakhliga suurtagalka ah?",
+      "answer2": "10,000 token oo la staking gareeyay 18.7% APY muddo 90 maalmood ah:\n\n📊 Abaalmarinta la qiyaasay: ~461 token\n\nTaasi waa qiyaastii 5.13 token maalintii. Xusuuso in APY-gu isbeddeli karo iyadoo ku xidhan wadarta la staking gareeyay."
     },
     "bookmarks": {
       "stakingGuide": "Tilmaan dhammaystiran oo loogu talagalay calaamadaha Riftn: Burburka APY, muddooyinka qufulka, iyo abaalmarinta multipliers ayaa sharaxay."
@@ -11765,7 +12786,7 @@
   "multiPost": {
     "tab": "Dhowr boost",
     "title": "Dhowr boost",
-    "intro": "U dir X, YouTube, Instagram, TikTok iyo kuwo kale isla markiiba sida dehub. Ku xir akoonnadaada hal mar, ka dibna dooro meesha boost kasta tagayso.",
+    "intro": "U dir X, YouTube, Instagram, TikTok iyo kuwo kale isla markiiba sida Riftn. Ku xir akoonnadaada hal mar, ka dibna dooro meesha boost kasta tagayso.",
     "creditsHeading": "Dhibcaha boostka",
     "credits": "{{count}} dhibcaha boostka",
     "topUpTitle": "Ku soo kabo oo keydi",
@@ -11813,7 +12834,12 @@
   "dm": {
     "planRestricted": "Isticmaalahan wuxuu u baahan yahay rukumid si uu fariimo u helo.",
     "planTypeNotAllowed": "Qorshaha abuurahan ma oggola nooca fariintan.",
-    "planMinTip": "Tip-ka abuurahan waa inuu ahaadaa ugu yaraan {{amount}} tokens."
+    "planMinTip": "Tip-ka abuurahan waa inuu ahaadaa ugu yaraan {{amount}} tokens.",
+    "shareKindGroup": "Koox",
+    "shareKindCommunity": "Bulsho",
+    "shareGroups": "Kooxo",
+    "shareKindChannel": "Kanaal",
+    "reportMessage": "Soo sheeg fariinta"
   },
   "credits": {
     "earningsWorth": "Qiimihiisu waa {{amount}}",
@@ -11855,7 +12881,11 @@
     "error": "Lama soo gudbin karin codsigaaga tirtirida. Akoonkaaga lama xaqiijinin in la tirtiro. Fadlan isku day mar kale.",
     "back": "Ku noqo Dejinta",
     "signIn": "Soo gal si aad u tirtirto akoonkaaga",
-    "acknowledge": "Waxaan kaydiyay faahfaahinta soo kabashada jeebkayga oo waxaan fahamsanahay in tirtiridu ay tahay mid joogto ah."
+    "acknowledge": "Waxaan kaydiyay faahfaahinta soo kabashada jeebkayga oo waxaan fahamsanahay in tirtiridu ay tahay mid joogto ah.",
+    "signedInAs": "Waxaad u gashay sida",
+    "confirmTitle": "Ma tirtiraysaa akoonkaaga si buuxda?",
+    "confirmBody": "Akoonkaaga iyo wax kasta oo ku jira waa la tirtiri doonaa. Waa lagaa saari doonaa, tanna dib looma celin karo.",
+    "confirmBodyNamed": "{{who}} iyo wax kasta oo ku jira waa la tirtiri doonaa. Waa lagaa saari doonaa, tanna dib looma celin karo."
   },
   "miniApps": {
     "badge": {
@@ -11951,12 +12981,43 @@
       "rewardPaid": "Mushahar",
       "rewardPending": "Sugitaanka",
       "stats": {
-        "button": "Tirakoob toos ah"
+        "button": "Tirakoob toos ah",
+        "chartTitle": "Dadka furay app-kaaga, 30-kii maalmood ee la soo dhaafay",
+        "peak_one": "Ugu badnaan {{count}} maalintii",
+        "peak_other": "Ugu badnaan {{count}} maalintii",
+        "people30": "Dad, 30 maalmood",
+        "people7": "Dad, 7 maalmood",
+        "added": "Way ku dareen",
+        "dhb30": "Token la bixiyay, 30 maalmood",
+        "notified30": "Ogeysiisyo la diray, 30 maalmood",
+        "rewards": "Abaalmarinta token ee la helay"
       },
       "signin": {
         "users_one": "isticmaale {{count}}",
         "users_other": "isticmaalayaal {{count}}",
-        "delete": "Tirtir"
+        "delete": "Tirtir",
+        "title": "Ku gal Riftn",
+        "body": "U oggolow dadka inay ku galaan website-kaaga ama app-kaaga akoonkooda Riftn. Halkan ka samee fure, kadibna raac hagaha.",
+        "guide": "Akhri hagaha",
+        "copyId": "Koobi client ID",
+        "rotate": "Sir cusub",
+        "rotateConfirm": "Ma u samaysaa sir cusub {{name}}? Sirtii hore isla markiiba way joogsanaysaa.",
+        "deleteConfirm": "Ma tirtiraysaa {{name}}? Qof kasta oo ku galay waa laga saarayaa.",
+        "secretOnce": "Sirta {{name}}. Hadda koobi: hal mar keliya ayaa la tusayaa.",
+        "name": "Magaca app-ka",
+        "website": "Website (ikhtiyaari)",
+        "redirects": "URL-yada dib-u-hagidda, mid xariiq kasta (https://yoursite.com/callback)",
+        "create": "Samee fure"
+      },
+      "stateRejected": "Toos ku jira xiriiriye · looma oggolaan dukaanka",
+      "rewardsNone": "Weli abaalmarino lama xisaabin. Toddobaadka koowaad wuxuu xidhmayaa Isniinta.",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Dhacdooyinka Riftn u diray webhookUrl-kaaga. Tijaabadu waxay dirtaa dhacdo ping ah.",
+        "test": "Dir tijaabo",
+        "ok": "Webhook-gu wuxuu ku jawaabay {{status}}",
+        "failed": "Webhook-gu wuu fashilmay: {{reason}}",
+        "none": "Weli webhook lama dirin."
       }
     },
     "card": {
@@ -11983,7 +13044,10 @@
       "confirm": "Bixi {{amount}} tokens",
       "sending": "Siyad ka bixiyey inaan ku saabsan...",
       "sent": "Baadidaa {{amount}} tokens ka soo badbaad {{name}}.",
-      "noOwner": "Waa inay ku saabsan appa ka soo saarayaa inuu ka soo dhaafayay inay ku saabsan walidka ayaa uu ka soo dhaafayay."
+      "noOwner": "Waa inay ku saabsan appa ka soo saarayaa inuu ka soo dhaafayay inay ku saabsan walidka ayaa uu ka soo dhaafayay.",
+      "testBadge": "Habka tijaabada",
+      "testBody": "App-kan adigaa leh, sidaa darteed tani waa tijaabo: token ma dhaqaaqayo, rasiidkana waxaa lagu calaamadeeyaa tijaabo.",
+      "testSent": "Lacag-bixin tijaabo ah oo {{amount}} token ah. Waxba lama dirin."
     },
     "add": {
       "title": "Add {{name}}?",
@@ -12054,7 +13118,8 @@
     "howSafari": "Safari, fur menu-ga File oo dooro Add to Dock.",
     "howFirefox": "Firefox ma rakibi karo apps. Furo boggan Chrome, Edge ama Safari si aad u rakibto Riftn.",
     "desktopMeta": "Windows · Mac · Linux · ChromeOS",
-    "microsoftStore": "Ma doorbidaa Microsoft Store? Halkaas ka hel."
+    "microsoftStore": "Ma doorbidaa Microsoft Store? Halkaas ka hel.",
+    "seoTitleAll": "Hel App-ka Riftn: Desktop iyo Android APK"
   },
   "postStage": {
     "back": "Dib u noqo",
@@ -19087,7 +20152,76 @@
     "127053546dd4": "Waxaan ka dhalatay file ayaa ka dhacay.",
     "d14896aa4bf8": "Furaha ya librayadaas oo dhex maray. Ku dhex maray xarafkaaga iyo siyaarto badan.",
     "953e708b2287": "Dhacdooyinka qorshooyinka ayaa ka dhacay.",
-    "4a52cdd6ac72": "Laa aqbalaynayaa layarreynan."
+    "4a52cdd6ac72": "Laa aqbalaynayaa layarreynan.",
+    "dbc468a14b60": "Su'aalaha inta badan la is weydiiyo",
+    "ab7b9519e1a2": "Ah ah ah (Girl)",
+    "3f9b2c71d0a4": "{{n}} natiijo",
+    "8c4e1a6b2f57": "“{{query}}”",
+    "1d7234ff1b79": "gudaha {{feed}}",
+    "e122e5c2b563": "Kor u jiid si aad u xidho",
+    "1aa9d734f2ee": "Dooro waxa la raadinayo",
+    "ef557404f465": "Natiijo looma helin “{{query}}”",
+    "35034aa59bd3": "Waxba kuma habboonaan {{feed}}. Isku day erayo kale ama raadi wax kasta.",
+    "415155739590": "Raadi wax kasta",
+    "9e13d826baaf": "Raadi sawirro",
+    "cbf6f228327c": "Raadi muusig",
+    "e8756c6865a5": "Raadi shorts",
+    "c7661da99c41": "Raadi fiidiyowyo",
+    "90f1afe66801": "Waxaa la raadinayaa “{{query}}”…",
+    "d7b559f2d8c6": "Isku day erayo kale, ama beddel shaandhooyinka.",
+    "d1a0c7e2f301": "Maxaa maanta maskaxdaada ku jira?",
+    "d1a0c7e2f302": "Maxaad maanta ka fikiraysaa?",
+    "d1a0c7e2f303": "Maxaa maskaxdaada ku jira?",
+    "d1a0c7e2f304": "Ma jiraa wax maskaxdaada ku jira?",
+    "d1a0c7e2f305": "Maxaa hadda maskaxdaada ku jira?",
+    "d1a0c7e2f306": "Maxaan maanta ka fikiraynaa?",
+    "d1a0c7e2f307": "Wax maanta maskaxdaada ku jira ma jiraan?",
+    "d1a0c7e2f308": "Maxaa markan maskaxdaada ku jira?",
+    "a7c1e0f4b2d9": "Taabo si aad u hadasho",
+    "b3e8d1c6f0a2": "Taabo si aad u dirto",
+    "c9f2a4e7d1b5": "Waa la dhegaysanayaa... taabo kubadda si aad u dirto",
+    "22577ebd908e": "Abuur fiidiyow Wan 3.0 · muusig asal ah",
+    "1fa2357ab7e1": "Abuur fiidiyow Seedance 720p · muusig asal ah",
+    "7f78bdc0762d": "+{{value1}} dhibcood",
+    "f0c8bb34335b": "Waxaad heshay +{{value1}} dhibcood",
+    "0fbe06b679a8": "{{value1}} dhibcood codsi kasta oo la soo saaray, waxaa lagu daraa dhibcahaaga Top builders.",
+    "e9f96afd5448": "Ereyada heesta ",
+    "431bc73eb60b": "[verse]\nEreyadaada halkan...\n\n[chorus]\nEreyada korasta...",
+    "cb88754c2411": "Qoraallo la dhejiyay ma jiraan",
+    "a3c1e5f20b71": "Riftn ku isticmaal ChatGPT, Claude ama app kasta oo MCP ah. Dheji URL-ka hoose dejinta connector-ka caawiyahaaga si aad u daawato qoraallo, profile-yo iyo faallooyin, kadibna gal marka lagu weydiiyo si aad ugu xidho akoonkaaga.",
+    "b84d2e7c9a16": "Cinwaankan waxaa loogu talagalay apps AI, ma aha bog web. Ku furistiisa browser waxay kuu soo celinaysaa halkan.",
+    "c5e9f1a3d742": "Ku xidh akoonkaaga Riftn",
+    "d61a7b4e8c05": "Marka caawiyahaagu ku weydiiyo inaad gasho, gal Riftn oo guji Allow. Kadib wuu cusboonaysiin karaa profile-kaaga, daabici karaa qoraallo iyo faallooyin, raaci karaa dad oo wax ku abuuri karaa Creator Studio. Xidhiidhadu way xidhan yihiin inta aad isticmaashid waxayna dhacaan 30 maalmood oo aan la isticmaalin kadib.",
+    "e27b8c5f9d13": "Hagaha ChatGPT tallaabo-tallaabo",
+    "f38c9d6a0e24": "Hagaha Claude tallaabo-tallaabo",
+    "0a49d7b1f835": "Ma door bidaysaa akoon bot oo gaar ah? Samee agent si aad u hesho URL connector oo u qora sida agent-kaas.",
+    "1b5ae8c20f46": "Marka ChatGPT ku weydiiyo, gal Riftn oo guji Allow si aad akoonkaaga ugu xidho.",
+    "2c6bf9d31a57": "Guji Connect, gal Riftn oo guji Allow si aad akoonkaaga ugu xidho.",
+    "27c26a5a38b3": "Gal si aad u aragto fariimihii hore",
+    "674e70bcd915": "Taariikhda wada-sheekaysiga oo dhan waxay u furan tahay qof kasta oo akoon leh.",
+    "feaf753f6557": "Bilowga wada-sheekaysiga",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "817e82cace2e": "Fiidiyowga waa la gooyay!",
+    "ebebdc70335b": "Baararka Muraayadda",
+    "5ff272ba7871": "Xariiqyada Xariirta",
+    "a941e90ca93d": "Halo Daboolka",
+    "04dbbe4dff7a": "Mawjad Dhab ah",
+    "85330dcbaadd": "Ma jiraan algorithm-yo u janjeera hal dhinac oo dooddu. \nQof kasta si siman oo cadaalad ah ayaa loo kor qaadaa.",
+    "29beacb7d918": "@{{value1}} ayaa ku siiyay hadiyad {{value2}} {{value3}}",
+    "d4d4c7619589": "{{value1}} jecleysi",
+    "73638ce2dea2": "Tus slide {{value1}}: {{value2}} {{value3}}",
+    "4b545391239a": "Qiimaha Sawirka ({{value1}} × ${{value2}})",
+    "440d013a091e": "{{value1}} weli ma dejin wax qorshe ah.",
+    "61d964ed9f7f": "{{value1}} ee @{{value2}}",
+    "064656b93bd0": "Furaha sirta walletka cusub (ugu yaraan {{value1}} xaraf)",
+    "1e488da3dfa7": "Fariimaha aad u dirto {{value1}} waa lacag waxayna midkiiba ku kacayaan <amount>{{value2}}</amount> <coin></coin>. Ma hubtaa inaad sii wadato?",
+    "253ffa81cd88": "{{value1}} wuxuu u baahan yahay hadiyad ugu yaraan <amount>{{value2}} <coin></coin></amount> si loo bilaabo wada-hadal.",
+    "338524eabcce": "🔥 Siinta {{value1}} <coin></coin> fariin kasta ayaa kor kuu qaadaysa sanduuqa {{value2}}",
+    "70d1cca2aba3": "{{value1}} wuxuu u baahan yahay hadiyad ugu yaraan <amount>{{value2}} <coin></coin></amount> fariin kasta. Fariin kasta oo aad dirto ayaa lacagtan kaa jaraysa.",
+    "9f11cad12bdd": "Haraaga kuguma filna hadiyad {{value1}} <coin></coin> ah",
+    "0c400a307803": "Dooro fayl qaabab summadeed JSON ah oo ka yar 32 KB",
+    "6e71ae3669b1": "Natiijada la kaydiyay lama heli karo"
   },
   "articles": {
     "cardLabel": "Maqaal · {{count}} daqiiqo oo akhris ah",
@@ -19129,7 +20263,16 @@
     "formatting": "Qaabaynta",
     "bodyPlaceholder": "Sheeg sheekadaada. Xulo qoraalka oo isticmaal barta sare ee cinwaannada, qoraalka culus, xigashooyinka iyo liisaska.",
     "bodyLabel": "Jirka maqaalka",
-    "wordCount": "{{count}} erey"
+    "wordCount": "{{count}} erey",
+    "imageLimit": "Maqaaladu waxay qaadi karaan ilaa {{count}} sawir",
+    "imageLimitSome": "Kaliya {{count}} sawir oo kale ayaa ku eg maqaalkan",
+    "imageFailed": "Sawirkaas lama dari karin. Isku day mid kale.",
+    "imagesUploading": "Sawirro ayaa lagu darayaa ({{count}})…",
+    "bodyTooLong": "{{count}} xaraf ayaa xadka ka badan",
+    "imagesCount": "Sawirro · {{count}}/{{max}}",
+    "captionPlaceholder": "Ku dar qoraal-hoosaad",
+    "captionLabel": "Qoraal-hoosaadka sawirka {{n}}",
+    "removeInlineImage": "Ka saar sawirka {{n}}"
   },
   "liveAudience": {
     "whosHere": "Yaa halkan jooga",
@@ -19178,23 +20321,94 @@
       "stage": {
         "preparing": "Diyaarinta…",
         "confirming": "Sugaya macaamilka…",
-        "recording": "Waa la dhammaynayaa…"
-      }
+        "recording": "Waa la dhammaynayaa…",
+        "wallet": "Ku xaqiiji boorsadaada"
+      },
+      "open": "Hadiyad rukumaysi",
+      "title": "Hadiyad rukumaysi",
+      "mode": {
+        "random": "Daawadayaal random ah oo chat-ka ku jira",
+        "user": "Qof gaar ah"
+      },
+      "randomHint": "Waxay u socotaa dadka ku qoray chat-ka 30-kii daqiiqo ee u dambeeyay oo aan weli is-diiwaangelin.",
+      "send_one": "Hadiyad 1 sub · ${{price}}",
+      "send_other": "Hadiyad {{count}} sub · ${{price}}",
+      "payHint": "Waxaa lagu bixiyaa tokens ka yimaada boorsadaada hal mar oo keliya.",
+      "fewer_one": "Hadda 1 qof oo keliya ayaa chat-ka ka heli kara sub, markaa waxaad bixinaysaa 1.",
+      "fewer_other": "Hadda {{count}} qof oo keliya ayaa chat-ka ka heli kara sub, markaa waxaad bixinaysaa {{count}}.",
+      "done_one": "Is-diiwaangelinta waa la hadiyeeyay!",
+      "done_other": "{{count}} is-diiwaangelin ayaa la hadiyeeyay!",
+      "failed": "Lama hadiyeyn karin is-diiwaangelinnada",
+      "notReady": "Hadiyadda weli looma heli karo qorshahan",
+      "noPlan": "Marka hore dooro qorshe",
+      "noPlans": "{{name}} weli ma laha qorshayaal is-diiwaangelin oo la hadiyeyn karo."
     },
     "badges": {
       "audience": {
-        "subscribers": "Iigu biixiyayaal"
+        "subscribers": "Iigu biixiyayaal",
+        "both": "Macaamiisha iyo hadiyad-bixiyayaasha",
+        "gifters": "Hadiyad-bixiyayaasha"
       },
       "ended": "Dhamaatay",
       "until": "Ilaa {{date}}",
-      "failed": "Taasi ma aysan shaqeyn. isku day mar kale."
+      "failed": "Taasi ma aysan shaqeyn. isku day mar kale.",
+      "title": "Calaamado waqti xaddidan",
+      "intro": "Bixi calaamad dhawr maalmood. Qof kasta oo is-diiwaangeliya ama hadiyad bixiya inta ay socoto wuu helayaa, waxayna ka muuqan doontaa magaciisa agtiisa chat-kaaga weligeed.",
+      "name": "Magaca calaamadda",
+      "namePlaceholder": "Toddobaadka bilowga",
+      "days": "Diyaar muddo (maalmo)",
+      "emoji": "Emoji",
+      "who": "Yaa heli kara",
+      "create": "Bixi calaamad",
+      "created": "Calaamaddu waa shaqaynaysaa.",
+      "end": "Hadda jooji",
+      "holders_one": "{{count}} haysta",
+      "holders_other": "{{count}} haysta",
+      "limit": "Saddex calaamadood ayaa hal mar socon kara. Mid jooji si aad mid kale u bixiso.",
+      "hypeHint": "Qof kasta oo fuula hype train wuxuu sidoo kale helayaa calaamaddaada 🚂 heerka ay gaartay."
+    },
+    "train": {
+      "level": "Tareenka Hype · Heerka {{level}}",
+      "endedLevel": "Tareenka Hype wuxuu dhammeeyay heerka {{level}}!",
+      "ended": "Tareenka Hype wuu dhammaaday",
+      "thanks_one": "Mahad {{count}} taageere",
+      "thanks_other": "Mahad {{count}} taageerayaal",
+      "top": "Ugu sarreeya: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "wuxuu hadiyad ahaan bixiyay rukumaysi 🎁",
+      "giftedSubs_other": "wuxuu hadiyad ahaan bixiyay {{count}} rukumaysi 🎁"
     }
   },
   "whenSheet": {
     "today": "Maanta",
     "tooSoon": "Dooro wakhti mustaqbalka ah.",
     "show": "Muuji",
-    "hide": "Qari"
+    "hide": "Qari",
+    "earlierShort": "Hore",
+    "title": "Goorma?",
+    "tonight": "Caawa",
+    "inAnHour": "Saacad kadib",
+    "tomorrow": "Berri",
+    "primeTime": "Waqtiga ugu fiican",
+    "scheduleFor": "U qorshee {{when}}",
+    "liveTip": "Kuwa ku raacaa waxay dejin karaan xasuusin. Adiga ayaa bilaabaya Live-ka marka waqtigu yimaado.",
+    "stageTip": "Isla markiiba wuxuu galayaa qaybta Soo socda, si dadku u taabtaan Ii xasuusi.",
+    "typePlaceholder": "Qor waqti, sida \"jim 8pm\" ama \"2 saacadood kadib\"",
+    "typeLabel": "Qor waqti",
+    "typeHelp": "Isku day \"caawa\", \"berri 9am\", \"sab duhur\" ama \"30 oct 7pm\".",
+    "orPickDay": "Ama dooro maalin",
+    "earlier": "15 daqiiqo ka hor",
+    "later": "15 daqiiqo kadib",
+    "laterShort": "Goor dambe",
+    "tooSoonMin": "Dooro waqti ugu yaraan {{count}} daqiiqo hadda kadib.",
+    "zone": "Waqtigaaga ({{zone}}). Qof kasta oo kale wuxuu ku arkayaa waqtigiisa.",
+    "remove": "Ka saar jadwalka",
+    "startsIn": "Wuxuu bilaabmayaa {{time}} kadib",
+    "bestTime": "Waqtiga ugu fiican",
+    "fansOnline": "Goorma ayay taageerayaashaydu online yihiin?",
+    "fansBasis": "Iftiin badan macnaheedu waa in kuwa ku raaca badankood ay daawanayeen, {{count}}-kii maalmood ee u dambeeyay.",
+    "everyoneBasis": "Weli ma jiro dhaqdhaqaaq ku filan oo kuwa ku raaca ah, markaa tani waa qof kasta oo Riftn ku jira."
   },
   "planned": {
     "title": "La Qorsheeyay",
@@ -19209,22 +20423,45 @@
     "loading": "Waa la soo rarayaa…",
     "startNow": "Hadda bilow",
     "cancel": "Jooji",
-    "cancelled": "Waa la joojiyay"
+    "cancelled": "Waa la joojiyay",
+    "subtitle": "Qoraallo, Lives iyo Stages aad jadwalaysay",
+    "seoTitle": "Qorshaysan · Riftn",
+    "seoDescription": "Qoraalladaada, Lives iyo Stages-ka jadwalaysan ee Riftn, hal meel.",
+    "lives": "Lives",
+    "signIn": "Gal si aad u aragto waxaad qorshaysay",
+    "emptyTitle": "Weli waxba lama qorshayn",
+    "emptyBody": "Dooro \"Goorma?\" markaad samaynayso qoraal, Live ama Stage, halkan ayuu ka muuqan doonaa.",
+    "move": "Dhaqaaji",
+    "postNow": "Hadda dhig",
+    "confirmCancel": "Mar kale taabo si aad u joojiso",
+    "moved": "Loo wareejiyay {{when}}",
+    "postingNow": "Waxaa la dhigayaa hal daqiiqo gudaheed",
+    "moveFailed": "Lama dhaqaajin karin. Isku day mar kale.",
+    "seeAll": "Arag wax kasta oo aad qorshaysay"
   },
   "welcome": {
     "about": {
       "title": "Ku soo dhawow Riftn",
       "day": "Maalin",
       "month": "Bil",
-      "year": "Sannad"
+      "year": "Sannad",
+      "sub": "Dhalashadaadu waa qarsoon tahay. Dooro muuqaal, waad beddeli kartaa waqti kasta.",
+      "birthday": "Taariikhda dhalashada",
+      "pick": "Dooro dhalashadaada",
+      "invalid": "Geli taariikhda dhalashadaada oo dhammaystiran.",
+      "tooYoung": "Waa inaad tahay {{age}} ama ka weyn si aad u isticmaasho Riftn.",
+      "theme": "Muuqaalkaaga"
     },
     "name": {
       "title": "Magacaaga",
-      "placeholder": "Magacaaga"
+      "placeholder": "Magacaaga",
+      "sub": "Kani waa magaca dadku ku arkaan qoraalladaada."
     },
     "card": {
       "name": "Magacaaga",
-      "followers": "kuwa raacsan"
+      "followers": "kuwa raacsan",
+      "interests": "Xiisahaaga",
+      "following": "la raaco"
     },
     "topic": {
       "music": "Muusig",
@@ -19236,11 +20473,47 @@
       "film": "Filim",
       "food": "Cunto",
       "news": "Wararka",
-      "science": "Sayniska"
+      "science": "Sayniska",
+      "travel": "Safar",
+      "anime": "Anime",
+      "cars": "Baabuur",
+      "podcast": "Podcast",
+      "animals": "Xayawaan",
+      "tech": "Tiknoolajiyad"
     },
     "back": "Dib",
     "skipPhoto": "U bood hadda",
-    "preview": "Muuqaal hore"
+    "preview": "Muuqaal hore",
+    "username": {
+      "title": "@username-kaaga",
+      "sub": "Xarfo, tirooyin iyo underscore. Waad beddeli kartaa goor dambe.",
+      "yours": "@{{name}} adigaa leh"
+    },
+    "photo": {
+      "title": "Sawirkaaga",
+      "sub": "Ikhtiyaari. Dadku si dhakhso ah ayay u raacaan wejiyada.",
+      "choose": "Dooro sawir",
+      "change": "Dooro mid kale"
+    },
+    "interests": {
+      "title": "Xiisahaaga",
+      "sub": "Dooro ugu yaraan 3. Waxay ku horreeyaan qaybahaaga."
+    },
+    "people": {
+      "title": "Dadkaaga",
+      "sub": "Taabo si aad u raacdo. Qoraalladooda ayaa buuxinaya feed-kaaga La raaco.",
+      "empty": "Hadda ma jiraan talooyin. Explore waxaa ku jira dad badan oo la helo.",
+      "followers": "{{count}} raacayaal"
+    },
+    "done": {
+      "title": "Waad qurux badan tahay, {{name}}",
+      "sub": "Qof kasta ayaa arkaya kaarkan maanta laga bilaabo.",
+      "eyebrow": "Profile-ku waa shaqaynayaa"
+    },
+    "enter": "Gal Riftn",
+    "pickMore": "Dooro {{count}} kale",
+    "cardHint": "Sidan ayay dadku kuu arki doonaan",
+    "followFailed": "Lama raaci karin. Isku day mar kale."
   },
   "appTokens": {
     "title": "Token-kaaga",
@@ -19251,28 +20524,102 @@
     "amount": "Qaddar",
     "notePlaceholder": "Ku dar qoraal (ikhtiyaari)",
     "sendButton": "Dir",
-    "errorInsufficient": "Tokens ma filna"
+    "errorInsufficient": "Tokens ma filna",
+    "rowHint": "Haraaga app-ka gudihiisa",
+    "explainer": "Tokens-kaagu hadda waxay ku jiraan Riftn gudihiisa. Waxaad ku bilowday wixii aad haysay oo aad onchain ku stake-gareysay markii la bilaabay. Dirista, tip-ka iyo kharashgareyntu isla markiiba ayay dhaqaajiyaan, khidmad la'aan iyo onchain la'aan. Haraagu wuxuu u gudbayaa token-ka cusub xilliga airdrop-ka.",
+    "kindOpening": "Haraaga bilowga",
+    "kindSent": "Loo diray {{name}}",
+    "kindReceived": "Ka yimid {{name}}",
+    "kindSpent": "Lagu kharashgareeyay Riftn",
+    "kindRefund": "Lacag celin",
+    "kindAdjust": "Hagaajin Riftn",
+    "sendTitle": "Dir tokens",
+    "sendHint": "Waxay tokens u dirtaa akoon kale oo Riftn gudihiisa ah. Degdeg iyo bilaash, waxba onchain ma galaan.",
+    "toPlaceholder": "@username ama cinwaan 0x",
+    "looking": "Waa la raadinayaa…",
+    "available": "La heli karo: {{amount}}",
+    "sent": "{{amount}} tokens ayaa loo diray {{name}}",
+    "errorRateLimit": "Diris aad u badan saacaddii u dambeysay. Isku day goor dambe.",
+    "errorNoRecipient": "Lama helin akoon Riftn ah",
+    "errorSelf": "Naftaada uma diri kartid",
+    "errorGeneric": "Lama diri karin. Isku day mar kale."
   },
   "reactions": {
     "policy": {
       "everyone": "Qof walba",
       "followers": "Kuwa ku raaca",
-      "nobody": "Qofna"
+      "nobody": "Qofna",
+      "default": "Default-ka akoonka ({{value}})"
     },
     "heading": "Falcelinta",
     "more": "Muuji wax badan",
     "liveNow": "Toos",
-    "untitled": "Falcelin"
+    "untitled": "Falcelin",
+    "reactionTo": "Falcelin ku saabsan",
+    "reactingTo": "Ka falcelinaya",
+    "count_one": "{{count}} falcelin",
+    "count_other": "{{count}} falcelin",
+    "allow": "Oggolow falcelinta",
+    "remixesSection": "Remix",
+    "allowDescription": "U oggolow abuurayaasha kale inay ka falceliyaan muuqaalladaada, duuban ama toos ah. Weli waad ku beddeli kartaa qoraal kasta.",
+    "pageTitle": "Falcelinta {{title}} | Riftn",
+    "pageDescription": "Daawo abuurayaasha oo ka falcelinaya “{{title}}” ee {{creator}} ku jira Riftn, duuban iyo toos.",
+    "backToVideo": "Ku noqo muuqaalka",
+    "empty": "Weli falcelin ma jirto. Fur menu-ga Remix ee muuqaalka oo dooro React si aad u noqoto kan ugu horreeya.",
+    "wasLive": "Wuxuu ahaa toos",
+    "thisVideo": "muuqaalkan"
   },
   "connectGuide": {
     "title": "Ku xir Riftn kaaliyahaaga AI",
     "urlLabel": "URL-ka server-ka MCP",
     "copy": "Koobbi",
     "copied": "La nuqulay",
-    "copiedToast": "URL-ka MCP waa la koobiyeeyay"
+    "copiedToast": "URL-ka MCP waa la koobiyeeyay",
+    "accountBody2": "Kaydi qabyo gaar ah, daabac oo jadwalee qoraallo, maamul sawirro iyo codbixinno, akhri falanqaynta, ka jawaab, falceli, dib u dhig, raac, kaydi bookmarks, akhri ogeysiisyada, wax ka beddel profile-kaaga oo ku abuur credits-kaaga. Dib u isticmaalka aqoonsiga codsiga qoraalka ma abuuro mana tiriyo qoraal labaad. Wuu ku weydiinayaa ka hor inta uusan wax kharashgareyn.",
+    "agentsTitle": "Ka maamul agents-kaaga kaaliyahaaga",
+    "agentsBody": "Markaad xiriirto, sidoo kale oggolow \"U dhaqaaq sida agents-kaaga\". Kaaliyahaagu markaa wuxuu dhigi karaa, ka jawaabi karaa, falcelin karaa, dib u dhigi karaa, raaci karaa ama wax ka beddeli karaa profile sida agent kasta oo aad leedahay, mid mid ama qaar badan oo isku xiga. Weligiis uma dhaqmi karo sida akoon aadan lahayn.",
+    "agentsExample": "Isku day: \"@mybot ha ka jawaabo qoraalka ugu sarreeya feed-kayga, kadibna jeclow jawaabtaas sida @otherbot.\"",
+    "desc": "Ka isticmaal Riftn ChatGPT, Claude, Cursor ama app kasta oo MCP ah. Baadh akoon la'aan, ama gal si kaaliyahaagu kuu dhigo, kuu jawaabo oo kuu abuuro.",
+    "copyFailed": "Koobiyeyntu way fashilantay",
+    "urlNote": "Ku dheji tan app-kaaga AI. Ma aha bog web ah, markaa haddii aad browser ku furto halkan ayay kuu soo celinaysaa.",
+    "canTitle": "Waxa kaaliyahaagu samayn karo",
+    "publicTitle": "Adigoon gelin",
+    "publicBody": "Baadh feed-ka, raadi qoraallo iyo dad, akhri faallooyinka oo eeg profiles.",
+    "accountTitle": "Markaad gasho kadib",
+    "accountBody": "Dhig, ka jawaab, falceli, raac, kaydi bookmarks, akhri ogeysiisyada, wax ka beddel profile-kaaga oo ku abuur sawirro, muuqaal iyo muusig credits-kaaga. Wuu ku weydiinayaa ka hor inta uusan wax kharashgareyn.",
+    "chatgpt1": "Fur Settings-ka ChatGPT, kadib Apps & Connectors, kadib Advanced, oo shid Developer mode.",
+    "chatgpt2": "Ku noqo Apps & Connectors, dooro Create si aad ugu darto connector cusub.",
+    "chatgpt3": "U magacow Riftn, ku dheji URL-ka sare oo dooro OAuth nooca gelitaanka.",
+    "chatgpt4": "Riix Connect. Riftn ayaa furmaya: gal, hubi oggolaanshaha oo riix Allow.",
+    "chatgpt5": "Chat cusub, fur menu-ga +, dooro Riftn oo weydii, tusaale ahaan, “I tus qoraallada caanka ah ee Riftn.”",
+    "claude1": "Fur settings-ka connector-ka Claude oo dooro Add custom connector.",
+    "claude2": "U magacow Riftn, ku dheji URL-ka sare oo riix Add.",
+    "claude3": "Riix Connect. Riftn ayaa furmaya: gal, hubi oggolaanshaha oo riix Allow.",
+    "claude4": "Chat gudihiisa, fur menu-ga tools, shid Riftn oo weydii wax kasta.",
+    "openSettings": "Fur settings",
+    "devTitle": "Claude Code, Cursor iyo apps kale",
+    "devBody": "Ku dar Riftn sida server MCP fog oo HTTP ah. App-ku wuxuu furayaa gelitaanka Riftn markii ugu horreysay ee uu u baahdo akoonkaaga.",
+    "manageTitle": "Apps-kaaga ku xiran",
+    "manageBody": "Apps-ka ku xiran way sii xirnaanayaan inta aad isticmaasho, waxayna go'ayaan 30 maalmood oo aan la isticmaalin kadib. Waad arki kartaa ama goyn kartaa waqti kasta.",
+    "manageLink": "Maamul apps-ka ku xiran",
+    "agentTitle": "Ma rabtaa bot ku dhiga akoonkiisa gaarka ah?",
+    "agentBody": "Samee agent waxaadna heli doontaa URL connector u gaar ah oo furaha ku dhex jiro. Kaaliyahaagu markaa wuxuu dhigi karaa, faallo bixin karaa, codayn karaa oo raaci karaa sida agent-kaas halkii uu adiga ahaan lahaa.",
+    "agentLink": "Samee agent",
+    "helpTitle": "Haddii ay wax khaldamaan",
+    "help1": "“Authentication update required” ama badhanka Reconnect: riix Reconnect oo mar kale gal Riftn.",
+    "help2": "“Link your Riftn account” markaad weydiiso qoraalladaada: riix Connect ee settings-ka connector-ka app-ka.",
+    "help3": "Khalad marka aad URL-ka ku furto tab browser waa caadi. Taa beddelkeeda ku dheji app-kaaga AI.",
+    "other": "App kasta oo kale oo MCP ah sidaas oo kale ayuu u shaqeeyaa: ku dar server MCP fog oo ku dheji URL-ka sare."
   },
   "avatarPrompt": {
-    "notNow": "Maya hadda"
+    "notNow": "Maya hadda",
+    "title": "Ku dar sawir profile",
+    "body": "Dadku si dhakhso ah ayay kuugu arkaan feeds, faallooyin iyo chats markaad leedahay weji ama astaan.",
+    "choose": "Dooro sawir",
+    "another": "Dooro mid kale",
+    "save": "Isticmaal sawirkan",
+    "saved": "Waad qurux badan tahay",
+    "failed": "Lama kaydin karin sawirkaaga. Isku day mar kale."
   },
   "postStats": {
     "audience": "Dhageystayaasha",
@@ -19290,14 +20637,77 @@
     "shares": "Wadaagyo",
     "signedOutViewers": "Waa laga baxay",
     "topSupporters": "Taageerayaasha ugu sareeya",
-    "visitors": "Waa laga baxay"
+    "visitors": "Waa laga baxay",
+    "aboutUsual": "qiyaastii sidii caadiga ahayd",
+    "afterWatching": "raacay kadib markay arkeen",
+    "avg": "celcelis",
+    "avgWatch": "Celceliska daawashada",
+    "bestTime": "Goorta dadkaagu daawadaan",
+    "bigDrop": "Hoos u dhac weyn",
+    "byBadge": "calaamad ahaan",
+    "devices": "Qalabka (xubnaha)",
+    "finishedLower": "dhammeeyay",
+    "finishedPct": "{{pct}}% ayaa daawaday ilaa dhammaadka",
+    "inOut": "{{in}} xubnood · {{out}} ka baxsan",
+    "leave": "{{pct}}% way baxaan",
+    "linkClicks": "Gujinta linkiga",
+    "newToYou": "kuu cusub",
+    "noAccount": "akoon la'aan",
+    "noViewersYet": "Weli qofna ma arkin qoraalkan.",
+    "noWatchYet": "Waqtiga daawashada halkan ayuu ka muuqanayaa marka dadku daaraan. Wuxuu bilaabay tirinta 31 Oct 2026.",
+    "open": "Arag sida qoraalkaagu u socdo",
+    "otherBadges": "Calaamado kale",
+    "peak": "Ugu sarreeya {{time}} · {{n}}",
+    "peopleReached": "Dadka la gaaray",
+    "playsLower": "daaris",
+    "playsMembers": "Daarista xubnaha",
+    "playsVisitors": "Daaris ka baxsan",
+    "profileTaps": "Taabashada profile-kaaga",
+    "reach": "Gaarid",
+    "saves": "Kaydin",
+    "seeAll": "Arag dhammaan tirakoobka",
+    "signedIn": "galay",
+    "signedOutLower": "ka baxsan",
+    "stillWatching": "Weli daawanaya",
+    "timesUsual": "{{ratio}}× caadiga",
+    "vsUsualPct": "{{pct}} marka loo eego qoraalkaaga caadiga ah",
+    "unavailableBody": "Abuuraha oo keliya ayaa arki kara tirakoobka qoraalkan.",
+    "unavailableTitle": "Tirakoob lama heli karo",
+    "vsUsual": "marka loo eego qoraalkaaga caadiga ah",
+    "watching": "Daawanaya",
+    "whoSawIt": "Yaa arkay",
+    "withRepeats": "{{n}} ku celin",
+    "yourFollowers": "raacayaashaada",
+    "first48": "48-ka saacadood ee ugu horreeya",
+    "howItsDoing": "Sida uu u socdo",
+    "bestTip": "Daawadayaashaada badankood waxay yimaadaan {{day}} qiyaastii {{hour}}:00. Dhigista wax yar ka hor waxay qoraalka siinaysaa bilow ugu fiican.",
+    "last30": "30-kii maalmood ee u dambeeyay",
+    "day": {
+      "sun": "Axd",
+      "mon": "Isn",
+      "tue": "Tal",
+      "wed": "Arb",
+      "thu": "Kham",
+      "fri": "Jim",
+      "sat": "Sab"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Imaanshaha ugu dhakhsaha badan",
     "notifyMe": "I ogeysii",
     "emailLabel": "Iimeyl",
     "failed": "Ma badbaadin karo taas. isku day mar kale.",
-    "seoDescription": "Token cusub ee Riftn ayaa lagu sii dayn doona dhow. Ku biir liiska oo hel email hal mar markii ay bilaabato, ka dibna iibso sida toos ah meesha Riftn wallet-kaaga."
+    "seoDescription": "Token cusub ee Riftn ayaa lagu sii dayn doona dhow. Ku biir liiska oo hel email hal mar markii ay bilaabato, ka dibna iibso sida toos ah meesha Riftn wallet-kaaga.",
+    "title": "Token-ku dhowaan ayuu soo baxayaa",
+    "body": "Iibsiga waa xiran yahay inta token-ka cusub la diyaarinayo. Hel iimayl isla marka uu shaqeeyo.",
+    "sendTo": "Waxaan iimayl u diri doonnaa {{email}}",
+    "emailPlaceholder": "Iimaylkaaga",
+    "invalidEmail": "Geli iimayl sax ah",
+    "joinedTitle": "Waxaad ku jirtaa liiska",
+    "joinedBody": "Waxaan iimayl u diri doonnaa {{email}} marka token-ku soo baxo.",
+    "joinedBodyNoEmail": "Waxaan kuu soo diri doonnaa iimayl marka token-ku soo baxo.",
+    "privacy": "Waxaa kaliya loo isticmaalaa in lagugu ogeysiiyo soo bixitaanka.",
+    "seoTitle": "Token-ku dhowaan ayuu soo baxayaa | Riftn"
   },
   "githubLink": {
     "hint": "Waxbarashada GitHub ku xidha inyo aad ugu xidha shaqaalaha aad ugu tahay. Riftn waxaad u baahantahay profileka GitHub-kaaga ah.",
@@ -19313,7 +20723,27 @@
   },
   "mcpKeys": {
     "delete": "Tirtir",
-    "shortProfile": "Bogga shaqsiga"
+    "shortProfile": "Bogga shaqsiga",
+    "title": "Furayaal gaar ah",
+    "body": "Loogu talagalay scripts, bots iyo apps aan furi karin bogga gelitaanka. Furuhu wuxuu sameeyaa oo keliya waxaad oggolaato, akoonkaaga iyo agents-ka aad leedahay. Wuu shaqaynayaa inta la isticmaalo, wuxuuna joogsanayaa 30 maalmood oo aan la isticmaalin kadib.",
+    "signIn": "Gal si aad fure u samayso",
+    "newTitle": "Hadda koobiyee furahaaga",
+    "newBody": "Kani waa mar keliya oo la muujinayo. Qof kasta oo haysta wuu isticmaali karaa akoonkaaga gudaha oggolaanshaha aad dooratay, markaa qarso.",
+    "useIt": "Ku dar app-kaaga mid ka mid ah kuwan:",
+    "name": "Magaca furaha",
+    "namePlaceholder": "Bot-kayga",
+    "permissions": "Waxa furahani samayn karo",
+    "limits": "Xadka maalinlaha ah ee akoonkaaga iyo agents-ka: 50 qoraal, 300 jawaab, 1,000 falcelin, 200 raacid, 200 dib u dhig iyo 30 wax ka beddel profile.",
+    "create": "Samee fure",
+    "show": "I tus furayaashayda",
+    "yours": "Furayaashaada",
+    "empty": "Weli fure ma jiro.",
+    "expires": "Wuu shaqaynayaa ilaa {{date}} haddii aan mar kale la isticmaalin",
+    "shortRead": "Akhri",
+    "shortSocial": "Dhig oo ka jawaab",
+    "shortGenerate": "Abuur media",
+    "shortAgents": "Agents-kaaga",
+    "settingsBody": "Ka isticmaal Riftn iyo agents-kaaga ChatGPT, Claude ama app kasta oo MCP ah, ama samee fure gaar ah."
   },
   "chatSearch": {
     "placeholder": "Raadi farriimaha ama dadka",
@@ -19349,12 +20779,81 @@
     "title": "Codsiga",
     "accept": "Aqbal",
     "delete": "Tirtir",
-    "block": "Xannib"
+    "block": "Xannib",
+    "hint": "Fariimo ka yimid dad aadan raacin. Aqbal mid, ka jawaab ama raac, chat-ku wuxuu u gudbayaa sanduuqaaga.",
+    "rowHint": "{{n}} ka yimid dad aadan raacin",
+    "banner": "Ma raacdid {{name}}. Aqbal si chat-kan loogu wareejiyo sanduuqaaga, ama si fudud uga jawaab.",
+    "accepted": "Loo wareejiyay sanduuqaaga",
+    "acceptFailed": "Lama aqbali karin, isku day mar kale"
   },
   "dmSchedule": {
     "view": "Arag",
     "edit": "Wax ka beddel",
     "editLabel": "Tafatir farriinta",
-    "error": "Taasi ma aysan shaqeyn. isku day mar kale."
+    "error": "Taasi ma aysan shaqeyn. isku day mar kale.",
+    "button": "Jadwalee fariin",
+    "title": "Fariimaha jadwalaysan",
+    "whenTitle": "Goorma la diraa?",
+    "waiting": "{{n}} jadwalaysan",
+    "next": "xiga {{when}}",
+    "failedCount": "{{n}} lama dirin",
+    "notSent": "Lama dirin",
+    "emptyTitle": "Waxba lama jadwalayn",
+    "emptyBody": "Qor fariin, kadib taabo saacadda si aad u doorato goorta la dirayo.",
+    "changeTime": "Beddel waqtiga",
+    "sendNow": "Hadda dir",
+    "deleted": "Fariintii jadwalaysnayd waa la tirtiray",
+    "unreadable": "Waxaa lagu qoray qalab kale. Weli waa la diri doonaa.",
+    "footnote": "Waqtiyadu waxay ku jiraan aaggaaga waqtiga. Qofna ma arko fariin ilaa la diro.",
+    "footnoteNamed": "Waqtiyadu waxay ku jiraan aaggaaga waqtiga. {{name}} wuxuu arkaa fariin oo keliya marka la diro.",
+    "textOnly": "Hadda fariimaha qoraalka oo keliya ayaa la jadwalayn karaa.",
+    "scheduledToast": "Loo jadwaleeyay {{when}}",
+    "failedToast": "Fariin jadwalaysan lama diri karin"
+  },
+  "mentionLinks": {
+    "communities": "Bulshooyin",
+    "pages": "Bogag",
+    "people": "Dadka",
+    "empty": "Waxba lama helin",
+    "hint": "Qor si aad u hesho dad, bulshooyin iyo bogag",
+    "linkTo": "Ku xidh {{name}}",
+    "members": " xubnood",
+    "placeholder": "Raadi dad, bulshooyin, bogag...",
+    "title": "Xus ama xidhiidh"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Waxaan fahamsanahay in profile-kayga la qarin doono oo la iga saari doono meel kasta.",
+    "title": "Hakad geli akoonka",
+    "short": "Hadda qari profile-kaaga. Dib u gal si aad u soo celiso",
+    "description": "Taa beddelkeeda nasasho qaado. Profile-kaaga, qoraalladaada iyo faallooyinkaaga waa la qarinayaa waxaana lagaa saarayaa meel kasta. Waxba lama tirtirayo, dib u galiddu way soo celinaysaa dhammaan.",
+    "button": "Hakad geli",
+    "confirmTitle": "Ma hakad gelinaysaa akoonkaaga?",
+    "confirmBody": "Profile-kaaga, qoraalladaada iyo faallooyinkaaga waa la qarin doonaa waxaana lagaa saari doonaa qalab kasta. Dib u gal wakhti kasta si aad tan uga noqoto.",
+    "busy": "Hakad ayaa la gelinayaa…",
+    "done": "Akoonka hakad ayaa la geliyay",
+    "receipt": "Profile-kaaga, qoraalladaada iyo faallooyinkaaga waa la qariyay. Mar kale gal wakhti kasta si aad wax walba u soo celiso.",
+    "error": "Akoonkaaga hakad lama gelin karin. Fadlan isku day mar kale."
+  },
+  "halloween": {
+    "title": "Halloween wanaagsan",
+    "otherThemes": "Ma dareemaysid cabsi? Hel muuqaallo kale:",
+    "enter": "Gal godka"
+  },
+  "msgDelete": {
+    "title": "Tirtir fariinta?",
+    "titleMany": "Tirtir {{count}} fariimood?",
+    "bodyOwn": "Ka saar chat-kaaga oo keliya, ama qof walba.",
+    "bodyOwnMany": "Ka saar chat-kaaga oo keliya, ama qof walba.",
+    "bodyOthers": "Waxaa laga saarayaa chat-kaaga oo keliya. Qofka kale weli wuu arki doonaa.",
+    "bodyOthersMany": "Waxaa laga saarayaa chat-kaaga oo keliya. Kuwa kale ee chat-ka weli way arki doonaan.",
+    "bodyOwnBoth": "Ka saar chat-kaaga oo keliya, ama labadiinnaba.",
+    "bodyOwnBothMany": "Ka saar chat-kaaga oo keliya, ama labadiinnaba.",
+    "forMe": "Ii tirtir aniga",
+    "forEveryone": "U tirtir qof kasta",
+    "forBoth": "Noo tirtir labadeenna",
+    "forMeAndName": "Ii tirtir aniga iyo {{name}}",
+    "remember": "Xasuuso doorashadayda",
+    "rememberHint": "Ku beddel waqti kasta Settings",
+    "failed": "Lama tirtiri karin fariinta"
   }
 }

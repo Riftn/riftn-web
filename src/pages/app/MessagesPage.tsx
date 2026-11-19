@@ -34,10 +34,12 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
+import { useChatCards } from '@/lib/chat-cards';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { collapseChat, cameFromPanel } from '@/lib/chat-expand';
 import { PublicChat, DirectMessageChat, NewConversationModal, NewMessageSelector } from '@/components/app/chat';
 import { NewMessageDrawer, type NewMessageDrawerHandle } from '@/components/app/chat/NewMessageDrawer';
 import { flushSync } from 'react-dom';
@@ -65,7 +67,10 @@ import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { showUndoToast } from '@/components/ui/undo-toast';
 import { scheduleDelete, undoDelete, usePendingDeletes, UNDO_WINDOW_MS } from '@/lib/undoable-delete';
 import { useKeyboardOpen, useVisualViewportBox } from '@/hooks/use-keyboard-open';
-import { emitSendMessage, waitForDmSocket } from '@/lib/api/dehub/dm-socket';
+import { emitSendMessage, onConversationDeleted, waitForDmSocket } from '@/lib/api/dehub/dm-socket';
+import { DeleteMessageDialog, type DeleteScope } from '@/components/app/chat/DeleteMessageDialog';
+import { usePublicChatLastLine, useRoomChatSummaries } from '@/hooks/use-room-chat-summaries';
+import { roomPreviewLine } from '@/lib/room-chat-read';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import chatBubbleIcon from '@/assets/icons/chat-bubble.webp';
 import messagesBubbleIcon from '@/assets/icons/messages-3d-icon.webp';
@@ -82,6 +87,7 @@ import { useUserCommunities, type Community } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
 import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { previewLinks } from '@/lib/dehub-links';
 
 /**
  * The other person's name with their badge sitting on its baseline, the same
@@ -159,7 +165,7 @@ export function ConversationItem({
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : 'User');
   const lastMessagePreview = conversation.lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
-    : conversation.lastMessage?.content || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
+    : (conversation.lastMessage?.content && previewLinks(conversation.lastMessage.content)) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
   const lastMessageTime = conversation.lastMessage?.createdAt
     ? (compactTime
       ? formatTimeAgo(conversation.lastMessage.createdAt)
@@ -445,10 +451,16 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // The row is gone the moment it is swiped away, with Undo in the toast; the
   // real delete runs when that window closes. A swipe is one careless thumb
   // away, and a confirm dialog after every one defeats the point of swiping.
+  // Swiping a chat away asks first: Delete for me, Delete for both (1:1
+  // chats), or Cancel. The same pop-up as deleting a message.
+  const [confirmChatDelete, setConfirmChatDelete] = useState<DeHubConversation | null>(null);
   const handleDeleteConversation = useCallback((conv: DeHubConversation) => {
+    setConfirmChatDelete(conv);
+  }, []);
+  const deleteConversationNow = useCallback((conv: DeHubConversation, scope: DeleteScope) => {
     setSelectedConversation(prev => (prev?.id === conv.id ? null : prev));
     scheduleDelete(conv.id, () =>
-      deleteConversationMutation.mutate(conv.id, {
+      deleteConversationMutation.mutate(scope === 'everyone' ? { id: conv.id, forEveryone: true } : conv.id, {
         onError: () => toast.error(t('messages.deleteConversationFailed')),
       }),
     );
@@ -460,6 +472,13 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onUndo: () => undoDelete(conv.id),
     });
   }, [deleteConversationMutation, t]);
+
+  // The other person deleted a 1:1 chat for both of you: drop it from the list.
+  useEffect(() => onConversationDeleted((data) => {
+    if (!data?.forEveryone) return;
+    setSelectedConversation(prev => (prev?.id === data.dmId ? null : prev));
+    void refetch();
+  }), [refetch]);
 
   const liveConversations = (conversations || []).filter(c => !pendingDeletes.has(c.id));
   // First messages from people you don't follow wait under Requests. A search
@@ -481,8 +500,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     setActiveTabRaw(id);
     try { localStorage.setItem('riftn.chatTab', id); } catch { /* private mode */ }
   }, []);
-  // Full-screen /chat only: /app/messages has its own card tabs.
-  const tabsOn = fullscreen && !guest && !searchQuery.trim();
+  // The same tabs on /chat and /app/messages, so both pages behave alike.
+  const tabsOn = !guest && !searchQuery.trim();
   const activeTabView = chatTabs.tabs.find(x => x.id === activeTabRaw && !x.hidden);
   const activeTab = tabsOn && activeTabView ? activeTabView.id : 'all';
   const customTab = activeTabView && !activeTabView.builtin && tabsOn ? activeTabView : null;
@@ -517,9 +536,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
   // a row at the top of the list on phones.
   const cards = !fullscreen;
+  // Settings → Appearance → Chats as cards, off: the same page as a plain list.
+  const plainList = !useChatCards() && cards;
   const deskCards = cards && !phonePill;
-  const phoneCards = cards && phonePill;
-  const [listTab, setListTab] = useState<'all' | 'unread' | 'groups'>('all');
   const clearHistory = useClearChatHistory();
   const [showArchived, setShowArchived] = useState(false);
   // The last request was accepted or deleted: nothing left to show here.
@@ -564,7 +583,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       ? archivedRooms
       : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
   // "Add to tab" in a chat's menu.
-  const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (!fullscreen || guest ? {} : {
+  const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (guest ? {} : {
     tabs: chatTabs.tabs.filter(x => !x.builtin).map(x => ({ id: x.id, name: x.name, emoji: x.emoji, has: x.chats.includes(chatId) })),
     onToggleTab: (tabId) => {
       const tab = chatTabs.tabs.find(x => x.id === tabId);
@@ -582,7 +601,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     activeTab === 'communities' ? false : customTab ? customTab.chats.includes(c.id) : true;
   const roomInTab = (c: { id: string }) =>
     activeTab === 'direct' ? false : customTab ? customTab.chats.includes(roomChatId(c.id)) : true;
-  const publicInTab = activeTab === 'direct' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
+  const publicInTab = activeTab === 'direct' || activeTab === 'communities' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
   const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
     pref: roomPref(c),
     hasUnread: false,
@@ -600,19 +619,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     setSelectedRoom(c);
   };
   const archivedCount = archivedConversations.length + archivedRooms.length;
+  // Newest line + unread number for each group row, and General Chat's newest line.
+  const roomSummaries = useRoomChatSummaries(groupChats.map(c => c.id), isAuthenticated ? walletAddress : null);
+  const publicLastLine = usePublicChatLastLine(isAuthenticated);
+  const publicPreview = publicLastLine ? roomPreviewLine(publicLastLine, walletAddress || '', (key, options) => _copy(key, options)) : '';
   // Computer tabs: Unread keeps chats with something new (or marked unread),
   // Groups keeps group, channel and community chats only.
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread || !!chatPrefs.get(c.id)?.reactions;
-  const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions;
+  const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions || (roomSummaries[c.id]?.unread ?? 0) > 0;
   const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
-  const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : tabsOn && activeTab === 'unread' ? 'unread' : 'all';
-  const shownConversations = tabFilter === 'groups' ? [] : tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
-  // Computers: the first tab is "Messages", direct chats only; groups, channels,
-  // communities and Public Chat live under Groups.
-  const messagesTab = tabFilter === 'all' && deskCards && !searchQuery.trim() && !showArchived && !inRequests;
-  const shownRooms = messagesTab ? [] : tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
-  const inboxUnreadChats = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)) && convHasUnread(c)).length
-    + groupChats.filter(c => !isArchived(roomPref(c)) && roomHasUnread(c)).length;
+  const tabFilter = tabsOn && activeTab === 'unread' && !showArchived && !inRequests ? 'unread' : 'all';
+  const shownConversations = tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
+  const shownRooms = tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
   const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
@@ -998,6 +1016,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     }
   }, [chatParamPresent, isMessagesRouteActive]);
 
+  // Opened out of the side panel: Esc folds the page back into it.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented || !cameFromPanel()) return;
+      if (document.querySelector('[role="dialog"],[data-radix-popper-content-wrapper]')) return;
+      collapseChat();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fullscreen]);
+
   // The in-app arrow has to CONSUME the entry we pushed, or it is left dangling
   // and the next Back walks straight back into the chat. Don't clear the ref
   // here — navigate(-1)'s popstate is async, so clearing it early loses the
@@ -1108,8 +1138,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   // If Public Chat is open, show full-screen chat
   const publicChatPane = fullscreen && showPublicChat ? (
-    <div className="h-full overflow-hidden pt-1">
-      <PublicChat onBack={closeChat} />
+    <div data-chat-expand-target className="h-full overflow-hidden pt-1">
+      <PublicChat onBack={() => { if (!collapseChat()) closeChat(); }} />
     </div>
   ) : null;
   if (showPublicChat && !fullscreen) {
@@ -1208,11 +1238,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Unread chats per tab, for the counts on the tab row.
   const inboxConvs = liveConversations.filter(c => !c.isRequest);
   const unreadOf = (c: DeHubConversation) => c.unreadCount || 0;
+  const roomsUnread = listedRooms.filter(c => !isMuted(roomPref(c))).reduce((n, c) => n + (roomSummaries[c.id]?.unread ?? 0), 0);
   const tabUnread: Record<string, number> = {
-    all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
-    unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
+    all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread + roomsUnread,
+    unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread + roomsUnread,
     direct: inboxConvs.reduce((n, c) => n + unreadOf(c), 0),
-    communities: publicUnread,
+    communities: roomsUnread,
     requests: requestUnread,
   };
   for (const tab of chatTabs.tabs) {
@@ -1260,9 +1291,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const tabBar = tabsOn ? (
     <ChatTabBar
       tabs={tabRowTabs}
-      active={activeTab}
       unread={tabUnread}
-      onSelect={(id) => { setShowArchived(false); setActiveTab(id); }}
+      active={showArchived ? 'archived' : inRequests ? 'requests' : activeTab}
+      onSelect={(id) => { setShowArchived(false); setShowRequests(false); setActiveTab(id); }}
       onNew={() => setTabEditor({})}
       onManage={() => setTabManager(true)}
       onEdit={(id) => setTabEditor({ id })}
@@ -1275,6 +1306,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         void chatTabs.addChats(tabId, [chatId]);
         toast.success(_copy('chatTabs.addedTo', { defaultValue: 'Added to {{name}}', name: tab.name }));
       }}
+      className={deskCards ? 'px-0 pb-0 pt-0' : undefined}
+      trailing={deskCards && (archivedCount > 0 || showArchived) ? (
+        <button type="button" role="tab" data-chat-tab="archived" data-msg-cards-archived aria-selected={showArchived}
+          onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
+          <Archive className="h-3.5 w-3.5" />
+          <span className="whitespace-nowrap">{_copy('chatMenu.archived', { defaultValue: 'Archived' })}</span>
+          {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{archivedCount}</span>}
+        </button>
+      ) : undefined}
     />
   ) : null;
   const tabSheets = (
@@ -1363,24 +1403,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </ChatIconButton>
         </>
       )}
-      actions={<ChatTextSizeButton className="rounded-full" />}
+      actions={<ChatTextSizeButton className="rounded-full transition-[color,transform] duration-150 hover:scale-110 hover:bg-transparent" />}
     />
   ) : null;
 
   // Same total as the nav icon: requests never light it.
   const dmUnread = liveConversations.reduce((sum, c) => sum + (c.isRequest ? 0 : c.unreadCount || 0), 0);
-  const pickTab = (tab: 'all' | 'unread' | 'groups' | 'requests' | 'archived') => {
-    setShowRequests(tab === 'requests');
-    setShowArchived(tab === 'archived');
-    setListTab(tab === 'unread' || tab === 'groups' ? tab : 'all');
-  };
-  const cardTab = showArchived ? 'archived' : inRequests ? 'requests' : listTab;
-  const deskTabs: { key: 'all' | 'unread' | 'groups' | 'requests' | 'archived'; label: string; count?: number }[] = [
-    { key: 'all', label: _copy('nav.messages', { defaultValue: 'Messages' }) },
-    { key: 'unread', label: _copy('messagesTabs.unread', { defaultValue: 'Unread' }), count: inboxUnreadChats },
-    { key: 'groups', label: _copy('messagesTabs.groups', { defaultValue: 'Groups' }) },
-    ...(requestConversations.length > 0 ? [{ key: 'requests' as const, label: _copy('dmRequests.title', { defaultValue: 'Requests' }), count: requestConversations.length }] : []),
-  ];
   const deskTop = deskCards ? (
     <PageIsland
       className="shrink-0"
@@ -1437,23 +1465,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
         </button>
       </div>
-      {!searchQuery.trim() && (
-        <div data-msg-cards-tabs role="tablist" className="flex items-center gap-1">
-          {deskTabs.map(tab => (
-            <button key={tab.key} type="button" role="tab" data-msg-cards-tab aria-selected={cardTab === tab.key} onClick={() => pickTab(tab.key)}>
-              {tab.label}
-              {!!tab.count && <span data-msg-cards-tab-count>{tab.count > 99 ? '99+' : tab.count}</span>}
-            </button>
-          ))}
-          {(archivedCount > 0 || showArchived) && (
-            <button type="button" role="tab" data-msg-cards-tab data-msg-cards-archived aria-selected={cardTab === 'archived'} onClick={() => pickTab(showArchived ? 'all' : 'archived')} className="ml-auto">
-              <Archive />
-              {_copy('chatMenu.archived', { defaultValue: 'Archived' })}
-              {archivedCount > 0 && <span data-msg-cards-tab-count data-quiet>{archivedCount}</span>}
-            </button>
-          )}
-        </div>
-      )}
+      {tabBar}
     </PageIsland>
   ) : null;
 
@@ -1464,7 +1476,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             [data-page-bento] hook stays: the Osaka and Jungle `#app-root` class
             nets exclude on it, and without it every bg-zinc-8/9 descendant in
             here becomes a frosted rectangle. */}
-        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
+        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
           {fullscreenTop ?? deskTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
@@ -1555,7 +1567,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </div>
           </PageIsland>)}
 
-          {tabBar}
+          {!deskCards && tabBar}
           {tabSheets}
 
           {/* Conversation List */}
@@ -1571,16 +1583,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </div>
             </div>
             <div ref={chatPullRef} data-chat-list-body>
-            {phoneCards && !searchQuery.trim() && (
-              <div data-msg-cards-tabs data-msg-cards-phone-tabs role="tablist">
-                {deskTabs.map(tab => (
-                  <button key={tab.key} type="button" role="tab" data-msg-cards-tab aria-selected={cardTab === tab.key} onClick={() => pickTab(tab.key)}>
-                    {tab.label}
-                    {!!tab.count && <span data-msg-cards-tab-count>{tab.count > 99 ? '99+' : tab.count}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1589,7 +1591,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             />
             {/* Public Chat (pinned) */}
             {!inRequests && (<>
-            {((tabFilter === 'all' && !messagesTab) || tabFilter === 'groups' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
+            {(tabFilter === 'all' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
             <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row
@@ -1604,17 +1606,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="font-semibold text-white truncate block">{t('publicChat.title')}</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="font-semibold text-white truncate">{t('publicChat.title')}</span>
+                  {publicLastLine && <span data-room-last-at className="ml-auto shrink-0 text-zinc-500 text-sm tabular-nums">{formatTimeAgo(publicLastLine.created_at)}</span>}
+                  {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} className={publicLastLine ? 'ml-0.5' : 'ml-auto'} />}
+                  {/* Same white number as a private chat, not a red pill. */}
+                  {publicUnread > 0 && !showPublicChat && <UnreadCountChip count={publicUnread} className={publicLastLine || publicReactions ? 'ml-0.5' : 'ml-auto'} />}
+                </span>
                 {publicReactions && !showPublicChat
                   ? <p data-reaction-alert-line className="text-white font-bold text-sm truncate">{reactionAlertLine(t, publicReactions, { named: true })}</p>
-                  : <p className="text-zinc-500 text-sm truncate">{t('publicChat.subtitle')}</p>}
+                  : publicPreview
+                    ? <p data-room-preview className={`text-white text-sm truncate ${publicUnread > 0 ? 'font-bold' : 'font-normal'}`}>{publicPreview}</p>
+                    : <p className="text-zinc-500 text-sm truncate">{t('publicChat.subtitle')}</p>}
               </div>
-              {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} />}
-              {publicUnread > 0 && (
-                <span data-unread-chip data-public-chat-unread className="min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center leading-none">
-                  {publicUnread > 99 ? '99+' : publicUnread}
-                </span>
-              )}
             </button>
             )}
 
@@ -1625,6 +1629,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   key={chat.id}
                   community={chat}
                   pref={richList ? roomPref(chat) : unreadOnly(roomPref(chat))}
+                  summary={roomSummaries[chat.id]}
+                  me={walletAddress || ''}
                   reactions={selectedRoom?.id === chat.id ? null : roomPref(chat)?.reactions}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
@@ -1831,6 +1837,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const dialogs = (
     <>
+      <DeleteMessageDialog
+        subject="chat"
+        open={!!confirmChatDelete}
+        onOpenChange={(open) => { if (!open) setConfirmChatDelete(null); }}
+        canDeleteForEveryone={!!confirmChatDelete && !confirmChatDelete.isGroup && !confirmChatDelete.id.startsWith('new_')}
+        oneToOne
+        peerName={confirmChatDelete ? (confirmChatDelete.otherUser?.displayName || confirmChatDelete.otherUser?.username || null) : null}
+        onDelete={(scope) => { const conv = confirmChatDelete; setConfirmChatDelete(null); if (conv) deleteConversationNow(conv, scope); }}
+      />
       <AlertDialog open={!!clearTarget} onOpenChange={(open) => { if (!open) setClearTarget(null); }}>
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>

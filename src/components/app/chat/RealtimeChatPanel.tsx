@@ -19,7 +19,6 @@ import { dblClickReply } from '@/lib/dblclick-reply';
  */
 
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2, CornerDownRight, LogIn, ArrowDown, type LucideIcon } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
@@ -43,6 +42,7 @@ import { cn } from '@/lib/utils';
 import { RoomChatText } from './RoomChatText';
 
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, MessageMoreButton } from './message-menu-kit';
@@ -153,6 +153,7 @@ function ChatReactions({
   onRemoveReaction: (id: string, emoji: string) => void;
   messageId: string;
 }) {
+  useReactionHost(messageId);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
 
@@ -165,6 +166,7 @@ function ChatReactions({
         return (
           <button
             key={emoji}
+            data-chat-reaction-chip
             onClick={() => mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
             className={`group/reaction inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded-md border transition-colors ${
               mine
@@ -172,14 +174,14 @@ function ChatReactions({
                 : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600'
             }`}
           >
-            <span className="text-xs inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+            <span className="text-xs inline-flex items-center"><ReactionGlyph messageId={messageId} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" /></span>
             {mine ? (
               <>
-                <span className="group-hover/reaction:hidden">{addresses.length}</span>
+                <RollingCount value={addresses.length} className="group-hover/reaction:hidden" />
                 <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
               </>
             ) : (
-              <span>{addresses.length}</span>
+              <RollingCount value={addresses.length} />
             )}
           </button>
         );
@@ -486,15 +488,13 @@ export function RealtimeChatPanel({
                         ) : (
                           <RoomChatText key={msg.id} text={msg.content} />
                         )}
-                        {msg.reactions && Object.keys(msg.reactions).length > 0 && (
-                          <ChatReactions
-                            reactions={msg.reactions}
-                            currentUserAddress={walletAddress || undefined}
-                            onReact={onReact}
-                            onRemoveReaction={onRemoveReaction}
-                            messageId={msg.id}
-                          />
-                        )}
+                        <ChatReactions
+                          reactions={msg.reactions ?? {}}
+                          currentUserAddress={walletAddress || undefined}
+                          onReact={onReact}
+                          onRemoveReaction={onRemoveReaction}
+                          messageId={msg.id}
+                        />
                       </div>
                       {/* Every action lives in the message menu (right-click, a
                           hold on a phone, or this "..." for keyboard users). */}

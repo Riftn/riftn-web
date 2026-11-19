@@ -336,10 +336,11 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
 
   // Navigate to single post page when clicking non-interactive areas
   // Pre-cache post data for instant display on the single post page
-  /** Text opens immediately; reactions stay on their explicit controls. */
+  /** A click opens the post at once; on a phone a double tap on the text likes it. */
   const tapGestures = useTapGestures({
     postId: post.id,
     singleTapOnly: true,
+    touchLadder: true,
     reactionArea: 'center',
     enableLongPress: false,
     onSingleTap: (event) => {

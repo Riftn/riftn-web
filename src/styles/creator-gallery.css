@@ -1,0 +1,346 @@
+/* Creator gallery (/creator/gallery, the detail page and the Creator page
+   preview) dressed like Chat: every tile and panel is a Chat glass card on
+   the theme's own canvas, with the Chat accent for the lit bits.
+   The tokens copy the Chat inbox's (messages-cards.css) so both pages read as
+   one app in every theme. Components carry data attributes, never colour
+   classes, so the theme nets keyed on bg-white / text-white can't reach them. */
+
+[data-gallery-look] {
+  --cg-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 62%, white);
+  --cg-accent-ink: #fff;
+  --cg-ink: #fff;
+  --cg-muted: rgb(255 255 255 / 0.62);
+  --cg-soft: rgb(255 255 255 / 0.09);
+  --cg-hover: rgb(255 255 255 / 0.05);
+  --cg-card: linear-gradient(rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0)),
+    linear-gradient(var(--nav-glass, transparent), var(--nav-glass, transparent)),
+    var(--nav-glass-base, rgb(24 24 27 / 0.6));
+  --cg-rim: inset 0 0 0 1px rgb(255 255 255 / 0.14), inset 0 1px 0 rgb(255 255 255 / 0.22);
+  --cg-well: rgb(0 0 0 / 0.35);
+  --cg-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.7);
+  /* Canvas themes: the theme's own moving background shows through. */
+  --cg-canvas: color-mix(in srgb, var(--stage-solid, #111) 28%, transparent);
+  --cg-bar: color-mix(in srgb, var(--stage-solid, #111) 55%, transparent);
+  color: var(--cg-ink);
+}
+/* Plain themes: the page's own body colour, like Chat. */
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light']) [data-gallery-look] {
+  --cg-canvas: transparent;
+  --cg-bar: rgb(0 0 0 / 0.55);
+}
+html:is([data-theme='system'], [data-theme='immersive']) [data-gallery-look] {
+  --cg-accent: #fff;
+  --cg-accent-ink: #0b0b0c;
+  --cg-card: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03) 50%, rgb(255 255 255 / 0.02)), rgb(24 24 27 / 0.72);
+}
+html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-gallery-look] {
+  --cg-accent: #0b0b0c;
+  --cg-accent-ink: #fff;
+  --cg-ink: #0b0b0c;
+  --cg-muted: rgb(11 11 13 / 0.56);
+  --cg-soft: rgb(11 11 13 / 0.06);
+  --cg-hover: rgb(11 11 13 / 0.03);
+  --cg-card: rgb(250 250 252 / 0.85);
+  --cg-rim: inset 0 0 0 0.5px rgb(11 11 13 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(11 11 13 / 0.04), 0 4px 12px -6px rgb(11 11 13 / 0.12);
+  --cg-well: rgb(11 11 13 / 0.05);
+  --cg-shadow: 0 14px 30px -18px rgb(11 11 13 / 0.35);
+}
+html:is([data-system-tone='light'], [data-theme='light']) [data-gallery-look] {
+  --cg-canvas: transparent;
+  --cg-bar: rgb(249 248 244 / 0.82);
+}
+/* Minimal is the black-and-white theme: black page, Chat's white accent. */
+html[data-theme='minimal'] [data-gallery-look] {
+  --cg-accent: #fff;
+  --cg-accent-ink: #000;
+  --cg-ink: #fff;
+  --cg-muted: #8a8a8a;
+  --cg-soft: #1c1c1c;
+  --cg-hover: #111;
+  --cg-card: #0c0c0c;
+  --cg-rim: inset 0 0 0 1px #2c2c2c;
+  --cg-well: #050505;
+  --cg-shadow: none;
+}
+html[data-theme='winter'] [data-gallery-look] {
+  --cg-ink: #10263a;
+  --cg-muted: #4f6a82;
+  --cg-accent: #1f5f94;
+  --cg-soft: rgb(20 70 120 / 0.1);
+  --cg-hover: rgb(20 70 120 / 0.05);
+  --cg-card: rgb(255 255 255 / 0.62);
+  --cg-rim: inset 0 0 0 1px rgb(20 60 100 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --cg-well: rgb(20 60 100 / 0.08);
+  --cg-shadow: 0 14px 30px -18px rgb(20 60 100 / 0.4);
+}
+html[data-theme='osaka'] [data-gallery-look] { --cg-accent: #ff6fb5; }
+
+/* The Creator page itself is always dark, so its preview keeps dark cards. */
+html body [data-creator-page] [data-gallery-look] {
+  --cg-ink: #fff;
+  --cg-muted: rgb(255 255 255 / 0.62);
+  --cg-soft: rgb(255 255 255 / 0.09);
+  --cg-hover: rgb(255 255 255 / 0.05);
+  --cg-card: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03) 50%, rgb(255 255 255 / 0.02)), rgb(24 24 27 / 0.72);
+  --cg-rim: inset 0 0 0 1px rgb(255 255 255 / 0.14), inset 0 1px 0 rgb(255 255 255 / 0.22);
+  --cg-well: rgb(0 0 0 / 0.35);
+  --cg-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.7);
+}
+html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal'], [data-theme='winter']) [data-creator-page] [data-gallery-look] {
+  --cg-accent: #fff;
+  --cg-accent-ink: #0b0b0c;
+}
+
+/* ---- Page ---- */
+[data-gallery-page] {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  background: var(--cg-canvas);
+}
+[data-gallery-bar] {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 10px 12px;
+}
+[data-gallery-bar-pill] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 1800px;
+  margin: 0 auto;
+  min-height: 56px;
+  padding: 6px 8px;
+  border-radius: 20px;
+  background: var(--cg-bar);
+  background-image: linear-gradient(rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02));
+  box-shadow: var(--cg-rim), var(--cg-shadow);
+  -webkit-backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+  backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+}
+[data-gallery-bar-title] { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-gallery-bar-title] small { display: block; font-size: 12px; font-weight: 500; color: var(--cg-muted); }
+
+/* Round icon buttons, the Chat header's action buttons. */
+[data-gallery-icon] {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--cg-muted);
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+[data-gallery-icon] svg { width: 18px; height: 18px; }
+[data-gallery-icon]:disabled { opacity: 0.3; }
+@media (hover: hover) { [data-gallery-icon]:not(:disabled):hover { color: var(--cg-ink); background: var(--cg-hover); } }
+[data-gallery-icon]:not(:disabled):active { transform: scale(0.94); }
+[data-gallery-icon][aria-pressed='true'] { color: var(--cg-accent-ink); background: var(--cg-accent); }
+[data-gallery-icon][data-boxed] { background: var(--cg-soft); color: var(--cg-ink); }
+
+/* Accent pill: Load more, Browse all. */
+[data-gallery-pill] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cg-ink);
+  background: var(--cg-soft);
+  transition: background-color 150ms ease;
+}
+[data-gallery-pill] svg { width: 15px; height: 15px; }
+@media (hover: hover) { [data-gallery-pill]:hover { background: var(--cg-accent); color: var(--cg-accent-ink); } }
+
+/* ---- Grid ---- */
+[data-gallery-grid-head] { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+[data-gallery-grid-head] h2 { position: relative; padding-left: 14px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+/* The lit bar from Chat's unread rows marks the section. */
+[data-gallery-grid-head] h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 3px;
+  background: var(--cg-accent);
+  box-shadow: 0 0 10px var(--cg-accent);
+}
+[data-gallery-grid-head] p { font-size: 13px; color: var(--cg-muted); }
+
+[data-gallery-tile] {
+  position: relative;
+  display: block;
+  margin-bottom: 12px;
+  break-inside: avoid;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--cg-card);
+  box-shadow: var(--cg-rim);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  outline: none;
+}
+[data-gallery-tile] img { display: block; width: 100%; height: auto; border-radius: 18px; transition: transform 400ms ease; }
+/* The rim sits over the picture, like Chat's card edge. */
+[data-gallery-tile]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--cg-rim);
+  pointer-events: none;
+}
+[data-gallery-tile-meta] {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 28px 10px 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.72));
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+[data-gallery-tile-meta] span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-gallery-stat] { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+[data-gallery-stat] svg { width: 13px; height: 13px; }
+[data-gallery-video-badge] {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.5);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+[data-gallery-video-badge] svg { width: 12px; height: 12px; }
+@media (hover: hover) {
+  [data-gallery-tile]:hover { transform: translateY(-2px); box-shadow: var(--cg-rim), var(--cg-shadow); }
+  [data-gallery-tile]:hover img { transform: scale(1.03); }
+  [data-gallery-tile]:hover [data-gallery-tile-meta] { opacity: 1; transform: none; }
+}
+/* Phones have no hover: keep the counts in view when there are any. */
+@media (hover: none) {
+  [data-gallery-tile-meta][data-has-stats] { opacity: 1; transform: none; padding-top: 20px; }
+  [data-gallery-tile-meta][data-has-stats] span:first-child { visibility: hidden; }
+}
+[data-gallery-tile]:focus-visible { box-shadow: var(--cg-rim), 0 0 0 2px var(--cg-accent); }
+[data-gallery-tile]:focus-visible [data-gallery-tile-meta] { opacity: 1; transform: none; }
+
+[data-gallery-skeleton] {
+  margin-bottom: 12px;
+  break-inside: avoid;
+  border-radius: 18px;
+  background: var(--cg-card);
+  box-shadow: var(--cg-rim);
+  animation: cg-pulse 1.4s ease-in-out infinite;
+}
+@keyframes cg-pulse { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) {
+  [data-gallery-skeleton] { animation: none; }
+  [data-gallery-tile], [data-gallery-tile] img, [data-gallery-tile-meta] { transition: none; }
+}
+
+[data-gallery-empty] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 16px;
+  border-radius: 18px;
+  text-align: center;
+  color: var(--cg-muted);
+  background: var(--cg-card);
+  box-shadow: var(--cg-rim);
+}
+
+/* ---- Detail ---- */
+[data-gallery-card] {
+  border-radius: 22px;
+  background: var(--cg-card);
+  box-shadow: var(--cg-rim);
+}
+[data-gallery-stage] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--cg-well);
+  box-shadow: var(--cg-rim);
+}
+/* The picture's own colours blur behind it so tall and wide work both fill the stage. */
+[data-gallery-stage-glow] {
+  position: absolute;
+  inset: -40px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(48px) saturate(1.3);
+  opacity: 0.45;
+  pointer-events: none;
+}
+[data-gallery-stage] > :is(img, video) { position: relative; }
+[data-gallery-stage-tool] {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.5);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+[data-gallery-stage-tool] svg { width: 18px; height: 18px; }
+/* Side arrows on the stage for computers. */
+[data-gallery-stage-nav] {
+  position: absolute;
+  top: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: 14px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.45);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+[data-gallery-stage-nav][data-side='prev'] { left: 12px; }
+[data-gallery-stage-nav][data-side='next'] { right: 12px; }
+@media (hover: hover) and (min-width: 1024px) {
+  [data-gallery-stage-nav]:not(:disabled) { display: inline-flex; }
+  [data-gallery-stage]:hover [data-gallery-stage-nav] { opacity: 1; }
+}
+[data-gallery-actions] { padding: 4px 8px; }
+[data-gallery-actions] :is(button, a) { color: var(--cg-ink); }
+[data-gallery-muted] { color: var(--cg-muted); }
+[data-gallery-card] :is(textarea, input) { color: var(--cg-ink); }

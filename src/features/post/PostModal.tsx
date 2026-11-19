@@ -67,7 +67,7 @@ interface PostModalProps {
 function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, initialText, initialCategory, initialSound, initialPoll, initialLiveMode, draftScope, quotedPost, onPosted }: PostModalProps & { draftScope: string }) {
   const { t: _copy } = _useCopy();
   const isQuoting = !!quotedPost;
-  const { style: keyboardStyle } = useKeyboardSafeSheet(isOpen);
+  const { style: keyboardStyle, keyboardOpen } = useKeyboardSafeSheet(isOpen);
   const { isBanned } = useBannedAccount();
   // Where a live post goes once its mint has provisioned the stream. Held here
   // rather than in the action bar so it survives the bar's own re-renders, and
@@ -415,6 +415,9 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         </div>
       )}
       <PostAccessToggles
+        // While typing, the options shrink so the post itself (title and
+        // every line) has room to show and scroll.
+        compact={keyboardOpen}
         draftScope={draftScope}
         isSubscribersOnly={state.isSubscribersOnly}
         setIsSubscribersOnly={actions.setIsSubscribersOnly}
@@ -477,7 +480,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       />
 
       <PostActionBar
-        extraTool={!state.liveMode && !isQuoting && state.visibility === 'public' ? <CrossPostPicker onNavigateAway={handleClose} /> : undefined}
+        extraTool={!state.liveMode && !isQuoting && state.visibility === 'public' ? <CrossPostPicker /> : undefined}
         hideLive={isQuoting}
         imageInputRef={refs.imageInputRef}
         videoInputRef={refs.videoInputRef}

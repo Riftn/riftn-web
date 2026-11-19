@@ -39,6 +39,7 @@ import { MessageMenu } from '@/components/app/chat/MessageMenu';
 import { keepBrowserMenu, messageMenuMeta, useMenuPoint } from '@/components/app/chat/message-menu-kit';
 import { reactionMeta as holdReactionMeta, type PostReaction as HoldReaction } from '@/lib/reactions';
 import Languages from "@/components/ui/cut-icons/language";
+import { translateTargetName, useComposeTranslate } from '@/hooks/use-compose-translate';
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
 import Sparkles from "@/components/ui/cut-icons/assistant";
@@ -1297,6 +1298,9 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
   const commentDraftScope = commentDraftKey(walletAddress, tokenId);
   const [restoredDraft] = useState(() => loadDraft(commentDraftScope));
   const [newComment, setNewComment] = useDraftState(`comment:${tokenId}:text`, restoredDraft?.text ?? '');
+  // Translate what you typed (English unless you picked another language in
+  // the chat composer). Same button as the Public Chat composer.
+  const commentTranslator = useComposeTranslate(newComment, setNewComment as (v: string) => void);
   const [aiRewriting, setAiRewriting] = useState(false);
   const [aiMenu, setAiMenu] = useState<'closed' | 'open' | 'vibes'>('closed');
   const aiRewrite = async (mode: 'grammar' | 'style', style?: string) => {
@@ -3342,7 +3346,9 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
             <div
               data-comment-reply-tag
               className={cn(
-                "flex items-center gap-1.5 px-3 bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] rounded-xl",
+                // Solid, not glass: it sits inside the frosted reply bar, where its own
+                // blur can't reach the page, so the post read straight through it.
+                "flex items-center gap-1.5 px-3 bg-[var(--float-solid)] border border-white/[0.12] rounded-xl",
                 isMobile ? "mb-1 py-1.5" : "mb-2 py-2"
               )}
             >
@@ -3676,6 +3682,19 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                       aria-label={t('comments.recordVoiceNote')}
                     >
                       <Mic className="w-4 h-4" />
+                    </button>
+                  )}
+                  {newComment.trim().length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => { void commentTranslator.translate(); }}
+                      disabled={commentTranslator.busy}
+                      data-comment-tool="translate"
+                      aria-label={`${t('copy.8fe147696fbf', { defaultValue: 'Translate' })} · ${translateTargetName()}`}
+                      title={`${t('copy.8fe147696fbf', { defaultValue: 'Translate' })} · ${translateTargetName()}`}
+                      className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] rounded-lg text-zinc-400 hover:text-white transition-colors disabled:opacity-60"
+                    >
+                      {commentTranslator.busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
                     </button>
                   )}
                   {/* Desktop: AI sits beside the mic. Phones keep it above Post. */}

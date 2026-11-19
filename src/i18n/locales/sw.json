@@ -6,7 +6,11 @@
     "videoSize": "Video hiyo ni zaidi ya {{n}} MB. Chagua ndogo zaidi."
   },
   "textFeed": {
-    "tab": "Maandishi"
+    "tab": "Maandishi",
+    "errorTitle": "Machapisho hayakuweza kupakia",
+    "errorBody": "Jaribu kupakia tena mlisho wa maandishi.",
+    "emptyTitle": "Bado hakuna machapisho ya maandishi",
+    "emptyBody": "Machapisho ya maandishi yataonekana hapa."
   },
   "comic": {
     "showAll": "Onyesha kurasa zote {{count}}"
@@ -28,16 +32,63 @@
     "policyEveryone": "Kila mtu",
     "policyFollowers": "Wafuasi",
     "policyNobody": "Hakuna mtu",
-    "loadMore": "Pakia zaidi"
+    "loadMore": "Pakia zaidi",
+    "with": "Duet na @{{username}}",
+    "withOriginal": "Duet · tazama asili",
+    "unavailable": "Video hii haipatikani tena kwa duet.",
+    "allowLabel": "Ruhusu duet",
+    "allowDescription": "Nani anaweza kurekodi duet kando ya video zako. Unaweza pia kubadilisha hili kwenye kila chapisho.",
+    "settingsSection": "Duet",
+    "policyDefault": "Mipangilio ya akaunti",
+    "saveFailed": "Haikuweza kuhifadhi. Jaribu tena.",
+    "count_one": "Duet {{count}}",
+    "count_other": "Duet {{count}}",
+    "pageHeading": "Duet",
+    "pageTitle": "Duet za {{title}} na @{{creator}}",
+    "pageTitleNoCreator": "Duet za {{title}}",
+    "pageDescription": "Tazama kila duet ya video hii kwenye Riftn, au rekodi yako mwenyewe kando kwa kando.",
+    "empty": "Bado hakuna duet. Fungua chaguo za video na uchague Remix → Duet ili kutengeneza ya kwanza.",
+    "video": "Video",
+    "notFound": "Video hii haipatikani.",
+    "browseShorts": "Vinjari Shorts",
+    "notFoundTitle": "Video haikupatikana | Riftn"
   },
   "videoRemix": {
-    "sound": "Tumia sauti hii"
+    "sound": "Tumia sauti hii",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Skrini ya kijani",
+    "stitch": "Stitch",
+    "selectSource": "Fungua chaguo za video na uchague Remix ili kuanza."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Kila mtu",
       "followers": "Wafuasi",
-      "nobody": "Hakuna mtu"
+      "nobody": "Hakuna mtu",
+      "default": "Chaguo-msingi langu"
+    },
+    "shareFailed": "Zawadi yako imetumwa, lakini mgao wa muundaji wa asili haukufanikiwa.",
+    "notify": {
+      "duet": "{{name}} amefanya duet na video yako",
+      "stitch": "{{name}} amefanya stitch ya video yako",
+      "react": "{{name}} ameitikia video yako",
+      "reactLive": "{{name}} anaitikia video yako moja kwa moja"
+    },
+    "linkFailed": "Chapisho lako limewekwa, lakini halikuweza kuunganishwa na video ya asili.",
+    "settingsHeading": "Remix",
+    "stitch": {
+      "allow": "Ruhusu stitch",
+      "allowDesc": "Nani anaweza kutumia hadi sekunde 5 za video zako kwenye zao. Unaweza pia kubadilisha hili kwa kila chapisho.",
+      "saveFailed": "Haikuweza kuhifadhi mpangilio wako wa stitch. Jaribu tena.",
+      "settingFailed": "Chapisho lako limewekwa, lakini mpangilio wake wa stitch haukuhifadhiwa. Ubadilishe kutoka Hariri chapisho.",
+      "from": "Imeunganishwa kutoka kwa {{name}}",
+      "count_one": "Stitch {{count}}",
+      "count_other": "Stitch {{count}}",
+      "listTitle": "Stitch",
+      "listFailed": "Haikuweza kupakia stitch. Jaribu tena.",
+      "listEmpty": "Bado hakuna stitch.",
+      "unavailable": "Video hii haipatikani tena kwa stitch."
     }
   },
   "dehubAppPage": {
@@ -63,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Fungua Riftn kwenye kivinjari chako",
     "seoDescription": "Pata programu ya Riftn: chanzo huria, mitandao ya kijamii inayomilikiwa na mtumiaji yenye utiririshaji wa moja kwa moja, ujumbe uliosimbwa na uangalie ili upate mapato. Bure kwenye Google Play, App Store na wavuti.",
-    "seoTitle": "Programu ya Riftn: Pakua kwa Android, iPhone na Wavuti"
+    "seoTitle": "Programu ya Riftn: Pakua kwa Android, iPhone na Wavuti",
+    "learnMore": "Unataka picha kamili? <guide>Riftn ni nini?</guide> inaeleza jukwaa kwa kina."
   },
   "dehubLinks": {
     "copyLinkDetail": "Nakili kiunganishi cha {{item}} kwenye ubao wako wa kunakili",
@@ -80,12 +132,16 @@
       "profile": "wasifu",
       "proposal": "pendekezo",
       "stage": "sahifa",
-      "store": "duka"
+      "store": "duka",
+      "featureRequest": "ombi",
+      "page": "ukurasa"
     },
     "recipientChat": "gumzo",
     "recipientUser": "mtumiaji",
     "sendFailed": "Imeshindwa kutuma {{item}}",
-    "sentTo": "{{item}} imetumwa kwa {{name}}"
+    "sentTo": "{{item}} imetumwa kwa {{name}}",
+    "openPage": "Fungua ukurasa",
+    "viewRequest": "Tazama ombi"
   },
   "stageCover": {
     "admitOne": "KUBALI MOJA",
@@ -194,7 +250,24 @@
   "signedFollows": {
     "setUp": "Washa",
     "turnOff": "Zima",
-    "efpTurnOff": "Zima"
+    "efpTurnOff": "Zima",
+    "title": "Unaowafuata, kwenye mnyororo",
+    "description": "Pochi yako inasaini unaowafuata, na kila siku orodha hugongwa muhuri kwenye Base. Programu yoyote inaweza kupata unaowafuata kutoka kwa pochi yako, hata bila Riftn.",
+    "on": "Imewashwa kwa kifaa hiki",
+    "off": "Imezimwa kwa kifaa hiki",
+    "turnedOn": "Unaowafuata sasa wanasainiwa na pochi yako",
+    "turnedOff": "Imezimwa kwa kifaa hiki",
+    "failed": "Pochi yako haikusaini. Jaribu tena.",
+    "hiddenNote": "Orodha za kufuata zilizofichwa na akaunti za faragha haziwekwi kwenye orodha ya umma.",
+    "efpOn": "Imenakiliwa kwenye EFP · {{count}} unaowafuata",
+    "efpOff": "Ziweke pia kwenye EFP",
+    "efpTurnOn": "Ongeza kwenye EFP",
+    "efpDone": "Unaowafuata wanawekwa kwenye EFP",
+    "efpStopped": "Kunakili kwenye EFP kumesimamishwa. Orodha inabaki kuwa yako.",
+    "efpHasList": "Tayari una orodha ya EFP. Riftn haiwezi kuijaza hiyo bado.",
+    "efpNoGas": "Pochi yako inahitaji ETH kidogo kwenye Base kwa hili.",
+    "efpFailed": "Hilo halikufanikiwa. Jaribu tena.",
+    "efpNote": "EFP ni orodha ya kufuata ambayo programu nyingine husoma (efp.app). Ni bure ukitumia pochi yako ya Riftn; pochi nyingine hulipa senti chache kwenye Base. Orodha ni yako."
   },
   "profileFields": {
     "title": "Sehemu za wasifu",
@@ -223,7 +296,9 @@
       "location": "Eneo",
       "custom": "Maalum",
       "customOption": "Lebo mahususi"
-    }
+    },
+    "add": "Ongeza sehemu",
+    "remove": "Ondoa sehemu"
   },
   "followedTags": {
     "follow": "Fuata #{{tag}}",
@@ -370,7 +445,8 @@
     "step": "Kwa udhibiti wa akaunti, ongeza https://riftn.com/mcp kama mteja wa OAuth, uingie kwenye Riftn na tathmini manufaa kabla ya kubakiza kuingia.",
     "profilePrompt": "Sasisha wasifu wangu wa Riftn kuwa: Muundaji huru anayetengeneza filamu na muziki.",
     "generatePrompt": "Nionyeshe mifano ya picha ya Riftn na nukuu picha kabla ya kuizalisha.",
-    "libraryPrompt": "Onyesha nyenzo za hivi karibuni kwenye maktaba yangu ya Muumba wa Riftn."
+    "libraryPrompt": "Onyesha nyenzo za hivi karibuni kwenye maktaba yangu ya Muumba wa Riftn.",
+    "agents": "Chapisha, jibu, itikia, chapisha tena, fuata na hariri wasifu kama mawakala unaowamiliki"
   },
   "twitchMirror": {
     "title": "Kioo cha kuogelea",
@@ -471,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "pakua programu, Android, iPhone, programu ya simu, weka, APK, programu ya kompyuta, weka kwenye kompyuta, Windows, Mac"
+      "getTheApp": "pakua programu, Android, iPhone, programu ya simu, weka, APK, programu ya kompyuta, weka kwenye kompyuta, Windows, Mac",
+      "home": "mlisho, ratiba, machapisho mapya, kwa ajili yako, unaowafuata, ukurasa wa mbele",
+      "profile": "wasifu wangu, akaunti yangu, ukurasa wangu, machapisho yangu, picha ya wasifu, bio, wafuasi",
+      "explore": "tafuta, gundua, pata, zinazovuma, maarufu, hashtag, watu, waundaji",
+      "prompt": "AI, tengeneza, picha ya AI, video ya AI, kitengeneza picha, maandishi kuwa picha, sanaa ya AI",
+      "editor": "kihariri video, hariri video, punguza, kata, manukuu, maandishi chini, madoido",
+      "creator": "unda, studio, zana za AI, picha, video, muziki, sauti ya maelezo, 3D",
+      "converter": "ingiza video, pakua, YouTube, TikTok, Instagram, badilisha",
+      "migrate": "hamisha chaneli yangu, ingiza chaneli, uingizaji kwa wingi, chaneli ya YouTube",
+      "notifications": "tahadhari, shughuli, kutajwa, majibu, kupendwa, kengele",
+      "messages": "DM, ujumbe wa moja kwa moja, gumzo, kikasha, mazungumzo, ujumbe wa faragha",
+      "communities": "vikundi, jumuiya, vyumba, vilabu, majukwaa, wanachama",
+      "assistant": "AI, chatbot, uliza, msaada, gumzo la AI, maswali",
+      "settings": "mapendeleo, akaunti, faragha, usalama, nenosiri, lugha, mandhari, hali ya giza, waliozuiwa, futa akaunti",
+      "leaderboard": "orodha ya viongozi, nafasi, waundaji bora, watumiaji bora, pointi, alama",
+      "bookmarks": "zilizohifadhiwa, vipendwa, tazama baadaye, soma baadaye, machapisho yaliyohifadhiwa, maktaba",
+      "command": "dashibodi, takwimu, mapato, kipato, maarifa, udhibiti, takwimu zangu",
+      "wallet": "salio, pesa, fedha, tokeni, crypto, weka, toa, tuma, pokea, lipa",
+      "events": "kalenda, ratiba, mkutano, zijazo, tiketi, AMA",
+      "stages": "vyumba vya sauti, gumzo la sauti, spaces, sauti ya moja kwa moja, mazungumzo, podikasti",
+      "featureRequests": "jenga, wajenzi, mawazo, mapendekezo, ripoti hitilafu, hitilafu, marekebisho, ramani ya njia, piga kura, orodha ya matakwa, boresha",
+      "feedback": "tathmini, ukadiriaji, utafiti, maoni, malalamiko, toa maoni",
+      "staking": "weka hisa, staking, weka, faida, zawadi, pata mapato, mgao wa faida, beji, viwango, riba",
+      "superpowers": "kuza, tangaza, manufaa, nguvu, manufaa ya beji, ufikiaji, maboresho",
+      "governance": "piga kura, upigaji kura, mapendekezo, kura ya maoni, karatasi ya kura, amua",
+      "dao": "hazina, changia, mchango, mfuko wa jumuiya, toa mchango, ruzuku",
+      "bounties": "kazi, ajira, majukumu, vibarua, kazi huru, ajiri, pata pesa, kazi ya kulipwa",
+      "myBounties": "zawadi zangu za kazi, kazi zangu, historia, malipo, kazi zilizokamilika",
+      "affiliate": "rufaa, alika marafiki, alika, kamisheni, mshirika, pata mapato",
+      "careers": "kazi, kuajiri, fanya kazi nasi, jiunge na timu, tuma maombi, nafasi za kazi",
+      "stores": "duka, maduka, soko, bidhaa za chapa, nunua, uza, bidhaa, ununuzi",
+      "fractions": "hisa, umiliki, wekeza, miliki chapisho, NFT, NFTs, vitu vya kukusanya, biashara",
+      "usernames": "jina la mtumiaji, handle, jina, badilisha jina langu, nunua jina, uza jina",
+      "accounts": "nunua akaunti, uza akaunti, akaunti zinazouzwa, wafuasi, hamisha akaunti",
+      "apps": "duka la programu, programu ndogo, jenga programu, wasanidi, zana",
+      "arcade": "michezo, mchezo, cheza, uchezaji, chess, shooter, burudani",
+      "glossary": "istilahi, maana, kamusi, maelezo, ni nini",
+      "compare": "ulinganisho, linganisha, dhidi ya, mbadala, YouTube, X, TikTok",
+      "guide": "kuanza, jinsi ya, mafunzo, msaada, jifunze, mwanzilishi, mgeni hapa",
+      "stats": "takwimu, uchanganuzi, nambari, chati, bei, ugavi, wamiliki",
+      "docs": "nyaraka, msaada, API, whitepaper, wasanidi, mwongozo",
+      "blog": "habari, makala, masasisho, matangazo, kipya ni nini",
+      "videos": "tazama, video, klipu, video ndefu",
+      "shorts": "reels, video fupi, video wima, telezesha",
+      "music": "sauti, nyimbo, trakti, sikiliza, redio, orodha ya kucheza",
+      "liveTv": "TV, mitiririko, kutiririsha, moja kwa moja, matangazo, chaneli, tazama moja kwa moja",
+      "buyTokens": "nunua tokeni, nunua, ongeza salio, kadi, kadi ya mkopo, fiat",
+      "bridge": "kati ya minyororo, hamisha tokeni, minyororo, hamisha kati ya minyororo",
+      "top100": "top 100, sarafu, sarafu za kidijitali, thamani ya soko, bei",
+      "agents": "mawakala wa AI, mawakala, boti, otomatiki, haiba",
+      "advertising": "matangazo, tangazo, kampeni, tangaza, dhamini, masoko",
+      "premium": "usajili, boresha, pro, uanachama, bila matangazo, hakuna matangazo",
+      "pricing": "mipango, gharama, bei, kiasi gani, usajili",
+      "creators": "programu ya waundaji, mabalozi, washirika, omba kuwa muundaji, pata mapato",
+      "connectAi": "MCP, ChatGPT, Claude, API, muunganisho, unganisha AI",
+      "packs": "emoji, stika, GIF, vifurushi vya emoji, vifurushi vya stika, emoji maalum",
+      "publicChat": "gumzo, gumzo la jumla, chumba cha gumzo, ukumbi, ongea, gumzo la jumuiya",
+      "planned": "zilizopangwa, panga ratiba, machapisho yaliyopangwa, foleni, baadaye",
+      "liveStudio": "nenda moja kwa moja, tiririsha, kutiririsha, OBS, viwekelea, tahadhari, wijeti",
+      "launchpad": "zindua tokeni, unda sarafu, tengeneza sarafu, meme coin, bonding curve, geuza kuwa tokeni"
     },
     "reorderHint": "Shikilia na buruta ikoni yoyote ili kupanga upya",
     "reorderReset": "Weka upya",
@@ -519,7 +654,14 @@
     "getTheApp": "Pata Programu",
     "connectAi": "Unganisha AI",
     "converter": "Kigeuzi",
-    "affiliate": "Ushirika"
+    "affiliate": "Ushirika",
+    "groups": {
+      "create": "Unda",
+      "discover": "Gundua",
+      "main": "Kuu",
+      "money": "Pesa",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Angalia wasifu wa {{name}}",
@@ -1143,7 +1285,39 @@
     "socialConnectedShort": "Imeunganishwa",
     "socialConnectFailed": "Imeshindwa kuunganisha {{platform}}. Tafadhali jaribu tena.",
     "socialVerifiedFollowers": "{{value}} wafuasi",
-    "socialFollowersPending": "Kusasisha idadi ya wafuasi"
+    "socialFollowersPending": "Kusasisha idadi ya wafuasi",
+    "menuLayoutFolders": "Folda",
+    "chatCards": "Gumzo kama kadi",
+    "chatCardsDesc": "Kila gumzo kwenye kadi yake. Zima ili kupata orodha ya kawaida yenye mstari kati ya gumzo.",
+    "chatDeleteChoice": "Unapofuta ujumbe",
+    "chatDeleteChoiceDesc": "Uliza kila mara, au futa kila mara kwa ajili yako tu au kwa kila mtu kwenye gumzo.",
+    "chatDeleteAsk": "Uliza kila mara",
+    "chatDeleteMe": "Futa kwa ajili yangu",
+    "chatDeleteMeDesc": "Umeondoka kwenye gumzo lako, wengine bado wanauona",
+    "chatDeleteEveryone": "Futa kwa kila mtu",
+    "chatDeleteEveryoneDesc": "Inapowezekana. Ujumbe wa mtu mwingine kwenye kikundi bado unafutwa kwako tu",
+    "showLikes": "Onyesha ninachopenda kwa kila mtu",
+    "showLikesDesc": "Yeyote anaweza kufungua kichupo cha Ninazopenda kwenye wasifu wako. Imezimwa kwa chaguo-msingi, kwa hivyo ni wewe tu unayeweza kuona ulichopenda.",
+    "showFollowersList": "Onyesha wanaonifuata",
+    "showFollowersListDesc": "Ruhusu yeyote kufungua orodha ya wafuasi wako. Hili likizimwa, ni wewe tu unayeweza kuiona.",
+    "showFollowingList": "Onyesha ninaowafuata",
+    "showFollowingListDesc": "Ruhusu yeyote kufungua orodha ya watu unaowafuata. Hili likizimwa, ni wewe tu unayeweza kuiona.",
+    "showFollowCounts": "Onyesha idadi ya wafuasi wangu",
+    "showFollowCountsDesc": "Onyesha una wafuasi wangapi na unafuata watu wangapi. Kuzima hili pia huficha orodha zote mbili.",
+    "readerProfileView": "Fungua wasifu mwingine kama",
+    "readerProfileViewDesc": "Chagua gridi au orodha kwa kila wasifu unaofungua, au acha chaguo la kila mtu",
+    "readerProfileViewOwner": "Chaguo la kila mtu",
+    "tipsOffNote": "Zawadi na utumaji kwako vimezimwa hili likiwa limewashwa. Lizime ili upokee zawadi tena.",
+    "playback": "Uchezaji",
+    "menuLayout": "Mpangilio wa menyu",
+    "menuLayoutDesc": "Jinsi menyu inavyopanga kurasa zake",
+    "menuLayoutTabs": "Vichupo",
+    "menuLayoutTabsDesc": "Kikundi kimoja kwa wakati, chenye aikoni kubwa",
+    "menuLayoutSections": "Sehemu",
+    "menuLayoutSectionsDesc": "Kila ukurasa kwa wakati mmoja, chini ya vichwa vya vikundi",
+    "menuLayoutFoldersDesc": "Kurasa zako kuu, kisha folda kwa kila kikundi",
+    "publicChatInBar": "Gumzo la Umma kwenye upau wa chini",
+    "publicChatInBarDesc": "Mguso mmoja kuingia Gumzo la Umma kutoka kwenye upau wa chini wa skrini"
   },
   "common": {
     "confirm": "Thibitisha",
@@ -1233,7 +1407,14 @@
     "messagePublic": "Umma",
     "railTitle": "Vidokezo",
     "railTotal": "{{amount}} tokeni",
-    "tokensUnit": "tokeni"
+    "tokensUnit": "tokeni",
+    "messagePlaceholder": "Sema kitu pamoja na zawadi yako",
+    "messagePrivate": "{{name}} pekee",
+    "theCreator": "muundaji",
+    "messageWallNote": "Huonekana kwenye ukuta wa zawadi baada ya zawadi kufanikiwa.",
+    "sendWithMessage": "Tuma pamoja na ujumbe",
+    "messageFailed": "Ujumbe wako haukuweza kuongezwa. Hakuna zawadi iliyotumwa.",
+    "wallLabel": "Jumbe za zawadi"
   },
   "postOptions": {
     "liveAlertsOn": "Sasa unamfuata {{name}}. Utapata arifa wanapoanza matangazo ya moja kwa moja.",
@@ -1273,7 +1454,14 @@
     "giftBoost": "Toa zawadi ya boost",
     "markSection": "Sehemu zinazoweza kuruka",
     "copyFailed": "Imeshindwa kunakili kiungo",
-    "share": "Shiriki"
+    "share": "Shiriki",
+    "refreshLinkPreview": "Onyesha upya hakikisho la kiungo",
+    "linkPreviewRefreshed": "Hakikisho la kiungo limeonyeshwa upya",
+    "linkPreviewRefreshFailed": "Imeshindwa kufikia tovuti hiyo. Jaribu tena baadaye.",
+    "castToTv": "Tuma kwenye TV",
+    "castStarted": "Inacheza kwenye TV yako",
+    "castUnsupported": "Kivinjari hiki hakiwezi kutuma. Fungua Riftn kwenye Chrome au Safari ili kuicheza kwenye TV yako.",
+    "castFailed": "Imeshindwa kufikia TV. Hakikisha iko kwenye Wi-Fi ileile kisha ujaribu tena."
   },
   "filters": {
     "sort": "Panga",
@@ -1877,7 +2065,10 @@
       "bountySubmittedNamed": "{{name}} ilipokea kazi yake kwenye bai ya “{{title}}”",
       "bountySubmitted": "{{name}} ilipokea kazi yake kwenye bai",
       "sentNotification": "{{name}} alikutumia arifa"
-    }
+    },
+    "groupEarlier": "Awali",
+    "searchPlaceholder": "Tafuta arifa",
+    "searchEmpty": "Hakuna arifa zinazolingana"
   },
   "leaderboard": {
     "title": "Ubao wa Viongozi",
@@ -1922,7 +2113,13 @@
     "loadingBoard": "Inapakia ubao wa viongozi…",
     "amountTokens": "{{amount}} tokeni",
     "directReferrals": "{{count}} moja kwa moja",
-    "secondaryReferrals": "{{count}} sekondari"
+    "secondaryReferrals": "{{count}} sekondari",
+    "ogChallenge": "Changamoto ya OG",
+    "ogHolders_one": "Mmiliki {{count}} wa OG",
+    "ogHolders_other": "Wamiliki {{count}} wa OG",
+    "ogChallengeTitle": "Warudishe wamiliki wa OG",
+    "ogChallengeBody": "Alika watu ambao bado wanamiliki DHB. Wakijiunga kwa kiungo chako cha mwaliko na kuweka DHB yao kwenye pochi yao ya Riftn, wanahesabiwa kwako hapa.",
+    "ogChallengeCta": "Pata kiungo chako cha mwaliko"
   },
   "dhbListing": {
     "title": "Uorodheshaji wa tokeni unakuja hivi karibuni!",
@@ -2065,17 +2262,39 @@
     "shipping": "Kinatengenezwa",
     "noShippingYet": "Hakuna kinachoendelea",
     "shippingAppearHere": "Maombi yanayotengenezwa yataonekana hapa.",
-    "loadFailed": "Haikuweza kupakia maombi"
+    "loadFailed": "Haikuweza kupakia maombi",
+    "editMedia": "Picha na video",
+    "editAddMedia": "Ongeza picha au video",
+    "deviceInfoNote": "Maelezo ya kifaa yameambatishwa ili kutusaidia kurekebisha hitilafu.",
+    "deviceInfo": "Maelezo ya kifaa",
+    "deviceInfoOwners": "Wamiliki wa ubao pekee ndio wanaoona hili",
+    "deviceInfoError": "Imeshindwa kupakia maelezo ya kifaa",
+    "deviceInfoNone": "Hakuna maelezo ya kifaa kwa ombi hili",
+    "deviceInfoErrors": "Hitilafu za hivi karibuni"
   },
   "auth": {
-    "loginRequired": "Kuingia kunahitajika"
+    "loginRequired": "Kuingia kunahitajika",
+    "accountDeleted": "Akaunti hii ilifutwa. Unaweza kujisajili tena kama akaunti mpya.",
+    "accountDeletedHours_one": "Akaunti hii ilifutwa. Unaweza kujisajili tena kwa barua pepe au simu ileile baada ya takriban saa {{count}}.",
+    "accountDeletedHours_other": "Akaunti hii ilifutwa. Unaweza kujisajili tena kwa barua pepe au simu ileile baada ya takriban saa {{count}}.",
+    "accountDeletedDays_one": "Akaunti hii ilifutwa. Unaweza kujisajili tena kwa barua pepe au simu ileile baada ya takriban siku {{count}}.",
+    "accountDeletedDays_other": "Akaunti hii ilifutwa. Unaweza kujisajili tena kwa barua pepe au simu ileile baada ya takriban siku {{count}}."
   },
   "messages": {
     "newDrawer": {
       "to": "Kwa",
       "recent": "Hivi karibuni",
       "suggested": "Inapendekezwa",
-      "youFollow": "Watu unaowafuata"
+      "youFollow": "Watu unaowafuata",
+      "placeholder": "Jina au @jinalamtumiaji",
+      "chattedBefore": "Mmeongea",
+      "mutual": "Mnafuatana",
+      "dmsOff": "DM zimezimwa",
+      "keepTyping": "Endelea kuandika ili kumtafuta kila mtu",
+      "noOne": "Hakuna aliyepatikana",
+      "tryUsername": "Jaribu @jinalamtumiaji lake halisi",
+      "sayHi": "Msalimie mtu",
+      "typeAny": "Andika jina lolote au @jinalamtumiaji"
     },
     "reply": "Jibu",
     "react": "Itikia",
@@ -2116,7 +2335,8 @@
     "noConversationsYet": "Hakuna mazungumzo bado",
     "sending": "Inatuma",
     "retrySend": "Jaribu tena",
-    "discardSend": "Ondoa"
+    "discardSend": "Ondoa",
+    "notSent": "Haukutumwa"
   },
   "music": {
     "listeningCount_one": "{{count}} akisikiliza",
@@ -2200,7 +2420,22 @@
     "viewMode": "Mvuto",
     "back": "Rudi",
     "reserve": {
-      "signIn": "Ingia"
+      "signIn": "Ingia",
+      "available": "Jina la mtumiaji linapatikana",
+      "held": "Limeshikiliwa kwa ajili yako",
+      "ended": "Muda wa kushikilia umeisha",
+      "busy": "Linahifadhiwa",
+      "availableBody": "riftn.com/{{name}} liko wazi sasa hivi. Lihifadhi na tutalishikilia kwa dakika moja wakati unajisajili.",
+      "heldBody": "Hakuna mwingine anayeweza kuchukua @{{name}} hadi kipima muda kiishe. Kamilisha usajili ili ulibaki nalo.",
+      "endedBody": "Dakika yako imeisha, kwa hivyo @{{name}} liko wazi kwa kila mtu tena. Bado linapatikana.",
+      "busyBody": "Kuna mtu anajisajili kama @{{name}} sasa hivi. Asipomaliza, litakuwa wazi kipima muda kikiisha.",
+      "finish": "Kamilisha usajili",
+      "again": "Hifadhi tena",
+      "cta": "Hifadhi sasa",
+      "letGo": "Liachilie",
+      "haveAccount": "Una akaunti?",
+      "seoTitle": "@{{name}} linapatikana kwenye Riftn",
+      "seoDescription": "Hakuna aliye na riftn.com/{{name}} bado. Lihifadhi na ujisajili ili liwe lako."
     },
     "usernameAvailable": "Jina la mtumiaji linapatikana!",
     "signUpToClaim": "Jisajili leo kudai",
@@ -2231,12 +2466,16 @@
     "tabs": {
       "playlists": "Orodha za kucheza",
       "dislikes": "Sivyopenda",
-      "likes": "Kupenda"
+      "likes": "Kupenda",
+      "articles": "Makala"
     },
     "likedPosts": {
       "emptyTitle": "Hakuna vipendwa bado",
       "privateTitle": "Vipendwa ni vya faragha",
-      "loadMore": "Pakia zaidi"
+      "loadMore": "Pakia zaidi",
+      "emptyOwn": "Machapisho unayopenda yanaonekana hapa. Ni wewe tu unayeweza kuyaona isipokuwa uwashe Onyesha ninachopenda kwenye Mipangilio.",
+      "emptyOther": "Bado hakuna kilichopendwa.",
+      "privateDesc": "Akaunti hii inaweka inavyopenda kuwa siri."
     },
     "dislikes": {
       "emptyTitle": "Bado hakuna",
@@ -2261,11 +2500,31 @@
     "sortMostLiked": "Kupendwa zaidi",
     "sortCustomShort": "Maalum",
     "arrange": {
-      "saving": "Inahifadhi..."
+      "saving": "Inahifadhi...",
+      "title": "Panga machapisho yako",
+      "hint": "Shikilia chapisho na ukiburute hadi mahali pake papya. Wageni wanaona mpangilio huu kwanza.",
+      "drag": "Buruta ili kusogeza",
+      "toTop": "Sogeza juu kabisa",
+      "save": "Hifadhi mpangilio",
+      "saved": "Mpangilio wako umehifadhiwa",
+      "reset": "Rudi kwa mapya kwanza",
+      "resetDone": "Rudi kwa mapya kwanza",
+      "saveFailed": "Haikuweza kuhifadhi mpangilio wako. Tafadhali jaribu tena.",
+      "loadFailed": "Haikuweza kupakia machapisho yako. Funga hili na ujaribu tena.",
+      "empty": "Bado hakuna cha kupanga. Chapisha kitu kwanza."
     },
     "searchThisChannel": "Tafuta katika kituo hiki",
     "searchResultCount": "Matokeo 1 kwa \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} matokeo ya \"{{query}}\""
+    "searchResultCountPlural": "{{count}} matokeo ya \"{{query}}\"",
+    "unavailable": "Wasifu haupatikani",
+    "mutualsOne": "{{count}} Mnayefuatana naye:",
+    "mutualsMany": "{{count}} Mnaofuatana nao:",
+    "articles": {
+      "emptyTitle": "Bado hakuna makala",
+      "emptySubtitle": "Makala yataonekana hapa"
+    },
+    "sortCustom": "Mpangilio maalum",
+    "arrangeButton": "Panga machapisho"
   },
   "tv": {
     "seoTitle": "TV ya Moja kwa Moja: Vituo vya Bure Kutoka Ulimwenguni Pote",
@@ -2341,7 +2600,8 @@
     },
     "swapSuccess": {
       "title": "Kubadilisha kumefanikiwa!",
-      "addedToWallet": "{{amount}} {{symbol}} imewekwa kwenye pochi yako"
+      "addedToWallet": "{{amount}} {{symbol}} imewekwa kwenye pochi yako",
+      "received": "{{amount}} <coin></coin> imepokelewa"
     },
     "tokensUnit": "tokeni"
   },
@@ -2529,7 +2789,26 @@
     "createSignIn": "Ingia tena ili kuunda wakala",
     "checkConnection": "Angalia muunganisho wako kisha jaribu tena.",
     "welcome": {
-      "text": "Ujumbe wa kukaribisha"
+      "text": "Ujumbe wa kukaribisha",
+      "title": "Karibisha wanachama wapya",
+      "help": "Wakala huyu hufuata na/au hutuma ujumbe kwa watu waliojiunga na Riftn hivi karibuni, wachache kwa siku.",
+      "follow": "Fuata wanachama wapya",
+      "message": "Tuma ujumbe kwa wanachama wapya",
+      "textHelp": "{name} inakuwa @jinalamtumiaji wao. Hakuna viungo. Hutumwa mara moja kwa kila mtu.",
+      "saveText": "Hifadhi ujumbe",
+      "perDay": "Watu kwa siku",
+      "fewer": "Wachache zaidi kwa siku",
+      "more": "Zaidi kwa siku",
+      "today": "Leo: {{follows}} wamefuatwa · {{messages}} wametumiwa ujumbe",
+      "limits": "Kamwe si mtu yuleyule mara mbili. Huruka yeyote aliyekuzuia au kukunyamazisha, aliyezima jumbe mpya au aliyejificha kutoka Wanachama wapya.",
+      "showLog": "Ona aliowakaribisha",
+      "hideLog": "Ficha makaribisho",
+      "empty": "Bado hakuna. Wanachama wapya wanaonekana hapa wanapojiunga.",
+      "followed": "Amefuatwa",
+      "messaged": "Ametumiwa ujumbe",
+      "skipped": "Ameachwa",
+      "failed": "Haikuweza kumfikia",
+      "defaultText": "Habari {name}, karibu Riftn! 👋"
     },
     "workspace": {
       "moderation": "Usimamizi wa mkondo",
@@ -2725,7 +3004,15 @@
     "switchWalletAccount": "Kuondoa akaunti",
     "walletLoadFailed": "Haikupatikana kwenye timu. Jaribu tena.",
     "openInBrowser": "Fungua kwenye kivinjari",
-    "copyLink": "Nakili kiungo"
+    "copyLink": "Nakili kiungo",
+    "bringLoginOver": "Ulitumia Riftn kwenye dehub.io? <bring>Leta kuingia kwako hapa</bring>",
+    "didYouMean": "Ulimaanisha {{email}}?",
+    "profileMovedTitle": "Wasifu wako umehamishwa",
+    "migrateWrongLogin": "Kuingia huko kulifungua pochi nyingine, kwa hivyo hakuna kilichobadilika. Wasifu wako wa zamani uliundwa kwa {{login}}. Tumia hiyo kuurudisha.",
+    "googleInAppTitle": "Google haitaingia ndani ya {{app}}",
+    "googleInAppTitleUnnamed": "Google haitaingia ndani ya programu hii",
+    "googleInAppBody": "Fungua Riftn kwenye kivinjari chako ili kutumia Google, au ingia kwa barua pepe hapa.",
+    "tryAnyway": "Jaribu hata hivyo"
   },
   "careers": {
     "title": "Kazi katika Riftn",
@@ -2950,7 +3237,16 @@
     "searchDehubFor": "Tafuta \"{{query}}\" kwenye Riftn",
     "switchAccount": "Badilisha akaunti",
     "signedInAs": "Imebainika kama {{name}}",
-    "requestSend": "Tuma ombi"
+    "requestSend": "Tuma ombi",
+    "requestPrompt": "Bado haipo hapa? Itume kama ombi",
+    "requestPromptShort": "Bado haipo hapa?",
+    "requestDraftMenu": "Ongeza {{query}} kwenye Riftn",
+    "requestDraftSettings": "Mpangilio wa {{query}}",
+    "requestPostsTo": "Inachapisha kwenye Maombi",
+    "requestHint": "Inachapisha kwenye Maombi kwa jina lako. Tutakujulisha itakapotolewa.",
+    "requestSent": "Imetumwa kwenye Maombi",
+    "requestSentHint": "Tutakujulisha itakapotolewa.",
+    "requestSeeIt": "Lione kwenye Maombi"
   },
   "comments": {
     "reportComment": "Ripoti maoni",
@@ -3043,7 +3339,23 @@
     "likersEmptyTitle": "Hakuna vipendwa bado",
     "likersEmptyBody": "Vipendwa vya maoni haya vitaonekana hapa.",
     "anonymousLikes_one": "Kipendwa {{count}} kutoka kwa mmiliki wa beji asiyejulikana",
-    "anonymousLikes_other": "Vipendwa {{count}} kutoka kwa wamiliki wa beji wasiojulikana"
+    "anonymousLikes_other": "Vipendwa {{count}} kutoka kwa wamiliki wa beji wasiojulikana",
+    "threadParts": {
+      "moveUp": "Waeleze mifumo ya kawaida",
+      "moveDown": "Nenda chini",
+      "reorder": "Panga upya",
+      "save": "Hifadhi mpangilio",
+      "saved": "Mpangilio wa mfululizo umehifadhiwa",
+      "saveFailed": "Haikuweza kuhifadhi mpangilio. Jaribu tena.",
+      "dragPart": "Buruta ili kusogeza sehemu {{n}}",
+      "addPart": "Ongeza kwenye mfululizo",
+      "addPlaceholder": "Ongeza kwenye mfululizo wako...",
+      "label": "Mfululizo · sehemu {{count}}",
+      "reorderHint": "Buruta sehemu, au tumia mishale, kisha uhifadhi."
+    },
+    "attachMedia": "Ambatisha picha, video au sauti",
+    "attachUnsupported": "Ambatisha picha, video au faili la sauti.",
+    "attachTooLarge": "Faili hilo linazidi kikomo cha MB {{size}}."
   },
   "mintChain": {
     "title": "Chapisho la sinia",
@@ -3061,7 +3373,14 @@
     "notAvailable": "Uwekaji picha kwenye mnyororo huu bado haupatikani."
   },
   "postEditHistory": {
-    "original": "Asili"
+    "original": "Asili",
+    "title": "Historia ya uhariri",
+    "edited_one": "Limehaririwa mara moja",
+    "edited_other": "Limehaririwa mara {{count}}",
+    "lastEdit": "Uhariri wa mwisho {{time}}",
+    "editN": "Uhariri {{n}}",
+    "now": "Sasa",
+    "showChanges": "Onyesha kilichobadilika"
   },
   "postInfo": {
     "title": "Taarifa ya chapisho",
@@ -3356,7 +3675,10 @@
     "waiting_for_wallet": "Inasubiri pochi yako",
     "waiting_for_wallet_desc": "Fungua {{wallet}} na uidhinishe saini — ombi linasubiri hapo.",
     "your_wallet": "pochi yako",
-    "max_available_on_chain": "Upeo unaopatikana: {{amount}} tokeni kwenye {{chain}}"
+    "max_available_on_chain": "Upeo unaopatikana: {{amount}} tokeni kwenye {{chain}}",
+    "not_available_for_this_post": "Haipatikani kwa chapisho hili",
+    "turn_back_on_desktop_notifications": "Washa tena arifa za kompyuta ya mezani?",
+    "notifications_moved_to_riftn": "Tumehamia riftn.com, kwa hivyo kivinjari chako kinahitaji idhini yako mara nyingine ili kuonyesha majibu, zawadi na DM hapa."
   },
   "staking": {
     "title": "Uwekaji Amana",
@@ -3645,7 +3967,8 @@
         "listTitle": "Linki za kuwapa wanachama",
         "loading": "Linki za kuwapa wanachama zinapowekwa...",
         "emptyTitle": "Hakuna linki za kuwapa wanachama zilizo naandikwa",
-        "empty": "Tengeneza moja ili kuwapa wanachama wengine wenyewe."
+        "empty": "Tengeneza moja ili kuwapa wanachama wengine wenyewe.",
+        "expires": "inaisha {{when}}"
       },
       "roleOwner": "Mwenye mali",
       "roleAdmin": "Msimamizi",
@@ -5263,18 +5586,167 @@
     "buy": "Nunua",
     "reject": "Kataa",
     "needsYouHold": "Inahitaji {{needed}}, unayo {{held}}",
-    "sellYourFractions": "Uza sehemu zako ({{held}} inayoshikiliwa)"
+    "sellYourFractions": "Uza sehemu zako ({{held}} inayoshikiliwa)",
+    "nftsSubtitle": "NFT yoyote, ubadilishaji wa hatua moja",
+    "buyersTab": "Wanunuzi",
+    "soldOfListing": "Imeuzwa {{sold}} kati ya {{total}}",
+    "noBuyersYet": "Bado hakuna aliyenunua sehemu za chapisho hili",
+    "fromYou": "kutoka kwako",
+    "statusOverdue": "Imechelewa"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Tumia maelezo haya"
+        "use": "Tumia maelezo haya",
+        "url": "URL ya ukurasa wa bidhaa",
+        "action": "Soma ukurasa wa bidhaa",
+        "loading": "Inasoma ukurasa…",
+        "hint": "Ingiza maandishi kutoka kwa ukurasa wa umma wa bidhaa. Kagua maelezo kabla ya kuyatumia; ambatisha picha za bidhaa kando kwenye studio.",
+        "source": "Chanzo kilichoingizwa",
+        "review": "Chagua bidhaa ya kunakili kwenye maelezo yako yanayoweza kuhaririwa. Kichwa chako, sauti na rangi za chapa havibadiliki.",
+        "errors": {
+          "signIn": "Ingia ili kuingiza ukurasa wa bidhaa.",
+          "url": "Tumia URL ya umma ya bidhaa yenye HTTPS.",
+          "empty": "Hakuna maelezo ya bidhaa yanayoweza kutumika yaliyopatikana. Yaongeze mwenyewe.",
+          "busy": "Uingizaji mwingi sana unaendelea. Jaribu tena baada ya muda mfupi.",
+          "unavailable": "Ukurasa huu haukuweza kuingizwa. Ongeza maelezo ya bidhaa mwenyewe.",
+          "failed": "Uingizaji umeshindwa. Maelezo yako yamehifadhiwa; jaribu tena au weka maelezo mwenyewe."
+        }
+      },
+      "return": "Rudi kwenye rasimu ya studio",
+      "title": "Maelezo ya kampeni",
+      "intro": "Eleza bidhaa na chapa yako, kisha uandae miundo ya matangazo inayolingana.",
+      "saved": "Maelezo yako yamehifadhiwa kwenye kifaa hiki kwa akaunti hii.",
+      "preview": "Andaa miundo",
+      "clear": "Futa maelezo",
+      "required": "Ongeza jina la bidhaa na maelezo ili kuandaa miundo.",
+      "variants": "Miundo ya kampeni",
+      "reviewHint": "Kagua modeli, bei na rejeleo la bidhaa kwenye studio kabla ya kutengeneza. Kila muundo ni utengenezaji tofauti.",
+      "open": "Kagua kwenye studio",
+      "fields": {
+        "product": "Jina la bidhaa (linahitajika)",
+        "description": "Ukweli wa bidhaa (unahitajika)",
+        "brand": "Jina la chapa",
+        "audience": "Hadhira lengwa",
+        "benefit": "Faida kuu",
+        "voice": "Sauti ya chapa",
+        "palette": "Rangi za chapa",
+        "headline": "Kichwa kilichoidhinishwa",
+        "cta": "Mwito wa kuchukua hatua"
+      },
+      "formats": {
+        "square": "Tangazo la mraba",
+        "portrait": "Tangazo la wima",
+        "story": "Picha ya hadithi",
+        "video": "Video wima"
       }
     },
     "cinema": {
       "close": "Funga",
       "performance": {
-        "label": "Utendaji"
+        "label": "Utendaji",
+        "0": "Mwenye furaha",
+        "1": "Mwenye huzuni",
+        "2": "Mwenye wasiwasi",
+        "3": "Mwenye kujiamini",
+        "4": "Mwenye mshangao",
+        "5": "Mtulivu",
+        "6": "Mcheshi"
+      },
+      "title": "Mwelekeo wa sinema",
+      "hint": "Ongoza mtindo wa picha wa picha au video yako inayofuata. Matokeo hutofautiana kulingana na modeli.",
+      "none": "Hakuna mwelekeo",
+      "reset": "Futa mwelekeo",
+      "camera": {
+        "label": "Mwonekano wa kamera",
+        "0": "Sinema ya kidijitali",
+        "1": "Filamu ya 35mm",
+        "2": "Filamu ya 16mm",
+        "3": "Muundo mkubwa",
+        "4": "Kamkoda ya zamani"
+      },
+      "lens": {
+        "label": "Mwonekano wa lenzi",
+        "0": "Duara",
+        "1": "Anamorphic",
+        "2": "Kioo laini cha zamani",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Urefu wa fokasi",
+        "0": "18mm pana",
+        "1": "24mm pana",
+        "2": "35mm asilia",
+        "3": "50mm ya kawaida",
+        "4": "85mm ya picha ya mtu",
+        "5": "135mm ya telephoto"
+      },
+      "aperture": {
+        "label": "Kina cha uwanja",
+        "0": "f/1.4 kina kidogo sana",
+        "1": "f/2.8 kina kidogo",
+        "2": "f/5.6 wastani",
+        "3": "f/11 fokasi ya kina"
+      },
+      "movement": {
+        "label": "Mwendo wa kamera",
+        "0": "Tripodi isiyosogea",
+        "1": "Dolly ya polepole kuingia",
+        "2": "Dolly ya polepole kutoka",
+        "3": "Kufuatilia kwa pembeni",
+        "4": "Zunguka mhusika",
+        "5": "Kushikwa mkononi",
+        "6": "Kupanda kwa kreni",
+        "7": "Pan ya polepole"
+      },
+      "lighting": {
+        "label": "Mwanga",
+        "0": "Mwanga laini wa mchana",
+        "1": "Saa ya dhahabu",
+        "2": "Chiaroscuro ya mwanga hafifu",
+        "3": "Studio ya mwanga mwingi",
+        "4": "Taa za neon",
+        "5": "Kivuli dhidi ya mwanga wa nyuma",
+        "6": "Mwanga uliotawanyika wa mawingu"
+      },
+      "tempo": {
+        "label": "Kasi ya picha",
+        "0": "Picha moja mfululizo",
+        "1": "Kitendo tulivu, kisicho na haraka",
+        "2": "Kitendo chenye nguvu na msisimko",
+        "3": "Kitendo cha vurugu na kasi"
+      },
+      "era": {
+        "label": "Enzi",
+        "0": "Miaka ya 1920",
+        "1": "Miaka ya 1950",
+        "2": "Miaka ya 1960",
+        "3": "Miaka ya 1970",
+        "4": "Miaka ya 1980",
+        "5": "Miaka ya 1990",
+        "6": "Siku hizi",
+        "7": "Siku za usoni karibu"
+      },
+      "genre": {
+        "label": "Aina",
+        "0": "Makala halisi",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Hadithi za kisayansi",
+        "4": "Njozi",
+        "5": "Vichekesho vya mapenzi",
+        "6": "Msisimko",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Rangi",
+        "0": "Kahawia ya joto",
+        "1": "Bluu baridi",
+        "2": "Rangi hafifu za udongo",
+        "3": "Rangi laini",
+        "4": "Nyeusi na nyeupe yenye utofautishaji mkubwa",
+        "5": "Rangi za msingi zilizokolea"
       }
     },
     "libraryEmpty": "Ubunifu wako uliohifadhiwa utaonekana hapa.",
@@ -6076,8 +6548,120 @@
       "needsImageToAnimate": "{{model}} inahitaji picha ili kuhuisha. Ambatisha moja kwanza.",
       "needsImageToWork": "{{model}} inahitaji picha ya kufanyia kazi. Ambatisha moja kwanza.",
       "speechLimit": "Hii ni {{length}} tarakimu. Kikomo ni {{limit}}.",
-      "musicTrackLength": "{{count}}s track"
-    }
+      "musicTrackLength": "{{count}}s track",
+      "cannotEditImage": "{{model}} haiwezi kuhariri picha iliyoambatishwa. Iondoe au uchague modeli nyingine."
+    },
+    "gallery": {
+      "send": "Tuma",
+      "notifications": {
+        "generation_reply": "{{name}} amejibu maoni yako",
+        "generation_like": "{{name}} ameitikia kitu ulichotengeneza",
+        "generation_comment_like": "{{name}} ameitikia maoni yako",
+        "generation_comment": "{{name}} ametoa maoni kwenye kitu ulichotengeneza"
+      },
+      "browse": "Vinjari vilivyotengenezwa",
+      "create": "Unda",
+      "fullscreen": "Tazama skrini nzima",
+      "missing": "Kilichotengenezwa hiki hakipatikani."
+    },
+    "avatarTitle": "Picha inayozungumza",
+    "avatarRequirements": "Picha ya PNG ya mraba, pikseli 512–2048, hadi MB 5. WAV ya mono 24 kHz 16-bit PCM, sekunde 5–30. Sehemu ya mwisho ya sekunde hujazwa ukimya.",
+    "avatarPortrait": "Chagua picha ya PNG",
+    "avatarAudio": "Chagua WAV ya sauti",
+    "avatarPermission": "Nina ruhusa ya kuhuisha picha hii na kutumia sauti hii.",
+    "avatarQuote": "Sekunde {{seconds}} pamoja na ukimya · tokeni {{amount}}",
+    "avatarPrepare": "Andaa na ukague bei",
+    "batchFlowLimit": "Orodha ya Flow imejaa. Ondoa Flow isiyotumika kabla ya kuunda kundi jingine.",
+    "batchReviewCampaign": "Kagua kundi la kampeni kwenye Flow",
+    "batchReviewFilmImages": "Kagua kundi la picha za ubao wa hadithi",
+    "batchReviewFilmVideos": "Kagua kundi la klipu za filamu",
+    "batchReviewHint": "Hufungua Flow tofauti iliyohifadhiwa. Kagua kila kipengee na bei kamili kabla ya kulipa. Vipengee vilivyokamilika na malipo ya awali huhifadhiwa kwa ajili ya urejeshaji. Marejeleo yanakiliwa kwenye maktaba yako ya faragha; matumizi ya hifadhi na mtandao yanatozwa.",
+    "batchInvalid": "Kamilisha kila kipengee kabla ya kuandaa kundi la picha au klipu 1–12.",
+    "batchReferenceLimit": "Kundi hili linaruhusu rejeleo moja la picha kwa kila kipengee. Ondoa marejeleo ya ziada au andaa kipengee hicho peke yake.",
+    "batchVideoSettings": "Kwa kundi hili, klipu zinahitaji muda kamili wa sekunde 4–15 na uwiano wa 16:9, 9:16 au 1:1.",
+    "batchMissingReference": "Rejeleo linakosekana, halitumiki au ni kubwa kuliko MB 25. Lirejeshe kwenye kihariri kabla ya kuandaa kundi.",
+    "batchOwnerChanged": "Akaunti au rasimu imebadilika. Fungua tena kundi hili chini ya akaunti yake ya awali.",
+    "batchConflict": "Kundi lililohifadhiwa halilingani na picha yake ya awali.",
+    "audioExportFormat": "Muundo wa kuhamisha",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Ambatisha klipu moja ya chanzo ili kuirefusha.",
+    "extensionSeconds": "+{{seconds}}s za picha mpya",
+    "extensionHelp": "Hurudisha klipu yako ya chanzo ikiwa na takriban sekunde nne mpya. Matokeo hubadilishwa ukubwa hadi 720p kwa 24 fps. Sauti mpya inatengenezwa kwa sehemu iliyoongezwa.",
+    "extensionForward": "Ongeza takriban sekunde nne baada ya klipu yako ya chanzo",
+    "extensionBackward": "Ongeza takriban sekunde nne kabla ya klipu yako ya chanzo",
+    "expandDescription": "Tengeneza kingo mpya za picha. Kidokezi cha Kiingereza ni hiari; picha moja ya chanzo.",
+    "relightDescription": "Badilisha mwanga wa picha moja kulingana na maelezo yako ya mwanga na mandharinyuma.",
+    "expandPromptHint": "Ambatisha picha moja na uchague uwiano wake mpya. Kidokezi cha Kiingereza ni hiari.",
+    "expandEnglishOnly": "Modeli hii ya upanuzi inakubali vidokezi vya Kiingereza. Acha kidokezi kitupu kwa upanuzi wa kiotomatiki.",
+    "expandNeedsImage": "Ambatisha picha ili kuipanua.",
+    "learn": {
+      "title": "Masomo ya Creator",
+      "intro": "Masomo mafupi, jaribio la maarifa na zoezi linaloweza kuhaririwa kwa kila moja. Maendeleo huhifadhiwa kwenye kifaa hiki kwa akaunti yako.",
+      "back": "Rudi kwa Creator",
+      "lessons": "Masomo",
+      "progress": "Majaribio {{completed}} kati ya {{total}} ya maarifa yamefaulu",
+      "check": "Kagua jibu",
+      "correct": "Jaribio la maarifa limefaulu",
+      "retry": "Jaribu tena. Pitia somo lililo hapo juu.",
+      "exerciseTitle": "Zoezi la vitendo",
+      "exerciseHint": "Fungua mfano unaoweza kuhaririwa kwenye eneo lako la kazi la studio. Kufungua rasimu ni bure; kutengeneza kunahitaji ukaguzi wako na bei yake. Hariri mfano kabla ya kutengeneza.",
+      "openExercise": "Fungua rasimu ya zoezi",
+      "closeExercise": "Funga zoezi",
+      "brief": {
+        "title": "Andika maelezo ya picha yaliyo wazi",
+        "body1": "Eleza mhusika halisi, kitendo chake na mazingira. Ongeza mpangilio wa picha au mwendo wa kamera unaposaidia tukio. Weka mawazo yasiyohusiana kwa rasimu nyingine.",
+        "body2": "Maelekezo ya mwanga, lenzi na mtindo huongoza modeli. Hayahakikishi tabia halisi ya kamera wala picha kamili. Badilisha sehemu moja kwa wakati ili uweze kulinganisha marekebisho.",
+        "body3": "Kabla ya kutengeneza, kagua modeli iliyochaguliwa, viambatisho vinavyotumika, vipimo na bei. Hifadhi rasimu ya asili ili uweze kurudi kwake.",
+        "question": "Maelezo yapi ni rahisi zaidi kurekebisha?",
+        "answer0": "Mhusika, kitendo na mazingira yaliyo wazi",
+        "answer1": "Jina la modeli pekee",
+        "answer2": "Orodha ya mitindo inayopingana",
+        "exercise": "Birika la chai la udongo juu ya meza ya mbao kando ya dirisha. Mwanga laini wa asubuhi, picha ya kati, mandharinyuma rahisi. Birika liwe mhusika mkuu wazi."
+      },
+      "continuity": {
+        "title": "Panga picha na ukague mwendelezo",
+        "body1": "Tumia paneli ya Filamu kwenye kihariri kuhifadhi maelezo na picha zilizopangwa. Andaa kila fremu au klipu kando, kagua bei yake, na uchague matokeo yaliyokubaliwa.",
+        "body2": "Ambatisha marejeleo yanayokubaliwa na modeli uliyochagua pekee. Kutumia rejeleo tena kunaweza kuongoza mwonekano; hakufunzi utambulisho wala kuhakikisha mfanano. Wahusika na sauti zinaweza kutofautiana kati ya utengenezaji.",
+        "body3": "Hifadhi picha zilizofanikiwa na uziunganishe kwenye ratiba ya muda. Kagua mwendo, nyuso, mazungumzo na mipito kabla ya kuhamisha.",
+        "question": "Nini kinasaidia mwendelezo kati ya picha?",
+        "answer0": "Vidokezi zaidi visivyohusiana",
+        "answer1": "Marejeleo yaliyoidhinishwa na maelezo ya picha yaliyokaguliwa",
+        "answer2": "Kudhani utambulisho wa mhusika umehakikishwa",
+        "exercise": "Picha pana ya msafiri pekee akifika pwani tulivu wakati wa macheo. Mwendo wa polepole wa kamera kwenda mbele, hali ya utulivu. Picha moja mfululizo."
+      },
+      "campaign": {
+        "title": "Tumia ukweli wa bidhaa ulioidhinishwa",
+        "body1": "Anza na ukweli wa bidhaa unaoweza kuthibitisha. Kagua metadata iliyoingizwa kabla ya kuitumia. Andika kichwa na mwito wa kuchukua hatua waziwazi; usibuni bei, maoni wala madai ya utendaji.",
+        "body2": "Tumia matoleo ya kampeni yaliyohifadhiwa ili kuweka pamoja maelezo ya pamoja na vivutio, hati, lugha na miundo ya kila moja. Andaa kipengee kimoja kilichokaguliwa kwa wakati na ukague bei yake kwenye studio.",
+        "body3": "Kagua maandishi yanayoonekana, mwonekano wa bidhaa na madai yoyote yanayozungumzwa kwenye matokeo. Kidokezi si uthibitisho wa usahihi wa bidhaa wala utendaji wa masoko.",
+        "question": "Dai la bidhaa linapaswa kujumuishwa lini?",
+        "answer0": "Wakati wowote linaposikika kushawishi",
+        "answer1": "Baada ya kubuni maoni ya nyota tano",
+        "answer2": "Linapotokana na ukweli wa bidhaa ulioidhinishwa",
+        "exercise": "Tengeneza tangazo la bidhaa la wima kwa chai ya majani mazima inayouzwa kwenye kopo linaloweza kutumika tena. Kichwa kilichoidhinishwa: Pata muda wa chai. CTA iliyoidhinishwa: Gundua mkusanyiko. Tumia ukweli huu pekee; usibuni punguzo, maoni wala madai ya afya."
+      }
+    },
+    "campaignPlanTitle": "Matoleo na vipindi vya kampeni",
+    "campaignPlanIntro": "Hifadhi hadi matoleo au vipindi 12. Kila kimoja hufungua studio kwa ukaguzi na bei yake. Maelezo ya pamoja huongoza mwendelezo; mwonekano wa bidhaa, wahusika na sauti vinaweza kutofautiana kati ya utengenezaji.",
+    "campaignTitle": "Jina la kampeni au mfululizo",
+    "campaignContinuity": "Maelezo ya pamoja ya mhusika, sauti na mtindo",
+    "campaignVariantTitle": "Jina la toleo au kipindi",
+    "campaignHook": "Kivutio cha mwanzo",
+    "campaignLanguage": "Lugha ya matokeo",
+    "campaignScript": "Hati iliyoidhinishwa au mfuatano wa matukio",
+    "campaignAdd": "Ongeza toleo au kipindi",
+    "campaignClear": "Futa mpango",
+    "campaignFormat": "Muundo wa matokeo",
+    "audioInvalidResponse": "Huduma ya sauti ilirudisha matokeo yasiyo sahihi.",
+    "batchPaymentHelp": "Kila picha iliyowasilishwa hutozwa kando. Kundi likisimama, tokeni ambazo hazikutumika kutoka kwa malipo yake hutumika tena kiotomatiki kwa utengenezaji wa baadaye unaoufunika.",
+    "invalidSeed": "Seed lazima iwe nambari kamili kuanzia 0 hadi 2147483647.",
+    "libraryFavorites": "Vipendwa",
+    "libraryFavoriteAdd": "Ongeza kwenye vipendwa",
+    "libraryFavoriteRemove": "Ondoa kwenye vipendwa",
+    "audioTaskDialoguePlaceholder": "Alice: Tunapaswa kwenda.\nBob: [anacheka] Tangulia wewe.",
+    "priceOwnKey": "Ufunguo wako",
+    "audioResultTooLarge": "Matokeo ya sauti ni tupu au yanazidi 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Mipango kwa kila workflow",
@@ -6244,7 +6828,8 @@
     "createTheFirst": "Unda ya kwanza",
     "docsSeoTitle": "Maelekezo ya Ustadi wa AI | Riftn",
     "docsSeoDescription": "Nyaraka za kumbukumbu za ujuzi wa msaidizi wa AI wa Riftn na maktaba ya haraka.",
-    "raw": "MBICHI"
+    "raw": "MBICHI",
+    "docsLoadFailed": "# Hitilafu\nImeshindwa kupakia nyaraka za ujuzi."
   },
   "nftMarket": {
     "actAll": "Zote",
@@ -6355,7 +6940,35 @@
     "spotlight": "Mipango ya kwanza",
     "spotlightBuyNote": "NFT na malipo yanazama katika madawa moja.",
     "spotlightOfferNote": "Hainafanyika chaguo bado. Safisha ofari na mlolongo anapata kubali ofari hiyo kila wakati.",
-    "signInToTradeCta": "Ingia kwa kutafuta"
+    "signInToTradeCta": "Ingia kwa kutafuta",
+    "actCollectionOffer": "Ofa ya mkusanyiko",
+    "actListed": "Imeorodheshwa",
+    "actSale": "Mauzo",
+    "buyAll": "Nunua zote",
+    "buySeveral": "Nunua kadhaa",
+    "cartBought": "Umenunua {{n}}. Sasa ziko kwenye pochi yako.",
+    "cartCount": "{{n}} kwenye kikapu",
+    "cartFull": "Hadi 20 kwa wakati mmoja",
+    "cartOneCoin": "Mnyororo mmoja na sarafu moja kwa kila kikapu. Kifute ili kubadilisha.",
+    "cartOwn": "Hiyo ni yako",
+    "cartPick": "Gusa ili kuongeza kwenye kikapu",
+    "forSaleHere": "Zinauzwa hapa",
+    "noActivity": "Bado hakuna kitu hapa",
+    "openToOffers": "Wazi kwa ofa",
+    "offersOpen": "Wazi kwa ofa",
+    "seoDescription": "Nunua, uza na toa ofa kwa NFT kwenye BNB Chain na Base. Lipa kwa BNB, ETH au tokeni za Riftn. Kila biashara hubadilishana NFT na malipo kwa hatua moja.",
+    "dehubPostsName": "Machapisho ya Riftn",
+    "allChains": "Minyororo yote",
+    "emptyBody": "Kuwa wa kwanza. Orodhesha NFT kutoka kwa pochi yako na yeyote kwenye Riftn anaweza kuinunua.",
+    "tryAgain": "Jaribu tena baada ya muda mfupi.",
+    "noNfts": "Hakuna NFT kwenye {{chain}}",
+    "volShort": "Kiasi",
+    "salesCount": "{{n}} zimeuzwa",
+    "bestOffer": "Ofa bora",
+    "fromOpenSea": "Mikusanyiko bora kwenye OpenSea",
+    "buyHere": "Zinunue hapa",
+    "openSeaNote": "Imeorodheshwa kwenye OpenSea. Unamlipa muuzaji moja kwa moja kwenye Seaport; Riftn haiongezi ada.",
+    "viewOnOpenSea": "Tazama kwenye OpenSea"
   },
   "usernames": {
     "seoTitle": "Soko la Jina la Mtumiaji | Riftn",
@@ -6710,7 +7323,18 @@
       "votes_other": "{{count}} kura",
       "howToVote_one": "Andika {{command}} na nambari kwenye gumzo ili upige kura · {{count}} kupiga kura",
       "howToVote_other": "Andika {{command}} na nambari kwenye gumzo ili upige kura · {{count}} kura"
-    }
+    },
+    "eyebrow": {
+      "follow": "Mfuasi mpya",
+      "subscribe": "Mjisajili mpya",
+      "subscribedTo": "Amejisajili · {{plan}}",
+      "gifted_one": "Ametoa usajili kama zawadi",
+      "gifted_other": "Ametoa usajili {{count}} kama zawadi",
+      "share": "Ameshiriki mtiririko",
+      "join": "Amejiunga sasa hivi"
+    },
+    "giftedSubs_one": "{{name}} ametoa usajili kama zawadi!",
+    "giftedSubs_other": "{{name}} ametoa usajili {{count}} kama zawadi!"
   },
   "liveChatModeration": {
     "timeout1m": "Pumzika kwa dakika 1",
@@ -6731,15 +7355,40 @@
       "modes": {
         "none": "Zima",
         "blur": "Ukungu",
-        "color": "Rangi"
-      }
+        "color": "Rangi",
+        "image": "Picha"
+      },
+      "failed": "Kuondoa mandharinyuma hakukuweza kuanza kwenye kifaa hiki.",
+      "hint": "Inaendeshwa kwenye kifaa chako. Mara ya kwanza huchukua sekunde chache kupakia."
     },
     "remove": "Ondoa",
     "scenes": {
       "countdown": "Hesabu",
       "minutes": "{{count}} dk",
       "names": {
-        "starting": "Inaanza hivi karibuni"
+        "starting": "Inaanza hivi karibuni",
+        "chatting": "Kupiga gumzo tu",
+        "gameplay": "Uchezaji wa mchezo",
+        "brb": "Narudi sasa hivi",
+        "ending": "Mtiririko unaisha"
+      },
+      "title": "Matukio",
+      "edit": "Hariri {{name}}",
+      "subtitle": "Mstari wa pili (hiari)",
+      "picture": "Picha",
+      "noCountdown": "Hakuna kuhesabu kurudi nyuma",
+      "muteMic": "Nyamazisha maikrofoni yangu hili likiwa limewashwa",
+      "hints": {
+        "starting": "Kadi yenye kuhesabu kurudi nyuma",
+        "chatting": "Kamera skrini nzima",
+        "gameplay": "Skrini pamoja na kamera yako",
+        "brb": "Kadi, maikrofoni imenyamazishwa",
+        "ending": "Kadi ya shukrani"
+      },
+      "subtitles": {
+        "starting": "Mtiririko unaanza baada ya",
+        "brb": "Narudi baada ya muda mfupi",
+        "ending": "Asante kwa kutazama"
       }
     },
     "sources": {
@@ -6749,15 +7398,37 @@
       "show": "Onyesha kwenye mkondo",
       "loop": "Kitanzi",
       "positions": {
-        "center": "Kituo"
+        "center": "Kituo",
+        "top-left": "Juu kushoto",
+        "top-right": "Juu kulia",
+        "bottom-left": "Chini kushoto",
+        "bottom-right": "Chini kulia"
       },
       "sizes": {
-        "medium": "Kati"
+        "medium": "Kati",
+        "small": "Ndogo",
+        "large": "Kubwa"
       },
       "shapes": {
         "circle": "Duara",
-        "rect": "Mraba"
-      }
+        "rect": "Mraba",
+        "rounded": "Yenye pembe za mviringo"
+      },
+      "title": "Vyanzo",
+      "addImage": "Picha au nembo",
+      "addCamera": "Kamera ya pili",
+      "addClip": "Klipu ya video",
+      "addReaction": "Itikia video",
+      "reactPlaceholder": "Bandika kiungo cha video ya Riftn",
+      "reactInvalid": "Bandika kiungo cha video ya Riftn.",
+      "reactNotLive": "Nenda moja kwa moja kwanza, kisha uongeze video.",
+      "reactNoBubble": "Kamera yako haikuweza kufunguka mara mbili hapa. Badilisha ukubwa wa video ili uso wako ubaki kwenye skrini.",
+      "failed": "Imeshindwa kuongeza chanzo hicho.",
+      "empty": "Ongeza nembo, kamera ya pili au klipu ya video juu ya mtiririko wako.",
+      "hint": "Vyanzo vinachorwa juu ya picha yako kwa kila mtazamaji na kila jukwaa.",
+      "clip": "Klipu",
+      "restart": "Anza upya",
+      "play": "Cheza au sitisha"
     },
     "audio": {
       "mute": "Nyamazisha",
@@ -6766,7 +7437,27 @@
         "off": "Zima",
         "low": "Mwanga",
         "high": "Imara"
-      }
+      },
+      "title": "Kichanganya sauti",
+      "unavailable": "Kivinjari hiki hakiwezi kuchanganya sauti, kwa hivyo maikrofoni yako inatoka kama ilivyo.",
+      "channels": {
+        "mic": "Maikrofoni",
+        "game": "Mchezo / kichupo",
+        "clip": "Klipu ya video"
+      },
+      "absent": {
+        "mic": "Hakuna maikrofoni",
+        "game": "Shiriki skrini yenye sauti au tumia kadi ya kunasa",
+        "clip": "Ongeza klipu ya video kwenye Vyanzo"
+      },
+      "gate": "Kizuia kelele",
+      "gateHint": "Hunyamazisha maikrofoni yako kati ya maneno ili mibofyo ya kibodi na feni zisisikike kwenye mtiririko."
+    },
+    "imageTooLarge": "Picha hiyo ni kubwa mno. Jaribu ndogo zaidi.",
+    "widgets": {
+      "title": "Onyesha wijeti kwenye video yangu",
+      "hint": "Tahadhari, mistari ya malengo na gumzo vinachorwa ndani ya mtiririko wako, kwa hivyo watazamaji kwenye Twitch, YouTube na kila jukwaa jingine wanaviona pia.",
+      "failed": "Imeshindwa kubadilisha mahali wijeti zako zinapoonekana. Jaribu tena."
     }
   },
   "liveStudio": {
@@ -6780,12 +7471,32 @@
         "off": "Zima",
         "idle": "Tayari",
         "live": "Moja kwa Moja",
-        "error": "Hitilafu"
-      }
+        "error": "Hitilafu",
+        "connecting": "Inaunganisha"
+      },
+      "title": "Maeneo ya mitiririko mingi",
+      "intro": "Nenda moja kwa moja kwenye Riftn mara moja na tunasukuma mtiririko wako kwenye kila jukwaa lililowashwa hapa, bure. Huanza ndani ya sekunde chache baada ya wewe kwenda moja kwa moja.",
+      "add": "Ongeza eneo",
+      "empty": "Bado hakuna maeneo. Ongeza Twitch, YouTube, Kick au seva yoyote ya RTMP.",
+      "server": "URL ya seva",
+      "findKey": "Pata seva na ufunguo wako wa {{name}}",
+      "customHint": "Bandika seva ya RTMP na ufunguo ambao jukwaa lako linakupa.",
+      "keyNote": "Ufunguo wako unahifadhiwa kwa usimbaji fiche kwenye seva zetu na hauonyeshwi tena.",
+      "added": "{{name}} imeongezwa",
+      "saveFailed": "Imeshindwa kuhifadhi eneo",
+      "toggle": "Tiririsha kwenye eneo hili"
     },
     "vertical": {
       "centre": "Kituo",
-      "live": "MOJA KWA MOJA"
+      "live": "MOJA KWA MOJA",
+      "title": "Mwonekano wima",
+      "intro": "Simu zinatazama mtiririko wako kwenye mlisho wima. Buruta kisanduku ili kuchagua sehemu ya picha yako wanayoiona.",
+      "enabled": "Onyesha mtiririko wangu kwenye mlisho wima",
+      "zoom": "Kuza",
+      "frame": "Picha yako ya mlalo",
+      "box": "Kile simu zinachoona",
+      "hint": "Buruta kisanduku, au tumia vitufe vya mishale. Hifadhi ili kukitumia kwenye mtiririko wako wa moja kwa moja.",
+      "watch": "Tazama {{name}} moja kwa moja"
     },
     "subathon": {
       "title": "Mashindano ya mbio ndogo",
@@ -6948,7 +7659,8 @@
       "subathon_timer": "Miongozo ya Subathon",
       "points_board": "Wakusudi wa watazamaji",
       "streamer_level": "Kiwango cha mtiririko",
-      "tip_jar": "Chombo cha zawadi"
+      "tip_jar": "Chombo cha zawadi",
+      "hype_train": "Treni ya msisimko"
     },
     "hints": {
       "tip_alert": "Husherehekea kila kiinua mgongo, kulingana na kiwango chake",
@@ -6972,7 +7684,8 @@
       "subathon_timer": "Kutaja ambayo hiba, kufuata na usajili wa msaada unazidi muda",
       "points_board": "Watazamaji wenu bora kwa nafasi kutokana na kuwatazama na kuhiba",
       "streamer_level": "Kiwango chako cha mtiririko na mfululizo wa kila wiki, kutoka kwenye wasifu wako",
-      "tip_jar": "Chupa inayojaza kama zawadi zinazolipwa zinaingia"
+      "tip_jar": "Chupa inayojaza kama zawadi zinazolipwa zinaingia",
+      "hype_train": "Huonyesha treni ya msisimko inapoendelea: zawadi tatu au usajili ndani ya dakika tano huianzisha."
     },
     "fields": {
       "style": "Mtindo",
@@ -7358,7 +8071,10 @@
     "endStreamConfirmBody": "Mtangazo wako unasimama kwa kila mtu anayetazama na hauwezi kuenezwa tena.",
     "keepStreaming": "Endelea kusambaza",
     "encoderPermanentHint": "Ufunguo huu haubadiliki kamwe. Weka kisimbiko chako mara moja — wakati mwingine bonyeza tu Anza hapo na Riftn ikutengenezee chapisho.",
-    "notEnoughTokensForBounty": "Tokeni hazitoshi. Unahitaji tokeni {{need}} lakini una {{have}}."
+    "notEnoughTokensForBounty": "Tokeni hazitoshi. Unahitaji tokeni {{need}} lakini una {{have}}.",
+    "screenInAppHint": "Kwenye programu ya Riftn",
+    "screenInAppNote": "Vivinjari vya simu haviruhusu tovuti yoyote kushiriki skrini yako. Nenda moja kwa moja kutoka kwenye programu ya Riftn badala yake, kisha uguse Shiriki skrini.",
+    "screenInAppCta": "Pata programu ya Riftn"
   },
   "events": {
     "seoTitle": "Matukio: Mikutano & Matukio ya Jamii kwenye Riftn",
@@ -7948,7 +8664,45 @@
     "foldersInFolder_other": "Kwenye folda {{count}}",
     "foldersNoItems": "Hakuna chochote kwenye folda hii bado",
     "foldersNoItemsHint": "Fungua matokeo na uchague \"Ongeza kwenye folda\" ili uihifadhi hapa.",
-    "skippedUpstreamFailed": "Imeruka kwa sababu hatua ya awali imeshindwa. Gharama yake inakaa katika salio lako."
+    "skippedUpstreamFailed": "Imeruka kwa sababu hatua ya awali imeshindwa. Gharama yake inakaa katika salio lako.",
+    "signInForAudioLibrary": "Ingia ili kufungua maktaba yako ya faragha ya sauti zilizohifadhiwa.",
+    "audioLibraryFailed": "Sauti zako zilizohifadhiwa hazikuweza kupakiwa. Jaribu tena.",
+    "retryFreeTask": "Jaribu tena kazi ya bure",
+    "previewSavedMedia": "Hakiki midia iliyohifadhiwa",
+    "audioSavePending": "Sauti iko tayari, lakini kuihifadhi kwenye maktaba ya faragha bado kunasubiri. Endelea ili kuichukua.",
+    "confirmInterruptedRetry": "Jaribu tena kazi ya sauti au ya msaidizi iliyokatizwa. Matokeo yake ya awali hayajulikani na kujaribu tena kunaweza kurudia kazi ya uendeshaji. Malipo yaliyopo na vitambulisho vya kazi zilizolipiwa vitatumika tena.",
+    "freeResultUnknown": "Jibu la kazi ya bure lilikatizwa. Halitawasilishwa tena kiotomatiki. Chagua Jaribu tena kazi ya bure, kisha uendelee; malipo yako na kazi nyingine zimehifadhiwa.",
+    "formAuthor": "Hariri flow",
+    "formAuthorHint": "Jenga flow yenye viingizo vya aina maalum. Ihifadhi hapa, au ipange kwenye turubai ya wavuti.",
+    "chooseSavedMedia": "Chagua midia iliyohifadhiwa",
+    "formInput": "Kiingizo: {{handle}}",
+    "reviewRun": "Kagua uendeshaji",
+    "resumeRun": "Endelea na uendeshaji uliohifadhiwa",
+    "confirmPrice": "Jumla: tokeni {{price}}",
+    "recoveryHint": "Marejeleo ya kazi na malipo yamehifadhiwa kwenye kifaa hiki. Endelea na kazi iliyokatizwa kabla ya kuanza uendeshaji mwingine.",
+    "newRun": "Anza uendeshaji mwingine",
+    "loadMoreMedia": "Pakia midia zaidi",
+    "invalidGraph": "Kagua miunganisho: kila kiingizo kinahitaji chanzo kinachooana na grafu haiwezi kuwa na mizunguko.",
+    "unsupportedNode": "Nodi hii haiwezi kuendeshwa kwenye fomu asili bado. Tumia turubai ya wavuti kwa flow hii.",
+    "missingPrompt": "Unganisha nodi ya maandishi yenye kidokezi.",
+    "invalidSettings": "Mipangilio hii haitumiki na modeli iliyochaguliwa.",
+    "missingCapturedFrame": "Nasa fremu kwenye turubai ya wavuti kabla ya kutumia video hii kama kiingizo cha picha.",
+    "missingSavedMedia": "Midia ya chanzo iliyohifadhiwa inakosekana au haipatikani tena kwa akaunti hii.",
+    "quoteFailed": "Imeshindwa kuweka bei ya flow hii. Jaribu tena.",
+    "recoverBeforeEdit": "Endelea na uendeshaji uliohifadhiwa kabla ya kubadilisha grafu yake au kuanza uendeshaji mwingine.",
+    "runAlreadyComplete": "Uendeshaji huu umekamilika. Chagua Anza uendeshaji mwingine ili kutengeneza tena.",
+    "recoveryCorrupt": "Rekodi ya urejeshaji iliyohifadhiwa haikuweza kusomwa. Hifadhi flow hii na uwasiliane na usaidizi kabla ya kulipa tena.",
+    "paidUnavailable": "Unaweza kuandika na kuhifadhi flow hapa. Uendeshaji wa kulipia haupatikani kwenye duka hili.",
+    "planChanged": "Flow ilibadilika baada ya kuwekewa bei. Kagua uendeshaji tena.",
+    "connectOwnerWallet": "Unganisha pochi inayomiliki flow hii.",
+    "runFailed": "Nodi haikuweza kumaliza. Rejeleo lake la kazi lililohifadhiwa limebakizwa kwa ajili ya urejeshaji.",
+    "recoveryPending": "Uchakataji bado unasubiri. Endelea na uendeshaji huu ili kuuchukua.",
+    "nodeAudioGen": "Kitengeneza sauti",
+    "nodeAudioGenDesc": "Hotuba, madoido ya sauti, unukuzi na utenganishaji wa sauti",
+    "nodeAudioInput": "Sauti iliyohifadhiwa",
+    "nodeAudioInputDesc": "Tumia sauti ya faragha kutoka kwenye maktaba yako",
+    "audioVoiceId": "Kitambulisho cha sauti",
+    "audioSeconds": "Urefu wa sauti kwa sekunde"
   },
   "videoPlayer": {
     "volume": "Sauti",
@@ -8101,7 +8855,13 @@
       "doneAll": "Akaunti za {{done}} ambazo hazikutafuta zimefutwa.",
       "doneSome": "Akaunti za {{done}} zimefutwa. {{failed}} haikuweza kufutwa.",
       "doneToast": "Akaunti za {{done}} ambazo hazikutafuta zimefutwa"
-    }
+    },
+    "followBackConfirmTitle_one": "Mfuate tena mtu {{count}}?",
+    "followBackConfirmTitle_other": "Wafuate tena watu {{count}}?",
+    "followBackConfirmBody": "Tayari wanakufuata. Akaunti za faragha zinapata ombi la kufuata.",
+    "followedBackCount_one": "Umemfuata tena mtu {{count}}",
+    "followedBackCount_other": "Umewafuata tena watu {{count}}",
+    "followBackDoneBody": "Unaweza kuwapata wote kwenye Unaowafuata."
   },
   "reactionInfo": {
     "title": "Miitikio",
@@ -8903,7 +9663,28 @@
       "add": "Ongeza",
       "scale": "Ukubwa",
       "color": "Rangi",
-      "light": "Mwanga"
+      "light": "Mwanga",
+      "create": "Ongeza jukwaa la 3D",
+      "title": "Jukwaa la tukio la 3D",
+      "hint": "Panga picha kwa tufe na visanduku. Kamera, uwekaji na taa tatu huru za eneo hubadilisha fremu inayochakatwa.",
+      "preview": "Hakikisho la tukio lililochakatwa",
+      "error": "Haikuweza kuandaa fremu. Kagua marejeleo ya picha yako na ujaribu tena.",
+      "elevation": "Mwinuko",
+      "distance": "Umbali",
+      "fov": "Uwanja wa mwonekano",
+      "object": "Kitu",
+      "sphere": "Tufe",
+      "box": "Kisanduku",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Ondoa kitu",
+      "intensity": "Ukali",
+      "diffusion": "Mtawanyiko",
+      "saving": "Inaandaa fremu…",
+      "useFrame": "Tumia fremu iliyochakatwa kama rejeleo la picha",
+      "frameHint": "Hutengeneza PNG ya 320 × 180 na kuiongeza kwenye marejeleo ya picha hii. Kagua kikomo cha marejeleo na bei ya modeli kabla ya kutengeneza.",
+      "frameName": "Fremu ya jukwaa la tukio"
     },
     "video": {
       "tFade": "Kuyeyuka",
@@ -8998,7 +9779,9 @@
       "pptx": "Uwasilishaji wa PowerPoint",
       "pptxHint": "Kila ukurasa unakuwa picha moja ya slaidi, ikiwa na maelezo na viunganishi vya mtangazaji. Hariri maandishi na vipengele binafsi katika muundo wa awali.",
       "section": "Sehemu iliyopewa jina",
-      "transparent": "Mandharinyuma ya uwazi"
+      "transparent": "Mandharinyuma ya uwazi",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Hupakua ZIP yenye ratiba yako ya muda kama FCPXML na Premiere XML pamoja na kila faili la midia, ili uweze kumaliza uhariri kwenye Premiere Pro, Final Cut Pro au DaVinci Resolve. Maandishi yanakuwa alama; madoido yanabaki kwenye Riftn."
     },
     "inspector": {
       "selectHint": "Chagua safu kwenye turubai au kipande kwenye kalenda ya matukio.",
@@ -9092,7 +9875,45 @@
       "failed": "AI haikuweza kufanya hivyo sasa hivi. Jaribu tena baada ya muda mfupi.",
       "changes": "Mabadiliko yaliyofanywa: {{count}}",
       "undo": "Tendua",
-      "openGenerator": "Kagua na utengeneze"
+      "openGenerator": "Kagua na utengeneze",
+      "stopped": "Imesimamishwa. Hakuna kingine kilichobadilishwa.",
+      "queued": "{{count}} kwenye foleni",
+      "restore": "Rejesha hadi hapa",
+      "restoreHint": "Rudisha mradi jinsi ulivyokuwa kabla ya ujumbe huu. Tendua huurudisha.",
+      "restored": "Mradi umerejeshwa kabla ya ujumbe huo. Bonyeza tendua ili kurudisha toleo jipya zaidi.",
+      "rewrite": "Fanya ombi langu liwe wazi zaidi",
+      "rewriteFailed": "Imeshindwa kuandika upya. Maandishi yako hayajabadilika.",
+      "feedback": "Je, hili lilisaidia?",
+      "good": "Jibu zuri",
+      "bad": "Jibu baya",
+      "retryPrefix": "Hilo halikuwa sahihi. Badala yake, ",
+      "recipesTitle": "Mapishi",
+      "recipe": {
+        "podcastClip": {
+          "label": "Klipu ya podikasti",
+          "prompt": "Tafuta wakati wenye nguvu zaidi wa sekunde 30, punguza hadi hapo, ongeza manukuu ya Word Pop na uifanye 9:16."
+        },
+        "talkingHead": {
+          "label": "Mzungumzaji safi",
+          "prompt": "Kata vituo virefu, ongeza manukuu ya Classic, na uipe mwonekano hafifu wa joto."
+        },
+        "productPromo": {
+          "label": "Tangazo la bidhaa",
+          "prompt": "Tengeneza tangazo la sekunde 15: kichwa chenye nguvu mwanzoni, mipito ya Zoom in kati ya klipu, manukuu ya Bold na muziki wa kuchangamsha."
+        },
+        "hypeReel": {
+          "label": "Reel ya msisimko",
+          "prompt": "Kata klipu kufuata mdundo wa muziki, tumia mipito ya Fly up na mwonekano wa Technicolor."
+        },
+        "retroEdit": {
+          "label": "Uhariri wa zamani",
+          "prompt": "Ipe kila klipu mwonekano wa VHS, ongeza kichwa kikubwa cha serif, na utumie mipito ya Fade."
+        },
+        "tutorial": {
+          "label": "Mafunzo",
+          "prompt": "Ongeza kichwa kwa kila hatua, manukuu ya Boxed, na upunguze kasi ya wakati muhimu hadi 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Mstatili",
@@ -9267,7 +10088,9 @@
       "tint": "Rangi-ndogo {{value}}",
       "vignette": "Vinyeti {{value}}%",
       "auto": "Boresha kiotomatiki",
-      "autoFailed": "Haikuweza kuchanganua picha hii."
+      "autoFailed": "Haikuweza kuchanganua picha hii.",
+      "halation": "Halation {{value}}%",
+      "scanlines": "Mistari ya skani {{value}}%"
     },
     "pages": {
       "add": "Ongeza ukurasa",
@@ -9342,7 +10165,15 @@
       "textSaved": "Majina ya kichwa yaliyopigwa upya.",
       "action": "Manukuu ya kiotomatiki",
       "styles": {
-        "bold": "Herufi nzito"
+        "bold": "Herufi nzito",
+        "classic": "Classic",
+        "boxed": "Boxed",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Yaliyopangwa",
+        "serif": "Serif",
+        "bubble": "Kiputo"
       },
       "working": "Inasikiliza… {{percent}}%",
       "downloading": "Inaandaa modeli ya usemi… {{percent}}%",
@@ -9354,7 +10185,8 @@
       "translateCount": "Tafsiri {{count}} maelezo mafupi",
       "translationDone": "Uandikishaji wa{{count}} kichwa cha video ulipaswa",
       "translationFailed": "Masharti ya kuchora picha yako yamepunguzwa. Masharti yako yamebaki kama yalivyokuwa.",
-      "lockedTranslation": "Fungua maelezo mafupi yaliyofungwa ili kuyajumuisha."
+      "lockedTranslation": "Fungua maelezo mafupi yaliyofungwa ili kuyajumuisha.",
+      "style": "Mtindo wa manukuu"
     },
     "multi": {
       "selected": "Safu {{count}} zimechaguliwa",
@@ -9391,7 +10223,10 @@
       "saveNewPreset": "Hifadhi mpya",
       "saveStyles": "Kuhifadhi mawasiliano na ufundi wa ujenzi",
       "stylesSaved": "Mitindo ya chapa imehifadhiwa kwa kutumia muundo huu",
-      "usePreset": "Tumia mitindo"
+      "usePreset": "Tumia mitindo",
+      "dehubApplied": "Chapa ya Riftn imetumika kwenye tabaka {{count}}.",
+      "dehubApply": "Tumia chapa ya Riftn",
+      "dehubHint": "Rangi rasmi za Riftn, fonti za Exo na Inter, na nembo ya Riftn, kwa kubofya mara moja."
     },
     "draw": {
       "heading": "Chora",
@@ -10725,7 +11560,23 @@
       "zoomOut": "Zoom utafuta kwenye kanisa"
     },
     "clipFix": {
-      "listening": "Inasikiliza…"
+      "listening": "Inasikiliza…",
+      "detach": "Tenganisha sauti",
+      "detached": "Sauti imehamishiwa kwenye klipu yake",
+      "detachFailed": "Haikuweza kutenganisha sauti ya klipu hii",
+      "removeBars": "Ondoa mistari myeusi",
+      "scanning": "Inakagua fremu…",
+      "noBars": "Hakuna mistari myeusi iliyopatikana",
+      "barsRemoved": "Mistari myeusi imekatwa",
+      "barsFailed": "Haikuweza kukagua video hii kwa mistari myeusi",
+      "reframe": "Panga upya kiotomatiki",
+      "reframeHint": "Video tayari inatoshea umbo la ukurasa huu",
+      "reframed": "Imepangwa upya kufuata kitendo",
+      "reframeFailed": "Haikuweza kupanga upya video hii",
+      "retakes": "Ondoa marudio",
+      "noRetakes": "Hakuna marudio yaliyopatikana",
+      "retakesRemoved": "Marudio {{count}} yameondolewa, la mwisho limebakizwa",
+      "retakesFailed": "Haikuweza kuondoa marudio kwenye klipu hii"
     },
     "shortcuts": {
       "action": {
@@ -10733,19 +11584,109 @@
         "play": "Cheza",
         "pause": "Sitisha",
         "frameBack": "Frame ya hapo awali",
-        "frameForward": "Frame ya kujifunza"
-      }
+        "frameForward": "Frame ya kujifunza",
+        "back": "Rudi nyuma sekunde 1",
+        "rippleDelete": "Futa klipu",
+        "liftDelete": "Futa klipu",
+        "start": "Nenda mwanzo",
+        "end": "Nenda mwisho"
+      },
+      "preset": "Mpangilio wa kibodi",
+      "presetHint": "Tumia vitufe vya ratiba ya muda kutoka kwenye kihariri unachokijua. Njia za mkato za Riftn zinaendelea kufanya kazi kwa kila kitu kingine."
     },
     "voiceClone": {
       "stop": "Acha kurekodi",
-      "failed": "Ukubadilishaji wa sauti iliposhindwa."
+      "failed": "Ukubadilishaji wa sauti iliposhindwa.",
+      "pickerLabel": "Nakili sauti yako",
+      "pickerDetail": "Sauti za maelezo kwa sauti yako mwenyewe",
+      "title": "Nakili sauti yako",
+      "description": "Jirekodi au chagua klipu yako ukiongea. Unalipa mara moja na sauti yako ni yako kwa kila sauti ya maelezo.",
+      "defaultName": "Sauti yangu",
+      "record": "Rekodi sampuli (sekunde 30 hadi dakika 2)",
+      "fromMedia": "Au tumia klipu kutoka Midia",
+      "recorded": "Rekodi yako",
+      "sample": "Sampuli: {{name}}",
+      "hint": "Hotuba wazi bila muziki hufanya kazi vizuri zaidi.",
+      "noMic": "Haikuweza kutumia maikrofoni.",
+      "sampleFailed": "Haikuweza kusoma sauti kutoka kwenye klipu hiyo.",
+      "pay": "Nakili kwa tokeni {{amount}}",
+      "useFree": "Nakili (imeshalipiwa)",
+      "owned": "Sauti yako “{{name}}” tayari imewekwa. Ichague kutoka kwenye orodha ya sauti.",
+      "useOwned": "Tumia sauti yangu",
+      "ready": "“{{name}}” iko tayari kwa sauti za maelezo.",
+      "paidFailed": "Malipo yako yamehifadhiwa. Fungua hili tena na jaribio linalofuata ni bure.",
+      "consent": "Nakili sauti yako tu, au ile uliyo na ruhusa ya kuitumia."
     },
     "linkImport": {
       "go": "Ingiza",
-      "downloading": "Inapakuliwa {{percent}}%"
+      "downloading": "Inapakuliwa {{percent}}%",
+      "open": "Ingiza kutoka kwa kiungo",
+      "placeholder": "Bandika kiungo cha YouTube, TikTok au kingine",
+      "rights": "Ninamiliki video hii au nina ruhusa ya kuitumia",
+      "audioOnly": "Sauti pekee",
+      "queued": "Kwenye foleni…",
+      "waiting": "Inasubiri tovuti, itajaribu tena hivi karibuni…",
+      "adding": "Inaongeza kwenye Midia…",
+      "added": "Imeingizwa na kuongezwa kwenye ratiba ya muda.",
+      "failed": "Haikuweza kuingiza kiungo hicho."
     },
     "reverse": {
-      "action": "Geuza"
+      "action": "Geuza",
+      "working": "Inageuza {{percent}}%",
+      "done": "Klipu imegeuzwa.",
+      "failed": "Haikuweza kugeuza klipu hii.",
+      "unsupported": "Kivinjari hiki hakiwezi kugeuza video. Jaribu Chrome au Edge.",
+      "tooLong": "Klipu za hadi sekunde {{seconds}} zinaweza kugeuzwa."
+    },
+    "film": {
+      "repairRefs": "Ondoa viungo vya midia vinavyokosekana",
+      "title": "Mradi wa filamu",
+      "intro": "Panga picha kwa marejeleo ya picha yanayoweza kutumika tena. Maelezo yako, mpangilio wa picha na matokeo uliyochagua huhifadhiwa pamoja na mradi huu.",
+      "create": "Unda mpango wa filamu",
+      "name": "Jina la filamu",
+      "brief": "Maelezo ya filamu",
+      "sharedReferences": "Marejeleo ya picha ya pamoja (hadi 4)",
+      "shot": "Picha",
+      "addShot": "Ongeza picha",
+      "shotName": "Jina la picha",
+      "action": "Kitendo na mpangilio wa picha",
+      "seconds": "Sekunde za video zinazoombwa",
+      "shotReferences": "Marejeleo ya ziada ya picha (kikomo cha jumla 4)",
+      "frame": "Andaa fremu",
+      "video": "Andaa video",
+      "review": "Kagua modeli, marejeleo, muda wa video na bei kwenye studio kabla ya kutengeneza.",
+      "result": "Matokeo ya picha yaliyokubaliwa",
+      "noResult": "Hakuna matokeo yaliyochaguliwa",
+      "resultHint": "Chagua picha au video iliyokubaliwa kutoka Vilivyopakiwa. Kiungo chake huhifadhiwa pamoja na picha hii; tumia ratiba ya muda kuunganisha filamu.",
+      "earlier": "Sogeza mapema",
+      "later": "Sogeza baadaye",
+      "remove": "Ondoa picha",
+      "issue": "Kagua maelezo ya picha na midia ya marejeleo, kisha ujaribu tena. Acha mradi wazi ikiwa haukuweza kuhifadhiwa.",
+      "searchMedia": "Tafuta midia kwa jina",
+      "refreshMedia": "Onyesha upya midia"
+    },
+    "speakers": {
+      "find": "Tafuta wazungumzaji",
+      "name": "Mzungumzaji {{number}}",
+      "onlyOne": "Mzungumzaji mmoja tu amepatikana.",
+      "failed": "Haikuweza kupata wazungumzaji.",
+      "kept": "Amebakizwa {{name}} pekee.",
+      "editFailed": "Uhariri huo haukutoshea klipu hii.",
+      "split": "Imegawanywa katika picha {{count}} za wazungumzaji.",
+      "keepOnly": "Bakiza pekee",
+      "splitAction": "Kata kila mzungumzaji anapobadilika"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Eleza kitu cha 3D unachotaka",
+      "queued": "Tunajenga kitu chako cha 3D. Kitaingia kwenye kichupo cha Vilivyotengenezwa.",
+      "note": "Vitu vya 3D vinaingia kwenye Midia kama klipu fupi inayozunguka yenye mandharinyuma angavu."
+    },
+    "behind": {
+      "action": "Maandishi nyuma ya mtu",
+      "working": "Inamkata mtu…",
+      "done": "Maandishi na manukuu sasa yako nyuma ya mtu.",
+      "failed": "Haikuweza kuweka maandishi nyuma ya mtu."
     }
   },
   "jungleMood": {
@@ -11148,7 +12089,9 @@
     "tokenAmount": "{{amount}} tokeni",
     "assistant": {
       "question1": "Je, APY ya sasa ya kustaajabisha ya tokeni za Riftn ni ipi?",
-      "question2": "Ndiyo, ikiwa nitaweka tokeni 10,000 kwa siku 90"
+      "question2": "Ndiyo, ikiwa nitaweka tokeni 10,000 kwa siku 90",
+      "answer1": "APY ya sasa ya staking kwa tokeni za Riftn ni 12.4% kwa kipindi cha kufunga cha siku 30. Huu hapa mchanganuo:\n\n• Kufunga siku 7: 8.2% APY\n• Kufunga siku 30: 12.4% APY\n• Kufunga siku 90: 18.7% APY\n\nUngependa nikusaidie kukokotoa mapato yanayowezekana?",
+      "answer2": "Kwa tokeni 10,000 zilizowekwa kwa 18.7% APY kwa siku 90:\n\n📊 Zawadi inayokadiriwa: ~tokeni 461\n\nHiyo ni takriban tokeni 5.13 kwa siku. Kumbuka APY inaweza kubadilika kulingana na jumla ya kiasi kilichowekwa."
     },
     "bookmarks": {
       "stakingGuide": "Mwongozo kamili wa kuweka ishara za Riftn: uchanganuzi wa APY, vipindi vya kufuli na vizidishaji vya zawadi vimefafanuliwa."
@@ -11844,7 +12787,7 @@
   "multiPost": {
     "tab": "Chapisho nyingi",
     "title": "Chapisho nyingi",
-    "intro": "Chapisha kwenye X, YouTube, Instagram, TikTok na zaidi kwa wakati mmoja ukitumia dehub. Unganisha akaunti zako mara moja, kisha uchague ni wapi kila chapisho litaenda.",
+    "intro": "Chapisha kwenye X, YouTube, Instagram, TikTok na zaidi kwa wakati mmoja ukitumia Riftn. Unganisha akaunti zako mara moja, kisha uchague ni wapi kila chapisho litaenda.",
     "creditsHeading": "Mikopo ya chapisho",
     "credits": "{{count}} mikopo ya chapisho",
     "topUpTitle": "Ongeza na uhifadhi",
@@ -11892,7 +12835,12 @@
   "dm": {
     "planRestricted": "Mtumiaji huyu anahitaji usajili ili kupokea ujumbe.",
     "planTypeNotAllowed": "Mpango wa mtayarishi huyu hauruhusu aina hii ya ujumbe.",
-    "planMinTip": "Bakshishi kwa mtayarishi huyu lazima iwe angalau {{amount}} tokeni."
+    "planMinTip": "Bakshishi kwa mtayarishi huyu lazima iwe angalau {{amount}} tokeni.",
+    "shareKindGroup": "Gawa",
+    "shareKindCommunity": "Jumuiya",
+    "shareGroups": "Vikundi",
+    "shareKindChannel": "Chaneli",
+    "reportMessage": "Ripoti ujumbe"
   },
   "credits": {
     "earningsWorth": "Thamani {{amount}}",
@@ -11934,7 +12882,11 @@
     "error": "Imeshindwa kuwasilisha ombi lako la kufuta. Akaunti yako haijathibitishwa kufutwa. Tafadhali jaribu tena.",
     "back": "Rudi kwenye Mipangilio",
     "signIn": "Ingia ili kufuta akaunti yako",
-    "acknowledge": "Nimehifadhi maelezo yangu ya kurejesha pochi na ninaelewa kuwa kufutwa ni kwa kudumu."
+    "acknowledge": "Nimehifadhi maelezo yangu ya kurejesha pochi na ninaelewa kuwa kufutwa ni kwa kudumu.",
+    "signedInAs": "Umeingia kama",
+    "confirmTitle": "Futa akaunti yako kabisa?",
+    "confirmBody": "Akaunti yako na kila kitu kilichomo kitafutwa. Utaondolewa na hili haliwezi kutenduliwa.",
+    "confirmBodyNamed": "{{who}} na kila kitu kilichomo kitafutwa. Utaondolewa na hili haliwezi kutenduliwa."
   },
   "miniApps": {
     "badge": {
@@ -12031,12 +12983,42 @@
       "rewardPending": "Inashuhulikiwa",
       "rewardsNone": "Bado hakuna zawadi zilizohesabiwa. Wiki ya kwanza inafungwa Jumatatu.",
       "stats": {
-        "button": "Takwimu za moja kwa moja"
+        "button": "Takwimu za moja kwa moja",
+        "chartTitle": "Watu waliofungua programu yako, siku 30 zilizopita",
+        "peak_one": "Kilele {{count}} kwa siku",
+        "peak_other": "Kilele {{count}} kwa siku",
+        "people30": "Watu, siku 30",
+        "people7": "Watu, siku 7",
+        "added": "Walioiongeza",
+        "dhb30": "Tokeni zilizolipwa, siku 30",
+        "notified30": "Arifa zilizotumwa, siku 30",
+        "rewards": "Zawadi za tokeni zilizopatikana"
       },
       "signin": {
         "users_one": "mtumiaji {{count}}",
         "users_other": "watumiaji {{count}}",
-        "delete": "Futa"
+        "delete": "Futa",
+        "title": "Ingia ukitumia Riftn",
+        "body": "Ruhusu watu waingie kwenye tovuti au programu yako kwa akaunti yao ya Riftn. Unda ufunguo hapa, kisha ufuate mwongozo.",
+        "guide": "Soma mwongozo",
+        "copyId": "Nakili kitambulisho cha mteja",
+        "rotate": "Siri mpya",
+        "rotateConfirm": "Tengeneza siri mpya kwa {{name}}? Siri ya zamani itaacha kufanya kazi mara moja.",
+        "deleteConfirm": "Futa {{name}}? Kila aliyeingia kwa kutumia hiyo ataondolewa.",
+        "secretOnce": "Siri ya {{name}}. Inakili sasa: inaonyeshwa mara moja tu.",
+        "name": "Jina la programu",
+        "website": "Tovuti (hiari)",
+        "redirects": "URL za kuelekeza, moja kwa kila mstari (https://yoursite.com/callback)",
+        "create": "Unda ufunguo"
+      },
+      "stateRejected": "Hai kwa kiungo · haijaidhinishwa kwa duka",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Matukio ambayo Riftn ilituma kwa webhookUrl yako. Jaribio hutuma tukio la ping.",
+        "test": "Tuma jaribio",
+        "ok": "Webhook ilijibu {{status}}",
+        "failed": "Webhook imeshindwa: {{reason}}",
+        "none": "Bado hakuna webhook zilizotumwa."
       }
     },
     "card": {
@@ -12063,7 +13045,10 @@
       "confirm": "Baada ya kufikia {{amount}} tokeni",
       "sending": "Tunaondoa malipo yako…",
       "sent": "Bajaji {{amount}} tokeni kwa {{name}}.",
-      "noOwner": "Hivi app haina waleti mwelekeo wa kurejea kufikia kiasi cha kuzalisha malipo bado."
+      "noOwner": "Hivi app haina waleti mwelekeo wa kurejea kufikia kiasi cha kuzalisha malipo bado.",
+      "testBadge": "Hali ya majaribio",
+      "testBody": "Unamiliki programu hii, kwa hivyo hili ni jaribio: hakuna tokeni zinazohamishwa na risiti imewekwa alama ya jaribio.",
+      "testSent": "Malipo ya majaribio ya tokeni {{amount}}. Hakuna kilichotumwa."
     },
     "add": {
       "title": "Weka {{name}}?",
@@ -19184,7 +20169,60 @@
     "127053546dd4": "Haikupata taarifa hii ya kudumu",
     "d14896aa4bf8": "Librayi ya kujitegemea haikupata. Tafuta uhusiano wako na jaribu tena.",
     "953e708b2287": "Uundaji wa sauti ulipaswa.",
-    "4a52cdd6ac72": "Haikupata uchapishaji wa masanduku haya"
+    "4a52cdd6ac72": "Haikupata uchapishaji wa masanduku haya",
+    "dbc468a14b60": "Maswali yanayoulizwa mara kwa mara",
+    "3f9b2c71d0a4": "Matokeo {{n}}",
+    "8c4e1a6b2f57": "kwa “{{query}}”",
+    "1d7234ff1b79": "katika {{feed}}",
+    "e122e5c2b563": "Buruta juu ili kufunga",
+    "1aa9d734f2ee": "Chagua cha kutafuta",
+    "ef557404f465": "Hakuna matokeo ya “{{query}}”",
+    "35034aa59bd3": "Hakuna kilicholingana katika {{feed}}. Jaribu maneno mengine au tafuta kila kitu.",
+    "415155739590": "Tafuta kila kitu",
+    "9e13d826baaf": "Tafuta picha",
+    "cbf6f228327c": "Tafuta muziki",
+    "e8756c6865a5": "Tafuta Shorts",
+    "c7661da99c41": "Tafuta video",
+    "90f1afe66801": "Inatafuta “{{query}}”…",
+    "d7b559f2d8c6": "Jaribu maneno mengine, au badilisha vichujio.",
+    "d1a0c7e2f301": "Una nini akilini leo?",
+    "d1a0c7e2f302": "Unafikiria nini leo?",
+    "d1a0c7e2f303": "Una nini akilini?",
+    "d1a0c7e2f304": "Una jambo akilini?",
+    "d1a0c7e2f305": "Una nini akilini sasa hivi?",
+    "d1a0c7e2f306": "Tunafikiria nini leo?",
+    "d1a0c7e2f307": "Kuna jambo akilini leo?",
+    "d1a0c7e2f308": "Una nini akilini safari hii?",
+    "a7c1e0f4b2d9": "Gusa ili kuongea",
+    "b3e8d1c6f0a2": "Gusa ili kutuma",
+    "c9f2a4e7d1b5": "Inasikiliza... gusa mpira ili kutuma",
+    "22577ebd908e": "Tengeneza video ya Wan 3.0 · sauti asili",
+    "1fa2357ab7e1": "Tengeneza video ya Seedance 720p · sauti asili",
+    "7f78bdc0762d": "+{{value1}} pointi",
+    "f0c8bb34335b": "Umepata pointi +{{value1}}",
+    "0fbe06b679a8": "Pointi {{value1}} kwa kila ombi lililotolewa, zinaongezwa kwenye alama yako ya Wajenzi bora.",
+    "431bc73eb60b": "[verse]\nManeno ya wimbo wako hapa...\n\n[chorus]\nManeno ya kiitikio...",
+    "a3c1e5f20b71": "Tumia Riftn ndani ya ChatGPT, Claude au programu yoyote ya MCP. Bandika URL iliyo hapa chini kwenye mipangilio ya kiunganishi ya msaidizi wako ili kuvinjari machapisho, wasifu na maoni, kisha ingia unapoombwa ili kuunganisha akaunti yako.",
+    "b84d2e7c9a16": "Anwani hii ni ya programu za AI, si ukurasa wa wavuti. Kuifungua kwenye kivinjari kunakuleta hapa.",
+    "c5e9f1a3d742": "Unganisha akaunti yako ya Riftn",
+    "d61a7b4e8c05": "Msaidizi wako anapokuomba uingie, ingia kwenye Riftn na ubofye Ruhusu. Kisha unaweza kusasisha wasifu wako, kuchapisha machapisho na maoni, kufuata watu na kuunda kwenye Creator Studio. Miunganisho hubaki imeunganishwa unapoitumia na huisha baada ya siku 30 bila kutumika.",
+    "e27b8c5f9d13": "Mwongozo wa hatua kwa hatua wa ChatGPT",
+    "f38c9d6a0e24": "Mwongozo wa hatua kwa hatua wa Claude",
+    "0a49d7b1f835": "Unapendelea akaunti tofauti ya boti? Unda wakala ili kupata URL ya kiunganishi inayochapisha kama wakala huyo.",
+    "1b5ae8c20f46": "ChatGPT inapouliza, ingia kwenye Riftn na ubofye Ruhusu ili kuunganisha akaunti yako.",
+    "2c6bf9d31a57": "Bofya Unganisha, ingia kwenye Riftn na ubofye Ruhusu ili kuunganisha akaunti yako.",
+    "27c26a5a38b3": "Ingia ili kuona jumbe za zamani",
+    "674e70bcd915": "Historia kamili ya gumzo iko wazi kwa kila mtu mwenye akaunti.",
+    "feaf753f6557": "Mwanzo wa gumzo",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Pau za Kioo",
+    "5ff272ba7871": "Mistari ya Hariri",
+    "a941e90ca93d": "Halo ya Jalada",
+    "04dbbe4dff7a": "Wimbi Halisi",
+    "85330dcbaadd": "Hakuna algoriti zinazopendelea upande mmoja wa hoja. \nKila mtu anakuzwa kwa usawa na haki.",
+    "b1fee9bb72b1": "Ubadilishaji unafanya kisanduku {{cell}} kuwa na zaidi ya herufi 200",
+    "58bb9356472b": "Ongeza visanduku vya jedwali kabla ya kusafisha maandishi",
+    "6e71ae3669b1": "Matokeo yaliyohifadhiwa hayapatikani"
   },
   "articles": {
     "cardLabel": "Tukio · {{count}} min read",
@@ -19226,7 +20264,16 @@
     "formatting": "Inapangilia",
     "bodyPlaceholder": "Simulia hadithi yako. Chagua maandishi na utumie upau hapo juu kwa vichwa, ujasiri, nukuu na orodha.",
     "bodyLabel": "Mwili WA makala",
-    "wordCount": "{{count}} maneno"
+    "wordCount": "{{count}} maneno",
+    "imageLimit": "Makala yanaweza kuwa na hadi picha {{count}}",
+    "imageLimitSome": "Picha {{count}} tu zaidi zinatosha kwenye makala haya",
+    "imageFailed": "Picha hiyo haikuweza kuongezwa. Jaribu nyingine.",
+    "imagesUploading": "Inaongeza picha ({{count}})…",
+    "bodyTooLong": "Herufi {{count}} zaidi ya kikomo",
+    "imagesCount": "Picha · {{count}}/{{max}}",
+    "captionPlaceholder": "Ongeza maelezo",
+    "captionLabel": "Maelezo ya picha {{n}}",
+    "removeInlineImage": "Ondoa picha {{n}}"
   },
   "liveAudience": {
     "whosHere": "Nani yuko hapa",
@@ -19275,24 +20322,94 @@
       "stage": {
         "preparing": "Inaandaliwa…",
         "confirming": "Inasubiri muamala…",
-        "recording": "Inakamilisha…"
-      }
+        "recording": "Inakamilisha…",
+        "wallet": "Thibitisha kwenye pochi yako"
+      },
+      "open": "Toa usajili kama zawadi",
+      "title": "Toa usajili kama zawadi",
+      "mode": {
+        "random": "Watazamaji wa nasibu kwenye gumzo",
+        "user": "Mtu mahususi"
+      },
+      "randomHint": "Huenda kwa watu waliopiga gumzo ndani ya dakika 30 zilizopita na ambao bado hawajajisajili.",
+      "send_one": "Toa usajili 1 · ${{price}}",
+      "send_other": "Toa usajili {{count}} · ${{price}}",
+      "payHint": "Inalipwa kwa tokeni kutoka kwenye pochi yako kwa uhamisho mmoja.",
+      "fewer_one": "Ni mtu 1 tu kwenye gumzo anayeweza kupokea usajili sasa hivi, kwa hivyo unalipia 1.",
+      "fewer_other": "Ni watu {{count}} tu kwenye gumzo wanaoweza kupokea usajili sasa hivi, kwa hivyo unalipia {{count}}.",
+      "done_one": "Usajili umetolewa kama zawadi!",
+      "done_other": "Usajili {{count}} umetolewa kama zawadi!",
+      "failed": "Imeshindwa kutoa usajili kama zawadi",
+      "notReady": "Kutoa zawadi bado hakupatikani kwa mpango huu",
+      "noPlan": "Chagua mpango kwanza",
+      "noPlans": "{{name}} bado hana mipango ya usajili ya kutoa kama zawadi."
     },
     "badges": {
       "emoji": "concentrating",
       "audience": {
-        "subscribers": "Wasajili"
+        "subscribers": "Wasajili",
+        "both": "Waliojisajili na watoa zawadi",
+        "gifters": "Watoa zawadi"
       },
       "ended": "Imeisha",
       "until": "Hadi {{date}}",
-      "failed": "Hiyo haikufanya kazi. Jaribu tena."
+      "failed": "Hiyo haikufanya kazi. Jaribu tena.",
+      "title": "Beji za muda mfupi",
+      "intro": "Toa beji kwa siku chache. Yeyote anayejisajili au kutoa zawadi wakati inaendelea anaipata, na inaonekana kando ya jina lake kwenye gumzo lako milele.",
+      "name": "Jina la beji",
+      "namePlaceholder": "Wiki ya uzinduzi",
+      "days": "Inapatikana kwa (siku)",
+      "who": "Nani anaweza kuipata",
+      "create": "Toa beji",
+      "created": "Beji iko hai.",
+      "end": "Maliza sasa",
+      "holders_one": "Mmiliki {{count}}",
+      "holders_other": "Wamiliki {{count}}",
+      "limit": "Beji tatu zinaweza kuendelea kwa wakati mmoja. Maliza moja ili kutoa nyingine.",
+      "hypeHint": "Kila anayepanda treni ya msisimko pia anapata beji yako ya 🚂 katika kiwango ilichofikia."
+    },
+    "train": {
+      "level": "Treni ya Msisimko · Kiwango {{level}}",
+      "endedLevel": "Treni ya Msisimko imemaliza kiwango {{level}}!",
+      "ended": "Treni ya Msisimko imeisha",
+      "thanks_one": "Asante kwa mfadhili {{count}}",
+      "thanks_other": "Asante kwa wafadhili {{count}}",
+      "top": "Bora: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "ametoa usajili kama zawadi 🎁",
+      "giftedSubs_other": "ametoa usajili {{count}} kama zawadi 🎁"
     }
   },
   "whenSheet": {
     "today": "Leo",
     "tooSoon": "Chagua wakati ujao.",
     "show": "Onyesha",
-    "hide": "Ficha"
+    "hide": "Ficha",
+    "title": "Lini?",
+    "tonight": "Usiku huu",
+    "inAnHour": "Baada ya saa moja",
+    "tomorrow": "Kesho",
+    "primeTime": "Wakati wa kilele",
+    "scheduleFor": "Panga kwa {{when}}",
+    "liveTip": "Wafuasi wako wanaweza kuweka kikumbusho. Unaanzisha Live mwenyewe wakati ukifika.",
+    "stageTip": "Inaingia kwenye rafu ya Zijazo mara moja, ili watu waweze kugusa Nikumbushe.",
+    "typePlaceholder": "Andika muda, kama \"ijumaa saa 2 usiku\" au \"baada ya saa 2\"",
+    "typeLabel": "Andika muda",
+    "typeHelp": "Jaribu \"usiku huu\", \"kesho saa 3 asubuhi\", \"jumamosi mchana\" au \"30 okt saa 1 usiku\".",
+    "orPickDay": "Au chagua siku",
+    "earlier": "Dakika 15 mapema",
+    "later": "Dakika 15 baadaye",
+    "earlierShort": "Awali",
+    "laterShort": "Baadaye",
+    "tooSoonMin": "Chagua muda angalau dakika {{count}} kuanzia sasa.",
+    "zone": "Muda wako ({{zone}}). Kila mtu mwingine anauona kwa muda wake.",
+    "remove": "Ondoa ratiba",
+    "startsIn": "Inaanza baada ya {{time}}",
+    "bestTime": "Muda bora",
+    "fansOnline": "Mashabiki wangu wako mtandaoni lini?",
+    "fansBasis": "Kung'aa zaidi kunamaanisha wafuasi wako wengi zaidi walikuwa wakitazama, siku {{count}} zilizopita.",
+    "everyoneBasis": "Bado hakuna shughuli za kutosha za wafuasi, kwa hivyo hii ni kila mtu kwenye Riftn."
   },
   "planned": {
     "title": "Imepangwa",
@@ -19307,22 +20424,45 @@
     "loading": "Inapakia…",
     "startNow": "Anza sasa",
     "cancel": "Ghairi",
-    "cancelled": "Imetoshwa"
+    "cancelled": "Imetoshwa",
+    "subtitle": "Machapisho, Live na Stages ulizopanga",
+    "seoTitle": "Vilivyopangwa · Riftn",
+    "seoDescription": "Machapisho, Live na Stages zako zilizopangwa kwenye Riftn, zote mahali pamoja.",
+    "lives": "Live",
+    "signIn": "Ingia ili kuona ulichopanga",
+    "emptyTitle": "Bado hakuna kilichopangwa",
+    "emptyBody": "Chagua \"Lini?\" unapotengeneza chapisho, Live au Stage na itaonekana hapa.",
+    "move": "Hamisha",
+    "postNow": "Chapisha sasa",
+    "confirmCancel": "Gusa tena ili kughairi",
+    "moved": "Imehamishiwa {{when}}",
+    "postingNow": "Inachapisha ndani ya chini ya dakika moja",
+    "moveFailed": "Imeshindwa kuihamisha. Jaribu tena.",
+    "seeAll": "Ona kila kitu ulichopanga"
   },
   "welcome": {
     "about": {
       "title": "Karibu Riftn",
       "day": "Siku",
       "month": "Mwezi",
-      "year": "Mwaka"
+      "year": "Mwaka",
+      "sub": "Siku yako ya kuzaliwa inabaki kuwa siri. Chagua mwonekano, unaweza kuubadilisha wakati wowote.",
+      "birthday": "Tarehe ya kuzaliwa",
+      "pick": "Chagua siku yako ya kuzaliwa",
+      "invalid": "Weka tarehe yako kamili ya kuzaliwa.",
+      "tooYoung": "Unahitaji kuwa na umri wa miaka {{age}} au zaidi ili kutumia Riftn.",
+      "theme": "Mwonekano wako"
     },
     "name": {
       "title": "Jina lako",
-      "placeholder": "Jina lako"
+      "placeholder": "Jina lako",
+      "sub": "Hili ndilo jina ambalo watu wanaona kwenye machapisho yako."
     },
     "card": {
       "name": "Jina lako",
-      "followers": "wafuasi"
+      "followers": "wafuasi",
+      "interests": "Mambo yanayokuvutia",
+      "following": "anafuata"
     },
     "topic": {
       "music": "Muziki",
@@ -19335,11 +20475,46 @@
       "podcast": "Podikasti",
       "food": "Chakula",
       "news": "Habari",
-      "science": "Sayansi"
+      "science": "Sayansi",
+      "travel": "Usafiri",
+      "anime": "Anime",
+      "cars": "Magari",
+      "animals": "Wanyama",
+      "tech": "Teknolojia"
     },
     "back": "Rudi",
     "skipPhoto": "Ruka kwa sasa",
-    "preview": "Uchunguzi"
+    "preview": "Uchunguzi",
+    "username": {
+      "title": "@jinalamtumiaji lako",
+      "sub": "Herufi, nambari na mistari ya chini. Unaweza kulibadilisha baadaye.",
+      "yours": "@{{name}} ni lako"
+    },
+    "photo": {
+      "title": "Picha yako",
+      "sub": "Hiari. Watu hufuata nyuso haraka zaidi.",
+      "choose": "Chagua picha",
+      "change": "Chagua nyingine"
+    },
+    "interests": {
+      "title": "Mambo yanayokuvutia",
+      "sub": "Chagua angalau 3. Yanatangulia kwenye kategoria zako."
+    },
+    "people": {
+      "title": "Watu wako",
+      "sub": "Gusa ili kufuata. Machapisho yao hujaza mlisho wako wa Unaowafuata.",
+      "empty": "Hakuna mapendekezo kwa sasa. Gundua ina watu zaidi wa kupata.",
+      "followers": "Wafuasi {{count}}"
+    },
+    "done": {
+      "title": "Unapendeza, {{name}}",
+      "sub": "Kila mtu anaona kadi hii kuanzia leo.",
+      "eyebrow": "Wasifu uko hai"
+    },
+    "enter": "Ingia Riftn",
+    "pickMore": "Chagua {{count}} zaidi",
+    "cardHint": "Hivi ndivyo watu watakavyokuona",
+    "followFailed": "Imeshindwa kufuata. Jaribu tena."
   },
   "appTokens": {
     "title": "Tokeni zako",
@@ -19350,28 +20525,102 @@
     "amount": "Kiasi",
     "notePlaceholder": "Ongeza ujumbe (si lazima)",
     "sendButton": "Tuma",
-    "errorInsufficient": "Hakuna tokeni za kutosha"
+    "errorInsufficient": "Hakuna tokeni za kutosha",
+    "rowHint": "Salio ndani ya programu",
+    "explainer": "Tokeni zako sasa ziko ndani ya Riftn. Ulianza na ulichokuwa nacho na ulichoweka hisa kwenye mnyororo wakati wa uzinduzi. Kutuma, kutoa zawadi na kutumia huzihamisha papo hapo, bila ada na bila chochote kwenye mnyororo. Salio huhamia kwenye tokeni mpya wakati wa airdrop.",
+    "kindOpening": "Salio la mwanzo",
+    "kindSent": "Imetumwa kwa {{name}}",
+    "kindReceived": "Kutoka kwa {{name}}",
+    "kindSpent": "Imetumika ndani ya Riftn",
+    "kindRefund": "Marejesho",
+    "kindAdjust": "Marekebisho na Riftn",
+    "sendTitle": "Tuma tokeni",
+    "sendHint": "Hutuma tokeni ndani ya Riftn kwa akaunti nyingine. Papo hapo na bure, hakuna kinachoenda kwenye mnyororo.",
+    "toPlaceholder": "@jinalamtumiaji au anwani ya 0x",
+    "looking": "Inatafuta…",
+    "available": "Inapatikana: {{amount}}",
+    "sent": "Umetuma tokeni {{amount}} kwa {{name}}",
+    "errorRateLimit": "Utumaji mwingi sana ndani ya saa iliyopita. Jaribu tena baadaye.",
+    "errorNoRecipient": "Hakuna akaunti ya Riftn iliyopatikana",
+    "errorSelf": "Huwezi kujitumia mwenyewe",
+    "errorGeneric": "Imeshindwa kutuma. Jaribu tena."
   },
   "reactions": {
     "policy": {
       "everyone": "Kila mtu",
       "followers": "Wafuasi",
-      "nobody": "Hakuna mtu"
+      "nobody": "Hakuna mtu",
+      "default": "Chaguo-msingi la akaunti ({{value}})"
     },
     "heading": "Miitikio",
     "more": "Onyesha zaidi",
     "liveNow": "Moja kwa Moja",
-    "untitled": "Mwitikio"
+    "untitled": "Mwitikio",
+    "reactionTo": "Mwitikio kwa",
+    "reactingTo": "Unaitikia",
+    "count_one": "Mwitikio {{count}}",
+    "count_other": "Mwitikio {{count}}",
+    "allow": "Ruhusu mwitikio",
+    "remixesSection": "Remix",
+    "allowDescription": "Ruhusu waundaji wengine waitikie video zako, zilizorekodiwa au moja kwa moja. Bado unaweza kubadilisha hili kwenye kila chapisho.",
+    "pageDescription": "Tazama waundaji wakiitikia “{{title}}” ya {{creator}} kwenye Riftn, zilizorekodiwa na moja kwa moja.",
+    "backToVideo": "Rudi kwenye video",
+    "empty": "Bado hakuna mwitikio. Fungua menyu ya Remix ya video na uchague Itikia ili kuwa wa kwanza.",
+    "wasLive": "Ilikuwa moja kwa moja",
+    "thisVideo": "video hii",
+    "pageTitle": "Maoni kwa {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Unganisha Riftn na msaidizi wako wa AI",
     "urlLabel": "URL ya seva ya MCP",
     "copy": "Nakili",
     "copied": "Imenakiliwa",
-    "copiedToast": "URL ya MCP imenakiliwa"
+    "copiedToast": "URL ya MCP imenakiliwa",
+    "accountBody2": "Hifadhi rasimu za faragha, chapisha na panga machapisho, simamia picha na kura za maoni, soma takwimu, jibu, itikia, chapisha tena, fuata, hifadhi alamisho, soma arifa, hariri wasifu wako na unda kwa kutumia salio lako. Kutumia tena kitambulisho cha ombi la chapisho hakuundi wala kuhesabu chapisho la pili. Huuliza kabla ya kutumia chochote.",
+    "agentsTitle": "Endesha mawakala wako kutoka kwa msaidizi wako",
+    "agentsBody": "Unapounganisha, ruhusu pia \"Tenda kama mawakala wako\". Kisha msaidizi wako anaweza kuchapisha, kujibu, kuitikia, kuchapisha tena, kufuata au kuhariri wasifu kama wakala yeyote unayemmiliki, mmoja baada ya mwingine au wengi mfululizo. Hawezi kamwe kutenda kama akaunti usiyoimiliki.",
+    "agentsExample": "Jaribu: \"Mfanye @mybot ajibu chapisho bora kwenye mlisho wangu, kisha upende jibu hilo kama @otherbot.\"",
+    "desc": "Tumia Riftn kutoka ChatGPT, Claude, Cursor au programu yoyote ya MCP. Vinjari bila akaunti, au ingia ili msaidizi wako aweze kuchapisha, kujibu na kuunda kwa ajili yako.",
+    "copyFailed": "Kunakili kumeshindwa",
+    "urlNote": "Bandika hii kwenye programu yako ya AI. Si ukurasa wa wavuti, kwa hivyo kuifungua kwenye kivinjari kunakurudisha hapa.",
+    "canTitle": "Kile msaidizi wako anaweza kufanya",
+    "publicTitle": "Bila kuingia",
+    "publicBody": "Vinjari mlisho, tafuta machapisho na watu, soma maoni na tafuta wasifu.",
+    "accountTitle": "Baada ya kuingia",
+    "accountBody": "Chapisha, jibu, itikia, fuata, hifadhi alamisho, soma arifa, hariri wasifu wako na unda picha, video na muziki kwa kutumia salio lako. Huuliza kabla ya kutumia chochote.",
+    "chatgpt1": "Fungua Mipangilio ya ChatGPT, kisha Apps & Connectors, kisha Advanced, na uwashe Developer mode.",
+    "chatgpt2": "Ukirudi kwenye Apps & Connectors, chagua Create ili kuongeza kiunganishi kipya.",
+    "chatgpt3": "Kiite Riftn, bandika URL iliyo hapo juu na uchague OAuth kama aina ya kuingia.",
+    "chatgpt4": "Bonyeza Connect. Riftn hufunguka: ingia, kagua ruhusa na ubonyeze Ruhusu.",
+    "chatgpt5": "Kwenye gumzo jipya, fungua menyu ya +, chagua Riftn na uulize, kwa mfano, “Nionyeshe machapisho yanayovuma kwenye Riftn.”",
+    "claude1": "Fungua mipangilio ya viunganishi ya Claude na uchague Add custom connector.",
+    "claude2": "Kiite Riftn, bandika URL iliyo hapo juu na ubonyeze Add.",
+    "claude3": "Bonyeza Connect. Riftn hufunguka: ingia, kagua ruhusa na ubonyeze Ruhusu.",
+    "claude4": "Kwenye gumzo, fungua menyu ya zana, washa Riftn na uulize chochote.",
+    "openSettings": "Fungua mipangilio",
+    "devTitle": "Claude Code, Cursor na programu nyingine",
+    "devBody": "Ongeza Riftn kama seva ya mbali ya MCP kupitia HTTP. Programu hufungua kuingia kwa Riftn mara ya kwanza inapohitaji akaunti yako.",
+    "manageTitle": "Programu zako zilizounganishwa",
+    "manageBody": "Programu zilizounganishwa hubaki zimeunganishwa unapozitumia na hukatika baada ya siku 30 bila kutumika. Unaweza kuziona au kuzitenganisha wakati wowote.",
+    "manageLink": "Simamia programu zilizounganishwa",
+    "agentTitle": "Unataka boti inayochapisha kama akaunti yake yenyewe?",
+    "agentBody": "Unda wakala na upate URL yake ya kiunganishi yenye ufunguo ndani. Kisha msaidizi wako anaweza kuchapisha, kutoa maoni, kupiga kura na kufuata kama wakala huyo badala yako.",
+    "agentLink": "Unda wakala",
+    "helpTitle": "Kitu kikienda vibaya",
+    "help1": "“Authentication update required” au kitufe cha Reconnect: bonyeza Reconnect na uingie kwenye Riftn tena.",
+    "help2": "“Unganisha akaunti yako ya Riftn” unapouliza kuhusu machapisho yako: bonyeza Connect kwenye mipangilio ya viunganishi ya programu.",
+    "help3": "Hitilafu unapofungua URL kwenye kichupo cha kivinjari ni kawaida. Ibandike kwenye programu yako ya AI badala yake.",
+    "other": "Programu nyingine yoyote ya MCP hufanya kazi kwa njia ileile: ongeza seva ya mbali ya MCP na ubandike URL iliyo hapo juu."
   },
   "avatarPrompt": {
-    "notNow": "Sio sasa"
+    "notNow": "Sio sasa",
+    "title": "Ongeza picha ya wasifu",
+    "body": "Watu wanakutambua haraka zaidi kwenye milisho, maoni na gumzo ukiwa na uso au nembo.",
+    "choose": "Chagua picha",
+    "another": "Chagua nyingine",
+    "save": "Tumia picha hii",
+    "saved": "Unapendeza",
+    "failed": "Imeshindwa kuhifadhi picha yako. Jaribu tena."
   },
   "postStats": {
     "audience": "Hadhira",
@@ -19389,7 +20638,60 @@
     "shares": "Kushiriki",
     "signedOutViewers": "Umetoka",
     "topSupporters": "Wafuasi wakuu",
-    "visitors": "Umetoka"
+    "visitors": "Umetoka",
+    "aboutUsual": "karibu na kawaida yako",
+    "afterWatching": "walifuata baada ya kuliona",
+    "avg": "wastani",
+    "avgWatch": "Wastani wa kutazama",
+    "bestTime": "Watu wako wanapotazama",
+    "bigDrop": "Kushuka kukubwa",
+    "byBadge": "kwa beji",
+    "devices": "Kifaa (wanachama)",
+    "finishedLower": "walimaliza",
+    "finishedPct": "{{pct}}% walitazama hadi mwisho",
+    "inOut": "Wanachama {{in}} · {{out}} hawajaingia",
+    "leave": "{{pct}}% wanaondoka",
+    "linkClicks": "Mibofyo ya kiungo",
+    "newToYou": "wapya kwako",
+    "noAccount": "hawana akaunti",
+    "noViewersYet": "Bado hakuna aliyeona chapisho hili.",
+    "noWatchYet": "Muda wa kutazama unaonekana hapa watu wakishalicheza. Ulianza kuhesabiwa tarehe 31 Okt 2026.",
+    "open": "Ona jinsi chapisho lako linavyofanya",
+    "otherBadges": "Beji nyingine",
+    "peak": "Kilele {{time}} · {{n}}",
+    "peopleReached": "Watu waliofikiwa",
+    "playsLower": "michezo",
+    "playsMembers": "Michezo ya wanachama",
+    "playsVisitors": "Michezo bila kuingia",
+    "profileTaps": "Miguso kwenye wasifu wako",
+    "reach": "Ufikiaji",
+    "saves": "Vilivyohifadhiwa",
+    "seeAll": "Ona takwimu zote",
+    "signedIn": "wameingia",
+    "signedOutLower": "hawajaingia",
+    "stillWatching": "Bado wanatazama",
+    "timesUsual": "{{ratio}}× ya kawaida",
+    "vsUsualPct": "{{pct}} dhidi ya chapisho lako la kawaida",
+    "unavailableBody": "Ni muundaji pekee anayeweza kuona takwimu za chapisho hili.",
+    "unavailableTitle": "Takwimu hazipatikani",
+    "vsUsual": "dhidi ya chapisho lako la kawaida",
+    "watching": "Wanatazama",
+    "whoSawIt": "Nani aliliona",
+    "withRepeats": "Marudio {{n}}",
+    "yourFollowers": "wafuasi wako",
+    "first48": "Saa 48 za kwanza",
+    "howItsDoing": "Linavyofanya",
+    "bestTip": "Watazamaji wako wengi hufika {{day}} karibu saa {{hour}}:00. Kuchapisha muda mfupi kabla ya hapo kunalipa chapisho mwanzo bora.",
+    "last30": "siku 30 zilizopita",
+    "day": {
+      "sun": "Jpi",
+      "mon": "Jtt",
+      "tue": "Jnn",
+      "wed": "Jtn",
+      "thu": "Alh",
+      "fri": "Iju",
+      "sat": "Jmo"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Inakuja hivi karibuni",
@@ -19422,7 +20724,27 @@
   },
   "mcpKeys": {
     "delete": "Futa",
-    "shortProfile": "Wasifu"
+    "shortProfile": "Wasifu",
+    "title": "Funguo binafsi",
+    "body": "Kwa skripti, boti na programu zisizoweza kufungua ukurasa wa kuingia. Ufunguo hufanya tu unachoruhusu, kwenye akaunti yako na mawakala unaowamiliki. Unabaki hai unapotumika na huacha kufanya kazi baada ya siku 30 bila kutumika.",
+    "signIn": "Ingia ili kutengeneza ufunguo",
+    "newTitle": "Nakili ufunguo wako sasa",
+    "newBody": "Hii ndiyo mara pekee unaonyeshwa. Yeyote aliye nao anaweza kutumia akaunti yako ndani ya ruhusa ulizochagua, kwa hivyo uweke siri.",
+    "useIt": "Uongeze kwenye programu yako kwa mojawapo ya hivi:",
+    "name": "Jina la ufunguo",
+    "namePlaceholder": "Boti yangu",
+    "permissions": "Ufunguo huu unaweza kufanya nini",
+    "limits": "Vikomo vya kila siku kwa akaunti yako na mawakala: machapisho 50, majibu 300, miitikio 1,000, ufuataji 200, uchapishaji upya 200 na uhariri wa wasifu 30.",
+    "create": "Unda ufunguo",
+    "show": "Onyesha funguo zangu",
+    "yours": "Funguo zako",
+    "empty": "Bado hakuna funguo.",
+    "expires": "Hai hadi {{date}} usipotumika tena",
+    "shortRead": "Soma",
+    "shortSocial": "Chapisha na jibu",
+    "shortGenerate": "Unda midia",
+    "shortAgents": "Mawakala wako",
+    "settingsBody": "Tumia Riftn na mawakala wako kutoka ChatGPT, Claude au programu yoyote ya MCP, au tengeneza ufunguo binafsi."
   },
   "chatSearch": {
     "placeholder": "Tafuta ujumbe au watu",
@@ -19458,12 +20780,81 @@
     "title": "Maombi",
     "accept": "Kubali",
     "delete": "Futa",
-    "block": "zuia"
+    "block": "zuia",
+    "hint": "Jumbe kutoka kwa watu usiowafuata. Kubali mmoja, jibu au mfuate na gumzo litahamia kwenye kikasha chako.",
+    "rowHint": "{{n}} kutoka kwa watu usiowafuata",
+    "banner": "Humfuati {{name}}. Kubali ili kuhamisha gumzo hili kwenye kikasha chako, au jibu tu.",
+    "accepted": "Imehamishiwa kwenye kikasha chako",
+    "acceptFailed": "Imeshindwa kukubali, jaribu tena"
   },
   "dmSchedule": {
     "view": "Tazama",
     "edit": "Tafuta",
     "editLabel": "Hariri ujumbe",
-    "error": "Hiyo haikufanya kazi. Jaribu tena."
+    "error": "Hiyo haikufanya kazi. Jaribu tena.",
+    "button": "Panga ujumbe",
+    "title": "Jumbe zilizopangwa",
+    "whenTitle": "Tuma lini?",
+    "waiting": "{{n}} zimepangwa",
+    "next": "inayofuata {{when}}",
+    "failedCount": "{{n}} hazijatumwa",
+    "notSent": "Haukutumwa",
+    "emptyTitle": "Hakuna kilichopangwa",
+    "emptyBody": "Andika ujumbe, kisha gusa saa ili kuchagua utakapotumwa.",
+    "changeTime": "Badilisha muda",
+    "sendNow": "Tuma sasa",
+    "deleted": "Ujumbe uliopangwa umefutwa",
+    "unreadable": "Uliandikwa kwenye kifaa kingine. Bado utatumwa.",
+    "footnote": "Nyakati ziko kwenye saa za eneo lako. Hakuna anayeona ujumbe hadi utumwe.",
+    "footnoteNamed": "Nyakati ziko kwenye saa za eneo lako. {{name}} anaona ujumbe tu ukishatumwa.",
+    "textOnly": "Ni jumbe za maandishi pekee zinazoweza kupangwa kwa sasa.",
+    "scheduledToast": "Umepangwa kwa {{when}}",
+    "failedToast": "Ujumbe uliopangwa haukuweza kutumwa"
+  },
+  "mentionLinks": {
+    "communities": "Jamii",
+    "pages": "Kurasa",
+    "people": "Watu",
+    "empty": "Hakuna kilichopatikana",
+    "hint": "Andika ili kupata watu, jumuiya na kurasa",
+    "linkTo": "Unganisha {{name}}",
+    "members": " wanachama",
+    "placeholder": "Tafuta watu, jumuiya, kurasa...",
+    "title": "Taja au unganisha"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Ninaelewa wasifu wangu utafichwa na nitaondolewa kila mahali.",
+    "title": "Zima akaunti kwa muda",
+    "short": "Ficha wasifu wako kwa sasa. Ingia tena ili kuurejesha",
+    "description": "Pumzika badala yake. Wasifu, machapisho na maoni yako yanafichwa na unaondolewa kila mahali. Hakuna kinachofutwa, na kuingia tena kunarudisha kila kitu.",
+    "button": "Zima kwa muda",
+    "confirmTitle": "Zima akaunti yako kwa muda?",
+    "confirmBody": "Wasifu, machapisho na maoni yako yatafichwa na utaondolewa kwenye kila kifaa. Ingia tena wakati wowote ili kutendua hili.",
+    "busy": "Inazima…",
+    "done": "Akaunti imezimwa kwa muda",
+    "receipt": "Wasifu, machapisho na maoni yako yamefichwa. Ingia tena wakati wowote ili kurudisha kila kitu.",
+    "error": "Haikuweza kuzima akaunti yako. Tafadhali jaribu tena."
+  },
+  "halloween": {
+    "title": "Heri ya Halloween",
+    "otherThemes": "Hupendi mambo ya kutisha? Tafuta mandhari mengine:",
+    "enter": "Ingia kwenye shimo"
+  },
+  "msgDelete": {
+    "title": "Futa ujumbe?",
+    "titleMany": "Futa jumbe {{count}}?",
+    "bodyOwn": "Uondoe kwenye gumzo lako tu, au kwa kila mtu.",
+    "bodyOwnMany": "Uziondoe kwenye gumzo lako tu, au kwa kila mtu.",
+    "bodyOthers": "Utaondolewa kwenye gumzo lako tu. Mtu mwingine bado ataona.",
+    "bodyOthersMany": "Zitaondolewa kwenye gumzo lako tu. Wengine kwenye gumzo bado watazione.",
+    "bodyOwnBoth": "Uondoe kwenye gumzo lako tu, au kwa nyote wawili.",
+    "bodyOwnBothMany": "Uziondoe kwenye gumzo lako tu, au kwa nyote wawili.",
+    "forMe": "Futa kwa ajili yangu",
+    "forEveryone": "Futa kwa kila mtu",
+    "forBoth": "Futa kwa sisi sote wawili",
+    "forMeAndName": "Futa kwangu na kwa {{name}}",
+    "remember": "Kumbuka chaguo langu",
+    "rememberHint": "Libadilishe wakati wowote kwenye Mipangilio",
+    "failed": "Imeshindwa kufuta ujumbe"
   }
 }

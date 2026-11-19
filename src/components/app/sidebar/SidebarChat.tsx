@@ -6,14 +6,13 @@ import { useDraftState } from '@/hooks/use-draft-state';
 import { useDraft } from '@/hooks/use-draft';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2 } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 
 import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
 import Attach from "@/components/ui/cut-icons/attach";
-import OpenExternally from "@/components/ui/cut-icons/open-externally";
+import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import X from "@/components/ui/cut-icons/close";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,6 +38,7 @@ import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import { preloadRoute } from '@/lib/route-preload';
+import { expandChat, forgetChatOrigin } from '@/lib/chat-expand';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppState } from '@/components/app/AppState';
 import { VoiceRecorder } from '@/components/app/chat/VoiceRecorder';
@@ -59,9 +59,11 @@ import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLink
 import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from '@/components/app/chat/ReactionArrival';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from '@/components/app/chat/message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -136,6 +138,7 @@ function SidebarReactions({
   /** Your own line: a reaction opens the list of who left it. */
   ownLine?: boolean;
 }) {
+  useReactionHost(messageId);
   const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
@@ -157,14 +160,14 @@ function SidebarReactions({
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <span className="text-xs inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+            <span className="text-xs inline-flex items-center"><ReactionGlyph messageId={messageId} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" /></span>
             {mine && !ownLine ? (
               <>
-                <span className="group-hover/reaction:hidden">{addresses.length}</span>
+                <RollingCount value={addresses.length} className="group-hover/reaction:hidden" />
                 <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
               </>
             ) : (
-              <span>{addresses.length}</span>
+              <RollingCount value={addresses.length} />
             )}
           </button>
         );
@@ -182,6 +185,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const { t: _copy } = _useCopy();
   // A tapped photo opens full screen, with Download.
   const [viewingImage, setViewingImage] = useState<string | null>(null);
+  // Back beside the feed (by any route): the full page's back arrow no longer
+  // owes a trip back here.
+  useEffect(() => { forgetChatOrigin(); }, []);
   const [replyTo, setReplyTo] = useState<SupabaseLiveChatMessage | null>(null);
   // Edits happen in the row itself rather than in the composer at the foot of
   // the rail — the composer is a 169-character single line shared with the
@@ -476,6 +482,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
     });
+    const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
+      : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
+    if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
     if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
   }
   const lineMenu = menuPoint.mounted && menuMsg ? (
@@ -718,22 +727,21 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                         <SidebarMessageBody content={msg.content} />
                       )}
                       {/* Reactions */}
-                      {msg.reactions && (
-                        <SidebarReactions
-                          reactions={msg.reactions}
-                          currentUserAddress={walletAddress || undefined}
-                          onReact={addReaction}
-                          onRemoveReaction={removeReaction}
-                          messageId={msg.id}
-                          ownLine={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()}
-                        />
-                      )}
+                      <SidebarReactions
+                        reactions={msg.reactions ?? {}}
+                        currentUserAddress={walletAddress || undefined}
+                        onReact={addReaction}
+                        onRemoveReaction={removeReaction}
+                        messageId={msg.id}
+                        ownLine={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()}
+                      />
                     </div>
                     {/* Every action lives in the line's menu (right-click, or this
                         "..." on hover for keyboard users). */}
                     {editingId !== msg.id && !(msg.client_key && msg.send_state === 'failed') && (
                       <div data-sidebar-chat-actions className="pointer-events-none absolute right-0 top-0 z-10 rounded-l-md bg-zinc-900/90 pl-0.5 opacity-0 backdrop-blur-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
                         <MessageMoreButton
+                          plain
                           className="h-5 w-5"
                           onOpen={(point) => { setMenuMsg(msg); menuPoint.openAt(point); }}
                         />
@@ -821,16 +829,17 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
               <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
                 <ChatTextSizeButton />
-                {/* Pop the global chat out into its own window, beside the feed. */}
+                {/* Opens the full chat page in this tab: it slides in over the
+                    feed (lib/chat-expand), and back / Esc returns here. */}
                 <button
                   type="button"
-                  data-chat-popout
-                  aria-label={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
-                  title={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
-                  onClick={() => { window.open('/chat?chat=public', 'riftn-global-chat', 'popup,width=520,height=780'); }}
+                  data-chat-fullscreen
+                  aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                  title={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                  onClick={expandChat}
                   className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
                 >
-                  <OpenExternally className="h-4 w-4" />
+                  <Fullscreen className="h-4 w-4" />
                 </button>
               </div>
             )}

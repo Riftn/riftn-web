@@ -15,7 +15,6 @@ import { NAV_ITEMS } from '@/constants/app.constants';
 import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { MobileHeader } from './navigation/MobileHeader';
 import { DesktopSidebar } from './navigation/DesktopSidebar';
-import { MobileMenuLayout, MenuTabs } from './navigation/MobileMenuLayout';
 import { groupMenuItems } from './navigation/menu-groups';
 import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -47,6 +46,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { canManageAgents } from '@/lib/agent-access';
 
 // Loaded on first empty search: it pulls in the Requests board's submit code.
+// The phone menu's tiles and tab row: only drawn once the menu opens, so they
+// load then (and on idle before that), off the first paint.
+const loadMenuLayout = () => import('./navigation/MobileMenuLayout');
+const MobileMenuLayout = lazy(() => loadMenuLayout().then((m) => ({ default: m.MobileMenuLayout })));
+const MenuTabs = lazy(() => loadMenuLayout().then((m) => ({ default: m.MenuTabs })));
 const SearchRequestPrompt = lazy(() => import('./navigation/SearchRequestPrompt').then((m) => ({ default: m.SearchRequestPrompt })));
 
 interface AppSidebarProps {
@@ -99,6 +103,15 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     setMenuQuery.complete(menuQuery, '');
     setSearchOpen(false);
   }, [menuQuery, setMenuQuery]);
+  // Fetch the menu's tiles once the page is idle, so the first open is instant.
+  useEffect(() => {
+    const idle = (window as any).requestIdleCallback as ((cb: () => void) => number) | undefined;
+    const id = idle ? idle(() => { void loadMenuLayout(); }) : window.setTimeout(() => { void loadMenuLayout(); }, 2000);
+    return () => {
+      const cancel = (window as any).cancelIdleCallback as ((id: number) => void) | undefined;
+      if (idle && cancel) cancel(id); else window.clearTimeout(id);
+    };
+  }, []);
   // Reset whenever the sheet closes, so it never reopens mid-filter, and
   // always reopens on the first group.
   useEffect(() => {
@@ -199,7 +212,9 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           >
             <Search className="h-[18px] w-[18px]" />
           </button>
-          <MenuTabs groups={menuGroups} activeTab={menuTab} onTabChange={setMenuTab} />
+          <Suspense fallback={<div className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5" />}>
+            <MenuTabs groups={menuGroups} activeTab={menuTab} onTabChange={setMenuTab} />
+          </Suspense>
         </div>
       ) : (
       <div className="relative mb-3 px-1">
@@ -239,6 +254,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           (which also smeared the pinned footer while it moved). */}
       <div data-vaul-no-drag className="-mx-1 -mt-1 pt-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-2 [touch-action:pan-y]">
       {/* Navigation tiles */}
+      <Suspense fallback={null}>
       <MobileMenuLayout
         layout={menuLayout}
         groups={menuGroups}
@@ -251,6 +267,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
         messageCount={messagesUnread}
         onNavigate={closeMenu}
       />
+      </Suspense>
 
       {menuQuery && (
         <>

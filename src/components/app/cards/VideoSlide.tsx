@@ -49,6 +49,8 @@ interface VideoSlideProps {
   isActive: boolean;
   handoffKey?: string;
   isMuted: boolean;
+  /** The browser refused sound, so this short started silent. */
+  onAutoMuted?: () => void;
   playbackRate?: number;
   onTimeUpdate?: (currentTime: number, duration: number, loops?: boolean) => void;
   /** The video played to its end (loop off), so the viewer can move on. */
@@ -142,6 +144,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
   isActive: activeSlide,
   handoffKey,
   isMuted,
+  onAutoMuted,
   playbackRate = 1,
   onTimeUpdate,
   onEnded,
@@ -196,6 +199,16 @@ const VideoSlideBody = memo(function VideoSlideBody({
     component: 'ShortsViewer', postId: short.id,
     allowed: () => isActiveRef.current && !visualActivity.isCallBusy(),
   });
+  // Swiping fast on iPhone hands each new short to a fresh player the
+  // browser will not start with sound. Start it silent instead of stopping on
+  // a Play button; the viewer's speaker shows muted until they tap it.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (playbackPhase !== 'blocked' || !isActive || !video || video.muted) return;
+    video.muted = true;
+    onAutoMuted?.();
+    void requestVideoPlayback(video).catch(() => {});
+  }, [playbackPhase, isActive, onAutoMuted]);
   useEffect(() => {
     if (playbackPhase === 'failed') onPlaybackFailed?.();
   }, [playbackPhase, onPlaybackFailed]);

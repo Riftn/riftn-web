@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { socialReachQueryKey } from '@/hooks/use-social-reach';
@@ -23,6 +23,8 @@ import {
 import {
   MULTIPOST_PLATFORMS, PLATFORM_NAMES, buyCredits, disconnectAccount, getMultipostStatus, startConnect,
 } from '@/lib/multipost';
+import { MULTIPOST_CHANNEL, MULTIPOST_POPUP_PARAM, openMultipostWindow, type MultipostPopupResult } from '@/lib/multipost-popup';
+import { useCrossPostStore } from '@/store/crossPostStore';
 
 const ICON_KEY: Record<string, string> = {
   twitter: 'twitterLink', instagram: 'instagramLink', tiktok: 'tiktokLink',
@@ -55,13 +57,20 @@ function refreshReach(qc: QueryClient, wallet: string | null | undefined) {
     .catch(() => { /* the profile catches up when its cache expires */ });
 }
 
-export function MultiPostSettings() {
+/**
+ * Everything multi-posting needs: status, connecting, disconnecting and buying
+ * credits. Settings uses it as a page; the composer uses it `inPost`, where a
+ * platform sign-in runs in its own small window so the post never unloads, and
+ * an account connected from there is switched on for that post.
+ */
+export function useMultipostSetup({ inPost = false }: { inPost?: boolean } = {}) {
   const { t } = useTranslation();
   const { isAuthenticated, walletAddress } = useAuth();
   const qc = useQueryClient();
-  const [stopIndex, setStopIndex] = useState(2);
   const [buying, setBuying] = useState(false);
   const [connecting, setConnecting] = useState<string | null>(null);
+  const knownIds = useRef<Set<string> | null>(null);
+  const watchTimer = useRef<number | null>(null);
 
   const status = useQuery({
     queryKey: MULTIPOST_QUERY_KEY,
@@ -72,6 +81,119 @@ export function MultiPostSettings() {
     // Farcaster approval happens in another app, so keep checking while it's pending.
     refetchInterval: (query) => (query.state.data?.accounts.some((a) => a.pending) ? 5000 : false),
   });
+  const refresh = useCallback(() => qc.invalidateQueries({ queryKey: MULTIPOST_QUERY_KEY }), [qc]);
+
+  useEffect(() => () => { if (watchTimer.current) window.clearInterval(watchTimer.current); }, []);
+
+  // The sign-in window reports back over a same-site channel, even when the
+  // platform's own pages cut the link to this window on the way.
+  useEffect(() => {
+    if (!inPost || typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel(MULTIPOST_CHANNEL);
+    channel.onmessage = (event: MessageEvent<MultipostPopupResult>) => {
+      const { connected, platform: raw } = event.data ?? {};
+      const platform = PLATFORM_NAMES[connected || raw || ''] ?? connected ?? '';
+      if (connected) {
+        toast.success(t('multiPost.connectedToast', { platform }));
+        refreshReach(qc, walletAddress);
+      } else {
+        toast.error(t('multiPost.connectFailed', { platform }));
+      }
+      setConnecting(null);
+      refresh();
+    };
+    return () => channel.close();
+  }, [inPost, qc, refresh, t, walletAddress]);
+
+  // A newly connected account goes straight into this post.
+  const accounts = status.data?.accounts;
+  useEffect(() => {
+    if (!inPost || !knownIds.current || !accounts) return;
+    const fresh = accounts.filter((a) => !a.pending && !knownIds.current!.has(a.id)).map((a) => a.id);
+    if (!fresh.length) return;
+    knownIds.current = null;
+    const { selected, set } = useCrossPostStore.getState();
+    set([...selected, ...fresh.filter((id) => !selected.includes(id))]);
+  }, [inPost, accounts]);
+
+  const handleConnect = async (platform: string) => {
+    // Opened inside the tap so the browser allows it; the link arrives a moment later.
+    const popup = inPost && platform !== 'farcaster' ? openMultipostWindow() : null;
+    knownIds.current = new Set((status.data?.accounts ?? []).filter((a) => !a.pending).map((a) => a.id));
+    setConnecting(platform);
+    try {
+      const back = popup ? `&${MULTIPOST_POPUP_PARAM}=1` : '';
+      const redirect = `${window.location.origin}/app/settings?tab=multipost${back}`;
+      const url = await startConnect(platform, redirect);
+      if (!url) {
+        popup?.close();
+        refresh();
+        setConnecting(null);
+        return;
+      }
+      if (platform === 'farcaster') {
+        // Approval happens in the Farcaster app; stay here and watch for it.
+        window.open(url, '_blank', 'noopener');
+        refresh();
+        setConnecting(null);
+        return;
+      }
+      if (popup) {
+        popup.location.href = url;
+        if (watchTimer.current) window.clearInterval(watchTimer.current);
+        watchTimer.current = window.setInterval(() => {
+          if (!popup.closed) return;
+          window.clearInterval(watchTimer.current!);
+          watchTimer.current = null;
+          setConnecting(null);
+          refresh();
+        }, 800);
+        return;
+      }
+      window.location.href = url;
+    } catch (err) {
+      popup?.close();
+      // The provider's reason comes back in English ("X (Twitter) requires a
+      // payment method..."); show our own words in the reader's language.
+      console.warn('[multipost] connect failed', platform, err);
+      toast.error(t('multiPost.connectFailed', { platform: PLATFORM_NAMES[platform] }));
+      setConnecting(null);
+    }
+  };
+
+  const handleDisconnect = async (accountId: string) => {
+    try {
+      await disconnectAccount(accountId);
+      toast.success(t('multiPost.disconnected'));
+      refresh();
+      refreshReach(qc, walletAddress);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleBuy = async (credits: number) => {
+    setBuying(true);
+    try {
+      await buyCredits(credits, walletAddress ?? null);
+      toast.success(t('multiPost.bought', { count: credits }));
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBuying(false);
+    }
+  };
+
+  return { isAuthenticated, status, buying, connecting, handleConnect, handleDisconnect, handleBuy };
+}
+
+export function MultiPostSettings() {
+  const { t } = useTranslation();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+  const [stopIndex, setStopIndex] = useState(2);
+  const { isAuthenticated, status, buying, connecting, handleConnect, handleDisconnect, handleBuy: buy } = useMultipostSetup();
 
   // Back from a platform's sign-in page.
   useEffect(() => {
@@ -82,7 +204,7 @@ export function MultiPostSettings() {
     const platform = PLATFORM_NAMES[connected || params.get('platform') || ''] ?? connected ?? '';
     if (connected) toast.success(t('multiPost.connectedToast', { platform }));
     else toast.error(t('multiPost.connectFailed', { platform }));
-    ['connected', 'error', 'error_message', 'platform', 'profileId', 'accountId', 'username', 'request_id', 'stage', 'is_user_fixable', 'error_reason']
+    [MULTIPOST_POPUP_PARAM, 'connected', 'error', 'error_message', 'platform', 'profileId', 'accountId', 'username', 'request_id', 'stage', 'is_user_fixable', 'error_reason']
       .forEach((k) => params.delete(k));
     const query = params.toString();
     window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
@@ -99,57 +221,7 @@ export function MultiPostSettings() {
   const total = bundlePriceUsd(credits);
   const accounts = status.data?.accounts ?? [];
   const connectedPlatforms = new Set(accounts.filter((a) => !a.pending).map((a) => a.platform));
-
-  const handleConnect = async (platform: string) => {
-    setConnecting(platform);
-    try {
-      const redirect = `${window.location.origin}/app/settings?tab=multipost`;
-      const url = await startConnect(platform, redirect);
-      if (!url) {
-        qc.invalidateQueries({ queryKey: MULTIPOST_QUERY_KEY });
-        setConnecting(null);
-        return;
-      }
-      if (platform === 'farcaster') {
-        // Approval happens in the Farcaster app; stay here and watch for it.
-        window.open(url, '_blank', 'noopener');
-        qc.invalidateQueries({ queryKey: MULTIPOST_QUERY_KEY });
-        setConnecting(null);
-        return;
-      }
-      window.location.href = url;
-    } catch (err) {
-      // The provider's reason comes back in English ("X (Twitter) requires a
-      // payment method..."); show our own words in the reader's language.
-      console.warn('[multipost] connect failed', platform, err);
-      toast.error(t('multiPost.connectFailed', { platform: PLATFORM_NAMES[platform] }));
-      setConnecting(null);
-    }
-  };
-
-  const handleDisconnect = async (accountId: string) => {
-    try {
-      await disconnectAccount(accountId);
-      toast.success(t('multiPost.disconnected'));
-      qc.invalidateQueries({ queryKey: MULTIPOST_QUERY_KEY });
-      refreshReach(qc, walletAddress);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err));
-    }
-  };
-
-  const handleBuy = async () => {
-    setBuying(true);
-    try {
-      await buyCredits(credits, walletAddress ?? null);
-      toast.success(t('multiPost.bought', { count: credits }));
-      qc.invalidateQueries({ queryKey: MULTIPOST_QUERY_KEY });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBuying(false);
-    }
-  };
+  const handleBuy = () => buy(credits);
 
   return (
     <div className="space-y-8" data-setting-anchor="multipost">

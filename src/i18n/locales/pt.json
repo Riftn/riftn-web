@@ -1317,7 +1317,18 @@
     "menuLayoutSections": "Seções",
     "menuLayoutSectionsDesc": "Todas as páginas, sob cabeçalhos",
     "menuLayoutFolders": "Pastas",
-    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo"
+    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo",
+    "publicChatInBar": "Chat público na barra inferior",
+    "publicChatInBarDesc": "Entre no Chat público com um toque na barra inferior da tela",
+    "chatCards": "Chats como cartões",
+    "chatCardsDesc": "Cada chat no seu próprio cartão. Desative para uma lista simples com uma linha entre chats.",
+    "chatDeleteChoice": "Ao apagar uma mensagem",
+    "chatDeleteChoiceDesc": "Perguntar sempre, ou sempre apagar só para você ou para todos no chat.",
+    "chatDeleteAsk": "Perguntar sempre",
+    "chatDeleteMe": "Apagar para mim",
+    "chatDeleteMeDesc": "Some do seu chat, os outros ainda veem",
+    "chatDeleteEveryone": "Apagar para todos",
+    "chatDeleteEveryoneDesc": "Quando possível. A mensagem de outra pessoa em um grupo é apagada só para você"
   },
   "common": {
     "confirm": "Confirmar",
@@ -2079,6 +2090,12 @@
     "likes": "Curtidas",
     "subscribers": "Inscritos",
     "affiliates": "Afiliados",
+    "ogChallenge": "Desafio OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holders OG",
+    "ogChallengeTitle": "Traga de volta os holders OG",
+    "ogChallengeBody": "Convide quem ainda tem DHB. Quando entrarem com seu link de convite e mantiverem o DHB na carteira Riftn, eles contam para você aqui.",
+    "ogChallengeCta": "Pegue seu link de convite",
     "directReferrals_one": "{{count}} diretos",
     "directReferrals_other": "{{count}} diretos",
     "secondaryReferrals_one": "{{count}} secundários",
@@ -6644,7 +6661,21 @@
       "needsImageToWork": "{{model}} precisa de uma imagem para trabalhar. Anexe um primeiro.",
       "speechLimit": "São {{length}} caracteres. O limite é {{limit}}.",
       "musicTrackLength": "Faixa de {{count}}s"
-    }
+    },
+    "gallery": {
+      "send": "Enviar",
+      "notifications": {
+        "generation_reply": "{{name}} respondeu ao seu comentário",
+        "generation_like": "{{name}} reagiu à sua geração",
+        "generation_comment_like": "{{name}} reagiu ao seu comentário",
+        "generation_comment": "{{name}} comentou na sua geração"
+      },
+      "browse": "Explorar gerações",
+      "create": "Criar",
+      "fullscreen": "Ver em tela cheia",
+      "missing": "Esta geração não está disponível."
+    },
+    "audioTaskDialoguePlaceholder": "Alice: Precisamos ir.\nBob: [risos] Você primeiro."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planos para cada fluxo de trabalho",
@@ -6811,7 +6842,8 @@
     "createTheFirst": "Criar o primeiro",
     "docsSeoTitle": "Instruções de Habilidade de IA | Riftn",
     "docsSeoDescription": "Documentação de referência para as habilidades de assistente de IA do Riftn e biblioteca de prompt.",
-    "raw": "Raw"
+    "raw": "Raw",
+    "docsLoadFailed": "# Erro\nNão foi possível carregar a documentação da habilidade."
   },
   "nftMarket": {
     "actAll": "Todos",
@@ -6948,7 +6980,9 @@
     "spotlight": "Destaque",
     "spotlightBuyNote": "O NFT e o pagamento são trocados em uma etapa.",
     "spotlightOfferNote": "Ainda não listado. Envie uma oferta e o detentor pode aceitá-la a qualquer momento.",
-    "signInToTradeCta": "Faça login para negociar"
+    "signInToTradeCta": "Faça login para negociar",
+    "listedCount": "{{n}} à venda",
+    "allChains": "Todas as redes"
   },
   "usernames": {
     "seoTitle": "Nome de utilizador Marketplace | Riftn",
@@ -7313,7 +7347,8 @@
       "votes_other": "{{count}} votos",
       "howToVote_one": "Digite {{command}} e um número no chat para votar · {{count}} voto",
       "howToVote_other": "Digite {{command}} e um número no chat para votar · {{count}} votos"
-    }
+    },
+    "giftedSubs_other": "{{name}} presenteou {{count}} inscrições!"
   },
   "liveChatModeration": {
     "timeout1m": "Tempo limite para 1 minuto",
@@ -8050,7 +8085,10 @@
     "endStreamConfirmBody": "Sua transmissão para para todos que estão assistindo e não pode ser retomada.",
     "keepStreaming": "Continuar transmitindo",
     "encoderPermanentHint": "Esta chave nunca muda. Configure o codificador uma vez — da próxima vez, basta pressionar Iniciar e o Riftn cria o post para você.",
-    "notEnoughTokensForBounty": "Tokens insuficientes. Precisa de {{need}} tokens, mas tem {{have}}."
+    "notEnoughTokensForBounty": "Tokens insuficientes. Precisa de {{need}} tokens, mas tem {{have}}.",
+    "screenInAppHint": "No app Riftn",
+    "screenInAppNote": "Navegadores de celular não permitem que nenhum site compartilhe sua tela. Entre ao vivo pelo app Riftn e toque em Compartilhar tela.",
+    "screenInAppCta": "Baixar o app Riftn"
   },
   "events": {
     "seoTitle": "Eventos: Encontros e Eventos Comunitários no Riftn",
@@ -12065,7 +12103,9 @@
     "tokenAmount": "Tokens {{amount}}",
     "assistant": {
       "question1": "Qual é o Apy de staking atual para tokens Riftn?",
-      "question2": "Sim, se eu apostar 10.000 tokens por 90 dias"
+      "question2": "Sim, se eu apostar 10.000 tokens por 90 dias",
+      "answer1": "O APY atual de staking dos tokens Riftn é de 12,4% para um período de bloqueio de 30 dias. Veja o detalhamento:\n\n• Bloqueio de 7 dias: 8,2% APY\n• Bloqueio de 30 dias: 12,4% APY\n• Bloqueio de 90 dias: 18,7% APY\n\nQuer que eu ajude a calcular os ganhos possíveis?",
+      "answer2": "Para 10.000 tokens em staking a 18,7% APY por 90 dias:\n\n📊 Recompensa estimada: ~461 tokens\n\nIsso dá cerca de 5,13 tokens por dia. Lembre-se de que o APY pode variar conforme o valor total em staking."
     },
     "bookmarks": {
       "stakingGuide": "Guia completo para fazer staking de tokens Riftn: detalhamento de Apy, períodos de bloqueio e multiplicadores de recompensa explicados."
@@ -12761,7 +12801,7 @@
   "multiPost": {
     "tab": "Publicação múltipla",
     "title": "Publicação múltipla",
-    "intro": "Publique no X, YouTube, Instagram, TikTok e mais ao mesmo tempo com o dehub. Conecte suas contas uma vez, depois escolha onde cada publicação vai.",
+    "intro": "Publique no X, YouTube, Instagram, TikTok e mais ao mesmo tempo com o Riftn. Conecte suas contas uma vez, depois escolha onde cada publicação vai.",
     "creditsHeading": "Créditos de publicação",
     "credits": "{{count}} créditos de publicação",
     "topUpTitle": "Recarregue e economize",
@@ -12809,7 +12849,12 @@
   "dm": {
     "planRestricted": "Este usuário exige uma assinatura para receber mensagens.",
     "planTypeNotAllowed": "O plano deste criador não permite este tipo de mensagem.",
-    "planMinTip": "A gorjeta deve ser de pelo menos {{amount}} tokens para este criador."
+    "planMinTip": "A gorjeta deve ser de pelo menos {{amount}} tokens para este criador.",
+    "shareGroups": "Grupos",
+    "shareKindGroup": "Grupo",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Comunidade",
+    "reportMessage": "Denunciar mensagem"
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",
@@ -20198,7 +20243,13 @@
     "d14896aa4bf8": "A biblioteca gratuita não pôde ser carregada. Verifique a sua ligação e tente novamente.",
     "953e708b2287": "Falha na geração de voz.",
     "4a52cdd6ac72": "Não foi possível duplicar estas camadas",
-    "6e71ae3669b1": "Saída guardada indisponível"
+    "6e71ae3669b1": "Saída guardada indisponível",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "Você ganhou +{{value1}} pontos",
+    "0fbe06b679a8": "{{value1}} pontos por cada pedido entregue, somados à sua pontuação de Top builders.",
+    "431bc73eb60b": "[verse]\nSua letra aqui...\n\n[chorus]\nLetra do refrão...",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "85330dcbaadd": "Nenhum algoritmo que favoreça um lado da discussão. \nTodos são amplificados de forma igual e justa."
   },
   "articles": {
     "cardLabel": "Artigo · {{count}} min de leitura",
@@ -20688,7 +20739,8 @@
     "failed": "Não foi possível salvar isso. Tente novamente.",
     "privacy": "Apenas para te contar sobre o lançamento.",
     "seoTitle": "Lançamento de token em breve | Riftn",
-    "seoDescription": "O novo token Riftn está prestes a ser lançado. Junte-se à lista e receba um e-mail assim que for lançado, então compre diretamente da sua carteira Riftn."
+    "seoDescription": "O novo token Riftn está prestes a ser lançado. Junte-se à lista e receba um e-mail assim que for lançado, então compre diretamente da sua carteira Riftn.",
+    "emailPlaceholder": "Seu e-mail"
   },
   "githubLink": {
     "hint": "Faça login no GitHub para comprovar que a conta é sua. O Riftn só vê seu perfil público do GitHub.",
@@ -20790,5 +20842,22 @@
     "scheduledToast": "Agendada para {{when}}",
     "failedToast": "Não foi possível enviar uma mensagem agendada",
     "error": "Isso não funcionou. Tente novamente."
+  },
+  "msgDelete": {
+    "titleMany": "Eliminar mensagens {{count}}?",
+    "title": "Apagar mensagem?",
+    "bodyOwn": "Remova só do seu chat ou para todos.",
+    "bodyOwnMany": "Remova-as só do seu chat ou para todos.",
+    "bodyOthers": "Ela será removida só do seu chat. A outra pessoa ainda poderá vê-la.",
+    "bodyOthersMany": "Elas serão removidas só do seu chat. Os outros no chat ainda poderão vê-las.",
+    "bodyOwnBoth": "Remova só do seu chat ou para vocês dois.",
+    "bodyOwnBothMany": "Remova-as só do seu chat ou para vocês dois.",
+    "forMe": "Apagar para mim",
+    "forEveryone": "Apagar para todos",
+    "forBoth": "Apagar para nós dois",
+    "forMeAndName": "Apagar para mim e {{name}}",
+    "remember": "Lembrar minha escolha",
+    "rememberHint": "Altere quando quiser em Configurações",
+    "failed": "Não foi possível apagar a mensagem"
   }
 }

@@ -50,7 +50,8 @@
     "video": "Видео",
     "notFound": "Этот видео не доступно.",
     "notFoundTitle": "Видео не найдено | Riftn",
-    "browseShorts": "Просмотр Shorts"
+    "browseShorts": "Просмотр Shorts",
+    "count_other": "{{count}} дуэты"
   },
   "videoRemix": {
     "menu": "Ремикс",
@@ -307,7 +308,8 @@
       "location": "Местоположение",
       "custom": "Пользовательский",
       "customOption": "Пользовательская метка"
-    }
+    },
+    "placeholderLink": "yoursite.com"
   },
   "followedTags": {
     "follow": "Подписаться на #{{tag}}",
@@ -1314,7 +1316,19 @@
     "menuLayoutSections": "Разделы",
     "menuLayoutSectionsDesc": "Все страницы сразу, под заголовками",
     "menuLayoutFolders": "Папки",
-    "menuLayoutFoldersDesc": "Главные страницы, затем папка для каждой группы"
+    "menuLayoutFoldersDesc": "Главные страницы, затем папка для каждой группы",
+    "publicChatInBar": "Общий чат в нижней панели",
+    "publicChatInBarDesc": "Общий чат в одно касание из панели внизу экрана",
+    "chatCards": "Чаты карточками",
+    "chatCardsDesc": "Каждый чат на своей карточке. Выключите для простого списка с линиями между чатами.",
+    "chatDeleteChoice": "При удалении сообщения",
+    "chatDeleteChoiceDesc": "Спрашивать каждый раз или всегда удалять только у себя либо у всех в чате.",
+    "chatDeleteAsk": "Спрашивать каждый раз",
+    "chatDeleteMe": "Удалить у меня",
+    "chatDeleteMeDesc": "Исчезнет из вашего чата, другие всё ещё его видят",
+    "chatDeleteEveryone": "Удалить у всех",
+    "chatDeleteEveryoneDesc": "Когда это возможно. Чужое сообщение в группе всё равно удаляется только у вас",
+    "ensSection": "ENS"
   },
   "common": {
     "confirm": "Подтвердить",
@@ -2076,6 +2090,14 @@
     "likes": "Лайки",
     "subscribers": "Подписчики",
     "affiliates": "Партнёры",
+    "ogChallenge": "OG-челлендж",
+    "ogHolders_one": "{{count}} OG-холдер",
+    "ogHolders_few": "{{count}} OG-холдеров",
+    "ogHolders_many": "{{count}} OG-холдеров",
+    "ogHolders_other": "{{count}} OG-холдеров",
+    "ogChallengeTitle": "Верни OG-холдеров",
+    "ogChallengeBody": "Приглашай тех, у кого ещё есть DHB. Когда они присоединятся по твоей ссылке и будут держать DHB в кошельке Riftn, они засчитываются тебе здесь.",
+    "ogChallengeCta": "Получить ссылку-приглашение",
     "directReferrals_one": "{{count}} прямых",
     "directReferrals_other": "{{count}} прямых",
     "secondaryReferrals_one": "{{count}} вторичных",
@@ -2592,7 +2614,8 @@
       "received": "Получено: {{amount}} <coin></coin>",
       "addedToWallet": "{{amount}} {{symbol}} добавлено в ваш кошелек"
     },
-    "tokensUnit": "токенов"
+    "tokensUnit": "токенов",
+    "cardBankDesc": "Visa, Mastercard, Apple Pay"
   },
   "agents": {
     "life": {
@@ -5690,7 +5713,8 @@
           "empty": "Нет доступной информации о товаре. Добавьте ее вручную.",
           "busy": "Много импортов запущено. Попробуйте еще раз скоро.",
           "unavailable": "Эта страница не может быть импортирована. Добавьте детали продукта вручную.",
-          "failed": "Невозможно выполнить импорт. Ваша заметка сохранена; попробуйте еще раз или введите подробности вручную."
+          "failed": "Невозможно выполнить импорт. Ваша заметка сохранена; попробуйте еще раз или введите подробности вручную.",
+          "url": "Используйте общедоступный HTTPS URL продукта."
         }
       },
       "return": "Вернуться в студию черновика",
@@ -6638,7 +6662,22 @@
       "needsImageToWork": "{{model}} нужен образ для работы. Сначала прикрепите один.",
       "speechLimit": "Это {{length}} символов. Ограничение: {{limit}}.",
       "musicTrackLength": "Трек {{count}}s"
-    }
+    },
+    "gallery": {
+      "send": "Отправить",
+      "notifications": {
+        "generation_reply": "{{name}} ответил на ваш комментарий",
+        "generation_like": "{{name}} отреагировал(а) на вашу генерацию",
+        "generation_comment_like": "{{name}} отреагировал(а) на ваш комментарий",
+        "generation_comment": "{{name}} прокомментировал(а) вашу генерацию"
+      },
+      "browse": "Смотреть генерации",
+      "create": "Создать",
+      "fullscreen": "Во весь экран",
+      "missing": "Эта генерация недоступна."
+    },
+    "campaignLanguage": "Язык результата",
+    "audioTaskDialoguePlaceholder": "Алиса: Нам пора.\nБоб: [смеётся] После вас."
   },
   "pricing": {
     "plansForEveryWorkflow": "Планы для каждого рабочего процесса",
@@ -6805,7 +6844,8 @@
     "docsSeoTitle": "Инструкции по навыкам ИИ | Riftn",
     "docsSeoDescription": "Справочная документация по навыкам помощника ИИ Riftn и библиотеке подсказок.",
     "raw": "Свежие",
-    "usesCount_one": "{{count}} use"
+    "usesCount_one": "{{count}} use",
+    "docsLoadFailed": "# Ошибка\nНе удалось загрузить документацию навыка."
   },
   "nftMarket": {
     "actAll": "Все",
@@ -8047,7 +8087,10 @@
     "endStreamConfirmBody": "Ваша трансляция прекратится для всех зрителей и не может быть возобновлена.",
     "keepStreaming": "Продолжить трансляцию",
     "encoderPermanentHint": "Этот ключ никогда не меняется. Установите энкодер один раз — в следующий раз просто нажмите Start there, и Riftn создаст запись для вас.",
-    "notEnoughTokensForBounty": "Недостаточно токенов. Требуется {{need}} токенов, а у вас {{have}}."
+    "notEnoughTokensForBounty": "Недостаточно токенов. Требуется {{need}} токенов, а у вас {{have}}.",
+    "screenInAppHint": "В приложении Riftn",
+    "screenInAppNote": "Мобильные браузеры не позволяют сайтам показывать ваш экран. Начните трансляцию из приложения Riftn, затем нажмите «Показать экран».",
+    "screenInAppCta": "Скачать приложение Riftn"
   },
   "events": {
     "seoTitle": "События: встречи и мероприятия сообщества на Riftn",
@@ -9780,7 +9823,8 @@
       "pptxHint": "Каждая страница становится одним слайд-изображением с примечаниями и ссылками. Отредактируйте отдельный текст и элементы в оригинальном дизайне.",
       "section": "Именованный раздел",
       "transparent": "Прозрачный фон",
-      "nleHint": "Загружает ZIP-архив с вашей временной шкалой в форматах FCPXML и Premiere XML, а также всеми медиафайлами, чтобы вы могли завершить монтаж в Premiere Pro, Final Cut Pro или DaVinci Resolve. Текст преобразуется в маркеры; эффекты остаются в Riftn."
+      "nleHint": "Загружает ZIP-архив с вашей временной шкалой в форматах FCPXML и Premiere XML, а также всеми медиафайлами, чтобы вы могли завершить монтаж в Premiere Pro, Final Cut Pro или DaVinci Resolve. Текст преобразуется в маркеры; эффекты остаются в Riftn.",
+      "nle": "Premiere / Final Cut / Resolve (XML)"
     },
     "inspector": {
       "selectHint": "Выберите слой на холсте или клип на временной шкале.",
@@ -12061,7 +12105,9 @@
     "tokenAmount": "{{amount}} токенов",
     "assistant": {
       "question1": "Каков текущий APY стейкинга для токенов Riftn?",
-      "question2": "Да, если я ставлю 10 000 токенов на 90 дней"
+      "question2": "Да, если я ставлю 10 000 токенов на 90 дней",
+      "answer1": "Текущая доходность стейкинга токенов Riftn составляет 12,4% APY при блокировке на 30 дней. Подробнее:\n\n• Блокировка на 7 дней: 8,2% APY\n• Блокировка на 30 дней: 12,4% APY\n• Блокировка на 90 дней: 18,7% APY\n\nПомочь рассчитать возможный доход?",
+      "answer2": "Для 10 000 токенов в стейкинге под 18,7% APY на 90 дней:\n\n📊 Ожидаемая награда: ~461 токен\n\nЭто примерно 5,13 токена в день. Учтите, что APY может меняться в зависимости от общего объёма стейкинга."
     },
     "bookmarks": {
       "stakingGuide": "Полное руководство по размещению токенов Riftn: пробой APY, периоды блокировки и мультипликаторы вознаграждения."
@@ -12757,7 +12803,7 @@
   "multiPost": {
     "tab": "Мультипостинг",
     "title": "Мультипостинг",
-    "intro": "Публикуйте в X, YouTube, Instagram, TikTok и других одновременно с dehub. Подключите свои аккаунты один раз, а затем выберите, куда отправлять каждую публикацию.",
+    "intro": "Публикуйте в X, YouTube, Instagram, TikTok и других одновременно с Riftn. Подключите свои аккаунты один раз, а затем выберите, куда отправлять каждую публикацию.",
     "creditsHeading": "Кредиты публикаций",
     "credits": "{{count}} кредитов публикаций",
     "topUpTitle": "Пополните и сэкономьте",
@@ -12805,7 +12851,12 @@
   "dm": {
     "planRestricted": "Этот пользователь принимает сообщения только по подписке.",
     "planTypeNotAllowed": "План этого автора не разрешает такой тип сообщений.",
-    "planMinTip": "Чаевые для этого автора должны быть не меньше {{amount}} токенов."
+    "planMinTip": "Чаевые для этого автора должны быть не меньше {{amount}} токенов.",
+    "shareGroups": "Группы",
+    "shareKindGroup": "Группа",
+    "shareKindChannel": "Канал",
+    "shareKindCommunity": "Сообщество",
+    "reportMessage": "Пожаловаться на сообщение"
   },
   "credits": {
     "earningsWorth": "Стоимость {{amount}}",
@@ -20136,7 +20187,71 @@
     "4a52cdd6ac72": "Не удалось дублировать эти слои",
     "6e71ae3669b1": "Сохраненная выгрузка недоступна",
     "be4b0c384393": "Solana",
-    "89c9b65356e3": "X (Twitter)"
+    "89c9b65356e3": "X (Twitter)",
+    "0ddb74a93b79": "{{value1}}…",
+    "42f90c931762": "{{value1}} д",
+    "4ae268ba1719": "BRG {{value1}}",
+    "4ea2d71e5a61": "Ура-а-а!",
+    "7a73328114fe": "{{value1}}В · {{value2}}П · {{value3}}Н",
+    "ca56c9d369b9": "TX: {{value1}}…",
+    "cbf6f8f402b2": "Поделитесь ссылкой: {{value1}}",
+    "cc9105d204ba": "{{value1}} г {{value2}} д",
+    "e46818576648": "{{value1}} с",
+    "26d2d4fc2c0f": "Застейкать всё",
+    "7f78bdc0762d": "+{{value1}} очк.",
+    "f0c8bb34335b": "Вы заработали +{{value1}} очков",
+    "0fbe06b679a8": "{{value1}} очков за каждый выполненный запрос — они добавляются к вашему рейтингу в «Лучших разработчиках».",
+    "6ad446059a8b": "ПРОПУСТИТЬ",
+    "e6eadfd6d1d8": " eCPM",
+    "431bc73eb60b": "[verse]\nВаш текст здесь...\n\n[chorus]\nТекст припева...",
+    "ca7842e53ac8": "riftn.com",
+    "2d1896e3b281": "BadgeShowcase",
+    "3d1d43659027": " / USD",
+    "877db1b57c60": "@creator",
+    "fa9a1cd7ddb3": "// featured_in",
+    "53e6cdc30765": "you@example.com",
+    "e2d214894af7": "elevenlabs.io",
+    "f8440db475e2": "@Image1",
+    "a1bbfae0f460": "@Image9",
+    "273a81e9b289": "@Image",
+    "6cd06db20425": "Livepeer",
+    "94b3fa810269": "JustWatch",
+    "b751c9aea6a3": "OpenCut",
+    "e44dc88eb777": "@alice.eth",
+    "bf640b85d499": "riftn.com · ",
+    "12cd58ea291d": "//ANDROID_APK",
+    "531595a185f5": " 3Speak.",
+    "790583caf7d2": " zap.stream.",
+    "71320997a469": "Riftn Extra",
+    "ff7a48f27df6": "Riftn MCP API",
+    "0e633747fd23": "Visa, Mastercard, Apple Pay, Google Pay",
+    "4001b1e9d20e": "dev@riftn.com",
+    "dcd932e65e57": "discord_username",
+    "616685a138d8": "/api/stats/users",
+    "00fb5022b75a": "TSMC",
+    "aaa197c64e1f": "src/constants/app.constants.ts",
+    "addc90cfd45b": "cURL",
+    "599f4a9886b4": "Friend.tech",
+    "c558e7501904": "dapp.daoTitle",
+    "43b9fafd6db4": "dapp.exchangeTitle",
+    "d924f9b45914": "dapp.marketsTitle",
+    "97f2d908b7dc": "@noble/ciphers",
+    "8731790030df": "@noble/curves",
+    "886e533d7364": "dev@riftn.com",
+    "e8921bdee214": "@riftn_com",
+    "c44e2f745b9a": "lastchadstanding.com",
+    "7046b00dbc33": "• Chrome 90+",
+    "6dc617ca7c7f": "• Firefox 88+",
+    "cd03861f0ff8": "slug",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "fd0ce9669a4e": "🎞️ GIF",
+    "b635325d40c2": "BSCScan",
+    "993d23ce5b8b": "DHBScan",
+    "85330dcbaadd": "Никаких алгоритмов, подыгрывающих одной из сторон спора. \nГолос каждого усиливается одинаково и честно.",
+    "0a783b9b8a7d": "XXL",
+    "af4707aebdfa": "OpenAI $",
+    "8160489cae2b": "quickStart.nextDappTitle"
   },
   "articles": {
     "cardLabel": "Статья · {{count}} мин читать",
@@ -20729,5 +20844,22 @@
     "scheduledToast": "Запланировано на {{when}}",
     "failedToast": "Не удалось отправить запланированное сообщение",
     "error": "Это не сработало. Попробуйте еще раз."
+  },
+  "msgDelete": {
+    "titleMany": "Удалить сообщения {{count}}?",
+    "title": "Удалить сообщение?",
+    "bodyOwn": "Удалить только из вашего чата или у всех.",
+    "bodyOwnMany": "Удалить их только из вашего чата или у всех.",
+    "bodyOthers": "Сообщение удалится только из вашего чата. Собеседник по-прежнему будет его видеть.",
+    "bodyOthersMany": "Сообщения удалятся только из вашего чата. Другие участники чата по-прежнему будут их видеть.",
+    "bodyOwnBoth": "Удалить только из вашего чата или у вас обоих.",
+    "bodyOwnBothMany": "Удалить их только из вашего чата или у вас обоих.",
+    "forMe": "Удалить у меня",
+    "forEveryone": "Удалить у всех",
+    "forBoth": "Удалить у нас обоих",
+    "forMeAndName": "Удалить у меня и у {{name}}",
+    "remember": "Запомнить мой выбор",
+    "rememberHint": "Это можно изменить в любой момент в настройках",
+    "failed": "Не удалось удалить сообщение"
   }
 }

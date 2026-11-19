@@ -50,6 +50,8 @@ function useWarmNotificationsChunk() {
   }, [isAuthenticated, queryClient]);
 }
 
+const DRAWER_PULL = { snap: false, grab: '[data-drawer-grab], [data-bell-handle]' };
+
 export function NotificationsDrawer() {
   const { t: _copy } = _useCopy();
   const [open, setOpen] = useState(false);
@@ -76,16 +78,17 @@ export function NotificationsDrawer() {
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setOpen(false), []);
-  useDrawerPullClose(sheetRef, scrollRef, open, close);
+  // One resting height (full) and the header is the only grab: one swipe or a
+  // small flick down on it closes the sheet; the list just scrolls.
+  useDrawerPullClose(sheetRef, scrollRef, open, close, DRAWER_PULL);
   return (
     <Drawer open={open} onOpenChange={setOpen} handleOnly animatedExit>
       {/* Phone only (the bell routes to the page on desktop). A glass sheet
-          with a small grab bar and no close button. It opens lowered by a fifth of
-          the screen, so the page above shows it is a drawer; dragging it up
-          fills the screen, and pulling down (from the top of the list) steps
-          back and then closes it (useDrawerPullClose). Rows scrolling up under
+          with a small grab bar and no close button. It opens full; a pull down
+          on the header (the grab bar area) closes it in one go, with no stop
+          part way, and a small flick does too (useDrawerPullClose). Rows scrolling up under
           the header blur out behind it (index.css). */}
-      <DrawerContent ref={sheetRef} glass overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', translate: '0 20vh' }}>
+      <DrawerContent ref={sheetRef} glass overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer data-expanded="" className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <DrawerTitle className="sr-only">{_copy("copy.788011833a5a", { defaultValue: "Notifications" })}</DrawerTitle>
         <DrawerDescription className="sr-only">{_copy("copy.efe4bbcc61b3", { defaultValue: "Your notifications" })}</DrawerDescription>
         {/* Shows the sheet drags down. Over the pill's own top inset, so it

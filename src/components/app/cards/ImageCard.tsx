@@ -65,6 +65,7 @@ import { MatureContentGate, useMatureGate } from './MatureContentGate';
 import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
 import { ActionBar } from './ActionBar';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
+import { PollCard } from './PollCard';
 import { CommentsWrapper } from './CommentsWrapper';
 import { PostMetadata } from './PostMetadata';
 import { PPVDrawerContent } from './LazyPPVDrawerContent';
@@ -260,7 +261,8 @@ function ImageSlide({
   // gets the same triple-tap ❤️ and hold-for-the-tray as every other surface.
   const tapGestures = useTapGestures({
     postId,
-    reactionArea: immersive ? 'surface' : 'center',
+    // Two taps anywhere on the photo like it, not only in the middle.
+    reactionArea: 'surface',
     onSingleTap: (event) => {
       // A narrow photo sits left-aligned in its frame, so a tap can land beside
       // it. Report whether it landed on the picture itself. The tap can resolve
@@ -1684,6 +1686,10 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
             sourceLang,
           }}
         />
+
+        {/* A photo post can carry a poll too, under the caption as on text posts.
+            On the post page the page itself places it. */}
+        {!postPage && !isLocked && !isSubGated && !isPPV && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
 
         {/* The creator's Shop board — affiliate links, opened in place. */}
         <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />

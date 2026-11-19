@@ -6,7 +6,11 @@
     "videoSize": "Video kuwi luwih saka {{n}} MB. Pilih sing luwih cilik."
   },
   "textFeed": {
-    "tab": "Teks"
+    "tab": "Teks",
+    "errorTitle": "Kiriman ora bisa dimuat",
+    "errorBody": "Coba muat maneh feed teks.",
+    "emptyTitle": "Durung ana kiriman teks",
+    "emptyBody": "Kiriman teks bakal katon ing kene."
   },
   "comic": {
     "showAll": "Tampilake kabeh {{count}} kaca"
@@ -28,16 +32,63 @@
     "policyEveryone": "Kabeh wong",
     "policyFollowers": "Pengikut",
     "policyNobody": "Ora Ana",
-    "loadMore": "Muat Luwih Akeh"
+    "loadMore": "Muat Luwih Akeh",
+    "with": "Duet karo @{{username}}",
+    "withOriginal": "Duet · deleng asline",
+    "unavailable": "Video iki wis ora kena kanggo duet.",
+    "allowLabel": "Idinake duet",
+    "allowDescription": "Sapa sing bisa ngrekam duet ing sandhinge video sampeyan. Sampeyan uga bisa ngganti ing saben kiriman.",
+    "settingsSection": "Duet",
+    "policyDefault": "Setelan akun",
+    "saveFailed": "Ora bisa disimpen. Coba maneh.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duet",
+    "pageHeading": "Duet",
+    "pageTitle": "Duet saka {{title}} dening @{{creator}}",
+    "pageTitleNoCreator": "Duet saka {{title}}",
+    "pageDescription": "Tonton kabeh duet video iki ing Riftn, utawa rekam duetmu dhewe jejer-jejer.",
+    "empty": "Durung ana duet. Bukak pilihan video banjur pilih Remix → Duet kanggo nggawe sing kapisan.",
+    "video": "Video",
+    "notFound": "Video iki ora kasedhiya.",
+    "browseShorts": "Deleng Shorts",
+    "notFoundTitle": "Video ora ketemu | Riftn"
   },
   "videoRemix": {
-    "sound": "Gunakake swara iki"
+    "sound": "Gunakake swara iki",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Layar ijo",
+    "stitch": "Stitch",
+    "selectSource": "Bukak pilihan video banjur pilih Remix kanggo miwiti."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Kabeh wong",
       "followers": "Pengikut",
-      "nobody": "Ora Ana"
+      "nobody": "Ora Ana",
+      "default": "Gawan saka aku"
+    },
+    "shareFailed": "Tip sampeyan wis dikirim, nanging bagian kanggo kreator asli ora kasil.",
+    "notify": {
+      "duet": "{{name}} duet karo video sampeyan",
+      "stitch": "{{name}} nge-stitch video sampeyan",
+      "react": "{{name}} menehi reaksi marang video sampeyan",
+      "reactLive": "{{name}} lagi menehi reaksi langsung marang video sampeyan"
+    },
+    "linkFailed": "Kiriman sampeyan wis tayang, nanging ora bisa disambungake menyang video asline.",
+    "settingsHeading": "Remix",
+    "stitch": {
+      "allow": "Idinake stitch",
+      "allowDesc": "Sapa sing bisa nggunakake nganti 5 detik saka video sampeyan ing videone dhewe. Sampeyan uga bisa ngganti saben kiriman.",
+      "saveFailed": "Setelan stitch ora bisa disimpen. Coba maneh.",
+      "settingFailed": "Kiriman sampeyan wis tayang, nanging setelan stitch-e ora kesimpen. Ganti saka Sunting kiriman.",
+      "from": "Di-stitch saka {{name}}",
+      "count_one": "{{count}} Stitch",
+      "count_other": "{{count}} Stitch",
+      "listTitle": "Stitch",
+      "listFailed": "Stitch ora bisa dimuat. Coba maneh.",
+      "listEmpty": "Durung ana stitch.",
+      "unavailable": "Video iki wis ora kena kanggo stitch."
     }
   },
   "dehubAppPage": {
@@ -63,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Buka Riftn di browser Anda",
     "seoDescription": "Dapatkan aplikasi Riftn: media sosial open-source, dimiliki pengguna, dengan live streaming, pesan terenkripsi, dan watch-to-earn. Gratis di Google Play, App Store, dan web.",
-    "seoTitle": "Riftn Aplikasi: Unduh untuk Android, iPhone & Web"
+    "seoTitle": "Riftn Aplikasi: Unduh untuk Android, iPhone & Web",
+    "learnMore": "Pengin weruh gambaran lengkape? <guide>Apa iku Riftn?</guide> njlentrehake platform iki kanthi jero."
   },
   "dehubLinks": {
     "copyLinkDetail": "Kopiaken link {{item}} menyang clipboarde.",
@@ -80,12 +132,16 @@
       "profile": "profil",
       "proposal": "usulan",
       "stage": "tahapan",
-      "store": "toko"
+      "store": "toko",
+      "featureRequest": "permintaan",
+      "page": "kaca"
     },
     "recipientChat": "cèthi",
     "recipientUser": "Sedulur",
     "sendFailed": "Gagal kirim {{item}}",
-    "sentTo": "{{item}} dikirim ke {{name}}"
+    "sentTo": "{{item}} dikirim ke {{name}}",
+    "openPage": "Bukak kaca",
+    "viewRequest": "Deleng panjaluk"
   },
   "stageCover": {
     "admitOne": "SAJI SITI SETUNGGAL",
@@ -194,7 +250,24 @@
   "signedFollows": {
     "setUp": "Aktifake",
     "turnOff": "Mateni",
-    "efpTurnOff": "Mandheg"
+    "efpTurnOff": "Mandheg",
+    "title": "Sing sampeyan ikuti, ing chain",
+    "description": "Dompet sampeyan nandhatangani sapa sing sampeyan ikuti, lan saben dina dhaftar kasebut dicap ing Base. Aplikasi apa wae bisa nemokake sing sampeyan ikuti saka dompet sampeyan, sanajan tanpa Riftn.",
+    "on": "Urip kanggo piranti iki",
+    "off": "Mati kanggo piranti iki",
+    "turnedOn": "Sing sampeyan ikuti saiki ditandhatangani dompet sampeyan",
+    "turnedOff": "Dipateni kanggo piranti iki",
+    "failed": "Dompet sampeyan ora nandhatangani. Coba maneh.",
+    "hiddenNote": "Dhaftar ikuti sing didhelikake lan akun pribadi ora dilebokake ing dhaftar umum.",
+    "efpOn": "Disalin menyang EFP · {{count}} ikuti",
+    "efpOff": "Lebokake uga menyang EFP",
+    "efpTurnOn": "Tambahake menyang EFP",
+    "efpDone": "Sing sampeyan ikuti lagi dilebokake menyang EFP",
+    "efpStopped": "Salinan EFP dimandhegake. Dhaftare tetep duweke sampeyan.",
+    "efpHasList": "Sampeyan wis duwe dhaftar EFP. Riftn durung bisa ngisi dhaftar kuwi.",
+    "efpNoGas": "Dompet sampeyan butuh ETH sithik ing Base kanggo iki.",
+    "efpFailed": "Ora kasil. Coba maneh.",
+    "efpNote": "EFP yaiku dhaftar ikuti sing diwaca aplikasi liya (efp.app). Gratis nganggo dompet Riftn; dompet liyane mbayar sawetara sen ing Base. Dhaftare duweke sampeyan."
   },
   "profileFields": {
     "title": "Kolom profil",
@@ -223,7 +296,9 @@
       "location": "Lokasi",
       "custom": "Custom",
       "customOption": "Siji label khusus"
-    }
+    },
+    "add": "Tambah kolom",
+    "remove": "Busak kolom"
   },
   "followedTags": {
     "follow": "Tut #{{tag}}",
@@ -370,7 +445,8 @@
     "step": "Kanggo kontrol akun, tambahake https://riftn.com/mcp minangka koneksi OAuth, nulakake Riftn lan nyimpeni izin-izin sadurunge ngrujuk akses.",
     "profilePrompt": "Ganti bio Riftn-ku dadi: Kreator mandiri sing nggawe film lan musik.",
     "generatePrompt": "Tuduhna model gambar Riftn lan wenehi taksiran rega kanggo potret sadurunge nggawe.",
-    "libraryPrompt": "Tampilna aset paling anyar ing perpustakaan Riftn Creator kula."
+    "libraryPrompt": "Tampilna aset paling anyar ing perpustakaan Riftn Creator kula.",
+    "agents": "Ngirim, mbales, menehi reaksi, ngirim ulang, ngikuti lan nyunting profil minangka agen duweke sampeyan"
   },
   "twitchMirror": {
     "title": "Twitch miripin",
@@ -471,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "unduh aplikasi, Android, iPhone, aplikasi seluler, pasang, APK, aplikasi desktop, pasang ing komputer, Windows, Mac"
+      "getTheApp": "unduh aplikasi, Android, iPhone, aplikasi seluler, pasang, APK, aplikasi desktop, pasang ing komputer, Windows, Mac",
+      "home": "feed, linimasa, kiriman paling anyar, kanggo sampeyan, diikuti, kaca ngarep",
+      "profile": "profilku, akunku, kacaku, kirimanku, avatar, bio, pengikut",
+      "explore": "goleki, temokake, golek, tren, populer, hashtag, wong, kreator",
+      "prompt": "AI, gawe, gambar AI, video AI, gawe gambar, teks dadi gambar, seni AI",
+      "editor": "editor video, sunting video, potong, cekak, katrangan, subtitel, efek",
+      "creator": "gawe, studio, piranti AI, gambar, video, musik, sulih swara, 3D",
+      "converter": "impor video, unduh, YouTube, TikTok, Instagram, konversi",
+      "migrate": "pindhah saluranku, impor saluran, impor akeh, saluran YouTube",
+      "notifications": "kabar, aktivitas, sebutan, wangsulan, seneng, lonceng",
+      "messages": "DM, pesen langsung, obrolan, kothak mlebu, pacelathon, pesen pribadi",
+      "communities": "grup, komunitas, ruangan, klub, forum, anggota",
+      "assistant": "AI, chatbot, takon, pitulung, obrolan AI, pitakonan",
+      "settings": "preferensi, akun, privasi, keamanan, sandhi, basa, tema, mode peteng, diblokir, busak akun",
+      "leaderboard": "peringkat, rangking, kreator paling top, pangguna paling top, poin, skor",
+      "bookmarks": "disimpen, favorit, tonton mengko, waca mengko, kiriman disimpen, pustaka",
+      "command": "dasbor, analitik, penghasilan, pangasilan, wawasan, moderasi, statistikku",
+      "wallet": "saldo, dhuwit, dana, token, kripto, setor, tarik, kirim, tampa, bayar",
+      "events": "tanggalan, jadwal, kumpulan, sing bakal teka, tiket, AMA",
+      "stages": "ruang audio, obrolan swara, spaces, audio langsung, omong-omongan, podcast",
+      "featureRequests": "gawe, pembangun, ide, saran, lapor bug, bug, dandanan, roadmap, voting, kekarepan, apikake",
+      "feedback": "ulasan, biji, survei, panemu, keluhan, wenehi masukan",
+      "staking": "stake, setor, imbal asil, ganjaran, entuk, bagi asil, lencana, tingkatan, bunga",
+      "superpowers": "boost, promosi, kauntungan, kekuwatan, kauntungan lencana, jangkauan, upgrade",
+      "governance": "voting, milih, usulan, polling, surat suara, mutusake",
+      "dao": "kas, sumbang, sumbangan, dana komunitas, kontribusi, hibah",
+      "bounties": "gawean, lowongan, tugas, gig, freelance, nyewa, golek dhuwit, gawean mbayar",
+      "myBounties": "bounty-ku, gaweanku, riwayat, pambayaran, gawean rampung",
+      "affiliate": "referal, ajak kanca, undhangan, komisi, mitra, entuk",
+      "careers": "lowongan, rekrutmen, kerja bareng kita, gabung tim, nglamar, lowongan kerja",
+      "stores": "toko, warung, marketplace, merch, tuku, adol, produk, blanja",
+      "fractions": "saham, kepemilikan, investasi, duwe kiriman, NFT, NFT, koleksi, dagang",
+      "usernames": "jeneng pangguna, handle, jeneng, ganti jenengku, tuku jeneng, adol jeneng",
+      "accounts": "tuku akun, adol akun, akun didol, pengikut, pindhah akun",
+      "apps": "toko aplikasi, aplikasi mini, gawe aplikasi, pangembang, piranti",
+      "arcade": "game, dolanan, main, gaming, catur, tembak-tembakan, seneng-seneng",
+      "glossary": "istilah, definisi, kamus, teges, apa iku",
+      "compare": "bandhingan, bandhingake, lawan, alternatif, YouTube, X, TikTok",
+      "guide": "miwiti, carane, tutorial, pitulung, sinau, pamula, anyar ing kene",
+      "stats": "statistik, analitik, angka, grafik, rega, pasokan, pemegang",
+      "docs": "dokumentasi, pitulung, API, whitepaper, pangembang, pandhuan",
+      "blog": "kabar, artikel, nganyari, pengumuman, apa sing anyar",
+      "videos": "tonton, video, klip, video dawa",
+      "shorts": "reels, video cekak, video vertikal, geser",
+      "music": "audio, lagu, trek, ngrungokake, radio, playlist",
+      "liveTv": "TV, siaran, streaming, langsung, siaran langsung, saluran, tonton langsung",
+      "buyTokens": "tuku token, tuku, isi ulang, kertu, kertu kredit, fiat",
+      "bridge": "antar chain, pindhah token, chain, transfer antar chain",
+      "top100": "top 100, koin, mata uang kripto, kapitalisasi pasar, rega",
+      "agents": "agen AI, agen, bot, otomatisasi, persona",
+      "advertising": "iklan, pariwara, kampanye, promosi, sponsor, pemasaran",
+      "premium": "langganan, upgrade, pro, keanggotaan, tanpa iklan, bebas iklan",
+      "pricing": "paket, biaya, rega, pira regane, langganan",
+      "creators": "program kreator, duta, mitra, daftar dadi kreator, monetisasi",
+      "connectAi": "MCP, ChatGPT, Claude, API, integrasi, sambungake AI",
+      "packs": "emoji, stiker, GIF, paket emoji, paket stiker, emoji kustom",
+      "publicChat": "obrolan, obrolan global, ruang obrolan, lobi, omong-omongan, obrolan komunitas",
+      "planned": "dijadwal, jadwal, kiriman dijadwal, antrean, mengko",
+      "liveStudio": "siaran langsung, stream, streaming, OBS, overlay, tandha, widget",
+      "launchpad": "luncurake token, gawe koin, nggawe koin, meme coin, bonding curve, tokenisasi"
     },
     "reorderHint": "Tahan lan seret lambang apa wae kanggo nata ulang",
     "reorderReset": "Reset",
@@ -519,7 +654,14 @@
     "getTheApp": "Njupuk aplikasi",
     "connectAi": "Nyambungake AI",
     "converter": "Converter",
-    "affiliate": "Afiliasi"
+    "affiliate": "Afiliasi",
+    "groups": {
+      "create": "Gawe",
+      "discover": "Temokake",
+      "main": "Utama",
+      "money": "Dhuwit",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Deleng profil {{name}}",
@@ -1124,7 +1266,58 @@
     "socialConnectedShort": "Nyambung",
     "socialConnectFailed": "Ora bisa ngubungake {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Angka pengikut ngisor-ngerobong"
+    "socialFollowersPending": "Angka pengikut ngisor-ngerobong",
+    "channelSpeed": "Kacepetan muter saben saluran",
+    "menuLayoutFolders": "Folder",
+    "chatCards": "Obrolan minangka kertu",
+    "chatCardsDesc": "Saben obrolan ing kertune dhewe. Pateni kanggo dhaftar biasa kanthi garis ing antarane obrolan.",
+    "chatDeleteChoice": "Nalika sampeyan mbusak pesen",
+    "chatDeleteChoiceDesc": "Takon saben wektu, utawa tansah busak mung kanggo sampeyan utawa kanggo kabeh wong ing obrolan.",
+    "chatDeleteAsk": "Takon saben wektu",
+    "chatDeleteMe": "Busak kanggo aku",
+    "chatDeleteMeDesc": "Ilang saka obrolan sampeyan, wong liya isih bisa ndeleng",
+    "chatDeleteEveryone": "Busak kanggo kabeh",
+    "chatDeleteEveryoneDesc": "Yen bisa. Pesen wong liya ing grup tetep mung ilang kanggo sampeyan",
+    "postLanding": "Sawise sampeyan ngirim",
+    "postLandingDesc": "Kepiye kiriman anyar sampeyan mlebu ing feed",
+    "postLandingGhost": "Slot bayangan",
+    "postLandingGhostDesc": "Feed sampeyan nyedhiyakake papan lan kiriman sampeyan alon-alon katon ing panggonane",
+    "postLandingMorph": "Malih wujud",
+    "postLandingMorphDesc": "Kothak nulis nyusut dadi kiriman sampeyan",
+    "postLandingPill": "Pil dadi kertu",
+    "postLandingPillDesc": "Bar unggahan mbukak dadi kiriman sampeyan sawise tayang",
+    "postLandingDrop": "Tiba",
+    "postLandingDropDesc": "Kiriman sampeyan tiba saka ndhuwur karo mental sithik",
+    "showLikes": "Tuduhake senenganku marang kabeh wong",
+    "showLikesDesc": "Sapa wae bisa mbukak tab Seneng ing profil sampeyan. Gawane mati, dadi mung sampeyan sing bisa ndeleng apa sing sampeyan senengi.",
+    "showFollowersList": "Tuduhake sapa sing ngikuti aku",
+    "showFollowersListDesc": "Idinake sapa wae mbukak dhaftar pengikut sampeyan. Yen iki mati, mung sampeyan sing bisa ndeleng.",
+    "showFollowingList": "Tuduhake sapa sing tak ikuti",
+    "showFollowingListDesc": "Idinake sapa wae mbukak dhaftar wong sing sampeyan ikuti. Yen iki mati, mung sampeyan sing bisa ndeleng.",
+    "showFollowCounts": "Tuduhake cacah pengikutku",
+    "showFollowCountsDesc": "Tuduhake pira pengikut sampeyan lan pira wong sing sampeyan ikuti. Yen iki dipateni, loro dhaftar uga didhelikake.",
+    "defaultProfileView": "Tata letak kiriman profil",
+    "defaultProfileViewDesc": "Tuduhake kiriman sampeyan minangka kisi utawa dhaftar nalika wong mbukak profil sampeyan",
+    "readerProfileView": "Bukak profil liyane minangka",
+    "readerProfileViewDesc": "Pilih kisi utawa dhaftar kanggo saben profil sing sampeyan bukak, utawa tetepake pilihane saben wong",
+    "readerProfileViewOwner": "Pilihane saben wong",
+    "signOutAllDesc": "Iki bakal metu saka {{count}} piranti liyane. Piranti iki tetep mlebu.",
+    "deleteAccountDataDesc": "Nyuwun mbusak akun utawa data sampeyan",
+    "tipsOffNote": "Tip lan kiriman marang sampeyan mati salawase iki urip. Pateni supaya bisa nampa tip maneh.",
+    "playback": "Puter ulang",
+    "feedVideoShape": "Ukuran video ing feed",
+    "feedVideoShapeOriginalDesc": "Saben video tetep nganggo wujude dhewe",
+    "feedVideoShapeWide": "Layar amba",
+    "socialConnectAria": "Sambungake {{platform}}",
+    "menuLayout": "Tata letak menu",
+    "menuLayoutDesc": "Kepiye menu nglompokake kaca-kacane",
+    "menuLayoutTabs": "Tab",
+    "menuLayoutTabsDesc": "Siji klompok sakwayah, nganggo ikon gedhe",
+    "menuLayoutSections": "Bagian",
+    "menuLayoutSectionsDesc": "Kabeh kaca bebarengan, ing sangisore judhul klompok",
+    "menuLayoutFoldersDesc": "Kaca utama sampeyan, banjur folder kanggo saben klompok",
+    "publicChatInBar": "Obrolan Umum ing bar ngisor",
+    "publicChatInBarDesc": "Sepisan tutul menyang Obrolan Umum saka bar ing ngisor layar"
   },
   "common": {
     "confirm": "Kuwuwus ngarani.",
@@ -1214,7 +1407,14 @@
     "messagePublic": "Umum",
     "railTitle": "Tip",
     "railTotal": "{{amount}} token",
-    "tokensUnit": "token"
+    "tokensUnit": "token",
+    "messagePlaceholder": "Ngomonga apa-apa bareng tip sampeyan",
+    "messagePrivate": "Mung {{name}}",
+    "theCreator": "kreatore",
+    "messageWallNote": "Katon ing tembok tip sawise tip kasil dikirim.",
+    "sendWithMessage": "Kirim karo pesen",
+    "messageFailed": "Pesen sampeyan ora bisa ditambahake. Ora ana tip sing dikirim.",
+    "wallLabel": "Pesen tip"
   },
   "postOptions": {
     "liveAlertsOn": "Saiki kowe ngetutake {{name}}. Kowe bakal oleh notifikasi nalika dheweke miwiti siaran langsung.",
@@ -1254,7 +1454,14 @@
     "giftBoost": "Menehi boost",
     "markSection": "Bagean sing bisa dilewati",
     "copyFailed": "Ora bisa nyalin pranala",
-    "share": "Bareng"
+    "share": "Bareng",
+    "refreshLinkPreview": "Anyarake pratinjau link",
+    "linkPreviewRefreshed": "Pratinjau link wis dianyarake",
+    "linkPreviewRefreshFailed": "Situs kuwi ora bisa digayuh. Coba maneh mengko.",
+    "castToTv": "Puter ing TV",
+    "castStarted": "Lagi diputer ing TV sampeyan",
+    "castUnsupported": "Browser iki ora bisa cast. Bukak Riftn ing Chrome utawa Safari kanggo muter ing TV sampeyan.",
+    "castFailed": "TV ora bisa digayuh. Priksa manawa ana ing Wi-Fi sing padha banjur coba maneh."
   },
   "filters": {
     "sort": "Urutake",
@@ -1857,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} ngajalan kerja di bountymu “{{title}}”",
       "bountySubmitted": "{{name}} ngajalan kerja di bounty",
       "sentNotification": "{{name}} ngirim notifikasi ke"
-    }
+    },
+    "groupEarlier": "Sadurunge",
+    "searchPlaceholder": "Goleki kabar",
+    "searchEmpty": "Ora ana kabar sing cocog"
   },
   "leaderboard": {
     "title": "Papan Peringkat",
@@ -1902,7 +2112,13 @@
     "loadingBoard": "Ngemot papan peringkat…",
     "amountTokens": "{{amount}} token",
     "directReferrals": "{{count}} langsung",
-    "secondaryReferrals": "{{count}} tingkat loro"
+    "secondaryReferrals": "{{count}} tingkat loro",
+    "ogChallenge": "Tantangan OG",
+    "ogHolders_one": "{{count}} pemegang OG",
+    "ogHolders_other": "{{count}} pemegang OG",
+    "ogChallengeTitle": "Balekake para pemegang OG",
+    "ogChallengeBody": "Undang wong sing isih nyekel DHB. Yen dheweke gabung nganggo link undhangan sampeyan lan nyimpen DHB ing dompet Riftn, dheweke diitung kanggo sampeyan ing kene.",
+    "ogChallengeCta": "Entuk link undhangan sampeyan"
   },
   "dhbListing": {
     "title": "Listing token enggal teka!",
@@ -2045,17 +2261,39 @@
     "shipping": "Lagi digawe",
     "noShippingYet": "Ora ana sing lagi digarap",
     "shippingAppearHere": "Panjaluk sing lagi digawe bakal katon ing kene.",
-    "loadFailed": "Gak bisa ngeloadin permintaan."
+    "loadFailed": "Gak bisa ngeloadin permintaan.",
+    "editMedia": "Foto lan video",
+    "editAddMedia": "Tambah foto utawa video",
+    "deviceInfoNote": "Info piranti dilampirake kanggo mbantu kita ndandani bug.",
+    "deviceInfo": "Info piranti",
+    "deviceInfoOwners": "Mung pamilik papan sing bisa ndeleng iki",
+    "deviceInfoError": "Info piranti ora bisa dimuat",
+    "deviceInfoNone": "Ora ana info piranti kanggo panjaluk iki",
+    "deviceInfoErrors": "Kesalahan anyar"
   },
   "auth": {
-    "loginRequired": "Kudu Mlebu"
+    "loginRequired": "Kudu Mlebu",
+    "accountDeleted": "Akun iki wis dibusak. Sampeyan bisa ndhaftar maneh minangka akun anyar.",
+    "accountDeletedHours_one": "Akun iki wis dibusak. Sampeyan bisa ndhaftar maneh nganggo email utawa telpon sing padha sajrone kira-kira {{count}} jam.",
+    "accountDeletedHours_other": "Akun iki wis dibusak. Sampeyan bisa ndhaftar maneh nganggo email utawa telpon sing padha sajrone kira-kira {{count}} jam.",
+    "accountDeletedDays_one": "Akun iki wis dibusak. Sampeyan bisa ndhaftar maneh nganggo email utawa telpon sing padha sajrone kira-kira {{count}} dina.",
+    "accountDeletedDays_other": "Akun iki wis dibusak. Sampeyan bisa ndhaftar maneh nganggo email utawa telpon sing padha sajrone kira-kira {{count}} dina."
   },
   "messages": {
     "newDrawer": {
       "to": "Tos",
       "recent": "Anyar",
       "suggested": "Disaranake",
-      "youFollow": "Wong sing koktindakake"
+      "youFollow": "Wong sing koktindakake",
+      "placeholder": "Jeneng utawa @username",
+      "chattedBefore": "Wis tau ngobrol",
+      "mutual": "Saling ngikuti",
+      "dmsOff": "DM mati",
+      "keepTyping": "Terusna ngetik kanggo nggoleki kabeh wong",
+      "noOne": "Ora ana sing ketemu",
+      "tryUsername": "Coba @username-e sing pas",
+      "sayHi": "Aruh-aruh marang wong",
+      "typeAny": "Ketik jeneng utawa @username apa wae"
     },
     "reply": "Bales",
     "react": "Reaksi",
@@ -2096,7 +2334,8 @@
     "noConversationsYet": "Gak ada obrolan lan kanggo ngerti.",
     "sending": "Sedane dikirim.",
     "retrySend": "Coba maneh",
-    "discardSend": "Busak"
+    "discardSend": "Busak",
+    "notSent": "Ora kekirim"
   },
   "music": {
     "listeningCount_one": "{{count}} ngelakoni",
@@ -2180,7 +2419,22 @@
     "viewMode": "Kelihatan",
     "back": "Bali",
     "reserve": {
-      "signIn": "Mlebu"
+      "signIn": "Mlebu",
+      "available": "Username kasedhiya",
+      "held": "Dicadhangake kanggo sampeyan",
+      "ended": "Cadhangan rampung",
+      "busy": "Lagi dicadhangake",
+      "availableBody": "riftn.com/{{name}} saiki isih kosong. Cadhangake lan kita bakal nyekel sajrone siji menit nalika sampeyan ndhaftar.",
+      "heldBody": "Ora ana wong liya sing bisa njupuk @{{name}} nganti wektune entek. Rampungake ndhaftar supaya tetep dadi duweke sampeyan.",
+      "endedBody": "Menit sampeyan wis entek, dadi @{{name}} mbukak maneh kanggo kabeh wong. Isih kosong.",
+      "busyBody": "Ana wong sing lagi ndhaftar minangka @{{name}} saiki. Yen ora dirampungake, bakal kosong maneh nalika wektune entek.",
+      "finish": "Rampungake ndhaftar",
+      "again": "Cadhangake maneh",
+      "cta": "Cadhangake saiki",
+      "letGo": "Uculake",
+      "haveAccount": "Wis duwe akun?",
+      "seoTitle": "@{{name}} kasedhiya ing Riftn",
+      "seoDescription": "Durung ana sing duwe riftn.com/{{name}}. Cadhangake lan ndhaftar supaya dadi duweke sampeyan."
     },
     "usernameAvailable": "Jeneng pangguna kasedhiya!",
     "signUpToClaim": "Daftar kanggo njupuk",
@@ -2211,12 +2465,16 @@
     "tabs": {
       "playlists": "Dhaptar Puter",
       "dislikes": "Gak suka",
-      "likes": "Seneng"
+      "likes": "Seneng",
+      "articles": "Artikel"
     },
     "likedPosts": {
       "emptyTitle": "Durung ana sing seneng",
       "privateTitle": "Dhaftar seneng iku pribadi",
-      "loadMore": "Muat Luwih Akeh"
+      "loadMore": "Muat Luwih Akeh",
+      "emptyOwn": "Kiriman sing sampeyan senengi katon ing kene. Mung sampeyan sing bisa ndeleng, kajaba sampeyan nguripake Tuduhake senenganku ing Setelan.",
+      "emptyOther": "Durung ana sing disenengi.",
+      "privateDesc": "Akun iki ora nuduhake senengane."
     },
     "dislikes": {
       "emptyTitle": "Durung ana sing ora disenengi",
@@ -2241,11 +2499,31 @@
     "sortMostLiked": "Paling akeh disukai",
     "sortCustomShort": "Kustom",
     "arrange": {
-      "saving": "Nyimpen..."
+      "saving": "Nyimpen...",
+      "title": "Tata kiriman sampeyan",
+      "hint": "Tahan kiriman banjur seret menyang panggonan anyare. Pengunjung ndeleng urutan iki dhisik.",
+      "drag": "Seret kanggo mindhah",
+      "toTop": "Pindhah menyang ndhuwur",
+      "save": "Simpen urutan",
+      "saved": "Urutan sampeyan wis kesimpen",
+      "reset": "Bali menyang paling anyar dhisik",
+      "resetDone": "Bali menyang paling anyar dhisik",
+      "saveFailed": "Urutan sampeyan ora bisa disimpen. Coba maneh.",
+      "loadFailed": "Kiriman sampeyan ora bisa dimuat. Tutup iki banjur coba maneh.",
+      "empty": "Durung ana sing bisa ditata. Kirim apa-apa dhisik."
     },
     "searchThisChannel": "Telusuri saluran iki",
     "searchResultCount": "1 asil kanggo \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} asil kanggo \"{{query}}\""
+    "searchResultCountPlural": "{{count}} asil kanggo \"{{query}}\"",
+    "unavailable": "Profil ora kasedhiya",
+    "mutualsOne": "{{count}} Saling ngikuti:",
+    "mutualsMany": "{{count}} Saling ngikuti:",
+    "articles": {
+      "emptyTitle": "Durung ana artikel",
+      "emptySubtitle": "Artikel bakal katon ing kene"
+    },
+    "sortCustom": "Urutan kustom",
+    "arrangeButton": "Tata kiriman"
   },
   "tv": {
     "seoTitle": "Live TV: Saluran Gratis Dari Luar Negeri",
@@ -2510,7 +2788,26 @@
     "createSignIn": "Mlebu maneh kanggo nggawe agen",
     "checkConnection": "Priksa sambungan sampeyan banjur coba maneh.",
     "welcome": {
-      "text": "Pesen sugeng rawuh"
+      "text": "Pesen sugeng rawuh",
+      "title": "Sugeng rawuh anggota anyar",
+      "help": "Agen iki ngikuti lan/utawa ngirim pesen marang wong sing lagi gabung ing Riftn, sawetara saben dina.",
+      "follow": "Ikuti anggota anyar",
+      "message": "Kirim pesen marang anggota anyar",
+      "textHelp": "{name} dadi @username-e. Tanpa link. Dikirim sepisan saben wong.",
+      "saveText": "Simpen pesen",
+      "perDay": "Wong saben dina",
+      "fewer": "Luwih sithik saben dina",
+      "more": "Luwih akeh saben dina",
+      "today": "Dina iki: {{follows}} diikuti · {{messages}} dikirimi pesen",
+      "limits": "Ora tau wong sing padha kaping pindho. Nglewati sapa wae sing mblokir utawa mbisokake sampeyan, mateni pesen anyar utawa ndhelik saka Anggota anyar.",
+      "showLog": "Deleng sapa wae sing disambut",
+      "hideLog": "Dhelikake sambutan",
+      "empty": "Durung ana. Anggota anyar katon ing kene nalika gabung.",
+      "followed": "Diikuti",
+      "messaged": "Dikirimi pesen",
+      "skipped": "Dilewati",
+      "failed": "Ora bisa digayuh",
+      "defaultText": "Halo {name}, sugeng rawuh ing Riftn! 👋"
     },
     "workspace": {
       "moderation": "Moderasi siaran langsung",
@@ -2704,7 +3001,17 @@
     "switchWalletAccount": "Ganti akun",
     "walletLoadFailed": "Gagal muat dompet. Coba lagi.",
     "openInBrowser": "Bukak ing browser",
-    "copyLink": "Salin tautan"
+    "copyLink": "Salin tautan",
+    "bringLoginOver": "Wis tau nganggo Riftn ing dehub.io? <bring>Gawa login sampeyan mrene</bring>",
+    "useAnotherLogin": "Gunakake login liyane",
+    "didYouMean": "Apa maksude {{email}}?",
+    "profileMovedTitle": "Profil sampeyan wis pindhah",
+    "checkYourEmail": "Priksa email sampeyan",
+    "migrateWrongLogin": "Login kuwi mbukak dompet liyane, dadi ora ana sing owah. Profil lawas sampeyan digawe nganggo {{login}}. Gunakake kuwi kanggo mbalekake.",
+    "googleInAppTitle": "Google ora bisa mlebu ing njero {{app}}",
+    "googleInAppTitleUnnamed": "Google ora bisa mlebu ing njero aplikasi iki",
+    "googleInAppBody": "Bukak Riftn ing browser sampeyan kanggo nganggo Google, utawa mlebu nganggo email ing kene.",
+    "tryAnyway": "Coba wae"
   },
   "careers": {
     "title": "Gabung Riftn",
@@ -2929,7 +3236,16 @@
     "searchDehubFor": "Golek \"{{query}}\" ing Riftn",
     "switchAccount": "Ganti akun",
     "signedInAs": "Sudah log in minangka {{name}}",
-    "requestSend": "Kirim panyuwunan"
+    "requestSend": "Kirim panyuwunan",
+    "requestPrompt": "Durung ana ing kene? Kirim minangka panjaluk",
+    "requestPromptShort": "Durung ana ing kene?",
+    "requestDraftMenu": "Tambahake {{query}} menyang Riftn",
+    "requestDraftSettings": "Setelan kanggo {{query}}",
+    "requestPostsTo": "Dikirim menyang Panjaluk",
+    "requestHint": "Dikirim menyang Panjaluk atas jeneng sampeyan. Kita bakal ngabari yen wis dirilis.",
+    "requestSent": "Dikirim menyang Panjaluk",
+    "requestSentHint": "Kita bakal ngabari yen wis dirilis.",
+    "requestSeeIt": "Deleng ing Panjaluk"
   },
   "comments": {
     "reportComment": "Laporaen komentar",
@@ -3022,7 +3338,23 @@
     "likersEmptyTitle": "Durung ana sing seneng",
     "likersEmptyBody": "Sing seneng komentar iki bakal katon ing kene.",
     "anonymousLikes_one": "{{count}} seneng saka pemegang lencana anonim",
-    "anonymousLikes_other": "{{count}} seneng saka pemegang lencana anonim"
+    "anonymousLikes_other": "{{count}} seneng saka pemegang lencana anonim",
+    "threadParts": {
+      "moveUp": "Njupuk dhuwur",
+      "reorder": "Tata ulang",
+      "save": "Simpen urutan",
+      "saved": "Urutan utas wis kesimpen",
+      "saveFailed": "Urutan ora bisa disimpen. Coba maneh.",
+      "moveDown": "Pindhah mudhun",
+      "dragPart": "Seret kanggo mindhah bagian {{n}}",
+      "addPart": "Tambahake menyang utas",
+      "addPlaceholder": "Tambahake menyang utas sampeyan...",
+      "label": "Utas · {{count}} bagian",
+      "reorderHint": "Seret bagean-bagean, utawa gunakake panah, banjur simpen."
+    },
+    "attachMedia": "Lampirake foto, video utawa audio",
+    "attachUnsupported": "Lampirake foto, video utawa file audio.",
+    "attachTooLarge": "File kuwi ngluwihi watesan {{size}} MB."
   },
   "mintChain": {
     "title": "Mint post",
@@ -3040,7 +3372,14 @@
     "notAvailable": "Minting ing ranting iki ora ana."
   },
   "postEditHistory": {
-    "original": "Asli"
+    "original": "Asli",
+    "title": "Riwayat suntingan",
+    "edited_one": "Disunting sepisan",
+    "edited_other": "Disunting {{count}} kaping",
+    "lastEdit": "Suntingan pungkasan {{time}}",
+    "editN": "Suntingan {{n}}",
+    "now": "Saiki",
+    "showChanges": "Tuduhake apa sing owah"
   },
   "postInfo": {
     "title": "Info Postingan",
@@ -3335,7 +3674,10 @@
     "waiting_for_wallet": "Ngenteni dompetmu",
     "waiting_for_wallet_desc": "Buka {{wallet}} lan setujoni tandatangan — panjaluke wis ngenteni ana ing kono.",
     "your_wallet": "dompetmu",
-    "max_available_on_chain": "Maksimal kasedhiya: {{amount}} token ing {{chain}}"
+    "max_available_on_chain": "Maksimal kasedhiya: {{amount}} token ing {{chain}}",
+    "not_available_for_this_post": "Ora kasedhiya kanggo kiriman iki",
+    "turn_back_on_desktop_notifications": "Urupake maneh kabar desktop?",
+    "notifications_moved_to_riftn": "Kita wis pindhah menyang riftn.com, dadi browser sampeyan butuh idin sepisan maneh kanggo nuduhake wangsulan, tip lan DM ing kene."
   },
   "staking": {
     "title": "Saking",
@@ -3615,7 +3957,13 @@
         "createButton": "Tebak link undangan",
         "loading": "Menggawe link undangan...",
         "emptyTitle": "Ora ana link undangan",
-        "empty": "Ngundangake wong-wong kang kudu diundang."
+        "empty": "Ngundangake wong-wong kang kudu diundang.",
+        "expiredWhen": "kadaluwarsa {{when}}",
+        "expires": "kadaluwarsa {{when}}",
+        "limit": "watesan {{max}}",
+        "namePlaceholder": "conto: Twitter drop",
+        "expiryLabel": "Kadaluwarsa sawise",
+        "listTitle": "Link undhangan"
       },
       "roleOwner": "Pemilik",
       "roleAdmin": "Admin",
@@ -3663,7 +4011,9 @@
         "filterLabel": "Saring aksi",
         "emptyTitle": "Gak ada aksi-aksi baru.",
         "empty": "Kebijakan moderasi bakal kelihatan langsung kalo udah dijalankan.",
-        "showMore": "Tampilake luwih akeh ({{value}})"
+        "showMore": "Tampilake luwih akeh ({{value}})",
+        "noAccess": "Sampeyan ora duwe idin kanggo ndeleng tumindak anyar.",
+        "emptyFilter": "Durung ana tumindak jinis iki."
       },
       "banTitle": "Larangan {{name}}",
       "muteTitle": "Bungkem {{name}}",
@@ -3684,7 +4034,16 @@
       "rulePlaceholder": "Jlentrehna aturane",
       "moveUp": "Njupuk dhuwur",
       "addRule": "Tambah aturan",
-      "saveRules": "Simpen aturan"
+      "saveRules": "Simpen aturan",
+      "tabInvites": "Link undhangan",
+      "transferConfirmTitle": "Dadekake {{name}} pamilik?",
+      "deleteConfirmAction": "Busak salawase",
+      "removeMemberTitle": "Busak {{name}}?",
+      "showMore": "Tuduhake luwih akeh (kari {{remaining}})",
+      "rulesHint": "Ditampilake ing tab Babagan. Aturan kosong dibuang nalika sampeyan nyimpen.",
+      "ruleNumber": "Aturan {{number}}",
+      "moveDown": "Pindhah mudhun",
+      "removeRule": "Busak aturan"
     },
     "invite": {
       "revoked": "Kang undhani link undhani ini diwongsi.",
@@ -3697,9 +4056,12 @@
       "connect": "Ngubung-ubungan",
       "requestToJoin": "Manggung munggung",
       "join": "Gabung",
-      "approvalNote": "Siji admin wus watesan permohonanmu sadurungé bisa nggabung."
+      "approvalNote": "Siji admin wus watesan permohonanmu sadurungé bisa nggabung.",
+      "invalidTitle": "Link undhangan - Komunitas Riftn",
+      "memberCount": "{{n}} anggota"
     },
-    "bannedFromCommunity": "Kamu dilarang di komunitas ini."
+    "bannedFromCommunity": "Kamu dilarang di komunitas ini.",
+    "manageMembers": "Atur anggota"
   },
   "prompt": {
     "seoTitle": "Wenehi feed sampeyan | Riftn",
@@ -3924,7 +4286,8 @@
       "reinvestmentNote": "Riftn nandangake yèn dana operasional sejarah sing dipegang wis sepenuhnya diinvestasikan. Gaji marketing lan pengembang ditampilake siji, diakumulasi saka setiap bulan, sawisé dikurangi biaya-biaya sing wis direkam ing bulan iki.",
       "profitShared": "Laburan omzet",
       "profitSharedHint": "{{usd}} dibayarekepung karo pemegang lan staker · {{from}}–{{to}}",
-      "sourceUnavailable": "Tidak tersedia"
+      "sourceUnavailable": "Tidak tersedia",
+      "net": "Bersih"
     },
     "ledger": {
       "allTime": "saben wanci",
@@ -5222,18 +5585,167 @@
     "buy": "Beli",
     "reject": "Tolak",
     "needsYouHold": "Butuh {{needed}}, kanggo wongane {{held}}",
-    "sellYourFractions": "Jual fraksi kanggo wongane ({{held}} dipegang)"
+    "sellYourFractions": "Jual fraksi kanggo wongane ({{held}} dipegang)",
+    "nftsSubtitle": "NFT apa wae, swap sakali langkah",
+    "buyersTab": "Panuku",
+    "soldOfListing": "Kedol {{sold}} saka {{total}}",
+    "noBuyersYet": "Durung ana sing tuku pecahan kiriman iki",
+    "fromYou": "saka sampeyan",
+    "statusOverdue": "Telat"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Gunakake rincian iki"
+        "use": "Gunakake rincian iki",
+        "url": "URL kaca produk",
+        "action": "Waca kaca produk",
+        "loading": "Lagi maca kaca…",
+        "hint": "Impor teks saka kaca produk umum. Priksa rinciane sadurunge nganggo; lampirake gambar produk kapisah ing studio.",
+        "source": "Sumber sing diimpor",
+        "review": "Pilih produk kanggo disalin menyang brief sing bisa disunting. Judhul, swara lan warna merek sampeyan ora owah.",
+        "errors": {
+          "signIn": "Mlebu kanggo ngimpor kaca produk.",
+          "url": "Gunakake URL produk HTTPS umum.",
+          "empty": "Ora ana rincian produk sing bisa dienggo. Tambahna kanthi manual.",
+          "busy": "Kakehan impor sing lagi mlaku. Coba maneh sedhela engkas.",
+          "unavailable": "Kaca iki ora bisa diimpor. Tambahna rincian produk kanthi manual.",
+          "failed": "Impor gagal. Brief-mu wis kesimpen; coba maneh utawa isi rincian kanthi manual."
+        }
+      },
+      "return": "Bali menyang draf studio",
+      "title": "Brief kampanye",
+      "intro": "Critakna produk lan merekmu, banjur siyapna format iklan sing cocog.",
+      "saved": "Brief-mu kesimpen ing piranti iki kanggo akun iki.",
+      "preview": "Siyapna format",
+      "clear": "Busak brief",
+      "required": "Tambahna jeneng lan katrangan produk kanggo nyiyapake format.",
+      "variants": "Format kampanye",
+      "reviewHint": "Priksa model, rega lan referensi produk ing studio sadurunge nggawe. Saben format iku generasi dhewe-dhewe.",
+      "open": "Priksa ing studio",
+      "fields": {
+        "product": "Jeneng produk (wajib)",
+        "description": "Fakta produk (wajib)",
+        "brand": "Jeneng merek",
+        "audience": "Target pamirsa",
+        "benefit": "Kaluwihan utama",
+        "voice": "Swara merek",
+        "palette": "Werna merek",
+        "headline": "Judhul sing disetujoni",
+        "cta": "Ajakan tumindak"
+      },
+      "formats": {
+        "square": "Iklan kothak",
+        "portrait": "Iklan potret",
+        "story": "Gambar story",
+        "video": "Video vertikal"
       }
     },
     "cinema": {
       "close": "Tutup",
       "performance": {
-        "label": "Kinerja"
+        "label": "Kinerja",
+        "0": "Bungah",
+        "1": "Sedhih",
+        "2": "Kuwatir",
+        "3": "Yakin",
+        "4": "Kagum",
+        "5": "Ngempet",
+        "6": "Guyonan"
+      },
+      "title": "Arahan sinema",
+      "hint": "Arahna gaya visual gambar utawa videomu sabanjure. Asile beda-beda gumantung model.",
+      "none": "Tanpa arahan",
+      "reset": "Busak arahan",
+      "camera": {
+        "label": "Tampilan kamera",
+        "0": "Sinema digital",
+        "1": "Film 35mm",
+        "2": "Film 16mm",
+        "3": "Format gedhe",
+        "4": "Camcorder lawas"
+      },
+      "lens": {
+        "label": "Tampilan lensa",
+        "0": "Sferis",
+        "1": "Anamorfik",
+        "2": "Kaca alus lawas",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Dawa fokus",
+        "0": "18mm amba",
+        "1": "24mm amba",
+        "2": "35mm alami",
+        "3": "50mm standar",
+        "4": "85mm potret",
+        "5": "135mm telefoto"
+      },
+      "aperture": {
+        "label": "Jeroning fokus",
+        "0": "f/1.4 cethek banget",
+        "1": "f/2.8 cethek",
+        "2": "f/5.6 sedheng",
+        "3": "f/11 fokus jero"
+      },
+      "movement": {
+        "label": "Obahing kamera",
+        "0": "Tripod mantep",
+        "1": "Dolly mlebu alon",
+        "2": "Dolly metu alon",
+        "3": "Tracking nyamping",
+        "4": "Ngubengi subjek",
+        "5": "Dicekel tangan",
+        "6": "Crane munggah",
+        "7": "Pan alon"
+      },
+      "lighting": {
+        "label": "Pencahayaan",
+        "0": "Srengenge alus",
+        "1": "Golden hour",
+        "2": "Chiaroscuro peteng",
+        "3": "Studio padhang",
+        "4": "Lampu neon",
+        "5": "Siluet saka mburi",
+        "6": "Mendhung nyebar"
+      },
+      "tempo": {
+        "label": "Tempo shot",
+        "0": "Siji shot terus-terusan",
+        "1": "Aksi tenang, ora kesusu",
+        "2": "Aksi dinamis, sregep",
+        "3": "Aksi kacau, rame"
+      },
+      "era": {
+        "label": "Jaman",
+        "0": "Taun 1920-an",
+        "1": "Taun 1950-an",
+        "2": "Taun 1960-an",
+        "3": "Taun 1970-an",
+        "4": "Taun 1980-an",
+        "5": "Taun 1990-an",
+        "6": "Jaman saiki",
+        "7": "Mangsa ngarep cedhak"
+      },
+      "genre": {
+        "label": "Genre",
+        "0": "Dokumenter",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Fiksi ilmiah",
+        "4": "Fantasi",
+        "5": "Komedi romantis",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Palet werna",
+        "0": "Amber anget",
+        "1": "Biru adhem",
+        "2": "Werna bumi kalem",
+        "3": "Pastel",
+        "4": "Monokrom kontras dhuwur",
+        "5": "Werna primer mencorong"
       }
     },
     "libraryEmpty": "Asil generasi sing koksimpen bakal katon ing kene.",
@@ -6039,7 +6551,117 @@
       "speechLimit": "Iki ya {{length}} karakter. Batasane {{limit}}.",
       "musicTrackLength": "{{count}} track"
     },
-    "closeBanner": "Tutup banner pembuat"
+    "closeBanner": "Tutup banner pembuat",
+    "gallery": {
+      "send": "Kirim",
+      "notifications": {
+        "generation_reply": "{{name}} mbalas komentarmu",
+        "generation_like": "{{name}} menehi reaksi marang asil gawean sampeyan",
+        "generation_comment_like": "{{name}} menehi reaksi marang komentar sampeyan",
+        "generation_comment": "{{name}} menehi komentar ing asil gawean sampeyan"
+      },
+      "browse": "Deleng asil gawean",
+      "create": "Gawe",
+      "fullscreen": "Deleng layar wutuh",
+      "missing": "Asil gawean iki ora kasedhiya."
+    },
+    "avatarTitle": "Potret sing bisa ngomong",
+    "avatarRequirements": "Potret PNG kothak, 512–2048 piksel, nganti 5 MB. WAV PCM mono 24 kHz 16-bit, 5–30 detik. Sapérangan detik pungkasan diisi sepi.",
+    "avatarPortrait": "Pilih potret PNG",
+    "avatarAudio": "Pilih WAV omongan",
+    "avatarPermission": "Aku duwe idin kanggo nganimasi potret iki lan nganggo audio iki.",
+    "avatarQuote": "{{seconds}} detik kalebu sepi · {{amount}} token",
+    "avatarPrepare": "Siapake lan priksa rega",
+    "batchFlowLimit": "Dhaftar Flow wis kebak. Busak Flow sing ora dienggo sadurunge nggawe batch liyane.",
+    "batchReviewCampaign": "Priksa batch kampanye ing Flow",
+    "batchReviewFilmImages": "Priksa batch gambar storyboard",
+    "batchReviewFilmVideos": "Priksa batch klip film",
+    "batchReviewHint": "Mbukak Flow kesimpen sing kapisah. Priksa saben item lan rega lengkap sadurunge mbayar. Item sing wis rampung lan pambayaran asli disimpen kanggo pemulihan. Referensi disalin menyang pustaka pribadi sampeyan; panggunaan panyimpenan lan jaringan ditrapake.",
+    "batchInvalid": "Rampungake saben item sadurunge nyiapake batch 1–12 gambar utawa klip.",
+    "batchReferenceLimit": "Batch iki ndhukung siji referensi gambar saben item. Busak referensi tambahan utawa siapake item kuwi dhewe-dhewe.",
+    "batchVideoSettings": "Kanggo batch iki, klip kudu duwe durasi wutuh 4–15 detik lan rasio aspek 16:9, 9:16 utawa 1:1.",
+    "batchMissingReference": "Ana referensi sing ilang, ora didhukung utawa luwih gedhe saka 25 MB. Balekake ing editor sadurunge nyiapake batch.",
+    "batchOwnerChanged": "Akun utawa draf wis owah. Bukak maneh batch iki nganggo akun asline.",
+    "batchConflict": "Batch sing kesimpen ora cocog karo snapshot asline.",
+    "audioExportFormat": "Format ekspor",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Lampirake siji klip sumber kanggo dipanjangake.",
+    "extensionSeconds": "+{{seconds}}s rekaman anyar",
+    "extensionHelp": "Mbalekake klip sumber sampeyan kanthi kira-kira patang detik anyar. Asile diowahi ukurane nganti 720p ing 24 fps. Audio anyar digawe kanggo tambahane.",
+    "extensionForward": "Tambahake kira-kira patang detik sawise klip sumber",
+    "extensionBackward": "Tambahake kira-kira patang detik sadurunge klip sumber",
+    "expandDescription": "Gawe pinggiran gambar anyar. Prompt basa Inggris opsional; siji gambar sumber.",
+    "relightDescription": "Owahi pepadhang siji foto saka katrangan pepadhang lan latar sampeyan.",
+    "expandPromptHint": "Lampirake siji gambar lan pilih rasio aspek anyare. Prompt basa Inggris opsional.",
+    "expandEnglishOnly": "Model ekspansi iki mung nampa prompt basa Inggris. Kosongna prompt kanggo ekspansi otomatis.",
+    "expandNeedsImage": "Lampirake gambar kanggo diamba.",
+    "learn": {
+      "title": "Pelajaran kreator",
+      "intro": "Pelajaran cekak, uji kawruh lan latihan sing bisa disunting kanggo saben pelajaran. Kemajuan disimpen ing piranti iki kanggo akun sampeyan.",
+      "back": "Bali menyang Creator",
+      "lessons": "Pelajaran",
+      "progress": "{{completed}} saka {{total}} uji kawruh lulus",
+      "check": "Priksa wangsulan",
+      "correct": "Uji kawruh lulus",
+      "retry": "Coba maneh. Waca maneh pelajaran ing ndhuwur.",
+      "exerciseTitle": "Latihan praktik",
+      "exerciseHint": "Bukak conto sing bisa disunting ing ruang kerja studio sampeyan dhewe. Mbukak draf gratis; nggawe asil butuh priksan sampeyan lan rega dhewe. Sunting contone sadurunge nggawe.",
+      "openExercise": "Bukak draf latihan",
+      "closeExercise": "Tutup latihan",
+      "brief": {
+        "title": "Tulis brief visual sing cetha",
+        "body1": "Gambarake subjek sing konkret, tumindake lan papane. Tambahake framing utawa obahing kamera yen mbantu adegan. Simpen ide sing ora ana gandheng cenenge kanggo draf liyane.",
+        "body2": "Arahan pepadhang, lensa lan gaya nuntun model. Iku ora njamin tumindake kamera fisik utawa gambar sing persis. Owahi siji bagian sakwayah supaya sampeyan bisa mbandhingake revisi.",
+        "body3": "Sadurunge nggawe, priksa model sing dipilih, lampiran sing didhukung, ukuran lan rega. Simpen draf asli supaya sampeyan bisa bali menyang kono.",
+        "question": "Brief endi sing paling gampang direvisi?",
+        "answer0": "Subjek, tumindak lan papan sing cetha",
+        "answer1": "Mung jeneng model",
+        "answer2": "Dhaftar gaya sing pating sulaya",
+        "exercise": "Teko keramik ing meja kayu ing sandhinge jendhela. Pepadhang esuk sing alus, framing medium, latar prasaja. Tetepake teko minangka subjek sing cetha."
+      },
+      "continuity": {
+        "title": "Rencanakake shot lan priksa kesinambungan",
+        "body1": "Gunakake panel Film ing editor kanggo nyimpen brief lan shot sing wis urut. Siapake saben frame utawa klip dhewe-dhewe, priksa regane, lan pilih asil sing ditampa.",
+        "body2": "Lampirake mung referensi sing ditampa model pilihan sampeyan. Nganggo maneh referensi bisa nuntun tampilan; iku ora nglatih identitas utawa njamin padha. Paraga lan swara bisa beda ing antarane asil gawean.",
+        "body3": "Simpen take sing kasil lan rakit ing timeline. Priksa obah, rai, dialog lan transisi sadurunge ekspor.",
+        "question": "Apa sing ndhukung kesinambungan ing antarane shot?",
+        "answer0": "Luwih akeh prompt sing ora ana gandheng cenenge",
+        "answer1": "Referensi sing disetujoni lan cathetan shot sing wis dipriksa",
+        "answer2": "Nganggep identitas paraga mesthi dijamin",
+        "exercise": "Shot amba saka wong lelungan dhewekan sing tekan pesisir sepi nalika srengenge njedhul. Kamera maju alon, swasana ayem. Siji shot terus-terusan."
+      },
+      "campaign": {
+        "title": "Gunakake fakta produk sing disetujoni",
+        "body1": "Miwiti saka fakta produk sing bisa sampeyan verifikasi. Priksa metadata sing diimpor sadurunge nganggo. Tulis judhul lan ajakan tumindak kanthi cetha; aja ngarang rega, ulasan utawa klaim kinerja.",
+        "body2": "Gunakake varian kampanye sing kesimpen kanggo nglumpukake cathetan bareng lan hook, naskah, basa lan format saben varian. Siapake siji item sing wis dipriksa sakwayah lan priksa regane ing studio.",
+        "body3": "Priksa teks sing katon, tampilan produk lan klaim sing diomongake ing asile. Prompt dudu bukti akurasi produk utawa kinerja pemasaran.",
+        "question": "Kapan klaim produk kudu dilebokake?",
+        "answer0": "Saben-saben keprungu ngyakinake",
+        "answer1": "Sawise ngarang ulasan bintang lima",
+        "answer2": "Yen asale saka fakta produk sing disetujoni",
+        "exercise": "Gawe iklan produk potret kanggo teh godhong wutuh sing didol ing kaleng sing bisa dienggo maneh. Judhul sing disetujoni: Make time for tea. CTA sing disetujoni: Explore the collection. Gunakake mung fakta iki; aja ngarang diskon, ulasan utawa klaim kesehatan."
+      }
+    },
+    "campaignPlanTitle": "Varian kampanye lan episode",
+    "campaignPlanIntro": "Simpen nganti 12 variasi utawa episode. Saben siji mbukak studio kanggo priksan lan regane dhewe. Cathetan bareng nuntun kesinambungan; tampilan produk, paraga lan swara bisa beda ing antarane asil gawean.",
+    "campaignTitle": "Jeneng kampanye utawa seri",
+    "campaignContinuity": "Cathetan paraga, swara lan gaya bareng",
+    "campaignVariantTitle": "Jeneng varian utawa episode",
+    "campaignHook": "Hook pambuka",
+    "campaignLanguage": "Basa asil",
+    "campaignScript": "Naskah utawa urutan adegan sing disetujoni",
+    "campaignAdd": "Tambah varian utawa episode",
+    "campaignClear": "Resiki rencana",
+    "campaignFormat": "Format asil",
+    "audioInvalidResponse": "Layanan audio mbalekake asil sing ora valid.",
+    "batchPaymentHelp": "Saben gambar sing dikirim dibayar dhewe-dhewe. Yen siji batch mandheg, token sing ora kanggo saka pembayarane bakal dienggo maneh kanthi otomatis kanggo generasi sabanjure sing dicakup.",
+    "invalidSeed": "Seed kudu angka wutuh saka 0 nganti 2147483647.",
+    "libraryFavorites": "Favorit",
+    "libraryFavoriteAdd": "Tambah menyang favorit",
+    "libraryFavoriteRemove": "Busak saka favorit",
+    "priceOwnKey": "Kunci-mu",
+    "audioResultTooLarge": "Asil audio kosong utawa luwih saka 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Rencana untuk setiap alur kerja",
@@ -6324,7 +6946,29 @@
     "spotlight": "Sorotan",
     "spotlightBuyNote": "NFT lan pembayaran ganti ing siji langkah.",
     "spotlightOfferNote": "Durung didaftar. Kirim tawaran lan pemegang bisa nampa kapan wae.",
-    "signInToTradeCta": "Mlebu kanggo dagang"
+    "signInToTradeCta": "Mlebu kanggo dagang",
+    "actCollectionOffer": "Tawaran koleksi",
+    "actListed": "Didol",
+    "actOffer": "Tawaran",
+    "actSale": "Dodolan",
+    "buyAll": "Tuku kabeh",
+    "buySeveral": "Tuku sawetara",
+    "cartBought": "Wis tuku {{n}}. Saiki ana ing dompetmu.",
+    "cartCount": "{{n}} ing kranjang",
+    "cartFull": "Nganti 20 sakali",
+    "cartOneCoin": "Siji chain lan siji koin saben kranjang. Busak dhisik yen arep ganti.",
+    "cartOwn": "Sing iki duwekmu",
+    "cartPick": "Tutul kanggo nambah menyang kranjang",
+    "forSaleHere": "Didol ing kene",
+    "noActivity": "Durung ana apa-apa ing kene",
+    "sold": "Payu. Pembayarane wis ana ing dompetmu.",
+    "volShort": "Vol",
+    "salesCount": "{{n}} payu",
+    "bestOffer": "Tawaran paling apik",
+    "fromOpenSea": "Koleksi paling top ing OpenSea",
+    "buyHere": "Tuku ing kene",
+    "openSeaNote": "Didol ing OpenSea. Sampeyan mbayar langsung marang sing ngedol ing Seaport; Riftn ora nambah biaya.",
+    "viewOnOpenSea": "Deleng ing OpenSea"
   },
   "usernames": {
     "seoTitle": "Username Marketplace | Riftn",
@@ -6679,7 +7323,18 @@
       "votes_other": "{{count}} suara",
       "howToVote_one": "Ketik {{command}} dan angka di chat untuk memilih · {{count}} pilihan",
       "howToVote_other": "Ketik {{command}} dan angka di chat untuk memilih · {{count}} pilihan"
-    }
+    },
+    "eyebrow": {
+      "follow": "Pengikut anyar",
+      "subscribe": "Pelanggan anyar",
+      "subscribedTo": "Langganan · {{plan}}",
+      "gifted_one": "Menehi siji langganan",
+      "gifted_other": "Menehi {{count}} langganan",
+      "share": "Mbagekake stream",
+      "join": "Lagi gabung"
+    },
+    "giftedSubs_one": "{{name}} menehi siji langganan!",
+    "giftedSubs_other": "{{name}} menehi {{count}} langganan!"
   },
   "liveChatModeration": {
     "timeout1m": "Waktu timeout 1 menit",
@@ -6700,15 +7355,40 @@
       "modes": {
         "none": "Mati",
         "blur": "Burem",
-        "color": "Warna"
-      }
+        "color": "Warna",
+        "image": "Gambar"
+      },
+      "failed": "Mbusak latar ora bisa diwiwiti ing piranti iki.",
+      "hint": "Mlaku ing pirantimu. Pisanan butuh sawetara detik kanggo ngemot."
     },
     "remove": "Busak",
     "scenes": {
       "countdown": "Petungan mundur",
       "minutes": "{{count}} menit",
       "names": {
-        "starting": "Arep wiwit"
+        "starting": "Arep wiwit",
+        "chatting": "Mung ngobrol",
+        "gameplay": "Gameplay",
+        "brb": "Sedhela maneh bali",
+        "ending": "Stream rampung"
+      },
+      "title": "Adegan",
+      "edit": "Sunting {{name}}",
+      "subtitle": "Baris kapindho (opsional)",
+      "picture": "Gambar",
+      "noCountdown": "Tanpa itungan mundur",
+      "muteMic": "Bisu mikku nalika iki urip",
+      "hints": {
+        "starting": "Kertu nganggo itungan mundur",
+        "chatting": "Kamera layar kebak",
+        "gameplay": "Layar karo kameramu",
+        "brb": "Kertu, mik bisu",
+        "ending": "Kertu matur nuwun"
+      },
+      "subtitles": {
+        "starting": "Stream diwiwiti ing",
+        "brb": "Sedhela maneh bali",
+        "ending": "Matur nuwun wis nonton"
       }
     },
     "sources": {
@@ -6717,15 +7397,38 @@
       "camera": "Kamera",
       "show": "Tampilake ing stream",
       "positions": {
-        "center": "Kénéka"
+        "center": "Kénéka",
+        "top-left": "Kiwa ndhuwur",
+        "top-right": "Tengen ndhuwur",
+        "bottom-left": "Kiwa ngisor",
+        "bottom-right": "Tengen ngisor"
       },
       "sizes": {
-        "medium": "Sedheng"
+        "medium": "Sedheng",
+        "small": "Cilik",
+        "large": "Gedhe"
       },
       "shapes": {
         "circle": "Bunderan",
-        "rect": "Kothak"
-      }
+        "rect": "Kothak",
+        "rounded": "Bunder"
+      },
+      "title": "Sumber",
+      "addImage": "Gambar utawa logo",
+      "addCamera": "Kamera kapindho",
+      "addClip": "Klip video",
+      "addReaction": "Reaksi marang video",
+      "reactPlaceholder": "Tempel link video Riftn",
+      "reactInvalid": "Tempel link menyang video Riftn.",
+      "reactNotLive": "Siaran langsung dhisik, banjur tambahna videone.",
+      "reactNoBubble": "Kameramu ora bisa dibukak kaping pindho ing kene. Owahi ukuran video supaya raimu tetep katon ing layar.",
+      "failed": "Ora bisa nambah sumber kuwi.",
+      "empty": "Tambahna logo, kamera kapindho utawa klip video ing ndhuwur stream-mu.",
+      "hint": "Sumber digambar ing ndhuwur gambarmu kanggo saben pamirsa lan saben platform.",
+      "clip": "Klip",
+      "restart": "Wiwiti maneh",
+      "play": "Puter utawa jeda",
+      "loop": "Baleni"
     },
     "audio": {
       "mute": "Bisokake",
@@ -6734,7 +7437,27 @@
         "off": "Mati",
         "low": "Padhang",
         "high": "Kuwat"
-      }
+      },
+      "title": "Mixer audio",
+      "unavailable": "Browser iki ora bisa nyampur audio, dadi mikmu dikirim kaya apa anane.",
+      "channels": {
+        "mic": "Mik",
+        "game": "Game / tab",
+        "clip": "Klip video"
+      },
+      "absent": {
+        "mic": "Ora ana mikropon",
+        "game": "Bagekake layar karo audio utawa nganggo capture card",
+        "clip": "Tambahna klip video ing Sumber"
+      },
+      "gate": "Noise gate",
+      "gateHint": "Mbisu mikmu ing antarane tembung supaya swara keyboard lan kipas ora mlebu stream."
+    },
+    "imageTooLarge": "Gambar kuwi kegedhen. Coba sing luwih cilik.",
+    "widgets": {
+      "title": "Tampilake widget ing videoku",
+      "hint": "Notifikasi, bar target lan obrolan digambar ing stream-mu, dadi pamirsa ing Twitch, YouTube lan platform liyane uga ndeleng.",
+      "failed": "Ora bisa ngganti panggonan widget-mu ditampilake. Coba maneh."
     }
   },
   "liveStudio": {
@@ -6748,12 +7471,32 @@
         "off": "Mati",
         "idle": "Siap",
         "live": "Langsung",
-        "error": "Kesalahan"
-      }
+        "error": "Kesalahan",
+        "connecting": "Nyambungake"
+      },
+      "title": "Tujuan multistream",
+      "intro": "Siaran langsung ing Riftn sepisan lan stream-mu dikirim menyang saben platform sing diurupake ing kene, gratis. Diwiwiti sawetara detik sawise sampeyan siaran.",
+      "add": "Tambah tujuan",
+      "empty": "Durung ana tujuan. Tambahna Twitch, YouTube, Kick utawa server RTMP apa wae.",
+      "server": "URL server",
+      "findKey": "Golek server lan kunci {{name}}-mu",
+      "customHint": "Tempel server RTMP lan kunci sing diwenehake platformmu.",
+      "keyNote": "Kuncimu disimpen kanthi enkripsi ing server kita lan ora bakal ditampilake maneh.",
+      "added": "{{name}} wis ditambahake",
+      "saveFailed": "Ora bisa nyimpen tujuan",
+      "toggle": "Stream menyang tujuan iki"
     },
     "vertical": {
       "centre": "Kénéka",
-      "live": "LANGSUNG"
+      "live": "LANGSUNG",
+      "title": "Tampilan vertikal",
+      "intro": "HP nonton stream-mu ing feed vertikal. Seret kothak kanggo milih bagean gambarmu sing katon.",
+      "enabled": "Tampilake stream-ku ing feed vertikal",
+      "zoom": "Zoom",
+      "frame": "Gambar landscape-mu",
+      "box": "Sing katon ing HP",
+      "hint": "Seret kothak, utawa nganggo tombol panah. Simpen kanggo ngetrapake ing siaran langsungmu.",
+      "watch": "Tonton {{name}} langsung"
     },
     "subathon": {
       "title": "Subathon",
@@ -6916,7 +7659,8 @@
       "subathon_timer": "Timer Subathon",
       "points_board": "Tontonan yang setia",
       "streamer_level": "Tingkatan streamer",
-      "tip_jar": "Wadah hadiah"
+      "tip_jar": "Wadah hadiah",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "Ngrayakake saben tip, disesuaikan karo tingkaté",
@@ -6940,7 +7684,8 @@
       "subathon_timer": "Countdown yang ditolakin oleh hadiah, follow, dan suskripsi",
       "points_board": "Tontonan teratasmu berdasarkan poin dari nonton dan hadiah",
       "streamer_level": "Tingkatanmu sebagai streamer dan *streak* mingguan dari profilmu",
-      "tip_jar": "Wadah yang penuh karena hadiah yang dibayar masuk"
+      "tip_jar": "Wadah yang penuh karena hadiah yang dibayar masuk",
+      "hype_train": "Nampilake hype train nalika lagi mlaku: telung hadiah utawa langganan sajrone limang menit bakal miwiti."
     },
     "fields": {
       "style": "Gaya",
@@ -7326,7 +8071,10 @@
     "endStreamConfirmBody": "Siaran sampeyan mandheg kanggo kabeh sing nonton lan ora bisa diulang.",
     "keepStreaming": "Terus streaming",
     "encoderPermanentHint": "Kunci iki ora bakal owah. Setel encoder-mu sepisan — sabanjure mung pencet Mulai ing kana lan Riftn bakal nggawe kiriman kanggo sampeyan.",
-    "notEnoughTokensForBounty": "Token ora cukup. Butuh {{need}} token nanging duwe {{have}}."
+    "notEnoughTokensForBounty": "Token ora cukup. Butuh {{need}} token nanging duwe {{have}}.",
+    "screenInAppHint": "Ing aplikasi Riftn",
+    "screenInAppNote": "Browser HP ora ngidini situs web apa wae mbagekake layar. Siaran langsung saka aplikasi Riftn wae, banjur tutul Bagekake layar.",
+    "screenInAppCta": "Njupuk aplikasi Riftn"
   },
   "events": {
     "seoTitle": "Kebajenan: Kumpul-Kumpulan & Acara Masyarakat di Riftn",
@@ -7703,7 +8451,8 @@
     "faqInstallNeededA": "Ora. Kabeh mlaku ing tab nggunakake panyimpenan lokal perambanmu. Nutup tab bakal mungkasi simpulmu; ora ana layanan latar mburi lan ora ana instalasi.",
     "ctaTitle": "Miwiti mung nalika kegagalan aman.",
     "ctaBody": "Dhukungan asal, media sing dilindhungi enkripsi, lan karya sing diverifikasi luwih dhisik tinimbang hadiah simpul umum.",
-    "footerNote": "Partisipasi DePin minangka layanan kontribusi, dudu produk investasi. Kasedhiyan, kelayakan, lan hadiah bisa diganti."
+    "footerNote": "Partisipasi DePin minangka layanan kontribusi, dudu produk investasi. Kasedhiyan, kelayakan, lan hadiah bisa diganti.",
+    "navFaq": "Pitakon sing kerep ditakokake"
   },
   "creatorFlow": {
     "newNativeFlow": "Alur anyar",
@@ -7915,7 +8664,45 @@
     "foldersInFolder_other": "Ing folder {{count}}",
     "foldersNoItems": "Durung ana apa-apa ing folder iki",
     "foldersNoItemsHint": "Bukak asil lan pilih \"Tambahake menyang folder\" kanggo nyimpen ing kene.",
-    "skippedUpstreamFailed": "Dilangkahi amarga langkah sadurunge gagal. Biayane tetep ana ing imbangan sampeyan."
+    "skippedUpstreamFailed": "Dilangkahi amarga langkah sadurunge gagal. Biayane tetep ana ing imbangan sampeyan.",
+    "signInForAudioLibrary": "Mlebu kanggo mbukak perpustakaan audio pribadimu.",
+    "audioLibraryFailed": "Audio simpenanmu ora bisa dimuat. Coba maneh.",
+    "retryFreeTask": "Baleni tugas gratis",
+    "previewSavedMedia": "Pratinjau media simpenan",
+    "audioSavePending": "Audio wis siap, nanging nyimpen menyang perpustakaan pribadi isih ditundha. Terusna kanggo njupuk.",
+    "confirmInterruptedRetry": "Baleni tugas audio utawa asisten sing kepedhot. Asil sadurunge ora dingerteni lan mbaleni bisa ngulang proses. Pembayaran lan ID tugas sing wis dibayar bakal dienggo maneh.",
+    "freeResultUnknown": "Respon tugas gratis kepedhot. Ora bakal dikirim maneh kanthi otomatis. Pilih Baleni tugas gratis, banjur terusna; pembayaran lan tugas liyane tetep disimpen.",
+    "formAuthor": "Sunting alur",
+    "formAuthorHint": "Gawe alur nganggo input sing ana jinise. Simpen ing kene, utawa tata ing kanvas web.",
+    "chooseSavedMedia": "Pilih media simpenan",
+    "formInput": "Input: {{handle}}",
+    "reviewRun": "Priksa proses",
+    "resumeRun": "Terusna proses simpenan",
+    "confirmPrice": "Total: {{price}} token",
+    "recoveryHint": "Referensi tugas lan pembayaran disimpen ing piranti iki. Terusna proses sing kepedhot sadurunge miwiti sing liyane.",
+    "newRun": "Wiwiti proses liyane",
+    "loadMoreMedia": "Muat media maneh",
+    "invalidGraph": "Priksa sambungane: saben input butuh sumber sing cocog lan graf ora oleh ana siklus.",
+    "unsupportedNode": "Node iki durung bisa mlaku ing formulir native. Gunakake kanvas web kanggo alur iki.",
+    "missingPrompt": "Sambungake node teks sing ana prompt-e.",
+    "invalidSettings": "Setelan iki ora didhukung model sing dipilih.",
+    "missingCapturedFrame": "Jupuk frame ing kanvas web sadurunge nganggo video iki minangka input gambar.",
+    "missingSavedMedia": "Media sumber simpenan ilang utawa wis ora kasedhiya kanggo akun iki.",
+    "quoteFailed": "Ora bisa ngitung rega alur iki. Coba maneh.",
+    "recoverBeforeEdit": "Terusna proses simpenan sadurunge ngowahi graf utawa miwiti proses liyane.",
+    "runAlreadyComplete": "Proses iki wis rampung. Pilih Wiwiti proses liyane kanggo nggawe maneh.",
+    "recoveryCorrupt": "Cathetan pemulihan simpenan ora bisa diwaca. Simpen alur iki lan hubungi dhukungan sadurunge mbayar maneh.",
+    "paidUnavailable": "Sampeyan bisa nggawe lan nyimpen alur ing kene. Proses mbayar ora kasedhiya ing toko iki.",
+    "planChanged": "Alur owah sawise diitung regane. Priksa proses maneh.",
+    "connectOwnerWallet": "Sambungake dompet sing nduweni alur iki.",
+    "runFailed": "Node ora bisa rampung. Referensi tugas simpenane tetep disimpen kanggo pemulihan.",
+    "recoveryPending": "Render isih ditundha. Terusna proses iki kanggo njupuk.",
+    "nodeAudioGen": "Generator audio",
+    "nodeAudioGenDesc": "Wicara, efek swara, transkripsi lan isolasi audio",
+    "nodeAudioInput": "Audio simpenan",
+    "nodeAudioInputDesc": "Gunakake audio pribadi saka perpustakaanmu",
+    "audioVoiceId": "ID swara",
+    "audioSeconds": "Dawane swara ing detik"
   },
   "videoPlayer": {
     "volume": "Volume",
@@ -8068,7 +8855,13 @@
       "doneAll": "Mbusak tindak {{done}} akun sing ora ngetutake sampeyan bali.",
       "doneSome": "Mbusak tindak {{done}} akun. {{failed}} ora bisa dibusak.",
       "doneToast": "Mbusak tindak {{done}} akun sing ora ngetutake sampeyan bali"
-    }
+    },
+    "followBackConfirmTitle_one": "Tut bali {{count}} wong?",
+    "followBackConfirmTitle_other": "Tut bali {{count}} wong?",
+    "followBackConfirmBody": "Dheweke wis ngetut sampeyan. Akun pribadi bakal entuk panjaluk ngetut.",
+    "followedBackCount_one": "Wis ngetut bali {{count}} wong",
+    "followedBackCount_other": "Wis ngetut bali {{count}} wong",
+    "followBackDoneBody": "Sampeyan bisa nemokake kabeh ing Ngetut."
   },
   "reactionInfo": {
     "title": "Reaksi",
@@ -8870,7 +9663,28 @@
       "add": "Tambah",
       "scale": "Ukuran",
       "color": "Werna",
-      "light": "Padhang"
+      "light": "Padhang",
+      "create": "Tambah panggung 3D",
+      "title": "Panggung adegan 3D",
+      "hint": "Atur shot nganggo bal lan kothak. Kamera, posisi lan telung lampu area mandiri ngowahi frame sing dirender.",
+      "preview": "Pratinjau adegan sing dirender",
+      "error": "Ora bisa nyiyapake frame. Priksa referensi shot-mu lan coba maneh.",
+      "elevation": "Elevasi",
+      "distance": "Jarak",
+      "fov": "Bidang pandang",
+      "object": "Objek",
+      "sphere": "Bal",
+      "box": "Kothak",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Busak objek",
+      "intensity": "Intensitas",
+      "diffusion": "Difusi",
+      "saving": "Nyiyapake frame…",
+      "useFrame": "Gunakake frame render minangka referensi shot",
+      "frameHint": "Nggawe PNG 320 × 180 lan nambahake menyang referensi shot iki. Priksa watesan referensi lan rega model sadurunge nggawe.",
+      "frameName": "Frame panggung adegan"
     },
     "video": {
       "tFade": "Lebur silang",
@@ -8965,7 +9779,9 @@
       "pptx": "Pra-sajian PowerPoint",
       "pptxHint": "Klo tipe halaman lan jadi satu gambar slide, lan dadi dhuwur presenter notes lan URL. Edit teks lan elemen lanjaran sing dadi dhuwur lan dinawisahake.",
       "section": "Bagian kang diarani",
-      "transparent": "Gambar latar belakang transparan"
+      "transparent": "Gambar latar belakang transparan",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Ngundhuh ZIP isi timeline-mu minangka FCPXML lan Premiere XML plus kabeh file media, supaya sampeyan bisa ngrampungake suntingan ing Premiere Pro, Final Cut Pro utawa DaVinci Resolve. Teks dadi marker; efek tetep ing Riftn."
     },
     "inspector": {
       "selectHint": "Pilih lapisan ing kanvas utawa klip ing garis wektu.",
@@ -9059,7 +9875,45 @@
       "failed": "AI saiki durung bisa nindakake kuwi. Coba maneh sedhela engkas.",
       "changes": "Suntingan sing digawe: {{count}}",
       "undo": "Batalake",
-      "openGenerator": "Priksa lan gawe"
+      "openGenerator": "Priksa lan gawe",
+      "stopped": "Mandheg. Ora ana liyane sing diowahi.",
+      "queued": "{{count}} ngantri",
+      "restore": "Balekna nganti kene",
+      "restoreHint": "Balekna proyek kaya sadurunge pesen iki. Batalake bakal mbalekake maneh.",
+      "restored": "Proyek wis dibalekake kaya sadurunge pesen kuwi. Pencet batalake kanggo mbalekake versi sing luwih anyar.",
+      "rewrite": "Gawe panjalukku luwih cetha",
+      "rewriteFailed": "Ora bisa nulis ulang kuwi. Teksmu ora owah.",
+      "feedback": "Apa iki mbiyantu?",
+      "good": "Wangsulan apik",
+      "bad": "Wangsulan elek",
+      "retryPrefix": "Kuwi ora bener. Luwih becik, ",
+      "recipesTitle": "Resep",
+      "recipe": {
+        "podcastClip": {
+          "label": "Klip podcast",
+          "prompt": "Golek momen 30 detik sing paling kuat, potong, tambahna caption Word Pop lan gawe 9:16."
+        },
+        "talkingHead": {
+          "label": "Talking head resik",
+          "prompt": "Potong jeda dawa, tambahna caption Classic, lan wenehi tampilan anget sing alus."
+        },
+        "productPromo": {
+          "label": "Promo produk",
+          "prompt": "Gawe promo 15 detik: judhul nendang ing wiwitan, transisi Zoom in ing antarane klip, caption Bold lan musik sing sregep."
+        },
+        "hypeReel": {
+          "label": "Hype reel",
+          "prompt": "Potong klip miturut ketukan musik, gunakake transisi Fly up lan tampilan Technicolor."
+        },
+        "retroEdit": {
+          "label": "Suntingan retro",
+          "prompt": "Wenehi saben klip tampilan VHS, tambahna judhul serif gedhe, lan gunakake transisi Fade."
+        },
+        "tutorial": {
+          "label": "Tutorial",
+          "prompt": "Tambahna judhul kanggo saben langkah, caption Boxed, lan alonana momen penting nganti 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Persegi dawa",
@@ -9234,7 +10088,9 @@
       "tint": "Tint {{value}}",
       "vignette": "Vignette {{value}}%",
       "auto": "Paningkatan otomatis",
-      "autoFailed": "Foto iki ora bisa dianalisis."
+      "autoFailed": "Foto iki ora bisa dianalisis.",
+      "halation": "Halation {{value}}%",
+      "scanlines": "Scanline {{value}}%"
     },
     "pages": {
       "add": "Tambah kaca",
@@ -9309,7 +10165,15 @@
       "textSaved": "Caption udah disimpan.",
       "action": "Teks otomatis",
       "styles": {
-        "bold": "Tebal"
+        "bold": "Tebal",
+        "classic": "Classic",
+        "boxed": "Boxed",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Stacked",
+        "serif": "Serif",
+        "bubble": "Bubble"
       },
       "working": "Lagi ngrungokake… {{percent}}%",
       "downloading": "Lagi nyiapake model swara… {{percent}}%",
@@ -9321,7 +10185,8 @@
       "translateCount": "Terjemahkan {{count}} caption",
       "translationDone": "{{count}} caption udah diterjemahkan",
       "translationFailed": "Gagal menerjemahkan caption. Captionmu gak berubah.",
-      "lockedTranslation": "Bebaskan caption yang terkunci buat nggak diabaikan."
+      "lockedTranslation": "Bebaskan caption yang terkunci buat nggak diabaikan.",
+      "style": "Gaya caption"
     },
     "multi": {
       "selected": "{{count}} lapisan dipilih",
@@ -9358,7 +10223,10 @@
       "saveNewPreset": "Sawen-awon!",
       "saveStyles": "Saben gaya rancangan",
       "stylesSaved": "Saben warna lan warna iki wis disimpen karo desain iki",
-      "usePreset": "Gunakake gaya"
+      "usePreset": "Gunakake gaya",
+      "dehubApplied": "Merek Riftn diterapake ing {{count}} lapisan.",
+      "dehubApply": "Gunakake merek Riftn",
+      "dehubHint": "Werna resmi Riftn, font Exo lan Inter, lan logo Riftn, sakali klik."
     },
     "draw": {
       "heading": "Nggambar",
@@ -9455,7 +10323,9 @@
       "reviewTitle": "Pirsa-pirsa utama",
       "reviewPlaceholder": "Saran-saran cadangan, utawa backup tips, utawa moment 2:",
       "reviewResult": "Dipilih {{count}} saka {{total}} momen. Reviewaken sadurung nggawe revisi.",
-      "reviewFailed": "Sukuné pilihanmu ora bisa diupdate. Pilihan-pilihanmu sadurungé isih dipilih."
+      "reviewFailed": "Sukuné pilihanmu ora bisa diupdate. Pilihan-pilihanmu sadurungé isih dipilih.",
+      "projectTitle": "{{title}} — Sorotan",
+      "undoSelection": "Batalake pilihan"
     },
     "videoMatte": {
       "frames": "Kanggo nganggo background · {{completed}} / {{total}} frame",
@@ -10689,7 +11559,23 @@
       "zoomOut": "Zoout canvas"
     },
     "clipFix": {
-      "listening": "Menganggo..."
+      "listening": "Menganggo...",
+      "detach": "Pisahake audio",
+      "detached": "Audio dipindhah menyang klipe dhewe",
+      "detachFailed": "Ora bisa misahake audio klip iki",
+      "removeBars": "Busak bar ireng",
+      "scanning": "Mriksa frame…",
+      "noBars": "Ora ana bar ireng",
+      "barsRemoved": "Bar ireng wis dipotong",
+      "barsFailed": "Ora bisa mriksa bar ireng ing video iki",
+      "reframe": "Reframe otomatis",
+      "reframeHint": "Video wis pas karo bentuk kaca iki",
+      "reframed": "Di-reframe ngetutake aksi",
+      "reframeFailed": "Ora bisa reframe video iki",
+      "retakes": "Busak retake",
+      "noRetakes": "Ora ana retake",
+      "retakesRemoved": "Mbusak {{count}} retake, njaga take pungkasan",
+      "retakesFailed": "Ora bisa mbusak retake saka klip iki"
     },
     "shortcuts": {
       "action": {
@@ -10697,19 +11583,110 @@
         "play": "Main",
         "pause": "Tenggelam",
         "frameBack": "Kadha laning ring ngisor",
-        "frameForward": "Frame selanjutnya"
-      }
+        "frameForward": "Frame selanjutnya",
+        "back": "Mundur 1 detik",
+        "rippleDelete": "Busak klip",
+        "liftDelete": "Busak klip",
+        "start": "Menyang wiwitan",
+        "end": "Menyang pungkasan"
+      },
+      "preset": "Tata letak keyboard",
+      "presetHint": "Gunakake tombol timeline saka editor sing wis kokkenal. Pintasan Riftn dhewe tetep mlaku kanggo liyane."
     },
     "voiceClone": {
       "stop": "Mandeg Rekam",
-      "failed": "Gagal kloning suara"
+      "failed": "Gagal kloning suara",
+      "pickerLabel": "Kloning swaramu",
+      "pickerDetail": "Voiceover nganggo swaramu dhewe",
+      "title": "Kloning swaramu",
+      "description": "Rekam dhewe utawa pilih klip nalika sampeyan ngomong. Mbayar sepisan lan swaramu dadi duwekmu kanggo saben voiceover.",
+      "defaultName": "Swaraku",
+      "record": "Rekam conto (30 detik nganti 2 menit)",
+      "fromMedia": "Utawa gunakake klip saka Media",
+      "recorded": "Rekamanmu",
+      "sample": "Conto: {{name}}",
+      "hint": "Wicara sing cetha tanpa musik paling apik.",
+      "noMic": "Ora bisa nganggo mikropon.",
+      "sampleFailed": "Ora bisa maca swara saka klip kuwi.",
+      "pay": "Kloning kanthi {{amount}} token",
+      "useFree": "Kloning (wis dibayar)",
+      "owned": "Swaramu “{{name}}” wis disetel. Pilih saka dhaptar swara.",
+      "useOwned": "Gunakake swaraku",
+      "ready": "“{{name}}” wis siap kanggo voiceover.",
+      "paidFailed": "Pembayaranmu kesimpen. Bukak iki maneh lan percobaan sabanjure gratis.",
+      "consent": "Mung kloning swaramu dhewe, utawa swara sing sampeyan duwe idin nganggo."
     },
     "linkImport": {
       "go": "Impor",
-      "downloading": "Ngundhuh {{percent}}%"
+      "downloading": "Ngundhuh {{percent}}%",
+      "open": "Impor saka link",
+      "placeholder": "Tempel link YouTube, TikTok utawa liyane",
+      "rights": "Aku nduwe video iki utawa duwe idin nganggo",
+      "audioOnly": "Mung swara",
+      "queued": "Ngantri…",
+      "waiting": "Ngenteni situs, nyoba maneh sedhela engkas…",
+      "adding": "Nambah menyang Media…",
+      "added": "Wis diimpor lan ditambahake menyang timeline.",
+      "failed": "Ora bisa ngimpor link kuwi."
     },
     "reverse": {
-      "action": "Balik"
+      "action": "Balik",
+      "working": "Mbalik {{percent}}%",
+      "done": "Klip wis dibalik.",
+      "failed": "Ora bisa mbalik klip iki.",
+      "unsupported": "Browser iki ora bisa mbalik video. Coba Chrome utawa Edge.",
+      "tooLong": "Klip nganti {{seconds}} detik bisa dibalik."
+    },
+    "film": {
+      "repairRefs": "Busak link media sing ilang",
+      "title": "Proyek film",
+      "intro": "Rencanakake shot nganggo referensi gambar sing bisa dienggo maneh. Brief, urutan shot lan asil sing dipilih kesimpen karo proyek iki.",
+      "create": "Gawe rencana film",
+      "name": "Jeneng film",
+      "brief": "Brief film",
+      "sharedReferences": "Referensi gambar bareng (nganti 4)",
+      "shot": "Shot",
+      "addShot": "Tambah shot",
+      "shotName": "Jeneng shot",
+      "action": "Aksi lan komposisi shot",
+      "seconds": "Detik video sing dijaluk",
+      "shotReferences": "Referensi gambar tambahan (gabungan maksimal 4)",
+      "frame": "Siyapna frame",
+      "video": "Siyapna video",
+      "review": "Priksa model, referensi, durasi video lan rega ing studio sadurunge nggawe.",
+      "result": "Asil shot sing ditampa",
+      "noResult": "Durung ana asil sing dipilih",
+      "resultHint": "Pilih gambar utawa video sing ditampa saka Unggahan. Link-e kesimpen karo shot iki; gunakake timeline kanggo nyusun film.",
+      "earlier": "Pindhah luwih awal",
+      "later": "Pindhah luwih mburi",
+      "remove": "Busak shot",
+      "issue": "Priksa katrangan shot lan media referensi, banjur coba maneh. Bukak terus proyeke yen ora bisa kesimpen.",
+      "searchMedia": "Golek media miturut jeneng",
+      "refreshMedia": "Segerake media"
+    },
+    "videoNeedsImage": "{{model}} butuh gambar wiwitan. Gawe saka studio Creator wae.",
+    "speakers": {
+      "find": "Golek pamicara",
+      "name": "Pamicara {{number}}",
+      "onlyOne": "Mung ketemu siji pamicara.",
+      "failed": "Ora bisa nemokake pamicara.",
+      "kept": "Mung njaga {{name}}.",
+      "editFailed": "Suntingan kuwi ora pas karo klip iki.",
+      "split": "Dipecah dadi {{count}} shot pamicara.",
+      "keepOnly": "Jaga mung",
+      "splitAction": "Potong saben ganti pamicara"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Critakna objek 3D sing kokkarepake",
+      "queued": "Nggawe objek 3D-mu. Bakal mlebu ing tab Generasi.",
+      "note": "Objek 3D mlebu ing Media minangka klip muter cendhak kanthi latar tembus pandang."
+    },
+    "behind": {
+      "action": "Teks ing mburi wong",
+      "working": "Motong wonge…",
+      "done": "Teks lan caption saiki ana ing mburi wong.",
+      "failed": "Ora bisa nyelehake teks ing mburi wong."
     }
   },
   "jungleMood": {
@@ -10950,7 +11927,11 @@
     "viewOnExplorer": "Kiwon ing Ngisor",
     "viewOnExplorerDesc": "Mbukak blockchain explorer (BaseScan) kanggo ndeleng rincian transaksi on-chain kanggo kiriman utawa transfer.",
     "title": "Kamus",
-    "subtitle": "Sinau tegese saben lambang lan fitur"
+    "subtitle": "Sinau tegese saben lambang lan fitur",
+    "listFractions": "Dhaptar Pecahan",
+    "txHashDesc": "Pengenal unik kanggo saben transaksi on-chain. Klik kanggo ndeleng rincian transaksi lengkap ing blockchain explorer.",
+    "upvote": "Upvote",
+    "downvote": "Downvote"
   },
   "tipFunding": {
     "noRoute": "Ora ana rute Uniswap menyang token Riftn kanggo token iki saiki",
@@ -11108,7 +12089,9 @@
     "tokenAmount": "{{amount}} token",
     "assistant": {
       "question1": "APY staking Riftn token saiki pira?",
-      "question2": "Inggih, menawi kula stake 10.000 token dangunipun 90 dinten"
+      "question2": "Inggih, menawi kula stake 10.000 token dangunipun 90 dinten",
+      "answer1": "APY staking saiki kanggo token Riftn yaiku 12.4% kanggo periode kunci 30 dina. Iki rinciane:\n\n• Kunci 7 dina: 8.2% APY\n• Kunci 30 dina: 12.4% APY\n• Kunci 90 dina: 18.7% APY\n\nApa sampeyan pengin aku mbiyantu ngitung potensi asile?",
+      "answer2": "Kanggo 10,000 token sing di-stake ing 18.7% APY sajrone 90 dina:\n\n📊 Kira-kira ganjaran: ~461 token\n\nKuwi kira-kira 5.13 token saben dina. Elinga APY bisa owah gumantung total jumlah sing di-stake."
     },
     "bookmarks": {
       "stakingGuide": "Pandhuan lengkap kanggo staking token Riftn: rincian APY, periode kunci, lan pengganda hadiah dijelasake."
@@ -11804,7 +12787,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Kirim menyang X, YouTube, Instagram, TikTok lan liya-liyane bebarengan karo dehub. Sambungake akun sampeyan sapisan, banjur pilih ngendi saben kiriman bakal dikirim.",
+    "intro": "Kirim menyang X, YouTube, Instagram, TikTok lan liya-liyane bebarengan karo Riftn. Sambungake akun sampeyan sapisan, banjur pilih ngendi saben kiriman bakal dikirim.",
     "creditsHeading": "Kredit kiriman",
     "credits": "{{count}} kredit kiriman",
     "topUpTitle": "Top up lan ngirit",
@@ -11852,7 +12835,12 @@
   "dm": {
     "planRestricted": "Pangguna iki mbutuhake langganan kanggo nampa pesen.",
     "planTypeNotAllowed": "Paket kreator iki ora ngidini jinis pesen iki.",
-    "planMinTip": "Tip kanggo kreator iki paling sithik {{amount}} token."
+    "planMinTip": "Tip kanggo kreator iki paling sithik {{amount}} token.",
+    "shareKindGroup": "Golongan",
+    "shareKindCommunity": "Komunitas",
+    "shareGroups": "Grup",
+    "shareKindChannel": "Kanal",
+    "reportMessage": "Laporake pesen"
   },
   "credits": {
     "earningsWorth": "Nilai {{amount}}",
@@ -11894,7 +12882,11 @@
     "error": "Ora bisa ngirim panjaluk mbusak sampeyan. Akun sampeyan durung dikonfirmasi kanggo dibusak. Mangga coba maneh.",
     "back": "Balik menyang Setelan",
     "signIn": "Mlebu kanggo mbusak akun sampeyan",
-    "acknowledge": "Aku wis nyimpen rincian pemulihan dompetku lan ngerti yen mbusak iku permanen."
+    "acknowledge": "Aku wis nyimpen rincian pemulihan dompetku lan ngerti yen mbusak iku permanen.",
+    "signedInAs": "Mlebu minangka",
+    "confirmTitle": "Busak akunmu selawase?",
+    "confirmBody": "Akunmu lan kabeh isine bakal dibusak. Sampeyan bakal metu lan iki ora bisa dibatalake.",
+    "confirmBodyNamed": "{{who}} lan kabeh isine bakal dibusak. Sampeyan bakal metu lan iki ora bisa dibatalake."
   },
   "miniApps": {
     "badge": {
@@ -11990,12 +12982,43 @@
       "rewardPending": "Dalam proses",
       "rewardsNone": "Gak ada imbalan yang udah dihitung nggak. Minggu pertama tutup pikeun Senin.",
       "stats": {
-        "button": "Statistik langsung"
+        "button": "Statistik langsung",
+        "chartTitle": "Wong sing mbukak aplikasimu, 30 dina pungkasan",
+        "peak_one": "Puncak {{count}} saben dina",
+        "peak_other": "Puncak {{count}} saben dina",
+        "people30": "Wong, 30 dina",
+        "people7": "Wong, 7 dina",
+        "added": "Nambahake",
+        "dhb30": "Token dibayar, 30 dina",
+        "notified30": "Notifikasi dikirim, 30 dina",
+        "rewards": "Ganjaran token sing dipikolehi"
       },
       "signin": {
         "users_one": "pangguna {{count}}",
         "users_other": "pangguna {{count}}",
-        "delete": "Busak"
+        "delete": "Busak",
+        "title": "Mlebu nganggo Riftn",
+        "body": "Ngidini wong mlebu menyang situs web utawa aplikasimu nganggo akun Riftn. Gawe kunci ing kene, banjur tindakake pandhuane.",
+        "guide": "Waca pandhuan",
+        "copyId": "Salin client ID",
+        "rotate": "Secret anyar",
+        "rotateConfirm": "Gawe secret anyar kanggo {{name}}? Secret lawas langsung ora bisa dienggo.",
+        "deleteConfirm": "Busak {{name}}? Kabeh wong sing mlebu nganggo iki bakal metu.",
+        "secretOnce": "Secret kanggo {{name}}. Salin saiki: mung ditampilake sepisan.",
+        "name": "Jeneng aplikasi",
+        "website": "Situs web (opsional)",
+        "redirects": "URL redirect, siji saben baris (https://yoursite.com/callback)",
+        "create": "Gawe kunci"
+      },
+      "stateRejected": "Urip liwat link · ora disetujoni kanggo toko",
+      "rewardsWeek": "Minggu {{date}}",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Acara sing dikirim Riftn menyang webhookUrl-mu. Tes ngirim acara ping.",
+        "test": "Kirim tes",
+        "ok": "Webhook mangsuli {{status}}",
+        "failed": "Webhook gagal: {{reason}}",
+        "none": "Durung ana webhook sing dikirim."
       }
     },
     "card": {
@@ -12022,7 +13045,10 @@
       "confirm": "Bayar {{amount}} token",
       "sending": "Kirim pembayaranmu…",
       "sent": "Bayar ke {{amount}} token untuk {{name}}.",
-      "noOwner": "Goyang app ingkang gak punya dompet terverifikasi buat bayar dhuwur."
+      "noOwner": "Goyang app ingkang gak punya dompet terverifikasi buat bayar dhuwur.",
+      "testBadge": "Mode tes",
+      "testBody": "Sampeyan sing nduwe aplikasi iki, dadi iki tes: ora ana token sing pindhah lan kuitansine ditandhani tes.",
+      "testSent": "Pembayaran tes {{amount}} token. Ora ana sing dikirim."
     },
     "add": {
       "title": "{{name}}?",
@@ -18978,7 +20004,225 @@
     "127053546dd4": "Tidak bisa download file iki",
     "d14896aa4bf8": "Perpustakaan bebas ora bisa muat. Cek koneksi lan coba lagi.",
     "953e708b2287": "Penggantian suara gagal.",
-    "4a52cdd6ac72": "Tidak bisa duplikasi layer iki"
+    "4a52cdd6ac72": "Tidak bisa duplikasi layer iki",
+    "dbc468a14b60": "Pitakon sing kerep ditakokake",
+    "3f9b2c71d0a4": "{{n}} asil",
+    "8c4e1a6b2f57": "kanggo “{{query}}”",
+    "1d7234ff1b79": "ing {{feed}}",
+    "e122e5c2b563": "Seret munggah kanggo nutup",
+    "1aa9d734f2ee": "Pilih apa sing digoleki",
+    "ef557404f465": "Ora ana asil kanggo “{{query}}”",
+    "35034aa59bd3": "Ora ana sing cocog ing {{feed}}. Coba tembung liyane utawa goleki kabeh.",
+    "415155739590": "Goleki kabeh",
+    "9e13d826baaf": "Goleki gambar",
+    "cbf6f228327c": "Goleki musik",
+    "e8756c6865a5": "Goleki short",
+    "c7661da99c41": "Goleki video",
+    "90f1afe66801": "Nggoleki “{{query}}”…",
+    "d7b559f2d8c6": "Coba tembung liyane, utawa ganti filter.",
+    "d1a0c7e2f301": "Apa sing ana ing pikiranmu dina iki?",
+    "d1a0c7e2f302": "Apa sing kokpikirake dina iki?",
+    "d1a0c7e2f303": "Apa sing ana ing pikiranmu?",
+    "d1a0c7e2f304": "Ana sing lagi kokpikirake?",
+    "d1a0c7e2f305": "Apa sing ana ing pikiranmu saiki?",
+    "d1a0c7e2f306": "Lagi mikir apa dina iki?",
+    "d1a0c7e2f307": "Ana sing kokpikirake dina iki?",
+    "d1a0c7e2f308": "Apa sing ana ing pikiranmu saiki iki?",
+    "a7c1e0f4b2d9": "Tutul kanggo ngomong",
+    "b3e8d1c6f0a2": "Tutul kanggo ngirim",
+    "c9f2a4e7d1b5": "Ngrungokake... tutul bal kanggo ngirim",
+    "22577ebd908e": "Gawe video Wan 3.0 · soundtrack asli",
+    "1fa2357ab7e1": "Gawe video Seedance 720p · soundtrack asli",
+    "7f78bdc0762d": "+{{value1}} poin",
+    "f0c8bb34335b": "Sampeyan entuk +{{value1}} poin",
+    "0fbe06b679a8": "{{value1}} poin kanggo saben panjaluk sing dirilis, ditambahake menyang skor Top builders-mu.",
+    "6e0b22a7cbc0": "Dividen",
+    "9031bdeee7ac": "Dividen Taunan",
+    "e991eda6eeac": " tontonan / wong / dina",
+    "ea30d1c554b8": "/dina",
+    "9a7d4f0d2827": "Saldo iklan:",
+    "6c501d1a34b7": " asil",
+    "ca9fda1c17a9": "Golek liwat gelombang audio",
+    "431bc73eb60b": "[verse]\nLirikmu ing kene...\n\n[chorus]\nLirik chorus...",
+    "8343b1273ba1": "Nulis...",
+    "bac1555a01a0": "Terusna menyang Pembayaran",
+    "db08e3de9713": "Varian Logo",
+    "112a5da99805": "(saka dapp & dokumen kita)",
+    "18170f516593": "Lebokake Link",
+    "c595e334dd5d": "Gawe Poster",
+    "489b9f7c7b08": "Jeneng folder anyar",
+    "c83851d5858f": "Diterjemahake saka ",
+    "a1794783aab7": "Offline",
+    "7c5784e7b79a": "Wong sing nonton stream iki saiki",
+    "9757ccd5ef12": "Sunting pesen",
+    "7468f894907a": "Busak swara",
+    "e60be9da2148": " Mint kiriman",
+    "2f45e002d1d8": "Terjemahake kiriman iki",
+    "680029c7141b": "Short sabanjure",
+    "32acbd96e5cd": "Kapitalisasi pasar:",
+    "e65ae0cd6a5a": "Ucapna halo kanggo miwiti obrolan.",
+    "c1a5a2073bed": "Busak Obrolan?",
+    "f214cbc07715": "Saldomu:",
+    "5269efbb02b6": "🔥 Ngirim tip ",
+    "fe20acd5b775": "Saldo ora cukup kanggo ",
+    "aa39569a26c1": " tip",
+    "db832651856c": "Sorotan Platform:",
+    "874c4620ba58": "Dhukungan Multi-chain:",
+    "f31b2b482d5c": "Antarmuka Gampang Dienggo:",
+    "67e6c5aafd14": " Desain resik lan gampang dimangerteni sing nggawe data rumit gampang diakses",
+    "82d0983e06e9": "Responsif ing HP:",
+    "e6ed89729cf1": "Link Referensi",
+    "c930dcc7438a": "Pengumuman Resmi Coinbase",
+    "4068235b7ac5": "Tweet resmi saka Coinbase babagan integrasi Base DEX",
+    "50ad5f03e532": "Busak ",
+    "07041d8592a7": "Kiriman Pilihan",
+    "1a8835e75e15": "Tag Populer",
+    "1bd55b98c963": "Nyunting proyek bareng. Simpen nganyari versi cloud-e; Simpen salinan nggawe proyekmu dhewe.",
+    "3be9d16e3178": "Animasi mlebu",
+    "104b6614f58d": "Animasi metu",
+    "a2b8baaa846d": "File-mu",
+    "9d31b48bc0c0": "Dijaga",
+    "78f6e2ebacae": " Salin kredit",
+    "5abe9e1fbc5b": "Bisa nyunting",
+    "1c97ca603b05": "Wangsuli · v",
+    "b21fac174275": "Busak trek",
+    "1c6f8e00dd95": " Pecah ing playhead",
+    "cd609bcd00a5": "Busak transisi",
+    "40cc2fc5a264": " Tempel sawise iki",
+    "e98872cc5520": "Apa sing arep digawe",
+    "3626e7fdea1c": "Gaya",
+    "fe079cfa9423": "Disaranake kanggo sampeyan",
+    "dead825df821": "Total Usulan",
+    "a3b4295b32a3": "Aktif Saiki",
+    "b29ae9358c04": "Digital Dreams",
+    "f9730ea7776a": "Sabanjure",
+    "a3c1e5f20b71": "Gunakake Riftn ing ChatGPT, Claude utawa aplikasi MCP apa wae. Tempel URL ing ngisor menyang setelan konektor asistenmu kanggo ndeleng kiriman, profil lan komentar, banjur mlebu nalika dijaluk kanggo nyambungake akunmu dhewe.",
+    "b84d2e7c9a16": "Alamat iki kanggo aplikasi AI, dudu kaca web. Yen dibukak ing browser bakal nggawa sampeyan mrene.",
+    "c5e9f1a3d742": "Sambungake akun Riftn-mu",
+    "d61a7b4e8c05": "Nalika asistenmu njaluk sampeyan mlebu, mlebu menyang Riftn lan klik Allow. Sawise iku bisa nganyari profilmu, nerbitake kiriman lan komentar, ngetut wong lan nggawe ing Creator Studio. Sambungan tetep kecanthol salawase dienggo lan kadaluwarsa sawise 30 dina ora dienggo.",
+    "e27b8c5f9d13": "Pandhuan ChatGPT langkah demi langkah",
+    "f38c9d6a0e24": "Pandhuan Claude langkah demi langkah",
+    "0a49d7b1f835": "Luwih seneng akun bot kapisah? Gawe agen kanggo entuk URL konektor sing ngirim minangka agen kuwi.",
+    "1b5ae8c20f46": "Nalika ChatGPT njaluk, mlebu menyang Riftn lan klik Allow kanggo nyambungake akunmu.",
+    "2c6bf9d31a57": "Klik Connect, mlebu menyang Riftn lan klik Allow kanggo nyambungake akunmu.",
+    "206245cb4b8e": "Mlebu kanggo njupuk mik",
+    "ad9f9dcc4cd7": "· BNB",
+    "5b9e8d7c728d": "Tx",
+    "3c00e7b75264": "Cadhangan dompet",
+    "1340eb7a333e": "Statistik Situs Langsung: Pengunjung lan Anggota Riftn Wektu Nyata",
+    "2baf411ba3c5": "Statistik Situs Langsung Riftn — Pengunjung, Tampilan Kaca, Anggota lan Pangguna Aktif",
+    "f57d7f82c107": "SuperPowers: Gunakake Lencana Riftn-mu kanggo Jangkauan",
+    "54ead07b0a79": " panggunaan",
+    "3325c2b56f2b": "Au",
+    "468415f0e112": "Ag",
+    "dbc2def4603a": "Ditampilake Ing",
+    "6cd2ed68db06": "Pitakon pers & media",
+    "be60b6a22470": "Utawa segerake kabeh kaca",
+    "bfec166eea05": "Jatah feed beranda saben dina miturut lencana",
+    "1515cc6f1d25": "Bagean iki lagi digawe.",
+    "7b06ece76fdb": "Emoji ati katresnan katon ing stream",
+    "69354fad62aa": "Emoji buket kembang katon ing stream",
+    "b18479b5ea82": "Emoji cincin gaib katon ing layar",
+    "368808eaf27e": "Animasi wadyabala Sparta diputer",
+    "25690b4e85fe": "Animasi pesta lengkap karo confetti lan bal disko",
+    "31d248c44579": "Obrolan tanpa judhul",
+    "4b5a6403c9db": "Jeda audio",
+    "690c816e9745": "Cathetan swara wis dikirim!",
+    "e1d1843963c8": "Menehi hadiah ora kasedhiya kanggo stream iki",
+    "7874ebc95c83": "REPLAY SEBAGIAN",
+    "2700f90ccf62": "Pilih reaksi downvote",
+    "f32a1950ff2f": "Pilih reaksi",
+    "9b28eeeae8c9": "Karakter wis dianyari",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "680d5e9f5113": " — ditagih ing iki",
+    "3455b0b36e9e": " · ngenteni setelan kas",
+    "2784e618bce7": "Nyathet pembayaran…",
+    "7387ffb8ad51": "Kreator iki",
+    "2bcd455ba302": "Tambah cadhangan sandhi",
+    "bc72f5e48888": " · passkey sing disinkronake — bisa dienggo saka piranti liyane",
+    "92763dec21db": "Rampungake & mlebu",
+    "e0edfeb3a71a": "Reset sandhi",
+    "413ecefdf0a6": "Link kiriman blog wis disalin menyang clipboard",
+    "329895f60ede": "Bali maneh mengko kanggo konten anyar!",
+    "6ad9d50f7fec": " · Seri",
+    "58dbb846fe02": "Mode Bocah urip",
+    "5d6661a4d994": "Paket wis aktif — wong saiki bisa langganan",
+    "2ed17d468145": "Kesalahan Puteran",
+    "c43eaf46d577": "Masalah link",
+    "f8c11a767d2d": "Aplikasi streaming terdesentralisasi lan Web3 sing pancen bisa ditonton ing 2026 — Riftn, Streamplace, Odysee, 3Speak, zap.stream lan Audius — karo monetisasi, jumlah pamirsa lan kanggo sapa saben aplikasi.",
+    "06ce40d90680": "Bioskop | Ing Ngendi Nonton, Nyewa utawa Tuku Film Apa Wae | Riftn",
+    "9bab7b8fd081": "Kas DAO Riftn — saldo langsung, kontributor lan bagean pancasan dheweke.",
+    "1b13ff986443": "📷 Foto",
+    "2a14c0b8505d": "Panjaluk wis ditangani",
+    "0cd09d44006a": "Direaksi dening",
+    "5b79c5daab9d": "Dikirim ulang dening",
+    "376bde01356c": "Kiriman sing direaksi",
+    "1318b0271dac": "Kiriman sing dikirim ulang",
+    "67ae514e929e": "Statistik pengunjung riftn.com sing diukur ing edge bebarengan karo angka komunitas platform dhewe — anggota, pangguna aktif, pendaftaran lan wutuhing — diterbitake langsung.",
+    "a3b142af6e97": "gunakake",
+    "1784371d756d": "📦 Teaser Produk",
+    "d9c930ee7f28": "🎤 Tur Konser",
+    "dd05b3bca137": "📰 Feed Gabungan",
+    "db9897e168fa": "📢 Multi-Posting",
+    "38fddb1a5217": "📡 Siaran Langsung",
+    "fb673c9c986e": "🧑‍💻 Bounty Riftn",
+    "fea1030abae5": "🖼️ Gawe Gambar AI",
+    "90fade6fb78e": "Pangilon",
+    "bab4c75d0722": "Cincin",
+    "ebebdc70335b": "Bar Kaca",
+    "5ff272ba7871": "Garis Sutra",
+    "a941e90ca93d": "Halo Sampul",
+    "04dbbe4dff7a": "True Wave",
+    "57d161bcad73": "Alokasi Kas kanggo Hibah Developer Q2",
+    "fe839bff9e97": "Dana Komunitas kanggo Onboarding Kreator",
+    "c205924de0fe": "Dokumentasi",
+    "16840520f59c": "Liberal",
+    "3ef3ea1dd2c9": "Rincian Obrolan",
+    "c7e0489ecaaf": "Electric Soul (Live Performance)",
+    "1202d20ddea6": "Summer Vibes - Beach Sessions",
+    "132dd8763452": "Midnight Runner",
+    "2a723990eaee": "Bass Drop",
+    "04998e4249a5": "Ocean Breeze",
+    "67fd3b2b288f": "Sunset Boulevard",
+    "626facc50d5a": "settings.skills",
+    "8160489cae2b": "quickStart.nextDappTitle",
+    "00ec9936bf43": "Unggah {{value1}}",
+    "264fa40661cb": "Busak {{value1}}",
+    "9f40fece26d6": "Menyang gambar {{value1}}",
+    "1746d8e72cbb": "Dadi anggota kanggo ndeleng {{value1}} komunitas iki",
+    "b8c0275bd491": "Ora ana token sing cocog karo \"{{value1}}\".",
+    "62f3a3b868d9": " paling ora {{value1}} menit saka saiki",
+    "515c8ef71c75": "Pilih werna lan font merek sing valid",
+    "aae1384faa62": "Tambahna baris header lan paling ora siji baris data",
+    "83f26bfcfd2a": "Baris {{row}}: gunakake link web, email, telpon, utawa kaca sing valid ing {{column}}",
+    "4e6c73036632": "Baris {{row}}: isi QR kudu 1–1,500 karakter lan muat ing kode QR",
+    "412d9f8ca7b2": "Baris {{row}}: foto sumber sing dijenengi ora kasedhiya ing piranti iki",
+    "74d0747f5d0b": "Kolom {{column}}: format placeholder {{format}} ora didhukung",
+    "be7577fd22a9": "Lebokake judhul acara, karo lokasi nganti 200 karakter lan cathetan nganti 500 karakter",
+    "96a977eee3c4": "Koreksi caption ora valid",
+    "c004ff73eef3": "Tambahna data grafik sadurunge ngganti urutane",
+    "4b26d0c35bb2": "Gunakake tanggal ISO kayata 2026-01-31 utawa timestamp UTC kayata 2026-01-31T14:30Z",
+    "5a2ebe54449a": "Pilih seri data lan wates angka sing urut ing sangisore sepuluh triliun, utawa kosongna wates",
+    "c7bc9bd6d0bd": "Tambahna jeneng kolom ing baris pisanan, banjur label lan nilai angka",
+    "6b509a58d82e": "Jaga paling ora siji seri data",
+    "b6f971c911fa": "Pilih file gaya grafik sing luwih cilik saka 32 KB",
+    "113840e9b269": "Pilih paling akeh {{maximum}} kolom",
+    "6c4bbd9fb1a9": "Gunakake paling akeh {{maximum}} kolom",
+    "c710eaeac6b8": "Gunakake paling akeh {{maximum}} baris",
+    "b043d683b3d8": "Pilih font diagram sing kasedhiya",
+    "b7a218edc80a": "Gunakake observasi angka ing sangisore siji triliun. Lewati baris header yen perlu",
+    "9344a49b2b83": "File ora didhukung: {{name}}",
+    "a3f938cda315": "Gunakake {name}, {text}, {type}, {n}, utawa {nn} ing pola jeneng",
+    "f04a65d80539": "Pilih SVG lengkap kanthi geometri statis sing didhukung",
+    "f5f5b28846cb": "Gunakake prentah SVG move, line, curve, arc lan close",
+    "059fcf831c4e": "Gunakake matrix, translate, scale, rotate, skewX utawa skewY karo koordinat sing dibutuhake",
+    "08429ee7bf89": "Gunakake dhaptar transform SVG sing lengkap",
+    "2ea7f628e03b": "Tambahna baris tabel sadurunge ngresiki",
+    "1fbb28d8e06b": "Jaga paling ora siji baris lan siji kolom ing tabel",
+    "0bc32da0736d": "Pilih itungan mundur saka 30 detik nganti 120 menit",
+    "cb23cac06668": "Gawe kode QR dhisik",
+    "48cdeedad049": "Pilih file elemen JSON sing luwih cilik saka 800 KB",
+    "6e71ae3669b1": "Output simpenan ora kasedhiya"
   },
   "articles": {
     "cardLabel": "Artikel · {{count}} menit baca",
@@ -19020,7 +20264,16 @@
     "formatting": "Format",
     "bodyPlaceholder": "Ceritain cerita. Pilih teks dan pakai baris di atas untuk judul, tebal, kutipan, dan daftar",
     "bodyLabel": "Isi artikel",
-    "wordCount": "{{count}} kata"
+    "wordCount": "{{count}} kata",
+    "imageLimit": "Artikel bisa ngemot nganti {{count}} gambar",
+    "imageLimitSome": "Mung {{count}} gambar maneh sing muat ing artikel iki",
+    "imageFailed": "Gambar kuwi ora bisa ditambahake. Coba liyane.",
+    "imagesUploading": "Nambah gambar ({{count}})…",
+    "bodyTooLong": "Kaluwihan {{count}} karakter saka wates",
+    "imagesCount": "Gambar · {{count}}/{{max}}",
+    "captionPlaceholder": "Tambah caption",
+    "captionLabel": "Caption kanggo gambar {{n}}",
+    "removeInlineImage": "Busak gambar {{n}}"
   },
   "liveAudience": {
     "whosHere": "Siapa yang ada",
@@ -19069,23 +20322,94 @@
       "stage": {
         "preparing": "Nyepakake…",
         "confirming": "Ngenteni transaksi…",
-        "recording": "Ngrampungake…"
-      }
+        "recording": "Ngrampungake…",
+        "wallet": "Konfirmasi ing dompetmu"
+      },
+      "open": "Hadiahake langganan",
+      "title": "Hadiahake langganan",
+      "mode": {
+        "random": "Pamirsa acak ing obrolan",
+        "user": "Wong tartamtu"
+      },
+      "randomHint": "Kanggo wong sing ngobrol ing 30 menit pungkasan lan durung langganan.",
+      "send_one": "Hadiahake 1 langganan · ${{price}}",
+      "send_other": "Hadiahake {{count}} langganan · ${{price}}",
+      "payHint": "Dibayar nganggo token saka dompetmu ing siji transfer.",
+      "fewer_one": "Mung 1 wong ing obrolan sing bisa nampa langganan saiki, dadi sampeyan mbayar kanggo 1.",
+      "fewer_other": "Mung {{count}} wong ing obrolan sing bisa nampa langganan saiki, dadi sampeyan mbayar kanggo {{count}}.",
+      "done_one": "Langganan wis dihadiahake!",
+      "done_other": "{{count}} langganan wis dihadiahake!",
+      "failed": "Ora bisa menehi hadiah langganan",
+      "notReady": "Menehi hadiah durung kasedhiya kanggo paket iki",
+      "noPlan": "Pilih paket dhisik",
+      "noPlans": "{{name}} durung duwe paket langganan kanggo dihadiahake."
     },
     "badges": {
       "audience": {
-        "subscribers": "Pelanggan"
+        "subscribers": "Pelanggan",
+        "both": "Pelanggan lan pemberi hadiah",
+        "gifters": "Pemberi hadiah"
       },
       "ended": "Wis rampung",
       "until": "Nganti {{date}}",
-      "failed": "Iku ora bisa. Coba maneh."
+      "failed": "Iku ora bisa. Coba maneh.",
+      "title": "Lencana wektu winates",
+      "intro": "Tawakake lencana sawetara dina. Sapa wae sing langganan utawa menehi hadiah salawase isih mlaku bakal entuk, lan lencana katon ing jejere jenenge ing obrolanmu selawase.",
+      "name": "Jeneng lencana",
+      "namePlaceholder": "Minggu peluncuran",
+      "days": "Kasedhiya kanggo (dina)",
+      "emoji": "Emoji",
+      "who": "Sapa sing bisa entuk",
+      "create": "Tawakake lencana",
+      "created": "Lencana wis aktif.",
+      "end": "Rampungake saiki",
+      "holders_one": "{{count}} sing nduwe",
+      "holders_other": "{{count}} sing nduwe",
+      "limit": "Telung lencana bisa mlaku bebarengan. Rampungake siji kanggo nawakake liyane.",
+      "hypeHint": "Saben wong sing numpak hype train uga entuk lencana 🚂-mu ing level sing digayuh."
+    },
+    "train": {
+      "level": "Hype Train · Level {{level}}",
+      "endedLevel": "Hype Train rampung level {{level}}!",
+      "ended": "Hype Train wis rampung",
+      "thanks_one": "Matur nuwun marang {{count}} pendhukung",
+      "thanks_other": "Matur nuwun marang {{count}} pendhukung",
+      "top": "Paling dhuwur: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "menehi langganan 🎁",
+      "giftedSubs_other": "menehi {{count}} langganan 🎁"
     }
   },
   "whenSheet": {
     "today": "Dina Iki",
     "tooSoon": "Pilih wektu ing mangsa ngarep.",
     "show": "Tampilake",
-    "hide": "Umpetake"
+    "hide": "Umpetake",
+    "title": "Kapan?",
+    "tonight": "Bengi iki",
+    "inAnHour": "Sejam maneh",
+    "tomorrow": "Sesuk",
+    "primeTime": "Wektu rame",
+    "scheduleFor": "Jadwalake kanggo {{when}}",
+    "liveTip": "Pengikutmu bisa nyetel pangeling. Sampeyan dhewe sing miwiti Live nalika wis wayahe.",
+    "stageTip": "Langsung mlebu rak Bakal Teka, dadi wong bisa nutul Elingna aku.",
+    "typePlaceholder": "Ketik wektu, kaya \"fri 8pm\" utawa \"in 2 hours\"",
+    "typeLabel": "Ketik wektu",
+    "typeHelp": "Coba \"tonight\", \"tomorrow 9am\", \"sat noon\" utawa \"30 oct 7pm\".",
+    "orPickDay": "Utawa pilih dina",
+    "earlier": "15 menit luwih awal",
+    "later": "15 menit luwih suwe",
+    "earlierShort": "Sadurunge",
+    "laterShort": "Mengko",
+    "tooSoonMin": "Pilih wektu paling ora {{count}} menit saka saiki.",
+    "zone": "Wektumu ({{zone}}). Wong liya ndeleng ing wektune dhewe-dhewe.",
+    "remove": "Busak jadwal",
+    "startsIn": "Diwiwiti ing {{time}}",
+    "bestTime": "Wektu paling apik",
+    "fansOnline": "Kapan penggemarku online?",
+    "fansBasis": "Luwih padhang tegese luwih akeh pengikutmu sing nonton, {{count}} dina pungkasan.",
+    "everyoneBasis": "Aktivitas pengikut durung cukup, dadi iki kabeh wong ing Riftn."
   },
   "planned": {
     "title": "Direncanakake",
@@ -19100,22 +20424,45 @@
     "loading": "Ngundhuh…",
     "startNow": "Wiwiti saiki",
     "cancel": "Batal",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "subtitle": "Kiriman, Live lan Stage sing wis kokjadwalake",
+    "seoTitle": "Direncanakake · Riftn",
+    "seoDescription": "Kiriman, Live lan Stage sing dijadwalake ing Riftn, kabeh ing siji panggonan.",
+    "lives": "Live",
+    "signIn": "Mlebu kanggo ndeleng apa sing wis kokrencanakake",
+    "emptyTitle": "Durung ana rencana",
+    "emptyBody": "Pilih \"Kapan?\" nalika nggawe kiriman, Live utawa Stage lan bakal katon ing kene.",
+    "move": "Pindhah",
+    "postNow": "Kirim saiki",
+    "confirmCancel": "Tutul maneh kanggo mbatalake",
+    "moved": "Dipindhah menyang {{when}}",
+    "postingNow": "Dikirim kurang saka semenit",
+    "moveFailed": "Ora bisa mindhah. Coba maneh.",
+    "seeAll": "Deleng kabeh sing wis kokrencanakake"
   },
   "welcome": {
     "about": {
       "title": "Sugeng rawuh ing Riftn",
       "day": "Dina",
       "month": "Sasi",
-      "year": "Taun"
+      "year": "Taun",
+      "sub": "Ulang taunmu tetep pribadi. Pilih tampilan, bisa kokganti kapan wae.",
+      "birthday": "Tanggal lair",
+      "pick": "Pilih ulang taunmu",
+      "invalid": "Lebokake tanggal lairmu kanthi lengkap.",
+      "tooYoung": "Sampeyan kudu umur {{age}} utawa luwih kanggo nganggo Riftn.",
+      "theme": "Tampilanmu"
     },
     "name": {
       "title": "Jenengmu",
-      "placeholder": "Jenengmu"
+      "placeholder": "Jenengmu",
+      "sub": "Iki jeneng sing dideleng wong ing kirimanmu."
     },
     "card": {
       "name": "Jenengmu",
-      "followers": "pengikut"
+      "followers": "pengikut",
+      "interests": "Minatmu",
+      "following": "ngetut"
     },
     "topic": {
       "music": "Musik",
@@ -19127,11 +20474,47 @@
       "podcast": "Pandhawa Swara",
       "food": "Panganan",
       "news": "Berita",
-      "science": "Sains"
+      "science": "Sains",
+      "travel": "Lelungan",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Mobil",
+      "animals": "Kewan",
+      "tech": "Teknologi"
     },
     "back": "Bali",
     "skipPhoto": "Liwat saiki",
-    "preview": "Pratélanan"
+    "preview": "Pratélanan",
+    "username": {
+      "title": "@username-mu",
+      "sub": "Aksara, angka lan garis ngisor. Bisa kokganti mengko.",
+      "yours": "@{{name}} dadi duwekmu"
+    },
+    "photo": {
+      "title": "Fotomu",
+      "sub": "Opsional. Wong luwih cepet ngetut rai.",
+      "choose": "Pilih foto",
+      "change": "Pilih liyane"
+    },
+    "interests": {
+      "title": "Minatmu",
+      "sub": "Pilih paling ora 3. Bakal dadi sing pisanan ing kategorimu."
+    },
+    "people": {
+      "title": "Wong-wongmu",
+      "sub": "Tutul kanggo ngetut. Kirimane bakal ngebaki feed Ngetut-mu.",
+      "empty": "Saiki ora ana saran. Jelajahi duwe luwih akeh wong kanggo ditemokake.",
+      "followers": "{{count}} pengikut"
+    },
+    "done": {
+      "title": "Apik tenan, {{name}}",
+      "sub": "Kabeh wong ndeleng kertu iki wiwit dina iki.",
+      "eyebrow": "Profil aktif"
+    },
+    "enter": "Mlebu Riftn",
+    "pickMore": "Pilih {{count}} maneh",
+    "cardHint": "Kaya ngene wong bakal ndeleng sampeyan",
+    "followFailed": "Ora bisa ngetut. Coba maneh."
   },
   "appTokens": {
     "title": "Token sampeyan",
@@ -19142,28 +20525,102 @@
     "amount": "Jumlah",
     "notePlaceholder": "Tambahi cathetan (opsional)",
     "sendButton": "Kirim",
-    "errorInsufficient": "Token ora cukup"
+    "errorInsufficient": "Token ora cukup",
+    "rowHint": "Saldo ing aplikasi",
+    "explainer": "Token-mu saiki ana ing njero Riftn. Sampeyan miwiti karo apa sing kokcekel lan kok-stake onchain nalika peluncuran. Ngirim, ngirim tip lan mbelanjakake mindhah token kanthi cepet, tanpa biaya lan ora ana sing onchain. Saldo bakal digawa menyang token anyar nalika airdrop.",
+    "kindOpening": "Saldo wiwitan",
+    "kindSent": "Dikirim menyang {{name}}",
+    "kindReceived": "Saka {{name}}",
+    "kindSpent": "Dibelanjakake ing Riftn",
+    "kindRefund": "Mbalekake dhuwit",
+    "kindAdjust": "Penyesuaian dening Riftn",
+    "sendTitle": "Kirim token",
+    "sendHint": "Ngirim token ing njero Riftn menyang akun liya. Cepet lan gratis, ora ana sing mlebu onchain.",
+    "toPlaceholder": "@username utawa alamat 0x",
+    "looking": "Nggoleki…",
+    "available": "Kasedhiya: {{amount}}",
+    "sent": "Ngirim {{amount}} token menyang {{name}}",
+    "errorRateLimit": "Kakehan ngirim ing sejam pungkasan. Coba maneh mengko.",
+    "errorNoRecipient": "Akun Riftn ora ketemu",
+    "errorSelf": "Sampeyan ora bisa ngirim menyang dhewe",
+    "errorGeneric": "Ora bisa ngirim. Coba maneh."
   },
   "reactions": {
     "policy": {
       "everyone": "Kabeh wong",
       "followers": "Pengikut",
-      "nobody": "Ora Ana"
+      "nobody": "Ora Ana",
+      "default": "Bawaan akun ({{value}})"
     },
     "heading": "Tanggapan",
     "more": "Nampilin lebih",
     "liveNow": "Langsung",
-    "untitled": "Réaksi"
+    "untitled": "Réaksi",
+    "reactionTo": "Reaksi marang",
+    "reactingTo": "Reaksi marang",
+    "count_one": "{{count}} reaksi",
+    "count_other": "{{count}} reaksi",
+    "allow": "Idinake reaksi",
+    "remixesSection": "Remix",
+    "allowDescription": "Ngidini kreator liya nggawe reaksi marang videomu, rekaman utawa langsung. Sampeyan isih bisa ngganti ing saben kiriman.",
+    "pageDescription": "Tonton kreator nggawe reaksi marang “{{title}}” dening {{creator}} ing Riftn, rekaman lan langsung.",
+    "backToVideo": "Bali menyang video",
+    "empty": "Durung ana reaksi. Bukak menu Remix video lan pilih Reaksi supaya dadi sing pisanan.",
+    "wasLive": "Tau langsung",
+    "thisVideo": "video iki",
+    "pageTitle": "Reaksi kanggo {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Sambungna Riftn karo asisten AI sampeyan",
     "urlLabel": "URL server MCP",
     "copy": "Salin",
     "copied": "Salin",
-    "copiedToast": "URL MCP wis disalin"
+    "copiedToast": "URL MCP wis disalin",
+    "accountBody2": "Simpen draf pribadi, nerbitake lan njadwal kiriman, ngatur gambar lan polling, maca analitik, mangsuli, menehi reaksi, ngirim ulang, ngetut, nyimpen tandha buku, maca notifikasi, nyunting profilmu lan nggawe nganggo kreditmu. Nganggo maneh ID panjaluk kiriman ora nggawe utawa ngitung kiriman kapindho. Takon dhisik sadurunge mbelanjakake apa wae.",
+    "agentsTitle": "Jalanake agenmu saka asistenmu",
+    "agentsBody": "Nalika nyambungake, idinake uga \"Act as your agents\". Asistenmu banjur bisa ngirim, mangsuli, menehi reaksi, ngirim ulang, ngetut utawa nyunting profil minangka agen apa wae sing kokduweni, siji-siji utawa akeh sakaligus. Ora bakal bisa tumindak minangka akun sing dudu duwekmu.",
+    "agentsExample": "Coba: \"Kon @mybot mangsuli kiriman paling dhuwur ing feed-ku, banjur seneng wangsulan kuwi minangka @otherbot.\"",
+    "desc": "Gunakake Riftn saka ChatGPT, Claude, Cursor utawa aplikasi MCP apa wae. Jelajahi tanpa akun, utawa mlebu supaya asistenmu bisa ngirim, mangsuli lan nggawe kanggo sampeyan.",
+    "copyFailed": "Gagal nyalin",
+    "urlNote": "Tempel iki ing aplikasi AI-mu. Iki dudu kaca web, dadi yen dibukak ing browser bakal mbalekake sampeyan mrene.",
+    "canTitle": "Apa sing bisa ditindakake asistenmu",
+    "publicTitle": "Tanpa mlebu",
+    "publicBody": "Jelajahi feed, goleki kiriman lan wong, waca komentar lan goleki profil.",
+    "accountTitle": "Sawise sampeyan mlebu",
+    "accountBody": "Ngirim, mangsuli, menehi reaksi, ngetut, nyimpen tandha buku, maca notifikasi, nyunting profilmu lan nggawe gambar, video lan musik nganggo kreditmu. Takon dhisik sadurunge mbelanjakake apa wae.",
+    "chatgpt1": "Bukak Settings ChatGPT, banjur Apps & Connectors, banjur Advanced, lan urupake Developer mode.",
+    "chatgpt2": "Bali ing Apps & Connectors, pilih Create kanggo nambah konektor anyar.",
+    "chatgpt3": "Wenehi jeneng Riftn, tempel URL ing ndhuwur lan pilih OAuth minangka jinis mlebu.",
+    "chatgpt4": "Pencet Connect. Riftn kabukak: mlebu, priksa idin lan pencet Allow.",
+    "chatgpt5": "Ing obrolan anyar, bukak menu +, pilih Riftn lan takon, contone, “Tampilake kiriman sing lagi tren ing Riftn.”",
+    "claude1": "Bukak setelan konektor Claude lan pilih Add custom connector.",
+    "claude2": "Wenehi jeneng Riftn, tempel URL ing ndhuwur lan pencet Add.",
+    "claude3": "Pencet Connect. Riftn kabukak: mlebu, priksa idin lan pencet Allow.",
+    "claude4": "Ing obrolan, bukak menu tools, urupake Riftn lan takon apa wae.",
+    "openSettings": "Bukak setelan",
+    "devTitle": "Claude Code, Cursor lan aplikasi liyane",
+    "devBody": "Tambahna Riftn minangka server MCP remote liwat HTTP. Aplikasi bakal mbukak mlebu Riftn pisanan nalika butuh akunmu.",
+    "manageTitle": "Aplikasi sing kesambung",
+    "manageBody": "Aplikasi sing kesambung tetep nyambung salawase dienggo lan pedhot sawise 30 dina ora dienggo. Sampeyan bisa ndeleng utawa medhot kapan wae.",
+    "manageLink": "Atur aplikasi sing kesambung",
+    "agentTitle": "Pengin bot sing ngirim nganggo akune dhewe?",
+    "agentBody": "Gawe agen lan sampeyan entuk URL konektor dhewe kanthi kunci sing wis ana ing njerone. Asistenmu banjur bisa ngirim, komentar, milih lan ngetut minangka agen kuwi, dudu sampeyan.",
+    "agentLink": "Gawe agen",
+    "helpTitle": "Yen ana sing salah",
+    "help1": "“Authentication update required” utawa tombol Reconnect: pencet Reconnect lan mlebu menyang Riftn maneh.",
+    "help2": "“Sambungake akun Riftn-mu” nalika takon babagan kirimanmu dhewe: pencet Connect ing setelan konektor aplikasi.",
+    "help3": "Kesalahan nalika mbukak URL ing tab browser iku lumrah. Tempel ing aplikasi AI-mu wae.",
+    "other": "Aplikasi MCP liyane mlaku kanthi cara sing padha: tambahna server MCP remote lan tempel URL ing ndhuwur."
   },
   "avatarPrompt": {
-    "notNow": "Ora saiki"
+    "notNow": "Ora saiki",
+    "title": "Tambah foto profil",
+    "body": "Wong luwih cepet nemokake sampeyan ing feed, komentar lan obrolan yen ana rai utawa logo.",
+    "choose": "Pilih foto",
+    "another": "Pilih liyane",
+    "save": "Gunakake foto iki",
+    "saved": "Apik tenan",
+    "failed": "Ora bisa nyimpen fotomu. Coba maneh."
   },
   "postStats": {
     "engagement": "Keterlibatan",
@@ -19180,7 +20637,61 @@
     "shares": "Dibagekake",
     "signedOutViewers": "Metu",
     "topSupporters": "Pendukung paling dhuwur",
-    "visitors": "Metu"
+    "visitors": "Metu",
+    "aboutUsual": "kira-kira kaya biasane",
+    "afterWatching": "ngetut sawise ndeleng",
+    "audience": "Pamirsa",
+    "avg": "rata-rata",
+    "avgWatch": "Rata-rata nonton",
+    "bestTime": "Nalika wong-wongmu nonton",
+    "bigDrop": "Mudhun akeh",
+    "byBadge": "miturut lencana",
+    "devices": "Piranti (anggota)",
+    "finishedLower": "rampung",
+    "finishedPct": "{{pct}}% nonton nganti rampung",
+    "inOut": "{{in}} anggota · {{out}} ora mlebu",
+    "leave": "{{pct}}% metu",
+    "linkClicks": "Klik link",
+    "newToYou": "anyar kanggo sampeyan",
+    "noAccount": "tanpa akun",
+    "noViewersYet": "Durung ana sing ndeleng kiriman iki.",
+    "noWatchYet": "Wektu nonton katon ing kene sawise wong muter. Wiwit diitung tanggal 31 Okt 2026.",
+    "open": "Deleng kepiye kirimanmu",
+    "otherBadges": "Lencana liyane",
+    "peak": "Puncak {{time}} · {{n}}",
+    "peopleReached": "Wong sing digayuh",
+    "playsLower": "puteran",
+    "playsMembers": "Puteran dening anggota",
+    "playsVisitors": "Puteran tanpa mlebu",
+    "profileTaps": "Tutul menyang profilmu",
+    "reach": "Jangkauan",
+    "saves": "Simpenan",
+    "seeAll": "Deleng kabeh statistik",
+    "signedIn": "mlebu",
+    "signedOutLower": "ora mlebu",
+    "stillWatching": "Isih nonton",
+    "timesUsual": "{{ratio}}× biasane",
+    "vsUsualPct": "{{pct}} dibandhingake kiriman biasamu",
+    "unavailableBody": "Mung kreator sing bisa ndeleng statistik kiriman iki.",
+    "unavailableTitle": "Statistik ora kasedhiya",
+    "vsUsual": "dibandhingake kiriman biasamu",
+    "watching": "Nonton",
+    "whoSawIt": "Sapa sing ndeleng",
+    "withRepeats": "{{n}} baleni",
+    "yourFollowers": "pengikutmu",
+    "first48": "48 jam pisanan",
+    "howItsDoing": "Kepiye kahanane",
+    "bestTip": "Akeh-akehe pamirsamu teka {{day}} watara jam {{hour}}:00. Ngirim sadurunge wektu kuwi menehi wiwitan paling apik kanggo kiriman.",
+    "last30": "30 dina pungkasan",
+    "day": {
+      "sun": "Min",
+      "mon": "Sen",
+      "tue": "Sel",
+      "wed": "Rab",
+      "thu": "Kam",
+      "fri": "Jum",
+      "sat": "Set"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Segera hadir",
@@ -19193,7 +20704,11 @@
     "joinedBody": "Kita bakal ngirim email ke {{email}} kalau token udah keluar.",
     "joinedBodyNoEmail": "Kami bakal ngirim email ke gwe kanggo ngaweni token lanjar.",
     "failed": "Saya nggih ora bisa ngerti apa inggung.",
-    "privacy": "Gampang aja ngomongin tentang peluncuran."
+    "privacy": "Gampang aja ngomongin tentang peluncuran.",
+    "title": "Token bakal diluncurake",
+    "invalidEmail": "Lebokake email sing valid",
+    "seoTitle": "Token bakal diluncurake | Riftn",
+    "seoDescription": "Token Riftn anyar bakal diluncurake. Gabung ing dhaptar lan entuk siji email nalika wis aktif, banjur tuku langsung saka dompet Riftn-mu."
   },
   "githubLink": {
     "hint": "Masuk ke GitHub ngawasih kanggo ngerti akun kanggo kanggo. Riftn cuma nglihat profil GitHub kanggo kanggo.",
@@ -19209,7 +20724,27 @@
   },
   "mcpKeys": {
     "delete": "Busak",
-    "shortProfile": "Profil"
+    "shortProfile": "Profil",
+    "title": "Kunci pribadi",
+    "body": "Kanggo skrip, bot lan aplikasi sing ora bisa mbukak kaca mlebu. Kunci mung nindakake apa sing kokidinake, ing akunmu lan agen sing kokduweni. Tetep aktif salawase dienggo lan mandheg sawise 30 dina ora dienggo.",
+    "signIn": "Mlebu kanggo nggawe kunci",
+    "newTitle": "Salin kuncimu saiki",
+    "newBody": "Iki mung sepisan ditampilake. Sapa wae sing nduwe bisa nganggo akunmu miturut idin sing kokpilih, dadi rahasiakna.",
+    "useIt": "Tambahna menyang aplikasimu nganggo salah siji iki:",
+    "name": "Jeneng kunci",
+    "namePlaceholder": "Bot-ku",
+    "permissions": "Apa sing oleh ditindakake kunci iki",
+    "limits": "Wates saben dina kanggo akun lan agenmu: 50 kiriman, 300 wangsulan, 1,000 reaksi, 200 ngetut, 200 kiriman ulang lan 30 suntingan profil.",
+    "create": "Gawe kunci",
+    "show": "Tampilake kunciku",
+    "yours": "Kuncimu",
+    "empty": "Durung ana kunci.",
+    "expires": "Aktif nganti {{date}} kajaba dienggo maneh",
+    "shortRead": "Waca",
+    "shortSocial": "Ngirim lan mangsuli",
+    "shortGenerate": "Gawe media",
+    "shortAgents": "Agenmu",
+    "settingsBody": "Gunakake Riftn lan agenmu saka ChatGPT, Claude utawa aplikasi MCP apa wae, utawa gawe kunci pribadi."
   },
   "chatSearch": {
     "placeholder": "Cari pesan atau orang",
@@ -19245,11 +20780,81 @@
     "title": "Panjalukan Fitur",
     "accept": "Tampa",
     "delete": "Busak",
-    "block": "Blokir"
+    "block": "Blokir",
+    "hint": "Pesen saka wong sing ora kokketut. Tampa siji, wangsuli utawa ketut dheweke lan obrolan pindhah menyang kothak mlebumu.",
+    "rowHint": "{{n}} saka wong sing ora kokketut",
+    "banner": "Sampeyan ora ngetut {{name}}. Tampa kanggo mindhah obrolan iki menyang kothak mlebumu, utawa wangsuli wae.",
+    "accepted": "Dipindhah menyang kothak mlebumu",
+    "acceptFailed": "Ora bisa nampa, coba maneh"
   },
   "dmSchedule": {
     "view": "Tonton",
     "edit": "Rubah",
-    "error": "Iku ora bisa. Coba maneh."
+    "error": "Iku ora bisa. Coba maneh.",
+    "button": "Jadwalake pesen",
+    "title": "Pesen sing dijadwalake",
+    "whenTitle": "Kirim kapan?",
+    "waiting": "{{n}} dijadwalake",
+    "next": "sabanjure {{when}}",
+    "failedCount": "{{n}} ora dikirim",
+    "notSent": "Ora kekirim",
+    "emptyTitle": "Ora ana sing dijadwalake",
+    "emptyBody": "Tulis pesen, banjur tutul jam kanggo milih kapan dikirim.",
+    "editLabel": "Sunting pesen",
+    "changeTime": "Ganti wektu",
+    "sendNow": "Kirim saiki",
+    "deleted": "Pesen sing dijadwalake wis dibusak",
+    "unreadable": "Ditulis ing piranti liya. Tetep bakal dikirim.",
+    "footnote": "Wektu miturut zona wektumu. Ora ana sing ndeleng pesen nganti dikirim.",
+    "footnoteNamed": "Wektu miturut zona wektumu. {{name}} mung ndeleng pesen sawise dikirim.",
+    "textOnly": "Saiki mung pesen teks sing bisa dijadwalake.",
+    "scheduledToast": "Dijadwalake kanggo {{when}}",
+    "failedToast": "Pesen sing dijadwalake ora bisa dikirim"
+  },
+  "mentionLinks": {
+    "communities": "Komunitas",
+    "pages": "Kaca",
+    "people": "Wong",
+    "empty": "Ora ana sing ketemu",
+    "hint": "Ketik kanggo nggoleki wong, komunitas lan kaca",
+    "linkTo": "Sambungake {{name}}",
+    "members": " anggota",
+    "placeholder": "Goleki wong, komunitas, kaca...",
+    "title": "Sebut utawa sambungake"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Aku ngerti profilku bakal didhelikake lan aku bakal metu saka kabeh piranti.",
+    "title": "Nonaktifake akun",
+    "short": "Dhelikake profilmu saiki. Mlebu maneh kanggo mbalekake",
+    "description": "Leren dhisik wae. Profil, kiriman lan komentarmu didhelikake lan sampeyan metu saka kabeh piranti. Ora ana sing dibusak, lan mlebu maneh bakal mbalekake kabeh.",
+    "button": "Nonaktifake",
+    "confirmTitle": "Nonaktifake akunmu?",
+    "confirmBody": "Profil, kiriman lan komentarmu bakal didhelikake lan sampeyan bakal metu ing saben piranti. Mlebu maneh kapan wae kanggo mbatalake iki.",
+    "busy": "Nonaktifake…",
+    "done": "Akun wis dinonaktifake",
+    "receipt": "Profil, kiriman lan komentarmu didhelikake. Mlebu maneh kapan wae kanggo mbalekake kabeh.",
+    "error": "Ora bisa nonaktifake akunmu. Coba maneh."
+  },
+  "halloween": {
+    "title": "Sugeng Halloween",
+    "otherThemes": "Ora pengin sing medeni? Golek tema liyane:",
+    "enter": "Mlebu guwa"
+  },
+  "msgDelete": {
+    "title": "Busak pesen?",
+    "titleMany": "Busak {{count}} pesen?",
+    "bodyOwn": "Busak saka obrolanmu wae, utawa kanggo kabeh wong.",
+    "bodyOwnMany": "Busak saka obrolanmu wae, utawa kanggo kabeh wong.",
+    "bodyOthers": "Bakal dibusak saka obrolanmu wae. Wong liyane isih bisa ndeleng.",
+    "bodyOthersMany": "Bakal dibusak saka obrolanmu wae. Wong liya ing obrolan isih bisa ndeleng.",
+    "bodyOwnBoth": "Busak saka obrolanmu wae, utawa kanggo kowe loro.",
+    "bodyOwnBothMany": "Busak saka obrolanmu wae, utawa kanggo kowe loro.",
+    "forMe": "Busak kanggo aku",
+    "forEveryone": "Busak kanggo kabeh",
+    "forBoth": "Busak kanggo awake dhewe loro",
+    "forMeAndName": "Busak kanggo aku lan {{name}}",
+    "remember": "Elingna pilihanku",
+    "rememberHint": "Ganti kapan wae ing Setelan",
+    "failed": "Ora bisa mbusak pesen"
   }
 }

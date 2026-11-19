@@ -780,6 +780,23 @@
     "heading": "Courts Riftn"
   },
   "settings": {
+    "chatDeleteChoice": "Quand vous supprimez un message",
+    "chatDeleteChoiceDesc": "Demander à chaque fois, ou toujours supprimer pour vous seul ou pour tout le monde dans la discussion.",
+    "chatReactionStyle": "Réactions dans le chat",
+    "chatReactionStyleDesc": "Comment une réaction bouge quand elle arrive dans un chat, la vôtre ou celle d’un autre.",
+    "chatReactionFly": "Envol",
+    "chatReactionFlyDesc": "L’emoji vole jusqu’au message",
+    "chatReactionPop": "Pop",
+    "chatReactionPopDesc": "Elle rebondit sur place, petite et calme",
+    "chatReactionBurst": "Explosion",
+    "chatReactionBurstDesc": "La vôtre s’ouvre en grand avec des étincelles",
+    "chatReactionOff": "Désactivé",
+    "chatReactionOffDesc": "Aucun mouvement, seul le nombre change",
+    "chatDeleteAsk": "Demander à chaque fois",
+    "chatDeleteMe": "Supprimer pour moi",
+    "chatDeleteMeDesc": "Disparaît de votre discussion, les autres le voient encore",
+    "chatDeleteEveryone": "Supprimer pour tout le monde",
+    "chatDeleteEveryoneDesc": "Quand c’est possible. Le message de quelqu’un d’autre dans un groupe n’est supprimé que pour vous",
     "postLanding": "Après la publication",
     "postLandingDesc": "Comment votre nouvelle publication arrive dans votre fil",
     "postLandingGhost": "Emplacement fantôme",
@@ -1381,7 +1398,11 @@
     "menuLayoutSections": "Sections",
     "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
     "menuLayoutFolders": "Dossiers",
-    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe"
+    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe",
+    "publicChatInBar": "Chat public dans la barre du bas",
+    "publicChatInBarDesc": "Ouvre le Chat public d'un seul geste depuis la barre en bas de l'écran",
+    "chatCards": "Chats en cartes",
+    "chatCardsDesc": "Chaque chat sur sa propre carte. Désactivez pour une liste simple avec une ligne entre les chats."
   },
   "common": {
     "confirm": "Confirmer",
@@ -2143,6 +2164,12 @@
     "likes": "J'aime",
     "subscribers": "Abonnés",
     "affiliates": "Affiliés",
+    "ogChallenge": "Défi OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holders OG",
+    "ogChallengeTitle": "Faites revenir les holders OG",
+    "ogChallengeBody": "Invitez les personnes qui détiennent encore du DHB. Quand elles rejoignent avec votre lien d'invitation et gardent leur DHB dans leur portefeuille Riftn, elles comptent pour vous ici.",
+    "ogChallengeCta": "Obtenir votre lien d'invitation",
     "directReferrals_one": "{{count}} directs",
     "directReferrals_other": "{{count}} directs",
     "secondaryReferrals_one": "{{count}} secondaires",
@@ -2249,6 +2276,11 @@
     "followBack": "Suivre en retour"
   },
   "features": {
+    "cropDraw": "Rogner et dessiner",
+    "crop": "Rogner",
+    "cropHint": "Tracez un cadre sur la partie à garder. Faites-le glisser de l'intérieur pour le déplacer.",
+    "drawHint": "Dessinez sur l'image pour montrer des éléments.",
+    "resetCrop": "Réinitialiser le rognage",
     "prompts": "Propositions",
     "queued": "En attente",
     "promptPageTitle": "Demandes",
@@ -3720,6 +3752,10 @@
     "statsLoadFailed": "Impossible de charger les statistiques de staking"
   },
   "communities": {
+    "muteChat": "Couper",
+    "mutedChat": "Coupé",
+    "muteChatHint": "Ne plus recevoir d'alertes du chat de cette communauté. Vous pouvez toujours le lire",
+    "unmuteChatHint": "Recevoir à nouveau les alertes du chat de cette communauté",
     "sortTop": "Top",
     "shareLink": "Partager le lien",
     "pinnedMore": "Plus",
@@ -6627,6 +6663,7 @@
     },
     "gallery": {
       "browse": "Parcourir les créations",
+      "create": "Créer",
       "fullscreen": "Afficher en plein écran",
       "missing": "Cette création n’est pas disponible.",
       "send": "Envoyer",
@@ -8008,6 +8045,9 @@
     "sourceEncoder": "OBS / Encodeur",
     "sourceEncoderHint": "Obtenir les détails RTMP",
     "screenPickHint": "Vous choisirez l'écran, la fenêtre ou l'onglet ensuite — puis il se met en direct avec votre micro et le son propre de l'onglet.",
+    "screenInAppHint": "Dans l'app Riftn",
+    "screenInAppNote": "Les navigateurs mobiles ne permettent à aucun site de partager votre écran. Passez en direct depuis l'app Riftn, puis touchez Partager l'écran.",
+    "screenInAppCta": "Télécharger l'app Riftn",
     "replayAllowanceUsed": "Vous avez utilisé l'allocation de téléchargement d'aujourd'hui, donc cette diffusion n'aura pas de rediffusion. L'allocation se réinitialise à minuit UTC.",
     "replayFreeTier": "Les comptes gratuits conservent les {{size}} premiers d'un flux en tant que rediffusion — les badges de mise en jeu augmentent la limite.",
     "replayTiered": "Jusqu'à {{size}} de ce flux est conservé en tant que rediffusion ({{tier}} allocation quotidienne).",
@@ -9081,7 +9121,19 @@
     "declined": "Appel refusé",
     "noAnswer": "Pas de réponse",
     "missed": "Appel manqué",
-    "callBack": "Rappeler"
+    "callBack": "Rappeler",
+    "group": "Groupe",
+    "groupVoiceCall": "Appel vocal de groupe",
+    "groupVideoCall": "Appel vidéo de groupe",
+    "callingGroup": "Appel du groupe...",
+    "isCalling": "{{name}} vous appelle",
+    "leave": "Quitter",
+    "joinCall": "Rejoindre",
+    "inCall_one": "{{count}} dans l'appel",
+    "inCall_other": "{{count}} dans l'appel",
+    "startGroupVoice": "Lancer un appel vocal de groupe",
+    "startGroupVideo": "Lancer un appel vidéo de groupe",
+    "you": "Vous"
   },
   "badgeAscension": {
     "reached": "Vous avez atteint {{tier}}",
@@ -12759,7 +12811,7 @@
   "multiPost": {
     "tab": "Multi-publication",
     "title": "Multi-publication",
-    "intro": "Publiez sur X, YouTube, Instagram, TikTok et plus en même temps avec dehub. Connectez vos comptes une fois, puis choisissez où chaque publication va.",
+    "intro": "Publiez sur X, YouTube, Instagram, TikTok et plus en même temps avec Riftn. Connectez vos comptes une fois, puis choisissez où chaque publication va.",
     "creditsHeading": "Crédits de publication",
     "credits": "{{count}} crédits de publication",
     "topUpTitle": "Rechargez et économisez",
@@ -12807,7 +12859,12 @@
   "dm": {
     "planRestricted": "Cet utilisateur exige un abonnement pour recevoir des messages.",
     "planTypeNotAllowed": "L'offre de ce créateur n'autorise pas ce type de message.",
-    "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur."
+    "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur.",
+    "shareGroups": "Groupes",
+    "shareKindGroup": "Groupe",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Communauté",
+    "reportMessage": "Signaler le message"
   },
   "credits": {
     "earningsWorth": "Valeur {{amount}}",
@@ -20833,6 +20890,9 @@
     "title": "Mentionner ou lier"
   },
   "msgDelete": {
+    "chatTitle": "Supprimer cette discussion ?",
+    "chatBodyBoth": "Supprimez-la seulement de vos discussions, ou supprimez tous les messages pour vous deux. Action irréversible.",
+    "chatBodyMe": "Elle sera retirée de vos discussions uniquement. Les autres la verront toujours.",
     "title": "Supprimer le message ?",
     "titleMany": "Supprimer {{count}} messages ?",
     "bodyOwn": "Retirez-le seulement de votre discussion, ou pour tout le monde.",
@@ -20845,6 +20905,12 @@
     "forEveryone": "Supprimer pour tout le monde",
     "forBoth": "Supprimer pour nous deux",
     "forMeAndName": "Supprimer pour moi et {{name}}",
+    "remember": "Mémoriser mon choix",
+    "rememberHint": "Modifiable à tout moment dans les Paramètres",
     "failed": "Impossible de supprimer le message"
+  },
+  "roomPreview": {
+    "you": "Vous",
+    "voice": "🎤 Message vocal"
   }
 }

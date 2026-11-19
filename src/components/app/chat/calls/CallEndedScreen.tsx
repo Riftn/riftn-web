@@ -17,8 +17,10 @@ const CallEndedScreen: React.FC = () => {
   const peer = usePeerIdentity(callSummary?.peerAddress ?? '');
 
   if (!callSummary) return null;
-  const { peerAddress, callType, outcome, duration } = callSummary;
+  const { peerAddress, callType, outcome, duration, groupName } = callSummary;
   const isVideo = callType === 'video';
+  const isGroup = groupName != null;
+  const shown = isGroup ? { name: groupName || t('calls.group', 'Group'), avatarUrl: peer.avatarUrl } : peer;
 
   const status = outcome === 'ended'
     ? `${t('calls.ended', 'Call ended')}${duration ? ` · ${duration}` : ''}`
@@ -35,21 +37,24 @@ const CallEndedScreen: React.FC = () => {
   };
 
   return (
-    <CallStage peer={peer}>
+    <CallStage peer={shown}>
       <button type="button" className="call-stage__min" onClick={dismissCallSummary} aria-label={t('calls.close')} title={t('calls.close')}>
         <X className="h-5 w-5" />
       </button>
       <CallIdentity
         kindIcon={isVideo ? Video : Phone}
-        kindLabel={isVideo ? t('calls.videoCall') : t('calls.voiceCall')}
-        peer={peer}
+        kindLabel={isGroup
+          ? (isVideo ? t('calls.groupVideoCall', 'Group video call') : t('calls.groupVoiceCall', 'Group voice call'))
+          : (isVideo ? t('calls.videoCall') : t('calls.voiceCall'))}
+        peer={shown}
         status={status}
       />
       <div className="call-stage__foot">
-        <div className="call-row">
+        {/* A group call has nobody single to message or call back; the group chat is where you came from. */}
+        {isGroup ? null : <div className="call-row">
           <CallPill icon={MessageCircle} label={t('messages.message')} onClick={message} />
           <CallPill icon={isVideo ? Video : Phone} label={t('calls.callBack', 'Call back')} onClick={() => { void startCall(peerAddress, callType); }} solid />
-        </div>
+        </div>}
       </div>
     </CallStage>
   );

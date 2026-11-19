@@ -11,7 +11,6 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  */
 
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useReducer, memo, Fragment, type ReactNode } from 'react';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -131,11 +130,13 @@ import {
 } from '@/lib/api/dehub/dm-socket';
 import { ForwardMessageDialog } from './ForwardMessageDialog';
 import { DeleteMessageDialog, type DeleteScope } from './DeleteMessageDialog';
+import { ReportModal } from '@/components/app/modals/ReportModal';
 import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -145,6 +146,7 @@ import { isDmCallNotice } from '@/lib/dm-call-notice';
 import { CallNoteCard } from './calls/CallNoteCard';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
 
 // Picking messages: only the ticked rows are shaded, the rest stay clear and
 // only hint on hover. Mixed from the text colour rather than bg-white/..., which
@@ -187,6 +189,17 @@ export type CozyGroupPos = { first: boolean; last: boolean };
 
 const COZY_GROUP_GAP_MS = 5 * 60_000;
 const COZY_GROUPABLE = new Set(['msg', 'media', 'gif']);
+
+const COZY_POS: Record<string, CozyGroupPos> = {
+  tt: { first: true, last: true },
+  tf: { first: true, last: false },
+  ft: { first: false, last: true },
+  ff: { first: false, last: false },
+};
+/** Shared objects, so a bubble's memo sees the same `cozy` prop each render. */
+function cozyPosFor(first: boolean, last: boolean): CozyGroupPos {
+  return COZY_POS[`${first ? 't' : 'f'}${last ? 't' : 'f'}`];
+}
 
 function cozyDayKey(iso: string) {
   const d = new Date(iso);
@@ -468,6 +481,16 @@ export function CozyDayPill({ iso }: { iso: string }) {
   );
 }
 
+/** What moderators see with a reported chat message. Same lines as the app sends. */
+function messageReportContext(message: DmMessage, where: string): string {
+  const text = (message.content || '').trim().slice(0, 500);
+  return [
+    `Reported message (${where})`,
+    message._id ? `Message id: ${message._id}` : null,
+    text ? `Text: ${text}` : null,
+  ].filter(Boolean).join('\n');
+}
+
 const MessageBubble = memo(function MessageBubble({
   message,
   isOwnMessage,
@@ -493,6 +516,7 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick,
   onStartPick,
   onDelete,
+  onReport,
   canPin = true,
   isPinned = false,
   onUnpin,
@@ -501,6 +525,8 @@ const MessageBubble = memo(function MessageBubble({
   isOwnMessage: boolean;
   /** Delete one message (asks first: for me, or for everyone when it is yours). */
   onDelete?: (message: DmMessage) => void;
+  /** Report a message someone else sent, with its text attached for moderators. */
+  onReport?: (message: DmMessage) => void;
   /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
   canPin?: boolean;
   isPinned?: boolean;
@@ -534,6 +560,7 @@ const MessageBubble = memo(function MessageBubble({
   onDiscardSend?: (clientKey: string) => void;
 }) {
   const { t: _copy } = _useCopy();
+  useReactionHost(message._id);
   // Cozy layout: the avatar and the time line belong to the run, so only its
   // last bubble carries them. A failed or sending bubble keeps its line, since
   // that is where Retry and the spinner live.
@@ -728,6 +755,18 @@ const MessageBubble = memo(function MessageBubble({
       () => undefined,
     );
   };
+  // A photo, GIF or video can be copied as itself, not just its caption.
+  // Paid and encrypted attachments stay out, like Download.
+  const copyMediaTarget = (() => {
+    if ((message.msgType !== 'media' && message.msgType !== 'gif') || message.undecryptable || message.lock || encMedia || isLockedMedia || isFileMedia) return null;
+    const url = copyableMediaUrl(getMediaUrl(primaryMediaUrl) || primaryMediaUrl);
+    if (!url) return null;
+    const kind = message.msgType === 'gif' || primaryMedia?.mimeType === 'image/gif' ? 'gif' as const
+      : primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? 'video' as const
+      : 'image' as const;
+    return { url, kind };
+  })();
+  const copyMediaNow = () => { if (copyMediaTarget) copyMediaWithToast(copyMediaTarget.url, copyMediaTarget.kind, _copy); };
   const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
   // Translate also translates every message above this one that still needs it.
   const translateUp = useTranslateUp('dm', message._id, message.createdAt, canTranslate && !isTranslated && !isTranslating, handleTranslate);
@@ -764,6 +803,10 @@ const MessageBubble = memo(function MessageBubble({
       menuActions.push({ key: 'copy', icon: menuIcons.copy, label: L.copy, onSelect: copyText, hint: 'C' });
       holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
     }
+    if (copyMediaTarget) {
+      menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
+      holdActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
+    }
     if (canTranslate) {
       const go = isTranslated ? handleShowOriginal : translateUp;
       menuActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go, hint: 'T' });
@@ -786,6 +829,12 @@ const MessageBubble = memo(function MessageBubble({
     if (pickable) {
       menuActions.push({ key: 'select', divided: !canDeleteThis, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
       holdActions.push({ key: 'select', secondary: true, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message) });
+    }
+    // Anyone can report a message they were sent, the same as in the app.
+    if (onReport && !isOwnMessage && !message.isDeleted && (message.sender?.address || message.sender?.username)) {
+      const label = _copy('dm.reportMessage', { defaultValue: 'Report message' });
+      menuActions.push({ key: 'report', destructive: true, icon: menuIcons.report, label, onSelect: () => onReport(message) });
+      holdActions.push({ key: 'report', secondary: true, destructive: true, icon: menuIcons.report, label, onSelect: () => onReport(message) });
     }
   }
   const hasReactions = !!message.reactions && Object.values(message.reactions).some((who) => who?.length);
@@ -1233,13 +1282,14 @@ const MessageBubble = memo(function MessageBubble({
                 <button
                   type="button"
                   key={emoji}
+                  data-chat-reaction-chip
                   onClick={() => mine ? onRemoveReaction?.(message._id, emoji) : onReact?.(message._id, emoji)}
                   className={`group/reaction inline-flex items-center gap-1 px-1 py-0.5 text-xs ${mine ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
                 >
-                  <span className="inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+                  <ReactionGlyph messageId={message._id} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" />
                   {mine ? (
-                    <><span className="text-[10px] group-hover/reaction:hidden">{addresses.length}</span><X className="hidden w-3 h-3 group-hover/reaction:block" /></>
-                  ) : <span className="text-[10px]">{addresses.length}</span>}
+                    <><RollingCount value={addresses.length} className="text-[10px] group-hover/reaction:hidden" /><X className="hidden w-3 h-3 group-hover/reaction:block" /></>
+                  ) : <RollingCount value={addresses.length} className="text-[10px]" />}
                 </button>
               );
             })}
@@ -1520,7 +1570,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const paidTxHashRef = useRef<{ hash: string; content: string } | null>(null);
   // Version tick: incremented when a tx confirms so the (memoized) bubbles
   // re-render and pick up the new txConfirmed prop.
-  const [, bumpTxConfirmations] = useReducer((v: number) => v + 1, 0);
+  const [txConfirmations, bumpTxConfirmations] = useReducer((v: number) => v + 1, 0);
 
   // Determine if fee is required
   const feeRequired = dmFee?.required && !dmFee.hasFreeAccess;
@@ -2376,6 +2426,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const [confirmPickDelete, setConfirmPickDelete] = useState(false);
   // Delete from the message menu, after picking for me or for everyone.
   const [confirmDeleteOne, setConfirmDeleteOne] = useState<DmMessage | null>(null);
+  // Report message: the sender is reported with the line itself attached.
+  const [reportTarget, setReportTarget] = useState<DmMessage | null>(null);
   /** Take messages out of this chat on screen: gone (for me) or "deleted" (for everyone). */
   const dropFromThread = useCallback((ids: Set<string>, scope: DeleteScope) => {
     if (!resolvedConversationId || ids.size === 0) return;
@@ -2413,11 +2465,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
     [pickedMsgs, messages],
   );
-  // Every pick can be deleted for you; only when all of them are yours can
-  // they go for everyone too.
-  const pickedAllOwn = useMemo(
-    () => pickedList.length > 0 && pickedList.every((m) => isMineMsg(m)),
-    [pickedList, isMineMsg],
+  // Every pick can be deleted for you. In a one-to-one chat any of them can
+  // also go for both of you; in a group only when all of them are yours.
+  const pickedForEveryone = useMemo(
+    () => pickedList.length > 0 && (!isGroupChat || pickedList.every((m) => isMineMsg(m))),
+    [pickedList, isMineMsg, isGroupChat],
   );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
   const togglePick = useCallback((m: DmMessage) => {
@@ -2452,7 +2504,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   }, [pickedList, _copy]);
   const deletePicked = useCallback(async (scope: DeleteScope) => {
     if (!resolvedConversationId || pickedList.length === 0) return;
-    const forEveryone = scope === 'everyone' && pickedAllOwn;
+    const forEveryone = scope === 'everyone' && pickedForEveryone;
     const send = forEveryone ? emitDeleteMessage : emitHideMessage;
     const results = await Promise.allSettled(pickedList.map((m) => send(resolvedConversationId, m._id)));
     const gone = new Set(pickedList.filter((_, i) => results[i].status === 'fulfilled').map((m) => m._id));
@@ -2463,7 +2515,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     } else {
       toast.error(_copy('msgSelect.partDeleted', { defaultValue: 'Deleted {{ok}} of {{total}}', ok: gone.size, total: pickedList.length }));
     }
-  }, [resolvedConversationId, pickedList, pickedAllOwn, dropFromThread, _copy]);
+  }, [resolvedConversationId, pickedList, pickedForEveryone, dropFromThread, _copy]);
 
   // Handle scroll
   const handleScroll = useCallback(() => {
@@ -2750,8 +2802,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       );
   };
 
-  const handleDeleteConversation = () => {
-    deleteConversationMutation.mutate(conversation.id, {
+  const handleDeleteConversation = (scope: DeleteScope = 'me') => {
+    deleteConversationMutation.mutate(scope === 'everyone' ? { id: conversation.id, forEveryone: true } : conversation.id, {
       onSuccess: () => {
         toast.success(_copy("copy.09d6990a101a", { defaultValue: "Conversation deleted" }));
         onBack();
@@ -2824,6 +2876,121 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   };
 
   const isVirtualConv = resolvedConversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(resolvedConversationId);
+
+  const handleReact = useCallback((messageId: string, emoji: string) => {
+    void addReaction(messageId, emoji).catch(() => toast.error(_copy("copy.1344ec522f09", { defaultValue: "Could not add reaction." })));
+  }, [addReaction, _copy]);
+  const handleRemoveReaction = useCallback((messageId: string, emoji: string) => {
+    void removeReaction(messageId, emoji).catch(() => toast.error(_copy("copy.b5145e1c11a3", { defaultValue: "Could not remove reaction." })));
+  }, [removeReaction, _copy]);
+
+  // The thread's rows, rebuilt only when a line or what a row shows changes.
+  // Scrolling flips the jump button and unread counts; those re-render the
+  // frame around the list, not every bubble in it.
+  const threadRows = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase().trim();
+    const filtered = searchLower
+      ? messages.filter(m => (m.content || '').toLowerCase().includes(searchLower))
+      : messages;
+
+    if (filtered.length === 0 && searchLower) {
+      return (
+        <AppState
+          icon="search"
+          title={_copy("copy.bf3cda441288", { defaultValue: "No matching messages" })}
+          description={_copy("copy.c3de7ea4ce48", { defaultValue: "No messages match \"{{value1}}\".", value1: searchQuery })}
+          kind="search-empty"
+          size="compact"
+          className="h-full"
+        />
+      );
+    }
+
+    return filtered.map((message, index) => {
+      // Lines encrypted for another device collapse into one row per run.
+      if (message.undecryptable && !message.isDeleted) {
+        const prev = filtered[index - 1];
+        if (prev?.undecryptable && !prev.isDeleted) return null;
+        let count = 1;
+        while (filtered[index + count]?.undecryptable && !filtered[index + count].isDeleted) count++;
+        return <DmUndecryptableRun key={message._id} count={count} />;
+      }
+      const ownAddress = walletAddress?.toLowerCase();
+      const ownId = user?._id;
+      const isOwn = (m: DmMessage) => {
+        const a = m.sender?.address?.toLowerCase();
+        const id = m.sender?._id;
+        return m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId);
+      };
+      const isOwnMessage = isOwn(message);
+
+      // Cozy: a run is back-to-back plain messages from one side,
+      // each within 5 minutes of the last, on the same day.
+      const joins = (a: DmMessage | undefined, b: DmMessage | undefined) =>
+        !!a && !!b && !a.undecryptable && !b.undecryptable && !a.isDeleted && !b.isDeleted &&
+        COZY_GROUPABLE.has(a.msgType || 'msg') && COZY_GROUPABLE.has(b.msgType || 'msg') &&
+        isOwn(a) === isOwn(b) &&
+        (isOwn(a) || (a.sender?.address || a.sender?._id) === (b.sender?.address || b.sender?._id)) &&
+        cozyDayKey(a.createdAt) === cozyDayKey(b.createdAt) &&
+        Math.abs(new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) < COZY_GROUP_GAP_MS;
+      const prevMsg = filtered[index - 1];
+      const cozyPos: CozyGroupPos | undefined = cozy
+        ? cozyPosFor(!joins(prevMsg, message), !joins(message, filtered[index + 1]))
+        : undefined;
+      const dayPill = cozy && (!prevMsg || cozyDayKey(prevMsg.createdAt) !== cozyDayKey(message.createdAt))
+        ? <CozyDayPill iso={message.createdAt} />
+        : null;
+      const unreadMarker = !searchLower && unreadAnchor?.id === message._id
+        ? <UnreadMarker count={unreadAnchor.count} />
+        : null;
+
+      return (
+      <Fragment key={message.clientKey ?? message._id}>
+      {dayPill}
+      {unreadMarker}
+      <MessageBubble
+        message={message}
+        isOwnMessage={isOwnMessage}
+        cozy={cozyPos}
+        highlightText={searchLower}
+        txConfirmed={
+          !!(message.paymentTxHash &&
+            confirmedTxHashes.current.has(message.paymentTxHash.toLowerCase()))
+        }
+        isEditing={editingMessageId === message._id}
+        onPin={canPinHere ? handlePinMessage : undefined}
+        onForward={handleForward}
+        onReply={handleReply}
+        onEdit={handleStartEdit}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={handleCancelEdit}
+        onOpenImage={setFullscreenImage}
+        currentUserAddress={walletAddress || undefined}
+        onReact={handleReact}
+        onRemoveReaction={handleRemoveReaction}
+        onRetrySend={handleRetrySend}
+        onDiscardSend={handleDiscardSend}
+        callPeerAddress={isGroupChat ? undefined : otherUser?.address}
+        selecting={pickedMsgs !== null}
+        picked={!!pickedMsgs?.has(message._id)}
+        onTogglePick={togglePick}
+        onStartPick={startPick}
+        onDelete={setConfirmDeleteOne}
+        onReport={setReportTarget}
+        canPin={canPinHere}
+        isPinned={pinnedMessageId === message._id}
+        onUnpin={handleUnpinMessage}
+      />
+      </Fragment>
+    )});
+  }, [
+    // txConfirmations: re-reads confirmedTxHashes (a ref) after a payment lands.
+    messages, searchQuery, walletAddress, user?._id, cozy, unreadAnchor, txConfirmations,
+    editingMessageId, canPinHere, handlePinMessage, handleForward, handleReply, handleStartEdit,
+    handleSaveEdit, handleCancelEdit, handleReact, handleRemoveReaction, handleRetrySend,
+    handleDiscardSend, isGroupChat, otherUser?.address, pickedMsgs, togglePick, startPick,
+    pinnedMessageId, handleUnpinMessage, _copy, setReportTarget,
+  ]);
 
   return (
     <div data-page-bento data-bento-flat className="h-full flex flex-col overflow-hidden relative">
@@ -3087,6 +3254,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             <RefreshCw className="w-3 h-3 mr-2" />{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
         </div>
       ) : (
+        <div className="relative flex-1 min-h-0 flex flex-col">
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
@@ -3118,107 +3286,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.e65ae0cd6a5a", { defaultValue: "Say hello to start the conversation." })} size="section" className="h-full" />
           )}
 
-          {(() => {
-            const searchLower = searchQuery.toLowerCase().trim();
-            const filtered = searchLower
-              ? messages.filter(m => (m.content || '').toLowerCase().includes(searchLower))
-              : messages;
-
-            if (filtered.length === 0 && searchLower) {
-              return (
-                <AppState
-                  icon="search"
-                  title={_copy("copy.bf3cda441288", { defaultValue: "No matching messages" })}
-                  description={_copy("copy.c3de7ea4ce48", { defaultValue: "No messages match \"{{value1}}\".", value1: searchQuery })}
-                  kind="search-empty"
-                  size="compact"
-                  className="h-full"
-                />
-              );
-            }
-
-            return filtered.map((message, index) => {
-              // Lines encrypted for another device collapse into one row per run.
-              if (message.undecryptable && !message.isDeleted) {
-                const prev = filtered[index - 1];
-                if (prev?.undecryptable && !prev.isDeleted) return null;
-                let count = 1;
-                while (filtered[index + count]?.undecryptable && !filtered[index + count].isDeleted) count++;
-                return <DmUndecryptableRun key={message._id} count={count} />;
-              }
-              const ownAddress = walletAddress?.toLowerCase();
-              const ownId = user?._id;
-              const isOwn = (m: DmMessage) => {
-                const a = m.sender?.address?.toLowerCase();
-                const id = m.sender?._id;
-                return m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId);
-              };
-              const isOwnMessage = isOwn(message);
-
-              // Cozy: a run is back-to-back plain messages from one side,
-              // each within 5 minutes of the last, on the same day.
-              const joins = (a: DmMessage | undefined, b: DmMessage | undefined) =>
-                !!a && !!b && !a.undecryptable && !b.undecryptable && !a.isDeleted && !b.isDeleted &&
-                COZY_GROUPABLE.has(a.msgType || 'msg') && COZY_GROUPABLE.has(b.msgType || 'msg') &&
-                isOwn(a) === isOwn(b) &&
-                (isOwn(a) || (a.sender?.address || a.sender?._id) === (b.sender?.address || b.sender?._id)) &&
-                cozyDayKey(a.createdAt) === cozyDayKey(b.createdAt) &&
-                Math.abs(new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) < COZY_GROUP_GAP_MS;
-              const prevMsg = filtered[index - 1];
-              const cozyPos: CozyGroupPos | undefined = cozy
-                ? { first: !joins(prevMsg, message), last: !joins(message, filtered[index + 1]) }
-                : undefined;
-              const dayPill = cozy && (!prevMsg || cozyDayKey(prevMsg.createdAt) !== cozyDayKey(message.createdAt))
-                ? <CozyDayPill iso={message.createdAt} />
-                : null;
-              const unreadMarker = !searchLower && unreadAnchor?.id === message._id
-                ? <UnreadMarker count={unreadAnchor.count} />
-                : null;
-
-              return (
-              <Fragment key={message.clientKey ?? message._id}>
-              {dayPill}
-              {unreadMarker}
-              <MessageBubble
-                message={message}
-                isOwnMessage={isOwnMessage}
-                cozy={cozyPos}
-                highlightText={searchLower}
-                txConfirmed={
-                  !!(message.paymentTxHash &&
-                    confirmedTxHashes.current.has(message.paymentTxHash.toLowerCase()))
-                }
-                isEditing={editingMessageId === message._id}
-                onPin={canPinHere ? handlePinMessage : undefined}
-                onForward={handleForward}
-                onReply={handleReply}
-                onEdit={handleStartEdit}
-                onSaveEdit={handleSaveEdit}
-                onCancelEdit={handleCancelEdit}
-                onOpenImage={setFullscreenImage}
-                currentUserAddress={walletAddress || undefined}
-                onReact={(messageId, emoji) => { void addReaction(messageId, emoji).catch(() => toast.error(_copy("copy.1344ec522f09", { defaultValue: "Could not add reaction." }))); }}
-                onRemoveReaction={(messageId, emoji) => { void removeReaction(messageId, emoji).catch(() => toast.error(_copy("copy.b5145e1c11a3", { defaultValue: "Could not remove reaction." }))); }}
-                onRetrySend={handleRetrySend}
-                onDiscardSend={handleDiscardSend}
-                callPeerAddress={isGroupChat ? undefined : otherUser?.address}
-                selecting={pickedMsgs !== null}
-                picked={!!pickedMsgs?.has(message._id)}
-                onTogglePick={togglePick}
-                onStartPick={startPick}
-                onDelete={setConfirmDeleteOne}
-                canPin={canPinHere}
-                isPinned={pinnedMessageId === message._id}
-                onUnpin={handleUnpinMessage}
-              />
-              </Fragment>
-            )});
-          })()}
+          {threadRows}
 
           <div ref={bottomRef} />
           </div>
         </div>
-      )}
 
       {/* Jump control: up to the unread marker until it has been seen, then
           down to the newest line. The count is unread lines still below. */}
@@ -3231,10 +3303,12 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             up={up}
             count={count}
             onClick={up ? jumpToUnreadMarker : scrollToBottom}
-            className="absolute bottom-20 right-4 z-10"
+            className="absolute bottom-3 right-3 z-10"
           />
         );
       })()}
+        </div>
+      )}
 
       {/* Init error banner — shown when createAndStart timed out for a new conversation */}
       {initError && isVirtualConv && (
@@ -3277,16 +3351,23 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       <DeleteMessageDialog
         open={!!confirmDeleteOne}
         onOpenChange={(next) => { if (!next) setConfirmDeleteOne(null); }}
-        canDeleteForEveryone={!!confirmDeleteOne && isMineMsg(confirmDeleteOne)}
+        canDeleteForEveryone={!!confirmDeleteOne && (!isGroupChat || isMineMsg(confirmDeleteOne))}
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { const target = confirmDeleteOne; setConfirmDeleteOne(null); if (target) void deleteOne(target, scope); }}
+      />
+      <ReportModal
+        open={!!reportTarget}
+        onOpenChange={(next) => { if (!next) setReportTarget(null); }}
+        reportType="user"
+        userId={reportTarget?.sender?.address || reportTarget?.sender?.username || undefined}
+        context={reportTarget ? messageReportContext(reportTarget, isGroupChat ? 'Group chat' : 'Direct message') : undefined}
       />
       <DeleteMessageDialog
         open={confirmPickDelete}
         onOpenChange={setConfirmPickDelete}
         count={pickedList.length}
-        canDeleteForEveryone={pickedAllOwn}
+        canDeleteForEveryone={pickedForEveryone}
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { void deletePicked(scope); }}
@@ -3321,19 +3402,16 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         confirmBeforeSend={feeRequired ? confirmFeeSend : undefined}
       />}
 
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">{_copy("copy.c1a5a2073bed", { defaultValue: "Delete Conversation?" })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{_copy("copy.7e2cc56d23d2", { defaultValue: "This will permanently delete this conversation and all its messages. This action cannot be undone." })}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConversation}>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete the whole chat: for me, for both (1:1), or cancel */}
+      <DeleteMessageDialog
+        subject="chat"
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        canDeleteForEveryone={!isGroupChat && !isVirtualConv}
+        oneToOne
+        peerName={isGroupChat ? null : displayName}
+        onDelete={(scope) => handleDeleteConversation(scope)}
+      />
 
       {/* First-paid-message warning — shown once per browser before the first fee is charged */}
       <AlertDialog open={showFeeWarning} onOpenChange={handleFeeWarningOpenChange}>

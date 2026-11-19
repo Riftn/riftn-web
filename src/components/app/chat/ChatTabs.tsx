@@ -6,12 +6,15 @@ import * as Ctx from '@/components/ui/context-menu';
 import { cn } from '@/lib/utils';
 import { CHAT_MENU_CONTENT } from '@/components/app/chat/ChatOptionsMenu';
 import { MAX_TAB_NAME } from '@/lib/api/dehub/chat-tabs';
+import '@/styles/chat-tabs.css';
 import type { ChatTabView } from '@/hooks/use-chat-tabs';
 
 /*
- * Tabs above the chat list on riftn.com/chat: All, Direct, Communities,
- * Requests, then the tabs a person makes. + makes a tab, the sliders button
- * reorders or hides them. Right-click a tab (hold it on a phone) for its menu.
+ * Tabs above the chat list on riftn.com/chat and /app/messages: All, Unread,
+ * Direct, Groups, Requests, then the tabs a person makes. The open tab is lit
+ * with a glowing underline. Right-click the empty part of the
+ * bar (hold it on a phone) to make a tab or edit tabs; the sliders button
+ * reorders or hides them. Right-click a tab for its own menu.
  */
 
 const ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
@@ -30,6 +33,10 @@ export interface ChatTabBarProps {
   onDelete: (id: string) => void;
   /** A chat dragged from the list onto a custom tab. */
   onDropChat?: (tabId: string, chatId: string) => void;
+  /** Extra classes for the row (padding where it sits inside a header). */
+  className?: string;
+  /** Pinned to the right end of the row (Archived on /app/messages). */
+  trailing?: ReactNode;
 }
 
 export const CHAT_DRAG_TYPE = 'application/x-riftn-chat';
@@ -52,11 +59,13 @@ export function ChatTabBar(p: ChatTabBarProps) {
   }, [p.active, p.tabs.length]);
 
   return (
+    <Ctx.ContextMenu>
+    <Ctx.ContextMenuTrigger asChild>
     <div
       ref={scroller}
       role="tablist"
       data-chat-tabs
-      className="flex shrink-0 items-center gap-1.5 overflow-x-auto px-3 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className={cn('flex shrink-0 items-center gap-1 overflow-x-auto px-3 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', p.className)}
     >
       {visible.map(tab => {
         const n = p.unread[tab.id] || 0;
@@ -83,19 +92,11 @@ export function ChatTabBar(p: ChatTabBarProps) {
                   setDropOn(null);
                   if (chat) { e.preventDefault(); p.onDropChat?.(tab.id, chat); }
                 }}
-                className={cn(
-                  'flex h-8 shrink-0 select-none items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold transition-colors',
-                  on ? 'bg-white text-black' : 'bg-white/[0.06] text-zinc-300 hover:bg-white/10 hover:text-white',
-                  dropOn === tab.id && 'ring-2 ring-white',
-                )}
               >
                 {tab.emoji && <span className="text-[13px] leading-none">{tab.emoji}</span>}
                 <span className="whitespace-nowrap">{tab.name}</span>
                 {n > 0 && (
-                  <span
-                    data-chat-tab-unread
-                    className={cn('flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-bold leading-none', on ? 'bg-black text-white' : 'bg-red-500 text-white')}
-                  >
+                  <span data-chat-tab-unread>
                     {n > 99 ? '99+' : n}
                   </span>
                 )}
@@ -143,16 +144,6 @@ export function ChatTabBar(p: ChatTabBarProps) {
       })}
       <button
         type="button"
-        data-chat-tab-new
-        onClick={p.onNew}
-        aria-label={t('chatTabs.new', 'New tab')}
-        title={t('chatTabs.new', 'New tab')}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-zinc-400 hover:bg-white/10 hover:text-white"
-      >
-        <Plus className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
         data-chat-tab-manage
         onClick={p.onManage}
         aria-label={t('chatTabs.edit', 'Edit tabs')}
@@ -161,7 +152,20 @@ export function ChatTabBar(p: ChatTabBarProps) {
       >
         <SlidersHorizontal className="h-4 w-4" />
       </button>
+      {/* Fills the rest of the row so there's room to right-click. */}
+      <div aria-hidden className="h-8 min-w-6 flex-1" />
+      {p.trailing}
     </div>
+    </Ctx.ContextMenuTrigger>
+    <Ctx.ContextMenuContent data-chat-tabs-menu className={CHAT_MENU_CONTENT}>
+      <Ctx.ContextMenuItem className={ROW} onSelect={p.onNew}>
+        <Plus />{t('chatTabs.new', 'New tab')}
+      </Ctx.ContextMenuItem>
+      <Ctx.ContextMenuItem className={ROW} onSelect={p.onManage}>
+        <SlidersHorizontal />{t('chatTabs.edit', 'Edit tabs')}
+      </Ctx.ContextMenuItem>
+    </Ctx.ContextMenuContent>
+    </Ctx.ContextMenu>
   );
 }
 

@@ -164,15 +164,42 @@ export function startVersionWatch(onUpdate: (version: BuildVersion) => void): ()
 }
 
 /**
- * Should this navigation load the page fresh instead of rendering it with the
- * old build? True once per newer deploy the watcher has seen. Moving between
- * pages is the moment a reload costs nothing: the old page is going away anyway
- * and nothing typed on it survives the route change either. Returns false after
- * the first time for a given deploy, so an edge that still serves the old HTML
- * cannot turn every tap into a reload.
+ * How long a tab may keep running a superseded build before a page change
+ * reloads it onto the live one.
+ *
+ * This used to be zero: the first page change after ANY deploy reloaded the
+ * whole app. With dozens of deploys a day that meant a random tap every half
+ * hour or so flashed the shell, dropped every kept-alive page, scroll position
+ * and playing video, and looked like the app "re-rendering everything".
+ *
+ * An old tab does not need that. Deploys keep the previous builds' chunks
+ * online for days (scripts/carry-retired-assets.mjs), so a tab one deploy
+ * behind keeps working, and if a chunk ever is gone, lib/lazy-with-retry
+ * reloads at that moment. The toast still offers a refresh. The reload on
+ * navigation is only for a tab that has lived long enough to drift: one that
+ * has been open for half a day.
  */
-export function takeStaleReload(): boolean {
+export const STALE_RELOAD_AFTER_MS = 12 * 60 * 60 * 1000;
+
+function documentAgeMs(): number {
+  try {
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') return performance.now();
+  } catch {
+    // No performance clock — treat the tab as fresh.
+  }
+  return 0;
+}
+
+/**
+ * Should this navigation load the page fresh instead of rendering it with the
+ * old build? Only when a newer deploy is live AND this tab has been open for
+ * longer than STALE_RELOAD_AFTER_MS. Returns true at most once per newer
+ * deploy, so an edge that still serves the old HTML cannot turn every tap into
+ * a reload.
+ */
+export function takeStaleReload(ageMs: number = documentAgeMs()): boolean {
   if (!newerDeployId) return false;
+  if (ageMs < STALE_RELOAD_AFTER_MS) return false;
   try {
     if (sessionStorage.getItem(RELOADED_KEY) === newerDeployId) return false;
     sessionStorage.setItem(RELOADED_KEY, newerDeployId);
@@ -182,4 +209,9 @@ export function takeStaleReload(): boolean {
     return false;
   }
   return true;
+}
+
+/** Test hook: pretend the watcher has seen this deploy id. */
+export function __setNewerDeployIdForTest(id: string | null): void {
+  newerDeployId = id;
 }

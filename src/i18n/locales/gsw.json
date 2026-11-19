@@ -6,7 +6,11 @@
     "videoSize": "Das Video isch grösser als {{n}} MB. Wähl es chliiners."
   },
   "textFeed": {
-    "tab": "Tekscht"
+    "tab": "Tekscht",
+    "errorTitle": "Biiträg händ nöd chöne glade wärde",
+    "errorBody": "Lad de Text-Feed nomal.",
+    "emptyTitle": "No kei Text-Biiträg",
+    "emptyBody": "Text-Biiträg erschiined da."
   },
   "comic": {
     "showAll": "Alli {{count}} Siite zeige"
@@ -28,16 +32,63 @@
     "policyEveryone": "Alli",
     "policyFollowers": "Follower",
     "policyNobody": "Niemer",
-    "loadMore": "Meh lade"
+    "loadMore": "Meh lade",
+    "with": "Duett mit @{{username}}",
+    "withOriginal": "Duett · Original aaluege",
+    "unavailable": "Das Video isch für Duett nümm verfüegbar.",
+    "allowLabel": "Duett erlaube",
+    "allowDescription": "Wer näbe dine Videos es Duett cha ufneh. Du chasch das au bi jedem Biitrag ändere.",
+    "settingsSection": "Duett",
+    "policyDefault": "Konto-Istellig",
+    "saveFailed": "Het nöd chöne gspeicheret wärde. Probier's nomal.",
+    "count_one": "{{count}} Duett",
+    "count_other": "{{count}} Duett",
+    "pageHeading": "Duett",
+    "pageTitle": "Duett vo {{title}} vo @{{creator}}",
+    "pageTitleNoCreator": "Duett vo {{title}}",
+    "pageDescription": "Lueg jedes Duett vo dem Video uf Riftn aa, oder nimm dis eigete näbedra uf.",
+    "empty": "No kei Duett. Mach d Optione vom Video uf und wähl Remix → Duett, zum s Erschte mache.",
+    "video": "Video",
+    "notFound": "Das Video isch nöd verfüegbar.",
+    "browseShorts": "Shorts dürestöbere",
+    "notFoundTitle": "Video nöd gfunde | Riftn"
   },
   "videoRemix": {
-    "sound": "Benutz dä Sound"
+    "sound": "Benutz dä Sound",
+    "menu": "Remix",
+    "duet": "Duett",
+    "green-screen": "Green Screen",
+    "stitch": "Stitch",
+    "selectSource": "Mach d Optione vomene Video uf und wähl Remix zum Starte."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Alli",
       "followers": "Follower",
-      "nobody": "Niemer"
+      "nobody": "Niemer",
+      "default": "Mini Standard-Istellig"
+    },
+    "shareFailed": "Dis Trinkgäld isch gschickt worde, aber de Aateil vom Original-Creator isch nöd dürecho.",
+    "notify": {
+      "duet": "{{name}} het es Duett mit dim Video gmacht",
+      "stitch": "{{name}} het dis Video gstitcht",
+      "react": "{{name}} het uf dis Video reagiert",
+      "reactLive": "{{name}} reagiert live uf dis Video"
+    },
+    "linkFailed": "Din Biitrag isch online, aber er het nöd mit em Original-Video chöne verlinkt wärde.",
+    "settingsHeading": "Remixes",
+    "stitch": {
+      "allow": "Stitches erlaube",
+      "allowDesc": "Wer bis zu 5 Sekunde vo dine Videos i sine eigete cha bruuche. Du chasch das au pro Biitrag ändere.",
+      "saveFailed": "Dini Stitch-Istellig het nöd chöne gspeicheret wärde. Probier's nomal.",
+      "settingFailed": "Din Biitrag isch online, aber sini Stitch-Istellig isch nöd gspeicheret worde. Änder si under Biitrag bearbeite.",
+      "from": "Gstitcht vo {{name}}",
+      "count_one": "{{count}} Stitch",
+      "count_other": "{{count}} Stitches",
+      "listTitle": "Stitches",
+      "listFailed": "Stitches händ nöd chöne glade wärde. Probier's nomal.",
+      "listEmpty": "No kei Stitches.",
+      "unavailable": "Das Video isch für Stitches nümm verfüegbar."
     }
   },
   "dehubAppPage": {
@@ -63,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Riftn in eme Browser öffne",
     "seoDescription": "Läd dir die Riftn-App herunter: Open-Source, nutzerbesitzte Social-Media-Plattform mit Livestreaming, verschlüsselter Messaging und Watch-to-Earn. Kostenlos auf Google Play, dem App Store und der Webseite.",
-    "seoTitle": "Riftn App | Download für Android, iPhone & Web"
+    "seoTitle": "Riftn App | Download für Android, iPhone & Web",
+    "learnMore": "Wotsch s ganze Bild? <guide>Was isch Riftn?</guide> erklärt d Plattform genau."
   },
   "dehubLinks": {
     "copyLinkDetail": "Kopier den {{item}} Link in deine Zwischenablage.",
@@ -80,12 +132,16 @@
       "profile": "profil",
       "proposal": "Vorschlag",
       "stage": "Stufe",
-      "store": "laden"
+      "store": "laden",
+      "featureRequest": "Anforderig",
+      "page": "Siite"
     },
     "recipientChat": "Chatt",
     "recipientUser": "Benützer",
     "sendFailed": "Nöti gsi sendet {{item}}",
-    "sentTo": "{{item}} gschickt an {{name}}"
+    "sentTo": "{{item}} gschickt an {{name}}",
+    "openPage": "Siite öffne",
+    "viewRequest": "Aafrog aaluege"
   },
   "stageCover": {
     "admitOne": "ADMITT EIN",
@@ -194,7 +250,24 @@
   "signedFollows": {
     "setUp": "Aktiviere",
     "turnOff": "Ausschalten",
-    "efpTurnOff": "Stoppe"
+    "efpTurnOff": "Stoppe",
+    "title": "Dini Follows, uf de Chain",
+    "description": "Dis Wallet signiert, wem du folgsch, und jede Tag wird d Liste uf Base gstämplet. Jedi App cha dini Follows über dis Wallet finde, sogar ohni Riftn.",
+    "on": "Ii für das Gerät",
+    "off": "Uus für das Gerät",
+    "turnedOn": "Dini Follows wärded jetzt vo dim Wallet signiert",
+    "turnedOff": "Für das Gerät usgschaltet",
+    "failed": "Dis Wallet het nöd signiert. Probier's nomal.",
+    "hiddenNote": "Versteckti Follow-Liste und privati Konte sind nöd i de öffentliche Liste.",
+    "efpOn": "Uf EFP kopiert · {{count}} Follows",
+    "efpOff": "Si au uf EFP tue",
+    "efpTurnOn": "Zu EFP hinzuefüege",
+    "efpDone": "Dini Follows chömed uf EFP",
+    "efpStopped": "EFP-Kopie gstoppt. D Liste ghört wiiterhin dir.",
+    "efpHasList": "Du häsch scho e EFP-Liste. Riftn cha die no nöd fülle.",
+    "efpNoGas": "Dis Wallet bruucht für das es bitzli ETH uf Base.",
+    "efpFailed": "Das isch nöd dürecho. Probier's nomal.",
+    "efpNote": "EFP isch e Follow-Liste, wo anderi Apps läsed (efp.app). Gratis mit dim Riftn-Wallet; anderi Wallets zahled es paar Rappe uf Base. D Liste ghört dir."
   },
   "profileFields": {
     "title": "Profilfälder",
@@ -372,7 +445,8 @@
     "step": "Für Kontrollzugriffe füge https://riftn.com/mcp als OAuth-Connector hinzu, melde dich bei Riftn an und überprüfe die Berechtigungen, bevor du den Zugriff erlaubst.",
     "profilePrompt": "Aktualisiere mein Riftn-Bio: Independent Kreativ, der Filme und Musik macht.",
     "generatePrompt": "Zeige mir die Riftn-Bildmodelle und zitiere ein Portrait, bevor ich es generiere.",
-    "libraryPrompt": "Zeige mir die neuesten Inhalte in meiner Riftn-Creator-Bibliothek."
+    "libraryPrompt": "Zeige mir die neuesten Inhalte in meiner Riftn-Creator-Bibliothek.",
+    "agents": "Als dini eigete Agents poste, antworte, reagiere, reposte, folge und Profil bearbeite"
   },
   "twitchMirror": {
     "title": "Twitch-Mirroring",
@@ -473,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "download d'App, Android, iPhone, Mobile-App, installiere, APK, Desktop-App, installiere uf em Computer, Windows, Mac"
+      "getTheApp": "download d'App, Android, iPhone, Mobile-App, installiere, APK, Desktop-App, installiere uf em Computer, Windows, Mac",
+      "home": "Feed, Timeline, neusti Biiträg, für dich, folge, Startsiite",
+      "profile": "mis Profil, mis Konto, mini Siite, mini Biiträg, Avatar, Bio, Follower",
+      "explore": "sueche, entdecke, finde, Trends, beliebt, Hashtags, Lüüt, Creator",
+      "prompt": "KI, generiere, KI-Bild, KI-Video, Bild mache, Text zu Bild, KI-Kunst",
+      "editor": "Video-Editor, Video bearbeite, trimme, schniide, Untertitel, Captions, Effekt",
+      "creator": "erstelle, Studio, KI-Tools, Bild, Video, Musig, Voiceover, 3D",
+      "converter": "Video importiere, abelade, YouTube, TikTok, Instagram, umwandle",
+      "migrate": "min Kanal zügle, Kanal importiere, Massenimport, YouTube-Kanal",
+      "notifications": "Mitteilige, Aktivität, Erwähnige, Antworte, Likes, Glogge",
+      "messages": "DM, Direktnachrichte, Chat, Iigang, Gspröch, privati Nachricht",
+      "communities": "Gruppe, Community, Rüüm, Clubs, Forum, Mitglieder",
+      "assistant": "KI, Chatbot, frage, Hilf, KI-Chat, Frage",
+      "settings": "Istellige, Konto, Privatsphäre, Sicherheit, Passwort, Sprach, Design, Dunkelmodus, blockiert, Konto lösche",
+      "leaderboard": "Ranglischte, Rang, Top-Creator, Top-User, Pünkt, Punktzahl",
+      "bookmarks": "gspeicheret, Favorite, spöter luege, spöter läse, gspeicherti Biiträg, Bibliothek",
+      "command": "Dashboard, Analyse, Iinahme, Iikomme, Insights, Moderation, mini Statistik",
+      "wallet": "Guthabe, Gäld, Mittel, Tokens, Krypto, iizahle, uszahle, schicke, empfange, zahle",
+      "events": "Kaländer, Zytplan, Treffe, demnächst, Tickets, AMA",
+      "stages": "Audio-Rüüm, Voice-Chat, Spaces, Live-Audio, rede, Podcast",
+      "featureRequests": "baue, Builder, Ideä, Vorschläg, Fähler mälde, Bugs, Fixes, Roadmap, abstimme, Wunschliste, verbessere",
+      "feedback": "Bewertig, Rating, Umfrog, Meinig, Reklamation, Feedback gee",
+      "staking": "stake, iizahle, Rendite, Belohnige, verdiene, Gwünnbeteiligung, Badge, Stufe, Zins",
+      "superpowers": "Boost, promote, Vorteil, Powers, Badge-Vorteil, Reichwiti, Upgrades",
+      "governance": "abstimme, Abstimmig, Vorschläg, Umfrog, Stimmzettel, entscheide",
+      "dao": "Kasse, spände, Spände, Community-Fonds, biitrage, Fördergäld",
+      "bounties": "Arbet, Jobs, Ufgabe, Gigs, Freelance, aastelle, Gäld verdiene, bezahlti Arbet",
+      "myBounties": "mini Bounties, mini Jobs, Verlauf, Uszahlige, erledigti Arbet",
+      "affiliate": "Empfehlig, Fründe iilade, iilade, Provision, Partner, verdiene",
+      "careers": "Jobs, mir stelled ii, schaff mit üs, im Team mitmache, bewerbe, offeni Stelle",
+      "stores": "Lade, Shop, Marktplatz, Merch, chaufe, verchaufe, Produkt, ichaufe",
+      "fractions": "Aateil, Eigetum, investiere, en Biitrag bsitze, NFT, NFTs, Sammlerstück, handle",
+      "usernames": "Benutzername, Handle, Name, min Name ändere, en Name chaufe, en Name verchaufe",
+      "accounts": "Konto chaufe, Konto verchaufe, Konte zum Verchaufe, Follower, Konto übertrage",
+      "apps": "App Store, Mini-Apps, e App baue, Entwickler, Tools",
+      "arcade": "Games, Spiel, spiele, Gaming, Schach, Shooter, Spass",
+      "glossary": "Begriff, Definitione, Wörterbuech, Bedüütig, was isch",
+      "compare": "Verglich, vergliiche, versus, Alternative, YouTube, X, TikTok",
+      "guide": "Iistieg, wie gaht, Tutorial, Hilf, lerne, Aafänger, neu da",
+      "stats": "Statistik, Analyse, Zahle, Diagramm, Priis, Aagebot, Holder",
+      "docs": "Dokumentation, Hilf, API, Whitepaper, Entwickler, Handbuech",
+      "blog": "News, Artikel, Updates, Aakündigunge, was isch neu",
+      "videos": "luege, Videos, Clips, langi Videos",
+      "shorts": "Reels, churzi Videos, vertikali Videos, wische",
+      "music": "Audio, Lieder, Tracks, lose, Radio, Playlist",
+      "liveTv": "TV, Streams, Streaming, live, Übertragig, Kanäl, live luege",
+      "buyTokens": "Tokens chaufe, Chauf, ufladä, Charte, Chreditcharte, Fiat",
+      "bridge": "Cross-Chain, Tokens verschiebe, Chains, zwüsche Chains übertrage",
+      "top100": "Top 100, Coins, Kryptowährige, Marktkapitalisierig, Priise",
+      "agents": "KI-Agents, Agents, Bots, Automatisierig, Personas",
+      "advertising": "Werbig, Inserat, Kampagne, promote, sponsere, Marketing",
+      "premium": "Abo, Upgrade, Pro, Mitgliedschaft, kei Werbig, werbefrei",
+      "pricing": "Abos, Choschte, Priis, wieviel, Abo",
+      "creators": "Creator-Programm, Botschafter, Partner, als Creator bewerbe, monetarisiere",
+      "connectAi": "MCP, ChatGPT, Claude, API, Integration, KI verbinde",
+      "packs": "Emoji, Sticker, GIFs, Emoji-Päckli, Sticker-Päckli, eigeti Emoji",
+      "publicChat": "Chat, globale Chat, Chatruum, Lobby, rede, Community-Chat",
+      "planned": "plant, plane, planti Biiträg, Warteschlange, spöter",
+      "liveStudio": "live gah, streame, Streaming, OBS, Overlays, Alerts, Widgets",
+      "launchpad": "en Token lanciere, e Coin mache, e Coin erstelle, Meme-Coin, Bonding Curve, tokenisiere"
     },
     "reorderHint": "Halb und zieh jede Ikon, um neu anzuordnen.",
     "reorderReset": "Zrüggsetze",
@@ -521,7 +654,14 @@
     "getTheApp": "App lade",
     "connectAi": "KI verbinde",
     "converter": "Converter",
-    "affiliate": "Partnerprogramm"
+    "affiliate": "Partnerprogramm",
+    "groups": {
+      "create": "Erstelle",
+      "discover": "Entdecke",
+      "main": "Haupt",
+      "money": "Gäld",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Lueg {{name}}'s Profil aa",
@@ -1131,7 +1271,53 @@
     "socialConnectedShort": "Verbunde",
     "socialConnectFailed": "Könnt nöd mit {{platform}} verbunde wärde. Versuech's no.",
     "socialVerifiedFollowers": "{{value}} Follower",
-    "socialFollowersPending": "Followerzahle aktualisierend"
+    "socialFollowersPending": "Followerzahle aktualisierend",
+    "menuLayoutFolders": "Ordner",
+    "chatCards": "Chats als Charte",
+    "chatCardsDesc": "Jede Chat uf sinere eigete Charte. Usschalte für e eifachi Liste mit emne Strich zwüsche de Chats.",
+    "chatDeleteChoice": "Wenn du e Nachricht löschsch",
+    "chatDeleteChoiceDesc": "Jedes Mal frage, oder immer nur für dich oder für alli im Chat lösche.",
+    "chatDeleteAsk": "Jedes Mal frage",
+    "chatDeleteMe": "Für mich lösche",
+    "chatDeleteMeDesc": "Weg us dim Chat, anderi gsehnd si no",
+    "chatDeleteEveryone": "Für alli lösche",
+    "chatDeleteEveryoneDesc": "Wenn's gaht. E Nachricht vo öpper anderem inere Gruppe verschwindet nur für dich",
+    "postLanding": "Nachem Poste",
+    "postLandingDesc": "Wie din neue Biitrag i dim Feed landet",
+    "postLandingGhost": "Gspänster-Platz",
+    "postLandingGhostDesc": "Din Feed macht Platz und din Biitrag blendet sich ii",
+    "postLandingMorph": "Morph",
+    "postLandingMorphDesc": "De Editor schrumpft zu dim Biitrag",
+    "postLandingPill": "Pille zu Charte",
+    "postLandingPillDesc": "De Upload-Balke gaht zu dim Biitrag uf, sobald er online isch",
+    "postLandingDrop": "Iifalle",
+    "postLandingDropDesc": "Din Biitrag fallt vo obe ine mit emne chliine Hüpfer",
+    "showLikes": "Mini Likes allne zeige",
+    "showLikesDesc": "Jede cha de Likes-Tab uf dim Profil öffne. Standardmässig uus, so gsehsch nur du, was du gliked häsch.",
+    "showFollowersList": "Zeige, wer mir folgt",
+    "showFollowersListDesc": "Jede cha dini Follower-Liste öffne. Wenn das uus isch, gsehsch si nur du.",
+    "showFollowingList": "Zeige, wem ich folge",
+    "showFollowingListDesc": "Jede cha d Liste vo de Lüüt öffne, wo du ne folgsch. Wenn das uus isch, gsehsch si nur du.",
+    "showFollowCounts": "Mini Follower-Zahle zeige",
+    "showFollowCountsDesc": "Zeig, wie vill Follower du häsch und wie vill Lüüt du folgsch. Wenn das uus isch, sind au beidi Liste versteckt.",
+    "defaultProfileView": "Layout vo de Profil-Biiträg",
+    "defaultProfileViewDesc": "Zeig dini Biiträg als Raster oder Liste, wenn Lüüt dis Profil öffned",
+    "readerProfileView": "Anderi Profil öffne als",
+    "readerProfileViewDesc": "Wähl Raster oder Liste für jedes Profil, wo du öffnisch, oder bhalt d Wahl vo de jewiilige Person",
+    "readerProfileViewOwner": "D Wahl vo de Person",
+    "ensSection": "ENS",
+    "tipsOffNote": "Trinkgäld und Zahlige a dich sind uus, solang das ii isch. Schalt's uus, zum wieder Trinkgäld übercho.",
+    "playback": "Wiedergab",
+    "feedVideoShape": "Videogrössi i dim Feed",
+    "menuLayout": "Menü-Layout",
+    "menuLayoutDesc": "Wie s Menü sini Siite gruppiert",
+    "menuLayoutTabs": "Tabs",
+    "menuLayoutTabsDesc": "Ei Gruppe ufs Mal, mit grosse Symbol",
+    "menuLayoutSections": "Abschnitt",
+    "menuLayoutSectionsDesc": "Alli Siite ufs Mal, under Gruppe-Überschrifte",
+    "menuLayoutFoldersDesc": "Dini Hauptsiite, denn en Ordner für jedi Gruppe",
+    "publicChatInBar": "Public Chat i de undere Liiste",
+    "publicChatInBarDesc": "Mit eim Tipp i Public Chat vo de Liiste unde am Bildschirm"
   },
   "common": {
     "confirm": "Bestätige.",
@@ -1221,7 +1407,14 @@
     "messagePublic": "Öffentlech",
     "railTitle": "Trinkgelder",
     "railTotal": "{{amount}} Tokens",
-    "tokensUnit": "Tokens"
+    "tokensUnit": "Tokens",
+    "messagePlaceholder": "Säg öppis zu dim Trinkgäld",
+    "messagePrivate": "Nur {{name}}",
+    "theCreator": "de Creator",
+    "messageWallNote": "Erschiint a de Trinkgäld-Wand, sobald s Trinkgäld dure isch.",
+    "sendWithMessage": "Mit Nachricht schicke",
+    "messageFailed": "Dini Nachricht het nöd chöne hinzuegfüegt wärde. Es isch kei Trinkgäld gschickt worde.",
+    "wallLabel": "Trinkgäld-Nachrichte"
   },
   "postOptions": {
     "liveAlertsOn": "Du folgsch jetzt {{name}}. Du überchunnsch e Benachrichtigung, wenn s live gaht.",
@@ -1261,7 +1454,14 @@
     "giftBoost": "Ei uf dämpfe",
     "markSection": "Skippbare Abschnitte",
     "copyFailed": "Link het nöd chöne kopiert werde",
-    "share": "Teilen"
+    "share": "Teilen",
+    "refreshLinkPreview": "Link-Vorschau aktualisiere",
+    "linkPreviewRefreshed": "Link-Vorschau aktualisiert",
+    "linkPreviewRefreshFailed": "Die Siite isch nöd erreichbar gsi. Probier's spöter nomal.",
+    "castToTv": "Uf TV streame",
+    "castStarted": "Lauft uf dim TV",
+    "castUnsupported": "De Browser cha nöd caste. Öffne Riftn in Chrome oder Safari, zum's uf dim TV abspiele.",
+    "castFailed": "De TV isch nöd erreichbar gsi. Lueg, öb er im gliiche WLAN isch, und probier's nomal."
   },
   "filters": {
     "sort": "Sortiere",
@@ -1864,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} het uf dämmere Bounty “{{title}}” gschickt",
       "bountySubmitted": "{{name}} het uf dämmere Bounty gschickt",
       "sentNotification": "{{name}} het uf dämmere Benachrichtigung gschickt"
-    }
+    },
+    "groupEarlier": "Früehner",
+    "searchPlaceholder": "Mitteilige dursueche",
+    "searchEmpty": "Kei passendi Mitteilige"
   },
   "leaderboard": {
     "title": "Rangllischte",
@@ -1909,7 +2112,13 @@
     "loadingBoard": "Ranglischte wird glade…",
     "amountTokens": "{{amount}} Tokens",
     "directReferrals": "{{count}} het dämmere direkte",
-    "secondaryReferrals": "{{count}} het dämmere sekundäre"
+    "secondaryReferrals": "{{count}} het dämmere sekundäre",
+    "ogChallenge": "OG Challenge",
+    "ogHolders_one": "{{count}} OG-Holder",
+    "ogHolders_other": "{{count}} OG-Holder",
+    "ogChallengeTitle": "Hol d OG-Holder zrugg",
+    "ogChallengeBody": "Lad Lüüt ii, wo no DHB händ. Wenn si mit dim Iiladigslink beitrete und ihri DHB i ihrem Riftn-Wallet bhalted, zelled si da für dich.",
+    "ogChallengeCta": "Hol din Iiladigslink"
   },
   "dhbListing": {
     "title": "Token-Listing chunnt bald!",
@@ -2052,17 +2261,39 @@
     "shipping": "Am Uslifere",
     "noShippingYet": "Nüt am Loufe",
     "shippingAppearHere": "Aafroge wo baut wärde erschiine da.",
-    "loadFailed": "Könnt nützli Vorgäng nüme läde."
+    "loadFailed": "Könnt nützli Vorgäng nüme läde.",
+    "editMedia": "Fotos und Videos",
+    "editAddMedia": "Foto oder Video hinzuefüege",
+    "deviceInfoNote": "Gerät-Infos sind aaghänkt, zum üs hälfe Fähler behebe.",
+    "deviceInfo": "Gerät-Infos",
+    "deviceInfoOwners": "Nur Board-Bsitzer gsehnd das",
+    "deviceInfoError": "Gerät-Infos händ nöd chöne glade wärde",
+    "deviceInfoNone": "Kei Gerät-Infos für die Aafrog",
+    "deviceInfoErrors": "Neusti Fähler"
   },
   "auth": {
-    "loginRequired": "Aamäldig erforderlich"
+    "loginRequired": "Aamäldig erforderlich",
+    "accountDeleted": "Das Konto isch glöscht worde. Du chasch di als neus Konto wieder registriere.",
+    "accountDeletedHours_one": "Das Konto isch glöscht worde. Du chasch di i öppe {{count}} Stund mit de gliiche E-Mail oder Telefonnummer wieder registriere.",
+    "accountDeletedHours_other": "Das Konto isch glöscht worde. Du chasch di i öppe {{count}} Stunde mit de gliiche E-Mail oder Telefonnummer wieder registriere.",
+    "accountDeletedDays_one": "Das Konto isch glöscht worde. Du chasch di i öppe {{count}} Tag mit de gliiche E-Mail oder Telefonnummer wieder registriere.",
+    "accountDeletedDays_other": "Das Konto isch glöscht worde. Du chasch di i öppe {{count}} Täg mit de gliiche E-Mail oder Telefonnummer wieder registriere."
   },
   "messages": {
     "newDrawer": {
       "to": "Bis",
       "recent": "Neuschti",
       "suggested": "Vorgeschlage",
-      "youFollow": "Lüüt, wo du ne folgsch"
+      "youFollow": "Lüüt, wo du ne folgsch",
+      "placeholder": "Name oder @Benutzername",
+      "chattedBefore": "Ihr redet mitenand",
+      "mutual": "Gegesiitig",
+      "dmsOff": "DMs uus",
+      "keepTyping": "Wiiter tippe, zum alli dursueche",
+      "noOne": "Niemer gfunde",
+      "tryUsername": "Probier ihre exakte @Benutzername",
+      "sayHi": "Säg öpperem Hoi",
+      "typeAny": "Tipp en Name oder @Benutzername"
     },
     "reply": "Antworte",
     "react": "Reagiere",
@@ -2103,7 +2334,8 @@
     "noConversationsYet": "Keini Gspräche noch.",
     "sending": "Wird gesendet",
     "retrySend": "Nomol probiere",
-    "discardSend": "Entferne"
+    "discardSend": "Entferne",
+    "notSent": "Nöd gschickt"
   },
   "music": {
     "listeningCount_one": "{{count}} Zuhörende",
@@ -2187,7 +2419,22 @@
     "viewMode": "Blick",
     "back": "Zrugg",
     "reserve": {
-      "signIn": "Zuechmäldig"
+      "signIn": "Zuechmäldig",
+      "available": "Benutzername verfüegbar",
+      "held": "Für dich reserviert",
+      "ended": "Reservierig abgloffe",
+      "busy": "Wird grad reserviert",
+      "availableBody": "riftn.com/{{name}} isch grad frei. Reservier en und mir hebed en für dich e Minute, während du di registriersch.",
+      "heldBody": "Niemer anders cha @{{name}} neh, bis de Timer abgloffe isch. Schliess d Registrierig ab, zum en bhalte.",
+      "endedBody": "Dini Minute isch abgloffe, drum isch @{{name}} wieder für alli offe. Er isch immer no frei.",
+      "busyBody": "Öpper registriert sich grad als @{{name}}. Wenn er nöd fertig macht, wird de Name frei, sobald de Timer abgloffe isch.",
+      "finish": "Registrierig abschliesse",
+      "again": "Nomal reserviere",
+      "cta": "Jetzt reserviere",
+      "letGo": "Loslah",
+      "haveAccount": "Häsch scho es Konto?",
+      "seoTitle": "@{{name}} isch uf Riftn verfüegbar",
+      "seoDescription": "Niemer het riftn.com/{{name}} bis jetzt. Reservier en und registrier di, zum en dir z sichere."
     },
     "usernameAvailable": "Benutzername verfüegbar!",
     "signUpToClaim": "Mäld di aa zum",
@@ -2218,12 +2465,16 @@
     "tabs": {
       "playlists": "Playlistä",
       "dislikes": "Abstimmungen",
-      "likes": "Gfäut-mir"
+      "likes": "Gfäut-mir",
+      "articles": "Artikel"
     },
     "likedPosts": {
       "emptyTitle": "No kei Likes",
       "privateTitle": "Likes sind privat",
-      "loadMore": "Meh lade"
+      "loadMore": "Meh lade",
+      "emptyOwn": "Biiträg, wo dir gfalled, erschiined da. Nur du gsehsch si, usser du schaltisch i de Istellige Mini Likes zeige ii.",
+      "emptyOther": "No nüt gliked.",
+      "privateDesc": "Das Konto bhaltet sini Likes für sich."
     },
     "dislikes": {
       "emptyTitle": "Noch kenne ni abgstimmte",
@@ -2248,11 +2499,31 @@
     "sortMostLiked": "Meist geliked",
     "sortCustomShort": "Benutzerdefiniert",
     "arrange": {
-      "saving": "Spycheret..."
+      "saving": "Spycheret...",
+      "title": "Ordne dini Biiträg aa",
+      "hint": "Halt en Biitrag gedrückt und zieh en a sin neue Platz. Bsuecher gsehnd die Reihefolg zerscht.",
+      "drag": "Zieh zum Verschiebe",
+      "toTop": "Ganz nach obe",
+      "save": "Reihefolg speichere",
+      "saved": "Dini Reihefolg isch gspeicheret",
+      "reset": "Zrugg zu Neuschti zerscht",
+      "resetDone": "Zrugg zu Neuschti zerscht",
+      "saveFailed": "Dini Reihefolg het nöd chöne gspeicheret wärde. Probier's bitte nomal.",
+      "loadFailed": "Dini Biiträg händ nöd chöne glade wärde. Mach das zue und probier's nomal.",
+      "empty": "No nüt zum Aaordne. Poste zerscht öppis."
     },
     "searchThisChannel": "Suche in diesem Kanal",
     "searchResultCount": "1 Ergebnis für \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} Ergebnisse für \"{{query}}\""
+    "searchResultCountPlural": "{{count}} Ergebnisse für \"{{query}}\"",
+    "unavailable": "Profil nöd verfüegbar",
+    "mutualsOne": "{{count}} gegesiitige Follower:",
+    "mutualsMany": "{{count}} gegesiitigi Follower:",
+    "articles": {
+      "emptyTitle": "No kei Artikel",
+      "emptySubtitle": "Artikel erschiined da"
+    },
+    "sortCustom": "Eigeti Reihefolg",
+    "arrangeButton": "Biiträg aaordne"
   },
   "tv": {
     "seoTitle": "Live TV: Frei Kanäle us em ganze Wält",
@@ -2517,7 +2788,26 @@
     "createSignIn": "Mäld di nomal a, zum en Agent erstelle",
     "checkConnection": "Prüef dini Verbindig und probier s nomal.",
     "welcome": {
-      "text": "Willkommensnachricht"
+      "text": "Willkommensnachricht",
+      "title": "Neui Mitglieder begrüesse",
+      "help": "De Agent folgt und/oder schriibt Lüüt aa, wo grad neu bi Riftn sind, es paar pro Tag.",
+      "follow": "Neue Mitglieder folge",
+      "message": "Neui Mitglieder aaschriibe",
+      "textHelp": "{name} wird zu ihrem @Benutzername. Kei Links. Eimal pro Person gschickt.",
+      "saveText": "Nachricht speichere",
+      "perDay": "Lüüt pro Tag",
+      "fewer": "Weniger pro Tag",
+      "more": "Meh pro Tag",
+      "today": "Hüt: {{follows}} gfolgt · {{messages}} aagschriebe",
+      "limits": "Nie zweimal di gliich Person. Überspringt alli, wo di blockiert oder stummgschaltet händ, neui Nachrichte abgschaltet händ oder sich bi Neui Mitglieder versteckt händ.",
+      "showLog": "Lueg, wer begrüesst worde isch",
+      "hideLog": "Begrüessige uusblende",
+      "empty": "No niemer. Neui Mitglieder erschiined da, sobald si beitreted.",
+      "followed": "Gfolgt",
+      "messaged": "Aagschriebe",
+      "skipped": "Übersprunge",
+      "failed": "Nöd erreichbar",
+      "defaultText": "Hoi {name}, willkomme bi Riftn! 👋"
     },
     "workspace": {
       "moderation": "Stream-Moderation",
@@ -2712,7 +3002,16 @@
     "switchWalletAccount": "Konto wechseln",
     "walletLoadFailed": "Köönnte Wallets nid läde. Bitte probiere wider.",
     "openInBrowser": "Im Browser öffne",
-    "copyLink": "Link kopiere"
+    "copyLink": "Link kopiere",
+    "bringLoginOver": "Häsch Riftn uf dehub.io bruucht? <bring>Nimm din Login mit</bring>",
+    "migrateNothingToRecover": "Uf dem Login git's kei früehners Riftn-Konto, drum git's nüt zum Mitneh. Gang zrugg zu Neus Konto, zum das do fertig iirichte.",
+    "didYouMean": "Häsch {{email}} gmeint?",
+    "profileMovedTitle": "Dis Profil isch umzoge",
+    "migrateWrongLogin": "Die Aamäldig het es anders Wallet göffnet, drum het sich nüt gänderet. Dis alte Profil isch mit {{login}} erstellt worde. Bruuch das, zum's zruggzhole.",
+    "googleInAppTitle": "Google mäldet di in {{app}} nöd aa",
+    "googleInAppTitleUnnamed": "Google mäldet di i dere App nöd aa",
+    "googleInAppBody": "Öffne Riftn i dim Browser, zum Google z bruuche, oder mäld di da mit E-Mail aa.",
+    "tryAnyway": "Trotzdem probiere"
   },
   "careers": {
     "title": "Stellene bi Riftn",
@@ -2967,7 +3266,16 @@
     "searchDehubFor": "Uf Riftn noch \"{{query}}\" sueche",
     "switchAccount": "Wechseln Sie zum anderen Konto",
     "signedInAs": "Gloggt as {{name}}",
-    "requestSend": "Bitä schicke"
+    "requestSend": "Bitä schicke",
+    "requestPrompt": "No nöd da? Schick's als Aafrog",
+    "requestPromptShort": "No nöd da?",
+    "requestDraftMenu": "{{query}} zu Riftn hinzuefüege",
+    "requestDraftSettings": "E Istellig für {{query}}",
+    "requestPostsTo": "Postet i Aafroge",
+    "requestHint": "Postet i Aafroge als du. Mir säged dir Bscheid, wenn's live gaht.",
+    "requestSent": "A Aafroge gschickt",
+    "requestSentHint": "Mir säged dir Bscheid, wenn's live gaht.",
+    "requestSeeIt": "Uf Aafroge aaluege"
   },
   "comments": {
     "reportComment": "Kommentar melde",
@@ -3060,7 +3368,23 @@
     "likersEmptyTitle": "No kei Likes",
     "likersEmptyBody": "Likes uf dä Kommentar erschiined do.",
     "anonymousLikes_one": "{{count}} Like vomene anonyme Badge-Inhaber",
-    "anonymousLikes_other": "{{count}} Likes vo anonyme Badge-Inhaber"
+    "anonymousLikes_other": "{{count}} Likes vo anonyme Badge-Inhaber",
+    "threadParts": {
+      "moveUp": "Nimm nach obe",
+      "moveDown": "Gang abe",
+      "reorder": "Neu ordne",
+      "save": "Reihefolg speichere",
+      "saved": "Thread-Reihefolg gspeicheret",
+      "saveFailed": "D Reihefolg het nöd chöne gspeicheret wärde. Probier's nomal.",
+      "dragPart": "Zieh zum Teil {{n}} verschiebe",
+      "addPart": "Zum Thread hinzuefüege",
+      "addPlaceholder": "Zu dim Thread hinzuefüege...",
+      "label": "Thread · {{count}} Teil",
+      "reorderHint": "Zieh d Teil oder bruuch d Pfiil, und speicher dänn."
+    },
+    "attachMedia": "Foto, Video oder Audio aahänke",
+    "attachUnsupported": "Hänk es Foto, es Video oder e Audiodatei aa.",
+    "attachTooLarge": "Die Datei isch über de Limite vo {{size}} MB."
   },
   "mintChain": {
     "title": "Mint-Post",
@@ -3370,7 +3694,10 @@
     "waiting_for_wallet": "Warte uf dis Wallet",
     "waiting_for_wallet_desc": "Öffne {{wallet}} und bestätig d Signatur — d Afrag wartet det.",
     "your_wallet": "Din Portemonnaie",
-    "max_available_on_chain": "Maximal verfügbar: {{amount}} Tokens uf {{chain}}"
+    "max_available_on_chain": "Maximal verfügbar: {{amount}} Tokens uf {{chain}}",
+    "not_available_for_this_post": "Für dä Biitrag nöd verfüegbar",
+    "turn_back_on_desktop_notifications": "Desktop-Mitteilige wieder iischalte?",
+    "notifications_moved_to_riftn": "Mir sind uf riftn.com züglet, drum bruucht din Browser nomal dis OK, zum Antworte, Trinkgäld und DMs da z zeige."
   },
   "staking": {
     "title": "Staking",
@@ -3750,9 +4077,11 @@
       "connect": "Verbinde dich, um dich anzuschliessen",
       "requestToJoin": "Bittet um Mitgliedchaft",
       "join": "Chreuze",
-      "approvalNote": "Een Admin müesset eure Forderig vorerstelle, bevor si chäi dere drin chöne."
+      "approvalNote": "Een Admin müesset eure Forderig vorerstelle, bevor si chäi dere drin chöne.",
+      "memberCount": "{{n}} Mitglieder"
     },
-    "bannedFromCommunity": "Du bist vom Forum ausgeschlossen."
+    "bannedFromCommunity": "Du bist vom Forum ausgeschlossen.",
+    "inviteToCommunity": "I d Community iilade"
   },
   "prompt": {
     "seoTitle": "Gib dis Feedback bekannt | Riftn",
@@ -5128,7 +5457,9 @@
     "launch": "Starte",
     "launching": "Läscht los…",
     "launched": "{{symbol}} hat lanciert",
-    "createFailed": "Hä scheitert am Erschaffa."
+    "createFailed": "Hä scheitert am Erschaffa.",
+    "coinSeoDescription": "Handle ${{symbol}} uf em Riftn-Launchpad.",
+    "backToLaunchpad": "Launchpad"
   },
   "fractions": {
     "seoTitle": "Fraktione | Riftn",
@@ -5274,18 +5605,167 @@
     "buy": "Kaufen",
     "reject": "Ablehnen",
     "needsYouHold": "Benötigt {{needed}}, du hältst {{held}}",
-    "sellYourFractions": "Verkauf deine Anteile ({{held}} gehalten)"
+    "sellYourFractions": "Verkauf deine Anteile ({{held}} gehalten)",
+    "nftsSubtitle": "Jedes NFT, Swaps i eim Schritt",
+    "buyersTab": "Chäufer",
+    "soldOfListing": "{{sold}} vo {{total}} verchauft",
+    "noBuyersYet": "No niemer het Aateil vo dem Biitrag kauft",
+    "fromYou": "vo dir",
+    "statusOverdue": "Z spot"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Nutze diese Details"
+        "use": "Nutze diese Details",
+        "url": "URL vo de Produktsiite",
+        "action": "Produktsiite läse",
+        "loading": "Siite wird gläse…",
+        "hint": "Importier Text vonere öffentliche Produktsiite. Prüef d Details, bevor du si bruuchsch; hänk Produktbilder separat im Studio aa.",
+        "source": "Importierti Quelle",
+        "review": "Wähl es Produkt zum i dis bearbeitbare Briefing kopiere. Dini Schlagziile, Stimm und Markefarbe bliibed unveränderet.",
+        "errors": {
+          "signIn": "Mäld di aa, zum e Produktsiite z importiere.",
+          "url": "Bruuch e öffentlichi HTTPS-Produkt-URL.",
+          "empty": "Es sind kei bruuchbari Produktdetails gfunde worde. Füeg si manuell dezue.",
+          "busy": "Es laufed z vill Importe. Probier's bald nomal.",
+          "unavailable": "Die Siite het nöd chöne importiert wärde. Füeg d Produktdetails manuell dezue.",
+          "failed": "Import fehlgschlage. Dis Briefing isch gspeicheret; probier's nomal oder gib d Details manuell ii."
+        }
+      },
+      "return": "Zrugg zum Studio-Entwurf",
+      "title": "Kampagne-Briefing",
+      "intro": "Beschriib dis Produkt und dini Marke, denn bereit passendi Werbeformate vor.",
+      "saved": "Dis Briefing isch uf dem Gerät für das Konto gspeicheret.",
+      "preview": "Formate vorbereite",
+      "clear": "Briefing lösche",
+      "required": "Füeg en Produktname und e Beschriibig dezue, zum Formate vorzbereite.",
+      "variants": "Kampagne-Formate",
+      "reviewHint": "Prüef Modell, Priis und Produkt-Referenz im Studio vorem Generiere. Jedes Format isch e separati Generierig.",
+      "open": "Im Studio prüefe",
+      "fields": {
+        "product": "Produktname (Pflicht)",
+        "description": "Produktfakte (Pflicht)",
+        "brand": "Markename",
+        "audience": "Zielgruppe",
+        "benefit": "Hauptvorteil",
+        "voice": "Marke-Stimm",
+        "palette": "Markefarbe",
+        "headline": "Freigegebeni Schlagziile",
+        "cta": "Ufforderig zum Handle"
+      },
+      "formats": {
+        "square": "Quadratischi Aazeig",
+        "portrait": "Hochformat-Aazeig",
+        "story": "Story-Bild",
+        "video": "Vertikals Video"
       }
     },
     "cinema": {
       "close": "Schliesse",
       "performance": {
-        "label": "Leischtig"
+        "label": "Leischtig",
+        "0": "Fröhlich",
+        "1": "Melancholisch",
+        "2": "Ängschtlich",
+        "3": "Sälbschtsicher",
+        "4": "Ehrfürchtig",
+        "5": "Zrugghaltend",
+        "6": "Verspielt"
+      },
+      "title": "Kino-Regie",
+      "hint": "Leit de visuelle Stil vo dim nächschte Bild oder Video. D Resultat sind je nach Modell andersch.",
+      "none": "Kei Regie",
+      "reset": "Regie lösche",
+      "camera": {
+        "label": "Kamera-Look",
+        "0": "Digitals Kino",
+        "1": "35mm-Film",
+        "2": "16mm-Film",
+        "3": "Grossformat",
+        "4": "Alte Camcorder"
+      },
+      "lens": {
+        "label": "Objektiv-Look",
+        "0": "Sphärisch",
+        "1": "Anamorphotisch",
+        "2": "Weichs Vintage-Glas",
+        "3": "Makro",
+        "4": "Tilt-Shift"
+      },
+      "focalLength": {
+        "label": "Brennwiti",
+        "0": "18mm wit",
+        "1": "24mm wit",
+        "2": "35mm natürlich",
+        "3": "50mm Standard",
+        "4": "85mm Porträt",
+        "5": "135mm Tele"
+      },
+      "aperture": {
+        "label": "Schärfetüüfi",
+        "0": "f/1.4 sehr flach",
+        "1": "f/2.8 flach",
+        "2": "f/5.6 mittel",
+        "3": "f/11 tüüfi Schärfi"
+      },
+      "movement": {
+        "label": "Kamerabewegig",
+        "0": "Fix uf em Stativ",
+        "1": "Langsams Dolly-in",
+        "2": "Langsams Dolly-out",
+        "3": "Siitlichs Tracking",
+        "4": "Um s Motiv kreise",
+        "5": "Us de Hand",
+        "6": "Kran-Fahrt ufe",
+        "7": "Langsame Schwenk"
+      },
+      "lighting": {
+        "label": "Beleuchtig",
+        "0": "Weichs Tagesliecht",
+        "1": "Goldigi Stund",
+        "2": "Low-Key Hell-Dunkel",
+        "3": "High-Key Studio",
+        "4": "Neon im Bild",
+        "5": "Silhouette im Gägeliecht",
+        "6": "Diffus, bedeckt"
+      },
+      "tempo": {
+        "label": "Shot-Tempo",
+        "0": "Ei durchgehende Shot",
+        "1": "Ruhigi, gmüetlichi Handlig",
+        "2": "Dynamischi, energischi Handlig",
+        "3": "Chaotischi, hektischi Handlig"
+      },
+      "era": {
+        "label": "Epoche",
+        "0": "1920er",
+        "1": "1950er",
+        "2": "1960er",
+        "3": "1970er",
+        "4": "1980er",
+        "5": "1990er",
+        "6": "Hüt",
+        "7": "Nöchi Zuekunft"
+      },
+      "genre": {
+        "label": "Genre",
+        "0": "Dokumentarfilm",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Science-Fiction",
+        "4": "Fantasy",
+        "5": "Romantischi Komödie",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Farbpalette",
+        "0": "Warms Bernstei",
+        "1": "Kühls Blau",
+        "2": "Gedämpfti Erdtön",
+        "3": "Pastell",
+        "4": "Kontraschtriichs Schwarz-Wiiss",
+        "5": "Gsättigti Primärfarbe"
       }
     },
     "libraryEmpty": "Dini gspeicherete Generierige erschiined da.",
@@ -6077,8 +6557,130 @@
     "validation": {
       "needsImageToAnimate": "{{model}} braucht e ene Bilde, wo drin animiert wär. Dräi druf!",
       "needsImageToWork": "Dä {{model}} bruucht e e Bild, wuusst du, druf aaschliessend.",
-      "musicTrackLength": "{{count}}s track"
-    }
+      "musicTrackLength": "{{count}}s track",
+      "cannotEditImage": "{{model}} cha keis aaghängts Bild bearbeite. Entfern s oder wähl es anders Modell.",
+      "cannotUseReference": "{{model}} cha keis Referenzbild bruuche. Entfern s oder wähl es anders Modell.",
+      "speechLimit": "Das sind {{length}} Zeiche. S Limit isch {{limit}}."
+    },
+    "gallery": {
+      "send": "Schicke",
+      "notifications": {
+        "generation_reply": "{{name}} het uf din Kommentar gantwortet",
+        "generation_like": "{{name}} het uf dini Generierig reagiert",
+        "generation_comment_like": "{{name}} het uf din Kommentar reagiert",
+        "generation_comment": "{{name}} het dini Generierig kommentiert"
+      },
+      "browse": "Generierige dursueche",
+      "create": "Erstelle",
+      "fullscreen": "Vollbild aaluege",
+      "missing": "Die Generierig isch nöd verfüegbar."
+    },
+    "avatarTitle": "Redends Porträt",
+    "avatarRequirements": "Quadratischs PNG-Porträt, 512–2048 Pixel, bis 5 MB. Mono 24 kHz 16-bit PCM WAV, 5–30 Sekunde. De letscht Bruchteil vonere Sekunde wird mit Stilli ufgfüllt.",
+    "avatarPortrait": "Porträt-PNG uswähle",
+    "avatarAudio": "Sprach-WAV uswähle",
+    "avatarPermission": "Ich ha d Erlaubnis, das Porträt z animiere und das Audio z bruuche.",
+    "avatarQuote": "{{seconds}} Sekunde inkl. Stilli · {{amount}} Tokens",
+    "avatarPrepare": "Vorbereite und Priis prüefe",
+    "batchFlowLimit": "D Flow-Liste isch voll. Entfern en unbruuchte Flow, bevor du en neue Batch erstellsch.",
+    "batchReviewCampaign": "Kampagne-Batch im Flow prüefe",
+    "batchReviewFilmImages": "Storyboard-Bild-Batch prüefe",
+    "batchReviewFilmVideos": "Film-Clip-Batch prüefe",
+    "batchReviewHint": "Öffnet en separate gspeicherete Flow. Prüef jedes Element und de ganz Priis vorem Zahle. Fertigi Elemente und d Original-Zahlig wärded zur Wiederherstellig bhalte. Referenze wärded i dini privati Bibliothek kopiert; Speicher- und Netzwerk-Nutzig wird verrechnet.",
+    "batchInvalid": "Mach jedes Element fertig, bevor du en Batch vo 1–12 Bilder oder Clips vorbereitisch.",
+    "batchReferenceLimit": "De Batch unterstützt ei Bild-Referenz pro Element. Entfern zuesätzlichi Referenze oder bereit das Element einzeln vor.",
+    "batchVideoSettings": "Für de Batch bruuched Clips e ganzi Dauer vo 4–15 Sekunde und es Siiteverhältnis vo 16:9, 9:16 oder 1:1.",
+    "batchMissingReference": "E Referenz fehlt, wird nöd unterstützt oder isch grösser als 25 MB. Stell si im Editor wieder her, bevor du de Batch vorbereitisch.",
+    "batchOwnerChanged": "S Konto oder de Entwurf het sich gänderet. Öffne de Batch wieder under sim ursprüngliche Konto.",
+    "batchConflict": "De gspeicheret Batch stimmt nöd mit sim ursprüngliche Snapshot überii.",
+    "audioExportFormat": "Export-Format",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Hänk en Quell-Clip aa zum Verlängere.",
+    "extensionSeconds": "+{{seconds}}s neus Material",
+    "extensionHelp": "Git din Quell-Clip mit öppe vier neue Sekunde zrugg. D Usgab wird uf bis zu 720p bi 24 fps skaliert. Für d Verlängerig wird neus Audio generiert.",
+    "extensionForward": "Öppe vier Sekunde nach dim Quell-Clip hinzuefüege",
+    "extensionBackward": "Öppe vier Sekunde vor dim Quell-Clip hinzuefüege",
+    "expandDescription": "Neui Bildränder generiere. Optionale Prompt uf Englisch; ei Quellbild.",
+    "relightDescription": "Es Foto neu belüüchte nach dinere Liecht- und Hintergrund-Beschriibig.",
+    "expandPromptHint": "Hänk es Bild aa und wähl sis neue Siiteverhältnis. Englische Prompt optional.",
+    "expandEnglishOnly": "Das Erwiiterigs-Modell akzeptiert englischi Prompts. Lah de Prompt leer für automatischi Erwiiterig.",
+    "expandNeedsImage": "Hänk es Bild aa zum Erwiitere.",
+    "learn": {
+      "title": "Creator-Lektione",
+      "intro": "Churzi Lektione, en Wüsse-Check und e bearbeitbari Üebig für jedi. De Fortschritt wird uf dem Gerät für dis Konto gspeicheret.",
+      "back": "Zrugg zu Creator",
+      "lessons": "Lektione",
+      "progress": "{{completed}} vo {{total}} Wüsse-Checks bestande",
+      "check": "Antwort prüefe",
+      "correct": "Wüsse-Check bestande",
+      "retry": "Probier's nomal. Lueg d Lektion obe nomal aa.",
+      "exerciseTitle": "Praktischi Üebig",
+      "exerciseHint": "Öffne es bearbeitbars Biispiel i dim eigete Studio-Arbetsbereich. En Entwurf öffne isch gratis; d Generierig bruucht dini Prüefig und es eigets Aagebot. Bearbeit s Biispiel vorem Generiere.",
+      "openExercise": "Üebigs-Entwurf öffne",
+      "closeExercise": "Üebig zuemache",
+      "brief": {
+        "title": "Schriib es klars visuells Briefing",
+        "body1": "Beschriib es konkrets Motiv, sini Handlig und d Umgebig. Füeg Bildusschnitt oder Kamerabewegig dezue, wenn's de Szene hilft. Bhalt unpassendi Ideä für en andere Entwurf.",
+        "body2": "Aagabe zu Liecht, Objektiv und Stil leited s Modell. Si garantiered kei physikalischs Kameraverhalte und kei exakts Bild. Änder immer nur ei Teil, so chasch d Versione vergliiche.",
+        "body3": "Prüef vorem Generiere s gwählte Modell, unterstützti Aahäng, Abmessige und Priis. Bhalt de Original-Entwurf, so chasch zu ihm zrugg.",
+        "question": "Weles Briefing isch am eifachste z überarbeite?",
+        "answer0": "Es klars Motiv, Handlig und Umgebig",
+        "answer1": "Nur en Modellname",
+        "answer2": "E Liste vo widersprüchliche Stil",
+        "exercise": "E Teechanne us Keramik uf emne Holztisch näbem Fänster. Weichs Morgeliecht, mittlere Bildusschnitt, eifache Hintergrund. D Teechanne bliibt s klare Motiv."
+      },
+      "continuity": {
+        "title": "Shots plane und Kontinuität prüefe",
+        "body1": "Bruuch s Film-Panel im Editor, zum es Briefing und sortierti Shots z speichere. Bereit jedes Frame oder jede Clip separat vor, prüef sis Aagebot und wähl es akzeptierts Resultat.",
+        "body2": "Hänk nur Referenze aa, wo dis gwählte Modell akzeptiert. E Referenz wiederverwände cha s Uussehe leite; si trainiert kei Identität und garantiert kei Übereinstimmig. Figure und Stimme chönd zwüsche Generierige variiere.",
+        "body3": "Bhalt gelungeni Takes und setz si i de Timeline zäme. Prüef Bewegig, Gsichter, Dialog und Übergäng vorem Export.",
+        "question": "Was unterstützt d Kontinuität zwüsche Shots?",
+        "answer0": "Meh unpassendi Prompts",
+        "answer1": "Freigegebeni Referenze und prüefti Shot-Notize",
+        "answer2": "Aaneh, d Identität vo de Figur sig garantiert",
+        "exercise": "Totale vomene einsame Reisende, wo bi Sunneufgang a e ruhigi Küste chunnt. Langsami Kamerabewegig nach vorne, ruhigi Stimmig. Ei durchgehende Shot."
+      },
+      "campaign": {
+        "title": "Freigegebeni Produktfakte bruuche",
+        "body1": "Fang mit Produktfakte aa, wo du chasch überprüefe. Prüef importierti Metadate, bevor du si bruuchsch. Schriib Schlagziile und Call to Action explizit; erfind kei Priise, Bewertige oder Leistigsversprächige.",
+        "body2": "Bruuch gspeicheret Kampagne-Variante, zum gmeinsami Notize und einzelni Hooks, Skripts, Sprache und Formate zämezhalte. Bereit immer es prüefts Element ufs Mal vor und prüef sis Aagebot im Studio.",
+        "body3": "Prüef im Resultat sichtbare Text, s Uussehe vom Produkt und gsprocheni Uussage. En Prompt isch kei Bewiis für Produktgenauigkeit oder Marketing-Erfolg.",
+        "question": "Wenn sött e Produktuussag drin sii?",
+        "answer0": "Immer wenn si überzügend tönt",
+        "answer1": "Nachdem mer e Füfstärn-Bewertig erfunde het",
+        "answer2": "Wenn si us freigegebene Produktfakte chunnt",
+        "exercise": "Erstell e Hochformat-Produktwerbig für Blatt-Tee, wo inere wiederverwändbare Dose verchauft wird. Freigegebeni Schlagziile: Nimm dir Ziit für Tee. Freigegebene CTA: Entdeck d Kollektion. Bruuch nur die Fakte; erfind kei Rabatt, Bewertige oder Gsundheitsversprächige."
+      }
+    },
+    "campaignPlanTitle": "Kampagne-Variante und Episode",
+    "campaignPlanIntro": "Speicher bis zu 12 Variante oder Episode. Jedi öffnet s Studio für ihri eigeti Prüefig und ihres Aagebot. Gmeinsami Notize leited d Kontinuität; Produkt-Uussehe, Figure und Stimme chönd zwüsche Generierige variiere.",
+    "campaignTitle": "Kampagne- oder Serie-Name",
+    "campaignContinuity": "Gmeinsami Notize zu Figur, Stimm und Stil",
+    "campaignVariantTitle": "Variante- oder Episode-Name",
+    "campaignHook": "Iistiegs-Hook",
+    "campaignLanguage": "Usgabe-Sprach",
+    "campaignScript": "Freigegebes Skript oder Szene-Abfolg",
+    "campaignAdd": "Variante oder Episode hinzuefüege",
+    "campaignClear": "Plan lösche",
+    "campaignFormat": "Usgabe-Format",
+    "audioInvalidResponse": "De Audio-Dienst het es ungültigs Resultat zruggäh.",
+    "batchPaymentHelp": "Jedes iigreichte Bild wird einzeln verrächnet. Wenn en Batch abbricht, wärde di unbruchte Token us sinere Zahlig automatisch für e spöteri Generierig bruucht, wo si abdecket.",
+    "invalidSeed": "De Seed mues e ganzi Zahl vo 0 bis 2147483647 sii.",
+    "libraryFavorites": "Favorite",
+    "libraryFavoriteAdd": "Zu de Favorite",
+    "libraryFavoriteRemove": "Us de Favorite entferne",
+    "audioTaskDialogueLabel": "Dialog",
+    "audioTaskDialogueDesc": "Szene mit mehrere Sprächer, ei Stimm pro Ziile",
+    "audioTaskDialoguePlaceholder": "Alice: Mir söttet gah.\nBob: [lacht] Nach dir.",
+    "audioTaskSfxLabel": "Soundeffekt",
+    "audioTaskSfxDesc": "Beschrib en Sound und überchum ne",
+    "audioTaskSfxPlaceholder": "Beschrib de Sound, zum Bispil «schweri Tür, wo in ere Steihalle zueknallt»",
+    "audioTaskVoiceDesignDesc": "Erfind e Stimm us ere Beschriibig",
+    "clearLibraryAria_one": "Di fertigi Generierig us de Bibliothek entferne",
+    "presetMerchMockupName": "Merch-Mockup",
+    "priceOwnKey": "Din Schlüssel",
+    "audioResultTooLarge": "S Audio-Resultat isch leer oder grösser als 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Pläne für jeden Workflow",
@@ -6365,7 +6967,27 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "S'NFT und d'Zahlig wäxle in eine Schritt.",
     "spotlightOfferNote": "Nid ufglischtet no. Schick e Abot und de Holder chann es jederziit akzeptiere.",
-    "signInToTradeCta": "Mäld di aa zum Handla"
+    "signInToTradeCta": "Mäld di aa zum Handla",
+    "actCollectionOffer": "Kollektions-Aagebot",
+    "actListed": "Gelistet",
+    "actSale": "Verchauf",
+    "buyAll": "Alli chaufe",
+    "buySeveral": "Mehreri chaufe",
+    "cartBought": "{{n}} gchauft. Si sind jetzt i dim Wallet.",
+    "cartCount": "{{n}} im Warechorb",
+    "cartFull": "Bis zu 20 ufs Mal",
+    "cartOneCoin": "Ei Chain und ei Coin pro Warechorb. Läär ne, zum wächsle.",
+    "cartOwn": "Das ghört dir scho",
+    "cartPick": "Tippe zum in Warechorb lege",
+    "forSaleHere": "Do z verchaufe",
+    "noActivity": "No nüt do",
+    "volShort": "Vol",
+    "salesCount": "{{n}} verchauft",
+    "bestOffer": "Bescht Aagebot",
+    "fromOpenSea": "Top-Kollektione uf OpenSea",
+    "buyHere": "Do chaufe",
+    "openSeaNote": "Uf OpenSea gelistet. Du zahlsch em Verchäufer direkt uf Seaport; Riftn verlangt kei Gebühr.",
+    "viewOnOpenSea": "Uf OpenSea aaluege"
   },
   "usernames": {
     "seoTitle": "Benutzername-Marktplatz | Riftn",
@@ -6720,7 +7342,18 @@
       "votes_other": "{{count}} Stimmen",
       "howToVote_one": "Tippe {{command}} und eine Zahl in den Chat, um abzustimmen · {{count}} Stimme",
       "howToVote_other": "Tippe {{command}} und eine Zahl in den Chat, um abzustimmen · {{count}} Stimmen"
-    }
+    },
+    "eyebrow": {
+      "follow": "Neue Follower",
+      "subscribe": "Neue Abonnent",
+      "subscribedTo": "Abonniert · {{plan}}",
+      "gifted_one": "Es Abo verschänkt",
+      "gifted_other": "{{count}} Abos verschänkt",
+      "share": "Stream teilt",
+      "join": "Grad dezuecho"
+    },
+    "giftedSubs_one": "{{name}} het es Abo verschänkt!",
+    "giftedSubs_other": "{{name}} het {{count}} Abos verschänkt!"
   },
   "liveChatModeration": {
     "timeout1m": "Zeitlimit für 1 Minute",
@@ -6741,14 +7374,40 @@
       "modes": {
         "none": "Aus",
         "blur": "Unschärfi",
-        "color": "Farbe"
-      }
+        "color": "Farbe",
+        "image": "Bild"
+      },
+      "failed": "Hintergrund entferne het uf dem Grät nöd chönne starte.",
+      "hint": "Lauft uf dim Grät. S erschte Mal brucht s es paar Sekunde zum Lade."
     },
     "remove": "Entferne",
     "scenes": {
       "countdown": "Zähle runter",
       "names": {
-        "starting": "Fangt gly a"
+        "starting": "Fangt gly a",
+        "chatting": "Eifach chatte",
+        "gameplay": "Gameplay",
+        "brb": "Bin grad zrugg",
+        "ending": "Stream gaht z Änd"
+      },
+      "title": "Szene",
+      "edit": "{{name}} bearbeite",
+      "subtitle": "Zwöiti Ziile (optional)",
+      "picture": "Bild",
+      "noCountdown": "Kei Countdown",
+      "minutes": "{{count}} Min",
+      "muteMic": "Mis Mikro stummschalte, solang das aa isch",
+      "hints": {
+        "starting": "Charte mit Countdown",
+        "chatting": "Kamera im Vollbild",
+        "gameplay": "Bildschirm mit dinere Kamera",
+        "brb": "Charte, Mikro stumm",
+        "ending": "Danke-Charte"
+      },
+      "subtitles": {
+        "starting": "De Stream startet in",
+        "brb": "Bi grad zrugg",
+        "ending": "Merci fürs Zueluege"
       }
     },
     "sources": {
@@ -6758,15 +7417,37 @@
       "show": "Show on Stream",
       "loop": "Wiederholung",
       "positions": {
-        "center": "Zentrum"
+        "center": "Zentrum",
+        "top-left": "Obe links",
+        "top-right": "Obe rächts",
+        "bottom-left": "Une links",
+        "bottom-right": "Une rächts"
       },
       "sizes": {
-        "medium": "Mittel"
+        "medium": "Mittel",
+        "small": "Chlii",
+        "large": "Gross"
       },
       "shapes": {
         "circle": "Kreis",
-        "rect": "Quadrat"
-      }
+        "rect": "Quadrat",
+        "rounded": "Abgrundet"
+      },
+      "title": "Quelle",
+      "addImage": "Bild oder Logo",
+      "addCamera": "Zwöiti Kamera",
+      "addClip": "Videoclip",
+      "addReaction": "Uf es Video reagiere",
+      "reactPlaceholder": "Füeg en Riftn-Videolink ii",
+      "reactInvalid": "Füeg en Link zu me Riftn-Video ii.",
+      "reactNotLive": "Gang zersch live, dänn füeg s Video dezue.",
+      "reactNoBubble": "Dini Kamera het do nöd zwöimal chönne ufgah. Mach s Video chliiner, damit dis Gsicht im Bild blibt.",
+      "failed": "Die Quelle het nöd chönne dezuegfüegt wärde.",
+      "empty": "Füeg es Logo, e zwöiti Kamera oder en Videoclip über din Stream.",
+      "hint": "Quelle wärde für jede Zueschauer und uf jeder Plattform über dis Bild zeichnet.",
+      "clip": "Clip",
+      "restart": "Neu starte",
+      "play": "Abspile oder pausiere"
     },
     "audio": {
       "mute": "Stummschalte",
@@ -6775,7 +7456,27 @@
         "off": "Aus",
         "low": "Hell",
         "high": "Stark"
-      }
+      },
+      "title": "Audio-Mixer",
+      "unavailable": "De Browser cha kei Audio mische, drum gaht dis Mikro so use, wie s isch.",
+      "channels": {
+        "mic": "Mikro",
+        "game": "Game / Tab",
+        "clip": "Videoclip"
+      },
+      "absent": {
+        "mic": "Kei Mikrofon",
+        "game": "Teil en Bildschirm mit Audio oder bruuch e Capture-Charte",
+        "clip": "Füeg under Quelle en Videoclip dezue"
+      },
+      "gate": "Noise Gate",
+      "gateHint": "Schaltet dis Mikro zwüsche de Wörter stumm, damit Tastaturklicks und Lüfter nöd im Stream sind."
+    },
+    "imageTooLarge": "Das Bild isch z gross. Probier es chliiners.",
+    "widgets": {
+      "title": "Widgets i mim Video zeige",
+      "hint": "Alerts, Ziel-Balke und Chat wärde i din Stream iizeichnet, drum gsehnd s au Zueschauer uf Twitch, YouTube und allne andere Plattforme.",
+      "failed": "Han nöd chönne ändere, wo dini Widgets erschiined. Probier s nomol."
     }
   },
   "liveStudio": {
@@ -6788,11 +7489,33 @@
         "off": "Aus",
         "idle": "Parat",
         "live": "Lebe",
-        "error": "Fehler"
-      }
+        "error": "Fehler",
+        "connecting": "Verbinde"
+      },
+      "title": "Multistream-Ziel",
+      "intro": "Gang eimal uf Riftn live und mir schicked din Stream gratis a jedi Plattform, wo do iigschaltet isch. Es startet wenigi Sekunde nachdem du live gasch.",
+      "add": "Ziel dezuefüege",
+      "empty": "No kei Ziel. Füeg Twitch, YouTube, Kick oder en RTMP-Server dezue.",
+      "label": "Name (optional)",
+      "server": "Server-URL",
+      "findKey": "Find din {{name}}-Server und Schlüssel",
+      "customHint": "Füeg de RTMP-Server und Schlüssel ii, wo dir dini Plattform git.",
+      "keyNote": "Din Schlüssel wird verschlüsslet uf eusne Server gspeicheret und nie meh aazeigt.",
+      "added": "{{name}} dezuegfüegt",
+      "saveFailed": "S Ziel het nöd chönne gspeicheret wärde",
+      "toggle": "A das Ziel streame"
     },
     "vertical": {
-      "centre": "Zentrum"
+      "centre": "Zentrum",
+      "title": "Vertikali Aasicht",
+      "intro": "Handys luegend din Stream im vertikale Feed. Zieh d Box, zum uswähle, weles Stuck vo dim Bild si gsehnd.",
+      "enabled": "Min Stream im vertikale Feed zeige",
+      "zoom": "Zoom",
+      "frame": "Dis Querformat-Bild",
+      "box": "Was d Handys gsehnd",
+      "hint": "Zieh d Box oder bruuch d Pfiltaschte. Speicher, zum s uf din Livestream aawände.",
+      "live": "LIVE",
+      "watch": "{{name}} live luege"
     },
     "subathon": {
       "title": "Subathon",
@@ -6955,7 +7678,8 @@
       "subathon_timer": "Subathon-Timer",
       "points_board": "Loyale Zuschauer",
       "streamer_level": "Streamer-Level",
-      "tip_jar": "Geschenkschrank"
+      "tip_jar": "Geschenkschrank",
+      "hype_train": "Hype-Train"
     },
     "hints": {
       "tip_alert": "Feiert jede Tipp, passend zu sim Level",
@@ -6979,7 +7703,8 @@
       "subathon_timer": "Ene Zählrückwärts, wo Geschenke, Follower und Abonnements zurückgedrängt werden.",
       "points_board": "Ihre Top-Zuschauer nach Punkten aus Zuschauen und Verschenken",
       "streamer_level": "Dein Streamer-Level und die wöchentliche Streak, von deinem Profil",
-      "tip_jar": "Ein Schrank, der sich mit bezahlten Geschenken füllt"
+      "tip_jar": "Ein Schrank, der sich mit bezahlten Geschenken füllt",
+      "hype_train": "Zeigt de Hype-Train, solang eine lauft: drü Gschänk oder Abos innert föif Minute starte ne."
     },
     "fields": {
       "style": "Stil",
@@ -7365,7 +8090,10 @@
     "endStreamConfirmBody": "Di Übertragig stoppt für alli, wo zueluege, und cha nit wiiter gmacht werde.",
     "keepStreaming": "Wiiter streame",
     "encoderPermanentHint": "Dä Schlüssel verändert sich nie. Stell din Encoder eimal i – nächstes Mal drucksch eifach uf Start und Riftn macht de Post für dich.",
-    "notEnoughTokensForBounty": "Nicht genügend Tokens. Benötigt {{need}} Tokens, hat aber {{have}}."
+    "notEnoughTokensForBounty": "Nicht genügend Tokens. Benötigt {{need}} Tokens, hat aber {{have}}.",
+    "screenInAppHint": "I de Riftn-App",
+    "screenInAppNote": "Handy-Browser lönd kei Websiite din Bildschirm teile. Gang stattdesse us de Riftn-App live und tipp dänn uf Bildschirm teile.",
+    "screenInAppCta": "Hol dir d Riftn-App"
   },
   "events": {
     "seoTitle": "Ereignisse: Meetups & Gemeindschaftsereignisse auf Riftn",
@@ -7955,7 +8683,45 @@
     "foldersInFolder_other": "I {{count}} Ordner",
     "foldersNoItems": "Nüt i dim Ordner",
     "foldersNoItemsHint": "Öffne e Resultat und wähle \"Ordner zuefüge\", zum es do ablaage.",
-    "skippedUpstreamFailed": "Übersprunge, will en früehner Schritt fehlgschlage isch. Dini Kost blibt uf dim Kontostand."
+    "skippedUpstreamFailed": "Übersprunge, will en früehner Schritt fehlgschlage isch. Dini Kost blibt uf dim Kontostand.",
+    "signInForAudioLibrary": "Mäld di aa, zum dini privati Audio-Bibliothek z öffne.",
+    "audioLibraryFailed": "Dis gspeicherete Audio het nöd chönne glade wärde. Probier s nomol.",
+    "retryFreeTask": "Gratis-Ufgab nomol probiere",
+    "previewSavedMedia": "Gspeicheri Medie vorschaue",
+    "audioSavePending": "S Audio isch parat, aber s Speichere i dini privati Bibliothek staht no us. Wiitermache, zum s abzhole.",
+    "confirmInterruptedRetry": "Di unterbrocheni Audio- oder Assistänt-Ufgab nomol probiere. Ihres vorherige Resultat isch unbekannt und en neue Versuech chönnt Arbet widerhole. Di bestehendi Zahlig und di bezahlte Job-IDs wärde wiiter bruucht.",
+    "freeResultUnknown": "D Antwort vo de Gratis-Ufgab isch unterbroche worde. Si wird nöd automatisch nomol gschickt. Wähl Gratis-Ufgab nomol probiere und mach dänn wiiter; dini Zahlig und anderi Jobs blibed erhalte.",
+    "formAuthor": "Flow bearbeite",
+    "formAuthorHint": "Bau en Flow mit typisierte Iigabe. Speicher en do oder ordne en uf em Web-Canvas aa.",
+    "chooseSavedMedia": "Gspeicheri Medie uswähle",
+    "formInput": "Iigab: {{handle}}",
+    "reviewRun": "Durchlauf prüefe",
+    "resumeRun": "Gspeicherete Durchlauf wiiterfüehre",
+    "confirmPrice": "Total: {{price}} Token",
+    "recoveryHint": "Job- und Zahligs-Referänze sind uf dem Grät gspeicheret. Füehr unterbrocheni Arbet wiiter, bevor du en neue Durchlauf startisch.",
+    "newRun": "En andere Durchlauf starte",
+    "loadMoreMedia": "Meh Medie lade",
+    "invalidGraph": "Prüef d Verbindige: jedi Iigab bruucht e passendi Quelle und de Graph darf kei Zykle ha.",
+    "unsupportedNode": "De Knote cha no nöd im native Formular laufe. Bruuch für de Flow de Web-Canvas.",
+    "missingPrompt": "Verbind en Text-Knote mit eme Prompt.",
+    "invalidSettings": "Die Iistellige wärde vom gwählte Modell nöd unterstützt.",
+    "missingCapturedFrame": "Nimm uf em Web-Canvas es Frame uf, bevor du das Video als Bild-Iigab bruuchsch.",
+    "missingSavedMedia": "Gspeicheri Quell-Medie fehled oder sind für das Konto nüme verfüegbar.",
+    "quoteFailed": "Für de Flow het kein Pris chönne berächnet wärde. Probier s nomol.",
+    "recoverBeforeEdit": "Füehr de gspeicherete Durchlauf wiiter, bevor du sin Graph änderisch oder en neue startisch.",
+    "runAlreadyComplete": "De Durchlauf isch fertig. Wähl En andere Durchlauf starte, zum nomol z generiere.",
+    "recoveryCorrupt": "De gspeicheret Wiederherstelligs-Iitrag het nöd chönne gläse wärde. Bhalt de Flow und kontaktier de Support, bevor du nomol zahlsch.",
+    "paidUnavailable": "Du chasch do Flows erstelle und speichere. Bezahlti Durchläuf sind i dem Store nöd verfüegbar.",
+    "planChanged": "De Flow het sich nach de Pris-Berächnig gänderet. Prüef de Durchlauf nomol.",
+    "connectOwnerWallet": "Verbind s Wallet, wo dä Flow ghört.",
+    "runFailed": "De Knote het nöd chönne fertig mache. Sini gspeicheret Job-Referänz blibt für d Wiederherstellig erhalte.",
+    "recoveryPending": "S Rendering staht no us. Füehr de Durchlauf wiiter, zum s abzhole.",
+    "nodeAudioGen": "Audio-Generator",
+    "nodeAudioGenDesc": "Sprach, Soundeffekt, Transkription und Audio-Isolierig",
+    "nodeAudioInput": "Gspeicherets Audio",
+    "nodeAudioInputDesc": "Bruuch privats Audio us dinere Bibliothek",
+    "audioVoiceId": "Stimm-ID",
+    "audioSeconds": "Soundlängi in Sekunde"
   },
   "videoPlayer": {
     "volume": "Lutstärchi",
@@ -8031,7 +8797,8 @@
       "bug": "Fehler",
       "feature_request": "Feature-Anfrage",
       "other": "Sonstiges"
-    }
+    },
+    "updatedAgo": "aktualisiert {{when}}"
   },
   "digest": {
     "andOthers_one": "{{names}} und {{count}} anderi",
@@ -8107,7 +8874,13 @@
       "doneAll": "{{done}} Accounts, wo nöd zrugg gfolgt händ, sind entfolgt.",
       "doneSome": "{{done}} Accounts entfolgt. {{failed}} chond nöd entfolgt werde.",
       "doneToast": "{{done}} Accounts, wo nöd zrugg gfolgt händ, sind entfolgt."
-    }
+    },
+    "followBackConfirmTitle_one": "{{count}} Person zrugg folge?",
+    "followBackConfirmTitle_other": "{{count}} Lüüt zrugg folge?",
+    "followBackConfirmBody": "Si folged dir scho. Privati Konte überchömed e Folg-Aafrog.",
+    "followedBackCount_one": "{{count}} Person zrugg gfolgt",
+    "followedBackCount_other": "{{count}} Lüüt zrugg gfolgt",
+    "followBackDoneBody": "Du findsch alli under Gfolgt."
   },
   "reactionInfo": {
     "title": "Reaktione",
@@ -8909,7 +9682,28 @@
       "add": "Dazue",
       "scale": "Grösse",
       "color": "Farb",
-      "light": "Hell"
+      "light": "Hell",
+      "create": "3D-Bühni dezuefüege",
+      "title": "3D-Szenebühni",
+      "hint": "Plan en Shot mit Kugle und Boxe. Kamera, Platzierig und drü unabhängigi Flächeliechter verändered s grenderet Frame.",
+      "preview": "Vorschau vo de grenderete Szene",
+      "error": "S Frame het nöd chönne vorbereitet wärde. Prüef dini Shot-Referänze und probier s nomol.",
+      "elevation": "Höchi",
+      "distance": "Distanz",
+      "fov": "Bildwinkel",
+      "object": "Objekt",
+      "sphere": "Kugle",
+      "box": "Box",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Objekt entferne",
+      "intensity": "Intensität",
+      "diffusion": "Streuig",
+      "saving": "Frame wird vorbereitet…",
+      "useFrame": "Grenderets Frame als Shot-Referänz bruuche",
+      "frameHint": "Erstellt es 320 × 180 PNG und füegt s de Referänze vo dem Shot dezue. Prüef s Referänz-Limit und s Modell-Aagebot vor em Generiere.",
+      "frameName": "Szenebühni-Frame"
     },
     "video": {
       "tFade": "Überbländig",
@@ -9004,7 +9798,9 @@
       "pptx": "PowerPoint-Präsentation",
       "pptxHint": "Jede Seite wird zu einem Folienbild, mit Präsentatorennotizen und Links. Bearbeite den Text und Elemente individuell in der ursprünglichen Gestaltung.",
       "section": "Benannte Sektion",
-      "transparent": "Transparent Hintergrund"
+      "transparent": "Transparent Hintergrund",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Ladet es ZIP mit dinere Timeline als FCPXML und Premiere-XML plus allne Mediedateie abe, so chasch de Schnitt in Premiere Pro, Final Cut Pro oder DaVinci Resolve fertig mache. Text wird zu Marker; Effekt blibed in Riftn."
     },
     "inspector": {
       "selectHint": "Wähle e Schicht uf em Canvas oder e Clip uf de Timeline us.",
@@ -9098,7 +9894,45 @@
       "failed": "D'AI het das grad nöd chöne mache. Probier's gli nomol.",
       "changes": "Bearbeitige: {{count}}",
       "undo": "Rückgängig",
-      "openGenerator": "Aaluege und generiere"
+      "openGenerator": "Aaluege und generiere",
+      "stopped": "Gstoppt. Süscht isch nüt gänderet worde.",
+      "queued": "{{count}} i de Warteschlange",
+      "restore": "Bis do here wiederherstelle",
+      "restoreHint": "Setz s Projekt zrugg uf de Stand vor dere Nachricht. Rückgängig holt s wieder.",
+      "restored": "S Projekt isch uf de Stand vor dere Nachricht zruggsetzt. Drück Rückgängig, zum di neueri Version zruggzhole.",
+      "rewrite": "Mini Aafrog klarer mache",
+      "rewriteFailed": "Das het nöd chönne umgschribe wärde. Din Text isch unveränderet.",
+      "feedback": "Hät das gholfe?",
+      "good": "Gueti Antwort",
+      "bad": "Schlächti Antwort",
+      "retryPrefix": "Das isch nöd richtig gsi. Stattdesse ",
+      "recipesTitle": "Rezept",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podcast-Clip",
+          "prompt": "Find de stärchscht 30-Sekunde-Moment, schnid druf zue, füeg Word-Pop-Untertitel dezue und mach s 9:16."
+        },
+        "talkingHead": {
+          "label": "Suubere Talking Head",
+          "prompt": "Schnid langi Pause use, füeg klassischi Untertitel dezue und gib em e dezänte, warme Look."
+        },
+        "productPromo": {
+          "label": "Produkt-Promo",
+          "prompt": "Mach e 15-Sekunde-Promo: knackige Titel am Aafang, Zoom-in-Übergäng zwüsche de Clips, fetti Untertitel und fröhlichi Musig."
+        },
+        "hypeReel": {
+          "label": "Hype-Reel",
+          "prompt": "Schnid d Clips im Takt vo de Musig, bruuch Fly-up-Übergäng und de Technicolor-Look."
+        },
+        "retroEdit": {
+          "label": "Retro-Schnitt",
+          "prompt": "Gib jedem Clip de VHS-Look, füeg en grosse Serif-Titel dezue und bruuch Fade-Übergäng."
+        },
+        "tutorial": {
+          "label": "Tutorial",
+          "prompt": "Füeg für jede Schritt en Titel dezue, Box-Untertitel, und mach de wichtigscht Moment langsamer uf 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Rechteck",
@@ -9273,7 +10107,9 @@
       "tint": "Tönig {{value}}",
       "vignette": "Vignettierig {{value}}%",
       "auto": "Automatisch verbessere",
-      "autoFailed": "Das Bild händ mir nöd chöne analysiere."
+      "autoFailed": "Das Bild händ mir nöd chöne analysiere.",
+      "halation": "Halation {{value}}%",
+      "scanlines": "Scanlines {{value}}%"
     },
     "pages": {
       "add": "Siite dezue tue",
@@ -9349,7 +10185,14 @@
       "action": "Automatischi Untertitel",
       "styles": {
         "bold": "Fett",
-        "serif": "Schriften"
+        "serif": "Schriften",
+        "classic": "Klassisch",
+        "boxed": "Box",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Gstaplet",
+        "bubble": "Blase"
       },
       "working": "Lost zue… {{percent}} %",
       "downloading": "Sprachmodell wird parat gmacht… {{percent}} %",
@@ -9361,7 +10204,8 @@
       "translateCount": "{{count}} Überschrifte",
       "translationDone": "{{count}} Bildunterschriften übersetzt",
       "translationFailed": "Die Übersetzung der Überschriften ist fehlgeschlagen. Die Überschriften bleiben unverändert.",
-      "lockedTranslation": "De Locked Captions lösen, um si uszschalte."
+      "lockedTranslation": "De Locked Captions lösen, um si uszschalte.",
+      "style": "Untertitel-Stil"
     },
     "multi": {
       "selected": "{{count}} Ebene usgwählt",
@@ -9398,7 +10242,10 @@
       "saveNewPreset": "Spare neu",
       "saveStyles": "Speichere Designs mit Stil.",
       "stylesSaved": "Brand-Styles mit disem Design gespärt",
-      "usePreset": "Stil bruche"
+      "usePreset": "Stil bruche",
+      "dehubApplied": "Riftn-Brand uf {{count}} Ebene aagwändet.",
+      "dehubApply": "Riftn-Brand bruuche",
+      "dehubHint": "Offizielli Riftn-Farbe, d Schrifte Exo und Inter und s Riftn-Logo, mit eim Klick."
     },
     "draw": {
       "heading": "Zeichne",
@@ -10732,7 +11579,23 @@
       "zoomOut": "Canvas zoome raus"
     },
     "clipFix": {
-      "listening": "Abspielen…"
+      "listening": "Abspielen…",
+      "detach": "Audio abtrenne",
+      "detached": "Audio isch i en eigete Clip verschobe",
+      "detachFailed": "S Audio vo dem Clip het nöd chönne abtrennt wärde",
+      "removeBars": "Schwarzi Balke entferne",
+      "scanning": "Frames wärde prüeft…",
+      "noBars": "Kei schwarzi Balke gfunde",
+      "barsRemoved": "Schwarzi Balke zuegschnitte",
+      "barsFailed": "S Video het nöd uf schwarzi Balke chönne prüeft wärde",
+      "reframe": "Auto-Reframe",
+      "reframeHint": "S Video passt scho zu dem Siiteformat",
+      "reframed": "Neu usgrichtet, zum de Action z folge",
+      "reframeFailed": "S Video het nöd chönne neu usgrichtet wärde",
+      "retakes": "Retakes entferne",
+      "noRetakes": "Kei Retakes gfunde",
+      "retakesRemoved": "{{count}} Retake(s) entfernt, de letscht Take bhalte",
+      "retakesFailed": "D Retakes vo dem Clip händ nöd chönne entfernt wärde"
     },
     "shortcuts": {
       "action": {
@@ -10740,19 +11603,109 @@
         "play": "Spiele",
         "pause": "Pausiere",
         "frameBack": "Vorheriger Rahmen",
-        "frameForward": "Nächster Rahmen"
-      }
+        "frameForward": "Nächster Rahmen",
+        "back": "1 Sekunde zrugg",
+        "rippleDelete": "Clip lösche",
+        "liftDelete": "Clip lösche",
+        "start": "Zum Aafang",
+        "end": "Zum Änd"
+      },
+      "preset": "Tastatur-Layout",
+      "presetHint": "Bruuch d Timeline-Taschte vo dem Editor, wo du kennsch. Riftn-eigeti Shortcuts funktioniered für alles anderi wiiter."
     },
     "voiceClone": {
       "stop": "Ufnahm stoppe",
-      "failed": "Stimme-Cloning isch nid gschlunge."
+      "failed": "Stimme-Cloning isch nid gschlunge.",
+      "pickerLabel": "Dini Stimm klone",
+      "pickerDetail": "Voiceovers mit dinere eigete Stimm",
+      "title": "Dini Stimm klone",
+      "description": "Nimm di uf oder wähl en Clip, wo du redsch. Du zahlsch eimal und dini Stimm ghört dir für jedes Voiceover.",
+      "defaultName": "Mini Stimm",
+      "record": "Es Muster ufnäh (30 Sekunde bis 2 Minute)",
+      "fromMedia": "Oder bruuch en Clip us de Medie",
+      "recorded": "Dini Ufnahm",
+      "sample": "Muster: {{name}}",
+      "hint": "Klari Sprach ohni Musig funktioniert am beschte.",
+      "noMic": "S Mikrofon het nöd chönne bruucht wärde.",
+      "sampleFailed": "De Ton us dem Clip het nöd chönne gläse wärde.",
+      "pay": "Für {{amount}} Token klone",
+      "useFree": "Klone (scho zahlt)",
+      "owned": "Dini Stimm «{{name}}» isch scho iigrichtet. Wähl si us de Stimm-Lischte.",
+      "useOwned": "Mini Stimm bruuche",
+      "ready": "«{{name}}» isch parat für Voiceovers.",
+      "paidFailed": "Dini Zahlig isch gspeicheret. Öffne das nomol und de nächscht Versuech isch gratis.",
+      "consent": "Klon nur dini eigeti Stimm oder eini, wo du d Erlaubnis dezue häsch."
     },
     "linkImport": {
       "go": "Importiere",
-      "downloading": "Wird abelade {{percent}}%"
+      "downloading": "Wird abelade {{percent}}%",
+      "open": "Vo me Link importiere",
+      "placeholder": "Füeg en YouTube-, TikTok- oder andere Link ii",
+      "rights": "S Video ghört mir oder ich ha d Erlaubnis, s z bruuche",
+      "audioOnly": "Nur Ton",
+      "queued": "I de Warteschlange…",
+      "waiting": "Warte uf d Siite, probier s bald nomol…",
+      "adding": "Wird zu de Medie dezuegfüegt…",
+      "added": "Importiert und zur Timeline dezuegfüegt.",
+      "failed": "De Link het nöd chönne importiert wärde."
     },
     "reverse": {
-      "action": "Umkehren"
+      "action": "Umkehren",
+      "working": "Wird umkehrt {{percent}}%",
+      "done": "Clip umkehrt.",
+      "failed": "De Clip het nöd chönne umkehrt wärde.",
+      "unsupported": "De Browser cha kei Video umkehre. Probier Chrome oder Edge.",
+      "tooLong": "Clips bis {{seconds}} Sekunde chönd umkehrt wärde."
+    },
+    "film": {
+      "repairRefs": "Fehlendi Medie-Links entferne",
+      "title": "Filmprojekt",
+      "intro": "Plan Shots mit wiederverwändbare Bild-Referänze. Din Brief, d Shot-Reihefolg und usgwählti Resultat wärde mit dem Projekt gspeicheret.",
+      "create": "Filmplan erstelle",
+      "name": "Filmname",
+      "brief": "Film-Brief",
+      "sharedReferences": "Gmeinsami Bild-Referänze (bis 4)",
+      "shot": "Shot",
+      "addShot": "Shot dezuefüege",
+      "shotName": "Shot-Name",
+      "action": "Shot-Handlig und Komposition",
+      "seconds": "Gwünschti Video-Sekunde",
+      "shotReferences": "Zuesätzlichi Bild-Referänze (zäme maximal 4)",
+      "frame": "Frame vorbereite",
+      "video": "Video vorbereite",
+      "review": "Prüef Modell, Referänze, Videolängi und Pris im Studio, bevor du generiersch.",
+      "result": "Akzeptierts Shot-Resultat",
+      "noResult": "Kei Resultat usgwählt",
+      "resultHint": "Wähl es akzeptierts Bild oder Video us de Uploads. Sin Link wird mit dem Shot gspeicheret; bruuch d Timeline, zum de Film zämezsetze.",
+      "earlier": "Früehner verschiebe",
+      "later": "Spöter verschiebe",
+      "remove": "Shot entferne",
+      "issue": "Prüef d Shot-Beschriibig und d Referänz-Medie und probier s dänn nomol. Lass s Projekt offe, falls s nöd het chönne gspeicheret wärde.",
+      "searchMedia": "Medie nach Name sueche",
+      "refreshMedia": "Medie aktualisiere"
+    },
+    "speakers": {
+      "find": "Sprächer finde",
+      "name": "Sprächer {{number}}",
+      "onlyOne": "Nur ein Sprächer gfunde.",
+      "failed": "D Sprächer händ nöd chönne gfunde wärde.",
+      "kept": "Nur {{name}} bhalte.",
+      "editFailed": "Die Bearbeitig het nöd zu dem Clip passt.",
+      "split": "In {{count}} Sprächer-Shots ufteilt.",
+      "keepOnly": "Nur bhalte",
+      "splitAction": "Bi jedem Sprächerwächsel schnide"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Beschrib s 3D-Objekt, wo du wotsch",
+      "queued": "Dis 3D-Objekt wird baut. Es landet im Tab Generierige.",
+      "note": "3D-Objekt chömed als churze, drehende Clip mit durchsichtigem Hintergrund i d Medie."
+    },
+    "behind": {
+      "action": "Text hinder de Person",
+      "working": "D Person wird usgschnitte…",
+      "done": "Text und Untertitel sind jetzt hinder de Person.",
+      "failed": "De Text het nöd hinder d Person chönne gsetzt wärde."
     }
   },
   "jungleMood": {
@@ -11138,7 +12091,8 @@
     "unsupportedNetwork": "Riftn Token chönd nöd uf dem Netzwerk gschickt werde.",
     "transfersPausedPurchase": "Riftn Token-Transfers sind grad pausiert, drum würd dieä Chauf nid klappe. Versuechs no einisch, wänn de Handel weder aafangt.",
     "transactionsPaused": "Riftn Token Transaktione sind grad uf em Blockchain pausiärt.",
-    "transferFailedCheckBalance": "Token-Überwiisig het nid klappt. Bitte prüf din Token-Stand und d Wallet-Bewilligung."
+    "transferFailedCheckBalance": "Token-Überwiisig het nid klappt. Bitte prüf din Token-Stand und d Wallet-Bewilligung.",
+    "ppvTokensOnly": "On-Chain wärde nur Pay-per-View-Zahlige mit Riftn-Token unterstützt"
   },
   "tokenPayments": {
     "paying": "Bezahle {{amount}} Tokens...",
@@ -11154,7 +12108,9 @@
     "tokenAmount": "{{amount}} Toke",
     "assistant": {
       "question1": "Was isch de aktuelli Staking APY für Riftn Tokens?",
-      "question2": "Jo, wenn ich 10'000 Tokens für 90 Täg für Staking abgebä"
+      "question2": "Jo, wenn ich 10'000 Tokens für 90 Täg für Staking abgebä",
+      "answer1": "De aktuelli Staking-APY für Riftn-Token isch 12.4% für e Sperrfrist vo 30 Täg. Do e Übersicht:\n\n• 7 Täg Sperri: 8.2% APY\n• 30 Täg Sperri: 12.4% APY\n• 90 Täg Sperri: 18.7% APY\n\nSoll ich dir hälfe, din mögliche Ertrag uszrächne?",
+      "answer2": "Für 10,000 Token, wo mit 18.7% APY für 90 Täg gstaked sind:\n\n📊 Gschätzti Belohnig: ~461 Token\n\nDas sind öppe 5.13 Token pro Tag. Dänk dra, dass de APY je nach gsamthaft gstakter Mängi schwanke cha."
     },
     "bookmarks": {
       "stakingGuide": "Kompletti Uuswies zum Staking vo Riftn Tokens: APY Uufschlüsselig, Sperrfriste und Belohnigs-Multiplikatore erklärt."
@@ -11850,7 +12806,7 @@
   "multiPost": {
     "tab": "Multi-Posting",
     "title": "Multi-Posting",
-    "intro": "Post zu X, YouTube, Instagram, TikTok und meh glichziitig mit dehub. Verbind din Account einisch, denn wählsch, wohi jede Post gaht.",
+    "intro": "Post zu X, YouTube, Instagram, TikTok und meh glichziitig mit Riftn. Verbind din Account einisch, denn wählsch, wohi jede Post gaht.",
     "creditsHeading": "Post-Credits",
     "credits": "{{count}} Post-Credits",
     "topUpTitle": "Auflade und spare",
@@ -11898,7 +12854,12 @@
   "dm": {
     "planRestricted": "Dä Benutzer bruucht es Abo, zum Nachrichte übercho.",
     "planTypeNotAllowed": "Dä Plan vo dem Creator erlaubt die Art vo Nachricht nöd.",
-    "planMinTip": "S Trinkgäld für dä Creator mues mindestens {{amount}} Tokens sii."
+    "planMinTip": "S Trinkgäld für dä Creator mues mindestens {{amount}} Tokens sii.",
+    "shareKindGroup": "Gruppä",
+    "shareKindCommunity": "Gmeinschaft",
+    "shareGroups": "Gruppe",
+    "shareKindChannel": "Kanal",
+    "reportMessage": "Nachricht mälde"
   },
   "credits": {
     "earningsWorth": "Wert {{amount}}",
@@ -11940,7 +12901,11 @@
     "error": "Chönnt dini Löschig‑Aafrog nöd abschicke. Dini Konto isch nöd für d’Löschig bestätigt worde. Bitte probier’s nomal.",
     "back": "Zrugg zu de Iistellige",
     "signIn": "Melde dich a, um din Account z'lösche",
-    "acknowledge": "Ich ha mini Wallet‑Wiederherstellungsdatei gspeichert und verstoh, dass d’Löschung permanent isch."
+    "acknowledge": "Ich ha mini Wallet‑Wiederherstellungsdatei gspeichert und verstoh, dass d’Löschung permanent isch.",
+    "signedInAs": "Aagmäldet als",
+    "confirmTitle": "Dis Konto endgültig lösche?",
+    "confirmBody": "Dis Konto und alles druf wird glöscht. Du wirsch abgmäldet und das cha nöd rückgängig gmacht wärde.",
+    "confirmBodyNamed": "{{who}} und alles druf wird glöscht. Du wirsch abgmäldet und das cha nöd rückgängig gmacht wärde."
   },
   "miniApps": {
     "badge": {
@@ -12036,12 +13001,43 @@
       "rewardPending": "Hängig",
       "rewardsNone": "No Belohnungen wurden bis anhin berechnet. Die erste Woche schliessst am Montag ab.",
       "stats": {
-        "button": "Live-Statistike"
+        "button": "Live-Statistike",
+        "chartTitle": "Lüüt, wo dini App göffnet händ, letschti 30 Täg",
+        "peak_one": "Spitze {{count}} pro Tag",
+        "peak_other": "Spitze {{count}} pro Tag",
+        "people30": "Lüüt, 30 Täg",
+        "people7": "Lüüt, 7 Täg",
+        "added": "Händ s dezuegfüegt",
+        "dhb30": "Zahlti Token, 30 Täg",
+        "notified30": "Gschickti Benachrichtigunge, 30 Täg",
+        "rewards": "Verdienti Token-Belohnige"
       },
       "signin": {
         "users_one": "{{count}} User",
         "users_other": "{{count}} Users",
-        "delete": "Lösche"
+        "delete": "Lösche",
+        "title": "Mit Riftn aamälde",
+        "body": "Lass Lüüt sich mit ihrem Riftn-Konto uf dinere Websiite oder App aamälde. Erstell do en Schlüssel und folg dänn de Aaleitig.",
+        "guide": "Aaleitig läse",
+        "copyId": "Client-ID kopiere",
+        "rotate": "Neus Secret",
+        "rotateConfirm": "Es neus Secret für {{name}} mache? S alte Secret funktioniert sofort nüme.",
+        "deleteConfirm": "{{name}} lösche? Alli, wo sich dermit aagmäldet händ, wärde abgmäldet.",
+        "secretOnce": "Secret für {{name}}. Kopier s jetzt: es wird nur eimal aazeigt.",
+        "name": "App-Name",
+        "website": "Websiite (optional)",
+        "redirects": "Redirect-URLs, eini pro Ziile (https://yoursite.com/callback)",
+        "create": "Schlüssel erstelle"
+      },
+      "stateRejected": "Live per Link · nöd für de Store freigäh",
+      "rankBody": "Jedi Nacht überchunt jedi gelisteti App e Punktzahl: 55% vo wiederkehrende Nutzer (Lüüt, wo si die Wuche und d Wuche vorher göffnet händ), 35% vo wöchentliche Nutzer, plus en Bonus vo 10% i de erschte 14 Täg. Nur aagmäldeti Riftn-Konte zelled, drum bringed Bots und Neulade nüt.",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Events, wo Riftn a dini webhookUrl gschickt het. Test schickt es ping-Event.",
+        "test": "Test schicke",
+        "ok": "Webhook het mit {{status}} antwortet",
+        "failed": "Webhook fehlgschlage: {{reason}}",
+        "none": "No kei Webhooks gschickt."
       }
     },
     "card": {
@@ -12068,7 +13064,10 @@
       "confirm": "{{amount}} Tokens bezahlen",
       "sending": "Zahlung wird gesendet…",
       "sent": "{{amount}} Tokens an {{name}} bezahlt.",
-      "noOwner": "Diese App hat noch keine bestätigte Wallet zum Bezahlen."
+      "noOwner": "Diese App hat noch keine bestätigte Wallet zum Bezahlen.",
+      "testBadge": "Testmodus",
+      "testBody": "D App ghört dir, drum isch das en Test: es wärde kei Token bewegt und d Quittig isch als Test markiert.",
+      "testSent": "Testzahlig vo {{amount}} Token. Es isch nüt gschickt worde."
     },
     "add": {
       "title": "App {{name}} hinzufügen?",
@@ -12196,7 +13195,8 @@
     "done": "Fertig",
     "reminderTitle": "Wärtschutz deini Wallet",
     "reminderAction": "Wärtschutz",
-    "reminderLater": "Nöd jetzt"
+    "reminderLater": "Nöd jetzt",
+    "copied": "Kopiert. D Zwüscheablag wird in 30s glärt"
   },
   "copy": {
     "55656b5e434f": "Suche schliessen",
@@ -19126,7 +20126,122 @@
     "127053546dd4": "Könnti nüme däti Datei downloade",
     "d14896aa4bf8": "D Freilaschtbibliothek hätti nüme laade. Überprüfi d Iinzässverbindig und probiere wider.",
     "953e708b2287": "D Stimmgenerierig hätti nüme gschafft.",
-    "4a52cdd6ac72": "Könnti nüme däti Schichte dupliziere"
+    "4a52cdd6ac72": "Könnti nüme däti Schichte dupliziere",
+    "3f9b2c71d0a4": "{{n}} Resultat",
+    "8c4e1a6b2f57": "für «{{query}}»",
+    "1d7234ff1b79": "in {{feed}}",
+    "e122e5c2b563": "Nach obe zieh zum Schliesse",
+    "1aa9d734f2ee": "Wähl, was du suechsch",
+    "ef557404f465": "Kei Resultat für «{{query}}»",
+    "35034aa59bd3": "I {{feed}} het nüt passt. Probier anderi Wörter oder such überall.",
+    "415155739590": "Überall sueche",
+    "9e13d826baaf": "Bilder sueche",
+    "cbf6f228327c": "Musig sueche",
+    "e8756c6865a5": "Shorts sueche",
+    "c7661da99c41": "Videos sueche",
+    "90f1afe66801": "Suech nach «{{query}}»…",
+    "d7b559f2d8c6": "Probier anderi Wörter oder änder d Filter.",
+    "d1a0c7e2f301": "Was gaht dir hüt dur de Chopf?",
+    "d1a0c7e2f302": "Über was dänksch hüt nah?",
+    "d1a0c7e2f303": "Was gaht dir dur de Chopf?",
+    "d1a0c7e2f304": "Häsch öppis im Chopf?",
+    "d1a0c7e2f305": "Was gaht dir grad dur de Chopf?",
+    "d1a0c7e2f306": "Was dänked mir hüt?",
+    "d1a0c7e2f307": "Öppis, wo dich hüt beschäftigt?",
+    "d1a0c7e2f308": "Was beschäftigt dich das Mal?",
+    "a7c1e0f4b2d9": "Tippe zum Rede",
+    "b3e8d1c6f0a2": "Tippe zum Schicke",
+    "c9f2a4e7d1b5": "Am Lose... tipp uf d Kugle zum Schicke",
+    "22577ebd908e": "Wan-3.0-Video generiere · originale Soundtrack",
+    "1fa2357ab7e1": "Seedance-720p-Video generiere · originale Soundtrack",
+    "ef13b74e5743": "Swahili",
+    "7f78bdc0762d": "+{{value1}} Pkt",
+    "f0c8bb34335b": "Du häsch +{{value1}} Pünkt verdient",
+    "0fbe06b679a8": "{{value1}} Pünkt für jedi umgsetzti Aafrog, dezuezellt zu dinere Top-Builders-Punktzahl.",
+    "f17e14bd5d26": "Live-Schätzig us On-Chain-Bestands-Snapshots — Reichwiti vo No Badge & Gäscht chunt dezue",
+    "89b532bf8e17": "Fang aa chatte, zum e Underhaltig z speichere.",
+    "c9f2f9f8a5ab": "🎵 Es Lied mache",
+    "431bc73eb60b": "[verse]\nDin Songtext do...\n\n[chorus]\nRefrain-Text...",
+    "18170f516593": "Links mitnäh",
+    "35e0d0360a0a": "LIVE",
+    "3dd188029374": "Es Trinkgeld schicke",
+    "ee088652116b": "En Chatruum zu me Thema erstelle",
+    "e77a718fc076": "Dis ETH-Guethabe (Base)",
+    "f04dca8697ae": "Dini Abo-Plän",
+    "c37206676570": " im Prompt",
+    "a6e6ee702c2c": "Sprach: ",
+    "6cab56411173": "💰 Monetarisierigs-Funktione",
+    "0b4b4a2f7fca": "Wichtigi Funktione:",
+    "d2089be67295": "Token",
+    "bff7683881b8": "Cover-Bild dezuefüege",
+    "c80b0b85e6aa": "Bescht dezentrali Streaming-Apps",
+    "d4a69f6e6a86": "Riftn für ChatGPT: Riftn i ChatGPT bruuche (MCP-Connector)",
+    "81663fc4bc4b": "Riftn i ChatGPT bruuche",
+    "e102a35a7417": "Riftn i ChatGPT öffne",
+    "31aa434fa5e5": "Riftn für Claude: Riftn i Claude bruuche (MCP-Connector)",
+    "88be8e79a171": "Riftn i Claude bruuche",
+    "8a6656d1e13b": "Riftn i Claude öffne",
+    "a3c1e5f20b71": "Bruuch Riftn i ChatGPT, Claude oder jeder MCP-App. Füeg d URL unde i d Connector-Iistellige vo dim Assistänt ii, zum Poste, Profil und Kommentar aazluege, und mäld di aa, wenn du gfrogt wirsch, zum dis eigets Konto z verknüpfe.",
+    "b84d2e7c9a16": "Die Adrässe isch für KI-Apps, nöd e Websiite. Wenn du si im Browser öffnisch, chunsch do here.",
+    "c5e9f1a3d742": "Dis Riftn-Konto verknüpfe",
+    "d61a7b4e8c05": "Wenn din Assistänt di bittet, di aazmälde, mäld di bi Riftn aa und klick uf Erlaube. Dänn cha er dis Profil aktualisiere, Poste und Kommentar veröffentliche, Lüüt folge und im Creator Studio erstelle. Verbindige blibed verknüpft, solang du si bruuchsch, und laufed nach 30 Täg ohni Nutzig ab.",
+    "e27b8c5f9d13": "ChatGPT-Aaleitig Schritt für Schritt",
+    "f38c9d6a0e24": "Claude-Aaleitig Schritt für Schritt",
+    "0a49d7b1f835": "Lieber es separats Bot-Konto? Erstell en Agent, zum e Connector-URL z überchoo, wo als dä Agent postet.",
+    "1b5ae8c20f46": "Wenn ChatGPT frogt, mäld di bi Riftn aa und klick uf Erlaube, zum dis Konto z verknüpfe.",
+    "2c6bf9d31a57": "Klick uf Verbinde, mäld di bi Riftn aa und klick uf Erlaube, zum dis Konto z verknüpfe.",
+    "73d01ae84196": "Riftn Startsiite",
+    "9ae6de224302": "Creator wärde",
+    "bd22e7a24198": "POVR Ads Manager isch live",
+    "7b06ece76fdb": "Herz-Emoji erschiint im Stream",
+    "c7c0091104cf": "Schoggi-Schachtle-Emoji erschiint im Stream",
+    "b18479b5ea82": "Zauberring-Emoji erschiint uf em Bildschirm",
+    "98b4adfad956": "✨ Songtext verbessere",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "a6df11e706c5": "Versionsverlauf",
+    "4c02b2095c3a": "Öppis generiere",
+    "0e6ebb58c64c": "Komplette Guide zu Riftn-Icons, Funktione und Web3-Begriff.",
+    "1b13ff986443": "📷 Foto",
+    "fd0ce9669a4e": "🎞️ GIF",
+    "ebebdc70335b": "Glas-Balke",
+    "5ff272ba7871": "Siide-Linie",
+    "a941e90ca93d": "Cover-Halo",
+    "04dbbe4dff7a": "True Wave",
+    "31e06f7d89fe": "chat",
+    "85330dcbaadd": "Kei Algorithme, wo ei Siite vo de Diskussion bevorzueged. \nAlli wärde glich und fair verstärcht.",
+    "29beacb7d918": "@{{value1}} het dir {{value2}} {{value3}} Trinkgeld gäh",
+    "73638ce2dea2": "Folie {{value1}} zeige: {{value2}} {{value3}}",
+    "7e44b080227f": "{{value1}}% direkt verdiene",
+    "2ed16d4204db": "{{value1}}% sekundär verdiene",
+    "1132ea896089": "QR-Code für d Wallet-Adrässe {{value1}}",
+    "f47d2472ba8f": "Post #{{value1}} | Riftn",
+    "11ef7a60f50a": "{{value1}} uf Riftn aaluege",
+    "ccf0988984a3": "{{value1}} vo {{value2}} aazeigt",
+    "253ffa81cd88": "{{value1}} verlangt es Mindesttrinkgeld vo <amount>{{value2}} <coin></coin></amount>, zum e Underhaltig z starte.",
+    "39958a403593": "Du häsch bi eusem WM-Giveaway uf Twitter en <prize>$200-Pris</prize> gwunne. Dini Token sind dim Konto guetgschribe und wärde überwise, sobald de Contract live isch.",
+    "6ed656c2254e": "<amount></amount> a {{value1}}",
+    "70d1cca2aba3": "{{value1}} verlangt es Mindesttrinkgeld vo <amount>{{value2}} <coin></coin></amount> pro Nachricht. Jedi Nachricht, wo du schicksch, zieht dä Betrag ab.",
+    "515c8ef71c75": "Wähl gültigi Brand-Farbe und Schrifte",
+    "aae1384faa62": "Füeg e Chopfziile und mindestens ei Dateziile dezue",
+    "9103bf0e2557": "Gib jeder Spalte en eidüttige Name vo 1–100 Zeiche",
+    "83f26bfcfd2a": "Ziile {{row}}: bruuch in {{column}} en gültige Web-, E-Mail-, Telefon- oder Siite-Link",
+    "4e6c73036632": "Ziile {{row}}: QR-Inhalt mues 1–1,500 Zeiche ha und in en QR-Code passe",
+    "f75815446d45": "Ziile {{row}}: kei Quellfoto-Ebeni heisst «{{name}}»",
+    "a25f83df8c86": "Ziile {{row}}: verschideni Fotos händ de glich Name «{{name}}». Gib de Quellfotos eidüttigi Ebene-Näme",
+    "412d9f8ca7b2": "Ziile {{row}}: es benannts Quellfoto isch uf dem Grät nöd verfüegbar",
+    "5c1685670a96": "Ziile {{row}}: s Vorlage-Foto isch uf dem Grät nöd verfüegbar",
+    "5d2d691d9979": "Spalte {{column}}: Zahleformatierig bruucht e eifachi Zahl under einere Billion",
+    "b93b4ca1fdc5": "Bruuch bis zu 500 druckbari Zeiche für Ersatztext, Präfix und Suffix",
+    "c7bc9bd6d0bd": "Füeg i de erschte Ziile Spaltenäme ii, gfolgt vo Beschriftig und Zahlewärt",
+    "b6f971c911fa": "Wähl e Chart-Stil-Datei, wo chliiner als 32 KB isch",
+    "6c4bbd9fb1a9": "Bruuch höchstens {{maximum}} Spalte",
+    "c710eaeac6b8": "Bruuch höchstens {{maximum}} Ziile",
+    "b40d1906126f": "Bruuch i de letschte Spalte nöd-negativi Zahlegrössene under einere Billion",
+    "d77ed09d4007": "{{name}} isch z gross (max 500 MB).",
+    "aff079bf3e36": "Wähl e gültigi Textusrichtig",
+    "914ee48b8079": "Lass ei Ziile für d Zämefassig frei; Tabelle unterstützed 20 Ziile",
+    "37e84dcd2412": "Wähl e Text-Bereinigigs-Aktion",
+    "6e71ae3669b1": "Gspeicherti Usgab nöd verfüegbar"
   },
   "articles": {
     "read": "Läs Artikel",
@@ -19166,7 +20281,18 @@
     "formatting": "Formatierung",
     "bodyPlaceholder": "Erzähl eure Geschichte. Wählt Text us und verwendet d Bar überm Text für Überschrifte, Fett, Anführungszeichen und Listen.",
     "bodyLabel": "Kein Problem!",
-    "wordCount": "{{count}} Wörter"
+    "wordCount": "{{count}} Wörter",
+    "cardLabel": "Artikel · {{count}} Min Läsiziit",
+    "readTitle": "«{{title}}» läse",
+    "imageLimit": "Artikel chönd bis zu {{count}} Bilder ha",
+    "imageLimitSome": "Nur no {{count}} Bilder passed i dä Artikel",
+    "imageFailed": "Das Bild het nöd chönne dezuegfüegt wärde. Probier es anders.",
+    "imagesUploading": "Bilder wärde dezuegfüegt ({{count}})…",
+    "bodyTooLong": "{{count}} Zeiche über em Limit",
+    "imagesCount": "Bilder · {{count}}/{{max}}",
+    "captionPlaceholder": "Bildunterschrift dezuefüege",
+    "captionLabel": "Bildunterschrift für Bild {{n}}",
+    "removeInlineImage": "Bild {{n}} entferne"
   },
   "liveAudience": {
     "whosHere": "Wer isch do?",
@@ -19214,23 +20340,95 @@
       "stage": {
         "preparing": "Wird vorbereitet…",
         "confirming": "Warte uf d Transaktion…",
-        "recording": "Wird abgschlosse…"
-      }
+        "recording": "Wird abgschlosse…",
+        "wallet": "I dim Wallet bestätige"
+      },
+      "open": "Abos verschänke",
+      "title": "Abos verschänke",
+      "plan": "Plan",
+      "mode": {
+        "random": "Zuefälligi Zueschauer im Chat",
+        "user": "Öpper Bestimmts"
+      },
+      "randomHint": "Gaht a Lüüt, wo i de letschte 30 Minute gchattet händ und no nöd abonniert sind.",
+      "send_one": "1 Abo verschänke · ${{price}}",
+      "send_other": "{{count}} Abos verschänke · ${{price}}",
+      "payHint": "Zahlt mit Token us dim Wallet in einere Überwisig.",
+      "fewer_one": "Nur 1 Person im Chat cha grad es Abo überchoo, drum zahlsch für 1.",
+      "fewer_other": "Nur {{count}} Lüüt im Chat chönd grad es Abo überchoo, drum zahlsch für {{count}}.",
+      "done_one": "Abo verschänkt!",
+      "done_other": "{{count}} Abos verschänkt!",
+      "failed": "Abos händ nöd chönne verschänkt wärde",
+      "notReady": "Verschänke isch für dä Plan no nöd verfüegbar",
+      "noPlan": "Wähl zersch en Plan",
+      "noPlans": "{{name}} het no kei Abo-Plän zum Verschänke."
     },
     "badges": {
       "audience": {
-        "subscribers": "Abonnente"
+        "subscribers": "Abonnente",
+        "both": "Abonnente und Schänker",
+        "gifters": "Schänker"
       },
       "ended": "Verbi",
       "until": "Bis {{date}}",
-      "failed": "Das het nid funktioniert. Versuchs nomol."
+      "failed": "Das het nid funktioniert. Versuchs nomol.",
+      "title": "Badges uf Ziit",
+      "intro": "Biet für es paar Täg en Badge aa. Wer abonniert oder verschänkt, solang er lauft, überchunt ne, und er wird für immer näbem Name i dim Chat aazeigt.",
+      "name": "Badge-Name",
+      "namePlaceholder": "Launch-Wuche",
+      "days": "Verfüegbar für (Täg)",
+      "emoji": "Emoji",
+      "who": "Wer ne cha verdiene",
+      "create": "Badge aabiete",
+      "created": "Badge isch live.",
+      "end": "Jetzt beände",
+      "holders_one": "{{count}} Bsitzer",
+      "holders_other": "{{count}} Bsitzer",
+      "limit": "Drü Badges chönd glichziitig laufe. Beänd eine, zum en andere aazbiete.",
+      "hypeHint": "Alli, wo bim Hype-Train mitfahred, überchömed au din 🚂-Badge uf em erreichte Level."
+    },
+    "train": {
+      "level": "Hype-Train · Level {{level}}",
+      "endedLevel": "Hype-Train het Level {{level}} gschafft!",
+      "ended": "Hype-Train isch fertig",
+      "thanks_one": "Merci a {{count}} Unterstützer",
+      "thanks_other": "Merci a {{count}} Unterstützer",
+      "top": "Top: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "het es Abo verschänkt 🎁",
+      "giftedSubs_other": "het {{count}} Abos verschänkt 🎁"
     }
   },
   "whenSheet": {
     "today": "Hüt",
     "tooSoon": "Wähl en Zytpunkt i de Zuekunft.",
     "show": "Zeige",
-    "hide": "Verstecke"
+    "hide": "Verstecke",
+    "title": "Wänn?",
+    "tonight": "Hüt z Obig",
+    "inAnHour": "In ere Stund",
+    "tomorrow": "Morn",
+    "primeTime": "Prime Time",
+    "scheduleFor": "Für {{when}} plane",
+    "liveTip": "Dini Follower chönd e Erinnerig setze. Du startisch s Live sälber, wenn s Ziit isch.",
+    "stageTip": "Es chunt grad uf s Rege Demnächscht, so chönd Lüüt uf Erinner mich tippe.",
+    "typePlaceholder": "Gib e Ziit ii, wie \"fri 8pm\" oder \"in 2 hours\"",
+    "typeLabel": "Ziit iigäh",
+    "typeHelp": "Probier \"tonight\", \"tomorrow 9am\", \"sat noon\" oder \"30 oct 7pm\".",
+    "orPickDay": "Oder wähl en Tag",
+    "earlier": "15 Minute früehner",
+    "later": "15 Minute spöter",
+    "earlierShort": "Früehner",
+    "laterShort": "Spöter",
+    "tooSoonMin": "Wähl e Ziit, wo mindestens {{count}} Minute vo jetzt isch.",
+    "zone": "Dini Ziit ({{zone}}). Alli andere gsehnd s i ihrere eigete Ziit.",
+    "remove": "Planig entferne",
+    "startsIn": "Startet in {{time}}",
+    "bestTime": "Bescht Ziit",
+    "fansOnline": "Wänn sind mini Fans online?",
+    "fansBasis": "Heller heisst, dass meh vo dine Follower zueglueget händ, letschti {{count}} Täg.",
+    "everyoneBasis": "No nöd gnueg Follower-Aktivität, drum isch das alli uf Riftn."
   },
   "planned": {
     "title": "Geplant",
@@ -19245,22 +20443,45 @@
     "loading": "Lade…",
     "startNow": "Jetz starte",
     "cancel": "Abbrechen",
-    "cancelled": "Storniert"
+    "cancelled": "Storniert",
+    "subtitle": "Poste, Lives und Stages, wo du plant häsch",
+    "seoTitle": "Plant · Riftn",
+    "seoDescription": "Dini plante Poste, Lives und Stages uf Riftn, alles a eim Ort.",
+    "lives": "Lives",
+    "signIn": "Mäld di aa, zum z gseh, was du plant häsch",
+    "emptyTitle": "No nüt plant",
+    "emptyBody": "Wähl «Wänn?», wenn du en Post, es Live oder e Stage machsch, und es erschiint do.",
+    "move": "Verschiebe",
+    "postNow": "Jetzt poste",
+    "confirmCancel": "Nomol tippe zum Abbräche",
+    "moved": "Uf {{when}} verschobe",
+    "postingNow": "Wird in weniger als ere Minute postet",
+    "moveFailed": "Het nöd chönne verschobe wärde. Probier s nomol.",
+    "seeAll": "Alles aaluege, wo du plant häsch"
   },
   "welcome": {
     "about": {
       "title": "Willkomme bi Riftn",
       "day": "Tag",
       "month": "Monet",
-      "year": "Jahr"
+      "year": "Jahr",
+      "sub": "Din Geburtstag blibt privat. Wähl en Look, du chasch ne jederzit ändere.",
+      "birthday": "Geburtsdatum",
+      "pick": "Wähl din Geburtstag",
+      "invalid": "Gib dis vollständige Geburtsdatum ii.",
+      "tooYoung": "Du muesch {{age}} oder älter sii, zum Riftn z bruuche.",
+      "theme": "Din Look"
     },
     "name": {
       "title": "Deini Name",
-      "placeholder": "Deini Name"
+      "placeholder": "Deini Name",
+      "sub": "Das isch de Name, wo d Lüüt uf dine Poste gsehnd."
     },
     "card": {
       "name": "Deini Name",
-      "followers": "Follower"
+      "followers": "Follower",
+      "interests": "Dini Interesse",
+      "following": "gfolgt"
     },
     "topic": {
       "music": "Musig",
@@ -19270,11 +20491,49 @@
       "comedy": "Komödie",
       "food": "Essen",
       "news": "Nachrichten",
-      "science": "Wissenschaft"
+      "science": "Wissenschaft",
+      "gaming": "Gaming",
+      "travel": "Reise",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Autos",
+      "podcast": "Podcast",
+      "animals": "Tier",
+      "tech": "Tech"
     },
     "back": "Zrugg",
     "skipPhoto": "Skip fürs Moment.",
-    "preview": "Vorschau"
+    "preview": "Vorschau",
+    "username": {
+      "title": "Din @username",
+      "sub": "Buechstabe, Zahle und Understrich. Du chasch ne spöter ändere.",
+      "yours": "@{{name}} ghört dir"
+    },
+    "photo": {
+      "title": "Dis Foto",
+      "sub": "Optional. Lüüt folged Gsichter schnäller.",
+      "choose": "Es Foto uswähle",
+      "change": "Es anders uswähle"
+    },
+    "interests": {
+      "title": "Dini Interesse",
+      "sub": "Wähl mindestens 3. Si chömed i dine Kategorie zersch."
+    },
+    "people": {
+      "title": "Dini Lüüt",
+      "sub": "Tippe zum Folge. Ihri Poste füllend din Gfolgt-Feed.",
+      "empty": "Grad kei Vorschläg. Unter Entdecke häts meh Lüüt z finde.",
+      "followers": "{{count}} Follower"
+    },
+    "done": {
+      "title": "Gseht guet us, {{name}}",
+      "sub": "Ab hüt gsehnd alli die Charte.",
+      "eyebrow": "Profil live"
+    },
+    "enter": "Zu Riftn",
+    "pickMore": "No {{count}} wähle",
+    "cardHint": "So gsehnd di d Lüüt",
+    "followFailed": "Het nöd chönne gfolgt wärde. Probier s nomol."
   },
   "appTokens": {
     "title": "Dini Tokens",
@@ -19285,28 +20544,102 @@
     "amount": "Betrag",
     "notePlaceholder": "Notiz dezuetue (optional)",
     "sendButton": "Schicke",
-    "errorInsufficient": "Nöd gnueg Tokens"
+    "errorInsufficient": "Nöd gnueg Tokens",
+    "rowHint": "Guethabe i de App",
+    "explainer": "Dini Token läbed jetzt in Riftn. Du häsch mit dem aagfange, wo du zum Start onchain ghalte und gstaked häsch. Schicke, Trinkgeld gäh und Usgäh bewegt si sofort, ohni Gebühre und ohni öppis onchain. Guethabe wärde bim Airdrop uf de neu Token übernoh.",
+    "kindOpening": "Startguethabe",
+    "kindSent": "A {{name}} gschickt",
+    "kindReceived": "Vo {{name}}",
+    "kindSpent": "In Riftn usgäh",
+    "kindRefund": "Rückerstattig",
+    "kindAdjust": "Aapassig dur Riftn",
+    "sendTitle": "Token schicke",
+    "sendHint": "Schickt Token in Riftn a es anders Konto. Sofort und gratis, nüt gaht onchain.",
+    "toPlaceholder": "@username oder 0x-Adrässe",
+    "looking": "Wird gsuecht…",
+    "available": "Verfüegbar: {{amount}}",
+    "sent": "{{amount}} Token a {{name}} gschickt",
+    "errorRateLimit": "Z vill Überwisige i de letschte Stund. Probier s spöter nomol.",
+    "errorNoRecipient": "Kei Riftn-Konto gfunde",
+    "errorSelf": "Du chasch dir nöd sälber schicke",
+    "errorGeneric": "Het nöd chönne gschickt wärde. Probier s nomol."
   },
   "reactions": {
     "policy": {
       "everyone": "Alli",
       "followers": "Follower",
-      "nobody": "Niemer"
+      "nobody": "Niemer",
+      "default": "Konto-Standard ({{value}})"
     },
     "heading": "Reaktionen",
     "more": "Mehr zeigen",
     "liveNow": "Lebe",
-    "untitled": "Reaktion"
+    "untitled": "Reaktion",
+    "reactionTo": "Reaktion uf",
+    "reactingTo": "Reagiert uf",
+    "count_one": "{{count}} Reaktion",
+    "count_other": "{{count}} Reaktione",
+    "allow": "Reaktione erlaube",
+    "remixesSection": "Remixes",
+    "allowDescription": "Lass anderi Creator uf dini Videos reagiere, ufgnoh oder live. Du chasch s bi jedem Post immer no ändere.",
+    "pageDescription": "Lueg, wie Creator uf «{{title}}» vo {{creator}} uf Riftn reagiered, ufgnoh und live.",
+    "backToVideo": "Zrugg zum Video",
+    "empty": "No kei Reaktione. Öffne s Remix-Menü vom Video und wähl Reagiere, zum de Erscht z sii.",
+    "wasLive": "Isch live gsi",
+    "thisVideo": "das Video",
+    "pageTitle": "Reaktione uf {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Verbinde Riftn mit deinem KI-Assistenten",
     "urlLabel": "MCP-Server-URL",
     "copy": "Kopiere",
     "copied": "Kopiert",
-    "copiedToast": "MCP-URL kopiert"
+    "copiedToast": "MCP-URL kopiert",
+    "accountBody2": "Speicher privati Entwürf, veröffentlich und plan Poste, verwalte Bilder und Umfroge, lies Analytics, antworte, reagier, reposte, folge, speicher Lesezeiche, lies Benachrichtigunge, bearbeite dis Profil und erstell mit dine Credits. Wenn e Post-Aafrog-ID wiederverwändet wird, git s kein zwöite Post und es zellt au nöd. Es frogt, bevor öppis usgäh wird.",
+    "agentsTitle": "Füehr dini Agents vo dim Assistänt us",
+    "agentsBody": "Wenn du di verbindisch, erlaub au «Als dini Agents handle». Din Assistänt cha dänn als jede Agent, wo dir ghört, poste, antworte, reagiere, reposte, folge oder es Profil bearbeite, eine nach em andere oder vill hinterenand. Er cha nie als es Konto handle, wo dir nöd ghört.",
+    "agentsExample": "Probier: «Lass @mybot uf de Top-Post i mim Feed antworte und like dänn die Antwort als @otherbot.»",
+    "desc": "Bruuch Riftn us ChatGPT, Claude, Cursor oder jeder MCP-App. Lueg di ohni Konto um oder mäld di aa, damit din Assistänt für dich poste, antworte und erstelle cha.",
+    "copyFailed": "Kopiere fehlgschlage",
+    "urlNote": "Füeg das i dini KI-App ii. Es isch kei Websiite, drum bringt di s Öffne im Browser do here zrugg.",
+    "canTitle": "Was din Assistänt cha",
+    "publicTitle": "Ohni Aamäldig",
+    "publicBody": "Feed aaluege, Poste und Lüüt sueche, Kommentar läse und Profil nacheluege.",
+    "accountTitle": "Nachdem du di aagmäldet häsch",
+    "accountBody": "Poste, antworte, reagiere, folge, Lesezeiche speichere, Benachrichtigunge läse, dis Profil bearbeite und mit dine Credits Bilder, Video und Musig erstelle. Es frogt, bevor öppis usgäh wird.",
+    "chatgpt1": "Öffne d ChatGPT-Iistellige, dänn Apps & Connectors, dänn Advanced, und schalt de Developer mode ii.",
+    "chatgpt2": "Zrugg i Apps & Connectors, wähl Create, zum en neue Connector dezuezfüege.",
+    "chatgpt3": "Nenn ne Riftn, füeg d URL vo obe ii und wähl OAuth als Aamälde-Typ.",
+    "chatgpt4": "Drück Connect. Riftn gaht uf: mäld di aa, prüef d Berechtigunge und drück Allow.",
+    "chatgpt5": "Öffne i me neue Chat s +-Menü, wähl Riftn und frog zum Bispil: «Zeig mir trendigi Poste uf Riftn.»",
+    "claude1": "Öffne d Connector-Iistellige vo Claude und wähl Add custom connector.",
+    "claude2": "Nenn ne Riftn, füeg d URL vo obe ii und drück Add.",
+    "claude3": "Drück Connect. Riftn gaht uf: mäld di aa, prüef d Berechtigunge und drück Allow.",
+    "claude4": "Öffne i me Chat s Tools-Menü, schalt Riftn ii und frog druflos.",
+    "openSettings": "Iistellige öffne",
+    "devTitle": "Claude Code, Cursor und anderi Apps",
+    "devBody": "Füeg Riftn als Remote-MCP-Server über HTTP dezue. D App öffnet d Riftn-Aamäldig s erschte Mal, wenn si dis Konto bruucht.",
+    "manageTitle": "Dini verknüpfte Apps",
+    "manageBody": "Verknüpfti Apps blibed verbunde, solang du si bruuchsch, und wärde nach 30 Täg ohni Nutzig trennt. Du chasch si jederzit aaluege oder trenne.",
+    "manageLink": "Verknüpfti Apps verwalte",
+    "agentTitle": "Wotsch en Bot, wo mit sim eigete Konto postet?",
+    "agentBody": "Erstell en Agent und du überchunsch sini eigeti Connector-URL mit iibautem Schlüssel. Din Assistänt cha dänn als dä Agent statt als du poste, kommentiere, abstimme und folge.",
+    "agentLink": "En Agent erstelle",
+    "helpTitle": "Wenn öppis schiefgaht",
+    "help1": "«Authentication update required» oder en Reconnect-Chnopf: drück Reconnect und mäld di nomol bi Riftn aa.",
+    "help2": "«Link your Riftn account», wenn du nach dine eigete Poste frogsch: drück Connect i de Connector-Iistellige vo de App.",
+    "help3": "En Fehler, wenn du d URL in ere Browser-Tab öffnisch, isch normal. Füeg si stattdesse i dini KI-App ii.",
+    "other": "Jedi anderi MCP-App funktioniert gliich: füeg en Remote-MCP-Server dezue und füeg d URL vo obe ii."
   },
   "avatarPrompt": {
-    "notNow": "Jetzt nöd"
+    "notNow": "Jetzt nöd",
+    "title": "Es Profilfoto dezuefüege",
+    "body": "D Lüüt gsehnd di schnäller in Feeds, Kommentar und Chats, wenn du es Gsicht oder es Logo häsch.",
+    "choose": "Es Foto uswähle",
+    "another": "Es anders uswähle",
+    "save": "Das Foto bruuche",
+    "saved": "Gseht guet us",
+    "failed": "Dis Foto het nöd chönne gspeicheret wärde. Probier s nomol."
   },
   "postStats": {
     "audience": "Zuegl",
@@ -19323,7 +20656,61 @@
     "shares": "Teile",
     "signedOutViewers": "Abgmeldet",
     "topSupporters": "Top-Unterstützer",
-    "visitors": "Abgmeldet"
+    "visitors": "Abgmeldet",
+    "aboutUsual": "öppe wie süscht",
+    "afterWatching": "händ nach em Aaluege gfolgt",
+    "avg": "Ø",
+    "avgWatch": "Ø Luegziit",
+    "bestTime": "Wänn dini Lüüt luegend",
+    "bigDrop": "Grosse Abfall",
+    "byBadge": "nach Badge",
+    "devices": "Grät (Mitglieder)",
+    "finishedLower": "fertig gluegt",
+    "finishedPct": "{{pct}}% händ bis zum Schluss gluegt",
+    "inOut": "{{in}} Mitglieder · {{out}} abgmäldet",
+    "leave": "{{pct}}% gönd",
+    "linkClicks": "Link-Klicks",
+    "newToYou": "neu für dich",
+    "noAccount": "kei Konto",
+    "noViewersYet": "No niemer het dä Post gseh.",
+    "noWatchYet": "D Luegziit erschiint do, sobald Lüüt s abspieled. Si wird sit em 31. Okt 2026 zellt.",
+    "open": "Lueg, wie s dim Post gaht",
+    "otherBadges": "Anderi Badges",
+    "peak": "Spitze {{time}} · {{n}}",
+    "peopleReached": "Erreichti Lüüt",
+    "playsLower": "Wiedergabe",
+    "playsMembers": "Wiedergabe vo Mitglieder",
+    "playsVisitors": "Wiedergabe abgmäldet",
+    "profileTaps": "Tipps uf dis Profil",
+    "reach": "Reichwiti",
+    "reposts": "Reposts",
+    "saves": "Gspeicheret",
+    "seeAll": "Alli Statistike aaluege",
+    "signedIn": "aagmäldet",
+    "signedOutLower": "abgmäldet",
+    "stillWatching": "Lueged no",
+    "timesUsual": "{{ratio}}× wie süscht",
+    "vsUsualPct": "{{pct}} vs. din übliche Post",
+    "unavailableBody": "Nur de Creator cha d Statistike vo dem Post gseh.",
+    "unavailableTitle": "Statistike nöd verfüegbar",
+    "vsUsual": "vs. din übliche Post",
+    "watching": "Am Luege",
+    "whoSawIt": "Wer s gseh het",
+    "withRepeats": "{{n}} Widerholige",
+    "yourFollowers": "dini Follower",
+    "first48": "Erschti 48 Stunde",
+    "howItsDoing": "Wie s lauft",
+    "bestTip": "Di meischte vo dine Zueschauer chömed {{day}} öppe um {{hour}}:00. Wenn du churz devor postisch, het en Post de bescht Start.",
+    "last30": "letschti 30 Täg",
+    "day": {
+      "sun": "So",
+      "mon": "Mo",
+      "tue": "Di",
+      "wed": "Mi",
+      "thu": "Do",
+      "fri": "Fr",
+      "sat": "Sa"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Chùò chùò",
@@ -19356,7 +20743,27 @@
   },
   "mcpKeys": {
     "delete": "Lösche",
-    "shortProfile": "Profiu"
+    "shortProfile": "Profiu",
+    "title": "Persönlichi Schlüssel",
+    "body": "Für Scripts, Bots und Apps, wo kei Aamälde-Siite chönd öffne. En Schlüssel macht nur, was du erlaubsch, uf dim Konto und dine Agents. Er blibt aktiv, solang er bruucht wird, und hört nach 30 Täg ohni Nutzig uf.",
+    "signIn": "Mäld di aa, zum en Schlüssel z mache",
+    "newTitle": "Kopier din Schlüssel jetzt",
+    "newBody": "Das isch s einzig Mal, wo er aazeigt wird. Wer ne het, cha dis Konto innerhalb vo de gwählte Berechtigunge bruuche, drum halt ne gheim.",
+    "useIt": "Füeg ne mit eim vo dene i dini App ii:",
+    "name": "Schlüssel-Name",
+    "namePlaceholder": "Min Bot",
+    "permissions": "Was dä Schlüssel dörf",
+    "limits": "Tageslimits über dis Konto und dini Agents: 50 Poste, 300 Antworte, 1,000 Reaktione, 200 Follows, 200 Reposts und 30 Profil-Bearbeitige.",
+    "create": "Schlüssel erstelle",
+    "show": "Mini Schlüssel zeige",
+    "yours": "Dini Schlüssel",
+    "empty": "No kei Schlüssel.",
+    "expires": "Aktiv bis {{date}}, usser er wird wieder bruucht",
+    "shortRead": "Läse",
+    "shortSocial": "Poste und antworte",
+    "shortGenerate": "Medie erstelle",
+    "shortAgents": "Dini Agents",
+    "settingsBody": "Bruuch Riftn und dini Agents us ChatGPT, Claude oder jeder MCP-App, oder mach en persönliche Schlüssel."
   },
   "chatSearch": {
     "placeholder": "Suäch Nachrichtä oder Lüüt",
@@ -19392,12 +20799,91 @@
     "title": "Aafrage",
     "accept": "Annehmen",
     "delete": "Lösche",
-    "block": "Blockiere"
+    "block": "Blockiere",
+    "hint": "Nachrichte vo Lüüt, wo du nöd folgsch. Akzeptier eini, antworte oder folg ne, und de Chat chunt i dini Inbox.",
+    "rowHint": "{{n}} vo Lüüt, wo du nöd folgsch",
+    "banner": "Du folgsch {{name}} nöd. Akzeptier, zum dä Chat i dini Inbox z verschiebe, oder antworte eifach.",
+    "accepted": "I dini Inbox verschobe",
+    "acceptFailed": "Het nöd chönne akzeptiert wärde, probier s nomol"
   },
   "dmSchedule": {
     "view": "Aaluege",
     "edit": "Ändere",
     "editLabel": "Nachricht bearbeite",
-    "error": "Das het nid funktioniert. Versuchs nomol."
+    "error": "Das het nid funktioniert. Versuchs nomol.",
+    "button": "Nachricht plane",
+    "title": "Planti Nachrichte",
+    "whenTitle": "Wänn schicke?",
+    "waiting": "{{n}} plant",
+    "next": "nächschti {{when}}",
+    "failedCount": "{{n}} nöd gschickt",
+    "notSent": "Nöd gschickt",
+    "emptyTitle": "Nüt plant",
+    "emptyBody": "Schrib e Nachricht und tipp dänn uf d Uhr, zum uszwähle, wänn si gschickt wird.",
+    "changeTime": "Ziit ändere",
+    "sendNow": "Jetzt schicke",
+    "deleted": "Planti Nachricht glöscht",
+    "unreadable": "Uf eme andere Grät gschribe. Si wird trotzdem gschickt.",
+    "footnote": "D Ziite sind i dinere Ziitzone. Niemer gseht e Nachricht, bevor si gschickt isch.",
+    "footnoteNamed": "D Ziite sind i dinere Ziitzone. {{name}} gseht e Nachricht erscht, wenn si gschickt isch.",
+    "textOnly": "Vorerscht chönd nur Textnachrichte plant wärde.",
+    "scheduledToast": "Plant für {{when}}",
+    "failedToast": "E planti Nachricht het nöd chönne gschickt wärde"
+  },
+  "mentionLinks": {
+    "communities": "Communitys",
+    "pages": "Siite",
+    "people": "Lüt",
+    "empty": "Nüt gfunde",
+    "hint": "Tipp, zum Lüüt, Communitys und Siite finde",
+    "linkTo": "{{name}} verlinke",
+    "members": " Mitglieder",
+    "placeholder": "Lüüt, Communitys, Siite sueche...",
+    "title": "Erwähne oder verlinke"
+  },
+  "postEditHistory": {
+    "title": "Bearbeitigsverlauf",
+    "edited_one": "Eimal bearbeitet",
+    "edited_other": "{{count}} Mal bearbeitet",
+    "lastEdit": "Letschti Bearbeitig {{time}}",
+    "original": "Original",
+    "editN": "Bearbeitig {{n}}",
+    "now": "Jetzt",
+    "showChanges": "Zeig, was sich gänderet het"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Ich verstah, dass mis Profil versteckt wird und ich überall abgmäldet wirde.",
+    "title": "Konto deaktiviere",
+    "short": "Versteck dis Profil vorerscht. Mäld di wieder aa, zum s zruggzhole",
+    "description": "Mach lieber e Pause. Dis Profil, dini Poste und Kommentar wärde versteckt und du wirsch überall abgmäldet. Nüt wird glöscht, und wenn du di wieder aamäldisch, isch alles wieder do.",
+    "button": "Deaktiviere",
+    "confirmTitle": "Dis Konto deaktiviere?",
+    "confirmBody": "Dis Profil, dini Poste und Kommentar wärde versteckt und du wirsch uf jedem Grät abgmäldet. Mäld di jederzit wieder aa, zum das rückgängig z mache.",
+    "busy": "Wird deaktiviert…",
+    "done": "Konto deaktiviert",
+    "receipt": "Dis Profil, dini Poste und Kommentar sind versteckt. Mäld di jederzit wieder aa, zum alles zruggzhole.",
+    "error": "Dis Konto het nöd chönne deaktiviert wärde. Probier s bitte nomol."
+  },
+  "halloween": {
+    "title": "Schöni Halloween",
+    "otherThemes": "Kei Luscht uf gruselig? Find anderi Themes:",
+    "enter": "Is Verliess"
+  },
+  "msgDelete": {
+    "title": "Nachricht lösche?",
+    "titleMany": "{{count}} Nachrichte lösche?",
+    "bodyOwn": "Nur us dim Chat entferne oder für alli.",
+    "bodyOwnMany": "Nur us dim Chat entferne oder für alli.",
+    "bodyOthers": "Si wird nur us dim Chat entfernt. Di ander Person gseht si wiiterhin.",
+    "bodyOthersMany": "Si wärde nur us dim Chat entfernt. Anderi im Chat gsehnd si wiiterhin.",
+    "bodyOwnBoth": "Nur us dim Chat entferne oder für eu beidi.",
+    "bodyOwnBothMany": "Nur us dim Chat entferne oder für eu beidi.",
+    "forMe": "Für mich lösche",
+    "forEveryone": "Für alli lösche",
+    "forBoth": "Für eus beidi lösche",
+    "forMeAndName": "Für mich und {{name}} lösche",
+    "remember": "Mini Wahl merke",
+    "rememberHint": "Jederzit i de Iistellige änderbar",
+    "failed": "D Nachricht het nöd chönne glöscht wärde"
   }
 }

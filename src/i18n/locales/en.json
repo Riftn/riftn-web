@@ -791,6 +791,25 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "chatCards": "Chats as cards",
+    "chatCardsDesc": "Each chat on its own card. Turn off for a plain list with a line between chats.",
+    "chatDeleteChoice": "When you delete a message",
+    "chatDeleteChoiceDesc": "Ask every time, or always delete for you only or for everyone in the chat.",
+    "chatReactionStyle": "Reactions in chat",
+    "chatReactionStyleDesc": "How a reaction moves when it lands in a chat, yours or someone else’s.",
+    "chatReactionFly": "Fly in",
+    "chatReactionFlyDesc": "The emoji flies onto the message",
+    "chatReactionPop": "Pop",
+    "chatReactionPopDesc": "It springs in place, small and calm",
+    "chatReactionBurst": "Burst",
+    "chatReactionBurstDesc": "Yours blooms big with sparks",
+    "chatReactionOff": "Off",
+    "chatReactionOffDesc": "No motion, the number just changes",
+    "chatDeleteAsk": "Ask every time",
+    "chatDeleteMe": "Delete for me",
+    "chatDeleteMeDesc": "Gone from your chat, others still see it",
+    "chatDeleteEveryone": "Delete for everyone",
+    "chatDeleteEveryoneDesc": "When you can. Someone else’s message in a group still goes for you only",
     "postLanding": "After you post",
     "postLandingDesc": "How your new post lands in your feed",
     "postLandingGhost": "Ghost slot",
@@ -1392,7 +1411,9 @@
     "menuLayoutSections": "Sections",
     "menuLayoutSectionsDesc": "Every page at once, under group headers",
     "menuLayoutFolders": "Folders",
-    "menuLayoutFoldersDesc": "Your main pages, then a folder for each group"
+    "menuLayoutFoldersDesc": "Your main pages, then a folder for each group",
+    "publicChatInBar": "Public Chat in the bottom bar",
+    "publicChatInBarDesc": "One tap into Public Chat from the bar at the bottom of the screen"
   },
   "common": {
     "confirm": "Confirm",
@@ -2154,6 +2175,12 @@
     "likes": "Likes",
     "subscribers": "Subscribers",
     "affiliates": "Affiliates",
+    "ogChallenge": "OG Challenge",
+    "ogHolders_one": "{{count}} OG holder",
+    "ogHolders_other": "{{count}} OG holders",
+    "ogChallengeTitle": "Bring back the OG holders",
+    "ogChallengeBody": "Invite people who still hold DHB. When they join with your invite link and keep their DHB in their Riftn wallet, they count for you here.",
+    "ogChallengeCta": "Get your invite link",
     "directReferrals_one": "{{count}} direct",
     "directReferrals_other": "{{count}} direct",
     "secondaryReferrals_one": "{{count}} secondary",
@@ -2260,6 +2287,11 @@
     "followBack": "Follow Back"
   },
   "features": {
+    "cropDraw": "Crop & draw",
+    "crop": "Crop",
+    "cropHint": "Drag a box over the part to keep. Drag inside it to move it.",
+    "drawHint": "Draw on the picture to point things out.",
+    "resetCrop": "Reset crop",
     "prompts": "Prompts",
     "queued": "Queued",
     "promptPageTitle": "Requests",
@@ -3727,6 +3759,10 @@
     "statsLoadFailed": "Couldn't load staking stats"
   },
   "communities": {
+    "muteChat": "Mute",
+    "mutedChat": "Muted",
+    "muteChatHint": "Stop alerts from this community's chat. You can still read it",
+    "unmuteChatHint": "Get alerts from this community's chat again",
     "sortTop": "Top",
     "shareLink": "Share link",
     "pinnedMore": "More",
@@ -5579,6 +5615,7 @@
   "creator": {
     "gallery": {
       "browse": "Browse generations",
+      "create": "Create",
       "fullscreen": "View full screen",
       "missing": "This generation is unavailable.",
       "send": "Send",
@@ -7968,6 +8005,9 @@
     "sourceEncoder": "OBS / Encoder",
     "sourceEncoderHint": "Get RTMP details",
     "screenPickHint": "You'll pick the screen, window or tab next — then it goes live with your mic and the tab's own sound.",
+    "screenInAppHint": "In the Riftn app",
+    "screenInAppNote": "Phone browsers don't let any website share your screen. Go live from the Riftn app instead, then tap Share screen.",
+    "screenInAppCta": "Get the Riftn app",
     "replayAllowanceUsed": "You've used today's upload allowance, so this stream won't keep a replay. The allowance resets at midnight UTC.",
     "replayFreeTier": "Free accounts keep the first {{size}} of a stream as a replay — staking badges raises the limit.",
     "replayTiered": "Up to {{size}} of this stream is kept as a replay ({{tier}} daily allowance).",
@@ -9041,7 +9081,19 @@
     "declined": "Call declined",
     "noAnswer": "No answer",
     "missed": "Missed call",
-    "callBack": "Call back"
+    "callBack": "Call back",
+    "group": "Group",
+    "groupVoiceCall": "Group voice call",
+    "groupVideoCall": "Group video call",
+    "callingGroup": "Ringing the group...",
+    "isCalling": "{{name}} is calling",
+    "leave": "Leave",
+    "joinCall": "Join call",
+    "inCall_one": "{{count}} in the call",
+    "inCall_other": "{{count}} in the call",
+    "startGroupVoice": "Start a group voice call",
+    "startGroupVideo": "Start a group video call",
+    "you": "You"
   },
   "badgeAscension": {
     "reached": "You reached {{tier}}",
@@ -12691,7 +12743,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as dehub. Connect your accounts once, then pick where each post goes.",
+    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as Riftn. Connect your accounts once, then pick where each post goes.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up and save",
@@ -12737,6 +12789,11 @@
     "skippedOtherToast": "Skipped {{platforms}}: they couldn't take this post."
   },
   "dm": {
+    "shareGroups": "Groups",
+    "shareKindGroup": "Group",
+    "shareKindChannel": "Channel",
+    "shareKindCommunity": "Community",
+    "reportMessage": "Report message",
     "planRestricted": "This user requires a subscription to receive messages.",
     "planTypeNotAllowed": "This creator's plan doesn't allow this kind of message.",
     "planMinTip": "Tip must be at least {{amount}} tokens for this creator."
@@ -20724,6 +20781,9 @@
     "error": "That did not work. Try again."
   },
   "msgDelete": {
+    "chatTitle": "Delete this chat?",
+    "chatBodyBoth": "Delete it from your chats only, or every message for both of you. This can't be undone.",
+    "chatBodyMe": "It will be removed from your chats only. Others will still see it.",
     "title": "Delete message?",
     "titleMany": "Delete {{count}} messages?",
     "bodyOwn": "Remove it from your chat only, or for everyone.",
@@ -20736,6 +20796,12 @@
     "forEveryone": "Delete for everyone",
     "forBoth": "Delete for both of us",
     "forMeAndName": "Delete for me and {{name}}",
+    "remember": "Remember my choice",
+    "rememberHint": "Change it any time in Settings",
     "failed": "Could not delete the message"
+  },
+  "roomPreview": {
+    "you": "You",
+    "voice": "🎤 Voice message"
   }
 }

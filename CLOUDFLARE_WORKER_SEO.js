@@ -4,6 +4,7 @@ import { handleWorkReceipt } from './server/work-receipts.ts';
 import { handleEditorPresence } from './server/editor-presence.ts';
 import { stageShareImageUrl } from './server/stage-share-card.js';
 import { applyPostShareImage, applyProfileShareImage, postShareImageUrl } from './server/post-share-card.js';
+import { liveShareCopy } from './server/live-share-copy.js';
 import { handleFinanceRequest } from './server/finance-stats.js';
 import { handleCreatorMotionSource } from './server/creator-motion-source.js';
 import { handleAccountMcp, isAccountMcpRoute } from './server/account-mcp.js';
@@ -2496,6 +2497,29 @@ function enrichPostMeta(html, postId, nft) {
       /(<p>)Post by .+? on Riftn(?: —|,) join the decentralized creator network\.(<\/p>)/g,
       (m, a, b) => `${a}${attrDesc}${b}`,
     );
+}
+
+/**
+ * A live stream's own title and description (server/live-share-copy.js
+ * builds them): `pureglo is live on Riftn` / `Watch pureglo live on Riftn
+ * now! "glo is live"` while it is on air, the replay or a past stream after.
+ * Runs after enrichPostMeta, so whatever title and description that settled
+ * on are the ones swapped, in every place the page carries them: the meta
+ * tags, the JSON-LD and the paragraph a crawler reads. `copy` is null for
+ * anything that is not a live post, which leaves the page alone.
+ */
+function enrichLivePostMeta(html, copy) {
+  if (!copy) return html;
+  const titleTag = html.match(/<title>([^<]*)<\/title>/i);
+  const current = decodeFnText(titleTag ? titleTag[1] : '').replace(/\s+/g, ' ').trim();
+  let out = current !== copy.title ? replacePostTitle(html, current, copy.title) : html;
+  const old = (out.match(/<meta name="description" content="([^"]*)">/) || [])[1];
+  if (old == null) return out;
+  const description = truncate(copy.description, DESCRIPTION_MAX);
+  const attr = escFnAttr(description);
+  out = out.split(`content="${old}"`).join(`content="${attr}"`).split(`<p>${old}</p>`).join(`<p>${attr}</p>`);
+  const oldJson = escJsonText(decodeFnText(old));
+  return out.split(`"description":"${oldJson}"`).join(`"description":"${escJsonText(description)}"`);
 }
 
 /**
@@ -7995,6 +8019,7 @@ async function handleRequest(request, env, ctx) {
       }
       aiReserved = aiTrainingReserved(record && record.minterUser && record.minterUser.customs);
       html = enrichPostMeta(html, proxiedPostId, record);
+      html = enrichLivePostMeta(html, liveShareCopy(record, postAuthor(html, record, null), { titleMax: TITLE_MAX }));
       // oEmbed discovery: WordPress, Ghost, Iframely, Embedly and Mastodon's
       // link cards turn a pasted post link into the embedded post.
       const oembedTag = oembedLinkTag(APP_URL, record);

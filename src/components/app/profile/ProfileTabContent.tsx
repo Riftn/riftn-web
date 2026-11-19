@@ -3,7 +3,7 @@ import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Repeat2 from "@/components/ui/cut-icons/repost";
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
@@ -655,6 +655,11 @@ function PostsTabPanel({
     return failed;
   }, [uniqueTokenIds, parentPostQueries]);
 
+  // One handler for every reply card, so its memo holds while the list scrolls.
+  const openComment = React.useCallback((comment: UserCommentItem) => {
+    if (comment.tokenId) navigate(`/app/post/${comment.tokenId}?comment=${comment.id}`);
+  }, [navigate]);
+
   const mergedItems = React.useMemo(() => {
     const items: Array<{ type: 'post' | 'comment'; data: TextPost | UserCommentItem; createdAt: string }> = [
       ...PROFILE_POSTS.map(p => ({ type: 'post' as const, data: p, createdAt: p.createdAt || '' })),
@@ -698,11 +703,7 @@ function PostsTabPanel({
               parentPost={parentPost}
               parentPostFailed={!!comment.tokenId && failedParentPosts.has(String(comment.tokenId))}
               isOwnComment={!!isViewingOwnProfile}
-              onClick={() => {
-                if (comment.tokenId) {
-                  navigate(`/app/post/${comment.tokenId}?comment=${comment.id}`);
-                }
-              }}
+              onOpen={openComment}
             />
           </div>
         );
@@ -1354,14 +1355,17 @@ function resolveCommentMediaUrl(url?: string | null): string | undefined {
   return /^(https?:)?\/\//.test(url) || url.startsWith('data:') ? url : getMediaUrl(url) || url;
 }
 
-function CommentCard({ comment, parentPost, parentPostFailed, isOwnComment, onClick }: {
+// memo: the tab re-renders as each post behind a reply loads; unchanged
+// cards skip that.
+const CommentCard = React.memo(function CommentCard({ comment, parentPost, parentPostFailed, isOwnComment, onOpen }: {
   comment: UserCommentItem;
   parentPost?: DeHubNFT;
   /** The post could not be loaded (deleted, hidden, or the request failed). */
   parentPostFailed?: boolean;
   isOwnComment?: boolean;
-  onClick: () => void;
+  onOpen: (comment: UserCommentItem) => void;
 }) {
+  const onClick = useCallback(() => onOpen(comment), [onOpen, comment]);
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
@@ -1530,4 +1534,4 @@ function CommentCard({ comment, parentPost, parentPostFailed, isOwnComment, onCl
       </ThreadRow>
     </div>
   );
-}
+});

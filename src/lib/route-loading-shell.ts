@@ -13,6 +13,9 @@ export function notifyRouteContentReady(key: string): void {
   window.dispatchEvent(new CustomEvent(ROUTE_CONTENT_READY, { detail: key }));
 }
 
+/** Longest entrance in app-route-motion.css (220ms), plus a frame or two. */
+const ENTRANCE_MS = 260;
+
 /** A small, independent layer can composite while the destination renders. */
 export function showRouteLoadingShell(title: string, backLabel: string, backwards = false): RouteLoadingShell | null {
   const main = document.querySelector<HTMLElement>('[data-main-panel]');
@@ -43,7 +46,16 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
   button.onclick = () => window.history.back();
   node.querySelector('strong')!.textContent = title;
   document.body.appendChild(node);
+  // When the shell first reached a frame, so reveal() knows if its entrance
+  // has finished without asking the browser.
+  let firstFrameAt = 0;
+  requestAnimationFrame((at) => { firstFrameAt = at; });
   const inert = main.inert;
+  // Phones: the shell already sits over the whole feed and takes every touch,
+  // and switching `inert` makes the browser restyle each feed card, once on the
+  // way in and once on the way out, while the post is trying to draw. Computers
+  // keep it, for the keyboard.
+  const phone = window.matchMedia?.('(max-width: 1023px)').matches === true;
   let removed = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const restore = () => { main.inert = inert; };
@@ -57,7 +69,7 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
   // A lost route or error must never leave the feed hidden behind a shell.
   timer = setTimeout(remove, 5000);
   return {
-    cover() { if (!removed) main.inert = true; },
+    cover() { if (!removed && !phone) main.inert = true; },
     reveal() {
       if (removed) return;
       restore();
@@ -67,9 +79,15 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
         return;
       }
       button.disabled = true;
-      const current = getComputedStyle(node);
-      node.style.opacity = current.opacity;
-      node.style.transform = current.transform;
+      // Leave from where the entrance got to. Once the entrance is over that
+      // is simply "fully shown"; reading it back from the browser would lay
+      // out the page that just landed underneath one more time.
+      const entered = firstFrameAt > 0 && performance.now() - firstFrameAt > ENTRANCE_MS;
+      if (!entered) {
+        const current = getComputedStyle(node);
+        node.style.opacity = current.opacity;
+        node.style.transform = current.transform;
+      }
       node.dataset.leaving = '';
       timer = setTimeout(remove, 120);
     },

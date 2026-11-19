@@ -20,6 +20,7 @@ import { postBgById, withPostBgColors, type PostBg } from '@/lib/post-background
 import type { TextPost as GalleryTextPost } from '@/types/feed.types';
 import type { ProviderKeyRow } from '@/lib/api/dehub/provider-keys';
 import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
+import { MultiPostSheetView } from '@/features/post/components/MultiPostSheet';
 import { NewMessageDrawer } from '@/components/app/chat/NewMessageDrawer';
 import type { DeHubConversation } from '@/lib/api/dehub';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -164,8 +165,10 @@ import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { ChatReactionArrivalGallery } from './ChatReactionArrivalGallery';
 import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
 import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
+import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
 import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
@@ -423,7 +426,7 @@ function MessageMenuGallery() {
       <DeleteMessageDialog
         open={!!deleting}
         onOpenChange={(open) => { if (!open) setDeleting(null); }}
-        canDeleteForEveryone={!!deleting?.mine}
+        canDeleteForEveryone={!!deleting}
         oneToOne
         peerName="Ella Verse"
         onDelete={noop}
@@ -768,6 +771,7 @@ import { UsernameReserve } from '@/components/app/profile/UsernameReserve';
 import { ComicPagesEditor } from '@/features/post/components/ComicPagesEditor';
 import { ComicBorderPicker } from '@/features/post/components/ComicBorderPicker';
 import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -1861,6 +1865,35 @@ function PostStatsGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   );
 }
 
+/** Multi-post set up opened from the composer; ?sheet=multipost, &mp=empty for a first-time poster. */
+function MultiPostSheetGallery({ initiallyOpen, empty }: { initiallyOpen: boolean; empty: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  const [selected, setSelected] = useState<string[]>(['g-x']);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const accounts = empty ? [] : [
+    { id: 'g-x', platform: 'twitter', username: 'riftn_com' },
+    { id: 'g-ig', platform: 'instagram', username: 'riftn.app' },
+    { id: 'g-fc', platform: 'farcaster', username: '', pending: true, approvalUrl: 'https://farcaster.xyz' },
+  ];
+  return (
+    <section data-multipost-gallery className="mb-5">
+      <Button onClick={() => setOpen(true)}>Multi-posting sheet</Button>
+      <MultiPostSheetView
+        open={open}
+        onOpenChange={setOpen}
+        accounts={accounts}
+        balance={empty ? 0 : 42}
+        selected={selected}
+        onToggle={(id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))}
+        connecting={connecting}
+        onConnect={(p) => { setConnecting(p); setTimeout(() => setConnecting(null), 1500); }}
+        buying={false}
+        onBuy={() => {}}
+      />
+    </section>
+  );
+}
+
 /** The "Add a profile photo" ask; saving here only waits, nothing uploads. */
 function AvatarPromptGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
@@ -2093,10 +2126,14 @@ export default function StateGalleryPage() {
         <NameBadgesGallery />
         <FullScreenChatGallery />
         <MessageMenuGallery />
+        <ChatReactionArrivalGallery />
         <FollowCardsGallery />
 
         <StreamerArtworkGallery />
 
+        <section data-page-bento data-login-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <LoginLookSetting />
+        </section>
         <PinnedProfileGallery />
         <ProfileImageMenuGallery />
         <ContentWarningGallery />
@@ -2241,6 +2278,7 @@ export default function StateGalleryPage() {
         <ChatBulkGallery />
         <PostEditHistoryGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
+        <MultiPostSheetGallery initiallyOpen={params.get('sheet') === 'multipost'} empty={params.get('mp') === 'empty'} />
         <ToastsGallery />
         <TooltipsGallery />
         <AppTokensGallery />
@@ -2354,7 +2392,27 @@ const GALLERY_GROUP = { ...GALLERY_COMMUNITY, id: 'gallery-group', slug: 'night-
 const GALLERY_CHANNEL = { ...GALLERY_COMMUNITY, id: 'gallery-channel', slug: 'alpha-calls', name: 'Alpha Calls', kind: 'channel', entry_price: 1000, member_count: 1204, avatar_url: null } as Community;
 
 /** The + in Messages: what it offers, the New channel sheet, and the list rows. */
+/** A made-up phone screenshot for the Requests crop editor. */
+function galleryScreenshotFile(): File {
+  const c = document.createElement('canvas');
+  c.width = 390; c.height = 844;
+  const g = c.getContext('2d');
+  if (g) {
+    const grad = g.createLinearGradient(0, 0, 0, 844);
+    grad.addColorStop(0, '#4b6cb7'); grad.addColorStop(1, '#182848');
+    g.fillStyle = grad; g.fillRect(0, 0, 390, 844);
+    g.fillStyle = '#fff'; g.font = 'bold 72px sans-serif'; g.fillText('22:18', 100, 200);
+    g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillRect(20, 560, 350, 90);
+  }
+  const bytes = atob(c.toDataURL('image/png').split(',')[1]);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i += 1) arr[i] = bytes.charCodeAt(i);
+  return new File([arr], 'screenshot.png', { type: 'image/png' });
+}
+
 function GroupsChannelsGallery() {
+  const [chatDelete, setChatDelete] = useState(false);
+  const [markupFile, setMarkupFile] = useState<File | null>(null);
   const [selector, setSelector] = useState(false);
   const [sheet, setSheet] = useState<NewChatKind | null>(null);
   return (
@@ -2369,6 +2427,17 @@ function GroupsChannelsGallery() {
         <GroupChatRow community={GALLERY_GROUP} onClick={noop} />
         <GroupChatRow community={GALLERY_CHANNEL} onClick={noop} />
       </div>
+      {/* Newest line, time and unread number on a group row. */}
+      <div data-group-rows-summary className="mt-3 rounded-2xl border border-white/10 overflow-hidden">
+        <GroupChatRow community={GALLERY_GROUP} onClick={noop} me="0xme" summary={{ unread: 3, last: { content: 'Who is going live tonight?', display_name: 'Ella Verse', wallet_address: '0xella', created_at: new Date(Date.now() - 4 * 60_000).toISOString() } }} />
+        <GroupChatRow community={GALLERY_CHANNEL} onClick={noop} me="0xme" summary={{ unread: 0, last: { content: '', message_type: 'image', image_url: 'x.jpg', wallet_address: '0xme', created_at: new Date(Date.now() - 3 * 3600_000).toISOString() } }} />
+      </div>
+      <div className="flex flex-wrap gap-2 mt-3">
+        <button type="button" data-open-chat-delete onClick={() => setChatDelete(true)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Delete chat</button>
+        <button type="button" data-open-markup onClick={() => setMarkupFile(galleryScreenshotFile())} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Requests crop</button>
+      </div>
+      <DeleteMessageDialog subject="chat" open={chatDelete} onOpenChange={setChatDelete} canDeleteForEveryone oneToOne peerName="Ella Verse" onDelete={noop} />
+      <ImageMarkupDialog file={markupFile} onClose={() => setMarkupFile(null)} onSave={() => setMarkupFile(null)} />
       <div className="mt-3">
         <CommunityKindChip community={GALLERY_GROUP} />
         <CommunityKindChip community={GALLERY_CHANNEL} />

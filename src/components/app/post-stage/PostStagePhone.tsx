@@ -14,6 +14,7 @@
  * so the feed and the tablet/desktop post page are untouched.
  */
 import { useEffect, useRef, type ReactNode } from 'react';
+import { markBody } from '@/lib/body-mark';
 import { PostStageContext, type PostStageValue } from './post-stage-context';
 import { StageMiniPlayer, type StageMediaKind } from './StageMiniPlayer';
 
@@ -33,15 +34,15 @@ interface PostStagePhoneProps {
   padded?: boolean;
 }
 
-/** Body class that hides the app's phone chrome while the stage is up. */
-export const POST_STAGE_BODY_CLASS = 'post-stage-mode';
+/** Body mark that hides the app's phone chrome while the stage is up. */
+export const POST_STAGE_BODY_MARK = 'data-post-stage-mode';
 
 export function PostStagePhone({ value, children, comments, related, kind, title, subtitle, thumbnail, padded }: PostStagePhoneProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.body.classList.add(POST_STAGE_BODY_CLASS);
-    return () => document.body.classList.remove(POST_STAGE_BODY_CLASS);
+    markBody(POST_STAGE_BODY_MARK, true);
+    return () => markBody(POST_STAGE_BODY_MARK, false);
   }, []);
 
   return (

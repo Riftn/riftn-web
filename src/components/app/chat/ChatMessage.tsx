@@ -10,8 +10,9 @@ import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { dblClickReply } from '@/lib/dblclick-reply';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
+import Images from '@/components/ui/cut-icons/images';
 import { ShieldBan, Loader2, RotateCcw, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import Languages from "@/components/ui/cut-icons/language";
@@ -37,6 +38,7 @@ import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { VoiceWaveformPlayer } from './VoiceWaveformPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
@@ -168,6 +170,7 @@ function ReactionBar({
   /** Your own line: a reaction opens the list of who left it. */
   ownLine?: boolean;
 }) {
+  useReactionHost(messageId);
   const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
@@ -197,14 +200,14 @@ function ReactionBar({
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <span className="inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+            <ReactionGlyph messageId={messageId} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" />
             {myReaction && !ownLine ? (
               <>
-                <span className="text-[10px] group-hover/reaction:hidden">{addresses.length}</span>
+                <RollingCount value={addresses.length} className="text-[10px] group-hover/reaction:hidden" />
                 <X className="w-3 h-3 hidden group-hover/reaction:block text-white" />
               </>
             ) : (
-              <span className="text-[10px]">{addresses.length}</span>
+              <RollingCount value={addresses.length} className="text-[10px]" />
             )}
           </button>
         );
@@ -357,6 +360,10 @@ export const ChatMessage = memo(function ChatMessage({
       );
     },
   });
+  // A photo or GIF can be copied as itself, not just its caption.
+  const mediaUrl = (message.type === 'image' || message.type === 'gif') ? copyableMediaUrl(message.imageUrl) : null;
+  const copyMediaNow = mediaUrl ? () => copyMediaWithToast(mediaUrl, message.type === 'gif' ? 'gif' : 'image', _copy) : null;
+  if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
   if (message.type === 'text' && message.content?.trim() && !isTooShort) holdActions.push(
     isTranslated
       ? { key: 'original', icon: <Languages />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
@@ -386,6 +393,7 @@ export const ChatMessage = memo(function ChatMessage({
   if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing, hint: 'E' });
   if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
   if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
+  if (copyMediaNow) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
   if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
     isTranslated
       ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
@@ -624,16 +632,14 @@ export const ChatMessage = memo(function ChatMessage({
         )}
 
         {/* Reactions display */}
-        {message.reactions && (
-          <ReactionBar
-            reactions={message.reactions}
-            currentUserAddress={currentUserAddress}
-            onReact={onReact}
-            onRemoveReaction={onRemoveReaction}
-            ownLine={isMine}
-            messageId={message.id}
-          />
-        )}
+        <ReactionBar
+          reactions={message.reactions ?? {}}
+          currentUserAddress={currentUserAddress}
+          onReact={onReact}
+          onRemoveReaction={onRemoveReaction}
+          ownLine={isMine}
+          messageId={message.id}
+        />
       </div>
     </div>
     </>

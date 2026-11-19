@@ -7,7 +7,7 @@
 
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import { destructFromChoice, type DmDestructChoice } from '@/lib/dm-destruct';
-import { useEffect, useRef, useReducer, useCallback, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useReducer, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -442,8 +442,10 @@ export function useMessages(conversationId: string | null) {
     });
   }, [headEnabled, conversationId, queryClient]);
 
-  // Flatten pages → single array, oldest first for chat display
-  const messages: DmMessage[] = messageHistoryItems(query.data?.pages ?? []).reverse();
+  // Flatten pages → single array, oldest first for chat display. Kept stable
+  // between renders so the thread's memoised rows don't all redraw each time.
+  const pages = query.data?.pages;
+  const messages: DmMessage[] = useMemo(() => messageHistoryItems(pages ?? []).reverse(), [pages]);
 
   // Once the encryption identity comes online (first signature on this
   // device), lines fetched before it are sitting in the cache as
@@ -842,6 +844,9 @@ export function useMessages(conversationId: string | null) {
     },
   });
 
+  const addReaction = useCallback((messageId: string, emoji: string) => updateReaction(messageId, emoji, true), [updateReaction]);
+  const removeReaction = useCallback((messageId: string, emoji: string) => updateReaction(messageId, emoji, false), [updateReaction]);
+
   return {
     messages,
     isLoading: query.isLoading,
@@ -852,8 +857,8 @@ export function useMessages(conversationId: string | null) {
     isFetchingNextPage: query.isFetchingNextPage,
     refetch: query.refetch,
     markAsRead: markAsRead.mutate,
-    addReaction: (messageId: string, emoji: string) => updateReaction(messageId, emoji, true),
-    removeReaction: (messageId: string, emoji: string) => updateReaction(messageId, emoji, false),
+    addReaction,
+    removeReaction,
   };
 }
 
@@ -1231,14 +1236,20 @@ function persistDeletedConversation(conversationId: string) {
   localStorage.setItem(DELETED_CONVOS_KEY, JSON.stringify([...ids]));
 }
 
+export type DeleteConversationTarget = string | { id: string; forEveryone?: boolean };
+const deleteTargetId = (target: DeleteConversationTarget) => (typeof target === 'string' ? target : target.id);
+
 export function useDeleteConversation() {
   const queryClient = useQueryClient();
   const { walletAddress } = useAuth();
 
   return useMutation({
-    mutationFn: (conversationId: string) =>
-      deleteConversation(conversationId, walletAddress || undefined),
-    onMutate: async (conversationId: string) => {
+    // A bare id deletes the chat for you only; { id, forEveryone } on a 1:1
+    // chat deletes every message and the chat for both people.
+    mutationFn: (target: DeleteConversationTarget) =>
+      deleteConversation(deleteTargetId(target), walletAddress || undefined, { forEveryone: typeof target === 'object' && !!target.forEveryone }),
+    onMutate: async (target: DeleteConversationTarget) => {
+      const conversationId = deleteTargetId(target);
       // Persist deletion so it survives refetches and page reloads
       persistDeletedConversation(conversationId);
 
@@ -1261,7 +1272,8 @@ export function useDeleteConversation() {
     onSuccess: () => {
       // Don't invalidate — the deleted ID is persisted and will be filtered on next fetch
     },
-    onError: (_err, conversationId, context) => {
+    onError: (_err, target, context) => {
+      const conversationId = deleteTargetId(target);
       // Rollback: remove from persisted deletions
       const ids = getDeletedConversationIds();
       ids.delete(conversationId);

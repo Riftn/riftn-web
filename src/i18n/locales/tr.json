@@ -780,6 +780,23 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "chatDeleteChoice": "Bir mesajı sildiğinde",
+    "chatDeleteChoiceDesc": "Her seferinde sor ya da her zaman yalnızca senin için veya sohbetteki herkes için sil.",
+    "chatReactionStyle": "Sohbette tepkiler",
+    "chatReactionStyleDesc": "Bir tepki sohbete düştüğünde nasıl hareket eder, seninki ya da başkasınınki.",
+    "chatReactionFly": "Uçarak",
+    "chatReactionFlyDesc": "Emoji mesaja uçar",
+    "chatReactionPop": "Zıpla",
+    "chatReactionPopDesc": "Yerinde zıplar, küçük ve sakin",
+    "chatReactionBurst": "Patlama",
+    "chatReactionBurstDesc": "Seninki kıvılcımlarla büyükçe açılır",
+    "chatReactionOff": "Kapalı",
+    "chatReactionOffDesc": "Hareket yok, sadece sayı değişir",
+    "chatDeleteAsk": "Her seferinde sor",
+    "chatDeleteMe": "Benden sil",
+    "chatDeleteMeDesc": "Senin sohbetinden gider, diğerleri hâlâ görür",
+    "chatDeleteEveryone": "Herkesten sil",
+    "chatDeleteEveryoneDesc": "Mümkün olduğunda. Bir gruptaki başkasının mesajı yalnızca senden silinir",
     "postLanding": "Paylaştıktan sonra",
     "postLandingDesc": "Yeni gönderinin akışında nasıl belirdiği",
     "postLandingGhost": "Hayalet yuva",
@@ -1381,7 +1398,11 @@
     "menuLayoutSections": "Bölümler",
     "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
     "menuLayoutFolders": "Klasörler",
-    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör"
+    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör",
+    "publicChatInBar": "Alt çubukta Genel Sohbet",
+    "publicChatInBarDesc": "Ekranın altındaki çubuktan tek dokunuşla Genel Sohbet'e gir",
+    "chatCards": "Sohbetler kart olarak",
+    "chatCardsDesc": "Her sohbet kendi kartında. Kapatınca sohbetler arasında çizgi olan sade bir liste olur."
   },
   "common": {
     "confirm": "Onayla",
@@ -2090,14 +2111,14 @@
       "governanceVotedRejected": "Oyladığınız bir teklif kabul edilmedi: “{{title}}”",
       "governancePassed": "“{{title}}” teklifiniz kabul edildi 🎉",
       "governanceRejected": "“{{title}}” teklifiniz kabul edilmedi",
-      "featureLikeNamed": "{{name}} beğendiğiniz özelleştirme talebinizi “{{title}}”",
-      "featureLike": "{{name}} beğendiğiniz özelleştirme talebi",
-      "featureCommentNamed": "{{name}} özelleştirme talebiniz “{{title}}” üzerine yorum yaptı",
-      "featureComment": "{{name}} özelleştirme talebiniz üzerine yorum yaptı",
+      "featureLikeNamed": "{{name}} “{{title}}” isteğinizi beğendi",
+      "featureLike": "{{name}} isteğinizi beğendi",
+      "featureCommentNamed": "{{name}} “{{title}}” isteğinize yorum yaptı",
+      "featureComment": "{{name}} isteğinize yorum yaptı",
       "featureReplyNamed": "{{name}} “{{title}}” üzerine size cevap verdi",
       "featureReply": "{{name}} yorumunuza cevap verdi",
       "featureMentionNamed": "{{name}} “{{title}}” üzerinde size atıfta bulundu",
-      "featureMention": "{{name}} bir özelleştirme talebinde size atıfta bulundu",
+      "featureMention": "{{name}} bir istekte sizden bahsetti",
       "featureNewNamed": "{{name}} yeni bir istekte bulundu: “{{title}}”",
       "featureNew": "{{name}} yeni bir istekte bulundu",
       "featureActivityNamed": "{{name}}, “{{title}}” üzerine yorum yaptı",
@@ -2143,6 +2164,12 @@
     "likes": "Beğeniler",
     "subscribers": "Aboneler",
     "affiliates": "Ortaklar",
+    "ogChallenge": "OG Görevi",
+    "ogHolders_one": "{{count}} OG sahibi",
+    "ogHolders_other": "{{count}} OG sahibi",
+    "ogChallengeTitle": "OG sahiplerini geri getir",
+    "ogChallengeBody": "Hâlâ DHB tutan kişileri davet et. Davet bağlantınla katılıp DHB'lerini Riftn cüzdanlarında tuttuklarında burada senin için sayılırlar.",
+    "ogChallengeCta": "Davet bağlantını al",
     "directReferrals_one": "{{count}} doğrudan",
     "directReferrals_other": "{{count}} doğrudan",
     "secondaryReferrals_one": "{{count}} dolaylı",
@@ -2249,6 +2276,11 @@
     "followBack": "Takip Et"
   },
   "features": {
+    "cropDraw": "Kırp ve çiz",
+    "crop": "Kırp",
+    "cropHint": "Tutmak istediğin kısmın üzerine bir kutu sürükle. Taşımak için kutunun içinden sürükle.",
+    "drawHint": "Bir şeyleri göstermek için resmin üzerine çiz.",
+    "resetCrop": "Kırpmayı sıfırla",
     "prompts": "İstemler",
     "queued": "Sırada",
     "promptPageTitle": "İstekler",
@@ -3716,6 +3748,10 @@
     "statsLoadFailed": "Staking istatistikleri yüklenemedi"
   },
   "communities": {
+    "muteChat": "Sessize al",
+    "mutedChat": "Sessizde",
+    "muteChatHint": "Bu topluluğun sohbetinden bildirim alma. Sohbeti okumaya devam edebilirsin",
+    "unmuteChatHint": "Bu topluluğun sohbetinden yeniden bildirim al",
     "sortTop": "En İyi",
     "shareLink": "Bağlantıyı paylaş",
     "pinnedMore": "Daha fazla",
@@ -6623,6 +6659,7 @@
     },
     "gallery": {
       "browse": "Üretimlere göz at",
+      "create": "Oluştur",
       "fullscreen": "Tam ekran görüntüle",
       "missing": "Bu üretim kullanılamıyor.",
       "send": "Gönder",
@@ -8004,6 +8041,9 @@
     "sourceEncoder": "OBS / kodlayıcı",
     "sourceEncoderHint": "RTMP bilgilerini al",
     "screenPickHint": "Sırada ekranı, pencereyi ya da sekmeyi seçeceksiniz — ardından mikrofonunuz ve sekmenin kendi sesiyle birlikte yayına girer.",
+    "screenInAppHint": "Riftn uygulamasında",
+    "screenInAppNote": "Telefon tarayıcıları hiçbir sitenin ekranını paylaşmasına izin vermez. Bunun yerine Riftn uygulamasından canlı yayına geç ve Ekranı paylaş'a dokun.",
+    "screenInAppCta": "Riftn uygulamasını indir",
     "replayAllowanceUsed": "Bugünkü yükleme hakkınızı kullandınız, bu yüzden bu yayının tekrarı saklanmayacak. Hak, UTC gece yarısı sıfırlanır.",
     "replayFreeTier": "Ücretsiz hesaplar yayının ilk {{size}} kısmını tekrar olarak saklar — rozet stake etmek sınırı yükseltir.",
     "replayTiered": "Bu yayının {{size}} kadarı tekrar olarak saklanır ({{tier}} günlük hak).",
@@ -9077,7 +9117,19 @@
     "declined": "Arama reddedildi",
     "noAnswer": "Cevap yok",
     "missed": "Cevapsız arama",
-    "callBack": "Geri ara"
+    "callBack": "Geri ara",
+    "group": "Grup",
+    "groupVoiceCall": "Grup sesli araması",
+    "groupVideoCall": "Grup görüntülü araması",
+    "callingGroup": "Grup aranıyor...",
+    "isCalling": "{{name}} arıyor",
+    "leave": "Ayrıl",
+    "joinCall": "Katıl",
+    "inCall_one": "Aramada {{count}} kişi",
+    "inCall_other": "Aramada {{count}} kişi",
+    "startGroupVoice": "Grup sesli araması başlat",
+    "startGroupVideo": "Grup görüntülü araması başlat",
+    "you": "Sen"
   },
   "badgeAscension": {
     "reached": "{{tier}} seviyesine ulaştınız",
@@ -12755,7 +12807,7 @@
   "multiPost": {
     "tab": "Çoklu gönderim",
     "title": "Çoklu gönderim",
-    "intro": "X, YouTube, Instagram, TikTok ve daha fazlasına aynı anda dehub ile gönderin. Hesaplarınızı bir kez bağlayın, ardından her gönderinin nereye gideceğini seçin.",
+    "intro": "X, YouTube, Instagram, TikTok ve daha fazlasına aynı anda Riftn ile gönderin. Hesaplarınızı bir kez bağlayın, ardından her gönderinin nereye gideceğini seçin.",
     "creditsHeading": "Gönderi kredileri",
     "credits": "{{count}} gönderi kredisi",
     "topUpTitle": "Yükleyin ve tasarruf edin",
@@ -12803,7 +12855,12 @@
   "dm": {
     "planRestricted": "Bu kullanıcı mesaj almak için abonelik gerektiriyor.",
     "planTypeNotAllowed": "Bu içerik üreticisinin planı bu tür mesaja izin vermiyor.",
-    "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı."
+    "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı.",
+    "shareGroups": "Gruplar",
+    "shareKindGroup": "Grup",
+    "shareKindChannel": "Kanal",
+    "shareKindCommunity": "Topluluk",
+    "reportMessage": "Mesajı bildir"
   },
   "credits": {
     "earningsWorth": "{{amount}} değerinde",
@@ -20829,6 +20886,9 @@
     "title": "Bahset veya bağlantı ver"
   },
   "msgDelete": {
+    "chatTitle": "Bu sohbet silinsin mi?",
+    "chatBodyBoth": "Yalnızca sohbetlerinden sil ya da ikiniz için tüm mesajları sil. Bu işlem geri alınamaz.",
+    "chatBodyMe": "Yalnızca senin sohbetlerinden kaldırılır. Diğerleri görmeye devam eder.",
     "title": "Mesaj silinsin mi?",
     "titleMany": "{{count}} mesaj silinsin mi?",
     "bodyOwn": "Yalnızca kendi sohbetinden ya da herkes için kaldır.",
@@ -20841,6 +20901,12 @@
     "forEveryone": "Herkes için sil",
     "forBoth": "İkimiz için de sil",
     "forMeAndName": "Benim ve {{name}} için sil",
+    "remember": "Seçimimi hatırla",
+    "rememberHint": "İstediğin zaman Ayarlar'dan değiştir",
     "failed": "Mesaj silinemedi"
+  },
+  "roomPreview": {
+    "you": "Sen",
+    "voice": "🎤 Sesli mesaj"
   }
 }

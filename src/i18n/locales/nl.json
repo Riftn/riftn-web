@@ -780,6 +780,23 @@
     "heading": "Riftn-shorts"
   },
   "settings": {
+    "chatDeleteChoice": "Als je een bericht verwijdert",
+    "chatDeleteChoiceDesc": "Elke keer vragen, of altijd alleen voor jou of voor iedereen in de chat verwijderen.",
+    "chatReactionStyle": "Reacties in chat",
+    "chatReactionStyleDesc": "Hoe een reactie beweegt als die in een chat binnenkomt, van jou of van iemand anders.",
+    "chatReactionFly": "Invliegen",
+    "chatReactionFlyDesc": "De emoji vliegt naar het bericht",
+    "chatReactionPop": "Pop",
+    "chatReactionPopDesc": "Springt op zijn plek, klein en rustig",
+    "chatReactionBurst": "Burst",
+    "chatReactionBurstDesc": "Die van jou bloeit groot op met vonken",
+    "chatReactionOff": "Uit",
+    "chatReactionOffDesc": "Geen beweging, alleen het getal verandert",
+    "chatDeleteAsk": "Elke keer vragen",
+    "chatDeleteMe": "Verwijderen voor mij",
+    "chatDeleteMeDesc": "Weg uit jouw chat, anderen zien het nog",
+    "chatDeleteEveryone": "Verwijderen voor iedereen",
+    "chatDeleteEveryoneDesc": "Waar dat kan. Een bericht van iemand anders in een groep verdwijnt alleen voor jou",
     "postLanding": "Na het plaatsen",
     "postLandingDesc": "Hoe je nieuwe bericht in je feed verschijnt",
     "postLandingGhost": "Spookplek",
@@ -1381,7 +1398,11 @@
     "menuLayoutSections": "Secties",
     "menuLayoutSectionsDesc": "Alle pagina's tegelijk, onder kopjes",
     "menuLayoutFolders": "Mappen",
-    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep"
+    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep",
+    "publicChatInBar": "Openbare chat in de onderste balk",
+    "publicChatInBarDesc": "Met één tik vanuit de balk onderaan het scherm naar de openbare chat",
+    "chatCards": "Chats als kaarten",
+    "chatCardsDesc": "Elke chat op een eigen kaart. Zet uit voor een gewone lijst met een lijn tussen chats."
   },
   "common": {
     "confirm": "Bevestigen",
@@ -2333,6 +2354,12 @@
     "likes": "Likes",
     "subscribers": "Abonnees",
     "affiliates": "Partners",
+    "ogChallenge": "OG-uitdaging",
+    "ogHolders_one": "{{count}} OG-holder",
+    "ogHolders_other": "{{count}} OG-holders",
+    "ogChallengeTitle": "Haal de OG-holders terug",
+    "ogChallengeBody": "Nodig mensen uit die nog DHB hebben. Als ze via jouw uitnodigingslink lid worden en hun DHB in hun Riftn-wallet houden, tellen ze hier voor jou.",
+    "ogChallengeCta": "Haal je uitnodigingslink op",
     "directReferrals_one": "{{count}} rechtstreeks",
     "directReferrals_other": "{{count}} rechtstreeks",
     "secondaryReferrals_one": "{{count}} secundair",
@@ -2439,6 +2466,11 @@
     "followBack": "Volg terug"
   },
   "features": {
+    "cropDraw": "Bijsnijden en tekenen",
+    "crop": "Bijsnijden",
+    "cropHint": "Sleep een kader over het deel dat je wilt houden. Sleep erin om het te verplaatsen.",
+    "drawHint": "Teken op de afbeelding om dingen aan te wijzen.",
+    "resetCrop": "Bijsnijden herstellen",
     "prompts": "Voorstellen",
     "queued": "In de wachtrij",
     "promptPageTitle": "Verzoeken",
@@ -3906,6 +3938,10 @@
     "statsLoadFailed": "Kon stakingstatistieken niet laden"
   },
   "communities": {
+    "muteChat": "Dempen",
+    "mutedChat": "Gedempt",
+    "muteChatHint": "Geen meldingen meer van de chat van deze community. Je kunt hem nog steeds lezen",
+    "unmuteChatHint": "Weer meldingen krijgen van de chat van deze community",
     "sortTop": "Top",
     "shareLink": "Link delen",
     "pinnedMore": "Meer",
@@ -6813,6 +6849,7 @@
     },
     "gallery": {
       "browse": "Creaties bekijken",
+      "create": "Maken",
       "fullscreen": "Op volledig scherm bekijken",
       "missing": "Deze creatie is niet beschikbaar.",
       "send": "Versturen",
@@ -8194,6 +8231,9 @@
     "sourceEncoder": "OBS / Encoder",
     "sourceEncoderHint": "RTMP-details ophalen",
     "screenPickHint": "Je kiest vervolgens het scherm, venster of tabblad — dan gaat het live met je microfoon en het geluid van het tabblad zelf.",
+    "screenInAppHint": "In de Riftn-app",
+    "screenInAppNote": "Telefoonbrowsers laten geen enkele website je scherm delen. Ga live vanuit de Riftn-app en tik op Scherm delen.",
+    "screenInAppCta": "Download de Riftn-app",
     "replayAllowanceUsed": "Je hebt vandaag je uploadlimiet gebruikt, dus deze stream krijgt geen replay. De limiet wordt om middernacht UTC opnieuw ingesteld.",
     "replayFreeTier": "Gratis accounts behouden de eerste {{size}} van een stream als replay — badges staken verhoogt de limiet.",
     "replayTiered": "Tot {{size}} van deze stream wordt als replay bewaard ({{tier}} dagelijkse limiet).",
@@ -9267,7 +9307,19 @@
     "declined": "Oproep geweigerd",
     "noAnswer": "Geen antwoord",
     "missed": "Gemist gesprek",
-    "callBack": "Terugbellen"
+    "callBack": "Terugbellen",
+    "group": "Groep",
+    "groupVoiceCall": "Groepsspraakoproep",
+    "groupVideoCall": "Groepsvideogesprek",
+    "callingGroup": "Groep wordt gebeld...",
+    "isCalling": "{{name}} belt",
+    "leave": "Verlaten",
+    "joinCall": "Deelnemen",
+    "inCall_one": "{{count}} in het gesprek",
+    "inCall_other": "{{count}} in het gesprek",
+    "startGroupVoice": "Groepsspraakoproep starten",
+    "startGroupVideo": "Groepsvideogesprek starten",
+    "you": "Jij"
   },
   "badgeAscension": {
     "reached": "Je hebt {{tier}} bereikt",
@@ -13004,7 +13056,7 @@
   "multiPost": {
     "tab": "Multi-posten",
     "title": "Multi-posten",
-    "intro": "Post tegelijkertijd naar X, YouTube, Instagram, TikTok en meer met dehub. Verbind je accounts één keer, kies dan waar elke post naartoe gaat.",
+    "intro": "Post tegelijkertijd naar X, YouTube, Instagram, TikTok en meer met Riftn. Verbind je accounts één keer, kies dan waar elke post naartoe gaat.",
     "creditsHeading": "Tegoed plaatsen",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top-up en bespaar",
@@ -13052,7 +13104,12 @@
   "dm": {
     "planRestricted": "Deze gebruiker vereist een abonnement om berichten te ontvangen.",
     "planTypeNotAllowed": "Het abonnement van deze maker staat dit soort bericht niet toe.",
-    "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn."
+    "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn.",
+    "shareGroups": "Groepen",
+    "shareKindGroup": "Groep",
+    "shareKindChannel": "Kanaal",
+    "shareKindCommunity": "Gemeenschap",
+    "reportMessage": "Bericht melden"
   },
   "credits": {
     "earningsWorth": "Waarde {{amount}}",
@@ -21078,6 +21135,9 @@
     "title": "Noemen of linken"
   },
   "msgDelete": {
+    "chatTitle": "Deze chat verwijderen?",
+    "chatBodyBoth": "Verwijder hem alleen uit je chats, of verwijder alle berichten voor jullie allebei. Dit kan niet ongedaan worden gemaakt.",
+    "chatBodyMe": "Hij wordt alleen uit jouw chats verwijderd. Anderen zien hem nog wel.",
     "title": "Bericht verwijderen?",
     "titleMany": "{{count}} berichten verwijderen?",
     "bodyOwn": "Verwijder het alleen uit jouw chat, of voor iedereen.",
@@ -21090,6 +21150,12 @@
     "forEveryone": "Verwijderen voor iedereen",
     "forBoth": "Verwijderen voor ons allebei",
     "forMeAndName": "Verwijderen voor mij en {{name}}",
+    "remember": "Onthoud mijn keuze",
+    "rememberHint": "Wijzig dit altijd in Instellingen",
     "failed": "Kon het bericht niet verwijderen"
+  },
+  "roomPreview": {
+    "you": "Jij",
+    "voice": "🎤 Spraakbericht"
   }
 }
