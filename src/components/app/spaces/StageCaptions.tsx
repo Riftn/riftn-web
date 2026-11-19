@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import type { ReactNode } from 'react';
 /**
  * StageCaptions — live subtitles under a stage, in the viewer's language.
  *
@@ -48,6 +49,7 @@ import {
   setCaptionLanguage,
   setSendCaptions,
   setShowCaptions,
+  type CaptionScope,
   useCaptionLanguage,
   useSendCaptions,
   useShowCaptions,
@@ -56,12 +58,15 @@ import {
 interface StageCaptionsOverlayProps {
   spaceId: string | undefined | null;
   className?: string;
+  /** A call's own people. Stages leave this out and use their seats. */
+  speakers?: string[] | null;
+  scope?: CaptionScope;
 }
 
-export function StageCaptionsOverlay({ spaceId, className }: StageCaptionsOverlayProps) {
-  const show = useShowCaptions();
+export function StageCaptionsOverlay({ spaceId, className, speakers, scope = 'stage' }: StageCaptionsOverlayProps) {
+  const show = useShowCaptions(scope);
   const language = useCaptionLanguage();
-  const lines = useStageCaptionFeed(spaceId, show);
+  const lines = useStageCaptionFeed(spaceId, show, speakers);
 
   if (!show || lines.length === 0) return null;
 
@@ -122,16 +127,23 @@ interface StageCaptionsButtonProps {
   /** The buyer. Dubbing is metered per minute, so it needs a wallet to charge. */
   wallet?: string | null;
   className?: string;
+  /** Lowers the others under a dubbed line. A call passes its own; a stage uses the room's. */
+  setRoomVolume?: (volume: number) => void;
+  /** Draws the menu's button. A call swaps the stage's square button for its own round one. */
+  renderTrigger?: (state: { show: boolean; code: string | null; label: string }) => ReactNode;
+  scope?: CaptionScope;
+  /** Raises the menu and the bill above a full-screen surface such as a call. */
+  layerClassName?: string;
 }
 
-export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className }: StageCaptionsButtonProps) {
+export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className, setRoomVolume, renderTrigger, scope = 'stage', layerClassName }: StageCaptionsButtonProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const show = useShowCaptions();
+  const show = useShowCaptions(scope);
   const send = useSendCaptions();
   const language = useCaptionLanguage();
 
-  const dubbing = useStageDubbing(spaceId, wallet ?? null);
+  const dubbing = useStageDubbing(spaceId, wallet ?? null, setRoomVolume);
   const dubQuote = dubbing.quote;
 
   const active = CAPTION_LANGUAGES.find((l) => l.code === language);
@@ -140,7 +152,7 @@ export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className }: S
     <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
+        {renderTrigger ? renderTrigger({ show, code: show && active ? active.code : null, label: t('stages.subtitles') }) : <Button
           size="lg"
           className={cn(
             'relative rounded-xl w-12 h-12 shrink-0',
@@ -159,13 +171,13 @@ export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className }: S
               {active.code}
             </span>
           )}
-        </Button>
+        </Button>}
       </DropdownMenuTrigger>
 
       {/* One flat scrolling menu rather than a nested submenu: nested menus are
           awkward to open on touch, and this is one tap fewer on every device. */}
-      <DropdownMenuContent align="center" className="w-56 max-h-[60vh] overflow-y-auto">
-        <DropdownMenuItem onSelect={() => setShowCaptions(!show)}>
+      <DropdownMenuContent align="center" className={cn('w-56 max-h-[60vh] overflow-y-auto', layerClassName)}>
+        <DropdownMenuItem onSelect={() => setShowCaptions(!show, scope)}>
           <Check className={cn('w-4 h-4 mr-2 shrink-0', show ? 'opacity-100' : 'opacity-0')} />
           {t('stages.showSubtitles')}
         </DropdownMenuItem>
@@ -229,7 +241,7 @@ export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className }: S
               // speaker was ever asked to produce. Turning them on is the fix
               // rather than refusing: the listener asked to hear the stage in
               // their language, and this is what delivers it.
-              if (!show) setShowCaptions(true);
+              if (!show) setShowCaptions(true, scope);
               void dubbing.start(language);
             }}
           >
@@ -253,7 +265,7 @@ export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className }: S
           timer and never silently — the whole point of running a tab is that
           the charge is a thing the listener does, not a thing that happens. */}
       <AlertDialog open={!!dubbing.bill} onOpenChange={(open) => { if (!open) dubbing.dismissBill(); }}>
-        <AlertDialogContent>
+        <AlertDialogContent className={layerClassName}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('stages.payForDubbing')}</AlertDialogTitle>
             {/* One sentence, one key. Splitting it around the styled spans put

@@ -17,6 +17,7 @@ import {
   CallPill,
   usePeerIdentity,
 } from './CallChrome';
+import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 
 const VideoCallModal: React.FC = () => {
   const { walletAddress } = useAuth();
@@ -107,6 +108,7 @@ const VideoCallModal: React.FC = () => {
       )}
 
       <div className="call-stage__foot">
+        {isCallActive ? <CallCaptionsOverlay /> : null}
         {isIncoming ? (
           <div className="call-row">
             <CallPill icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
@@ -115,7 +117,7 @@ const VideoCallModal: React.FC = () => {
         ) : (
           <>
             {isRinging ? <CallPill icon={MessageCircle} label={t('messages.message')} onClick={messageInstead} quiet /> : null}
-            <CallDock>
+            <CallDock crowded={isCallActive}>
               <CallControl
                 icon={isMuted ? MicOff : Mic}
                 label={isMuted ? t('calls.unmute') : t('calls.mute')}
@@ -129,6 +131,7 @@ const VideoCallModal: React.FC = () => {
                 active={isCameraOff}
               />
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
+              {isCallActive ? <CallCaptionsControl /> : null}
               <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
             </CallDock>
           </>
