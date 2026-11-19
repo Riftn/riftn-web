@@ -121,6 +121,12 @@ html[data-theme] body :is([data-video-card], [data-audio-player], [data-video-ca
 [data-video-scrubber="line"][data-controls-hidden="true"] [data-video-button-row] :is(button, [role="button"]) {
   pointer-events: none;
 }
+/* The hover volume slider sits inside the row, so it inherited the row's
+   pointer-events: none. The pointer fell through to the video, the hover
+   wrapper saw it leave, and the slider closed the moment you reached it. */
+[data-video-scrubber="line"] [data-video-button-row] [data-volume-pop] {
+  pointer-events: auto;
+}
 
 /* Reserve a separate black transport strip; the picture ends above it. */
 [data-feed-video-frame][data-video-split-controls]:not(#_) {
