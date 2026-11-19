@@ -6620,6 +6620,18 @@
       "needsImageToWork": "{{model}} necesita una imagen para trabajar. Adjunta uno primero.",
       "speechLimit": "Son {{length}} caracteres. El límite es {{limit}}.",
       "musicTrackLength": "Seguimiento de {{count}}s"
+    },
+    "gallery": {
+      "browse": "Explorar creaciones",
+      "fullscreen": "Ver en pantalla completa",
+      "missing": "Esta creación no está disponible.",
+      "send": "Enviar",
+      "notifications": {
+        "generation_like": "{{name}} reaccionó a tu creación",
+        "generation_comment_like": "{{name}} reaccionó a tu comentario",
+        "generation_reply": "{{name}} respondió a tu comentario",
+        "generation_comment": "{{name}} comentó tu creación"
+      }
     }
   },
   "pricing": {

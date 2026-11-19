@@ -6640,6 +6640,18 @@
       "needsImageToWork": "يحتاج {{model}} إلى صورة للعمل منها. قم بإرفاق واحد أولاً.",
       "speechLimit": "هذا {{length}} أحرف. الحد الأقصى هو {{limit}}.",
       "musicTrackLength": "مسار {{count}}s"
+    },
+    "gallery": {
+      "browse": "تصفح الإبداعات",
+      "fullscreen": "عرض بملء الشاشة",
+      "missing": "هذا الإبداع غير متاح.",
+      "send": "إرسال",
+      "notifications": {
+        "generation_like": "تفاعل {{name}} مع إبداعك",
+        "generation_comment_like": "تفاعل {{name}} مع تعليقك",
+        "generation_reply": "ردّ {{name}} على تعليقك",
+        "generation_comment": "علّق {{name}} على إبداعك"
+      }
     }
   },
   "pricing": {

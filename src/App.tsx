@@ -243,6 +243,7 @@ const CreatorEditorHost = React.lazy(() => import("./pages/CreatorEditorHost"));
 const VideoRemix = React.lazy(() => import("./pages/VideoRemix"));
 // Creator Flow (node canvas) is its own chunk: React Flow and its d3 deps are
 // only worth downloading once someone opens the canvas, not with /creator.
+const CreatorGalleryPage = React.lazy(() => import('./pages/app/CreatorGalleryPage'));
 const CreatorLearningPage = React.lazy(() => import("./pages/app/CreatorLearningPage"));
 const CreatorFlowPage = React.lazy(() => import("./pages/app/CreatorFlowPage"));
 const CreatorFlowPublicPage = React.lazy(() => import("./pages/app/CreatorFlowPublicPage"));
@@ -661,6 +662,8 @@ function AppContent() {
           <Route path="/editor" element={<Suspense fallback={<PageLoader />}><CreatorEditorHost /></Suspense>} />
           <Route path="/creator/remix" element={<Suspense fallback={<PageLoader />}><VideoRemix /></Suspense>} />
           <Route path="/creator" element={<Suspense fallback={<PageLoader />}><CreatorEditorHost /></Suspense>} />
+          <Route path="/creator/gallery" element={<Suspense fallback={<PageLoader />}><CreatorGalleryPage /></Suspense>} />
+          <Route path="/creator/gallery/:id" element={<Suspense fallback={<PageLoader />}><CreatorGalleryPage /></Suspense>} />
           <Route path="/creator/learn" element={<Suspense fallback={<PageLoader />}><CreatorLearningPage /></Suspense>} />
           <Route path="/creator/flow" element={<Suspense fallback={<PageLoader />}><CreatorFlowPage /></Suspense>} />
           <Route path="/creator/remake" element={<Suspense fallback={<PageLoader />}><MaboroshiPage remake /></Suspense>} />
