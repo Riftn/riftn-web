@@ -6,7 +6,6 @@ import { useDraftState } from '@/hooks/use-draft-state';
 import { useDraft } from '@/hooks/use-draft';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2 } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 
@@ -60,6 +59,7 @@ import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLink
 import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from '@/components/app/chat/ReactionArrival';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
@@ -138,6 +138,7 @@ function SidebarReactions({
   /** Your own line: a reaction opens the list of who left it. */
   ownLine?: boolean;
 }) {
+  useReactionHost(messageId);
   const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
@@ -159,14 +160,14 @@ function SidebarReactions({
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <span className="text-xs inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+            <span className="text-xs inline-flex items-center"><ReactionGlyph messageId={messageId} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" /></span>
             {mine && !ownLine ? (
               <>
-                <span className="group-hover/reaction:hidden">{addresses.length}</span>
+                <RollingCount value={addresses.length} className="group-hover/reaction:hidden" />
                 <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
               </>
             ) : (
-              <span>{addresses.length}</span>
+              <RollingCount value={addresses.length} />
             )}
           </button>
         );
@@ -726,16 +727,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                         <SidebarMessageBody content={msg.content} />
                       )}
                       {/* Reactions */}
-                      {msg.reactions && (
-                        <SidebarReactions
-                          reactions={msg.reactions}
-                          currentUserAddress={walletAddress || undefined}
-                          onReact={addReaction}
-                          onRemoveReaction={removeReaction}
-                          messageId={msg.id}
-                          ownLine={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()}
-                        />
-                      )}
+                      <SidebarReactions
+                        reactions={msg.reactions ?? {}}
+                        currentUserAddress={walletAddress || undefined}
+                        onReact={addReaction}
+                        onRemoveReaction={removeReaction}
+                        messageId={msg.id}
+                        ownLine={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()}
+                      />
                     </div>
                     {/* Every action lives in the line's menu (right-click, or this
                         "..." on hover for keyboard users). */}
