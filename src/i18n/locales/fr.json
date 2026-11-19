@@ -3737,6 +3737,10 @@
     "statsLoadFailed": "Impossible de charger les statistiques de staking"
   },
   "communities": {
+    "muteChat": "Couper",
+    "mutedChat": "Coupé",
+    "muteChatHint": "Ne plus recevoir d'alertes du chat de cette communauté. Vous pouvez toujours le lire",
+    "unmuteChatHint": "Recevoir à nouveau les alertes du chat de cette communauté",
     "sortTop": "Top",
     "shareLink": "Partager le lien",
     "pinnedMore": "Plus",

@@ -3923,6 +3923,10 @@
     "statsLoadFailed": "Kon stakingstatistieken niet laden"
   },
   "communities": {
+    "muteChat": "Dempen",
+    "mutedChat": "Gedempt",
+    "muteChatHint": "Geen meldingen meer van de chat van deze community. Je kunt hem nog steeds lezen",
+    "unmuteChatHint": "Weer meldingen krijgen van de chat van deze community",
     "sortTop": "Top",
     "shareLink": "Link delen",
     "pinnedMore": "Meer",
