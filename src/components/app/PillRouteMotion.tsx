@@ -12,8 +12,29 @@ import { useLocation } from 'react-router-dom';
  */
 const PHONE = '(max-width: 1023px)';
 
-function visiblePill(): HTMLElement | null {
-  const pills = document.querySelectorAll<HTMLElement>('[data-feed-nav]');
+function allPills(): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>('[data-feed-nav]'));
+}
+
+const shown = (el: HTMLElement) => el.checkVisibility?.({ visibilityProperty: true }) !== false;
+
+/**
+ * True when the pill noted on the tap is still the one showing: the same
+ * pills are on the page, it is still displayed, and none before it is (a page
+ * kept alive in the background is `display: none`, and so is its pill).
+ * Answers from styles alone, so it never lays the page out.
+ */
+function stillTheSamePill(pills: HTMLElement[], oldPills: HTMLElement[] | null, oldEl: HTMLElement | null): boolean {
+  if (!oldEl || !oldPills || !oldEl.checkVisibility) return false;
+  if (pills.length !== oldPills.length || !pills.every((el, i) => el === oldPills[i])) return false;
+  for (const el of pills) {
+    if (el === oldEl) return shown(el);
+    if (shown(el)) return false;
+  }
+  return false;
+}
+
+function visiblePill(pills: HTMLElement[] = allPills()): HTMLElement | null {
   for (const el of pills) {
     const r = el.getBoundingClientRect();
     if (r.width > 0 && r.height > 0 && r.bottom > 0 && el.checkVisibility?.({ visibilityProperty: true }) !== false) {
@@ -27,11 +48,14 @@ export function PillRouteMotion(): null {
   const { pathname } = useLocation();
   const lastTop = useRef<number | null>(null);
   const lastEl = useRef<HTMLElement | null>(null);
+  const lastPills = useRef<HTMLElement[] | null>(null);
   const firstRun = useRef(true);
 
   useEffect(() => {
     const note = () => {
-      const el = visiblePill();
+      const pills = allPills();
+      const el = visiblePill(pills);
+      lastPills.current = pills;
       lastEl.current = el;
       lastTop.current = el ? el.getBoundingClientRect().top : null;
     };
@@ -50,8 +74,10 @@ export function PillRouteMotion(): null {
     }
     const from = lastTop.current;
     const oldEl = lastEl.current;
+    const oldPills = lastPills.current;
     lastTop.current = null;
     lastEl.current = null;
+    lastPills.current = null;
     if (from == null || !window.matchMedia(PHONE).matches) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -84,7 +110,16 @@ export function PillRouteMotion(): null {
     };
     const isSkeleton = (el: HTMLElement) => !!el.closest('[data-pill-skeleton]');
     const run = () => {
-      const el = visiblePill();
+      const pills = allPills();
+      // The pill from the tap is still the one showing (a post opening over
+      // the feed has none of its own): keep waiting without measuring.
+      // Measuring here lays the whole page out on every frame while the new
+      // page is drawing.
+      if (!skeleton && stillTheSamePill(pills, oldPills, oldEl)) {
+        if (++frames < 90) raf = requestAnimationFrame(run);
+        return;
+      }
+      const el = visiblePill(pills);
       if (skeleton) {
         // Follow the skeleton (it may still be gliding) until the page lands.
         if (el === skeleton || !el || isSkeleton(el)) {

@@ -884,7 +884,9 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   // too: the reply it names lives in that list, and a closed list left the
   // reader on the top of the post with nothing to land on. The card strips
   // ?comments=1 from the address on mount, so it is read once, here.
-  const desktopView = () => typeof window !== 'undefined' && window.innerWidth >= 1024;
+  // matchMedia, not innerWidth: on a phone innerWidth lays the whole page out
+  // first, and this runs while the post is opening over the feed.
+  const desktopView = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
   const askedForComments = useRef(new URLSearchParams(location.search).get('comments') === '1');
   const [showPageComments, setShowPageComments] = useState(() => !desktopView() || !!focusCommentId || askedForComments.current);
   const [postOptions, setPostOptions] = useState<(() => void) | null>(null);

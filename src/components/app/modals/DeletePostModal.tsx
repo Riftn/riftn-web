@@ -7,6 +7,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  */
 
 import { useState } from 'react';
+import { useOpenedOnce } from '@/hooks/use-opened-once';
 import { Loader2 } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 
@@ -30,7 +31,12 @@ interface DeletePostModalProps {
   onSuccess?: () => void;
 }
 
-export function DeletePostModal({
+/** Closed in every post card: built the first time it opens. */
+export function DeletePostModal(props: DeletePostModalProps) {
+  return useOpenedOnce(props.open) ? <DeletePostModalBody {...props} /> : null;
+}
+
+function DeletePostModalBody({
   open,
   onOpenChange,
   tokenId,

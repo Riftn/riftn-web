@@ -20,7 +20,7 @@ describe('live post HLS startup', () => {
   });
 
   it('never draws the play/pause button over the loading spinner', () => {
-    expect(source).toContain("isBuffering && !error && !broadcastPaused\n                ? 'opacity-0'");
+    expect(source).toContain("(isBuffering && !error && !broadcastPaused) || ((isBuffering || error || broadcastPaused) && isPlaying)\n                ? 'opacity-0'");
     expect(source).toContain("aria-label={isPlaying ? t('audioPost.pause', 'Pause') : t('audioPost.play', 'Play')}");
     expect(source).not.toContain('setIsPlaying(!isPlaying)');
   });
