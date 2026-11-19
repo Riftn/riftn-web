@@ -6,7 +6,11 @@
     "videoSize": "Bu video {{n}} MB-dan böyükdür. Daha kiçik birini seç."
   },
   "textFeed": {
-    "tab": "Mətn"
+    "tab": "Mətn",
+    "errorTitle": "Paylaşımlar yüklənmədi",
+    "errorBody": "Mətn lentini yenidən yükləməyə cəhd edin.",
+    "emptyTitle": "Hələ mətn paylaşımı yoxdur",
+    "emptyBody": "Mətn paylaşımları burada görünəcək."
   },
   "comic": {
     "showAll": "Bütün {{count}} səhifəni göstər"
@@ -29,16 +33,61 @@
     "policyFollowers": "İzləyicilər",
     "policyNobody": "Heç kim",
     "loadMore": "Daha çox yüklə",
-    "video": "Videolar"
+    "video": "Videolar",
+    "with": "@{{username}} ilə duet",
+    "withOriginal": "Duet · orijinala bax",
+    "unavailable": "Bu video artıq duet üçün əlçatan deyil.",
+    "allowLabel": "Duetlərə icazə ver",
+    "allowDescription": "Videolarınızın yanında kimin duet yaza biləcəyi. Bunu hər paylaşımda da dəyişə bilərsiniz.",
+    "settingsSection": "Duetlər",
+    "policyDefault": "Hesab parametri",
+    "saveFailed": "Saxlanmadı. Yenidən cəhd edin.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duet",
+    "pageHeading": "Duetlər",
+    "pageTitle": "@{{creator}} tərəfindən {{title}} duetləri",
+    "pageTitleNoCreator": "{{title}} duetləri",
+    "pageDescription": "Bu videonun bütün duetlərinə Riftn-də baxın və ya öz duetinizi yan-yana yazın.",
+    "empty": "Hələ duet yoxdur. İlkini etmək üçün videonun seçimlərini açın və Remiks → Duet seçin.",
+    "notFound": "Bu video əlçatan deyil.",
+    "browseShorts": "Qısalara bax"
   },
   "videoRemix": {
-    "sound": "Bu səsdən istifadə et"
+    "sound": "Bu səsdən istifadə et",
+    "menu": "Remiks",
+    "duet": "Duet",
+    "green-screen": "Yaşıl ekran",
+    "stitch": "Birləşdirmə",
+    "selectSource": "Başlamaq üçün videonun seçimlərini açın və Remiks seçin."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Hamı",
       "followers": "İzləyicilər",
-      "nobody": "Heç kim"
+      "nobody": "Heç kim",
+      "default": "Mənim standartım"
+    },
+    "shareFailed": "Bəxşişiniz göndərildi, amma orijinal yaradıcının payı keçmədi.",
+    "notify": {
+      "duet": "{{name}} videonuzla duet etdi",
+      "stitch": "{{name}} videonuzu birləşdirdi",
+      "react": "{{name}} videonuza reaksiya verdi",
+      "reactLive": "{{name}} videonuza canlı reaksiya verir"
+    },
+    "linkFailed": "Paylaşımınız yayımlandı, amma orijinal videoya bağlana bilmədi.",
+    "settingsHeading": "Remikslər",
+    "stitch": {
+      "allow": "Birləşdirməyə icazə ver",
+      "allowDesc": "Videolarınızın 5 saniyəyə qədərini öz videolarında kim istifadə edə bilər. Bunu hər paylaşımda da dəyişə bilərsiniz.",
+      "saveFailed": "Birləşdirmə parametriniz saxlanmadı. Yenidən cəhd edin.",
+      "settingFailed": "Paylaşımınız yayımlandı, amma birləşdirmə parametri saxlanmadı. Onu Paylaşımı redaktə et bölməsindən dəyişin.",
+      "from": "{{name}} videosundan birləşdirilib",
+      "count_one": "{{count}} birləşdirmə",
+      "count_other": "{{count}} birləşdirmə",
+      "listTitle": "Birləşdirmələr",
+      "listFailed": "Birləşdirmələr yüklənmədi. Yenidən cəhd edin.",
+      "listEmpty": "Hələ birləşdirmə yoxdur.",
+      "unavailable": "Bu video artıq birləşdirmə üçün əlçatan deyil."
     }
   },
   "dehubAppPage": {
@@ -64,7 +113,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Riftn-ı brauzerinizdə açın",
     "seoDescription": "Riftn tətbiqini əldə edin: açıq mənbəli, istifadəçiyə məxsus sosial mediada canlı yayım, şifrəli mesajlaşma və izləmə imkanı. Google Play, App Store və internetdə pulsuz.",
-    "seoTitle": "Riftn Tətbiqi: Android, iPhone və Web üçün endirin"
+    "seoTitle": "Riftn Tətbiqi: Android, iPhone və Web üçün endirin",
+    "learnMore": "Tam mənzərəni istəyirsiniz? <guide>Riftn nədir?</guide> platformanı ətraflı izah edir."
   },
   "dehubLinks": {
     "copyLinkDetail": "Mübadilə buferinizin {{item}} linkini kopyalayın",
@@ -82,12 +132,15 @@
       "proposal": "təklif",
       "stage": "sahə",
       "store": "dükkan",
-      "featureRequest": "istənilən istifadəçi hesabını qəbul et"
+      "featureRequest": "istənilən istifadəçi hesabını qəbul et",
+      "page": "səhifə"
     },
     "recipientChat": "söhbət",
     "recipientUser": "istifadəçi",
     "sendFailed": "{{item}} göndərmək alınmadı",
-    "sentTo": "{{item}} {{name}} ünvanına göndərildi"
+    "sentTo": "{{item}} {{name}} ünvanına göndərildi",
+    "openPage": "Səhifəni aç",
+    "viewRequest": "Sorğuya bax"
   },
   "stageCover": {
     "admitOne": "BİRİNİ QƏBUL ET",
@@ -196,7 +249,24 @@
   "signedFollows": {
     "setUp": "Aktivləşdir",
     "turnOff": "söndürmək",
-    "efpTurnOff": "Dayandır"
+    "efpTurnOff": "Dayandır",
+    "title": "İzlədikləriniz, zəncirdə",
+    "description": "Cüzdanınız kimi izlədiyinizi imzalayır və siyahı hər gün Base-də möhürlənir. İstənilən tətbiq izlədiklərinizi cüzdanınızdan tapa bilər, hətta Riftn olmadan.",
+    "on": "Bu cihaz üçün aktivdir",
+    "off": "Bu cihaz üçün söndürülüb",
+    "turnedOn": "İzlədikləriniz artıq cüzdanınızla imzalanır",
+    "turnedOff": "Bu cihaz üçün söndürüldü",
+    "failed": "Cüzdanınız imzalamadı. Yenidən cəhd edin.",
+    "hiddenNote": "Gizli izləmə siyahıları və məxfi hesablar ictimai siyahıya daxil edilmir.",
+    "efpOn": "EFP-yə kopyalandı · {{count}} izləmə",
+    "efpOff": "Onları EFP-yə də əlavə et",
+    "efpTurnOn": "EFP-yə əlavə et",
+    "efpDone": "İzlədikləriniz EFP-yə köçürülür",
+    "efpStopped": "EFP kopyalanması dayandı. Siyahı sizdə qalır.",
+    "efpHasList": "Artıq EFP siyahınız var. Riftn hələ onu doldura bilmir.",
+    "efpNoGas": "Bunun üçün cüzdanınızda Base şəbəkəsində bir az ETH lazımdır.",
+    "efpFailed": "Alınmadı. Yenidən cəhd edin.",
+    "efpNote": "EFP digər tətbiqlərin oxuduğu izləmə siyahısıdır (efp.app). Riftn cüzdanınızla pulsuzdur; digər cüzdanlar Base-də bir neçə sent ödəyir. Siyahı sizindir."
   },
   "profileFields": {
     "title": "Profil sahələri",
@@ -374,7 +444,8 @@
     "step": "Hesab nəzarətləri üçün https://riftn.com/mcp saytını OAuth birləşdiricisi kimi əlavə edin, Riftn-a daxil olun və girişə icazə verməzdən əvvəl icazələri nəzərdən keçirin.",
     "profilePrompt": "Riftn bioqrafiyamı yeniləyin: Müstəqil yaradıcı film və musiqi çəkir.",
     "generatePrompt": "Mənə Riftn-ın təsvir modellərini göstərin və onu yaratmazdan əvvəl portreti sitat gətirin.",
-    "libraryPrompt": "Riftn Yaradıcı kitabxanamda ən son aktivləri göstərin."
+    "libraryPrompt": "Riftn Yaradıcı kitabxanamda ən son aktivləri göstərin.",
+    "agents": "Sahib olduğunuz agentlər adından paylaşın, cavab verin, reaksiya verin, yenidən paylaşın, izləyin və profilləri redaktə edin"
   },
   "twitchMirror": {
     "title": "Twitch güzgü",
@@ -475,7 +546,66 @@
   "nav": {
     "launchpad": "İşəsalma paneli",
     "findWords": {
-      "getTheApp": "tətbiqi yükləyin, Android, iPhone, mobil tətbiq, quraşdır, APK, masaüstü tətbiq, kompüterdə quraşdır, Windows, Mac"
+      "getTheApp": "tətbiqi yükləyin, Android, iPhone, mobil tətbiq, quraşdır, APK, masaüstü tətbiq, kompüterdə quraşdır, Windows, Mac",
+      "home": "lent, xronologiya, son paylaşımlar, sizin üçün, izlədiklərim, əsas səhifə",
+      "profile": "profilim, hesabım, səhifəm, paylaşımlarım, avatar, bio, izləyicilər",
+      "explore": "axtarış, kəşf et, tap, trend, populyar, heşteqlər, insanlar, yaradıcılar",
+      "prompt": "AI, yarat, AI şəkil, AI video, şəkil yaradıcı, mətndən şəkilə, AI sənəti",
+      "editor": "video redaktoru, videonu redaktə et, kəs, qısalt, başlıqlar, altyazılar, effektlər",
+      "creator": "yarat, studiya, AI alətləri, şəkil, video, musiqi, səsləndirmə, 3D",
+      "converter": "video idxalı, yüklə, YouTube, TikTok, Instagram, çevir",
+      "migrate": "kanalımı köçür, kanal idxalı, toplu idxal, YouTube kanalı",
+      "notifications": "bildirişlər, fəaliyyət, qeydlər, cavablar, bəyənmələr, zəng",
+      "messages": "DM, birbaşa mesajlar, söhbət, gələnlər qutusu, yazışmalar, şəxsi mesaj",
+      "communities": "qruplar, icma, otaqlar, klublar, forumlar, üzvlər",
+      "assistant": "AI, çatbot, soruş, kömək, AI söhbət, suallar",
+      "settings": "tərcihlər, hesab, məxfilik, təhlükəsizlik, şifrə, dil, mövzu, qaranlıq rejim, bloklananlar, hesabı sil",
+      "leaderboard": "reytinq, sıralama, top yaradıcılar, top istifadəçilər, xallar, hesablar",
+      "bookmarks": "saxlanılanlar, sevimlilər, sonra bax, sonra oxu, saxlanılan paylaşımlar, kitabxana",
+      "command": "idarə paneli, analitika, qazanc, gəlir, təhlillər, moderasiya, statistikam",
+      "wallet": "balans, pul, vəsait, tokenlər, kripto, depozit, çıxarış, göndər, qəbul et, ödə",
+      "events": "təqvim, cədvəl, görüş, qarşıdan gələn, biletlər, AMA",
+      "stages": "səs otaqları, səsli söhbət, spaces, canlı səs, danışıq, podkast",
+      "featureRequests": "qur, qurucular, ideyalar, təkliflər, xəta bildir, xətalar, düzəlişlər, yol xəritəsi, səs ver, arzu siyahısı, təkmilləşdir",
+      "feedback": "rəy, qiymətləndirmə, sorğu, fikir, şikayət, rəy bildir",
+      "staking": "steyk, depozit, gəlirlilik, mükafatlar, qazan, gəlir payı, nişan, səviyyələr, faiz",
+      "superpowers": "gücləndir, təbliğ et, üstünlüklər, güclər, nişan üstünlükləri, əhatə, təkmilləşdirmələr",
+      "governance": "səs ver, səsvermə, təkliflər, sorğu, bülleten, qərar ver",
+      "dao": "xəzinə, ianə, bağış, icma fondu, töhfə ver, qrantlar",
+      "bounties": "iş, vakansiyalar, tapşırıqlar, sifarişlər, frilans, işə götür, pul qazan, ödənişli iş",
+      "myBounties": "mükafatlarım, işlərim, tarixçə, ödənişlər, tamamlanmış iş",
+      "affiliate": "referal, dostları dəvət et, dəvət, komissiya, tərəfdaş, qazan",
+      "careers": "vakansiyalar, işə qəbul, bizimlə işlə, komandaya qoşul, müraciət et, boş yerlər",
+      "stores": "mağaza, dükan, bazar, merç, al, sat, məhsullar, alış-veriş",
+      "fractions": "paylar, sahiblik, investisiya, paylaşıma sahib ol, NFT, NFT-lər, kolleksiyalar, ticarət",
+      "usernames": "istifadəçi adı, ləqəb, ad, adımı dəyiş, ad al, ad sat",
+      "accounts": "hesab al, hesab sat, satılıq hesablar, izləyicilər, hesabı köçür",
+      "apps": "tətbiq mağazası, mini tətbiqlər, tətbiq qur, tərtibatçılar, alətlər",
+      "arcade": "oyunlar, oyun, oyna, oyunçuluq, şahmat, atıcı, əyləncə",
+      "glossary": "terminlər, təriflər, lüğət, məna, nədir",
+      "compare": "müqayisə, müqayisə et, qarşı, alternativlər, YouTube, X, TikTok",
+      "guide": "başlanğıc, necə etməli, dərslik, kömək, öyrən, yeni başlayan, burada yeniyəm",
+      "stats": "statistika, analitika, rəqəmlər, qrafiklər, qiymət, təklif, sahiblər",
+      "docs": "sənədlər, kömək, API, ağ kağız, tərtibatçılar, təlimat",
+      "blog": "xəbərlər, məqalələr, yeniliklər, elanlar, nə yenilik var",
+      "videos": "izlə, videolar, kliplər, uzun videolar",
+      "shorts": "reels, qısa videolar, şaquli videolar, sürüşdür",
+      "music": "audio, mahnılar, treklər, dinlə, radio, pleylist",
+      "liveTv": "TV, yayımlar, yayım, canlı, translyasiya, kanallar, canlı izlə",
+      "buyTokens": "token al, satın al, balansı artır, kart, kredit kartı, fiat",
+      "bridge": "zəncirlərarası, tokenləri köçür, zəncirlər, zəncirlər arasında köçürmə",
+      "top100": "top 100, koinlər, kriptovalyutalar, bazar dəyəri, qiymətlər",
+      "agents": "AI agentləri, agentlər, botlar, avtomatlaşdırma, personajlar",
+      "advertising": "reklamlar, elanlar, kampaniya, təbliğ et, sponsor, marketinq",
+      "premium": "abunəlik, təkmilləşdir, pro, üzvlük, reklamsız, reklamdan azad",
+      "pricing": "planlar, xərc, qiymət, nə qədər, abunəlik",
+      "creators": "yaradıcı proqramı, səfirlər, tərəfdaşlar, yaradıcı kimi müraciət et, monetizasiya",
+      "connectAi": "MCP, ChatGPT, Claude, API, inteqrasiya, AI qoş",
+      "packs": "emoji, stikerlər, GIF-lər, emoji paketləri, stiker paketləri, xüsusi emoji",
+      "publicChat": "söhbət, ümumi söhbət, söhbət otağı, lobbi, danışıq, icma söhbəti",
+      "planned": "planlaşdırılmış, planla, planlaşdırılmış paylaşımlar, növbə, sonra",
+      "liveStudio": "canlı yayıma başla, yayım, yayımlama, OBS, overleylər, bildirişlər, vidcetlər",
+      "launchpad": "token burax, koin yarat, koin düzəlt, meme koin, bonding curve, tokenləşdir"
     },
     "reorderHint": "Dəstək və simvolları yerinə yetirmək üçün tutaraq sırala bilərsiniz.",
     "reorderReset": "Sıfırla",
@@ -526,7 +656,10 @@
     "affiliate": "Tərəfdaş",
     "groups": {
       "create": "Yarat",
-      "discover": "Kəşf et"
+      "discover": "Kəşf et",
+      "main": "Əsas",
+      "money": "Pul",
+      "riftn": "Riftn"
     }
   },
   "feed": {
@@ -1150,7 +1283,40 @@
     "socialConnectFailed": "{{platform}} ilə əlaqələndirmək mümkün olmadı. Yenidən cəhd edin.",
     "socialVerifiedFollowers": "{{value}} izləyicilər",
     "socialFollowersPending": "İzləyici sayı yenilənir",
-    "menuLayoutFolders": "Qovluqlar"
+    "menuLayoutFolders": "Qovluqlar",
+    "chatCards": "Söhbətlər kart kimi",
+    "chatCardsDesc": "Hər söhbət öz kartında. Söhbətlər arasında xətt olan sadə siyahı üçün söndürün.",
+    "chatDeleteChoice": "Mesajı siləndə",
+    "chatDeleteChoiceDesc": "Hər dəfə soruş, ya da həmişə yalnız özün üçün və ya söhbətdəki hər kəs üçün sil.",
+    "chatDeleteAsk": "Hər dəfə soruş",
+    "chatDeleteMe": "Mənim üçün sil",
+    "chatDeleteMeDesc": "Söhbətinizdən silinir, başqaları hələ də görür",
+    "chatDeleteEveryone": "Hər kəs üçün sil",
+    "chatDeleteEveryoneDesc": "Mümkün olduqda. Qrupda başqasının mesajı yenə yalnız sizin üçün silinir",
+    "showLikes": "Bəyənmələrimi hamıya göstər",
+    "showLikesDesc": "Hər kəs profilinizdəki Bəyənmələr bölməsini aça bilər. Standart olaraq söndürülüb, belə ki, nəyi bəyəndiyinizi yalnız siz görürsünüz.",
+    "showFollowersList": "Məni kimin izlədiyini göstər",
+    "showFollowersListDesc": "Hər kəsə izləyiciləriniz siyahısını açmağa icazə verin. Bu söndürüləndə onu yalnız siz görə bilərsiniz.",
+    "showFollowingList": "Kimi izlədiyimi göstər",
+    "showFollowingListDesc": "Hər kəsə izlədiyiniz insanların siyahısını açmağa icazə verin. Bu söndürüləndə onu yalnız siz görə bilərsiniz.",
+    "showFollowCounts": "İzləyici saylarımı göstər",
+    "showFollowCountsDesc": "Neçə izləyiciniz olduğunu və neçə nəfəri izlədiyinizi göstərin. Bunu söndürmək hər iki siyahını da gizlədir.",
+    "defaultProfileView": "Profil paylaşımlarının düzülüşü",
+    "defaultProfileViewDesc": "İnsanlar profilinizi açanda paylaşımlarınızı şəbəkə və ya siyahı kimi göstərin",
+    "readerProfileView": "Digər profilləri belə aç",
+    "readerProfileViewDesc": "Açdığınız hər profil üçün şəbəkə və ya siyahı seçin, ya da hər kəsin öz seçimini saxlayın",
+    "readerProfileViewOwner": "Hər kəsin öz seçimi",
+    "exportPartial": "Bu bölmələr oxunmadı və yoxdur: {{sections}}.",
+    "tipsOffNote": "Bu aktiv olduqda sizə bəxşişlər və göndərişlər bağlıdır. Yenidən bəxşiş almaq üçün onu söndürün.",
+    "menuLayout": "Menyu düzülüşü",
+    "menuLayoutDesc": "Menyu səhifələrini necə qruplaşdırır",
+    "menuLayoutTabs": "Bölmələr",
+    "menuLayoutTabsDesc": "Bir dəfəyə bir qrup, böyük ikonlarla",
+    "menuLayoutSections": "Hissələr",
+    "menuLayoutSectionsDesc": "Bütün səhifələr birdən, qrup başlıqları altında",
+    "menuLayoutFoldersDesc": "Əsas səhifələriniz, sonra hər qrup üçün qovluq",
+    "publicChatInBar": "Aşağı paneldə İctimai söhbət",
+    "publicChatInBarDesc": "Ekranın aşağısındakı paneldən bir toxunuşla İctimai söhbətə keçin"
   },
   "common": {
     "confirm": "Təsdiq et",
@@ -1240,7 +1406,14 @@
     "messagePublic": "Açıq",
     "railTitle": "İpuçları",
     "railTotal": "{{amount}} token",
-    "tokensUnit": "token"
+    "tokensUnit": "token",
+    "messagePlaceholder": "Bəxşişinizlə bir şey deyin",
+    "messagePrivate": "Yalnız {{name}}",
+    "theCreator": "yaradıcı",
+    "messageWallNote": "Bəxşiş keçəndən sonra bəxşiş divarında görünür.",
+    "sendWithMessage": "Mesajla göndər",
+    "messageFailed": "Mesajınız əlavə edilmədi. Bəxşiş göndərilmədi.",
+    "wallLabel": "Bəxşiş mesajları"
   },
   "postOptions": {
     "liveAlertsOn": "Artıq {{name}} izləyirsiniz. Canlı yayına başlayanda bildiriş alacaqsınız.",
@@ -1280,7 +1453,14 @@
     "giftBoost": "Artırma hədiyyə etmək",
     "markSection": "Atlanılabilən bölmələr",
     "copyFailed": "Linki kopyalamaq mümkün olmadı",
-    "share": "Paylaş"
+    "share": "Paylaş",
+    "refreshLinkPreview": "Keçid önizləməsini yenilə",
+    "linkPreviewRefreshed": "Keçid önizləməsi yeniləndi",
+    "linkPreviewRefreshFailed": "Həmin sayta qoşulmaq olmadı. Sonra yenidən cəhd edin.",
+    "castToTv": "Televizora yayımla",
+    "castStarted": "Televizorunuzda oynayır",
+    "castUnsupported": "Bu brauzer yayım edə bilmir. Televizorunuzda oynatmaq üçün Riftn-i Chrome və ya Safari-də açın.",
+    "castFailed": "Televizora qoşulmaq olmadı. Eyni Wi-Fi şəbəkəsində olduğunu yoxlayın və yenidən cəhd edin."
   },
   "filters": {
     "sort": "Sırala",
@@ -1883,7 +2063,10 @@
       "bountySubmittedNamed": "{{name}} sizin mükafatınız üçün işi təqdim etdi “{{title}}”",
       "bountySubmitted": "{{name}} sizin mükafatınız üçün işi təqdim etdi",
       "sentNotification": "{{name}} sizə xəbərdarlıq göndərdi"
-    }
+    },
+    "groupEarlier": "Əvvəlki",
+    "searchPlaceholder": "Bildirişlərdə axtar",
+    "searchEmpty": "Uyğun bildiriş yoxdur"
   },
   "leaderboard": {
     "title": "Lider Lövhəsi",
@@ -1928,7 +2111,13 @@
     "loadingBoard": "Lider lövhəsi yüklənir…",
     "amountTokens": "{{amount}} token",
     "directReferrals": "{{count}} doğrudan",
-    "secondaryReferrals": "{{count}} ikincil"
+    "secondaryReferrals": "{{count}} ikincil",
+    "ogChallenge": "OG Çağırışı",
+    "ogHolders_one": "{{count}} OG sahibi",
+    "ogHolders_other": "{{count}} OG sahibi",
+    "ogChallengeTitle": "OG sahiblərini geri qaytarın",
+    "ogChallengeBody": "Hələ də DHB saxlayan insanları dəvət edin. Onlar sizin dəvət keçidinizlə qoşulub DHB-lərini Riftn cüzdanında saxlayanda burada sizin hesabınıza sayılırlar.",
+    "ogChallengeCta": "Dəvət keçidinizi alın"
   },
   "dhbListing": {
     "title": "Token listinqi tezliklə!",
@@ -2071,17 +2260,39 @@
     "shipping": "Hazırlanır",
     "noShippingYet": "Davam edən heç nə yoxdur",
     "shippingAppearHere": "Hazırlanan sorğular burada görünəcək.",
-    "loadFailed": "Sorğuları yükləmək mümkün olmadı"
+    "loadFailed": "Sorğuları yükləmək mümkün olmadı",
+    "editMedia": "Şəkillər və videolar",
+    "editAddMedia": "Şəkil və ya video əlavə et",
+    "deviceInfoNote": "Xətaları düzəltməyimizə kömək üçün cihaz məlumatı əlavə olunur.",
+    "deviceInfo": "Cihaz məlumatı",
+    "deviceInfoOwners": "Bunu yalnız lövhə sahibləri görür",
+    "deviceInfoError": "Cihaz məlumatı yüklənmədi",
+    "deviceInfoNone": "Bu sorğu üçün cihaz məlumatı yoxdur",
+    "deviceInfoErrors": "Son xətalar"
   },
   "auth": {
-    "loginRequired": "Daxil olmaq lazımdır"
+    "loginRequired": "Daxil olmaq lazımdır",
+    "accountDeleted": "Bu hesab silinib. Yeni hesab kimi yenidən qeydiyyatdan keçə bilərsiniz.",
+    "accountDeletedHours_one": "Bu hesab silinib. Təxminən {{count}} saatdan sonra eyni e-poçt və ya telefonla yenidən qeydiyyatdan keçə bilərsiniz.",
+    "accountDeletedHours_other": "Bu hesab silinib. Təxminən {{count}} saatdan sonra eyni e-poçt və ya telefonla yenidən qeydiyyatdan keçə bilərsiniz.",
+    "accountDeletedDays_one": "Bu hesab silinib. Təxminən {{count}} gündən sonra eyni e-poçt və ya telefonla yenidən qeydiyyatdan keçə bilərsiniz.",
+    "accountDeletedDays_other": "Bu hesab silinib. Təxminən {{count}} gündən sonra eyni e-poçt və ya telefonla yenidən qeydiyyatdan keçə bilərsiniz."
   },
   "messages": {
     "newDrawer": {
       "to": "Kimə",
       "recent": "Son",
       "suggested": "Təklif olunan",
-      "youFollow": "İzlədiyiniz insanlar"
+      "youFollow": "İzlədiyiniz insanlar",
+      "placeholder": "Ad və ya @istifadəçi_adı",
+      "chattedBefore": "Danışırsınız",
+      "mutual": "Qarşılıqlı",
+      "dmsOff": "DM bağlıdır",
+      "keepTyping": "Hər kəsi axtarmaq üçün yazmağa davam edin",
+      "noOne": "Heç kim tapılmadı",
+      "tryUsername": "Onların dəqiq @istifadəçi_adını yoxlayın",
+      "sayHi": "Kiməsə salam deyin",
+      "typeAny": "İstənilən ad və ya @istifadəçi_adı yazın"
     },
     "reply": "Cavabla",
     "react": "Reaksiya ver",
@@ -2122,7 +2333,8 @@
     "noConversationsYet": "Hələ söhbət yoxdur",
     "sending": "Göndərilir",
     "retrySend": "Yenidən cəhd et",
-    "discardSend": "Sil"
+    "discardSend": "Sil",
+    "notSent": "Göndərilmədi"
   },
   "music": {
     "listeningCount_one": "{{count}} dinləmək",
@@ -2206,7 +2418,22 @@
     "viewMode": "Bax",
     "back": "Geri",
     "reserve": {
-      "signIn": "Giriş edin"
+      "signIn": "Giriş edin",
+      "available": "İstifadəçi adı boşdur",
+      "held": "Sizin üçün saxlanılıb",
+      "ended": "Saxlama bitdi",
+      "busy": "Rezerv edilir",
+      "availableBody": "riftn.com/{{name}} hazırda boşdur. Rezerv edin, qeydiyyatdan keçənə qədər onu bir dəqiqə saxlayırıq.",
+      "heldBody": "Taymer bitənə qədər heç kim @{{name}} adını götürə bilməz. Saxlamaq üçün qeydiyyatı tamamlayın.",
+      "endedBody": "Dəqiqəniz bitdi, ona görə @{{name}} yenidən hamı üçün açıqdır. Hələ də boşdur.",
+      "busyBody": "Kimsə hazırda @{{name}} adı ilə qeydiyyatdan keçir. Tamamlamasa, taymer bitəndə ad boşalacaq.",
+      "finish": "Qeydiyyatı tamamla",
+      "again": "Yenidən rezerv et",
+      "cta": "İndi rezerv et",
+      "letGo": "Burax",
+      "haveAccount": "Hesabınız var?",
+      "seoTitle": "@{{name}} Riftn-də boşdur",
+      "seoDescription": "Hələ heç kimin riftn.com/{{name}} ünvanı yoxdur. Onu sizin etmək üçün rezerv edin və qeydiyyatdan keçin."
     },
     "usernameAvailable": "İstifadəçi adı mövcuddur!",
     "signUpToClaim": "İddia etmək üçün bu gün qeydiyyatdan keçin",
@@ -2237,12 +2464,16 @@
     "tabs": {
       "playlists": "Səsləndirmə siyahıları",
       "dislikes": "Dislike",
-      "likes": "Bəyənmələr"
+      "likes": "Bəyənmələr",
+      "articles": "Məqalələr"
     },
     "likedPosts": {
       "emptyTitle": "Hələ bəyənmə yoxdur",
       "privateTitle": "Bəyənmələr gizlidir",
-      "loadMore": "Daha çox yüklə"
+      "loadMore": "Daha çox yüklə",
+      "emptyOwn": "Bəyəndiyiniz paylaşımlar burada görünür. Parametrlərdə Bəyənmələrimi göstər seçimini aktiv etməsəniz, onları yalnız siz görürsünüz.",
+      "emptyOther": "Hələ heç nə bəyənilməyib.",
+      "privateDesc": "Bu hesab bəyənmələrini gizli saxlayır."
     },
     "dislikes": {
       "emptyTitle": "Hal-hazırda dislike yoxdur",
@@ -2267,11 +2498,31 @@
     "sortMostLiked": "Ən çox bəyənilənlər",
     "sortCustomShort": "Fərdi",
     "arrange": {
-      "saving": "Yadda saxlanılır..."
+      "saving": "Yadda saxlanılır...",
+      "title": "Paylaşımlarınızı düzün",
+      "hint": "Paylaşımı basıb saxlayın və yeni yerinə sürüşdürün. Ziyarətçilər əvvəlcə bu sıranı görür.",
+      "drag": "Köçürmək üçün sürüşdürün",
+      "toTop": "Ən yuxarıya köçür",
+      "save": "Sıranı saxla",
+      "saved": "Sıranız saxlanıldı",
+      "reset": "Yenidən ən yenilər əvvəl",
+      "resetDone": "Yenidən ən yenilər əvvəl",
+      "saveFailed": "Sıranız saxlanmadı. Yenidən cəhd edin.",
+      "loadFailed": "Paylaşımlarınız yüklənmədi. Bunu bağlayın və yenidən cəhd edin.",
+      "empty": "Hələ düzəcək bir şey yoxdur. Əvvəlcə nəsə paylaşın."
     },
     "searchThisChannel": "Bu kanalı axtarın",
     "searchResultCount": "\"{{query}}\" üçün 1 nəticə",
-    "searchResultCountPlural": "{{count}} \"{{query}}\" üçün nəticələr"
+    "searchResultCountPlural": "{{count}} \"{{query}}\" üçün nəticələr",
+    "unavailable": "Profil əlçatan deyil",
+    "mutualsOne": "{{count}} qarşılıqlı:",
+    "mutualsMany": "{{count}} qarşılıqlı:",
+    "articles": {
+      "emptyTitle": "Hələ məqalə yoxdur",
+      "emptySubtitle": "Məqalələr burada görünəcək"
+    },
+    "sortCustom": "Xüsusi sıra",
+    "arrangeButton": "Paylaşımları düz"
   },
   "tv": {
     "seoTitle": "Live TV: Dünyanın Hər Yerindən Pulsuz Kanallar",
@@ -2536,7 +2787,26 @@
     "createSignIn": "Agent yaratmaq üçün yenidən daxil olun",
     "checkConnection": "Bağlantınızı yoxlayın və yenidən cəhd edin.",
     "welcome": {
-      "text": "Xoş gəldin mesajı"
+      "text": "Xoş gəldin mesajı",
+      "title": "Yeni üzvləri salamla",
+      "help": "Bu agent Riftn-ə yenicə qoşulan insanları izləyir və/və ya onlara mesaj yazır, gündə bir neçə nəfər.",
+      "follow": "Yeni üzvləri izlə",
+      "message": "Yeni üzvlərə mesaj yaz",
+      "textHelp": "{name} onların @istifadəçi_adı olur. Keçid yoxdur. Hər nəfərə bir dəfə göndərilir.",
+      "saveText": "Mesajı saxla",
+      "perDay": "Gündə nəfər",
+      "fewer": "Gündə daha az",
+      "more": "Gündə daha çox",
+      "today": "Bu gün: {{follows}} izlənildi · {{messages}} mesaj yazıldı",
+      "limits": "Heç vaxt eyni insana iki dəfə. Sizi bloklayan və ya səssizləşdirən, yeni mesajları söndürən və ya Yeni üzvlərdən gizlənən hər kəsi ötürür.",
+      "showLog": "Kimi salamladığına bax",
+      "hideLog": "Salamlamaları gizlət",
+      "empty": "Hələ heç kim yoxdur. Yeni üzvlər qoşulduqca burada görünür.",
+      "followed": "İzlənildi",
+      "messaged": "Mesaj yazıldı",
+      "skipped": "Ötürüldü",
+      "failed": "Çatmaq olmadı",
+      "defaultText": "Salam {name}, Riftn-ə xoş gəldin! 👋"
     },
     "workspace": {
       "moderation": "Axının moderatorluğu",
@@ -2732,7 +3002,15 @@
     "switchWalletAccount": "Hesabı dəyiş",
     "walletLoadFailed": "Cüzdələri yükləmə mümkün olmadı. Lütfən yenidən cəhd edin.",
     "openInBrowser": "Brauzerdə aç",
-    "copyLink": "Linkini kopyala"
+    "copyLink": "Linkini kopyala",
+    "bringLoginOver": "Riftn-i dehub.io-da istifadə etmisiniz? <bring>Girişinizi buraya köçürün</bring>",
+    "didYouMean": "{{email}} nəzərdə tuturdunuz?",
+    "profileMovedTitle": "Profiliniz köçürüldü",
+    "migrateWrongLogin": "Bu giriş başqa cüzdan açdı, ona görə heç nə dəyişmədi. Köhnə profiliniz {{login}} ilə yaradılıb. Onu geri qaytarmaq üçün ondan istifadə edin.",
+    "googleInAppTitle": "Google {{app}} daxilində giriş etmir",
+    "googleInAppTitleUnnamed": "Google bu tətbiq daxilində giriş etmir",
+    "googleInAppBody": "Google-dan istifadə etmək üçün Riftn-i brauzerinizdə açın və ya burada e-poçtla daxil olun.",
+    "tryAnyway": "Yenə də cəhd et"
   },
   "careers": {
     "title": "Riftn-da Karyera",
@@ -2957,7 +3235,16 @@
     "searchDehubFor": "Riftn-da «{{query}}» axtar",
     "switchAccount": "Hesabı dəyişin",
     "signedInAs": "{{name}} kimi daxil oldunuz",
-    "requestSend": "Müraciət göndər"
+    "requestSend": "Müraciət göndər",
+    "requestPrompt": "Hələ burada yoxdur? Sorğu kimi göndərin",
+    "requestPromptShort": "Hələ burada yoxdur?",
+    "requestDraftMenu": "{{query}} Riftn-ə əlavə edilsin",
+    "requestDraftSettings": "{{query}} üçün parametr",
+    "requestPostsTo": "Sorğulara paylaşır",
+    "requestHint": "Sizin adınızdan Sorğulara paylaşır. Hazır olanda sizə xəbər verəcəyik.",
+    "requestSent": "Sorğulara göndərildi",
+    "requestSentHint": "Hazır olanda sizə xəbər verəcəyik.",
+    "requestSeeIt": "Sorğularda bax"
   },
   "comments": {
     "reportComment": "Şərh bildir",
@@ -3053,8 +3340,19 @@
     "anonymousLikes_other": "Anonim nişan sahiblərindən {{count}} bəyənmə",
     "threadParts": {
       "moveUp": "Yuxarıya daşı",
-      "moveDown": "Aşağıya daşı"
-    }
+      "moveDown": "Aşağıya daşı",
+      "reorder": "Yenidən sırala",
+      "save": "Sıranı saxla",
+      "saved": "Mövzu sırası saxlanıldı",
+      "saveFailed": "Sıra saxlanmadı. Yenidən cəhd edin.",
+      "dragPart": "{{n}}-ci hissəni köçürmək üçün sürüşdürün",
+      "addPart": "Mövzuya əlavə et",
+      "addPlaceholder": "Mövzunuza əlavə edin...",
+      "label": "Mövzu · {{count}} hissə"
+    },
+    "attachMedia": "Şəkil, video və ya audio əlavə et",
+    "attachUnsupported": "Şəkil, video və ya audio fayl əlavə edin.",
+    "attachTooLarge": "Bu fayl {{size}} MB limitini keçir."
   },
   "mintChain": {
     "title": "Nanə yazısı",
@@ -3068,10 +3366,18 @@
     "priceUnavailable": "Qiymət mövcud deyil",
     "confirm": "Nanə {{chain}}",
     "confirmWithCost": "Nanə {{chain}} · {{cost}}",
-    "notAvailable": "Bu zəncirdə mintinq hələ mövcud deyil."
+    "notAvailable": "Bu zəncirdə mintinq hələ mövcud deyil.",
+    "gasOnly": "≈ {{usd}} qaz"
   },
   "postEditHistory": {
-    "original": "Orijinal"
+    "original": "Orijinal",
+    "title": "Redaktə tarixçəsi",
+    "edited_one": "Bir dəfə redaktə edilib",
+    "edited_other": "{{count}} dəfə redaktə edilib",
+    "lastEdit": "Son redaktə {{time}}",
+    "editN": "Redaktə {{n}}",
+    "now": "İndi",
+    "showChanges": "Nəyin dəyişdiyini göstər"
   },
   "postInfo": {
     "title": "Paylaşım məlumatı",
@@ -3366,7 +3672,10 @@
     "waiting_for_wallet": "Pul kisəniz gözlənilir",
     "waiting_for_wallet_desc": "{{wallet}} açın və imzanı təsdiq edin — sorğu orada gözləyir.",
     "your_wallet": "cüzdanınız",
-    "max_available_on_chain": "Maksimum mövcud: {{chain}}-da {{amount}} token"
+    "max_available_on_chain": "Maksimum mövcud: {{chain}}-da {{amount}} token",
+    "not_available_for_this_post": "Bu paylaşım üçün əlçatan deyil",
+    "turn_back_on_desktop_notifications": "Masaüstü bildirişləri yenidən aktiv edilsin?",
+    "notifications_moved_to_riftn": "Biz riftn.com-a köçdük, ona görə brauzeriniz burada cavabları, bəxşişləri və DM-ləri göstərmək üçün bir dəfə də razılığınızı istəyir."
   },
   "staking": {
     "title": "Mərc",
@@ -4015,7 +4324,8 @@
       "title": "Token vergi şnuru",
       "subtitle": "2021-23-cü illərdə hər yandırma, sahib ödəməsi və əməliyyatlar üzrə ödəməni yoxlamaq üçün linki olan",
       "empty": "Burada göstəriləcək heç nə yoxdur.",
-      "contractProof": "Həmin gün hər bir iddia bu müqavilənin tədbir jurnalında var: {{address}}"
+      "contractProof": "Həmin gün hər bir iddia bu müqavilənin tədbir jurnalında var: {{address}}",
+      "summary": "{{entries}} sətir · hər günün BNB qiymətinə görə {{total}} · hər sətir BscScan-da yoxlanıla bilər"
     }
   },
   "superpowers": {
@@ -5273,18 +5583,167 @@
     "buy": "Satın al",
     "reject": "Rədd et",
     "needsYouHold": "{{needed}} lazımdır, siz {{held}} saxlayırsınız",
-    "sellYourFractions": "Fraksiyalarınızı satın ({{held}} saxlanılır)"
+    "sellYourFractions": "Fraksiyalarınızı satın ({{held}} saxlanılır)",
+    "nftsSubtitle": "İstənilən NFT, bir addımlı mübadilələr",
+    "buyersTab": "Alıcılar",
+    "soldOfListing": "{{total}} ədəddən {{sold}} satılıb",
+    "noBuyersYet": "Hələ heç kim bu paylaşımın paylarını almayıb",
+    "fromYou": "sizdən",
+    "statusOverdue": "Gecikmiş"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Bu təfərrüatlardan istifadə et"
+        "use": "Bu təfərrüatlardan istifadə et",
+        "url": "Məhsul səhifəsinin URL-i",
+        "action": "Məhsul səhifəsini oxu",
+        "loading": "Səhifə oxunur…",
+        "hint": "Açıq məhsul səhifəsindən mətn idxal edin. İstifadə etməzdən əvvəl detallara baxın; məhsul şəkillərini studiyada ayrıca əlavə edin.",
+        "source": "İdxal edilmiş mənbə",
+        "review": "Redaktə edilə bilən tapşırığınıza kopyalamaq üçün məhsul seçin. Başlığınız, səsiniz və brend rəngləriniz dəyişmir.",
+        "errors": {
+          "signIn": "Məhsul səhifəsini idxal etmək üçün daxil olun.",
+          "url": "Açıq HTTPS məhsul URL-indən istifadə edin.",
+          "empty": "İstifadəyə yararlı məhsul detalları tapılmadı. Onları əl ilə əlavə edin.",
+          "busy": "Çox sayda idxal icra olunur. Bir azdan yenidən cəhd edin.",
+          "unavailable": "Bu səhifə idxal edilmədi. Məhsul detallarını əl ilə əlavə edin.",
+          "failed": "İdxal alınmadı. Tapşırığınız saxlanılıb; yenidən cəhd edin və ya detalları əl ilə daxil edin."
+        }
+      },
+      "return": "Studiya qaralamasına qayıt",
+      "title": "Kampaniya tapşırığı",
+      "intro": "Məhsulunuzu və brendinizi təsvir edin, sonra uyğun reklam formatlarını hazırlayın.",
+      "saved": "Tapşırığınız bu hesab üçün bu cihazda saxlanılıb.",
+      "preview": "Formatları hazırla",
+      "clear": "Tapşırığı təmizlə",
+      "required": "Formatları hazırlamaq üçün məhsul adı və təsviri əlavə edin.",
+      "variants": "Kampaniya formatları",
+      "reviewHint": "Generasiyadan əvvəl studiyada modelə, qiymətə və məhsul istinadına baxın. Hər format ayrıca generasiyadır.",
+      "open": "Studiyada bax",
+      "fields": {
+        "product": "Məhsul adı (tələb olunur)",
+        "description": "Məhsul faktları (tələb olunur)",
+        "brand": "Brend adı",
+        "audience": "Hədəf auditoriya",
+        "benefit": "Əsas üstünlük",
+        "voice": "Brend səsi",
+        "palette": "Brend rəngləri",
+        "headline": "Təsdiqlənmiş başlıq",
+        "cta": "Fəaliyyətə çağırış"
+      },
+      "formats": {
+        "square": "Kvadrat reklam",
+        "portrait": "Portret reklam",
+        "story": "Story şəkli",
+        "video": "Şaquli video"
       }
     },
     "cinema": {
       "close": "Bağla",
       "performance": {
-        "label": "Performans"
+        "label": "Performans",
+        "0": "Şən",
+        "1": "Həzin",
+        "2": "Narahat",
+        "3": "Özünəinamlı",
+        "4": "Heyran",
+        "5": "Təmkinli",
+        "6": "Oynaq"
+      },
+      "title": "Kino istiqaməti",
+      "hint": "Növbəti şəkil və ya videonuzun vizual üslubunu istiqamətləndirin. Nəticələr modeldən asılı olaraq fərqlənir.",
+      "none": "İstiqamət yoxdur",
+      "reset": "İstiqaməti təmizlə",
+      "camera": {
+        "label": "Kamera görünüşü",
+        "0": "Rəqəmsal kino",
+        "1": "35mm plyonka",
+        "2": "16mm plyonka",
+        "3": "Böyük format",
+        "4": "Köhnə videokamera"
+      },
+      "lens": {
+        "label": "Obyektiv görünüşü",
+        "0": "Sferik",
+        "1": "Anamorfik",
+        "2": "Köhnə yumşaq şüşə",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Fokus məsafəsi",
+        "0": "18mm geniş",
+        "1": "24mm geniş",
+        "2": "35mm təbii",
+        "3": "50mm standart",
+        "4": "85mm portret",
+        "5": "135mm teleobyektiv"
+      },
+      "aperture": {
+        "label": "Sahənin dərinliyi",
+        "0": "f/1.4 çox dayaz",
+        "1": "f/2.8 dayaz",
+        "2": "f/5.6 orta",
+        "3": "f/11 dərin fokus"
+      },
+      "movement": {
+        "label": "Kamera hərəkəti",
+        "0": "Sabit ştativ",
+        "1": "Yavaş dolly yaxınlaşma",
+        "2": "Yavaş dolly uzaqlaşma",
+        "3": "Yan izləmə",
+        "4": "Obyekt ətrafında fırlanma",
+        "5": "Əldə",
+        "6": "Kran qalxması",
+        "7": "Yavaş panorama"
+      },
+      "lighting": {
+        "label": "İşıqlandırma",
+        "0": "Yumşaq gün işığı",
+        "1": "Qızıl saat",
+        "2": "Tünd kiaroskuro",
+        "3": "Parlaq studiya",
+        "4": "Neon işıqlar",
+        "5": "Arxa işıqda siluet",
+        "6": "Buludlu səpələnmiş işıq"
+      },
+      "tempo": {
+        "label": "Kadr tempi",
+        "0": "Tək fasiləsiz kadr",
+        "1": "Sakit, tələsiksiz hərəkət",
+        "2": "Dinamik, enerjili hərəkət",
+        "3": "Xaotik, qızğın hərəkət"
+      },
+      "era": {
+        "label": "Dövr",
+        "0": "1920-ci illər",
+        "1": "1950-ci illər",
+        "2": "1960-cı illər",
+        "3": "1970-ci illər",
+        "4": "1980-ci illər",
+        "5": "1990-cı illər",
+        "6": "Müasir dövr",
+        "7": "Yaxın gələcək"
+      },
+      "genre": {
+        "label": "Janr",
+        "0": "Sənədli",
+        "1": "Dram",
+        "2": "Film noir",
+        "3": "Elmi fantastika",
+        "4": "Fantastika",
+        "5": "Romantik komediya",
+        "6": "Triller",
+        "7": "Vestern"
+      },
+      "palette": {
+        "label": "Rəng palitrası",
+        "0": "İsti kəhrəba",
+        "1": "Soyuq mavi",
+        "2": "Solğun torpaq tonları",
+        "3": "Pastel",
+        "4": "Yüksək kontrastlı monoxrom",
+        "5": "Doymuş əsas rənglər"
       }
     },
     "libraryEmpty": "Saxladığınız generasiyalar burada görünəcək.",
@@ -6086,14 +6545,119 @@
       "cannotUseReference": "{{model}} istinad şəklindən istifadə edə bilməz. Onu silin və ya başqa model seçin.",
       "needsImageToAnimate": "{{model}} animasiya üçün bir şəkil lazımdır. Əvvəlcə birini əlavə edin.",
       "needsImageToWork": "{{model}} işləmək üçün bir şəkil lazımdır. Əvvəlcə birini əlavə edin.",
-      "musicTrackLength": "{{count}}s track"
+      "musicTrackLength": "{{count}}s track",
+      "speechLimit": "Bu {{length}} simvoldur. Limit {{limit}}-dir."
     },
     "gallery": {
       "send": "Göndər",
       "notifications": {
-        "generation_reply": "{{name}} şərhinizə cavab verdi"
+        "generation_reply": "{{name}} şərhinizə cavab verdi",
+        "generation_like": "{{name}} generasiyanıza reaksiya verdi",
+        "generation_comment_like": "{{name}} şərhinizə reaksiya verdi",
+        "generation_comment": "{{name}} generasiyanıza şərh yazdı"
+      },
+      "browse": "Generasiyalara bax",
+      "create": "Yarat",
+      "fullscreen": "Tam ekranda bax",
+      "missing": "Bu generasiya əlçatan deyil."
+    },
+    "avatarTitle": "Danışan portret",
+    "avatarRequirements": "Kvadrat PNG portret, 512–2048 piksel, 5 MB-a qədər. Mono 24 kHz 16-bit PCM WAV, 5–30 saniyə. Saniyənin son hissəsi sükutla doldurulur.",
+    "avatarPortrait": "Portret PNG seç",
+    "avatarAudio": "Nitq WAV seç",
+    "avatarPermission": "Bu portreti animasiya etməyə və bu audiodan istifadə etməyə icazəm var.",
+    "avatarQuote": "Sükut daxil {{seconds}} saniyə · {{amount}} token",
+    "avatarPrepare": "Hazırla və qiymətə bax",
+    "batchFlowLimit": "Flow siyahısı doludur. Yeni partiya yaratmazdan əvvəl istifadə olunmayan Flow-u silin.",
+    "batchReviewCampaign": "Kampaniya partiyasına Flow-da bax",
+    "batchReviewFilmImages": "Storyboard şəkil partiyasına bax",
+    "batchReviewFilmVideos": "Film klipi partiyasına bax",
+    "batchReviewHint": "Ayrıca saxlanılmış Flow açır. Ödəməzdən əvvəl hər elementə və tam qiymətə baxın. Tamamlanmış elementlər və ilkin ödəniş bərpa üçün saxlanılır. İstinadlar şəxsi kitabxananıza kopyalanır; yaddaş və şəbəkə istifadəsi tətbiq olunur.",
+    "batchInvalid": "1–12 şəkil və ya klipdən ibarət partiya hazırlamazdan əvvəl hər elementi tamamlayın.",
+    "batchReferenceLimit": "Bu partiya hər element üçün bir şəkil istinadını dəstəkləyir. Əlavə istinadları silin və ya həmin elementi ayrıca hazırlayın.",
+    "batchVideoSettings": "Bu partiyada kliplər 4–15 saniyəlik tam müddət və 16:9, 9:16 və ya 1:1 tərəf nisbəti tələb edir.",
+    "batchMissingReference": "İstinad yoxdur, dəstəklənmir və ya 25 MB-dan böyükdür. Partiyanı hazırlamazdan əvvəl onu redaktorda bərpa edin.",
+    "batchOwnerChanged": "Hesab və ya qaralama dəyişib. Bu partiyanı ilkin hesabı altında yenidən açın.",
+    "batchConflict": "Saxlanılmış partiya ilkin görüntüsünə uyğun gəlmir.",
+    "audioExportFormat": "İxrac formatı",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Uzatmaq üçün bir mənbə klipi əlavə edin.",
+    "extensionSeconds": "+{{seconds}} san yeni kadr",
+    "extensionHelp": "Mənbə klipinizi təxminən dörd yeni saniyə ilə qaytarır. Nəticə 24 fps-də 720p-yə qədər ölçüləndirilir. Uzantı üçün yeni audio yaradılır.",
+    "extensionForward": "Mənbə klipinizdən sonra təxminən dörd saniyə əlavə edin",
+    "extensionBackward": "Mənbə klipinizdən əvvəl təxminən dörd saniyə əlavə edin",
+    "expandDescription": "Yeni şəkil kənarları yaradın. İstəyə bağlı ingilis dilində prompt; bir mənbə şəkli.",
+    "relightDescription": "Bir fotonu işıqlandırma və fon təsvirinizə görə yenidən işıqlandırın.",
+    "expandPromptHint": "Bir şəkil əlavə edin və onun yeni tərəf nisbətini seçin. İngilis dilində prompt istəyə bağlıdır.",
+    "expandEnglishOnly": "Bu genişləndirmə modeli ingilis dilində promptları qəbul edir. Avtomatik genişləndirmə üçün promptu boş saxlayın.",
+    "expandNeedsImage": "Genişləndirmək üçün şəkil əlavə edin.",
+    "learn": {
+      "title": "Yaradıcı dərsləri",
+      "intro": "Qısa dərslər, bilik yoxlaması və hər biri üçün redaktə edilə bilən tapşırıq. İrəliləyiş hesabınız üçün bu cihazda saxlanılır.",
+      "back": "Yaradıcıya qayıt",
+      "lessons": "Dərslər",
+      "progress": "{{total}} bilik yoxlamasından {{completed}} keçilib",
+      "check": "Cavabı yoxla",
+      "correct": "Bilik yoxlaması keçildi",
+      "retry": "Yenidən cəhd edin. Yuxarıdakı dərsə nəzər salın.",
+      "exerciseTitle": "Praktik tapşırıq",
+      "exerciseHint": "Öz studiya iş sahənizdə redaktə edilə bilən nümunə açın. Qaralamanı açmaq pulsuzdur; generasiya sizin baxışınızı və ayrıca qiymət təklifini tələb edir. Generasiyadan əvvəl nümunəni redaktə edin.",
+      "openExercise": "Tapşırıq qaralamasını aç",
+      "closeExercise": "Tapşırığı bağla",
+      "brief": {
+        "title": "Aydın vizual tapşırıq yazın",
+        "body1": "Konkret obyekti, onun hərəkətini və mühiti təsvir edin. Səhnəyə kömək edəndə kadrlama və ya kamera hərəkəti əlavə edin. Əlaqəsiz ideyaları başqa qaralama üçün saxlayın.",
+        "body2": "İşıqlandırma, obyektiv və üslub göstərişləri modeli istiqamətləndirir. Onlar fiziki kamera davranışına və ya dəqiq şəkilə zəmanət vermir. Düzəlişləri müqayisə edə bilmək üçün hər dəfə bir hissəni dəyişin.",
+        "body3": "Generasiyadan əvvəl seçilmiş modelə, dəstəklənən əlavələrə, ölçülərə və qiymətə baxın. Ona qayıda bilmək üçün ilkin qaralamanı saxlayın.",
+        "question": "Hansı tapşırığa düzəliş etmək ən asandır?",
+        "answer0": "Aydın obyekt, hərəkət və mühit",
+        "answer1": "Yalnız model adı",
+        "answer2": "Bir-birinə zidd üslublar siyahısı",
+        "exercise": "Pəncərə yanında taxta masanın üstündə keramik çaydan. Yumşaq səhər işığı, orta kadr, sadə fon. Çaydanı aydın obyekt kimi saxlayın."
+      },
+      "continuity": {
+        "title": "Kadrları planlayın və ardıcıllığı yoxlayın",
+        "body1": "Tapşırığı və sıralanmış kadrları saxlamaq üçün redaktordakı Film panelindən istifadə edin. Hər kadrı və ya klipi ayrıca hazırlayın, qiymət təklifinə baxın və qəbul edilmiş nəticəni seçin.",
+        "body2": "Yalnız seçdiyiniz modelin qəbul etdiyi istinadları əlavə edin. İstinadı təkrar istifadə etmək görünüşü istiqamətləndirə bilər; o, şəxsiyyəti öyrətmir və uyğunluğa zəmanət vermir. Personajlar və səslər generasiyalar arasında fərqlənə bilər.",
+        "body3": "Uğurlu çəkilişləri saxlayın və onları zaman xəttində birləşdirin. İxracdan əvvəl hərəkətə, üzlərə, dialoqa və keçidlərə baxın.",
+        "question": "Kadrlar arasında ardıcıllığı nə dəstəkləyir?",
+        "answer0": "Daha çox əlaqəsiz prompt",
+        "answer1": "Təsdiqlənmiş istinadlar və yoxlanılmış kadr qeydləri",
+        "answer2": "Personaj şəxsiyyətinin zəmanətli olduğunu güman etmək",
+        "exercise": "Gün doğarkən sakit sahilə çatan tənha səyyahın geniş kadrı. Yavaş irəli kamera hərəkəti, sakit atmosfer. Bir fasiləsiz kadr."
+      },
+      "campaign": {
+        "title": "Təsdiqlənmiş məhsul faktlarından istifadə edin",
+        "body1": "Yoxlaya biləcəyiniz məhsul faktları ilə başlayın. İdxal edilmiş metadata istifadə etməzdən əvvəl ona baxın. Başlığı və çağırışı açıq yazın; qiymət, rəy və ya performans iddiaları uydurmayın.",
+        "body2": "Ümumi qeydləri və ayrı-ayrı hook-ları, ssenariləri, dilləri və formatları bir yerdə saxlamaq üçün saxlanılmış kampaniya variantlarından istifadə edin. Hər dəfə bir yoxlanılmış element hazırlayın və onun qiymət təklifini studiyada yoxlayın.",
+        "body3": "Nəticədə görünən mətnə, məhsulun görünüşünə və hər hansı səsli iddialara baxın. Prompt məhsulun dəqiqliyinin və ya marketinq performansının sübutu deyil.",
+        "question": "Məhsul iddiası nə vaxt daxil edilməlidir?",
+        "answer0": "İnandırıcı səsləndikdə",
+        "answer1": "Beş ulduzlu rəy uydurduqdan sonra",
+        "answer2": "Təsdiqlənmiş məhsul faktlarından gələndə",
+        "exercise": "Təkrar istifadə olunan qutuda satılan bütöv yarpaq çay üçün portret formatında məhsul reklamı yaradın. Təsdiqlənmiş başlıq: Çaya vaxt ayır. Təsdiqlənmiş CTA: Kolleksiyanı kəşf et. Yalnız bu faktlardan istifadə edin; endirim, rəy və ya sağlamlıq iddiaları uydurmayın."
       }
-    }
+    },
+    "campaignPlanTitle": "Kampaniya variantları və epizodlar",
+    "campaignPlanIntro": "12-yə qədər variant və ya epizod saxlayın. Hər biri öz baxışı və qiymət təklifi üçün studiyanı açır. Ümumi qeydlər ardıcıllığı istiqamətləndirir; məhsulun görünüşü, personajlar və səslər generasiyalar arasında fərqlənə bilər.",
+    "campaignTitle": "Kampaniya və ya seriya adı",
+    "campaignContinuity": "Ümumi personaj, səs və üslub qeydləri",
+    "campaignVariantTitle": "Variant və ya epizod adı",
+    "campaignHook": "Açılış hook-u",
+    "campaignLanguage": "Nəticə dili",
+    "campaignScript": "Təsdiqlənmiş ssenari və ya səhnə ardıcıllığı",
+    "campaignAdd": "Variant və ya epizod əlavə et",
+    "campaignClear": "Planı təmizlə",
+    "campaignFormat": "Nəticə formatı",
+    "audioInvalidResponse": "Audio xidməti etibarsız nəticə qaytardı.",
+    "batchPaymentHelp": "Göndərilən hər şəkil üçün ayrıca ödəniş alınır. Partiya dayanarsa, onun ödənişindən istifadə olunmamış tokenlər əhatə etdiyi sonrakı generasiya üçün avtomatik istifadə olunur.",
+    "invalidSeed": "Seed 0-dan 2147483647-yə qədər tam ədəd olmalıdır.",
+    "libraryFavorites": "Sevimlilər",
+    "libraryFavoriteAdd": "Sevimlilərə əlavə et",
+    "libraryFavoriteRemove": "Sevimlilərdən sil",
+    "audioTaskDialoguePlaceholder": "Alice: Getməliyik.\nBob: [gülür] Əvvəlcə sən.",
+    "priceOwnKey": "Açarınız"
   },
   "pricing": {
     "plansForEveryWorkflow": "Hər bir iş axını üçün planlar",
@@ -6260,7 +6824,8 @@
     "createTheFirst": "Birincisini yaradın",
     "docsSeoTitle": "AI Bacarıq Təlimatları | Riftn",
     "docsSeoDescription": "Riftn-un AI köməkçisi bacarıqları və cəld kitabxana üçün istinad sənədləri.",
-    "raw": "Xammal"
+    "raw": "Xammal",
+    "docsLoadFailed": "# Xəta\nBacarıq sənədləri yüklənmədi."
   },
   "nftMarket": {
     "actAll": "Hamısı",
@@ -6378,7 +6943,28 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT və ödəniş bir addımda dəyişir.",
     "spotlightOfferNote": "Hələ siyahıya alınmayıb. Təklif göndərin və hədd edən istənilən vaxt qəbul edə bilər.",
-    "signInToTradeCta": "Ticarət üçün daxil olun"
+    "signInToTradeCta": "Ticarət üçün daxil olun",
+    "actCollectionOffer": "Kolleksiya təklifi",
+    "actListed": "Satışa qoyulub",
+    "actOffer": "Təklif",
+    "actSale": "Satış",
+    "buyAll": "Hamısını al",
+    "buySeveral": "Bir neçəsini al",
+    "cartBought": "{{n}} ədəd alındı. Onlar artıq cüzdanınızdadır.",
+    "cartCount": "Səbətdə {{n}}",
+    "cartFull": "Bir dəfəyə 20-yə qədər",
+    "cartOneCoin": "Hər səbətdə bir zəncir və bir koin. Dəyişmək üçün səbəti təmizləyin.",
+    "cartOwn": "Bu sizindir",
+    "cartPick": "Səbətə əlavə etmək üçün toxunun",
+    "forSaleHere": "Burada satılır",
+    "noActivity": "Hələ burada heç nə yoxdur",
+    "volShort": "Həcm",
+    "salesCount": "{{n}} satılıb",
+    "bestOffer": "Ən yaxşı təklif",
+    "fromOpenSea": "OpenSea-də top kolleksiyalar",
+    "buyHere": "Onları burada alın",
+    "openSeaNote": "OpenSea-də satışa qoyulub. Satıcıya birbaşa Seaport-da ödəyirsiniz; Riftn komissiya əlavə etmir.",
+    "viewOnOpenSea": "OpenSea-də bax"
   },
   "usernames": {
     "seoTitle": "İstifadəçi adı bazarı | Riftn",
@@ -6733,7 +7319,18 @@
       "votes_other": "{{count}} səs",
       "howToVote_one": "Chatda {{command}} və bir rəqəm yazaraq səs ver · {{count}} səs",
       "howToVote_other": "Chatda {{command}} və bir rəqəm yazaraq səs ver · {{count}} səs"
-    }
+    },
+    "eyebrow": {
+      "follow": "Yeni izləyici",
+      "subscribe": "Yeni abunəçi",
+      "subscribedTo": "Abunə oldu · {{plan}}",
+      "gifted_one": "Abunəlik hədiyyə etdi",
+      "gifted_other": "{{count}} abunəlik hədiyyə etdi",
+      "share": "Yayımı paylaşdı",
+      "join": "Yenicə qoşuldu"
+    },
+    "giftedSubs_one": "{{name}} abunəlik hədiyyə etdi!",
+    "giftedSubs_other": "{{name}} {{count}} abunəlik hədiyyə etdi!"
   },
   "liveChatModeration": {
     "timeout1m": "1 dəqiqəlik vaxt bitməsi",
@@ -6754,15 +7351,40 @@
       "modes": {
         "none": "Söndür",
         "blur": "Bulanıqlıq",
-        "color": "Rəng"
-      }
+        "color": "Rəng",
+        "image": "Şəkil"
+      },
+      "failed": "Fonun silinməsi bu cihazda başlaya bilmədi.",
+      "hint": "Cihazınızda işləyir. İlk dəfə yüklənməsi bir neçə saniyə çəkir."
     },
     "remove": "Sil",
     "scenes": {
       "countdown": "Geri sayım",
       "minutes": "{{count}} dəq",
       "names": {
-        "starting": "Tezliklə başlayacaq"
+        "starting": "Tezliklə başlayacaq",
+        "chatting": "Sadəcə söhbət",
+        "gameplay": "Oyun prosesi",
+        "brb": "Tezliklə qayıdıram",
+        "ending": "Yayım bitir"
+      },
+      "title": "Səhnələr",
+      "edit": "{{name}} redaktə et",
+      "subtitle": "İkinci sətir (istəyə bağlı)",
+      "picture": "Şəkil",
+      "noCountdown": "Geri sayım yoxdur",
+      "muteMic": "Bu aktiv olanda mikrofonumu söndür",
+      "hints": {
+        "starting": "Geri sayımlı kart",
+        "chatting": "Kamera tam ekranda",
+        "gameplay": "Kameranızla ekran",
+        "brb": "Kart, mikrofon söndürülüb",
+        "ending": "Təşəkkür kartı"
+      },
+      "subtitles": {
+        "starting": "Yayım başlayır",
+        "brb": "Bir azdan qayıdıram",
+        "ending": "İzlədiyiniz üçün təşəkkürlər"
       }
     },
     "sources": {
@@ -6772,15 +7394,37 @@
       "show": "Yayımda göstər",
       "loop": "Döngə",
       "positions": {
-        "center": "Mərkəzləşdir"
+        "center": "Mərkəzləşdir",
+        "top-left": "Yuxarı sol",
+        "top-right": "Yuxarı sağ",
+        "bottom-left": "Aşağı sol",
+        "bottom-right": "Aşağı sağ"
       },
       "sizes": {
-        "medium": "Orta"
+        "medium": "Orta",
+        "small": "Kiçik",
+        "large": "Böyük"
       },
       "shapes": {
         "circle": "Dairə",
-        "rect": "Kvadrat"
-      }
+        "rect": "Kvadrat",
+        "rounded": "Yuvarlaq"
+      },
+      "title": "Mənbələr",
+      "addImage": "Şəkil və ya loqo",
+      "addCamera": "İkinci kamera",
+      "addClip": "Video klip",
+      "addReaction": "Videoya reaksiya ver",
+      "reactPlaceholder": "Riftn video keçidini yapışdırın",
+      "reactInvalid": "Riftn videosunun keçidini yapışdırın.",
+      "reactNotLive": "Əvvəlcə canlı yayıma başlayın, sonra videonu əlavə edin.",
+      "reactNoBubble": "Kameranız burada iki dəfə açıla bilmədi. Üzünüzü ekranda saxlamaq üçün videonun ölçüsünü dəyişin.",
+      "failed": "Bu mənbə əlavə edilmədi.",
+      "empty": "Yayımınızın üstünə loqo, ikinci kamera və ya video klip əlavə edin.",
+      "hint": "Mənbələr hər izləyici və hər platforma üçün şəklinizin üstünə çəkilir.",
+      "clip": "Klip",
+      "restart": "Yenidən başlat",
+      "play": "Oynat və ya dayandır"
     },
     "audio": {
       "mute": "Səssizləşdir",
@@ -6789,7 +7433,27 @@
         "off": "Söndür",
         "low": "İşıqlı",
         "high": "Güclü"
-      }
+      },
+      "title": "Audio mikser",
+      "unavailable": "Bu brauzer audionu qarışdıra bilmir, ona görə mikrofonunuz olduğu kimi gedir.",
+      "channels": {
+        "mic": "Mikrofon",
+        "game": "Oyun / tab",
+        "clip": "Video klip"
+      },
+      "absent": {
+        "mic": "Mikrofon yoxdur",
+        "game": "Ekranı səslə paylaşın və ya capture kartdan istifadə edin",
+        "clip": "Mənbələrdə video klip əlavə edin"
+      },
+      "gate": "Səs qapısı",
+      "gateHint": "Sözlər arasında mikrofonunuzu susdurur ki, klaviatura klikləri və ventilyatorlar yayıma düşməsin."
+    },
+    "imageTooLarge": "Bu şəkil çox böyükdür. Daha kiçiyini sınayın.",
+    "widgets": {
+      "title": "Vidcetləri videomda göstər",
+      "hint": "Bildirişlər, hədəf zolaqları və söhbət yayımınıza çəkilir, beləliklə Twitch, YouTube və digər bütün platformalardakı izləyicilər də onları görür.",
+      "failed": "Vidcetlərin göründüyü yer dəyişdirilmədi. Yenidən cəhd edin."
     }
   },
   "liveStudio": {
@@ -6803,12 +7467,32 @@
         "off": "Söndür",
         "idle": "Hazırdır",
         "live": "Canlı",
-        "error": "Xəta"
-      }
+        "error": "Xəta",
+        "connecting": "Qoşulur"
+      },
+      "title": "Multistrim istiqamətləri",
+      "intro": "Riftn-də bir dəfə canlı yayıma başlayın, yayımınızı burada aktiv edilmiş hər platformaya pulsuz ötürürük. Canlı yayıma başladıqdan bir neçə saniyə sonra başlayır.",
+      "add": "İstiqamət əlavə et",
+      "empty": "Hələ istiqamət yoxdur. Twitch, YouTube, Kick və ya istənilən RTMP serveri əlavə edin.",
+      "server": "Server URL-i",
+      "findKey": "{{name}} serverinizi və açarınızı tapın",
+      "customHint": "Platformanızın verdiyi RTMP serverini və açarı yapışdırın.",
+      "keyNote": "Açarınız serverlərimizdə şifrələnmiş saxlanılır və bir daha göstərilmir.",
+      "added": "{{name}} əlavə edildi",
+      "saveFailed": "İstiqamət saxlanmadı",
+      "toggle": "Bu istiqamətə yayımla"
     },
     "vertical": {
       "centre": "Mərkəzləşdir",
-      "live": "CANLI"
+      "live": "CANLI",
+      "title": "Şaquli görünüş",
+      "intro": "Telefonlar yayımınızı şaquli lentdə izləyir. Onların görəcəyi hissəni seçmək üçün qutunu sürüşdürün.",
+      "enabled": "Yayımımı şaquli lentdə göstər",
+      "zoom": "Yaxınlaşdır",
+      "frame": "Üfüqi şəkliniz",
+      "box": "Telefonların gördüyü",
+      "hint": "Qutunu sürüşdürün və ya ox düymələrindən istifadə edin. Canlı yayımınıza tətbiq etmək üçün saxlayın.",
+      "watch": "{{name}} canlı izlə"
     },
     "subathon": {
       "title": "Subafon",
@@ -6971,7 +7655,8 @@
       "subathon_timer": "Yarmarka taymeri",
       "points_board": "Sadiq izləyicilər",
       "streamer_level": "Axınçı səviyyəsi",
-      "tip_jar": "Hədiyyə bankası"
+      "tip_jar": "Hədiyyə bankası",
+      "hype_train": "Hype qatarı"
     },
     "hints": {
       "tip_alert": "Hər bir təklifə təşəkkür edir, boyu təyinatına görə dəyişir.",
@@ -6995,7 +7680,8 @@
       "subathon_timer": "Hədiyyələr, izləmələr və abunələrlə geri atılan bir sayğı",
       "points_board": "İzləmə və hədiyyə ilə qazandıqları xallar üzrə sizin ən yaxşı izləyiciləriniz",
       "streamer_level": "Profilinizdən axın səviyyəsi və həftəlik zolağınız",
-      "tip_jar": "Ödənişli hədiyyələrin daxil olduğu banka"
+      "tip_jar": "Ödənişli hədiyyələrin daxil olduğu banka",
+      "hype_train": "Hype qatarı gedərkən onu göstərir: beş dəqiqə ərzində üç hədiyyə və ya abunəlik onu başladır."
     },
     "fields": {
       "style": "Üslub",
@@ -7381,7 +8067,10 @@
     "endStreamConfirmBody": "Sizin yayımınız bütün izləyicilər üçün dayandırılır və bərpa edilə bilməz.",
     "keepStreaming": "Axını davam etdir",
     "encoderPermanentHint": "Bu açar heç vaxt dəyişmir. Kodlamanızı bir dəfə qurun — növbəti dəfə sadəcə Başla düyməsini basın və Riftn yazını sizin üçün yaradır.",
-    "notEnoughTokensForBounty": "Kifayət qədər token yoxdur. {{need}} token lazımdır, lakin {{have}} var."
+    "notEnoughTokensForBounty": "Kifayət qədər token yoxdur. {{need}} token lazımdır, lakin {{have}} var.",
+    "screenInAppHint": "Riftn tətbiqində",
+    "screenInAppNote": "Telefon brauzerləri heç bir sayta ekranınızı paylaşmağa icazə vermir. Bunun əvəzinə Riftn tətbiqindən canlı yayıma başlayın, sonra Ekranı paylaş düyməsinə toxunun.",
+    "screenInAppCta": "Riftn tətbiqini yüklə"
   },
   "events": {
     "seoTitle": "Tədbirlər: Riftn-da Görüşlər və Cəmiyyət Tədbirləri",
@@ -7971,7 +8660,45 @@
     "foldersInFolder_other": "{{count}} qovluqlarda",
     "foldersNoItems": "Bu qovluqda heç nə yoxdur",
     "foldersNoItemsHint": "Nəticəni açın və \"Qovluğa əlavə et\" seçin, bunu burada saxlamaq üçün.",
-    "skippedUpstreamFailed": "Əvvəlki addım uğursuz olduğu üçün ötürüldü. Onun xərci balansınızda qalır."
+    "skippedUpstreamFailed": "Əvvəlki addım uğursuz olduğu üçün ötürüldü. Onun xərci balansınızda qalır.",
+    "signInForAudioLibrary": "Şəxsi saxlanılmış audio kitabxananızı açmaq üçün daxil olun.",
+    "audioLibraryFailed": "Saxlanılmış audionuz yüklənmədi. Yenidən cəhd edin.",
+    "retryFreeTask": "Pulsuz tapşırığı təkrarla",
+    "previewSavedMedia": "Saxlanılmış mediaya önizləmə",
+    "audioSavePending": "Audio hazırdır, amma şəxsi kitabxanaya saxlanması gözləmədədir. Onu götürmək üçün davam edin.",
+    "confirmInterruptedRetry": "Kəsilmiş audio və ya köməkçi tapşırığını təkrarlayın. Əvvəlki nəticəsi məlum deyil və təkrarlamaq iş yükünü təkrarlaya bilər. Mövcud ödəniş və ödənilmiş iş ID-ləri yenidən istifadə olunacaq.",
+    "freeResultUnknown": "Pulsuz tapşırığın cavabı kəsildi. Avtomatik olaraq yenidən göndərilməyəcək. Pulsuz tapşırığı təkrarla seçin, sonra davam edin; ödənişiniz və digər işlər saxlanılır.",
+    "formAuthor": "Axını redaktə et",
+    "formAuthorHint": "Tipli girişlərlə axın qurun. Onu burada saxlayın və ya veb kətanda düzün.",
+    "chooseSavedMedia": "Saxlanılmış media seç",
+    "formInput": "Giriş: {{handle}}",
+    "reviewRun": "İcraya bax",
+    "resumeRun": "Saxlanılmış icranı davam et",
+    "confirmPrice": "Cəmi: {{price}} token",
+    "recoveryHint": "İş və ödəniş istinadları bu cihazda saxlanılıb. Başqa icraya başlamazdan əvvəl kəsilmiş işi davam etdirin.",
+    "newRun": "Başqa icraya başla",
+    "loadMoreMedia": "Daha çox media yüklə",
+    "invalidGraph": "Bağlantıları yoxlayın: hər girişə uyğun mənbə lazımdır və qrafda dövr ola bilməz.",
+    "unsupportedNode": "Bu düyün hələ native formada işləyə bilmir. Bu axın üçün veb kətandan istifadə edin.",
+    "missingPrompt": "Promptu olan mətn düyününü qoşun.",
+    "invalidSettings": "Bu parametrlər seçilmiş model tərəfindən dəstəklənmir.",
+    "missingCapturedFrame": "Bu videonu şəkil girişi kimi istifadə etməzdən əvvəl veb kətanda kadr çəkin.",
+    "missingSavedMedia": "Saxlanılmış mənbə media yoxdur və ya artıq bu hesab üçün əlçatan deyil.",
+    "quoteFailed": "Bu axının qiyməti hesablanmadı. Yenidən cəhd edin.",
+    "recoverBeforeEdit": "Qrafı dəyişməzdən və ya başqa icraya başlamazdan əvvəl saxlanılmış icranı davam etdirin.",
+    "runAlreadyComplete": "Bu icra tamamlanıb. Yenidən yaratmaq üçün Başqa icraya başla seçin.",
+    "recoveryCorrupt": "Saxlanılmış bərpa qeydi oxunmadı. Bu axını saxlayın və yenidən ödəməzdən əvvəl dəstəklə əlaqə saxlayın.",
+    "paidUnavailable": "Burada axınlar yarada və saxlaya bilərsiniz. Ödənişli icralar bu mağazada əlçatan deyil.",
+    "planChanged": "Qiymətləndirmədən sonra axın dəyişdi. İcraya yenidən baxın.",
+    "connectOwnerWallet": "Bu axının sahibi olan cüzdanı qoşun.",
+    "runFailed": "Düyün tamamlana bilmədi. Onun saxlanılmış iş istinadı bərpa üçün saxlanılır.",
+    "recoveryPending": "Render hələ gözləmədədir. Onu götürmək üçün bu icranı davam etdirin.",
+    "nodeAudioGen": "Audio generatoru",
+    "nodeAudioGenDesc": "Nitq, səs effektləri, transkripsiya və audio ayırma",
+    "nodeAudioInput": "Saxlanılmış audio",
+    "nodeAudioInputDesc": "Kitabxananızdan şəxsi audio istifadə edin",
+    "audioVoiceId": "Səs ID-si",
+    "audioSeconds": "Səsin uzunluğu saniyə ilə"
   },
   "videoPlayer": {
     "volume": "Səs səviyyəsi",
@@ -8047,7 +8774,8 @@
       "bug": "Sürətli",
       "feature_request": "Funksiyalar üçün müraciət",
       "other": "Digər"
-    }
+    },
+    "updatedAgo": "{{when}} yeniləndi"
   },
   "digest": {
     "andOthers_one": "{{names}} və {{count}} digər",
@@ -8121,8 +8849,15 @@
       "doneTitle": "Hamısı təmizləndi",
       "doneAll": "Geri izləmədiyiniz {{done}} hesabları ləğv edildi.",
       "doneSome": "Doldurulmamış {{done}} hesabları. {{failed}} deaktiv edilə bilmədi.",
-      "doneToast": "Geri izləmədiyiniz{{done}} hesabları ləğv edildi"
-    }
+      "doneToast": "Geri izləmədiyiniz{{done}} hesabları ləğv edildi",
+      "working": "{{total}} nəfərdən {{done}} izləmədən çıxarılır..."
+    },
+    "followBackConfirmTitle_one": "{{count}} nəfəri geri izləmək?",
+    "followBackConfirmTitle_other": "{{count}} nəfəri geri izləmək?",
+    "followBackConfirmBody": "Onlar artıq sizi izləyir. Məxfi hesablara izləmə sorğusu gedir.",
+    "followedBackCount_one": "{{count}} nəfər geri izlənildi",
+    "followedBackCount_other": "{{count}} nəfər geri izlənildi",
+    "followBackDoneBody": "Onların hamısını İzlədiklərim bölməsində tapa bilərsiniz."
   },
   "reactionInfo": {
     "title": "Reaksiyalar",
@@ -8924,7 +9659,28 @@
       "add": "Əlavə et",
       "scale": "Ölçü",
       "color": "Rəng",
-      "light": "İşıqlı"
+      "light": "İşıqlı",
+      "create": "3D səhnə əlavə et",
+      "title": "3D səhnə",
+      "hint": "Kadrı kürələr və qutularla qurun. Kamera, yerləşdirmə və üç müstəqil sahə işığı render olunan kadrı dəyişir.",
+      "preview": "Render olunmuş səhnə önizləməsi",
+      "error": "Kadr hazırlanmadı. Kadr istinadlarınızı yoxlayın və yenidən cəhd edin.",
+      "elevation": "Hündürlük",
+      "distance": "Məsafə",
+      "fov": "Görüş sahəsi",
+      "object": "Obyekt",
+      "sphere": "Kürə",
+      "box": "Qutu",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Obyekti sil",
+      "intensity": "İntensivlik",
+      "diffusion": "Səpələnmə",
+      "saving": "Kadr hazırlanır…",
+      "useFrame": "Render olunmuş kadrı kadr istinadı kimi istifadə et",
+      "frameHint": "320 × 180 PNG yaradır və onu bu kadrın istinadlarına əlavə edir. Generasiyadan əvvəl istinad limitinə və modelin qiymət təklifinə baxın.",
+      "frameName": "Səhnə kadrı"
     },
     "video": {
       "tFade": "Qarışıq keçid",
@@ -9019,7 +9775,9 @@
       "pptx": "PowerPoint təqdimatı",
       "pptxHint": "Hər səhifə bir slayd təsvirinə çevrilir, təqdimatçı qeydləri və linklər yerləşdirilir. Orijinal dizaynda fərdi mətn və elementləri redaktə edin.",
       "section": "Adlı bölmə",
-      "transparent": "Şəffaf arxa fon"
+      "transparent": "Şəffaf arxa fon",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Montajı Premiere Pro, Final Cut Pro və ya DaVinci Resolve-da tamamlaya bilməniz üçün zaman xəttinizi FCPXML və Premiere XML kimi, üstəlik bütün media fayllarını ZIP şəklində yükləyir. Mətn markerlərə çevrilir; effektlər Riftn-də qalır."
     },
     "inspector": {
       "selectHint": "Kanvasda bir qatı və ya vaxt qrafikində bir klipi seçin.",
@@ -9113,7 +9871,45 @@
       "failed": "AI bunu hazırda edə bilmədi. Bir az sonra yenidən cəhd edin.",
       "changes": "Edilən dəyişikliklər: {{count}}",
       "undo": "Geri qaytar",
-      "openGenerator": "Bax və yarat"
+      "openGenerator": "Bax və yarat",
+      "stopped": "Dayandırıldı. Başqa heç nə dəyişmədi.",
+      "queued": "{{count}} növbədə",
+      "restore": "Buraya qədər bərpa et",
+      "restoreHint": "Layihəni bu mesajdan əvvəlki vəziyyətinə qaytarın. Geri al onu geri gətirir.",
+      "restored": "Layihə həmin mesajdan əvvəlki vəziyyətə bərpa edildi. Yeni versiyanı qaytarmaq üçün geri al düyməsini basın.",
+      "rewrite": "Sorğumu daha aydın et",
+      "rewriteFailed": "Yenidən yazmaq olmadı. Mətniniz dəyişməyib.",
+      "feedback": "Bu faydalı oldu?",
+      "good": "Yaxşı cavab",
+      "bad": "Pis cavab",
+      "retryPrefix": "Bu düz deyildi. Bunun əvəzinə, ",
+      "recipesTitle": "Reseptlər",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podkast klipi",
+          "prompt": "Ən güclü 30 saniyəlik anı tapın, ona qədər kəsin, Word Pop altyazıları əlavə edin və 9:16 edin."
+        },
+        "talkingHead": {
+          "label": "Təmiz danışan baş",
+          "prompt": "Uzun fasilələri kəsin, Klassik altyazılar əlavə edin və ona incə isti görünüş verin."
+        },
+        "productPromo": {
+          "label": "Məhsul promosu",
+          "prompt": "15 saniyəlik promo hazırlayın: əvvəldə təsirli başlıq, kliplər arasında Yaxınlaşma keçidləri, Qalın altyazılar və şən musiqi."
+        },
+        "hypeReel": {
+          "label": "Hype çarxı",
+          "prompt": "Klipləri musiqinin ritminə görə kəsin, Yuxarı uçuş keçidlərindən və Technicolor görünüşündən istifadə edin."
+        },
+        "retroEdit": {
+          "label": "Retro montaj",
+          "prompt": "Hər klipə VHS görünüşü verin, böyük serif başlıq əlavə edin və Solma keçidlərindən istifadə edin."
+        },
+        "tutorial": {
+          "label": "Dərslik",
+          "prompt": "Hər addım üçün başlıq, Çərçivəli altyazılar əlavə edin və əsas anı 0.5x-ə qədər yavaşladın."
+        }
+      }
     },
     "shape": {
       "rect": "Düzbucaqlı",
@@ -9288,7 +10084,9 @@
       "tint": "Çalar {{value}}",
       "vignette": "Vinyet {{value}}%",
       "auto": "Avtomatik təkmilləşdirmə",
-      "autoFailed": "Bu şəkli təhlil etmək mümkün olmadı."
+      "autoFailed": "Bu şəkli təhlil etmək mümkün olmadı.",
+      "halation": "Halo parıltısı {{value}}%",
+      "scanlines": "Skan xətləri {{value}}%"
     },
     "pages": {
       "add": "Səhifə əlavə et",
@@ -9363,7 +10161,15 @@
       "textSaved": "Alt yazı dəyişiklikləri yadda saxlanıldı.",
       "action": "Avtomatik altyazılar",
       "styles": {
-        "bold": "Qalın"
+        "bold": "Qalın",
+        "classic": "Klassik",
+        "boxed": "Çərçivəli",
+        "wordpop": "Word Pop",
+        "rapid": "Sürətli açılış",
+        "beast": "Beast Mode",
+        "stacked": "Üst-üstə",
+        "serif": "Serif",
+        "bubble": "Qabarcıq"
       },
       "working": "Dinlənilir… {{percent}}%",
       "downloading": "Nitq modeli hazırlanır… {{percent}}%",
@@ -9375,7 +10181,8 @@
       "translateCount": "{{count}} alt yazını tərcümə et",
       "translationDone": "{{count}} alt yazı tərcümə edildi",
       "translationFailed": "Alt yazı tərcüməsi uğursuz oldu. Alt yazılarınız dəyişdirilməyib.",
-      "lockedTranslation": "Daxil etmək üçün kilidli alt yazıların kilidini açın."
+      "lockedTranslation": "Daxil etmək üçün kilidli alt yazıların kilidini açın.",
+      "style": "Altyazı üslubu"
     },
     "multi": {
       "selected": "{{count}} qat seçildi",
@@ -9412,7 +10219,10 @@
       "saveNewPreset": "Yeni saxla",
       "saveStyles": "Tərzləri dizaynla yaddaşda saxla",
       "stylesSaved": "Bu dizayn ilə bağlı marka stiləri saxlanılmışdır.",
-      "usePreset": "Üslublardan istifadə edin"
+      "usePreset": "Üslublardan istifadə edin",
+      "dehubApplied": "Riftn brendi {{count}} təbəqəyə tətbiq edildi.",
+      "dehubApply": "Riftn brendindən istifadə et",
+      "dehubHint": "Rəsmi Riftn rəngləri, Exo və Inter şriftləri və Riftn loqosu, bir kliklə."
     },
     "draw": {
       "heading": "Çək",
@@ -10746,7 +11556,23 @@
       "zoomOut": "Kətanı yaxınlaşdırın"
     },
     "clipFix": {
-      "listening": "Dinləyirəm…"
+      "listening": "Dinləyirəm…",
+      "detach": "Audionu ayır",
+      "detached": "Audio öz klipinə köçürüldü",
+      "detachFailed": "Bu klipin audiosu ayrıla bilmədi",
+      "removeBars": "Qara zolaqları sil",
+      "scanning": "Kadrlar yoxlanılır…",
+      "noBars": "Qara zolaq tapılmadı",
+      "barsRemoved": "Qara zolaqlar kəsildi",
+      "barsFailed": "Bu video qara zolaqlar üçün yoxlanıla bilmədi",
+      "reframe": "Avtomatik çərçivələmə",
+      "reframeHint": "Video artıq bu səhifə formasına uyğundur",
+      "reframed": "Hərəkəti izləmək üçün yenidən çərçivələndi",
+      "reframeFailed": "Bu video yenidən çərçivələnə bilmədi",
+      "retakes": "Təkrar çəkilişləri sil",
+      "noRetakes": "Təkrar çəkiliş tapılmadı",
+      "retakesRemoved": "{{count}} təkrar çəkiliş silindi, sonuncu çəkiliş saxlanıldı",
+      "retakesFailed": "Bu klipdən təkrar çəkilişlər silinə bilmədi"
     },
     "shortcuts": {
       "action": {
@@ -10754,19 +11580,109 @@
         "play": "Oxut",
         "pause": "Fasilə ver",
         "frameBack": "Əvvəlki çərçivə",
-        "frameForward": "Növbəti çərçivə"
-      }
+        "frameForward": "Növbəti çərçivə",
+        "back": "1 saniyə geri",
+        "rippleDelete": "Klipi sil",
+        "liftDelete": "Klipi sil",
+        "start": "Əvvələ get",
+        "end": "Sona get"
+      },
+      "preset": "Klaviatura düzülüşü",
+      "presetHint": "Tanıdığınız redaktorun zaman xətti düymələrindən istifadə edin. Riftn-in öz qısayolları qalan hər şey üçün işləməyə davam edir."
     },
     "voiceClone": {
       "stop": "Yazmağı dayandır",
-      "failed": "Səs klonu uğursuz oldu."
+      "failed": "Səs klonu uğursuz oldu.",
+      "pickerLabel": "Səsinizi klonlayın",
+      "pickerDetail": "Öz səsinizlə səsləndirmələr",
+      "title": "Səsinizi klonlayın",
+      "description": "Özünüzü yazın və ya danışdığınız klipi seçin. Bir dəfə ödəyirsiniz və səsiniz bütün səsləndirmələr üçün sizindir.",
+      "defaultName": "Mənim səsim",
+      "record": "Nümunə yazın (30 saniyədən 2 dəqiqəyə qədər)",
+      "fromMedia": "Və ya Mediadan klip istifadə edin",
+      "recorded": "Sizin yazınız",
+      "sample": "Nümunə: {{name}}",
+      "hint": "Musiqisiz aydın nitq ən yaxşı nəticə verir.",
+      "noMic": "Mikrofondan istifadə etmək olmadı.",
+      "sampleFailed": "Həmin klipdən səs oxunmadı.",
+      "pay": "{{amount}} tokenə klonla",
+      "useFree": "Klonla (artıq ödənilib)",
+      "owned": "“{{name}}” səsiniz artıq qurulub. Onu səs siyahısından seçin.",
+      "useOwned": "Səsimdən istifadə et",
+      "ready": "“{{name}}” səsləndirmələr üçün hazırdır.",
+      "paidFailed": "Ödənişiniz saxlanılıb. Bunu yenidən açın, növbəti cəhd pulsuzdur.",
+      "consent": "Yalnız öz səsinizi və ya istifadəsinə icazəniz olan səsi klonlayın."
     },
     "linkImport": {
       "go": "İdxal Et",
-      "downloading": "{{percent}}% yüklənir"
+      "downloading": "{{percent}}% yüklənir",
+      "open": "Keçiddən idxal et",
+      "placeholder": "YouTube, TikTok və ya digər keçidi yapışdırın",
+      "rights": "Bu videonun sahibiyəm və ya ondan istifadəyə icazəm var",
+      "audioOnly": "Yalnız səs",
+      "queued": "Növbədə…",
+      "waiting": "Sayt gözlənilir, tezliklə yenidən cəhd edilir…",
+      "adding": "Mediaya əlavə edilir…",
+      "added": "İdxal edildi və zaman xəttinə əlavə edildi.",
+      "failed": "Bu keçid idxal edilmədi."
     },
     "reverse": {
-      "action": "Tərs"
+      "action": "Tərs",
+      "working": "Tərsinə çevrilir {{percent}}%",
+      "done": "Klip tərsinə çevrildi.",
+      "failed": "Bu klip tərsinə çevrilə bilmədi.",
+      "unsupported": "Bu brauzer videonu tərsinə çevirə bilmir. Chrome və ya Edge-i sınayın.",
+      "tooLong": "{{seconds}} saniyəyə qədər olan kliplər tərsinə çevrilə bilər."
+    },
+    "film": {
+      "repairRefs": "Çatışmayan media keçidlərini sil",
+      "title": "Film layihəsi",
+      "intro": "Təkrar istifadə olunan şəkil istinadları ilə kadrları planlayın. Tapşırığınız, kadr sırası və seçilmiş nəticələr bu layihə ilə saxlanılır.",
+      "create": "Film planı yarat",
+      "name": "Film adı",
+      "brief": "Film tapşırığı",
+      "sharedReferences": "Ümumi şəkil istinadları (4-ə qədər)",
+      "shot": "Kadr",
+      "addShot": "Kadr əlavə et",
+      "shotName": "Kadr adı",
+      "action": "Kadrın hərəkəti və kompozisiyası",
+      "seconds": "Tələb olunan video saniyələri",
+      "shotReferences": "Əlavə şəkil istinadları (ümumi limit 4)",
+      "frame": "Kadrı hazırla",
+      "video": "Videonu hazırla",
+      "review": "Generasiyadan əvvəl studiyada modelə, istinadlara, video müddətinə və qiymətə baxın.",
+      "result": "Qəbul edilmiş kadr nəticəsi",
+      "noResult": "Nəticə seçilməyib",
+      "resultHint": "Yükləmələrdən qəbul edilmiş şəkil və ya video seçin. Onun keçidi bu kadrla saxlanılır; filmi yığmaq üçün zaman xəttindən istifadə edin.",
+      "earlier": "Əvvələ köçür",
+      "later": "Sonraya köçür",
+      "remove": "Kadrı sil",
+      "issue": "Kadr təsvirini və istinad medianı yoxlayın, sonra yenidən cəhd edin. Saxlanmadısa layihəni açıq saxlayın.",
+      "searchMedia": "Medianı adla tap",
+      "refreshMedia": "Medianı yenilə"
+    },
+    "speakers": {
+      "find": "Danışanları tap",
+      "name": "Danışan {{number}}",
+      "onlyOne": "Yalnız bir danışan tapıldı.",
+      "failed": "Danışanlar tapılmadı.",
+      "kept": "Yalnız {{name}} saxlanıldı.",
+      "editFailed": "Bu redaktə bu klipə uyğun gəlmədi.",
+      "split": "{{count}} danışan kadrına bölündü.",
+      "keepOnly": "Yalnız bunu saxla",
+      "splitAction": "Hər danışan dəyişəndə kəs"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "İstədiyiniz 3D obyekti təsvir edin",
+      "queued": "3D obyektiniz qurulur. O, Generasiyalar bölməsinə düşəcək.",
+      "note": "3D obyektlər Mediaya şəffaf fonlu qısa fırlanan klip kimi gəlir."
+    },
+    "behind": {
+      "action": "Mətn insanın arxasında",
+      "working": "İnsan kəsilib çıxarılır…",
+      "done": "Mətn və altyazılar indi insanın arxasındadır.",
+      "failed": "Mətni insanın arxasına qoymaq olmadı."
     }
   },
   "jungleMood": {
@@ -11067,7 +11983,8 @@
     "tokensOnBase": "Base-dəki tokenlər",
     "tokensOnBnb": "BNB Chain-dəki tokenlər",
     "step3": "Komanda tokenləri təyinat zəncirində göndərir, adətən 1-5 iş günü ərzində.",
-    "statusReceived": "Qəbul edildi"
+    "statusReceived": "Qəbul edildi",
+    "onlyHave": "{{chain}} şəbəkəsində cəmi {{amount}} tokeniniz var."
   },
   "builder": {
     "manage": {
@@ -11168,7 +12085,9 @@
     "tokenAmount": "{{amount}} token",
     "assistant": {
       "question1": "Riftn tokenləri üçün hazırkı maraqlı APY nədir?",
-      "question2": "Bəli, 90 gün ərzində 10 min token paylasam"
+      "question2": "Bəli, 90 gün ərzində 10 min token paylasam",
+      "answer1": "Riftn tokenləri üçün cari steykinq APY 30 günlük kilid müddəti üçün 12.4%-dir. Ətraflı:\n\n• 7 günlük kilid: 8.2% APY\n• 30 günlük kilid: 12.4% APY\n• 90 günlük kilid: 18.7% APY\n\nPotensial qazancı hesablamağa kömək edim?",
+      "answer2": "90 gün ərzində 18.7% APY ilə steyk edilmiş 10,000 token üçün:\n\n📊 Təxmini mükafat: ~461 token\n\nBu, gündə təxminən 5.13 token edir. Nəzərə alın ki, APY ümumi steyk edilmiş məbləğdən asılı olaraq dəyişə bilər."
     },
     "bookmarks": {
       "stakingGuide": "Riftn ayələr hazırlamaq üçün tam təlimat: APY təhlili, kilidləmə müddətləri və mükafat çoxluqları izah edildi."
@@ -11914,7 +12833,10 @@
     "planTypeNotAllowed": "Bu yaradıcının planı bu növ mesaja icazə vermir.",
     "planMinTip": "Bu yaradıcı üçün bəxşiş ən azı {{amount}} tokenlər olmalıdır.",
     "shareKindGroup": "Qruplaşdır",
-    "shareKindCommunity": "İcma"
+    "shareKindCommunity": "İcma",
+    "shareGroups": "Qruplar",
+    "shareKindChannel": "Kanal",
+    "reportMessage": "Mesajı şikayət et"
   },
   "credits": {
     "earningsWorth": "Dəyər {{amount}}",
@@ -11956,7 +12878,11 @@
     "error": "Silinmə sorğunuzu təqdim etmək mümkün olmadı. Hesabınız silinməsi üçün təsdiqlənməyib. Yenidən cəhd edin.",
     "back": "Parametrlərə qayıt",
     "signIn": "Hesabınızı silmək üçün daxil olun",
-    "acknowledge": "Cüzdan bərpa təfərrüatlarımı yaddaşda saxladım və silinmənin daimi olduğunu başa düşdüm."
+    "acknowledge": "Cüzdan bərpa təfərrüatlarımı yaddaşda saxladım və silinmənin daimi olduğunu başa düşdüm.",
+    "signedInAs": "Daxil olmusunuz:",
+    "confirmTitle": "Hesabınız həmişəlik silinsin?",
+    "confirmBody": "Hesabınız və içindəki hər şey silinəcək. Çıxış edəcəksiniz və bu geri qaytarıla bilməz.",
+    "confirmBodyNamed": "{{who}} və içindəki hər şey silinəcək. Çıxış edəcəksiniz və bu geri qaytarıla bilməz."
   },
   "miniApps": {
     "badge": {
@@ -12052,12 +12978,43 @@
       "rewardPaid": "Ödənilib",
       "rewardPending": "Gözləmədədir",
       "stats": {
-        "button": "Canlı statistika"
+        "button": "Canlı statistika",
+        "chartTitle": "Tətbiqinizi açan insanlar, son 30 gün",
+        "peak_one": "Gündə ən çox {{count}}",
+        "peak_other": "Gündə ən çox {{count}}",
+        "people30": "İnsanlar, 30 gün",
+        "people7": "İnsanlar, 7 gün",
+        "added": "Əlavə etdilər",
+        "dhb30": "Ödənilmiş tokenlər, 30 gün",
+        "notified30": "Göndərilmiş bildirişlər, 30 gün",
+        "rewards": "Qazanılmış token mükafatları"
       },
       "signin": {
         "users_one": "{{count}} istifadəçi",
         "users_other": "{{count}} istifadəçilər",
-        "delete": "Sil"
+        "delete": "Sil",
+        "title": "Riftn ilə daxil ol",
+        "body": "İnsanlara Riftn hesabları ilə saytınıza və ya tətbiqinizə daxil olmağa icazə verin. Burada açar yaradın, sonra bələdçiyə əməl edin.",
+        "guide": "Bələdçini oxu",
+        "copyId": "Client ID-ni kopyala",
+        "rotate": "Yeni sirr",
+        "rotateConfirm": "{{name}} üçün yeni sirr yaradılsın? Köhnə sirr dərhal işləməyi dayandırır.",
+        "deleteConfirm": "{{name}} silinsin? Onunla daxil olan hər kəs çıxarılacaq.",
+        "secretOnce": "{{name}} üçün sirr. İndi kopyalayın: yalnız bir dəfə göstərilir.",
+        "name": "Tətbiq adı",
+        "website": "Vebsayt (istəyə bağlı)",
+        "redirects": "Yönləndirmə URL-ləri, hər sətirdə bir (https://yoursite.com/callback)",
+        "create": "Açar yarat"
+      },
+      "stateRejected": "Keçidlə aktivdir · mağaza üçün təsdiqlənməyib",
+      "rewardsNone": "Hələ heç bir mükafat hesablanmayıb. İlk həftə bazar ertəsi bağlanır.",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Riftn-in webhookUrl ünvanınıza göndərdiyi hadisələr. Test ping hadisəsi göndərir.",
+        "test": "Test göndər",
+        "ok": "Webhook {{status}} cavab verdi",
+        "failed": "Webhook alınmadı: {{reason}}",
+        "none": "Hələ webhook göndərilməyib."
       }
     },
     "card": {
@@ -12084,7 +13041,10 @@
       "confirm": "{{amount}} tokenlər ödə",
       "sending": "Ödənişiniz göndərilir…",
       "sent": "{{amount}} tokenlər-ni {{name}}-ə ödədiniz.",
-      "noOwner": "Bu app hələ də təsdiqlənmiş bir cibxara ödəmək üçün yoxdur."
+      "noOwner": "Bu app hələ də təsdiqlənmiş bir cibxara ödəmək üçün yoxdur.",
+      "testBadge": "Test rejimi",
+      "testBody": "Bu tətbiqin sahibi sizsiniz, ona görə bu testdir: heç bir token köçmür və qəbz test kimi işarələnir.",
+      "testSent": "{{amount}} tokenlik test ödənişi. Heç nə göndərilmədi."
     },
     "add": {
       "title": "{{name}}-ni əlavə et?",
@@ -19179,7 +20139,86 @@
     "127053546dd4": "Bu faylı endirmək mümkün olmadı",
     "d14896aa4bf8": "Pulsuz kitabxananı yükləmək mümkün olmadı. Bağlantınızı yoxlayın və yenidən cəhd edin.",
     "953e708b2287": "Səs generasiyası uğursuz oldu.",
-    "4a52cdd6ac72": "Bu təbəqələrin dublikatı çıxarıla bilmədi"
+    "4a52cdd6ac72": "Bu təbəqələrin dublikatı çıxarıla bilmədi",
+    "3f9b2c71d0a4": "{{n}} nəticə",
+    "8c4e1a6b2f57": "“{{query}}” üçün",
+    "1d7234ff1b79": "{{feed}} daxilində",
+    "e122e5c2b563": "Bağlamaq üçün yuxarı sürüşdürün",
+    "1aa9d734f2ee": "Nəyi axtaracağınızı seçin",
+    "ef557404f465": "“{{query}}” üçün nəticə yoxdur",
+    "35034aa59bd3": "{{feed}} daxilində uyğun heç nə tapılmadı. Başqa sözlər yoxlayın və ya hər yerdə axtarın.",
+    "415155739590": "Hər yerdə axtar",
+    "9e13d826baaf": "Şəkilləri axtar",
+    "cbf6f228327c": "Musiqi axtar",
+    "e8756c6865a5": "Qısa videoları axtar",
+    "c7661da99c41": "Videoları axtar",
+    "90f1afe66801": "“{{query}}” axtarılır…",
+    "d7b559f2d8c6": "Başqa sözlər yoxlayın və ya filtrləri dəyişin.",
+    "d1a0c7e2f301": "Bu gün nə düşünürsünüz?",
+    "d1a0c7e2f302": "Bu gün nə haqqında düşünürsünüz?",
+    "d1a0c7e2f303": "Nə düşünürsünüz?",
+    "d1a0c7e2f304": "Ağlınızda nəsə var?",
+    "d1a0c7e2f305": "İndi nə düşünürsünüz?",
+    "d1a0c7e2f306": "Bu gün nə düşünürük?",
+    "d1a0c7e2f307": "Bu gün ağlınızda nəsə var?",
+    "d1a0c7e2f308": "Bu dəfə nə düşünürsünüz?",
+    "a7c1e0f4b2d9": "Danışmaq üçün toxunun",
+    "b3e8d1c6f0a2": "Göndərmək üçün toxunun",
+    "c9f2a4e7d1b5": "Dinlənilir... göndərmək üçün topa toxunun",
+    "044ba8a9ae43": "Həmişə aktiv",
+    "11fb682be0a0": "Sİ",
+    "12077ff20db4": "{{value1}} Solana-da PPV üçün əlçatan deyil",
+    "2247ef59ce64": "Malayalam dili",
+    "2c6ef73fc9e2": "Urdu dili",
+    "68a65692d2f4": "Bu həftə #{{value1}}",
+    "22577ebd908e": "Wan 3.0 video yarat · orijinal saundtrek",
+    "1fa2357ab7e1": "Seedance 720p video yarat · orijinal saundtrek",
+    "7ac7cc545c79": "Ən azı {{value1}} simvol istifadə edin",
+    "86d8609422b1": "{{value2}} daxilində \"{{value1}}\" üçün nəticələr",
+    "89db78228f64": "İzləmə sorğusu {{value1}} istifadəçisinə göndərildi",
+    "8ae18739e3f7_one": "{{value1}} nəfərə Siqnal Fişəngi",
+    "8d8ddae8f050": "{{value1}} qoşuldu",
+    "91266f0b5e2a": "{{value1}} izlənilir",
+    "97e3f1368597": "{{value1}} izlənilir!",
+    "b16e7d5bea3b": "{{value1}} tərəfindən borc verilib",
+    "b80021ded1cc": "Sindhi dili",
+    "7f78bdc0762d": "+{{value1}} xal",
+    "f0c8bb34335b": "+{{value1}} xal qazandınız",
+    "0fbe06b679a8": "Hər göndərilmiş sorğu üçün {{value1}} xal, Top qurucular hesabınıza əlavə olunur.",
+    "431bc73eb60b": "[verse]\nSözləriniz burada...\n\n[chorus]\nNəqarət sözləri...",
+    "e5828dae4735": "Theta",
+    "a3c1e5f20b71": "Riftn-dən ChatGPT, Claude və ya istənilən MCP tətbiqində istifadə edin. Postlara, profillərə və şərhlərə baxmaq üçün aşağıdakı URL-i köməkçinizin konnektor parametrlərinə yapışdırın, sonra öz hesabınızı bağlamaq istənildikdə daxil olun.",
+    "b84d2e7c9a16": "Bu ünvan veb səhifə deyil, Sİ tətbiqləri üçündür. Onu brauzerdə açsanız, buraya gələcəksiniz.",
+    "c5e9f1a3d742": "Riftn hesabınızı bağlayın",
+    "d61a7b4e8c05": "Köməkçiniz daxil olmağı istədikdə Riftn-ə daxil olun və İcazə ver düyməsini basın. Bundan sonra o, profilinizi yeniləyə, post və şərhlər dərc edə, insanları izləyə və Creator Studio-da yarada bilər. Bağlantılar istifadə etdiyiniz müddətdə aktiv qalır və 30 gün istifadə edilmədikdə bitir.",
+    "e27b8c5f9d13": "Addım-addım ChatGPT bələdçisi",
+    "f38c9d6a0e24": "Addım-addım Claude bələdçisi",
+    "0a49d7b1f835": "Ayrıca bot hesabı istəyirsiniz? O agent adından paylaşım edən konnektor URL-i almaq üçün agent yaradın.",
+    "1b5ae8c20f46": "ChatGPT soruşduqda hesabınızı bağlamaq üçün Riftn-ə daxil olun və İcazə ver düyməsini basın.",
+    "2c6bf9d31a57": "Hesabınızı bağlamaq üçün Qoş düyməsini basın, Riftn-ə daxil olun və İcazə ver düyməsini basın.",
+    "27c26a5a38b3": "Köhnə mesajları görmək üçün daxil olun",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Şüşə zolaqlar",
+    "5ff272ba7871": "İpək xətlər",
+    "a941e90ca93d": "Üz qabığı halosu",
+    "04dbbe4dff7a": "Həqiqi dalğa",
+    "85330dcbaadd": "Mübahisənin bir tərəfinə üstünlük verən alqoritmlər yoxdur. \nHər kəs bərabər və ədalətli şəkildə gücləndirilir.",
+    "e956a9404b46": "Tez-tez verilən suallar",
+    "29beacb7d918": "@{{value1}} sizə {{value2}} {{value3}} bəxşiş verdi",
+    "a97a4b610ce0": "Hələ {{value1}} yoxdur",
+    "88bb4da02044": "{{value1}} ləğv et",
+    "78d4a6075ea1": "{{value1}} versiyasını {{value2}} vaxtında aç",
+    "1067b33ac325": "{{value1}} şəklini dəyiş",
+    "62f3a3b868d9": " indidən ən azı {{value1}} dəqiqə sonra",
+    "d32af5b18e14": "{{value1}} keçidini sil",
+    "ccf0988984a3": "{{value2}} içindən {{value1}} göstərilir",
+    "5fb924a4a79f": "{{value1}} redaktəsi | Riftn Mükafatları",
+    "253ffa81cd88": "{{value1}} söhbətə başlamaq üçün minimum <amount>{{value2}} <coin></coin></amount> bəxşiş tələb edir.",
+    "70d1cca2aba3": "{{value1}} hər mesaj üçün minimum <amount>{{value2}} <coin></coin></amount> bəxşiş tələb edir. Göndərdiyiniz hər mesajdan bu məbləğ çıxılacaq.",
+    "a1c4dfe605c3": "Birdən altıya qədər kateqoriya sütunu, ardınca rəqəmli ölçü sütunu istifadə edin",
+    "3a8cddad37d6": "Vizual analiz əlçatan deyil",
+    "f6b9549bd36a": "{{name}} üçün bulud sinxronizasiyası alınmadı. Bu cihazda lokal saxlanıldı.",
+    "6e71ae3669b1": "Saxlanılmış nəticə əlçatan deyil"
   },
   "articles": {
     "cardLabel": "Məqalə · {{count}} min oxumaq",
@@ -19221,7 +20260,16 @@
     "formatting": "Formatlaşdırma",
     "bodyPlaceholder": "Hekayənizi danışın. Mətn seçin və başlıqlar, qalın, qiymət təklifləri və siyahılar üçün yuxarıdakı xanadan istifadə edin.",
     "bodyLabel": "Məqalə orqanı",
-    "wordCount": "{{count}} sözləri"
+    "wordCount": "{{count}} sözləri",
+    "imageLimit": "Məqalələrdə ən çox {{count}} şəkil ola bilər",
+    "imageLimitSome": "Bu məqaləyə yalnız daha {{count}} şəkil sığar",
+    "imageFailed": "Bu şəkil əlavə edilə bilmədi. Başqasını yoxlayın.",
+    "imagesUploading": "Şəkillər əlavə olunur ({{count}})…",
+    "bodyTooLong": "Limitdən {{count}} simvol artıq",
+    "imagesCount": "Şəkillər · {{count}}/{{max}}",
+    "captionPlaceholder": "Başlıq əlavə et",
+    "captionLabel": "{{n}} şəkli üçün başlıq",
+    "removeInlineImage": "{{n}} şəklini sil"
   },
   "liveAudience": {
     "whosHere": "Kimlər buradadır",
@@ -19233,7 +20281,9 @@
     "hereNow": "İndi burada",
     "nobodyYet": "Hələ heç kim yoxdur",
     "rotate": "Ekranı fırlat",
-    "showControls": "Kontrolları göstər"
+    "showControls": "Kontrolları göstər",
+    "hereCount": "Burada {{formatted}}",
+    "joinedAgo": "{{time}} qoşuldu"
   },
   "postProcessing": {
     "uploading": "Yüklənir…",
@@ -19268,23 +20318,94 @@
       "stage": {
         "preparing": "Hazırlanır…",
         "confirming": "Əməliyyat gözlənilir…",
-        "recording": "Tamamlanır…"
-      }
+        "recording": "Tamamlanır…",
+        "wallet": "Cüzdanınızda təsdiq edin"
+      },
+      "open": "Abunəlik hədiyyə et",
+      "title": "Abunəlik hədiyyə et",
+      "mode": {
+        "random": "Söhbətdəki təsadüfi izləyicilər",
+        "user": "Konkret biri"
+      },
+      "randomHint": "Son 30 dəqiqədə söhbətdə yazan və hələ abunə olmayan insanlara gedir.",
+      "send_one": "1 abunəlik hədiyyə et · ${{price}}",
+      "send_other": "{{count}} abunəlik hədiyyə et · ${{price}}",
+      "payHint": "Cüzdanınızdan bir köçürmə ilə tokenlərlə ödənilir.",
+      "fewer_one": "Hazırda söhbətdə yalnız 1 nəfər abunəlik ala bilər, ona görə də 1 üçün ödəyirsiniz.",
+      "fewer_other": "Hazırda söhbətdə yalnız {{count}} nəfər abunəlik ala bilər, ona görə də {{count}} üçün ödəyirsiniz.",
+      "done_one": "Abunəlik hədiyyə edildi!",
+      "done_other": "{{count}} abunəlik hədiyyə edildi!",
+      "failed": "Abunəliklər hədiyyə edilə bilmədi",
+      "notReady": "Bu plan üçün hədiyyə hələ əlçatan deyil",
+      "noPlan": "Əvvəlcə plan seçin",
+      "noPlans": "{{name}} üçün hələ hədiyyə ediləcək abunəlik planı yoxdur."
     },
     "badges": {
       "audience": {
-        "subscribers": "Abunəçilər"
+        "subscribers": "Abunəçilər",
+        "both": "Abunəçilər və hədiyyə edənlər",
+        "gifters": "Hədiyyə edənlər"
       },
       "ended": "Bitdi",
       "until": "{{date}} tarixinə qədər",
-      "failed": "Bu alınmadı. Yenidən cəhd edin."
+      "failed": "Bu alınmadı. Yenidən cəhd edin.",
+      "title": "Məhdud müddətli nişanlar",
+      "intro": "Bir neçə günlük nişan təklif edin. Bu müddətdə abunə olan və ya hədiyyə edən hər kəs onu qazanır və o, söhbətinizdə adlarının yanında həmişəlik görünür.",
+      "name": "Nişan adı",
+      "namePlaceholder": "Buraxılış həftəsi",
+      "days": "Müddət (gün)",
+      "emoji": "Emoji",
+      "who": "Kim qazana bilər",
+      "create": "Nişan təklif et",
+      "created": "Nişan aktivdir.",
+      "end": "İndi bitir",
+      "holders_one": "{{count}} sahib",
+      "holders_other": "{{count}} sahib",
+      "limit": "Eyni anda üç nişan aktiv ola bilər. Başqasını təklif etmək üçün birini bitirin.",
+      "hypeHint": "Hype qatarına minən hər kəs həmçinin çatdığı səviyyədə 🚂 nişanınızı alır."
+    },
+    "train": {
+      "level": "Hype Qatarı · Səviyyə {{level}}",
+      "endedLevel": "Hype Qatarı {{level}} səviyyəsini tamamladı!",
+      "ended": "Hype Qatarı bitdi",
+      "thanks_one": "{{count}} dəstəkçiyə təşəkkürlər",
+      "thanks_other": "{{count}} dəstəkçiyə təşəkkürlər",
+      "top": "Top: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "abunəlik hədiyyə etdi 🎁",
+      "giftedSubs_other": "{{count}} abunəlik hədiyyə etdi 🎁"
     }
   },
   "whenSheet": {
     "today": "Bu gün",
     "tooSoon": "Gələcəkdə bir vaxt seçin.",
     "show": "Göstər",
-    "hide": "Gizlə"
+    "hide": "Gizlə",
+    "title": "Nə vaxt?",
+    "tonight": "Bu axşam",
+    "inAnHour": "Bir saatdan sonra",
+    "tomorrow": "Sabah",
+    "primeTime": "Pik vaxt",
+    "scheduleFor": "{{when}} üçün planlaşdır",
+    "liveTip": "İzləyiciləriniz xatırlatma qura bilər. Vaxtı gələndə Canlı yayımı özünüz başladırsınız.",
+    "stageTip": "O dərhal Gələcək rəfinə düşür, beləliklə insanlar Xatırlat düyməsinə toxuna bilər.",
+    "typePlaceholder": "Vaxt yazın, məsələn \"cümə 20:00\" və ya \"2 saatdan sonra\"",
+    "typeLabel": "Vaxt yazın",
+    "typeHelp": "\"bu axşam\", \"sabah 9:00\", \"şənbə günorta\" və ya \"30 okt 19:00\" yoxlayın.",
+    "orPickDay": "Və ya gün seçin",
+    "earlier": "15 dəqiqə əvvəl",
+    "later": "15 dəqiqə sonra",
+    "earlierShort": "Əvvəlki",
+    "laterShort": "Sonra",
+    "tooSoonMin": "İndidən ən azı {{count}} dəqiqə sonrakı vaxtı seçin.",
+    "zone": "Sizin vaxtınız ({{zone}}). Hər kəs onu öz vaxtında görür.",
+    "remove": "Planı sil",
+    "startsIn": "{{time}} sonra başlayır",
+    "bestTime": "Ən yaxşı vaxt",
+    "fansOnline": "Fanatlarım nə vaxt onlayn olur?",
+    "fansBasis": "Daha parlaq o deməkdir ki, son {{count}} gündə izləyicilərinizin daha çoxu baxırdı.",
+    "everyoneBasis": "Hələ kifayət qədər izləyici fəallığı yoxdur, ona görə də bu, Riftn-dəki hər kəsdir."
   },
   "planned": {
     "title": "Planlaşdırılıb",
@@ -19299,22 +20420,45 @@
     "loading": "Yüklənir…",
     "startNow": "İndi başla",
     "cancel": "Ləğv et",
-    "cancelled": "Ləğv edildi"
+    "cancelled": "Ləğv edildi",
+    "subtitle": "Planlaşdırdığınız postlar, Canlı yayımlar və Səhnələr",
+    "seoTitle": "Planlaşdırılanlar · Riftn",
+    "seoDescription": "Riftn-də planlaşdırılmış postlarınız, Canlı yayımlarınız və Səhnələriniz bir yerdə.",
+    "lives": "Canlı yayımlar",
+    "signIn": "Planlaşdırdıqlarınızı görmək üçün daxil olun",
+    "emptyTitle": "Hələ heç nə planlaşdırılmayıb",
+    "emptyBody": "Post, Canlı yayım və ya Səhnə yaradarkən \"Nə vaxt?\" seçin və o burada görünəcək.",
+    "move": "Köçür",
+    "postNow": "İndi paylaş",
+    "confirmCancel": "Ləğv etmək üçün yenidən toxunun",
+    "moved": "{{when}} vaxtına köçürüldü",
+    "postingNow": "Bir dəqiqədən az müddətdə paylaşılır",
+    "moveFailed": "Köçürmək alınmadı. Yenidən cəhd edin.",
+    "seeAll": "Planlaşdırdığınız hər şeyə baxın"
   },
   "welcome": {
     "about": {
       "title": "Riftn-a xoş gəlmisiniz",
       "day": "Gün",
       "month": "Ay",
-      "year": "İl"
+      "year": "İl",
+      "sub": "Doğum gününüz gizli qalır. Görünüş seçin, onu istənilən vaxt dəyişə bilərsiniz.",
+      "birthday": "Doğum tarixi",
+      "pick": "Doğum gününüzü seçin",
+      "invalid": "Tam doğum tarixinizi daxil edin.",
+      "tooYoung": "Riftn-dən istifadə etmək üçün {{age}} və ya daha böyük yaşda olmalısınız.",
+      "theme": "Görünüşünüz"
     },
     "name": {
       "title": "Adınız",
-      "placeholder": "Adınız"
+      "placeholder": "Adınız",
+      "sub": "Bu, insanların postlarınızda gördüyü addır."
     },
     "card": {
       "name": "Adınız",
-      "followers": "izləyicilər"
+      "followers": "izləyicilər",
+      "interests": "Maraqlarınız",
+      "following": "izlənilir"
     },
     "topic": {
       "music": "Musiqi",
@@ -19326,11 +20470,47 @@
       "podcast": "Podkast",
       "food": "Yemək",
       "news": "Xəbərlər",
-      "science": "Elm"
+      "science": "Elm",
+      "travel": "Səyahət",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Avtomobillər",
+      "animals": "Heyvanlar",
+      "tech": "Texnologiya"
     },
     "back": "Geri",
     "skipPhoto": "İndi keç",
-    "preview": "Önbaxış"
+    "preview": "Önbaxış",
+    "username": {
+      "title": "@istifadəçi adınız",
+      "sub": "Hərflər, rəqəmlər və alt xətlər. Sonra dəyişə bilərsiniz.",
+      "yours": "@{{name}} sizindir"
+    },
+    "photo": {
+      "title": "Şəkliniz",
+      "sub": "İstəyə bağlı. İnsanlar üzləri daha tez izləyir.",
+      "choose": "Şəkil seçin",
+      "change": "Başqasını seçin"
+    },
+    "interests": {
+      "title": "Maraqlarınız",
+      "sub": "Ən azı 3 seçin. Onlar kateqoriyalarınızda birinci gəlir."
+    },
+    "people": {
+      "title": "Sizin insanlarınız",
+      "sub": "İzləmək üçün toxunun. Onların postları İzlənilənlər lentinizi doldurur.",
+      "empty": "Hazırda təklif yoxdur. Kəşf et bölməsində tapılacaq daha çox insan var.",
+      "followers": "{{count}} izləyici"
+    },
+    "done": {
+      "title": "Əla görünür, {{name}}",
+      "sub": "Bu kartı bu gündən hər kəs görür.",
+      "eyebrow": "Profil aktivdir"
+    },
+    "enter": "Riftn-ə daxil ol",
+    "pickMore": "Daha {{count}} seçin",
+    "cardHint": "İnsanlar sizi belə görəcək",
+    "followFailed": "İzləmək alınmadı. Yenidən cəhd edin."
   },
   "appTokens": {
     "title": "Sizin tokenləriniz",
@@ -19341,28 +20521,101 @@
     "amount": "Məbləğ",
     "notePlaceholder": "Qeyd əlavə et (istəyə bağlı)",
     "sendButton": "Göndər",
-    "errorInsufficient": "Kifayət qədər token yoxdur"
+    "errorInsufficient": "Kifayət qədər token yoxdur",
+    "rowHint": "Tətbiqdaxili balans",
+    "explainer": "Tokenləriniz artıq Riftn daxilində yaşayır. Başlanğıcda zəncirdə saxladığınız və stake etdiyiniz məbləğlə başladınız. Göndərmə, bəxşiş və xərcləmə onları dərhal, komissiyasız və zəncirə heç nə yazmadan köçürür. Balanslar airdrop zamanı yeni tokenə keçir.",
+    "kindOpening": "Başlanğıc balans",
+    "kindSent": "{{name}} istifadəçisinə göndərildi",
+    "kindReceived": "{{name}} tərəfindən",
+    "kindSpent": "Riftn-də xərcləndi",
+    "kindRefund": "Geri qaytarma",
+    "kindAdjust": "Riftn tərəfindən düzəliş",
+    "sendTitle": "Token göndər",
+    "sendHint": "Riftn daxilində başqa hesaba token göndərir. Dərhal və pulsuz, zəncirə heç nə getmir.",
+    "toPlaceholder": "@istifadəçi adı və ya 0x ünvanı",
+    "looking": "Axtarılır…",
+    "available": "Mövcud: {{amount}}",
+    "sent": "{{amount}} token {{name}} istifadəçisinə göndərildi",
+    "errorRateLimit": "Son bir saatda çox göndərmə olub. Sonra yenidən cəhd edin.",
+    "errorNoRecipient": "Riftn hesabı tapılmadı",
+    "errorSelf": "Özünüzə göndərə bilməzsiniz",
+    "errorGeneric": "Göndərmək alınmadı. Yenidən cəhd edin."
   },
   "reactions": {
     "policy": {
       "everyone": "Hamı",
       "followers": "İzləyicilər",
-      "nobody": "Heç kim"
+      "nobody": "Heç kim",
+      "default": "Hesab defoltu ({{value}})"
     },
     "heading": "Reaksiyalar",
     "more": "Daha çox göstər",
     "liveNow": "Canlı",
-    "untitled": "Reaksiya"
+    "untitled": "Reaksiya",
+    "reactionTo": "Reaksiya:",
+    "reactingTo": "Reaksiya verilir:",
+    "count_one": "{{count}} reaksiya",
+    "count_other": "{{count}} reaksiya",
+    "allow": "Reaksiyalara icazə ver",
+    "remixesSection": "Remikslər",
+    "allowDescription": "Digər yaradıcılara videolarınıza yazılmış və ya canlı reaksiya verməyə icazə verin. Bunu hər postda yenə dəyişə bilərsiniz.",
+    "pageDescription": "Riftn-də yaradıcıların {{creator}} tərəfindən “{{title}}” videosuna yazılmış və canlı reaksiyalarına baxın.",
+    "backToVideo": "Videoya qayıt",
+    "empty": "Hələ reaksiya yoxdur. Videonun Remiks menyusunu açın və birinci olmaq üçün Reaksiya ver seçin.",
+    "wasLive": "Canlı idi",
+    "thisVideo": "bu video"
   },
   "connectGuide": {
     "title": "Riftn-ı süni intellekt köməkçinizə qoşun",
     "urlLabel": "MCP server URL-i",
     "copy": "Kopyala",
     "copied": "Kopyalandı",
-    "copiedToast": "MCP URL-i kopyalandı"
+    "copiedToast": "MCP URL-i kopyalandı",
+    "accountBody2": "Gizli qaralamaları saxlayın, postları dərc edin və planlaşdırın, şəkilləri və sorğuları idarə edin, analitikaya baxın, cavab verin, reaksiya verin, yenidən paylaşın, izləyin, əlfəcinlər saxlayın, bildirişləri oxuyun, profilinizi redaktə edin və kreditlərinizlə yaradın. Post sorğusu ID-sinin təkrar istifadəsi ikinci post yaratmır və saymır. Nəsə xərcləməzdən əvvəl soruşur.",
+    "agentsTitle": "Agentlərinizi köməkçinizdən idarə edin",
+    "agentsBody": "Qoşularkən \"Agentləriniz adından hərəkət et\" icazəsini də verin. Bundan sonra köməkçiniz sahib olduğunuz istənilən agent adından paylaşa, cavab verə, reaksiya verə, yenidən paylaşa, izləyə və ya profili redaktə edə bilər, bir-bir və ya ardıcıl çoxlu. O, sizə məxsus olmayan hesab adından heç vaxt hərəkət edə bilməz.",
+    "agentsExample": "Sınayın: \"@mybot lentimdəki ən yuxarı posta cavab versin, sonra həmin cavabı @otherbot kimi bəyən.\"",
+    "desc": "Riftn-dən ChatGPT, Claude, Cursor və ya istənilən MCP tətbiqindən istifadə edin. Hesabsız gəzin və ya köməkçiniz sizin üçün paylaşsın, cavab versin və yaratsın deyə daxil olun.",
+    "copyFailed": "Kopyalamaq alınmadı",
+    "urlNote": "Bunu Sİ tətbiqinizə yapışdırın. Bu veb səhifə deyil, ona görə də brauzerdə açsanız, buraya qayıdacaqsınız.",
+    "canTitle": "Köməkçiniz nə edə bilər",
+    "publicTitle": "Daxil olmadan",
+    "publicBody": "Lentə baxın, postları və insanları axtarın, şərhləri oxuyun və profillərə baxın.",
+    "accountTitle": "Daxil olduqdan sonra",
+    "accountBody": "Paylaşın, cavab verin, reaksiya verin, izləyin, əlfəcinlər saxlayın, bildirişləri oxuyun, profilinizi redaktə edin və kreditlərinizlə şəkil, video və musiqi yaradın. Nəsə xərcləməzdən əvvəl soruşur.",
+    "chatgpt1": "ChatGPT Parametrlərini, sonra Apps & Connectors, sonra Advanced bölməsini açın və Developer mode-u aktiv edin.",
+    "chatgpt2": "Apps & Connectors bölməsinə qayıdıb yeni konnektor əlavə etmək üçün Create seçin.",
+    "chatgpt3": "Onu Riftn adlandırın, yuxarıdakı URL-i yapışdırın və giriş növü kimi OAuth seçin.",
+    "chatgpt4": "Connect düyməsini basın. Riftn açılır: daxil olun, icazələri yoxlayın və İcazə ver düyməsini basın.",
+    "chatgpt5": "Yeni söhbətdə + menyusunu açın, Riftn seçin və məsələn, “Riftn-də trend postları göstər” deyə soruşun.",
+    "claude1": "Claude-un konnektor parametrlərini açın və Add custom connector seçin.",
+    "claude2": "Onu Riftn adlandırın, yuxarıdakı URL-i yapışdırın və Add düyməsini basın.",
+    "claude3": "Connect düyməsini basın. Riftn açılır: daxil olun, icazələri yoxlayın və İcazə ver düyməsini basın.",
+    "claude4": "Söhbətdə alətlər menyusunu açın, Riftn-i aktiv edin və soruşun.",
+    "openSettings": "Parametrləri aç",
+    "devTitle": "Claude Code, Cursor və digər tətbiqlər",
+    "devBody": "Riftn-i HTTP üzərindən uzaq MCP serveri kimi əlavə edin. Tətbiq hesabınıza ilk dəfə ehtiyac duyduqda Riftn girişini açır.",
+    "manageTitle": "Bağlı tətbiqləriniz",
+    "manageBody": "Bağlı tətbiqlər istifadə etdiyiniz müddətdə qoşulu qalır və 30 gün istifadə edilmədikdə ayrılır. Onlara istənilən vaxt baxa və ya ayıra bilərsiniz.",
+    "manageLink": "Bağlı tətbiqləri idarə et",
+    "agentTitle": "Öz hesabından paylaşım edən bot istəyirsiniz?",
+    "agentBody": "Agent yaradın və açarı daxil olan öz konnektor URL-ni alın. Bundan sonra köməkçiniz sizin yerinizə həmin agent kimi paylaşa, şərh yaza, səs verə və izləyə bilər.",
+    "agentLink": "Agent yarat",
+    "helpTitle": "Nəsə səhv gedərsə",
+    "help1": "“Authentication update required” və ya Yenidən qoş düyməsi: Yenidən qoş düyməsini basın və Riftn-ə yenidən daxil olun.",
+    "help2": "Öz postlarınız barədə soruşduqda “Riftn hesabınızı bağlayın”: tətbiqin konnektor parametrlərində Qoş düyməsini basın.",
+    "help3": "URL-i brauzer tabında açanda xəta görünməsi normaldır. Bunun əvəzinə onu Sİ tətbiqinizə yapışdırın.",
+    "other": "Hər hansı digər MCP tətbiqi də eyni qaydada işləyir: uzaq MCP serveri əlavə edin və yuxarıdakı URL-i yapışdırın."
   },
   "avatarPrompt": {
-    "notNow": "İndi yox"
+    "notNow": "İndi yox",
+    "title": "Profil şəkli əlavə et",
+    "body": "Üzünüz və ya loqonuz olanda insanlar sizi lentlərdə, şərhlərdə və söhbətlərdə daha tez tanıyır.",
+    "choose": "Şəkil seçin",
+    "another": "Başqasını seçin",
+    "save": "Bu şəkli istifadə et",
+    "saved": "Əla görünür",
+    "failed": "Şəkliniz saxlanıla bilmədi. Yenidən cəhd edin."
   },
   "postStats": {
     "audience": "Auditoriya",
@@ -19380,7 +20633,60 @@
     "shares": "Paylaşımlar",
     "signedOutViewers": "Çıxış edildi",
     "topSupporters": "Ən yaxşı dəstəkçilər",
-    "visitors": "Çıxış edildi"
+    "visitors": "Çıxış edildi",
+    "aboutUsual": "adətən olduğu qədər",
+    "afterWatching": "gördükdən sonra izlədi",
+    "avg": "orta",
+    "avgWatch": "Orta baxış",
+    "bestTime": "İnsanlarınız nə vaxt baxır",
+    "bigDrop": "Böyük düşüş",
+    "byBadge": "nişana görə",
+    "devices": "Cihaz (üzvlər)",
+    "finishedLower": "bitirdi",
+    "finishedPct": "{{pct}}% sona qədər baxdı",
+    "inOut": "{{in}} üzv · {{out}} daxil olmayıb",
+    "leave": "{{pct}}% tərk edir",
+    "linkClicks": "Keçid klikləri",
+    "newToYou": "sizin üçün yeni",
+    "noAccount": "hesab yoxdur",
+    "noViewersYet": "Bu postu hələ heç kim görməyib.",
+    "noWatchYet": "İnsanlar oynatdıqdan sonra baxış vaxtı burada görünür. Sayma 31 okt 2026-da başlayıb.",
+    "open": "Postunuzun necə getdiyinə baxın",
+    "otherBadges": "Digər nişanlar",
+    "peak": "Pik {{time}} · {{n}}",
+    "peopleReached": "Əhatə olunan insanlar",
+    "playsLower": "oynatma",
+    "playsMembers": "Üzvlərin oynatmaları",
+    "playsVisitors": "Daxil olmayanların oynatmaları",
+    "profileTaps": "Profilinizə toxunuşlar",
+    "reach": "Əhatə",
+    "saves": "Saxlamalar",
+    "seeAll": "Bütün statistikaya bax",
+    "signedIn": "daxil olub",
+    "signedOutLower": "daxil olmayıb",
+    "stillWatching": "Hələ baxır",
+    "timesUsual": "adi haldan {{ratio}}×",
+    "vsUsualPct": "adi postunuza nisbətən {{pct}}",
+    "unavailableBody": "Bu postun statistikasını yalnız yaradıcı görə bilər.",
+    "unavailableTitle": "Statistika əlçatan deyil",
+    "vsUsual": "adi postunuza nisbətən",
+    "watching": "Baxır",
+    "whoSawIt": "Kim gördü",
+    "withRepeats": "{{n}} təkrar",
+    "yourFollowers": "izləyiciləriniz",
+    "first48": "İlk 48 saat",
+    "howItsDoing": "Necə gedir",
+    "bestTip": "İzləyicilərinizin çoxu {{day}} saat {{hour}}:00 radələrində gəlir. Bundan bir az əvvəl paylaşmaq posta ən yaxşı başlanğıc verir.",
+    "last30": "son 30 gün",
+    "day": {
+      "sun": "B.",
+      "mon": "B.e.",
+      "tue": "Ç.a.",
+      "wed": "Ç.",
+      "thu": "C.a.",
+      "fri": "C.",
+      "sat": "Ş."
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Tezliklə",
@@ -19395,7 +20701,9 @@
     "failed": "Bunu yaddaşda saxlamaq mümkün olmadı. Yenidən cəhd edin.",
     "privacy": "Yalnız bu ilan üçün istifadə olunur.",
     "seoTitle": "Token ləğv edilməsi yaxşıda | Riftn",
-    "seoDescription": "Yeni Riftn tokenı çox çabuk yayımlanacaq. Siqışın və tokenin canlı olarkən bir email almaq üçün siyahıya düşün. Sonra Riftn cibinizdən doğrudan satın alın."
+    "seoDescription": "Yeni Riftn tokenı çox çabuk yayımlanacaq. Siqışın və tokenin canlı olarkən bir email almaq üçün siyahıya düşün. Sonra Riftn cibinizdən doğrudan satın alın.",
+    "title": "Token tezliklə buraxılır",
+    "sendTo": "{{email}} ünvanına e-poçt göndərəcəyik"
   },
   "githubLink": {
     "hint": "Hesabın sizin olduğunu sübut etmək üçün GitHub-a daxil olun. Riftn yalnız ictimai GitHub profilinizi görür.",
@@ -19411,7 +20719,27 @@
   },
   "mcpKeys": {
     "delete": "Sil",
-    "shortProfile": "Profil"
+    "shortProfile": "Profil",
+    "title": "Şəxsi açarlar",
+    "body": "Giriş səhifəsini aça bilməyən skriptlər, botlar və tətbiqlər üçün. Açar yalnız icazə verdiyiniz işləri, hesabınızda və sahib olduğunuz agentlərdə görür. İstifadə edildikcə aktiv qalır və 30 gün istifadə edilmədikdə dayanır.",
+    "signIn": "Açar yaratmaq üçün daxil olun",
+    "newTitle": "Açarınızı indi kopyalayın",
+    "newBody": "O yalnız bu dəfə göstərilir. Ona sahib olan hər kəs seçdiyiniz icazələr çərçivəsində hesabınızdan istifadə edə bilər, ona görə də onu gizli saxlayın.",
+    "useIt": "Onu bunlardan biri ilə tətbiqinizə əlavə edin:",
+    "name": "Açar adı",
+    "namePlaceholder": "Mənim botum",
+    "permissions": "Bu açar nə edə bilər",
+    "limits": "Hesabınız və agentləriniz üzrə gündəlik limitlər: 50 post, 300 cavab, 1.000 reaksiya, 200 izləmə, 200 yenidən paylaşım və 30 profil redaktəsi.",
+    "create": "Açar yarat",
+    "show": "Açarlarımı göstər",
+    "yours": "Açarlarınız",
+    "empty": "Hələ açar yoxdur.",
+    "expires": "Yenidən istifadə edilməsə {{date}} tarixinədək aktivdir",
+    "shortRead": "Oxu",
+    "shortSocial": "Paylaş və cavab ver",
+    "shortGenerate": "Media yarat",
+    "shortAgents": "Agentləriniz",
+    "settingsBody": "Riftn-dən və agentlərinizdən ChatGPT, Claude və ya istənilən MCP tətbiqindən istifadə edin, ya da şəxsi açar yaradın."
   },
   "chatSearch": {
     "placeholder": "Mesajlar və ya şəxslər axtarın",
@@ -19447,17 +20775,81 @@
     "title": "Sorğular",
     "accept": "Qəbul et",
     "delete": "Sil",
-    "block": "Blok"
+    "block": "Blok",
+    "hint": "İzləmədiyiniz insanlardan mesajlar. Birini qəbul edin, cavab verin və ya onları izləyin, söhbət gələnlər qutunuza keçir.",
+    "rowHint": "İzləmədiyiniz insanlardan {{n}}",
+    "banner": "Siz {{name}} istifadəçisini izləmirsiniz. Bu söhbəti gələnlər qutunuza köçürmək üçün qəbul edin və ya sadəcə cavab verin.",
+    "accepted": "Gələnlər qutunuza köçürüldü",
+    "acceptFailed": "Qəbul etmək alınmadı, yenidən cəhd edin"
   },
   "dmSchedule": {
     "view": "Bax",
     "edit": "Redaktə et",
     "editLabel": "Mesajı redaktə et",
-    "error": "Bu alınmadı. Yenidən cəhd edin."
+    "error": "Bu alınmadı. Yenidən cəhd edin.",
+    "button": "Mesajı planlaşdır",
+    "title": "Planlaşdırılmış mesajlar",
+    "whenTitle": "Nə vaxt göndərilsin?",
+    "waiting": "{{n}} planlaşdırılıb",
+    "next": "növbəti {{when}}",
+    "failedCount": "{{n}} göndərilməyib",
+    "notSent": "Göndərilmədi",
+    "emptyTitle": "Heç nə planlaşdırılmayıb",
+    "emptyBody": "Mesaj yazın, sonra nə vaxt göndəriləcəyini seçmək üçün saata toxunun.",
+    "changeTime": "Vaxtı dəyiş",
+    "sendNow": "İndi göndər",
+    "deleted": "Planlaşdırılmış mesaj silindi",
+    "unreadable": "Başqa cihazda yazılıb. Yenə də göndəriləcək.",
+    "footnote": "Vaxtlar sizin saat qurşağınızdadır. Mesaj göndərilənədək onu heç kim görmür.",
+    "footnoteNamed": "Vaxtlar sizin saat qurşağınızdadır. {{name}} mesajı yalnız göndərildikdən sonra görür.",
+    "textOnly": "Hələlik yalnız mətn mesajları planlaşdırıla bilər.",
+    "scheduledToast": "{{when}} üçün planlaşdırılıb",
+    "failedToast": "Planlaşdırılmış mesaj göndərilə bilmədi"
   },
   "mentionLinks": {
     "communities": "İcmalar",
     "pages": "Səhifələr",
-    "people": "İnsanlar"
+    "people": "İnsanlar",
+    "empty": "Heç nə tapılmadı",
+    "hint": "İnsanları, icmaları və səhifələri tapmaq üçün yazın",
+    "linkTo": "{{name}} keçidini əlavə et",
+    "members": " üzv",
+    "placeholder": "İnsanları, icmaları, səhifələri axtarın...",
+    "title": "Qeyd et və ya keçid ver"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Profilimin gizlədiləcəyini və hər yerdən çıxış edəcəyimi başa düşürəm.",
+    "title": "Hesabı deaktiv et",
+    "short": "Profilinizi hələlik gizlədin. Bərpa etmək üçün yenidən daxil olun",
+    "description": "Bunun əvəzinə fasilə verin. Profiliniz, paylaşımlarınız və şərhləriniz gizlədilir və hər yerdən çıxış edirsiniz. Heç nə silinmir və yenidən daxil olmaq hər şeyi geri qaytarır.",
+    "button": "Deaktiv et",
+    "confirmTitle": "Hesabınız deaktiv edilsin?",
+    "confirmBody": "Profiliniz, paylaşımlarınız və şərhləriniz gizlədiləcək və bütün cihazlardan çıxış edəcəksiniz. Bunu ləğv etmək üçün istənilən vaxt yenidən daxil olun.",
+    "busy": "Deaktiv edilir…",
+    "done": "Hesab deaktiv edildi",
+    "receipt": "Profiliniz, paylaşımlarınız və şərhləriniz gizlədilib. Hər şeyi geri qaytarmaq üçün istənilən vaxt yenidən daxil olun.",
+    "error": "Hesabınız deaktiv edilmədi. Yenidən cəhd edin."
+  },
+  "halloween": {
+    "title": "Xoşbəxt Halloween",
+    "otherThemes": "Qorxulu əhvalınız yoxdur? Başqa temalar tapın:",
+    "enter": "Zindana daxil ol"
+  },
+  "msgDelete": {
+    "title": "Mesaj silinsin?",
+    "titleMany": "{{count}} mesaj silinsin?",
+    "bodyOwn": "Onu yalnız öz söhbətinizdən və ya hamı üçün silin.",
+    "bodyOwnMany": "Onları yalnız öz söhbətinizdən və ya hamı üçün silin.",
+    "bodyOthers": "O, yalnız sizin söhbətinizdən silinəcək. Qarşı tərəf onu görməyə davam edəcək.",
+    "bodyOthersMany": "Onlar yalnız sizin söhbətinizdən silinəcək. Söhbətdəki digərləri onları görməyə davam edəcək.",
+    "bodyOwnBoth": "Onu yalnız öz söhbətinizdən və ya hər ikiniz üçün silin.",
+    "bodyOwnBothMany": "Onları yalnız öz söhbətinizdən və ya hər ikiniz üçün silin.",
+    "forMe": "Mənim üçün sil",
+    "forEveryone": "Hər kəs üçün sil",
+    "forBoth": "Hər ikimiz üçün sil",
+    "forMeAndName": "Mənim və {{name}} üçün sil",
+    "remember": "Seçimimi yadda saxla",
+    "rememberHint": "İstənilən vaxt Parametrlərdə dəyişin",
+    "failed": "Mesaj silinə bilmədi"
   }
 }
