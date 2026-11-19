@@ -626,7 +626,7 @@ export function PostActionBar({
               <DrawerTitle>{t('upload.postOptions', { defaultValue: 'Post options' })}</DrawerTitle>
             </DrawerHeader>
             <div className="overflow-y-auto p-4">
-              {!isLive && !hasVideo && !hasImage && !isComic && onTogglePoll && (
+              {!isLive && !isComic && onTogglePoll && (
                 <button type="button" aria-pressed={!!hasPoll}
                   onClick={() => { setPostOptionsOpen(false); onTogglePoll(); }}
                   className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', hasPoll && 'bg-white/15')}
