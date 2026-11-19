@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { watchFrozenPicture } from '../browser-playback-recovery';
+import { watchFrozenPicture } from '../frozen-picture';
 vi.mock('../logger', () => ({ logToBackend: vi.fn() }));
 
 function fakeVideo() {
