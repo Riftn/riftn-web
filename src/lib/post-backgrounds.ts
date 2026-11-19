@@ -205,6 +205,29 @@ export function postBgFromToken(token: string | null | undefined): PostBg | null
   return withPostBgColors(bg, parsePostBgColors(colors));
 }
 
+/**
+ * One post's own backdrop as the server stores it on the post (Token.postBg):
+ * "id|#a,#b,#c|postbgs/key". The picture part is a CDN key, not a URL.
+ */
+export function postBgFromStored(raw: unknown, cdnBase = CDN_BASE): PostBg | null {
+  if (typeof raw !== 'string' || !raw) return null;
+  const [id, colors, key] = raw.split('|');
+  const bg = postBgById(id);
+  if (!bg) return null;
+  if (bg.kind === 'photo') {
+    return key && /^postbgs\/[a-z0-9-]+\.(jpg|webp|mp4)$/i.test(key) ? { ...bg, image: cdnBase + key } : null;
+  }
+  return withPostBgColors(bg, parsePostBgColors(colors));
+}
+
+/** The stored string for a backdrop with colours (no picture): what /post_background takes. */
+export function postBgStored(id: string | null, colors: PostBgPalette | null | undefined): string {
+  const bg = id ? BY_ID.get(id) : undefined;
+  if (!bg || bg.kind === 'photo') return '';
+  const c = bg.palettes.length && colors && !samePalette(colors, bg.palettes[0]) ? postBgColorsString(colors) : '';
+  return c ? `${bg.id}|${c}` : bg.id;
+}
+
 export interface PostBgChoice {
   id: string | null;
   /** Colours for the backdrop; null or the default colourway clears them. */

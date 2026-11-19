@@ -163,6 +163,21 @@ export interface UpdateProfileData {
   postBgImg?: File;
 }
 
+/**
+ * Give one of your own text posts its own backdrop: `postBg` "id|#a,#b,#c",
+ * or a picture / GIF / video file for that post only. Empty `postBg` sends it
+ * back to the profile's backdrop; tokenId 'all' does that for every post.
+ */
+export async function setPostBackground(tokenId: string | number | 'all', postBg: string, file?: File | null): Promise<{ result: boolean; postBg: string | null }> {
+  const formData = new FormData();
+  formData.append('tokenId', String(tokenId));
+  formData.append('postBg', postBg);
+  if (file) formData.append('postBgImg', file);
+  const result = await authedUpload<{ result: boolean; postBg: string | null; error?: string }>('/api/post_background', formData);
+  if (!result?.result) throw new Error(result?.error || 'Could not save the background');
+  return result;
+}
+
 export async function updateProfile(data: UpdateProfileData): Promise<{ result: boolean }> {
   const formData = new FormData();
 

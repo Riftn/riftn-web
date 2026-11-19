@@ -19,6 +19,22 @@ import '@/styles/post-backgrounds.css';
 export const ProfilePostBgContext = createContext<PostBg | null>(null);
 export const useProfilePostBg = () => useContext(ProfilePostBgContext);
 
+/**
+ * Posts that carry their own backdrop (post id -> backdrop, null = back to the
+ * profile's). Filled from the posts themselves plus any save made on this page.
+ */
+export const ProfilePostBgMapContext = createContext<ReadonlyMap<string, PostBg | null> | null>(null);
+
+/** For lists: a function giving each text post's backdrop, its own if it has one, else the profile's. */
+export function usePostBgResolver(): (postId: string | number | null | undefined) => PostBg | null {
+  const profileBg = useContext(ProfilePostBgContext);
+  const own = useContext(ProfilePostBgMapContext);
+  return useCallback((postId) => {
+    const key = postId == null ? '' : String(postId);
+    return (key && own?.get(key)) || profileBg;
+  }, [own, profileBg]);
+}
+
 /** The profile picture of the profile being viewed, for the backdrop that blurs it (Profile Echo). */
 export const ProfilePostBgArtContext = createContext<string | null>(null);
 
@@ -33,11 +49,12 @@ const lowEndDevice = (() => {
  * Props that turn any card element into a backdrop host. Spread on the
  * element that wraps a text post, and render <PostBgLayer> as its first child.
  */
-export function postBgHostProps(bg: PostBg | null): Record<string, string> {
+export function postBgHostProps(bg: PostBg | null, postId?: string | number | null): Record<string, string> {
   // data-pbg-text marks every text post, with or without a backdrop, so the
-  // owner can hold it to open the picker.
-  if (!bg) return { 'data-pbg-text': '' };
-  return { 'data-pbg-text': '', 'data-pbg': bg.id, 'data-pbg-tone': bg.tone, 'data-pbg-kind': bg.kind };
+  // owner can hold it to open the picker; data-pbg-post says which post.
+  const who: Record<string, string> = { 'data-pbg-text': '', ...(postId != null ? { 'data-pbg-post': String(postId) } : {}) };
+  if (!bg) return who;
+  return { ...who, 'data-pbg': bg.id, 'data-pbg-tone': bg.tone, 'data-pbg-kind': bg.kind };
 }
 
 let sharedObserver: IntersectionObserver | null = null;
@@ -118,7 +135,7 @@ const HOLD_SKIP = 'a, button, input, textarea, select, video, audio, [role="butt
  * a computer. The click that ends a completed hold is swallowed so it does not
  * also open the avatar or a link underneath.
  */
-export function usePostBgHold(enabled: boolean, onOpen: () => void, selector?: string) {
+export function usePostBgHold(enabled: boolean, onOpen: (held?: HTMLElement | null) => void, selector?: string) {
   const [ring, setRing] = useState<{ x: number; y: number; p: number } | null>(null);
   const state = useRef<{ t0: number; x: number; y: number; raf: number; fired: boolean; id: number | null }>({ t0: 0, x: 0, y: 0, raf: 0, fired: false, id: null });
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -144,6 +161,7 @@ export function usePostBgHold(enabled: boolean, onOpen: () => void, selector?: s
     }
     const box = host.getBoundingClientRect();
     const s = state.current;
+    const held = selector ? ((e.target as HTMLElement).closest(selector) as HTMLElement | null) : null;
     s.t0 = performance.now();
     s.x = e.clientX;
     s.y = e.clientY;
@@ -160,7 +178,7 @@ export function usePostBgHold(enabled: boolean, onOpen: () => void, selector?: s
         s.fired = true;
         stop();
         try { navigator.vibrate?.(12); } catch { /* not supported */ }
-        onOpen();
+        onOpen(held);
         return;
       }
       s.raf = requestAnimationFrame(tick);
@@ -194,7 +212,7 @@ export function usePostBgHold(enabled: boolean, onOpen: () => void, selector?: s
     } else if (target.closest('a, input, textarea')) return;
     e.preventDefault();
     stop();
-    onOpen();
+    onOpen(selector ? (target.closest(selector) as HTMLElement | null) : null);
   }, [enabled, onOpen, stop, selector]);
 
   const handlers = enabled
@@ -226,7 +244,11 @@ export interface PostBgSave {
   colors: PostBgPalette | null;
   /** A new picture or GIF to upload for "Your photo". */
   file?: File | null;
+  /** 'post': only the post that was held. 'all': the whole profile, every post. */
+  scope?: PostBgScope;
 }
+
+export type PostBgScope = 'post' | 'all';
 
 export interface PostBgPickerProps {
   open: boolean;
@@ -239,6 +261,12 @@ export interface PostBgPickerProps {
   /** The owner's own picture, if they ever uploaded one. */
   photoUrl?: string | null;
   saving?: boolean;
+  /**
+   * Set when the picker was opened from one post: shows "This post / All posts".
+   * `postCurrent` is that post's own backdrop (undefined = it uses the profile's).
+   */
+  postId?: string | null;
+  postCurrent?: PostBg | null;
   onCancel: () => void;
   onSave: (choice: PostBgSave) => void;
 }
@@ -253,8 +281,12 @@ const MAX_VIDEO_MB = 90;
  * Whatever sits in the middle of the strip is applied live; Done saves.
  * On a computer it is a centred panel and the arrow keys step through.
  */
-export function PostBgPicker({ open, current, name, handle, avatarUrl, sampleText, photoUrl, saving, onCancel, onSave }: PostBgPickerProps) {
+export function PostBgPicker({ open, current: profileCurrent, name, handle, avatarUrl, sampleText, photoUrl, saving, postId, postCurrent, onCancel, onSave }: PostBgPickerProps) {
   const { t } = useTranslation();
+  const [scope, setScope] = useState<PostBgScope>('all');
+  useEffect(() => { if (open) setScope(postId ? 'post' : 'all'); }, [open, postId]);
+  // In "This post", start from what that post shows now.
+  const current = scope === 'post' && postCurrent !== undefined ? postCurrent : profileCurrent;
   const [sel, setSel] = useState<string | null>(current?.id ?? null);
   // Colours per backdrop while the picker is open, so flicking away and back keeps a choice.
   const [colorsById, setColorsById] = useState<Record<string, PostBgPalette>>({});
@@ -386,7 +418,7 @@ export function PostBgPicker({ open, current, name, handle, avatarUrl, sampleTex
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
           </span>
         )}
-        <span className="pbg-tile-label">{b ? t(`postBg.names.${b.id}`, b.name) : t('postBg.none', 'None')}</span>
+        <span className="pbg-tile-label">{b ? t(`postBg.names.${b.id}`, b.name) : scope === 'post' && postId ? t('postBg.sameAsProfile', 'Profile') : t('postBg.none', 'None')}</span>
       </button>
     );
   };
@@ -404,13 +436,23 @@ export function PostBgPicker({ open, current, name, handle, avatarUrl, sampleTex
             type="button"
             className="pbg-picker-btn pbg-picker-btn--done"
             disabled={!canSave}
-            onClick={() => onSave({ id: sel, colors: bg && bg.palettes.length ? bg.colors ?? null : null, file: sel === POST_BG_PHOTO_ID ? file : null })}
+            onClick={() => onSave({ id: sel, colors: bg && bg.palettes.length ? bg.colors ?? null : null, file: sel === POST_BG_PHOTO_ID ? file : null, scope: postId ? scope : 'all' })}
           >
             <span>{saving ? t('postBg.saving', 'Saving') : t('common.done', 'Done')}</span>
           </button>
         </div>
 
         <div className="pbg-picker-stage">
+          {postId && (
+            <div className="pbg-chips pbg-scope" role="radiogroup" aria-label={t('postBg.scope', 'Apply to')}>
+              <button type="button" role="radio" aria-checked={scope === 'post'} aria-pressed={scope === 'post'} className="pbg-chip" onClick={() => setScope('post')}>
+                {t('postBg.thisPost', 'This post')}
+              </button>
+              <button type="button" role="radio" aria-checked={scope === 'all'} aria-pressed={scope === 'all'} className="pbg-chip" onClick={() => setScope('all')}>
+                {t('postBg.allPosts', 'All posts')}
+              </button>
+            </div>
+          )}
           <div className="pbg-preview" {...postBgHostProps(bg && (bg.kind !== 'photo' || bg.image) ? bg : null)}>
             <PostBgLayer bg={bg && (bg.kind !== 'photo' || bg.image) ? bg : null} />
             <div className="pbg-preview-who">

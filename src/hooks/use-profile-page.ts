@@ -341,6 +341,17 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     return (pinsData?.items ?? []).map((pin) => String(pin.tokenId));
   }, [isViewingOwnProfile, myPinnedIds, pinsData]);
 
+  // Text posts that carry their own backdrop (Token.postBg), by post id.
+  const POST_BGS = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const page of userContentData?.pages ?? []) {
+      for (const nft of (page.data || []) as Array<{ tokenId?: number | string; postBg?: string }>) {
+        if (nft?.tokenId !== undefined && typeof nft.postBg === 'string' && nft.postBg) map.set(String(nft.tokenId), nft.postBg);
+      }
+    }
+    return map;
+  }, [userContentData]);
+
   // Content separation
   const { PROFILE_POSTS, PROFILE_IMAGES, ALL_PROFILE_VIDEOS, PROFILE_LIVE, ALL_CONTENT } = useMemo(() => {
     if (!userContentData?.pages) {
@@ -706,6 +717,8 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
   });
 
   return {
+    // Text posts with their own backdrop: post id -> stored "id|colours|key".
+    POST_BGS,
     // Route info
     routeUsername,
     userId,
