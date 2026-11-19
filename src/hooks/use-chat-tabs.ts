@@ -59,6 +59,7 @@ export function useChatTabs() {
 
   const builtinName = useCallback((id: string) => ({
     all: t('chatTabs.all', 'All'),
+    unread: t('chatTabs.unread', 'Unread'),
     direct: t('chatTabs.direct', 'Direct'),
     communities: t('chatTabs.communities', 'Communities'),
     requests: t('chatTabs.requests', 'Requests'),

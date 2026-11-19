@@ -590,7 +590,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Computer tabs: Unread keeps chats with something new (or marked unread),
   // Groups keeps group, channel and community chats only.
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread;
-  const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : 'all';
+  const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : tabsOn && activeTab === 'unread' ? 'unread' : 'all';
   const shownConversations = tabFilter === 'groups' ? [] : tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
   // Computers: the first tab is "Messages", direct chats only; groups, channels,
   // communities and Public Chat live under Groups.
@@ -1184,6 +1184,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const unreadOf = (c: DeHubConversation) => c.unreadCount || 0;
   const tabUnread: Record<string, number> = {
     all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
+    unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
     direct: inboxConvs.reduce((n, c) => n + unreadOf(c), 0),
     communities: publicUnread,
     requests: requestUnread,

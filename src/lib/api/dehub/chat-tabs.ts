@@ -1,7 +1,7 @@
 import { apiCall } from './core';
 
 /** Tabs every person has. "All" can never be hidden. */
-export const BUILTIN_TABS = ['all', 'direct', 'communities', 'requests'] as const;
+export const BUILTIN_TABS = ['all', 'unread', 'direct', 'communities', 'requests'] as const;
 export type BuiltinTabId = (typeof BUILTIN_TABS)[number];
 
 export interface ChatTab {
