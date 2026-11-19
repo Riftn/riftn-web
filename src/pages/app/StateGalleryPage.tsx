@@ -12,6 +12,7 @@ import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePo
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import type { ArticleTileLook } from '@/lib/article-tile';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
+import { FormatGlyph, type FormatKind } from '@/components/app/profile/FormatMark';
 import { PostCard as GalleryPostCard } from '@/components/app/cards/PostCard';
 import { ContentWarningGate } from '@/components/app/cards/ContentWarningGate';
 import { AuthorThread } from '@/components/app/cards/AuthorThread';
@@ -2089,6 +2090,7 @@ export default function StateGalleryPage() {
         <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
         <TextTilesGallery />
         <ArticleTilesGallery initialLook={params.get('atile')} initiallyOpen={params.get('sheet') === 'article-tile'} />
+        <FormatIconsGallery />
         <GridCardsGallery />
         <GridReorderGallery />
 
@@ -2698,6 +2700,44 @@ function GridCardsGallery() {
       <AuthContext.Provider value={GALLERY_AUTH}>
         {ready && <div className="max-w-[360px]"><ProfileMixedGrid entries={GRID_CARD_ENTRIES} /></div>}
       </AuthContext.Provider>
+    </section>
+  );
+}
+
+const FORMAT_KINDS: FormatKind[] = ['photo', 'photos', 'video', 'short', 'replay', 'audio', 'article', 'text', 'comic', 'earn', 'stage', 'event', 'poll', 'quote', 'sharedPost', 'link', 'community', 'shop', 'profile', 'film', 'bounty', 'app', 'proposal', 'spotify'];
+
+/** Every post format's custom icon, on real grid tiles and as a key. */
+function FormatIconsGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => { seedGridCards(qc); return true; });
+  const media = [
+    pillImage('fi-photo', pillArtF),
+    pillImage('fi-photos', pillArtB, { imageUrls: [pillArtB, pillArtC] }),
+    pillVideo('fi-video', 'Night ride through the city', pillArtB),
+    pillVideo('fi-short', 'POV: first ride', pillArtC, { isShort: true }),
+    pillVideo('fi-replay', 'Friday night stream', pillArtE, { isLivePost: true, duration: '1:12:04' }),
+    pillVideo('fi-audio', 'Midnight drive', pillArtD, { isAudio: true }),
+    pillText('fi-article', 'How we shoot at night', { title: 'How we shoot at night', articleBody: GALLERY_ARTICLE_BODY, articleImageUrl: pillAbs(pillArtE) }),
+    pillImage('fi-comic', pillArtA, { layout: 'comic', imageUrls: [pillArtA, pillArtB, pillArtC] }),
+    pillVideo('fi-earn', 'Watch to the end and earn', pillArtD, { bountyAmount: 1000 }),
+    pillText('fi-plain', 'Sunday reset. Coffee, long walk, no notifications.'),
+  ];
+  const cards = GRID_CARD_ENTRIES.filter((e) => e.type === 'post' && e.key !== 'gc-plain');
+  const entries = [...media, ...cards] as unknown as MixedGridEntry[];
+  return (
+    <section data-page-bento data-format-icons-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: format icons</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {ready && <div className="max-w-[360px]" data-format-icons-grid><ProfileMixedGrid entries={entries} /></div>}
+      </AuthContext.Provider>
+      <div data-format-icons-key className="mt-4 grid max-w-[360px] grid-cols-4 gap-2 text-[10px]">
+        {FORMAT_KINDS.map((kind) => (
+          <div key={kind} className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] p-2">
+            <FormatGlyph kind={kind} className="h-6 w-6 [&_.fmt-wash]:opacity-0" />
+            <span className="opacity-70">{kind === 'sharedPost' ? 'shared' : kind}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
