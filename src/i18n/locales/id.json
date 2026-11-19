@@ -1235,6 +1235,8 @@
     "menuLayoutSectionsDesc": "Semua halaman sekaligus, di bawah judul",
     "menuLayoutFolders": "Folder",
     "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup",
+    "publicChatInBar": "Obrolan Publik di bilah bawah",
+    "publicChatInBarDesc": "Buka Obrolan Publik dengan sekali ketuk dari bilah di bawah layar",
     "chatCards": "Chat sebagai kartu",
     "chatCardsDesc": "Setiap chat di kartunya sendiri. Matikan untuk daftar polos dengan garis di antara chat."
   },

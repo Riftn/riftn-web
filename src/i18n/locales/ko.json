@@ -1234,6 +1234,8 @@
     "menuLayoutSectionsDesc": "모든 페이지를 제목 아래에 한 번에",
     "menuLayoutFolders": "폴더",
     "menuLayoutFoldersDesc": "주요 페이지, 그리고 그룹별 폴더",
+    "publicChatInBar": "하단 바에 공개 채팅",
+    "publicChatInBarDesc": "화면 하단 바에서 한 번만 눌러 공개 채팅으로 이동",
     "chatCards": "채팅을 카드로",
     "chatCardsDesc": "채팅마다 카드로 표시합니다. 끄면 채팅 사이에 선이 있는 단순한 목록이 됩니다."
   },

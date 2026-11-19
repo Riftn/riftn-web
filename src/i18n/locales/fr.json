@@ -1389,6 +1389,8 @@
     "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
     "menuLayoutFolders": "Dossiers",
     "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe",
+    "publicChatInBar": "Chat public dans la barre du bas",
+    "publicChatInBarDesc": "Ouvre le Chat public d'un seul geste depuis la barre en bas de l'écran",
     "chatCards": "Chats en cartes",
     "chatCardsDesc": "Chaque chat sur sa propre carte. Désactivez pour une liste simple avec une ligne entre les chats."
   },

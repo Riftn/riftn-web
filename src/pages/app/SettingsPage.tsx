@@ -25,6 +25,10 @@ import ConnectIcon from "@/components/ui/cut-icons/connect";
 import Moon from "@/components/ui/cut-icons/appearance";
 import Lock from "@/components/ui/cut-icons/privacy";
 import LayoutGrid from "@/components/ui/cut-icons/apps";
+import PublicChatIcon from "@/components/ui/cut-icons/chat";
+import { applyNavOrder, publicChatInBar, withPublicChatInBar } from '@/lib/nav-order';
+import { useNavOrderEditor } from '@/hooks/use-nav-order';
+import { DEFAULT_BAR_IDS } from '@/components/app/MobileBottomNav';
 import HomeCutIcon from "@/components/ui/cut-icons/home";
 import FilterCutIcon from "@/components/ui/cut-icons/filter";
 import { FEED_TABS } from "@/constants/app.constants";
@@ -2792,6 +2796,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
             />}
           />
           <MenuLayoutRow />
+          <PublicChatBarRow />
           <DefaultFeedSetting />
           <FeedTogglesSetting />
           <PostLandingSetting />
@@ -3439,6 +3444,30 @@ function WideVideoModeRow() {
           { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideVideoRailsDesc', 'The video beside one glass panel with what it is, a Follow button and the top comments') },
           { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideVideoStandardDesc', 'The video on its own, as before') },
         ]}
+      />}
+    />
+  );
+}
+
+/**
+ * Phones: put Public Chat on the bottom bar's first screen (lib/nav-order
+ * withPublicChatInBar). Writes the shared bar order, so the app follows.
+ */
+function PublicChatBarRow() {
+  const { t } = useTranslation();
+  const isDesktop = useIsDesktopViewport();
+  const { order, save } = useNavOrderEditor('bar', DEFAULT_BAR_IDS);
+  const effective = useMemo(() => applyNavOrder(DEFAULT_BAR_IDS, order, (id) => id), [order]);
+  if (isDesktop) return null;
+  return (
+    <SettingsRow
+      icon={<PublicChatIcon />}
+      anchor="public-chat-bar"
+      title={t('settings.publicChatInBar', 'Public Chat in the bottom bar')}
+      description={t('settings.publicChatInBarDesc', 'One tap into Public Chat from the bar at the bottom of the screen')}
+      action={<Switch
+        checked={publicChatInBar(effective)}
+        onCheckedChange={(on) => save(withPublicChatInBar(effective, on))}
       />}
     />
   );

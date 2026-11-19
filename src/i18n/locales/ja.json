@@ -1294,6 +1294,8 @@
     "menuLayoutSectionsDesc": "すべてのページを見出しの下に表示",
     "menuLayoutFolders": "フォルダ",
     "menuLayoutFoldersDesc": "メインのページと、グループごとのフォルダ",
+    "publicChatInBar": "下のバーに公開チャット",
+    "publicChatInBarDesc": "画面下のバーからワンタップで公開チャットへ",
     "tipsOffNote": "これがオンの間、チップの受け取りはオフになります。チップを再び受け取るにはオフにしてください。",
     "chatCards": "チャットをカード表示",
     "chatCardsDesc": "チャットごとにカードで表示します。オフにすると区切り線付きのシンプルな一覧になります。"

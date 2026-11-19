@@ -1389,6 +1389,8 @@
     "menuLayoutSectionsDesc": "كل الصفحات معًا، تحت عناوين",
     "menuLayoutFolders": "مجلدات",
     "menuLayoutFoldersDesc": "صفحاتك الرئيسية، ثم مجلد لكل مجموعة",
+    "publicChatInBar": "الدردشة العامة في الشريط السفلي",
+    "publicChatInBarDesc": "ادخل إلى الدردشة العامة بلمسة واحدة من الشريط أسفل الشاشة",
     "chatCards": "الدردشات كبطاقات",
     "chatCardsDesc": "كل دردشة في بطاقتها. أوقفه لقائمة بسيطة بخط بين الدردشات."
   },

@@ -1389,6 +1389,8 @@
     "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
     "menuLayoutFolders": "Klasörler",
     "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör",
+    "publicChatInBar": "Alt çubukta Genel Sohbet",
+    "publicChatInBarDesc": "Ekranın altındaki çubuktan tek dokunuşla Genel Sohbet'e gir",
     "chatCards": "Sohbetler kart olarak",
     "chatCardsDesc": "Her sohbet kendi kartında. Kapatınca sohbetler arasında çizgi olan sade bir liste olur."
   },

@@ -1389,6 +1389,8 @@
     "menuLayoutSectionsDesc": "Alle pagina's tegelijk, onder kopjes",
     "menuLayoutFolders": "Mappen",
     "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep",
+    "publicChatInBar": "Openbare chat in de onderste balk",
+    "publicChatInBarDesc": "Met één tik vanuit de balk onderaan het scherm naar de openbare chat",
     "chatCards": "Chats als kaarten",
     "chatCardsDesc": "Elke chat op een eigen kaart. Zet uit voor een gewone lijst met een lijn tussen chats."
   },

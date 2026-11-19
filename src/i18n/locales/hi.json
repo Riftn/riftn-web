@@ -1318,6 +1318,8 @@
     "menuLayoutSectionsDesc": "सभी पेज एक साथ, शीर्षकों के नीचे",
     "menuLayoutFolders": "फ़ोल्डर",
     "menuLayoutFoldersDesc": "आपके मुख्य पेज, फिर हर समूह के लिए एक फ़ोल्डर",
+    "publicChatInBar": "नीचे की पट्टी में पब्लिक चैट",
+    "publicChatInBarDesc": "स्क्रीन के नीचे की पट्टी से एक टैप में पब्लिक चैट खोलें",
     "chatCards": "चैट कार्ड के रूप में",
     "chatCardsDesc": "हर चैट अपने कार्ड पर। बंद करने पर चैट के बीच लाइन वाली सादी सूची।"
   },

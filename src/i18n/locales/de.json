@@ -1233,6 +1233,8 @@
     "menuLayoutSectionsDesc": "Alle Seiten auf einmal, unter Überschriften",
     "menuLayoutFolders": "Ordner",
     "menuLayoutFoldersDesc": "Deine Hauptseiten, dann ein Ordner pro Gruppe",
+    "publicChatInBar": "Öffentlicher Chat in der unteren Leiste",
+    "publicChatInBarDesc": "Mit einem Tipp in der Leiste unten zum öffentlichen Chat",
     "chatCards": "Chats als Karten",
     "chatCardsDesc": "Jeder Chat auf einer eigenen Karte. Aus für eine schlichte Liste mit Linien zwischen den Chats."
   },

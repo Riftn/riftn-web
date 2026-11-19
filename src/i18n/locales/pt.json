@@ -1318,6 +1318,8 @@
     "menuLayoutSectionsDesc": "Todas as páginas, sob cabeçalhos",
     "menuLayoutFolders": "Pastas",
     "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo",
+    "publicChatInBar": "Chat público na barra inferior",
+    "publicChatInBarDesc": "Entre no Chat público com um toque na barra inferior da tela",
     "chatCards": "Chats como cartões",
     "chatCardsDesc": "Cada chat no seu próprio cartão. Desative para uma lista simples com uma linha entre chats."
   },

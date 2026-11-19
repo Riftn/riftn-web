@@ -43,6 +43,8 @@ import { LeaderboardUserAvatar } from '@/components/app/LeaderboardUserAvatar';
 import { getLeaderboard, type LeaderboardSortMode, type LeaderboardEntry, type LeaderboardPeriod } from '@/lib/api/dehub';
 import { dehubAuthHeaders } from '@/lib/ai-invoke';
 import { getAffiliateLeaderboard, type AffiliateLeaderboardEntry } from '@/lib/api/affiliate-leaderboard';
+import { getOgChallengeLeaderboard, type OgChallengeEntry } from '@/lib/api/og-challenge-leaderboard';
+import Trophy from "@/components/ui/cut-icons/leaderboard";
 import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { SEOHead } from '@/components/SEOHead';
@@ -60,7 +62,7 @@ import {
 const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co';
 
-type CategoryType = 'holdings' | 'sentTips' | 'receivedTips' | 'followers' | 'likes' | 'subscribers' | 'affiliates';
+type CategoryType = 'holdings' | 'sentTips' | 'receivedTips' | 'followers' | 'likes' | 'subscribers' | 'affiliates' | 'ogChallenge';
 
 // `apiSort` is null for a category that is not served by /api/leaderboard.
 const categories: { id: CategoryType; labelKey: string; icon: typeof Wallet; apiSort: LeaderboardSortMode | null }[] = [
@@ -71,6 +73,8 @@ const categories: { id: CategoryType; labelKey: string; icon: typeof Wallet; api
   { id: 'likes', labelKey: 'leaderboard.likes', icon: Heart, apiSort: 'likes' },
   { id: 'subscribers', labelKey: 'leaderboard.subscribers', icon: UserCheck, apiSort: 'subscribers' },
   { id: 'affiliates', labelKey: 'leaderboard.affiliates', icon: Share2, apiSort: null },
+  // Invites that brought back original DHB holders (lib/api/og-challenge-leaderboard).
+  { id: 'ogChallenge', labelKey: 'leaderboard.ogChallenge', icon: Trophy, apiSort: null },
 ];
 
 const timePeriods: { id: LeaderboardPeriod; labelKey: string }[] = [
@@ -128,7 +132,9 @@ export default function LeaderboardPage() {
     return () => clearTimeout(t);
   }, []);
   const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/LeaderboardPage.tsx:searchQuery", '');
-  const [category, setCategory] = useState<CategoryType>('holdings');
+  // ?board=og opens straight on the OG holder challenge (shared links).
+  const [category, setCategory] = useState<CategoryType>(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('board') === 'og' ? 'ogChallenge' : 'holdings');
   const [timePeriod, setTimePeriod] = useState<LeaderboardPeriod>('all');
   const [shimmerKey, setShimmerKey] = useState(0);
   const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc');
@@ -149,7 +155,9 @@ export default function LeaderboardPage() {
   // Referrals aren't in the leaderboard API, so this one category is
   // aggregated out of Supabase instead. Everything downstream — search, the
   // sort toggle, the row markup — works off whichever list wins below.
-  const isAffiliates = category === 'affiliates';
+  const isOgChallenge = category === 'ogChallenge';
+  // Both referral boards are ranked here rather than by the API.
+  const isAffiliates = category === 'affiliates' || isOgChallenge;
 
   const handleRefreshMe = useCallback(async () => {
     if (refreshCooldown || isRefreshing) return;
@@ -228,8 +236,9 @@ export default function LeaderboardPage() {
     isLoading: affiliateLoading,
     error: affiliateError,
   } = useQuery({
-    queryKey: ['leaderboard', 'affiliates', timePeriod],
-    queryFn: () => getAffiliateLeaderboard(timePeriod),
+    queryKey: ['leaderboard', isOgChallenge ? 'ogChallenge' : 'affiliates', timePeriod],
+    queryFn: (): Promise<AffiliateLeaderboardEntry[]> =>
+      isOgChallenge ? getOgChallengeLeaderboard(timePeriod) : getAffiliateLeaderboard(timePeriod),
     enabled: isAffiliates,
     staleTime: 5 * 60_000,
     gcTime: 2 * 60 * 60 * 1000,
@@ -317,6 +326,12 @@ export default function LeaderboardPage() {
   const isDhbCategory = DHB_CATEGORIES.includes(category);
 
   const formatDisplayValue = (entry: LeaderboardEntry): string => {
+    if (category === 'ogChallenge') {
+      const og = entry as OgChallengeEntry;
+      const holders = t('leaderboard.ogHolders', { defaultValue: '{{count}} OG holders', count: og.directReferrals ?? 0 });
+      if (!og.ogDhb) return String(holders);
+      return String(holders) + ' · ' + formatLeaderboardNumber(og.ogDhb) + ' DHB';
+    }
     if (category === 'affiliates') {
       const affiliate = entry as AffiliateLeaderboardEntry;
       const direct = t('leaderboard.directReferrals', {
@@ -486,6 +501,15 @@ export default function LeaderboardPage() {
 
       {/* Content */}
       <PageBody className={phone ? 'pt-1' : undefined}>
+        {isOgChallenge && (
+          <div data-og-challenge-note className={cn('mb-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300', phone && 'mx-3')}>
+            <p className="font-semibold text-white">{t('leaderboard.ogChallengeTitle', 'Bring back the OG holders')}</p>
+            <p className="mt-1">{t('leaderboard.ogChallengeBody', 'Invite people who still hold DHB. When they join with your invite link and keep their DHB in their Riftn wallet, they count for you here.')}</p>
+            <Link to="/app/affiliate" className={cn('mt-2 inline-block font-semibold text-white underline underline-offset-4', FOCUS_RING)}>
+              {t('leaderboard.ogChallengeCta', 'Get your invite link')}
+            </Link>
+          </div>
+        )}
         <div data-page-bento={phone ? undefined : true} data-kit-section={phone ? undefined : true} className={phone ? undefined : 'bg-zinc-900 overflow-hidden'}>
         {/* Loading State */}
         {listLoading && (
