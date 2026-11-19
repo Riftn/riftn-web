@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, EyeOff, Hand, Lock, LockOpen, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
+import { Check, FolderPlus, Plus, Archive, ArchiveRestore, Bell, BellOff, CheckCircle2, Eraser, EyeOff, Hand, Lock, LockOpen, MessageCircle, MessageCircleDashed, Pin, PinOff, PictureInPicture2, Trash2 } from 'lucide-react';
 import * as Ctx from '@/components/ui/context-menu';
 import * as Drop from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,11 @@ export interface ChatOptionsHandlers {
   onToggleEncryption?: () => void;
   /** Start picking several chats at once (right-click menu only). */
   onSelectMany?: () => void;
+  /** The person's own Chat tabs, and whether this chat is in each. */
+  tabs?: { id: string; name: string; emoji: string; has: boolean }[];
+  onToggleTab?: (tabId: string) => void;
+  /** Make a new tab with this chat already in it. */
+  onNewTabWith?: () => void;
 }
 
 type Kit = {
@@ -128,6 +133,28 @@ function ChatOptionItems({ kit, h }: { kit: Kit; h: ChatOptionsHandlers }) {
         {unread ? <MessageCircle /> : <MessageCircleDashed />}
         {unread ? t('chatMenu.markRead', 'Mark as read') : t('chatMenu.markUnread', 'Mark as unread')}
       </Item>
+      {h.onToggleTab && h.onNewTabWith && (
+        <Sub>
+          <SubTrigger className={cn(ROW, 'data-[state=open]:bg-white/10 [&>svg:last-child]:text-zinc-500')}>
+            <FolderPlus />{t('chatTabs.addToTab', 'Add to tab')}
+          </SubTrigger>
+          <Portal>
+          <SubContent data-chat-add-to-tab className={cn(CHAT_MENU_CONTENT, 'min-w-[12rem]')}>
+            {(h.tabs ?? []).map(tab => (
+              <Item key={tab.id} className={ROW} onSelect={() => h.onToggleTab?.(tab.id)}>
+                <span className="w-[18px] text-center text-[14px] leading-none">{tab.emoji || '•'}</span>
+                <span className="flex-1 truncate">{tab.name}</span>
+                {tab.has && <Check className="h-4 w-4 text-white" />}
+              </Item>
+            ))}
+            {!!h.tabs?.length && <Separator className="my-1 h-px bg-white/10" />}
+            <Item className={ROW} onSelect={h.onNewTabWith}>
+              <Plus />{t('chatTabs.newWith', 'New tab…')}
+            </Item>
+          </SubContent>
+          </Portal>
+        </Sub>
+      )}
       {h.onToggleEncryption && (
         <Item className={ROW} onSelect={h.onToggleEncryption}>
           {h.pref?.encryptedAt ? <LockOpen /> : <Lock />}
