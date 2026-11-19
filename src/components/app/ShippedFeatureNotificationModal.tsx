@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnnotifiedShippedFeatures, useMarkShippedNotified, CATEGORY_LABELS } from '@/hooks/use-feature-requests';
 import { getShippedFeatureDestination } from '@/lib/feature-shipped-destination';
+import { SHIPPED_POINTS } from '@/lib/top-builders';
 
 export function ShippedFeatureNotificationModal() {
   const { t: _copy } = _useCopy();
@@ -52,6 +53,7 @@ export function ShippedFeatureNotificationModal() {
   };
 
   const isPlural = shippedItems.length > 1;
+  const totalPoints = shippedItems.length * SHIPPED_POINTS;
 
   return (
     <AnimatePresence>
@@ -88,6 +90,14 @@ export function ShippedFeatureNotificationModal() {
             <h2 className="text-white font-bold text-lg mb-1.5">{_copy("copy.8f3dc69e83c4", { defaultValue: "Your feedback shipped!" })}</h2>
             <p className="text-zinc-400 text-sm leading-relaxed mb-4">{isPlural ? _copy("copy.905392fbed15", { defaultValue: "Thanks for helping make Riftn better — {{value1}} things you asked for are now live:", value1: shippedItems.length }) : _copy("copy.2971f9103f78", { defaultValue: "Thanks for helping make Riftn better — something you asked for is now live:" })}</p>
 
+            <div className="mb-4 flex items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3.5 py-3">
+              <span className="text-2xl font-bold tabular-nums text-white">+{totalPoints}</span>
+              <div className="min-w-0">
+                <p className="text-white text-sm font-semibold leading-tight">{_copy("copy.f0c8bb34335b", { defaultValue: "You earned +{{value1}} points", value1: totalPoints })}</p>
+                <p className="text-zinc-400 text-xs leading-snug mt-0.5">{_copy("copy.0fbe06b679a8", { defaultValue: "{{value1}} points for each shipped request, added to your Top builders score.", value1: SHIPPED_POINTS })}</p>
+              </div>
+            </div>
+
             <div className="flex flex-col gap-2 mb-5 max-h-48 overflow-y-auto">
               {shippedItems.map((item) => (
                 <button
@@ -99,6 +109,9 @@ export function ShippedFeatureNotificationModal() {
                   <span className="text-white text-sm font-medium leading-snug flex-1 min-w-0">{item.title}</span>
                   <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg whitespace-nowrap shrink-0 bg-white/10 text-white/60">
                     {CATEGORY_LABELS[item.category]}
+                  </span>
+                  <span className="text-[11px] font-semibold tabular-nums whitespace-nowrap shrink-0 text-white">
+                    {_copy("copy.7f78bdc0762d", { defaultValue: "+{{value1}} pts", value1: SHIPPED_POINTS })}
                   </span>
                   <ArrowUpRight className="h-4 w-4 shrink-0 text-zinc-500 transition-colors group-hover:text-white" aria-hidden="true" />
                 </button>
