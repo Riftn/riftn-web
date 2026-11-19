@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
-import { startCallRingtone, stopCallRingtone } from '@/lib/call-ringtone';
+import { startCallRingback, startCallRingtone, stopCallRingback, stopCallRingtone } from '@/lib/call-ringtone';
 
 const VoiceCallModal = lazy(() => import('./VoiceCallModal'));
 const VideoCallModal = lazy(() => import('./VideoCallModal'));
@@ -11,7 +11,7 @@ const CallMiniPlayer = lazy(() => import('./CallMiniPlayer').then(m => ({ defaul
 
 /** Keep incoming coordination mounted; download call surfaces only for a call. */
 export function CallModalsHost() {
-  const { currentCall, isMinimized, callSummary, isIncoming } = useCall();
+  const { currentCall, isMinimized, callSummary, isIncoming, isRinging } = useCall();
   const { t } = useTranslation();
   const incomingLine = t('calls.incoming', 'Incoming call');
   // Ring for as long as a call is waiting; answering, declining or the caller
@@ -21,6 +21,12 @@ export function CallModalsHost() {
     startCallRingtone(`📞 ${incomingLine}`);
     return stopCallRingtone;
   }, [isIncoming, incomingLine]);
+  // The caller hears a ringback until the other side answers or it gives up.
+  useEffect(() => {
+    if (!isRinging) return;
+    startCallRingback();
+    return stopCallRingback;
+  }, [isRinging]);
   if (!currentCall) return callSummary ? <Suspense fallback={null}><CallEndedScreen /></Suspense> : null;
   return <Suspense fallback={null}>
     {isMinimized ? <CallMiniPlayer /> : currentCall.group_id ? <GroupCallModal /> : currentCall.call_type === 'video' ? <VideoCallModal /> : <VoiceCallModal />}

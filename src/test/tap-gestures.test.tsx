@@ -96,6 +96,41 @@ describe('the tap ladder', () => {
     expect(casts).toEqual([]);
   });
 
+  it('lets a finger double tap navigable text to like it, while a mouse still opens at once', () => {
+    const onSingleTap = vi.fn();
+    const h = mountGesture({ postId: '7', singleTapOnly: true, touchLadder: true, enableLongPress: false, onSingleTap });
+    const finger = (x: number, y: number) => ({ clientX: x, clientY: y, pointerId: 1, pointerType: 'touch' }) as unknown as React.PointerEvent;
+    act(() => { h.current!.onPointerDown(finger(50, 50)); h.current!.onPointerUp(finger(50, 50)); });
+    act(() => void vi.advanceTimersByTime(80));
+    act(() => { h.current!.onPointerDown(finger(52, 51)); h.current!.onPointerUp(finger(52, 51)); });
+    act(() => void vi.advanceTimersByTime(500));
+    expect(onSingleTap).not.toHaveBeenCalled();
+    expect(casts.map((c) => c.reaction ?? 'like')).toEqual(['like']);
+
+    // A single finger tap still opens, after the double-tap window.
+    act(() => { h.current!.onPointerDown(finger(50, 50)); h.current!.onPointerUp(finger(50, 50)); });
+    expect(onSingleTap).not.toHaveBeenCalled();
+    act(() => void vi.advanceTimersByTime(400));
+    expect(onSingleTap).toHaveBeenCalledTimes(1);
+
+    // A mouse click is unchanged: it opens on release.
+    const mouse = { clientX: 50, clientY: 50, pointerId: 2, pointerType: 'mouse', button: 0 } as unknown as React.PointerEvent;
+    act(() => { h.current!.onPointerDown(mouse); h.current!.onPointerUp(mouse); });
+    expect(onSingleTap).toHaveBeenCalledTimes(2);
+  });
+
+  it('lets a finger double tap anywhere on a photo, not only the middle', () => {
+    const onSingleTap = vi.fn();
+    const h = mountGesture({ postId: '8', reactionArea: 'center', onSingleTap });
+    const edge = { clientX: 3, clientY: 3, pointerId: 1, pointerType: 'touch', currentTarget: { getBoundingClientRect: () => ({ left: 0, top: 0, width: 300, height: 300 }) } } as unknown as React.PointerEvent;
+    act(() => { h.current!.onPointerDown(edge); h.current!.onPointerUp(edge); });
+    act(() => void vi.advanceTimersByTime(80));
+    act(() => { h.current!.onPointerDown(edge); h.current!.onPointerUp(edge); });
+    act(() => void vi.advanceTimersByTime(500));
+    expect(onSingleTap).not.toHaveBeenCalled();
+    expect(casts).toHaveLength(1);
+  });
+
   it('keeps scroll, cancel and controls excluded from immediate text opening', () => {
     const onSingleTap = vi.fn();
     const h = mountGesture({ postId: '7', singleTapOnly: true, enableLongPress: false, onSingleTap });

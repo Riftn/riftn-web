@@ -59,3 +59,33 @@ export function stopCallRingtone(): void {
     savedTitle = null;
   }
 }
+
+/**
+ * The soft tone the caller hears while the other side rings, so a call that
+ * is going through doesn't sound like nothing is happening.
+ */
+const RINGBACK_SRC = '/sounds/call-ringback.wav';
+let ringback: HTMLAudioElement | null = null;
+
+export function startCallRingback(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    ringback ??= new Audio(RINGBACK_SRC);
+    ringback.loop = true;
+    ringback.volume = 0.5;
+    ringback.currentTime = 0;
+    void ringback.play().catch(() => undefined);
+  } catch {
+    // A silent ringback never blocks the call.
+  }
+}
+
+export function stopCallRingback(): void {
+  if (!ringback) return;
+  try {
+    ringback.pause();
+    ringback.currentTime = 0;
+  } catch {
+    // Already stopped.
+  }
+}
