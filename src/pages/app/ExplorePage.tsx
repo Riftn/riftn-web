@@ -54,6 +54,7 @@ import {
 } from '@/hooks/use-dehub-search';
 import { useSearchHistory } from '@/hooks/use-search-history';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useStagedCount } from '@/hooks/use-staged-count';
 import { useDeHubUserSearch } from '@/hooks/use-dehub-user-search';
 
 // content-visibility for below-fold result cards — browser skips their
@@ -62,6 +63,10 @@ const OFFSCREEN_RESULT_STYLE: CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: 'auto 320px',
 };
+// A card that is still to be drawn (see useStagedCount) holds its place.
+const PENDING_RESULT_STYLE: CSSProperties = { minHeight: 320 };
+/** Cards drawn with the results themselves; the rest follow without holding the page. */
+const FIRST_RESULT_CARDS = 3;
 import { buildAvatarUrl } from '@/lib/media-url';
 import { getMediaUrl, getCategories, searchNFTs, type DeHubNFT, type DeHubCategory } from '@/lib/api/dehub';
 import { VideoCard } from '@/components/app/cards/VideoCard';
@@ -228,6 +233,7 @@ export default function ExplorePage() {
       }
     });
   }, [categoryBrowseFeed.data]);
+  const categoryCardsDrawn = useStagedCount(categoryFeedItems.length, FIRST_RESULT_CARDS, exploreCategoryId ?? '');
 
   // Infinite scroll for category browse
   const categoryLoaderRef = useRef<HTMLDivElement>(null);
@@ -649,6 +655,10 @@ export default function ExplorePage() {
     });
   }, [searchResults.posts]);
 
+  // The first cards come up with the results; the rest are drawn right after
+  // in slices, so a page of fifteen cards no longer freezes the screen.
+  const resultCardsDrawn = useStagedCount(mappedFeedItems.length, FIRST_RESULT_CARDS, `${effectiveQuery}|${activeTab}`);
+
   const showLoading = isSearchLoading || isUserLoading;
   const showResults = isSearching && !showLoading && (searchResults.users.length > 0 || searchResults.posts.length > 0);
   const showNoResults = isSearching && !showLoading && searchResults.users.length === 0 && searchResults.posts.length === 0;
@@ -942,19 +952,20 @@ export default function ExplorePage() {
                       {mappedFeedItems.map((feedItem, index) => {
                         // Off-screen results skip layout/paint until scrolled
                         // near (same technique as the home feed).
-                        const cvStyle = index < 3 ? undefined : OFFSCREEN_RESULT_STYLE;
+                        const drawn = index < resultCardsDrawn;
+                        const cvStyle = !drawn ? PENDING_RESULT_STYLE : index < 3 ? undefined : OFFSCREEN_RESULT_STYLE;
                         if (feedItem.type === 'video') {
                           const video = feedItem.item as VideoItem;
                           return (
                             <div key={video.id} style={cvStyle}>
-                              <VideoCard video={video} />
+                              {drawn && <VideoCard video={video} />}
                             </div>
                           );
                         } else {
                           const image = feedItem.item as ImagePost;
                           return (
                             <div key={image.id} style={cvStyle}>
-                              <ImageCard post={image} />
+                              {drawn && <ImageCard post={image} />}
                             </div>
                           );
                         }
@@ -1094,13 +1105,14 @@ export default function ExplorePage() {
                   ) : (
                     <div className="space-y-4">
                       {categoryFeedItems.map((feedItem, index) => {
-                        const cvStyle = index < 3 ? undefined : OFFSCREEN_RESULT_STYLE;
+                        const drawn = index < categoryCardsDrawn;
+                        const cvStyle = !drawn ? PENDING_RESULT_STYLE : index < 3 ? undefined : OFFSCREEN_RESULT_STYLE;
                         if (feedItem.type === 'video') {
                           const video = feedItem.item as VideoItem;
-                          return <div key={video.id} style={cvStyle}><VideoCard video={video} /></div>;
+                          return <div key={video.id} style={cvStyle}>{drawn && <VideoCard video={video} />}</div>;
                         } else {
                           const image = feedItem.item as ImagePost;
-                          return <div key={image.id} style={cvStyle}><ImageCard post={image} /></div>;
+                          return <div key={image.id} style={cvStyle}>{drawn && <ImageCard post={image} />}</div>;
                         }
                       })}
                       <div ref={categoryLoaderRef} className="h-10 flex items-center justify-center">
