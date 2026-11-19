@@ -664,11 +664,13 @@ export function useMessages(conversationId: string | null) {
         messagesKeys.messages(conversationId),
         (old: any) => {
           if (!old?.pages) return old;
+          const id = data._id ?? data.messageId;
           const pages = old.pages.map((page: any) => ({
             ...page,
-            items: page.items.map((m: DmMessage) =>
-              m._id === (data._id ?? data.messageId) ? { ...m, isDeleted: true, content: '' } : m
-            ),
+            // Deleted for me: gone from this chat. For everyone: the line says so.
+            items: data.forMe
+              ? page.items.filter((m: DmMessage) => m._id !== id)
+              : page.items.map((m: DmMessage) => (m._id === id ? { ...m, isDeleted: true, content: '' } : m)),
           }));
           return { ...old, pages };
         }

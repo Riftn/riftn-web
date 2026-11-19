@@ -20785,5 +20785,20 @@
     "members": " miembros",
     "placeholder": "Buscar personas, comunidades, páginas...",
     "title": "Mencionar o enlazar"
+  },
+  "msgDelete": {
+    "title": "¿Eliminar mensaje?",
+    "titleMany": "¿Eliminar {{count}} mensajes?",
+    "bodyOwn": "Quítalo solo de tu chat o para todos.",
+    "bodyOwnMany": "Quítalos solo de tu chat o para todos.",
+    "bodyOthers": "Se quitará solo de tu chat. La otra persona lo seguirá viendo.",
+    "bodyOthersMany": "Se quitarán solo de tu chat. Los demás en el chat los seguirán viendo.",
+    "bodyOwnBoth": "Quítalo solo de tu chat o para los dos.",
+    "bodyOwnBothMany": "Quítalos solo de tu chat o para los dos.",
+    "forMe": "Eliminar para mí",
+    "forEveryone": "Eliminar para todos",
+    "forBoth": "Eliminar para los dos",
+    "forMeAndName": "Eliminar para mí y {{name}}",
+    "failed": "No se pudo eliminar el mensaje"
   }
 }

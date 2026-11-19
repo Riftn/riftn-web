@@ -120,6 +120,7 @@ import {
   emitForwardMessage,
   emitEditMessage,
   emitDeleteMessage,
+  emitHideMessage,
   emitSendMessage,
   waitForDmSocket,
   onConversationDeleted,
@@ -128,6 +129,7 @@ import {
   onDmError,
 } from '@/lib/api/dehub/dm-socket';
 import { ForwardMessageDialog } from './ForwardMessageDialog';
+import { DeleteMessageDialog, type DeleteScope } from './DeleteMessageDialog';
 import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
@@ -490,17 +492,14 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick,
   onStartPick,
   onDelete,
-  canDeleteAny = false,
   canPin = true,
   isPinned = false,
   onUnpin,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
-  /** Delete one message for everyone (asks first). Your own, or any in a one-to-one chat. */
+  /** Delete one message (asks first: for me, or for everyone when it is yours). */
   onDelete?: (message: DmMessage) => void;
-  /** One-to-one chat: either person can delete the other's messages too, like Telegram. */
-  canDeleteAny?: boolean;
   /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
   canPin?: boolean;
   isPinned?: boolean;
@@ -777,7 +776,8 @@ const MessageBubble = memo(function MessageBubble({
       menuActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
       holdActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
     }
-    const canDeleteThis = !!onDelete && (isOwnMessage || canDeleteAny);
+    // Every line can be deleted for yourself; your own can also go for everyone.
+    const canDeleteThis = !!onDelete;
     if (canDeleteThis && onDelete) {
       menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
       holdActions.push({ key: 'delete', secondary: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
@@ -2372,28 +2372,33 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   // ─── Picking several messages (Select) ──────────────────────────────────────
   const [confirmPickDelete, setConfirmPickDelete] = useState(false);
-  // Delete from the message menu: one of your own, after a yes.
+  // Delete from the message menu, after picking for me or for everyone.
   const [confirmDeleteOne, setConfirmDeleteOne] = useState<DmMessage | null>(null);
-  const deleteOne = useCallback(async () => {
-    const target = confirmDeleteOne;
-    setConfirmDeleteOne(null);
-    if (!target || !resolvedConversationId) return;
+  /** Take messages out of this chat on screen: gone (for me) or "deleted" (for everyone). */
+  const dropFromThread = useCallback((ids: Set<string>, scope: DeleteScope) => {
+    if (!resolvedConversationId || ids.size === 0) return;
+    queryClient.setQueryData(messagesKeys.messages(resolvedConversationId), (old: any) => {
+      if (!old?.pages) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          items: scope === 'me'
+            ? page.items.filter((m: DmMessage) => !ids.has(m._id))
+            : page.items.map((m: DmMessage) => (ids.has(m._id) ? { ...m, isDeleted: true, content: '' } : m)),
+        })),
+      };
+    });
+  }, [resolvedConversationId, queryClient]);
+  const deleteOne = useCallback(async (target: DmMessage, scope: DeleteScope) => {
+    if (!resolvedConversationId) return;
     try {
-      await emitDeleteMessage(resolvedConversationId, target._id);
-      queryClient.setQueryData(messagesKeys.messages(resolvedConversationId), (old: any) => {
-        if (!old?.pages) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            items: page.items.map((m: DmMessage) => (m._id === target._id ? { ...m, isDeleted: true, content: '' } : m)),
-          })),
-        };
-      });
+      await (scope === 'everyone' ? emitDeleteMessage : emitHideMessage)(resolvedConversationId, target._id);
+      dropFromThread(new Set([target._id]), scope);
     } catch {
       toast.error(_copy('msgMenu.deleteFailed', { defaultValue: 'Could not delete the message' }));
     }
-  }, [confirmDeleteOne, resolvedConversationId, queryClient, _copy]);
+  }, [resolvedConversationId, dropFromThread, _copy]);
   // Phones say "Tap", computers "Click".
   const coarsePointer = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
   const isMineMsg = useCallback((m: DmMessage) => {
@@ -2406,10 +2411,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
     [pickedMsgs, messages],
   );
-  // What Delete removes: your own picks, or in a one-to-one chat any pick (not tips).
-  const pickedOwn = useMemo(
-    () => pickedList.filter((m) => isMineMsg(m) || (!isGroupChat && m.msgType !== 'tip')),
-    [pickedList, isMineMsg, isGroupChat],
+  // Every pick can be deleted for you; only when all of them are yours can
+  // they go for everyone too.
+  const pickedAllOwn = useMemo(
+    () => pickedList.length > 0 && pickedList.every((m) => isMineMsg(m)),
+    [pickedList, isMineMsg],
   );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
   const togglePick = useCallback((m: DmMessage) => {
@@ -2442,30 +2448,20 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       toast.error(_copy('msgSelect.copyFailed', { defaultValue: 'Could not copy' }));
     }
   }, [pickedList, _copy]);
-  const deletePicked = useCallback(async () => {
-    setConfirmPickDelete(false);
-    if (!resolvedConversationId || pickedOwn.length === 0) return;
-    const results = await Promise.allSettled(pickedOwn.map((m) => emitDeleteMessage(resolvedConversationId, m._id)));
-    const gone = new Set(pickedOwn.filter((_, i) => results[i].status === 'fulfilled').map((m) => m._id));
-    if (gone.size) {
-      queryClient.setQueryData(messagesKeys.messages(resolvedConversationId), (old: any) => {
-        if (!old?.pages) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            items: page.items.map((m: DmMessage) => (gone.has(m._id) ? { ...m, isDeleted: true, content: '' } : m)),
-          })),
-        };
-      });
-    }
-    if (gone.size === pickedOwn.length) {
+  const deletePicked = useCallback(async (scope: DeleteScope) => {
+    if (!resolvedConversationId || pickedList.length === 0) return;
+    const forEveryone = scope === 'everyone' && pickedAllOwn;
+    const send = forEveryone ? emitDeleteMessage : emitHideMessage;
+    const results = await Promise.allSettled(pickedList.map((m) => send(resolvedConversationId, m._id)));
+    const gone = new Set(pickedList.filter((_, i) => results[i].status === 'fulfilled').map((m) => m._id));
+    dropFromThread(gone, forEveryone ? 'everyone' : 'me');
+    if (gone.size === pickedList.length) {
       toast.success(_copy('msgSelect.deleted', { defaultValue: 'Deleted {{count}} messages', count: gone.size }));
       setPickedMsgs(null);
     } else {
-      toast.error(_copy('msgSelect.partDeleted', { defaultValue: 'Deleted {{ok}} of {{total}}', ok: gone.size, total: pickedOwn.length }));
+      toast.error(_copy('msgSelect.partDeleted', { defaultValue: 'Deleted {{ok}} of {{total}}', ok: gone.size, total: pickedList.length }));
     }
-  }, [resolvedConversationId, pickedOwn, queryClient, _copy]);
+  }, [resolvedConversationId, pickedList, pickedAllOwn, dropFromThread, _copy]);
 
   // Handle scroll
   const handleScroll = useCallback(() => {
@@ -3209,7 +3205,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onTogglePick={togglePick}
                 onStartPick={startPick}
                 onDelete={setConfirmDeleteOne}
-                canDeleteAny={!isGroupChat}
                 canPin={canPinHere}
                 isPinned={pinnedMessageId === message._id}
                 onUnpin={handleUnpinMessage}
@@ -3269,7 +3264,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       {pickedMsgs !== null && (
         <MessageSelectBar
           count={pickedList.length}
-          ownCount={pickedOwn.length}
+          ownCount={pickedList.length}
           touch={coarsePointer}
           onCopy={() => { void copyPicked(); }}
           onForward={() => setBulkForward(pickedList)}
@@ -3277,34 +3272,23 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           onCancel={() => setPickedMsgs(null)}
         />
       )}
-      <AlertDialog open={!!confirmDeleteOne} onOpenChange={(next) => { if (!next) setConfirmDeleteOne(null); }}>
-        <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">{_copy('msgMenu.deleteOneTitle', { defaultValue: 'Delete this message?' })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{isGroupChat
-              ? _copy('msgMenu.deleteOneBody', { defaultValue: 'It will be removed for everyone in this chat.' })
-              : _copy('msgMenu.deleteForBothBody', { defaultValue: 'It will be removed for both of you.' })}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
-            <AlertDialogAction data-msg-delete-one-confirm onClick={() => { void deleteOne(); }}>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <AlertDialog open={confirmPickDelete} onOpenChange={setConfirmPickDelete}>
-        <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">{_copy('msgSelect.deleteTitle', { defaultValue: 'Delete {{count}} messages?', count: pickedOwn.length })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{isGroupChat
-              ? _copy('msgSelect.deleteBody', { defaultValue: 'They will be removed for everyone in this chat.' })
-              : _copy('msgSelect.deleteForBothBody', { defaultValue: 'They will be removed for both of you.' })}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
-            <AlertDialogAction data-msg-select-delete-confirm onClick={() => { void deletePicked(); }}>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteMessageDialog
+        open={!!confirmDeleteOne}
+        onOpenChange={(next) => { if (!next) setConfirmDeleteOne(null); }}
+        canDeleteForEveryone={!!confirmDeleteOne && isMineMsg(confirmDeleteOne)}
+        oneToOne={!isGroupChat}
+        peerName={isGroupChat ? null : displayName}
+        onDelete={(scope) => { const target = confirmDeleteOne; setConfirmDeleteOne(null); if (target) void deleteOne(target, scope); }}
+      />
+      <DeleteMessageDialog
+        open={confirmPickDelete}
+        onOpenChange={setConfirmPickDelete}
+        count={pickedList.length}
+        canDeleteForEveryone={pickedAllOwn}
+        oneToOne={!isGroupChat}
+        peerName={isGroupChat ? null : displayName}
+        onDelete={(scope) => { void deletePicked(scope); }}
+      />
       {pickedMsgs === null && <ChatInput
         onScheduleClick={canSchedule ? handleScheduleClick : undefined}
         scheduledCount={scheduled.items.length}
