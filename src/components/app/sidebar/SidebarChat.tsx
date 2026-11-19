@@ -742,6 +742,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                     {editingId !== msg.id && !(msg.client_key && msg.send_state === 'failed') && (
                       <div data-sidebar-chat-actions className="pointer-events-none absolute right-0 top-0 z-10 rounded-l-md bg-zinc-900/90 pl-0.5 opacity-0 backdrop-blur-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
                         <MessageMoreButton
+                          plain
                           className="h-5 w-5"
                           onOpen={(point) => { setMenuMsg(msg); menuPoint.openAt(point); }}
                         />
