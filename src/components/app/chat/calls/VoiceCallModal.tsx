@@ -16,6 +16,7 @@ import {
   CallWave,
   usePeerIdentity,
 } from './CallChrome';
+import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 
 const VoiceCallModal: React.FC = () => {
   const {
@@ -95,6 +96,7 @@ const VoiceCallModal: React.FC = () => {
       </div>
 
       <div className="call-stage__foot">
+        {isCallActive ? <CallCaptionsOverlay /> : null}
         {audioNeedsInteraction && (
           <button type="button" className="call-stage__hint" onClick={handleUserInteraction}>
             <Volume2 className="h-4 w-4" />
@@ -128,6 +130,7 @@ const VoiceCallModal: React.FC = () => {
                 active={isMuted}
                 disabled={!isCallActive}
               />
+              {isCallActive ? <CallCaptionsControl /> : null}
               <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
             </CallDock>
           </>

@@ -25,6 +25,18 @@ import { handleCorsPreflight, jsonResponse, serviceClient, guardPaidEndpoint } f
 import { claimDhbPayment, DHB_TREASURY } from '../_shared/dhb-transfer.ts';
 import { signEntitlement } from '../_shared/dub-entitlement.ts';
 import { quotePriceDhb } from '../_shared/ai-pricing.ts';
+import { callRoom, mayTalkInCall } from '../_shared/call-room.ts';
+
+/**
+ * Where a room's tab lives. Stages keep theirs in stage_dub_usage (keyed by the
+ * stage id); calls pass their room name and keep theirs in call_dub_usage.
+ * Same rules, same prices, same payment check.
+ */
+function tabStore(spaceId: string) {
+  return callRoom(spaceId)
+    ? { table: 'call_dub_usage', column: 'room_key', tick: 'call_dub_tick', param: 'p_room' }
+    : { table: 'stage_dub_usage', column: 'space_id', tick: 'stage_dub_tick', param: 'p_space_id' };
+}
 
 const MODEL_ID = 'dub-live';
 const BLOCK_SECONDS = 60;
@@ -45,6 +57,9 @@ function pricePerMinute(): number {
 
 /** Does this stage have the host's own voice to dub in? Display only — it does not move the price. */
 async function hasClonedVoice(stageId: string): Promise<boolean> {
+  // A call has no host; each person is dubbed in their own marked voice if
+  // they have one, so the menu promises the stock voice and may be pleasantly wrong.
+  if (callRoom(stageId)) return false;
   const admin = serviceClient();
   const { data: stage } = await admin
     .from('audio_spaces')
@@ -74,8 +89,16 @@ interface UnsettledTab {
 }
 
 async function unsettled(wallet: string): Promise<UnsettledTab[]> {
-  const { data } = await serviceClient().rpc('stage_dub_unsettled', { p_wallet: wallet });
-  return (data as UnsettledTab[]) ?? [];
+  const admin = serviceClient();
+  const [{ data: stages }, { data: calls }] = await Promise.all([
+    admin.rpc('stage_dub_unsettled', { p_wallet: wallet }),
+    // Calls keep their own tabs. An unpaid call blocks the next dub like an
+    // unpaid stage does. Until the call table exists this just returns nothing.
+    admin.rpc('call_dub_unsettled', { p_wallet: wallet }),
+  ]);
+  const callTabs = ((calls as Array<Omit<UnsettledTab, 'space_id'> & { room_key: string }>) ?? [])
+    .map(({ room_key, ...rest }) => ({ space_id: room_key, ...rest }));
+  return [...((stages as UnsettledTab[]) ?? []), ...callTabs];
 }
 
 async function mintToken(spaceId: string, language: string): Promise<{ token: string; expiresAt: number }> {
@@ -122,6 +145,12 @@ Deno.serve(async (req) => {
       // An unpaid tab has to be cleared first. It is the only real collection
       // lever a pay-after model has, and naming the stage makes settling it
       // one click rather than a mystery.
+      // A stage can be listened to by anyone; a call only by the people on it.
+      const call = callRoom(spaceId);
+      if (call && !(await mayTalkInCall(call, wallet))) {
+        return jsonResponse({ error: 'You are not on this call.' }, 403);
+      }
+
       const open = (await unsettled(wallet)).filter((tab) => tab.space_id !== spaceId);
       if (open.length) {
         return jsonResponse({
@@ -144,8 +173,9 @@ Deno.serve(async (req) => {
       // point — but it is reported as a start failure rather than swallowed.
       let minutes = 0;
       try {
-        const { data, error } = await serviceClient().rpc('stage_dub_tick', {
-          p_space_id: spaceId,
+        const store = tabStore(spaceId);
+        const { data, error } = await serviceClient().rpc(store.tick, {
+          [store.param]: spaceId,
           p_wallet: wallet,
           p_language: language,
           p_price_per_min: perMinute,
@@ -159,7 +189,7 @@ Deno.serve(async (req) => {
         // old one. Falling through leaves the pre-existing behaviour — the tab
         // opens on the first tick — instead of taking dubbing off the air.
         const message = String((e as { message?: string })?.message ?? e);
-        if (!/p_start|does not exist|schema cache/i.test(message)) throw e;
+        if (callRoom(spaceId) || !/p_start|does not exist|schema cache/i.test(message)) throw e;
         console.warn('[dub-session] start could not open the tab; awaiting migration 20260902100000');
       }
 
@@ -179,8 +209,9 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: 'spaceId and a supported language are required' }, 400);
       }
 
-      const { data, error } = await serviceClient().rpc('stage_dub_tick', {
-        p_space_id: spaceId,
+      const store = tabStore(spaceId);
+      const { data, error } = await serviceClient().rpc(store.tick, {
+        [store.param]: spaceId,
         p_wallet: wallet,
         p_language: language,
         p_price_per_min: perMinute,
@@ -209,9 +240,9 @@ Deno.serve(async (req) => {
     if (action === 'bill') {
       if (!spaceId) return jsonResponse({ error: 'spaceId is required' }, 400);
       const { data: tab } = await serviceClient()
-        .from('stage_dub_usage')
+        .from(tabStore(spaceId).table)
         .select('minutes, price_dhb_per_min, settled_at')
-        .eq('space_id', spaceId)
+        .eq(tabStore(spaceId).column, spaceId)
         .ilike('wallet_address', wallet)
         .maybeSingle();
       const minutes = tab?.settled_at ? 0 : Number(tab?.minutes ?? 0);
@@ -229,9 +260,9 @@ Deno.serve(async (req) => {
 
       const admin = serviceClient();
       const { data: tab } = await admin
-        .from('stage_dub_usage')
+        .from(tabStore(spaceId).table)
         .select('minutes, price_dhb_per_min, settled_at')
-        .eq('space_id', spaceId)
+        .eq(tabStore(spaceId).column, spaceId)
         .ilike('wallet_address', wallet)
         .maybeSingle();
 
@@ -243,9 +274,9 @@ Deno.serve(async (req) => {
 
       // Nothing heard, nothing owed — close it without asking for a transfer.
       if (minutes <= 0 || owed <= 0) {
-        await admin.from('stage_dub_usage')
+        await admin.from(tabStore(spaceId).table)
           .update({ settled_at: new Date().toISOString(), settled_ref: 'zero' })
-          .eq('space_id', spaceId).ilike('wallet_address', wallet);
+          .eq(tabStore(spaceId).column, spaceId).ilike('wallet_address', wallet);
         return jsonResponse({ ok: true, minutes: 0, paidDhb: 0 });
       }
 
@@ -259,9 +290,9 @@ Deno.serve(async (req) => {
       // `settled_ref` is unique, so the same transfer cannot close a second
       // tab: a replayed hash collides here rather than paying twice over.
       const { error: closeError } = await admin
-        .from('stage_dub_usage')
+        .from(tabStore(spaceId).table)
         .update({ settled_at: new Date().toISOString(), settled_ref: payment.hash })
-        .eq('space_id', spaceId)
+        .eq(tabStore(spaceId).column, spaceId)
         .ilike('wallet_address', wallet)
         .is('settled_at', null);
 

@@ -205,8 +205,8 @@ export function CallControl({
 }
 
 /** The glass dock the round controls sit in. */
-export function CallDock({ children }: { children: React.ReactNode }) {
-  return <div className="call-dock">{children}</div>;
+export function CallDock({ children, crowded }: { children: React.ReactNode; /** Five controls: tighter on a phone. */ crowded?: boolean }) {
+  return <div className="call-dock" data-crowded={crowded ? 'true' : undefined}>{children}</div>;
 }
 
 /** A wide labelled button: accept, decline, call back. `solid` marks the one to press. */

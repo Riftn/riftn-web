@@ -10,6 +10,7 @@
 // seated speaker generating languages nobody bought. Neither alone is enough.
 import { handleCorsPreflight, jsonResponse, serviceClient, guardPaidEndpoint } from '../_shared/auth.ts';
 import { verifyEntitlement } from '../_shared/dub-entitlement.ts';
+import { callRoom, mayTalkInCall } from '../_shared/call-room.ts';
 
 const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY') ?? '';
 
@@ -164,7 +165,9 @@ Deno.serve(async (req) => {
     });
     if (!guard.ok) return guard.response;
 
-    if (!(await maySpeak(spaceId, guard.wallet))) {
+    // A call passes its room name here; see _shared/call-room.ts.
+    const call = callRoom(spaceId);
+    if (!(call ? await mayTalkInCall(call, guard.wallet) : await maySpeak(spaceId, guard.wallet))) {
       return jsonResponse({ error: 'Not entitled to dub this stage.' }, 403);
     }
 

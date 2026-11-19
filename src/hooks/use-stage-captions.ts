@@ -115,6 +115,14 @@ export interface CaptionPublisherOptions {
   name: string;
   /** The pre-effects microphone stream, straight from getUserMedia. */
   getRawStream: () => MediaStream | null;
+  /**
+   * Transcribe only while somebody else in the room is reading. A call sets
+   * this: it is private, so nobody's voice goes to the transcriber unless
+   * another person on the call switched subtitles on. `selfWatching` says
+   * whether this browser is one of the readers, so it is not counted.
+   */
+  onlyWhenWatched?: boolean;
+  selfWatching?: boolean;
 }
 
 export interface CaptionPublisher {
@@ -127,8 +135,10 @@ export interface CaptionPublisher {
 }
 
 export function useStageCaptionPublisher(options: CaptionPublisherOptions): CaptionPublisher {
-  const { spaceId, isSpeaker, isMuted, wallet, name, getRawStream } = options;
+  const { spaceId, isSpeaker, isMuted, wallet, name, getRawStream, onlyWhenWatched = false, selfWatching = false } = options;
   const sendCaptions = useSendCaptions();
+  /** Readers on the caption channel, this browser included if it reads. */
+  const [readers, setReaders] = useState(0);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const identityRef = useRef({ wallet, name });
@@ -188,6 +198,11 @@ export function useStageCaptionPublisher(options: CaptionPublisherOptions): Capt
           }
           dubTokensRef.current = tokens;
           activeLanguagesRef.current = [...languages];
+          let readerCount = 0;
+          for (const entries of Object.values(state)) {
+            if (entries.some((entry) => typeof entry.lang === 'string')) readerCount += 1;
+          }
+          setReaders(readerCount);
         },
       }],
     });
@@ -207,6 +222,7 @@ export function useStageCaptionPublisher(options: CaptionPublisherOptions): Capt
       lease.release();
       channelRef.current = null;
       activeLanguagesRef.current = [];
+      setReaders(0);
     };
   }, [spaceId, isSpeaker]);
 
@@ -378,7 +394,8 @@ export function useStageCaptionPublisher(options: CaptionPublisherOptions): Capt
   // track that Agora publishes, not the raw getUserMedia stream this reads —
   // so without this gate a muted speaker would keep being transcribed to the
   // whole room, which is the one behaviour a mute button must never have.
-  const active = !!spaceId && isSpeaker && sendCaptions && !isMuted && !!wallet;
+  const watched = !onlyWhenWatched || readers - (selfWatching ? 1 : 0) > 0;
+  const active = !!spaceId && isSpeaker && sendCaptions && !isMuted && !!wallet && watched;
 
   useEffect(() => {
     if (!active || !spaceId || !wallet) return;
@@ -697,6 +714,11 @@ function toLine(message: StageCaptionMessage, wallet: string): StageCaptionLine 
 export function useStageCaptionFeed(
   spaceId: string | undefined | null,
   enabled: boolean,
+  /**
+   * Who may be captioned, when the room is not a stage. A call passes its own
+   * people here; a stage leaves it out and the roster comes from its seats.
+   */
+  speakers?: string[] | null,
 ): StageCaptionLine[] {
   const [lines, setLines] = useState<StageCaptionLine[]>([]);
   const language = useCaptionLanguage();
@@ -707,9 +729,14 @@ export function useStageCaptionFeed(
   const languageRef = useRef(language);
   languageRef.current = language;
 
+  const speakersKey = speakers ? speakers.map((w) => w.toLowerCase()).sort().join(',') : null;
   const refreshRoster = useCallback(async () => {
     if (!spaceId) return;
     lastRosterFetchRef.current = Date.now();
+    if (speakersKey !== null) {
+      allowedRef.current = new Set(speakersKey ? speakersKey.split(',') : []);
+      return;
+    }
     const [{ data: seats }, { data: stage }] = await Promise.all([
       supabase
         .from('space_participants')
@@ -726,7 +753,7 @@ export function useStageCaptionFeed(
     }
     if (stage?.host_wallet_address) next.add(String(stage.host_wallet_address).toLowerCase());
     allowedRef.current = next;
-  }, [spaceId]);
+  }, [spaceId, speakersKey]);
 
   useEffect(() => {
     if (!spaceId || !enabled) {
@@ -814,6 +841,10 @@ export function useStageCaptionFeed(
       clearInterval(sweeper);
       unsubscribeCaption();
       unsubscribeTranslation();
+      // Leave presence before letting go: on a call the speakers' clients only
+      // transcribe while someone is reading, and a shared channel would
+      // otherwise keep this reader counted after subtitles were turned off.
+      void lease.channel.untrack().catch(() => { /* already gone */ });
       lease.release();
       channelRef.current = null;
       setLines([]);

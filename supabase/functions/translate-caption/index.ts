@@ -27,6 +27,7 @@ import {
   serviceClient,
 } from "../_shared/auth.ts";
 import { aiChat } from "../_shared/ai-chat.ts";
+import { callRoom, mayTalkInCall } from "../_shared/call-room.ts";
 
 /**
  * Languages the picker offers. An allowlist rather than free text: the code
@@ -219,7 +220,9 @@ Deno.serve(async (req) => {
     });
     if (!guard.ok) return guard.response;
 
-    if (!(await maySpeak(spaceId, guard.wallet))) {
+    // A call passes its room name here; see _shared/call-room.ts.
+    const call = callRoom(spaceId);
+    if (!(call ? await mayTalkInCall(call, guard.wallet) : await maySpeak(spaceId, guard.wallet))) {
       return jsonResponse({ error: "Not entitled to caption this stage." }, 403);
     }
 

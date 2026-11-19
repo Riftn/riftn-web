@@ -2994,6 +2994,11 @@ export function StageProvider({ children }: { children: ReactNode }) {
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
+/** The stage, or null outside a StageProvider (a call's subtitles reuse stage hooks). */
+export function useOptionalStage() {
+  return useContext(StageContext);
+}
+
 export function useStage() {
   const ctx = useContext(StageContext);
   if (!ctx) throw new Error('useStage must be used within a StageProvider');
