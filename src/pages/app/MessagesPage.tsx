@@ -1366,7 +1366,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </ChatIconButton>
         </>
       )}
-      actions={<ChatTextSizeButton className="rounded-full" />}
+      actions={<ChatTextSizeButton className="rounded-full transition-[color,transform] duration-150 hover:scale-110 hover:bg-transparent" />}
     />
   ) : null;
 
