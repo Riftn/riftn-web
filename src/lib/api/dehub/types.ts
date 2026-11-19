@@ -20,8 +20,12 @@ export type QuotePolicy = 'public' | 'followers' | 'nobody';
 /** Who may reply to a post (dehub-stream-backend src/reaction/reply-policy). Absent means anyone. */
 export type ReplyPolicy = 'public' | 'followers' | 'following' | 'mentioned';
 
-/** Who may see a post (dehub-stream-backend common/util/post-visibility). Absent means everyone. */
-export type PostVisibility = 'public' | 'followers' | 'direct';
+/**
+ * Who may see a post (riftn-backend common/util/post-visibility). Absent means everyone.
+ * 'self' ("Only me") is only ever sent when making a post: the server stores it
+ * as a direct post that names nobody, so it reads back as 'direct'.
+ */
+export type PostVisibility = 'public' | 'followers' | 'direct' | 'self';
 
 // Types based on Riftn API response (supports both API field naming conventions)
 export interface DeHubUser {

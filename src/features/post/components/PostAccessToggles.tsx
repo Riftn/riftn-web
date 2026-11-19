@@ -745,6 +745,8 @@ export function PostAccessToggles({
             options={[
               { value: 'followers', label: t('postVisibility.followers') },
               { value: 'direct', label: t('postVisibility.direct') },
+              // Only the author can read it. Same words as the quote setting's "Only me".
+              { value: 'self', label: t('quotePolicy.nobody') },
             ]}
             onChange={(v) => setVisibility(v as PostVisibility)}
             hint={visibility === 'direct' ? t('postVisibility.directHint') : undefined}
