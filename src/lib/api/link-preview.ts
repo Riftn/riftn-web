@@ -31,6 +31,19 @@ export function getLinkPreviewFavicon(url: string): string | null {
   }
 }
 
+const NAMED_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+
+/** Meta tag values arrive HTML-escaped ("Riftn&#39;s"); cards show plain text. */
+export function decodeHtmlEntities(text: string): string {
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, code: string) => {
+    if (code[0] === '#') {
+      const n = code[1] === 'x' || code[1] === 'X' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isFinite(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : m;
+    }
+    return NAMED_ENTITIES[code.toLowerCase()] ?? m;
+  });
+}
+
 function compactPreview(url: string): LinkPreviewData {
   let domain = url;
   try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch { /* keep the supplied link */ }
@@ -191,12 +204,12 @@ async function crawlLinkPreview(url: string, refresh: boolean): Promise<LinkPrev
 
     const preview: LinkPreviewData = {
       url,
-      title: data.title || compactPreview(url).title,
-      description: data.description || '',
+      title: decodeHtmlEntities(data.title || '') || compactPreview(url).title,
+      description: decodeHtmlEntities(data.description || ''),
       // The preview endpoint can return an HTML-escaped OG URL. Its query
       // parameters must be decoded before the image renderer receives them.
       image: refresh ? markRefreshedImage(getLinkPreviewImage(url, data.image), Date.now()) : getLinkPreviewImage(url, data.image),
-      siteName: data.siteName || compactPreview(url).siteName,
+      siteName: decodeHtmlEntities(data.siteName || '') || compactPreview(url).siteName,
     };
 
     // Cache the result
