@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppSidebar } from '@/components/app/AppSidebar';
@@ -49,27 +49,32 @@ beforeEach(() => {
   // Every page on one screen; the tabs layout has its own test below.
   localStorage.setItem('menu-layout', 'sections');
 });
-const mount = () => render(<MemoryRouter initialEntries={['/app']}><Harness /></MemoryRouter>);
+// The menu's tiles load on demand (React.lazy): wait for them to land.
+const mount = async () => {
+  const view = render(<MemoryRouter initialEntries={['/app']}><Harness /></MemoryRouter>);
+  await waitFor(() => expect(document.querySelector('[data-menu-layout]')).not.toBeNull());
+  return view;
+};
 
 describe('mobile menu dismissal', () => {
-  it('shows the combined direct and public chat unread count on Messages', () => {
+  it('shows the combined direct and public chat unread count on Messages', async () => {
     counts.dm = 2;
     counts.publicChat = 3;
-    mount();
+    await mount();
     const messages = screen.getByText('settings.chat').closest('a');
     expect(messages?.querySelector('[data-menu-badge]')?.textContent).toBe('5');
   });
 
-  it.each(NAV_ITEMS.filter(item => !item.external && !item.action && item.label !== 'Home').map(item => [NAV_LABEL_KEYS[item.label] || item.label, item.path]))('opens %s and closes the menu', (label, path) => {
-    mount();
+  it.each(NAV_ITEMS.filter(item => !item.external && !item.action && item.label !== 'Home').map(item => [NAV_LABEL_KEYS[item.label] || item.label, item.path]))('opens %s and closes the menu', async (label, path) => {
+    await mount();
     fireEvent.click(screen.getByText(label));
     expect(screen.getByTestId('path').textContent).toBe(path);
     expect(screen.queryByTestId('menu')).toBeNull();
   });
 
-  it('opens on the Main tab by default and switches groups', () => {
+  it('opens on the Main tab by default and switches groups', async () => {
     localStorage.removeItem('menu-layout');
-    mount();
+    await mount();
     expect(screen.getByText('nav.profile')).toBeTruthy();
     expect(screen.queryByText('nav.dao')).toBeNull();
     fireEvent.click(screen.getByText('nav.groups.riftn'));
@@ -77,9 +82,21 @@ describe('mobile menu dismissal', () => {
     expect(screen.queryByText('nav.profile')).toBeNull();
   });
 
-  it('turns the tab row into the search field and back', () => {
+  it('moves to the next group with a sideways swipe on the tiles', async () => {
     localStorage.removeItem('menu-layout');
-    mount();
+    await mount();
+    const pager = document.querySelector('[data-menu-pager]')!;
+    const at = (x: number) => ({ touches: [{ clientX: x, clientY: 300 }], changedTouches: [{ clientX: x, clientY: 300 }] });
+    fireEvent.touchStart(pager, at(300));
+    fireEvent.touchMove(pager, at(260));
+    fireEvent.touchMove(pager, at(120));
+    fireEvent.touchEnd(pager, at(120));
+    expect(screen.getByRole('tab', { name: 'nav.groups.create' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('turns the tab row into the search field and back', async () => {
+    localStorage.removeItem('menu-layout');
+    await mount();
     fireEvent.click(screen.getByRole('button', { name: 'sidebar.searchMenu' }));
     const field = screen.getByRole('textbox', { name: 'sidebar.searchMenu' });
     fireEvent.change(field, { target: { value: 'dao' } });
@@ -89,14 +106,14 @@ describe('mobile menu dismissal', () => {
     expect(screen.getByText('nav.groups.main')).toBeTruthy();
   });
 
-  it('keeps repeated close requests closed', () => {
-    mount();
+  it('keeps repeated close requests closed', async () => {
+    await mount();
     fireEvent.click(screen.getByText('Dismiss twice'));
     expect(screen.queryByTestId('menu')).toBeNull();
   });
 
   it('closes the menu when opening the composer', async () => {
-    mount();
+    await mount();
     fireEvent.click(screen.getByRole('button', { name: 'sidebar.post' }));
     expect(screen.queryByTestId('menu')).toBeNull();
     expect(await screen.findByText('Composer open')).toBeTruthy();
