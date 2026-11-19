@@ -48,7 +48,10 @@ import { join } from 'node:path';
 
 const DIST = 'dist';
 const ASSETS = join(DIST, 'assets');
-const ENTRY_SIZE_CEILING = 2.2 * 1024 * 1024; // raw bytes, pre-gzip
+// 19 Nov 2026: entry 2,254 KB after ordinary chat and grid merges tipped the
+// 2.2 MB line and failed every deploy behind them. Raised to 2.5 MB; a wallet
+// merge still roughly doubles the entry and trips it.
+const ENTRY_SIZE_CEILING = 2.5 * 1024 * 1024; // raw bytes, pre-gzip
 
 // Boot-path ceilings, raw bytes. Set roughly 10-20% above the latest
 // measurement so ordinary feature work doesn't trip them, while a new heavy
