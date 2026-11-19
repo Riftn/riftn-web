@@ -1,3 +1,7 @@
+import Cutphoto from '@/components/ui/cut-icons/images';
+import Cutvideo from '@/components/ui/cut-icons/video';
+import Cutshort from '@/components/ui/cut-icons/shorts';
+import Cuttext from '@/components/ui/cut-icons/messages';
 /**
  * FormatMark
  * ==========
@@ -22,17 +26,7 @@ import type { GridCardKind } from '@/lib/grid-card';
 export type FormatKind = GridCardKind | 'photo' | 'photos' | 'video' | 'replay' | 'audio' | 'article' | 'text';
 
 /** Each glyph: the shape that takes the duotone wash, then the lines on top. */
-const GLYPHS: Record<FormatKind, { wash?: ReactNode; lines: ReactNode }> = {
-  photo: {
-    wash: <path d="M7 17.5l3.6-4.2 2.7 2.7 1.9-1.9 2.8 3.4z" />,
-    lines: (
-      <>
-        <path d="M3 8V5.5A2.5 2.5 0 0 1 5.5 3H8M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8M21 16v2.5a2.5 2.5 0 0 1-2.5 2.5H16M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16" />
-        <circle cx="9.3" cy="8.8" r="1.5" />
-        <path d="M7 17.5l3.6-4.2 2.7 2.7 1.9-1.9 2.8 3.4" />
-      </>
-    ),
-  },
+const GLYPHS: Record<Exclude<FormatKind, 'photo' | 'video' | 'short' | 'text'>, { wash?: ReactNode; lines: ReactNode }> = {
   photos: {
     wash: <rect x="3" y="7" width="14" height="14" rx="3" />,
     lines: (
@@ -40,26 +34,6 @@ const GLYPHS: Record<FormatKind, { wash?: ReactNode; lines: ReactNode }> = {
         <path d="M7.5 3H18a3 3 0 0 1 3 3v10.5" />
         <rect x="3" y="7" width="14" height="14" rx="3" />
         <path d="M6 18l3.2-3.4 2.3 2.3 1.4-1.4 1.6 2.5" />
-      </>
-    ),
-  },
-  video: {
-    wash: <rect x="2.5" y="4.5" width="19" height="15" rx="4" />,
-    lines: (
-      <>
-        <rect x="2.5" y="4.5" width="19" height="15" rx="4" />
-        <path d="M10.2 8.6v4.8l4-2.4z" fill="currentColor" />
-        <path d="M6.5 16.3h3.5" />
-      </>
-    ),
-  },
-  short: {
-    wash: <rect x="6" y="2.5" width="12" height="19" rx="3.5" />,
-    lines: (
-      <>
-        <rect x="6" y="2.5" width="12" height="19" rx="3.5" />
-        <path d="M10.6 10.3v4.4l3.6-2.2z" fill="currentColor" />
-        <path d="M10.3 6.4L12 5.2l1.7 1.2" />
       </>
     ),
   },
@@ -93,23 +67,8 @@ const GLYPHS: Record<FormatKind, { wash?: ReactNode; lines: ReactNode }> = {
       </>
     ),
   },
-  text: {
-    wash: <path d="M6.5 3.5h11a3 3 0 0 1 3 3V14a3 3 0 0 1-3 3H11.5L7 20.8V17h-.5a3 3 0 0 1-3-3V6.5a3 3 0 0 1 3-3z" />,
-    lines: (
-      <>
-        <path d="M6.5 3.5h11a3 3 0 0 1 3 3V14a3 3 0 0 1-3 3H11.5L7 20.8V17h-.5a3 3 0 0 1-3-3V6.5a3 3 0 0 1 3-3z" />
-        <path d="M8.6 7.8h6.8M12 7.8v5.4" />
-      </>
-    ),
-  },
   comic: {
-    wash: <path d="M12 3h6a3 3 0 0 1 3 3v5h-9z" />,
-    lines: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="3" />
-        <path d="M12 3v8M3 11h18M14.5 11l-2.8 10" />
-      </>
-    ),
+    lines: <path d="M3 3h13q5 0 5 5v13H8q-5 0-5-5ZM14 3l-5 18" strokeLinejoin="miter" />,
   },
   earn: {
     wash: <circle cx="10.5" cy="13.5" r="7.5" />,
@@ -284,6 +243,10 @@ const LABEL: Record<FormatKind, [string, string]> = {
 /** Just the glyph, for places that draw their own frame. */
 export function FormatGlyph({ kind, className }: { kind: FormatKind; className?: string }) {
   if (kind === 'spotify') return <SpotifyLogo className={className} />;
+  if (kind === 'photo' || kind === 'video' || kind === 'short' || kind === 'text') {
+    const Glyph = { photo: Cutphoto, video: Cutvideo, short: Cutshort, text: Cuttext }[kind];
+    return <Glyph className={className} />;
+  }
   const { wash, lines } = GLYPHS[kind];
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
