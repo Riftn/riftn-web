@@ -6,7 +6,11 @@
     "videoSize": "Fídíò yìí ju {{n}} MB lọ. Yan èyí tí ó kéré."
   },
   "textFeed": {
-    "tab": "Ọ̀rọ̀"
+    "tab": "Ọ̀rọ̀",
+    "errorTitle": "Àwọn ìfiweránṣẹ́ kò lè ṣí",
+    "errorBody": "Gbìyànjú láti tún ṣí àkójọ ìfiweránṣẹ́ ọ̀rọ̀.",
+    "emptyTitle": "Kò sí ìfiweránṣẹ́ ọ̀rọ̀ síbẹ̀",
+    "emptyBody": "Àwọn ìfiweránṣẹ́ ọ̀rọ̀ yóò hàn níbí."
   },
   "comic": {
     "showAll": "Fi gbogbo ojú ìwé {{count}} hàn"
@@ -29,16 +33,61 @@
     "policyFollowers": "Àwọn olùtẹ̀lé",
     "policyNobody": "Kò sí ẹnìkan",
     "loadMore": "Rù síi",
-    "video": "Fídíò"
+    "video": "Fídíò",
+    "with": "Duet pẹ̀lú @{{username}}",
+    "withOriginal": "Duet · wo ti àkọ́kọ́",
+    "unavailable": "Fídíò yìí kò sí fún duet mọ́.",
+    "allowLabel": "Gba duet láàyè",
+    "allowDescription": "Ta ló lè ká duet sí ẹ̀gbẹ́ àwọn fídíò rẹ. O tún lè yí i padà lórí ìfiweránṣẹ́ kọ̀ọ̀kan.",
+    "settingsSection": "Duet",
+    "policyDefault": "Ètò àkọọ́lẹ̀",
+    "saveFailed": "Kò lè fi pamọ́. Gbìyànjú lẹ́ẹ̀kan si.",
+    "count_one": "Duet {{count}}",
+    "count_other": "Duet {{count}}",
+    "pageHeading": "Duet",
+    "pageTitle": "Àwọn duet ti {{title}} láti ọwọ́ @{{creator}}",
+    "pageTitleNoCreator": "Àwọn duet ti {{title}}",
+    "pageDescription": "Wo gbogbo duet fídíò yìí lórí Riftn, tàbí ká tìrẹ sí ẹ̀gbẹ́ rẹ̀.",
+    "empty": "Kò sí duet síbẹ̀. Ṣí àwọn àṣàyàn fídíò náà kí o sì yan Remix → Duet láti ṣe àkọ́kọ́.",
+    "notFound": "Fídíò yìí kò sí.",
+    "browseShorts": "Wo àwọn Fídíò kúkúrú"
   },
   "videoRemix": {
-    "sound": "Lo ohun yii"
+    "sound": "Lo ohun yii",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Ìbòjú àwọ̀ ewé",
+    "stitch": "Stitch",
+    "selectSource": "Ṣí àwọn àṣàyàn fídíò kan kí o sì yan Remix láti bẹ̀rẹ̀."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Gbogbo ènìyàn",
       "followers": "Àwọn olùtẹ̀lé",
-      "nobody": "Kò sí ẹnìkan"
+      "nobody": "Kò sí ẹnìkan",
+      "default": "Ètò mi"
+    },
+    "shareFailed": "A ti fi ẹ̀bùn rẹ ránṣẹ́, ṣùgbọ́n ìpín olùdá àkọ́kọ́ kò lọ.",
+    "notify": {
+      "duet": "{{name}} ṣe duet pẹ̀lú fídíò rẹ",
+      "stitch": "{{name}} ṣe stitch fídíò rẹ",
+      "react": "{{name}} fèsì sí fídíò rẹ",
+      "reactLive": "{{name}} ń fèsì sí fídíò rẹ lásìkò"
+    },
+    "linkFailed": "Ìfiweránṣẹ́ rẹ ti jáde, ṣùgbọ́n a kò lè so ó mọ́ fídíò àkọ́kọ́.",
+    "settingsHeading": "Àwọn Remix",
+    "stitch": {
+      "allow": "Gba stitch láàyè",
+      "allowDesc": "Ta ló lè lo tó ìṣẹ́jú-àáyá 5 nínú àwọn fídíò rẹ nínú tiwọn. O tún lè yí i padà fún ìfiweránṣẹ́ kọ̀ọ̀kan.",
+      "saveFailed": "Kò lè fi ètò stitch rẹ pamọ́. Gbìyànjú lẹ́ẹ̀kan si.",
+      "settingFailed": "Ìfiweránṣẹ́ rẹ ti jáde, ṣùgbọ́n a kò fi ètò stitch rẹ̀ pamọ́. Yí i padà láti Ṣàtúnṣe ìfiweránṣẹ́.",
+      "from": "Stitch láti ọ̀dọ̀ {{name}}",
+      "count_one": "Stitch {{count}}",
+      "count_other": "Stitch {{count}}",
+      "listTitle": "Àwọn Stitch",
+      "listFailed": "Kò lè ṣí àwọn stitch. Gbìyànjú lẹ́ẹ̀kan si.",
+      "listEmpty": "Kò sí stitch síbẹ̀.",
+      "unavailable": "Fídíò yìí kò sí fún stitch mọ́."
     }
   },
   "dehubAppPage": {
@@ -64,7 +113,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Ṣí Riftn nínú aṣàwárí rẹ",
     "seoDescription": "Gba àpẹẹrẹ Riftn: àwùjọ oníṣe tí ó jẹ́ open-source, pẹ̀lú ìgbóhùnsáfẹ́fẹ́ láàyè, ìránṣẹ́ tí a fi àmì ìpamọ́ ṣọ́, àti ètò wò-kí-o-jẹ. Ó ọ̀fẹ́ lórí Google Play, App Store àti wẹ́ẹ̀bù.",
-    "seoTitle": "Riftn App | Ṣe àgbékalẹ̀ fún Android, iPhone & Wẹ́ẹ̀bù"
+    "seoTitle": "Riftn App | Ṣe àgbékalẹ̀ fún Android, iPhone & Wẹ́ẹ̀bù",
+    "learnMore": "Ṣé o fẹ́ ìmọ̀ kíkún? <guide>Kí ni Riftn?</guide> ṣàlàyé pẹpẹ náà ní kíkún."
   },
   "dehubLinks": {
     "copyLinkDetail": "Ṣàdàkọ ọ̀nà àsopọ̀ {{item}} sí pátákó àdàkọ rẹ",
@@ -82,12 +132,15 @@
       "proposal": "àbá",
       "stage": "ìpele",
       "store": "ilé-ìtajà",
-      "featureRequest": "ìbéèrè"
+      "featureRequest": "ìbéèrè",
+      "page": "ojú-ìwé"
     },
     "recipientChat": "ìjíròrò",
     "recipientUser": "oníṣe",
     "sendFailed": "Ìkùnà láti fi {{item}} ránṣẹ́",
-    "sentTo": "{{item}} ni a fi ránṣẹ́ sí {{name}}"
+    "sentTo": "{{item}} ni a fi ránṣẹ́ sí {{name}}",
+    "openPage": "Ṣí ojú-ìwé",
+    "viewRequest": "Wo ìbéèrè"
   },
   "stageCover": {
     "admitOne": "Gba ọkan",
@@ -196,7 +249,24 @@
   "signedFollows": {
     "setUp": "Tan an",
     "turnOff": "Pa á",
-    "efpTurnOff": "Duro"
+    "efpTurnOff": "Duro",
+    "title": "Àwọn tí o ń tẹ̀lé, lórí chain",
+    "description": "Àpò owó rẹ ń fọwọ́ sí àwọn tí o ń tẹ̀lé, a sì ń tẹ àkójọ náà sórí Base lójoojúmọ́. Ohun èlò èyíkéyìí lè rí àwọn tí o ń tẹ̀lé láti inú àpò owó rẹ, kódà láìsí Riftn.",
+    "on": "Ó wà ní títàn fún ẹ̀rọ yìí",
+    "off": "Ó wà ní pípa fún ẹ̀rọ yìí",
+    "turnedOn": "Àpò owó rẹ ti ń fọwọ́ sí àwọn tí o ń tẹ̀lé báyìí",
+    "turnedOff": "A ti pa á fún ẹ̀rọ yìí",
+    "failed": "Àpò owó rẹ kò fọwọ́ sí i. Gbìyànjú lẹ́ẹ̀kan si.",
+    "hiddenNote": "A kò fi àwọn àkójọ ìtẹ̀lé tí a fi pamọ́ àti àwọn àkọọ́lẹ̀ àdáni sínú àkójọ gbangba.",
+    "efpOn": "A ti dà á kọ sí EFP · ìtẹ̀lé {{count}}",
+    "efpOff": "Fi wọ́n sí EFP pẹ̀lú",
+    "efpTurnOn": "Fi kún EFP",
+    "efpDone": "Àwọn tí o ń tẹ̀lé ń lọ sórí EFP",
+    "efpStopped": "A ti dá ìdàkọ EFP dúró. Àkójọ náà ṣì jẹ́ tìrẹ.",
+    "efpHasList": "O ti ní àkójọ EFP kan tẹ́lẹ̀. Riftn kò lè kún èyí náà síbẹ̀.",
+    "efpNoGas": "Àpò owó rẹ nílò ETH díẹ̀ lórí Base fún èyí.",
+    "efpFailed": "Ìyẹn kò lọ. Gbìyànjú lẹ́ẹ̀kan si.",
+    "efpNote": "EFP jẹ́ àkójọ ìtẹ̀lé tí àwọn ohun èlò mìíràn ń kà (efp.app). Ó jẹ́ ọ̀fẹ́ pẹ̀lú àpò owó Riftn rẹ; àwọn àpò owó mìíràn ń san sẹ́ǹtì díẹ̀ lórí Base. Àkójọ náà jẹ́ tìrẹ."
   },
   "profileFields": {
     "title": "Àwọn pápá profaili",
@@ -374,7 +444,8 @@
     "step": "Fún ìdarí àkáǹtì, fi https://riftn.com/mcp kún un gẹ́gẹ́ bí ìsopọ̀ OAuth, wọlé sí Riftn kí o sì ṣe àtúnyẹ̀wò àwọn ìyọ̀ǹda náà kí o tó gbà á láyè láti wọlé.",
     "profilePrompt": "Ṣe àmúyẹ fun gbígbọ́ orin ko le ṣiṣẹ lori ẹ̀rọ rẹ Àkọlé fídíò",
     "generatePrompt": "Fi àwọn àwòṣe àwòrán Riftn hàn mí kí o sì fa àwòrán yọ kí o tó ṣe é.",
-    "libraryPrompt": "Fi àwọn ohun ìní tuntun hàn nínú ilé ìkówèésí Riftn Creator mi."
+    "libraryPrompt": "Fi àwọn ohun ìní tuntun hàn nínú ilé ìkówèésí Riftn Creator mi.",
+    "agents": "Fi ránṣẹ́, fèsì, fi ìfẹ́ hàn, tún fi ránṣẹ́, tẹ̀lé kí o sì ṣàtúnṣe àkọsílẹ̀ gẹ́gẹ́ bí àwọn aṣojú tí o ní"
   },
   "twitchMirror": {
     "title": "Àtúnṣàfihàn Twitch",
@@ -523,7 +594,71 @@
     "affiliate": "Alábàáṣiṣẹ́",
     "groups": {
       "create": "Ṣẹ̀dá",
-      "discover": "Ṣàwárí"
+      "discover": "Ṣàwárí",
+      "main": "Àkọ́kọ́",
+      "money": "Owó",
+      "riftn": "Riftn"
+    },
+    "findWords": {
+      "home": "àkójọ, ìlà àkókò, ìfiweránṣẹ́ tuntun, fún ọ, ń tẹ̀lé, ojú-ìwé àkọ́kọ́, feed",
+      "profile": "àkọsílẹ̀ mi, àkọọ́lẹ̀ mi, ojú-ìwé mi, ìfiweránṣẹ́ mi, àwòrán, ìtàn ara, olùtẹ̀lé, profile",
+      "explore": "wá, ṣàwárí, rí, gbajúmọ̀, olókìkí, hashtag, ènìyàn, olùdá",
+      "prompt": "AI, ṣẹ̀dá, àwòrán AI, fídíò AI, ẹlẹ́dàá àwòrán, ọ̀rọ̀ sí àwòrán, iṣẹ́ ọnà AI",
+      "editor": "olóòtú fídíò, ṣàtúnṣe fídíò, gé, gé kúrú, àkọlé, atúmọ̀ ọ̀rọ̀, ipa",
+      "creator": "ṣẹ̀dá, studio, irinṣẹ́ AI, àwòrán, fídíò, orin, ohùn, 3D",
+      "converter": "gbé fídíò wọlé, gbà sílẹ̀, YouTube, TikTok, Instagram, yí padà",
+      "migrate": "gbé ikanni mi, gbé ikanni wọlé, gbé púpọ̀ wọlé, ikanni YouTube",
+      "notifications": "ìkìlọ̀, ìṣe, ìdárúkọ, ìdáhùn, ìfẹ́ràn, agogo",
+      "messages": "DM, ìfiránṣẹ́ tààrà, ìbánisọ̀rọ̀, àpótí ìfiránṣẹ́, ìjíròrò, ìfiránṣẹ́ àdáni",
+      "communities": "ẹgbẹ́, àwùjọ, yàrá, kọ́ọ̀bù, àpéjọ, ọmọ ẹgbẹ́",
+      "assistant": "AI, chatbot, béèrè, ìrànlọ́wọ́, ìbánisọ̀rọ̀ AI, ìbéèrè",
+      "settings": "ìfẹ́, àkọọ́lẹ̀, àṣírí, ààbò, ọ̀rọ̀ aṣínà, èdè, àwọ̀, ipò òkùnkùn, dínà, pa àkọọ́lẹ̀ rẹ́",
+      "leaderboard": "ipò, ìpele, olùdá tó ga jù, olùlò tó ga jù, àmì, ìdíyelé",
+      "bookmarks": "tí a fi pamọ́, àyànfẹ́, wò ó lẹ́yìn, kà á lẹ́yìn, ìfiweránṣẹ́ tí a fi pamọ́, ibi ìkówèésí",
+      "command": "dashboard, ìtúpalẹ̀, èrè, owó tó ń wọlé, ìmọ̀, ìṣàkóso, ìṣirò mi",
+      "wallet": "ìwọ̀ntúnwọ̀nsì, owó, ohun ìní, token, crypto, fi owó sí, gba owó jáde, fi ránṣẹ́, gbà, sanwó",
+      "events": "kàlẹ́ńdà, ètò, ìpàdé, tó ń bọ̀, tíkẹ́ẹ̀tì, AMA",
+      "stages": "yàrá ohùn, ìbánisọ̀rọ̀ ohùn, spaces, ohùn lásìkò, ọ̀rọ̀, podcast",
+      "featureRequests": "kọ́, olùkọ́, èrò, àbá, ròyìn àṣìṣe, àṣìṣe, àtúnṣe, ọ̀nà ìdàgbàsókè, dìbò, ohun tí a fẹ́, mú dára sí i",
+      "feedback": "àyẹ̀wò, ìdíyelé, ìwádìí, èrò, ẹ̀sùn, fún wa ní èrò",
+      "staking": "stake, fi owó sí, èrè, ẹ̀bùn, jèrè, ìpín èrè, àmì, ìpele, èlé",
+      "superpowers": "boost, polówó, àǹfààní, agbára, àǹfààní àmì, àrọ́wọ́tó, ìgbéga",
+      "governance": "dìbò, ìdìbò, àbá, ìbò, ìwé ìdìbò, pinnu",
+      "dao": "àpò ìṣúra, ṣe ìtọrẹ, ẹ̀bùn, owó àwùjọ, ṣe àfikún, ìrànwọ́ owó",
+      "bounties": "iṣẹ́, àwọn iṣẹ́, iṣẹ́ kékeré, gig, òmìnira, gba ènìyàn síṣẹ́, jèrè owó, iṣẹ́ olówó",
+      "myBounties": "ẹ̀bùn iṣẹ́ mi, iṣẹ́ mi, ìtàn, ìsanwó, iṣẹ́ tí a parí",
+      "affiliate": "ìtọ́kasí, pe ọ̀rẹ́, pè, kọmíṣọ̀n, alábàáṣiṣẹ́pọ̀, jèrè",
+      "careers": "iṣẹ́, gbígba òṣìṣẹ́, ṣiṣẹ́ pẹ̀lú wa, darapọ̀ mọ́ ẹgbẹ́, béèrè, àyè iṣẹ́",
+      "stores": "ṣọ́ọ̀bù, ilé ìtajà, ọjà, ọjà ìpolówó, rà, tà, ọjà, rírajà",
+      "fractions": "ìpín, níní, dókòwò, ní ìfiweránṣẹ́, NFT, NFTs, ohun ìkójọ, ṣòwò",
+      "usernames": "orúkọ olùlò, handle, orúkọ, yí orúkọ mi padà, ra orúkọ, ta orúkọ",
+      "accounts": "ra àkọọ́lẹ̀, ta àkọọ́lẹ̀, àkọọ́lẹ̀ fún títà, olùtẹ̀lé, gbé àkọọ́lẹ̀ lọ",
+      "apps": "ilé ìtajà ohun èlò, ohun èlò kékeré, kọ́ ohun èlò, olùgbéjáde, irinṣẹ́",
+      "arcade": "eré, eré ìdárayá, ṣeré, gaming, ayò, chess, ìbọn, ìgbádùn",
+      "glossary": "ọ̀rọ̀, ìtumọ̀, ìwé atúmọ̀, ìtumọ̀ rẹ̀, kí ni",
+      "compare": "àfiwé, ṣe àfiwé, lòdì sí, àwọn yíyàn mìíràn, YouTube, X, TikTok",
+      "guide": "bíbẹ̀rẹ̀, bí a ṣe ń ṣe, ìkẹ́kọ̀ọ́, ìrànlọ́wọ́, kọ́, olùbẹ̀rẹ̀, tuntun níbí",
+      "stats": "ìṣirò, ìtúpalẹ̀, nọ́ńbà, àwòrán àtẹ, iye owó, ìpèsè, olùní",
+      "docs": "ìwé àlàyé, ìrànlọ́wọ́, API, whitepaper, olùgbéjáde, ìwé ìtọ́sọ́nà",
+      "blog": "ìròyìn, àpilẹ̀kọ, ìmúdójúìwọ̀n, ìkéde, kí ni tuntun",
+      "videos": "wò, fídíò, àgékù fídíò, fídíò gígùn",
+      "shorts": "reels, fídíò kúkúrú, fídíò ìdúró, fà",
+      "music": "ohùn, orin, àwọn orin, gbọ́, rédíò, àkójọ orin",
+      "liveTv": "TV, ìgbóhùnsáfẹ́fẹ́, sísanwọ̀, lásìkò, ìkéde, ikanni, wò lásìkò",
+      "buyTokens": "ra token, rà, fi owó kún, káàdì, káàdì ìyáwó, owó ìjọba",
+      "bridge": "láàrin chain, gbé token, chain, gbé láàrin chain",
+      "top100": "100 tó ga jù, owó crypto, cryptocurrency, iye ọjà, iye owó",
+      "agents": "aṣojú AI, aṣojú, bot, ìṣiṣẹ́ aládàáṣe, ìwà",
+      "advertising": "ìpolówó, àwọn ìpolówó, ìpolongo, polówó, onígbọ̀wọ́, títà ọjà",
+      "premium": "ìforúkọsílẹ̀, ìgbéga, pro, ọmọ ẹgbẹ́, láìsí ìpolówó",
+      "pricing": "ètò, iye owó, owó, èló ni, ìforúkọsílẹ̀",
+      "creators": "ètò olùdá, aṣojú, alábàáṣiṣẹ́pọ̀, béèrè gẹ́gẹ́ bí olùdá, jèrè owó",
+      "connectAi": "MCP, ChatGPT, Claude, API, ìsopọ̀, so AI pọ̀",
+      "packs": "emoji, sítíkà, GIF, àkójọ emoji, àkójọ sítíkà, emoji àdáni",
+      "publicChat": "ìbánisọ̀rọ̀, ìbánisọ̀rọ̀ àgbáyé, yàrá ìbánisọ̀rọ̀, gbọ̀ngàn, ọ̀rọ̀, ìbánisọ̀rọ̀ àwùjọ",
+      "planned": "tí a ṣètò, ṣètò, ìfiweránṣẹ́ tí a ṣètò, ìlà, lẹ́yìn náà",
+      "liveStudio": "lọ lásìkò, ìgbóhùnsáfẹ́fẹ́, sísanwọ̀, OBS, ìbòrí, ìkìlọ̀, widget",
+      "launchpad": "ṣe ìfilọ́lẹ̀ token, ṣẹ̀dá coin, ṣe coin, meme coin, bonding curve, sọ di token"
     }
   },
   "feed": {
@@ -925,7 +1060,8 @@
     "smsBand": {
       "domestic": "Ìjọba Àpapọ̀ Gẹ̀ẹ́sì",
       "global": "Ọ̀pọ̀lọpọ̀ àwọn orílẹ̀-èdè mìíràn",
-      "premium": "Nibikibi"
+      "premium": "Nibikibi",
+      "europe": "Yúróòpù"
     },
     "smsDepositAction": "Rán {{dhb}} tokens",
     "smsDepositPaying": "Jẹrisi ninu apamọwọ rẹ...",
@@ -1142,7 +1278,44 @@
     "socialConnectFailed": "Kò lè so mọ́ {{platform}}. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan síi.",
     "socialVerifiedFollowers": "{{value}} awọn ọmọlẹyin",
     "socialFollowersPending": "Ṣíṣe ìmúdójúìwọ̀n iye àwọn ọmọlẹ́yìn",
-    "menuLayoutFolders": "Àwọn Fódà"
+    "menuLayoutFolders": "Àwọn Fódà",
+    "chatCards": "Ìbánisọ̀rọ̀ bí káàdì",
+    "chatCardsDesc": "Ìbánisọ̀rọ̀ kọ̀ọ̀kan lórí káàdì tirẹ̀. Pa á fún àkójọ lásán pẹ̀lú ìlà láàrin àwọn ìbánisọ̀rọ̀.",
+    "chatDeleteChoice": "Nígbà tí o bá pa ìfiránṣẹ́ rẹ́",
+    "chatDeleteChoiceDesc": "Béèrè ní gbogbo ìgbà, tàbí máa pa á rẹ́ fún ìwọ nìkan tàbí fún gbogbo ènìyàn nínú ìbánisọ̀rọ̀.",
+    "chatDeleteAsk": "Béèrè ní gbogbo ìgbà",
+    "chatDeleteMe": "Pa á rẹ́ fún mi",
+    "chatDeleteMeDesc": "Ó kúrò nínú ìbánisọ̀rọ̀ rẹ, àwọn mìíràn ṣì ń rí i",
+    "chatDeleteEveryone": "Pa á rẹ́ fún gbogbo ènìyàn",
+    "chatDeleteEveryoneDesc": "Nígbà tí ó bá ṣeé ṣe. Ìfiránṣẹ́ ẹlòmíràn nínú ẹgbẹ́ ṣì máa kúrò fún ìwọ nìkan",
+    "showLikes": "Fi àwọn ìfẹ́ràn mi han gbogbo ènìyàn",
+    "showLikesDesc": "Ẹnikẹ́ni lè ṣí táàbù Ìfẹ́ràn lórí àkọsílẹ̀ rẹ. Ó wà ní pípa ní àkọ́kọ́, nítorí náà ìwọ nìkan ló lè rí ohun tí o fẹ́ràn.",
+    "showFollowersList": "Fi àwọn tí ń tẹ̀lé mi hàn",
+    "showFollowersListDesc": "Jẹ́ kí ẹnikẹ́ni ṣí àkójọ olùtẹ̀lé rẹ. Nígbà tí èyí bá wà ní pípa, ìwọ nìkan ló lè rí i.",
+    "showFollowingList": "Fi àwọn tí mo ń tẹ̀lé hàn",
+    "showFollowingListDesc": "Jẹ́ kí ẹnikẹ́ni ṣí àkójọ àwọn tí o ń tẹ̀lé. Nígbà tí èyí bá wà ní pípa, ìwọ nìkan ló lè rí i.",
+    "showFollowCounts": "Fi iye olùtẹ̀lé mi hàn",
+    "showFollowCountsDesc": "Fi iye olùtẹ̀lé tí o ní àti iye ènìyàn tí o ń tẹ̀lé hàn. Pípa èyí tún fi àwọn àkójọ méjèèjì pamọ́.",
+    "defaultProfileView": "Ìtò ìfiweránṣẹ́ àkọsílẹ̀",
+    "defaultProfileViewDesc": "Fi àwọn ìfiweránṣẹ́ rẹ hàn bí àtẹ tàbí àkójọ nígbà tí àwọn ènìyàn bá ṣí àkọsílẹ̀ rẹ",
+    "readerProfileView": "Ṣí àwọn àkọsílẹ̀ mìíràn bí",
+    "readerProfileViewDesc": "Yan àtẹ tàbí àkójọ fún gbogbo àkọsílẹ̀ tí o bá ṣí, tàbí tọ́jú yíyàn ẹnìkọ̀ọ̀kan",
+    "readerProfileViewOwner": "Yíyàn ẹnìkọ̀ọ̀kan",
+    "extractDataDesc3": "Gba gbogbo nǹkan tó wà lórí àkọọ́lẹ̀ yìí sílẹ̀ bí fáìlì kan: àkọsílẹ̀ rẹ, ìfiweránṣẹ́, àsọyé, ìfiránṣẹ́, ìwífúnni, ìdúnàádúrà, ìtẹ̀lé, ìdínà, ìfiweránṣẹ́ tí a fi pamọ́, fódà àti ètò.",
+    "ensLinked": "A ti so ó pọ̀ — àkọsílẹ̀ rẹ wà ní {{url}} báyìí",
+    "ensSignHere": "Fọwọ́ sí i pẹ̀lú àpò owó tí a so pọ̀",
+    "tipsOffNote": "Ẹ̀bùn àti owó tí a fi ránṣẹ́ sí ọ wà ní pípa nígbà tí èyí bá wà ní títàn. Pa á láti tún gba ẹ̀bùn.",
+    "feedVideoShapeWide": "Ìbòjú fífẹ̀",
+    "adLoadFewerDesc": "Ọ̀kan nínú mẹ́rìndínlógún",
+    "menuLayout": "Ìtò àkójọ àṣàyàn",
+    "menuLayoutDesc": "Bí àkójọ àṣàyàn ṣe ń kó àwọn ojú-ìwé rẹ̀ jọ",
+    "menuLayoutTabs": "Táàbù",
+    "menuLayoutTabsDesc": "Ẹgbẹ́ kan ní ìgbà kan, pẹ̀lú àwọn àmì ńlá",
+    "menuLayoutSections": "Àwọn ìpín",
+    "menuLayoutSectionsDesc": "Gbogbo ojú-ìwé ní ẹ̀ẹ̀kan, lábẹ́ àkọlé ẹgbẹ́",
+    "menuLayoutFoldersDesc": "Àwọn ojú-ìwé pàtàkì rẹ, lẹ́yìn náà fódà fún ẹgbẹ́ kọ̀ọ̀kan",
+    "publicChatInBar": "Ìbánisọ̀rọ̀ Gbangba nínú ọ̀pá ìsàlẹ̀",
+    "publicChatInBarDesc": "Tẹ̀ẹ́ lẹ́ẹ̀kan wọ Ìbánisọ̀rọ̀ Gbangba láti ọ̀pá ìsàlẹ̀ ìbòjú"
   },
   "common": {
     "confirm": "Jẹrisi",
@@ -1232,7 +1405,14 @@
     "messagePublic": "Gbangba",
     "railTitle": "Awọn imọran",
     "railTotal": "{{amount}} awọn ami-ami",
-    "tokensUnit": "awọn ami-ami"
+    "tokensUnit": "awọn ami-ami",
+    "messagePlaceholder": "Sọ nǹkan kan pẹ̀lú ẹ̀bùn rẹ",
+    "messagePrivate": "{{name}} nìkan",
+    "theCreator": "olùdá náà",
+    "messageWallNote": "Ó máa hàn lórí ògiri ẹ̀bùn nígbà tí ẹ̀bùn bá ti lọ.",
+    "sendWithMessage": "Fi ránṣẹ́ pẹ̀lú ìfiránṣẹ́",
+    "messageFailed": "A kò lè fi ìfiránṣẹ́ rẹ kún un. A kò fi ẹ̀bùn kankan ránṣẹ́.",
+    "wallLabel": "Ìfiránṣẹ́ ẹ̀bùn"
   },
   "postOptions": {
     "liveAlertsOn": "O ti ń tẹ̀lé {{name}} báyìí. Wàá gba ìfitónilétí nígbà tí wọ́n bá bẹ̀rẹ̀ ìgbóhùnsáfẹ́fẹ́ tààrà.",
@@ -1272,7 +1452,14 @@
     "giftBoost": "Ẹ fún un ní ìfúnnilókun",
     "markSection": "Àwọn apá tí ó ṣeé fò kọjá",
     "copyFailed": "Ko ṣee ṣe lati daakọ ọna asopọ naa",
-    "share": "Pín"
+    "share": "Pín",
+    "refreshLinkPreview": "Sọ àwòtẹ́lẹ̀ ìjápọ̀ dọ̀tun",
+    "linkPreviewRefreshed": "A ti sọ àwòtẹ́lẹ̀ ìjápọ̀ dọ̀tun",
+    "linkPreviewRefreshFailed": "Kò lè dé ojú-òpó náà. Gbìyànjú lẹ́yìn náà.",
+    "castToTv": "Gbé e sí TV",
+    "castStarted": "Ó ń ṣiṣẹ́ lórí TV rẹ",
+    "castUnsupported": "Aṣàwákiri yìí kò lè gbé e sí TV. Ṣí Riftn nínú Chrome tàbí Safari láti wò ó lórí TV rẹ.",
+    "castFailed": "Kò lè dé TV náà. Ríi dájú pé ó wà lórí Wi-Fi kan náà kí o sì gbìyànjú lẹ́ẹ̀kan si."
   },
   "filters": {
     "sort": "Tò",
@@ -1438,7 +1625,8 @@
     "whatsHappeningNews": "Kí ni ó ń ṣẹlẹ̀ nínú ìròyìn lónìí?",
     "loginRequired": "Wọlé láti wọlé sí Olùrànlọ́wọ́ àti láti ṣí àwọn ẹ̀yà agbára bíi ṣíṣẹ̀dá àwòrán àti fídíò.",
     "payingTokens": "Sisan {{amount}} tokens...",
-    "retry": "Gbìyànjú lẹ́ẹ̀kan sí i"
+    "retry": "Gbìyànjú lẹ́ẹ̀kan sí i",
+    "videoGenPaymentKept": "A kò tíì ná token {{amount}} rẹ. Wọ́n ṣì wà lórí àkọọ́lẹ̀ rẹ, a ó sì lò wọ́n fúnra rẹ̀ fún ìṣẹ̀dá rẹ tó kàn tí iye rẹ̀ kò ju iye yẹn lọ, nítorí náà gbígbìyànjú lẹ́ẹ̀kan si kò ní béèrè pé kí o san lẹ́ẹ̀mejì."
   },
   "publicChat": {
     "title": "Ìfọ̀rọ̀wérọ̀ Gbangba",
@@ -1605,7 +1793,9 @@
     "tokenAmountLabel": "Iye tí a fi àmì hàn",
     "swapEthForTokens": "Yipada ETH fun awọn aami",
     "loadingMore": "Gbigba iṣẹ lori pq...",
-    "loginDescription": "Wọlé láti wọlé sí àpò owó rẹ àti ṣàkóso owó rẹ."
+    "loginDescription": "Wọlé láti wọlé sí àpò owó rẹ àti ṣàkóso owó rẹ.",
+    "refundAddressHint": "Bí pàṣípààrọ̀ náà kò bá lè parí, a ó dá {{symbol}} rẹ padà síbí.",
+    "txSentTo": "A fi token {{amount}} ránṣẹ́ sí {{to}}"
   },
   "wallet": {
     "title": "Àpò Owó",
@@ -1864,8 +2054,19 @@
       "bountyApplied": "{{name}} lo sí bounty rẹ",
       "bountySubmittedNamed": "{{name}} fi iṣẹ́ sílẹ̀ lórí èrè rẹ \"{{title}}\"",
       "bountySubmitted": "{{name}} fi iṣẹ́ sílẹ̀ lórí bounty rẹ",
-      "sentNotification": "{{name}} fi ìkìlọ̀ ránṣẹ́ sí ọ"
-    }
+      "sentNotification": "{{name}} fi ìkìlọ̀ ránṣẹ́ sí ọ",
+      "featureCommentLikeNamed": "{{name}} fẹ́ràn àsọyé rẹ lórí “{{title}}”",
+      "featureCommentLike": "{{name}} fẹ́ràn àsọyé rẹ lórí ìbéèrè kan",
+      "governanceCommentLikeNamed": "{{name}} fẹ́ràn àsọyé rẹ lórí àbá “{{title}}”",
+      "governanceCommentLike": "{{name}} fẹ́ràn àsọyé rẹ lórí àbá kan",
+      "featureNewNamed": "{{name}} fi ìbéèrè tuntun “{{title}}” ránṣẹ́",
+      "featureNew": "{{name}} fi ìbéèrè tuntun ránṣẹ́",
+      "featureActivityNamed": "{{name}} sọ̀rọ̀ lórí “{{title}}”",
+      "featureActivity": "{{name}} sọ̀rọ̀ lórí ìbéèrè kan"
+    },
+    "groupEarlier": "Tẹ́lẹ̀",
+    "searchPlaceholder": "Wá nínú ìwífúnni",
+    "searchEmpty": "Kò sí ìwífúnni tó bá a mu"
   },
   "leaderboard": {
     "title": "Àtòjọ Ìpò",
@@ -1910,7 +2111,13 @@
     "loadingBoard": "Ń gbé àtòjọ ìpò wọlé…",
     "amountTokens": "{{amount}} àmi-ìṣẹ́",
     "directReferrals": "{{count}} taara",
-    "secondaryReferrals": "{{count}} ipele kejì"
+    "secondaryReferrals": "{{count}} ipele kejì",
+    "ogChallenge": "Ìpèníjà OG",
+    "ogHolders_one": "Olùní OG {{count}}",
+    "ogHolders_other": "Olùní OG {{count}}",
+    "ogChallengeTitle": "Mú àwọn olùní OG padà wá",
+    "ogChallengeBody": "Pe àwọn ènìyàn tí wọ́n ṣì ní DHB. Nígbà tí wọ́n bá darapọ̀ pẹ̀lú ìjápọ̀ ìpè rẹ tí wọ́n sì tọ́jú DHB wọn sínú àpò owó Riftn wọn, wọ́n á kà fún ọ níbí.",
+    "ogChallengeCta": "Gba ìjápọ̀ ìpè rẹ"
   },
   "dhbListing": {
     "title": "Àkọsílẹ̀ token ń bọ̀ láìpẹ́!",
@@ -2052,17 +2259,40 @@
     "statusDeclined": "A Kọ̀",
     "shipping": "Ń kọ́",
     "noShippingYet": "Kò sí ohunkóhun tí ń lọ lọ́wọ́",
-    "shippingAppearHere": "Àwọn ìbéèrè tí a ń kọ́ yóò farahàn níbí."
+    "shippingAppearHere": "Àwọn ìbéèrè tí a ń kọ́ yóò farahàn níbí.",
+    "editMedia": "Àwòrán àti fídíò",
+    "editAddMedia": "Fi àwòrán tàbí fídíò kún un",
+    "deviceInfoNote": "A so ìwífún ẹ̀rọ mọ́ ọn láti ràn wá lọ́wọ́ láti ṣàtúnṣe àṣìṣe.",
+    "deviceInfo": "Ìwífún ẹ̀rọ",
+    "deviceInfoOwners": "Àwọn olùní pátákó nìkan ló ń rí èyí",
+    "deviceInfoError": "Kò lè ṣí ìwífún ẹ̀rọ",
+    "deviceInfoNone": "Kò sí ìwífún ẹ̀rọ fún ìbéèrè yìí",
+    "deviceInfoErrors": "Àwọn àṣìṣe àìpẹ́",
+    "loadFailed": "Kò lè ṣí àwọn ìbéèrè"
   },
   "auth": {
-    "loginRequired": "Wíwọlé ni a nílò"
+    "loginRequired": "Wíwọlé ni a nílò",
+    "accountDeleted": "A ti pa àkọọ́lẹ̀ yìí rẹ́. O lè tún forúkọ sílẹ̀ bí àkọọ́lẹ̀ tuntun.",
+    "accountDeletedHours_one": "A ti pa àkọọ́lẹ̀ yìí rẹ́. O lè tún forúkọ sílẹ̀ pẹ̀lú ímeèlì tàbí fóònù kan náà ní nǹkan bí wákàtí {{count}}.",
+    "accountDeletedHours_other": "A ti pa àkọọ́lẹ̀ yìí rẹ́. O lè tún forúkọ sílẹ̀ pẹ̀lú ímeèlì tàbí fóònù kan náà ní nǹkan bí wákàtí {{count}}.",
+    "accountDeletedDays_one": "A ti pa àkọọ́lẹ̀ yìí rẹ́. O lè tún forúkọ sílẹ̀ pẹ̀lú ímeèlì tàbí fóònù kan náà ní nǹkan bí ọjọ́ {{count}}.",
+    "accountDeletedDays_other": "A ti pa àkọọ́lẹ̀ yìí rẹ́. O lè tún forúkọ sílẹ̀ pẹ̀lú ímeèlì tàbí fóònù kan náà ní nǹkan bí ọjọ́ {{count}}."
   },
   "messages": {
     "newDrawer": {
       "to": "Sí",
       "recent": "Àìpẹ́",
       "suggested": "A daba",
-      "youFollow": "Àwọn tí o ń tẹ̀lé"
+      "youFollow": "Àwọn tí o ń tẹ̀lé",
+      "placeholder": "Orúkọ tàbí @orúkọolùlò",
+      "chattedBefore": "Ẹ ti ń sọ̀rọ̀",
+      "mutual": "Ẹ ń tẹ̀lé ara yín",
+      "dmsOff": "DM wà ní pípa",
+      "keepTyping": "Máa tẹ̀ ẹ́ láti wá gbogbo ènìyàn",
+      "noOne": "A kò rí ẹnikẹ́ni",
+      "tryUsername": "Gbìyànjú @orúkọolùlò wọn gangan",
+      "sayHi": "Kí ẹnì kan",
+      "typeAny": "Tẹ orúkọ èyíkéyìí tàbí @orúkọolùlò"
     },
     "reply": "Dáhùn",
     "react": "Fèsì",
@@ -2102,7 +2332,9 @@
     "noConversationsYet": "Ko si awọn ibaraẹnisọrọ sibẹsibẹ",
     "sending": "Firanṣẹ",
     "retrySend": "Gbìyànjú lẹ́ẹ̀kan sí i",
-    "discardSend": "Yọ kúrò"
+    "discardSend": "Yọ kúrò",
+    "encryptionReconnect": "Tún so àpò owó rẹ pọ̀ láti tan ìfipamọ́ àṣírí.",
+    "notSent": "A kò fi ránṣẹ́"
   },
   "music": {
     "listeningCount_one": "{{count}} gbigbọ",
@@ -2186,7 +2418,22 @@
     "viewMode": "Wo",
     "back": "Padà",
     "reserve": {
-      "signIn": "Wọlé"
+      "signIn": "Wọlé",
+      "available": "Orúkọ olùlò wà",
+      "held": "A tọ́jú rẹ̀ fún ọ",
+      "ended": "Ìtọ́jú ti parí",
+      "busy": "Ẹnì kan ń ṣe ìpamọ́ rẹ̀",
+      "availableBody": "riftn.com/{{name}} wà ní òmìnira báyìí. Fi pamọ́ fún ara rẹ, a ó sì tọ́jú rẹ̀ fún ìṣẹ́jú kan nígbà tí o bá ń forúkọ sílẹ̀.",
+      "heldBody": "Kò sí ẹlòmíràn tó lè gba @{{name}} títí aago fi parí. Parí ìforúkọsílẹ̀ láti pa á mọ́.",
+      "endedBody": "Ìṣẹ́jú rẹ ti parí, nítorí náà @{{name}} ti ṣí sílẹ̀ fún gbogbo ènìyàn lẹ́ẹ̀kan si. Ó ṣì wà ní òmìnira.",
+      "busyBody": "Ẹnì kan ń forúkọ sílẹ̀ bí @{{name}} báyìí. Bí wọn kò bá parí, yóò di òmìnira nígbà tí aago bá parí.",
+      "finish": "Parí ìforúkọsílẹ̀",
+      "again": "Tún fi pamọ́",
+      "cta": "Fi pamọ́ báyìí",
+      "letGo": "Jẹ́ kó lọ",
+      "haveAccount": "Ṣé o ní àkọọ́lẹ̀?",
+      "seoTitle": "@{{name}} wà lórí Riftn",
+      "seoDescription": "Kò sí ẹni tó ní riftn.com/{{name}} síbẹ̀. Fi pamọ́ kí o sì forúkọ sílẹ̀ láti sọ ọ́ di tìrẹ."
     },
     "usernameAvailable": "Orúkọ oníṣàmúlò wà!",
     "signUpToClaim": "Forúkọsílẹ̀ lónìí láti gba",
@@ -2217,12 +2464,16 @@
     "tabs": {
       "playlists": "Àwọn àtòjọ orin",
       "dislikes": "Àgbàjọ",
-      "likes": "Ìfẹ́ràn"
+      "likes": "Ìfẹ́ràn",
+      "articles": "Àpilẹ̀kọ"
     },
     "likedPosts": {
       "emptyTitle": "Kò sí ìfẹ́ràn síbẹ̀",
       "privateTitle": "Àwọn ìfẹ́ràn jẹ́ àṣírí",
-      "loadMore": "Rù síi"
+      "loadMore": "Rù síi",
+      "emptyOwn": "Àwọn ìfiweránṣẹ́ tí o fẹ́ràn ń hàn níbí. Ìwọ nìkan ló lè rí wọn àyàfi tí o bá tan Fi àwọn ìfẹ́ràn mi hàn nínú Ètò.",
+      "emptyOther": "Kò sí ohun tí a fẹ́ràn síbẹ̀.",
+      "privateDesc": "Àkọọ́lẹ̀ yìí ń pa àwọn ìfẹ́ràn rẹ̀ mọ́ fún ara rẹ̀."
     },
     "dislikes": {
       "emptyTitle": "Kò sí ohun tí ó wù ú",
@@ -2247,11 +2498,31 @@
     "sortMostLiked": "Èyí tí ó wù ú jùlọ",
     "sortCustomShort": "Aṣa",
     "arrange": {
-      "saving": "Ó ń fi pamọ́..."
+      "saving": "Ó ń fi pamọ́...",
+      "title": "Tò àwọn ìfiweránṣẹ́ rẹ",
+      "hint": "Di ìfiweránṣẹ́ kan mú kí o sì fà á lọ sí ààyè tuntun rẹ̀. Àwọn àlejò máa rí ìtò yìí ní àkọ́kọ́.",
+      "drag": "Fà á láti gbé e",
+      "toTop": "Gbé e sí òkè",
+      "save": "Fi ìtò pamọ́",
+      "saved": "A ti fi ìtò rẹ pamọ́",
+      "reset": "Padà sí tuntun jù lọ ní àkọ́kọ́",
+      "resetDone": "Padà sí tuntun jù lọ ní àkọ́kọ́",
+      "saveFailed": "Kò lè fi ìtò rẹ pamọ́. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan si.",
+      "loadFailed": "Kò lè ṣí àwọn ìfiweránṣẹ́ rẹ. Pa èyí dé kí o sì gbìyànjú lẹ́ẹ̀kan si.",
+      "empty": "Kò sí ohun tí a lè tò síbẹ̀. Kọ́kọ́ fi nǹkan ránṣẹ́."
     },
     "searchThisChannel": "Ṣawari ikanni yii",
     "searchResultCount": "Àbájáde 1 fún \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} èsì fún \"{{query}}\""
+    "searchResultCountPlural": "{{count}} èsì fún \"{{query}}\"",
+    "unavailable": "Àkọsílẹ̀ kò sí",
+    "mutualsOne": "Ọ̀rẹ́ àjọṣe {{count}}:",
+    "mutualsMany": "Ọ̀rẹ́ àjọṣe {{count}}:",
+    "articles": {
+      "emptyTitle": "Kò sí àpilẹ̀kọ síbẹ̀",
+      "emptySubtitle": "Àwọn àpilẹ̀kọ yóò hàn níbí"
+    },
+    "sortCustom": "Ìtò àdáni",
+    "arrangeButton": "Tò àwọn ìfiweránṣẹ́"
   },
   "tv": {
     "seoTitle": "TV Live: Awọn ikanni ọfẹ lati kakiri agbaye",
@@ -2327,7 +2598,8 @@
     },
     "swapSuccess": {
       "title": "Ṣàtúnṣe Àṣeyọrí!",
-      "addedToWallet": "{{amount}} {{symbol}} fi kun si apamọwọ rẹ"
+      "addedToWallet": "{{amount}} {{symbol}} fi kun si apamọwọ rẹ",
+      "received": "A gba {{amount}} <coin></coin>"
     },
     "tokensUnit": "àmì"
   },
@@ -2515,7 +2787,26 @@
     "createSignIn": "Wọlé padà láti ṣẹ̀dá aṣojú",
     "checkConnection": "Ṣàyẹ̀wò ìsopọ̀ rẹ kí o sì gbìyànjú lẹ́ẹ̀kan sí.",
     "welcome": {
-      "text": "Ìfiránṣẹ́ ìkíni"
+      "text": "Ìfiránṣẹ́ ìkíni",
+      "title": "Kí àwọn ọmọ ẹgbẹ́ tuntun káàbọ̀",
+      "help": "Aṣojú yìí ń tẹ̀lé àti/tàbí ń fi ìfiránṣẹ́ ránṣẹ́ sí àwọn tí wọ́n ṣẹ̀ṣẹ̀ darapọ̀ mọ́ Riftn, díẹ̀ lójúmọ́.",
+      "follow": "Tẹ̀lé àwọn ọmọ ẹgbẹ́ tuntun",
+      "message": "Fi ìfiránṣẹ́ ránṣẹ́ sí àwọn ọmọ ẹgbẹ́ tuntun",
+      "textHelp": "{name} máa di @orúkọolùlò wọn. Kò sí ìjápọ̀. A ń fi ránṣẹ́ lẹ́ẹ̀kan sí ẹnìkọ̀ọ̀kan.",
+      "saveText": "Fi ìfiránṣẹ́ pamọ́",
+      "perDay": "Ènìyàn lójúmọ́",
+      "fewer": "Díẹ̀ lójúmọ́",
+      "more": "Púpọ̀ lójúmọ́",
+      "today": "Lónìí: a tẹ̀lé {{follows}} · a fi ìfiránṣẹ́ ránṣẹ́ sí {{messages}}",
+      "limits": "Kì í ṣe ẹni kan náà lẹ́ẹ̀mejì. Ó fo ẹnikẹ́ni tó dínà rẹ tàbí pa ọ́ lẹ́nu mọ́, tó pa ìfiránṣẹ́ tuntun, tàbí tó fara pamọ́ kúrò nínú Ọmọ ẹgbẹ́ tuntun.",
+      "showLog": "Wo àwọn tí ó kí káàbọ̀",
+      "hideLog": "Fi ìkíni pamọ́",
+      "empty": "Kò sí ẹnìkan síbẹ̀. Àwọn ọmọ ẹgbẹ́ tuntun ń hàn níbí bí wọ́n ṣe ń darapọ̀.",
+      "followed": "A tẹ̀lé",
+      "messaged": "A fi ìfiránṣẹ́ ránṣẹ́",
+      "skipped": "A fò ó",
+      "failed": "Kò lè dé ọ̀dọ̀ wọn",
+      "defaultText": "Báwo {name}, káàbọ̀ sí Riftn! 👋"
     },
     "workspace": {
       "moderation": "Ìṣàkóso ìgbóhùnsáfẹ́fẹ́",
@@ -2711,7 +3002,15 @@
     "switchWalletAccount": "Yí àkántì padà",
     "walletLoadFailed": "Kò lè ṣí àwọn àpò owó. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
     "openInBrowser": "Ṣí nínú ẹ̀rọ àbáwoṣùwẹ̀ẹ̀rí",
-    "copyLink": "Ẹ̀dà ìjápọ̀"
+    "copyLink": "Ẹ̀dà ìjápọ̀",
+    "bringLoginOver": "Ṣé o lo Riftn lórí dehub.io? <bring>Mú ìwọlé rẹ wá síbí</bring>",
+    "didYouMean": "Ṣé {{email}} ni o ní lọ́kàn?",
+    "profileMovedTitle": "Àkọsílẹ̀ rẹ ti kúrò",
+    "migrateWrongLogin": "Ìwọlé yẹn ṣí àpò owó mìíràn, nítorí náà kò sí ohun tó yípadà. A fi {{login}} ṣe àkọsílẹ̀ àtijọ́ rẹ. Lo ìyẹn láti mú un padà.",
+    "googleInAppTitle": "Google kò ní wọlé nínú {{app}}",
+    "googleInAppTitleUnnamed": "Google kò ní wọlé nínú ohun èlò yìí",
+    "googleInAppBody": "Ṣí Riftn nínú aṣàwákiri rẹ láti lo Google, tàbí wọlé pẹ̀lú ímeèlì níbí.",
+    "tryAnyway": "Gbìyànjú bẹ́ẹ̀ náà"
   },
   "careers": {
     "title": "Iṣẹ́ ní Riftn",
@@ -2936,7 +3235,16 @@
     "searchDehubFor": "Wá \"{{query}}\" lórí Riftn",
     "switchAccount": "Àkọkọ́ àjàyí",
     "signedInAs": "Wọlé gẹ́gẹ́ bí {{name}}",
-    "requestSend": "Fi ìbéèrè rànsẹ̀"
+    "requestSend": "Fi ìbéèrè rànsẹ̀",
+    "requestPrompt": "Kò sí níbí síbẹ̀? Fi ránṣẹ́ bí ìbéèrè",
+    "requestPromptShort": "Kò sí níbí síbẹ̀?",
+    "requestDraftMenu": "Fi {{query}} kún Riftn",
+    "requestDraftSettings": "Ètò kan fún {{query}}",
+    "requestPostsTo": "Ó ń lọ sí Ìbéèrè",
+    "requestHint": "Ó ń lọ sí Ìbéèrè ní orúkọ rẹ. A ó sọ fún ọ nígbà tí ó bá jáde.",
+    "requestSent": "A fi ránṣẹ́ sí Ìbéèrè",
+    "requestSentHint": "A ó sọ fún ọ nígbà tí ó bá jáde.",
+    "requestSeeIt": "Wò ó lórí Ìbéèrè"
   },
   "comments": {
     "reportComment": "Iroyin asọye",
@@ -3032,8 +3340,19 @@
     "anonymousLikes_other": "Ìfẹ́ràn {{count}} láti ọ̀dọ̀ àwọn tó ní báàjì tí kò fi orúkọ hàn",
     "threadParts": {
       "moveUp": "Gbe soke",
-      "moveDown": "Gbe si isalẹ"
-    }
+      "moveDown": "Gbe si isalẹ",
+      "reorder": "Tún tò",
+      "save": "Fi ìtò pamọ́",
+      "saved": "A ti fi ìtò okùn pamọ́",
+      "saveFailed": "Kò lè fi ìtò pamọ́. Gbìyànjú lẹ́ẹ̀kan si.",
+      "dragPart": "Fà á láti gbé apá {{n}}",
+      "addPart": "Fi kún okùn",
+      "addPlaceholder": "Fi kún okùn rẹ...",
+      "label": "Okùn · apá {{count}}"
+    },
+    "attachMedia": "So àwòrán, fídíò tàbí ohùn mọ́ ọn",
+    "attachUnsupported": "So àwòrán, fídíò tàbí fáìlì ohùn mọ́ ọn.",
+    "attachTooLarge": "Fáìlì yẹn ju òpin {{size}} MB lọ."
   },
   "mintChain": {
     "title": "Mint post",
@@ -3051,7 +3370,14 @@
     "notAvailable": "A ṣe minting ni wọn ni ó ṣẹlẹ."
   },
   "postEditHistory": {
-    "original": "Ojúlówó"
+    "original": "Ojúlówó",
+    "title": "Ìtàn àtúnṣe",
+    "edited_one": "A ṣàtúnṣe rẹ̀ lẹ́ẹ̀kan",
+    "edited_other": "A ṣàtúnṣe rẹ̀ nígbà {{count}}",
+    "lastEdit": "Àtúnṣe tó kẹ́yìn {{time}}",
+    "editN": "Àtúnṣe {{n}}",
+    "now": "Báyìí",
+    "showChanges": "Fi ohun tó yípadà hàn"
   },
   "postInfo": {
     "title": "Ìwífún nípa àkọsílẹ̀",
@@ -3346,7 +3672,10 @@
     "waiting_for_wallet": "Nduro fun apamọwọ rẹ",
     "waiting_for_wallet_desc": "Ṣí {{wallet}} kí o sì fọwọ́ sí ìforúkọsílẹ̀ náà — ìbéèrè náà ń dúró síbẹ̀.",
     "your_wallet": "apamọwọ rẹ",
-    "max_available_on_chain": "Max wà: {{amount}} tokens on {{chain}}"
+    "max_available_on_chain": "Max wà: {{amount}} tokens on {{chain}}",
+    "not_available_for_this_post": "Kò sí fún ìfiweránṣẹ́ yìí",
+    "turn_back_on_desktop_notifications": "Tún tan ìwífúnni kọ̀ǹpútà?",
+    "notifications_moved_to_riftn": "A ti kó lọ sí riftn.com, nítorí náà aṣàwákiri rẹ nílò ìfọwọ́sí rẹ lẹ́ẹ̀kan si láti fi ìdáhùn, ẹ̀bùn àti DM hàn níbí."
   },
   "staking": {
     "title": "Dìde",
@@ -3712,7 +4041,8 @@
       "moveDown": "Gbe si isalẹ",
       "removeRule": "Yọ ofin kuro",
       "addRule": "Ṣafikun ofin",
-      "saveRules": "Fi àwọn òfin pamọ́"
+      "saveRules": "Fi àwọn òfin pamọ́",
+      "dismissAdminBody": "{{name}} ṣì máa jẹ́ ọmọ ẹgbẹ́ ṣùgbọ́n yóò pàdánù gbogbo ẹ̀tọ́ alákòóso nínú {{community}}."
     },
     "invite": {
       "revoked": "Wọ́n fagilé ìjápọ ìkésíni yìí.",
@@ -5253,18 +5583,167 @@
     "buy": "Ra",
     "reject": "Kọ̀ ọ́",
     "needsYouHold": "Ó nílò {{needed}}, o mú {{held}}",
-    "sellYourFractions": "Ta ìpín rẹ ({{held}} mú)"
+    "sellYourFractions": "Ta ìpín rẹ ({{held}} mú)",
+    "nftsSubtitle": "NFT èyíkéyìí, pàṣípààrọ̀ ìgbésẹ̀ kan",
+    "buyersTab": "Àwọn olùrà",
+    "soldOfListing": "A ta {{sold}} nínú {{total}}",
+    "noBuyersYet": "Kò sí ẹni tó tíì ra ìpín ìfiweránṣẹ́ yìí",
+    "fromYou": "láti ọ̀dọ̀ rẹ",
+    "statusOverdue": "Ó ti pẹ́"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Lo àwọn kúlẹ̀kúlẹ̀ wọ̀nyí"
+        "use": "Lo àwọn kúlẹ̀kúlẹ̀ wọ̀nyí",
+        "url": "URL ojú-ìwé ọjà",
+        "action": "Ka ojú-ìwé ọjà",
+        "loading": "Ó ń ka ojú-ìwé…",
+        "hint": "Gbé ọ̀rọ̀ wọlé láti ojú-ìwé ọjà gbangba. Ṣàyẹ̀wò àwọn àlàyé kí o tó lò wọ́n; so àwòrán ọjà mọ́ ọn lọ́tọ̀ nínú studio.",
+        "source": "Orísun tí a gbé wọlé",
+        "review": "Yan ọjà kan láti dà kọ sínú àlàyé rẹ tí a lè ṣàtúnṣe. Àkọlé, ohùn àti àwọ̀ ilé-iṣẹ́ rẹ kò ní yípadà.",
+        "errors": {
+          "signIn": "Wọlé láti gbé ojú-ìwé ọjà wọlé.",
+          "url": "Lo URL ọjà HTTPS gbangba.",
+          "empty": "A kò rí àlàyé ọjà tí a lè lò. Fi wọ́n kún un fúnra rẹ.",
+          "busy": "Ìgbéwọlé púpọ̀ jù ló ń ṣiṣẹ́. Gbìyànjú láìpẹ́.",
+          "unavailable": "A kò lè gbé ojú-ìwé yìí wọlé. Fi àlàyé ọjà kún un fúnra rẹ.",
+          "failed": "Ìgbéwọlé kùnà. A ti fi àlàyé rẹ pamọ́; gbìyànjú lẹ́ẹ̀kan si tàbí tẹ àlàyé sí i fúnra rẹ."
+        }
+      },
+      "return": "Padà sí àkọpamọ́ studio",
+      "title": "Àlàyé ìpolongo",
+      "intro": "Ṣàpèjúwe ọjà àti ilé-iṣẹ́ rẹ, lẹ́yìn náà múra àwọn ọ̀nà ìpolówó tó bá a mu sílẹ̀.",
+      "saved": "A ti fi àlàyé rẹ pamọ́ sórí ẹ̀rọ yìí fún àkọọ́lẹ̀ yìí.",
+      "preview": "Múra àwọn ọ̀nà sílẹ̀",
+      "clear": "Pa àlàyé rẹ́",
+      "required": "Fi orúkọ ọjà àti àpèjúwe kún un láti múra àwọn ọ̀nà sílẹ̀.",
+      "variants": "Àwọn ọ̀nà ìpolongo",
+      "reviewHint": "Ṣàyẹ̀wò àwòṣe, iye owó àti ìtọ́kasí ọjà nínú studio kí o tó ṣẹ̀dá. Ọ̀nà kọ̀ọ̀kan jẹ́ ìṣẹ̀dá lọ́tọ̀.",
+      "open": "Ṣàyẹ̀wò nínú studio",
+      "fields": {
+        "product": "Orúkọ ọjà (ó pọndandan)",
+        "description": "Òtítọ́ ọjà (ó pọndandan)",
+        "brand": "Orúkọ ilé-iṣẹ́",
+        "audience": "Àwọn olùgbọ́ àfojúsùn",
+        "benefit": "Àǹfààní pàtàkì",
+        "voice": "Ohùn ilé-iṣẹ́",
+        "palette": "Àwọ̀ ilé-iṣẹ́",
+        "headline": "Àkọlé tí a fọwọ́ sí",
+        "cta": "Ìpè sí ìṣe"
+      },
+      "formats": {
+        "square": "Ìpolówó onígun mẹ́rin",
+        "portrait": "Ìpolówó ìdúró",
+        "story": "Àwòrán ìtàn",
+        "video": "Fídíò ìdúró"
       }
     },
     "cinema": {
       "close": "Pàdé",
       "performance": {
-        "label": "Ìṣẹ́"
+        "label": "Ìṣẹ́",
+        "0": "Ayọ̀",
+        "1": "Ìbànújẹ́",
+        "2": "Àníyàn",
+        "3": "Ìgboyà",
+        "4": "Ìyàlẹ́nu",
+        "5": "Ìkóraẹnimú",
+        "6": "Ẹ̀fẹ̀"
+      },
+      "title": "Ìtọ́sọ́nà sinimá",
+      "hint": "Tọ́ àṣà ìrísí àwòrán tàbí fídíò rẹ tó kàn sọ́nà. Àbájáde yàtọ̀ ní ìbámu pẹ̀lú àwòṣe.",
+      "none": "Kò sí ìtọ́sọ́nà",
+      "reset": "Pa ìtọ́sọ́nà rẹ́",
+      "camera": {
+        "label": "Ìrísí kámẹ́rà",
+        "0": "Sinimá oní-nọ́ńbà",
+        "1": "Fíìmù 35mm",
+        "2": "Fíìmù 16mm",
+        "3": "Ọ̀nà ńlá",
+        "4": "Camcorder àtijọ́"
+      },
+      "lens": {
+        "label": "Ìrísí lẹ́ńsì",
+        "0": "Ròbótó",
+        "1": "Anamorphic",
+        "2": "Gíláàsì rírọ̀ àtijọ́",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Gígùn ìfojúsùn",
+        "0": "18mm fífẹ̀",
+        "1": "24mm fífẹ̀",
+        "2": "35mm àdánidá",
+        "3": "50mm àṣà",
+        "4": "85mm àwòrán ojú",
+        "5": "135mm ìwòjìnnà"
+      },
+      "aperture": {
+        "label": "Ìjìnlẹ̀ ìfojúsùn",
+        "0": "f/1.4 kò jìn rárá",
+        "1": "f/2.8 kò jìn",
+        "2": "f/5.6 ààrin",
+        "3": "f/11 ìfojúsùn jíjìn"
+      },
+      "movement": {
+        "label": "Ìrìn kámẹ́rà",
+        "0": "Lórí ẹsẹ̀ mẹ́ta láìmì",
+        "1": "Dolly wọlé díẹ̀díẹ̀",
+        "2": "Dolly jáde díẹ̀díẹ̀",
+        "3": "Títẹ̀lé ní ẹ̀gbẹ́",
+        "4": "Yí ká kókó",
+        "5": "Ní ọwọ́",
+        "6": "Gíga crane",
+        "7": "Pan díẹ̀díẹ̀"
+      },
+      "lighting": {
+        "label": "Ìmọ́lẹ̀",
+        "0": "Ìmọ́lẹ̀ ọ̀sán rírọ̀",
+        "1": "Wákàtí wúrà",
+        "2": "Chiaroscuro òkùnkùn",
+        "3": "Studio onímọ́lẹ̀ gíga",
+        "4": "Ìmọ́lẹ̀ neon",
+        "5": "Ìmọ́lẹ̀ ẹ̀yìn òjìji",
+        "6": "Ìkùukùu tí ó tàn ká"
+      },
+      "tempo": {
+        "label": "Ìyára ìyàwòrán",
+        "0": "Ìyàwòrán kan tí kò dúró",
+        "1": "Ìṣe tó parọ́rọ́, láìkánjú",
+        "2": "Ìṣe alágbára, tó kún fún agbára",
+        "3": "Ìṣe rúdurùdu, oníwàdùwàdù"
+      },
+      "era": {
+        "label": "Àsìkò",
+        "0": "Ọdún 1920",
+        "1": "Ọdún 1950",
+        "2": "Ọdún 1960",
+        "3": "Ọdún 1970",
+        "4": "Ọdún 1980",
+        "5": "Ọdún 1990",
+        "6": "Àsìkò yìí",
+        "7": "Ọjọ́ iwájú tó súnmọ́"
+      },
+      "genre": {
+        "label": "Irú",
+        "0": "Àkọsílẹ̀ òtítọ́",
+        "1": "Eré onítàn",
+        "2": "Film noir",
+        "3": "Ìtàn sáyẹ́ǹsì",
+        "4": "Ìtàn àròsọ",
+        "5": "Eré ìfẹ́ apanilẹ́rìn-ín",
+        "6": "Eré ìbẹ̀rù",
+        "7": "Eré Western"
+      },
+      "palette": {
+        "label": "Àkójọ àwọ̀",
+        "0": "Amber gbígbóná",
+        "1": "Búlúù tútù",
+        "2": "Àwọ̀ ilẹ̀ tí kò tàn",
+        "3": "Pastel",
+        "4": "Àwọ̀ kan ṣoṣo oníyàtọ̀ gíga",
+        "5": "Àwọ̀ ìpìlẹ̀ tó kún"
       }
     },
     "libraryEmpty": "Àwọn ìṣẹ̀dá rẹ tí o fi pamọ́ yóò hàn níbí.",
@@ -6057,9 +6536,128 @@
     "gallery": {
       "send": "Rán",
       "notifications": {
-        "generation_reply": "{{name}} dáhùn àsọyé rẹ"
+        "generation_reply": "{{name}} dáhùn àsọyé rẹ",
+        "generation_like": "{{name}} fèsì sí ìṣẹ̀dá rẹ",
+        "generation_comment_like": "{{name}} fèsì sí àsọyé rẹ",
+        "generation_comment": "{{name}} sọ̀rọ̀ lórí ìṣẹ̀dá rẹ"
+      },
+      "browse": "Wo àwọn ìṣẹ̀dá",
+      "create": "Ṣẹ̀dá",
+      "fullscreen": "Wò ó ní ìbòjú kíkún",
+      "missing": "Ìṣẹ̀dá yìí kò sí."
+    },
+    "avatarTitle": "Àwòrán tó ń sọ̀rọ̀",
+    "avatarRequirements": "Àwòrán PNG onígun mẹ́rin, 512–2048 píkísẹ́lì, títí dé 5 MB. WAV PCM 16-bit mono 24 kHz, ìṣẹ́jú-àáyá 5–30. A fi ìdákẹ́jẹ́ kún ìpín ìṣẹ́jú-àáyá tó kẹ́yìn.",
+    "avatarPortrait": "Yan àwòrán PNG",
+    "avatarAudio": "Yan WAV ọ̀rọ̀",
+    "avatarPermission": "Mo ní àṣẹ láti mú àwòrán yìí ṣiṣẹ́ àti láti lo ohùn yìí.",
+    "avatarQuote": "Ìṣẹ́jú-àáyá {{seconds}} pẹ̀lú ìdákẹ́jẹ́ · token {{amount}}",
+    "avatarPrepare": "Múra sílẹ̀ kí o sì wo iye owó",
+    "batchFlowLimit": "Àkójọ Flow ti kún. Yọ Flow tí a kò lò kúrò kí o tó ṣẹ̀dá àkójọ mìíràn.",
+    "batchReviewCampaign": "Ṣàyẹ̀wò àkójọ ìpolongo nínú Flow",
+    "batchReviewFilmImages": "Ṣàyẹ̀wò àkójọ àwòrán ìtàn",
+    "batchReviewFilmVideos": "Ṣàyẹ̀wò àkójọ àgékù fíìmù",
+    "batchReviewHint": "Ó ṣí Flow tí a fi pamọ́ lọ́tọ̀. Ṣàyẹ̀wò gbogbo ohun kọ̀ọ̀kan àti iye owó kíkún kí o tó sanwó. A ń tọ́jú àwọn ohun tí a parí àti ìsanwó àkọ́kọ́ fún ìmúpadàbọ̀sípò. A ń da àwọn ìtọ́kasí kọ sí ibi ìkówèésí àdáni rẹ; owó ìpamọ́ àti nẹ́tíwọ̀ọ̀kì wúlò.",
+    "batchInvalid": "Parí ohun kọ̀ọ̀kan kí o tó múra àkójọ àwòrán tàbí àgékù 1–12.",
+    "batchReferenceLimit": "Àkójọ yìí ń gba ìtọ́kasí àwòrán kan fún ohun kọ̀ọ̀kan. Yọ àwọn ìtọ́kasí àfikún kúrò tàbí múra ohun náà sílẹ̀ lọ́tọ̀.",
+    "batchVideoSettings": "Fún àkójọ yìí, àwọn àgékù nílò gígùn odindi ìṣẹ́jú-àáyá 4–15 àti ìwọ̀n 16:9, 9:16 tàbí 1:1.",
+    "batchMissingReference": "Ìtọ́kasí kan sọnù, a kò ṣe àtìlẹ́yìn rẹ̀, tàbí ó tóbi ju 25 MB lọ. Dá a padà nínú olóòtú kí o tó múra àkójọ náà.",
+    "batchOwnerChanged": "Àkọọ́lẹ̀ tàbí àkọpamọ́ náà ti yípadà. Tún ṣí àkójọ yìí lábẹ́ àkọọ́lẹ̀ àkọ́kọ́ rẹ̀.",
+    "batchConflict": "Àkójọ tí a fi pamọ́ kò bá àwòrán àkọ́kọ́ rẹ̀ mu.",
+    "audioExportFormat": "Ọ̀nà ìkójáde",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "So àgékù orísun kan mọ́ ọn láti fà á gùn.",
+    "extensionSeconds": "+{{seconds}}s fídíò tuntun",
+    "extensionHelp": "Ó dá àgékù orísun rẹ padà pẹ̀lú nǹkan bí ìṣẹ́jú-àáyá mẹ́rin tuntun. A tún ìwọ̀n àbájáde ṣe títí dé 720p ní 24 fps. A ṣẹ̀dá ohùn tuntun fún àfikún náà.",
+    "extensionForward": "Fi nǹkan bí ìṣẹ́jú-àáyá mẹ́rin kún un lẹ́yìn àgékù orísun rẹ",
+    "extensionBackward": "Fi nǹkan bí ìṣẹ́jú-àáyá mẹ́rin kún un ṣáájú àgékù orísun rẹ",
+    "expandDescription": "Ṣẹ̀dá ààlà àwòrán tuntun. Ìtọ́sọ́nà Gẹ̀ẹ́sì jẹ́ àṣàyàn; àwòrán orísun kan.",
+    "relightDescription": "Tún ìmọ́lẹ̀ àwòrán kan ṣe láti inú àpèjúwe ìmọ́lẹ̀ àti ẹ̀yìn rẹ.",
+    "expandPromptHint": "So àwòrán kan mọ́ ọn kí o sì yan ìwọ̀n tuntun rẹ̀. Ìtọ́sọ́nà Gẹ̀ẹ́sì jẹ́ àṣàyàn.",
+    "expandEnglishOnly": "Àwòṣe ìfẹ̀sí yìí ń gba ìtọ́sọ́nà Gẹ̀ẹ́sì. Fi ìtọ́sọ́nà sílẹ̀ ní òfo fún ìfẹ̀sí aládàáṣe.",
+    "expandNeedsImage": "So àwòrán kan mọ́ ọn láti fẹ̀ ẹ́.",
+    "learn": {
+      "title": "Ẹ̀kọ́ Olùdá",
+      "intro": "Ẹ̀kọ́ kúkúrú, àyẹ̀wò ìmọ̀ àti ìdánrawò tí a lè ṣàtúnṣe fún ọ̀kọ̀ọ̀kan. A fi ìlọsíwájú pamọ́ sórí ẹ̀rọ yìí fún àkọọ́lẹ̀ rẹ.",
+      "back": "Padà sí Olùdá",
+      "lessons": "Àwọn ẹ̀kọ́",
+      "progress": "O ti yege nínú {{completed}} nínú àyẹ̀wò ìmọ̀ {{total}}",
+      "check": "Ṣàyẹ̀wò ìdáhùn",
+      "correct": "O ti yege nínú àyẹ̀wò ìmọ̀",
+      "retry": "Gbìyànjú lẹ́ẹ̀kan si. Tún ẹ̀kọ́ tó wà lókè kà.",
+      "exerciseTitle": "Ìdánrawò ìlò",
+      "exerciseHint": "Ṣí àpẹẹrẹ tí a lè ṣàtúnṣe nínú ibi iṣẹ́ studio tìrẹ. Ṣíṣí àkọpamọ́ jẹ́ ọ̀fẹ́; ìṣẹ̀dá nílò àyẹ̀wò rẹ àti iye owó tirẹ̀. Ṣàtúnṣe àpẹẹrẹ náà kí o tó ṣẹ̀dá.",
+      "openExercise": "Ṣí àkọpamọ́ ìdánrawò",
+      "closeExercise": "Pa ìdánrawò dé",
+      "brief": {
+        "title": "Kọ àlàyé ìran tó ṣe kedere",
+        "body1": "Ṣàpèjúwe kókó kan pàtó, ohun tó ń ṣe àti ibi tí ó wà. Fi ìṣètò fírémù tàbí ìrìn kámẹ́rà kún un nígbà tí ó bá ran ìran náà lọ́wọ́. Fi àwọn èrò tí kò bá a mu sílẹ̀ fún àkọpamọ́ mìíràn.",
+        "body2": "Ìtọ́sọ́nà ìmọ́lẹ̀, lẹ́ńsì àti àṣà ń tọ́ àwòṣe náà sọ́nà. Wọn kò ṣe ìdánilójú ìhùwàsí kámẹ́rà gidi tàbí àwòrán pàtó kan. Yí apá kan padà ní ìgbà kan kí o lè ṣe àfiwé àwọn àtúnṣe.",
+        "body3": "Kí o tó ṣẹ̀dá, ṣàyẹ̀wò àwòṣe tí a yàn, àwọn àsomọ́ tí a ṣe àtìlẹ́yìn, ìwọ̀n àti iye owó. Tọ́jú àkọpamọ́ àkọ́kọ́ kí o lè padà sí i.",
+        "question": "Àlàyé wo ló rọrùn jù láti ṣàtúnṣe?",
+        "answer0": "Kókó, ìṣe àti ibi tó ṣe kedere",
+        "answer1": "Orúkọ àwòṣe nìkan",
+        "answer2": "Àkójọ àwọn àṣà tó tako ara wọn",
+        "exercise": "Ìkòkò tíì amọ̀ lórí tábìlì igi lẹ́gbẹ̀ẹ́ fèrèsé. Ìmọ́lẹ̀ òwúrọ̀ rírọ̀, fírémù àárín, ẹ̀yìn tó rọrùn. Jẹ́ kí ìkòkò tíì jẹ́ kókó tó ṣe kedere."
+      },
+      "continuity": {
+        "title": "Ṣètò àwọn ìyàwòrán kí o sì ṣàyẹ̀wò ìtẹ̀síwájú",
+        "body1": "Lo pánẹ́ẹ̀lì Fíìmù nínú olóòtú láti fi àlàyé àti àwọn ìyàwòrán tí a tò pamọ́. Múra fírémù tàbí àgékù kọ̀ọ̀kan sílẹ̀ lọ́tọ̀, ṣàyẹ̀wò iye owó rẹ̀, kí o sì yan àbájáde tí a gbà.",
+        "body2": "So àwọn ìtọ́kasí tí àwòṣe tí o yàn gbà nìkan mọ́ ọn. Lílo ìtọ́kasí lẹ́ẹ̀kan si lè tọ́ ìrísí sọ́nà; kò kọ́ ìdánimọ̀ tàbí ṣe ìdánilójú ìbámu. Àwọn ẹ̀dá ìtàn àti ohùn lè yàtọ̀ láàrin ìṣẹ̀dá.",
+        "body3": "Tọ́jú àwọn ìyàwòrán tó yọrí sí rere kí o sì kó wọn jọ nínú ìlà àkókò. Ṣàyẹ̀wò ìrìn, ojú, ìjíròrò àti ìyípadà kí o tó kó o jáde.",
+        "question": "Kí ló ń ran ìtẹ̀síwájú lọ́wọ́ láàrin àwọn ìyàwòrán?",
+        "answer0": "Ìtọ́sọ́nà púpọ̀ sí i tí kò bá ara wọn mu",
+        "answer1": "Ìtọ́kasí tí a fọwọ́ sí àti àkọsílẹ̀ ìyàwòrán tí a ṣàyẹ̀wò",
+        "answer2": "Gbígbàgbọ́ pé ìdánimọ̀ ẹ̀dá ìtàn dájú",
+        "exercise": "Ìyàwòrán gbígbòòrò ti arìnrìn-àjò kan ṣoṣo tó ń dé etí òkun tó dákẹ́ nígbà ìlà oòrùn. Ìrìn kámẹ́rà síwájú díẹ̀díẹ̀, àyíká tó parọ́rọ́. Ìyàwòrán kan tí kò dúró."
+      },
+      "campaign": {
+        "title": "Lo òtítọ́ ọjà tí a fọwọ́ sí",
+        "body1": "Bẹ̀rẹ̀ pẹ̀lú òtítọ́ ọjà tí o lè jẹ́rìí sí. Ṣàyẹ̀wò ìwífún tí a gbé wọlé kí o tó lò ó. Kọ àkọlé àti ìpè sí ìṣe ní kedere; má ṣe hùmọ̀ iye owó, àgbéyẹ̀wò tàbí ẹ̀tọ́ iṣẹ́.",
+        "body2": "Lo àwọn ẹ̀yà ìpolongo tí a fi pamọ́ láti tọ́jú àkọsílẹ̀ àjọpín àti àwọn ìfàmọ́ra, ìwé eré, èdè àti ọ̀nà ẹnìkọ̀ọ̀kan pọ̀. Múra ohun kan tí a ṣàyẹ̀wò sílẹ̀ ní ìgbà kan kí o sì wo iye owó rẹ̀ nínú studio.",
+        "body3": "Ṣàyẹ̀wò ọ̀rọ̀ tí a rí, ìrísí ọjà àti ẹ̀tọ́ tí a sọ jáde nínú àbájáde. Ìtọ́sọ́nà kì í ṣe ẹ̀rí pé ọjà péye tàbí pé ìpolówó máa ṣiṣẹ́.",
+        "question": "Ìgbà wo ló yẹ kí a fi ẹ̀tọ́ ọjà kún un?",
+        "answer0": "Nígbàkígbà tí ó bá dún bí òtítọ́",
+        "answer1": "Lẹ́yìn hùmọ̀ àgbéyẹ̀wò ìràwọ̀ márùn-ún",
+        "answer2": "Nígbà tí ó bá wá láti inú òtítọ́ ọjà tí a fọwọ́ sí",
+        "exercise": "Ṣẹ̀dá ìpolówó ọjà ìdúró fún tíì ewé odindi tí a ń tà nínú agolo tí a lè tún lò. Àkọlé tí a fọwọ́ sí: Wá àkókò fún tíì. CTA tí a fọwọ́ sí: Ṣàwárí àkójọ náà. Lo òtítọ́ wọ̀nyí nìkan; má ṣe hùmọ̀ ẹ̀dínwó, àgbéyẹ̀wò tàbí ẹ̀tọ́ ìlera."
       }
-    }
+    },
+    "campaignPlanTitle": "Àwọn ẹ̀yà ìpolongo àti àwọn ìṣẹ̀lẹ̀",
+    "campaignPlanIntro": "Fi tó ẹ̀yà tàbí ìṣẹ̀lẹ̀ 12 pamọ́. Ọ̀kọ̀ọ̀kan ń ṣí studio fún àyẹ̀wò àti iye owó tirẹ̀. Àkọsílẹ̀ àjọpín ń tọ́ ìtẹ̀síwájú sọ́nà; ìrísí ọjà, ẹ̀dá ìtàn àti ohùn lè yàtọ̀ láàrin ìṣẹ̀dá.",
+    "campaignTitle": "Orúkọ ìpolongo tàbí ọ̀wọ́",
+    "campaignContinuity": "Àkọsílẹ̀ àjọpín fún ẹ̀dá ìtàn, ohùn àti àṣà",
+    "campaignVariantTitle": "Orúkọ ẹ̀yà tàbí ìṣẹ̀lẹ̀",
+    "campaignHook": "Ìfàmọ́ra ìbẹ̀rẹ̀",
+    "campaignLanguage": "Èdè àbájáde",
+    "campaignScript": "Ìwé eré tàbí ìtẹ̀léra ìran tí a fọwọ́ sí",
+    "campaignAdd": "Fi ẹ̀yà tàbí ìṣẹ̀lẹ̀ kún un",
+    "campaignClear": "Pa ètò rẹ́",
+    "campaignFormat": "Ọ̀nà àbájáde",
+    "audioInvalidResponse": "Iṣẹ́ ohùn dá àbájáde tí kò wúlò padà.",
+    "batchPaymentHelp": "A ń gba owó fún àwòrán kọ̀ọ̀kan tí a fi ránṣẹ́ lọ́tọ̀. Bí àkójọ kan bá dúró, a ó tún lo àwọn token tí a kò lò nínú ìsanwó rẹ̀ fúnra rẹ̀ fún ìṣẹ̀dá míì tí ó bò.",
+    "invalidSeed": "Seed gbọ́dọ̀ jẹ́ nọ́ńbà odindi láti 0 dé 2147483647.",
+    "libraryFavorites": "Àyànfẹ́",
+    "libraryFavoriteAdd": "Fi kún àyànfẹ́",
+    "libraryFavoriteRemove": "Yọ kúrò nínú àyànfẹ́",
+    "attachFailed": "Kò lè so àwòrán yẹn mọ́ ọn.",
+    "dubQueued": "Àtúnsọ ohùn wà nínú ìlà. Ó ń bá a lọ bí o bá tilẹ̀ kúrò ní ojú-ìwé.",
+    "audioTaskSpeechDesc": "Ọ̀rọ̀ sí ohùn ní ohùn èyíkéyìí",
+    "audioTaskDialoguePlaceholder": "Alice: Ó yẹ ká lọ.\nBob: [ń rẹ́rìn-ín] Ìwọ ṣáájú.",
+    "stopWaitingConfirm": "Dúró dídúró de ìṣẹ̀dá yìí? A ti sanwó rẹ̀, yóò sì máa bá a lọ, ṣùgbọ́n àbájáde kò ní padà wá sọ́dọ̀ rẹ.",
+    "presetQuickBlockoutHint": "Àkọpamọ́ olówó pọ́ọ́kú láti dán èrò kan wò",
+    "presetAdEnergeticName": "Kíka ìpolówó",
+    "presetSfxImpactHint": "Ìlù mímú kan, kò sí ìrù",
+    "presetSfxUiName": "Ojú ìṣàfihàn",
+    "presetSfxUiHint": "Ìró UI kékeré, mímọ́",
+    "presetMusicUpbeatName": "Ìpolówó Alárinrin",
+    "presetMusicTensionName": "Ìfọkànsókè",
+    "toolPosterDesc": "Pátákó ìpolongo, ohun èlò ìfilọ́lẹ̀ àti ìfiweránṣẹ́ àwùjọ pẹ̀lú òfin àmì Riftn.",
+    "toolSongStudioDesc": "Orin, ìfàmọ́ra, ọ̀rọ̀ orin àti ìtọ́sọ́nà ìṣelọ́pọ̀ nínú ìṣàn kan.",
+    "toolCreativeChatDesc": "Jíròrò èrò, àkọlé, àlàyé àti ètò ìfilọ́lẹ̀.",
+    "communityFeed": "Àkójọ Àwùjọ",
+    "priceOwnKey": "Kọ́kọ́rọ́ rẹ"
   },
   "pricing": {
     "plansForEveryWorkflow": "Àwọn ìtòlẹ́sẹẹsẹ fún gbogbo iṣẹ́",
@@ -6222,7 +6820,12 @@
     "noneYet": "Kò sí ògbógi kankan tí ó tíì wà.",
     "createTheFirst": "Ṣẹ̀dá àkọ́kọ́",
     "docsSeoTitle": "Àwọn Ìtọ́ni Ọgbọ́n AI | Riftn",
-    "docsSeoDescription": "Ìwé ìtọ́kasí fún àwọn ọ̀nà olùrànlọ́wọ́ AI ti Riftn àti ilé ìkówèésí kíákíá."
+    "docsSeoDescription": "Ìwé ìtọ́kasí fún àwọn ọ̀nà olùrànlọ́wọ́ AI ti Riftn àti ilé ìkówèésí kíákíá.",
+    "featShort": "Feat",
+    "triggerPhrasesPlaceholder": "dehub poster, dehub social, dehub banner",
+    "loadingSkills": "Ó ń ṣí àwọn ọgbọ́n…",
+    "docsLoadFailed": "# Àṣìṣe\nKò lè ṣí ìwé àlàyé ọgbọ́n.",
+    "raw": "Àìṣe"
   },
   "nftMarket": {
     "actAll": "Gbogbo",
@@ -6337,7 +6940,31 @@
     "spotlight": "Ìmọ̀ràn",
     "spotlightBuyNote": "NFT àti ìsanwo yípadà nínú ìgbésẹ̀ kan.",
     "spotlightOfferNote": "Kò tí ìfihàn tó. Rán àbá àti olùmọ̀ lè gba á níkọ̀ọ̀kan.",
-    "signInToTradeCta": "Wọlé láti ṣe ìfipádì"
+    "signInToTradeCta": "Wọlé láti ṣe ìfipádì",
+    "actCollectionOffer": "Ìfilọ̀ àkójọ",
+    "actListed": "A gbé e kalẹ̀",
+    "actSale": "Títà",
+    "buyAll": "Ra gbogbo rẹ̀",
+    "buySeveral": "Ra púpọ̀",
+    "cartBought": "A ra {{n}}. Wọ́n wà nínú àpò owó rẹ báyìí.",
+    "cartCount": "{{n}} nínú agbọ̀n",
+    "cartFull": "Títí dé 20 ní ìgbà kan",
+    "cartOneCoin": "Chain kan àti coin kan fún agbọ̀n kan. Pa á rẹ́ láti yípadà.",
+    "cartOwn": "Tìrẹ ni ìyẹn",
+    "cartPick": "Tẹ̀ ẹ́ láti fi kún agbọ̀n",
+    "forSaleHere": "Wà fún títà níbí",
+    "noActivity": "Kò sí nǹkan níbí síbẹ̀",
+    "volShort": "Iye",
+    "salesCount": "A ta {{n}}",
+    "bestOffer": "Ìfilọ̀ tó dára jù",
+    "fromOpenSea": "Àwọn àkójọ tó ga jù lórí OpenSea",
+    "buyHere": "Rà wọ́n níbí",
+    "openSeaNote": "A gbé e kalẹ̀ lórí OpenSea. O ń san owó fún olùtà tààrà lórí Seaport; Riftn kò fi owó kankan kún un.",
+    "viewOnOpenSea": "Wò ó lórí OpenSea",
+    "alertUnder": "Sọ fún mi nígbà tí wọ́n bá gbé e kalẹ̀ ní iye yìí tàbí kéré sí i ({{symbol}}, àṣàyàn)",
+    "yourOffer": "Ìfilọ̀ rẹ ({{symbol}})",
+    "endPrice": "Iye tó kéré jù, tí a dé ní ìparí ({{symbol}})",
+    "quantity": "Mélòó (o ní {{n}})"
   },
   "usernames": {
     "seoTitle": "Orukọ Olumulo | Riftn",
@@ -6461,7 +7088,8 @@
     "addedToYourUsernames": "A ó fi kún àwọn orúkọ olùmúlò rẹ",
     "boughtNameGoesToVault": "O ṣì jẹ́ @{{current}}. @{{handle}} yóò wọ inú àwọn orúkọ olùmúlò rẹ, o sì lè yí padà sí i nígbàkúùgbà tí o bá fẹ́.",
     "youAreNow": "O ti di @{{handle}} báyìí",
-    "boughtToVaultToast": "@{{handle}} ti wà nínú àwọn orúkọ olùmúlò rẹ báyìí"
+    "boughtToVaultToast": "@{{handle}} ti wà nínú àwọn orúkọ olùmúlò rẹ báyìí",
+    "exactTaken": "<handle>@{{handle}}</handle> jẹ́ ti ẹnì kan tí kò tíì gbé e kalẹ̀ fún títà. O lè <profile>béèrè lọ́wọ́ wọn</profile>."
   },
   "accounts": {
     "seoTitle": "Ọjà Àkáǹtì | Riftn",
@@ -6691,7 +7319,18 @@
       "votes_other": "{{count}} àwọn àbò",
       "howToVote_one": "Tẹ {{command}} àti nọ́mbà kan nínú ìjíròrò láti dìbò · {{count}} dìbò",
       "howToVote_other": "Tẹ {{command}} àti nọ́mbà kan nínú ìjíròrò láti dìbò · {{count}} dìbò"
-    }
+    },
+    "eyebrow": {
+      "follow": "Olùtẹ̀lé tuntun",
+      "subscribe": "Alábàápín tuntun",
+      "subscribedTo": "Ó ti forúkọ sílẹ̀ · {{plan}}",
+      "gifted_one": "Ó fi ìforúkọsílẹ̀ kan ṣe ẹ̀bùn",
+      "gifted_other": "Ó fi ìforúkọsílẹ̀ {{count}} ṣe ẹ̀bùn",
+      "share": "Ó pín ìgbóhùnsáfẹ́fẹ́ náà",
+      "join": "Ó ṣẹ̀ṣẹ̀ darapọ̀"
+    },
+    "giftedSubs_one": "{{name}} fi ìforúkọsílẹ̀ kan ṣe ẹ̀bùn!",
+    "giftedSubs_other": "{{name}} fi ìforúkọsílẹ̀ {{count}} ṣe ẹ̀bùn!"
   },
   "liveChatModeration": {
     "timeout1m": "Duro fun iṣẹju 1",
@@ -6712,15 +7351,40 @@
       "modes": {
         "none": "Pa",
         "blur": "Ìṣújú",
-        "color": "Awọ"
-      }
+        "color": "Awọ",
+        "image": "Àwòrán"
+      },
+      "failed": "Yíyọ ẹ̀yìn kò lè bẹ̀rẹ̀ lórí ẹ̀rọ yìí.",
+      "hint": "Ó ń ṣiṣẹ́ lórí ẹ̀rọ rẹ. Ìgbà àkọ́kọ́ máa gba ìṣẹ́jú-àáyá díẹ̀ láti ṣí."
     },
     "remove": "Yọ kúrò",
     "scenes": {
       "countdown": "Ìkàwé",
       "minutes": "{{count}} iṣẹju",
       "names": {
-        "starting": "Yóò bẹ̀rẹ̀ láìpẹ́"
+        "starting": "Yóò bẹ̀rẹ̀ láìpẹ́",
+        "chatting": "Ìfọ̀rọ̀wérọ̀ lásán",
+        "gameplay": "Eré ṣíṣe",
+        "brb": "Màá padà wá láìpẹ́",
+        "ending": "Ìgbóhùnsáfẹ́fẹ́ ń parí"
+      },
+      "title": "Àwọn ìran",
+      "edit": "Ṣàtúnṣe {{name}}",
+      "subtitle": "Ìlà kejì (àṣàyàn)",
+      "picture": "Àwòrán",
+      "noCountdown": "Kò sí ìkàsẹ̀yìn",
+      "muteMic": "Pa gbohùngbohùn mi lẹ́nu mọ́ nígbà tí èyí bá wà ní títàn",
+      "hints": {
+        "starting": "Káàdì pẹ̀lú ìkàsẹ̀yìn",
+        "chatting": "Kámẹ́rà ní ìbòjú kíkún",
+        "gameplay": "Ìbòjú pẹ̀lú kámẹ́rà rẹ",
+        "brb": "Káàdì, gbohùngbohùn pa",
+        "ending": "Káàdì ọpẹ́"
+      },
+      "subtitles": {
+        "starting": "Ìgbóhùnsáfẹ́fẹ́ yóò bẹ̀rẹ̀ ní",
+        "brb": "Màá padà wá ní ìṣẹ́jú kan",
+        "ending": "Ẹ ṣé fún wíwò"
       }
     },
     "sources": {
@@ -6729,15 +7393,38 @@
       "camera": "Kamẹra",
       "show": "Fihàn lórí ìṣẹ̀lẹ̀",
       "positions": {
-        "center": "Àárín"
+        "center": "Àárín",
+        "top-left": "Òkè òsì",
+        "top-right": "Òkè ọ̀tún",
+        "bottom-left": "Ìsàlẹ̀ òsì",
+        "bottom-right": "Ìsàlẹ̀ ọ̀tún"
       },
       "sizes": {
-        "medium": "Ààrin"
+        "medium": "Ààrin",
+        "small": "Kékeré",
+        "large": "Ńlá"
       },
       "shapes": {
         "circle": "Àyíká",
-        "rect": "Onígun mẹ́rin"
-      }
+        "rect": "Onígun mẹ́rin",
+        "rounded": "Rìbìtì"
+      },
+      "title": "Àwọn orísun",
+      "addImage": "Àwòrán tàbí àmì",
+      "addCamera": "Kámẹ́rà kejì",
+      "addClip": "Àgékù fídíò",
+      "addReaction": "Fèsì sí fídíò kan",
+      "reactPlaceholder": "Lẹ ìjápọ̀ fídíò Riftn kan",
+      "reactInvalid": "Lẹ ìjápọ̀ sí fídíò Riftn kan.",
+      "reactNotLive": "Kọ́kọ́ lọ lásìkò, lẹ́yìn náà fi fídíò náà kún un.",
+      "reactNoBubble": "Kámẹ́rà rẹ kò lè ṣí lẹ́ẹ̀mejì níbí. Tún ìwọ̀n fídíò náà ṣe kí ojú rẹ lè wà lórí ìbòjú.",
+      "failed": "Kò lè fi orísun yẹn kún un.",
+      "empty": "Fi àmì, kámẹ́rà kejì tàbí àgékù fídíò kún un lórí ìgbóhùnsáfẹ́fẹ́ rẹ.",
+      "hint": "A ń ya àwọn orísun sórí àwòrán rẹ fún gbogbo òǹwòran àti gbogbo pẹpẹ.",
+      "clip": "Àgékù",
+      "restart": "Tún bẹ̀rẹ̀",
+      "play": "Ṣe é tàbí dá a dúró",
+      "loop": "Yípo"
     },
     "audio": {
       "mute": "Pa lẹ́nu mọ́",
@@ -6746,7 +7433,27 @@
         "off": "Pa",
         "low": "Ìmọ́lẹ̀",
         "high": "Lágbára"
-      }
+      },
+      "title": "Apòpọ̀ ohùn",
+      "unavailable": "Aṣàwákiri yìí kò lè po ohùn pọ̀, nítorí náà gbohùngbohùn rẹ ń jáde bí ó ti wà.",
+      "channels": {
+        "mic": "Gbohùngbohùn",
+        "game": "Eré / táàbù",
+        "clip": "Àgékù fídíò"
+      },
+      "absent": {
+        "mic": "Kò sí gbohùngbohùn",
+        "game": "Pín ìbòjú pẹ̀lú ohùn tàbí lo káàdì ìgbàsílẹ̀",
+        "clip": "Fi àgékù fídíò kún un nínú Àwọn orísun"
+      },
+      "gate": "Ẹnu-ọ̀nà ariwo",
+      "gateHint": "Ó ń pa gbohùngbohùn rẹ lẹ́nu mọ́ láàrin ọ̀rọ̀ kí ìró kíbọ́ọ̀dù àti afẹ́fẹ́ má bàa wọ ìgbóhùnsáfẹ́fẹ́."
+    },
+    "imageTooLarge": "Àwòrán yẹn tóbi jù. Gbìyànjú èyí tó kéré.",
+    "widgets": {
+      "title": "Fi àwọn widget hàn nínú fídíò mi",
+      "hint": "A ń ya ìkìlọ̀, ọ̀pá àfojúsùn àti ìbánisọ̀rọ̀ sínú ìgbóhùnsáfẹ́fẹ́ rẹ, nítorí náà àwọn òǹwòran lórí Twitch, YouTube àti gbogbo pẹpẹ mìíràn náà ń rí wọn.",
+      "failed": "Kò lè yí ibi tí àwọn widget rẹ ti ń hàn padà. Gbìyànjú lẹ́ẹ̀kan si."
     }
   },
   "liveStudio": {
@@ -6760,12 +7467,32 @@
         "off": "Pa",
         "idle": "Ó ti ṣetán",
         "live": "Lásìkò",
-        "error": "Aṣiṣe"
-      }
+        "error": "Aṣiṣe",
+        "connecting": "Ó ń so pọ̀"
+      },
+      "title": "Ibi ìgbóhùnsáfẹ́fẹ́ púpọ̀",
+      "intro": "Lọ lásìkò lórí Riftn lẹ́ẹ̀kan, a ó sì gbé ìgbóhùnsáfẹ́fẹ́ rẹ lọ sí gbogbo pẹpẹ tí a tàn níbí, lọ́fẹ̀ẹ́. Ó ń bẹ̀rẹ̀ láàrin ìṣẹ́jú-àáyá díẹ̀ lẹ́yìn tí o bá lọ lásìkò.",
+      "add": "Fi ibi kún un",
+      "empty": "Kò sí ibi kankan síbẹ̀. Fi Twitch, YouTube, Kick tàbí olupin RTMP èyíkéyìí kún un.",
+      "server": "URL olupin",
+      "findKey": "Wá olupin àti kọ́kọ́rọ́ {{name}} rẹ",
+      "customHint": "Lẹ olupin RTMP àti kọ́kọ́rọ́ tí pẹpẹ rẹ fún ọ.",
+      "keyNote": "A tọ́jú kọ́kọ́rọ́ rẹ ní ìpamọ́ àṣírí lórí olupin wa, a kò sì ní fi hàn mọ́.",
+      "added": "A ti fi {{name}} kún un",
+      "saveFailed": "Kò lè fi ibi náà pamọ́",
+      "toggle": "Ṣe ìgbóhùnsáfẹ́fẹ́ sí ibi yìí"
     },
     "vertical": {
       "centre": "Àárín",
-      "live": "LÁÀÁYÈ"
+      "live": "LÁÀÁYÈ",
+      "title": "Ìwò ìdúró",
+      "intro": "Àwọn fóònù ń wo ìgbóhùnsáfẹ́fẹ́ rẹ nínú àkójọ ìdúró. Fa àpótí náà láti yan apá àwòrán rẹ tí wọ́n ń rí.",
+      "enabled": "Fi ìgbóhùnsáfẹ́fẹ́ mi hàn nínú àkójọ ìdúró",
+      "zoom": "Sún mọ́",
+      "frame": "Àwòrán ìbú rẹ",
+      "box": "Ohun tí àwọn fóònù ń rí",
+      "hint": "Fa àpótí náà, tàbí lo àwọn bọ́tìnnì ọfà. Fi pamọ́ láti lò ó fún ìgbóhùnsáfẹ́fẹ́ rẹ.",
+      "watch": "Wo {{name}} lásìkò"
     },
     "subathon": {
       "title": "Subathon",
@@ -6927,7 +7654,9 @@
       "subathon_timer": "Àsìkò Subathon",
       "points_board": "Àwọn olùwò olóòótọ́",
       "streamer_level": "Ipele Streamer",
-      "tip_jar": "Ìkòkò ẹ̀bùn"
+      "tip_jar": "Ìkòkò ẹ̀bùn",
+      "frame": "Fírémù",
+      "hype_train": "Ọkọ̀ ojú-irin ìtara"
     },
     "hints": {
       "tip_alert": "Ṣe ayẹyẹ gbogbo awọn imọran, iwọn si ipele rẹ.",
@@ -6951,7 +7680,8 @@
       "subathon_timer": "Ìkàwé tí ó ń fúnni ní ẹ̀bùn, tí ó ń tẹ̀lé àti tí ó ń tẹ àwọn ìforúkọsílẹ̀ padà.",
       "points_board": "Àwọn olùwoye tó ga jùlọ rẹ nípa àwọn kókó láti wíwo àti fífún wọn ní ẹ̀bùn.",
       "streamer_level": "Ipele ṣiṣan rẹ àti ìlà ọ̀sọ̀ọ̀sẹ̀ rẹ, láti inú àkójọpọ̀ rẹ",
-      "tip_jar": "Igo ti o kun bi awọn ẹbun ti o sanwo ti n wọle"
+      "tip_jar": "Igo ti o kun bi awọn ẹbun ti o sanwo ti n wọle",
+      "hype_train": "Ó ń fi ọkọ̀ ojú-irin ìtara hàn nígbà tí ó bá ń lọ: ẹ̀bùn tàbí ìforúkọsílẹ̀ mẹ́ta láàrin ìṣẹ́jú márùn-ún ló ń bẹ̀rẹ̀ rẹ̀."
     },
     "fields": {
       "style": "Àṣà",
@@ -7337,7 +8067,10 @@
     "endStreamConfirmBody": "Ìfipamọ́ rẹ dúró fún gbogbo ẹnìkan tó ń wò ó ati kò lè tún bẹ̀rẹ̀.",
     "keepStreaming": "Tẹ̀síwájú ìfipamọ́",
     "encoderPermanentHint": "Bọtini yìí kò yí padà láéláé. Ṣètò àdàkọ rẹ lẹ́ẹ̀kan — ìgbà mìíràn kàn tẹ Bẹ̀rẹ̀ níbẹ̀ àti Riftn ṣẹ̀dá ìfiránṣẹ́ náà fún ọ.",
-    "notEnoughTokensForBounty": "Kò tó àmi-ìṣẹ́. Nílò {{need}} àmi-ìṣẹ́ ṣùgbọ́n ní {{have}}."
+    "notEnoughTokensForBounty": "Kò tó àmi-ìṣẹ́. Nílò {{need}} àmi-ìṣẹ́ ṣùgbọ́n ní {{have}}.",
+    "screenInAppHint": "Nínú ohun èlò Riftn",
+    "screenInAppNote": "Àwọn aṣàwákiri fóònù kì í jẹ́ kí ojú-òpó kankan pín ìbòjú rẹ. Lọ lásìkò láti inú ohun èlò Riftn dípò, lẹ́yìn náà tẹ Pín ìbòjú.",
+    "screenInAppCta": "Gba ohun èlò Riftn"
   },
   "events": {
     "seoTitle": "Awọn iṣẹlẹ: Awọn ipade & Awọn iṣẹlẹ Agbegbe lori Riftn",
@@ -7412,7 +8145,8 @@
     "logInToChat": "Wọle si iwiregbe",
     "uploadingVoiceNote": "Gbígbé àkíyèsí ohùn...",
     "voiceNoteSent": "Àkíyèsí ohùn tí a rán jáde!",
-    "voiceNoteFailed": "Ó kùnà láti fi àkíyèsí ohùn ránṣẹ́"
+    "voiceNoteFailed": "Ó kùnà láti fi àkíyèsí ohùn ránṣẹ́",
+    "filterMine": "Àwọn Ìṣẹ̀lẹ̀ Mi"
   },
   "referral": {
     "stats": {
@@ -7540,7 +8274,8 @@
     "faqTopTierStakerQ": "Mo jẹ́ alátakò tí ó ga jùlọ. Ṣé mo ṣì ń sanwó?",
     "faqTopTierStakerA": "Rárá. Top 7 staking tiers gba Riftn Extra lọ́fẹ̀ẹ́. Àwọn ìpele 4 tó ga jù lọ gba ìdílé Riftn lọ́fẹ̀ẹ́. Unstake and the perks lift — sinmi wọ́n sì padà wá.",
     "faqPayInDhbQ": "Ṣe mo le sanwo ni awọn ami Riftn?",
-    "faqPayInDhbA": "Awọn sisanwo kaadi ni ifilọlẹ. Sisanwo ni awọn ami Riftn n bọ laipẹ ati pe yoo pẹlu ẹdinwo."
+    "faqPayInDhbA": "Awọn sisanwo kaadi ni ifilọlẹ. Sisanwo ni awọn ami Riftn n bọ laipẹ ati pe yoo pẹlu ẹdinwo.",
+    "openApp": "Ṣí ohun èlò →"
   },
   "jobs": {
     "seoTitle": "Iṣẹ́ ní Riftn: Ṣii ipa nínú Web3 Social Media",
@@ -7925,7 +8660,45 @@
     "foldersInFolder_other": "Ni {{count}} awọn folda",
     "foldersNoItems": "Ko si nkankan ninu folda yii sibẹsibẹ",
     "foldersNoItemsHint": "Ṣí àbájáde kan kí o sì yan \"Ṣafikun sí àkájọ ìwé\" láti fi sílẹ̀ níbí.",
-    "skippedUpstreamFailed": "Skipped nítorí pé ìgbésẹ̀ tí ó ṣáájú kùnà. Owó rẹ̀ dúró nínú ìdúróṣánṣán rẹ."
+    "skippedUpstreamFailed": "Skipped nítorí pé ìgbésẹ̀ tí ó ṣáájú kùnà. Owó rẹ̀ dúró nínú ìdúróṣánṣán rẹ.",
+    "signInForAudioLibrary": "Wọlé láti ṣí ibi ìkówèésí ohùn àdáni rẹ tí a fi pamọ́.",
+    "audioLibraryFailed": "A kò lè ṣí ohùn rẹ tí a fi pamọ́. Gbìyànjú lẹ́ẹ̀kan si.",
+    "retryFreeTask": "Tún gbìyànjú iṣẹ́ ọ̀fẹ́",
+    "previewSavedMedia": "Wo media tí a fi pamọ́",
+    "audioSavePending": "Ohùn náà ti ṣetán, ṣùgbọ́n fífi pamọ́ sí ibi ìkówèésí àdáni ṣì ń dúró. Tẹ̀síwájú láti gbà á.",
+    "confirmInterruptedRetry": "Tún gbìyànjú iṣẹ́ ohùn tàbí olùrànlọ́wọ́ tí a dá dúró. A kò mọ àbájáde rẹ̀ tẹ́lẹ̀, títún gbìyànjú sì lè tún iṣẹ́ ṣe. A ó tún lo ìsanwó tó wà àti ID iṣẹ́ tí a ti sanwó fún.",
+    "freeResultUnknown": "Ìdáhùn iṣẹ́ ọ̀fẹ́ náà dá dúró. A kò ní fi ránṣẹ́ lẹ́ẹ̀kan si fúnra rẹ̀. Yan Tún gbìyànjú iṣẹ́ ọ̀fẹ́, lẹ́yìn náà tẹ̀síwájú; a ń tọ́jú ìsanwó rẹ àti àwọn iṣẹ́ mìíràn.",
+    "formAuthor": "Ṣàtúnṣe flow",
+    "formAuthorHint": "Kọ́ flow pẹ̀lú àwọn ìgbéwọlé oníru. Fi pamọ́ níbí, tàbí tò ó lórí kanfasi wẹ́ẹ̀bù.",
+    "chooseSavedMedia": "Yan media tí a fi pamọ́",
+    "formInput": "Ìgbéwọlé: {{handle}}",
+    "reviewRun": "Ṣàyẹ̀wò ìṣiṣẹ́",
+    "resumeRun": "Tẹ̀síwájú ìṣiṣẹ́ tí a fi pamọ́",
+    "confirmPrice": "Àpapọ̀: token {{price}}",
+    "recoveryHint": "A fi ìtọ́kasí iṣẹ́ àti ìsanwó pamọ́ sórí ẹ̀rọ yìí. Tẹ̀síwájú iṣẹ́ tí a dá dúró kí o tó bẹ̀rẹ̀ ìṣiṣẹ́ mìíràn.",
+    "newRun": "Bẹ̀rẹ̀ ìṣiṣẹ́ mìíràn",
+    "loadMoreMedia": "Ṣí media sí i",
+    "invalidGraph": "Ṣàyẹ̀wò àwọn ìsopọ̀: gbogbo ìgbéwọlé nílò orísun tó bá a mu, àwòrán náà kò sì gbọdọ̀ ní àyíká.",
+    "unsupportedNode": "Node yìí kò lè ṣiṣẹ́ nínú fọ́ọ̀mù àbínibí síbẹ̀. Lo kanfasi wẹ́ẹ̀bù fún flow yìí.",
+    "missingPrompt": "So node ọ̀rọ̀ kan pọ̀ pẹ̀lú ìtọ́sọ́nà.",
+    "invalidSettings": "Àwòṣe tí a yàn kò ṣe àtìlẹ́yìn fún àwọn ètò wọ̀nyí.",
+    "missingCapturedFrame": "Ya fírémù kan lórí kanfasi wẹ́ẹ̀bù kí o tó lo fídíò yìí bí ìgbéwọlé àwòrán.",
+    "missingSavedMedia": "Media orísun tí a fi pamọ́ ti sọnù tàbí kò sí fún àkọọ́lẹ̀ yìí mọ́.",
+    "quoteFailed": "A kò lè díyelé flow yìí. Gbìyànjú lẹ́ẹ̀kan si.",
+    "recoverBeforeEdit": "Tẹ̀síwájú ìṣiṣẹ́ tí a fi pamọ́ kí o tó yí àwòrán rẹ̀ padà tàbí bẹ̀rẹ̀ ìṣiṣẹ́ mìíràn.",
+    "runAlreadyComplete": "Ìṣiṣẹ́ yìí ti parí. Yan Bẹ̀rẹ̀ ìṣiṣẹ́ mìíràn láti tún ṣẹ̀dá.",
+    "recoveryCorrupt": "A kò lè ka àkọsílẹ̀ ìmúpadàbọ̀sípò tí a fi pamọ́. Tọ́jú flow yìí kí o sì kàn sí ìrànlọ́wọ́ kí o tó tún sanwó.",
+    "paidUnavailable": "O lè kọ àti fi àwọn flow pamọ́ níbí. Ìṣiṣẹ́ olówó kò sí nínú ilé ìtajà yìí.",
+    "planChanged": "Flow náà yípadà lẹ́yìn ìdíyelé. Tún ṣàyẹ̀wò ìṣiṣẹ́ náà.",
+    "connectOwnerWallet": "So àpò owó tó ní flow yìí pọ̀.",
+    "runFailed": "Node náà kò lè parí. A ń tọ́jú ìtọ́kasí iṣẹ́ rẹ̀ tí a fi pamọ́ fún ìmúpadàbọ̀sípò.",
+    "recoveryPending": "Ìṣẹ̀dá náà ṣì ń dúró. Tẹ̀síwájú ìṣiṣẹ́ yìí láti gbà á.",
+    "nodeAudioGen": "Olùṣẹ̀dá ohùn",
+    "nodeAudioGenDesc": "Ọ̀rọ̀ sísọ, ipa ohùn, ìkọsílẹ̀ àti ìyàsọ́tọ̀ ohùn",
+    "nodeAudioInput": "Ohùn tí a fi pamọ́",
+    "nodeAudioInputDesc": "Lo ohùn àdáni láti ibi ìkówèésí rẹ",
+    "audioVoiceId": "ID ohùn",
+    "audioSeconds": "Gígùn ohùn ní ìṣẹ́jú-àáyá"
   },
   "videoPlayer": {
     "volume": "Ìwọ̀n ohùn",
@@ -8064,8 +8837,27 @@
     "nonFollowers": {
       "notNow": "Kì í ṣe ní báyìí",
       "cancel": "Fagilee",
-      "close": "Pàdé"
-    }
+      "close": "Pàdé",
+      "title": "Ṣé o fẹ́ wẹ àwọn tí o ń tẹ̀lé mọ́?",
+      "body": "Àkọọ́lẹ̀ {{count}} tí o ń tẹ̀lé kò tẹ̀lé ọ padà.",
+      "cta": "Dẹ́kun títẹ̀lé gbogbo {{count}}",
+      "confirmTitle": "Dẹ́kun títẹ̀lé àkọọ́lẹ̀ {{count}}?",
+      "confirmBody": "A kò ní sọ fún wọn. O lè tún tẹ̀lé ẹnikẹ́ni lẹ́yìn náà.",
+      "confirm": "Bẹ́ẹ̀ ni, dẹ́kun títẹ̀lé {{count}}",
+      "working": "Ó ń dẹ́kun títẹ̀lé {{done}} nínú {{total}}...",
+      "background": "Máa bá a lọ lẹ́yìn",
+      "failed": "Kò lè bẹ̀rẹ̀. Gbìyànjú lẹ́ẹ̀kan si ní ìṣẹ́jú kan.",
+      "doneTitle": "Gbogbo rẹ̀ ti mọ́",
+      "doneAll": "O dẹ́kun títẹ̀lé àkọọ́lẹ̀ {{done}} tí kò tẹ̀lé ọ padà.",
+      "doneSome": "O dẹ́kun títẹ̀lé àkọọ́lẹ̀ {{done}}. A kò lè dẹ́kun títẹ̀lé {{failed}}.",
+      "doneToast": "O dẹ́kun títẹ̀lé àkọọ́lẹ̀ {{done}} tí kò tẹ̀lé ọ padà"
+    },
+    "followBackConfirmTitle_one": "Tẹ̀lé ènìyàn {{count}} padà?",
+    "followBackConfirmTitle_other": "Tẹ̀lé ènìyàn {{count}} padà?",
+    "followBackConfirmBody": "Wọ́n ti ń tẹ̀lé ọ tẹ́lẹ̀. Àwọn àkọọ́lẹ̀ àdáni máa gba ìbéèrè ìtẹ̀lé.",
+    "followedBackCount_one": "O tẹ̀lé ènìyàn {{count}} padà",
+    "followedBackCount_other": "O tẹ̀lé ènìyàn {{count}} padà",
+    "followBackDoneBody": "O lè rí gbogbo wọn nínú Ń tẹ̀lé."
   },
   "reactionInfo": {
     "title": "Ìdáhùn",
@@ -8867,7 +9659,28 @@
       "add": "Fikún",
       "scale": "Iwọn",
       "color": "Àwọ̀",
-      "light": "Ìmọ́lẹ̀"
+      "light": "Ìmọ́lẹ̀",
+      "create": "Fi pẹpẹ 3D kún un",
+      "title": "Pẹpẹ ìran 3D",
+      "hint": "Ṣètò ìyàwòrán pẹ̀lú àwọn òbìrìkìtì àti àpótí. Kámẹ́rà, ibi ìgbékalẹ̀ àti ìmọ́lẹ̀ agbègbè mẹ́ta tó dá dúró ń yí fírémù tí a ṣẹ̀dá padà.",
+      "preview": "Àwòtẹ́lẹ̀ ìran tí a ṣẹ̀dá",
+      "error": "Kò lè múra fírémù sílẹ̀. Ṣàyẹ̀wò àwọn ìtọ́kasí ìyàwòrán rẹ kí o sì gbìyànjú lẹ́ẹ̀kan si.",
+      "elevation": "Gíga",
+      "distance": "Ìjìnnà",
+      "fov": "Ààyè ìríran",
+      "object": "Ohun",
+      "sphere": "Òbìrìkìtì",
+      "box": "Àpótí",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Yọ ohun kúrò",
+      "intensity": "Agbára",
+      "diffusion": "Ìtànká",
+      "saving": "Ó ń múra fírémù sílẹ̀…",
+      "useFrame": "Lo fírémù tí a ṣẹ̀dá bí ìtọ́kasí ìyàwòrán",
+      "frameHint": "Ó ń ṣẹ̀dá PNG 320 × 180 ó sì fi kún àwọn ìtọ́kasí ìyàwòrán yìí. Ṣàyẹ̀wò òpin ìtọ́kasí àti iye owó àwòṣe kí o tó ṣẹ̀dá.",
+      "frameName": "Fírémù pẹpẹ ìran"
     },
     "video": {
       "tFade": "Ìdàpọ̀ ìyípadà",
@@ -8962,7 +9775,9 @@
       "pptx": "Ìgbékalẹ̀ PowerPoint",
       "pptxHint": "Ojú-ewé kọ̀ọ̀kan yóò di àwòrán selaidi kan, pẹ̀lú àwọn àkọsílẹ̀ olùgbékalẹ̀ àti àwọn ọ̀nà-ìjápọ̀. Ṣàtúnṣe ọ̀rọ̀ àti àwọn ohun tó wà nínú àpẹẹrẹ àtìbẹ̀rẹ̀.",
       "section": "Apá kan tí a sọ ní orúkọ",
-      "transparent": "Ìpìlẹ̀ tó ṣeé rí lára"
+      "transparent": "Ìpìlẹ̀ tó ṣeé rí lára",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Ó ń gba ZIP sílẹ̀ pẹ̀lú ìlà àkókò rẹ bí FCPXML àti Premiere XML pẹ̀lú gbogbo fáìlì media, kí o lè parí àtúnṣe nínú Premiere Pro, Final Cut Pro tàbí DaVinci Resolve. Ọ̀rọ̀ máa di àmì; àwọn ipa ṣì wà nínú Riftn."
     },
     "inspector": {
       "selectHint": "Yan ipele kan lori kanfasi tabi agekuru kan lori akoko.",
@@ -9056,7 +9871,45 @@
       "failed": "AI kò lè ṣe ìyẹn báyìí. Gbìyànjú lẹ́ẹ̀kan sí i láìpẹ́.",
       "changes": "Àwọn àtúnṣe tí a ṣe: {{count}}",
       "undo": "Dá padà",
-      "openGenerator": "Ṣàyẹ̀wò kí o sì ṣẹ̀dá"
+      "openGenerator": "Ṣàyẹ̀wò kí o sì ṣẹ̀dá",
+      "stopped": "Ó ti dúró. Kò sí ohun mìíràn tí a yípadà.",
+      "queued": "{{count}} wà nínú ìlà",
+      "restore": "Dá a padà sí ibí",
+      "restoreHint": "Dá iṣẹ́ náà padà sí bí ó ti wà ṣáájú ìfiránṣẹ́ yìí. Ìyípadà ẹ̀yìn máa mú un padà.",
+      "restored": "A ti dá iṣẹ́ náà padà sí ṣáájú ìfiránṣẹ́ yẹn. Tẹ ìyípadà ẹ̀yìn láti mú ẹ̀dà tuntun padà.",
+      "rewrite": "Jẹ́ kí ìbéèrè mi ṣe kedere sí i",
+      "rewriteFailed": "Kò lè tún un kọ. Ọ̀rọ̀ rẹ kò yípadà.",
+      "feedback": "Ṣé èyí wúlò?",
+      "good": "Ìdáhùn tó dára",
+      "bad": "Ìdáhùn tí kò dára",
+      "retryPrefix": "Ìyẹn kò tọ́. Dípò bẹ́ẹ̀, ",
+      "recipesTitle": "Àwọn ìlànà",
+      "recipe": {
+        "podcastClip": {
+          "label": "Àgékù podcast",
+          "prompt": "Wá àkókò ìṣẹ́jú-àáyá 30 tó lágbára jù, gé e sí i, fi àkọlé Word Pop kún un kí o sì ṣe é ní 9:16."
+        },
+        "talkingHead": {
+          "label": "Ẹni tó ń sọ̀rọ̀ tó mọ́",
+          "prompt": "Gé àwọn ìdánudúró gígùn kúrò, fi àkọlé Classic kún un, kí o sì fún un ní ìrísí gbígbóná díẹ̀."
+        },
+        "productPromo": {
+          "label": "Ìpolówó ọjà",
+          "prompt": "Ṣe ìpolówó ìṣẹ́jú-àáyá 15: àkọlé alágbára ní ìbẹ̀rẹ̀, ìyípadà Zoom in láàrin àwọn àgékù, àkọlé Bold àti orin alárinrin."
+        },
+        "hypeReel": {
+          "label": "Fídíò ìtara",
+          "prompt": "Gé àwọn àgékù sí ìlù orin náà, lo ìyípadà Fly up àti ìrísí Technicolor."
+        },
+        "retroEdit": {
+          "label": "Àtúnṣe àtijọ́",
+          "prompt": "Fún gbogbo àgékù ní ìrísí VHS, fi àkọlé serif ńlá kún un, kí o sì lo ìyípadà Fade."
+        },
+        "tutorial": {
+          "label": "Ìkẹ́kọ̀ọ́",
+          "prompt": "Fi àkọlé kún ìgbésẹ̀ kọ̀ọ̀kan, àkọlé Boxed, kí o sì dín ìyára àkókò pàtàkì kù sí 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Onígun mẹ́rin gígùn",
@@ -9231,7 +10084,9 @@
       "tint": "Àwọ̀ díẹ̀ {{value}}",
       "vignette": "Òkùnkùn etí {{value}}%",
       "auto": "Àtúnṣe aládàáṣe",
-      "autoFailed": "A kò lè ṣàyẹ̀wò àwòrán yìí."
+      "autoFailed": "A kò lè ṣàyẹ̀wò àwòrán yìí.",
+      "halation": "Ìtànmọ́lẹ̀ {{value}}%",
+      "scanlines": "Ìlà ìwòran {{value}}%"
     },
     "pages": {
       "add": "Fi ojú-ìwé kún un",
@@ -9306,7 +10161,15 @@
       "textSaved": "Àwọn àyípadà àkọlé ti wà ní ìpamọ́.",
       "action": "Àkọlé aládàáṣe",
       "styles": {
-        "bold": "Ọ̀rọ̀ ẹ̀ẹ̀ẹ̀"
+        "bold": "Ọ̀rọ̀ ẹ̀ẹ̀ẹ̀",
+        "classic": "Classic",
+        "boxed": "Boxed",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Tí a tò jọ",
+        "serif": "Serif",
+        "bubble": "Fọ́nrán"
       },
       "working": "Ń gbọ́… {{percent}}%",
       "downloading": "Ń ṣètò àwòṣe ọ̀rọ̀ sísọ… {{percent}}%",
@@ -9318,7 +10181,8 @@
       "translateCount": "Túmọ̀ àwọn àkọlé {{count}}",
       "translationDone": "Àwọn àkọlé {{count}} tí a túmọ̀",
       "translationFailed": "Ìtumọ̀ àkọlé kùnà. Àwọn àkọlé rẹ kò yí padà.",
-      "lockedTranslation": "Ṣí àwọn àkọlé tí ó ti wà ní títìpa láti fi wọ́n kún un."
+      "lockedTranslation": "Ṣí àwọn àkọlé tí ó ti wà ní títìpa láti fi wọ́n kún un.",
+      "style": "Àṣà àkọlé"
     },
     "multi": {
       "selected": "A ti yan ìpele {{count}}",
@@ -9355,7 +10219,10 @@
       "saveNewPreset": "Fi titun pamọ",
       "saveStyles": "Fipamọ awọn aṣa pẹlu apẹrẹ",
       "stylesSaved": "Awọn aṣa iyasọtọ ti a fipamọ pẹlu apẹrẹ yii",
-      "usePreset": "Lo àwọn ọ̀nà"
+      "usePreset": "Lo àwọn ọ̀nà",
+      "dehubApplied": "A lo àmì Riftn sí ìpele {{count}}.",
+      "dehubApply": "Lo àmì Riftn",
+      "dehubHint": "Àwọ̀ Riftn ti òṣìṣẹ́, fọ́ǹtì Exo àti Inter, àti àmì Riftn, ní títẹ̀ kan."
     },
     "draw": {
       "heading": "Yà",
@@ -10689,7 +11556,23 @@
       "zoomOut": "Ṣe ìfúnkánfásì kúrò"
     },
     "clipFix": {
-      "listening": "Gbígbọ́..."
+      "listening": "Gbígbọ́...",
+      "detach": "Ya ohùn sọ́tọ̀",
+      "detached": "A gbé ohùn lọ sí àgékù tirẹ̀",
+      "detachFailed": "Kò lè ya ohùn àgékù yìí sọ́tọ̀",
+      "removeBars": "Yọ àwọn ọ̀pá dúdú kúrò",
+      "scanning": "Ó ń ṣàyẹ̀wò fírémù…",
+      "noBars": "A kò rí ọ̀pá dúdú kankan",
+      "barsRemoved": "A gé àwọn ọ̀pá dúdú kúrò",
+      "barsFailed": "Kò lè ṣàyẹ̀wò fídíò yìí fún ọ̀pá dúdú",
+      "reframe": "Tún fírémù ṣe fúnra rẹ̀",
+      "reframeHint": "Fídíò náà ti bá ìrísí ojú-ìwé yìí mu",
+      "reframed": "A tún fírémù ṣe láti tẹ̀lé ìṣe náà",
+      "reframeFailed": "Kò lè tún fírémù fídíò yìí ṣe",
+      "retakes": "Yọ àwọn àtúngbà kúrò",
+      "noRetakes": "A kò rí àtúngbà kankan",
+      "retakesRemoved": "A yọ àtúngbà {{count}} kúrò, a tọ́jú èyí tó kẹ́yìn",
+      "retakesFailed": "Kò lè yọ àwọn àtúngbà kúrò nínú àgékù yìí"
     },
     "shortcuts": {
       "action": {
@@ -10697,19 +11580,109 @@
         "play": "Bẹ̀rẹ̀",
         "pause": "Duro",
         "frameBack": "Fọ́nrán tẹ́lẹ̀",
-        "frameForward": "Fọ́nrán tẹ̀lé e"
-      }
+        "frameForward": "Fọ́nrán tẹ̀lé e",
+        "back": "Padà sẹ́yìn ìṣẹ́jú-àáyá 1",
+        "rippleDelete": "Pa àgékù rẹ́",
+        "liftDelete": "Pa àgékù rẹ́",
+        "start": "Lọ sí ìbẹ̀rẹ̀",
+        "end": "Lọ sí òpin"
+      },
+      "preset": "Ìtò kíbọ́ọ̀dù",
+      "presetHint": "Lo àwọn bọ́tìnnì ìlà àkókò láti inú olóòtú tí o mọ̀. Àwọn ọ̀nà àbùjá Riftn ṣì ń ṣiṣẹ́ fún gbogbo nǹkan mìíràn."
     },
     "voiceClone": {
       "stop": "Dá ìgbàsílẹ̀ dúró",
-      "failed": "Ìfọkànbalẹ̀ ohùn kùnà."
+      "failed": "Ìfọkànbalẹ̀ ohùn kùnà.",
+      "pickerLabel": "Ṣe ẹ̀dà ohùn rẹ",
+      "pickerDetail": "Ohùn àtẹnusọ ní ohùn tìrẹ",
+      "title": "Ṣe ẹ̀dà ohùn rẹ",
+      "description": "Ká ara rẹ sílẹ̀ tàbí yan àgékù tí o ti ń sọ̀rọ̀. O máa sanwó lẹ́ẹ̀kan, ohùn rẹ sì jẹ́ tìrẹ fún gbogbo ohùn àtẹnusọ.",
+      "defaultName": "Ohùn mi",
+      "record": "Ká àpẹẹrẹ sílẹ̀ (ìṣẹ́jú-àáyá 30 sí ìṣẹ́jú 2)",
+      "fromMedia": "Tàbí lo àgékù láti Media",
+      "recorded": "Ohun tí o ká sílẹ̀",
+      "sample": "Àpẹẹrẹ: {{name}}",
+      "hint": "Ọ̀rọ̀ tó ṣe kedere láìsí orin ló dára jù.",
+      "noMic": "Kò lè lo gbohùngbohùn.",
+      "sampleFailed": "Kò lè ka ohùn láti inú àgékù yẹn.",
+      "pay": "Ṣe ẹ̀dà fún token {{amount}}",
+      "useFree": "Ṣe ẹ̀dà (a ti sanwó)",
+      "owned": "Ohùn rẹ “{{name}}” ti wà ní ìmúrasílẹ̀. Yàn án láti inú àkójọ ohùn.",
+      "useOwned": "Lo ohùn mi",
+      "ready": "“{{name}}” ti ṣetán fún ohùn àtẹnusọ.",
+      "paidFailed": "A ti fi ìsanwó rẹ pamọ́. Tún èyí ṣí, ìgbìyànjú tó kàn sì máa jẹ́ ọ̀fẹ́.",
+      "consent": "Ṣe ẹ̀dà ohùn tìrẹ nìkan, tàbí èyí tí o ní àṣẹ láti lò."
     },
     "linkImport": {
       "go": "Gbe wọlé",
-      "downloading": "Ìgbàkúrò {{percent}}%"
+      "downloading": "Ìgbàkúrò {{percent}}%",
+      "open": "Gbé wọlé láti ìjápọ̀",
+      "placeholder": "Lẹ ìjápọ̀ YouTube, TikTok tàbí òmíràn",
+      "rights": "Èmi ni mo ni fídíò yìí tàbí mo ní àṣẹ láti lò ó",
+      "audioOnly": "Ohùn nìkan",
+      "queued": "Ó wà nínú ìlà…",
+      "waiting": "Ó ń dúró de ojú-òpó náà, yóò tún gbìyànjú láìpẹ́…",
+      "adding": "Ó ń fi kún Media…",
+      "added": "A gbé e wọlé a sì fi kún ìlà àkókò.",
+      "failed": "Kò lè gbé ìjápọ̀ yẹn wọlé."
     },
     "reverse": {
-      "action": "Yí padà"
+      "action": "Yí padà",
+      "working": "Ó ń yí i padà sẹ́yìn {{percent}}%",
+      "done": "A ti yí àgékù padà sẹ́yìn.",
+      "failed": "Kò lè yí àgékù yìí padà sẹ́yìn.",
+      "unsupported": "Aṣàwákiri yìí kò lè yí fídíò padà sẹ́yìn. Gbìyànjú Chrome tàbí Edge.",
+      "tooLong": "A lè yí àgékù tó tó ìṣẹ́jú-àáyá {{seconds}} padà sẹ́yìn."
+    },
+    "film": {
+      "repairRefs": "Yọ àwọn ìjápọ̀ media tó sọnù kúrò",
+      "title": "Iṣẹ́ fíìmù",
+      "intro": "Ṣètò àwọn ìyàwòrán pẹ̀lú ìtọ́kasí àwòrán tí a lè tún lò. Àlàyé rẹ, ìtò ìyàwòrán àti àbájáde tí a yàn ni a fi pamọ́ pẹ̀lú iṣẹ́ yìí.",
+      "create": "Ṣẹ̀dá ètò fíìmù",
+      "name": "Orúkọ fíìmù",
+      "brief": "Àlàyé fíìmù",
+      "sharedReferences": "Ìtọ́kasí àwòrán àjọpín (títí dé 4)",
+      "shot": "Ìyàwòrán",
+      "addShot": "Fi ìyàwòrán kún un",
+      "shotName": "Orúkọ ìyàwòrán",
+      "action": "Ìṣe àti ìṣètò ìyàwòrán",
+      "seconds": "Ìṣẹ́jú-àáyá fídíò tí a béèrè",
+      "shotReferences": "Ìtọ́kasí àwòrán àfikún (òpin àpapọ̀ 4)",
+      "frame": "Múra fírémù sílẹ̀",
+      "video": "Múra fídíò sílẹ̀",
+      "review": "Ṣàyẹ̀wò àwòṣe, ìtọ́kasí, gígùn fídíò àti iye owó nínú studio kí o tó ṣẹ̀dá.",
+      "result": "Àbájáde ìyàwòrán tí a gbà",
+      "noResult": "A kò yan àbájáde kankan",
+      "resultHint": "Yan àwòrán tàbí fídíò tí a gbà láti Àwọn ìgbéjáde. Ìjápọ̀ rẹ̀ ń fi pamọ́ pẹ̀lú ìyàwòrán yìí; lo ìlà àkókò láti kó fíìmù jọ.",
+      "earlier": "Gbé e ṣáájú",
+      "later": "Gbé e sẹ́yìn",
+      "remove": "Yọ ìyàwòrán kúrò",
+      "issue": "Ṣàyẹ̀wò àpèjúwe ìyàwòrán àti media ìtọ́kasí, lẹ́yìn náà gbìyànjú lẹ́ẹ̀kan si. Jẹ́ kí iṣẹ́ náà wà ní ṣíṣí bí a kò bá lè fi pamọ́.",
+      "searchMedia": "Wá media nípa orúkọ",
+      "refreshMedia": "Sọ media dọ̀tun"
+    },
+    "speakers": {
+      "find": "Wá àwọn olùsọ̀rọ̀",
+      "name": "Olùsọ̀rọ̀ {{number}}",
+      "onlyOne": "Olùsọ̀rọ̀ kan ṣoṣo la rí.",
+      "failed": "Kò lè rí àwọn olùsọ̀rọ̀.",
+      "kept": "A tọ́jú {{name}} nìkan.",
+      "editFailed": "Àtúnṣe yẹn kò bá àgékù yìí mu.",
+      "split": "A pín in sí ìyàwòrán olùsọ̀rọ̀ {{count}}.",
+      "keepOnly": "Tọ́jú èyí nìkan",
+      "splitAction": "Gé e ní ìyípadà olùsọ̀rọ̀ kọ̀ọ̀kan"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Ṣàpèjúwe ohun 3D tí o fẹ́",
+      "queued": "Ó ń kọ́ ohun 3D rẹ. Yóò dé inú táàbù Àwọn ìṣẹ̀dá.",
+      "note": "Àwọn ohun 3D ń wọ inú Media bí àgékù kúkúrú tó ń yípo pẹ̀lú ẹ̀yìn tí a lè rí kọjá."
+    },
+    "behind": {
+      "action": "Ọ̀rọ̀ lẹ́yìn ènìyàn",
+      "working": "Ó ń gé ènìyàn náà jáde…",
+      "done": "Ọ̀rọ̀ àti àkọlé ti wà lẹ́yìn ènìyàn náà báyìí.",
+      "failed": "Kò lè fi ọ̀rọ̀ sí ẹ̀yìn ènìyàn náà."
     }
   },
   "jungleMood": {
@@ -10953,7 +11926,8 @@
     "viewOnExplorer": "Àmọ́nà òṣèlú",
     "viewOnExplorerDesc": "Ṣii aṣàwákiri blockchain (BaseScan) láti wo àwọn kúlẹ̀kúlẹ̀ ìdúnàádúrà lórí pq fún ìfìwéránṣẹ́ tàbí ìfowópamọ́.",
     "title": "Àtòjọ Àkọọlẹ",
-    "subtitle": "Kọ́ ohun tí àmì àti àwòṣe kọ̀ọ̀kan túmọ̀ sí."
+    "subtitle": "Kọ́ ohun tí àmì àti àwòṣe kọ̀ọ̀kan túmọ̀ sí.",
+    "listFractions": "Ṣe àkójọ àwọn ìpín"
   },
   "tipFunding": {
     "noRoute": "Ko si ọna Uniswap si awọn ami Riftn fun ami yii ni bayi",
@@ -11111,7 +12085,9 @@
     "tokenAmount": "{{amount}} àmi-ìṣẹ́",
     "assistant": {
       "question1": "Kín ni APY tí ó wà nísinsìnyí fún àwọn àmì Riftn?",
-      "question2": "Bẹ́ẹ̀ni, bí mo bá fi ẹgbẹ̀rún mẹ́wàá owó pamọ́ fún àádọ́rùn-ún ọjọ́"
+      "question2": "Bẹ́ẹ̀ni, bí mo bá fi ẹgbẹ̀rún mẹ́wàá owó pamọ́ fún àádọ́rùn-ún ọjọ́",
+      "answer1": "APY ìfipamọ́ lọ́wọ́lọ́wọ́ fún àwọn owó àmì Riftn jẹ́ 12.4% fún àkókò títìpa ọjọ́ 30. Èyí ni àlàyé rẹ̀:\n\n• Títìpa ọjọ́ 7: 8.2% APY\n• Títìpa ọjọ́ 30: 12.4% APY\n• Títìpa ọjọ́ 90: 18.7% APY\n\nṢé o fẹ́ kí n ràn ọ́ lọ́wọ́ láti ṣírò èrè tí o lè rí?",
+      "answer2": "Fún owó àmì 10,000 tí a fi pamọ́ ní 18.7% APY fún ọjọ́ 90:\n\n📊 Èrè tí a fojú sí: ~461 owó àmì\n\nÌyẹn jẹ́ nǹkan bí owó àmì 5.13 lójoojúmọ́. Rántí pé APY lè yí padà gẹ́gẹ́ bí iye àpapọ̀ tí a fi pamọ́ ṣe rí."
     },
     "bookmarks": {
       "stakingGuide": "Itọsọna pipe si awọn aami Riftn staking: APY breakdown, awọn akoko titiipa, ati awọn isodipupo ẹbun ti salaye."
@@ -11121,6 +12097,9 @@
     },
     "home": {
       "stakedPost": "Àmì 50k Riftn tí a tẹ. APY wò ó pé ó lágbára ní 12.4%. Ìrònú alákòókò pípẹ́. 💎🙌"
+    },
+    "notifications": {
+      "tippedYou": "fún ọ ní ẹ̀bùn owó àmì {{amount}}"
     }
   },
   "emojiPicker": {
@@ -11854,7 +12833,10 @@
     "planTypeNotAllowed": "Ètò olùdá yìí kò gba irú ìfiránṣẹ́ yìí láàyè.",
     "planMinTip": "Owó ìmoore fún olùdá yìí gbọ́dọ̀ jẹ́ ó kéré tán {{amount}} àmì.",
     "shareKindGroup": "Ikọ̀",
-    "shareKindCommunity": "Àwùjọ"
+    "shareKindCommunity": "Àwùjọ",
+    "shareGroups": "Àwọn ẹgbẹ́",
+    "shareKindChannel": "Ikanni",
+    "reportMessage": "Ròyìn ìfiránṣẹ́"
   },
   "credits": {
     "earningsWorth": "Iye {{amount}}",
@@ -11896,7 +12878,11 @@
     "error": "Kò lè fi ẹ̀bẹ̀ píparẹ́ rẹ sílẹ̀. A kò tíì fìdí àkáǹtì rẹ múlẹ̀ fún píparẹ́. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan síi.",
     "back": "Pada si Eto",
     "signIn": "Wọle lati paarẹ akọọlẹ rẹ",
-    "acknowledge": "Mo ti fi àwọn kúlẹ̀kúlẹ̀ ìmúpadàbọ̀sípò àpamọ́wọ́ mi pamọ́, mo sì lóye pé píparẹ́ jẹ́ ohun tí ó wà pẹ́ títí."
+    "acknowledge": "Mo ti fi àwọn kúlẹ̀kúlẹ̀ ìmúpadàbọ̀sípò àpamọ́wọ́ mi pamọ́, mo sì lóye pé píparẹ́ jẹ́ ohun tí ó wà pẹ́ títí.",
+    "signedInAs": "O ti wọlé bí",
+    "confirmTitle": "Pa àkọọ́lẹ̀ rẹ rẹ́ pátápátá?",
+    "confirmBody": "A ó pa àkọọ́lẹ̀ rẹ àti gbogbo ohun tó wà nínú rẹ̀ rẹ́. A ó jáde rẹ, kò sì ní ṣeé yí padà.",
+    "confirmBodyNamed": "A ó pa {{who}} àti gbogbo ohun tó wà nínú rẹ̀ rẹ́. A ó jáde rẹ, kò sì ní ṣeé yí padà."
   },
   "miniApps": {
     "badge": {
@@ -11993,12 +12979,42 @@
       "rewardPending": "Ndúró",
       "rewardsNone": "Kò tíì sí èrè kankan tí a ti ṣe iye rẹ̀. Ọ̀sẹ̀ àkọ́kọ́ máa dópin ní ọjọ́ Àbámẹ́ta.",
       "stats": {
-        "button": "Ìṣirò tààrà"
+        "button": "Ìṣirò tààrà",
+        "chartTitle": "Àwọn èèyàn tó ṣí àpù rẹ, ọjọ́ 30 sẹ́yìn",
+        "peak_one": "Òkè jùlọ {{count}} lójúmọ́",
+        "peak_other": "Òkè jùlọ {{count}} lójúmọ́",
+        "people30": "Àwọn èèyàn, ọjọ́ 30",
+        "people7": "Àwọn èèyàn, ọjọ́ 7",
+        "added": "Ti fi kún un",
+        "dhb30": "Owó àmì tí a san, ọjọ́ 30",
+        "notified30": "Ìfitónilétí tí a fi ránṣẹ́, ọjọ́ 30",
+        "rewards": "Èrè owó àmì tí o rí"
       },
       "signin": {
         "users_one": "olumulo {{count}}",
         "users_other": "awọn olumulo {{count}}",
-        "delete": "Parẹ́"
+        "delete": "Parẹ́",
+        "title": "Wọlé pẹ̀lú Riftn",
+        "body": "Jẹ́ kí àwọn èèyàn wọlé sí ojú òpó wẹ́ẹ̀bù tàbí àpù rẹ pẹ̀lú àkọọ́lẹ̀ Riftn wọn. Ṣẹ̀dá kọ́kọ́rọ́ níbí, lẹ́yìn náà tẹ̀lé ìtọ́sọ́nà.",
+        "guide": "Ka ìtọ́sọ́nà",
+        "copyId": "Daakọ client ID",
+        "rotate": "Àṣírí tuntun",
+        "rotateConfirm": "Ṣe àṣírí tuntun fún {{name}}? Àṣírí àtijọ́ yóò dá iṣẹ́ dúró lẹ́sẹ̀kẹsẹ̀.",
+        "deleteConfirm": "Pa {{name}} rẹ́? A ó jáde gbogbo ẹni tó wọlé pẹ̀lú rẹ̀.",
+        "secretOnce": "Àṣírí fún {{name}}. Daakọ rẹ̀ báyìí: ẹ̀ẹ̀kan ṣoṣo ni a ó fi hàn.",
+        "name": "Orúkọ àpù",
+        "website": "Ojú òpó wẹ́ẹ̀bù (àṣàyàn)",
+        "redirects": "Àwọn URL ìdarí, ọ̀kan ní ìlà kọ̀ọ̀kan (https://yoursite.com/callback)",
+        "create": "Ṣẹ̀dá kọ́kọ́rọ́"
+      },
+      "stateRejected": "Wà láàyè nípasẹ̀ ìjápọ̀ · a kò fọwọ́ sí i fún ilé ìtajà",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Àwọn ìṣẹ̀lẹ̀ tí Riftn fi ránṣẹ́ sí webhookUrl rẹ. Ìdánwò máa ń fi ìṣẹ̀lẹ̀ ping ránṣẹ́.",
+        "test": "Fi ìdánwò ránṣẹ́",
+        "ok": "Webhook fèsì {{status}}",
+        "failed": "Webhook kùnà: {{reason}}",
+        "none": "A kò tíì fi webhook kankan ránṣẹ́."
       }
     },
     "card": {
@@ -12025,7 +13041,10 @@
       "confirm": "San {{amount}} àmì",
       "sending": "Fífi owó rẹ ránṣẹ́...",
       "sent": "San {{amount}} àmì sí {{name}}.",
-      "noOwner": "Ohun-èlò yìí kò ní àpò-ìfowópamọ́ tí a ti fìdí múlẹ̀ láti san."
+      "noOwner": "Ohun-èlò yìí kò ní àpò-ìfowópamọ́ tí a ti fìdí múlẹ̀ láti san.",
+      "testBadge": "Ipò ìdánwò",
+      "testBody": "Ìwọ ló ni àpù yìí, nítorí náà ìdánwò ni èyí: kò sí owó àmì tó ń gbéra, a sì sàmì sí ìwé-ẹ̀rí náà pé ìdánwò ni.",
+      "testSent": "Ìsanwó ìdánwò ti owó àmì {{amount}}. A kò fi nǹkan kan ránṣẹ́."
     },
     "add": {
       "title": "Fi {{name}} kún un?",
@@ -12096,7 +13115,8 @@
     "howSafari": "Ní Safari, ṣí àtòjọ File kí o yan Fikun-un si Dock.",
     "howFirefox": "Firefox ko le fi sori ẹrọ awọn ohun elo. Ṣii oju-iwe yii ninu Chrome, Edge tabi Safari lati fi sori ẹrọ Riftn.",
     "desktopMeta": "Windows · Mac · Linux · ChromeOS",
-    "microsoftStore": "Ṣe fẹ́ Microsoft Store? Gba rẹ̀ nìkan."
+    "microsoftStore": "Ṣe fẹ́ Microsoft Store? Gba rẹ̀ nìkan.",
+    "seoTitleAll": "Gba Àpù Riftn: Tábìlì àti Android APK"
   },
   "postStage": {
     "back": "Pada sẹ́yìn",
@@ -19119,7 +20139,86 @@
     "d14896aa4bf8": "Àti òṣùpọ̀ oríṣiríṣẹ́ ẹgbẹ́ ẹgbẹ́rún ọkàn. Ṣe àṣẹ ọ̀rọ̀ àti ṣe pọ̀ mọ́.",
     "953e708b2287": "Ìran ohùn kùnà.",
     "4a52cdd6ac72": "Kò lè ṣe ẹ̀dà àwọn ìpele wọ̀nyí.",
-    "dbc468a14b60": "Àwọn ìbéèrè tí a máa ń béèrè"
+    "dbc468a14b60": "Àwọn ìbéèrè tí a máa ń béèrè",
+    "3f9b2c71d0a4": "Àbájáde {{n}}",
+    "8c4e1a6b2f57": "fún “{{query}}”",
+    "1d7234ff1b79": "nínú {{feed}}",
+    "e122e5c2b563": "Fà sókè láti pa á dé",
+    "1aa9d734f2ee": "Yan ohun tí o fẹ́ wá",
+    "ef557404f465": "Kò sí àbájáde fún “{{query}}”",
+    "35034aa59bd3": "Kò sí ohun tó bá a mu nínú {{feed}}. Gbìyànjú àwọn ọ̀rọ̀ mìíràn tàbí wá gbogbo nǹkan.",
+    "415155739590": "Wá gbogbo nǹkan",
+    "9e13d826baaf": "Wá àwòrán",
+    "cbf6f228327c": "Wá orin",
+    "e8756c6865a5": "Wá fídíò kúkúrú",
+    "c7661da99c41": "Wá fídíò",
+    "90f1afe66801": "Ó ń wá “{{query}}”…",
+    "d7b559f2d8c6": "Gbìyànjú àwọn ọ̀rọ̀ mìíràn, tàbí yí àwọn àlẹ̀mọ́ padà.",
+    "d1a0c7e2f301": "Kí ló wà lọ́kàn rẹ lónìí?",
+    "d1a0c7e2f302": "Kí lò ń rò lónìí?",
+    "d1a0c7e2f303": "Kí ló wà lọ́kàn rẹ?",
+    "d1a0c7e2f304": "Ṣé nǹkan kan wà lọ́kàn rẹ?",
+    "d1a0c7e2f305": "Kí ló wà lọ́kàn rẹ báyìí?",
+    "d1a0c7e2f306": "Kí la ń rò lónìí?",
+    "d1a0c7e2f307": "Ṣé nǹkan kan wà lọ́kàn rẹ lónìí?",
+    "d1a0c7e2f308": "Kí ló wà lọ́kàn rẹ lọ́tẹ̀ yìí?",
+    "a7c1e0f4b2d9": "Tẹ̀ láti sọ̀rọ̀",
+    "b3e8d1c6f0a2": "Tẹ̀ láti fi ránṣẹ́",
+    "c9f2a4e7d1b5": "Ó ń gbọ́... tẹ bọ́ọ̀lù náà láti fi ránṣẹ́",
+    "22577ebd908e": "Ṣẹ̀dá fídíò Wan 3.0 · orin àtilẹ̀wá",
+    "1fa2357ab7e1": "Ṣẹ̀dá fídíò Seedance 720p · orin àtilẹ̀wá",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "O ti rí +{{value1}} pọ́ọ̀nù",
+    "0fbe06b679a8": "Pọ́ọ̀nù {{value1}} fún ìbéèrè kọ̀ọ̀kan tí a parí, tí a fi kún àmì Top builders rẹ.",
+    "431bc73eb60b": "[verse]\nÀwọn ọ̀rọ̀ orin rẹ níbí...\n\n[chorus]\nỌ̀rọ̀ ègbè...",
+    "52cc67d87de8": "Ṣé àpilẹ̀kọ yìí wù ọ́? Pín in pẹ̀lú àwọn èèyàn rẹ!",
+    "b4cd31c743bf": "Ìrírí Ìgbóhùnsáfẹ́fẹ́ Láàyè Tó Yàtọ̀",
+    "dc422dc5fbac": "Ètò DM ọ̀fẹ́ wa ni ẹnu ọ̀nà fún kíkọ́ àwùjọ, ó ń jẹ́ kí àwọn olùṣẹ̀dá máa bá àwọn olùwò wọn sọ̀rọ̀ ní gbangba, nígbà tí wọ́n ṣì lè gba owó fún àwọn ìbánisọ̀rọ̀ pàtàkì. Àwọn ìfiránṣẹ́ ọ̀fẹ́ ń jẹ́ kí:",
+    "e3c6b436e789": "Tọpinpin bí DHB ṣe ń ṣe láti ìgbà dé ìgbà pẹ̀lú àwọn àwòrán àtẹ alálàyé àti àwọn àmì ìṣẹ̀lẹ̀ pàtàkì. Láìpẹ́, a ó fi àwòrán àtẹ kíkún ti FTV & DHB hàn láti sọ gbogbo ìtàn náà",
+    "a3c1e5f20b71": "Lo Riftn nínú ChatGPT, Claude tàbí àpù MCP èyíkéyìí. Lẹ URL tó wà nísàlẹ̀ sínú ètò connector olùrànlọ́wọ́ rẹ láti wo àwọn ìfiránṣẹ́, profaili àti àsọyé, lẹ́yìn náà wọlé nígbà tí a bá ní kí o so àkọọ́lẹ̀ rẹ pọ̀.",
+    "b84d2e7c9a16": "Àdírẹ́sì yìí wà fún àwọn àpù AI, kì í ṣe ojú ewé wẹ́ẹ̀bù. Ṣíṣí i nínú aṣàwákiri yóò mú ọ wá síbí.",
+    "c5e9f1a3d742": "So àkọọ́lẹ̀ Riftn rẹ pọ̀",
+    "d61a7b4e8c05": "Nígbà tí olùrànlọ́wọ́ rẹ bá ní kí o wọlé, wọlé sí Riftn kí o sì tẹ Gbà. Lẹ́yìn náà ó lè ṣàtúnṣe profaili rẹ, tẹ àwọn ìfiránṣẹ́ àti àsọyé jáde, tẹ̀lé àwọn èèyàn kí ó sì ṣẹ̀dá nínú Creator Studio. Àwọn ìsopọ̀ máa wà nígbà tí o bá ń lò wọ́n, wọ́n sì máa parí lẹ́yìn ọjọ́ 30 tí o kò bá lò wọ́n.",
+    "e27b8c5f9d13": "Ìtọ́sọ́nà ChatGPT ní ìgbésẹ̀-ní-ìgbésẹ̀",
+    "f38c9d6a0e24": "Ìtọ́sọ́nà Claude ní ìgbésẹ̀-ní-ìgbésẹ̀",
+    "0a49d7b1f835": "Ṣé o fẹ́ àkọọ́lẹ̀ bọ́ọ̀tì ọ̀tọ̀? Ṣẹ̀dá aṣojú kan láti gba URL connector tó ń fìwéránṣẹ́ bí aṣojú náà.",
+    "1b5ae8c20f46": "Nígbà tí ChatGPT bá béèrè, wọlé sí Riftn kí o sì tẹ Gbà láti so àkọọ́lẹ̀ rẹ pọ̀.",
+    "2c6bf9d31a57": "Tẹ Connect, wọlé sí Riftn kí o sì tẹ Gbà láti so àkọọ́lẹ̀ rẹ pọ̀.",
+    "27c26a5a38b3": "Wọlé láti rí àwọn ìfiránṣẹ́ àtijọ́",
+    "674e70bcd915": "Gbogbo ìtàn ìbánisọ̀rọ̀ wà ní ṣíṣí fún gbogbo ẹni tó ní àkọọ́lẹ̀.",
+    "feaf753f6557": "Ìbẹ̀rẹ̀ ìbánisọ̀rọ̀",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Àwọn Ọ̀pá Dígí",
+    "5ff272ba7871": "Àwọn Ìlà Sílíkì",
+    "a941e90ca93d": "Ìmọ́lẹ̀ Ìbòrí",
+    "04dbbe4dff7a": "Ìgbì Òótọ́",
+    "925917aad5b0": "Ojú Ọlọ́run",
+    "71b386d38529": "Akọni Òpópónà",
+    "2ed16d4204db": "Rí {{value1}}% ìkejì",
+    "116044a926ba": "Wò ó lórí {{value1}}",
+    "0f8f49bd32e6": "🔥 Fífi ẹ̀bùn {{value1}} <coin></coin> yóò gbé ọ ga sí i nínú àpótí ìfiránṣẹ́ {{value2}}",
+    "1e488da3dfa7": "Àwọn ìfiránṣẹ́ tí o fi ránṣẹ́ sí {{value1}} jẹ́ ti ìsanwó, ọ̀kọ̀ọ̀kan yóò sì ná <amount>{{value2}}</amount> <coin></coin>. Ṣé o dájú pé o fẹ́ tẹ̀síwájú?",
+    "253ffa81cd88": "{{value1}} nílò ẹ̀bùn tó kéré jù <amount>{{value2}} <coin></coin></amount> láti bẹ̀rẹ̀ ìbánisọ̀rọ̀.",
+    "338524eabcce": "🔥 Fífi ẹ̀bùn {{value1}} <coin></coin> fún ìfiránṣẹ́ kọ̀ọ̀kan yóò gbé ọ ga sí i nínú àpótí ìfiránṣẹ́ {{value2}}",
+    "70d1cca2aba3": "{{value1}} nílò ẹ̀bùn tó kéré jù <amount>{{value2}} <coin></coin></amount> fún ìfiránṣẹ́ kọ̀ọ̀kan. A ó yọ iye yìí fún ìfiránṣẹ́ kọ̀ọ̀kan tí o bá fi ránṣẹ́.",
+    "825123b7470b": "Ìwọ̀ntúnwọ̀nsì rẹ: {{value1}} <coin></coin>",
+    "a5b214ef27ab": "Owó kò tó. O ní {{value1}} <coin></coin> ṣùgbọ́n o nílò {{value2}} <coin></coin>.",
+    "81de3b03c3bd": "Àwọn sẹ́ẹ̀lì tí a kó wọlé ní ọ̀pọ̀ kò gbọ́dọ̀ ju ẹyọ ọ̀rọ̀ 10,000 lọ",
+    "54f4138518ee": "Ìlà dátà {{row}} nílò ipò X oníye tí kò ju tírílíọ̀nù kan lọ",
+    "40b65d63c266": "Má ṣe lo ju ẹyọ ọ̀rọ̀ 200 lọ nínú sẹ́ẹ̀lì kan",
+    "8d02cfb48fb7": "Yí ìlà dátà àwòrán àtẹ tó tó 19 padà kí tábìlì àti àkọlé rẹ̀ lè wọ inú ìlà 20",
+    "4e4070b497cb": "Yí tábìlì tó ní ọ̀wọ̀n àmì kan àti ọ̀wọ̀n oníye kan sí mẹ́fà padà",
+    "5f299ae57b99": "Yan àwòrán dátà tó kéré jù fún gbígbé jáde bí vector",
+    "5924a673ef02": "Lo àmì,iye kan ní ìlà kọ̀ọ̀kan",
+    "6c4bbd9fb1a9": "Má ṣe lo ju ọ̀wọ̀n {{maximum}} lọ",
+    "c710eaeac6b8": "Má ṣe lo ju ìlà {{maximum}} lọ",
+    "b3d62115764b": "Lẹ àwọn fọ́tò àti fídíò sínú àpẹrẹ àtilẹ̀wá wọn. A lè lẹ ọ̀rọ̀ àti àwọn àwòrán ìrísí sínú àpẹrẹ mìíràn",
+    "eecd1c0e91ea": "Lo àwọn àmì connector tí kò ju ẹyọ ọ̀rọ̀ 80 lọ",
+    "626567c83e73": "Lo kánfáàsì tó jẹ́ píksẹ́ẹ̀lì 64–8,192 ní ẹ̀gbẹ́ kọ̀ọ̀kan àti ìpinnu ìtẹ̀wé píksẹ́ẹ̀lì 72–600 fún íǹṣì kọ̀ọ̀kan",
+    "06d6bdfa16ae": "Yọ ìpele tí a kò lò kúrò kí o tó fi nọ́ńbà ojú ewé kún un",
+    "2f35e5107bbd": "Kò ṣeé ṣe láti gbé {{name}} wọlé",
+    "6b7ef8443530": "Lo iye odindi àwọn nǹkan tí a kún láàárín òdo àti àpapọ̀ àwọn àmì",
+    "6e71ae3669b1": "Àbájáde tí a fi pamọ́ kò sí"
   },
   "articles": {
     "cardLabel": "Àpilẹ̀kọ · {{count}} min ka",
@@ -19161,7 +20260,16 @@
     "formatting": "Àdàkọ",
     "bodyPlaceholder": "Sọ ìtàn rẹ. Yan àyọkà kí o sì lo àpáàdì tí ó wà lókè fún àwọn àkọlé, ìgboyà, àwọn àyọkà àti àwọn àtòjọ.",
     "bodyLabel": "Ara Àpilẹ̀kọ",
-    "wordCount": "{{count}} àwọn ọ̀rọ̀"
+    "wordCount": "{{count}} àwọn ọ̀rọ̀",
+    "imageLimit": "Àpilẹ̀kọ lè gba àwòrán tó tó {{count}}",
+    "imageLimitSome": "Àwòrán {{count}} péré ló kù tó lè wọ inú àpilẹ̀kọ yìí",
+    "imageFailed": "A kò lè fi àwòrán yẹn kún un. Gbìyànjú òmíràn.",
+    "imagesUploading": "Ó ń fi àwòrán kún un ({{count}})…",
+    "bodyTooLong": "Ẹyọ ọ̀rọ̀ {{count}} ju òdiwọ̀n lọ",
+    "imagesCount": "Àwòrán · {{count}}/{{max}}",
+    "captionPlaceholder": "Fi àkọlé kún un",
+    "captionLabel": "Àkọlé fún àwòrán {{n}}",
+    "removeInlineImage": "Yọ àwòrán {{n}} kúrò"
   },
   "liveAudience": {
     "whosHere": "Ta ni ó wà níhìn-ín",
@@ -19210,24 +20318,94 @@
       "stage": {
         "preparing": "Nmuratan…",
         "confirming": "Ń dúró de ìṣòwò…",
-        "recording": "Ń parí…"
-      }
+        "recording": "Ń parí…",
+        "wallet": "Jẹ́rìísí nínú àpò owó rẹ"
+      },
+      "open": "Fún ní ìforúkọsílẹ̀ bí ẹ̀bùn",
+      "title": "Fún ní ìforúkọsílẹ̀ bí ẹ̀bùn",
+      "mode": {
+        "random": "Àwọn olùwò láìròtẹ́lẹ̀ nínú ìbánisọ̀rọ̀",
+        "user": "Ẹnì kan pàtó"
+      },
+      "randomHint": "Ó ń lọ sọ́dọ̀ àwọn tó sọ̀rọ̀ nínú ìbánisọ̀rọ̀ ní ìṣẹ́jú 30 sẹ́yìn tí wọn kò sì tíì forúkọsílẹ̀.",
+      "send_one": "Fún ní ìforúkọsílẹ̀ 1 · ${{price}}",
+      "send_other": "Fún ní ìforúkọsílẹ̀ {{count}} · ${{price}}",
+      "payHint": "A ó san án ní owó àmì láti inú àpò owó rẹ ní ìfiránṣẹ́ kan.",
+      "fewer_one": "Ẹnì 1 péré nínú ìbánisọ̀rọ̀ ló lè gba ìforúkọsílẹ̀ báyìí, nítorí náà o ó san fún 1.",
+      "fewer_other": "Àwọn èèyàn {{count}} péré nínú ìbánisọ̀rọ̀ ló lè gba ìforúkọsílẹ̀ báyìí, nítorí náà o ó san fún {{count}}.",
+      "done_one": "A ti fi ìforúkọsílẹ̀ ṣe ẹ̀bùn!",
+      "done_other": "A ti fi ìforúkọsílẹ̀ {{count}} ṣe ẹ̀bùn!",
+      "failed": "Kò ṣeé ṣe láti fi ìforúkọsílẹ̀ ṣe ẹ̀bùn",
+      "notReady": "Fífúnni ní ẹ̀bùn kò tíì sí fún ètò yìí",
+      "noPlan": "Kọ́kọ́ yan ètò kan",
+      "noPlans": "{{name}} kò tíì ní ètò ìforúkọsílẹ̀ kankan láti fi ṣe ẹ̀bùn."
     },
     "badges": {
       "emoji": "Àmì ìyàtọ̀",
       "audience": {
-        "subscribers": "Àwọn olùforúkọsílẹ̀"
+        "subscribers": "Àwọn olùforúkọsílẹ̀",
+        "both": "Àwọn olùforúkọsílẹ̀ àti àwọn olùfúnni",
+        "gifters": "Àwọn olùfúnni"
       },
       "ended": "Ìparí",
       "until": "Títí di {{date}}",
-      "failed": "Ìyẹn kò ṣiṣẹ́. Gbìyànjú lẹ́ẹ̀kan síi."
+      "failed": "Ìyẹn kò ṣiṣẹ́. Gbìyànjú lẹ́ẹ̀kan síi.",
+      "title": "Àwọn bàájì àkókò díẹ̀",
+      "intro": "Pèsè bàájì fún ọjọ́ díẹ̀. Ẹnikẹ́ni tó bá forúkọsílẹ̀ tàbí fúnni ní ẹ̀bùn nígbà tó ń lọ yóò rí i, yóò sì máa hàn lẹ́gbẹ̀ẹ́ orúkọ wọn nínú ìbánisọ̀rọ̀ rẹ títí láé.",
+      "name": "Orúkọ bàájì",
+      "namePlaceholder": "Ọ̀sẹ̀ ìfilọ́lẹ̀",
+      "days": "Ó wà fún (ọjọ́)",
+      "who": "Ta ló lè rí i",
+      "create": "Pèsè bàájì",
+      "created": "Bàájì ti wà láàyè.",
+      "end": "Parí báyìí",
+      "holders_one": "Olùní {{count}}",
+      "holders_other": "Àwọn olùní {{count}}",
+      "limit": "Bàájì mẹ́ta lè máa lọ ní ẹ̀ẹ̀kan. Parí ọ̀kan láti pèsè òmíràn.",
+      "hypeHint": "Gbogbo ẹni tó bá wọ hype train yóò tún gba bàájì 🚂 rẹ ní ìpele tó dé."
+    },
+    "train": {
+      "level": "Hype Train · Ìpele {{level}}",
+      "endedLevel": "Hype Train parí ìpele {{level}}!",
+      "ended": "Hype Train ti parí",
+      "thanks_one": "Ọpẹ́ fún olùtìlẹ́yìn {{count}}",
+      "thanks_other": "Ọpẹ́ fún àwọn olùtìlẹ́yìn {{count}}",
+      "top": "Òkè: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "fún ní ìforúkọsílẹ̀ kan 🎁",
+      "giftedSubs_other": "fún ní ìforúkọsílẹ̀ {{count}} 🎁"
     }
   },
   "whenSheet": {
     "today": "Lónìí",
     "tooSoon": "Yan àkókò kan ní ọjọ́ iwájú.",
     "show": "Fihàn",
-    "hide": "Fi pamọ́"
+    "hide": "Fi pamọ́",
+    "title": "Nígbà wo?",
+    "tonight": "Lálẹ́ òní",
+    "inAnHour": "Ní wákàtí kan",
+    "tomorrow": "Lọ́la",
+    "primeTime": "Àkókò pàtàkì",
+    "scheduleFor": "Ṣètò fún {{when}}",
+    "liveTip": "Àwọn olùtẹ̀lé rẹ lè ṣètò ìránnilétí. Ìwọ fúnra rẹ ni yóò bẹ̀rẹ̀ Láàyè nígbà tí àkókò bá tó.",
+    "stageTip": "Ó máa lọ sí àpótí Upcoming lẹ́sẹ̀kẹsẹ̀, kí àwọn èèyàn lè tẹ Rán mi létí.",
+    "typePlaceholder": "Tẹ àkókò kan, bíi \"fri 8pm\" tàbí \"in 2 hours\"",
+    "typeLabel": "Tẹ àkókò kan",
+    "typeHelp": "Gbìyànjú \"tonight\", \"tomorrow 9am\", \"sat noon\" tàbí \"30 oct 7pm\".",
+    "orPickDay": "Tàbí yan ọjọ́ kan",
+    "earlier": "Ìṣẹ́jú 15 ṣáájú",
+    "later": "Ìṣẹ́jú 15 lẹ́yìn",
+    "earlierShort": "Tẹ́lẹ̀",
+    "laterShort": "Lẹ́yìn náà",
+    "tooSoonMin": "Yan àkókò tó kéré tán ìṣẹ́jú {{count}} sí ìsinsìnyí.",
+    "zone": "Àkókò rẹ ({{zone}}). Gbogbo àwọn mìíràn yóò rí i ní àkókò tiwọn.",
+    "remove": "Yọ ètò kúrò",
+    "startsIn": "Ó bẹ̀rẹ̀ ní {{time}}",
+    "bestTime": "Àkókò tó dára jù",
+    "fansOnline": "Nígbà wo ni àwọn olólùfẹ́ mi máa ń wà lórí ayélujára?",
+    "fansBasis": "Bí ó bá ṣe mọ́lẹ̀ sí, bẹ́ẹ̀ ni àwọn olùtẹ̀lé rẹ tó ń wò ṣe pọ̀ sí, ọjọ́ {{count}} sẹ́yìn.",
+    "everyoneBasis": "Ìṣe àwọn olùtẹ̀lé kò tíì tó, nítorí náà gbogbo èèyàn lórí Riftn ni èyí."
   },
   "planned": {
     "title": "Tí A Gbèrò",
@@ -19242,22 +20420,45 @@
     "loading": "Nṣe àgbékún…",
     "startNow": "Bẹ̀rẹ̀ báyìí",
     "cancel": "Fagilee",
-    "cancelled": "Ti fagile"
+    "cancelled": "Ti fagile",
+    "subtitle": "Àwọn ìfiránṣẹ́, Láàyè àti Stage tí o ti ṣètò",
+    "seoTitle": "Tí a Ṣètò · Riftn",
+    "seoDescription": "Àwọn ìfiránṣẹ́, Láàyè àti Stage tí o ṣètò lórí Riftn, gbogbo rẹ̀ ní ibì kan.",
+    "lives": "Àwọn Láàyè",
+    "signIn": "Wọlé láti rí ohun tí o ti ṣètò",
+    "emptyTitle": "Kò sí ohun tí a ṣètò síbẹ̀",
+    "emptyBody": "Yan \"Nígbà wo?\" nígbà tí o bá ń ṣe ìfiránṣẹ́, Láàyè tàbí Stage, yóò sì hàn síbí.",
+    "move": "Gbé e lọ",
+    "postNow": "Firánṣẹ́ báyìí",
+    "confirmCancel": "Tẹ̀ ẹ́ lẹ́ẹ̀kan sí i láti fagilé",
+    "moved": "A gbé e lọ sí {{when}}",
+    "postingNow": "Ó ń firánṣẹ́ láàárín ìṣẹ́jú kan",
+    "moveFailed": "Kò ṣeé ṣe láti gbé e lọ. Gbìyànjú lẹ́ẹ̀kan sí i.",
+    "seeAll": "Wo gbogbo ohun tí o ti ṣètò"
   },
   "welcome": {
     "about": {
       "title": "Ì kàbọ̀ sí Riftn",
       "day": "Ọjọ́",
       "month": "Oṣù",
-      "year": "Ọdún"
+      "year": "Ọdún",
+      "sub": "Ọjọ́ ìbí rẹ máa wà ní ìkọ̀kọ̀. Yan ìrísí kan, o lè yí i padà nígbàkígbà.",
+      "birthday": "Ọjọ́ ìbí",
+      "pick": "Yan ọjọ́ ìbí rẹ",
+      "invalid": "Tẹ ọjọ́ ìbí rẹ ní kíkún.",
+      "tooYoung": "O gbọ́dọ̀ jẹ́ ọmọ ọdún {{age}} tàbí jù bẹ́ẹ̀ lọ láti lo Riftn.",
+      "theme": "Ìrísí rẹ"
     },
     "name": {
       "title": "Orúkọ rẹ",
-      "placeholder": "Orúkọ rẹ"
+      "placeholder": "Orúkọ rẹ",
+      "sub": "Èyí ni orúkọ tí àwọn èèyàn máa rí lórí àwọn ìfiránṣẹ́ rẹ."
     },
     "card": {
       "name": "Orúkọ rẹ",
-      "followers": "àwọn ọmọ-ẹ̀yìn"
+      "followers": "àwọn ọmọ-ẹ̀yìn",
+      "interests": "Àwọn ohun tó wù ọ́",
+      "following": "ń tẹ̀lé"
     },
     "topic": {
       "music": "Orin",
@@ -19270,11 +20471,46 @@
       "podcast": "Adarọ ese",
       "food": "Oúnjẹ",
       "news": "Awọn iroyin",
-      "science": "Sáyẹ́nsì"
+      "science": "Sáyẹ́nsì",
+      "travel": "Ìrìn àjò",
+      "anime": "Anime",
+      "cars": "Ọkọ̀ ayọ́kẹ́lẹ́",
+      "animals": "Ẹranko",
+      "tech": "Ìmọ̀ ẹ̀rọ"
     },
     "back": "Padà",
     "skipPhoto": "Ṣe àìpẹ̀ fún báyìí",
-    "preview": "Awotẹlẹ"
+    "preview": "Awotẹlẹ",
+    "username": {
+      "title": "@username rẹ",
+      "sub": "Lẹ́tà, nọ́ńbà àti àmì ìlà ìsàlẹ̀. O lè yí i padà lẹ́yìn náà.",
+      "yours": "@{{name}} jẹ́ tìrẹ"
+    },
+    "photo": {
+      "title": "Fọ́tò rẹ",
+      "sub": "Àṣàyàn. Àwọn èèyàn máa ń tẹ̀lé ojú kíákíá.",
+      "choose": "Yan fọ́tò kan",
+      "change": "Yan òmíràn"
+    },
+    "interests": {
+      "title": "Àwọn ohun tó wù ọ́",
+      "sub": "Yan ó kéré tán 3. Wọ́n máa kọ́kọ́ hàn nínú àwọn ẹ̀ka rẹ."
+    },
+    "people": {
+      "title": "Àwọn èèyàn rẹ",
+      "sub": "Tẹ̀ láti tẹ̀lé. Àwọn ìfiránṣẹ́ wọn máa kún ojú-ìwé Following rẹ.",
+      "empty": "Kò sí àbá kankan báyìí. Explore ní àwọn èèyàn mìíràn láti rí.",
+      "followers": "Àwọn olùtẹ̀lé {{count}}"
+    },
+    "done": {
+      "title": "Ó dára gan-an, {{name}}",
+      "sub": "Gbogbo èèyàn máa rí káàdì yìí láti òní lọ.",
+      "eyebrow": "Profaili ti wà láàyè"
+    },
+    "enter": "Wọ Riftn",
+    "pickMore": "Yan {{count}} sí i",
+    "cardHint": "Báyìí ni àwọn èèyàn máa rí ọ",
+    "followFailed": "Kò ṣeé ṣe láti tẹ̀lé. Gbìyànjú lẹ́ẹ̀kan sí i."
   },
   "appTokens": {
     "title": "Awọn token rẹ",
@@ -19285,28 +20521,101 @@
     "amount": "Iye",
     "notePlaceholder": "Fi àkíyèsí kún un (àṣàyàn)",
     "sendButton": "Rán",
-    "errorInsufficient": "Ko to awọn ami-ami"
+    "errorInsufficient": "Ko to awọn ami-ami",
+    "rowHint": "Ìwọ̀ntúnwọ̀nsì nínú àpù",
+    "explainer": "Àwọn owó àmì rẹ ti wà nínú Riftn báyìí. O bẹ̀rẹ̀ pẹ̀lú ohun tí o ní àti tí o fi pamọ́ lórí blockchain nígbà ìfilọ́lẹ̀. Fífiránṣẹ́, fífúnni ní ẹ̀bùn àti ríná máa ń gbé wọn lẹ́sẹ̀kẹsẹ̀, láìsí owó iṣẹ́ àti láìsí nǹkan kan lórí blockchain. Ìwọ̀ntúnwọ̀nsì máa kọjá sí owó àmì tuntun nígbà airdrop.",
+    "kindOpening": "Ìwọ̀ntúnwọ̀nsì ìbẹ̀rẹ̀",
+    "kindSent": "A fi ránṣẹ́ sí {{name}}",
+    "kindReceived": "Láti ọ̀dọ̀ {{name}}",
+    "kindSpent": "Tí a ná nínú Riftn",
+    "kindRefund": "Ìdápadà owó",
+    "kindAdjust": "Àtúnṣe láti ọwọ́ Riftn",
+    "sendTitle": "Fi owó àmì ránṣẹ́",
+    "sendHint": "Ó ń fi owó àmì ránṣẹ́ sí àkọọ́lẹ̀ mìíràn nínú Riftn. Lẹ́sẹ̀kẹsẹ̀ àti lọ́fẹ̀ẹ́, kò sí ohun tó ń lọ sórí blockchain.",
+    "toPlaceholder": "@username tàbí àdírẹ́sì 0x",
+    "looking": "Ó ń wá a…",
+    "available": "Tó wà: {{amount}}",
+    "sent": "A fi owó àmì {{amount}} ránṣẹ́ sí {{name}}",
+    "errorRateLimit": "Fífiránṣẹ́ ti pọ̀ jù ní wákàtí tó kọjá. Gbìyànjú lẹ́yìn náà.",
+    "errorNoRecipient": "A kò rí àkọọ́lẹ̀ Riftn kankan",
+    "errorSelf": "O kò lè fi ránṣẹ́ sí ara rẹ",
+    "errorGeneric": "Kò ṣeé ṣe láti fi ránṣẹ́. Gbìyànjú lẹ́ẹ̀kan sí i."
   },
   "reactions": {
     "policy": {
       "everyone": "Gbogbo ènìyàn",
       "followers": "Àwọn olùtẹ̀lé",
-      "nobody": "Kò sí ẹnìkan"
+      "nobody": "Kò sí ẹnìkan",
+      "default": "Ètò àkọọ́lẹ̀ ({{value}})"
     },
     "heading": "Ìdáhùn",
     "more": "Fi kún un",
     "liveNow": "Lásìkò",
-    "untitled": "Ìdáhùn"
+    "untitled": "Ìdáhùn",
+    "reactionTo": "Ìhùwàsí sí",
+    "reactingTo": "Ó ń hùwà sí",
+    "count_one": "Ìhùwàsí {{count}}",
+    "count_other": "Àwọn ìhùwàsí {{count}}",
+    "allow": "Gba ìhùwàsí láàyè",
+    "remixesSection": "Àwọn Remix",
+    "allowDescription": "Jẹ́ kí àwọn olùṣẹ̀dá mìíràn hùwà sí àwọn fídíò rẹ, tí a gbà sílẹ̀ tàbí láàyè. O ṣì lè yí i padà lórí ìfiránṣẹ́ kọ̀ọ̀kan.",
+    "pageDescription": "Wo àwọn olùṣẹ̀dá tó ń hùwà sí “{{title}}” láti ọwọ́ {{creator}} lórí Riftn, tí a gbà sílẹ̀ àti láàyè.",
+    "backToVideo": "Padà sí fídíò",
+    "empty": "Kò sí ìhùwàsí síbẹ̀. Ṣí àkójọ Remix fídíò náà kí o sì yan React láti jẹ́ ẹni àkọ́kọ́.",
+    "wasLive": "Ó wà láàyè tẹ́lẹ̀",
+    "thisVideo": "fídíò yìí"
   },
   "connectGuide": {
     "title": "So Riftn pọ̀ mọ́ olùrànlọ́wọ́ AI rẹ",
     "urlLabel": "URL olupin MCP",
     "copy": "Daakọ",
     "copied": "A ti dàkọ rẹ̀",
-    "copiedToast": "A ti daakọ URL MCP"
+    "copiedToast": "A ti daakọ URL MCP",
+    "accountBody2": "Fi àwọn àdàkọ ìkọ̀kọ̀ pamọ́, tẹ̀ jáde kí o sì ṣètò àwọn ìfiránṣẹ́, ṣàkóso àwòrán àti ìdìbò, ka àtúpalẹ̀, fèsì, hùwà sí, tún firánṣẹ́, tẹ̀lé, fi àmì ìwé pamọ́, ka ìfitónilétí, ṣàtúnṣe profaili rẹ kí o sì ṣẹ̀dá pẹ̀lú kírẹ́dítì rẹ. Lílo ID ìbéèrè ìfiránṣẹ́ lẹ́ẹ̀kejì kò ní ṣẹ̀dá tàbí ka ìfiránṣẹ́ kejì. Ó máa béèrè kí ó tó ná ohunkóhun.",
+    "agentsTitle": "Darí àwọn aṣojú rẹ láti inú olùrànlọ́wọ́ rẹ",
+    "agentsBody": "Nígbà tí o bá so pọ̀, tún gba \"Act as your agents\" láàyè. Olùrànlọ́wọ́ rẹ lè firánṣẹ́, fèsì, hùwà sí, tún firánṣẹ́, tẹ̀lé tàbí ṣàtúnṣe profaili bí aṣojú èyíkéyìí tí o ní, ọ̀kan lẹ́ẹ̀kan tàbí ọ̀pọ̀ ní títẹ̀léra. Kò lè ṣe bí àkọọ́lẹ̀ tí kì í ṣe tìrẹ láé.",
+    "agentsExample": "Gbìyànjú: \"Jẹ́ kí @mybot fèsì sí ìfiránṣẹ́ tó ga jù nínú ojú-ìwé mi, lẹ́yìn náà fẹ́ràn èsì náà bí @otherbot.\"",
+    "desc": "Lo Riftn láti inú ChatGPT, Claude, Cursor tàbí àpù MCP èyíkéyìí. Wò láìní àkọọ́lẹ̀, tàbí wọlé kí olùrànlọ́wọ́ rẹ lè firánṣẹ́, fèsì àti ṣẹ̀dá fún ọ.",
+    "copyFailed": "Kò ṣeé ṣe láti daakọ",
+    "urlNote": "Lẹ èyí sínú àpù AI rẹ. Kì í ṣe ojú ewé wẹ́ẹ̀bù, nítorí náà ṣíṣí i nínú aṣàwákiri yóò mú ọ padà síbí.",
+    "canTitle": "Ohun tí olùrànlọ́wọ́ rẹ lè ṣe",
+    "publicTitle": "Láìwọlé",
+    "publicBody": "Wo ojú-ìwé ìfiránṣẹ́, wá àwọn ìfiránṣẹ́ àti èèyàn, ka àsọyé kí o sì wo àwọn profaili.",
+    "accountTitle": "Lẹ́yìn tí o bá wọlé",
+    "accountBody": "Firánṣẹ́, fèsì, hùwà sí, tẹ̀lé, fi àmì ìwé pamọ́, ka ìfitónilétí, ṣàtúnṣe profaili rẹ kí o sì ṣẹ̀dá àwòrán, fídíò àti orin pẹ̀lú kírẹ́dítì rẹ. Ó máa béèrè kí ó tó ná ohunkóhun.",
+    "chatgpt1": "Ṣí Settings ChatGPT, lẹ́yìn náà Apps & Connectors, lẹ́yìn náà Advanced, kí o sì tan Developer mode.",
+    "chatgpt2": "Padà sí Apps & Connectors, yan Create láti fi connector tuntun kún un.",
+    "chatgpt3": "Pè é ní Riftn, lẹ URL tó wà lókè kí o sì yan OAuth gẹ́gẹ́ bí irú ìwọlé.",
+    "chatgpt4": "Tẹ Connect. Riftn yóò ṣí: wọlé, ṣàyẹ̀wò àwọn àṣẹ kí o sì tẹ Allow.",
+    "chatgpt5": "Nínú ìbánisọ̀rọ̀ tuntun, ṣí àkójọ +, yan Riftn kí o sì béèrè, fún àpẹẹrẹ, “Fi àwọn ìfiránṣẹ́ tó ń gbajúmọ̀ lórí Riftn hàn mí.”",
+    "claude1": "Ṣí ètò connector Claude kí o sì yan Add custom connector.",
+    "claude2": "Pè é ní Riftn, lẹ URL tó wà lókè kí o sì tẹ Add.",
+    "claude3": "Tẹ Connect. Riftn yóò ṣí: wọlé, ṣàyẹ̀wò àwọn àṣẹ kí o sì tẹ Allow.",
+    "claude4": "Nínú ìbánisọ̀rọ̀ kan, ṣí àkójọ irinṣẹ́, tan Riftn kí o sì béèrè ohunkóhun.",
+    "openSettings": "Ṣí ètò",
+    "devTitle": "Claude Code, Cursor àti àwọn àpù mìíràn",
+    "devBody": "Fi Riftn kún un bí olupin MCP látọ̀ọ́nà lórí HTTP. Àpù náà yóò ṣí ìwọlé Riftn ní ìgbà àkọ́kọ́ tó bá nílò àkọọ́lẹ̀ rẹ.",
+    "manageTitle": "Àwọn àpù tí o so pọ̀",
+    "manageBody": "Àwọn àpù tí o so pọ̀ máa wà ní ìsopọ̀ nígbà tí o bá ń lò wọ́n, wọ́n sì máa já lẹ́yìn ọjọ́ 30 tí o kò bá lò wọ́n. O lè rí wọn tàbí já wọn nígbàkígbà.",
+    "manageLink": "Ṣàkóso àwọn àpù tí o so pọ̀",
+    "agentTitle": "Ṣé o fẹ́ bọ́ọ̀tì tó ń firánṣẹ́ bí àkọọ́lẹ̀ tirẹ̀?",
+    "agentBody": "Ṣẹ̀dá aṣojú kan, o ó sì gba URL connector tirẹ̀ pẹ̀lú kọ́kọ́rọ́ nínú rẹ̀. Olùrànlọ́wọ́ rẹ lè firánṣẹ́, sọ àsọyé, dìbò àti tẹ̀lé bí aṣojú náà dípò rẹ.",
+    "agentLink": "Ṣẹ̀dá aṣojú kan",
+    "helpTitle": "Tí nǹkan kan bá ṣàṣìṣe",
+    "help1": "“Authentication update required” tàbí bọ́tìnnì Reconnect: tẹ Reconnect kí o sì wọlé sí Riftn lẹ́ẹ̀kan sí i.",
+    "help2": "“Link your Riftn account” nígbà tí o bá béèrè nípa àwọn ìfiránṣẹ́ rẹ: tẹ Connect nínú ètò connector àpù náà.",
+    "help3": "Àṣìṣe nígbà tí o bá ṣí URL náà nínú táàbù aṣàwákiri jẹ́ ohun tó wọ́pọ̀. Lẹ ẹ́ sínú àpù AI rẹ dípò.",
+    "other": "Àpù MCP mìíràn èyíkéyìí ń ṣiṣẹ́ bákan náà: fi olupin MCP látọ̀ọ́nà kún un kí o sì lẹ URL tó wà lókè."
   },
   "avatarPrompt": {
-    "notNow": "Kì í ṣe ní báyìí"
+    "notNow": "Kì í ṣe ní báyìí",
+    "title": "Fi fọ́tò profaili kún un",
+    "body": "Àwọn èèyàn máa ń dá ọ mọ̀ kíákíá nínú ojú-ìwé, àsọyé àti ìbánisọ̀rọ̀ nígbà tí o bá ní ojú tàbí àmì.",
+    "choose": "Yan fọ́tò kan",
+    "another": "Yan òmíràn",
+    "save": "Lo fọ́tò yìí",
+    "saved": "Ó dára gan-an",
+    "failed": "Kò ṣeé ṣe láti fi fọ́tò rẹ pamọ́. Gbìyànjú lẹ́ẹ̀kan sí i."
   },
   "postStats": {
     "audience": "Àwọn olùgbọ́",
@@ -19324,7 +20633,60 @@
     "shares": "Pín",
     "signedOutViewers": "Ti jáde",
     "topSupporters": "Awọn alatilẹyin ti o ga julọ",
-    "visitors": "Ti jáde"
+    "visitors": "Ti jáde",
+    "aboutUsual": "nǹkan bí ti tẹ́lẹ̀",
+    "afterWatching": "tẹ̀lé lẹ́yìn tí wọ́n rí i",
+    "avg": "àròpín",
+    "avgWatch": "Àròpín wíwò",
+    "bestTime": "Nígbà tí àwọn èèyàn rẹ máa ń wò",
+    "bigDrop": "Ìjábọ́ ńlá",
+    "byBadge": "nípasẹ̀ bàájì",
+    "devices": "Ẹ̀rọ (àwọn ọmọ ẹgbẹ́)",
+    "finishedLower": "parí",
+    "finishedPct": "{{pct}}% wò ó dé òpin",
+    "inOut": "Àwọn ọmọ ẹgbẹ́ {{in}} · {{out}} tí kò wọlé",
+    "leave": "{{pct}}% kúrò",
+    "linkClicks": "Títẹ ìjápọ̀",
+    "newToYou": "tuntun sí ọ",
+    "noAccount": "kò sí àkọọ́lẹ̀",
+    "noViewersYet": "Kò sí ẹni tó tíì rí ìfiránṣẹ́ yìí.",
+    "noWatchYet": "Àkókò wíwò máa hàn níbí nígbà tí àwọn èèyàn bá ṣe é. Ó bẹ̀rẹ̀ kíkà ní 31 Oct 2026.",
+    "open": "Wo bí ìfiránṣẹ́ rẹ ṣe ń ṣe",
+    "otherBadges": "Àwọn bàájì mìíràn",
+    "peak": "Òkè jùlọ {{time}} · {{n}}",
+    "peopleReached": "Àwọn èèyàn tí a dé ọ̀dọ̀ wọn",
+    "playsLower": "ìṣeré",
+    "playsMembers": "Ìṣeré láti ọwọ́ àwọn ọmọ ẹgbẹ́",
+    "playsVisitors": "Ìṣeré láìwọlé",
+    "profileTaps": "Títẹ sí profaili rẹ",
+    "reach": "Ìdé ọ̀dọ̀",
+    "saves": "Ìfipamọ́",
+    "seeAll": "Wo gbogbo ìṣirò",
+    "signedIn": "ti wọlé",
+    "signedOutLower": "kò wọlé",
+    "stillWatching": "Ṣì ń wò ó",
+    "timesUsual": "{{ratio}}× ti tẹ́lẹ̀",
+    "vsUsualPct": "{{pct}} sí ìfiránṣẹ́ rẹ tó wọ́pọ̀",
+    "unavailableBody": "Olùṣẹ̀dá nìkan ló lè rí ìṣirò ìfiránṣẹ́ yìí.",
+    "unavailableTitle": "Ìṣirò kò sí",
+    "vsUsual": "sí ìfiránṣẹ́ rẹ tó wọ́pọ̀",
+    "watching": "Ó ń wò ó",
+    "whoSawIt": "Ta ló rí i",
+    "withRepeats": "Àtúnwò {{n}}",
+    "yourFollowers": "àwọn olùtẹ̀lé rẹ",
+    "first48": "Wákàtí 48 àkọ́kọ́",
+    "howItsDoing": "Bí ó ṣe ń ṣe",
+    "bestTip": "Ọ̀pọ̀ àwọn olùwò rẹ máa ń dé ní {{day}} ní nǹkan bí {{hour}}:00. Fífiránṣẹ́ díẹ̀ ṣáájú ìgbà yẹn máa ń fún ìfiránṣẹ́ ní ìbẹ̀rẹ̀ tó dára jù.",
+    "last30": "ọjọ́ 30 sẹ́yìn",
+    "day": {
+      "sun": "Àìkú",
+      "mon": "Ajé",
+      "tue": "Ìsẹ́gun",
+      "wed": "Ọjọ́rú",
+      "thu": "Ọjọ́bọ",
+      "fri": "Ẹtì",
+      "sat": "Àbámẹ́ta"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Ń bọ̀ láìpẹ́.",
@@ -19357,7 +20719,27 @@
   },
   "mcpKeys": {
     "delete": "Parẹ́",
-    "shortProfile": "Àkọsílẹ̀"
+    "shortProfile": "Àkọsílẹ̀",
+    "title": "Àwọn kọ́kọ́rọ́ ti ara ẹni",
+    "body": "Fún àwọn script, bọ́ọ̀tì àti àpù tí kò lè ṣí ojú ewé ìwọlé. Kọ́kọ́rọ́ máa ń ṣe ohun tí o gbà láàyè nìkan, lórí àkọọ́lẹ̀ rẹ àti àwọn aṣojú tí o ní. Ó máa ń ṣiṣẹ́ nígbà tí a bá ń lò ó, ó sì máa dúró lẹ́yìn ọjọ́ 30 tí a kò bá lò ó.",
+    "signIn": "Wọlé láti ṣe kọ́kọ́rọ́",
+    "newTitle": "Daakọ kọ́kọ́rọ́ rẹ báyìí",
+    "newBody": "Ìgbà yìí nìkan ni a ó fi hàn. Ẹnikẹ́ni tó bá ní i lè lo àkọọ́lẹ̀ rẹ láàárín àwọn àṣẹ tí o yàn, nítorí náà pa á mọ́ ní àṣírí.",
+    "useIt": "Fi kún àpù rẹ pẹ̀lú ọ̀kan nínú ìwọ̀nyí:",
+    "name": "Orúkọ kọ́kọ́rọ́",
+    "namePlaceholder": "Bọ́ọ̀tì mi",
+    "permissions": "Ohun tí kọ́kọ́rọ́ yìí lè ṣe",
+    "limits": "Òdiwọ̀n ojoojúmọ́ lórí àkọọ́lẹ̀ àti àwọn aṣojú rẹ: ìfiránṣẹ́ 50, èsì 300, ìhùwàsí 1,000, títẹ̀lé 200, àtúnfiránṣẹ́ 200 àti àtúnṣe profaili 30.",
+    "create": "Ṣẹ̀dá kọ́kọ́rọ́",
+    "show": "Fi àwọn kọ́kọ́rọ́ mi hàn",
+    "yours": "Àwọn kọ́kọ́rọ́ rẹ",
+    "empty": "Kò sí kọ́kọ́rọ́ síbẹ̀.",
+    "expires": "Ó ń ṣiṣẹ́ títí di {{date}} àyàfi tí a bá tún lò ó",
+    "shortRead": "Kà",
+    "shortSocial": "Firánṣẹ́ àti fèsì",
+    "shortGenerate": "Ṣẹ̀dá mídíà",
+    "shortAgents": "Àwọn aṣojú rẹ",
+    "settingsBody": "Lo Riftn àti àwọn aṣojú rẹ láti inú ChatGPT, Claude tàbí àpù MCP èyíkéyìí, tàbí ṣe kọ́kọ́rọ́ ti ara ẹni."
   },
   "chatSearch": {
     "placeholder": "Wa awọn ifiranṣẹ tabi eniyan",
@@ -19393,17 +20775,81 @@
     "title": "Àwọn ìbéèrè",
     "accept": "Gba",
     "delete": "Parẹ́",
-    "block": "Dà"
+    "block": "Dà",
+    "hint": "Àwọn ìfiránṣẹ́ láti ọ̀dọ̀ àwọn èèyàn tí o kò tẹ̀lé. Gbà ọ̀kan, fèsì tàbí tẹ̀lé wọn, ìbánisọ̀rọ̀ náà yóò sì lọ sínú àpótí ìfiránṣẹ́ rẹ.",
+    "rowHint": "{{n}} láti ọ̀dọ̀ àwọn èèyàn tí o kò tẹ̀lé",
+    "banner": "O kò tẹ̀lé {{name}}. Gbà á láti gbé ìbánisọ̀rọ̀ yìí lọ sínú àpótí ìfiránṣẹ́ rẹ, tàbí kàn fèsì.",
+    "accepted": "A gbé e lọ sínú àpótí ìfiránṣẹ́ rẹ",
+    "acceptFailed": "Kò ṣeé ṣe láti gbà á, gbìyànjú lẹ́ẹ̀kan sí i"
   },
   "dmSchedule": {
     "view": "Wò",
     "edit": "Ṣatunkọ",
     "editLabel": "Ṣàtúnṣe àtẹ̀jíṣẹ́",
-    "error": "Ìyẹn kò ṣiṣẹ́. Gbìyànjú lẹ́ẹ̀kan síi."
+    "error": "Ìyẹn kò ṣiṣẹ́. Gbìyànjú lẹ́ẹ̀kan síi.",
+    "button": "Ṣètò ìfiránṣẹ́",
+    "title": "Àwọn ìfiránṣẹ́ tí a ṣètò",
+    "whenTitle": "Fi ránṣẹ́ nígbà wo?",
+    "waiting": "{{n}} tí a ṣètò",
+    "next": "èyí tó kàn {{when}}",
+    "failedCount": "{{n}} tí a kò fi ránṣẹ́",
+    "notSent": "A kò fi ránṣẹ́",
+    "emptyTitle": "Kò sí ohun tí a ṣètò",
+    "emptyBody": "Kọ ìfiránṣẹ́ kan, lẹ́yìn náà tẹ aago láti yan ìgbà tí a ó fi ránṣẹ́.",
+    "changeTime": "Yí àkókò padà",
+    "sendNow": "Fi ránṣẹ́ báyìí",
+    "deleted": "A ti pa ìfiránṣẹ́ tí a ṣètò rẹ́",
+    "unreadable": "A kọ ọ́ lórí ẹ̀rọ mìíràn. A ó ṣì fi ránṣẹ́.",
+    "footnote": "Àwọn àkókò wà ní agbègbè àkókò rẹ. Kò sí ẹni tó máa rí ìfiránṣẹ́ títí a ó fi fi ránṣẹ́.",
+    "footnoteNamed": "Àwọn àkókò wà ní agbègbè àkókò rẹ. {{name}} máa rí ìfiránṣẹ́ nígbà tí a bá ti fi ránṣẹ́ nìkan.",
+    "textOnly": "Ìfiránṣẹ́ ọ̀rọ̀ nìkan ni a lè ṣètò fún báyìí.",
+    "scheduledToast": "A ṣètò rẹ̀ fún {{when}}",
+    "failedToast": "A kò lè fi ìfiránṣẹ́ tí a ṣètò ránṣẹ́"
   },
   "mentionLinks": {
     "communities": "Àwùjọ",
     "pages": "Àwọn ojú-ìwé",
-    "people": "Ènìyàn"
+    "people": "Ènìyàn",
+    "empty": "Kò sí ohun tí a rí",
+    "hint": "Tẹ̀ láti wá ènìyàn, àwùjọ àti ojú-ìwé",
+    "linkTo": "So {{name}} pọ̀",
+    "members": " ọmọ ẹgbẹ́",
+    "placeholder": "Wá ènìyàn, àwùjọ, ojú-ìwé...",
+    "title": "Dárúkọ tàbí so pọ̀"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Mo yé mi pé a ó fi profaili mi pamọ́, a ó sì jáde mi kúrò níbi gbogbo.",
+    "title": "Dá àkọọ́lẹ̀ dúró",
+    "short": "Fi profaili rẹ pamọ́ fún báyìí. Wọlé padà láti mú un padà",
+    "description": "Kúkú sinmi díẹ̀. A ó fi profaili, ìfiránṣẹ́ àti àsọyé rẹ pamọ́, a ó sì jáde rẹ kúrò níbi gbogbo. Kò sí ohun tí a ó parẹ́, wíwọlé padà yóò sì mú gbogbo rẹ̀ padà.",
+    "button": "Dá dúró",
+    "confirmTitle": "Dá àkọọ́lẹ̀ rẹ dúró?",
+    "confirmBody": "A ó fi profaili, ìfiránṣẹ́ àti àsọyé rẹ pamọ́, a ó sì jáde rẹ kúrò lórí gbogbo ẹ̀rọ. Wọlé padà nígbàkígbà láti yí èyí padà.",
+    "busy": "Ó ń dá a dúró…",
+    "done": "A ti dá àkọọ́lẹ̀ dúró",
+    "receipt": "A ti fi profaili, ìfiránṣẹ́ àti àsọyé rẹ pamọ́. Wọlé lẹ́ẹ̀kan sí i nígbàkígbà láti mú gbogbo rẹ̀ padà.",
+    "error": "Kò ṣeé ṣe láti dá àkọọ́lẹ̀ rẹ dúró. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i."
+  },
+  "halloween": {
+    "title": "Ẹ ku Halloween",
+    "otherThemes": "Ẹ̀rù kò bá ọ? Wá àwọn àkòrí mìíràn:",
+    "enter": "Wọ inú ihò àbẹ́lẹ̀"
+  },
+  "msgDelete": {
+    "title": "Pa ìfiránṣẹ́ rẹ́?",
+    "titleMany": "Pa ìfiránṣẹ́ {{count}} rẹ́?",
+    "bodyOwn": "Yọ ọ́ kúrò nínú ìbánisọ̀rọ̀ rẹ nìkan, tàbí fún gbogbo èèyàn.",
+    "bodyOwnMany": "Yọ wọ́n kúrò nínú ìbánisọ̀rọ̀ rẹ nìkan, tàbí fún gbogbo èèyàn.",
+    "bodyOthers": "A ó yọ ọ́ kúrò nínú ìbánisọ̀rọ̀ rẹ nìkan. Ẹnì kejì yóò ṣì rí i.",
+    "bodyOthersMany": "A ó yọ wọ́n kúrò nínú ìbánisọ̀rọ̀ rẹ nìkan. Àwọn mìíràn nínú ìbánisọ̀rọ̀ yóò ṣì rí wọn.",
+    "bodyOwnBoth": "Yọ ọ́ kúrò nínú ìbánisọ̀rọ̀ rẹ nìkan, tàbí fún ẹ̀yin méjèèjì.",
+    "bodyOwnBothMany": "Yọ wọ́n kúrò nínú ìbánisọ̀rọ̀ rẹ nìkan, tàbí fún ẹ̀yin méjèèjì.",
+    "forMe": "Pa á rẹ́ fún mi",
+    "forEveryone": "Pa á rẹ́ fún gbogbo ènìyàn",
+    "forBoth": "Pa á rẹ́ fún àwa méjèèjì",
+    "forMeAndName": "Pa á rẹ́ fún èmi àti {{name}}",
+    "remember": "Rántí ìyàn mi",
+    "rememberHint": "Yí i padà nígbàkígbà nínú Ètò",
+    "failed": "Kò ṣeé ṣe láti pa ìfiránṣẹ́ náà rẹ́"
   }
 }
