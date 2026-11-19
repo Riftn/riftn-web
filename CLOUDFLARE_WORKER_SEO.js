@@ -4264,6 +4264,62 @@ ${breadcrumbScript([HOME_CRUMB, { name: 'Blog', url: `${APP_URL}/docs/blog` }, {
 }
 
 
+/** The share tags a blog post or guide's own page carries, or null. */
+async function articleShareMeta(pathname, request, env) {
+  const m = pathname.replace(/\/+$/, '').match(/^\/(?:docs\/blog|guides)\/([^/?#]+)$/);
+  if (!m) return null;
+  let slug;
+  try { slug = decodeURIComponent(m[1]); } catch { return null; }
+  const url = `${APP_URL}/guides/${encodeURIComponent(slug)}`;
+  if (pathname.startsWith('/guides/') && Object.hasOwn(GUIDE_PAGES, slug)) {
+    const g = GUIDE_PAGES[slug];
+    return { url, title: g.title, description: g.description, image: shareImage(`guides/${slug}`), alt: g.title };
+  }
+  const manifest = await getBlogManifest(request, env);
+  const post = manifest.get(slug);
+  if (!post) return null;
+  const description = (post.seoDescription || post.excerpt || `${post.title}, read on Riftn.`).replace(/\s+/g, ' ').trim();
+  return {
+    url,
+    title: blogTitle(post),
+    description: snippet(description, 280),
+    image: buildBlogShareImage(post),
+    alt: post.bannerImageAlt || post.title,
+  };
+}
+
+/**
+ * The SPA shell with an article's share tags in place of the homepage's.
+ * Only the values change; React's SEOHead still takes over once it runs.
+ */
+async function withArticleShareMeta(resp, pathname, request, env) {
+  const type = (resp.headers.get('Content-Type') || '').toLowerCase();
+  if (resp.status !== 200 || !type.startsWith('text/html')) return resp;
+  let meta = null;
+  try { meta = await articleShareMeta(pathname, request, env); } catch { meta = null; }
+  if (!meta) return resp;
+  const set = (html, attr, key, value) => html.replace(
+    new RegExp(`(<meta ${attr}="${key}" content=")[^"]*(")`, 'i'),
+    (_, a, b) => `${a}${escHtml(value)}${b}`,
+  );
+  let html = await resp.text();
+  html = html.replace(/<title>[^<]*<\/title>/i, () => `<title>${escHtml(meta.title)}</title>`);
+  html = set(html, 'name', 'description', meta.description);
+  html = set(html, 'property', 'og:type', 'article');
+  html = set(html, 'property', 'og:title', meta.title);
+  html = set(html, 'name', 'twitter:title', meta.title);
+  html = set(html, 'property', 'og:description', meta.description);
+  html = set(html, 'name', 'twitter:description', meta.description);
+  html = set(html, 'property', 'og:image', meta.image);
+  html = set(html, 'name', 'twitter:image', meta.image);
+  html = html.replace('</head>', () => `<meta property="og:url" content="${escHtml(meta.url)}">
+<meta property="og:image:alt" content="${escHtml(meta.alt)}">
+</head>`);
+  const out = new Response(html, resp);
+  out.headers.delete('Content-Length');
+  return out;
+}
+
 /** Minimal OG HTML served to bots when SSR times out or fails.
  *  Prevents them from caching the generic React SPA index.html,
  *  which has no post-specific image and causes the 2-3 hour re-scrape delay.
@@ -4475,8 +4531,19 @@ function looksLikeRenderingBrowser(ua) {
   return !CRAWLER_TOKEN_PATTERN.test(ua);
 }
 
+// Every browser and in-app WebView introduces itself as `Mozilla/5.0 ...`
+// (Presto Opera as `Opera/`). A UA that does not is a program fetching the
+// page, and a program cannot run the SPA, so it reads the prerendered card.
+// Our own link-preview function (`DeHubLinkPreview/1.0`) named no bot and got
+// the homepage shell, so every article, post and profile pasted into a Riftn
+// post unfurled as the generic "Riftn" card. Same for any new previewer that
+// has not been listed in BOT_UA_PATTERN yet.
+const BROWSER_UA_PREFIX = /^\s*(?:mozilla|opera)\//i;
+
 export function isCrawlerUa(ua) {
-  return BOT_UA_PATTERN.test(ua) && !looksLikeRenderingBrowser(ua);
+  const agent = ua || '';
+  if (agent.trim() && !BROWSER_UA_PREFIX.test(agent)) return true;
+  return BOT_UA_PATTERN.test(agent) && !looksLikeRenderingBrowser(agent);
 }
 
 // The escape hatch out of a prerendered page. Every self-referencing CTA in
@@ -7223,7 +7290,11 @@ async function handleRequest(request, env, ctx) {
     // These URLs serve different bodies per UA; without Vary a fronting CDN
     // (e.g. Cloudflare) could cache bot HTML by URL and serve it to browsers —
     // which triggers the infinite-reload loop documented above.
-    const resp = await guardNext();
+    let resp = await guardNext();
+    // Article pages: previewers that send a full browser UA (opengraph.xyz,
+    // Notion, some chat apps) get the shell too, so the shell itself carries
+    // the article's title, description and banner instead of the homepage's.
+    resp = await withArticleShareMeta(resp, pathname, request, env);
     const varied = new Response(resp.body, resp);
     varied.headers.append('Vary', 'User-Agent');
     // ?app=1 is a duplicate of the canonical URL: keep it out of the index,
