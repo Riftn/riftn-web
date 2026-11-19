@@ -117,6 +117,7 @@ import { useVideoGlitch, writeVideoGlitch } from '@/lib/video-glitch';
 import { useUserPreferences } from '@/contexts/UserPreferencesContext';
 import { getCreatorPlaybackRateCount, clearCreatorPlaybackRates } from '@/lib/video-preferences';
 import { normaliseFeedVideoShape, useFeedVideoShape, writeFeedVideoShape } from '@/lib/feed-video-shape';
+import { MENU_LAYOUT_PREF_KEY, normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 import { isWideVideoMode, useWideVideoMode, writeWideVideoMode } from '@/lib/wide-video-mode';
 import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 import { useCoinPlacement } from '@/hooks/use-coin-placement';
@@ -2788,6 +2789,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
               ]}
             />}
           />
+          <MenuLayoutRow />
           <DefaultFeedSetting />
           <FeedTogglesSetting />
           <PostLandingSetting />
@@ -3399,6 +3401,38 @@ function WideVideoModeRow() {
           { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideVideoAmbientDesc', 'The video fills the width, with a soft blurred glow of itself on each side') },
           { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideVideoRailsDesc', 'The video beside one glass panel with what it is, a Follow button and the top comments') },
           { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideVideoStandardDesc', 'The video on its own, as before') },
+        ]}
+      />}
+    />
+  );
+}
+
+/** Phone menu grouping (lib/menu-layout). Phones only: desktop has no such menu. */
+function MenuLayoutRow() {
+  const { t } = useTranslation();
+  const layout = useMenuLayout();
+  const prefs = useUserPreferences();
+  const isDesktop = useIsDesktopViewport();
+  if (isDesktop) return null;
+
+  return (
+    <SettingsRow
+      icon={<LayoutGrid />}
+      anchor="menu-layout"
+      title={t('settings.menuLayout', 'Menu layout')}
+      description={t('settings.menuLayoutDesc', 'How the menu groups its pages')}
+      action={<SettingDrawerSelect
+        value={layout}
+        onValueChange={(value) => {
+          const next = normaliseMenuLayout(value);
+          writeMenuLayout(next);
+          prefs?.setPref(MENU_LAYOUT_PREF_KEY, next);
+        }}
+        title={t('settings.menuLayout', 'Menu layout')}
+        options={[
+          { value: 'tabs', label: t('settings.menuLayoutTabs', 'Tabs'), description: t('settings.menuLayoutTabsDesc', 'One group at a time, with big icons') },
+          { value: 'sections', label: t('settings.menuLayoutSections', 'Sections'), description: t('settings.menuLayoutSectionsDesc', 'Every page at once, under group headers') },
+          { value: 'folders', label: t('settings.menuLayoutFolders', 'Folders'), description: t('settings.menuLayoutFoldersDesc', 'Your main pages, then a folder for each group') },
         ]}
       />}
     />

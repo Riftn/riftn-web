@@ -578,7 +578,14 @@
     "getTheApp": "アプリを入手",
     "connectAi": "AI を接続",
     "converter": "変換",
-    "affiliate": "アフィリエイト"
+    "affiliate": "アフィリエイト",
+    "groups": {
+      "main": "メイン",
+      "create": "作成",
+      "discover": "見つける",
+      "money": "お金",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}}のプロフィールを表示",
@@ -1208,7 +1215,15 @@
     "socialConnectedShort": "連携済み",
     "socialConnectFailed": "{{platform}}を連携できませんでした。もう一度お試しください。",
     "socialVerifiedFollowers": "フォロワー{{value}}人",
-    "socialFollowersPending": "フォロワー数を更新中"
+    "socialFollowersPending": "フォロワー数を更新中",
+    "menuLayout": "メニューのレイアウト",
+    "menuLayoutDesc": "メニューのページのまとめ方",
+    "menuLayoutTabs": "タブ",
+    "menuLayoutTabsDesc": "1グループずつ、大きなアイコンで",
+    "menuLayoutSections": "セクション",
+    "menuLayoutSectionsDesc": "すべてのページを見出しの下に表示",
+    "menuLayoutFolders": "フォルダ",
+    "menuLayoutFoldersDesc": "メインのページと、グループごとのフォルダ"
   },
   "common": {
     "confirm": "確認",

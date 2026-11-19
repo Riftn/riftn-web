@@ -659,7 +659,14 @@
     "getTheApp": "ऐप पाएँ",
     "connectAi": "AI जोड़ें",
     "converter": "कनवर्टर का",
-    "affiliate": "एफिलिएट"
+    "affiliate": "एफिलिएट",
+    "groups": {
+      "main": "मुख्य",
+      "create": "बनाएँ",
+      "discover": "खोजें",
+      "money": "पैसा",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} की प्रोफ़ाइल देखें",
@@ -1291,7 +1298,15 @@
     "socialConnectedShort": "कनेक्टेड",
     "socialConnectFailed": "{{platform}} कनेक्ट नहीं हो सका। फिर से कोशिश करें।",
     "socialVerifiedFollowers": "{{value}} फ़ॉलोअर",
-    "socialFollowersPending": "फ़ॉलोअर संख्या अपडेट हो रही है"
+    "socialFollowersPending": "फ़ॉलोअर संख्या अपडेट हो रही है",
+    "menuLayout": "मेनू लेआउट",
+    "menuLayoutDesc": "मेनू अपने पेज कैसे समूहित करता है",
+    "menuLayoutTabs": "टैब",
+    "menuLayoutTabsDesc": "एक बार में एक समूह, बड़े आइकन के साथ",
+    "menuLayoutSections": "सेक्शन",
+    "menuLayoutSectionsDesc": "सभी पेज एक साथ, शीर्षकों के नीचे",
+    "menuLayoutFolders": "फ़ोल्डर",
+    "menuLayoutFoldersDesc": "आपके मुख्य पेज, फिर हर समूह के लिए एक फ़ोल्डर"
   },
   "common": {
     "confirm": "कन्फ़र्म करें",

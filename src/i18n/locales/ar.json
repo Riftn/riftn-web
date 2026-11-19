@@ -723,7 +723,14 @@
     "getTheApp": "حمّل التطبيق",
     "connectAi": "ربط الذكاء الاصطناعي",
     "converter": "المحول",
-    "affiliate": "التسويق بالعمولة"
+    "affiliate": "التسويق بالعمولة",
+    "groups": {
+      "main": "الرئيسية",
+      "create": "إنشاء",
+      "discover": "استكشاف",
+      "money": "المال",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "عرض ملف {{name}} الشخصي",
@@ -1355,7 +1362,15 @@
     "socialConnectedShort": "مرتبط",
     "socialConnectFailed": "تعذر ربط {{platform}}. حاول مرة أخرى.",
     "socialVerifiedFollowers": "{{value}} متابع",
-    "socialFollowersPending": "جارٍ تحديث عدد المتابعين"
+    "socialFollowersPending": "جارٍ تحديث عدد المتابعين",
+    "menuLayout": "تخطيط القائمة",
+    "menuLayoutDesc": "كيف تجمع القائمة صفحاتها",
+    "menuLayoutTabs": "علامات تبويب",
+    "menuLayoutTabsDesc": "مجموعة واحدة في كل مرة، بأيقونات كبيرة",
+    "menuLayoutSections": "أقسام",
+    "menuLayoutSectionsDesc": "كل الصفحات معًا، تحت عناوين",
+    "menuLayoutFolders": "مجلدات",
+    "menuLayoutFoldersDesc": "صفحاتك الرئيسية، ثم مجلد لكل مجموعة"
   },
   "common": {
     "confirm": "تأكيد",

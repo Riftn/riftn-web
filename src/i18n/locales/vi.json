@@ -577,7 +577,14 @@
     "getTheApp": "Tải ứng dụng",
     "connectAi": "Kết nối AI",
     "converter": "Bộ chuyển đổi",
-    "affiliate": "Tiếp thị liên kết"
+    "affiliate": "Tiếp thị liên kết",
+    "groups": {
+      "main": "Chính",
+      "create": "Tạo",
+      "discover": "Khám phá",
+      "money": "Tiền",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Xem hồ sơ của {{name}}",
@@ -1208,7 +1215,15 @@
     "socialConnectedShort": "Đã kết nối",
     "socialConnectFailed": "Không thể kết nối {{platform}}. Vui lòng thử lại.",
     "socialVerifiedFollowers": "{{value}} người theo dõi",
-    "socialFollowersPending": "Đang cập nhật số người theo dõi"
+    "socialFollowersPending": "Đang cập nhật số người theo dõi",
+    "menuLayout": "Bố cục menu",
+    "menuLayoutDesc": "Cách menu nhóm các trang",
+    "menuLayoutTabs": "Thẻ",
+    "menuLayoutTabsDesc": "Mỗi lần một nhóm, biểu tượng lớn",
+    "menuLayoutSections": "Mục",
+    "menuLayoutSectionsDesc": "Tất cả trang cùng lúc, dưới tiêu đề",
+    "menuLayoutFolders": "Thư mục",
+    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục"
   },
   "common": {
     "confirm": "Xác nhận",
