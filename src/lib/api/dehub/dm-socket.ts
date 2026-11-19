@@ -80,6 +80,8 @@ export interface ReadReceiptData {
 
 export interface ConversationDeletedData {
   dmId: string;
+  /** A 1:1 chat the other person deleted for both of you. */
+  forEveryone?: boolean;
 }
 
 export interface FeeConfirmedData {

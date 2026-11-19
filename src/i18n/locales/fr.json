@@ -2266,6 +2266,11 @@
     "followBack": "Suivre en retour"
   },
   "features": {
+    "cropDraw": "Rogner et dessiner",
+    "crop": "Rogner",
+    "cropHint": "Tracez un cadre sur la partie à garder. Faites-le glisser de l'intérieur pour le déplacer.",
+    "drawHint": "Dessinez sur l'image pour montrer des éléments.",
+    "resetCrop": "Réinitialiser le rognage",
     "prompts": "Propositions",
     "queued": "En attente",
     "promptPageTitle": "Demandes",
@@ -20875,6 +20880,9 @@
     "title": "Mentionner ou lier"
   },
   "msgDelete": {
+    "chatTitle": "Supprimer cette discussion ?",
+    "chatBodyBoth": "Supprimez-la seulement de vos discussions, ou supprimez tous les messages pour vous deux. Action irréversible.",
+    "chatBodyMe": "Elle sera retirée de vos discussions uniquement. Les autres la verront toujours.",
     "title": "Supprimer le message ?",
     "titleMany": "Supprimer {{count}} messages ?",
     "bodyOwn": "Retirez-le seulement de votre discussion, ou pour tout le monde.",
@@ -20890,5 +20898,9 @@
     "remember": "Mémoriser mon choix",
     "rememberHint": "Modifiable à tout moment dans les Paramètres",
     "failed": "Impossible de supprimer le message"
+  },
+  "roomPreview": {
+    "you": "Vous",
+    "voice": "🎤 Message vocal"
   }
 }

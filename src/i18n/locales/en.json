@@ -2277,6 +2277,11 @@
     "followBack": "Follow Back"
   },
   "features": {
+    "cropDraw": "Crop & draw",
+    "crop": "Crop",
+    "cropHint": "Drag a box over the part to keep. Drag inside it to move it.",
+    "drawHint": "Draw on the picture to point things out.",
+    "resetCrop": "Reset crop",
     "prompts": "Prompts",
     "queued": "Queued",
     "promptPageTitle": "Requests",
@@ -20766,6 +20771,9 @@
     "error": "That did not work. Try again."
   },
   "msgDelete": {
+    "chatTitle": "Delete this chat?",
+    "chatBodyBoth": "Delete it from your chats only, or every message for both of you. This can't be undone.",
+    "chatBodyMe": "It will be removed from your chats only. Others will still see it.",
     "title": "Delete message?",
     "titleMany": "Delete {{count}} messages?",
     "bodyOwn": "Remove it from your chat only, or for everyone.",
@@ -20781,5 +20789,9 @@
     "remember": "Remember my choice",
     "rememberHint": "Change it any time in Settings",
     "failed": "Could not delete the message"
+  },
+  "roomPreview": {
+    "you": "You",
+    "voice": "🎤 Voice message"
   }
 }
