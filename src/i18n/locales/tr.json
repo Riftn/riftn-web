@@ -2266,6 +2266,11 @@
     "followBack": "Takip Et"
   },
   "features": {
+    "cropDraw": "Kırp ve çiz",
+    "crop": "Kırp",
+    "cropHint": "Tutmak istediğin kısmın üzerine bir kutu sürükle. Taşımak için kutunun içinden sürükle.",
+    "drawHint": "Bir şeyleri göstermek için resmin üzerine çiz.",
+    "resetCrop": "Kırpmayı sıfırla",
     "prompts": "İstemler",
     "queued": "Sırada",
     "promptPageTitle": "İstekler",
@@ -20859,6 +20864,9 @@
     "title": "Bahset veya bağlantı ver"
   },
   "msgDelete": {
+    "chatTitle": "Bu sohbet silinsin mi?",
+    "chatBodyBoth": "Yalnızca sohbetlerinden sil ya da ikiniz için tüm mesajları sil. Bu işlem geri alınamaz.",
+    "chatBodyMe": "Yalnızca senin sohbetlerinden kaldırılır. Diğerleri görmeye devam eder.",
     "title": "Mesaj silinsin mi?",
     "titleMany": "{{count}} mesaj silinsin mi?",
     "bodyOwn": "Yalnızca kendi sohbetinden ya da herkes için kaldır.",
@@ -20874,5 +20882,9 @@
     "remember": "Seçimimi hatırla",
     "rememberHint": "İstediğin zaman Ayarlar'dan değiştir",
     "failed": "Mesaj silinemedi"
+  },
+  "roomPreview": {
+    "you": "Sen",
+    "voice": "🎤 Sesli mesaj"
   }
 }

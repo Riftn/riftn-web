@@ -2266,6 +2266,11 @@
     "followBack": "Seguir de vuelta"
   },
   "features": {
+    "cropDraw": "Recortar y dibujar",
+    "crop": "Recortar",
+    "cropHint": "Arrastra un recuadro sobre la parte que quieres conservar. Arrastra dentro para moverlo.",
+    "drawHint": "Dibuja sobre la imagen para señalar cosas.",
+    "resetCrop": "Restablecer recorte",
     "prompts": "Propuestas",
     "queued": "En cola",
     "promptPageTitle": "Solicitudes",
@@ -20859,6 +20864,9 @@
     "title": "Mencionar o enlazar"
   },
   "msgDelete": {
+    "chatTitle": "¿Eliminar este chat?",
+    "chatBodyBoth": "Bórralo solo de tus chats o borra todos los mensajes para los dos. No se puede deshacer.",
+    "chatBodyMe": "Se quitará solo de tus chats. Los demás lo seguirán viendo.",
     "title": "¿Eliminar mensaje?",
     "titleMany": "¿Eliminar {{count}} mensajes?",
     "bodyOwn": "Quítalo solo de tu chat o para todos.",
@@ -20874,5 +20882,9 @@
     "remember": "Recordar mi elección",
     "rememberHint": "Cámbialo cuando quieras en Ajustes",
     "failed": "No se pudo eliminar el mensaje"
+  },
+  "roomPreview": {
+    "you": "Tú",
+    "voice": "🎤 Mensaje de voz"
   }
 }
