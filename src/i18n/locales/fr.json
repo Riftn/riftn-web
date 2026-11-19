@@ -723,7 +723,14 @@
     "getTheApp": "Obtenir l'application",
     "connectAi": "Connecter l'IA",
     "converter": "Convertisseur",
-    "affiliate": "Affiliation"
+    "affiliate": "Affiliation",
+    "groups": {
+      "main": "Principal",
+      "create": "Créer",
+      "discover": "Découvrir",
+      "money": "Argent",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Afficher le profil de {{name}}",
@@ -1357,7 +1364,15 @@
     "socialConnectedShort": "Connecté",
     "socialConnectFailed": "Impossible de connecter {{platform}}. Veuillez réessayer.",
     "socialVerifiedFollowers": "{{value}} abonnés",
-    "socialFollowersPending": "Mise à jour des abonnés"
+    "socialFollowersPending": "Mise à jour des abonnés",
+    "menuLayout": "Disposition du menu",
+    "menuLayoutDesc": "Comment le menu regroupe ses pages",
+    "menuLayoutTabs": "Onglets",
+    "menuLayoutTabsDesc": "Un groupe à la fois, avec de grandes icônes",
+    "menuLayoutSections": "Sections",
+    "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
+    "menuLayoutFolders": "Dossiers",
+    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe"
   },
   "common": {
     "confirm": "Confirmer",

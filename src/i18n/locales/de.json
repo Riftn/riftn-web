@@ -575,7 +575,14 @@
     "getTheApp": "App holen",
     "connectAi": "KI verbinden",
     "converter": "Wandler",
-    "affiliate": "Partnerprogramm"
+    "affiliate": "Partnerprogramm",
+    "groups": {
+      "main": "Start",
+      "create": "Erstellen",
+      "discover": "Entdecken",
+      "money": "Geld",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Profil von {{name}} anzeigen",
@@ -1208,7 +1215,15 @@
     "socialConnectedShort": "Verbunden",
     "socialConnectFailed": "{{platform}} konnte nicht verbunden werden. Bitte versuche es erneut.",
     "socialVerifiedFollowers": "{{value}} Follower",
-    "socialFollowersPending": "Followerzahl wird aktualisiert"
+    "socialFollowersPending": "Followerzahl wird aktualisiert",
+    "menuLayout": "Menü-Layout",
+    "menuLayoutDesc": "Wie das Menü seine Seiten gruppiert",
+    "menuLayoutTabs": "Tabs",
+    "menuLayoutTabsDesc": "Eine Gruppe nach der anderen, mit großen Symbolen",
+    "menuLayoutSections": "Abschnitte",
+    "menuLayoutSectionsDesc": "Alle Seiten auf einmal, unter Überschriften",
+    "menuLayoutFolders": "Ordner",
+    "menuLayoutFoldersDesc": "Deine Hauptseiten, dann ein Ordner pro Gruppe"
   },
   "common": {
     "confirm": "Bestätigen",

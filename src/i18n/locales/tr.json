@@ -723,7 +723,14 @@
     "getTheApp": "Uygulamayı İndir",
     "connectAi": "Yapay Zekâyı Bağla",
     "converter": "Dönüştürücü",
-    "affiliate": "Satış Ortaklığı"
+    "affiliate": "Satış Ortaklığı",
+    "groups": {
+      "main": "Ana",
+      "create": "Oluştur",
+      "discover": "Keşfet",
+      "money": "Para",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} adlı kişinin profilini görüntüleyin",
@@ -1357,7 +1364,15 @@
     "socialConnectedShort": "Bağlı",
     "socialConnectFailed": "{{platform}} bağlanamadı. Lütfen tekrar dene.",
     "socialVerifiedFollowers": "{{value}} takipçi",
-    "socialFollowersPending": "Takipçi sayısı güncelleniyor"
+    "socialFollowersPending": "Takipçi sayısı güncelleniyor",
+    "menuLayout": "Menü düzeni",
+    "menuLayoutDesc": "Menünün sayfaları nasıl grupladığı",
+    "menuLayoutTabs": "Sekmeler",
+    "menuLayoutTabsDesc": "Her seferinde bir grup, büyük simgelerle",
+    "menuLayoutSections": "Bölümler",
+    "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
+    "menuLayoutFolders": "Klasörler",
+    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör"
   },
   "common": {
     "confirm": "Onayla",

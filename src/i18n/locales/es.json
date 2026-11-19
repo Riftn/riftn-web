@@ -723,7 +723,14 @@
     "getTheApp": "Descargar la app",
     "connectAi": "Conectar IA",
     "converter": "Conversión",
-    "affiliate": "Afiliados"
+    "affiliate": "Afiliados",
+    "groups": {
+      "main": "Principal",
+      "create": "Crear",
+      "discover": "Descubrir",
+      "money": "Dinero",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Ver el perfil de {{name}}",
@@ -1357,7 +1364,15 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "No se pudo conectar {{platform}}. Inténtalo de nuevo.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Actualizando seguidores"
+    "socialFollowersPending": "Actualizando seguidores",
+    "menuLayout": "Diseño del menú",
+    "menuLayoutDesc": "Cómo agrupa el menú sus páginas",
+    "menuLayoutTabs": "Pestañas",
+    "menuLayoutTabsDesc": "Un grupo a la vez, con iconos grandes",
+    "menuLayoutSections": "Secciones",
+    "menuLayoutSectionsDesc": "Todas las páginas a la vez, bajo encabezados",
+    "menuLayoutFolders": "Carpetas",
+    "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo"
   },
   "common": {
     "confirm": "Confirmar",

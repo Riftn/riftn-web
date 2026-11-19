@@ -578,7 +578,14 @@
     "getTheApp": "앱 받기",
     "connectAi": "AI 연결",
     "converter": "컨버터",
-    "affiliate": "제휴"
+    "affiliate": "제휴",
+    "groups": {
+      "main": "메인",
+      "create": "만들기",
+      "discover": "둘러보기",
+      "money": "머니",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} 님의 프로필 보기",
@@ -1209,7 +1216,15 @@
     "socialConnectedShort": "연결됨",
     "socialConnectFailed": "{{platform}}에 연결하지 못했습니다. 다시 시도해 주세요.",
     "socialVerifiedFollowers": "팔로워 {{value}}명",
-    "socialFollowersPending": "팔로워 수 업데이트 중"
+    "socialFollowersPending": "팔로워 수 업데이트 중",
+    "menuLayout": "메뉴 레이아웃",
+    "menuLayoutDesc": "메뉴가 페이지를 묶는 방식",
+    "menuLayoutTabs": "탭",
+    "menuLayoutTabsDesc": "한 번에 한 그룹씩, 큰 아이콘으로",
+    "menuLayoutSections": "섹션",
+    "menuLayoutSectionsDesc": "모든 페이지를 제목 아래에 한 번에",
+    "menuLayoutFolders": "폴더",
+    "menuLayoutFoldersDesc": "주요 페이지, 그리고 그룹별 폴더"
   },
   "common": {
     "confirm": "확인",

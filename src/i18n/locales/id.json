@@ -577,7 +577,14 @@
     "getTheApp": "Dapatkan Aplikasi",
     "connectAi": "Hubungkan AI",
     "converter": "Konverter",
-    "affiliate": "Afiliasi"
+    "affiliate": "Afiliasi",
+    "groups": {
+      "main": "Utama",
+      "create": "Buat",
+      "discover": "Jelajahi",
+      "money": "Uang",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Lihat profil {{name}}",
@@ -1210,7 +1217,15 @@
     "socialConnectedShort": "Terhubung",
     "socialConnectFailed": "Tidak dapat menghubungkan {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Memperbarui jumlah pengikut"
+    "socialFollowersPending": "Memperbarui jumlah pengikut",
+    "menuLayout": "Tata letak menu",
+    "menuLayoutDesc": "Cara menu mengelompokkan halamannya",
+    "menuLayoutTabs": "Tab",
+    "menuLayoutTabsDesc": "Satu grup sekaligus, dengan ikon besar",
+    "menuLayoutSections": "Bagian",
+    "menuLayoutSectionsDesc": "Semua halaman sekaligus, di bawah judul",
+    "menuLayoutFolders": "Folder",
+    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup"
   },
   "common": {
     "confirm": "Konfirmasi",

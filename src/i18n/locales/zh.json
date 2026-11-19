@@ -658,7 +658,14 @@
     "connectAi": "连接 AI",
     "converter": "转换器",
     "affiliate": "推广联盟",
-    "dao": "DAO"
+    "dao": "DAO",
+    "groups": {
+      "main": "主要",
+      "create": "创作",
+      "discover": "发现",
+      "money": "资金",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "查看{{name}}的个人资料",
@@ -1291,7 +1298,15 @@
     "socialConnectedShort": "已连接",
     "socialConnectFailed": "无法连接 {{platform}}，请重试。",
     "socialVerifiedFollowers": "{{value}} 位粉丝",
-    "socialFollowersPending": "粉丝数更新中"
+    "socialFollowersPending": "粉丝数更新中",
+    "menuLayout": "菜单布局",
+    "menuLayoutDesc": "菜单如何分组页面",
+    "menuLayoutTabs": "标签页",
+    "menuLayoutTabsDesc": "一次一个分组，大图标",
+    "menuLayoutSections": "分区",
+    "menuLayoutSectionsDesc": "所有页面一次显示，按标题分组",
+    "menuLayoutFolders": "文件夹",
+    "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹"
   },
   "common": {
     "confirm": "确认",

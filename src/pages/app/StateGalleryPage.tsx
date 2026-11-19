@@ -35,6 +35,7 @@ import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type React
 import { PostActionBar } from '@/features/post/components/PostActionBar';
 import { createPortal } from 'react-dom';
 import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
+import MenuSearchIcon from "@/components/ui/cut-icons/search";
 import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
 import { hideDislikedPost, restoreDislikedPost } from '@/lib/disliked-posts-store';
 import { useTranslation } from 'react-i18next';
@@ -172,7 +173,9 @@ import { ProfileFieldsEditor, type FieldRow } from '@/components/app/settings/Pr
 import type { SuggestedAccount } from '@/lib/api/dehub';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { filterNavItems } from '@/components/app/navigation/nav-search';
-import { MobileMenuGrid } from '@/components/app/navigation/MobileMenuGrid';
+import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { groupMenuItems } from '@/components/app/navigation/menu-groups';
+import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 
 /**
  * Comic posts: the deck as the feed shows it, the post page with the hand of
@@ -883,20 +886,49 @@ function MenuReorderGallery() {
   const { t } = useTranslation();
   // Type here to see the menu search exactly as the phone menu runs it.
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState(0);
+  const layout = useMenuLayout();
+  // ?menuLayout=tabs|sections|folders opens the gallery on that layout.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get('menuLayout');
+    if (param) writeMenuLayout(normaliseMenuLayout(param));
+    const tabParam = Number(new URLSearchParams(window.location.search).get('menuTab'));
+    if (tabParam > 0) setTab(tabParam);
+  }, []);
   const items = useMemo(() => filterNavItems(NAV_ITEMS, query, t, false), [query, t]);
+  const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
   return (
     <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t('sidebar.searchMenu')}
-        aria-label={t('sidebar.searchMenu')}
-        data-menu-search
-        data-search-surface
-        className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
-      />
-      <MobileMenuGrid items={items} searching={!!query.trim()} currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
+      <div className="mb-3 flex gap-1.5">
+        {(['tabs', 'sections', 'folders'] as const).map((value) => (
+          <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}
+            className={`h-8 rounded-lg border px-3 text-[13px] font-semibold ${layout === value ? 'border-white/30 bg-white/15 text-white' : 'border-white/10 text-zinc-400'}`}>
+            {value}
+          </button>
+        ))}
+      </div>
+      {layout === 'tabs' && !query ? (
+        <div className="mb-3 flex items-stretch gap-1.5">
+          <button type="button" onClick={() => setQuery(' ')} aria-label={t('sidebar.searchMenu')} data-search-surface
+            className="flex w-[42px] flex-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-200">
+            <MenuSearchIcon className="h-[18px] w-[18px]" />
+          </button>
+          <MenuTabs groups={groups} activeTab={tab} onTabChange={setTab} />
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('sidebar.searchMenu')}
+          aria-label={t('sidebar.searchMenu')}
+          data-menu-search
+          data-search-surface
+          className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
+        />
+      )}
+      <MobileMenuLayout layout={layout} groups={groups} flatItems={items} searching={!!query.trim()} activeTab={tab} onTabChange={setTab}
+        currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
     </section>
   );
 }

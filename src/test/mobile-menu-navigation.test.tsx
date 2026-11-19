@@ -46,6 +46,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   counts.dm = 0;
   counts.publicChat = 0;
+  // Every page on one screen; the tabs layout has its own test below.
+  localStorage.setItem('menu-layout', 'sections');
 });
 const mount = () => render(<MemoryRouter initialEntries={['/app']}><Harness /></MemoryRouter>);
 
@@ -63,6 +65,28 @@ describe('mobile menu dismissal', () => {
     fireEvent.click(screen.getByText(label));
     expect(screen.getByTestId('path').textContent).toBe(path);
     expect(screen.queryByTestId('menu')).toBeNull();
+  });
+
+  it('opens on the Main tab by default and switches groups', () => {
+    localStorage.removeItem('menu-layout');
+    mount();
+    expect(screen.getByText('nav.profile')).toBeTruthy();
+    expect(screen.queryByText('nav.dao')).toBeNull();
+    fireEvent.click(screen.getByText('nav.groups.riftn'));
+    expect(screen.getByText('nav.dao')).toBeTruthy();
+    expect(screen.queryByText('nav.profile')).toBeNull();
+  });
+
+  it('turns the tab row into the search field and back', () => {
+    localStorage.removeItem('menu-layout');
+    mount();
+    fireEvent.click(screen.getByRole('button', { name: 'sidebar.searchMenu' }));
+    const field = screen.getByRole('textbox', { name: 'sidebar.searchMenu' });
+    fireEvent.change(field, { target: { value: 'dao' } });
+    expect(screen.getByText('nav.dao')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'sidebar.clearSearch' }));
+    expect(screen.queryByRole('textbox', { name: 'sidebar.searchMenu' })).toBeNull();
+    expect(screen.getByText('nav.groups.main')).toBeTruthy();
   });
 
   it('keeps repeated close requests closed', () => {
