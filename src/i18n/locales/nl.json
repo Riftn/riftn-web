@@ -6810,6 +6810,18 @@
       "needsImageToWork": "{{model}} heeft een afbeelding nodig om mee te werken. Bevestig er eerst een.",
       "speechLimit": "Dat zijn {{length}} tekens. De limiet is {{limit}}.",
       "musicTrackLength": "{{count}}s nummer"
+    },
+    "gallery": {
+      "browse": "Creaties bekijken",
+      "fullscreen": "Op volledig scherm bekijken",
+      "missing": "Deze creatie is niet beschikbaar.",
+      "send": "Versturen",
+      "notifications": {
+        "generation_like": "{{name}} reageerde op je creatie",
+        "generation_comment_like": "{{name}} reageerde op je opmerking",
+        "generation_reply": "{{name}} antwoordde op je opmerking",
+        "generation_comment": "{{name}} plaatste een opmerking bij je creatie"
+      }
     }
   },
   "pricing": {

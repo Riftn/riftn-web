@@ -6624,6 +6624,18 @@
       "needsImageToWork": "{{model}} a besoin d'une image pour fonctionner. Attachez-en un en premier.",
       "speechLimit": "Soit {{length}} caractères. La limite est de {{limit}}.",
       "musicTrackLength": "Piste {{count}}s"
+    },
+    "gallery": {
+      "browse": "Parcourir les créations",
+      "fullscreen": "Afficher en plein écran",
+      "missing": "Cette création n’est pas disponible.",
+      "send": "Envoyer",
+      "notifications": {
+        "generation_like": "{{name}} a réagi à votre création",
+        "generation_comment_like": "{{name}} a réagi à votre commentaire",
+        "generation_reply": "{{name}} a répondu à votre commentaire",
+        "generation_comment": "{{name}} a commenté votre création"
+      }
     }
   },
   "pricing": {

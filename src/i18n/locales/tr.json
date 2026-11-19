@@ -6620,6 +6620,18 @@
       "needsImageToWork": "{{model}} üzerinde çalışmak için bir resme ihtiyaç duyuyor. Önce bir tane ekleyin.",
       "speechLimit": "Bu {{length}} karakterdir. Sınır {{limit}}.",
       "musicTrackLength": "{{count}}s parkur"
+    },
+    "gallery": {
+      "browse": "Üretimlere göz at",
+      "fullscreen": "Tam ekran görüntüle",
+      "missing": "Bu üretim kullanılamıyor.",
+      "send": "Gönder",
+      "notifications": {
+        "generation_like": "{{name}} üretimine tepki verdi",
+        "generation_comment_like": "{{name}} yorumuna tepki verdi",
+        "generation_reply": "{{name}} yorumunu yanıtladı",
+        "generation_comment": "{{name}} üretimine yorum yaptı"
+      }
     }
   },
   "pricing": {

@@ -5577,6 +5577,18 @@
     "sellYourFractions": "Sell your fractions ({{held}} held)"
   },
   "creator": {
+    "gallery": {
+      "browse": "Browse generations",
+      "fullscreen": "View full screen",
+      "missing": "This generation is unavailable.",
+      "send": "Send",
+      "notifications": {
+        "generation_like": "{{name}} reacted to your generation",
+        "generation_comment_like": "{{name}} reacted to your comment",
+        "generation_reply": "{{name}} replied to your comment",
+        "generation_comment": "{{name}} commented on your generation"
+      }
+    },
     "avatarTitle": "Talking portrait",
     "avatarRequirements": "Square PNG portrait, 512–2048 pixels, up to 5 MB. Mono 24 kHz 16-bit PCM WAV, 5–30 seconds. The last fraction of a second is padded with silence.",
     "avatarPortrait": "Choose portrait PNG",
