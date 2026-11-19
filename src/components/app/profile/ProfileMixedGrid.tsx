@@ -22,14 +22,9 @@ import { cdnImage, deviceWidth } from '@/lib/media-url';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Pin } from 'lucide-react';
-import Film from '@/components/ui/cut-icons/video';
-import Shorts from '@/components/ui/cut-icons/shorts';
-import Images from '@/components/ui/cut-icons/images';
 import Music from '@/components/ui/cut-icons/music';
 import MessageSquare from '@/components/ui/cut-icons/messages';
 import ThumbsUp from '@/components/ui/cut-icons/like';
-import Blog from '@/components/ui/cut-icons/blog';
-import Radio from '@/components/ui/cut-icons/live';
 import Repeat2 from '@/components/ui/cut-icons/repost';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
 import type { ProfileContentItem } from '@/hooks/use-profile-page';
@@ -40,9 +35,13 @@ import { PostBgLayer, postBgHostProps, useProfilePostBg } from './PostBackground
 import { postBgToken, postBgVariant } from '@/lib/post-backgrounds';
 import { ArticleTileFace, useProfileArticleTile } from './ArticleTile';
 import { articleReadMinutes } from '@/lib/article-tile';
-import { GridCardFace, GridKindPill, GridPollProbe } from './GridCardTile';
-import { mediaCardOf, textCardOf, wordsWithoutLinks } from '@/lib/grid-card';
+import { GridCardFace, GridPollProbe } from './GridCardTile';
+import { FormatMark } from './FormatMark';
+import { mediaCardOf, textCardOf, wordsWithoutLinks, type GridCardKind } from '@/lib/grid-card';
 import './profile-mixed-grid.css';
+
+/** Concept switch (local only): ?fmt=a|b|c. */
+const FMT_LOOK = typeof window === 'undefined' ? 'b' : new URLSearchParams(window.location.search).get('fmt') || 'b';
 
 /** One cell's worth of content. Optimistic posts arrive in the same shape. */
 export interface MixedGridEntry {
@@ -112,13 +111,6 @@ function plainText(text: string | undefined): string {
     .trim();
 }
 
-function Badge({ children, label }: { children: ReactNode; label: string }) {
-  return (
-    <span className="pmg-badge" aria-label={label} title={label}>
-      {children}
-    </span>
-  );
-}
 
 export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove }: ProfileMixedGridProps) {
   const { t } = useTranslation();
@@ -200,7 +192,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
 
   return (
     <>
-      <div data-profile-mixed-grid className="pmg-grid">
+      <div data-profile-mixed-grid data-fmt-look={FMT_LOOK} className="pmg-grid">
         {shown.map((entry, index) => {
           const pinChip = entry.isPinned ? (
             <span className="pmg-chip pmg-chip--pin"><Pin className="pmg-chip-icon" />{t('profile.pinnedShort', 'Pinned')}</span>
@@ -235,10 +227,10 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                 aria-label={post.caption || post.title || t('profile.tabs.images', 'Image')}
               >
                 <img src={tileImage(post.image)} alt="" loading={eager ? 'eager' : 'lazy'} decoding="async" className={post.isPPV ? 'pmg-img pmg-img--locked' : 'pmg-img'} />
-                {(multi || pinChip || mediaKind) && <span className="pmg-shade" />}
-                {multi && <Badge label={t('profile.multiPhoto', 'Photos')}><Images /></Badge>}
+                <span className="pmg-shade" />
+                <FormatMark kind={mediaKind ?? (multi ? 'photos' : 'photo')} />
                 {post.isPPV && <span className="pmg-lock"><Lock /></span>}
-                {pinChip ?? (mediaKind && <GridKindPill kind={mediaKind} />)}
+                {pinChip}
                 {grip(entry)}
               </button>
             );
@@ -256,7 +248,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                 <button key={entry.key} {...tileProps(entry)} type="button" data-tile="audio" className="pmg-tile pmg-audio" disabled={entry.isOptimistic} onClick={() => openPost(video.id, video.articleSlug, entry)} aria-label={video.title}>
                   {cover ? <span className="pmg-audio-blur" style={{ backgroundImage: `url(${cover})` }} /> : <span className="pmg-audio-blur pmg-audio-blur--empty" />}
                   <span className="pmg-audio-cover" style={cover ? { backgroundImage: `url(${cover})` } : undefined}>{!cover && <Music />}</span>
-                  <Badge label={t('profile.tabs.songs', 'Audio')}><Music /></Badge>
+                  <FormatMark kind="audio" />
                   <span className="pmg-wave" aria-hidden>
                     {waveFor(video.id).map((h, i) => <i key={i} style={{ height: `${Math.round(h * 100)}%` }} />)}
                   </span>
@@ -275,13 +267,13 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                   <span className="pmg-chip pmg-chip--live"><i />{t('live.liveBadge', 'LIVE')}</span>
                 ) : (
                   <>
-                    <Badge label={video.isLivePost ? t('profile.tabs.live', 'Live') : video.isShort ? t('profile.gridCard.short', 'Short') : t('profile.tabs.videos', 'Video')}>{video.isLivePost ? <Radio /> : video.isShort ? <Shorts /> : <Film />}</Badge>
+                    <FormatMark kind={mediaKind ?? (video.isLivePost ? 'replay' : 'video')} />
                     {!!video.duration && video.duration !== '0:00' && <span className="pmg-dur">{video.duration}</span>}
                   </>
                 )}
                 {!!video.views && video.views !== '0' && <span className="pmg-views">{video.views}</span>}
                 {locked && <span className="pmg-lock"><Lock /></span>}
-                {!isLive && (pinChip ?? (mediaKind && <GridKindPill kind={mediaKind} />))}
+                {!isLive && pinChip}
                 {grip(entry)}
               </button>
             );
@@ -317,7 +309,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                   views={post.views && post.views !== '0' ? post.views : undefined}
                   eager={eager}
                 />
-                {articleLook === 'cover' && <Badge label={t('profile.tabs.articles', 'Article')}><Blog /></Badge>}
+                <FormatMark kind="article" />
                 {pinChip}
                 {grip(entry)}
               </button>
@@ -330,10 +322,10 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
           const card = locked ? null : textCardOf(post);
           const words = plainText(card ? wordsWithoutLinks(post.content || post.title || '') : post.content || post.title);
           const tokenId = Number(String(post.id).replace(/^[a-z]+-/, '')) || 0;
-          const poster = (pill?: ReactNode) => (
+          const poster = (kind?: GridCardKind) => (
             <>
-              <Badge label={t('profile.tabs.posts', 'Post')}><MessageSquare /></Badge>
-              {pinChip ?? pill ?? <span className="pmg-quote" aria-hidden>“</span>}
+              <FormatMark kind={kind ?? 'text'} />
+              {pinChip ?? <span className="pmg-quote" aria-hidden>“</span>}
               <span className="pmg-words">{locked ? <><Lock className="pmg-inline-lock" />{t('profile.lockedPost', 'Locked post')}</> : words}</span>
               <span className="pmg-meta pmg-stats">
                 <span><MessageSquare />{compact(post.stats?.comments)}</span>
@@ -344,7 +336,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
           if (card) {
             return (
               <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" data-card={card.kind} className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80) || post.title || t('profile.tabs.posts', 'Post')}>
-                <GridCardFace card={card} tokenId={tokenId} quotedPost={post.quotedPost} words={words} chip={pinChip ?? undefined} fallback={poster(<GridKindPill kind={card.kind} inline />)} />
+                <GridCardFace card={card} tokenId={tokenId} quotedPost={post.quotedPost} words={words} chip={pinChip ?? undefined} fallback={poster(card.kind)} />
                 {grip(entry)}
               </button>
             );
@@ -354,7 +346,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
               {!entry.isRepost && <PostBgLayer bg={postBg} seed={post.id} />}
               {locked || entry.isOptimistic || tokenId <= 0
                 ? poster()
-                : <GridPollProbe tokenId={tokenId} words={words} chip={pinChip ?? undefined} poster={poster()} fallback={poster(<GridKindPill kind="poll" inline />)} />}
+                : <GridPollProbe tokenId={tokenId} words={words} chip={pinChip ?? undefined} poster={poster()} fallback={poster('poll')} />}
               {grip(entry)}
             </button>
           );
