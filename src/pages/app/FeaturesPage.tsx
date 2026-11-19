@@ -579,7 +579,7 @@ function FeatureCard({
                     ...editNew.map((a, i) => ({ key: a.preview, src: a.preview, video: a.file.type.startsWith('video/'), remove: () => removeEditNew(i) }))].map(item => (
                     <div key={item.key} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10 bg-black">
                       {item.video
-                        ? <video src={item.src} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                        ? <video src={`${item.src}#t=0.1`} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                         : <img src={item.src} alt="" className="w-full h-full object-cover" />}
                       <button
                         type="button"
@@ -813,7 +813,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
         {attachments.length > 0 && <div className="flex gap-2 overflow-x-auto py-2">
           {attachments.map((attachment, index) => <div key={attachment.preview} className="relative shrink-0 w-28">
             <div className="h-20 rounded-lg overflow-hidden border border-white/15 bg-black/20">
-              {attachment.file.type.startsWith('video/') ? <video src={attachment.preview} className="w-full h-full object-cover" muted /> : <img src={attachment.preview} alt={attachment.file.name} className="w-full h-full object-cover" />}
+              {attachment.file.type.startsWith('video/') ? <video src={`${attachment.preview}#t=0.1`} className="w-full h-full object-cover" muted playsInline preload="metadata" /> : <img src={attachment.preview} alt={attachment.file.name} className="w-full h-full object-cover" />}
             </div>
             <button type="button" disabled={submitMutation.isPending} onClick={() => removeAttachment(index)}
               aria-label={t('features.removePromptAttachment', 'Remove {{name}}', { name: attachment.file.name })}
