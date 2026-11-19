@@ -63,6 +63,7 @@ import { ProfileFollowButton } from '@/components/app/profile/ProfileFollowButto
 import { UserAvatar } from '@/components/app/UserAvatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { ProfilePostBgContext, ProfilePostBgArtContext, ProfilePostBgMapContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
 import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
@@ -425,6 +426,19 @@ export default function ProfilePage() {
     : parseArticleTile(data.apiProfile?.customs);
   const openArticleTile = useCallback(() => setArticleTileOpen(true), []);
   const articleTileHold = usePostBgHold(!!data.isViewingOwnProfile, openArticleTile, '[data-tile="article"]');
+  // Right-click on your own text post or article opens the post menu; its
+  // "Post background" / "Article tiles" row lands here.
+  useEffect(() => {
+    if (!data.isViewingOwnProfile) return;
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (!look) return;
+      if (look.kind === 'article') openArticleTile();
+      else openPostBgFor(look.el);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, [data.isViewingOwnProfile, openArticleTile, openPostBgFor]);
   const articleTileSample = useMemo(() => {
     const a = data.PROFILE_POSTS.find((p) => !!p.articleBody);
     return {
