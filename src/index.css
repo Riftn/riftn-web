@@ -7379,3 +7379,9 @@ html[data-system-tone="light"] [data-chat-mod-badge] {
   background: rgba(9, 9, 11, 0.08);
   color: #3f3f46;
 }
+
+/* Post tiles open the post menu on a hold (lib/post-menu): no iOS picture callout over it. */
+[data-post-tile-hold],
+[data-post-tile-hold] img {
+  -webkit-touch-callout: none;
+}

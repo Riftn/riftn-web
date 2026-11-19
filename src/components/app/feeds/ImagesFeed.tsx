@@ -29,6 +29,8 @@ import { FeedFilterLoader } from '@/components/app/feeds/FeedFilterLoader';
 import { FeedSearchResults } from '@/components/app/feeds/FeedSearchResults';
 import { useFeedFilterTransition } from '@/hooks/use-feed-filter-transition';
 import { cn } from '@/lib/utils';
+import { postTileMenuProps } from '@/lib/post-menu';
+import { imagePostMenuTarget } from '@/lib/post-menu-targets';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassFilterRow } from '@/components/app/feeds/GlassFilterRow';
 import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
@@ -270,6 +272,7 @@ function CollageView({ posts, onImageClick, loaderRef, isFetchingNextPage, hasNe
             <div
               key={post.id}
               data-media-tile
+              {...postTileMenuProps(() => imagePostMenuTarget(post))}
               onClick={() => onImageClick(post.id)}
               className={cn(
                 'relative aspect-square bg-zinc-800 rounded-xl overflow-hidden group cursor-pointer [contain:layout_paint]',

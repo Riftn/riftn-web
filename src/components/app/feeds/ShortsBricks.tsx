@@ -18,6 +18,8 @@ import { LiveShortTile } from '@/components/app/feeds/LiveShortTile';
 import { cn } from '@/lib/utils';
 import type { BrickRow } from '@/lib/shorts-bricks';
 import type { LiveStream, ShortVideo } from '@/types/feed.types';
+import { postTileMenuProps } from '@/lib/post-menu';
+import { shortMenuTarget } from '@/lib/post-menu-targets';
 
 function formatDuration(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));
@@ -49,6 +51,7 @@ export function ShortTile({ short, viewerOpen, onOpen, className, still }: TileP
     <div
         data-media-tile
       data-media-scrim
+      {...postTileMenuProps(() => shortMenuTarget(short))}
       onClick={onOpen}
       className={cn("relative bg-zinc-900 rounded-xl overflow-hidden cursor-pointer group", className ?? "aspect-[9/16]")}
     >
@@ -140,6 +143,7 @@ export function WideShortTile({ short, viewerOpen, onOpen, className, still, her
       data-media-tile
       data-media-scrim
       data-short-shape="wide"
+      {...postTileMenuProps(() => shortMenuTarget(short))}
       onClick={onOpen}
       className={cn("relative bg-zinc-900 rounded-xl overflow-hidden cursor-pointer", className)}
     >

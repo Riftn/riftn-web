@@ -17,6 +17,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import Play from '@/components/ui/cut-icons/play';
 import { AppState } from '@/components/app/AppState';
 import { cn } from '@/lib/utils';
+import { postTileMenuProps } from '@/lib/post-menu';
+import { imagePostMenuTarget, videoMenuTarget } from '@/lib/post-menu-targets';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeedFilterValues } from '@/hooks/use-persisted-feed-filter';
 import { useUnifiedFeed, mapToImagePost, mapToVideoItem, type UnifiedFeedItem } from '@/hooks/use-unified-feed';
@@ -332,7 +334,7 @@ function FeedSearchResultsGrid({ tab, query, extras }: { tab: FeedSearchTab; que
       {layout === 'shorts' ? (
         <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
           {shorts.map((short, i) => (
-            <button key={short.id} type="button" data-media-tile data-media-scrim data-sr-tile style={tileDelay(i)} onClick={() => setViewerIndex(i)} className="relative aspect-[9/16] min-w-0 overflow-hidden rounded-lg bg-white/[0.06] text-left">
+            <button key={short.id} type="button" data-media-tile data-media-scrim data-sr-tile style={tileDelay(i)} {...postTileMenuProps(() => (items[i] ? videoMenuTarget(mapToVideoItem(items[i], i)) : null))} onClick={() => setViewerIndex(i)} className="relative aspect-[9/16] min-w-0 overflow-hidden rounded-lg bg-white/[0.06] text-left">
               {short.thumbnail && <RevealImg src={short.thumbnail} />}
               <span className="absolute inset-0 bg-gradient-to-b from-transparent from-55% to-black/75" />
               <span className="absolute bottom-1.5 left-1.5 right-1.5 block truncate text-[10px] font-semibold text-white">@{short.creatorUsername || short.username}</span>
@@ -344,7 +346,7 @@ function FeedSearchResultsGrid({ tab, query, extras }: { tab: FeedSearchTab; que
           {items.map((item, i) => {
             const v = mapToVideoItem(item, i);
             return (
-              <button key={item.tokenId} type="button" data-sr-tile style={tileDelay(i)} onClick={() => open(item)} className="min-w-0 text-left">
+              <button key={item.tokenId} type="button" data-sr-tile style={tileDelay(i)} {...postTileMenuProps(() => videoMenuTarget(v))} onClick={() => open(item)} className="min-w-0 text-left">
                 <span className="relative block aspect-[16/10] overflow-hidden rounded-lg bg-white/[0.06]">
                   {v.thumbnail && <RevealImg src={v.thumbnail} />}
                   {v.duration && <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 text-[10px] font-semibold text-white">{v.duration}</span>}
@@ -361,7 +363,7 @@ function FeedSearchResultsGrid({ tab, query, extras }: { tab: FeedSearchTab; que
             const p = mapToImagePost(item, i);
             const cover = audioCover(item, i);
             return (
-              <button key={item.tokenId} type="button" data-sr-tile style={tileDelay(i)} onClick={() => open(item)} className="min-w-0 overflow-hidden rounded-xl border border-white/[0.12] bg-white/[0.03] text-left">
+              <button key={item.tokenId} type="button" data-sr-tile style={tileDelay(i)} {...postTileMenuProps(() => imagePostMenuTarget(p))} onClick={() => open(item)} className="min-w-0 overflow-hidden rounded-xl border border-white/[0.12] bg-white/[0.03] text-left">
                 <span className="relative block aspect-square" style={{ background: cover.tint }}>
                   {cover.src && <RevealImg src={cover.src} />}
                   <span className="absolute inset-0 bg-gradient-to-b from-transparent from-40% to-black/70" />
@@ -389,6 +391,7 @@ function FeedSearchResultsGrid({ tab, query, extras }: { tab: FeedSearchTab; que
                 type="button"
                 data-sr-tile
                 style={tileDelay(i)}
+                {...postTileMenuProps(() => imagePostMenuTarget(p))}
                 onClick={() => open(item)}
                 className={cn('relative min-h-0 overflow-hidden rounded-lg bg-white/[0.06] text-left', mosaicSpan(shape))}
               >

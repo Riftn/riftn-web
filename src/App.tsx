@@ -34,6 +34,7 @@ import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
 import { AppLayout } from "./components/app/AppLayout";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
+import { PostMenuGate } from "./components/app/post-menu/PostMenuGate";
 import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
 import { AfterSignIn } from "@/components/app/AfterSignIn";
 import { SignInHandoff } from "@/components/app/login/SignInHandoff";
@@ -550,6 +551,7 @@ function AppContent() {
       <SelfBadgeSync />
       <DefaultChainSync />
       <QuickActionsHost />
+      <PostMenuGate />
       <BadgeShowcaseHost />
       <ViewingPreferencesSync />
       <AccountLanguageSync />

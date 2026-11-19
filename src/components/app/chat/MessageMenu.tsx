@@ -37,6 +37,10 @@ export interface MessageMenuProps {
   meta?: string | null;
   /** What the menu is for, read out by screen readers. Defaults to "Message options". */
   label?: string;
+  /** Card width. Wider for a post's ten reactions in one row. */
+  width?: number;
+  /** A line of who and what at the head of the card, e.g. a post's author. */
+  header?: ReactNode;
 }
 
 const MENU_W = 248;
@@ -61,7 +65,7 @@ const KEEP = {
  * Opens at the pointer, flips to stay on screen, grows from the corner nearest
  * the pointer. Arrow keys move through the actions, Enter picks, Esc closes.
  */
-export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta, label }: MessageMenuProps) {
+export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta, label, width = MENU_W, header }: MessageMenuProps) {
   const { t } = useTranslation();
   const open = !!point;
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -86,7 +90,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
   useLayoutEffect(() => {
     if (!point) { setPos(null); return; }
     const el = wrapRef.current;
-    const w = el?.offsetWidth || MENU_W;
+    const w = el?.offsetWidth || width;
     const h = el?.offsetHeight || 360;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -97,7 +101,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
     left = Math.max(EDGE, Math.min(left, vw - w - EDGE));
     top = Math.max(EDGE, Math.min(top, vh - h - EDGE));
     setPos({ left, top, originX: flipX ? 'right' : 'left', originY: flipY ? 'bottom' : 'top' });
-  }, [point, view, actions.length, showReactors]);
+  }, [point, view, actions.length, showReactors, width]);
 
   const close = useCallback(() => onClose(), [onClose]);
 
@@ -202,15 +206,15 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
             position: 'fixed',
             left: pos?.left ?? point!.x,
             top: pos?.top ?? point!.y,
-            width: view === 'emoji' ? 340 : MENU_W,
+            width: view === 'emoji' ? Math.max(340, width) : width,
             zIndex: 260,
             transformOrigin: pos ? `${pos.originX} ${pos.originY}` : 'left top',
           }}
           className="flex flex-col gap-1.5"
         >
           {showEmoji && view === 'main' && (
-            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-2.5' : 'pr-1.5'}`} data-msg-menu-surface data-msg-menu-emoji>
-              {quickReactions!.slice(0, allowMore ? 6 : 7).map((emoji, i) => (
+            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-2.5' : 'pr-1.5'} ${width > MENU_W ? 'justify-between' : ''}`} data-msg-menu-surface data-msg-menu-emoji>
+              {quickReactions!.slice(0, allowMore ? 6 : width > MENU_W ? 10 : 7).map((emoji, i) => (
                 <motion.button
                   key={emoji}
                   type="button"
@@ -222,7 +226,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   whileHover={{ scale: 1.28, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   // Seven fit the capsule when there is no chevron (comments: the six faces and 👎).
-                  className={`grid shrink-0 place-items-center rounded-full leading-none ${!allowMore && quickReactions!.length > 6 ? 'h-8 w-8 text-[20px]' : 'h-[34px] w-[34px] text-[22px]'}`}
+                  className={`grid shrink-0 place-items-center rounded-full leading-none ${!allowMore && quickReactions!.length > 7 ? 'h-[27px] w-[27px] text-[18px]' : !allowMore && quickReactions!.length > 6 ? 'h-8 w-8 text-[20px]' : 'h-[34px] w-[34px] text-[22px]'}`}
                   data-msg-menu-chip={mine.includes(emoji) ? 'on' : ''}
                 >
                   {emoji}
@@ -268,6 +272,12 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
 
             {view === 'main' && (
               <>
+                {header && (
+                  <>
+                    <div className="px-3 pb-1 pt-1.5" data-msg-menu-header>{header}</div>
+                    <div className="mx-3 my-1 h-px" data-msg-menu-rule />
+                  </>
+                )}
                 {showReactors && (
                   <>
                     <button

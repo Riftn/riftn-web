@@ -84,6 +84,7 @@ import { warmPostPage } from '@/lib/preload-post-page';
 import { useCreatePoll } from '@/hooks/use-polls';
 import { PollCard } from './PollCard';
 import { PostUtilityMenuItems } from './PostUtilityMenuItems';
+import { usePostMenuContext } from '@/lib/post-menu';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useMuteAuthor } from '@/hooks/use-mute-author';
 import { useTapGestures } from '@/hooks/use-tap-gestures';
@@ -443,6 +444,43 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
     }
   }, [post.id, post.newPostId, post.content, _copy]);
 
+  // Right-click anywhere on the card: every action for the post at the pointer.
+  const onPostContextMenu = usePostMenuContext(() => ({
+    id: post.id,
+    newPostId: post.status === 'signed' ? post.newPostId ?? null : null,
+    articleSlug: post.articleSlug,
+    authorId: post.author.id,
+    authorName: post.author.name,
+    authorHandle: post.author.handle,
+    text: post.content,
+    title: post.rawName ?? post.title ?? post.content,
+    isOwn: isOwnPost,
+    visibility: post.visibility,
+    quotePolicy: post.quotePolicy,
+    myReaction: post.myReaction,
+    isReposted: post.isReposted,
+    noTip: !!post.author.paymentsDisabled,
+    actions: {
+      comments: () => {
+        if (onOpenComments) { onOpenComments(); return; }
+        setCommentsInitialTab(undefined);
+        setShowComments(true);
+      },
+      askAI: () => { if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); },
+      seeEngagements: () => {
+        if (onOpenComments) { onOpenComments('reposts'); return; }
+        setCommentsInitialTab('reposts');
+        setShowComments(true);
+      },
+      quote: handleQuote,
+      tip: () => setShowTipModal(true),
+      report: () => setShowReportModal(true),
+      boost: () => setShowBoostModal(true),
+      edit: isOwnPost ? () => setShowEditModal(true) : undefined,
+      delete: isOwnPost ? () => setShowDeleteModal(true) : undefined,
+    },
+  }));
+
   // Build a minimal DeHubNFT for the quote modal from post data
   const postAsNFT = {
     tokenId: parseInt(post.id, 10) || 0,
@@ -463,6 +501,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
       data-post-card
       data-stats-token={post.id}
       onClick={handleCardClick}
+      onContextMenu={onPostContextMenu}
       onPointerDownCapture={warmPostPage}
       className="overflow-visible relative cursor-pointer isolate"
     >
