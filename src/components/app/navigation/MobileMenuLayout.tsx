@@ -335,7 +335,7 @@ export function MenuTabs({ groups, activeTab, onTabChange, className }: MenuTabs
       data-search-surface
       className={cn('relative flex min-w-0 flex-1 items-stretch rounded-xl border border-white/10 bg-white/5 p-[3px]', className)}
     >
-      <GlassIndicator ref={indicatorRef} rect={rect} borderRadius="9px" enableTransition={glide} />
+      <GlassIndicator ref={indicatorRef} rect={rect} borderRadius="9px" enableTransition={glide} className="left-0 top-0" />
       {groups.map((group, i) => (
         <button
           key={group.id}
