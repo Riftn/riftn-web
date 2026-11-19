@@ -447,6 +447,7 @@ html:is([data-theme='light'], [data-system-tone='light']) .pbg-color[aria-checke
 .pbg-photo-row { display: grid; gap: 6px; justify-items: center; }
 .pbg-photo-error { font-size: 12px; color: #ff6b6b; }
 .pbg-chips { display: flex; gap: 8px; justify-content: center; }
+.pbg-scope { margin: 0 0 12px; justify-self: center; }
 .pbg-chip { border: 1px solid rgba(127,127,127,.35); background: transparent; color: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
 .pbg-chip[aria-pressed='true'] { background: rgba(127,127,127,.28); }
 .pbg-chip--solid { background: #fff; color: #0b0b0f; border-color: #fff; padding: 9px 16px; font-size: 13.5px; }

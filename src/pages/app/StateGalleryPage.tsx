@@ -8,7 +8,7 @@ import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/P
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
 import { ResetWalletSettings, type ResetWalletReadiness } from '@/components/app/settings/ResetWalletSettings';
 import PersonalKeys from '@/components/PersonalKeys';
-import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
+import { ProfilePostBgContext, ProfilePostBgMapContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import type { ArticleTileLook } from '@/lib/article-tile';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
@@ -2556,8 +2556,11 @@ function ContentWarningGallery() {
 function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: string | null; initiallyOpen: boolean }) {
   const [bg, setBg] = useState<PostBg | null>(postBgById(initialBg) ?? postBgById('aurora'));
   const [open, setOpen] = useState(initiallyOpen);
-  const hold = usePostBgHold(true, () => setOpen(true));
-  const postHold = usePostBgHold(true, () => setOpen(true), '[data-pbg-text]');
+  // One post can carry its own backdrop: hold it and pick "This post".
+  const [target, setTarget] = useState<string | null>(null);
+  const [own, setOwn] = useState<Map<string, PostBg | null>>(() => new Map());
+  const hold = usePostBgHold(true, () => { setTarget(null); setOpen(true); });
+  const postHold = usePostBgHold(true, (held) => { setTarget(held?.dataset.pbgPost || null); setOpen(true); }, '[data-pbg-text]');
   const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
   return (
     <section data-page-bento data-post-bg-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
@@ -2574,18 +2577,20 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
           <div><p className="font-bold text-white">Marco V</p><p className="text-xs text-zinc-400">Hold here to choose a background</p></div>
         </div>
         <ProfilePostBgContext.Provider value={bg}>
+          <ProfilePostBgMapContext.Provider value={own}>
           <div ref={postHold.hostRef} {...postHold.handlers} className="relative grid gap-4 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
             {postHold.ringEl}
             <div data-post-bg-phone-grid><ProfileMixedGrid entries={entries} /></div>
             <div data-post-bg-desktop className="space-y-3">
               {GALLERY_TEXT_POSTS.slice(0, 2).map((post) => (
-                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" {...postBgHostProps(bg)}>
-                  <PostBgLayer bg={bg} seed={post.id} />
+                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" {...postBgHostProps(own.get(post.id) || bg, post.id)}>
+                  <PostBgLayer bg={own.get(post.id) || bg} seed={post.id} />
                   <GalleryPostCard post={post} />
                 </div>
               ))}
             </div>
           </div>
+          </ProfilePostBgMapContext.Provider>
         </ProfilePostBgContext.Provider>
         <PostBgPicker
           open={open}
@@ -2594,10 +2599,14 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
           handle="@marco_v"
           avatarUrl={galleryAvatar}
           sampleText={GALLERY_TEXT_POSTS[0].content}
+          postId={target}
+          postCurrent={target ? own.get(target) ?? bg : undefined}
           onCancel={() => setOpen(false)}
-          onSave={({ id, colors, file }) => {
+          onSave={({ id, colors, file, scope }) => {
             const def = postBgById(id);
-            setBg(!def ? null : def.kind === 'photo' ? (file ? { ...def, image: URL.createObjectURL(file) } : null) : withPostBgColors(def, colors));
+            const next = !def ? null : def.kind === 'photo' ? (file ? { ...def, image: URL.createObjectURL(file) } : null) : withPostBgColors(def, colors);
+            if (scope === 'post' && target) setOwn((m) => new Map(m).set(target, next));
+            else { setBg(next); setOwn(new Map()); }
             setOpen(false);
           }}
         />

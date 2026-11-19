@@ -31,7 +31,7 @@ import type { ProfileContentItem } from '@/hooks/use-profile-page';
 import type { TextPost, ImagePost, VideoItem } from '@/types/feed.types';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
 import { openBrainrotFeed } from '@/lib/brainrot-feed';
-import { PostBgLayer, postBgHostProps, useProfilePostBg } from './PostBackground';
+import { PostBgLayer, postBgHostProps, usePostBgResolver } from './PostBackground';
 import { postBgToken, postBgVariant } from '@/lib/post-backgrounds';
 import { ArticleTileFace, useProfileArticleTile } from './ArticleTile';
 import { articleReadMinutes } from '@/lib/article-tile';
@@ -172,7 +172,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
     </span>
   ) : null);
 
-  const postBg = useProfilePostBg();
+  const bgFor = usePostBgResolver();
   const articleLook = useProfileArticleTile();
   const navigate = useNavigate();
   // Every tile opens a post. Fetch the post page's code while the reader is
@@ -200,7 +200,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
     // the reel would have to page back through the whole history to find it.
     if (entry.isPinned && !entries.some((other) => !other.isPinned && !other.isRepost && other.data.id === entry.data.id)) return false;
     noteProfileFeedOpen(profileFeed, id);
-    openBrainrotFeed(id, undefined, { bgId: postBgToken(postBg) });
+    openBrainrotFeed(id, undefined, { bgId: postBgToken(bgFor(id)) });
     return true;
   };
   const openPost = (id: string, slug?: string, entry?: MixedGridEntry) => {
@@ -361,8 +361,8 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
             );
           }
           return (
-            <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80)} data-soft={postBgVariant(post.id, 3)} {...(entry.isRepost ? {} : postBgHostProps(postBg))}>
-              {!entry.isRepost && <PostBgLayer bg={postBg} seed={post.id} />}
+            <button key={entry.key} {...tileProps(entry)} type="button" data-tile="text" className="pmg-tile pmg-poster pmg-text" disabled={entry.isOptimistic} onClick={openThis} aria-label={words.slice(0, 80)} data-soft={postBgVariant(post.id, 3)} {...(entry.isRepost ? {} : postBgHostProps(bgFor(post.id), post.id))}>
+              {!entry.isRepost && <PostBgLayer bg={bgFor(post.id)} seed={post.id} />}
               {locked || entry.isOptimistic || tokenId <= 0
                 ? poster()
                 : <GridPollProbe tokenId={tokenId} words={words} chip={pinChip ?? undefined} poster={poster()} fallback={poster('poll')} />}
