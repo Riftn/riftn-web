@@ -101,6 +101,7 @@ import Quote from "@/components/ui/cut-icons/quote";
 import Link from "@/components/ui/cut-icons/link";
 
 import Repeat2 from "@/components/ui/cut-icons/repost";
+import Captions from "@/components/ui/cut-icons/captions";
 
 import { cn } from '@/lib/utils';
 import type { ShortVideo } from '@/types/feed.types';
@@ -113,7 +114,7 @@ import { useVideoFullscreen } from '@/hooks/use-video-fullscreen';
 import { useInAppVideoMini } from '@/hooks/use-in-app-video-mini';
 import '@/styles/shorts-mini.css';
 import { setVoteCache, getVoteCache } from '@/lib/vote-cache';
-import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted } from '@/lib/video-preferences';
+import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted, useMediaLooping, setIsLooping as vpSetIsLooping } from '@/lib/video-preferences';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
 import { createWheelPager } from '@/lib/wheel-pager';
 import { commitsDismiss } from '@/lib/video-hold-gestures';
@@ -441,6 +442,9 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   }, [showComments]);
   const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  // Loop off (the default): a short that ends moves on to the next one.
+  const isLooping = useMediaLooping();
+  const [captionSlot, setCaptionSlot] = useState<HTMLDivElement | null>(null);
   const [shareToDmOpen, setShareToDmOpen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -1089,6 +1093,14 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   const goToPrevRef = useRef(goToPrev);
   goToNextRef.current = goToNext;
   goToPrevRef.current = goToPrev;
+  // Stable, so the memoised slides don't re-render for it. Not while a sheet
+  // or the menu is open over the video: moving on under it would lose the place.
+  const shortEndedBlockedRef = useRef(false);
+  shortEndedBlockedRef.current = shareSheetOpen || showComments;
+  const handleShortEnded = useCallback(() => {
+    if (shortEndedBlockedRef.current || getVideoPreferences().isLooping) return;
+    goToNextRef.current();
+  }, []);
   // Where the wheel can go right now, so a push past either end rubber bands.
   const wheelNavRef = useRef({ index: currentIndex, count: shorts.length });
   wheelNavRef.current = { index: currentIndex, count: shorts.length };
@@ -1681,6 +1693,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // back. A deliberate swipe-down clear (overlaysHidden) still switches them off.
   const chromeInert = overlaysHidden;
 
+  /** The playing short's <video>, for the player rows in the options menu. */
+  const activePlayer = () => containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`) ?? null;
+  const cycleSpeed = () => {
+    const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as (typeof PLAYBACK_RATES)[number]);
+    const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
+    // Apply to the current slide before rerendering its neighbours.
+    const player = activePlayer();
+    if (player) player.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+    vpSetPlaybackRate(nextRate, currentShort?.creatorId);
+  };
+
   const handleCopyLink = () => {
     const url = viewerShareUrl(`${window.location.origin}/app/post/${currentShort.articleSlug || currentShort.id}`);
     navigator.clipboard.writeText(url);
@@ -1914,13 +1938,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   <button
                     onClick={(event) => {
                       event.stopPropagation();
-                      const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as any);
-                      const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
-                      // Apply to the current slide before rerendering its neighbours.
-                      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
-                      if (player) player.playbackRate = nextRate;
-                      setPlaybackRate(nextRate);
-                      vpSetPlaybackRate(nextRate, currentShort?.creatorId);
+                      cycleSpeed();
                     }}
                     className={cn(VIEWER_CONTROL, 'min-w-[40px] px-1.5')}
                     style={{ touchAction: 'manipulation' }}
@@ -1928,6 +1946,11 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   >
                     <span className="text-white text-[11px] font-bold leading-none">{formatRate(playbackRate)}x</span>
                   </button>
+
+                  {/* Subtitles: the playing short puts its CC button in here. */}
+                  {!currentShort?.reelPost && !currentShort?.imageUrls?.length && (
+                    <div ref={setCaptionSlot} data-shorts-caption-slot className="relative flex h-10 w-10 shrink-0 items-center justify-center empty:hidden" />
+                  )}
 
                   {/* Full screen: a wide video also turns sideways where the browser allows it. */}
                   {(isMobile || !currentShort?.imageUrls?.length) && <button
@@ -2141,6 +2164,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       isMuted={isMuted}
                       playbackRate={playbackRate}
                       onTimeUpdate={isActive ? trackView : undefined}
+                      onEnded={isActive ? handleShortEnded : undefined}
+                      captionSlot={isActive ? captionSlot : null}
                       onTap={handleVideoTap}
                       onTapUndo={undoVideoTap}
                       sideGestures={isMobile}
@@ -2737,6 +2762,71 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
             <DrawerTitle className="text-white text-lg">{_copy("copy.d0db8b5e364b", { defaultValue: "Options" })}</DrawerTitle>
           </DrawerHeader>
           <div className="flex flex-col gap-1">
+            {/* The player's own buttons, as on a video in the feed: loop,
+                speed, subtitles, picture in picture, full screen, sound. The
+                toggles keep the menu open so you can see what changed. */}
+            {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.reelPost && (
+              <div data-shorts-player-rows className="flex flex-col gap-1 border-b border-white/10 pb-1 mb-1">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isLooping}
+                  onClick={() => {
+                    const next = !isLooping;
+                    const player = activePlayer();
+                    if (player) player.loop = next;
+                    vpSetIsLooping(next);
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Repeat2 className="w-5 h-5" />
+                  <span className="flex-1">{isLooping ? _copy("copy.2e68f91aef20", { defaultValue: "Loop on" }) : _copy("copy.daee48e3d2b7", { defaultValue: "Loop off" })}</span>
+                  <span aria-hidden className={cn('relative h-5 w-9 rounded-full transition-colors', isLooping ? 'bg-white' : 'bg-white/20')}>
+                    <span className={cn('absolute top-0.5 h-4 w-4 rounded-full transition-all', isLooping ? 'left-[18px] bg-black' : 'left-0.5 bg-white')} />
+                  </span>
+                </button>
+                <button type="button" onClick={cycleSpeed} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  <span className="flex w-5 justify-center text-[11px] font-bold">{formatRate(playbackRate)}x</span>
+                  <span className="flex-1">{_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}</span>
+                  <span className="text-sm text-white/60 tabular-nums">{formatRate(playbackRate)}x</span>
+                </button>
+                {!!captionSlot && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShareSheetOpen(false);
+                      // The subtitles menu belongs to the CC button in the
+                      // control row; open it once the drawer has gone.
+                      window.setTimeout(() => captionSlot.querySelector<HTMLButtonElement>('button')?.click(), 320);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Captions className="w-5 h-5" />{_copy("copy.0ee695bdeb26", { defaultValue: "Subtitles" })}
+                  </button>
+                )}
+                {document.pictureInPictureEnabled && !currentShort.gated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShareSheetOpen(false);
+                      const player = activePlayer();
+                      if (player) void player.requestPictureInPicture().catch(() => {});
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <PictureInPicture2 className="w-5 h-5" />{_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                  </button>
+                )}
+                <button type="button" onClick={() => { setShareSheetOpen(false); toggleFullscreen(); }} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                  {isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+                </button>
+                <button type="button" onClick={toggleMute} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  {isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                </button>
+              </div>
+            )}
             {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.gated
               && !downloadGate.isGated && !currentShort.spoilerText
               && visibility === 'public' && (!currentShort.visibility || currentShort.visibility === 'public')
