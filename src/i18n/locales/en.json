@@ -1401,7 +1401,9 @@
     "menuLayoutSections": "Sections",
     "menuLayoutSectionsDesc": "Every page at once, under group headers",
     "menuLayoutFolders": "Folders",
-    "menuLayoutFoldersDesc": "Your main pages, then a folder for each group"
+    "menuLayoutFoldersDesc": "Your main pages, then a folder for each group",
+    "publicChatInBar": "Public Chat in the bottom bar",
+    "publicChatInBarDesc": "One tap into Public Chat from the bar at the bottom of the screen"
   },
   "common": {
     "confirm": "Confirm",
@@ -2163,6 +2165,12 @@
     "likes": "Likes",
     "subscribers": "Subscribers",
     "affiliates": "Affiliates",
+    "ogChallenge": "OG Challenge",
+    "ogHolders_one": "{{count}} OG holder",
+    "ogHolders_other": "{{count}} OG holders",
+    "ogChallengeTitle": "Bring back the OG holders",
+    "ogChallengeBody": "Invite people who still hold DHB. When they join with your invite link and keep their DHB in their Riftn wallet, they count for you here.",
+    "ogChallengeCta": "Get your invite link",
     "directReferrals_one": "{{count}} direct",
     "directReferrals_other": "{{count}} direct",
     "secondaryReferrals_one": "{{count}} secondary",

@@ -15,7 +15,10 @@
 import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardSortMode } from '@/lib/api/dehub';
 
 /** Every board the API serves, plus the Supabase-aggregated referral board. */
-export type LeaderboardRuleSort = LeaderboardSortMode | 'affiliates';
+export type LeaderboardRuleSort = LeaderboardSortMode | 'affiliates' | 'ogChallenge';
+
+/** The two boards ranked from invite rows (direct count), not from the API. */
+const isReferralBoard = (sort: LeaderboardRuleSort) => sort === 'affiliates' || sort === 'ogChallenge';
 
 /** Usernames that never appear on any board (staff and service accounts). */
 export const BLOCKED_LEADERBOARD_USERS: readonly string[] = ['dehubdev1', 'uss', 'support'];
@@ -41,6 +44,7 @@ export function isHidden(entry: LeaderboardEntry): boolean {
 export function getAbsoluteValue(entry: LeaderboardEntry, sort: LeaderboardRuleSort): number {
   switch (sort) {
     case 'affiliates':
+    case 'ogChallenge':
       return (entry as LeaderboardEntry & { directReferrals?: number }).directReferrals ?? 0;
     case 'sentTips':
       return entry.sentTips ?? 0;
@@ -65,14 +69,14 @@ export function getAbsoluteValue(entry: LeaderboardEntry, sort: LeaderboardRuleS
  * always show the direct-referral count.
  */
 export function getEntryValue(entry: LeaderboardEntry, sort: LeaderboardRuleSort, period: LeaderboardPeriod): number {
-  if (sort === 'affiliates') return getAbsoluteValue(entry, sort);
+  if (isReferralBoard(sort)) return getAbsoluteValue(entry, sort);
   if (period !== 'all') return entry.delta ?? 0;
   return getAbsoluteValue(entry, sort);
 }
 
 /** Whether a period board has any row that shows a delta at all. */
 export function hasDelta(entry: LeaderboardEntry, sort: LeaderboardRuleSort, period: LeaderboardPeriod): boolean {
-  if (sort === 'affiliates' || period === 'all') return true;
+  if (isReferralBoard(sort) || period === 'all') return true;
   return typeof entry.delta === 'number';
 }
 
@@ -92,7 +96,7 @@ export function applyLeaderboardRules<T extends LeaderboardEntry>(
   entries: readonly T[] | undefined | null,
   { sort, period }: LeaderboardRuleOptions,
 ): RankedEntry<T>[] {
-  const isAffiliates = sort === 'affiliates';
+  const isAffiliates = isReferralBoard(sort);
 
   let list: T[] = (entries ?? []).filter((entry) => {
     const uname = entry.username?.toLowerCase();
