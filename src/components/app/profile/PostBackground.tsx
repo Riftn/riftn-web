@@ -385,6 +385,9 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
     : base.kind === 'photo'
       ? (photoSrc ? { ...base, image: photoSrc } : base)
       : withPostBgColors(base, chosenColors);
+  // On one post, None means "same as my profile": preview and name that.
+  const followsProfile = scope === 'post' && !!postId && !base;
+  const previewBg = followsProfile ? profileCurrent ?? null : bg && (bg.kind !== 'photo' || bg.image) ? bg : null;
   const paletteIndex = postBgPaletteIndex(bg);
   const setColors = (colors: PostBgPalette) => { if (base) setColorsById((m) => ({ ...m, [base.id]: colors })); };
   const setOneColor = (i: number, value: string) => {
@@ -453,8 +456,8 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
               </button>
             </div>
           )}
-          <div className="pbg-preview" {...postBgHostProps(bg && (bg.kind !== 'photo' || bg.image) ? bg : null)}>
-            <PostBgLayer bg={bg && (bg.kind !== 'photo' || bg.image) ? bg : null} />
+          <div className="pbg-preview" {...postBgHostProps(previewBg)}>
+            <PostBgLayer bg={previewBg} />
             <div className="pbg-preview-who">
               {avatarUrl ? <img src={avatarUrl} alt="" /> : <span className="pbg-preview-av" />}
               <span><b>{name}</b><span>{handle}</span></span>
@@ -464,8 +467,8 @@ export function PostBgPicker({ open, current: profileCurrent, name, handle, avat
         </div>
 
         <div className="pbg-picker-name" aria-live="polite">
-          <b>{bg ? t(`postBg.names.${bg.id}`, bg.name) : t('postBg.none', 'None')}</b>
-          <span>{bg ? kindLabel(bg) : t('postBg.plain', 'Plain posts')}</span>
+          <b>{bg ? t(`postBg.names.${bg.id}`, bg.name) : followsProfile ? t('postBg.sameAsProfile', 'Profile') : t('postBg.none', 'None')}</b>
+          <span>{bg ? kindLabel(bg) : followsProfile ? t('postBg.sameAsProfileSub', 'Same as your profile') : t('postBg.plain', 'Plain posts')}</span>
         </div>
 
         <div className="pbg-colors">

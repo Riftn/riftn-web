@@ -359,8 +359,10 @@ export default function ProfilePage() {
   // Holding (or right-clicking) one of your own text posts opens it for that post.
   const postBgPostHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBgFor, '[data-pbg-text]');
   const postBgSample = useMemo(
-    () => data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
-    [data.PROFILE_POSTS],
+    // The held post's own words, else your newest text post.
+    () => (postBgTarget && data.PROFILE_POSTS.find((p) => String(p.id) === postBgTarget)?.content?.trim())
+      || data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
+    [data.PROFILE_POSTS, postBgTarget],
   );
   const savePostBg = useCallback(async ({ id, colors, file, scope }: PostBgSave) => {
     if (!profileKey) return;
