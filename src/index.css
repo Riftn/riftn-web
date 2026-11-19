@@ -7344,6 +7344,30 @@ html[data-system-tone="light"] [data-chat-unread-marker] [data-unread-hairline] 
   --tw-gradient-to: rgba(0, 0, 0, 0.22) var(--tw-gradient-to-position) !important;
 }
 
+/* Your own lines in the public chats (live chat page, side chat) sit on a
+   soft filled card, as your messages do in group chats. */
+[data-chat-own] {
+  background: rgba(255, 255, 255, 0.07);
+}
+[data-chat-own]:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+[data-message-id][data-chat-own] {
+  border-radius: 12px;
+}
+/* Back-to-back lines of yours in the side chat: two cards, not one overlap. */
+[data-message-id][data-chat-own][data-chat-continued] {
+  margin-top: 2px;
+}
+html[data-theme="light"] [data-chat-own],
+html[data-system-tone="light"] [data-chat-own] {
+  background: rgba(9, 9, 11, 0.05);
+}
+html[data-theme="light"] [data-chat-own]:hover,
+html[data-system-tone="light"] [data-chat-own]:hover {
+  background: rgba(9, 9, 11, 0.07);
+}
+
 /* Chat MOD chip: the quiet grey chip the app's live chat uses, on every
    theme, in place of the old green one. */
 [data-chat-mod-badge] {
