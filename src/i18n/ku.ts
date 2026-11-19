@@ -1754,6 +1754,9 @@ export const ku = {
     liveStudioB7Desc: 'Dema ku weşanek diqede, Live Studio kurteyek bi dirêjahiya wê, lûtkeya temaşevanan, diyariyên dravî, şopînerên nû, chat û anketan vedike.',
     liveStudioB8: 'Dubarekirin overlay diparêzin:',
     liveStudioB8Desc: 'Overlay ya weşanekê li ser dubarekirina wê dilîze, ku ji loga xwe ya weşanê hatî avakirin.',
+    tocFirstRun: 'Destpêka Yekem û Têketin',
+    firstRunTitle: 'Destpêka Yekem û Têketin',
+    firstRunB1Desc: 'Di destpêka yekem de zimanek, temayek û Zarok, Her kes an Mezin hilbijêre. Sepan heman gavan nîşan dide.',
   },
   games: {
     chessDesc: 'Şetrenceke 3D ya sînemayî ku li pişt her kevirî artêşek heye. Sê şaristaniyên bi anîmasyon li ser textekî mermerî, di çar meydanên şer de dimeşin, êrîş dikin û dikevin; bi sê astên hêza motorê û bi rêzbendiyeke serhêl a li gorî Elo.',
@@ -2812,6 +2815,7 @@ export const ku = {
     googleDataItem3: 'Kî em wê parve bikin: tu kes. Ew firotinê ne, ne ji bo reklamê tê bikar anîn, û ne ji bo fêrkirina modelên AI tê bikar anîn.',
     googleDataItem4: 'Jêbirin: hesabê xwe di Mîhengan de jê bibe, an jî ji dev@riftn.com re e-nameyekê bişîne, û daneyên Google yên ku em digirin dê werin jêbirin. Her weha hûn dikarin di her kêliyê de li myaccount.google.com/permissions gihîştina Riftn betal bikin.',
     googleDataLimitedUse: 'Bikaranîna Riftn ya agahdariyên ku ji API-yên Google hatine wergirtin, li gorî Siyaseta Daneyên Bikarhêner a Karûbarên API-ya Google-ê ye, tevî hewcedariyên Bikaranîna Sînorkirî.',
+    googleDataTitle: 'Daneyên bikarhêner ên Google',
   },
   contact: {
     title: 'Bi Me re Têkilî Deynin',
@@ -2925,6 +2929,7 @@ export const ku = {
     a20: 'Na, nîşanekanên Riftn bi tenê ji bo armancên bikêrhatî di nav ekosîstema Riftn de ne, dişibin pereyên dîjîtal ên di nav lîstikê an jî di nav sepanê de. Ew ne amûrên veberhênanê ne û bazar pir ne aram in.',
     q21: 'Moderasyona naveroka li ser Riftn çawa dixebite?',
     a21: 'Riftn sîstema moderasyona naveroka ya nenavendî bikar tîne ku endamên civakê dikarin di rêvebiriya nakokiyan û moderasyona naveroka de beşdar bibin da ku xelatan bi dest bixin.',
+    a4Launch: 'Tokena nû ya Riftn di demeke nêzîk de tê û hîn nayê bazirganîkirin, ji ber vê yekê hîn ne lîsteya borsayê heye ne jî navnîşana peymanê. Tevlî lîsteya destpêkirinê bibe li riftn.com/buy da ku dema bazirganî dest pê dike e-nameyekê bistînî.',
   },
   donate: {
     title: 'Bexşîn',
