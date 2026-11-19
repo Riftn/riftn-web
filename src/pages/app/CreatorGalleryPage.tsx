@@ -50,8 +50,8 @@ export default function CreatorGalleryPage() {
     catch (error) { if (!(error instanceof DOMException && error.name === 'AbortError')) toast.error(t('common.somethingWentWrong')); }
   };
   const button = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-current/15 px-3 disabled:opacity-30';
-  return <main className="min-h-dvh bg-background text-foreground" data-creator-gallery>
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-current/10 bg-background/95 px-4 py-3 backdrop-blur-xl">
+  return <main className="relative z-[1] min-h-dvh bg-[#090a0b] text-white" data-creator-gallery data-glass-page>
+    <header data-theme-page-surface className="sticky top-0 z-30 flex items-center justify-between border-b border-current/10 bg-black/80 px-4 py-3 backdrop-blur-xl">
       <Link className={button} to={id ? '/creator/gallery' : '/creator'} aria-label={t('common.back')}><ArrowLeft size={20} /></Link>
       <h1 className="font-bold">{t('creator.madeOnDehub')}</h1>
       <div className="flex gap-2">{id && <><button className={button} disabled={index <= 0} onClick={() => move(-1)} aria-label={t('common.previous', { defaultValue: 'Previous' })}><ChevronLeft /></button><button className={button} disabled={index < 0 || index >= items.length - 1} onClick={() => move(1)} aria-label={t('common.next', { defaultValue: 'Next' })}><ChevronRight /></button></>}</div>

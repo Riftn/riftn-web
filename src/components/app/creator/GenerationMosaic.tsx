@@ -3,7 +3,15 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { generationPath, readGenerations } from '@/lib/creator/gallery';
-import { thumbUrl } from './CreatorStage';
+function mosaicThumbnail(url: string, width: number | null, height: number | null) {
+  if (!url.includes('/storage/v1/object/public/')) return url;
+  const thumbnail = new URL(url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/'));
+  thumbnail.searchParams.set('width', '640');
+  thumbnail.searchParams.set('height', String(width && height ? Math.max(1, Math.round(640 * height / width)) : 640));
+  thumbnail.searchParams.set('resize', 'contain');
+  thumbnail.searchParams.set('quality', '65');
+  return thumbnail.toString();
+}
 
 export function GenerationMosaic({ preview = false }: { preview?: boolean }) {
   const { t } = useTranslation();
@@ -21,7 +29,7 @@ export function GenerationMosaic({ preview = false }: { preview?: boolean }) {
       {(preview ? items.slice(0, 12) : items).map(item => <Link key={item.id} to={generationPath(item.id)}
         className="mb-3 block break-inside-avoid overflow-hidden rounded-xl border border-current/10 bg-current/5 focus-visible:outline focus-visible:outline-2"
         aria-label={item.title || t('creator.aiGenerationCommunityAlt')}>
-        <img src={thumbUrl(item.image_url, 640)} alt={item.title || t('creator.aiGenerationCommunityAlt')} loading="lazy" decoding="async"
+        <img src={mosaicThumbnail(item.image_url, item.width, item.height)} alt={item.title || t('creator.aiGenerationCommunityAlt')} loading="lazy" decoding="async"
           width={item.width ?? undefined} height={item.height ?? undefined} className="h-auto w-full" />
       </Link>)}
     </div>
