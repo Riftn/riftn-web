@@ -691,6 +691,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   const cleanWide = isMobile && phoneStage === 'clean' && wideRatio > 0 && !isLiveSlide && !currentShort?.imageUrls?.length && !isFullscreen;
   const downloadVideo = useVideoDownload();
   const downloadGate = useMatureGate(currentShort?.contentRating);
+  /** Desktop puts the subtitles button in the top corner row, beside options. */
+  const hasDesktopCaptions = !isMobile && !isLiveSlide && !!currentShort?.videoUrl && !currentShort?.reelPost && !currentShort?.imageUrls?.length;
   const isOwnShort = !!walletAddress && currentShort?.creatorId?.toLowerCase() === walletAddress.toLowerCase();
   // Boost, as on the feed card: the owner boosts their own post, and anyone
   // holding Deep Current can gift one to somebody else's.
@@ -1209,6 +1211,9 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
       if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); goToNext(); }
       else if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); goToPrev(); }
       else if (e.key === 'Escape') {
+        // A sheet or dialog open over the viewer (options, share, report)
+        // closes on its own; Esc must not also close the player under it.
+        if (shareSheetOpen || document.querySelector('[data-vaul-drawer][data-state="open"], [role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]')) return;
         // Esc steps back one level, it does not close everything: from
         // fullscreen it returns to the windowed viewer. Browsers normally
         // swallow the key themselves to exit native fullscreen, so in practice
@@ -1227,7 +1232,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized]);
+  }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized, shareSheetOpen]);
 
   /**
    * The short a drag is heading for, already playing (silently) while it
@@ -2230,7 +2235,20 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                 <MoreHorizontal className="w-5 h-5" />
               </button>
 
-              {/* The owner's Boost bolt, left of options (which ends 9.25rem in). */}
+              {/* Subtitles, left of options: the playing short puts its CC button in here. */}
+              {hasDesktopCaptions && (
+                <div
+                  ref={setCaptionSlot}
+                  data-shorts-caption-slot
+                  className={cn(
+                    CORNER_CONTROL,
+                    "right-[9.75rem] empty:hidden",
+                    chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                  )}
+                />
+              )}
+
+              {/* The owner's Boost bolt, left of options (and of subtitles when they are there). */}
               {isOwnShort && canBoostCurrent && (
                 <button
                   onClick={() => {
@@ -2239,7 +2257,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   }}
                   className={cn(
                     CORNER_CONTROL,
-                    "right-[9.75rem]",
+                    hasDesktopCaptions ? "right-[12.75rem]" : "right-[9.75rem]",
                     chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
                   )}
                   aria-label={t('postOptions.boostPost')}
@@ -2757,7 +2775,8 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
         url={viewerShareUrl(`${window.location.origin}/app/post/${currentShort.articleSlug || currentShort.id}`)}
       />
       <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
-        <DrawerContent scrollable glass className="px-4 pb-6">
+        {/* On desktop a centred column under the player, not a sheet across the whole window. */}
+        <DrawerContent scrollable glass className="px-4 pb-6 md:left-[calc(50%_-_15rem)] md:right-auto md:w-[30rem]">
           <DrawerHeader className="relative pb-2">
             <DrawerTitle className="text-white text-lg">{_copy("copy.d0db8b5e364b", { defaultValue: "Options" })}</DrawerTitle>
           </DrawerHeader>
