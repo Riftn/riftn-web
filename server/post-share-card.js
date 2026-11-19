@@ -25,7 +25,7 @@ export function plainPostText(value) {
 const flag = (v) => v === true || v === 1 || v === 'true';
 const count = (v) => Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0;
 const SHARE_IMAGE = `${ORIGIN}/og/riftn-share.png`;
-const CARD_POST_TYPES = ['feed-simple', 'text', 'video', 'feed-video', 'image', 'feed-images'];
+const CARD_POST_TYPES = ['feed-simple', 'text', 'video', 'feed-video', 'image', 'feed-images', 'live'];
 
 /** An absent rating reads as safe, as it does everywhere else. Mature, blocked and pending posts never show their content to a stranger. */
 export function hasSafeRating(post) {
@@ -42,11 +42,12 @@ function cdnUrl(path) {
 
 /** The picture the post itself shows: a video's poster, otherwise its first image or cover (see buildImageUrl in src/lib/media-url.ts). */
 export function postCardMedia(post) {
-  const video = !!post.videoUrl || ['video', 'feed-video'].includes(post.postType);
+  const video = !!post.videoUrl || ['video', 'feed-video', 'live'].includes(post.postType);
   const image = (raw) => {
     const path = String(raw || '').trim().replace(/^statics\//, '');
     if (!path || /^https?:/.test(path)) return cdnUrl(path);
-    if (/^(?:images|shorts)\//.test(path)) return cdnUrl(path);
+    // Live streams keep their thumbnail under live/thumbnails/.
+    if (/^(?:images|shorts|live)\//.test(path)) return cdnUrl(path);
     return cdnUrl(`images/${post.tokenId}.${(path.match(/\.([a-z0-9-]+)$/i)?.[1] || 'png').toLowerCase()}`);
   };
   // Covers saved under the legacy nfts/images/ prefix moved to feed-images/.
@@ -118,7 +119,10 @@ function setShareTags(html, tags) {
  * drops its og:video, so nothing it carries reaches a preview.
  */
 export function applyPostShareImage(html, post) {
-  if (!post || !hasSafeRating(post)) {
+  // A live post with no usable thumbnail would otherwise keep the page's own
+  // og:image, which for streams points at a file that was never written.
+  const liveWithoutCard = post?.postType === 'live' && !postCardData(post);
+  if (!post || !hasSafeRating(post) || liveWithoutCard) {
     return setShareTags(html.replace(/<meta property="og:video(?::[a-z_:]+)?" content="[^"]*">\s*/g, ''), {
       'og:image': SHARE_IMAGE, 'og:image:secure_url': SHARE_IMAGE, 'og:image:type': 'image/png',
       'og:image:width': '1200', 'og:image:height': '630', 'og:image:alt': 'Riftn',
