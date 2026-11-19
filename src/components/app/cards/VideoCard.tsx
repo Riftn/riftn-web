@@ -2163,6 +2163,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const tapGestures = useTapGestures({
     postId: video.id,
     singleTapOnly: feedPreview,
+    // On a phone the feed video likes on a double tap; one tap still opens it.
+    touchLadder: true,
     reactionArea: isImmersive || isFullscreen ? 'surface' : 'center',
     // A gated card (PPV, holdings/subscriber lock, mature warning) draws no
     // burst — TapReactionBurst lives inside the isContentGated block further

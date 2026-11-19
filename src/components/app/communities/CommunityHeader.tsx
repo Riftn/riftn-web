@@ -5,7 +5,7 @@ import { CommunityKindChip } from './CommunityKindChip';
 import { communityKindOf, isPublicChatCommunity, entryPriceOf } from '@/lib/community-kinds';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { useRef, useState, useCallback } from 'react';
-import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus } from "lucide-react";
+import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus, Bell, BellOff } from "lucide-react";
 import Users from "@/components/ui/cut-icons/communities";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 import Camera from "@/components/ui/cut-icons/camera";
@@ -32,7 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { dehubLinkFor } from '@/lib/dehub-links';
 import { toast } from 'sonner';
-import { useChatPrefs } from '@/hooks/use-chat-prefs';
+import { useChatPrefs, isMuted as isChatMuted } from '@/hooks/use-chat-prefs';
 import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { useTranslation } from 'react-i18next';
 import { DescriptionWithLinks } from './DescriptionWithLinks';
@@ -148,6 +148,10 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
   const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
   const canAddToMessages = !!walletAddress && (isMember || isOwner) && communityKindOf(community) === 'community' && !isPublicChatCommunity(community.id);
   const inMessages = !!chatPrefs.get(roomChatId(community.id))?.listedAt;
+  // Muting the community's chat stops its message pushes until you unmute.
+  // Same setting as Mute on the chat in Messages, so it follows you to the app.
+  const canMute = !!walletAddress && (isMember || isOwner);
+  const chatMuted = isChatMuted(chatPrefs.get(roomChatId(community.id)));
 
   return (
     <div className="px-3 pt-3 pb-4 relative">
@@ -454,6 +458,22 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
             >
               {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
               {isPinned ? t('communities.unpin') : t('communities.pin')}
+            </Button>
+          )}
+          {canMute && (
+            <Button
+              size="sm"
+              variant="ghost"
+              data-community-mute={chatMuted ? 'on' : 'off'}
+              aria-pressed={chatMuted}
+              onClick={() => updateChatPref(roomChatId(community.id), { mutedUntil: chatMuted ? null : 'forever' })}
+              className={buttonBase}
+              title={chatMuted
+                ? t('chatMenu.unmute', 'Unmute notifications')
+                : t('chatMenu.mute', 'Mute notifications')}
+            >
+              {chatMuted ? <BellOff className="w-3.5 h-3.5" /> : <Bell className="w-3.5 h-3.5" />}
+              {chatMuted ? t('common.unmute', 'Unmute') : t('common.mute', 'Mute')}
             </Button>
           )}
           {canAddToMessages && (
