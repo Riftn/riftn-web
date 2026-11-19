@@ -50,7 +50,8 @@
     "pageDescription": "Buka yonke i-duet yale vidiyo ku-Riftn, noma uqophe eyakho eceleni.",
     "empty": "Akukabikho ma-duet. Vula izinketho zevidiyo bese ukhetha i-Remix → Duet ukwenza eyokuqala.",
     "notFound": "Le vidiyo ayitholakali.",
-    "browseShorts": "Phequlula Okufushane"
+    "browseShorts": "Phequlula Okufushane",
+    "notFoundTitle": "Ividiyo ayitholakalanga | Riftn"
   },
   "videoRemix": {
     "sound": "Sebenzisa lesi sinton",
@@ -658,7 +659,8 @@
       "publicChat": "ingxoxo, ingxoxo yomhlaba, igumbi lengxoxo, i-lobby, khuluma, ingxoxo yomphakathi",
       "planned": "okuhleliwe, hlela, okuthunyelwe okuhleliwe, ulayini, kamuva",
       "liveStudio": "sakaza bukhoma, ukusakaza, ukusakaza bukhoma, OBS, ama-overlay, izexwayiso, ama-widget",
-      "launchpad": "qalisa ithokheni, dala uhlamvu lwemali, yenza uhlamvu lwemali, i-meme coin, i-bonding curve, yenza ithokheni"
+      "launchpad": "qalisa ithokheni, dala uhlamvu lwemali, yenza uhlamvu lwemali, i-meme coin, i-bonding curve, yenza ithokheni",
+      "getTheApp": "landa uhlelo lokusebenza, i-app, Android, iPhone, i-app yeselula, faka, APK, i-app yekhompyutha, faka kukhompyutha, Windows, Mac"
     }
   },
   "feed": {
@@ -3378,7 +3380,8 @@
       "dragPart": "Hudula ukuze uhambise ingxenye {{n}}",
       "addPart": "Engeza ochungechungeni",
       "addPlaceholder": "Engeza ochungechungeni lwakho...",
-      "label": "Uchungechunge · izingxenye ezingu-{{count}}"
+      "label": "Uchungechunge · izingxenye ezingu-{{count}}",
+      "reorderHint": "Hudula izingxenye, noma usebenzise imicibisholo, bese ulondoloza."
     },
     "attachMedia": "Namathisela isithombe, ividiyo noma umsindo",
     "attachUnsupported": "Namathisela isithombe, ividiyo noma ifayela lomsindo.",
@@ -6687,7 +6690,8 @@
     "countRunning_other": "{{count}} kuyasebenza",
     "audioTaskDialoguePlaceholder": "Alice: Kufanele sihambe.\nBob: [laughs] Ngemuva kwakho.",
     "designThreeVoices": "Klama amazwi amathathu",
-    "priceOwnKey": "Ukhiye wakho"
+    "priceOwnKey": "Ukhiye wakho",
+    "audioResultTooLarge": "Umphumela womsindo awunalutho noma udlula u-128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Izinhlelo zawo wonke umsebenzi",
@@ -20593,7 +20597,8 @@
     "backToVideo": "Buyela kuvidiyo",
     "empty": "Akukho ukusabela okwamanje. Vula imenyu ye-Remix yevidiyo bese ukhetha u-React ukuze ube ngowokuqala.",
     "wasLive": "Ibibukhoma",
-    "thisVideo": "le vidiyo"
+    "thisVideo": "le vidiyo",
+    "pageTitle": "Ukusabela ku-{{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Xhuma i-Riftn nomsizi wakho we-AI",

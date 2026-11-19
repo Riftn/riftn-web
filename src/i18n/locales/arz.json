@@ -50,7 +50,8 @@
     "pageDescription": "اتفرّج على كل ديوهات الفيديو ده على Riftn، أو سجّل بتاعك جنبه.",
     "empty": "مفيش ديوهات لسه. افتح خيارات الفيديو واختار ريمكس ← ديو عشان تعمل أول واحد.",
     "notFound": "الفيديو ده مش متاح.",
-    "browseShorts": "تصفّح Shorts"
+    "browseShorts": "تصفّح Shorts",
+    "notFoundTitle": "الفيديو مش موجود | Riftn"
   },
   "videoRemix": {
     "sound": "استخدم هذا الصوت",
@@ -3348,7 +3349,8 @@
       "dragPart": "اسحب عشان تحرّك الجزء {{n}}",
       "addPart": "أضف للثريد",
       "addPlaceholder": "أضف للثريد بتاعك...",
-      "label": "ثريد · {{count}} أجزاء"
+      "label": "ثريد · {{count}} أجزاء",
+      "reorderHint": "اسحب الأجزاء أو استخدم الأسهم، وبعدين احفظ."
     },
     "attachMedia": "أرفق صورة أو فيديو أو صوت",
     "attachUnsupported": "أرفق صورة أو فيديو أو ملف صوتي.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteRemove": "شيل من المفضلة",
     "audioTaskDialoguePlaceholder": "Alice: لازم نمشي.\nBob: [بيضحك] اتفضلي إنتي الأول.",
     "toolSongStudio": "استوديو الأغاني",
-    "priceOwnKey": "مفتاحك"
+    "priceOwnKey": "مفتاحك",
+    "audioResultTooLarge": "نتيجة الصوت فاضية أو أكبر من 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "خطط لكل سير عمل",
@@ -20563,7 +20566,8 @@
     "backToVideo": "رجوع للفيديو",
     "empty": "مفيش رياكشنز لسه. افتح قايمة ريمكس في الفيديو واختار رياكشن عشان تبقى الأول.",
     "wasLive": "كان لايف",
-    "thisVideo": "الفيديو ده"
+    "thisVideo": "الفيديو ده",
+    "pageTitle": "التفاعلات على {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "اربط Riftn بمساعد الذكاء الاصطناعي الخاص بك",

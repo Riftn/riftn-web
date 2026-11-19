@@ -43,7 +43,8 @@
     "empty": "Inga duetter än. Öppna videons alternativ och välj Remix → Duett för att göra den första.",
     "video": "Video",
     "notFound": "Den här videon är inte tillgänglig.",
-    "browseShorts": "Bläddra bland Shorts"
+    "browseShorts": "Bläddra bland Shorts",
+    "notFoundTitle": "Videon hittades inte | Riftn"
   },
   "videoRemix": {
     "sound": "Använd detta ljud",
@@ -3345,7 +3346,8 @@
       "dragPart": "Dra för att flytta del {{n}}",
       "addPart": "Lägg till i tråden",
       "addPlaceholder": "Lägg till i din tråd...",
-      "label": "Tråd · {{count}} delar"
+      "label": "Tråd · {{count}} delar",
+      "reorderHint": "Dra delarna eller använd pilarna och spara sedan."
     },
     "attachMedia": "Bifoga ett foto, en video eller ljud",
     "attachUnsupported": "Bifoga ett foto, en video eller en ljudfil.",
@@ -6643,7 +6645,8 @@
     "libraryFavoriteRemove": "Ta bort från favoriter",
     "toolRemake": "Gör om",
     "audioTaskDialoguePlaceholder": "Alice: Vi borde gå.\nBob: [skrattar] Efter dig.",
-    "priceOwnKey": "Din nyckel"
+    "priceOwnKey": "Din nyckel",
+    "audioResultTooLarge": "Ljudresultatet är tomt eller större än 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planer för varje arbetsflöde",
@@ -20549,7 +20552,8 @@
     "backToVideo": "Tillbaka till videon",
     "empty": "Inga reaktioner än. Öppna videons Remix-meny och välj Reagera för att bli först.",
     "wasLive": "Var live",
-    "thisVideo": "den här videon"
+    "thisVideo": "den här videon",
+    "pageTitle": "Reaktioner på {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Koppla Riftn till din AI-assistent",

@@ -50,7 +50,8 @@
     "empty": "Još nema dueta. Otvorite opcije videa i odaberite Remix → Duet da napravite prvi.",
     "video": "Video",
     "notFound": "Ovaj video nije dostupan.",
-    "browseShorts": "Pregledaj Kratke"
+    "browseShorts": "Pregledaj Kratke",
+    "notFoundTitle": "Videozapis nije pronađen | Riftn"
   },
   "videoRemix": {
     "sound": "Koristi ovaj zvuk",
@@ -3348,7 +3349,8 @@
       "dragPart": "Povucite za pomicanje dijela {{n}}",
       "addPart": "Dodaj u nit",
       "addPlaceholder": "Dodajte u svoju nit...",
-      "label": "Nit · {{count}} dijelova"
+      "label": "Nit · {{count}} dijelova",
+      "reorderHint": "Povucite dijelove ili upotrijebite strelice, a zatim spremite."
     },
     "attachMedia": "Priložite fotografiju, video ili audio",
     "attachUnsupported": "Priložite fotografiju, video ili audio datoteku.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Dodaj u favorite",
     "libraryFavoriteRemove": "Ukloni iz favorita",
     "audioTaskDialoguePlaceholder": "Alice: Trebali bismo krenuti.\nBob: [smije se] Ti prvi.",
-    "priceOwnKey": "Vaš ključ"
+    "priceOwnKey": "Vaš ključ",
+    "audioResultTooLarge": "Audiorezultat je prazan ili premašuje 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planovi za svaki radni tok",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Natrag na video",
     "empty": "Još nema reakcija. Otvorite izbornik Remix videa i odaberite Reagiraj da budete prvi.",
     "wasLive": "Bilo je uživo",
-    "thisVideo": "ovaj video"
+    "thisVideo": "ovaj video",
+    "pageTitle": "Reakcije na {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Povežite Riftn sa svojim AI asistentom",

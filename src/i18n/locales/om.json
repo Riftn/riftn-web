@@ -50,7 +50,8 @@
     "pageDescription": "Duweetii viidiyoo kanaa hunda Riftn irratti ilaali, ykn kan kee cinaa cinaatti waraabi.",
     "empty": "Ammaaf duweetiin hin jiru. Isa jalqabaa uumuuf filannoowwan viidiyoo banii Remix → Duweetii filadhu.",
     "notFound": "Viidiyoon kun hin argamu.",
-    "browseShorts": "Gabaabduu ilaali"
+    "browseShorts": "Gabaabduu ilaali",
+    "notFoundTitle": "Viidiyoon hin argamne | Riftn"
   },
   "videoRemix": {
     "sound": "Sagalee kana fayyadami",
@@ -658,7 +659,8 @@
       "publicChat": "haasawa, haasawa addunyaa, kutaa haasawaa, lobby, haasawi, haasawa hawaasaa",
       "planned": "kan karoorfame, sagantaa baasi, barreeffamoota karoorfaman, tarree, booda",
       "liveStudio": "kallattiin seeni, tamsaasi, tamsaasuu, OBS, overlays, akeekkachiisa, widgets",
-      "launchpad": "token jalqabsiisi, saantima uumi, saantima hojjedhu, meme coin, bonding curve, tokenise godhi"
+      "launchpad": "token jalqabsiisi, saantima uumi, saantima hojjedhu, meme coin, bonding curve, tokenise godhi",
+      "getTheApp": "appii buusi, Android, iPhone, appii moobaayilaa, fe'i, APK, appii kompiitaraa, kompiitara irratti fe'i, Windows, Mac"
     }
   },
   "feed": {
@@ -3360,7 +3362,8 @@
       "dragPart": "Kutaa {{n}} sochoosuuf harkisi",
       "addPart": "Tarree irratti dabali",
       "addPlaceholder": "Tarree kee irratti dabali...",
-      "label": "Tarree · kutaalee {{count}}"
+      "label": "Tarree · kutaalee {{count}}",
+      "reorderHint": "Kutaalee harkisi, yookiin xiyyaawwan fayyadami, achiis olkaa'i."
     },
     "attachMedia": "Suuraa, viidiyoo ykn sagalee maxxansi",
     "attachUnsupported": "Suuraa, viidiyoo ykn faayilii sagalee maxxansi.",
@@ -6669,7 +6672,8 @@
     "presetAnimateStillName": "Suuraa dhaabbataa sochoosi",
     "decrease": "{{field}} hir'isi",
     "thirtyOff": "30% HIR'ISA",
-    "priceOwnKey": "Furtuu kee"
+    "priceOwnKey": "Furtuu kee",
+    "audioResultTooLarge": "Bu'aan sagalee duwwaa dha yookiin 128 MB caala."
   },
   "pricing": {
     "plansForEveryWorkflow": "Karoora adeemsa hojii hundaaf",
@@ -6975,7 +6979,8 @@
     "buyHere": "Asitti bitadhu",
     "openSeaNote": "OpenSea irratti tarreeffame. Gurgurtaa Seaport irratti kallattiin kaffalta; Riftn kaffaltii hin dabalu.",
     "viewOnOpenSea": "OpenSea irratti ilaali",
-    "yourOffer": "Dhiheessa kee ({{symbol}})"
+    "yourOffer": "Dhiheessa kee ({{symbol}})",
+    "notListed": "Ammaaf gurgurtaaf hin dhiyaanne. Gatii dhiyeessi, abbaan isaa fudhachuu danda'a."
   },
   "usernames": {
     "seoTitle": "Maqaa Fayyadamtootaa Iddoo Gabaa | Riftn jedhamuun beekama",
@@ -20582,7 +20587,8 @@
     "backToVideo": "Gara viidiyootti deebi'i",
     "empty": "Ammaaf deebiin miiraa hin jiru. Kan jalqabaa ta'uuf meenuu Remix viidiyoo banii Deebii miiraa filadhu.",
     "wasLive": "Kallattii ture",
-    "thisVideo": "viidiyoo kana"
+    "thisVideo": "viidiyoo kana",
+    "pageTitle": "Deebii {{title}} irratti kenname | Riftn"
   },
   "connectGuide": {
     "title": "Riftn gargaaraa AI keessan waliin walqunnamsiisaa",

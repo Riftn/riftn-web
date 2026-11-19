@@ -50,7 +50,8 @@
     "pageDescription": "تفرج فكل ديو ديال هاد الفيديو على Riftn، ولا سجّل ديالك جنب لجنب.",
     "empty": "مازال ماكاين حتى ديو. حل الخيارات ديال الفيديو وختار ريمكس ← ديو باش تدير الأول.",
     "notFound": "هاد الفيديو ماشي متاح.",
-    "browseShorts": "تصفح Shorts"
+    "browseShorts": "تصفح Shorts",
+    "notFoundTitle": "الفيديو ما كاينش | Riftn"
   },
   "videoRemix": {
     "sound": "استخدم هذا الصوت",
@@ -3378,7 +3379,8 @@
       "dragPart": "جر باش تحرك الجزء {{n}}",
       "addPart": "زيد للسلسلة",
       "addPlaceholder": "زيد للسلسلة ديالك...",
-      "label": "سلسلة · {{count}} أجزاء"
+      "label": "سلسلة · {{count}} أجزاء",
+      "reorderHint": "جر الأجزاء، ولا استعمل الأسهم، ومن بعد سجل."
     },
     "attachMedia": "رفق تصويرة، فيديو ولا أوديو",
     "attachUnsupported": "رفق تصويرة، فيديو ولا ملف أوديو.",
@@ -6687,7 +6689,8 @@
     "presetSfxAmbienceName": "خلفية جو",
     "srHeading": "Riftn Creator Studio",
     "toolSongStudio": "ستوديو الأغاني",
-    "priceOwnKey": "المفتاح ديالك"
+    "priceOwnKey": "المفتاح ديالك",
+    "audioResultTooLarge": "نتيجة الصوت خاوية ولا كتفوت 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "خطط لكل سير عمل",
@@ -20593,7 +20596,8 @@
     "backToVideo": "رجع للفيديو",
     "empty": "مازال حتى تفاعل. حل قائمة الريمكس ديال الفيديو وختار تفاعل باش تكون الأول.",
     "wasLive": "كان مباشر",
-    "thisVideo": "هاد الفيديو"
+    "thisVideo": "هاد الفيديو",
+    "pageTitle": "التفاعلات مع {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "اربط Riftn بمساعد الذكاء الاصطناعي الخاص بك",

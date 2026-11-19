@@ -50,7 +50,8 @@
     "pageDescription": "Nézd meg a videó összes duettjét a Riftnen, vagy vedd fel a sajátodat mellé.",
     "empty": "Még nincsenek duettek. Nyisd meg a videó beállításait, és válaszd a Remix → Duett lehetőséget az elsőhöz.",
     "notFound": "Ez a videó nem érhető el.",
-    "browseShorts": "Shortsok böngészése"
+    "browseShorts": "Shortsok böngészése",
+    "notFoundTitle": "A videó nem található | Riftn"
   },
   "videoRemix": {
     "sound": "Használd ezt a hangot",
@@ -3352,7 +3353,8 @@
       "dragPart": "Húzd a(z) {{n}}. rész áthelyezéséhez",
       "addPart": "Hozzáadás a szálhoz",
       "addPlaceholder": "Folytasd a szálad...",
-      "label": "Szál · {{count}} rész"
+      "label": "Szál · {{count}} rész",
+      "reorderHint": "Húzd a részeket, vagy használd a nyilakat, majd ments."
     },
     "attachMedia": "Fotó, videó vagy hang csatolása",
     "attachUnsupported": "Csatolj fotót, videót vagy hangfájlt.",
@@ -6661,7 +6663,8 @@
     "libraryFavoriteAdd": "Hozzáadás a kedvencekhez",
     "libraryFavoriteRemove": "Eltávolítás a kedvencek közül",
     "audioTaskDialoguePlaceholder": "Alice: Mennünk kéne.\nBob: [nevet] Csak utánad.",
-    "priceOwnKey": "Saját kulcs"
+    "priceOwnKey": "Saját kulcs",
+    "audioResultTooLarge": "A hangeredmény üres, vagy meghaladja a 128 MB-ot."
   },
   "pricing": {
     "plansForEveryWorkflow": "Csomagok minden munkafolyamathoz",
@@ -20567,7 +20570,8 @@
     "backToVideo": "Vissza a videóhoz",
     "empty": "Még nincsenek reakciók. Nyisd meg a videó Remix menüjét, és válaszd a Reagálás lehetőséget, hogy te legyél az első.",
     "wasLive": "Élő volt",
-    "thisVideo": "ez a videó"
+    "thisVideo": "ez a videó",
+    "pageTitle": "Reakciók erre: {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Csatlakoztasd a Riftnot az MI-asszisztensedhez",

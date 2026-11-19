@@ -50,7 +50,8 @@
     "pageDescription": "Bu wideonyň ähli duetlerini Riftn-de görüň ýa-da öz duetiňizi ýanaşyk ýazyň.",
     "empty": "Entek duet ýok. Ilkinjisini etmek üçin wideonyň opsiýalaryny açyň we Remix → Duet saýlaň.",
     "notFound": "Bu wideo elýeterli däl.",
-    "browseShorts": "Shorts-a göz aýla"
+    "browseShorts": "Shorts-a göz aýla",
+    "notFoundTitle": "Wideo tapylmady | Riftn"
   },
   "videoRemix": {
     "sound": "Bu sesi ulanyň",
@@ -658,7 +659,8 @@
       "publicChat": "çat, umumy çat, çat otagy, lobbi, gürrüň, jemgyýet çaty",
       "planned": "meýilleşdirilen, meýilnama, meýilleşdirilen ýazgylar, nobat, soňra",
       "liveStudio": "göni efire çyk, ýaýlym, ýaýlym etmek, OBS, örtükler, duýduryşlar, widjetler",
-      "launchpad": "token çykar, teňňe döret, teňňe ýasa, mem teňňe, bonding curve, tokenleşdir"
+      "launchpad": "token çykar, teňňe döret, teňňe ýasa, mem teňňe, bonding curve, tokenleşdir",
+      "getTheApp": "programmany ýükle, Android, iPhone, mobil programma, gurnamak, APK, desktop programma, kompýutere gurnamak, Windows, Mac"
     }
   },
   "feed": {
@@ -3347,7 +3349,8 @@
       "dragPart": "{{n}} bölegi süýşürmek üçin süýräň",
       "addPart": "Tema goş",
       "addPlaceholder": "Temaňyza goşuň...",
-      "label": "Tema · {{count}} bölek"
+      "label": "Tema · {{count}} bölek",
+      "reorderHint": "Bölekleri süýräň ýa-da oklary ulanyň, soňra ýatda saklaň."
     },
     "attachMedia": "Surat, wideo ýa-da ses goş",
     "attachUnsupported": "Surat, wideo ýa-da ses faýlyny goşuň.",
@@ -6656,7 +6659,8 @@
     "presetGroupVoiceover": "Ses ýazgysy",
     "presetAsmrWhisperHint": "Ýakyn, sessiz, mikrofona ýakyn",
     "presetMusicUpbeatHint": "Şadyýan, güýçli, täjirçilik",
-    "priceOwnKey": "Öz açaryňyz"
+    "priceOwnKey": "Öz açaryňyz",
+    "audioResultTooLarge": "Ses netijesi boş ýa-da 128 MB-dan köp."
   },
   "pricing": {
     "plansForEveryWorkflow": "Her bir iş akymy üçin planlar",
@@ -20559,7 +20563,8 @@
     "backToVideo": "Wideo gaýt",
     "empty": "Entek reaksiýa ýok. Birinji bolmak üçin wideonyň Remiks menýusyny açyň we Reaksiýa saýlaň.",
     "wasLive": "Göni ýaýlymdady",
-    "thisVideo": "bu wideo"
+    "thisVideo": "bu wideo",
+    "pageTitle": "{{title}} üçin reaksiýalar | Riftn"
   },
   "connectGuide": {
     "title": "Riftn-y emeli aň kömekçiňize birikdiriň",

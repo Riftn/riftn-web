@@ -50,7 +50,8 @@
     "pageDescription": "Riftn پر اس ویڈیو کا ہر ڈوئٹ دیکھو، یا بازو بازو میں اپنا ریکارڈ کرو۔",
     "empty": "ابھی کوئی ڈوئٹ نئیں۔ پہلا بنانے کو ویڈیو کے آپشنز کھولو اور ریمکس → ڈوئٹ چنو۔",
     "notFound": "یہ ویڈیو دستیاب نئیں ہے۔",
-    "browseShorts": "شارٹس دیکھو"
+    "browseShorts": "شارٹس دیکھو",
+    "notFoundTitle": "ویڈیو نئیں ملا | Riftn"
   },
   "videoRemix": {
     "sound": "یہ ساؤنڈ استعمال کریں",
@@ -3348,7 +3349,8 @@
       "dragPart": "حصہ {{n}} ہلانے کو کھینچو",
       "addPart": "تھریڈ میں جوڑو",
       "addPlaceholder": "اپنے تھریڈ میں جوڑو...",
-      "label": "تھریڈ · {{count}} حصے"
+      "label": "تھریڈ · {{count}} حصے",
+      "reorderHint": "حصے کھینچو، یا تیر استعمال کرو، پھر سیو کرو۔"
     },
     "attachMedia": "تصویر، ویڈیو یا آڈیو جوڑو",
     "attachUnsupported": "تصویر، ویڈیو یا آڈیو فائل جوڑو۔",
@@ -6656,7 +6658,8 @@
     "featureMemoryCopy": "کردار، سکلز اور برانڈ کے اصول سب پرامپٹس میں دستیاب رہتے۔",
     "featureConnectedTitle": "Riftn سے جڑا ہوا",
     "originalsBadge": "اوریجنلز",
-    "priceOwnKey": "آپ کی کی"
+    "priceOwnKey": "آپ کی کی",
+    "audioResultTooLarge": "آڈیو کا نتیجہ خالی ہے یا 128 MB سے زیادہ ہے۔"
   },
   "pricing": {
     "plansForEveryWorkflow": "ہر ورکفلو کے لیے پلانز",
@@ -20556,7 +20559,8 @@
     "backToVideo": "ویڈیو پر واپس",
     "empty": "ابھی کوئی ری ایکشن نئیں۔ ویڈیو کا Remix مینو کھولو اور React چنو تاکہ پہلے آپ بنو۔",
     "wasLive": "لائیو تھا",
-    "thisVideo": "یہ ویڈیو"
+    "thisVideo": "یہ ویڈیو",
+    "pageTitle": "{{title}} پر ردعمل | Riftn"
   },
   "connectGuide": {
     "title": "Riftn کو اپنے AI اسسٹنٹ سے جوڑیں",

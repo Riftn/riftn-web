@@ -50,7 +50,8 @@
     "pageDescription": "Bu videonun bütün duetlərinə Riftn-də baxın və ya öz duetinizi yan-yana yazın.",
     "empty": "Hələ duet yoxdur. İlkini etmək üçün videonun seçimlərini açın və Remiks → Duet seçin.",
     "notFound": "Bu video əlçatan deyil.",
-    "browseShorts": "Qısalara bax"
+    "browseShorts": "Qısalara bax",
+    "notFoundTitle": "Video tapılmadı | Riftn"
   },
   "videoRemix": {
     "sound": "Bu səsdən istifadə et",
@@ -3348,7 +3349,8 @@
       "dragPart": "{{n}}-ci hissəni köçürmək üçün sürüşdürün",
       "addPart": "Mövzuya əlavə et",
       "addPlaceholder": "Mövzunuza əlavə edin...",
-      "label": "Mövzu · {{count}} hissə"
+      "label": "Mövzu · {{count}} hissə",
+      "reorderHint": "Hissələri sürükləyin və ya oxlardan istifadə edin, sonra yadda saxlayın."
     },
     "attachMedia": "Şəkil, video və ya audio əlavə et",
     "attachUnsupported": "Şəkil, video və ya audio fayl əlavə edin.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Sevimlilərə əlavə et",
     "libraryFavoriteRemove": "Sevimlilərdən sil",
     "audioTaskDialoguePlaceholder": "Alice: Getməliyik.\nBob: [gülür] Əvvəlcə sən.",
-    "priceOwnKey": "Açarınız"
+    "priceOwnKey": "Açarınız",
+    "audioResultTooLarge": "Audio nəticəsi boşdur və ya 128 MB-ı keçir."
   },
   "pricing": {
     "plansForEveryWorkflow": "Hər bir iş axını üçün planlar",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Videoya qayıt",
     "empty": "Hələ reaksiya yoxdur. Videonun Remiks menyusunu açın və birinci olmaq üçün Reaksiya ver seçin.",
     "wasLive": "Canlı idi",
-    "thisVideo": "bu video"
+    "thisVideo": "bu video",
+    "pageTitle": "{{title}} üçün reaksiyalar | Riftn"
   },
   "connectGuide": {
     "title": "Riftn-ı süni intellekt köməkçinizə qoşun",

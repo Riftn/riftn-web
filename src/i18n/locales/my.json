@@ -50,7 +50,8 @@
     "pageDescription": "ဤဗီဒီယို၏ Duet အားလုံးကို Riftn တွင် ကြည့်ပါ၊ သို့မဟုတ် ဘေးချင်းယှဉ် ကိုယ်ပိုင် Duet ရိုက်ပါ။",
     "empty": "Duet မရှိသေးပါ။ ဗီဒီယို၏ ရွေးချယ်စရာများကို ဖွင့်ပြီး Remix → Duet ကို ရွေး၍ ပထမဆုံးတစ်ခု ပြုလုပ်ပါ။",
     "notFound": "ဤဗီဒီယို မရနိုင်ပါ။",
-    "browseShorts": "Shorts ကြည့်ရန်"
+    "browseShorts": "Shorts ကြည့်ရန်",
+    "notFoundTitle": "ဗီဒီယို မတွေ့ပါ | Riftn"
   },
   "videoRemix": {
     "sound": "ဤအသံကို အသုံးပြုပါ",
@@ -3361,7 +3362,8 @@
       "dragPart": "အပိုင်း {{n}} ကို ရွှေ့ရန် ဆွဲပါ",
       "addPart": "Thread သို့ ထည့်ရန်",
       "addPlaceholder": "သင့် thread သို့ ထည့်ပါ...",
-      "label": "Thread · အပိုင်း {{count}} ခု"
+      "label": "Thread · အပိုင်း {{count}} ခု",
+      "reorderHint": "အပိုင်းများကို ဆွဲရွှေ့ပါ သို့မဟုတ် မြှားများကို သုံးပြီး သိမ်းဆည်းပါ။"
     },
     "attachMedia": "ဓာတ်ပုံ၊ ဗီဒီယို သို့မဟုတ် အသံ ပူးတွဲရန်",
     "attachUnsupported": "ဓာတ်ပုံ၊ ဗီဒီယို သို့မဟုတ် အသံဖိုင် ပူးတွဲပါ။",
@@ -6670,7 +6672,8 @@
     "presetAria": "{{name}} preset။ {{hint}}",
     "presetGroupVoiceover": "အသံသွင်း",
     "readClaudeGuide": "Claude လမ်းညွှန်ကို ဖတ်ရန်",
-    "priceOwnKey": "သင့် key"
+    "priceOwnKey": "သင့် key",
+    "audioResultTooLarge": "အသံရလဒ်သည် ဗလာဖြစ်နေသည် သို့မဟုတ် 128 MB ထက် ကျော်လွန်နေသည်။"
   },
   "pricing": {
     "plansForEveryWorkflow": "အလုပ်အကိုင်တိုင်းအတွက် အစီအစဉ်များ",
@@ -20580,7 +20583,8 @@
     "backToVideo": "ဗီဒီယိုသို့ ပြန်ရန်",
     "empty": "တုံ့ပြန်မှု မရှိသေးပါ။ ပထမဆုံး ဖြစ်ရန် ဗီဒီယို၏ Remix မီနူးကို ဖွင့်ပြီး React ကို ရွေးပါ။",
     "wasLive": "တိုက်ရိုက် ဖြစ်ခဲ့သည်",
-    "thisVideo": "ဤဗီဒီယို"
+    "thisVideo": "ဤဗီဒီယို",
+    "pageTitle": "{{title}} အပေါ် တုံ့ပြန်မှုများ | Riftn"
   },
   "connectGuide": {
     "title": "Riftn ကို သင့် AI အကူနှင့် ချိတ်ဆက်ပါ",

@@ -50,7 +50,8 @@
     "pageDescription": "Kalli kowane duet na wannan bidiyon a Riftn, ko ka naɗi naka gefe da gefe.",
     "empty": "Babu duet tukuna. Buɗe zaɓuɓɓukan bidiyon kuma zaɓi Remix → Duet don yin na farko.",
     "notFound": "Wannan bidiyon ba ya samuwa.",
-    "browseShorts": "Duba Shorts"
+    "browseShorts": "Duba Shorts",
+    "notFoundTitle": "Ba a sami bidiyon ba | Riftn"
   },
   "videoRemix": {
     "sound": "Yi amfani da wannan sauti",
@@ -3348,7 +3349,8 @@
       "dragPart": "Ja don motsa sashe {{n}}",
       "addPart": "Ƙara zuwa zare",
       "addPlaceholder": "Ƙara zuwa zarenka...",
-      "label": "Zare · sassa {{count}}"
+      "label": "Zare · sassa {{count}}",
+      "reorderHint": "Ja sassan, ko yi amfani da kibiyoyi, sannan ka adana."
     },
     "attachMedia": "Haɗa hoto, bidiyo ko sauti",
     "attachUnsupported": "Haɗa hoto, bidiyo ko fayil ɗin sauti.",
@@ -6657,7 +6659,8 @@
     "presetWhipPanName": "Whip Pan",
     "presetLevitateName": "Tashi sama",
     "presetVhsGlitchName": "VHS Glitch",
-    "priceOwnKey": "Maɓallinka"
+    "priceOwnKey": "Maɓallinka",
+    "audioResultTooLarge": "Sakamakon sautin babu komai ko ya wuce 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Shirye-shiryen kowane gudana na aiki",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Koma zuwa bidiyo",
     "empty": "Babu martani tukuna. Buɗe menu na Remix na bidiyon kuma zaɓi Martani don zama na farko.",
     "wasLive": "Ya kasance kai tsaye",
-    "thisVideo": "wannan bidiyon"
+    "thisVideo": "wannan bidiyon",
+    "pageTitle": "Martani ga {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Haɗa Riftn da mataimakinka na AI",

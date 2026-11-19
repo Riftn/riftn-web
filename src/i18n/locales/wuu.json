@@ -50,7 +50,8 @@
     "pageDescription": "勒 Riftn 上看此视频的所有合拍，或者并排录侬自家的。",
     "empty": "还呒没合拍。打开视频选项，选择 混剪 → 合拍，做第一个。",
     "notFound": "此视频勿可用。",
-    "browseShorts": "浏览短视频"
+    "browseShorts": "浏览短视频",
+    "notFoundTitle": "寻勿着视频 | Riftn"
   },
   "videoRemix": {
     "sound": "使用此声音",
@@ -3348,7 +3349,8 @@
       "dragPart": "拖动以移动第 {{n}} 段",
       "addPart": "添加到串帖",
       "addPlaceholder": "添加到侬的串帖...",
-      "label": "串帖 · {{count}} 段"
+      "label": "串帖 · {{count}} 段",
+      "reorderHint": "拖动各部分，或者用箭头，再保存。"
     },
     "attachMedia": "附上照片、视频或音频",
     "attachUnsupported": "请附上照片、视频或音频文件。",
@@ -6657,7 +6659,8 @@
     "libraryFavorites": "收藏",
     "libraryFavoriteAdd": "加入收藏",
     "libraryFavoriteRemove": "取消收藏",
-    "priceOwnKey": "侬的密钥"
+    "priceOwnKey": "侬的密钥",
+    "audioResultTooLarge": "音频结果是空个，或者超过 128 MB。"
   },
   "pricing": {
     "plansForEveryWorkflow": "適合每種流程的計畫",
@@ -6963,7 +6966,8 @@
     "dehubFee": "Riftn 费用（{{pct}}%）",
     "youGet": "侬得到",
     "holderGets": "持有人得到",
-    "offerNote": "持有人接受前，侬的 {{symbol}} 一直留勒侬钱包里。随时可以取消。"
+    "offerNote": "持有人接受前，侬的 {{symbol}} 一直留勒侬钱包里。随时可以取消。",
+    "list": "挂牌"
   },
   "usernames": {
     "seoDescription": "買賣 Riftn 用戶名，用 代币 交易。尋找短、數字或獨特的用戶名出售，或自行列表出售, 支付確認後，轉移即在鏈上完成。",
@@ -20216,7 +20220,8 @@
     "d1cbdb512587": "选一个导出个表格样式 JSON 文件",
     "5e36accaa2bd": "选一个导出个表格样式文件",
     "8b3b888f06fe": "选一个支持个表格样式文件",
-    "6e71ae3669b1": "保存个输出勿可用"
+    "6e71ae3669b1": "保存个输出勿可用",
+    "2c7bc98141ec": "试试看：/admin <侬个问题>"
   },
   "articles": {
     "cardLabel": "文獻 · {{count}} 分鐘閱讀",
@@ -20561,7 +20566,8 @@
     "backToVideo": "回到视频",
     "empty": "还没有反应。打开视频个混剪菜单，选“反应”做第一个。",
     "wasLive": "直播过",
-    "thisVideo": "迭个视频"
+    "thisVideo": "迭个视频",
+    "pageTitle": "对《{{title}}》个反应 | Riftn"
   },
   "connectGuide": {
     "title": "将 Riftn 连接到你的 AI 助手",

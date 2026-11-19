@@ -50,7 +50,8 @@
     "pageDescription": "Li Riftn her duetên vê vîdyoyê temaşe bike, an ya xwe li kêlekê tomar bike.",
     "empty": "Hêj duet tune. Vebijarkên vîdyoyê veke û Remix → Duet hilbijêre da ku yê yekem çêkî.",
     "notFound": "Ev vîdyo ne berdest e.",
-    "browseShorts": "Li kurte vîdyoyan bigere"
+    "browseShorts": "Li kurte vîdyoyan bigere",
+    "notFoundTitle": "Vîdyo nehat dîtin | Riftn"
   },
   "videoRemix": {
     "green-screen": "Ekrana kesk",
@@ -658,7 +659,8 @@
       "publicChat": "sohbet, sohbeta giştî, odeya sohbetê, lobî, axaftin, sohbeta civakê",
       "planned": "plankirî, bername, şandiyên plankirî, rêz, paşê",
       "liveStudio": "zindî biweşîne, weşan, weşandin, OBS, overlay, hişyarî, wîdget",
-      "launchpad": "tokenekê dest pê bike, coinekê çêke, coin çêke, meme coin, bonding curve, tokenîze bike"
+      "launchpad": "tokenekê dest pê bike, coinekê çêke, coin çêke, meme coin, bonding curve, tokenîze bike",
+      "getTheApp": "sepanê daxe, Android, iPhone, sepana mobîl, saz bike, APK, sepana sermasê, li ser komputerê saz bike, Windows, Mac"
     }
   },
   "feed": {
@@ -3347,7 +3349,8 @@
       "dragPart": "Bikişîne da ku beşa {{n}} bilivînî",
       "addPart": "Li zincîrê zêde bike",
       "addPlaceholder": "Li zincîra xwe zêde bike...",
-      "label": "Zincîr · {{count}} beş"
+      "label": "Zincîr · {{count}} beş",
+      "reorderHint": "Beşan bikişîne, an tîran bi kar bîne, paşê tomar bike."
     },
     "attachMedia": "Wêne, vîdyo an deng pêve bike",
     "attachUnsupported": "Wêneyek, vîdyoyek an pelekî dengî pêve bike.",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Vegere vîdyoyê",
     "empty": "Hêj bertek tune. Menuya Remix a vîdyoyê veke û Bertek hilbijêre da ku yê yekem bî.",
     "wasLive": "Zindî bû",
-    "thisVideo": "ev vîdyo"
+    "thisVideo": "ev vîdyo",
+    "pageTitle": "Bertekên li ser {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Riftn bi alîkarê xwe yê AI ve girê bide",

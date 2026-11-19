@@ -50,7 +50,8 @@
     "pageDescription": "Riftn પર આ વીડિયોના બધા ડ્યુએટ જુઓ, અથવા બાજુમાં તમારો પોતાનો રેકોર્ડ કરો.",
     "empty": "હજી સુધી કોઈ ડ્યુએટ નથી. પહેલો બનાવવા માટે વીડિયોના વિકલ્પો ખોલો અને રીમિક્સ → ડ્યુએટ પસંદ કરો.",
     "notFound": "આ વીડિયો ઉપલબ્ધ નથી.",
-    "browseShorts": "શોર્ટ્સ જુઓ"
+    "browseShorts": "શોર્ટ્સ જુઓ",
+    "notFoundTitle": "વિડિઓ મળ્યો નથી | Riftn"
   },
   "videoRemix": {
     "sound": "આ સાઉન્ડનો ઉપયોગ કરો",
@@ -3348,7 +3349,8 @@
       "dragPart": "ભાગ {{n}} ખસેડવા માટે ખેંચો",
       "addPart": "થ્રેડમાં ઉમેરો",
       "addPlaceholder": "તમારા થ્રેડમાં ઉમેરો...",
-      "label": "થ્રેડ · {{count}} ભાગ"
+      "label": "થ્રેડ · {{count}} ભાગ",
+      "reorderHint": "ભાગોને ખેંચો અથવા તીરનો ઉપયોગ કરો, પછી સાચવો."
     },
     "attachMedia": "ફોટો, વીડિયો કે ઓડિયો જોડો",
     "attachUnsupported": "ફોટો, વીડિયો કે ઓડિયો ફાઇલ જોડો.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "મનપસંદમાં ઉમેરો",
     "libraryFavoriteRemove": "મનપસંદમાંથી દૂર કરો",
     "audioTaskDialoguePlaceholder": "એલિસ: આપણે જવું જોઈએ.\nબોબ: [હસે છે] પહેલા તમે.",
-    "priceOwnKey": "તમારી કી"
+    "priceOwnKey": "તમારી કી",
+    "audioResultTooLarge": "ઑડિઓ પરિણામ ખાલી છે અથવા 128 MB કરતાં વધુ છે."
   },
   "pricing": {
     "plansForEveryWorkflow": "દરેક વર્કફ્લો માટેની યોજનાઓ",
@@ -20563,7 +20566,8 @@
     "backToVideo": "વીડિયો પર પાછા",
     "empty": "હજી કોઈ પ્રતિક્રિયા નથી. પહેલા બનવા વીડિયોનું રીમિક્સ મેનૂ ખોલો અને પ્રતિક્રિયા પસંદ કરો.",
     "wasLive": "લાઇવ હતું",
-    "thisVideo": "આ વીડિયો"
+    "thisVideo": "આ વીડિયો",
+    "pageTitle": "{{title}} પર પ્રતિક્રિયાઓ | Riftn"
   },
   "connectGuide": {
     "title": "Riftn ને તમારા AI સહાયક સાથે જોડો",

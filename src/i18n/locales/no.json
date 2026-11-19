@@ -50,7 +50,8 @@
     "empty": "Ingen duetter ennå. Åpne videoens alternativer og velg Remiks → Duett for å lage den første.",
     "video": "Video",
     "notFound": "Denne videoen er ikke tilgjengelig.",
-    "browseShorts": "Bla i Shorts"
+    "browseShorts": "Bla i Shorts",
+    "notFoundTitle": "Fant ikke videoen | Riftn"
   },
   "videoRemix": {
     "sound": "Bruk denne lyden",
@@ -3348,7 +3349,8 @@
       "dragPart": "Dra for å flytte del {{n}}",
       "addPart": "Legg til i tråden",
       "addPlaceholder": "Legg til i tråden din...",
-      "label": "Tråd · {{count}} deler"
+      "label": "Tråd · {{count}} deler",
+      "reorderHint": "Dra delene, eller bruk pilene, og lagre deretter."
     },
     "attachMedia": "Legg ved et bilde, en video eller lyd",
     "attachUnsupported": "Legg ved et bilde, en video eller en lydfil.",
@@ -6647,7 +6649,8 @@
     "libraryFavorites": "Favoritter",
     "libraryFavoriteAdd": "Legg til i favoritter",
     "libraryFavoriteRemove": "Fjern fra favoritter",
-    "priceOwnKey": "Din nøkkel"
+    "priceOwnKey": "Din nøkkel",
+    "audioResultTooLarge": "Lydresultatet er tomt eller større enn 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planer for hver arbeidsflyt",
@@ -6953,7 +6956,8 @@
     "buyHere": "Kjøp dem her",
     "openSeaNote": "Lagt ut på OpenSea. Du betaler selgeren direkte på Seaport; Riftn legger ikke til noe gebyr.",
     "viewOnOpenSea": "Se på OpenSea",
-    "lasts": "Varer"
+    "lasts": "Varer",
+    "list": "Legg ut"
   },
   "usernames": {
     "seoTitle": "Raw",
@@ -20552,7 +20556,8 @@
     "backToVideo": "Tilbake til videoen",
     "empty": "Ingen reaksjoner ennå. Åpne videoens Remiks-meny og velg Reager for å bli den første.",
     "wasLive": "Var direkte",
-    "thisVideo": "denne videoen"
+    "thisVideo": "denne videoen",
+    "pageTitle": "Reaksjoner på {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Koble Riftn til AI-assistenten din",

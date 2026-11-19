@@ -50,7 +50,8 @@
     "pageDescription": "Riftn تے ایں ویڈیو دا ہر ڈوئیٹ ݙیکھو، یا نال نال اپݨا ریکارڈ کرو۔",
     "empty": "اڄݨ تئیں کوئی ڈوئیٹ کائنی۔ ویڈیو دے آپشن کھولو تے پہلا بݨاوݨ کیتے ریمکس ← ڈوئیٹ چُݨو۔",
     "notFound": "ایہ ویڈیو دستیاب کائنی۔",
-    "browseShorts": "شارٹس ݙیکھو"
+    "browseShorts": "شارٹس ݙیکھو",
+    "notFoundTitle": "ویڈیو کائنی لبھی | Riftn"
   },
   "videoRemix": {
     "sound": "ایہہ آواز استعمال کرو",
@@ -3348,7 +3349,8 @@
       "dragPart": "حصہ {{n}} ہلاوݨ کیتے گھسیٹو",
       "addPart": "تھریڈ وچ شامل کرو",
       "addPlaceholder": "اپݨے تھریڈ وچ شامل کرو...",
-      "label": "تھریڈ · {{count}} حصے"
+      "label": "تھریڈ · {{count}} حصے",
+      "reorderHint": "حصیاں کوں گھسیٹو، یا تیر ورتو، ول محفوظ کرو۔"
     },
     "attachMedia": "فوٹو، ویڈیو یا آڈیو نال لاؤ",
     "attachUnsupported": "فوٹو، ویڈیو یا آڈیو فائل نال لاؤ۔",
@@ -6656,7 +6658,8 @@
     "placeholderVideo": "جیہڑا شاٹ چاہندے ہو اوہ بیان کرو",
     "userCreations": "صارفین دیاں تخلیقاں",
     "aiGenerationCommunityAlt": "Riftn کمیونٹی دی AI جنریشن",
-    "priceOwnKey": "تہاݙی کی"
+    "priceOwnKey": "تہاݙی کی",
+    "audioResultTooLarge": "آڈیو نتیجہ خالی ہے یا 128 MB توں ودھ ہے۔"
   },
   "pricing": {
     "plansForEveryWorkflow": "ہر ورک فلو لئی پلان",
@@ -6962,7 +6965,8 @@
     "days": "{{n}} ݙینہہ",
     "dehubFee": "Riftn فیس ({{pct}}%)",
     "sendOffer": "آفر بھیجو",
-    "spotlight": "سپاٹ لائٹ"
+    "spotlight": "سپاٹ لائٹ",
+    "list": "وکری کیتے رکھو"
   },
   "usernames": {
     "seoDescription": "Riftn یوزراں نال ٹوکن دے وچ خرید و فروخت کرو۔ شارٹ، عددی تے اوریجنل ہینڈل تلاش کرو جو بِک رہے ہون، یا اپنے خود دے درج کرو, جدوں ادائیگی کلیئر ہووے تاں ٹرانسفر آن چین ہوندا اے۔",
@@ -20558,7 +20562,8 @@
     "backToVideo": "ویڈیو تے واپس",
     "empty": "ہݨ تئیں کوئی ری ایکشن کائنی۔ ویڈیو دا Remix مینیو کھولو تے پہلا بݨݨ کیتے React چݨو۔",
     "wasLive": "لائیو ہا",
-    "thisVideo": "ایہ ویڈیو"
+    "thisVideo": "ایہ ویڈیو",
+    "pageTitle": "{{title}} تے ردعمل | Riftn"
   },
   "connectGuide": {
     "title": "Riftn کو اپنے AI اسسٹنٹ سے جوڑیں",

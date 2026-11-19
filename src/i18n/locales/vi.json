@@ -50,7 +50,8 @@
     "empty": "Chưa có duet nào. Mở tùy chọn của video và chọn Remix → Duet để tạo duet đầu tiên.",
     "video": "Video",
     "notFound": "Video này không khả dụng.",
-    "browseShorts": "Xem Shorts"
+    "browseShorts": "Xem Shorts",
+    "notFoundTitle": "Không tìm thấy video | Riftn"
   },
   "videoRemix": {
     "sound": "Sử dụng âm thanh này",
@@ -3358,7 +3359,8 @@
       "dragPart": "Kéo để di chuyển phần {{n}}",
       "addPart": "Thêm vào chuỗi",
       "addPlaceholder": "Thêm vào chuỗi của bạn...",
-      "label": "Chuỗi · {{count}} phần"
+      "label": "Chuỗi · {{count}} phần",
+      "reorderHint": "Kéo các phần hoặc dùng mũi tên, rồi lưu lại."
     },
     "attachMedia": "Đính kèm ảnh, video hoặc âm thanh",
     "attachUnsupported": "Hãy đính kèm ảnh, video hoặc tệp âm thanh.",
@@ -6667,7 +6669,8 @@
     "libraryFavoriteAdd": "Thêm vào yêu thích",
     "libraryFavoriteRemove": "Xóa khỏi yêu thích",
     "audioTaskDialoguePlaceholder": "Alice: Chúng ta nên đi thôi.\nBob: [cười] Mời bạn đi trước.",
-    "priceOwnKey": "Khóa của bạn"
+    "priceOwnKey": "Khóa của bạn",
+    "audioResultTooLarge": "Kết quả âm thanh trống hoặc vượt quá 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Kế hoạch cho mọi quy trình làm việc",
@@ -20658,7 +20661,8 @@
     "backToVideo": "Quay lại video",
     "empty": "Chưa có video react nào. Mở menu Remix của video và chọn React để là người đầu tiên.",
     "wasLive": "Đã phát trực tiếp",
-    "thisVideo": "video này"
+    "thisVideo": "video này",
+    "pageTitle": "Cảm xúc về {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Kết nối Riftn với trợ lý AI của bạn",

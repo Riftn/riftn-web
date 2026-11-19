@@ -50,7 +50,8 @@
     "empty": "No kei Duett. Mach d Optione vom Video uf und wähl Remix → Duett, zum s Erschte mache.",
     "video": "Video",
     "notFound": "Das Video isch nöd verfüegbar.",
-    "browseShorts": "Shorts dürestöbere"
+    "browseShorts": "Shorts dürestöbere",
+    "notFoundTitle": "Video nöd gfunde | Riftn"
   },
   "videoRemix": {
     "sound": "Benutz dä Sound",
@@ -3378,7 +3379,8 @@
       "dragPart": "Zieh zum Teil {{n}} verschiebe",
       "addPart": "Zum Thread hinzuefüege",
       "addPlaceholder": "Zu dim Thread hinzuefüege...",
-      "label": "Thread · {{count}} Teil"
+      "label": "Thread · {{count}} Teil",
+      "reorderHint": "Zieh d Teil oder bruuch d Pfiil, und speicher dänn."
     },
     "attachMedia": "Foto, Video oder Audio aahänke",
     "attachUnsupported": "Hänk es Foto, es Video oder e Audiodatei aa.",
@@ -6677,7 +6679,8 @@
     "audioTaskVoiceDesignDesc": "Erfind e Stimm us ere Beschriibig",
     "clearLibraryAria_one": "Di fertigi Generierig us de Bibliothek entferne",
     "presetMerchMockupName": "Merch-Mockup",
-    "priceOwnKey": "Din Schlüssel"
+    "priceOwnKey": "Din Schlüssel",
+    "audioResultTooLarge": "S Audio-Resultat isch leer oder grösser als 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Pläne für jeden Workflow",
@@ -20583,7 +20586,8 @@
     "backToVideo": "Zrugg zum Video",
     "empty": "No kei Reaktione. Öffne s Remix-Menü vom Video und wähl Reagiere, zum de Erscht z sii.",
     "wasLive": "Isch live gsi",
-    "thisVideo": "das Video"
+    "thisVideo": "das Video",
+    "pageTitle": "Reaktione uf {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Verbinde Riftn mit deinem KI-Assistenten",

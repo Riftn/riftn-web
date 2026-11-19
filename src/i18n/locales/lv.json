@@ -50,7 +50,8 @@
     "empty": "Vēl nav duetu. Atveriet video opcijas un izvēlieties Remikss → Duets, lai izveidotu pirmo.",
     "video": "Video",
     "notFound": "Šis video nav pieejams.",
-    "browseShorts": "Pārlūkot Shorts"
+    "browseShorts": "Pārlūkot Shorts",
+    "notFoundTitle": "Video nav atrasts | Riftn"
   },
   "videoRemix": {
     "sound": "Izmantot šo skaņu",
@@ -3348,7 +3349,8 @@
       "dragPart": "Velciet, lai pārvietotu {{n}}. daļu",
       "addPart": "Pievienot pavedienam",
       "addPlaceholder": "Pievienot savam pavedienam...",
-      "label": "Pavediens · {{count}} daļas"
+      "label": "Pavediens · {{count}} daļas",
+      "reorderHint": "Velciet daļas vai izmantojiet bultiņas, pēc tam saglabājiet."
     },
     "attachMedia": "Pievienot foto, video vai audio",
     "attachUnsupported": "Pievienojiet foto, video vai audio failu.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Pievienot izlasei",
     "libraryFavoriteRemove": "Noņemt no izlases",
     "audioTaskDialoguePlaceholder": "Alise: Mums jāiet.\nBobs: [smejas] Pēc jums.",
-    "priceOwnKey": "Jūsu atslēga"
+    "priceOwnKey": "Jūsu atslēga",
+    "audioResultTooLarge": "Audio rezultāts ir tukšs vai pārsniedz 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plāni katrai darba plūsmai",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Atpakaļ uz video",
     "empty": "Vēl nav reakciju. Atveriet video izvēlni Remikss un izvēlieties Reaģēt, lai būtu pirmais.",
     "wasLive": "Bija tiešraidē",
-    "thisVideo": "šo video"
+    "thisVideo": "šo video",
+    "pageTitle": "Reakcijas uz {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Savienojiet Riftn ar savu MI asistentu",

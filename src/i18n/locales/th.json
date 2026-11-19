@@ -50,7 +50,8 @@
     "pageDescription": "ดูดูเอ็ตทั้งหมดของวิดีโอนี้บน Riftn หรือบันทึกของคุณเองแบบเคียงข้างกัน",
     "empty": "ยังไม่มีดูเอ็ต เปิดตัวเลือกของวิดีโอแล้วเลือก รีมิกซ์ → ดูเอ็ต เพื่อเป็นคนแรก",
     "notFound": "วิดีโอนี้ไม่พร้อมใช้งาน",
-    "browseShorts": "เรียกดู Shorts"
+    "browseShorts": "เรียกดู Shorts",
+    "notFoundTitle": "ไม่พบวิดีโอ | Riftn"
   },
   "videoRemix": {
     "sound": "ใช้เสียงนี้",
@@ -3376,7 +3377,8 @@
       "dragPart": "ลากเพื่อย้ายส่วนที่ {{n}}",
       "addPart": "เพิ่มในเธรด",
       "addPlaceholder": "เพิ่มในเธรดของคุณ...",
-      "label": "เธรด · {{count}} ส่วน"
+      "label": "เธรด · {{count}} ส่วน",
+      "reorderHint": "ลากส่วนต่างๆ หรือใช้ลูกศร แล้วบันทึก"
     },
     "attachMedia": "แนบรูปภาพ วิดีโอ หรือเสียง",
     "attachUnsupported": "แนบรูปภาพ วิดีโอ หรือไฟล์เสียง",
@@ -6685,7 +6687,8 @@
     "imageUnit": "ภาพ",
     "audioTaskDialoguePlaceholder": "อลิซ: เราควรไปกันแล้ว\nบ็อบ: [หัวเราะ] เชิญคุณก่อนเลย",
     "srHeading": "Riftn Creator Studio",
-    "priceOwnKey": "คีย์ของคุณ"
+    "priceOwnKey": "คีย์ของคุณ",
+    "audioResultTooLarge": "ผลลัพธ์เสียงว่างเปล่าหรือเกิน 128 MB"
   },
   "pricing": {
     "plansForEveryWorkflow": "แผนสำหรับทุกเวิร์กโฟลว์",
@@ -6991,7 +6994,8 @@
     "alertUnder": "แจ้งฉันเมื่อมีการลงขายในราคาเท่ากับหรือต่ำกว่า ({{symbol}}, ไม่บังคับ)",
     "lasts": "ระยะเวลา",
     "dehubFee": "ค่าธรรมเนียม Riftn ({{pct}}%)",
-    "holderGets": "ผู้ถือได้รับ"
+    "holderGets": "ผู้ถือได้รับ",
+    "list": "ลงขาย"
   },
   "usernames": {
     "seoTitle": "ชื่อผู้ใช้ Marketplace | Riftn",
@@ -20594,7 +20598,8 @@
     "backToVideo": "กลับไปที่วิดีโอ",
     "empty": "ยังไม่มีรีแอคชัน เปิดเมนูรีมิกซ์ของวิดีโอแล้วเลือกรีแอคต์เพื่อเป็นคนแรก",
     "wasLive": "เคยไลฟ์",
-    "thisVideo": "วิดีโอนี้"
+    "thisVideo": "วิดีโอนี้",
+    "pageTitle": "รีแอคชันต่อ {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "เชื่อมต่อ Riftn กับผู้ช่วย AI ของคุณ",

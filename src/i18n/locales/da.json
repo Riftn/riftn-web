@@ -50,7 +50,8 @@
     "empty": "Ingen duetter endnu. Åbn videoens indstillinger og vælg Remix → Duet for at lave den første.",
     "video": "Video",
     "notFound": "Denne video er ikke tilgængelig.",
-    "browseShorts": "Gennemse Shorts"
+    "browseShorts": "Gennemse Shorts",
+    "notFoundTitle": "Videoen blev ikke fundet | Riftn"
   },
   "videoRemix": {
     "sound": "Brug denne lyd",
@@ -3352,7 +3353,8 @@
       "dragPart": "Træk for at flytte del {{n}}",
       "addPart": "Tilføj til tråd",
       "addPlaceholder": "Tilføj til din tråd...",
-      "label": "Tråd · {{count}} dele"
+      "label": "Tråd · {{count}} dele",
+      "reorderHint": "Træk delene, eller brug pilene, og gem derefter."
     },
     "attachMedia": "Vedhæft et billede, en video eller lyd",
     "attachUnsupported": "Vedhæft et billede, en video eller en lydfil.",
@@ -6651,7 +6653,8 @@
     "libraryFavoriteAdd": "Føj til favoritter",
     "libraryFavoriteRemove": "Fjern fra favoritter",
     "audioTaskDialoguePlaceholder": "Alice: Vi bør gå.\nBob: [griner] Efter dig.",
-    "priceOwnKey": "Din nøgle"
+    "priceOwnKey": "Din nøgle",
+    "audioResultTooLarge": "Lydresultatet er tomt eller over 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planer for hvert arbejdsflow",
@@ -20557,7 +20560,8 @@
     "empty": "Ingen reaktioner endnu. Åbn videoens Remix-menu, og vælg Reager for at være den første.",
     "liveNow": "Live",
     "wasLive": "Var live",
-    "thisVideo": "denne video"
+    "thisVideo": "denne video",
+    "pageTitle": "Reaktioner på {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Forbind Riftn med din AI-assistent",

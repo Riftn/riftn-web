@@ -50,7 +50,8 @@
     "pageDescription": "Riftn تي هن وڊيو جا سڀ ڊوئيٽ ڏسو، يا ان جي ڀرسان پنهنجو رڪارڊ ڪريو.",
     "empty": "اڃا ڪو ڊوئيٽ ناهي. وڊيو جا آپشن کوليو ۽ پهريون ٺاهڻ لاءِ ريمڪس ← ڊوئيٽ چونڊيو.",
     "notFound": "هي وڊيو دستياب ناهي.",
-    "browseShorts": "شارٽس ڏسو"
+    "browseShorts": "شارٽس ڏسو",
+    "notFoundTitle": "وڊيو نه ملي | Riftn"
   },
   "videoRemix": {
     "sound": "هي آواز استعمال ڪريو",
@@ -3348,7 +3349,8 @@
       "dragPart": "حصو {{n}} منتقل ڪرڻ لاءِ ڇڪيو",
       "addPart": "ٿريڊ ۾ شامل ڪريو",
       "addPlaceholder": "پنهنجي ٿريڊ ۾ شامل ڪريو...",
-      "label": "ٿريڊ · {{count}} حصا"
+      "label": "ٿريڊ · {{count}} حصا",
+      "reorderHint": "حصن کي ڇڪيو، يا تيرن کي استعمال ڪريو، پوءِ محفوظ ڪريو."
     },
     "attachMedia": "فوٽو، وڊيو يا آڊيو ڳنڍيو",
     "attachUnsupported": "فوٽو، وڊيو يا آڊيو فائل ڳنڍيو.",
@@ -6657,7 +6659,8 @@
     "dragToOrbit": "گهمائڻ لاءِ ڇڪيو · زوم لاءِ اسڪرول ڪريو",
     "presetStylisedCollectibleName": "اسٽائلائيز ڪليڪٽيبل",
     "featureConnectedCopy": "ڪنهن اوزار مان اسسٽنٽ، ايڊيٽر، ٽي وي، ايجنٽن يا سيٽنگن ڏانهن وڃو.",
-    "priceOwnKey": "توهان جي ڪي"
+    "priceOwnKey": "توهان جي ڪي",
+    "audioResultTooLarge": "آڊيو نتيجو خالي آهي يا 128 MB کان وڌيڪ آهي."
   },
   "pricing": {
     "plansForEveryWorkflow": "هر ڪم فلو لاءِ منصوبا",
@@ -6962,7 +6965,9 @@
     "youGet": "توهان کي ملندو",
     "holderGets": "هولڊر کي ملندو",
     "sendOffer": "آفر موڪليو",
-    "spotlight": "اسپاٽ لائٽ"
+    "spotlight": "اسپاٽ لائٽ",
+    "subtitle": "BNB، Base، Ethereum ۽ Robinhood تي خريد ڪريو، وڪرو ڪريو ۽ آڇ ڏيو",
+    "list": "وڪري لاءِ رکو"
   },
   "usernames": {
     "seoTitle": "استعمال ڪندڙ جو نالو مارڪيٽ جي جڳھ | Riftn",
@@ -20561,7 +20566,8 @@
     "backToVideo": "وڊيو ڏانهن واپس",
     "empty": "اڃا ڪو ردعمل ناهي. وڊيو جو ريمڪس مينيو کوليو ۽ پهريون ٿيڻ لاءِ ردعمل چونڊيو.",
     "wasLive": "لائيو هو",
-    "thisVideo": "هي وڊيو"
+    "thisVideo": "هي وڊيو",
+    "pageTitle": "{{title}} تي ردعمل | Riftn"
   },
   "connectGuide": {
     "title": "Riftn کي پنهنجي AI مددگار سان ڳنڍيو",

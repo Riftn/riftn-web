@@ -50,7 +50,8 @@
     "empty": "Ei vielä duettoja. Avaa videon valinnat ja valitse Remix → Duetto tehdäksesi ensimmäisen.",
     "video": "Video",
     "notFound": "Tämä video ei ole saatavilla.",
-    "browseShorts": "Selaa Shortseja"
+    "browseShorts": "Selaa Shortseja",
+    "notFoundTitle": "Videota ei löytynyt | Riftn"
   },
   "videoRemix": {
     "sound": "Käytä tätä ääntä",
@@ -3348,7 +3349,8 @@
       "dragPart": "Siirrä osaa {{n}} vetämällä",
       "addPart": "Lisää ketjuun",
       "addPlaceholder": "Lisää ketjuusi...",
-      "label": "Ketju · {{count}} osaa"
+      "label": "Ketju · {{count}} osaa",
+      "reorderHint": "Vedä osia tai käytä nuolia ja tallenna sitten."
     },
     "attachMedia": "Liitä kuva, video tai ääni",
     "attachUnsupported": "Liitä kuva, video tai äänitiedosto.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Lisää suosikkeihin",
     "libraryFavoriteRemove": "Poista suosikeista",
     "audioTaskDialoguePlaceholder": "Liisa: Meidän pitäisi lähteä.\nPekka: [nauraa] Mene sinä ensin.",
-    "priceOwnKey": "Oma avain"
+    "priceOwnKey": "Oma avain",
+    "audioResultTooLarge": "Äänitulos on tyhjä tai ylittää 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Suunnitelmat jokaiselle työnkululle",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Takaisin videoon",
     "empty": "Ei vielä reaktioita. Avaa videon Remix-valikko ja valitse Reagoi ollaksesi ensimmäinen.",
     "wasLive": "Oli suorana",
-    "thisVideo": "tämä video"
+    "thisVideo": "tämä video",
+    "pageTitle": "Reaktiot: {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Yhdistä Riftn tekoälyavustajaasi",
