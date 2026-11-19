@@ -91,8 +91,18 @@ export function watchFrozenPicture(video: HTMLVideoElement, component: string, p
   };
   handle = v.requestVideoFrameCallback(onFrame);
   const reset = () => { lastMediaTime = -1; };
+  // Browsers stop painting frames for a player that is off screen or covered
+  // up (feed scrolled away, sound playing on in the background). That is not
+  // a freeze, so only judge a player that is actually showing.
+  let onScreen = typeof IntersectionObserver === 'undefined';
+  const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
+    const entry = entries[entries.length - 1];
+    onScreen = !!entry && entry.isIntersecting && entry.intersectionRatio >= 0.5;
+    reset();
+  }, { threshold: [0, 0.5] });
+  observer?.observe(video);
   const check = () => {
-    if (video.paused || video.seeking || video.ended || video.readyState < 3) return;
+    if (!onScreen || video.paused || video.seeking || video.ended || video.readyState < 3) { if (!onScreen) reset(); return; }
     if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
     if (typeof document !== 'undefined' && (document as Document & { pictureInPictureElement?: Element | null }).pictureInPictureElement === video) return;
     if (lastMediaTime < 0) { lastMediaTime = video.currentTime; return; }
@@ -113,6 +123,7 @@ export function watchFrozenPicture(video: HTMLVideoElement, component: string, p
   video.addEventListener('emptied', reset);
   return () => {
     stopped = true;
+    observer?.disconnect();
     v.cancelVideoFrameCallback?.(handle);
     video.removeEventListener('timeupdate', check);
     video.removeEventListener('seeked', reset);
