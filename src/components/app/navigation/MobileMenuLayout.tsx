@@ -210,7 +210,9 @@ export function MenuTabs({ groups, activeTab, onTabChange, className }: MenuTabs
     const measure = () => {
       const button = buttonRefs.current[index];
       if (!button) return;
-      setRect({ x: button.offsetLeft, y: button.offsetTop, width: button.offsetWidth, height: button.offsetHeight, ready: true });
+      const next = { x: button.offsetLeft, y: button.offsetTop, width: button.offsetWidth, height: button.offsetHeight, ready: true };
+      // Same rect, same state: a fresh object every pass would loop renders.
+      setRect((prev) => (prev.ready && prev.x === next.x && prev.y === next.y && prev.width === next.width && prev.height === next.height ? prev : next));
     };
     measure();
     const row = rowRef.current;
@@ -218,7 +220,7 @@ export function MenuTabs({ groups, activeTab, onTabChange, className }: MenuTabs
     const ro = new ResizeObserver(measure);
     ro.observe(row);
     return () => ro.disconnect();
-  }, [index, groups.length, t]);
+  }, [index, groups]);
 
   return (
     <div
