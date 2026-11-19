@@ -166,3 +166,19 @@ describe('appHref', () => {
     expect(appHref('https://riftn.com/r/ABC?app=1')).toBe('https://riftn.com/r/ABC?app=1');
   });
 });
+
+describe('fetchers that do not look like a browser get the prerendered HTML', () => {
+  const FETCHERS: Record<string, string> = {
+    'Riftn link preview': 'DeHubLinkPreview/1.0',
+    'unknown previewer': 'SomeChatApp-Unfurl/3.2',
+    'Apple CFNetwork': 'MyApp/1 CFNetwork/1490.0.4 Darwin/23.2.0',
+  };
+  for (const [name, ua] of Object.entries(FETCHERS)) {
+    it(`prerenders for ${name}`, () => {
+      expect(isCrawlerUa(ua)).toBe(true);
+    });
+  }
+  it('still serves the app when there is no user agent at all', () => {
+    expect(isCrawlerUa('')).toBe(false);
+  });
+});

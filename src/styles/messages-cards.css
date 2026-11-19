@@ -52,7 +52,8 @@ html[data-theme='osaka'] [data-msg-cards] { --mc-accent: #ff6fb5; }
 }
 [data-msg-cards] [data-msg-cards-tab] svg { width: 14px; height: 14px; }
 @media (hover: hover) { [data-msg-cards] [data-msg-cards-tab]:hover { color: var(--mc-ink); } }
-[data-msg-cards] [data-msg-cards-tab][aria-selected='true'] { color: var(--mc-ink); background: var(--mc-soft); }
+/* Selected: the ink and the Beam underline only, no box behind it. */
+  [data-msg-cards] [data-msg-cards-tab][aria-selected='true'] { color: var(--mc-ink); background: transparent; }
 [data-msg-cards] [data-msg-cards-tab][aria-selected='true']::after {
   content: '';
   position: absolute;
