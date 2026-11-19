@@ -38,6 +38,7 @@ import '@/styles/messages-cards.css';
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { collapseChat, cameFromPanel } from '@/lib/chat-expand';
 import { PublicChat, DirectMessageChat, NewConversationModal, NewMessageSelector } from '@/components/app/chat';
 import { NewMessageDrawer, type NewMessageDrawerHandle } from '@/components/app/chat/NewMessageDrawer';
 import { flushSync } from 'react-dom';
@@ -1006,6 +1007,18 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // '?chat=1' since chatOpen was still true — undoing the back nav and
   // forcing a second tap. Leave it true and let that effect reset it once
   // the URL actually changes.
+  // Opened out of the side panel: Esc folds the page back into it.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented || !cameFromPanel()) return;
+      if (document.querySelector('[role="dialog"],[data-radix-popper-content-wrapper]')) return;
+      collapseChat();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fullscreen]);
+
   const closeChat = useCallback(() => {
     if (chatEntryRef.current) {
       navigate(-1);
@@ -1108,8 +1121,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   // If Public Chat is open, show full-screen chat
   const publicChatPane = fullscreen && showPublicChat ? (
-    <div className="h-full overflow-hidden pt-1">
-      <PublicChat onBack={closeChat} />
+    <div data-chat-expand-target className="h-full overflow-hidden pt-1">
+      <PublicChat onBack={() => { if (!collapseChat()) closeChat(); }} />
     </div>
   ) : null;
   if (showPublicChat && !fullscreen) {

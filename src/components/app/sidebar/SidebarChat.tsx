@@ -39,6 +39,7 @@ import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import { preloadRoute } from '@/lib/route-preload';
+import { expandChat } from '@/lib/chat-expand';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppState } from '@/components/app/AppState';
 import { VoiceRecorder } from '@/components/app/chat/VoiceRecorder';
@@ -827,7 +828,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                   data-chat-popout
                   aria-label={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
                   title={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
-                  onClick={() => { window.open('/chat?chat=public', 'riftn-global-chat', 'popup,width=520,height=780'); }}
+                  onClick={(e) => { expandChat((e.currentTarget as HTMLElement).closest('[data-side-panel]')); }}
                   className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
                 >
                   <OpenExternally className="h-4 w-4" />
