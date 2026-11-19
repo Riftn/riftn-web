@@ -703,6 +703,8 @@
     "feedTogglesCleared": "Syötteen suodattimet nollattu",
     "defaultProfileTab": "Profiilin oletusvälilehti",
     "defaultProfileTabDesc": "Valitse, minkä välilehden kävijät näkevät ensin profiilissasi",
+    "defaultProfileView": "Profiilin julkaisujen asettelu",
+    "defaultProfileViewDesc": "Näytä julkaisusi ruudukkona tai listana, kun joku avaa profiilisi",
     "public": "Julkinen",
     "publicDesc": "Kuka tahansa voi nähdä julkaisusi",
     "private": "Yksityinen",

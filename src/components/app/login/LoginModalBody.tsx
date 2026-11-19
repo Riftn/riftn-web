@@ -34,6 +34,7 @@ import { LoginBodySkeleton } from './LoginBodySkeleton';
 import { type LoginStep, isInlineLoginStep } from './steps';
 import type { DiscoveredWallet, WalletId } from './LoginWalletsStep';
 import { createLogger } from '@/lib/logger';
+import { suggestEmailFix } from '@/lib/email-typo';
 import { toast } from 'sonner';
 import { PROFILE_MOVED_EVENT, WALLET_SIGNUP_BLOCKED_EVENT } from '@/lib/api/dehub/auth';
 
@@ -174,6 +175,10 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
   const [email, setEmail] = useSurfaceDraft("src/components/app/login/LoginModalBody.tsx:email", '');
   const [emailCode, setEmailCode] = useState('');
   const [emailError, setEmailError] = useState('');
+  // "Did you mean name@gmail.com?" for a misspelled provider. Shown once per
+  // typed address; pressing Continue again sends to it as typed.
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+  const emailTypoShownForRef = useRef<string | null>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const [phone, setPhone] = useSurfaceDraft("src/components/app/login/LoginModalBody.tsx:phone", '');
   const [phoneCode, setPhoneCode] = useState('');
@@ -356,6 +361,15 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
       emailInputRef.current?.focus();
       return;
     }
+
+    const typed = email.trim();
+    const fix = suggestEmailFix(typed);
+    if (fix && emailTypoShownForRef.current !== typed) {
+      emailTypoShownForRef.current = typed;
+      setEmailSuggestion(fix);
+      return;
+    }
+    setEmailSuggestion(null);
 
     setActiveProvider('email');
     try {
@@ -851,12 +865,13 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
             autoComplete="email"
             placeholder={t('loginModal.emailPlaceholder')}
             value={email}
-            onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); }}
+            onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); if (emailSuggestion) setEmailSuggestion(null); }}
             disabled={isConnecting}
             className="h-14 text-center bg-transparent border-white/30 text-white text-base placeholder:text-white/40 rounded-2xl"
           />
         </div>
         {emailError && <p className="text-red-400 text-sm">{emailError}</p>}
+        {renderEmailSuggestion()}
         <Button
           type="submit"
           disabled={isConnecting}
@@ -932,6 +947,20 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
     </div>
   );
 
+  const renderEmailSuggestion = () => emailSuggestion && (
+    <button
+      type="button"
+      onClick={() => {
+        setEmail(emailSuggestion);
+        setEmailSuggestion(null);
+        emailInputRef.current?.focus();
+      }}
+      className="block w-full text-center text-sm text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
+    >
+      {t('loginModal.didYouMean', 'Did you mean {{email}}?', { email: emailSuggestion })}
+    </button>
+  );
+
   const renderEmailStep = () => (
     <div className="space-y-4">
       <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -941,7 +970,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
             ref={emailInputRef}
             placeholder={t('loginModal.emailPlaceholder')}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); if (emailSuggestion) setEmailSuggestion(null); }}
             disabled={isConnecting}
             className="h-12 bg-white/10 border-white/10 text-white placeholder:text-white/40 rounded-xl"
             autoFocus
@@ -949,6 +978,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default' }: LoginM
           {emailError && (
             <p className="text-red-400 text-sm">{emailError}</p>
           )}
+          {renderEmailSuggestion()}
         </div>
 
         <Button

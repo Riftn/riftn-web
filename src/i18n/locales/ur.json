@@ -703,6 +703,8 @@
     "feedTogglesCleared": "فیڈ فلٹرز ری سیٹ ہو گئے",
     "defaultProfileTab": "پہلے سے طے شدہ پروفائل ٹیب",
     "defaultProfileTabDesc": "منتخب کریں کہ آپ کی پروفائل پر آنے والے پہلے کون سا ٹیب دیکھیں",
+    "defaultProfileView": "پروفائل پوسٹس کی ترتیب",
+    "defaultProfileViewDesc": "جب لوگ آپ کی پروفائل کھولیں تو اپنی پوسٹس گرڈ یا فہرست کی شکل میں دکھائیں",
     "public": "عوامی",
     "publicDesc": "کوئی بھی آپ کی پوسٹس دیکھ سکتا ہے",
     "private": "نجی",

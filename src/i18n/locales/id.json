@@ -577,7 +577,14 @@
     "getTheApp": "Dapatkan Aplikasi",
     "connectAi": "Hubungkan AI",
     "converter": "Konverter",
-    "affiliate": "Afiliasi"
+    "affiliate": "Afiliasi",
+    "groups": {
+      "main": "Utama",
+      "create": "Buat",
+      "discover": "Jelajahi",
+      "money": "Uang",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Lihat profil {{name}}",
@@ -773,6 +780,8 @@
     "feedTogglesCleared": "Filter feed diatur ulang",
     "defaultProfileTab": "Tab profil bawaan",
     "defaultProfileTabDesc": "Pilih tab mana yang pertama dilihat pengunjung di profil Anda",
+    "defaultProfileView": "Tata letak postingan profil",
+    "defaultProfileViewDesc": "Tampilkan postingan Anda sebagai kisi atau daftar saat orang membuka profil Anda",
     "public": "Publik",
     "publicDesc": "Siapa saja dapat melihat postingan Anda",
     "private": "Pribadi",
@@ -1208,7 +1217,15 @@
     "socialConnectedShort": "Terhubung",
     "socialConnectFailed": "Tidak dapat menghubungkan {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Memperbarui jumlah pengikut"
+    "socialFollowersPending": "Memperbarui jumlah pengikut",
+    "menuLayout": "Tata letak menu",
+    "menuLayoutDesc": "Cara menu mengelompokkan halamannya",
+    "menuLayoutTabs": "Tab",
+    "menuLayoutTabsDesc": "Satu grup sekaligus, dengan ikon besar",
+    "menuLayoutSections": "Bagian",
+    "menuLayoutSectionsDesc": "Semua halaman sekaligus, di bawah judul",
+    "menuLayoutFolders": "Folder",
+    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup"
   },
   "common": {
     "confirm": "Konfirmasi",
@@ -2720,6 +2737,7 @@
     "failedSubmit": "Gagal mengirim aplikasi. Silakan coba lagi."
   },
   "loginModal": {
+    "didYouMean": "Maksud Anda {{email}}?",
     "restoreWalletTitle": "Bawa kembali dompet Anda",
     "restoreOriginalWallet": "Profil Anda berada di dompet asli Anda dari saat Anda mendaftar, bukan yang disimpan untuk login ini. Masuklah seperti saat Anda pertama kali bergabung di Riftn untuk membawa dompet itu kembali. Profil dan dana Anda tetap seperti semula.",
     "useAnotherLogin": "Gunakan login yang berbeda",

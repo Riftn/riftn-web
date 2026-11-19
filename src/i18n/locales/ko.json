@@ -578,7 +578,14 @@
     "getTheApp": "앱 받기",
     "connectAi": "AI 연결",
     "converter": "컨버터",
-    "affiliate": "제휴"
+    "affiliate": "제휴",
+    "groups": {
+      "main": "메인",
+      "create": "만들기",
+      "discover": "둘러보기",
+      "money": "머니",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} 님의 프로필 보기",
@@ -774,6 +781,8 @@
     "feedTogglesCleared": "피드 필터가 초기화되었습니다",
     "defaultProfileTab": "기본 프로필 탭",
     "defaultProfileTabDesc": "방문자가 프로필에서 가장 먼저 보게 될 탭을 선택하세요",
+    "defaultProfileView": "프로필 게시물 레이아웃",
+    "defaultProfileViewDesc": "사람들이 프로필을 열 때 게시물을 그리드 또는 목록으로 보여 주세요",
     "public": "공개",
     "publicDesc": "누구나 게시물을 볼 수 있습니다",
     "private": "비공개",
@@ -1207,7 +1216,15 @@
     "socialConnectedShort": "연결됨",
     "socialConnectFailed": "{{platform}}에 연결하지 못했습니다. 다시 시도해 주세요.",
     "socialVerifiedFollowers": "팔로워 {{value}}명",
-    "socialFollowersPending": "팔로워 수 업데이트 중"
+    "socialFollowersPending": "팔로워 수 업데이트 중",
+    "menuLayout": "메뉴 레이아웃",
+    "menuLayoutDesc": "메뉴가 페이지를 묶는 방식",
+    "menuLayoutTabs": "탭",
+    "menuLayoutTabsDesc": "한 번에 한 그룹씩, 큰 아이콘으로",
+    "menuLayoutSections": "섹션",
+    "menuLayoutSectionsDesc": "모든 페이지를 제목 아래에 한 번에",
+    "menuLayoutFolders": "폴더",
+    "menuLayoutFoldersDesc": "주요 페이지, 그리고 그룹별 폴더"
   },
   "common": {
     "confirm": "확인",
@@ -2723,6 +2740,7 @@
     "email": "이메일"
   },
   "loginModal": {
+    "didYouMean": "{{email}}을(를) 말씀하신 건가요?",
     "restoreWalletTitle": "지갑을 다시 불러오세요",
     "restoreOriginalWallet": "프로필은 원래 가입한 방식으로 로그인한 계정의 지갑에서 불러오세요. 이 로그인에 저장된 지갑이 아닌 것입니다. 프로필과 자금은 그대로 유지됩니다.",
     "useAnotherLogin": "다른 로그인 사용",

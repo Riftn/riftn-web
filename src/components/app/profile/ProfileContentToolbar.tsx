@@ -26,7 +26,7 @@ import X from "@/components/ui/cut-icons/close";
 import Check from "@/components/ui/cut-icons/check";
 import SortIcon from "@/components/ui/cut-icons/sort";
 import { ChevronDown, LayoutGrid, List } from "lucide-react";
-import { setProfileViewMode, useProfileViewMode } from '@/lib/profile-view-mode';
+import { useProfileViewMode, useSetProfileViewMode } from '@/lib/profile-view-mode';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -94,6 +94,7 @@ interface ProfileContentToolbarProps {
 function ProfileViewToggle() {
   const { t } = useTranslation();
   const mode = useProfileViewMode();
+  const setProfileViewMode = useSetProfileViewMode();
   const items = [
     { key: 'grid' as const, Icon: LayoutGrid, label: t('profile.viewGrid', 'Grid view') },
     { key: 'list' as const, Icon: List, label: t('profile.viewList', 'List view') },

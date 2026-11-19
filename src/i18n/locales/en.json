@@ -688,6 +688,13 @@
       "liveStudio": "go live, stream, streaming, OBS, overlays, alerts, widgets",
       "launchpad": "launch a token, create a coin, make a coin, meme coin, bonding curve, tokenise"
     },
+    "groups": {
+      "main": "Main",
+      "create": "Create",
+      "discover": "Discover",
+      "money": "Money",
+      "riftn": "Riftn"
+    },
     "reorderHint": "Hold and drag any icon to rearrange",
     "reorderReset": "Reset",
     "reorderResetLong": "Reset menu order",
@@ -930,6 +937,8 @@
     "feedTogglesCleared": "Feed toggles reset",
     "defaultProfileTab": "Default profile tab",
     "defaultProfileTabDesc": "Choose which tab visitors see first on your profile",
+    "defaultProfileView": "Profile posts layout",
+    "defaultProfileViewDesc": "Show your posts as a grid or a list when people open your profile",
     "public": "Public",
     "publicDesc": "Anyone can see your posts",
     "private": "Private",
@@ -1366,7 +1375,15 @@
     "socialConnectedShort": "Connected",
     "socialConnectFailed": "Could not connect {{platform}}. Please try again.",
     "socialVerifiedFollowers": "{{value}} followers",
-    "socialFollowersPending": "Follower count updating"
+    "socialFollowersPending": "Follower count updating",
+    "menuLayout": "Menu layout",
+    "menuLayoutDesc": "How the menu groups its pages",
+    "menuLayoutTabs": "Tabs",
+    "menuLayoutTabsDesc": "One group at a time, with big icons",
+    "menuLayoutSections": "Sections",
+    "menuLayoutSectionsDesc": "Every page at once, under group headers",
+    "menuLayoutFolders": "Folders",
+    "menuLayoutFoldersDesc": "Your main pages, then a folder for each group"
   },
   "common": {
     "confirm": "Confirm",
@@ -2918,6 +2935,7 @@
     "connectWallet": "Connect Wallet",
     "emailPlaceholder": "Enter your email",
     "invalidEmail": "Please enter a valid email address",
+    "didYouMean": "Did you mean {{email}}?",
     "sendingLink": "Sending code...",
     "continue": "Continue",
     "magicLinkInfo": "We'll send you a verification code to sign in",

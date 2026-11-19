@@ -577,7 +577,14 @@
     "getTheApp": "Tải ứng dụng",
     "connectAi": "Kết nối AI",
     "converter": "Bộ chuyển đổi",
-    "affiliate": "Tiếp thị liên kết"
+    "affiliate": "Tiếp thị liên kết",
+    "groups": {
+      "main": "Chính",
+      "create": "Tạo",
+      "discover": "Khám phá",
+      "money": "Tiền",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Xem hồ sơ của {{name}}",
@@ -773,6 +780,8 @@
     "feedTogglesCleared": "Đã đặt lại bộ lọc bảng tin",
     "defaultProfileTab": "Tab hồ sơ mặc định",
     "defaultProfileTabDesc": "Chọn tab mà khách xem đầu tiên trên hồ sơ của bạn",
+    "defaultProfileView": "Bố cục bài đăng trên hồ sơ",
+    "defaultProfileViewDesc": "Hiển thị bài đăng của bạn dạng lưới hoặc danh sách khi mọi người mở hồ sơ của bạn",
     "public": "Công khai",
     "publicDesc": "Bất kỳ ai cũng có thể xem bài viết của bạn",
     "private": "Riêng tư",
@@ -1208,7 +1217,15 @@
     "socialConnectedShort": "Đã kết nối",
     "socialConnectFailed": "Không thể kết nối {{platform}}. Vui lòng thử lại.",
     "socialVerifiedFollowers": "{{value}} người theo dõi",
-    "socialFollowersPending": "Đang cập nhật số người theo dõi"
+    "socialFollowersPending": "Đang cập nhật số người theo dõi",
+    "menuLayout": "Bố cục menu",
+    "menuLayoutDesc": "Cách menu nhóm các trang",
+    "menuLayoutTabs": "Thẻ",
+    "menuLayoutTabsDesc": "Mỗi lần một nhóm, biểu tượng lớn",
+    "menuLayoutSections": "Mục",
+    "menuLayoutSectionsDesc": "Tất cả trang cùng lúc, dưới tiêu đề",
+    "menuLayoutFolders": "Thư mục",
+    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục"
   },
   "common": {
     "confirm": "Xác nhận",
@@ -2730,6 +2747,7 @@
     "failedSubmit": "Không thể gửi đơn đăng ký. Vui lòng thử lại."
   },
   "loginModal": {
+    "didYouMean": "Ý bạn là {{email}}?",
     "restoreWalletTitle": "Lấy lại ví tiền",
     "restoreOriginalWallet": "Tài khoản của bạn nằm trên ví tiền từ đăng nhập ban đầu, không phải ví tiền được lưu trữ cho lần đăng nhập này. Đăng nhập theo cách bạn đã tham gia Riftn lần đầu để lấy lại ví tiền đó. Tài khoản và số dư của bạn sẽ được giữ nguyên.",
     "useAnotherLogin": "Sử dụng đăng nhập khác",

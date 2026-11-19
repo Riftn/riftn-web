@@ -578,7 +578,14 @@
     "getTheApp": "アプリを入手",
     "connectAi": "AI を接続",
     "converter": "変換",
-    "affiliate": "アフィリエイト"
+    "affiliate": "アフィリエイト",
+    "groups": {
+      "main": "メイン",
+      "create": "作成",
+      "discover": "見つける",
+      "money": "お金",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}}のプロフィールを表示",
@@ -774,6 +781,8 @@
     "feedTogglesCleared": "フィードのフィルターをリセットしました",
     "defaultProfileTab": "既定のプロフィールタブ",
     "defaultProfileTabDesc": "訪問者がプロフィールで最初に見るタブを選びます",
+    "defaultProfileView": "プロフィールの投稿レイアウト",
+    "defaultProfileViewDesc": "プロフィールを開いた人に、投稿をグリッドとリストのどちらで表示するかを選びます",
     "public": "公開",
     "publicDesc": "誰でも投稿を見ることができます",
     "private": "非公開",
@@ -1208,7 +1217,15 @@
     "socialConnectedShort": "連携済み",
     "socialConnectFailed": "{{platform}}を連携できませんでした。もう一度お試しください。",
     "socialVerifiedFollowers": "フォロワー{{value}}人",
-    "socialFollowersPending": "フォロワー数を更新中"
+    "socialFollowersPending": "フォロワー数を更新中",
+    "menuLayout": "メニューのレイアウト",
+    "menuLayoutDesc": "メニューのページのまとめ方",
+    "menuLayoutTabs": "タブ",
+    "menuLayoutTabsDesc": "1グループずつ、大きなアイコンで",
+    "menuLayoutSections": "セクション",
+    "menuLayoutSectionsDesc": "すべてのページを見出しの下に表示",
+    "menuLayoutFolders": "フォルダ",
+    "menuLayoutFoldersDesc": "メインのページと、グループごとのフォルダ"
   },
   "common": {
     "confirm": "確認",
@@ -2721,6 +2738,7 @@
     "emailRequired": "メールは必須です"
   },
   "loginModal": {
+    "didYouMean": "{{email}} のことですか?",
     "restoreWalletTitle": "お財布をお持ち帰りください",
     "restoreOriginalWallet": "このログイン用に保存されたプロフィールではなく、元のサインイン時のウォレットにプロフィールがあります。最初にRiftnに参加した方法でサインインして、そのウォレットを取り戻します。プロフィールと資金はそのまま維持されます。",
     "useAnotherLogin": "別のログインを使用する",

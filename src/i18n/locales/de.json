@@ -575,7 +575,14 @@
     "getTheApp": "App holen",
     "connectAi": "KI verbinden",
     "converter": "Wandler",
-    "affiliate": "Partnerprogramm"
+    "affiliate": "Partnerprogramm",
+    "groups": {
+      "main": "Start",
+      "create": "Erstellen",
+      "discover": "Entdecken",
+      "money": "Geld",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Profil von {{name}} anzeigen",
@@ -771,6 +778,8 @@
     "feedTogglesCleared": "Feed-Filter zurückgesetzt",
     "defaultProfileTab": "Standard-Profiltab",
     "defaultProfileTabDesc": "Wähle, welchen Tab Besucher auf deinem Profil zuerst sehen",
+    "defaultProfileView": "Layout der Profilbeiträge",
+    "defaultProfileViewDesc": "Zeige deine Beiträge als Raster oder als Liste, wenn jemand dein Profil öffnet",
     "public": "Öffentlich",
     "publicDesc": "Jeder kann deine Beiträge sehen",
     "private": "Privat",
@@ -1206,7 +1215,15 @@
     "socialConnectedShort": "Verbunden",
     "socialConnectFailed": "{{platform}} konnte nicht verbunden werden. Bitte versuche es erneut.",
     "socialVerifiedFollowers": "{{value}} Follower",
-    "socialFollowersPending": "Followerzahl wird aktualisiert"
+    "socialFollowersPending": "Followerzahl wird aktualisiert",
+    "menuLayout": "Menü-Layout",
+    "menuLayoutDesc": "Wie das Menü seine Seiten gruppiert",
+    "menuLayoutTabs": "Tabs",
+    "menuLayoutTabsDesc": "Eine Gruppe nach der anderen, mit großen Symbolen",
+    "menuLayoutSections": "Abschnitte",
+    "menuLayoutSectionsDesc": "Alle Seiten auf einmal, unter Überschriften",
+    "menuLayoutFolders": "Ordner",
+    "menuLayoutFoldersDesc": "Deine Hauptseiten, dann ein Ordner pro Gruppe"
   },
   "common": {
     "confirm": "Bestätigen",
@@ -2737,6 +2754,7 @@
     "failedSubmit": "Einreichung fehlgeschlagen. Bitte erneut versuchen."
   },
   "loginModal": {
+    "didYouMean": "Meintest du {{email}}?",
     "restoreWalletTitle": "Deinen Geldbeutel zurückholen",
     "restoreOriginalWallet": "Dein Profil ist auf dem Geldbeutel von deiner ursprünglichen Anmeldung, nicht auf dem, der für diese Anmeldung gespeichert ist. Melden Sie sich mit der gleichen Methode an, mit der Sie Riftn zuerst beigetreten sind, um diesen Geldbeutel zurückzuholen. Dein Profil und deine Guthaben bleiben wie sie sind.",
     "useAnotherLogin": "Ein anderes Login verwenden",

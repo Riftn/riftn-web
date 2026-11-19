@@ -701,6 +701,8 @@
     "feedTogglesCleared": "Filtrele fluxului au fost resetate",
     "defaultProfileTab": "Fila implicită a profilului",
     "defaultProfileTabDesc": "Alege ce filă văd prima vizitatorii pe profilul tău",
+    "defaultProfileView": "Aspectul postărilor din profil",
+    "defaultProfileViewDesc": "Arată-ți postările ca grilă sau ca listă când cineva îți deschide profilul",
     "public": "Public",
     "publicDesc": "Oricine îți poate vedea postările",
     "private": "Privat",
