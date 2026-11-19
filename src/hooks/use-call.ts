@@ -9,20 +9,43 @@ import { toast } from 'sonner';
 import { simpleCallCheck, debugAllCalls } from '@/utils/simple-call-check';
 import { formatCallDuration } from '@/lib/call-duration';
 import { visualActivity } from '@/lib/visual-activity';
+import { leaseChannel, type ChannelLease } from '@/lib/realtime-channel-lease';
+import { groupCallChannel, groupCallPresenceTopic, groupCallUid, presenceList, GROUP_CALL_MAX_RING, type GroupCallPresence } from '@/lib/group-call';
 
 export interface CallSession {
   id: string; caller_address: string; recipient_address: string;
   status: 'ringing' | 'connected' | 'ended'; call_type: 'audio' | 'video';
   signaling_data?: any; created_at: string;
+  /** Set on a group call: the group whose room this is. */
+  group_id?: string | null; group_name?: string | null;
 }
+/** Someone else in a group call's room. */
+export interface GroupParticipant {
+  uid: number;
+  /** From the room's presence; null for the moment between joining and announcing. */
+  wallet: string | null;
+  audio: boolean; video: boolean; speaking: boolean;
+}
+export interface GroupCallTarget { id: string; name: string }
 /** How a call finished, kept briefly so the stage can say so and offer a way back. */
 export type CallOutcome = 'ended' | 'declined' | 'no_answer' | 'missed';
 export interface CallSummary {
   peerAddress: string; callType: 'audio' | 'video'; outcome: CallOutcome;
   /** Formatted length of a call that connected; null for one that never did. */
   duration: string | null;
+  /** Set when it was a group call: the group's name stands in for the peer. */
+  groupName?: string | null;
 }
 export interface UseCallReturn {
+  isGroupCall: boolean;
+  groupParticipants: GroupParticipant[];
+  /** Is your own microphone picking up speech right now (group tiles). */
+  selfSpeaking: boolean;
+  attachGroupVideo: (uid: number) => (node: HTMLDivElement | null) => void;
+  /** Ring every member of a group and open its room. */
+  startGroupCall: (group: GroupCallTarget, members: string[], callType?: 'audio' | 'video') => Promise<void>;
+  /** Step into a group call that is already going. */
+  joinGroupCall: (group: GroupCallTarget, callType?: 'audio' | 'video') => Promise<void>;
   /** The caller's side while the other phone is still ringing. */
   isRinging: boolean;
   callSummary: CallSummary | null; dismissCallSummary: () => void;
@@ -43,7 +66,13 @@ export interface UseCallReturn {
   checkForCalls: () => Promise<void>;
   setCallMessageHandler: (handler: ((content: string) => void) | null) => void;
 }
-type CallMedia = { client: any; audio: any; video: any; remoteVideo: any; remoteAudio: any; closed: boolean };
+type GroupRemote = { audio: any; video: any };
+type CallMedia = {
+  client: any; audio: any; video: any; remoteVideo: any; remoteAudio: any; closed: boolean;
+  remotes: Map<number, GroupRemote>; presence: ChannelLease | null;
+};
+/** The starter's own side of a group call has no row of its own. */
+const isSessionId = (id: string) => id !== 'pending' && !id.startsWith('group:');
 const callChecksVisible = () => document.visibilityState !== 'hidden';
 
 export const useCall = (): UseCallReturn => {
@@ -60,6 +89,12 @@ export const useCall = (): UseCallReturn => {
   const [callStartedAt, setCallStartedAt] = useState<number | null>(null);
   const [mediaRevision, setMediaRevision] = useState(0);
   const [callSummary, setCallSummary] = useState<CallSummary | null>(null);
+  const [groupParticipants, setGroupParticipants] = useState<GroupParticipant[]>([]);
+  const [selfSpeaking, setSelfSpeaking] = useState(false);
+  const rosterRef = useRef<Map<number, string>>(new Map());
+  const speakingRef = useRef<Set<number>>(new Set());
+  /** Ring rows a group call's starter wrote, so an unanswered start can stop the phones. */
+  const groupRingIdsRef = useRef<string[]>([]);
   const summaryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dismissCallSummary = useCallback(() => {
     if (summaryTimerRef.current) clearTimeout(summaryTimerRef.current);
@@ -89,9 +124,19 @@ export const useCall = (): UseCallReturn => {
   const setCallMessageHandler = useCallback((handler: ((content: string) => void) | null) => {
     callMessageHandlerRef.current = handler;
   }, []);
-  const markEnded = useCallback(async (call: CallSession | null) => {
-    if (!call || call.id === 'pending') return;
-    try { await callClient.from('call_sessions').update({ status: 'ended' }).eq('id', call.id); }
+  const markEnded = useCallback(async (call: CallSession | null, answered = true) => {
+    if (!call) return;
+    const ringIds = groupRingIdsRef.current;
+    groupRingIdsRef.current = [];
+    try {
+      // A group call nobody picked up stops every phone it set ringing. Once
+      // somebody is in the room, leaving it is just leaving; the rest carry on.
+      if (call.group_id && ringIds.length && !answered) {
+        await callClient.from('call_sessions').update({ status: 'ended' }).in('id', ringIds).eq('status', 'ringing');
+      }
+      if (!isSessionId(call.id)) return;
+      await callClient.from('call_sessions').update({ status: 'ended' }).eq('id', call.id);
+    }
     catch (error) { console.warn('Call status update failed', error); }
   }, [callClient]);
   const clearTimers = useCallback(() => {
@@ -110,6 +155,12 @@ export const useCall = (): UseCallReturn => {
         try { track?.close(); } catch {}
       }
       for (const track of [media.remoteAudio, media.remoteVideo]) { try { track?.stop(); } catch {} }
+      for (const remote of media.remotes.values()) {
+        for (const track of [remote.audio, remote.video]) { try { track?.stop(); } catch {} }
+      }
+      media.remotes.clear();
+      try { media.presence?.release(); } catch {}
+      media.presence = null;
       try { media.client?.removeAllListeners(); } catch {}
     }
     // Retry leaving if a pending join completed after the first teardown.
@@ -129,8 +180,12 @@ export const useCall = (): UseCallReturn => {
     setCallStartedAt(null);
     setIsCallActive(false); setIsIncoming(false); setIsConnecting(false);
     setIsMuted(false); setIsCameraOff(false); setIsMinimized(false);
+    setGroupParticipants([]); setSelfSpeaking(false);
+    rosterRef.current = new Map(); speakingRef.current = new Set();
     visualActivity.setCall(false, false);
-    if (call && startedAt != null) {
+    // The chat note handler belongs to whichever direct chat is open, so a
+    // group call never writes into it.
+    if (call && startedAt != null && !call.group_id) {
       callMessageHandlerRef.current?.(`📞 ${call.call_type === 'video' ? 'Video' : 'Voice'} call ended · ${formatCallDuration(startedAt)}`);
     }
     const outcome: CallOutcome | null = startedAt != null ? 'ended' : reason ?? null;
@@ -138,19 +193,27 @@ export const useCall = (): UseCallReturn => {
       const mine = call.caller_address.toLowerCase() === userAddress?.toLowerCase();
       if (summaryTimerRef.current) clearTimeout(summaryTimerRef.current);
       setCallSummary({
-        peerAddress: mine ? call.recipient_address : call.caller_address,
+        peerAddress: call.group_id ? call.caller_address : mine ? call.recipient_address : call.caller_address,
         callType: call.call_type, outcome,
         duration: startedAt != null ? formatCallDuration(startedAt) : null,
+        groupName: call.group_id ? call.group_name || '' : null,
       });
       summaryTimerRef.current = setTimeout(() => { summaryTimerRef.current = null; setCallSummary(null); }, 6000);
     }
-    await Promise.all([disposeMedia(media), markEnded(call)]);
+    await Promise.all([disposeMedia(media), markEnded(call, startedAt != null)]);
   }, [publishCall, clearTimers, disposeMedia, markEnded, userAddress]);
   const endCall = useCallback(() => finishCall(), [finishCall]);
   /** The far side closed the call. Before anyone answered, that is a decline (ours) or a missed call (theirs). */
   const remoteClosed = useCallback(() => {
     const call = currentCallRef.current;
     if (!call) return;
+    if (call.group_id) {
+      // One member hanging up is not the end of a group call. The only ping
+      // that matters is the starter cancelling while this phone still rings.
+      if (startedAtRef.current == null && !joiningRef.current && call.status === 'ringing'
+        && call.recipient_address.toLowerCase() === userAddress?.toLowerCase()) void finishCall('missed');
+      return;
+    }
     if (startedAtRef.current != null || call.status !== 'ringing' || joiningRef.current) { void finishCall(); return; }
     if (call.caller_address.toLowerCase() === userAddress?.toLowerCase()) {
       callMessageHandlerRef.current?.(call.call_type === 'video' ? '📵 Video call declined' : '📵 Voice call declined');
@@ -158,16 +221,29 @@ export const useCall = (): UseCallReturn => {
     } else void finishCall('missed');
   }, [finishCall, userAddress]);
 
+  /** Push the room's remotes, names and talkers into render state. */
+  const syncGroup = useCallback((media: CallMedia) => {
+    if (media.closed) return;
+    const roster = rosterRef.current;
+    const speaking = speakingRef.current;
+    setGroupParticipants([...media.remotes.entries()].map(([uid, remote]) => ({
+      uid, wallet: roster.get(uid) ?? null, audio: !!remote.audio, video: !!remote.video, speaking: speaking.has(uid),
+    })));
+  }, []);
+
   const joinAgoraChannel = useCallback(async (call: CallSession, generation: number): Promise<boolean> => {
     const current = () => generationRef.current === generation && currentCallRef.current?.id === call.id;
     if (!current()) return false;
+    const groupId = call.group_id || null;
+    const channelName = groupId ? groupCallChannel(groupId) : `dm-call-${call.id}`;
+    const ownUid = groupId && userAddress ? groupCallUid(userAddress.toLowerCase()) : 0;
     let media: CallMedia | null = null;
     try {
       const authToken = getAuthToken();
       const headers = authToken && userAddress
         ? { 'x-dehub-token': authToken, 'x-wallet-address': userAddress.toLowerCase() } : undefined;
       const { data, error } = await supabase.functions.invoke('agora-token', {
-        body: { channelName: `dm-call-${call.id}`, role: 'publisher' }, ...(headers ? { headers } : {}),
+        body: { channelName, role: 'publisher', ...(groupId ? { uid: ownUid } : {}) }, ...(headers ? { headers } : {}),
       });
       if (!current()) return false;
       if (error || data?.error || !data?.appId || !data?.token) throw new Error('Could not get call credentials');
@@ -175,9 +251,21 @@ export const useCall = (): UseCallReturn => {
       if (!current()) return false;
       AgoraRTC.setLogLevel(3);
       const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-      media = { client, audio: null, video: null, remoteVideo: null, remoteAudio: null, closed: false };
+      media = { client, audio: null, video: null, remoteVideo: null, remoteAudio: null, closed: false, remotes: new Map(), presence: null };
       const ownedMedia = media;
       mediaRef.current = media;
+      /** Somebody is on the other end: the call is live and its clock starts. */
+      const markLive = () => {
+        publishCall({ ...currentCallRef.current!, status: 'connected' });
+        setIsCallActive(true); setIsConnecting(false);
+        if (callTimeoutRef.current) clearTimeout(callTimeoutRef.current);
+        callTimeoutRef.current = null;
+        // Publishing audio, video or a replacement camera shares one clock.
+        if (startedAtRef.current == null) {
+          startedAtRef.current = Date.now();
+          setCallStartedAt(startedAtRef.current);
+        }
+      };
       client.on('user-published', async (remoteUser: any, mediaType: 'audio' | 'video') => {
         if (!current() || ownedMedia.closed) return;
         try {
@@ -186,36 +274,97 @@ export const useCall = (): UseCallReturn => {
             remoteUser[mediaType === 'audio' ? 'audioTrack' : 'videoTrack']?.stop();
             return;
           }
-          if (mediaType === 'audio') {
+          if (groupId) {
+            const remote = ownedMedia.remotes.get(remoteUser.uid) ?? { audio: null, video: null };
+            if (mediaType === 'audio') { remote.audio = remoteUser.audioTrack; remoteUser.audioTrack?.play(); }
+            else remote.video = remoteUser.videoTrack;
+            ownedMedia.remotes.set(remoteUser.uid, remote);
+            syncGroup(ownedMedia);
+            setMediaRevision(revision => revision + 1);
+          } else if (mediaType === 'audio') {
             ownedMedia.remoteAudio = remoteUser.audioTrack;
             remoteUser.audioTrack?.play();
           } else {
             ownedMedia.remoteVideo = remoteUser.videoTrack;
             setMediaRevision(revision => revision + 1);
           }
-          publishCall({ ...currentCallRef.current!, status: 'connected' });
-          setIsCallActive(true); setIsConnecting(false);
-          if (callTimeoutRef.current) clearTimeout(callTimeoutRef.current);
-          callTimeoutRef.current = null;
-          // Publishing audio, video or a replacement camera shares one clock.
-          if (startedAtRef.current == null) {
-            startedAtRef.current = Date.now();
-            setCallStartedAt(startedAtRef.current);
-          }
+          markLive();
         } catch (error) {
-          if (current()) { console.warn('Call subscription failed', error); void endCall(); }
+          if (current() && !groupId) { console.warn('Call subscription failed', error); void endCall(); }
+          else if (current()) console.warn('Group call subscription failed', error);
         }
       });
-      client.on('user-unpublished', (_user: any, type: 'audio' | 'video') => {
+      client.on('user-unpublished', (remoteUser: any, type: 'audio' | 'video') => {
         if (!current()) return;
+        if (groupId) {
+          const remote = ownedMedia.remotes.get(remoteUser.uid);
+          if (!remote) return;
+          try { remote[type]?.stop(); } catch {}
+          remote[type] = null;
+          syncGroup(ownedMedia);
+          setMediaRevision(revision => revision + 1);
+          return;
+        }
         if (type === 'video') {
           ownedMedia.remoteVideo?.stop();
           ownedMedia.remoteVideo = null; setMediaRevision(revision => revision + 1);
         }
       });
-      client.on('user-left', () => { if (current()) void endCall(); });
-      await client.join(data.appId, `dm-call-${call.id}`, data.token, data.uid ?? 0);
+      if (groupId) {
+        // A member in the room counts as there before they unmute anything.
+        client.on('user-joined', (remoteUser: any) => {
+          if (!current() || ownedMedia.closed) return;
+          if (!ownedMedia.remotes.has(remoteUser.uid)) ownedMedia.remotes.set(remoteUser.uid, { audio: null, video: null });
+          syncGroup(ownedMedia);
+          markLive();
+        });
+        client.on('user-left', (remoteUser: any) => {
+          if (!current() || ownedMedia.closed) return;
+          const remote = ownedMedia.remotes.get(remoteUser.uid);
+          for (const track of [remote?.audio, remote?.video]) { try { track?.stop(); } catch {} }
+          ownedMedia.remotes.delete(remoteUser.uid);
+          speakingRef.current.delete(remoteUser.uid);
+          syncGroup(ownedMedia);
+          // Last one out: nobody left to talk to.
+          if (!ownedMedia.remotes.size && startedAtRef.current != null) void endCall();
+        });
+        client.enableAudioVolumeIndicator();
+        client.on('volume-indicator', (levels: Array<{ uid: number | string; level: number }>) => {
+          if (!current() || ownedMedia.closed) return;
+          const next = new Set<number>();
+          let self = false;
+          for (const { uid, level } of levels) {
+            if (level < 6) continue;
+            if (Number(uid) === ownUid || uid === 0) self = true;
+            else next.add(Number(uid));
+          }
+          setSelfSpeaking(previous => (previous === self ? previous : self));
+          const before = speakingRef.current;
+          if (next.size === before.size && [...next].every(uid => before.has(uid))) return;
+          speakingRef.current = next;
+          syncGroup(ownedMedia);
+        });
+      } else {
+        client.on('user-left', () => { if (current()) void endCall(); });
+      }
+      await client.join(data.appId, channelName, data.token, groupId ? ownUid : (data.uid ?? 0));
       if (!current() || media.closed) { await disposeMedia(media); return false; }
+      if (groupId && userAddress) {
+        const wallet = userAddress.toLowerCase();
+        ownedMedia.presence = leaseChannel(groupCallPresenceTopic(groupId), {
+          listen: [{
+            type: 'presence',
+            filter: { event: 'sync' },
+            handler: (_payload, channel) => {
+              if (ownedMedia.closed) return;
+              rosterRef.current = new Map(presenceList(channel.presenceState() as Record<string, unknown[]>)
+                .map((entry: GroupCallPresence) => [entry.uid, entry.wallet]));
+              syncGroup(ownedMedia);
+            },
+          }],
+          onJoin: channel => { if (!ownedMedia.closed) void channel.track({ uid: ownUid, wallet, type: call.call_type }); },
+        });
+      }
       const audio = await AgoraRTC.createMicrophoneAudioTrack();
       if (!current() || media.closed) { audio.close(); await disposeMedia(media); return false; }
       media.audio = audio;
@@ -238,7 +387,67 @@ export const useCall = (): UseCallReturn => {
       }
       return false;
     }
-  }, [userAddress, disposeMedia, publishCall, endCall, _copy]);
+  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup]);
+
+  /** Nobody came: a group room you are alone in closes itself after the ring window. */
+  const armGroupTimeout = useCallback((generation: number, outcome: 'no_answer' | 'missed') => {
+    if (callTimeoutRef.current) clearTimeout(callTimeoutRef.current);
+    callTimeoutRef.current = setTimeout(() => {
+      if (generationRef.current !== generation || startedAtRef.current != null) return;
+      void finishCall(outcome);
+    }, 45_000);
+  }, [finishCall]);
+
+  const openGroupRoom = useCallback(async (group: GroupCallTarget, callType: 'audio' | 'video', members: string[] | null) => {
+    if (!userAddress || currentCallRef.current) return;
+    dismissCallSummary();
+    const me = userAddress.toLowerCase();
+    const generation = ++generationRef.current;
+    const call: CallSession = {
+      id: `group:${group.id}:${Date.now()}`, caller_address: me, recipient_address: me,
+      status: 'ringing', call_type: callType, created_at: new Date().toISOString(),
+      group_id: group.id, group_name: group.name,
+    };
+    groupRingIdsRef.current = [];
+    publishCall(call);
+    setIsMinimized(false); setCallFailureReason(null); setIsUserOffline(false); setIsConnecting(true);
+    visualActivity.setCall(true, true);
+    try {
+      if (members) {
+        const others = [...new Set(members.map(member => member.toLowerCase()))].filter(member => member !== me).slice(0, GROUP_CALL_MAX_RING);
+        if (others.length) {
+          const { data, error } = await callClient.from('call_sessions').insert(others.map(recipient => ({
+            caller_address: me, recipient_address: recipient, call_type: callType, status: 'ringing',
+            group_id: group.id, group_name: group.name,
+          }))).select('id');
+          if (error) throw error;
+          const ids = (data ?? []).map((row: { id: string }) => row.id);
+          if (generationRef.current !== generation) {
+            await callClient.from('call_sessions').update({ status: 'ended' }).in('id', ids);
+            return;
+          }
+          groupRingIdsRef.current = ids;
+          void ensureWalletSession(me).then(session => {
+            if (!session) throw new Error('Signed call session unavailable');
+            return Promise.allSettled(ids.map(sessionId =>
+              apiCall('/api/push/call-ring', { method: 'POST', body: { sessionId, walletSession: session.token }, requiresAuth: true })));
+          }).catch(error => console.warn('Group ring push failed', error));
+        }
+      }
+      const joined = await joinAgoraChannel(call, generation);
+      if (generationRef.current !== generation) return;
+      if (!joined) { await endCall(); return; }
+      if (startedAtRef.current == null) armGroupTimeout(generation, 'no_answer');
+    } catch (error) {
+      if (generationRef.current === generation) {
+        console.warn('Group call start failed', error); setCallFailureReason('technical_error'); await endCall();
+      }
+    }
+  }, [userAddress, callClient, publishCall, joinAgoraChannel, endCall, dismissCallSummary, armGroupTimeout]);
+  const startGroupCall = useCallback((group: GroupCallTarget, members: string[], callType: 'audio' | 'video' = 'audio') =>
+    openGroupRoom(group, callType, members), [openGroupRoom]);
+  const joinGroupCall = useCallback((group: GroupCallTarget, callType: 'audio' | 'video' = 'audio') =>
+    openGroupRoom(group, callType, null), [openGroupRoom]);
 
   const startCall = useCallback(async (recipientAddress: string, callType: 'audio' | 'video' = 'audio') => {
     if (!userAddress || currentCallRef.current) return;
@@ -313,10 +522,12 @@ export const useCall = (): UseCallReturn => {
       publishCall({ ...call, status: 'connected' });
       const joined = await joinAgoraChannel(call, generation);
       if (generationRef.current === generation && !joined) await endCall();
+      // Answered after everyone else had already gone: do not sit in an empty room.
+      else if (joined && call.group_id && startedAtRef.current == null) armGroupTimeout(generation, 'missed');
     } catch (error) {
       if (generationRef.current === generation) { setCallFailureReason('technical_error'); await endCall(); }
     } finally { if (generationRef.current === generation) joiningRef.current = false; }
-  }, [callClient, clearTimers, publishCall, joinAgoraChannel, endCall, markEnded]);
+  }, [callClient, clearTimers, publishCall, joinAgoraChannel, endCall, markEnded, armGroupTimeout]);
   const checkForCalls = useCallback(async (recover = false): Promise<void> => {
     if (!userAddress || currentCallRef.current || !callChecksVisible()) return;
     const generation = generationRef.current;
@@ -402,6 +613,31 @@ export const useCall = (): UseCallReturn => {
     const media = mediaRef.current;
     if (node && media && !media.closed) { try { media.video?.play(node); } catch {} }
   }, []);
+  const groupVideoRefs = useRef<Map<number, (node: HTMLDivElement | null) => void>>(new Map());
+  const groupVideoNodes = useRef<Map<number, HTMLDivElement>>(new Map());
+  /** One stable ref callback per tile, so a re-render does not re-attach every camera. */
+  const attachGroupVideo = useCallback((uid: number) => {
+    let attach = groupVideoRefs.current.get(uid);
+    if (!attach) {
+      attach = (node: HTMLDivElement | null) => {
+        if (!node) { groupVideoNodes.current.delete(uid); return; }
+        groupVideoNodes.current.set(uid, node);
+        const track = mediaRef.current?.remotes.get(uid)?.video;
+        if (track && !mediaRef.current?.closed) { try { track.play(node); } catch {} }
+      };
+      groupVideoRefs.current.set(uid, attach);
+    }
+    return attach;
+  }, []);
+  // A camera that comes on after its tile mounted.
+  useEffect(() => {
+    const media = mediaRef.current;
+    if (!media || media.closed || isMinimized) return;
+    for (const [uid, remote] of media.remotes) {
+      const node = groupVideoNodes.current.get(uid);
+      if (node && remote.video && !remote.video.isPlaying) { try { remote.video.play(node); } catch {} }
+    }
+  }, [mediaRevision, groupParticipants, isMinimized]);
   const attachRemoteVideo = useCallback((node: HTMLDivElement | null) => {
     (remoteVideoRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
     const media = mediaRef.current;
@@ -435,13 +671,16 @@ export const useCall = (): UseCallReturn => {
       ? currentCall.recipient_address : currentCall.caller_address : '';
   const isRinging = !!currentCall && isConnecting && !isCallActive && currentCall.status === 'ringing'
     && currentCall.caller_address.toLowerCase() === userAddress?.toLowerCase();
+  const isGroupCall = !!currentCall?.group_id;
   return useMemo(() => ({
+    isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary,
     isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
     attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
-  }), [isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
+  }), [isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
+    isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);
 };

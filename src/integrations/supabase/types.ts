@@ -1805,6 +1805,8 @@ export type Database = {
           call_type: string
           caller_address: string
           created_at: string
+          group_id: string | null
+          group_name: string | null
           id: string
           recipient_address: string
           signaling_data: Json | null
@@ -1815,6 +1817,8 @@ export type Database = {
           call_type: string
           caller_address: string
           created_at?: string
+          group_id?: string | null
+          group_name?: string | null
           id?: string
           recipient_address: string
           signaling_data?: Json | null
@@ -1825,6 +1829,8 @@ export type Database = {
           call_type?: string
           caller_address?: string
           created_at?: string
+          group_id?: string | null
+          group_name?: string | null
           id?: string
           recipient_address?: string
           signaling_data?: Json | null

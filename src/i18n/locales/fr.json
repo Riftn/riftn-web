@@ -9102,7 +9102,19 @@
     "declined": "Appel refusé",
     "noAnswer": "Pas de réponse",
     "missed": "Appel manqué",
-    "callBack": "Rappeler"
+    "callBack": "Rappeler",
+    "group": "Groupe",
+    "groupVoiceCall": "Appel vocal de groupe",
+    "groupVideoCall": "Appel vidéo de groupe",
+    "callingGroup": "Appel du groupe...",
+    "isCalling": "{{name}} vous appelle",
+    "leave": "Quitter",
+    "joinCall": "Rejoindre",
+    "inCall_one": "{{count}} dans l'appel",
+    "inCall_other": "{{count}} dans l'appel",
+    "startGroupVoice": "Lancer un appel vocal de groupe",
+    "startGroupVideo": "Lancer un appel vidéo de groupe",
+    "you": "Vous"
   },
   "badgeAscension": {
     "reached": "Vous avez atteint {{tier}}",

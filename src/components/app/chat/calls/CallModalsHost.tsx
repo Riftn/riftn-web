@@ -3,6 +3,7 @@ import { useCall } from '@/contexts/CallContext';
 
 const VoiceCallModal = lazy(() => import('./VoiceCallModal'));
 const VideoCallModal = lazy(() => import('./VideoCallModal'));
+const GroupCallModal = lazy(() => import('./GroupCallModal'));
 const CallEndedScreen = lazy(() => import('./CallEndedScreen'));
 const CallMiniPlayer = lazy(() => import('./CallMiniPlayer').then(m => ({ default: m.CallMiniPlayer })));
 
@@ -11,6 +12,6 @@ export function CallModalsHost() {
   const { currentCall, isMinimized, callSummary } = useCall();
   if (!currentCall) return callSummary ? <Suspense fallback={null}><CallEndedScreen /></Suspense> : null;
   return <Suspense fallback={null}>
-    {isMinimized ? <CallMiniPlayer /> : currentCall.call_type === 'video' ? <VideoCallModal /> : <VoiceCallModal />}
+    {isMinimized ? <CallMiniPlayer /> : currentCall.group_id ? <GroupCallModal /> : currentCall.call_type === 'video' ? <VideoCallModal /> : <VoiceCallModal />}
   </Suspense>;
 }
