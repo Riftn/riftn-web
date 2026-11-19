@@ -7231,7 +7231,10 @@ html[data-system-tone="light"] [data-non-follower-confirm] {
 /* Audio deck placeholder sizes its card the way the loaded deck does. */
 html[data-theme] [data-audio-frame]:has([data-audio-studio-placeholder]):not([data-video-fullscreen]):not(#_):not(#_) { height: auto !important; min-height: 0; max-height: none !important; aspect-ratio: auto !important; width: 100% !important; }
 html[data-theme] [data-audio-backdrop]:has([data-audio-studio-placeholder]):not(#_):not(#_) { border: 0; border-radius: 28px; }
-[data-audio-backdrop]:has([data-audio-studio-placeholder]) > .absolute { position: relative; }
+/* :has() sits on the stage itself, last in the selector. Written as
+   `[data-audio-backdrop]:has(…) > .absolute` it made the browser restyle every
+   `.absolute` element on the page each time anything was added or removed. */
+[data-audio-backdrop] > .absolute:has(> [data-audio-studio-placeholder]) { position: relative; }
 
 /* One-line names and @handles: clip only sideways. `truncate` used
    overflow:hidden, which also cut the tails of g, j, p and y wherever the
@@ -7291,8 +7294,10 @@ html[data-theme] [data-audio-backdrop]:has([data-audio-studio-placeholder]):not(
 /* riftn.com/chat is a full-screen layer at z-70. Menus, dialogs and sheets
    opened from it are portalled to <body> at z-50, so they opened BEHIND it
    (the three-dot menu "did nothing"). While the page is up, lift them. */
-body:has(#app-root[data-fullscreen-chat]) > :is([data-radix-popper-content-wrapper], .fixed:not(#app-root)),
-body:has(#app-root[data-fullscreen-chat]) > :not(#root) > :is([data-radix-popper-content-wrapper], .fixed) {
+/* The page marks <body> itself (FullScreenChatShell). A `body:has(…)` here
+   made every `.fixed` element restyle on each change anywhere on any page. */
+body[data-fullscreen-chat-up] > :is([data-radix-popper-content-wrapper], .fixed:not(#app-root)),
+body[data-fullscreen-chat-up] > :not(#root) > :is([data-radix-popper-content-wrapper], .fixed) {
   z-index: 150 !important;
 }
 
