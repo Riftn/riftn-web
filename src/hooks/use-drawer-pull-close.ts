@@ -16,6 +16,7 @@ export function useDrawerPullClose(
   options?: DrawerPullOptions,
 ) {
   const snap = options?.snap ?? true;
+  const grab = options?.grab;
   const closeRef = useRef(close);
   closeRef.current = close;
 
@@ -35,7 +36,7 @@ export function useDrawerPullClose(
           frame = requestAnimationFrame(attach);
           return;
         }
-        detach = bindDrawerPullClose(sheet, scroller, () => closeRef.current(), { snap });
+        detach = bindDrawerPullClose(sheet, scroller, () => closeRef.current(), { snap, grab });
       };
       attach();
     });
@@ -44,6 +45,6 @@ export function useDrawerPullClose(
       cancelAnimationFrame(frame);
       detach?.();
     };
-  }, [open, sheetRef, scrollRef, snap]);
+  }, [open, sheetRef, scrollRef, snap, grab]);
 }
 

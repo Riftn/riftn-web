@@ -2641,7 +2641,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       {!inDrawer && <SEOHead title={_copy("copy.c598c6a2fa2a", { defaultValue: "Notifications - Stay Updated" })} description={_copy("copy.3ac4d647017f", { defaultValue: "Stay on top of likes, comments, follows, tips, mentions and more on Riftn. Never miss an interaction from your community." })} url="https://riftn.com/app/notifications" />}
       <h1 className="sr-only">{_copy("copy.231ec14284fc", { defaultValue: "Riftn Notifications - Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
       {/* Header */}
-      <div ref={islandHostRef} className="contents">
+      <div ref={islandHostRef} className="contents" data-drawer-grab={inDrawer ? '' : undefined}>
         <PageIsland
           className={inDrawer ? 'top-0 lg:top-0 pt-2' : undefined}
           icon="notifications"
