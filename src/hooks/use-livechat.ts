@@ -1156,10 +1156,14 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
     });
   }, [roomId]);
 
+  // Stable: Public Chat's ban/unban handlers depend on it, and a new function
+  // each render redrew every line on screen while scrolling.
+  const refetch = useCallback(() => fetchMessages(false), [fetchMessages]);
+
   return {
     messages, isLoading, isSending, isConnected, isBanned, isModerator, mutedUntil,
     send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
-    refetch: () => fetchMessages(false),
+    refetch,
     hasOlder, loadingOlder, loadOlder, signInWall,
     hasNewer, jumpTo, loadNewer, backToLatest,
   };
