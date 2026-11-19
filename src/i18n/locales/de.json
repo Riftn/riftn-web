@@ -771,6 +771,8 @@
     "feedTogglesCleared": "Feed-Filter zurückgesetzt",
     "defaultProfileTab": "Standard-Profiltab",
     "defaultProfileTabDesc": "Wähle, welchen Tab Besucher auf deinem Profil zuerst sehen",
+    "defaultProfileView": "Layout der Profilbeiträge",
+    "defaultProfileViewDesc": "Zeige deine Beiträge als Raster oder als Liste, wenn jemand dein Profil öffnet",
     "public": "Öffentlich",
     "publicDesc": "Jeder kann deine Beiträge sehen",
     "private": "Privat",

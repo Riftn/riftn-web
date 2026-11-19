@@ -919,6 +919,8 @@
     "feedTogglesCleared": "Feedfilters gereset",
     "defaultProfileTab": "Standaard profieltabblad",
     "defaultProfileTabDesc": "Kies welk tabblad bezoekers als eerste zien op je profiel",
+    "defaultProfileView": "Indeling van profielberichten",
+    "defaultProfileViewDesc": "Toon je berichten als raster of als lijst wanneer mensen je profiel openen",
     "public": "Openbaar",
     "publicDesc": "Iedereen kan je berichten zien",
     "private": "Privé",

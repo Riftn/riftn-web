@@ -74,6 +74,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
   { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
   { tab: 'appearance', anchor: 'default-profile-tab', label: 'Default profile tab', labelKey: 'settings.defaultProfileTab', keywords: 'landing tab visitors' },
+  { tab: 'appearance', anchor: 'default-profile-view', label: 'Profile posts layout', labelKey: 'settings.defaultProfileView', keywords: 'grid list view layout profile posts tiles visitors' },
   { tab: 'appearance', anchor: 'autoplay', label: 'Auto-play', labelKey: 'settings.autoPlay', keywords: 'autoplay video play automatically' },
   { tab: 'appearance', anchor: 'autoplay-muted', label: 'Start autoplay muted', labelKey: 'settings.autoPlayMuted', keywords: 'autoplay mute muted sound audio silent quiet volume' },
   { tab: 'appearance', anchor: 'data-saver', label: 'Data Saver', labelKey: 'settings.dataSaver', keywords: 'bandwidth quality mobile data' },

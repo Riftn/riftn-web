@@ -919,6 +919,8 @@
     "feedTogglesCleared": "تمت إعادة ضبط فلاتر الخلاصة",
     "defaultProfileTab": "تبويب الملف الشخصي الافتراضي",
     "defaultProfileTabDesc": "اختر التبويب الذي يراه الزوار أولًا في ملفك الشخصي",
+    "defaultProfileView": "تخطيط منشورات الملف الشخصي",
+    "defaultProfileViewDesc": "اعرض منشوراتك كشبكة أو كقائمة عندما يفتح الناس ملفك الشخصي",
     "public": "عام",
     "publicDesc": "يمكن لأي شخص رؤية منشوراتك",
     "private": "خاص",

@@ -716,6 +716,8 @@
     "feedTogglesCleared": "รีเซ็ตตัวกรองฟีดแล้ว",
     "defaultProfileTab": "แท็บโปรไฟล์เริ่มต้น",
     "defaultProfileTabDesc": "เลือกว่าผู้เยี่ยมชมจะเห็นแท็บไหนก่อนในโปรไฟล์ของคุณ",
+    "defaultProfileView": "รูปแบบโพสต์ในโปรไฟล์",
+    "defaultProfileViewDesc": "แสดงโพสต์ของคุณเป็นตารางหรือรายการเมื่อมีคนเปิดโปรไฟล์ของคุณ",
     "public": "สาธารณะ",
     "publicDesc": "ทุกคนเห็นโพสต์ของคุณได้",
     "private": "ส่วนตัว",

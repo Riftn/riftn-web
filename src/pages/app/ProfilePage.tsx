@@ -69,6 +69,7 @@ import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/p
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
 import { updateProfile } from '@/lib/api/dehub';
+import { PROFILE_VIEW_DEFAULT_KEY, ProfileViewModeContext, parseProfileViewDefault, useProfileViewState } from '@/lib/profile-view-mode';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { checkUsernameAvailability } from '@/lib/api/dehub/auth';
 
@@ -308,6 +309,13 @@ export default function ProfilePage() {
   // aren't clobbered, and navigating to a different profile re-applies theirs.
   const appliedDefaultTabFor = useRef<string | null>(null);
   const profileKey = data.apiProfile?.walletAddress || null;
+
+  // Grid or list on the All tab: the owner's saved default, unless this
+  // visitor flipped the toggle on this profile during this browser tab.
+  const profileView = useProfileViewState(
+    profileKey,
+    parseProfileViewDefault((data.apiProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_DEFAULT_KEY]),
+  );
 
   // Text-post backdrop the owner picked (customs.postBg). A save shows at once
   // through the override and the profile query catches up behind it.
@@ -868,6 +876,7 @@ return () => rail.removeEventListener('wheel', onWheel);
         </div>
 
         {/* Tab Content - all panels rendered, inactive hidden via CSS */}
+        <ProfileViewModeContext.Provider value={profileView}>
         <div data-feed-swallow-bounds>
         <div ref={profileContentRef} data-profile-content>
         <FeedSwallowMotion>
@@ -958,6 +967,7 @@ return () => rail.removeEventListener('wheel', onWheel);
         </FeedSwallowMotion>
         </div>
         </div>
+        </ProfileViewModeContext.Provider>
       </div>
 
       {data.isViewingOwnProfile && (

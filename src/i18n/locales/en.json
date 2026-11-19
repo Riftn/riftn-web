@@ -930,6 +930,8 @@
     "feedTogglesCleared": "Feed toggles reset",
     "defaultProfileTab": "Default profile tab",
     "defaultProfileTabDesc": "Choose which tab visitors see first on your profile",
+    "defaultProfileView": "Profile posts layout",
+    "defaultProfileViewDesc": "Show your posts as a grid or a list when people open your profile",
     "public": "Public",
     "publicDesc": "Anyone can see your posts",
     "private": "Private",

@@ -773,6 +773,8 @@
     "feedTogglesCleared": "Filter feed diatur ulang",
     "defaultProfileTab": "Tab profil bawaan",
     "defaultProfileTabDesc": "Pilih tab mana yang pertama dilihat pengunjung di profil Anda",
+    "defaultProfileView": "Tata letak postingan profil",
+    "defaultProfileViewDesc": "Tampilkan postingan Anda sebagai kisi atau daftar saat orang membuka profil Anda",
     "public": "Publik",
     "publicDesc": "Siapa saja dapat melihat postingan Anda",
     "private": "Pribadi",

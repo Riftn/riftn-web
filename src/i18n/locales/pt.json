@@ -855,6 +855,8 @@
     "feedTogglesCleared": "Filtros do feed redefinidos",
     "defaultProfileTab": "Separador de perfil padrão",
     "defaultProfileTabDesc": "Escolha que separador os visitantes veem primeiro no seu perfil",
+    "defaultProfileView": "Esquema das publicações do perfil",
+    "defaultProfileViewDesc": "Mostre as suas publicações em grelha ou em lista quando alguém abrir o seu perfil",
     "public": "Público",
     "publicDesc": "Qualquer pessoa pode ver suas publicações",
     "private": "Privado",

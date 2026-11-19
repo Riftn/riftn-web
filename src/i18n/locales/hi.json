@@ -855,6 +855,8 @@
     "feedTogglesCleared": "फ़ीड फ़िल्टर रीसेट हो गए",
     "defaultProfileTab": "डिफ़ॉल्ट प्रोफ़ाइल टैब",
     "defaultProfileTabDesc": "चुनें कि आपकी प्रोफ़ाइल पर आने वाले सबसे पहले कौन-सा टैब देखें",
+    "defaultProfileView": "प्रोफ़ाइल पोस्ट लेआउट",
+    "defaultProfileViewDesc": "लोग आपकी प्रोफ़ाइल खोलें तो आपकी पोस्ट ग्रिड या सूची में दिखाएँ",
     "public": "सार्वजनिक",
     "publicDesc": "कोई भी आपकी पोस्ट देख सकता है",
     "private": "निजी",

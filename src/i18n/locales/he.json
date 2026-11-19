@@ -702,6 +702,8 @@
     "feedTogglesCleared": "מסנני הפיד אופסו",
     "defaultProfileTab": "לשונית ברירת המחדל בפרופיל",
     "defaultProfileTabDesc": "בחרו איזו לשונית מבקרים רואים ראשונה בפרופיל שלכם",
+    "defaultProfileView": "פריסת הפוסטים בפרופיל",
+    "defaultProfileViewDesc": "הציגו את הפוסטים שלכם כרשת או כרשימה כשאנשים פותחים את הפרופיל שלכם",
     "public": "ציבורי",
     "publicDesc": "כולם יכולים לראות את הפוסטים שלך",
     "private": "פרטי",
