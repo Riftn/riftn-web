@@ -19,6 +19,19 @@ interface GlassIndicatorProps {
   variant?: 'nav';
 }
 
+/**
+ * Whether a tab click should slide the glass across to the new tab.
+ *
+ * Not on desktop. Picking a tab mounts that tab's whole page in the same
+ * moment, and the slide only starts moving once that work is done, so the
+ * glass sat on the tab just left (its white rim reading as that tab still
+ * being selected) while the new tab was already lit. On desktop the glass
+ * lands on the clicked tab in the same frame. Phones keep the slide.
+ */
+export function glideOnTabClick(): boolean {
+  return typeof window === 'undefined' || !window.matchMedia?.('(min-width: 1024px)').matches;
+}
+
 const GLASS_CLASSES = 'pointer-events-none absolute bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30';
 
 // Cache indicator positions so returning to a page renders instantly

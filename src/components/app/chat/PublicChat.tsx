@@ -1,6 +1,10 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from "@/hooks/use-draft-state";
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Fragment } from 'react';
+import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
+import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
+import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
+import { useChatReadPosition } from '@/hooks/use-chat-read-position';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw, ChevronsDown } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
@@ -112,6 +116,9 @@ const ROOM_MANAGEMENT_ENABLED = false;
 const CHAT_PAGE_SIZE = 20;
 /** How close to the top (px) the next older page is fetched. */
 const LOAD_OLDER_AT = 240;
+
+/** Older pages (20 lines each) the room may pull in at open to reach where you left off. */
+const MAX_READ_SPOT_PAGES = 10;
 
 export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // A mention notification names the line that tagged the reader.
@@ -246,6 +253,27 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     );
   }, [messages, buyAlerts, localAssistantReplies, hasNewer]);
 
+  // ─── Where you left off ───────────────────────────────────────────────────
+  // Signed in, the room opens on the first line you haven't seen (saved on
+  // the server, same on every device) under an "Unread messages" line.
+  const readSpot = useChatReadPosition(isAuthenticated && selectedRoomId && /^[a-z0-9_-]{1,40}$/i.test(selectedRoomId) ? `live:${selectedRoomId}` : null);
+  const [unreadAnchor, setUnreadAnchor] = useState<UnreadAnchor | null>(null);
+  const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
+  const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
+  const [unreadBelow, setUnreadBelow] = useState(0);
+  const [scrolledUp, setScrolledUp] = useState(false);
+  const readDecidedRoom = useRef<string | null>(null);
+  const unreadPlacedRef = useRef(false);
+  const readSpotPagesRef = useRef(0);
+  const readTrackingRef = useRef(false);
+  const ownAddress = walletAddress?.toLowerCase() ?? null;
+  const readLines = useMemo(() => messages.map((m) => ({
+    id: m.id,
+    own: !!ownAddress && m.userId?.toLowerCase() === ownAddress,
+    at: m.timestamp.getTime(),
+    skip: !!m.sendState || isAssistantAddress(m.userId),
+  })), [messages, ownAddress]);
+
   const openSearch = useCallback((person?: ChatSearchPerson) => {
     setSearchPerson(person ?? null);
     setSearchText('');
@@ -367,6 +395,125 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // Rows keep growing after they land (images, replies, reactions), so stay
   // pinned to the very bottom through those too, not just on new rows.
   useStickToBottom(scrollContainerRef, () => followLatest.current && !olderAnchor.current);
+
+  // Decide once per room where it opens: on the "Unread messages" line, or at
+  // the newest line as before.
+  useEffect(() => {
+    if (!selectedRoomId || readDecidedRoom.current === selectedRoomId) return;
+    if (messagesLoading || !messages.length || !readSpot.ready) return;
+    const decide = (anchor: UnreadAnchor | null) => {
+      readDecidedRoom.current = selectedRoomId;
+      readSpotPagesRef.current = 0;
+      unreadPlacedRef.current = false;
+      setUnreadMarkerSeen(false);
+      setUnreadAnchor(anchor);
+      if (anchor) {
+        followLatest.current = false;
+        window.setTimeout(() => { readTrackingRef.current = true; }, 1500);
+      } else {
+        readTrackingRef.current = true;
+      }
+    };
+    if (!readSpot.opening || hasNewer || isSearchOpen) { decide(null); return; }
+    const found = anchorFromReadSpot(readLines, readSpot.opening, hasOlder && !signInWall);
+    if (found.kind === 'older') {
+      if (readSpotPagesRef.current < MAX_READ_SPOT_PAGES) {
+        if (!loadingOlder) {
+          readSpotPagesRef.current += 1;
+          requestOlder();
+        }
+        return;
+      }
+      const theirs = readLines.filter((l) => !l.own && !l.skip);
+      decide(theirs.length ? { id: theirs[0].id, ids: theirs.map((l) => l.id), count: theirs.length } : null);
+      return;
+    }
+    decide(found.kind === 'anchor' ? found.anchor : null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoomId, messages.length, messagesLoading, readSpot.ready, hasOlder, loadingOlder, signInWall]);
+
+  /** How many unread lines sit below the fold, and whether the marker is above it. */
+  const refreshUnreadJump = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !unreadAnchor) return;
+    const box = container.getBoundingClientRect();
+    let below = 0;
+    for (const id of unreadAnchor.ids) {
+      const el = document.getElementById(chatMessageDomId(id));
+      if (el && el.getBoundingClientRect().top > box.bottom - 4) below++;
+    }
+    setUnreadBelow(below);
+    const marker = container.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!marker) { setUnreadMarkerAbove(false); return; }
+    const r = marker.getBoundingClientRect();
+    const above = r.bottom < box.top;
+    setUnreadMarkerAbove(above);
+    if (!above && r.top < box.bottom) setUnreadMarkerSeen(true);
+  }, [unreadAnchor]);
+
+  /** Saves the newest line on screen as where you left off. */
+  const reportReadSpot = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !readTrackingRef.current || readDecidedRoom.current !== selectedRoomId) return;
+    const ids: string[] = [];
+    for (let i = messages.length - 1; i >= 0; i--) if (!messages[i].sendState) ids.push(messages[i].id);
+    const id = newestLineOnScreen(container, ids, (x) => document.getElementById(chatMessageDomId(x)));
+    if (!id) return;
+    const line = messages.find((m) => m.id === id);
+    if (line) readSpot.report(line.id, line.timestamp.toISOString());
+  }, [messages, selectedRoomId, readSpot.report]);
+
+  const scrollFrame = useRef(0);
+  const scheduleScrollWork = useCallback(() => {
+    if (scrollFrame.current) return;
+    scrollFrame.current = requestAnimationFrame(() => {
+      scrollFrame.current = 0;
+      refreshUnreadJump();
+      reportReadSpot();
+    });
+  }, [refreshUnreadJump, reportReadSpot]);
+  useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
+  useEffect(() => {
+    const timer = window.setTimeout(scheduleScrollWork, 400);
+    return () => window.clearTimeout(timer);
+  }, [messages, scheduleScrollWork]);
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') scheduleScrollWork(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [scheduleScrollWork]);
+
+  // Land on the marker: just under the top edge, the unread lines below it.
+  useLayoutEffect(() => {
+    if (!unreadAnchor || unreadPlacedRef.current) return;
+    const container = scrollContainerRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return;
+    unreadPlacedRef.current = true;
+    followLatest.current = false;
+    const offset = marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTop = Math.max(0, container.scrollTop + offset - 8);
+    const fromEnd = container.scrollHeight - container.clientHeight - container.scrollTop;
+    // Few enough unread lines to fit: the clamp left us at the bottom, so follow it.
+    followLatest.current = fromEnd < 120;
+    readTrackingRef.current = true;
+    scheduleScrollWork();
+  }, [unreadAnchor, filteredMessages.length, scheduleScrollWork]);
+
+  const jumpToUnreadMarker = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return;
+    const offset = marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - 8), behavior: 'smooth' });
+    setUnreadMarkerSeen(true);
+  }, []);
+  const jumpToNewest = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    followLatest.current = true;
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+  }, []);
 
   const handleReply = useCallback((message: Message) => {
     setReplyTo(message);
@@ -658,6 +805,8 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
             const fromEnd = el.scrollHeight - el.clientHeight - el.scrollTop;
             // In old history the end of the list is not the newest line yet.
             followLatest.current = !hasNewer && fromEnd < 120;
+            setScrolledUp(fromEnd > 160);
+            scheduleScrollWork();
             if (el.scrollTop < LOAD_OLDER_AT) requestOlder();
             if (hasNewer && fromEnd < LOAD_OLDER_AT) void loadNewer();
           }}
@@ -705,7 +854,8 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
                 {_copy("copy.feaf753f6557", { defaultValue: "Start of the chat" })}
               </p>
             ) : null}
-            {filteredMessages.map((message) => (
+            {filteredMessages.map((message) => {
+              const row = (
               message.id.startsWith('buy-alert-') ? (
                 buyBotHidden ? null : (
                   <BuyAlertCard
@@ -745,7 +895,15 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
                 isPinned={pinnedMessage?.id === message.id}
               />
               )
-            ))}
+              );
+              if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
+              return (
+                <Fragment key={`unread-${message.id}`}>
+                  <UnreadMarker count={unreadAnchor.count} />
+                  {row}
+                </Fragment>
+              );
+            })}
             </>
           )}
           <div ref={bottomRef} />
@@ -779,6 +937,20 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
             onNewer={() => void openResult(activeHit - 1)}
           />
         )}
+        {!hasNewer && !showSearchList && !isSearchOpen && (() => {
+          // Same control as DMs: up to the unread line until it has been seen,
+          // then down to the newest, with the unread lines still below.
+          const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
+          if (!(up || scrolledUp || unreadBelow > 0)) return null;
+          return (
+            <UnreadJumpButton
+              up={up}
+              count={unreadAnchor ? unreadBelow : 0}
+              onClick={up ? jumpToUnreadMarker : jumpToNewest}
+              className="absolute bottom-3 right-3 z-10"
+            />
+          );
+        })()}
         {hasNewer && !showSearchList && (
           <button
             type="button"

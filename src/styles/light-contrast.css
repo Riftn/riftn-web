@@ -118,3 +118,30 @@ html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_
   [data-button-variant='destructive']:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *) :is(span, svg) {
   color: #b91c1c !important;
 }
+
+/* System Light: menu rows that only light up on focus (`focus:bg-white/10`)
+   were caught by the repaint of every `bg-white/` class, so every row sat
+   grey and the list read as one block. Rows stay clear; only the hovered or
+   keyboard-focused row greys, with a little air between rows. */
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/'] {
+  border-radius: 10px;
+}
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/'] + [role='menuitem'] {
+  margin-top: 2px;
+}
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/']:not([data-highlighted]) {
+  background-color: transparent !important;
+}
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/'][data-highlighted] {
+  background-color: #f0f1f3 !important;
+}
+
+/* System Light flattens feed rows edge to edge. The profile's list view shows
+   posts as separate cards, so there they keep their rounded corners. */
+html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-profile-list-view] [data-feed-item] {
+  border-radius: 0.75rem !important;
+}

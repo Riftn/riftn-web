@@ -15,6 +15,23 @@
     "saved": "Vora desada",
     "failed": "No s’ha pogut desar la vora"
   },
+  "duet": {
+    "policyEveryone": "Tothom",
+    "policyFollowers": "Seguidors",
+    "policyNobody": "Ningú",
+    "loadMore": "Carregar més",
+    "video": "Vídeo"
+  },
+  "videoRemix": {
+    "sound": "Fes servir aquest so"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Tothom",
+      "followers": "Seguidors",
+      "nobody": "Ningú"
+    }
+  },
   "dehubAppPage": {
     "android": "Android",
     "appStore": "Descàrrega a l’App Store",
@@ -166,11 +183,18 @@
     "privateNote": "Els comptes privats no es mostren al fedivers.",
     "noUsername": "Tria un nom d'usuari per tenir una adreça al fedivers."
   },
+  "signedFollows": {
+    "setUp": "Activa",
+    "turnOff": "Desactiva",
+    "efpTurnOff": "Aturar"
+  },
   "profileFields": {
     "title": "Camps del perfil",
     "description": "Fins a quatre línies més al teu perfil, com un lloc web o els teus pronoms.",
     "label": "Etiqueta",
     "content": "Contingut",
+    "add": "Afegeix un camp",
+    "remove": "Elimina el camp",
     "save": "Desa els camps",
     "saved": "S'han desat els camps del perfil",
     "failed": "No s'ha desat. Torna-ho a provar.",
@@ -368,6 +392,7 @@
     "checkFailed": "No hem pogut comprovar la disponibilitat. Torna-ho a provar.",
     "checking": "S'està comprovant...",
     "ownership": "Codi obert. Propietat de l'usuari.",
+    "title": "Una mica de feina.\nUn Riftn millor.",
     "intermission": "Temporalment fora de línia",
     "community": "La comunitat és el primer. Sempre."
   },
@@ -676,6 +701,8 @@
     "feedTogglesCleared": "Filtres del feed restablerts",
     "defaultProfileTab": "Pestanya de perfil per defecte",
     "defaultProfileTabDesc": "Tria quina pestanya veuen primer els visitants al teu perfil",
+    "defaultProfileView": "Disposició de les publicacions del perfil",
+    "defaultProfileViewDesc": "Mostra les teves publicacions en graella o en llista quan algú obri el teu perfil",
     "public": "Públic",
     "publicDesc": "Qualsevol pot veure les teves publicacions",
     "private": "Privat",
@@ -1196,7 +1223,12 @@
     "payDirect": "Enviat directament a {{name}} en {{symbol}} el {{chain}}. Sense intercanvi.",
     "payDirectNoName": "Enviat directament al creador en {{symbol}} el {{chain}}. Sense intercanvi.",
     "payViaBridgeDpay": "Mogut a Base i pagat a Riftn Pay, les fitxes arriben en aproximadament un minut",
-    "dmSent": "S'han enviat {{amount}} fitxes a {{name}}!"
+    "dmSent": "S'han enviat {{amount}} fitxes a {{name}}!",
+    "addMessage": "Afegeix un missatge (opcional)",
+    "messagePublic": "Públic",
+    "railTitle": "Consells",
+    "railTotal": "{{amount}} fitxes",
+    "tokensUnit": "fitxes"
   },
   "postOptions": {
     "liveAlertsOn": "Ara segueixes {{name}}. Rebràs una notificació quan faci un directe.",
@@ -1697,6 +1729,9 @@
   "notifications": {
     "title": "Notificacions",
     "markAllRead": "Marcar tot com a llegit",
+    "groupNew": "Nou",
+    "groupToday": "Avui",
+    "groupThisWeek": "Aquesta setmana",
     "settings": "Configuració de notificacions",
     "actions": "Accions",
     "markAllAsRead": "Marcar tot com a llegit",
@@ -1725,6 +1760,7 @@
     "communities": "Comunitats",
     "stores": "Botigues",
     "noNotificationsYet": "Encara no hi ha notificacions",
+    "searchClose": "Tanca la cerca",
     "noNotificationsDesc": "Quan rebis m'agrada, comentaris, propines o nous subscriptors, apareixeran aquí.",
     "loadMore": "Carregar més",
     "markAsRead": "Marcar com a llegit",
@@ -1964,11 +2000,13 @@
     "promptLabel": "El teu prompt",
     "promptPlaceholder": "Descriu una idea, millora o error…",
     "promptAttach": "Adjunta imatges",
+    "removeAttachment": "Elimina l'adjunt",
     "promptDrop": "Enganxa o diposita imatges aquí",
     "promptPost": "Publicar prompt",
     "promptShortcut": "Ctrl / ⌘ + Enter per publicar",
     "promptDetails": "Detalls opcionals",
     "promptDevice": "Dispositiu i sistema operatiu (per errors)",
+    "deviceInfoNoErrors": "Cap",
     "promptFilters": "Filtra per categoria",
     "promptMediaError": "Selecciona imatges o vídeos de menys de 20MB cadascun.",
     "promptMediaLimit": "Fins a {{max}} adjunts.",
@@ -2027,6 +2065,12 @@
     "loginRequired": "Cal iniciar sessió"
   },
   "messages": {
+    "newDrawer": {
+      "to": "A",
+      "recent": "Recents",
+      "suggested": "Suggerit",
+      "youFollow": "Gent que segueixes"
+    },
     "reply": "Respon",
     "react": "Reacciona",
     "edit": "Editar",
@@ -2063,7 +2107,10 @@
     "checkingTokenBalance": "Comprovant el teu saldo de fitxes...",
     "deleteConversationFailed": "No s'ha pogut eliminar la conversa",
     "message": "Missatge",
-    "noConversationsYet": "No hi ha converses encara"
+    "noConversationsYet": "No hi ha converses encara",
+    "sending": "Enviant",
+    "retrySend": "Torna-ho a provar",
+    "discardSend": "Treu"
   },
   "music": {
     "listeningCount_one": "{{count}} escoltant",
@@ -2146,6 +2193,9 @@
     "viewList": "Visualització de la llista",
     "viewMode": "Visualitza",
     "back": "Enrere",
+    "reserve": {
+      "signIn": "Inicia sessió"
+    },
     "usernameAvailable": "Nom d'usuari disponible!",
     "signUpToClaim": "Registra't avui per reclamar",
     "signUp": "Registrar-se",
@@ -2164,7 +2214,8 @@
       "total": "Abast total",
       "breakdownTitle": "D'on ve aquest abast",
       "dehubFollowers": "Seguidors de Riftn",
-      "verified": "Els recomptes de xarxes socials provenen dels comptes que el creador ha connectat."
+      "verified": "Els recomptes de xarxes socials provenen dels comptes que el creador ha connectat.",
+      "selfReported": "El creador introdueix els recomptes de seguidors socials."
     },
     "loginDescription": "Inicia sessió per veure i gestionar el teu perfil.",
     "replyThread": {
@@ -2173,7 +2224,13 @@
     },
     "tabs": {
       "playlists": "Llista de reproducció",
-      "dislikes": "No m'agrada"
+      "dislikes": "No m'agrada",
+      "likes": "M'agrada"
+    },
+    "likedPosts": {
+      "emptyTitle": "Encara no hi ha m'agrada",
+      "privateTitle": "Els m'agrada són privats",
+      "loadMore": "Carregar més"
     },
     "dislikes": {
       "emptyTitle": "Encara cap «no m'agrada»",
@@ -2196,6 +2253,10 @@
     "sortMostViewed": "Més vist",
     "sortLikes": "Llikes",
     "sortMostLiked": "Més votat",
+    "sortCustomShort": "Personalitzat",
+    "arrange": {
+      "saving": "Desant..."
+    },
     "searchThisChannel": "Cerca aquest canal",
     "searchResultCount": "1 resultat per \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultats per \"{{query}}\""
@@ -2353,6 +2414,7 @@
       "runSwarm": "Executa colla",
       "description": "Les accions s'executen com l'agent seleccionat. Les tasques programades continuen amb l'aplicació tancada.",
       "instructions": "Instruccions de l'agent",
+      "examples": "Publica un cop al dia sobre: música independent\nEstil: curiós, concís i conversacional\nFes m'agrada a fins a 2 publicacions recents al dia sobre: música, concerts en directe, vinil",
       "preparing": "Preparant tasca…",
       "run": "Executa prompt",
       "limits": "Una publicació diària i fins a 3 likes rellevants per tasca. Tots els agents comparteixen un buit posterior de 20 minuts. Les fotos utilitzen peus de foto marcats; els vídeos necessiten una imatge de portada. Les publicacions no superen els 500 caràcters. No hi ha gas a menys que s'encunyi; l'escriptura pot utilitzar crèdits.",
@@ -2461,6 +2523,9 @@
     "signInAgain": "Torna a iniciar sessió",
     "createSignIn": "Torna a iniciar sessió per crear un agent",
     "checkConnection": "Comprova la connexió i torna-ho a provar.",
+    "welcome": {
+      "text": "Missatge de benvinguda"
+    },
     "workspace": {
       "moderation": "Moderació de streams",
       "moderationHelp": "Activa primer el permís de moderació. El compte ja ha de ser el creador del stream o un moderador assignat. Els modes d'aprovació i d'esborrany continuen vigents. Les suspensions caduquen automàticament.",
@@ -2653,7 +2718,9 @@
     "resendCodePhone": "Número incorrecte o sense codi? Torna enrere",
     "continueAs": "Continua com a",
     "switchWalletAccount": "Canvia de compte",
-    "walletLoadFailed": "No s'han pogut carregar les carteres. Torna-ho a provar."
+    "walletLoadFailed": "No s'han pogut carregar les carteres. Torna-ho a provar.",
+    "openInBrowser": "Obre al navegador",
+    "copyLink": "Copia l'enllaç"
   },
   "careers": {
     "title": "Carreres a Riftn",
@@ -2877,7 +2944,8 @@
     "noMenuMatches": "Res del menú no coincideix",
     "searchDehubFor": "Cerca «{{query}}» a Riftn",
     "switchAccount": "Canvia de compte",
-    "signedInAs": "S'ha iniciat la sessió com a {{name}}"
+    "signedInAs": "S'ha iniciat la sessió com a {{name}}",
+    "requestSend": "Envia la sol·licitud"
   },
   "comments": {
     "reportComment": "Denuncia el comentari",
@@ -5098,6 +5166,7 @@
     "settledTitleSpeed": ", típicament en {{speed}}",
     "settledCount_one": "{{count}} liquidat",
     "settledCount_other": "{{count}} liquidat",
+    "statusInProgress": "En curs",
     "howMany": "Quants",
     "availableCount_one": "{{count}} disponibles",
     "availableCount_other": "{{count}} disponibles",
@@ -5190,6 +5259,17 @@
     "sellYourFractions": "Vendre les teves fraccions ({{held}} retingudes)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Utilitza aquesta informació"
+      }
+    },
+    "cinema": {
+      "close": "Tancar",
+      "performance": {
+        "label": "Rendiment"
+      }
+    },
     "libraryEmpty": "Les teves generacions desades apareixeran aquí.",
     "toolMaboroshi": "Maboroshi",
     "toolMaboroshiDesc": "Substitueix els personatges i els objectes, revisa un esborrany i, a continuació, exporta amb la banda sonora original.",
@@ -6160,6 +6240,12 @@
     "raw": "Aliments crus"
   },
   "nftMarket": {
+    "actAll": "Tots",
+    "actListings": "Anuncis",
+    "actOffer": "Oferta",
+    "actOffers": "Ofertes",
+    "actSales": "Vendes",
+    "tabActivity": "Activitat",
     "shortTitle": "NFTS",
     "filters": "Filtres",
     "forSale": "En venda",
@@ -6224,6 +6310,9 @@
     "offered": "Oferta enviada. El titular pot acceptar-la en qualsevol moment.",
     "dehubPost": "Publicació Riftn",
     "youHold": "Tens {{n}}",
+    "price": "Preu",
+    "volume": "Volum",
+    "tabRecent": "Recents",
     "buyNow": "Compra ara",
     "dropsTo": "El preu baixa a {{price}} per {{date}}",
     "inBundle": "Venut com a paquet de {{n}}",
@@ -6637,7 +6726,62 @@
     "youAreBanned": "No pots xatejar a les transmissions d'aquest creador",
     "youAreTimedOut": "Tens temps límit per un moment"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Fons",
+      "modes": {
+        "none": "Desactivat",
+        "blur": "Difuminat",
+        "color": "Color"
+      }
+    },
+    "remove": "Treu",
+    "scenes": {
+      "countdown": "Compte enrere",
+      "names": {
+        "starting": "Comença aviat"
+      }
+    },
+    "sources": {
+      "reactAdd": "Mostra",
+      "image": "Imatge",
+      "camera": "Càmera",
+      "show": "Mostra a la transmissió",
+      "loop": "Bucle",
+      "sizes": {
+        "medium": "Mitjana"
+      },
+      "shapes": {
+        "circle": "Cercle",
+        "rect": "Quadrat"
+      }
+    },
+    "audio": {
+      "mute": "Silencia",
+      "unmute": "Deixa de silenciar",
+      "gateLevels": {
+        "off": "Desactivat",
+        "low": "Clar",
+        "high": "Forta"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Plataforma",
+      "label": "Nom (opcional)",
+      "key": "Clau de transmissió",
+      "save": "Afegir",
+      "cancel": "Cancel·lar",
+      "states": {
+        "off": "Desactivat",
+        "idle": "A punt",
+        "live": "En directe"
+      }
+    },
+    "vertical": {
+      "live": "EN DIRECTE"
+    },
     "subathon": {
       "title": "Subató",
       "intro": "Un comptador enrere en el teu stream. Cada regal pagat, seguiment i subscripció afegix temps, així que la sala et manté en directe.",
@@ -7590,6 +7734,8 @@
     "footerNote": "La participació en DePin és un servei de contribució, no un producte d'inversió. La disponibilitat, l'elegibilitat i les recompenses poden canviar."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nou flux",
+    "disconnect": "Desconnecta",
     "title": "Creator Flow",
     "backToStudio": "Tornar a Creator Studio",
     "backToFlows": "Tornar als vostres fluxos",
@@ -7930,6 +8076,9 @@
     "followingBackProgress": "Seguint a {{completed}} de {{total}}",
     "findingFollowers": "Cercant seguidors...",
     "followBackAll": "Segueix a tothom",
+    "followBackConfirm": "Seguir de tornada",
+    "followBackNotNow": "Ara no",
+    "followBackDone": "Fet",
     "nonFollowers": {
       "title": "Neteja a qui segueixes?",
       "body": "Els {{count}} comptes que segueixes no et tornen a seguir.",
@@ -8743,6 +8892,13 @@
     "priceChartCleared": "S'ha eliminat el gràfic de preus. Preu de referència fix: $ 0,0001. Els preus d'execució depenen de les comandes disponibles."
   },
   "editor": {
+    "stage": {
+      "camera": "Càmera",
+      "yaw": "Rotació",
+      "add": "Afegir",
+      "scale": "Mida",
+      "light": "Clar"
+    },
     "video": {
       "tFade": "Fos encadenat",
       "none": "Cap",
@@ -8909,6 +9065,8 @@
       "tools": "Eines de l'editor"
     },
     "agent": {
+      "stop": "Aturar",
+      "queue": "Afegir a la cua",
       "introTitle": "Digues a la IA què vols",
       "introBody": "Descriu el disseny o el canvi amb les teves paraules. Redimensiona la pàgina, escriu i dona estil al text, troba fotos, vídeos i música gratuïts, aplica filtres, ordena les capes i les anima. Cada petició es desfà d'un sol cop.",
       "suggestPoster": "Fes una publicació quadrada d'Instagram per a les rebaixes d'estiu amb una foto de platja i un títol destacat",
@@ -9177,6 +9335,9 @@
       "reloadText": "Torna a carregar el títol",
       "textSaved": "S'han desat els canvis en els peus de foto",
       "action": "Subtítols automàtics",
+      "styles": {
+        "bold": "Negreta"
+      },
       "working": "Escoltant… {{percent}}%",
       "downloading": "Preparant el model de veu… {{percent}}%",
       "hint": "Converteix la veu en subtítols sincronitzats que pots personalitzar. Funciona al teu dispositiu: gratuït i privat. El primer ús descarrega el model.",
@@ -10556,6 +10717,29 @@
       "toolbar": "Navegació de llenç",
       "zoomIn": "Zoom al canvas en",
       "zoomOut": "Redueix el llenç"
+    },
+    "clipFix": {
+      "listening": "Escoltant…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Divideix",
+        "play": "Jugar",
+        "pause": "Pausa",
+        "frameBack": "Fotograma anterior",
+        "frameForward": "Següent fotograma"
+      }
+    },
+    "voiceClone": {
+      "stop": "Aturar gravació",
+      "failed": "La clonació de veu ha fallat."
+    },
+    "linkImport": {
+      "go": "Importar",
+      "downloading": "Descarregant {{percent}}%"
+    },
+    "reverse": {
+      "action": "Inverteix"
     }
   },
   "jungleMood": {
@@ -11839,7 +12023,15 @@
       "rewardsWeek": "Setmana de {{date}}",
       "rewardPaid": "Pagament",
       "rewardPending": "En tràmit",
-      "rewardsNone": "Encara no s'ha calculat cap recompensa. La primera setmana tanca el dilluns."
+      "rewardsNone": "Encara no s'ha calculat cap recompensa. La primera setmana tanca el dilluns.",
+      "stats": {
+        "button": "Estadístiques en directe"
+      },
+      "signin": {
+        "users_one": "usuari {{count}}",
+        "users_other": "usuaris {{count}}",
+        "delete": "Eliminar"
+      }
     },
     "card": {
       "open": "Obre"
@@ -11997,6 +12189,9 @@
     "reminderLater": "No ara"
   },
   "copy": {
+    "55656b5e434f": "Tanca la cerca",
+    "57e2faa5ec63": "Cerca a Riftn",
+    "96d7bff86b44": "No s'ha pogut carregar la cerca",
     "1607715e45ed": "Toca la bola per parlar, o escriu a sota",
     "00140a37bd26": "Les transaccions en aquesta xarxa estan temporalment indisponibles. Torni a intentar-ho.",
     "002286513398": "No tens permís per gestionar esdeveniments.",
@@ -16485,7 +16680,6 @@
     "8731790030df": "@noble/curves",
     "e745d68f7240": "@noble/hashes",
     "886e533d7364": "dev@riftn.com",
-    "e8921bdee214": "@dehub_oficial",
     "dbc2def4603a": "Destacat a",
     "ee1c1eecf1b6": "Riftn ha estat cobert per algunes de les publicacions més grans i més confiables del món. Aquí hi ha els articles que destaquen la nostra missió de democratitzar els mitjans.",
     "6ccae4bbf68d": "El publicador ha eliminat l'original; això obre la captura de Wayback Machine.",
@@ -19001,6 +19195,7 @@
     "backToTop": "Tornar al principi",
     "needTitle": "Afegir un títol per continuar",
     "needBody": "{{count}} caràcters per anar",
+    "imagesLabel": "Imatges",
     "backToWriting": "Tornar a escriure",
     "readyTitle": "Preparat per publicar",
     "sharePreview": "Com apareix quan es comparteix",
@@ -19062,6 +19257,129 @@
     "exploreFirst": "Explora primer",
     "codeNote": "T'enviem un codi per correu, sense contrasenya."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Pla",
+      "howMany": "Quants",
+      "who": "Nom d'usuari o adreça de la cartera",
+      "whoPlaceholder": "@nomusuari",
+      "cancel": "Cancel·lar",
+      "stage": {
+        "preparing": "Preparant…",
+        "confirming": "S'està esperant la transacció…",
+        "recording": "S'està finalitzant…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Subscriptors"
+      },
+      "ended": "Finalitzat",
+      "until": "Fins al {{date}}",
+      "failed": "No ha funcionat. Torna-ho a provar."
+    }
+  },
+  "whenSheet": {
+    "today": "Avui",
+    "tooSoon": "Tria una hora en el futur.",
+    "show": "Mostra",
+    "hide": "Amaga"
+  },
+  "planned": {
+    "title": "Planificat",
+    "all": "Tots",
+    "posts": "Publicacions",
+    "stages": "Sales d'àudio",
+    "post": "Publicació",
+    "live": "En directe",
+    "stage": "Escenari",
+    "untitledPost": "Publicació",
+    "untitledLive": "En directe",
+    "loading": "S'està carregant...",
+    "startNow": "Comença ara",
+    "cancel": "Cancel·lar",
+    "cancelled": "Cancel·lada"
+  },
+  "welcome": {
+    "about": {
+      "title": "Benvingut a Riftn",
+      "day": "Dia",
+      "month": "Mes",
+      "year": "Any"
+    },
+    "name": {
+      "title": "El teu nom",
+      "placeholder": "El teu nom"
+    },
+    "card": {
+      "name": "El teu nom",
+      "followers": "seguidors"
+    },
+    "topic": {
+      "music": "Música",
+      "gaming": "Jocs",
+      "crypto": "Cripto",
+      "sports": "Esports",
+      "comedy": "Comèdia",
+      "film": "Pel·lícula",
+      "food": "Alimentació",
+      "news": "Notícies",
+      "science": "Ciències"
+    },
+    "back": "Enrere",
+    "skipPhoto": "Omet ara",
+    "preview": "Previsualització"
+  },
+  "appTokens": {
+    "title": "Els teus tokens",
+    "history": "Historial",
+    "noHistory": "Encara no hi ha activitat",
+    "kindDeposit": "Dipositar",
+    "to": "A",
+    "amount": "Quantitat",
+    "notePlaceholder": "Afegeix una nota (opcional)",
+    "sendButton": "Enviar",
+    "errorInsufficient": "Tokens insuficients"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Tothom",
+      "followers": "Seguidors",
+      "nobody": "Ningú"
+    },
+    "heading": "Reaccions",
+    "more": "Mostra més",
+    "liveNow": "En directe",
+    "untitled": "Reacció"
+  },
+  "connectGuide": {
+    "title": "Connecta Riftn al teu assistent d'IA",
+    "urlLabel": "URL del servidor MCP",
+    "copy": "Copia",
+    "copied": "Copiat",
+    "copiedToast": "URL de MCP copiat"
+  },
+  "avatarPrompt": {
+    "notNow": "Ara no"
+  },
+  "postStats": {
+    "audience": "Audiència",
+    "engagement": "Interacció",
+    "finished": "Finalitzat",
+    "members": "Membres",
+    "membersLower": "membres",
+    "newFollowers": "Nous seguidors",
+    "noBadge": "Sense distintiu",
+    "people": "Persones",
+    "plays": "Jocs",
+    "quotes": "cites",
+    "reposts": "Republicacions",
+    "saved": "Desat",
+    "shares": "Compartits",
+    "signedOutViewers": "Sessió tancada",
+    "topSupporters": "Els millors seguidors",
+    "visitors": "Sessió tancada"
+  },
   "tokenLaunch": {
     "eyebrow": "Proximament",
     "title": "Llançament de tokens pròximament",
@@ -19090,6 +19408,10 @@
     "unavailable": "Aviat arribarà la verificació de GitHub.",
     "connect": "Connecta el GitHub",
     "disconnect": "Desconnecta"
+  },
+  "mcpKeys": {
+    "delete": "Eliminar",
+    "shortProfile": "Perfil"
   },
   "chatSearch": {
     "placeholder": "Cerca missatges o persones",
@@ -19120,5 +19442,17 @@
     "gone": "Aquest missatge ja no hi és",
     "theirMessages": "Els seus missatges",
     "seeTheirMessages": "Mostra els seus missatges"
+  },
+  "dmRequests": {
+    "title": "Sol·licituds",
+    "accept": "Accepta",
+    "delete": "Eliminar",
+    "block": "Bloca"
+  },
+  "dmSchedule": {
+    "view": "Veure",
+    "edit": "Editar",
+    "editLabel": "Editar missatge",
+    "error": "No ha funcionat. Torna-ho a provar."
   }
 }

@@ -1,4 +1,5 @@
 import { outsideImage } from '@/lib/outside-image';
+import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { useTranslation as _useCopy, Trans } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
@@ -13,13 +14,12 @@ import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, CornerUpRight, FileText, Unlock, LockOpen, SmilePlus, CheckCircle2 } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
 import Gift from "@/components/ui/cut-icons/gifts";
 import Languages from "@/components/ui/cut-icons/language";
-import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
 import Lock from "@/components/ui/cut-icons/privacy";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -56,10 +56,13 @@ import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetR
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
+import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useMessages, useSendMessage, useDeleteConversation, useCreateAndStart, messagesKeys, registerOpenConversation, createTransientBlobUrl, peerAddressForConversation, failedSendRetry, discardFailedSend } from '@/hooks/use-messages';
 import { SendStatus } from './SendStatus';
 import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
 import { findUnreadAnchor, type UnreadAnchor } from '@/lib/chat-unread-anchor';
+import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
+import { useChatReadPosition } from '@/hooks/use-chat-read-position';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDmSettings } from '@/hooks/use-dm-settings';
 import { useBannedAccount } from '@/hooks/use-banned-account';
@@ -129,7 +132,7 @@ import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint } from './message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -137,10 +140,14 @@ import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { formatUnreadCount } from '@/lib/unread-count';
 import { isDmCallNotice } from '@/lib/dm-call-notice';
 import { CallNoteCard } from './calls/CallNoteCard';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
-import { MoreReactionsButton } from './MoreReactionsButton';
+
+// Picking messages: only the ticked rows are shaded, the rest stay clear and
+// only hint on hover. Mixed from the text colour rather than bg-white/..., which
+// light themes repaint grey on every row whatever its state.
+const PICKED_ROW = 'bg-[color-mix(in_srgb,currentColor_8%,transparent)]';
+const PICKABLE_ROW = 'hover:bg-[color-mix(in_srgb,currentColor_4%,transparent)]';
 
 interface DirectMessageChatProps {
   conversation: DeHubConversation;
@@ -483,14 +490,17 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick,
   onStartPick,
   onDelete,
+  canDeleteAny = false,
   canPin = true,
   isPinned = false,
   onUnpin,
 }: {
   message: DmMessage;
   isOwnMessage: boolean;
-  /** Delete one of your own messages (asks first). */
+  /** Delete one message for everyone (asks first). Your own, or any in a one-to-one chat. */
   onDelete?: (message: DmMessage) => void;
+  /** One-to-one chat: either person can delete the other's messages too, like Telegram. */
+  canDeleteAny?: boolean;
   /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
   canPin?: boolean;
   isPinned?: boolean;
@@ -640,7 +650,6 @@ const MessageBubble = memo(function MessageBubble({
     try { if (await onSaveEdit(message._id, draftText) && setDraftText.complete(draftText, '')) onCancelEdit?.(); }
     finally { editPending.current = false; setIsSavingEdit(false); }
   };
-  const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
   useEffect(() => {
     if (isEditing) setDraftText.initialize(message.content || '');
   }, [isEditing, message.content, setDraftText]);
@@ -695,6 +704,7 @@ const MessageBubble = memo(function MessageBubble({
    * picking several messages a hold or click ticks instead.
    */
   const rowRef = useRef<HTMLDivElement>(null);
+  useSwipeReply(rowRef, onReply ? () => onReply(message) : undefined, !selecting);
   const [holdOpen, setHoldOpen] = useState(false);
   const menuPoint = useMenuPoint();
   const menuable = !message.isDeleted && !isUnsent && !isEditing && !isCallMessage;
@@ -719,6 +729,8 @@ const MessageBubble = memo(function MessageBubble({
     );
   };
   const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
+  // Translate also translates every message above this one that still needs it.
+  const translateUp = useTranslateUp('dm', message._id, message.createdAt, canTranslate && !isTranslated && !isTranslating, handleTranslate);
   const menuActions: MessageMenuAction[] = [];
   const holdActions: ChatHoldAction[] = [];
   if (menuable && message.msgType !== 'tip') {
@@ -753,7 +765,7 @@ const MessageBubble = memo(function MessageBubble({
       holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
     }
     if (canTranslate) {
-      const go = isTranslated ? handleShowOriginal : handleTranslate;
+      const go = isTranslated ? handleShowOriginal : translateUp;
       menuActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go, hint: 'T' });
       holdActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go });
     }
@@ -765,12 +777,13 @@ const MessageBubble = memo(function MessageBubble({
       menuActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
       holdActions.push({ key: 'download', icon: menuIcons.download, label: L.download, onSelect: () => void handleDownloadMedia() });
     }
-    if (isOwnMessage && onDelete) {
+    const canDeleteThis = !!onDelete && (isOwnMessage || canDeleteAny);
+    if (canDeleteThis && onDelete) {
       menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
       holdActions.push({ key: 'delete', secondary: true, destructive: true, icon: menuIcons.delete, label: L.del, onSelect: () => onDelete(message) });
     }
     if (pickable) {
-      menuActions.push({ key: 'select', divided: !(isOwnMessage && onDelete), icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
+      menuActions.push({ key: 'select', divided: !canDeleteThis, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
       holdActions.push({ key: 'select', secondary: true, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message) });
     }
   }
@@ -853,7 +866,7 @@ const MessageBubble = memo(function MessageBubble({
         if (selecting) { e.preventDefault(); e.stopPropagation(); onTogglePick?.(message); return; }
         if (e.metaKey || e.ctrlKey || e.shiftKey) { e.preventDefault(); e.stopPropagation(); onStartPick?.(message); }
       }}
-      className={`flex ${cozy ? `gap-2 items-end ${cozy.first ? 'pt-2' : 'pt-0.5'} ${cozy.last ? 'pb-1' : 'pb-0'}` : 'gap-3 py-2'} ${isOwnMessage ? 'flex-row-reverse' : ''} group relative rounded-lg transition-colors ${selecting && pickable ? `cursor-pointer select-none ${picked ? 'bg-white/[0.07]' : 'hover:bg-white/[0.03]'}` : ''}`}
+      className={`flex ${cozy ? `gap-2 items-end ${cozy.first ? 'pt-2' : 'pt-0.5'} ${cozy.last ? 'pb-1' : 'pb-0'}` : 'gap-3 py-2'} ${isOwnMessage ? 'flex-row-reverse' : ''} group relative rounded-lg transition-colors ${selecting && pickable ? `my-0.5 cursor-pointer select-none ${picked ? PICKED_ROW : PICKABLE_ROW}` : ''}`}
     >
       {selecting && pickable && (
         <span className={`flex ${isOwnMessage ? 'order-last mr-auto pr-1' : 'pr-1'} self-center`}><MessagePickTick checked={picked} /></span>
@@ -1201,108 +1214,11 @@ const MessageBubble = memo(function MessageBubble({
           </div>
         )}
 
-          {!selecting && !message.isDeleted && !isUnsent && message.msgType !== 'tip' && !isEditing && (onReply || onReact || onPin || onForward || downloadTarget || (onEdit && canEdit) || pickable) && (
-            <div
-              className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? 'right-full mr-1' : 'left-full ml-1'} flex items-center gap-1 transition-all opacity-0 group-hover:opacity-100 z-10`}
-            >
-              {pickable && (
-                <button
-                  type="button"
-                  data-msg-select-start
-                  onClick={() => onStartPick?.(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={_copy('msgSelect.select', { defaultValue: 'Select' })}
-                  aria-label={_copy('msgSelect.select', { defaultValue: 'Select' })}
-                >
-                  <CheckCircle2 className="w-3 h-3" />
-                </button>
-              )}
-              {onReply && (
-                <button
-                  type="button"
-                  onClick={() => onReply(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.reply')}
-                >
-                  <Reply className="w-3 h-3" />
-                </button>
-              )}
-              {onReact && (
-                <Popover open={reactionPickerOpen} onOpenChange={setReactionPickerOpen}>
-                  <PopoverTrigger asChild>
-                    <button type="button" className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white" title={tr('messages.react')}>
-                      <SmilePlus className="w-3 h-3" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="top" align={isOwnMessage ? 'start' : 'end'} className="w-auto p-1.5 bg-zinc-800 border-zinc-700 rounded-xl">
-                    <div className="flex gap-0.5">
-                      {QUICK_CHAT_REACTIONS.map((emoji) => {
-                        const mine = currentUserAddress && message.reactions?.[emoji]?.some(address => address.toLowerCase() === currentUserAddress.toLowerCase());
-                        return (
-                          <button type="button" key={emoji} onClick={() => {
-                            if (mine) onRemoveReaction?.(message._id, emoji);
-                            else onReact(message._id, emoji);
-                            setReactionPickerOpen(false);
-                          }} className={`w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-colors ${mine ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'}`}>
-                            {emoji}
-                          </button>
-                        );
-                      })}
-                      <MoreReactionsButton
-                        reactions={message.reactions}
-                        viewerAddress={currentUserAddress}
-                        onPick={(emoji) => {
-                          const mine = currentUserAddress && message.reactions?.[emoji]?.some(address => address.toLowerCase() === currentUserAddress.toLowerCase());
-                          if (mine) onRemoveReaction?.(message._id, emoji);
-                          else onReact(message._id, emoji);
-                          setReactionPickerOpen(false);
-                        }}
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-              {onEdit && canEdit && (
-                <button
-                  type="button"
-                  onClick={() => onEdit(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.edit')}
-                >
-                  <Pencil className="w-3 h-3" />
-                </button>
-              )}
-              {downloadTarget && (
-                <button
-                  type="button"
-                  onClick={() => void handleDownloadMedia()}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={_copy("copy.d6eafe823591", { defaultValue: "Download" })}
-                  aria-label={_copy("copy.d6eafe823591", { defaultValue: "Download" })}
-                >
-                  <Download className="w-3 h-3" />
-                </button>
-              )}
-              {onForward && (
-                <button
-                  type="button"
-                  onClick={() => onForward(message)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.forward')}
-                >
-                  <CornerUpRight className="w-3 h-3" />
-                </button>
-              )}
-              {onPin && (
-                <button
-                  type="button"
-                  onClick={() => onPin(message._id)}
-                  className="p-1.5 rounded-full bg-zinc-800/90 hover:bg-zinc-700 text-zinc-400 hover:text-white"
-                  title={tr('messages.pin')}
-                >
-                  <Pin className="w-3 h-3" />
-                </button>
-              )}
+          {/* Every action lives in the message menu: right-click, a hold on a
+              phone, or this one "..." for keyboard and mouse users. */}
+          {!selecting && menuable && message.msgType !== 'tip' && (
+            <div className={`absolute top-1/2 -translate-y-1/2 ${isOwnMessage ? 'right-full mr-1' : 'left-full ml-1'} z-10`}>
+              <MessageMoreButton onOpen={menuPoint.openAt} />
             </div>
           )}
         </div>
@@ -1345,7 +1261,7 @@ const MessageBubble = memo(function MessageBubble({
             (message.msgType === 'msg' || (message.msgType === 'media' && !!message.content)) && (
             <button
               type="button"
-              onClick={isTranslated ? handleShowOriginal : handleTranslate}
+              onClick={isTranslated ? handleShowOriginal : translateUp}
               disabled={isTranslating}
               className="inline-flex items-center gap-0.5 p-1.5 -m-1 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-50"
               title={isTranslated ? _copy("copy.16194a69c43d", { defaultValue: "Show original" }) : _copy("copy.8fe147696fbf", { defaultValue: "Translate" })}
@@ -1486,6 +1402,11 @@ function useDmPin(conversationId: string, address: string | undefined, conversat
 
   return { pinnedMessageId, pinMessage, unpinMessage };
 }
+
+/** History pages (30 lines each) a chat may pull in at open to reach where you left off. */
+const MAX_READ_SPOT_PAGES = 10;
+/** Room above the unread line when a chat opens on it, so the sticky day pill doesn't cover it. */
+const UNREAD_MARKER_TOP_GAP = 48;
 
 export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, options }: DirectMessageChatProps) {
   const { t: _copy } = _useCopy();
@@ -1893,6 +1814,16 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const messagesRef = useRef(messages);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
+  // Where you left off (server-saved, same on every device). Real chats only:
+  // a chat that is still being created has nothing to come back to.
+  const readChatId = /^[0-9a-f]{24}$/i.test(resolvedConversationId || '') ? resolvedConversationId : null;
+  const readSpot = useChatReadPosition(readChatId);
+  // History pages pulled in at open to reach the spot (30 lines a page).
+  const readSpotPagesRef = useRef(0);
+  // Saving starts once the chat has been placed, so the jump to the bottom on
+  // open never counts as having read everything.
+  const readTrackingRef = useRef(false);
+
   const pinnedMessage = pinnedMessageId ? messages.find(m => m._id === pinnedMessageId) ?? null : null;
 
   /**
@@ -1954,34 +1885,95 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   // Emit markAsRead (socket) + scroll on initial load
   useEffect(() => {
-    if (isInitialMount.current && messages.length > 0) {
+    if (isInitialMount.current && messages.length > 0 && readSpot.ready) {
       const ownAddress = walletAddress?.toLowerCase();
       const ownId = user?._id;
-      const anchor = findUnreadAnchor(
-        messages.map((m) => {
-          const a = m.sender?.address?.toLowerCase();
-          const id = m.sender?._id;
-          return {
-            id: m._id,
-            own: m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId),
-            isRead: m.isRead,
-            skip: !!m.isDeleted || !!m.undecryptable || m._id.startsWith('temp-'),
-          };
-        }),
-        unreadAtOpenRef.current,
-      );
+      const lines = messages.map((m) => {
+        const a = m.sender?.address?.toLowerCase();
+        const id = m.sender?._id;
+        return {
+          id: m._id,
+          own: m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId),
+          isRead: m.isRead,
+          at: m.createdAt,
+          skip: !!m.isDeleted || !!m.undecryptable || m._id.startsWith('temp-'),
+        };
+      });
+      let anchor: UnreadAnchor | null = null;
+      if (readSpot.opening) {
+        // Open on the line after where you left off, wherever that is.
+        const found = anchorFromReadSpot(lines, readSpot.opening, !!hasNextPage);
+        if (found.kind === 'older') {
+          if (readSpotPagesRef.current < MAX_READ_SPOT_PAGES) {
+            if (!isFetchingNextPage) {
+              readSpotPagesRef.current += 1;
+              void fetchNextPage();
+            }
+            return;
+          }
+          // Too far back to pull in at once: open on the oldest loaded unread line.
+          const theirs = lines.filter((l) => !l.own && !l.skip);
+          if (theirs.length) anchor = { id: theirs[0].id, ids: theirs.map((l) => l.id), count: Math.max(theirs.length, unreadAtOpenRef.current) };
+        } else if (found.kind === 'anchor') {
+          anchor = found.anchor;
+        }
+      } else {
+        // No spot saved yet for this chat: fall back to the read flags.
+        anchor = findUnreadAnchor(lines, unreadAtOpenRef.current);
+      }
       // Scroll ONLY this container — scrollIntoView scrolls every ancestor,
       // dragging the page itself down and parking dead space under composer.
       // With unread lines the layout effect below opens on the marker instead.
       const container = scrollContainerRef.current;
-      if (anchor) setUnreadAnchor(anchor);
-      else if (container) container.scrollTop = container.scrollHeight;
+      if (anchor) {
+        setUnreadAnchor(anchor);
+        // The marker normally places itself at once; never leave saving off.
+        window.setTimeout(() => { readTrackingRef.current = true; }, 1500);
+      } else {
+        if (container) container.scrollTop = container.scrollHeight;
+        readTrackingRef.current = true;
+      }
       isInitialMount.current = false;
       prevLastMessageIdRef.current = messages[messages.length - 1]?._id ?? null;
       markAsRead();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length, markAsRead]);
+  }, [messages.length, markAsRead, readSpot.ready, isFetchingNextPage]);
+
+  /** Saves the newest line that is on screen as where you left off. */
+  const reportReadSpot = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !readTrackingRef.current || !readChatId) return;
+    const list = messagesRef.current;
+    const ids: string[] = [];
+    for (let i = list.length - 1; i >= 0; i--) {
+      const m = list[i];
+      if (!m._id.startsWith('temp-') && m.createdAt) ids.push(m._id);
+    }
+    const id = newestLineOnScreen(container, ids, (x) => container.querySelector<HTMLElement>(`[id="dm-msg-${x}"]`));
+    if (!id) return;
+    const line = list.find((m) => m._id === id);
+    if (line?.createdAt) readSpot.report(line._id, line.createdAt);
+  }, [readChatId, readSpot.report]);
+  const readReportFrame = useRef(0);
+  const scheduleReadReport = useCallback(() => {
+    if (readReportFrame.current) return;
+    readReportFrame.current = requestAnimationFrame(() => {
+      readReportFrame.current = 0;
+      reportReadSpot();
+    });
+  }, [reportReadSpot]);
+  useEffect(() => () => cancelAnimationFrame(readReportFrame.current), []);
+  // New lines landing while you sit at the bottom are read as they arrive.
+  useEffect(() => {
+    const timer = window.setTimeout(scheduleReadReport, 400);
+    return () => window.clearTimeout(timer);
+  }, [messages, scheduleReadReport]);
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') scheduleReadReport(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [scheduleReadReport]);
 
   /** Top of the unread marker relative to the visible top of the thread, or null. */
   const unreadMarkerOffset = useCallback((): number | null => {
@@ -2018,8 +2010,10 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const offset = unreadMarkerOffset();
     if (!container || offset === null) return;
     unreadPlacedRef.current = true;
-    container.scrollTop = Math.max(0, container.scrollTop + offset - 8);
+    container.scrollTop = Math.max(0, container.scrollTop + offset - UNREAD_MARKER_TOP_GAP);
     refreshUnreadJump();
+    readTrackingRef.current = true;
+    scheduleReadReport();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unreadAnchor, unreadMarkerOffset]);
 
@@ -2037,7 +2031,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     const container = scrollContainerRef.current;
     const offset = unreadMarkerOffset();
     if (!container || offset === null) return;
-    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - 8), behavior: 'smooth' });
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - UNREAD_MARKER_TOP_GAP), behavior: 'smooth' });
     setUnreadMarkerSeen(true);
   }, [unreadMarkerOffset]);
 
@@ -2412,7 +2406,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
     [pickedMsgs, messages],
   );
-  const pickedOwn = useMemo(() => pickedList.filter(isMineMsg), [pickedList, isMineMsg]);
+  // What Delete removes: your own picks, or in a one-to-one chat any pick (not tips).
+  const pickedOwn = useMemo(
+    () => pickedList.filter((m) => isMineMsg(m) || (!isGroupChat && m.msgType !== 'tip')),
+    [pickedList, isMineMsg, isGroupChat],
+  );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
   const togglePick = useCallback((m: DmMessage) => {
     setPickedMsgs((prev) => {
@@ -2478,6 +2476,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     setShowJumpToLatest(distanceFromBottom > 100);
     if (distanceFromBottom < 50) setNewMessageCount(0);
     scheduleUnreadJump();
+    scheduleReadReport();
 
     if (container.scrollTop < 100 && hasNextPage && !isFetchingNextPage) {
       const previousHeight = container.scrollHeight;
@@ -2493,7 +2492,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         });
       });
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, scheduleUnreadJump]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, scheduleUnreadJump, scheduleReadReport]);
 
   const scrollToBottom = () => {
     // Container-scoped — scrollIntoView would drag the page down with it.
@@ -2840,7 +2839,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               size="icon"
               onClick={onBack}
               data-swipe-back
-              className="text-white hover:bg-zinc-800"
+              className="text-white hover:bg-[color-mix(in_srgb,currentColor_10%,transparent)]"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -3210,6 +3209,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onTogglePick={togglePick}
                 onStartPick={startPick}
                 onDelete={setConfirmDeleteOne}
+                canDeleteAny={!isGroupChat}
                 canPin={canPinHere}
                 isPinned={pinnedMessageId === message._id}
                 onUnpin={handleUnpinMessage}
@@ -3281,7 +3281,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">{_copy('msgMenu.deleteOneTitle', { defaultValue: 'Delete this message?' })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{_copy('msgMenu.deleteOneBody', { defaultValue: 'It will be removed for everyone in this chat.' })}</AlertDialogDescription>
+            <AlertDialogDescription className="text-zinc-400">{isGroupChat
+              ? _copy('msgMenu.deleteOneBody', { defaultValue: 'It will be removed for everyone in this chat.' })
+              : _copy('msgMenu.deleteForBothBody', { defaultValue: 'It will be removed for both of you.' })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
@@ -3293,7 +3295,9 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">{_copy('msgSelect.deleteTitle', { defaultValue: 'Delete {{count}} messages?', count: pickedOwn.length })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{_copy('msgSelect.deleteBody', { defaultValue: 'They will be removed for everyone in this chat.' })}</AlertDialogDescription>
+            <AlertDialogDescription className="text-zinc-400">{isGroupChat
+              ? _copy('msgSelect.deleteBody', { defaultValue: 'They will be removed for everyone in this chat.' })
+              : _copy('msgSelect.deleteForBothBody', { defaultValue: 'They will be removed for both of you.' })}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>

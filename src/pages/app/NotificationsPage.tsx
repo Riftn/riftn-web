@@ -12,6 +12,11 @@ import SearchIcon from '@/components/ui/cut-icons/search';
 import { useDrawerPullClose } from '@/hooks/use-drawer-pull-close';
 import { useTranslation } from 'react-i18next';
 import { AppealDrawer } from '@/components/app/notifications/AppealDrawer';
+import { NotificationCommentCard } from '@/components/app/notifications/NotificationCommentCard';
+import { notificationHasComment } from '@/lib/notification-comment';
+import { NotificationRequestCard } from '@/components/app/notifications/NotificationRequestCard';
+import { notificationHasRequestCard } from '@/lib/notification-request';
+import { useFollow } from '@/hooks/use-follow';
 import { AtSign, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Filter as FilterIcon } from "lucide-react";
 import MessageSquareText from "@/components/ui/cut-icons/messages";
 import Users from "@/components/ui/cut-icons/communities";
@@ -169,7 +174,7 @@ let moduleAvatarCache = new Map<string, EnrichedAvatar>();
 const moduleEnrichedKeys = new Set<string>();
 
 // Bundled notification: wraps one or more raw notifications into a display group
-interface BundledNotification {
+export interface BundledNotification {
   /** The primary notification (most recent in the bundle) */
   primary: DeHubNotification;
   /** All notification IDs in this bundle */
@@ -632,7 +637,7 @@ function notificationContentWithActorBadge(content: React.ReactNode, notificatio
   const name = actor.displayName || actor.username || notification.actorUsername;
   const at = name ? content.indexOf(name) : -1;
   if (at < 0 || /\w/.test(content.charAt(at - 1)) || /\w/.test(content.charAt(at + name.length))) return content;
-  return <>{content.slice(0, at)}{name}<BadgeIcon badgeBalance={actor.badgeBalance} badgeLock={actor.badgeLock} username={actor.username} />{content.slice(at + name.length)}</>;
+  return <>{content.slice(0, at)}{name}{'\u2009'}<BadgeIcon badgeBalance={actor.badgeBalance} badgeLock={actor.badgeLock} username={actor.username} />{content.slice(at + name.length)}</>;
 }
 
 function getNotificationContent(
@@ -1148,7 +1153,7 @@ function offscreenRowStyle(index: number): React.CSSProperties | undefined {
 // re-render used to re-run every row's per-render work (canonical-actor
 // building, date formatting). All props are kept referentially stable in the
 // parent (memoized bundles/list, useCallback onMarkAsRead, constant style).
-const NotificationItem = memo(function NotificationItem({
+export const NotificationItem = memo(function NotificationItem({
   notification,
   bundle,
   onMarkAsRead,
@@ -1319,6 +1324,29 @@ const NotificationItem = memo(function NotificationItem({
     : !notification.read;
   const { walletAddress } = useAuth();
 
+  // Follow back, right on the row. A follow row names one person; the shared
+  // override keeps this pill in step with every other Follow button.
+  const followActor = notification.actor?.address || notification.actorAddress;
+  const { isFollowing: followOverride, toggleFollow } = useFollow(followActor);
+  const followsActor = followOverride ?? !!notification.actor?.isFollowing;
+  const showFollowBack =
+    (notification.type as string) === 'following' &&
+    !isBackendAggregatedMultiActor &&
+    bundle.bundleType === 'single' &&
+    !!followActor &&
+    followActor.toLowerCase() !== walletAddress?.toLowerCase() &&
+    !notification.actor?.isFollowRequestPending;
+  // A live row is a door: Watch goes straight in.
+  const watchLink = (notification.type as string) === 'livestream_start' && notification.tokenId
+    ? `/app/post/${notification.tokenId}`
+    : null;
+  // Likes and reposts are about your own post: show it big enough to tell
+  // which one, not as a 44px chip.
+  const bigPostPicture = !!postThumbnail &&
+    bundle.bundleType !== 'same-actor' &&
+    ['like', 'repost'].includes(notification.type as string);
+  const markEngaged = () => { if (hasUnread) bundle.allIds.forEach(id => onMarkAsRead(id)); };
+
   // Seed profile cache before navigating to a profile so the header renders instantly
   const seedAndNavigateToProfile = (n: DeHubNotification) => {
     const actor = n.actor;
@@ -1431,7 +1459,7 @@ const NotificationItem = memo(function NotificationItem({
       data-feed-row
       data-unread={isUnreadRow ? '' : undefined}
       style={style}
-      className="relative flex items-start gap-3 py-3 pl-[18px] pr-4 transition-colors duration-300 cursor-pointer"
+      className="relative flex items-start gap-3 rounded-2xl py-3 pl-[18px] pr-4 transition-colors duration-300 cursor-pointer"
     >
       {/* Unread is a solid dot, not a filled block. It doubles as the
           per-row "mark as read" control the old round button gave. */}
@@ -1566,8 +1594,28 @@ const NotificationItem = memo(function NotificationItem({
           <span data-feed-time className="text-[13px] text-zinc-500 whitespace-nowrap">{' · '}{formatTimeAgo(String(notification.createdAt))}</span>
         </p>
         
+        {/* The comment itself, whole, with Reply / Like / Tip right here. */}
+        {bundle.bundleType !== 'same-actor' && notificationHasComment(notification) && (
+          <>
+            {notification.tokenTitle && (notification.type === 'comment_reply' || notification.type === 'mention') && (
+              <p data-feed-quote className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{_copy("copy.2c26ae1e5724", { defaultValue: "on: " })}{notification.tokenTitle}
+              </p>
+            )}
+            <NotificationCommentCard
+              notification={notification}
+              onEngaged={() => { if (hasUnread) bundle.allIds.forEach(id => onMarkAsRead(id)); }}
+            />
+          </>
+        )}
+
+        {/* A Requests-board row: the comment or the new request itself, with
+            Reply / Like or Upvote. */}
+        {bundle.bundleType !== 'same-actor' && notificationHasRequestCard(notification) && (
+          <NotificationRequestCard notification={notification} onEngaged={markEngaged} />
+        )}
+
         {/* Post preview snippet — for replies/mentions show the comment text, otherwise the post title */}
-        {bundle.bundleType !== 'same-actor' && (() => {
+        {bundle.bundleType !== 'same-actor' && !notificationHasComment(notification) && !notificationHasRequestCard(notification) && !bigPostPicture && (() => {
           const commentPreview = (notification as any).commentPreview;
           const isReplyOrMention = notification.type === 'comment_reply' || notification.type === 'mention';
           // Strip leading @mention from comment preview
@@ -1595,6 +1643,53 @@ const NotificationItem = memo(function NotificationItem({
           );
         })()}
         
+        {bigPostPicture && (
+          <Link
+            to={`/app/post/${notification.tokenId}`}
+            onClick={(e) => { e.stopPropagation(); markEngaged(); }}
+            className="mt-2 block w-fit"
+          >
+            <img
+              src={postThumbnail!}
+              alt={notification.tokenTitle || _copy("copy.a5554622c655", { defaultValue: "Post" })}
+              loading="lazy"
+              decoding="async"
+              data-feed-comment-media
+              className="block h-[132px] w-auto max-w-full min-w-[100px] rounded-xl object-cover"
+            />
+          </Link>
+        )}
+
+        {(showFollowBack || watchLink) && (
+          <div className="flex items-center gap-2 mt-2.5" onClick={(e) => e.stopPropagation()}>
+            {showFollowBack && (
+              <button
+                type="button"
+                onClick={() => {
+                  markEngaged();
+                  void toggleFollow(followsActor, { name: notification.actor?.username || notification.actorUsername });
+                }}
+                data-feed-pill={followsActor ? 'ghost' : 'primary'}
+                className={`h-[30px] px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1 transition-opacity ${followsActor ? 'border border-white/20 text-white' : ''}`}
+              >
+                {followsActor
+                  ? <><Check className="w-3 h-3" />{t('follow.following', { defaultValue: 'Following' })}</>
+                  : <><UserPlus className="w-3 h-3" />{t('follow.followBack', { defaultValue: 'Follow back' })}</>}
+              </button>
+            )}
+            {watchLink && (
+              <button
+                type="button"
+                onClick={() => { markEngaged(); navigate(watchLink); }}
+                data-feed-pill="primary"
+                className="h-[30px] px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1 transition-opacity"
+              >
+                <Radio className="w-3 h-3" />{t('copy.42f3cc7b5f71', { defaultValue: 'Watch now' })}
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Show individual actor names below backend-aggregated follows */}
         {notification.type === 'following' && (notification as any).aggregatedCount > 1 && (notification as any).latestActorNames?.length > 1 && (
           <p className="text-xs text-zinc-500 mt-0.5">
@@ -1666,7 +1761,7 @@ const NotificationItem = memo(function NotificationItem({
       </div>
 
       {/* Post thumbnail if applicable */}
-      {postThumbnail && bundle.bundleType !== 'same-actor' && (
+      {postThumbnail && bundle.bundleType !== 'same-actor' && !bigPostPicture && (
         <Link 
           to={`/app/post/${notification.tokenId}`}
           onClick={(e) => e.stopPropagation()}

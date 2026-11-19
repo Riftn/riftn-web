@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Testo"
+  },
   "comic": {
     "showAll": "Mostra tutte le {{count}} pagine"
   },
@@ -14,6 +17,22 @@
     "glitter": "Glitter",
     "saved": "Bordo salvato",
     "failed": "Impossibile salvare il bordo"
+  },
+  "duet": {
+    "policyEveryone": "Tutti",
+    "policyFollowers": "Follower",
+    "policyNobody": "Nessuno",
+    "loadMore": "Carica altro"
+  },
+  "videoRemix": {
+    "sound": "Usa questo suono"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Tutti",
+      "followers": "Follower",
+      "nobody": "Nessuno"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -55,12 +74,16 @@
       "profile": "profilo",
       "proposal": "proposta",
       "stage": "fase",
-      "store": "negozio"
+      "store": "negozio",
+      "featureRequest": "richiesta",
+      "page": "pagina"
     },
     "recipientChat": "chat",
     "recipientUser": "utente",
     "sendFailed": "Impossibile inviare {{item}}",
-    "sentTo": "{{item}} inviata a {{name}}"
+    "sentTo": "{{item}} inviata a {{name}}",
+    "openPage": "Apri pagina",
+    "viewRequest": "Vedi richiesta"
   },
   "stageCover": {
     "admitOne": "AMMETTINE UNO",
@@ -166,11 +189,18 @@
     "privateNote": "Gli account privati non sono mostrati nel fediverso.",
     "noUsername": "Scegli un nome utente per avere un indirizzo nel fediverso."
   },
+  "signedFollows": {
+    "setUp": "Attiva",
+    "turnOff": "Disattiva",
+    "efpTurnOff": "Ferma"
+  },
   "profileFields": {
     "title": "Campi del profilo",
     "description": "Fino a quattro righe in più sul tuo profilo, come un sito web o i tuoi pronomi.",
     "label": "Etichetta",
     "content": "Contenuto",
+    "add": "Aggiungi campo",
+    "remove": "Elimina campo",
     "save": "Salva campi",
     "saved": "Campi del profilo salvati",
     "failed": "Non è stato salvato. Riprova.",
@@ -368,6 +398,7 @@
     "checkFailed": "Non siamo riusciti a verificare la disponibilità. Riprova.",
     "checking": "Controllo in corso...",
     "ownership": "Open source. Di proprietà dell'utente.",
+    "title": "Un po' di lavoro.\nUn Riftn migliore.",
     "intermission": "Fuori servizio temporaneamente",
     "community": "La comunità prima di tutto. Sempre."
   },
@@ -547,7 +578,14 @@
     "getTheApp": "Scarica l'app",
     "connectAi": "Collega l'IA",
     "converter": "Convertitore",
-    "affiliate": "Affiliazione"
+    "affiliate": "Affiliazione",
+    "groups": {
+      "main": "Principale",
+      "create": "Crea",
+      "discover": "Scopri",
+      "money": "Soldi",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Visualizza il profilo di {{name}}",
@@ -743,6 +781,8 @@
     "feedTogglesCleared": "Filtri del feed reimpostati",
     "defaultProfileTab": "Scheda profilo predefinita",
     "defaultProfileTabDesc": "Scegli quale scheda vedono per prima i visitatori sul tuo profilo",
+    "defaultProfileView": "Layout dei post del profilo",
+    "defaultProfileViewDesc": "Mostra i tuoi post in griglia o in elenco quando qualcuno apre il tuo profilo",
     "public": "Pubblico",
     "publicDesc": "Chiunque può vedere i tuoi post",
     "private": "Privato",
@@ -1178,7 +1218,15 @@
     "socialConnectedShort": "Collegato",
     "socialConnectFailed": "Impossibile collegare {{platform}}. Riprova.",
     "socialVerifiedFollowers": "{{value}} follower",
-    "socialFollowersPending": "Aggiornamento follower"
+    "socialFollowersPending": "Aggiornamento follower",
+    "menuLayout": "Layout del menu",
+    "menuLayoutDesc": "Come il menu raggruppa le pagine",
+    "menuLayoutTabs": "Schede",
+    "menuLayoutTabsDesc": "Un gruppo alla volta, con icone grandi",
+    "menuLayoutSections": "Sezioni",
+    "menuLayoutSectionsDesc": "Tutte le pagine insieme, sotto intestazioni",
+    "menuLayoutFolders": "Cartelle",
+    "menuLayoutFoldersDesc": "Le tue pagine principali, poi una cartella per gruppo"
   },
   "common": {
     "confirm": "Conferma",
@@ -1263,7 +1311,12 @@
     "payDirect": "Inviato direttamente a {{name}} in {{symbol}} su {{chain}}. Nessuno swap.",
     "payDirectNoName": "Inviato direttamente al creator in {{symbol}} su {{chain}}. Nessuno swap.",
     "payViaBridgeDpay": "Spostati su Base e pagati a Riftn Pay, i token arrivano in circa un minuto",
-    "dmSent": "Inviati {{amount}} token a {{name}}!"
+    "dmSent": "Inviati {{amount}} token a {{name}}!",
+    "addMessage": "Aggiungi un messaggio (facoltativo)",
+    "messagePublic": "Pubblico",
+    "railTitle": "Mance",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "token"
   },
   "postOptions": {
     "liveAlertsOn": "Ora segui {{name}}. Riceverai una notifica quando andrà in diretta.",
@@ -1796,6 +1849,7 @@
     "communities": "Community",
     "stores": "Negozi",
     "noNotificationsYet": "Nessuna notifica ancora",
+    "searchClose": "Chiudi ricerca",
     "noNotificationsDesc": "Quando riceverai mi piace, commenti, mance o nuovi abbonati, appariranno qui.",
     "loadMore": "Carica altro",
     "markAsRead": "Segna come letto",
@@ -2035,11 +2089,13 @@
     "promptLabel": "Il tuo promemoria",
     "promptPlaceholder": "Descrivi un'idea, un miglioramento o un bug...",
     "promptAttach": "Inserisci immagini",
+    "removeAttachment": "Rimuovi allegato",
     "promptDrop": "Incolla o rilascia immagini qui",
     "promptPost": "Prompt post",
     "promptShortcut": "CTRL / + Invio per pubblicare",
     "promptDetails": "Dettagli opzionali",
     "promptDevice": "Dispositivo e sistema operativo (per bug)",
+    "deviceInfoNoErrors": "Nessuno",
     "promptFilters": "Filtra per categoria",
     "promptMediaError": "Scegli immagini o video di dimensioni inferiori a 50 MB ciascuno.",
     "promptMediaLimit": "Fino a {{max}} allegati.",
@@ -2098,6 +2154,12 @@
     "loginRequired": "Accesso richiesto"
   },
   "messages": {
+    "newDrawer": {
+      "to": "A",
+      "recent": "Recenti",
+      "suggested": "Suggeriti",
+      "youFollow": "Persone che segui"
+    },
     "reply": "Rispondi",
     "react": "Reagisci",
     "edit": "Modifica",
@@ -2134,7 +2196,10 @@
     "checkingTokenBalance": "Verifica del tuo saldo token...",
     "deleteConversationFailed": "Impossibile eliminare la conversazione",
     "message": "Messaggio",
-    "noConversationsYet": "Ancora nessuna conversazione"
+    "noConversationsYet": "Ancora nessuna conversazione",
+    "sending": "Invio in corso",
+    "retrySend": "Riprova",
+    "discardSend": "Rimuovi"
   },
   "music": {
     "listeningCount_one": "{{count}} in ascolto",
@@ -2218,6 +2283,9 @@
     "viewList": "Visualizzazione elenco",
     "viewMode": "Visualizza",
     "back": "Indietro",
+    "reserve": {
+      "signIn": "Accedi"
+    },
     "usernameAvailable": "Nome utente disponibile!",
     "signUpToClaim": "Registrati oggi per richiederlo",
     "signUp": "Registrati",
@@ -2236,7 +2304,8 @@
       "total": "Portata totale",
       "breakdownTitle": "Da dove proviene questa portata",
       "dehubFollowers": "Follower Riftn",
-      "verified": "I numeri social provengono dagli account collegati dal creator."
+      "verified": "I numeri social provengono dagli account collegati dal creator.",
+      "selfReported": "Il conteggio dei follower social viene inserito dal creator."
     },
     "loginDescription": "Accedi per visualizzare e gestire il tuo profilo.",
     "replyThread": {
@@ -2282,6 +2351,10 @@
     "sortMostViewed": "Più visti",
     "sortLikes": "Mi piace",
     "sortMostLiked": "I più graditi",
+    "sortCustomShort": "Personalizzato",
+    "arrange": {
+      "saving": "Salvataggio..."
+    },
     "searchThisChannel": "Cerca in questo canale",
     "searchResultCount": "1 risultato per \"{{query}}\"",
     "searchResultCountPlural": "{{count}} risultati per \"{{query}}\""
@@ -2438,6 +2511,7 @@
       "runSwarm": "Esegui sciame",
       "description": "Azioni eseguite come l'agente selezionato. Le attività programmate continuano anche con l'app chiusa.",
       "instructions": "Istruzioni per gli agenti",
+      "examples": "Pubblica un post al giorno su: musica indipendente\nStile: curioso, conciso e colloquiale\nMetti mi piace a massimo 2 post recenti al giorno su: musica, concerti, vinili",
       "preparing": "Preparazione del compito…",
       "run": "Esegui richiesta",
       "limits": "Un post al giorno e fino a 3 Mi piace pertinenti per attività. Tutti gli agenti condividono un intervallo post di 20 minuti. Le foto utilizzano didascalie selezionate; i video hanno bisogno di un'immagine di copertina. I post non superano i 500 caratteri. Nessun gas se non conio; la scrittura può utilizzare crediti.",
@@ -2546,6 +2620,9 @@
     "signInAgain": "Accedi di nuovo",
     "createSignIn": "Accedi di nuovo per creare un agente",
     "checkConnection": "Controlla la connessione e riprova.",
+    "welcome": {
+      "text": "Messaggio di benvenuto"
+    },
     "workspace": {
       "moderation": "Moderazione dello stream",
       "moderationHelp": "Attiva prima il permesso di moderazione. L'account deve già essere il creatore dello stream o un moderatore assegnato. Le modalità di approvazione e bozza restano valide. I timeout scadono automaticamente.",
@@ -2660,6 +2737,7 @@
     "failedSubmit": "Invio candidatura fallito. Riprova."
   },
   "loginModal": {
+    "didYouMean": "Intendevi {{email}}?",
     "restoreWalletTitle": "Riprendi la tua borsa",
     "restoreOriginalWallet": "Il tuo profilo è sul portafoglio dal tuo primo accesso, non su quello salvato per questo accesso. Accedi come hai fatto per la prima volta su Riftn per riportare indietro quel portafoglio. Il tuo profilo e i tuoi fondi rimangono come sono.",
     "useAnotherLogin": "Usa un diverso accesso",
@@ -2738,7 +2816,9 @@
     "resendCodePhone": "Numero sbagliato o nessun codice? Torna indietro",
     "continueAs": "Continua come",
     "switchWalletAccount": "Passa all'account",
-    "walletLoadFailed": "Non è stato possibile caricare i portafogli. Riprova."
+    "walletLoadFailed": "Non è stato possibile caricare i portafogli. Riprova.",
+    "openInBrowser": "Apri nel browser",
+    "copyLink": "Copia link"
   },
   "careers": {
     "title": "Carriere su Riftn",
@@ -3081,6 +3161,9 @@
     "confirm": "Menta su {{chain}}",
     "confirmWithCost": "Menta su {{chain}} · {{cost}}",
     "notAvailable": "La coniazione su questa catena non è ancora disponibile."
+  },
+  "postEditHistory": {
+    "original": "Originale"
   },
   "postInfo": {
     "title": "Info Post",
@@ -5194,6 +5277,7 @@
     "settledTitleSpeed": ", tipicamente in {{speed}}",
     "settledCount_one": "{{count}} concluso",
     "settledCount_other": "{{count}} concluso",
+    "statusInProgress": "In corso",
     "howMany": "Quanti",
     "availableCount_one": "{{count}} disponibile",
     "availableCount_other": "{{count}} disponibile",
@@ -5286,6 +5370,17 @@
     "sellYourFractions": "Vendi le tue frazioni ({{held}} possedute)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Utilizza questi dettagli"
+      }
+    },
+    "cinema": {
+      "close": "Chiudi",
+      "performance": {
+        "label": "Prestazioni"
+      }
+    },
     "libraryEmpty": "Le tue generazioni salvate appariranno qui.",
     "toolRemake": "Rimanda",
     "toolMaboroshi": "Maboroshi",
@@ -5979,6 +6074,7 @@
     "presetTvSpotName": "Spot TV",
     "presetTvSpotHint": "Pubblicità lucida in stile broadcast",
     "priceTokensUsd": "{{amount}} token · USD {{usd}}",
+    "presetCrashZoomName": "Zoom improvviso",
     "presetCrashZoomHint": "Punch-in rapido per un ritmo drammatico",
     "presetDollyZoomName": "Dolly Zoom",
     "presetDollyZoomHint": "Effetto vertigini: lo sfondo si allunga, il soggetto trattiene",
@@ -6256,6 +6352,12 @@
     "raw": "Materie"
   },
   "nftMarket": {
+    "actAll": "Tutti",
+    "actListings": "Annunci",
+    "actOffer": "Offerta",
+    "actOffers": "Offerte",
+    "actSales": "Vendite",
+    "tabActivity": "Attività",
     "shortTitle": "NFT",
     "filters": "Filtri",
     "forSale": "In vendita",
@@ -6320,6 +6422,8 @@
     "offered": "Offerta inviata. Il destinatario può accettarla in qualsiasi momento.",
     "dehubPost": "Riftn post",
     "youHold": "Tu tieni {{n}}",
+    "price": "Prezzo",
+    "tabRecent": "Recenti",
     "buyNow": "Compra ora",
     "dropsTo": "Prezzi scendono a {{price}} da parte di {{date}}",
     "inBundle": "Venduto come bundle di {{n}}",
@@ -6733,7 +6837,68 @@
     "youAreBanned": "Non puoi chattare negli stream di questo creatore",
     "youAreTimedOut": "Sei temporaneamente bloccato"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Sfondo",
+      "modes": {
+        "none": "Disattivato",
+        "blur": "Sfocatura",
+        "color": "Colore"
+      }
+    },
+    "remove": "Rimuovi",
+    "scenes": {
+      "countdown": "Conto alla rovescia",
+      "names": {
+        "starting": "Inizia a breve"
+      }
+    },
+    "sources": {
+      "reactAdd": "Mostra",
+      "image": "Immagine",
+      "camera": "Fotocamera",
+      "show": "Mostra in streaming",
+      "positions": {
+        "center": "Centra"
+      },
+      "sizes": {
+        "small": "Piccolo",
+        "medium": "Media",
+        "large": "Grande"
+      },
+      "shapes": {
+        "circle": "Cerchio",
+        "rect": "Quadrato"
+      }
+    },
+    "audio": {
+      "mute": "Silenzia",
+      "unmute": "Riattiva",
+      "gateLevels": {
+        "off": "Disattivato",
+        "low": "Chiaro",
+        "high": "Forte"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Piattaforma",
+      "label": "Nome (opzionale)",
+      "key": "Chiave di streaming",
+      "save": "Aggiungi",
+      "cancel": "Annulla",
+      "states": {
+        "off": "Disattivato",
+        "idle": "Pronto",
+        "live": "In diretta",
+        "error": "Errore"
+      }
+    },
+    "vertical": {
+      "centre": "Centra",
+      "live": "IN DIRETTA"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Un countdown durante il tuo stream. Ogni dono pagato, follow e iscrizione aggiungono tempo, quindi la stanza ti mantiene in diretta.",
@@ -7686,6 +7851,8 @@
     "footerNote": "La partecipazione a DePin è un servizio di contribuzione, non un prodotto di investimento. La disponibilità, l'idoneità e le ricompense possono cambiare."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nuovo flusso",
+    "disconnect": "Disconnetti",
     "title": "Flusso del creator",
     "backToStudio": "Torna a Creator Studio",
     "backToFlows": "Torna ai tuoi flussi",
@@ -8848,6 +9015,14 @@
     "priceChartCleared": "La tabella dei prezzi è stata cancellata. Prezzo di riferimento fissato: $0,0001. I prezzi di esecuzione dipendono dagli ordini disponibili."
   },
   "editor": {
+    "stage": {
+      "camera": "Fotocamera",
+      "yaw": "Rotazione",
+      "add": "Aggiungi",
+      "scale": "Dimensione",
+      "color": "Colore",
+      "light": "Chiaro"
+    },
     "video": {
       "tFade": "Dissolvenza incrociata",
       "none": "Nessuna",
@@ -9014,6 +9189,8 @@
       "tools": "Strumenti di modifica"
     },
     "agent": {
+      "stop": "Ferma",
+      "queue": "Aggiungi alla coda",
       "introTitle": "Di' all'IA cosa vuoi",
       "introBody": "Descrivi il design o la modifica con parole tue. Ridimensiona la pagina, scrive e formatta il testo, trova foto, video e musica gratuiti, applica filtri, dispone i livelli e li anima. Ogni richiesta si annulla in un solo passaggio.",
       "suggestPoster": "Crea un post Instagram quadrato per i saldi estivi con una foto di spiaggia e un titolo in grassetto",
@@ -9282,6 +9459,9 @@
       "reloadText": "Ricarica sottotitolo",
       "textSaved": "Modifiche ai sottotitoli salvate.",
       "action": "Sottotitoli automatici",
+      "styles": {
+        "bold": "Grassetto"
+      },
       "working": "In ascolto… {{percent}}%",
       "downloading": "Preparazione del modello vocale… {{percent}}%",
       "hint": "Trasforma il parlato in sottotitoli sincronizzati che puoi personalizzare. Funziona sul tuo dispositivo: gratis e privato. Al primo utilizzo scarica il modello.",
@@ -10661,6 +10841,29 @@
       "toolbar": "Navigazione su tela",
       "zoomIn": "Ingrandisci la tela",
       "zoomOut": "Zoom indietro sul canvas"
+    },
+    "clipFix": {
+      "listening": "In ascolto…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Dividi",
+        "play": "Riproduci",
+        "pause": "Pausa",
+        "frameBack": "Righe precedenti",
+        "frameForward": "Righe successive"
+      }
+    },
+    "voiceClone": {
+      "stop": "Ferma registrazione",
+      "failed": "Clonazione della voce fallita."
+    },
+    "linkImport": {
+      "go": "Importa",
+      "downloading": "Download {{percent}}%"
+    },
+    "reverse": {
+      "action": "Inversa"
     }
   },
   "jungleMood": {
@@ -11961,7 +12164,15 @@
       "rewardsWeek": "Settimana del {{date}}",
       "rewardPaid": "Accreditato",
       "rewardPending": "In sospeso",
-      "rewardsNone": "Non sono state ancora calcolate ricompense. La prima settimana si chiude il lunedì."
+      "rewardsNone": "Non sono state ancora calcolate ricompense. La prima settimana si chiude il lunedì.",
+      "stats": {
+        "button": "Statistiche live"
+      },
+      "signin": {
+        "users_one": "utente {{count}}",
+        "users_other": "utenti {{count}}",
+        "delete": "Elimina"
+      }
     },
     "card": {
       "open": "Apri"
@@ -12119,6 +12330,9 @@
     "reminderLater": "Non ora"
   },
   "copy": {
+    "55656b5e434f": "Chiudi ricerca",
+    "57e2faa5ec63": "Cerca su Riftn",
+    "96d7bff86b44": "La ricerca non è riuscita a caricarsi",
     "1607715e45ed": "Tocca la sfera per parlare, o scrivi qui sotto",
     "00140a37bd26": "Transazioni sulla rete non disponibili al momento. Riprova più tardi.",
     "002286513398": "Non hai il permesso di gestire gli eventi.",
@@ -19123,6 +19337,7 @@
     "backToTop": "Torna alla testa",
     "needTitle": "Aggiungi un titolo per continuare",
     "needBody": "{{count}} caratteri in più",
+    "imagesLabel": "Immagini",
     "backToWriting": "Torna alla scrittura",
     "readyTitle": "Pronto per la pubblicazione",
     "sharePreview": "Come appare quando viene condiviso",
@@ -19184,6 +19399,128 @@
     "exploreFirst": "Esplora prima",
     "codeNote": "Ti inviamo un codice via email, senza password."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Piano",
+      "howMany": "Quanti",
+      "who": "Nome utente o indirizzo del wallet",
+      "whoPlaceholder": "@nomeutente",
+      "cancel": "Annulla",
+      "stage": {
+        "preparing": "Preparazione…",
+        "confirming": "In attesa della transazione…",
+        "recording": "Completamento…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Abbonati"
+      },
+      "ended": "Terminato",
+      "until": "Fino al {{date}}",
+      "failed": "Non ha funzionato. Riprova."
+    }
+  },
+  "whenSheet": {
+    "today": "Oggi",
+    "earlierShort": "Precedenti",
+    "tooSoon": "Scegli un orario futuro.",
+    "show": "Mostra",
+    "hide": "Nascondi"
+  },
+  "planned": {
+    "title": "Pianificata",
+    "all": "Tutti",
+    "posts": "Post",
+    "stages": "Stanze audio",
+    "post": "Pubblica",
+    "live": "In diretta",
+    "stage": "Palco",
+    "untitledPost": "Pubblica",
+    "untitledLive": "In diretta",
+    "loading": "Caricamento in corso...",
+    "startNow": "Inizia ora",
+    "cancel": "Annulla",
+    "cancelled": "Annullato"
+  },
+  "welcome": {
+    "about": {
+      "title": "Benvenuto in Riftn",
+      "day": "Giorno",
+      "month": "Mese",
+      "year": "Anno"
+    },
+    "name": {
+      "title": "Il tuo nome",
+      "placeholder": "Il tuo nome"
+    },
+    "card": {
+      "name": "Il tuo nome"
+    },
+    "topic": {
+      "music": "Musica",
+      "art": "Arte",
+      "crypto": "Cripto",
+      "sports": "Sport",
+      "comedy": "Commedia",
+      "food": "Cibo",
+      "news": "Notizie",
+      "science": "Scienze"
+    },
+    "back": "Indietro",
+    "skipPhoto": "Salta per ora",
+    "preview": "Anteprima"
+  },
+  "appTokens": {
+    "title": "I tuoi token",
+    "history": "Cronologia",
+    "noHistory": "Ancora nessuna attività",
+    "kindDeposit": "Deposita",
+    "to": "A",
+    "amount": "Importo",
+    "notePlaceholder": "Aggiungi una nota (facoltativo)",
+    "sendButton": "Invia",
+    "errorInsufficient": "Token non sufficienti"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Tutti",
+      "followers": "Follower",
+      "nobody": "Nessuno"
+    },
+    "heading": "Reazioni",
+    "more": "Mostra di più",
+    "liveNow": "In diretta",
+    "untitled": "Reazione"
+  },
+  "connectGuide": {
+    "title": "Collega Riftn al tuo assistente IA",
+    "urlLabel": "URL del server MCP",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "copiedToast": "URL MCP copiato"
+  },
+  "avatarPrompt": {
+    "notNow": "Non ora"
+  },
+  "postStats": {
+    "audience": "Pubblico",
+    "engagement": "Interazioni",
+    "finished": "Terminato",
+    "members": "Membri",
+    "membersLower": "membri",
+    "newFollowers": "Nuovi follower",
+    "noBadge": "Nessuna medaglia",
+    "people": "Persone",
+    "plays": "Riproduzioni",
+    "quotes": "citazioni",
+    "reposts": "Condivisioni",
+    "saved": "Salvato",
+    "shares": "Condivisioni",
+    "signedOutViewers": "Disconnesso",
+    "topSupporters": "I migliori sostenitori",
+    "visitors": "Disconnesso"
+  },
   "halloween": {
     "title": "Buon Halloween",
     "otherThemes": "Niente brividi? Trova altri temi:",
@@ -19218,6 +19555,10 @@
     "connect": "Connetti GitHub",
     "disconnect": "Disconnetti"
   },
+  "mcpKeys": {
+    "delete": "Elimina",
+    "shortProfile": "Profilo"
+  },
   "chatSearch": {
     "placeholder": "Cerca messaggi o persone",
     "placeholderPerson": "Cerca i messaggi di {{name}}",
@@ -19247,5 +19588,28 @@
     "gone": "Questo messaggio non è più qui",
     "theirMessages": "I loro messaggi",
     "seeTheirMessages": "Visualizza i loro messaggi"
+  },
+  "dmRequests": {
+    "title": "Richieste",
+    "accept": "Accetta",
+    "delete": "Elimina",
+    "block": "Blocca"
+  },
+  "dmSchedule": {
+    "view": "Visualizza",
+    "edit": "Modifica",
+    "editLabel": "Modifica messaggio",
+    "error": "Non ha funzionato. Riprova."
+  },
+  "mentionLinks": {
+    "communities": "Community",
+    "pages": "Pagine",
+    "people": "Persone",
+    "linkTo": "Collega {{name}}",
+    "empty": "Nessun risultato",
+    "hint": "Scrivi per trovare persone, community e pagine",
+    "members": " membri",
+    "placeholder": "Cerca persone, community, pagine...",
+    "title": "Menziona o collega"
   }
 }

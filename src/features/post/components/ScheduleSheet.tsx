@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Clock, Sparkles } from "lucide-react";
-import Minus from "@/components/ui/cut-icons/minus";
-import Plus from "@/components/ui/cut-icons/add";
 import X from '@/components/ui/cut-icons/close';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { parseWhen } from '@/lib/schedule/parseWhen';
+import { TimeWheel } from './TimeWheel';
+import { localWhenPlaceholder, toEnglishWhen } from '@/lib/schedule/localWhen';
 import { bestTime, toLocalGrid } from '@/lib/schedule/fansOnline';
 import { getFansOnline } from '@/lib/api/dehub/scheduled';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -80,7 +80,8 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
   const selectedAt = atMinutes(day, minutes);
   const validTime = selectedAt.getTime() > earliest;
 
-  const parsed = useMemo(() => (typed.trim() ? parseWhen(typed) : null), [typed]);
+  // Typed in the reader's own language ("cuma 20:00", "2 saat sonra") as well as English.
+  const parsed = useMemo(() => (typed.trim() ? parseWhen(typed) ?? parseWhen(toEnglishWhen(typed, locale ?? 'en')) : null), [typed, locale]);
   useEffect(() => {
     if (!parsed) return;
     setDay(startOfDay(parsed.at));
@@ -132,11 +133,9 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
     } catch { return ''; }
   })();
 
-  const stepBy = kind === 'message' ? 5 : STEP;
-  const step = (delta: number) => {
-    const next = atMinutes(day, minutes + delta);
-    setDay(startOfDay(next));
-    setMinutes(next.getHours() * 60 + next.getMinutes());
+  // The wheels move the time within the picked day.
+  const pickClock = (total: number) => {
+    setMinutes(total);
     setTyped('');
   };
   const choose = (at: Date) => {
@@ -164,8 +163,18 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent glass hideHandle column scrollable className="max-h-[92dvh] px-4 pb-2" data-when-sheet>
-        <DrawerHeader className="relative mx-auto w-full max-w-[440px] px-0 pb-3">
+      {/* Desktop: the sheet hugs its 440px of content with an even 24px all
+          round, centred in the column it opened from, instead of stretching
+          across the whole column. */}
+      <DrawerContent
+        glass
+        hideHandle
+        column
+        scrollable
+        className="max-h-[92dvh] px-4 pb-2 md:left-[calc(var(--app-main-left,0px)+(var(--app-main-width,100vw)-488px)/2)] md:w-[488px] md:px-6 md:pb-0"
+        data-when-sheet
+      >
+        <DrawerHeader className="relative mx-auto w-full max-w-[440px] px-0 pb-3 md:pt-4">
           <div className="flex items-center justify-between">
             <button type="button" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="-ml-2 rounded-xl p-2 transition-colors hover:bg-white/10">
               <X className="h-5 w-5 text-white/70" />
@@ -182,7 +191,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && parsed) { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
-              placeholder={t('whenSheet.typePlaceholder', { defaultValue: 'Type a time, like "fri 8pm" or "in 2 hours"' })}
+              placeholder={localWhenPlaceholder(t('whenSheet.typePlaceholder', { defaultValue: 'Type a time, like "fri 8pm" or "in 2 hours"' }), locale ?? 'en')}
               aria-label={t('whenSheet.typeLabel', { defaultValue: 'Type a time' })}
               className="min-w-0 flex-1 bg-transparent text-sm font-medium text-inherit outline-none placeholder:text-white/45"
               enterKeyHint="done"
@@ -273,7 +282,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
 
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/50">{t('whenSheet.orPickDay', { defaultValue: 'Or pick a day' })}</p>
-            <div ref={stripRef} role="tablist" className="scrollbar-hide -mx-1 flex gap-1 overflow-x-auto px-1 pb-2">
+            <div ref={stripRef} role="tablist" className="scrollbar-hide -mx-1 flex gap-1 overflow-x-auto px-1 pb-2 [mask-image:linear-gradient(90deg,transparent,#000_12px,#000_calc(100%_-_28px),transparent)]">
               {days.map((d, i) => {
                 const active = i === dayIndex;
                 return (
@@ -297,15 +306,8 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-5 text-white">
-            <button type="button" data-kit-button="quiet" onClick={() => step(-stepBy)} aria-label={kind === 'message' ? t('whenSheet.earlierShort', { defaultValue: 'Earlier' }) : t('whenSheet.earlier', { defaultValue: '15 minutes earlier' })} className="!h-10 !w-10 !rounded-full !p-0">
-              <Minus className="h-4 w-4" />
-            </button>
-            <span className="min-w-[7.5rem] text-center text-[28px] font-extrabold tabular-nums tracking-tight">{timeLabel(selectedAt)}</span>
-            <button type="button" data-kit-button="quiet" onClick={() => step(stepBy)} aria-label={kind === 'message' ? t('whenSheet.laterShort', { defaultValue: 'Later' }) : t('whenSheet.later', { defaultValue: '15 minutes later' })} className="!h-10 !w-10 !rounded-full !p-0">
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+          {/* Spin the hour and the minutes, like the iPhone clock. */}
+          <TimeWheel minutes={minutes} onChange={pickClock} locale={locale} />
 
           <div className="space-y-1 text-center text-xs text-white/60">
             {!validTime ? (
@@ -320,7 +322,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
             {kindTip && <p>{kindTip}</p>}
           </div>
 
-          <div className="flex flex-col gap-2 pb-1">
+          <div className="flex flex-col gap-2 pb-1 md:pb-0">
             <button type="button" data-kit-button="primary" onClick={handleConfirm} disabled={!validTime} className="w-full">
               {confirmText}
             </button>

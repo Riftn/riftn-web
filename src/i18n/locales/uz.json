@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "Matn"
+  },
   "comic": {
     "showAll": "Barcha {{count}} sahifani ko‘rsatish"
   },
@@ -14,6 +17,22 @@
     "glitter": "Yaltiroq zarra",
     "saved": "Hoshiya saqlandi",
     "failed": "Hoshiyani saqlab bo‘lmadi"
+  },
+  "duet": {
+    "policyEveryone": "Hamma",
+    "policyFollowers": "Obunachilar",
+    "policyNobody": "Hech kim",
+    "loadMore": "Koʻproq yuklash"
+  },
+  "videoRemix": {
+    "sound": "Ushbu tovushni ishlating"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Hamma",
+      "followers": "Obunachilar",
+      "nobody": "Hech kim"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -166,11 +185,18 @@
     "privateNote": "Shaxsiy akkauntlar fediverse'da ko'rsatilmaydi.",
     "noUsername": "Fediverse manzilini olish uchun foydalanuvchi nomini tanlang."
   },
+  "signedFollows": {
+    "setUp": "Yoqish",
+    "turnOff": "O‘chirish",
+    "efpTurnOff": "To'xtatish"
+  },
   "profileFields": {
     "title": "Profil maydonlari",
     "description": "Profilingizda to'rttagacha qo'shimcha qator, masalan veb-sayt yoki olmoshlaringiz.",
     "label": "Yorliq",
     "content": "Mazmun",
+    "add": "Oʻrin qoʻshish",
+    "remove": "Oʻrin olib tashlash",
     "save": "Maydonlarni saqlash",
     "saved": "Profil maydonlari saqlandi",
     "failed": "Saqlanmadi. Qayta urinib ko'ring.",
@@ -188,8 +214,11 @@
       "portfolio": "Portfolio",
       "shop": "Do'kon",
       "podcast": "Podkast",
+      "newsletter": "Habarlar",
+      "pronouns": "Unvonlar",
       "location": "Mekan",
-      "custom": "Kamolot"
+      "custom": "Kamolot",
+      "customOption": "Maxsus etiket"
     }
   },
   "followedTags": {
@@ -351,8 +380,10 @@
     "error": "Ko&#39;zgularga e&#39;tibor berish kerak",
     "refresh": "Yangilash holati",
     "disconnect": "Twitch’ni uzib qo‘ying",
+    "open": "Riftn-da tomosha qiling",
     "retry": "Aks ettirishni qayta sinab ko&#39;ring",
     "consent": "Faqat o&#39;zingizga tegishli kanalni ulang. Aks ettirishni yoqish Riftnga sizning eshittirishlaringizni uzatish va mavjud yozib olish ruxsatnomangiz doirasida qayta ijro etish imkonini beradi.",
+    "disabled": "Avtomatik ko'chirish o'chirilgan",
     "failed": "Twitch aks ettirish funksiyasini yangilab bo&#39;lmadi. Qaytadan urinib ko&#39;ring."
   },
   "maintenance": {
@@ -421,6 +452,7 @@
     "publicNotice": "Sizning hisobotingiz va har qanday skrinshot ommaviy xatolar taxtasida ko&#39;rsatiladi. Yuborishdan oldin skrinshotni tekshiring.",
     "deviceNotice": "Sahifa, qurilma, mavjud bo&#39;lganda model va ilova yoki brauzer tafsilotlari avtomatik ravishda qo&#39;shiladi.",
     "capturing": "Ushbu sahifa yozib olinmoqda…",
+    "screenshot": "Skrinshot ko'rinishi",
     "removeScreenshot": "Skrinshotni olib tashlash",
     "noScreenshot": "Avtomatik skrinshot mavjud emas. Siz hali ham hisobotingizni yuborishingiz mumkin.",
     "attachScreenshot": "Skrinshotni biriktiring",
@@ -1187,7 +1219,12 @@
     "payDirect": "{{chain}} da {{symbol}} da to&#39;g&#39;ridan-to&#39;g&#39;ri {{name}} ga yuborildi. Almashtirish yo&#39;q.",
     "payDirectNoName": "{{chain}} da {{symbol}} ichida to&#39;g&#39;ridan-to&#39;g&#39;ri yaratuvchiga yuborildi. Almashtirish yo&#39;q.",
     "payViaBridgeDpay": "Base ga ko'chirildi va Riftn Pay ga to'landi, tokenlar taxminan bir daqiqada keladi",
-    "dmSent": "{{name}} ga {{amount}} tokenlar yuborildi!"
+    "dmSent": "{{name}} ga {{amount}} tokenlar yuborildi!",
+    "addMessage": "Xabar yozing (va shart emas).",
+    "messagePublic": "Ommaviy",
+    "railTitle": "Maslahatlar",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "tokenlar"
   },
   "postOptions": {
     "liveAlertsOn": "Endi {{name}} sahifasiga obuna boʻldingiz. Jonli efirga chiqqanida bildirishnoma olasiz.",
@@ -1706,6 +1743,9 @@
   "notifications": {
     "title": "Bildirishnomalar",
     "markAllRead": "Hammasini oʻqilgan deb belgilash",
+    "groupNew": "Yangi",
+    "groupToday": "Bugun",
+    "groupThisWeek": "Bu hafta",
     "settings": "Bildirishnoma sozlamalari",
     "actions": "Amallar",
     "markAllAsRead": "Hammasini oʻqilgan deb belgilash",
@@ -1734,6 +1774,7 @@
     "communities": "Hamjamiyatlar",
     "stores": "Do'konlar",
     "noNotificationsYet": "Hali bildirishnomalar yoʻq",
+    "searchClose": "Yopish",
     "noNotificationsDesc": "Yoqtirishlar, izohlar, tiplar yoki yangi obunachilar olganingizda shu yerda koʻrinadi.",
     "loadMore": "Koʻproq yuklash",
     "markAsRead": "Oʻqilgan deb belgilash",
@@ -1970,15 +2011,18 @@
     "promptLabel": "Sizning boshlangʻich taklifi",
     "promptPlaceholder": "G&#39;oya, yaxshilanish yoki xatoni tasvirlab bering...",
     "promptAttach": "Rasmlarni biriktiring",
+    "removeAttachment": "Ilovani & olib tashlash",
     "promptDrop": "Rasmlarni bu yerga joylashtiring yoki tashlang",
     "promptPost": "So&#39;rovni yuborish",
     "promptShortcut": "Joylashtirish uchun Ctrl / ⌘ + Enter tugmalarini bosing",
     "promptDetails": "Ixtiyoriy tafsilotlar",
     "promptDevice": "Qurilma va operatsion tizim (xatoliklar uchun)",
+    "deviceInfoNoErrors": "Yo'q",
     "promptFilters": "Kategoriya bo&#39;yicha filtrlash",
     "promptMediaError": "Har biri 50 MB dan kam rasm yoki videolarni tanlang.",
     "promptMediaLimit": "{{max}} gacha qo&#39;shimchalar.",
     "removePromptAttachment": "{{name}} ni olib tashlang",
+    "promptAttachment": "Ilova {{number}}",
     "title": "Funksiya soʻrovlari",
     "ideasSubmitted": "{{count}} gʻoya taqdim etildi",
     "ideaSubmitted": "1 gʻoya taqdim etildi",
@@ -2032,6 +2076,12 @@
     "loginRequired": "Avtorizatsiya kerak"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Gacha",
+      "recent": "So'nggi",
+      "suggested": "Taklif qilingan",
+      "youFollow": "Siz kuzatadigan odamlar"
+    },
     "reply": "Javob berish",
     "react": "Reaksiya",
     "edit": "Tahrirlash",
@@ -2068,7 +2118,10 @@
     "checkingTokenBalance": "Token balansingiz tekshirilmoqda...",
     "deleteConversationFailed": "Suhbatni o'chirib bo'lmadi",
     "message": "Xabar",
-    "noConversationsYet": "Hali suhbatlar yo&#39;q"
+    "noConversationsYet": "Hali suhbatlar yo&#39;q",
+    "sending": "Yuborishda",
+    "retrySend": "Qayta urinish",
+    "discardSend": "Olib tashlash"
   },
   "music": {
     "listeningCount_one": "{{count}} tinglash",
@@ -2151,6 +2204,9 @@
     "viewList": "Ro'yxat ko'rinishi",
     "viewMode": "Ko'rish",
     "back": "Orqaga",
+    "reserve": {
+      "signIn": "Kirish"
+    },
     "usernameAvailable": "Foydalanuvchi nomi boʻsh!",
     "signUpToClaim": "Olish uchun roʻyxatdan oʻting",
     "signUp": "Roʻyxatdan oʻtish",
@@ -2169,7 +2225,8 @@
       "total": "Umumiy qamrov",
       "breakdownTitle": "Bu imkoniyat qayerdan keladi",
       "dehubFollowers": "Riftn izdoshlari",
-      "verified": "Ijtimoiy hisoblar yaratuvchi bog&#39;lagan akkauntlardan olinadi."
+      "verified": "Ijtimoiy hisoblar yaratuvchi bog&#39;lagan akkauntlardan olinadi.",
+      "selfReported": "Ijtimoiy tarmoqlardagi obunachilar soni yaratuvchi tomonidan kiritiladi."
     },
     "loginDescription": "Profilingizni koʻrish va boshqarish uchun kiring.",
     "replyThread": {
@@ -2178,7 +2235,13 @@
     },
     "tabs": {
       "playlists": "Qoʻshiq roʻyxatlari",
-      "dislikes": "Yoqtirmaganlar"
+      "dislikes": "Yoqtirmaganlar",
+      "likes": "Yoqtirishlar"
+    },
+    "likedPosts": {
+      "emptyTitle": "Hozircha layklar yoʻq",
+      "privateTitle": "Layklar yopiq",
+      "loadMore": "Koʻproq yuklash"
     },
     "dislikes": {
       "emptyTitle": "Hali yoqtirishlar yo&#39;q",
@@ -2201,6 +2264,10 @@
     "sortMostViewed": "Eng ko&#39;p ko&#39;rilgan",
     "sortLikes": "Yoqtirishlar",
     "sortMostLiked": "Eng ko&#39;p yoqdi",
+    "sortCustomShort": "Maxsus",
+    "arrange": {
+      "saving": "Saqlanmoqda..."
+    },
     "searchThisChannel": "Ushbu kanalni qidirish",
     "searchResultCount": "&quot;{{query}}&quot; uchun 1 ta natija",
     "searchResultCountPlural": "{{count}} natijalari uchun \"{{query}}\""
@@ -2302,6 +2369,7 @@
       "title": "Tirik",
       "help": "Bu agentga mustaqil yashashga ruxsat bering. U o&#39;z ish vaqtini, postlarini, layklarini va javoblarini o&#39;z ovozida saqlaydi va kechalari uxlaydi.",
       "starting": "Uning shaxsiyatini sozlash…",
+      "awake": "Uyg'on {{home}}",
       "asleep": "{{home}} da uxlab yotgan",
       "next": "keyingi tekshirish {{time}}",
       "recent": "Yaqinda",
@@ -2464,6 +2532,9 @@
     "signInAgain": "Qayta kirish",
     "createSignIn": "Agent yaratish uchun qayta kiring",
     "checkConnection": "Ulanishni tekshiring va qayta urinib koʻring.",
+    "welcome": {
+      "text": "Xush kelibsiz xabari"
+    },
     "workspace": {
       "moderation": "Oqim moderatsiyasi",
       "moderationHelp": "Avval moderatsiya ruxsatini yoqing. Hisob allaqachon oqim yaratuvchisi yoki tayinlangan moderator boʻlishi kerak. Tasdiqlash va qoralama rejimlari hali ham qoʻllaniladi. Vaqtincha cheklovlar avtomatik ravishda tugaydi.",
@@ -2656,7 +2727,9 @@
     "resendCodePhone": "Raqam noto&#39;g&#39;rimi yoki kod yo&#39;qmi? Orqaga qayting",
     "continueAs": "Davom etish",
     "switchWalletAccount": "Hisobni almashtirish",
-    "walletLoadFailed": "Hamyonlarni yuklab bo&#39;lmadi. Qaytadan urinib ko&#39;ring."
+    "walletLoadFailed": "Hamyonlarni yuklab bo&#39;lmadi. Qaytadan urinib ko&#39;ring.",
+    "openInBrowser": "Brauzerda ochish",
+    "copyLink": "Havolani nusxalash"
   },
   "careers": {
     "title": "Riftn da karyera",
@@ -2880,7 +2953,8 @@
     "noMenuMatches": "Menyuda hech nima mos kelmadi",
     "searchDehubFor": "Riftn'da «{{query}}» ni qidirish",
     "switchAccount": "Hisobni o'zgartirish",
-    "signedInAs": "{{name}} sifatida tizimga kirildi"
+    "signedInAs": "{{name}} sifatida tizimga kirildi",
+    "requestSend": "So'rov yuborish"
   },
   "comments": {
     "reportComment": "Fikr haqida xabar berish",
@@ -2989,6 +3063,9 @@
     "confirm": "{{chain}} da yalpiz",
     "confirmWithCost": "{{chain}} da yalpiz · {{cost}}",
     "notAvailable": "Ushbu zanjirda zarb qilish hali mavjud emas."
+  },
+  "postEditHistory": {
+    "original": "Asl"
   },
   "postInfo": {
     "title": "Post ma'lumoti",
@@ -5100,6 +5177,7 @@
     "settledTitleSpeed": ", odatda {{speed}} da",
     "settledCount_one": "{{count}} joylashdi",
     "settledCount_other": "{{count}} joylashdi",
+    "statusInProgress": "Davom etmoqda",
     "howMany": "Qancha",
     "availableCount_one": "{{count}} mavjud",
     "availableCount_other": "{{count}} mavjud",
@@ -5192,6 +5270,17 @@
     "sellYourFractions": "Kasrlaringizni soting ({{held}} ushlab turilgan)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Ushbu tafsilotlardan foydalaning"
+      }
+    },
+    "cinema": {
+      "close": "Yopish",
+      "performance": {
+        "label": "Samaradorlik"
+      }
+    },
     "libraryEmpty": "Saqlangan generatsiyalaringiz shu yerda paydo bo‘ladi.",
     "toolRemake": "Remeyk",
     "toolMaboroshiDesc": "Belgilar va obyektlarni almashtiring, qoralamani ko&#39;rib chiqing, so&#39;ngra asl saundtrekingiz bilan eksport qiling.",
@@ -5445,6 +5534,7 @@
     "presetOpenUnderwaterSurfaceHint": "Suv ostidagi pufakchalar va singan quyosh nuri",
     "presetOpenViaductTrainName": "Viaduct poyezdi",
     "presetOpenViaductTrainHint": "Yoritilgan derazalar va uzun linzali chuqurlik bilan statik kenglik",
+    "presetOpenTowerTiltName": "Minora egilishi",
     "presetOpenTowerTiltHint": "Koʻtarilishni sekinlashtirib, yoritilgan shaharga tushib ketish",
     "whatToCreate": "Nima yaratish kerak",
     "startCreatingWith": "{{model}} bilan yaratishni boshlang",
@@ -6160,6 +6250,12 @@
     "raw": "Xom"
   },
   "nftMarket": {
+    "actAll": "Hammasi",
+    "actListings": "E'lonlar",
+    "actOffer": "Taklif qilish",
+    "actOffers": "Takliflar",
+    "actSales": "Savdo",
+    "tabActivity": "Faoliyat",
     "shortTitle": "NFTlar",
     "filters": "Filtrlar",
     "forSale": "Sotuvda",
@@ -6221,6 +6317,9 @@
     "offered": "Taklif yuborildi. Egasi har qanday vaqtda uni qabul qilishi mumkin.",
     "dehubPost": "Riftn post",
     "youHold": "Sizda {{n}} bor.",
+    "price": "Narx",
+    "volume": "Ovoz balandligi",
+    "tabRecent": "So'nggi",
     "buyNow": "Hozir sotib oling",
     "dropsTo": "Narxi {{price}} gacha tushadi {{date}}da",
     "inBundle": "{{n}} ta toʻplam sifatida sotilgan",
@@ -6642,7 +6741,68 @@
     "youAreBanned": "Siz bu ijodkorning strimlarida chatlasha olmaysiz",
     "youAreTimedOut": "Siz bir zumga vaqtingiz tugadi"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Fon",
+      "modes": {
+        "none": "Oʻchiq",
+        "blur": "Xiralik",
+        "color": "Rang"
+      }
+    },
+    "remove": "Olib tashlash",
+    "scenes": {
+      "countdown": "Ortga hisoblash",
+      "minutes": "{{count}} daqika",
+      "names": {
+        "starting": "Tez orada boshlanadi"
+      }
+    },
+    "sources": {
+      "reactAdd": "Ko'rsatish",
+      "image": "Rasm",
+      "camera": "Kamera",
+      "show": "Strimda ko'rsatish",
+      "loop": "Davr",
+      "positions": {
+        "center": "Markazlashtir"
+      },
+      "sizes": {
+        "medium": "O'rtacha"
+      },
+      "shapes": {
+        "circle": "Doira",
+        "rect": "Kvadrat"
+      }
+    },
+    "audio": {
+      "mute": "Ovozini o'chirish",
+      "unmute": "Ovozini yoqish",
+      "gateLevels": {
+        "off": "Oʻchiq",
+        "low": "Yorugʻ",
+        "high": "Kuchli"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platforma",
+      "label": "Nom (ariza)",
+      "key": "Oqim kaliti",
+      "save": "Qo'shish",
+      "cancel": "Bekor qilish",
+      "states": {
+        "off": "Oʻchiq",
+        "idle": "Tayyor",
+        "live": "Jonli",
+        "error": "Xatolik"
+      }
+    },
+    "vertical": {
+      "centre": "Markazlashtir",
+      "live": "JONLI"
+    },
     "subathon": {
       "title": "Subaton",
       "intro": "Oʻyingizda streamda qoldirib turish uchun har bir toʻlovli hodiya, taklif va abonentlik vaqtni qoʻshadi.",
@@ -7594,6 +7754,8 @@
     "footerNote": "DePin ishtiroki investitsiya mahsuloti emas, balki hissa qo'shish xizmatidir. Mavjudligi, huquqlari va mukofotlari o'zgarishi mumkin."
   },
   "creatorFlow": {
+    "newNativeFlow": "Yangi oqim",
+    "disconnect": "Uzish",
     "title": "Creator Flow",
     "backToStudio": "Creator Studio-ga qaytish",
     "backToFlows": "Sizning oqimlaringizga qaytish",
@@ -7933,7 +8095,15 @@
     "followBackAllFailed": "Hech kimni orqasidan ergashtira olmadim",
     "followingBackProgress": "{{total}} dan {{completed}} ga ergashish",
     "findingFollowers": "Obunachilar qidirilmoqda...",
-    "followBackAll": "Barchasini kuzatib boring"
+    "followBackAll": "Barchasini kuzatib boring",
+    "followBackConfirm": "Obunani qaytarish",
+    "followBackNotNow": "Hozir emas",
+    "followBackDone": "Bajarildi",
+    "nonFollowers": {
+      "notNow": "Hozir emas",
+      "cancel": "Bekor qilish",
+      "close": "Yopish"
+    }
   },
   "reactionInfo": {
     "title": "Reaksiyalar",
@@ -8729,6 +8899,14 @@
     "priceChartCleared": "Narxlar jadvali tozalandi. Belgilangan ma&#39;lumotnoma narxi: $0.0001. Bajarish narxlari mavjud buyurtmalarga bog&#39;liq."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Aylanish",
+      "add": "Qo'shish",
+      "scale": "Hajmi",
+      "color": "Rang",
+      "light": "Yorugʻ"
+    },
     "video": {
       "tFade": "Aralash o‘tish",
       "none": "Yo‘q",
@@ -8895,6 +9073,8 @@
       "tools": "Tahrirlash vositalari"
     },
     "agent": {
+      "stop": "To'xtatish",
+      "queue": "Navbatga qo'shish",
       "introTitle": "AI'ga nima xohlayotganingizni ayting",
       "introBody": "Dizayn yoki o'zgarishni o'z so'zlaringiz bilan tasvirlang. U sahifa o'lchamini o'zgartiradi, matn yozadi va bezaydi, bepul foto, video va musiqa topadi, filtrlar qo'llaydi, qatlamlarni tartiblaydi va ularni animatsiya qiladi. Har bir so'rov bir qadamda bekor qilinadi.",
       "suggestPoster": "Yozgi chegirma uchun plyaj surati va qalin sarlavhali kvadrat Instagram post tayyorla",
@@ -9163,6 +9343,9 @@
       "reloadText": "Taglavhani qayta yuklash",
       "textSaved": "Taglavha o&#39;zgarishlari saqlandi.",
       "action": "Avtomatik subtitrlar",
+      "styles": {
+        "bold": "Qalin"
+      },
       "working": "Tinglanmoqda… {{percent}}%",
       "downloading": "Nutq modeli tayyorlanmoqda… {{percent}}%",
       "hint": "Nutqni vaqtga moslangan, uslubini o‘zgartirish mumkin bo‘lgan subtitrlarga aylantiradi. Qurilmangizda ishlaydi: bepul va maxfiy. Birinchi foydalanishda model yuklab olinadi.",
@@ -10542,6 +10725,29 @@
       "toolbar": "Kanvas navigatsiyasi",
       "zoomIn": "Tuvalni kattalashtirish",
       "zoomOut": "Kanvasni kattalashtirish"
+    },
+    "clipFix": {
+      "listening": "Teshiklash…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Bo‘lish",
+        "play": "O'yin",
+        "pause": "To'xtatib turish",
+        "frameBack": "Oldingi kadr",
+        "frameForward": "Keyingi kadr"
+      }
+    },
+    "voiceClone": {
+      "stop": "Yozishni toʻxtatish",
+      "failed": "Ses klonlash muvaffaqiyatsizlik."
+    },
+    "linkImport": {
+      "go": "Import qilish",
+      "downloading": "Yuklab olinmoqda {{percent}}%"
+    },
+    "reverse": {
+      "action": "Teskari"
     }
   },
   "jungleMood": {
@@ -10691,6 +10897,7 @@
     "bookmarkDesc": "Saqlash uchun postni savatga qoʻy. Keyin savatdan Bookmarks (Kitobxon) sahifasida saqlangan barcha postlarni o'qib ko'ring.",
     "tip": "Maslahat",
     "report": "Hisobot",
+    "reportDesc": "Noto'g'ri yoki zararli kontentni ko'rib chiqish uchun belgilang. Hisobotlar hamjamiyatni xavfsiz saqlashga yordam beradi.",
     "moreOptions": "Qo&#39;shimcha imkoniyatlar (⋯)",
     "moreOptionsDesc": "Xabarni tahrirlash, o&#39;chirish yoki xabar berish kabi qo&#39;shimcha amallarni ochadi.",
     "translateButton": "Tarjima tugmasi",
@@ -10752,6 +10959,7 @@
     "dm": "To&#39;g&#39;ridan-to&#39;g&#39;ri xabarlar",
     "dmDesc": "Foydalanuvchilar o&#39;rtasidagi shaxsiy xabarlar. Hozirda mobil ilovada mavjud, veb-qo&#39;llab-quvvatlash tez orada ishga tushadi.",
     "mention": "Eslatib o&#39;tishlar (@)",
+    "mentionDesc": "Post yoki sharhda boshqa foydalanuvchini @dan keyin ularning foydalanuvchi nomini yozib belgilang. Ular bildirishnoma oladi.",
     "homeFeed": "Uy tasmasi",
     "homeFeedDesc": "Sizdan keyingi yangiliklar va trend mavzular.",
     "explore": "Oʻrganing",
@@ -11823,7 +12031,15 @@
       "rewardsWeek": "{{date}} haftasi",
       "rewardPaid": "To’langan",
       "rewardPending": "Kutish jarayonida",
-      "rewardsNone": "Hali hech qanday mukofot hisoblanmagan. Birinchi hafta dushanba kuni yopiladi."
+      "rewardsNone": "Hali hech qanday mukofot hisoblanmagan. Birinchi hafta dushanba kuni yopiladi.",
+      "stats": {
+        "button": "Jonli statistika"
+      },
+      "signin": {
+        "users_one": "{{count}} foydalanuvchi",
+        "users_other": "{{count}} foydalanuvchilar",
+        "delete": "Oʻchirish"
+      }
     },
     "card": {
       "open": "Ochiq"
@@ -11981,6 +12197,9 @@
     "reminderLater": "Hozir qarzni saqlamayman"
   },
   "copy": {
+    "55656b5e434f": "Qidiruvni yopish",
+    "57e2faa5ec63": "Riftn dan qidirish",
+    "96d7bff86b44": "Qidiruv yuklashda muammoqalik",
     "1607715e45ed": "Gapirish uchun to‘pga bosing yoki pastda yozing",
     "00140a37bd26": "Ushbu tarmoqdagi tranzaksiyalar vaqtincha mavjud emas. Iltimos, qaytadan urinib ko&#39;ring.",
     "002286513398": "Siz tadbirlarni boshqarishga ruxsat etilmagan",
@@ -14692,6 +14911,7 @@
     "220277ae54c6": "Almashtirishni tasdiqlash",
     "24df132b16d3": "Oʻrin-almashtirish...",
     "7b79b4f67293": "Video qo&#39;ng&#39;iroq",
+    "8b968cce31a0": "Ovozli qo'ng'iroq",
     "a7e8af837a2b": "Daromadlarni taqqoslash",
     "6b7b77d53839": "Xuddi shu ko&#39;rishlar boshqa joyda to&#39;lagan bo&#39;lardigan daromadga nisbatan sizning haqiqiy Riftn daromadingiz.",
     "1dc1e547e65f": "Riftn&#39;da qo&#39;lga kiritilgan",
@@ -15901,7 +16121,6 @@
     "23cc49836f60": "Riftn da jonli efirga chiqing",
     "ce39b97c0f94": "Brauzeringizdan, telefoningizdan yoki OBS dan efirga chiqing, ovoz o'zgartirgichlar, tovush effektlari va kamera ko'rinishlari o'rnatilgan. Maslahatlar hamyon sifatida keladi — hech qanday kuzatuvchi chegarasi yo'q, hech qanday to'lov tsikli yo'q va boshlash uchun hamyon kerak emas.",
     "efc85ecfd402": "Riftn ni oching",
-    "dbc468a14b60": "Ko'p so'raladigan savollar",
     "1e5b36078e37": "Tegishli qo'llanmalar",
     "95f48da59b9a": "2026 yilda eng yaxshi markazlashtirilmagan ijtimoiy media platformalari",
     "89ec0bb81771": "Kino",
@@ -16375,7 +16594,7 @@
     "c0ebb7d6b693": "Jim",
     "616685a138d8": "/api/stats/foydalanuvchilar",
     "1340eb7a333e": "Live Sayt Statistikasi: Riftn Ziyokorlar va A'zolarining Real Time Holati",
-    "e1110847f32e": "Live sonlar uchun riftn.com: Cloudflarening qamrovi bo'yicha dehubning vizitachilar soni, Riftnning o'z a'zolari soni, shuningdek, platforma to'lovi, xarajatlar va asl token solig'i qayerga ketganligi haqida ma'lumot, har bir on-chain xat yozuviga tegishli bo'lgan har bir xarajat.",
+    "e1110847f32e": "Live sonlar uchun riftn.com: Cloudflarening qamrovi bo'yicha Riftnning vizitachilar soni, Riftnning o'z a'zolari soni, shuningdek, platforma to'lovi, xarajatlar va asl token solig'i qayerga ketganligi haqida ma'lumot, har bir on-chain xat yozuviga tegishli bo'lgan har bir xarajat.",
     "2baf411ba3c5": "Riftn jonli sayt statistikasi — tashrif buyuruvchilar, sahifa ko&#39;rishlari, a&#39;zolar va faol foydalanuvchilar",
     "1b2b527551e9": "Riftn peer-to-peer bozorida mahsulotlarni ko&#39;rib chiqing va soting. Tokenlardan foydalangan holda raqamli tovarlar, savdogarlar, san&#39;at va xizmatlar bilan savdo qiling.",
     "f57d7f82c107": "SuperPowers: Riftn nishoningizni qo&#39;lingiz yetganda sarflang",
@@ -17219,7 +17438,9 @@
     "c7ea1b9c02fb": "Xususiyat so&#39;rovi yuborilmadi",
     "485fbbcb6b0e": "Ovoz berish amalga oshmadi. Qaytadan urinib ko&#39;ring.",
     "b8af57e311aa": "Funksiya so&#39;rovi yangilandi!",
+    "db455cae992e": "Xususiyat so'rovini yangilashda xato",
     "be692c8e223e": "Funksiya so&#39;rovi o&#39;chirildi",
+    "b500b2068ac7": "Xususiyat so'rovini o'chirishda xato",
     "ac7d69cdcaf6": "To&#39;langan — sotuvchidan kasrlaringizni yuborish so&#39;ralgan",
     "2579be0056a3": "Yetkazib berildi — savdo yakunlandi",
     "8066dc7e1263": "To&#39;langan — savdo amalga oshirildi",
@@ -17669,6 +17890,7 @@
     "021aaa052282": "Voy Ahh",
     "f3404466f096": "Voy (odam)",
     "ab7b9519e1a2": "Oh (Qiz)",
+    "d65768d34aa0": "Ба Дум Тиш",
     "07339b14c9a0": "Dahshatli",
     "d9bdbfaed8c9": "Sehrli afsun",
     "f334cda47039": "Jim bo&#39;l",
@@ -18862,6 +19084,7 @@
     "backToTop": "Yuqoriga qaytish",
     "needTitle": "Davom etish uchun sarlavha qo'shing",
     "needBody": "{{count}} ko'proq belgi qoldi",
+    "imagesLabel": "Rasmlar",
     "backToWriting": "Yozishga qaytish",
     "readyTitle": "Nashr uchun tayyor",
     "sharePreview": "Ulashilganda qanday ko'rinadi",
@@ -18923,11 +19146,136 @@
     "exploreFirst": "Birinchi marta tekshiring",
     "codeNote": "Biz sizga kod yuboramiz, parol kerak emas."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Reja",
+      "howMany": "Nechta",
+      "who": "Foydalanuvchi nomi yoki hamyon manzili",
+      "whoPlaceholder": "@foydalanuvchinomi",
+      "cancel": "Bekor qilish",
+      "stage": {
+        "preparing": "Tayyorlanmoqda…",
+        "confirming": "Tranzaksiya kutilmoqda…",
+        "recording": "Yakunlanmoqda…"
+      }
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Obunachi"
+      },
+      "ended": "Yakunlandi",
+      "until": "{{date}} gacha",
+      "failed": "Bu ish bermadi. Qaytadan urinib ko'ring."
+    }
+  },
+  "whenSheet": {
+    "today": "Bugun",
+    "tooSoon": "Kelajakdan vaqtni tanlang.",
+    "show": "Ko'rsatish",
+    "hide": "Yashirish"
+  },
+  "planned": {
+    "title": "Rejalashtirilgan",
+    "all": "Hammasi",
+    "posts": "Postlar",
+    "stages": "Audio xonalar",
+    "post": "Joylash",
+    "live": "Jonli",
+    "stage": "Sahna",
+    "untitledPost": "Joylash",
+    "untitledLive": "Jonli",
+    "loading": "Yuklanyapti…",
+    "startNow": "Hozir boshlash",
+    "cancel": "Bekor qilish",
+    "cancelled": "Bekor qilindi"
+  },
+  "welcome": {
+    "about": {
+      "title": "Riftn'ga xush kelibsiz",
+      "day": "Kun",
+      "month": "Oy",
+      "year": "Yil"
+    },
+    "name": {
+      "title": "Ismingiz",
+      "placeholder": "Ismingiz"
+    },
+    "card": {
+      "name": "Ismingiz",
+      "followers": "izdoshlar"
+    },
+    "topic": {
+      "music": "Musiqa",
+      "art": "Sanʼat",
+      "gaming": "Oʻyinlar",
+      "crypto": "Kripto",
+      "sports": "Sport",
+      "comedy": "Komediya",
+      "podcast": "Podkast",
+      "food": "Oziq-ovqat",
+      "news": "Yangiliklar",
+      "science": "Fan"
+    },
+    "back": "Orqaga",
+    "skipPhoto": "Hozirda o'tkazib yuborish",
+    "preview": "Koʻrinish"
+  },
+  "appTokens": {
+    "title": "Sizning tokenlaringiz",
+    "history": "Tarix",
+    "noHistory": "Topshiriqlar mavjud emas!",
+    "kindDeposit": "Mablagʻ qoʻshish",
+    "to": "Gacha",
+    "amount": "Miqdori",
+    "notePlaceholder": "Izoh qo‘sh (ixtiyoriy)",
+    "sendButton": "Yuborish",
+    "errorInsufficient": "Tokenlar yetarli emas"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Hamma",
+      "followers": "Obunachilar",
+      "nobody": "Hech kim"
+    },
+    "heading": "Reaksiyalar",
+    "more": "Batafsil ma'lumot",
+    "liveNow": "Jonli",
+    "untitled": "Reaksiya"
+  },
+  "connectGuide": {
+    "title": "Riftn'ni sun'iy intellekt yordamchingizga ulang",
+    "urlLabel": "MCP server URL'i",
+    "copy": "Nusxalash",
+    "copied": "Nusxalandi",
+    "copiedToast": "MCP URL nusxalandi"
+  },
+  "avatarPrompt": {
+    "notNow": "Hozir emas"
+  },
+  "postStats": {
+    "audience": "Tomoshabin",
+    "engagement": "Qiziqish",
+    "finished": "Tugadi",
+    "members": "A'zolar",
+    "membersLower": "a'zolar",
+    "newFollowers": "Yangi izdoshlar",
+    "noBadge": "Nishon yo'q",
+    "people": "Odamlar",
+    "plays": "Spektakllar",
+    "quotes": "Iqtibos",
+    "reposts": "Repostlar",
+    "saved": "Saqlandi",
+    "shares": "Ulashishlar",
+    "signedOutViewers": "Chiqdingiz",
+    "topSupporters": "Eng yaxshi tarafdorlar",
+    "visitors": "Chiqdingiz"
+  },
   "tokenLaunch": {
     "eyebrow": "Tez kunlarda",
     "body": "Sotib olish to‘g‘ri kelmayapti, yangi token tayyorlanmoqda. Token chiqib ketganda, tezda email yuboriladi.",
     "notifyMe": "Xabar bering.",
     "sendTo": "Biz {{email}} email yuboramiz.",
+    "emailLabel": "Elektron pochta",
     "emailPlaceholder": "Muhim so'xangiz",
     "joinedTitle": "Siz roʻyxatda!",
     "joinedBody": "Biz token chiqqanda {{email}} ga elektron pochta orqali murojaat qilamiz.",
@@ -18949,31 +19297,9 @@
     "connect": "GitHubga ulangish qiling",
     "disconnect": "Uzish"
   },
-  "spaces": {
-    "title": "Boʻlimlar",
-    "live": "Jonli",
-    "upcoming": "Kelgusi",
-    "past": "Oʻtgan",
-    "create": "Boʻlim yaratish",
-    "join": "Qoʻshilish",
-    "listeners": "Tinglovchilar",
-    "speakers": "Nutqchilar",
-    "host": "Boshlovchi",
-    "endSpace": "Boʻlimni tugatish",
-    "raiseHand": "Qoʻl koʻtarish",
-    "lowerHand": "Qoʻlni tushirish",
-    "mute": "Ovozni oʻchirish",
-    "unmute": "Ovozni yoqish",
-    "leave": "Boʻlimni tark etish",
-    "noSpaces": "Hali boʻlimlar yoʻq",
-    "loginDescription": "Audio boʻlimlar yaratish va qoʻshilish uchun kiring."
-  },
-  "blog": {
-    "title": "Blog",
-    "readMore": "Koʻproq oʻqish",
-    "backToBlog": "Blogga qaytish",
-    "sharePost": "Postni ulashish",
-    "relatedPosts": "Bogʻliq postlar"
+  "mcpKeys": {
+    "delete": "Oʻchirish",
+    "shortProfile": "Profil"
   },
   "chatSearch": {
     "placeholder": "Qidiruv qilish",
@@ -19004,5 +19330,43 @@
     "gone": "Ushbu xabar hali ham mavjud emas",
     "theirMessages": "Ular xabarlarini koʻring",
     "seeTheirMessages": "Ular xabarlarini koʻring"
+  },
+  "dmRequests": {
+    "title": "Soʻrovlar",
+    "accept": "Qabul qilish",
+    "delete": "Oʻchirish",
+    "block": "Bloklash"
+  },
+  "dmSchedule": {
+    "view": "Koʻrish",
+    "edit": "Tahrirlash",
+    "editLabel": "Xabarni tahrirlash",
+    "error": "Bu ish bermadi. Qaytadan urinib ko'ring."
+  },
+  "spaces": {
+    "title": "Boʻlimlar",
+    "live": "Jonli",
+    "upcoming": "Kelgusi",
+    "past": "Oʻtgan",
+    "create": "Boʻlim yaratish",
+    "join": "Qoʻshilish",
+    "listeners": "Tinglovchilar",
+    "speakers": "Nutqchilar",
+    "host": "Boshlovchi",
+    "endSpace": "Boʻlimni tugatish",
+    "raiseHand": "Qoʻl koʻtarish",
+    "lowerHand": "Qoʻlni tushirish",
+    "mute": "Ovozni oʻchirish",
+    "unmute": "Ovozni yoqish",
+    "leave": "Boʻlimni tark etish",
+    "noSpaces": "Hali boʻlimlar yoʻq",
+    "loginDescription": "Audio boʻlimlar yaratish va qoʻshilish uchun kiring."
+  },
+  "blog": {
+    "title": "Blog",
+    "readMore": "Koʻproq oʻqish",
+    "backToBlog": "Blogga qaytish",
+    "sharePost": "Postni ulashish",
+    "relatedPosts": "Bogʻliq postlar"
   }
 }

@@ -14,15 +14,18 @@ interface TotalReachPillProps {
   wallet?: string | null;
   /** Riftn followers as counted by Riftn. */
   followers?: number | null;
+  /** The profile's customs with its links merged in; holds the counts entered in the app. */
+  customs?: Record<string, unknown> | null;
   className?: string;
 }
 
 /**
- * "Total reach" beside the follower count: Riftn followers plus the verified
- * follower counts of the socials the creator has connected. Renders nothing
- * until at least one connected account carries a count. Hover opens the breakdown on a pointer device; a tap toggles it.
+ * "Total reach" beside the follower count: Riftn followers plus the follower
+ * counts of the creator's linked socials (verified when connected, otherwise
+ * the figure entered in the app, so web and app show the same total). Renders
+ * nothing until at least one social carries a count. Hover opens the breakdown on a pointer device; a tap toggles it.
  */
-export function TotalReachPill({ wallet, followers, className }: TotalReachPillProps) {
+export function TotalReachPill({ wallet, followers, customs, className }: TotalReachPillProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<number | null>(null);
@@ -32,7 +35,7 @@ export function TotalReachPill({ wallet, followers, className }: TotalReachPillP
   }, []);
 
   const { data: accounts } = useSocialReach(wallet);
-  const reach = computeSocialReach(accounts, followers);
+  const reach = computeSocialReach(accounts, followers, customs);
   if (!hasSocialReach(reach)) return null;
 
   const cancelClose = () => {
@@ -103,7 +106,9 @@ export function TotalReachPill({ wallet, followers, className }: TotalReachPillP
           <span className="text-zinc-300">{t('profile.reach.total')}</span>
           <span className="font-bold tabular-nums text-white">{total}</span>
         </div>
-        <p className="mt-2 text-[11px] leading-snug text-zinc-500">{t('profile.reach.verified')}</p>
+        <p className="mt-2 text-[11px] leading-snug text-zinc-500">
+          {reach.socials.every((entry) => entry.verified) ? t('profile.reach.verified') : t('profile.reach.selfReported')}
+        </p>
       </PopoverContent>
     </Popover>
   );

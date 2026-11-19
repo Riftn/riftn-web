@@ -479,7 +479,57 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
 
   // Custom and shortcode emoji (`:fire:`, `<:pepe:123>`) inside the plain-text
   // runs — see components/app/emoji/EmojiText.
-  return expandEmojiTokens(parts.length > 0 ? parts : [text]);
+  return expandEmojiTokens(linkChatMentions(parts.length > 0 ? parts : [text]));
+}
+
+/** @name in a message; the character before the @ can't be part of a word, so name@mail.com stays text. */
+const CHAT_MENTION_SOURCE = '(^|[^a-zA-Z0-9_@./])@([a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?)';
+/** Group-wide pings, not people. */
+const NON_PROFILE_MENTIONS = new Set(['here', 'everyone', 'channel']);
+
+/**
+ * Turn @name in the plain-text runs of a message into a link to that profile,
+ * as posts and comments do. Links are anchors by the time this runs, so a
+ * URL's @ is never touched. The tap stops at the anchor, like the links above,
+ * so it doesn't also open the bubble's reply/long-press menu.
+ */
+function linkChatMentions(parts: ReactNode[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  parts.forEach((part, partIndex) => {
+    if (typeof part !== 'string' || !part.includes('@')) {
+      out.push(part);
+      return;
+    }
+    const mentionRegex = new RegExp(CHAT_MENTION_SOURCE, 'g');
+    let last = 0;
+    let found: RegExpExecArray | null;
+    while ((found = mentionRegex.exec(part)) !== null) {
+      const username = found[2];
+      if (NON_PROFILE_MENTIONS.has(username.toLowerCase())) continue;
+      const at = found.index + found[1].length;
+      if (at > last) out.push(part.slice(last, at));
+      out.push(
+        <a
+          key={`chat-mention-${partIndex}-${at}`}
+          href={`/${username}`}
+          className="font-semibold hover:underline underline-offset-2"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clientNavigate(`/${username}`);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          data-no-navigate="true"
+        >
+          @{username}
+        </a>,
+      );
+      last = at + 1 + username.length;
+    }
+    if (last < part.length) out.push(part.slice(last));
+  });
+  return out;
 }
 
 // Translation cache to avoid repeat API calls. Capped: entries hold full

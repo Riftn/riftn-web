@@ -5,7 +5,7 @@ import { postTextLimit } from '@/lib/post-text-limit';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { usePostForm } from './hooks/usePostForm';
-import { usePostSound } from './hooks/usePostSound';
+import { usePostSound, type AttachedSound } from './hooks/usePostSound';
 import { buildSoundtrackTag } from '@/lib/soundtrack';
 import type { PollData, LiveStreamHandoff } from './types';
 import { PostContentArea } from './components/PostContentArea';
@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { CrossPostPicker } from './components/CrossPostPicker';
 import { CameraCaptureModal } from './components/CameraCaptureModal';
 import { SoundPicker } from './components/SoundPicker';
+import { soundMix, withSoundMix } from '@/lib/sound-window';
 import { cn } from '@/lib/utils';
 import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
 import { afterNextFrame, useSheetFlickClose } from '@/hooks/use-sheet-flick-close';
@@ -49,6 +50,8 @@ interface PostModalProps {
   onFilesProcessed?: () => void;
   initialText?: string;
   initialCategory?: string;
+  /** A post's song to start with, from tapping the song on that post. */
+  initialSound?: AttachedSound | null;
   initialPoll?: PollData | null;
   /** Open on the Livestream tab instead of Post. */
   initialLiveMode?: 'video';
@@ -61,7 +64,7 @@ interface PostModalProps {
   onPosted?: (tokenId: string) => void;
 }
 
-function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, initialText, initialCategory, initialPoll, initialLiveMode, draftScope, quotedPost, onPosted }: PostModalProps & { draftScope: string }) {
+function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, initialText, initialCategory, initialSound, initialPoll, initialLiveMode, draftScope, quotedPost, onPosted }: PostModalProps & { draftScope: string }) {
   const { t: _copy } = _useCopy();
   const isQuoting = !!quotedPost;
   const { style: keyboardStyle } = useKeyboardSafeSheet(isOpen);
@@ -133,6 +136,11 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
     }
   }, [state.poll, actions.setPoll]);
 
+
+  // Opened from a post's song: start with that song attached.
+  useEffect(() => {
+    if (isOpen && initialSound) selectSound(initialSound);
+  }, [isOpen, initialSound, selectSound]);
 
   // When opening from share (initialText provided), reset form first for a fresh start
   useEffect(() => {
@@ -507,6 +515,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
         onOpenSoundPicker={() => setSoundPickerOpen(true)}
         attachedSound={attachedSound}
         onClearSound={clearSound}
+        onSoundMixChange={(mix) => { if (attachedSound) selectSound({ ...attachedSound, url: withSoundMix(attachedSound.url, mix) }); }}
         onCloseModal={closeKeepingDraft}
         onTogglePoll={handleTogglePoll}
         hasPoll={!!state.poll}
@@ -595,7 +604,8 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       <SoundPicker
         isOpen={soundPickerOpen}
         onClose={() => setSoundPickerOpen(false)}
-        onSelect={selectSound}
+        // A new song keeps the levels the poster already set.
+        onSelect={(sound) => selectSound(attachedSound ? { ...sound, url: withSoundMix(sound.url, soundMix(attachedSound.url)) } : sound)}
         currentSound={attachedSound}
         clipSeconds={state.media.find(m => m.type === 'video')?.duration}
       />

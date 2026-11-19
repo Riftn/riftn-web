@@ -26,17 +26,26 @@ interface VideoPreferences {
    * the old button, which pinned on every tap.
    */
   rateScope?: number;
+  /**
+   * 3 = loop is off unless the viewer turned it on, so a short moves on to
+   * the next one when it ends. Scope 2 briefly turned loop on for everyone;
+   * blobs before 3 go back to off once, and a choice after that is kept.
+   */
+  loopScope?: number;
 }
 
 const RATE_SCOPE = 3;
+const LOOP_SCOPE = 3;
 
 const DEFAULTS: VideoPreferences = {
   playbackRate: 1,
+  // Off: a short ends and the next one plays. The loop button turns it on.
   isLooping: false,
   volume: 0.8,
   mediaMuted: null,
   ratesByCreator: {},
   rateScope: RATE_SCOPE,
+  loopScope: LOOP_SCOPE,
 };
 
 let cached: VideoPreferences | null = null;
@@ -51,7 +60,8 @@ export function getVideoPreferences(): VideoPreferences {
       cached = {
         ...DEFAULTS,
         ...stored,
-        isLooping: stored?.isLooping === true,
+        isLooping: stored?.loopScope === LOOP_SCOPE ? stored?.isLooping === true : false,
+        loopScope: LOOP_SCOPE,
         // The old speed button pinned every tap on the creator being watched
         // and moved every other video too, so people found whole profiles
         // (often their own) stuck at 2x. Blobs written before this go back to

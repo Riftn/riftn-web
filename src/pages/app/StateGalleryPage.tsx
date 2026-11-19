@@ -6,15 +6,16 @@ import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
+import { ResetWalletSettings, type ResetWalletReadiness } from '@/components/app/settings/ResetWalletSettings';
 import PersonalKeys from '@/components/PersonalKeys';
-import { ProfilePostBgContext, PostBgPicker, usePostBgHold } from '@/components/app/profile/PostBackground';
+import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import type { ArticleTileLook } from '@/lib/article-tile';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
 import { PostCard as GalleryPostCard } from '@/components/app/cards/PostCard';
 import { ContentWarningGate } from '@/components/app/cards/ContentWarningGate';
 import { AuthorThread } from '@/components/app/cards/AuthorThread';
-import { postBgById } from '@/lib/post-backgrounds';
+import { postBgById, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import type { TextPost as GalleryTextPost } from '@/types/feed.types';
 import type { ProviderKeyRow } from '@/lib/api/dehub/provider-keys';
 import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
@@ -34,6 +35,7 @@ import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type React
 import { PostActionBar } from '@/features/post/components/PostActionBar';
 import { createPortal } from 'react-dom';
 import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
+import MenuSearchIcon from "@/components/ui/cut-icons/search";
 import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
 import { hideDislikedPost, restoreDislikedPost } from '@/lib/disliked-posts-store';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +44,7 @@ import { showUndoToast } from '@/components/ui/undo-toast';
 import { showUpdateToast } from '@/components/app/NewVersionToast';
 import type { BuildVersion } from '@/lib/version-check';
 import { useSearchParams } from 'react-router-dom';
+import { NotificationRowsGallery } from '@/components/app/notifications/NotificationRowsGallery';
 import { transcriptKey } from '@/hooks/use-transcript';
 import { AppState } from '@/components/app/AppState';
 import { LiveRipple } from '@/components/app/LiveRipple';
@@ -127,6 +130,9 @@ import { DraftVideoProgress } from '@/features/post/components/DraftVideoProgres
 import { PostProcessingPill } from '@/components/app/PostProcessingDock';
 import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { DehubLinkEmbeds } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { UserMentionDropdown } from '@/components/app/mentions';
+import { findDehubLinks } from '@/lib/dehub-links';
 import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
 import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
 import type { GovernanceProposal } from '@/hooks/use-governance';
@@ -167,7 +173,9 @@ import { ProfileFieldsEditor, type FieldRow } from '@/components/app/settings/Pr
 import type { SuggestedAccount } from '@/lib/api/dehub';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { filterNavItems } from '@/components/app/navigation/nav-search';
-import { MobileMenuGrid } from '@/components/app/navigation/MobileMenuGrid';
+import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { groupMenuItems } from '@/components/app/navigation/menu-groups';
+import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 
 /**
  * Comic posts: the deck as the feed shows it, the post page with the hand of
@@ -402,6 +410,7 @@ function MessageMenuGallery() {
             showActions
             onTogglePin={noop}
             onBan={noop}
+            moderators={[others[0]]}
           />
         ))}
       </div>
@@ -877,20 +886,49 @@ function MenuReorderGallery() {
   const { t } = useTranslation();
   // Type here to see the menu search exactly as the phone menu runs it.
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState(0);
+  const layout = useMenuLayout();
+  // ?menuLayout=tabs|sections|folders opens the gallery on that layout.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get('menuLayout');
+    if (param) writeMenuLayout(normaliseMenuLayout(param));
+    const tabParam = Number(new URLSearchParams(window.location.search).get('menuTab'));
+    if (tabParam > 0) setTab(tabParam);
+  }, []);
   const items = useMemo(() => filterNavItems(NAV_ITEMS, query, t, false), [query, t]);
+  const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
   return (
     <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t('sidebar.searchMenu')}
-        aria-label={t('sidebar.searchMenu')}
-        data-menu-search
-        data-search-surface
-        className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
-      />
-      <MobileMenuGrid items={items} searching={!!query.trim()} currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
+      <div className="mb-3 flex gap-1.5">
+        {(['tabs', 'sections', 'folders'] as const).map((value) => (
+          <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}
+            className={`h-8 rounded-lg border px-3 text-[13px] font-semibold ${layout === value ? 'border-white/30 bg-white/15 text-white' : 'border-white/10 text-zinc-400'}`}>
+            {value}
+          </button>
+        ))}
+      </div>
+      {layout === 'tabs' && !query ? (
+        <div className="mb-3 flex items-stretch gap-1.5">
+          <button type="button" onClick={() => setQuery(' ')} aria-label={t('sidebar.searchMenu')} data-search-surface
+            className="flex w-[42px] flex-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-200">
+            <MenuSearchIcon className="h-[18px] w-[18px]" />
+          </button>
+          <MenuTabs groups={groups} activeTab={tab} onTabChange={setTab} />
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('sidebar.searchMenu')}
+          aria-label={t('sidebar.searchMenu')}
+          data-menu-search
+          data-search-surface
+          className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
+        />
+      )}
+      <MobileMenuLayout layout={layout} groups={groups} flatItems={items} searching={!!query.trim()} activeTab={tab} onTabChange={setTab}
+        currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
     </section>
   );
 }
@@ -2003,9 +2041,16 @@ export default function StateGalleryPage() {
 
         {params.get('predictions') === '1' && <PredictionGallery />}
         {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('resetwallet') && (
+          <section data-reset-wallet-gallery className="mb-5 max-w-xl">
+            <ResetWalletSettings preview={(['ready', 'no-login', 'signed-in-with-wallet', 'done'] as const).find((s) => s === params.get('resetwallet')) ?? ('ready' as ResetWalletReadiness)} />
+          </section>
+        )}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
+        {params.get('notifs') === '1' && <NotificationRowsGallery />}
+        {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
 
@@ -2039,6 +2084,7 @@ export default function StateGalleryPage() {
         <StreamerArtworkGallery />
 
         <PinnedProfileGallery />
+        <ProfileImageMenuGallery />
         <ContentWarningGallery />
         <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
         <TextTilesGallery />
@@ -2495,9 +2541,8 @@ function ContentWarningGallery() {
 
 /** Profile text-post backgrounds: the owner's hold-to-pick picker, phone grid tiles and a desktop card. */
 function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: string | null; initiallyOpen: boolean }) {
-  const [bgId, setBgId] = useState<string | null>(postBgById(initialBg)?.id ?? 'aurora');
+  const [bg, setBg] = useState<PostBg | null>(postBgById(initialBg) ?? postBgById('aurora'));
   const [open, setOpen] = useState(initiallyOpen);
-  const bg = postBgById(bgId);
   const hold = usePostBgHold(true, () => setOpen(true));
   const postHold = usePostBgHold(true, () => setOpen(true), '[data-pbg-text]');
   const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
@@ -2521,8 +2566,8 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
             <div data-post-bg-phone-grid><ProfileMixedGrid entries={entries} /></div>
             <div data-post-bg-desktop className="space-y-3">
               {GALLERY_TEXT_POSTS.slice(0, 2).map((post) => (
-                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" data-pbg-text="" data-pbg={bg?.id} data-pbg-tone={bg?.tone} data-pbg-kind={bg?.kind}>
-                  {bg && <span aria-hidden className={`pbg pbg-${bg.id}`} />}
+                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" {...postBgHostProps(bg)}>
+                  <PostBgLayer bg={bg} seed={post.id} />
                   <GalleryPostCard post={post} />
                 </div>
               ))}
@@ -2537,7 +2582,11 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
           avatarUrl={galleryAvatar}
           sampleText={GALLERY_TEXT_POSTS[0].content}
           onCancel={() => setOpen(false)}
-          onSave={(id) => { setBgId(id); setOpen(false); }}
+          onSave={({ id, colors, file }) => {
+            const def = postBgById(id);
+            setBg(!def ? null : def.kind === 'photo' ? (file ? { ...def, image: URL.createObjectURL(file) } : null) : withPostBgColors(def, colors));
+            setOpen(false);
+          }}
         />
       </AuthContext.Provider>
     </section>
@@ -2734,6 +2783,49 @@ function PinnedProfileGallery() {
             isAuthenticated={false}
             badgeUrl={null}
             isFollowing
+            isPending={false}
+            isTargetPrivate={false}
+            isFollowLoading={false}
+            handleFollow={noop}
+            handleUnfollow={noop}
+            isSubscribed={false}
+            hasPlans={false}
+            setFullscreenImage={noop}
+            setActiveTab={noop}
+            shareSheetOpen={false}
+            setShareSheetOpen={noop}
+            setLoginModalOpen={noop}
+            ShareOptions={() => null}
+            showFollowersFollowing
+            hideFollowerCounts={false}
+            setFollowListType={noop}
+            setFollowListDrawerOpen={noop}
+            translatedBio={null}
+            setTranslatedBio={noop}
+          />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/**
+ * The owner's own header: right-click (or hold) the picture or banner for
+ * Change, Paste, Copy, Delete. Nothing saves here (no signed-in user).
+ */
+function ProfileImageMenuGallery() {
+  return (
+    <section data-page-bento data-profile-image-menu-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile picture and banner menu</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[680px]">
+          <ProfileHeader
+            profile={GALLERY_PROFILE}
+            apiProfile={GALLERY_PROFILE}
+            isViewingOwnProfile
+            isAuthenticated
+            badgeUrl={null}
+            isFollowing={false}
             isPending={false}
             isTargetPrivate={false}
             isFollowLoading={false}
@@ -2959,6 +3051,70 @@ const GALLERY_PROPOSALS: GovernanceProposal[] = (() => {
       options: ['Creator tools', 'Token roadmap', 'Moderation'], option_tallies: [{ weight: 470, voters: 52 }, { weight: 230, voters: 28 }, { weight: 120, voters: 13 }] },
   ] as GovernanceProposal[];
 })();
+
+/**
+ * Links to our own things as cards (`?links=1`): a Requests board link, a
+ * community, and pages, the way a DM, a comment or a live chat line shows
+ * them. `&mention=lead` opens the @ list on that word, live.
+ */
+const GALLERY_REQUEST_ID = '00000000-0000-4000-8000-0000000000aa';
+const GALLERY_LINK_TEXT = [
+  `https://riftn.com/features?feature=${GALLERY_REQUEST_ID}`,
+  'https://riftn.com/app/communities/gallery-builders',
+  'https://riftn.com/app/leaderboard',
+  'https://riftn.com/shorts',
+  'https://riftn.com/arcade/kings-gambit',
+  'https://riftn.com/features',
+];
+
+function LinkCardsGallery({ mention }: { mention: string | null }) {
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState(0);
+  const [open, setOpen] = useState(!!mention);
+  useState(() => {
+    const now = new Date().toISOString();
+    queryClient.setQueryData(['feature-request', GALLERY_REQUEST_ID], {
+      id: GALLERY_REQUEST_ID, title: 'Tag communities and pages with @ in messages', status: 'in_progress',
+      description: 'Typing @ should find communities and pages too, and drop a link that opens in the app.',
+      category: 'new_feature', author_wallet_address: '0x1111111111111111111111111111111111111111',
+      author_username: 'marco_v', author_avatar: null, image_url: null, image_urls: null,
+      vote_count: 128, like_count: 128, dislike_count: 3, comment_count: 14, created_at: now, updated_at: now,
+    });
+    queryClient.setQueryData(['communities', 'slug', 'gallery-builders'], {
+      id: 'gallery-community', name: 'Riftn Builders', slug: 'gallery-builders',
+      description: 'Ship ideas, find testers, show what you made.', avatar_url: null, banner_url: null,
+      creator_wallet_address: '0x1111111111111111111111111111111111111111', is_private: false, member_count: 2480,
+      rules: [], ticker_symbol: null, ticker_contract_address: null, ticker_chain_id: null, ticker_pair_address: null,
+      slow_mode_seconds: 0, default_permissions: null, created_at: now, updated_at: now,
+    });
+  });
+  const pairs = [GALLERY_LINK_TEXT.slice(0, 2), GALLERY_LINK_TEXT.slice(2, 4), GALLERY_LINK_TEXT.slice(4, 6)];
+  return (
+    <section data-page-bento data-link-cards-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Link cards</h2>
+      <div className="grid gap-4 md:grid-cols-3">
+        {pairs.map((pair, i) => (
+          <div key={i} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-sm text-white/80">{i === 0 ? 'have a look at these' : i === 1 ? 'top of the board today' : 'play this one'}</p>
+            <DehubLinkEmbeds links={findDehubLinks(pair.join(' '))} compact />
+          </div>
+        ))}
+      </div>
+      <button type="button" data-open-mention onClick={() => setOpen(true)} className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-sm">
+        @ list
+      </button>
+      <UserMentionDropdown
+        query={mention || 'lead'}
+        isOpen={open}
+        position={{ top: 0, left: 0 }}
+        selectedIndex={selected}
+        onSelectedIndexChange={setSelected}
+        onSelect={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+      />
+    </section>
+  );
+}
 
 function ProposalCardGallery() {
   const { t } = useTranslation();

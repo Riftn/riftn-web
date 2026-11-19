@@ -126,12 +126,16 @@
       "profile": "perfil",
       "proposal": "propuesta",
       "stage": "etapa",
-      "store": "tienda"
+      "store": "tienda",
+      "featureRequest": "solicitud",
+      "page": "página"
     },
     "recipientChat": "chat",
     "recipientUser": "usuario",
     "sendFailed": "Error al enviar {{item}}",
-    "sentTo": "{{item}} enviado a {{name}}"
+    "sentTo": "{{item}} enviado a {{name}}",
+    "openPage": "Abrir página",
+    "viewRequest": "Ver solicitud"
   },
   "stageCover": {
     "admitOne": "ADMITIR UNO",
@@ -719,7 +723,14 @@
     "getTheApp": "Descargar la app",
     "connectAi": "Conectar IA",
     "converter": "Conversión",
-    "affiliate": "Afiliados"
+    "affiliate": "Afiliados",
+    "groups": {
+      "main": "Principal",
+      "create": "Crear",
+      "discover": "Descubrir",
+      "money": "Dinero",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Ver el perfil de {{name}}",
@@ -915,6 +926,8 @@
     "feedTogglesCleared": "Filtros del feed restablecidos",
     "defaultProfileTab": "Pestaña de perfil por defecto",
     "defaultProfileTabDesc": "Elige qué pestaña ven primero los visitantes en tu perfil",
+    "defaultProfileView": "Diseño de las publicaciones del perfil",
+    "defaultProfileViewDesc": "Muestra tus publicaciones en cuadrícula o en lista cuando alguien abra tu perfil",
     "public": "Público",
     "publicDesc": "Cualquiera puede ver tus publicaciones",
     "private": "Privado",
@@ -1351,7 +1364,15 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "No se pudo conectar {{platform}}. Inténtalo de nuevo.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Actualizando seguidores"
+    "socialFollowersPending": "Actualizando seguidores",
+    "menuLayout": "Diseño del menú",
+    "menuLayoutDesc": "Cómo agrupa el menú sus páginas",
+    "menuLayoutTabs": "Pestañas",
+    "menuLayoutTabsDesc": "Un grupo a la vez, con iconos grandes",
+    "menuLayoutSections": "Secciones",
+    "menuLayoutSectionsDesc": "Todas las páginas a la vez, bajo encabezados",
+    "menuLayoutFolders": "Carpetas",
+    "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo"
   },
   "common": {
     "confirm": "Confirmar",
@@ -2485,7 +2506,8 @@
       "total": "Alcance total",
       "breakdownTitle": "De dónde viene este alcance",
       "dehubFollowers": "Seguidores de Riftn",
-      "verified": "Los datos sociales provienen de cuentas que el creador conectó."
+      "verified": "Los datos sociales provienen de cuentas que el creador conectó.",
+      "selfReported": "El creador introduce el número de seguidores en redes sociales."
     },
     "loginDescription": "Inicia sesión para ver y gestionar tu perfil.",
     "replyThread": {
@@ -2865,6 +2887,7 @@
     "failedSubmit": "Error al enviar solicitud. Inténtalo de nuevo."
   },
   "loginModal": {
+    "didYouMean": "¿Quisiste decir {{email}}?",
     "bringLoginOver": "¿Usabas Riftn en dehub.io? <bring>Trae tu sesión</bring>",
     "restoreWalletTitle": "Recupera tu billetera",
     "restoreOriginalWallet": "Tu perfil está en la billetera de tu inicio de sesión original, no en la guardada para este inicio de sesión. Inicia sesión como lo hiciste la primera vez en Riftn para recuperar esa billetera. Tu perfil y tus fondos no cambian.",
@@ -20769,5 +20792,16 @@
     "scheduledToast": "Programado para {{when}}",
     "failedToast": "No se pudo enviar un mensaje programado",
     "error": "No ha funcionado. Inténtalo de nuevo."
+  },
+  "mentionLinks": {
+    "communities": "Comunidades",
+    "pages": "Páginas",
+    "people": "Personas",
+    "linkTo": "Enlazar {{name}}",
+    "empty": "No se encontró nada",
+    "hint": "Escribe para buscar personas, comunidades y páginas",
+    "members": " miembros",
+    "placeholder": "Buscar personas, comunidades, páginas...",
+    "title": "Mencionar o enlazar"
   }
 }

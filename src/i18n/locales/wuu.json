@@ -1,4 +1,7 @@
 {
+  "textFeed": {
+    "tab": "文字"
+  },
   "comic": {
     "showAll": "显示全部 {{count}} 页"
   },
@@ -14,6 +17,23 @@
     "glitter": "闪粉",
     "saved": "边框保存好了",
     "failed": "边框保存勿脱"
+  },
+  "duet": {
+    "policyEveryone": "所有人",
+    "policyFollowers": "粉丝",
+    "policyNobody": "呒没人",
+    "loadMore": "加载更多",
+    "video": "视频"
+  },
+  "videoRemix": {
+    "sound": "使用此声音"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "所有人",
+      "followers": "粉丝",
+      "nobody": "呒没人"
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -94,7 +114,7 @@
     "inviteLink": "获取邀请链接",
     "moreGuides": "從TikTok來的？ 來看看<tiktok>英國創作者指南：</tiktok>離開TikTok<live>和</live>Web3直播：一個去中心化的Twitch替代品。",
     "proof": {
-      "label1": "deHub直播的并发观众",
+      "label1": "Riftn直播的并发观众",
       "label2": "跨流媒体服务的正常运行时间",
       "label3": "全球 Riftn 自家 CDN 的延遲",
       "value3": "200毫秒以下"
@@ -166,11 +186,18 @@
     "privateNote": "私密账号勿会出现勒联邦宇宙里。",
     "noUsername": "选一只用户名，好拿到联邦宇宙地址。"
   },
+  "signedFollows": {
+    "setUp": "开启",
+    "turnOff": "关闭",
+    "efpTurnOff": "停"
+  },
   "profileFields": {
     "title": "个人资料字段",
     "description": "勒个人资料里最多加四行，譬如网站或者侬个代词。",
     "label": "标签",
     "content": "内容",
+    "add": "添加字段",
+    "remove": "删除字段",
     "save": "保存字段",
     "saved": "个人资料字段保存好了",
     "failed": "呒没保存好，请再试一趟。",
@@ -179,6 +206,7 @@
     "descriptionPresets": "添加一个网站、代词或其他任何东西。链接显示你的社交媒体。",
     "type": "字段类型",
     "needsLabel": "给每个自定义字段一个标签",
+    "placeholderPronouns": "他们/他们",
     "placeholderLocation": "城市、国家",
     "presets": {
       "website": "网站",
@@ -320,27 +348,51 @@
   },
   "accountConnect": {
     "title": "連你的 Riftn 帳戶",
+    "read": "阅读您的帐户、帖子、通知和 Creator 库",
+    "profile": "编辑您的资料、图片和隐私设置",
     "social": "發佈文章和留言，跟隨用戶並儲存書籤",
+    "generate": "使用您的积分、确认支付或符合条件的免费图片生成媒体",
     "signIn": "登入Riftn",
+    "allow": "允许连接",
     "deny": "取消",
     "manage": "帳號連結管理",
     "empty": "無活躍帳號連線。",
     "disconnect": "断开连接",
     "failed": "請重新連接。",
     "intro": "瀏覽 Riftn 在 ChatGPT 中，或鏈接您的帳戶以更新您的個人檔案、發布文章並使用 Creator Studio。加入 https://riftn.com/mcp 作為 OAuth 連接器以控制帳戶。",
-    "what": "瀏覽公共帖子和個人檔案。透過OAuth帳號連結，管理個人檔案和隱私設定，發佈帖子和留言，追蹤使用者，閱讀通知，儲存書籤並生成圖像、視頻、音頻和3D資產。生成使用Riftn的現有付款規則。"
+    "what": "瀏覽公共帖子和個人檔案。透過OAuth帳號連結，管理個人檔案和隱私設定，發佈帖子和留言，追蹤使用者，閱讀通知，儲存書籤並生成圖像、視頻、音頻和3D資產。生成使用Riftn的現有付款規則。",
+    "account": "无需帐户即可浏览公共内容。链接您的 Riftn 帐户来管理您的资料和创建或发布内容。",
+    "profilePrompt": "更新我的 Riftn 个性简介为：独立创作者，制作电影和音乐。",
+    "generatePrompt": "显示 Riftn 的图像模型并引用肖像之前生成它。",
+    "libraryPrompt": "显示我的 Riftn Creator 库中的最新资产。"
   },
   "twitchMirror": {
+    "title": "Twitch 镜像",
+    "intro": "在 Twitch 上直播如常。您的直播可以自动出现在 Riftn 上，无需额外的直播工具。",
     "unavailable": "𠊎𠊎𠊎 Twitch 影像鏡像功能尚未開放喔。",
+    "connect": "连接 Twitch",
+    "auto": "自动镜像我的 Twitch 流",
+    "waiting": "准备您的下一场 Twitch 直播",
+    "starting": "连接直播视频",
+    "live": "在 Riftn 直播",
     "error": "鏡像需要注意",
     "refresh": "更新狀態",
     "disconnect": "斷開Twitch",
+    "open": "在Riftn上观看",
+    "retry": "重试镜像",
     "consent": "只連接你擁有的頻道。 啟用鏡像授權 Riftn 重新播出你的直播並儲存回放，根據你現有的錄製配額。",
-    "disabled": "自動鏡像關閉中"
+    "disabled": "自動鏡像關閉中",
+    "failed": "无法更新Twitch镜像。请重试。"
   },
   "maintenance": {
+    "brand": "德赫布",
+    "mode": "维护模式",
+    "description": "我们正在进行维护，稍后再回来。",
     "retry": "再试一下",
+    "checkFailed": "请再试一次。",
+    "checking": "正在检查...",
     "ownership": "開源。用戶擁有。",
+    "title": "做一眼眼生活。\n一个更好个 Riftn。",
     "intermission": "暫時離線",
     "community": "社群第一。永遠如此。"
   },
@@ -376,7 +428,9 @@
   "maboroshiShowcase": {
     "title": "你自己的场景。另一个你。",
     "intro": "180 個樣式，從柔軟的絨毛到液態的鎳。",
+    "inspiration": "寻找灵感。上传您自己的匹配角色参考。",
     "browse": "探索全部180套造型",
+    "choose": "尝试 {{name}}",
     "previous": "前面看",
     "next": "下面看",
     "plushie": "軟玩物接管",
@@ -1156,7 +1210,12 @@
     "payDirect": "直接發送到 {{name}} 在 {{symbol}} 的 {{chain}}。沒有交換。",
     "payDirectNoName": "直接發送到創作者在 {{symbol}} 的 {{chain}}。沒有交換。",
     "payViaBridgeDpay": "已移至 Base 并支付给 Riftn Pay，代币大约一分钟后到账",
-    "dmSent": "已经畀 {{name}} 送出 {{amount}} 代币！"
+    "dmSent": "已经畀 {{name}} 送出 {{amount}} 代币！",
+    "addMessage": "添加一則訊息（選填）",
+    "messagePublic": "公开",
+    "railTitle": "打赏",
+    "railTotal": "{{amount}} 个代币",
+    "tokensUnit": "代币"
   },
   "postOptions": {
     "liveAlertsOn": "已经关注{{name}}了。伊开始直播个辰光侬会收到通知。",
@@ -1657,6 +1716,9 @@
   "notifications": {
     "title": "通知",
     "markAllRead": "全部标为已读",
+    "groupNew": "新个",
+    "groupToday": "今朝",
+    "groupThisWeek": "搿个礼拜",
     "settings": "通知设置",
     "actions": "操作",
     "markAllAsRead": "全部标为已读",
@@ -1685,6 +1747,7 @@
     "communities": "社区",
     "stores": "店铺",
     "noNotificationsYet": "暂时呒没通知",
+    "searchClose": "關閉搜尋",
     "noNotificationsDesc": "当侬收到赞、评论、礼物或新订阅者个辰光会勒搿个地方显示。",
     "loadMore": "加载更多",
     "markAsRead": "标为已读",
@@ -1921,8 +1984,19 @@
     "promptHint": "描述它。放入截圖。讓它發生。",
     "promptLabel": "您的提示",
     "promptPlaceholder": "描述一個想法、改進或錯誤…",
+    "promptAttach": "附加图片",
+    "removeAttachment": "移除附件",
+    "promptDrop": "将图像粘贴或拖放到此处",
+    "promptPost": "POST提示",
     "promptShortcut": "Ctrl / ⌘ + Enter 送出帖子",
+    "promptDetails": "选填信息",
+    "promptDevice": "设备和操作系统（针对错误）",
+    "deviceInfoNoErrors": "無",
+    "promptFilters": "按类别筛选",
     "promptMediaError": "選擇每張圖片或視頻大小小於50MB的。",
+    "promptMediaLimit": "最多{{max}}个附件。",
+    "removePromptAttachment": "移除{{name}}",
+    "promptAttachment": "附件{{number}}",
     "title": "功能请求",
     "ideasSubmitted": "已提交 {{count}} 个意见",
     "ideaSubmitted": "已提交1个意见",
@@ -1975,6 +2049,12 @@
     "loginRequired": "需要登录"
   },
   "messages": {
+    "newDrawer": {
+      "to": "到",
+      "recent": "最近",
+      "suggested": "建議",
+      "youFollow": "侬关注个人"
+    },
     "reply": "回复",
     "react": "表情回应",
     "edit": "编辑",
@@ -2011,7 +2091,10 @@
     "checkingTokenBalance": "正在检查您的代币余额...",
     "deleteConversationFailed": "删脱了对话",
     "message": "信息",
-    "noConversationsYet": "無聊聊天"
+    "noConversationsYet": "無聊聊天",
+    "sending": "正在傳送",
+    "retrySend": "再试",
+    "discardSend": "移除"
   },
   "music": {
     "listeningCount_one": "{{count}} 聽聽",
@@ -2067,14 +2150,18 @@
       "stage": "劇場",
       "liveStage": "現場演出",
       "event": "活動",
+      "poll": "投票",
       "quote": "引用",
       "shared": "共享",
+      "link": "链接",
+      "community": "社区",
       "shop": "商店",
       "profile": "個人簡介",
       "film": "影片",
       "bounty": "獎金",
       "app": "應用程式",
       "proposal": "《提案》",
+      "short": "短",
       "earn": "挣钱",
       "listening_one": "{{value}} 聽",
       "listening_other": "{{value}} 聽",
@@ -2088,6 +2175,9 @@
     "viewList": "列表视图",
     "viewMode": "看",
     "back": "返回",
+    "reserve": {
+      "signIn": "登录"
+    },
     "usernameAvailable": "用户名可用！",
     "signUpToClaim": "注册来拿",
     "signUp": "注册",
@@ -2106,7 +2196,8 @@
       "total": "总触达",
       "breakdownTitle": "呢个触达从边度嚟",
       "dehubFollowers": "Riftn 关注者",
-      "verified": "社交數據來自創作者連接的帳戶。"
+      "verified": "社交數據來自創作者連接的帳戶。",
+      "selfReported": "社交关注数由创作者输入。"
     },
     "loginDescription": "登录来看搭管理侬个个人档案。",
     "replyThread": {
@@ -2115,7 +2206,13 @@
     },
     "tabs": {
       "playlists": "歌单",
-      "dislikes": "不滿意"
+      "dislikes": "不滿意",
+      "likes": "赞"
+    },
+    "likedPosts": {
+      "emptyTitle": "还没点赞",
+      "privateTitle": "点赞是私密个",
+      "loadMore": "加载更多"
     },
     "dislikes": {
       "emptyTitle": "目前無不滿意",
@@ -2138,6 +2235,10 @@
     "sortMostViewed": "最多人浏览",
     "sortLikes": "点赞",
     "sortMostLiked": "最受欢喜",
+    "sortCustomShort": "自定义",
+    "arrange": {
+      "saving": "保存中..."
+    },
     "searchThisChannel": "搜尋這個頻道",
     "searchResultCountPlural": "{{count}} 結果為 \"{{query}}\""
   },
@@ -2235,6 +2336,7 @@
       "unlike": "唔同",
       "unliked": "唔鍾意",
       "viewPost": "查看文章",
+      "title": "存活",
       "help": "讓這個代理自己活著。它自己定時上線、發文、按讚、回覆，還有自己的聲音，晚上睡覺。",
       "starting": "設定它的個性…",
       "awake": "{{home}} 時候醒來",
@@ -2253,6 +2355,7 @@
     },
     "profile": {
       "edit": "編輯個人檔案",
+      "avatar": "头像",
       "banner": "橫幅",
       "imageHelp": "JPG、PNG、WebP或GIF，最大每個5MB。",
       "saved": "個人檔案已儲存。"
@@ -2291,12 +2394,17 @@
       "swarmMember": "群體代理 {{index}} 的 {{total}}",
       "runSwarm": "运行群组",
       "description": "行為會以選擇的代理執行。排程任務會繼續執行即使程式關閉。",
+      "instructions": "客服代表说明",
+      "examples": "每日发一趟帖子，内容：独立音乐\n风格：好奇、简洁、像嘎讪胡一样\n每日顶多点赞 2 篇最近个帖子，内容：音乐、现场演出、黑胶唱片",
       "preparing": "正在准备任务…",
       "run": "运行提示",
+      "limits": "每日一篇帖子，每项任务最多可获得3个相关点赞。所有客服代表共享20分钟的帖子间隙。照片使用选中的标题；视频需要封面图片。帖子不能超过500个字符。除非铸造，否则不得使用煤气；书写可以使用积分。",
+      "createFirst": "在下方创建代理，为其分配任务。",
       "list": "任务",
       "refresh": "刷新",
       "loading": "加载任务…",
       "meta": "@{{agent}} · {{status}} · 处理过：{{total}}",
+      "next": "下次运行： {{time}}",
       "pause": "暂停",
       "resume": "恢复",
       "skip": "跳过未确认的动作并恢复",
@@ -2396,6 +2504,9 @@
     "signInAgain": "重新登录",
     "createSignIn": "重新登录再好创建代理",
     "checkConnection": "检查一下连接，再试一趟。",
+    "welcome": {
+      "text": "欢迎语"
+    },
     "workspace": {
       "participant": "参与者钱包",
       "participantHint": "参与者钱包（0x…）",
@@ -2582,7 +2693,9 @@
     "wrongEmailGoBack": "錯了郵件？回去！",
     "phonePlaceholder": "+1 415 555 2671",
     "continueAs": "以此身份继续",
-    "switchWalletAccount": "切换账户"
+    "switchWalletAccount": "切换账户",
+    "openInBrowser": "拿浏览器打开",
+    "copyLink": "复制链接"
   },
   "careers": {
     "title": "加入Riftn",
@@ -2806,7 +2919,8 @@
     "noMenuMatches": "菜单里向呒没匹配个",
     "searchDehubFor": "勒 Riftn 里向搜「{{query}}」",
     "switchAccount": "切換帳戶",
-    "signedInAs": "已登入為 {{name}}"
+    "signedInAs": "已登入為 {{name}}",
+    "requestSend": "发送申请"
   },
   "comments": {
     "reportComment": "举报评论",
@@ -2915,6 +3029,9 @@
     "confirm": "在 {{chain}} 上铸造",
     "confirmWithCost": "在 {{chain}} · {{cost}} 上铸造",
     "notAvailable": "此链上的铸造功能暂不可用。"
+  },
+  "postEditHistory": {
+    "original": "原图"
   },
   "postInfo": {
     "title": "帖子信息",
@@ -3471,6 +3588,7 @@
         "expiry1h": "一小時",
         "expiry1d": "一天",
         "expiry1w": "一周",
+        "limitNone": "无限制",
         "limit1": "1 位會員",
         "limit10": "10名成员",
         "limit50": "五十名成员",
@@ -4994,6 +5112,7 @@
     "settledTitleSpeed": "，通常 {{speed}}",
     "settledCount_one": "{{count}} 已結算",
     "settledCount_other": "{{count}} 已結算",
+    "statusInProgress": "勒进行",
     "howMany": "多少",
     "availableCount_one": "{{count}} 可用",
     "availableCount_other": "{{count}} 可用",
@@ -5086,6 +5205,17 @@
     "sellYourFractions": "賣出你的分割({{held}}持有)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "用箇眼底个详细信息"
+      }
+    },
+    "cinema": {
+      "close": "关闭",
+      "performance": {
+        "label": "性能"
+      }
+    },
     "libraryEmpty": "侬保存个生成内容会辣此地显示。",
     "toolRemake": "重做",
     "toolMaboroshi": "幻影",
@@ -5224,7 +5354,9 @@
     "presetExtraLowFollowHint": "地面級別的追蹤，在移動的腳邊",
     "presetExtraOverShoulderFollowName": "肩後追蹤",
     "presetExtraOverShoulderFollowHint": "一個親密的追蹤，穿過真實空間",
+    "presetExtraDoorwayRevealName": "门道揭幕",
     "presetExtraDoorwayRevealHint": "黑暗的門檻之後，展現出一片光明的景色",
+    "presetExtraReflectionSlideName": "反射滑动",
     "presetExtraReflectionSlideHint": "攝影機移動，顯示主體和反射",
     "presetExtraOverheadQuarterTurnName": "上方四分之一轉",
     "presetExtraOverheadQuarterTurnHint": "慢慢地从上往下轉一圈，轉了四分之一圈",
@@ -5287,6 +5419,8 @@
     "presetExtraProductLightSweepName": "產品光線掃描",
     "presetExtraProductLightSweepHint": "在參考產品上柔和的移動高光",
     "presetExtraIllustrationParallaxName": "插畫視差",
+    "presetExtraIllustrationParallaxHint": "细微的深度从供给的插图中",
+    "presetExtraArchitectureLightChangeName": "建筑物光线变化",
     "presetExtraArchitectureLightChangeHint": "軟雲變換參考場景",
     "presetExtraPetSmallMotionName": "小動作",
     "presetExtraPetSmallMotionHint": "一隻寵物肖像中的眨眼和耳朵動作",
@@ -5334,6 +5468,7 @@
     "presetOpenRecordWhipPanHint": "快速鋇燈照明掃描，重度運動模糊",
     "presetOpenUnderwaterSurfaceName": "水下表面",
     "presetOpenUnderwaterSurfaceHint": "水下泡泡和折射的陽光",
+    "presetOpenViaductTrainName": "高架桥列车",
     "presetOpenViaductTrainHint": "靜態寬闊，燈光明亮，長焦距深度感",
     "presetOpenTowerTiltName": "塔傾斜",
     "presetOpenTowerTiltHint": "緩慢向下傾斜進入陰霾城市",
@@ -5591,6 +5726,8 @@
     "presetSlowPushHint": "穩定推鏡頭向主體靠近",
     "presetOrbitName": "環繞",
     "presetOrbitHint": "環繞移動以展現深度",
+    "presetCraneRevealName": "升降揭示",
+    "presetCraneRevealHint": "升起后展开为全景",
     "presetProductTurnName": "產品轉動",
     "presetProductTurnHint": "產品轉盤循環",
     "presetTalkingPortraitName": "說話肖像",
@@ -5775,6 +5912,7 @@
     "priceTokensUsd": "{{amount}} 代幣 · USD {{usd}}",
     "presetCrashZoomName": "撞擊縮放",
     "presetCrashZoomHint": "快打入戲劇效果",
+    "presetDollyZoomName": "杜比放大",
     "presetDollyZoomHint": "垂直偏差：背景拉伸，主體保持不變",
     "presetBulletTimeName": "子彈時間",
     "presetBulletTimeHint": "攝影機靜止一刻，鏡頭旋轉拍攝",
@@ -5816,6 +5954,7 @@
     "presetPackagingHint": "攝製盒、瓶子或袋子的攝影",
     "presetStorefrontSignName": "商店招牌",
     "presetStorefrontSignHint": "你的品牌在真實世界的招牌",
+    "presetLogoMarkName": "标志标记",
     "presetLogoMarkHint": "簡單、大膽的Logo在單純背景上",
     "presetClay3dName": "黏土渲染",
     "presetClay3dHint": "可愛的軟膠泥3D動畫效果",
@@ -6043,6 +6182,12 @@
     "docsSeoDescription": "Riftn AI 助手技能及提示詞庫的參考文檔。"
   },
   "nftMarket": {
+    "actAll": "全部",
+    "actListings": "挂牌",
+    "actOffers": "出价",
+    "actSales": "銷售",
+    "tabActivity": "活动",
+    "shortTitle": "NFT",
     "filters": "濾選器",
     "forSale": "出售中",
     "openToOffers": "歡迎報價",
@@ -6072,11 +6217,15 @@
     "tabSell": "賣出",
     "tabMine": "我的訂單",
     "tabSales": "銷售",
+    "statForSale": "待售",
+    "loadMore": "加载更多",
     "tapToOffer": "點擊一下就能做出一份報價",
     "walletError": "唔識睇你個錢包",
+    "cancel": "取消",
     "pickHint": "拣 2 到 4",
     "makeBundle": "打包一份",
     "noNfts": "没有 NFTs 在 {{chain}}",
+    "listing": "挂牌",
     "noSales": "还没有销售",
     "collections": "收藏",
     "alertSaved": "警报开启。我们会告诉你什么时候有一个被列出来。",
@@ -6085,14 +6234,20 @@
     "cancelled": "取消",
     "listed": "已上架。任何人都可以购买。",
     "offered": "收到邀約。持有人隨時可以接受。",
+    "dehubPost": "Riftn 帖子",
     "youHold": "你擁有{{n}}",
+    "price": "价格",
+    "volume": "音量",
+    "tabRecent": "最近",
     "buyNow": "買咗囉！",
     "dropsTo": "價格降至 {{price}} 由 {{date}}",
     "inBundle": "售作{{n}}的套裝",
     "buy": "買",
+    "listForSale": "挂牌卖脱",
     "priceAlert": "價格警報",
     "signInToTrade": "用你的錢包登入，購買、出售或發出交易邀請。",
     "offers": "職位",
+    "accept": "接受",
     "yourListings": "你的列表",
     "recentSales": "最近的销售",
     "notListed": "未售卖。请出价，持有人可接受。",
@@ -6469,7 +6624,68 @@
     "youAreBanned": "您无法在此创作者的视频流中聊天",
     "youAreTimedOut": "您暂时超时了"
   },
+  "studioDeck": {
+    "background": {
+      "title": "背景",
+      "modes": {
+        "none": "关闭",
+        "blur": "模糊",
+        "color": "顏色"
+      }
+    },
+    "remove": "移除",
+    "scenes": {
+      "countdown": "倒數計時",
+      "minutes": "{{count}} 分钟",
+      "names": {
+        "starting": "马上开始"
+      }
+    },
+    "sources": {
+      "reactAdd": "显示",
+      "image": "圖片",
+      "camera": "摄像头",
+      "show": "在直播中顯示",
+      "loop": "循環",
+      "positions": {
+        "center": "居中"
+      },
+      "sizes": {
+        "medium": "中"
+      },
+      "shapes": {
+        "circle": "圆形",
+        "rect": "方形"
+      }
+    },
+    "audio": {
+      "mute": "屏蔽",
+      "unmute": "取消屏蔽",
+      "gateLevels": {
+        "off": "关闭",
+        "low": "浅色",
+        "high": "强"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "平台",
+      "label": "名稱（可選）",
+      "key": "直播密钥",
+      "save": "添加",
+      "cancel": "取消",
+      "states": {
+        "off": "关闭",
+        "idle": "好了",
+        "live": "直播",
+        "error": "错误"
+      }
+    },
+    "vertical": {
+      "centre": "居中",
+      "live": "直播"
+    },
     "subathon": {
       "title": "苏巴吞",
       "intro": "你直播間的倒數計時器。每個付費贈禮、追蹤和訂閱都會加上時間，讓直播間保持直播。",
@@ -7422,6 +7638,8 @@
     "footerNote": "DePin 参与是一项贡献服务，而非投资产品。可用性、资格和奖励可能会发生变化。"
   },
   "creatorFlow": {
+    "newNativeFlow": "新建 flow",
+    "disconnect": "断开连接",
     "title": "创作者流程",
     "backToStudio": "返回 Creator Studio",
     "backToFlows": "返回你的 flows",
@@ -7759,7 +7977,15 @@
     "followBackAllFailed": "無法跟隨回應任何人",
     "followingBackProgress": "跟隨回應 {{completed}} 個 {{total}}",
     "findingFollowers": "找人追随...",
-    "followBackAll": "跟隨回應所有人"
+    "followBackAll": "跟隨回應所有人",
+    "followBackConfirm": "回关",
+    "followBackNotNow": "现在不用",
+    "followBackDone": "完成",
+    "nonFollowers": {
+      "notNow": "现在不用",
+      "cancel": "取消",
+      "close": "关闭"
+    }
   },
   "reactionInfo": {
     "title": "反应",
@@ -8555,6 +8781,14 @@
     "priceChartCleared": "價格表清空。固定參考價格：$0.0001。執行價格取決於可用委託。"
   },
   "editor": {
+    "stage": {
+      "camera": "摄像头",
+      "yaw": "旋转",
+      "add": "添加",
+      "scale": "大小",
+      "color": "颜色",
+      "light": "浅色"
+    },
     "video": {
       "tFade": "交叉溶解",
       "none": "无",
@@ -8721,6 +8955,8 @@
       "tools": "编辑工具"
     },
     "agent": {
+      "stop": "停",
+      "queue": "加到队列",
       "introTitle": "告诉 AI 你想要什么",
       "introBody": "用你自己的话描述设计或修改。它可以调整页面尺寸、撰写并排版文字、查找免费照片、视频和音乐、应用滤镜、排列图层并添加动画。每个请求都可一步撤销。",
       "suggestPoster": "做一张正方形的 Instagram 夏季促销帖子，配一张海滩照片和醒目的粗体标题",
@@ -8976,7 +9212,9 @@
     "captions": {
       "textPanel": "編輯字幕",
       "findText": "在字幕中搜尋",
+      "replaceText": "替换为",
       "matchCase": "匹配案例",
+      "replaceCount": "在 {{total}} 条字幕中替换",
       "emptyText": "空白字幕",
       "noTextMatches": "無可編輯的字幕匹配。請導入字幕或修改搜尋。",
       "previousText": "上一頁",
@@ -8987,6 +9225,9 @@
       "reloadText": "重新加载字幕",
       "textSaved": "字幕已經儲存。",
       "action": "自动字幕",
+      "styles": {
+        "bold": "加粗"
+      },
       "working": "正在聆听… {{percent}}%",
       "downloading": "正在准备语音模型… {{percent}}%",
       "hint": "将语音转换为带时间轴的字幕，样式可随意调整。在您的设备上运行：免费且私密。首次使用时会下载模型。",
@@ -8995,7 +9236,9 @@
       "failed": "无法为此片段生成字幕。",
       "targetLanguage": "字幕語言",
       "translateCount": "{{count}}個字幕翻譯",
-      "translationDone": "{{count}}個字幕已經翻譯"
+      "translationDone": "{{count}}個字幕已經翻譯",
+      "translationFailed": "字幕翻译失败。字幕未更改。",
+      "lockedTranslation": "解锁已锁定的字幕以将其包含在内。"
     },
     "multi": {
       "selected": "已选择 {{count}} 个图层",
@@ -9107,12 +9350,18 @@
     "highlights": {
       "visual": "画面精彩片段",
       "visualPrivacy": "发送选取的帧进行画面分析。",
+      "chatSuggest": "在此视频中寻找精彩时刻",
       "chatFound": "找到 {{count}} 個時刻。先預覽、調整選擇，再製作獨立的剪輯。",
+      "chatHint": "回顾高亮。类型保留或删除，或者返回编辑。",
       "chatExit": "回到編輯",
       "chatSelectVideo": "選擇一個可見、未鎖定的視頻。",
       "chatCaptionsMissing": "本視頻沒有現有的字幕。請再次要求不使用現有的字幕來轉錄它。",
+      "chatLimit": "使用一个不超过10分钟的视频，高亮预算为15、30或60秒。",
       "title": "精选",
+      "find": "查找高亮",
       "privacy": "影片會留在你的裝置上。對話會在此轉譯；轉譯文字會被傳送給精華排名系統。在製作獨立剪輯前，檢視每個時刻。",
+      "focus": "首选主题（可选）",
+      "useCaptions": "使用当前字幕",
       "captionHint": "只會考慮目前字幕所覆蓋的對話。",
       "ranking": "找尋有用的時刻…",
       "none": "寻弗着有用个讲闲话片段。试下别个话题或者视频。",
@@ -9174,6 +9423,7 @@
         "fourthPick": "你的第四選擇",
         "thirdPick": "你的第三選擇",
         "secondPick": "你的第二選擇",
+        "bestPick": "你的第一名",
         "favourite": "你最愛哪個？",
         "myth": "流傳的迷思",
         "fact": "實用的真相",
@@ -10357,6 +10607,29 @@
       "toolbar": "畫布導航",
       "zoomIn": "放大畫布",
       "zoomOut": "縮小畫布"
+    },
+    "clipFix": {
+      "listening": "正在聽..."
+    },
+    "shortcuts": {
+      "action": {
+        "split": "分割",
+        "play": "播放",
+        "pause": "暂停",
+        "frameBack": "上一帧",
+        "frameForward": "下一帧"
+      }
+    },
+    "voiceClone": {
+      "stop": "停止录音",
+      "failed": "語音克隆失敗。"
+    },
+    "linkImport": {
+      "go": "导入",
+      "downloading": "下载中 {{percent}}%"
+    },
+    "reverse": {
+      "action": "反轉"
     }
   },
   "jungleMood": {
@@ -10576,6 +10849,9 @@
     "featureRequests": "功能建議",
     "featureRequestsDesc": "建議新功能和投票支持社區想法。受歡迎的建議將優先考慮開發。",
     "upvote": "點贊",
+    "upvoteDesc": "对治理提案或功能请求投赞成票。帮助传达社区支持的信号。",
+    "downvote": "踩",
+    "downvoteDesc": "对治理提案或功能请求投反对票。帮助发出社区反对的信号。",
     "stakingBadge": "质押徽章",
     "leaderboardRanking": "排行榜",
     "delta": "▲▼排行",
@@ -10585,7 +10861,9 @@
     "editDesc": "修改帖子的标题或描述，只有原创者才能编辑。",
     "delete": "刪除帖子",
     "deleteDesc": "永久刪除帖子，鏈上記錄仍然存在，但內容不再顯示。",
+    "pin": "固定帖子",
     "pinDesc": "將帖子鎖定在你的個人主頁上，讓訪客們在進入你的個人主頁時就能看到。",
+    "viewOnExplorer": "浏览器",
     "viewOnExplorerDesc": "查看鏈上交易細節（BaseScan）",
     "title": "词汇表",
     "subtitle": "了解每个图标和功能的意思"
@@ -10651,10 +10929,15 @@
     "manage": {
       "open": "管理",
       "address": "應用程式地址",
+      "copy": "复制",
+      "copied": "連結已複製",
+      "save": "保存",
       "addressSaved": "地址更新",
+      "public": "公开",
       "publicHint": "任何人都可以點擊鏈接。",
       "privateHint": "只你能开启。",
       "store": "德胡比應用程式商店",
+      "publishHint": "把这个应用在 Riftn 应用商店里列出来，这样人们就能找到并安装它。",
       "publish": "發佈到應用程式商店",
       "publishedToast": "已發佈到應用程式商店",
       "inStore": "已上架App Store",
@@ -11538,6 +11821,7 @@
       "close": "关脱应用",
       "backToStore": "回到應用程式",
       "notFound": "搿个 App 勿勒 Riftn App Store 里向，或者已经下架了。",
+      "badUrl": "搿只地址勿好当小应用开。伊要用 https:// 开头，或者是开发者模式里向个 localhost 地址。",
       "readyTimeout": "這個 app 好像沒有呼叫 `dehub.ready()`，所以 splash screen 在 8 秒後就消失囉！"
     },
     "signIn": {
@@ -11617,7 +11901,15 @@
       "rankBody": "每晚每个列出的应用都会得到一个分数：55% 来自回访用户（本周和上周都打开过的人），35% 来自每周用户，再加上前 14 天的 10% 提升。只有已登录的 Riftn 账户才算，机器人和页面刷新不计分。",
       "rewardsBody": "每個月 {{pool}} 代币 會依照每週計算出來的分數，平均分配給各個應用程式。要符合資格，應用程式需要有一個驗證過的擁有者錢包，並且至少有三位回頭客。獎勵會由 Riftn 付給擁有者錢包。",
       "rewardPaid": "付脱",
-      "rewardPending": "待處理"
+      "rewardPending": "待處理",
+      "stats": {
+        "button": "实时统计"
+      },
+      "signin": {
+        "users_one": "{{count}} 用户",
+        "users_other": "{{count}} 个用户",
+        "delete": "删除"
+      }
     },
     "card": {
       "open": "開啟"
@@ -11744,6 +12036,8 @@
   },
   "walletBackup": {
     "backedUpOn": "已備份{{date}}",
+    "phraseUnavailable": "恢復詞彙不可從此登入中取得。使用您的原始登入或設備來檢查它。您仍然可以備份您的私鑰。",
+    "phraseMismatch": "這個備份屬於不同的錢包。使用您的原始登入來訪問正確的備份。",
     "backupDescription": "儲存您的恢復詞彙或私鑰，以便您可以恢復您的錢包。",
     "phraseOtherDevice": "在您首次儲存此錢包的設備上打開Riftn以查看恢復詞彙。您也可以在這裡備份您的私鑰。",
     "tabPrivateKey": "私鑰",
@@ -11765,6 +12059,9 @@
     "reminderLater": "現在不繼續"
   },
   "copy": {
+    "55656b5e434f": "關閉搜尋",
+    "57e2faa5ec63": "搜索 Riftn",
+    "96d7bff86b44": "搜索无法加载",
     "1607715e45ed": "点一记球就好讲闲话，或者勒下头打字",
     "00140a37bd26": "網絡交易暫時不可用，請再試一次。",
     "002286513398": "侬无权管理活动",
@@ -14402,6 +14699,7 @@
     "1d097df795ff": "每 1,000 次點擊",
     "43fb11b48038": "一般情況",
     "4caa918bf60d": "一萬",
+    "6bdf24e0e55f": "每小时旋转数",
     "0435a318b3b4": "在 Riftn",
     "600d1c6e47ab": "不是你的数据？试试任意播放量",
     "ea68771a3994": "互动",
@@ -14772,6 +15070,8 @@
     "70cf128f75cd": "· 重置",
     "bedf102cf459": "跟隨群組和您的播放設定",
     "c3ad9fa615e4": "你跟着我，屏蔽我的账号，什么都不会被删除。",
+    "53e6cdc30765": "你@example.com",
+    "419f1a83fab2": "你的名字.eth",
     "58d29fba0046": "無語言發現",
     "ef9ec257e675": "儲值錢包",
     "50e88d341eaa": "高級：顯示私鑰",
@@ -14950,6 +15250,7 @@
     "63f8013d7b5a": "戰鬥區",
     "c683270a539e": "抽取 / ESC",
     "2e09e3d50ce9": "無法部署",
+    "60b676c3ea06": "克劳德的使命",
     "f665ae14eeba": "生成戰鬥區",
     "74b886bd1df4": "生成戰鬥區",
     "689b1ac5db50": "錯誤：",
@@ -15290,8 +15591,10 @@
     "29a9b4e8f9e8": "資產無法載入",
     "6b7ba43f75e5": "無匹配資產",
     "5c39123805ff": "提示词",
+    "5e2c614c23f0": "模型",
     "d7ad336f35e1": "比例",
     "dc98456bbe64": "世代",
+    "76f613ec06cb": "尚未生成任何內容",
     "f61f1f091c1a": "所有你在這裡或創作者工作室創作的內容都會收集在這個標籤中。",
     "ec8a1263ecc5": "將生成的內容導入媒體，然後將其掛在播放頭上。",
     "bf8a9eab9e7e": "重新連接",
@@ -15609,6 +15912,7 @@
     "62f2ccfffcc5": "副次",
     "bd9d153c3d65": "總計收入",
     "3d41e1a66a7d": "委託",
+    "f53b52ad6d21": "应用",
     "ae16d3d53b5c": "编辑器",
     "1ed61b786730": "你的邀请链接",
     "c0ac0f73ce8d": "分享任何地方。您赚取。",
@@ -15749,6 +16053,7 @@
     "f7a1332ec093": "Riftn 領先榜單 — 分散式社交媒體、審查抵抗與言論自由",
     "ce42a8ab1ca9": "摩里布希 | Riftn 创造者",
     "8f3a26244094": "幻影",
+    "c6d99d44a9f8": "幻影",
     "9565c5e214a4": "草稿：",
     "b38dabfa0639": "登入以存取您的訊息和與其他人聊天。",
     "3875aefdf8b8": "訊息: 直接 & 團隊聊天",
@@ -15784,6 +16089,7 @@
     "854cbbb4f34f": "分數 (",
     "7614c65db3bf": "複製錢包地址",
     "817da1791eca": "分數 (100%)",
+    "2e5f79bb94a8": "正在检查...",
     "e674447337e8": "可用",
     "e58201630b42": "有人回复你的评论时",
     "6f32e692ede0": "提及",
@@ -15892,6 +16198,9 @@
     "504282c0611d": "使用记录",
     "90c3fd22b403": "本周期，以及仍在进行的内容。",
     "a7a3e94141c9": "这个能力还没有使用记录。",
+    "3325c2b56f2b": "至",
+    "468415f0e112": "没有内容需要翻译",
+    "b62c681738d1": "你",
     "b602b7029be6": "PT",
     "d8d91b2e06df": "NG",
     "f223faa96f22": "Apple",
@@ -16290,6 +16599,7 @@
     "ea574034aa5a": "無人發現",
     "47ca5ef7eac6": "寻个人去搭讪。",
     "0600175af842": "打开聊天",
+    "8e4b97ca7c6e": "向所有人发送信号爆炸",
     "412ae55409b3": "此账户在私密余额模式启用时已禁用提示。",
     "babd987b2954": "无法验证收件人隐私设置。未发送提示。",
     "a074b23fd5f3": "需附圖",
@@ -16948,6 +17258,7 @@
     "e9e509dcd358": "《故事》",
     "6bb795fea2b8": "🎯 Riftn 標誌",
     "eb1bb7452892": "🎲驚喜",
+    "ca01201adaea": "🍎 苹果发布会",
     "edd50297ca4a": "🎞️ A24 電影海報",
     "b534bb26caf1": "🌆 网络黑客街",
     "f8cfb761cc4d": "💧 水晶液",
@@ -16992,6 +17303,7 @@
     "6ee5630c9dde": "🧩 分割",
     "fb673c9c986e": "🧑‍💻 Riftn 獎勵",
     "2b13f4c55720": "💸 小費",
+    "1205929886b3": "👑 Riftn Extra 会员",
     "24a657b7384e": "🤖 AI 助手",
     "fea1030abae5": "🖼️ AI 圖像生成",
     "7209e5080253": "🎥 AI 影片生成",
@@ -17001,8 +17313,10 @@
     "4d675ad7e188": "🤝 20% 代理商",
     "94e2d0eda8c8": "🎮 最後一個 Chad 站立 TGE",
     "1925f0dffb3b": "🕹️ 游戲中心",
+    "5b560f273940": "🛰️ 德國人",
     "226d010f636d": "🛠️ 開發者 SDK",
     "4f97987243b4": "🎯 廣告平台",
+    "748d190d59af": "📱 苹果应用商店",
     "104272ba3fd3": "✍️ 部落格",
     "58114cd29d10": "📅 活動",
     "c6db0784ded4": "🥽 V/AR 專屬中心",
@@ -17064,6 +17378,7 @@
     "74efbe0f30ab": "半色调",
     "2a0817015729": "查爾迪尼",
     "f5d61ead3eef": "短",
+    "b19565a545ba": "Instagram转轴",
     "4268168ace02": "廣告收入",
     "314b92e83a11": "赏金",
     "0c0f9221e9fc": "PPV 订单销售",
@@ -17106,7 +17421,9 @@
     "34d52e35bd31": "錯誤資訊",
     "50ea9e32e19c": "前 50",
     "925917aad5b0": "上帝之眼",
+    "f0052e2e699b": "国王的赌局",
     "71b386d38529": "街頭殺手",
+    "d9bac180ccc1": "图表狂潮",
     "a151f2e912fe": "订阅",
     "965b516df3ba": "沒有匹配",
     "6144d0791f06": "嘗試不同的搜尋，或清除它以查看所有內容",
@@ -17993,6 +18310,7 @@
     "685352af5d13": "行间距设在0.5到3之间",
     "10ef67a56618": "请使用从 −10 到 80 嗰字间距。",
     "bd4418be962a": "选一个有效个字体族",
+    "a56bbea16871": "使用六位十六进制颜色",
     "134d2e776997": "選擇當前頁面的向量圖形",
     "6ce2c8f32da0": "解鎖選定的向量層後再進行樣式設定",
     "99c9f6eac293": "字體大小會將一些文字超出支援的字型範圍",
@@ -18257,6 +18575,7 @@
     "share": "分享",
     "backToTop": "回頂部",
     "needBody": "{{count}} 更多字符",
+    "imagesLabel": "图片",
     "readyTitle": "準備發佈",
     "sharePreview": "分享時的樣子",
     "noCoverShare": "目前沒有封面。連結會沒有圖片顯示。",
@@ -18315,12 +18634,142 @@
     "exploreFirst": "先探索",
     "codeNote": "我們會寄一個驗證碼給你，不需密碼。"
   },
+  "liveHype": {
+    "gift": {
+      "plan": "计划",
+      "howMany": "几化",
+      "who": "用户名或钱包地址",
+      "whoPlaceholder": "@用户名",
+      "cancel": "取消",
+      "stage": {
+        "preparing": "准备中…",
+        "confirming": "正在等待交易…",
+        "recording": "正在收尾…"
+      }
+    },
+    "badges": {
+      "emoji": "表情符号",
+      "audience": {
+        "subscribers": "订阅者"
+      },
+      "ended": "已结束",
+      "until": "一直到 {{date}}",
+      "failed": "那没有奏效。再试一次。"
+    }
+  },
+  "whenSheet": {
+    "today": "今朝",
+    "tooSoon": "选择未来的某个时间。",
+    "show": "显示",
+    "hide": "隐藏"
+  },
+  "planned": {
+    "title": "已规划",
+    "all": "全部",
+    "posts": "帖子",
+    "stages": "语音房",
+    "post": "发布",
+    "live": "直播",
+    "stage": "劇場",
+    "untitledPost": "发布",
+    "untitledLive": "直播",
+    "loading": "正在加载…",
+    "startNow": "现在开始",
+    "cancel": "取消",
+    "cancelled": "已取消"
+  },
+  "welcome": {
+    "about": {
+      "title": "欢迎来到 Riftn",
+      "day": "日",
+      "month": "月",
+      "year": "年"
+    },
+    "name": {
+      "title": "你的名字",
+      "placeholder": "你的名字"
+    },
+    "card": {
+      "name": "你的名字",
+      "followers": "粉丝"
+    },
+    "topic": {
+      "music": "音乐",
+      "art": "艺术",
+      "gaming": "游戏",
+      "crypto": "加密货币",
+      "sports": "運動",
+      "comedy": "喜劇",
+      "film": "影片",
+      "podcast": "播客",
+      "food": "食物",
+      "news": "新聞",
+      "science": "科学"
+    },
+    "back": "返回",
+    "skipPhoto": "暫時跳過",
+    "preview": "预览"
+  },
+  "appTokens": {
+    "title": "您的代币",
+    "history": "历史",
+    "noHistory": "暂无活动",
+    "kindDeposit": "充值",
+    "to": "到",
+    "amount": "金额",
+    "notePlaceholder": "加条备注（好勿填）",
+    "sendButton": "发送",
+    "errorInsufficient": "代币不足"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "所有人",
+      "followers": "粉丝",
+      "nobody": "呒没人"
+    },
+    "heading": "反应",
+    "more": "顯示更多",
+    "liveNow": "直播",
+    "untitled": "反應"
+  },
+  "connectGuide": {
+    "title": "将 Riftn 连接到你的 AI 助手",
+    "urlLabel": "MCP 服务器 URL",
+    "copy": "复制",
+    "copied": "已复制",
+    "copiedToast": "已复制 MCP URL"
+  },
+  "avatarPrompt": {
+    "notNow": "现在不用"
+  },
+  "postStats": {
+    "audience": "觀眾",
+    "engagement": "互动",
+    "finished": "已结束",
+    "members": "成员",
+    "membersLower": "成员",
+    "newFollowers": "新粉丝",
+    "noBadge": "無徽章",
+    "people": "用户",
+    "plays": "播放",
+    "quotes": "引用",
+    "reposts": "转发",
+    "saved": "已保存",
+    "shares": "分享",
+    "signedOutViewers": "退出了",
+    "topSupporters": "顶级支持者",
+    "visitors": "退出了"
+  },
   "tokenLaunch": {
+    "eyebrow": "即将推出",
     "body": "买卖暂停，等新代币准备好。收到邮件时即刻上线。",
+    "notifyMe": "通知我",
+    "emailLabel": "邮箱",
     "emailPlaceholder": "你个电邮",
     "invalidEmail": "输入有效个邮箱",
     "joinedTitle": "侬在名单上",
     "joinedBody": "代币上线辰光，我会给{{email}}发邮件。",
+    "failed": "無法儲存。請再試一次。",
     "seoTitle": "Token 就快上架囉 | Riftn",
     "seoDescription": "新的Riftn代幣快出來囉！加入名單，一旦上線就會收到一封email，然後直接用你的Riftn錢包買入囉！"
   },
@@ -18334,6 +18783,10 @@
     "failed": "无法连接 GitHub。请重试。",
     "unavailable": "GitHub 验证功能即将推出。",
     "disconnect": "断开连接"
+  },
+  "mcpKeys": {
+    "delete": "删除",
+    "shortProfile": "个人档案"
   },
   "chatSearch": {
     "placeholder": "搜寻信息或人",
@@ -18363,5 +18816,17 @@
     "gone": "那条信息已不在此处",
     "theirMessages": "他们的信息",
     "seeTheirMessages": "查看他们的信息"
+  },
+  "dmRequests": {
+    "title": "功能请求",
+    "accept": "接受",
+    "delete": "删除",
+    "block": "封锁"
+  },
+  "dmSchedule": {
+    "view": "观看",
+    "edit": "编辑",
+    "editLabel": "編輯訊息",
+    "error": "那没有奏效。再试一次。"
   }
 }

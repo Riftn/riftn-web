@@ -39,7 +39,7 @@ vi.mock('@/components/app/chat', () => ({
 }));
 vi.mock('@/components/app/chat/NewMessageDrawer', () => ({ NewMessageDrawer: () => null }));
 vi.mock('@/components/app/page-kit/PageKit', () => ({
-  PageIsland: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  PageIsland: ({ children, actions }: { children: ReactNode; actions?: ReactNode }) => <div>{actions}{children}</div>,
   IslandAction: () => null,
   usePhonePill: () => layout.phone,
 }));
@@ -176,9 +176,10 @@ describe('picking several chats on the Messages page (computer, not full screen)
     await waitFor(() => expect(screen.queryByRole('toolbar')).toBeNull());
   });
 
-  it('right-click and Ctrl-click on a row start picking from it', async () => {
+  it('right-click offers Select, and Ctrl-click on a row starts picking from it', async () => {
     render(messagesPage());
     fireEvent.contextMenu(row('Bea'));
+    fireEvent.click(await screen.findByRole('menuitem', { name: /chatMenu.select/ }));
     expect(document.querySelectorAll('[data-bulk-checked="true"]')).toHaveLength(1);
     fireEvent.keyDown(window, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('toolbar')).toBeNull());

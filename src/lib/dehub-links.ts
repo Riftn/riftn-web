@@ -28,6 +28,7 @@
 import i18n from 'i18next';
 import { RESERVED_LINK_SEGMENTS } from '@/lib/reserved-usernames';
 import { cutFromText } from '@/lib/cut-from-text';
+import { appPageFor } from '@/lib/app-page-paths';
 
 export type DehubLinkKind =
   | 'post'
@@ -40,7 +41,9 @@ export type DehubLinkKind =
   | 'bounty'
   | 'app'
   | 'proposal'
-  | 'skill';
+  | 'skill'
+  | 'featureRequest'
+  | 'page';
 
 export interface DehubLinkMatch {
   kind: DehubLinkKind;
@@ -77,6 +80,13 @@ export interface DehubLinkMatch {
   /** `/app/governance/<n>` or the legacy `/app/governance/<uuid>` — a governance proposal. */
   proposalId?: string;
   skillSlug?: string;
+  /** `/features?feature=<uuid>` — one card on the Requests board. */
+  featureRequestId?: string;
+  /**
+   * Any other page of ours (Leaderboard, Shorts, an arcade game...). The card
+   * looks the page up in the menu by this pathname.
+   */
+  pagePath?: string;
 }
 
 // ── Hosts ───────────────────────────────────────────────────────────────────
@@ -195,9 +205,10 @@ export function parseDehubLink(input: string): DehubLinkMatch | null {
 
   if (isAppScoped && scoped.length === 1 && scoped[0] === 'assistant') {
     const skillSlug = new URLSearchParams(search).get('skill');
-    return skillSlug && /^[a-z0-9-]{1,80}$/.test(skillSlug)
-      ? { ...base, kind: 'skill', skillSlug }
-      : null;
+    // A skill link cards as the skill; the bare page falls through and
+    // cards as the Assistant page below.
+    if (skillSlug && /^[a-z0-9-]{1,80}$/.test(skillSlug)) return { ...base, kind: 'skill', skillSlug };
+    if (skillSlug) return null;
   }
 
   // ── /app/post/:tokenId, /app/video/:tokenId ──
@@ -325,6 +336,28 @@ export function parseDehubLink(input: string): DehubLinkMatch | null {
   if (scoped[0] === 'work' && scoped[1] && scoped[1] !== 'post' && scoped[1] !== 'history') {
     if (!/^[a-fA-F0-9-]{8,}$/.test(scoped[1])) return null;
     return { ...base, kind: 'bounty', bountyJobKey: scoped[1] };
+  }
+
+  // ── /features?feature=<uuid> — one request on the Requests board ──
+  //
+  // `?request=` is the older name for the same thing and still routes.
+  if (scoped[0] === 'features' && !scoped[1]) {
+    const params = new URLSearchParams(search);
+    const id = params.get('feature') || params.get('request');
+    if (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return { ...base, kind: 'featureRequest', featureRequestId: id.toLowerCase() };
+    }
+  }
+
+  // ── Any other page of ours ──
+  //
+  // Host-qualified links only, like profiles below: a riftn.com link is a
+  // statement that it is one of our pages, a bare "/app/x" in a sentence is
+  // not. Only real pages (the menu's own list) card; anything else stays a
+  // link, so a typo never becomes a card that opens a 404.
+  if (!raw.startsWith('/')) {
+    const page = appPageFor(pathname);
+    if (page) return { ...base, kind: 'page', pagePath: page };
   }
 
   // ── /:username ──
@@ -472,6 +505,17 @@ export const dehubLinkFor = {
   bounty: (jobNumber: string | number) => `${shareOrigin()}/bounty/${jobNumber}`,
   proposal: (proposal: string | { id: string; proposal_number?: number | null }) =>
     `${shareOrigin()}${proposalPath(proposal)}`,
+};
+
+/**
+ * Links typed into a message by the @ list. Always the live site, never the
+ * build the sender happens to be on, because the person reading it may be on
+ * the phone app, where only riftn.com links open in-app.
+ */
+export const LIVE_ORIGIN = 'https://riftn.com';
+export const mentionLinkFor = {
+  community: (slug: string) => `${LIVE_ORIGIN}/app/communities/${encodeURIComponent(slug)}`,
+  page: (path: string) => `${LIVE_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`,
 };
 
 /**

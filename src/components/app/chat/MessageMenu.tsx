@@ -35,6 +35,8 @@ export interface MessageMenuProps {
   reactors?: ReactorsSource | null;
   /** A muted line at the foot of the card, e.g. the full send time. */
   meta?: string | null;
+  /** What the menu is for, read out by screen readers. Defaults to "Message options". */
+  label?: string;
 }
 
 const MENU_W = 248;
@@ -59,7 +61,7 @@ const KEEP = {
  * Opens at the pointer, flips to stay on screen, grows from the corner nearest
  * the pointer. Arrow keys move through the actions, Enter picks, Esc closes.
  */
-export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta }: MessageMenuProps) {
+export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact, allowMore = true, actions, reactors, meta, label }: MessageMenuProps) {
   const { t } = useTranslation();
   const open = !!point;
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -188,7 +190,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           key="msg-menu"
           ref={wrapRef}
           role="menu"
-          aria-label={t('chatHold.title', 'Message options')}
+          aria-label={label ?? t('chatHold.title', 'Message options')}
           data-msg-menu
           data-no-navigate
           {...KEEP}
@@ -207,8 +209,8 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           className="flex flex-col gap-1.5"
         >
           {showEmoji && view === 'main' && (
-            <div className="flex items-center gap-0.5 self-stretch rounded-full px-1.5 py-1" data-msg-menu-surface data-msg-menu-emoji>
-              {quickReactions!.slice(0, 6).map((emoji, i) => (
+            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-2.5' : 'pr-1.5'}`} data-msg-menu-surface data-msg-menu-emoji>
+              {quickReactions!.slice(0, allowMore ? 6 : 7).map((emoji, i) => (
                 <motion.button
                   key={emoji}
                   type="button"
@@ -219,7 +221,8 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   transition={{ delay: 0.02 + i * 0.022, type: 'spring', stiffness: 520, damping: 24 }}
                   whileHover={{ scale: 1.28, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full text-[22px] leading-none"
+                  // Seven fit the capsule when there is no chevron (comments: the six faces and 👎).
+                  className={`grid shrink-0 place-items-center rounded-full leading-none ${!allowMore && quickReactions!.length > 6 ? 'h-8 w-8 text-[20px]' : 'h-[34px] w-[34px] text-[22px]'}`}
                   data-msg-menu-chip={mine.includes(emoji) ? 'on' : ''}
                 >
                   {emoji}
@@ -230,8 +233,9 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   type="button"
                   onClick={() => setView('emoji')}
                   aria-label={t('emojiPicker.moreReactions')}
-                  className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full transition-transform hover:scale-110"
+                  className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full opacity-60 transition-[opacity,transform] hover:opacity-100 active:scale-95 active:opacity-100 [&>svg]:transition-[stroke-width] hover:[&>svg]:stroke-[2.75] active:[&>svg]:stroke-[2.75]"
                   data-msg-menu-chip
+                  data-msg-menu-more
                 >
                   <ChevronDown className="h-4 w-4" />
                 </button>

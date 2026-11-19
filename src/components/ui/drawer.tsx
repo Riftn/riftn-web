@@ -7,6 +7,7 @@ import { guardOutsideDismiss } from "@/lib/overlay-dismiss";
 import { useWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
 import { settleAfterOverlayClose } from '@/lib/scroll-freeze-watchdog';
 import { OverlayContentPresent, useOverlayLifetime } from '@/hooks/use-overlay-lifetime';
+import { OverlayExit, useOverlayExitRef } from '@/components/ui/overlay-exit';
 
 // Shared guard against the vaul "ghost click": dismissing a sheet — tapping the
 // scrim, or an outside tap on a non-modal drawer — fires a synthesized click on
@@ -199,6 +200,7 @@ const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, war
 
   return (
     <OverlayContentPresent.Provider value={lifetime.present}>
+    <OverlayExit present={lifetime.present}>
     <DrawerPrimitive.Root
       shouldScaleBackground={shouldScaleBackground}
       modal={modal}
@@ -242,6 +244,7 @@ const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, war
         {children}
       </DrawerRootMounted.Provider>
     </DrawerPrimitive.Root>
+    </OverlayExit>
     </OverlayContentPresent.Provider>
   );
 };
@@ -258,7 +261,7 @@ const DrawerOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay 
-    ref={ref} 
+    ref={useOverlayExitRef(ref)} 
     className={cn("fixed inset-0 z-[100] bg-black/80", className)} 
     {...props} 
   />
@@ -291,6 +294,7 @@ const DrawerContent = React.forwardRef<
 >(({ className, children, glass = false, hideHandle = true, handleClassName, noOverlay = false, overlayClassName, column = false, scrollable = false, onPointerDownOutside, ...props }, ref) => {
   const rootMounted = React.useContext(DrawerRootMounted);
   const present = React.useContext(OverlayContentPresent);
+  const surfaceRef = useOverlayExitRef(ref);
   // No Root above us — this sheet is dormant (or the content escaped its
   // Drawer entirely). Render nothing rather than portalling into no Dialog.
   if (!rootMounted || !present) return null;
@@ -302,7 +306,7 @@ const DrawerContent = React.forwardRef<
     <OverlayOpenTracker />
     {!noOverlay && <DrawerOverlay className={cn(glass ? "bg-black/20 backdrop-blur-md" : undefined, overlayClassName)} />}
     <DrawerPrimitive.Content
-      ref={ref}
+      ref={surfaceRef}
       className={cn(
         "fixed inset-x-0 bottom-0 z-[100] mt-24 flex h-auto flex-col rounded-t-[20px]",
         /* Ceiling for a sheet that names no height of its own, in the unit that

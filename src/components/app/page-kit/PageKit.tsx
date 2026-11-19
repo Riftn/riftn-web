@@ -123,6 +123,14 @@ export function PageIsland({
   const drawerControlled = drawerOpenProp !== undefined;
   const drawerOpen = drawerControlled ? drawerOpenProp : drawerOpenState;
   const [drawerFilled, setDrawerFilled] = useState(false);
+  // A shut search drawer still sat (clipped) behind the pill, and anything
+  // moving in it, like the refresh arrow spinning during a refresh, repainted
+  // under the pill's frosted glass: on Android Chrome that made the pill's
+  // shine blink. Once shut it is taken out of painting entirely (kept in the
+  // DOM so a typed search survives); it comes back the moment it opens.
+  const [drawerShutDone, setDrawerShutDone] = useState(true);
+  const drawerPainted = drawerOpen || !drawerShutDone;
+  useEffect(() => { if (drawerOpen) setDrawerShutDone(false); }, [drawerOpen]);
   const drawerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!drawerOpen || drawerControlled) return;
@@ -220,7 +228,10 @@ export function PageIsland({
             initial={false}
             animate={{ height: drawerOpen ? 'auto' : 0, marginTop: drawerOpen ? -DRAWER_BEHIND : 0 }}
             transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
+            onAnimationComplete={() => { if (!drawerOpen) setDrawerShutDone(true); }}
             className="relative z-0 -mx-12 overflow-hidden px-12"
+            style={drawerPainted ? undefined : { display: 'none' }}
+            data-kit-search-slot-shut={drawerPainted ? undefined : ''}
             aria-hidden={!drawerOpen}
             ref={(el: HTMLDivElement | null) => { if (el) el.toggleAttribute('inert', !drawerOpen); }}
           >

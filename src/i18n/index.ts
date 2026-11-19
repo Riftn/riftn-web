@@ -92,7 +92,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'rkt', name: 'Rangpuri', nativeName: 'রংপুরী' },
   { code: 'ro', name: 'Romanian', nativeName: 'Română' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский' },
-  { code: 'sdr', name: 'Sadri', nativeName: 'سدری' },
+  { code: 'sdr', name: 'Sadri', nativeName: 'सादरी' },
   { code: 'skr', name: 'Saraiki', nativeName: 'سرائیکی' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'sr', name: 'Serbian', nativeName: 'Српски' },
@@ -156,7 +156,7 @@ if (urlLang) defaultLang = urlLang;
 // Languages written right-to-left. Keep in sync with SUPPORTED_LANGUAGES.
 export const RTL_LANGUAGES = new Set([
   'ar', 'acm', 'acw', 'aec', 'ajp', 'ayn', 'apd', 'ary', 'arz', // Arabic + dialects
-  'he', 'fa', 'ur', 'pbt', 'sd', 'skr', 'ug', 'dcc', 'sdr',
+  'he', 'fa', 'ur', 'pbt', 'sd', 'skr', 'ug', 'dcc',
 ]);
 
 export function applyDocumentDirection(lang: string): void {

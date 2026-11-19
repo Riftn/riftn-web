@@ -9,6 +9,24 @@ export function pullForDrag(drag: number) {
   return 165 * (1 - Math.exp(-Math.max(0, drag) / 170));
 }
 
+/** The finger travel that pulls the list `distance` down (pullForDrag's inverse). */
+export function dragForPull(distance: number) {
+  'worklet';
+  const d = Math.max(0, Math.min(164, distance));
+  return -170 * Math.log(1 - d / 165);
+}
+
+/** A quick flick refreshes from this share of the full pull... */
+const FLICK_SHARE = .6;
+/** ...when the finger is still moving down this fast (px/s) as it lets go. */
+const FLICK_SPEED = 900;
+
+/** Whether letting go here refreshes: a full pull, or a shorter quick flick. */
+export function pullShouldRefresh(distance: number, velocityY: number, threshold = PULL_REFRESH_THRESHOLD) {
+  'worklet';
+  return distance >= threshold || (distance >= threshold * FLICK_SHARE && velocityY >= FLICK_SPEED);
+}
+
 /** A lightly underdamped spring with zero initial velocity: the feed springs
  *  about 4% past its resting place, settles back and ends exactly at rest. */
 const SPRING_ZETA = .72;

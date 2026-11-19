@@ -1,6 +1,7 @@
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
-import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { flushSync } from 'react-dom';
 import { PenSquare, LogIn, CornerDownLeft } from "lucide-react";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 
@@ -14,7 +15,9 @@ import { NAV_ITEMS } from '@/constants/app.constants';
 import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { MobileHeader } from './navigation/MobileHeader';
 import { DesktopSidebar } from './navigation/DesktopSidebar';
-import { MobileMenuGrid } from './navigation/MobileMenuGrid';
+import { MobileMenuLayout, MenuTabs } from './navigation/MobileMenuLayout';
+import { groupMenuItems } from './navigation/menu-groups';
+import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { useSelfBadge } from '@/hooks/use-self-badge-balance';
@@ -78,9 +81,32 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     () => filterNavItems(NAV_ITEMS, menuQuery, t, canManageAgents(walletAddress)),
     [menuQuery, t, isKidsMode, walletAddress],
   );
-  // Reset whenever the sheet closes, so it never reopens mid-filter.
+  // Every page the menu may show, before any search: what the groups sort.
+  const allNavItems = useMemo(
+    () => filterNavItems(NAV_ITEMS, '', t, canManageAgents(walletAddress)),
+    [t, isKidsMode, walletAddress],
+  );
+  const menuGroups = useMemo(() => groupMenuItems(allNavItems), [allNavItems]);
+  const menuLayout = useMenuLayout();
+  const [menuTab, setMenuTab] = useState(0);
+  // Tabs layout: search is a button on the tab row until tapped, then that
+  // row turns into the search field (X turns it back).
+  const tabsHeader = menuLayout === 'tabs' && !isKidsMode && menuGroups.length > 1;
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const showSearchField = !tabsHeader || searchOpen || !!menuQuery;
+  const closeSearch = useCallback(() => {
+    setMenuQuery.complete(menuQuery, '');
+    setSearchOpen(false);
+  }, [menuQuery, setMenuQuery]);
+  // Reset whenever the sheet closes, so it never reopens mid-filter, and
+  // always reopens on the first group.
   useEffect(() => {
-    if (!isOpen) setMenuQuery.initialize('');
+    if (!isOpen) {
+      setMenuQuery.initialize('');
+      setSearchOpen(false);
+      setMenuTab(0);
+    }
   }, [isOpen, setMenuQuery]);
 
   const runFullSearch = useCallback(() => {
@@ -160,15 +186,32 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
       {/* Menu search — filters the list below. Content search is one row away
           via the hand-off at the bottom, which runs whatever is typed on
           Explore rather than leaving the field as a dead end. */}
+      {!showSearchField ? (
+        <div className="mb-3 flex items-stretch gap-1.5 px-1">
+          <button
+            type="button"
+            // Focus inside the tap itself, or iOS will not raise the keyboard.
+            onClick={() => { flushSync(() => setSearchOpen(true)); searchInputRef.current?.focus(); }}
+            aria-label={t('sidebar.searchMenu')}
+            data-menu-search-button
+            data-search-surface
+            className="flex w-[42px] flex-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 transition-colors active:bg-white/10"
+          >
+            <Search className="h-[18px] w-[18px]" />
+          </button>
+          <MenuTabs groups={menuGroups} activeTab={menuTab} onTabChange={setMenuTab} />
+        </div>
+      ) : (
       <div className="relative mb-3 px-1">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
         <input
+          ref={searchInputRef}
           type="text"
           value={menuQuery}
           onChange={(e) => setMenuQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') { e.preventDefault(); runFullSearch(); }
-            if (e.key === 'Escape') { e.preventDefault(); setMenuQuery.complete(menuQuery, ''); }
+            if (e.key === 'Escape') { e.preventDefault(); closeSearch(); }
           }}
           placeholder={t('sidebar.searchMenu')}
           aria-label={t('sidebar.searchMenu')}
@@ -176,10 +219,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           data-search-surface
           className="w-full h-[42px] pl-10 pr-9 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30 transition-colors"
         />
-        {menuQuery && (
+        {(menuQuery || (tabsHeader && searchOpen)) && (
           <button
             type="button"
-            onClick={() => setMenuQuery.complete(menuQuery, '')}
+            onClick={closeSearch}
             aria-label={t('sidebar.clearSearch')}
             className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
           >
@@ -187,6 +230,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           </button>
         )}
       </div>
+      )}
 
       </div>
 
@@ -195,9 +239,13 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           (which also smeared the pinned footer while it moved). */}
       <div data-vaul-no-drag className="-mx-1 -mt-1 pt-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pb-2 [touch-action:pan-y]">
       {/* Navigation tiles */}
-      <MobileMenuGrid
-        items={visibleNavItems}
+      <MobileMenuLayout
+        layout={menuLayout}
+        groups={menuGroups}
+        flatItems={visibleNavItems}
         searching={!!menuQuery.trim()}
+        activeTab={menuTab}
+        onTabChange={setMenuTab}
         currentPath={location.pathname}
         notificationCount={notificationCount}
         messageCount={messagesUnread}

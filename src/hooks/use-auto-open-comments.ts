@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useFocusComment } from '@/lib/focus-comment';
+import { useFocusComment, useMayOpenLinkedComments } from '@/lib/focus-comment';
 
 /**
  * Opens the comments when the reader arrived from a comment notification.
@@ -20,6 +20,9 @@ import { useFocusComment } from '@/lib/focus-comment';
  */
 export function useAutoOpenComments(setShowComments: (open: boolean) => void, tokenId?: string) {
   const focusCommentId = useFocusComment(tokenId);
+  // A related card under the post must not take the link's ?comments=1: on a
+  // phone its comments sheet slid up over the reply the link was about.
+  const mayOpen = useMayOpenLinkedComments(tokenId);
 
   useEffect(() => {
     if (focusCommentId) setShowComments(true);
@@ -27,6 +30,7 @@ export function useAutoOpenComments(setShowComments: (open: boolean) => void, to
   }, [focusCommentId]);
 
   useEffect(() => {
+    if (!mayOpen) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('comments') === '1') {
       setShowComments(true);

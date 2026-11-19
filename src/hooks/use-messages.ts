@@ -984,12 +984,14 @@ export function useSendMessage(conversationId: string) {
         price: lockDhbForUsd(lockPrice),
         priceUsd: lockPrice,
         symbol: 'DHB',
-        kind: mediaFile.type.startsWith('video/') ? 'video' : 'image',
+        kind: mediaFile.type.startsWith('video/') ? 'video' : mediaFile.type.startsWith('image/') ? 'image' : 'file',
         previewUrl: null,
         unlocked: true,
         mine: true,
         ready: false,
-        mediaUrl: optimisticMessage.mediaUrls[0]?.url,
+        ...(mediaFile.type.startsWith('video/') || mediaFile.type.startsWith('image/')
+          ? { mediaUrl: optimisticMessage.mediaUrls[0]?.url }
+          : { fileName: mediaFile.name, fileSize: mediaFile.size }),
       };
     }
 

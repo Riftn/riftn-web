@@ -22,6 +22,7 @@ import { sanitiseGroups, useFollowGroupList, writeGroups } from '@/lib/follow-gr
 import { DEFAULT_AD_LOAD, normaliseAdLoad, useAdLoad, writeAdLoad } from '@/lib/ad-load';
 import { DEFAULT_FEED_VIDEO_SHAPE, normaliseFeedVideoShape, useFeedVideoShape, writeFeedVideoShape } from '@/lib/feed-video-shape';
 import { useSkipSegments, writeSkipSegments } from '@/lib/skip-segments';
+import { DEFAULT_MENU_LAYOUT, MENU_LAYOUT_PREF_KEY, normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 import { useVideoGlitch, writeVideoGlitch } from '@/lib/video-glitch';
 import {
   PUBLIC_CHAT_ALERTS_PREF_KEY,
@@ -76,6 +77,15 @@ function useFeedVideoShapeSync() {
     writeFeedVideoShape(normaliseFeedVideoShape(value));
   }, []);
   useSyncedPreference(FEED_VIDEO_SHAPE_KEY, shape, apply, DEFAULT_FEED_VIDEO_SHAPE);
+}
+
+/** Phone menu layout (tabs / sections / folders) is one string; same as above. */
+function useMenuLayoutSync() {
+  const layout = useMenuLayout();
+  const apply = useCallback((value: unknown) => {
+    writeMenuLayout(normaliseMenuLayout(value));
+  }, []);
+  useSyncedPreference(MENU_LAYOUT_PREF_KEY, layout, apply, DEFAULT_MENU_LAYOUT);
 }
 
 /** Sponsor skipping is one boolean; inbound only, like the two above. */
@@ -140,6 +150,7 @@ export function ViewingPreferencesSync() {
   useFollowGroupSync();
   useAdLoadSync();
   useFeedVideoShapeSync();
+  useMenuLayoutSync();
   useSkipSegmentsSync();
   useVideoGlitchSync();
   usePublicChatAlertsSync();

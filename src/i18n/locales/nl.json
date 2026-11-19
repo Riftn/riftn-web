@@ -126,12 +126,16 @@
       "profile": "profiel",
       "proposal": "voorstel",
       "stage": "fase",
-      "store": "winkel"
+      "store": "winkel",
+      "featureRequest": "verzoek",
+      "page": "pagina"
     },
     "recipientChat": "chat",
     "recipientUser": "gebruiker",
     "sendFailed": "Verstuurde {{item}} niet",
-    "sentTo": "{{item}} verzonden naar {{name}}"
+    "sentTo": "{{item}} verzonden naar {{name}}",
+    "openPage": "Pagina openen",
+    "viewRequest": "Verzoek bekijken"
   },
   "stageCover": {
     "admitOne": "GEEF ER EEN TOE",
@@ -719,7 +723,14 @@
     "getTheApp": "Download de app",
     "connectAi": "AI verbinden",
     "converter": "Omvormer",
-    "affiliate": "Partner"
+    "affiliate": "Partner",
+    "groups": {
+      "main": "Hoofd",
+      "create": "Maken",
+      "discover": "Ontdekken",
+      "money": "Geld",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Bekijk het profiel van {{name}}",
@@ -915,6 +926,8 @@
     "feedTogglesCleared": "Feedfilters gereset",
     "defaultProfileTab": "Standaard profieltabblad",
     "defaultProfileTabDesc": "Kies welk tabblad bezoekers als eerste zien op je profiel",
+    "defaultProfileView": "Indeling van profielberichten",
+    "defaultProfileViewDesc": "Toon je berichten als raster of als lijst wanneer mensen je profiel openen",
     "public": "Openbaar",
     "publicDesc": "Iedereen kan je berichten zien",
     "private": "Privé",
@@ -1351,7 +1364,15 @@
     "socialConnectedShort": "Gekoppeld",
     "socialConnectFailed": "Kan {{platform}} niet koppelen. Probeer het opnieuw.",
     "socialVerifiedFollowers": "{{value}} volgers",
-    "socialFollowersPending": "Aantal volgers wordt bijgewerkt"
+    "socialFollowersPending": "Aantal volgers wordt bijgewerkt",
+    "menuLayout": "Menu-indeling",
+    "menuLayoutDesc": "Hoe het menu zijn pagina's groepeert",
+    "menuLayoutTabs": "Tabbladen",
+    "menuLayoutTabsDesc": "Eén groep tegelijk, met grote iconen",
+    "menuLayoutSections": "Secties",
+    "menuLayoutSectionsDesc": "Alle pagina's tegelijk, onder kopjes",
+    "menuLayoutFolders": "Mappen",
+    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep"
   },
   "common": {
     "confirm": "Bevestigen",
@@ -2675,7 +2696,8 @@
       "total": "Totaal bereik",
       "breakdownTitle": "Waar dit bereik vandaan komt",
       "dehubFollowers": "Riftn-volgers",
-      "verified": "Sociale cijfers komen van accounts die de maker heeft gekoppeld."
+      "verified": "Sociale cijfers komen van accounts die de maker heeft gekoppeld.",
+      "selfReported": "Het aantal sociale volgers wordt ingevoerd door de maker."
     },
     "loginDescription": "Log in om je profiel te bekijken en beheren.",
     "replyThread": {
@@ -3055,6 +3077,7 @@
     "failedSubmit": "Aanvraag indienen mislukt. Probeer het opnieuw."
   },
   "loginModal": {
+    "didYouMean": "Bedoelde je {{email}}?",
     "bringLoginOver": "Riftn gebruikt op dehub.io? <bring>Neem je login mee</bring>",
     "restoreWalletTitle": "Haal je wallet terug",
     "restoreOriginalWallet": "Je profiel staat op de wallet van je oorspronkelijke aanmelding, niet op de wallet die voor deze login is opgeslagen. Meld je aan zoals je dat de eerste keer bij Riftn deed om die wallet terug te halen. Je profiel en tegoeden blijven zoals ze zijn.",
@@ -21018,5 +21041,16 @@
     "scheduledToast": "Gepland voor {{when}}",
     "failedToast": "Een gepland bericht kon niet worden verstuurd",
     "error": "Dat is niet gelukt. Probeer het opnieuw."
+  },
+  "mentionLinks": {
+    "communities": "Community’s",
+    "pages": "Pagina’s",
+    "people": "Mensen",
+    "linkTo": "{{name}} linken",
+    "empty": "Niets gevonden",
+    "hint": "Typ om mensen, community’s en pagina’s te vinden",
+    "members": " leden",
+    "placeholder": "Zoek mensen, community’s, pagina’s...",
+    "title": "Noemen of linken"
   }
 }

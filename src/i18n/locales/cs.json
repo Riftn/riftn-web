@@ -15,6 +15,23 @@
     "saved": "Okraj uložen",
     "failed": "Okraj se nepodařilo uložit"
   },
+  "duet": {
+    "policyEveryone": "Všichni",
+    "policyFollowers": "Sledující",
+    "policyNobody": "Nikdo",
+    "loadMore": "Načíst více",
+    "video": "Videozáznam"
+  },
+  "videoRemix": {
+    "sound": "Použít tento zvuk"
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Všichni",
+      "followers": "Sledující",
+      "nobody": "Nikdo"
+    }
+  },
   "dehubAppPage": {
     "android": "Android",
     "appStore": "Stáhnout z App Store",
@@ -166,11 +183,18 @@
     "privateNote": "Soukromé účty se ve fediverse nezobrazují.",
     "noUsername": "Zvolte si uživatelské jméno, abyste získali adresu ve fediverse."
   },
+  "signedFollows": {
+    "setUp": "Zapnout",
+    "turnOff": "Vypnout",
+    "efpTurnOff": "Zastavit"
+  },
   "profileFields": {
     "title": "Pole profilu",
     "description": "Až čtyři řádky navíc na vašem profilu, třeba web nebo vaše zájmena.",
     "label": "Popisek",
     "content": "Obsah",
+    "add": "Přidat pole",
+    "remove": "Odebrat pole",
     "save": "Uložit pole",
     "saved": "Pole profilu uložena",
     "failed": "Neuložilo se. Zkuste to znovu.",
@@ -677,6 +701,8 @@
     "feedTogglesCleared": "Filtry kanálu obnoveny",
     "defaultProfileTab": "Výchozí karta profilu",
     "defaultProfileTabDesc": "Vyber, kterou kartu uvidí návštěvníci na tvém profilu jako první",
+    "defaultProfileView": "Rozložení příspěvků na profilu",
+    "defaultProfileViewDesc": "Zobraz své příspěvky jako mřížku nebo seznam, když někdo otevře tvůj profil",
     "public": "Veřejné",
     "publicDesc": "Kdokoli může vidět vaše příspěvky",
     "private": "Soukromé",
@@ -1197,7 +1223,12 @@
     "payDirect": "Posláno přímo na {{name}} v {{symbol}} dne {{chain}}. Žádná výměna.",
     "payDirectNoName": "Posláno tvůrci přímo v {{symbol}} dne {{chain}}. Žádná výměna.",
     "payViaBridgeDpay": "Přesunuto na Base a zaplaceno do Riftn Pay, tokeny dorazí přibližně za minutu",
-    "dmSent": "Odesláno {{amount}} tokenů uživateli {{name}}!"
+    "dmSent": "Odesláno {{amount}} tokenů uživateli {{name}}!",
+    "addMessage": "Přidat zprávu (volitelné)",
+    "messagePublic": "Veřejné",
+    "railTitle": "Tipy",
+    "railTotal": "{{amount}} tokenů",
+    "tokensUnit": "tokeny"
   },
   "postOptions": {
     "liveAlertsOn": "Nyní sledujete {{name}}. Až začne vysílat živě, dostanete upozornění.",
@@ -1698,6 +1729,9 @@
   "notifications": {
     "title": "Oznámení",
     "markAllRead": "Označit vše jako přečtené",
+    "groupNew": "Nové",
+    "groupToday": "Dnes",
+    "groupThisWeek": "Tento týden",
     "settings": "Nastavení oznámení",
     "actions": "Akce",
     "markAllAsRead": "Označit vše jako přečtené",
@@ -1726,6 +1760,7 @@
     "communities": "Komunity",
     "stores": "Obchody",
     "noNotificationsYet": "Zatím žádná oznámení",
+    "searchClose": "Zavřít vyhledávání",
     "noNotificationsDesc": "Líbí se, komentáře, spropitné nebo noví odběratelé se zobrazí zde.",
     "loadMore": "Načíst více",
     "markAsRead": "Přečteno",
@@ -1965,11 +2000,13 @@
     "promptLabel": "Vaše prompt",
     "promptPlaceholder": "Popište nápad, zlepšení nebo chybu…",
     "promptAttach": "Připojte obrázky",
+    "removeAttachment": "Odebrat přílohu",
     "promptDrop": "Zadejte nebo přetáhněte obrázky zde",
     "promptPost": "Odeslat prompt",
     "promptShortcut": "Ctrl / ⌘ + Enter k odeslání",
     "promptDetails": "Volitelné podrobnosti",
     "promptDevice": "Zarazitelnost a OS (pro chyby)",
+    "deviceInfoNoErrors": "Žádný",
     "promptFilters": "Filtrovat podle kategorie",
     "promptMediaError": "Vyberte obrázky nebo videa do 20 MB.",
     "promptMediaLimit": "Do {{max}} připojitelných souborů.",
@@ -2028,6 +2065,12 @@
     "loginRequired": "Vyžadováno přihlášení"
   },
   "messages": {
+    "newDrawer": {
+      "to": "Do",
+      "recent": "Nedávné",
+      "suggested": "Navrhované",
+      "youFollow": "Lidé, které sledujete"
+    },
     "reply": "Odpovědět",
     "react": "Reagovat",
     "edit": "Upravit",
@@ -2064,7 +2107,10 @@
     "checkingTokenBalance": "Kontrola zůstatku tokenů...",
     "deleteConversationFailed": "Konverzaci se nepodařilo smazat",
     "message": "Zpráva",
-    "noConversationsYet": "Žádné konverzace zatím"
+    "noConversationsYet": "Žádné konverzace zatím",
+    "sending": "Odesílání",
+    "retrySend": "Zkusit znovu",
+    "discardSend": "Odebrat"
   },
   "music": {
     "listeningCount_one": "{{count}} naslouchání",
@@ -2147,6 +2193,9 @@
     "viewList": "Zobrazení seznamu",
     "viewMode": "Zobrazit",
     "back": "Zpět",
+    "reserve": {
+      "signIn": "Přihlásit se"
+    },
     "usernameAvailable": "Uživatelské jméno je dostupné!",
     "signUpToClaim": "Zaregistrujte se a získejte ho",
     "signUp": "Registrace",
@@ -2165,7 +2214,8 @@
       "total": "Celkový dosah",
       "breakdownTitle": "Odkud tento dosah pochází",
       "dehubFollowers": "Následovníci Riftnu",
-      "verified": "Sociální počty pocházejí z účtů, ke kterým je tvůrce připojen."
+      "verified": "Sociální počty pocházejí z účtů, ke kterým je tvůrce připojen.",
+      "selfReported": "Počet sledujících na sociálních sítích zadává tvůrce."
     },
     "loginDescription": "Přihlaste se pro zobrazení a správu profilu.",
     "replyThread": {
@@ -2174,7 +2224,13 @@
     },
     "tabs": {
       "playlists": "Playlisty",
-      "dislikes": "Nelíbí se"
+      "dislikes": "Nelíbí se",
+      "likes": "Líbí se"
+    },
+    "likedPosts": {
+      "emptyTitle": "Zatím žádné lajky",
+      "privateTitle": "Lajky jsou soukromé",
+      "loadMore": "Načíst více"
     },
     "dislikes": {
       "emptyTitle": "Zatím nic",
@@ -2197,6 +2253,10 @@
     "sortMostViewed": "Nejvíce zobrazeno",
     "sortLikes": "Likey",
     "sortMostLiked": "Nejvíce oblíbené",
+    "sortCustomShort": "Vlastní",
+    "arrange": {
+      "saving": "Ukládá se..."
+    },
     "searchThisChannel": "Hledejte tento kanál",
     "searchResultCount": "1 výsledek pro \"{{query}}\"",
     "searchResultCountPlural": "{{count}} výsledků pro \"{{query}}\""
@@ -2354,6 +2414,7 @@
       "runSwarm": "Spustit hejno",
       "description": "Akce běží jako vybraný agent. Naplánované úkoly pokračují po zavření aplikace.",
       "instructions": "Agentové pokyny",
+      "examples": "Publikuj jednou denně o: nezávislé hudbě\nStyl: zvídavý, stručný a konverzační\nDej like až 2 nedávným příspěvkům denně o: hudbě, živých koncertech, vinylu",
       "preparing": "Příprava úkolu…",
       "run": "Spustit dotaz",
       "limits": "Jedna denní příspěvek a až tři relevantní like na úkol. Všechny agenty sdílejí 20minutovou pauzu mezi příspěvky. Fotografie používají ověřené popisky; videa potřebují obrázek na přehrávání. Příspěvky zůstávají pod 500 znaky. Žádný gas kromě mintingu; psaní může používat kredity.",
@@ -2462,6 +2523,9 @@
     "signInAgain": "Znovu se přihlásit",
     "createSignIn": "Pro vytvoření agenta se znovu přihlaste",
     "checkConnection": "Zkontrolujte připojení a zkuste to znovu.",
+    "welcome": {
+      "text": "Uvítací zpráva"
+    },
     "workspace": {
       "moderation": "Moderování streamu",
       "moderationHelp": "Nejprve povolte oprávnění k moderování. Účet již musí být tvůrcem streamu nebo přiděleným moderátorem. Režimy schválení a konceptu stále platí. Dočasná umlčení automaticky vyprší.",
@@ -2658,7 +2722,9 @@
     "resendCodePhone": "Špatný telefonní číslo nebo žádný kód? Zpět",
     "continueAs": "Pokračovat jako",
     "switchWalletAccount": "Výběr účtu",
-    "walletLoadFailed": "Nemohlo se načíst peněženky. Zkuste to prosím znovu."
+    "walletLoadFailed": "Nemohlo se načíst peněženky. Zkuste to prosím znovu.",
+    "openInBrowser": "Otevřít v prohlížeči",
+    "copyLink": "Zkopírovat odkaz"
   },
   "careers": {
     "title": "Kariéra v Riftn",
@@ -2882,7 +2948,8 @@
     "noMenuMatches": "Nic v nabídce neodpovídá",
     "searchDehubFor": "Hledat „{{query}}“ na Riftnu",
     "switchAccount": "Přepnout účet",
-    "signedInAs": "Přihlášen jako {{name}}"
+    "signedInAs": "Přihlášen jako {{name}}",
+    "requestSend": "Odeslat žádost"
   },
   "comments": {
     "reportComment": "Nahlásit komentář",
@@ -2991,6 +3058,9 @@
     "confirm": "Mincovna {{chain}}",
     "confirmWithCost": "Mincovna {{chain}} · {{cost}}",
     "notAvailable": "Minting na tomto řetězci zatím není k dispozici."
+  },
+  "postEditHistory": {
+    "original": "Originál"
   },
   "postInfo": {
     "title": "Informace o příspěvku",
@@ -5102,6 +5172,7 @@
     "settledTitleSpeed": ", typicky v {{speed}}",
     "settledCount_one": "{{count}} vypořádáno",
     "settledCount_other": "{{count}} vypořádáno",
+    "statusInProgress": "Probíhá",
     "howMany": "Kolik",
     "availableCount_one": "{{count}} dostupné",
     "availableCount_other": "{{count}} dostupné",
@@ -5194,6 +5265,17 @@
     "sellYourFractions": "Prodej své zlomky ({{held}} drženo)"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Použít tyto údaje"
+      }
+    },
+    "cinema": {
+      "close": "Zavřít",
+      "performance": {
+        "label": "Výkon"
+      }
+    },
     "libraryEmpty": "Vaše uložené generace se zobrazí tady.",
     "toolRemake": "Remake",
     "toolMaboroshi": "Maboroš",
@@ -6163,6 +6245,12 @@
     "raw": "Suroviny"
   },
   "nftMarket": {
+    "actAll": "Vše",
+    "actListings": "Inzeráty",
+    "actOffer": "Nabídka",
+    "actOffers": "Nabídky",
+    "actSales": "Prodeje",
+    "tabActivity": "Aktivita",
     "shortTitle": "NFTS",
     "filters": "Filtry",
     "forSale": "Na prodej",
@@ -6227,6 +6315,9 @@
     "offered": "Nabídka odeslána. Držitel ji může kdykoli přijmout.",
     "dehubPost": "Riftn příspěvek",
     "youHold": "Máte {{n}}",
+    "price": "Cena",
+    "volume": "Hlasitost",
+    "tabRecent": "Nedávné",
     "buyNow": "Koupit nyní",
     "dropsTo": "Cena klesne na {{price}} do {{date}}",
     "inBundle": "Prodáno jako balíček {{n}}",
@@ -6640,7 +6731,67 @@
     "youAreBanned": "Nemůžeš chatovat v streamech tohoto tvůrce",
     "youAreTimedOut": "Jsi na chvíli v časovém limitu"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Pozadí",
+      "modes": {
+        "none": "Vypnuto",
+        "blur": "Rozostření",
+        "color": "Barva"
+      }
+    },
+    "remove": "Odebrat",
+    "scenes": {
+      "countdown": "Odpočítávání",
+      "names": {
+        "starting": "Spuštění brzy"
+      }
+    },
+    "sources": {
+      "reactAdd": "Zobrazit",
+      "image": "Obrázek",
+      "camera": "Kamera",
+      "show": "Zobrazit na přenosu",
+      "loop": "Smyčka",
+      "positions": {
+        "center": "Střed"
+      },
+      "sizes": {
+        "medium": "Střední"
+      },
+      "shapes": {
+        "circle": "Kruh",
+        "rect": "Čtverec"
+      }
+    },
+    "audio": {
+      "mute": "Ztlumit",
+      "unmute": "Zrušit ztlumení",
+      "gateLevels": {
+        "off": "Vypnuto",
+        "low": "Světlý",
+        "high": "Silné"
+      }
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platforma",
+      "label": "Jméno (nepovinné)",
+      "key": "Streamovací klíč",
+      "save": "Přidat",
+      "cancel": "Zrušit",
+      "states": {
+        "off": "Vypnuto",
+        "idle": "Připraveno",
+        "live": "Živě",
+        "error": "Chyba"
+      }
+    },
+    "vertical": {
+      "centre": "Střed",
+      "live": "ŽIVĚ"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Počítadlo na vašem streamu. Každý placený dar, follow a předplatné přidává čas, takže místnost vás drží naživu.",
@@ -7593,6 +7744,8 @@
     "footerNote": "Účast v DePin je služba příspěvku, nikoli investiční produkt. Dostupnost, způsobilost a odměny se mohou změnit."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nový tok",
+    "disconnect": "Odpojit",
     "title": "Creator Flow",
     "backToStudio": "Zpět do Creator Studio",
     "backToFlows": "Zpět na vaše toky",
@@ -7933,6 +8086,9 @@
     "followingBackProgress": "Následuji zpět {{completed}} z {{total}}",
     "findingFollowers": "Hledám následovníky...",
     "followBackAll": "Následovat zpět všechny",
+    "followBackConfirm": "Oplatit sledování",
+    "followBackNotNow": "Teď ne",
+    "followBackDone": "Hotovo",
     "nonFollowers": {
       "title": "Ukliď, koho sleduješ?",
       "body": "Účty {{count}}, které sledujete, vás nesledují zpět.",
@@ -8746,6 +8902,14 @@
     "priceChartCleared": "Graf ceny vymazán. Fikní referenční cena: $0.0001. Výkonné ceny závisí na dostupných objedech."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Rotace",
+      "add": "Přidat",
+      "scale": "Velikost",
+      "color": "Barva",
+      "light": "Světlý"
+    },
     "video": {
       "tFade": "Prolínání",
       "none": "Žádný",
@@ -8912,6 +9076,8 @@
       "tools": "Nástroje editoru"
     },
     "agent": {
+      "stop": "Zastavit",
+      "queue": "Přidat do fronty",
       "introTitle": "Řekněte AI, co chcete",
       "introBody": "Popište návrh nebo změnu vlastními slovy. Změní velikost stránky, napíše a naformátuje text, najde volné fotky, videa a hudbu, použije filtry, uspořádá vrstvy a animuje je. Každý požadavek jde vrátit jedním krokem zpět.",
       "suggestPoster": "Udělej čtvercový příspěvek na Instagram pro letní výprodej s fotkou pláže a výrazným nadpisem",
@@ -9180,6 +9346,9 @@
       "reloadText": "Obnovit nadpis",
       "textSaved": "Nadpisy byly uloženy.",
       "action": "Automatické titulky",
+      "styles": {
+        "bold": "Tučné"
+      },
       "working": "Poslouchám… {{percent}} %",
       "downloading": "Připravuji model řeči… {{percent}} %",
       "hint": "Převede řeč na časované titulky, které můžete upravit. Běží ve vašem zařízení: zdarma a soukromě. Při prvním použití se stáhne model.",
@@ -10559,6 +10728,29 @@
       "toolbar": "Navigace na plátně",
       "zoomIn": "Přiblížit plátno",
       "zoomOut": "Zobrazit na mapě v širší perspektivě"
+    },
+    "clipFix": {
+      "listening": "Poslouchám…"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Rozdělit",
+        "play": "Hrát",
+        "pause": "Pozastavit",
+        "frameBack": "Předchozí snímek",
+        "frameForward": "Další snímek"
+      }
+    },
+    "voiceClone": {
+      "stop": "Zastavit nahrávání",
+      "failed": "Klónování hlasu selhalo."
+    },
+    "linkImport": {
+      "go": "Importovat",
+      "downloading": "Stahování {{percent}}%"
+    },
+    "reverse": {
+      "action": "Zpětný chod"
     }
   },
   "jungleMood": {
@@ -10789,6 +10981,7 @@
     "downvote": "Hlasuj dolů",
     "downvoteDesc": "Hlasujte proti vládnímu návrhu nebo požadavku na funkci. Pomáhá signalizovat opozici komunity.",
     "stakingBadge": "Odznaky sázky",
+    "leaderboardRanking": "Pořadí v žebříčku",
     "delta": "Delta hodnocení (▲▼)",
     "deltaDesc": "Zelená nebo červená šipka vedle položky žebříčku ukazuje, jak moc se během vybraného časového období (1 den, 1 týden atd.) změnil zůstatek uživatele.",
     "tokenId": "ID tokenu",
@@ -11840,7 +12033,15 @@
       "rewardsWeek": "Týden od {{date}}",
       "rewardPaid": "Zaplaceno",
       "rewardPending": "Čekající",
-      "rewardsNone": "Zatím nebyly vypočítány žádné odměny. První týden končí v pondělí."
+      "rewardsNone": "Zatím nebyly vypočítány žádné odměny. První týden končí v pondělí.",
+      "stats": {
+        "button": "Živé statistiky"
+      },
+      "signin": {
+        "users_one": "{{count}} uživatel",
+        "users_other": "{{count}} uživatelů",
+        "delete": "Smazat"
+      }
     },
     "card": {
       "open": "Otevřít"
@@ -11998,6 +12199,9 @@
     "reminderLater": "Nyní ne"
   },
   "copy": {
+    "55656b5e434f": "Zavřít vyhledávání",
+    "57e2faa5ec63": "Hledat v Riftn",
+    "96d7bff86b44": "Vyhledávání se nepodařilo načíst",
     "1607715e45ed": "Klepněte na kouli a mluvte, nebo pište níže",
     "00140a37bd26": "Připojení k síti je dočasně nedostupné. Zkuste to prosím znovu.",
     "002286513398": "Nemáte povolení spravovat události.",
@@ -19003,6 +19207,7 @@
     "backToTop": "Zpět na začátek",
     "needTitle": "Přidat název k pokračování",
     "needBody": "{{count}} znaků k překročení",
+    "imagesLabel": "Obrázky",
     "backToWriting": "Zpět k psaní",
     "readyTitle": "Připraveno k publikování",
     "sharePreview": "Jak vypadá, když je sdíleno",
@@ -19064,6 +19269,130 @@
     "exploreFirst": "Nejdřív se rozhlédni",
     "codeNote": "Pošleme ti kód e-mailem, bez hesla."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Plán",
+      "howMany": "Kolik",
+      "who": "Uživatelské jméno nebo adresa peněženky",
+      "whoPlaceholder": "@uživatelské_jméno",
+      "cancel": "Zrušit",
+      "stage": {
+        "preparing": "Připravuje se…",
+        "confirming": "Čeká se na transakci…",
+        "recording": "Dokončuje se…"
+      }
+    },
+    "badges": {
+      "emoji": "Emotikony",
+      "audience": {
+        "subscribers": "Odběratelé"
+      },
+      "ended": "skončený",
+      "until": "Do {{date}}",
+      "failed": "To nefungovalo. Zkuste to znovu."
+    }
+  },
+  "whenSheet": {
+    "today": "Dnes",
+    "tooSoon": "Vyberte čas v budoucnosti.",
+    "show": "Zobrazit",
+    "hide": "Skrýt"
+  },
+  "planned": {
+    "title": "Plánováno",
+    "all": "Vše",
+    "posts": "Příspěvky",
+    "stages": "Audio místnosti",
+    "post": "Příspěvek",
+    "live": "Živě",
+    "stage": "Stádia",
+    "untitledPost": "Příspěvek",
+    "untitledLive": "Živě",
+    "loading": "Načítání…",
+    "startNow": "Spustit nyní",
+    "cancel": "Zrušit",
+    "cancelled": "Zrušeno"
+  },
+  "welcome": {
+    "about": {
+      "title": "Vítejte v Riftn",
+      "day": "Den",
+      "month": "Měsíc",
+      "year": "Rok"
+    },
+    "name": {
+      "title": "Vaše jméno",
+      "placeholder": "Vaše jméno"
+    },
+    "card": {
+      "name": "Vaše jméno",
+      "followers": "následovníci"
+    },
+    "topic": {
+      "music": "Hudba",
+      "art": "Umění",
+      "gaming": "Počítačové hry",
+      "crypto": "Krypto",
+      "sports": "Sport",
+      "comedy": "Komédie",
+      "food": "Jídlo",
+      "news": "Novinky",
+      "science": "Věda"
+    },
+    "back": "Zpět",
+    "skipPhoto": "Prozatím přeskočit",
+    "preview": "Nahlédnout"
+  },
+  "appTokens": {
+    "title": "Vaše tokeny",
+    "history": "Historie",
+    "noHistory": "Zatím žádná aktivita",
+    "kindDeposit": "Přidat prostředky",
+    "to": "Do",
+    "amount": "Částka",
+    "notePlaceholder": "Přidej poznámku (nepovinné)",
+    "sendButton": "Odeslat",
+    "errorInsufficient": "Nedostatek tokenů"
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Všichni",
+      "followers": "Sledující",
+      "nobody": "Nikdo"
+    },
+    "heading": "Reakce",
+    "more": "Zobrazit více",
+    "liveNow": "Živě",
+    "untitled": "Reakce"
+  },
+  "connectGuide": {
+    "title": "Propojte Riftn se svým AI asistentem",
+    "urlLabel": "URL serveru MCP",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "copiedToast": "URL MCP zkopírována"
+  },
+  "avatarPrompt": {
+    "notNow": "Teď ne"
+  },
+  "postStats": {
+    "audience": "Publikum",
+    "engagement": "Zapojení",
+    "finished": "Dokončeno",
+    "members": "Členové",
+    "membersLower": "členů",
+    "newFollowers": "Noví sledující",
+    "noBadge": "Žádná odznaka",
+    "people": "Lidé",
+    "plays": "Hraje",
+    "quotes": "citací",
+    "reposts": "Sdílení",
+    "saved": "Uloženo",
+    "shares": "Sdílení",
+    "signedOutViewers": "Odhlášeno",
+    "topSupporters": "Nejlepší podporovatelé",
+    "visitors": "Odhlášeno"
+  },
   "tokenLaunch": {
     "eyebrow": "Brzy přijde",
     "title": "Lancování tokenu brzy",
@@ -19092,6 +19421,10 @@
     "unavailable": "Ověření na GitHubu již brzy.",
     "connect": "Připojit GitHub",
     "disconnect": "Odpojit"
+  },
+  "mcpKeys": {
+    "delete": "Smazat",
+    "shortProfile": "Profil"
   },
   "chatSearch": {
     "placeholder": "Hledat zprávy nebo lidi",
@@ -19122,5 +19455,17 @@
     "gone": "Tato zpráva už tady není",
     "theirMessages": "Jejich zprávy",
     "seeTheirMessages": "Zobrazit jejich zprávy"
+  },
+  "dmRequests": {
+    "title": "Požadavky na funkce",
+    "accept": "Přijmout",
+    "delete": "Smazat",
+    "block": "Blokovat"
+  },
+  "dmSchedule": {
+    "view": "Zobrazit",
+    "edit": "Upravit",
+    "editLabel": "Upravit zprávu",
+    "error": "To nefungovalo. Zkuste to znovu."
   }
 }

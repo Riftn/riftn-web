@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Languages, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
+import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Languages, MoreHorizontal, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
 import { translateCopy } from '@/i18n/copy';
 
 /** One line-icon set for every chat's right-click menu, so DMs, groups and live chat read the same. */
@@ -58,4 +58,36 @@ export function useMenuPoint() {
   const openAt = useCallback((p: { x: number; y: number }) => { setMounted(true); setPoint(p); }, []);
   const close = useCallback(() => setPoint(null), []);
   return { point, mounted, openAt, close };
+}
+
+/**
+ * The one button a message keeps: a small "..." that shows on hover or
+ * keyboard focus and opens the same menu as a right-click, under itself.
+ * Every action lives in that menu, so the row needs nothing else. Phones never
+ * see it (chat-hold.css hides [data-chat-hover-actions] on touch); a hold
+ * opens the sheet there.
+ */
+export function MessageMoreButton({ onOpen, className = '' }: {
+  onOpen: (point: { x: number; y: number }, button: HTMLElement) => void;
+  className?: string;
+}) {
+  const label = translateCopy('common.more', { defaultValue: 'More' });
+  return (
+    <button
+      type="button"
+      data-chat-hover-actions
+      data-msg-more
+      aria-label={label}
+      aria-haspopup="menu"
+      title={label}
+      onClick={(e) => {
+        e.stopPropagation();
+        const r = e.currentTarget.getBoundingClientRect();
+        onOpen({ x: Math.round(r.left), y: Math.round(r.bottom + 4) }, e.currentTarget);
+      }}
+      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-zinc-500 opacity-0 transition-opacity hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)] hover:text-white focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 ${className}`}
+    >
+      <MoreHorizontal className="h-4 w-4" />
+    </button>
+  );
 }

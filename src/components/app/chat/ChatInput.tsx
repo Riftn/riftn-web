@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import '@/styles/chat-hold.css';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, MessageCircleQuestion, FileText, Play, Lock, EyeOff, Timer, Plus } from "lucide-react";
+import { Loader2, Wand2, MessageCircleQuestion, FileText, Play, Lock, EyeOff, Timer, Plus, Languages } from "lucide-react";
 import Sparkles from "@/components/ui/cut-icons/assistant";
 import Reply from "@/components/ui/cut-icons/reply";
 import Paperclip from "@/components/ui/cut-icons/attach";
@@ -18,6 +18,9 @@ import Clock from "@/components/ui/cut-icons/clock";
 
 import { EmojiGifPicker } from './EmojiGifPicker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { SUPPORTED_LANGUAGES } from '@/i18n';
+
+const TRANSLATE_TO_KEY = 'riftn.chat.translateTo';
 
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
@@ -43,6 +46,8 @@ import { dragHasFiles } from '@/lib/comment-attachments';
 import { cleanVideoOptions, type DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestructChoice } from '@/lib/dm-destruct';
 import { DmMediaStudio, type DmStudioItem } from './DmVideoStudio';
+import { PhotoStudio, type StudioResult } from '@/features/post/components/PhotoStudio';
+import { LockPriceControl } from './LockPriceControl';
 
 /** Per-kind caps, matching the backend's DM limits. */
 const DM_MEDIA_LIMITS = { image: 10 * 1024 * 1024, video: 50 * 1024 * 1024, audio: 20 * 1024 * 1024 } as const;
@@ -146,11 +151,17 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     if (initialText) setMessage(prev => (prev ? prev : initialText));
   }, [initialText, setMessage]);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [translateTo, setTranslateTo] = useState<string>(() => {
+    try { return localStorage.getItem(TRANSLATE_TO_KEY) || 'en'; } catch { return 'en'; }
+  });
+  const [isTranslating, setIsTranslating] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   // imageFile holds a picked audio file; photos and videos go to the edit screen.
   // Photos and videos picked for the edit screen; it is open while any are here.
   const [studioItems, setStudioItems] = useState<DmStudioItem[]>([]);
+  // Index of the photo open in the full photo editor, or null.
+  const [photoEditAt, setPhotoEditAt] = useState<number | null>(null);
   const [studioActive, setStudioActive] = useState(0);
   const studioUrls = useRef<string[]>([]);
   // The edit screen opens on a pick; Confirm brings the picks back here as a
@@ -161,6 +172,8 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   const studioBase = useRef(0);
   const [dropHover, setDropHover] = useState(false);
   const [docFile, setDocFile] = useState<File | null>(null);
+  // A document can go out locked too: they pay to download it.
+  const [docLockPrice, setDocLockPrice] = useState<number | null>(null);
   const [audioPreview, setAudioPreview] = useState<{ file: File; blob: Blob; duration: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -380,6 +393,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
         content: message.trim(),
         type: 'media',
         mediaFile: docFile,
+        ...(allowLock && docLockPrice ? { lockPrice: docLockPrice } : {}),
       });
       if (!sent) return;
       clearDoc();
@@ -597,6 +611,40 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
     toast.success(_copy("copy.4951131f6346", { defaultValue: "Recording saved ({{value1}}s)", value1: duration }));
   };
 
+  // Rewrite what is typed in the chosen language before it is sent. The
+  // pick is remembered (same key as the app).
+  const handleTranslate = async (code: string = translateTo) => {
+    const draft = message.trim();
+    if (!draft || isTranslating) return;
+    setIsTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-text', {
+        body: { text: draft, targetLang: code },
+      });
+      const out: string | undefined = data?.translatedText;
+      if (error || !out) {
+        toast.error(_copy('copy.037091068590', { defaultValue: 'Translation failed' }));
+        return;
+      }
+      if (data?.sameLanguage || out.trim() === draft) {
+        const name = SUPPORTED_LANGUAGES.find(l => l.code === code)?.nativeName ?? code;
+        toast(`${_copy('copy.8fe147696fbf', { defaultValue: 'Translate' })} · ${name} ✓`);
+        return;
+      }
+      setMessage(out);
+    } catch {
+      toast.error(_copy('copy.037091068590', { defaultValue: 'Translation failed' }));
+    } finally {
+      setIsTranslating(false);
+      textareaRef.current?.focus();
+    }
+  };
+
+  const chooseTranslateTo = (code: string) => {
+    setTranslateTo(code);
+    try { localStorage.setItem(TRANSLATE_TO_KEY, code); } catch { /* private mode */ }
+  };
+
   const handleEnhanceText = async () => {
     if (!message.trim()) {
       toast.error(_copy("copy.7530edd4f509", { defaultValue: "Enter some text to enhance" }));
@@ -674,6 +722,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
   // No object URL to revoke — a document has no preview to render.
   const clearDoc = () => {
     setDocFile(null);
+    setDocLockPrice(null);
   };
 
   const removeAudioPreview = () => setAudioPreview(null);
@@ -772,7 +821,31 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
         allowLock={allowLock}
         allowTimer={allowDocuments}
         onDropFiles={attachFiles}
+        onEditPhoto={(i) => { setStudioOpen(false); setPhotoEditAt(i); }}
       />
+      {photoEditAt != null && studioItems[photoEditAt] && (() => {
+        const it = studioItems[photoEditAt];
+        const back = () => { setPhotoEditAt(null); setStudioOpen(true); };
+        return (
+          <PhotoStudio
+            photos={[{ original: it.studioOriginal ?? it.file, edits: it.studioEdits }]}
+            startIndex={0}
+            startTab="crop"
+            onClose={back}
+            onDone={(results: StudioResult[]) => {
+              const r = results[0];
+              if (r) {
+                const url = URL.createObjectURL(r.file);
+                studioUrls.current.push(url);
+                URL.revokeObjectURL(it.url);
+                studioUrls.current = studioUrls.current.filter((u) => u !== it.url);
+                setStudioItems((prev) => prev.map((x, j) => (j === photoEditAt ? { ...x, file: r.file, url, studioOriginal: r.original, studioEdits: r.edits } : x)));
+              }
+              back();
+            }}
+          />
+        );
+      })()}
       {studioItems.length > 0 && (
         <div data-attach-preview="media" className="mb-2 flex items-center gap-2 overflow-x-auto pt-1.5 [scrollbar-width:none]">
           {studioItems.map((it, i) => (
@@ -844,6 +917,11 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
           >
             <X className="w-3 h-3 text-white" />
           </button>
+        </div>
+      )}
+      {docFile && allowLock && (
+        <div className="mb-2">
+          <LockPriceControl value={docLockPrice} onChange={setDocLockPrice} kind="file" />
         </div>
       )}
 
@@ -1020,9 +1098,9 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
-                    disabled={isEnhancing}
+                    disabled={isEnhancing || isTranslating}
                   >
-                    {isEnhancing ? (
+                    {isEnhancing || isTranslating ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <Sparkles className="w-5 h-5" />
@@ -1035,7 +1113,7 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
             <PopoverContent
               align="end"
               sideOffset={6}
-              className="w-48 p-1 bg-black/80 backdrop-blur-[24px] border border-white/10 text-white"
+              className="w-60 p-1 bg-black/80 backdrop-blur-[24px] border border-white/10 text-white"
             >
               <button
                 type="button"
@@ -1052,6 +1130,34 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                   <span className="text-[10px] text-zinc-500">{_copy("copy.0563e717bbdb", { defaultValue: "Fix spelling & grammar" })}</span>
                 </div>
               </button>
+              <div className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-sm hover:bg-white/10 transition-colors">
+                <button
+                  type="button"
+                  data-testid="chat-translate"
+                  onClick={(e) => {
+                    void handleTranslate();
+                    (e.currentTarget.closest('[data-radix-popper-content-wrapper]') as HTMLElement | null)?.blur();
+                  }}
+                  disabled={!message.trim()}
+                  className="flex items-center gap-2 min-w-0 flex-1 text-left disabled:opacity-50"
+                >
+                  <Languages className="w-4 h-4 text-zinc-300 flex-shrink-0" />
+                  <span className="flex flex-col min-w-0">
+                    <span>{_copy('copy.8fe147696fbf', { defaultValue: 'Translate' })}</span>
+                    <span className="text-[10px] text-zinc-500 truncate">{SUPPORTED_LANGUAGES.find(l => l.code === translateTo)?.nativeName ?? translateTo}</span>
+                  </span>
+                </button>
+                <select
+                  aria-label={_copy('copy.a4fe65264ef7', { defaultValue: 'Language' })}
+                  value={translateTo}
+                  onChange={(e) => chooseTranslateTo(e.target.value)}
+                  className="w-24 shrink-0 bg-white/10 text-white text-[11px] rounded-md px-1 py-1 border border-white/10 focus:outline-none"
+                >
+                  {SUPPORTED_LANGUAGES.map(l => (
+                    <option key={l.code} value={l.code} className="bg-zinc-900 text-white">{l.nativeName}</option>
+                  ))}
+                </select>
+              </div>
               <button
                 type="button"
                 onClick={() => handleAskAssistant()}
