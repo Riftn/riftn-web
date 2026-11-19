@@ -707,7 +707,7 @@ function AppContent() {
               the viewport. Reached from the button in Messages. */}
           <Route path="/chat" element={<Suspense fallback={<ChatPageLoader />}><FullScreenChatPage /></Suspense>} />
           <Route path="/app/chat" element={<Navigate to="/chat" replace />} />
-          <Route path="/stream" element={<StreamPage />} />
+          <Route path="/stream" element={<Suspense fallback={<PageLoader />}><StreamPage /></Suspense>} />
 
           <Route path="/dehub-app" element={<Suspense fallback={<PageLoader />}><DehubAppPage /></Suspense>} />
 
@@ -1000,7 +1000,7 @@ function AppContent() {
             <Route path="/:username" element={<Suspense fallback={<SeededProfileSkeleton />}><ProfilePage /></Suspense>} />
           </Route>
 
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
         </Routes>
           )}
         </SurfaceTransition>
