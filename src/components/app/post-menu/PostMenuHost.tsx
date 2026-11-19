@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Pin, Share, Type, UserCheck } from 'lucide-react';
+import { Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import Flag from '@/components/ui/cut-icons/report';
 import Ban from '@/components/ui/cut-icons/blocked';
@@ -49,7 +49,7 @@ import { viewerShareUrl } from '@/lib/share-url';
 import { getVoteCache } from '@/lib/vote-cache';
 import { isPostReposted, markReposted, unmarkReposted } from '@/lib/repost-cache';
 import { REACTION_LIST, type PostReaction } from '@/lib/reactions';
-import { askPostBar, closePostMenu, usePostMenuState, type PostMenuOpen, type PostMenuTarget } from '@/lib/post-menu';
+import { askPostBar, closePostMenu, openPostLook, usePostMenuState, type PostMenuOpen, type PostMenuTarget } from '@/lib/post-menu';
 import { QuotePostModalLazy } from '@/components/app/modals/QuotePostModalLazy';
 import { ReportModal } from '@/components/app/modals/ReportModal';
 
@@ -240,6 +240,11 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     add(isOwn && tokenId > 0 && {
       key: 'pin', label: isPinned ? t('postOptions.unpinPost', 'Unpin from your profile') : t('postOptions.pinPost', 'Pin to your profile'),
       icon: <Pin />, onSelect: () => togglePin.mutate(tokenId),
+    });
+    add(!!target.look && {
+      key: 'look',
+      label: target.look.kind === 'article' ? t('articleTile.title', 'Article tiles') : t('postBg.title', 'Post background'),
+      icon: <Palette />, onSelect: () => openPostLook(target.look!),
     });
 
     add({
