@@ -381,15 +381,17 @@ export default function ProfilePage() {
       : def.kind === 'photo'
         ? { ...def, image: file ? URL.createObjectURL(file) + (/^video\//.test(file.type) ? POST_BG_VIDEO_HINT : '') : postBgPhoto ?? undefined }
         : withPostBgColors(def, colors);
-    const unchanged = !file && !postBgMap.size && (postBg?.id ?? null) === (next?.id ?? null) && (postBg?.colors ?? []).join() === (next?.colors ?? []).join();
+    const fromPost = !!postBgTarget && postBgMap.size > 0;
+    const unchanged = !file && !fromPost && (postBg?.id ?? null) === (next?.id ?? null) && (postBg?.colors ?? []).join() === (next?.colors ?? []).join();
     if (unchanged) { setPostBgOpen(false); return; }
     setPostBgSaving(true);
     try {
       const customs = mergePostBg(data.apiProfile?.customs, { id, colors }) as Record<string, string | number | boolean>;
       await updateProfile({ customs, ...(id === POST_BG_PHOTO_ID && file ? { postBgImg: file } : {}) });
       setPostBgOverride({ owner: profileKey, bg: next });
-      // "All posts" means all of them, so posts with their own go back too.
-      if (postBgMap.size) {
+      // "All posts" (from a held post) means all of them, so posts with their
+      // own go back too. Holding the header only sets the profile's backdrop.
+      if (fromPost) {
         await setPostBackground('all', '').catch(() => undefined);
         setPostBgSaved({ owner: profileKey, map: new Map([...postBgMap.keys()].map((k) => [k, null])) });
       }
