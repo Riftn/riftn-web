@@ -1235,7 +1235,9 @@
     "menuLayoutSections": "Sezioni",
     "menuLayoutSectionsDesc": "Tutte le pagine insieme, sotto intestazioni",
     "menuLayoutFolders": "Cartelle",
-    "menuLayoutFoldersDesc": "Le tue pagine principali, poi una cartella per gruppo"
+    "menuLayoutFoldersDesc": "Le tue pagine principali, poi una cartella per gruppo",
+    "chatCards": "Chat come schede",
+    "chatCardsDesc": "Ogni chat sulla sua scheda. Disattiva per un elenco semplice con una linea tra le chat."
   },
   "common": {
     "confirm": "Conferma",

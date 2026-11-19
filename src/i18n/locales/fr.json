@@ -1388,7 +1388,9 @@
     "menuLayoutSections": "Sections",
     "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
     "menuLayoutFolders": "Dossiers",
-    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe"
+    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe",
+    "chatCards": "Chats en cartes",
+    "chatCardsDesc": "Chaque chat sur sa propre carte. Désactivez pour une liste simple avec une ligne entre les chats."
   },
   "common": {
     "confirm": "Confirmer",

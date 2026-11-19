@@ -74,6 +74,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'appearance', anchor: 'feed-toggles', label: 'Reset feed toggles', labelKey: 'settings.feedToggles', keywords: 'filters sort default remember clear' },
   { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
   { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
+  { tab: 'appearance', anchor: 'chat-cards', label: 'Chats as cards', labelKey: 'settings.chatCards', keywords: 'chat list cards plain lines rows compact messages inbox layout' },
   { tab: 'appearance', anchor: 'chat-delete-choice', label: 'When you delete a message', labelKey: 'settings.chatDeleteChoice', keywords: 'delete message chat dm remove for me everyone both remember choice ask' },
   { tab: 'appearance', anchor: 'default-profile-tab', label: 'Default profile tab', labelKey: 'settings.defaultProfileTab', keywords: 'landing tab visitors' },
   { tab: 'appearance', anchor: 'default-profile-view', label: 'Profile posts layout', labelKey: 'settings.defaultProfileView', keywords: 'grid list view layout profile posts tiles visitors' },

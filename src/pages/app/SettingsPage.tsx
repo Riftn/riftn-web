@@ -157,6 +157,7 @@ import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNo
 import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
+import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
 import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
 import { WalletMenuContent } from '@/components/app/CoinBalanceMenu';
 import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
@@ -2795,6 +2796,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
           <FeedTogglesSetting />
           <PostLandingSetting />
           <ChatTextSizeSetting />
+          <ChatCardsSetting />
           <ChatDeleteChoiceSetting />
           <SettingsRow
             icon={<LayoutGrid />}

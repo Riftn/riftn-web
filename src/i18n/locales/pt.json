@@ -1317,7 +1317,9 @@
     "menuLayoutSections": "Seções",
     "menuLayoutSectionsDesc": "Todas as páginas, sob cabeçalhos",
     "menuLayoutFolders": "Pastas",
-    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo"
+    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo",
+    "chatCards": "Chats como cartões",
+    "chatCardsDesc": "Cada chat no seu próprio cartão. Desative para uma lista simples com uma linha entre chats."
   },
   "common": {
     "confirm": "Confirmar",

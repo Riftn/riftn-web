@@ -1234,7 +1234,9 @@
     "menuLayoutSections": "Mục",
     "menuLayoutSectionsDesc": "Tất cả trang cùng lúc, dưới tiêu đề",
     "menuLayoutFolders": "Thư mục",
-    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục"
+    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục",
+    "chatCards": "Cuộc trò chuyện dạng thẻ",
+    "chatCardsDesc": "Mỗi cuộc trò chuyện một thẻ. Tắt để có danh sách đơn giản với đường kẻ giữa các cuộc trò chuyện."
   },
   "common": {
     "confirm": "Xác nhận",

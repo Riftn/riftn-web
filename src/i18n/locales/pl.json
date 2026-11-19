@@ -1164,7 +1164,9 @@
     "socialConnectFailed": "Nie udało się połączyć {{platform}}. Spróbuj ponownie.",
     "socialVerifiedFollowers": "{{value}} obserwujących",
     "socialFollowersPending": "Aktualizowanie liczby obserwujących",
-    "menuLayoutFolders": "Foldery"
+    "menuLayoutFolders": "Foldery",
+    "chatCards": "Czaty jako karty",
+    "chatCardsDesc": "Każdy czat na osobnej karcie. Wyłącz, aby mieć prostą listę z linią między czatami."
   },
   "common": {
     "confirm": "Potwierdź",

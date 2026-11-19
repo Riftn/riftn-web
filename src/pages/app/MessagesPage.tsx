@@ -34,6 +34,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
+import { useChatCards } from '@/lib/chat-cards';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -517,6 +518,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
   // a row at the top of the list on phones.
   const cards = !fullscreen;
+  // Settings → Appearance → Chats as cards, off: the same page as a plain list.
+  const plainList = !useChatCards() && cards;
   const deskCards = cards && !phonePill;
   const phoneCards = cards && phonePill;
   const [listTab, setListTab] = useState<'all' | 'unread' | 'groups'>('all');
@@ -1464,7 +1467,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             [data-page-bento] hook stays: the Osaka and Jungle `#app-root` class
             nets exclude on it, and without it every bg-zinc-8/9 descendant in
             here becomes a frosted rectangle. */}
-        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
+        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
           {fullscreenTop ?? deskTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}

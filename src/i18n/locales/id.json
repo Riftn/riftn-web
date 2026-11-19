@@ -1234,7 +1234,9 @@
     "menuLayoutSections": "Bagian",
     "menuLayoutSectionsDesc": "Semua halaman sekaligus, di bawah judul",
     "menuLayoutFolders": "Folder",
-    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup"
+    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup",
+    "chatCards": "Chat sebagai kartu",
+    "chatCardsDesc": "Setiap chat di kartunya sendiri. Matikan untuk daftar polos dengan garis di antara chat."
   },
   "common": {
     "confirm": "Konfirmasi",
