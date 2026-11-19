@@ -56,17 +56,6 @@
     "seoDescription": "Holen Sie sich die Riftn-App: Open-Source-Nutzer-eigene soziale Medien mit Live-Streaming, verschlüsseltem Messaging und Watch-to-Earn. Kostenlos bei Google Play, im App Store und im Web.",
     "seoTitle": "Riftn App | Download für Android, iPhone & Web"
   },
-  "mentionLinks": {
-    "communities": "Communities",
-    "empty": "Nichts gefunden",
-    "hint": "Tippe, um Personen, Communities und Seiten zu finden",
-    "linkTo": "{{name}} verlinken",
-    "members": " Mitglieder",
-    "pages": "Seiten",
-    "people": "Personen",
-    "placeholder": "Personen, Communities, Seiten suchen...",
-    "title": "Erwähnen oder verlinken"
-  },
   "dehubLinks": {
     "copyLinkDetail": "Kopiere den {{item}} -Link in deine Zwischenablage",
     "kind": {
@@ -86,12 +75,12 @@
       "featureRequest": "Anfrage",
       "page": "Seite"
     },
-    "openPage": "Seite öffnen",
-    "viewRequest": "Anfrage ansehen",
     "recipientChat": "Chat",
     "recipientUser": "benutzer",
     "sendFailed": "Fehler beim Senden von {{item}}",
-    "sentTo": "{{item}} gesendet an {{name}}"
+    "sentTo": "{{item}} gesendet an {{name}}",
+    "openPage": "Seite öffnen",
+    "viewRequest": "Anfrage ansehen"
   },
   "stageCover": {
     "admitOne": "GEBEN SIE EINE ZU",
@@ -8410,6 +8399,7 @@
     "paying": "Bezahle {{amount}} Token…",
     "pickCount": "{{selected}} von {{total}} ausgewählt. Alles, was bereits in deinem Profil vorhanden ist, wird übersprungen und nie zweimal berechnet.",
     "pickTitle": "Wähle aus, was du mitnehmen möchtest",
+    "placeholder": "youtube.com/@you, tiktok.com/@you, vimeo.com/you…",
     "progressDone": "{{imported}} importiert.",
     "progressDoneWithFailures": "{{imported}} importiert, {{failed}} konnte nicht importiert werden.",
     "progressIdle": "Jedes Video in einem Batch erhält hier seine eigene Kachel, damit du sehen kannst, was angekommen ist, und erneut versuchen kannst, was nicht funktioniert hat. Noch nichts läuft — das Raster unten ist ein Beispiel.",
@@ -19603,5 +19593,16 @@
     "edit": "Bearbeiten",
     "editLabel": "Nachricht bearbeiten",
     "error": "Das hat nicht funktioniert. Versuchen Sie es erneut."
+  },
+  "mentionLinks": {
+    "communities": "Communities",
+    "pages": "Seiten",
+    "people": "Personen",
+    "linkTo": "{{name}} verlinken",
+    "empty": "Nichts gefunden",
+    "hint": "Tippe, um Personen, Communities und Seiten zu finden",
+    "members": " Mitglieder",
+    "placeholder": "Personen, Communities, Seiten suchen...",
+    "title": "Erwähnen oder verlinken"
   }
 }

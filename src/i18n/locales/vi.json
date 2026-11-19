@@ -59,17 +59,6 @@
     "seoDescription": "Tải ứng dụng Riftn: mạng xã hội phi tập trung và được sở hữu bởi người dùng, hỗ trợ phát trực tiếp, tin nhắn mã hóa và thưởng cho người xem. Miễn phí trên Google Play, App Store và web.",
     "seoTitle": "Riftn App | Tải về cho Android, iPhone & Web"
   },
-  "mentionLinks": {
-    "communities": "Cộng đồng",
-    "empty": "Không tìm thấy gì",
-    "hint": "Nhập để tìm người, cộng đồng và trang",
-    "linkTo": "Liên kết {{name}}",
-    "members": " thành viên",
-    "pages": "Trang",
-    "people": "Mọi người",
-    "placeholder": "Tìm người, cộng đồng, trang...",
-    "title": "Nhắc đến hoặc liên kết"
-  },
   "dehubLinks": {
     "copyLinkDetail": "Sao chép liên kết {{item}} vào clipboard",
     "kind": {
@@ -89,12 +78,12 @@
       "featureRequest": "yêu cầu",
       "page": "trang"
     },
-    "openPage": "Mở trang",
-    "viewRequest": "Xem yêu cầu",
     "recipientChat": "chat",
     "recipientUser": "người dùng",
     "sendFailed": "Không thể gửi {{item}}",
-    "sentTo": "{{item}} đã được gửi đến {{name}}"
+    "sentTo": "{{item}} đã được gửi đến {{name}}",
+    "openPage": "Mở trang",
+    "viewRequest": "Xem yêu cầu"
   },
   "stageCover": {
     "admitOne": "CHẤP NHẬN MỘT",
@@ -8405,6 +8394,7 @@
     "paying": "Thanh toán {{amount}} token…",
     "pickCount": "{{selected}} trong {{total}} được chọn. Bất cứ thứ gì đã có trên hồ sơ của bạn sẽ bị bỏ qua và không bao giờ bị tính phí hai lần.",
     "pickTitle": "Chọn những gì cần mang theo",
+    "placeholder": "youtube.com/@you, tiktok.com/@you, vimeo.com/you…",
     "progressDone": "{{imported}} đã nhập.",
     "progressDoneWithFailures": "{{imported}} đã nhập, {{failed}} không thể nhập.",
     "progressIdle": "Mỗi video trong một lô sẽ có ô riêng của nó ở đây, vì vậy bạn có thể thấy những gì đã được tải và thử lại những gì không được. Chưa có gì chạy — lưới dưới đây chỉ là một ví dụ.",
@@ -19676,5 +19666,16 @@
     "edit": "Chỉnh sửa",
     "editLabel": "Chỉnh sửa tin nhắn",
     "error": "Điều đó không hiệu quả. Hãy thử lại."
+  },
+  "mentionLinks": {
+    "communities": "Cộng đồng",
+    "pages": "Trang",
+    "people": "Mọi người",
+    "linkTo": "Liên kết {{name}}",
+    "empty": "Không tìm thấy gì",
+    "hint": "Nhập để tìm người, cộng đồng và trang",
+    "members": " thành viên",
+    "placeholder": "Tìm người, cộng đồng, trang...",
+    "title": "Nhắc đến hoặc liên kết"
   }
 }

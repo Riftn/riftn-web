@@ -108,7 +108,8 @@
     "learnMore": "想了解全貌吗？<guide>什么是 Riftn？</guide> 对该平台有深入介绍。",
     "openInBrowser": "在浏览器中打开Riftn",
     "seoDescription": "获取Riftn应用程序：开源、用户拥有的社交媒体，提供实时流媒体、加密消息和手表赚钱功能。在Google Play、App Store和网络上免费。",
-    "seoTitle": "Riftn应用程序, 下载Android、iPhone和Web版"
+    "seoTitle": "Riftn应用程序, 下载Android、iPhone和Web版",
+    "iphone": "iPhone"
   },
   "mentionLinks": {
     "communities": "社区",
@@ -656,7 +657,8 @@
     "getTheApp": "下载应用",
     "connectAi": "连接 AI",
     "converter": "转换器",
-    "affiliate": "推广联盟"
+    "affiliate": "推广联盟",
+    "dao": "DAO"
   },
   "feed": {
     "viewProfile": "查看{{name}}的个人资料",
@@ -3044,7 +3046,10 @@
     "submitApplication": "提交申请",
     "nameEmailRequired": "姓名和邮箱为必填项",
     "applicationSuccess": "申请提交成功！我们会与你联系。",
-    "applicationFailed": "提交失败。请重试。"
+    "applicationFailed": "提交失败。请重试。",
+    "telegram": "Telegram",
+    "xTwitter": "X (Twitter)",
+    "instagram": "Instagram"
   },
   "dao": {
     "title": "DAO 金库",
@@ -4113,7 +4118,7 @@
       "soFarToday": "今天截至目前，UTC",
       "peakHour": "最繁忙的小时",
       "peakDay": "最繁忙的一天",
-      "peakAtHour": "于 {{when}} UTC",
+      "peakAtHour": "{{when}} UTC",
       "peakOnDay": "是{{when}}",
       "inRange": "在此范围内",
       "pageViews": "页面浏览量",
@@ -4647,7 +4652,8 @@
     "fromYourWalletNow": " — 现在从你的钱包发出，作为处理争议的一部分。",
     "disputeTotal": "合计：{{total}} / {{remaining}} {{currency}}",
     "resolveAndPay": "处理并支付",
-    "resolve": "处理"
+    "resolve": "处理",
+    "urlPlaceholder": "https://…"
   },
   "stores": {
     "podToggle": "按需印刷商品",
@@ -4812,7 +4818,8 @@
     "viewStore": "查看商店",
     "store": "商店",
     "listing": "商品",
-    "shopAllowanceUsed": "已使用 {{allowance}} / {{allowance}}。质押更多 Riftn 代币以获得更高徽章和另一个插槽。"
+    "shopAllowanceUsed": "已使用 {{allowance}} / {{allowance}}。质押更多 Riftn 代币以获得更高徽章和另一个插槽。",
+    "podUrlPlaceholder": "https://…"
   },
   "stages": {
     "allStages": "全部语音房",
@@ -5298,9 +5305,9 @@
     "povrPricingIntro": "我们线性的分层定价系统确保公平且可扩展的广告成本，基于受众价值。价值以美元计价，便于管理，但付款将在执行时以 Riftn 代币提示。"
   },
   "launchpad": {
-    "seoTitle": "启动台 | Riftn",
+    "seoTitle": "Launchpad | Riftn",
     "seoDescription": "在 Riftn Launchpad 上把生意代币化：浏览在线代币，或创建你自己的。",
-    "srHeading": "Riftn 启动台",
+    "srHeading": "Riftn Launchpad",
     "phaseBadge": "第 1 阶段 · 内测",
     "heroTitle": "把生意代币化",
     "heroSubtitle": "与 代币 配对的联合曲线。市值达到 4.2 万美元即毕业上 Uniswap。",
@@ -5398,7 +5405,9 @@
     "launch": "发行",
     "launching": "发行中…",
     "launched": "{{symbol}} 已发行",
-    "createFailed": "创建失败"
+    "createFailed": "创建失败",
+    "twitter": "X / Twitter",
+    "telegram": "Telegram"
   },
   "fractions": {
     "seoTitle": "碎片 | Riftn",
@@ -6665,7 +6674,8 @@
     "indemnification": "赔偿保障",
     "noTraining": "不使用你的数据训练模型",
     "soc2": "SOC 2 安全认证（即将推出）",
-    "aiEducator": "AI Educator 与 Slack 支持"
+    "aiEducator": "AI Educator 与 Slack 支持",
+    "groupSeedance20": "Seedance 2.0"
   },
   "videoLooks": {
     "button": "摄像头滤镜",
@@ -6682,7 +6692,7 @@
     "cool": "冷色",
     "vivid": "鲜艳",
     "dream": "梦幻",
-    "vhs": "录像带",
+    "vhs": "VHS",
     "neon": "霓虹",
     "blur": "模糊",
     "pixelate": "像素化"
@@ -6910,7 +6920,8 @@
     "spotlight": "焦点",
     "spotlightBuyNote": "NFT 和支付在一步内交换。",
     "spotlightOfferNote": "尚未上架。发送报价，持有人可以随时接受。",
-    "signInToTradeCta": "登录以交易"
+    "signInToTradeCta": "登录以交易",
+    "shortTitle": "NFT"
   },
   "usernames": {
     "seoTitle": "用户名市场 | Riftn",
@@ -8922,8 +8933,10 @@
       "failed": "失败",
       "emptyFeed": "我们在该订阅源中找不到任何剧集。",
       "badFeed": "该链接看起来不像播客源。",
-      "tooMany": "一次最多可导入20集。"
-    }
+      "tooMany": "一次最多可导入20集。",
+      "feedUrlPlaceholder": "https://example.com/feed.xml"
+    },
+    "tileSourceKind": "{{source}} · {{kind}}"
   },
   "banned": {
     "title": "您的账号已被封禁",
@@ -9012,7 +9025,8 @@
     "viewFeed": "查看您的动态",
     "watchOnSource": "打开原件",
     "yourChannel": "您的频道",
-    "yourChannelHint": "粘贴您的频道地址—其本身的句柄也起作用。"
+    "yourChannelHint": "粘贴您的频道地址—其本身的句柄也起作用。",
+    "placeholder": "youtube.com/ @ you、tiktok.com/ @ you、vimeo.com/you…"
   },
   "calls": {
     "voiceCall": "Riftn语音通话",
@@ -9360,7 +9374,8 @@
     "scheduled": "已安排"
   },
   "home": {
-    "seoDescription": "Riftn 是一个开源、由用户拥有且抗审查的社交媒体协议，提供传统平台拒绝给你的全部功能。"
+    "seoDescription": "Riftn 是一个开源、由用户拥有且抗审查的社交媒体协议，提供传统平台拒绝给你的全部功能。",
+    "seoTitle": "Riftn"
   },
   "docs": {
     "seoTitle": "Riftn 文档: 指南、代币、dApp 与常见问题",
@@ -10037,7 +10052,8 @@
       "browseAssets": "浏览免费素材",
       "importMedia": "导入媒体",
       "generateClip": "生成片段",
-      "addHeadline": "添加标题"
+      "addHeadline": "添加标题",
+      "portraitDetail": "Instagram"
     },
     "adjust": {
       "warmth": "色温 {{value}}",
@@ -10238,7 +10254,8 @@
         "easeOutBack": "回弹缓出",
         "easeInOutBack": "回弹缓入缓出",
         "hold": "定格"
-      }
+      },
+      "segment": "{{from}} → {{to}}"
     },
     "shots": {
       "detect": "检测场景变化",
@@ -12639,7 +12656,7 @@
     "tab": {
       "emoji": "表情",
       "sticker": "贴纸",
-      "gif": "GIF 动图"
+      "gif": "GIF"
     },
     "kind": {
       "emoji": "表情包",
@@ -12665,7 +12682,7 @@
       "packs": "表情包",
       "emoji": "表情",
       "stickers": "贴纸",
-      "gifs": "GIF 动图"
+      "gifs": "GIF"
     },
     "signInToCreate": "创建包以登录",
     "signInToAdd": "添加以登录",
@@ -16038,7 +16055,7 @@
     "1b52b1397dee": "返回",
     "9e9ae626652a": "字母、数字、横线和下划线。最多 30 个字符。",
     "dc85af8f2b1d": "保存...",
-    "08b6a3efc2b5": "幻影",
+    "08b6a3efc2b5": "Phantom",
     "bcbaa814d3ca": "提及用户",
     "8f1aa08d3a21": "搜索用户",
     "3457098e7042": "跟随你的人",
@@ -17323,7 +17340,7 @@
     "b98adf20f5f3": "钱包, 管理您的加密资产",
     "00787feeb046": "在Riftn上跨多个链查看余额、发送和接收代币以及管理您的加密资产。",
     "112e22b0fd15": "Riftn钱包—去中心化社交媒体、抗审查和言论自由",
-    "5dc85dbc155e": "BNB链",
+    "5dc85dbc155e": "BNB Chain",
     "6b8a9141538a": "质押",
     "228fc4afbce4": "赠品（已锁定）",
     "911c67ed8f19": "通过Coinbase购买— Visa、Mastercard、Apple Pay",
@@ -17536,7 +17553,7 @@
     "b62c681738d1": "你",
     "b602b7029be6": "葡萄牙",
     "d8d91b2e06df": "NG",
-    "f223faa96f22": "苹果",
+    "f223faa96f22": "Apple",
     "c7bac46904be": "微软",
     "6850f76b953d": "伯克希尔·哈撒韦公司",
     "00fb5022b75a": "台积电",
@@ -17574,7 +17591,7 @@
     "b6ad48b669f7": "多链应用",
     "599f4a9886b4": "朋友科技",
     "6133f824f41c": "镜头方案",
-    "a37468be5d59": "黎明",
+    "a37468be5d59": "Zora",
     "538447759dad": "MV + MS + BE + BS = (RG / RS)",
     "e207739f2f08": "DAPP转换器",
     "663e192da1bc": "Dapp小应用",
@@ -17972,7 +17989,7 @@
     "6662a5411155": "现在写",
     "4945a70fa7f9": "匹配",
     "a54084383e3c": "关注请求",
-    "6a40edf1fc87": "微信",
+    "6a40edf1fc87": "WhatsApp",
     "761747747547": "已批准关注请求",
     "c97583fe9025": "无法批准请求",
     "962b110538f3": "拒绝关注请求",
@@ -20057,7 +20074,9 @@
     "d14896aa4bf8": "免费库无法加载。检查您的连接并再试一次。",
     "953e708b2287": "语音生成失败。",
     "4a52cdd6ac72": "无法复制这些层",
-    "6e71ae3669b1": "保存的输出不可用"
+    "6e71ae3669b1": "保存的输出不可用",
+    "be4b0c384393": "Solana",
+    "2ef54eee0edd": "Trust Wallet"
   },
   "articles": {
     "cardLabel": "文章 · {{count}} 分钟阅读",
