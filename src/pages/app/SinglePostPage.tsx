@@ -1569,8 +1569,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
                     verified={videoData.verified}
                     badgeBalance={videoData.creatorBadgeBalance}
                   />
+                  {/* The video card draws its own poll. */}
                   {renderContent()}
-                  {id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
                   {pageComments}
                 </div>
                 {/* Related Videos Feed */}
@@ -1733,7 +1733,6 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
          no composer. The ad and then more posts follow the post straight away;
          comments (with their composer) appear only when the comment button asks. */
       <section data-retained-post-details className="pt-3">
-        {isImagePost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
         {detailsExpanded && !commentsSplit && <div ref={retainedCommentsRef}>{pageComments}</div>}
         {/* Hidden, not unmounted, while the sheet is up: the top half shows the post alone. */}
         <div hidden={commentsSplit}>
@@ -1751,7 +1750,6 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           <More className="h-5 w-5" />
         </button>
         {detailsExpanded && <div ref={retainedCommentsRef} hidden={commentsSplit}>
-          {isImagePost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
           {!commentsSplit && pageComments}
           {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
           {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
@@ -1763,7 +1761,6 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
          The card above keeps its own comment button and opens comments inside
          its bento; under it, the ad and then more posts, loading as you scroll. */
       <section data-retained-post-details className="pt-3">
-        {isImagePost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
         {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
         {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
       </section>
@@ -1808,7 +1805,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
             className={isMobileView && !feedLookPhone ? 'px-1 sm:px-0 pt-1' : 'rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3'}
           >
             {renderContent()}
-            {!isTextPost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
+            {/* A video card draws its own poll; a photo card leaves it to the page. */}
+            {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
             {/* Desktop: comments open inside the post's bento, attached to it like on the feed. */}
             {!isMobileView && !isLivePost && !commentsSplit && pageComments}
           </div>
