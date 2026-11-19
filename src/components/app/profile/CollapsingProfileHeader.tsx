@@ -13,7 +13,7 @@ export function CollapsingProfileHeader({ tabsPinned = false }: { tabsPinned?: b
       <div data-profile-collapse data-tabs-pinned={tabsPinned} className="profile-collapse-bar" aria-hidden={tabsPinned}>
         {!tabsPinned && (
           <PageHeader overlay plainBack className={cn(
-            '!right-auto !top-3 !left-0 sm:!top-4 sm:!left-3',
+            '!right-auto !top-3 !left-0 sm:!top-3 sm:!left-3',
             (theme === 'system' || theme === 'immersive') && 'max-sm:!top-1',
           )} />
         )}
