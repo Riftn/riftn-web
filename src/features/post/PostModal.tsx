@@ -480,7 +480,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       />
 
       <PostActionBar
-        extraTool={!state.liveMode && !isQuoting && state.visibility === 'public' ? <CrossPostPicker onNavigateAway={handleClose} /> : undefined}
+        extraTool={!state.liveMode && !isQuoting && state.visibility === 'public' ? <CrossPostPicker /> : undefined}
         hideLive={isQuoting}
         imageInputRef={refs.imageInputRef}
         videoInputRef={refs.videoInputRef}
