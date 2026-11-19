@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "One group at a time, wit big icon",
     "menuLayoutSections": "Section dem",
     "menuLayoutSectionsDesc": "All page dem one time, under group header",
-    "menuLayoutFoldersDesc": "Ya main page dem, den folder fo each group"
+    "menuLayoutFoldersDesc": "Ya main page dem, den folder fo each group",
+    "publicChatInBar": "Chat fo pablik fo di bar fo down",
+    "publicChatInBarDesc": "One tap go Chat fo pablik from di bar fo down fo di screen"
   },
   "common": {
     "confirm": "Confam",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "Leaderboard di load…",
     "amountTokens": "{{amount}} token",
     "directReferrals": "{{count}} direkt",
-    "secondaryReferrals": "{{count}} sekondari"
+    "secondaryReferrals": "{{count}} sekondari",
+    "ogChallenge": "OG Challenge",
+    "ogHolders_one": "{{count}} OG holder",
+    "ogHolders_other": "{{count}} OG holder dem",
+    "ogChallengeTitle": "Bring di OG holder dem come back",
+    "ogChallengeBody": "Invite people wey still di hold DHB. When dem join wit ya invite link and keep dia DHB fo dia Riftn wallet, dem go count fo you fo here.",
+    "ogChallengeCta": "Get ya invite link"
   },
   "dhbListing": {
     "title": "Token listing di come soon!",
@@ -8051,7 +8059,10 @@
     "publishing": "E di publish fo decentralized database...",
     "youAreGoingLive": "You di go live!",
     "streamIsReady": "Live stream don ready!",
-    "signingFailed": "Blockchain signing no pass. Abeg check ya wallet or refresh di page."
+    "signingFailed": "Blockchain signing no pass. Abeg check ya wallet or refresh di page.",
+    "screenInAppHint": "Fo di Riftn app",
+    "screenInAppNote": "Phone browser dem no di allow any website share ya screen. Go live from di Riftn app instead, den tap Share screen.",
+    "screenInAppCta": "Get di Riftn app"
   },
   "events": {
     "seoDescription": "Browse akoming Riftn komyuni event, RSVP fo meetup, an host yu own event on dis dezentralize, yu-own social platform.",
