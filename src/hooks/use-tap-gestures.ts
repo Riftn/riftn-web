@@ -67,6 +67,14 @@ export interface UseTapGesturesOptions {
   /** Navigable text opens on release; multi-tap reactions belong to its media. */
   singleTapOnly?: boolean;
   /**
+   * On a finger (not a mouse) the whole surface takes the double tap, even
+   * where `singleTapOnly` or a `'center'` reaction area would hold a mouse
+   * click to one action. Phones had double-tap-to-like only in the middle 40%
+   * of a photo and nowhere on a feed video or a text post, so most double taps
+   * opened the post instead. Desktop clicks keep their instant open.
+   */
+  touchLadder?: boolean;
+  /**
    * The surface's own single-tap action. By default it is held back
    * `TAP_WINDOW_MS` so a second tap can overtake it — the price of telling one
    * tap from two on a surface where the first tap does something you cannot
@@ -104,6 +112,7 @@ export function useTapGestures({
   postId,
   reactionArea = 'surface',
   singleTapOnly = false,
+  touchLadder = false,
   onSingleTap,
   onUndoSingleTap,
   disabled,
@@ -115,7 +124,7 @@ export function useTapGestures({
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const taps = useRef(0);
   /** Where and which pointer started the press, or null once it is disqualified. */
-  const origin = useRef<{ x: number; y: number; id: number; central: boolean } | null>(null);
+  const origin = useRef<{ x: number; y: number; id: number; central: boolean; single: boolean } | null>(null);
   /** A hold already acted, so the release that ends it must not also tap. */
   const held = useRef(false);
 
@@ -151,9 +160,12 @@ export function useTapGestures({
         return;
       }
       held.current = false;
-      const rect = !singleTapOnly && reactionArea === 'center' ? event.currentTarget.getBoundingClientRect() : null;
+      const finger = event.pointerType === 'touch' || event.pointerType === 'pen';
+      const single = singleTapOnly && !(touchLadder && finger && !disabled);
+      // The middle-only rule is for a mouse: a finger can double tap anywhere.
+      const rect = !single && !finger && reactionArea === 'center' ? event.currentTarget.getBoundingClientRect() : null;
       const central = !rect || isInTapReactionCenter(event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height);
-      origin.current = { x: event.clientX, y: event.clientY, id: event.pointerId, central };
+      origin.current = { x: event.clientX, y: event.clientY, id: event.pointerId, central, single };
 
       if (!enableLongPress) return;
       if (holdTimer.current) clearTimeout(holdTimer.current);
@@ -169,7 +181,7 @@ export function useTapGestures({
         emitOpenReactions(id);
       }, LONG_PRESS_MS);
     },
-    [disabled, id, enableLongPress, reactionArea, singleTapOnly, reset],
+    [disabled, id, enableLongPress, reactionArea, singleTapOnly, touchLadder, reset],
   );
 
   const onPointerMove = useCallback(
@@ -231,7 +243,7 @@ export function useTapGestures({
       // The rest of a feed post is an immediate open target. Crossing out
       // of the center also cancels a pending center gesture, so a later timer
       // cannot open or react to the post after navigation.
-      if (singleTapOnly || !from.central) {
+      if (from.single || !from.central) {
         reset();
         onSingleTap?.(event);
         return;

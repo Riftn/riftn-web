@@ -11,7 +11,6 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  */
 
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useReducer, memo, Fragment, type ReactNode } from 'react';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -147,6 +146,7 @@ import { isDmCallNotice } from '@/lib/dm-call-notice';
 import { CallNoteCard } from './calls/CallNoteCard';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
 
 // Picking messages: only the ticked rows are shaded, the rest stay clear and
 // only hint on hover. Mixed from the text colour rather than bg-white/..., which
@@ -560,6 +560,7 @@ const MessageBubble = memo(function MessageBubble({
   onDiscardSend?: (clientKey: string) => void;
 }) {
   const { t: _copy } = _useCopy();
+  useReactionHost(message._id);
   // Cozy layout: the avatar and the time line belong to the run, so only its
   // last bubble carries them. A failed or sending bubble keeps its line, since
   // that is where Retry and the spinner live.
@@ -1281,13 +1282,14 @@ const MessageBubble = memo(function MessageBubble({
                 <button
                   type="button"
                   key={emoji}
+                  data-chat-reaction-chip
                   onClick={() => mine ? onRemoveReaction?.(message._id, emoji) : onReact?.(message._id, emoji)}
                   className={`group/reaction inline-flex items-center gap-1 px-1 py-0.5 text-xs ${mine ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
                 >
-                  <span className="inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+                  <ReactionGlyph messageId={message._id} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" />
                   {mine ? (
-                    <><span className="text-[10px] group-hover/reaction:hidden">{addresses.length}</span><X className="hidden w-3 h-3 group-hover/reaction:block" /></>
-                  ) : <span className="text-[10px]">{addresses.length}</span>}
+                    <><RollingCount value={addresses.length} className="text-[10px] group-hover/reaction:hidden" /><X className="hidden w-3 h-3 group-hover/reaction:block" /></>
+                  ) : <RollingCount value={addresses.length} className="text-[10px]" />}
                 </button>
               );
             })}
