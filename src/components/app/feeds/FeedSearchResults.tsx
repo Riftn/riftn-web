@@ -10,6 +10,7 @@
  * @module components/app/feeds/FeedSearchResults
  */
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { FormatGlyph, type FormatKind } from '@/components/app/profile/FormatMark';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation as _useCopy } from 'react-i18next';
@@ -78,13 +79,19 @@ function Wave({ className }: { className?: string }) {
   );
 }
 
-function TypeBadge({ postType }: { postType: UnifiedFeedItem['postType'] }) {
-  const tab = postType === 'video' ? 'videos' : postType === 'feed-images' ? 'images' : postType === 'feed-audio' || postType === 'audio' ? 'music' : postType === 'live' ? 'live' : null;
-  const Icon = tab ? FEED_TABS.find((t) => t.value === tab)?.icon : null;
-  if (!Icon) return null;
+/** The post's format icon, same glyphs as the profile grid (FormatMark). */
+function TypeBadge({ item }: { item: UnifiedFeedItem }) {
+  const it = item as UnifiedFeedItem & { isShort?: boolean; layout?: string; imageUrls?: string[] };
+  const kind: FormatKind | null =
+    item.postType === 'video' ? (it.isShort ? 'short' : 'video')
+    : item.postType === 'feed-images' ? (it.layout === 'comic' ? 'comic' : (it.imageUrls?.length ?? 0) > 1 ? 'photos' : 'photo')
+    : item.postType === 'feed-audio' || item.postType === 'audio' ? 'audio'
+    : item.postType === 'live' ? 'replay'
+    : null;
+  if (!kind) return null;
   return (
-    <span className="absolute left-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md bg-black/60 text-white">
-      <Icon className="h-3 w-3" />
+    <span className="pointer-events-none absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-[7px] border border-white/25 bg-black/30 text-white backdrop-blur-md [&_.fmt-wash]:opacity-30">
+      <FormatGlyph kind={kind} className="h-3.5 w-3.5" />
     </span>
   );
 }
@@ -398,7 +405,7 @@ function FeedSearchResultsGrid({ tab, query, extras }: { tab: FeedSearchTab; que
                 ) : (
                   <RevealImg src={p.image} />
                 )}
-                {tab === 'home' && !isText && <TypeBadge postType={item.postType} />}
+                {tab === 'home' && !isText && <TypeBadge item={item} />}
               </button>
             );
           })}
