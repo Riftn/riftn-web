@@ -780,6 +780,13 @@
     "heading": "Riftn-shorts"
   },
   "settings": {
+    "chatDeleteChoice": "Als je een bericht verwijdert",
+    "chatDeleteChoiceDesc": "Elke keer vragen, of altijd alleen voor jou of voor iedereen in de chat verwijderen.",
+    "chatDeleteAsk": "Elke keer vragen",
+    "chatDeleteMe": "Verwijderen voor mij",
+    "chatDeleteMeDesc": "Weg uit jouw chat, anderen zien het nog",
+    "chatDeleteEveryone": "Verwijderen voor iedereen",
+    "chatDeleteEveryoneDesc": "Waar dat kan. Een bericht van iemand anders in een groep verdwijnt alleen voor jou",
     "postLanding": "Na het plaatsen",
     "postLandingDesc": "Hoe je nieuwe bericht in je feed verschijnt",
     "postLandingGhost": "Spookplek",
@@ -21090,6 +21097,8 @@
     "forEveryone": "Verwijderen voor iedereen",
     "forBoth": "Verwijderen voor ons allebei",
     "forMeAndName": "Verwijderen voor mij en {{name}}",
+    "remember": "Onthoud mijn keuze",
+    "rememberHint": "Wijzig dit altijd in Instellingen",
     "failed": "Kon het bericht niet verwijderen"
   }
 }

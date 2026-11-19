@@ -780,6 +780,13 @@
     "heading": "Cortos de Riftn"
   },
   "settings": {
+    "chatDeleteChoice": "Al eliminar un mensaje",
+    "chatDeleteChoiceDesc": "Preguntar siempre, o eliminar siempre solo para ti o para todos en el chat.",
+    "chatDeleteAsk": "Preguntar siempre",
+    "chatDeleteMe": "Eliminar para mí",
+    "chatDeleteMeDesc": "Desaparece de tu chat, los demás lo siguen viendo",
+    "chatDeleteEveryone": "Eliminar para todos",
+    "chatDeleteEveryoneDesc": "Cuando se pueda. El mensaje de otra persona en un grupo solo se elimina para ti",
     "postLanding": "Después de publicar",
     "postLandingDesc": "Cómo aparece tu nueva publicación en tu feed",
     "postLandingGhost": "Hueco fantasma",
@@ -20841,6 +20848,8 @@
     "forEveryone": "Eliminar para todos",
     "forBoth": "Eliminar para los dos",
     "forMeAndName": "Eliminar para mí y {{name}}",
+    "remember": "Recordar mi elección",
+    "rememberHint": "Cámbialo cuando quieras en Ajustes",
     "failed": "No se pudo eliminar el mensaje"
   }
 }

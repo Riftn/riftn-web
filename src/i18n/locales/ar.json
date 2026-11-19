@@ -780,6 +780,13 @@
     "heading": "مقاطع Riftn القصيرة"
   },
   "settings": {
+    "chatDeleteChoice": "عند حذف رسالة",
+    "chatDeleteChoiceDesc": "اسألني كل مرة، أو احذف دائمًا لي فقط أو للجميع في المحادثة.",
+    "chatDeleteAsk": "اسألني كل مرة",
+    "chatDeleteMe": "حذف لدي",
+    "chatDeleteMeDesc": "تختفي من محادثتك ويظل الآخرون يرونها",
+    "chatDeleteEveryone": "حذف لدى الجميع",
+    "chatDeleteEveryoneDesc": "عندما يكون ذلك ممكنًا. رسالة شخص آخر في مجموعة تُحذف لديك فقط",
     "postLanding": "بعد النشر",
     "postLandingDesc": "كيف يظهر منشورك الجديد في موجزك",
     "postLandingGhost": "خانة شبحية",
@@ -20869,6 +20876,8 @@
     "forEveryone": "حذف للجميع",
     "forBoth": "حذف لدينا نحن الاثنين",
     "forMeAndName": "حذف لديّ ولدى {{name}}",
+    "remember": "تذكّر اختياري",
+    "rememberHint": "يمكنك تغييره في أي وقت من الإعدادات",
     "failed": "تعذّر حذف الرسالة"
   }
 }

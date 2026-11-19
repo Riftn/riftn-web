@@ -423,7 +423,7 @@ function MessageMenuGallery() {
       <DeleteMessageDialog
         open={!!deleting}
         onOpenChange={(open) => { if (!open) setDeleting(null); }}
-        canDeleteForEveryone={!!deleting?.mine}
+        canDeleteForEveryone={!!deleting}
         oneToOne
         peerName="Ella Verse"
         onDelete={noop}

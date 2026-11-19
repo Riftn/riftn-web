@@ -2413,11 +2413,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
     [pickedMsgs, messages],
   );
-  // Every pick can be deleted for you; only when all of them are yours can
-  // they go for everyone too.
-  const pickedAllOwn = useMemo(
-    () => pickedList.length > 0 && pickedList.every((m) => isMineMsg(m)),
-    [pickedList, isMineMsg],
+  // Every pick can be deleted for you. In a one-to-one chat any of them can
+  // also go for both of you; in a group only when all of them are yours.
+  const pickedForEveryone = useMemo(
+    () => pickedList.length > 0 && (!isGroupChat || pickedList.every((m) => isMineMsg(m))),
+    [pickedList, isMineMsg, isGroupChat],
   );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
   const togglePick = useCallback((m: DmMessage) => {
@@ -2452,7 +2452,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   }, [pickedList, _copy]);
   const deletePicked = useCallback(async (scope: DeleteScope) => {
     if (!resolvedConversationId || pickedList.length === 0) return;
-    const forEveryone = scope === 'everyone' && pickedAllOwn;
+    const forEveryone = scope === 'everyone' && pickedForEveryone;
     const send = forEveryone ? emitDeleteMessage : emitHideMessage;
     const results = await Promise.allSettled(pickedList.map((m) => send(resolvedConversationId, m._id)));
     const gone = new Set(pickedList.filter((_, i) => results[i].status === 'fulfilled').map((m) => m._id));
@@ -2463,7 +2463,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     } else {
       toast.error(_copy('msgSelect.partDeleted', { defaultValue: 'Deleted {{ok}} of {{total}}', ok: gone.size, total: pickedList.length }));
     }
-  }, [resolvedConversationId, pickedList, pickedAllOwn, dropFromThread, _copy]);
+  }, [resolvedConversationId, pickedList, pickedForEveryone, dropFromThread, _copy]);
 
   // Handle scroll
   const handleScroll = useCallback(() => {
@@ -3277,7 +3277,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       <DeleteMessageDialog
         open={!!confirmDeleteOne}
         onOpenChange={(next) => { if (!next) setConfirmDeleteOne(null); }}
-        canDeleteForEveryone={!!confirmDeleteOne && isMineMsg(confirmDeleteOne)}
+        canDeleteForEveryone={!!confirmDeleteOne && (!isGroupChat || isMineMsg(confirmDeleteOne))}
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { const target = confirmDeleteOne; setConfirmDeleteOne(null); if (target) void deleteOne(target, scope); }}
@@ -3286,7 +3286,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         open={confirmPickDelete}
         onOpenChange={setConfirmPickDelete}
         count={pickedList.length}
-        canDeleteForEveryone={pickedAllOwn}
+        canDeleteForEveryone={pickedForEveryone}
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { void deletePicked(scope); }}
