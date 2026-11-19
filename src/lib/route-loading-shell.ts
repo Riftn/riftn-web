@@ -13,6 +13,9 @@ export function notifyRouteContentReady(key: string): void {
   window.dispatchEvent(new CustomEvent(ROUTE_CONTENT_READY, { detail: key }));
 }
 
+/** Longest entrance in app-route-motion.css (220ms), plus a frame or two. */
+const ENTRANCE_MS = 260;
+
 /** A small, independent layer can composite while the destination renders. */
 export function showRouteLoadingShell(title: string, backLabel: string, backwards = false): RouteLoadingShell | null {
   const main = document.querySelector<HTMLElement>('[data-main-panel]');
@@ -43,6 +46,10 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
   button.onclick = () => window.history.back();
   node.querySelector('strong')!.textContent = title;
   document.body.appendChild(node);
+  // When the shell first reached a frame, so reveal() knows if its entrance
+  // has finished without asking the browser.
+  let firstFrameAt = 0;
+  requestAnimationFrame((at) => { firstFrameAt = at; });
   const inert = main.inert;
   let removed = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -67,9 +74,15 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
         return;
       }
       button.disabled = true;
-      const current = getComputedStyle(node);
-      node.style.opacity = current.opacity;
-      node.style.transform = current.transform;
+      // Leave from where the entrance got to. Once the entrance is over that
+      // is simply "fully shown"; reading it back from the browser would lay
+      // out the page that just landed underneath one more time.
+      const entered = firstFrameAt > 0 && performance.now() - firstFrameAt > ENTRANCE_MS;
+      if (!entered) {
+        const current = getComputedStyle(node);
+        node.style.opacity = current.opacity;
+        node.style.transform = current.transform;
+      }
       node.dataset.leaving = '';
       timer = setTimeout(remove, 120);
     },
