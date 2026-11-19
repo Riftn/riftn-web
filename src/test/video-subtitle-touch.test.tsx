@@ -165,4 +165,24 @@ describe('subtitle menu on phones', () => {
     render(<VideoSubtitleOverlay tokenId={123} videoRef={{ current: document.createElement('video') }} onDubAvailableChange={available} />);
     expect(available).toHaveBeenLastCalledWith(false);
   });
+
+  it('switches the dub on when a foreign language is picked, and off on Original', async () => {
+    fixture.sourceLang = 'en';
+    fireEvent.click(setup());
+    await screen.findByRole('dialog');
+    fireEvent.click(screen.getByRole('button', { name: 'Spanish' }));
+    expect(fixture.request).toHaveBeenLastCalledWith(true, null);
+    fixture.request.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'English' }));
+    expect(fixture.request).not.toHaveBeenCalled();
+  });
+
+  it('goes back to the original audio when Original is picked with a dub on', async () => {
+    fixture.dub = true;
+    fixture.sourceLang = 'en';
+    fireEvent.click(setup());
+    await screen.findByRole('dialog');
+    fireEvent.click(screen.getByRole('button', { name: 'Original' }));
+    expect(fixture.request).toHaveBeenLastCalledWith(false, null);
+  });
 });

@@ -418,11 +418,25 @@ export function VideoSubtitleOverlay({ tokenId, videoRef, buttonClassName, butto
     setDub(next, null);
   };
 
-  // Picking a caption language takes the dub along with it, including one the
-  // post menu had pointed somewhere else.
+  // Picking a language is picking what you hear too: a language the video
+  // was not spoken in switches the dubbed audio on in that language, and
+  // Original (or the spoken language) goes back to the original audio. Runs
+  // inside the tap, so iOS Safari lets the voice speak.
   const handleLangPick = (code: string) => {
     setLang(code);
-    if (dubPick) setDub(dubOn, null);
+    const l = code.toLowerCase();
+    if (l === 'original' || sameAsSource(l)) {
+      if (dubOn || dubPick) setDub(false, null);
+      return;
+    }
+    // Voices load a moment after the page; an empty list is not a "no".
+    const voiceable = hasCachedDubLanguage(l) || !voices.length || !!pickVoice(voices, l);
+    if (voiceable) {
+      primeSpeech();
+      setDub(true, null);
+    } else if (dubPick) {
+      setDub(dubOn, null);
+    }
   };
 
   // Inject ::cue size styles for native <track> rendering
