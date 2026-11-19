@@ -13,7 +13,7 @@ import Reply from "@/components/ui/cut-icons/reply";
 import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
 import Attach from "@/components/ui/cut-icons/attach";
-import OpenExternally from "@/components/ui/cut-icons/open-externally";
+import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import X from "@/components/ui/cut-icons/close";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,6 +39,7 @@ import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import { preloadRoute } from '@/lib/route-preload';
+import { expandChat, forgetChatOrigin } from '@/lib/chat-expand';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppState } from '@/components/app/AppState';
 import { VoiceRecorder } from '@/components/app/chat/VoiceRecorder';
@@ -183,6 +184,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const { t: _copy } = _useCopy();
   // A tapped photo opens full screen, with Download.
   const [viewingImage, setViewingImage] = useState<string | null>(null);
+  // Back beside the feed (by any route): the full page's back arrow no longer
+  // owes a trip back here.
+  useEffect(() => { forgetChatOrigin(); }, []);
   const [replyTo, setReplyTo] = useState<SupabaseLiveChatMessage | null>(null);
   // Edits happen in the row itself rather than in the composer at the foot of
   // the rail — the composer is a 169-character single line shared with the
@@ -825,16 +829,17 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
               <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
                 <ChatTextSizeButton />
-                {/* Pop the global chat out into its own window, beside the feed. */}
+                {/* Opens the full chat page in this tab: it slides in over the
+                    feed (lib/chat-expand), and back / Esc returns here. */}
                 <button
                   type="button"
-                  data-chat-popout
-                  aria-label={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
-                  title={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
-                  onClick={() => { window.open('/chat?chat=public', 'riftn-global-chat', 'popup,width=520,height=780'); }}
+                  data-chat-fullscreen
+                  aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                  title={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                  onClick={expandChat}
                   className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
                 >
-                  <OpenExternally className="h-4 w-4" />
+                  <Fullscreen className="h-4 w-4" />
                 </button>
               </div>
             )}
