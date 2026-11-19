@@ -5588,6 +5588,7 @@
   "creator": {
     "gallery": {
       "browse": "Browse generations",
+      "create": "Create",
       "fullscreen": "View full screen",
       "missing": "This generation is unavailable.",
       "send": "Send",

@@ -6636,6 +6636,7 @@
     },
     "gallery": {
       "browse": "Parcourir les créations",
+      "create": "Créer",
       "fullscreen": "Afficher en plein écran",
       "missing": "Cette création n’est pas disponible.",
       "send": "Envoyer",
