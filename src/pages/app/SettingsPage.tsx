@@ -160,6 +160,7 @@ import { useLeftHanded } from '@/hooks/use-left-handed';
 import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNotificationsSetting';
 import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
 import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
 import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
@@ -2761,6 +2762,9 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
           <DimLightsToggle />
         </div>
       </div>
+
+      {/* Sign-in screen look: Tube TV, VHS, LED wall or Hologram */}
+      <LoginLookSetting />
 
       {/* Language */}
       <div data-setting-anchor="language">

@@ -769,6 +769,7 @@ import { UsernameReserve } from '@/components/app/profile/UsernameReserve';
 import { ComicPagesEditor } from '@/features/post/components/ComicPagesEditor';
 import { ComicBorderPicker } from '@/features/post/components/ComicBorderPicker';
 import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -2127,6 +2128,9 @@ export default function StateGalleryPage() {
 
         <StreamerArtworkGallery />
 
+        <section data-page-bento data-login-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <LoginLookSetting />
+        </section>
         <PinnedProfileGallery />
         <ProfileImageMenuGallery />
         <ContentWarningGallery />
