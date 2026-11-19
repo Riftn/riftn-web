@@ -1308,7 +1308,9 @@
     "menuLayoutSections": "Sections",
     "menuLayoutSectionsDesc": "Every page at once, under group headers",
     "menuLayoutFolders": "Folders",
-    "menuLayoutFoldersDesc": "Your main pages, then one folder for each group"
+    "menuLayoutFoldersDesc": "Your main pages, then one folder for each group",
+    "publicChatInBar": "Public Chat for di bottom bar",
+    "publicChatInBarDesc": "One tap enter Public Chat from di bar for bottom of di screen"
   },
   "common": {
     "confirm": "Confam",
@@ -2104,7 +2106,13 @@
     "loadingBoard": "Leaderboard dey load…",
     "amountTokens": "{{amount}} tokens",
     "directReferrals": "{{count}} wey you bring",
-    "secondaryReferrals": "{{count}} second level"
+    "secondaryReferrals": "{{count}} second level",
+    "ogChallenge": "OG Challenge",
+    "ogHolders_one": "{{count}} OG holder",
+    "ogHolders_other": "{{count}} OG holders",
+    "ogChallengeTitle": "Bring di OG holders come back",
+    "ogChallengeBody": "Invite people wey still dey hold DHB. When dem join with your invite link and keep dia DHB for dia Riftn wallet, dem go count for you here.",
+    "ogChallengeCta": "Collect your invite link"
   },
   "dhbListing": {
     "title": "Token listing dey come soon!",
@@ -8045,7 +8053,10 @@
     "streamIsReady": "Live stream don ready!",
     "web3AuthSlow": "Web3Auth service dey slow or dey time out now. Abeg check your internet or try refresh.",
     "signingFailed": "Blockchain signing no work. Abeg check your wallet or refresh the page.",
-    "createStreamFailed": "We no fit create stream"
+    "createStreamFailed": "We no fit create stream",
+    "screenInAppHint": "For di Riftn app",
+    "screenInAppNote": "Phone browser no dey allow any website share your screen. Go live from di Riftn app instead, then tap Share screen.",
+    "screenInAppCta": "Download di Riftn app"
   },
   "events": {
     "title": "Event",

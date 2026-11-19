@@ -1283,7 +1283,9 @@
     "menuLayoutTabsDesc": "एक बेर में एगो ग्रुप, बड़का आइकन संग",
     "menuLayoutSections": "भाग",
     "menuLayoutSectionsDesc": "सेभे पेज एके संग, ग्रुप सीर्सक कर नीचे",
-    "menuLayoutFoldersDesc": "तोहर मुख्य पेज, फिर हर ग्रुप ले एगो फोल्डर"
+    "menuLayoutFoldersDesc": "तोहर मुख्य पेज, फिर हर ग्रुप ले एगो फोल्डर",
+    "publicChatInBar": "नीचे बार में पब्लिक चैट",
+    "publicChatInBarDesc": "स्क्रीन कर नीचे वाला बार से एके टैप में पब्लिक चैट"
   },
   "common": {
     "mute": "आवाज बंद करा",
@@ -2078,7 +2080,13 @@
     "provisional": "अस्थायी",
     "loadingBoard": "लीडरबोर्ड लोड होवेला…",
     "directReferrals": "{{count}} सीधा",
-    "secondaryReferrals": "{{count}} दोसर स्तर"
+    "secondaryReferrals": "{{count}} दोसर स्तर",
+    "ogChallenge": "OG चैलेंज",
+    "ogHolders_one": "{{count}} OG होल्डर",
+    "ogHolders_other": "{{count}} OG होल्डर",
+    "ogChallengeTitle": "OG होल्डर मन के वापस लावा",
+    "ogChallengeBody": "ऊ लोग मन के न्योता देवा जेकर पास अभी भी DHB हय। जब ऊ मन तोहर इनवाइट लिंक से जुड़बयँ आउर आपन DHB के आपन Riftn वॉलेट में रखबयँ, तब ऊ मन इहाँ तोहर खातिर गिनाबयँ।",
+    "ogChallengeCta": "आपन इनवाइट लिंक पावा"
   },
   "dhbListing": {
     "notifyMe": "मोके बतावा",
@@ -7919,7 +7927,10 @@
     "bigEvent": "बड़ इवेंट",
     "bigEventHint": "बड़ दर्सक ले: दर्सक करीब 20 सेकंड पीछे देखेला, कम रुकावट संगे।",
     "encoderPermanentHint": "ई की कभी नी बदलेला। आपन एनकोडर एक बेरा सेट करा — अगला बेरा उहाँ बस Start दबावा आउर Riftn तोर ले पोस्ट बनाय देवी।",
-    "notEnoughTokensForBounty": "पूरा टोकन नखे। {{need}} टोकन चाही मगर {{have}} हे।"
+    "notEnoughTokensForBounty": "पूरा टोकन नखे। {{need}} टोकन चाही मगर {{have}} हे।",
+    "screenInAppHint": "Riftn ऐप में",
+    "screenInAppNote": "फोन कर ब्राउजर कोनो वेबसाइट के तोहर स्क्रीन साझा करे नी देवयँ। ओकर बदले Riftn ऐप से लाइव जावा, फिर स्क्रीन साझा करा पर टैप करा।",
+    "screenInAppCta": "Riftn ऐप पावा"
   },
   "events": {
     "filterUpcoming": "Gelecek",

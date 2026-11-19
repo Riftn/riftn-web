@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "Hal koox markiiba, oo leh astaamo waaweyn",
     "menuLayoutSections": "Qaybo",
     "menuLayoutSectionsDesc": "Bog kasta hal mar, oo ku hoos jira cinwaannada kooxaha",
-    "menuLayoutFoldersDesc": "Boggaga ugu muhiimsan, kadibna gal koox kasta"
+    "menuLayoutFoldersDesc": "Boggaga ugu muhiimsan, kadibna gal koox kasta",
+    "publicChatInBar": "Sheekaysiga Guud ee barta hoose",
+    "publicChatInBarDesc": "Hal taabasho ku gal Sheekaysiga Guud adigoo ka imanaya barta hoose ee shaashadda"
   },
   "common": {
     "confirm": "Xaqiiji",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "Liiska hogaamiyayaasha waa la soo dejinayaa…",
     "amountTokens": "{{amount}} calaamado",
     "directReferrals": "{{count}} toos",
-    "secondaryReferrals": "{{count}} labaad"
+    "secondaryReferrals": "{{count}} labaad",
+    "ogChallenge": "Tartanka OG",
+    "ogHolders_one": "{{count}} haystaha OG",
+    "ogHolders_other": "{{count}} haystayaal OG",
+    "ogChallengeTitle": "Soo celi haystayaasha OG",
+    "ogChallengeBody": "Casuun dadka weli haysta DHB. Markay ku soo biiraan xiriiriyaha martiqaadkaaga oo ay DHB-gooda ku hayaan walletkooda Riftn, halkan adiga ayay kuu tirsanayaan.",
+    "ogChallengeCta": "Hel xiriiriyaha martiqaadkaaga"
   },
   "dhbListing": {
     "title": "Liiska token-ka dhawaan!",
@@ -8062,7 +8070,10 @@
     "endStreamConfirmBody": "Broadcast-kaaga wuu joogsadaa qof kasta oo eegaya oo lama soo celinayo.",
     "keepStreaming": "Stream-ka sii wad",
     "encoderPermanentHint": "Furahan waligiis isma beddelo. Deji encoder-kaaga hal mar — marka xigta kaliya riix Ka bilow halkaas oo Riftn ayaa kuu abuuraya boostada.",
-    "notEnoughTokensForBounty": "Kama filna tokens. Waxaad u baahan tahay {{need}} tokens laakiin waxaad haysataa {{have}}."
+    "notEnoughTokensForBounty": "Kama filna tokens. Waxaad u baahan tahay {{need}} tokens laakiin waxaad haysataa {{have}}.",
+    "screenInAppHint": "App-ka Riftn gudihiisa",
+    "screenInAppNote": "Biraawsarada taleefanku uma oggola website kasta inuu wadaago shaashaddaada. Taa beddelkeeda ka tag live app-ka Riftn, kadibna taabo Wadaag shaashadda.",
+    "screenInAppCta": "Hel app-ka Riftn"
   },
   "events": {
     "seoTitle": "Dhacdooyinka: Kulamada & Dhacdooyinka Bulshada ee Riftn",
