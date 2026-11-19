@@ -1154,7 +1154,13 @@ function useFloatingPin(
       if (!section.getClientRects().length) { bar.style.visibility = 'hidden'; return; }
       bar.style.visibility = '';
       const stickTop = window.innerHeight - (parseFloat(getComputedStyle(bar).bottom) || 0) - h;
-      const top = Math.max(section.getBoundingClientRect().top, Math.min(slot.getBoundingClientRect().top, stickTop));
+      let top = Math.max(section.getBoundingClientRect().top, Math.min(slot.getBoundingClientRect().top, stickTop));
+      // Being written in, it never drops below the screen's bottom edge. On a
+      // post with few or no comments the page is too short to scroll, so the
+      // section's top can sit near the bottom of the screen: the first letter
+      // made the bar taller, the clamp pushed it down past the edge (under the
+      // keyboard on iPhones), and a saved draft kept it there after a reload.
+      if (top > stickTop && (bar.contains(document.activeElement) || bar.querySelector('[data-expanded]'))) top = stickTop;
       bar.style.transform = top === stickTop ? '' : `translate3d(0,${Math.round(top - stickTop)}px,0)`;
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(place); };
@@ -1168,12 +1174,16 @@ function useFloatingPin(
     window.addEventListener('scroll', schedule, { passive: true, capture: true });
     window.addEventListener('resize', schedule);
     bar.addEventListener('transitionend', schedule);
+    bar.addEventListener('focusin', schedule);
+    bar.addEventListener('focusout', schedule);
     return () => {
       cancelAnimationFrame(frame);
       resize.disconnect();
       window.removeEventListener('scroll', schedule, { capture: true });
       window.removeEventListener('resize', schedule);
       bar.removeEventListener('transitionend', schedule);
+      bar.removeEventListener('focusin', schedule);
+      bar.removeEventListener('focusout', schedule);
       bar.style.transform = '';
       bar.style.visibility = '';
     };
