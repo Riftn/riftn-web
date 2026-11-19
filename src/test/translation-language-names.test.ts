@@ -20,7 +20,7 @@ function mappedCodes(): Set<string> {
   const body = MAP_SOURCE.split('LANGUAGE_NAMES: Record<string, string> = {')[1] ?? '';
   const entries = body.split('};')[0] ?? '';
   return new Set(
-    [...entries.matchAll(/^\s*'?([A-Za-z-]+)'?\s*:/gm)].map((match) => match[1].toLowerCase()),
+    [...entries.matchAll(/^\s*'?([A-Za-z_-]+)'?\s*:/gm)].map((match) => match[1].toLowerCase()),
   );
 }
 
