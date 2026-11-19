@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "Jɛkulu kelen waati kelen, ni ikɔni belebelew ye",
     "menuLayoutSections": "Yɔrɔw",
     "menuLayoutSectionsDesc": "Ɲɛ bɛɛ ɲɔgɔn fɛ, jɛkulu kuncɛw kɔrɔ",
-    "menuLayoutFoldersDesc": "I ka ɲɛ kunbabaw, o kɔ dosiye jɛkulu kelen kelen bɛɛ ye"
+    "menuLayoutFoldersDesc": "I ka ɲɛ kunbabaw, o kɔ dosiye jɛkulu kelen kelen bɛɛ ye",
+    "publicChatInBar": "Jama ka baro duguma bara la",
+    "publicChatInBarDesc": "Digi kelen ka don Jama ka baro la ka bɔ ɛkran duguma bara la"
   },
   "common": {
     "confirm": "Ka sɔn",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "Ɲɛmɔgɔya sɛbɛn bɛ ka don…",
     "amountTokens": "{{amount}} tɔkɛns",
     "directReferrals": "{{count}} tilennen",
-    "secondaryReferrals": "{{count}} filanan"
+    "secondaryReferrals": "{{count}} filanan",
+    "ogChallenge": "OG Kɛlɛ",
+    "ogHolders_one": "OG marabaga {{count}}",
+    "ogHolders_other": "OG marabagaw {{count}}",
+    "ogChallengeTitle": "OG marabagaw lasegin",
+    "ogChallengeBody": "Mɔgɔ minnu bɛ DHB mara hali bi, olu wele. Ni u donna ni i ka weleli sira ye ka u ka DHB to u ka Riftn wari bɔrɔ kɔnɔ, u bɛ jate i ye yan.",
+    "ogChallengeCta": "I ka weleli sira sɔrɔ"
   },
   "dhbListing": {
     "title": "Tokɛn bɛna sɔrɔ sɔɔni!",
@@ -8062,7 +8070,10 @@
     "endStreamConfirmBody": "Broadcast stop ye everyone la watch ye walima resume ye kan.",
     "keepStreaming": "Streaming keep ye",
     "encoderPermanentHint": "O la, a tun be se ka kɛ ko a tun be se ka kɛ cogo min na. I ka coder sigi siɲɛ kelen — siɲɛ wɛrɛ, i ka Start kan ani Riftn ka baara kɛ i ye.",
-    "notEnoughTokensForBounty": "Token tɛ kɛ. Token {{need}} cɛ kɛ nka {{have}} nka."
+    "notEnoughTokensForBounty": "Token tɛ kɛ. Token {{need}} cɛ kɛ nka {{have}} nka.",
+    "screenInAppHint": "Riftn app kɔnɔ",
+    "screenInAppNote": "Telefɔni navigatɛriw tɛ sɔn siti si ka i ka ɛkran tila. Bɔ ɲɛnama Riftn app kɔnɔ o nɔ na, o kɔ ka digi Ɛkran tila kan.",
+    "screenInAppCta": "Riftn app sɔrɔ"
   },
   "events": {
     "seoTitle": "Ɲɛnamayaw: Ɲɛnamayaw ni sigida koo minw be kɛra Riftn kan",

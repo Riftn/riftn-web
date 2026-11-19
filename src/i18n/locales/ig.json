@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "Otu otu n'otu oge, nwere akara ngosi buru ibu",
     "menuLayoutSections": "Ngalaba",
     "menuLayoutSectionsDesc": "Peeji niile n'otu oge, n'okpuru isiokwu otu",
-    "menuLayoutFoldersDesc": "Peeji gị ndị bụ isi, wee nwee folda maka otu ọ bụla"
+    "menuLayoutFoldersDesc": "Peeji gị ndị bụ isi, wee nwee folda maka otu ọ bụla",
+    "publicChatInBar": "Nkata Ọha n'ogwe dị n'ala",
+    "publicChatInBarDesc": "Otu mpịakọta ruo Nkata Ọha site n'ogwe dị n'okpuru ihuenyo"
   },
   "common": {
     "confirm": "Gosi",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "Na-ebudata ndepụta ọkwa…",
     "amountTokens": "{{amount}} tokenịị",
     "directReferrals": "{{count}} ozugbo",
-    "secondaryReferrals": "{{count}} nke abụọ"
+    "secondaryReferrals": "{{count}} nke abụọ",
+    "ogChallenge": "Asọmpi OG",
+    "ogHolders_one": "{{count}} onye nwe OG",
+    "ogHolders_other": "{{count}} ndị nwe OG",
+    "ogChallengeTitle": "Kpọghachite ndị nwe OG",
+    "ogChallengeBody": "Kpọọ ndị ka jidere DHB. Mgbe ha sonyere site na njikọ ịkpọ òkù gị ma debe DHB ha n'obere akpa Riftn ha, a na-agụ ha maka gị ebe a.",
+    "ogChallengeCta": "Nweta njikọ ịkpọ òkù gị"
   },
   "dhbListing": {
     "title": "Ndepụta token na-abịa n'oge na-adịghị anya!",
@@ -8062,7 +8070,10 @@
     "endStreamConfirmBody": "Mgbasa ozi gị na-akwụsị maka onye ọ bụla na-ekiri ma ọ gaghị enweghachi.",
     "keepStreaming": "Gụnye na-agbasa ozi",
     "encoderPermanentHint": "Igodo a anaghị agbanwe agbanwe. Nịm gị encoder elu otu ugboro — oge ọzọ dị nnọọ pịa Malite n 'ebe ahụ na Riftn emepụta post n' ihi na ị.",
-    "notEnoughTokensForBounty": "Enweghị tokenịị zuru. Chọrọ {{need}} tokenịị mana nwere {{have}}."
+    "notEnoughTokensForBounty": "Enweghị tokenịị zuru. Chọrọ {{need}} tokenịị mana nwere {{have}}.",
+    "screenInAppHint": "N'ime ngwa Riftn",
+    "screenInAppNote": "Ihe nchọgharị ekwentị anaghị ekwe ka weebụsaịtị ọ bụla kesaa ihuenyo gị. Kama nke ahụ, gaa Live site na ngwa Riftn, wee pịa Kesaa ihuenyo.",
+    "screenInAppCta": "Nweta ngwa Riftn"
   },
   "events": {
     "seoTitle": "Ihe omume: Nzukọ & Ihe Omume Obodo na Riftn",
