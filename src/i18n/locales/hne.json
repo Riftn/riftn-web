@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "एक बखत म एक समूह, बड़े आइकन संग",
     "menuLayoutSections": "खंड",
     "menuLayoutSectionsDesc": "सबो पेज एके संग, समूह सीर्षक के तरी",
-    "menuLayoutFoldersDesc": "तुंहर मुख्य पेज, फेर हर समूह बर एक फोल्डर"
+    "menuLayoutFoldersDesc": "तुंहर मुख्य पेज, फेर हर समूह बर एक फोल्डर",
+    "publicChatInBar": "नीचे के बार म पब्लिक चैट",
+    "publicChatInBarDesc": "स्क्रीन के नीचे के बार ले एक टैप म पब्लिक चैट म जाव"
   },
   "common": {
     "confirm": "पुस्टि करव",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "लीडरबोर्ड लोड होवत हे…",
     "amountTokens": "{{amount}} टोकन",
     "directReferrals": "{{count}} डायरेक्ट",
-    "secondaryReferrals": "{{count}} सेकेंडरी"
+    "secondaryReferrals": "{{count}} सेकेंडरी",
+    "ogChallenge": "OG चुनौती",
+    "ogHolders_one": "{{count}} OG होल्डर",
+    "ogHolders_other": "{{count}} OG होल्डर",
+    "ogChallengeTitle": "OG होल्डर मन ला वापस लानव",
+    "ogChallengeBody": "वो मनखे मन ला बलावव जेमन करा अभी घलो DHB हे। जब वो मन तोर इनवाइट लिंक ले जुड़थें अउ अपन DHB ला Riftn बटुआ म रखथें, त वो मन इहाँ तोर बर गिने जाथें।",
+    "ogChallengeCta": "अपन इनवाइट लिंक पाव"
   },
   "dhbListing": {
     "title": "टोकन लिस्टिंग जल्दी आवत हे!",
@@ -8065,7 +8073,10 @@
     "endStreamConfirmBody": "आपका प्रसारण सभी दर्शकों के लिए बंद हो जाता है और इसे फिर से शुरू नहीं किया जा सकता।",
     "keepStreaming": "स्ट्रीमिंग जारी रखें",
     "encoderPermanentHint": "ये कुंजी कभी नहीं बदलती। अपने एनकोडर को एक बार सेट करें — अगली बार बस वहां स्टार्ट दबाएं और Riftn आपके लिए पोस्ट बना देगा।",
-    "notEnoughTokensForBounty": "टोकन कम पड़त हावय। {{need}} टोकन चाही लेकिन {{have}} हावय।"
+    "notEnoughTokensForBounty": "टोकन कम पड़त हावय। {{need}} टोकन चाही लेकिन {{have}} हावय।",
+    "screenInAppHint": "Riftn ऐप म",
+    "screenInAppNote": "फोन के ब्राउजर कोनो वेबसाइट ला तोर स्क्रीन साझा करन नइ देवंय। एकर बदला Riftn ऐप ले लाइव जाव, फेर स्क्रीन साझा करव म टैप करव।",
+    "screenInAppCta": "Riftn ऐप पाव"
   },
   "events": {
     "seoTitle": "घटना: Riftn म बैठक अउ सामुदायिक घटना",
