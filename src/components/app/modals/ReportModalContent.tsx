@@ -99,6 +99,12 @@ interface ReportModalProps {
   /** Whether this is a content, user or comment report */
   reportType?: ReportType;
   contentType?: 'post' | 'video' | 'image' | 'audio';
+  /**
+   * What the report is about, sent to moderators ahead of the reporter's own
+   * note: a reported chat message attaches its text here, so it lands in the
+   * same review queue as profile reports with the line itself in view.
+   */
+  context?: string;
 }
 
 export function ReportModal({
@@ -109,6 +115,7 @@ export function ReportModal({
   commentId,
   reportType = 'content',
   contentType = 'post',
+  context,
 }: ReportModalProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
@@ -155,7 +162,7 @@ export function ReportModal({
         await reportUser({
           userId,
           reason: selectedReason,
-          description: description.trim() || undefined,
+          description: [context?.trim(), description.trim()].filter(Boolean).join('\n\n') || undefined,
         });
       } else if (reportType === 'comment') {
         if (commentId === undefined || commentId === null || commentId === '') {
