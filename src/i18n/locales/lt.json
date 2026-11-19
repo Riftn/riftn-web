@@ -50,7 +50,8 @@
     "pageDescription": "Žiūrėkite visus šio vaizdo įrašo duetus „Riftn“ arba įrašykite savo greta.",
     "empty": "Duetų dar nėra. Atidarykite vaizdo įrašo parinktis ir pasirinkite Remiksas → Duetas, kad sukurtumėte pirmąjį.",
     "notFound": "Šis vaizdo įrašas nepasiekiamas.",
-    "browseShorts": "Naršyti trumpuosius vaizdo įrašus"
+    "browseShorts": "Naršyti trumpuosius vaizdo įrašus",
+    "notFoundTitle": "Vaizdo įrašas nerastas | Riftn"
   },
   "videoRemix": {
     "sound": "Naudoti šį garsą",
@@ -3348,7 +3349,8 @@
       "dragPart": "Vilkite, kad perkeltumėte {{n}} dalį",
       "addPart": "Pridėti prie gijos",
       "addPlaceholder": "Pridėkite prie savo gijos...",
-      "label": "Gija · dalių: {{count}}"
+      "label": "Gija · dalių: {{count}}",
+      "reorderHint": "Vilkite dalis arba naudokite rodykles, tada išsaugokite."
     },
     "attachMedia": "Pridėti nuotrauką, vaizdo ar garso įrašą",
     "attachUnsupported": "Pridėkite nuotrauką, vaizdo įrašą arba garso failą.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Pridėti prie mėgstamų",
     "libraryFavoriteRemove": "Pašalinti iš mėgstamų",
     "audioTaskDialoguePlaceholder": "Alisa: Reikėtų eiti.\nBobas: [juokiasi] Po jūsų.",
-    "priceOwnKey": "Jūsų raktas"
+    "priceOwnKey": "Jūsų raktas",
+    "audioResultTooLarge": "Garso rezultatas tuščias arba viršija 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planai kiekvienam darbo procesui",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Atgal į vaizdo įrašą",
     "empty": "Reakcijų dar nėra. Atidarykite vaizdo įrašo meniu Remiksas ir pasirinkite Reaguoti, kad būtumėte pirmi.",
     "wasLive": "Buvo tiesiogiai",
-    "thisVideo": "šį vaizdo įrašą"
+    "thisVideo": "šį vaizdo įrašą",
+    "pageTitle": "Reakcijos į {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Prijunkite Riftn prie savo DI asistento",

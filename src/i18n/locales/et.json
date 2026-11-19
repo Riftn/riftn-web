@@ -50,7 +50,8 @@
     "empty": "Duette veel pole. Ava video valikud ja vali Remiks → Duett, et teha esimene.",
     "video": "Video",
     "notFound": "See video pole saadaval.",
-    "browseShorts": "Sirvi lühivideoid"
+    "browseShorts": "Sirvi lühivideoid",
+    "notFoundTitle": "Videot ei leitud | Riftn"
   },
   "videoRemix": {
     "sound": "Kasuta seda heli",
@@ -3348,7 +3349,8 @@
       "dragPart": "Lohista, et liigutada osa {{n}}",
       "addPart": "Lisa lõimesse",
       "addPlaceholder": "Lisa oma lõimesse...",
-      "label": "Lõim · {{count}} osa"
+      "label": "Lõim · {{count}} osa",
+      "reorderHint": "Lohista osi või kasuta nooli, seejärel salvesta."
     },
     "attachMedia": "Lisa foto, video või heli",
     "attachUnsupported": "Lisa foto, video või helifail.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Lisa lemmikutesse",
     "libraryFavoriteRemove": "Eemalda lemmikutest",
     "audioTaskDialoguePlaceholder": "Alice: Peaksime minema.\nBob: [naerab] Sina enne.",
-    "priceOwnKey": "Sinu võti"
+    "priceOwnKey": "Sinu võti",
+    "audioResultTooLarge": "Helitulemus on tühi või ületab 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plaanid igale töövoogule",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Tagasi video juurde",
     "empty": "Reaktsioone pole veel. Ava video Remiksi menüü ja vali Reageeri, et olla esimene.",
     "wasLive": "Oli otse",
-    "thisVideo": "see video"
+    "thisVideo": "see video",
+    "pageTitle": "Reaktsioonid: {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Ühenda Riftn oma tehisintellekti assistendiga",

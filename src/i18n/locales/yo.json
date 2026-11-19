@@ -50,7 +50,8 @@
     "pageDescription": "Wo gbogbo duet fídíò yìí lórí Riftn, tàbí ká tìrẹ sí ẹ̀gbẹ́ rẹ̀.",
     "empty": "Kò sí duet síbẹ̀. Ṣí àwọn àṣàyàn fídíò náà kí o sì yan Remix → Duet láti ṣe àkọ́kọ́.",
     "notFound": "Fídíò yìí kò sí.",
-    "browseShorts": "Wo àwọn Fídíò kúkúrú"
+    "browseShorts": "Wo àwọn Fídíò kúkúrú",
+    "notFoundTitle": "A kò rí fídíò náà | Riftn"
   },
   "videoRemix": {
     "sound": "Lo ohun yii",
@@ -658,7 +659,8 @@
       "publicChat": "ìbánisọ̀rọ̀, ìbánisọ̀rọ̀ àgbáyé, yàrá ìbánisọ̀rọ̀, gbọ̀ngàn, ọ̀rọ̀, ìbánisọ̀rọ̀ àwùjọ",
       "planned": "tí a ṣètò, ṣètò, ìfiweránṣẹ́ tí a ṣètò, ìlà, lẹ́yìn náà",
       "liveStudio": "lọ lásìkò, ìgbóhùnsáfẹ́fẹ́, sísanwọ̀, OBS, ìbòrí, ìkìlọ̀, widget",
-      "launchpad": "ṣe ìfilọ́lẹ̀ token, ṣẹ̀dá coin, ṣe coin, meme coin, bonding curve, sọ di token"
+      "launchpad": "ṣe ìfilọ́lẹ̀ token, ṣẹ̀dá coin, ṣe coin, meme coin, bonding curve, sọ di token",
+      "getTheApp": "gba app sílẹ̀, Android, iPhone, app fóònù, fi sórí ẹ̀rọ, APK, app kọ̀ǹpútà, fi sórí kọ̀ǹpútà, Windows, Mac"
     }
   },
   "feed": {
@@ -3348,7 +3350,8 @@
       "dragPart": "Fà á láti gbé apá {{n}}",
       "addPart": "Fi kún okùn",
       "addPlaceholder": "Fi kún okùn rẹ...",
-      "label": "Okùn · apá {{count}}"
+      "label": "Okùn · apá {{count}}",
+      "reorderHint": "Fa àwọn apá náà, tàbí lo àwọn ọfà, lẹ́yìn náà fi pamọ́."
     },
     "attachMedia": "So àwòrán, fídíò tàbí ohùn mọ́ ọn",
     "attachUnsupported": "So àwòrán, fídíò tàbí fáìlì ohùn mọ́ ọn.",
@@ -6657,7 +6660,8 @@
     "toolSongStudioDesc": "Orin, ìfàmọ́ra, ọ̀rọ̀ orin àti ìtọ́sọ́nà ìṣelọ́pọ̀ nínú ìṣàn kan.",
     "toolCreativeChatDesc": "Jíròrò èrò, àkọlé, àlàyé àti ètò ìfilọ́lẹ̀.",
     "communityFeed": "Àkójọ Àwùjọ",
-    "priceOwnKey": "Kọ́kọ́rọ́ rẹ"
+    "priceOwnKey": "Kọ́kọ́rọ́ rẹ",
+    "audioResultTooLarge": "Àbájáde ohùn ṣófo tàbí ó ju 128 MB lọ."
   },
   "pricing": {
     "plansForEveryWorkflow": "Àwọn ìtòlẹ́sẹẹsẹ fún gbogbo iṣẹ́",
@@ -20563,7 +20567,8 @@
     "backToVideo": "Padà sí fídíò",
     "empty": "Kò sí ìhùwàsí síbẹ̀. Ṣí àkójọ Remix fídíò náà kí o sì yan React láti jẹ́ ẹni àkọ́kọ́.",
     "wasLive": "Ó wà láàyè tẹ́lẹ̀",
-    "thisVideo": "fídíò yìí"
+    "thisVideo": "fídíò yìí",
+    "pageTitle": "Àwọn ìfèsì sí {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "So Riftn pọ̀ mọ́ olùrànlọ́wọ́ AI rẹ",

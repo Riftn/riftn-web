@@ -50,7 +50,8 @@
     "pageDescription": "Riftn 'ਤੇ ਇਸ ਵੀਡੀਓ ਦਾ ਹਰ ਡੂਏਟ ਵੇਖੋ, ਜਾਂ ਨਾਲ-ਨਾਲ ਆਪਣਾ ਰਿਕਾਰਡ ਕਰੋ।",
     "empty": "ਅਜੇ ਕੋਈ ਡੂਏਟ ਨਹੀਂ। ਪਹਿਲਾ ਬਣਾਉਣ ਲਈ ਵੀਡੀਓ ਦੇ ਵਿਕਲਪ ਖੋਲ੍ਹੋ ਅਤੇ ਰੀਮਿਕਸ → ਡੂਏਟ ਚੁਣੋ।",
     "notFound": "ਇਹ ਵੀਡੀਓ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।",
-    "browseShorts": "Shorts ਬ੍ਰਾਊਜ਼ ਕਰੋ"
+    "browseShorts": "Shorts ਬ੍ਰਾਊਜ਼ ਕਰੋ",
+    "notFoundTitle": "ਵੀਡੀਓ ਨਹੀਂ ਮਿਲੀ | Riftn"
   },
   "videoRemix": {
     "sound": "ਇਹ ਸਾਊਂਡ ਵਰਤੋ",
@@ -3352,7 +3353,8 @@
       "dragPart": "ਹਿੱਸਾ {{n}} ਹਿਲਾਉਣ ਲਈ ਖਿੱਚੋ",
       "addPart": "ਥ੍ਰੈਡ ਵਿੱਚ ਜੋੜੋ",
       "addPlaceholder": "ਆਪਣੇ ਥ੍ਰੈਡ ਵਿੱਚ ਜੋੜੋ...",
-      "label": "ਥ੍ਰੈਡ · {{count}} ਹਿੱਸੇ"
+      "label": "ਥ੍ਰੈਡ · {{count}} ਹਿੱਸੇ",
+      "reorderHint": "ਹਿੱਸਿਆਂ ਨੂੰ ਖਿੱਚੋ, ਜਾਂ ਤੀਰਾਂ ਦੀ ਵਰਤੋਂ ਕਰੋ, ਫਿਰ ਸੇਵ ਕਰੋ।"
     },
     "attachMedia": "ਫੋਟੋ, ਵੀਡੀਓ ਜਾਂ ਆਡੀਓ ਨੱਥੀ ਕਰੋ",
     "attachUnsupported": "ਇੱਕ ਫੋਟੋ, ਵੀਡੀਓ ਜਾਂ ਆਡੀਓ ਫਾਈਲ ਨੱਥੀ ਕਰੋ।",
@@ -6661,7 +6663,8 @@
     "libraryFavoriteRemove": "ਮਨਪਸੰਦ ਵਿੱਚੋਂ ਹਟਾਓ",
     "pace": "ਰਫ਼ਤਾਰ",
     "audioTaskDialoguePlaceholder": "Alice: ਸਾਨੂੰ ਚੱਲਣਾ ਚਾਹੀਦਾ ਹੈ।\nBob: [ਹੱਸਦਾ ਹੈ] ਪਹਿਲਾਂ ਤੁਸੀਂ।",
-    "priceOwnKey": "ਤੁਹਾਡੀ ਕੁੰਜੀ"
+    "priceOwnKey": "ਤੁਹਾਡੀ ਕੁੰਜੀ",
+    "audioResultTooLarge": "ਆਡੀਓ ਨਤੀਜਾ ਖਾਲੀ ਹੈ ਜਾਂ 128 MB ਤੋਂ ਵੱਧ ਹੈ।"
   },
   "pricing": {
     "plansForEveryWorkflow": "ਸਾਰੀਆਂ ਵਰਕਫਲੋਜ਼ ਲਈ ਯੋਜਨਾਵਾਂ",
@@ -20567,7 +20570,8 @@
     "backToVideo": "ਵੀਡੀਓ 'ਤੇ ਵਾਪਸ",
     "empty": "ਅਜੇ ਕੋਈ ਪ੍ਰਤੀਕਿਰਿਆ ਨਹੀਂ। ਪਹਿਲੇ ਬਣਨ ਲਈ ਵੀਡੀਓ ਦਾ ਰੀਮਿਕਸ ਮੀਨੂ ਖੋਲ੍ਹੋ ਅਤੇ ਪ੍ਰਤੀਕਿਰਿਆ ਚੁਣੋ।",
     "wasLive": "ਲਾਈਵ ਸੀ",
-    "thisVideo": "ਇਹ ਵੀਡੀਓ"
+    "thisVideo": "ਇਹ ਵੀਡੀਓ",
+    "pageTitle": "{{title}} 'ਤੇ ਪ੍ਰਤੀਕਿਰਿਆਵਾਂ | Riftn"
   },
   "connectGuide": {
     "title": "Riftn ਨੂੰ ਆਪਣੇ AI ਸਹਾਇਕ ਨਾਲ ਜੋੜੋ",

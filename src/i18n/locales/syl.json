@@ -50,7 +50,8 @@
     "pageDescription": "Riftn-এ ই ভিডিওর হকল ডুয়েট দেখো, না অইলে পাশাপাশি নিজর ডুয়েট রেকর্ড করো।",
     "empty": "এখনো কোনো ডুয়েট নাই। পয়লাটা বানাইতে ভিডিওর অপশন খুলিয়া Remix → Duet বাছো।",
     "notFound": "ই ভিডিও পাওয়া যায় না।",
-    "browseShorts": "Shorts দেখো"
+    "browseShorts": "Shorts দেখো",
+    "notFoundTitle": "ভিডিও পাওয়া গেছে না | Riftn"
   },
   "videoRemix": {
     "sound": "এই সাউন্ড ব্যবহার কর",
@@ -3515,7 +3516,8 @@
       "dragPart": "অংশ {{n}} সরাইতে টানো",
       "addPart": "থ্রেডো যোগ করো",
       "addPlaceholder": "তোমার থ্রেডো যোগ করো...",
-      "label": "থ্রেড · {{count}}টা অংশ"
+      "label": "থ্রেড · {{count}}টা অংশ",
+      "reorderHint": "অংশগুলা টানইন, নাইলে তীর ব্যবহার করইন, তারপরে সেভ করইন।"
     },
     "attachMedia": "ছবি, ভিডিও বা অডিও লাগাও",
     "attachUnsupported": "ছবি, ভিডিও বা অডিও ফাইল লাগাও।",
@@ -6823,7 +6825,8 @@
     "presetSfxAmbienceName": "পরিবেশর আওয়াজ",
     "presetSfxUiName": "ইন্টারফেস",
     "showcaseAlt": "ল্যাপটপর স্ক্রিনর ভিতরে Riftn ক্রিয়েটর স্টুডিওর ইন্টারফেস",
-    "priceOwnKey": "তোমার কি"
+    "priceOwnKey": "তোমার কি",
+    "audioResultTooLarge": "অডিওর ফলাফল খালি বা 128 MB-র থাকি বেশি।"
   },
   "pricing": {
     "plansForEveryWorkflow": "প্রতিটি কাজের জন্য পরিকল্পনা",
@@ -20732,7 +20735,8 @@
     "backToVideo": "ভিডিওত ফিরো",
     "empty": "অখনো কোনো রিঅ্যাকশন নাই। ভিডিওর Remix মেনু খুলো আর পয়লা অইতে React বাছো।",
     "wasLive": "লাইভ আছিল",
-    "thisVideo": "ই ভিডিও"
+    "thisVideo": "ই ভিডিও",
+    "pageTitle": "{{title}}-র প্রতিক্রিয়া | Riftn"
   },
   "connectGuide": {
     "title": "Riftn-কে আপনার AI সহকারীর সাথে যুক্ত করুন",

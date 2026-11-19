@@ -50,7 +50,8 @@
     "empty": "Hali duetlar yo'q. Birinchisini yaratish uchun video sozlamalarini oching va Remiks → Duet ni tanlang.",
     "video": "Video",
     "notFound": "Bu video mavjud emas.",
-    "browseShorts": "Shorts'ni ko'rish"
+    "browseShorts": "Shorts'ni ko'rish",
+    "notFoundTitle": "Video topilmadi | Riftn"
   },
   "videoRemix": {
     "sound": "Ushbu tovushni ishlating",
@@ -3366,7 +3367,8 @@
       "dragPart": "{{n}}-qismni ko'chirish uchun suring",
       "addPart": "Tredga qo'shish",
       "addPlaceholder": "Tredingizga qo'shing...",
-      "label": "Tred · {{count}} qism"
+      "label": "Tred · {{count}} qism",
+      "reorderHint": "Qismlarni torting yoki strelkalardan foydalaning, so‘ng saqlang."
     },
     "attachMedia": "Rasm, video yoki audio biriktirish",
     "attachUnsupported": "Rasm, video yoki audio fayl biriktiring.",
@@ -6675,7 +6677,8 @@
     "libraryFavoriteRemove": "Sevimlilardan olib tashlash",
     "toolMaboroshi": "Maboroshi",
     "heroHollywoodSubtitle": "Kino darajasidagi asarlar yarating",
-    "priceOwnKey": "Sizning kalitingiz"
+    "priceOwnKey": "Sizning kalitingiz",
+    "audioResultTooLarge": "Audio natijasi bo‘sh yoki 128 MB dan oshadi."
   },
   "pricing": {
     "plansForEveryWorkflow": "Har bir ish uchun rejalar",
@@ -20589,7 +20592,8 @@
     "backToVideo": "Videoga qaytish",
     "empty": "Hali reaksiyalar yo'q. Birinchi bo'lish uchun videoning Remiks menyusini oching va Reaksiya ni tanlang.",
     "wasLive": "Jonli edi",
-    "thisVideo": "bu video"
+    "thisVideo": "bu video",
+    "pageTitle": "{{title}} ga reaksiyalar | Riftn"
   },
   "connectGuide": {
     "title": "Riftn'ni sun'iy intellekt yordamchingizga ulang",

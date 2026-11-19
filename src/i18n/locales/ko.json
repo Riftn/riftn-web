@@ -50,7 +50,8 @@
     "pageDescription": "Riftn에서 이 동영상의 모든 듀엣을 보거나 나란히 직접 녹화해 보세요.",
     "empty": "아직 듀엣이 없습니다. 동영상 옵션을 열고 리믹스 → 듀엣을 선택해 첫 듀엣을 만들어 보세요.",
     "notFound": "이 동영상을 사용할 수 없습니다.",
-    "browseShorts": "쇼츠 둘러보기"
+    "browseShorts": "쇼츠 둘러보기",
+    "notFoundTitle": "동영상을 찾을 수 없습니다 | Riftn"
   },
   "videoRemix": {
     "sound": "이 사운드 사용",
@@ -3352,7 +3353,8 @@
       "dragPart": "드래그하여 {{n}}번째 항목 이동",
       "addPart": "스레드에 추가",
       "addPlaceholder": "스레드에 추가...",
-      "label": "스레드 · {{count}}개 항목"
+      "label": "스레드 · {{count}}개 항목",
+      "reorderHint": "부분을 드래그하거나 화살표를 사용한 다음 저장하세요."
     },
     "attachMedia": "사진, 동영상 또는 오디오 첨부",
     "attachUnsupported": "사진, 동영상 또는 오디오 파일을 첨부하세요.",
@@ -6661,7 +6663,8 @@
     "libraryFavoriteAdd": "즐겨찾기에 추가",
     "libraryFavoriteRemove": "즐겨찾기에서 삭제",
     "audioTaskDialoguePlaceholder": "Alice: 이제 가자.\nBob: [laughs] 먼저 가.",
-    "priceOwnKey": "내 키"
+    "priceOwnKey": "내 키",
+    "audioResultTooLarge": "오디오 결과가 비어 있거나 128 MB를 초과합니다."
   },
   "pricing": {
     "plansForEveryWorkflow": "모든 워크플로우를 위한 플랜",
@@ -20580,7 +20583,8 @@
     "backToVideo": "동영상으로 돌아가기",
     "empty": "아직 리액션이 없습니다. 동영상의 리믹스 메뉴를 열고 리액션을 선택해 첫 리액션을 남겨 보세요.",
     "wasLive": "라이브였음",
-    "thisVideo": "이 동영상"
+    "thisVideo": "이 동영상",
+    "pageTitle": "{{title}}에 대한 반응 | Riftn"
   },
   "connectGuide": {
     "title": "Riftn를 AI 어시스턴트에 연결하세요",

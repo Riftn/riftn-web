@@ -50,7 +50,8 @@
     "pageDescription": "የዚህን ቪዲዮ ሁሉንም ዱዌቶች በRiftn ላይ ይመልከቱ፣ ወይም የራስዎን ጎን ለጎን ይቅረጹ።",
     "empty": "እስካሁን ዱዌቶች የሉም። የመጀመሪያውን ለመስራት የቪዲዮውን አማራጮች ከፍተው ሪሚክስ → ዱዌት ይምረጡ።",
     "notFound": "ይህ ቪዲዮ አይገኝም።",
-    "browseShorts": "ሾርትስን ያስሱ"
+    "browseShorts": "ሾርትስን ያስሱ",
+    "notFoundTitle": "ቪዲዮው አልተገኘም | Riftn"
   },
   "videoRemix": {
     "sound": "ይህን ድምጽ ይጠቀሙ",
@@ -3378,7 +3379,8 @@
       "dragPart": "ክፍል {{n}}ን ለማንቀሳቀስ ይጎትቱ",
       "addPart": "ወደ ክር ያክሉ",
       "addPlaceholder": "ወደ ክርዎ ያክሉ...",
-      "label": "ክር · {{count}} ክፍሎች"
+      "label": "ክር · {{count}} ክፍሎች",
+      "reorderHint": "ክፍሎቹን ይጎትቱ ወይም ቀስቶቹን ይጠቀሙ፣ ከዚያ ያስቀምጡ።"
     },
     "attachMedia": "ፎቶ፣ ቪዲዮ ወይም ድምፅ ያያይዙ",
     "attachUnsupported": "ፎቶ፣ ቪዲዮ ወይም የድምፅ ፋይል ያያይዙ።",
@@ -6687,7 +6689,8 @@
     "audioTaskDubbingLabel": "ዱቢንግ",
     "presetAria": "{{name}} ቅድመ-ቅንብር። {{hint}}",
     "presetGamePropName": "የጨዋታ ቁሳቁስ",
-    "priceOwnKey": "የእርስዎ ቁልፍ"
+    "priceOwnKey": "የእርስዎ ቁልፍ",
+    "audioResultTooLarge": "የድምጽ ውጤቱ ባዶ ነው ወይም ከ128 MB ይበልጣል።"
   },
   "pricing": {
     "plansForEveryWorkflow": "ለእያንዳንዱ የሥራ ፍሰት ዕቅዶች",
@@ -20593,7 +20596,8 @@
     "backToVideo": "ወደ ቪዲዮው ተመለስ",
     "empty": "እስካሁን ምላሾች የሉም። የቪዲዮውን የሪሚክስ ምናሌ ከፍተው የመጀመሪያው ለመሆን «ምላሽ»ን ይምረጡ።",
     "wasLive": "ቀጥታ ነበር",
-    "thisVideo": "ይህ ቪዲዮ"
+    "thisVideo": "ይህ ቪዲዮ",
+    "pageTitle": "ለ{{title}} የተሰጡ ምላሾች | Riftn"
   },
   "connectGuide": {
     "title": "Riftnን ከAI ረዳትዎ ጋር ያገናኙ",

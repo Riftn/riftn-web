@@ -43,7 +43,8 @@
     "pageDescription": "Pozrite si všetky duety tohto videa na Riftn alebo nahrajte vlastný vedľa neho.",
     "empty": "Zatiaľ žiadne duety. Otvorte možnosti videa a vyberte Remix → Duet, aby ste vytvorili prvý.",
     "notFound": "Toto video nie je dostupné.",
-    "browseShorts": "Prehliadať Shorts"
+    "browseShorts": "Prehliadať Shorts",
+    "notFoundTitle": "Video sa nenašlo | Riftn"
   },
   "videoRemix": {
     "sound": "Použite tento zvuk",
@@ -3449,7 +3450,8 @@
       "dragPart": "Potiahnutím presuniete časť {{n}}",
       "addPart": "Pridať do vlákna",
       "addPlaceholder": "Pridajte do svojho vlákna...",
-      "label": "Vlákno · {{count}} častí"
+      "label": "Vlákno · {{count}} častí",
+      "reorderHint": "Potiahnite časti alebo použite šípky a potom uložte."
     },
     "attachMedia": "Priložiť fotku, video alebo zvuk",
     "attachUnsupported": "Priložte fotku, video alebo zvukový súbor.",
@@ -6758,7 +6760,8 @@
     "libraryFavoriteAdd": "Pridať do obľúbených",
     "libraryFavoriteRemove": "Odstrániť z obľúbených",
     "audioTaskDialoguePlaceholder": "Alica: Mali by sme ísť.\nBob: [smeje sa] Až po tebe.",
-    "priceOwnKey": "Váš kľúč"
+    "priceOwnKey": "Váš kľúč",
+    "audioResultTooLarge": "Zvukový výsledok je prázdny alebo presahuje 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plány pre každý workflow",
@@ -20667,7 +20670,8 @@
     "backToVideo": "Späť na video",
     "empty": "Zatiaľ žiadne reakcie. Otvorte ponuku Remix pri videu a zvoľte Reagovať, aby ste boli prvý.",
     "wasLive": "Bolo naživo",
-    "thisVideo": "toto video"
+    "thisVideo": "toto video",
+    "pageTitle": "Reakcie na {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Prepojte Riftn so svojím AI asistentom",

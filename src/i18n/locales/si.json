@@ -50,7 +50,8 @@
     "pageDescription": "Riftn හි මෙම වීඩියෝවේ සෑම ඩුවට් එකක්ම නරඹන්න, නැතහොත් ඔබේම එකක් පැත්තෙන් පැත්තට පටිගත කරන්න.",
     "empty": "තවම ඩුවට් නැත. පළමු එක සෑදීමට වීඩියෝවේ විකල්ප විවෘත කර Remix → ඩුවට් තෝරන්න.",
     "notFound": "මෙම වීඩියෝව ලබා ගත නොහැක.",
-    "browseShorts": "Shorts පිරික්සන්න"
+    "browseShorts": "Shorts පිරික්සන්න",
+    "notFoundTitle": "වීඩියෝව හමු නොවීය | Riftn"
   },
   "videoRemix": {
     "sound": "මෙම ශබ්දය භාවිතා කරන්න",
@@ -3361,7 +3362,8 @@
       "dragPart": "කොටස {{n}} ගෙන යාමට අදින්න",
       "addPart": "නූලට එක් කරන්න",
       "addPlaceholder": "ඔබගේ නූලට එක් කරන්න...",
-      "label": "නූල · කොටස් {{count}}"
+      "label": "නූල · කොටස් {{count}}",
+      "reorderHint": "කොටස් ඇදගෙන යන්න, නැතහොත් ඊතල භාවිත කරන්න, ඉන්පසු සුරකින්න."
     },
     "attachMedia": "ඡායාරූපයක්, වීඩියෝවක් හෝ ශ්‍රව්‍යයක් අමුණන්න",
     "attachUnsupported": "ඡායාරූපයක්, වීඩියෝවක් හෝ ශ්‍රව්‍ය ගොනුවක් අමුණන්න.",
@@ -6670,7 +6672,8 @@
     "audioTaskVoiceDesignDesc": "විස්තරයකින් හඬක් නිර්මාණය කරන්න",
     "presetSfxAmbienceName": "පරිසර පසුබිම",
     "srHeading": "Riftn Creator Studio",
-    "priceOwnKey": "ඔබගේ යතුර"
+    "priceOwnKey": "ඔබගේ යතුර",
+    "audioResultTooLarge": "ශ්‍රව්‍ය ප්‍රතිඵලය හිස් හෝ 128 MB ඉක්මවයි."
   },
   "pricing": {
     "plansForEveryWorkflow": "සෑම ප්‍රවාහයක් සඳහා සැලසුම්",
@@ -20580,7 +20583,8 @@
     "backToVideo": "වීඩියෝවට ආපසු",
     "empty": "තවම ප්‍රතික්‍රියා නැත. පළමුවැන්නා වීමට වීඩියෝවේ Remix මෙනුව විවෘත කර React තෝරන්න.",
     "wasLive": "සජීවීව තිබුණි",
-    "thisVideo": "මෙම වීඩියෝව"
+    "thisVideo": "මෙම වීඩියෝව",
+    "pageTitle": "{{title}} වෙත ප්‍රතිචාර | Riftn"
   },
   "connectGuide": {
     "title": "Riftn ඔබේ AI සහායකයා හා සම්බන්ධ කරන්න",

@@ -50,7 +50,8 @@
     "pageDescription": "Mātakitakihia ia takirua o tēnei ataata i Riftn, hopukina rānei tōu ake i te taha.",
     "empty": "Kāore anō he takirua. Huakina ngā kōwhiringa o te ataata, ka kōwhiri i Whakaranu → Takirua hei hanga i te tuatahi.",
     "notFound": "Kāore e wātea ana tēnei ataata.",
-    "browseShorts": "Tirotiro Poto"
+    "browseShorts": "Tirotiro Poto",
+    "notFoundTitle": "Kāore i kitea te ataata | Riftn"
   },
   "videoRemix": {
     "sound": "Whakamahia tēnei oro",
@@ -3348,7 +3349,8 @@
       "dragPart": "Tōia kia nekehia te wāhanga {{n}}",
       "addPart": "Tāpiri ki te miro",
       "addPlaceholder": "Tāpiri ki tō miro...",
-      "label": "Miro · {{count}} wāhanga"
+      "label": "Miro · {{count}} wāhanga",
+      "reorderHint": "Tōia ngā wāhanga, whakamahia rānei ngā pere, kātahi ka tiaki."
     },
     "attachMedia": "Tāpiri whakaahua, ataata, ororongo rānei",
     "attachUnsupported": "Tāpiritia he whakaahua, he ataata, he kōnae ororongo rānei.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteRemove": "Tango i ngā makau",
     "objectToReconstruct": "Mea hei hanga anō — mā tō kupu tohu e ārahi",
     "audioTaskDialoguePlaceholder": "Alice: Me haere tāua.\nBob: [kata] Ko koe i mua.",
-    "priceOwnKey": "Tō kī"
+    "priceOwnKey": "Tō kī",
+    "audioResultTooLarge": "He kau te hua ororongo, nui ake rānei i te 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Ngā mahere mō ia rere mahi",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Hoki ki te ataata",
     "empty": "Kāore anō he tauhohe. Huakina te tahua Whakaranu o te ataata, ka kōwhiri i Tauhohe kia tuatahi ai koe.",
     "wasLive": "I ora",
-    "thisVideo": "tēnei ataata"
+    "thisVideo": "tēnei ataata",
+    "pageTitle": "Ngā urupare ki {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Hono atu a Riftn ki tō kaiāwhina AI",

@@ -43,7 +43,8 @@
     "pageDescription": "Sledujte všechny duety tohoto videa na Riftn, nebo nahrajte vlastní vedle něj.",
     "empty": "Zatím žádné duety. Otevřete možnosti videa a zvolte Remix → Duet a vytvořte první.",
     "notFound": "Toto video není k dispozici.",
-    "browseShorts": "Procházet Shorts"
+    "browseShorts": "Procházet Shorts",
+    "notFoundTitle": "Video nenalezeno | Riftn"
   },
   "videoRemix": {
     "sound": "Použít tento zvuk",
@@ -3345,7 +3346,8 @@
       "dragPart": "Přetáhněte pro přesun části {{n}}",
       "addPart": "Přidat do vlákna",
       "addPlaceholder": "Přidejte do svého vlákna...",
-      "label": "Vlákno · {{count}} částí"
+      "label": "Vlákno · {{count}} částí",
+      "reorderHint": "Přetáhněte části nebo použijte šipky a pak uložte."
     },
     "attachMedia": "Přiložit fotku, video nebo audio",
     "attachUnsupported": "Přiložte fotku, video nebo zvukový soubor.",
@@ -6654,7 +6656,8 @@
     "presetOpenTowerTiltName": "Náklon věže",
     "audioTaskDialoguePlaceholder": "Alice: Měli bychom jít.\nBob: [směje se] Po tobě.",
     "presetPixelArtName": "Pixel Art",
-    "priceOwnKey": "Váš klíč"
+    "priceOwnKey": "Váš klíč",
+    "audioResultTooLarge": "Zvukový výsledek je prázdný nebo přesahuje 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plány pro každý pracovní postup",
@@ -20560,7 +20563,8 @@
     "backToVideo": "Zpět na video",
     "empty": "Zatím žádné reakce. Otevřete menu Remix u videa a zvolte Reagovat, abyste byli první.",
     "wasLive": "Bylo živě",
-    "thisVideo": "toto video"
+    "thisVideo": "toto video",
+    "pageTitle": "Reakce na {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Propojte Riftn se svým AI asistentem",

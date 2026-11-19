@@ -43,7 +43,8 @@
     "pageDescription": "Urmărește toate dueturile acestui videoclip pe Riftn sau înregistrează-l pe al tău alături.",
     "empty": "Încă nu există dueturi. Deschide opțiunile videoclipului și alege Remix → Duet ca să faci primul.",
     "notFound": "Acest videoclip nu este disponibil.",
-    "browseShorts": "Răsfoiește Shorts"
+    "browseShorts": "Răsfoiește Shorts",
+    "notFoundTitle": "Videoclipul nu a fost găsit | Riftn"
   },
   "videoRemix": {
     "sound": "Folosește acest sunet",
@@ -3341,7 +3342,8 @@
       "dragPart": "Trage pentru a muta partea {{n}}",
       "addPart": "Adaugă în fir",
       "addPlaceholder": "Adaugă în firul tău...",
-      "label": "Fir · {{count}} părți"
+      "label": "Fir · {{count}} părți",
+      "reorderHint": "Trage părțile sau folosește săgețile, apoi salvează."
     },
     "attachMedia": "Atașează o fotografie, un videoclip sau audio",
     "attachUnsupported": "Atașează o fotografie, un videoclip sau un fișier audio.",
@@ -6640,7 +6642,8 @@
     "libraryFavoriteAdd": "Adaugă la favorite",
     "libraryFavoriteRemove": "Elimină din favorite",
     "audioTaskDialoguePlaceholder": "Alice: Ar trebui să plecăm.\nBob: [râde] După tine.",
-    "priceOwnKey": "Cheia ta"
+    "priceOwnKey": "Cheia ta",
+    "audioResultTooLarge": "Rezultatul audio este gol sau depășește 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planuri pentru fiecare flux de lucru",
@@ -6946,7 +6949,8 @@
     "fromOpenSea": "Top colecții pe OpenSea",
     "buyHere": "Cumpără-le aici",
     "openSeaNote": "Listat pe OpenSea. Plătești vânzătorul direct pe Seaport; Riftn nu adaugă nicio taxă.",
-    "viewOnOpenSea": "Vezi pe OpenSea"
+    "viewOnOpenSea": "Vezi pe OpenSea",
+    "title": "Piața NFT"
   },
   "usernames": {
     "seoTitle": "Nume de utilizator Marketplace | Riftn",
@@ -20550,7 +20554,8 @@
     "backToVideo": "Înapoi la videoclip",
     "empty": "Încă nu există reacții. Deschide meniul Remix al videoclipului și alege Reacționează pentru a fi primul.",
     "wasLive": "A fost live",
-    "thisVideo": "acest videoclip"
+    "thisVideo": "acest videoclip",
+    "pageTitle": "Reacții la {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Conectează Riftn la asistentul tău AI",

@@ -50,7 +50,8 @@
     "pageDescription": "មើល Duet ទាំងអស់នៃវីដេអូនេះនៅលើ Riftn ឬថតផ្ទាល់ខ្លួនអ្នកនៅក្បែរគ្នា។",
     "empty": "មិនទាន់មាន Duet នៅឡើយទេ។ បើកជម្រើសវីដេអូ ហើយជ្រើសរើស Remix → Duet ដើម្បីបង្កើតមុនគេ។",
     "notFound": "វីដេអូនេះមិនមានទេ។",
-    "browseShorts": "រុករក Shorts"
+    "browseShorts": "រុករក Shorts",
+    "notFoundTitle": "រកមិនឃើញវីដេអូ | Riftn"
   },
   "videoRemix": {
     "sound": "ប្រើសំឡេងនេះ",
@@ -3361,7 +3362,8 @@
       "dragPart": "អូសដើម្បីផ្លាស់ទីផ្នែក {{n}}",
       "addPart": "បន្ថែមទៅខ្សែសារ",
       "addPlaceholder": "បន្ថែមទៅខ្សែសាររបស់អ្នក...",
-      "label": "ខ្សែសារ · {{count}} ផ្នែក"
+      "label": "ខ្សែសារ · {{count}} ផ្នែក",
+      "reorderHint": "អូសផ្នែកនានា ឬប្រើព្រួញ រួចរក្សាទុក។"
     },
     "attachMedia": "ភ្ជាប់រូបថត វីដេអូ ឬសំឡេង",
     "attachUnsupported": "ភ្ជាប់រូបថត វីដេអូ ឬឯកសារសំឡេង។",
@@ -6670,7 +6672,8 @@
     "audioTaskTranscribeLabel": "ចម្លងជាអត្ថបទ",
     "presetAria": "preset {{name}}។ {{hint}}",
     "logoAlt": "ឡូហ្គោ {{brand}}",
-    "priceOwnKey": "គន្លឹះរបស់អ្នក"
+    "priceOwnKey": "គន្លឹះរបស់អ្នក",
+    "audioResultTooLarge": "លទ្ធផលសំឡេងទទេ ឬលើសពី 128 MB។"
   },
   "pricing": {
     "plansForEveryWorkflow": "ផែនការសម្រាប់រាល់លំហូរការងារ",
@@ -20580,7 +20583,8 @@
     "backToVideo": "ត្រឡប់ទៅវីដេអូ",
     "empty": "មិនទាន់មានប្រតិកម្មនៅឡើយទេ។ បើកម៉ឺនុយ Remix របស់វីដេអូ ហើយជ្រើសរើស ប្រតិកម្ម ដើម្បីធ្វើជាអ្នកដំបូង។",
     "wasLive": "ធ្លាប់ផ្ទាល់",
-    "thisVideo": "វីដេអូនេះ"
+    "thisVideo": "វីដេអូនេះ",
+    "pageTitle": "ប្រតិកម្មចំពោះ {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "ភ្ជាប់ Riftn ទៅជំនួយការ AI របស់អ្នក",

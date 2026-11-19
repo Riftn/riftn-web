@@ -50,7 +50,8 @@
     "pageDescription": "Obejrzyj wszystkie duety z tym filmem na Riftn albo nagraj własny obok.",
     "empty": "Brak duetów. Otwórz opcje filmu i wybierz Remiks → Duet, aby nagrać pierwszy.",
     "notFound": "Ten film jest niedostępny.",
-    "browseShorts": "Przeglądaj Shorts"
+    "browseShorts": "Przeglądaj Shorts",
+    "notFoundTitle": "Nie znaleziono wideo | Riftn"
   },
   "videoRemix": {
     "sound": "Użyj tego dźwięku",
@@ -3350,7 +3351,8 @@
       "dragPart": "Przeciągnij, aby przenieść część {{n}}",
       "addPart": "Dodaj do wątku",
       "addPlaceholder": "Dodaj do swojego wątku...",
-      "label": "Wątek · części: {{count}}"
+      "label": "Wątek · części: {{count}}",
+      "reorderHint": "Przeciągnij części lub użyj strzałek, a potem zapisz."
     },
     "attachMedia": "Dołącz zdjęcie, film lub audio",
     "attachUnsupported": "Dołącz zdjęcie, film lub plik audio.",
@@ -6659,7 +6661,8 @@
     "libraryFavoriteAdd": "Dodaj do ulubionych",
     "libraryFavoriteRemove": "Usuń z ulubionych",
     "audioTaskDialoguePlaceholder": "Alicja: Powinniśmy iść.\nBartek: [śmieje się] Ty pierwsza.",
-    "priceOwnKey": "Twój klucz"
+    "priceOwnKey": "Twój klucz",
+    "audioResultTooLarge": "Wynik audio jest pusty lub przekracza 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plany dla każdego przepływu pracy",
@@ -20643,7 +20646,8 @@
     "backToVideo": "Wróć do filmu",
     "empty": "Brak reakcji. Otwórz menu Remiks filmu i wybierz Reaguj, aby być pierwszym.",
     "wasLive": "Było na żywo",
-    "thisVideo": "ten film"
+    "thisVideo": "ten film",
+    "pageTitle": "Reakcje na {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Połącz Riftn ze swoim asystentem AI",
