@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "एकवारम् एकः समूहः, बृहद्भिः चिह्नैः",
     "menuLayoutSections": "विभागाः",
     "menuLayoutSectionsDesc": "सर्वाणि पृष्ठानि एकत्र, समूह-शीर्षकाणाम् अधः",
-    "menuLayoutFoldersDesc": "भवतः मुख्यपृष्ठानि, ततः प्रत्येकस्य समूहस्य कृते एकः कोशः"
+    "menuLayoutFoldersDesc": "भवतः मुख्यपृष्ठानि, ततः प्रत्येकस्य समूहस्य कृते एकः कोशः",
+    "publicChatInBar": "अधःपट्टिकायां सार्वजनिकसम्भाषणम्",
+    "publicChatInBarDesc": "पटलस्य अधःपट्टिकातः एकेन स्पर्शेन सार्वजनिकसम्भाषणं प्रविशन्तु"
   },
   "common": {
     "confirm": "निश्चितम्",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "श्रेष्ठतासूची लोड्यते…",
     "amountTokens": "{{amount}} टोकन",
     "directReferrals": "{{count}} प्रत्यक्ष",
-    "secondaryReferrals": "{{count}} द्वितीयक"
+    "secondaryReferrals": "{{count}} द्वितीयक",
+    "ogChallenge": "OG आह्वानम्",
+    "ogHolders_one": "{{count}} OG धारकः",
+    "ogHolders_other": "{{count}} OG धारकाः",
+    "ogChallengeTitle": "OG धारकान् पुनः आनयन्तु",
+    "ogChallengeBody": "ये अद्यापि DHB धारयन्ति तान् आमन्त्रयन्तु। यदा ते भवतः आमन्त्रणसम्पर्केण सम्मिलन्ति स्वं DHB च स्वस्मिन् Riftn कोषे रक्षन्ति, तदा ते अत्र भवतः कृते गण्यन्ते।",
+    "ogChallengeCta": "आमन्त्रणसम्पर्कं प्राप्नुवन्तु"
   },
   "dhbListing": {
     "title": "टोकनसूचीकरणं शीघ्रम्!",
@@ -8062,7 +8070,10 @@
     "endStreamConfirmBody": "आपका प्रसारण सभी दर्शकों के लिए बंद हो जाता है और इसे फिर से शुरू नहीं किया जा सकता।",
     "keepStreaming": "स्ट्रीमिंग जारी रखें",
     "encoderPermanentHint": "एष कुञ्जी कदापि न परिवर्तते ।.",
-    "notEnoughTokensForBounty": "पर्याप्त टोकन नहीं हैं। {{need}} टोकन की आवश्यकता है लेकिन {{have}} हैं।"
+    "notEnoughTokensForBounty": "पर्याप्त टोकन नहीं हैं। {{need}} टोकन की आवश्यकता है लेकिन {{have}} हैं।",
+    "screenInAppHint": "Riftn अनुप्रयोगे",
+    "screenInAppNote": "दूरभाषस्य ब्राउज़र्-मध्ये कोऽपि जालस्थलः भवतः पटलं भागं कर्तुं न शक्नोति। अतः Riftn अनुप्रयोगात् प्रत्यक्षप्रसारणं आरभन्तु, ततः पटलं भागं करोतु इति स्पृशन्तु।",
+    "screenInAppCta": "Riftn अनुप्रयोगं प्राप्नुवन्तु"
   },
   "events": {
     "seoTitle": "Tag Archives: देहरादून में जनसभाएं एवं कार्यक्रम",
