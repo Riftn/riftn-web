@@ -9,7 +9,7 @@ import { useMatureGate } from "./MatureContentGate";
  * Uses Framer Motion for smooth translateY animations.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, useId, lazy, Suspense } from 'react';
 import {
   claimMediaSession,
   releaseMediaSession,
@@ -48,6 +48,10 @@ import Bookmark from "@/components/ui/cut-icons/save";
 import Share2 from "@/components/ui/cut-icons/feedshare";
 import Send from "@/components/ui/cut-icons/send";
 import Gem from "@/components/ui/cut-icons/diamond";
+import Gift from "@/components/ui/cut-icons/gifts";
+import { Zap } from "lucide-react";
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useSuperpowers } from '@/hooks/use-superpowers';
 
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useTranslation as useContentTranslation, splitTranslatedTitleAndBody } from '../TranslatableText';
@@ -97,6 +101,7 @@ import Quote from "@/components/ui/cut-icons/quote";
 import Link from "@/components/ui/cut-icons/link";
 
 import Repeat2 from "@/components/ui/cut-icons/repost";
+import Captions from "@/components/ui/cut-icons/captions";
 
 import { cn } from '@/lib/utils';
 import type { ShortVideo } from '@/types/feed.types';
@@ -109,7 +114,7 @@ import { useVideoFullscreen } from '@/hooks/use-video-fullscreen';
 import { useInAppVideoMini } from '@/hooks/use-in-app-video-mini';
 import '@/styles/shorts-mini.css';
 import { setVoteCache, getVoteCache } from '@/lib/vote-cache';
-import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted } from '@/lib/video-preferences';
+import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted, useMediaLooping, setIsLooping as vpSetIsLooping } from '@/lib/video-preferences';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
 import { createWheelPager } from '@/lib/wheel-pager';
 import { commitsDismiss } from '@/lib/video-hold-gestures';
@@ -390,6 +395,11 @@ const PEEK_START_PX = 8;
  * visibly different shades. Both are built from this now — position and the
  * hidden state are all either is allowed to add.
  */
+// Same lazy chunk the feed card uses: fetched on the tap that opens it.
+const BoostModal = lazy(() =>
+  import('../modals/BoostModal').then((m) => ({ default: m.BoostModal }))
+);
+
 const CORNER_CONTROL =
   `absolute top-3 z-10 ${VIEWER_CONTROL} transition-opacity duration-300`;
 
@@ -404,10 +414,23 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     return () => resumeMedia(paused);
   }, []);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const isMuted = useMediaMuted();
+  const prefMuted = useMediaMuted();
+  // The browser refused sound on a short (iPhone, fast swiping), so it plays
+  // silent until the viewer taps the speaker. Not saved as their choice.
+  const [autoMuted, setAutoMuted] = useState(false);
+  const isMuted = prefMuted || autoMuted;
+  const handleAutoMuted = useCallback(() => setAutoMuted(true), []);
   const toggleMute = useCallback(() => {
+    if (autoMuted && !prefMuted) {
+      setAutoMuted(false);
+      // Inside the tap, so the browser lets the sound start.
+      document.querySelectorAll<HTMLVideoElement>('video.shorts-inline-video').forEach((v) => {
+        if (!v.paused) v.muted = false;
+      });
+      return;
+    }
     videoPlaybackManager.globalMuted = getVideoPreferences().mediaMuted !== true;
-  }, []);
+  }, [autoMuted, prefMuted]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const transitioningRef = useRef(false);
   const queuedStep = useRef<'next' | 'prev' | null>(null);
@@ -432,9 +455,13 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   }, [showComments]);
   const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  // Loop off (the default): a short that ends moves on to the next one.
+  const isLooping = useMediaLooping();
+  const [captionSlot, setCaptionSlot] = useState<HTMLDivElement | null>(null);
   const [shareToDmOpen, setShareToDmOpen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showBoostModal, setShowBoostModal] = useState(false);
   const [visibility, setVisibility] = useState<TokenVisibility>('public');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -677,7 +704,17 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   const cleanWide = isMobile && phoneStage === 'clean' && wideRatio > 0 && !isLiveSlide && !currentShort?.imageUrls?.length && !isFullscreen;
   const downloadVideo = useVideoDownload();
   const downloadGate = useMatureGate(currentShort?.contentRating);
+  /** Desktop puts the subtitles button in the top corner row, beside options. */
+  const hasDesktopCaptions = !isMobile && !isLiveSlide && !!currentShort?.videoUrl && !currentShort?.reelPost && !currentShort?.imageUrls?.length;
   const isOwnShort = !!walletAddress && currentShort?.creatorId?.toLowerCase() === walletAddress.toLowerCase();
+  // Boost, as on the feed card: the owner boosts their own post, and anyone
+  // holding Deep Current can gift one to somebody else's.
+  const { data: superpowerStatus } = useSuperpowers(!!walletAddress);
+  const canGiftBoost = !!superpowerStatus?.powers.some(
+    p => p.key === 'deep_current' && p.unlocked && p.available,
+  );
+  const boostTokenId = parseInt(currentShort?.id ?? '', 10) || undefined;
+  const canBoostCurrent = !!boostTokenId && !isLiveSlide;
 
   // Swiping to another creator picks up that creator's pinned rate, the same
   // way opening one of their videos does. Creators with none keep the global.
@@ -1071,6 +1108,14 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   const goToPrevRef = useRef(goToPrev);
   goToNextRef.current = goToNext;
   goToPrevRef.current = goToPrev;
+  // Stable, so the memoised slides don't re-render for it. Not while a sheet
+  // or the menu is open over the video: moving on under it would lose the place.
+  const shortEndedBlockedRef = useRef(false);
+  shortEndedBlockedRef.current = shareSheetOpen || showComments;
+  const handleShortEnded = useCallback(() => {
+    if (shortEndedBlockedRef.current || getVideoPreferences().isLooping) return;
+    goToNextRef.current();
+  }, []);
   // Where the wheel can go right now, so a push past either end rubber bands.
   const wheelNavRef = useRef({ index: currentIndex, count: shorts.length });
   wheelNavRef.current = { index: currentIndex, count: shorts.length };
@@ -1179,6 +1224,9 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
       if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); goToNext(); }
       else if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); goToPrev(); }
       else if (e.key === 'Escape') {
+        // A sheet or dialog open over the viewer (options, share, report)
+        // closes on its own; Esc must not also close the player under it.
+        if (shareSheetOpen || document.querySelector('[data-vaul-drawer][data-state="open"], [role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]')) return;
         // Esc steps back one level, it does not close everything: from
         // fullscreen it returns to the windowed viewer. Browsers normally
         // swallow the key themselves to exit native fullscreen, so in practice
@@ -1197,7 +1245,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized]);
+  }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized, shareSheetOpen]);
 
   /**
    * The short a drag is heading for, already playing (silently) while it
@@ -1663,6 +1711,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // back. A deliberate swipe-down clear (overlaysHidden) still switches them off.
   const chromeInert = overlaysHidden;
 
+  /** The playing short's <video>, for the player rows in the options menu. */
+  const activePlayer = () => containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`) ?? null;
+  const cycleSpeed = () => {
+    const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as (typeof PLAYBACK_RATES)[number]);
+    const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
+    // Apply to the current slide before rerendering its neighbours.
+    const player = activePlayer();
+    if (player) player.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+    vpSetPlaybackRate(nextRate, currentShort?.creatorId);
+  };
+
   const handleCopyLink = () => {
     const url = viewerShareUrl(`${window.location.origin}/app/post/${currentShort.articleSlug || currentShort.id}`);
     navigator.clipboard.writeText(url);
@@ -1896,13 +1956,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   <button
                     onClick={(event) => {
                       event.stopPropagation();
-                      const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as any);
-                      const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
-                      // Apply to the current slide before rerendering its neighbours.
-                      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
-                      if (player) player.playbackRate = nextRate;
-                      setPlaybackRate(nextRate);
-                      vpSetPlaybackRate(nextRate, currentShort?.creatorId);
+                      cycleSpeed();
                     }}
                     className={cn(VIEWER_CONTROL, 'min-w-[40px] px-1.5')}
                     style={{ touchAction: 'manipulation' }}
@@ -1910,6 +1964,11 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                   >
                     <span className="text-white text-[11px] font-bold leading-none">{formatRate(playbackRate)}x</span>
                   </button>
+
+                  {/* Subtitles: the playing short puts its CC button in here. */}
+                  {!currentShort?.reelPost && !currentShort?.imageUrls?.length && (
+                    <div ref={setCaptionSlot} data-shorts-caption-slot className="relative flex h-10 w-10 shrink-0 items-center justify-center empty:hidden" />
+                  )}
 
                   {/* Full screen: a wide video also turns sideways where the browser allows it. */}
                   {(isMobile || !currentShort?.imageUrls?.length) && <button
@@ -1937,6 +1996,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     )}
                   </button>
                   </>}
+
+                  {/* The owner's Boost bolt, beside options as on the feed card. */}
+                  {isOwnShort && canBoostCurrent && (
+                    <button
+                      onClick={(event) => { event.stopPropagation(); setShowBoostModal(true); }}
+                      className={VIEWER_CONTROL}
+                      aria-label={t('postOptions.boostPost')}
+                      data-viewer-boost
+                    >
+                      <Zap className="w-5 h-5 text-white" />
+                    </button>
+                  )}
 
                   {/* More options button */}
                   <button
@@ -2109,8 +2180,11 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       isActive={isActive && !isPaused}
                       handoffKey={reuseInitialVideo && index === initialIndex ? short.id : undefined}
                       isMuted={isMuted}
+                      onAutoMuted={handleAutoMuted}
                       playbackRate={playbackRate}
                       onTimeUpdate={isActive ? trackView : undefined}
+                      onEnded={isActive ? handleShortEnded : undefined}
+                      captionSlot={isActive ? captionSlot : null}
                       onTap={handleVideoTap}
                       onTapUndo={undoVideoTap}
                       sideGestures={isMobile}
@@ -2174,6 +2248,38 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
               >
                 <MoreHorizontal className="w-5 h-5" />
               </button>
+
+              {/* Subtitles, left of options: the playing short puts its CC button in here. */}
+              {hasDesktopCaptions && (
+                <div
+                  ref={setCaptionSlot}
+                  data-shorts-caption-slot
+                  className={cn(
+                    CORNER_CONTROL,
+                    "right-[9.75rem] empty:hidden",
+                    chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                  )}
+                />
+              )}
+
+              {/* The owner's Boost bolt, left of options (and of subtitles when they are there). */}
+              {isOwnShort && canBoostCurrent && (
+                <button
+                  onClick={() => {
+                    if (isFullscreen) toggleFullscreen();
+                    setShowBoostModal(true);
+                  }}
+                  className={cn(
+                    CORNER_CONTROL,
+                    hasDesktopCaptions ? "right-[12.75rem]" : "right-[9.75rem]",
+                    chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                  )}
+                  aria-label={t('postOptions.boostPost')}
+                  data-viewer-boost
+                >
+                  <Zap className="w-5 h-5" />
+                </button>
+              )}
 
               <button
                 onClick={toggleFullscreen}
@@ -2683,11 +2789,77 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
         url={viewerShareUrl(`${window.location.origin}/app/post/${currentShort.articleSlug || currentShort.id}`)}
       />
       <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
-        <DrawerContent scrollable glass className="px-4 pb-6">
+        {/* On desktop a centred column under the player, not a sheet across the whole window. */}
+        <DrawerContent scrollable glass className="px-4 pb-6 md:left-[calc(50%_-_15rem)] md:right-auto md:w-[30rem]">
           <DrawerHeader className="relative pb-2">
             <DrawerTitle className="text-white text-lg">{_copy("copy.d0db8b5e364b", { defaultValue: "Options" })}</DrawerTitle>
           </DrawerHeader>
           <div className="flex flex-col gap-1">
+            {/* The player's own buttons, as on a video in the feed: loop,
+                speed, subtitles, picture in picture, full screen, sound. The
+                toggles keep the menu open so you can see what changed. */}
+            {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.reelPost && (
+              <div data-shorts-player-rows className="flex flex-col gap-1 border-b border-white/10 pb-1 mb-1">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isLooping}
+                  onClick={() => {
+                    const next = !isLooping;
+                    const player = activePlayer();
+                    if (player) player.loop = next;
+                    vpSetIsLooping(next);
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Repeat2 className="w-5 h-5" />
+                  <span className="flex-1">{isLooping ? _copy("copy.2e68f91aef20", { defaultValue: "Loop on" }) : _copy("copy.daee48e3d2b7", { defaultValue: "Loop off" })}</span>
+                  <span aria-hidden className={cn('relative h-5 w-9 rounded-full transition-colors', isLooping ? 'bg-white' : 'bg-white/20')}>
+                    <span className={cn('absolute top-0.5 h-4 w-4 rounded-full transition-all', isLooping ? 'left-[18px] bg-black' : 'left-0.5 bg-white')} />
+                  </span>
+                </button>
+                <button type="button" onClick={cycleSpeed} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  <span className="flex w-5 justify-center text-[11px] font-bold">{formatRate(playbackRate)}x</span>
+                  <span className="flex-1">{_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}</span>
+                  <span className="text-sm text-white/60 tabular-nums">{formatRate(playbackRate)}x</span>
+                </button>
+                {!!captionSlot && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShareSheetOpen(false);
+                      // The subtitles menu belongs to the CC button in the
+                      // control row; open it once the drawer has gone.
+                      window.setTimeout(() => captionSlot.querySelector<HTMLButtonElement>('button')?.click(), 320);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Captions className="w-5 h-5" />{_copy("copy.0ee695bdeb26", { defaultValue: "Subtitles" })}
+                  </button>
+                )}
+                {document.pictureInPictureEnabled && !currentShort.gated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShareSheetOpen(false);
+                      const player = activePlayer();
+                      if (player) void player.requestPictureInPicture().catch(() => {});
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <PictureInPicture2 className="w-5 h-5" />{_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                  </button>
+                )}
+                <button type="button" onClick={() => { setShareSheetOpen(false); toggleFullscreen(); }} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                  {isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+                </button>
+                <button type="button" onClick={toggleMute} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  {isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                </button>
+              </div>
+            )}
             {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.gated
               && !downloadGate.isGated && !currentShort.spoilerText
               && visibility === 'public' && (!currentShort.visibility || currentShort.visibility === 'public')
@@ -2793,9 +2965,25 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
               >
                 <Ban className="w-5 h-5" />{_copy("copy.eb326e0e85cf", { defaultValue: " Block Creator" })}</button>
             )}
+            {!isOwnShort && canGiftBoost && canBoostCurrent && (
+              <button
+                onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
+              </button>
+            )}
             {isOwnShort && (
               <>
                 <div className="border-t border-white/10 my-1" />
+                {canBoostCurrent && (
+                  <button
+                    onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <ThemedIcon icon="superpowers" alt="" className="w-5 h-5 object-contain" /> {t('postOptions.boostPost')}
+                  </button>
+                )}
                 <button
                   onClick={async () => {
                     const next: TokenVisibility = visibility === 'public' ? 'private' : 'public';
@@ -2830,6 +3018,18 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
         tokenId={currentShort?.id}
         context="post"
       />
+
+      {/* Boost Modal — mounted only while open. */}
+      {showBoostModal && (
+        <Suspense fallback={null}>
+          <BoostModal
+            open={showBoostModal}
+            onOpenChange={setShowBoostModal}
+            tokenId={boostTokenId}
+            postTitle={currentShort?.title ?? ''}
+          />
+        </Suspense>
+      )}
 
       {/* Report Modal */}
       <ReportModal

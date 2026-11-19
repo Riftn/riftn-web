@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Pridať obrázok, GIF alebo video",
+    "changeMedia": "Zmeniť obrázok, GIF alebo video",
+    "mediaType": "Vyberte obrázok, GIF alebo video.",
+    "videoSize": "Toto video má viac ako {{n}} MB. Vyberte menšie."
+  },
   "comic": {
     "showAll": "Zobraziť všetkých {{count}} strán"
   },
@@ -14,6 +20,69 @@
     "glitter": "Trblietky",
     "saved": "Okraj uložený",
     "failed": "Okraj sa nepodarilo uložiť"
+  },
+  "duet": {
+    "policyEveryone": "Všetci",
+    "policyFollowers": "Sledovatelia",
+    "policyNobody": "Nikto",
+    "loadMore": "Načítať viac",
+    "video": "Obraz",
+    "with": "Duet s @{{username}}",
+    "withOriginal": "Duet · zobraziť originál",
+    "unavailable": "Toto video už nie je dostupné na duety.",
+    "allowLabel": "Povoliť duety",
+    "allowDescription": "Kto môže nahrať duet vedľa vašich videí. Môžete to zmeniť aj pri každom príspevku.",
+    "settingsSection": "Duety",
+    "policyDefault": "Nastavenie účtu",
+    "saveFailed": "Nepodarilo sa uložiť. Skúste to znova.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duetov",
+    "pageHeading": "Duety",
+    "pageTitle": "Duety k {{title}} od @{{creator}}",
+    "pageTitleNoCreator": "Duety k {{title}}",
+    "pageDescription": "Pozrite si všetky duety tohto videa na Riftn alebo nahrajte vlastný vedľa neho.",
+    "empty": "Zatiaľ žiadne duety. Otvorte možnosti videa a vyberte Remix → Duet, aby ste vytvorili prvý.",
+    "notFound": "Toto video nie je dostupné.",
+    "browseShorts": "Prehliadať Shorts",
+    "notFoundTitle": "Video sa nenašlo | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Použite tento zvuk",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Zelené plátno",
+    "stitch": "Stitch",
+    "selectSource": "Otvorte možnosti videa a vyberte Remix, aby ste začali."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Všetci",
+      "followers": "Sledovatelia",
+      "nobody": "Nikto",
+      "default": "Moje predvolené"
+    },
+    "shareFailed": "Vaše prepitné bolo odoslané, ale podiel pôvodného tvorcu neprešiel.",
+    "notify": {
+      "duet": "{{name}} nahral(a) duet s vaším videom",
+      "stitch": "{{name}} použil(a) stitch z vášho videa",
+      "react": "{{name}} reagoval(a) na vaše video",
+      "reactLive": "{{name}} naživo reaguje na vaše video"
+    },
+    "linkFailed": "Váš príspevok je zverejnený, ale nepodarilo sa ho prepojiť s pôvodným videom.",
+    "settingsHeading": "Remixy",
+    "stitch": {
+      "allow": "Povoliť stitche",
+      "allowDesc": "Kto môže použiť až 5 sekúnd z vašich videí vo svojich. Môžete to zmeniť aj pri každom príspevku.",
+      "saveFailed": "Nastavenie stitchov sa nepodarilo uložiť. Skúste to znova.",
+      "settingFailed": "Váš príspevok je zverejnený, ale jeho nastavenie stitchov sa neuložilo. Zmeňte ho cez Upraviť príspevok.",
+      "from": "Stitch od {{name}}",
+      "count_one": "{{count}} stitch",
+      "count_other": "{{count}} stitchov",
+      "listTitle": "Stitche",
+      "listFailed": "Stitche sa nepodarilo načítať. Skúste to znova.",
+      "listEmpty": "Zatiaľ žiadne stitche.",
+      "unavailable": "Toto video už nie je dostupné na stitche."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +107,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Otvoriť Riftn v preháľadle",
     "seoDescription": "Stiahnite si Riftn: open-source, užívateľovlastná sociálna sieť s živým prenosom, šifrovanou správovosťou a systémom watch-to-earn. Zdarma na Google Play, App Store a webe.",
-    "seoTitle": "Riftn App | Stiahnuť pre Android, iPhone & Web"
+    "seoTitle": "Riftn App | Stiahnuť pre Android, iPhone & Web",
+    "learnMore": "Chcete celý obraz? <guide>Čo je Riftn?</guide> podrobne popisuje platformu."
   },
   "dehubLinks": {
     "copyLinkDetail": "Skopírujte odkaz {{item}} do schránky",
@@ -55,12 +125,16 @@
       "profile": "profil",
       "proposal": "predložka",
       "stage": "scéna",
-      "store": "obchod"
+      "store": "obchod",
+      "featureRequest": "požiadavka",
+      "page": "stránka"
     },
     "recipientChat": "chat",
     "recipientUser": "užívateľ",
     "sendFailed": "Neúspešné odoslanie {{item}}",
-    "sentTo": "{{item}} odoslané na {{name}}"
+    "sentTo": "{{item}} odoslané na {{name}}",
+    "openPage": "Otvoriť stránku",
+    "viewRequest": "Zobraziť požiadavku"
   },
   "stageCover": {
     "admitOne": "PRIZNAŤ JEDEN",
@@ -166,11 +240,35 @@
     "privateNote": "Súkromné účty sa vo fediverze nezobrazujú.",
     "noUsername": "Zvoľte si používateľské meno, aby ste získali adresu vo fediverze."
   },
+  "signedFollows": {
+    "setUp": "Zapnúť",
+    "turnOff": "Vypnúť",
+    "efpTurnOff": "Zastaviť",
+    "title": "Vaše sledovania na blockchaine",
+    "description": "Vaša peňaženka podpisuje, koho sledujete, a každý deň sa zoznam zapíše na Base. Ktorákoľvek aplikácia nájde vaše sledovania podľa peňaženky, aj bez Riftn.",
+    "on": "Zapnuté pre toto zariadenie",
+    "off": "Vypnuté pre toto zariadenie",
+    "turnedOn": "Vaše sledovania teraz podpisuje vaša peňaženka",
+    "turnedOff": "Vypnuté pre toto zariadenie",
+    "failed": "Vaša peňaženka nepodpísala. Skúste to znova.",
+    "hiddenNote": "Skryté zoznamy sledovaní a súkromné účty nie sú vo verejnom zozname.",
+    "efpOn": "Skopírované do EFP · {{count}} sledovaní",
+    "efpOff": "Pridať ich aj do EFP",
+    "efpTurnOn": "Pridať do EFP",
+    "efpDone": "Vaše sledovania sa prenášajú do EFP",
+    "efpStopped": "Kopírovanie do EFP zastavené. Zoznam zostáva váš.",
+    "efpHasList": "Už máte zoznam EFP. Riftn ho zatiaľ nevie naplniť.",
+    "efpNoGas": "Vaša peňaženka na to potrebuje trochu ETH na Base.",
+    "efpFailed": "Neprešlo to. Skúste to znova.",
+    "efpNote": "EFP je zoznam sledovaní, ktorý čítajú iné aplikácie (efp.app). S peňaženkou Riftn zadarmo; iné peňaženky zaplatia pár centov na Base. Zoznam je váš."
+  },
   "profileFields": {
     "title": "Polia profilu",
     "description": "Až štyri riadky navyše na vašom profile, napríklad web alebo vaše zámená.",
     "label": "Označenie",
     "content": "Obsah",
+    "add": "Pridať pole",
+    "remove": "Odstrániť pole",
     "save": "Uložiť polia",
     "saved": "Polia profilu uložené",
     "failed": "Neuložilo sa. Skúste to znova.",
@@ -340,7 +438,8 @@
     "step": "Pre kontrolu účtov pridajte https://riftn.com/mcp ako OAuth connector, prihláste sa do Riftn a prezrite sa na povolenia pred tým, ako povoľujete prístup.",
     "profilePrompt": "Aktualizujte môj profil Riftn na: Independetný tvorca, ktorý robí filmy a hudbu.",
     "generatePrompt": "Zobrazte mi modely obrázkov Riftn a citujte portrét pred tým, ako generujete.",
-    "libraryPrompt": "Zobrazte mi najnovšie zdroje v mojej knižnici tvorcov Riftn."
+    "libraryPrompt": "Zobrazte mi najnovšie zdroje v mojej knižnici tvorcov Riftn.",
+    "agents": "Uverejňujte, odpovedajte, reagujte, zdieľajte, sledujte a upravujte profily ako agenti, ktorých vlastníte"
   },
   "twitchMirror": {
     "title": "Twitch mirroring",
@@ -368,6 +467,7 @@
     "checkFailed": "Nepodarilo sa nám skontrolovať dostupnosť. Skúste to znova.",
     "checking": "Kontroluje sa...",
     "ownership": "Open source. Vlastnené používateľom.",
+    "title": "Trochu práce.\nLepší Riftn.",
     "intermission": "Dočasne offline",
     "community": "Komunita na prvom mieste. Vždy."
   },
@@ -440,7 +540,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "stiahnuť aplikáciu, Android, iPhone, mobilná aplikácia, nainštalovať, APK, desktopová aplikácia, nainštalovať na počítač, Windows, Mac"
+      "getTheApp": "stiahnuť aplikáciu, Android, iPhone, mobilná aplikácia, nainštalovať, APK, desktopová aplikácia, nainštalovať na počítač, Windows, Mac",
+      "home": "kanál, časová os, najnovšie príspevky, pre vás, sledované, hlavná stránka",
+      "profile": "môj profil, môj účet, moja stránka, moje príspevky, avatar, bio, sledujúci",
+      "explore": "hľadať, objavovať, nájsť, trendy, populárne, hashtagy, ľudia, tvorcovia",
+      "prompt": "AI, generovať, AI obrázok, AI video, tvorba obrázkov, text na obrázok, AI umenie",
+      "editor": "editor videa, upraviť video, orezať, strih, titulky, efekty",
+      "creator": "tvoriť, štúdio, AI nástroje, obrázok, video, hudba, hlasový komentár, 3D",
+      "converter": "importovať video, stiahnuť, YouTube, TikTok, Instagram, konvertovať",
+      "migrate": "presunúť kanál, importovať kanál, hromadný import, YouTube kanál",
+      "notifications": "upozornenia, aktivita, zmienky, odpovede, páči sa mi, zvonček",
+      "messages": "DM, priame správy, chat, schránka, konverzácie, súkromná správa",
+      "communities": "skupiny, komunita, miestnosti, kluby, fóra, členovia",
+      "assistant": "AI, chatbot, opýtať sa, pomoc, AI chat, otázky",
+      "settings": "predvoľby, účet, súkromie, zabezpečenie, heslo, jazyk, téma, tmavý režim, blokovaní, zmazať účet",
+      "leaderboard": "rebríček, poradie, top tvorcovia, top používatelia, body, skóre",
+      "bookmarks": "uložené, obľúbené, pozrieť neskôr, prečítať neskôr, uložené príspevky, knižnica",
+      "command": "nástenka, analytika, zárobky, príjem, prehľady, moderovanie, moje štatistiky",
+      "wallet": "zostatok, peniaze, prostriedky, tokeny, krypto, vklad, výber, poslať, prijať, platiť",
+      "events": "kalendár, rozvrh, stretnutie, nadchádzajúce, vstupenky, AMA",
+      "stages": "audio miestnosti, hlasový chat, priestory, živé audio, rozhovor, podcast",
+      "featureRequests": "vytvárať, tvorcovia, nápady, návrhy, nahlásiť chybu, chyby, opravy, plán, hlasovať, zoznam želaní, vylepšiť",
+      "feedback": "recenzia, hodnotenie, prieskum, názor, sťažnosť, dať spätnú väzbu",
+      "staking": "stake, vklad, výnos, odmeny, zarábať, podiel na zisku, odznak, úrovne, úrok",
+      "superpowers": "boost, propagovať, výhody, schopnosti, výhody odznakov, dosah, vylepšenia",
+      "governance": "hlasovať, hlasovanie, návrhy, anketa, hlasovací lístok, rozhodnúť",
+      "dao": "pokladnica, darovať, dar, komunitný fond, prispieť, granty",
+      "bounties": "práca, pracovné ponuky, úlohy, zákazky, freelance, najať, zarobiť peniaze, platená práca",
+      "myBounties": "moje odmeny, moje zákazky, história, výplaty, dokončená práca",
+      "affiliate": "odporúčanie, pozvať priateľov, pozvať, provízia, partner, zarábať",
+      "careers": "práca, nábor, pracujte s nami, pridajte sa k tímu, prihlásiť sa, voľné miesta",
+      "stores": "obchod, predajňa, trhovisko, merch, kúpiť, predať, produkty, nakupovanie",
+      "fractions": "podiely, vlastníctvo, investovať, vlastniť príspevok, NFT, zberateľské predmety, obchodovať",
+      "usernames": "používateľské meno, prezývka, meno, zmeniť meno, kúpiť meno, predať meno",
+      "accounts": "kúpiť účet, predať účet, účty na predaj, sledujúci, previesť účet",
+      "apps": "obchod s aplikáciami, mini aplikácie, vytvoriť aplikáciu, vývojári, nástroje",
+      "arcade": "hry, hra, hrať, hranie, šach, strieľačka, zábava",
+      "glossary": "pojmy, definície, slovník, význam, čo je",
+      "compare": "porovnanie, porovnať, verzus, alternatívy, YouTube, X, TikTok",
+      "guide": "začíname, ako na to, návod, pomoc, učiť sa, začiatočník, som tu nový",
+      "stats": "štatistiky, analytika, čísla, grafy, cena, ponuka, držitelia",
+      "docs": "dokumentácia, pomoc, API, whitepaper, vývojári, príručka",
+      "blog": "novinky, články, aktualizácie, oznámenia, čo je nové",
+      "videos": "pozerať, videá, klipy, dlhé videá",
+      "shorts": "reels, krátke videá, vertikálne videá, potiahnuť",
+      "music": "audio, piesne, skladby, počúvať, rádio, playlist",
+      "liveTv": "TV, streamy, streamovanie, naživo, vysielanie, kanály, pozerať naživo",
+      "buyTokens": "kúpiť tokeny, nákup, dobiť, karta, kreditná karta, fiat",
+      "bridge": "cross chain, presunúť tokeny, siete, prevod medzi sieťami",
+      "top100": "top 100, mince, kryptomeny, trhová kapitalizácia, ceny",
+      "agents": "AI agenti, agenti, boti, automatizácia, persóny",
+      "advertising": "reklamy, inzeráty, kampaň, propagovať, sponzor, marketing",
+      "premium": "predplatné, upgrade, pro, členstvo, bez reklám",
+      "pricing": "plány, náklady, cena, koľko, predplatné",
+      "creators": "program pre tvorcov, ambasádori, partneri, prihlásiť sa ako tvorca, monetizovať",
+      "connectAi": "MCP, ChatGPT, Claude, API, integrácia, pripojiť AI",
+      "packs": "emoji, nálepky, GIFy, balíčky emoji, balíčky nálepiek, vlastné emoji",
+      "publicChat": "chat, globálny chat, chatovacia miestnosť, lobby, rozhovor, komunitný chat",
+      "planned": "naplánované, plánovať, naplánované príspevky, fronta, neskôr",
+      "liveStudio": "ísť naživo, stream, streamovanie, OBS, prekryvy, upozornenia, widgety",
+      "launchpad": "spustiť token, vytvoriť mincu, urobiť mincu, meme coin, bonding curve, tokenizovať"
     },
     "reorderHint": "Ak chcete zmeniť usporiadanie, podržte a presuňte ľubovoľ",
     "reorderReset": "Obnoviť",
@@ -488,7 +647,14 @@
     "getTheApp": "Stiahnuť aplikáciu",
     "connectAi": "Pripojiť AI",
     "converter": "Konvertor",
-    "affiliate": "Partnerský program"
+    "affiliate": "Partnerský program",
+    "groups": {
+      "create": "Vytvoriť",
+      "discover": "Objavovať",
+      "main": "Hlavné",
+      "money": "Peniaze",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Zobraziť profil používateľa {{name}}",
@@ -680,6 +846,8 @@
     "feedTogglesCleared": "Filtre kanála obnovené",
     "defaultProfileTab": "Predvolená karta profilu",
     "defaultProfileTabDesc": "Vyber, ktorú kartu uvidia návštevníci na tvojom profile ako prvú",
+    "defaultProfileView": "Rozloženie príspevkov na profile",
+    "defaultProfileViewDesc": "Zobraz svoje príspevky ako mriežku alebo zoznam, keď niekto otvorí tvoj profil",
     "public": "Verejné",
     "publicDesc": "Ktokoľvek môže vidieť vaše príspevky",
     "private": "Súkromné",
@@ -1115,7 +1283,38 @@
     "socialConnectedShort": "Pripojené",
     "socialConnectFailed": "Nepodarilo sa pripojiť {{platform}}. Skúste to znova.",
     "socialVerifiedFollowers": "{{value}} sledujúcich",
-    "socialFollowersPending": "Aktualizácia počtu sledovateľov"
+    "socialFollowersPending": "Aktualizácia počtu sledovateľov",
+    "menuLayoutFolders": "Priečinky",
+    "chatCards": "Chaty ako karty",
+    "chatCardsDesc": "Každý chat na vlastnej karte. Vypnite pre jednoduchý zoznam s čiarou medzi chatmi.",
+    "chatDeleteChoice": "Keď zmažete správu",
+    "chatDeleteChoiceDesc": "Pýtať sa zakaždým, alebo vždy zmazať len pre vás alebo pre všetkých v chate.",
+    "chatDeleteAsk": "Pýtať sa zakaždým",
+    "chatDeleteMe": "Zmazať pre mňa",
+    "chatDeleteMeDesc": "Zmizne z vášho chatu, ostatní ju stále vidia",
+    "chatDeleteEveryone": "Zmazať pre všetkých",
+    "chatDeleteEveryoneDesc": "Keď je to možné. Cudzia správa v skupine sa aj tak zmaže len pre vás",
+    "showLikes": "Zobraziť moje páči sa mi všetkým",
+    "showLikesDesc": "Ktokoľvek môže otvoriť kartu Páči sa mi na vašom profile. Predvolene vypnuté, takže len vy vidíte, čo sa vám páčilo.",
+    "showFollowersList": "Zobraziť, kto ma sleduje",
+    "showFollowersListDesc": "Umožnite komukoľvek otvoriť zoznam vašich sledujúcich. Keď je to vypnuté, vidíte ho len vy.",
+    "showFollowingList": "Zobraziť, koho sledujem",
+    "showFollowingListDesc": "Umožnite komukoľvek otvoriť zoznam ľudí, ktorých sledujete. Keď je to vypnuté, vidíte ho len vy.",
+    "showFollowCounts": "Zobraziť počty mojich sledujúcich",
+    "showFollowCountsDesc": "Zobrazte, koľko máte sledujúcich a koľko ľudí sledujete. Vypnutím sa skryjú aj oba zoznamy.",
+    "readerProfileView": "Otvárať ostatné profily ako",
+    "readerProfileViewDesc": "Vyberte mriežku alebo zoznam pre každý profil, ktorý otvoríte, alebo ponechajte voľbu každej osoby",
+    "readerProfileViewOwner": "Voľba každej osoby",
+    "tipsOffNote": "Kým je toto zapnuté, prepitné a platby pre vás sú vypnuté. Vypnite to, ak chcete znova dostávať prepitné.",
+    "menuLayout": "Rozloženie menu",
+    "menuLayoutDesc": "Ako menu zoskupuje svoje stránky",
+    "menuLayoutTabs": "Karty",
+    "menuLayoutTabsDesc": "Jedna skupina naraz, s veľkými ikonami",
+    "menuLayoutSections": "Sekcie",
+    "menuLayoutSectionsDesc": "Všetky stránky naraz, pod nadpismi skupín",
+    "menuLayoutFoldersDesc": "Vaše hlavné stránky, potom priečinok pre každú skupinu",
+    "publicChatInBar": "Verejný chat v dolnej lište",
+    "publicChatInBarDesc": "Jedným ťuknutím do Verejného chatu z lišty v dolnej časti obrazovky"
   },
   "common": {
     "confirm": "Potvrdiť",
@@ -1217,7 +1416,19 @@
     "payDirect": "Poslané priamo na {{name}} o {{symbol}} dňa {{chain}}. Žiadna výmena.",
     "payDirectNoName": "Odoslané priamo tvorcovi o {{symbol}} dňa {{chain}}. Žiadna výmena.",
     "payViaBridgeDpay": "Presunuté na Base a zaplatené na Riftn Pay, tokeny dorazia približne za minútu",
-    "dmSent": "Odoslané {{amount}} tokenov používateľovi {{name}}!"
+    "dmSent": "Odoslané {{amount}} tokenov používateľovi {{name}}!",
+    "addMessage": "Pridať správu (nepovinné)",
+    "messagePublic": "Verejné",
+    "railTitle": "Tipy",
+    "railTotal": "{{amount}} tokenov",
+    "tokensUnit": "tokenov",
+    "messagePlaceholder": "Povedzte niečo k prepitnému",
+    "messagePrivate": "Len {{name}}",
+    "theCreator": "tvorca",
+    "messageWallNote": "Zobrazí sa na stene prepitného, keď prepitné prejde.",
+    "sendWithMessage": "Poslať so správou",
+    "messageFailed": "Vašu správu sa nepodarilo pridať. Žiadne prepitné nebolo odoslané.",
+    "wallLabel": "Správy k prepitnému"
   },
   "postOptions": {
     "liveAlertsOn": "Teraz sledujete {{name}}. Keď začne vysielať naživo, dostanete upozornenie.",
@@ -1257,7 +1468,14 @@
     "giftBoost": "Darujte nový impulz",
     "markSection": "Preskočiteľné sekcie",
     "copyFailed": "Odkaz sa nepodarilo skopírovať",
-    "share": "Zdieľať"
+    "share": "Zdieľať",
+    "refreshLinkPreview": "Obnoviť náhľad odkazu",
+    "linkPreviewRefreshed": "Náhľad odkazu obnovený",
+    "linkPreviewRefreshFailed": "Stránka je nedostupná. Skúste to neskôr.",
+    "castToTv": "Prenášať do TV",
+    "castStarted": "Prehráva sa na vašom TV",
+    "castUnsupported": "Tento prehliadač nevie prenášať. Otvorte Riftn v Chrome alebo Safari a prehrajte to na TV.",
+    "castFailed": "TV je nedostupný. Skontrolujte, či je na rovnakej Wi-Fi, a skúste to znova."
   },
   "filters": {
     "sort": "Zoradiť",
@@ -1739,6 +1957,9 @@
   "notifications": {
     "title": "Upozornenia",
     "markAllRead": "Označiť všetko ako prečítané",
+    "groupNew": "Nové",
+    "groupToday": "Dnes",
+    "groupThisWeek": "Tento týždeň",
     "settings": "Nastavenia upozornení",
     "actions": "Akcie",
     "markAllAsRead": "Označiť všetko ako prečítané",
@@ -1767,6 +1988,7 @@
     "communities": "Komunity",
     "stores": "Obchody",
     "noNotificationsYet": "Zatiaľ žiadne upozornenia",
+    "searchClose": "Zatvoriť vyhľadávanie",
     "noNotificationsDesc": "Keď dostanete lajky, komentáre, tipy alebo nových predplatiteľov, zobrazia sa tu.",
     "loadMore": "Načítať viac",
     "markAsRead": "Označiť ako prečítané",
@@ -1875,14 +2097,18 @@
       "bountyApplied": "{{name}} uplatnené na vašu odmenu",
       "bountySubmittedNamed": "{{name}} odoslali prácu na vašu odmenu „{{title}}“",
       "bountySubmitted": "{{name}} odoslané práce na vašej odmene",
-      "sentNotification": "{{name}} vám poslal upozornenie"
+      "sentNotification": "{{name}} vám poslal upozornenie",
+      "featureActivity": "{{name}} komentoval(a) požiadavku"
     },
     "milestones": "Míľniky",
     "noNotifications": "Zatiaľ žiadne upozornenia",
     "subscribedToYou": "{{name}} si vás predplatil",
     "repostedPost": "{{name}} zdieľal váš príspevok",
     "quotedPost": "{{name}} citoval váš príspevok",
-    "videoMilestone": "Vaše video dosiahlo míľnik!"
+    "videoMilestone": "Vaše video dosiahlo míľnik!",
+    "groupEarlier": "Skôr",
+    "searchPlaceholder": "Hľadať upozornenia",
+    "searchEmpty": "Žiadne zodpovedajúce upozornenia"
   },
   "leaderboard": {
     "title": "Rebríček",
@@ -1936,7 +2162,13 @@
     "topEarners": "Top zárobky",
     "topTippers": "Top tipujúci",
     "mostFollowed": "Najviac sledovaní",
-    "mostLiked": "Najviac obľúbení"
+    "mostLiked": "Najviac obľúbení",
+    "ogChallenge": "OG výzva",
+    "ogHolders_one": "{{count}} OG držiteľ",
+    "ogHolders_other": "{{count}} OG držiteľov",
+    "ogChallengeTitle": "Priveďte späť OG držiteľov",
+    "ogChallengeBody": "Pozvite ľudí, ktorí stále držia DHB. Keď sa pripoja cez váš pozývací odkaz a ponechajú si DHB vo svojej peňaženke Riftn, započítajú sa vám tu.",
+    "ogChallengeCta": "Získať pozývací odkaz"
   },
   "dhbListing": {
     "title": "Listing tokenu už čoskoro!",
@@ -2020,11 +2252,13 @@
     "promptLabel": "Vaša výzva",
     "promptPlaceholder": "Popíšte nápad, zlepšenie alebo chybu...",
     "promptAttach": "Priložiť obrázky",
+    "removeAttachment": "Odstrániť prílohu",
     "promptDrop": "Sem prilepte alebo presuňte obrázky",
     "promptPost": "Výzva na uverejnenie príspev",
     "promptShortcut": "Ctrl / ⌘ + Enter k postovaniu",
     "promptDetails": "Nepovinné údaje",
     "promptDevice": "Zariadenie a operačný systém (pre chyby)",
+    "deviceInfoNoErrors": "Žiadny",
     "promptFilters": "Filtrovať podľa kategórie",
     "promptMediaError": "Vyberte obrázky alebo videa do 50 MB každé.",
     "promptMediaLimit": "Až {{max}} príloh.",
@@ -2077,12 +2311,40 @@
     "shipping": "Vo výrobe",
     "noShippingYet": "Nič sa nerobí",
     "shippingAppearHere": "Požiadavky, na ktorých sa pracuje, sa zobrazia tu.",
-    "loadFailed": "Žiadosti sa nepodarilo načítať"
+    "loadFailed": "Žiadosti sa nepodarilo načítať",
+    "editMedia": "Fotky a videá",
+    "editAddMedia": "Pridať fotku alebo video",
+    "deviceInfoNote": "Informácie o zariadení sú priložené, aby nám pomohli opraviť chyby.",
+    "deviceInfo": "Informácie o zariadení",
+    "deviceInfoOwners": "Vidia to len vlastníci nástenky",
+    "deviceInfoError": "Informácie o zariadení sa nepodarilo načítať",
+    "deviceInfoNone": "K tejto požiadavke nie sú informácie o zariadení",
+    "deviceInfoErrors": "Nedávne chyby"
   },
   "auth": {
-    "loginRequired": "Vyžaduje sa prihlásenie"
+    "loginRequired": "Vyžaduje sa prihlásenie",
+    "accountDeleted": "Tento účet bol zmazaný. Môžete sa znova zaregistrovať ako nový účet.",
+    "accountDeletedHours_one": "Tento účet bol zmazaný. S rovnakým e-mailom alebo telefónom sa môžete znova zaregistrovať približne o {{count}} hodinu.",
+    "accountDeletedHours_other": "Tento účet bol zmazaný. S rovnakým e-mailom alebo telefónom sa môžete znova zaregistrovať približne o {{count}} hodín.",
+    "accountDeletedDays_one": "Tento účet bol zmazaný. S rovnakým e-mailom alebo telefónom sa môžete znova zaregistrovať približne o {{count}} deň.",
+    "accountDeletedDays_other": "Tento účet bol zmazaný. S rovnakým e-mailom alebo telefónom sa môžete znova zaregistrovať približne o {{count}} dní."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Do",
+      "recent": "Nedávne",
+      "suggested": "Navrhované",
+      "youFollow": "Ľudia, ktorých sledujete",
+      "placeholder": "Meno alebo @používateľ",
+      "chattedBefore": "Píšete si",
+      "mutual": "Vzájomné",
+      "dmsOff": "DM vypnuté",
+      "keepTyping": "Píšte ďalej a hľadajte medzi všetkými",
+      "noOne": "Nikto sa nenašiel",
+      "tryUsername": "Skúste presné @používateľské meno",
+      "sayHi": "Pozdravte niekoho",
+      "typeAny": "Zadajte akékoľvek meno alebo @používateľa"
+    },
     "reply": "Odpovedať",
     "react": "Reagovať",
     "edit": "Upraviť",
@@ -2120,13 +2382,17 @@
     "deleteConversationFailed": "Konverzáciu sa nepodarilo odstrániť",
     "message": "Správa",
     "noConversationsYet": "Zatiaľ žiadne konverzácie",
+    "sending": "Odosielam...",
+    "retrySend": "Skúsiť znova",
+    "discardSend": "Odstrániť",
     "search": "Hľadať správy",
     "newMessage": "Nová správa",
     "noMessages": "Zatiaľ žiadne správy",
     "typeMessage": "Napíšte správu...",
     "send": "Odoslať",
     "offline": "Offline",
-    "lastSeen": "Naposledy videný"
+    "lastSeen": "Naposledy videný",
+    "notSent": "Neodoslané"
   },
   "music": {
     "listeningCount_one": "{{count}} počúvanie",
@@ -2201,12 +2467,32 @@
       "listens_one": "{{value}} pozriť",
       "listens_other": "{{value}} počúva",
       "votes_one": "{{value}} hlas",
-      "votes_other": "{{value}} hlasov"
+      "votes_other": "{{value}} hlasov",
+      "members_one": "{{value}} člen",
+      "members_other": "{{value}} členov"
     },
     "viewGrid": "Zobrazenie mriežky",
     "viewList": "Zobrazenie zoznamu",
     "viewMode": "Zobraziť",
     "back": "Späť",
+    "reserve": {
+      "signIn": "Prihlásiť sa",
+      "available": "Používateľské meno je voľné",
+      "held": "Držíme ho pre vás",
+      "ended": "Rezervácia skončila",
+      "busy": "Práve sa rezervuje",
+      "availableBody": "riftn.com/{{name}} je práve voľné. Rezervujte si ho a podržíme ho pre vás jednu minútu, kým sa zaregistrujete.",
+      "heldBody": "Nikto iný si nemôže vziať @{{name}}, kým nevyprší časovač. Dokončite registráciu, aby ste si ho ponechali.",
+      "endedBody": "Vaša minúta vypršala, takže @{{name}} je znova otvorené pre všetkých. Stále je voľné.",
+      "busyBody": "Niekto sa práve registruje ako @{{name}}. Ak to nedokončí, uvoľní sa po skončení časovača.",
+      "finish": "Dokončiť registráciu",
+      "again": "Rezervovať znova",
+      "cta": "Rezervovať teraz",
+      "letGo": "Pustiť",
+      "haveAccount": "Máte účet?",
+      "seoTitle": "@{{name}} je dostupné na Riftn",
+      "seoDescription": "riftn.com/{{name}} zatiaľ nikto nemá. Rezervujte si ho a zaregistrujte sa, aby bolo vaše."
+    },
     "usernameAvailable": "Používateľské meno je voľné!",
     "signUpToClaim": "Zaregistrujte sa ešte dnes a získajte ho",
     "signUp": "Zaregistrovať sa",
@@ -2225,7 +2511,8 @@
       "total": "Celkový dosah",
       "breakdownTitle": "Odkiaľ pochádza tento dosah",
       "dehubFollowers": "Sledovatelia Riftnu",
-      "verified": "Sociálne počty pochádzajú z účtov, ku ktorým je tvorca pripojený."
+      "verified": "Sociálne počty pochádzajú z účtov, ku ktorým je tvorca pripojený.",
+      "selfReported": "Počet sledovateľov na sociálnych sieťach zadáva tvorca."
     },
     "loginDescription": "Prihláste sa na zobrazenie a správu svojho profilu.",
     "replyThread": {
@@ -2234,7 +2521,17 @@
     },
     "tabs": {
       "playlists": "Playlisty",
-      "dislikes": "Nedobré hodnotenie"
+      "dislikes": "Nedobré hodnotenie",
+      "likes": "Páči sa mi",
+      "articles": "Články"
+    },
+    "likedPosts": {
+      "emptyTitle": "Zatiaľ žiadne lajky",
+      "privateTitle": "Lajky sú súkromné",
+      "loadMore": "Načítať viac",
+      "emptyOwn": "Príspevky, ktoré sa vám páčia, sa zobrazia tu. Vidíte ich len vy, pokiaľ v Nastaveniach nezapnete Zobraziť moje páči sa mi.",
+      "emptyOther": "Zatiaľ sa nič nepáčilo.",
+      "privateDesc": "Tento účet si svoje páči sa mi necháva pre seba."
     },
     "dislikes": {
       "emptyTitle": "Ešte žiadne nedobré hodnotenie",
@@ -2257,6 +2554,21 @@
     "sortMostViewed": "Najprezeranejšie",
     "sortLikes": "Páči sa mi to",
     "sortMostLiked": "Najobľúbenejšie",
+    "sortCustomShort": "Vlastné",
+    "arrange": {
+      "saving": "Ukladá sa...",
+      "title": "Usporiadajte svoje príspevky",
+      "hint": "Podržte príspevok a presuňte ho na nové miesto. Návštevníci uvidia toto poradie ako prvé.",
+      "drag": "Potiahnutím presuniete",
+      "toTop": "Presunúť navrch",
+      "save": "Uložiť poradie",
+      "saved": "Vaše poradie je uložené",
+      "reset": "Späť na najnovšie prvé",
+      "resetDone": "Späť na najnovšie prvé",
+      "saveFailed": "Vaše poradie sa nepodarilo uložiť. Skúste to znova.",
+      "loadFailed": "Vaše príspevky sa nepodarilo načítať. Zatvorte to a skúste znova.",
+      "empty": "Zatiaľ nie je čo usporiadať. Najprv niečo uverejnite."
+    },
     "searchThisChannel": "Hľadať v tomto kanáli",
     "searchResultCount": "1 výsledok pre „{{query}}“",
     "searchResultCountPlural": "{{count}} výsledky vyhľadávania „{{query}}“",
@@ -2273,7 +2585,16 @@
     "muteUser": "Stlmiť",
     "subscribe": "Predplatiť",
     "subscribed": "Predplatené",
-    "tip": "Tip"
+    "tip": "Tip",
+    "unavailable": "Profil nie je dostupný",
+    "mutualsOne": "{{count}} spoločný:",
+    "mutualsMany": "{{count}} spoločných:",
+    "articles": {
+      "emptyTitle": "Zatiaľ žiadne články",
+      "emptySubtitle": "Články sa zobrazia tu"
+    },
+    "sortCustom": "Vlastné poradie",
+    "arrangeButton": "Usporiadať príspevky"
   },
   "tv": {
     "seoTitle": "Živé TV: Zdarma Kanály zo Celého Sveta",
@@ -2431,6 +2752,7 @@
       "runSwarm": "Spustiť štvor",
       "description": "Akcie sa spúšťajú ako vybraný agent. Naplánované úlohy pokračujú po zatvorení aplikácie.",
       "instructions": "Pokyny pre zástupcu",
+      "examples": "Uverejni príspevok raz denne na tému: nezávislá hudba\nŠtýl: zvedavý, stručný a konverzačný\nOznač „Páči sa mi“ až 2 nedávnym príspevkom denne na témy: hudba, živé vystúpenia, vinyl",
       "preparing": "Príprava úlohy…",
       "run": "Spustiť prompt",
       "limits": "Jeden denný príspevok a až 3 relevantné lajky na úlohu. Všetci agenti zdieľajú 20-minútovú medzeru po odoslaní. Fotky používajú začiarknuté titulky. Videá potrebujú titulný obrázok. Príspevky majú menej ako 500 znakov. Žiadny plyn, pokiaľ nie je razený; pri písaní sa môžu použiť kredity.",
@@ -2438,6 +2760,7 @@
       "list": "Úlohy",
       "refresh": "Obnoviť",
       "loading": "Načítavajú sa úlohy…",
+      "meta": "@{{agent}} · {{status}} · Spracované: {{total}}",
       "next": "Ďalšia jazda: {{time}}",
       "pause": "Pozastaviť",
       "resume": "Obnoviť",
@@ -2538,6 +2861,28 @@
     "signInAgain": "Znova sa prihlásiť",
     "createSignIn": "Na vytvorenie agenta sa znova prihláste",
     "checkConnection": "Skontrolujte pripojenie a skúste to znova.",
+    "welcome": {
+      "text": "Uvítacia správa",
+      "title": "Privítajte nových členov",
+      "help": "Tento agent sleduje a/alebo píše ľuďom, ktorí sa práve pridali k Riftn, niekoľkým denne.",
+      "follow": "Sledovať nových členov",
+      "message": "Písať novým členom",
+      "textHelp": "{name} sa nahradí ich @používateľským menom. Žiadne odkazy. Posiela sa raz každej osobe.",
+      "saveText": "Uložiť správu",
+      "perDay": "Ľudí denne",
+      "fewer": "Menej denne",
+      "more": "Viac denne",
+      "today": "Dnes: {{follows}} sledovaných · {{messages}} správ",
+      "limits": "Nikdy dvakrát tú istú osobu. Preskočí každého, kto vás zablokoval alebo stlmil, vypol nové správy alebo sa skryl z Nových členov.",
+      "showLog": "Pozrieť, koho privítal",
+      "hideLog": "Skryť privítania",
+      "empty": "Zatiaľ nikto. Noví členovia sa tu zobrazia, keď sa pridajú.",
+      "followed": "Sledovaný",
+      "messaged": "Napísané",
+      "skipped": "Preskočené",
+      "failed": "Nedostupné",
+      "defaultText": "Ahoj {name}, vitaj na Riftn! 👋"
+    },
     "workspace": {
       "moderation": "Moderovanie streamu",
       "moderationHelp": "Najprv povoľte oprávnenie na moderovanie. Účet už musí byť tvorcom streamu alebo prideleným moderátorom. Režimy schvaľovania a konceptov naďalej platia. Dočasné umlčania automaticky vypršia.",
@@ -2730,7 +3075,17 @@
     "resendCodePhone": "Nesprávne číslo alebo žiadny kód? Vráťte sa",
     "continueAs": "Pokračovať ako",
     "switchWalletAccount": "Prepnúť účet",
-    "walletLoadFailed": "Nepodarilo sa načítať peňaženky. Skúste to znova."
+    "walletLoadFailed": "Nepodarilo sa načítať peňaženky. Skúste to znova.",
+    "openInBrowser": "Otvoriť v prehliadači",
+    "copyLink": "Skopírovať odkaz",
+    "bringLoginOver": "Používali ste Riftn na dehub.io? <bring>Preneste si prihlásenie</bring>",
+    "didYouMean": "Mysleli ste {{email}}?",
+    "profileMovedTitle": "Váš profil sa presunul",
+    "migrateWrongLogin": "Toto prihlásenie otvorilo inú peňaženku, takže sa nič nezmenilo. Váš starý profil bol vytvorený cez {{login}}. Použite ho, aby ste ho obnovili.",
+    "googleInAppTitle": "Google sa v aplikácii {{app}} neprihlási",
+    "googleInAppTitleUnnamed": "Google sa v tejto aplikácii neprihlási",
+    "googleInAppBody": "Otvorte Riftn v prehliadači, ak chcete použiť Google, alebo sa tu prihláste e-mailom.",
+    "tryAnyway": "Skúsiť aj tak"
   },
   "careers": {
     "title": "Kariéra",
@@ -2981,7 +3336,17 @@
     "noMenuMatches": "Nič v ponuke nezodpovedá",
     "searchDehubFor": "Hľadať „{{query}}“ na Riftne",
     "switchAccount": "Prepnúť účet",
-    "signedInAs": "Prihlásený ako {{name}}"
+    "signedInAs": "Prihlásený ako {{name}}",
+    "requestSend": "Odoslať žiadosť",
+    "requestPrompt": "Ešte to tu nie je? Pošlite to ako požiadavku",
+    "requestPromptShort": "Ešte to tu nie je?",
+    "requestDraftMenu": "Pridať {{query}} do Riftn",
+    "requestDraftSettings": "Nastavenie pre {{query}}",
+    "requestPostsTo": "Uverejní sa v Požiadavkách",
+    "requestHint": "Uverejní sa v Požiadavkách vaším menom. Dáme vám vedieť, keď to spustíme.",
+    "requestSent": "Odoslané do Požiadaviek",
+    "requestSentHint": "Dáme vám vedieť, keď to spustíme.",
+    "requestSeeIt": "Pozrieť v Požiadavkách"
   },
   "comments": {
     "reportComment": "Nahlásiť komentár",
@@ -3074,7 +3439,23 @@
     "likersEmptyTitle": "Zatiaľ žiadne lajky",
     "likersEmptyBody": "Lajky tohto komentára sa zobrazia tu.",
     "anonymousLikes_one": "{{count}} lajk od anonymného držiteľa odznaku",
-    "anonymousLikes_other": "{{count}} lajkov od anonymných držiteľov odznakov"
+    "anonymousLikes_other": "{{count}} lajkov od anonymných držiteľov odznakov",
+    "threadParts": {
+      "moveUp": "Pohori",
+      "moveDown": "Dol",
+      "reorder": "Zmeniť poradie",
+      "save": "Uložiť poradie",
+      "saved": "Poradie vlákna uložené",
+      "saveFailed": "Poradie sa nepodarilo uložiť. Skúste to znova.",
+      "dragPart": "Potiahnutím presuniete časť {{n}}",
+      "addPart": "Pridať do vlákna",
+      "addPlaceholder": "Pridajte do svojho vlákna...",
+      "label": "Vlákno · {{count}} častí",
+      "reorderHint": "Potiahnite časti alebo použite šípky a potom uložte."
+    },
+    "attachMedia": "Priložiť fotku, video alebo zvuk",
+    "attachUnsupported": "Priložte fotku, video alebo zvukový súbor.",
+    "attachTooLarge": "Súbor presahuje limit {{size}} MB."
   },
   "mintChain": {
     "title": "Príspevok mincovne",
@@ -3090,6 +3471,16 @@
     "confirm": "Mincovňa {{chain}}",
     "confirmWithCost": "Mincovňa {{chain}} · {{cost}}",
     "notAvailable": "Minting na tomto reťazci ešte nie je k dispozícii."
+  },
+  "postEditHistory": {
+    "original": "Originál",
+    "title": "História úprav",
+    "edited_one": "Upravené raz",
+    "edited_other": "Upravené {{count}}-krát",
+    "lastEdit": "Posledná úprava {{time}}",
+    "editN": "Úprava {{n}}",
+    "now": "Teraz",
+    "showChanges": "Zobraziť zmeny"
   },
   "postInfo": {
     "title": "Informácie o príspevku",
@@ -3384,7 +3775,10 @@
     "waiting_for_wallet": "Čaká sa na vašu peňaženku",
     "waiting_for_wallet_desc": "Otvorte {{wallet}} a potvrďte podpis — žiadosť tam čaká.",
     "your_wallet": "vaša peňaženka",
-    "max_available_on_chain": "Maximálne dostupné: {{amount}} tokenov na {{chain}}"
+    "max_available_on_chain": "Maximálne dostupné: {{amount}} tokenov na {{chain}}",
+    "not_available_for_this_post": "Pre tento príspevok nie je dostupné",
+    "turn_back_on_desktop_notifications": "Znova zapnúť upozornenia na ploche?",
+    "notifications_moved_to_riftn": "Presunuli sme sa na riftn.com, takže váš prehliadač potrebuje ešte raz váš súhlas, aby tu zobrazoval odpovede, prepitné a DM."
   },
   "staking": {
     "title": "Stakovanie",
@@ -5202,6 +5596,7 @@
     "settledTitleSpeed": ", typicky za {{speed}}",
     "settledCount_one": "{{count}} vyrovnaný",
     "settledCount_other": "{{count}} vyrovnaný",
+    "statusInProgress": "Prebieha",
     "howMany": "Koľko",
     "availableCount_one": "{{count}} dostupné",
     "availableCount_other": "{{count}} dostupné",
@@ -5291,9 +5686,169 @@
     "buy": "Kúpiť",
     "reject": "Zamietnuť",
     "needsYouHold": "Potrebuješ {{needed}}, držiš {{held}}",
-    "sellYourFractions": "Predaj svoje zlomky ({{held}} držaných)"
+    "sellYourFractions": "Predaj svoje zlomky ({{held}} držaných)",
+    "nftsSubtitle": "Akékoľvek NFT, výmeny v jednom kroku",
+    "buyersTab": "Kupujúci",
+    "soldOfListing": "Predané {{sold}} z {{total}}",
+    "noBuyersYet": "Podiely tohto príspevku si zatiaľ nikto nekúpil",
+    "fromYou": "od vás",
+    "statusOverdue": "Oneskorené"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Použiť tieto detaily",
+        "url": "URL stránky produktu",
+        "action": "Načítať stránku produktu",
+        "loading": "Načítava sa stránka…",
+        "hint": "Importujte text z verejnej stránky produktu. Údaje pred použitím skontrolujte; obrázky produktu priložte v štúdiu samostatne.",
+        "source": "Importovaný zdroj",
+        "review": "Vyberte produkt, ktorý sa skopíruje do vášho upraviteľného zadania. Váš titulok, tón a farby značky zostanú nezmenené.",
+        "errors": {
+          "signIn": "Prihláste sa, aby ste mohli importovať stránku produktu.",
+          "url": "Použite verejnú HTTPS URL produktu.",
+          "empty": "Nenašli sa žiadne použiteľné údaje o produkte. Pridajte ich ručne.",
+          "busy": "Prebieha príliš veľa importov. Skúste to o chvíľu.",
+          "unavailable": "Túto stránku sa nepodarilo importovať. Pridajte údaje o produkte ručne.",
+          "failed": "Import zlyhal. Vaše zadanie je uložené; skúste to znova alebo zadajte údaje ručne."
+        }
+      },
+      "return": "Späť ku konceptu v štúdiu",
+      "title": "Zadanie kampane",
+      "intro": "Opíšte svoj produkt a značku, potom pripravte zodpovedajúce reklamné formáty.",
+      "saved": "Vaše zadanie je uložené na tomto zariadení pre tento účet.",
+      "preview": "Pripraviť formáty",
+      "clear": "Vymazať zadanie",
+      "required": "Na prípravu formátov pridajte názov a popis produktu.",
+      "variants": "Formáty kampane",
+      "reviewHint": "Pred generovaním skontrolujte v štúdiu model, cenu a referenciu produktu. Každý formát je samostatné generovanie.",
+      "open": "Skontrolovať v štúdiu",
+      "fields": {
+        "product": "Názov produktu (povinné)",
+        "description": "Fakty o produkte (povinné)",
+        "brand": "Názov značky",
+        "audience": "Cieľové publikum",
+        "benefit": "Hlavný prínos",
+        "voice": "Tón značky",
+        "palette": "Farby značky",
+        "headline": "Schválený titulok",
+        "cta": "Výzva k akcii"
+      },
+      "formats": {
+        "square": "Štvorcová reklama",
+        "portrait": "Portrétna reklama",
+        "story": "Obrázok do príbehu",
+        "video": "Vertikálne video"
+      }
+    },
+    "cinema": {
+      "close": "Zavrieť",
+      "performance": {
+        "label": "Výkon",
+        "0": "Radostný",
+        "1": "Melancholický",
+        "2": "Úzkostlivý",
+        "3": "Sebavedomý",
+        "4": "Ohromený",
+        "5": "Zdržanlivý",
+        "6": "Hravý"
+      },
+      "title": "Filmová réžia",
+      "hint": "Usmernite vizuálny štýl vášho ďalšieho obrázka alebo videa. Výsledky sa líšia podľa modelu.",
+      "none": "Bez réžie",
+      "reset": "Vymazať réžiu",
+      "camera": {
+        "label": "Vzhľad kamery",
+        "0": "Digitálne kino",
+        "1": "35mm film",
+        "2": "16mm film",
+        "3": "Veľký formát",
+        "4": "Vintage videokamera"
+      },
+      "lens": {
+        "label": "Vzhľad objektívu",
+        "0": "Sférický",
+        "1": "Anamorfický",
+        "2": "Vintage mäkké sklo",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Ohnisková vzdialenosť",
+        "0": "18 mm široký",
+        "1": "24 mm široký",
+        "2": "35 mm prirodzený",
+        "3": "50 mm štandardný",
+        "4": "85 mm portrétny",
+        "5": "135 mm teleobjektív"
+      },
+      "aperture": {
+        "label": "Hĺbka ostrosti",
+        "0": "f/1.4 veľmi malá",
+        "1": "f/2.8 malá",
+        "2": "f/5.6 stredná",
+        "3": "f/11 hlboké zaostrenie"
+      },
+      "movement": {
+        "label": "Pohyb kamery",
+        "0": "Pevný statív",
+        "1": "Pomalý nájazd",
+        "2": "Pomalý odjazd",
+        "3": "Bočné sledovanie",
+        "4": "Obeh okolo objektu",
+        "5": "Z ruky",
+        "6": "Zdvih žeriavom",
+        "7": "Pomalé panorámovanie"
+      },
+      "lighting": {
+        "label": "Osvetlenie",
+        "0": "Mäkké denné svetlo",
+        "1": "Zlatá hodinka",
+        "2": "Tmavé šerosvitné",
+        "3": "Svetlé štúdiové",
+        "4": "Neónové svetlá v zábere",
+        "5": "Silueta v protisvetle",
+        "6": "Rozptýlené zamračené"
+      },
+      "tempo": {
+        "label": "Tempo záberu",
+        "0": "Jeden nepretržitý záber",
+        "1": "Pokojná, nenáhlivá akcia",
+        "2": "Dynamická, energická akcia",
+        "3": "Chaotická, zbesilá akcia"
+      },
+      "era": {
+        "label": "Obdobie",
+        "0": "20. roky 20. storočia",
+        "1": "50. roky",
+        "2": "60. roky",
+        "3": "70. roky",
+        "4": "80. roky",
+        "5": "90. roky",
+        "6": "Súčasnosť",
+        "7": "Blízka budúcnosť"
+      },
+      "genre": {
+        "label": "Žáner",
+        "0": "Dokument",
+        "1": "Dráma",
+        "2": "Film noir",
+        "3": "Sci-fi",
+        "4": "Fantasy",
+        "5": "Romantická komédia",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Farebná paleta",
+        "0": "Teplá jantárová",
+        "1": "Chladná modrá",
+        "2": "Tlmené zemité tóny",
+        "3": "Pastelová",
+        "4": "Vysokokontrastná čiernobiela",
+        "5": "Sýte základné farby"
+      }
+    },
     "libraryEmpty": "Tu sa zobrazia vaše uložené generovania.",
     "toolRemake": "Znovu vytvorte",
     "toolMaboroshi": "Maboroshi",
@@ -6095,7 +6650,118 @@
       "needsImageToWork": "{{model}} potrebuje obrázok, z ktorého bude fungovať. Najprv jeden priložte.",
       "speechLimit": "To je {{length}} znakov. Limit je {{limit}}.",
       "musicTrackLength": "{{count}}s trať"
-    }
+    },
+    "gallery": {
+      "send": "Poslať",
+      "notifications": {
+        "generation_reply": "{{name}} odpovedal na váš komentár",
+        "generation_like": "{{name}} reagoval(a) na vaše generovanie",
+        "generation_comment_like": "{{name}} reagoval(a) na váš komentár",
+        "generation_comment": "{{name}} komentoval(a) vaše generovanie"
+      },
+      "browse": "Prehliadať generovania",
+      "create": "Vytvoriť",
+      "fullscreen": "Zobraziť na celej obrazovke",
+      "missing": "Toto generovanie nie je dostupné."
+    },
+    "avatarTitle": "Hovoriaci portrét",
+    "avatarRequirements": "Štvorcový PNG portrét, 512–2048 pixelov, do 5 MB. Mono 24 kHz 16-bit PCM WAV, 5–30 sekúnd. Posledný zlomok sekundy sa doplní tichom.",
+    "avatarPortrait": "Vybrať portrét PNG",
+    "avatarAudio": "Vybrať reč WAV",
+    "avatarPermission": "Mám povolenie animovať tento portrét a použiť tento zvuk.",
+    "avatarQuote": "{{seconds}} sekúnd vrátane ticha · {{amount}} tokenov",
+    "avatarPrepare": "Pripraviť a skontrolovať cenu",
+    "batchFlowLimit": "Zoznam Flow je plný. Pred vytvorením ďalšej dávky odstráňte nepoužívaný Flow.",
+    "batchReviewCampaign": "Skontrolovať dávku kampane vo Flow",
+    "batchReviewFilmImages": "Skontrolovať dávku obrázkov storyboardu",
+    "batchReviewFilmVideos": "Skontrolovať dávku filmových klipov",
+    "batchReviewHint": "Otvorí samostatný uložený Flow. Pred zaplatením skontrolujte každú položku a celú cenu. Dokončené položky a pôvodná platba sa uchovajú na obnovenie. Referencie sa skopírujú do vašej súkromnej knižnice; účtuje sa úložisko a sieťová prevádzka.",
+    "batchInvalid": "Pred prípravou dávky 1–12 obrázkov alebo klipov dokončite každú položku.",
+    "batchReferenceLimit": "Táto dávka podporuje jednu obrázkovú referenciu na položku. Odstráňte nadbytočné referencie alebo pripravte danú položku samostatne.",
+    "batchVideoSettings": "V tejto dávke musia mať klipy celú dĺžku 4–15 sekúnd a pomer strán 16:9, 9:16 alebo 1:1.",
+    "batchMissingReference": "Referencia chýba, nie je podporovaná alebo je väčšia ako 25 MB. Pred prípravou dávky ju obnovte v editore.",
+    "batchOwnerChanged": "Účet alebo koncept sa zmenil. Otvorte túto dávku znova pod pôvodným účtom.",
+    "batchConflict": "Uložená dávka nezodpovedá svojmu pôvodnému stavu.",
+    "audioExportFormat": "Formát exportu",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Priložte jeden zdrojový klip na predĺženie.",
+    "extensionSeconds": "+{{seconds}} s nového záznamu",
+    "extensionHelp": "Vráti váš zdrojový klip s približne štyrmi novými sekundami. Výstup sa prispôsobí až na 720p pri 24 fps. Pre predĺženie sa vygeneruje nový zvuk.",
+    "extensionForward": "Pridať asi štyri sekundy za zdrojový klip",
+    "extensionBackward": "Pridať asi štyri sekundy pred zdrojový klip",
+    "expandDescription": "Vygenerujte nové okraje obrázka. Voliteľný prompt v angličtine; jeden zdrojový obrázok.",
+    "relightDescription": "Zmeňte osvetlenie jednej fotky podľa vášho opisu svetla a pozadia.",
+    "expandPromptHint": "Priložte jeden obrázok a vyberte nový pomer strán. Prompt v angličtine je voliteľný.",
+    "expandEnglishOnly": "Tento model rozšírenia prijíma prompty v angličtine. Pre automatické rozšírenie nechajte prompt prázdny.",
+    "expandNeedsImage": "Priložte obrázok na rozšírenie.",
+    "learn": {
+      "title": "Lekcie pre tvorcov",
+      "intro": "Krátke lekcie, kontrola vedomostí a upraviteľné cvičenie ku každej. Pokrok sa ukladá na tomto zariadení pre váš účet.",
+      "back": "Späť do Creatora",
+      "lessons": "Lekcie",
+      "progress": "Splnené kontroly vedomostí: {{completed}} z {{total}}",
+      "check": "Skontrolovať odpoveď",
+      "correct": "Kontrola vedomostí splnená",
+      "retry": "Skúste to znova. Prejdite si lekciu vyššie.",
+      "exerciseTitle": "Praktické cvičenie",
+      "exerciseHint": "Otvorte upraviteľný príklad vo vlastnom pracovnom priestore štúdia. Otvorenie konceptu je zadarmo; generovanie vyžaduje vašu kontrolu a vlastnú cenovú ponuku. Pred generovaním príklad upravte.",
+      "openExercise": "Otvoriť koncept cvičenia",
+      "closeExercise": "Zavrieť cvičenie",
+      "brief": {
+        "title": "Napíšte jasné vizuálne zadanie",
+        "body1": "Opíšte konkrétny objekt, jeho činnosť a prostredie. Pridajte záber alebo pohyb kamery, ak to scéne pomôže. Nesúvisiace nápady si nechajte na iný koncept.",
+        "body2": "Pokyny k osvetleniu, objektívu a štýlu usmerňujú model. Nezaručujú fyzické správanie kamery ani presný obrázok. Meňte vždy len jednu časť, aby ste mohli porovnať verzie.",
+        "body3": "Pred generovaním skontrolujte zvolený model, podporované prílohy, rozmery a cenu. Pôvodný koncept si ponechajte, aby ste sa k nemu mohli vrátiť.",
+        "question": "Ktoré zadanie sa najľahšie upravuje?",
+        "answer0": "Jasný objekt, činnosť a prostredie",
+        "answer1": "Iba názov modelu",
+        "answer2": "Zoznam protichodných štýlov",
+        "exercise": "Keramická čajová kanvica na drevenom stole pri okne. Jemné ranné svetlo, stredný záber, jednoduché pozadie. Kanvica nech zostane jasným hlavným objektom."
+      },
+      "continuity": {
+        "title": "Plánujte zábery a kontrolujte kontinuitu",
+        "body1": "Na uloženie zadania a zoradených záberov použite panel Film v editore. Každý snímok alebo klip pripravte samostatne, skontrolujte jeho cenovú ponuku a vyberte prijatý výsledok.",
+        "body2": "Prikladajte len referencie, ktoré zvolený model prijíma. Opakované použitie referencie môže usmerniť vzhľad; netrénuje identitu ani nezaručuje zhodu. Postavy a hlasy sa môžu medzi generovaniami líšiť.",
+        "body3": "Úspešné zábery si ponechajte a poskladajte ich na časovej osi. Pred exportom skontrolujte pohyb, tváre, dialógy a prechody.",
+        "question": "Čo podporuje kontinuitu medzi zábermi?",
+        "answer0": "Viac nesúvisiacich promptov",
+        "answer1": "Schválené referencie a skontrolované poznámky k záberom",
+        "answer2": "Predpoklad, že identita postavy je zaručená",
+        "exercise": "Široký záber osamelého cestovateľa, ktorý pri východe slnka prichádza na tiché pobrežie. Pomalý pohyb kamery dopredu, pokojná atmosféra. Jeden súvislý záber."
+      },
+      "campaign": {
+        "title": "Používajte schválené fakty o produkte",
+        "body1": "Začnite faktami o produkte, ktoré si viete overiť. Importované metadáta pred použitím skontrolujte. Titulok a výzvu k akcii napíšte výslovne; nevymýšľajte ceny, recenzie ani tvrdenia o výkone.",
+        "body2": "Uložené varianty kampane vám pomôžu držať spolu spoločné poznámky aj jednotlivé háčiky, scenáre, jazyky a formáty. Pripravujte vždy jednu skontrolovanú položku a v štúdiu skontrolujte jej cenovú ponuku.",
+        "body3": "Vo výsledku skontrolujte viditeľný text, vzhľad produktu a všetky vyslovené tvrdenia. Prompt nie je dôkazom presnosti produktu ani marketingového výkonu.",
+        "question": "Kedy by malo byť tvrdenie o produkte zahrnuté?",
+        "answer0": "Kedykoľvek znie presvedčivo",
+        "answer1": "Po vymyslení päťhviezdičkovej recenzie",
+        "answer2": "Keď pochádza zo schválených faktov o produkte",
+        "exercise": "Vytvorte portrétnu reklamu na sypaný čaj predávaný v opakovane použiteľnej plechovke. Schválený titulok: Nájdite si čas na čaj. Schválená výzva: Preskúmajte kolekciu. Použite iba tieto fakty; nevymýšľajte zľavy, recenzie ani zdravotné tvrdenia."
+      }
+    },
+    "campaignPlanTitle": "Varianty a epizódy kampane",
+    "campaignPlanIntro": "Uložte až 12 variantov alebo epizód. Každá otvorí štúdio na vlastnú kontrolu a cenovú ponuku. Spoločné poznámky usmerňujú kontinuitu; vzhľad produktu, postavy a hlasy sa môžu medzi generovaniami líšiť.",
+    "campaignTitle": "Názov kampane alebo série",
+    "campaignContinuity": "Spoločné poznámky k postave, hlasu a štýlu",
+    "campaignVariantTitle": "Názov variantu alebo epizódy",
+    "campaignHook": "Úvodný háčik",
+    "campaignLanguage": "Výstupný jazyk",
+    "campaignScript": "Schválený scenár alebo sled scén",
+    "campaignAdd": "Pridať variant alebo epizódu",
+    "campaignClear": "Vymazať plán",
+    "campaignFormat": "Výstupný formát",
+    "audioInvalidResponse": "Zvuková služba vrátila neplatný výsledok.",
+    "batchPaymentHelp": "Každý odoslaný obrázok sa účtuje samostatne. Ak sa dávka zastaví, nevyužité tokeny z jej platby sa automaticky použijú na neskoršie generovanie, ktoré pokrýva.",
+    "invalidSeed": "Seed musí byť celé číslo od 0 do 2147483647.",
+    "libraryFavorites": "Obľúbené",
+    "libraryFavoriteAdd": "Pridať do obľúbených",
+    "libraryFavoriteRemove": "Odstrániť z obľúbených",
+    "audioTaskDialoguePlaceholder": "Alica: Mali by sme ísť.\nBob: [smeje sa] Až po tebe.",
+    "priceOwnKey": "Váš kľúč",
+    "audioResultTooLarge": "Zvukový výsledok je prázdny alebo presahuje 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plány pre každý workflow",
@@ -6262,9 +6928,16 @@
     "createTheFirst": "Vytvorte prvý",
     "docsSeoTitle": "Pokyny týkajúce sa zručností AI | Riftn",
     "docsSeoDescription": "Referenčná dokumentácia pre zručnosti asistenta AI spoločnosti Riftn a rýchlu knižnicu.",
-    "raw": "Surové"
+    "raw": "Surové",
+    "docsLoadFailed": "# Chyba\nDokumentáciu zručnosti sa nepodarilo načítať."
   },
   "nftMarket": {
+    "actAll": "Všetko",
+    "actListings": "Inzeráty",
+    "actOffer": "Ponuka",
+    "actOffers": "Ponuky",
+    "actSales": "Predaje",
+    "tabActivity": "Aktivita",
     "shortTitle": "NFTs",
     "filters": "Filtráciu",
     "forSale": "Na predaj",
@@ -6329,6 +7002,9 @@
     "offered": "Nabídka odoslaná. Držiteľ ju môže akokoľvek prijať.",
     "dehubPost": "Riftn post",
     "youHold": "Máte {{n}}",
+    "price": "Cena",
+    "volume": "Hlasitosť",
+    "tabRecent": "Nedávne",
     "buyNow": "Kúpiť teraz",
     "dropsTo": "Cena klesá na {{price}} do {{date}}",
     "inBundle": "Predané ako balík {{n}}",
@@ -6372,7 +7048,27 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT a platba sa vymenia v jednom kroku.",
     "spotlightOfferNote": "Ešte nie je zoznamované. Poslať ponuku a vlastník môže ju akokoľvek prijať.",
-    "signInToTradeCta": "Prihláste sa na obchodovanie"
+    "signInToTradeCta": "Prihláste sa na obchodovanie",
+    "actCollectionOffer": "Ponuka na kolekciu",
+    "actListed": "Ponúknuté",
+    "actSale": "Predaj",
+    "buyAll": "Kúpiť všetko",
+    "buySeveral": "Kúpiť viacero",
+    "cartBought": "Kúpené: {{n}}. Už sú vo vašej peňaženke.",
+    "cartCount": "{{n}} v košíku",
+    "cartFull": "Najviac 20 naraz",
+    "cartOneCoin": "Jeden reťazec a jedna mena na košík. Pre zmenu ho vyprázdnite.",
+    "cartOwn": "Toto je vaše",
+    "cartPick": "Ťuknutím pridáte do košíka",
+    "forSaleHere": "Na predaj tu",
+    "noActivity": "Zatiaľ tu nič nie je",
+    "volShort": "Obj.",
+    "salesCount": "Predané: {{n}}",
+    "bestOffer": "Najlepšia ponuka",
+    "fromOpenSea": "Top kolekcie na OpenSea",
+    "buyHere": "Kúpte ich tu",
+    "openSeaNote": "Ponúkané na OpenSea. Platíte predajcovi priamo cez Seaport; Riftn nepridáva žiadny poplatok.",
+    "viewOnOpenSea": "Zobraziť na OpenSea"
   },
   "usernames": {
     "seoTitle": "Trh s používateľským menom | Riftn",
@@ -6730,7 +7426,18 @@
       "votes_other": "{{count}} hlasy",
       "howToVote_one": "Typuj {{command}} a číslo v chatu, aby si hlasoval · {{count}} hlas",
       "howToVote_other": "Typuj {{command}} a číslo v chatu, aby si hlasoval · {{count}} hlasy"
-    }
+    },
+    "eyebrow": {
+      "follow": "Nový sledujúci",
+      "subscribe": "Nový odberateľ",
+      "subscribedTo": "Odber · {{plan}}",
+      "gifted_one": "Daroval odber",
+      "gifted_other": "Daroval odbery: {{count}}",
+      "share": "Zdieľal stream",
+      "join": "Práve sa pridal"
+    },
+    "giftedSubs_one": "{{name}} daroval odber!",
+    "giftedSubs_other": "{{name}} daroval odbery: {{count}}!"
   },
   "liveChatModeration": {
     "timeout1m": "Časový limit na 1 minútu",
@@ -6745,7 +7452,155 @@
     "youAreBanned": "Nemôžete chatovať v streamoch tohto tvárca",
     "youAreTimedOut": "Momentálne ste časovo omezení"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Pozadie",
+      "modes": {
+        "none": "Vypnuté",
+        "blur": "Rozostrenie",
+        "color": "Farba",
+        "image": "Obrázok"
+      },
+      "failed": "Odstránenie pozadia sa na tomto zariadení nepodarilo spustiť.",
+      "hint": "Beží na vašom zariadení. Prvé načítanie trvá niekoľko sekúnd."
+    },
+    "remove": "Odstrániť",
+    "scenes": {
+      "countdown": "Odpočítavanie",
+      "names": {
+        "starting": "Čoskoro začína",
+        "chatting": "Len chatovanie",
+        "gameplay": "Hranie",
+        "brb": "Hneď som späť",
+        "ending": "Koniec streamu"
+      },
+      "title": "Scény",
+      "edit": "Upraviť {{name}}",
+      "subtitle": "Druhý riadok (voliteľné)",
+      "picture": "Obrázok",
+      "noCountdown": "Bez odpočtu",
+      "minutes": "{{count}} min",
+      "muteMic": "Stlmiť môj mikrofón, kým je toto zapnuté",
+      "hints": {
+        "starting": "Karta s odpočtom",
+        "chatting": "Kamera na celú obrazovku",
+        "gameplay": "Obrazovka s vašou kamerou",
+        "brb": "Karta, mikrofón stlmený",
+        "ending": "Ďakovná karta"
+      },
+      "subtitles": {
+        "starting": "Stream začne o",
+        "brb": "Hneď som späť",
+        "ending": "Ďakujeme za pozeranie"
+      }
+    },
+    "sources": {
+      "reactAdd": "Zobraziť",
+      "image": "Obrázok",
+      "camera": "Fotoaparát",
+      "show": "Zobraziť v streame",
+      "loop": "Slučka",
+      "positions": {
+        "center": "Stred",
+        "top-left": "Vľavo hore",
+        "top-right": "Vpravo hore",
+        "bottom-left": "Vľavo dole",
+        "bottom-right": "Vpravo dole"
+      },
+      "sizes": {
+        "medium": "Stredná",
+        "small": "Malé",
+        "large": "Veľké"
+      },
+      "shapes": {
+        "circle": "Kruh",
+        "rect": "Štvorec",
+        "rounded": "Zaoblené"
+      },
+      "title": "Zdroje",
+      "addImage": "Obrázok alebo logo",
+      "addCamera": "Druhá kamera",
+      "addClip": "Videoklip",
+      "addReaction": "Reagovať na video",
+      "reactPlaceholder": "Vložte odkaz na video Riftn",
+      "reactInvalid": "Vložte odkaz na video Riftn.",
+      "reactNotLive": "Najprv začnite vysielať naživo, potom pridajte video.",
+      "reactNoBubble": "Vaša kamera sa tu nemohla otvoriť dvakrát. Zmeňte veľkosť videa, aby bola vaša tvár na obrazovke.",
+      "failed": "Tento zdroj sa nepodarilo pridať.",
+      "empty": "Pridajte logo, druhú kameru alebo videoklip nad váš stream.",
+      "hint": "Zdroje sa vykresľujú cez váš obraz pre každého diváka a každú platformu.",
+      "clip": "Klip",
+      "restart": "Reštartovať",
+      "play": "Prehrať alebo pozastaviť"
+    },
+    "audio": {
+      "mute": "Stlmiť",
+      "unmute": "Zrušiť stlmenie",
+      "gateLevels": {
+        "off": "Vypnuté",
+        "low": "Svetlá",
+        "high": "Silné"
+      },
+      "title": "Zvukový mixér",
+      "unavailable": "Tento prehliadač nedokáže mixovať zvuk, takže váš mikrofón ide von tak, ako je.",
+      "channels": {
+        "mic": "Mikrofón",
+        "game": "Hra / karta",
+        "clip": "Videoklip"
+      },
+      "absent": {
+        "mic": "Žiadny mikrofón",
+        "game": "Zdieľajte obrazovku so zvukom alebo použite záznamovú kartu",
+        "clip": "Pridajte videoklip v Zdrojoch"
+      },
+      "gate": "Šumová brána",
+      "gateHint": "Stlmí mikrofón medzi slovami, aby klikanie klávesnice a ventilátory neboli v streame počuť."
+    },
+    "imageTooLarge": "Obrázok je príliš veľký. Skúste menší.",
+    "widgets": {
+      "title": "Zobraziť widgety v mojom videu",
+      "hint": "Upozornenia, lišty cieľov a chat sa vykreslia do vášho streamu, takže ich uvidia aj diváci na Twitchi, YouTube a všetkých ďalších platformách.",
+      "failed": "Nepodarilo sa zmeniť, kde sa zobrazujú vaše widgety. Skúste znova."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platforma",
+      "label": "Meno (nepovinné)",
+      "key": "Streamovací kľúč",
+      "save": "Pridať",
+      "cancel": "Zrušiť",
+      "states": {
+        "off": "Vypnuté",
+        "idle": "Pripravené",
+        "live": "Naživo",
+        "error": "Chyba",
+        "connecting": "Pripája sa"
+      },
+      "title": "Ciele multistreamu",
+      "intro": "Začnite vysielať na Riftn raz a my váš stream zadarmo pošleme na každú platformu, ktorú tu zapnete. Začne sa do niekoľkých sekúnd od spustenia vysielania.",
+      "add": "Pridať cieľ",
+      "empty": "Zatiaľ žiadne ciele. Pridajte Twitch, YouTube, Kick alebo akýkoľvek RTMP server.",
+      "server": "URL servera",
+      "findKey": "Nájdite svoj server a kľúč pre {{name}}",
+      "customHint": "Vložte RTMP server a kľúč, ktoré vám dala vaša platforma.",
+      "keyNote": "Váš kľúč je uložený šifrovane na našich serveroch a už sa nikdy nezobrazí.",
+      "added": "{{name}} pridaný",
+      "saveFailed": "Cieľ sa nepodarilo uložiť",
+      "toggle": "Streamovať do tohto cieľa"
+    },
+    "vertical": {
+      "centre": "Stred",
+      "live": "Naživo",
+      "title": "Vertikálne zobrazenie",
+      "intro": "Telefóny sledujú váš stream vo vertikálnom feede. Potiahnutím rámčeka vyberte časť obrazu, ktorú uvidia.",
+      "enabled": "Zobraziť môj stream vo vertikálnom feede",
+      "zoom": "Priblíženie",
+      "frame": "Váš obraz na šírku",
+      "box": "Čo vidia telefóny",
+      "hint": "Potiahnite rámček alebo použite šípky. Uložením ho použijete na živý stream.",
+      "watch": "Sledovať {{name}} naživo"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Počítadlo na tvojom streami. Každá zaplatená darček, sledovanie a predplatné pridáva čas, takže si v priestore udržíš živý.",
@@ -6907,7 +7762,8 @@
       "subathon_timer": "Subathon časovač",
       "points_board": "Lojálni diváci",
       "streamer_level": "Úroveň streamera",
-      "tip_jar": "Darčeková nádoba"
+      "tip_jar": "Darčeková nádoba",
+      "hype_train": "Hype vlak"
     },
     "hints": {
       "tip_alert": "Oslavuje každé prepitné vo veľkosti podľa jeho úrovne",
@@ -6931,7 +7787,8 @@
       "subathon_timer": "Počítadlo, ktoré odkladá čas darčekmi, sledovaním a predplatnými",
       "points_board": "Tvoj top diváci podľa bodov z sledovania a darovania",
       "streamer_level": "Vaša úroveň streamera a týždenná séria vo vašom profile",
-      "tip_jar": "Pohár, ktorý sa naplní pri príchode zaplatených darčekov"
+      "tip_jar": "Pohár, ktorý sa naplní pri príchode zaplatených darčekov",
+      "hype_train": "Zobrazí hype vlak, kým beží: spustia ho tri dary alebo odbery do piatich minút."
     },
     "fields": {
       "style": "Štýl",
@@ -7317,7 +8174,10 @@
     "endStreamConfirmBody": "Vaše vysielanie sa zastaví pre všetkých divákov a nemôže sa obnoviť.",
     "keepStreaming": "Pokračovať v streamovaní",
     "encoderPermanentHint": "Tento kľúč sa nikdy nemení. Nastavte svoj kodér raz — nabudúce stačí stlačiť tlačidlo Štart a Riftn vytvorí príspevok za vás.",
-    "notEnoughTokensForBounty": "Nedostatok tokenov. Potrebujete {{need}} tokenov, ale máte {{have}}."
+    "notEnoughTokensForBounty": "Nedostatok tokenov. Potrebujete {{need}} tokenov, ale máte {{have}}.",
+    "screenInAppHint": "V aplikácii Riftn",
+    "screenInAppNote": "Prehliadače v telefónoch nedovolia žiadnej webovej stránke zdieľať obrazovku. Začnite vysielať z aplikácie Riftn a potom ťuknite na Zdieľať obrazovku.",
+    "screenInAppCta": "Stiahnuť aplikáciu Riftn"
   },
   "events": {
     "seoTitle": "Události: Setkania & Komunitné Události na Riftn",
@@ -7698,6 +8558,8 @@
     "footerNote": "Účasť DePin je príspevková služba, nie investičný produkt. Dostupnosť, oprávnenosť a odmeny sa môžu zmeniť."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nový tok",
+    "disconnect": "Odpojiť",
     "title": "Creator Flow",
     "backToStudio": "Späť do Creator Studia",
     "backToFlows": "Späť na vaše toky",
@@ -7905,7 +8767,45 @@
     "foldersInFolder_other": "V priečinkoch {{count}}",
     "foldersNoItems": "V tomto priečinku zatiaľ nič nie je",
     "foldersNoItemsHint": "Otvorte výsledok a vyberte „Pridať do priečinka“, aby ste ho sem zaradili.",
-    "skippedUpstreamFailed": "Preskočené, pretože skorší krok zlyhal. Jeho cena zostane vo vašom zostatku."
+    "skippedUpstreamFailed": "Preskočené, pretože skorší krok zlyhal. Jeho cena zostane vo vašom zostatku.",
+    "signInForAudioLibrary": "Prihláste sa a otvorte svoju súkromnú knižnicu uloženého zvuku.",
+    "audioLibraryFailed": "Uložený zvuk sa nepodarilo načítať. Skúste znova.",
+    "retryFreeTask": "Zopakovať bezplatnú úlohu",
+    "previewSavedMedia": "Náhľad uložených médií",
+    "audioSavePending": "Zvuk je pripravený, ale jeho uloženie do súkromnej knižnice čaká. Pokračujte a vyzdvihnite ho.",
+    "confirmInterruptedRetry": "Zopakovať prerušenú zvukovú úlohu alebo úlohu asistenta. Jej predchádzajúci výsledok nie je známy a opakovanie môže zopakovať prácu. Existujúca platba a ID platených úloh sa použijú znova.",
+    "freeResultUnknown": "Odpoveď bezplatnej úlohy bola prerušená. Automaticky sa znova neodošle. Zvoľte Zopakovať bezplatnú úlohu a potom pokračujte; vaša platba a ostatné úlohy zostávajú zachované.",
+    "formAuthor": "Upraviť tok",
+    "formAuthorHint": "Vytvorte tok s typovanými vstupmi. Uložte ho tu alebo ho usporiadajte na webovom plátne.",
+    "chooseSavedMedia": "Vybrať uložené médiá",
+    "formInput": "Vstup: {{handle}}",
+    "reviewRun": "Skontrolovať spustenie",
+    "resumeRun": "Pokračovať v uloženom spustení",
+    "confirmPrice": "Spolu: {{price}} tokenov",
+    "recoveryHint": "Odkazy na úlohy a platby sú uložené v tomto zariadení. Pred ďalším spustením dokončite prerušenú prácu.",
+    "newRun": "Spustiť znova",
+    "loadMoreMedia": "Načítať viac médií",
+    "invalidGraph": "Skontrolujte prepojenia: každý vstup potrebuje kompatibilný zdroj a graf nesmie obsahovať cykly.",
+    "unsupportedNode": "Tento uzol zatiaľ nemôže bežať v natívnom formulári. Pre tento tok použite webové plátno.",
+    "missingPrompt": "Pripojte textový uzol s promptom.",
+    "invalidSettings": "Tieto nastavenia vybraný model nepodporuje.",
+    "missingCapturedFrame": "Pred použitím tohto videa ako obrazového vstupu zachyťte snímku na webovom plátne.",
+    "missingSavedMedia": "Uložené zdrojové médiá chýbajú alebo už nie sú pre tento účet dostupné.",
+    "quoteFailed": "Cenu tohto toku sa nepodarilo určiť. Skúste znova.",
+    "recoverBeforeEdit": "Pred zmenou grafu alebo ďalším spustením pokračujte v uloženom spustení.",
+    "runAlreadyComplete": "Toto spustenie je dokončené. Ak chcete generovať znova, zvoľte Spustiť znova.",
+    "recoveryCorrupt": "Uložený záznam obnovy sa nepodarilo prečítať. Ponechajte tento tok a pred ďalšou platbou kontaktujte podporu.",
+    "paidUnavailable": "Toky tu môžete vytvárať a ukladať. Platené spustenia nie sú v tomto obchode dostupné.",
+    "planChanged": "Tok sa po stanovení ceny zmenil. Skontrolujte spustenie znova.",
+    "connectOwnerWallet": "Pripojte peňaženku, ktorá vlastní tento tok.",
+    "runFailed": "Uzol sa nepodarilo dokončiť. Jeho uložený odkaz na úlohu zostáva zachovaný na obnovu.",
+    "recoveryPending": "Renderovanie stále čaká. Pokračujte v tomto spustení a vyzdvihnite ho.",
+    "nodeAudioGen": "Generátor zvuku",
+    "nodeAudioGenDesc": "Reč, zvukové efekty, prepis a izolácia zvuku",
+    "nodeAudioInput": "Uložený zvuk",
+    "nodeAudioInputDesc": "Použite súkromný zvuk zo svojej knižnice",
+    "audioVoiceId": "ID hlasu",
+    "audioSeconds": "Dĺžka zvuku v sekundách"
   },
   "videoPlayer": {
     "volume": "Hlasitosť",
@@ -8038,6 +8938,9 @@
     "followingBackProgress": "Sledujem späť {{completed}} z {{total}}",
     "findingFollowers": "Hľadajú sa sledovatelia...",
     "followBackAll": "Sledujte všetko späť",
+    "followBackConfirm": "Opätovať sledovanie",
+    "followBackNotNow": "Teraz nie",
+    "followBackDone": "Hotovo",
     "nonFollowers": {
       "title": "Vyčistiť, koho sleduješ?",
       "body": "{{count}} účty, ktoré sleduješ, ti nevracajú sledovanie.",
@@ -8055,7 +8958,13 @@
       "doneAll": "Zrušené sledovanie {{done}} účtov, ktoré ti nevracajú sledovanie.",
       "doneSome": "Zrušené sledovanie {{done}} účtov. {{failed}} sa nedalo zrušiť sledovanie.",
       "doneToast": "Zrušené sledovanie {{done}} účtov, ktoré ti nevracajú sledovanie"
-    }
+    },
+    "followBackConfirmTitle_one": "Sledovať späť {{count}} osobu?",
+    "followBackConfirmTitle_other": "Sledovať späť ľudí ({{count}})?",
+    "followBackConfirmBody": "Už vás sledujú. Súkromné účty dostanú žiadosť o sledovanie.",
+    "followedBackCount_one": "Sledujete späť {{count}} osobu",
+    "followedBackCount_other": "Sledujete späť ľudí: {{count}}",
+    "followBackDoneBody": "Všetkých ich nájdete v sekcii Sledované."
   },
   "reactionInfo": {
     "title": "Reakcie",
@@ -8851,6 +9760,35 @@
     "priceChartCleared": "Cena lístka bola odstránená. Fixná referenčná cena: $0.0001. Exekučné ceny sú závislé od dostupných objednávok."
   },
   "editor": {
+    "stage": {
+      "camera": "Fotoaparát",
+      "yaw": "Rotácia",
+      "add": "Pridať",
+      "scale": "Velkosť",
+      "color": "Farba",
+      "light": "Svetlá",
+      "create": "Pridať 3D scénu",
+      "title": "3D scéna",
+      "hint": "Rozvrhnite záber pomocou gúľ a kvádrov. Kamera, umiestnenie a tri nezávislé plošné svetlá menia vyrenderovanú snímku.",
+      "preview": "Náhľad vyrenderovanej scény",
+      "error": "Snímku sa nepodarilo pripraviť. Skontrolujte referencie záberu a skúste znova.",
+      "elevation": "Výška",
+      "distance": "Vzdialenosť",
+      "fov": "Zorné pole",
+      "object": "Objekt",
+      "sphere": "Guľa",
+      "box": "Kváder",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Odstrániť objekt",
+      "intensity": "Intenzita",
+      "diffusion": "Rozptyl",
+      "saving": "Pripravuje sa snímka…",
+      "useFrame": "Použiť vyrenderovanú snímku ako referenciu záberu",
+      "frameHint": "Vytvorí PNG 320 × 180 a pridá ho do referencií tohto záberu. Pred generovaním skontrolujte limit referencií a cenovú ponuku modelu.",
+      "frameName": "Snímka 3D scény"
+    },
     "video": {
       "tFade": "Prelínanie",
       "none": "Žiadny",
@@ -8944,7 +9882,9 @@
       "pptx": "PowerPoint prezentácia",
       "pptxHint": "Každá stránka sa zmení na jeden obrázok snímky s poznámkami prezentujúceho a odkazmi. Upravte jednotlivé texty a prvky v pôvodnom dizajne.",
       "section": "Pomenovaná sekcia",
-      "transparent": "Priehľadné pozadie"
+      "transparent": "Priehľadné pozadie",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Stiahne ZIP s vašou časovou osou ako FCPXML a Premiere XML spolu so všetkými mediálnymi súbormi, aby ste mohli dokončiť strih v Premiere Pro, Final Cut Pro alebo DaVinci Resolve. Text sa zmení na značky; efekty zostanú v Riftn."
     },
     "inspector": {
       "selectHint": "Vyberte vrstvu na plátne alebo klip na časovej osi.",
@@ -9017,6 +9957,8 @@
       "tools": "Nástroje editora"
     },
     "agent": {
+      "stop": "Zastaviť",
+      "queue": "Pridať do frontu",
       "introTitle": "Povedzte AI, čo chcete",
       "introBody": "Opíšte dizajn alebo zmenu vlastnými slovami. Mení veľkosť stránky, píše a štýluje text, hľadá bezplatné fotky, videá a hudbu, používa filtre, usporadúva vrstvy a animuje ich. Každú požiadavku vrátite jedným Späť.",
       "suggestPoster": "Vytvor štvorcový príspevok na Instagram pre letný výpredaj s fotkou pláže a výrazným nadpisom",
@@ -9036,7 +9978,45 @@
       "failed": "AI to teraz nedokázala urobiť. Skúste to znova o chvíľu.",
       "changes": "Vykonané úpravy: {{count}}",
       "undo": "Späť",
-      "openGenerator": "Skontrolovať a generovať"
+      "openGenerator": "Skontrolovať a generovať",
+      "stopped": "Zastavené. Nič iné sa nezmenilo.",
+      "queued": "V poradí: {{count}}",
+      "restore": "Obnoviť do tohto bodu",
+      "restoreHint": "Vráti projekt do stavu pred touto správou. Späť ho opäť vráti.",
+      "restored": "Projekt bol obnovený do stavu pred touto správou. Stlačením Späť vrátite novšiu verziu.",
+      "rewrite": "Sformulovať moju požiadavku jasnejšie",
+      "rewriteFailed": "Nepodarilo sa to prepísať. Váš text sa nezmenil.",
+      "feedback": "Pomohlo to?",
+      "good": "Dobrá odpoveď",
+      "bad": "Zlá odpoveď",
+      "retryPrefix": "To nebolo správne. Namiesto toho ",
+      "recipesTitle": "Recepty",
+      "recipe": {
+        "podcastClip": {
+          "label": "Klip z podcastu",
+          "prompt": "Nájdi najsilnejší 30-sekundový moment, oreži ho naň, pridaj titulky Word Pop a nastav formát 9:16."
+        },
+        "talkingHead": {
+          "label": "Čistý hovoriaci záber",
+          "prompt": "Vystrihni dlhé pauzy, pridaj titulky Classic a dodaj jemný teplý vzhľad."
+        },
+        "productPromo": {
+          "label": "Produktová promo",
+          "prompt": "Urob 15-sekundové promo: výrazný titulok na začiatku, prechody Zoom in medzi klipmi, titulky Bold a svižná hudba."
+        },
+        "hypeReel": {
+          "label": "Hype video",
+          "prompt": "Nastrihaj klipy do rytmu hudby, použi prechody Fly up a vzhľad Technicolor."
+        },
+        "retroEdit": {
+          "label": "Retro strih",
+          "prompt": "Daj každému klipu vzhľad VHS, pridaj veľký pätkový titulok a použi prechody Fade."
+        },
+        "tutorial": {
+          "label": "Návod",
+          "prompt": "Pridaj titulok pre každý krok, titulky Boxed a spomaľ kľúčový moment na 0,5x."
+        }
+      }
     },
     "shape": {
       "rect": "Obdĺžnik",
@@ -9211,7 +10191,9 @@
       "tint": "Odtieň {{value}}",
       "vignette": "Vineta {{value}}%",
       "auto": "Automatické vylepšenie",
-      "autoFailed": "Tento obrázok sa nepodarilo analyzovať."
+      "autoFailed": "Tento obrázok sa nepodarilo analyzovať.",
+      "halation": "Halácia {{value}} %",
+      "scanlines": "Riadkovanie {{value}} %"
     },
     "pages": {
       "add": "Pridať stranu",
@@ -9285,6 +10267,17 @@
       "reloadText": "Obnoviť nadpísok",
       "textSaved": "Zmeny nadpísok uložené.",
       "action": "Automatické titulky",
+      "styles": {
+        "bold": "Tučné",
+        "classic": "Klasický",
+        "boxed": "V rámčeku",
+        "wordpop": "Word Pop",
+        "rapid": "Rýchle odhalenie",
+        "beast": "Beast Mode",
+        "stacked": "Naskladané",
+        "serif": "Pätkový",
+        "bubble": "Bublina"
+      },
       "working": "Počúvam… {{percent}} %",
       "downloading": "Pripravujem model reči… {{percent}} %",
       "hint": "Premení reč na časované titulky, ktorým môžeš zmeniť štýl. Beží na tvojom zariadení: zadarmo a súkromne. Pri prvom použití sa stiahne model.",
@@ -9295,7 +10288,8 @@
       "translateCount": "Preložiť {{count}} nadpísok",
       "translationDone": "Preložené {{count}} nadpísok",
       "translationFailed": "Preloženie nadpísok zlyhalo. Vaše nadpísok zostávajú nezmienené.",
-      "lockedTranslation": "Odblokovať zakázané nadpísok, aby ste ich mohli zahrnúť."
+      "lockedTranslation": "Odblokovať zakázané nadpísok, aby ste ich mohli zahrnúť.",
+      "style": "Štýl titulkov"
     },
     "multi": {
       "selected": "Vybraté vrstvy: {{count}}",
@@ -9332,7 +10326,10 @@
       "saveNewPreset": "Uložiť nové",
       "saveStyles": "Uložte štýly s dizajnom",
       "stylesSaved": "Štýly značky uložené s týmto dizajnom",
-      "usePreset": "Použiť štýly"
+      "usePreset": "Použiť štýly",
+      "dehubApplied": "Značka Riftn použitá na {{count}} vrstiev.",
+      "dehubApply": "Použiť značku Riftn",
+      "dehubHint": "Oficiálne farby Riftn, písma Exo a Inter a logo Riftn jedným kliknutím."
     },
     "draw": {
       "heading": "Kresliť",
@@ -10664,6 +11661,135 @@
       "toolbar": "Navigácia na plátne",
       "zoomIn": "Priblížiť plátno",
       "zoomOut": "Oddialiť plátno"
+    },
+    "clipFix": {
+      "listening": "Poslúchanie…",
+      "detach": "Oddeliť zvuk",
+      "detached": "Zvuk presunutý do samostatného klipu",
+      "detachFailed": "Zvuk tohto klipu sa nepodarilo oddeliť",
+      "removeBars": "Odstrániť čierne pruhy",
+      "scanning": "Kontrolujú sa snímky…",
+      "noBars": "Nenašli sa žiadne čierne pruhy",
+      "barsRemoved": "Čierne pruhy orezané",
+      "barsFailed": "Toto video sa nepodarilo skontrolovať na čierne pruhy",
+      "reframe": "Automatické prerámovanie",
+      "reframeHint": "Video už zodpovedá tvaru tejto stránky",
+      "reframed": "Prerámované tak, aby sledovalo dej",
+      "reframeFailed": "Toto video sa nepodarilo prerámovať",
+      "retakes": "Odstrániť opakované zábery",
+      "noRetakes": "Nenašli sa žiadne opakované zábery",
+      "retakesRemoved": "Odstránené opakované zábery: {{count}}, ponechaný posledný",
+      "retakesFailed": "Opakované zábery sa z tohto klipu nepodarilo odstrániť"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Rozdeliť",
+        "play": "Prehrať",
+        "pause": "Pozastaviť",
+        "frameBack": "Predchádzajúca snímka",
+        "frameForward": "Ďalšia snímka",
+        "back": "Späť o 1 sekundu",
+        "rippleDelete": "Vymazať klip",
+        "liftDelete": "Vymazať klip",
+        "start": "Prejsť na začiatok",
+        "end": "Prejsť na koniec"
+      },
+      "preset": "Rozloženie klávesnice",
+      "presetHint": "Používajte klávesy časovej osi z editora, ktorý poznáte. Vlastné skratky Riftn naďalej fungujú pre všetko ostatné."
+    },
+    "voiceClone": {
+      "stop": "Zastaviť nahrávanie",
+      "failed": "Zlyhalo hlasové klonovanie.",
+      "pickerLabel": "Naklonovať váš hlas",
+      "pickerDetail": "Komentáre vaším vlastným hlasom",
+      "title": "Naklonovať váš hlas",
+      "description": "Nahrajte sa alebo vyberte klip, kde hovoríte. Zaplatíte raz a váš hlas je váš pre každý komentár.",
+      "defaultName": "Môj hlas",
+      "record": "Nahrať ukážku (30 sekúnd až 2 minúty)",
+      "fromMedia": "Alebo použite klip z Médií",
+      "recorded": "Vaša nahrávka",
+      "sample": "Ukážka: {{name}}",
+      "hint": "Najlepšie funguje zrozumiteľná reč bez hudby.",
+      "noMic": "Mikrofón sa nepodarilo použiť.",
+      "sampleFailed": "Z toho klipu sa nepodarilo prečítať zvuk.",
+      "pay": "Naklonovať za {{amount}} tokenov",
+      "useFree": "Naklonovať (už zaplatené)",
+      "owned": "Váš hlas „{{name}}“ je už nastavený. Vyberte ho zo zoznamu hlasov.",
+      "useOwned": "Použiť môj hlas",
+      "ready": "„{{name}}“ je pripravený na komentáre.",
+      "paidFailed": "Vaša platba je uložená. Otvorte to znova a ďalší pokus je zadarmo.",
+      "consent": "Klonujte iba svoj vlastný hlas alebo hlas, na ktorého použitie máte povolenie."
+    },
+    "linkImport": {
+      "go": "Importovať",
+      "downloading": "Sťahovanie {{percent}}%",
+      "open": "Importovať z odkazu",
+      "placeholder": "Vložte odkaz z YouTube, TikToku alebo iný",
+      "rights": "Toto video vlastním alebo mám povolenie ho použiť",
+      "audioOnly": "Iba zvuk",
+      "queued": "V poradí…",
+      "waiting": "Čaká sa na stránku, čoskoro skúsime znova…",
+      "adding": "Pridáva sa do Médií…",
+      "added": "Importované a pridané na časovú os.",
+      "failed": "Tento odkaz sa nepodarilo importovať."
+    },
+    "reverse": {
+      "action": "Obráť",
+      "working": "Otáča sa {{percent}} %",
+      "done": "Klip otočený.",
+      "failed": "Tento klip sa nepodarilo otočiť.",
+      "unsupported": "Tento prehliadač nedokáže otočiť video. Skúste Chrome alebo Edge.",
+      "tooLong": "Otočiť sa dajú klipy do {{seconds}} sekúnd."
+    },
+    "film": {
+      "repairRefs": "Odstrániť chýbajúce odkazy na médiá",
+      "title": "Filmový projekt",
+      "intro": "Plánujte zábery s opakovane použiteľnými obrazovými referenciami. Váš brief, poradie záberov a vybrané výsledky sa uložia s týmto projektom.",
+      "create": "Vytvoriť plán filmu",
+      "name": "Názov filmu",
+      "brief": "Brief filmu",
+      "sharedReferences": "Zdieľané obrazové referencie (najviac 4)",
+      "shot": "Záber",
+      "addShot": "Pridať záber",
+      "shotName": "Názov záberu",
+      "action": "Dej a kompozícia záberu",
+      "seconds": "Požadované sekundy videa",
+      "shotReferences": "Ďalšie obrazové referencie (spolu najviac 4)",
+      "frame": "Pripraviť snímku",
+      "video": "Pripraviť video",
+      "review": "Pred generovaním skontrolujte v štúdiu model, referencie, dĺžku videa a cenu.",
+      "result": "Prijatý výsledok záberu",
+      "noResult": "Nie je vybraný žiadny výsledok",
+      "resultHint": "Vyberte prijatý obrázok alebo video z Nahraných. Jeho odkaz sa uloží s týmto záberom; film poskladajte na časovej osi.",
+      "earlier": "Posunúť skôr",
+      "later": "Posunúť neskôr",
+      "remove": "Odstrániť záber",
+      "issue": "Skontrolujte popis záberu a referenčné médiá a skúste znova. Ak sa projekt nepodarilo uložiť, nechajte ho otvorený.",
+      "searchMedia": "Hľadať médiá podľa názvu",
+      "refreshMedia": "Obnoviť médiá"
+    },
+    "speakers": {
+      "find": "Nájsť rečníkov",
+      "name": "Rečník {{number}}",
+      "onlyOne": "Našiel sa len jeden rečník.",
+      "failed": "Rečníkov sa nepodarilo nájsť.",
+      "kept": "Ponechaný iba {{name}}.",
+      "editFailed": "Táto úprava sa do klipu nezmestila.",
+      "split": "Rozdelené na zábery rečníkov: {{count}}.",
+      "keepOnly": "Ponechať iba",
+      "splitAction": "Strihnúť pri každej zmene rečníka"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Opíšte 3D objekt, ktorý chcete",
+      "queued": "Vytvára sa váš 3D objekt. Objaví sa na karte Generovania.",
+      "note": "3D objekty prichádzajú do Médií ako krátky otáčajúci sa klip s priehľadným pozadím."
+    },
+    "behind": {
+      "action": "Text za osobou",
+      "working": "Vystrihuje sa osoba…",
+      "done": "Text a titulky sú teraz za osobou.",
+      "failed": "Text sa nepodarilo umiestniť za osobu."
     }
   },
   "jungleMood": {
@@ -10907,7 +12033,8 @@
     "viewOnExplorer": "Zobraziť v Prieskumníkovi",
     "viewOnExplorerDesc": "Otvorí blockchain explorer (BaseScan) na zobrazenie podrobností o transakciách na reťazci pre príspevok alebo prevod.",
     "title": "Slovník pojmov",
-    "subtitle": "Zistite, čo znamená každá ikona a funkcia"
+    "subtitle": "Zistite, čo znamená každá ikona a funkcia",
+    "postInfoPageDesc": "Podrobný pohľad na akýkoľvek príspevok s jeho on-chain údajmi, štatistikami interakcií, podielmi vlastníctva a informáciami o tvorcovi. Otvoríte ho ťuknutím na ikonu „ⓘ“ pri ľubovoľnom príspevku."
   },
   "tipFunding": {
     "noRoute": "Momentálne neexistuje žiadna cesta Uniswap k tokenom Riftn pre tento token",
@@ -11065,7 +12192,9 @@
     "tokenAmount": "{{amount}} tokenov",
     "assistant": {
       "question1": "Aká je aktuálna stávková APY pre tokeny Riftn?",
-      "question2": "Áno, ak vsadím 10 000 tokenov na 90 dní"
+      "question2": "Áno, ak vsadím 10 000 tokenov na 90 dní",
+      "answer1": "Aktuálny staking APY pre tokeny Riftn je 12,4 % pri 30-dňovom uzamknutí. Tu je prehľad:\n\n• 7-dňové uzamknutie: 8,2 % APY\n• 30-dňové uzamknutie: 12,4 % APY\n• 90-dňové uzamknutie: 18,7 % APY\n\nChcete, aby som vám pomohol vypočítať možné zárobky?",
+      "answer2": "Pre 10 000 tokenov stakovaných pri 18,7 % APY na 90 dní:\n\n📊 Odhadovaná odmena: ~461 tokenov\n\nTo je zhruba 5,13 tokenu denne. Majte na pamäti, že APY sa môže meniť podľa celkového stakovaného množstva."
     },
     "bookmarks": {
       "stakingGuide": "Kompletný sprievodca stávkovaním žetónov Riftn: vysvetlenie rozpisu APY, období uzamknutia a multiplikátorov odmien."
@@ -11761,7 +12890,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Uverejňujte na X, YouTube, Instagram, TikTok a ďalšie platformy naraz pomocou dehub. Pripojte svoje účty raz a potom si vyberte, kam každý príspevok pôjde.",
+    "intro": "Uverejňujte na X, YouTube, Instagram, TikTok a ďalšie platformy naraz pomocou Riftn. Pripojte svoje účty raz a potom si vyberte, kam každý príspevok pôjde.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Doplniť a ušetriť",
@@ -11809,7 +12938,12 @@
   "dm": {
     "planRestricted": "Tento používateľ vyžaduje predplatné na prijímanie správ.",
     "planTypeNotAllowed": "Plán tohto tvorcu nepovoľuje tento typ správy.",
-    "planMinTip": "Prepitné pre tohto tvorcu musí byť aspoň {{amount}} tokenov."
+    "planMinTip": "Prepitné pre tohto tvorcu musí byť aspoň {{amount}} tokenov.",
+    "shareKindGroup": "Zoskupiť",
+    "shareKindCommunity": "Komunita",
+    "shareGroups": "Skupiny",
+    "shareKindChannel": "Kanál",
+    "reportMessage": "Nahlásiť správu"
   },
   "credits": {
     "earningsWorth": "V hodnote {{amount}}",
@@ -11851,7 +12985,11 @@
     "error": "Vašu žiadosť o odstránenie sa nepodarilo odoslať. Váš účet nebol potvrdený na odstránenie. Skúste to znova.",
     "back": "Späť na nastavenia",
     "signIn": "Prihláste sa, aby ste mohli odstrániť svoj účet",
-    "acknowledge": "Uložil som si podrobnosti o obnovení peňaženky a chápem, že odstránenie je trvalé."
+    "acknowledge": "Uložil som si podrobnosti o obnovení peňaženky a chápem, že odstránenie je trvalé.",
+    "signedInAs": "Prihlásený ako",
+    "confirmTitle": "Natrvalo vymazať váš účet?",
+    "confirmBody": "Váš účet a všetko v ňom bude vymazané. Budete odhlásení a túto akciu nemožno vrátiť späť.",
+    "confirmBodyNamed": "{{who}} a všetko v ňom bude vymazané. Budete odhlásení a túto akciu nemožno vrátiť späť."
   },
   "miniApps": {
     "badge": {
@@ -11946,7 +13084,45 @@
       "rewardsWeek": "Týždeň {{date}}",
       "rewardPaid": "Zaplatené",
       "rewardPending": "Čakajúce",
-      "rewardsNone": "Zatiaľ neboli vypočítané žiadne odmeny. Prvý týždeň končí v pondelok."
+      "rewardsNone": "Zatiaľ neboli vypočítané žiadne odmeny. Prvý týždeň končí v pondelok.",
+      "stats": {
+        "button": "Živé štatistiky",
+        "chartTitle": "Ľudia, ktorí otvorili vašu aplikáciu, posledných 30 dní",
+        "peak_one": "Maximum {{count}} denne",
+        "peak_other": "Maximum {{count}} denne",
+        "people30": "Ľudia, 30 dní",
+        "people7": "Ľudia, 7 dní",
+        "added": "Pridali si ju",
+        "dhb30": "Zaplatené tokeny, 30 dní",
+        "notified30": "Odoslané upozornenia, 30 dní",
+        "rewards": "Získané tokenové odmeny"
+      },
+      "signin": {
+        "users_one": "{{count}} používateľ",
+        "users_other": "{{count}} používatelia",
+        "delete": "Vymazať",
+        "title": "Prihlásiť sa cez Riftn",
+        "body": "Umožnite ľuďom prihlásiť sa na váš web alebo do aplikácie účtom Riftn. Vytvorte tu kľúč a potom postupujte podľa návodu.",
+        "guide": "Prečítať návod",
+        "copyId": "Kopírovať ID klienta",
+        "rotate": "Nový tajný kľúč",
+        "rotateConfirm": "Vytvoriť nový tajný kľúč pre {{name}}? Starý tajný kľúč okamžite prestane fungovať.",
+        "deleteConfirm": "Vymazať {{name}}? Všetci, ktorí sa ním prihlásili, budú odhlásení.",
+        "secretOnce": "Tajný kľúč pre {{name}}. Skopírujte ho teraz: zobrazí sa iba raz.",
+        "name": "Názov aplikácie",
+        "website": "Webová stránka (voliteľné)",
+        "redirects": "URL presmerovania, jedna na riadok (https://yoursite.com/callback)",
+        "create": "Vytvoriť kľúč"
+      },
+      "stateRejected": "Naživo cez odkaz · neschválené pre obchod",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Udalosti, ktoré Riftn poslal na váš webhookUrl. Test pošle udalosť ping.",
+        "test": "Odoslať test",
+        "ok": "Webhook odpovedal {{status}}",
+        "failed": "Webhook zlyhal: {{reason}}",
+        "none": "Zatiaľ neboli odoslané žiadne webhooky."
+      }
     },
     "card": {
       "open": "Otvoriť"
@@ -11972,7 +13148,10 @@
       "confirm": "Platiť {{amount}} tokenov",
       "sending": "Posielate Vašu platbu…",
       "sent": "Platba {{amount}} tokenov na {{name}}.",
-      "noOwner": "Tento aplikácia ešte nemá overený portemiel na platby."
+      "noOwner": "Tento aplikácia ešte nemá overený portemiel na platby.",
+      "testBadge": "Testovací režim",
+      "testBody": "Túto aplikáciu vlastníte, takže ide o test: žiadne tokeny sa nepresunú a doklad je označený ako test.",
+      "testSent": "Testovacia platba {{amount}} tokenov. Nič nebolo odoslané."
     },
     "add": {
       "title": "Pridaj {{name}}?",
@@ -12104,6 +13283,9 @@
     "reminderLater": "Ne teraz"
   },
   "copy": {
+    "55656b5e434f": "Zavrieť vyhľadávanie",
+    "57e2faa5ec63": "Hľadať v Riftn",
+    "96d7bff86b44": "Vyhľadávanie sa nepodarilo načítať",
     "1607715e45ed": "Ťuknite na guľu a hovorte, alebo píšte nižšie",
     "00140a37bd26": "Transakcie na tejto sieti sú momentálne nedostupné. Skús to znova.",
     "002286513398": "Nemáte povolenie na riadenie udalostí",
@@ -19091,7 +20273,59 @@
     "127053546dd4": "Tento súbor sa nepodarilo stiahnuť",
     "d14896aa4bf8": "Voľná knižnica sa nepodarilo načítať. Skontrolujte pripojenie a skúste to znova.",
     "953e708b2287": "Generovanie hlasu zlyhalo.",
-    "4a52cdd6ac72": "Nepodarilo sa duplikovať tieto vrstvy"
+    "4a52cdd6ac72": "Nepodarilo sa duplikovať tieto vrstvy",
+    "3f9b2c71d0a4": "Výsledky: {{n}}",
+    "8c4e1a6b2f57": "pre „{{query}}“",
+    "1d7234ff1b79": "v {{feed}}",
+    "e122e5c2b563": "Potiahnutím nahor zavriete",
+    "1aa9d734f2ee": "Vyberte, čo hľadať",
+    "ef557404f465": "Žiadne výsledky pre „{{query}}“",
+    "35034aa59bd3": "V {{feed}} sa nič nenašlo. Skúste iné slová alebo hľadajte všade.",
+    "415155739590": "Hľadať všade",
+    "9e13d826baaf": "Hľadať obrázky",
+    "cbf6f228327c": "Hľadať hudbu",
+    "e8756c6865a5": "Hľadať krátke videá",
+    "c7661da99c41": "Hľadať videá",
+    "90f1afe66801": "Hľadá sa „{{query}}“…",
+    "d7b559f2d8c6": "Skúste iné slová alebo zmeňte filtre.",
+    "d1a0c7e2f301": "Na čo dnes myslíte?",
+    "d1a0c7e2f302": "O čom dnes premýšľate?",
+    "d1a0c7e2f303": "Na čo myslíte?",
+    "d1a0c7e2f304": "Máte niečo na srdci?",
+    "d1a0c7e2f305": "Na čo práve myslíte?",
+    "d1a0c7e2f306": "Čo dnes vymyslíme?",
+    "d1a0c7e2f307": "Myslíte dnes na niečo?",
+    "d1a0c7e2f308": "Na čo myslíte tentoraz?",
+    "a7c1e0f4b2d9": "Ťuknutím hovorte",
+    "b3e8d1c6f0a2": "Ťuknutím odošlete",
+    "c9f2a4e7d1b5": "Počúvam... ťuknutím na guľu odošlete",
+    "22577ebd908e": "Generovať video Wan 3.0 · pôvodný soundtrack",
+    "1fa2357ab7e1": "Generovať video Seedance 720p · pôvodný soundtrack",
+    "7f78bdc0762d": "+{{value1}} b.",
+    "f0c8bb34335b": "Získali ste +{{value1}} bodov",
+    "0fbe06b679a8": "{{value1}} bodov za každú dodanú požiadavku, pripočítaných k vášmu skóre Top tvorcov.",
+    "431bc73eb60b": "[verse]\nVáš text tu...\n\n[chorus]\nText refrénu...",
+    "a3c1e5f20b71": "Používajte Riftn v ChatGPT, Claude alebo akejkoľvek MCP aplikácii. Vložte URL nižšie do nastavení konektorov vášho asistenta, aby ste mohli prehliadať príspevky, profily a komentáre, a keď vás vyzve, prihláste sa a prepojte svoj účet.",
+    "b84d2e7c9a16": "Táto adresa je pre AI aplikácie, nie webová stránka. Ak ju otvoríte v prehliadači, dostanete sa sem.",
+    "c5e9f1a3d742": "Prepojte svoj účet Riftn",
+    "d61a7b4e8c05": "Keď vás asistent požiada o prihlásenie, prihláste sa do Riftn a kliknite na Povoliť. Potom môže upravovať váš profil, zverejňovať príspevky a komentáre, sledovať ľudí a tvoriť v Creator Studio. Pripojenia zostávajú prepojené, kým ich používate, a vypršia po 30 dňoch nepoužívania.",
+    "e27b8c5f9d13": "Podrobný návod pre ChatGPT",
+    "f38c9d6a0e24": "Podrobný návod pre Claude",
+    "0a49d7b1f835": "Chcete radšej samostatný účet bota? Vytvorte agenta a získate URL konektora, ktorý publikuje ako tento agent.",
+    "1b5ae8c20f46": "Keď vás ChatGPT vyzve, prihláste sa do Riftn a kliknutím na Povoliť prepojte svoj účet.",
+    "2c6bf9d31a57": "Kliknite na Pripojiť, prihláste sa do Riftn a kliknutím na Povoliť prepojte svoj účet.",
+    "002f6e549556": "Riftn Editor: videoeditor v prehliadači",
+    "468415f0e112": "Ag",
+    "27c26a5a38b3": "Prihláste sa a zobrazte staršie správy",
+    "674e70bcd915": "Celá história chatu je prístupná každému s účtom.",
+    "feaf753f6557": "Začiatok chatu",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "fd0ce9669a4e": "🎞️ GIF",
+    "ebebdc70335b": "Sklenené pruhy",
+    "5ff272ba7871": "Hodvábne línie",
+    "a941e90ca93d": "Svätožiara obalu",
+    "04dbbe4dff7a": "Pravá vlna",
+    "6e71ae3669b1": "Uložený výstup nie je dostupný"
   },
   "articles": {
     "cardLabel": "Článok · {{count}} min čítania",
@@ -19110,6 +20344,7 @@
     "backToTop": "Späť na začiatok",
     "needTitle": "Ak chcete pokračovať, pridajte názov",
     "needBody": "Zostáva ešte {{count}} znakov",
+    "imagesLabel": "Obrázky",
     "backToWriting": "Späť k písaniu",
     "readyTitle": "Pripravené na zverejnenie",
     "sharePreview": "Ako to vyzerá pri zdieľaní",
@@ -19132,7 +20367,16 @@
     "formatting": "Formátovanie",
     "bodyPlaceholder": "Povedzte svoj príbeh. Vyberte text a pomocou panela nad nadpismi, tučným písmom, citáciami a zoznamami.",
     "bodyLabel": "Telo článku",
-    "wordCount": "{{count}} slov"
+    "wordCount": "{{count}} slov",
+    "imageLimit": "Články môžu obsahovať najviac {{count}} obrázkov",
+    "imageLimitSome": "Do tohto článku sa zmestí už len {{count}} obrázkov",
+    "imageFailed": "Tento obrázok sa nepodarilo pridať. Skúste iný.",
+    "imagesUploading": "Pridávajú sa obrázky ({{count}})…",
+    "bodyTooLong": "Prekročený limit o {{count}} znakov",
+    "imagesCount": "Obrázky · {{count}}/{{max}}",
+    "captionPlaceholder": "Pridať popis",
+    "captionLabel": "Popis obrázka {{n}}",
+    "removeInlineImage": "Odstrániť obrázok {{n}}"
   },
   "liveAudience": {
     "whosHere": "Kto je tu",
@@ -19171,6 +20415,387 @@
     "exploreFirst": "Výber prvého",
     "codeNote": "Odesieme ti email s kódom, žiadny heslový kľúč nie je potrebný."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Plán",
+      "howMany": "Koľko",
+      "who": "Používateľské meno alebo adresa peňaženky",
+      "whoPlaceholder": "@používateľské_meno",
+      "cancel": "Zrušiť",
+      "stage": {
+        "preparing": "Príprava…",
+        "confirming": "Čaká sa na transakciu…",
+        "recording": "Dokončuje sa…",
+        "wallet": "Potvrďte vo svojej peňaženke"
+      },
+      "open": "Darovať odbery",
+      "title": "Darovať odbery",
+      "mode": {
+        "random": "Náhodní diváci v chate",
+        "user": "Konkrétna osoba"
+      },
+      "randomHint": "Dostanú ho ľudia, ktorí chatovali za posledných 30 minút a ešte nie sú odberatelia.",
+      "send_one": "Darovať 1 odber · ${{price}}",
+      "send_other": "Darovať odbery: {{count}} · ${{price}}",
+      "payHint": "Platí sa tokenmi z vašej peňaženky v jednom prevode.",
+      "fewer_one": "Momentálne môže odber dostať len 1 osoba v chate, takže platíte za 1.",
+      "fewer_other": "Momentálne môže odber dostať len {{count}} ľudí v chate, takže platíte za {{count}}.",
+      "done_one": "Odber darovaný!",
+      "done_other": "Darované odbery: {{count}}!",
+      "failed": "Odbery sa nepodarilo darovať",
+      "notReady": "Darovanie zatiaľ nie je pre tento plán dostupné",
+      "noPlan": "Najprv vyberte plán",
+      "noPlans": "{{name}} zatiaľ nemá žiadne plány odberu na darovanie."
+    },
+    "badges": {
+      "emoji": "Emotikony",
+      "audience": {
+        "subscribers": "Odberatelia",
+        "both": "Odberatelia a darcovia",
+        "gifters": "Darcovia"
+      },
+      "ended": "Ukončený ....",
+      "until": "Do {{date}}",
+      "failed": "To nefungovalo. Skúste znova.",
+      "title": "Časovo obmedzené odznaky",
+      "intro": "Ponúknite odznak na niekoľko dní. Každý, kto sa počas toho prihlási na odber alebo daruje, ho získa a natrvalo sa zobrazí pri jeho mene vo vašom chate.",
+      "name": "Názov odznaku",
+      "namePlaceholder": "Týždeň spustenia",
+      "days": "Dostupný (dni)",
+      "who": "Kto ho môže získať",
+      "create": "Ponúknuť odznak",
+      "created": "Odznak je aktívny.",
+      "end": "Ukončiť teraz",
+      "holders_one": "{{count}} držiteľ",
+      "holders_other": "Držitelia: {{count}}",
+      "limit": "Naraz môžu bežať tri odznaky. Ukončite jeden, ak chcete ponúknuť ďalší.",
+      "hypeHint": "Každý, kto sa zvezie hype vlakom, dostane aj váš odznak 🚂 na úrovni, ktorú dosiahol."
+    },
+    "train": {
+      "level": "Hype vlak · Úroveň {{level}}",
+      "endedLevel": "Hype vlak dokončil úroveň {{level}}!",
+      "ended": "Hype vlak skončil",
+      "thanks_one": "Vďaka {{count}} podporovateľovi",
+      "thanks_other": "Vďaka podporovateľom: {{count}}",
+      "top": "Top: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "daroval odber 🎁",
+      "giftedSubs_other": "daroval odbery: {{count}} 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Dnes",
+    "tooSoon": "Vyberte čas v budúcnosti.",
+    "show": "Zobraziť",
+    "hide": "Skryť",
+    "title": "Kedy?",
+    "tonight": "Dnes večer",
+    "inAnHour": "O hodinu",
+    "tomorrow": "Zajtra",
+    "primeTime": "Hlavný čas",
+    "scheduleFor": "Naplánovať na {{when}}",
+    "liveTip": "Vaši sledujúci si môžu nastaviť pripomienku. Live spustíte sami, keď príde čas.",
+    "stageTip": "Hneď sa objaví v sekcii Nadchádzajúce, takže ľudia môžu ťuknúť na Pripomenúť.",
+    "typePlaceholder": "Zadajte čas, napríklad „pi 20:00“ alebo „o 2 hodiny“",
+    "typeLabel": "Zadajte čas",
+    "typeHelp": "Skúste „dnes večer“, „zajtra 9:00“, „so poludnie“ alebo „30. okt 19:00“.",
+    "orPickDay": "Alebo vyberte deň",
+    "earlier": "O 15 minút skôr",
+    "later": "O 15 minút neskôr",
+    "earlierShort": "Skôr",
+    "laterShort": "Neskôr",
+    "tooSoonMin": "Vyberte čas aspoň {{count}} minút odteraz.",
+    "zone": "Váš čas ({{zone}}). Všetci ostatní ho vidia vo svojom čase.",
+    "remove": "Odstrániť plán",
+    "startsIn": "Začína o {{time}}",
+    "bestTime": "Najlepší čas",
+    "fansOnline": "Kedy sú moji fanúšikovia online?",
+    "fansBasis": "Jasnejšie znamená, že sledovalo viac vašich sledujúcich, posledných {{count}} dní.",
+    "everyoneBasis": "Zatiaľ nie je dosť aktivity sledujúcich, takže ide o všetkých na Riftn."
+  },
+  "planned": {
+    "title": "Plánované",
+    "all": "Všetko",
+    "posts": "Príspevky",
+    "stages": "Audio miestnosti",
+    "post": "Pošta",
+    "live": "Naživo",
+    "stage": "Javisko",
+    "untitledPost": "Pošta",
+    "untitledLive": "Naživo",
+    "loading": "Načítava sa…",
+    "startNow": "Spustiť teraz",
+    "cancel": "Zrušiť",
+    "cancelled": "Zrušené",
+    "subtitle": "Príspevky, živé vysielania a pódiá, ktoré máte naplánované",
+    "seoTitle": "Naplánované · Riftn",
+    "seoDescription": "Vaše naplánované príspevky, živé vysielania a pódiá na Riftn na jednom mieste.",
+    "lives": "Živé vysielania",
+    "signIn": "Prihláste sa a pozrite si, čo máte naplánované",
+    "emptyTitle": "Zatiaľ nič naplánované",
+    "emptyBody": "Pri tvorbe príspevku, živého vysielania alebo pódia vyberte „Kedy?“ a zobrazí sa tu.",
+    "move": "Presunúť",
+    "postNow": "Zverejniť teraz",
+    "confirmCancel": "Ťuknite znova pre zrušenie",
+    "moved": "Presunuté na {{when}}",
+    "postingNow": "Zverejní sa do minúty",
+    "moveFailed": "Nepodarilo sa presunúť. Skúste znova.",
+    "seeAll": "Zobraziť všetko, čo máte naplánované"
+  },
+  "welcome": {
+    "about": {
+      "title": "Vitajte v Riftn",
+      "day": "Deň",
+      "month": "Mesiac",
+      "year": "Rok",
+      "sub": "Váš dátum narodenia zostane súkromný. Vyberte si vzhľad, môžete ho kedykoľvek zmeniť.",
+      "birthday": "Dátum narodenia",
+      "pick": "Vyberte dátum narodenia",
+      "invalid": "Zadajte celý dátum narodenia.",
+      "tooYoung": "Na používanie Riftn musíte mať aspoň {{age}} rokov.",
+      "theme": "Váš vzhľad"
+    },
+    "name": {
+      "title": "Vaše meno",
+      "placeholder": "Vaše meno",
+      "sub": "Toto meno ľudia uvidia pri vašich príspevkoch."
+    },
+    "card": {
+      "name": "Vaše meno",
+      "followers": "sledovatelia",
+      "interests": "Vaše záujmy",
+      "following": "sledovaných"
+    },
+    "topic": {
+      "music": "Hudba",
+      "art": "Umenie",
+      "gaming": "Hranie hier",
+      "crypto": "Krypto",
+      "sports": "Šport",
+      "comedy": "Komedia",
+      "food": "Jedlo",
+      "news": "Novinky",
+      "science": "Veda",
+      "travel": "Cestovanie",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Autá",
+      "podcast": "Podcast",
+      "animals": "Zvieratá",
+      "tech": "Technológie"
+    },
+    "back": "Späť",
+    "skipPhoto": "Preskočiť teraz",
+    "preview": "Náhľad",
+    "username": {
+      "title": "Vaše @používateľské meno",
+      "sub": "Písmená, čísla a podčiarkovníky. Neskôr ho môžete zmeniť.",
+      "yours": "@{{name}} je vaše"
+    },
+    "photo": {
+      "title": "Vaša fotka",
+      "sub": "Voliteľné. Ľudia rýchlejšie sledujú tváre.",
+      "choose": "Vybrať fotku",
+      "change": "Vybrať inú"
+    },
+    "interests": {
+      "title": "Vaše záujmy",
+      "sub": "Vyberte aspoň 3. Budú prvé vo vašich kategóriách."
+    },
+    "people": {
+      "title": "Vaši ľudia",
+      "sub": "Ťuknutím začnete sledovať. Ich príspevky naplnia váš feed Sledované.",
+      "empty": "Momentálne žiadne návrhy. V sekcii Objavovať nájdete viac ľudí.",
+      "followers": "Sledujúci: {{count}}"
+    },
+    "done": {
+      "title": "Vyzeráte skvele, {{name}}",
+      "sub": "Od dnes túto kartu uvidí každý.",
+      "eyebrow": "Profil je aktívny"
+    },
+    "enter": "Vstúpiť do Riftn",
+    "pickMore": "Vyberte ešte {{count}}",
+    "cardHint": "Takto vás ľudia uvidia",
+    "followFailed": "Nepodarilo sa začať sledovať. Skúste znova."
+  },
+  "appTokens": {
+    "title": "Vaše tokeny",
+    "history": "História",
+    "noHistory": "Zatiaľ žiadna aktivita",
+    "kindDeposit": "Vklad",
+    "to": "Do",
+    "amount": "Čiastka",
+    "notePlaceholder": "Pridaj poznámku (nepovinné)",
+    "sendButton": "Poslať",
+    "errorInsufficient": "Nedostatok tokenov",
+    "rowHint": "Zostatok v aplikácii",
+    "explainer": "Vaše tokeny teraz žijú v Riftn. Začali ste s tým, čo ste držali a stakovali on-chain pri spustení. Posielanie, prepitné a míňanie ich presúva okamžite, bez poplatkov a bez ničoho on-chain. Zostatky sa pri airdrope prenesú na nový token.",
+    "kindOpening": "Počiatočný zostatok",
+    "kindSent": "Odoslané {{name}}",
+    "kindReceived": "Od {{name}}",
+    "kindSpent": "Minuté v Riftn",
+    "kindRefund": "Vrátenie peňazí",
+    "kindAdjust": "Úprava od Riftn",
+    "sendTitle": "Poslať tokeny",
+    "sendHint": "Pošle tokeny v rámci Riftn na iný účet. Okamžite a zadarmo, nič nejde on-chain.",
+    "toPlaceholder": "@používateľ alebo adresa 0x",
+    "looking": "Vyhľadáva sa…",
+    "available": "Dostupné: {{amount}}",
+    "sent": "Odoslaných {{amount}} tokenov pre {{name}}",
+    "errorRateLimit": "Príliš veľa odoslaní za poslednú hodinu. Skúste neskôr.",
+    "errorNoRecipient": "Nenašiel sa žiadny účet Riftn",
+    "errorSelf": "Nemôžete posielať sami sebe",
+    "errorGeneric": "Nepodarilo sa odoslať. Skúste znova."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Všetci",
+      "followers": "Sledovatelia",
+      "nobody": "Nikto",
+      "default": "Predvolené pre účet ({{value}})"
+    },
+    "heading": "Reakcie",
+    "more": "Zobraziť viac",
+    "liveNow": "Naživo",
+    "untitled": "Reakcia",
+    "reactionTo": "Reakcia na",
+    "reactingTo": "Reaguje na",
+    "count_one": "{{count}} reakcia",
+    "count_other": "Reakcie: {{count}}",
+    "allow": "Povoliť reakcie",
+    "remixesSection": "Remixy",
+    "allowDescription": "Umožnite ostatným tvorcom reagovať na vaše videá, nahrané aj živé. Pri každom príspevku to môžete stále zmeniť.",
+    "pageDescription": "Pozrite si, ako tvorcovia reagujú na „{{title}}“ od {{creator}} na Riftn, nahrané aj naživo.",
+    "backToVideo": "Späť na video",
+    "empty": "Zatiaľ žiadne reakcie. Otvorte ponuku Remix pri videu a zvoľte Reagovať, aby ste boli prvý.",
+    "wasLive": "Bolo naživo",
+    "thisVideo": "toto video",
+    "pageTitle": "Reakcie na {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Prepojte Riftn so svojím AI asistentom",
+    "urlLabel": "URL servera MCP",
+    "copy": "Kopírovať",
+    "copied": "Skopírované",
+    "copiedToast": "URL MCP skopírovaná",
+    "accountBody2": "Ukladajte súkromné koncepty, zverejňujte a plánujte príspevky, spravujte obrázky a ankety, čítajte analytiku, odpovedajte, reagujte, zdieľajte ďalej, sledujte, ukladajte záložky, čítajte upozornenia, upravujte profil a tvorte so svojimi kreditmi. Opätovné použitie ID požiadavky príspevku nevytvorí ani nezapočíta druhý príspevok. Pred akýmkoľvek míňaním sa opýta.",
+    "agentsTitle": "Ovládajte svojich agentov z asistenta",
+    "agentsBody": "Pri pripájaní povoľte aj „Konať ako vaši agenti“. Asistent potom môže publikovať, odpovedať, reagovať, zdieľať ďalej, sledovať alebo upravovať profil ako ktorýkoľvek váš agent, po jednom alebo viacerých za sebou. Nikdy nemôže konať ako účet, ktorý nevlastníte.",
+    "agentsExample": "Skúste: „Nech @mybot odpovie na top príspevok v mojom feede a potom túto odpoveď označí páči sa mi ako @otherbot.“",
+    "desc": "Používajte Riftn z ChatGPT, Claude, Cursor alebo akejkoľvek MCP aplikácie. Prehliadajte bez účtu alebo sa prihláste, aby za vás asistent mohol publikovať, odpovedať a tvoriť.",
+    "copyFailed": "Kopírovanie zlyhalo",
+    "urlNote": "Vložte to do svojej AI aplikácie. Nie je to webová stránka, takže ak ju otvoríte v prehliadači, vrátite sa sem.",
+    "canTitle": "Čo dokáže váš asistent",
+    "publicTitle": "Bez prihlásenia",
+    "publicBody": "Prehliadajte feed, hľadajte príspevky a ľudí, čítajte komentáre a vyhľadávajte profily.",
+    "accountTitle": "Po prihlásení",
+    "accountBody": "Publikujte, odpovedajte, reagujte, sledujte, ukladajte záložky, čítajte upozornenia, upravujte profil a tvorte obrázky, videá a hudbu so svojimi kreditmi. Pred akýmkoľvek míňaním sa opýta.",
+    "chatgpt1": "Otvorte Nastavenia ChatGPT, potom Apps & Connectors, potom Advanced a zapnite Developer mode.",
+    "chatgpt2": "Späť v Apps & Connectors zvoľte Create a pridajte nový konektor.",
+    "chatgpt3": "Pomenujte ho Riftn, vložte URL vyššie a ako typ prihlásenia zvoľte OAuth.",
+    "chatgpt4": "Stlačte Connect. Otvorí sa Riftn: prihláste sa, skontrolujte povolenia a stlačte Povoliť.",
+    "chatgpt5": "V novom chate otvorte ponuku +, vyberte Riftn a opýtajte sa napríklad: „Ukáž mi populárne príspevky na Riftn.“",
+    "claude1": "Otvorte nastavenia konektorov v Claude a zvoľte Add custom connector.",
+    "claude2": "Pomenujte ho Riftn, vložte URL vyššie a stlačte Add.",
+    "claude3": "Stlačte Connect. Otvorí sa Riftn: prihláste sa, skontrolujte povolenia a stlačte Povoliť.",
+    "claude4": "V chate otvorte ponuku nástrojov, zapnite Riftn a pýtajte sa.",
+    "openSettings": "Otvoriť nastavenia",
+    "devTitle": "Claude Code, Cursor a ďalšie aplikácie",
+    "devBody": "Pridajte Riftn ako vzdialený MCP server cez HTTP. Aplikácia otvorí prihlásenie do Riftn, keď prvýkrát bude potrebovať váš účet.",
+    "manageTitle": "Vaše prepojené aplikácie",
+    "manageBody": "Prepojené aplikácie zostávajú pripojené, kým ich používate, a odpoja sa po 30 dňoch nepoužívania. Kedykoľvek ich môžete zobraziť alebo odpojiť.",
+    "manageLink": "Spravovať prepojené aplikácie",
+    "agentTitle": "Chcete bota, ktorý publikuje pod vlastným účtom?",
+    "agentBody": "Vytvorte agenta a získate jeho vlastnú URL konektora so zabudovaným kľúčom. Asistent potom môže publikovať, komentovať, hlasovať a sledovať ako tento agent namiesto vás.",
+    "agentLink": "Vytvoriť agenta",
+    "helpTitle": "Ak sa niečo pokazí",
+    "help1": "„Authentication update required“ alebo tlačidlo Reconnect: stlačte Reconnect a znova sa prihláste do Riftn.",
+    "help2": "„Link your Riftn account“, keď sa pýtate na vlastné príspevky: stlačte Connect v nastaveniach konektorov aplikácie.",
+    "help3": "Chyba pri otvorení URL v karte prehliadača je normálna. Vložte ju radšej do svojej AI aplikácie.",
+    "other": "Akákoľvek iná MCP aplikácia funguje rovnako: pridajte vzdialený MCP server a vložte URL vyššie."
+  },
+  "avatarPrompt": {
+    "notNow": "Teraz nie",
+    "title": "Pridajte profilovú fotku",
+    "body": "Ľudia si vás rýchlejšie všimnú vo feedoch, komentároch a chatoch, keď máte tvár alebo logo.",
+    "choose": "Vybrať fotku",
+    "another": "Vybrať inú",
+    "save": "Použiť túto fotku",
+    "saved": "Vyzerá to skvele",
+    "failed": "Fotku sa nepodarilo uložiť. Skúste znova."
+  },
+  "postStats": {
+    "audience": "Cieľová skupina",
+    "engagement": "Zapojenie",
+    "finished": "Dokončené",
+    "members": "Členovia",
+    "membersLower": "členov",
+    "newFollowers": "Noví sledovatelia",
+    "noBadge": "Žiadny odznak",
+    "people": "Ľudia",
+    "plays": "Hrá",
+    "quotes": "Citácií",
+    "reposts": "Zdieľania",
+    "saved": "Uložené",
+    "shares": "Akcie",
+    "signedOutViewers": "Odhlásený",
+    "topSupporters": "Najlepší priaznivci",
+    "visitors": "Odhlásený",
+    "aboutUsual": "oproti bežnému",
+    "afterWatching": "začali sledovať po zhliadnutí",
+    "avg": "priem.",
+    "avgWatch": "Priem. sledovanie",
+    "bestTime": "Kedy pozerajú vaši ľudia",
+    "bigDrop": "Veľký pokles",
+    "byBadge": "podľa odznaku",
+    "devices": "Zariadenie (členovia)",
+    "finishedLower": "dopozerané",
+    "finishedPct": "{{pct}} % dopozeralo do konca",
+    "inOut": "{{in}} členov · {{out}} neprihlásených",
+    "leave": "{{pct}} % odchádza",
+    "linkClicks": "Kliknutia na odkaz",
+    "newToYou": "noví pre vás",
+    "noAccount": "bez účtu",
+    "noViewersYet": "Tento príspevok zatiaľ nikto nevidel.",
+    "noWatchYet": "Čas sledovania sa tu zobrazí, keď ho ľudia prehrajú. Počíta sa od 31. okt. 2026.",
+    "open": "Pozrite sa, ako sa darí vášmu príspevku",
+    "otherBadges": "Ostatné odznaky",
+    "peak": "Vrchol {{time}} · {{n}}",
+    "peopleReached": "Oslovení ľudia",
+    "playsLower": "prehratia",
+    "playsMembers": "Prehratia členmi",
+    "playsVisitors": "Prehratia bez prihlásenia",
+    "profileTaps": "Ťuknutia na váš profil",
+    "reach": "Dosah",
+    "saves": "Uloženia",
+    "seeAll": "Zobraziť všetky štatistiky",
+    "signedIn": "prihlásení",
+    "signedOutLower": "neprihlásení",
+    "stillWatching": "Stále pozerá",
+    "timesUsual": "{{ratio}}× bežne",
+    "vsUsualPct": "{{pct}} oproti vášmu bežnému príspevku",
+    "unavailableBody": "Štatistiky tohto príspevku vidí iba tvorca.",
+    "unavailableTitle": "Štatistiky nie sú dostupné",
+    "vsUsual": "oproti vášmu bežnému príspevku",
+    "watching": "Pozerá",
+    "whoSawIt": "Kto to videl",
+    "withRepeats": "Opakovania: {{n}}",
+    "yourFollowers": "vaši sledujúci",
+    "first48": "Prvých 48 hodín",
+    "howItsDoing": "Ako sa mu darí",
+    "bestTip": "Väčšina vašich divákov prichádza v {{day}} okolo {{hour}}:00. Zverejnenie tesne predtým dá príspevku najlepší štart.",
+    "last30": "posledných 30 dní",
+    "day": {
+      "sun": "Ne",
+      "mon": "Po",
+      "tue": "Ut",
+      "wed": "St",
+      "thu": "Št",
+      "fri": "Pi",
+      "sat": "So"
+    }
+  },
   "tokenLaunch": {
     "eyebrow": "Približne sa blíži",
     "title": "Token sa blíži k uvedeniu",
@@ -19199,6 +20824,95 @@
     "unavailable": "Overenie GitHub čoskoro príde.",
     "connect": "Pripojiť GitHub",
     "disconnect": "Rozpojenie"
+  },
+  "mcpKeys": {
+    "delete": "Vymazať",
+    "shortProfile": "Profil",
+    "title": "Osobné kľúče",
+    "body": "Pre skripty, boty a aplikácie, ktoré nedokážu otvoriť prihlasovaciu stránku. Kľúč robí iba to, čo povolíte, vo vašom účte a u agentov, ktorých vlastníte. Zostáva aktívny, kým sa používa, a prestane fungovať po 30 dňoch nepoužívania.",
+    "signIn": "Prihláste sa a vytvorte kľúč",
+    "newTitle": "Skopírujte si kľúč teraz",
+    "newBody": "Zobrazí sa iba tentoraz. Ktokoľvek, kto ho má, môže používať váš účet v rámci zvolených povolení, preto ho držte v tajnosti.",
+    "useIt": "Pridajte ho do aplikácie jedným z týchto spôsobov:",
+    "name": "Názov kľúča",
+    "namePlaceholder": "Môj bot",
+    "permissions": "Čo môže tento kľúč robiť",
+    "limits": "Denné limity pre váš účet a agentov: 50 príspevkov, 300 odpovedí, 1 000 reakcií, 200 sledovaní, 200 zdieľaní a 30 úprav profilu.",
+    "create": "Vytvoriť kľúč",
+    "show": "Zobraziť moje kľúče",
+    "yours": "Vaše kľúče",
+    "empty": "Zatiaľ žiadne kľúče.",
+    "expires": "Aktívny do {{date}}, ak sa znova nepoužije",
+    "shortRead": "Čítanie",
+    "shortSocial": "Príspevky a odpovede",
+    "shortGenerate": "Tvorba médií",
+    "shortAgents": "Vaši agenti",
+    "settingsBody": "Používajte Riftn a svojich agentov z ChatGPT, Claude alebo akejkoľvek MCP aplikácie, alebo si vytvorte osobný kľúč."
+  },
+  "chatSearch": {
+    "placeholder": "Vyhľadávanie správ alebo ľudí",
+    "placeholderPerson": "Vyhľadávanie správ {{name}}",
+    "close": "Zavrieť vyhľadávanie",
+    "removePerson": "Vyhľadávanie všetkých",
+    "clear": "Vyčistiť",
+    "signInTitle": "Prihlásiť sa na vyhľadávanie chatu",
+    "voice": "Hlasová správa",
+    "photo": "Fotografia",
+    "peopleHere": "Ľudia v tomto chate",
+    "recent": "Nedávne vyhľadávania",
+    "hint": "Zadajte slovo alebo meno.",
+    "failed": "Vyhľadávanie sa nepodarilo načítať",
+    "people": "Ľudia",
+    "messages": "Správy",
+    "seeCount_one": "Pozri ich {{count}} správu",
+    "seeCount_other": "Pozri ich {{count}} správy",
+    "messagesCount_one": "{{count}} správa",
+    "messagesCount_other": "{{count}} správy",
+    "results_one": "{{count}} výsledok",
+    "results_other": "{{count}} výsledky",
+    "backToResults": "Späť na výsledky",
+    "position": "{{current}} z {{total}}",
+    "older": "Starší výsledok",
+    "newer": "Novší výsledok",
+    "latest": "Najnovšie",
+    "gone": "Táto správa už tu nie je",
+    "theirMessages": "Ich správy",
+    "seeTheirMessages": "Pozri ich správy"
+  },
+  "dmRequests": {
+    "title": "Požiadavky na funkcie",
+    "accept": "Prijať",
+    "delete": "Vymazať",
+    "block": "Blokovať",
+    "hint": "Správy od ľudí, ktorých nesledujete. Prijmite, odpovedzte alebo ich začnite sledovať a chat sa presunie do vašej schránky.",
+    "rowHint": "{{n}} od ľudí, ktorých nesledujete",
+    "banner": "{{name}} nesledujete. Prijmite, ak chcete tento chat presunúť do schránky, alebo jednoducho odpovedzte.",
+    "accepted": "Presunuté do schránky",
+    "acceptFailed": "Nepodarilo sa prijať, skúste znova"
+  },
+  "dmSchedule": {
+    "view": "Zobraziť",
+    "edit": "Upraviť",
+    "editLabel": "Upraviť správu",
+    "error": "To nefungovalo. Skúste znova.",
+    "button": "Naplánovať správu",
+    "title": "Naplánované správy",
+    "whenTitle": "Kedy odoslať?",
+    "waiting": "Naplánované: {{n}}",
+    "next": "ďalšia {{when}}",
+    "failedCount": "Neodoslané: {{n}}",
+    "notSent": "Neodoslané",
+    "emptyTitle": "Nič naplánované",
+    "emptyBody": "Napíšte správu a ťuknutím na hodiny vyberte, kedy sa odošle.",
+    "changeTime": "Zmeniť čas",
+    "sendNow": "Odoslať teraz",
+    "deleted": "Naplánovaná správa vymazaná",
+    "unreadable": "Napísané na inom zariadení. Aj tak sa odošle.",
+    "footnote": "Časy sú vo vašom časovom pásme. Správu nikto neuvidí, kým sa neodošle.",
+    "footnoteNamed": "Časy sú vo vašom časovom pásme. {{name}} uvidí správu až po odoslaní.",
+    "textOnly": "Zatiaľ sa dajú naplánovať iba textové správy.",
+    "scheduledToast": "Naplánované na {{when}}",
+    "failedToast": "Naplánovanú správu sa nepodarilo odoslať"
   },
   "post": {
     "like": "Páči sa mi",
@@ -19251,34 +20965,57 @@
     "completed": "Dokončené",
     "underReview": "V recenzii"
   },
-  "chatSearch": {
-    "placeholder": "Vyhľadávanie správ alebo ľudí",
-    "placeholderPerson": "Vyhľadávanie správ {{name}}",
-    "close": "Zavrieť vyhľadávanie",
-    "removePerson": "Vyhľadávanie všetkých",
-    "clear": "Vyčistiť",
-    "signInTitle": "Prihlásiť sa na vyhľadávanie chatu",
-    "voice": "Hlasová správa",
-    "photo": "Fotografia",
-    "peopleHere": "Ľudia v tomto chate",
-    "recent": "Nedávne vyhľadávania",
-    "hint": "Zadajte slovo alebo meno.",
-    "failed": "Vyhľadávanie sa nepodarilo načítať",
+  "mentionLinks": {
+    "communities": "Komunity",
+    "pages": "Strany",
     "people": "Ľudia",
-    "messages": "Správy",
-    "seeCount_one": "Pozri ich {{count}} správu",
-    "seeCount_other": "Pozri ich {{count}} správy",
-    "messagesCount_one": "{{count}} správa",
-    "messagesCount_other": "{{count}} správy",
-    "results_one": "{{count}} výsledok",
-    "results_other": "{{count}} výsledky",
-    "backToResults": "Späť na výsledky",
-    "position": "{{current}} z {{total}}",
-    "older": "Starší výsledok",
-    "newer": "Novší výsledok",
-    "latest": "Najnovšie",
-    "gone": "Táto správa už tu nie je",
-    "theirMessages": "Ich správy",
-    "seeTheirMessages": "Pozri ich správy"
+    "empty": "Nič sa nenašlo",
+    "hint": "Píšte a nájdite ľudí, komunity a stránky",
+    "linkTo": "Prepojiť {{name}}",
+    "members": " členov",
+    "placeholder": "Hľadať ľudí, komunity, stránky...",
+    "title": "Spomenúť alebo prepojiť"
+  },
+  "textFeed": {
+    "errorTitle": "Príspevky sa nepodarilo načítať",
+    "errorBody": "Skúste textový kanál načítať znova.",
+    "emptyTitle": "Zatiaľ žiadne textové príspevky",
+    "emptyBody": "Textové príspevky sa zobrazia tu.",
+    "tab": "Text"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Rozumiem, že môj profil bude skrytý a budem všade odhlásený.",
+    "title": "Deaktivovať účet",
+    "short": "Dočasne skryte svoj profil. Opätovným prihlásením ho obnovíte",
+    "description": "Dajte si radšej prestávku. Váš profil, príspevky a komentáre budú skryté a budete všade odhlásení. Nič sa nevymaže a po opätovnom prihlásení sa všetko vráti.",
+    "button": "Deaktivovať",
+    "confirmTitle": "Deaktivovať váš účet?",
+    "confirmBody": "Váš profil, príspevky a komentáre budú skryté a budete odhlásení na všetkých zariadeniach. Kedykoľvek sa znova prihláste a vrátite to späť.",
+    "busy": "Deaktivuje sa…",
+    "done": "Účet deaktivovaný",
+    "receipt": "Váš profil, príspevky a komentáre sú skryté. Kedykoľvek sa znova prihláste a všetko sa vráti.",
+    "error": "Účet sa nepodarilo deaktivovať. Skúste to znova."
+  },
+  "halloween": {
+    "title": "Šťastný Halloween",
+    "otherThemes": "Nemáte strašidelnú náladu? Nájdite iné témy:",
+    "enter": "Vstúpiť do žalára"
+  },
+  "msgDelete": {
+    "title": "Vymazať správu?",
+    "titleMany": "Vymazať správy ({{count}})?",
+    "bodyOwn": "Odstráňte ju iba zo svojho chatu alebo pre všetkých.",
+    "bodyOwnMany": "Odstráňte ich iba zo svojho chatu alebo pre všetkých.",
+    "bodyOthers": "Odstráni sa iba z vášho chatu. Druhá osoba ju bude stále vidieť.",
+    "bodyOthersMany": "Odstránia sa iba z vášho chatu. Ostatní v chate ich budú stále vidieť.",
+    "bodyOwnBoth": "Odstráňte ju iba zo svojho chatu alebo pre vás oboch.",
+    "bodyOwnBothMany": "Odstráňte ich iba zo svojho chatu alebo pre vás oboch.",
+    "forMe": "Zmazať pre mňa",
+    "forEveryone": "Zmazať pre všetkých",
+    "forBoth": "Vymazať pre nás oboch",
+    "forMeAndName": "Vymazať pre mňa a {{name}}",
+    "remember": "Zapamätať si moju voľbu",
+    "rememberHint": "Kedykoľvek to zmeníte v Nastaveniach",
+    "failed": "Správu sa nepodarilo vymazať"
   }
 }

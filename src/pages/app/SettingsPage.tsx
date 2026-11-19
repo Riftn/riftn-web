@@ -25,6 +25,10 @@ import ConnectIcon from "@/components/ui/cut-icons/connect";
 import Moon from "@/components/ui/cut-icons/appearance";
 import Lock from "@/components/ui/cut-icons/privacy";
 import LayoutGrid from "@/components/ui/cut-icons/apps";
+import PublicChatIcon from "@/components/ui/cut-icons/chat";
+import { applyNavOrder, publicChatInBar, withPublicChatInBar } from '@/lib/nav-order';
+import { useNavOrderEditor } from '@/hooks/use-nav-order';
+import { DEFAULT_BAR_IDS } from '@/components/app/MobileBottomNav';
 import HomeCutIcon from "@/components/ui/cut-icons/home";
 import FilterCutIcon from "@/components/ui/cut-icons/filter";
 import { FEED_TABS } from "@/constants/app.constants";
@@ -95,6 +99,7 @@ import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { updateProfile, getAccountInfo, type UpdateProfileData, type DeHubUser } from '@/lib/api/dehub';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
+import { useProfileImageMenu } from '@/components/app/profile/useProfileImageMenu';
 import { getBlockListPaginated, unblockUser as apiUnblockUser, type BlockedUser, checkUsernameAvailability } from '@/lib/api/dehub';
 import { isReservedUsername } from '@/lib/reserved-usernames';
 import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
@@ -116,6 +121,7 @@ import { useVideoGlitch, writeVideoGlitch } from '@/lib/video-glitch';
 import { useUserPreferences } from '@/contexts/UserPreferencesContext';
 import { getCreatorPlaybackRateCount, clearCreatorPlaybackRates } from '@/lib/video-preferences';
 import { normaliseFeedVideoShape, useFeedVideoShape, writeFeedVideoShape } from '@/lib/feed-video-shape';
+import { MENU_LAYOUT_PREF_KEY, normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 import { isWideVideoMode, useWideVideoMode, writeWideVideoMode } from '@/lib/wide-video-mode';
 import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 import { useCoinPlacement } from '@/hooks/use-coin-placement';
@@ -123,6 +129,7 @@ import { usePrivacySettings } from '@/hooks/use-privacy-settings';
 import { useNewMemberSelf } from '@/hooks/use-new-members';
 import { useWalletUnlockInterval, type WalletUnlockIntervalOption } from '@/hooks/use-wallet-unlock-interval';
 import { WalletRecoveryTools } from '@/components/app/settings/WalletRecoveryTools';
+import { ResetWalletSettings } from '@/components/app/settings/ResetWalletSettings';
 import { BiometricUnlockSettings } from '@/components/app/settings/BiometricUnlockSettings';
 import { EmailNotificationsSetting } from '@/components/app/settings/EmailNotificationsSetting';
 import { SmsNotificationsSetting } from '@/components/app/settings/SmsNotificationsSetting';
@@ -153,6 +160,9 @@ import { useLeftHanded } from '@/hooks/use-left-handed';
 import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNotificationsSetting';
 import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
+import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
+import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
 import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
 import { WalletMenuContent } from '@/components/app/CoinBalanceMenu';
 import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
@@ -621,6 +631,9 @@ function ProfileSettings() {
   const [coverPreview, setCoverPreview] = useState<string | undefined>();
   const [avatarFile, setAvatarFile] = useState<File | undefined>();
   const [coverFile, setCoverFile] = useState<File | undefined>();
+  // Delete from the picture / banner menu: cleared on screen now, on Save for real.
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+  const [removeCover, setRemoveCover] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const debouncedUsername = useDebouncedValue(username, 300);
@@ -751,7 +764,9 @@ function ProfileSettings() {
     telegramLink !== originalValues.telegramLink ||
     facebookLink !== originalValues.facebookLink ||
     !!avatarFile ||
-    !!coverFile;
+    !!coverFile ||
+    removeAvatar ||
+    removeCover;
 
   // A changed username must be positively cleared before Save unlocks. The old
   // gate was `usernameAvailable !== false`, which passes while it is still null
@@ -817,6 +832,21 @@ function ProfileSettings() {
 
       setAvatarFile(undefined);
       setCoverFile(undefined);
+      setRemoveAvatar(false);
+      setRemoveCover(false);
+      if (variables.removeAvatar || variables.removeCover) {
+        if (authUser?.address) bumpProfileImageVersion(authUser.address);
+        const own = authUser?.address?.toLowerCase();
+        queryClient.setQueriesData<ProfileData>({ queryKey: ['dehub-profile'] }, (old) => {
+          if (!old || old.walletAddress?.toLowerCase() !== own) return old;
+          return {
+            ...old,
+            ...(variables.removeAvatar ? { avatarUrl: undefined } : {}),
+            ...(variables.removeCover ? { coverUrl: undefined } : {}),
+          };
+        });
+        queryClient.invalidateQueries({ queryKey: ['profile-avatar'] });
+      }
 
       // Reset file inputs so re-selecting the same file triggers onChange
       if (avatarInputRef.current) avatarInputRef.current.value = '';
@@ -905,6 +935,7 @@ function ProfileSettings() {
         return;
       }
       setAvatarFile(file);
+      setRemoveAvatar(false);
       setAvatarPreview(prev => swapBlobPreview(prev, file));
     }
   };
@@ -917,10 +948,48 @@ function ProfileSettings() {
         return;
       }
       setCoverFile(file);
+      setRemoveCover(false);
       setCoverPreview(prev => swapBlobPreview(prev, file));
     }
   };
   
+  // Right-click / hold menu and Ctrl/Cmd+V paste on the banner and picture.
+  // Same as picking a file: shown at once, saved with Save.
+  const setPickedCover = (file: File) => {
+    setCoverFile(file);
+    setRemoveCover(false);
+    setCoverPreview(prev => swapBlobPreview(prev, file));
+  };
+  const setPickedAvatar = (file: File) => {
+    setAvatarFile(file);
+    setRemoveAvatar(false);
+    setAvatarPreview(prev => swapBlobPreview(prev, file));
+  };
+  const coverMenu = useProfileImageMenu({
+    kind: 'cover',
+    canEdit: true,
+    imageUrl: coverPreview,
+    hasImage: !!coverPreview,
+    onFile: setPickedCover,
+    onRemove: () => {
+      setCoverFile(undefined);
+      setRemoveCover(true);
+      setCoverPreview(prev => { if (prev?.startsWith('blob:')) { try { URL.revokeObjectURL(prev); } catch { /* noop */ } } return undefined; });
+    },
+  });
+  const avatarMenu = useProfileImageMenu({
+    kind: 'avatar',
+    canEdit: true,
+    imageUrl: avatarPreview,
+    hasImage: !!avatarPreview,
+    onFile: setPickedAvatar,
+    onRemove: () => {
+      setAvatarFile(undefined);
+      setRemoveAvatar(true);
+      setAvatarPreview(prev => { if (prev?.startsWith('blob:')) { try { URL.revokeObjectURL(prev); } catch { /* noop */ } } return undefined; });
+    },
+  });
+
   const handleSave = () => {
     if (usernameAvailable === false) {
       toast.error(
@@ -957,6 +1026,8 @@ function ProfileSettings() {
     data.facebookLink = facebookLink;
     if (avatarFile) data.avatarImg = avatarFile;
     if (coverFile) data.coverImg = coverFile;
+    if (removeAvatar && !avatarFile) data.removeAvatar = true;
+    if (removeCover && !coverFile) data.removeCover = true;
     
     updateMutation.mutate(data, { onSuccess: () => {
         if (data.displayName !== undefined) setDisplayName.complete(displayName, displayName);
@@ -1008,21 +1079,7 @@ function ProfileSettings() {
         data-setting-anchor="cover-image"
         data-keep-dark
         className="relative aspect-[3/1] bg-zinc-800 rounded-xl overflow-hidden group"
-        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const file = e.dataTransfer?.files?.[0];
-          if (file && file.type.startsWith('image/')) {
-            if (file.size > 10 * 1024 * 1024) {
-              toast.error(t('settings.imageTooLarge10'));
-              return;
-            }
-            setCoverFile(file);
-            setCoverPreview(prev => swapBlobPreview(prev, file));
-          }
-        }}
+        {...coverMenu.targetProps}
       >
         {coverPreview && (
           <img src={coverPreview} alt={_copy("copy.fa8d84566676", { defaultValue: "Cover" })} className="w-full h-full object-cover" />
@@ -1048,27 +1105,14 @@ function ProfileSettings() {
           className="hidden"
           onChange={handleCoverChange}
         />
+        {coverMenu.menu}
       </div>
 
       {/* Profile Picture */}
       <div data-setting-anchor="profile-picture" className="flex items-center gap-4 -mt-10">
-        <div 
-          className="relative"
-          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const file = e.dataTransfer?.files?.[0];
-            if (file && file.type.startsWith('image/')) {
-              if (file.size > 5 * 1024 * 1024) {
-                toast.error(t('settings.imageTooLarge5'));
-                return;
-              }
-              setAvatarFile(file);
-              setAvatarPreview(prev => swapBlobPreview(prev, file));
-            }
-          }}
+        <div
+          className="relative rounded-xl"
+          {...avatarMenu.targetProps}
         >
           <Avatar className="w-20 h-20 border-4 border-zinc-900">
             <AvatarImage src={avatarPreview} />
@@ -1091,6 +1135,7 @@ function ProfileSettings() {
             className="hidden"
             onChange={handleAvatarChange}
           />
+          {avatarMenu.menu}
         </div>
         <div>
           <h3 className="font-medium text-white">{t('settings.profilePicture')}</h3>
@@ -2104,6 +2149,9 @@ function PrivacySettings() {
           <div data-setting-anchor="wallet-recovery">
             <WalletRecoveryTools />
           </div>
+          <div data-setting-anchor="reset-wallet">
+            <ResetWalletSettings />
+          </div>
         </div>
       </div>
 
@@ -2655,7 +2703,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
   const { isCollapsed, setCollapsed } = useSidebarCollapse();
   const { ref: themePickerFadeRef, style: themePickerFadeStyle } = useScrollFadeMask<HTMLDivElement>();
   const [feedLayout, setFeedLayout] = useState('comfortable');
-  const { defaultProfileTab, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  const { defaultProfileTab, defaultProfileView, readerProfileView, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -2715,6 +2763,9 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
         </div>
       </div>
 
+      {/* Sign-in screen look: Tube TV, VHS, LED wall or Hologram */}
+      <LoginLookSetting />
+
       {/* Language */}
       <div data-setting-anchor="language">
         <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.language')}</h3>
@@ -2748,10 +2799,14 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
               ]}
             />}
           />
+          <MenuLayoutRow />
+          <PublicChatBarRow />
           <DefaultFeedSetting />
           <FeedTogglesSetting />
           <PostLandingSetting />
           <ChatTextSizeSetting />
+          <ChatCardsSetting />
+          <ChatDeleteChoiceSetting />
           <SettingsRow
             icon={<LayoutGrid />}
             anchor="default-profile-tab"
@@ -2766,6 +2821,39 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
                 value: o.value,
                 label: t(`profile.tabs.${o.value}`, o.label),
               }))}
+            />}
+          />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="default-profile-view"
+            title={t('settings.defaultProfileView', 'Profile posts layout')}
+            description={t('settings.defaultProfileViewDesc', 'Show your posts as a grid or a list when people open your profile')}
+            action={<SettingDrawerSelect
+              value={defaultProfileView}
+              onValueChange={(value) => updateSettings({ default_profile_view: value === 'list' ? 'list' : 'grid' })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.defaultProfileView', 'Profile posts layout')}
+              options={[
+                { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
+                { value: 'list', label: t('profile.viewList', 'List view') },
+              ]}
+            />}
+          />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="reader-profile-view"
+            title={t('settings.readerProfileView', 'Open other profiles as')}
+            description={t('settings.readerProfileViewDesc', 'Pick grid or list for every profile you open, or keep each person\'s own choice')}
+            action={<SettingDrawerSelect
+              value={readerProfileView}
+              onValueChange={(value) => updateSettings({ reader_profile_view: value === 'grid' || value === 'list' ? value : 'owner' })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.readerProfileView', 'Open other profiles as')}
+              options={[
+                { value: 'owner', label: t('settings.readerProfileViewOwner', 'Each person\'s choice') },
+                { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
+                { value: 'list', label: t('profile.viewList', 'List view') },
+              ]}
             />}
           />
         </div>
@@ -3359,6 +3447,62 @@ function WideVideoModeRow() {
           { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideVideoAmbientDesc', 'The video fills the width, with a soft blurred glow of itself on each side') },
           { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideVideoRailsDesc', 'The video beside one glass panel with what it is, a Follow button and the top comments') },
           { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideVideoStandardDesc', 'The video on its own, as before') },
+        ]}
+      />}
+    />
+  );
+}
+
+/**
+ * Phones: put Public Chat on the bottom bar's first screen (lib/nav-order
+ * withPublicChatInBar). Writes the shared bar order, so the app follows.
+ */
+function PublicChatBarRow() {
+  const { t } = useTranslation();
+  const isDesktop = useIsDesktopViewport();
+  const { order, save } = useNavOrderEditor('bar', DEFAULT_BAR_IDS);
+  const effective = useMemo(() => applyNavOrder(DEFAULT_BAR_IDS, order, (id) => id), [order]);
+  if (isDesktop) return null;
+  return (
+    <SettingsRow
+      icon={<PublicChatIcon />}
+      anchor="public-chat-bar"
+      title={t('settings.publicChatInBar', 'Public Chat in the bottom bar')}
+      description={t('settings.publicChatInBarDesc', 'One tap into Public Chat from the bar at the bottom of the screen')}
+      action={<Switch
+        checked={publicChatInBar(effective)}
+        onCheckedChange={(on) => save(withPublicChatInBar(effective, on))}
+      />}
+    />
+  );
+}
+
+/** Phone menu grouping (lib/menu-layout). Phones only: desktop has no such menu. */
+function MenuLayoutRow() {
+  const { t } = useTranslation();
+  const layout = useMenuLayout();
+  const prefs = useUserPreferences();
+  const isDesktop = useIsDesktopViewport();
+  if (isDesktop) return null;
+
+  return (
+    <SettingsRow
+      icon={<LayoutGrid />}
+      anchor="menu-layout"
+      title={t('settings.menuLayout', 'Menu layout')}
+      description={t('settings.menuLayoutDesc', 'How the menu groups its pages')}
+      action={<SettingDrawerSelect
+        value={layout}
+        onValueChange={(value) => {
+          const next = normaliseMenuLayout(value);
+          writeMenuLayout(next);
+          prefs?.setPref(MENU_LAYOUT_PREF_KEY, next);
+        }}
+        title={t('settings.menuLayout', 'Menu layout')}
+        options={[
+          { value: 'tabs', label: t('settings.menuLayoutTabs', 'Tabs'), description: t('settings.menuLayoutTabsDesc', 'One group at a time, with big icons') },
+          { value: 'sections', label: t('settings.menuLayoutSections', 'Sections'), description: t('settings.menuLayoutSectionsDesc', 'Every page at once, under group headers') },
+          { value: 'folders', label: t('settings.menuLayoutFolders', 'Folders'), description: t('settings.menuLayoutFoldersDesc', 'Your main pages, then a folder for each group') },
         ]}
       />}
     />

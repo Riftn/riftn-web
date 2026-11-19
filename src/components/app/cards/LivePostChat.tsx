@@ -10,7 +10,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * Uses the livechat_messages table with realtime subscriptions.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
@@ -38,6 +38,8 @@ import { useDraft } from '@/hooks/use-draft';
 import { useLiveViewerActions } from '@/components/app/live/live-viewer-actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { replaceLinksWithEmoji, renderTextWithLinks } from '@/components/app/TranslatableText';
+import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { stripDehubLinkMatches } from '@/lib/dehub-links';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { useTranslation as useTextTranslation } from '@/components/app/TranslatableText';
 import { useLiveChatMessages } from '@/hooks/use-livechat';
@@ -67,6 +69,7 @@ import Copy from '@/components/ui/cut-icons/copy';
 import type { ChatCreatorBadge } from '@/lib/live/chat-badges';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
+import { dblClickReply } from '@/lib/dblclick-reply';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function LiveChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
@@ -137,11 +140,23 @@ function TranslatableChatMsg({ content, onHandle }: { content: string; onHandle:
   }, [onHandle, isTooShort, isTranslated, handleTranslate, handleShowOriginal]);
   useEffect(() => () => onHandle(null), [onHandle]);
 
+  // Links to our own things (a community, a request, a page) show as cards
+  // under the line, and the text drops the URL the card stands for.
+  const { links, displayText } = useDehubLinks(content);
+  const shownText = isTranslated ? stripDehubLinkMatches(translatedText, links) : displayText;
+
   return (
     <div>
-      <p className="text-sm text-zinc-300 break-words whitespace-pre-wrap">
-        {renderTextWithLinks(isTranslated ? translatedText : content)}
-      </p>
+      {shownText.trim() && (
+        <p className="text-sm text-zinc-300 break-words whitespace-pre-wrap">
+          {renderTextWithLinks(shownText)}
+        </p>
+      )}
+      {links.length > 0 && (
+        <div data-live-chat-cards className="max-w-[320px]">
+          <DehubLinkEmbeds links={links} compact />
+        </div>
+      )}
       {!isTooShort && (isTranslateLoading || isTranslated || translateError) && (
         <div className="flex items-center gap-1 mt-0.5">
           {isTranslateLoading ? (
@@ -322,6 +337,25 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       });
     }
   }, [messages.length]);
+
+  // The right-click menu opens at the pointer, flipped left or up when it
+  // would run past the window's edge.
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const [contextMenuPlace, setContextMenuPlace] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = contextMenuRef.current;
+    if (!contextMenuMsg || !el) { setContextMenuPlace(null); return; }
+    const EDGE = 10;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let left = contextMenuPos.x + w + EDGE > vw ? contextMenuPos.x - w : contextMenuPos.x;
+    let top = contextMenuPos.y + h + EDGE > vh && contextMenuPos.y - h - EDGE > 0 ? contextMenuPos.y - h : contextMenuPos.y;
+    left = Math.max(EDGE, Math.min(left, vw - w - EDGE));
+    top = Math.max(EDGE, Math.min(top, vh - h - EDGE));
+    setContextMenuPlace({ left, top });
+  }, [contextMenuMsg, contextMenuPos]);
 
   // Close context menu on outside click
   useEffect(() => {
@@ -693,6 +727,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                 id={chatMessageDomId(msg.id)}
                 ref={(el) => { if (el) messageRefs.current.set(msg.id, el); else messageRefs.current.delete(msg.id); }}
                 data-live-msg={msg.id}
+                onDoubleClick={(e) => dblClickReply(e, canReply && editingId !== msg.id && (() => { setReplyTo(msg); textareaRef.current?.focus(); }))}
                 data-chat-row
                 className={`group py-1.5 px-1 rounded-lg transition-colors duration-700 ${isPinned ? 'bg-blue-400/5 border-l-2 border-blue-400/50 pl-2' : ''}${landClass(msg)}`}
               >
@@ -884,9 +919,10 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           menu off screen. */}
       {contextMenuMsg && (canModerate || isMine(contextMenuMsg) || translateHandles.current.has(contextMenuMsg.id)) && createPortal(
         <div
+          ref={contextMenuRef}
           data-glass-menu
           className="fixed z-50 bg-zinc-800 border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px]"
-          style={{ top: contextMenuPos.y, left: contextMenuPos.x }}
+          style={{ top: contextMenuPlace?.top ?? contextMenuPos.y, left: contextMenuPlace?.left ?? contextMenuPos.x, visibility: contextMenuPlace ? undefined : 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
           {(() => {

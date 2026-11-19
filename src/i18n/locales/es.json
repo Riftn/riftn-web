@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Añade una imagen, un GIF o un vídeo",
+    "changeMedia": "Cambiar imagen, GIF o vídeo",
+    "mediaType": "Elige una imagen, un GIF o un vídeo.",
+    "videoSize": "Ese vídeo pesa más de {{n}} MB. Elige uno más pequeño."
+  },
   "textFeed": {
     "errorTitle": "No se pudieron cargar las publicaciones",
     "errorBody": "Intenta cargar de nuevo el feed de texto.",
@@ -126,12 +132,16 @@
       "profile": "perfil",
       "proposal": "propuesta",
       "stage": "etapa",
-      "store": "tienda"
+      "store": "tienda",
+      "featureRequest": "solicitud",
+      "page": "página"
     },
     "recipientChat": "chat",
     "recipientUser": "usuario",
     "sendFailed": "Error al enviar {{item}}",
-    "sentTo": "{{item}} enviado a {{name}}"
+    "sentTo": "{{item}} enviado a {{name}}",
+    "openPage": "Abrir página",
+    "viewRequest": "Ver solicitud"
   },
   "stageCover": {
     "admitOne": "ADMITIR UNO",
@@ -719,7 +729,14 @@
     "getTheApp": "Descargar la app",
     "connectAi": "Conectar IA",
     "converter": "Conversión",
-    "affiliate": "Afiliados"
+    "affiliate": "Afiliados",
+    "groups": {
+      "main": "Principal",
+      "create": "Crear",
+      "discover": "Descubrir",
+      "money": "Dinero",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Ver el perfil de {{name}}",
@@ -763,6 +780,13 @@
     "heading": "Cortos de Riftn"
   },
   "settings": {
+    "chatDeleteChoice": "Al eliminar un mensaje",
+    "chatDeleteChoiceDesc": "Preguntar siempre, o eliminar siempre solo para ti o para todos en el chat.",
+    "chatDeleteAsk": "Preguntar siempre",
+    "chatDeleteMe": "Eliminar para mí",
+    "chatDeleteMeDesc": "Desaparece de tu chat, los demás lo siguen viendo",
+    "chatDeleteEveryone": "Eliminar para todos",
+    "chatDeleteEveryoneDesc": "Cuando se pueda. El mensaje de otra persona en un grupo solo se elimina para ti",
     "postLanding": "Después de publicar",
     "postLandingDesc": "Cómo aparece tu nueva publicación en tu feed",
     "postLandingGhost": "Hueco fantasma",
@@ -915,6 +939,11 @@
     "feedTogglesCleared": "Filtros del feed restablecidos",
     "defaultProfileTab": "Pestaña de perfil por defecto",
     "defaultProfileTabDesc": "Elige qué pestaña ven primero los visitantes en tu perfil",
+    "defaultProfileView": "Diseño de las publicaciones del perfil",
+    "defaultProfileViewDesc": "Muestra tus publicaciones en cuadrícula o en lista cuando alguien abra tu perfil",
+    "readerProfileView": "Abrir otros perfiles como",
+    "readerProfileViewDesc": "Elige cuadrícula o lista para cada perfil que abras, o mantén la elección de cada persona",
+    "readerProfileViewOwner": "Elección de cada persona",
     "public": "Público",
     "publicDesc": "Cualquiera puede ver tus publicaciones",
     "private": "Privado",
@@ -1351,7 +1380,19 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "No se pudo conectar {{platform}}. Inténtalo de nuevo.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Actualizando seguidores"
+    "socialFollowersPending": "Actualizando seguidores",
+    "menuLayout": "Diseño del menú",
+    "menuLayoutDesc": "Cómo agrupa el menú sus páginas",
+    "menuLayoutTabs": "Pestañas",
+    "menuLayoutTabsDesc": "Un grupo a la vez, con iconos grandes",
+    "menuLayoutSections": "Secciones",
+    "menuLayoutSectionsDesc": "Todas las páginas a la vez, bajo encabezados",
+    "menuLayoutFolders": "Carpetas",
+    "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo",
+    "publicChatInBar": "Chat público en la barra inferior",
+    "publicChatInBarDesc": "Entra al Chat público con un toque desde la barra inferior de la pantalla",
+    "chatCards": "Chats como tarjetas",
+    "chatCardsDesc": "Cada chat en su propia tarjeta. Desactívalo para una lista simple con una línea entre chats."
   },
   "common": {
     "confirm": "Confirmar",
@@ -2113,6 +2154,12 @@
     "likes": "Me gusta",
     "subscribers": "Suscriptores",
     "affiliates": "Afiliados",
+    "ogChallenge": "Reto OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holders OG",
+    "ogChallengeTitle": "Trae de vuelta a los holders OG",
+    "ogChallengeBody": "Invita a quienes aún tienen DHB. Cuando se unan con tu enlace de invitación y mantengan su DHB en su billetera de Riftn, cuentan para ti aquí.",
+    "ogChallengeCta": "Obtén tu enlace de invitación",
     "directReferrals_one": "{{count}} directos",
     "directReferrals_other": "{{count}} directos",
     "secondaryReferrals_one": "{{count}} secundarios",
@@ -2485,7 +2532,8 @@
       "total": "Alcance total",
       "breakdownTitle": "De dónde viene este alcance",
       "dehubFollowers": "Seguidores de Riftn",
-      "verified": "Los datos sociales provienen de cuentas que el creador conectó."
+      "verified": "Los datos sociales provienen de cuentas que el creador conectó.",
+      "selfReported": "El creador introduce el número de seguidores en redes sociales."
     },
     "loginDescription": "Inicia sesión para ver y gestionar tu perfil.",
     "replyThread": {
@@ -2865,6 +2913,7 @@
     "failedSubmit": "Error al enviar solicitud. Inténtalo de nuevo."
   },
   "loginModal": {
+    "didYouMean": "¿Quisiste decir {{email}}?",
     "bringLoginOver": "¿Usabas Riftn en dehub.io? <bring>Trae tu sesión</bring>",
     "restoreWalletTitle": "Recupera tu billetera",
     "restoreOriginalWallet": "Tu perfil está en la billetera de tu inicio de sesión original, no en la guardada para este inicio de sesión. Inicia sesión como lo hiciste la primera vez en Riftn para recuperar esa billetera. Tu perfil y tus fondos no cambian.",
@@ -3684,6 +3733,10 @@
     "statsLoadFailed": "No se pudieron cargar las estadísticas de staking"
   },
   "communities": {
+    "muteChat": "Silenciar",
+    "mutedChat": "Silenciado",
+    "muteChatHint": "Deja de recibir avisos del chat de esta comunidad. Podrás seguir leyéndolo",
+    "unmuteChatHint": "Vuelve a recibir avisos del chat de esta comunidad",
     "sortTop": "Top",
     "shareLink": "Compartir enlace",
     "pinnedMore": "Más",
@@ -6588,6 +6641,19 @@
       "needsImageToWork": "{{model}} necesita una imagen para trabajar. Adjunta uno primero.",
       "speechLimit": "Son {{length}} caracteres. El límite es {{limit}}.",
       "musicTrackLength": "Seguimiento de {{count}}s"
+    },
+    "gallery": {
+      "browse": "Explorar creaciones",
+      "create": "Crear",
+      "fullscreen": "Ver en pantalla completa",
+      "missing": "Esta creación no está disponible.",
+      "send": "Enviar",
+      "notifications": {
+        "generation_like": "{{name}} reaccionó a tu creación",
+        "generation_comment_like": "{{name}} reaccionó a tu comentario",
+        "generation_reply": "{{name}} respondió a tu comentario",
+        "generation_comment": "{{name}} comentó tu creación"
+      }
     }
   },
   "pricing": {
@@ -7960,6 +8026,9 @@
     "sourceEncoder": "OBS / codificador",
     "sourceEncoderHint": "Obtener los datos RTMP",
     "screenPickHint": "A continuación elegirás la pantalla, ventana o pestaña, y saldrá en directo con tu micrófono y el sonido de la propia pestaña.",
+    "screenInAppHint": "En la app de Riftn",
+    "screenInAppNote": "Los navegadores del móvil no dejan que ninguna web comparta tu pantalla. Emite en directo desde la app de Riftn y toca Compartir pantalla.",
+    "screenInAppCta": "Descarga la app de Riftn",
     "replayAllowanceUsed": "Ya has agotado el límite de subida de hoy, así que esta retransmisión no guardará repetición. El límite se reinicia a medianoche UTC.",
     "replayFreeTier": "Las cuentas gratuitas guardan los primeros {{size}} de una retransmisión como repetición; hacer staking de insignias amplía el límite.",
     "replayTiered": "Se guardan como repetición hasta {{size}} de esta retransmisión (límite diario {{tier}}).",
@@ -9033,7 +9102,19 @@
     "declined": "Llamada rechazada",
     "noAnswer": "Sin respuesta",
     "missed": "Llamada perdida",
-    "callBack": "Devolver la llamada"
+    "callBack": "Devolver la llamada",
+    "group": "Grupo",
+    "groupVoiceCall": "Llamada de voz grupal",
+    "groupVideoCall": "Videollamada grupal",
+    "callingGroup": "Llamando al grupo...",
+    "isCalling": "{{name}} está llamando",
+    "leave": "Salir",
+    "joinCall": "Unirse",
+    "inCall_one": "{{count}} en la llamada",
+    "inCall_other": "{{count}} en la llamada",
+    "startGroupVoice": "Iniciar una llamada de voz grupal",
+    "startGroupVideo": "Iniciar una videollamada grupal",
+    "you": "Tú"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",
@@ -12711,7 +12792,7 @@
   "multiPost": {
     "tab": "Publicaciones múltiples",
     "title": "Publicaciones múltiples",
-    "intro": "Publica en X, YouTube, Instagram, TikTok y más al mismo tiempo con dehub. Conecta tus cuentas una vez y elige a dónde va cada publicación.",
+    "intro": "Publica en X, YouTube, Instagram, TikTok y más al mismo tiempo con Riftn. Conecta tus cuentas una vez y elige a dónde va cada publicación.",
     "creditsHeading": "Créditos de publicación",
     "credits": "{{count}} créditos de publicación",
     "topUpTitle": "Recarga y ahorra",
@@ -12759,7 +12840,12 @@
   "dm": {
     "planRestricted": "Este usuario requiere una suscripción para recibir mensajes.",
     "planTypeNotAllowed": "El plan de este creador no permite este tipo de mensaje.",
-    "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador."
+    "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador.",
+    "shareGroups": "Grupos",
+    "shareKindGroup": "Grupo",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Comunidad",
+    "reportMessage": "Denunciar mensaje"
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",
@@ -15348,6 +15434,9 @@
     "8c7afb50b89c": "Compartir en otro lugar",
     "bdd4f5015e96": "Cerrar notificación de solicitud enviada",
     "8f3dc69e83c4": "¡Tu comentario ha sido enviado!",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "Ganaste +{{value1}} puntos",
+    "0fbe06b679a8": "{{value1}} puntos por cada petición lanzada, sumados a tu puntuación de Top builders.",
     "1aa7b1c1d5fb": "¡Gracias!",
     "6b1037924516": "% de deslizamiento",
     "e50f1f5e6029": "Tolerancia al deslizamiento",
@@ -20769,5 +20858,33 @@
     "scheduledToast": "Programado para {{when}}",
     "failedToast": "No se pudo enviar un mensaje programado",
     "error": "No ha funcionado. Inténtalo de nuevo."
+  },
+  "mentionLinks": {
+    "communities": "Comunidades",
+    "pages": "Páginas",
+    "people": "Personas",
+    "linkTo": "Enlazar {{name}}",
+    "empty": "No se encontró nada",
+    "hint": "Escribe para buscar personas, comunidades y páginas",
+    "members": " miembros",
+    "placeholder": "Buscar personas, comunidades, páginas...",
+    "title": "Mencionar o enlazar"
+  },
+  "msgDelete": {
+    "title": "¿Eliminar mensaje?",
+    "titleMany": "¿Eliminar {{count}} mensajes?",
+    "bodyOwn": "Quítalo solo de tu chat o para todos.",
+    "bodyOwnMany": "Quítalos solo de tu chat o para todos.",
+    "bodyOthers": "Se quitará solo de tu chat. La otra persona lo seguirá viendo.",
+    "bodyOthersMany": "Se quitarán solo de tu chat. Los demás en el chat los seguirán viendo.",
+    "bodyOwnBoth": "Quítalo solo de tu chat o para los dos.",
+    "bodyOwnBothMany": "Quítalos solo de tu chat o para los dos.",
+    "forMe": "Eliminar para mí",
+    "forEveryone": "Eliminar para todos",
+    "forBoth": "Eliminar para los dos",
+    "forMeAndName": "Eliminar para mí y {{name}}",
+    "remember": "Recordar mi elección",
+    "rememberHint": "Cámbialo cuando quieras en Ajustes",
+    "failed": "No se pudo eliminar el mensaje"
   }
 }

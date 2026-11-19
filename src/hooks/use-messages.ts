@@ -7,7 +7,7 @@
 
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import { destructFromChoice, type DmDestructChoice } from '@/lib/dm-destruct';
-import { useEffect, useRef, useReducer, useCallback, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useReducer, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -442,8 +442,10 @@ export function useMessages(conversationId: string | null) {
     });
   }, [headEnabled, conversationId, queryClient]);
 
-  // Flatten pages → single array, oldest first for chat display
-  const messages: DmMessage[] = messageHistoryItems(query.data?.pages ?? []).reverse();
+  // Flatten pages → single array, oldest first for chat display. Kept stable
+  // between renders so the thread's memoised rows don't all redraw each time.
+  const pages = query.data?.pages;
+  const messages: DmMessage[] = useMemo(() => messageHistoryItems(pages ?? []).reverse(), [pages]);
 
   // Once the encryption identity comes online (first signature on this
   // device), lines fetched before it are sitting in the cache as
@@ -664,11 +666,13 @@ export function useMessages(conversationId: string | null) {
         messagesKeys.messages(conversationId),
         (old: any) => {
           if (!old?.pages) return old;
+          const id = data._id ?? data.messageId;
           const pages = old.pages.map((page: any) => ({
             ...page,
-            items: page.items.map((m: DmMessage) =>
-              m._id === (data._id ?? data.messageId) ? { ...m, isDeleted: true, content: '' } : m
-            ),
+            // Deleted for me: gone from this chat. For everyone: the line says so.
+            items: data.forMe
+              ? page.items.filter((m: DmMessage) => m._id !== id)
+              : page.items.map((m: DmMessage) => (m._id === id ? { ...m, isDeleted: true, content: '' } : m)),
           }));
           return { ...old, pages };
         }
@@ -840,6 +844,9 @@ export function useMessages(conversationId: string | null) {
     },
   });
 
+  const addReaction = useCallback((messageId: string, emoji: string) => updateReaction(messageId, emoji, true), [updateReaction]);
+  const removeReaction = useCallback((messageId: string, emoji: string) => updateReaction(messageId, emoji, false), [updateReaction]);
+
   return {
     messages,
     isLoading: query.isLoading,
@@ -850,8 +857,8 @@ export function useMessages(conversationId: string | null) {
     isFetchingNextPage: query.isFetchingNextPage,
     refetch: query.refetch,
     markAsRead: markAsRead.mutate,
-    addReaction: (messageId: string, emoji: string) => updateReaction(messageId, emoji, true),
-    removeReaction: (messageId: string, emoji: string) => updateReaction(messageId, emoji, false),
+    addReaction,
+    removeReaction,
   };
 }
 
@@ -984,12 +991,14 @@ export function useSendMessage(conversationId: string) {
         price: lockDhbForUsd(lockPrice),
         priceUsd: lockPrice,
         symbol: 'DHB',
-        kind: mediaFile.type.startsWith('video/') ? 'video' : 'image',
+        kind: mediaFile.type.startsWith('video/') ? 'video' : mediaFile.type.startsWith('image/') ? 'image' : 'file',
         previewUrl: null,
         unlocked: true,
         mine: true,
         ready: false,
-        mediaUrl: optimisticMessage.mediaUrls[0]?.url,
+        ...(mediaFile.type.startsWith('video/') || mediaFile.type.startsWith('image/')
+          ? { mediaUrl: optimisticMessage.mediaUrls[0]?.url }
+          : { fileName: mediaFile.name, fileSize: mediaFile.size }),
       };
     }
 

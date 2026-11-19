@@ -25,7 +25,7 @@ import { useAppTheme } from '@/contexts/ThemeContext';
 import { FeedFilterAnchor } from '@/components/app/navigation/FeedFilterAnchor';
 import { cn } from '@/lib/utils';
 import { useTabIndicator } from '@/hooks/use-tab-indicator';
-import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
+import { GlassIndicator, glideOnTabClick } from '@/components/app/feeds/GlassIndicator';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { useAnyOverlayOpen } from '@/lib/overlay-open';
 import { closeCommentsSplit } from '@/lib/comments-split';
@@ -230,9 +230,11 @@ export function GlobalFeedNav({ postPage = false, profilePage = false, compactPr
           else openFeedSearch();
         } else window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: tabValue }));
       } else {
-        // Different tab — enable smooth transition, auto-reset after animation
-        setEnableTransition(true);
-        setTimeout(() => setEnableTransition(false), 450);
+        // Different tab — on phones slide the glass across (see glideOnTabClick)
+        if (glideOnTabClick()) {
+          setEnableTransition(true);
+          setTimeout(() => setEnableTransition(false), 450);
+        }
         applyTab(tabValue);
       }
     } else {

@@ -1,6 +1,5 @@
 import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
-import SmilePlus from "@/components/ui/cut-icons/packs";
 import CornerDownRight from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
@@ -10,12 +9,11 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2 } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
-import Pencil from "@/components/ui/cut-icons/edit";
-import Trash2 from "@/components/ui/cut-icons/delete";
 
 import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
 import Attach from "@/components/ui/cut-icons/attach";
+import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import X from "@/components/ui/cut-icons/close";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,8 +22,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
 import { TranslatableText, replaceLinksWithEmoji, SharedTranslationContext } from '../TranslatableText';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { EmojiGifPicker } from '../chat/EmojiGifPicker';
 import { formatTimeAgo } from '@/lib/feed-utils';
@@ -37,11 +33,13 @@ import { sendPublicChatImage } from '@/lib/public-chat-attachment';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePublicChatReading } from '@/hooks/use-public-chat-unread';
+import { dblClickReply } from '@/lib/dblclick-reply';
 import { supabase } from '@/integrations/supabase/client';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import { preloadRoute } from '@/lib/route-preload';
+import { expandChat, forgetChatOrigin } from '@/lib/chat-expand';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AppState } from '@/components/app/AppState';
 import { VoiceRecorder } from '@/components/app/chat/VoiceRecorder';
@@ -62,8 +60,10 @@ import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLink
 import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
-import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
+import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -184,6 +184,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const { t: _copy } = _useCopy();
   // A tapped photo opens full screen, with Download.
   const [viewingImage, setViewingImage] = useState<string | null>(null);
+  // Back beside the feed (by any route): the full page's back arrow no longer
+  // owes a trip back here.
+  useEffect(() => { forgetChatOrigin(); }, []);
   const [replyTo, setReplyTo] = useState<SupabaseLiveChatMessage | null>(null);
   // Edits happen in the row itself rather than in the composer at the foot of
   // the rail — the composer is a 169-character single line shared with the
@@ -456,10 +459,51 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     }
   }, [isAuthenticated, walletAddress, messages, addReaction, removeReaction]);
 
+  // Right-click a line: the same message menu as the full chat, with who reacted.
+  const menuPoint = useMenuPoint();
+  const [menuMsg, setMenuMsg] = useState<SupabaseLiveChatMessage | null>(null);
+  const openLineMenu = (e: React.MouseEvent<HTMLDivElement>, msg: SupabaseLiveChatMessage) => {
+    if (msg.client_key && msg.send_state === 'failed') return;
+    if (keepBrowserMenu(e.target as Element, e.currentTarget)) return;
+    e.preventDefault();
+    setMenuMsg(msg);
+    menuPoint.openAt({ x: e.clientX, y: e.clientY });
+  };
+  const menuMine = menuMsg && walletAddress
+    ? Object.entries(menuMsg.reactions ?? {}).filter(([, who]) => who.some((a) => a.toLowerCase() === walletAddress.toLowerCase())).map(([emoji]) => emoji)
+    : [];
+  const menuActions: MessageMenuAction[] = [];
+  if (menuMsg) {
+    const own = !!walletAddress && menuMsg.sender_address?.toLowerCase() === walletAddress.toLowerCase();
+    if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
+    if (own && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content || ''); }, hint: 'E' });
+    if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({
+      key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
+      : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
+    if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
+    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
+  }
+  const lineMenu = menuPoint.mounted && menuMsg ? (
+    <MessageMenu
+      point={menuPoint.point}
+      onClose={menuPoint.close}
+      quickReactions={QUICK_CHAT_REACTIONS}
+      mine={menuMine}
+      onReact={(emoji) => handleReact(menuMsg.id, emoji)}
+      actions={menuActions}
+      reactors={menuMsg.reactions ? { reactions: menuMsg.reactions, remoteMessageId: menuMsg.id } : null}
+      meta={messageMenuMeta(menuMsg.created_at, menuMsg.is_edited)}
+    />
+  ) : null;
+
   const isLoading = roomsLoading || messagesLoading;
 
   return (
     <div data-sidebar-chat className="flex flex-col h-full pl-px">
+      {lineMenu}
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
         <div
@@ -468,7 +512,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             const el = event.currentTarget;
             followLatest.current = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
           }}
-          className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2"
+          className="absolute inset-0 chat-text-zone overflow-y-auto overflow-x-hidden py-2 space-y-2"
         >
           {!isLoading && (hiddenLoaded || hasOlder) && !signInWall && (
             <button type="button" data-side-chat-older onClick={loadOlder} disabled={loadingOlder} className="w-full py-2 text-xs text-zinc-400 hover:text-white disabled:opacity-60">
@@ -597,7 +641,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 navigate(`/${handle}`);
               } : undefined;
               return (
-                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-continued={continued || undefined} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
                   {/* Reply indicator – click to scroll to original */}
                   {msg.reply_to && (
                     <button
@@ -610,7 +654,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           setTimeout(() => (target as HTMLElement).classList.remove('bg-white/10'), 1500);
                         }
                       }}
-                      className="flex items-center gap-1 text-[10px] text-zinc-500 ml-8 mb-0.5 hover:text-zinc-300 transition-colors cursor-pointer"
+                      className="flex max-w-[calc(100%-2rem)] overflow-hidden items-center gap-1 text-[10px] text-zinc-500 ml-8 mb-0.5 hover:text-zinc-300 transition-colors cursor-pointer"
                     >
                       <CornerDownRight className="w-2.5 h-2.5" />
                       <span className="font-medium">{msg.reply_to.sender_name}</span>
@@ -693,95 +737,15 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                         />
                       )}
                     </div>
-                    {/* Hover action buttons */}
-                    {isAuthenticated && (
-                      <div data-sidebar-chat-actions className="pointer-events-none absolute right-0 top-0 z-10 flex items-center gap-0.5 rounded-l-md bg-zinc-900/90 pl-1 opacity-0 backdrop-blur-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => setReplyTo(msg)}
-                              aria-label={_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}
-                              className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded"
-                            >
-                              <Reply className="w-3 h-3" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">{_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}</TooltipContent>
-                        </Tooltip>
-                        {walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase() && (
-                          <>
-                            {/* Text only: rewording an image or a voice note
-                                changes what people think they are looking at. */}
-                            {(!msg.message_type || msg.message_type === 'text') && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={() => { setEditingId(msg.id); setEditInitial(msg.content || ''); }}
-                                    aria-label={_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}
-                                    className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded"
-                                  >
-                                    <Pencil className="w-3 h-3" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">{_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}</TooltipContent>
-                              </Tooltip>
-                            )}
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => void deleteMessage(msg.id)}
-                                  aria-label={_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}
-                                  className="p-0.5 text-zinc-500 hover:text-red-400 transition-colors rounded"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</TooltipContent>
-                            </Tooltip>
-                          </>
-                        )}
-                        <Popover>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <PopoverTrigger asChild>
-                                <button aria-label={_copy("copy.01fad993ff61", { defaultValue: "React" })} className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded">
-                                  <SmilePlus className="w-3 h-3" />
-                                </button>
-                              </PopoverTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">{_copy("copy.01fad993ff61", { defaultValue: "React" })}</TooltipContent>
-                          </Tooltip>
-                          <PopoverContent
-                            side="top"
-                            align="end"
-                            className="w-auto p-1 bg-zinc-800 border-zinc-700 rounded-xl"
-                          >
-                            <div className="flex gap-0.5">
-                              {QUICK_CHAT_REACTIONS.map((emoji) => {
-                                const isActive = walletAddress && msg.reactions?.[emoji]?.some(
-                                  (a) => a.toLowerCase() === walletAddress.toLowerCase()
-                                );
-                                return (
-                                  <button
-                                    key={emoji}
-                                    onClick={() => handleReact(msg.id, emoji)}
-                                    className={`w-7 h-7 flex items-center justify-center text-sm rounded-lg transition-colors ${
-                                      isActive ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'
-                                    }`}
-                                  >
-                                    {emoji}
-                                  </button>
-                                );
-                              })}
-                              <MoreReactionsButton
-                                className="w-7 h-7"
-                                onPick={(emoji) => handleReact(msg.id, emoji)}
-                                reactions={msg.reactions}
-                                viewerAddress={walletAddress}
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                    {/* Every action lives in the line's menu (right-click, or this
+                        "..." on hover for keyboard users). */}
+                    {editingId !== msg.id && !(msg.client_key && msg.send_state === 'failed') && (
+                      <div data-sidebar-chat-actions className="pointer-events-none absolute right-0 top-0 z-10 rounded-l-md bg-zinc-900/90 pl-0.5 opacity-0 backdrop-blur-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+                        <MessageMoreButton
+                          plain
+                          className="h-5 w-5"
+                          onOpen={(point) => { setMenuMsg(msg); menuPoint.openAt(point); }}
+                        />
                       </div>
                     )}
                   </div>
@@ -861,11 +825,23 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div className="flex items-center justify-end gap-0.5 pt-1">
+          <div data-live-chat-toolbar className="flex items-center justify-end gap-2 pt-1">
             {roomId && (
-              <div className="mr-auto flex items-center gap-1.5">
+              <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
                 <ChatTextSizeButton />
+                {/* Opens the full chat page in this tab: it slides in over the
+                    feed (lib/chat-expand), and back / Esc returns here. */}
+                <button
+                  type="button"
+                  data-chat-fullscreen
+                  aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                  title={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+                  onClick={expandChat}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
+                >
+                  <Fullscreen className="h-4 w-4" />
+                </button>
               </div>
             )}
             <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {

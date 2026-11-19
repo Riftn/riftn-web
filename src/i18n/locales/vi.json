@@ -1,4 +1,17 @@
 {
+  "postBg": {
+    "addMedia": "Thêm ảnh, GIF hoặc video",
+    "changeMedia": "Đổi ảnh, GIF hoặc video",
+    "mediaType": "Hãy chọn ảnh, GIF hoặc video.",
+    "videoSize": "Video này lớn hơn {{n}} MB. Hãy chọn video nhỏ hơn."
+  },
+  "textFeed": {
+    "tab": "Văn bản",
+    "errorTitle": "Không tải được bài đăng",
+    "errorBody": "Hãy thử tải lại bảng tin văn bản.",
+    "emptyTitle": "Chưa có bài đăng văn bản",
+    "emptyBody": "Bài đăng văn bản sẽ hiện ở đây."
+  },
   "comic": {
     "showAll": "Hiện tất cả {{count}} trang"
   },
@@ -14,6 +27,69 @@
     "glitter": "Kim tuyến",
     "saved": "Đã lưu viền",
     "failed": "Không lưu được viền"
+  },
+  "duet": {
+    "policyEveryone": "Mọi người",
+    "policyFollowers": "Người theo dõi",
+    "policyNobody": "Không ai",
+    "loadMore": "Tải thêm",
+    "with": "Duet với @{{username}}",
+    "withOriginal": "Duet · xem bản gốc",
+    "unavailable": "Video này không còn cho phép duet.",
+    "allowLabel": "Cho phép duet",
+    "allowDescription": "Ai có thể quay duet bên cạnh video của bạn. Bạn cũng có thể đổi cho từng bài đăng.",
+    "settingsSection": "Duet",
+    "policyDefault": "Cài đặt tài khoản",
+    "saveFailed": "Không lưu được. Hãy thử lại.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duet",
+    "pageHeading": "Duet",
+    "pageTitle": "Các duet của {{title}} bởi @{{creator}}",
+    "pageTitleNoCreator": "Các duet của {{title}}",
+    "pageDescription": "Xem mọi duet của video này trên Riftn, hoặc quay duet của riêng bạn song song.",
+    "empty": "Chưa có duet nào. Mở tùy chọn của video và chọn Remix → Duet để tạo duet đầu tiên.",
+    "video": "Video",
+    "notFound": "Video này không khả dụng.",
+    "browseShorts": "Xem Shorts",
+    "notFoundTitle": "Không tìm thấy video | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Sử dụng âm thanh này",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Phông xanh",
+    "stitch": "Ghép nối",
+    "selectSource": "Mở tùy chọn của một video và chọn Remix để bắt đầu."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Mọi người",
+      "followers": "Người theo dõi",
+      "nobody": "Không ai",
+      "default": "Mặc định của tôi"
+    },
+    "shareFailed": "Tiền tip của bạn đã được gửi, nhưng phần chia cho nhà sáng tạo gốc chưa được chuyển.",
+    "notify": {
+      "duet": "{{name}} đã duet video của bạn",
+      "stitch": "{{name}} đã ghép nối video của bạn",
+      "react": "{{name}} đã react video của bạn",
+      "reactLive": "{{name}} đang react trực tiếp video của bạn"
+    },
+    "linkFailed": "Bài đăng của bạn đã lên, nhưng không liên kết được với video gốc.",
+    "settingsHeading": "Remix",
+    "stitch": {
+      "allow": "Cho phép ghép nối",
+      "allowDesc": "Ai có thể dùng tối đa 5 giây video của bạn trong video của họ. Bạn cũng có thể đổi cho từng bài đăng.",
+      "saveFailed": "Không lưu được cài đặt ghép nối. Hãy thử lại.",
+      "settingFailed": "Bài đăng của bạn đã lên, nhưng cài đặt ghép nối chưa được lưu. Hãy đổi trong Sửa bài đăng.",
+      "from": "Ghép nối từ {{name}}",
+      "count_one": "{{count}} lượt ghép nối",
+      "count_other": "{{count}} lượt ghép nối",
+      "listTitle": "Ghép nối",
+      "listFailed": "Không tải được các video ghép nối. Hãy thử lại.",
+      "listEmpty": "Chưa có video ghép nối nào.",
+      "unavailable": "Video này không còn cho phép ghép nối."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Mở Riftn trong trình duyệt của bạn",
     "seoDescription": "Tải ứng dụng Riftn: mạng xã hội phi tập trung và được sở hữu bởi người dùng, hỗ trợ phát trực tiếp, tin nhắn mã hóa và thưởng cho người xem. Miễn phí trên Google Play, App Store và web.",
-    "seoTitle": "Riftn App | Tải về cho Android, iPhone & Web"
+    "seoTitle": "Riftn App | Tải về cho Android, iPhone & Web",
+    "learnMore": "Muốn hiểu đầy đủ? <guide>Riftn là gì?</guide> giới thiệu chi tiết về nền tảng."
   },
   "dehubLinks": {
     "copyLinkDetail": "Sao chép liên kết {{item}} vào clipboard",
@@ -55,12 +132,16 @@
       "profile": "tài khoản",
       "proposal": "gợi ý",
       "stage": "bàn diễn",
-      "store": "cửa hàng"
+      "store": "cửa hàng",
+      "featureRequest": "yêu cầu",
+      "page": "trang"
     },
     "recipientChat": "chat",
     "recipientUser": "người dùng",
     "sendFailed": "Không thể gửi {{item}}",
-    "sentTo": "{{item}} đã được gửi đến {{name}}"
+    "sentTo": "{{item}} đã được gửi đến {{name}}",
+    "openPage": "Mở trang",
+    "viewRequest": "Xem yêu cầu"
   },
   "stageCover": {
     "admitOne": "CHẤP NHẬN MỘT",
@@ -166,11 +247,35 @@
     "privateNote": "Tài khoản riêng tư không hiển thị trên fediverse.",
     "noUsername": "Hãy chọn tên người dùng để có địa chỉ fediverse."
   },
+  "signedFollows": {
+    "setUp": "Bật",
+    "turnOff": "Tắt",
+    "efpTurnOff": "Dừng",
+    "title": "Danh sách theo dõi của bạn, trên chuỗi",
+    "description": "Ví của bạn ký danh sách những người bạn theo dõi, và mỗi ngày danh sách được ghi lên Base. Mọi ứng dụng đều có thể tìm danh sách theo dõi từ ví của bạn, kể cả không có Riftn.",
+    "on": "Đang bật trên thiết bị này",
+    "off": "Đang tắt trên thiết bị này",
+    "turnedOn": "Danh sách theo dõi của bạn giờ được ví ký",
+    "turnedOff": "Đã tắt trên thiết bị này",
+    "failed": "Ví của bạn chưa ký. Hãy thử lại.",
+    "hiddenNote": "Danh sách theo dõi bị ẩn và tài khoản riêng tư không có trong danh sách công khai.",
+    "efpOn": "Đã sao chép sang EFP · {{count}} lượt theo dõi",
+    "efpOff": "Đưa cả lên EFP",
+    "efpTurnOn": "Thêm vào EFP",
+    "efpDone": "Danh sách theo dõi của bạn đang được đưa lên EFP",
+    "efpStopped": "Đã dừng sao chép sang EFP. Danh sách vẫn là của bạn.",
+    "efpHasList": "Bạn đã có một danh sách EFP. Riftn chưa thể điền vào danh sách đó.",
+    "efpNoGas": "Ví của bạn cần một ít ETH trên Base cho việc này.",
+    "efpFailed": "Chưa thực hiện được. Hãy thử lại.",
+    "efpNote": "EFP là danh sách theo dõi mà các ứng dụng khác đọc được (efp.app). Miễn phí với ví Riftn; ví khác trả vài xu trên Base. Danh sách là của bạn."
+  },
   "profileFields": {
     "title": "Trường hồ sơ",
     "description": "Tối đa bốn dòng thêm trên hồ sơ của bạn, như trang web hoặc đại từ nhân xưng.",
     "label": "Nhãn",
     "content": "Nội dung",
+    "add": "Thêm trường",
+    "remove": "Xóa trường",
     "save": "Lưu các trường",
     "saved": "Đã lưu các trường hồ sơ",
     "failed": "Chưa lưu được. Hãy thử lại.",
@@ -191,7 +296,8 @@
       "pronouns": "Từ ngữ chỉ nhân xưng",
       "location": "Địa điểm",
       "custom": "Tùy chỉnh",
-      "customOption": "Nhãn tùy chỉnh"
+      "customOption": "Nhãn tùy chỉnh",
+      "blog": "Blog"
     }
   },
   "followedTags": {
@@ -339,7 +445,8 @@
     "step": "Đối với các điều khiển tài khoản, thêm https://riftn.com/mcp làm bộ kết nối OAuth, đăng nhập vào Riftn và xem xét các quyền trước khi cho phép truy cập.",
     "profilePrompt": "Cập nhật tiểu sử Riftn của tôi thành: Nhà sáng tạo độc lập làm phim và âm nhạc.",
     "generatePrompt": "Hiển thị các mô hình hình ảnh của Riftn và trích dẫn một bức chân dung trước khi tạo ra nó.",
-    "libraryPrompt": "Hiển thị các tài sản mới nhất trong thư viện Creator của tôi trên Riftn."
+    "libraryPrompt": "Hiển thị các tài sản mới nhất trong thư viện Creator của tôi trên Riftn.",
+    "agents": "Đăng, trả lời, bày tỏ cảm xúc, đăng lại, theo dõi và sửa hồ sơ dưới danh nghĩa các tác nhân bạn sở hữu"
   },
   "twitchMirror": {
     "title": "Phản chiếu Twitch",
@@ -367,6 +474,7 @@
     "checkFailed": "Chúng tôi không thể kiểm tra tình trạng còn phòng. Vui lòng thử lại.",
     "checking": "Đang kiểm tra...",
     "ownership": "Nguồn mở. Thuộc sở hữu của người dùng.",
+    "title": "Một chút bảo trì.\nMột Riftn tốt hơn.",
     "intermission": "Tạm thời ngoại tuyến",
     "community": "Cộng đồng là trên hết. Luôn luôn như vậy."
   },
@@ -546,7 +654,14 @@
     "getTheApp": "Tải ứng dụng",
     "connectAi": "Kết nối AI",
     "converter": "Bộ chuyển đổi",
-    "affiliate": "Tiếp thị liên kết"
+    "affiliate": "Tiếp thị liên kết",
+    "groups": {
+      "main": "Chính",
+      "create": "Tạo",
+      "discover": "Khám phá",
+      "money": "Tiền",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Xem hồ sơ của {{name}}",
@@ -742,6 +857,11 @@
     "feedTogglesCleared": "Đã đặt lại bộ lọc bảng tin",
     "defaultProfileTab": "Tab hồ sơ mặc định",
     "defaultProfileTabDesc": "Chọn tab mà khách xem đầu tiên trên hồ sơ của bạn",
+    "defaultProfileView": "Bố cục bài đăng trên hồ sơ",
+    "defaultProfileViewDesc": "Hiển thị bài đăng của bạn dạng lưới hoặc danh sách khi mọi người mở hồ sơ của bạn",
+    "readerProfileView": "Mở hồ sơ khác dưới dạng",
+    "readerProfileViewDesc": "Chọn lưới hoặc danh sách cho mọi hồ sơ bạn mở, hoặc giữ lựa chọn của từng người",
+    "readerProfileViewOwner": "Lựa chọn của từng người",
     "public": "Công khai",
     "publicDesc": "Bất kỳ ai cũng có thể xem bài viết của bạn",
     "private": "Riêng tư",
@@ -1086,6 +1206,7 @@
     "exportPartial": "Không thể đọc các phần này và bị thiếu: {{sections}}.",
     "exportFailed": "Không thể tạo bản xuất của bạn. Hãy thử lại.",
     "importDone": "Đã nhập: Đã theo dõi {{followed}}, đã gửi các thư mục {{folders}}, {{items}} bài đăng.",
+    "importPartial": "Không thể theo dõi {{count}} tài khoản — hãy chạy lại quá trình nhập để thử lại.",
     "importFailed": "Quá trình nhập đã dừng sớm. Những gì đã được áp dụng sẽ được giữ lại.",
     "exportStep": "Đang thu thập dữ liệu của bạn — {{done}} trong số các mục {{total}} …",
     "extractDataDesc3": "Tải xuống tất cả mọi thứ trên tài khoản này dưới dạng một tệp: hồ sơ, bài đăng, nhận xét, tin nhắn, thông báo, giao dịch, theo dõi, chặn, bài đăng, thư mục và cài đặt đã lưu của bạn.",
@@ -1098,7 +1219,7 @@
     "ensLinked": "Đã liên kết — hồ sơ của bạn hiện ở {{url}}",
     "ensUnlinked": "Đã xóa — tên người dùng của bạn không thay đổi",
     "ensHandle": "Tên hệ thần kinh ruột",
-    "ensLinkedDesc": "Bạn cũng có thể truy cậpdehub.io/{{name}}",
+    "ensLinkedDesc": "Bạn cũng có thể truy cậpriftn.com/{{name}}",
     "ensHandleDesc": "Chứng minh bạn có tên .eth cũng có thể truy cập được tại riftn.com/yourname.eth. Tên người dùng của bạn không thay đổi.",
     "ensRemove": "Xóa",
     "ensCheck": "Kiểm tra",
@@ -1176,7 +1297,27 @@
     "socialConnectedShort": "Đã kết nối",
     "socialConnectFailed": "Không thể kết nối {{platform}}. Vui lòng thử lại.",
     "socialVerifiedFollowers": "{{value}} người theo dõi",
-    "socialFollowersPending": "Đang cập nhật số người theo dõi"
+    "socialFollowersPending": "Đang cập nhật số người theo dõi",
+    "menuLayout": "Bố cục menu",
+    "menuLayoutDesc": "Cách menu nhóm các trang",
+    "menuLayoutTabs": "Thẻ",
+    "menuLayoutTabsDesc": "Mỗi lần một nhóm, biểu tượng lớn",
+    "menuLayoutSections": "Mục",
+    "menuLayoutSectionsDesc": "Tất cả trang cùng lúc, dưới tiêu đề",
+    "menuLayoutFolders": "Thư mục",
+    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục",
+    "publicChatInBar": "Trò chuyện công khai trên thanh dưới cùng",
+    "publicChatInBarDesc": "Chạm một lần trên thanh cuối màn hình để vào Trò chuyện công khai",
+    "chatCards": "Cuộc trò chuyện dạng thẻ",
+    "chatCardsDesc": "Mỗi cuộc trò chuyện một thẻ. Tắt để có danh sách đơn giản với đường kẻ giữa các cuộc trò chuyện.",
+    "chatDeleteChoice": "Khi bạn xóa tin nhắn",
+    "chatDeleteChoiceDesc": "Hỏi mỗi lần, hoặc luôn chỉ xóa phía bạn hoặc xóa với mọi người trong cuộc trò chuyện.",
+    "chatDeleteAsk": "Hỏi mỗi lần",
+    "chatDeleteMe": "Xóa phía tôi",
+    "chatDeleteMeDesc": "Biến mất khỏi cuộc trò chuyện của bạn, người khác vẫn thấy",
+    "chatDeleteEveryone": "Xóa với mọi người",
+    "chatDeleteEveryoneDesc": "Khi có thể. Tin nhắn của người khác trong nhóm vẫn chỉ bị xóa phía bạn",
+    "tipsOffNote": "Tip và chuyển tiền cho bạn bị tắt khi tùy chọn này bật. Tắt nó đi để nhận tip trở lại."
   },
   "common": {
     "confirm": "Xác nhận",
@@ -1271,7 +1412,19 @@
     "payDirect": "Gửi thẳng cho {{name}} bằng {{symbol}} trên {{chain}}. Không swap.",
     "payDirectNoName": "Gửi thẳng cho nhà sáng tạo bằng {{symbol}} trên {{chain}}. Không swap.",
     "payViaBridgeDpay": "Đã chuyển sang Base và thanh toán cho Riftn Pay, token sẽ nhận được trong khoảng một phút",
-    "dmSent": "Đã gửi {{amount}} token cho {{name}}!"
+    "dmSent": "Đã gửi {{amount}} token cho {{name}}!",
+    "addMessage": "Thêm tin nhắn (không bắt buộc)",
+    "messagePublic": "Công khai",
+    "railTitle": "Tiền thưởng",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "token",
+    "messagePlaceholder": "Gửi kèm lời nhắn với tiền tip",
+    "messagePrivate": "Chỉ {{name}}",
+    "theCreator": "nhà sáng tạo",
+    "messageWallNote": "Hiện trên tường tip khi tiền tip được chuyển thành công.",
+    "sendWithMessage": "Gửi kèm lời nhắn",
+    "messageFailed": "Không thêm được lời nhắn. Chưa có tiền tip nào được gửi.",
+    "wallLabel": "Lời nhắn tip"
   },
   "postOptions": {
     "liveAlertsOn": "Bạn đã theo dõi {{name}}. Bạn sẽ nhận được thông báo khi họ phát trực tiếp.",
@@ -1311,7 +1464,14 @@
     "giftBoost": "Tặng một lần tăng cường",
     "markSection": "Các phần có thể bỏ qua",
     "copyFailed": "Không thể sao chép liên kết",
-    "share": "Chia sẻ"
+    "share": "Chia sẻ",
+    "refreshLinkPreview": "Làm mới bản xem trước liên kết",
+    "linkPreviewRefreshed": "Đã làm mới bản xem trước liên kết",
+    "linkPreviewRefreshFailed": "Không kết nối được trang đó. Hãy thử lại sau.",
+    "castToTv": "Truyền lên TV",
+    "castStarted": "Đang phát trên TV của bạn",
+    "castUnsupported": "Trình duyệt này không truyền được. Mở Riftn trên Chrome hoặc Safari để phát trên TV.",
+    "castFailed": "Không kết nối được TV. Kiểm tra TV dùng cùng Wi-Fi rồi thử lại."
   },
   "filters": {
     "sort": "Sắp xếp",
@@ -1804,6 +1964,7 @@
     "communities": "Cộng đồng",
     "stores": "Cửa hàng",
     "noNotificationsYet": "Chưa có thông báo nào",
+    "searchClose": "Đóng tìm kiếm",
     "noNotificationsDesc": "Khi bạn nhận được lượt thích, bình luận, tiền tip hoặc người đăng ký mới, chúng sẽ hiển thị tại đây.",
     "loadMore": "Tải thêm",
     "markAsRead": "Đánh dấu đã đọc",
@@ -1914,7 +2075,9 @@
       "bountySubmittedNamed": "{{name}} đã gửi tác phẩm về tiền thưởng của bạn “{{title}}”",
       "bountySubmitted": "{{name}} đã gửi công việc về tiền thưởng của bạn",
       "sentNotification": "{{name}} đã gửi thông báo cho bạn"
-    }
+    },
+    "searchPlaceholder": "Tìm thông báo",
+    "searchEmpty": "Không có thông báo nào khớp"
   },
   "leaderboard": {
     "title": "Bảng xếp hạng",
@@ -1926,6 +2089,12 @@
     "likes": "Lượt thích",
     "subscribers": "Người đăng ký",
     "affiliates": "Đối tác",
+    "ogChallenge": "Thử thách OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holder OG",
+    "ogChallengeTitle": "Đưa các holder OG trở lại",
+    "ogChallengeBody": "Mời những người vẫn còn giữ DHB. Khi họ tham gia bằng liên kết mời của bạn và giữ DHB trong ví Riftn, họ được tính cho bạn ở đây.",
+    "ogChallengeCta": "Lấy liên kết mời",
     "directReferrals_one": "{{count}} trực tiếp",
     "directReferrals_other": "{{count}} trực tiếp",
     "secondaryReferrals_one": "{{count}} gián tiếp",
@@ -2043,11 +2212,13 @@
     "promptLabel": "Lời nhắc của bạn",
     "promptPlaceholder": "Mô tả một ý tưởng, cải tiến hoặc lỗi…",
     "promptAttach": "Đính kèm hình ảnh",
+    "removeAttachment": "Xóa tệp đính kèm",
     "promptDrop": "Dán hoặc thả hình ảnh vào đây",
     "promptPost": "Đăng lời nhắc",
     "promptShortcut": "Bấm ⌘ + V để đăng bài",
     "promptDetails": "Chi tiết tùy chọn",
     "promptDevice": "Thiết bị & Hệ điều hành (cho lỗi)",
+    "deviceInfoNoErrors": "Không có",
     "promptFilters": "Lọc theo danh mục",
     "promptMediaError": "Chọn hình ảnh hoặc video dưới 50MB mỗi cái.",
     "promptMediaLimit": "Tối đa {{max}} tệp đính kèm.",
@@ -2100,12 +2271,40 @@
     "shipping": "Đang triển khai",
     "noShippingYet": "Chưa có gì đang làm",
     "shippingAppearHere": "Các yêu cầu đang được xây dựng sẽ hiện ở đây.",
-    "loadFailed": "Không thể tải yêu cầu"
+    "loadFailed": "Không thể tải yêu cầu",
+    "editMedia": "Ảnh và video",
+    "editAddMedia": "Thêm ảnh hoặc video",
+    "deviceInfoNote": "Thông tin thiết bị được đính kèm để giúp chúng tôi sửa lỗi.",
+    "deviceInfo": "Thông tin thiết bị",
+    "deviceInfoOwners": "Chỉ chủ bảng thấy thông tin này",
+    "deviceInfoError": "Không tải được thông tin thiết bị",
+    "deviceInfoNone": "Không có thông tin thiết bị cho yêu cầu này",
+    "deviceInfoErrors": "Lỗi gần đây"
   },
   "auth": {
-    "loginRequired": "Yêu cầu đăng nhập"
+    "loginRequired": "Yêu cầu đăng nhập",
+    "accountDeleted": "Tài khoản này đã bị xóa. Bạn có thể đăng ký lại như một tài khoản mới.",
+    "accountDeletedHours_one": "Tài khoản này đã bị xóa. Bạn có thể đăng ký lại bằng cùng email hoặc số điện thoại sau khoảng {{count}} giờ.",
+    "accountDeletedHours_other": "Tài khoản này đã bị xóa. Bạn có thể đăng ký lại bằng cùng email hoặc số điện thoại sau khoảng {{count}} giờ.",
+    "accountDeletedDays_one": "Tài khoản này đã bị xóa. Bạn có thể đăng ký lại bằng cùng email hoặc số điện thoại sau khoảng {{count}} ngày.",
+    "accountDeletedDays_other": "Tài khoản này đã bị xóa. Bạn có thể đăng ký lại bằng cùng email hoặc số điện thoại sau khoảng {{count}} ngày."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Đến",
+      "recent": "Gần đây",
+      "suggested": "Đề xuất",
+      "youFollow": "Người bạn theo dõi",
+      "placeholder": "Tên hoặc @tên người dùng",
+      "chattedBefore": "Đã trò chuyện",
+      "mutual": "Theo dõi chéo",
+      "dmsOff": "Tắt tin nhắn",
+      "keepTyping": "Tiếp tục gõ để tìm mọi người",
+      "noOne": "Không tìm thấy ai",
+      "tryUsername": "Thử đúng @tên người dùng của họ",
+      "sayHi": "Chào ai đó",
+      "typeAny": "Nhập tên bất kỳ hoặc @tên người dùng"
+    },
     "reply": "Trả lời",
     "react": "Bày tỏ cảm xúc",
     "edit": "Chỉnh sửa",
@@ -2142,7 +2341,11 @@
     "checkingTokenBalance": "Đang kiểm tra số dư token của bạn...",
     "deleteConversationFailed": "Không thể xóa cuộc trò chuyện",
     "message": "Tin nhắn",
-    "noConversationsYet": "Chưa có cuộc trò chuyện nào"
+    "noConversationsYet": "Chưa có cuộc trò chuyện nào",
+    "sending": "Đang gửi",
+    "retrySend": "Thử lại",
+    "discardSend": "Gỡ",
+    "notSent": "Chưa gửi"
   },
   "music": {
     "listeningCount_one": "{{count}} đang nghe",
@@ -2226,6 +2429,24 @@
     "viewList": "Chế độ xem danh sách",
     "viewMode": "Xem",
     "back": "Quay lại",
+    "reserve": {
+      "signIn": "Đăng nhập",
+      "available": "Tên người dùng còn trống",
+      "held": "Đang giữ cho bạn",
+      "ended": "Đã hết thời gian giữ",
+      "busy": "Đang được giữ chỗ",
+      "availableBody": "riftn.com/{{name}} hiện còn trống. Giữ chỗ và chúng tôi sẽ giữ nó trong một phút khi bạn đăng ký.",
+      "heldBody": "Không ai khác lấy được @{{name}} cho đến khi hết giờ. Hoàn tất đăng ký để giữ tên này.",
+      "endedBody": "Một phút của bạn đã hết, nên @{{name}} lại mở cho mọi người. Tên vẫn còn trống.",
+      "busyBody": "Có người đang đăng ký với tên @{{name}}. Nếu họ không hoàn tất, tên sẽ được giải phóng khi hết giờ.",
+      "finish": "Hoàn tất đăng ký",
+      "again": "Giữ chỗ lại",
+      "cta": "Giữ chỗ ngay",
+      "letGo": "Bỏ qua",
+      "haveAccount": "Đã có tài khoản?",
+      "seoTitle": "@{{name}} đang còn trống trên Riftn",
+      "seoDescription": "Chưa ai có riftn.com/{{name}}. Giữ chỗ và đăng ký để biến nó thành của bạn."
+    },
     "usernameAvailable": "Tên người dùng còn trống!",
     "signUpToClaim": "Đăng ký hôm nay để nhận",
     "signUp": "Đăng ký",
@@ -2244,7 +2465,8 @@
       "total": "Tổng phạm vi tiếp cận",
       "breakdownTitle": "Phạm vi tiếp cận này đến từ đâu",
       "dehubFollowers": "Người theo dõi Riftn",
-      "verified": "Số liệu mạng xã hội lấy từ các tài khoản nhà sáng tạo đã kết nối."
+      "verified": "Số liệu mạng xã hội lấy từ các tài khoản nhà sáng tạo đã kết nối.",
+      "selfReported": "Người sáng tạo nhập số lượng người theo dõi trên mạng xã hội."
     },
     "loginDescription": "Đăng nhập để xem và quản lý hồ sơ của bạn.",
     "replyThread": {
@@ -2290,9 +2512,28 @@
     "sortMostViewed": "Được xem nhiều nhất",
     "sortLikes": "Lượt thích",
     "sortMostLiked": "Được thích nhiều nhất",
+    "sortCustomShort": "Tùy chỉnh",
+    "arrange": {
+      "saving": "Đang lưu...",
+      "title": "Sắp xếp bài đăng của bạn",
+      "hint": "Giữ một bài đăng và kéo nó đến vị trí mới. Khách truy cập sẽ thấy thứ tự này trước.",
+      "drag": "Kéo để di chuyển",
+      "toTop": "Chuyển lên đầu",
+      "save": "Lưu thứ tự",
+      "saved": "Đã lưu thứ tự của bạn",
+      "reset": "Trở về mới nhất trước",
+      "resetDone": "Trở về mới nhất trước",
+      "saveFailed": "Không lưu được thứ tự. Vui lòng thử lại.",
+      "loadFailed": "Không tải được bài đăng của bạn. Đóng lại rồi thử lại.",
+      "empty": "Chưa có gì để sắp xếp. Hãy đăng gì đó trước."
+    },
     "searchThisChannel": "Tìm kiếm kênh này",
     "searchResultCount": "1 kết quả cho \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} kết quả cho \"{{query}}\""
+    "searchResultCountPlural": "{{count}} kết quả cho \"{{query}}\"",
+    "mutualsOne": "{{count}} bạn chung:",
+    "mutualsMany": "{{count}} bạn chung:",
+    "sortCustom": "Thứ tự tùy chỉnh",
+    "arrangeButton": "Sắp xếp bài đăng"
   },
   "tv": {
     "seoTitle": "Live TV: Các Kênh Miễn Phí Từ Khắp Nơi Trên Thế Giới",
@@ -2447,6 +2688,7 @@
       "runSwarm": "Chạy swarm",
       "description": "Các hành động được chạy dưới dạng tác nhân đã chọn. Các tác vụ đã lên lịch tiếp tục khi ứng dụng đã đóng.",
       "instructions": "Hướng dẫn dành cho nhân viên",
+      "examples": "Đăng mỗi ngày một lần về: nhạc độc lập\nPhong cách: tò mò, ngắn gọn và gần gũi như trò chuyện\nThích tối đa 2 bài đăng gần đây mỗi ngày về: âm nhạc, buổi diễn trực tiếp, đĩa than",
       "preparing": "Đang chuẩn bị nhiệm vụ",
       "run": "Lời nhắc chạy",
       "limits": "Một bài đăng hàng ngày và tối đa 3 lượt thích có liên quan cho mỗi tác vụ. Tất cả các nhân viên chăm sóc khách hàng chia sẻ khoảng trống sau 20 phút. Ảnh sử dụng chú thích đã chọn; video cần ảnh bìa. Bài đăng dưới 500 ký tự. Không có gas trừ khi đúc tiền; viết có thể sử dụng tín dụng.",
@@ -2555,6 +2797,28 @@
     "signInAgain": "Đăng nhập lại",
     "createSignIn": "Đăng nhập lại để tạo agent",
     "checkConnection": "Hãy kiểm tra kết nối rồi thử lại.",
+    "welcome": {
+      "text": "Lời chào mừng",
+      "title": "Chào đón thành viên mới",
+      "help": "Tác nhân này theo dõi và/hoặc nhắn tin cho những người vừa tham gia Riftn, vài người mỗi ngày.",
+      "follow": "Theo dõi thành viên mới",
+      "message": "Nhắn tin cho thành viên mới",
+      "textHelp": "{name} sẽ thành @tên người dùng của họ. Không có liên kết. Gửi một lần cho mỗi người.",
+      "saveText": "Lưu tin nhắn",
+      "perDay": "Số người mỗi ngày",
+      "fewer": "Ít hơn mỗi ngày",
+      "more": "Nhiều hơn mỗi ngày",
+      "today": "Hôm nay: đã theo dõi {{follows}} · đã nhắn {{messages}}",
+      "limits": "Không bao giờ hai lần với cùng một người. Bỏ qua người đã chặn hoặc tắt tiếng bạn, tắt tin nhắn mới hoặc ẩn khỏi Thành viên mới.",
+      "showLog": "Xem đã chào đón ai",
+      "hideLog": "Ẩn lượt chào đón",
+      "empty": "Chưa có ai. Thành viên mới sẽ hiện ở đây khi họ tham gia.",
+      "followed": "Đã theo dõi",
+      "messaged": "Đã nhắn tin",
+      "skipped": "Đã bỏ qua",
+      "failed": "Không liên hệ được",
+      "defaultText": "Chào {name}, chào mừng đến với Riftn! 👋"
+    },
     "workspace": {
       "moderation": "Kiểm duyệt phát trực tiếp",
       "moderationHelp": "Hãy bật quyền kiểm duyệt trước. Tài khoản phải sẵn là người tạo buổi phát trực tiếp hoặc kiểm duyệt viên được chỉ định. Chế độ phê duyệt và chế độ bản nháp vẫn được áp dụng. Lệnh cấm chat tạm thời sẽ tự động hết hạn.",
@@ -2669,6 +2933,7 @@
     "failedSubmit": "Không thể gửi đơn đăng ký. Vui lòng thử lại."
   },
   "loginModal": {
+    "didYouMean": "Ý bạn là {{email}}?",
     "restoreWalletTitle": "Lấy lại ví tiền",
     "restoreOriginalWallet": "Tài khoản của bạn nằm trên ví tiền từ đăng nhập ban đầu, không phải ví tiền được lưu trữ cho lần đăng nhập này. Đăng nhập theo cách bạn đã tham gia Riftn lần đầu để lấy lại ví tiền đó. Tài khoản và số dư của bạn sẽ được giữ nguyên.",
     "useAnotherLogin": "Sử dụng đăng nhập khác",
@@ -2747,7 +3012,16 @@
     "resendCodePhone": "Số điện thoại sai hoặc không có mã? Quay lại",
     "continueAs": "Tiếp tục như",
     "switchWalletAccount": "Chuyển tài khoản",
-    "walletLoadFailed": "Không thể tải ví tiền. Hãy thử lại."
+    "walletLoadFailed": "Không thể tải ví tiền. Hãy thử lại.",
+    "openInBrowser": "Mở trong trình duyệt",
+    "copyLink": "Sao chép liên kết",
+    "bringLoginOver": "Đã dùng Riftn trên dehub.io? <bring>Chuyển thông tin đăng nhập sang</bring>",
+    "profileMovedTitle": "Hồ sơ của bạn đã được chuyển",
+    "migrateWrongLogin": "Cách đăng nhập đó mở một ví khác, nên không có gì thay đổi. Hồ sơ cũ của bạn được tạo bằng {{login}}. Hãy dùng cách đó để lấy lại.",
+    "googleInAppTitle": "Google không cho đăng nhập bên trong {{app}}",
+    "googleInAppTitleUnnamed": "Google không cho đăng nhập bên trong ứng dụng này",
+    "googleInAppBody": "Mở Riftn trong trình duyệt để dùng Google, hoặc đăng nhập bằng email tại đây.",
+    "tryAnyway": "Vẫn thử"
   },
   "careers": {
     "title": "Cơ hội nghề nghiệp tại Riftn",
@@ -3074,7 +3348,23 @@
     "likersEmptyTitle": "Chưa có lượt thích",
     "likersEmptyBody": "Lượt thích cho bình luận này sẽ hiển thị ở đây.",
     "anonymousLikes_one": "{{count}} lượt thích từ người giữ huy hiệu ẩn danh",
-    "anonymousLikes_other": "{{count}} lượt thích từ những người giữ huy hiệu ẩn danh"
+    "anonymousLikes_other": "{{count}} lượt thích từ những người giữ huy hiệu ẩn danh",
+    "threadParts": {
+      "moveUp": "Chuyển lên",
+      "moveDown": "Chuyển xuống",
+      "reorder": "Sắp xếp lại",
+      "save": "Lưu thứ tự",
+      "saved": "Đã lưu thứ tự chuỗi",
+      "saveFailed": "Không lưu được thứ tự. Hãy thử lại.",
+      "dragPart": "Kéo để di chuyển phần {{n}}",
+      "addPart": "Thêm vào chuỗi",
+      "addPlaceholder": "Thêm vào chuỗi của bạn...",
+      "label": "Chuỗi · {{count}} phần",
+      "reorderHint": "Kéo các phần hoặc dùng mũi tên, rồi lưu lại."
+    },
+    "attachMedia": "Đính kèm ảnh, video hoặc âm thanh",
+    "attachUnsupported": "Hãy đính kèm ảnh, video hoặc tệp âm thanh.",
+    "attachTooLarge": "Tệp đó vượt quá giới hạn {{size}} MB."
   },
   "mintChain": {
     "title": "Trụ đúc tiền",
@@ -3090,6 +3380,16 @@
     "confirm": "Đúc tiền vào {{chain}}",
     "confirmWithCost": "Đúc tiền vào {{chain}} · {{cost}}",
     "notAvailable": "Việc đúc tiền trên chuỗi này chưa khả dụng."
+  },
+  "postEditHistory": {
+    "original": "Gốc",
+    "title": "Lịch sử chỉnh sửa",
+    "edited_one": "Đã sửa một lần",
+    "edited_other": "Đã sửa {{count}} lần",
+    "lastEdit": "Sửa lần cuối {{time}}",
+    "editN": "Lần sửa {{n}}",
+    "now": "Hiện tại",
+    "showChanges": "Hiện những gì đã thay đổi"
   },
   "postInfo": {
     "title": "Thông tin bài viết",
@@ -3384,7 +3684,10 @@
     "waiting_for_wallet": "Đang chờ ví của bạn",
     "waiting_for_wallet_desc": "Mở {{wallet}} và phê duyệt chữ ký — yêu cầu đang chờ ở đó.",
     "your_wallet": "Ví của bạn",
-    "max_available_on_chain": "Tối đa có sẵn: {{amount}} token trên {{chain}}"
+    "max_available_on_chain": "Tối đa có sẵn: {{amount}} token trên {{chain}}",
+    "not_available_for_this_post": "Không khả dụng cho bài đăng này",
+    "turn_back_on_desktop_notifications": "Bật lại thông báo trên máy tính?",
+    "notifications_moved_to_riftn": "Chúng tôi đã chuyển sang riftn.com, nên trình duyệt cần bạn đồng ý thêm một lần để hiện phản hồi, tiền tip và tin nhắn tại đây."
   },
   "staking": {
     "title": "Ký gửi (staking)",
@@ -5202,6 +5505,7 @@
     "settledTitleSpeed": ", thường là trong {{speed}}",
     "settledCount_one": "{{count}} đã thanh toán",
     "settledCount_other": "{{count}} đã thanh toán",
+    "statusInProgress": "Đang thực hiện",
     "howMany": "Bao nhiêu",
     "availableCount_one": "{{count}} có sẵn",
     "availableCount_other": "{{count}} có sẵn",
@@ -5291,9 +5595,169 @@
     "buy": "Mua",
     "reject": "Từ chối",
     "needsYouHold": "Cần {{needed}}, bạn giữ {{held}}",
-    "sellYourFractions": "Bán các phần của bạn ({{held}} được giữ)"
+    "sellYourFractions": "Bán các phần của bạn ({{held}} được giữ)",
+    "nftsSubtitle": "Mọi NFT, hoán đổi một bước",
+    "buyersTab": "Người mua",
+    "soldOfListing": "Đã bán {{sold}}/{{total}}",
+    "noBuyersYet": "Chưa ai mua phần nào của bài đăng này",
+    "fromYou": "từ bạn",
+    "statusOverdue": "Trễ hạn"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Sử dụng các chi tiết này",
+        "url": "URL trang sản phẩm",
+        "action": "Đọc trang sản phẩm",
+        "loading": "Đang đọc trang…",
+        "hint": "Nhập văn bản từ một trang sản phẩm công khai. Xem lại chi tiết trước khi dùng; đính kèm ảnh sản phẩm riêng trong studio.",
+        "source": "Nguồn đã nhập",
+        "review": "Chọn một sản phẩm để sao chép vào bản mô tả có thể chỉnh sửa. Tiêu đề, giọng điệu và màu thương hiệu của bạn được giữ nguyên.",
+        "errors": {
+          "signIn": "Đăng nhập để nhập trang sản phẩm.",
+          "url": "Hãy dùng URL sản phẩm HTTPS công khai.",
+          "empty": "Không tìm thấy thông tin sản phẩm dùng được. Hãy thêm thủ công.",
+          "busy": "Có quá nhiều lượt nhập đang chạy. Hãy thử lại sau ít phút.",
+          "unavailable": "Không nhập được trang này. Hãy thêm thông tin sản phẩm thủ công.",
+          "failed": "Nhập thất bại. Bản mô tả của bạn đã được lưu; hãy thử lại hoặc nhập thông tin thủ công."
+        }
+      },
+      "return": "Quay lại bản nháp studio",
+      "title": "Bản mô tả chiến dịch",
+      "intro": "Mô tả sản phẩm và thương hiệu, rồi chuẩn bị các định dạng quảng cáo phù hợp.",
+      "saved": "Bản mô tả của bạn được lưu trên thiết bị này cho tài khoản này.",
+      "preview": "Chuẩn bị định dạng",
+      "clear": "Xóa bản mô tả",
+      "required": "Thêm tên và mô tả sản phẩm để chuẩn bị định dạng.",
+      "variants": "Định dạng chiến dịch",
+      "reviewHint": "Xem lại mô hình, giá và tham chiếu sản phẩm trong studio trước khi tạo. Mỗi định dạng là một lần tạo riêng.",
+      "open": "Xem lại trong studio",
+      "fields": {
+        "product": "Tên sản phẩm (bắt buộc)",
+        "description": "Thông tin sản phẩm (bắt buộc)",
+        "brand": "Tên thương hiệu",
+        "audience": "Đối tượng mục tiêu",
+        "benefit": "Lợi ích chính",
+        "voice": "Giọng điệu thương hiệu",
+        "palette": "Màu thương hiệu",
+        "headline": "Tiêu đề đã duyệt",
+        "cta": "Lời kêu gọi hành động"
+      },
+      "formats": {
+        "square": "Quảng cáo vuông",
+        "portrait": "Quảng cáo dọc",
+        "story": "Ảnh story",
+        "video": "Video dọc"
+      }
+    },
+    "cinema": {
+      "close": "Đóng",
+      "performance": {
+        "label": "Hiệu năng",
+        "0": "Vui tươi",
+        "1": "U sầu",
+        "2": "Lo âu",
+        "3": "Tự tin",
+        "4": "Kinh ngạc",
+        "5": "Kiềm chế",
+        "6": "Tinh nghịch"
+      },
+      "title": "Định hướng điện ảnh",
+      "hint": "Định hướng phong cách hình ảnh cho ảnh hoặc video tiếp theo. Kết quả khác nhau tùy mô hình.",
+      "none": "Không định hướng",
+      "reset": "Xóa định hướng",
+      "camera": {
+        "label": "Kiểu máy quay",
+        "0": "Điện ảnh kỹ thuật số",
+        "1": "Phim 35mm",
+        "2": "Phim 16mm",
+        "3": "Khổ lớn",
+        "4": "Máy quay cầm tay cổ điển"
+      },
+      "lens": {
+        "label": "Kiểu ống kính",
+        "0": "Cầu",
+        "1": "Anamorphic",
+        "2": "Kính mềm cổ điển",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Tiêu cự",
+        "0": "18mm góc rộng",
+        "1": "24mm góc rộng",
+        "2": "35mm tự nhiên",
+        "3": "50mm tiêu chuẩn",
+        "4": "85mm chân dung",
+        "5": "135mm tele"
+      },
+      "aperture": {
+        "label": "Độ sâu trường ảnh",
+        "0": "f/1.4 rất nông",
+        "1": "f/2.8 nông",
+        "2": "f/5.6 vừa phải",
+        "3": "f/11 lấy nét sâu"
+      },
+      "movement": {
+        "label": "Chuyển động máy quay",
+        "0": "Cố định trên chân máy",
+        "1": "Dolly tiến chậm",
+        "2": "Dolly lùi chậm",
+        "3": "Tracking ngang",
+        "4": "Quay vòng quanh chủ thể",
+        "5": "Cầm tay",
+        "6": "Cần cẩu nâng lên",
+        "7": "Lia chậm"
+      },
+      "lighting": {
+        "label": "Ánh sáng",
+        "0": "Ánh sáng ban ngày dịu",
+        "1": "Giờ vàng",
+        "2": "Tông tối tương phản sáng tối",
+        "3": "Studio tông sáng",
+        "4": "Đèn neon trong cảnh",
+        "5": "Ngược sáng tạo bóng",
+        "6": "Trời âm u khuếch tán"
+      },
+      "tempo": {
+        "label": "Nhịp cảnh quay",
+        "0": "Một cảnh quay liền mạch",
+        "1": "Hành động bình thản, thong thả",
+        "2": "Hành động năng động, sôi nổi",
+        "3": "Hành động hỗn loạn, cuồng nhiệt"
+      },
+      "era": {
+        "label": "Thời đại",
+        "0": "Thập niên 1920",
+        "1": "Thập niên 1950",
+        "2": "Thập niên 1960",
+        "3": "Thập niên 1970",
+        "4": "Thập niên 1980",
+        "5": "Thập niên 1990",
+        "6": "Ngày nay",
+        "7": "Tương lai gần"
+      },
+      "genre": {
+        "label": "Thể loại",
+        "0": "Tài liệu",
+        "1": "Chính kịch",
+        "2": "Phim noir",
+        "3": "Khoa học viễn tưởng",
+        "4": "Giả tưởng",
+        "5": "Hài lãng mạn",
+        "6": "Giật gân",
+        "7": "Cao bồi miền Tây"
+      },
+      "palette": {
+        "label": "Bảng màu",
+        "0": "Hổ phách ấm",
+        "1": "Xanh lạnh",
+        "2": "Tông đất trầm",
+        "3": "Pastel",
+        "4": "Đơn sắc tương phản cao",
+        "5": "Màu cơ bản rực rỡ"
+      }
+    },
     "libraryEmpty": "Các nội dung đã tạo bạn lưu sẽ xuất hiện ở đây.",
     "toolRemake": "Làm lại",
     "toolMaboroshi": "Maboroshi",
@@ -6095,7 +6559,118 @@
       "needsImageToWork": "Chúng ta cần một hình ảnh để {{model}} hoạt động. Vui lòng thêm hình ảnh trước.",
       "speechLimit": "Đó là {{length}} ký tự. Giới hạn là {{limit}}.",
       "musicTrackLength": "{{count}}s theo dõi"
-    }
+    },
+    "gallery": {
+      "send": "Gửi",
+      "notifications": {
+        "generation_reply": "{{name}} đã trả lời bình luận của bạn",
+        "generation_like": "{{name}} đã bày tỏ cảm xúc với tác phẩm của bạn",
+        "generation_comment_like": "{{name}} đã bày tỏ cảm xúc với bình luận của bạn",
+        "generation_comment": "{{name}} đã bình luận về tác phẩm của bạn"
+      },
+      "browse": "Duyệt các tác phẩm đã tạo",
+      "create": "Tạo",
+      "fullscreen": "Xem toàn màn hình",
+      "missing": "Tác phẩm này không khả dụng."
+    },
+    "avatarTitle": "Chân dung biết nói",
+    "avatarRequirements": "Ảnh chân dung PNG vuông, 512–2048 pixel, tối đa 5 MB. WAV PCM mono 24 kHz 16-bit, 5–30 giây. Phần nhỏ của giây cuối được đệm bằng khoảng lặng.",
+    "avatarPortrait": "Chọn ảnh chân dung PNG",
+    "avatarAudio": "Chọn WAV giọng nói",
+    "avatarPermission": "Tôi có quyền làm chuyển động ảnh chân dung này và sử dụng âm thanh này.",
+    "avatarQuote": "{{seconds}} giây kể cả khoảng lặng · {{amount}} token",
+    "avatarPrepare": "Chuẩn bị và xem giá",
+    "batchFlowLimit": "Danh sách Flow đã đầy. Hãy xóa một Flow không dùng trước khi tạo lô khác.",
+    "batchReviewCampaign": "Xem lại lô chiến dịch trong Flow",
+    "batchReviewFilmImages": "Xem lại lô ảnh storyboard",
+    "batchReviewFilmVideos": "Xem lại lô clip phim",
+    "batchReviewHint": "Mở một Flow đã lưu riêng. Xem lại từng mục và tổng giá trước khi thanh toán. Các mục đã hoàn tất và khoản thanh toán ban đầu được giữ để khôi phục. Tài liệu tham chiếu được sao chép vào thư viện riêng của bạn; có tính phí lưu trữ và mạng.",
+    "batchInvalid": "Hoàn tất từng mục trước khi chuẩn bị lô 1–12 ảnh hoặc clip.",
+    "batchReferenceLimit": "Lô này hỗ trợ một ảnh tham chiếu cho mỗi mục. Xóa bớt tham chiếu hoặc chuẩn bị riêng mục đó.",
+    "batchVideoSettings": "Với lô này, clip cần thời lượng chẵn 4–15 giây và tỷ lệ khung hình 16:9, 9:16 hoặc 1:1.",
+    "batchMissingReference": "Một tham chiếu bị thiếu, không được hỗ trợ hoặc lớn hơn 25 MB. Hãy khôi phục nó trong trình chỉnh sửa trước khi chuẩn bị lô.",
+    "batchOwnerChanged": "Tài khoản hoặc bản nháp đã thay đổi. Mở lại lô này bằng tài khoản ban đầu.",
+    "batchConflict": "Lô đã lưu không khớp với bản chụp ban đầu.",
+    "audioExportFormat": "Định dạng xuất",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Đính kèm một clip nguồn để kéo dài.",
+    "extensionSeconds": "+{{seconds}} giây cảnh quay mới",
+    "extensionHelp": "Trả về clip nguồn của bạn kèm khoảng bốn giây mới. Đầu ra được đổi kích thước tối đa 720p ở 24 fps. Âm thanh mới được tạo cho phần kéo dài.",
+    "extensionForward": "Thêm khoảng bốn giây sau clip nguồn",
+    "extensionBackward": "Thêm khoảng bốn giây trước clip nguồn",
+    "expandDescription": "Tạo viền ảnh mới. Câu lệnh tiếng Anh tùy chọn; một ảnh nguồn.",
+    "relightDescription": "Chiếu sáng lại một bức ảnh theo mô tả ánh sáng và nền của bạn.",
+    "expandPromptHint": "Đính kèm một ảnh và chọn tỷ lệ khung hình mới. Câu lệnh tiếng Anh là tùy chọn.",
+    "expandEnglishOnly": "Mô hình mở rộng này nhận câu lệnh tiếng Anh. Để trống câu lệnh để mở rộng tự động.",
+    "expandNeedsImage": "Đính kèm một ảnh để mở rộng.",
+    "learn": {
+      "title": "Bài học Creator",
+      "intro": "Bài học ngắn, kèm câu hỏi kiểm tra và bài tập có thể chỉnh sửa cho mỗi bài. Tiến độ được lưu trên thiết bị này cho tài khoản của bạn.",
+      "back": "Quay lại Creator",
+      "lessons": "Bài học",
+      "progress": "Đã qua {{completed}}/{{total}} bài kiểm tra kiến thức",
+      "check": "Kiểm tra đáp án",
+      "correct": "Đã qua bài kiểm tra kiến thức",
+      "retry": "Hãy thử lại. Xem lại bài học ở trên.",
+      "exerciseTitle": "Bài tập thực hành",
+      "exerciseHint": "Mở một ví dụ có thể chỉnh sửa trong không gian studio của bạn. Mở bản nháp là miễn phí; việc tạo cần bạn xem lại và có báo giá riêng. Hãy sửa ví dụ trước khi tạo.",
+      "openExercise": "Mở bản nháp bài tập",
+      "closeExercise": "Đóng bài tập",
+      "brief": {
+        "title": "Viết một bản mô tả hình ảnh rõ ràng",
+        "body1": "Mô tả một chủ thể cụ thể, hành động và bối cảnh. Thêm khung hình hoặc chuyển động máy quay khi giúp ích cho cảnh. Để các ý tưởng không liên quan cho bản nháp khác.",
+        "body2": "Chỉ dẫn về ánh sáng, ống kính và phong cách định hướng mô hình. Chúng không đảm bảo hành vi máy quay thực tế hay một hình ảnh chính xác. Thay đổi từng phần một để có thể so sánh các bản sửa.",
+        "body3": "Trước khi tạo, xem lại mô hình đã chọn, tệp đính kèm được hỗ trợ, kích thước và giá. Giữ bản nháp gốc để có thể quay lại.",
+        "question": "Bản mô tả nào dễ chỉnh sửa nhất?",
+        "answer0": "Chủ thể, hành động và bối cảnh rõ ràng",
+        "answer1": "Chỉ có tên mô hình",
+        "answer2": "Một danh sách phong cách mâu thuẫn nhau",
+        "exercise": "Một ấm trà gốm trên bàn gỗ cạnh cửa sổ. Ánh sáng buổi sáng dịu nhẹ, khung hình trung, nền đơn giản. Giữ ấm trà là chủ thể rõ ràng."
+      },
+      "continuity": {
+        "title": "Lên kế hoạch cảnh quay và kiểm tra tính liên tục",
+        "body1": "Dùng bảng Film trong trình chỉnh sửa để lưu bản mô tả và các cảnh quay theo thứ tự. Chuẩn bị riêng từng khung hình hoặc clip, xem báo giá và chọn một kết quả được chấp nhận.",
+        "body2": "Chỉ đính kèm tham chiếu mà mô hình đã chọn chấp nhận. Dùng lại một tham chiếu có thể định hướng ngoại hình; nó không huấn luyện danh tính hay đảm bảo khớp. Nhân vật và giọng nói có thể khác nhau giữa các lần tạo.",
+        "body3": "Giữ các cảnh quay thành công và ghép chúng trên dòng thời gian. Kiểm tra chuyển động, khuôn mặt, lời thoại và chuyển cảnh trước khi xuất.",
+        "question": "Điều gì hỗ trợ tính liên tục giữa các cảnh quay?",
+        "answer0": "Thêm nhiều câu lệnh không liên quan",
+        "answer1": "Tham chiếu đã duyệt và ghi chú cảnh quay đã xem lại",
+        "answer2": "Cho rằng danh tính nhân vật được đảm bảo",
+        "exercise": "Cảnh rộng một lữ khách đơn độc đến một bờ biển yên tĩnh lúc bình minh. Máy quay tiến chậm về phía trước, không khí tĩnh lặng. Một cảnh quay liền mạch."
+      },
+      "campaign": {
+        "title": "Dùng thông tin sản phẩm đã duyệt",
+        "body1": "Bắt đầu với thông tin sản phẩm bạn có thể xác minh. Xem lại siêu dữ liệu đã nhập trước khi dùng. Viết rõ tiêu đề và lời kêu gọi hành động; không bịa ra giá, đánh giá hay tuyên bố về hiệu quả.",
+        "body2": "Dùng các biến thể chiến dịch đã lưu để giữ chung ghi chú và từng câu mở đầu, kịch bản, ngôn ngữ và định dạng. Chuẩn bị từng mục đã xem lại một lần và kiểm tra báo giá trong studio.",
+        "body3": "Xem lại chữ hiển thị, hình dáng sản phẩm và mọi tuyên bố bằng lời trong kết quả. Câu lệnh không phải bằng chứng về độ chính xác của sản phẩm hay hiệu quả tiếp thị.",
+        "question": "Khi nào nên đưa một tuyên bố về sản phẩm vào?",
+        "answer0": "Bất cứ khi nào nghe có vẻ thuyết phục",
+        "answer1": "Sau khi bịa ra một đánh giá năm sao",
+        "answer2": "Khi nó đến từ thông tin sản phẩm đã duyệt",
+        "exercise": "Tạo một quảng cáo sản phẩm dạng dọc cho trà lá nguyên bán trong hộp thiếc dùng lại được. Tiêu đề đã duyệt: Dành thời gian cho trà. CTA đã duyệt: Khám phá bộ sưu tập. Chỉ dùng những thông tin này; không bịa ra giảm giá, đánh giá hay tuyên bố về sức khỏe."
+      }
+    },
+    "campaignPlanTitle": "Biến thể và tập của chiến dịch",
+    "campaignPlanIntro": "Lưu tối đa 12 biến thể hoặc tập. Mỗi mục mở studio để xem lại và báo giá riêng. Ghi chú chung định hướng tính liên tục; hình dáng sản phẩm, nhân vật và giọng nói có thể khác nhau giữa các lần tạo.",
+    "campaignTitle": "Tên chiến dịch hoặc loạt",
+    "campaignContinuity": "Ghi chú chung về nhân vật, giọng nói và phong cách",
+    "campaignVariantTitle": "Tên biến thể hoặc tập",
+    "campaignHook": "Câu mở đầu",
+    "campaignLanguage": "Ngôn ngữ đầu ra",
+    "campaignScript": "Kịch bản hoặc trình tự cảnh đã duyệt",
+    "campaignAdd": "Thêm biến thể hoặc tập",
+    "campaignClear": "Xóa kế hoạch",
+    "campaignFormat": "Định dạng đầu ra",
+    "audioInvalidResponse": "Dịch vụ âm thanh trả về kết quả không hợp lệ.",
+    "batchPaymentHelp": "Mỗi ảnh đã gửi được tính phí riêng. Nếu một lô dừng lại, token chưa dùng từ khoản thanh toán đó sẽ tự động được dùng lại cho lần tạo sau mà nó bao trả.",
+    "invalidSeed": "Seed phải là số nguyên từ 0 đến 2147483647.",
+    "libraryFavorites": "Yêu thích",
+    "libraryFavoriteAdd": "Thêm vào yêu thích",
+    "libraryFavoriteRemove": "Xóa khỏi yêu thích",
+    "audioTaskDialoguePlaceholder": "Alice: Chúng ta nên đi thôi.\nBob: [cười] Mời bạn đi trước.",
+    "priceOwnKey": "Khóa của bạn",
+    "audioResultTooLarge": "Kết quả âm thanh trống hoặc vượt quá 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Kế hoạch cho mọi quy trình làm việc",
@@ -6262,9 +6837,17 @@
     "createTheFirst": "Tạo ảnh đầu tiên",
     "docsSeoTitle": "Hướng dẫn kỹ năng AI | Riftn",
     "docsSeoDescription": "Tài liệu tham khảo về kỹ năng trợ lý AI của Riftn và thư viện nhắc nhở.",
-    "raw": "Thô"
+    "raw": "Thô",
+    "docsLoadFailed": "# Lỗi\nKhông tải được tài liệu kỹ năng."
   },
   "nftMarket": {
+    "actAll": "Tất cả",
+    "actListings": "Tin đăng",
+    "actOffer": "Đề nghị",
+    "actOffers": "Đề nghị",
+    "actSales": "Bán hàng",
+    "tabActivity": "Hoạt động",
+    "shortTitle": "NFT",
     "filters": "Filters",
     "forSale": "Đang bán",
     "openToOffers": "Mở cửa cho các đề nghị",
@@ -6328,6 +6911,9 @@
     "offered": "Đã gửi đề nghị. Người nắm giữ có thể chấp nhận nó bất kỳ lúc nào.",
     "dehubPost": "Bài đăng của Riftn",
     "youHold": "Bạn đang nắm giữ {{n}}",
+    "price": "Giá",
+    "volume": "Âm lượng",
+    "tabRecent": "Gần đây",
     "buyNow": "Mua ngay",
     "dropsTo": "Giá giảm xuống {{price}} vào lúc {{date}}",
     "inBundle": "Được bán theo bộ {{n}}",
@@ -6370,7 +6956,28 @@
     "spotlight": "Ánh sáng chói",
     "spotlightBuyNote": "NFT và thanh toán được trao đổi trong một bước.",
     "spotlightOfferNote": "Chưa được đăng bán. Gửi một đề nghị và người sở hữu có thể chấp nhận nó bất kỳ lúc nào.",
-    "signInToTradeCta": "Đăng nhập để giao dịch"
+    "signInToTradeCta": "Đăng nhập để giao dịch",
+    "actCollectionOffer": "Đề nghị cho bộ sưu tập",
+    "actListed": "Đã niêm yết",
+    "actSale": "Bán",
+    "buyAll": "Mua tất cả",
+    "buySeveral": "Mua nhiều",
+    "cartBought": "Đã mua {{n}}. Chúng đã ở trong ví của bạn.",
+    "cartCount": "{{n}} trong giỏ",
+    "cartFull": "Tối đa 20 mỗi lần",
+    "cartOneCoin": "Mỗi giỏ một chuỗi và một loại coin. Xóa giỏ để đổi.",
+    "cartOwn": "Cái đó là của bạn",
+    "cartPick": "Chạm để thêm vào giỏ",
+    "forSaleHere": "Đang bán tại đây",
+    "noActivity": "Chưa có gì ở đây",
+    "volShort": "KL",
+    "salesCount": "Đã bán {{n}}",
+    "bestOffer": "Đề nghị tốt nhất",
+    "fromOpenSea": "Bộ sưu tập hàng đầu trên OpenSea",
+    "buyHere": "Mua tại đây",
+    "openSeaNote": "Niêm yết trên OpenSea. Bạn trả trực tiếp cho người bán trên Seaport; Riftn không thu thêm phí.",
+    "viewOnOpenSea": "Xem trên OpenSea",
+    "lasts": "Thời hạn"
   },
   "usernames": {
     "seoTitle": "Thị trường Tên người dùng | Riftn",
@@ -6725,7 +7332,18 @@
       "votes_other": "{{count}} phiếu",
       "howToVote_one": "Gõ {{command}} và một số trong tin nhắn để bỏ phiếu · {{count}} phiếu",
       "howToVote_other": "Gõ {{command}} và một số trong tin nhắn để bỏ phiếu · {{count}} phiếu"
-    }
+    },
+    "eyebrow": {
+      "follow": "Người theo dõi mới",
+      "subscribe": "Người đăng ký mới",
+      "subscribedTo": "Đã đăng ký · {{plan}}",
+      "gifted_one": "Đã tặng một gói đăng ký",
+      "gifted_other": "Đã tặng {{count}} gói đăng ký",
+      "share": "Đã chia sẻ buổi phát trực tiếp",
+      "join": "Vừa tham gia"
+    },
+    "giftedSubs_one": "{{name}} đã tặng một gói đăng ký!",
+    "giftedSubs_other": "{{name}} đã tặng {{count}} gói đăng ký!"
   },
   "liveChatModeration": {
     "timeout1m": "Thời gian chờ 1 phút",
@@ -6740,7 +7358,155 @@
     "youAreBanned": "Bạn không thể chat trong các stream của người tạo nội dung này.",
     "youAreTimedOut": "Bạn đang bị time out một lúc."
   },
+  "studioDeck": {
+    "background": {
+      "title": "Nền",
+      "modes": {
+        "none": "Tắt",
+        "blur": "Làm mờ",
+        "color": "Màu sắc",
+        "image": "Hình ảnh"
+      },
+      "failed": "Không thể bắt đầu xóa phông nền trên thiết bị này.",
+      "hint": "Chạy trên thiết bị của bạn. Lần đầu mất vài giây để tải."
+    },
+    "remove": "Gỡ",
+    "scenes": {
+      "countdown": "Đếm ngược",
+      "minutes": "{{count}} phút",
+      "names": {
+        "starting": "Sắp bắt đầu",
+        "chatting": "Trò chuyện thôi",
+        "gameplay": "Chơi game",
+        "brb": "Quay lại ngay",
+        "ending": "Kết thúc phát trực tiếp"
+      },
+      "title": "Cảnh",
+      "edit": "Sửa {{name}}",
+      "subtitle": "Dòng thứ hai (tùy chọn)",
+      "picture": "Hình ảnh",
+      "noCountdown": "Không đếm ngược",
+      "muteMic": "Tắt mic của tôi khi cảnh này bật",
+      "hints": {
+        "starting": "Thẻ có đếm ngược",
+        "chatting": "Camera toàn màn hình",
+        "gameplay": "Màn hình kèm camera của bạn",
+        "brb": "Thẻ, tắt mic",
+        "ending": "Thẻ cảm ơn"
+      },
+      "subtitles": {
+        "starting": "Buổi phát trực tiếp bắt đầu sau",
+        "brb": "Quay lại trong giây lát",
+        "ending": "Cảm ơn đã xem"
+      }
+    },
+    "sources": {
+      "reactAdd": "Hiện",
+      "image": "Hình ảnh",
+      "camera": "Máy ảnh",
+      "show": "Hiển thị trên phát trực tuyến",
+      "loop": "Vòng lặp",
+      "positions": {
+        "center": "Trung tâm",
+        "top-left": "Trên cùng bên trái",
+        "top-right": "Trên cùng bên phải",
+        "bottom-left": "Dưới cùng bên trái",
+        "bottom-right": "Dưới cùng bên phải"
+      },
+      "sizes": {
+        "small": "Nhỏ",
+        "medium": "Trung bình",
+        "large": "Lớn"
+      },
+      "shapes": {
+        "circle": "Hình tròn",
+        "rect": "Vuông",
+        "rounded": "Bo tròn"
+      },
+      "title": "Nguồn",
+      "addImage": "Hình ảnh hoặc logo",
+      "addCamera": "Camera thứ hai",
+      "addClip": "Clip video",
+      "addReaction": "React một video",
+      "reactPlaceholder": "Dán liên kết video Riftn",
+      "reactInvalid": "Hãy dán liên kết tới một video Riftn.",
+      "reactNotLive": "Hãy phát trực tiếp trước, rồi thêm video.",
+      "reactNoBubble": "Camera của bạn không mở được hai lần ở đây. Hãy đổi kích thước video để giữ khuôn mặt bạn trên màn hình.",
+      "failed": "Không thêm được nguồn đó.",
+      "empty": "Thêm logo, camera thứ hai hoặc clip video lên trên buổi phát trực tiếp.",
+      "hint": "Nguồn được vẽ đè lên hình của bạn cho mọi người xem và mọi nền tảng.",
+      "clip": "Clip",
+      "restart": "Phát lại từ đầu",
+      "play": "Phát hoặc tạm dừng"
+    },
+    "audio": {
+      "mute": "Tắt tiếng",
+      "unmute": "Bật tiếng",
+      "gateLevels": {
+        "off": "Tắt",
+        "low": "Sáng",
+        "high": "Mạnh"
+      },
+      "title": "Bộ trộn âm thanh",
+      "unavailable": "Trình duyệt này không trộn được âm thanh, nên mic của bạn được phát nguyên trạng.",
+      "channels": {
+        "mic": "Mic",
+        "game": "Game / tab",
+        "clip": "Clip video"
+      },
+      "absent": {
+        "mic": "Không có micro",
+        "game": "Chia sẻ màn hình kèm âm thanh hoặc dùng card capture",
+        "clip": "Thêm clip video trong Nguồn"
+      },
+      "gate": "Cổng lọc tiếng ồn",
+      "gateHint": "Tắt mic giữa các từ để tiếng gõ phím và quạt không lọt vào buổi phát."
+    },
+    "imageTooLarge": "Ảnh đó quá lớn. Hãy thử ảnh nhỏ hơn.",
+    "widgets": {
+      "title": "Hiện widget trong video của tôi",
+      "hint": "Thông báo, thanh mục tiêu và trò chuyện được vẽ vào buổi phát trực tiếp, nên người xem trên Twitch, YouTube và mọi nền tảng khác cũng thấy.",
+      "failed": "Không đổi được vị trí hiển thị widget. Hãy thử lại."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Nền tảng",
+      "label": "Tên (không bắt buộc)",
+      "key": "Khóa luồng",
+      "save": "Thêm",
+      "cancel": "Hủy",
+      "states": {
+        "off": "Tắt",
+        "idle": "Sẵn sàng",
+        "live": "Trực tiếp",
+        "error": "Lỗi",
+        "connecting": "Đang kết nối"
+      },
+      "title": "Điểm đến phát đa nền tảng",
+      "intro": "Phát trực tiếp trên Riftn một lần và chúng tôi đẩy buổi phát tới mọi nền tảng được bật ở đây, miễn phí. Bắt đầu trong vài giây sau khi bạn lên sóng.",
+      "add": "Thêm điểm đến",
+      "empty": "Chưa có điểm đến. Thêm Twitch, YouTube, Kick hoặc bất kỳ máy chủ RTMP nào.",
+      "server": "URL máy chủ",
+      "findKey": "Tìm máy chủ và khóa {{name}} của bạn",
+      "customHint": "Dán máy chủ RTMP và khóa mà nền tảng cung cấp.",
+      "keyNote": "Khóa của bạn được lưu mã hóa trên máy chủ của chúng tôi và không bao giờ hiện lại.",
+      "added": "Đã thêm {{name}}",
+      "saveFailed": "Không lưu được điểm đến",
+      "toggle": "Phát tới điểm đến này"
+    },
+    "vertical": {
+      "centre": "Trung tâm",
+      "live": "TRỰC TIẾP",
+      "title": "Chế độ dọc",
+      "intro": "Điện thoại xem buổi phát của bạn trong bảng tin dọc. Kéo khung để chọn phần hình mà họ thấy.",
+      "enabled": "Hiện buổi phát của tôi trong bảng tin dọc",
+      "zoom": "Thu phóng",
+      "frame": "Hình ngang của bạn",
+      "box": "Những gì điện thoại thấy",
+      "hint": "Kéo khung hoặc dùng phím mũi tên. Lưu để áp dụng cho buổi phát trực tiếp.",
+      "watch": "Xem {{name}} trực tiếp"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Một đếm ngược trên stream của bạn. Mỗi món quà trả tiền, theo dõi và đăng ký sẽ thêm thời gian, giúp phòng chat giữ bạn online.",
@@ -6902,7 +7668,8 @@
       "subathon_timer": "Bộ hẹn giờ Subathon",
       "points_board": "Người xem trung thành",
       "streamer_level": "Cấp độ streamer",
-      "tip_jar": "Lọ quà tặng"
+      "tip_jar": "Lọ quà tặng",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "Tưởng thưởng cho mỗi gợi ý, kích thước theo cấp bậc",
@@ -6926,7 +7693,8 @@
       "subathon_timer": "Một đếm ngược mà các món quà, theo dõi và đăng ký sẽ kéo dài",
       "points_board": "Top người xem của bạn theo điểm từ việc xem và tặng quà",
       "streamer_level": "Cấp độ streamer và streak hàng tuần của bạn, từ hồ sơ của bạn",
-      "tip_jar": "Một cái lọ được đổ đầy khi quà tặng trả tiền được gửi đến"
+      "tip_jar": "Một cái lọ được đổ đầy khi quà tặng trả tiền được gửi đến",
+      "hype_train": "Hiện hype train khi đang diễn ra: ba quà tặng hoặc lượt đăng ký trong năm phút sẽ khởi động nó."
     },
     "fields": {
       "style": "Phong cách",
@@ -7312,7 +8080,10 @@
     "endStreamConfirmBody": "Phát sóng của bạn dừng lại đối với mọi người đang xem và không thể tiếp tục.",
     "keepStreaming": "Tiếp tục phát sóng",
     "encoderPermanentHint": "Phím này không bao giờ thay đổi. Thiết lập bộ mã hóa của bạn một lần — lần tới chỉ cần nhấn Bắt đầu ở đó và Riftn sẽ tạo bài đăng cho bạn.",
-    "notEnoughTokensForBounty": "Không đủ token. Cần {{need}} token nhưng chỉ có {{have}}."
+    "notEnoughTokensForBounty": "Không đủ token. Cần {{need}} token nhưng chỉ có {{have}}.",
+    "screenInAppHint": "Trong ứng dụng Riftn",
+    "screenInAppNote": "Trình duyệt điện thoại không cho trang web nào chia sẻ màn hình. Hãy phát trực tiếp từ ứng dụng Riftn, rồi chạm Chia sẻ màn hình.",
+    "screenInAppCta": "Tải ứng dụng Riftn"
   },
   "events": {
     "seoTitle": "Sự kiện: Các Cuộc Gặp Gỡ & Sự Kiện Cộng Đồng trên Riftn",
@@ -7693,6 +8464,8 @@
     "footerNote": "Sự tham gia của DePin là một dịch vụ đóng góp, không phải là một sản phẩm đầu tư. Tình trạng còn phòng, tính đủ điều kiện và phần thưởng có thể thay đổi."
   },
   "creatorFlow": {
+    "newNativeFlow": "Flow mới",
+    "disconnect": "Ngắt kết nối",
     "title": "Creator Flow",
     "backToStudio": "Quay lại Creator Studio",
     "backToFlows": "Quay lại các flow của bạn",
@@ -7900,7 +8673,45 @@
     "foldersInFolder_other": "Trong {{count}} thư mục",
     "foldersNoItems": "Chưa có nội dung nào trong thư mục này",
     "foldersNoItemsHint": "Mở kết quả và chọn \"Thêm vào thư mục\" để gửi kết quả tại đây.",
-    "skippedUpstreamFailed": "Đã bỏ qua vì bước trước đó không thành công. Chi phí vẫn nằm trong số dư của bạn."
+    "skippedUpstreamFailed": "Đã bỏ qua vì bước trước đó không thành công. Chi phí vẫn nằm trong số dư của bạn.",
+    "signInForAudioLibrary": "Đăng nhập để mở thư viện âm thanh đã lưu riêng tư của bạn.",
+    "audioLibraryFailed": "Không tải được âm thanh đã lưu. Hãy thử lại.",
+    "retryFreeTask": "Thử lại tác vụ miễn phí",
+    "previewSavedMedia": "Xem trước nội dung đã lưu",
+    "audioSavePending": "Âm thanh đã sẵn sàng, nhưng việc lưu vào thư viện riêng đang chờ. Tiếp tục để lấy nó.",
+    "confirmInterruptedRetry": "Thử lại tác vụ âm thanh hoặc trợ lý bị gián đoạn. Kết quả trước đó không rõ và thử lại có thể lặp lại xử lý. Khoản thanh toán hiện có và ID tác vụ đã trả phí sẽ được dùng lại.",
+    "freeResultUnknown": "Phản hồi của tác vụ miễn phí bị gián đoạn. Nó sẽ không tự động được gửi lại. Chọn Thử lại tác vụ miễn phí, rồi tiếp tục; khoản thanh toán và các tác vụ khác của bạn được giữ lại.",
+    "formAuthor": "Sửa flow",
+    "formAuthorHint": "Xây dựng flow với các đầu vào có kiểu. Lưu tại đây, hoặc sắp xếp trên canvas web.",
+    "chooseSavedMedia": "Chọn nội dung đã lưu",
+    "formInput": "Đầu vào: {{handle}}",
+    "reviewRun": "Xem lại lượt chạy",
+    "resumeRun": "Tiếp tục lượt chạy đã lưu",
+    "confirmPrice": "Tổng: {{price}} token",
+    "recoveryHint": "Tham chiếu tác vụ và thanh toán được lưu trên thiết bị này. Hãy tiếp tục công việc bị gián đoạn trước khi bắt đầu lượt chạy khác.",
+    "newRun": "Bắt đầu lượt chạy khác",
+    "loadMoreMedia": "Tải thêm nội dung",
+    "invalidGraph": "Kiểm tra các kết nối: mỗi đầu vào cần một nguồn tương thích và sơ đồ không được có vòng lặp.",
+    "unsupportedNode": "Nút này chưa chạy được ở dạng gốc. Hãy dùng canvas web cho flow này.",
+    "missingPrompt": "Kết nối một nút văn bản có câu lệnh.",
+    "invalidSettings": "Mô hình đã chọn không hỗ trợ các cài đặt này.",
+    "missingCapturedFrame": "Chụp một khung hình trên canvas web trước khi dùng video này làm đầu vào ảnh.",
+    "missingSavedMedia": "Nội dung nguồn đã lưu bị thiếu hoặc không còn khả dụng cho tài khoản này.",
+    "quoteFailed": "Không định giá được flow này. Hãy thử lại.",
+    "recoverBeforeEdit": "Tiếp tục lượt chạy đã lưu trước khi thay đổi sơ đồ hoặc bắt đầu lượt chạy khác.",
+    "runAlreadyComplete": "Lượt chạy này đã hoàn tất. Chọn Bắt đầu lượt chạy khác để tạo lại.",
+    "recoveryCorrupt": "Không đọc được bản ghi khôi phục đã lưu. Hãy giữ flow này và liên hệ hỗ trợ trước khi thanh toán lại.",
+    "paidUnavailable": "Bạn có thể soạn và lưu flow tại đây. Lượt chạy trả phí không khả dụng trong cửa hàng này.",
+    "planChanged": "Flow đã thay đổi sau khi định giá. Hãy xem lại lượt chạy.",
+    "connectOwnerWallet": "Kết nối ví sở hữu flow này.",
+    "runFailed": "Nút không hoàn tất được. Tham chiếu tác vụ đã lưu được giữ lại để khôi phục.",
+    "recoveryPending": "Quá trình render vẫn đang chờ. Tiếp tục lượt chạy này để lấy kết quả.",
+    "nodeAudioGen": "Trình tạo âm thanh",
+    "nodeAudioGenDesc": "Giọng nói, hiệu ứng âm thanh, chuyển văn bản và tách âm thanh",
+    "nodeAudioInput": "Âm thanh đã lưu",
+    "nodeAudioInputDesc": "Dùng âm thanh riêng tư từ thư viện của bạn",
+    "audioVoiceId": "ID giọng nói",
+    "audioSeconds": "Độ dài âm thanh tính bằng giây"
   },
   "videoPlayer": {
     "volume": "Âm lượng",
@@ -8855,6 +9666,35 @@
     "priceChartCleared": "Đã xóa biểu đồ giá. Giá tham chiếu cố định: $ 0,0001. Giá khớp lệnh phụ thuộc vào các lệnh có sẵn."
   },
   "editor": {
+    "stage": {
+      "camera": "Máy ảnh",
+      "yaw": "Xoay",
+      "add": "Thêm",
+      "scale": "Kích thước",
+      "color": "Màu",
+      "light": "Sáng",
+      "create": "Thêm sân khấu 3D",
+      "title": "Sân khấu cảnh 3D",
+      "hint": "Dàn dựng cảnh quay bằng hình cầu và hình hộp. Camera, vị trí và ba đèn vùng độc lập sẽ thay đổi khung hình được render.",
+      "preview": "Xem trước cảnh đã render",
+      "error": "Không chuẩn bị được khung hình. Kiểm tra tham chiếu cảnh quay rồi thử lại.",
+      "elevation": "Độ cao",
+      "distance": "Khoảng cách",
+      "fov": "Góc nhìn",
+      "object": "Vật thể",
+      "sphere": "Hình cầu",
+      "box": "Hình hộp",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Xóa vật thể",
+      "intensity": "Cường độ",
+      "diffusion": "Khuếch tán",
+      "saving": "Đang chuẩn bị khung hình…",
+      "useFrame": "Dùng khung hình đã render làm tham chiếu cảnh quay",
+      "frameHint": "Tạo một ảnh PNG 320 × 180 và thêm vào tham chiếu của cảnh quay này. Xem lại giới hạn tham chiếu và báo giá mô hình trước khi tạo.",
+      "frameName": "Khung hình sân khấu cảnh"
+    },
     "video": {
       "tFade": "Hòa tan",
       "none": "Không có",
@@ -8948,7 +9788,9 @@
       "pptx": "Bài thuyết trình PowerPoint",
       "pptxHint": "Mỗi trang trở thành một hình ảnh trang riêng, với ghi chú người trình bày và liên kết. Sửa đổi văn bản và các yếu tố riêng lẻ trong thiết kế gốc.",
       "section": "Phần tên",
-      "transparent": "Mở rộng nền"
+      "transparent": "Mở rộng nền",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Tải xuống tệp ZIP chứa dòng thời gian dạng FCPXML và Premiere XML cùng mọi tệp nội dung, để bạn hoàn thiện bản dựng trong Premiere Pro, Final Cut Pro hoặc DaVinci Resolve. Văn bản thành marker; hiệu ứng ở lại trong Riftn."
     },
     "inspector": {
       "selectHint": "Chọn một lớp trên khung vẽ hoặc một clip trên dòng thời gian.",
@@ -9021,6 +9863,8 @@
       "tools": "Công cụ chỉnh sửa"
     },
     "agent": {
+      "stop": "Dừng",
+      "queue": "Thêm vào hàng chờ",
       "introTitle": "Nói với AI điều bạn muốn",
       "introBody": "Mô tả thiết kế hoặc thay đổi bằng lời của bạn. AI sẽ đổi kích thước trang, viết và định dạng chữ, tìm ảnh, video và nhạc miễn phí, áp dụng bộ lọc, sắp xếp các lớp và tạo hiệu ứng cho chúng. Mỗi yêu cầu chỉ cần một lần hoàn tác.",
       "suggestPoster": "Tạo một bài đăng Instagram vuông cho đợt giảm giá mùa hè với ảnh bãi biển và tiêu đề nổi bật",
@@ -9040,7 +9884,45 @@
       "failed": "AI hiện không thể làm việc này. Hãy thử lại sau một lát.",
       "changes": "Số chỉnh sửa đã thực hiện: {{count}}",
       "undo": "Hoàn tác",
-      "openGenerator": "Xem lại và tạo"
+      "openGenerator": "Xem lại và tạo",
+      "stopped": "Đã dừng. Không có gì khác bị thay đổi.",
+      "queued": "{{count}} đang chờ",
+      "restore": "Khôi phục đến đây",
+      "restoreHint": "Đưa dự án về trạng thái trước tin nhắn này. Hoàn tác sẽ mang nó trở lại.",
+      "restored": "Đã khôi phục dự án về trước tin nhắn đó. Nhấn hoàn tác để lấy lại phiên bản mới hơn.",
+      "rewrite": "Làm yêu cầu của tôi rõ hơn",
+      "rewriteFailed": "Không viết lại được. Văn bản của bạn không thay đổi.",
+      "feedback": "Câu trả lời này có hữu ích không?",
+      "good": "Trả lời tốt",
+      "bad": "Trả lời chưa tốt",
+      "retryPrefix": "Như vậy chưa đúng. Thay vào đó, ",
+      "recipesTitle": "Công thức",
+      "recipe": {
+        "podcastClip": {
+          "label": "Clip podcast",
+          "prompt": "Tìm khoảnh khắc 30 giây hay nhất, cắt theo đó, thêm phụ đề Word Pop và chuyển sang 9:16."
+        },
+        "talkingHead": {
+          "label": "Video nói chuyện gọn gàng",
+          "prompt": "Cắt các khoảng ngừng dài, thêm phụ đề Classic và tạo tông ấm nhẹ."
+        },
+        "productPromo": {
+          "label": "Quảng bá sản phẩm",
+          "prompt": "Làm video quảng bá 15 giây: tiêu đề ấn tượng ở đầu, chuyển cảnh Zoom in giữa các clip, phụ đề Bold và nhạc sôi động."
+        },
+        "hypeReel": {
+          "label": "Reel sôi động",
+          "prompt": "Cắt các clip theo nhịp nhạc, dùng chuyển cảnh Fly up và tông Technicolor."
+        },
+        "retroEdit": {
+          "label": "Dựng phong cách retro",
+          "prompt": "Cho mọi clip tông VHS, thêm tiêu đề serif lớn và dùng chuyển cảnh Fade."
+        },
+        "tutorial": {
+          "label": "Hướng dẫn",
+          "prompt": "Thêm tiêu đề cho mỗi bước, phụ đề Boxed và làm chậm khoảnh khắc chính xuống 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Hình chữ nhật",
@@ -9215,7 +10097,9 @@
       "tint": "Sắc thái {{value}}",
       "vignette": "Làm tối góc {{value}}%",
       "auto": "Tự động nâng cao",
-      "autoFailed": "Không thể phân tích ảnh này."
+      "autoFailed": "Không thể phân tích ảnh này.",
+      "halation": "Quầng sáng {{value}}%",
+      "scanlines": "Đường quét {{value}}%"
     },
     "pages": {
       "add": "Thêm trang",
@@ -9289,6 +10173,17 @@
       "reloadText": "Lưu lại tiêu đề",
       "textSaved": "Đã lưu lại thay đổi tiêu đề.",
       "action": "Phụ đề tự động",
+      "styles": {
+        "bold": "Đậm",
+        "classic": "Cổ điển",
+        "boxed": "Đóng khung",
+        "wordpop": "Word Pop",
+        "rapid": "Hiện nhanh",
+        "beast": "Beast Mode",
+        "stacked": "Xếp chồng",
+        "serif": "Serif",
+        "bubble": "Bong bóng"
+      },
       "working": "Đang nghe… {{percent}}%",
       "downloading": "Đang chuẩn bị mô hình giọng nói… {{percent}}%",
       "hint": "Chuyển lời nói thành phụ đề có mốc thời gian mà bạn có thể đổi kiểu. Chạy trên thiết bị của bạn: miễn phí và riêng tư. Lần dùng đầu tiên sẽ tải mô hình xuống.",
@@ -9299,7 +10194,8 @@
       "translateCount": "Chuyển đổi {{count}} tiêu đề",
       "translationDone": "Đã chuyển đổi {{count}} tiêu đề",
       "translationFailed": "Chuyển đổi tiêu đề thất bại. Tiêu đề của bạn vẫn chưa thay đổi.",
-      "lockedTranslation": "Mở khóa tiêu đề bị khóa để bao gồm chúng."
+      "lockedTranslation": "Mở khóa tiêu đề bị khóa để bao gồm chúng.",
+      "style": "Kiểu phụ đề"
     },
     "multi": {
       "selected": "Đã chọn {{count}} lớp",
@@ -9336,7 +10232,10 @@
       "saveNewPreset": "Lưu mới",
       "saveStyles": "Lưu kiểu dáng với thiết kế",
       "stylesSaved": "Kiểu dáng thương hiệu đã lưu với thiết kế này",
-      "usePreset": "Sử dụng kiểu dáng"
+      "usePreset": "Sử dụng kiểu dáng",
+      "dehubApplied": "Đã áp dụng thương hiệu Riftn cho {{count}} lớp.",
+      "dehubApply": "Dùng thương hiệu Riftn",
+      "dehubHint": "Màu chính thức của Riftn, phông Exo và Inter, cùng logo Riftn, chỉ với một lần nhấp."
     },
     "draw": {
       "heading": "Vẽ",
@@ -10668,6 +11567,135 @@
       "toolbar": "Điều hướng Canvas",
       "zoomIn": "Thu Phóng Khung Vẽ",
       "zoomOut": "Thu Phóng Khung Vẽ"
+    },
+    "clipFix": {
+      "listening": "Đang nghe…",
+      "detach": "Tách âm thanh",
+      "detached": "Âm thanh đã được chuyển sang clip riêng",
+      "detachFailed": "Không tách được âm thanh của clip này",
+      "removeBars": "Xóa viền đen",
+      "scanning": "Đang kiểm tra khung hình…",
+      "noBars": "Không tìm thấy viền đen",
+      "barsRemoved": "Đã cắt viền đen",
+      "barsFailed": "Không kiểm tra được viền đen của video này",
+      "reframe": "Tự động căn khung",
+      "reframeHint": "Video đã vừa với khung trang này",
+      "reframed": "Đã căn khung theo hành động",
+      "reframeFailed": "Không căn khung được video này",
+      "retakes": "Xóa cảnh quay lại",
+      "noRetakes": "Không tìm thấy cảnh quay lại",
+      "retakesRemoved": "Đã xóa {{count}} cảnh quay lại, giữ lần quay cuối",
+      "retakesFailed": "Không xóa được cảnh quay lại khỏi clip này"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Tách",
+        "play": "Phát",
+        "pause": "Tạm dừng",
+        "frameBack": "Khung trước",
+        "frameForward": "Khung tiếp theo",
+        "back": "Lùi 1 giây",
+        "rippleDelete": "Xóa clip",
+        "liftDelete": "Xóa clip",
+        "start": "Về đầu",
+        "end": "Đến cuối"
+      },
+      "preset": "Bố cục bàn phím",
+      "presetHint": "Dùng phím dòng thời gian từ trình dựng bạn quen. Các phím tắt riêng của Riftn vẫn hoạt động cho mọi thứ khác."
+    },
+    "voiceClone": {
+      "stop": "Dừng ghi âm",
+      "failed": "Đồng giọng nói thất bại.",
+      "pickerLabel": "Nhân bản giọng nói của bạn",
+      "pickerDetail": "Lồng tiếng bằng chính giọng của bạn",
+      "title": "Nhân bản giọng nói của bạn",
+      "description": "Tự ghi âm hoặc chọn một clip bạn đang nói. Bạn trả một lần và giọng nói là của bạn cho mọi lần lồng tiếng.",
+      "defaultName": "Giọng của tôi",
+      "record": "Ghi một mẫu (30 giây đến 2 phút)",
+      "fromMedia": "Hoặc dùng một clip từ Nội dung",
+      "recorded": "Bản ghi của bạn",
+      "sample": "Mẫu: {{name}}",
+      "hint": "Giọng nói rõ ràng, không có nhạc cho kết quả tốt nhất.",
+      "noMic": "Không dùng được micro.",
+      "sampleFailed": "Không đọc được âm thanh từ clip đó.",
+      "pay": "Nhân bản với {{amount}} token",
+      "useFree": "Nhân bản (đã thanh toán)",
+      "owned": "Giọng “{{name}}” của bạn đã được thiết lập. Hãy chọn trong danh sách giọng.",
+      "useOwned": "Dùng giọng của tôi",
+      "ready": "“{{name}}” đã sẵn sàng để lồng tiếng.",
+      "paidFailed": "Khoản thanh toán của bạn đã được lưu. Mở lại mục này và lần thử tiếp theo sẽ miễn phí.",
+      "consent": "Chỉ nhân bản giọng của chính bạn, hoặc giọng bạn được phép sử dụng."
+    },
+    "linkImport": {
+      "go": "Nhập",
+      "downloading": "Đang tải xuống {{percent}}%",
+      "open": "Nhập từ liên kết",
+      "placeholder": "Dán liên kết YouTube, TikTok hoặc khác",
+      "rights": "Tôi sở hữu video này hoặc được phép sử dụng nó",
+      "audioOnly": "Chỉ âm thanh",
+      "queued": "Đang chờ…",
+      "waiting": "Đang chờ trang web, sẽ sớm thử lại…",
+      "adding": "Đang thêm vào Nội dung…",
+      "added": "Đã nhập và thêm vào dòng thời gian.",
+      "failed": "Không nhập được liên kết đó."
+    },
+    "reverse": {
+      "action": "Đảo ngược",
+      "working": "Đang đảo ngược {{percent}}%",
+      "done": "Đã đảo ngược clip.",
+      "failed": "Không đảo ngược được clip này.",
+      "unsupported": "Trình duyệt này không đảo ngược được video. Hãy thử Chrome hoặc Edge.",
+      "tooLong": "Có thể đảo ngược clip dài tối đa {{seconds}} giây."
+    },
+    "film": {
+      "repairRefs": "Xóa liên kết nội dung bị thiếu",
+      "title": "Dự án phim",
+      "intro": "Lên kế hoạch cảnh quay với ảnh tham chiếu dùng lại được. Bản mô tả, thứ tự cảnh quay và kết quả đã chọn được lưu cùng dự án.",
+      "create": "Tạo kế hoạch phim",
+      "name": "Tên phim",
+      "brief": "Bản mô tả phim",
+      "sharedReferences": "Ảnh tham chiếu chung (tối đa 4)",
+      "shot": "Cảnh quay",
+      "addShot": "Thêm cảnh quay",
+      "shotName": "Tên cảnh quay",
+      "action": "Hành động và bố cục cảnh quay",
+      "seconds": "Số giây video yêu cầu",
+      "shotReferences": "Ảnh tham chiếu bổ sung (tổng giới hạn 4)",
+      "frame": "Chuẩn bị khung hình",
+      "video": "Chuẩn bị video",
+      "review": "Xem lại mô hình, tham chiếu, thời lượng video và giá trong studio trước khi tạo.",
+      "result": "Kết quả cảnh quay được chấp nhận",
+      "noResult": "Chưa chọn kết quả",
+      "resultHint": "Chọn một ảnh hoặc video được chấp nhận từ Tải lên. Liên kết của nó được lưu cùng cảnh quay; dùng dòng thời gian để ghép phim.",
+      "earlier": "Chuyển lên trước",
+      "later": "Chuyển ra sau",
+      "remove": "Xóa cảnh quay",
+      "issue": "Kiểm tra mô tả cảnh quay và nội dung tham chiếu, rồi thử lại. Hãy giữ dự án mở nếu chưa lưu được.",
+      "searchMedia": "Tìm nội dung theo tên",
+      "refreshMedia": "Làm mới nội dung"
+    },
+    "speakers": {
+      "find": "Tìm người nói",
+      "name": "Người nói {{number}}",
+      "onlyOne": "Chỉ tìm thấy một người nói.",
+      "failed": "Không tìm được người nói.",
+      "kept": "Chỉ giữ {{name}}.",
+      "editFailed": "Chỉnh sửa đó không phù hợp với clip này.",
+      "split": "Đã tách thành {{count}} cảnh quay theo người nói.",
+      "keepOnly": "Chỉ giữ",
+      "splitAction": "Cắt tại mỗi lần đổi người nói"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Mô tả vật thể 3D bạn muốn",
+      "queued": "Đang tạo vật thể 3D. Nó sẽ xuất hiện trong tab Đã tạo.",
+      "note": "Vật thể 3D được đưa vào Nội dung dưới dạng clip xoay ngắn với nền trong suốt."
+    },
+    "behind": {
+      "action": "Chữ phía sau người",
+      "working": "Đang tách người…",
+      "done": "Chữ và phụ đề giờ nằm phía sau người.",
+      "failed": "Không đặt được chữ phía sau người."
     }
   },
   "jungleMood": {
@@ -11142,7 +12170,9 @@
     "tokenAmount": "Mã thông báo {{amount}}",
     "assistant": {
       "question1": "APY đặt cược hiện tại cho mã thông báo Riftn là bao nhiêu?",
-      "question2": "Có, nếu tôi cọc 10.000 token trong 90 ngày"
+      "question2": "Có, nếu tôi cọc 10.000 token trong 90 ngày",
+      "answer1": "APY staking hiện tại cho token Riftn là 12.4% với thời hạn khóa 30 ngày. Chi tiết như sau:\n\n• Khóa 7 ngày: APY 8.2%\n• Khóa 30 ngày: APY 12.4%\n• Khóa 90 ngày: APY 18.7%\n\nBạn có muốn tôi giúp tính thu nhập tiềm năng không?",
+      "answer2": "Với 10,000 token staking ở APY 18.7% trong 90 ngày:\n\n📊 Phần thưởng ước tính: ~461 token\n\nTức khoảng 5.13 token mỗi ngày. Lưu ý APY có thể dao động theo tổng lượng đã stake."
     },
     "bookmarks": {
       "stakingGuide": "Hướng dẫn đầy đủ về staking token Riftn: giải thích chi tiết tỷ suất lợi nhuận hằng năm, thời gian khóa và số nhân phần thưởng."
@@ -11838,7 +12868,7 @@
   "multiPost": {
     "tab": "Đăng đa nền tảng",
     "title": "Đăng đa nền tảng",
-    "intro": "Đăng lên X, YouTube, Instagram, TikTok và nhiều nền tảng khác cùng một lúc với dehub. Kết nối tài khoản của bạn một lần, sau đó chọn nơi mỗi bài đăng sẽ được gửi.",
+    "intro": "Đăng lên X, YouTube, Instagram, TikTok và nhiều nền tảng khác cùng một lúc với Riftn. Kết nối tài khoản của bạn một lần, sau đó chọn nơi mỗi bài đăng sẽ được gửi.",
     "creditsHeading": "Tín dụng đăng bài",
     "credits": "{{count}} tín dụng đăng bài",
     "topUpTitle": "Nạp thêm và tiết kiệm",
@@ -11886,7 +12916,12 @@
   "dm": {
     "planRestricted": "Người dùng này yêu cầu đăng ký để nhận tin nhắn.",
     "planTypeNotAllowed": "Gói của nhà sáng tạo này không cho phép loại tin nhắn này.",
-    "planMinTip": "Tiền tip cho nhà sáng tạo này phải ít nhất {{amount}} token."
+    "planMinTip": "Tiền tip cho nhà sáng tạo này phải ít nhất {{amount}} token.",
+    "shareGroups": "Nhóm",
+    "shareKindGroup": "Nhóm",
+    "shareKindChannel": "Kênh",
+    "shareKindCommunity": "Cộng đồng",
+    "reportMessage": "Báo cáo tin nhắn"
   },
   "credits": {
     "earningsWorth": "Trị giá {{amount}}",
@@ -12040,7 +13075,45 @@
       "rewardsWeek": "Tuần của {{date}}",
       "rewardPaid": "Đã thanh toán",
       "rewardPending": "Đang chờ xử lý",
-      "rewardsNone": "Chưa có phần thưởng nào được tính toán. Tuần đầu tiên kết thúc vào thứ Hai."
+      "rewardsNone": "Chưa có phần thưởng nào được tính toán. Tuần đầu tiên kết thúc vào thứ Hai.",
+      "stats": {
+        "button": "Thống kê trực tiếp",
+        "chartTitle": "Số người đã mở ứng dụng của bạn, 30 ngày qua",
+        "peak_one": "Cao nhất {{count}} mỗi ngày",
+        "peak_other": "Cao nhất {{count}} mỗi ngày",
+        "people30": "Số người, 30 ngày",
+        "people7": "Số người, 7 ngày",
+        "added": "Đã thêm",
+        "dhb30": "Token đã trả, 30 ngày",
+        "notified30": "Thông báo đã gửi, 30 ngày",
+        "rewards": "Phần thưởng token đã nhận"
+      },
+      "signin": {
+        "users_one": "{{count}} người dùng",
+        "users_other": "{{count}} người dùng",
+        "delete": "Xóa",
+        "title": "Đăng nhập bằng Riftn",
+        "body": "Cho phép mọi người đăng nhập vào trang web hoặc ứng dụng của bạn bằng tài khoản Riftn. Tạo khóa tại đây, rồi làm theo hướng dẫn.",
+        "guide": "Đọc hướng dẫn",
+        "copyId": "Sao chép client ID",
+        "rotate": "Secret mới",
+        "rotateConfirm": "Tạo secret mới cho {{name}}? Secret cũ sẽ ngừng hoạt động ngay lập tức.",
+        "deleteConfirm": "Xóa {{name}}? Mọi người đăng nhập bằng nó sẽ bị đăng xuất.",
+        "secretOnce": "Secret cho {{name}}. Hãy sao chép ngay: nó chỉ hiện một lần.",
+        "name": "Tên ứng dụng",
+        "website": "Trang web (tùy chọn)",
+        "redirects": "URL chuyển hướng, mỗi dòng một URL (https://yoursite.com/callback)",
+        "create": "Tạo khóa"
+      },
+      "stateRejected": "Hoạt động qua liên kết · chưa được duyệt lên cửa hàng",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Các sự kiện Riftn đã gửi tới webhookUrl của bạn. Kiểm tra sẽ gửi một sự kiện ping.",
+        "test": "Gửi thử",
+        "ok": "Webhook đã phản hồi {{status}}",
+        "failed": "Webhook thất bại: {{reason}}",
+        "none": "Chưa gửi webhook nào."
+      }
     },
     "card": {
       "open": "Mở"
@@ -12066,7 +13139,10 @@
       "confirm": "token sẽ được chuyển trực tiếp vào ví của ứng dụng, {{amount}}. Thanh toán không thể hoàn lại.",
       "sending": "Đang gửi thanh toán của bạn…",
       "sent": "Đã thanh toán {{amount}} cho {{name}}.",
-      "noOwner": "Ứng dụng này chưa có ví được xác minh để thanh toán."
+      "noOwner": "Ứng dụng này chưa có ví được xác minh để thanh toán.",
+      "testBadge": "Chế độ thử",
+      "testBody": "Bạn sở hữu ứng dụng này, nên đây là thử nghiệm: không có token nào được chuyển và biên nhận được đánh dấu thử.",
+      "testSent": "Thanh toán thử {{amount}} token. Không có gì được gửi."
     },
     "add": {
       "title": "Thêm {{name}}?",
@@ -12137,7 +13213,8 @@
     "howSafari": "Mở menu File trong Safari và chọn Add to Dock.",
     "howFirefox": "Firefox không thể cài đặt ứng dụng. Mở trang này trên Chrome, Edge hoặc Safari để cài đặt Riftn.",
     "desktopMeta": "Windows · Mac · Linux · ChromeOS",
-    "microsoftStore": "Thích Microsoft Store hơn? Lấy ứng dụng ở đó thay vào."
+    "microsoftStore": "Thích Microsoft Store hơn? Lấy ứng dụng ở đó thay vào.",
+    "howChromium": "Nhấp vào biểu tượng cài đặt ở cuối bên phải thanh địa chỉ, rồi chọn Cài đặt."
   },
   "postStage": {
     "back": "Quay lại",
@@ -12197,6 +13274,9 @@
     "reminderLater": "Không bây giờ"
   },
   "copy": {
+    "55656b5e434f": "Đóng tìm kiếm",
+    "57e2faa5ec63": "Tìm trên Riftn",
+    "96d7bff86b44": "Không thể tải tìm kiếm",
     "1607715e45ed": "Chạm vào quả cầu để nói, hoặc gõ bên dưới",
     "00140a37bd26": "Các giao dịch trên mạng tạm thời không khả dụng. Hãy thử lại.",
     "002286513398": "Bạn không có quyền quản lý sự kiện",
@@ -19180,7 +20260,63 @@
     "127053546dd4": "Không thể tải xuống tệp này",
     "d14896aa4bf8": "Thư viện miễn phí không thể tải được. Kiểm tra kết nối và thử lại.",
     "953e708b2287": "Tạo giọng nói thất bại.",
-    "4a52cdd6ac72": "Không thể sao chép các lớp này"
+    "4a52cdd6ac72": "Không thể sao chép các lớp này",
+    "3f9b2c71d0a4": "{{n}} kết quả",
+    "8c4e1a6b2f57": "cho “{{query}}”",
+    "1d7234ff1b79": "trong {{feed}}",
+    "e122e5c2b563": "Kéo lên để đóng",
+    "1aa9d734f2ee": "Chọn nội dung cần tìm",
+    "ef557404f465": "Không có kết quả cho “{{query}}”",
+    "35034aa59bd3": "Không có gì trong {{feed}} khớp. Hãy thử từ khác hoặc tìm mọi thứ.",
+    "415155739590": "Tìm mọi thứ",
+    "9e13d826baaf": "Tìm hình ảnh",
+    "cbf6f228327c": "Tìm nhạc",
+    "e8756c6865a5": "Tìm shorts",
+    "c7661da99c41": "Tìm video",
+    "90f1afe66801": "Đang tìm “{{query}}”…",
+    "d7b559f2d8c6": "Hãy thử từ khác hoặc đổi bộ lọc.",
+    "d1a0c7e2f301": "Hôm nay bạn đang nghĩ gì?",
+    "d1a0c7e2f302": "Hôm nay bạn đang nghĩ về điều gì?",
+    "d1a0c7e2f303": "Bạn đang nghĩ gì?",
+    "d1a0c7e2f304": "Có điều gì trong đầu không?",
+    "d1a0c7e2f305": "Lúc này bạn đang nghĩ gì?",
+    "d1a0c7e2f306": "Hôm nay mình nghĩ gì nhỉ?",
+    "d1a0c7e2f307": "Hôm nay có điều gì muốn chia sẻ không?",
+    "d1a0c7e2f308": "Lần này bạn đang nghĩ gì?",
+    "a7c1e0f4b2d9": "Chạm để nói",
+    "b3e8d1c6f0a2": "Chạm để gửi",
+    "c9f2a4e7d1b5": "Đang nghe... chạm vào quả cầu để gửi",
+    "22577ebd908e": "Tạo video Wan 3.0 · nhạc nền gốc",
+    "1fa2357ab7e1": "Tạo video Seedance 720p · nhạc nền gốc",
+    "7f78bdc0762d": "+{{value1}} điểm",
+    "f0c8bb34335b": "Bạn đã nhận +{{value1}} điểm",
+    "0fbe06b679a8": "{{value1}} điểm cho mỗi yêu cầu đã phát hành, được cộng vào điểm Top builders của bạn.",
+    "431bc73eb60b": "[verse]\nLời bài hát của bạn ở đây...\n\n[chorus]\nLời điệp khúc...",
+    "ebda9f3a43c5": " giây nữa",
+    "a3c1e5f20b71": "Dùng Riftn bên trong ChatGPT, Claude hoặc bất kỳ ứng dụng MCP nào. Dán URL bên dưới vào cài đặt connector của trợ lý để duyệt bài đăng, hồ sơ và bình luận, rồi đăng nhập khi được yêu cầu để liên kết tài khoản của bạn.",
+    "b84d2e7c9a16": "Địa chỉ này dành cho ứng dụng AI, không phải trang web. Mở nó trong trình duyệt sẽ đưa bạn đến đây.",
+    "c5e9f1a3d742": "Liên kết tài khoản Riftn của bạn",
+    "d61a7b4e8c05": "Khi trợ lý yêu cầu đăng nhập, hãy đăng nhập Riftn và nhấp Cho phép. Sau đó nó có thể cập nhật hồ sơ, đăng bài và bình luận, theo dõi mọi người và sáng tạo trong Creator Studio. Kết nối luôn được liên kết khi bạn dùng và hết hạn sau 30 ngày không dùng.",
+    "e27b8c5f9d13": "Hướng dẫn ChatGPT từng bước",
+    "f38c9d6a0e24": "Hướng dẫn Claude từng bước",
+    "0a49d7b1f835": "Muốn dùng tài khoản bot riêng? Tạo một tác nhân để nhận URL connector đăng bài dưới danh nghĩa tác nhân đó.",
+    "1b5ae8c20f46": "Khi ChatGPT yêu cầu, hãy đăng nhập Riftn và nhấp Cho phép để liên kết tài khoản.",
+    "2c6bf9d31a57": "Nhấp Kết nối, đăng nhập Riftn và nhấp Cho phép để liên kết tài khoản.",
+    "12a7c0529934": "/docs/getting-started",
+    "468415f0e112": "Ag",
+    "b62c681738d1": "Cu",
+    "27c26a5a38b3": "Đăng nhập để xem tin nhắn cũ hơn",
+    "674e70bcd915": "Toàn bộ lịch sử trò chuyện mở cho mọi người có tài khoản.",
+    "feaf753f6557": "Đầu cuộc trò chuyện",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Thanh kính",
+    "5ff272ba7871": "Đường lụa",
+    "a941e90ca93d": "Quầng ảnh bìa",
+    "04dbbe4dff7a": "Sóng thực",
+    "9103bf0e2557": "Đặt cho mỗi cột một tên riêng dài 1–100 ký tự",
+    "c1568fd358ae": "Kết nối văn bản, mã QR, trường trang, liên kết lớp hoặc ảnh với một cột, hoặc thêm placeholder {{column}} tương ứng",
+    "6b7ef8443530": "Dùng số mục đã tô là số nguyên từ 0 đến tổng số ký hiệu",
+    "6e71ae3669b1": "Đầu ra đã lưu không khả dụng"
   },
   "articles": {
     "cardLabel": "Bài viết · {{count}} phút đọc",
@@ -19199,6 +20335,7 @@
     "backToTop": "Quay lại đầu trang",
     "needTitle": "Tiêu đề:",
     "needBody": "Còn{{count}} ký tự nữa",
+    "imagesLabel": "Hình ảnh",
     "backToWriting": "Quay lại bài viết",
     "readyTitle": "Sẵn sàng đăng",
     "sharePreview": "Nó trông như thế nào khi được chia sẻ",
@@ -19221,7 +20358,16 @@
     "formatting": "Định dạng",
     "bodyPlaceholder": "Kể câu chuyện của bạn. Chọn văn bản và sử dụng thanh ở trên cho các tiêu đề, in đậm, trích dẫn và danh sách.",
     "bodyLabel": "Nội dung bài viết",
-    "wordCount": "{{count}} từ"
+    "wordCount": "{{count}} từ",
+    "imageLimit": "Bài viết có thể chứa tối đa {{count}} ảnh",
+    "imageLimitSome": "Chỉ còn chỗ cho {{count}} ảnh nữa trong bài viết này",
+    "imageFailed": "Không thêm được ảnh đó. Hãy thử ảnh khác.",
+    "imagesUploading": "Đang thêm ảnh ({{count}})…",
+    "bodyTooLong": "Vượt giới hạn {{count}} ký tự",
+    "imagesCount": "Ảnh · {{count}}/{{max}}",
+    "captionPlaceholder": "Thêm chú thích",
+    "captionLabel": "Chú thích cho ảnh {{n}}",
+    "removeInlineImage": "Xóa ảnh {{n}}"
   },
   "liveAudience": {
     "whosHere": "Ai ở đây",
@@ -19260,6 +20406,387 @@
     "exploreFirst": "Khám phá trước",
     "codeNote": "Chúng tôi gửi mã qua email, không cần mật khẩu."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Gói",
+      "howMany": "Bao nhiêu",
+      "who": "Tên người dùng hoặc địa chỉ ví",
+      "whoPlaceholder": "@tennguoidung",
+      "cancel": "Hủy",
+      "stage": {
+        "preparing": "Đang chuẩn bị…",
+        "confirming": "Đang chờ giao dịch…",
+        "recording": "Đang hoàn tất…",
+        "wallet": "Xác nhận trong ví của bạn"
+      },
+      "open": "Tặng gói đăng ký",
+      "title": "Tặng gói đăng ký",
+      "mode": {
+        "random": "Người xem ngẫu nhiên trong trò chuyện",
+        "user": "Một người cụ thể"
+      },
+      "randomHint": "Dành cho những người đã trò chuyện trong 30 phút qua và chưa đăng ký.",
+      "send_one": "Tặng 1 gói · ${{price}}",
+      "send_other": "Tặng {{count}} gói · ${{price}}",
+      "payHint": "Thanh toán bằng token từ ví của bạn trong một lần chuyển.",
+      "fewer_one": "Hiện chỉ có 1 người trong trò chuyện nhận được gói, nên bạn trả cho 1.",
+      "fewer_other": "Hiện chỉ có {{count}} người trong trò chuyện nhận được gói, nên bạn trả cho {{count}}.",
+      "done_one": "Đã tặng gói đăng ký!",
+      "done_other": "Đã tặng {{count}} gói đăng ký!",
+      "failed": "Không tặng được gói đăng ký",
+      "notReady": "Gói này chưa hỗ trợ tặng",
+      "noPlan": "Hãy chọn một gói trước",
+      "noPlans": "{{name}} chưa có gói đăng ký nào để tặng."
+    },
+    "badges": {
+      "emoji": "Biểu tượng cảm xúc",
+      "audience": {
+        "subscribers": "Người đăng ký",
+        "both": "Người đăng ký và người tặng",
+        "gifters": "Người tặng"
+      },
+      "ended": "Đã kết thúc",
+      "until": "Đến {{date}}",
+      "failed": "Điều đó không hiệu quả. Hãy thử lại.",
+      "title": "Huy hiệu có thời hạn",
+      "intro": "Mở một huy hiệu trong vài ngày. Ai đăng ký hoặc tặng quà trong thời gian đó sẽ nhận được, và huy hiệu hiện vĩnh viễn cạnh tên họ trong trò chuyện của bạn.",
+      "name": "Tên huy hiệu",
+      "namePlaceholder": "Tuần ra mắt",
+      "days": "Thời gian mở (ngày)",
+      "who": "Ai có thể nhận",
+      "create": "Mở huy hiệu",
+      "created": "Huy hiệu đã được mở.",
+      "end": "Kết thúc ngay",
+      "holders_one": "{{count}} người sở hữu",
+      "holders_other": "{{count}} người sở hữu",
+      "limit": "Có thể chạy ba huy hiệu cùng lúc. Kết thúc một cái để mở cái khác.",
+      "hypeHint": "Mọi người tham gia hype train cũng nhận huy hiệu 🚂 của bạn ở cấp mà nó đạt được."
+    },
+    "train": {
+      "level": "Hype Train · Cấp {{level}}",
+      "endedLevel": "Hype Train đã hoàn thành cấp {{level}}!",
+      "ended": "Hype Train đã kết thúc",
+      "thanks_one": "Cảm ơn {{count}} người ủng hộ",
+      "thanks_other": "Cảm ơn {{count}} người ủng hộ",
+      "top": "Hàng đầu: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "đã tặng một gói đăng ký 🎁",
+      "giftedSubs_other": "đã tặng {{count}} gói đăng ký 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Hôm nay",
+    "earlierShort": "Trước đó",
+    "tooSoon": "Chọn một thời điểm trong tương lai.",
+    "show": "Hiện",
+    "hide": "Ẩn",
+    "title": "Khi nào?",
+    "tonight": "Tối nay",
+    "inAnHour": "Một giờ nữa",
+    "tomorrow": "Ngày mai",
+    "primeTime": "Giờ vàng",
+    "scheduleFor": "Lên lịch vào {{when}}",
+    "liveTip": "Người theo dõi có thể đặt lời nhắc. Bạn tự bắt đầu Live khi đến giờ.",
+    "stageTip": "Nó xuất hiện ngay trên kệ Sắp diễn ra, để mọi người có thể chạm Nhắc tôi.",
+    "typePlaceholder": "Nhập thời gian, như \"t6 8pm\" hoặc \"2 giờ nữa\"",
+    "typeLabel": "Nhập thời gian",
+    "typeHelp": "Thử \"tối nay\", \"mai 9am\", \"t7 trưa\" hoặc \"30 oct 7pm\".",
+    "orPickDay": "Hoặc chọn một ngày",
+    "earlier": "Sớm hơn 15 phút",
+    "later": "Muộn hơn 15 phút",
+    "laterShort": "Muộn hơn",
+    "tooSoonMin": "Hãy chọn thời gian cách hiện tại ít nhất {{count}} phút.",
+    "zone": "Giờ của bạn ({{zone}}). Người khác thấy theo giờ của họ.",
+    "remove": "Xóa lịch",
+    "startsIn": "Bắt đầu sau {{time}}",
+    "bestTime": "Thời điểm tốt nhất",
+    "fansOnline": "Khi nào fan của tôi online?",
+    "fansBasis": "Càng sáng nghĩa là càng nhiều người theo dõi bạn đang xem, trong {{count}} ngày qua.",
+    "everyoneBasis": "Chưa đủ hoạt động của người theo dõi, nên đây là dữ liệu của mọi người trên Riftn."
+  },
+  "planned": {
+    "title": "Đã lên kế hoạch",
+    "all": "Tất cả",
+    "posts": "Bài đăng",
+    "stages": "Phòng âm thanh",
+    "post": "Bài viết",
+    "live": "Trực tiếp",
+    "stage": "Sân khấu",
+    "untitledPost": "Bài viết",
+    "untitledLive": "Trực tiếp",
+    "loading": "Đang tải…",
+    "startNow": "Bắt đầu ngay",
+    "cancel": "Hủy",
+    "cancelled": "Đã hủy",
+    "subtitle": "Bài đăng, Live và Stage bạn đã lên lịch",
+    "seoTitle": "Đã lên kế hoạch · Riftn",
+    "seoDescription": "Bài đăng, Live và Stage đã lên lịch của bạn trên Riftn, tất cả ở một nơi.",
+    "lives": "Live",
+    "signIn": "Đăng nhập để xem những gì bạn đã lên kế hoạch",
+    "emptyTitle": "Chưa có kế hoạch nào",
+    "emptyBody": "Chọn \"Khi nào?\" khi tạo bài đăng, Live hoặc Stage và nó sẽ hiện ở đây.",
+    "move": "Dời",
+    "postNow": "Đăng ngay",
+    "confirmCancel": "Chạm lần nữa để hủy",
+    "moved": "Đã dời sang {{when}}",
+    "postingNow": "Sẽ đăng trong chưa đầy một phút",
+    "moveFailed": "Không dời được. Hãy thử lại.",
+    "seeAll": "Xem mọi thứ bạn đã lên kế hoạch"
+  },
+  "welcome": {
+    "about": {
+      "title": "Chào mừng bạn đến với Riftn",
+      "day": "Ngày",
+      "month": "Tháng",
+      "year": "Năm",
+      "sub": "Ngày sinh của bạn được giữ riêng tư. Chọn giao diện, bạn có thể đổi bất cứ lúc nào.",
+      "birthday": "Ngày sinh",
+      "pick": "Chọn ngày sinh của bạn",
+      "invalid": "Nhập đầy đủ ngày sinh của bạn.",
+      "tooYoung": "Bạn cần từ {{age}} tuổi trở lên để dùng Riftn.",
+      "theme": "Giao diện của bạn"
+    },
+    "name": {
+      "title": "Tên của bạn",
+      "placeholder": "Tên của bạn",
+      "sub": "Đây là tên mọi người thấy trên bài đăng của bạn."
+    },
+    "card": {
+      "name": "Tên của bạn",
+      "followers": "người theo dõi",
+      "interests": "Sở thích của bạn",
+      "following": "đang theo dõi"
+    },
+    "topic": {
+      "music": "Âm nhạc",
+      "art": "Nghệ thuật",
+      "gaming": "Game",
+      "crypto": "Tiền mã hoá",
+      "sports": "Thể thao",
+      "comedy": "Phim hài",
+      "film": "Phim",
+      "food": "Thực phẩm",
+      "news": "Tin tức",
+      "science": "Khoa học",
+      "travel": "Du lịch",
+      "anime": "Anime",
+      "cars": "Xe hơi",
+      "podcast": "Podcast",
+      "animals": "Động vật",
+      "tech": "Công nghệ"
+    },
+    "back": "Quay lại",
+    "skipPhoto": "Bỏ qua lúc này",
+    "preview": "Xem trước",
+    "username": {
+      "title": "@tên người dùng của bạn",
+      "sub": "Chữ cái, số và dấu gạch dưới. Bạn có thể đổi sau.",
+      "yours": "@{{name}} là của bạn"
+    },
+    "photo": {
+      "title": "Ảnh của bạn",
+      "sub": "Tùy chọn. Mọi người theo dõi gương mặt nhanh hơn.",
+      "choose": "Chọn ảnh",
+      "change": "Chọn ảnh khác"
+    },
+    "interests": {
+      "title": "Sở thích của bạn",
+      "sub": "Chọn ít nhất 3. Chúng sẽ hiện đầu tiên trong danh mục của bạn."
+    },
+    "people": {
+      "title": "Những người của bạn",
+      "sub": "Chạm để theo dõi. Bài đăng của họ sẽ lấp đầy bảng tin Đang theo dõi.",
+      "empty": "Hiện chưa có gợi ý. Khám phá có thêm nhiều người để tìm.",
+      "followers": "{{count}} người theo dõi"
+    },
+    "done": {
+      "title": "Trông tuyệt lắm, {{name}}",
+      "sub": "Từ hôm nay mọi người sẽ thấy thẻ này.",
+      "eyebrow": "Hồ sơ đã hoạt động"
+    },
+    "enter": "Vào Riftn",
+    "pickMore": "Chọn thêm {{count}}",
+    "cardHint": "Đây là cách mọi người sẽ thấy bạn",
+    "followFailed": "Không theo dõi được. Hãy thử lại."
+  },
+  "appTokens": {
+    "title": "Token của bạn",
+    "history": "Lịch sử",
+    "noHistory": "Chưa có hoạt động nào",
+    "kindDeposit": "Nạp tiền",
+    "to": "Đến",
+    "amount": "Số tiền",
+    "notePlaceholder": "Thêm ghi chú (không bắt buộc)",
+    "sendButton": "Gửi",
+    "errorInsufficient": "Không đủ token",
+    "rowHint": "Số dư trong ứng dụng",
+    "explainer": "Token của bạn giờ nằm bên trong Riftn. Bạn bắt đầu với số đã nắm giữ và stake trên chuỗi lúc ra mắt. Gửi, tip và chi tiêu đều chuyển ngay lập tức, không phí và không có gì trên chuỗi. Số dư sẽ được chuyển sang token mới khi airdrop.",
+    "kindOpening": "Số dư ban đầu",
+    "kindSent": "Đã gửi cho {{name}}",
+    "kindReceived": "Từ {{name}}",
+    "kindSpent": "Đã chi trong Riftn",
+    "kindRefund": "Hoàn tiền",
+    "kindAdjust": "Điều chỉnh bởi Riftn",
+    "sendTitle": "Gửi token",
+    "sendHint": "Gửi token trong Riftn tới tài khoản khác. Tức thì và miễn phí, không có gì lên chuỗi.",
+    "toPlaceholder": "@tên người dùng hoặc địa chỉ 0x",
+    "looking": "Đang tìm…",
+    "available": "Khả dụng: {{amount}}",
+    "sent": "Đã gửi {{amount}} token cho {{name}}",
+    "errorRateLimit": "Gửi quá nhiều lần trong giờ qua. Hãy thử lại sau.",
+    "errorNoRecipient": "Không tìm thấy tài khoản Riftn",
+    "errorSelf": "Bạn không thể gửi cho chính mình",
+    "errorGeneric": "Không gửi được. Hãy thử lại."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Mọi người",
+      "followers": "Người theo dõi",
+      "nobody": "Không ai",
+      "default": "Mặc định tài khoản ({{value}})"
+    },
+    "heading": "Cảm xúc",
+    "more": "Hiển thị thêm",
+    "liveNow": "Trực tiếp",
+    "untitled": "Phản ứng",
+    "reactionTo": "React với",
+    "reactingTo": "Đang react với",
+    "count_one": "{{count}} video react",
+    "count_other": "{{count}} video react",
+    "allow": "Cho phép react",
+    "remixesSection": "Remix",
+    "allowDescription": "Cho phép nhà sáng tạo khác react video của bạn, ghi sẵn hoặc trực tiếp. Bạn vẫn có thể đổi cho từng bài đăng.",
+    "pageDescription": "Xem các nhà sáng tạo react “{{title}}” của {{creator}} trên Riftn, ghi sẵn và trực tiếp.",
+    "backToVideo": "Quay lại video",
+    "empty": "Chưa có video react nào. Mở menu Remix của video và chọn React để là người đầu tiên.",
+    "wasLive": "Đã phát trực tiếp",
+    "thisVideo": "video này",
+    "pageTitle": "Cảm xúc về {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Kết nối Riftn với trợ lý AI của bạn",
+    "urlLabel": "URL máy chủ MCP",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "copiedToast": "Đã sao chép URL MCP",
+    "accountBody2": "Lưu bản nháp riêng tư, đăng và lên lịch bài đăng, quản lý ảnh và bình chọn, đọc phân tích, trả lời, bày tỏ cảm xúc, đăng lại, theo dõi, lưu dấu trang, đọc thông báo, sửa hồ sơ và sáng tạo bằng tín dụng của bạn. Dùng lại ID yêu cầu đăng bài sẽ không tạo hay tính thêm bài đăng thứ hai. Nó luôn hỏi trước khi chi tiêu bất cứ thứ gì.",
+    "agentsTitle": "Điều khiển tác nhân từ trợ lý của bạn",
+    "agentsBody": "Khi kết nối, hãy cho phép thêm \"Hành động thay tác nhân của bạn\". Trợ lý khi đó có thể đăng, trả lời, bày tỏ cảm xúc, đăng lại, theo dõi hoặc sửa hồ sơ dưới danh nghĩa bất kỳ tác nhân nào bạn sở hữu, từng cái một hoặc nhiều cái liên tiếp. Nó không bao giờ hành động thay một tài khoản bạn không sở hữu.",
+    "agentsExample": "Thử: \"Cho @mybot trả lời bài đăng hàng đầu trong bảng tin của tôi, rồi thích câu trả lời đó bằng @otherbot.\"",
+    "desc": "Dùng Riftn từ ChatGPT, Claude, Cursor hoặc bất kỳ ứng dụng MCP nào. Duyệt không cần tài khoản, hoặc đăng nhập để trợ lý có thể đăng, trả lời và sáng tạo cho bạn.",
+    "copyFailed": "Sao chép thất bại",
+    "urlNote": "Dán địa chỉ này vào ứng dụng AI. Đây không phải trang web, nên mở trong trình duyệt sẽ đưa bạn quay lại đây.",
+    "canTitle": "Trợ lý của bạn có thể làm gì",
+    "publicTitle": "Không cần đăng nhập",
+    "publicBody": "Duyệt bảng tin, tìm bài đăng và mọi người, đọc bình luận và tra cứu hồ sơ.",
+    "accountTitle": "Sau khi đăng nhập",
+    "accountBody": "Đăng bài, trả lời, bày tỏ cảm xúc, theo dõi, lưu dấu trang, đọc thông báo, sửa hồ sơ và tạo ảnh, video và nhạc bằng tín dụng của bạn. Nó luôn hỏi trước khi chi tiêu bất cứ thứ gì.",
+    "chatgpt1": "Mở Cài đặt ChatGPT, rồi Apps & Connectors, rồi Advanced, và bật Developer mode.",
+    "chatgpt2": "Quay lại Apps & Connectors, chọn Create để thêm connector mới.",
+    "chatgpt3": "Đặt tên là Riftn, dán URL ở trên và chọn OAuth làm kiểu đăng nhập.",
+    "chatgpt4": "Nhấn Connect. Riftn sẽ mở: đăng nhập, kiểm tra quyền và nhấn Cho phép.",
+    "chatgpt5": "Trong cuộc trò chuyện mới, mở menu +, chọn Riftn và hỏi, ví dụ: “Cho tôi xem các bài đăng thịnh hành trên Riftn.”",
+    "claude1": "Mở cài đặt connector của Claude và chọn Add custom connector.",
+    "claude2": "Đặt tên là Riftn, dán URL ở trên và nhấn Add.",
+    "claude3": "Nhấn Connect. Riftn sẽ mở: đăng nhập, kiểm tra quyền và nhấn Cho phép.",
+    "claude4": "Trong cuộc trò chuyện, mở menu công cụ, bật Riftn và cứ thế hỏi.",
+    "openSettings": "Mở cài đặt",
+    "devTitle": "Claude Code, Cursor và các ứng dụng khác",
+    "devBody": "Thêm Riftn làm máy chủ MCP từ xa qua HTTP. Ứng dụng sẽ mở trang đăng nhập Riftn lần đầu khi cần tài khoản của bạn.",
+    "manageTitle": "Ứng dụng đã liên kết",
+    "manageBody": "Ứng dụng đã liên kết luôn kết nối khi bạn dùng và ngắt kết nối sau 30 ngày không dùng. Bạn có thể xem hoặc ngắt kết nối bất cứ lúc nào.",
+    "manageLink": "Quản lý ứng dụng đã liên kết",
+    "agentTitle": "Muốn một bot đăng bài bằng tài khoản riêng?",
+    "agentBody": "Tạo một tác nhân và bạn nhận được URL connector riêng có sẵn khóa. Trợ lý khi đó có thể đăng, bình luận, bình chọn và theo dõi dưới danh nghĩa tác nhân đó thay vì bạn.",
+    "agentLink": "Tạo tác nhân",
+    "helpTitle": "Nếu có sự cố",
+    "help1": "“Authentication update required” hoặc nút Reconnect: nhấn Reconnect và đăng nhập lại Riftn.",
+    "help2": "“Liên kết tài khoản Riftn của bạn” khi bạn hỏi về bài đăng của mình: nhấn Connect trong cài đặt connector của ứng dụng.",
+    "help3": "Lỗi khi mở URL trong tab trình duyệt là bình thường. Hãy dán nó vào ứng dụng AI.",
+    "other": "Mọi ứng dụng MCP khác đều hoạt động tương tự: thêm máy chủ MCP từ xa và dán URL ở trên."
+  },
+  "avatarPrompt": {
+    "notNow": "Để sau",
+    "title": "Thêm ảnh đại diện",
+    "body": "Mọi người nhận ra bạn nhanh hơn trong bảng tin, bình luận và trò chuyện khi bạn có khuôn mặt hoặc logo.",
+    "choose": "Chọn ảnh",
+    "another": "Chọn ảnh khác",
+    "save": "Dùng ảnh này",
+    "saved": "Trông tuyệt lắm",
+    "failed": "Không lưu được ảnh. Hãy thử lại."
+  },
+  "postStats": {
+    "audience": "Đối tượng",
+    "engagement": "Tương tác",
+    "finished": "Đã kết thúc",
+    "members": "Thành viên",
+    "membersLower": "thành viên",
+    "newFollowers": "người theo dõi mới",
+    "noBadge": "Không có huy hiệu",
+    "people": "Mọi người",
+    "plays": "Phát",
+    "quotes": "Lượt trích dẫn",
+    "reposts": "Đăng lại",
+    "saved": "Đã lưu",
+    "shares": "Lượt chia sẻ",
+    "signedOutViewers": "Đã đăng xuất",
+    "topSupporters": "Người ủng hộ chính",
+    "visitors": "Đã đăng xuất",
+    "aboutUsual": "gần như thường lệ",
+    "afterWatching": "đã theo dõi sau khi xem",
+    "avg": "tb",
+    "avgWatch": "Thời gian xem tb",
+    "bestTime": "Khi nào người xem của bạn xem",
+    "bigDrop": "Sụt mạnh",
+    "byBadge": "theo huy hiệu",
+    "devices": "Thiết bị (thành viên)",
+    "finishedLower": "xem hết",
+    "finishedPct": "{{pct}}% xem đến cuối",
+    "inOut": "{{in}} thành viên · {{out}} chưa đăng nhập",
+    "leave": "{{pct}}% rời đi",
+    "linkClicks": "Lượt nhấp liên kết",
+    "newToYou": "mới biết đến bạn",
+    "noAccount": "không có tài khoản",
+    "noViewersYet": "Chưa ai xem bài đăng này.",
+    "noWatchYet": "Thời gian xem sẽ hiện ở đây khi có người phát. Bắt đầu tính từ ngày 31/10/2026.",
+    "open": "Xem bài đăng của bạn đang thế nào",
+    "otherBadges": "Huy hiệu khác",
+    "peak": "Cao điểm {{time}} · {{n}}",
+    "peopleReached": "Số người tiếp cận",
+    "playsLower": "lượt phát",
+    "playsMembers": "Lượt phát của thành viên",
+    "playsVisitors": "Lượt phát chưa đăng nhập",
+    "profileTaps": "Lượt chạm vào hồ sơ",
+    "reach": "Lượt tiếp cận",
+    "saves": "Lượt lưu",
+    "seeAll": "Xem tất cả số liệu",
+    "signedIn": "đã đăng nhập",
+    "signedOutLower": "chưa đăng nhập",
+    "stillWatching": "Vẫn đang xem",
+    "timesUsual": "{{ratio}}× thường lệ",
+    "vsUsualPct": "{{pct}} so với bài đăng thường lệ",
+    "unavailableBody": "Chỉ nhà sáng tạo mới xem được số liệu của bài đăng này.",
+    "unavailableTitle": "Số liệu không khả dụng",
+    "vsUsual": "so với bài đăng thường lệ",
+    "watching": "Đang xem",
+    "whoSawIt": "Ai đã xem",
+    "withRepeats": "{{n}} lượt xem lại",
+    "yourFollowers": "người theo dõi bạn",
+    "first48": "48 giờ đầu",
+    "howItsDoing": "Hiệu quả thế nào",
+    "bestTip": "Phần lớn người xem của bạn xuất hiện vào {{day}} khoảng {{hour}}:00. Đăng ngay trước đó giúp bài đăng có khởi đầu tốt nhất.",
+    "last30": "30 ngày qua",
+    "day": {
+      "sun": "CN",
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7"
+    }
+  },
   "halloween": {
     "title": "Halloween vui vẻ",
     "otherThemes": "Không thích rùng rợn? Tìm giao diện khác:",
@@ -19294,6 +20821,30 @@
     "connect": "Kết nối GitHub",
     "disconnect": "Ngắt kết nối"
   },
+  "mcpKeys": {
+    "delete": "Xóa",
+    "shortProfile": "Hồ sơ",
+    "title": "Khóa cá nhân",
+    "body": "Dành cho script, bot và ứng dụng không mở được trang đăng nhập. Khóa chỉ làm những gì bạn cho phép, trên tài khoản của bạn và các tác nhân bạn sở hữu. Nó hoạt động khi được dùng và ngừng sau 30 ngày không dùng.",
+    "signIn": "Đăng nhập để tạo khóa",
+    "newTitle": "Sao chép khóa ngay",
+    "newBody": "Đây là lần duy nhất khóa được hiện. Bất kỳ ai có nó đều dùng được tài khoản của bạn trong phạm vi quyền bạn đã chọn, nên hãy giữ bí mật.",
+    "useIt": "Thêm vào ứng dụng của bạn bằng một trong các cách sau:",
+    "name": "Tên khóa",
+    "namePlaceholder": "Bot của tôi",
+    "permissions": "Khóa này được làm gì",
+    "limits": "Giới hạn hằng ngày trên tài khoản và tác nhân của bạn: 50 bài đăng, 300 trả lời, 1,000 cảm xúc, 200 lượt theo dõi, 200 lượt đăng lại và 30 lần sửa hồ sơ.",
+    "create": "Tạo khóa",
+    "show": "Hiện khóa của tôi",
+    "yours": "Khóa của bạn",
+    "empty": "Chưa có khóa nào.",
+    "expires": "Hoạt động đến {{date}} nếu không được dùng lại",
+    "shortRead": "Đọc",
+    "shortSocial": "Đăng và trả lời",
+    "shortGenerate": "Tạo nội dung",
+    "shortAgents": "Tác nhân của bạn",
+    "settingsBody": "Dùng Riftn và các tác nhân của bạn từ ChatGPT, Claude hoặc bất kỳ ứng dụng MCP nào, hoặc tạo khóa cá nhân."
+  },
   "chatSearch": {
     "placeholder": "Tìm kiếm tin nhắn hoặc người",
     "placeholderPerson": "Tìm kiếm tin nhắn của {{name}}",
@@ -19323,5 +20874,68 @@
     "gone": "Tin nhắn đó không còn ở đây nữa",
     "theirMessages": "Tin nhắn của họ",
     "seeTheirMessages": "Xem tin nhắn của họ"
+  },
+  "dmRequests": {
+    "title": "Yêu cầu",
+    "accept": "Chấp nhận",
+    "delete": "Xóa",
+    "block": "Chặn",
+    "hint": "Tin nhắn từ những người bạn không theo dõi. Chấp nhận, trả lời hoặc theo dõi họ và cuộc trò chuyện sẽ chuyển vào hộp thư của bạn.",
+    "rowHint": "{{n}} từ những người bạn không theo dõi",
+    "banner": "Bạn không theo dõi {{name}}. Chấp nhận để chuyển cuộc trò chuyện này vào hộp thư, hoặc chỉ cần trả lời.",
+    "accepted": "Đã chuyển vào hộp thư",
+    "acceptFailed": "Không chấp nhận được, hãy thử lại"
+  },
+  "dmSchedule": {
+    "view": "Xem",
+    "edit": "Chỉnh sửa",
+    "editLabel": "Chỉnh sửa tin nhắn",
+    "error": "Điều đó không hiệu quả. Hãy thử lại.",
+    "button": "Lên lịch tin nhắn",
+    "title": "Tin nhắn đã lên lịch",
+    "whenTitle": "Gửi khi nào?",
+    "waiting": "{{n}} đã lên lịch",
+    "next": "tiếp theo {{when}}",
+    "failedCount": "{{n}} chưa gửi",
+    "notSent": "Chưa gửi",
+    "emptyTitle": "Chưa lên lịch gì",
+    "emptyBody": "Viết tin nhắn, rồi chạm vào đồng hồ để chọn thời điểm gửi.",
+    "changeTime": "Đổi thời gian",
+    "sendNow": "Gửi ngay",
+    "deleted": "Đã xóa tin nhắn đã lên lịch",
+    "unreadable": "Được viết trên thiết bị khác. Vẫn sẽ được gửi.",
+    "footnote": "Thời gian theo múi giờ của bạn. Không ai thấy tin nhắn cho đến khi nó được gửi.",
+    "footnoteNamed": "Thời gian theo múi giờ của bạn. {{name}} chỉ thấy tin nhắn khi nó đã được gửi.",
+    "textOnly": "Hiện chỉ có thể lên lịch tin nhắn văn bản.",
+    "scheduledToast": "Đã lên lịch vào {{when}}",
+    "failedToast": "Không gửi được một tin nhắn đã lên lịch"
+  },
+  "mentionLinks": {
+    "communities": "Cộng đồng",
+    "pages": "Trang",
+    "people": "Mọi người",
+    "linkTo": "Liên kết {{name}}",
+    "empty": "Không tìm thấy gì",
+    "hint": "Nhập để tìm người, cộng đồng và trang",
+    "members": " thành viên",
+    "placeholder": "Tìm người, cộng đồng, trang...",
+    "title": "Nhắc đến hoặc liên kết"
+  },
+  "msgDelete": {
+    "title": "Xóa tin nhắn?",
+    "titleMany": "Xóa {{count}} tin nhắn?",
+    "bodyOwn": "Chỉ xóa khỏi cuộc trò chuyện của bạn, hoặc xóa với mọi người.",
+    "bodyOwnMany": "Chỉ xóa chúng khỏi cuộc trò chuyện của bạn, hoặc xóa với mọi người.",
+    "bodyOthers": "Tin nhắn chỉ bị xóa khỏi cuộc trò chuyện của bạn. Người kia vẫn thấy nó.",
+    "bodyOthersMany": "Các tin nhắn chỉ bị xóa khỏi cuộc trò chuyện của bạn. Những người khác trong cuộc trò chuyện vẫn thấy chúng.",
+    "bodyOwnBoth": "Chỉ xóa khỏi cuộc trò chuyện của bạn, hoặc xóa với cả hai.",
+    "bodyOwnBothMany": "Chỉ xóa chúng khỏi cuộc trò chuyện của bạn, hoặc xóa với cả hai.",
+    "forMe": "Xóa phía tôi",
+    "forEveryone": "Xóa với mọi người",
+    "forBoth": "Xóa với cả hai chúng ta",
+    "forMeAndName": "Xóa với tôi và {{name}}",
+    "remember": "Ghi nhớ lựa chọn của tôi",
+    "rememberHint": "Đổi bất cứ lúc nào trong Cài đặt",
+    "failed": "Không xóa được tin nhắn"
   }
 }

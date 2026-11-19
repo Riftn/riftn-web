@@ -1,4 +1,17 @@
 {
+  "postBg": {
+    "addMedia": "Tambahkan gambar, GIF, atau video",
+    "changeMedia": "Ganti gambar, GIF, atau video",
+    "mediaType": "Pilih gambar, GIF, atau video.",
+    "videoSize": "Video itu lebih dari {{n}} MB. Pilih yang lebih kecil."
+  },
+  "textFeed": {
+    "tab": "Teks",
+    "errorTitle": "Postingan tidak dapat dimuat",
+    "errorBody": "Coba muat ulang feed teks.",
+    "emptyTitle": "Belum ada postingan teks",
+    "emptyBody": "Postingan teks akan muncul di sini."
+  },
   "comic": {
     "showAll": "Tampilkan semua {{count}} halaman"
   },
@@ -14,6 +27,69 @@
     "glitter": "Glitter",
     "saved": "Bingkai disimpan",
     "failed": "Gagal menyimpan bingkai"
+  },
+  "duet": {
+    "policyEveryone": "Semua orang",
+    "policyFollowers": "Pengikut",
+    "policyNobody": "Tidak Ada",
+    "loadMore": "Muat lebih banyak",
+    "with": "Duet dengan @{{username}}",
+    "withOriginal": "Duet · lihat asli",
+    "unavailable": "Video ini tidak lagi tersedia untuk duet.",
+    "allowLabel": "Izinkan duet",
+    "allowDescription": "Siapa yang dapat merekam duet di samping video Anda. Anda juga dapat mengubahnya di setiap postingan.",
+    "settingsSection": "Duet",
+    "policyDefault": "Pengaturan akun",
+    "saveFailed": "Tidak dapat menyimpan. Coba lagi.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duet",
+    "pageHeading": "Duet",
+    "pageTitle": "Duet {{title}} oleh @{{creator}}",
+    "pageTitleNoCreator": "Duet {{title}}",
+    "pageDescription": "Tonton setiap duet video ini di Riftn, atau rekam duet Anda sendiri berdampingan.",
+    "empty": "Belum ada duet. Buka opsi video dan pilih Remix → Duet untuk membuat yang pertama.",
+    "video": "Video",
+    "notFound": "Video ini tidak tersedia.",
+    "browseShorts": "Jelajahi Shorts",
+    "notFoundTitle": "Video tidak ditemukan | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Gunakan suara ini",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Layar hijau",
+    "stitch": "Stitch",
+    "selectSource": "Buka opsi video dan pilih Remix untuk memulai."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Semua orang",
+      "followers": "Pengikut",
+      "nobody": "Tidak Ada",
+      "default": "Default saya"
+    },
+    "shareFailed": "Tip Anda terkirim, tetapi bagian untuk kreator asli tidak berhasil dikirim.",
+    "notify": {
+      "duet": "{{name}} berduet dengan video Anda",
+      "stitch": "{{name}} men-stitch video Anda",
+      "react": "{{name}} bereaksi terhadap video Anda",
+      "reactLive": "{{name}} sedang bereaksi langsung terhadap video Anda"
+    },
+    "linkFailed": "Postingan Anda sudah tayang, tetapi tidak dapat ditautkan ke video asli.",
+    "settingsHeading": "Remix",
+    "stitch": {
+      "allow": "Izinkan stitch",
+      "allowDesc": "Siapa yang dapat menggunakan hingga 5 detik video Anda di video mereka. Anda juga dapat mengubahnya per postingan.",
+      "saveFailed": "Tidak dapat menyimpan pengaturan stitch Anda. Coba lagi.",
+      "settingFailed": "Postingan Anda sudah tayang, tetapi pengaturan stitch-nya tidak tersimpan. Ubah dari Edit postingan.",
+      "from": "Di-stitch dari {{name}}",
+      "count_one": "{{count}} Stitch",
+      "count_other": "{{count}} Stitch",
+      "listTitle": "Stitch",
+      "listFailed": "Tidak dapat memuat stitch. Coba lagi.",
+      "listEmpty": "Belum ada stitch.",
+      "unavailable": "Video ini tidak lagi tersedia untuk stitch."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Buka Riftn di browser Anda",
     "seoDescription": "Dapatkan aplikasi Riftn: media sosial open-source, dimiliki pengguna dengan streaming langsung, pesan terenkripsi dan watch-to-earn. Gratis di Google Play, App Store dan web.",
-    "seoTitle": "Aplikasi Riftn: Unduh untuk Android, iPhone & Web"
+    "seoTitle": "Aplikasi Riftn: Unduh untuk Android, iPhone & Web",
+    "learnMore": "Ingin gambaran lengkap? <guide>Apa itu Riftn?</guide> membahas platform ini secara mendalam."
   },
   "dehubLinks": {
     "copyLinkDetail": "Salin tautan {{item}} ke clipboard",
@@ -55,12 +132,16 @@
       "profile": "profil",
       "proposal": "Proposal",
       "stage": "panggung",
-      "store": "toko"
+      "store": "toko",
+      "featureRequest": "permintaan",
+      "page": "halaman"
     },
     "recipientChat": "chat",
     "recipientUser": "pengguna",
     "sendFailed": "Gagal mengirim {{item}}",
-    "sentTo": "{{item}} dikirim ke {{name}}"
+    "sentTo": "{{item}} dikirim ke {{name}}",
+    "openPage": "Buka halaman",
+    "viewRequest": "Lihat permintaan"
   },
   "stageCover": {
     "admitOne": "AKUI SATU",
@@ -166,11 +247,35 @@
     "privateNote": "Akun privat tidak ditampilkan di fediverse.",
     "noUsername": "Pilih nama pengguna untuk mendapatkan alamat fediverse."
   },
+  "signedFollows": {
+    "setUp": "Nyalakan",
+    "turnOff": "Matikan",
+    "efpTurnOff": "Berhenti",
+    "title": "Ikutan Anda, di on-chain",
+    "description": "Dompet Anda menandatangani siapa yang Anda ikuti, dan setiap hari daftar itu dicap di Base. Aplikasi apa pun dapat menemukan ikutan Anda dari dompet Anda, bahkan tanpa Riftn.",
+    "on": "Aktif untuk perangkat ini",
+    "off": "Nonaktif untuk perangkat ini",
+    "turnedOn": "Ikutan Anda sekarang ditandatangani oleh dompet Anda",
+    "turnedOff": "Dinonaktifkan untuk perangkat ini",
+    "failed": "Dompet Anda tidak menandatangani. Coba lagi.",
+    "hiddenNote": "Daftar ikutan tersembunyi dan akun privat tidak dimasukkan ke daftar publik.",
+    "efpOn": "Disalin ke EFP · {{count}} ikutan",
+    "efpOff": "Masukkan juga ke EFP",
+    "efpTurnOn": "Tambahkan ke EFP",
+    "efpDone": "Ikutan Anda sedang dimasukkan ke EFP",
+    "efpStopped": "Penyalinan ke EFP dihentikan. Daftarnya tetap milik Anda.",
+    "efpHasList": "Anda sudah memiliki daftar EFP. Riftn belum dapat mengisinya.",
+    "efpNoGas": "Dompet Anda memerlukan sedikit ETH di Base untuk ini.",
+    "efpFailed": "Itu tidak berhasil. Coba lagi.",
+    "efpNote": "EFP adalah daftar ikutan yang dibaca aplikasi lain (efp.app). Gratis dengan dompet Riftn Anda; dompet lain membayar beberapa sen di Base. Daftarnya milik Anda."
+  },
   "profileFields": {
     "title": "Kolom profil",
     "description": "Hingga empat baris tambahan di profilmu, seperti situs web atau kata gantimu.",
     "label": "Label",
     "content": "Isi",
+    "add": "Tambahkan field",
+    "remove": "Hapus field",
     "save": "Simpan kolom",
     "saved": "Kolom profil tersimpan",
     "failed": "Tidak tersimpan. Coba lagi.",
@@ -340,7 +445,8 @@
     "step": "Untuk kontrol akun, tambahkan https://riftn.com/mcp sebagai konektor OAuth, masuk ke Riftn dan tinjau izin sebelum mengizinkan akses.",
     "profilePrompt": "Perbarui bio Riftn saya menjadi: Kreator independen yang membuat film dan musik.",
     "generatePrompt": "Tunjukkan model gambar Riftn dan kutip potret sebelum memproduksinya.",
-    "libraryPrompt": "Daftar aset terbaru di perpustakaan Riftn Creator saya."
+    "libraryPrompt": "Daftar aset terbaru di perpustakaan Riftn Creator saya.",
+    "agents": "Posting, balas, bereaksi, repost, ikuti, dan edit profil sebagai agen milik Anda"
   },
   "twitchMirror": {
     "title": "Twitch Mirroring",
@@ -368,6 +474,7 @@
     "checkFailed": "Kami tidak dapat memeriksa ketersediaan. Silakan coba lagi.",
     "checking": "Mengecek...",
     "ownership": "Sumber terbuka. Dimiliki pengguna.",
+    "title": "Sedikit perbaikan.\nRiftn yang lebih baik.",
     "intermission": "Offline sementara",
     "community": "Masyarakat terlebih dahulu. Selalu."
   },
@@ -472,7 +579,6 @@
       "stores": "toko, toko daring, pasar, merchandise, beli, jual, produk, belanja",
       "fractions": "saham, kepemilikan, investasi, miliki postingan, NFT, koleksi, berdagang",
       "usernames": "nama pengguna, handle, nama, ganti nama saya, beli nama, jual nama",
-      "accounts": "beli akun, jual akun, akun dijual, pengikut, transfer akun",
       "apps": "toko aplikasi, aplikasi mini, buat aplikasi, pengembang, alat",
       "arcade": "permainan, game, main, catur, tembak-tembakan, seru",
       "glossary": "istilah, definisi, kamus, arti, apa itu",
@@ -499,7 +605,8 @@
       "publicChat": "obrolan, obrolan umum, ruang obrolan, lobi, obrolan komunitas",
       "planned": "terjadwal, jadwalkan, postingan terjadwal, antrean, nanti",
       "liveStudio": "siaran langsung, siarkan, streaming, OBS, overlay, peringatan, widget",
-      "launchpad": "luncurkan token, buat koin, memecoin, kurva bonding, tokenisasi"
+      "launchpad": "luncurkan token, buat koin, memecoin, kurva bonding, tokenisasi",
+      "accounts": "beli akun, jual akun, akun dijual, pengikut, transfer akun"
     },
     "reorderHint": "Tahan dan seret ikon apa pun untuk mengatur ulang",
     "reorderReset": "Atur ulang",
@@ -547,7 +654,14 @@
     "getTheApp": "Dapatkan Aplikasi",
     "connectAi": "Hubungkan AI",
     "converter": "Konverter",
-    "affiliate": "Afiliasi"
+    "affiliate": "Afiliasi",
+    "groups": {
+      "main": "Utama",
+      "create": "Buat",
+      "discover": "Jelajahi",
+      "money": "Uang",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Lihat profil {{name}}",
@@ -743,6 +857,11 @@
     "feedTogglesCleared": "Filter feed diatur ulang",
     "defaultProfileTab": "Tab profil bawaan",
     "defaultProfileTabDesc": "Pilih tab mana yang pertama dilihat pengunjung di profil Anda",
+    "defaultProfileView": "Tata letak postingan profil",
+    "defaultProfileViewDesc": "Tampilkan postingan Anda sebagai kisi atau daftar saat orang membuka profil Anda",
+    "readerProfileView": "Buka profil lain sebagai",
+    "readerProfileViewDesc": "Pilih grid atau daftar untuk setiap profil yang kamu buka, atau ikuti pilihan masing-masing orang",
+    "readerProfileViewOwner": "Pilihan masing-masing orang",
     "public": "Publik",
     "publicDesc": "Siapa saja dapat melihat postingan Anda",
     "private": "Pribadi",
@@ -1100,7 +1219,7 @@
     "ensLinked": "Tertaut — profil Anda sekarang di {{url}}",
     "ensUnlinked": "Dihapus — nama pengguna Anda tidak berubah",
     "ensHandle": "Nama Ens",
-    "ensLinkedDesc": "Anda juga berada didehub.io/{{name}}",
+    "ensLinkedDesc": "Anda juga berada diriftn.com/{{name}}",
     "ensHandleDesc": "Buktikan bahwa Anda memiliki nama .eth yang juga dapat dijangkau di riftn.com/yourname.eth. Nama pengguna Anda tidak berubah.",
     "ensRemove": "Hapus",
     "ensCheck": "Periksa",
@@ -1178,7 +1297,27 @@
     "socialConnectedShort": "Terhubung",
     "socialConnectFailed": "Tidak dapat menghubungkan {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Memperbarui jumlah pengikut"
+    "socialFollowersPending": "Memperbarui jumlah pengikut",
+    "menuLayout": "Tata letak menu",
+    "menuLayoutDesc": "Cara menu mengelompokkan halamannya",
+    "menuLayoutTabs": "Tab",
+    "menuLayoutTabsDesc": "Satu grup sekaligus, dengan ikon besar",
+    "menuLayoutSections": "Bagian",
+    "menuLayoutSectionsDesc": "Semua halaman sekaligus, di bawah judul",
+    "menuLayoutFolders": "Folder",
+    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup",
+    "publicChatInBar": "Obrolan Publik di bilah bawah",
+    "publicChatInBarDesc": "Buka Obrolan Publik dengan sekali ketuk dari bilah di bawah layar",
+    "chatCards": "Chat sebagai kartu",
+    "chatCardsDesc": "Setiap chat di kartunya sendiri. Matikan untuk daftar polos dengan garis di antara chat.",
+    "chatDeleteChoice": "Saat Anda menghapus pesan",
+    "chatDeleteChoiceDesc": "Tanyakan setiap kali, atau selalu hapus hanya untuk Anda atau untuk semua orang di obrolan.",
+    "chatDeleteAsk": "Tanyakan setiap kali",
+    "chatDeleteMe": "Hapus untuk saya",
+    "chatDeleteMeDesc": "Hilang dari obrolan Anda, orang lain masih melihatnya",
+    "chatDeleteEveryone": "Hapus untuk semua orang",
+    "chatDeleteEveryoneDesc": "Jika memungkinkan. Pesan orang lain di grup tetap hanya terhapus untuk Anda",
+    "tipsOffNote": "Tip dan kiriman untuk Anda nonaktif selama ini aktif. Matikan untuk menerima tip lagi."
   },
   "common": {
     "confirm": "Konfirmasi",
@@ -1263,7 +1402,19 @@
     "payDirect": "Dikirim langsung ke {{name}} dalam {{symbol}} di {{chain}}. Tanpa swap.",
     "payDirectNoName": "Dikirim langsung ke kreator dalam {{symbol}} di {{chain}}. Tanpa swap.",
     "payViaBridgeDpay": "Dipindahkan ke Base dan dibayar ke Riftn Pay, token tiba dalam waktu sekitar satu menit",
-    "dmSent": "Terkirim {{amount}} token ke {{name}}!"
+    "dmSent": "Terkirim {{amount}} token ke {{name}}!",
+    "addMessage": "Tambahkan pesan (opsional)",
+    "messagePublic": "Publik",
+    "railTitle": "Tip",
+    "railTotal": "{{amount}} token",
+    "tokensUnit": "token",
+    "messagePlaceholder": "Sampaikan sesuatu bersama tip Anda",
+    "messagePrivate": "Hanya {{name}}",
+    "theCreator": "kreator",
+    "messageWallNote": "Tampil di dinding tip setelah tip berhasil.",
+    "sendWithMessage": "Kirim dengan pesan",
+    "messageFailed": "Pesan Anda tidak dapat ditambahkan. Tidak ada tip yang dikirim.",
+    "wallLabel": "Pesan tip"
   },
   "postOptions": {
     "liveAlertsOn": "Anda sekarang mengikuti {{name}}. Anda akan mendapat notifikasi saat mereka mulai siaran langsung.",
@@ -1303,7 +1454,14 @@
     "giftBoost": "Berikan bantuan",
     "markSection": "Bagian yang dapat dilewati",
     "copyFailed": "Tidak dapat menyalin tautan",
-    "share": "Bagikan"
+    "share": "Bagikan",
+    "refreshLinkPreview": "Segarkan pratinjau tautan",
+    "linkPreviewRefreshed": "Pratinjau tautan disegarkan",
+    "linkPreviewRefreshFailed": "Tidak dapat menjangkau situs itu. Coba lagi nanti.",
+    "castToTv": "Transmisikan ke TV",
+    "castStarted": "Diputar di TV Anda",
+    "castUnsupported": "Browser ini tidak dapat mentransmisikan. Buka Riftn di Chrome atau Safari untuk memutarnya di TV Anda.",
+    "castFailed": "Tidak dapat menjangkau TV. Pastikan TV terhubung ke Wi-Fi yang sama, lalu coba lagi."
   },
   "filters": {
     "sort": "Urutkan",
@@ -1796,6 +1954,7 @@
     "communities": "Komunitas",
     "stores": "Toko",
     "noNotificationsYet": "Belum ada notifikasi",
+    "searchClose": "Tutup pencarian",
     "noNotificationsDesc": "Saat Anda mendapat suka, komentar, tip, atau pelanggan baru, mereka akan muncul di sini.",
     "loadMore": "Muat lebih banyak",
     "markAsRead": "Tandai sebagai dibaca",
@@ -1906,7 +2065,9 @@
       "bountySubmittedNamed": "{{name}} mengirimkan pekerjaan pada bounty Anda “{{title}}”",
       "bountySubmitted": "{{name}} mengirimkan pekerjaan pada bounty Anda",
       "sentNotification": "{{name}} mengirimkan notifikasi kepadamu"
-    }
+    },
+    "searchPlaceholder": "Cari notifikasi",
+    "searchEmpty": "Tidak ada notifikasi yang cocok"
   },
   "leaderboard": {
     "title": "Papan Peringkat",
@@ -1918,6 +2079,12 @@
     "likes": "Suka",
     "subscribers": "Pelanggan",
     "affiliates": "Afiliasi",
+    "ogChallenge": "Tantangan OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holder OG",
+    "ogChallengeTitle": "Ajak kembali holder OG",
+    "ogChallengeBody": "Undang orang yang masih memegang DHB. Saat mereka bergabung lewat tautan undanganmu dan menyimpan DHB di dompet Riftn, mereka dihitung untukmu di sini.",
+    "ogChallengeCta": "Dapatkan tautan undanganmu",
     "directReferrals_one": "{{count}} langsung",
     "directReferrals_other": "{{count}} langsung",
     "secondaryReferrals_one": "{{count}} sekunder",
@@ -2035,11 +2202,13 @@
     "promptLabel": "Prompt Anda",
     "promptPlaceholder": "Deskripsikan ide, perbaikan, atau bug…",
     "promptAttach": "Masukkan gambar",
+    "removeAttachment": "Hapus lampiran",
     "promptDrop": "Masukkan atau lepas gambar di sini",
     "promptPost": "Kirim prompt",
     "promptShortcut": "Ctrl /⌘+ Enter untuk memposting",
     "promptDetails": "Rincian opsional",
     "promptDevice": "Perangkat & OS (untuk bug)",
+    "deviceInfoNoErrors": "Tidak ada",
     "promptFilters": "Filter berdasarkan kategori",
     "promptMediaError": "Pilih gambar atau video masing - masing di bawah 50MB.",
     "promptMediaLimit": "Hingga {{max}} lampiran.",
@@ -2092,12 +2261,40 @@
     "shipping": "Sedang dikerjakan",
     "noShippingYet": "Tidak ada yang sedang dikerjakan",
     "shippingAppearHere": "Permintaan yang sedang dibangun akan muncul di sini.",
-    "loadFailed": "Tidak dapat memuat permintaan"
+    "loadFailed": "Tidak dapat memuat permintaan",
+    "editMedia": "Foto dan video",
+    "editAddMedia": "Tambahkan foto atau video",
+    "deviceInfoNote": "Info perangkat dilampirkan untuk membantu kami memperbaiki bug.",
+    "deviceInfo": "Info perangkat",
+    "deviceInfoOwners": "Hanya pemilik papan yang melihat ini",
+    "deviceInfoError": "Tidak dapat memuat info perangkat",
+    "deviceInfoNone": "Tidak ada info perangkat untuk permintaan ini",
+    "deviceInfoErrors": "Error terbaru"
   },
   "auth": {
-    "loginRequired": "Login diperlukan"
+    "loginRequired": "Login diperlukan",
+    "accountDeleted": "Akun ini telah dihapus. Anda dapat mendaftar lagi sebagai akun baru.",
+    "accountDeletedHours_one": "Akun ini telah dihapus. Anda dapat mendaftar lagi dengan email atau nomor telepon yang sama dalam sekitar {{count}} jam.",
+    "accountDeletedHours_other": "Akun ini telah dihapus. Anda dapat mendaftar lagi dengan email atau nomor telepon yang sama dalam sekitar {{count}} jam.",
+    "accountDeletedDays_one": "Akun ini telah dihapus. Anda dapat mendaftar lagi dengan email atau nomor telepon yang sama dalam sekitar {{count}} hari.",
+    "accountDeletedDays_other": "Akun ini telah dihapus. Anda dapat mendaftar lagi dengan email atau nomor telepon yang sama dalam sekitar {{count}} hari."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Sampai",
+      "recent": "Terbaru",
+      "suggested": "Saran",
+      "youFollow": "Orang yang Anda ikuti",
+      "placeholder": "Nama atau @username",
+      "chattedBefore": "Pernah mengobrol",
+      "mutual": "Saling mengikuti",
+      "dmsOff": "DM nonaktif",
+      "keepTyping": "Terus ketik untuk mencari semua orang",
+      "noOne": "Tidak ada yang ditemukan",
+      "tryUsername": "Coba @username persisnya",
+      "sayHi": "Sapa seseorang",
+      "typeAny": "Ketik nama atau @username apa pun"
+    },
     "reply": "Balas",
     "react": "Reaksi",
     "edit": "Ubah",
@@ -2134,7 +2331,11 @@
     "checkingTokenBalance": "Memeriksa saldo token Anda...",
     "deleteConversationFailed": "Tidak dapat menghapus percakapan",
     "message": "Pesan",
-    "noConversationsYet": "Belum ada percakapan"
+    "noConversationsYet": "Belum ada percakapan",
+    "sending": "Mengirim",
+    "retrySend": "Coba lagi",
+    "discardSend": "Hapus",
+    "notSent": "Tidak terkirim"
   },
   "music": {
     "listeningCount_one": "{{count}} mendengarkan",
@@ -2218,6 +2419,24 @@
     "viewList": "Tampilan daftar",
     "viewMode": "Lihat",
     "back": "Kembali",
+    "reserve": {
+      "signIn": "Masuk",
+      "available": "Username tersedia",
+      "held": "Ditahan untuk Anda",
+      "ended": "Penahanan berakhir",
+      "busy": "Sedang dipesan",
+      "availableBody": "riftn.com/{{name}} sedang tersedia. Pesan sekarang dan kami akan menahannya selama satu menit selagi Anda mendaftar.",
+      "heldBody": "Tidak ada orang lain yang dapat mengambil @{{name}} sampai waktunya habis. Selesaikan pendaftaran untuk menyimpannya.",
+      "endedBody": "Satu menit Anda telah habis, jadi @{{name}} terbuka lagi untuk semua orang. Username ini masih tersedia.",
+      "busyBody": "Seseorang sedang mendaftar sebagai @{{name}} saat ini. Jika mereka tidak menyelesaikannya, username ini akan tersedia lagi saat waktunya habis.",
+      "finish": "Selesaikan pendaftaran",
+      "again": "Pesan lagi",
+      "cta": "Pesan sekarang",
+      "letGo": "Lepaskan",
+      "haveAccount": "Sudah punya akun?",
+      "seoTitle": "@{{name}} tersedia di Riftn",
+      "seoDescription": "Belum ada yang memiliki riftn.com/{{name}}. Pesan dan daftar untuk menjadikannya milik Anda."
+    },
     "usernameAvailable": "Nama pengguna tersedia!",
     "signUpToClaim": "Daftar hari ini untuk mengklaim",
     "signUp": "Daftar",
@@ -2236,7 +2455,8 @@
       "total": "Total jangkauan",
       "breakdownTitle": "Dari mana jangkauan ini berasal",
       "dehubFollowers": "Pengikut Riftn",
-      "verified": "Angka sosial berasal dari akun yang dihubungkan kreator."
+      "verified": "Angka sosial berasal dari akun yang dihubungkan kreator.",
+      "selfReported": "Jumlah pengikut sosial dimasukkan oleh kreator."
     },
     "loginDescription": "Masuk untuk melihat dan mengelola profil Anda.",
     "replyThread": {
@@ -2282,9 +2502,28 @@
     "sortMostViewed": "Paling banyak dilihat",
     "sortLikes": "Suka",
     "sortMostLiked": "Paling disukai",
+    "sortCustomShort": "Personalizado",
+    "arrange": {
+      "saving": "Menyimpan...",
+      "title": "Atur postingan Anda",
+      "hint": "Tahan postingan dan seret ke posisi barunya. Pengunjung melihat urutan ini lebih dulu.",
+      "drag": "Seret untuk memindahkan",
+      "toTop": "Pindahkan ke atas",
+      "save": "Simpan urutan",
+      "saved": "Urutan Anda tersimpan",
+      "reset": "Kembali ke terbaru dulu",
+      "resetDone": "Kembali ke terbaru dulu",
+      "saveFailed": "Tidak dapat menyimpan urutan Anda. Silakan coba lagi.",
+      "loadFailed": "Tidak dapat memuat postingan Anda. Tutup ini dan coba lagi.",
+      "empty": "Belum ada yang bisa diatur. Posting sesuatu dulu."
+    },
     "searchThisChannel": "Cari saluran ini",
     "searchResultCount": "1 hasil untuk \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\""
+    "searchResultCountPlural": "{{count}} hasil untuk \"{{query}}\"",
+    "mutualsOne": "{{count}} Saling mengikuti:",
+    "mutualsMany": "{{count}} Saling mengikuti:",
+    "sortCustom": "Urutan kustom",
+    "arrangeButton": "Atur postingan"
   },
   "tv": {
     "seoTitle": "TV Langsung: Kanal gratis dari seluruh dunia",
@@ -2439,6 +2678,7 @@
       "runSwarm": "Jalankan swarm",
       "description": "Tindakan dijalankan sebagai agen yang dipilih. Tugas terjadwal dilanjutkan dengan aplikasi ditutup.",
       "instructions": "Petunjuk agen",
+      "examples": "Posting sekali sehari tentang: musik independen\nGaya: penuh rasa ingin tahu, ringkas, dan santai\nSukai hingga 2 postingan terbaru per hari tentang: musik, pertunjukan live, piringan hitam",
       "preparing": "Mempersiapkan tugas…",
       "run": "Jalankan prompt",
       "limits": "Satu postingan harian dan hingga 3 suka yang relevan per tugas. Semua agen berbagi jeda waktu 20 menit. Foto menggunakan keterangan yang dicentang; video memerlukan gambar sampul. Postingan tetap di bawah 500 karakter. Tidak ada gas kecuali pencetakan; penulisan dapat menggunakan kredit.",
@@ -2547,6 +2787,28 @@
     "signInAgain": "Masuk lagi",
     "createSignIn": "Masuk lagi untuk membuat agen",
     "checkConnection": "Periksa koneksi Anda lalu coba lagi.",
+    "welcome": {
+      "text": "Pesan sambutan",
+      "title": "Sambut anggota baru",
+      "help": "Agen ini mengikuti dan/atau mengirim pesan ke orang yang baru bergabung dengan Riftn, beberapa orang per hari.",
+      "follow": "Ikuti anggota baru",
+      "message": "Kirim pesan ke anggota baru",
+      "textHelp": "{name} menjadi @username mereka. Tanpa tautan. Dikirim sekali per orang.",
+      "saveText": "Simpan pesan",
+      "perDay": "Orang per hari",
+      "fewer": "Lebih sedikit per hari",
+      "more": "Lebih banyak per hari",
+      "today": "Hari ini: {{follows}} diikuti · {{messages}} dikirimi pesan",
+      "limits": "Tidak pernah orang yang sama dua kali. Melewati siapa pun yang memblokir atau membisukan Anda, menonaktifkan pesan baru, atau bersembunyi dari Anggota baru.",
+      "showLog": "Lihat siapa yang disambut",
+      "hideLog": "Sembunyikan sambutan",
+      "empty": "Belum ada. Anggota baru muncul di sini saat mereka bergabung.",
+      "followed": "Diikuti",
+      "messaged": "Dikirimi pesan",
+      "skipped": "Dilewati",
+      "failed": "Tidak dapat dijangkau",
+      "defaultText": "Hai {name}, selamat datang di Riftn! 👋"
+    },
     "workspace": {
       "moderation": "Moderasi siaran langsung",
       "moderationHelp": "Aktifkan izin moderasi terlebih dahulu. Akun harus sudah menjadi pembuat siaran langsung atau moderator yang ditunjuk. Mode persetujuan dan mode draf tetap berlaku. Timeout akan berakhir secara otomatis.",
@@ -2661,6 +2923,7 @@
     "failedSubmit": "Gagal mengirim aplikasi. Silakan coba lagi."
   },
   "loginModal": {
+    "didYouMean": "Maksud Anda {{email}}?",
     "restoreWalletTitle": "Bawa kembali dompet Anda",
     "restoreOriginalWallet": "Profil Anda berada di dompet asli Anda dari saat Anda mendaftar, bukan yang disimpan untuk login ini. Masuklah seperti saat Anda pertama kali bergabung di Riftn untuk membawa dompet itu kembali. Profil dan dana Anda tetap seperti semula.",
     "useAnotherLogin": "Gunakan login yang berbeda",
@@ -2739,7 +3002,16 @@
     "resendCodePhone": "Nomor salah atau tidak ada kode? Kembali ke sana",
     "continueAs": "Lanjutkan sebagai",
     "switchWalletAccount": "Ganti akun",
-    "walletLoadFailed": "Gagal memuat dompet. Silakan mencoba lagi."
+    "walletLoadFailed": "Gagal memuat dompet. Silakan mencoba lagi.",
+    "openInBrowser": "Buka di browser",
+    "copyLink": "Salin tautan",
+    "bringLoginOver": "Pernah memakai Riftn di dehub.io? <bring>Bawa login Anda ke sini</bring>",
+    "profileMovedTitle": "Profil Anda telah pindah",
+    "migrateWrongLogin": "Login itu membuka dompet yang berbeda, jadi tidak ada yang berubah. Profil lama Anda dibuat dengan {{login}}. Gunakan itu untuk mengembalikannya.",
+    "googleInAppTitle": "Google tidak dapat login di dalam {{app}}",
+    "googleInAppTitleUnnamed": "Google tidak dapat login di dalam aplikasi ini",
+    "googleInAppBody": "Buka Riftn di browser Anda untuk menggunakan Google, atau masuk dengan email di sini.",
+    "tryAnyway": "Tetap coba"
   },
   "careers": {
     "title": "Karir di Riftn",
@@ -3066,7 +3338,23 @@
     "likersEmptyTitle": "Belum ada suka",
     "likersEmptyBody": "Suka pada komentar ini akan muncul di sini.",
     "anonymousLikes_one": "{{count}} suka dari pemegang lencana anonim",
-    "anonymousLikes_other": "{{count}} suka dari pemegang lencana anonim"
+    "anonymousLikes_other": "{{count}} suka dari pemegang lencana anonim",
+    "threadParts": {
+      "moveUp": "Pindah ke atas",
+      "moveDown": "Pindah ke bawah",
+      "reorder": "Ubah urutan",
+      "save": "Simpan urutan",
+      "saved": "Urutan utas tersimpan",
+      "saveFailed": "Tidak dapat menyimpan urutan. Coba lagi.",
+      "dragPart": "Seret untuk memindahkan bagian {{n}}",
+      "addPart": "Tambahkan ke utas",
+      "addPlaceholder": "Tambahkan ke utas Anda...",
+      "label": "Utas · {{count}} bagian",
+      "reorderHint": "Seret bagian-bagiannya, atau gunakan panah, lalu simpan."
+    },
+    "attachMedia": "Lampirkan foto, video, atau audio",
+    "attachUnsupported": "Lampirkan foto, video, atau file audio.",
+    "attachTooLarge": "File itu melebihi batas {{size}} MB."
   },
   "mintChain": {
     "title": "Pos mint",
@@ -3082,6 +3370,16 @@
     "confirm": "Mint pada {{chain}}",
     "confirmWithCost": "Pesan di {{chain}} · {{cost}}",
     "notAvailable": "Pencetakan pada rantai ini belum tersedia."
+  },
+  "postEditHistory": {
+    "original": "Asli",
+    "title": "Riwayat edit",
+    "edited_one": "Diedit sekali",
+    "edited_other": "Diedit {{count}} kali",
+    "lastEdit": "Edit terakhir {{time}}",
+    "editN": "Edit {{n}}",
+    "now": "Sekarang",
+    "showChanges": "Tampilkan perubahan"
   },
   "postInfo": {
     "title": "Info Postingan",
@@ -3377,7 +3675,9 @@
     "waiting_for_wallet": "Menunggu dompet Anda",
     "waiting_for_wallet_desc": "Buka {{wallet}} dan setujui tanda tangan - permintaan sudah menunggu di sana.",
     "your_wallet": "dompet Anda",
-    "max_available_on_chain": "Maksimum tersedia: {{amount}} token di {{chain}}"
+    "max_available_on_chain": "Maksimum tersedia: {{amount}} token di {{chain}}",
+    "turn_back_on_desktop_notifications": "Aktifkan lagi notifikasi desktop?",
+    "notifications_moved_to_riftn": "Kami pindah ke riftn.com, jadi browser Anda memerlukan izin Anda sekali lagi untuk menampilkan balasan, tip, dan DM di sini."
   },
   "staking": {
     "title": "Staking",
@@ -5195,6 +5495,7 @@
     "settledTitleSpeed": ", biasanya dalam {{speed}}",
     "settledCount_one": "{{count}} selesai",
     "settledCount_other": "{{count}} selesai",
+    "statusInProgress": "Sedang berjalan",
     "howMany": "Berapa banyak",
     "availableCount_one": "{{count}} tersedia",
     "availableCount_other": "{{count}} tersedia",
@@ -5284,9 +5585,169 @@
     "buy": "Beli",
     "reject": "Tolak",
     "needsYouHold": "Butuh {{needed}}, Anda punya {{held}}",
-    "sellYourFractions": "Jual fraksi Anda ({{held}} dipegang)"
+    "sellYourFractions": "Jual fraksi Anda ({{held}} dipegang)",
+    "nftsSubtitle": "NFT apa pun, swap satu langkah",
+    "buyersTab": "Pembeli",
+    "soldOfListing": "Terjual {{sold}} dari {{total}}",
+    "noBuyersYet": "Belum ada yang membeli fraksi postingan ini",
+    "fromYou": "dari Anda",
+    "statusOverdue": "Terlambat"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Gunakan detail ini",
+        "url": "URL halaman produk",
+        "action": "Baca halaman produk",
+        "loading": "Membaca halaman…",
+        "hint": "Impor teks dari halaman produk publik. Tinjau detailnya sebelum digunakan; lampirkan gambar produk secara terpisah di studio.",
+        "source": "Sumber yang diimpor",
+        "review": "Pilih produk untuk disalin ke brief Anda yang dapat diedit. Judul, gaya bahasa, dan warna merek Anda tidak berubah.",
+        "errors": {
+          "signIn": "Masuk untuk mengimpor halaman produk.",
+          "url": "Gunakan URL produk HTTPS publik.",
+          "empty": "Tidak ditemukan detail produk yang dapat digunakan. Tambahkan secara manual.",
+          "busy": "Terlalu banyak impor yang sedang berjalan. Coba lagi sebentar lagi.",
+          "unavailable": "Halaman ini tidak dapat diimpor. Tambahkan detail produk secara manual.",
+          "failed": "Impor gagal. Brief Anda tersimpan; coba lagi atau masukkan detail secara manual."
+        }
+      },
+      "return": "Kembali ke draf studio",
+      "title": "Brief kampanye",
+      "intro": "Jelaskan produk dan merek Anda, lalu siapkan format iklan yang sesuai.",
+      "saved": "Brief Anda tersimpan di perangkat ini untuk akun ini.",
+      "preview": "Siapkan format",
+      "clear": "Hapus brief",
+      "required": "Tambahkan nama dan deskripsi produk untuk menyiapkan format.",
+      "variants": "Format kampanye",
+      "reviewHint": "Tinjau model, harga, dan referensi produk di studio sebelum membuat. Setiap format adalah generasi terpisah.",
+      "open": "Tinjau di studio",
+      "fields": {
+        "product": "Nama produk (wajib)",
+        "description": "Fakta produk (wajib)",
+        "brand": "Nama merek",
+        "audience": "Target audiens",
+        "benefit": "Manfaat utama",
+        "voice": "Gaya bahasa merek",
+        "palette": "Warna merek",
+        "headline": "Judul yang disetujui",
+        "cta": "Ajakan bertindak"
+      },
+      "formats": {
+        "square": "Iklan persegi",
+        "portrait": "Iklan potret",
+        "story": "Gambar story",
+        "video": "Video vertikal"
+      }
+    },
+    "cinema": {
+      "close": "Tutup",
+      "performance": {
+        "label": "Performa",
+        "0": "Gembira",
+        "1": "Melankolis",
+        "2": "Cemas",
+        "3": "Percaya diri",
+        "4": "Terpukau",
+        "5": "Tertahan",
+        "6": "Jenaka"
+      },
+      "title": "Arahan sinematik",
+      "hint": "Pandu gaya visual gambar atau video Anda berikutnya. Hasil bervariasi tergantung model.",
+      "none": "Tanpa arahan",
+      "reset": "Hapus arahan",
+      "camera": {
+        "label": "Tampilan kamera",
+        "0": "Sinema digital",
+        "1": "Film 35mm",
+        "2": "Film 16mm",
+        "3": "Format besar",
+        "4": "Camcorder vintage"
+      },
+      "lens": {
+        "label": "Tampilan lensa",
+        "0": "Sferis",
+        "1": "Anamorfik",
+        "2": "Kaca lembut vintage",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Panjang fokus",
+        "0": "18mm lebar",
+        "1": "24mm lebar",
+        "2": "35mm natural",
+        "3": "50mm standar",
+        "4": "85mm potret",
+        "5": "135mm telefoto"
+      },
+      "aperture": {
+        "label": "Kedalaman bidang",
+        "0": "f/1.4 sangat dangkal",
+        "1": "f/2.8 dangkal",
+        "2": "f/5.6 sedang",
+        "3": "f/11 fokus dalam"
+      },
+      "movement": {
+        "label": "Gerakan kamera",
+        "0": "Tripod statis",
+        "1": "Dolly in perlahan",
+        "2": "Dolly out perlahan",
+        "3": "Tracking lateral",
+        "4": "Mengitari subjek",
+        "5": "Genggam tangan",
+        "6": "Crane naik",
+        "7": "Pan perlahan"
+      },
+      "lighting": {
+        "label": "Pencahayaan",
+        "0": "Cahaya siang lembut",
+        "1": "Golden hour",
+        "2": "Chiaroscuro low-key",
+        "3": "Studio high-key",
+        "4": "Lampu neon praktis",
+        "5": "Siluet cahaya belakang",
+        "6": "Mendung tersebar"
+      },
+      "tempo": {
+        "label": "Tempo shot",
+        "0": "Satu shot berkelanjutan",
+        "1": "Aksi tenang dan santai",
+        "2": "Aksi dinamis dan energik",
+        "3": "Aksi kacau dan hiruk-pikuk"
+      },
+      "era": {
+        "label": "Era",
+        "0": "1920-an",
+        "1": "1950-an",
+        "2": "1960-an",
+        "3": "1970-an",
+        "4": "1980-an",
+        "5": "1990-an",
+        "6": "Masa kini",
+        "7": "Masa depan dekat"
+      },
+      "genre": {
+        "label": "Genre",
+        "0": "Dokumenter",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Fiksi ilmiah",
+        "4": "Fantasi",
+        "5": "Komedi romantis",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Palet warna",
+        "0": "Amber hangat",
+        "1": "Biru sejuk",
+        "2": "Nuansa tanah yang lembut",
+        "3": "Pastel",
+        "4": "Monokrom kontras tinggi",
+        "5": "Warna primer yang jenuh"
+      }
+    },
     "libraryEmpty": "Hasil generasi tersimpan Anda akan muncul di sini.",
     "toolRemake": "Remake",
     "toolMaboroshi": "Maboroshi",
@@ -6029,6 +6490,7 @@
     "presetLogoMarkHint": "Logo sederhana dan tebal dengan latar belakang polos",
     "presetClay3dName": "Clay Render",
     "presetClay3dHint": "Tampilan claymation 3D lembut yang lucu",
+    "presetAnimeStillName": "Cuplikan Anime",
     "presetAnimeStillHint": "Bingkai dari film anime yang digambar tangan",
     "presetPixelArtName": "Seni Piksel",
     "presetPixelArtHint": "Adegan game 16 - bit retro",
@@ -6088,7 +6550,117 @@
       "needsImageToWork": "{{model}} membutuhkan gambar untuk bekerja. Lampirkan satu terlebih dahulu.",
       "speechLimit": "Itu adalah {{length}} karakter. Batasnya adalah {{limit}}.",
       "musicTrackLength": "Trek {{count}}"
-    }
+    },
+    "gallery": {
+      "send": "Kirim",
+      "notifications": {
+        "generation_reply": "{{name}} membalas komentar Anda",
+        "generation_like": "{{name}} bereaksi terhadap hasil generasi Anda",
+        "generation_comment_like": "{{name}} bereaksi terhadap komentar Anda",
+        "generation_comment": "{{name}} mengomentari hasil generasi Anda"
+      },
+      "browse": "Jelajahi hasil generasi",
+      "create": "Buat",
+      "fullscreen": "Lihat layar penuh",
+      "missing": "Hasil generasi ini tidak tersedia."
+    },
+    "avatarTitle": "Potret berbicara",
+    "avatarRequirements": "Potret PNG persegi, 512–2048 piksel, hingga 5 MB. WAV PCM mono 24 kHz 16-bit, 5–30 detik. Sepersekian detik terakhir diisi dengan keheningan.",
+    "avatarPortrait": "Pilih potret PNG",
+    "avatarAudio": "Pilih WAV ucapan",
+    "avatarPermission": "Saya memiliki izin untuk menganimasikan potret ini dan menggunakan audio ini.",
+    "avatarQuote": "{{seconds}} detik termasuk keheningan · {{amount}} token",
+    "avatarPrepare": "Siapkan dan tinjau harga",
+    "batchFlowLimit": "Daftar Flow penuh. Hapus Flow yang tidak dipakai sebelum membuat batch lain.",
+    "batchReviewCampaign": "Tinjau batch kampanye di Flow",
+    "batchReviewFilmImages": "Tinjau batch gambar storyboard",
+    "batchReviewFilmVideos": "Tinjau batch klip film",
+    "batchReviewHint": "Membuka Flow tersimpan terpisah. Tinjau setiap item dan harga lengkap sebelum membayar. Item yang selesai dan pembayaran awal disimpan untuk pemulihan. Referensi disalin ke pustaka pribadi Anda; biaya penyimpanan dan jaringan berlaku.",
+    "batchInvalid": "Lengkapi setiap item sebelum menyiapkan batch berisi 1–12 gambar atau klip.",
+    "batchReferenceLimit": "Batch ini mendukung satu referensi gambar per item. Hapus referensi tambahan atau siapkan item itu secara terpisah.",
+    "batchVideoSettings": "Untuk batch ini, klip memerlukan durasi bulat 4–15 detik dan rasio aspek 16:9, 9:16, atau 1:1.",
+    "batchMissingReference": "Sebuah referensi hilang, tidak didukung, atau lebih besar dari 25 MB. Pulihkan di editor sebelum menyiapkan batch.",
+    "batchOwnerChanged": "Akun atau draf telah berubah. Buka kembali batch ini dengan akun aslinya.",
+    "batchConflict": "Batch tersimpan tidak cocok dengan snapshot aslinya.",
+    "audioExportFormat": "Format ekspor",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Lampirkan satu klip sumber untuk diperpanjang.",
+    "extensionSeconds": "+{{seconds}} dtk rekaman baru",
+    "extensionHelp": "Mengembalikan klip sumber Anda dengan sekitar empat detik baru. Output diubah ukurannya hingga 720p pada 24 fps. Audio baru dibuat untuk perpanjangan.",
+    "extensionForward": "Tambahkan sekitar empat detik setelah klip sumber Anda",
+    "extensionBackward": "Tambahkan sekitar empat detik sebelum klip sumber Anda",
+    "expandDescription": "Buat batas gambar baru. Prompt bahasa Inggris opsional; satu gambar sumber.",
+    "relightDescription": "Ubah pencahayaan satu foto berdasarkan deskripsi pencahayaan dan latar belakang Anda.",
+    "expandPromptHint": "Lampirkan satu gambar dan pilih rasio aspek barunya. Prompt bahasa Inggris opsional.",
+    "expandEnglishOnly": "Model perluasan ini menerima prompt bahasa Inggris. Biarkan prompt kosong untuk perluasan otomatis.",
+    "expandNeedsImage": "Lampirkan gambar untuk diperluas.",
+    "learn": {
+      "title": "Pelajaran kreator",
+      "intro": "Pelajaran singkat, uji pemahaman, dan latihan yang dapat diedit untuk masing-masing. Progres disimpan di perangkat ini untuk akun Anda.",
+      "back": "Kembali ke Creator",
+      "lessons": "Pelajaran",
+      "progress": "{{completed}} dari {{total}} uji pemahaman lulus",
+      "check": "Periksa jawaban",
+      "correct": "Uji pemahaman lulus",
+      "retry": "Coba lagi. Tinjau pelajaran di atas.",
+      "exerciseTitle": "Latihan praktik",
+      "exerciseHint": "Buka contoh yang dapat diedit di ruang kerja studio Anda sendiri. Membuka draf gratis; pembuatan memerlukan tinjauan Anda dan penawaran harganya sendiri. Edit contoh sebelum membuat.",
+      "openExercise": "Buka draf latihan",
+      "closeExercise": "Tutup latihan",
+      "brief": {
+        "title": "Tulis brief visual yang jelas",
+        "body1": "Jelaskan subjek yang konkret, aksinya, dan latarnya. Tambahkan pembingkaian atau gerakan kamera jika membantu adegan. Simpan ide yang tidak berkaitan untuk draf lain.",
+        "body2": "Arahan pencahayaan, lensa, dan gaya memandu model. Arahan ini tidak menjamin perilaku kamera fisik atau gambar yang persis. Ubah satu bagian setiap kali agar Anda dapat membandingkan revisi.",
+        "body3": "Sebelum membuat, tinjau model yang dipilih, lampiran yang didukung, dimensi, dan harga. Simpan draf asli agar Anda dapat kembali ke sana.",
+        "question": "Brief mana yang paling mudah direvisi?",
+        "answer0": "Subjek, aksi, dan latar yang jelas",
+        "answer1": "Hanya nama model",
+        "answer2": "Daftar gaya yang saling bertentangan",
+        "exercise": "Teko keramik di atas meja kayu di samping jendela. Cahaya pagi yang lembut, pembingkaian sedang, latar belakang sederhana. Jadikan teko sebagai subjek yang jelas."
+      },
+      "continuity": {
+        "title": "Rencanakan shot dan tinjau kontinuitas",
+        "body1": "Gunakan panel Film di editor untuk menyimpan brief dan shot yang berurutan. Siapkan setiap frame atau klip secara terpisah, tinjau penawaran harganya, dan pilih hasil yang diterima.",
+        "body2": "Lampirkan hanya referensi yang diterima oleh model pilihan Anda. Menggunakan ulang referensi dapat memandu tampilan; hal ini tidak melatih identitas atau menjamin kecocokan. Karakter dan suara dapat berbeda antar-generasi.",
+        "body3": "Simpan take yang berhasil dan susun di timeline. Tinjau gerakan, wajah, dialog, dan transisi sebelum ekspor.",
+        "question": "Apa yang mendukung kontinuitas antar-shot?",
+        "answer0": "Lebih banyak prompt yang tidak berkaitan",
+        "answer1": "Referensi yang disetujui dan catatan shot yang sudah ditinjau",
+        "answer2": "Menganggap identitas karakter terjamin",
+        "exercise": "Wide shot seorang pengelana yang tiba di pantai sepi saat matahari terbit. Gerakan kamera maju yang lambat, suasana tenang. Satu shot berkelanjutan."
+      },
+      "campaign": {
+        "title": "Gunakan fakta produk yang disetujui",
+        "body1": "Mulailah dengan fakta produk yang dapat Anda verifikasi. Tinjau metadata yang diimpor sebelum menggunakannya. Tulis judul dan ajakan bertindak secara eksplisit; jangan mengarang harga, ulasan, atau klaim performa.",
+        "body2": "Gunakan varian kampanye tersimpan untuk menyatukan catatan bersama serta hook, naskah, bahasa, dan format masing-masing. Siapkan satu item yang sudah ditinjau setiap kali dan periksa penawaran harganya di studio.",
+        "body3": "Tinjau teks yang terlihat, tampilan produk, dan klaim lisan apa pun dalam hasilnya. Prompt bukan bukti akurasi produk atau performa pemasaran.",
+        "question": "Kapan klaim produk sebaiknya disertakan?",
+        "answer0": "Kapan pun terdengar meyakinkan",
+        "answer1": "Setelah mengarang ulasan bintang lima",
+        "answer2": "Saat berasal dari fakta produk yang disetujui",
+        "exercise": "Buat iklan produk potret untuk teh daun utuh yang dijual dalam kaleng yang dapat digunakan ulang. Judul yang disetujui: Luangkan waktu untuk teh. CTA yang disetujui: Jelajahi koleksinya. Gunakan hanya fakta ini; jangan mengarang diskon, ulasan, atau klaim kesehatan."
+      }
+    },
+    "campaignPlanTitle": "Varian dan episode kampanye",
+    "campaignPlanIntro": "Simpan hingga 12 variasi atau episode. Masing-masing membuka studio untuk tinjauan dan penawaran harganya sendiri. Catatan bersama memandu kontinuitas; tampilan produk, karakter, dan suara dapat berbeda antar-generasi.",
+    "campaignTitle": "Nama kampanye atau seri",
+    "campaignContinuity": "Catatan karakter, suara, dan gaya bersama",
+    "campaignVariantTitle": "Nama varian atau episode",
+    "campaignHook": "Hook pembuka",
+    "campaignLanguage": "Bahasa output",
+    "campaignScript": "Naskah atau urutan adegan yang disetujui",
+    "campaignAdd": "Tambahkan varian atau episode",
+    "campaignClear": "Hapus rencana",
+    "campaignFormat": "Format output",
+    "audioInvalidResponse": "Layanan audio mengembalikan hasil yang tidak valid.",
+    "batchPaymentHelp": "Setiap gambar yang dikirim dikenai biaya terpisah. Jika batch berhenti, token yang tidak terpakai dari pembayarannya digunakan ulang secara otomatis untuk generasi berikutnya yang dicakupnya.",
+    "invalidSeed": "Seed harus berupa bilangan bulat dari 0 hingga 2147483647.",
+    "libraryFavorites": "Favorit",
+    "libraryFavoriteAdd": "Tambahkan ke favorit",
+    "libraryFavoriteRemove": "Hapus dari favorit",
+    "priceOwnKey": "Kunci Anda",
+    "audioResultTooLarge": "Hasil audio kosong atau melebihi 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Paket untuk setiap alur kerja",
@@ -6259,6 +6831,12 @@
     "raw": "Mentah"
   },
   "nftMarket": {
+    "actAll": "Semua",
+    "actListings": "Iklan",
+    "actOffer": "Tawarkan",
+    "actOffers": "Penawaran",
+    "actSales": "Penjualan",
+    "tabActivity": "Aktivitas",
     "shortTitle": "Nft",
     "filters": "Filter",
     "forSale": "Dijual",
@@ -6323,6 +6901,9 @@
     "offered": "Tawaran telah dikirim. Pemegang dapat menerima tawaran kapan saja.",
     "dehubPost": "Post Riftn",
     "youHold": "Anda memegang {{n}}",
+    "price": "Harga",
+    "volume": "Volume suara",
+    "tabRecent": "Terbaru",
     "buyNow": "Belilah sekarang",
     "dropsTo": "Harga turun hingga {{price}} pada {{date}}",
     "inBundle": "Dijual sebagai paket dari {{n}}",
@@ -6366,7 +6947,27 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT dan pembayaran bertukar dalam satu langkah.",
     "spotlightOfferNote": "Belum terdaftar. Kirim penawaran dan pemegang dapat menerima kapan saja.",
-    "signInToTradeCta": "Masuk untuk berdagang"
+    "signInToTradeCta": "Masuk untuk berdagang",
+    "actCollectionOffer": "Penawaran koleksi",
+    "actListed": "Terdaftar",
+    "actSale": "Penjualan",
+    "buyAll": "Beli semua",
+    "buySeveral": "Beli beberapa",
+    "cartBought": "{{n}} dibeli. Semuanya sudah ada di dompet Anda.",
+    "cartCount": "{{n}} di keranjang",
+    "cartFull": "Hingga 20 sekaligus",
+    "cartOneCoin": "Satu chain dan satu koin per keranjang. Kosongkan untuk beralih.",
+    "cartOwn": "Yang itu milik Anda",
+    "cartPick": "Ketuk untuk menambahkan ke keranjang",
+    "forSaleHere": "Dijual di sini",
+    "noActivity": "Belum ada apa-apa di sini",
+    "volShort": "Vol",
+    "salesCount": "{{n}} terjual",
+    "bestOffer": "Penawaran terbaik",
+    "fromOpenSea": "Koleksi teratas di OpenSea",
+    "buyHere": "Beli di sini",
+    "openSeaNote": "Terdaftar di OpenSea. Anda membayar penjual langsung di Seaport; Riftn tidak menambahkan biaya.",
+    "viewOnOpenSea": "Lihat di OpenSea"
   },
   "usernames": {
     "seoTitle": "Pasar Nama Pengguna | Riftn",
@@ -6721,7 +7322,18 @@
       "votes_other": "{{count}} pilihan",
       "howToVote_one": "Ketik {{command}} dan angka di chat untuk memilih · {{count}} pilihan",
       "howToVote_other": "Ketik {{command}} dan angka di chat untuk memilih · {{count}} pilihan"
-    }
+    },
+    "eyebrow": {
+      "follow": "Pengikut baru",
+      "subscribe": "Pelanggan baru",
+      "subscribedTo": "Berlangganan · {{plan}}",
+      "gifted_one": "Menghadiahkan langganan",
+      "gifted_other": "Menghadiahkan {{count}} langganan",
+      "share": "Membagikan siaran",
+      "join": "Baru bergabung"
+    },
+    "giftedSubs_one": "{{name}} menghadiahkan langganan!",
+    "giftedSubs_other": "{{name}} menghadiahkan {{count}} langganan!"
   },
   "liveChatModeration": {
     "timeout1m": "Waktu untuk 1 menit",
@@ -6736,7 +7348,155 @@
     "youAreBanned": "Anda tidak bisa berbicara di siaran pembuat ini",
     "youAreTimedOut": "Anda ditimpa waktu untuk sejenak"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Latar belakang",
+      "modes": {
+        "none": "Mati",
+        "blur": "Buram",
+        "color": "Warna",
+        "image": "Gambar"
+      },
+      "failed": "Penghapusan latar belakang tidak dapat dimulai di perangkat ini.",
+      "hint": "Berjalan di perangkat Anda. Pertama kali perlu beberapa detik untuk memuat."
+    },
+    "remove": "Hapus",
+    "scenes": {
+      "countdown": "Hitung mundur",
+      "minutes": "{{count}} mnt",
+      "names": {
+        "starting": "Segera mulai",
+        "chatting": "Sekadar mengobrol",
+        "gameplay": "Gameplay",
+        "brb": "Segera kembali",
+        "ending": "Siaran berakhir"
+      },
+      "title": "Adegan",
+      "edit": "Edit {{name}}",
+      "subtitle": "Baris kedua (opsional)",
+      "picture": "Gambar",
+      "noCountdown": "Tanpa hitung mundur",
+      "muteMic": "Bisukan mikrofon saya selama ini aktif",
+      "hints": {
+        "starting": "Kartu dengan hitung mundur",
+        "chatting": "Kamera layar penuh",
+        "gameplay": "Layar dengan kamera Anda",
+        "brb": "Kartu, mikrofon dibisukan",
+        "ending": "Kartu terima kasih"
+      },
+      "subtitles": {
+        "starting": "Siaran dimulai dalam",
+        "brb": "Segera kembali",
+        "ending": "Terima kasih sudah menonton"
+      }
+    },
+    "sources": {
+      "reactAdd": "Tampilkan",
+      "image": "Gambar",
+      "camera": "Kamera",
+      "show": "Tampilkan di streaming",
+      "positions": {
+        "center": "Pusat",
+        "top-left": "Kiri atas",
+        "top-right": "Kanan atas",
+        "bottom-left": "Kiri bawah",
+        "bottom-right": "Kanan bawah"
+      },
+      "sizes": {
+        "small": "Kecil",
+        "medium": "Sedang",
+        "large": "Besar"
+      },
+      "shapes": {
+        "circle": "Lingkaran",
+        "rect": "Persegi",
+        "rounded": "Membulat"
+      },
+      "title": "Sumber",
+      "addImage": "Gambar atau logo",
+      "addCamera": "Kamera kedua",
+      "addClip": "Klip video",
+      "addReaction": "Bereaksi ke video",
+      "reactPlaceholder": "Tempel tautan video Riftn",
+      "reactInvalid": "Tempel tautan ke video Riftn.",
+      "reactNotLive": "Mulai siaran langsung dulu, lalu tambahkan videonya.",
+      "reactNoBubble": "Kamera Anda tidak dapat dibuka dua kali di sini. Ubah ukuran video agar wajah Anda tetap terlihat di layar.",
+      "failed": "Tidak dapat menambahkan sumber itu.",
+      "empty": "Tambahkan logo, kamera kedua, atau klip video di atas siaran Anda.",
+      "hint": "Sumber digambar di atas gambar Anda untuk setiap penonton dan setiap platform.",
+      "clip": "Klip",
+      "restart": "Mulai ulang",
+      "play": "Putar atau jeda",
+      "loop": "Ulangi"
+    },
+    "audio": {
+      "mute": "Bisukan",
+      "unmute": "Batalkan bisu",
+      "gateLevels": {
+        "off": "Mati",
+        "low": "Terang",
+        "high": "Kuat"
+      },
+      "title": "Mixer audio",
+      "unavailable": "Browser ini tidak dapat mencampur audio, jadi mikrofon Anda dikirim apa adanya.",
+      "channels": {
+        "mic": "Mikrofon",
+        "game": "Game / tab",
+        "clip": "Klip video"
+      },
+      "absent": {
+        "mic": "Tidak ada mikrofon",
+        "game": "Bagikan layar dengan audio atau gunakan capture card",
+        "clip": "Tambahkan klip video di Sumber"
+      },
+      "gate": "Noise gate",
+      "gateHint": "Membisukan mikrofon Anda di antara kata-kata agar suara keyboard dan kipas tidak masuk siaran."
+    },
+    "imageTooLarge": "Gambar itu terlalu besar. Coba yang lebih kecil.",
+    "widgets": {
+      "title": "Tampilkan widget di video saya",
+      "hint": "Notifikasi, bilah target, dan chat digambar ke dalam siaran Anda, sehingga penonton di Twitch, YouTube, dan semua platform lain juga melihatnya.",
+      "failed": "Tidak dapat mengubah tempat widget Anda ditampilkan. Coba lagi."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "label": "Nama (opsional)",
+      "key": "Kunci streaming",
+      "save": "Tambah",
+      "cancel": "Membatalkan",
+      "states": {
+        "off": "Mati",
+        "idle": "Siap",
+        "live": "Siaran Langsung",
+        "error": "Kesalahan",
+        "connecting": "Menghubungkan"
+      },
+      "title": "Tujuan multistream",
+      "intro": "Siaran langsung di Riftn sekali dan kami teruskan siaran Anda ke setiap platform yang diaktifkan di sini, gratis. Dimulai dalam beberapa detik setelah Anda live.",
+      "add": "Tambah tujuan",
+      "empty": "Belum ada tujuan. Tambahkan Twitch, YouTube, Kick, atau server RTMP apa pun.",
+      "platform": "Platform",
+      "server": "URL server",
+      "findKey": "Temukan server dan kunci {{name}} Anda",
+      "customHint": "Tempel server RTMP dan kunci yang diberikan platform Anda.",
+      "keyNote": "Kunci Anda disimpan terenkripsi di server kami dan tidak akan ditampilkan lagi.",
+      "added": "{{name}} ditambahkan",
+      "saveFailed": "Tidak dapat menyimpan tujuan",
+      "toggle": "Siarkan ke tujuan ini"
+    },
+    "vertical": {
+      "centre": "Pusat",
+      "live": "LANGSUNG",
+      "title": "Tampilan vertikal",
+      "intro": "Ponsel menonton siaran Anda di feed vertikal. Seret kotak untuk memilih bagian gambar yang mereka lihat.",
+      "enabled": "Tampilkan siaran saya di feed vertikal",
+      "zoom": "Zoom",
+      "frame": "Gambar lanskap Anda",
+      "box": "Yang dilihat ponsel",
+      "hint": "Seret kotak, atau gunakan tombol panah. Simpan untuk menerapkannya ke siaran langsung Anda.",
+      "watch": "Tonton {{name}} live"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Penghitung mundur di stream Anda. Setiap hadiah berbayar, follow, dan langganan menambahkan waktu, sehingga ruangan mempertahankan Anda tetap online.",
@@ -6898,7 +7658,8 @@
       "subathon_timer": "Penghitung mundur Subathon",
       "points_board": "Penggemar setia",
       "streamer_level": "Level streamer",
-      "tip_jar": "Guci hadiah"
+      "tip_jar": "Guci hadiah",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "Rayakan setiap tip, ukuran sesuai tingkatannya",
@@ -6922,7 +7683,8 @@
       "subathon_timer": "Penghitung mundur yang ditolak oleh hadiah, follow, dan langganan",
       "points_board": "Penggemar teratas Anda berdasarkan poin dari menonton dan memberikan hadiah",
       "streamer_level": "Level streamer dan beruntun mingguan Anda, dari profil Anda",
-      "tip_jar": "Sebuah toples yang terisi saat hadiah berbayar masuk"
+      "tip_jar": "Sebuah toples yang terisi saat hadiah berbayar masuk",
+      "hype_train": "Menampilkan hype train saat sedang berjalan: tiga hadiah atau langganan dalam lima menit akan memulainya."
     },
     "fields": {
       "style": "Gaya",
@@ -7308,7 +8070,10 @@
     "endStreamConfirmBody": "Siaran Anda berhenti untuk semua yang sedang menonton dan tidak bisa dilanjutkan.",
     "keepStreaming": "Lanjutkan siaran",
     "encoderPermanentHint": "Kunci ini tidak pernah berubah. Atur enkoder Anda satu kali — lain kali cukup tekan Mulai di sana dan Riftn membuat postingan untuk Anda.",
-    "notEnoughTokensForBounty": "Token tidak cukup. Membutuhkan {{need}} token tetapi memiliki {{have}}."
+    "notEnoughTokensForBounty": "Token tidak cukup. Membutuhkan {{need}} token tetapi memiliki {{have}}.",
+    "screenInAppHint": "Di aplikasi Riftn",
+    "screenInAppNote": "Browser ponsel tidak mengizinkan situs web mana pun membagikan layar Anda. Mulai siaran langsung dari aplikasi Riftn, lalu ketuk Bagikan layar.",
+    "screenInAppCta": "Dapatkan aplikasi Riftn"
   },
   "events": {
     "seoTitle": "Acara: Meetup dan acara komunitas di Riftn",
@@ -7689,6 +8454,8 @@
     "footerNote": "Partisipasi DePin adalah layanan kontribusi, bukan produk investasi. Ketersediaan, kelayakan, dan imbalan dapat berubah."
   },
   "creatorFlow": {
+    "newNativeFlow": "Alur baru",
+    "disconnect": "Putuskan",
     "title": "Alur Kreator",
     "backToStudio": "Kembali ke Studio Kreator",
     "backToFlows": "Kembali ke alur Anda",
@@ -7896,7 +8663,45 @@
     "foldersInFolder_other": "Di folder {{count}}",
     "foldersNoItems": "Belum ada apa pun di folder ini",
     "foldersNoItemsHint": "Buka hasil dan pilih \"Tambahkan ke folder\" untuk menyimpannya di sini.",
-    "skippedUpstreamFailed": "Dilewati karena langkah sebelumnya gagal. Biayanya tetap ada di saldo Anda."
+    "skippedUpstreamFailed": "Dilewati karena langkah sebelumnya gagal. Biayanya tetap ada di saldo Anda.",
+    "signInForAudioLibrary": "Masuk untuk membuka pustaka audio pribadi Anda.",
+    "audioLibraryFailed": "Audio tersimpan Anda tidak dapat dimuat. Coba lagi.",
+    "retryFreeTask": "Ulangi tugas gratis",
+    "previewSavedMedia": "Pratinjau media tersimpan",
+    "audioSavePending": "Audio sudah siap, tetapi penyimpanannya ke pustaka pribadi masih tertunda. Lanjutkan untuk mengambilnya.",
+    "confirmInterruptedRetry": "Ulangi tugas audio atau asisten yang terputus. Hasil sebelumnya tidak diketahui dan mengulang dapat menjalankan pekerjaan lagi. Pembayaran dan ID tugas berbayar yang ada akan digunakan kembali.",
+    "freeResultUnknown": "Respons tugas gratis terputus. Tugas tidak akan dikirim ulang secara otomatis. Pilih Ulangi tugas gratis, lalu lanjutkan; pembayaran dan tugas lain Anda tetap tersimpan.",
+    "formAuthor": "Edit alur",
+    "formAuthorHint": "Buat alur dengan input bertipe. Simpan di sini, atau susun di kanvas web.",
+    "chooseSavedMedia": "Pilih media tersimpan",
+    "formInput": "Input: {{handle}}",
+    "reviewRun": "Tinjau proses",
+    "resumeRun": "Lanjutkan proses tersimpan",
+    "confirmPrice": "Total: {{price}} token",
+    "recoveryHint": "Referensi tugas dan pembayaran disimpan di perangkat ini. Lanjutkan pekerjaan yang terputus sebelum memulai proses lain.",
+    "newRun": "Mulai proses lain",
+    "loadMoreMedia": "Muat media lainnya",
+    "invalidGraph": "Periksa koneksinya: setiap input memerlukan sumber yang kompatibel dan grafik tidak boleh berisi siklus.",
+    "unsupportedNode": "Node ini belum dapat berjalan di formulir native. Gunakan kanvas web untuk alur ini.",
+    "missingPrompt": "Hubungkan node teks yang berisi prompt.",
+    "invalidSettings": "Pengaturan ini tidak didukung oleh model yang dipilih.",
+    "missingCapturedFrame": "Tangkap frame di kanvas web sebelum menggunakan video ini sebagai input gambar.",
+    "missingSavedMedia": "Media sumber tersimpan hilang atau tidak lagi tersedia untuk akun ini.",
+    "quoteFailed": "Tidak dapat menghitung harga alur ini. Coba lagi.",
+    "recoverBeforeEdit": "Lanjutkan proses tersimpan sebelum mengubah grafiknya atau memulai proses lain.",
+    "runAlreadyComplete": "Proses ini sudah selesai. Pilih Mulai proses lain untuk membuat lagi.",
+    "recoveryCorrupt": "Catatan pemulihan tersimpan tidak dapat dibaca. Simpan alur ini dan hubungi dukungan sebelum membayar lagi.",
+    "paidUnavailable": "Anda dapat membuat dan menyimpan alur di sini. Proses berbayar tidak tersedia di toko ini.",
+    "planChanged": "Alur berubah setelah harga dihitung. Tinjau proses lagi.",
+    "connectOwnerWallet": "Hubungkan dompet pemilik alur ini.",
+    "runFailed": "Node tidak dapat selesai. Referensi tugas tersimpannya dipertahankan untuk pemulihan.",
+    "recoveryPending": "Render masih tertunda. Lanjutkan proses ini untuk mengambilnya.",
+    "nodeAudioGen": "Generator audio",
+    "nodeAudioGenDesc": "Ucapan, efek suara, transkripsi, dan isolasi audio",
+    "nodeAudioInput": "Audio tersimpan",
+    "nodeAudioInputDesc": "Gunakan audio pribadi dari pustaka Anda",
+    "audioVoiceId": "ID suara",
+    "audioSeconds": "Durasi suara dalam detik"
   },
   "videoPlayer": {
     "volume": "Volume",
@@ -8851,6 +9656,35 @@
     "priceChartCleared": "Grafik harga dibersihkan. Harga referensi tetap: $0,0001. Harga eksekusi bergantung pada pesanan yang tersedia."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Rotasi",
+      "add": "Tambah",
+      "scale": "Ukuran",
+      "color": "Warna",
+      "light": "Terang",
+      "create": "Tambah panggung 3D",
+      "title": "Panggung adegan 3D",
+      "hint": "Atur blocking shot dengan bola dan kotak. Kamera, penempatan, dan tiga lampu area independen mengubah frame yang dirender.",
+      "preview": "Pratinjau adegan yang dirender",
+      "error": "Tidak dapat menyiapkan frame. Periksa referensi shot Anda dan coba lagi.",
+      "elevation": "Elevasi",
+      "distance": "Jarak",
+      "fov": "Bidang pandang",
+      "object": "Objek",
+      "sphere": "Bola",
+      "box": "Kotak",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Hapus objek",
+      "intensity": "Intensitas",
+      "diffusion": "Difusi",
+      "saving": "Menyiapkan frame…",
+      "useFrame": "Gunakan frame yang dirender sebagai referensi shot",
+      "frameHint": "Membuat PNG 320 × 180 dan menambahkannya ke referensi shot ini. Tinjau batas referensi dan penawaran harga model sebelum membuat.",
+      "frameName": "Frame panggung adegan"
+    },
     "video": {
       "tFade": "Larut silang",
       "none": "Tidak ada",
@@ -8944,7 +9778,9 @@
       "pptx": "Presentasi PowerPoint",
       "pptxHint": "Setiap halaman menjadi satu gambar slide, dengan catatan presenter dan tautan. Edit teks dan elemen individu dalam desain asli.",
       "section": "Bagian bernama",
-      "transparent": "Latar belakang transparan"
+      "transparent": "Latar belakang transparan",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Mengunduh ZIP berisi timeline Anda sebagai FCPXML dan Premiere XML beserta semua file media, agar Anda bisa menyelesaikan editan di Premiere Pro, Final Cut Pro, atau DaVinci Resolve. Teks menjadi penanda; efek tetap di Riftn."
     },
     "inspector": {
       "selectHint": "Pilih lapisan di kanvas atau klip di linimasa.",
@@ -9017,6 +9853,8 @@
       "tools": "Alat editor"
     },
     "agent": {
+      "stop": "Berhenti",
+      "queue": "Tambahkan ke antrian",
       "introTitle": "Beri tahu AI apa yang Anda inginkan",
       "introBody": "Jelaskan desain atau perubahannya dengan kata-kata Anda sendiri. AI mengubah ukuran halaman, menulis dan menata teks, mencari foto, video, dan musik gratis, menerapkan filter, menyusun lapisan, dan menganimasikannya. Setiap permintaan bisa dibatalkan dengan satu kali urungkan.",
       "suggestPoster": "Buat postingan Instagram persegi untuk diskon musim panas dengan foto pantai dan judul tebal",
@@ -9036,7 +9874,45 @@
       "failed": "AI tidak bisa melakukannya sekarang. Coba lagi sebentar lagi.",
       "changes": "Edit dilakukan: {{count}}",
       "undo": "Urungkan",
-      "openGenerator": "Tinjau dan buat"
+      "openGenerator": "Tinjau dan buat",
+      "stopped": "Dihentikan. Tidak ada hal lain yang diubah.",
+      "queued": "{{count}} dalam antrean",
+      "restore": "Pulihkan ke sini",
+      "restoreHint": "Kembalikan proyek seperti sebelum pesan ini. Urungkan akan mengembalikannya.",
+      "restored": "Proyek dipulihkan ke kondisi sebelum pesan itu. Tekan urungkan untuk mengembalikan versi yang lebih baru.",
+      "rewrite": "Perjelas permintaan saya",
+      "rewriteFailed": "Tidak dapat menulis ulang. Teks Anda tidak berubah.",
+      "feedback": "Apakah ini membantu?",
+      "good": "Balasan bagus",
+      "bad": "Balasan buruk",
+      "retryPrefix": "Itu kurang tepat. Sebagai gantinya, ",
+      "recipesTitle": "Resep",
+      "recipe": {
+        "podcastClip": {
+          "label": "Klip podcast",
+          "prompt": "Temukan momen 30 detik terkuat, potong ke bagian itu, tambahkan teks Word Pop, dan jadikan 9:16."
+        },
+        "talkingHead": {
+          "label": "Talking head yang rapi",
+          "prompt": "Potong jeda panjang, tambahkan teks Classic, dan beri tampilan hangat yang halus."
+        },
+        "productPromo": {
+          "label": "Promo produk",
+          "prompt": "Buat promo 15 detik: judul yang menggigit di awal, transisi Zoom in di antara klip, teks Bold, dan musik yang ceria."
+        },
+        "hypeReel": {
+          "label": "Hype reel",
+          "prompt": "Potong klip sesuai ketukan musik, gunakan transisi Fly up dan tampilan Technicolor."
+        },
+        "retroEdit": {
+          "label": "Edit retro",
+          "prompt": "Beri setiap klip tampilan VHS, tambahkan judul serif besar, dan gunakan transisi Fade."
+        },
+        "tutorial": {
+          "label": "Tutorial",
+          "prompt": "Tambahkan judul untuk setiap langkah, teks Boxed, dan perlambat momen penting menjadi 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Persegi panjang",
@@ -9211,7 +10087,9 @@
       "tint": "Rona {{value}}",
       "vignette": "Vignet {{value}}%",
       "auto": "Tingkatkan otomatis",
-      "autoFailed": "Tidak dapat menganalisis gambar ini."
+      "autoFailed": "Tidak dapat menganalisis gambar ini.",
+      "halation": "Halasi {{value}}%",
+      "scanlines": "Garis pindai {{value}}%"
     },
     "pages": {
       "add": "Tambah halaman",
@@ -9285,6 +10163,17 @@
       "reloadText": "Muat ulang teks caption",
       "textSaved": "Perubahan teks caption disimpan.",
       "action": "Teks otomatis",
+      "styles": {
+        "bold": "Tebal",
+        "classic": "Klasik",
+        "boxed": "Berkotak",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Bertumpuk",
+        "serif": "Serif",
+        "bubble": "Gelembung"
+      },
       "working": "Mendengarkan… {{percent}}%",
       "downloading": "Menyiapkan model ucapan… {{percent}}%",
       "hint": "Mengubah ucapan menjadi teks berwaktu yang bisa kamu ubah gayanya. Berjalan di perangkatmu: gratis dan privat. Penggunaan pertama akan mengunduh modelnya.",
@@ -9295,7 +10184,8 @@
       "translateCount": "Terjemahkan {{count}} teks caption",
       "translationDone": "Teks caption {{count}} telah diterjemahkan",
       "translationFailed": "Terjemahan teks caption gagal. Teks caption Anda tetap sama.",
-      "lockedTranslation": "Buka teks caption yang terkunci untuk termasuk mereka."
+      "lockedTranslation": "Buka teks caption yang terkunci untuk termasuk mereka.",
+      "style": "Gaya teks"
     },
     "multi": {
       "selected": "{{count}} lapisan dipilih",
@@ -9332,7 +10222,10 @@
       "saveNewPreset": "Simpan baru",
       "saveStyles": "Simpan gaya dengan desain",
       "stylesSaved": "Gaya merek disimpan bersama desain ini",
-      "usePreset": "Gunakan gaya"
+      "usePreset": "Gunakan gaya",
+      "dehubApplied": "Merek Riftn diterapkan ke {{count}} lapisan.",
+      "dehubApply": "Gunakan merek Riftn",
+      "dehubHint": "Warna resmi Riftn, font Exo dan Inter, serta logo Riftn, dalam satu klik."
     },
     "draw": {
       "heading": "Gambar",
@@ -10664,6 +11557,135 @@
       "toolbar": "Navigasi kanvas",
       "zoomIn": "Perbesar kanvas di",
       "zoomOut": "Perbesar kanvas"
+    },
+    "clipFix": {
+      "listening": "Mendengarkan…",
+      "detach": "Pisahkan audio",
+      "detached": "Audio dipindahkan ke klipnya sendiri",
+      "detachFailed": "Tidak dapat memisahkan audio klip ini",
+      "removeBars": "Hapus bilah hitam",
+      "scanning": "Memeriksa frame…",
+      "noBars": "Tidak ditemukan bilah hitam",
+      "barsRemoved": "Bilah hitam dipangkas",
+      "barsFailed": "Tidak dapat memeriksa bilah hitam pada video ini",
+      "reframe": "Bingkai ulang otomatis",
+      "reframeHint": "Video sudah sesuai dengan bentuk halaman ini",
+      "reframed": "Dibingkai ulang mengikuti aksi",
+      "reframeFailed": "Tidak dapat membingkai ulang video ini",
+      "retakes": "Hapus pengambilan ulang",
+      "noRetakes": "Tidak ditemukan pengambilan ulang",
+      "retakesRemoved": "{{count}} pengambilan ulang dihapus, pengambilan terakhir dipertahankan",
+      "retakesFailed": "Tidak dapat menghapus pengambilan ulang dari klip ini"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Pisahkan",
+        "play": "Mainkan",
+        "pause": "Jeda",
+        "frameBack": "Bingkai sebelumnya",
+        "frameForward": "Bingkai berikutnya",
+        "back": "Mundur 1 detik",
+        "rippleDelete": "Hapus klip",
+        "liftDelete": "Hapus klip",
+        "start": "Ke awal",
+        "end": "Ke akhir"
+      },
+      "preset": "Tata letak keyboard",
+      "presetHint": "Gunakan tombol timeline dari editor yang Anda kenal. Pintasan Riftn sendiri tetap berfungsi untuk yang lainnya."
+    },
+    "voiceClone": {
+      "stop": "Berhenti merekam",
+      "failed": "Klon suara gagal.",
+      "pickerLabel": "Kloning suara Anda",
+      "pickerDetail": "Sulih suara dengan suara Anda sendiri",
+      "title": "Kloning suara Anda",
+      "description": "Rekam diri Anda atau pilih klip saat Anda berbicara. Bayar sekali dan suara Anda bisa dipakai untuk setiap sulih suara.",
+      "defaultName": "Suara saya",
+      "record": "Rekam sampel (30 detik hingga 2 menit)",
+      "fromMedia": "Atau gunakan klip dari Media",
+      "recorded": "Rekaman Anda",
+      "sample": "Sampel: {{name}}",
+      "hint": "Ucapan jelas tanpa musik memberikan hasil terbaik.",
+      "noMic": "Tidak dapat menggunakan mikrofon.",
+      "sampleFailed": "Tidak dapat membaca suara dari klip itu.",
+      "pay": "Kloning seharga {{amount}} token",
+      "useFree": "Kloning (sudah dibayar)",
+      "owned": "Suara Anda “{{name}}” sudah siap. Pilih dari daftar suara.",
+      "useOwned": "Gunakan suara saya",
+      "ready": "“{{name}}” siap untuk sulih suara.",
+      "paidFailed": "Pembayaran Anda tersimpan. Buka ini lagi dan percobaan berikutnya gratis.",
+      "consent": "Hanya kloning suara Anda sendiri, atau suara yang Anda punya izin untuk digunakan."
+    },
+    "linkImport": {
+      "go": "Impor",
+      "downloading": "Mengunduh {{percent}}%",
+      "open": "Impor dari tautan",
+      "placeholder": "Tempel tautan YouTube, TikTok, atau lainnya",
+      "rights": "Saya pemilik video ini atau punya izin untuk menggunakannya",
+      "audioOnly": "Hanya suara",
+      "queued": "Dalam antrean…",
+      "waiting": "Menunggu situs, segera mencoba lagi…",
+      "adding": "Menambahkan ke Media…",
+      "added": "Diimpor dan ditambahkan ke timeline.",
+      "failed": "Tidak dapat mengimpor tautan itu."
+    },
+    "reverse": {
+      "action": "Mundur",
+      "working": "Membalik {{percent}}%",
+      "done": "Klip dibalik.",
+      "failed": "Tidak dapat membalik klip ini.",
+      "unsupported": "Browser ini tidak dapat membalik video. Coba Chrome atau Edge.",
+      "tooLong": "Klip hingga {{seconds}} detik dapat dibalik."
+    },
+    "film": {
+      "repairRefs": "Hapus tautan media yang hilang",
+      "title": "Proyek film",
+      "intro": "Rencanakan shot dengan referensi gambar yang dapat digunakan ulang. Brief, urutan shot, dan hasil yang dipilih tersimpan bersama proyek ini.",
+      "create": "Buat rencana film",
+      "name": "Nama film",
+      "brief": "Brief film",
+      "sharedReferences": "Referensi gambar bersama (maks. 4)",
+      "shot": "Shot",
+      "addShot": "Tambah shot",
+      "shotName": "Nama shot",
+      "action": "Aksi dan komposisi shot",
+      "seconds": "Durasi video yang diminta (detik)",
+      "shotReferences": "Referensi gambar tambahan (batas gabungan 4)",
+      "frame": "Siapkan frame",
+      "video": "Siapkan video",
+      "review": "Tinjau model, referensi, durasi video, dan harga di studio sebelum membuat.",
+      "result": "Hasil shot yang diterima",
+      "noResult": "Belum ada hasil dipilih",
+      "resultHint": "Pilih gambar atau video yang diterima dari Unggahan. Tautannya tersimpan bersama shot ini; gunakan timeline untuk menyusun film.",
+      "earlier": "Pindah lebih awal",
+      "later": "Pindah lebih akhir",
+      "remove": "Hapus shot",
+      "issue": "Periksa deskripsi shot dan media referensi, lalu coba lagi. Biarkan proyek tetap terbuka jika tidak dapat disimpan.",
+      "searchMedia": "Cari media berdasarkan nama",
+      "refreshMedia": "Muat ulang media"
+    },
+    "speakers": {
+      "find": "Temukan pembicara",
+      "name": "Pembicara {{number}}",
+      "onlyOne": "Hanya satu pembicara ditemukan.",
+      "failed": "Tidak dapat menemukan pembicara.",
+      "kept": "Hanya {{name}} yang dipertahankan.",
+      "editFailed": "Editan itu tidak sesuai dengan klip ini.",
+      "split": "Dibagi menjadi {{count}} shot pembicara.",
+      "keepOnly": "Pertahankan hanya",
+      "splitAction": "Potong di setiap pergantian pembicara"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Jelaskan objek 3D yang Anda inginkan",
+      "queued": "Membuat objek 3D Anda. Hasilnya akan muncul di tab Hasil.",
+      "note": "Objek 3D masuk ke Media sebagai klip pendek berputar dengan latar belakang transparan."
+    },
+    "behind": {
+      "action": "Teks di belakang orang",
+      "working": "Memotong orang…",
+      "done": "Teks dan keterangan kini berada di belakang orang.",
+      "failed": "Tidak dapat menaruh teks di belakang orang."
     }
   },
   "jungleMood": {
@@ -11066,7 +12088,9 @@
     "tokenAmount": "Token {{amount}}",
     "assistant": {
       "question1": "Apa APY yang dipertaruhkan saat ini untuk token Riftn?",
-      "question2": "Ya, jika saya mempertaruhkan 10.000 token selama 90 hari"
+      "question2": "Ya, jika saya mempertaruhkan 10.000 token selama 90 hari",
+      "answer1": "APY staking saat ini untuk token Riftn adalah 12.4% untuk periode kunci 30 hari. Berikut rinciannya:\n\n• Kunci 7 hari: 8.2% APY\n• Kunci 30 hari: 12.4% APY\n• Kunci 90 hari: 18.7% APY\n\nMau saya bantu menghitung potensi penghasilan Anda?",
+      "answer2": "Untuk 10,000 token yang di-stake dengan 18.7% APY selama 90 hari:\n\n📊 Perkiraan hadiah: ~461 token\n\nItu sekitar 5.13 token per hari. Ingat, APY dapat berubah tergantung jumlah total yang di-stake."
     },
     "bookmarks": {
       "stakingGuide": "Panduan lengkap untuk mempertaruhkan token Riftn: perincian APY, periode penguncian, dan pengganda hadiah dijelaskan."
@@ -11762,7 +12786,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Posting ke X, YouTube, Instagram, TikTok, dan lainnya secara bersamaan dengan dehub. Hubungkan akun Anda sekali, lalu pilih ke mana setiap postingan akan dikirim.",
+    "intro": "Posting ke X, YouTube, Instagram, TikTok, dan lainnya secara bersamaan dengan Riftn. Hubungkan akun Anda sekali, lalu pilih ke mana setiap postingan akan dikirim.",
     "creditsHeading": "Kredit postingan",
     "credits": "{{count}} kredit postingan",
     "topUpTitle": "Isi ulang dan hemat",
@@ -11810,7 +12834,12 @@
   "dm": {
     "planRestricted": "Pengguna ini memerlukan langganan untuk menerima pesan.",
     "planTypeNotAllowed": "Paket kreator ini tidak mengizinkan jenis pesan ini.",
-    "planMinTip": "Tip untuk kreator ini minimal {{amount}} token."
+    "planMinTip": "Tip untuk kreator ini minimal {{amount}} token.",
+    "shareGroups": "Grup",
+    "shareKindGroup": "Grup",
+    "shareKindChannel": "Kanal",
+    "shareKindCommunity": "Komunitas",
+    "reportMessage": "Laporkan pesan"
   },
   "credits": {
     "earningsWorth": "Layak {{amount}}",
@@ -11964,7 +12993,45 @@
       "rewardsWeek": "Minggu {{date}}",
       "rewardPaid": "Dibayar",
       "rewardPending": "Tertunda",
-      "rewardsNone": "Belum ada imbalan yang dihitung. Minggu pertama ditutup pada hari Senin."
+      "rewardsNone": "Belum ada imbalan yang dihitung. Minggu pertama ditutup pada hari Senin.",
+      "stats": {
+        "button": "Statistik langsung",
+        "chartTitle": "Orang yang membuka aplikasi Anda, 30 hari terakhir",
+        "peak_one": "Puncak {{count}} per hari",
+        "peak_other": "Puncak {{count}} per hari",
+        "people30": "Orang, 30 hari",
+        "people7": "Orang, 7 hari",
+        "added": "Menambahkannya",
+        "dhb30": "Token dibayar, 30 hari",
+        "notified30": "Notifikasi terkirim, 30 hari",
+        "rewards": "Hadiah token yang diperoleh"
+      },
+      "signin": {
+        "users_one": "{{count}} pengguna",
+        "users_other": "{{count}} pengguna",
+        "delete": "Hapus",
+        "title": "Masuk dengan Riftn",
+        "body": "Biarkan orang masuk ke situs web atau aplikasi Anda dengan akun Riftn mereka. Buat kunci di sini, lalu ikuti panduannya.",
+        "guide": "Baca panduan",
+        "copyId": "Salin ID klien",
+        "rotate": "Secret baru",
+        "rotateConfirm": "Buat secret baru untuk {{name}}? Secret lama langsung berhenti berfungsi.",
+        "deleteConfirm": "Hapus {{name}}? Semua yang masuk dengannya akan dikeluarkan.",
+        "secretOnce": "Secret untuk {{name}}. Salin sekarang: ini hanya ditampilkan sekali.",
+        "name": "Nama aplikasi",
+        "website": "Situs web (opsional)",
+        "redirects": "URL pengalihan, satu per baris (https://yoursite.com/callback)",
+        "create": "Buat kunci"
+      },
+      "stateRejected": "Live lewat tautan · tidak disetujui untuk toko",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Peristiwa yang dikirim Riftn ke webhookUrl Anda. Uji mengirim peristiwa ping.",
+        "test": "Kirim uji",
+        "ok": "Webhook menjawab {{status}}",
+        "failed": "Webhook gagal: {{reason}}",
+        "none": "Belum ada webhook yang dikirim."
+      }
     },
     "card": {
       "open": "Buka"
@@ -11990,7 +13057,10 @@
       "confirm": "token langsung pergi ke dompet aplikasi, {{amount}}. Pembayaran tidak dapat dibatalkan.",
       "sending": "Mengirim pembayaran Anda…",
       "sent": "Bayar {{amount}} token ke {{name}}.",
-      "noOwner": "Aplikasi ini belum memiliki dompet terverifikasi untuk pembayaran."
+      "noOwner": "Aplikasi ini belum memiliki dompet terverifikasi untuk pembayaran.",
+      "testBadge": "Mode uji",
+      "testBody": "Anda pemilik aplikasi ini, jadi ini adalah uji coba: tidak ada token yang berpindah dan tanda terimanya ditandai uji.",
+      "testSent": "Pembayaran uji sebesar {{amount}} token. Tidak ada yang dikirim."
     },
     "add": {
       "title": "Tambahkan {{name}}?",
@@ -12122,6 +13192,9 @@
     "reminderLater": "Tidak sekarang"
   },
   "copy": {
+    "55656b5e434f": "Bersihkan pencarian",
+    "57e2faa5ec63": "Cari di Riftn",
+    "96d7bff86b44": "Pencarian tidak dapat dimuat",
     "1607715e45ed": "Ketuk bola untuk bicara, atau ketik di bawah",
     "00140a37bd26": "Transaksi di jaringan tersebut sementara tidak tersedia. Silakan coba lagi.",
     "002286513398": "Anda tidak memiliki izin untuk mengelola acara",
@@ -16129,7 +17202,7 @@
     "f569d8ad4ccc": "Dokumentasi Aplikasi",
     "2785ac1adc62": "Petunjuk dan fitur aplikasi mobile dan desktop.",
     "e5e1e25f7f1d": "Riftn Platform",
-    "87acb1194366": "Petunjuk lengkap untuk menggunakan platform dehub yang desentralisasi.",
+    "87acb1194366": "Petunjuk lengkap untuk menggunakan platform Riftn yang desentralisasi.",
     "deace4186d0f": "X Integrasi",
     "6f5fcdf9e99b": "Integrasi media sosial dan fitur X.",
     "4d10e3879b66": "Integrasi Instagram",
@@ -19109,7 +20182,59 @@
     "127053546dd4": "Tidak dapat mengunduh file ini",
     "d14896aa4bf8": "Perpustakaan gratis tidak dapat dimuat. Periksa koneksi Anda dan coba lagi.",
     "953e708b2287": "Pembuatan suara gagal.",
-    "4a52cdd6ac72": "Tidak dapat menduplikasi lapisan ini"
+    "4a52cdd6ac72": "Tidak dapat menduplikasi lapisan ini",
+    "3f9b2c71d0a4": "{{n}} hasil",
+    "8c4e1a6b2f57": "untuk “{{query}}”",
+    "1d7234ff1b79": "di {{feed}}",
+    "e122e5c2b563": "Seret ke atas untuk menutup",
+    "1aa9d734f2ee": "Pilih yang ingin dicari",
+    "ef557404f465": "Tidak ada hasil untuk “{{query}}”",
+    "35034aa59bd3": "Tidak ada yang cocok di {{feed}}. Coba kata lain atau cari di semua.",
+    "415155739590": "Cari semua",
+    "9e13d826baaf": "Cari gambar",
+    "cbf6f228327c": "Cari musik",
+    "e8756c6865a5": "Cari Shorts",
+    "c7661da99c41": "Cari video",
+    "90f1afe66801": "Mencari “{{query}}”…",
+    "d7b559f2d8c6": "Coba kata lain, atau ubah filter.",
+    "d1a0c7e2f301": "Apa yang ada di pikiran Anda hari ini?",
+    "d1a0c7e2f302": "Apa yang sedang Anda pikirkan hari ini?",
+    "d1a0c7e2f303": "Apa yang ada di pikiran Anda?",
+    "d1a0c7e2f304": "Ada yang sedang Anda pikirkan?",
+    "d1a0c7e2f305": "Apa yang Anda pikirkan sekarang?",
+    "d1a0c7e2f306": "Kita lagi mikirin apa hari ini?",
+    "d1a0c7e2f307": "Ada yang terpikir hari ini?",
+    "d1a0c7e2f308": "Apa yang Anda pikirkan kali ini?",
+    "a7c1e0f4b2d9": "Ketuk untuk bicara",
+    "b3e8d1c6f0a2": "Ketuk untuk mengirim",
+    "c9f2a4e7d1b5": "Mendengarkan... ketuk bola untuk mengirim",
+    "22577ebd908e": "Buat video Wan 3.0 · soundtrack orisinal",
+    "1fa2357ab7e1": "Buat video Seedance 720p · soundtrack orisinal",
+    "7f78bdc0762d": "+{{value1}} poin",
+    "f0c8bb34335b": "Anda mendapatkan +{{value1}} poin",
+    "0fbe06b679a8": "{{value1}} poin untuk setiap permintaan yang dirilis, ditambahkan ke skor Top builder Anda.",
+    "431bc73eb60b": "[verse]\nLirik Anda di sini...\n\n[chorus]\nLirik chorus...",
+    "572abf9d987b": " SRT",
+    "a3c1e5f20b71": "Gunakan Riftn di dalam ChatGPT, Claude, atau aplikasi MCP apa pun. Tempel URL di bawah ke pengaturan konektor asisten Anda untuk menjelajahi postingan, profil, dan komentar, lalu masuk saat diminta untuk menautkan akun Anda sendiri.",
+    "b84d2e7c9a16": "Alamat ini untuk aplikasi AI, bukan halaman web. Membukanya di browser akan membawa Anda ke sini.",
+    "c5e9f1a3d742": "Tautkan akun Riftn Anda",
+    "d61a7b4e8c05": "Saat asisten Anda meminta Anda masuk, masuk ke Riftn dan klik Izinkan. Asisten kemudian dapat memperbarui profil Anda, memublikasikan postingan dan komentar, mengikuti orang, dan berkreasi di Creator Studio. Koneksi tetap tertaut selama Anda menggunakannya dan kedaluwarsa setelah 30 hari tidak dipakai.",
+    "e27b8c5f9d13": "Panduan ChatGPT langkah demi langkah",
+    "f38c9d6a0e24": "Panduan Claude langkah demi langkah",
+    "0a49d7b1f835": "Lebih suka akun bot terpisah? Buat agen untuk mendapatkan URL konektor yang memposting sebagai agen itu.",
+    "1b5ae8c20f46": "Saat ChatGPT meminta, masuk ke Riftn dan klik Izinkan untuk menautkan akun Anda.",
+    "2c6bf9d31a57": "Klik Hubungkan, masuk ke Riftn, dan klik Izinkan untuk menautkan akun Anda.",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Bilah Kaca",
+    "5ff272ba7871": "Garis Sutra",
+    "a941e90ca93d": "Halo Sampul",
+    "04dbbe4dff7a": "Gelombang Asli",
+    "85330dcbaadd": "Tanpa algoritma yang memihak satu sisi perdebatan. \nSemua orang diperkuat secara setara dan adil.",
+    "c2db6b417427": "Pratinjau {{value1}}",
+    "2db0df1472cb": "Sepia {{value1}}%",
+    "fffcac029bff": "Volume {{value1}}%",
+    "a0c199c85b21": "Dibisukan {{value1}} → {{value2}}",
+    "6e71ae3669b1": "Output tersimpan tidak tersedia"
   },
   "articles": {
     "cardLabel": "Artikel · {{count}} menit dibaca",
@@ -19128,6 +20253,7 @@
     "backToTop": "Kembali ke atas",
     "needTitle": "Tambahkan judul untuk melanjutkan",
     "needBody": "{{count}} karakter untuk membaca",
+    "imagesLabel": "Gambar",
     "backToWriting": "Kembali ke menulis",
     "readyTitle": "Sudah siap untuk dipublikasikan",
     "sharePreview": "Bagaimana tampilnya ketika dibagikan",
@@ -19150,7 +20276,16 @@
     "formatting": "Pemformatan",
     "bodyPlaceholder": "Ceritakan kisah Anda. Pilih teks dan gunakan bilah di atas untuk judul, tebal, kutipan, dan daftar.",
     "bodyLabel": "Isi artikel",
-    "wordCount": "{{count}} kata"
+    "wordCount": "{{count}} kata",
+    "imageLimit": "Artikel dapat memuat hingga {{count}} gambar",
+    "imageLimitSome": "Hanya {{count}} gambar lagi yang muat di artikel ini",
+    "imageFailed": "Gambar itu tidak dapat ditambahkan. Coba gambar lain.",
+    "imagesUploading": "Menambahkan gambar ({{count}})…",
+    "bodyTooLong": "{{count}} karakter melebihi batas",
+    "imagesCount": "Gambar · {{count}}/{{max}}",
+    "captionPlaceholder": "Tambahkan keterangan",
+    "captionLabel": "Keterangan untuk gambar {{n}}",
+    "removeInlineImage": "Hapus gambar {{n}}"
   },
   "liveAudience": {
     "whosHere": "Siapa yang ada di sini",
@@ -19189,12 +20324,394 @@
     "exploreFirst": "Jelajahi dulu",
     "codeNote": "Kami kirim kode lewat email, tanpa kata sandi."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Paket",
+      "howMany": "Berapa banyak",
+      "who": "Nama pengguna atau alamat dompet",
+      "whoPlaceholder": "@namapengguna",
+      "cancel": "Membatalkan",
+      "stage": {
+        "preparing": "Menyiapkan…",
+        "confirming": "Menunggu transaksi…",
+        "recording": "Menyelesaikan…",
+        "wallet": "Konfirmasi di dompet Anda"
+      },
+      "open": "Hadiahkan langganan",
+      "title": "Hadiahkan langganan",
+      "mode": {
+        "random": "Penonton acak di chat",
+        "user": "Orang tertentu"
+      },
+      "randomHint": "Diberikan kepada orang yang mengobrol dalam 30 menit terakhir dan belum berlangganan.",
+      "send_one": "Hadiahkan 1 langganan · ${{price}}",
+      "send_other": "Hadiahkan {{count}} langganan · ${{price}}",
+      "payHint": "Dibayar dengan token dari dompet Anda dalam satu transfer.",
+      "fewer_one": "Saat ini hanya 1 orang di chat yang dapat menerima langganan, jadi Anda membayar untuk 1.",
+      "fewer_other": "Saat ini hanya {{count}} orang di chat yang dapat menerima langganan, jadi Anda membayar untuk {{count}}.",
+      "done_one": "Langganan dihadiahkan!",
+      "done_other": "{{count}} langganan dihadiahkan!",
+      "failed": "Tidak dapat menghadiahkan langganan",
+      "notReady": "Hadiah belum tersedia untuk paket ini",
+      "noPlan": "Pilih paket terlebih dahulu",
+      "noPlans": "{{name}} belum punya paket langganan untuk dihadiahkan."
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Pelanggan",
+        "both": "Pelanggan dan pemberi hadiah",
+        "gifters": "Pemberi hadiah"
+      },
+      "ended": "Selesai",
+      "until": "Sampai {{date}}",
+      "failed": "Itu tidak berhasil. Coba lagi.",
+      "title": "Lencana waktu terbatas",
+      "intro": "Tawarkan lencana selama beberapa hari. Siapa pun yang berlangganan atau memberi hadiah selama periode itu akan mendapatkannya, dan lencana itu tampil di samping nama mereka di chat Anda selamanya.",
+      "name": "Nama lencana",
+      "namePlaceholder": "Minggu peluncuran",
+      "days": "Tersedia selama (hari)",
+      "emoji": "Emoji",
+      "who": "Siapa yang bisa mendapatkannya",
+      "create": "Tawarkan lencana",
+      "created": "Lencana sudah aktif.",
+      "end": "Akhiri sekarang",
+      "holders_one": "{{count}} pemilik",
+      "holders_other": "{{count}} pemilik",
+      "limit": "Tiga lencana dapat aktif sekaligus. Akhiri satu untuk menawarkan yang lain.",
+      "hypeHint": "Semua yang ikut hype train juga mendapatkan lencana 🚂 Anda sesuai level yang dicapai."
+    },
+    "train": {
+      "level": "Hype Train · Level {{level}}",
+      "endedLevel": "Hype Train menyelesaikan level {{level}}!",
+      "ended": "Hype Train berakhir",
+      "thanks_one": "Terima kasih kepada {{count}} pendukung",
+      "thanks_other": "Terima kasih kepada {{count}} pendukung",
+      "top": "Teratas: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "menghadiahkan langganan 🎁",
+      "giftedSubs_other": "menghadiahkan {{count}} langganan 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Hari ini",
+    "earlierShort": "Sebelumnya",
+    "tooSoon": "Pilih waktu di masa mendatang.",
+    "show": "Tampilkan",
+    "hide": "Sembunyikan",
+    "title": "Kapan?",
+    "tonight": "Malam ini",
+    "inAnHour": "Satu jam lagi",
+    "tomorrow": "Besok",
+    "primeTime": "Jam tayang utama",
+    "scheduleFor": "Jadwalkan untuk {{when}}",
+    "liveTip": "Pengikut Anda dapat memasang pengingat. Anda sendiri yang memulai Live saat waktunya tiba.",
+    "stageTip": "Langsung masuk ke rak Mendatang, sehingga orang dapat mengetuk Ingatkan saya.",
+    "typePlaceholder": "Ketik waktu, misalnya \"jum 8pm\" atau \"2 jam lagi\"",
+    "typeLabel": "Ketik waktu",
+    "typeHelp": "Coba \"malam ini\", \"besok 9am\", \"sab siang\", atau \"30 okt 7pm\".",
+    "orPickDay": "Atau pilih hari",
+    "earlier": "15 menit lebih awal",
+    "later": "15 menit lebih lambat",
+    "laterShort": "Nanti",
+    "tooSoonMin": "Pilih waktu setidaknya {{count}} menit dari sekarang.",
+    "zone": "Waktu Anda ({{zone}}). Orang lain melihatnya dalam waktu setempat mereka.",
+    "remove": "Hapus jadwal",
+    "startsIn": "Dimulai dalam {{time}}",
+    "bestTime": "Waktu terbaik",
+    "fansOnline": "Kapan penggemar saya online?",
+    "fansBasis": "Makin terang berarti makin banyak pengikut Anda yang menonton, {{count}} hari terakhir.",
+    "everyoneBasis": "Aktivitas pengikut belum cukup, jadi ini untuk semua orang di Riftn."
+  },
+  "planned": {
+    "title": "Direncanakan",
+    "all": "Semua",
+    "posts": "Postingan",
+    "stages": "Ruang audio",
+    "post": "Postingan",
+    "live": "Siaran Langsung",
+    "stage": "Panggung",
+    "untitledPost": "Postingan",
+    "untitledLive": "Siaran Langsung",
+    "loading": "Memuat…",
+    "startNow": "Mulai sekarang",
+    "cancel": "Membatalkan",
+    "cancelled": "Dibatalkan",
+    "subtitle": "Postingan, Live, dan Panggung yang telah Anda jadwalkan",
+    "seoTitle": "Terjadwal · Riftn",
+    "seoDescription": "Postingan, Live, dan Panggung terjadwal Anda di Riftn, semuanya di satu tempat.",
+    "lives": "Live",
+    "signIn": "Masuk untuk melihat rencana Anda",
+    "emptyTitle": "Belum ada yang direncanakan",
+    "emptyBody": "Pilih \"Kapan?\" saat membuat postingan, Live, atau Panggung dan itu akan muncul di sini.",
+    "move": "Pindahkan",
+    "postNow": "Posting sekarang",
+    "confirmCancel": "Ketuk lagi untuk membatalkan",
+    "moved": "Dipindahkan ke {{when}}",
+    "postingNow": "Diposting dalam kurang dari satu menit",
+    "moveFailed": "Tidak dapat memindahkannya. Coba lagi.",
+    "seeAll": "Lihat semua yang Anda rencanakan"
+  },
+  "welcome": {
+    "about": {
+      "title": "Selamat datang di Riftn",
+      "day": "Hari",
+      "month": "Bulan",
+      "year": "Tahun",
+      "sub": "Tanggal lahir Anda tetap pribadi. Pilih tampilan, Anda bisa mengubahnya kapan saja.",
+      "birthday": "Tanggal lahir",
+      "pick": "Pilih tanggal lahir Anda",
+      "invalid": "Masukkan tanggal lahir lengkap Anda.",
+      "tooYoung": "Anda harus berusia {{age}} tahun atau lebih untuk menggunakan Riftn.",
+      "theme": "Tampilan Anda"
+    },
+    "name": {
+      "title": "Nama Anda",
+      "placeholder": "Nama Anda",
+      "sub": "Ini adalah nama yang dilihat orang di postingan Anda."
+    },
+    "card": {
+      "name": "Nama Anda",
+      "followers": "pengikut",
+      "interests": "Minat Anda",
+      "following": "mengikuti"
+    },
+    "topic": {
+      "music": "Musik",
+      "art": "Seni",
+      "gaming": "Permainan",
+      "crypto": "Kripto",
+      "sports": "Olahraga",
+      "comedy": "Komedi",
+      "food": "Makanan",
+      "news": "Berita",
+      "science": "Sains",
+      "travel": "Perjalanan",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Mobil",
+      "podcast": "Podcast",
+      "animals": "Hewan",
+      "tech": "Teknologi"
+    },
+    "back": "Kembali",
+    "skipPhoto": "Lewati dulu",
+    "preview": "Penglihatan awal",
+    "username": {
+      "title": "@username Anda",
+      "sub": "Huruf, angka, dan garis bawah. Anda dapat mengubahnya nanti.",
+      "yours": "@{{name}} milik Anda"
+    },
+    "photo": {
+      "title": "Foto Anda",
+      "sub": "Opsional. Orang lebih cepat mengikuti wajah.",
+      "choose": "Pilih foto",
+      "change": "Pilih yang lain"
+    },
+    "interests": {
+      "title": "Minat Anda",
+      "sub": "Pilih minimal 3. Minat ini tampil lebih dulu di kategori Anda."
+    },
+    "people": {
+      "title": "Orang-orang Anda",
+      "sub": "Ketuk untuk mengikuti. Postingan mereka mengisi feed Mengikuti Anda.",
+      "empty": "Belum ada saran saat ini. Jelajahi punya lebih banyak orang untuk ditemukan.",
+      "followers": "{{count}} pengikut"
+    },
+    "done": {
+      "title": "Kelihatan keren, {{name}}",
+      "sub": "Semua orang melihat kartu ini mulai hari ini.",
+      "eyebrow": "Profil aktif"
+    },
+    "enter": "Masuk ke Riftn",
+    "pickMore": "Pilih {{count}} lagi",
+    "cardHint": "Beginilah orang akan melihat Anda",
+    "followFailed": "Tidak dapat mengikuti. Coba lagi."
+  },
+  "appTokens": {
+    "title": "Token Anda",
+    "history": "Riwayat",
+    "noHistory": "Belum ada aktivitas",
+    "kindDeposit": "Setor",
+    "to": "Sampai",
+    "amount": "Jumlah",
+    "notePlaceholder": "Tambahkan catatan (opsional)",
+    "sendButton": "Kirim",
+    "errorInsufficient": "Token tidak cukup",
+    "rowHint": "Saldo dalam aplikasi",
+    "explainer": "Token Anda kini berada di dalam Riftn. Anda memulai dengan jumlah yang Anda pegang dan stake onchain saat peluncuran. Mengirim, memberi tip, dan membelanjakan memindahkannya secara instan, tanpa biaya dan tanpa transaksi onchain. Saldo akan dibawa ke token baru saat airdrop.",
+    "kindOpening": "Saldo awal",
+    "kindSent": "Dikirim ke {{name}}",
+    "kindReceived": "Dari {{name}}",
+    "kindSpent": "Dibelanjakan di Riftn",
+    "kindRefund": "Pengembalian dana",
+    "kindAdjust": "Penyesuaian oleh Riftn",
+    "sendTitle": "Kirim token",
+    "sendHint": "Mengirim token di dalam Riftn ke akun lain. Instan dan gratis, tidak ada yang masuk onchain.",
+    "toPlaceholder": "@username atau alamat 0x",
+    "looking": "Mencari…",
+    "available": "Tersedia: {{amount}}",
+    "sent": "{{amount}} token dikirim ke {{name}}",
+    "errorRateLimit": "Terlalu banyak pengiriman dalam satu jam terakhir. Coba lagi nanti.",
+    "errorNoRecipient": "Akun Riftn tidak ditemukan",
+    "errorSelf": "Anda tidak dapat mengirim ke diri sendiri",
+    "errorGeneric": "Tidak dapat mengirim. Coba lagi."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Semua orang",
+      "followers": "Pengikut",
+      "nobody": "Tidak Ada",
+      "default": "Default akun ({{value}})"
+    },
+    "heading": "Tanggapan",
+    "more": "Tampilkan lebih banyak",
+    "liveNow": "Siaran Langsung",
+    "untitled": "Reaksi",
+    "reactionTo": "Reaksi untuk",
+    "reactingTo": "Bereaksi terhadap",
+    "count_one": "{{count}} reaksi",
+    "count_other": "{{count}} reaksi",
+    "allow": "Izinkan reaksi",
+    "remixesSection": "Remix",
+    "allowDescription": "Biarkan kreator lain bereaksi terhadap video Anda, rekaman atau live. Anda tetap bisa mengubahnya di setiap postingan.",
+    "pageDescription": "Tonton para kreator bereaksi terhadap “{{title}}” oleh {{creator}} di Riftn, rekaman dan live.",
+    "backToVideo": "Kembali ke video",
+    "empty": "Belum ada reaksi. Buka menu Remix video dan pilih Bereaksi untuk menjadi yang pertama.",
+    "wasLive": "Pernah live",
+    "thisVideo": "video ini",
+    "pageTitle": "Reaksi untuk {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Hubungkan Riftn ke asisten AI Anda",
+    "urlLabel": "URL server MCP",
+    "copy": "Salin",
+    "copied": "Tersalin",
+    "copiedToast": "URL MCP disalin",
+    "accountBody2": "Simpan draf pribadi, publikasikan dan jadwalkan postingan, kelola gambar dan polling, baca analitik, balas, beri reaksi, posting ulang, ikuti, simpan markah, baca notifikasi, edit profil Anda, dan berkreasi dengan kredit Anda. Menggunakan ulang ID permintaan postingan tidak membuat atau menghitung postingan kedua. Asisten selalu bertanya sebelum membelanjakan apa pun.",
+    "agentsTitle": "Jalankan agen Anda dari asisten",
+    "agentsBody": "Saat Anda menghubungkan, izinkan juga \"Bertindak sebagai agen Anda\". Asisten Anda kemudian dapat memposting, membalas, memberi reaksi, memposting ulang, mengikuti, atau mengedit profil sebagai agen mana pun yang Anda miliki, satu per satu atau banyak sekaligus. Asisten tidak pernah dapat bertindak sebagai akun yang bukan milik Anda.",
+    "agentsExample": "Coba: \"Minta @mybot membalas postingan teratas di feed saya, lalu sukai balasan itu sebagai @otherbot.\"",
+    "desc": "Gunakan Riftn dari ChatGPT, Claude, Cursor, atau aplikasi MCP apa pun. Jelajahi tanpa akun, atau masuk agar asisten Anda dapat memposting, membalas, dan berkreasi untuk Anda.",
+    "copyFailed": "Gagal menyalin",
+    "urlNote": "Tempel ini ke aplikasi AI Anda. Ini bukan halaman web, jadi membukanya di browser akan membawa Anda kembali ke sini.",
+    "canTitle": "Yang dapat dilakukan asisten Anda",
+    "publicTitle": "Tanpa masuk",
+    "publicBody": "Jelajahi feed, cari postingan dan orang, baca komentar, dan lihat profil.",
+    "accountTitle": "Setelah Anda masuk",
+    "accountBody": "Posting, balas, beri reaksi, ikuti, simpan markah, baca notifikasi, edit profil Anda, dan buat gambar, video, serta musik dengan kredit Anda. Asisten selalu bertanya sebelum membelanjakan apa pun.",
+    "chatgpt1": "Buka Pengaturan ChatGPT, lalu Apps & Connectors, lalu Advanced, dan aktifkan Developer mode.",
+    "chatgpt2": "Kembali di Apps & Connectors, pilih Create untuk menambahkan konektor baru.",
+    "chatgpt3": "Beri nama Riftn, tempel URL di atas, dan pilih OAuth sebagai jenis login.",
+    "chatgpt4": "Tekan Connect. Riftn akan terbuka: masuk, periksa izinnya, dan tekan Izinkan.",
+    "chatgpt5": "Di chat baru, buka menu +, pilih Riftn, lalu tanyakan, misalnya, “Tampilkan postingan yang sedang tren di Riftn.”",
+    "claude1": "Buka pengaturan konektor Claude dan pilih Add custom connector.",
+    "claude2": "Beri nama Riftn, tempel URL di atas, dan tekan Add.",
+    "claude3": "Tekan Connect. Riftn akan terbuka: masuk, periksa izinnya, dan tekan Izinkan.",
+    "claude4": "Di chat, buka menu alat, aktifkan Riftn, lalu silakan bertanya.",
+    "openSettings": "Buka pengaturan",
+    "devTitle": "Claude Code, Cursor, dan aplikasi lain",
+    "devBody": "Tambahkan Riftn sebagai server MCP jarak jauh melalui HTTP. Aplikasi akan membuka halaman masuk Riftn saat pertama kali membutuhkan akun Anda.",
+    "manageTitle": "Aplikasi tertaut Anda",
+    "manageBody": "Aplikasi tertaut tetap terhubung selama Anda menggunakannya dan terputus setelah 30 hari tidak dipakai. Anda dapat melihat atau memutuskannya kapan saja.",
+    "manageLink": "Kelola aplikasi tertaut",
+    "agentTitle": "Ingin bot yang memposting dengan akunnya sendiri?",
+    "agentBody": "Buat agen dan Anda akan mendapatkan URL konektornya sendiri dengan kunci yang sudah tertanam. Asisten Anda kemudian dapat memposting, berkomentar, memberi suara, dan mengikuti sebagai agen itu, bukan sebagai Anda.",
+    "agentLink": "Buat agen",
+    "helpTitle": "Jika terjadi masalah",
+    "help1": "“Authentication update required” atau tombol Reconnect: tekan Reconnect dan masuk ke Riftn lagi.",
+    "help2": "“Tautkan akun Riftn Anda” saat Anda bertanya tentang postingan Anda sendiri: tekan Connect di pengaturan konektor aplikasi.",
+    "help3": "Error saat Anda membuka URL di tab browser itu normal. Tempel di aplikasi AI Anda saja.",
+    "other": "Aplikasi MCP lainnya bekerja dengan cara yang sama: tambahkan server MCP jarak jauh dan tempel URL di atas."
+  },
+  "avatarPrompt": {
+    "notNow": "Nanti saja",
+    "title": "Tambahkan foto profil",
+    "body": "Orang lebih cepat mengenali Anda di feed, komentar, dan chat saat Anda punya wajah atau logo.",
+    "choose": "Pilih foto",
+    "another": "Pilih yang lain",
+    "save": "Gunakan foto ini",
+    "saved": "Kelihatan keren",
+    "failed": "Tidak dapat menyimpan foto Anda. Coba lagi."
+  },
+  "postStats": {
+    "audience": "Audiens",
+    "engagement": "Interaksi",
+    "finished": "Selesai",
+    "members": "Anggota",
+    "membersLower": "anggota",
+    "newFollowers": "Pengikut baru",
+    "noBadge": "Tidak ada bintang",
+    "people": "Orang",
+    "plays": "Putar",
+    "quotes": "kutipan",
+    "reposts": "Repost",
+    "saved": "Tersimpan",
+    "shares": "Bagikan",
+    "signedOutViewers": "Keluar",
+    "topSupporters": "Pendukung teratas",
+    "visitors": "Keluar",
+    "aboutUsual": "seperti biasanya",
+    "afterWatching": "mengikuti setelah melihatnya",
+    "avg": "rata-rata",
+    "avgWatch": "Rata-rata tonton",
+    "bestTime": "Kapan orang-orang Anda menonton",
+    "bigDrop": "Penurunan besar",
+    "byBadge": "per lencana",
+    "devices": "Perangkat (anggota)",
+    "finishedLower": "selesai",
+    "finishedPct": "{{pct}}% menonton sampai akhir",
+    "inOut": "{{in}} anggota · {{out}} tidak masuk",
+    "leave": "{{pct}}% pergi",
+    "linkClicks": "Klik tautan",
+    "newToYou": "baru bagi Anda",
+    "noAccount": "tanpa akun",
+    "noViewersYet": "Belum ada yang melihat postingan ini.",
+    "noWatchYet": "Waktu tonton muncul di sini setelah orang memutarnya. Penghitungan dimulai pada 31 Okt 2026.",
+    "open": "Lihat performa postingan Anda",
+    "otherBadges": "Lencana lain",
+    "peak": "Puncak {{time}} · {{n}}",
+    "peopleReached": "Orang yang dijangkau",
+    "playsLower": "putaran",
+    "playsMembers": "Diputar oleh anggota",
+    "playsVisitors": "Diputar tanpa masuk",
+    "profileTaps": "Ketukan ke profil Anda",
+    "reach": "Jangkauan",
+    "saves": "Disimpan",
+    "seeAll": "Lihat semua statistik",
+    "signedIn": "masuk",
+    "signedOutLower": "tidak masuk",
+    "stillWatching": "Masih menonton",
+    "timesUsual": "{{ratio}}× biasanya",
+    "vsUsualPct": "{{pct}} dibanding postingan biasa Anda",
+    "unavailableBody": "Hanya kreator yang dapat melihat statistik postingan ini.",
+    "unavailableTitle": "Statistik tidak tersedia",
+    "vsUsual": "dibanding postingan biasa Anda",
+    "watching": "Menonton",
+    "whoSawIt": "Siapa yang melihatnya",
+    "withRepeats": "{{n}} tonton ulang",
+    "yourFollowers": "pengikut Anda",
+    "first48": "48 jam pertama",
+    "howItsDoing": "Performanya",
+    "bestTip": "Sebagian besar penonton Anda muncul hari {{day}} sekitar pukul {{hour}}:00. Memposting tepat sebelum itu memberi postingan awal terbaik.",
+    "last30": "30 hari terakhir",
+    "day": {
+      "sun": "Min",
+      "mon": "Sen",
+      "tue": "Sel",
+      "wed": "Rab",
+      "thu": "Kam",
+      "fri": "Jum",
+      "sat": "Sab"
+    }
+  },
   "halloween": {
     "title": "Selamat Halloween",
     "otherThemes": "Lagi nggak mau seram? Temukan tema lain:",
     "enter": "Masuki ruang bawah tanah"
   },
   "tokenLaunch": {
+    "eyebrow": "Segera hadir",
     "title": "Token peluncuran segera",
     "body": "Belanjaan ditutup sementara token baru dalam proses persiapan. Dapatkan email saat token tersebut diluncurkan.",
     "notifyMe": "Kirim notifikasi kepadaku",
@@ -19206,7 +20723,9 @@
     "failed": "Tidak dapat menyimpannya. Coba lagi.",
     "privacy": "Hanya digunakan untuk memberitahumu tentang peluncuran.",
     "seoTitle": "Token launching soon | Riftn",
-    "seoDescription": "Token baru Riftn akan segera diluncurkan. Bergabunglah dengan daftar dan dapatkan satu email saatnya diluncurkan, kemudian beli langsung dari dompet Riftn Anda."
+    "seoDescription": "Token baru Riftn akan segera diluncurkan. Bergabunglah dengan daftar dan dapatkan satu email saatnya diluncurkan, kemudian beli langsung dari dompet Riftn Anda.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Email Anda"
   },
   "githubLink": {
     "hint": "Masuk ke GitHub untuk membuktikan bahwa akun itu milik Anda. Riftn hanya melihat profil GitHub publik Anda.",
@@ -19219,6 +20738,30 @@
     "unavailable": "Verifikasi GitHub akan segera hadir.",
     "connect": "Hubungkan GitHub",
     "disconnect": "Putuskan"
+  },
+  "mcpKeys": {
+    "delete": "Hapus",
+    "shortProfile": "Profil",
+    "title": "Kunci pribadi",
+    "body": "Untuk skrip, bot, dan aplikasi yang tidak dapat membuka halaman masuk. Kunci hanya melakukan apa yang Anda izinkan, pada akun Anda dan agen yang Anda miliki. Kunci tetap aktif selama dipakai dan berhenti setelah 30 hari tidak digunakan.",
+    "signIn": "Masuk untuk membuat kunci",
+    "newTitle": "Salin kunci Anda sekarang",
+    "newBody": "Ini satu-satunya saat kunci ditampilkan. Siapa pun yang memilikinya dapat menggunakan akun Anda sesuai izin yang Anda pilih, jadi rahasiakan.",
+    "useIt": "Tambahkan ke aplikasi Anda dengan salah satu cara ini:",
+    "name": "Nama kunci",
+    "namePlaceholder": "Bot saya",
+    "permissions": "Yang boleh dilakukan kunci ini",
+    "limits": "Batas harian untuk akun dan agen Anda: 50 postingan, 300 balasan, 1,000 reaksi, 200 follow, 200 posting ulang, dan 30 edit profil.",
+    "create": "Buat kunci",
+    "show": "Tampilkan kunci saya",
+    "yours": "Kunci Anda",
+    "empty": "Belum ada kunci.",
+    "expires": "Aktif hingga {{date}} kecuali digunakan lagi",
+    "shortRead": "Baca",
+    "shortSocial": "Posting dan balas",
+    "shortGenerate": "Buat media",
+    "shortAgents": "Agen Anda",
+    "settingsBody": "Gunakan Riftn dan agen Anda dari ChatGPT, Claude, atau aplikasi MCP apa pun, atau buat kunci pribadi."
   },
   "chatSearch": {
     "placeholder": "Cari pesan atau orang",
@@ -19249,5 +20792,68 @@
     "gone": "Pesan itu tidak lagi ada",
     "theirMessages": "Pesan mereka",
     "seeTheirMessages": "Lihat pesan mereka"
+  },
+  "dmRequests": {
+    "title": "Permintaan",
+    "accept": "Terima",
+    "delete": "Hapus",
+    "block": "Blokir",
+    "hint": "Pesan dari orang yang tidak Anda ikuti. Terima, balas, atau ikuti mereka dan obrolan akan pindah ke kotak masuk Anda.",
+    "rowHint": "{{n}} dari orang yang tidak Anda ikuti",
+    "banner": "Anda tidak mengikuti {{name}}. Terima untuk memindahkan obrolan ini ke kotak masuk Anda, atau balas saja.",
+    "accepted": "Dipindahkan ke kotak masuk Anda",
+    "acceptFailed": "Tidak dapat menerima, coba lagi"
+  },
+  "dmSchedule": {
+    "view": "Lihat",
+    "edit": "Ubah",
+    "editLabel": "Edit pesan",
+    "error": "Itu tidak berhasil. Coba lagi.",
+    "button": "Jadwalkan pesan",
+    "title": "Pesan terjadwal",
+    "whenTitle": "Kirim kapan?",
+    "waiting": "{{n}} terjadwal",
+    "next": "berikutnya {{when}}",
+    "failedCount": "{{n}} tidak terkirim",
+    "notSent": "Tidak terkirim",
+    "emptyTitle": "Tidak ada yang terjadwal",
+    "emptyBody": "Tulis pesan, lalu ketuk ikon jam untuk memilih kapan pesan dikirim.",
+    "changeTime": "Ubah waktu",
+    "sendNow": "Kirim sekarang",
+    "deleted": "Pesan terjadwal dihapus",
+    "unreadable": "Ditulis di perangkat lain. Pesan tetap akan dikirim.",
+    "footnote": "Waktu mengikuti zona waktu Anda. Tidak ada yang melihat pesan sampai pesan dikirim.",
+    "footnoteNamed": "Waktu mengikuti zona waktu Anda. {{name}} hanya melihat pesan setelah pesan dikirim.",
+    "textOnly": "Untuk saat ini hanya pesan teks yang dapat dijadwalkan.",
+    "scheduledToast": "Dijadwalkan untuk {{when}}",
+    "failedToast": "Pesan terjadwal tidak dapat dikirim"
+  },
+  "mentionLinks": {
+    "communities": "Komunitas",
+    "pages": "Halaman",
+    "people": "Orang",
+    "linkTo": "Tautkan {{name}}",
+    "empty": "Tidak ditemukan apa pun",
+    "hint": "Ketik untuk mencari orang, komunitas, dan halaman",
+    "members": " anggota",
+    "placeholder": "Cari orang, komunitas, halaman...",
+    "title": "Sebut atau tautkan"
+  },
+  "msgDelete": {
+    "title": "Hapus pesan?",
+    "titleMany": "Hapus {{count}} pesan?",
+    "bodyOwn": "Hapus dari obrolan Anda saja, atau untuk semua orang.",
+    "bodyOwnMany": "Hapus dari obrolan Anda saja, atau untuk semua orang.",
+    "bodyOthers": "Pesan hanya akan dihapus dari obrolan Anda. Orang lain tetap dapat melihatnya.",
+    "bodyOthersMany": "Pesan-pesan hanya akan dihapus dari obrolan Anda. Orang lain di obrolan tetap dapat melihatnya.",
+    "bodyOwnBoth": "Hapus dari obrolan Anda saja, atau untuk kalian berdua.",
+    "bodyOwnBothMany": "Hapus dari obrolan Anda saja, atau untuk kalian berdua.",
+    "forMe": "Hapus untuk saya",
+    "forEveryone": "Hapus untuk semua orang",
+    "forBoth": "Hapus untuk kami berdua",
+    "forMeAndName": "Hapus untuk saya dan {{name}}",
+    "remember": "Ingat pilihan saya",
+    "rememberHint": "Ubah kapan saja di Pengaturan",
+    "failed": "Tidak dapat menghapus pesan"
   }
 }

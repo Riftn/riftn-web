@@ -14,7 +14,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Lock, LockOpen, Check, Play } from 'lucide-react';
+import { Loader2, Lock, LockOpen, Check, Play, FileText, Download } from 'lucide-react';
+import { formatAttachmentSize } from '@/lib/attachments';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -98,7 +99,7 @@ export function LockedMediaBubble({ message, onOpenImage }: LockedMediaBubblePro
   useEffect(() => (!signedIn ? undefined : onDmMediaUnlocked(data => {
     if (data.messageId !== message._id) return;
     void queryClient.invalidateQueries({ queryKey: lockedMediaKey(message._id) });
-    if (mine) toast.success(t('dmPaidLock.lockedUnlockedByThem', { defaultValue: 'Your locked {{kind}} was unlocked: +{{amount}} DHB', kind: lock.kind === 'video' ? 'video' : 'photo', amount: formatPrice(data.amount) }));
+    if (mine) toast.success(t('dmPaidLock.lockedUnlockedByThem', { defaultValue: 'Your locked {{kind}} was unlocked: +{{amount}} DHB', kind: lock.kind === 'video' ? 'video' : lock.kind === 'file' ? 'file' : 'photo', amount: formatPrice(data.amount) }));
   })), [signedIn, message._id, mine, lock.kind, queryClient, t]);
 
   const view = status?.lock ?? lock;
@@ -141,7 +142,7 @@ export function LockedMediaBubble({ message, onOpenImage }: LockedMediaBubblePro
         const realNow = res.lock?.mediaUrl;
         await Promise.all([
           wait(800),
-          lock.kind === 'video' ? Promise.resolve() : preloadImage(realNow ? getMediaUrl(realNow) || realNow : undefined),
+          lock.kind !== 'image' ? Promise.resolve() : preloadImage(realNow ? getMediaUrl(realNow) || realNow : undefined),
         ]);
         setSheetOpen(false);
         await wait(250);
@@ -198,6 +199,83 @@ export function LockedMediaBubble({ message, onOpenImage }: LockedMediaBubblePro
 
   const priceLabel = formatLockUsd(usd);
   const senderName = message.sender?.displayName || message.sender?.username || '';
+
+  // ── A locked document: a file card, never a picture ──
+  if (lock.kind === 'file') {
+    const name = view.fileName || lock.fileName || t('copy.a424e33d9093', 'Locked');
+    const bytes = view.fileSize ?? lock.fileSize ?? 0;
+    const sold = (view.unlockCount ?? 0) > 0;
+    const href = realUrl ? getMediaUrl(realUrl) || realUrl : undefined;
+    const meta = [bytes ? formatAttachmentSize(bytes) : '', priceLabel].filter(Boolean).join(' · ');
+    return (
+      <div data-dm-locked={href ? 'open' : 'closed'} className="w-[260px] max-w-full space-y-2">
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          download={href ? name : undefined}
+          onClick={href ? undefined : (e) => e.preventDefault()}
+          className={cn('flex items-center gap-2.5 rounded-lg bg-black/20 px-3 py-2.5', href && 'hover:bg-black/30')}
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white/10">
+            {href ? <FileText className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium" title={name}>{name}</span>
+            <span className="block text-[11px] opacity-70">
+              {meta}
+              {mine && sold && <> · <Check className="inline h-3 w-3" /> {t('dmPaidLock.lockedUnlockedTag', 'Unlocked')}</>}
+            </span>
+          </span>
+          {href && <Download className="h-4 w-4 shrink-0 opacity-80" />}
+        </a>
+        {!href && mine && (
+          <div className="flex items-center gap-2 px-1 text-xs opacity-70">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            {t('dmPaidLock.lockedUploading', { defaultValue: 'Locking your {{kind}}…', kind: name })}
+          </div>
+        )}
+        {!href && !mine && (
+          <div className="flex flex-col items-start gap-1 px-1">
+            <button
+              type="button"
+              onClick={handleUnlock}
+              disabled={pending || !status}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border border-current/30 bg-black/30 px-4 py-1.5 text-sm font-semibold transition-transform hover:bg-black/40 active:scale-95',
+                (pending || !status) && 'opacity-80',
+              )}
+            >
+              {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockOpen className="h-4 w-4" />}
+              {pending
+                ? t('dmPaidLock.lockedConfirming', 'Confirming payment…')
+                : t('dmPaidLock.lockedUnlockFor', { defaultValue: 'Unlock for {{price}}', price: priceLabel })}
+            </button>
+            {!pending && (
+              <span className="text-[11px] opacity-70">
+                {t('dmPaidLock.lockedDhbNow', { defaultValue: '{{dhb}} at today’s price', dhb: formatLockDhb(dhbNow) })}
+              </span>
+            )}
+          </div>
+        )}
+        {isMobile && !href && !mine && (
+          <UnlockConfirmSheet
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            title={name}
+            who={senderName ? t('dmPaidLock.sheetFrom', { defaultValue: 'From {{name}}', name: senderName }) : t('dmPaidLock.sheetFromThem', 'From this chat')}
+            sub={senderName ? t('dmPaidLock.sheetAllTo', { defaultValue: 'All of it goes to {{name}}', name: senderName }) : t('dmPaidLock.sheetAllToThem', 'All of it goes to them')}
+            previewUrl={undefined}
+            priceLabel={priceLabel}
+            dhbLabel={`≈ ${formatLockDhb(dhbNow)}`}
+            phase={phase}
+            doneLabel={t('settings.download', 'Download')}
+            onPay={handleSheetPay}
+          />
+        )}
+      </div>
+    );
+  }
 
   // ── Sender, or someone who has paid: the real thing ──
   if (realUrl) {

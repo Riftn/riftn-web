@@ -6,18 +6,21 @@ import { withSoundWindow } from '@/lib/sound-window';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
+import { ResetWalletSettings, type ResetWalletReadiness } from '@/components/app/settings/ResetWalletSettings';
 import PersonalKeys from '@/components/PersonalKeys';
-import { ProfilePostBgContext, PostBgPicker, usePostBgHold } from '@/components/app/profile/PostBackground';
+import { ProfilePostBgContext, ProfilePostBgMapContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import type { ArticleTileLook } from '@/lib/article-tile';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
+import { FormatGlyph, type FormatKind } from '@/components/app/profile/FormatMark';
 import { PostCard as GalleryPostCard } from '@/components/app/cards/PostCard';
 import { ContentWarningGate } from '@/components/app/cards/ContentWarningGate';
 import { AuthorThread } from '@/components/app/cards/AuthorThread';
-import { postBgById } from '@/lib/post-backgrounds';
+import { postBgById, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import type { TextPost as GalleryTextPost } from '@/types/feed.types';
 import type { ProviderKeyRow } from '@/lib/api/dehub/provider-keys';
 import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
+import { MultiPostSheetView } from '@/features/post/components/MultiPostSheet';
 import { NewMessageDrawer } from '@/components/app/chat/NewMessageDrawer';
 import type { DeHubConversation } from '@/lib/api/dehub';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -31,9 +34,12 @@ import { DmLockedState, DmUndecryptableRun } from '@/components/app/chat/DmLocke
 import { DmSafetyBanner } from '@/components/app/chat/DmSafetyBanner';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
+import { PostMenuGate } from '@/components/app/post-menu/PostMenuGate';
 import { PostActionBar } from '@/features/post/components/PostActionBar';
 import { createPortal } from 'react-dom';
 import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
+import MenuSearchIcon from "@/components/ui/cut-icons/search";
 import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
 import { hideDislikedPost, restoreDislikedPost } from '@/lib/disliked-posts-store';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +48,7 @@ import { showUndoToast } from '@/components/ui/undo-toast';
 import { showUpdateToast } from '@/components/app/NewVersionToast';
 import type { BuildVersion } from '@/lib/version-check';
 import { useSearchParams } from 'react-router-dom';
+import { NotificationRowsGallery } from '@/components/app/notifications/NotificationRowsGallery';
 import { transcriptKey } from '@/hooks/use-transcript';
 import { AppState } from '@/components/app/AppState';
 import { LiveRipple } from '@/components/app/LiveRipple';
@@ -67,6 +74,7 @@ import { ActionBar } from '@/components/app/cards/ActionBar';
 import type { PostReaction, ReactionCounts } from '@/lib/reactions';
 import { ReactionEmoji } from '@/components/app/cards/ReactionEmoji';
 import { AuthContext, type AuthContextType } from '@/contexts/AuthContext';
+import { ThreadedComments, type ThreadedCommentsLabels } from '@/components/app/comments/ThreadedComments';
 import { TipWall, TipChip } from '@/components/app/comments/TipWall';
 import type { Comment as GalleryComment } from '@/lib/comment-mapper';
 import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
@@ -126,6 +134,9 @@ import { DraftVideoProgress } from '@/features/post/components/DraftVideoProgres
 import { PostProcessingPill } from '@/components/app/PostProcessingDock';
 import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { DehubLinkEmbeds } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { UserMentionDropdown } from '@/components/app/mentions';
+import { findDehubLinks } from '@/lib/dehub-links';
 import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
 import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
 import type { GovernanceProposal } from '@/hooks/use-governance';
@@ -155,6 +166,8 @@ import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
 import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
+import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
+import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
@@ -165,7 +178,9 @@ import { ProfileFieldsEditor, type FieldRow } from '@/components/app/settings/Pr
 import type { SuggestedAccount } from '@/lib/api/dehub';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { filterNavItems } from '@/components/app/navigation/nav-search';
-import { MobileMenuGrid } from '@/components/app/navigation/MobileMenuGrid';
+import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { groupMenuItems } from '@/components/app/navigation/menu-groups';
+import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 
 /**
  * Comic posts: the deck as the feed shows it, the post page with the hand of
@@ -335,6 +350,89 @@ function NameBadgesGallery() {
  * bubbles, one avatar and one time line per run, a day pill, the wallpaper).
  * Laid out by hand from the real bubble, since the live chat needs a session.
  */
+/**
+ * Right-click (computer) or hold (phone) a message: quick reactions, the
+ * actions, and who reacted. Lines here carry reactions so the "N reactions"
+ * row shows; the people come from /api/account_info/batch (DMs) and
+ * /api/livechat/reactors (live chat).
+ */
+function MessageMenuGallery() {
+  const iso = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const ella = { _id: 'ella', address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' };
+  const others = ['0x7777777777777777777777777777777777777772', '0x7777777777777777777777777777777777777773', '0x7777777777777777777777777777777777777774'];
+  const msg = (id: string, mine: boolean, content: string, createdAt: string, reactions?: Record<string, string[]>): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: (mine ? me : ella) as DmMessage['sender'], author: mine ? 'me' : 'other', content,
+    msgType: 'msg', mediaUrls: [], voiceDuration: null, isRead: mine, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, createdAt, reactions,
+  } as unknown as DmMessage);
+  const thread = [
+    { m: msg('mm-a', false, 'the new intro is unreal, who made the music?', iso(30), { '🔥': [me.address, others[0]], '❤️': [others[1]] }), mine: false },
+    { m: msg('mm-b', true, 'a friend of mine, I will send you the full track tonight', iso(24), { '🙏': [ella.address], '💯': [ella.address, others[2]] }), mine: true },
+    { m: msg('mm-c', false, 'deal. pinning this so I remember', iso(20)), mine: false },
+  ];
+  const noop = () => {};
+  // Delete opens the real choice: for me / for both (yours) or for me only (theirs).
+  const [deleting, setDeleting] = useState<{ mine: boolean } | null>(null);
+  const live: LiveChatLineMessage[] = [
+    { id: 'mm-live-1', userId: others[0], userName: 'Luna', userHandle: 'xluna', content: 'gm chat, who is watching the stream tonight?', timestamp: new Date(Date.now() - 6 * 60_000), type: 'text', reactions: { '👍': [others[1], others[2], me.address], '🚀': [others[1]] } },
+    { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
+  ];
+  return (
+    <section data-msg-menu-gallery className="mb-5 space-y-3">
+      <h2 className="text-sm font-semibold">Message menu (right-click on a computer, hold on a phone)</h2>
+      <div data-msg-menu-dm className="flex h-[22rem] flex-col overflow-hidden rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-6">
+          {thread.map(({ m, mine }) => (
+            <DmMessageBubble
+              key={m._id}
+              message={m}
+              isOwnMessage={mine}
+              cozy={{ first: true, last: true }}
+              currentUserAddress={me.address}
+              onReply={noop}
+              onReact={noop}
+              onRemoveReaction={noop}
+              onForward={noop}
+              onPin={noop}
+              onEdit={noop}
+              onDelete={() => setDeleting({ mine })}
+              onStartPick={noop}
+              onTogglePick={noop}
+            />
+          ))}
+        </div>
+      </div>
+      <div data-msg-menu-live className="overflow-hidden rounded-2xl border border-white/10 py-2">
+        {live.map((line) => (
+          <LiveChatLine
+            key={line.id}
+            message={line}
+            currentUserAddress={me.address}
+            onReact={noop}
+            onRemoveReaction={noop}
+            onReply={noop}
+            onEdit={noop}
+            onDelete={noop}
+            showActions
+            onTogglePin={noop}
+            onBan={noop}
+            moderators={[others[0]]}
+          />
+        ))}
+      </div>
+      <DeleteMessageDialog
+        open={!!deleting}
+        onOpenChange={(open) => { if (!open) setDeleting(null); }}
+        canDeleteForEveryone={!!deleting}
+        oneToOne
+        peerName="Ella Verse"
+        onDelete={noop}
+      />
+    </section>
+  );
+}
+
 function FullScreenChatGallery() {
   const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
   const yesterday = (h: number) => { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(h, 12, 0, 0); return d.toISOString(); };
@@ -620,6 +718,41 @@ function AuthorThreadGallery() {
   );
 }
 
+// The Requests / proposal comment box, signed in, with an empty thread: type
+// into it to check long text uses the whole width and the buttons drop below.
+function ThreadedComposerGallery() {
+  const labels = useMemo<ThreadedCommentsLabels>(() => ({
+    addComment: 'Add a comment...', writeReply: 'Write a reply...', reply: 'Reply',
+    replyingTo: (name) => `Replying to ${name}`, edited: 'edited', empty: 'No comments yet',
+    showMoreReplies: (count) => `Show ${count} more replies`,
+  }), []);
+  const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
+  const noop = () => Promise.resolve();
+  return (
+    <AuthContext.Provider value={GALLERY_THREAD_AUTHOR_AUTH}>
+      <section data-threaded-composer-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+        <ThreadedComments
+          draftScope="gallery:threaded-composer"
+          threads={[]}
+          isLoading={false}
+          isError={false}
+          isFetching={false}
+          onRetry={() => {}}
+          entityAuthorAddress={GALLERY_THREAD_AUTHOR}
+          labels={labels}
+          busy={false}
+          submitting={false}
+          media={media}
+          onSubmit={noop}
+          onEdit={noop}
+          onDelete={() => {}}
+          onReact={() => {}}
+        />
+      </section>
+    </AuthContext.Provider>
+  );
+}
+
 // The gallery sits outside the wallet providers; a signed-out stub is all the
 // action row needs to render.
 const GALLERY_AUTH = {
@@ -636,6 +769,7 @@ import { UsernameReserve } from '@/components/app/profile/UsernameReserve';
 import { ComicPagesEditor } from '@/features/post/components/ComicPagesEditor';
 import { ComicBorderPicker } from '@/features/post/components/ComicBorderPicker';
 import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -768,20 +902,49 @@ function MenuReorderGallery() {
   const { t } = useTranslation();
   // Type here to see the menu search exactly as the phone menu runs it.
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState(0);
+  const layout = useMenuLayout();
+  // ?menuLayout=tabs|sections|folders opens the gallery on that layout.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get('menuLayout');
+    if (param) writeMenuLayout(normaliseMenuLayout(param));
+    const tabParam = Number(new URLSearchParams(window.location.search).get('menuTab'));
+    if (tabParam > 0) setTab(tabParam);
+  }, []);
   const items = useMemo(() => filterNavItems(NAV_ITEMS, query, t, false), [query, t]);
+  const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
   return (
     <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t('sidebar.searchMenu')}
-        aria-label={t('sidebar.searchMenu')}
-        data-menu-search
-        data-search-surface
-        className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
-      />
-      <MobileMenuGrid items={items} searching={!!query.trim()} currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
+      <div className="mb-3 flex gap-1.5">
+        {(['tabs', 'sections', 'folders'] as const).map((value) => (
+          <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}
+            className={`h-8 rounded-lg border px-3 text-[13px] font-semibold ${layout === value ? 'border-white/30 bg-white/15 text-white' : 'border-white/10 text-zinc-400'}`}>
+            {value}
+          </button>
+        ))}
+      </div>
+      {layout === 'tabs' && !query ? (
+        <div className="mb-3 flex items-stretch gap-1.5">
+          <button type="button" onClick={() => setQuery(' ')} aria-label={t('sidebar.searchMenu')} data-search-surface
+            className="flex w-[42px] flex-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-200">
+            <MenuSearchIcon className="h-[18px] w-[18px]" />
+          </button>
+          <MenuTabs groups={groups} activeTab={tab} onTabChange={setTab} />
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('sidebar.searchMenu')}
+          aria-label={t('sidebar.searchMenu')}
+          data-menu-search
+          data-search-surface
+          className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
+        />
+      )}
+      <MobileMenuLayout layout={layout} groups={groups} flatItems={items} searching={!!query.trim()} activeTab={tab} onTabChange={setTab}
+        currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
     </section>
   );
 }
@@ -1700,6 +1863,35 @@ function PostStatsGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   );
 }
 
+/** Multi-post set up opened from the composer; ?sheet=multipost, &mp=empty for a first-time poster. */
+function MultiPostSheetGallery({ initiallyOpen, empty }: { initiallyOpen: boolean; empty: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  const [selected, setSelected] = useState<string[]>(['g-x']);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const accounts = empty ? [] : [
+    { id: 'g-x', platform: 'twitter', username: 'riftn_com' },
+    { id: 'g-ig', platform: 'instagram', username: 'riftn.app' },
+    { id: 'g-fc', platform: 'farcaster', username: '', pending: true, approvalUrl: 'https://farcaster.xyz' },
+  ];
+  return (
+    <section data-multipost-gallery className="mb-5">
+      <Button onClick={() => setOpen(true)}>Multi-posting sheet</Button>
+      <MultiPostSheetView
+        open={open}
+        onOpenChange={setOpen}
+        accounts={accounts}
+        balance={empty ? 0 : 42}
+        selected={selected}
+        onToggle={(id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))}
+        connecting={connecting}
+        onConnect={(p) => { setConnecting(p); setTimeout(() => setConnecting(null), 1500); }}
+        buying={false}
+        onBuy={() => {}}
+      />
+    </section>
+  );
+}
+
 /** The "Add a profile photo" ask; saving here only waits, nothing uploads. */
 function AvatarPromptGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
@@ -1894,8 +2086,16 @@ export default function StateGalleryPage() {
 
         {params.get('predictions') === '1' && <PredictionGallery />}
         {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('resetwallet') && (
+          <section data-reset-wallet-gallery className="mb-5 max-w-xl">
+            <ResetWalletSettings preview={(['ready', 'no-login', 'signed-in-with-wallet', 'done'] as const).find((s) => s === params.get('resetwallet')) ?? ('ready' as ResetWalletReadiness)} />
+          </section>
+        )}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
+        {params.get('composer') === '1' && <ThreadedComposerGallery />}
+        {params.get('notifs') === '1' && <NotificationRowsGallery />}
+        {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
 
         <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
 
@@ -1923,15 +2123,21 @@ export default function StateGalleryPage() {
 
         <NameBadgesGallery />
         <FullScreenChatGallery />
+        <MessageMenuGallery />
         <FollowCardsGallery />
 
         <StreamerArtworkGallery />
 
+        <section data-page-bento data-login-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <LoginLookSetting />
+        </section>
         <PinnedProfileGallery />
+        <ProfileImageMenuGallery />
         <ContentWarningGallery />
         <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
         <TextTilesGallery />
         <ArticleTilesGallery initialLook={params.get('atile')} initiallyOpen={params.get('sheet') === 'article-tile'} />
+        <FormatIconsGallery />
         <GridCardsGallery />
         <GridReorderGallery />
 
@@ -2069,6 +2275,7 @@ export default function StateGalleryPage() {
         <ChatBulkGallery />
         <PostEditHistoryGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
+        <MultiPostSheetGallery initiallyOpen={params.get('sheet') === 'multipost'} empty={params.get('mp') === 'empty'} />
         <ToastsGallery />
         <TooltipsGallery />
         <AppTokensGallery />
@@ -2384,16 +2591,31 @@ function ContentWarningGallery() {
 
 /** Profile text-post backgrounds: the owner's hold-to-pick picker, phone grid tiles and a desktop card. */
 function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: string | null; initiallyOpen: boolean }) {
-  const [bgId, setBgId] = useState<string | null>(postBgById(initialBg)?.id ?? 'aurora');
+  const [bg, setBg] = useState<PostBg | null>(postBgById(initialBg) ?? postBgById('aurora'));
   const [open, setOpen] = useState(initiallyOpen);
-  const bg = postBgById(bgId);
-  const hold = usePostBgHold(true, () => setOpen(true));
-  const postHold = usePostBgHold(true, () => setOpen(true), '[data-pbg-text]');
+  // One post can carry its own backdrop: hold it and pick "This post".
+  const [target, setTarget] = useState<string | null>(null);
+  const [own, setOwn] = useState<Map<string, PostBg | null>>(() => new Map());
+  const hold = usePostBgHold(true, () => { setTarget(null); setOpen(true); });
+  const postHold = usePostBgHold(true, (held) => { setTarget(held?.dataset.pbgPost || null); setOpen(true); }, '[data-pbg-text]');
+  // Right-click opens the post menu; its "Post background" row lands here.
+  useEffect(() => {
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (look?.kind !== 'background') return;
+      setTarget(look.el.dataset.pbgPost || null);
+      setOpen(true);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, []);
   const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
   return (
     <section data-page-bento data-post-bg-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">Profile post backgrounds</h2>
       <AuthContext.Provider value={GALLERY_AUTH}>
+        {/* The gallery sits outside the app shell, so it brings its own right-click menu. */}
+        <PostMenuGate />
         <div
           ref={(el) => { hold.hostRef.current = el; }}
           {...hold.handlers}
@@ -2405,18 +2627,20 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
           <div><p className="font-bold text-white">Marco V</p><p className="text-xs text-zinc-400">Hold here to choose a background</p></div>
         </div>
         <ProfilePostBgContext.Provider value={bg}>
+          <ProfilePostBgMapContext.Provider value={own}>
           <div ref={postHold.hostRef} {...postHold.handlers} className="relative grid gap-4 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
             {postHold.ringEl}
             <div data-post-bg-phone-grid><ProfileMixedGrid entries={entries} /></div>
             <div data-post-bg-desktop className="space-y-3">
               {GALLERY_TEXT_POSTS.slice(0, 2).map((post) => (
-                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" data-pbg-text="" data-pbg={bg?.id} data-pbg-tone={bg?.tone} data-pbg-kind={bg?.kind}>
-                  {bg && <span aria-hidden className={`pbg pbg-${bg.id}`} />}
+                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" {...postBgHostProps(own.get(post.id) || bg, post.id)}>
+                  <PostBgLayer bg={own.get(post.id) || bg} seed={post.id} />
                   <GalleryPostCard post={post} />
                 </div>
               ))}
             </div>
           </div>
+          </ProfilePostBgMapContext.Provider>
         </ProfilePostBgContext.Provider>
         <PostBgPicker
           open={open}
@@ -2425,8 +2649,16 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
           handle="@marco_v"
           avatarUrl={galleryAvatar}
           sampleText={GALLERY_TEXT_POSTS[0].content}
+          postId={target}
+          postCurrent={target ? own.get(target) ?? bg : undefined}
           onCancel={() => setOpen(false)}
-          onSave={(id) => { setBgId(id); setOpen(false); }}
+          onSave={({ id, colors, file, scope }) => {
+            const def = postBgById(id);
+            const next = !def ? null : def.kind === 'photo' ? (file ? { ...def, image: URL.createObjectURL(file) } : null) : withPostBgColors(def, colors);
+            if (scope === 'post' && target) setOwn((m) => new Map(m).set(target, next));
+            else { setBg(next); setOwn(new Map()); }
+            setOpen(false);
+          }}
         />
       </AuthContext.Provider>
     </section>
@@ -2542,6 +2774,44 @@ function GridCardsGallery() {
   );
 }
 
+const FORMAT_KINDS: FormatKind[] = ['photo', 'photos', 'video', 'short', 'replay', 'audio', 'article', 'text', 'comic', 'earn', 'stage', 'event', 'poll', 'quote', 'sharedPost', 'link', 'community', 'shop', 'profile', 'film', 'bounty', 'app', 'proposal', 'spotify'];
+
+/** Every post format's custom icon, on real grid tiles and as a key. */
+function FormatIconsGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => { seedGridCards(qc); return true; });
+  const media = [
+    pillImage('fi-photo', pillArtF),
+    pillImage('fi-photos', pillArtB, { imageUrls: [pillArtB, pillArtC] }),
+    pillVideo('fi-video', 'Night ride through the city', pillArtB),
+    pillVideo('fi-short', 'POV: first ride', pillArtC, { isShort: true }),
+    pillVideo('fi-replay', 'Friday night stream', pillArtE, { isLivePost: true, duration: '1:12:04' }),
+    pillVideo('fi-audio', 'Midnight drive', pillArtD, { isAudio: true }),
+    pillText('fi-article', 'How we shoot at night', { title: 'How we shoot at night', articleBody: GALLERY_ARTICLE_BODY, articleImageUrl: pillAbs(pillArtE) }),
+    pillImage('fi-comic', pillArtA, { layout: 'comic', imageUrls: [pillArtA, pillArtB, pillArtC] }),
+    pillVideo('fi-earn', 'Watch to the end and earn', pillArtD, { bountyAmount: 1000 }),
+    pillText('fi-plain', 'Sunday reset. Coffee, long walk, no notifications.'),
+  ];
+  const cards = GRID_CARD_ENTRIES.filter((e) => e.type === 'post' && e.key !== 'gc-plain');
+  const entries = [...media, ...cards] as unknown as MixedGridEntry[];
+  return (
+    <section data-page-bento data-format-icons-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: format icons</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {ready && <div className="max-w-[360px]" data-format-icons-grid><ProfileMixedGrid entries={entries} /></div>}
+      </AuthContext.Provider>
+      <div data-format-icons-key className="mt-4 grid max-w-[360px] grid-cols-4 gap-2 text-[10px]">
+        {FORMAT_KINDS.map((kind) => (
+          <div key={kind} className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] p-2">
+            <FormatGlyph kind={kind} className="h-6 w-6 [&_.fmt-wash]:opacity-0" />
+            <span className="opacity-70">{kind === 'sharedPost' ? 'shared' : kind}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /** Plain text posts in the profile grid: Soft Light with no backdrop chosen, then the three backdrops that differ per post. */
 function TextTilesGallery() {
   const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.slice(0, 3).map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
@@ -2623,6 +2893,49 @@ function PinnedProfileGallery() {
             isAuthenticated={false}
             badgeUrl={null}
             isFollowing
+            isPending={false}
+            isTargetPrivate={false}
+            isFollowLoading={false}
+            handleFollow={noop}
+            handleUnfollow={noop}
+            isSubscribed={false}
+            hasPlans={false}
+            setFullscreenImage={noop}
+            setActiveTab={noop}
+            shareSheetOpen={false}
+            setShareSheetOpen={noop}
+            setLoginModalOpen={noop}
+            ShareOptions={() => null}
+            showFollowersFollowing
+            hideFollowerCounts={false}
+            setFollowListType={noop}
+            setFollowListDrawerOpen={noop}
+            translatedBio={null}
+            setTranslatedBio={noop}
+          />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/**
+ * The owner's own header: right-click (or hold) the picture or banner for
+ * Change, Paste, Copy, Delete. Nothing saves here (no signed-in user).
+ */
+function ProfileImageMenuGallery() {
+  return (
+    <section data-page-bento data-profile-image-menu-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile picture and banner menu</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[680px]">
+          <ProfileHeader
+            profile={GALLERY_PROFILE}
+            apiProfile={GALLERY_PROFILE}
+            isViewingOwnProfile
+            isAuthenticated
+            badgeUrl={null}
+            isFollowing={false}
             isPending={false}
             isTargetPrivate={false}
             isFollowLoading={false}
@@ -2848,6 +3161,70 @@ const GALLERY_PROPOSALS: GovernanceProposal[] = (() => {
       options: ['Creator tools', 'Token roadmap', 'Moderation'], option_tallies: [{ weight: 470, voters: 52 }, { weight: 230, voters: 28 }, { weight: 120, voters: 13 }] },
   ] as GovernanceProposal[];
 })();
+
+/**
+ * Links to our own things as cards (`?links=1`): a Requests board link, a
+ * community, and pages, the way a DM, a comment or a live chat line shows
+ * them. `&mention=lead` opens the @ list on that word, live.
+ */
+const GALLERY_REQUEST_ID = '00000000-0000-4000-8000-0000000000aa';
+const GALLERY_LINK_TEXT = [
+  `https://riftn.com/features?feature=${GALLERY_REQUEST_ID}`,
+  'https://riftn.com/app/communities/gallery-builders',
+  'https://riftn.com/app/leaderboard',
+  'https://riftn.com/shorts',
+  'https://riftn.com/arcade/kings-gambit',
+  'https://riftn.com/features',
+];
+
+function LinkCardsGallery({ mention }: { mention: string | null }) {
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState(0);
+  const [open, setOpen] = useState(!!mention);
+  useState(() => {
+    const now = new Date().toISOString();
+    queryClient.setQueryData(['feature-request', GALLERY_REQUEST_ID], {
+      id: GALLERY_REQUEST_ID, title: 'Tag communities and pages with @ in messages', status: 'in_progress',
+      description: 'Typing @ should find communities and pages too, and drop a link that opens in the app.',
+      category: 'new_feature', author_wallet_address: '0x1111111111111111111111111111111111111111',
+      author_username: 'marco_v', author_avatar: null, image_url: null, image_urls: null,
+      vote_count: 128, like_count: 128, dislike_count: 3, comment_count: 14, created_at: now, updated_at: now,
+    });
+    queryClient.setQueryData(['communities', 'slug', 'gallery-builders'], {
+      id: 'gallery-community', name: 'Riftn Builders', slug: 'gallery-builders',
+      description: 'Ship ideas, find testers, show what you made.', avatar_url: null, banner_url: null,
+      creator_wallet_address: '0x1111111111111111111111111111111111111111', is_private: false, member_count: 2480,
+      rules: [], ticker_symbol: null, ticker_contract_address: null, ticker_chain_id: null, ticker_pair_address: null,
+      slow_mode_seconds: 0, default_permissions: null, created_at: now, updated_at: now,
+    });
+  });
+  const pairs = [GALLERY_LINK_TEXT.slice(0, 2), GALLERY_LINK_TEXT.slice(2, 4), GALLERY_LINK_TEXT.slice(4, 6)];
+  return (
+    <section data-page-bento data-link-cards-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Link cards</h2>
+      <div className="grid gap-4 md:grid-cols-3">
+        {pairs.map((pair, i) => (
+          <div key={i} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-sm text-white/80">{i === 0 ? 'have a look at these' : i === 1 ? 'top of the board today' : 'play this one'}</p>
+            <DehubLinkEmbeds links={findDehubLinks(pair.join(' '))} compact />
+          </div>
+        ))}
+      </div>
+      <button type="button" data-open-mention onClick={() => setOpen(true)} className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-sm">
+        @ list
+      </button>
+      <UserMentionDropdown
+        query={mention || 'lead'}
+        isOpen={open}
+        position={{ top: 0, left: 0 }}
+        selectedIndex={selected}
+        onSelectedIndexChange={setSelected}
+        onSelect={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+      />
+    </section>
+  );
+}
 
 function ProposalCardGallery() {
   const { t } = useTranslation();

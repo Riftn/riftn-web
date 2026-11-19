@@ -63,12 +63,15 @@ import { ProfileFollowButton } from '@/components/app/profile/ProfileFollowButto
 import { UserAvatar } from '@/components/app/UserAvatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
-import { ProfilePostBgContext, ProfilePostBgArtContext, PostBgPicker, usePostBgHold } from '@/components/app/profile/PostBackground';
-import { mergePostBg, parsePostBg, postBgById } from '@/lib/post-backgrounds';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
+import { ProfilePostBgContext, ProfilePostBgArtContext, ProfilePostBgMapContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
+import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
-import { updateProfile } from '@/lib/api/dehub';
+import { updateProfile, setPostBackground } from '@/lib/api/dehub';
+import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, ProfileViewModeContext, parseProfileViewDefault, parseProfileViewReaderPref, startingProfileView, useProfileViewState } from '@/lib/profile-view-mode';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { checkUsernameAvailability } from '@/lib/api/dehub/auth';
 
@@ -309,31 +312,103 @@ export default function ProfilePage() {
   const appliedDefaultTabFor = useRef<string | null>(null);
   const profileKey = data.apiProfile?.walletAddress || null;
 
+  // Grid or list on the All tab: the owner's saved default, unless this
+  // visitor flipped the toggle on this profile during this browser tab.
+  // The reader can also pick grid or list for every profile they open
+  // (their own customs.profileViewOthers); "owner" keeps each owner's pick.
+  const { data: readerProfile } = useDeHubProfile({
+    userId: data.currentWalletAddress || undefined,
+    enabled: !!data.currentWalletAddress && data.isAuthenticated,
+  });
+  const profileView = useProfileViewState(
+    profileKey,
+    startingProfileView(
+      parseProfileViewDefault((data.apiProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_DEFAULT_KEY]),
+      parseProfileViewReaderPref((readerProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_READER_KEY]),
+      !!data.isViewingOwnProfile,
+    ),
+  );
+
   // Text-post backdrop the owner picked (customs.postBg). A save shows at once
   // through the override and the profile query catches up behind it.
   const queryClient = useQueryClient();
   const [postBgOpen, setPostBgOpen] = useState(false);
   const [postBgSaving, setPostBgSaving] = useState(false);
-  const [postBgOverride, setPostBgOverride] = useState<{ owner: string; id: string | null } | null>(null);
+  const [postBgOverride, setPostBgOverride] = useState<{ owner: string; bg: PostBg | null } | null>(null);
   const postBg = postBgOverride && postBgOverride.owner === profileKey
-    ? postBgById(postBgOverride.id)
+    ? postBgOverride.bg
     : parsePostBg(data.apiProfile?.customs);
-  const openPostBg = useCallback(() => setPostBgOpen(true), []);
+  // The owner's own picture stays on the account even while another backdrop is on.
+  const postBgPhoto = postBg?.kind === 'photo' ? postBg.image ?? null : postBgImageUrl(data.apiProfile?.customs?.[POST_BG_IMAGE_KEY]);
+  // Which post the picker was opened from (null: the header / menu, so "all").
+  const [postBgTarget, setPostBgTarget] = useState<string | null>(null);
+  // Posts with their own backdrop: what the server sent, then saves made here.
+  const [postBgSaved, setPostBgSaved] = useState<{ owner: string; map: Map<string, PostBg | null> } | null>(null);
+  const postBgMap = useMemo(() => {
+    const map = new Map<string, PostBg | null>();
+    data.POST_BGS.forEach((raw, id) => { const bg = postBgFromStored(raw); if (bg) map.set(id, bg); });
+    if (postBgSaved && postBgSaved.owner === profileKey) postBgSaved.map.forEach((bg, id) => { if (bg) map.set(id, bg); else map.delete(id); });
+    return map;
+  }, [data.POST_BGS, postBgSaved, profileKey]);
+  const openPostBg = useCallback(() => { setPostBgTarget(null); setPostBgOpen(true); }, []);
+  const openPostBgFor = useCallback((held?: HTMLElement | null) => {
+    setPostBgTarget(held?.dataset.pbgPost || null);
+    setPostBgOpen(true);
+  }, []);
   const postBgHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBg);
-  // Holding (or right-clicking) one of your own text posts opens it too.
-  const postBgPostHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBg, '[data-pbg-text]');
+  // Holding (or right-clicking) one of your own text posts opens it for that post.
+  const postBgPostHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBgFor, '[data-pbg-text]');
   const postBgSample = useMemo(
-    () => data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
-    [data.PROFILE_POSTS],
+    // The held post's own words, else your newest text post.
+    () => (postBgTarget && data.PROFILE_POSTS.find((p) => String(p.id) === postBgTarget)?.content?.trim())
+      || data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
+    [data.PROFILE_POSTS, postBgTarget],
   );
-  const savePostBg = useCallback(async (id: string | null) => {
+  const savePostBg = useCallback(async ({ id, colors, file, scope }: PostBgSave) => {
     if (!profileKey) return;
-    if ((postBg?.id ?? null) === id) { setPostBgOpen(false); return; }
+    // Just this post: saved on the post, the profile's backdrop is left alone.
+    if (scope === 'post' && postBgTarget) {
+      setPostBgSaving(true);
+      try {
+        const def = postBgById(id);
+        const keepPhoto = def?.kind === 'photo' && !file;
+        const photoKey = keepPhoto ? (data.apiProfile?.customs?.[POST_BG_IMAGE_KEY] as string | undefined) : undefined;
+        const stored = def?.kind === 'photo' ? (photoKey ? `photo||${photoKey}` : '') : postBgStored(id, colors);
+        const res = await setPostBackground(postBgTarget, stored, def?.kind === 'photo' ? file : null);
+        const next = res.postBg ? postBgFromStored(res.postBg) : null;
+        setPostBgSaved((cur) => {
+          const map = new Map(cur && cur.owner === profileKey ? cur.map : []);
+          map.set(postBgTarget, next);
+          return { owner: profileKey, map };
+        });
+        setPostBgOpen(false);
+      } catch {
+        toast.error(t('postBg.saveFailed', "Couldn't save your background. Try again."));
+      } finally {
+        setPostBgSaving(false);
+      }
+      return;
+    }
+    const def = postBgById(id);
+    const next: PostBg | null = !def
+      ? null
+      : def.kind === 'photo'
+        ? { ...def, image: file ? URL.createObjectURL(file) + (/^video\//.test(file.type) ? POST_BG_VIDEO_HINT : '') : postBgPhoto ?? undefined }
+        : withPostBgColors(def, colors);
+    const fromPost = !!postBgTarget && postBgMap.size > 0;
+    const unchanged = !file && !fromPost && (postBg?.id ?? null) === (next?.id ?? null) && (postBg?.colors ?? []).join() === (next?.colors ?? []).join();
+    if (unchanged) { setPostBgOpen(false); return; }
     setPostBgSaving(true);
     try {
-      const customs = mergePostBg(data.apiProfile?.customs, id) as Record<string, string | number | boolean>;
-      await updateProfile({ customs });
-      setPostBgOverride({ owner: profileKey, id });
+      const customs = mergePostBg(data.apiProfile?.customs, { id, colors }) as Record<string, string | number | boolean>;
+      await updateProfile({ customs, ...(id === POST_BG_PHOTO_ID && file ? { postBgImg: file } : {}) });
+      setPostBgOverride({ owner: profileKey, bg: next });
+      // "All posts" (from a held post) means all of them, so posts with their
+      // own go back too. Holding the header only sets the profile's backdrop.
+      if (fromPost) {
+        await setPostBackground('all', '').catch(() => undefined);
+        setPostBgSaved({ owner: profileKey, map: new Map([...postBgMap.keys()].map((k) => [k, null])) });
+      }
       setPostBgOpen(false);
       void queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
     } catch {
@@ -341,7 +416,7 @@ export default function ProfilePage() {
     } finally {
       setPostBgSaving(false);
     }
-  }, [profileKey, postBg, data.apiProfile?.customs, queryClient, t]);
+  }, [profileKey, postBg, postBgPhoto, postBgTarget, postBgMap, data.apiProfile?.customs, queryClient, t]);
 
   // How the owner's articles look as grid tiles (customs.articleTile). Holding
   // one of your own articles opens the picker, like text posts and backdrops.
@@ -353,6 +428,19 @@ export default function ProfilePage() {
     : parseArticleTile(data.apiProfile?.customs);
   const openArticleTile = useCallback(() => setArticleTileOpen(true), []);
   const articleTileHold = usePostBgHold(!!data.isViewingOwnProfile, openArticleTile, '[data-tile="article"]');
+  // Right-click on your own text post or article opens the post menu; its
+  // "Post background" / "Article tiles" row lands here.
+  useEffect(() => {
+    if (!data.isViewingOwnProfile) return;
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (!look) return;
+      if (look.kind === 'article') openArticleTile();
+      else openPostBgFor(look.el);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, [data.isViewingOwnProfile, openArticleTile, openPostBgFor]);
   const articleTileSample = useMemo(() => {
     const a = data.PROFILE_POSTS.find((p) => !!p.articleBody);
     return {
@@ -779,7 +867,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           data-nav-hide="off"
           className="sticky z-50 -mx-2 sm:-mx-3 -mb-2 sm:-mb-3 px-2 sm:px-3 pt-1 pb-1"
         >
-        <div data-page-bento data-feed-nav data-profile-single-row className={cn('bg-zinc-900 rounded-xl relative', isTabsStuck && 'flex items-center gap-1 p-1')} style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
+        <div data-page-bento data-feed-nav data-profile-single-row className={cn('bg-zinc-900 rounded-xl relative p-1', isTabsStuck && 'flex items-center gap-1')} style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
           <div data-nav-glass-backdrop aria-hidden />
           {isTabsStuck && <>
             <div className="relative shrink-0 w-9 h-11">
@@ -841,7 +929,8 @@ return () => rail.removeEventListener('wheel', onWheel);
                     className={cn(
                       'relative z-40 flex flex-col items-center justify-center gap-px px-2 rounded-xl transition-[color,opacity] duration-300 text-white',
                       !isActive && 'opacity-60 hover:opacity-90',
-                      isTabsStuck ? 'shrink-0 w-14 h-11' : 'flex-1 min-w-[52px] py-[9px]',
+                      // Same tab size as the pinned bar, so the open pill doesn't squeeze them.
+                      isTabsStuck ? 'shrink-0 w-14 h-11' : 'flex-1 min-w-14 h-11',
                     )}
                   >
                     <tab.icon data-tab-glyph className="w-[18px] h-[18px] relative z-10" />
@@ -859,6 +948,7 @@ return () => rail.removeEventListener('wheel', onWheel);
         </div>
 
         {/* Tab Content - all panels rendered, inactive hidden via CSS */}
+        <ProfileViewModeContext.Provider value={profileView}>
         <div data-feed-swallow-bounds>
         <div ref={profileContentRef} data-profile-content>
         <FeedSwallowMotion>
@@ -902,6 +992,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           </Suspense>
         )}
         <ProfilePostBgContext.Provider value={postBg}>
+        <ProfilePostBgMapContext.Provider value={postBgMap}>
         <ProfilePostBgArtContext.Provider value={data.profile?.avatarUrl ?? null}>
         <ProfileArticleTileContext.Provider value={articleTile}>
         <div ref={postBgPostHold.hostRef} className="relative" {...postBgPostHold.handlers}>
@@ -945,10 +1036,12 @@ return () => rail.removeEventListener('wheel', onWheel);
         </div>
         </ProfileArticleTileContext.Provider>
         </ProfilePostBgArtContext.Provider>
+        </ProfilePostBgMapContext.Provider>
         </ProfilePostBgContext.Provider>
         </FeedSwallowMotion>
         </div>
         </div>
+        </ProfileViewModeContext.Provider>
       </div>
 
       {data.isViewingOwnProfile && (
@@ -959,7 +1052,10 @@ return () => rail.removeEventListener('wheel', onWheel);
           handle={data.profile.handle}
           avatarUrl={data.profile.avatarUrl}
           sampleText={postBgSample}
+          photoUrl={postBgPhoto}
           saving={postBgSaving}
+          postId={postBgTarget}
+          postCurrent={postBgTarget ? postBgMap.get(postBgTarget) ?? postBg : undefined}
           onCancel={() => setPostBgOpen(false)}
           onSave={savePostBg}
         />

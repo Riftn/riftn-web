@@ -1,6 +1,10 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from "@/hooks/use-draft-state";
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Fragment } from 'react';
+import { UnreadMarker, UnreadJumpButton } from './UnreadJump';
+import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
+import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
+import { useChatReadPosition } from '@/hooks/use-chat-read-position';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { MoreVertical, Loader2, ShieldBan, MessageSquarePlus, AlertCircle, RotateCcw, ChevronsDown } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
@@ -22,7 +26,8 @@ import { ChatInput, type ChatInputSendArgs } from './ChatInput';
 import { CreateTopicRoomModal } from './CreateTopicRoomModal';
 import { RoomSettingsModal } from './RoomSettingsModal';
 import { useLiveChatRooms, useLiveChatMessages, useLiveChatRoomDetails, useLiveChatPresence, type SupabaseLiveChatMessage } from '@/hooks/use-livechat';
-import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, type LiveChatRoom } from '@/lib/api/dehub';
+import { getMediaUrl, banLiveChatUser, unbanLiveChatUser, uploadChatImage, uploadLiveChatVoice, pinLiveChatMessage, unpinLiveChatMessage, type LiveChatRoom } from '@/lib/api/dehub';
+import { Pin, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { validatePublicChatMedia } from '@/lib/public-chat-media';
@@ -56,6 +61,21 @@ interface PublicChatProps {
   embedded?: boolean;
 }
 
+/**
+ * Converted lines, kept per server row: the hook swaps a row object only when
+ * that row changes, so an unchanged line keeps the same Message and its
+ * memoised ChatMessage skips re-rendering.
+ */
+const localMessageCache = new WeakMap<SupabaseLiveChatMessage, Message>();
+function toLocalMessageCached(msg: SupabaseLiveChatMessage): Message {
+  let out = localMessageCache.get(msg);
+  if (!out) {
+    out = toLocalMessage(msg);
+    localMessageCache.set(msg, out);
+  }
+  return out;
+}
+
 /** Map Supabase livechat message to local ChatMessage format */
 function toLocalMessage(msg: SupabaseLiveChatMessage): Message {
   return {
@@ -74,6 +94,7 @@ function toLocalMessage(msg: SupabaseLiveChatMessage): Message {
     audioDuration: msg.audio_duration || undefined,
 
     isEdited: msg.is_edited,
+    isPinned: !!msg.is_pinned,
     clientKey: msg.client_key,
     sendState: msg.send_state,
     reactions: msg.reactions,
@@ -111,6 +132,9 @@ const CHAT_PAGE_SIZE = 20;
 /** How close to the top (px) the next older page is fetched. */
 const LOAD_OLDER_AT = 240;
 
+/** Older pages (20 lines each) the room may pull in at open to reach where you left off. */
+const MAX_READ_SPOT_PAGES = 10;
+
 export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // A mention notification names the line that tagged the reader.
   useFocusChatMessage();
@@ -141,6 +165,13 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // Translation state
   const [translateSignal, setTranslateSignal] = useState(0);
   const [originalSignal, setOriginalSignal] = useState(0);
+  // Stable value: a fresh object here re-rendered every line on each render.
+  const translationShare = useMemo(() => ({
+    translateSignal,
+    originalSignal,
+    requestTranslate: () => setTranslateSignal((n) => n + 1),
+    requestOriginal: () => setOriginalSignal((n) => n + 1),
+  }), [translateSignal, originalSignal]);
   const [isAllTranslated, setIsAllTranslated] = useState(false);
 
   // Fetch rooms, use the first available room
@@ -199,7 +230,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   const isModerator = isRoomModerator;
 
   // Convert API messages to local format
-  const messages: Message[] = apiMessages.map(toLocalMessage);
+  const messages: Message[] = useMemo(() => apiMessages.map(toLocalMessageCached), [apiMessages]);
 
   // Assistant replies are ordinary chat messages now — they arrive over the
   // socket like everyone else's and only differ in how they are rendered. The
@@ -243,6 +274,27 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
     );
   }, [messages, buyAlerts, localAssistantReplies, hasNewer]);
+
+  // ─── Where you left off ───────────────────────────────────────────────────
+  // Signed in, the room opens on the first line you haven't seen (saved on
+  // the server, same on every device) under an "Unread messages" line.
+  const readSpot = useChatReadPosition(isAuthenticated && selectedRoomId && /^[a-z0-9_-]{1,40}$/i.test(selectedRoomId) ? `live:${selectedRoomId}` : null);
+  const [unreadAnchor, setUnreadAnchor] = useState<UnreadAnchor | null>(null);
+  const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
+  const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
+  const [unreadBelow, setUnreadBelow] = useState(0);
+  const [scrolledUp, setScrolledUp] = useState(false);
+  const readDecidedRoom = useRef<string | null>(null);
+  const unreadPlacedRef = useRef(false);
+  const readSpotPagesRef = useRef(0);
+  const readTrackingRef = useRef(false);
+  const ownAddress = walletAddress?.toLowerCase() ?? null;
+  const readLines = useMemo(() => messages.map((m) => ({
+    id: m.id,
+    own: !!ownAddress && m.userId?.toLowerCase() === ownAddress,
+    at: m.timestamp.getTime(),
+    skip: !!m.sendState || isAssistantAddress(m.userId),
+  })), [messages, ownAddress]);
 
   const openSearch = useCallback((person?: ChatSearchPerson) => {
     setSearchPerson(person ?? null);
@@ -366,6 +418,125 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // pinned to the very bottom through those too, not just on new rows.
   useStickToBottom(scrollContainerRef, () => followLatest.current && !olderAnchor.current);
 
+  // Decide once per room where it opens: on the "Unread messages" line, or at
+  // the newest line as before.
+  useEffect(() => {
+    if (!selectedRoomId || readDecidedRoom.current === selectedRoomId) return;
+    if (messagesLoading || !messages.length || !readSpot.ready) return;
+    const decide = (anchor: UnreadAnchor | null) => {
+      readDecidedRoom.current = selectedRoomId;
+      readSpotPagesRef.current = 0;
+      unreadPlacedRef.current = false;
+      setUnreadMarkerSeen(false);
+      setUnreadAnchor(anchor);
+      if (anchor) {
+        followLatest.current = false;
+        window.setTimeout(() => { readTrackingRef.current = true; }, 1500);
+      } else {
+        readTrackingRef.current = true;
+      }
+    };
+    if (!readSpot.opening || hasNewer || isSearchOpen) { decide(null); return; }
+    const found = anchorFromReadSpot(readLines, readSpot.opening, hasOlder && !signInWall);
+    if (found.kind === 'older') {
+      if (readSpotPagesRef.current < MAX_READ_SPOT_PAGES) {
+        if (!loadingOlder) {
+          readSpotPagesRef.current += 1;
+          requestOlder();
+        }
+        return;
+      }
+      const theirs = readLines.filter((l) => !l.own && !l.skip);
+      decide(theirs.length ? { id: theirs[0].id, ids: theirs.map((l) => l.id), count: theirs.length } : null);
+      return;
+    }
+    decide(found.kind === 'anchor' ? found.anchor : null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoomId, messages.length, messagesLoading, readSpot.ready, hasOlder, loadingOlder, signInWall]);
+
+  /** How many unread lines sit below the fold, and whether the marker is above it. */
+  const refreshUnreadJump = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !unreadAnchor) return;
+    const box = container.getBoundingClientRect();
+    let below = 0;
+    for (const id of unreadAnchor.ids) {
+      const el = document.getElementById(chatMessageDomId(id));
+      if (el && el.getBoundingClientRect().top > box.bottom - 4) below++;
+    }
+    setUnreadBelow(below);
+    const marker = container.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!marker) { setUnreadMarkerAbove(false); return; }
+    const r = marker.getBoundingClientRect();
+    const above = r.bottom < box.top;
+    setUnreadMarkerAbove(above);
+    if (!above && r.top < box.bottom) setUnreadMarkerSeen(true);
+  }, [unreadAnchor]);
+
+  /** Saves the newest line on screen as where you left off. */
+  const reportReadSpot = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !readTrackingRef.current || readDecidedRoom.current !== selectedRoomId) return;
+    const ids: string[] = [];
+    for (let i = messages.length - 1; i >= 0; i--) if (!messages[i].sendState) ids.push(messages[i].id);
+    const id = newestLineOnScreen(container, ids, (x) => document.getElementById(chatMessageDomId(x)));
+    if (!id) return;
+    const line = messages.find((m) => m.id === id);
+    if (line) readSpot.report(line.id, line.timestamp.toISOString());
+  }, [messages, selectedRoomId, readSpot.report]);
+
+  const scrollFrame = useRef(0);
+  const scheduleScrollWork = useCallback(() => {
+    if (scrollFrame.current) return;
+    scrollFrame.current = requestAnimationFrame(() => {
+      scrollFrame.current = 0;
+      refreshUnreadJump();
+      reportReadSpot();
+    });
+  }, [refreshUnreadJump, reportReadSpot]);
+  useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
+  useEffect(() => {
+    const timer = window.setTimeout(scheduleScrollWork, 400);
+    return () => window.clearTimeout(timer);
+  }, [messages, scheduleScrollWork]);
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') scheduleScrollWork(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [scheduleScrollWork]);
+
+  // Land on the marker: just under the top edge, the unread lines below it.
+  useLayoutEffect(() => {
+    if (!unreadAnchor || unreadPlacedRef.current) return;
+    const container = scrollContainerRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return;
+    unreadPlacedRef.current = true;
+    followLatest.current = false;
+    const offset = marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTop = Math.max(0, container.scrollTop + offset - 8);
+    const fromEnd = container.scrollHeight - container.clientHeight - container.scrollTop;
+    // Few enough unread lines to fit: the clamp left us at the bottom, so follow it.
+    followLatest.current = fromEnd < 120;
+    readTrackingRef.current = true;
+    scheduleScrollWork();
+  }, [unreadAnchor, filteredMessages.length, scheduleScrollWork]);
+
+  const jumpToUnreadMarker = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return;
+    const offset = marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - 8), behavior: 'smooth' });
+    setUnreadMarkerSeen(true);
+  }, []);
+  const jumpToNewest = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    followLatest.current = true;
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+  }, []);
+
   const handleReply = useCallback((message: Message) => {
     setReplyTo(message);
   }, [setReplyTo]);
@@ -466,6 +637,36 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     void editMessage(messageId, content);
   }, [editMessage]);
 
+  /*
+   * Pinned line, Telegram style: a bar over the list, moderators pin and
+   * unpin from the message menu. The room details carry the server's pins;
+   * a pin made here shows straight away and the details are read again.
+   */
+  const [pinOverride, setPinOverride] = useState<{ id: string | null; message?: Message } | null>(null);
+  useEffect(() => { setPinOverride(null); }, [selectedRoomId]);
+  const serverPinned = useMemo(() => {
+    const list = (roomDetails?.pinnedMessages ?? []) as unknown[];
+    const last = list[list.length - 1] as { id?: string; _id?: string; content?: string } | string | undefined;
+    if (!last) return messages.find((m) => m.isPinned) ?? null;
+    const id = typeof last === 'string' ? last : (last.id || last._id || '');
+    return messages.find((m) => m.id === id) ?? (typeof last === 'string' ? null : { id, content: last.content || '' } as Message);
+  }, [roomDetails, messages]);
+  const pinnedMessage: Message | null = pinOverride
+    ? (pinOverride.id ? (messages.find((m) => m.id === pinOverride.id) ?? pinOverride.message ?? null) : null)
+    : serverPinned;
+  const handleTogglePin = useCallback(async (message: Message) => {
+    if (!selectedRoomId) return;
+    const unpin = pinnedMessage?.id === message.id;
+    try {
+      if (unpin) await unpinLiveChatMessage(selectedRoomId, message.id);
+      else await pinLiveChatMessage(selectedRoomId, message.id);
+      setPinOverride(unpin ? { id: null } : { id: message.id, message });
+      toast.success(unpin ? _copy('msgMenu.unpinned', { defaultValue: 'Message unpinned' }) : _copy('msgMenu.pinned', { defaultValue: 'Message pinned' }));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : _copy('msgMenu.pinFailed', { defaultValue: 'Could not pin the message' }));
+    }
+  }, [selectedRoomId, pinnedMessage, _copy]);
+
   // Merge list-level room data with the richer single-room details
   const enrichedRoom = roomDetails || selectedRoom;
   const isLoading = roomsLoading || (messagesLoading && apiMessages.length === 0);
@@ -476,6 +677,60 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     refetchRooms();
     setSelectedRoomId(room.id);
   }, [refetchRooms]);
+
+  // The rows only change when a line, the reply target, the pin or the
+  // unread marker does. Kept as one memoised list so scroll-driven state
+  // (the jump button, unread counts) re-renders the frame, not every line.
+  const messageRows = useMemo(() => filteredMessages.map((message) => {
+      const row = (
+      message.id.startsWith('buy-alert-') ? (
+        buyBotHidden ? null : (
+          <BuyAlertCard
+            key={message.id}
+            content={message.content}
+            timestamp={message.timestamp.toISOString()}
+            onHide={hideBuyBot}
+          />
+        )
+      ) : isAssistantAddress(message.userId) || message.id.startsWith('assistant-reply-') ? (
+        <AssistantReplyCard
+          key={message.id}
+          content={message.content}
+          timestamp={message.timestamp}
+          replyToName={message.replyTo?.senderName}
+        />
+      ) : (
+      <ChatMessage
+        key={message.clientKey ?? message.id}
+        message={message}
+        showActions={isModerator}
+        moderators={roomDetails?.moderators}
+        currentUserAddress={walletAddress || undefined}
+        onBan={handleBanUser}
+        onUnban={handleUnbanUser}
+        onDelete={handleDeleteMessage}
+        onEdit={handleEditMessage}
+        onReact={isAuthenticated ? addReaction : promptSignIn}
+        onRemoveReaction={removeReaction}
+        onReply={isAuthenticated ? handleReply : undefined}
+        onRetrySend={retrySend}
+        onDiscardSend={discardSend}
+        onSeeMessages={handleSeeMessages}
+        holdFrame
+        replying={!!replyTo && replyTo.id === message.id}
+        onTogglePin={isModerator ? handleTogglePin : undefined}
+        isPinned={pinnedMessage?.id === message.id}
+      />
+      )
+      );
+      if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
+      return (
+        <Fragment key={`unread-${message.id}`}>
+          <UnreadMarker count={unreadAnchor.count} />
+          {row}
+        </Fragment>
+      );
+    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
 
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
@@ -520,7 +775,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           </div>
         </div>
         
-        <div className="flex shrink-0 items-center gap-2">
+        <div data-live-chat-toolbar className="flex shrink-0 items-center gap-3">
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
           {/* Translate all toggle */}
@@ -586,8 +841,38 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       </div>
       )}
 
+      {pinnedMessage && !showSearchList && (
+        <div data-chat-pinned-bar className="mx-3 mt-2 flex items-center gap-2.5 rounded-2xl px-3 py-2">
+          <button
+            type="button"
+            onClick={() => { void jumpTo(pinnedMessage.id).then((found) => { if (found) focusRow(pinnedMessage.id); }); }}
+            className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+          >
+            <span data-chat-pinned-accent className="h-8 w-[3px] shrink-0 rounded-full" />
+            <span className="min-w-0 flex-1">
+              <span data-chat-pinned-label className="block text-[11px] font-semibold leading-tight">{_copy('copy.2aa60e3c77ee', { defaultValue: 'Pinned Message' })}</span>
+              <span className="block truncate text-[13px] leading-snug opacity-80">
+                {pinnedMessage.userName ? <span className="font-semibold">{pinnedMessage.userName}: </span> : null}
+                {pinnedMessage.content || _copy('copy.2bc85f36b3e4', { defaultValue: '📎 Media' })}
+              </span>
+            </span>
+            <Pin className="h-4 w-4 shrink-0 opacity-60" />
+          </button>
+          {isModerator && (
+            <button
+              type="button"
+              onClick={() => void handleTogglePin(pinnedMessage)}
+              aria-label={_copy('copy.ee3c71613054', { defaultValue: 'Unpin' })}
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full opacity-60 transition-opacity hover:opacity-100"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Messages Area */}
-      <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => setTranslateSignal(s => s + 1), requestOriginal: () => setOriginalSignal(s => s + 1) }}>
+      <SharedTranslationContext.Provider value={translationShare}>
       <div className="relative flex-1">
         <div
           ref={scrollContainerRef}
@@ -596,6 +881,8 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
             const fromEnd = el.scrollHeight - el.clientHeight - el.scrollTop;
             // In old history the end of the list is not the newest line yet.
             followLatest.current = !hasNewer && fromEnd < 120;
+            setScrolledUp(fromEnd > 160);
+            scheduleScrollWork();
             if (el.scrollTop < LOAD_OLDER_AT) requestOlder();
             if (hasNewer && fromEnd < LOAD_OLDER_AT) void loadNewer();
           }}
@@ -643,45 +930,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
                 {_copy("copy.feaf753f6557", { defaultValue: "Start of the chat" })}
               </p>
             ) : null}
-            {filteredMessages.map((message) => (
-              message.id.startsWith('buy-alert-') ? (
-                buyBotHidden ? null : (
-                  <BuyAlertCard
-                    key={message.id}
-                    content={message.content}
-                    timestamp={message.timestamp.toISOString()}
-                    onHide={hideBuyBot}
-                  />
-                )
-              ) : isAssistantAddress(message.userId) || message.id.startsWith('assistant-reply-') ? (
-                <AssistantReplyCard
-                  key={message.id}
-                  content={message.content}
-                  timestamp={message.timestamp}
-                  replyToName={message.replyTo?.senderName}
-                />
-              ) : (
-              <ChatMessage
-                key={message.clientKey ?? message.id}
-                message={message}
-                showActions={isModerator}
-                moderators={roomDetails?.moderators}
-                currentUserAddress={walletAddress || undefined}
-                onBan={handleBanUser}
-                onUnban={handleUnbanUser}
-                onDelete={handleDeleteMessage}
-                onEdit={handleEditMessage}
-                onReact={isAuthenticated ? addReaction : promptSignIn}
-                onRemoveReaction={removeReaction}
-                onReply={isAuthenticated ? handleReply : undefined}
-                onRetrySend={retrySend}
-                onDiscardSend={discardSend}
-                onSeeMessages={handleSeeMessages}
-                holdFrame
-                replying={!!replyTo && replyTo.id === message.id}
-              />
-              )
-            ))}
+            {messageRows}
             </>
           )}
           <div ref={bottomRef} />
@@ -715,6 +964,20 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
             onNewer={() => void openResult(activeHit - 1)}
           />
         )}
+        {!hasNewer && !showSearchList && !isSearchOpen && (() => {
+          // Same control as DMs: up to the unread line until it has been seen,
+          // then down to the newest, with the unread lines still below.
+          const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
+          if (!(up || scrolledUp || unreadBelow > 0)) return null;
+          return (
+            <UnreadJumpButton
+              up={up}
+              count={unreadAnchor ? unreadBelow : 0}
+              onClick={up ? jumpToUnreadMarker : jumpToNewest}
+              className="absolute bottom-3 right-3 z-10"
+            />
+          );
+        })()}
         {hasNewer && !showSearchList && (
           <button
             type="button"

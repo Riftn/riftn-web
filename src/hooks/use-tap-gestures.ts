@@ -92,6 +92,14 @@ export interface UseTapGesturesOptions {
   enableLongPress?: boolean;
 }
 
+/**
+ * A right or middle mouse button. Its release is not a tap: a right-click
+ * opens the post menu and must not also open the post or like it.
+ */
+function isSecondaryButton(event: React.PointerEvent) {
+  return event.pointerType === 'mouse' && event.button !== 0;
+}
+
 export function useTapGestures({
   postId,
   reactionArea = 'surface',
@@ -132,7 +140,7 @@ export function useTapGestures({
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent) => {
-      if (isMediaControl(event.target)) {
+      if (isMediaControl(event.target) || isSecondaryButton(event)) {
         reset();
         return;
       }
@@ -182,7 +190,7 @@ export function useTapGestures({
 
   const onPointerUp = useCallback(
     (event: React.PointerEvent) => {
-      if (isMediaControl(event.target)) {
+      if (isMediaControl(event.target) || isSecondaryButton(event)) {
         reset();
         return;
       }

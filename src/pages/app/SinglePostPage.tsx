@@ -19,6 +19,7 @@ import { QuietPostLoading } from '@/components/app/QuietPostLoading';
 import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getVoteCache } from '@/lib/vote-cache';
 import { scrollDocumentTo } from '@/lib/document-scroll';
+import { markBody } from '@/lib/body-mark';
 import { cn } from '@/lib/utils';
 import {
   resolveLikeCount,
@@ -91,7 +92,7 @@ import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
 import { usePostStagePhone } from '@/hooks/use-post-stage-phone';
 import { StageRelated } from '@/components/app/post-stage/StageRelated';
@@ -880,8 +881,15 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   // Desktop: closed until the comment button asks, same as a feed card.
   // Phone and tablet keep them open under the post.
-  const desktopView = () => typeof window !== 'undefined' && window.innerWidth >= 1024;
-  const [showPageComments, setShowPageComments] = useState(() => !desktopView());
+  // A notification link (?comment=<id>, or ?comments=1) opens them on desktop
+  // too: the reply it names lives in that list, and a closed list left the
+  // reader on the top of the post with nothing to land on. The card strips
+  // ?comments=1 from the address on mount, so it is read once, here.
+  // matchMedia, not innerWidth: on a phone innerWidth lays the whole page out
+  // first, and this runs while the post is opening over the feed.
+  const desktopView = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
+  const askedForComments = useRef(new URLSearchParams(location.search).get('comments') === '1');
+  const [showPageComments, setShowPageComments] = useState(() => !desktopView() || !!focusCommentId || askedForComments.current);
   const [postOptions, setPostOptions] = useState<(() => void) | null>(null);
   const registerPostOptions = useCallback((open: (() => void) | null) => setPostOptions(() => open), []);
   const [pageCommentsInitialTab, setPageCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>();
@@ -889,9 +897,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setShowPageComments(!desktopView());
+    setShowPageComments(!desktopView() || !!focusCommentId || askedForComments.current);
+    askedForComments.current = false;
     setPageCommentsInitialTab(undefined);
-  }, [id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, focusCommentId]);
 
   const handleOpenPageComments = useCallback((tab?: 'replies' | 'quotes' | 'reposts' | 'search') => {
     setPageCommentsInitialTab(tab);
@@ -1179,8 +1189,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const isImagePost = contentType === 'image';
   const isTextPost = contentType === 'post' || contentType === null;
 
-  // Deep link to a thread entry: scroll it into view once the thread has
-  // rendered, and let the highlight ring live for a few seconds. The element
+  // Deep link to a thread entry or comment: put it in view once it has
+  // rendered, with no glow or wash, and hold it there while the post loads. The element
   // can lag the page by a fetch (the thread mounts with post data), so poll
   // briefly rather than giving up after one paint.
   useEffect(() => {
@@ -1190,7 +1200,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       if (cancelled) return;
       const el = document.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
       if (el) {
-        bringIntoViewAndFlash(el);
+        bringIntoView(el);
         return;
       }
       // The comments list mounts after the post and fetches on its own, so
@@ -1240,11 +1250,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   }, [feedLookPhone]);
   const isImmersiveImage = !detailsOnly && isImagePost && isMobileView && !feedLookPhone;
   useEffect(() => {
-    const cls = isFullBleedLive ? 'immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'immersive-video-mode' : null;
-    if (cls) document.body.classList.add(cls);
+    const mark = isFullBleedLive ? 'data-immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'data-immersive-video-mode' : null;
+    if (mark) markBody(mark, true);
     return () => {
-      document.body.classList.remove('immersive-video-mode');
-      document.body.classList.remove('immersive-live-mode');
+      markBody('data-immersive-video-mode', false);
+      markBody('data-immersive-live-mode', false);
     };
   }, [isFullBleedLive, isVideoPost, isImmersiveImage, feedLookPhone]);
 
@@ -1252,8 +1262,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   // and feed settings. Desktop keeps the nav pill's back like every other post.
   const hasMediaBack = isMobileView && isVideoPost && !isAudioPost && !!post && post.status !== 'pending' && !feedLookPhone;
   useEffect(() => {
-    if (hasMediaBack) document.body.classList.add('post-media-back');
-    return () => document.body.classList.remove('post-media-back');
+    if (hasMediaBack) markBody('data-post-media-back', true);
+    return () => markBody('data-post-media-back', false);
   }, [hasMediaBack]);
 
 
@@ -1562,8 +1572,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
                     verified={videoData.verified}
                     badgeBalance={videoData.creatorBadgeBalance}
                   />
+                  {/* The video card draws its own poll. */}
                   {renderContent()}
-                  {id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
                   {pageComments}
                 </div>
                 {/* Related Videos Feed */}
@@ -1726,7 +1736,6 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
          no composer. The ad and then more posts follow the post straight away;
          comments (with their composer) appear only when the comment button asks. */
       <section data-retained-post-details className="pt-3">
-        {isImagePost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
         {detailsExpanded && !commentsSplit && <div ref={retainedCommentsRef}>{pageComments}</div>}
         {/* Hidden, not unmounted, while the sheet is up: the top half shows the post alone. */}
         <div hidden={commentsSplit}>
@@ -1744,7 +1753,6 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           <More className="h-5 w-5" />
         </button>
         {detailsExpanded && <div ref={retainedCommentsRef} hidden={commentsSplit}>
-          {isImagePost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
           {!commentsSplit && pageComments}
           {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
           {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
@@ -1756,7 +1764,6 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
          The card above keeps its own comment button and opens comments inside
          its bento; under it, the ad and then more posts, loading as you scroll. */
       <section data-retained-post-details className="pt-3">
-        {isImagePost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
         {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
         {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
       </section>
@@ -1801,7 +1808,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
             className={isMobileView && !feedLookPhone ? 'px-1 sm:px-0 pt-1' : 'rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3'}
           >
             {renderContent()}
-            {!isTextPost && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
+            {/* A video card draws its own poll; a photo card leaves it to the page. */}
+            {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
             {/* Desktop: comments open inside the post's bento, attached to it like on the feed. */}
             {!isMobileView && !isLivePost && !commentsSplit && pageComments}
           </div>

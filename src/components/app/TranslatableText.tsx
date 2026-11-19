@@ -30,7 +30,7 @@ import { useUserLanguage, LANGUAGE_NAMES } from '@/hooks/use-user-language';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
 import { clientNavigate } from '@/lib/client-navigate';
 import { setFilterValue } from '@/hooks/use-persisted-feed-filter';
-import { parseDehubLink } from '@/lib/dehub-links';
+import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
 import { expandEmojiTokens } from '@/components/app/emoji/EmojiText';
 
 export { LANGUAGE_NAMES };
@@ -435,9 +435,11 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
     }
     if (wrapped) urlRegex.lastIndex += 1;
 
+    // Our own pages open in place, card or not; other sites get a new tab.
     const dehubLink = parseDehubLink(url);
-    const href = dehubLink
-      ? dehubLink.path
+    const ownPath = dehubLink ? dehubLink.path : ownSitePath(url);
+    const href = ownPath
+      ? ownPath
       : url.match(/^https?:\/\//i)
         ? url
         : `https://${url}`;
@@ -446,14 +448,14 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
       <a
         key={`chat-link-${match.index}`}
         href={href}
-        target={dehubLink ? undefined : '_blank'}
-        rel={dehubLink ? undefined : 'noopener noreferrer'}
+        target={ownPath ? undefined : '_blank'}
+        rel={ownPath ? undefined : 'noopener noreferrer'}
         className="underline underline-offset-2 decoration-white/40 hover:decoration-white break-all transition-colors"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (dehubLink) {
-            clientNavigate(dehubLink.path);
+          if (ownPath) {
+            clientNavigate(ownPath);
           } else {
             window.open(href, '_blank', 'noopener,noreferrer');
           }
@@ -479,7 +481,57 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
 
   // Custom and shortcode emoji (`:fire:`, `<:pepe:123>`) inside the plain-text
   // runs — see components/app/emoji/EmojiText.
-  return expandEmojiTokens(parts.length > 0 ? parts : [text]);
+  return expandEmojiTokens(linkChatMentions(parts.length > 0 ? parts : [text]));
+}
+
+/** @name in a message; the character before the @ can't be part of a word, so name@mail.com stays text. */
+const CHAT_MENTION_SOURCE = '(^|[^a-zA-Z0-9_@./])@([a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?)';
+/** Group-wide pings, not people. */
+const NON_PROFILE_MENTIONS = new Set(['here', 'everyone', 'channel']);
+
+/**
+ * Turn @name in the plain-text runs of a message into a link to that profile,
+ * as posts and comments do. Links are anchors by the time this runs, so a
+ * URL's @ is never touched. The tap stops at the anchor, like the links above,
+ * so it doesn't also open the bubble's reply/long-press menu.
+ */
+function linkChatMentions(parts: ReactNode[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  parts.forEach((part, partIndex) => {
+    if (typeof part !== 'string' || !part.includes('@')) {
+      out.push(part);
+      return;
+    }
+    const mentionRegex = new RegExp(CHAT_MENTION_SOURCE, 'g');
+    let last = 0;
+    let found: RegExpExecArray | null;
+    while ((found = mentionRegex.exec(part)) !== null) {
+      const username = found[2];
+      if (NON_PROFILE_MENTIONS.has(username.toLowerCase())) continue;
+      const at = found.index + found[1].length;
+      if (at > last) out.push(part.slice(last, at));
+      out.push(
+        <a
+          key={`chat-mention-${partIndex}-${at}`}
+          href={`/${username}`}
+          className="font-semibold hover:underline underline-offset-2"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clientNavigate(`/${username}`);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          data-no-navigate="true"
+        >
+          @{username}
+        </a>,
+      );
+      last = at + 1 + username.length;
+    }
+    if (last < part.length) out.push(part.slice(last));
+  });
+  return out;
 }
 
 // Translation cache to avoid repeat API calls. Capped: entries hold full
@@ -846,8 +898,13 @@ export function SharedTranslationProvider({ children }: { children: ReactNode })
   const requestTranslate = useCallback(() => setTranslateSignal(s => s + 1), []);
   const requestOriginal = useCallback(() => setOriginalSignal(s => s + 1), []);
 
+  const value = useMemo(
+    () => ({ translateSignal, originalSignal, requestTranslate, requestOriginal }),
+    [translateSignal, originalSignal, requestTranslate, requestOriginal],
+  );
+
   return (
-    <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate, requestOriginal }}>
+    <SharedTranslationContext.Provider value={value}>
       {children}
     </SharedTranslationContext.Provider>
   );

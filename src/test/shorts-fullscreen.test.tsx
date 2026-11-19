@@ -438,7 +438,8 @@ describe('the desktop shorts frame', () => {
     // `saturate-[180%]` that mute never had, and the pair sat side by side in
     // different shades.
     expect(VIEWER).toContain('const CORNER_CONTROL =');
-    expect(VIEWER.match(/cn\(\s*CORNER_CONTROL,/g) ?? []).toHaveLength(3);
+    // Boost (owner only), subtitles, options, fullscreen, mute.
+    expect(VIEWER.match(/cn\(\s*CORNER_CONTROL,/g) ?? []).toHaveLength(5);
     expect(VIEWER).not.toContain('saturate-[180%] text-white rounded-xl');
   });
 

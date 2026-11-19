@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Adaugă o imagine, un GIF sau un videoclip",
+    "changeMedia": "Schimbă imaginea, GIF-ul sau videoclipul",
+    "mediaType": "Alege o imagine, un GIF sau un videoclip.",
+    "videoSize": "Videoclipul depășește {{n}} MB. Alege unul mai mic."
+  },
   "comic": {
     "showAll": "Arată toate cele {{count}} pagini"
   },
@@ -14,6 +20,69 @@
     "glitter": "Sclipici",
     "saved": "Chenar salvat",
     "failed": "Chenarul nu a putut fi salvat"
+  },
+  "duet": {
+    "policyEveryone": "Toată lumea",
+    "policyFollowers": "Urmăritori",
+    "policyNobody": "Nimeni",
+    "loadMore": "Încarcă mai multe",
+    "video": "Videoclip",
+    "with": "Duet cu @{{username}}",
+    "withOriginal": "Duet · vezi originalul",
+    "unavailable": "Acest videoclip nu mai este disponibil pentru dueturi.",
+    "allowLabel": "Permite dueturi",
+    "allowDescription": "Cine poate înregistra un duet lângă videoclipurile tale. Poți schimba asta și la fiecare postare.",
+    "settingsSection": "Dueturi",
+    "policyDefault": "Setarea contului",
+    "saveFailed": "Nu s-a putut salva. Încearcă din nou.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} dueturi",
+    "pageHeading": "Dueturi",
+    "pageTitle": "Dueturi pentru {{title}} de @{{creator}}",
+    "pageTitleNoCreator": "Dueturi pentru {{title}}",
+    "pageDescription": "Urmărește toate dueturile acestui videoclip pe Riftn sau înregistrează-l pe al tău alături.",
+    "empty": "Încă nu există dueturi. Deschide opțiunile videoclipului și alege Remix → Duet ca să faci primul.",
+    "notFound": "Acest videoclip nu este disponibil.",
+    "browseShorts": "Răsfoiește Shorts",
+    "notFoundTitle": "Videoclipul nu a fost găsit | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Folosește acest sunet",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Ecran verde",
+    "stitch": "Stitch",
+    "selectSource": "Deschide opțiunile unui videoclip și alege Remix ca să începi."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Toată lumea",
+      "followers": "Urmăritori",
+      "nobody": "Nimeni",
+      "default": "Setarea mea implicită"
+    },
+    "shareFailed": "Bacșișul tău a fost trimis, dar partea creatorului original nu a ajuns.",
+    "notify": {
+      "duet": "{{name}} a făcut un duet cu videoclipul tău",
+      "stitch": "{{name}} a făcut stitch cu videoclipul tău",
+      "react": "{{name}} a reacționat la videoclipul tău",
+      "reactLive": "{{name}} reacționează live la videoclipul tău"
+    },
+    "linkFailed": "Postarea ta e publicată, dar nu a putut fi legată de videoclipul original.",
+    "settingsHeading": "Remixuri",
+    "stitch": {
+      "allow": "Permite stitch-uri",
+      "allowDesc": "Cine poate folosi până la 5 secunde din videoclipurile tale în ale lor. Poți schimba asta și pentru fiecare postare.",
+      "saveFailed": "Setarea pentru stitch nu s-a putut salva. Încearcă din nou.",
+      "settingFailed": "Postarea ta e publicată, dar setarea pentru stitch nu a fost salvată. Schimb-o din Editează postarea.",
+      "from": "Stitch din {{name}}",
+      "count_one": "{{count}} stitch",
+      "count_other": "{{count}} stitch-uri",
+      "listTitle": "Stitch-uri",
+      "listFailed": "Stitch-urile nu s-au putut încărca. Încearcă din nou.",
+      "listEmpty": "Încă nu există stitch-uri.",
+      "unavailable": "Acest videoclip nu mai este disponibil pentru stitch-uri."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +107,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Deschideți Riftn în browserul dvs.",
     "seoDescription": "Obțineți aplicația Riftn: o rețea socială open-source, deținută de utilizatori, cu streaming live, mesagerie criptată și watch-to-earn. Gratuit pe Google Play, App Store și pe web.",
-    "seoTitle": "Aplicatie Riftn: Descarca pentru Android, iPhone & Web"
+    "seoTitle": "Aplicatie Riftn: Descarca pentru Android, iPhone & Web",
+    "learnMore": "Vrei imaginea completă? <guide>Ce este Riftn?</guide> prezintă platforma în detaliu."
   },
   "dehubLinks": {
     "copyLinkDetail": "Copiază linkul {{item}} în clipboard",
@@ -55,12 +125,16 @@
       "profile": "profil",
       "proposal": "propunere",
       "stage": "etapă",
-      "store": "magazin"
+      "store": "magazin",
+      "featureRequest": "cerere",
+      "page": "pagină"
     },
     "recipientChat": "discuție",
     "recipientUser": "utilizator",
     "sendFailed": "Erat de neînțeles {{item}}.",
-    "sentTo": "{{item}} trimis la {{name}}"
+    "sentTo": "{{item}} trimis la {{name}}",
+    "openPage": "Deschide pagina",
+    "viewRequest": "Vezi cererea"
   },
   "stageCover": {
     "admitOne": "ADMITEȚI UNUL",
@@ -166,11 +240,35 @@
     "privateNote": "Conturile private nu apar în fediverse.",
     "noUsername": "Alege un nume de utilizator ca să ai o adresă fediverse."
   },
+  "signedFollows": {
+    "setUp": "Activează",
+    "turnOff": "Dezactivează",
+    "efpTurnOff": "Oprește",
+    "title": "Urmăririle tale, pe blockchain",
+    "description": "Portofelul tău semnează pe cine urmărești, iar lista este înregistrată zilnic pe Base. Orice aplicație îți poate găsi urmăririle după portofel, chiar și fără Riftn.",
+    "on": "Activat pe acest dispozitiv",
+    "off": "Dezactivat pe acest dispozitiv",
+    "turnedOn": "Urmăririle tale sunt acum semnate de portofel",
+    "turnedOff": "Dezactivat pe acest dispozitiv",
+    "failed": "Portofelul tău nu a semnat. Încearcă din nou.",
+    "hiddenNote": "Listele de urmăriri ascunse și conturile private nu apar în lista publică.",
+    "efpOn": "Copiat în EFP · {{count}} urmăriri",
+    "efpOff": "Pune-le și pe EFP",
+    "efpTurnOn": "Adaugă în EFP",
+    "efpDone": "Urmăririle tale sunt trecute pe EFP",
+    "efpStopped": "Copierea în EFP s-a oprit. Lista rămâne a ta.",
+    "efpHasList": "Ai deja o listă EFP. Riftn nu o poate completa încă.",
+    "efpNoGas": "Portofelul tău are nevoie de puțin ETH pe Base pentru asta.",
+    "efpFailed": "Nu a mers. Încearcă din nou.",
+    "efpNote": "EFP este o listă de urmăriri citită de alte aplicații (efp.app). Gratuit cu portofelul Riftn; alte portofele plătesc câțiva cenți pe Base. Lista este a ta."
+  },
   "profileFields": {
     "title": "Câmpuri de profil",
     "description": "Până la patru rânduri în plus pe profilul tău, cum ar fi un site web sau pronumele tale.",
     "label": "Etichetă",
     "content": "Conținut",
+    "add": "Adaugă câmp",
+    "remove": "Șterge câmp",
     "save": "Salvează câmpurile",
     "saved": "Câmpurile de profil au fost salvate",
     "failed": "Nu s-a salvat. Încearcă din nou.",
@@ -340,7 +438,8 @@
     "step": "Pentru controlul contului, adăugați https://riftn.com/mcp ca un connector OAuth, intrați în contul Riftn și revizuiți permisiunile înainte de a permite accesul.",
     "profilePrompt": "Actualizați bio-ul meu Riftn: Creator independent care face filme și muzică.",
     "generatePrompt": "Arătați-mi modelele de imagine Riftn și citați un portret înainte de a genera-o.",
-    "libraryPrompt": "Arătați-mi ultimele active din biblioteca Creator Riftn."
+    "libraryPrompt": "Arătați-mi ultimele active din biblioteca Creator Riftn.",
+    "agents": "Publică, răspunde, reacționează, redistribuie, urmărește și editează profiluri ca agenții pe care îi deții"
   },
   "twitchMirror": {
     "title": "Twitch mirroring",
@@ -368,6 +467,7 @@
     "checkFailed": "Nu am putut verifica disponibilitatea. Te rugăm să încerci din nou.",
     "checking": "Se verifică...",
     "ownership": "Sursă deschisă. Deținută de utilizator.",
+    "title": "Puțină muncă.\nUn Riftn mai bun.",
     "intermission": "Temporar deconectat",
     "community": "Comunitatea înainte de toate."
   },
@@ -440,7 +540,66 @@
   "nav": {
     "launchpad": "Platformă de lansare",
     "findWords": {
-      "getTheApp": "descarcă aplicația, Android, iPhone, aplicație mobilă, instalează, APK, aplicație desktop, instalează pe calculator, Windows, Mac"
+      "getTheApp": "descarcă aplicația, Android, iPhone, aplicație mobilă, instalează, APK, aplicație desktop, instalează pe calculator, Windows, Mac",
+      "home": "flux, cronologie, ultimele postări, pentru tine, urmăriți, prima pagină",
+      "profile": "profilul meu, contul meu, pagina mea, postările mele, avatar, bio, urmăritori",
+      "explore": "căutare, descoperă, găsește, în tendințe, populare, hashtaguri, persoane, creatori",
+      "prompt": "AI, generează, imagine AI, video AI, creator de imagini, text în imagine, artă AI",
+      "editor": "editor video, editează video, taie, decupează, subtitrări, efecte",
+      "creator": "creează, studio, instrumente AI, imagine, video, muzică, voce off, 3D",
+      "converter": "importă video, descarcă, YouTube, TikTok, Instagram, convertește",
+      "migrate": "mută canalul, importă canal, import în masă, canal YouTube",
+      "notifications": "alerte, activitate, mențiuni, răspunsuri, aprecieri, clopoțel",
+      "messages": "DM, mesaje directe, chat, inbox, conversații, mesaj privat",
+      "communities": "grupuri, comunitate, camere, cluburi, forumuri, membri",
+      "assistant": "AI, chatbot, întreabă, ajutor, chat AI, întrebări",
+      "settings": "preferințe, cont, confidențialitate, securitate, parolă, limbă, temă, mod întunecat, blocați, șterge contul",
+      "leaderboard": "clasament, rang, top creatori, top utilizatori, puncte, scoruri",
+      "bookmarks": "salvate, favorite, vezi mai târziu, citește mai târziu, postări salvate, bibliotecă",
+      "command": "panou, analize, câștiguri, venit, statistici, moderare, statisticile mele",
+      "wallet": "sold, bani, fonduri, jetoane, crypto, depunere, retragere, trimite, primește, plătește",
+      "events": "calendar, program, întâlnire, viitoare, bilete, AMA",
+      "stages": "camere audio, chat vocal, spaces, audio live, discuție, podcast",
+      "featureRequests": "construiește, constructori, idei, sugestii, raportează o eroare, erori, remedieri, foaie de parcurs, vot, listă de dorințe, îmbunătățește",
+      "feedback": "recenzie, evaluare, sondaj, părere, reclamație, trimite feedback",
+      "staking": "mizare, stake, depunere, randament, recompense, câștigă, împărțirea profitului, insignă, niveluri, dobândă",
+      "superpowers": "boost, promovează, avantaje, puteri, avantaje insignă, acoperire, upgrade-uri",
+      "governance": "vot, votare, propuneri, sondaj, buletin de vot, decide",
+      "dao": "trezorerie, donează, donație, fond comunitar, contribuie, granturi",
+      "bounties": "muncă, joburi, sarcini, gig-uri, freelance, angajează, câștigă bani, muncă plătită",
+      "myBounties": "recompensele mele, joburile mele, istoric, plăți, muncă finalizată",
+      "affiliate": "recomandare, invită prieteni, invită, comision, partener, câștigă",
+      "careers": "joburi, angajări, lucrează cu noi, alătură-te echipei, aplică, posturi libere",
+      "stores": "magazin, piață, merch, cumpără, vinde, produse, cumpărături",
+      "fractions": "acțiuni, proprietate, investește, deține o postare, NFT, NFT-uri, colecționabile, tranzacționează",
+      "usernames": "nume de utilizator, handle, nume, schimbă-mi numele, cumpără un nume, vinde un nume",
+      "accounts": "cumpără cont, vinde cont, conturi de vânzare, urmăritori, transferă contul",
+      "apps": "magazin de aplicații, mini aplicații, construiește o aplicație, dezvoltatori, instrumente",
+      "arcade": "jocuri, joc, joacă, gaming, șah, shooter, distracție",
+      "glossary": "termeni, definiții, dicționar, înțeles, ce este",
+      "compare": "comparație, compară, versus, alternative, YouTube, X, TikTok",
+      "guide": "primii pași, cum să, tutorial, ajutor, învață, începător, nou aici",
+      "stats": "statistici, analize, cifre, grafice, preț, ofertă, deținători",
+      "docs": "documentație, ajutor, API, whitepaper, dezvoltatori, manual",
+      "blog": "știri, articole, actualizări, anunțuri, ce e nou",
+      "videos": "urmărește, videoclipuri, clipuri, videoclipuri lungi",
+      "shorts": "reels, videoclipuri scurte, videoclipuri verticale, glisează",
+      "music": "audio, melodii, piese, ascultă, radio, playlist",
+      "liveTv": "TV, streamuri, streaming, live, transmisiune, canale, urmărește live",
+      "buyTokens": "cumpără jetoane, achiziție, reîncarcă, card, card de credit, fiat",
+      "bridge": "cross chain, mută jetoane, lanțuri, transfer între lanțuri",
+      "top100": "top 100, monede, criptomonede, capitalizare de piață, prețuri",
+      "agents": "agenți AI, agenți, boți, automatizare, persona",
+      "advertising": "reclame, anunțuri, campanie, promovează, sponsor, marketing",
+      "premium": "abonament, upgrade, pro, membru, fără reclame, fără anunțuri",
+      "pricing": "planuri, cost, preț, cât costă, abonament",
+      "creators": "program pentru creatori, ambasadori, parteneri, aplică drept creator, monetizează",
+      "connectAi": "MCP, ChatGPT, Claude, API, integrare, conectează AI",
+      "packs": "emoji, stickere, GIF-uri, pachete emoji, pachete de stickere, emoji personalizate",
+      "publicChat": "chat, chat global, cameră de chat, lobby, discuție, chat comunitar",
+      "planned": "programate, programează, postări programate, coadă, mai târziu",
+      "liveStudio": "intră live, stream, streaming, OBS, overlay-uri, alerte, widgeturi",
+      "launchpad": "lansează un token, creează o monedă, fă o monedă, meme coin, bonding curve, tokenizează"
     },
     "reorderHint": "Țineți apăsată și trageți orice pictogramă pentru a o rearanja",
     "reorderReset": "Resetează",
@@ -488,7 +647,14 @@
     "getTheApp": "Descarcă aplicația",
     "connectAi": "Conectează AI",
     "converter": "Convertor",
-    "affiliate": "Afiliere"
+    "affiliate": "Afiliere",
+    "groups": {
+      "create": "Creează",
+      "discover": "Descoperă",
+      "main": "Principal",
+      "money": "Bani",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Afișează profilul lui {{name}}",
@@ -676,6 +842,8 @@
     "feedTogglesCleared": "Filtrele fluxului au fost resetate",
     "defaultProfileTab": "Fila implicită a profilului",
     "defaultProfileTabDesc": "Alege ce filă văd prima vizitatorii pe profilul tău",
+    "defaultProfileView": "Aspectul postărilor din profil",
+    "defaultProfileViewDesc": "Arată-ți postările ca grilă sau ca listă când cineva îți deschide profilul",
     "public": "Public",
     "publicDesc": "Oricine îți poate vedea postările",
     "private": "Privat",
@@ -1033,7 +1201,7 @@
     "ensLinked": "Conectat — profilul tău este acum la {{url}}",
     "ensUnlinked": "Eliminat — numele dvs. de utilizator este neschimbat",
     "ensHandle": "Denumire ENS",
-    "ensLinkedDesc": "Sunteți, de asemenea, ladehub.io/{{name}}",
+    "ensLinkedDesc": "Sunteți, de asemenea, lariftn.com/{{name}}",
     "ensHandleDesc": "Dovediți că dețineți un nume .eth pentru a fi, de asemenea, accesibil la riftn.com/yourname.eth. Numele dvs. de utilizator nu se schimbă.",
     "ensRemove": "Elimină",
     "ensCheck": "Verificare",
@@ -1111,7 +1279,38 @@
     "socialConnectedShort": "Conectat",
     "socialConnectFailed": "Conectarea la {{platform}} nu a reușit. Te rugăm să încerci din nou.",
     "socialVerifiedFollowers": "{{value}} urmăritori",
-    "socialFollowersPending": "Actualizarea numărului de urmăritori"
+    "socialFollowersPending": "Actualizarea numărului de urmăritori",
+    "menuLayoutFolders": "Dosare",
+    "chatCards": "Chaturi ca carduri",
+    "chatCardsDesc": "Fiecare chat pe propriul card. Dezactivează pentru o listă simplă, cu o linie între chaturi.",
+    "chatDeleteChoice": "Când ștergi un mesaj",
+    "chatDeleteChoiceDesc": "Întreabă de fiecare dată sau șterge mereu doar pentru tine ori pentru toți din chat.",
+    "chatDeleteAsk": "Întreabă de fiecare dată",
+    "chatDeleteMe": "Șterge pentru mine",
+    "chatDeleteMeDesc": "Dispare din chatul tău, ceilalți încă îl văd",
+    "chatDeleteEveryone": "Șterge pentru toți",
+    "chatDeleteEveryoneDesc": "Când se poate. Mesajul altcuiva într-un grup se șterge tot doar pentru tine",
+    "showLikes": "Arată aprecierile mele tuturor",
+    "showLikesDesc": "Oricine poate deschide fila Aprecieri de pe profilul tău. Dezactivat implicit, deci doar tu vezi ce ai apreciat.",
+    "showFollowersList": "Arată cine mă urmărește",
+    "showFollowersListDesc": "Permite oricui să deschidă lista ta de urmăritori. Când e dezactivat, doar tu o poți vedea.",
+    "showFollowingList": "Arată pe cine urmăresc",
+    "showFollowingListDesc": "Permite oricui să deschidă lista persoanelor pe care le urmărești. Când e dezactivat, doar tu o poți vedea.",
+    "showFollowCounts": "Arată numărul meu de urmăritori",
+    "showFollowCountsDesc": "Arată câți urmăritori ai și câte persoane urmărești. Dezactivarea ascunde și ambele liste.",
+    "readerProfileView": "Deschide alte profiluri ca",
+    "readerProfileViewDesc": "Alege grilă sau listă pentru fiecare profil pe care îl deschizi, sau păstrează alegerea fiecărei persoane",
+    "readerProfileViewOwner": "Alegerea fiecărei persoane",
+    "tipsOffNote": "Bacșișurile și trimiterile către tine sunt oprite cât timp asta e activă. Dezactiveaz-o ca să primești din nou bacșișuri.",
+    "menuLayout": "Aspectul meniului",
+    "menuLayoutDesc": "Cum își grupează meniul paginile",
+    "menuLayoutTabs": "File",
+    "menuLayoutTabsDesc": "Câte un grup odată, cu pictograme mari",
+    "menuLayoutSections": "Secțiuni",
+    "menuLayoutSectionsDesc": "Toate paginile deodată, sub titlurile grupurilor",
+    "menuLayoutFoldersDesc": "Paginile tale principale, apoi câte un dosar pentru fiecare grup",
+    "publicChatInBar": "Chat public în bara de jos",
+    "publicChatInBarDesc": "O singură atingere până la Chatul public din bara din partea de jos a ecranului"
   },
   "common": {
     "confirm": "Confirmă",
@@ -1196,7 +1395,19 @@
     "payDirect": "Trimis direct la {{name}} în {{symbol}} pe {{chain}}. Fără schimb.",
     "payDirectNoName": "Trimis direct creatorului în {{symbol}} pe {{chain}}. Fără schimb.",
     "payViaBridgeDpay": "Mutat pe Base și plătit către Riftn Pay, tokenurile ajung în aproximativ un minut",
-    "dmSent": "Ați trimis {{amount}} tokenuri către {{name}}!"
+    "dmSent": "Ați trimis {{amount}} tokenuri către {{name}}!",
+    "addMessage": "Adăugați un mesaj (optional)",
+    "railTitle": "Sfaturi",
+    "railTotal": "{{amount}} tokenuri",
+    "tokensUnit": "tokenuri",
+    "messagePlaceholder": "Spune ceva împreună cu bacșișul",
+    "messagePublic": "Public",
+    "messagePrivate": "Doar {{name}}",
+    "theCreator": "creatorul",
+    "messageWallNote": "Apare pe peretele de bacșișuri după ce bacșișul trece.",
+    "sendWithMessage": "Trimite cu mesaj",
+    "messageFailed": "Mesajul tău nu a putut fi adăugat. Nu s-a trimis niciun bacșiș.",
+    "wallLabel": "Mesaje cu bacșiș"
   },
   "postOptions": {
     "liveAlertsOn": "Acum urmărești contul {{name}}. Vei primi o notificare când intră live.",
@@ -1236,7 +1447,14 @@
     "giftBoost": "Dă un boost",
     "markSection": "Secțiunile care pot fi omise",
     "copyFailed": "Linkul nu a putut fi copiat",
-    "share": "Distribuie"
+    "share": "Distribuie",
+    "refreshLinkPreview": "Reîmprospătează previzualizarea linkului",
+    "linkPreviewRefreshed": "Previzualizarea linkului a fost reîmprospătată",
+    "linkPreviewRefreshFailed": "Site-ul nu a putut fi accesat. Încearcă din nou mai târziu.",
+    "castToTv": "Proiectează pe TV",
+    "castStarted": "Se redă pe televizorul tău",
+    "castUnsupported": "Acest browser nu poate proiecta. Deschide Riftn în Chrome sau Safari ca să redai pe televizor.",
+    "castFailed": "Televizorul nu a putut fi accesat. Verifică dacă e pe aceeași rețea Wi-Fi și încearcă din nou."
   },
   "filters": {
     "sort": "Sortare",
@@ -1697,6 +1915,9 @@
   "notifications": {
     "title": "Notificări",
     "markAllRead": "Marchează tot ca citit",
+    "groupNew": "Noi",
+    "groupToday": "Astăzi",
+    "groupThisWeek": "Săptămâna aceasta",
     "settings": "Setări notificări",
     "actions": "Acțiuni",
     "markAllAsRead": "Marchează tot ca citit",
@@ -1725,6 +1946,7 @@
     "communities": "Comunități",
     "stores": "Magazine",
     "noNotificationsYet": "Nicio notificare încă",
+    "searchClose": "Închide căutarea",
     "noNotificationsDesc": "Când primești aprecieri, comentarii, bacșișuri sau abonați noi, vor apărea aici.",
     "loadMore": "Încarcă mai multe",
     "markAsRead": "Marchează ca citit",
@@ -1835,7 +2057,10 @@
       "bountySubmittedNamed": "{{name}} a trimis lucrarea la bursa dvs. “{{title}}”",
       "bountySubmitted": "{{name}} a trimis lucrarea la bursa dvs.",
       "sentNotification": "{{name}} v-a trimis o notificare"
-    }
+    },
+    "groupEarlier": "Mai devreme",
+    "searchPlaceholder": "Caută în notificări",
+    "searchEmpty": "Nicio notificare nu se potrivește"
   },
   "leaderboard": {
     "title": "Clasamente",
@@ -1880,7 +2105,13 @@
     "loadingBoard": "Se încarcă clasamentul…",
     "amountTokens": "{{amount}} tokenuri",
     "directReferrals": "{{count}} direcți",
-    "secondaryReferrals": "{{count}} secundar"
+    "secondaryReferrals": "{{count}} secundar",
+    "ogChallenge": "Provocarea OG",
+    "ogHolders_one": "{{count}} deținător OG",
+    "ogHolders_other": "{{count}} deținători OG",
+    "ogChallengeTitle": "Adu înapoi deținătorii OG",
+    "ogChallengeBody": "Invită persoane care încă dețin DHB. Când se înscriu cu linkul tău de invitație și își păstrează DHB în portofelul Riftn, contează pentru tine aici.",
+    "ogChallengeCta": "Obține linkul de invitație"
   },
   "dhbListing": {
     "title": "Listarea tokenului în curând!",
@@ -1964,10 +2195,13 @@
     "promptLabel": "Promptul dvs.",
     "promptPlaceholder": "Descrieți o idee, o îmbunătățire sau o eroare...",
     "promptAttach": "Atașați imagini",
+    "removeAttachment": "Eliminați accesoriul",
     "promptDrop": "Lipește sau fixează imagini aici",
     "promptPost": "Mesaj de postare",
+    "promptShortcut": "Ctrl / ⌘ + Enter pentru a publica",
     "promptDetails": "Detalii opționale",
     "promptDevice": "Dispozitiv și sistem de operare (pentru erori)",
+    "deviceInfoNoErrors": "Niciuna",
     "promptFilters": "Filtrează după categorie",
     "promptMediaError": "Alegeți imagini sau videoclipuri sub 50 MB fiecare.",
     "promptMediaLimit": "Până la {{max}} atașamente.",
@@ -2020,12 +2254,40 @@
     "shipping": "În lucru",
     "noShippingYet": "Nimic în lucru",
     "shippingAppearHere": "Cererile aflate în dezvoltare vor apărea aici.",
-    "loadFailed": "Nu s-au putut încărca cererile"
+    "loadFailed": "Nu s-au putut încărca cererile",
+    "editMedia": "Fotografii și videoclipuri",
+    "editAddMedia": "Adaugă fotografie sau videoclip",
+    "deviceInfoNote": "Informațiile despre dispozitiv sunt atașate ca să ne ajute să reparăm erorile.",
+    "deviceInfo": "Informații despre dispozitiv",
+    "deviceInfoOwners": "Doar proprietarii panoului văd asta",
+    "deviceInfoError": "Informațiile despre dispozitiv nu s-au putut încărca",
+    "deviceInfoNone": "Nu există informații despre dispozitiv pentru această cerere",
+    "deviceInfoErrors": "Erori recente"
   },
   "auth": {
-    "loginRequired": "Conectează-te obligatoriu"
+    "loginRequired": "Conectează-te obligatoriu",
+    "accountDeleted": "Acest cont a fost șters. Te poți înscrie din nou cu un cont nou.",
+    "accountDeletedHours_one": "Acest cont a fost șters. Te poți înscrie din nou cu același e-mail sau telefon în aproximativ {{count}} oră.",
+    "accountDeletedHours_other": "Acest cont a fost șters. Te poți înscrie din nou cu același e-mail sau telefon în aproximativ {{count}} ore.",
+    "accountDeletedDays_one": "Acest cont a fost șters. Te poți înscrie din nou cu același e-mail sau telefon în aproximativ {{count}} zi.",
+    "accountDeletedDays_other": "Acest cont a fost șters. Te poți înscrie din nou cu același e-mail sau telefon în aproximativ {{count}} zile."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Către",
+      "recent": "Recente",
+      "suggested": "Sugerat",
+      "youFollow": "Oameni pe care îi urmărești",
+      "placeholder": "Nume sau @username",
+      "chattedBefore": "Vorbiți",
+      "mutual": "Reciproc",
+      "dmsOff": "DM-uri dezactivate",
+      "keepTyping": "Continuă să scrii ca să cauți pe toată lumea",
+      "noOne": "Nu s-a găsit nimeni",
+      "tryUsername": "Încearcă exact @username-ul lor",
+      "sayHi": "Salută pe cineva",
+      "typeAny": "Scrie orice nume sau @username"
+    },
     "reply": "Răspunde",
     "react": "Reacționează",
     "edit": "Editează",
@@ -2062,7 +2324,11 @@
     "checkingTokenBalance": "Verificarea soldului tău de tokenuri...",
     "deleteConversationFailed": "Conversația nu a putut fi ștearsă",
     "message": "Mesaj",
-    "noConversationsYet": "Încă nu există conversații"
+    "noConversationsYet": "Încă nu există conversații",
+    "sending": "Se trimite",
+    "retrySend": "Încearcă din nou",
+    "discardSend": "Elimină",
+    "notSent": "Netrimis"
   },
   "music": {
     "listeningCount_one": "{{count}} ascultare",
@@ -2145,6 +2411,24 @@
     "viewList": "Vizualizare listă",
     "viewMode": "Afișează",
     "back": "Înapoi",
+    "reserve": {
+      "signIn": "Autentificare",
+      "available": "Nume de utilizator disponibil",
+      "held": "Rezervat pentru tine",
+      "ended": "Rezervarea a expirat",
+      "busy": "Se rezervă",
+      "availableBody": "riftn.com/{{name}} este liber acum. Rezervă-l și ți-l păstrăm un minut cât te înscrii.",
+      "heldBody": "Nimeni altcineva nu poate lua @{{name}} până expiră cronometrul. Termină înscrierea ca să-l păstrezi.",
+      "endedBody": "Minutul tău a expirat, așa că @{{name}} e din nou disponibil pentru toți. Încă e liber.",
+      "busyBody": "Cineva se înscrie chiar acum ca @{{name}}. Dacă nu termină, se eliberează când expiră cronometrul.",
+      "finish": "Termină înscrierea",
+      "again": "Rezervă din nou",
+      "cta": "Rezervă acum",
+      "letGo": "Renunță la el",
+      "haveAccount": "Ai deja un cont?",
+      "seoTitle": "@{{name}} este disponibil pe Riftn",
+      "seoDescription": "Nimeni nu are încă riftn.com/{{name}}. Rezervă-l și înscrie-te ca să fie al tău."
+    },
     "usernameAvailable": "Nume de utilizator disponibil!",
     "signUpToClaim": "Înscrie-te astăzi pentru a revendica",
     "signUp": "Înscrie-te",
@@ -2163,7 +2447,8 @@
       "total": "Acoperire totală",
       "breakdownTitle": "De unde provine această acoperire",
       "dehubFollowers": "Urmăritori Riftn",
-      "verified": "Contorizările sociale provin din conturile pe care creatorul le-a conectat."
+      "verified": "Contorizările sociale provin din conturile pe care creatorul le-a conectat.",
+      "selfReported": "Numărul de urmăritori sociali este introdus de creator."
     },
     "loginDescription": "Conectează-te pentru a-ți vizualiza și gestiona profilul.",
     "replyThread": {
@@ -2172,7 +2457,17 @@
     },
     "tabs": {
       "playlists": "Liste de redare",
-      "dislikes": "Nu-mi place"
+      "dislikes": "Nu-mi place",
+      "likes": "Aprecieri",
+      "articles": "Articole"
+    },
+    "likedPosts": {
+      "emptyTitle": "Nicio apreciere încă",
+      "privateTitle": "Aprecierile sunt private",
+      "loadMore": "Încarcă mai multe",
+      "emptyOwn": "Postările pe care le apreciezi apar aici. Doar tu le poți vedea, dacă nu activezi Arată aprecierile mele în Setări.",
+      "emptyOther": "Încă nu a apreciat nimic.",
+      "privateDesc": "Acest cont își păstrează aprecierile pentru sine."
     },
     "dislikes": {
       "emptyTitle": "Încă nimic",
@@ -2195,9 +2490,33 @@
     "sortMostViewed": "Cele mai vizionate",
     "sortLikes": "Aprecieri",
     "sortMostLiked": "Cele mai apreciate",
+    "sortCustomShort": "Personalizat",
+    "arrange": {
+      "saving": "Se salvează...",
+      "title": "Aranjează-ți postările",
+      "hint": "Ține apăsat pe o postare și trage-o în noul loc. Vizitatorii văd mai întâi această ordine.",
+      "drag": "Trage pentru a muta",
+      "toTop": "Mută sus de tot",
+      "save": "Salvează ordinea",
+      "saved": "Ordinea ta a fost salvată",
+      "reset": "Înapoi la cele mai noi primele",
+      "resetDone": "Înapoi la cele mai noi primele",
+      "saveFailed": "Ordinea nu s-a putut salva. Încearcă din nou.",
+      "loadFailed": "Postările nu s-au putut încărca. Închide și încearcă din nou.",
+      "empty": "Încă nu ai nimic de aranjat. Publică mai întâi ceva."
+    },
     "searchThisChannel": "Caută în acest canal",
     "searchResultCount": "1 rezultat pentru \"{{query}}\"",
-    "searchResultCountPlural": "Rezultatele {{count}} pentru „{{query}}”"
+    "searchResultCountPlural": "Rezultatele {{count}} pentru „{{query}}”",
+    "unavailable": "Profil indisponibil",
+    "mutualsOne": "{{count}} urmăritor comun:",
+    "mutualsMany": "{{count}} urmăritori comuni:",
+    "articles": {
+      "emptyTitle": "Încă nu există articole",
+      "emptySubtitle": "Articolele vor apărea aici"
+    },
+    "sortCustom": "Ordine personalizată",
+    "arrangeButton": "Aranjează postările"
   },
   "tv": {
     "seoTitle": "TV Live: Canale Gratuite Din Întreaga Lume",
@@ -2352,6 +2671,7 @@
       "runSwarm": "Rulare horda",
       "description": "Acțiunile rulează ca agent selectat. Sarcinile programate continuă cu aplicația închisă.",
       "instructions": "Instrucțiuni pentru agent",
+      "examples": "Publică o dată pe zi despre: muzică independentă\nStil: curios, concis și conversațional\nApreciază până la 2 postări recente pe zi despre: muzică, concerte, viniluri",
       "preparing": "Prepararea sarcinii…",
       "run": "Rulare prompt",
       "limits": "O postare zilnică și până la 3 aprecieri relevante pentru fiecare sarcină. Toți agenții au o pauză de 20 de minute. Fotografiile folosesc subtitrări bifate; videoclipurile au nevoie de o imagine de copertă. Postările au mai puțin de 500 de caractere. Nu există gaz decât dacă bateți; scrisul poate utiliza credite.",
@@ -2460,6 +2780,28 @@
     "signInAgain": "Autentifică-te din nou",
     "createSignIn": "Autentifică-te din nou pentru a crea un agent",
     "checkConnection": "Verifică conexiunea și încearcă din nou.",
+    "welcome": {
+      "text": "Mesaj de bun venit",
+      "title": "Întâmpină membrii noi",
+      "help": "Acest agent urmărește și/sau trimite mesaje persoanelor care tocmai s-au alăturat Riftn, câteva pe zi.",
+      "follow": "Urmărește membrii noi",
+      "message": "Trimite mesaj membrilor noi",
+      "textHelp": "{name} devine @username-ul lor. Fără linkuri. Trimis o singură dată fiecărei persoane.",
+      "saveText": "Salvează mesajul",
+      "perDay": "Persoane pe zi",
+      "fewer": "Mai puține pe zi",
+      "more": "Mai multe pe zi",
+      "today": "Azi: {{follows}} urmăriți · {{messages}} mesaje trimise",
+      "limits": "Niciodată aceeași persoană de două ori. Sare peste cei care te-au blocat sau ți-au dat mute, au dezactivat mesajele noi sau s-au ascuns din Membri noi.",
+      "showLog": "Vezi pe cine a întâmpinat",
+      "hideLog": "Ascunde întâmpinările",
+      "empty": "Încă nimeni. Membrii noi apar aici pe măsură ce se alătură.",
+      "followed": "Urmărit",
+      "messaged": "Mesaj trimis",
+      "skipped": "Omis",
+      "failed": "Nu a putut fi contactat",
+      "defaultText": "Salut {name}, bine ai venit pe Riftn! 👋"
+    },
     "workspace": {
       "moderation": "Moderare flux",
       "moderationHelp": "Activează mai întâi permisiunea de moderare. Contul trebuie să fie deja creatorul fluxului sau un moderator desemnat. Modurile de aprobare și de ciornă rămân valabile. Timeout-urile expiră automat.",
@@ -2652,7 +2994,17 @@
     "resendCodePhone": "Număr greșit sau niciun cod? Înapoi",
     "continueAs": "Continuă ca",
     "switchWalletAccount": "Schimbă contul",
-    "walletLoadFailed": "Nu s-au putut încărca portofelele. Te rugăm să încerci din nou."
+    "walletLoadFailed": "Nu s-au putut încărca portofelele. Te rugăm să încerci din nou.",
+    "openInBrowser": "Deschide în browser",
+    "copyLink": "Copiază linkul",
+    "bringLoginOver": "Ai folosit Riftn pe dehub.io? <bring>Adu-ți autentificarea aici</bring>",
+    "didYouMean": "Ai vrut să scrii {{email}}?",
+    "profileMovedTitle": "Profilul tău s-a mutat",
+    "migrateWrongLogin": "Autentificarea a deschis alt portofel, așa că nu s-a schimbat nimic. Profilul tău vechi a fost creat cu {{login}}. Folosește-l ca să-l recuperezi.",
+    "googleInAppTitle": "Google nu permite autentificarea în {{app}}",
+    "googleInAppTitleUnnamed": "Google nu permite autentificarea în această aplicație",
+    "googleInAppBody": "Deschide Riftn în browser ca să folosești Google sau autentifică-te aici cu e-mail.",
+    "tryAnyway": "Încearcă oricum"
   },
   "careers": {
     "title": "Cariere la Riftn",
@@ -2876,7 +3228,17 @@
     "noMenuMatches": "Nimic din meniu nu se potrivește",
     "searchDehubFor": "Caută „{{query}}” pe Riftn",
     "switchAccount": "Schimbă cont",
-    "signedInAs": "Conectat ca {{name}}"
+    "signedInAs": "Conectat ca {{name}}",
+    "requestSend": "Trimite cererea",
+    "requestPrompt": "Nu e încă aici? Trimite-l ca cerere",
+    "requestPromptShort": "Nu e încă aici?",
+    "requestDraftMenu": "Adaugă {{query}} în Riftn",
+    "requestDraftSettings": "O setare pentru {{query}}",
+    "requestPostsTo": "Se publică în Cereri",
+    "requestHint": "Se publică în Cereri în numele tău. Îți spunem când e lansat.",
+    "requestSent": "Trimis la Cereri",
+    "requestSentHint": "Îți spunem când e lansat.",
+    "requestSeeIt": "Vezi-l în Cereri"
   },
   "comments": {
     "reportComment": "Raportează un comentariu",
@@ -2969,7 +3331,23 @@
     "likersEmptyTitle": "Nicio apreciere încă",
     "likersEmptyBody": "Aprecierile acestui comentariu vor apărea aici.",
     "anonymousLikes_one": "{{count}} apreciere de la un deținător anonim de insignă",
-    "anonymousLikes_other": "{{count}} aprecieri de la deținători anonimi de insigne"
+    "anonymousLikes_other": "{{count}} aprecieri de la deținători anonimi de insigne",
+    "threadParts": {
+      "moveUp": "Mutare în sus",
+      "moveDown": "Deplasare în jos",
+      "reorder": "Reordonează",
+      "save": "Salvează ordinea",
+      "saved": "Ordinea firului a fost salvată",
+      "saveFailed": "Ordinea nu s-a putut salva. Încearcă din nou.",
+      "dragPart": "Trage pentru a muta partea {{n}}",
+      "addPart": "Adaugă în fir",
+      "addPlaceholder": "Adaugă în firul tău...",
+      "label": "Fir · {{count}} părți",
+      "reorderHint": "Trage părțile sau folosește săgețile, apoi salvează."
+    },
+    "attachMedia": "Atașează o fotografie, un videoclip sau audio",
+    "attachUnsupported": "Atașează o fotografie, un videoclip sau un fișier audio.",
+    "attachTooLarge": "Fișierul depășește limita de {{size}} MB."
   },
   "mintChain": {
     "title": "Suport pentru mentă",
@@ -3279,7 +3657,10 @@
     "waiting_for_wallet": "În așteptarea portofelului",
     "waiting_for_wallet_desc": "Deschideți {{wallet}} și aprobați semnătura — cererea așteaptă acolo.",
     "your_wallet": "portofelul tău",
-    "max_available_on_chain": "Maxim disponibil: {{amount}} tokenuri pe {{chain}}"
+    "max_available_on_chain": "Maxim disponibil: {{amount}} tokenuri pe {{chain}}",
+    "not_available_for_this_post": "Indisponibil pentru această postare",
+    "turn_back_on_desktop_notifications": "Reactivezi notificările pe desktop?",
+    "notifications_moved_to_riftn": "Ne-am mutat pe riftn.com, așa că browserul tău are nevoie încă o dată de acordul tău ca să afișeze aici răspunsuri, bacșișuri și DM-uri."
   },
   "staking": {
     "title": "Mizare",
@@ -5097,6 +5478,7 @@
     "settledTitleSpeed": ", de obicei în {{speed}}",
     "settledCount_one": "{{count}} decontat",
     "settledCount_other": "{{count}} decontat",
+    "statusInProgress": "În desfășurare",
     "howMany": "Câte",
     "availableCount_one": "{{count}} disponibil",
     "availableCount_other": "{{count}} disponibil",
@@ -5186,9 +5568,169 @@
     "buy": "Cumpără",
     "reject": "Respinge",
     "needsYouHold": "Necesită {{needed}}, tu deții {{held}}",
-    "sellYourFractions": "Vinde-ți fracțiunile ({{held}} deținute)"
+    "sellYourFractions": "Vinde-ți fracțiunile ({{held}} deținute)",
+    "nftsSubtitle": "Orice NFT, schimburi într-un singur pas",
+    "buyersTab": "Cumpărători",
+    "soldOfListing": "Vândute {{sold}} din {{total}}",
+    "noBuyersYet": "Nimeni nu a cumpărat încă fracțiuni din această postare",
+    "fromYou": "de la tine",
+    "statusOverdue": "Întârziat"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Folosește aceste detalii",
+        "url": "URL-ul paginii produsului",
+        "action": "Citește pagina produsului",
+        "loading": "Se citește pagina…",
+        "hint": "Importă text de pe o pagină publică de produs. Verifică detaliile înainte de a le folosi; atașează separat imaginile produsului în studio.",
+        "source": "Sursa importată",
+        "review": "Alege un produs pe care să-l copiezi în brieful tău editabil. Titlul, vocea și culorile mărcii tale rămân neschimbate.",
+        "errors": {
+          "signIn": "Autentifică-te ca să imporți o pagină de produs.",
+          "url": "Folosește un URL public HTTPS al produsului.",
+          "empty": "Nu s-au găsit detalii utilizabile despre produs. Adaugă-le manual.",
+          "busy": "Rulează prea multe importuri. Încearcă din nou în curând.",
+          "unavailable": "Această pagină nu a putut fi importată. Adaugă manual detaliile produsului.",
+          "failed": "Importul a eșuat. Brieful tău e salvat; încearcă din nou sau introdu detaliile manual."
+        }
+      },
+      "return": "Înapoi la ciorna din studio",
+      "title": "Brief de campanie",
+      "intro": "Descrie-ți produsul și marca, apoi pregătește formatele de reclamă potrivite.",
+      "saved": "Brieful tău este salvat pe acest dispozitiv pentru acest cont.",
+      "preview": "Pregătește formatele",
+      "clear": "Golește brieful",
+      "required": "Adaugă numele și descrierea produsului ca să pregătești formatele.",
+      "variants": "Formate de campanie",
+      "reviewHint": "Verifică modelul, prețul și referința produsului în studio înainte de a genera. Fiecare format este o generare separată.",
+      "open": "Verifică în studio",
+      "fields": {
+        "product": "Numele produsului (obligatoriu)",
+        "description": "Fapte despre produs (obligatoriu)",
+        "brand": "Numele mărcii",
+        "audience": "Public țintă",
+        "benefit": "Beneficiul principal",
+        "voice": "Vocea mărcii",
+        "palette": "Culorile mărcii",
+        "headline": "Titlu aprobat",
+        "cta": "Îndemn la acțiune"
+      },
+      "formats": {
+        "square": "Reclamă pătrată",
+        "portrait": "Reclamă portret",
+        "story": "Imagine story",
+        "video": "Videoclip vertical"
+      }
+    },
+    "cinema": {
+      "close": "Închideți",
+      "performance": {
+        "label": "Performanță",
+        "0": "Vesel",
+        "1": "Melancolic",
+        "2": "Anxios",
+        "3": "Încrezător",
+        "4": "Uimit",
+        "5": "Reținut",
+        "6": "Jucăuș"
+      },
+      "title": "Regie cinematografică",
+      "hint": "Ghidează stilul vizual al următoarei imagini sau al următorului videoclip. Rezultatele variază în funcție de model.",
+      "none": "Fără regie",
+      "reset": "Șterge regia",
+      "camera": {
+        "label": "Aspectul camerei",
+        "0": "Cinema digital",
+        "1": "Film de 35 mm",
+        "2": "Film de 16 mm",
+        "3": "Format mare",
+        "4": "Camcorder vintage"
+      },
+      "lens": {
+        "label": "Aspectul obiectivului",
+        "0": "Sferic",
+        "1": "Anamorfic",
+        "2": "Sticlă moale vintage",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Distanță focală",
+        "0": "18 mm larg",
+        "1": "24 mm larg",
+        "2": "35 mm natural",
+        "3": "50 mm standard",
+        "4": "85 mm portret",
+        "5": "135 mm teleobiectiv"
+      },
+      "aperture": {
+        "label": "Profunzimea câmpului",
+        "0": "f/1.4 foarte mică",
+        "1": "f/2.8 mică",
+        "2": "f/5.6 moderată",
+        "3": "f/11 focalizare profundă"
+      },
+      "movement": {
+        "label": "Mișcarea camerei",
+        "0": "Trepied fix",
+        "1": "Dolly lent înainte",
+        "2": "Dolly lent înapoi",
+        "3": "Travling lateral",
+        "4": "Orbită în jurul subiectului",
+        "5": "Din mână",
+        "6": "Ridicare cu macaraua",
+        "7": "Panoramare lentă"
+      },
+      "lighting": {
+        "label": "Iluminare",
+        "0": "Lumină de zi blândă",
+        "1": "Ora de aur",
+        "2": "Clarobscur low-key",
+        "3": "Studio high-key",
+        "4": "Surse practice neon",
+        "5": "Contralumină siluetă",
+        "6": "Lumină difuză de cer înnorat"
+      },
+      "tempo": {
+        "label": "Ritmul cadrului",
+        "0": "Un singur cadru continuu",
+        "1": "Acțiune calmă, fără grabă",
+        "2": "Acțiune dinamică, energică",
+        "3": "Acțiune haotică, frenetică"
+      },
+      "era": {
+        "label": "Epocă",
+        "0": "Anii 1920",
+        "1": "Anii 1950",
+        "2": "Anii 1960",
+        "3": "Anii 1970",
+        "4": "Anii 1980",
+        "5": "Anii 1990",
+        "6": "Prezent",
+        "7": "Viitorul apropiat"
+      },
+      "genre": {
+        "label": "Gen",
+        "0": "Documentar",
+        "1": "Dramă",
+        "2": "Film noir",
+        "3": "Științifico-fantastic",
+        "4": "Fantasy",
+        "5": "Comedie romantică",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Paletă de culori",
+        "0": "Chihlimbar cald",
+        "1": "Albastru rece",
+        "2": "Tonuri pământii estompate",
+        "3": "Pastel",
+        "4": "Monocrom cu contrast ridicat",
+        "5": "Culori primare saturate"
+      }
+    },
     "libraryEmpty": "Generările tale salvate vor apărea aici.",
     "toolRemake": "Remake",
     "toolMaboroshi": "Maboroshi",
@@ -5990,7 +6532,118 @@
       "needsImageToWork": "{{model}} are nevoie de o imagine din care să lucreze. Atașați mai întâi unul.",
       "speechLimit": "Acestea sunt {{length}} caractere. Limita este {{limit}}.",
       "musicTrackLength": "{{count}}s piesă"
-    }
+    },
+    "gallery": {
+      "send": "Trimite",
+      "notifications": {
+        "generation_reply": "{{name}} a răspuns la comentariul tău",
+        "generation_like": "{{name}} a reacționat la generarea ta",
+        "generation_comment_like": "{{name}} a reacționat la comentariul tău",
+        "generation_comment": "{{name}} a comentat la generarea ta"
+      },
+      "browse": "Răsfoiește generările",
+      "create": "Creează",
+      "fullscreen": "Vezi pe tot ecranul",
+      "missing": "Această generare nu este disponibilă."
+    },
+    "avatarTitle": "Portret vorbitor",
+    "avatarRequirements": "Portret PNG pătrat, 512–2048 pixeli, până la 5 MB. WAV PCM mono 24 kHz pe 16 biți, 5–30 secunde. Ultima fracțiune de secundă este completată cu liniște.",
+    "avatarPortrait": "Alege portretul PNG",
+    "avatarAudio": "Alege vorbirea WAV",
+    "avatarPermission": "Am permisiunea de a anima acest portret și de a folosi acest audio.",
+    "avatarQuote": "{{seconds}} secunde, inclusiv liniștea · {{amount}} jetoane",
+    "avatarPrepare": "Pregătește și verifică prețul",
+    "batchFlowLimit": "Lista Flow este plină. Elimină un Flow nefolosit înainte de a crea alt lot.",
+    "batchReviewCampaign": "Verifică lotul campaniei în Flow",
+    "batchReviewFilmImages": "Verifică lotul de imagini storyboard",
+    "batchReviewFilmVideos": "Verifică lotul de clipuri de film",
+    "batchReviewHint": "Deschide un Flow salvat separat. Verifică fiecare element și prețul total înainte de a plăti. Elementele finalizate și plata inițială sunt păstrate pentru recuperare. Referințele sunt copiate în biblioteca ta privată; se aplică costuri de stocare și rețea.",
+    "batchInvalid": "Completează fiecare element înainte de a pregăti un lot de 1–12 imagini sau clipuri.",
+    "batchReferenceLimit": "Acest lot acceptă o singură imagine de referință per element. Elimină referințele în plus sau pregătește acel element separat.",
+    "batchVideoSettings": "Pentru acest lot, clipurile necesită o durată întreagă de 4–15 secunde și un raport de aspect 16:9, 9:16 sau 1:1.",
+    "batchMissingReference": "O referință lipsește, nu este acceptată sau depășește 25 MB. Restaureaz-o în editor înainte de a pregăti lotul.",
+    "batchOwnerChanged": "Contul sau ciorna s-a schimbat. Redeschide acest lot din contul său original.",
+    "batchConflict": "Lotul salvat nu corespunde instantaneului său original.",
+    "audioExportFormat": "Format de export",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Atașează un clip sursă de extins.",
+    "extensionSeconds": "+{{seconds}} s de filmare nouă",
+    "extensionHelp": "Returnează clipul sursă cu aproximativ patru secunde noi. Rezultatul este redimensionat până la 720p la 24 fps. Pentru extensie se generează audio nou.",
+    "extensionForward": "Adaugă aproximativ patru secunde după clipul sursă",
+    "extensionBackward": "Adaugă aproximativ patru secunde înainte de clipul sursă",
+    "expandDescription": "Generează margini noi pentru imagine. Prompt opțional în engleză; o singură imagine sursă.",
+    "relightDescription": "Reiluminează o fotografie după descrierea ta a luminii și a fundalului.",
+    "expandPromptHint": "Atașează o imagine și alege noul raport de aspect. Promptul în engleză este opțional.",
+    "expandEnglishOnly": "Acest model de extindere acceptă prompturi în engleză. Lasă promptul gol pentru extindere automată.",
+    "expandNeedsImage": "Atașează o imagine de extins.",
+    "learn": {
+      "title": "Lecții Creator",
+      "intro": "Lecții scurte, fiecare cu un test de cunoștințe și un exercițiu editabil. Progresul este salvat pe acest dispozitiv pentru contul tău.",
+      "back": "Înapoi la Creator",
+      "lessons": "Lecții",
+      "progress": "{{completed}} din {{total}} teste de cunoștințe trecute",
+      "check": "Verifică răspunsul",
+      "correct": "Test de cunoștințe trecut",
+      "retry": "Încearcă din nou. Recitește lecția de mai sus.",
+      "exerciseTitle": "Exercițiu practic",
+      "exerciseHint": "Deschide un exemplu editabil în propriul spațiu de lucru din studio. Deschiderea unei ciorne e gratuită; generarea necesită verificarea ta și propria ofertă de preț. Editează exemplul înainte de a genera.",
+      "openExercise": "Deschide ciorna exercițiului",
+      "closeExercise": "Închide exercițiul",
+      "brief": {
+        "title": "Scrie un brief vizual clar",
+        "body1": "Descrie un subiect concret, acțiunea lui și cadrul. Adaugă încadrarea sau mișcarea camerei când ajută scena. Păstrează ideile fără legătură pentru altă ciornă.",
+        "body2": "Indicațiile de lumină, obiectiv și stil ghidează modelul. Ele nu garantează comportamentul fizic al camerei sau o imagine exactă. Schimbă câte o parte odată ca să poți compara reviziile.",
+        "body3": "Înainte de a genera, verifică modelul selectat, atașamentele acceptate, dimensiunile și prețul. Păstrează ciorna originală ca să te poți întoarce la ea.",
+        "question": "Ce brief este cel mai ușor de revizuit?",
+        "answer0": "Un subiect, o acțiune și un cadru clare",
+        "answer1": "Doar numele unui model",
+        "answer2": "O listă de stiluri contradictorii",
+        "exercise": "Un ceainic de ceramică pe o masă de lemn lângă o fereastră. Lumină blândă de dimineață, încadrare medie, fundal simplu. Păstrează ceainicul ca subiect clar."
+      },
+      "continuity": {
+        "title": "Planifică cadrele și verifică continuitatea",
+        "body1": "Folosește panoul Film din editor ca să salvezi un brief și cadre ordonate. Pregătește fiecare cadru sau clip separat, verifică oferta de preț și selectează un rezultat acceptat.",
+        "body2": "Atașează doar referințe acceptate de modelul ales. Refolosirea unei referințe poate ghida aspectul; nu antrenează o identitate și nu garantează o potrivire. Personajele și vocile pot varia între generări.",
+        "body3": "Păstrează dublele reușite și asamblează-le în cronologie. Verifică mișcarea, fețele, dialogul și tranzițiile înainte de export.",
+        "question": "Ce susține continuitatea între cadre?",
+        "answer0": "Mai multe prompturi fără legătură",
+        "answer1": "Referințe aprobate și note de cadru verificate",
+        "answer2": "Presupunerea că identitatea personajului este garantată",
+        "exercise": "Cadru larg cu un călător singuratic ajungând pe o coastă liniștită la răsărit. Mișcare lentă a camerei înainte, atmosferă calmă. Un singur cadru continuu."
+      },
+      "campaign": {
+        "title": "Folosește fapte aprobate despre produs",
+        "body1": "Pornește de la fapte despre produs pe care le poți verifica. Verifică metadatele importate înainte de a le folosi. Scrie explicit titlul și îndemnul la acțiune; nu inventa prețuri, recenzii sau afirmații despre performanță.",
+        "body2": "Folosește variantele de campanie salvate ca să păstrezi împreună notele comune și hook-urile, scripturile, limbile și formatele individuale. Pregătește câte un element verificat odată și verifică-i oferta de preț în studio.",
+        "body3": "Verifică textul vizibil, aspectul produsului și orice afirmații rostite în rezultat. Un prompt nu este o dovadă a acurateței produsului sau a performanței de marketing.",
+        "question": "Când ar trebui inclusă o afirmație despre produs?",
+        "answer0": "Oricând sună convingător",
+        "answer1": "După ce inventezi o recenzie de cinci stele",
+        "answer2": "Când provine din fapte aprobate despre produs",
+        "exercise": "Creează o reclamă de produs în format portret pentru ceai din frunze întregi vândut într-o cutie metalică reutilizabilă. Titlu aprobat: Fă-ți timp pentru ceai. CTA aprobat: Explorează colecția. Folosește doar aceste fapte; nu inventa reduceri, recenzii sau afirmații despre sănătate."
+      }
+    },
+    "campaignPlanTitle": "Variante și episoade de campanie",
+    "campaignPlanIntro": "Salvează până la 12 variante sau episoade. Fiecare deschide studioul pentru propria verificare și ofertă de preț. Notele comune ghidează continuitatea; aspectul produsului, personajele și vocile pot varia între generări.",
+    "campaignTitle": "Numele campaniei sau al seriei",
+    "campaignContinuity": "Note comune despre personaj, voce și stil",
+    "campaignVariantTitle": "Numele variantei sau al episodului",
+    "campaignHook": "Hook de deschidere",
+    "campaignLanguage": "Limba rezultatului",
+    "campaignScript": "Script aprobat sau succesiune de scene",
+    "campaignAdd": "Adaugă variantă sau episod",
+    "campaignClear": "Golește planul",
+    "campaignFormat": "Format de ieșire",
+    "audioInvalidResponse": "Serviciul audio a returnat un rezultat invalid.",
+    "batchPaymentHelp": "Fiecare imagine trimisă este taxată separat. Dacă un lot se oprește, jetoanele nefolosite din plata lui sunt refolosite automat pentru o generare ulterioară pe care o acoperă.",
+    "invalidSeed": "Seed-ul trebuie să fie un număr întreg între 0 și 2147483647.",
+    "libraryFavorites": "Favorite",
+    "libraryFavoriteAdd": "Adaugă la favorite",
+    "libraryFavoriteRemove": "Elimină din favorite",
+    "audioTaskDialoguePlaceholder": "Alice: Ar trebui să plecăm.\nBob: [râde] După tine.",
+    "priceOwnKey": "Cheia ta",
+    "audioResultTooLarge": "Rezultatul audio este gol sau depășește 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planuri pentru fiecare flux de lucru",
@@ -6157,9 +6810,16 @@
     "createTheFirst": "Creează-l pe primul",
     "docsSeoTitle": "Instrucțiuni de îndemânare AI | Riftn",
     "docsSeoDescription": "Documentație de referință pentru abilitățile de asistent AI și biblioteca promptă a Riftn.",
-    "raw": "Punctaj"
+    "raw": "Punctaj",
+    "docsLoadFailed": "# Eroare\nDocumentația skillului nu s-a putut încărca."
   },
   "nftMarket": {
+    "actAll": "Toate",
+    "actListings": "Anunțuri",
+    "actOffer": "Ofertă",
+    "actOffers": "Oferte",
+    "actSales": "Vânzări",
+    "tabActivity": "Activitate",
     "shortTitle": "NFTs",
     "filters": "Filtre",
     "forSale": "La vânzare",
@@ -6220,6 +6880,9 @@
     "offered": "Ofertă trimisă. Deținătorul o poate accepta în orice moment.",
     "dehubPost": "Riftn post",
     "youHold": "Deții {{n}}",
+    "price": "Preț",
+    "volume": "Volum",
+    "tabRecent": "Recente",
     "buyNow": "Cumpără acum",
     "dropsTo": "Prețul scade la {{price}} până la {{date}}",
     "inBundle": "Vândut ca un pachet de {{n}}",
@@ -6263,7 +6926,31 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT-ul și plata se schimbă în același pas.",
     "spotlightOfferNote": "Nu este încă listat. Trimite o ofertă și deținătorul poate accepta-o oricând.",
-    "signInToTradeCta": "Conectează-te pentru a tranzacționa"
+    "signInToTradeCta": "Conectează-te pentru a tranzacționa",
+    "actCollectionOffer": "Ofertă pe colecție",
+    "actListed": "Listat",
+    "actSale": "Vânzare",
+    "buyAll": "Cumpără tot",
+    "buySeveral": "Cumpără mai multe",
+    "cartBought": "Ai cumpărat {{n}}. Sunt acum în portofelul tău.",
+    "cartCount": "{{n}} în coș",
+    "cartFull": "Până la 20 odată",
+    "cartOneCoin": "Un singur lanț și o singură monedă per coș. Golește-l ca să schimbi.",
+    "cartOwn": "Acesta e al tău",
+    "cartPick": "Atinge ca să adaugi în coș",
+    "forSaleHere": "De vânzare aici",
+    "noActivity": "Încă nimic aici",
+    "floor": "Floor",
+    "collectionOffer": "Ofertă pentru oricare",
+    "dehubPosts": "Postări Riftn",
+    "volShort": "Vol",
+    "salesCount": "{{n}} vândute",
+    "bestOffer": "Cea mai bună ofertă",
+    "fromOpenSea": "Top colecții pe OpenSea",
+    "buyHere": "Cumpără-le aici",
+    "openSeaNote": "Listat pe OpenSea. Plătești vânzătorul direct pe Seaport; Riftn nu adaugă nicio taxă.",
+    "viewOnOpenSea": "Vezi pe OpenSea",
+    "title": "Piața NFT"
   },
   "usernames": {
     "seoTitle": "Nume de utilizator Marketplace | Riftn",
@@ -6618,7 +7305,18 @@
       "votes_other": "{{count}} voturi",
       "howToVote_one": "Scrie {{command}} și un număr în chat ca să votezi · {{count}} vot",
       "howToVote_other": "Tastați {{command}} și un număr în chat pentru a vota · {{count}} voturi"
-    }
+    },
+    "eyebrow": {
+      "follow": "Urmăritor nou",
+      "subscribe": "Abonat nou",
+      "subscribedTo": "Abonat · {{plan}}",
+      "gifted_one": "A oferit un abonament",
+      "gifted_other": "A oferit {{count}} abonamente",
+      "share": "A distribuit streamul",
+      "join": "Tocmai s-a alăturat"
+    },
+    "giftedSubs_one": "{{name}} a oferit un abonament!",
+    "giftedSubs_other": "{{name}} a oferit {{count}} abonamente!"
   },
   "liveChatModeration": {
     "timeout1m": "Timed out for 1 minute",
@@ -6633,7 +7331,155 @@
     "youAreBanned": "Nu puteți chatea în difuziunile acestui creator",
     "youAreTimedOut": "Ați fost timelined pentru un moment"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Fundal",
+      "modes": {
+        "none": "Oprit",
+        "blur": "Estompare",
+        "color": "Culoare",
+        "image": "Imagine"
+      },
+      "failed": "Eliminarea fundalului nu a putut porni pe acest dispozitiv.",
+      "hint": "Rulează pe dispozitivul tău. Prima dată durează câteva secunde să se încarce."
+    },
+    "remove": "Elimină",
+    "scenes": {
+      "countdown": "Numărătoare inversă",
+      "names": {
+        "starting": "Începe în curând",
+        "chatting": "Doar discuții",
+        "gameplay": "Gameplay",
+        "brb": "Revin imediat",
+        "ending": "Streamul se încheie"
+      },
+      "title": "Scene",
+      "edit": "Editează {{name}}",
+      "subtitle": "Al doilea rând (opțional)",
+      "picture": "Imagine",
+      "noCountdown": "Fără numărătoare inversă",
+      "minutes": "{{count}} min",
+      "muteMic": "Oprește-mi microfonul cât timp asta e activă",
+      "hints": {
+        "starting": "Card cu numărătoare inversă",
+        "chatting": "Camera pe tot ecranul",
+        "gameplay": "Ecranul cu camera ta",
+        "brb": "Card, microfon oprit",
+        "ending": "Card de mulțumire"
+      },
+      "subtitles": {
+        "starting": "Streamul începe în",
+        "brb": "Revin într-o clipă",
+        "ending": "Mulțumesc că ai urmărit"
+      }
+    },
+    "sources": {
+      "reactAdd": "Afișează",
+      "image": "Imagine",
+      "camera": "Cameră",
+      "show": "Afișează în flux",
+      "loop": "Buclă",
+      "positions": {
+        "center": "Centru",
+        "top-left": "Stânga sus",
+        "top-right": "Dreapta sus",
+        "bottom-left": "Stânga jos",
+        "bottom-right": "Dreapta jos"
+      },
+      "sizes": {
+        "medium": "Medie",
+        "small": "Mic",
+        "large": "Mare"
+      },
+      "shapes": {
+        "circle": "Cerc",
+        "rect": "Pătrat",
+        "rounded": "Rotunjit"
+      },
+      "title": "Surse",
+      "addImage": "Imagine sau logo",
+      "addCamera": "A doua cameră",
+      "addClip": "Clip video",
+      "addReaction": "Reacționează la un videoclip",
+      "reactPlaceholder": "Lipește un link de videoclip Riftn",
+      "reactInvalid": "Lipește un link către un videoclip Riftn.",
+      "reactNotLive": "Intră mai întâi live, apoi adaugă videoclipul.",
+      "reactNoBubble": "Camera ta nu a putut fi deschisă de două ori aici. Redimensionează videoclipul ca fața ta să rămână pe ecran.",
+      "failed": "Sursa nu a putut fi adăugată.",
+      "empty": "Adaugă un logo, o a doua cameră sau un clip video peste stream.",
+      "hint": "Sursele sunt desenate peste imaginea ta pentru fiecare spectator și pe fiecare platformă.",
+      "clip": "Clip",
+      "restart": "Repornește",
+      "play": "Redă sau pune pauză"
+    },
+    "audio": {
+      "mute": "Ascunde",
+      "unmute": "Nu mai ascunde",
+      "gateLevels": {
+        "off": "Oprit",
+        "low": "Luminos",
+        "high": "Puternică"
+      },
+      "title": "Mixer audio",
+      "unavailable": "Acest browser nu poate mixa audio, așa că microfonul tău se transmite așa cum este.",
+      "channels": {
+        "mic": "Microfon",
+        "game": "Joc / filă",
+        "clip": "Clip video"
+      },
+      "absent": {
+        "mic": "Niciun microfon",
+        "game": "Partajează un ecran cu audio sau folosește o placă de captură",
+        "clip": "Adaugă un clip video în Surse"
+      },
+      "gate": "Noise gate",
+      "gateHint": "Îți oprește microfonul între cuvinte, ca să nu se audă în stream clicurile tastaturii și ventilatoarele."
+    },
+    "imageTooLarge": "Imaginea e prea mare. Încearcă una mai mică.",
+    "widgets": {
+      "title": "Arată widgeturile în videoclipul meu",
+      "hint": "Alertele, barele de obiectiv și chatul sunt desenate în stream, așa că și spectatorii de pe Twitch, YouTube și orice altă platformă le văd.",
+      "failed": "Nu s-a putut schimba locul în care apar widgeturile. Încearcă din nou."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Platformă",
+      "label": "Nume (opțional)",
+      "key": "Cheie de streaming",
+      "save": "Adaugă",
+      "cancel": "Anulați",
+      "states": {
+        "off": "Oprit",
+        "idle": "Gata",
+        "live": "Fază",
+        "error": "Eroare",
+        "connecting": "Se conectează"
+      },
+      "title": "Destinații multistream",
+      "intro": "Intră live pe Riftn o singură dată și îți trimitem streamul gratuit pe fiecare platformă activată aici. Pornește la câteva secunde după ce intri live.",
+      "add": "Adaugă destinație",
+      "empty": "Încă nu există destinații. Adaugă Twitch, YouTube, Kick sau orice server RTMP.",
+      "server": "URL-ul serverului",
+      "findKey": "Găsește serverul și cheia {{name}}",
+      "customHint": "Lipește serverul RTMP și cheia oferite de platforma ta.",
+      "keyNote": "Cheia ta este stocată criptat pe serverele noastre și nu mai este afișată niciodată.",
+      "added": "{{name}} a fost adăugat",
+      "saveFailed": "Destinația nu s-a putut salva",
+      "toggle": "Transmite către această destinație"
+    },
+    "vertical": {
+      "centre": "Centru",
+      "live": "ÎN DIRECT",
+      "title": "Vizualizare verticală",
+      "intro": "Telefoanele îți urmăresc streamul în fluxul vertical. Trage caseta ca să alegi ce parte din imagine văd.",
+      "enabled": "Arată-mi streamul în fluxul vertical",
+      "zoom": "Zoom",
+      "frame": "Imaginea ta orizontală",
+      "box": "Ce văd telefoanele",
+      "hint": "Trage caseta sau folosește tastele săgeți. Salvează ca s-o aplici streamului live.",
+      "watch": "Urmărește-l live pe {{name}}"
+    },
     "subathon": {
       "title": "Subatonul",
       "intro": "O countdown în timpul difuzării tale. Fiecare dar monetar, urmărire și abonament adaugă timp, astfel încât camera să te țină în direct.",
@@ -6795,7 +7641,8 @@
       "subathon_timer": "Timer Subathon",
       "points_board": "Vizionari loiali",
       "streamer_level": "Nivelul streamerului",
-      "tip_jar": "Pahar de cadouri"
+      "tip_jar": "Pahar de cadouri",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "Celebrează fiecare sugestie, dimensionată în funcție de nivelul său",
@@ -6819,7 +7666,8 @@
       "subathon_timer": "O countdown pe care darurile, urmăririle și abonamentele le respinge",
       "points_board": "Topul vizionarilor tăi după puncte obținute prin privire și dăruire",
       "streamer_level": "Nivelul tău de streamer și streak-ul săptămânal, din profilul tău",
-      "tip_jar": "Un pahar care se umple pe măsură ce cadouri plătite sosesc"
+      "tip_jar": "Un pahar care se umple pe măsură ce cadouri plătite sosesc",
+      "hype_train": "Arată hype train-ul cât timp rulează: trei cadouri sau abonamente în cinci minute îl pornesc."
     },
     "fields": {
       "style": "Stil",
@@ -7205,7 +8053,10 @@
     "endStreamConfirmBody": "Transmisia dvs. se oprește pentru toți cei care se uită și nu poate fi reluată.",
     "keepStreaming": "Continuați transmisiunea",
     "encoderPermanentHint": "Această cheie nu se schimbă niciodată. Setați codificatorul o dată — data viitoare trebuie doar să apăsați Start acolo și Riftn creează postarea pentru dvs.",
-    "notEnoughTokensForBounty": "Nu sunt suficiente token-uri. Ai nevoie de {{need}} token-uri, dar ai {{have}}."
+    "notEnoughTokensForBounty": "Nu sunt suficiente token-uri. Ai nevoie de {{need}} token-uri, dar ai {{have}}.",
+    "screenInAppHint": "În aplicația Riftn",
+    "screenInAppNote": "Browserele de pe telefon nu permit niciunui site să-ți partajeze ecranul. Intră live din aplicația Riftn, apoi atinge Partajează ecranul.",
+    "screenInAppCta": "Descarcă aplicația Riftn"
   },
   "events": {
     "seoTitle": "Evenimente: Întâlniri și evenimente comunitare pe Riftn",
@@ -7586,6 +8437,7 @@
     "footerNote": "Participarea DePin este un serviciu de contribuție, nu un produs de investiție. Disponibilitatea, eligibilitatea și recompensele pot se schimba."
   },
   "creatorFlow": {
+    "disconnect": "Deconectați",
     "title": "Creator Flow",
     "backToStudio": "Înapoi la Studioul de creație",
     "backToFlows": "Înapoi la fluxurile dvs.",
@@ -7793,7 +8645,46 @@
     "foldersInFolder_other": "În dosarele {{count}}",
     "foldersNoItems": "Nimic în acest dosar încă",
     "foldersNoItemsHint": "Deschide un rezultat și alege „Adaugă în dosar” pentru a-l salva aici.",
-    "skippedUpstreamFailed": "Omis deoarece un pas anterior a eșuat. Costul său rămâne în soldul tău."
+    "skippedUpstreamFailed": "Omis deoarece un pas anterior a eșuat. Costul său rămâne în soldul tău.",
+    "signInForAudioLibrary": "Autentifică-te ca să deschizi biblioteca ta privată de audio salvat.",
+    "audioLibraryFailed": "Audio-ul salvat nu s-a putut încărca. Încearcă din nou.",
+    "retryFreeTask": "Reîncearcă sarcina gratuită",
+    "previewSavedMedia": "Previzualizează media salvată",
+    "audioSavePending": "Audio-ul e gata, dar salvarea în biblioteca privată este în așteptare. Reia ca să-l colectezi.",
+    "confirmInterruptedRetry": "Reîncearcă sarcina audio sau de asistent întreruptă. Rezultatul ei anterior este necunoscut, iar reîncercarea poate repeta procesarea. Plata existentă și ID-urile joburilor plătite vor fi refolosite.",
+    "freeResultUnknown": "Răspunsul sarcinii gratuite a fost întrerupt. Nu va fi retrimis automat. Alege Reîncearcă sarcina gratuită, apoi reia; plata și celelalte joburi sunt păstrate.",
+    "formAuthor": "Editează flow-ul",
+    "formAuthorHint": "Construiește un flow cu intrări tipizate. Salvează-l aici sau aranjează-l pe canvasul web.",
+    "newNativeFlow": "Flow nou",
+    "chooseSavedMedia": "Alege media salvată",
+    "formInput": "Intrare: {{handle}}",
+    "reviewRun": "Verifică rularea",
+    "resumeRun": "Reia rularea salvată",
+    "confirmPrice": "Total: {{price}} jetoane",
+    "recoveryHint": "Referințele jobului și ale plății sunt salvate pe acest dispozitiv. Reia lucrul întrerupt înainte de a porni altă rulare.",
+    "newRun": "Pornește altă rulare",
+    "loadMoreMedia": "Încarcă mai multă media",
+    "invalidGraph": "Verifică conexiunile: fiecare intrare are nevoie de o sursă compatibilă, iar graful nu poate conține cicluri.",
+    "unsupportedNode": "Acest nod nu poate rula încă în formularul nativ. Folosește canvasul web pentru acest flow.",
+    "missingPrompt": "Conectează un nod de text cu un prompt.",
+    "invalidSettings": "Aceste setări nu sunt acceptate de modelul selectat.",
+    "missingCapturedFrame": "Capturează un cadru pe canvasul web înainte de a folosi acest videoclip ca intrare de imagine.",
+    "missingSavedMedia": "Media sursă salvată lipsește sau nu mai este disponibilă pentru acest cont.",
+    "quoteFailed": "Prețul acestui flow nu a putut fi calculat. Încearcă din nou.",
+    "recoverBeforeEdit": "Reia rularea salvată înainte de a-i schimba graful sau de a porni altă rulare.",
+    "runAlreadyComplete": "Această rulare este completă. Alege Pornește altă rulare ca să generezi din nou.",
+    "recoveryCorrupt": "Înregistrarea de recuperare salvată nu a putut fi citită. Păstrează acest flow și contactează asistența înainte de a plăti din nou.",
+    "paidUnavailable": "Poți crea și salva flow-uri aici. Rulările plătite nu sunt disponibile în acest magazin.",
+    "planChanged": "Flow-ul s-a schimbat după calculul prețului. Verifică din nou rularea.",
+    "connectOwnerWallet": "Conectează portofelul care deține acest flow.",
+    "runFailed": "Nodul nu a putut termina. Referința jobului salvat este păstrată pentru recuperare.",
+    "recoveryPending": "Randarea este încă în așteptare. Reia această rulare ca s-o colectezi.",
+    "nodeAudioGen": "Generator audio",
+    "nodeAudioGenDesc": "Vorbire, efecte sonore, transcriere și izolare audio",
+    "nodeAudioInput": "Audio salvat",
+    "nodeAudioInputDesc": "Folosește audio privat din biblioteca ta",
+    "audioVoiceId": "ID voce",
+    "audioSeconds": "Durata sunetului în secunde"
   },
   "videoPlayer": {
     "volume": "Volum",
@@ -7926,6 +8817,9 @@
     "followingBackProgress": "Revenire {{completed}} din {{total}}",
     "findingFollowers": "Se caută urmăritori...",
     "followBackAll": "Urmărește toate",
+    "followBackConfirm": "Urmărește înapoi",
+    "followBackNotNow": "Nu acum",
+    "followBackDone": "Terminat",
     "nonFollowers": {
       "title": "Curăță pe cine urmezi?",
       "body": "{{count}} conturi pe care le urmărești nu te urmăresc înapoi.",
@@ -7943,7 +8837,13 @@
       "doneAll": "Au fost dezactivate {{done}} conturi care nu te urmăreau înapoi.",
       "doneSome": "Au fost dezactivate {{done}} conturi. {{failed}} nu au putut fi dezactivate.",
       "doneToast": "Au fost dezactivate {{done}} conturi care nu te urmăresc înapoi"
-    }
+    },
+    "followBackConfirmTitle_one": "Urmărești înapoi {{count}} persoană?",
+    "followBackConfirmTitle_other": "Urmărești înapoi {{count}} persoane?",
+    "followBackConfirmBody": "Te urmăresc deja. Conturile private primesc o cerere de urmărire.",
+    "followedBackCount_one": "Ai urmărit înapoi {{count}} persoană",
+    "followedBackCount_other": "Ai urmărit înapoi {{count}} persoane",
+    "followBackDoneBody": "Îi găsești pe toți în Urmăriți."
   },
   "reactionInfo": {
     "title": "Reacții",
@@ -8739,6 +9639,35 @@
     "priceChartCleared": "Tabloul de prețuri a fost curățat. Prețul de referință fixat: $0,0001. Prețurile de execuție depind de comenzi disponibile."
   },
   "editor": {
+    "stage": {
+      "camera": "Cameră",
+      "yaw": "Rotație",
+      "add": "Adaugă",
+      "scale": "Mărime",
+      "color": "Culoare",
+      "light": "Luminos",
+      "create": "Adaugă o scenă 3D",
+      "title": "Scenă 3D",
+      "hint": "Schițează un cadru cu sfere și cutii. Camera, poziționarea și trei lumini de suprafață independente schimbă cadrul randat.",
+      "preview": "Previzualizarea scenei randate",
+      "error": "Cadrul nu a putut fi pregătit. Verifică referințele cadrului și încearcă din nou.",
+      "elevation": "Elevație",
+      "distance": "Distanță",
+      "fov": "Câmp vizual",
+      "object": "Obiect",
+      "sphere": "Sferă",
+      "box": "Cutie",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Elimină obiectul",
+      "intensity": "Intensitate",
+      "diffusion": "Difuzie",
+      "saving": "Se pregătește cadrul…",
+      "useFrame": "Folosește cadrul randat ca referință pentru cadru",
+      "frameHint": "Creează un PNG de 320 × 180 și îl adaugă la referințele acestui cadru. Verifică limita de referințe și oferta de preț a modelului înainte de a genera.",
+      "frameName": "Cadru din scena 3D"
+    },
     "video": {
       "tFade": "Dizolvare",
       "none": "Niciuna",
@@ -8832,7 +9761,9 @@
       "pptx": "Prezentare PowerPoint",
       "pptxHint": "Fiecare pagină devine o singură imagine de diapozitiv, cu note și linkuri de prezentare. Editați textul și elementele individuale în designul original.",
       "section": "Secțiune denumită",
-      "transparent": "Fundal transparent"
+      "transparent": "Fundal transparent",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Descarcă un ZIP cu cronologia ta ca FCPXML și Premiere XML plus toate fișierele media, ca să termini montajul în Premiere Pro, Final Cut Pro sau DaVinci Resolve. Textul devine markeri; efectele rămân în Riftn."
     },
     "inspector": {
       "selectHint": "Selectează un strat pe pânză sau un clip pe cronologie.",
@@ -8905,6 +9836,8 @@
       "tools": "Instrumente editor"
     },
     "agent": {
+      "stop": "Oprește",
+      "queue": "Adaugă în coadă",
       "introTitle": "Spune-i AI-ului ce vrei",
       "introBody": "Descrie designul sau modificarea în cuvintele tale. Redimensionează pagina, scrie și stilizează text, găsește fotografii, videoclipuri și muzică gratuite, aplică filtre, aranjează straturile și le animă. Fiecare cerere se anulează dintr-o singură Anulare.",
       "suggestPoster": "Fă o postare pătrată de Instagram pentru o reducere de vară, cu o fotografie de plajă și un titlu îngroșat",
@@ -8924,7 +9857,45 @@
       "failed": "AI-ul nu a putut face asta acum. Încearcă din nou în câteva momente.",
       "changes": "Editări făcute: {{count}}",
       "undo": "Anulare",
-      "openGenerator": "Verifică și generează"
+      "openGenerator": "Verifică și generează",
+      "stopped": "Oprit. Nu s-a mai schimbat nimic.",
+      "queued": "{{count}} în așteptare",
+      "restore": "Restaurează până aici",
+      "restoreHint": "Readu proiectul cum era înainte de acest mesaj. Anularea îl readuce înapoi.",
+      "restored": "Proiectul a fost restaurat la starea dinainte de acel mesaj. Apasă anulează ca să readuci versiunea mai nouă.",
+      "rewrite": "Fă-mi cererea mai clară",
+      "rewriteFailed": "Nu s-a putut rescrie. Textul tău a rămas neschimbat.",
+      "feedback": "Ți-a fost de folos?",
+      "good": "Răspuns bun",
+      "bad": "Răspuns prost",
+      "retryPrefix": "Nu a fost corect. În schimb, ",
+      "recipesTitle": "Rețete",
+      "recipe": {
+        "podcastClip": {
+          "label": "Clip de podcast",
+          "prompt": "Găsește cel mai puternic moment de 30 de secunde, taie la el, adaugă subtitrări Word Pop și fă-l 9:16."
+        },
+        "talkingHead": {
+          "label": "Talking head curat",
+          "prompt": "Taie pauzele lungi, adaugă subtitrări Classic și dă-i un aspect cald subtil."
+        },
+        "productPromo": {
+          "label": "Promo de produs",
+          "prompt": "Fă un promo de 15 secunde: titlu percutant la început, tranziții Zoom in între clipuri, subtitrări Bold și muzică veselă."
+        },
+        "hypeReel": {
+          "label": "Hype reel",
+          "prompt": "Taie clipurile pe ritmul muzicii, folosește tranziții Fly up și aspectul Technicolor."
+        },
+        "retroEdit": {
+          "label": "Montaj retro",
+          "prompt": "Dă fiecărui clip aspectul VHS, adaugă un titlu mare cu serife și folosește tranziții Fade."
+        },
+        "tutorial": {
+          "label": "Tutorial",
+          "prompt": "Adaugă un titlu pentru fiecare pas, subtitrări Boxed și încetinește momentul cheie la 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Dreptunghi",
@@ -9099,7 +10070,9 @@
       "tint": "Nuanță {{value}}",
       "vignette": "Vignetă {{value}}%",
       "auto": "Îmbunătățire automată",
-      "autoFailed": "Nu am putut analiza această imagine."
+      "autoFailed": "Nu am putut analiza această imagine.",
+      "halation": "Halație {{value}}%",
+      "scanlines": "Linii de scanare {{value}}%"
     },
     "pages": {
       "add": "Adaugă pagină",
@@ -9173,6 +10146,17 @@
       "reloadText": "Încărcați titlul",
       "textSaved": "Schimbările de titlu au fost salvate.",
       "action": "Subtitrări automate",
+      "styles": {
+        "bold": "Îngroșat",
+        "classic": "Clasic",
+        "boxed": "În casetă",
+        "wordpop": "Word Pop",
+        "rapid": "Dezvăluire rapidă",
+        "beast": "Beast Mode",
+        "stacked": "Suprapus",
+        "serif": "Serif",
+        "bubble": "Balon"
+      },
       "working": "Se ascultă… {{percent}}%",
       "downloading": "Se pregătește modelul de vorbire… {{percent}}%",
       "hint": "Transformă vorbirea în subtitrări sincronizate, cărora le poți schimba stilul. Rulează pe dispozitivul tău: gratuit și privat. La prima utilizare se descarcă modelul.",
@@ -9183,7 +10167,8 @@
       "translateCount": "Traduceți {{count}} titluri",
       "translationDone": "Titlurile {{count}} traduse",
       "translationFailed": "Eșuat traducerea titlurilor. Titlurile dvs. rămân neschimbate.",
-      "lockedTranslation": "Dezblocați titlurile blocate pentru a le include."
+      "lockedTranslation": "Dezblocați titlurile blocate pentru a le include.",
+      "style": "Stilul subtitrărilor"
     },
     "multi": {
       "selected": "{{count}} straturi selectate",
@@ -9220,7 +10205,10 @@
       "saveNewPreset": "Salvați nou",
       "saveStyles": "Salvați stilurile cu designul",
       "stylesSaved": "Stilurile brand salvate cu acest design",
-      "usePreset": "Utilizați stilurile"
+      "usePreset": "Utilizați stilurile",
+      "dehubApplied": "Brandul Riftn a fost aplicat pe {{count}} straturi.",
+      "dehubApply": "Folosește brandul Riftn",
+      "dehubHint": "Culorile oficiale Riftn, fonturile Exo și Inter și logoul Riftn, dintr-un singur clic."
     },
     "draw": {
       "heading": "Desenează",
@@ -10552,6 +11540,135 @@
       "toolbar": "Navigare pe pânză",
       "zoomIn": "Măriți pânza",
       "zoomOut": "Micșorați pânza"
+    },
+    "clipFix": {
+      "listening": "Se ascultă…",
+      "detach": "Detașează audio",
+      "detached": "Audio-ul a fost mutat în propriul clip",
+      "detachFailed": "Audio-ul acestui clip nu a putut fi detașat",
+      "removeBars": "Elimină benzile negre",
+      "scanning": "Se verifică cadrele…",
+      "noBars": "Nu s-au găsit benzi negre",
+      "barsRemoved": "Benzile negre au fost decupate",
+      "barsFailed": "Nu s-a putut verifica dacă videoclipul are benzi negre",
+      "reframe": "Reîncadrare automată",
+      "reframeHint": "Videoclipul se potrivește deja cu forma acestei pagini",
+      "reframed": "Reîncadrat ca să urmărească acțiunea",
+      "reframeFailed": "Videoclipul nu a putut fi reîncadrat",
+      "retakes": "Elimină dublele repetate",
+      "noRetakes": "Nu s-au găsit duble repetate",
+      "retakesRemoved": "S-au eliminat {{count}} duble repetate, s-a păstrat ultima",
+      "retakesFailed": "Dublele repetate nu au putut fi eliminate din acest clip"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Împarte",
+        "play": "Redare",
+        "pause": "Pauză",
+        "frameBack": "Cadru anterior",
+        "frameForward": "Cadrul următor",
+        "back": "Înapoi 1 secundă",
+        "rippleDelete": "Șterge clipul",
+        "liftDelete": "Șterge clipul",
+        "start": "Mergi la început",
+        "end": "Mergi la sfârșit"
+      },
+      "preset": "Aspectul tastaturii",
+      "presetHint": "Folosește tastele de cronologie din editorul pe care îl cunoști. Scurtăturile proprii Riftn funcționează în continuare pentru tot restul."
+    },
+    "voiceClone": {
+      "stop": "Oprește înregistrarea",
+      "failed": "Clonarea vocii a eșuat.",
+      "pickerLabel": "Clonează-ți vocea",
+      "pickerDetail": "Voice-overuri cu propria ta voce",
+      "title": "Clonează-ți vocea",
+      "description": "Înregistrează-te sau alege un clip în care vorbești. Plătești o singură dată, iar vocea ta e a ta pentru fiecare voice-over.",
+      "defaultName": "Vocea mea",
+      "record": "Înregistrează o mostră (între 30 de secunde și 2 minute)",
+      "fromMedia": "Sau folosește un clip din Media",
+      "recorded": "Înregistrarea ta",
+      "sample": "Mostră: {{name}}",
+      "hint": "Cel mai bine merge vorbirea clară, fără muzică.",
+      "noMic": "Microfonul nu a putut fi folosit.",
+      "sampleFailed": "Sunetul din acel clip nu a putut fi citit.",
+      "pay": "Clonează pentru {{amount}} jetoane",
+      "useFree": "Clonează (deja plătit)",
+      "owned": "Vocea ta „{{name}}” este deja configurată. Alege-o din lista de voci.",
+      "useOwned": "Folosește vocea mea",
+      "ready": "„{{name}}” este gata pentru voice-overuri.",
+      "paidFailed": "Plata ta este salvată. Deschide din nou și următoarea încercare e gratuită.",
+      "consent": "Clonează doar propria voce sau una pe care ai permisiunea s-o folosești."
+    },
+    "linkImport": {
+      "go": "Importă",
+      "downloading": "Se descarcă {{percent}}%",
+      "open": "Importă dintr-un link",
+      "placeholder": "Lipește un link de YouTube, TikTok sau altul",
+      "rights": "Dețin acest videoclip sau am permisiunea să-l folosesc",
+      "audioOnly": "Doar sunet",
+      "queued": "În așteptare…",
+      "waiting": "Se așteaptă site-ul, se reîncearcă în curând…",
+      "adding": "Se adaugă în Media…",
+      "added": "Importat și adăugat în cronologie.",
+      "failed": "Linkul nu a putut fi importat."
+    },
+    "reverse": {
+      "action": "Marșarier",
+      "working": "Se inversează {{percent}}%",
+      "done": "Clip inversat.",
+      "failed": "Clipul nu a putut fi inversat.",
+      "unsupported": "Acest browser nu poate inversa videoclipuri. Încearcă Chrome sau Edge.",
+      "tooLong": "Se pot inversa clipuri de până la {{seconds}} secunde."
+    },
+    "film": {
+      "repairRefs": "Elimină linkurile media lipsă",
+      "title": "Proiect de film",
+      "intro": "Planifică cadrele cu referințe de imagine refolosibile. Brieful, ordinea cadrelor și rezultatele selectate se salvează cu acest proiect.",
+      "create": "Creează planul filmului",
+      "name": "Numele filmului",
+      "brief": "Brieful filmului",
+      "sharedReferences": "Referințe de imagine comune (până la 4)",
+      "shot": "Cadru",
+      "addShot": "Adaugă cadru",
+      "shotName": "Numele cadrului",
+      "action": "Acțiunea și compoziția cadrului",
+      "seconds": "Secunde de video solicitate",
+      "shotReferences": "Referințe de imagine suplimentare (limită totală 4)",
+      "frame": "Pregătește cadrul",
+      "video": "Pregătește videoclipul",
+      "review": "Verifică modelul, referințele, durata videoclipului și prețul în studio înainte de a genera.",
+      "result": "Rezultatul acceptat al cadrului",
+      "noResult": "Niciun rezultat selectat",
+      "resultHint": "Alege o imagine sau un videoclip acceptat din Încărcări. Linkul se salvează cu acest cadru; folosește cronologia ca să asamblezi filmul.",
+      "earlier": "Mută mai devreme",
+      "later": "Mută mai târziu",
+      "remove": "Elimină cadrul",
+      "issue": "Verifică descrierea cadrului și media de referință, apoi încearcă din nou. Ține proiectul deschis dacă nu a putut fi salvat.",
+      "searchMedia": "Găsește media după nume",
+      "refreshMedia": "Reîmprospătează media"
+    },
+    "speakers": {
+      "find": "Găsește vorbitorii",
+      "name": "Vorbitorul {{number}}",
+      "onlyOne": "S-a găsit un singur vorbitor.",
+      "failed": "Vorbitorii nu au putut fi găsiți.",
+      "kept": "S-a păstrat doar {{name}}.",
+      "editFailed": "Această editare nu s-a potrivit cu clipul.",
+      "split": "Împărțit în {{count}} cadre pe vorbitori.",
+      "keepOnly": "Păstrează doar",
+      "splitAction": "Taie la fiecare schimbare de vorbitor"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Descrie obiectul 3D pe care îl vrei",
+      "queued": "Se construiește obiectul tău 3D. Va apărea în fila Generări.",
+      "note": "Obiectele 3D ajung în Media ca un clip scurt care se rotește, cu fundal transparent."
+    },
+    "behind": {
+      "action": "Text în spatele persoanei",
+      "working": "Se decupează persoana…",
+      "done": "Textul și subtitrările stau acum în spatele persoanei.",
+      "failed": "Textul nu a putut fi pus în spatele persoanei."
     }
   },
   "jungleMood": {
@@ -10950,13 +12067,18 @@
     "sentUnconfirmed": "Transferul dvs. de jetoane a fost trimis, dar nu l-am putut confirma. Acesta este salvat și va plăti pentru următoarea dvs. încercare — nu îl trimiteți din nou.",
     "transferFailedNoCharge": "Transferul de jetoane nu a fost efectuat. Nu s-a perceput nimic.",
     "notEnoughForVoiceClone": "Nu sunt suficiente jetoane. Clonarea jetoanelor de voce costă {{amount}} și dețineți {{held}}.",
-    "insufficientBalance": "Nu sunt suficiente jetoane. Ai nevoie de {{needed}} jetoane, dar ai {{held}}."
+    "insufficientBalance": "Nu sunt suficiente jetoane. Ai nevoie de {{needed}} jetoane, dar ai {{held}}.",
+    "notEnoughInWallet": "Nu ai destule jetoane în portofel. Costă {{amount}} jetoane și deții {{held}}.",
+    "notEnough": "Nu ai destule jetoane. Costă {{amount}} jetoane și deții {{held}}.",
+    "notEnoughForSession": "Nu ai destule jetoane. Această sesiune costă {{amount}} jetoane și deții {{held}}."
   },
   "mobilePreview": {
     "tokenAmount": "{{amount}} token-uri",
     "assistant": {
       "question1": "Care este miza actuală APY pentru jetoanele Riftn?",
-      "question2": "Da, dacă pariez 10.000 de jetoane timp de 90 de zile"
+      "question2": "Da, dacă pariez 10.000 de jetoane timp de 90 de zile",
+      "answer1": "APY-ul actual de mizare pentru jetoanele Riftn este de 12,4% pentru o perioadă de blocare de 30 de zile. Iată detaliile:\n\n• Blocare 7 zile: 8,2% APY\n• Blocare 30 de zile: 12,4% APY\n• Blocare 90 de zile: 18,7% APY\n\nVrei să te ajut să calculezi câștigurile posibile?",
+      "answer2": "Pentru 10.000 de jetoane mizate la 18,7% APY timp de 90 de zile:\n\n📊 Recompensă estimată: ~461 de jetoane\n\nAdică aproximativ 5,13 jetoane pe zi. Ține cont că APY-ul poate varia în funcție de suma totală mizată."
     },
     "bookmarks": {
       "stakingGuide": "Ghid complet pentru mizarea jetoanelor Riftn: explicate defalcarea APY, perioadele de blocare și multiplicatorii de recompense."
@@ -10966,6 +12088,9 @@
     },
     "home": {
       "stakedPost": "Jetoane Riftn de 50k mizate. Apy arată solid la 12,4%. Mentalitatea deținătorului pe termen lung. 💎🙌"
+    },
+    "notifications": {
+      "tippedYou": "ți-a dat un bacșiș de {{amount}} jetoane"
     }
   },
   "emojiPicker": {
@@ -11649,7 +12774,7 @@
   "multiPost": {
     "tab": "Multi-postare",
     "title": "Multi-postare",
-    "intro": "Publică pe X, YouTube, Instagram, TikTok și altele simultan ca dehub. Conectează-ți conturile o singură dată, apoi alege unde merge fiecare postare.",
+    "intro": "Publică pe X, YouTube, Instagram, TikTok și altele simultan ca Riftn. Conectează-ți conturile o singură dată, apoi alege unde merge fiecare postare.",
     "creditsHeading": "Credite de postare",
     "credits": "{{count}} credite de postare",
     "topUpTitle": "Reîncarcă și economisește",
@@ -11697,7 +12822,12 @@
   "dm": {
     "planRestricted": "Acest utilizator necesită un abonament pentru a primi mesaje.",
     "planTypeNotAllowed": "Planul acestui creator nu permite acest tip de mesaj.",
-    "planMinTip": "Bacșișul pentru acest creator trebuie să fie de cel puțin {{amount}} tokenuri."
+    "planMinTip": "Bacșișul pentru acest creator trebuie să fie de cel puțin {{amount}} tokenuri.",
+    "shareKindGroup": "Grupează",
+    "shareKindCommunity": "Comunitate",
+    "shareGroups": "Grupuri",
+    "shareKindChannel": "Canal",
+    "reportMessage": "Raportează mesajul"
   },
   "credits": {
     "earningsWorth": "Valoare {{amount}}",
@@ -11739,7 +12869,11 @@
     "error": "Cererea de ștergere nu a putut fi trimisă. Contul tău nu a fost confirmat pentru ștergere. Te rugăm să încerci din nou.",
     "back": "Înapoi la Setări",
     "signIn": "Conectează-te pentru a-ți șterge contul",
-    "acknowledge": "Am salvat detaliile de recuperare a portofelului și înțeleg că ștergerea este permanentă."
+    "acknowledge": "Am salvat detaliile de recuperare a portofelului și înțeleg că ștergerea este permanentă.",
+    "signedInAs": "Autentificat ca",
+    "confirmTitle": "Îți ștergi contul definitiv?",
+    "confirmBody": "Contul tău și tot ce conține vor fi șterse. Vei fi deconectat, iar acțiunea nu poate fi anulată.",
+    "confirmBodyNamed": "{{who}} și tot ce conține vor fi șterse. Vei fi deconectat, iar acțiunea nu poate fi anulată."
   },
   "miniApps": {
     "badge": {
@@ -11775,7 +12909,8 @@
       "yourApps": "Aplicațiile dvs.",
       "notificationsOn": "Notificări pe",
       "remove": "Notificare cheie",
-      "removed": "Textul a fost șters. Nu vei primi niciun alt mesaj de notificare."
+      "removed": "Textul a fost șters. Nu vei primi niciun alt mesaj de notificare.",
+      "rising": "Noi și în ascensiune"
     },
     "dev": {
       "title": "Creează o miniaplicație",
@@ -11833,7 +12968,45 @@
       "rewardsWeek": "Săptămâna {{date}}",
       "rewardPaid": "Plătit",
       "rewardPending": "În așteptare",
-      "rewardsNone": "Încă nu au fost calculate recompense. Prima săptămână se încheie luni."
+      "rewardsNone": "Încă nu au fost calculate recompense. Prima săptămână se încheie luni.",
+      "stats": {
+        "button": "Statistici live",
+        "chartTitle": "Persoane care ți-au deschis aplicația, ultimele 30 de zile",
+        "peak_one": "Maxim {{count}} pe zi",
+        "peak_other": "Maxim {{count}} pe zi",
+        "people30": "Persoane, 30 de zile",
+        "people7": "Persoane, 7 zile",
+        "added": "Au adăugat-o",
+        "dhb30": "Jetoane plătite, 30 de zile",
+        "notified30": "Notificări trimise, 30 de zile",
+        "rewards": "Recompense în jetoane câștigate"
+      },
+      "signin": {
+        "users_one": "utilizator {{count}}",
+        "users_other": "utilizatori {{count}}",
+        "delete": "Ștergeți",
+        "title": "Autentificare cu Riftn",
+        "body": "Permite oamenilor să se autentifice pe site-ul sau în aplicația ta cu contul Riftn. Creează o cheie aici, apoi urmează ghidul.",
+        "guide": "Citește ghidul",
+        "copyId": "Copiază ID-ul clientului",
+        "rotate": "Secret nou",
+        "rotateConfirm": "Creezi un secret nou pentru {{name}}? Secretul vechi nu mai funcționează imediat.",
+        "deleteConfirm": "Ștergi {{name}}? Toți cei autentificați cu el vor fi deconectați.",
+        "secretOnce": "Secretul pentru {{name}}. Copiază-l acum: este afișat o singură dată.",
+        "name": "Numele aplicației",
+        "website": "Site web (opțional)",
+        "redirects": "URL-uri de redirecționare, câte unul pe rând (https://yoursite.com/callback)",
+        "create": "Creează cheia"
+      },
+      "stateRejected": "Live prin link · neaprobată pentru magazin",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Evenimentele trimise de Riftn la webhookUrl-ul tău. Testul trimite un eveniment ping.",
+        "test": "Trimite test",
+        "ok": "Webhookul a răspuns {{status}}",
+        "failed": "Webhookul a eșuat: {{reason}}",
+        "none": "Încă nu s-a trimis niciun webhook."
+      }
     },
     "card": {
       "open": "Deschide"
@@ -11859,7 +13032,10 @@
       "confirm": "Plătește {{amount}} tokenuri",
       "sending": "Trimiteți plățirea…",
       "sent": "Plătit {{amount}} tokenuri către {{name}}.",
-      "noOwner": "Această aplicație nu are încă portofel verificat pentru plată."
+      "noOwner": "Această aplicație nu are încă portofel verificat pentru plată.",
+      "testBadge": "Mod de test",
+      "testBody": "Deții această aplicație, deci acesta este un test: nu se mută niciun jeton, iar chitanța e marcată ca test.",
+      "testSent": "Plată de test de {{amount}} jetoane. Nu s-a trimis nimic."
     },
     "add": {
       "title": "Adăugați {{name}}?",
@@ -11991,6 +13167,9 @@
     "reminderLater": "Nu acum"
   },
   "copy": {
+    "55656b5e434f": "Închideți căutarea",
+    "57e2faa5ec63": "Caută pe Riftn",
+    "96d7bff86b44": "Căutarea nu a putut fi încărcată",
     "1607715e45ed": "Atinge sfera ca să vorbești sau scrie mai jos",
     "00140a37bd26": "Transacțiile pe această rețea sunt temporar indisponibile. Te rog să încerci din nou.",
     "002286513398": "Nu ai permisiunea să gestionezi evenimentele.",
@@ -15647,6 +16826,7 @@
     "6b7ba43f75e5": "Nu există active care să corespundă",
     "6d48f83a9539": "Încercați o căutare mai largă sau un alt format.",
     "e98872cc5520": "Ce să generezi",
+    "5c39123805ff": "Configurează",
     "5e2c614c23f0": "Modelul",
     "d7ad336f35e1": "Raport de aspect",
     "dc98456bbe64": "Generații",
@@ -18980,7 +20160,56 @@
     "127053546dd4": "Nu s-a putut descărca acest fișier",
     "d14896aa4bf8": "Biblioteca gratuită nu s-a putut încărca. Verifică-ți conexiunea și încearcă din nou.",
     "953e708b2287": "Generarea vocii a eșuat.",
-    "4a52cdd6ac72": "Nu s-au putut duplica aceste straturi"
+    "4a52cdd6ac72": "Nu s-au putut duplica aceste straturi",
+    "3f9b2c71d0a4": "{{n}} rezultate",
+    "8c4e1a6b2f57": "pentru „{{query}}”",
+    "1d7234ff1b79": "în {{feed}}",
+    "e122e5c2b563": "Trage în sus pentru a închide",
+    "1aa9d734f2ee": "Alege ce cauți",
+    "ef557404f465": "Niciun rezultat pentru „{{query}}”",
+    "35034aa59bd3": "Nimic din {{feed}} nu se potrivește. Încearcă alte cuvinte sau caută peste tot.",
+    "415155739590": "Caută peste tot",
+    "9e13d826baaf": "Caută imagini",
+    "cbf6f228327c": "Caută muzică",
+    "e8756c6865a5": "Caută clipuri scurte",
+    "c7661da99c41": "Caută videoclipuri",
+    "90f1afe66801": "Se caută „{{query}}”…",
+    "d7b559f2d8c6": "Încearcă alte cuvinte sau schimbă filtrele.",
+    "d1a0c7e2f301": "La ce te gândești azi?",
+    "d1a0c7e2f302": "La ce te gândești astăzi?",
+    "d1a0c7e2f303": "La ce te gândești?",
+    "d1a0c7e2f304": "Ai ceva pe suflet?",
+    "d1a0c7e2f305": "La ce te gândești acum?",
+    "d1a0c7e2f306": "La ce ne gândim azi?",
+    "d1a0c7e2f307": "Te frământă ceva azi?",
+    "d1a0c7e2f308": "La ce te gândești de data asta?",
+    "a7c1e0f4b2d9": "Atinge pentru a vorbi",
+    "b3e8d1c6f0a2": "Atinge pentru a trimite",
+    "c9f2a4e7d1b5": "Te ascult... atinge bila pentru a trimite",
+    "22577ebd908e": "Generează video Wan 3.0 · coloană sonoră originală",
+    "1fa2357ab7e1": "Generează video Seedance 720p · coloană sonoră originală",
+    "7f78bdc0762d": "+{{value1}} pct.",
+    "f0c8bb34335b": "Ai câștigat +{{value1}} puncte",
+    "0fbe06b679a8": "{{value1}} puncte pentru fiecare cerere livrată, adăugate la scorul tău din Top constructori.",
+    "431bc73eb60b": "[verse]\nVersurile tale aici...\n\n[chorus]\nVersurile refrenului...",
+    "c7bf4bbdbcd8": "RECLAMĂ",
+    "81acaafba961": "Aa",
+    "a3c1e5f20b71": "Folosește Riftn în ChatGPT, Claude sau orice aplicație MCP. Lipește adresa URL de mai jos în setările de conectori ale asistentului pentru a explora postări, profiluri și comentarii, apoi autentifică-te când ți se cere, ca să-ți conectezi contul.",
+    "b84d2e7c9a16": "Această adresă este pentru aplicații AI, nu o pagină web. Dacă o deschizi într-un browser, ajungi aici.",
+    "c5e9f1a3d742": "Conectează-ți contul Riftn",
+    "d61a7b4e8c05": "Când asistentul îți cere să te autentifici, conectează-te la Riftn și apasă Permite. Apoi îți poate actualiza profilul, publica postări și comentarii, urmări oameni și crea în Creator Studio. Conexiunile rămân active cât timp le folosești și expiră după 30 de zile de nefolosire.",
+    "e27b8c5f9d13": "Ghid pas cu pas pentru ChatGPT",
+    "f38c9d6a0e24": "Ghid pas cu pas pentru Claude",
+    "0a49d7b1f835": "Preferi un cont de bot separat? Creează un agent ca să primești un URL de conector care postează în numele acelui agent.",
+    "1b5ae8c20f46": "Când ChatGPT îți cere, autentifică-te în Riftn și apasă Permite pentru a-ți conecta contul.",
+    "2c6bf9d31a57": "Apasă Conectează, autentifică-te în Riftn și apasă Permite pentru a-ți conecta contul.",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Bare de sticlă",
+    "5ff272ba7871": "Linii de mătase",
+    "a941e90ca93d": "Halou copertă",
+    "04dbbe4dff7a": "Undă pură",
+    "85330dcbaadd": "Fără algoritmi care favorizează o parte a discuției. \nToată lumea este amplificată în mod egal și corect.",
+    "6e71ae3669b1": "Rezultatul salvat nu este disponibil"
   },
   "articles": {
     "cardLabel": "Articol · {{count}} min read",
@@ -18999,6 +20228,7 @@
     "backToTop": "Înapoi la început",
     "needTitle": "Adăugați un titlu pentru a continua",
     "needBody": "{{count}} caractere rămân",
+    "imagesLabel": "Imagini",
     "backToWriting": "Înapoi la scriere",
     "readyTitle": "Gata să publicați",
     "sharePreview": "Cum arată atunci când este partajat",
@@ -19021,7 +20251,16 @@
     "formatting": "Formatarea",
     "bodyPlaceholder": "Spuneți povestea dumneavoastră. Selectați textul și utilizați bara de sus pentru titluri, bold, citate și liste.",
     "bodyLabel": "Corpul articolului",
-    "wordCount": "{{count}} cuvinte"
+    "wordCount": "{{count}} cuvinte",
+    "imageLimit": "Articolele pot conține până la {{count}} imagini",
+    "imageLimitSome": "Mai încap doar {{count}} imagini în acest articol",
+    "imageFailed": "Imaginea nu a putut fi adăugată. Încearcă alta.",
+    "imagesUploading": "Se adaugă imaginile ({{count}})…",
+    "bodyTooLong": "{{count}} caractere peste limită",
+    "imagesCount": "Imagini · {{count}}/{{max}}",
+    "captionPlaceholder": "Adaugă o descriere",
+    "captionLabel": "Descriere pentru imaginea {{n}}",
+    "removeInlineImage": "Elimină imaginea {{n}}"
   },
   "liveAudience": {
     "whosHere": "Cine este aici",
@@ -19060,6 +20299,387 @@
     "exploreFirst": "Explorează mai întâi",
     "codeNote": "Îți trimitem un cod pe e-mail, fără parolă."
   },
+  "liveHype": {
+    "gift": {
+      "howMany": "Câte",
+      "who": "Nume de utilizator sau adresă de portofel",
+      "whoPlaceholder": "@numeutilizator",
+      "cancel": "Anulați",
+      "stage": {
+        "preparing": "Pregătire…",
+        "confirming": "Se așteaptă tranzacția…",
+        "recording": "Se finalizează…",
+        "wallet": "Confirmă în portofel"
+      },
+      "open": "Oferă abonamente cadou",
+      "title": "Oferă abonamente cadou",
+      "plan": "Plan",
+      "mode": {
+        "random": "Spectatori aleatorii din chat",
+        "user": "O anumită persoană"
+      },
+      "randomHint": "Ajunge la cei care au scris în chat în ultimele 30 de minute și nu sunt încă abonați.",
+      "send_one": "Oferă 1 abonament · ${{price}}",
+      "send_other": "Oferă {{count}} abonamente · ${{price}}",
+      "payHint": "Plătit în tokenuri din portofel, printr-un singur transfer.",
+      "fewer_one": "Doar 1 persoană din chat poate primi un abonament acum, așa că plătești pentru 1.",
+      "fewer_other": "Doar {{count}} persoane din chat pot primi un abonament acum, așa că plătești pentru {{count}}.",
+      "done_one": "Abonament oferit cadou!",
+      "done_other": "{{count}} abonamente oferite cadou!",
+      "failed": "Abonamentele nu au putut fi oferite",
+      "notReady": "Cadourile nu sunt încă disponibile pentru acest plan",
+      "noPlan": "Alege mai întâi un plan",
+      "noPlans": "{{name}} nu are încă planuri de abonament de oferit."
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Abonați",
+        "both": "Abonați și cei care oferă cadouri",
+        "gifters": "Cei care oferă cadouri"
+      },
+      "ended": "Încheiat",
+      "until": "Până la {{date}}",
+      "failed": "Asta nu a funcționat. Încearcă din nou.",
+      "title": "Insigne pe timp limitat",
+      "intro": "Oferă o insignă timp de câteva zile. Oricine se abonează sau oferă cadouri cât timp e activă o primește, iar ea apare pentru totdeauna lângă numele lor în chatul tău.",
+      "name": "Numele insignei",
+      "namePlaceholder": "Săptămâna lansării",
+      "days": "Disponibilă timp de (zile)",
+      "emoji": "Emoji",
+      "who": "Cine o poate obține",
+      "create": "Oferă insigna",
+      "created": "Insigna este activă.",
+      "end": "Încheie acum",
+      "holders_one": "{{count}} deținător",
+      "holders_other": "{{count}} deținători",
+      "limit": "Pot rula trei insigne în același timp. Încheie una pentru a oferi alta.",
+      "hypeHint": "Toți cei care participă la un hype train primesc și insigna ta 🚂 la nivelul atins."
+    },
+    "train": {
+      "level": "Hype Train · Nivelul {{level}}",
+      "endedLevel": "Hype Train a terminat nivelul {{level}}!",
+      "ended": "Hype Train s-a încheiat",
+      "thanks_one": "Mulțumim, {{count}} susținător",
+      "thanks_other": "Mulțumim, {{count}} susținători",
+      "top": "Top: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "a oferit un abonament cadou 🎁",
+      "giftedSubs_other": "a oferit {{count}} abonamente cadou 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Astăzi",
+    "tooSoon": "Alege o oră din viitor.",
+    "show": "Afișează",
+    "hide": "Ascunde",
+    "title": "Când?",
+    "tonight": "Diseară",
+    "inAnHour": "Într-o oră",
+    "tomorrow": "Mâine",
+    "primeTime": "Ora de vârf",
+    "scheduleFor": "Programează pentru {{when}}",
+    "liveTip": "Urmăritorii tăi pot seta un memento. Tu pornești Live-ul când vine momentul.",
+    "stageTip": "Apare imediat în secțiunea În curând, ca oamenii să poată apăsa Reamintește-mi.",
+    "typePlaceholder": "Scrie o oră, de ex. „vin 20:00” sau „în 2 ore”",
+    "typeLabel": "Scrie o oră",
+    "typeHelp": "Încearcă „diseară”, „mâine 9:00”, „sâm prânz” sau „30 oct 19:00”.",
+    "orPickDay": "Sau alege o zi",
+    "earlier": "Cu 15 minute mai devreme",
+    "later": "Cu 15 minute mai târziu",
+    "earlierShort": "Mai devreme",
+    "laterShort": "Mai târziu",
+    "tooSoonMin": "Alege o oră la cel puțin {{count}} minute de acum.",
+    "zone": "Ora ta ({{zone}}). Ceilalți o văd în fusul lor orar.",
+    "remove": "Elimină programarea",
+    "startsIn": "Începe în {{time}}",
+    "bestTime": "Cel mai bun moment",
+    "fansOnline": "Când sunt fanii mei online?",
+    "fansBasis": "Mai luminos înseamnă că mai mulți urmăritori se uitau, în ultimele {{count}} zile.",
+    "everyoneBasis": "Încă nu există destulă activitate a urmăritorilor, așa că sunt afișați toți utilizatorii Riftn."
+  },
+  "planned": {
+    "title": "Planificat",
+    "all": "Toate",
+    "posts": "Postări",
+    "stages": "Camere audio",
+    "post": "Postare",
+    "live": "Fază",
+    "stage": "Scenă",
+    "untitledPost": "Postare",
+    "untitledLive": "Fază",
+    "loading": "Se încarcă...",
+    "startNow": "Începe acum",
+    "cancel": "Anulați",
+    "cancelled": "Anulat",
+    "subtitle": "Postări, Live-uri și Scene pe care le-ai programat",
+    "seoTitle": "Planificate · Riftn",
+    "seoDescription": "Postările, Live-urile și Scenele tale programate pe Riftn, toate într-un singur loc.",
+    "lives": "Live-uri",
+    "signIn": "Autentifică-te pentru a vedea ce ai planificat",
+    "emptyTitle": "Nimic planificat încă",
+    "emptyBody": "Alege „Când?” când creezi o postare, un Live sau o Scenă și va apărea aici.",
+    "move": "Mută",
+    "postNow": "Postează acum",
+    "confirmCancel": "Atinge din nou pentru a anula",
+    "moved": "Mutat la {{when}}",
+    "postingNow": "Se postează în mai puțin de un minut",
+    "moveFailed": "Nu s-a putut muta. Încearcă din nou.",
+    "seeAll": "Vezi tot ce ai planificat"
+  },
+  "welcome": {
+    "about": {
+      "title": "Bine ai venit pe Riftn",
+      "day": "Zi",
+      "month": "Luna",
+      "year": "Anul",
+      "sub": "Ziua ta de naștere rămâne privată. Alege un aspect, îl poți schimba oricând.",
+      "birthday": "Data nașterii",
+      "pick": "Alege ziua de naștere",
+      "invalid": "Introdu data completă a nașterii.",
+      "tooYoung": "Trebuie să ai cel puțin {{age}} ani pentru a folosi Riftn.",
+      "theme": "Aspectul tău"
+    },
+    "name": {
+      "title": "Numele meu",
+      "placeholder": "Numele meu",
+      "sub": "Acesta este numele pe care îl văd oamenii la postările tale."
+    },
+    "card": {
+      "name": "Numele meu",
+      "followers": "urmăritori",
+      "interests": "Interesele tale",
+      "following": "urmărești"
+    },
+    "topic": {
+      "music": "Muzică",
+      "art": "Artă",
+      "gaming": "Jocuri",
+      "crypto": "Criptosporidium",
+      "sports": "Sporturi",
+      "comedy": "Comedie",
+      "food": "Mâncare",
+      "news": "Noutăți",
+      "science": "Știință",
+      "travel": "Călătorii",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Mașini",
+      "podcast": "Podcast",
+      "animals": "Animale",
+      "tech": "Tehnologie"
+    },
+    "back": "Înapoi",
+    "skipPhoto": "Ignoră deocamdată",
+    "preview": "Previsualizare",
+    "username": {
+      "title": "@username-ul tău",
+      "sub": "Litere, cifre și liniuțe de subliniere. Îl poți schimba mai târziu.",
+      "yours": "@{{name}} este al tău"
+    },
+    "photo": {
+      "title": "Fotografia ta",
+      "sub": "Opțional. Oamenii urmăresc mai repede o față.",
+      "choose": "Alege o fotografie",
+      "change": "Alege alta"
+    },
+    "interests": {
+      "title": "Interesele tale",
+      "sub": "Alege cel puțin 3. Vor apărea primele în categoriile tale."
+    },
+    "people": {
+      "title": "Oamenii tăi",
+      "sub": "Atinge pentru a urmări. Postările lor îți umplu fluxul Urmărești.",
+      "empty": "Nicio sugestie acum. În Explorează găsești mai mulți oameni.",
+      "followers": "{{count}} urmăritori"
+    },
+    "done": {
+      "title": "Arăți bine, {{name}}",
+      "sub": "Toată lumea vede acest card de azi.",
+      "eyebrow": "Profil activ"
+    },
+    "enter": "Intră în Riftn",
+    "pickMore": "Mai alege {{count}}",
+    "cardHint": "Așa te vor vedea oamenii",
+    "followFailed": "Nu s-a putut urmări. Încearcă din nou."
+  },
+  "appTokens": {
+    "title": "Tokenurile tale",
+    "history": "Istoric",
+    "noHistory": "Nicio activitate încă",
+    "kindDeposit": "Depunere",
+    "to": "Către",
+    "amount": "Sumă",
+    "notePlaceholder": "Adaugă o notă (opțional)",
+    "sendButton": "Trimite",
+    "errorInsufficient": "Nu sunt suficiente tokenuri",
+    "rowHint": "Sold în aplicație",
+    "explainer": "Tokenurile tale se află acum în Riftn. Ai pornit cu ce dețineai și aveai în staking onchain la lansare. Trimiterea, bacșișurile și cheltuielile le mută instantaneu, fără comisioane și fără nimic onchain. Soldurile se transferă la noul token la airdrop.",
+    "kindOpening": "Sold inițial",
+    "kindSent": "Trimis către {{name}}",
+    "kindReceived": "De la {{name}}",
+    "kindSpent": "Cheltuit în Riftn",
+    "kindRefund": "Rambursare",
+    "kindAdjust": "Ajustare de la Riftn",
+    "sendTitle": "Trimite tokenuri",
+    "sendHint": "Trimite tokenuri în Riftn către alt cont. Instant și gratuit, nimic nu ajunge onchain.",
+    "toPlaceholder": "@username sau adresă 0x",
+    "looking": "Se caută…",
+    "available": "Disponibil: {{amount}}",
+    "sent": "Ai trimis {{amount}} tokenuri către {{name}}",
+    "errorRateLimit": "Prea multe trimiteri în ultima oră. Încearcă mai târziu.",
+    "errorNoRecipient": "Nu s-a găsit niciun cont Riftn",
+    "errorSelf": "Nu îți poți trimite ție",
+    "errorGeneric": "Nu s-a putut trimite. Încearcă din nou."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Toată lumea",
+      "followers": "Urmăritori",
+      "nobody": "Nimeni",
+      "default": "Implicit pentru cont ({{value}})"
+    },
+    "heading": "Reacţii",
+    "more": "Arată mai mult",
+    "liveNow": "Fază",
+    "untitled": "Reacție",
+    "reactionTo": "Reacție la",
+    "reactingTo": "Reacționezi la",
+    "count_one": "{{count}} reacție",
+    "count_other": "{{count}} reacții",
+    "allow": "Permite reacții",
+    "remixesSection": "Remixuri",
+    "allowDescription": "Permite altor creatori să reacționeze la videoclipurile tale, înregistrate sau live. Poți schimba asta la fiecare postare.",
+    "pageDescription": "Urmărește creatori care reacționează la „{{title}}” de {{creator}} pe Riftn, înregistrat și live.",
+    "backToVideo": "Înapoi la videoclip",
+    "empty": "Încă nu există reacții. Deschide meniul Remix al videoclipului și alege Reacționează pentru a fi primul.",
+    "wasLive": "A fost live",
+    "thisVideo": "acest videoclip",
+    "pageTitle": "Reacții la {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Conectează Riftn la asistentul tău AI",
+    "urlLabel": "URL server MCP",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "copiedToast": "URL MCP copiat",
+    "accountBody2": "Salvează ciorne private, publică și programează postări, gestionează imagini și sondaje, citește statistici, răspunde, reacționează, repostează, urmărește, salvează marcaje, citește notificări, editează-ți profilul și creează cu creditele tale. Reutilizarea ID-ului unei cereri de postare nu creează și nu contorizează o a doua postare. Cere confirmare înainte de a cheltui ceva.",
+    "agentsTitle": "Rulează-ți agenții din asistent",
+    "agentsBody": "Când te conectezi, permite și „Acționează ca agenții tăi”. Asistentul poate apoi posta, răspunde, reacționa, reposta, urmări sau edita un profil ca oricare dintre agenții tăi, pe rând sau mai mulți la rând. Nu poate acționa niciodată ca un cont care nu îți aparține.",
+    "agentsExample": "Încearcă: „Fă-l pe @mybot să răspundă la prima postare din fluxul meu, apoi apreciază acel răspuns ca @otherbot.”",
+    "desc": "Folosește Riftn din ChatGPT, Claude, Cursor sau orice aplicație MCP. Explorează fără cont sau autentifică-te ca asistentul să poată posta, răspunde și crea pentru tine.",
+    "copyFailed": "Copierea a eșuat",
+    "urlNote": "Lipește asta în aplicația ta AI. Nu este o pagină web, așa că deschiderea ei într-un browser te aduce înapoi aici.",
+    "canTitle": "Ce poate face asistentul tău",
+    "publicTitle": "Fără autentificare",
+    "publicBody": "Explorează fluxul, caută postări și oameni, citește comentarii și vezi profiluri.",
+    "accountTitle": "După autentificare",
+    "accountBody": "Postează, răspunde, reacționează, urmărește, salvează marcaje, citește notificări, editează-ți profilul și creează imagini, video și muzică cu creditele tale. Cere confirmare înainte de a cheltui ceva.",
+    "chatgpt1": "Deschide Setări în ChatGPT, apoi Apps & Connectors, apoi Advanced, și activează Developer mode.",
+    "chatgpt2": "Înapoi în Apps & Connectors, alege Create pentru a adăuga un conector nou.",
+    "chatgpt3": "Numește-l Riftn, lipește URL-ul de mai sus și alege OAuth ca tip de autentificare.",
+    "chatgpt4": "Apasă Connect. Se deschide Riftn: autentifică-te, verifică permisiunile și apasă Permite.",
+    "chatgpt5": "Într-un chat nou, deschide meniul +, alege Riftn și întreabă, de exemplu, „Arată-mi postările populare pe Riftn.”",
+    "claude1": "Deschide setările de conectori din Claude și alege Add custom connector.",
+    "claude2": "Numește-l Riftn, lipește URL-ul de mai sus și apasă Add.",
+    "claude3": "Apasă Connect. Se deschide Riftn: autentifică-te, verifică permisiunile și apasă Permite.",
+    "claude4": "Într-un chat, deschide meniul de instrumente, activează Riftn și întreabă ce vrei.",
+    "openSettings": "Deschide setările",
+    "devTitle": "Claude Code, Cursor și alte aplicații",
+    "devBody": "Adaugă Riftn ca server MCP la distanță prin HTTP. Aplicația deschide autentificarea Riftn prima dată când are nevoie de contul tău.",
+    "manageTitle": "Aplicațiile tale conectate",
+    "manageBody": "Aplicațiile conectate rămân conectate cât timp le folosești și se deconectează după 30 de zile de nefolosire. Le poți vedea sau deconecta oricând.",
+    "manageLink": "Gestionează aplicațiile conectate",
+    "agentTitle": "Vrei un bot care postează din propriul cont?",
+    "agentBody": "Creează un agent și primești propriul lui URL de conector, cu cheia inclusă. Asistentul poate apoi posta, comenta, vota și urmări ca acel agent, nu ca tine.",
+    "agentLink": "Creează un agent",
+    "helpTitle": "Dacă ceva nu merge",
+    "help1": "„Authentication update required” sau un buton Reconnect: apasă Reconnect și autentifică-te din nou în Riftn.",
+    "help2": "„Conectează-ți contul Riftn” când întrebi de propriile postări: apasă Connect în setările de conectori ale aplicației.",
+    "help3": "O eroare când deschizi URL-ul într-o filă de browser este normală. Lipește-l în aplicația ta AI.",
+    "other": "Orice altă aplicație MCP funcționează la fel: adaugă un server MCP la distanță și lipește URL-ul de mai sus."
+  },
+  "avatarPrompt": {
+    "notNow": "Nu acum",
+    "title": "Adaugă o fotografie de profil",
+    "body": "Oamenii te recunosc mai repede în fluxuri, comentarii și chaturi când ai o față sau un logo.",
+    "choose": "Alege o fotografie",
+    "another": "Alege alta",
+    "save": "Folosește această fotografie",
+    "saved": "Arată bine",
+    "failed": "Fotografia nu a putut fi salvată. Încearcă din nou."
+  },
+  "postStats": {
+    "audience": "Audiență",
+    "engagement": "Angajament",
+    "finished": "Încheiat",
+    "members": "Membri",
+    "membersLower": "membri",
+    "newFollowers": "Urmăritori noi",
+    "noBadge": "Fără emblemă",
+    "people": "Oameni",
+    "plays": "Redă",
+    "quotes": "Citate",
+    "reposts": "Republicări",
+    "saved": "Salvat",
+    "shares": "Parti sociale",
+    "signedOutViewers": "Deconectat",
+    "topSupporters": "Susținători de top",
+    "visitors": "Deconectat",
+    "aboutUsual": "față de obișnuit",
+    "afterWatching": "au urmărit după ce au văzut-o",
+    "avg": "medie",
+    "avgWatch": "Vizionare medie",
+    "bestTime": "Când se uită oamenii tăi",
+    "bigDrop": "Scădere mare",
+    "byBadge": "după insignă",
+    "devices": "Dispozitiv (membri)",
+    "finishedLower": "terminat",
+    "finishedPct": "{{pct}}% au urmărit până la final",
+    "inOut": "{{in}} membri · {{out}} neautentificați",
+    "leave": "{{pct}}% pleacă",
+    "linkClicks": "Clicuri pe link",
+    "newToYou": "noi pentru tine",
+    "noAccount": "fără cont",
+    "noViewersYet": "Nimeni nu a văzut încă această postare.",
+    "noWatchYet": "Timpul de vizionare apare aici după ce oamenii o redau. Se contorizează din 31 oct. 2026.",
+    "open": "Vezi cum merge postarea ta",
+    "otherBadges": "Alte insigne",
+    "peak": "Vârf {{time}} · {{n}}",
+    "peopleReached": "Persoane atinse",
+    "playsLower": "redări",
+    "playsMembers": "Redări de la membri",
+    "playsVisitors": "Redări neautentificate",
+    "profileTaps": "Atingeri pe profilul tău",
+    "reach": "Acoperire",
+    "saves": "Salvări",
+    "seeAll": "Vezi toate statisticile",
+    "signedIn": "autentificați",
+    "signedOutLower": "neautentificați",
+    "stillWatching": "Încă urmăresc",
+    "timesUsual": "{{ratio}}× față de obișnuit",
+    "vsUsualPct": "{{pct}} față de postarea ta obișnuită",
+    "unavailableBody": "Doar creatorul poate vedea statisticile acestei postări.",
+    "unavailableTitle": "Statistici indisponibile",
+    "vsUsual": "față de postarea ta obișnuită",
+    "watching": "Urmăresc",
+    "whoSawIt": "Cine a văzut-o",
+    "withRepeats": "{{n}} repetări",
+    "yourFollowers": "urmăritorii tăi",
+    "first48": "Primele 48 de ore",
+    "howItsDoing": "Cum merge",
+    "bestTip": "Majoritatea spectatorilor tăi apar {{day}} pe la {{hour}}:00. Dacă postezi chiar înainte, postarea are cel mai bun start.",
+    "last30": "ultimele 30 de zile",
+    "day": {
+      "sun": "Dum",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mie",
+      "thu": "Joi",
+      "fri": "Vin",
+      "sat": "Sâm"
+    }
+  },
   "tokenLaunch": {
     "eyebrow": "În curând",
     "body": "Cumpărarea este închisă în timp ce noul token este pregătit. Primești un email în momentul în care devine disponibil.",
@@ -19074,7 +20694,8 @@
     "failed": "Imposibil de salvat. Încearcă din nou.",
     "privacy": "Doar pentru a-ți anunța lansarea.",
     "seoTitle": "Token launching soon | Riftn",
-    "seoDescription": "Tokenul nou Riftn este pe punctul de lansare. Alătură-te listei și primești un email în momentul în care se pune în circulație, apoi cumpară direct din portofelul tău Riftn."
+    "seoDescription": "Tokenul nou Riftn este pe punctul de lansare. Alătură-te listei și primești un email în momentul în care se pune în circulație, apoi cumpară direct din portofelul tău Riftn.",
+    "title": "Tokenul se lansează în curând"
   },
   "githubLink": {
     "hint": "Autentifică-te pe GitHub pentru a dovedi că contul este al tău. Riftn vede doar profilul public GitHub.",
@@ -19088,11 +20709,29 @@
     "connect": "Conectează-te la GitHub",
     "disconnect": "Deconectează"
   },
-  "footer": {
-    "about": "Despre noi",
-    "contact": "Contact",
-    "privacy": "Politica de confidențialitate",
-    "terms": "Termeni și condiții"
+  "mcpKeys": {
+    "delete": "Ștergeți",
+    "shortProfile": "Profil",
+    "title": "Chei personale",
+    "body": "Pentru scripturi, boți și aplicații care nu pot deschide o pagină de autentificare. O cheie face doar ce permiți, pe contul tău și pe agenții tăi. Rămâne activă cât e folosită și se oprește după 30 de zile de nefolosire.",
+    "signIn": "Autentifică-te pentru a crea o cheie",
+    "newTitle": "Copiază cheia acum",
+    "newBody": "Este singura dată când e afișată. Oricine o are îți poate folosi contul în limita permisiunilor alese, așa că păstreaz-o secretă.",
+    "useIt": "Adaug-o în aplicația ta cu una dintre acestea:",
+    "name": "Numele cheii",
+    "namePlaceholder": "Botul meu",
+    "permissions": "Ce poate face această cheie",
+    "limits": "Limite zilnice pentru contul și agenții tăi: 50 de postări, 300 de răspunsuri, 1.000 de reacții, 200 de urmăriri, 200 de repostări și 30 de editări de profil.",
+    "create": "Creează cheia",
+    "show": "Arată cheile mele",
+    "yours": "Cheile tale",
+    "empty": "Încă nu ai chei.",
+    "expires": "Activă până la {{date}}, dacă nu e folosită din nou",
+    "shortRead": "Citire",
+    "shortSocial": "Postare și răspuns",
+    "shortGenerate": "Creare media",
+    "shortAgents": "Agenții tăi",
+    "settingsBody": "Folosește Riftn și agenții tăi din ChatGPT, Claude sau orice aplicație MCP, ori creează o cheie personală."
   },
   "chatSearch": {
     "placeholder": "Caută mesaje sau persoane",
@@ -19123,5 +20762,109 @@
     "gone": "Acest mesaj nu mai există",
     "theirMessages": "Mesajele lor",
     "seeTheirMessages": "Vezi mesajele lor"
+  },
+  "dmRequests": {
+    "title": "Cereri",
+    "accept": "Acceptă",
+    "delete": "Ștergeți",
+    "block": "Blochează",
+    "hint": "Mesaje de la oameni pe care nu îi urmărești. Acceptă unul, răspunde sau urmărește-i și chatul se mută în inbox.",
+    "rowHint": "{{n}} de la oameni pe care nu îi urmărești",
+    "banner": "Nu îl urmărești pe {{name}}. Acceptă pentru a muta acest chat în inbox sau doar răspunde.",
+    "accepted": "Mutat în inbox",
+    "acceptFailed": "Nu s-a putut accepta, încearcă din nou"
+  },
+  "dmSchedule": {
+    "view": "Afișează",
+    "edit": "Editează",
+    "editLabel": "Editează mesajul",
+    "error": "Asta nu a funcționat. Încearcă din nou.",
+    "button": "Programează mesajul",
+    "title": "Mesaje programate",
+    "whenTitle": "Când se trimite?",
+    "waiting": "{{n}} programate",
+    "next": "următorul {{when}}",
+    "failedCount": "{{n}} netrimise",
+    "notSent": "Netrimis",
+    "emptyTitle": "Nimic programat",
+    "emptyBody": "Scrie un mesaj, apoi atinge ceasul pentru a alege când se trimite.",
+    "changeTime": "Schimbă ora",
+    "sendNow": "Trimite acum",
+    "deleted": "Mesaj programat șters",
+    "unreadable": "Scris pe alt dispozitiv. Va fi trimis oricum.",
+    "footnote": "Orele sunt în fusul tău orar. Nimeni nu vede mesajul până nu este trimis.",
+    "footnoteNamed": "Orele sunt în fusul tău orar. {{name}} vede mesajul doar după ce este trimis.",
+    "textOnly": "Deocamdată pot fi programate doar mesaje text.",
+    "scheduledToast": "Programat pentru {{when}}",
+    "failedToast": "Un mesaj programat nu a putut fi trimis"
+  },
+  "footer": {
+    "about": "Despre noi",
+    "contact": "Contact",
+    "privacy": "Politica de confidențialitate",
+    "terms": "Termeni și condiții"
+  },
+  "mentionLinks": {
+    "communities": "Comunități",
+    "pages": "Pagini",
+    "people": "Oameni",
+    "empty": "Nu s-a găsit nimic",
+    "hint": "Scrie ca să găsești persoane, comunități și pagini",
+    "linkTo": "Leagă {{name}}",
+    "members": " membri",
+    "placeholder": "Caută persoane, comunități, pagini...",
+    "title": "Menționează sau leagă"
+  },
+  "textFeed": {
+    "errorTitle": "Postările nu s-au putut încărca",
+    "errorBody": "Încearcă din nou să încarci fluxul de text.",
+    "emptyTitle": "Încă nu există postări text",
+    "emptyBody": "Postările text vor apărea aici.",
+    "tab": "Text"
+  },
+  "postEditHistory": {
+    "title": "Istoricul editărilor",
+    "edited_one": "Editat o dată",
+    "edited_other": "Editat de {{count}} ori",
+    "lastEdit": "Ultima editare {{time}}",
+    "original": "Original",
+    "editN": "Editarea {{n}}",
+    "now": "Acum",
+    "showChanges": "Arată ce s-a schimbat"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Înțeleg că profilul meu va fi ascuns și că voi fi deconectat peste tot.",
+    "title": "Dezactivează contul",
+    "short": "Ascunde-ți profilul deocamdată. Autentifică-te din nou ca să-l restaurezi",
+    "description": "Ia mai bine o pauză. Profilul, postările și comentariile tale sunt ascunse și ești deconectat peste tot. Nu se șterge nimic, iar când te autentifici din nou totul revine.",
+    "button": "Dezactivează",
+    "confirmTitle": "Îți dezactivezi contul?",
+    "confirmBody": "Profilul, postările și comentariile tale vor fi ascunse și vei fi deconectat de pe toate dispozitivele. Autentifică-te din nou oricând ca să anulezi.",
+    "busy": "Se dezactivează…",
+    "done": "Cont dezactivat",
+    "receipt": "Profilul, postările și comentariile tale sunt ascunse. Autentifică-te din nou oricând ca să readuci totul.",
+    "error": "Contul nu a putut fi dezactivat. Încearcă din nou."
+  },
+  "halloween": {
+    "title": "Halloween fericit",
+    "otherThemes": "Nu ești în starea de spaimă? Găsește alte teme:",
+    "enter": "Intră în temniță"
+  },
+  "msgDelete": {
+    "title": "Ștergi mesajul?",
+    "titleMany": "Ștergi {{count}} mesaje?",
+    "bodyOwn": "Șterge-l doar din chatul tău sau pentru toată lumea.",
+    "bodyOwnMany": "Șterge-le doar din chatul tău sau pentru toată lumea.",
+    "bodyOthers": "Va fi șters doar din chatul tău. Cealaltă persoană îl va vedea în continuare.",
+    "bodyOthersMany": "Vor fi șterse doar din chatul tău. Ceilalți din chat le vor vedea în continuare.",
+    "bodyOwnBoth": "Șterge-l doar din chatul tău sau pentru amândoi.",
+    "bodyOwnBothMany": "Șterge-le doar din chatul tău sau pentru amândoi.",
+    "forMe": "Șterge pentru mine",
+    "forEveryone": "Șterge pentru toți",
+    "forBoth": "Șterge pentru amândoi",
+    "forMeAndName": "Șterge pentru mine și {{name}}",
+    "remember": "Ține minte alegerea mea",
+    "rememberHint": "O poți schimba oricând din Setări",
+    "failed": "Mesajul nu a putut fi șters"
   }
 }

@@ -1090,10 +1090,10 @@ body > div[style*="position: fixed"][style*="height: 0"]:not([data-radix-popper-
    Scoped to mobile. On desktop `[data-feed-nav]` is the post page's own top bar
    (AppLayout renders `<GlobalFeedNav postPage />` there), which must stay. */
 @media (max-width: 1023px) {
-  body.immersive-video-mode [data-mobile-header],
-  body.immersive-video-mode [data-feed-nav],
-  body.immersive-video-mode [data-feed-nav-outer],
-  body.immersive-video-mode [data-home-tabs] {
+  body[data-immersive-video-mode] [data-mobile-header],
+  body[data-immersive-video-mode] [data-feed-nav],
+  body[data-immersive-video-mode] [data-feed-nav-outer],
+  body[data-immersive-video-mode] [data-home-tabs] {
     display: none !important;
   }
 }
@@ -1113,37 +1113,37 @@ body > div[style*="position: fixed"][style*="height: 0"]:not([data-radix-popper-
    the tab bar kept its 66px at the foot of the screen and sat across the
    chat composer. A video post scrolls and can live with the bar; a live
    viewer is the screen and its message box is the last thing on it, so this
-   is a separate class rather than one more selector on the video rule — a
+   is a separate mark rather than one more selector on the video rule — a
    video post should not silently lose its nav because a stream needed to. */
 @media (max-width: 1023px) {
-  body.immersive-live-mode [data-mobile-header],
-  body.immersive-live-mode [data-feed-nav],
-  body.immersive-live-mode [data-feed-nav-outer],
-  body.immersive-live-mode [data-home-tabs],
-  body.immersive-live-mode [data-bottom-nav] {
+  body[data-immersive-live-mode] [data-mobile-header],
+  body[data-immersive-live-mode] [data-feed-nav],
+  body[data-immersive-live-mode] [data-feed-nav-outer],
+  body[data-immersive-live-mode] [data-home-tabs],
+  body[data-immersive-live-mode] [data-bottom-nav] {
     display: none !important;
   }
 }
 
-body.immersive-live-mode main {
+body[data-immersive-live-mode] main {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 
 
-body.post-media-back [data-post-nav-back] {
+body[data-post-media-back] [data-post-nav-back] {
   display: none;
 }
 
-body.immersive-video-mode main {
+body[data-immersive-video-mode] main {
   padding-top: 0 !important;
 }
 
 /* Shorts fullscreen viewer open — drop the top nav bars beneath the viewer
    (z-[60]) so its backdrop-blur frosts them, instead of the sharp home tab bar
    (z-[110]) / mobile header (z-[60]) poking through the overlay. */
-body.shorts-viewer-open [data-home-tabs],
-body.shorts-viewer-open [data-mobile-header] {
+body[data-shorts-viewer-open] [data-home-tabs],
+body[data-shorts-viewer-open] [data-mobile-header] {
   z-index: 40 !important;
 }
 
@@ -1257,7 +1257,7 @@ button.cursor-square-item:hover {
    over the bottom one, whenever the chrome is showing. Both pins follow
    `data-nav-hidden` so they move with it instead of disappearing under it.
 
-   A video post hides that chrome outright (immersive-video-mode), so the tab
+   A video post hides that chrome outright (data-immersive-video-mode), so the tab
    row keeps to the very top there. The reply bar drops to the bottom edge
    while it is being typed in: the keyboard takes the bottom nav away. */
 [data-comment-tabs-pin],
@@ -1310,7 +1310,7 @@ html[data-theme='minimal'] :is([data-comment-tabs-pin], [data-comment-composer-p
   [data-comment-composer-pin] {
     transition: bottom 300ms ease-in-out;
   }
-  html:not([data-nav-hidden='true']) body:not(.immersive-video-mode) [data-comment-tabs-pin] {
+  html:not([data-nav-hidden='true']) body:not([data-immersive-video-mode]) [data-comment-tabs-pin] {
     top: 5.75rem;
   }
   html:not([data-nav-hidden='true']) [data-comment-composer-pin]:not(:focus-within) {
@@ -1432,7 +1432,7 @@ html[data-theme='minimal'] :is([data-comment-tabs-pin], [data-comment-composer-p
     [data-feed-nav-outer][data-nav-hide='pin'] {
     transform: none;
   }
-  html[data-no-top-bar]:not([data-nav-hidden='true']) body:not(.immersive-video-mode) [data-comment-tabs-pin] {
+  html[data-no-top-bar]:not([data-nav-hidden='true']) body:not([data-immersive-video-mode]) [data-comment-tabs-pin] {
     top: 3rem;
   }
 }
@@ -6019,20 +6019,8 @@ specificity animation declarations above.
   }
 }
 
-/* Notification targets keep the same row geometry and thread connectors. */
-@keyframes reply-text-glow {
-  from { text-shadow: 0 0 6px currentColor; }
-  to { text-shadow: none; }
-}
-.reply-text-glow {
-  animation: reply-text-glow 1600ms ease-out both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .reply-text-glow { animation: none; }
-}
-
-/* The row a notification opened, flashed once it has come to rest on screen
-   (lib/focus-scroll). Background only, so the row keeps its geometry and the
+/* A chat search hit, flashed once it has come to rest on screen
+   (lib/focus-scroll). Notification landings never flash. Background only, so the row keeps its geometry and the
    thread connectors stay put. */
 @keyframes focus-target-flash {
   0%, 35% { background-color: color-mix(in srgb, currentColor 14%, transparent); }
@@ -7147,7 +7135,16 @@ html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notifications-drawer][data-expanded] {
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* No handle, so the pill's sticky strip is the top of the sheet. Rows
+/* The bell drawer's grab bar sits in the pill's top inset, and below the
+   status bar once the sheet fills the screen. */
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer] [data-bell-handle] {
+  top: 3px;
+  transition: top 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer][data-expanded] [data-bell-handle] {
+  top: calc(env(safe-area-inset-top, 0px) + 3px);
+}
+/* The pill's sticky strip is the top of the sheet. Rows
    scrolling up past the pill blur out there instead of showing sharp in the
    gap above it and beside it, fading off just under the pill. Behind the
    pill (z-index -1 inside its sticky wrapper). */
@@ -7234,7 +7231,10 @@ html[data-system-tone="light"] [data-non-follower-confirm] {
 /* Audio deck placeholder sizes its card the way the loaded deck does. */
 html[data-theme] [data-audio-frame]:has([data-audio-studio-placeholder]):not([data-video-fullscreen]):not(#_):not(#_) { height: auto !important; min-height: 0; max-height: none !important; aspect-ratio: auto !important; width: 100% !important; }
 html[data-theme] [data-audio-backdrop]:has([data-audio-studio-placeholder]):not(#_):not(#_) { border: 0; border-radius: 28px; }
-[data-audio-backdrop]:has([data-audio-studio-placeholder]) > .absolute { position: relative; }
+/* :has() sits on the stage itself, last in the selector. Written as
+   `[data-audio-backdrop]:has(…) > .absolute` it made the browser restyle every
+   `.absolute` element on the page each time anything was added or removed. */
+[data-audio-backdrop] > .absolute:has(> [data-audio-studio-placeholder]) { position: relative; }
 
 /* One-line names and @handles: clip only sideways. `truncate` used
    overflow:hidden, which also cut the tails of g, j, p and y wherever the
@@ -7294,8 +7294,10 @@ html[data-theme] [data-audio-backdrop]:has([data-audio-studio-placeholder]):not(
 /* riftn.com/chat is a full-screen layer at z-70. Menus, dialogs and sheets
    opened from it are portalled to <body> at z-50, so they opened BEHIND it
    (the three-dot menu "did nothing"). While the page is up, lift them. */
-body:has(#app-root[data-fullscreen-chat]) > :is([data-radix-popper-content-wrapper], .fixed:not(#app-root)),
-body:has(#app-root[data-fullscreen-chat]) > :not(#root) > :is([data-radix-popper-content-wrapper], .fixed) {
+/* The page marks <body> itself (FullScreenChatShell). A `body:has(…)` here
+   made every `.fixed` element restyle on each change anywhere on any page. */
+body[data-fullscreen-chat-up] > :is([data-radix-popper-content-wrapper], .fixed:not(#app-root)),
+body[data-fullscreen-chat-up] > :not(#root) > :is([data-radix-popper-content-wrapper], .fixed) {
   z-index: 150 !important;
 }
 
@@ -7346,3 +7348,57 @@ html[data-theme="light"] [data-chat-unread-marker] [data-unread-hairline],
 html[data-system-tone="light"] [data-chat-unread-marker] [data-unread-hairline] {
   --tw-gradient-to: rgba(0, 0, 0, 0.22) var(--tw-gradient-to-position) !important;
 }
+
+/* Chat MOD chip: the quiet grey chip the app's live chat uses, on every
+   theme, in place of the old green one. */
+[data-chat-mod-badge] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+}
+html[data-theme="light"] [data-chat-mod-badge],
+html[data-system-tone="light"] [data-chat-mod-badge] {
+  background: rgba(9, 9, 11, 0.08);
+  color: #3f3f46;
+}
+
+/* Post tiles open the post menu on a hold (lib/post-menu): no iOS picture callout over it. */
+[data-post-tile-hold],
+[data-post-tile-hold] img {
+  -webkit-touch-callout: none;
+}
+
+/* ── Live chat panel <-> full chat page (lib/chat-expand.ts) ─────────────
+   Slide: the chat page comes in over the feed from the right edge, where
+   the panel sits; the feed eases back. Closing runs it in reverse.
+   Grow (Immersive): the panel box itself stretches into the chat column. */
+html[data-chat-fx] { --cx-ease: cubic-bezier(.22, 1, .36, 1); --cx-ms: 520ms; }
+html[data-chat-fx]::view-transition-group(*) { animation-duration: var(--cx-ms); animation-timing-function: var(--cx-ease); }
+
+html[data-chat-fx="slide"][data-chat-fx-dir="open"]::view-transition-old(root) { animation: cx-push var(--cx-ms) var(--cx-ease) both; }
+html[data-chat-fx="slide"][data-chat-fx-dir="open"]::view-transition-new(root) { animation: cx-slide-in var(--cx-ms) var(--cx-ease) both; box-shadow: -24px 0 60px rgba(0, 0, 0, .45); }
+html[data-chat-fx="slide"][data-chat-fx-dir="close"]::view-transition-old(root) { z-index: 2; animation: cx-slide-out var(--cx-ms) var(--cx-ease) both; box-shadow: -24px 0 60px rgba(0, 0, 0, .45); }
+html[data-chat-fx="slide"][data-chat-fx-dir="close"]::view-transition-new(root) { animation: cx-pull var(--cx-ms) var(--cx-ease) both; }
+
+html[data-chat-fx="grow"] [data-chat-expand-target] { view-transition-name: live-chat; }
+html[data-chat-fx="grow"]::view-transition-group(live-chat) { overflow: clip; border-radius: 18px; background: var(--cx-bg, #101012); backdrop-filter: blur(24px) saturate(1.2); box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+html[data-chat-fx="grow"][data-chat-fx-dir="open"]::view-transition-group(live-chat) { animation-name: -ua-view-transition-group-anim-live-chat, cx-surface-open; }
+html[data-chat-fx="grow"][data-chat-fx-dir="close"]::view-transition-group(live-chat) { animation-name: -ua-view-transition-group-anim-live-chat, cx-surface-close; }
+html[data-chat-fx="grow"]::view-transition-old(live-chat),
+html[data-chat-fx="grow"]::view-transition-new(live-chat) { width: 100%; height: 100%; object-fit: none; object-position: left bottom; }
+html[data-chat-fx="grow"]::view-transition-old(live-chat) { animation: cx-fade-out 260ms var(--cx-ease) both; }
+html[data-chat-fx="grow"]::view-transition-new(live-chat) { animation: cx-fade-in 340ms 80ms var(--cx-ease) both; }
+html[data-chat-fx="grow"][data-chat-fx-dir="open"]::view-transition-old(root) { animation: cx-recede var(--cx-ms) var(--cx-ease) both; }
+html[data-chat-fx="grow"][data-chat-fx-dir="open"]::view-transition-new(root) { animation: cx-fade-in 360ms 160ms var(--cx-ease) both; }
+html[data-chat-fx="grow"][data-chat-fx-dir="close"]::view-transition-old(root) { animation: cx-fade-out 240ms var(--cx-ease) both; }
+html[data-chat-fx="grow"][data-chat-fx-dir="close"]::view-transition-new(root) { animation: cx-arrive var(--cx-ms) var(--cx-ease) both; }
+
+@keyframes cx-slide-in { from { transform: translateX(100%); } }
+@keyframes cx-slide-out { to { transform: translateX(100%); } }
+@keyframes cx-push { to { transform: translateX(-8%); opacity: .4; } }
+@keyframes cx-pull { from { transform: translateX(-8%); opacity: .4; } }
+@keyframes cx-fade-out { to { opacity: 0; } }
+@keyframes cx-fade-in { from { opacity: 0; } }
+@keyframes cx-recede { to { opacity: .35; transform: scale(.96); filter: blur(2px); } }
+@keyframes cx-arrive { from { opacity: .35; transform: scale(.96); filter: blur(2px); } }
+@keyframes cx-surface-open { from { background-color: var(--cx-bg); border-radius: 18px; } to { background-color: var(--cx-bg2); border-radius: 0; } }
+@keyframes cx-surface-close { from { background-color: var(--cx-bg2); border-radius: 0; } to { background-color: var(--cx-bg); border-radius: 18px; } }

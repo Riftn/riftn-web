@@ -22,6 +22,8 @@ interface FocusCommentValue {
   tokenId?: string;
   /** The comment id, as a string — comment ids are strings server-side. */
   commentId?: string;
+  /** Inside NoFocusComment: a related feed under the post a link opened. */
+  blocked?: boolean;
 }
 
 const EMPTY: FocusCommentValue = {};
@@ -44,11 +46,25 @@ export function useFocusComment(tokenId: string | undefined): string | undefined
 }
 
 /**
+ * Whether a card may act on a notification link's `?comments=1`: only the
+ * post the link opened, never a related card under it. Off any post page
+ * (no provider) every card may.
+ */
+export function useMayOpenLinkedComments(tokenId: string | undefined): boolean {
+  const { tokenId: focusTokenId, blocked } = useContext(FocusCommentContext);
+  if (blocked) return false;
+  if (focusTokenId == null || tokenId == null) return true;
+  return String(focusTokenId) === String(tokenId);
+}
+
+const BLOCKED: FocusCommentValue = { blocked: true };
+
+/**
  * Clears the focused comment for everything inside. The related posts under a
  * post page can include that same post again (as a promoted card), and with
  * the id still in context its comments opened too and pulled the page down to
  * a second copy of the comment.
  */
 export function NoFocusComment({ children }: { children: ReactNode }) {
-  return <FocusCommentContext.Provider value={EMPTY}>{children}</FocusCommentContext.Provider>;
+  return <FocusCommentContext.Provider value={BLOCKED}>{children}</FocusCommentContext.Provider>;
 }

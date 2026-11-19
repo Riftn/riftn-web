@@ -9,14 +9,15 @@ import { OverlayOpenTracker } from "@/lib/overlay-open";
 import { guardOutsideDismiss } from "@/lib/overlay-dismiss";
 import { useWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
 import { OverlayContentPresent, useOverlayLifetime } from '@/hooks/use-overlay-lifetime';
+import { OverlayExit, useOverlayExitRef } from '@/components/ui/overlay-exit';
 
 const Dialog = ({ modal = true, onOpenChange, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) => {
   const unlockOpen = useWalletUnlockPrompt();
   const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange);
-  return <OverlayContentPresent.Provider value={lifetime.present}><DialogPrimitive.Root {...props} open={lifetime.open} modal={modal} onOpenChange={open => {
+  return <OverlayContentPresent.Provider value={lifetime.present}><OverlayExit present={lifetime.present}><DialogPrimitive.Root {...props} open={lifetime.open} modal={modal} onOpenChange={open => {
     if (!open && unlockOpen) return;
     lifetime.onChange(open);
-  }} /></OverlayContentPresent.Provider>;
+  }} /></OverlayExit></OverlayContentPresent.Provider>;
 };
 
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -30,7 +31,7 @@ const DialogOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
-    ref={ref}
+    ref={useOverlayExitRef(ref)}
     /* Radix does not emit a data-radix-* hook on the overlay; themes that want
        to tint the scrim need one. */
     data-radix-dialog-overlay
@@ -54,6 +55,7 @@ const DialogContent = React.forwardRef<
 >(({ className, children, hideCloseButton, overlayClassName, onPointerDownOutside, ...props }, ref) => {
   const { t: _copy } = _useCopy();
   const present = React.useContext(OverlayContentPresent);
+  const surfaceRef = useOverlayExitRef(ref);
   if (!present) return null;
   return (
   <DialogPortal>
@@ -63,7 +65,7 @@ const DialogContent = React.forwardRef<
     <OverlayOpenTracker />
     <DialogOverlay className={overlayClassName} />
     <DialogPrimitive.Content
-      ref={ref}
+      ref={surfaceRef}
       className={cn(
         // Mobile: bottom sheet style
         "fixed z-50 grid w-full gap-4 p-6 shadow-2xl duration-200",

@@ -94,6 +94,7 @@ import {
 import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
 const RepostShareSheet = lazy(() => import('@/components/app/post-stage/RepostShareSheet').then(m => ({ default: m.RepostShareSheet })));
 import { viewerShareUrl } from '@/lib/share-url';
+import { POST_MENU_EVENT, type PostMenuBridgeDetail } from '@/lib/post-menu';
 
 interface ActionBarProps {
   /** Post ID for info navigation and voting */
@@ -164,6 +165,8 @@ interface ActionBarProps {
   isOptimistic?: boolean;
   /** Handler for like action (overrides default voteOnPost) */
   onLike?: () => void;
+  /** Persist a reaction on a non-post entity using the same tray and gestures. */
+  onReaction?: (reaction: PostReaction | null) => Promise<unknown>;
   /** Handler for dislike action (overrides default voteOnPost) */
   onDislike?: () => void;
   /**
@@ -374,6 +377,7 @@ export function ActionBar({
   onRepost,
   onQuote,
   onLike,
+  onReaction,
   onDislike,
   className,
   showBorder = false,
@@ -496,7 +500,7 @@ export function ActionBar({
   const { leftHanded } = useLeftHanded();
   const queryClient = useQueryClient();
   // When external handlers are provided (governance), always sync from props
-  const hasExternalHandlers = !!(onLike || onDislike);
+  const hasExternalHandlers = !!(onLike || onDislike || onReaction);
 
   // Confirmed reactions accept fresh totals immediately, including during the
   // short vote guard. Only an unconfirmed local mutation keeps its overlay.
@@ -553,7 +557,7 @@ export function ActionBar({
     const wantsPositive = isPositiveReaction(reaction);
     // When external handlers are provided (e.g. governance), skip local optimistic updates
     // since the parent mutation handles optimistic state via React Query cache
-    const hasExternalHandler = (wantsPositive && onLike) || (!wantsPositive && onDislike);
+    const hasExternalHandler = onReaction || (wantsPositive && onLike) || (!wantsPositive && onDislike);
 
     const previous = myReaction;
     const isRemovingVote = previous === reaction;
@@ -631,7 +635,9 @@ export function ActionBar({
 
     try {
       // Use override if provided, otherwise hit the reaction endpoint
-      if (wantsPositive && onLike) {
+      if (onReaction) {
+        await onReaction(next);
+      } else if (wantsPositive && onLike) {
         await onLike();
       } else if (!wantsPositive && onDislike) {
         await onDislike();
@@ -714,7 +720,7 @@ export function ActionBar({
       voteInFlightRef.current = false;
       setIsVoting(false);
     }
-  }, [postId, isVoting, externalDisabled, isLiked, isDisliked, myReaction, localLikeCount, localDislikeCount, localReactionCounts, isAuthenticated, queryClient, onLike, onDislike, voteWeight, onLiveReaction, _copy]);
+  }, [postId, isVoting, externalDisabled, isLiked, isDisliked, myReaction, localLikeCount, localDislikeCount, localReactionCounts, isAuthenticated, queryClient, onLike, onDislike, onReaction, voteWeight, onLiveReaction, _copy]);
 
   /**
    * Tapping the thumbs-up / thumbs-down.
@@ -774,7 +780,7 @@ export function ActionBar({
   // reuse this bar with non-numeric ids and their own vote mutations, and the
   // reaction endpoint has no row to write for them.
   const numericPostId = postId ? parseInt(postId, 10) : NaN;
-  const reactionsEnabled = !disableReactions && !hasExternalHandlers && !isNaN(numericPostId);
+  const reactionsEnabled = !disableReactions && (!!onReaction || (!hasExternalHandlers && !isNaN(numericPostId)));
 
   // The breakdown of who reacted what belongs to the author. The ⓘ only exists
   // on your own posts; the API refuses the list to everyone else regardless.
@@ -928,6 +934,36 @@ export function ActionBar({
     setDmShareOpen(true);
   };
 
+  // The post's right-click menu (lib/post-menu) does its react, repost and
+  // send-in-a-message through this bar, so the counts here move with it.
+  // The first bar for the post takes it; a second copy of the same post's bar
+  // (the fullscreen viewer's) sets enableDoubleTapLike off and stays out.
+  const menuBridge = useRef({ handleRepost, handleUndoRepost, handleSendInDm, isReposted, myReaction, reactionsEnabled: false, canRepost: false, canSendInDm: false });
+  menuBridge.current = { handleRepost, handleUndoRepost, handleSendInDm, isReposted, myReaction, reactionsEnabled: reactionsEnabledRef.current, canRepost: !!onRepost, canSendInDm };
+  useEffect(() => {
+    if (!postId || !enableDoubleTapLike) return;
+    const listener = (e: Event) => {
+      const detail = (e as CustomEvent<PostMenuBridgeDetail>).detail;
+      if (!detail || detail.handled || String(detail.postId) !== String(postId)) return;
+      const bar = menuBridge.current;
+      if (detail.action === 'state') {
+        detail.handled = true;
+        detail.state = { myReaction: bar.myReaction, isReposted: bar.isReposted, reactionsEnabled: bar.reactionsEnabled };
+      } else if (detail.action === 'react' && detail.reaction && bar.reactionsEnabled) {
+        detail.handled = true;
+        handleReactionRef.current(detail.reaction);
+      } else if (detail.action === 'repost' && bar.canRepost) {
+        detail.handled = true;
+        if (bar.isReposted) bar.handleUndoRepost(); else bar.handleRepost();
+      } else if (detail.action === 'dm' && bar.canSendInDm) {
+        detail.handled = true;
+        bar.handleSendInDm();
+      }
+    };
+    window.addEventListener(POST_MENU_EVENT, listener as EventListener);
+    return () => window.removeEventListener(POST_MENU_EVENT, listener as EventListener);
+  }, [postId, enableDoubleTapLike]);
+
   const ShareOptions = () => (
     <>
       {isReposted ? (
@@ -1059,6 +1095,8 @@ export function ActionBar({
             toast.message(_copy("copy.9b2b21ee911e", { defaultValue: "Post processing, click ⓘ for more info" }), {
               icon: <Info className="w-4 h-4" />,
             });
+          } else if (onShare) {
+            onShare();
           } else if (quickRepost) {
             // Constrained overlays (fullscreen viewer) can't show the z-[100]
             // share drawer above the viewer — repost/undo directly instead.

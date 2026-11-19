@@ -50,7 +50,7 @@ it.each([[1920, 1080], [1080, 1080], [1080, 1920]])('minimizes and restores the 
   expect(view.mini.minimized).toBe(true);
   expect(view.mini.frame!.width / view.mini.frame!.height).toBeCloseTo(w / h);
   expect(bodyScrollLockDepth()).toBe(0);
-  expect(document.body.classList.contains('shorts-viewer-open')).toBe(false);
+  expect(document.body.hasAttribute('data-shorts-viewer-open')).toBe(false);
   expect(view.container.querySelector('video')).toBe(view.video);
   expect(view.video.currentTime).toBe(42);
   fireEvent.click(screen.getByText('Restore'));

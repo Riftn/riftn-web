@@ -1,6 +1,6 @@
 import { ProfileFollowButton } from './ProfileFollowButton';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { Star, EllipsisVertical } from "lucide-react";
+import { Star, EllipsisVertical, Loader2 } from "lucide-react";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Copy from "@/components/ui/cut-icons/copy";
 import Wallet from "@/components/ui/cut-icons/wallet";
@@ -9,7 +9,11 @@ import Ban from "@/components/ui/cut-icons/blocked";
 import MessageSquare from "@/components/ui/cut-icons/message-envelope";
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { AuthContext } from '@/contexts/AuthContext';
+import { saveOwnProfileImage, type ProfileImageKind } from '@/lib/profile-image-edit';
+import { useProfileImageMenu } from './useProfileImageMenu';
 import { useTranslation } from 'react-i18next';
 import { useBadgeCeremony } from '@/hooks/use-badge-ceremony';
 import { openBadgePromotion } from '@/lib/badge-showcase';
@@ -200,6 +204,54 @@ export function ProfileHeader({
 
   const coverSrc = profile.coverUrl || getDefaultBanner(profile.walletAddress);
 
+  // Right-click / hold menu and paste on the picture and banner. The owner
+  // saves straight from here; everyone else can only copy.
+  const queryClient = useQueryClient();
+  // Read softly: the state gallery draws this header with no auth provider.
+  const auth = useContext(AuthContext);
+  const refreshUser = auth?.refreshUser;
+  const patchUser = auth?.patchUser;
+  const [savingImage, setSavingImage] = useState<ProfileImageKind | null>(null);
+  const saveImage = useCallback(async (kind: ProfileImageKind, file: File | null) => {
+    const address = profile.walletAddress;
+    if (!address || !refreshUser || !patchUser) return;
+    setSavingImage(kind);
+    try {
+      await saveOwnProfileImage(kind, file, { address, queryClient, refreshUser, patchUser: patchUser as (p: Record<string, unknown>) => void });
+      toast.success(
+        kind === 'avatar'
+          ? (file ? t('profileImage.avatarSaved', 'Profile picture updated') : t('profileImage.avatarRemoved', 'Profile picture removed'))
+          : (file ? t('profileImage.coverSaved', 'Banner updated') : t('profileImage.coverRemoved', 'Banner removed')),
+      );
+    } catch (err) {
+      toast.error((err as Error)?.message || t('settings.failedUpdateProfile'));
+    } finally {
+      setSavingImage(null);
+    }
+  }, [profile.walletAddress, queryClient, refreshUser, patchUser, t]);
+  const ownsImages = !!isViewingOwnProfile && !!profile.walletAddress;
+  const coverMenu = useProfileImageMenu({
+    kind: 'cover',
+    canEdit: ownsImages,
+    imageUrl: coverSrc,
+    hasImage: !!profile.coverUrl,
+    onFile: (file) => saveImage('cover', file),
+    onRemove: () => saveImage('cover', null),
+  });
+  const avatarMenu = useProfileImageMenu({
+    kind: 'avatar',
+    canEdit: ownsImages,
+    imageUrl: profile.avatarUrl,
+    hasImage: !!profile.avatarUrl,
+    onFile: (file) => saveImage('avatar', file),
+    onRemove: () => saveImage('avatar', null),
+  });
+  const savingSpinner = (
+    <span className="absolute inset-0 z-[1] grid place-items-center bg-black/35" aria-hidden>
+      <Loader2 className="h-6 w-6 animate-spin text-white" />
+    </span>
+  );
+
   return (
     <div data-profile-header data-profile-art={featuredCommunity ? true : undefined} data-keep-dark={featuredCommunity ? true : undefined} className="rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] overflow-hidden relative">
       {/* Cover Photo */}
@@ -209,6 +261,7 @@ export function ProfileHeader({
         <button 
           data-profile-cover data-pull-through className="relative block aspect-[3/1] bg-zinc-800 w-full cursor-pointer"
           onClick={() => setFullscreenImage(profile.coverUrl || getDefaultBanner(profile.walletAddress))}
+          {...coverMenu.targetProps}
         >
           {/* The cover is the profile's LCP element. It was always fetched at
               1500 px wide; a phone renders it at ~375 CSS px. */}
@@ -224,8 +277,11 @@ export function ProfileHeader({
               and two blur panes deepen toward the top (profile-pull.css). */}
           <span data-profile-cover-blur="soft" aria-hidden style={{ backgroundImage: `url("${coverSrc}")` }} />
           <span data-profile-cover-blur="deep" aria-hidden style={{ backgroundImage: `url("${coverSrc}")` }} />
+          {savingImage === 'cover' && savingSpinner}
         </button>
       )}
+      {coverMenu.menu}
+      {avatarMenu.menu}
       
       {/* Profile Content */}
       <div className="relative isolate flow-root px-4 sm:px-6 pb-4">
@@ -241,9 +297,12 @@ export function ProfileHeader({
                   data-keep-dark
                   data-pull-through
                   data-own-avatar={isViewingOwnProfile ? '' : undefined}
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-zinc-900 backdrop-blur-none p-0.5 cursor-pointer disabled:cursor-default"
+                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-zinc-900 backdrop-blur-none p-0.5 cursor-pointer disabled:cursor-default"
                   onClick={() => profile.avatarUrl && setFullscreenImage(profile.avatarUrl)}
-                  disabled={!profile.avatarUrl}
+                  // Kept clickable for the owner with no picture yet, so the
+                  // right-click / hold menu (Change, Paste) still reaches it.
+                  disabled={!profile.avatarUrl && !ownsImages}
+                  {...avatarMenu.targetProps}
                 >
                   {profile.avatarUrl && !avatarCdnFailed ? (
                     <img
@@ -260,6 +319,7 @@ export function ProfileHeader({
                       className="w-full h-full rounded-[10px]"
                     />
                   )}
+                  {savingImage === 'avatar' && <span className="contents [&>span]:rounded-[10px]">{savingSpinner}</span>}
                 </button>
               </LiveRipple>
           </div>
@@ -522,9 +582,10 @@ export function ProfileHeader({
                   )}
                 </div>
               )}
-              {/* Riftn followers plus the verified counts of the creator's
-                  connected socials. Absent until one carries a count. */}
-              <TotalReachPill wallet={apiProfile?.walletAddress ?? profile.walletAddress} followers={profile.followers} />
+              {/* Riftn followers plus the counts of the creator's linked
+                  socials (verified, else entered in the app). Absent until
+                  one carries a count. */}
+              <TotalReachPill wallet={apiProfile?.walletAddress ?? profile.walletAddress} followers={profile.followers} customs={profile.customs} />
               {/* The links ride at the end of the counts line and
                   only wrap below when the line is genuinely full. */}
               {linksOnCountsRow && (

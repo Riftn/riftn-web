@@ -156,6 +156,26 @@ export interface UpdateProfileData {
   dmSettings?: { disables?: string[]; minTipDhb?: number };
   avatarImg?: File;
   coverImg?: File;
+  /** Clear the profile picture / banner (ignored when a new file is sent with it). */
+  removeAvatar?: boolean;
+  removeCover?: boolean;
+  /** The owner's own backdrop for their text posts; the server stores it and sets customs.postBg to 'photo'. */
+  postBgImg?: File;
+}
+
+/**
+ * Give one of your own text posts its own backdrop: `postBg` "id|#a,#b,#c",
+ * or a picture / GIF / video file for that post only. Empty `postBg` sends it
+ * back to the profile's backdrop; tokenId 'all' does that for every post.
+ */
+export async function setPostBackground(tokenId: string | number | 'all', postBg: string, file?: File | null): Promise<{ result: boolean; postBg: string | null }> {
+  const formData = new FormData();
+  formData.append('tokenId', String(tokenId));
+  formData.append('postBg', postBg);
+  if (file) formData.append('postBgImg', file);
+  const result = await authedUpload<{ result: boolean; postBg: string | null; error?: string }>('/api/post_background', formData);
+  if (!result?.result) throw new Error(result?.error || 'Could not save the background');
+  return result;
 }
 
 export async function updateProfile(data: UpdateProfileData): Promise<{ result: boolean }> {
@@ -205,6 +225,10 @@ export async function updateProfile(data: UpdateProfileData): Promise<{ result: 
     formData.append("coverImg", data.coverImg);
     console.log('[updateProfile] Attaching coverImg:', data.coverImg.name, data.coverImg.size, data.coverImg.type);
   }
+
+  if (data.removeAvatar && !data.avatarImg) formData.append("removeAvatar", "true");
+  if (data.removeCover && !data.coverImg) formData.append("removeCover", "true");
+  if (data.postBgImg) formData.append("postBgImg", data.postBgImg);
 
   // Log all FormData keys being sent
   const keys: string[] = [];

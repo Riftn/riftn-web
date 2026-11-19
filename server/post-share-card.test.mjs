@@ -34,7 +34,7 @@ test('restricted, unrated-unsafe and audio posts do not acquire a public image',
     { isHidden: true }, { isPrivate: true }, { visibility: 'private' }, { status: 'draft' },
     { isPublic: false }, { streamInfo: { isPayPerView: true } }, { streamInfo: { isLockContent: true } },
     { plansDetails: [{ id: 'paid' }] }, { streamStatus: { isLockedWithSubscription: true } },
-    { postType: 'feed-audio' }, { postType: 'live' },
+    { postType: 'feed-audio' }, { postType: 'live', streamInfo: { isPayPerView: true } },
     { contentRating: 'mature' }, { contentRating: 'blocked' }, { contentRating: 'pending' },
     { postType: 'video', videoUrl: 'videos/6501.mp4', thumbnail_url: 'images/6501.jpg', contentRating: 'mature' },
     { community: { is_private: true } },
@@ -177,4 +177,17 @@ test('profiles share a rendered card with their name, handle and followers', asy
       writeFileSync(`post-card-checks/${name}.png`, image.asPng());
     } finally { image.free(); renderer.free(); }
   }
+});
+
+test('live posts share their stream thumbnail, or the brand card when they have none', () => {
+  const cdn = 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com';
+  const live = { ...post, tokenId: 8048, postType: 'live', name: 'glo is live', description: '', streamInfo: {},
+    imageUrl: 'live/thumbnails/6aff2b89790b84974a8f0bf8-1795116327086.jpg' };
+  assert.deepEqual(postCardMedia(live), { url: `${cdn}/live/thumbnails/6aff2b89790b84974a8f0bf8-1795116327086.jpg`, video: true });
+  assert.equal(postCardData(live).title, 'glo is live');
+  const page = '<head><meta property="og:image" content="https://dehubcdn.ams3.cdn.digitaloceanspaces.com/images/8048.jpg"></head>';
+  assert.match(applyPostShareImage(page, live), /og:image" content="https:\/\/riftn\.com\/_og\/post\/v\d+\/8048\.png"/);
+  const noThumb = applyPostShareImage(page, { ...live, imageUrl: '' });
+  assert.match(noThumb, /og:image" content="https:\/\/riftn\.com\/og\/riftn-share\.png"/);
+  assert.doesNotMatch(noThumb, /images\/8048\.jpg/);
 });

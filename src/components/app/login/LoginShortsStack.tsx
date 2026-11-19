@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { loginClipLanes } from '@/lib/login-clip-lanes';
 import { LOGIN_CLIP_IDS } from './login-clip-assets';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLoginLook, type LoginLook } from '@/lib/login-look';
 import '@/styles/login-stack.css';
 
 type ClipName = typeof LOGIN_CLIP_IDS[number];
@@ -193,8 +194,44 @@ export interface LoginStackHeadline {
 }
 
 
-export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline } = {}) {
+/**
+ * The Riftn wordmark and the headline as one lit sign, in the look picked in
+ * Settings → Appearance (Tube TV, VHS tape, LED wall or Hologram). VHS draws a
+ * second copy that its tracking tear drags sideways.
+ */
+export function LoginSign({ headline, look: forced, className }: { headline?: LoginStackHeadline; look?: LoginLook; className?: string }) {
   const { t } = useTranslation();
+  const picked = useLoginLook();
+  const look = forced ?? picked;
+  const top = headline?.top ?? t('loginStack.headlineTop', 'You will own everything');
+  const accent = headline?.accent ?? t('loginStack.headlineAccent', 'and be happy.');
+  const sign = (copy: boolean) => (
+    <div className={copy ? 'login-stack__sign login-stack__sign--tear' : 'login-stack__sign'} aria-hidden={copy || undefined}>
+      <div className="login-stack__logo" role={copy ? undefined : 'img'} aria-label={copy ? undefined : 'Riftn'}>
+        <span className="login-stack__logo-mark" />
+      </div>
+      {copy ? (
+        <div className="login-stack__headline text-white">
+          {top}
+          <span className="login-stack__accent">{accent}</span>
+        </div>
+      ) : (
+        <h2 className="login-stack__headline text-white">
+          {top}
+          <span className="login-stack__accent">{accent}</span>
+        </h2>
+      )}
+    </div>
+  );
+  return (
+    <div className={className ? `login-stack__title ${className}` : 'login-stack__title'} data-look={look}>
+      {sign(false)}
+      {look === 'vhs' && sign(true)}
+    </div>
+  );
+}
+
+export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline } = {}) {
   const isMobile = useIsMobile();
   const count = DESKTOP_LANES;
   const [lanes] = useState(() => loginClipLanes(LOGIN_CLIP_IDS, Math.random, 12));
@@ -216,16 +253,7 @@ export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline }
       <div className="login-stack__lanes" aria-hidden="true">
         {columns.map((clips, index) => <Lane key={index} clips={clips} reverse={index % 2 === 1} blurs={blurs} />)}
       </div>
-      <div className="login-stack__title">
-        {/* Riftn wordmark as a neon sign, just above the headline, over the clips. */}
-        <div className="login-stack__logo" role="img" aria-label="Riftn">
-          <span className="login-stack__logo-mark" />
-        </div>
-        <h2 className="login-stack__headline text-white">
-          {headline?.top ?? t('loginStack.headlineTop', 'You will own everything')}
-          <span className="login-stack__accent">{headline?.accent ?? t('loginStack.headlineAccent', 'and be happy.')}</span>
-        </h2>
-      </div>
+      <LoginSign headline={headline} />
     </div>
   );
 }

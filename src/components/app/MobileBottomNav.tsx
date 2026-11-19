@@ -171,7 +171,8 @@ const CREATE_ID = 'create';
 const CREATE_SLOT = 2;
 /** Saved under the destination's i18n key, which the app's bar shares. */
 const barItemId = (item: MobileNavItem) => NAV_LABEL_KEYS[item.label] ?? item.label;
-const DEFAULT_BAR_IDS = BAR_ITEMS.map(barItemId);
+/** The bar's default order (Settings' Public Chat switch rearranges it). */
+export const DEFAULT_BAR_IDS = BAR_ITEMS.map(barItemId);
 
 /**
  * Drop everything off the Kids Mode allowlist. Explore stays, as it always

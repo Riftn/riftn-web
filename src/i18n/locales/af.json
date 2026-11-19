@@ -1,4 +1,17 @@
 {
+  "postBg": {
+    "addMedia": "Voeg 'n prent, GIF of video by",
+    "changeMedia": "Verander prent, GIF of video",
+    "mediaType": "Kies 'n prent, GIF of video.",
+    "videoSize": "Daardie video is groter as {{n}} MB. Kies 'n kleiner een."
+  },
+  "textFeed": {
+    "tab": "Teks",
+    "errorTitle": "Plasings kon nie laai nie",
+    "errorBody": "Probeer die teksvoer weer laai.",
+    "emptyTitle": "Nog geen teksplasings nie",
+    "emptyBody": "Teksplasings sal hier verskyn."
+  },
   "comic": {
     "showAll": "Wys al {{count}} bladsye"
   },
@@ -14,6 +27,69 @@
     "glitter": "Glitter",
     "saved": "Rand gestoor",
     "failed": "Kon nie die rand stoor nie"
+  },
+  "duet": {
+    "policyEveryone": "Almal",
+    "policyFollowers": "Volgers",
+    "policyNobody": "Niemand",
+    "loadMore": "Laai meer",
+    "video": "Agterground",
+    "with": "Duet met @{{username}}",
+    "withOriginal": "Duet · sien oorspronklike",
+    "unavailable": "Hierdie video is nie meer vir duette beskikbaar nie.",
+    "allowLabel": "Laat duette toe",
+    "allowDescription": "Wie 'n duet langs jou video's kan opneem. Jy kan dit ook by elke plasing verander.",
+    "settingsSection": "Duette",
+    "policyDefault": "Rekeninginstelling",
+    "saveFailed": "Kon nie stoor nie. Probeer weer.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duette",
+    "pageHeading": "Duette",
+    "pageTitle": "Duette van {{title}} deur @{{creator}}",
+    "pageTitleNoCreator": "Duette van {{title}}",
+    "pageDescription": "Kyk elke duet van hierdie video op Riftn, of neem jou eie langs mekaar op.",
+    "empty": "Nog geen duette nie. Maak die video se opsies oop en kies Remix → Duet om die eerste een te maak.",
+    "notFound": "Hierdie video is nie beskikbaar nie.",
+    "browseShorts": "Blaai deur Shorts",
+    "notFoundTitle": "Video nie gevind nie | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Gebruik hierdie klank",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Groen skerm",
+    "stitch": "Stitch",
+    "selectSource": "Maak 'n video se opsies oop en kies Remix om te begin."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Almal",
+      "followers": "Volgers",
+      "nobody": "Niemand",
+      "default": "My verstek"
+    },
+    "shareFailed": "Jou fooitjie is gestuur, maar die oorspronklike skepper se deel het nie deurgegaan nie.",
+    "notify": {
+      "duet": "{{name}} het 'n duet met jou video gemaak",
+      "stitch": "{{name}} het jou video gestitch",
+      "react": "{{name}} het op jou video gereageer",
+      "reactLive": "{{name}} reageer regstreeks op jou video"
+    },
+    "linkFailed": "Jou plasing is op, maar dit kon nie aan die oorspronklike video gekoppel word nie.",
+    "settingsHeading": "Remixes",
+    "stitch": {
+      "allow": "Laat stitches toe",
+      "allowDesc": "Wie tot 5 sekondes van jou video's in hul eie kan gebruik. Jy kan dit ook per plasing verander.",
+      "saveFailed": "Kon nie jou stitch-instelling stoor nie. Probeer weer.",
+      "settingFailed": "Jou plasing is op, maar die stitch-instelling is nie gestoor nie. Verander dit by Wysig plasing.",
+      "from": "Gestitch van {{name}}",
+      "count_one": "{{count}} Stitch",
+      "count_other": "{{count}} Stitches",
+      "listTitle": "Stitches",
+      "listFailed": "Kon nie stitches laai nie. Probeer weer.",
+      "listEmpty": "Nog geen stitches nie.",
+      "unavailable": "Hierdie video is nie meer vir stitches beskikbaar nie."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Open Riftn in jou blaaier",
     "seoDescription": "Kry die Riftn-app: open source, gebruikersbesit sosiale media met live streaming, geïnkripteer boodskappe en watch-to-earn. Gratis op Google Play, die App Store en die web.",
-    "seoTitle": "Riftn App | Aflaai vir Android, iPhone & Web"
+    "seoTitle": "Riftn App | Aflaai vir Android, iPhone & Web",
+    "learnMore": "Wil jy die volle prentjie hê? <guide>Wat is Riftn?</guide> verduidelik die platform in diepte."
   },
   "dehubLinks": {
     "copyLinkDetail": "Kopieer die {{item}} skakel na jou knipbord",
@@ -55,12 +132,16 @@
       "profile": "profiel",
       "proposal": "Voorslag",
       "stage": "stadium",
-      "store": "winkel"
+      "store": "winkel",
+      "featureRequest": "aanvrae",
+      "page": "bladsy"
     },
     "recipientChat": "gesels",
     "recipientUser": "gebruiker",
     "sendFailed": "Kon nie {{item}} stuur nie",
-    "sentTo": "{{item}} gestuur na {{name}}"
+    "sentTo": "{{item}} gestuur na {{name}}",
+    "openPage": "Maak bladsy oop",
+    "viewRequest": "Sien versoek"
   },
   "stageCover": {
     "admitOne": "Erken een",
@@ -166,11 +247,35 @@
     "privateNote": "Privaat rekeninge word nie op die fediverse gewys nie.",
     "noUsername": "Kies 'n gebruikersnaam om 'n fediverse-adres te kry."
   },
+  "signedFollows": {
+    "setUp": "Skakel aan",
+    "turnOff": "Draai af",
+    "efpTurnOff": "Stop.",
+    "title": "Jou volgings, op die ketting",
+    "description": "Jou beursie teken wie jy volg, en elke dag word die lys op Base gestempel. Enige app kan jou volgings vanaf jou beursie vind, selfs sonder Riftn.",
+    "on": "Aan vir hierdie toestel",
+    "off": "Af vir hierdie toestel",
+    "turnedOn": "Jou volgings word nou deur jou beursie geteken",
+    "turnedOff": "Afgeskakel vir hierdie toestel",
+    "failed": "Jou beursie het nie geteken nie. Probeer weer.",
+    "hiddenNote": "Versteekte volglyste en privaat rekeninge word uit die publieke lys gelaat.",
+    "efpOn": "Na EFP gekopieer · {{count}} volgings",
+    "efpOff": "Sit hulle ook op EFP",
+    "efpTurnOn": "Voeg by EFP",
+    "efpDone": "Jou volgings gaan na EFP",
+    "efpStopped": "EFP-kopie gestop. Die lys bly joune.",
+    "efpHasList": "Jy het reeds 'n EFP-lys. Riftn kan daardie een nog nie vul nie.",
+    "efpNoGas": "Jou beursie het 'n bietjie ETH op Base hiervoor nodig.",
+    "efpFailed": "Dit het nie deurgegaan nie. Probeer weer.",
+    "efpNote": "EFP is 'n volglys wat ander apps lees (efp.app). Gratis met jou Riftn-beursie; ander beursies betaal 'n paar sent op Base. Die lys is joune."
+  },
   "profileFields": {
     "title": "Profielvelde",
     "description": "Tot vier ekstra reëls op jou profiel, soos 'n webwerf of jou voornaamwoorde.",
     "label": "Etiket",
     "content": "Inhoud",
+    "add": "Voeg veld by",
+    "remove": "Verwyder veld",
     "save": "Stoor velde",
     "saved": "Profielvelde gestoor",
     "failed": "Dit is nie gestoor nie. Probeer weer.",
@@ -340,7 +445,8 @@
     "step": "Vir rekeningbeheer, voeg https://riftn.com/mcp by as 'n OAuth-verbindingspunt, meld aan by Riftn en kyk vooraf na die toestemming voordat toegang verleen word.",
     "profilePrompt": "Dateer my Riftn bio op na: Onafhanklike skepper wat films en musiek maak.",
     "generatePrompt": "Wys my Riftn se beeldmodelle en haal 'n portret aan voordat dit gegenereer word.",
-    "libraryPrompt": "Laasste assets in my Riftn Creator biblioteek wys."
+    "libraryPrompt": "Laasste assets in my Riftn Creator biblioteek wys.",
+    "agents": "Plaas, antwoord, reageer, herplaas, volg en wysig profiele as die agente wat jy besit"
   },
   "twitchMirror": {
     "title": "Twitch spieëlbeeld",
@@ -368,6 +474,7 @@
     "checkFailed": "Ons kon nie die beskikbaarheid nagaan nie. Probeer asseblief weer.",
     "checking": "Kontroleer tans...",
     "ownership": "Oopbron. Gebruiker besit.",
+    "title": "'n Bietjie werk.\n'n Beter Riftn.",
     "intermission": "Tydelik vanlyn",
     "community": "Gemeenskap eerste. Altyd."
   },
@@ -547,7 +654,14 @@
     "getTheApp": "Kry die app",
     "connectAi": "Koppel KI",
     "converter": "Converter",
-    "affiliate": "Vennoot"
+    "affiliate": "Vennoot",
+    "groups": {
+      "create": "Skep",
+      "discover": "Ontdek",
+      "main": "Hoof",
+      "money": "Geld",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Bekyk {{name}} se profiel",
@@ -1172,7 +1286,40 @@
     "socialVerifiedFollowers": "{{value}} volgers",
     "socialFollowersPending": "Volgertellings aanpas",
     "security": "Sekuriteit",
-    "about": "Oor"
+    "about": "Oor",
+    "menuLayoutFolders": "Vouers",
+    "chatCards": "Geselsies as kaarte",
+    "chatCardsDesc": "Elke geselsie op sy eie kaart. Skakel af vir 'n gewone lys met 'n lyn tussen geselsies.",
+    "chatDeleteChoice": "Wanneer jy 'n boodskap uitvee",
+    "chatDeleteChoiceDesc": "Vra elke keer, of vee altyd net vir jou of vir almal in die geselsie uit.",
+    "chatDeleteAsk": "Vra elke keer",
+    "chatDeleteMe": "Vee vir my uit",
+    "chatDeleteMeDesc": "Weg uit jou geselsie, ander sien dit steeds",
+    "chatDeleteEveryone": "Vee vir almal uit",
+    "chatDeleteEveryoneDesc": "Wanneer jy kan. Iemand anders se boodskap in 'n groep verdwyn steeds net vir jou",
+    "showLikes": "Wys my likes aan almal",
+    "showLikesDesc": "Enigiemand kan die Likes-oortjie op jou profiel oopmaak. Verstek af, sodat net jy kan sien waarvan jy gehou het.",
+    "showFollowersList": "Wys wie my volg",
+    "showFollowersListDesc": "Laat enigiemand jou volgerslys oopmaak. Wanneer dit af is, kan net jy dit sien.",
+    "showFollowingList": "Wys wie ek volg",
+    "showFollowingListDesc": "Laat enigiemand die lys mense wat jy volg oopmaak. Wanneer dit af is, kan net jy dit sien.",
+    "showFollowCounts": "Wys my volgergetalle",
+    "showFollowCountsDesc": "Wys hoeveel volgers jy het en hoeveel mense jy volg. Om dit af te skakel, versteek ook albei lyste.",
+    "defaultProfileView": "Uitleg van profielplasings",
+    "defaultProfileViewDesc": "Wys jou plasings as 'n rooster of 'n lys wanneer mense jou profiel oopmaak",
+    "readerProfileView": "Maak ander profiele oop as",
+    "readerProfileViewDesc": "Kies rooster of lys vir elke profiel wat jy oopmaak, of behou elke persoon se eie keuse",
+    "readerProfileViewOwner": "Elke persoon se keuse",
+    "tipsOffNote": "Fooitjies en stuurtjies aan jou is af terwyl dit aan is. Skakel dit af om weer fooitjies te kry.",
+    "menuLayout": "Spyskaartuitleg",
+    "menuLayoutDesc": "Hoe die spyskaart sy bladsye groepeer",
+    "menuLayoutTabs": "Oortjies",
+    "menuLayoutTabsDesc": "Een groep op 'n slag, met groot ikone",
+    "menuLayoutSections": "Afdelings",
+    "menuLayoutSectionsDesc": "Elke bladsy gelyktydig, onder groepopskrifte",
+    "menuLayoutFoldersDesc": "Jou hoofbladsye, dan 'n vouer vir elke groep",
+    "publicChatInBar": "Publieke Klets in die onderste balk",
+    "publicChatInBarDesc": "Een tik na Publieke Klets vanaf die balk onderaan die skerm"
   },
   "common": {
     "confirm": "Bevestig",
@@ -1257,7 +1404,19 @@
     "payDirect": "Gestuur reguit na {{name}} in {{symbol}} op {{chain}}. Geen omruil.",
     "payDirectNoName": "Gestuur reguit na die skepper in {{symbol}} op {{chain}}. Geen omruil.",
     "payViaBridgeDpay": "Verskuif na Base en betaal aan Riftn Pay, tokens arriveer in ongeveer 'n minuut",
-    "dmSent": "{{amount}} tokens aan {{name}} gestuur!"
+    "dmSent": "{{amount}} tokens aan {{name}} gestuur!",
+    "addMessage": "Voeg 'n boodskap (opsioneel)",
+    "messagePublic": "Publiek",
+    "railTitle": "Wenke",
+    "messagePlaceholder": "Sê iets saam met jou fooitjie",
+    "messagePrivate": "Net {{name}}",
+    "theCreator": "die skepper",
+    "messageWallNote": "Wys op die fooitjiemuur sodra die fooitjie deurgaan.",
+    "sendWithMessage": "Stuur met boodskap",
+    "messageFailed": "Jou boodskap kon nie bygevoeg word nie. Geen fooitjie is gestuur nie.",
+    "wallLabel": "Fooitjieboodskappe",
+    "railTotal": "{{amount}} tokens",
+    "tokensUnit": "tokens"
   },
   "postOptions": {
     "liveAlertsOn": "Jy volg nou {{name}}. Jy sal 'n kennisgewing kry wanneer hulle regstreeks gaan.",
@@ -1297,7 +1456,14 @@
     "giftBoost": "Een skeningsvermeerdering gee",
     "markSection": "Skippable afdelings",
     "copyFailed": "Kon nie skakel kopieer nie",
-    "share": "Deel"
+    "share": "Deel",
+    "refreshLinkPreview": "Verfris skakelvoorskou",
+    "linkPreviewRefreshed": "Skakelvoorskou verfris",
+    "linkPreviewRefreshFailed": "Kon nie daardie werf bereik nie. Probeer later weer.",
+    "castToTv": "Saai uit na TV",
+    "castStarted": "Speel op jou TV",
+    "castUnsupported": "Hierdie blaaier kan nie uitsaai nie. Maak Riftn in Chrome of Safari oop om dit op jou TV te speel.",
+    "castFailed": "Kon nie die TV bereik nie. Maak seker dit is op dieselfde Wi-Fi en probeer weer."
   },
   "filters": {
     "sort": "Sorteer",
@@ -1766,6 +1932,9 @@
   "notifications": {
     "title": "Kennisgewings",
     "markAllRead": "Merk alles gelees",
+    "groupNew": "Nuut",
+    "groupToday": "Vandag",
+    "groupThisWeek": "Hierdie week",
     "settings": "Kennisgewinginstellings",
     "actions": "Aksies",
     "markAllAsRead": "Merk alles as gelees",
@@ -1794,6 +1963,7 @@
     "communities": "Gemeenskappe",
     "stores": "Winkels",
     "noNotificationsYet": "Nog geen kennisgewings nie",
+    "searchClose": "Maak soektog toe",
     "noNotificationsDesc": "Wanneer jy laaiks, kommentaar, fooitjies of nuwe intekenare kry, sal dit hier verskyn.",
     "loadMore": "Laai meer",
     "markAsRead": "Merk as gelees",
@@ -1905,7 +2075,10 @@
       "bountySubmitted": "{{name}} ingedien werk op jou oorvloed",
       "sentNotification": "{{name}} stuur vir jou 'n kennisgewing"
     },
-    "noNotifications": "Geen kennisgewings nie."
+    "noNotifications": "Geen kennisgewings nie.",
+    "groupEarlier": "Vroeër",
+    "searchPlaceholder": "Soek kennisgewings",
+    "searchEmpty": "Geen kennisgewings pas nie"
   },
   "leaderboard": {
     "title": "Ranglyste",
@@ -1963,7 +2136,13 @@
       "week": "Week",
       "month": "Maand",
       "year": "Jaar"
-    }
+    },
+    "ogChallenge": "OG-uitdaging",
+    "ogHolders_one": "{{count}} OG-houer",
+    "ogHolders_other": "{{count}} OG-houers",
+    "ogChallengeTitle": "Bring die OG-houers terug",
+    "ogChallengeBody": "Nooi mense uit wat nog DHB hou. Wanneer hulle met jou uitnodigingskakel aansluit en hul DHB in hul Riftn-beursie hou, tel hulle hier vir jou.",
+    "ogChallengeCta": "Kry jou uitnodigingskakel"
   },
   "dhbListing": {
     "title": "Token-notering kom binnekort!",
@@ -2047,11 +2226,13 @@
     "promptLabel": "Jou vra",
     "promptPlaceholder": "Beskryf 'n idee, verbetering of fout...",
     "promptAttach": "Heg beelde aan",
+    "removeAttachment": "Verwyder aanhegsel",
     "promptDrop": "Afbeeldings kan hier geplaas word.",
     "promptPost": "Plaas vinnige",
     "promptShortcut": "Ctrl /+ Voer in om te plaas",
     "promptDetails": "Opsionele besonderhede",
     "promptDevice": "Toestel OS (vir foute)",
+    "deviceInfoNoErrors": "Geen",
     "promptFilters": "Kategorie filter",
     "promptMediaError": "Kies afbeeldings of videos onder 50MB elk.",
     "promptMediaLimit": "Tot {{max}} aanhangsels.",
@@ -2104,12 +2285,40 @@
     "shipping": "Word gebou",
     "noShippingYet": "Niks aan die gang nie",
     "shippingAppearHere": "Versoeke wat gebou word, verskyn hier.",
-    "loadFailed": "Kon nie versoeke laai nie"
+    "loadFailed": "Kon nie versoeke laai nie",
+    "editMedia": "Foto's en video's",
+    "editAddMedia": "Voeg foto of video by",
+    "deviceInfoNote": "Toestelinligting word aangeheg om ons te help om foute reg te maak.",
+    "deviceInfo": "Toestelinligting",
+    "deviceInfoOwners": "Net bordeienaars sien dit",
+    "deviceInfoError": "Kon nie toestelinligting laai nie",
+    "deviceInfoNone": "Geen toestelinligting vir hierdie versoek nie",
+    "deviceInfoErrors": "Onlangse foute"
   },
   "auth": {
-    "loginRequired": "Meld aan wat nodig is"
+    "loginRequired": "Meld aan wat nodig is",
+    "accountDeleted": "Hierdie rekening is uitgevee. Jy kan weer as 'n nuwe rekening registreer.",
+    "accountDeletedHours_one": "Hierdie rekening is uitgevee. Jy kan oor ongeveer {{count}} uur weer met dieselfde e-pos of foon registreer.",
+    "accountDeletedHours_other": "Hierdie rekening is uitgevee. Jy kan oor ongeveer {{count}} uur weer met dieselfde e-pos of foon registreer.",
+    "accountDeletedDays_one": "Hierdie rekening is uitgevee. Jy kan oor ongeveer {{count}} dag weer met dieselfde e-pos of foon registreer.",
+    "accountDeletedDays_other": "Hierdie rekening is uitgevee. Jy kan oor ongeveer {{count}} dae weer met dieselfde e-pos of foon registreer."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Aan",
+      "recent": "Onlangs",
+      "suggested": "Voorgestel",
+      "youFollow": "Mense wat jy volg",
+      "placeholder": "Naam of @gebruikersnaam",
+      "chattedBefore": "Julle gesels",
+      "mutual": "Wedersyds",
+      "dmsOff": "DM's af",
+      "keepTyping": "Hou aan tik om almal te soek",
+      "noOne": "Niemand gevind nie",
+      "tryUsername": "Probeer hul presiese @gebruikersnaam",
+      "sayHi": "Sê hallo vir iemand",
+      "typeAny": "Tik enige naam of @gebruikersnaam"
+    },
     "reply": "Antwoord",
     "react": "Reageer",
     "edit": "Wysig",
@@ -2233,6 +2442,24 @@
     "viewList": "Lysaansig",
     "viewMode": "Besigtig",
     "back": "Terug",
+    "reserve": {
+      "signIn": "Meld aan",
+      "available": "Gebruikersnaam beskikbaar",
+      "held": "Vir jou gehou",
+      "ended": "Hou het verval",
+      "busy": "Word gereserveer",
+      "availableBody": "riftn.com/{{name}} is nou vry. Reserveer dit en ons hou dit een minuut lank vir jou terwyl jy registreer.",
+      "heldBody": "Niemand anders kan @{{name}} neem voordat die tydhouer verstryk nie. Voltooi registrasie om dit te hou.",
+      "endedBody": "Jou minuut het verstryk, so @{{name}} is weer oop vir almal. Dit is steeds vry.",
+      "busyBody": "Iemand registreer nou as @{{name}}. As hulle nie klaarmaak nie, kom dit vry wanneer die tydhouer eindig.",
+      "finish": "Voltooi registrasie",
+      "again": "Reserveer weer",
+      "cta": "Reserveer nou",
+      "letGo": "Laat dit gaan",
+      "haveAccount": "Het jy 'n rekening?",
+      "seoTitle": "@{{name}} is beskikbaar op Riftn",
+      "seoDescription": "Niemand het riftn.com/{{name}} nog nie. Reserveer dit en registreer om dit joune te maak."
+    },
     "usernameAvailable": "Gebruikersnaam beskikbaar!",
     "signUpToClaim": "Teken vandag in om te eis",
     "signUp": "Registreer",
@@ -2251,7 +2478,8 @@
       "total": "Totale bereik",
       "breakdownTitle": "Waar hierdie reikwydte vandaan kom",
       "dehubFollowers": "Riftn-volgelinge",
-      "verified": "Sosiale tellings kom uit rekeninge wat die skepper verbind het."
+      "verified": "Sosiale tellings kom uit rekeninge wat die skepper verbind het.",
+      "selfReported": "Sosiale volgelinge tel word deur die skepper ingevoer."
     },
     "loginDescription": "Meld aan om jou profiel te sien en te bestuur.",
     "replyThread": {
@@ -2260,7 +2488,17 @@
     },
     "tabs": {
       "playlists": "Speellyste",
-      "dislikes": "Dinge wat nie hou nie"
+      "dislikes": "Dinge wat nie hou nie",
+      "likes": "Laaiks",
+      "articles": "Artikels"
+    },
+    "likedPosts": {
+      "emptyTitle": "Nog geen laaiks nie",
+      "privateTitle": "Laaiks is privaat",
+      "loadMore": "Laai meer",
+      "emptyOwn": "Plasings waarvan jy hou, verskyn hier. Net jy kan hulle sien tensy jy Wys my likes in Instellings aanskakel.",
+      "emptyOther": "Nog niks geliked nie.",
+      "privateDesc": "Hierdie rekening hou sy likes vir homself."
     },
     "dislikes": {
       "emptyTitle": "Nog geen dislikes nie",
@@ -2283,6 +2521,21 @@
     "sortMostViewed": "Meeste bekeken",
     "sortLikes": "Hou van",
     "sortMostLiked": "Meeste gehou",
+    "sortCustomShort": "Pasmaak",
+    "arrange": {
+      "saving": "Stoor tans...",
+      "title": "Rangskik jou plasings",
+      "hint": "Hou 'n plasing en sleep dit na sy nuwe plek. Besoekers sien hierdie volgorde eerste.",
+      "drag": "Sleep om te skuif",
+      "toTop": "Skuif na bo",
+      "save": "Stoor volgorde",
+      "saved": "Jou volgorde is gestoor",
+      "reset": "Terug na nuutste eerste",
+      "resetDone": "Terug na nuutste eerste",
+      "saveFailed": "Kon nie jou volgorde stoor nie. Probeer asseblief weer.",
+      "loadFailed": "Kon nie jou plasings laai nie. Maak dit toe en probeer weer.",
+      "empty": "Nog niks om te rangskik nie. Plaas eers iets."
+    },
     "searchThisChannel": "Deursoek hierdie kanaal",
     "searchResultCount": "1 gevolg vir \"{{query}}\"",
     "searchResultCountPlural": "{{count}} resultate vir \"{{query}}\"",
@@ -2291,7 +2544,16 @@
     "accountSettings": "Rekeninginstellings",
     "securitySettings": "Sekuriteitinstellings",
     "preferences": "Voorkeure",
-    "logout": "Teken uit"
+    "logout": "Teken uit",
+    "unavailable": "Profiel nie beskikbaar nie",
+    "mutualsOne": "{{count}} Wedersydse:",
+    "mutualsMany": "{{count}} Wedersydses:",
+    "articles": {
+      "emptyTitle": "Nog geen artikels nie",
+      "emptySubtitle": "Artikels sal hier verskyn"
+    },
+    "sortCustom": "Eie volgorde",
+    "arrangeButton": "Rangskik plasings"
   },
   "tv": {
     "seoTitle": "Live TV: Gratis Kanale Uit Die Hele Wêreld",
@@ -2446,6 +2708,7 @@
       "runSwarm": "Loop swarm",
       "description": "Aksies loop as die gekose agent. Beplande taaklysse voortgaan met die app gesluit.",
       "instructions": "Agentinstruksies",
+      "examples": "Plaas een keer per dag oor: onafhanklike musiek\nStyl: nuuskierig, bondig en geselserig\nHou van hoogstens 2 onlangse plasings per dag oor: musiek, lewendige vertonings, viniel",
       "preparing": "Voorbereiding taak...",
       "run": "Hardloop vinnig",
       "limits": "Een daaglikse pos en tot 3 relevante voorkeure per taak. Alle agente deel 'n postgaping van 20 minute. Foto's gebruik gekontroleerde onderskrifte; video's benodig 'n omslagbeeld. Posters die minder dan 500 karakters bevatten. Geen gas nie, tensy dit gemyn word; skryf mag krediete gebruik.",
@@ -2453,6 +2716,7 @@
       "list": "Take",
       "refresh": "Verfris",
       "loading": "Laai taakke aan…",
+      "meta": "@{{agent}} · {{status}} · Verwerk: {{total}}",
       "next": "Volgende hardloop: {{time}}",
       "pause": "Pouseer",
       "resume": "Voortgaan",
@@ -2553,6 +2817,28 @@
     "signInAgain": "Meld weer aan",
     "createSignIn": "Meld weer aan om 'n agent te skep",
     "checkConnection": "Kontroleer jou verbinding en probeer weer.",
+    "welcome": {
+      "text": "Welkomsboodskap",
+      "title": "Verwelkom nuwe lede",
+      "help": "Hierdie agent volg en/of stuur boodskappe aan mense wat pas by Riftn aangesluit het, 'n paar per dag.",
+      "follow": "Volg nuwe lede",
+      "message": "Stuur boodskap aan nuwe lede",
+      "textHelp": "{name} word hul @gebruikersnaam. Geen skakels nie. Een keer per persoon gestuur.",
+      "saveText": "Stoor boodskap",
+      "perDay": "Mense per dag",
+      "fewer": "Minder per dag",
+      "more": "Meer per dag",
+      "today": "Vandag: {{follows}} gevolg · {{messages}} boodskappe gestuur",
+      "limits": "Nooit twee keer dieselfde persoon nie. Slaan enigiemand oor wat jou geblokkeer of stilgemaak het, nuwe boodskappe afgeskakel het of van Nuwe lede versteek het.",
+      "showLog": "Sien wie dit verwelkom het",
+      "hideLog": "Versteek verwelkomings",
+      "empty": "Nog niemand nie. Nuwe lede verskyn hier soos hulle aansluit.",
+      "followed": "Gevolg",
+      "messaged": "Boodskap gestuur",
+      "skipped": "Oorgeslaan",
+      "failed": "Kon nie bereik nie",
+      "defaultText": "Haai {name}, welkom by Riftn! 👋"
+    },
     "workspace": {
       "moderation": "Stroommoderasie",
       "moderationHelp": "Aktiveer eers die moderasietoestemming. Die rekening moet reeds die stroomskepper of 'n toegewysde moderator wees. Goedkeurings- en konsepmodusse geld steeds. Tydelike uitsluitings verval outomaties.",
@@ -2745,7 +3031,17 @@
     "resendCodePhone": "Verkeerde nommer of geen kode? Gaan terug",
     "continueAs": "Voortgaan as",
     "switchWalletAccount": "Wissel rekening",
-    "walletLoadFailed": "Kon nie beursies laai nie. Probeer asseblief weer."
+    "walletLoadFailed": "Kon nie beursies laai nie. Probeer asseblief weer.",
+    "openInBrowser": "Maak in blaaier oop",
+    "copyLink": "Kopieer skakel",
+    "bringLoginOver": "Het jy Riftn op dehub.io gebruik? <bring>Bring jou aanmelding oor</bring>",
+    "didYouMean": "Het jy {{email}} bedoel?",
+    "profileMovedTitle": "Jou profiel het geskuif",
+    "migrateWrongLogin": "Daardie aanmelding het 'n ander beursie oopgemaak, so niks het verander nie. Jou ou profiel is met {{login}} gemaak. Gebruik dit om dit terug te bring.",
+    "googleInAppTitle": "Google sal nie binne {{app}} aanmeld nie",
+    "googleInAppTitleUnnamed": "Google sal nie binne hierdie app aanmeld nie",
+    "googleInAppBody": "Maak Riftn in jou blaaier oop om Google te gebruik, of meld hier met e-pos aan.",
+    "tryAnyway": "Probeer in elk geval"
   },
   "careers": {
     "title": "Loopbane",
@@ -2973,7 +3269,17 @@
     "noMenuMatches": "Niks in die kieslys pas nie",
     "searchDehubFor": "Soek “{{query}}” op Riftn",
     "switchAccount": "Wissel rekening",
-    "signedInAs": "Geteken as {{name}}"
+    "signedInAs": "Geteken as {{name}}",
+    "requestSend": "Stuur versoek",
+    "requestPrompt": "Nog nie hier nie? Stuur dit as 'n versoek",
+    "requestPromptShort": "Nog nie hier nie?",
+    "requestDraftMenu": "Voeg {{query}} by Riftn",
+    "requestDraftSettings": "'n Instelling vir {{query}}",
+    "requestPostsTo": "Plaas na Versoeke",
+    "requestHint": "Plaas as jy na Versoeke. Ons sal jou laat weet wanneer dit uitkom.",
+    "requestSent": "Na Versoeke gestuur",
+    "requestSentHint": "Ons sal jou laat weet wanneer dit uitkom.",
+    "requestSeeIt": "Sien dit op Versoeke"
   },
   "comments": {
     "reportComment": "Rapporteer kommentaar",
@@ -3066,7 +3372,23 @@
     "likersEmptyTitle": "Nog geen laaiks nie",
     "likersEmptyBody": "Laaiks op hierdie opmerking sal hier verskyn.",
     "anonymousLikes_one": "{{count}} laaik van 'n anonieme badgehouer",
-    "anonymousLikes_other": "{{count}} laaiks van anonieme badgehouers"
+    "anonymousLikes_other": "{{count}} laaiks van anonieme badgehouers",
+    "threadParts": {
+      "moveUp": "Beweeg op",
+      "moveDown": "Beweeg af",
+      "reorder": "Herrangskik",
+      "save": "Stoor volgorde",
+      "saved": "Draadvolgorde gestoor",
+      "saveFailed": "Kon nie die volgorde stoor nie. Probeer weer.",
+      "dragPart": "Sleep om deel {{n}} te skuif",
+      "addPart": "Voeg by draad",
+      "addPlaceholder": "Voeg by jou draad...",
+      "label": "Draad · {{count}} dele",
+      "reorderHint": "Sleep die dele, of gebruik die pyltjies, en stoor dan."
+    },
+    "attachMedia": "Heg 'n foto, video of klank aan",
+    "attachUnsupported": "Heg 'n foto, 'n video of 'n klanklêer aan.",
+    "attachTooLarge": "Daardie lêer is oor die limiet van {{size}} MB."
   },
   "mintChain": {
     "title": "Mint-pos",
@@ -3082,6 +3404,16 @@
     "confirm": "Munt op {{chain}}",
     "confirmWithCost": "Munt op {{chain}} · {{cost}}",
     "notAvailable": "Mining op hierdie ketting is nog nie beskikbaar nie."
+  },
+  "postEditHistory": {
+    "original": "Oorspronklik",
+    "title": "Wysigingsgeskiedenis",
+    "edited_one": "Een keer gewysig",
+    "edited_other": "{{count}} keer gewysig",
+    "lastEdit": "Laaste wysiging {{time}}",
+    "editN": "Wysiging {{n}}",
+    "now": "Nou",
+    "showChanges": "Wys wat verander het"
   },
   "postInfo": {
     "title": "Plaas inligting",
@@ -3376,7 +3708,10 @@
     "waiting_for_wallet": "Wag vir jou beursie",
     "waiting_for_wallet_desc": "Open {{wallet}} en keur die handtekening goed — die versoek wag daar.",
     "your_wallet": "jou beursie",
-    "max_available_on_chain": "Maksimum beskikbaar: {{amount}} tokens op {{chain}}"
+    "max_available_on_chain": "Maksimum beskikbaar: {{amount}} tokens op {{chain}}",
+    "not_available_for_this_post": "Nie beskikbaar vir hierdie plasing nie",
+    "turn_back_on_desktop_notifications": "Skakel rekenaarkennisgewings weer aan?",
+    "notifications_moved_to_riftn": "Ons het na riftn.com geskuif, so jou blaaier het weer jou toestemming nodig om antwoorde, fooitjies en DM's hier te wys."
   },
   "staking": {
     "title": "Staking",
@@ -5194,6 +5529,7 @@
     "settledTitleSpeed": ", tipies in {{speed}}",
     "settledCount_one": "{{count}} geskik",
     "settledCount_other": "{{count}} geskik",
+    "statusInProgress": "Aan die gang",
     "howMany": "Hoeveel",
     "availableCount_one": "{{count}} beskikbaar",
     "availableCount_other": "{{count}} beskikbaar",
@@ -5283,9 +5619,169 @@
     "buy": "Koop",
     "reject": "Verwerp",
     "needsYouHold": "Benodig {{needed}}, jy hou {{held}}",
-    "sellYourFractions": "Verkoop jou fraksies ({{held}} gehou)"
+    "sellYourFractions": "Verkoop jou fraksies ({{held}} gehou)",
+    "nftsSubtitle": "Enige NFT, ruil in een stap",
+    "buyersTab": "Kopers",
+    "soldOfListing": "{{sold}} van {{total}} verkoop",
+    "noBuyersYet": "Niemand het nog breukdele van hierdie plasing gekoop nie",
+    "fromYou": "van jou",
+    "statusOverdue": "Laat"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Gebruik hierdie besonderhede",
+        "url": "Produkbladsy-URL",
+        "action": "Lees produkbladsy",
+        "loading": "Lees bladsy…",
+        "hint": "Voer teks van 'n publieke produkbladsy in. Hersien besonderhede voordat jy dit gebruik; heg produkbeelde afsonderlik in die ateljee aan.",
+        "source": "Ingevoerde bron",
+        "review": "Kies 'n produk om na jou wysigbare opdrag te kopieer. Jou opskrif, stem en handelsmerkkleure bly onveranderd.",
+        "errors": {
+          "signIn": "Meld aan om 'n produkbladsy in te voer.",
+          "url": "Gebruik 'n publieke HTTPS-produk-URL.",
+          "empty": "Geen bruikbare produkbesonderhede is gevind nie. Voeg hulle self by.",
+          "busy": "Te veel invoere loop tans. Probeer binnekort weer.",
+          "unavailable": "Hierdie bladsy kon nie ingevoer word nie. Voeg die produkbesonderhede self by.",
+          "failed": "Invoer het misluk. Jou opdrag is gestoor; probeer weer of voer besonderhede self in."
+        }
+      },
+      "return": "Keer terug na ateljeekonsep",
+      "title": "Veldtogopdrag",
+      "intro": "Beskryf jou produk en handelsmerk en berei dan bypassende advertensieformate voor.",
+      "saved": "Jou opdrag is op hierdie toestel vir hierdie rekening gestoor.",
+      "preview": "Berei formate voor",
+      "clear": "Maak opdrag skoon",
+      "required": "Voeg 'n produknaam en beskrywing by om formate voor te berei.",
+      "variants": "Veldtogformate",
+      "reviewHint": "Hersien die model, prys en produkverwysing in die ateljee voordat jy genereer. Elke formaat is 'n aparte generasie.",
+      "open": "Hersien in ateljee",
+      "fields": {
+        "product": "Produknaam (vereis)",
+        "description": "Produkfeite (vereis)",
+        "brand": "Handelsmerknaam",
+        "audience": "Teikengehoor",
+        "benefit": "Hoofvoordeel",
+        "voice": "Handelsmerkstem",
+        "palette": "Handelsmerkkleure",
+        "headline": "Goedgekeurde opskrif",
+        "cta": "Oproep tot aksie"
+      },
+      "formats": {
+        "square": "Vierkantige advertensie",
+        "portrait": "Portret-advertensie",
+        "story": "Storiebeeld",
+        "video": "Vertikale video"
+      }
+    },
+    "cinema": {
+      "close": "Maak toe",
+      "performance": {
+        "label": "Opvoering",
+        "0": "Vreugdevol",
+        "1": "Melancholies",
+        "2": "Angstig",
+        "3": "Selfversekerd",
+        "4": "Met ontsag vervul",
+        "5": "Ingehoue",
+        "6": "Speels"
+      },
+      "title": "Filmregie",
+      "hint": "Lei die visuele styl van jou volgende beeld of video. Resultate verskil per model.",
+      "none": "Geen regie",
+      "reset": "Maak regie skoon",
+      "camera": {
+        "label": "Kameravoorkoms",
+        "0": "Digitale film",
+        "1": "35mm-film",
+        "2": "16mm-film",
+        "3": "Grootformaat",
+        "4": "Outydse videokamera"
+      },
+      "lens": {
+        "label": "Lensvoorkoms",
+        "0": "Sferies",
+        "1": "Anamorfies",
+        "2": "Outydse sagte glas",
+        "3": "Makro",
+        "4": "Kantel-skuif"
+      },
+      "focalLength": {
+        "label": "Brandpuntsafstand",
+        "0": "18mm wyd",
+        "1": "24mm wyd",
+        "2": "35mm natuurlik",
+        "3": "50mm standaard",
+        "4": "85mm portret",
+        "5": "135mm telefoto"
+      },
+      "aperture": {
+        "label": "Velddiepte",
+        "0": "f/1.4 baie vlak",
+        "1": "f/2.8 vlak",
+        "2": "f/5.6 matig",
+        "3": "f/11 diep fokus"
+      },
+      "movement": {
+        "label": "Kamerabeweging",
+        "0": "Vaste driepoot",
+        "1": "Stadige dolly in",
+        "2": "Stadige dolly uit",
+        "3": "Sywaartse volgskoot",
+        "4": "Sirkel om onderwerp",
+        "5": "Handgehou",
+        "6": "Kraanstyging",
+        "7": "Stadige swenk"
+      },
+      "lighting": {
+        "label": "Beligting",
+        "0": "Sagte daglig",
+        "1": "Goue uur",
+        "2": "Donker chiaroscuro",
+        "3": "Helder ateljee",
+        "4": "Neonligte in skoot",
+        "5": "Silhoeët-teenlig",
+        "6": "Bewolkte diffuse lig"
+      },
+      "tempo": {
+        "label": "Skoottempo",
+        "0": "Enkele aaneenlopende skoot",
+        "1": "Kalm, rustige aksie",
+        "2": "Dinamiese, energieke aksie",
+        "3": "Chaotiese, wilde aksie"
+      },
+      "era": {
+        "label": "Era",
+        "0": "1920's",
+        "1": "1950's",
+        "2": "1960's",
+        "3": "1970's",
+        "4": "1980's",
+        "5": "1990's",
+        "6": "Hede",
+        "7": "Nabye toekoms"
+      },
+      "genre": {
+        "label": "Genre",
+        "0": "Dokumentêr",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Wetenskapfiksie",
+        "4": "Fantasie",
+        "5": "Romantiese komedie",
+        "6": "Riller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Kleurpalet",
+        "0": "Warm amber",
+        "1": "Koel blou",
+        "2": "Gedempte aardtone",
+        "3": "Pastel",
+        "4": "Hoëkontras-monochroom",
+        "5": "Versadigde primêre kleure"
+      }
+    },
     "libraryEmpty": "Jou gestoorde generasies sal hier verskyn.",
     "toolRemake": "Herstel",
     "toolMaboroshi": "Maboroshi",
@@ -6085,8 +6581,120 @@
       "needsImageToAnimate": "{{model}} Beeld nodig om te animeren. Eerste aan te sluiten.",
       "needsImageToWork": "{{model}} 'n foto om van te werk. Eerste aan te sluiten.",
       "speechLimit": "Dit is {{length}} karakters. Die limiet is {{limit}}.",
-      "musicTrackLength": "{{count}}s snit"
-    }
+      "musicTrackLength": "{{count}}s snit",
+      "cannotUseReference": "{{model}} kan nie 'n verwysingsbeeld gebruik nie. Verwyder dit of kies 'n ander model."
+    },
+    "gallery": {
+      "send": "Stuur",
+      "notifications": {
+        "generation_reply": "{{name}} het op jou kommentaar geantwoord",
+        "generation_like": "{{name}} het op jou generasie gereageer",
+        "generation_comment_like": "{{name}} het op jou kommentaar gereageer",
+        "generation_comment": "{{name}} het kommentaar op jou generasie gelewer"
+      },
+      "browse": "Blaai deur generasies",
+      "create": "Skep",
+      "fullscreen": "Kyk volskerm",
+      "missing": "Hierdie generasie is nie beskikbaar nie."
+    },
+    "avatarTitle": "Pratende portret",
+    "avatarRequirements": "Vierkantige PNG-portret, 512–2048 pieksels, tot 5 MB. Mono 24 kHz 16-bis PCM WAV, 5–30 sekondes. Die laaste breukdeel van 'n sekonde word met stilte opgevul.",
+    "avatarPortrait": "Kies portret-PNG",
+    "avatarAudio": "Kies spraak-WAV",
+    "avatarPermission": "Ek het toestemming om hierdie portret te animeer en hierdie klank te gebruik.",
+    "avatarQuote": "{{seconds}} sekondes insluitend stilte · {{amount}} tokens",
+    "avatarPrepare": "Berei voor en hersien prys",
+    "batchFlowLimit": "Die Flow-lys is vol. Verwyder 'n ongebruikte Flow voordat jy nog 'n bondel skep.",
+    "batchReviewCampaign": "Hersien veldtogbondel in Flow",
+    "batchReviewFilmImages": "Hersien storiebord-beeldbondel",
+    "batchReviewFilmVideos": "Hersien filmgrepie-bondel",
+    "batchReviewHint": "Maak 'n aparte gestoorde Flow oop. Hersien elke item en die volle prys voordat jy betaal. Voltooide items en die oorspronklike betaling word vir herstel bewaar. Verwysings word na jou privaat biblioteek gekopieer; berging- en netwerkgebruik is van toepassing.",
+    "batchInvalid": "Voltooi elke item voordat jy 'n bondel van 1–12 beelde of grepies voorberei.",
+    "batchReferenceLimit": "Hierdie bondel ondersteun een beeldverwysing per item. Verwyder ekstra verwysings of berei daardie item afsonderlik voor.",
+    "batchVideoSettings": "Vir hierdie bondel moet grepies 'n heel duur van 4–15 sekondes en 'n 16:9-, 9:16- of 1:1-aspekverhouding hê.",
+    "batchMissingReference": "'n Verwysing ontbreek, word nie ondersteun nie of is groter as 25 MB. Herstel dit in die redigeerder voordat jy die bondel voorberei.",
+    "batchOwnerChanged": "Die rekening of konsep het verander. Maak hierdie bondel weer onder sy oorspronklike rekening oop.",
+    "batchConflict": "Die gestoorde bondel pas nie by sy oorspronklike momentopname nie.",
+    "audioExportFormat": "Uitvoerformaat",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Heg een brongrepie aan om te verleng.",
+    "extensionSeconds": "+{{seconds}}s nuwe beeldmateriaal",
+    "extensionHelp": "Gee jou brongrepie terug met ongeveer vier nuwe sekondes. Uitvoer word tot 720p teen 24 fps verstel. Nuwe klank word vir die verlenging gegenereer.",
+    "extensionForward": "Voeg ongeveer vier sekondes ná jou brongrepie by",
+    "extensionBackward": "Voeg ongeveer vier sekondes voor jou brongrepie by",
+    "expandDescription": "Genereer nuwe beeldrande. Opsionele Engelse opdrag; een bronbeeld.",
+    "relightDescription": "Belig een foto opnuut volgens jou beskrywing van beligting en agtergrond.",
+    "expandPromptHint": "Heg een beeld aan en kies sy nuwe aspekverhouding. Engelse opdrag opsioneel.",
+    "expandEnglishOnly": "Hierdie uitbreidingsmodel aanvaar Engelse opdragte. Laat die opdrag leeg vir outomatiese uitbreiding.",
+    "expandNeedsImage": "Heg 'n beeld aan om uit te brei.",
+    "learn": {
+      "title": "Skepperlesse",
+      "intro": "Kort lesse, 'n kennistoets en 'n wysigbare oefening vir elkeen. Vordering word op hierdie toestel vir jou rekening gestoor.",
+      "back": "Terug na Skepper",
+      "lessons": "Lesse",
+      "progress": "{{completed}} van {{total}} kennistoetse geslaag",
+      "check": "Kontroleer antwoord",
+      "correct": "Kennistoets geslaag",
+      "retry": "Probeer weer. Hersien die les hierbo.",
+      "exerciseTitle": "Praktiese oefening",
+      "exerciseHint": "Maak 'n wysigbare voorbeeld in jou eie ateljee-werkruimte oop. Om 'n konsep oop te maak is gratis; generering vereis jou hersiening en sy eie kwotasie. Wysig die voorbeeld voordat jy genereer.",
+      "openExercise": "Maak oefenkonsep oop",
+      "closeExercise": "Sluit oefening",
+      "brief": {
+        "title": "Skryf 'n duidelike visuele opdrag",
+        "body1": "Beskryf 'n konkrete onderwerp, sy aksie en die omgewing. Voeg raming of kamerabeweging by wanneer dit die toneel help. Hou onverwante idees vir 'n ander konsep.",
+        "body2": "Beligting-, lens- en stylriglyne lei die model. Hulle waarborg nie fisiese kameragedrag of 'n presiese beeld nie. Verander een deel op 'n slag sodat jy hersienings kan vergelyk.",
+        "body3": "Hersien voor generering die gekose model, ondersteunde aanhegsels, afmetings en prys. Hou die oorspronklike konsep sodat jy daarna kan terugkeer.",
+        "question": "Watter opdrag is die maklikste om te hersien?",
+        "answer0": "'n Duidelike onderwerp, aksie en omgewing",
+        "answer1": "Net 'n modelnaam",
+        "answer2": "'n Lys teenstrydige style",
+        "exercise": "'n Keramiek-teepot op 'n houttafel langs 'n venster. Sagte oggendlig, medium raming, eenvoudige agtergrond. Hou die teepot as die duidelike onderwerp."
+      },
+      "continuity": {
+        "title": "Beplan skote en hersien kontinuïteit",
+        "body1": "Gebruik die Film-paneel in die redigeerder om 'n opdrag en geordende skote te stoor. Berei elke raam of grepie afsonderlik voor, hersien sy kwotasie en kies 'n aanvaarde resultaat.",
+        "body2": "Heg net verwysings aan wat jou gekose model aanvaar. Om 'n verwysing te hergebruik kan voorkoms lei; dit oefen nie 'n identiteit nie en waarborg nie 'n ooreenstemming nie. Karakters en stemme kan tussen generasies verskil.",
+        "body3": "Hou suksesvolle opnames en stel hulle in die tydlyn saam. Hersien beweging, gesigte, dialoog en oorgange voor uitvoer.",
+        "question": "Wat ondersteun kontinuïteit oor skote heen?",
+        "answer0": "Meer onverwante opdragte",
+        "answer1": "Goedgekeurde verwysings en hersiene skootnotas",
+        "answer2": "Aanneem dat karakteridentiteit gewaarborg is",
+        "exercise": "Wye skoot van 'n eensame reisiger wat met sonop 'n stil kus bereik. Stadige vorentoe kamerabeweging, kalm atmosfeer. Een aaneenlopende skoot."
+      },
+      "campaign": {
+        "title": "Gebruik goedgekeurde produkfeite",
+        "body1": "Begin met produkfeite wat jy kan verifieer. Hersien ingevoerde metadata voordat jy dit gebruik. Skryf die opskrif en oproep tot aksie uitdruklik; moenie pryse, resensies of prestasie-aansprake uitdink nie.",
+        "body2": "Gebruik gestoorde veldtogvariante om gedeelde notas en individuele hakies, skrifte, tale en formate bymekaar te hou. Berei een hersiene item op 'n slag voor en kontroleer sy kwotasie in die ateljee.",
+        "body3": "Hersien sigbare teks, produkvoorkoms en enige gesproke aansprake in die resultaat. 'n Opdrag is nie bewys van produkakkuraatheid of bemarkingsprestasie nie.",
+        "question": "Wanneer moet 'n produkaanspraak ingesluit word?",
+        "answer0": "Wanneer dit oortuigend klink",
+        "answer1": "Nadat jy 'n vyfster-resensie uitgedink het",
+        "answer2": "Wanneer dit van goedgekeurde produkfeite kom",
+        "exercise": "Skep 'n portret-produkadvertensie vir heelblaar-tee wat in 'n herbruikbare blik verkoop word. Goedgekeurde opskrif: Maak tyd vir tee. Goedgekeurde CTA: Verken die versameling. Gebruik net hierdie feite; moenie afslag, resensies of gesondheidsaansprake uitdink nie."
+      }
+    },
+    "campaignPlanTitle": "Veldtogvariante en episodes",
+    "campaignPlanIntro": "Stoor tot 12 variasies of episodes. Elkeen maak die ateljee oop vir sy eie hersiening en kwotasie. Gedeelde notas lei kontinuïteit; produkvoorkoms, karakters en stemme kan tussen generasies verskil.",
+    "campaignTitle": "Veldtog- of reeksnaam",
+    "campaignContinuity": "Gedeelde karakter-, stem- en stylnotas",
+    "campaignVariantTitle": "Variant- of episodenaam",
+    "campaignHook": "Openingshaak",
+    "campaignLanguage": "Uitvoertaal",
+    "campaignScript": "Goedgekeurde skrif of toneelvolgorde",
+    "campaignAdd": "Voeg variant of episode by",
+    "campaignClear": "Maak plan skoon",
+    "campaignFormat": "Uitvoerformaat",
+    "audioInvalidResponse": "Die klankdiens het 'n ongeldige resultaat teruggestuur.",
+    "batchPaymentHelp": "Elke ingediende beeld word afsonderlik gehef. As 'n bondel stop, word ongebruikte tokens van sy betaling outomaties hergebruik vir 'n latere generasie wat dit dek.",
+    "invalidSeed": "Saad moet 'n heelgetal van 0 tot 2147483647 wees.",
+    "libraryFavorites": "Gunstelinge",
+    "libraryFavoriteAdd": "Voeg by gunstelinge",
+    "libraryFavoriteRemove": "Verwyder uit gunstelinge",
+    "audioTaskDialoguePlaceholder": "Alice: Ons moet gaan.\nBob: [lag] Na jou.",
+    "priceOwnKey": "Jou sleutel",
+    "audioResultTooLarge": "Die oudioresultaat is leeg of oorskry 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planne vir elke werkstroom",
@@ -6253,9 +6861,16 @@
     "createTheFirst": "Skep die eerste een",
     "docsSeoTitle": "AI Skill Instructions | Riftn",
     "docsSeoDescription": "Verwysingsdokumentasie vir Riftn se AI-assistentvaardighede en vinnige biblioteek.",
-    "raw": "Rou"
+    "raw": "Rou",
+    "docsLoadFailed": "# Fout\nKon nie die vaardigheidsdokumentasie laai nie."
   },
   "nftMarket": {
+    "actAll": "Alle",
+    "actListings": "Advertensies",
+    "actOffer": "Aanbod",
+    "actOffers": "Aanbiedinge",
+    "actSales": "Verkope",
+    "tabActivity": "Aktiwiteit",
     "shortTitle": "NFT's",
     "filters": "Filters",
     "forSale": "Te koop",
@@ -6318,8 +6933,10 @@
     "cancelled": "Gekanselleer",
     "listed": "Gelys. Enigiemand kan dit nou koop.",
     "offered": "Aanbod gestuur. Die houer kan dit enige tyd aanvaar.",
-    "dehubPost": "DeHub-pos",
+    "dehubPost": "Riftn-pos",
     "youHold": "Jy hou {{n}}",
+    "price": "Prys",
+    "tabRecent": "Onlangs",
     "buyNow": "Koop nou",
     "dropsTo": "Prys daal tot {{price}} teen {{date}}",
     "inBundle": "Verkoop as ’n bundel van {{n}}",
@@ -6363,7 +6980,28 @@
     "spotlight": "Skoonlig",
     "spotlightBuyNote": "Die NFT en die betaling ruil in een stap.",
     "spotlightOfferNote": "Nog nie gelys nie. Stuur 'n aanbod en die houer kan dit enige tyd aanvaar.",
-    "signInToTradeCta": "Meld aan om te handel"
+    "signInToTradeCta": "Meld aan om te handel",
+    "actCollectionOffer": "Versamelingsaanbod",
+    "actListed": "Gelys",
+    "actSale": "Verkoping",
+    "buyAll": "Koop almal",
+    "buySeveral": "Koop verskeie",
+    "cartBought": "{{n}} gekoop. Hulle is nou in jou beursie.",
+    "cartCount": "{{n}} in mandjie",
+    "cartFull": "Tot 20 op 'n slag",
+    "cartOneCoin": "Een ketting en een munt per mandjie. Maak dit leeg om te wissel.",
+    "cartOwn": "Daardie een is joune",
+    "cartPick": "Tik om by mandjie te voeg",
+    "forSaleHere": "Hier te koop",
+    "noActivity": "Nog niks hier nie",
+    "volume": "Volume",
+    "volShort": "Vol",
+    "salesCount": "{{n}} verkoop",
+    "bestOffer": "Beste aanbod",
+    "fromOpenSea": "Topversamelings op OpenSea",
+    "buyHere": "Koop hulle hier",
+    "openSeaNote": "Gelys op OpenSea. Jy betaal die verkoper direk op Seaport; Riftn voeg geen fooi by nie.",
+    "viewOnOpenSea": "Bekyk op OpenSea"
   },
   "usernames": {
     "seoTitle": "Gebruikernaam Marketplace | Riftn",
@@ -6718,7 +7356,18 @@
       "votes_other": "{{count}} stemme",
       "howToVote_one": "Tik {{command}} en 'n nommer in die klets om te stem · {{count}} stem",
       "howToVote_other": "Tik {{command}} en 'n nommer in die klets om te stem · {{count}} stemme"
-    }
+    },
+    "eyebrow": {
+      "follow": "Nuwe volger",
+      "subscribe": "Nuwe intekenaar",
+      "subscribedTo": "Ingeteken · {{plan}}",
+      "gifted_one": "Het 'n intekening geskenk",
+      "gifted_other": "Het {{count}} intekeninge geskenk",
+      "share": "Het die stroom gedeel",
+      "join": "Het pas aangesluit"
+    },
+    "giftedSubs_one": "{{name}} het 'n intekening geskenk!",
+    "giftedSubs_other": "{{name}} het {{count}} intekeninge geskenk!"
   },
   "liveChatModeration": {
     "timeout1m": "Tyd uit vir 1 minuut",
@@ -6733,7 +7382,155 @@
     "youAreBanned": "Jy kan nie in hierdie skepper se streams praat nie",
     "youAreTimedOut": "Jy is vir ’n oomblik tyd uit"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Agtergrond",
+      "modes": {
+        "none": "Af",
+        "blur": "Vervaag",
+        "color": "Kleur",
+        "image": "Prent"
+      },
+      "failed": "Agtergrondverwydering kon nie op hierdie toestel begin nie.",
+      "hint": "Loop op jou toestel. Die eerste keer neem 'n paar sekondes om te laai."
+    },
+    "remove": "Verwyder",
+    "scenes": {
+      "countdown": "Aftelling",
+      "names": {
+        "starting": "Begin binnekort",
+        "chatting": "Net klets",
+        "gameplay": "Spel",
+        "brb": "Nou terug",
+        "ending": "Stroom eindig"
+      },
+      "title": "Tonele",
+      "edit": "Wysig {{name}}",
+      "subtitle": "Tweede reël (opsioneel)",
+      "picture": "Prent",
+      "noCountdown": "Geen aftelling",
+      "minutes": "{{count}} min",
+      "muteMic": "Demp my mikrofoon terwyl dit aan is",
+      "hints": {
+        "starting": "Kaart met 'n aftelling",
+        "chatting": "Kamera volskerm",
+        "gameplay": "Skerm met jou kamera",
+        "brb": "Kaart, mikrofoon gedemp",
+        "ending": "Dankie-kaart"
+      },
+      "subtitles": {
+        "starting": "Die stroom begin oor",
+        "brb": "Nou-nou terug",
+        "ending": "Dankie dat jy gekyk het"
+      }
+    },
+    "sources": {
+      "reactAdd": "Wys",
+      "image": "Beeld",
+      "camera": "Kamera",
+      "show": "Wys op stroom",
+      "loop": "Lus",
+      "positions": {
+        "center": "Sentrum",
+        "top-left": "Links bo",
+        "top-right": "Regs bo",
+        "bottom-left": "Links onder",
+        "bottom-right": "Regs onder"
+      },
+      "shapes": {
+        "circle": "Sirkel",
+        "rect": "Vierkant",
+        "rounded": "Afgerond"
+      },
+      "title": "Bronne",
+      "addImage": "Prent of logo",
+      "addCamera": "Tweede kamera",
+      "addClip": "Videogreep",
+      "addReaction": "Reageer op 'n video",
+      "reactPlaceholder": "Plak 'n Riftn-videoskakel",
+      "reactInvalid": "Plak 'n skakel na 'n Riftn-video.",
+      "reactNotLive": "Gaan eers regstreeks, voeg dan die video by.",
+      "reactNoBubble": "Jou kamera kon nie twee keer hier oopmaak nie. Verander die video se grootte om jou gesig op die skerm te hou.",
+      "failed": "Kon nie daardie bron byvoeg nie.",
+      "empty": "Voeg 'n logo, 'n tweede kamera of 'n videogreep bo-op jou stroom by.",
+      "hint": "Bronne word oor jou beeld geteken vir elke kyker en elke platform.",
+      "clip": "Greep",
+      "restart": "Herbegin",
+      "play": "Speel of pouseer",
+      "sizes": {
+        "small": "Klein",
+        "medium": "Medium",
+        "large": "Groot"
+      }
+    },
+    "audio": {
+      "mute": "Demp",
+      "unmute": "Ontdemp",
+      "gateLevels": {
+        "off": "Af",
+        "low": "Lig",
+        "high": "Sterk"
+      },
+      "title": "Klankmenger",
+      "unavailable": "Hierdie blaaier kan nie klank meng nie, so jou mikrofoon gaan uit soos dit is.",
+      "channels": {
+        "mic": "Mikrofoon",
+        "game": "Speletjie / oortjie",
+        "clip": "Videogreep"
+      },
+      "absent": {
+        "mic": "Geen mikrofoon",
+        "game": "Deel 'n skerm met klank of gebruik 'n vaslegkaart",
+        "clip": "Voeg 'n videogreep by in Bronne"
+      },
+      "gate": "Geraashek",
+      "gateHint": "Maak jou mikrofoon stil tussen woorde sodat sleutelbordklikke en waaiers uit die stroom bly."
+    },
+    "imageTooLarge": "Daardie prent is te groot. Probeer 'n kleiner een.",
+    "widgets": {
+      "title": "Wys legstukke in my video",
+      "hint": "Waarskuwings, doelwitbalke en klets word in jou stroom geteken, sodat kykers op Twitch, YouTube en elke ander platform dit ook sien.",
+      "failed": "Kon nie verander waar jou legstukke wys nie. Probeer weer."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "PlatinumName",
+      "label": "Naam (opsioneel)",
+      "key": "Stroom sleutel",
+      "save": "Voeg by",
+      "cancel": "Afskiet",
+      "states": {
+        "off": "Af",
+        "idle": "Gereed",
+        "live": "Regstreeks",
+        "error": "Fout",
+        "connecting": "Koppel tans"
+      },
+      "title": "Multistroom-bestemmings",
+      "intro": "Gaan een keer regstreeks op Riftn en ons stuur jou stroom gratis na elke platform wat hier aangeskakel is. Dit begin binne 'n paar sekondes nadat jy regstreeks gaan.",
+      "add": "Voeg bestemming by",
+      "empty": "Nog geen bestemmings nie. Voeg Twitch, YouTube, Kick of enige RTMP-bediener by.",
+      "server": "Bediener-URL",
+      "findKey": "Vind jou {{name}}-bediener en -sleutel",
+      "customHint": "Plak die RTMP-bediener en sleutel wat jou platform jou gee.",
+      "keyNote": "Jou sleutel word geënkripteer op ons bedieners gestoor en word nooit weer gewys nie.",
+      "added": "{{name}} bygevoeg",
+      "saveFailed": "Kon nie die bestemming stoor nie",
+      "toggle": "Stroom na hierdie bestemming"
+    },
+    "vertical": {
+      "centre": "Sentrum",
+      "live": "LEWENDIG",
+      "title": "Vertikale aansig",
+      "intro": "Fone kyk jou stroom in die vertikale voer. Sleep die blokkie om te kies watter deel van jou beeld hulle sien.",
+      "enabled": "Wys my stroom in die vertikale voer",
+      "zoom": "Zoem",
+      "frame": "Jou landskapbeeld",
+      "box": "Wat fone sien",
+      "hint": "Sleep die blokkie, of gebruik die pyltjiesleutels. Stoor om dit op jou regstreekse stroom toe te pas.",
+      "watch": "Kyk {{name}} regstreeks"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "'n Aftelling op jou stroom. Elke betaalde geskenk, volg en intekening voeg tyd by, sodat die kamer jou lewendig hou.",
@@ -6895,7 +7692,8 @@
       "subathon_timer": "Subathon-timer",
       "points_board": "Lojale kykers",
       "streamer_level": "Stroomvlak",
-      "tip_jar": "Geskenkpot"
+      "tip_jar": "Geskenkpot",
+      "hype_train": "Opwindingstrein"
     },
     "hints": {
       "tip_alert": "Vier elke punt, grootte tot sy vlak",
@@ -6919,7 +7717,8 @@
       "subathon_timer": "'n Aftelling wat geskenke, volgs en intekeninge terugstoot",
       "points_board": "Jou top kykers volgens punte van kyk en geskenk",
       "streamer_level": "Jou streamer vlak en weeklikse streep, van jou profiel",
-      "tip_jar": "'N pot wat vul as betaalde geskenke kom in"
+      "tip_jar": "'N pot wat vul as betaalde geskenke kom in",
+      "hype_train": "Wys die opwindingstrein terwyl een loop: drie geskenke of intekeninge binne vyf minute begin dit."
     },
     "fields": {
       "style": "Styl",
@@ -7305,7 +8104,10 @@
     "endStreamConfirmBody": "Jou uitsending stop vir almal wat kyk en kan nie hervat word nie.",
     "keepStreaming": "Hou aan met streaming",
     "encoderPermanentHint": "Die sleutel het nie verander nie. Stel jou enkodeerder een keer op — volgende keer druk net Begin daar en Riftn skep die pos vir jou.",
-    "notEnoughTokensForBounty": "Nie genoeg tokens nie. Benodig {{need}} tokens maar het {{have}}."
+    "notEnoughTokensForBounty": "Nie genoeg tokens nie. Benodig {{need}} tokens maar het {{have}}.",
+    "screenInAppHint": "In die Riftn-toep",
+    "screenInAppNote": "Foonblaaiers laat geen webwerf toe om jou skerm te deel nie. Gaan eerder regstreeks vanuit die Riftn-toep en tik dan Deel skerm.",
+    "screenInAppCta": "Kry die Riftn-toep"
   },
   "events": {
     "seoTitle": "Gebeurtenisse: Byeenkomste & Gemeenskapsevenementen op Riftn",
@@ -7686,6 +8488,8 @@
     "footerNote": "DePin-deelname is 'n bydraediens, nie 'n beleggingsproduk nie. Beskikbaarheid, geskiktheid en belonings mag verander."
   },
   "creatorFlow": {
+    "newNativeFlow": "Nuwe vloei",
+    "disconnect": "Ontkoppel",
     "title": "Skepperstroom",
     "backToStudio": "Terug na Skepperstudio",
     "backToFlows": "Terug na jou strome",
@@ -7893,7 +8697,45 @@
     "foldersInFolder_other": "In {{count}}@ gidse",
     "foldersNoItems": "Niks in hierdie gids nog nie",
     "foldersNoItemsHint": "Maak 'n resultaat oop en kies \"Voeg by die gids\" om dit hier in te dien.",
-    "skippedUpstreamFailed": "Dit was omdat 'n vorige stap nie geslaag het nie. Die koste daarvan bly in jou balans."
+    "skippedUpstreamFailed": "Dit was omdat 'n vorige stap nie geslaag het nie. Die koste daarvan bly in jou balans.",
+    "signInForAudioLibrary": "Meld aan om jou private gestoorde klankbiblioteek oop te maak.",
+    "audioLibraryFailed": "Jou gestoorde klank kon nie gelaai word nie. Probeer weer.",
+    "retryFreeTask": "Probeer gratis taak weer",
+    "previewSavedMedia": "Voorskou gestoorde media",
+    "audioSavePending": "Die klank is gereed, maar die stoor in die private biblioteek is hangend. Hervat om dit te kry.",
+    "confirmInterruptedRetry": "Probeer die onderbreekte klank- of assistenttaak weer. Die vorige uitkoms is onbekend en weer probeer kan looptydwerk herhaal. Die bestaande betaling en betaalde taak-ID's sal hergebruik word.",
+    "freeResultUnknown": "Die gratis taak se antwoord is onderbreek. Dit sal nie outomaties weer ingedien word nie. Kies Probeer gratis taak weer en hervat dan; jou betaling en ander take word behou.",
+    "formAuthor": "Wysig vloei",
+    "formAuthorHint": "Bou 'n vloei met getikte insette. Stoor dit hier, of rangskik dit op die webdoek.",
+    "chooseSavedMedia": "Kies gestoorde media",
+    "formInput": "Inset: {{handle}}",
+    "reviewRun": "Hersien lopie",
+    "resumeRun": "Hervat gestoorde lopie",
+    "confirmPrice": "Totaal: {{price}} tokens",
+    "recoveryHint": "Taak- en betalingsverwysings word op hierdie toestel gestoor. Hervat onderbreekte werk voordat jy nog 'n lopie begin.",
+    "newRun": "Begin nog 'n lopie",
+    "loadMoreMedia": "Laai meer media",
+    "invalidGraph": "Gaan die verbindings na: elke inset het 'n versoenbare bron nodig en die grafiek mag nie siklusse bevat nie.",
+    "unsupportedNode": "Hierdie nodus kan nog nie in die oorspronklike vorm loop nie. Gebruik die webdoek vir hierdie vloei.",
+    "missingPrompt": "Koppel 'n teksnodus met 'n opdrag.",
+    "invalidSettings": "Hierdie instellings word nie deur die gekose model ondersteun nie.",
+    "missingCapturedFrame": "Vang 'n raam op die webdoek vas voordat jy hierdie video as 'n beeldinset gebruik.",
+    "missingSavedMedia": "Gestoorde bronmedia ontbreek of is nie meer vir hierdie rekening beskikbaar nie.",
+    "quoteFailed": "Kon nie hierdie vloei prys nie. Probeer weer.",
+    "recoverBeforeEdit": "Hervat die gestoorde lopie voordat jy sy grafiek verander of nog 'n lopie begin.",
+    "runAlreadyComplete": "Hierdie lopie is voltooi. Kies Begin nog 'n lopie om weer te genereer.",
+    "recoveryCorrupt": "Die gestoorde herstelrekord kon nie gelees word nie. Hou hierdie vloei en kontak ondersteuning voordat jy weer betaal.",
+    "paidUnavailable": "Jy kan vloeie hier skep en stoor. Betaalde lopies is nie in hierdie winkel beskikbaar nie.",
+    "planChanged": "Die vloei het ná prysbepaling verander. Hersien die lopie weer.",
+    "connectOwnerWallet": "Koppel die beursie wat hierdie vloei besit.",
+    "runFailed": "Die nodus kon nie klaarmaak nie. Sy gestoorde taakverwysing word vir herstel behou.",
+    "recoveryPending": "Die weergawe is nog hangend. Hervat hierdie lopie om dit te kry.",
+    "nodeAudioGen": "Klankgenerator",
+    "nodeAudioGenDesc": "Spraak, klankeffekte, transkripsie en klankisolasie",
+    "nodeAudioInput": "Gestoorde klank",
+    "nodeAudioInputDesc": "Gebruik private klank uit jou biblioteek",
+    "audioVoiceId": "Stem-ID",
+    "audioSeconds": "Klanklengte in sekondes"
   },
   "videoPlayer": {
     "volume": "Volume",
@@ -8026,6 +8868,9 @@
     "followingBackProgress": "Volg terug {{completed}} van {{total}}",
     "findingFollowers": "Vind navolgers...",
     "followBackAll": "Volg almal terug",
+    "followBackConfirm": "Volg terug",
+    "followBackNotNow": "Nie nou nie",
+    "followBackDone": "Klaar",
     "nonFollowers": {
       "title": "Skoonmaak van wie jy volg?",
       "body": "{{count}} rekeninge wat jy volg, volg jou nie terug nie.",
@@ -8043,7 +8888,13 @@
       "doneAll": "Ongevolg {{done}} rekeninge wat jou nie teruggevolg het nie.",
       "doneSome": "Ongevolg {{done}} rekeninge. {{failed}} kon nie gevolg word nie.",
       "doneToast": "Ongevolg {{done}} rekeninge volg jou nie terug nie"
-    }
+    },
+    "followBackConfirmTitle_one": "Volg {{count}} persoon terug?",
+    "followBackConfirmTitle_other": "Volg {{count}} mense terug?",
+    "followBackConfirmBody": "Hulle volg jou reeds. Private rekeninge kry 'n volgversoek.",
+    "followedBackCount_one": "{{count}} persoon teruggevolg",
+    "followedBackCount_other": "{{count}} mense teruggevolg",
+    "followBackDoneBody": "Jy kan hulle almal onder Volg vind."
   },
   "reactionInfo": {
     "title": "Reaksies",
@@ -8868,6 +9719,35 @@
     "priceChartCleared": "Prys grafiek skoongemaak. Vaste verwysingsprys: $ 0.0001. Uitvoeringspryse hang af van beskikbare bestellings."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Rotasie",
+      "add": "Voeg by",
+      "scale": "Grootte",
+      "color": "Kleur",
+      "light": "Lig",
+      "create": "Voeg 'n 3D-verhoog by",
+      "title": "3D-toneelverhoog",
+      "hint": "Beplan 'n skoot met sfere en blokke. Kamera, plasing en drie onafhanklike vlakligte verander die weergegewe raam.",
+      "preview": "Voorskou van weergegewe toneel",
+      "error": "Kon nie die raam voorberei nie. Gaan jou skootverwysings na en probeer weer.",
+      "elevation": "Hoogte",
+      "distance": "Afstand",
+      "fov": "Gesigsveld",
+      "object": "Voorwerp",
+      "sphere": "Sfeer",
+      "box": "Blok",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Verwyder voorwerp",
+      "intensity": "Intensiteit",
+      "diffusion": "Diffusie",
+      "saving": "Berei raam voor…",
+      "useFrame": "Gebruik weergegewe raam as 'n skootverwysing",
+      "frameHint": "Skep 'n 320 × 180 PNG en voeg dit by hierdie skoot se verwysings. Hersien die verwysingslimiet en modelkwotasie voordat jy genereer.",
+      "frameName": "Toneelverhoog-raam"
+    },
     "video": {
       "tFade": "Oorvloei",
       "none": "Geen",
@@ -8961,7 +9841,9 @@
       "pptx": "PowerPoint-aanbieding",
       "pptxHint": "Elke bladsy word een skyfiebeeld, met aanbiedersnotas en skakels. Wysig individuele teks en elemente in die oorspronklike ontwerp.",
       "section": "Genoemde afdeling",
-      "transparent": "Deursigtige agtergrond"
+      "transparent": "Deursigtige agtergrond",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Laai 'n ZIP af met jou tydlyn as FCPXML en Premiere XML plus elke medialêer, sodat jy die redigering in Premiere Pro, Final Cut Pro of DaVinci Resolve kan klaarmaak. Teks word merkers; effekte bly in Riftn."
     },
     "inspector": {
       "selectHint": "Kies 'n laag op die doek of 'n snit op die tydlyn.",
@@ -9034,6 +9916,8 @@
       "tools": "Redigeerderhulpmiddels"
     },
     "agent": {
+      "stop": "Stop.",
+      "queue": "Voeg by tou",
       "introTitle": "Sê vir die AI wat jy wil hê",
       "introBody": "Beskryf die ontwerp of die verandering in jou eie woorde. Dit verander die bladgrootte, skryf en stileer teks, vind gratis foto's, video's en musiek, pas filters toe, rangskik lae en animeer hulle. Elke versoek is een ontdoen-stap.",
       "suggestPoster": "Maak 'n vierkantige Instagram-plasing vir 'n someruitverkoping met 'n strandfoto en 'n vet titel",
@@ -9053,7 +9937,45 @@
       "failed": "Die AI kon dit nie nou doen nie. Probeer weer oor 'n oomblik.",
       "changes": "Wysigings gemaak: {{count}}",
       "undo": "Ontdoen",
-      "openGenerator": "Hersien en genereer"
+      "openGenerator": "Hersien en genereer",
+      "stopped": "Gestop. Niks anders is verander nie.",
+      "queued": "{{count}} in tou",
+      "restore": "Herstel tot hier",
+      "restoreHint": "Sit die projek terug soos dit voor hierdie boodskap was. Ontdoen bring dit terug.",
+      "restored": "Projek herstel tot voor daardie boodskap. Druk ontdoen om die nuwer weergawe terug te bring.",
+      "rewrite": "Maak my versoek duideliker",
+      "rewriteFailed": "Kon dit nie herskryf nie. Jou teks is onveranderd.",
+      "feedback": "Was dit nuttig?",
+      "good": "Goeie antwoord",
+      "bad": "Swak antwoord",
+      "retryPrefix": "Dit was nie reg nie. Doen eerder, ",
+      "recipesTitle": "Resepte",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podsending-greep",
+          "prompt": "Vind die sterkste moment van 30 sekondes, knip daarna, voeg Woordpop-onderskrifte by en maak dit 9:16."
+        },
+        "talkingHead": {
+          "label": "Skoon pratende kop",
+          "prompt": "Sny lang pouses uit, voeg Klassieke onderskrifte by en gee dit 'n subtiele warm voorkoms."
+        },
+        "productPromo": {
+          "label": "Produkpromosie",
+          "prompt": "Maak 'n promosie van 15 sekondes: 'n kragtige titel aan die begin, Zoem in-oorgange tussen grepe, Vet onderskrifte en lewendige musiek."
+        },
+        "hypeReel": {
+          "label": "Opwindingsrol",
+          "prompt": "Sny die grepe op die maat van die musiek, gebruik Vlieg op-oorgange en die Technicolor-voorkoms."
+        },
+        "retroEdit": {
+          "label": "Retro-redigering",
+          "prompt": "Gee elke greep die VHS-voorkoms, voeg 'n groot serif-titel by en gebruik Vervaag-oorgange."
+        },
+        "tutorial": {
+          "label": "Tutoriaal",
+          "prompt": "Voeg 'n titel vir elke stap by, Blokkie-onderskrifte, en vertraag die sleutelmoment na 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Reghoek",
@@ -9228,7 +10150,9 @@
       "tint": "Tint {{value}}",
       "vignette": "Vignet {{value}}%",
       "auto": "Outo-verbeter",
-      "autoFailed": "Kon nie hierdie foto ontleed nie."
+      "autoFailed": "Kon nie hierdie foto ontleed nie.",
+      "halation": "Halasie {{value}}%",
+      "scanlines": "Skanderingslyne {{value}}%"
     },
     "pages": {
       "add": "Voeg bladsy by",
@@ -9302,6 +10226,17 @@
       "reloadText": "Herlaai beskrywing",
       "textSaved": "Omskrywings verander.",
       "action": "Outo-onderskrifte",
+      "styles": {
+        "bold": "Vetdruk",
+        "classic": "Klassiek",
+        "boxed": "Blokkie",
+        "wordpop": "Woordpop",
+        "rapid": "Vinnige onthulling",
+        "beast": "Beesmodus",
+        "stacked": "Gestapel",
+        "serif": "Serif",
+        "bubble": "Borrel"
+      },
       "working": "Luister tans… {{percent}}%",
       "downloading": "Maak die spraakmodel gereed… {{percent}}%",
       "hint": "Verander spraak in getimede onderskrifte wat jy kan herstileer. Loop op jou toestel: gratis en privaat. Die eerste gebruik laai die model af.",
@@ -9310,8 +10245,10 @@
       "failed": "Kon nie onderskrifte vir hierdie snit skep nie.",
       "targetLanguage": "Opskrif taal",
       "translateCount": "Vertaal {{count}} onderskrifte",
+      "translationDone": "{{count}} onderskrifte vertaal",
       "translationFailed": "Onderskrif vertaling gevaal. Jou onderskrifte is onveranderd.",
-      "lockedTranslation": "Ontsluit geslote onderskrifte om dit in te sluit."
+      "lockedTranslation": "Ontsluit geslote onderskrifte om dit in te sluit.",
+      "style": "Onderskrifstyl"
     },
     "multi": {
       "selected": "{{count}} lae gekies",
@@ -9348,7 +10285,10 @@
       "saveNewPreset": "Stoor nuwe",
       "saveStyles": "Stoor style met ontwerp",
       "stylesSaved": "Brandstyle gestoor met hierdie ontwerp",
-      "usePreset": "Gebruik style"
+      "usePreset": "Gebruik style",
+      "dehubApplied": "Riftn-handelsmerk op {{count}} lae toegepas.",
+      "dehubApply": "Gebruik die Riftn-handelsmerk",
+      "dehubHint": "Amptelike Riftn-kleure, Exo- en Inter-lettertipes, en die Riftn-logo, met een klik."
     },
     "draw": {
       "heading": "Teken",
@@ -10680,6 +11620,135 @@
       "toolbar": "Doek navigasie",
       "zoomIn": "Zoem doek in",
       "zoomOut": "Zoem doek uit"
+    },
+    "clipFix": {
+      "listening": "Luister…",
+      "detach": "Maak klank los",
+      "detached": "Klank na sy eie greep geskuif",
+      "detachFailed": "Kon nie hierdie greep se klank losmaak nie",
+      "removeBars": "Verwyder swart stawe",
+      "scanning": "Gaan rame na…",
+      "noBars": "Geen swart stawe gevind nie",
+      "barsRemoved": "Swart stawe weggesny",
+      "barsFailed": "Kon nie hierdie video vir swart stawe nagaan nie",
+      "reframe": "Outo-herraam",
+      "reframeHint": "Die video pas reeds by hierdie bladsyvorm",
+      "reframed": "Herraam om die aksie te volg",
+      "reframeFailed": "Kon nie hierdie video herraam nie",
+      "retakes": "Verwyder oorneemskote",
+      "noRetakes": "Geen oorneemskote gevind nie",
+      "retakesRemoved": "{{count}} oorneemskoot(e) verwyder, laaste skoot behou",
+      "retakesFailed": "Kon nie oorneemskote uit hierdie greep verwyder nie"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Verdeel",
+        "play": "Speel",
+        "pause": "Pouseer",
+        "frameBack": "Vorige raam",
+        "frameForward": "Volgende raam",
+        "back": "1 sekonde terug",
+        "rippleDelete": "Vee greep uit",
+        "liftDelete": "Vee greep uit",
+        "start": "Gaan na begin",
+        "end": "Gaan na einde"
+      },
+      "preset": "Sleutelborduitleg",
+      "presetHint": "Gebruik die tydlynsleutels van die redigeerder wat jy ken. Riftn se eie kortpaaie werk steeds vir alles anders."
+    },
+    "voiceClone": {
+      "stop": "Hou op om op te neem",
+      "failed": "Stemkloning misluk.",
+      "pickerLabel": "Kloon jou stem",
+      "pickerDetail": "Stemopnames in jou eie stem",
+      "title": "Kloon jou stem",
+      "description": "Neem jouself op of kies 'n greep van jou wat praat. Jy betaal een keer en jou stem is joune vir elke stemopname.",
+      "defaultName": "My stem",
+      "record": "Neem 'n monster op (30 sekondes tot 2 minute)",
+      "fromMedia": "Of gebruik 'n greep uit Media",
+      "recorded": "Jou opname",
+      "sample": "Monster: {{name}}",
+      "hint": "Duidelike spraak sonder musiek werk die beste.",
+      "noMic": "Kon nie die mikrofoon gebruik nie.",
+      "sampleFailed": "Kon nie die klank uit daardie greep lees nie.",
+      "pay": "Kloon vir {{amount}} tokens",
+      "useFree": "Kloon (reeds betaal)",
+      "owned": "Jou stem “{{name}}” is reeds opgestel. Kies dit uit die stemlys.",
+      "useOwned": "Gebruik my stem",
+      "ready": "“{{name}}” is gereed vir stemopnames.",
+      "paidFailed": "Jou betaling is gestoor. Maak dit weer oop en die volgende poging is gratis.",
+      "consent": "Kloon slegs jou eie stem, of een wat jy toestemming het om te gebruik."
+    },
+    "linkImport": {
+      "go": "Voer in",
+      "downloading": "Aflaai {{percent}}%",
+      "open": "Voer in vanaf 'n skakel",
+      "placeholder": "Plak 'n YouTube-, TikTok- of ander skakel",
+      "rights": "Ek besit hierdie video of het toestemming om dit te gebruik",
+      "audioOnly": "Slegs klank",
+      "queued": "In tou…",
+      "waiting": "Wag op die webwerf, probeer binnekort weer…",
+      "adding": "Voeg by Media…",
+      "added": "Ingevoer en by die tydlyn gevoeg.",
+      "failed": "Kon nie daardie skakel invoer nie."
+    },
+    "reverse": {
+      "action": "Omgekeerde",
+      "working": "Keer om {{percent}}%",
+      "done": "Greep omgekeer.",
+      "failed": "Kon nie hierdie greep omkeer nie.",
+      "unsupported": "Hierdie blaaier kan nie video omkeer nie. Probeer Chrome of Edge.",
+      "tooLong": "Grepe tot {{seconds}} sekondes kan omgekeer word."
+    },
+    "film": {
+      "repairRefs": "Verwyder ontbrekende mediaskakels",
+      "title": "Filmprojek",
+      "intro": "Beplan skote met herbruikbare beeldverwysings. Jou opdrag, skootvolgorde en gekose resultate word saam met hierdie projek gestoor.",
+      "create": "Skep filmplan",
+      "name": "Filmnaam",
+      "brief": "Filmopdrag",
+      "sharedReferences": "Gedeelde beeldverwysings (tot 4)",
+      "shot": "Skoot",
+      "addShot": "Voeg skoot by",
+      "shotName": "Skootnaam",
+      "action": "Skootaksie en komposisie",
+      "seconds": "Versoekte videosekondes",
+      "shotReferences": "Ekstra beeldverwysings (gesamentlike limiet 4)",
+      "frame": "Berei raam voor",
+      "video": "Berei video voor",
+      "review": "Hersien die model, verwysings, videoduur en prys in die ateljee voordat jy genereer.",
+      "result": "Aanvaarde skootresultaat",
+      "noResult": "Geen resultaat gekies nie",
+      "resultHint": "Kies 'n aanvaarde prent of video uit Oplaaie. Die skakel word saam met hierdie skoot gestoor; gebruik die tydlyn om die film saam te stel.",
+      "earlier": "Skuif vroeër",
+      "later": "Skuif later",
+      "remove": "Verwyder skoot",
+      "issue": "Gaan die skootbeskrywing en verwysingsmedia na en probeer dan weer. Hou die projek oop as dit nie gestoor kon word nie.",
+      "searchMedia": "Vind media volgens naam",
+      "refreshMedia": "Verfris media"
+    },
+    "speakers": {
+      "find": "Vind sprekers",
+      "name": "Spreker {{number}}",
+      "onlyOne": "Net een spreker gevind.",
+      "failed": "Kon nie die sprekers vind nie.",
+      "kept": "Net {{name}} behou.",
+      "editFailed": "Daardie wysiging het nie by hierdie greep gepas nie.",
+      "split": "In {{count}} sprekerskote verdeel.",
+      "keepOnly": "Hou slegs",
+      "splitAction": "Sny by elke sprekerwisseling"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Beskryf die 3D-voorwerp wat jy wil hê",
+      "queued": "Bou jou 3D-voorwerp. Dit beland in die Generasies-oortjie.",
+      "note": "3D-voorwerpe kom in Media as 'n kort draaiende greep met 'n deursigtige agtergrond."
+    },
+    "behind": {
+      "action": "Teks agter persoon",
+      "working": "Sny die persoon uit…",
+      "done": "Teks en onderskrifte sit nou agter die persoon.",
+      "failed": "Kon nie teks agter die persoon sit nie."
     }
   },
   "jungleMood": {
@@ -11104,7 +12173,9 @@
     "tokenAmount": "{{amount}} tokens",
     "assistant": {
       "question1": "Wat is die huidige staking APY vir Riftn-tokens?",
-      "question2": "Ja, as ek 10 000 tekens vir 90 dae speel"
+      "question2": "Ja, as ek 10 000 tekens vir 90 dae speel",
+      "answer1": "Die huidige staking-APY vir Riftn-tokens is 12.4% vir 'n sluitperiode van 30 dae. Hier is 'n uiteensetting:\n\n• 7-dae-sluiting: 8.2% APY\n• 30-dae-sluiting: 12.4% APY\n• 90-dae-sluiting: 18.7% APY\n\nWil jy hê ek moet jou help om moontlike verdienste te bereken?",
+      "answer2": "Vir 10,000 tokens gestake teen 18.7% APY vir 90 dae:\n\n📊 Geskatte beloning: ~461 tokens\n\nDit is ongeveer 5.13 tokens per dag. Hou in gedagte dat APY kan wissel na gelang van die totale gestaakte bedrag."
     },
     "bookmarks": {
       "stakingGuide": "Volledige gids tot staking Riftn tekens: APY uiteensetting, slot periodes, en beloning vermenigvuldigers verduidelik."
@@ -11113,7 +12184,7 @@
       "stakedForVoting": "Ek stem saam, ek gooi my stem na middagete. Hoeveel Riftn-tokens het jy vir stemmag?"
     },
     "home": {
-      "stakedPost": "50k dehub aanbieding. APY lyk stewig op 12,4%. Langdurige mentaliteit. 💎🙌"
+      "stakedPost": "50k Riftn aanbieding. APY lyk stewig op 12,4%. Langdurige mentaliteit. 💎🙌"
     },
     "notifications": {
       "tippedYou": "getik jy {{amount}} tokens"
@@ -11800,7 +12871,7 @@
   "multiPost": {
     "tab": "Multi-plasing",
     "title": "Multi-plasing",
-    "intro": "Plaas gelyktydig na X, YouTube, Instagram, TikTok en meer met dehub. Koppel jou rekeninge een keer, kies dan waar elke plasing heen gaan.",
+    "intro": "Plaas gelyktydig na X, YouTube, Instagram, TikTok en meer met Riftn. Koppel jou rekeninge een keer, kies dan waar elke plasing heen gaan.",
     "creditsHeading": "Plaaskrediete",
     "credits": "{{count}} plaaskrediete",
     "topUpTitle": "Vul aan en spaar",
@@ -11848,7 +12919,12 @@
   "dm": {
     "planRestricted": "Hierdie gebruiker vereis 'n intekening om boodskappe te ontvang.",
     "planTypeNotAllowed": "Hierdie skepper se plan laat nie hierdie soort boodskap toe nie.",
-    "planMinTip": "Fooitjie moet minstens {{amount}} tokens vir hierdie skepper wees."
+    "planMinTip": "Fooitjie moet minstens {{amount}} tokens vir hierdie skepper wees.",
+    "shareKindGroup": "Groepeer",
+    "shareKindCommunity": "Gemeenskap",
+    "shareGroups": "Groepe",
+    "shareKindChannel": "Kanaal",
+    "reportMessage": "Rapporteer boodskap"
   },
   "credits": {
     "earningsWorth": "Die moeite werd {{amount}}",
@@ -11890,7 +12966,11 @@
     "error": "Kon nie jou uitvee-versoek indien nie. Jou rekening is nie bevestig om uitgevee te word nie. Probeer asseblief weer.",
     "back": "Terug na Instellings",
     "signIn": "Teken in om jou rekening te skrap",
-    "acknowledge": "Ek het my beursie herstel besonderhede gestoor en verstaan dat skrapping permanent is."
+    "acknowledge": "Ek het my beursie herstel besonderhede gestoor en verstaan dat skrapping permanent is.",
+    "signedInAs": "Aangemeld as",
+    "confirmTitle": "Vee jou rekening vir altyd uit?",
+    "confirmBody": "Jou rekening en alles daarop sal uitgevee word. Jy sal afgemeld word en dit kan nie ongedaan gemaak word nie.",
+    "confirmBodyNamed": "{{who}} en alles daarop sal uitgevee word. Jy sal afgemeld word en dit kan nie ongedaan gemaak word nie."
   },
   "miniApps": {
     "badge": {
@@ -11985,7 +13065,45 @@
       "rewardsWeek": "Week van {{date}}",
       "rewardPaid": "Betaal",
       "rewardPending": "Hangende",
-      "rewardsNone": "Geen belonings is nog bereken nie. Die eerste week sluit Maandag."
+      "rewardsNone": "Geen belonings is nog bereken nie. Die eerste week sluit Maandag.",
+      "stats": {
+        "button": "Regstreekse statistiek",
+        "chartTitle": "Mense wat jou toep oopgemaak het, laaste 30 dae",
+        "peak_one": "Piek van {{count}} per dag",
+        "peak_other": "Piek van {{count}} per dag",
+        "people30": "Mense, 30 dae",
+        "people7": "Mense, 7 dae",
+        "added": "Het dit bygevoeg",
+        "dhb30": "Tokens betaal, 30 dae",
+        "notified30": "Kennisgewings gestuur, 30 dae",
+        "rewards": "Token-belonings verdien"
+      },
+      "signin": {
+        "users_one": "{{count}} gebruiker",
+        "users_other": "{{count}} gebruikers",
+        "delete": "Vee uit",
+        "title": "Meld aan met Riftn",
+        "body": "Laat mense met hul Riftn-rekening by jou webwerf of toep aanmeld. Skep 'n sleutel hier en volg dan die gids.",
+        "guide": "Lees die gids",
+        "copyId": "Kopieer kliënt-ID",
+        "rotate": "Nuwe geheim",
+        "rotateConfirm": "Maak 'n nuwe geheim vir {{name}}? Die ou geheim hou dadelik op werk.",
+        "deleteConfirm": "Vee {{name}} uit? Almal wat daarmee aangemeld is, word afgemeld.",
+        "secretOnce": "Geheim vir {{name}}. Kopieer dit nou: dit word net een keer gewys.",
+        "name": "Toepnaam",
+        "website": "Webwerf (opsioneel)",
+        "redirects": "Herlei-URL's, een per reël (https://yoursite.com/callback)",
+        "create": "Skep sleutel"
+      },
+      "stateRejected": "Regstreeks via skakel · nie vir die winkel goedgekeur nie",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Gebeure wat Riftn na jou webhookUrl gestuur het. Toets stuur 'n ping-gebeurtenis.",
+        "test": "Stuur toets",
+        "ok": "Webhook het {{status}} geantwoord",
+        "failed": "Webhook het misluk: {{reason}}",
+        "none": "Nog geen webhooks gestuur nie."
+      }
     },
     "card": {
       "open": "Oop"
@@ -12011,7 +13129,10 @@
       "confirm": "Betaal {{amount}} tokens",
       "sending": "Stuur jou betaaling…",
       "sent": "Betaal {{amount}} tokens vir {{name}}.",
-      "noOwner": "Hierdie app het nog geen bevestigde portemonnee om met te betaal nie."
+      "noOwner": "Hierdie app het nog geen bevestigde portemonnee om met te betaal nie.",
+      "testBadge": "Toetsmodus",
+      "testBody": "Jy besit hierdie toep, so dit is 'n toets: geen tokens beweeg nie en die kwitansie word as toets gemerk.",
+      "testSent": "Toetsbetaling van {{amount}} tokens. Niks is gestuur nie."
     },
     "add": {
       "title": "Vegt {{name}}?",
@@ -12143,6 +13264,9 @@
     "reminderLater": "Nie nou nie"
   },
   "copy": {
+    "55656b5e434f": "Maak soektog toe",
+    "57e2faa5ec63": "Soek Riftn",
+    "96d7bff86b44": "Soektog kon nie laai nie",
     "1607715e45ed": "Tik op die bal om te praat, of tik hieronder",
     "00140a37bd26": "Transaksies op die netwerk is tydelik nie beskikbaar nie. Probeer asseblief weer.",
     "002286513398": "Jy het nie toestemming om gebeure te bestuur nie",
@@ -16635,7 +17759,6 @@
     "8731790030df": "@noble/kurwes",
     "e745d68f7240": "@noble/hasj",
     "886e533d7364": "dev@riftn.com",
-    "e8921bdee214": "@dehub_offisieel",
     "dbc2def4603a": "Verdere in",
     "ee1c1eecf1b6": "Riftn is deur sommige van die wêreld se grootste en meest betroubare publikasies gedekker. Hier is die artikels wat lig op ons missie om die media te demokratiseer.",
     "6ccae4bbf68d": "Die uitgewer het die oorspronklike verwyder; hierdie oop die Wayback Machine-kaptein.",
@@ -19136,7 +20259,54 @@
     "127053546dd4": "Kon nie hierdie lêer aflaai nie",
     "d14896aa4bf8": "Die gratis biblioteek kon nie laai nie. Kontroleer jou verbinding en probeer weer.",
     "953e708b2287": "Stemgenerasie het misluk.",
-    "4a52cdd6ac72": "Kon nie hierdie lae dupliseer nie"
+    "4a52cdd6ac72": "Kon nie hierdie lae dupliseer nie",
+    "3f9b2c71d0a4": "{{n}} resultate",
+    "8c4e1a6b2f57": "vir “{{query}}”",
+    "1d7234ff1b79": "in {{feed}}",
+    "e122e5c2b563": "Sleep op om toe te maak",
+    "1aa9d734f2ee": "Kies wat om te soek",
+    "ef557404f465": "Geen resultate vir “{{query}}” nie",
+    "35034aa59bd3": "Niks in {{feed}} het ooreengestem nie. Probeer ander woorde of soek alles.",
+    "415155739590": "Soek alles",
+    "9e13d826baaf": "Soek prente",
+    "cbf6f228327c": "Soek musiek",
+    "e8756c6865a5": "Soek kortvideo's",
+    "c7661da99c41": "Soek video's",
+    "90f1afe66801": "Soek tans na “{{query}}”…",
+    "d7b559f2d8c6": "Probeer ander woorde, of verander die filters.",
+    "d1a0c7e2f301": "Waaraan dink jy vandag?",
+    "d1a0c7e2f302": "Waaroor dink jy vandag?",
+    "d1a0c7e2f303": "Wat is op jou hart?",
+    "d1a0c7e2f304": "Het jy iets op die hart?",
+    "d1a0c7e2f305": "Waaraan dink jy nou?",
+    "d1a0c7e2f306": "Waaraan dink ons vandag?",
+    "d1a0c7e2f307": "Enigiets op jou hart vandag?",
+    "d1a0c7e2f308": "Wat is hierdie keer op jou hart?",
+    "a7c1e0f4b2d9": "Tik om te praat",
+    "b3e8d1c6f0a2": "Tik om te stuur",
+    "c9f2a4e7d1b5": "Luister... tik die bal om te stuur",
+    "22577ebd908e": "Genereer Wan 3.0-video · oorspronklike klankbaan",
+    "1fa2357ab7e1": "Genereer Seedance 720p-video · oorspronklike klankbaan",
+    "7f78bdc0762d": "+{{value1}} pte",
+    "f0c8bb34335b": "Jy het +{{value1}} punte verdien",
+    "0fbe06b679a8": "{{value1}} punte vir elke afgehandelde versoek, bygevoeg tot jou Topbouers-telling.",
+    "431bc73eb60b": "[vers]\nJou lirieke hier...\n\n[koor]\nKoorlirieke...",
+    "ef4bf6f0b0e9": "Gevorderde groepfunksies",
+    "1e5b36078e37": "Verwante gidse",
+    "e102a35a7417": "Maak Riftn in ChatGPT oop",
+    "a3c1e5f20b71": "Gebruik Riftn binne ChatGPT, Claude of enige MCP-toep. Plak die URL hieronder in jou assistent se connector-instellings om plasings, profiele en kommentaar te blaai, en meld dan aan wanneer gevra word om jou eie rekening te koppel.",
+    "b84d2e7c9a16": "Hierdie adres is vir KI-toepe, nie 'n webblad nie. As jy dit in 'n blaaier oopmaak, bring dit jou hierheen.",
+    "c5e9f1a3d742": "Koppel jou Riftn-rekening",
+    "d61a7b4e8c05": "Wanneer jou assistent jou vra om aan te meld, meld by Riftn aan en klik Laat toe. Dit kan dan jou profiel bywerk, plasings en kommentaar publiseer, mense volg en in Creator Studio skep. Verbindings bly gekoppel terwyl jy dit gebruik en verval ná 30 dae ongebruik.",
+    "e27b8c5f9d13": "Stap-vir-stap ChatGPT-gids",
+    "f38c9d6a0e24": "Stap-vir-stap Claude-gids",
+    "0a49d7b1f835": "Verkies jy 'n aparte botrekening? Skep 'n agent om 'n connector-URL te kry wat as daardie agent plaas.",
+    "1b5ae8c20f46": "Wanneer ChatGPT vra, meld by Riftn aan en klik Laat toe om jou rekening te koppel.",
+    "2c6bf9d31a57": "Klik Koppel, meld by Riftn aan en klik Laat toe om jou rekening te koppel.",
+    "e8921bdee214": "@riftn_com",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "5636cc5a29b8": " · posisie #{{value1}}",
+    "6e71ae3669b1": "Gestoorde uitvoer nie beskikbaar nie"
   },
   "articles": {
     "cardLabel": "Artikel · {{count}} min lees",
@@ -19155,6 +20325,7 @@
     "backToTop": "Terug na bo",
     "needTitle": "Voeg 'n titel by om voort te gaan",
     "needBody": "{{count}} meer karakters om te gaan",
+    "imagesLabel": "Prente",
     "backToWriting": "Terug na skryf",
     "readyTitle": "Gereed om te publiseer",
     "sharePreview": "Hoe dit lyk wanneer gedeel",
@@ -19177,7 +20348,16 @@
     "formatting": "Formatering",
     "bodyPlaceholder": "Vertel jou storie. Kies teks en gebruik die balk hierbo vir opskrifte, vet, aanhalings en lyste.",
     "bodyLabel": "Artikelinhoud",
-    "wordCount": "{{count}} woorde"
+    "wordCount": "{{count}} woorde",
+    "imageLimit": "Artikels kan tot {{count}} prente bevat",
+    "imageLimitSome": "Net {{count}} meer prente pas in hierdie artikel",
+    "imageFailed": "Daardie prent kon nie bygevoeg word nie. Probeer 'n ander een.",
+    "imagesUploading": "Voeg prente by ({{count}})…",
+    "bodyTooLong": "{{count}} karakters oor die limiet",
+    "imagesCount": "Prente · {{count}}/{{max}}",
+    "captionPlaceholder": "Voeg 'n onderskrif by",
+    "captionLabel": "Onderskrif vir prent {{n}}",
+    "removeInlineImage": "Verwyder prent {{n}}"
   },
   "liveAudience": {
     "whosHere": "Wie is hier",
@@ -19216,6 +20396,387 @@
     "exploreFirst": "Verken eers",
     "codeNote": "Ons stuur vir jou 'n kode, geen wagwoord nodig nie."
   },
+  "liveHype": {
+    "gift": {
+      "howMany": "Hoeveel",
+      "who": "Gebruikersnaam of beursieadres",
+      "whoPlaceholder": "@gebruikersnaam",
+      "cancel": "Afskiet",
+      "stage": {
+        "preparing": "Besig om voor te berei…",
+        "confirming": "Wag vir die transaksie…",
+        "recording": "Rond af…",
+        "wallet": "Bevestig in jou beursie"
+      },
+      "open": "Skenk intekeninge",
+      "title": "Skenk intekeninge",
+      "plan": "Plan",
+      "mode": {
+        "random": "Willekeurige kykers in klets",
+        "user": "Iemand spesifiek"
+      },
+      "randomHint": "Gaan na mense wat in die laaste 30 minute gekets het en nog nie ingeteken is nie.",
+      "send_one": "Skenk 1 intekening · ${{price}}",
+      "send_other": "Skenk {{count}} intekeninge · ${{price}}",
+      "payHint": "Betaal in tokens uit jou beursie in een oordrag.",
+      "fewer_one": "Net 1 persoon in die klets kan nou 'n intekening ontvang, so jy betaal vir 1.",
+      "fewer_other": "Net {{count}} mense in die klets kan nou 'n intekening ontvang, so jy betaal vir {{count}}.",
+      "done_one": "Intekening geskenk!",
+      "done_other": "{{count}} intekeninge geskenk!",
+      "failed": "Kon nie intekeninge skenk nie",
+      "notReady": "Skenking is nog nie vir hierdie plan beskikbaar nie",
+      "noPlan": "Kies eers 'n plan",
+      "noPlans": "{{name}} het nog geen intekenplanne om te skenk nie."
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Intekenare",
+        "both": "Intekenaars en skenkers",
+        "gifters": "Skenkers"
+      },
+      "ended": "Verstryk",
+      "until": "Tot {{date}}",
+      "failed": "Dit het nie gewerk nie. Probeer weer.",
+      "title": "Kentekens vir 'n beperkte tyd",
+      "intro": "Bied 'n kenteken vir 'n paar dae aan. Enigiemand wat inteken of skenk terwyl dit loop, verdien dit, en dit wys vir altyd langs hul naam in jou klets.",
+      "name": "Kentekennaam",
+      "namePlaceholder": "Bekendstellingsweek",
+      "days": "Beskikbaar vir (dae)",
+      "emoji": "Emoji",
+      "who": "Wie kan dit verdien",
+      "create": "Bied kenteken aan",
+      "created": "Kenteken is regstreeks.",
+      "end": "Beëindig nou",
+      "holders_one": "{{count}} houer",
+      "holders_other": "{{count}} houers",
+      "limit": "Drie kentekens kan gelyktydig loop. Beëindig een om nog een aan te bied.",
+      "hypeHint": "Almal wat 'n opwindingstrein ry, kry ook jou 🚂-kenteken op die vlak wat dit bereik het."
+    },
+    "train": {
+      "level": "Opwindingstrein · Vlak {{level}}",
+      "endedLevel": "Opwindingstrein het vlak {{level}} voltooi!",
+      "ended": "Opwindingstrein het geëindig",
+      "thanks_one": "Dankie aan {{count}} ondersteuner",
+      "thanks_other": "Dankie aan {{count}} ondersteuners",
+      "top": "Top: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "het 'n intekening geskenk 🎁",
+      "giftedSubs_other": "het {{count}} intekeninge geskenk 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Vandag",
+    "tooSoon": "Kies 'n tyd in die toekoms.",
+    "show": "Wys",
+    "hide": "Versteek",
+    "title": "Wanneer?",
+    "tonight": "Vanaand",
+    "inAnHour": "Oor 'n uur",
+    "tomorrow": "Môre",
+    "primeTime": "Spitstyd",
+    "scheduleFor": "Skeduleer vir {{when}}",
+    "liveTip": "Jou volgers kan 'n herinnering stel. Jy begin self die Regstreekse uitsending wanneer dit tyd is.",
+    "stageTip": "Dit gaan dadelik op die Binnekort-rak, sodat mense Herinner my kan tik.",
+    "typePlaceholder": "Tik 'n tyd, soos \"vr 20:00\" of \"oor 2 uur\"",
+    "typeLabel": "Tik 'n tyd",
+    "typeHelp": "Probeer \"vanaand\", \"môre 09:00\", \"sa middag\" of \"30 okt 19:00\".",
+    "orPickDay": "Of kies 'n dag",
+    "earlier": "15 minute vroeër",
+    "later": "15 minute later",
+    "earlierShort": "Vroeër",
+    "laterShort": "Later",
+    "tooSoonMin": "Kies 'n tyd minstens {{count}} minute van nou af.",
+    "zone": "Jou tyd ({{zone}}). Almal anders sien dit in hul eie tyd.",
+    "remove": "Verwyder skedule",
+    "startsIn": "Begin oor {{time}}",
+    "bestTime": "Beste tyd",
+    "fansOnline": "Wanneer is my aanhangers aanlyn?",
+    "fansBasis": "Helderder beteken meer van jou volgers het gekyk, laaste {{count}} dae.",
+    "everyoneBasis": "Nog nie genoeg volgeraktiwiteit nie, so dit is almal op Riftn."
+  },
+  "planned": {
+    "title": "Beplan",
+    "all": "Alle",
+    "posts": "Plasings",
+    "stages": "Oudiokamers",
+    "post": "Ná",
+    "live": "Regstreeks",
+    "stage": "Stadium",
+    "untitledPost": "Ná",
+    "untitledLive": "Regstreeks",
+    "loading": "Laai…",
+    "startNow": "Begin nou",
+    "cancel": "Afskiet",
+    "cancelled": "Gekanselleer",
+    "subtitle": "Plasings, regstreekse uitsendings en verhoë wat jy geskeduleer het",
+    "seoTitle": "Beplan · Riftn",
+    "seoDescription": "Jou geskeduleerde plasings, regstreekse uitsendings en verhoë op Riftn, alles op een plek.",
+    "lives": "Regstreeks",
+    "signIn": "Meld aan om te sien wat jy beplan het",
+    "emptyTitle": "Nog niks beplan nie",
+    "emptyBody": "Kies \"Wanneer?\" terwyl jy 'n plasing, regstreekse uitsending of verhoog maak en dit verskyn hier.",
+    "move": "Skuif",
+    "postNow": "Plaas nou",
+    "confirmCancel": "Tik weer om te kanselleer",
+    "moved": "Geskuif na {{when}}",
+    "postingNow": "Word binne 'n minuut geplaas",
+    "moveFailed": "Kon dit nie skuif nie. Probeer weer.",
+    "seeAll": "Sien alles wat jy beplan het"
+  },
+  "welcome": {
+    "about": {
+      "title": "Welkom by Riftn",
+      "day": "Dag",
+      "month": "Maand",
+      "year": "Jaar",
+      "sub": "Jou verjaardag bly privaat. Kies 'n voorkoms, jy kan dit enige tyd verander.",
+      "birthday": "Geboortedatum",
+      "pick": "Kies jou verjaardag",
+      "invalid": "Voer jou volledige geboortedatum in.",
+      "tooYoung": "Jy moet {{age}} of ouer wees om Riftn te gebruik.",
+      "theme": "Jou voorkoms"
+    },
+    "name": {
+      "title": "Jou naam",
+      "placeholder": "Jou naam",
+      "sub": "Dit is die naam wat mense op jou plasings sien."
+    },
+    "card": {
+      "name": "Jou naam",
+      "followers": "volgers",
+      "interests": "Jou belangstellings",
+      "following": "volg"
+    },
+    "topic": {
+      "music": "Musiek",
+      "art": "Kuns",
+      "gaming": "Speletjies",
+      "crypto": "Kripto",
+      "sports": "Sport",
+      "comedy": "Komedië",
+      "podcast": "Podsending",
+      "food": "Voedsel",
+      "news": "Nuus",
+      "science": "Wetenskap",
+      "travel": "Reis",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Motors",
+      "animals": "Diere",
+      "tech": "Tegnologie"
+    },
+    "back": "Terug",
+    "skipPhoto": "Spoor later op",
+    "preview": "Voorskou",
+    "username": {
+      "title": "Jou @gebruikersnaam",
+      "sub": "Letters, syfers en onderstrepe. Jy kan dit later verander.",
+      "yours": "@{{name}} is joune"
+    },
+    "photo": {
+      "title": "Jou foto",
+      "sub": "Opsioneel. Mense volg gesigte vinniger.",
+      "choose": "Kies 'n foto",
+      "change": "Kies 'n ander een"
+    },
+    "interests": {
+      "title": "Jou belangstellings",
+      "sub": "Kies minstens 3. Hulle kom eerste in jou kategorieë."
+    },
+    "people": {
+      "title": "Jou mense",
+      "sub": "Tik om te volg. Hul plasings vul jou Volg-voer.",
+      "empty": "Geen voorstelle nou nie. Verken het meer mense om te vind.",
+      "followers": "{{count}} volgers"
+    },
+    "done": {
+      "title": "Lyk goed, {{name}}",
+      "sub": "Almal sien hierdie kaart van vandag af.",
+      "eyebrow": "Profiel regstreeks"
+    },
+    "enter": "Betree Riftn",
+    "pickMore": "Kies nog {{count}}",
+    "cardHint": "Dit is hoe mense jou sal sien",
+    "followFailed": "Kon nie volg nie. Probeer weer."
+  },
+  "appTokens": {
+    "title": "Jou tokens",
+    "history": "Geskiedenis",
+    "noHistory": "Nog geen aktiwiteit nie",
+    "kindDeposit": "Deposito",
+    "to": "Aan",
+    "amount": "Bedrag",
+    "notePlaceholder": "Voeg ’n nota by (opsioneel)",
+    "sendButton": "Stuur",
+    "errorInsufficient": "Nie genoeg tokens nie",
+    "rowHint": "Saldo in die toep",
+    "explainer": "Jou tokens leef nou binne Riftn. Jy het begin met wat jy by bekendstelling onchain gehou en gestaak het. Stuur, fooitjies en spandeer skuif hulle onmiddellik, sonder fooie en niks onchain nie. Saldo's word by die airdrop na die nuwe token oorgedra.",
+    "kindOpening": "Beginsaldo",
+    "kindSent": "Gestuur aan {{name}}",
+    "kindReceived": "Van {{name}}",
+    "kindSpent": "In Riftn spandeer",
+    "kindRefund": "Terugbetaling",
+    "kindAdjust": "Aanpassing deur Riftn",
+    "sendTitle": "Stuur tokens",
+    "sendHint": "Stuur tokens binne Riftn na 'n ander rekening. Onmiddellik en gratis, niks gaan onchain nie.",
+    "toPlaceholder": "@gebruikersnaam of 0x-adres",
+    "looking": "Soek tans…",
+    "available": "Beskikbaar: {{amount}}",
+    "sent": "{{amount}} tokens aan {{name}} gestuur",
+    "errorRateLimit": "Te veel versendings in die laaste uur. Probeer later weer.",
+    "errorNoRecipient": "Geen Riftn-rekening gevind nie",
+    "errorSelf": "Jy kan nie aan jouself stuur nie",
+    "errorGeneric": "Kon nie stuur nie. Probeer weer."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Almal",
+      "followers": "Volgers",
+      "nobody": "Niemand",
+      "default": "Rekeningverstek ({{value}})"
+    },
+    "heading": "Reaksies",
+    "more": "Meer wys",
+    "liveNow": "Regstreeks",
+    "untitled": "Reaksie",
+    "reactionTo": "Reaksie op",
+    "reactingTo": "Reageer op",
+    "count_one": "{{count}} reaksie",
+    "count_other": "{{count}} reaksies",
+    "allow": "Laat reaksies toe",
+    "remixesSection": "Remixes",
+    "allowDescription": "Laat ander skeppers op jou video's reageer, opgeneem of regstreeks. Jy kan dit steeds op elke plasing verander.",
+    "pageDescription": "Kyk hoe skeppers op “{{title}}” deur {{creator}} op Riftn reageer, opgeneem en regstreeks.",
+    "backToVideo": "Terug na video",
+    "empty": "Nog geen reaksies nie. Maak die video se Remix-kieslys oop en kies Reageer om die eerste te wees.",
+    "wasLive": "Was regstreeks",
+    "thisVideo": "hierdie video",
+    "pageTitle": "Reaksies op {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Koppel Riftn aan jou KI-assistent",
+    "urlLabel": "MCP-bediener-URL",
+    "copy": "Kopieer",
+    "copied": "Gekopieer",
+    "copiedToast": "MCP-URL gekopieer",
+    "accountBody2": "Stoor private konsepte, publiseer en skeduleer plasings, bestuur prente en peilings, lees ontledings, antwoord, reageer, herplaas, volg, stoor boekmerke, lees kennisgewings, wysig jou profiel en skep met jou krediete. Hergebruik van 'n plasingversoek-ID skep of tel nie 'n tweede plasing nie. Dit vra voordat dit enigiets spandeer.",
+    "agentsTitle": "Bestuur jou agente vanuit jou assistent",
+    "agentsBody": "Wanneer jy koppel, laat ook \"Tree op as jou agente\" toe. Jou assistent kan dan plaas, antwoord, reageer, herplaas, volg of 'n profiel wysig as enige agent wat jy besit, een op 'n slag of baie na mekaar. Dit kan nooit optree as 'n rekening wat jy nie besit nie.",
+    "agentsExample": "Probeer: \"Laat @mybot op die topplasing in my voer antwoord, en hou dan van daardie antwoord as @otherbot.\"",
+    "desc": "Gebruik Riftn vanuit ChatGPT, Claude, Cursor of enige MCP-toep. Blaai sonder 'n rekening, of meld aan sodat jou assistent vir jou kan plaas, antwoord en skep.",
+    "copyFailed": "Kopieer het misluk",
+    "urlNote": "Plak dit in jou KI-toep. Dit is nie 'n webblad nie, so as jy dit in 'n blaaier oopmaak, bring dit jou terug hierheen.",
+    "canTitle": "Wat jou assistent kan doen",
+    "publicTitle": "Sonder om aan te meld",
+    "publicBody": "Blaai deur die voer, soek plasings en mense, lees kommentaar en soek profiele op.",
+    "accountTitle": "Nadat jy aangemeld het",
+    "accountBody": "Plaas, antwoord, reageer, volg, stoor boekmerke, lees kennisgewings, wysig jou profiel en skep prente, video en musiek met jou krediete. Dit vra voordat dit enigiets spandeer.",
+    "chatgpt1": "Maak ChatGPT se Settings oop, dan Apps & Connectors, dan Advanced, en skakel Developer mode aan.",
+    "chatgpt2": "Terug in Apps & Connectors, kies Create om 'n nuwe connector by te voeg.",
+    "chatgpt3": "Noem dit Riftn, plak die URL hierbo en kies OAuth as die aanmeldtipe.",
+    "chatgpt4": "Druk Connect. Riftn maak oop: meld aan, gaan die toestemmings na en druk Laat toe.",
+    "chatgpt5": "Maak in 'n nuwe klets die +-kieslys oop, kies Riftn en vra byvoorbeeld: “Wys my gewilde plasings op Riftn.”",
+    "claude1": "Maak Claude se connector-instellings oop en kies Add custom connector.",
+    "claude2": "Noem dit Riftn, plak die URL hierbo en druk Add.",
+    "claude3": "Druk Connect. Riftn maak oop: meld aan, gaan die toestemmings na en druk Laat toe.",
+    "claude4": "Maak in 'n klets die gereedskapkieslys oop, skakel Riftn aan en vra wat jy wil.",
+    "openSettings": "Maak instellings oop",
+    "devTitle": "Claude Code, Cursor en ander toepe",
+    "devBody": "Voeg Riftn by as 'n afgeleë MCP-bediener oor HTTP. Die toep maak Riftn-aanmelding oop die eerste keer dat dit jou rekening nodig het.",
+    "manageTitle": "Jou gekoppelde toepe",
+    "manageBody": "Gekoppelde toepe bly gekoppel terwyl jy hulle gebruik en ontkoppel ná 30 dae ongebruik. Jy kan hulle enige tyd sien of ontkoppel.",
+    "manageLink": "Bestuur gekoppelde toepe",
+    "agentTitle": "Wil jy 'n bot hê wat as sy eie rekening plaas?",
+    "agentBody": "Skep 'n agent en jy kry sy eie connector-URL met die sleutel ingebou. Jou assistent kan dan as daardie agent plaas, kommentaar lewer, stem en volg in plaas van jy.",
+    "agentLink": "Skep 'n agent",
+    "helpTitle": "As iets verkeerd loop",
+    "help1": "“Authentication update required” of 'n Herkoppel-knoppie: druk Herkoppel en meld weer by Riftn aan.",
+    "help2": "“Koppel jou Riftn-rekening” wanneer jy oor jou eie plasings vra: druk Connect in die toep se connector-instellings.",
+    "help3": "'n Fout wanneer jy die URL in 'n blaaieroortjie oopmaak, is normaal. Plak dit eerder in jou KI-toep.",
+    "other": "Enige ander MCP-toep werk op dieselfde manier: voeg 'n afgeleë MCP-bediener by en plak die URL hierbo."
+  },
+  "avatarPrompt": {
+    "notNow": "Nie nou nie",
+    "title": "Voeg 'n profielfoto by",
+    "body": "Mense raak jou vinniger raak in voere, kommentaar en klets wanneer jy 'n gesig of logo het.",
+    "choose": "Kies 'n foto",
+    "another": "Kies 'n ander een",
+    "save": "Gebruik hierdie foto",
+    "saved": "Lyk goed",
+    "failed": "Kon nie jou foto stoor nie. Probeer weer."
+  },
+  "postStats": {
+    "audience": "Gehoor",
+    "engagement": "Betrokkenheid",
+    "finished": "Klaar",
+    "members": "Lede",
+    "membersLower": "lede",
+    "newFollowers": "Nuwe volgelinge",
+    "noBadge": "Geen kentekens nie",
+    "people": "Mense",
+    "plays": "Speel",
+    "quotes": "aanhalings",
+    "reposts": "Herplasings",
+    "saved": "Gered",
+    "shares": "Deel",
+    "signedOutViewers": "Afgemeld",
+    "topSupporters": "Top ondersteuners",
+    "visitors": "Afgemeld",
+    "aboutUsual": "omtrent soos gewoonlik",
+    "afterWatching": "het gevolg nadat hulle dit gesien het",
+    "avg": "gem.",
+    "avgWatch": "Gem. kyktyd",
+    "bestTime": "Wanneer jou mense kyk",
+    "bigDrop": "Groot daling",
+    "byBadge": "volgens kenteken",
+    "devices": "Toestel (lede)",
+    "finishedLower": "klaar gekyk",
+    "finishedPct": "{{pct}}% het tot die einde gekyk",
+    "inOut": "{{in}} lede · {{out}} afgemeld",
+    "leave": "{{pct}}% verlaat",
+    "linkClicks": "Skakelklikke",
+    "newToYou": "nuut vir jou",
+    "noAccount": "geen rekening",
+    "noViewersYet": "Niemand het hierdie plasing nog gesien nie.",
+    "noWatchYet": "Kyktyd wys hier sodra mense dit speel. Dit het op 31 Okt 2026 begin tel.",
+    "open": "Sien hoe jou plasing vaar",
+    "otherBadges": "Ander kentekens",
+    "peak": "Piek {{time}} · {{n}}",
+    "peopleReached": "Mense bereik",
+    "playsLower": "speelbeurte",
+    "playsMembers": "Speelbeurte deur lede",
+    "playsVisitors": "Speelbeurte afgemeld",
+    "profileTaps": "Tikke na jou profiel",
+    "reach": "Bereik",
+    "saves": "Stoorbeurte",
+    "seeAll": "Sien alle statistieke",
+    "signedIn": "aangemeld",
+    "signedOutLower": "afgemeld",
+    "stillWatching": "Kyk steeds",
+    "timesUsual": "{{ratio}}× gewoonlik",
+    "vsUsualPct": "{{pct}} teenoor jou gewone plasing",
+    "unavailableBody": "Net die skepper kan statistieke vir hierdie plasing sien.",
+    "unavailableTitle": "Statistieke nie beskikbaar nie",
+    "vsUsual": "teenoor jou gewone plasing",
+    "watching": "Kyk",
+    "whoSawIt": "Wie het dit gesien",
+    "withRepeats": "{{n}} herhalings",
+    "yourFollowers": "jou volgers",
+    "first48": "Eerste 48 uur",
+    "howItsDoing": "Hoe dit vaar",
+    "bestTip": "Die meeste van jou kykers daag {{day}} rondom {{hour}}:00 op. As jy net voor dan plaas, kry 'n plasing die beste begin.",
+    "last30": "laaste 30 dae",
+    "day": {
+      "sun": "So",
+      "mon": "Ma",
+      "tue": "Di",
+      "wed": "Wo",
+      "thu": "Do",
+      "fri": "Vr",
+      "sat": "Sa"
+    }
+  },
   "tokenLaunch": {
     "eyebrow": "Binnekort beskikbaar",
     "title": "Token word binnekort geloods",
@@ -19244,6 +20805,95 @@
     "unavailable": "GitHub is soon.",
     "connect": "Verbind met GitHub",
     "disconnect": "Ontkoppel"
+  },
+  "mcpKeys": {
+    "delete": "Vee uit",
+    "shortProfile": "Profiel",
+    "title": "Persoonlike sleutels",
+    "body": "Vir skrifte, bots en toepe wat nie 'n aanmeldbladsy kan oopmaak nie. 'n Sleutel doen net wat jy toelaat, op jou rekening en die agente wat jy besit. Dit bly aktief terwyl dit gebruik word en hou op ná 30 dae ongebruik.",
+    "signIn": "Meld aan om 'n sleutel te maak",
+    "newTitle": "Kopieer jou sleutel nou",
+    "newBody": "Dit is die enigste keer dat dit gewys word. Enigiemand wat dit het, kan jou rekening binne die toestemmings wat jy gekies het gebruik, so hou dit geheim.",
+    "useIt": "Voeg dit by jou toep met een hiervan:",
+    "name": "Sleutelnaam",
+    "namePlaceholder": "My bot",
+    "permissions": "Wat hierdie sleutel mag doen",
+    "limits": "Daaglikse limiete oor jou rekening en agente: 50 plasings, 300 antwoorde, 1,000 reaksies, 200 volgings, 200 herplasings en 30 profielwysigings.",
+    "create": "Skep sleutel",
+    "show": "Wys my sleutels",
+    "yours": "Jou sleutels",
+    "empty": "Nog geen sleutels nie.",
+    "expires": "Aktief tot {{date}} tensy weer gebruik",
+    "shortRead": "Lees",
+    "shortSocial": "Plaas en antwoord",
+    "shortGenerate": "Skep media",
+    "shortAgents": "Jou agente",
+    "settingsBody": "Gebruik Riftn en jou agente vanuit ChatGPT, Claude of enige MCP-toep, of maak 'n persoonlike sleutel."
+  },
+  "chatSearch": {
+    "placeholder": "Soek boodskappe of mense",
+    "placeholderPerson": "Soek {{name}} se boodskappe",
+    "close": "Maak soektog toe",
+    "removePerson": "Soek almal",
+    "clear": "Vee uit",
+    "signInTitle": "Meld aan om die gesels te deursoek",
+    "voice": "Stem-boodskap",
+    "photo": "Foto",
+    "peopleHere": "Mense in hierdie gesels",
+    "recent": "Onlangse soektogte",
+    "hint": "Tik 'n woord of 'n naam in.",
+    "failed": "Soektog kon nie laai nie",
+    "people": "Mense",
+    "messages": "Boodskappe",
+    "seeCount_one": "Sien hul {{count}} boodskap",
+    "seeCount_other": "Sien hul {{count}} boodskappe",
+    "messagesCount_one": "{{count}} boodskap",
+    "messagesCount_other": "{{count}} boodskappe",
+    "results_one": "{{count}} resultaat",
+    "results_other": "{{count}} resultate",
+    "backToResults": "Terug na resultate",
+    "position": "{{current}} van {{total}}",
+    "older": "Ouer resultaat",
+    "newer": "Nuwer resultaat",
+    "latest": "Meeste onlangse",
+    "gone": "Daardie boodskap is nie meer hier nie",
+    "theirMessages": "Hulle boodskappe",
+    "seeTheirMessages": "Sien hul boodskappe"
+  },
+  "dmRequests": {
+    "title": "Versoeke",
+    "accept": "Aanvaar",
+    "delete": "Vee uit",
+    "block": "Blokkeer",
+    "hint": "Boodskappe van mense wat jy nie volg nie. Aanvaar een, antwoord of volg hulle en die klets skuif na jou inkassie.",
+    "rowHint": "{{n}} van mense wat jy nie volg nie",
+    "banner": "Jy volg nie {{name}} nie. Aanvaar om hierdie klets na jou inkassie te skuif, of antwoord net.",
+    "accepted": "Na jou inkassie geskuif",
+    "acceptFailed": "Kon nie aanvaar nie, probeer weer"
+  },
+  "dmSchedule": {
+    "view": "Kyk",
+    "notSent": "Nie gestuur nie",
+    "edit": "Redigeer",
+    "editLabel": "Redigeer boodskap",
+    "error": "Dit het nie gewerk nie. Probeer weer.",
+    "button": "Skeduleer boodskap",
+    "title": "Geskeduleerde boodskappe",
+    "whenTitle": "Wanneer stuur?",
+    "waiting": "{{n}} geskeduleer",
+    "next": "volgende {{when}}",
+    "failedCount": "{{n}} nie gestuur nie",
+    "emptyTitle": "Niks geskeduleer nie",
+    "emptyBody": "Skryf 'n boodskap en tik dan die horlosie om te kies wanneer dit gestuur word.",
+    "changeTime": "Verander tyd",
+    "sendNow": "Stuur nou",
+    "deleted": "Geskeduleerde boodskap uitgevee",
+    "unreadable": "Op 'n ander toestel geskryf. Dit sal steeds gestuur word.",
+    "footnote": "Tye is in jou tydsone. Niemand sien 'n boodskap totdat dit gestuur is nie.",
+    "footnoteNamed": "Tye is in jou tydsone. {{name}} sien 'n boodskap eers wanneer dit gestuur is.",
+    "textOnly": "Slegs teksboodskappe kan tans geskeduleer word.",
+    "scheduledToast": "Geskeduleer vir {{when}}",
+    "failedToast": "'n Geskeduleerde boodskap kon nie gestuur word nie"
   },
   "footer": {
     "company": "Maatskappy",
@@ -19279,34 +20929,50 @@
     "newProject": "Nuwe projek",
     "newPost": "Nuwe plasing"
   },
-  "chatSearch": {
-    "placeholder": "Soek boodskappe of mense",
-    "placeholderPerson": "Soek {{name}} se boodskappe",
-    "close": "Maak soektog toe",
-    "removePerson": "Soek almal",
-    "clear": "Vee uit",
-    "signInTitle": "Meld aan om die gesels te deursoek",
-    "voice": "Stem-boodskap",
-    "photo": "Foto",
-    "peopleHere": "Mense in hierdie gesels",
-    "recent": "Onlangse soektogte",
-    "hint": "Tik 'n woord of 'n naam in.",
-    "failed": "Soektog kon nie laai nie",
+  "mentionLinks": {
+    "communities": "Gemeenskappe",
+    "pages": "Bladsye",
     "people": "Mense",
-    "messages": "Boodskappe",
-    "seeCount_one": "Sien hul {{count}} boodskap",
-    "seeCount_other": "Sien hul {{count}} boodskappe",
-    "messagesCount_one": "{{count}} boodskap",
-    "messagesCount_other": "{{count}} boodskappe",
-    "results_one": "{{count}} resultaat",
-    "results_other": "{{count}} resultate",
-    "backToResults": "Terug na resultate",
-    "position": "{{current}} van {{total}}",
-    "older": "Ouer resultaat",
-    "newer": "Nuwer resultaat",
-    "latest": "Meeste onlangse",
-    "gone": "Daardie boodskap is nie meer hier nie",
-    "theirMessages": "Hulle boodskappe",
-    "seeTheirMessages": "Sien hul boodskappe"
+    "empty": "Niks gevind nie",
+    "hint": "Tik om mense, gemeenskappe en bladsye te vind",
+    "linkTo": "Koppel {{name}}",
+    "members": " lede",
+    "placeholder": "Soek mense, gemeenskappe, bladsye...",
+    "title": "Noem of koppel"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Ek verstaan my profiel sal versteek word en ek sal oral afgemeld word.",
+    "title": "Deaktiveer rekening",
+    "short": "Versteek jou profiel vir eers. Meld weer aan om dit te herstel",
+    "description": "Neem eerder 'n blaaskans. Jou profiel, plasings en kommentaar word versteek en jy word oral afgemeld. Niks word uitgevee nie, en as jy weer aanmeld, kom alles terug.",
+    "button": "Deaktiveer",
+    "confirmTitle": "Deaktiveer jou rekening?",
+    "confirmBody": "Jou profiel, plasings en kommentaar sal versteek word en jy sal op elke toestel afgemeld word. Meld enige tyd weer aan om dit ongedaan te maak.",
+    "busy": "Deaktiveer tans…",
+    "done": "Rekening gedeaktiveer",
+    "receipt": "Jou profiel, plasings en kommentaar is versteek. Meld enige tyd weer aan om alles terug te bring.",
+    "error": "Kon nie jou rekening deaktiveer nie. Probeer asseblief weer."
+  },
+  "halloween": {
+    "title": "Gelukkige Halloween",
+    "otherThemes": "Nie lus vir spookagtig nie? Vind ander temas:",
+    "enter": "Betree die kerker"
+  },
+  "msgDelete": {
+    "title": "Vee boodskap uit?",
+    "titleMany": "Vee {{count}} boodskappe uit?",
+    "bodyOwn": "Verwyder dit net uit jou klets, of vir almal.",
+    "bodyOwnMany": "Verwyder hulle net uit jou klets, of vir almal.",
+    "bodyOthers": "Dit sal net uit jou klets verwyder word. Die ander persoon sal dit steeds sien.",
+    "bodyOthersMany": "Hulle sal net uit jou klets verwyder word. Ander in die klets sal hulle steeds sien.",
+    "bodyOwnBoth": "Verwyder dit net uit jou klets, of vir julle albei.",
+    "bodyOwnBothMany": "Verwyder hulle net uit jou klets, of vir julle albei.",
+    "forMe": "Vee vir my uit",
+    "forEveryone": "Vee vir almal uit",
+    "forBoth": "Vee vir ons albei uit",
+    "forMeAndName": "Vee vir my en {{name}} uit",
+    "remember": "Onthou my keuse",
+    "rememberHint": "Verander dit enige tyd in Instellings",
+    "failed": "Kon nie die boodskap uitvee nie"
   }
 }

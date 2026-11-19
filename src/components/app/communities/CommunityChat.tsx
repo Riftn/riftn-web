@@ -1,6 +1,8 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useHoldBottomNav } from '@/lib/bottom-nav-hold';
+import { useSwipeReply } from '@/hooks/use-swipe-reply';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -15,12 +17,17 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * the authority: nothing here is a security boundary.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Fragment, useContext } from 'react';
+import { UnreadMarker, UnreadJumpButton } from '../chat/UnreadJump';
+import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
+import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
+import { useChatReadPosition } from '@/hooks/use-chat-read-position';
+import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
 import { markCommunityChatSeen, COMMUNITY_CHAT_SEEN_INTERVAL_MS } from '@/lib/community-chat-notify';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, Pin, PinOff, ImagePlus } from "lucide-react";
+import { Loader2, SmilePlus, CornerDownRight, LogIn, Pin, PinOff, ImagePlus } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
@@ -28,6 +35,7 @@ import Trash2 from "@/components/ui/cut-icons/delete";
 import MicOff from "@/components/ui/cut-icons/mic-off";
 import Megaphone from "@/components/ui/cut-icons/advertising";
 import { communityKindOf } from "@/lib/community-kinds";
+import { GroupCallButtons } from "@/components/app/chat/calls/GroupCallButtons";
 import Ban from "@/components/ui/cut-icons/blocked";
 
 import Send from "@/components/ui/cut-icons/send";
@@ -52,16 +60,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { AppState } from '@/components/app/AppState';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { EmojiGifPicker } from '../chat/EmojiGifPicker';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
@@ -72,6 +70,9 @@ import { useCommunityChat, type CommunityChatMessage } from '@/hooks/use-communi
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { useCommunityAbilities } from '@/hooks/use-community-admin';
 import type { Community, CommunityMember } from '@/hooks/use-communities';
+import { DeleteMessageDialog, type DeleteScope } from '@/components/app/chat/DeleteMessageDialog';
+import { MemberActionsDialog } from './manage/MemberActionsDialog';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { replaceLinksWithEmoji, TranslatableText, SharedTranslationContext } from '../TranslatableText';
@@ -95,6 +96,13 @@ const FOREVER_YEAR = 9000;
  * leads and the words follow, matching the DM bubble and the app; before this
  * the channel printed an invite as a lone 🔗 with nothing behind it.
  */
+/** Phone: drag a line left to reply to it, like Public Chat and DMs. */
+function SwipeReplyRow({ onReply, children }: { onReply?: () => void; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSwipeReply(ref, onReply);
+  return <div ref={ref}>{children}</div>;
+}
+
 function CommunityMessageBody({ content }: { content: string }) {
   const { links, displayText } = useDehubLinks(content);
   return (
@@ -124,7 +132,6 @@ function formatCountdown(seconds: number): string {
 // Buy alert card imported from shared component
 import { BuyAlertCard } from '../chat/BuyAlertCard';
 import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
-import { formatUnreadCount } from '@/lib/unread-count';
 import { SendStatus } from '@/components/app/chat/SendStatus';
 
 function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
@@ -208,6 +215,9 @@ interface CommunityChatProps {
   /** Fill the parent's height (the chat opened inside Chat) instead of the community tab's fixed size. */
   fill?: boolean;
 }
+
+/** History pages (50 lines each) a chat may pull in at open to reach where you left off. */
+const MAX_READ_SPOT_PAGES = 10;
 
 export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
   const { t: _copy } = _useCopy();
@@ -297,6 +307,25 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
   const canDeleteAnyMessage = abilities.can('delete_messages');
   const canSendMedia = abilities.can('send_media');
   const canSendMessages = abilities.can('send_messages');
+  const canRestrictMembers = abilities.isOwner || abilities.can('restrict_members');
+  const [memberActions, setMemberActions] = useState<CommunityMember | null>(null);
+  const openMemberActions = useCallback(async (wallet: string, fallback?: () => void) => {
+    try {
+      const { data } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*')
+          .eq('community_id', community.id)
+          .eq('wallet_address', wallet.toLowerCase())
+          .maybeSingle(),
+        walletAddress,
+      );
+      const row = data as CommunityMember | null;
+      // Same rank rule as the dialog: never the owner, an admin only for the owner.
+      if (row && row.role !== 'owner' && (row.role !== 'admin' || abilities.isOwner)) { setMemberActions(row); return; }
+    } catch { /* fall through to the profile */ }
+    fallback?.();
+  }, [community.id, walletAddress, abilities.isOwner]);
 
   const {
     messages,
@@ -308,10 +337,31 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     discardSend,
     editMessage,
     deleteMessage,
+    hideMessage,
     setPinned,
     addReaction,
     removeReaction,
   } = useCommunityChat(communityId, { isPrivate: community.is_private });
+
+  // ─── Where you left off ───────────────────────────────────────────────────
+  // Saved on the server per chat, so every device opens on the first line you
+  // haven't seen, under an "Unread messages" line.
+  const readSpot = useChatReadPosition(isAuthenticated && communityId ? roomChatId(communityId) : null);
+  const myLowerAddress = walletAddress?.toLowerCase() ?? null;
+  const readLines = useMemo(() => messages.map((m) => ({
+    id: m.id,
+    own: !!myLowerAddress && m.wallet_address?.toLowerCase() === myLowerAddress,
+    at: m.created_at,
+    // Bot cards have no row of their own to land on.
+    skip: !!m.send_state || m.message_type === 'buy_alert' || m.message_type === 'admin_response',
+  })), [messages, myLowerAddress]);
+  const [unreadAnchor, setUnreadAnchor] = useState<UnreadAnchor | null>(null);
+  const [unreadMarkerSeen, setUnreadMarkerSeen] = useState(false);
+  const [unreadMarkerAbove, setUnreadMarkerAbove] = useState(false);
+  const [unreadBelow, setUnreadBelow] = useState(0);
+  const unreadPlacedRef = useRef(false);
+  const readSpotPagesRef = useRef(0);
+  const readTrackingRef = useRef(false);
 
   // ─── Slow mode ────────────────────────────────────────────────────────────
   // Owners and admins are exempt server-side, so only plain members see this.
@@ -421,17 +471,125 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
 
   const hasMore = !searchQuery.trim() && (filteredMessages.length > displayedMessages.length || hasOlderMessages);
 
-  // Initial scroll to bottom once messages first load
+  // Open where you left off: on the "Unread messages" line when there are lines
+  // you haven't seen, otherwise at the newest line.
   useEffect(() => {
     if (didInitialScrollRef.current) return;
     if (messages.length === 0) return;
+    if (!readSpot.ready) return;
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
+    let anchor: UnreadAnchor | null = null;
+    if (readSpot.opening && !isHistoryWindow && !searchQuery.trim()) {
+      const found = anchorFromReadSpot(readLines, readSpot.opening, hasOlderMessages);
+      if (found.kind === 'older') {
+        if (readSpotPagesRef.current < MAX_READ_SPOT_PAGES) {
+          if (!isLoadingOlder) {
+            readSpotPagesRef.current += 1;
+            void loadOlder().catch(() => {});
+          }
+          return;
+        }
+        const theirs = readLines.filter((l) => !l.own && !l.skip);
+        if (theirs.length) anchor = { id: theirs[0].id, ids: theirs.map((l) => l.id), count: theirs.length };
+      } else if (found.kind === 'anchor') {
+        anchor = found.anchor;
+      }
+    }
+    if (anchor) {
+      const index = messages.findIndex((m) => m.id === anchor!.id);
+      // Show enough history that the marker and a few lines above it render.
+      if (index >= 0) setVisibleCount((c) => Math.max(c, messages.length - index + 3));
+      setUnreadAnchor(anchor);
+      didInitialScrollRef.current = true;
+      prevLastMessageIdRef.current = messages[messages.length - 1]?.id ?? null;
+      window.setTimeout(() => { readTrackingRef.current = true; }, 1500);
+      return;
+    }
     requestAnimationFrame(() => {
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
       didInitialScrollRef.current = true;
+      readTrackingRef.current = true;
     });
-  }, [messages.length]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, readSpot.ready, hasOlderMessages, isLoadingOlder]);
+
+  /** How many unread lines sit below the fold, and whether the marker is above it. */
+  const refreshUnreadJump = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container || !unreadAnchor) return;
+    const box = container.getBoundingClientRect();
+    let below = 0;
+    for (const id of unreadAnchor.ids) {
+      const el = messageRefs.current[id];
+      if (el && el.getBoundingClientRect().top > box.bottom - 4) below++;
+    }
+    setUnreadBelow(below);
+    const marker = container.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!marker) { setUnreadMarkerAbove(false); return; }
+    const r = marker.getBoundingClientRect();
+    const above = r.bottom < box.top;
+    setUnreadMarkerAbove(above);
+    if (!above && r.top < box.bottom) setUnreadMarkerSeen(true);
+  }, [unreadAnchor]);
+
+  /** Saves the newest line on screen as where you left off. */
+  const reportReadSpot = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container || !readTrackingRef.current || searchQuery.trim()) return;
+    const ids: string[] = [];
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (!m.send_state && m.created_at) ids.push(m.id);
+    }
+    const id = newestLineOnScreen(container, ids, (x) => messageRefs.current[x]);
+    if (!id) return;
+    const line = messages.find((m) => m.id === id);
+    if (line) readSpot.report(line.id, line.created_at);
+  }, [messages, searchQuery, readSpot.report]);
+
+  const scrollFrame = useRef(0);
+  const scheduleScrollWork = useCallback(() => {
+    if (scrollFrame.current) return;
+    scrollFrame.current = requestAnimationFrame(() => {
+      scrollFrame.current = 0;
+      refreshUnreadJump();
+      reportReadSpot();
+    });
+  }, [refreshUnreadJump, reportReadSpot]);
+  useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
+  // Lines landing while you sit at the bottom are read as they arrive.
+  useEffect(() => {
+    const timer = window.setTimeout(scheduleScrollWork, 400);
+    return () => window.clearTimeout(timer);
+  }, [messages, scheduleScrollWork]);
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') scheduleScrollWork(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [scheduleScrollWork]);
+
+  // Land on the marker: just under the top edge, the unread lines below it.
+  useLayoutEffect(() => {
+    if (!unreadAnchor || unreadPlacedRef.current) return;
+    const container = scrollRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return;
+    unreadPlacedRef.current = true;
+    const offset = marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTop = Math.max(0, container.scrollTop + offset - 8);
+    readTrackingRef.current = true;
+    scheduleScrollWork();
+  }, [unreadAnchor, displayedMessages, scheduleScrollWork]);
+
+  const jumpToUnreadMarker = useCallback(() => {
+    const container = scrollRef.current;
+    const marker = container?.querySelector<HTMLElement>('[data-chat-unread-marker]');
+    if (!container || !marker) return;
+    const offset = marker.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset - 8), behavior: 'smooth' });
+    setUnreadMarkerSeen(true);
+  }, []);
 
   // Auto-scroll to bottom on new message arrival (only if user is near bottom)
   //
@@ -589,8 +747,9 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     setShowJumpToLatest(distanceFromBottom > 100);
     if (distanceFromBottom < 50) setNewMessageCount(0);
+    scheduleScrollWork();
     if (el.scrollTop <= 0 && hasMore) void loadEarlier();
-  }, [hasMore, loadEarlier]);
+  }, [hasMore, loadEarlier, scheduleScrollWork]);
 
   const scrollToBottom = useCallback(async () => {
     try {
@@ -615,16 +774,18 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   }, [setPinned]);
 
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deleteTarget) return;
+  const handleConfirmDelete = useCallback(async (scope: DeleteScope) => {
+    const target = deleteTarget;
+    setDeleteTarget(null);
+    if (!target) return;
     setDeletePending(true);
     try {
-      await deleteMessage(deleteTarget.id);
-      setDeleteTarget(null);
+      if (scope === 'everyone') await deleteMessage(target.id);
+      else await hideMessage(target.id);
     } finally {
       setDeletePending(false);
     }
-  }, [deleteTarget, deleteMessage]);
+  }, [deleteTarget, deleteMessage, hideMessage]);
 
   const sendingRef = useRef(false);
   const handleSend = async () => {
@@ -834,7 +995,10 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     : '';
 
   // Members get a message box at the bottom: the phone bottom bar stands down.
-  useHoldBottomNav(active && isMember);
+  // Only while its page is on screen: Messages stays mounted (hidden) after
+  // you leave it, and an open group there kept the bar hidden on Home.
+  const pageOnScreen = useContext(CachedPageActiveContext);
+  useHoldBottomNav(active && isMember && pageOnScreen);
   const translateSignal = 0;
   const originalSignal = 0;
 
@@ -843,6 +1007,9 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
+          {!showSearch && isMember && communityKindOf(community) === 'group' ? (
+            <GroupCallButtons groupId={communityId} groupName={community?.name ?? ''} />
+          ) : null}
           {showSearch ? (
             <div className="flex-1 min-w-0">
               <ChatSearchBar
@@ -975,6 +1142,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                   </div>
                 )}
                 {displayedMessages.map((msg) => {
+                const row = (() => {
                 // Buy alert messages get a special card treatment
                 if (msg.message_type === 'buy_alert') {
                   if (buyBotHidden) return null;
@@ -1023,17 +1191,24 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
                 const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
                 const handle = msg.username;
-                const goToProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                const openProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                // Owners and admins who may restrict members get the member's
+                // actions (mute, ban, remove) from a click on the name or face.
+                const canActHere = canRestrictMembers && !!msg.wallet_address
+                  && !(walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase());
+                const goToProfile = canActHere ? () => void openMemberActions(msg.wallet_address!, openProfile) : openProfile;
                 const isMine = !!walletAddress && msg.wallet_address?.toLowerCase() === walletAddress.toLowerCase();
-                const canDeleteThis = isMine || canDeleteAnyMessage;
+                // Anyone can delete a line for themselves; for everyone needs it
+                // to be yours, or the delete_messages right.
+                const canDeleteThis = !msg.send_state;
                 const isPinned = !!msg.pinned_at;
                 const isHighlighted = highlight?.id === msg.id;
 
                 return (
+                  <SwipeReplyRow key={msg.client_key ?? msg.id} onReply={isMember && !msg.send_state ? () => setReplyTo(msg) : undefined}>
                   <div
-                    key={msg.client_key ?? msg.id}
                     ref={(node) => { messageRefs.current[msg.id] = node; }}
-                    className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
+                    className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isMine ? 'bg-white/5 py-1' : ''} ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
                   >
                     {msg.reply_to && (
                       <button
@@ -1048,13 +1223,13 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                       </button>
                     )}
                     <div className="flex items-start gap-2">
-                      <button onClick={goToProfile} disabled={!handle} className={`flex-shrink-0 ${handle ? 'cursor-pointer' : 'cursor-default'}`}>
+                      <button onClick={goToProfile} disabled={!goToProfile} className={`flex-shrink-0 ${goToProfile ? 'cursor-pointer' : 'cursor-default'}`}>
                         <ChatAvatar src={avatarUrl} address={msg.wallet_address} name={name} />
                       </button>
                        <div className="min-w-0 flex-1">
                         <span className="inline-flex items-baseline gap-1.5">
                           <span className="inline-flex items-baseline gap-1 shrink min-w-0">
-                            <button onClick={goToProfile} disabled={!handle} className={`text-xs font-semibold text-white truncate ${handle ? 'hover:underline cursor-pointer' : 'cursor-default'}`}>
+                            <button onClick={goToProfile} disabled={!goToProfile} className={`text-xs font-semibold text-white truncate ${goToProfile ? 'hover:underline cursor-pointer' : 'cursor-default'}`}>
                               {name}
                             </button>
                             <BadgeIcon badgeBalance={(msg as any).badge_balance} username={msg.username} className="w-[1em] h-[1em]" />
@@ -1253,6 +1428,15 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                       )}
                     </div>
                   </div>
+                  </SwipeReplyRow>
+                );
+                })();
+                if (unreadAnchor?.id !== msg.id || searchQuery.trim()) return row;
+                return (
+                  <Fragment key={`unread-${msg.id}`}>
+                    <UnreadMarker count={unreadAnchor.count} />
+                    {row}
+                  </Fragment>
                 );
               })}
               </>
@@ -1278,18 +1462,21 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
 
           </div>
 
-          {/* Jump to latest — appears when scrolled up, like DMs */}
-          {(showJumpToLatest || newMessageCount > 0 || isHistoryWindow) && (
-            <button
-              onClick={scrollToBottom}
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium shadow-lg border border-white/10 transition-colors"
-            >
-              <ArrowDown className="w-3.5 h-3.5" />
-              {newMessageCount > 0
-                ? _copy("copy.72dede4d0387", { defaultValue: "New messages: {{value1}}", value1: formatUnreadCount(newMessageCount), value2: newMessageCount > 1 ? 's' : '' })
-                : _copy("copy.867524581f01", { defaultValue: "Jump to latest" })}
-            </button>
-          )}
+          {/* Jump control, same as DMs: up to the unread marker until it has
+              been seen, then down to the newest line, with the count of
+              unread lines still below. */}
+          {(() => {
+            const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
+            if (!(up || showJumpToLatest || newMessageCount > 0 || isHistoryWindow)) return null;
+            return (
+              <UnreadJumpButton
+                up={up}
+                count={unreadBelow + newMessageCount}
+                onClick={up ? jumpToUnreadMarker : () => void scrollToBottom()}
+                className="absolute bottom-3 right-3 z-10"
+              />
+            );
+          })()}
         </div>
       </SharedTranslationContext.Provider>
 
@@ -1457,31 +1644,20 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         </div>
       )}
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}>
-        <AlertDialogContent className="bg-zinc-900 border-white/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">
-              {t('communities.chat.deleteMessageTitle', { defaultValue: 'Delete this message?' })}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
-              {t('communities.chat.deleteMessageBody', { defaultValue: 'This cannot be undone.' })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletePending} className="rounded-xl h-9 px-3">
-              {t('communities.chat.cancel', { defaultValue: 'Cancel' })}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleConfirmDelete(); }}
-              disabled={deletePending}
-              className="rounded-xl h-9 px-3 bg-transparent text-red-400 hover:bg-red-500/15 border border-white/[0.08] gap-1.5"
-            >
-              {deletePending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              {t('communities.chat.delete', { defaultValue: 'Delete' })}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteMessageDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}
+        canDeleteForEveryone={!!deleteTarget && (canDeleteAnyMessage || (!!walletAddress && deleteTarget.wallet_address?.toLowerCase() === walletAddress.toLowerCase()))}
+        onDelete={(scope) => { void handleConfirmDelete(scope); }}
+      />
+      <MemberActionsDialog
+        community={community}
+        membership={membership}
+        target={memberActions}
+        open={!!memberActions}
+        onOpenChange={(v) => { if (!v) setMemberActions(null); }}
+        onEditRights={() => setMemberActions(null)}
+      />
     </div>
   );
 }

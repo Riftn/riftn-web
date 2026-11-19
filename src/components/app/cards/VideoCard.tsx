@@ -29,6 +29,7 @@ const BountyClaimActions = lazy(() => import('./BountyClaimActions'));
 import { DhbAmount } from '@/components/app/DhbAmount';
 import { cn } from '@/lib/utils';
 import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
+import { usePostMenuContext } from '@/lib/post-menu';
 import { useNavigate } from 'react-router-dom';
 import { useHandoffVideo } from '@/hooks/use-handoff-video';
 import { useVideoCardOpen } from '@/hooks/use-video-card-open';
@@ -59,7 +60,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import { ListPlus, Clock, Zap, Ticket, Star, Loader2, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
-import { SoundCreditLink } from './SoundCreditLink';
+import { soundFromPost } from '@/lib/soundtrack';
+import { useOptionalGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { AltTextBadge } from './AltTextBadge';
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
@@ -891,6 +893,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const queryClient = useQueryClient();
   const profileFeed = useProfileFeedContext();
   const { walletAddress, openLoginModal } = useAuth();
+  const dropZone = useOptionalGlobalDropZone();
   const { selfReaction, sendLiveReaction } = useLiveReaction(video.liveStreamId, !!video.isLivePost && !!video.isLiveNow);
   // Deep Current is the one power spent on somebody ELSE's post, so it is
   // the one row that belongs in this half of the menu. `status.powers` is
@@ -2151,16 +2154,16 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   });
 
   /**
-   * Feed taps open the viewer immediately. Inside the player, one tap drives
-   * playback; two taps Like; three taps Love. Playback is
-   * reversible, so the first tap happens immediately and is put back on tap
-   * two rather than making every ordinary play/pause wait for the gesture
-   * window. Fullscreen and seeking stay on their visible controls.
+   * Anywhere on the video, two taps Like and three taps Love. In the phone
+   * feed one tap opens the viewer, a moment later so a second tap can still
+   * turn it into a like. Inside the player one tap drives playback; that is
+   * reversible, so it happens immediately and is put back on tap two rather
+   * than making every play/pause wait for the gesture window. Fullscreen and
+   * seeking stay on their visible controls.
    */
   const tapGestures = useTapGestures({
     postId: video.id,
-    singleTapOnly: feedPreview,
-    reactionArea: isImmersive || isFullscreen ? 'surface' : 'center',
+    reactionArea: 'surface',
     // A gated card (PPV, holdings/subscriber lock, mature warning) draws no
     // burst — TapReactionBurst lives inside the isContentGated block further
     // down — so a cast there would react, invisibly, to a post you cannot
@@ -2407,11 +2410,49 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // and the desktop branch has the post shell. Carrying no colour class is what
   // keeps it unreachable by those nets, permanently — do not give it one again.
   // Same fix, same reason, as [data-post-overlay-backdrop] in index.css.
+  // Right-click anywhere on the card: every action for the post at the pointer.
+  const onPostContextMenu = usePostMenuContext(() => ({
+    id: video.id,
+    newPostId: video.status === 'signed' ? video.newPostId ?? null : null,
+    articleSlug: video.articleSlug,
+    authorId: video.creatorId,
+    authorName: video.channel,
+    authorHandle: video.creatorUsername,
+    text: [video.title, video.description].filter(Boolean).join('\n\n'),
+    title: video.title ?? video.description ?? '',
+    isOwn: isOwnPost,
+    visibility: video.visibility,
+    quotePolicy: video.quotePolicy,
+    myReaction: video.myReaction,
+    isReposted: video.isReposted,
+    noTip: !!video.creatorPaymentsDisabled,
+    actions: {
+      comments: () => {
+        if (onOpenComments) { onOpenComments(); return; }
+        setCommentsInitialTab(undefined);
+        setShowComments(true);
+      },
+      askAI: () => { if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); },
+      seeEngagements: () => {
+        if (onOpenComments) { onOpenComments('reposts'); return; }
+        setCommentsInitialTab('reposts');
+        setShowComments(true);
+      },
+      quote: handleQuote,
+      tip: () => setShowTipModal(true),
+      report: () => setShowReportModal(true),
+      boost: () => setShowBoostModal(true),
+      edit: isOwnPost ? () => setShowEditModal(true) : undefined,
+      delete: isOwnPost ? () => setShowDeleteModal(true) : undefined,
+    },
+  }));
+
   return (
     <div
       ref={scrubEventRef}
       data-video-card
       data-stats-token={video.isAd ? undefined : video.id}
+      onContextMenu={video.isAd ? undefined : onPostContextMenu}
       data-video-header-above={headerAboveMedia ? '' : undefined}
       onClick={isImmersive || stage ? undefined : handleCardClick}
       className={isImmersive || stage
@@ -2922,15 +2963,25 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
           </div>
         )}
 
-        {/* Soundtrack badge — like TikTok "♪ Song Name" */}
-        {hasSoundtrack && video.soundtrackTitle && (
-          <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 bg-black/40 backdrop-blur-[16px] px-2 py-1 rounded-lg border border-white/10 max-w-[60%]">
+        {/* The post's song. Tapping it starts a new post with the same song. */}
+        {hasSoundtrack && video.soundtrackTitle && video.soundtrackUrl && (
+          <button
+            type="button"
+            data-no-navigate
+            data-keep-dark
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!walletAddress) { openLoginModal(); return; }
+              dropZone?.openPostModalWithSound(soundFromPost(video.soundtrackUrl!, video.soundtrackTitle!, video.soundtrackCreator));
+            }}
+            aria-label={`${_copy("copy.0418db35eb35", { defaultValue: "Use this sound" })}: ${video.soundtrackTitle}`}
+            className="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 bg-black/40 backdrop-blur-[16px] px-2 py-1 rounded-lg border border-white/10 max-w-[60%] text-left transition-colors hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
             <Music className="w-3 h-3 text-white flex-shrink-0" />
             <span className="text-white text-[10px] truncate">
               {video.soundtrackTitle}{video.soundtrackCreator ? ` — ${video.soundtrackCreator}` : ''}
             </span>
-            <SoundCreditLink url={video.soundtrackUrl} creator={video.soundtrackCreator} variant="short" className="shrink-0 text-[10px] text-white/70" />
-          </div>
+          </button>
         )}
         
         {onBack && !stage && !video.isAudio && !isFullscreen && (controlsVisible || isContentGated) && (
@@ -3078,7 +3129,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 {isMuted ? <MediaControlIcon icon={VolumeX} /> : <MediaControlIcon icon={Volume2} />}
               </button>
               {volumeOpen && (
-                <div className="absolute top-full right-0 pt-1.5" onClick={(e) => e.stopPropagation()}>
+                <div data-volume-pop className="absolute top-full right-0 pt-1.5" onClick={(e) => e.stopPropagation()}>
                   <div className="h-[104px] w-8 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] rounded-xl border border-white/10 flex items-center justify-center">
                     <input
                       type="range"
@@ -3171,7 +3222,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 {isMuted ? <MediaControlIcon icon={VolumeX} plain={splitControls} /> : <MediaControlIcon icon={Volume2} plain={splitControls} />}
               </button>
               {volumeOpen && (
-                <div className="absolute bottom-full left-0 pb-1.5" onClick={(e) => e.stopPropagation()}>
+                <div data-volume-pop className="absolute bottom-full left-0 pb-1.5" onClick={(e) => e.stopPropagation()}>
                   <div className="h-[104px] w-8 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] rounded-xl border border-white/10 flex items-center justify-center">
                     <input
                       type="range"

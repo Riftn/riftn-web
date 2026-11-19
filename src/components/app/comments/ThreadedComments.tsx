@@ -36,7 +36,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { UserMentionDropdown } from '@/components/app/mentions';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { EmojiGifPicker } from '@/components/app/chat/EmojiGifPicker';
 import { PostCommentRow, CommentCreatorContext } from '@/components/app/cards/CommentsSection';
 import { CommentLikersDrawer } from '@/components/app/cards/CommentLikersDrawer';
@@ -221,12 +221,19 @@ export function ThreadedComments<C extends ThreadedComment>({
   const chunksRef = useRef<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // One line sits beside the buttons. Once the text needs a second line it
+  // takes the whole width and the buttons drop to their own row underneath,
+  // so no line is cut short by the button column. Back to one bar when cleared.
+  const [stacked, setStacked] = useState(false);
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
     input.style.height = '0px';
-    input.style.height = `${Math.min(140, Math.max(32, input.scrollHeight))}px`;
-  }, [text]);
+    const needed = input.scrollHeight;
+    input.style.height = `${Math.min(140, Math.max(32, needed))}px`;
+    if (!text) { if (stacked) setStacked(false); }
+    else if (!stacked && (text.includes('\n') || needed > 36)) setStacked(true);
+  }, [text, stacked]);
 
   const mention = useMention({
     inputRef,
@@ -272,7 +279,7 @@ export function ThreadedComments<C extends ThreadedComment>({
     const row = listRef.current?.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
     if (!row) return;
     scrolledToRef.current = focusCommentId;
-    bringIntoViewAndFlash(row);
+    bringIntoView(row);
   }, [focusCommentId, threads, expanded]);
 
   useEffect(() => () => {
@@ -581,9 +588,17 @@ export function ThreadedComments<C extends ThreadedComment>({
         </button>
       ) : (
         <form onSubmit={handleSubmit} className="relative">
-          {/* One bar, same as the post composer: text on the left, attach / emoji /
-              voice / Post inside it on the right, every control the same 32px. */}
-          <div className="flex min-h-10 w-full min-w-0 items-end gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.08] py-[3px] pl-3 pr-[3px] backdrop-blur-xl">
+          {/* One bar: text on the left, attach / emoji / voice / Post inside it on
+              the right, every control the same 32px. Past one line the text takes
+              the full width and the controls sit on their own row below it. */}
+          <div
+            data-comment-bar
+            data-stacked={stacked || undefined}
+            className={cn(
+              'flex min-h-10 w-full min-w-0 items-end gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.08] py-[3px] pl-3 pr-[3px] backdrop-blur-xl',
+              stacked && 'flex-wrap gap-y-1',
+            )}
+          >
             <Textarea
               ref={inputRef}
               value={text}
@@ -615,8 +630,12 @@ export function ThreadedComments<C extends ThreadedComment>({
               placeholder={replyTo ? labels.writeReply : labels.addComment}
               maxLength={500}
               rows={1}
-              className="h-8 min-h-8 max-h-[140px] min-w-0 flex-1 resize-none rounded-none border-0 bg-transparent px-0 py-1.5 text-sm leading-5 text-white shadow-none placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className={cn(
+                'h-8 min-h-8 max-h-[140px] min-w-0 resize-none rounded-none border-0 bg-transparent px-0 py-1.5 text-sm leading-5 text-white shadow-none placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0',
+                stacked ? 'basis-full pr-2.5' : 'flex-1',
+              )}
             />
+            <div className={cn('flex shrink-0 items-center gap-1.5', stacked && 'ml-auto')}>
             {media && (
               <>
                 <input
@@ -669,6 +688,7 @@ export function ThreadedComments<C extends ThreadedComment>({
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : t('comments.post')}
             </button>
+            </div>
           </div>
           <UserMentionDropdown
             query={mention.query}

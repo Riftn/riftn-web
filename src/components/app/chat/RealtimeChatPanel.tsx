@@ -1,5 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
+import { dblClickReply } from '@/lib/dblclick-reply';
 /**
  * RealtimeChatPanel
  * =================
@@ -19,7 +20,7 @@ import { useDraftState } from '@/hooks/use-draft-state';
 
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { Loader2, SmilePlus, CornerDownRight, LogIn, ArrowDown, type LucideIcon } from "lucide-react";
+import { Loader2, CornerDownRight, LogIn, ArrowDown, type LucideIcon } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Check from "@/components/ui/cut-icons/check";
@@ -33,8 +34,6 @@ import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatTimeAgo } from '@/lib/feed-utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDraft } from '@/hooks/use-draft';
@@ -44,8 +43,9 @@ import { cn } from '@/lib/utils';
 import { RoomChatText } from './RoomChatText';
 
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
-import { MoreReactionsButton } from './MoreReactionsButton';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, MessageMoreButton } from './message-menu-kit';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import Copy from '@/components/ui/cut-icons/copy';
 import { toast } from 'sonner';
@@ -297,12 +297,7 @@ export function RealtimeChatPanel({
     }
   };
 
-  // The line whose reaction tray is open. One at a time, and a pick closes it:
-  // it used to stay up over the chat after every emoji.
-  const [reactTrayFor, setReactTrayFor] = useState<string | null>(null);
-
   const handleReact = (id: string, emoji: string) => {
-    setReactTrayFor(null);
     if (!walletAddress) {
       openLoginModal?.();
       return;
@@ -313,16 +308,48 @@ export function RealtimeChatPanel({
     else onReact(id, emoji);
   };
 
-  // Hold a line on a phone for the reaction + action sheet (hover buttons
-  // never show on an iPhone tap). Desktop keeps the hover buttons.
+  // Hold a line on a phone for the reaction + action sheet. Desktop gets the
+  // same actions from a right-click or the one "..." on hover.
   const [held, setHeld] = useState<{ msg: RealtimeChatMessage; el: HTMLElement } | null>(null);
-  const hold = useHoldMenu((_point, target) => {
-    if (!isTouchHold() || editingId) return false;
+  // Right-click with a mouse: the same actions, at the pointer.
+  const [menu, setMenu] = useState<{ msg: RealtimeChatMessage; el: HTMLElement; point: { x: number; y: number } } | null>(null);
+  const [menuMounted, setMenuMounted] = useState(false);
+  const hold = useHoldMenu((point, target) => {
+    if (editingId) return false;
     const el = target.closest<HTMLElement>('[data-rt-msg]');
     const msg = el ? messages.find((m) => m.id === el.dataset.rtMsg) : undefined;
     if (!el || !msg) return false;
-    setHeld({ msg, el });
+    if (isTouchHold()) { setHeld({ msg, el }); return; }
+    if (keepBrowserMenu(target, el)) return false;
+    setMenuMounted(true);
+    setMenu({ msg, el, point });
   });
+  useEffect(() => {
+    if (!menu) return;
+    menu.el.setAttribute('data-msg-menu-open', '');
+    return () => menu.el.removeAttribute('data-msg-menu-open');
+  }, [menu]);
+  const menuMsg = menu?.msg;
+  const menuMine = !!menuMsg && !!walletAddress && menuMsg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+  const menuActions: MessageMenuAction[] = [];
+  if (menuMsg) {
+    if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
+    if (menuMine && isAuthenticated) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content); }, hint: 'E' });
+    if (menuMsg.content?.trim()) menuActions.push({
+      key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if ((menuMine || canModerate) && isAuthenticated) menuActions.push({
+      key: 'delete', divided: true, destructive: true, icon: menuIcons.delete,
+      label: menuMine ? _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }) : _copy('copy.c3812fc4acb8', { defaultValue: 'Remove' }),
+      onSelect: () => { if (confirm(_copy('copy.8f6e2cda49ca', { defaultValue: 'Delete this message?' }))) onDelete(menuMsg.id); },
+    });
+  }
+  const menuMineReactions = menuMsg && walletAddress
+    ? Object.entries(menuMsg.reactions ?? {})
+        .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === walletAddress.toLowerCase()))
+        .map(([emoji]) => emoji)
+    : [];
   const heldMsg = held?.msg;
   const heldMine = !!heldMsg && !!walletAddress && heldMsg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
   const holdActions: ChatHoldAction[] = [];
@@ -389,7 +416,7 @@ export function RealtimeChatPanel({
                 const isMine = !!walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
 
                 return (
-                  <div key={msg.id} className="group relative" data-chat-row data-rt-msg={msg.id}>
+                  <div key={msg.id} className="group relative" data-chat-row data-rt-msg={msg.id} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))}>
                     {msg.reply_to && (
                       <div className="flex items-center gap-1 text-[10px] text-zinc-500 ml-9 mb-0.5">
                         <CornerDownRight className="w-2.5 h-2.5" />
@@ -469,90 +496,18 @@ export function RealtimeChatPanel({
                           />
                         )}
                       </div>
-                      {isAuthenticated && (
-                        <div data-chat-hover-actions className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 flex-shrink-0 mt-0.5">
-                          {isMine && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => { setEditingId(msg.id); setEditInitial(msg.content); }}
-                                  className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded"
-                                >
-                                  <Pencil className="w-3.5 h-3.5" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">{_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}</TooltipContent>
-                            </Tooltip>
-                          )}
-                          {(isMine || canModerate) && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => { if (confirm(_copy("copy.8f6e2cda49ca", { defaultValue: "Delete this message?" }))) onDelete(msg.id); }}
-                                  className="p-0.5 text-zinc-500 hover:text-red-400 transition-colors rounded"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">{isMine ? _copy("copy.e2d0a54968ea", { defaultValue: "Delete" }) : _copy("copy.c3812fc4acb8", { defaultValue: "Remove" })}</TooltipContent>
-                            </Tooltip>
-                          )}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => setReplyTo(msg)}
-                                className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded"
-                              >
-                                <Reply className="w-3.5 h-3.5" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">{_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}</TooltipContent>
-                          </Tooltip>
-                          <Popover
-                            open={reactTrayFor === msg.id}
-                            onOpenChange={(open) => setReactTrayFor(open ? msg.id : null)}
-                          >
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <PopoverTrigger asChild>
-                                  <button className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded">
-                                    <SmilePlus className="w-3.5 h-3.5" />
-                                  </button>
-                                </PopoverTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">{_copy("copy.01fad993ff61", { defaultValue: "React" })}</TooltipContent>
-                            </Tooltip>
-                            <PopoverContent
-                              side="top"
-                              align="end"
-                              className="w-auto p-1 bg-zinc-800 border-zinc-700 rounded-xl"
-                            >
-                              <div className="flex gap-0.5">
-                                {QUICK_CHAT_REACTIONS.map((emoji) => {
-                                  const isActive = walletAddress && msg.reactions?.[emoji]?.some(
-                                    (a) => a.toLowerCase() === walletAddress.toLowerCase()
-                                  );
-                                  return (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => handleReact(msg.id, emoji)}
-                                      className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg transition-colors ${
-                                        isActive ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'
-                                      }`}
-                                    >
-                                      {emoji}
-                                    </button>
-                                  );
-                                })}
-                                <MoreReactionsButton
-                                  onPick={(emoji) => handleReact(msg.id, emoji)}
-                                  reactions={msg.reactions}
-                                  viewerAddress={walletAddress}
-                                />
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
+                      {/* Every action lives in the message menu (right-click, a
+                          hold on a phone, or this "..." for keyboard users). */}
+                      {editingId !== msg.id && (
+                        <MessageMoreButton
+                          className="mt-0.5"
+                          onOpen={(point, button) => {
+                            const el = button.closest<HTMLElement>('[data-rt-msg]');
+                            if (!el) return;
+                            setMenuMounted(true);
+                            setMenu({ msg, el, point });
+                          }}
+                        />
                       )}
                     </div>
                   </div>
@@ -580,7 +535,20 @@ export function RealtimeChatPanel({
         mine={heldMineReactions}
         onReact={(emoji) => { if (heldMsg) handleReact(heldMsg.id, emoji); }}
         actions={holdActions}
+        reactors={heldMsg?.reactions ? { reactions: heldMsg.reactions } : null}
       />
+      {menuMounted && (
+        <MessageMenu
+          point={menu?.point ?? null}
+          onClose={() => setMenu(null)}
+          quickReactions={isAuthenticated ? QUICK_CHAT_REACTIONS : null}
+          mine={menuMineReactions}
+          onReact={(emoji) => { if (menuMsg) handleReact(menuMsg.id, emoji); }}
+          actions={menuActions}
+          reactors={menuMsg?.reactions ? { reactions: menuMsg.reactions } : null}
+          meta={menuMsg ? messageMenuMeta(menuMsg.created_at) : null}
+        />
+      )}
 
       {/* Reply preview */}
       {replyTo && (

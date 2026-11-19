@@ -23,6 +23,7 @@ import { tokenLabel } from '@/lib/token-label';
 
 import { emitPostTipped, commentTipKey } from '@/lib/tip-events';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useOpenedOnce } from '@/hooks/use-opened-once';
 import { DhbCoin } from '@/components/app/DhbAmount';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -79,7 +80,15 @@ interface TipModalProps {
   commentId?: string;
 }
 
-export function TipModal({
+/**
+ * Sits closed in every post card, comment and profile, so nothing of it is
+ * built (wallet, drafts, payment hooks) until the first time it opens.
+ */
+export function TipModal(props: TipModalProps) {
+  return useOpenedOnce(props.open) ? <TipModalBody {...props} /> : null;
+}
+
+function TipModalBody({
   open,
   onOpenChange,
   creatorAddress,

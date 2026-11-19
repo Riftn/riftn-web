@@ -6,9 +6,15 @@ import { toast } from 'sonner';
 import Copy from '@/components/ui/cut-icons/copy';
 import SearchIcon from '@/components/ui/cut-icons/search';
 import { useHoldMenu } from '@/hooks/use-hold-menu';
+import { useSwipeReply } from '@/hooks/use-swipe-reply';
+import { dblClickReply } from '@/lib/dblclick-reply';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
+import Images from '@/components/ui/cut-icons/images';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
-import { ShieldBan, MoreVertical, Loader2, RotateCcw, SmilePlus, CornerDownRight } from "lucide-react";
+import { ShieldBan, Loader2, RotateCcw, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import Languages from "@/components/ui/cut-icons/language";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -25,25 +31,14 @@ import { ChatLinkPreviews } from './ChatLinkPreviews';
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { useTranslation as useTextTranslation } from '../TranslatableText';
+import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { VoiceWaveformPlayer } from './VoiceWaveformPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
-import { MoreReactionsButton } from './MoreReactionsButton';
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
@@ -99,6 +94,8 @@ export interface Message {
   replyTo?: ReplyToData;
   /** Rewritten after it was posted — labelled so nobody is quoted on words they replaced. */
   isEdited?: boolean;
+  /** A moderator pinned it for the room. */
+  isPinned?: boolean;
   /** Local only: the id your own line was first drawn under (kept as the React key). */
   clientKey?: string;
   /** Local only: your line is still going out, or failed to. */
@@ -126,6 +123,9 @@ interface ChatMessageProps {
   /** Live chat on phones: frame the held line, and outline the line being answered. */
   holdFrame?: boolean;
   replying?: boolean;
+  /** Moderators: pin or unpin this line for the room. */
+  onTogglePin?: (message: Message) => void;
+  isPinned?: boolean;
 }
 
 /** Inline moderator badge shown next to the username */
@@ -138,8 +138,10 @@ function ModeratorBadge({ address, moderators }: { address: string; moderators?:
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold bg-emerald-400/10 rounded px-1 py-0.5">
-          <ShieldCheck className="w-3 h-3" />{_copy("copy.a4d1abed0b2b", { defaultValue: "MOD" })}</span>
+        {/* Same quiet grey chip as the app's live chat (see index.css
+            [data-chat-mod-badge]); one look for every theme. */}
+        <span data-chat-mod-badge className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold leading-none">
+          {_copy("copy.a4d1abed0b2b", { defaultValue: "MOD" })}</span>
       </TooltipTrigger>
       <TooltipContent>{_copy("copy.6748ec8b7668", { defaultValue: "Moderator" })}</TooltipContent>
     </Tooltip>
@@ -233,6 +235,8 @@ export const ChatMessage = memo(function ChatMessage({
   onSeeMessages,
   holdFrame,
   replying,
+  onTogglePin,
+  isPinned = false,
 }: ChatMessageProps) {
   // Your own line carries a small ring while it is going out; when it lands
   // the ring stops in its fixed box, so the line never shifts.
@@ -247,7 +251,6 @@ export const ChatMessage = memo(function ChatMessage({
   const { t: _copy } = _useCopy();
   const navigate = useStableNavigate();
   const queryClient = useQueryClient();
-  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useDraftState(`chat:edit:${message.id}`, message.content);
@@ -280,6 +283,14 @@ export const ChatMessage = memo(function ChatMessage({
     handleTranslate,
     handleShowOriginal,
   } = useTextTranslation(message.content, 'chat');
+  // Translate also translates every message above this one that still needs it.
+  const translateUp = useTranslateUp(
+    'room',
+    String(message.id),
+    message.timestamp,
+    !isTranslated && !isTranslateLoading && !isTooShort && !!message.content?.trim(),
+    handleTranslate,
+  );
 
   // Community chat used to card up community links and nothing else — a store
   // item or an event dropped into a channel arrived as a bare URL.
@@ -317,7 +328,6 @@ export const ChatMessage = memo(function ChatMessage({
     } else {
       onReact?.(message.id, emoji);
     }
-    setEmojiPickerOpen(false);
   }, [message.id, message.reactions, currentUserAddress, onReact, onRemoveReaction]);
 
   const isClickable = !!message.userHandle;
@@ -326,11 +336,16 @@ export const ChatMessage = memo(function ChatMessage({
   // shows the hover buttons on a tap and a long press there only selected the
   // text, so on an iPhone there was no way to reply or react at all.
   const rowRef = useRef<HTMLDivElement>(null);
+  useSwipeReply(rowRef, onReply ? () => onReply(message) : undefined);
   const [holdOpen, setHoldOpen] = useState(false);
+  // Right-click with a mouse: the menu opens where the pointer is.
+  const menuPoint = useMenuPoint();
   const canHold = !message.sendState;
-  const hold = useHoldMenu(() => {
-    if (!isTouchHold() || isEditing) return false;
-    setHoldOpen(true);
+  const hold = useHoldMenu((point, target) => {
+    if (isEditing) return false;
+    if (isTouchHold()) { setHoldOpen(true); return; }
+    if (keepBrowserMenu(target, rowRef.current)) return false;
+    menuPoint.openAt(point);
   }, canHold);
 
   const holdActions: ChatHoldAction[] = [];
@@ -344,10 +359,14 @@ export const ChatMessage = memo(function ChatMessage({
       );
     },
   });
+  // A photo or GIF can be copied as itself, not just its caption.
+  const mediaUrl = (message.type === 'image' || message.type === 'gif') ? copyableMediaUrl(message.imageUrl) : null;
+  const copyMediaNow = mediaUrl ? () => copyMediaWithToast(mediaUrl, message.type === 'gif' ? 'gif' : 'image', _copy) : null;
+  if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
   if (message.type === 'text' && message.content?.trim() && !isTooShort) holdActions.push(
     isTranslated
       ? { key: 'original', icon: <Languages />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
-      : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: handleTranslate },
+      : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp },
   );
   if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
   if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing });
@@ -359,6 +378,36 @@ export const ChatMessage = memo(function ChatMessage({
         .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === currentUserAddress.toLowerCase()))
         .map(([emoji]) => emoji)
     : [];
+
+  // The same actions as the phone sheet, in Telegram's order, for the
+  // right-click menu on a computer.
+  const copyText = () => {
+    void navigator.clipboard?.writeText(message.content).then(
+      () => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })),
+      () => undefined,
+    );
+  };
+  const menuActions: MessageMenuAction[] = [];
+  if (onReply) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => onReply(message), hint: 'R' });
+  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing, hint: 'E' });
+  if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
+  if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
+  if (copyMediaNow) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
+  if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
+    isTranslated
+      ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
+      : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp, hint: 'T' },
+  );
+  if (onSeeMessages) menuActions.push({ key: 'their-messages', icon: menuIcons.search, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
+  if ((canDelete || showActions) && onDelete) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
+  if (showActions && !isMine && onBan) menuActions.push({ key: 'ban', divided: !((canDelete || showActions) && onDelete), destructive: true, icon: menuIcons.ban, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
+  if (showActions && !isMine && onUnban) menuActions.push({ key: 'unban', icon: menuIcons.unban, label: _copy('chatHold.unban', { defaultValue: 'Unban' }), onSelect: () => onUnban(message.userId, message.userName) });
+  if (showActions && onTogglePin) holdActions.splice(Math.min(1, holdActions.length), 0, {
+    key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin,
+    label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }),
+    onSelect: () => onTogglePin(message),
+  });
+  const reactors = message.reactions ? { reactions: message.reactions, remoteMessageId: message.id } : null;
 
   // The sheet sits beside the row, not in it: its taps would otherwise bubble
   // through React into the row's hold handlers.
@@ -372,18 +421,37 @@ export const ChatMessage = memo(function ChatMessage({
       onReact={handleQuickReact}
       actions={holdActions}
       frame={holdFrame}
+      reactors={reactors}
     />
   );
+  const menu = menuPoint.mounted ? (
+    <MessageMenu
+      point={menuPoint.point}
+      onClose={menuPoint.close}
+      quickReactions={onReact ? QUICK_CHAT_REACTIONS : null}
+      mine={mineReactions}
+      onReact={handleQuickReact}
+      actions={menuActions}
+      reactors={reactors}
+      meta={messageMenuMeta(message.timestamp, message.isEdited)}
+    />
+  ) : null;
 
   return (
     <>
     {holdSheet}
+    {menu}
     <div
       ref={rowRef}
+      onDoubleClick={(e) => dblClickReply(e, !isEditing && onReply && (() => onReply(message)))}
+      data-msg-menu-open={menuPoint.point ? '' : undefined}
       id={`chat-msg-${message.id}`}
       data-chat-row
+      data-chat-own={isMine || undefined}
       data-chat-replying={replying || undefined}
-      className="flex gap-3 py-2 px-4 hover:bg-zinc-800/30 transition-colors group"
+      // Your own lines sit on a soft filled card, as in group chats, so they
+      // stand out from everyone else's. Same text position as other rows.
+      className={`flex gap-3 py-2 transition-colors group ${isMine ? 'mx-1.5 my-0.5 rounded-2xl px-2.5' : 'px-4 hover:bg-zinc-800/30'}`}
       {...hold}
     >
       <button
@@ -432,143 +500,10 @@ export const ChatMessage = memo(function ChatMessage({
           </span>
           <ModeratorBadge address={message.userId} moderators={moderators} />
 
-          {/* Action buttons - visible on hover */}
-          <div data-chat-hover-actions className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-            {/* Reply button */}
-            {onReply && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onReply(message)}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <Reply className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy("copy.c253f451bdd5", { defaultValue: "Reply" })}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Reaction picker */}
-            {onReact && (
-              <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <PopoverTrigger asChild>
-                      <button className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50">
-                        <SmilePlus className="w-3.5 h-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>{_copy("copy.01fad993ff61", { defaultValue: "React" })}</TooltipContent>
-                </Tooltip>
-                <PopoverContent
-                  side="top"
-                  align="end"
-                  className="w-auto p-1.5 bg-zinc-800 border-zinc-700 rounded-xl"
-                >
-                  <div className="flex gap-0.5">
-                    {QUICK_CHAT_REACTIONS.map((emoji) => {
-                      const isActive = currentUserAddress && message.reactions?.[emoji]?.some(
-                        (a) => a.toLowerCase() === currentUserAddress.toLowerCase()
-                      );
-                      return (
-                        <button
-                          key={emoji}
-                          onClick={() => handleQuickReact(emoji)}
-                          className={`w-8 h-8 flex items-center justify-center text-lg rounded-lg transition-colors ${
-                            isActive ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'
-                          }`}
-                        >
-                          {emoji}
-                        </button>
-                      );
-                    })}
-                    <MoreReactionsButton
-                      onPick={handleQuickReact}
-                      reactions={message.reactions}
-                      viewerAddress={currentUserAddress}
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-
-            {onSeeMessages && !message.sendState && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onSeeMessages(message)}
-                    aria-label={_copy('chatSearch.seeTheirMessages', { defaultValue: 'See their messages' })}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <SearchIcon className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy('chatSearch.seeTheirMessages', { defaultValue: 'See their messages' })}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Your own message — edit and remove, no moderator rights needed */}
-            {canEdit && !isEditing && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={startEditing}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}</TooltipContent>
-              </Tooltip>
-            )}
-            {canDelete && !showActions && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onDelete?.(message.id)}
-                    className="p-1 text-zinc-500 hover:text-red-400 transition-colors rounded-lg hover:bg-zinc-700/50"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</TooltipContent>
-              </Tooltip>
-            )}
-
-            {/* Mod actions */}
-            {showActions && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1 text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-zinc-700/50">
-                    <MoreVertical className="w-3.5 h-3.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[140px]">
-                  {onDelete && (
-                    <DropdownMenuItem
-                      onClick={() => onDelete(message.id)}
-                      className="text-red-400 rounded-lg cursor-pointer focus:bg-transparent focus:text-red-300 gap-2"
-                    >
-                      <Trash2 className="w-4 h-4" />{_copy("copy.43e94c3cb95e", { defaultValue: "Delete Message" })}</DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => onBan?.(message.userId, message.userName)}
-                    className="text-red-400 rounded-lg cursor-pointer focus:bg-transparent focus:text-red-300 gap-2"
-                  >
-                    <ShieldBan className="w-4 h-4" />{_copy("copy.b77b03efec27", { defaultValue: "Ban User" })}</DropdownMenuItem>
-                  {onUnban && (
-                    <DropdownMenuItem
-                      onClick={() => onUnban(message.userId, message.userName)}
-                      className="text-emerald-400 rounded-lg cursor-pointer focus:bg-transparent focus:text-emerald-300 gap-2"
-                    >
-                      <ShieldCheck className="w-4 h-4" />{_copy("copy.7da3f7886c54", { defaultValue: "Unban User" })}</DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
+          {/* Everything lives in the message menu (right-click, or this "..." for keyboard). */}
+          {canHold && !isEditing && (
+            <MessageMoreButton className="ml-auto self-center" onOpen={menuPoint.openAt} />
+          )}
         </div>
         
         {message.type === 'text' && isEditing && (
@@ -618,7 +553,7 @@ export const ChatMessage = memo(function ChatMessage({
                       <RotateCcw className="w-2.5 h-2.5" />
                     </button>
                   ) : (
-                    <button onClick={handleTranslate} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
                       <Languages className="w-3 h-3" />
                     </button>
                   )
@@ -661,7 +596,7 @@ export const ChatMessage = memo(function ChatMessage({
                     <RotateCcw className="w-2.5 h-2.5" />
                   </button>
                 ) : (
-                  <button onClick={handleTranslate} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
+                  <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
                     <Languages className="w-3 h-3" />
                   </button>
                 )

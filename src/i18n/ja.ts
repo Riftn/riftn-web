@@ -1358,7 +1358,7 @@ export const ja = {
     diagramCoordinatorRole: 'タスク、暗号化+復号化',
     diagramDataFlowStart: 'データフローの開始',
     diagramMinersRole1: 'コンピューティングパワーを提供する',
-    diagramMinersRole2: 'deHubトークンと引き換えに',
+    diagramMinersRole2: 'Riftnトークンと引き換えに',
   },
   e2ee: {
     fetchDbDesc: 'Riftnが取得するデータ：encrypted_content + nonce + version',
@@ -1906,8 +1906,8 @@ export const ja = {
       'Webスタートアップを、数百のファイルからハンドフルにまとめ、エッジから提供されるインターミッションのメンテナンス画面、画像サービスがアクセス不能の場合でも画像がロードされる機能 ✅',
       'AndroidアプリをExpo 55に移行し、起動が速くなり、スクリーン録画がエディターに直接保存され、キーボードの上にメッセージBOXが表示される機能 ✅',
       'ダイレクトメッセージの写真、動画、ボイスノート、ファイルはすべて端末間で暗号化されている ✅',
+      'Apple App Storeのリスト ✅',
       'テレビやゲーム機用アプリ',
-      'Apple App Storeのリスト',
       'X、TikTok、YouTube、Instagram、Twitchでアプリの起動マーケティングキャンペーン',
       'コミュニティの収穫によるLP農業',
       'ファイアットオフランプ機能のリリース、トークンからキャッシュへの円滑な変換',

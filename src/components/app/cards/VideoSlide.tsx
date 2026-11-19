@@ -33,6 +33,9 @@ import { useShortsSideGestures } from '@/hooks/use-shorts-side-gestures';
 import { useTranslation } from 'react-i18next';
 import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
 import { StoryboardPreview } from '@/components/app/video/StoryboardPreview';
+const VideoSubtitleOverlay = lazy(() =>
+  import('@/components/app/video/VideoSubtitleOverlay').then((m) => ({ default: m.VideoSubtitleOverlay })),
+);
 const TranscodeRetry = lazy(() => import('./TranscodeRetry').then(m => ({ default: m.TranscodeRetry })));
 import { useVideoProcessingStatus } from '@/hooks/use-video-processing-status';
 import { useHandoffVideo } from '@/hooks/use-handoff-video';
@@ -46,8 +49,17 @@ interface VideoSlideProps {
   isActive: boolean;
   handoffKey?: string;
   isMuted: boolean;
+  /** The browser refused sound, so this short started silent. */
+  onAutoMuted?: () => void;
   playbackRate?: number;
   onTimeUpdate?: (currentTime: number, duration: number, loops?: boolean) => void;
+  /** The video played to its end (loop off), so the viewer can move on. */
+  onEnded?: () => void;
+  /**
+   * The viewer's control row: the playing short puts its subtitles (CC)
+   * button in here, as the feed player does.
+   */
+  captionSlot?: HTMLElement | null;
   /** Gets the tap itself, so the viewer can tell the centre from the edges. */
   onTap?: (event?: React.PointerEvent) => void;
   /**
@@ -132,8 +144,11 @@ const VideoSlideBody = memo(function VideoSlideBody({
   isActive: activeSlide,
   handoffKey,
   isMuted,
+  onAutoMuted,
   playbackRate = 1,
   onTimeUpdate,
+  onEnded,
+  captionSlot = null,
   onTap,
   onTapUndo,
   onSeekStart,
@@ -184,6 +199,16 @@ const VideoSlideBody = memo(function VideoSlideBody({
     component: 'ShortsViewer', postId: short.id,
     allowed: () => isActiveRef.current && !visualActivity.isCallBusy(),
   });
+  // Swiping fast on iPhone hands each new short to a fresh player the
+  // browser will not start with sound. Start it silent instead of stopping on
+  // a Play button; the viewer's speaker shows muted until they tap it.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (playbackPhase !== 'blocked' || !isActive || !video || video.muted) return;
+    video.muted = true;
+    onAutoMuted?.();
+    void requestVideoPlayback(video).catch(() => {});
+  }, [playbackPhase, isActive, onAutoMuted]);
   useEffect(() => {
     if (playbackPhase === 'failed') onPlaybackFailed?.();
   }, [playbackPhase, onPlaybackFailed]);
@@ -353,6 +378,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
     preload: isActive ? 'auto' : preload ?? 'metadata',
     className: `shorts-inline-video pointer-events-none w-full h-full ${fitWhole || isFullscreen ? 'object-contain' : 'object-cover'} transition-none`,
     onTimeUpdate: handleTimeUpdate,
+    onEnded,
     onLoadedMetadata: handleLoadedMetadata,
     onPlaybackChange: (playing) => {
       const video = videoRef.current;
@@ -751,6 +777,16 @@ const VideoSlideBody = memo(function VideoSlideBody({
           </div>
         )}
       </div>
+
+      {/* Subtitles for the playing short. They sit in the top part of the
+          slide so the caption, creator row and buttons below stay clear. */}
+      {isActive && captionSlot && !!short.videoUrl && !short.imageUrls?.length && (
+        <div className="absolute inset-x-0 top-0 bottom-[34%] z-20 pointer-events-none">
+          <Suspense fallback={null}>
+            <VideoSubtitleOverlay tokenId={short.id} videoRef={videoRef} buttonPortalTarget={captionSlot} plainButton />
+          </Suspense>
+        </div>
+      )}
 
       {(playbackPhase === 'failed' || playbackPhase === 'blocked') && isActive && <button type="button"
         className="absolute top-32 left-1/2 -translate-x-1/2 z-20 min-h-11 rounded-full bg-black/70 px-4 text-white"

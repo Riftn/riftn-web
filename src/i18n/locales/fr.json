@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ajouter une image, un GIF ou une vidéo",
+    "changeMedia": "Changer l'image, le GIF ou la vidéo",
+    "mediaType": "Choisissez une image, un GIF ou une vidéo.",
+    "videoSize": "Cette vidéo dépasse {{n}} Mo. Choisissez-en une plus petite."
+  },
   "textFeed": {
     "errorTitle": "Impossible de charger les publications",
     "errorBody": "Réessayez de charger le fil de texte.",
@@ -126,12 +132,16 @@
       "profile": "profil",
       "proposal": "proposition",
       "stage": "étape",
-      "store": "magasin"
+      "store": "magasin",
+      "featureRequest": "demande",
+      "page": "page"
     },
     "recipientChat": "conversation",
     "recipientUser": "utilisateur",
     "sendFailed": "Échec de l'envoi de {{item}}",
-    "sentTo": "{{item}} envoyé à {{name}}"
+    "sentTo": "{{item}} envoyé à {{name}}",
+    "openPage": "Ouvrir la page",
+    "viewRequest": "Voir la demande"
   },
   "stageCover": {
     "admitOne": "ADMETTEZ-EN UN",
@@ -719,7 +729,14 @@
     "getTheApp": "Obtenir l'application",
     "connectAi": "Connecter l'IA",
     "converter": "Convertisseur",
-    "affiliate": "Affiliation"
+    "affiliate": "Affiliation",
+    "groups": {
+      "main": "Principal",
+      "create": "Créer",
+      "discover": "Découvrir",
+      "money": "Argent",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Afficher le profil de {{name}}",
@@ -763,6 +780,13 @@
     "heading": "Courts Riftn"
   },
   "settings": {
+    "chatDeleteChoice": "Quand vous supprimez un message",
+    "chatDeleteChoiceDesc": "Demander à chaque fois, ou toujours supprimer pour vous seul ou pour tout le monde dans la discussion.",
+    "chatDeleteAsk": "Demander à chaque fois",
+    "chatDeleteMe": "Supprimer pour moi",
+    "chatDeleteMeDesc": "Disparaît de votre discussion, les autres le voient encore",
+    "chatDeleteEveryone": "Supprimer pour tout le monde",
+    "chatDeleteEveryoneDesc": "Quand c’est possible. Le message de quelqu’un d’autre dans un groupe n’est supprimé que pour vous",
     "postLanding": "Après la publication",
     "postLandingDesc": "Comment votre nouvelle publication arrive dans votre fil",
     "postLandingGhost": "Emplacement fantôme",
@@ -915,6 +939,11 @@
     "feedTogglesCleared": "Filtres du fil réinitialisés",
     "defaultProfileTab": "Onglet de profil par défaut",
     "defaultProfileTabDesc": "Choisissez l'onglet que les visiteurs voient en premier sur votre profil",
+    "defaultProfileView": "Disposition des publications du profil",
+    "defaultProfileViewDesc": "Affichez vos publications en grille ou en liste quand quelqu'un ouvre votre profil",
+    "readerProfileView": "Ouvrir les autres profils en",
+    "readerProfileViewDesc": "Choisis grille ou liste pour chaque profil que tu ouvres, ou garde le choix de chaque personne",
+    "readerProfileViewOwner": "Choix de chaque personne",
     "public": "Public",
     "publicDesc": "Tout le monde peut voir vos publications",
     "private": "Privé",
@@ -1351,7 +1380,19 @@
     "socialConnectedShort": "Connecté",
     "socialConnectFailed": "Impossible de connecter {{platform}}. Veuillez réessayer.",
     "socialVerifiedFollowers": "{{value}} abonnés",
-    "socialFollowersPending": "Mise à jour des abonnés"
+    "socialFollowersPending": "Mise à jour des abonnés",
+    "menuLayout": "Disposition du menu",
+    "menuLayoutDesc": "Comment le menu regroupe ses pages",
+    "menuLayoutTabs": "Onglets",
+    "menuLayoutTabsDesc": "Un groupe à la fois, avec de grandes icônes",
+    "menuLayoutSections": "Sections",
+    "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
+    "menuLayoutFolders": "Dossiers",
+    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe",
+    "publicChatInBar": "Chat public dans la barre du bas",
+    "publicChatInBarDesc": "Ouvre le Chat public d'un seul geste depuis la barre en bas de l'écran",
+    "chatCards": "Chats en cartes",
+    "chatCardsDesc": "Chaque chat sur sa propre carte. Désactivez pour une liste simple avec une ligne entre les chats."
   },
   "common": {
     "confirm": "Confirmer",
@@ -2113,6 +2154,12 @@
     "likes": "J'aime",
     "subscribers": "Abonnés",
     "affiliates": "Affiliés",
+    "ogChallenge": "Défi OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holders OG",
+    "ogChallengeTitle": "Faites revenir les holders OG",
+    "ogChallengeBody": "Invitez les personnes qui détiennent encore du DHB. Quand elles rejoignent avec votre lien d'invitation et gardent leur DHB dans leur portefeuille Riftn, elles comptent pour vous ici.",
+    "ogChallengeCta": "Obtenir votre lien d'invitation",
     "directReferrals_one": "{{count}} directs",
     "directReferrals_other": "{{count}} directs",
     "secondaryReferrals_one": "{{count}} secondaires",
@@ -2485,7 +2532,8 @@
       "total": "Portée totale",
       "breakdownTitle": "D'où vient cette portée",
       "dehubFollowers": "Abonnés Riftn",
-      "verified": "Les chiffres sociaux proviennent des comptes connectés par le créateur."
+      "verified": "Les chiffres sociaux proviennent des comptes connectés par le créateur.",
+      "selfReported": "Les comptes d'abonnés sociaux sont saisis par le créateur."
     },
     "loginDescription": "Connectez-vous pour voir et gérer votre profil.",
     "replyThread": {
@@ -2869,6 +2917,7 @@
     "email": "Email"
   },
   "loginModal": {
+    "didYouMean": "Vouliez-vous dire {{email}} ?",
     "bringLoginOver": "Vous utilisiez Riftn sur dehub.io ? <bring>Récupérez votre connexion</bring>",
     "restoreWalletTitle": "Récupérez votre portefeuille",
     "restoreOriginalWallet": "Votre profil se trouve sur le portefeuille de votre connexion d'origine, pas sur celui enregistré pour cette connexion. Connectez-vous comme lors de votre première inscription sur Riftn pour récupérer ce portefeuille. Votre profil et vos fonds restent intacts.",
@@ -2971,7 +3020,7 @@
     "flexibleHoursTag": "Horaires Flexibles",
     "fullyRemoteTag": "Entièrement à Distance",
     "aboutTheRole": "À propos du poste",
-    "bdmAbout": "En tant que l'un de nos responsables du développement commercial chez Riftn, vous ferez partie de la force motrice de notre stratégie de partenariat. Votre mission est d'identifier, d'engager et de conclure des accords avec des entreprises à la fois sur Web2 et Web3 — des studios de jeux et des plateformes de contenu aux projets blockchain et aux protocoles DeFi. Il s'agit d'un poste basé sur des commissions OTE (On-Target Earnings) : plus vous vous démenez, plus vous gagnez.Le rôle est simple, amenez des entreprises, des projets, des communautés ou des comptes de profil importants sur Riftn et soyez payé.",
+    "bdmAbout": "En tant que l'un de nos responsables du développement commercial chez Riftn, vous ferez partie de la force motrice de notre stratégie de partenariat. Votre mission est d'identifier, d'engager et de conclure des accords avec des entreprises à la fois sur Web2 et Web3 — des studios de jeux et des plateformes de contenu aux projets blockchain et aux protocoles DeFi. Il s'agit d'un poste basé sur des commissions OTE (On-Target Earnings) : plus vous vous démenez, plus vous gagnez. Le rôle est simple, amenez des entreprises, des projets, des communautés ou des comptes de profil importants sur Riftn et soyez payé.",
     "keyResponsibilities": "Responsabilités clés",
     "bdmResp1": "Identifier et sécuriser des partenariats stratégiques avec des entreprises Web2 et Web3",
     "bdmResp2": "Construire et gérer un pipeline de partenaires, sponsors et opportunités d'intégration",
@@ -3688,6 +3737,10 @@
     "statsLoadFailed": "Impossible de charger les statistiques de staking"
   },
   "communities": {
+    "muteChat": "Couper",
+    "mutedChat": "Coupé",
+    "muteChatHint": "Ne plus recevoir d'alertes du chat de cette communauté. Vous pouvez toujours le lire",
+    "unmuteChatHint": "Recevoir à nouveau les alertes du chat de cette communauté",
     "sortTop": "Top",
     "shareLink": "Partager le lien",
     "pinnedMore": "Plus",
@@ -6592,6 +6645,19 @@
       "needsImageToWork": "{{model}} a besoin d'une image pour fonctionner. Attachez-en un en premier.",
       "speechLimit": "Soit {{length}} caractères. La limite est de {{limit}}.",
       "musicTrackLength": "Piste {{count}}s"
+    },
+    "gallery": {
+      "browse": "Parcourir les créations",
+      "create": "Créer",
+      "fullscreen": "Afficher en plein écran",
+      "missing": "Cette création n’est pas disponible.",
+      "send": "Envoyer",
+      "notifications": {
+        "generation_like": "{{name}} a réagi à votre création",
+        "generation_comment_like": "{{name}} a réagi à votre commentaire",
+        "generation_reply": "{{name}} a répondu à votre commentaire",
+        "generation_comment": "{{name}} a commenté votre création"
+      }
     }
   },
   "pricing": {
@@ -7964,6 +8030,9 @@
     "sourceEncoder": "OBS / Encodeur",
     "sourceEncoderHint": "Obtenir les détails RTMP",
     "screenPickHint": "Vous choisirez l'écran, la fenêtre ou l'onglet ensuite — puis il se met en direct avec votre micro et le son propre de l'onglet.",
+    "screenInAppHint": "Dans l'app Riftn",
+    "screenInAppNote": "Les navigateurs mobiles ne permettent à aucun site de partager votre écran. Passez en direct depuis l'app Riftn, puis touchez Partager l'écran.",
+    "screenInAppCta": "Télécharger l'app Riftn",
     "replayAllowanceUsed": "Vous avez utilisé l'allocation de téléchargement d'aujourd'hui, donc cette diffusion n'aura pas de rediffusion. L'allocation se réinitialise à minuit UTC.",
     "replayFreeTier": "Les comptes gratuits conservent les {{size}} premiers d'un flux en tant que rediffusion — les badges de mise en jeu augmentent la limite.",
     "replayTiered": "Jusqu'à {{size}} de ce flux est conservé en tant que rediffusion ({{tier}} allocation quotidienne).",
@@ -9037,7 +9106,19 @@
     "declined": "Appel refusé",
     "noAnswer": "Pas de réponse",
     "missed": "Appel manqué",
-    "callBack": "Rappeler"
+    "callBack": "Rappeler",
+    "group": "Groupe",
+    "groupVoiceCall": "Appel vocal de groupe",
+    "groupVideoCall": "Appel vidéo de groupe",
+    "callingGroup": "Appel du groupe...",
+    "isCalling": "{{name}} vous appelle",
+    "leave": "Quitter",
+    "joinCall": "Rejoindre",
+    "inCall_one": "{{count}} dans l'appel",
+    "inCall_other": "{{count}} dans l'appel",
+    "startGroupVoice": "Lancer un appel vocal de groupe",
+    "startGroupVideo": "Lancer un appel vidéo de groupe",
+    "you": "Vous"
   },
   "badgeAscension": {
     "reached": "Vous avez atteint {{tier}}",
@@ -12715,7 +12796,7 @@
   "multiPost": {
     "tab": "Multi-publication",
     "title": "Multi-publication",
-    "intro": "Publiez sur X, YouTube, Instagram, TikTok et plus en même temps avec dehub. Connectez vos comptes une fois, puis choisissez où chaque publication va.",
+    "intro": "Publiez sur X, YouTube, Instagram, TikTok et plus en même temps avec Riftn. Connectez vos comptes une fois, puis choisissez où chaque publication va.",
     "creditsHeading": "Crédits de publication",
     "credits": "{{count}} crédits de publication",
     "topUpTitle": "Rechargez et économisez",
@@ -12763,7 +12844,12 @@
   "dm": {
     "planRestricted": "Cet utilisateur exige un abonnement pour recevoir des messages.",
     "planTypeNotAllowed": "L'offre de ce créateur n'autorise pas ce type de message.",
-    "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur."
+    "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur.",
+    "shareGroups": "Groupes",
+    "shareKindGroup": "Groupe",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Communauté",
+    "reportMessage": "Signaler le message"
   },
   "credits": {
     "earningsWorth": "Valeur {{amount}}",
@@ -15352,11 +15438,14 @@
     "8c7afb50b89c": "Partager ailleurs",
     "bdd4f5015e96": "Fermer la notification de demande expédiée",
     "8f3dc69e83c4": "Votre retour a été envoyé !",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "Tu as gagné +{{value1}} points",
+    "0fbe06b679a8": "{{value1}} points pour chaque demande livrée, ajoutés à ton score Top builders.",
     "1aa7b1c1d5fb": "Merci !",
     "6b1037924516": "% de glissement",
     "e50f1f5e6029": "Tolérance au glissement",
     "8450ee5cde76": "Personnalisé %",
-    "c6631765f885": "**GLISSEMENT ÉLEVÉ - RISQUE DE PERTE**",
+    "c6631765f885": "GLISSEMENT ÉLEVÉ - RISQUE DE PERTE",
     "d4cf65e66b62": "⚠ Glissement faible — la transaction peut échouer",
     "7dbef8d0c1ba": "Hors heures : ",
     "8fd9ae2eea2d": "Pré-marché : ",
@@ -16445,8 +16534,8 @@
     "60b676c3ea06": "Claude du Devoir",
     "f665ae14eeba": "GÉNÉRATION DE LA ZONE DE COMBAT",
     "74b886bd1df4": "Génération de la zone de combat",
-    "689b1ac5db50": "**ERREUR :** ",
-    "9b318c8642ba": "**CACHER L'AFFICHAGE**",
+    "689b1ac5db50": "ERREUR : ",
+    "9b318c8642ba": "CACHER L'AFFICHAGE",
     "c8ca272aa637": "Retour au blog",
     "c533cafab69e": "En vedette",
     "121d7143a052": " min de lecture",
@@ -17242,7 +17331,7 @@
     "62f2ccfffcc5": "Secondaires",
     "bd9d153c3d65": "Total gagné",
     "3d41e1a66a7d": "Commission",
-    "f53b52ad6d21": "**/app**",
+    "f53b52ad6d21": "/app",
     "ae16d3d53b5c": "/editor",
     "1ed61b786730": "Votre lien d'invitation",
     "c0ac0f73ce8d": "Partagez n'importe où. Vous gagnez ",
@@ -17629,7 +17718,7 @@
     "5e9fe00ece85": "Cliquez avec le bouton droit de la souris sur une vignette de fichier Figma et choisissez Dupliquer",
     "3e046f2c30b1": "Cliquez simplement avec le bouton droit de la souris sur n'importe quelle vignette de fichier dans vos onglets récents ou partagés, puis appuyez sur Dupliquer.",
     "8f7bdf474291": "Continuer vers Figma",
-    "b86577a30956": "**Modèles de médias sociaux Riftn**",
+    "b86577a30956": "Modèles de médias sociaux Riftn",
     "8bd075ad6b13": "Télécharger le kit",
     "ca8d24a3e762": "dapp.articlesTitle",
     "b6ad48b669f7": "dapp.multipostTitle",
@@ -19047,38 +19136,38 @@
     "7f05ce754d0e": "Croquis quasi instantanés au prix le plus bas ici",
     "b9bc1ba02125": "Illustration et mise en page de qualité professionnelle",
     "0f2a22d8a443": "Vrais logos et icônes SVG",
-    "b5893515b61f": "**Typographie la plus puissante dans une affiche**",
-    "fc6ec390be63": "**Le plus économique, polyvalent solide**",
+    "b5893515b61f": "Typographie la plus puissante dans une affiche",
+    "fc6ec390be63": "Le plus économique, polyvalent solide",
     "0459220de3f8": "Expressif, contraste élevé, audacieux",
-    "fff1c1ce5e17": "**Meilleur réseau polyvalent, texte ou image**",
+    "fff1c1ce5e17": "Meilleur réseau polyvalent, texte ou image",
     "5f39eb0d1c20": "Tencent, géométrie nette issue d’une seule image",
-    "96e0787938ec": "**Conversion image-en-réseau rapide, idéal pour l’itération**",
+    "96e0787938ec": "Conversion image-en-réseau rapide, idéal pour l’itération",
     "1e8777bc4d46": "Qualité studio PBR, export en FBX/OBJ/USDZ",
-    "99a4c3f7f9da": "**Prêt pour le jeu**",
+    "99a4c3f7f9da": "Prêt pour le jeu",
     "5386ea5db81c": "Équilibré",
     "b6a3909630c4": "Haute définition",
     "66c9ab177708": "Maximum",
     "b8c339f21031": "Modèle phare de ByteDance — 30 secondes de rendu, meilleure adéquation avec la requête",
-    "4bddb1751509": "**Niveau cinématographique haut de gamme avec audio natif**",
+    "4bddb1751509": "Niveau cinématographique haut de gamme avec audio natif",
     "897e18877075": "Photoréaliste, esthétique onirique (720p)",
-    "3385bf19ecf6": "**Animer des images (nécessite une image)**",
+    "3385bf19ecf6": "Animer des images (nécessite une image)",
     "f508a0cf129e": "Génération rapide, excellente qualité",
     "8884959c3902": "Rapide et efficace",
-    "ee76a220959c": "**Cinématique ByteDance avec audio natif**",
+    "ee76a220959c": "Cinématique ByteDance avec audio natif",
     "c5a1d3b9268d": "Nouveau modèle ByteDance, qualité & audio supérieurs",
     "f4a56d3cb00f": "Génération plus rapide, qualité légèrement inférieure",
-    "8e831aaaa051": "**Modèle phare Google, ultra-réaliste avec audio**",
+    "8e831aaaa051": "Modèle phare Google, ultra-réaliste avec audio",
     "d593de2ed999": "Style Veo, un quart du prix",
-    "e2741c299499": "**Multiprises, synchronisation audio, prises longues**",
+    "e2741c299499": "Multiprises, synchronisation audio, prises longues",
     "b50840a8facb": "Même modèle, niveau de rendu plus léger",
     "ea5e0b780f7b": "Mouvement fluide et précision extrême des requêtes, sans audio",
     "c1cc166082bf": "Physique naturelle et émotion faciale",
-    "970971377727": "**Plus rapide et moins cher, Hailuo**",
+    "970971377727": "Plus rapide et moins cher, Hailuo",
     "cc65f4a45ebf": "Consistance des personnages avec audio synchronisé",
     "a525541f3e90": "Poids ouverts, stylisé et expérimental",
     "18ecea8f32e4": "Esthétique onirique Luma, niveau budget",
     "b19b2e83cbb1": "Mouvement stylisé et penchant anime",
-    "d2847c1435c7": "**Le moins cher par seconde, croquis rapides**",
+    "d2847c1435c7": "Le moins cher par seconde, croquis rapides",
     "75c47aa81c26": "Aucun effet",
     "4ec0665185ea": "Profond, déguisé — les vibrations des hackers",
     "7c7a9940551c": "Pitch élevé et grinçant",
@@ -20773,5 +20862,33 @@
     "scheduledToast": "Programmé pour {{when}}",
     "failedToast": "Un message programmé n'a pas pu être envoyé",
     "error": "Ça n'a pas marché. Réessayez."
+  },
+  "mentionLinks": {
+    "communities": "Communautés",
+    "pages": "Pages",
+    "people": "Personnes",
+    "linkTo": "Lier {{name}}",
+    "empty": "Aucun résultat",
+    "hint": "Tapez pour trouver des personnes, des communautés et des pages",
+    "members": " membres",
+    "placeholder": "Rechercher personnes, communautés, pages...",
+    "title": "Mentionner ou lier"
+  },
+  "msgDelete": {
+    "title": "Supprimer le message ?",
+    "titleMany": "Supprimer {{count}} messages ?",
+    "bodyOwn": "Retirez-le seulement de votre discussion, ou pour tout le monde.",
+    "bodyOwnMany": "Retirez-les seulement de votre discussion, ou pour tout le monde.",
+    "bodyOthers": "Il sera retiré de votre discussion uniquement. L'autre personne le verra toujours.",
+    "bodyOthersMany": "Ils seront retirés de votre discussion uniquement. Les autres membres les verront toujours.",
+    "bodyOwnBoth": "Retirez-le seulement de votre discussion, ou pour vous deux.",
+    "bodyOwnBothMany": "Retirez-les seulement de votre discussion, ou pour vous deux.",
+    "forMe": "Supprimer pour moi",
+    "forEveryone": "Supprimer pour tout le monde",
+    "forBoth": "Supprimer pour nous deux",
+    "forMeAndName": "Supprimer pour moi et {{name}}",
+    "remember": "Mémoriser mon choix",
+    "rememberHint": "Modifiable à tout moment dans les Paramètres",
+    "failed": "Impossible de supprimer le message"
   }
 }

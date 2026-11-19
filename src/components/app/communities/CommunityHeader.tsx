@@ -5,7 +5,7 @@ import { CommunityKindChip } from './CommunityKindChip';
 import { communityKindOf, isPublicChatCommunity, entryPriceOf } from '@/lib/community-kinds';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { useRef, useState, useCallback } from 'react';
-import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus } from "lucide-react";
+import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus, Bell, BellOff } from "lucide-react";
 import Users from "@/components/ui/cut-icons/communities";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 import Camera from "@/components/ui/cut-icons/camera";
@@ -32,7 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 import { dehubLinkFor } from '@/lib/dehub-links';
 import { toast } from 'sonner';
-import { useChatPrefs } from '@/hooks/use-chat-prefs';
+import { useChatPrefs, isMuted } from '@/hooks/use-chat-prefs';
 import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { useTranslation } from 'react-i18next';
 import { DescriptionWithLinks } from './DescriptionWithLinks';
@@ -148,6 +148,10 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
   const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
   const canAddToMessages = !!walletAddress && (isMember || isOwner) && communityKindOf(community) === 'community' && !isPublicChatCommunity(community.id);
   const inMessages = !!chatPrefs.get(roomChatId(community.id))?.listedAt;
+  // Stops this community's chat alerts on every device; the chat itself stays
+  // readable. Same switch as Mute in the Chat list, which few people found.
+  const canMuteChat = !!walletAddress && (isMember || isOwner) && !isPublicChatCommunity(community.id);
+  const chatMuted = isMuted(chatPrefs.get(roomChatId(community.id)));
 
   return (
     <div className="px-3 pt-3 pb-4 relative">
@@ -300,6 +304,20 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
                 </button>
               )}
             </div>
+          )}
+          {community.slug && (
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(viewerShareUrl(dehubLinkFor.community(community.slug)));
+                trackShare('copy_link', { kind: 'community' });
+                toast.success(t('communities.linkCopied'));
+              }}
+              className="mt-0.5 max-w-full truncate text-sm text-zinc-400 hover:text-white transition-colors"
+              data-testid="community-handle"
+            >
+              riftn/{community.slug.toLowerCase()}
+            </button>
           )}
         </div>
 
@@ -458,6 +476,24 @@ export function CommunityHeader({ community, isMember, isPendingMember, isOwner,
               {inMessages
                 ? t('communities.inMessages', { defaultValue: 'In Messages' })
                 : t('communities.addToMessages', { defaultValue: 'Add to Messages' })}
+            </Button>
+          )}
+          {canMuteChat && (
+            <Button
+              size="sm"
+              variant="ghost"
+              data-community-mute={chatMuted ? 'on' : 'off'}
+              aria-pressed={chatMuted}
+              onClick={() => updateChatPref(roomChatId(community.id), { mutedUntil: chatMuted ? null : 'forever' })}
+              className={buttonBase}
+              title={chatMuted
+                ? t('communities.unmuteChatHint', { defaultValue: "Get alerts from this community's chat again" })
+                : t('communities.muteChatHint', { defaultValue: "Stop alerts from this community's chat. You can still read it" })}
+            >
+              {chatMuted ? <BellOff className="w-3.5 h-3.5" /> : <Bell className="w-3.5 h-3.5" />}
+              {chatMuted
+                ? t('communities.mutedChat', { defaultValue: 'Muted' })
+                : t('communities.muteChat', { defaultValue: 'Mute' })}
             </Button>
           )}
           {canManage && (

@@ -35,6 +35,8 @@ import Reply from "@/components/ui/cut-icons/reply";
 import Pencil from "@/components/ui/cut-icons/edit";
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from '@/components/app/chat/ChatHoldSheet';
+import { MessageMenu } from '@/components/app/chat/MessageMenu';
+import { keepBrowserMenu, messageMenuMeta, useMenuPoint } from '@/components/app/chat/message-menu-kit';
 import { reactionMeta as holdReactionMeta, type PostReaction as HoldReaction } from '@/lib/reactions';
 import Languages from "@/components/ui/cut-icons/language";
 import Eye from "@/components/ui/cut-icons/visibility";
@@ -59,7 +61,7 @@ import { POST_STAGE_COMPOSE_EVENT } from '@/components/app/post-stage/post-stage
 import { VoiceStripPlayer } from '../audio/VoiceStripPlayer';
 import { LiveMicBars } from '../audio/LiveMicBars';
 import { useFocusComment } from '@/lib/focus-comment';
-import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { bringIntoView } from '@/lib/focus-scroll';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import {
@@ -437,7 +439,7 @@ function caretOffsetAt(root: HTMLElement, x: number, y: number): number | null {
 /** The reactions a held comment offers on a phone: the common faces, then 👎. */
 const HOLD_REACTIONS: HoldReaction[] = ['like', 'love', 'hot', 'lol', 'hundred', 'sad', 'dislike'];
 
-const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, onShowLikers, onReact, onReply, onShare, onEdit, onDelete, onTip, permalink, tipTotal, viewerTipped, onUserPress, isReply, threadLineAbove, threadLineBelow, isOwnComment, isThreadEntry, onAnchor, onPin, highlighted, onReport }: CommentItemProps) {
+const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, onShowLikers, onReact, onReply, onShare, onEdit, onDelete, onTip, permalink, tipTotal, viewerTipped, onUserPress, isReply, threadLineAbove, threadLineBelow, isOwnComment, isThreadEntry, onAnchor, onPin, onReport }: CommentItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   // Bumps each time this viewer tips this comment, replaying the gem swirl.
   const [tipBurst, setTipBurst] = useState(0);
@@ -566,12 +568,16 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
   const [menuOpen, setMenuOpen] = useState(false);
   // On a phone the hold opens the same glass sheet as live chat: the comment
   // stays put and glows, the rest dims, reactions and actions in one sheet.
-  // A mouse right-click keeps the row's dropdown.
+  // A mouse right-click opens the chat message menu right where the pointer
+  // is (it used to open the share dropdown, which hangs off the share icon at
+  // the foot of the comment, nowhere near the click).
   const rowRef = useRef<HTMLDivElement>(null);
   const [holdOpen, setHoldOpen] = useState(false);
-  const hold = useHoldMenu(() => {
-    if (isTouchHold()) setHoldOpen(true);
-    else setMenuOpen(true);
+  const menuPoint = useMenuPoint();
+  const hold = useHoldMenu((point, target) => {
+    if (isTouchHold()) { setHoldOpen(true); return; }
+    if (keepBrowserMenu(target, rowRef.current)) return false;
+    menuPoint.openAt(point);
   }, !isEditing && !isPending);
   const commentUrl = () => viewerShareUrl(permalink
     ? permalink(comment.id)
@@ -612,9 +618,25 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
       }}
       actions={holdActions}
     />
+    {menuPoint.mounted && (
+      <MessageMenu
+        point={menuPoint.point}
+        onClose={menuPoint.close}
+        quickReactions={isOwnComment ? null : holdEmoji}
+        mine={mineEmoji}
+        allowMore={false}
+        onReact={(emoji) => {
+          const reaction = HOLD_REACTIONS.find((r) => holdReactionMeta(r).emoji === emoji);
+          if (reaction) onReact(comment.id, reaction);
+        }}
+        actions={holdActions.map(({ prime: _prime, secondary: _secondary, ...a }) => ({ ...a, divided: a.key === 'delete' || a.key === 'report' }))}
+        meta={messageMenuMeta(comment.createdAt)}
+      />
+    )}
     <motion.div
       ref={rowRef}
       data-chat-row="comment"
+      data-msg-menu-open={menuPoint.point ? '' : undefined}
       // A comment you just sent is already on screen under its placeholder id;
       // when the real id swaps in, the row remounts and must not fade in twice.
       initial={delivery?.status === 'posted' ? false : isPending ? { opacity: 0, y: 28, scale: 0.97 } : { opacity: 0, y: 10 }}
@@ -807,7 +829,7 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
               >
                 <TranslatableText publicContent
                   text={commentDisplayText}
-                  className={cn("text-zinc-300 text-base leading-6 break-words", highlighted && "reply-text-glow", isPending && "dh-sent-text-glow")}
+                  className={cn("text-zinc-300 text-base leading-6 break-words", isPending && "dh-sent-text-glow")}
                   as="p"
                   hideControls
                   auto={false}
@@ -1132,7 +1154,13 @@ function useFloatingPin(
       if (!section.getClientRects().length) { bar.style.visibility = 'hidden'; return; }
       bar.style.visibility = '';
       const stickTop = window.innerHeight - (parseFloat(getComputedStyle(bar).bottom) || 0) - h;
-      const top = Math.max(section.getBoundingClientRect().top, Math.min(slot.getBoundingClientRect().top, stickTop));
+      let top = Math.max(section.getBoundingClientRect().top, Math.min(slot.getBoundingClientRect().top, stickTop));
+      // Being written in, it never drops below the screen's bottom edge. On a
+      // post with few or no comments the page is too short to scroll, so the
+      // section's top can sit near the bottom of the screen: the first letter
+      // made the bar taller, the clamp pushed it down past the edge (under the
+      // keyboard on iPhones), and a saved draft kept it there after a reload.
+      if (top > stickTop && (bar.contains(document.activeElement) || bar.querySelector('[data-expanded]'))) top = stickTop;
       bar.style.transform = top === stickTop ? '' : `translate3d(0,${Math.round(top - stickTop)}px,0)`;
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(place); };
@@ -1146,12 +1174,16 @@ function useFloatingPin(
     window.addEventListener('scroll', schedule, { passive: true, capture: true });
     window.addEventListener('resize', schedule);
     bar.addEventListener('transitionend', schedule);
+    bar.addEventListener('focusin', schedule);
+    bar.addEventListener('focusout', schedule);
     return () => {
       cancelAnimationFrame(frame);
       resize.disconnect();
       window.removeEventListener('scroll', schedule, { capture: true });
       window.removeEventListener('resize', schedule);
       bar.removeEventListener('transitionend', schedule);
+      bar.removeEventListener('focusin', schedule);
+      bar.removeEventListener('focusout', schedule);
       bar.style.transform = '';
       bar.style.visibility = '';
     };
@@ -2163,7 +2195,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
     const row = root.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
     if (!row) return;
     scrolledToFocusRef.current = focusCommentId;
-    bringIntoViewAndFlash(row);
+    bringIntoView(row);
   }, [focusCommentId, filteredGroupedComments]);
 
   /**
@@ -3310,7 +3342,9 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
             <div
               data-comment-reply-tag
               className={cn(
-                "flex items-center gap-1.5 px-3 bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] rounded-xl",
+                // Solid, not glass: it sits inside the frosted reply bar, where its own
+                // blur can't reach the page, so the post read straight through it.
+                "flex items-center gap-1.5 px-3 bg-[var(--float-solid)] border border-white/[0.12] rounded-xl",
                 isMobile ? "mb-1 py-1.5" : "mb-2 py-2"
               )}
             >

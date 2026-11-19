@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Resim, GIF veya video ekle",
+    "changeMedia": "Resmi, GIF'i veya videoyu değiştir",
+    "mediaType": "Bir resim, GIF veya video seç.",
+    "videoSize": "Bu video {{n}} MB'tan büyük. Daha küçük bir tane seç."
+  },
   "textFeed": {
     "errorTitle": "Gönderiler yüklenemedi",
     "errorBody": "Metin akışını yeniden yüklemeyi dene.",
@@ -126,12 +132,16 @@
       "profile": "profil",
       "proposal": "teklif",
       "stage": "aşama",
-      "store": "dükkan"
+      "store": "dükkan",
+      "featureRequest": "istek",
+      "page": "sayfa"
     },
     "recipientChat": "sohbet",
     "recipientUser": "kullanıcı",
     "sendFailed": "{{item}} gönderilemedi",
-    "sentTo": "{{item}},{{name}} adresine gönderildi"
+    "sentTo": "{{item}},{{name}} adresine gönderildi",
+    "openPage": "Sayfayı aç",
+    "viewRequest": "İsteği gör"
   },
   "stageCover": {
     "admitOne": "BİRİNİ KABUL ET",
@@ -719,7 +729,14 @@
     "getTheApp": "Uygulamayı İndir",
     "connectAi": "Yapay Zekâyı Bağla",
     "converter": "Dönüştürücü",
-    "affiliate": "Satış Ortaklığı"
+    "affiliate": "Satış Ortaklığı",
+    "groups": {
+      "main": "Ana",
+      "create": "Oluştur",
+      "discover": "Keşfet",
+      "money": "Para",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} adlı kişinin profilini görüntüleyin",
@@ -763,6 +780,13 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "chatDeleteChoice": "Bir mesajı sildiğinde",
+    "chatDeleteChoiceDesc": "Her seferinde sor ya da her zaman yalnızca senin için veya sohbetteki herkes için sil.",
+    "chatDeleteAsk": "Her seferinde sor",
+    "chatDeleteMe": "Benden sil",
+    "chatDeleteMeDesc": "Senin sohbetinden gider, diğerleri hâlâ görür",
+    "chatDeleteEveryone": "Herkesten sil",
+    "chatDeleteEveryoneDesc": "Mümkün olduğunda. Bir gruptaki başkasının mesajı yalnızca senden silinir",
     "postLanding": "Paylaştıktan sonra",
     "postLandingDesc": "Yeni gönderinin akışında nasıl belirdiği",
     "postLandingGhost": "Hayalet yuva",
@@ -915,6 +939,11 @@
     "feedTogglesCleared": "Akış filtreleri sıfırlandı",
     "defaultProfileTab": "Varsayılan profil sekmesi",
     "defaultProfileTabDesc": "Ziyaretçilerin profilinizde ilk hangi sekmeyi göreceğini seçin",
+    "defaultProfileView": "Profil gönderi düzeni",
+    "defaultProfileViewDesc": "Profilinizi açanlara gönderilerinizi ızgara ya da liste olarak gösterin",
+    "readerProfileView": "Diğer profilleri şöyle aç",
+    "readerProfileViewDesc": "Açtığın her profil için ızgara veya liste seç ya da her kişinin kendi seçimini koru",
+    "readerProfileViewOwner": "Kişinin kendi seçimi",
     "public": "Herkese Açık",
     "publicDesc": "Herkes gönderilerinizi görebilir",
     "private": "Özel",
@@ -1351,7 +1380,19 @@
     "socialConnectedShort": "Bağlı",
     "socialConnectFailed": "{{platform}} bağlanamadı. Lütfen tekrar dene.",
     "socialVerifiedFollowers": "{{value}} takipçi",
-    "socialFollowersPending": "Takipçi sayısı güncelleniyor"
+    "socialFollowersPending": "Takipçi sayısı güncelleniyor",
+    "menuLayout": "Menü düzeni",
+    "menuLayoutDesc": "Menünün sayfaları nasıl grupladığı",
+    "menuLayoutTabs": "Sekmeler",
+    "menuLayoutTabsDesc": "Her seferinde bir grup, büyük simgelerle",
+    "menuLayoutSections": "Bölümler",
+    "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
+    "menuLayoutFolders": "Klasörler",
+    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör",
+    "publicChatInBar": "Alt çubukta Genel Sohbet",
+    "publicChatInBarDesc": "Ekranın altındaki çubuktan tek dokunuşla Genel Sohbet'e gir",
+    "chatCards": "Sohbetler kart olarak",
+    "chatCardsDesc": "Her sohbet kendi kartında. Kapatınca sohbetler arasında çizgi olan sade bir liste olur."
   },
   "common": {
     "confirm": "Onayla",
@@ -2060,14 +2101,14 @@
       "governanceVotedRejected": "Oyladığınız bir teklif kabul edilmedi: “{{title}}”",
       "governancePassed": "“{{title}}” teklifiniz kabul edildi 🎉",
       "governanceRejected": "“{{title}}” teklifiniz kabul edilmedi",
-      "featureLikeNamed": "{{name}} beğendiğiniz özelleştirme talebinizi “{{title}}”",
-      "featureLike": "{{name}} beğendiğiniz özelleştirme talebi",
-      "featureCommentNamed": "{{name}} özelleştirme talebiniz “{{title}}” üzerine yorum yaptı",
-      "featureComment": "{{name}} özelleştirme talebiniz üzerine yorum yaptı",
+      "featureLikeNamed": "{{name}} “{{title}}” isteğinizi beğendi",
+      "featureLike": "{{name}} isteğinizi beğendi",
+      "featureCommentNamed": "{{name}} “{{title}}” isteğinize yorum yaptı",
+      "featureComment": "{{name}} isteğinize yorum yaptı",
       "featureReplyNamed": "{{name}} “{{title}}” üzerine size cevap verdi",
       "featureReply": "{{name}} yorumunuza cevap verdi",
       "featureMentionNamed": "{{name}} “{{title}}” üzerinde size atıfta bulundu",
-      "featureMention": "{{name}} bir özelleştirme talebinde size atıfta bulundu",
+      "featureMention": "{{name}} bir istekte sizden bahsetti",
       "featureNewNamed": "{{name}} yeni bir istekte bulundu: “{{title}}”",
       "featureNew": "{{name}} yeni bir istekte bulundu",
       "featureActivityNamed": "{{name}}, “{{title}}” üzerine yorum yaptı",
@@ -2113,6 +2154,12 @@
     "likes": "Beğeniler",
     "subscribers": "Aboneler",
     "affiliates": "Ortaklar",
+    "ogChallenge": "OG Görevi",
+    "ogHolders_one": "{{count}} OG sahibi",
+    "ogHolders_other": "{{count}} OG sahibi",
+    "ogChallengeTitle": "OG sahiplerini geri getir",
+    "ogChallengeBody": "Hâlâ DHB tutan kişileri davet et. Davet bağlantınla katılıp DHB'lerini Riftn cüzdanlarında tuttuklarında burada senin için sayılırlar.",
+    "ogChallengeCta": "Davet bağlantını al",
     "directReferrals_one": "{{count}} doğrudan",
     "directReferrals_other": "{{count}} doğrudan",
     "secondaryReferrals_one": "{{count}} dolaylı",
@@ -2485,7 +2532,8 @@
       "total": "Toplam erişim",
       "breakdownTitle": "Bu erişimin nereden geldiği",
       "dehubFollowers": "Riftn takipçileri",
-      "verified": "Sosyal sayılar içerik üreticisinin bağladığı hesaplardan gelir."
+      "verified": "Sosyal sayılar içerik üreticisinin bağladığı hesaplardan gelir.",
+      "selfReported": "Sosyal takipçi sayıları yaratıcı tarafından girilir."
     },
     "loginDescription": "Profilinizi görüntülemek ve yönetmek için giriş yapın.",
     "replyThread": {
@@ -2865,6 +2913,7 @@
     "failedSubmit": "Başvuru gönderilemedi. Lütfen tekrar deneyin."
   },
   "loginModal": {
+    "didYouMean": "{{email}} mi demek istediniz?",
     "bringLoginOver": "Riftn'ı dehub.io'da mı kullandın? <bring>Oturumunu buraya taşı</bring>",
     "restoreWalletTitle": "Cüzdanını geri getir",
     "restoreOriginalWallet": "Profilin, bu giriş için kaydedilen cüzdanda değil, ilk girişindeki cüzdanda. O cüzdanı geri getirmek için Riftn'a ilk katıldığın şekilde giriş yap. Profilin ve bakiyen olduğu gibi kalır.",
@@ -3684,6 +3733,10 @@
     "statsLoadFailed": "Staking istatistikleri yüklenemedi"
   },
   "communities": {
+    "muteChat": "Sessize al",
+    "mutedChat": "Sessizde",
+    "muteChatHint": "Bu topluluğun sohbetinden bildirim alma. Sohbeti okumaya devam edebilirsin",
+    "unmuteChatHint": "Bu topluluğun sohbetinden yeniden bildirim al",
     "sortTop": "En İyi",
     "shareLink": "Bağlantıyı paylaş",
     "pinnedMore": "Daha fazla",
@@ -6588,6 +6641,19 @@
       "needsImageToWork": "{{model}} üzerinde çalışmak için bir resme ihtiyaç duyuyor. Önce bir tane ekleyin.",
       "speechLimit": "Bu {{length}} karakterdir. Sınır {{limit}}.",
       "musicTrackLength": "{{count}}s parkur"
+    },
+    "gallery": {
+      "browse": "Üretimlere göz at",
+      "create": "Oluştur",
+      "fullscreen": "Tam ekran görüntüle",
+      "missing": "Bu üretim kullanılamıyor.",
+      "send": "Gönder",
+      "notifications": {
+        "generation_like": "{{name}} üretimine tepki verdi",
+        "generation_comment_like": "{{name}} yorumuna tepki verdi",
+        "generation_reply": "{{name}} yorumunu yanıtladı",
+        "generation_comment": "{{name}} üretimine yorum yaptı"
+      }
     }
   },
   "pricing": {
@@ -7960,6 +8026,9 @@
     "sourceEncoder": "OBS / kodlayıcı",
     "sourceEncoderHint": "RTMP bilgilerini al",
     "screenPickHint": "Sırada ekranı, pencereyi ya da sekmeyi seçeceksiniz — ardından mikrofonunuz ve sekmenin kendi sesiyle birlikte yayına girer.",
+    "screenInAppHint": "Riftn uygulamasında",
+    "screenInAppNote": "Telefon tarayıcıları hiçbir sitenin ekranını paylaşmasına izin vermez. Bunun yerine Riftn uygulamasından canlı yayına geç ve Ekranı paylaş'a dokun.",
+    "screenInAppCta": "Riftn uygulamasını indir",
     "replayAllowanceUsed": "Bugünkü yükleme hakkınızı kullandınız, bu yüzden bu yayının tekrarı saklanmayacak. Hak, UTC gece yarısı sıfırlanır.",
     "replayFreeTier": "Ücretsiz hesaplar yayının ilk {{size}} kısmını tekrar olarak saklar — rozet stake etmek sınırı yükseltir.",
     "replayTiered": "Bu yayının {{size}} kadarı tekrar olarak saklanır ({{tier}} günlük hak).",
@@ -9033,7 +9102,19 @@
     "declined": "Arama reddedildi",
     "noAnswer": "Cevap yok",
     "missed": "Cevapsız arama",
-    "callBack": "Geri ara"
+    "callBack": "Geri ara",
+    "group": "Grup",
+    "groupVoiceCall": "Grup sesli araması",
+    "groupVideoCall": "Grup görüntülü araması",
+    "callingGroup": "Grup aranıyor...",
+    "isCalling": "{{name}} arıyor",
+    "leave": "Ayrıl",
+    "joinCall": "Katıl",
+    "inCall_one": "Aramada {{count}} kişi",
+    "inCall_other": "Aramada {{count}} kişi",
+    "startGroupVoice": "Grup sesli araması başlat",
+    "startGroupVideo": "Grup görüntülü araması başlat",
+    "you": "Sen"
   },
   "badgeAscension": {
     "reached": "{{tier}} seviyesine ulaştınız",
@@ -11780,7 +11861,7 @@
     "audioSpace": "Ses Alanı",
     "audioSpaceDesc": "Kullanıcıların konuşabileceği, dinleyebileceği ve sohbete katılmak için ellerini kaldırabilecekleri canlı bir ses odası.",
     "public": "Herkese Açık",
-    "publicDesc": "Herkes tarafından görülebilen içerik. Kişiler, **görünür** gönderilere bakabilir, beğenebilir ve yorum yapabilir.",
+    "publicDesc": "Herkes tarafından görülebilen içerik. Kişiler, görünür gönderilere bakabilir, beğenebilir ve yorum yapabilir.",
     "private": "Özel",
     "privateDesc": "İçerik yalnızca sizin tarafınızdan görülebilir. Özel gönderiler diğer kullanıcılardan ve genel akıştan gizlenir.",
     "ppv": "Görüntüleme Başına Ödeme (PPV)",
@@ -12711,7 +12792,7 @@
   "multiPost": {
     "tab": "Çoklu gönderim",
     "title": "Çoklu gönderim",
-    "intro": "X, YouTube, Instagram, TikTok ve daha fazlasına aynı anda dehub ile gönderin. Hesaplarınızı bir kez bağlayın, ardından her gönderinin nereye gideceğini seçin.",
+    "intro": "X, YouTube, Instagram, TikTok ve daha fazlasına aynı anda Riftn ile gönderin. Hesaplarınızı bir kez bağlayın, ardından her gönderinin nereye gideceğini seçin.",
     "creditsHeading": "Gönderi kredileri",
     "credits": "{{count}} gönderi kredisi",
     "topUpTitle": "Yükleyin ve tasarruf edin",
@@ -12759,7 +12840,12 @@
   "dm": {
     "planRestricted": "Bu kullanıcı mesaj almak için abonelik gerektiriyor.",
     "planTypeNotAllowed": "Bu içerik üreticisinin planı bu tür mesaja izin vermiyor.",
-    "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı."
+    "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı.",
+    "shareGroups": "Gruplar",
+    "shareKindGroup": "Grup",
+    "shareKindChannel": "Kanal",
+    "shareKindCommunity": "Topluluk",
+    "reportMessage": "Mesajı bildir"
   },
   "credits": {
     "earningsWorth": "{{amount}} değerinde",
@@ -15348,6 +15434,9 @@
     "8c7afb50b89c": "Başka Yere Paylaş",
     "bdd4f5015e96": "Gönderilen İstek Bildirimi Kapat",
     "8f3dc69e83c4": "Geribildiriminiz gönderildi!",
+    "7f78bdc0762d": "+{{value1}} puan",
+    "f0c8bb34335b": "+{{value1}} puan kazandın",
+    "0fbe06b679a8": "Yayınlanan her istek için {{value1}} puan, Top builders puanına eklenir.",
     "1aa7b1c1d5fb": "Teşekkürler!",
     "6b1037924516": "% kayma",
     "e50f1f5e6029": "Kayma Toleransı",
@@ -15875,7 +15964,7 @@
     "43fb11b48038": "tipik ",
     "4caa918bf60d": " 1.000 'de",
     "6bdf24e0e55f": "RPM $",
-    "0435a318b3b4": " deHub'da",
+    "0435a318b3b4": " Riftn'da",
     "600d1c6e47ab": "Senin rakamların değil mi? Herhangi bir izlenme sayısını dene",
     "ea68771a3994": "Etkileşim",
     "dfdd39a6da39": "Bu dönem için veri yok",
@@ -15901,7 +15990,7 @@
     "00dc1fda673d": "En büyük kategori: ",
     "f75dda0d2e06": "Henüz işlem yok",
     "690dbe9dc099": "Yeni",
-    "556108290716": " **işlem**",
+    "556108290716": " işlem",
     "4c1aaeb07b12": "İşlemler yüklenemedi",
     "2406b03c78e5": "İşlem geçmişinizi yeniden yüklemeyi deneyin.",
     "7fe81b27eb29": "Bu topluluk özel hale getirilsin mi? Mevcut üyeler kalır; yeni katılanların onaya ihtiyacı olacaktır.",
@@ -17704,7 +17793,7 @@
     "0b69d8573e32": "En üst düzey (DEX) ulaşıldı",
     "a6be2efe5bce": "Her seviye kilidi açıldı",
     "6334c1d377c6": " (DEX)",
-    "54fb8a1d0578": "**DEX**",
+    "54fb8a1d0578": "DEX",
     "d5cade7ef319": "Mal",
     "3f248f69b2f7": "Hisse",
     "a26175817712": "Adres kopyalandı",
@@ -19256,23 +19345,23 @@
     "bff2afe05d86": "{{value1}}’i zaman çizelgesine ekle",
     "88bb4da02044": "{{value1}}’i iptal et",
     "78d4a6075ea1": "{{value1}} sürümünü {{value2}}’de aç",
-    "865e2b87260d": "Eklentiler zaman çizelgesine **{{value1}}** ekle",
-    "4a94ca0de4ce": "**{{value1}}** aç",
+    "865e2b87260d": "Eklentiler zaman çizelgesine {{value1}} ekle",
+    "4a94ca0de4ce": "{{value1}} aç",
     "d05a65eb0e67": " ({{value1}} çalışıyor)",
-    "023e45b5489c": "Yaratıcı'da **\"{{value1}}\"**'yi gör",
-    "be0c54989fce": "Yaratıcı'da **\"{{value1}}\"** 3D modelini gör",
-    "62c1c73d0370": "**{{value1}}**'yi zaman çizelgesine ekle",
-    "b0332617bf46": "Kanvasa veya zaman çizelgesine sürükle veya Enter tuşuna bas **{{value1}}** eklemek için",
-    "354c7f4b2dfa": "**{{value1}}** boyutlandır",
-    "17b433022c57": "**{{value1}}** rengini değiştir",
-    "4b0528e1523d": "**{{value1}}** planlanacak",
-    "d4e44dac1ed0": "**{{value1}}** canlı yayını oluşturulacak",
-    "58bb510b9e80": "Fotoğrafı yeniden sıralamak için **{{value1}}** sürükle",
-    "1067b33ac325": "**{{value1}}** resmini değiştir",
-    "0238af30a6db": "**{{value1}}** çerçevesi",
-    "62f3a3b868d9": " en az **{{value1}}** dakika sonra",
-    "cccae7763640": "**{{value1}}** nişanınız size toplamda **{{value2}}** verir.",
-    "53a9b7c51beb": "Toplamda **{{value1}}**'ye sahipsiniz. Her nişan seviyesi bir ekstra verir.",
+    "023e45b5489c": "Yaratıcı'da \"{{value1}}\"'yi gör",
+    "be0c54989fce": "Yaratıcı'da \"{{value1}}\" 3D modelini gör",
+    "62c1c73d0370": "{{value1}}'yi zaman çizelgesine ekle",
+    "b0332617bf46": "Kanvasa veya zaman çizelgesine sürükle veya Enter tuşuna bas {{value1}} eklemek için",
+    "354c7f4b2dfa": "{{value1}} boyutlandır",
+    "17b433022c57": "{{value1}} rengini değiştir",
+    "4b0528e1523d": "{{value1}} planlanacak",
+    "d4e44dac1ed0": "{{value1}} canlı yayını oluşturulacak",
+    "58bb510b9e80": "Fotoğrafı yeniden sıralamak için {{value1}} sürükle",
+    "1067b33ac325": "{{value1}} resmini değiştir",
+    "0238af30a6db": "{{value1}} çerçevesi",
+    "62f3a3b868d9": " en az {{value1}} dakika sonra",
+    "cccae7763640": "{{value1}} nişanınız size toplamda {{value2}} verir.",
+    "53a9b7c51beb": "Toplamda {{value1}}'ye sahipsiniz. Her nişan seviyesi bir ekstra verir.",
     "d32af5b18e14": "{{value1}} bağlantısını kaldır",
     "9776bafbaa83": "{{value1}}'yi kopyala",
     "65bc4474f7ea": "{{value1}} ile savaşınız başlıyor",
@@ -19282,10 +19371,10 @@
     "87a58776c5e4": "{{value1}}{{value2}} — İzleme Yeri | Riftn",
     "9f731f9393a8": "{{value2}} ve 140+ diğer ülkede {{value1}}'yi izlemek, kiralamak veya satın almak için nerede izleyebileceğiniz.",
     "e8474fe0fb3e": "{{value1}} | Riftn Etkinlikleri",
-    "5a56acf53e8e": "Herhangi birini Riftn'a davet edin ve onlar tarafından üretilen tüm gelirden **{{value1}}**% kazanın, plus onlar tarafından davet edilen herkesten **{{value2}}**% kazanın. Sonsuza kadar.",
+    "5a56acf53e8e": "Herhangi birini Riftn'a davet edin ve onlar tarafından üretilen tüm gelirden {{value1}}% kazanın, plus onlar tarafından davet edilen herkesten {{value2}}% kazanın. Sonsuza kadar.",
     "ef5523101c85": "{{value1}} sizi Riftn'a davet etti",
-    "7e44b080227f": "Doğrudan **{{value1}}**% kazanç",
-    "2ed16d4204db": "İkincil **{{value1}}**% kazanç",
+    "7e44b080227f": "Doğrudan {{value1}}% kazanç",
+    "2ed16d4204db": "İkincil {{value1}}% kazanç",
     "62918f8e0390": "{{value1}} - Riftn Topluluğu",
     "2dc2e3027208": "Riftn'da {{value1}}' a katılın",
     "9010b5b17d48": "Ek {{value1}}/{{value2}}",
@@ -20769,5 +20858,33 @@
     "scheduledToast": "{{when}} için zamanlandı",
     "failedToast": "Zamanlanmış bir mesaj gönderilemedi",
     "error": "Olmadı. Tekrar dene."
+  },
+  "mentionLinks": {
+    "communities": "Topluluklar",
+    "pages": "Sayfalar",
+    "people": "Kişiler",
+    "linkTo": "{{name}} bağlantısı ekle",
+    "empty": "Hiçbir şey bulunamadı",
+    "hint": "Kişi, topluluk ve sayfa bulmak için yazın",
+    "members": " üye",
+    "placeholder": "Kişi, topluluk, sayfa ara...",
+    "title": "Bahset veya bağlantı ver"
+  },
+  "msgDelete": {
+    "title": "Mesaj silinsin mi?",
+    "titleMany": "{{count}} mesaj silinsin mi?",
+    "bodyOwn": "Yalnızca kendi sohbetinden ya da herkes için kaldır.",
+    "bodyOwnMany": "Yalnızca kendi sohbetinden ya da herkes için kaldır.",
+    "bodyOthers": "Yalnızca senin sohbetinden kaldırılacak. Karşı taraf görmeye devam edecek.",
+    "bodyOthersMany": "Yalnızca senin sohbetinden kaldırılacaklar. Sohbetteki diğer kişiler görmeye devam edecek.",
+    "bodyOwnBoth": "Yalnızca kendi sohbetinden ya da ikiniz için kaldır.",
+    "bodyOwnBothMany": "Yalnızca kendi sohbetinden ya da ikiniz için kaldır.",
+    "forMe": "Benim için sil",
+    "forEveryone": "Herkes için sil",
+    "forBoth": "İkimiz için de sil",
+    "forMeAndName": "Benim ve {{name}} için sil",
+    "remember": "Seçimimi hatırla",
+    "rememberHint": "İstediğin zaman Ayarlar'dan değiştir",
+    "failed": "Mesaj silinemedi"
   }
 }

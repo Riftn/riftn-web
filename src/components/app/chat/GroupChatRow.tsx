@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { BellOff, Pin } from 'lucide-react';
 import { isMuted } from '@/hooks/use-chat-prefs';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
-import type { ChatPref } from '@/lib/api/dehub/chat-prefs';
+import type { ChatPref, ChatReactionSummary } from '@/lib/api/dehub/chat-prefs';
+import { ReactionAlertBadge, reactionAlertLine } from '@/components/app/chat/ReactionAlertBadge';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
 import Lock from '@/components/ui/cut-icons/privacy';
@@ -16,10 +17,12 @@ import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import dehubCoin from '@/assets/dehub-coin.png';
 
-export function GroupChatRow({ community, onClick, pref, selected, selecting = false, checked = false, onLongPress }: {
+export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress }: {
   community: Community;
   onClick: () => void;
   pref?: ChatPref;
+  /** Reactions to your messages here that you haven't seen yet. */
+  reactions?: ChatReactionSummary | null;
   selected?: boolean;
   /** Picking several chats (right-click, Select): the row shows a tick. */
   selecting?: boolean;
@@ -76,10 +79,14 @@ export function GroupChatRow({ community, onClick, pref, selected, selecting = f
           {community.is_private && <Lock className="w-3 h-3 shrink-0 text-zinc-500" />}
           {isMuted(pref) && <BellOff data-chat-row-muted aria-hidden="true" className="ml-auto h-3.5 w-3.5 shrink-0 text-zinc-500" />}
           {pref?.pinnedAt && <Pin data-chat-row-pinned aria-hidden="true" className={`${isMuted(pref) ? '' : 'ml-auto'} h-3.5 w-3.5 shrink-0 rotate-45 text-zinc-500`} />}
-          {pref?.markedUnread && (
+          {pref?.markedUnread && !reactions && (
             <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className={`${pref?.pinnedAt || isMuted(pref) ? 'ml-1' : 'ml-auto'} h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white`} />
           )}
+          <ReactionAlertBadge reactions={reactions} className={pref?.pinnedAt || isMuted(pref) ? 'ml-1' : 'ml-auto'} />
         </span>
+        {reactions ? (
+          <p data-reaction-alert-line className="text-white font-bold text-sm truncate">{reactionAlertLine(t, reactions, { named: true })}</p>
+        ) : (
         <p className="text-zinc-500 text-sm truncate flex items-center gap-1">
           {subtitle}
           {price > 0 && (
@@ -88,6 +95,7 @@ export function GroupChatRow({ community, onClick, pref, selected, selecting = f
             </span>
           )}
         </p>
+        )}
       </div>
     </button>
   );

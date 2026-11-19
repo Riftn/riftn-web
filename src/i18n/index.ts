@@ -19,7 +19,10 @@ const STORAGE_KEY = 'user-preferred-language';
 
 // Read cached language (same key as useUserLanguage hook)
 const savedLang = localStorage.getItem(STORAGE_KEY);
-const browserLang = navigator.language?.split('-')[0] || 'en';
+// Taiwan, Hong Kong, Macau and zh-Hant browsers read Traditional Chinese.
+const browserLang = /^zh-(tw|hk|mo)\b|^zh-hant/i.test(navigator.language || '')
+  ? 'zh_tw'
+  : navigator.language?.split('-')[0] || 'en';
 let defaultLang = savedLang || browserLang;
 
 export const SUPPORTED_LANGUAGES = [
@@ -44,7 +47,8 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'bg', name: 'Bulgarian', nativeName: 'Български' },
   { code: 'my', name: 'Burmese', nativeName: 'မြန်မာ' },
   { code: 'cs', name: 'Czech', nativeName: 'Čeština' },
-  { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: 'zh', name: 'Chinese (Simplified)', nativeName: '简体中文' },
+  { code: 'zh_tw', name: 'Chinese (Traditional)', nativeName: '繁體中文' },
   { code: 'cjy', name: 'Chinese, Jinyu', nativeName: '晋语' },
   { code: 'mnp', name: 'Chinese, Min Bei', nativeName: '闽北语' },
   { code: 'ctg', name: 'Chittagonian', nativeName: 'চাটগাঁইয়া' },
@@ -92,7 +96,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'rkt', name: 'Rangpuri', nativeName: 'রংপুরী' },
   { code: 'ro', name: 'Romanian', nativeName: 'Română' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский' },
-  { code: 'sdr', name: 'Sadri', nativeName: 'سدری' },
+  { code: 'sdr', name: 'Sadri', nativeName: 'सादरी' },
   { code: 'skr', name: 'Saraiki', nativeName: 'سرائیکی' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'sr', name: 'Serbian', nativeName: 'Српски' },
@@ -135,11 +139,12 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ky', name: 'Kyrgyz', nativeName: 'Кыргызча' },
 ];
 
-// ?hl=<code> is the URL a localised search result lands on: the crawler is
-// served that page in that language with an hreflang cluster (see
-// CLOUDFLARE_WORKER_SEO.js). Someone arriving on it asked for that language,
-// so for this visit it beats the saved preference, and it becomes the saved
-// preference so the next page keeps it after the router drops the parameter.
+// ?hl=<code> is the URL a localised search result (or a shared link) lands on:
+// the crawler is served that page in that language with an hreflang cluster
+// (see CLOUDFLARE_WORKER_SEO.js). It picks the language for this visit only.
+// It is NOT saved as the reader's preference: a link someone else shared must
+// not change the language every later visit opens in. Only an explicit pick in
+// a language menu saves one.
 const urlLang = (() => {
   try {
     const raw = (new URLSearchParams(window.location.search).get('hl') || '').toLowerCase();
@@ -148,21 +153,14 @@ const urlLang = (() => {
     return '';
   }
 })();
-if (urlLang) {
-  defaultLang = urlLang;
-  try {
-    localStorage.setItem(STORAGE_KEY, urlLang);
-  } catch {
-    /* private mode: the visit still gets the language, the next one will not */
-  }
-}
+if (urlLang) defaultLang = urlLang;
 
 // Dynamic import map for lazy loading locale files
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // Languages written right-to-left. Keep in sync with SUPPORTED_LANGUAGES.
 export const RTL_LANGUAGES = new Set([
   'ar', 'acm', 'acw', 'aec', 'ajp', 'ayn', 'apd', 'ary', 'arz', // Arabic + dialects
-  'he', 'fa', 'ur', 'pbt', 'sd', 'skr', 'ug', 'dcc', 'sdr',
+  'he', 'fa', 'ur', 'pbt', 'sd', 'skr', 'ug', 'dcc',
 ]);
 
 export function applyDocumentDirection(lang: string): void {

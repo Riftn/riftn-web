@@ -69,11 +69,17 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'appearance', anchor: 'jungle-mood', label: 'Time of day', labelKey: 'jungleMood.title', keywords: 'jungle day evening night dusk dark light mode sun moon' },
   { tab: 'appearance', anchor: 'language', label: 'Language', labelKey: 'settings.language', keywords: 'translate locale english' },
   { tab: 'appearance', anchor: 'feed-layout', label: 'Feed Layout', labelKey: 'settings.feedLayout', keywords: 'compact comfortable sidebar density' },
+  { tab: 'appearance', anchor: 'menu-layout', label: 'Menu layout', labelKey: 'settings.menuLayout', keywords: 'menu tabs sections folders groups categories buttons icons grid organise' },
   { tab: 'appearance', anchor: 'default-feed', label: 'Default feed', labelKey: 'settings.defaultFeed', keywords: 'home shorts videos images music audio live open start tab' },
   { tab: 'appearance', anchor: 'feed-toggles', label: 'Reset feed toggles', labelKey: 'settings.feedToggles', keywords: 'filters sort default remember clear' },
   { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
   { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
+  { tab: 'appearance', anchor: 'login-look', label: 'Sign-in screen', labelKey: 'settings.loginLook.title', keywords: 'login sign in screen logo animation look tube tv vhs led wall hologram retro scan lines slogan' },
+  { tab: 'appearance', anchor: 'chat-cards', label: 'Chats as cards', labelKey: 'settings.chatCards', keywords: 'chat list cards plain lines rows compact messages inbox layout' },
+  { tab: 'appearance', anchor: 'chat-delete-choice', label: 'When you delete a message', labelKey: 'settings.chatDeleteChoice', keywords: 'delete message chat dm remove for me everyone both remember choice ask' },
   { tab: 'appearance', anchor: 'default-profile-tab', label: 'Default profile tab', labelKey: 'settings.defaultProfileTab', keywords: 'landing tab visitors' },
+  { tab: 'appearance', anchor: 'default-profile-view', label: 'Profile posts layout', labelKey: 'settings.defaultProfileView', keywords: 'grid list view layout profile posts tiles visitors' },
+  { tab: 'appearance', anchor: 'reader-profile-view', label: 'Open other profiles as', labelKey: 'settings.readerProfileView', keywords: 'grid list view layout other profiles open everyone' },
   { tab: 'appearance', anchor: 'autoplay', label: 'Auto-play', labelKey: 'settings.autoPlay', keywords: 'autoplay video play automatically' },
   { tab: 'appearance', anchor: 'autoplay-muted', label: 'Start autoplay muted', labelKey: 'settings.autoPlayMuted', keywords: 'autoplay mute muted sound audio silent quiet volume' },
   { tab: 'appearance', anchor: 'data-saver', label: 'Data Saver', labelKey: 'settings.dataSaver', keywords: 'bandwidth quality mobile data' },
@@ -118,6 +124,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'privacy', anchor: 'wallet-unlock', label: 'Wallet unlock prompt', labelKey: 'settings.walletUnlockInterval', keywords: 'password timeout lock wallet' },
   { tab: 'privacy', anchor: 'biometric-unlock', label: 'Biometric unlock', labelKey: 'copy.18e709a14cb1', keywords: 'fingerprint face id passkey' },
   { tab: 'privacy', anchor: 'wallet-recovery', label: 'Back up wallet', labelKey: 'copy.ef9ec257e675', keywords: 'backup recovery 12 words seed phrase mnemonic private key export' },
+  { tab: 'privacy', anchor: 'reset-wallet', label: 'Reset wallet', labelKey: 'resetWallet.title', keywords: 'reset replace change new wallet lost stolen hacked compromised safepal metamask move account' },
   { tab: 'privacy', anchor: 'active-sessions', label: 'Active sessions', labelKey: 'settings.activeSessions', keywords: 'devices logged in sign out revoke' },
   { tab: 'privacy', anchor: 'your-data', label: 'Your Data', labelKey: 'settings.yourData', keywords: 'export download import gdpr' },
   { tab: 'privacy', anchor: 'blocked-users', label: 'Blocked Users', labelKey: 'copy.34e1447eb1e2', keywords: 'block unblock mute' },
@@ -231,13 +238,22 @@ let revealToken = 0;
 let flashTimer: ReturnType<typeof setTimeout> | null = null;
 let flashed: HTMLElement | null = null;
 
-/** Bottom edge of the sticky settings header, in viewport coordinates. */
+/**
+ * Bottom edge of the sticky settings header, in viewport coordinates.
+ * Pages stay mounted in the page cache, so a hidden page's header (e.g. the
+ * home feed's, 0px tall) can come first in the document; only a header that
+ * is actually on screen counts, or the setting lands under the visible one.
+ */
 function stickyHeaderBottom(): number {
-  const header = document.querySelector<HTMLElement>('[data-feed-nav-outer]');
-  if (!header) return 0;
-  const style = getComputedStyle(header);
-  if (style.position !== 'sticky' && style.position !== 'fixed') return 0;
-  return Math.max(0, header.getBoundingClientRect().bottom);
+  let bottom = 0;
+  for (const header of Array.from(document.querySelectorAll<HTMLElement>('[data-feed-nav-outer]'))) {
+    const style = getComputedStyle(header);
+    if (style.position !== 'sticky' && style.position !== 'fixed') continue;
+    const rect = header.getBoundingClientRect();
+    if (rect.height === 0) continue;
+    bottom = Math.max(bottom, rect.bottom);
+  }
+  return bottom;
 }
 
 function scrollAnchorIntoView(el: HTMLElement, smooth: boolean): void {

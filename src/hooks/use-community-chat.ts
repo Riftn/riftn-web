@@ -15,7 +15,7 @@ import { getAccountSummaries } from '@/lib/api/dehub';
 import { adminErrorMessage } from '@/hooks/use-community-admin';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { notifyCommunityMentions } from '@/lib/community-mention-notify';
-import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { reportCommunityChatMessage, reportCommunityChatReaction } from '@/lib/community-chat-notify';
 import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { toast } from 'sonner';
 import { useCommunityChatHistory } from './use-community-chat-history';
@@ -82,7 +82,28 @@ export function useCommunityChat(
   const history = useCommunityChatHistory({
     communityId, walletAddress: walletAddress ?? null, isPrivate, readPage: readCommunityPage,
   });
-  const { rawMessages, referenceMessages, messagesKey, isLoading } = history;
+  const { rawMessages: storedMessages, referenceMessages, messagesKey, isLoading } = history;
+
+  // "Delete for me": ids this person hid. Everyone else still sees them.
+  const hiddenKey = useMemo(() => ['community-chat-hidden', communityId, walletAddress?.toLowerCase() ?? ''] as const, [communityId, walletAddress]);
+  const { data: hiddenIds } = useQuery({
+    queryKey: hiddenKey,
+    queryFn: async () => {
+      const { data, error } = await withWalletHeader(
+        (supabase as any).rpc('community_hidden_message_ids', { _community_id: communityId }),
+        walletAddress!,
+      );
+      if (error) return [] as string[];
+      return (data ?? []) as string[];
+    },
+    enabled: !!communityId && !!walletAddress,
+    staleTime: 5 * 60_000,
+  });
+  const rawMessages = useMemo(() => {
+    if (!hiddenIds?.length) return storedMessages;
+    const hidden = new Set(hiddenIds);
+    return storedMessages.filter(m => !hidden.has(m.id));
+  }, [storedMessages, hiddenIds]);
 
   // Your lines that are still going out (or failed). Drawn at once, exactly as
   // they will look once stored, and kept outside the query cache so a history
@@ -357,6 +378,8 @@ export function useCommunityChat(
     if (error) {
       toast.error(adminErrorMessage(error, _translateCopy("copy.13931898084d", { defaultValue: "Failed to react" })));
       if (prev) queryClient.setQueryData(messagesKey, prev);
+    } else if (msg.wallet_address && msg.wallet_address.toLowerCase() !== walletAddress.toLowerCase()) {
+      void reportCommunityChatReaction(communityId, messageId, emoji, walletAddress);
     }
   }, [rawMessages, walletAddress, communityId, queryClient, messagesKey]);
 
@@ -389,6 +412,8 @@ export function useCommunityChat(
     if (error) {
       toast.error(adminErrorMessage(error, _translateCopy("copy.bf206a215a1f", { defaultValue: "Failed to remove reaction" })));
       if (prev) queryClient.setQueryData(messagesKey, prev);
+    } else if (msg.wallet_address && msg.wallet_address.toLowerCase() !== walletAddress.toLowerCase()) {
+      void reportCommunityChatReaction(communityId, messageId, emoji, walletAddress, true);
     }
   }, [rawMessages, walletAddress, communityId, queryClient, messagesKey]);
 
@@ -442,6 +467,24 @@ export function useCommunityChat(
     }
   }, [walletAddress, communityId, queryClient, messagesKey]);
 
+  // Delete for me: any line, gone from your view only (every device on next load).
+  const hideMessage = useCallback(async (messageId: string) => {
+    if (!walletAddress || !communityId) return false;
+    const prev = queryClient.getQueryData<string[]>(hiddenKey);
+    queryClient.setQueryData<string[]>(hiddenKey, (old = []) => (old.includes(messageId) ? old : [...old, messageId]));
+    const { error } = await withWalletHeader(
+      (supabase as any).rpc('community_hide_message', { _message_id: messageId }),
+      walletAddress
+    );
+    if (error) {
+      console.error('[CommunityChat] Hide error:', error);
+      queryClient.setQueryData(hiddenKey, prev ?? []);
+      toast.error(_translateCopy('msgDelete.failed', { defaultValue: 'Could not delete the message' }));
+      return false;
+    }
+    return true;
+  }, [walletAddress, communityId, queryClient, hiddenKey]);
+
   // Pin / unpin. Only ever reaches the server for someone holding pin_messages.
   const setPinned = useCallback(async (messageId: string, pinned: boolean) => {
     if (!walletAddress || !communityId) return;
@@ -493,6 +536,7 @@ export function useCommunityChat(
     discardSend,
     editMessage,
     deleteMessage,
+    hideMessage,
     setPinned,
     addReaction,
     removeReaction,

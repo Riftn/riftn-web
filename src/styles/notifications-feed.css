@@ -16,6 +16,8 @@
   --nf-hover: rgba(255, 255, 255, 0.03);
   --nf-line: rgba(255, 255, 255, 0.2);
   --nf-mute: rgba(255, 255, 255, 0.5);
+  --nf-ink: rgba(255, 255, 255, 0.92);
+  --nf-field: rgba(255, 255, 255, 0.06);
 }
 html:not([data-theme="system"]):not([data-theme="light"]):not([data-theme="minimal"]) [data-notifications-page] {
   --nf-accent: color-mix(in srgb, var(--tint-accent) 70%, white);
@@ -33,6 +35,8 @@ html[data-system-tone="light"] [data-notifications-page] {
   --nf-hover: rgba(11, 11, 13, 0.03);
   --nf-line: rgba(11, 11, 13, 0.18);
   --nf-mute: rgba(11, 11, 13, 0.5);
+  --nf-ink: rgba(11, 11, 13, 0.92);
+  --nf-field: rgba(11, 11, 13, 0.05);
 }
 
 html [data-notification-row][data-feed-row]:not(#_):not(#_),
@@ -99,4 +103,45 @@ html [data-feed-platform-mark]:not(#_):not(#_) {
   html [data-notification-list]:not(#_):not(#_):not(#_):not(#_) {
     padding-top: 0.25rem !important;
   }
+}
+
+/* The comment a row is about, shown whole, and its Reply / Like / Tip bar.
+   Quiet controls in the secondary ink; the one you hold (liked, reply box
+   open) takes the theme's accent, like the unread dot. */
+html [data-feed-comment-text]:not(#_):not(#_) {
+  color: var(--nf-ink) !important;
+}
+html [data-feed-actions] > button:not(#_):not(#_) {
+  color: var(--nf-mute) !important;
+  background: transparent !important;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+@media (hover: hover) {
+  html [data-feed-actions] > button:not(#_):not(#_):hover {
+    color: var(--nf-ink) !important;
+    background-color: var(--nf-hover) !important;
+  }
+}
+html [data-feed-actions] > button[data-active]:not(#_):not(#_) {
+  color: var(--nf-accent) !important;
+}
+html [data-feed-reply]:not(#_):not(#_) {
+  background: var(--nf-field) !important;
+  border: 1px solid var(--nf-line) !important;
+  color: var(--nf-ink) !important;
+}
+html [data-feed-reply] textarea:not(#_):not(#_) {
+  color: inherit !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+/* Paper themes square off rounded boxes; the reply box and its send button
+   stay round like every other pill here. */
+html [data-feed-reply]:not(#_):not(#_) {
+  border-radius: 1rem !important;
+}
+html [data-feed-reply] [data-feed-pill]:not(#_):not(#_),
+html [data-feed-actions] > button:not(#_):not(#_) {
+  border-radius: 9999px !important;
 }

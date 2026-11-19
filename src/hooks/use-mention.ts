@@ -254,10 +254,11 @@ export function useMention({ inputRef, onMentionInsert }: UseMentionOptions): Us
       cursorPos = getEditorCaret(input) ?? cursorPos;
     }
     
-    // Build new text with @username inserted
+    // Build new text with @username inserted. A community or a page types its
+    // link instead, which the sent message shows as a card.
     const before = text.substring(0, startIndex);
     const after = text.substring(cursorPos);
-    const mention = `@${user.username} `;
+    const mention = `${user.insertText ?? `@${user.username}`} `;
     const newText = before + mention + after;
     
     // Call callback with new text

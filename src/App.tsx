@@ -34,6 +34,7 @@ import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
 import { AppLayout } from "./components/app/AppLayout";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
+import { PostMenuGate } from "./components/app/post-menu/PostMenuGate";
 import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
 import { AfterSignIn } from "@/components/app/AfterSignIn";
 import { SignInHandoff } from "@/components/app/login/SignInHandoff";
@@ -242,6 +243,7 @@ const CreatorEditorHost = React.lazy(() => import("./pages/CreatorEditorHost"));
 const VideoRemix = React.lazy(() => import("./pages/VideoRemix"));
 // Creator Flow (node canvas) is its own chunk: React Flow and its d3 deps are
 // only worth downloading once someone opens the canvas, not with /creator.
+const CreatorGalleryPage = React.lazy(() => import('./pages/app/CreatorGalleryPage'));
 const CreatorLearningPage = React.lazy(() => import("./pages/app/CreatorLearningPage"));
 const CreatorFlowPage = React.lazy(() => import("./pages/app/CreatorFlowPage"));
 const CreatorFlowPublicPage = React.lazy(() => import("./pages/app/CreatorFlowPublicPage"));
@@ -550,6 +552,7 @@ function AppContent() {
       <SelfBadgeSync />
       <DefaultChainSync />
       <QuickActionsHost />
+      <PostMenuGate />
       <BadgeShowcaseHost />
       <ViewingPreferencesSync />
       <AccountLanguageSync />
@@ -659,6 +662,8 @@ function AppContent() {
           <Route path="/editor" element={<Suspense fallback={<PageLoader />}><CreatorEditorHost /></Suspense>} />
           <Route path="/creator/remix" element={<Suspense fallback={<PageLoader />}><VideoRemix /></Suspense>} />
           <Route path="/creator" element={<Suspense fallback={<PageLoader />}><CreatorEditorHost /></Suspense>} />
+          <Route path="/creator/gallery" element={<Suspense fallback={<PageLoader />}><CreatorGalleryPage /></Suspense>} />
+          <Route path="/creator/gallery/:id" element={<Suspense fallback={<PageLoader />}><CreatorGalleryPage /></Suspense>} />
           <Route path="/creator/learn" element={<Suspense fallback={<PageLoader />}><CreatorLearningPage /></Suspense>} />
           <Route path="/creator/flow" element={<Suspense fallback={<PageLoader />}><CreatorFlowPage /></Suspense>} />
           <Route path="/creator/remake" element={<Suspense fallback={<PageLoader />}><MaboroshiPage remake /></Suspense>} />
@@ -705,7 +710,7 @@ function AppContent() {
               the viewport. Reached from the button in Messages. */}
           <Route path="/chat" element={<Suspense fallback={<ChatPageLoader />}><FullScreenChatPage /></Suspense>} />
           <Route path="/app/chat" element={<Navigate to="/chat" replace />} />
-          <Route path="/stream" element={<StreamPage />} />
+          <Route path="/stream" element={<Suspense fallback={<PageLoader />}><StreamPage /></Suspense>} />
 
           <Route path="/dehub-app" element={<Suspense fallback={<PageLoader />}><DehubAppPage /></Suspense>} />
 
@@ -788,6 +793,10 @@ function AppContent() {
               <Route path="arcade" element={null} />
               
               <Route path="explore" element={null} />
+              {/* Old feed-tab links (shared before the clean URLs) land on the tab, not a 404. */}
+              <Route path="shorts" element={<Navigate to="/shorts" replace />} />
+              <Route path="videos" element={<Navigate to="/videos" replace />} />
+              <Route path="images" element={<Navigate to="/images" replace />} />
               <Route path="profile" element={null} />
               {/* The composer as a page, so it has an address to frame — see pages/app/UploadPage. */}
               <Route path="upload" element={<Suspense fallback={null}><UploadPage /></Suspense>} />
@@ -994,7 +1003,7 @@ function AppContent() {
             <Route path="/:username" element={<Suspense fallback={<SeededProfileSkeleton />}><ProfilePage /></Suspense>} />
           </Route>
 
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
         </Routes>
           )}
         </SurfaceTransition>

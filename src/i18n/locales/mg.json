@@ -1,4 +1,17 @@
 {
+  "postBg": {
+    "addMedia": "Ampio sary, GIF na horonan-tsary",
+    "changeMedia": "Ovay ny sary, GIF na horonan-tsary",
+    "mediaType": "Mifidiana sary, GIF na horonan-tsary.",
+    "videoSize": "Mihoatra ny {{n}} MB io horonan-tsary io. Mifidiana kely kokoa."
+  },
+  "textFeed": {
+    "tab": "Lahatsoratra",
+    "errorTitle": "Tsy nety nisokatra ny lahatsoratra",
+    "errorBody": "Andramo sokafana indray ny lahatsoratra soratra.",
+    "emptyTitle": "Mbola tsy misy lahatsoratra soratra",
+    "emptyBody": "Hiseho eto ny lahatsoratra soratra."
+  },
   "comic": {
     "showAll": "Asehoy ny pejy {{count}} rehetra"
   },
@@ -14,6 +27,69 @@
     "glitter": "Manjelanjelatra",
     "saved": "Voatahiry ny sisiny",
     "failed": "Tsy voatahiry ny sisiny"
+  },
+  "duet": {
+    "policyEveryone": "Ny rehetra",
+    "policyFollowers": "Mpanaraka",
+    "policyNobody": "Tsy misy",
+    "loadMore": "Ampidiro betsaka kokoa",
+    "video": "Vidéo",
+    "with": "Duet miaraka amin'i @{{username}}",
+    "withOriginal": "Duet · jereo ny tany am-boalohany",
+    "unavailable": "Tsy azo atao duet intsony ity horonan-tsary ity.",
+    "allowLabel": "Avelao ny duet",
+    "allowDescription": "Iza no afaka mandrakitra duet eo anilan'ny horonan-tsarinao. Azonao ovaina isaky ny lahatsoratra ihany koa.",
+    "settingsSection": "Duet",
+    "policyDefault": "Fikirana kaonty",
+    "saveFailed": "Tsy voatahiry. Andramo indray.",
+    "count_one": "Duet {{count}}",
+    "count_other": "Duet {{count}}",
+    "pageHeading": "Duet",
+    "pageTitle": "Duet an'i {{title}} nataon'i @{{creator}}",
+    "pageTitleNoCreator": "Duet an'i {{title}}",
+    "pageDescription": "Jereo ny duet rehetra amin'ity horonan-tsary ity ao amin'ny Riftn, na mandraketa ny anao mifanila.",
+    "empty": "Mbola tsy misy duet. Sokafy ny safidin'ny horonan-tsary ary safidio Remix → Duet mba hanao ny voalohany.",
+    "notFound": "Tsy misy ity horonan-tsary ity.",
+    "browseShorts": "Jereo ny Fohy",
+    "notFoundTitle": "Tsy hita ilay horonantsary | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Ampiasao ity feo ity",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Efijery maitso",
+    "stitch": "Stitch",
+    "selectSource": "Sokafy ny safidin'ny horonan-tsary ary safidio Remix hanombohana."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Ny rehetra",
+      "followers": "Mpanaraka",
+      "nobody": "Tsy misy",
+      "default": "Ny fikirako mahazatra"
+    },
+    "shareFailed": "Lasa ny tipinao, saingy tsy tafita ny anjaran'ny mpamorona tany am-boalohany.",
+    "notify": {
+      "duet": "Nanao duet tamin'ny horonan-tsarinao i {{name}}",
+      "stitch": "Nanao stitch tamin'ny horonan-tsarinao i {{name}}",
+      "react": "Naneho hevitra tamin'ny horonan-tsarinao i {{name}}",
+      "reactLive": "Maneho hevitra mivantana amin'ny horonan-tsarinao i {{name}}"
+    },
+    "linkFailed": "Voapetraka ny lahatsoratrao, saingy tsy afaka nampifandraisina tamin'ny horonan-tsary tany am-boalohany.",
+    "settingsHeading": "Remix",
+    "stitch": {
+      "allow": "Avelao ny stitch",
+      "allowDesc": "Iza no afaka mampiasa hatramin'ny 5 segondra amin'ny horonan-tsarinao ao amin'ny azy. Azonao ovaina isaky ny lahatsoratra ihany koa.",
+      "saveFailed": "Tsy voatahiry ny fikiranao stitch. Andramo indray.",
+      "settingFailed": "Voapetraka ny lahatsoratrao, saingy tsy voatahiry ny fikirany stitch. Ovay ao amin'ny Hanova lahatsoratra.",
+      "from": "Stitch avy amin'i {{name}}",
+      "count_one": "Stitch {{count}}",
+      "count_other": "Stitch {{count}}",
+      "listTitle": "Stitch",
+      "listFailed": "Tsy nety nisokatra ny stitch. Andramo indray.",
+      "listEmpty": "Mbola tsy misy stitch.",
+      "unavailable": "Tsy azo atao stitch intsony ity horonan-tsary ity."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +114,8 @@
     "iphone": "i Phone",
     "openInBrowser": "Sokafy ny Riftn ao amin'ny navigateur",
     "seoDescription": "Hahazo ny fampiharana Riftn: loharano misokatra, haino aman-jery sosialy an'ny mpampiasa miaraka amin'ny fampitàna mivantana, fandefasan-kafatra miafina ary mijery mivantana. Afaka hita ao amin'ny Google Play sy App Store ianao.",
-    "seoTitle": "Riftn App | Misintona ho an'ny Android, iPhone & Web"
+    "seoTitle": "Riftn App | Misintona ho an'ny Android, iPhone & Web",
+    "learnMore": "Te hahafantatra bebe kokoa? <guide>Inona no atao hoe Riftn?</guide> manazava lalina ny sehatra."
   },
   "dehubLinks": {
     "copyLinkDetail": "Adikao ny {{item}} link mankany amin'ny fanindri-taratasyo",
@@ -55,12 +132,16 @@
       "profile": "piraofily",
       "proposal": "soso-kevitra",
       "stage": "sehatra",
-      "store": "fivarotana"
+      "store": "fivarotana",
+      "featureRequest": "hevitra",
+      "page": "pejy"
     },
     "recipientChat": "tamy_ts's chat",
     "recipientUser": "mPAMPIASA",
     "sendFailed": "Tsy afaka nandefa {{item}}",
-    "sentTo": "{{item}} sent ny {{name}}"
+    "sentTo": "{{item}} sent ny {{name}}",
+    "openPage": "Sokafy ny pejy",
+    "viewRequest": "Jereo ny fangatahana"
   },
   "stageCover": {
     "admitOne": "Ekeo ny iray",
@@ -166,11 +247,34 @@
     "privateNote": "Tsy aseho ao amin'ny fediverse ny kaonty tsy miankina.",
     "noUsername": "Misafidiana anarana mpampiasa mba hahazoana adiresy fediverse."
   },
+  "signedFollows": {
+    "setUp": "Alefaso",
+    "turnOff": "Atsaharo",
+    "efpTurnOff": "Ajanony",
+    "title": "Ireo arahinao, ao amin'ny blockchain",
+    "description": "Ny kitapom-bolanao no manao sonia ireo arahinao, ary isan'andro dia voapetaka amin'ny Base ny lisitra. Afaka mahita ireo arahinao avy amin'ny kitapom-bolanao ny app rehetra, na tsy misy Riftn aza.",
+    "on": "Mandeha amin'ity fitaovana ity",
+    "off": "Maty amin'ity fitaovana ity",
+    "turnedOn": "Efa nosoniavin'ny kitapom-bolanao izao ireo arahinao",
+    "turnedOff": "Novonoina tamin'ity fitaovana ity",
+    "failed": "Tsy nanao sonia ny kitapom-bolanao. Andramo indray.",
+    "hiddenNote": "Tsy tafiditra ao amin'ny lisitra ho an'ny daholobe ny lisitra arahina miafina sy ny kaonty manokana.",
+    "efpOn": "Voadika tao amin'ny EFP · arahina {{count}}",
+    "efpOff": "Apetraho ao amin'ny EFP koa",
+    "efpTurnOn": "Ampidiro ao amin'ny EFP",
+    "efpDone": "Mandeha mankany amin'ny EFP ireo arahinao",
+    "efpStopped": "Nijanona ny fandikana EFP. Anao foana ny lisitra.",
+    "efpHasList": "Efa manana lisitra EFP ianao. Mbola tsy afaka mameno izany ny Riftn.",
+    "efpNoGas": "Mila ETH kely ao amin'ny Base ny kitapom-bolanao amin'ity.",
+    "efpFailed": "Tsy tafita izany. Andramo indray.",
+    "efpNote": "Lisitra arahina vakian'ny app hafa ny EFP (efp.app). Maimaim-poana amin'ny kitapom-bola Riftn anao; mandoa cents vitsivitsy amin'ny Base ny kitapom-bola hafa. Anao ny lisitra."
+  },
   "profileFields": {
     "title": "Saha ao amin'ny mombamomba",
     "description": "Andalana efatra fanampiny ao amin'ny mombamombanao, toy ny tranonkala na ny mpisolo anaranao.",
     "label": "Marika",
     "content": "Votoaty",
+    "remove": "Nisy fomba",
     "save": "Tehirizo ny saha",
     "saved": "Voatahiry ny sahan'ny mombamomba",
     "failed": "Tsy voatahiry. Andramo indray.",
@@ -193,7 +297,8 @@
       "location": "Toerana",
       "custom": "Safidy:",
       "customOption": "Mari-tsoratra safidy"
-    }
+    },
+    "add": "Ampio saha"
   },
   "followedTags": {
     "follow": "Araho #{{tag}}",
@@ -340,7 +445,8 @@
     "step": "Ho an'ny fanaraha-maso ny kaonty, ampio https://riftn.com/mcp ho toy ny connector OAuth, midira ao amin'ny Riftn ary avereno jerena ny fahazoan-dàlana alohan'ny hamelana ny fidirana.",
     "profilePrompt": "Amboary ny mombamomba ahy ao Riftn: Mpamorona mahaleo tena mamoaka sarimihetsika sy mozika.",
     "generatePrompt": "Asehoy ahy ny sarin'i Riftn ary manonona sary iray alohan'ny hamokarana azy.",
-    "libraryPrompt": "Asehoy ny fananana farany ao amin'ny tranombokin'ny mpamorona Riftn."
+    "libraryPrompt": "Asehoy ny fananana farany ao amin'ny tranombokin'ny mpamorona Riftn.",
+    "agents": "Mamoaha lahatsoratra, mamaly, maneho hevitra, mizara indray, manaraka ary manova mombamomba amin'ny maha-ireo agents anananao"
   },
   "twitchMirror": {
     "title": "Twitch dindo",
@@ -368,6 +474,7 @@
     "checkFailed": "Tsy afaka manadihady ny mety ho fisian'ny izahay. Avereno andramana azafady.",
     "checking": "Mifandray...",
     "ownership": "Loharano misokatra. tompon'ny mpampiasa.",
+    "title": "Asa kely.\nRiftn tsara kokoa.",
     "intermission": "Vonjimaika ivelan'ny aterineto",
     "community": "Vondrom-piarahamonina voalohany. foana."
   },
@@ -376,6 +483,8 @@
     "intro": "Jereo ohatra iray. Misafidiana vokatra na toetra iray. Ataovy ny zavatra tokony atao ary manaova ny sarinao.",
     "browse": "Zahao daholo {{count}} templates",
     "featured": "Miverina amin'ny nasongadina",
+    "useNamed": "Ampiasao {{name}}",
+    "preview": "Alefaso ny topi-maso {{name}}",
     "previewUnavailable": "Tsy mety ampiasaina ny topimaso",
     "search": "Search vokatry, endri-tsoratra sy ny dihy",
     "all": "Izy rehetra",
@@ -438,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "download ny app, Android, iPhone, mobile app, install, APK, desktop app, install amin'ny computer, Windows, Mac"
+      "getTheApp": "download ny app, Android, iPhone, mobile app, install, APK, desktop app, install amin'ny computer, Windows, Mac",
+      "home": "famahanana, fizotran-javatra, lahatsoratra farany, ho anao, arahina, pejy fandraisana",
+      "profile": "ny mombamomba ahy, ny kaontiko, ny pejiko, ny lahatsoratro, avatar, bio, mpanaraka",
+      "explore": "fikarohana, hitady, mahita, malaza, hashtag, olona, mpamorona",
+      "prompt": "AI, mamorona, sary AI, horonan-tsary AI, mpanao sary, soratra ho sary, zavakanto AI",
+      "editor": "fanovana horonan-tsary, hanova horonan-tsary, manapaka, tapaho, dikanteny, lohateny ambany, effets",
+      "creator": "mamorona, studio, fitaovana AI, sary, horonan-tsary, mozika, feo, 3D",
+      "converter": "ampidiro horonan-tsary, misintona, YouTube, TikTok, Instagram, avadika",
+      "migrate": "afindrao ny fantsoko, ampidiro fantsona, fampidirana betsaka, fantsona YouTube",
+      "notifications": "fampandrenesana, hetsika, fanononana, valiny, tiana, lakolosy",
+      "messages": "DM, hafatra mivantana, chat, boaty fandraisana, resaka, hafatra manokana",
+      "communities": "vondrona, vondrom-piarahamonina, efitrano, klioba, forum, mpikambana",
+      "assistant": "AI, chatbot, manontania, fanampiana, chat AI, fanontaniana",
+      "settings": "safidy, kaonty, fiainana manokana, fiarovana, tenimiafina, fiteny, lohahevitra, maizina, voasakana, fafao kaonty",
+      "leaderboard": "laharana, filaharana, mpamorona ambony, mpampiasa ambony, isa, naoty",
+      "bookmarks": "voatahiry, ankafiziko, jereo any aoriana, vakio any aoriana, lahatsoratra voatahiry, tranomboky",
+      "command": "tabilao fanaraha-maso, fanadihadiana, fidiram-bola, karama, fijery, fanaraha-maso, ny antontan'isako",
+      "wallet": "fitambaram-bola, vola, tahiry, token, crypto, petraho vola, esory vola, alefaso, raiso, mandoa",
+      "events": "kalandrie, fandaharam-potoana, fihaonana, ho avy, tapakila, AMA",
+      "stages": "efitrano feo, chat feo, spaces, feo mivantana, miresaka, podcast",
+      "featureRequests": "manamboatra, mpanamboatra, hevitra, soso-kevitra, tatero bug, bug, fanamboarana, roadmap, mifidy, faniriana, manatsara",
+      "feedback": "fanamarihana, naoty, fanadihadiana, hevitra, fitarainana, manome hevitra",
+      "staking": "staking, petraho, tombony, valisoa, mahazo, fizarana tombony, mari-pamantarana, ambaratonga, zana-bola",
+      "superpowers": "boost, ampiroboroboy, tombontsoa, hery, tombontsoan'ny mari-pamantarana, fahatongavana, fanatsarana",
+      "governance": "mifidy, fifidianana, tolo-kevitra, fitsapan-kevitra, latsa-bato, manapa-kevitra",
+      "dao": "tahirim-bola, manome, fanomezana, tahirim-bolan'ny vondrom-piarahamonina, mandray anjara, fanampiana ara-bola",
+      "bounties": "asa, asa an-karama, andraikitra, asa madinika, freelance, mandray mpiasa, mahazo vola, asa voaloa",
+      "myBounties": "ny bounties-ko, ny asako, tantara, fandoavana, asa vita",
+      "affiliate": "fanolorana, manasa namana, manasa, kaomisiona, mpiara-miasa, mahazo",
+      "careers": "asa, mandray mpiasa, miasa miaraka aminay, midira ao amin'ny ekipa, mangataka, toerana malalaka",
+      "stores": "fivarotana, tsena, entana, mividy, mivarotra, vokatra, fiantsenana",
+      "fractions": "anjara, fananana, mampiasa vola, manana lahatsoratra, NFT, NFTs, fanangonana, mifanakalo",
+      "usernames": "anarana mpampiasa, handle, anarana, ovay ny anarako, mividy anarana, mivarotra anarana",
+      "accounts": "mividy kaonty, mivarotra kaonty, kaonty amidy, mpanaraka, mamindra kaonty",
+      "apps": "fivarotana app, app kely, manamboatra app, mpamorona rindrambaiko, fitaovana",
+      "arcade": "lalao, milalao, fanatanjahantena, échecs, mitifitra, fialam-boly",
+      "glossary": "teny, famaritana, rakibolana, dikany, inona no atao hoe",
+      "compare": "fampitahana, ampitahao, mifanohitra, safidy hafa, YouTube, X, TikTok",
+      "guide": "fanombohana, ahoana, torolalana, fanampiana, mianatra, vao manomboka, vao tonga",
+      "stats": "antontan'isa, fanadihadiana, isa, tabilao, vidiny, famatsiana, mpitazona",
+      "docs": "antontan-taratasy, fanampiana, API, whitepaper, mpamorona rindrambaiko, boky torolalana",
+      "blog": "vaovao, lahatsoratra, fanavaozana, fanambarana, inona no vaovao",
+      "videos": "mijery, horonan-tsary, clip, horonan-tsary lava",
+      "shorts": "reels, horonan-tsary fohy, horonan-tsary mitsangana, mikasika",
+      "music": "feo, hira, tracks, mihaino, radio, playlist",
+      "liveTv": "TV, stream, streaming, mivantana, fampielezana, fantsona, mijery mivantana",
+      "buyTokens": "mividy token, fividianana, fameno, karatra, karatra banky, fiat",
+      "bridge": "cross chain, mamindra token, chain, famindrana eo amin'ny chain",
+      "top100": "top 100, vola madinika, cryptocurrency, market cap, vidiny",
+      "agents": "AI agents, agents, bots, automatisation, persona",
+      "advertising": "dokam-barotra, doka, fanentanana, ampiroboroboy, mpanohana, varotra",
+      "premium": "famandrihana, fanatsarana, pro, maha-mpikambana, tsy misy doka, afaka amin'ny doka",
+      "pricing": "drafitra, sarany, vidiny, ohatrinona, famandrihana",
+      "creators": "fandaharana mpamorona, masoivoho, mpiara-miasa, mangataka ho mpamorona, mahazo vola",
+      "connectAi": "MCP, ChatGPT, Claude, API, fampidirana, mampifandray AI",
+      "packs": "emoji, sticker, GIF, fonosana emoji, fonosana sticker, emoji manokana",
+      "publicChat": "chat, chat iraisana, efitrano chat, lobby, miresaka, chat vondrom-piarahamonina",
+      "planned": "voalahatra, fandaharam-potoana, lahatsoratra voalahatra, filaharana, any aoriana",
+      "liveStudio": "mivantana, stream, streaming, OBS, overlays, fampandrenesana, widgets",
+      "launchpad": "mandefa token, mamorona coin, manao coin, meme coin, bonding curve, manao token"
     },
     "reorderHint": "Tazony ary zarao izay kisary hanamboarana",
     "reorderReset": "Averina",
@@ -486,7 +654,14 @@
     "getTheApp": "Alaivo ny fampiharana",
     "connectAi": "Ampifandraiso ny AI",
     "converter": "Converter",
-    "affiliate": "Mpiara-miasa"
+    "affiliate": "Mpiara-miasa",
+    "groups": {
+      "create": "Mamorona",
+      "discover": "Hikaroka",
+      "main": "Fototra",
+      "money": "Vola",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Hijery ny mombamomba an'i {{name}}",
@@ -1098,7 +1273,51 @@
     "socialConnectedShort": "Mifandray",
     "socialConnectFailed": "Tsy afaka mifandray {{platform}}. Avereno andramana azafady.",
     "socialVerifiedFollowers": "{{value}} mpanaraka",
-    "socialFollowersPending": "Fanavaozana ny fanisana ny mpanara-dia"
+    "socialFollowersPending": "Fanavaozana ny fanisana ny mpanara-dia",
+    "menuLayoutFolders": "Rakitra",
+    "chatCards": "Chat ho karatra",
+    "chatCardsDesc": "Samy manana ny karatrany ny chat tsirairay. Vonoy raha te hahazo lisitra tsotra misy tsipika eo anelanelan'ny chat.",
+    "chatDeleteChoice": "Rehefa mamafa hafatra ianao",
+    "chatDeleteChoiceDesc": "Manontania isaky ny mandeha, na fafao ho anao ihany foana na ho an'ny rehetra ao amin'ny chat.",
+    "chatDeleteAsk": "Manontania isaky ny mandeha",
+    "chatDeleteMe": "Fafao ho ahy",
+    "chatDeleteMeDesc": "Tsy ao amin'ny chatinao intsony, mbola hitan'ny hafa",
+    "chatDeleteEveryone": "Fafao ho an'ny rehetra",
+    "chatDeleteEveryoneDesc": "Rehefa azo atao. Ny hafatry ny olon-kafa ao amin'ny vondrona dia voafafa ho anao ihany",
+    "postLanding": "Rehefa avy namoaka ianao",
+    "postLandingDesc": "Ahoana no hipetrahan'ny lahatsoratrao vaovao ao amin'ny famahananao",
+    "postLandingGhost": "Toerana matoatoa",
+    "postLandingGhostDesc": "Manao toerana ny famahananao ary miseho moramora ny lahatsoratrao",
+    "postLandingMorph": "Morph",
+    "postLandingMorphDesc": "Mihena ho lasa lahatsoratrao ny mpanoratra",
+    "postLandingPill": "Pilina ho karatra",
+    "postLandingPillDesc": "Mivelatra ho lasa lahatsoratrao ny bara fandefasana rehefa voapetraka",
+    "postLandingDrop": "Mianjera",
+    "postLandingDropDesc": "Midina avy any ambony ny lahatsoratrao miaraka amin'ny fitsambikinana kely",
+    "showLikes": "Asehoy amin'ny rehetra ny tiako",
+    "showLikesDesc": "Afaka manokatra ny tabilao Tiana ao amin'ny mombamombanao ny rehetra. Maty raha tsy ovaina, ka ianao irery no mahita izay tianao.",
+    "showFollowersList": "Asehoy izay manaraka ahy",
+    "showFollowersListDesc": "Avelao hanokatra ny lisitry ny mpanaraka anao ny rehetra. Raha maty ity, ianao irery no mahita azy.",
+    "showFollowingList": "Asehoy izay arahiko",
+    "showFollowingListDesc": "Avelao hanokatra ny lisitry ny olona arahinao ny rehetra. Raha maty ity, ianao irery no mahita azy.",
+    "showFollowCounts": "Asehoy ny isan'ny mpanaraka ahy",
+    "showFollowCountsDesc": "Asehoy hoe firy ny mpanaraka anao sy firy ny olona arahinao. Rehefa vonoina ity dia miafina koa ireo lisitra roa ireo.",
+    "defaultProfileView": "Fandaharana lahatsoratra amin'ny mombamomba",
+    "defaultProfileViewDesc": "Asehoy ho makarakara na lisitra ny lahatsoratrao rehefa manokatra ny mombamombanao ny olona",
+    "readerProfileView": "Sokafy ho toy izao ny mombamomba hafa",
+    "readerProfileViewDesc": "Misafidiana makarakara na lisitra ho an'ny mombamomba rehetra sokafanao, na tazony ny safidin'ny tsirairay",
+    "readerProfileViewOwner": "Safidin'ny tsirairay",
+    "signOutAllDesc": "Hivoaka amin'ny fitaovana hafa {{count}} izany. Mbola miditra ihany ity fitaovana ity.",
+    "tipsOffNote": "Maty ny tip sy ny fandefasana ho anao raha mandeha ity. Vonoy mba hahazoana tip indray.",
+    "menuLayout": "Fandaharana menio",
+    "menuLayoutDesc": "Ahoana no fanangonan'ny menio ny pejiny",
+    "menuLayoutTabs": "Tabilao",
+    "menuLayoutTabsDesc": "Vondrona iray isaky ny mandeha, misy kisary lehibe",
+    "menuLayoutSections": "Fizarana",
+    "menuLayoutSectionsDesc": "Ny pejy rehetra indray mandeha, eo ambanin'ny lohatenin'ny vondrona",
+    "menuLayoutFoldersDesc": "Ny pejy fototrao, avy eo lahatahiry iray isaky ny vondrona",
+    "publicChatInBar": "Chat Iraisana ao amin'ny bara ambany",
+    "publicChatInBarDesc": "Tsindry iray monja dia tafiditra ao amin'ny Chat Iraisana avy amin'ny bara eo ambanin'ny efijery"
   },
   "common": {
     "confirm": "Hanamafy",
@@ -1183,7 +1402,19 @@
     "payDirect": "Nalefa mivantana tany amin'ny {{name}} ao amin'ny {{symbol}} amin'ny {{chain}}. Tsy misy fifanakalozana.",
     "payDirectNoName": "Nalefa nivantana tany amin'ny mpamorona ny {{symbol}} {{chain}}. No swap.",
     "payViaBridgeDpay": "Nifindra tany Base ary nalefa tamin'ny Riftn Pay, tonga ny mari-tsoratra ao anatin'ny iray minitra eo ho eo",
-    "dmSent": "Nandefa {{amount}} tokens ho an'i {{name}}!"
+    "dmSent": "Nandefa {{amount}} tokens ho an'i {{name}}!",
+    "addMessage": "Ampidiro ny hafatra (azo atao)",
+    "messagePublic": "Ho an'ny rehetra",
+    "railTitle": "Torohevitra",
+    "railTotal": "{{amount}} marika",
+    "tokensUnit": "marika",
+    "messagePlaceholder": "Milazà zavatra miaraka amin'ny tipinao",
+    "messagePrivate": "{{name}} ihany",
+    "theCreator": "ny mpamorona",
+    "messageWallNote": "Miseho eo amin'ny rindrin'ny tip rehefa tafita ny tip.",
+    "sendWithMessage": "Alefaso miaraka amin'ny hafatra",
+    "messageFailed": "Tsy nety nampidirina ny hafatrao. Tsy nisy tip nalefa.",
+    "wallLabel": "Hafatra tip"
   },
   "postOptions": {
     "liveAlertsOn": "Manaraka an'i {{name}} ianao izao. Hahazo fampandrenesana ianao rehefa manao fampielezana mivantana izy.",
@@ -1223,7 +1454,14 @@
     "giftBoost": "Ny fanomezana ny tosika",
     "markSection": "Skippable fizarana",
     "copyFailed": "Tsy afaka nandika ny rohy",
-    "share": "MIZARA"
+    "share": "MIZARA",
+    "refreshLinkPreview": "Havaozy ny topy maso ny rohy",
+    "linkPreviewRefreshed": "Voavao ny topy maso ny rohy",
+    "linkPreviewRefreshFailed": "Tsy tratra io tranonkala io. Andramo indray any aoriana.",
+    "castToTv": "Alefaso amin'ny TV",
+    "castStarted": "Mandeha amin'ny TV-nao",
+    "castUnsupported": "Tsy afaka mandefa amin'ny TV ity navigateur ity. Sokafy amin'ny Chrome na Safari ny Riftn mba hijerena azy amin'ny TV-nao.",
+    "castFailed": "Tsy tratra ny TV. Hamarino fa amin'ny Wi-Fi iray ihany izy ary andramo indray."
   },
   "filters": {
     "sort": "Alamino",
@@ -1707,6 +1945,9 @@
   "notifications": {
     "title": "Fampandrenesana",
     "markAllRead": "Mariho fa voavaky daholo",
+    "groupNew": "Vaovao",
+    "groupToday": "Androany",
+    "groupThisWeek": "Ity herinandro ity",
     "settings": "Fikiran'ny fampandrenesana",
     "actions": "Hetsika",
     "markAllAsRead": "Mariho fa voavaky daholo",
@@ -1735,6 +1976,7 @@
     "communities": "Vondrom-piarahamonina",
     "stores": "Fivarotana",
     "noNotificationsYet": "Tsy mbola misy fampandrenesana",
+    "searchClose": "Akaro ny fikarohana",
     "noNotificationsDesc": "Rehefa misy tia, fanehoan-kevitra, fanomezana na mpanara-dia vaovao dia hiseho eto.",
     "loadMore": "Ampidiro betsaka kokoa",
     "markAsRead": "Mariho fa voavaky",
@@ -1845,7 +2087,10 @@
       "bountySubmittedNamed": "{{name}} nandefa asa amin'ny bounty \"{{title}}\" nao",
       "bountySubmitted": "{{name}} nandefa asa amin'ny bounty nao",
       "sentNotification": "{{name}} nandefa fampahafantarana anao"
-    }
+    },
+    "groupEarlier": "Taloha",
+    "searchPlaceholder": "Hitady fampandrenesana",
+    "searchEmpty": "Tsy misy fampandrenesana mifanaraka"
   },
   "leaderboard": {
     "title": "Lisitry ny tsara indrindra",
@@ -1890,7 +2135,13 @@
     "loadingBoard": "Mampiditra ny lisitry ny tsara indrindra…",
     "amountTokens": "{{amount}} tapaho",
     "directReferrals": "{{count}} mivantana",
-    "secondaryReferrals": "{{count}} faharoa"
+    "secondaryReferrals": "{{count}} faharoa",
+    "ogChallenge": "Fanamby OG",
+    "ogHolders_one": "Mpitazona OG {{count}}",
+    "ogHolders_other": "Mpitazona OG {{count}}",
+    "ogChallengeTitle": "Ampodio ireo mpitazona OG",
+    "ogChallengeBody": "Asao ireo olona mbola mitazona DHB. Rehefa miditra amin'ny rohy fanasanao izy ireo ary mitazona ny DHB-ny ao amin'ny kitapom-bola Riftn, dia isaina ho anao eto izy ireo.",
+    "ogChallengeCta": "Alaivo ny rohy fanasanao"
   },
   "dhbListing": {
     "title": "Ho avy tsy ho ela ny fisoratana ny token!",
@@ -1974,11 +2225,13 @@
     "promptLabel": "Ny prompt anao",
     "promptPlaceholder": "Faritanao ny hevitra, fanatsarana, na bug…",
     "promptAttach": "Ampidiro sary",
+    "removeAttachment": "Mpanaraka",
     "promptDrop": "Apidiro na ampidiro sary eto",
     "promptPost": "Postao ny prompt",
     "promptShortcut": "Ctrl / ⌘ + Enter mba postao",
     "promptDetails": "Antsipiriantsipiriana",
     "promptDevice": "Fitaovana & OS (ho an'ny bugs)",
+    "deviceInfoNoErrors": "Tsy misy",
     "promptFilters": "Sivitra avy amin'ny sokajy",
     "promptMediaError": "Safidio sary na horonan-tsary eo ambanin'ny 50MB.",
     "promptMediaLimit": "Hatramin'ny {{max}} attachments.",
@@ -2031,12 +2284,40 @@
     "shipping": "Amboarina",
     "noShippingYet": "Tsy misy zavatra atao",
     "shippingAppearHere": "Hiseho eto ireo fangatahana amboarina.",
-    "loadFailed": "Tsy afaka nampakatra ny fangatahana"
+    "loadFailed": "Tsy afaka nampakatra ny fangatahana",
+    "editMedia": "Sary sy horonan-tsary",
+    "editAddMedia": "Ampio sary na horonan-tsary",
+    "deviceInfoNote": "Ampiarahina ny mombamomban'ny fitaovana mba hanampiana anay hanamboatra bug.",
+    "deviceInfo": "Mombamomban'ny fitaovana",
+    "deviceInfoOwners": "Ny tompon'ny tabilao ihany no mahita ity",
+    "deviceInfoError": "Tsy nety nisokatra ny mombamomban'ny fitaovana",
+    "deviceInfoNone": "Tsy misy mombamomban'ny fitaovana ho an'ity fangatahana ity",
+    "deviceInfoErrors": "Fahadisoana vao haingana"
   },
   "auth": {
-    "loginRequired": "Ilaina ny fidirana"
+    "loginRequired": "Ilaina ny fidirana",
+    "accountDeleted": "Voafafa ity kaonty ity. Afaka misoratra anarana indray ho kaonty vaovao ianao.",
+    "accountDeletedHours_one": "Voafafa ity kaonty ity. Afaka misoratra anarana indray amin'ny mailaka na finday mitovy ianao afaka eo amin'ny {{count}} ora eo ho eo.",
+    "accountDeletedHours_other": "Voafafa ity kaonty ity. Afaka misoratra anarana indray amin'ny mailaka na finday mitovy ianao afaka eo amin'ny {{count}} ora eo ho eo.",
+    "accountDeletedDays_one": "Voafafa ity kaonty ity. Afaka misoratra anarana indray amin'ny mailaka na finday mitovy ianao afaka eo amin'ny {{count}} andro eo ho eo.",
+    "accountDeletedDays_other": "Voafafa ity kaonty ity. Afaka misoratra anarana indray amin'ny mailaka na finday mitovy ianao afaka eo amin'ny {{count}} andro eo ho eo."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Mankany amin'ny",
+      "recent": "Vao haingana",
+      "suggested": "Soso-kevitra",
+      "youFollow": "Ireo arahinao",
+      "placeholder": "Anarana na @anarana",
+      "chattedBefore": "Efa nifampiresaka ianareo",
+      "mutual": "Mifanaraka",
+      "dmsOff": "Maty ny DM",
+      "keepTyping": "Tohizo ny manoratra mba hitadiavana ny rehetra",
+      "noOne": "Tsy nisy olona hita",
+      "tryUsername": "Andramo ny @anarany marina",
+      "sayHi": "Miarahaba olona iray",
+      "typeAny": "Soraty izay anarana na @anarana"
+    },
     "reply": "Valio",
     "react": "Aneho fihetsika",
     "edit": "Ovay",
@@ -2073,7 +2354,11 @@
     "checkingTokenBalance": "Mijery ny volan'ny token anao...",
     "deleteConversationFailed": "Tsy afaka namafa ny resaka",
     "message": "Hafatra",
-    "noConversationsYet": "Tsy misy resadresaka pa"
+    "noConversationsYet": "Tsy misy resadresaka pa",
+    "sending": "Mandefa...",
+    "retrySend": "Andramo indray",
+    "discardSend": "Esory",
+    "notSent": "Tsy lasa"
   },
   "music": {
     "listeningCount_one": "{{count}} mihaino",
@@ -2129,6 +2414,7 @@
       "stage": "Sehatra",
       "liveStage": "Sehatra mivantana",
       "event": "Hetsika",
+      "poll": "Vato",
       "quote": "Teny nalaina",
       "shared": "Nozaraina",
       "link": "Rohy",
@@ -2147,12 +2433,32 @@
       "votes_one": "{{value}} vote",
       "votes_other": "{{value}} Vato",
       "members_one": "{{value}} mpikambana",
-      "members_other": "{{value}} mpikambana"
+      "members_other": "{{value}} mpikambana",
+      "listening_one": "{{value}} mihaino",
+      "listening_other": "{{value}} mihaino"
     },
     "viewGrid": "Seho an-kavia",
     "viewList": "Fijerin'ny lisitra",
     "viewMode": "Seho",
     "back": "Miverina",
+    "reserve": {
+      "signIn": "Miditra",
+      "available": "Misy ny anarana mpampiasa",
+      "held": "Voatahiry ho anao",
+      "ended": "Tapitra ny fitahirizana",
+      "busy": "Am-pitahirizana",
+      "availableBody": "Malalaka izao ny riftn.com/{{name}}. Tahirizo ary hotazoninay mandritra ny iray minitra izy raha mbola misoratra anarana ianao.",
+      "heldBody": "Tsy misy olon-kafa afaka maka ny @{{name}} mandra-pahatapitry ny fotoana. Vitao ny fisoratana anarana mba hitazonana azy.",
+      "endedBody": "Tapitra ny minitrao, ka misokatra ho an'ny rehetra indray ny @{{name}}. Mbola malalaka ihany izy.",
+      "busyBody": "Misy olona misoratra anarana ho @{{name}} izao. Raha tsy vitany, ho afaka indray izy rehefa tapitra ny fotoana.",
+      "finish": "Vitao ny fisoratana anarana",
+      "again": "Tahirizo indray",
+      "cta": "Tahirizo izao",
+      "letGo": "Avelao",
+      "haveAccount": "Manana kaonty?",
+      "seoTitle": "Misy ao amin'ny Riftn ny @{{name}}",
+      "seoDescription": "Mbola tsy misy manana ny riftn.com/{{name}}. Tahirizo ary misorata anarana mba ho anao izy."
+    },
     "usernameAvailable": "Misy io anaram-pikambana io!",
     "signUpToClaim": "Misorata mba haka azy",
     "signUp": "Misorata",
@@ -2171,7 +2477,8 @@
       "total": "TONTOLO IREO",
       "breakdownTitle": "Avy aiza no nihavian'izany",
       "dehubFollowers": "Mpanara-dia an'i Riftn",
-      "verified": "Ny fanisana ara-tsosialy dia avy amin'ny kaonty mifandray amin'ny mpamorona."
+      "verified": "Ny fanisana ara-tsosialy dia avy amin'ny kaonty mifandray amin'ny mpamorona.",
+      "selfReported": "Ny fandrindrana ara-tsosialy dia nampidirina tamin'ny mpamorona."
     },
     "loginDescription": "Midira mba hahitana sy hitantanana ny mombamombanao.",
     "replyThread": {
@@ -2180,7 +2487,17 @@
     },
     "tabs": {
       "playlists": "Lisitra filalao",
-      "dislikes": "Tsy tiany"
+      "dislikes": "Tsy tiany",
+      "likes": "Tia",
+      "articles": "Lahatsoratra"
+    },
+    "likedPosts": {
+      "emptyTitle": "Mbola tsy misy fankasitrahana",
+      "privateTitle": "Tsy ampahibemaso ny fankasitrahana",
+      "loadMore": "Ampidiro betsaka kokoa",
+      "emptyOwn": "Eto no miseho ny lahatsoratra tianao. Ianao irery no mahita azy raha tsy alefanao ny Asehoy ny tiako ao amin'ny Fikirana.",
+      "emptyOther": "Mbola tsy misy tiana.",
+      "privateDesc": "Tazonin'ity kaonty ity ho azy irery ny tiany."
     },
     "dislikes": {
       "emptyTitle": "Tsy misy tsy tia hatramin'izao.",
@@ -2203,9 +2520,33 @@
     "sortMostViewed": "Fijery be indrindra",
     "sortLikes": "Tia",
     "sortMostLiked": "Tia be indrindra",
+    "sortCustomShort": "Safidy:",
+    "arrange": {
+      "saving": "Eo am-pitahirizana...",
+      "title": "Alaharo ny lahatsoratrao",
+      "hint": "Tano ny lahatsoratra iray ary sintony mankany amin'ny toerany vaovao. Ity filaharana ity no hitan'ny mpitsidika voalohany.",
+      "drag": "Sintony hamindrana",
+      "toTop": "Afindrao ho any ambony",
+      "save": "Tahirizo ny filaharana",
+      "saved": "Voatahiry ny filaharanao",
+      "reset": "Miverina amin'ny vaovao indrindra aloha",
+      "resetDone": "Miverina amin'ny vaovao indrindra aloha",
+      "saveFailed": "Tsy voatahiry ny filaharanao. Andramo indray azafady.",
+      "loadFailed": "Tsy nety nisokatra ny lahatsoratrao. Akatony ity ary andramo indray.",
+      "empty": "Mbola tsy misy halaharina. Mamoaha zavatra aloha."
+    },
     "searchThisChannel": "Tadiavina ity channel ity",
     "searchResultCount": "1 valiny ho an'ny \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} valiny ho an'ny \"{{query}}\""
+    "searchResultCountPlural": "{{count}} valiny ho an'ny \"{{query}}\"",
+    "unavailable": "Tsy misy ny mombamomba",
+    "mutualsOne": "Mifanaraka {{count}}:",
+    "mutualsMany": "Mifanaraka {{count}}:",
+    "articles": {
+      "emptyTitle": "Mbola tsy misy lahatsoratra",
+      "emptySubtitle": "Hiseho eto ny lahatsoratra"
+    },
+    "sortCustom": "Filaharana manokana",
+    "arrangeButton": "Alaharo ny lahatsoratra"
   },
   "tv": {
     "seoTitle": "Fahitalavitra Live ¢avy amin'ny lafivalon'izao tontolo izao",
@@ -2360,6 +2701,7 @@
       "runSwarm": "Hampandeha ny vondrona",
       "description": "Ny aksyon dia miasa amin'ny agent voafidy. Ny asa voatakiana dia mitohy amin'ny app mihidy.",
       "instructions": "Torolalana agent",
+      "examples": "Mamoaha lahatsoratra indray mandeha isan'andro momba ny: mozika tsy miankina\nFomba: liana, fohy ary toy ny resaka\nTiavo hatramin'ny lahatsoratra vao haingana 2 isan'andro momba ny: mozika, fampisehoana mivantana, kapila vinyl",
       "preparing": "Manomana asa…",
       "run": "Alefaso ny baiko",
       "limits": "Lahatsoratra iray isan'andro sy hatramin'ny 3 manan-danja tiany isaky ny asa. Ny atiny dia mamoaka rano aorian'ny minitra 20. Ny sary dia mampiasa teny anglisy; Ny horonan-tsary dia mila sary. Ireo tsanganana ireo dia mijanona ho tarehin-tsoratra latsaky ny 500. Tsy misy entona raha tsy minting; fanoratana afaka mampiasa nahazoan-dalana.",
@@ -2468,6 +2810,28 @@
     "signInAgain": "Midira indray",
     "createSignIn": "Midira indray mba hamorona agent",
     "checkConnection": "Hamarino ny fifandraisanao ary andramo indray.",
+    "welcome": {
+      "text": "Hafatra fandraisana",
+      "title": "Raiso ny mpikambana vaovao",
+      "help": "Manaraka sy/na mandefa hafatra amin'ireo olona vao niditra tao amin'ny Riftn ity agent ity, vitsivitsy isan'andro.",
+      "follow": "Araho ny mpikambana vaovao",
+      "message": "Alefaso hafatra ny mpikambana vaovao",
+      "textHelp": "Lasa ny @anarany ny {name}. Tsy misy rohy. Alefa indray mandeha isaky ny olona.",
+      "saveText": "Tahirizo ny hafatra",
+      "perDay": "Olona isan'andro",
+      "fewer": "Vitsy kokoa isan'andro",
+      "more": "Betsaka kokoa isan'andro",
+      "today": "Androany: {{follows}} narahina · {{messages}} nalefan-kafatra",
+      "limits": "Tsy olona mitovy indroa mihitsy. Dinganina izay nanakana na nanangina anao, namono hafatra vaovao na niafina tamin'ny Mpikambana vaovao.",
+      "showLog": "Jereo izay noraisiny",
+      "hideLog": "Afeno ny fandraisana",
+      "empty": "Mbola tsy misy. Miseho eto ny mpikambana vaovao rehefa miditra izy ireo.",
+      "followed": "Narahina",
+      "messaged": "Nalefan-kafatra",
+      "skipped": "Nodinganina",
+      "failed": "Tsy tratra",
+      "defaultText": "Salama {name}, tongasoa eto amin'ny Riftn! 👋"
+    },
     "workspace": {
       "moderation": "Fandrindrana ny fandefasana mivantana",
       "moderationHelp": "Alefaso aloha ny alalana handrindra. Tsy maintsy efa mpamorona ilay fandefasana mivantana na mpandrindra voatendry ny kaonty. Mbola mihatra ihany ny fomba fankatoavina aloha sy vakiraoka ihany. Lany ho azy ny famerana.",
@@ -2660,7 +3024,17 @@
     "resendCodePhone": "Nomerika diso na tsy misy code? Bumalik",
     "continueAs": "Magpatuloy bilang",
     "switchWalletAccount": "Lumipat ng account",
-    "walletLoadFailed": "Hindi makapag-load ng mga wallet. Subukan ulit."
+    "walletLoadFailed": "Hindi makapag-load ng mga wallet. Subukan ulit.",
+    "openInBrowser": "Sokafy amin'ny navigatra",
+    "copyLink": "Kopia ny rohy",
+    "bringLoginOver": "Nampiasa Riftn tao amin'ny dehub.io? <bring>Ento eto ny fidiranao</bring>",
+    "didYouMean": "{{email}} ve no tianao holazaina?",
+    "profileMovedTitle": "Nifindra ny mombamombanao",
+    "migrateWrongLogin": "Kitapom-bola hafa no nosokafan'io fidirana io, ka tsy nisy niova. Tamin'ny {{login}} no nanaovana ny mombamombanao taloha. Ampiasao izany mba hamerenana azy.",
+    "googleInAppTitle": "Tsy miditra ao anatin'ny {{app}} ny Google",
+    "googleInAppTitleUnnamed": "Tsy miditra ao anatin'ity app ity ny Google",
+    "googleInAppBody": "Sokafy amin'ny navigateur-nao ny Riftn mba hampiasana Google, na midira amin'ny mailaka eto.",
+    "tryAnyway": "Andramo ihany"
   },
   "careers": {
     "title": "Asa ao amin'i Riftn",
@@ -2884,7 +3258,17 @@
     "noMenuMatches": "Tsy misy mifanaraka ao amin'ny safidy",
     "searchDehubFor": "Karohy \"{{query}}\" ao amin'ny Riftn",
     "switchAccount": "Miova ny kaonty",
-    "signedInAs": "Naka-sign in bilang {{name}}"
+    "signedInAs": "Naka-sign in bilang {{name}}",
+    "requestSend": "Alefaso ny fangatahana",
+    "requestPrompt": "Mbola tsy eto? Alefaso ho fangatahana",
+    "requestPromptShort": "Mbola tsy eto?",
+    "requestDraftMenu": "Ampio {{query}} ao amin'ny Riftn",
+    "requestDraftSettings": "Fikirana ho an'ny {{query}}",
+    "requestPostsTo": "Mamoaka ao amin'ny Fangatahana",
+    "requestHint": "Mamoaka ao amin'ny Fangatahana amin'ny anaranao. Hilazanay anao rehefa vita.",
+    "requestSent": "Lasa tany amin'ny Fangatahana",
+    "requestSentHint": "Hilazanay anao rehefa vita.",
+    "requestSeeIt": "Jereo ao amin'ny Fangatahana"
   },
   "comments": {
     "reportComment": "Tatitra momba ny tatitra",
@@ -2977,7 +3361,23 @@
     "likersEmptyTitle": "Mbola tsy misy fankasitrahana",
     "likersEmptyBody": "Hiseho eto ny fankasitrahana amin'ity fanehoan-kevitra ity.",
     "anonymousLikes_one": "{{count}} fankasitrahana avy amin'ny tompon'ny badge tsy mitonona anarana",
-    "anonymousLikes_other": "{{count}} fankasitrahana avy amin'ireo tompon'ny badge tsy mitonona anarana"
+    "anonymousLikes_other": "{{count}} fankasitrahana avy amin'ireo tompon'ny badge tsy mitonona anarana",
+    "threadParts": {
+      "moveUp": "Atsangana",
+      "moveDown": "Midina",
+      "reorder": "Alaharo indray",
+      "save": "Tahirizo ny filaharana",
+      "saved": "Voatahiry ny filaharan'ny thread",
+      "saveFailed": "Tsy voatahiry ny filaharana. Andramo indray.",
+      "dragPart": "Sintony hamindrana ny ampahany {{n}}",
+      "addPart": "Ampio amin'ny thread",
+      "addPlaceholder": "Ampio amin'ny thread-nao...",
+      "label": "Thread · ampahany {{count}}",
+      "reorderHint": "Sintony ireo ampahany, na ampiasao ireo zana-tsipika, dia tehirizo."
+    },
+    "attachMedia": "Ampiarao sary, horonan-tsary na feo",
+    "attachUnsupported": "Ampiarao sary, horonan-tsary na rakitra feo.",
+    "attachTooLarge": "Mihoatra ny fetra {{size}} MB io rakitra io."
   },
   "mintChain": {
     "title": "Mint lahatsoratra",
@@ -2991,7 +3391,18 @@
     "paidFromWalletPlain": "Hetrao ny volanao avy amin'ny kitapom-bolanao",
     "priceUnavailable": "Price tsy misy",
     "confirmWithCost": "Toriteny amin'ny {{chain}}{{cost}}",
-    "notAvailable": "Mbola tsy azo hazavaina ny momba ity kianjan'ny serasera ity amin'izao fotoana izao."
+    "notAvailable": "Mbola tsy azo hazavaina ny momba ity kianjan'ny serasera ity amin'izao fotoana izao.",
+    "confirm": "Mint amin'ny {{chain}}"
+  },
+  "postEditHistory": {
+    "original": "Tany am-boalohany",
+    "title": "Tantaran'ny fanovana",
+    "edited_one": "Novaina indray mandeha",
+    "edited_other": "Novaina in-{{count}}",
+    "lastEdit": "Fanovana farany {{time}}",
+    "editN": "Fanovana {{n}}",
+    "now": "Izao",
+    "showChanges": "Asehoy izay niova"
   },
   "postInfo": {
     "title": "Fampahalalana momba ny lahatsoratra",
@@ -3286,7 +3697,10 @@
     "waiting_for_wallet": "Miandry ny kitaponao",
     "waiting_for_wallet_desc": "Sokafy ny {{wallet}} ary ekeo ny sonia — miandry ny fangatahana eto.",
     "your_wallet": "ny kitaponao",
-    "max_available_on_chain": "Ambony indrindra azo: {{amount}} tokens ao amin'ny {{chain}}"
+    "max_available_on_chain": "Ambony indrindra azo: {{amount}} tokens ao amin'ny {{chain}}",
+    "not_available_for_this_post": "Tsy misy ho an'ity lahatsoratra ity",
+    "turn_back_on_desktop_notifications": "Haverina hampandeha ny fampandrenesana amin'ny solosaina?",
+    "notifications_moved_to_riftn": "Nifindra tany amin'ny riftn.com izahay, ka mila ny fanekenao indray ny navigateur-nao mba hanehoana valiny, tip ary DM eto."
   },
   "staking": {
     "title": "Hitsingevana",
@@ -4293,7 +4707,8 @@
     "fromYourWalletNow": "Ã¢Â avy ny kitapom-batsy, ankehitriny, izay tafiditra ny tapa-kevitra.",
     "disputeTotal": "Toto: {{total}} / {{remaining}} {{currency}}",
     "resolveAndPay": "MANAMPY & MANDEHA",
-    "resolve": "Tapa-kevitra"
+    "resolve": "Tapa-kevitra",
+    "markCompleteConfirm_one": "Misy fandefasana {{count}} nankatoavina mbola tsy voaloa ({{amount}}). Marihina ho vita ihany ve ity bounty ity?"
   },
   "stores": {
     "podToggle": "Entana atonta rehefa angatahina",
@@ -4941,7 +5356,8 @@
     "sentTokensNotCredited": "Nandefa tapaho Riftn tany amin'ny tahiry dokam-barotra saingy tsy voalohany? Alefaso ny hash fifanarahana — hojerentsika amin'ny blockchain izany.",
     "targetByTokenHoldings": "Tantano amin'ny fananana tapaho Riftn voamarina. Ny CPM isaky ny ambaratonga dia aloa rehefa mahita ny dokam-barotrao io ambaratonga io. Avelao ho foana mba hahatratra ny rehetra.",
     "stakersHint": "Mpilalao manana tantaran'ny fampidirana tapaho Riftn",
-    "povrPricingIntro": "Ny rafitra fandoavam-bola ambaratonga mifototra amin'ny tsipika dia miantoka ny vidin'ny dokam-barotra ara-drariny sy azo ampitomboina mifototra amin'ny sandan'ny mpihaino. Ny sandany dia voalohany amin'ny USD mba ho mora ny fitantanana, na izany aza ny fandoavam-bola dia ho avy amin'ny tapaho Riftn amin'ny fotoana anaovana izany."
+    "povrPricingIntro": "Ny rafitra fandoavam-bola ambaratonga mifototra amin'ny tsipika dia miantoka ny vidin'ny dokam-barotra ara-drariny sy azo ampitomboina mifototra amin'ny sandan'ny mpihaino. Ny sandany dia voalohany amin'ny USD mba ho mora ny fitantanana, na izany aza ny fandoavam-bola dia ho avy amin'ny tapaho Riftn amin'ny fotoana anaovana izany.",
+    "reviewTiers": "Ambaratonga: "
   },
   "launchpad": {
     "seoTitle": "Launchpad ¢Launchpad Riftn",
@@ -5102,6 +5518,7 @@
     "settledTitleSpeed": ", matetika ao amin'ny {{speed}}",
     "settledCount_one": "{{count}} vita",
     "settledCount_other": "{{count}} vita",
+    "statusInProgress": "Mandeha",
     "howMany": "Firy izay",
     "availableCount_one": "{{count}} misy",
     "availableCount_other": "{{count}} misy",
@@ -5191,9 +5608,169 @@
     "buy": "Mividy",
     "reject": "Mandà",
     "needsYouHold": "Mila {{needed}}, Hitanareo {{held}}",
-    "sellYourFractions": "Amidio ny tombotsoa azo avy aminao ({{held}} FOTSINY)"
+    "sellYourFractions": "Amidio ny tombotsoa azo avy aminao ({{held}} FOTSINY)",
+    "nftsSubtitle": "NFT rehetra, fifanakalozana indray mandeha",
+    "buyersTab": "Mpividy",
+    "soldOfListing": "Lafo {{sold}} amin'ny {{total}}",
+    "noBuyersYet": "Mbola tsy misy nividy ampahany amin'ity lahatsoratra ity",
+    "fromYou": "avy aminao",
+    "statusOverdue": "Tara"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Ampiasao ireo antsipiriany ireo",
+        "url": "URL-n'ny pejin'ny vokatra",
+        "action": "Vakio ny pejin'ny vokatra",
+        "loading": "Mamaky ny pejy…",
+        "hint": "Ampidiro ny soratra avy amin'ny pejin'ny vokatra ho an'ny daholobe. Jereo ny antsipiriany alohan'ny hampiasana azy; ampiarao misaraka ao amin'ny studio ny sarin'ny vokatra.",
+        "source": "Loharano nafarana",
+        "review": "Misafidiana vokatra hadika ao amin'ny famaritana azonao ovaina. Tsy miova ny lohateninao, ny feonao ary ny lokon'ny marikao.",
+        "errors": {
+          "signIn": "Midira mba hanafarana pejin'ny vokatra.",
+          "url": "Ampiasao URL vokatra HTTPS ho an'ny daholobe.",
+          "empty": "Tsy nisy antsipirian'ny vokatra azo ampiasaina hita. Ampidiro tanana izy ireo.",
+          "busy": "Betsaka loatra ny fanafarana mandeha. Andramo indray afaka kelikely.",
+          "unavailable": "Tsy afaka nafarana ity pejy ity. Ampidiro tanana ny antsipirian'ny vokatra.",
+          "failed": "Tsy nahomby ny fanafarana. Voatahiry ny famaritanao; andramo indray na ampidiro tanana ny antsipiriany."
+        }
+      },
+      "return": "Miverina amin'ny drafitra studio",
+      "title": "Famaritana fanentanana",
+      "intro": "Lazao ny vokatrao sy ny marikao, avy eo omano ny endrika dokam-barotra mifanaraka.",
+      "saved": "Voatahiry amin'ity fitaovana ity ho an'ity kaonty ity ny famaritanao.",
+      "preview": "Omano ny endrika",
+      "clear": "Fafao ny famaritana",
+      "required": "Ampio anaran'ny vokatra sy famaritana mba hanomanana endrika.",
+      "variants": "Endrika fanentanana",
+      "reviewHint": "Jereo ao amin'ny studio ny modely, ny vidiny ary ny reference-n'ny vokatra alohan'ny hamoronana. Famoronana misaraka ny endrika tsirairay.",
+      "open": "Jereo ao amin'ny studio",
+      "fields": {
+        "product": "Anaran'ny vokatra (ilaina)",
+        "description": "Zava-misy momba ny vokatra (ilaina)",
+        "brand": "Anaran'ny marika",
+        "audience": "Mpihaino kendrena",
+        "benefit": "Tombony lehibe",
+        "voice": "Feon'ny marika",
+        "palette": "Lokon'ny marika",
+        "headline": "Lohateny nankatoavina",
+        "cta": "Antso hanao hetsika"
+      },
+      "formats": {
+        "square": "Doka efamira",
+        "portrait": "Doka mitsangana",
+        "story": "Sary story",
+        "video": "Horonan-tsary mitsangana"
+      }
+    },
+    "cinema": {
+      "close": "Hidio",
+      "performance": {
+        "label": "Fahombiazan'ny asa",
+        "0": "Faly",
+        "1": "Malahelo",
+        "2": "Manahy",
+        "3": "Matoky tena",
+        "4": "Gaga be",
+        "5": "Voafehy",
+        "6": "Milalao"
+      },
+      "title": "Fitarihana sinema",
+      "hint": "Tariho ny fomba hita maso amin'ny sary na horonan-tsary manaraka. Miovaova arakaraka ny modely ny vokatra.",
+      "none": "Tsy misy fitarihana",
+      "reset": "Fafao ny fitarihana",
+      "camera": {
+        "label": "Endriky ny fakan-tsary",
+        "0": "Sinema nomerika",
+        "1": "Sarimihetsika 35mm",
+        "2": "Sarimihetsika 16mm",
+        "3": "Endrika lehibe",
+        "4": "Camcorder taloha"
+      },
+      "lens": {
+        "label": "Endriky ny lens",
+        "0": "Boribory",
+        "1": "Anamorphic",
+        "2": "Fitaratra malefaka taloha",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Halavan'ny focal",
+        "0": "18mm midadasika",
+        "1": "24mm midadasika",
+        "2": "35mm voajanahary",
+        "3": "50mm mahazatra",
+        "4": "85mm sarin'olona",
+        "5": "135mm telephoto"
+      },
+      "aperture": {
+        "label": "Halalin'ny saha",
+        "0": "f/1.4 tena marivo",
+        "1": "f/2.8 marivo",
+        "2": "f/5.6 antonony",
+        "3": "f/11 lalina"
+      },
+      "movement": {
+        "label": "Fihetsiky ny fakan-tsary",
+        "0": "Tripod tsy mihetsika",
+        "1": "Dolly miditra miadana",
+        "2": "Dolly mivoaka miadana",
+        "3": "Fanarahana avy amin'ny sisiny",
+        "4": "Mihodina manodidina ny lohahevitra",
+        "5": "Tazonina an-tanana",
+        "6": "Crane miakatra",
+        "7": "Pan miadana"
+      },
+      "lighting": {
+        "label": "Hazavana",
+        "0": "Hazavan'ny andro malefaka",
+        "1": "Ora volamena",
+        "2": "Chiaroscuro maizina",
+        "3": "Studio mazava be",
+        "4": "Jiro neon",
+        "5": "Silhouette hazavana avy ao aoriana",
+        "6": "Rahona miparitaka"
+      },
+      "tempo": {
+        "label": "Gadona ny sary",
+        "0": "Sary iray mitohy",
+        "1": "Hetsika milamina, tsy maika",
+        "2": "Hetsika mavitrika, be hery",
+        "3": "Hetsika mikorontana, mafy"
+      },
+      "era": {
+        "label": "Vanim-potoana",
+        "0": "Taona 1920",
+        "1": "Taona 1950",
+        "2": "Taona 1960",
+        "3": "Taona 1970",
+        "4": "Taona 1980",
+        "5": "Taona 1990",
+        "6": "Ankehitriny",
+        "7": "Ho avy akaiky"
+      },
+      "genre": {
+        "label": "Karazany",
+        "0": "Fanadihadiana",
+        "1": "Tantara mampihetsi-po",
+        "2": "Film noir",
+        "3": "Siansa foronina",
+        "4": "Nofinofy",
+        "5": "Hatsikana tantaram-pitiavana",
+        "6": "Mampientanentana",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Paletin'ny loko",
+        "0": "Volon-tantely mafana",
+        "1": "Manga mangatsiaka",
+        "2": "Lokon'ny tany malefaka",
+        "3": "Pastel",
+        "4": "Mainty sy fotsy mifanohitra mafy",
+        "5": "Loko fototra mamirapiratra"
+      }
+    },
     "libraryEmpty": "Hiseho eto ireo zavatra noforoninao voatahiry.",
     "toolRemake": "Misy fomba fampiasa",
     "toolMaboroshi": "Maboroši",
@@ -5436,6 +6013,7 @@
     "presetOpenLateNightDinerHint": "Voahidy fakan-tsary, orana sy ny flickering famantarana",
     "presetOpenSculptorPushName": "Mpanao faharoa singiolary ny filaza mandidy ny endriky ny mpanao ny mat",
     "presetOpenSculptorPushHint": "Miadana manosika mankany amin'ny varavarankely-mitoa asa tanana antsipirihany",
+    "presetOpenLighthouseOrbitName": "Fihodinana manodidina ny fanilo",
     "presetOpenLighthouseOrbitHint": "Drone orbit amin'ny onja volondavenona sy ny tifitra an-dranomasina",
     "presetOpenCanyonTimelapseName": "Vanim-potoana Canyon",
     "presetOpenCanyonTimelapseHint": "Cloud alokaloka avy amin'ny volamena ora ho dusk",
@@ -5989,8 +6567,123 @@
       "cannotUseReference": "{{model}} tsy afaka mampiasa sary famantarana. Manitatra na mifanaraka amin'ny maodely hafa.",
       "needsImageToAnimate": "{{model}} mila sary hamazivaziana. Azonao atao ny mametraka ny voalohany.",
       "needsImageToWork": "{{model}} mila sary mba hiasa. Azonao atao ny mametraka ny voalohany.",
-      "musicTrackLength": "{{count}}s"
-    }
+      "musicTrackLength": "{{count}}s",
+      "speechLimit": "Litera {{length}} izany. {{limit}} no fetra."
+    },
+    "gallery": {
+      "send": "Mandefa",
+      "notifications": {
+        "generation_reply": "{{name}} namaly ny fanehoan-kevitrao",
+        "generation_like": "Naneho hevitra tamin'ny famoronanao i {{name}}",
+        "generation_comment_like": "Naneho hevitra tamin'ny fanehoan-kevitrao i {{name}}",
+        "generation_comment": "Naneho hevitra momba ny famoronanao i {{name}}"
+      },
+      "browse": "Jereo ireo noforonina",
+      "create": "Mamorona",
+      "fullscreen": "Jereo amin'ny efijery feno",
+      "missing": "Tsy misy ity famoronana ity."
+    },
+    "avatarTitle": "Sary miteny",
+    "avatarRequirements": "Sary PNG efamira, 512–2048 piksely, hatramin'ny 5 MB. WAV PCM mono 24 kHz 16-bit, 5–30 segondra. Fenoina fahanginana ny ampahany farany amin'ny segondra.",
+    "avatarPortrait": "Safidio sary PNG",
+    "avatarAudio": "Safidio WAV feo",
+    "avatarPermission": "Manana alalana hanetsika ity sary ity sy hampiasa ity feo ity aho.",
+    "avatarQuote": "{{seconds}} segondra miaraka amin'ny fahanginana · token {{amount}}",
+    "avatarPrepare": "Omano ary jereo ny vidiny",
+    "batchFlowLimit": "Feno ny lisitra Flow. Esory ny Flow tsy ampiasaina iray alohan'ny hamoronana batch hafa.",
+    "batchReviewCampaign": "Jereo ao amin'ny Flow ny batch fanentanana",
+    "batchReviewFilmImages": "Jereo ny batch sarin'ny storyboard",
+    "batchReviewFilmVideos": "Jereo ny batch clip sarimihetsika",
+    "batchReviewHint": "Manokatra Flow voatahiry misaraka. Jereo ny singa rehetra sy ny vidiny feno alohan'ny handoavana. Tehirizina ny singa vita sy ny fandoavana tany am-boalohany ho fanarenana. Adika ao amin'ny tranombokinao manokana ny references; misy sarany ny fitahirizana sy ny fampiasana tambajotra.",
+    "batchInvalid": "Fenoy ny singa tsirairay alohan'ny hanomanana batch misy sary na clip 1–12.",
+    "batchReferenceLimit": "Reference sary iray isaky ny singa no zakan'ity batch ity. Esory ny references fanampiny na omano tsirairay io singa io.",
+    "batchVideoSettings": "Ho an'ity batch ity, mila faharetana feno 4–15 segondra sy refy 16:9, 9:16 na 1:1 ny clip.",
+    "batchMissingReference": "Misy reference tsy hita, tsy zaka na mihoatra ny 25 MB. Avereno ao amin'ny editor alohan'ny hanomanana ny batch.",
+    "batchOwnerChanged": "Niova ny kaonty na ny drafitra. Sokafy indray ity batch ity amin'ny kaontiny tany am-boalohany.",
+    "batchConflict": "Tsy mifanaraka amin'ny snapshot tany am-boalohany ny batch voatahiry.",
+    "audioExportFormat": "Endrika fanondranana",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Ampiarao clip loharano iray hohalavaina.",
+    "extensionSeconds": "+{{seconds}}s sary vaovao",
+    "extensionHelp": "Mamerina ny clip loharanonao miaraka amin'ny segondra vaovao efatra eo ho eo. Ovaina habe hatramin'ny 720p amin'ny 24 fps ny vokatra. Mamorona feo vaovao ho an'ny fanalavana.",
+    "extensionForward": "Ampio segondra efatra eo ho eo aorian'ny clip loharanonao",
+    "extensionBackward": "Ampio segondra efatra eo ho eo alohan'ny clip loharanonao",
+    "expandDescription": "Mamorona sisin-tsary vaovao. Prompt amin'ny teny anglisy tsy voatery; sary loharano iray.",
+    "relightDescription": "Ovay ny hazavan'ny sary iray araka ny famaritanao ny hazavana sy ny ambadika.",
+    "expandPromptHint": "Ampiarao sary iray ary safidio ny refiny vaovao. Prompt amin'ny teny anglisy tsy voatery.",
+    "expandEnglishOnly": "Prompt amin'ny teny anglisy ihany no raisin'ity modely fanitarana ity. Avelao ho foana ny prompt ho an'ny fanitarana mandeha ho azy.",
+    "expandNeedsImage": "Ampiarao sary hitarina.",
+    "learn": {
+      "title": "Lesona ho an'ny mpamorona",
+      "intro": "Lesona fohy, fanamarinana fahalalana ary fanazaran-tena azo ovaina isaky ny lesona. Voatahiry amin'ity fitaovana ity ho an'ny kaontinao ny fandrosoana.",
+      "back": "Hiverina amin'ny Creator",
+      "lessons": "Lesona",
+      "progress": "Fanamarinana fahalalana {{completed}} amin'ny {{total}} no afaka",
+      "check": "Hamarino ny valiny",
+      "correct": "Afaka ny fanamarinana fahalalana",
+      "retry": "Andramo indray. Jereo indray ny lesona etsy ambony.",
+      "exerciseTitle": "Fanazaran-tena azo ampiharina",
+      "exerciseHint": "Sokafy ohatra azo ovaina ao amin'ny toeram-piasanao studio. Maimaim-poana ny fanokafana drafitra; mila fandinihanao sy tombana manokana ny famoronana. Ovay ny ohatra alohan'ny hamoronana.",
+      "openExercise": "Sokafy ny drafitry ny fanazaran-tena",
+      "closeExercise": "Akatony ny fanazaran-tena",
+      "brief": {
+        "title": "Soraty famaritana hita maso mazava",
+        "body1": "Lazao lohahevitra mazava, ny ataony ary ny toerana. Ampio ny fandrafetana na ny fihetsiky ny fakan-tsary raha manampy ny sehatra izany. Tehirizo ho an'ny drafitra hafa ny hevitra tsy mifandray.",
+        "body2": "Mitarika ny modely ny toromarika momba ny hazavana, lens ary fomba. Tsy miantoka ny fihetsiky ny fakan-tsary ara-batana na sary mitovy tanteraka izy ireo. Ovay tsirairay ny ampahany mba hahafahanao mampitaha ny fanovana.",
+        "body3": "Alohan'ny hamoronana, jereo ny modely voafidy, ny fampiarahana zaka, ny refy ary ny vidiny. Tehirizo ny drafitra tany am-boalohany mba hahafahanao miverina aminy.",
+        "question": "Famaritana inona no mora indrindra ovaina?",
+        "answer0": "Lohahevitra, hetsika ary toerana mazava",
+        "answer1": "Anaran'ny modely fotsiny",
+        "answer2": "Lisitry ny fomba mifanohitra",
+        "exercise": "Vilia dite seramika eo ambonin'ny latabatra hazo eo akaikin'ny varavarankely. Hazavana maraina malefaka, fandrafetana antonony, ambadika tsotra. Tazony ho lohahevitra mazava ny vilia dite."
+      },
+      "continuity": {
+        "title": "Alamino ny sary ary jereo ny fitohizana",
+        "body1": "Ampiasao ny tontonana Film ao amin'ny editor mba hitahirizana famaritana sy sary voalahatra. Omano tsirairay ny frame na clip, jereo ny tombany ary safidio vokatra nekena.",
+        "body2": "Ampiarao ireo references ekena amin'ny modely voafidinao ihany. Afaka mitarika ny endrika ny fampiasana indray reference; tsy mampianatra maha-izy na miantoka fitoviana izany. Mety hiova isaky ny famoronana ny mpilalao sy ny feo.",
+        "body3": "Tehirizo ny sary nahomby ary ampifanaraho ao amin'ny timeline. Jereo ny fihetsika, ny tarehy, ny fifampiresahana ary ny fifindrana alohan'ny fanondranana.",
+        "question": "Inona no manohana ny fitohizana eo amin'ny sary?",
+        "answer0": "Prompt tsy mifandray betsaka kokoa",
+        "answer1": "References nankatoavina sy fanamarihana sary voadinika",
+        "answer2": "Mihevitra fa voaantoka ny maha-izy ny mpilalao",
+        "exercise": "Sary midadasika misy mpandeha irery tonga eo amoron-dranomasina mangina amin'ny fiposahan'ny masoandro. Fihetsiky ny fakan-tsary miroso miadana, rivotra milamina. Sary iray mitohy."
+      },
+      "campaign": {
+        "title": "Ampiasao ny zava-misy nankatoavina momba ny vokatra",
+        "body1": "Atombohy amin'ny zava-misy momba ny vokatra azonao hamarinina. Jereo ny metadata nafarana alohan'ny hampiasana azy. Soraty mazava ny lohateny sy ny antso hanao hetsika; aza mamorona vidiny, hevitry ny mpanjifa na fanambarana momba ny fahombiazana.",
+        "body2": "Ampiasao ny variants fanentanana voatahiry mba hitazonana miaraka ny fanamarihana iraisana sy ny hook, script, fiteny ary endrika tsirairay. Omano tsirairay ny singa voadinika ary jereo ny tombany ao amin'ny studio.",
+        "body3": "Jereo ny soratra hita, ny endriky ny vokatra ary izay fanambarana voalaza ao amin'ny vokatra. Tsy porofon'ny fahamarinan'ny vokatra na ny fahombiazan'ny varotra ny prompt.",
+        "question": "Rahoviana no tokony hampidirina ny fanambarana momba ny vokatra?",
+        "answer0": "Isaky ny toa mandresy lahatra izany",
+        "answer1": "Rehefa avy namorona hevitra kintana dimy",
+        "answer2": "Rehefa avy amin'ny zava-misy nankatoavina momba ny vokatra izany",
+        "exercise": "Mamorona dokam-barotra mitsangana ho an'ny dite ravina feno amidy ao anaty vifotsy azo ampiasaina indray. Lohateny nankatoavina: Manokàna fotoana ho an'ny dite. CTA nankatoavina: Jereo ny fanangonana. Ireo zava-misy ireo ihany no ampiasao; aza mamorona fihenam-bidy, hevitry ny mpanjifa na fanambarana ara-pahasalamana."
+      }
+    },
+    "campaignPlanTitle": "Variants sy fizarana fanentanana",
+    "campaignPlanIntro": "Tehirizo hatramin'ny fiovaovana na fizarana 12. Samy manokatra ny studio ho an'ny fandinihana sy ny tombany manokana. Mitarika ny fitohizana ny fanamarihana iraisana; mety hiova isaky ny famoronana ny endriky ny vokatra, ny mpilalao ary ny feo.",
+    "campaignTitle": "Anaran'ny fanentanana na andiany",
+    "campaignContinuity": "Fanamarihana iraisana momba ny mpilalao, feo ary fomba",
+    "campaignVariantTitle": "Anaran'ny variant na fizarana",
+    "campaignHook": "Hook fanombohana",
+    "campaignLanguage": "Fitenin'ny vokatra",
+    "campaignScript": "Script na filaharan'ny sehatra nankatoavina",
+    "campaignAdd": "Ampio variant na fizarana",
+    "campaignClear": "Fafao ny drafitra",
+    "campaignFormat": "Endriky ny vokatra",
+    "audioInvalidResponse": "Valiny tsy manan-kery no naverin'ny serivisy feo.",
+    "batchPaymentHelp": "Aloa misaraka ny sary tsirairay alefa. Raha mijanona ny batch, ampiasaina ho azy indray ny token tsy lany tamin'ny fandoavany ho an'ny famoronana manaraka rakofany.",
+    "invalidSeed": "Tsy maintsy isa feno manomboka amin'ny 0 ka hatramin'ny 2147483647 ny seed.",
+    "libraryFavorites": "Ankafizina",
+    "libraryFavoriteAdd": "Ampio amin'ny ankafizina",
+    "libraryFavoriteRemove": "Esory amin'ny ankafizina",
+    "audioTaskDialoguePlaceholder": "Alice: Tokony handeha isika.\nBob: [mihomehy] Mialoha ianao.",
+    "searchField": "Hitady {{field}}",
+    "nothingMatches": "Tsy misy mifanaraka amin'ny “{{query}}”.",
+    "navStudio": "Studio",
+    "priceOwnKey": "Ny lakileanao",
+    "audioResultTooLarge": "Foana na mihoatra ny 128 MB ny vokatra feo."
   },
   "pricing": {
     "plansForEveryWorkflow": "Mikasa ny hikolokoloana amin'ny asa rehetra",
@@ -6157,9 +6850,15 @@
     "createTheFirst": "Mamorona ny voalohany",
     "docsSeoTitle": "AI mahafeno fepetra Torolalana â Riftn",
     "docsSeoDescription": "Fanadihadiana momba ny antontan-taratasy ho an'ny fahaiza-manaon'ny Riftn sy ny tranomboky haingana.",
-    "raw": "Akora"
+    "raw": "Akora",
+    "docsLoadFailed": "# Hadisoana\nTsy nety nisokatra ny torolalan'ny skill."
   },
   "nftMarket": {
+    "actAll": "Izy rehetra",
+    "actListings": "Tolotra",
+    "actOffers": "Tolotra",
+    "actSales": "Varotra",
+    "tabActivity": "Hetsika",
     "shortTitle": "NFTs",
     "filters": "Sivana",
     "forSale": "ANTSIRABE",
@@ -6224,6 +6923,9 @@
     "offered": "Offer natsipy. Azo tanterahin'ny tompon'ny zavatra izany anytime.",
     "dehubPost": "Riftn post",
     "youHold": "Manana {{n}} ianao",
+    "price": "Vidiny",
+    "volume": "Hamafin'ny feo",
+    "tabRecent": "Vao haingana",
     "buyNow": "Vidiana ankehitriny",
     "dropsTo": "Mihena ny vidiny ho {{price}} amin {{date}}",
     "inBundle": "Nivarotra ho bundle of {{n}}",
@@ -6267,7 +6969,28 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "Ny NFT sy ny fandoavam-bola dia miova amin'ny dingana iray.",
     "spotlightOfferNote": "Tsy nolisitra pa. Alefaso ny fanofana ary ny mpanana dia afaka manaiky amin'ny fotoana rehetra.",
-    "signInToTradeCta": "Miditra mba hifampitoviana"
+    "signInToTradeCta": "Miditra mba hifampitoviana",
+    "actCollectionOffer": "Tolotra ho an'ny fanangonana",
+    "actListed": "Natao amidy",
+    "actOffer": "Tolotra",
+    "actSale": "Varotra",
+    "buyAll": "Vidio daholo",
+    "buySeveral": "Mividiana maromaro",
+    "cartBought": "Nividy {{n}}. Efa ao amin'ny kitapom-bolanao izy ireo izao.",
+    "cartCount": "{{n}} ao anaty harona",
+    "cartFull": "Hatramin'ny 20 indray mandeha",
+    "cartOneCoin": "Chain iray sy coin iray isaky ny harona. Fafao raha hanova.",
+    "cartOwn": "Anao io",
+    "cartPick": "Tsindrio hampidirana ao anaty harona",
+    "forSaleHere": "Amidy eto",
+    "noActivity": "Mbola tsy misy eto",
+    "volShort": "Vol",
+    "salesCount": "{{n}} lafo",
+    "bestOffer": "Tolotra tsara indrindra",
+    "fromOpenSea": "Fanangonana ambony ao amin'ny OpenSea",
+    "buyHere": "Vidio eto",
+    "openSeaNote": "Natao amidy ao amin'ny OpenSea. Mandoa mivantana amin'ny mpivarotra ao amin'ny Seaport ianao; tsy manampy sarany ny Riftn.",
+    "viewOnOpenSea": "Jereo ao amin'ny OpenSea"
   },
   "usernames": {
     "seoTitle": "Tsenan'ny mpampiasa | Riftn",
@@ -6586,7 +7309,8 @@
     "youPayNow": "Mandoa vola ianao",
     "paidToCreatorWallet": "Mandeha mivantana any amin'ny kitapom-bolan'ny mpamorona",
     "creatorPaidDirectNote": "Mivantana avy hatrany any amin'ny kitapon'izy ireo ny fizarana ny mpamorona raha vao misoratra anarana ianao. Ny tranonkala Riftn dia manana rindran-damina kely.",
-    "creatorEarnsDirect": "Ny mpandraharaha mandoa ao Riftn famantarana. Ny anjara tany ao amin'ny kitapom-batsy ny fotoana izy ireo misoratra anarana, tsy ny sehatra saran'ny noho ny badge Tier."
+    "creatorEarnsDirect": "Ny mpandraharaha mandoa ao Riftn famantarana. Ny anjara tany ao amin'ny kitapom-batsy ny fotoana izy ireo misoratra anarana, tsy ny sehatra saran'ny noho ny badge Tier.",
+    "benefitN": "Tombony {{number}}"
   },
   "liveOverlay": {
     "someone": "Olona iray",
@@ -6621,7 +7345,18 @@
       "votes_other": "{{count}} Vato",
       "howToVote_one": "Tadiavo ny {{command}} sy ny isa ao amin'ny karajia hifidianana · {{count}} vote",
       "howToVote_other": "Mitendry {{command}} sy ny isa ao amin'ny karajia mba hifidy · {{count}} votes"
-    }
+    },
+    "eyebrow": {
+      "follow": "Mpanaraka vaovao",
+      "subscribe": "Mpanjifa vaovao",
+      "subscribedTo": "Nisoratra · {{plan}}",
+      "gifted_one": "Nanome sub iray",
+      "gifted_other": "Nanome sub {{count}}",
+      "share": "Nizara ny stream",
+      "join": "Vao niditra"
+    },
+    "giftedSubs_one": "Nanome sub iray i {{name}}!",
+    "giftedSubs_other": "Nanome sub {{count}} i {{name}}!"
   },
   "liveChatModeration": {
     "timeout1m": "Miverena amin'ny hadisoana iray minitra",
@@ -6636,7 +7371,155 @@
     "youAreBanned": "Tsy afaka ny hiresaka amin'ny mpamorona ity ny renirano",
     "youAreTimedOut": "Ianao no tapa-kevitra ny hanao ny fotoana."
   },
+  "studioDeck": {
+    "background": {
+      "title": "Ambadika",
+      "modes": {
+        "none": "Maty",
+        "blur": "Manjavozavo",
+        "color": "Loko",
+        "image": "Sary"
+      },
+      "failed": "Tsy afaka nanomboka teto amin'ity fitaovana ity ny fanesorana ambadika.",
+      "hint": "Mandeha amin'ny fitaovanao. Maharitra segondra vitsivitsy ny fisokafana amin'ny voalohany."
+    },
+    "remove": "Esory",
+    "scenes": {
+      "countdown": "Mpitàna",
+      "names": {
+        "starting": "Hanomboka tsy ho ela",
+        "chatting": "Miresaka fotsiny",
+        "gameplay": "Lalao",
+        "brb": "Hiverina avy hatrany",
+        "ending": "Mifarana ny stream"
+      },
+      "title": "Sehatra",
+      "edit": "Ovay {{name}}",
+      "subtitle": "Andalana faharoa (tsy voatery)",
+      "picture": "Sary",
+      "noCountdown": "Tsy misy fanisana mihemotra",
+      "minutes": "{{count}} min",
+      "muteMic": "Ataovy mangina ny mikrôko raha mandeha ity",
+      "hints": {
+        "starting": "Karatra misy fanisana mihemotra",
+        "chatting": "Fakan-tsary efijery feno",
+        "gameplay": "Efijery miaraka amin'ny fakan-tsarinao",
+        "brb": "Karatra, mikrô mangina",
+        "ending": "Karatra fisaorana"
+      },
+      "subtitles": {
+        "starting": "Manomboka afaka ny stream",
+        "brb": "Hiverina afaka kelikely",
+        "ending": "Misaotra nijery"
+      }
+    },
+    "sources": {
+      "reactAdd": "Aseho",
+      "image": "Sary",
+      "camera": "Fakantsary",
+      "show": "Ipakita sa stream",
+      "loop": "Manome fitoerana",
+      "positions": {
+        "center": "Afovoany",
+        "top-left": "Ambony havia",
+        "top-right": "Ambony havanana",
+        "bottom-left": "Ambany havia",
+        "bottom-right": "Ambany havanana"
+      },
+      "sizes": {
+        "medium": "Salantsalany",
+        "small": "Kely",
+        "large": "Lehibe"
+      },
+      "shapes": {
+        "circle": "Faribolana",
+        "rect": "Efamira",
+        "rounded": "Boribory zoro"
+      },
+      "title": "Loharano",
+      "addImage": "Sary na logo",
+      "addCamera": "Fakan-tsary faharoa",
+      "addClip": "Clip horonan-tsary",
+      "addReaction": "Mihetsika amin'ny horonan-tsary",
+      "reactPlaceholder": "Apetaho ny rohin'ny horonan-tsary Riftn",
+      "reactInvalid": "Apetaho ny rohy mankany amin'ny horonan-tsary Riftn.",
+      "reactNotLive": "Mandehana mivantana aloha, avy eo ampio ny horonan-tsary.",
+      "reactNoBubble": "Tsy afaka nisokatra indroa teto ny fakan-tsarinao. Ovay habe ny horonan-tsary mba hitazonana ny tarehinao eo amin'ny efijery.",
+      "failed": "Tsy nety nampidirina io loharano io.",
+      "empty": "Ampio logo, fakan-tsary faharoa na clip horonan-tsary eo ambonin'ny stream-nao.",
+      "hint": "Soratana eo ambonin'ny sarinao ho an'ny mpijery sy ny sehatra rehetra ny loharano.",
+      "clip": "Clip",
+      "restart": "Averina atomboka",
+      "play": "Alefaso na ajanony"
+    },
+    "audio": {
+      "mute": "Ampanginina",
+      "unmute": "Esory ny fampanginana",
+      "gateLevels": {
+        "off": "Maty",
+        "low": "Mazava",
+        "high": "Mahery"
+      },
+      "title": "Mpampifangaro feo",
+      "unavailable": "Tsy afaka mampifangaro feo ity navigateur ity, ka mivoaka toy izao ny mikrônao.",
+      "channels": {
+        "mic": "Mikrô",
+        "game": "Lalao / tab",
+        "clip": "Clip horonan-tsary"
+      },
+      "absent": {
+        "mic": "Tsy misy mikrô",
+        "game": "Zarao efijery misy feo na ampiasao karatra capture",
+        "clip": "Ampio clip horonan-tsary ao amin'ny Loharano"
+      },
+      "gate": "Vavahady tabataba",
+      "gateHint": "Mampangina ny mikrônao eo anelanelan'ny teny mba tsy ho tafiditra ao amin'ny stream ny feon'ny klavier sy ny ventilateur."
+    },
+    "imageTooLarge": "Lehibe loatra io sary io. Andramo ny kely kokoa.",
+    "widgets": {
+      "title": "Asehoy ao amin'ny horonan-tsariko ny widgets",
+      "hint": "Soratana ao amin'ny stream-nao ny fampandrenesana, ny bara tanjona ary ny chat, ka hitan'ny mpijery ao amin'ny Twitch, YouTube ary ny sehatra hafa rehetra koa.",
+      "failed": "Tsy voaova ny toerana ipoiran'ny widgets-nao. Andramo indray."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Sehatra",
+      "label": "Anarana (tsy voatery)",
+      "key": "Fanalahidin'ny fampitana",
+      "save": "Ampio",
+      "cancel": "Ajanona",
+      "states": {
+        "off": "Maty",
+        "idle": "Vonona",
+        "live": "Mivantana",
+        "error": "Diso",
+        "connecting": "Mampifandray"
+      },
+      "title": "Toerana alefana multistream",
+      "intro": "Mandehana mivantana indray mandeha ao amin'ny Riftn ary halefanay any amin'ny sehatra rehetra navelona eto ny stream-nao, maimaim-poana. Manomboka ao anatin'ny segondra vitsivitsy aorian'ny fandehananao mivantana izy.",
+      "add": "Ampio toerana alefana",
+      "empty": "Mbola tsy misy toerana alefana. Ampio Twitch, YouTube, Kick na mpizara RTMP rehetra.",
+      "server": "URL-n'ny mpizara",
+      "findKey": "Tadiavo ny mpizara sy ny lakilen'ny {{name}}-nao",
+      "customHint": "Apetaho ny mpizara RTMP sy ny lakile omen'ny sehatrao anao.",
+      "keyNote": "Voatahiry voaaro ao amin'ny mpizaranay ny lakilenao ary tsy haseho intsony mihitsy.",
+      "added": "Tafiditra {{name}}",
+      "saveFailed": "Tsy voatahiry ny toerana alefana",
+      "toggle": "Alefaso any amin'ity toerana ity"
+    },
+    "vertical": {
+      "centre": "Afovoany",
+      "live": "MIVANTANA",
+      "title": "Fijery mitsangana",
+      "intro": "Mijery ny stream-nao ao amin'ny famahanana mitsangana ny finday. Sintony ny boaty mba hisafidianana ny ampahany amin'ny sarinao hitan'izy ireo.",
+      "enabled": "Asehoy ao amin'ny famahanana mitsangana ny stream-ko",
+      "zoom": "Zoom",
+      "frame": "Ny sarinao mitsivalana",
+      "box": "Izay hitan'ny finday",
+      "hint": "Sintony ny boaty, na ampiasao ny bokotra zana-tsipika. Tahirizo mba hampiharana azy amin'ny stream mivantana.",
+      "watch": "Jereo mivantana i {{name}}"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Fandaniana amin'ny iyong stream. Ny fanomezana karama, ny fanarahana ary ny subscription dia manampy ny ora, noho izany ny efitrano dia mitazona anao mielona.",
@@ -6798,7 +7681,8 @@
       "subathon_timer": "Famantarana fandaniana Subathon",
       "points_board": "Mpandinika mahatoky",
       "streamer_level": "Dingana mirohotra",
-      "tip_jar": "Fanomezana siny"
+      "tip_jar": "Fanomezana siny",
+      "hype_train": "Fiaran-dalamby hype"
     },
     "hints": {
       "tip_alert": "Mankalaza ny tip rehetra, arakaraka ny haavon'izy ireo",
@@ -6822,7 +7706,8 @@
       "subathon_timer": "Fandaniana izay itazonin'ny fanomezana karama, fanarahana ary subscription",
       "points_board": "Ny mpandinika ambony indrindra amin'ny toetra avy amin'ny fijery ary fanomezana",
       "streamer_level": "Ny haavon'ny renirano sy ny isan-kerinandro streak, avy amin'ny mombamomba azy",
-      "tip_jar": "Ny siny izay mameno ny toy ny fanomezana karama tonga ao"
+      "tip_jar": "Ny siny izay mameno ny toy ny fanomezana karama tonga ao",
+      "hype_train": "Mampiseho ny fiaran-dalamby hype raha mandeha: fanomezana na famandrihana telo ao anatin'ny dimy minitra no manomboka azy."
     },
     "fields": {
       "style": "Endrika",
@@ -7208,7 +8093,10 @@
     "endStreamConfirmBody": "Ang iyong broadcast ay tumitigil para sa lahat ng nanonood at hindi maaaring muling simulan.",
     "keepStreaming": "Magpatuloy sa streaming",
     "encoderPermanentHint": "Ity fanalahidy ity dia tsy miova mihitsy. Amboary indray mandeha ny encoder-nao — amin'ny manaraka dia tsindrio fotsiny ny \"Start\" eo ary ny Riftn no hamorona ny lahatsoratra ho anao.",
-    "notEnoughTokensForBounty": "Tsy ampy ny tapaho. Mila tapaho {{need}} fa manana {{have}}."
+    "notEnoughTokensForBounty": "Tsy ampy ny tapaho. Mila tapaho {{need}} fa manana {{have}}.",
+    "screenInAppHint": "Ao amin'ny app Riftn",
+    "screenInAppNote": "Tsy mamela tranonkala hizara ny efijerinao ny navigateur finday. Mandehana mivantana avy amin'ny app Riftn kosa, avy eo tsindrio Zarao efijery.",
+    "screenInAppCta": "Alaivo ny app Riftn"
   },
   "events": {
     "seoTitle": "Fampisehoana Ã¢Â Meetups & Famoriam-bahoaka ao amin'ny Riftn",
@@ -7585,9 +8473,12 @@
     "faqInstallNeededA": "Tsia. Mihazakazaka tanteraka ao amin'ny tabilao izy io amin'ny fampiasana ny fitahirizana ao an-toerana misy ny navigateur. Ny famaranana ny vakizoro mijanona ny node; tsy misy fototra fanompoana ary tsy misy hametraka.",
     "ctaTitle": "Atomboka raha tsy azo antoka ny tsy fahombiazana.",
     "ctaBody": "Ny fivadihan-trano niandohana, ny fampitam-baovao voaaro voaaro ary ny asa voamarina dia tonga alohan'ny valisoa azony avy amin'ny node ho an'ny daholobe.",
-    "footerNote": "Pennyauctionwizards dia fandraisana anjara amin'ny fanompoana, fa tsy amin'ny fampiasam-bola ny vokatra. Ny vidiny, ny fahamendrehana ary ny fahafahana dia mety hiova."
+    "footerNote": "Pennyauctionwizards dia fandraisana anjara amin'ny fanompoana, fa tsy amin'ny fampiasam-bola ny vokatra. Ny vidiny, ny fahamendrehana ary ny fahafahana dia mety hiova.",
+    "openDehub": "Sokafy ny Riftn"
   },
   "creatorFlow": {
+    "newNativeFlow": "New mikoriana",
+    "disconnect": "Atsaharo",
     "title": "Mpamorona Flow",
     "backToStudio": "Miverina amin'ny Studio mpamorona",
     "backToFlows": "Miverina amin'ny làlanao",
@@ -7793,7 +8684,47 @@
     "foldersInFolder_other": "Ao amin'ny fahavalo \"{{count}}\"",
     "foldersNoItems": "Tsy misy na inona na inona ato amin'ity laha-tahiry ity hatreto",
     "foldersNoItemsHint": "Sokafy ny vokatra ary safidio ny \"Add to folder\" raha hametraka izany eto.",
-    "skippedUpstreamFailed": "Ny antony dia satria efa tsy nahomby ny dingana voalohany. Ny vidiny dia hivadika."
+    "skippedUpstreamFailed": "Ny antony dia satria efa tsy nahomby ny dingana voalohany. Ny vidiny dia hivadika.",
+    "signInForAudioLibrary": "Midira mba hanokafana ny tranomboky feo voatahiry manokana.",
+    "audioLibraryFailed": "Tsy nety nisokatra ny feo voatahirinao. Andramo indray.",
+    "retryFreeTask": "Andramo indray ny asa maimaim-poana",
+    "previewSavedMedia": "Jereo mialoha ny media voatahiry",
+    "audioSavePending": "Vonona ny feo, saingy mbola miandry ny fitahirizana ao amin'ny tranomboky manokana. Tohizo mba hakana azy.",
+    "confirmInterruptedRetry": "Andramo indray ny asa feo na mpanampy tapaka. Tsy fantatra ny vokany teo aloha ary mety hamerina asa ny fanandramana indray. Hampiasaina indray ny fandoavana efa misy sy ny ID asa voaloa.",
+    "freeResultUnknown": "Tapaka ny valin'ny asa maimaim-poana. Tsy halefa indray ho azy izy. Safidio Andramo indray ny asa maimaim-poana, avy eo tohizo; voatahiry ny fandoavanao sy ny asa hafa.",
+    "formAuthor": "Ovay ny flow",
+    "formAuthorHint": "Manamboara flow misy fampidirana voafaritra. Tahirizo eto, na alamino ao amin'ny canvas web.",
+    "chooseSavedMedia": "Safidio media voatahiry",
+    "formInput": "Fampidirana: {{handle}}",
+    "reviewRun": "Jereo ny fanatanterahana",
+    "resumeRun": "Tohizo ny fanatanterahana voatahiry",
+    "confirmPrice": "Totaliny: token {{price}}",
+    "recoveryHint": "Voatahiry amin'ity fitaovana ity ny references asa sy fandoavana. Tohizo ny asa tapaka alohan'ny hanombohana fanatanterahana hafa.",
+    "newRun": "Atombohy fanatanterahana hafa",
+    "loadMoreMedia": "Hamaky media bebe kokoa",
+    "invalidGraph": "Hamarino ny fifandraisana: mila loharano mifanaraka ny fampidirana tsirairay ary tsy azo misy fihodinana ny graph.",
+    "unsupportedNode": "Mbola tsy afaka mandeha amin'ny endrika native ity node ity. Ampiasao ny canvas web ho an'ity flow ity.",
+    "missingPrompt": "Ampifandraiso node soratra misy prompt.",
+    "invalidSettings": "Tsy zakan'ny modely voafidy ireo fikirana ireo.",
+    "missingCapturedFrame": "Makà frame ao amin'ny canvas web alohan'ny hampiasana ity horonan-tsary ity ho fampidirana sary.",
+    "missingSavedMedia": "Tsy hita na tsy azon'ity kaonty ity intsony ny media loharano voatahiry.",
+    "quoteFailed": "Tsy voatombana ny vidin'ity flow ity. Andramo indray.",
+    "recoverBeforeEdit": "Tohizo ny fanatanterahana voatahiry alohan'ny hanovana ny graph-ny na hanombohana fanatanterahana hafa.",
+    "runAlreadyComplete": "Vita ity fanatanterahana ity. Safidio Atombohy fanatanterahana hafa mba hamoronana indray.",
+    "recoveryCorrupt": "Tsy voavaky ny rakitra fanarenana voatahiry. Tazony ity flow ity ary mifandraisa amin'ny fanohanana alohan'ny handoavana indray.",
+    "paidUnavailable": "Afaka manoratra sy mitahiry flow eto ianao. Tsy misy ao amin'ity fivarotana ity ny fanatanterahana voaloa.",
+    "planChanged": "Niova ny flow taorian'ny fanombanana vidiny. Jereo indray ny fanatanterahana.",
+    "connectOwnerWallet": "Ampifandraiso ny kitapom-bola tompon'ity flow ity.",
+    "runFailed": "Tsy vita ny node. Tazonina ho fanarenana ny reference asa voatahiry.",
+    "recoveryPending": "Mbola miandry ny render. Tohizo ity fanatanterahana ity mba hakana azy.",
+    "nodeAudioGen": "Mpamorona feo",
+    "nodeAudioGenDesc": "Kabary, effets feo, fandikana an-tsoratra ary fanasarahana feo",
+    "nodeAudioInput": "Feo voatahiry",
+    "nodeAudioInputDesc": "Ampiasao feo manokana avy amin'ny tranombokinao",
+    "audioVoiceId": "ID feo",
+    "audioSeconds": "Halavan'ny feo amin'ny segondra",
+    "runTitle_other": "Alefaso node {{count}}",
+    "freeNodes_one": "+ node mpanampy {{count}}, maimaim-poana"
   },
   "videoPlayer": {
     "volume": "Hamafin'ny feo",
@@ -7926,6 +8857,9 @@
     "followingBackProgress": "{{completed}} 1 {{total}}",
     "findingFollowers": "Mitadiava mpanaraka...",
     "followBackAll": "Araho ny rehetra",
+    "followBackConfirm": "Manaraka indray",
+    "followBackNotNow": "Tsy izao",
+    "followBackDone": "Vita",
     "nonFollowers": {
       "title": "Madio ve izay arahanao?",
       "body": "{{count}} kaonty arahanao dia tsy manaraka anao.",
@@ -7943,7 +8877,13 @@
       "doneAll": "Atsaharo {{done}} kaonty izay tsy manaraka anao.",
       "doneSome": "Atsaharo {{done}} kaonty. Tsy afaka atsaharo ny {{failed}}.",
       "doneToast": "Atsaharo {{done}} kaonty tsy manaraka anao."
-    }
+    },
+    "followBackConfirmTitle_one": "Hanaraka indray olona {{count}}?",
+    "followBackConfirmTitle_other": "Hanaraka indray olona {{count}}?",
+    "followBackConfirmBody": "Efa manaraka anao izy ireo. Mahazo fangatahana hanaraka ny kaonty manokana.",
+    "followedBackCount_one": "Nanaraka indray olona {{count}}",
+    "followedBackCount_other": "Nanaraka indray olona {{count}}",
+    "followBackDoneBody": "Hitanao ao amin'ny Arahina izy rehetra."
   },
   "reactionInfo": {
     "title": "Fanehoan-kevitra",
@@ -8739,6 +9679,35 @@
     "priceChartCleared": "Price tabilao nanala. Raikitra boky vidin'ny: $ 0.0001. Ny vidin'ny vokatra dia miankina amin'ny baiko rehetra."
   },
   "editor": {
+    "stage": {
+      "camera": "Fakantsary",
+      "yaw": "Fihodinana",
+      "add": "Ampio",
+      "scale": "Habe",
+      "color": "Loko",
+      "light": "Mazava",
+      "create": "Ampio sehatra 3D",
+      "title": "Sehatra 3D",
+      "hint": "Alamino sary amin'ny boribory sy boaty. Manova ny frame vokarina ny fakan-tsary, ny fametrahana ary jiro telo tsy miankina.",
+      "preview": "Topy maso ny sehatra vokarina",
+      "error": "Tsy voaomana ny frame. Hamarino ny references-n'ny sary ary andramo indray.",
+      "elevation": "Haavony",
+      "distance": "Halavirana",
+      "fov": "Sahan'ny fahitana",
+      "object": "Zavatra",
+      "sphere": "Boribory",
+      "box": "Boaty",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Esory ny zavatra",
+      "intensity": "Hamafiny",
+      "diffusion": "Fiparitahana",
+      "saving": "Manomana frame…",
+      "useFrame": "Ampiasao ho reference sary ny frame vokarina",
+      "frameHint": "Mamorona PNG 320 × 180 ary manampy azy amin'ny references-n'ity sary ity. Jereo ny fetran'ny reference sy ny tombana modely alohan'ny hamoronana.",
+      "frameName": "Frame sehatra"
+    },
     "video": {
       "tFade": "Fifangaroana",
       "none": "Tsy misy",
@@ -8832,7 +9801,9 @@
       "pptx": "PowerPoint famelabelarana",
       "pptxHint": "Ny pejy tsirairay dia mivadika ho sary iray manjavozavo, miaraka amin'ny fanamarihana sy rohy avy amin'ny mpanolotra. Amboary ny lahabolana sy ny singa tsirairay ao amin'ny famolavolana tany am-boalohany.",
       "section": "Pejy nomena anarana",
-      "transparent": "Afara tatera-pahazavana"
+      "transparent": "Afara tatera-pahazavana",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Misintona ZIP misy ny timeline-nao amin'ny FCPXML sy Premiere XML ary ny rakitra media rehetra, mba hahafahanao mamita ny fanovana ao amin'ny Premiere Pro, Final Cut Pro na DaVinci Resolve. Lasa marika ny soratra; mijanona ao amin'ny Riftn ny effets."
     },
     "inspector": {
       "selectHint": "Mifidiana sosona eo amin'ny sary na clip eo amin'ny tsipika fotoana.",
@@ -8905,6 +9876,8 @@
       "tools": "Fitaovana fanovana"
     },
     "agent": {
+      "stop": "Ajanony",
+      "queue": "Ampitaina amin'ny filaharana",
       "introTitle": "Lazao amin'ny AI izay tianao",
       "introBody": "Lazalazao amin'ny teninao manokana ny endrika na ny fanovana. Manova ny haben'ny pejy izy, manoratra sy mandravaka soratra, mitady sary, video ary mozika maimaim-poana, mampihatra sivana, mandamina ny sosona ary mampihetsika azy ireo. Azo foanana indray mandeha ny fangatahana tsirairay.",
       "suggestPoster": "Manaova lahatsoratra Instagram efamira ho an'ny varotra lafo mora amin'ny fahavaratra misy sarin'ny tora-pasika sy lohateny matevina",
@@ -8924,7 +9897,45 @@
       "failed": "Tsy vitan'ny AI izany amin'izao fotoana izao. Andramo indray afaka kelikely.",
       "changes": "Fanovana natao: {{count}}",
       "undo": "Foano",
-      "openGenerator": "Jereo ary mamorona"
+      "openGenerator": "Jereo ary mamorona",
+      "stopped": "Nijanona. Tsy nisy zavatra hafa niova.",
+      "queued": "{{count}} miandry",
+      "restore": "Avereno hatreto",
+      "restoreHint": "Avereno amin'ny toetrany talohan'ity hafatra ity ny tetikasa. Ny Foano no mamerina azy.",
+      "restored": "Naverina tamin'ny talohan'io hafatra io ny tetikasa. Tsindrio ny Foano mba hamerenana ny dika vaovao kokoa.",
+      "rewrite": "Ataovy mazava kokoa ny fangatahako",
+      "rewriteFailed": "Tsy voasoratra indray izany. Tsy niova ny soratrao.",
+      "feedback": "Nanampy ve izany?",
+      "good": "Valiny tsara",
+      "bad": "Valiny ratsy",
+      "retryPrefix": "Tsy marina izany. Fa kosa, ",
+      "recipesTitle": "Fomba fanao",
+      "recipe": {
+        "podcastClip": {
+          "label": "Clip podcast",
+          "prompt": "Tadiavo ny fotoana mahery indrindra 30 segondra, tapaho hatreo, ampio dikanteny Word Pop ary ataovy 9:16."
+        },
+        "talkingHead": {
+          "label": "Tarehy miteny madio",
+          "prompt": "Tapaho ny fiatoana lava, ampio dikanteny Classic, ary omeo endrika mafana malefaka."
+        },
+        "productPromo": {
+          "label": "Fanentanana vokatra",
+          "prompt": "Manaova fanentanana 15 segondra: lohateny mahery eo am-piandohana, fifindrana Zoom in eo anelanelan'ny clip, dikanteny Bold ary mozika mampientanentana."
+        },
+        "hypeReel": {
+          "label": "Reel hype",
+          "prompt": "Tapaho araka ny gadon'ny mozika ny clip, ampiasao ny fifindrana Fly up sy ny endrika Technicolor."
+        },
+        "retroEdit": {
+          "label": "Fanovana retro",
+          "prompt": "Omeo endrika VHS ny clip rehetra, ampio lohateny serif lehibe, ary ampiasao ny fifindrana Fade."
+        },
+        "tutorial": {
+          "label": "Torolalana",
+          "prompt": "Ampio lohateny isaky ny dingana, dikanteny Boxed, ary ataovy miadana hatramin'ny 0.5x ny fotoana lehibe."
+        }
+      }
     },
     "shape": {
       "rect": "Efamira lava",
@@ -9099,7 +10110,9 @@
       "tint": "Loko manjavozavo {{value}}",
       "vignette": "Maizina amin'ny sisiny {{value}}%",
       "auto": "Fanatsarana ho azy",
-      "autoFailed": "Tsy voadinika ity sary ity."
+      "autoFailed": "Tsy voadinika ity sary ity.",
+      "halation": "Halation {{value}}%",
+      "scanlines": "Tsipika scan {{value}}%"
     },
     "pages": {
       "add": "Hanampy pejy",
@@ -9173,6 +10186,17 @@
       "reloadText": "Avereno caption",
       "textSaved": "Voasafidy ny fiovana caption.",
       "action": "Dikanteny mandeha ho azy",
+      "styles": {
+        "bold": "Matevina",
+        "classic": "Classic",
+        "boxed": "Boxed",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Stacked",
+        "serif": "Serif",
+        "bubble": "Bubble"
+      },
       "working": "Mihaino… {{percent}}%",
       "downloading": "Manomana ny modely feo… {{percent}}%",
       "hint": "Mamadika ny teny ho dikanteny mifanaraka amin'ny fotoana izay azonao ovaina ny endriny. Mandeha amin'ny fitaovanao: maimaim-poana sy tsiambaratelo. Misintona ny modely amin'ny fampiasana voalohany.",
@@ -9183,7 +10207,8 @@
       "translateCount": "Famadihana {{count}} captions",
       "translationDone": "Nafadihina {{count}} captions",
       "translationFailed": "Tsy nahomby ny famadihana caption. Tsy niova ny iyong captions.",
-      "lockedTranslation": "Avela ny captions voahidy mba hisokatra azy."
+      "lockedTranslation": "Avela ny captions voahidy mba hisokatra azy.",
+      "style": "Fomban'ny dikanteny"
     },
     "multi": {
       "selected": "Sosona {{count}} voafidy",
@@ -9220,7 +10245,10 @@
       "saveNewPreset": "Raiketo ilay vaovao",
       "saveStyles": "Save fomba amin'ny famolavolana",
       "stylesSaved": "Brand fomba voavonjy amin'ny famolavolana izany",
-      "usePreset": "Ampiasao fomba"
+      "usePreset": "Ampiasao fomba",
+      "dehubApplied": "Nampiharina tamin'ny sosona {{count}} ny marika Riftn.",
+      "dehubApply": "Ampiasao ny marika Riftn",
+      "dehubHint": "Lokon'ny Riftn ofisialy, endri-tsoratra Exo sy Inter, ary ny logo Riftn, amin'ny tsindry iray."
     },
     "draw": {
       "heading": "Hanao sary",
@@ -10552,6 +11580,135 @@
       "toolbar": "Lisitry ny CANVAS",
       "zoomIn": "Zòma manalehibe",
       "zoomOut": "Zòma manakely"
+    },
+    "clipFix": {
+      "listening": "Mihaino…",
+      "detach": "Sarahy ny feo",
+      "detached": "Nafindra ho clip manokana ny feo",
+      "detachFailed": "Tsy voasaraka ny feon'ity clip ity",
+      "removeBars": "Esory ny bara mainty",
+      "scanning": "Manamarina ny frames…",
+      "noBars": "Tsy nisy bara mainty hita",
+      "barsRemoved": "Voatapaka ny bara mainty",
+      "barsFailed": "Tsy voamarina raha misy bara mainty ity horonan-tsary ity",
+      "reframe": "Reframe mandeha ho azy",
+      "reframeHint": "Efa mifanaraka amin'ny endrik'ity pejy ity ny horonan-tsary",
+      "reframed": "Voalamina indray hanaraka ny hetsika",
+      "reframeFailed": "Tsy voalamina indray ity horonan-tsary ity",
+      "retakes": "Esory ny retakes",
+      "noRetakes": "Tsy nisy retake hita",
+      "retakesRemoved": "Nesorina ny retake {{count}}, notazonina ny farany",
+      "retakesFailed": "Tsy voaesotra tamin'ity clip ity ny retakes"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Zarao",
+        "play": "Mamaky",
+        "pause": "Miato",
+        "frameBack": "Previous rafitra",
+        "frameForward": "Frame",
+        "back": "Miverina 1 segondra",
+        "rippleDelete": "Fafao ny clip",
+        "liftDelete": "Fafao ny clip",
+        "start": "Mankany am-piandohana",
+        "end": "Mankany amin'ny farany"
+      },
+      "preset": "Fandaharana klavier",
+      "presetHint": "Ampiasao ny bokotra timeline avy amin'ny editor fantatrao. Mbola mandeha ho an'ny zavatra hafa rehetra ny hitsin-dàlan'ny Riftn."
+    },
+    "generate3d": {
+      "label": "3 D",
+      "placeholder": "Lazao ny zavatra 3D tianao",
+      "queued": "Am-pamoronana ny zavatra 3D-nao. Hipetraka ao amin'ny tabilao Famoronana izy.",
+      "note": "Tonga ao amin'ny Media ho clip fohy mihodina misy ambadika mangarahara ny zavatra 3D."
+    },
+    "voiceClone": {
+      "stop": "Ajanony ny firaketana",
+      "failed": "Tsy nahomby ny famoronana feo mitovy (voice cloning).",
+      "pickerLabel": "Kopio ny feonao",
+      "pickerDetail": "Feo amin'ny feonao manokana",
+      "title": "Kopio ny feonao",
+      "description": "Mandraketa ny tenanao na misafidiana clip miresaka ianao. Mandoa indray mandeha ianao ary anao ny feonao ho an'ny voiceover rehetra.",
+      "defaultName": "Ny feoko",
+      "record": "Mandraketa santionany (30 segondra ka hatramin'ny 2 minitra)",
+      "fromMedia": "Na ampiasao clip avy amin'ny Media",
+      "recorded": "Ny firaketanao",
+      "sample": "Santionany: {{name}}",
+      "hint": "Kabary mazava tsy misy mozika no tsara indrindra.",
+      "noMic": "Tsy azo nampiasaina ny mikrô.",
+      "sampleFailed": "Tsy voavaky ny feo tamin'io clip io.",
+      "pay": "Kopio amin'ny token {{amount}}",
+      "useFree": "Kopio (efa voaloa)",
+      "owned": "Efa voalamina ny feonao “{{name}}”. Safidio ao amin'ny lisitry ny feo izy.",
+      "useOwned": "Ampiasao ny feoko",
+      "ready": "Vonona ho an'ny voiceover ny “{{name}}”.",
+      "paidFailed": "Voatahiry ny fandoavanao. Sokafy indray ity ary maimaim-poana ny fanandramana manaraka.",
+      "consent": "Ny feonao ihany no kopio, na feo nahazoanao alalana hampiasaina."
+    },
+    "linkImport": {
+      "go": "Mampiditra",
+      "downloading": "Midininika {{percent}}%",
+      "open": "Ampidiro avy amin'ny rohy",
+      "placeholder": "Apetaho rohy YouTube, TikTok na hafa",
+      "rights": "Tompon'ity horonan-tsary ity aho na manana alalana hampiasa azy",
+      "audioOnly": "Feo ihany",
+      "queued": "Miandry…",
+      "waiting": "Miandry ny tranonkala, hanandrana indray tsy ho ela…",
+      "adding": "Ampidirina ao amin'ny Media…",
+      "added": "Nafarana ary nampidirina tao amin'ny timeline.",
+      "failed": "Tsy voafarana io rohy io."
+    },
+    "reverse": {
+      "action": "Fiverenana",
+      "working": "Mamadika {{percent}}%",
+      "done": "Voavadika ny clip.",
+      "failed": "Tsy voavadika ity clip ity.",
+      "unsupported": "Tsy afaka mamadika horonan-tsary ity navigateur ity. Andramo Chrome na Edge.",
+      "tooLong": "Clip hatramin'ny {{seconds}} segondra no azo avadika."
+    },
+    "film": {
+      "repairRefs": "Esory ny rohy media tsy hita",
+      "title": "Tetikasa sarimihetsika",
+      "intro": "Alamino ny sary amin'ny references sary azo ampiasaina indray. Voatahiry miaraka amin'ity tetikasa ity ny famaritanao, ny filaharan'ny sary ary ny vokatra voafidy.",
+      "create": "Mamorona drafitra sarimihetsika",
+      "name": "Anaran'ny sarimihetsika",
+      "brief": "Famaritana sarimihetsika",
+      "sharedReferences": "References sary iraisana (hatramin'ny 4)",
+      "shot": "Sary",
+      "addShot": "Ampio sary",
+      "shotName": "Anaran'ny sary",
+      "action": "Hetsika sy fandrafetana ny sary",
+      "seconds": "Segondra horonan-tsary angatahina",
+      "shotReferences": "References sary fanampiny (fetra 4 miaraka)",
+      "frame": "Omano ny frame",
+      "video": "Omano ny horonan-tsary",
+      "review": "Jereo ao amin'ny studio ny modely, ny references, ny faharetan'ny horonan-tsary ary ny vidiny alohan'ny hamoronana.",
+      "result": "Vokatra sary nekena",
+      "noResult": "Tsy misy vokatra voafidy",
+      "resultHint": "Misafidiana sary na horonan-tsary nekena avy amin'ny Fandefasana. Voatahiry miaraka amin'ity sary ity ny rohiny; ampiasao ny timeline mba hanangonana ny sarimihetsika.",
+      "earlier": "Afindrao aloha",
+      "later": "Afindrao aoriana",
+      "remove": "Esory ny sary",
+      "issue": "Hamarino ny famaritana ny sary sy ny media reference, avy eo andramo indray. Avelao hisokatra ny tetikasa raha tsy voatahiry.",
+      "searchMedia": "Tadiavo amin'ny anarana ny media",
+      "refreshMedia": "Havaozy ny media"
+    },
+    "speakers": {
+      "find": "Tadiavo ny mpandahateny",
+      "name": "Mpandahateny {{number}}",
+      "onlyOne": "Mpandahateny iray ihany no hita.",
+      "failed": "Tsy hita ny mpandahateny.",
+      "kept": "{{name}} ihany no notazonina.",
+      "editFailed": "Tsy nifanaraka tamin'ity clip ity io fanovana io.",
+      "split": "Nozaraina ho sarin'ny mpandahateny {{count}}.",
+      "keepOnly": "Tazony ihany",
+      "splitAction": "Tapaho isaky ny fiovan'ny mpandahateny"
+    },
+    "behind": {
+      "action": "Soratra ao ambadiky ny olona",
+      "working": "Manapaka ny olona…",
+      "done": "Efa ao ambadiky ny olona izao ny soratra sy ny dikanteny.",
+      "failed": "Tsy voapetraka tao ambadiky ny olona ny soratra."
     }
   },
   "jungleMood": {
@@ -10778,6 +11935,7 @@
     "governance": "Fitantanam-pitondrana",
     "featureRequests": "Fangatahana endri-javatra",
     "featureRequestsDesc": "Manoro hevitra sy mifidy ireo hevi-baovao mikasika ny fiarahamonina. Ny fitadiavam-bidy no laharam-pahamehana ho an'ny fampandrosoana.",
+    "upvote": "Ankasitraho",
     "upvoteDesc": "Manohana ny tolo-kevitry ny governemanta na ny fangatahan'ny mpanao politika. Fanampiana amin'ny andaniny ny fanohanan'ny vondrom-piarahamonina",
     "downvote": "Misy fanambarana",
     "downvoteDesc": "Mifidy amin'ny tolo-kevitra momba ny fitantanana na fangatahana. Manampy amin'ny fanoherana ny fiarahamonina.",
@@ -10790,6 +11948,7 @@
     "editDesc": "Manova ny lohateny na ny fanoritsoritana lahatsoratra iray noforoninao. Ny mpamorona ihany no afaka mamafa ny lahatsorany.",
     "delete": "Hamafa Lahatsoratra",
     "deleteDesc": "Hatrany hanaisotra ny lahatsoratra avy amin'ny fahana. Mbola mitoetra ny rakitsoratra an-tserasera saingy tsy hita intsony ny votoatiny.",
+    "pin": "Apetaho eo ambony ny lahatsoratra",
     "pinDesc": "Mariho ny lahatsoratra ho any an-tampon'ny ny mombamomba azy mba mpitsidika mahita azy voalohany.",
     "viewOnExplorer": "Tsidiho ny Explorer",
     "viewOnExplorerDesc": "Manokatra ny blockchain Explorer (BaseScan) mba hijery ny on-fifanakalozana takela-bato ho an'ny antsipirihany ny lahatsoratra na ny famindrana.",
@@ -10952,7 +12111,9 @@
     "tokenAmount": "{{amount}} tapaho",
     "assistant": {
       "question1": "Inona no atao hoe APY amin'izao fotoana izao ho an'ny famantarana Riftn?",
-      "question2": "Eny, raha manao 10.000 famantarana nandritra ny 90 andro"
+      "question2": "Eny, raha manao 10.000 famantarana nandritra ny 90 andro",
+      "answer1": "12.4% ny APY staking ankehitriny ho an'ny token Riftn amin'ny fotoana fanidiana 30 andro. Ity ny antsipiriany:\n\n• Fanidiana 7 andro: 8.2% APY\n• Fanidiana 30 andro: 12.4% APY\n• Fanidiana 90 andro: 18.7% APY\n\nTe hanampiako anao hikajy ny tombony mety ho azo ve ianao?",
+      "answer2": "Ho an'ny token 10,000 napetraka amin'ny 18.7% APY mandritra ny 90 andro:\n\n📊 Valisoa tombanana: ~461 token\n\nEo amin'ny 5.13 token isan'andro eo ho eo izany. Tadidio fa mety hiovaova ny APY arakaraka ny totalin'ny vola napetraka."
     },
     "bookmarks": {
       "stakingGuide": "Complete mpitari-dalana ho amin'ny staking Riftn famantarana: APY rava, fotoam hidin-trano, ary ny valisoa multipliers nanazava."
@@ -11116,7 +12277,7 @@
           "8": "Tsindrio ny lahatsoratra rehetra mba hanokafana azy amin'ny fomba fijery tokana amin'ny efijery feno."
         },
         "tips": {
-          "1": "Ny toro-hevitra dia mandeha mivantana any amin'ny pokon'ny mpamorona amin'ny dehub tokens.",
+          "1": "Ny toro-hevitra dia mandeha mivantana any amin'ny pokon'ny mpamorona amin'ny Riftn tokens.",
           "2": "Azonao atao ny mametraka vola toro-hevitra amin'ny alalan'ny bokotra safidy haingana na mampiditra vola manokana.",
           "3": "Ny lahatsoratra voatahiry dia azo jerena ao amin'ny pejy Bookmarks ao amin'ny sidebar."
         }
@@ -11648,7 +12809,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Mba afaka mandefa amin'ny X, YouTube, Instagram, TikTok sy maro hafa miaraka amin'ny dehub. Ampifandraiso indray mandeha ny kaontinao, dia safidio izay handefasana ny tsirairay.",
+    "intro": "Mba afaka mandefa amin'ny X, YouTube, Instagram, TikTok sy maro hafa miaraka amin'ny Riftn. Ampifandraiso indray mandeha ny kaontinao, dia safidio izay handefasana ny tsirairay.",
     "creditsHeading": "Crédits fandefasana",
     "credits": "{{count}} crédits fandefasana",
     "topUpTitle": "Top up ary vonjy",
@@ -11696,7 +12857,12 @@
   "dm": {
     "planRestricted": "Mila famandrihana ity mpampiasa ity vao mahazo hafatra.",
     "planTypeNotAllowed": "Tsy mamela an'io karazana hafatra io ny drafitr'ity mpamorona ity.",
-    "planMinTip": "Tokony ho {{amount}} tokens farafahakeliny ny tip ho an'ity mpamorona ity."
+    "planMinTip": "Tokony ho {{amount}} tokens farafahakeliny ny tip ho an'ity mpamorona ity.",
+    "shareKindGroup": "Vondrona",
+    "shareKindCommunity": "Fiaraha-monina",
+    "shareGroups": "Vondrona",
+    "shareKindChannel": "Fantsona",
+    "reportMessage": "Tatero ny hafatra"
   },
   "credits": {
     "earningsWorth": "Mitentina {{amount}}",
@@ -11738,7 +12904,11 @@
     "error": "Tsy afaka nandefa ny fangatahanao famafana. Tsy voamarina ho fafana ny kaontinao. Avereno andramana azafady.",
     "back": "Hiverina any amin'ny Fikirana",
     "signIn": "Midira mba hamafa ny kaontinao",
-    "acknowledge": "Efa notehiriziko ny antsipirian'ny famerenana ny kitapom-bolako ary azoko fa maharitra ny famafana."
+    "acknowledge": "Efa notehiriziko ny antsipirian'ny famerenana ny kitapom-bolako ary azoko fa maharitra ny famafana.",
+    "signedInAs": "Niditra ho",
+    "confirmTitle": "Hamafa tanteraka ny kaontinao?",
+    "confirmBody": "Hofafana ny kaontinao sy izay rehetra ao aminy. Hivoaka ianao ary tsy azo averina izany.",
+    "confirmBodyNamed": "Hofafana {{who}} sy izay rehetra ao aminy. Hivoaka ianao ary tsy azo averina izany."
   },
   "miniApps": {
     "badge": {
@@ -11830,7 +13000,48 @@
       "rewardsBody": "Isam-bolana {{pool}} tokens dia ifampizarana amin'ny alalan'ny isa mitovy, kajy isankerinandro. Mba hahafeno fepetra, ny fampiharana mila voamarina tompony kitapom-batsy sy raha kely indrindra 3 niverina mpampiasa. Ny valisoa dia omen'ny Riftn amin'ny tompona kitapom-bola.",
       "rewardPaid": "Vidiana",
       "rewardPending": "Namidy",
-      "rewardsNone": "Tsy mbola misy ny mari-pankasitrahana. Raha izany ny herinandro voalohany dia ny Alatsinainy."
+      "rewardsNone": "Tsy mbola misy ny mari-pankasitrahana. Raha izany ny herinandro voalohany dia ny Alatsinainy.",
+      "stats": {
+        "button": "Antontan'isa mivantana",
+        "chartTitle": "Olona nanokatra ny app-nao, 30 andro farany",
+        "peak_one": "Ambony indrindra {{count}} isan'andro",
+        "peak_other": "Ambony indrindra {{count}} isan'andro",
+        "people30": "Olona, 30 andro",
+        "people7": "Olona, 7 andro",
+        "added": "Nanampy azy",
+        "dhb30": "Token naloa, 30 andro",
+        "notified30": "Fampandrenesana nalefa, 30 andro",
+        "rewards": "Valisoa token azo"
+      },
+      "signin": {
+        "users_one": "mpampiasa {{count}}",
+        "users_other": "mpampiasa {{count}}",
+        "delete": "Fafao",
+        "title": "Midira amin'ny Riftn",
+        "body": "Avelao hiditra amin'ny tranonkalanao na app-nao amin'ny kaonty Riftn-ny ny olona. Mamorona lakile eto, avy eo araho ny torolalana.",
+        "guide": "Vakio ny torolalana",
+        "copyId": "Adikao ny ID client",
+        "rotate": "Tsiambaratelo vaovao",
+        "rotateConfirm": "Hamorona tsiambaratelo vaovao ho an'ny {{name}}? Tsy mandeha intsony avy hatrany ny tsiambaratelo taloha.",
+        "deleteConfirm": "Hamafa {{name}}? Hivoaka avokoa izay rehetra niditra tamin'izany.",
+        "secretOnce": "Tsiambaratelo ho an'ny {{name}}. Adikao izao: indray mandeha ihany no aseho.",
+        "name": "Anaran'ny app",
+        "website": "Tranonkala (tsy voatery)",
+        "redirects": "URL redirect, iray isaky ny andalana (https://yoursite.com/callback)",
+        "create": "Mamorona lakile"
+      },
+      "signFor": "Sonia ho an'ny {{domain}}",
+      "stateRejected": "Mandeha amin'ny rohy · tsy nankatoavina ho an'ny fivarotana",
+      "notifyKeyOnce": "Lakile fampandrenesana vaovao ho an'ny {{name}}. Adikao izao: indray mandeha ihany no aseho, ary ny fanaovana hafa no manolo azy.",
+      "rewardsWeek": "Herinandron'ny {{date}}",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Hetsika nalefan'ny Riftn tany amin'ny webhookUrl-nao. Mandefa hetsika ping ny Andrana.",
+        "test": "Alefaso andrana",
+        "ok": "Namaly {{status}} ny webhook",
+        "failed": "Tsy nahomby ny webhook: {{reason}}",
+        "none": "Mbola tsy nisy webhook nalefa."
+      }
     },
     "card": {
       "open": "Hanokatra"
@@ -11856,7 +13067,10 @@
       "confirm": "Pay {{amount}} marika",
       "sending": "Mandefa ny fandoavanao…",
       "sent": "Mampanodina ny {{amount}} tokens ho {{name}}.",
-      "noOwner": "Mbola tsy afaka mividy kitapom-batsy io fangatahana io aloha hatreto."
+      "noOwner": "Mbola tsy afaka mividy kitapom-batsy io fangatahana io aloha hatreto.",
+      "testBadge": "Fomba andrana",
+      "testBody": "Anao ity app ity, ka andrana ity: tsy misy token mifindra ary voamarika ho andrana ny rosia.",
+      "testSent": "Fandoavana andrana token {{amount}}. Tsy nisy nalefa."
     },
     "add": {
       "title": "Ampio ny {{name}}?",
@@ -11988,6 +13202,9 @@
     "reminderLater": "Tsy ankehitriny"
   },
   "copy": {
+    "55656b5e434f": "Akaro ny fikarohana",
+    "57e2faa5ec63": "Karohy ao amin'ny Riftn",
+    "96d7bff86b44": "Tsy afaka nampiditra ny fikarohana",
     "1607715e45ed": "Tsindrio ny baolina raha hiteny, na soraty eto ambany",
     "00140a37bd26": "Tsy azo atao vonjimaika ny fifanakalozana amin'io tambajotra io. Miezaha indray azafady.",
     "002286513398": "Tsy manana alalana hitantana hetsika ianao",
@@ -18966,7 +20183,68 @@
     "127053546dd4": "Tsy afaka nampakatra io rakitra io",
     "d14896aa4bf8": "Tsy afaka nanatanteraka ilay trano famakiam-boky aho. Hamarino ny fifandraisanao dia andramo indray.",
     "953e708b2287": "Tsy nahomby ny taranaka.",
-    "4a52cdd6ac72": "Tsy afaka manao dika mitovy ireo sosona"
+    "4a52cdd6ac72": "Tsy afaka manao dika mitovy ireo sosona",
+    "3f9b2c71d0a4": "Valiny {{n}}",
+    "8c4e1a6b2f57": "ho an'ny “{{query}}”",
+    "1d7234ff1b79": "ao amin'ny {{feed}}",
+    "e122e5c2b563": "Sintony miakatra hanakatonana",
+    "1aa9d734f2ee": "Safidio izay hotadiavina",
+    "ef557404f465": "Tsy misy valiny ho an'ny “{{query}}”",
+    "35034aa59bd3": "Tsy nisy nifanaraka tao amin'ny {{feed}}. Andramo teny hafa na tadiavo ny zava-drehetra.",
+    "415155739590": "Tadiavo ny zava-drehetra",
+    "9e13d826baaf": "Hitady sary",
+    "cbf6f228327c": "Hitady mozika",
+    "e8756c6865a5": "Hitady Fohy",
+    "c7661da99c41": "Hitady horonan-tsary",
+    "90f1afe66801": "Mitady “{{query}}”…",
+    "d7b559f2d8c6": "Andramo teny hafa, na ovay ny sivana.",
+    "d1a0c7e2f301": "Inona no ao an-tsainao androany?",
+    "d1a0c7e2f302": "Inona no eritreretinao androany?",
+    "d1a0c7e2f303": "Inona no ao an-tsainao?",
+    "d1a0c7e2f304": "Misy zavatra ao an-tsainao ve?",
+    "d1a0c7e2f305": "Inona no ao an-tsainao izao?",
+    "d1a0c7e2f306": "Inona no eritreretintsika androany?",
+    "d1a0c7e2f307": "Misy zavatra ao an-tsainao ve androany?",
+    "d1a0c7e2f308": "Inona no ao an-tsainao amin'ity indray mitoraka ity?",
+    "a7c1e0f4b2d9": "Tsindrio hiresaka",
+    "b3e8d1c6f0a2": "Tsindrio handefasana",
+    "c9f2a4e7d1b5": "Mihaino... tsindrio ny baolina handefasana",
+    "22577ebd908e": "Mamorona horonan-tsary Wan 3.0 · feo tany am-boalohany",
+    "1fa2357ab7e1": "Mamorona horonan-tsary Seedance 720p · feo tany am-boalohany",
+    "9eb96040a358": "Token tombanana",
+    "7f78bdc0762d": "+{{value1}} isa",
+    "f0c8bb34335b": "Nahazo +{{value1}} isa ianao",
+    "0fbe06b679a8": "Isa {{value1}} isaky ny fangatahana vita, ampiana amin'ny naotinao Top builders.",
+    "8c3a7bb39f68": "Naoty antonony",
+    "431bc73eb60b": "[verse]\nNy tononkiranao eto...\n\n[chorus]\nTononkiran'ny fiverenana...",
+    "af8577a7ceb2": "• Vidiny arakaraka ny fotoana (sarany fanampiny amin'ny ora be olona)",
+    "b3e25af706b4": "Fizarana malama ny sary, horonan-tsary, antontan-taratasy ary stream mivantana premium mivantana ao anatin'ny chat vondrona, mamorona traikefa premium feno.",
+    "a3c1e5f20b71": "Ampiasao ao anatin'ny ChatGPT, Claude na app MCP rehetra ny Riftn. Apetaho ao amin'ny fikiran'ny connector-n'ny mpanampinao ny URL etsy ambany mba hijerena lahatsoratra, mombamomba ary fanehoan-kevitra, avy eo midira rehefa angatahina mba hampifandraisana ny kaontinao.",
+    "b84d2e7c9a16": "Ho an'ny app AI ity adiresy ity fa tsy pejy web. Ny fanokafana azy amin'ny navigateur dia mitondra anao eto.",
+    "c5e9f1a3d742": "Ampifandraiso ny kaonty Riftn-nao",
+    "d61a7b4e8c05": "Rehefa mangataka anao hiditra ny mpanampinao, midira amin'ny Riftn ary tsindrio Avelao. Afaka manavao ny mombamombanao, mamoaka lahatsoratra sy fanehoan-kevitra, manaraka olona ary mamorona ao amin'ny Creator Studio izy avy eo. Mijanona mifandray ny fifandraisana raha mbola ampiasainao ary lany daty rehefa tsy ampiasaina 30 andro.",
+    "e27b8c5f9d13": "Torolalana ChatGPT dingana tsirairay",
+    "f38c9d6a0e24": "Torolalana Claude dingana tsirairay",
+    "0a49d7b1f835": "Aleonao kaonty bot misaraka? Mamorona agent mba hahazoana URL connector mamoaka amin'ny anaran'io agent io.",
+    "1b5ae8c20f46": "Rehefa mangataka ny ChatGPT, midira amin'ny Riftn ary tsindrio Avelao mba hampifandraisana ny kaontinao.",
+    "2c6bf9d31a57": "Tsindrio Ampifandraiso, midira amin'ny Riftn ary tsindrio Avelao mba hampifandraisana ny kaontinao.",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Bara fitaratra",
+    "5ff272ba7871": "Tsipika landy",
+    "a941e90ca93d": "Halo fonony",
+    "04dbbe4dff7a": "Onja marina",
+    "29beacb7d918": "Nanome tip {{value2}} {{value3}} anao i @{{value1}}",
+    "3e6f1a9ba7e5": "Afindrao {{value1}}",
+    "e90f7c8c03b8": "Fijery {{value1}}",
+    "73638ce2dea2": "Asehoy ny slide {{value1}}: {{value2}} {{value3}}",
+    "440d013a091e": "Mbola tsy nanomana drafitra i {{value1}}.",
+    "8e0bf69428e3": "Tohizo amin'ny {{value1}}",
+    "ca54d7fc43c4": "Omeo naoty {{value1}} amin'ny 5",
+    "20a4d6a49b66": "Tantaran'ny {{value1}}",
+    "c2db6b417427": "Topy maso {{value1}}",
+    "ca76a418f18f": "Loko {{value1}}°",
+    "9bb47b8193d0": "Misafidiana andalana data fanombohana sy andalana iray ka hatramin'ny {{maximum}}",
+    "6e71ae3669b1": "Tsy misy ny vokatra voatahiry"
   },
   "articles": {
     "cardLabel": "Lahatsoratra · {{count}} minitra ny famakiana",
@@ -18985,6 +20263,7 @@
     "backToTop": "Miverina amin'ny tampony",
     "needTitle": "Ampidiro ny lohateny mba hanohy",
     "needBody": "{{count}} soratra maro hafa",
+    "imagesLabel": "Sary",
     "backToWriting": "Miverina amin'ny fanoratana",
     "readyTitle": "Vonona hanovoaka",
     "sharePreview": "Ahoana ny fijerena rehefa mizara",
@@ -19007,7 +20286,16 @@
     "formatting": "Fampifangaroana",
     "bodyPlaceholder": "Lazao ny ataonao. Safidio ny soratra ary ampiasao ny bara etsy ambony ho an'ny lohateny, mavesatra, fantatry ary lisitra.",
     "bodyLabel": "Vatosora lahatsoratra",
-    "wordCount": "{{count}} teny"
+    "wordCount": "{{count}} teny",
+    "imageLimit": "Afaka mitazona sary hatramin'ny {{count}} ny lahatsoratra",
+    "imageLimitSome": "Sary {{count}} fanampiny ihany no omby ao amin'ity lahatsoratra ity",
+    "imageFailed": "Tsy nety nampidirina io sary io. Andramo ny hafa.",
+    "imagesUploading": "Manampy sary ({{count}})…",
+    "bodyTooLong": "Mihoatra ny fetra amin'ny litera {{count}}",
+    "imagesCount": "Sary · {{count}}/{{max}}",
+    "captionPlaceholder": "Ampio fanamarihana",
+    "captionLabel": "Fanamarihana ho an'ny sary {{n}}",
+    "removeInlineImage": "Esory ny sary {{n}}"
   },
   "liveAudience": {
     "whosHere": "Iza no eto",
@@ -19046,6 +20334,387 @@
     "exploreFirst": "Mikaroha aloha",
     "codeNote": "Handefa kaody amin'ny mailaka izahay, tsy mila tenimiafina."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Fikasana",
+      "howMany": "Firy izay",
+      "who": "Anaran'ny mpampiasa na adiresy kitapom-bola",
+      "whoPlaceholder": "@anaranampiasa",
+      "cancel": "Ajanona",
+      "stage": {
+        "preparing": "Fanomanana…",
+        "confirming": "Miandry ny fifanakalozana…",
+        "recording": "Mamita…",
+        "wallet": "Hamafiso ao amin'ny kitapom-bolanao"
+      },
+      "open": "Omeo famandrihana",
+      "title": "Omeo famandrihana",
+      "mode": {
+        "random": "Mpijery kisendrasendra ao amin'ny chat",
+        "user": "Olona voafaritra"
+      },
+      "randomHint": "Mankany amin'ireo olona niresaka tao anatin'ny 30 minitra farany ary mbola tsy nisoratra.",
+      "send_one": "Omeo sub 1 · ${{price}}",
+      "send_other": "Omeo sub {{count}} · ${{price}}",
+      "payHint": "Aloa amin'ny token avy amin'ny kitapom-bolanao amin'ny famindrana iray.",
+      "fewer_one": "Olona 1 ihany ao amin'ny chat no afaka mandray sub izao, ka 1 no aloanao.",
+      "fewer_other": "Olona {{count}} ihany ao amin'ny chat no afaka mandray sub izao, ka {{count}} no aloanao.",
+      "done_one": "Voatolotra ny famandrihana!",
+      "done_other": "Voatolotra ny famandrihana {{count}}!",
+      "failed": "Tsy voatolotra ny famandrihana",
+      "notReady": "Mbola tsy azo atao ny fanomezana ho an'ity drafitra ity",
+      "noPlan": "Misafidiana drafitra aloha",
+      "noPlans": "Mbola tsy manana drafitra famandrihana azo omena i {{name}}."
+    },
+    "badges": {
+      "audience": {
+        "subscribers": "Mpanoratra",
+        "both": "Mpanjifa sy mpanome",
+        "gifters": "Mpanome"
+      },
+      "ended": "Tapitra",
+      "until": "Hatramin'ny {{date}}",
+      "failed": "Tsy nandeha izany. Andramo indray.",
+      "title": "Mari-pamantarana voafetra fotoana",
+      "intro": "Manolora mari-pamantarana mandritra ny andro vitsivitsy. Izay misoratra na manome raha mbola mandeha izy no mahazo azy, ary miseho eo akaikin'ny anarany ao amin'ny chat-nao mandrakizay izy.",
+      "name": "Anaran'ny mari-pamantarana",
+      "namePlaceholder": "Herinandro fanombohana",
+      "days": "Misy mandritra ny (andro)",
+      "emoji": "Emoji",
+      "who": "Iza no afaka mahazo azy",
+      "create": "Manolora mari-pamantarana",
+      "created": "Mandeha ny mari-pamantarana.",
+      "end": "Tapitra izao",
+      "holders_one": "Mpitazona {{count}}",
+      "holders_other": "Mpitazona {{count}}",
+      "limit": "Mari-pamantarana telo no afaka mandeha miaraka. Tapiro ny iray mba hanolorana hafa.",
+      "hypeHint": "Mahazo ny mari-pamantarana 🚂-nao amin'ny ambaratonga tratrany koa izay rehetra nandray anjara tamin'ny fiaran-dalamby hype."
+    },
+    "train": {
+      "level": "Fiaran-dalamby Hype · Ambaratonga {{level}}",
+      "endedLevel": "Nahavita ambaratonga {{level}} ny Fiaran-dalamby Hype!",
+      "ended": "Tapitra ny Fiaran-dalamby Hype",
+      "thanks_one": "Misaotra mpanohana {{count}}",
+      "thanks_other": "Misaotra mpanohana {{count}}",
+      "top": "Ambony: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "nanome famandrihana 🎁",
+      "giftedSubs_other": "nanome famandrihana {{count}} 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Androany",
+    "tooSoon": "Mifidiana fotoana ho avy.",
+    "show": "Aseho",
+    "hide": "Afeno",
+    "title": "Rahoviana?",
+    "tonight": "Anio alina",
+    "inAnHour": "Afaka adiny iray",
+    "tomorrow": "Rahampitso",
+    "primeTime": "Ora be mpijery",
+    "scheduleFor": "Alaharo amin'ny {{when}}",
+    "liveTip": "Afaka mametraka fampahatsiahivana ireo mpanaraka anao. Ianao no manomboka ny Live rehefa tonga ny fotoana.",
+    "stageTip": "Miditra avy hatrany amin'ny talantalana Ho avy izy, ka afaka manindry Ampahatsiahivo aho ny olona.",
+    "typePlaceholder": "Soraty ny ora, toy ny \"fri 8pm\" na \"in 2 hours\"",
+    "typeLabel": "Soraty ny ora",
+    "typeHelp": "Andramo \"tonight\", \"tomorrow 9am\", \"sat noon\" na \"30 oct 7pm\".",
+    "orPickDay": "Na misafidiana andro",
+    "earlier": "15 minitra aloha kokoa",
+    "later": "15 minitra aoriana kokoa",
+    "earlierShort": "Taloha",
+    "laterShort": "Aoriana",
+    "tooSoonMin": "Misafidiana ora farafahakeliny {{count}} minitra manomboka izao.",
+    "zone": "Ny oranao ({{zone}}). Hitan'ny hafa amin'ny orany manokana izany.",
+    "remove": "Esory ny fandaharam-potoana",
+    "startsIn": "Manomboka afaka {{time}}",
+    "bestTime": "Fotoana tsara indrindra",
+    "fansOnline": "Rahoviana no an-tserasera ny mpankafy ahy?",
+    "fansBasis": "Ny mazava kokoa dia midika fa betsaka kokoa ny mpanaraka anao nijery, {{count}} andro farany.",
+    "everyoneBasis": "Mbola tsy ampy ny hetsiky ny mpanaraka, ka ny rehetra ao amin'ny Riftn ity."
+  },
+  "planned": {
+    "title": "Voaomana",
+    "all": "Izy rehetra",
+    "posts": "Lahatsoratra",
+    "stages": "Efitrano feo",
+    "post": "Lahatsoratra",
+    "live": "Mivantana",
+    "stage": "Sehatra",
+    "untitledPost": "Lahatsoratra",
+    "untitledLive": "Mivantana",
+    "loading": "Mangala...",
+    "startNow": "Atombohy izao",
+    "cancel": "Ajanona",
+    "cancelled": "Nofoanana",
+    "subtitle": "Lahatsoratra, Live ary Stage nalaharinao",
+    "seoTitle": "Voalahatra · Riftn",
+    "seoDescription": "Ny lahatsoratrao, Live ary Stage voalahatra ao amin'ny Riftn, ao amin'ny toerana iray.",
+    "lives": "Live",
+    "signIn": "Midira mba hahitana izay nalaharinao",
+    "emptyTitle": "Mbola tsy misy voalahatra",
+    "emptyBody": "Safidio ny \"Rahoviana?\" rehefa manao lahatsoratra, Live na Stage ary hiseho eto izany.",
+    "move": "Afindrao",
+    "postNow": "Avoahy izao",
+    "confirmCancel": "Tsindrio indray hanafoanana",
+    "moved": "Nafindra ho {{when}}",
+    "postingNow": "Hivoaka ao anatin'ny latsaky ny iray minitra",
+    "moveFailed": "Tsy voafindra. Andramo indray.",
+    "seeAll": "Jereo izay rehetra nalaharinao"
+  },
+  "welcome": {
+    "about": {
+      "title": "Tongasoa eto amin'ny Riftn",
+      "day": "Andro",
+      "month": "Volana",
+      "year": "Taona",
+      "sub": "Mijanona ho tsiambaratelo ny tsingerintaona nahaterahanao. Misafidiana endrika, azonao ovaina amin'ny fotoana rehetra.",
+      "birthday": "Daty nahaterahana",
+      "pick": "Safidio ny tsingerintaona nahaterahanao",
+      "invalid": "Ampidiro feno ny daty nahaterahanao.",
+      "tooYoung": "Tsy maintsy {{age}} taona na mihoatra ianao vao afaka mampiasa Riftn.",
+      "theme": "Ny endrikao"
+    },
+    "name": {
+      "title": "Ny anaranao",
+      "placeholder": "Ny anaranao",
+      "sub": "Ity no anarana hitan'ny olona amin'ny lahatsoratrao."
+    },
+    "card": {
+      "name": "Ny anaranao",
+      "followers": "mpanara-dia",
+      "interests": "Ny zavatra tianao",
+      "following": "arahina"
+    },
+    "topic": {
+      "music": "Mozika",
+      "art": "Zavakanto",
+      "gaming": "Lalao",
+      "sports": "Fanatanjahan-tena",
+      "comedy": "Hetsika mampihomehy",
+      "film": "Fimbo",
+      "podcast": "Rakipeo",
+      "food": "Sakafo",
+      "news": "Vaovao",
+      "science": "Siansa",
+      "crypto": "Crypto",
+      "travel": "Dia",
+      "anime": "Anime",
+      "cars": "Fiara",
+      "animals": "Biby",
+      "tech": "Teknolojia"
+    },
+    "back": "Miverina",
+    "skipPhoto": "Aza atao aloha",
+    "preview": "Topimaso",
+    "username": {
+      "title": "Ny @anaranao",
+      "sub": "Litera, isa ary tsipika ambany. Azonao ovaina any aoriana.",
+      "yours": "Anao ny @{{name}}"
+    },
+    "photo": {
+      "title": "Ny saripikanao",
+      "sub": "Tsy voatery. Haingana kokoa ny olona manaraka tarehy.",
+      "choose": "Misafidiana sary",
+      "change": "Misafidiana hafa"
+    },
+    "interests": {
+      "title": "Ny zavatra tianao",
+      "sub": "Misafidiana farafahakeliny 3. Izy ireo no voalohany amin'ny sokajinao."
+    },
+    "people": {
+      "title": "Ny olonao",
+      "sub": "Tsindrio hanaraka. Ny lahatsoratr'izy ireo no mameno ny famahanana Arahina.",
+      "empty": "Tsy misy soso-kevitra amin'izao. Misy olona maro kokoa ao amin'ny Hijery.",
+      "followers": "Mpanaraka {{count}}"
+    },
+    "done": {
+      "title": "Tsara tarehy, {{name}}",
+      "sub": "Hitan'ny rehetra manomboka anio ity karatra ity.",
+      "eyebrow": "Mivantana ny mombamomba"
+    },
+    "enter": "Midira ao amin'ny Riftn",
+    "pickMore": "Misafidiana {{count}} fanampiny",
+    "cardHint": "Toy izao no hahitan'ny olona anao",
+    "followFailed": "Tsy voaraha. Andramo indray."
+  },
+  "appTokens": {
+    "title": "Ny token anao",
+    "history": "Tantara",
+    "noHistory": "Tsy misy asa atao mbola",
+    "kindDeposit": "Petra - bola",
+    "to": "Mankany amin'ny",
+    "amount": "Vola",
+    "notePlaceholder": "Ampio naoty (tsy voatery)",
+    "sendButton": "Mandefa",
+    "errorInsufficient": "Tsy ampy ny marika",
+    "rowHint": "Fitambaram-bola ao anaty app",
+    "explainer": "Ao anatin'ny Riftn izao ny token-nao. Nanomboka tamin'izay notazoninao sy napetrakao onchain tamin'ny fanombohana ianao. Mamindra azy avy hatrany ny fandefasana, ny fanomezana tip ary ny fandaniana, tsy misy sarany ary tsy misy onchain. Mifindra amin'ny token vaovao amin'ny airdrop ny fitambaram-bola.",
+    "kindOpening": "Fitambaram-bola fanombohana",
+    "kindSent": "Nalefa tany amin'i {{name}}",
+    "kindReceived": "Avy amin'i {{name}}",
+    "kindSpent": "Lany tao amin'ny Riftn",
+    "kindRefund": "Famerenam-bola",
+    "kindAdjust": "Fanitsiana nataon'ny Riftn",
+    "sendTitle": "Alefaso token",
+    "sendHint": "Mandefa token ao anatin'ny Riftn any amin'ny kaonty hafa. Avy hatrany sy maimaim-poana, tsy misy mankany onchain.",
+    "toPlaceholder": "@anarana na adiresy 0x",
+    "looking": "Mitady…",
+    "available": "Azo ampiasaina: {{amount}}",
+    "sent": "Nalefa token {{amount}} tany amin'i {{name}}",
+    "errorRateLimit": "Be loatra ny fandefasana tao anatin'ny ora farany. Andramo indray any aoriana.",
+    "errorNoRecipient": "Tsy nisy kaonty Riftn hita",
+    "errorSelf": "Tsy afaka mandefa ho an'ny tenanao ianao",
+    "errorGeneric": "Tsy lasa. Andramo indray."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Ny rehetra",
+      "followers": "Mpanaraka",
+      "nobody": "Tsy misy",
+      "default": "Mahazatra amin'ny kaonty ({{value}})"
+    },
+    "heading": "Fanehoan-kevitra",
+    "more": "Asehoy bebe kokoa",
+    "liveNow": "Mivantana",
+    "untitled": "Fanehoan-kevitra",
+    "reactionTo": "Fihetseham-po amin'ny",
+    "reactingTo": "Mihetsika amin'ny",
+    "count_one": "Fihetseham-po {{count}}",
+    "count_other": "Fihetseham-po {{count}}",
+    "allow": "Avelao ny fihetseham-po",
+    "remixesSection": "Remix",
+    "allowDescription": "Avelao hihetsika amin'ny horonan-tsarinao ny mpamorona hafa, voarakitra na mivantana. Mbola azonao ovaina isaky ny lahatsoratra ihany.",
+    "pageDescription": "Jereo ny mpamorona mihetsika amin'ny “{{title}}” nataon'i {{creator}} ao amin'ny Riftn, voarakitra sy mivantana.",
+    "backToVideo": "Hiverina amin'ny horonan-tsary",
+    "empty": "Mbola tsy misy fihetseham-po. Sokafy ny menio Remix amin'ny horonan-tsary ary safidio React mba ho voalohany.",
+    "wasLive": "Nivantana",
+    "thisVideo": "ity horonan-tsary ity",
+    "pageTitle": "Fihetsiky ny olona amin'ny {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Ampifandraiso amin'ny mpanampy AI anao ny Riftn",
+    "urlLabel": "URL an'ny mpizara MCP",
+    "copy": "Adikao",
+    "copied": "Nohavaozina",
+    "copiedToast": "Voadika ny URL MCP",
+    "accountBody2": "Tehirizo ny drafitra manokana, avoahy sy alaharo ny lahatsoratra, tantano ny sary sy ny fitsapan-kevitra, vakio ny fanadihadiana, valio, mihetsika, zarao indray, araho, tehirizo ny marika, vakio ny fampandrenesana, ovay ny mombamombanao ary mamorona amin'ny credits-nao. Tsy mamorona na manisa lahatsoratra faharoa ny fampiasana indray ID fangatahana lahatsoratra. Manontany aloha izy alohan'ny handaniana na inona na inona.",
+    "agentsTitle": "Tantano avy amin'ny mpanampinao ny agents-nao",
+    "agentsBody": "Rehefa mampifandray ianao, avelao koa ny \"Act as your agents\". Afaka mamoaka, mamaly, mihetsika, mizara indray, manaraka na manova mombamomba amin'ny maha-agent anananao ny mpanampinao avy eo, tsirairay na maromaro misesy. Tsy afaka miasa amin'ny maha-kaonty tsy anananao izy mihitsy.",
+    "agentsExample": "Andramo: \"Ataovy mamaly ny lahatsoratra ambony indrindra ao amin'ny famahanako i @mybot, avy eo ankafizo io valiny io amin'ny maha-@otherbot.\"",
+    "desc": "Ampiasao avy amin'ny ChatGPT, Claude, Cursor na app MCP rehetra ny Riftn. Mijerena tsy misy kaonty, na midira mba hahafahan'ny mpanampinao mamoaka, mamaly ary mamorona ho anao.",
+    "copyFailed": "Tsy nety ny fandikana",
+    "urlNote": "Apetaho ao amin'ny app AI-nao ity. Tsy pejy web izy, ka ny fanokafana azy amin'ny navigateur dia mamerina anao eto.",
+    "canTitle": "Izay azon'ny mpanampinao atao",
+    "publicTitle": "Tsy miditra",
+    "publicBody": "Jereo ny famahanana, tadiavo lahatsoratra sy olona, vakio ny fanehoan-kevitra ary jereo ny mombamomba.",
+    "accountTitle": "Rehefa avy niditra ianao",
+    "accountBody": "Mamoaha lahatsoratra, mamaly, mihetsika, manaraka, mitahiry marika, mamaky fampandrenesana, manova ny mombamombanao ary mamorona sary, horonan-tsary sy mozika amin'ny credits-nao. Manontany aloha izy alohan'ny handaniana na inona na inona.",
+    "chatgpt1": "Sokafy ny Settings ao amin'ny ChatGPT, avy eo Apps & Connectors, avy eo Advanced, ary alefaso ny Developer mode.",
+    "chatgpt2": "Miverena ao amin'ny Apps & Connectors, safidio Create mba hanampiana connector vaovao.",
+    "chatgpt3": "Omeo anarana hoe Riftn, apetaho ny URL etsy ambony ary safidio OAuth ho karazana fidirana.",
+    "chatgpt4": "Tsindrio Connect. Misokatra ny Riftn: midira, hamarino ny alalana ary tsindrio Avelao.",
+    "chatgpt5": "Ao amin'ny chat vaovao, sokafy ny menio +, safidio Riftn ary manontania, ohatra, “Asehoy ahy ny lahatsoratra malaza ao amin'ny Riftn.”",
+    "claude1": "Sokafy ny fikiran'ny connector ao amin'ny Claude ary safidio Add custom connector.",
+    "claude2": "Omeo anarana hoe Riftn, apetaho ny URL etsy ambony ary tsindrio Add.",
+    "claude3": "Tsindrio Connect. Misokatra ny Riftn: midira, hamarino ny alalana ary tsindrio Avelao.",
+    "claude4": "Ao amin'ny chat, sokafy ny menio tools, alefaso ny Riftn ary manontania.",
+    "openSettings": "Sokafy ny fikirana",
+    "devTitle": "Claude Code, Cursor sy app hafa",
+    "devBody": "Ampio ho mpizara MCP lavitra amin'ny HTTP ny Riftn. Manokatra ny fidirana Riftn ny app amin'ny voalohany ilany ny kaontinao.",
+    "manageTitle": "Ny app mifandray aminao",
+    "manageBody": "Mijanona mifandray ny app mifandray raha mbola ampiasainao ary miala rehefa tsy ampiasaina 30 andro. Afaka mijery na manapaka azy ireo ianao amin'ny fotoana rehetra.",
+    "manageLink": "Tantano ny app mifandray",
+    "agentTitle": "Mila bot mamoaka amin'ny kaontiny manokana?",
+    "agentBody": "Mamorona agent ary hahazo URL connector manokana misy lakile ao anatiny ianao. Afaka mamoaka, maneho hevitra, mifidy ary manaraka amin'ny maha-io agent io ny mpanampinao avy eo fa tsy ianao.",
+    "agentLink": "Mamorona agent",
+    "helpTitle": "Raha misy tsy mety",
+    "help1": "“Authentication update required” na bokotra Reconnect: tsindrio Reconnect ary midira indray amin'ny Riftn.",
+    "help2": "“Ampifandraiso ny kaonty Riftn-nao” rehefa manontany momba ny lahatsoratrao ianao: tsindrio Connect ao amin'ny fikiran'ny connector ao amin'ny app.",
+    "help3": "Mahazatra ny hadisoana rehefa manokatra ny URL amin'ny tab navigateur ianao. Apetaho ao amin'ny app AI-nao kosa izy.",
+    "other": "Mitovy fomba ihany ny app MCP hafa rehetra: ampio mpizara MCP lavitra ary apetaho ny URL etsy ambony."
+  },
+  "avatarPrompt": {
+    "notNow": "Tsy izao",
+    "title": "Ampio sarin'ny mombamomba",
+    "body": "Haingana kokoa no hahitan'ny olona anao ao amin'ny famahanana, fanehoan-kevitra ary chat rehefa manana tarehy na logo ianao.",
+    "choose": "Misafidiana sary",
+    "another": "Misafidiana hafa",
+    "save": "Ampiasao ity sary ity",
+    "saved": "Tsara tarehy",
+    "failed": "Tsy voatahiry ny saripikanao. Andramo indray."
+  },
+  "postStats": {
+    "audience": "Mpanjifa",
+    "engagement": "Fandraisana anjara",
+    "finished": "Vita",
+    "members": "Mpikambana",
+    "membersLower": "mpikambana",
+    "newFollowers": "Mpanara-dia vaovao",
+    "noBadge": "Tsy misy badge",
+    "people": "Olona",
+    "plays": "Milalao",
+    "quotes": "Teny nalaina",
+    "reposts": "Lahatsoratra naverina",
+    "saved": "Voavonjy",
+    "shares": "Nozaraina",
+    "signedOutViewers": "Nivoaka",
+    "topSupporters": "TOP mpanohana",
+    "visitors": "Nivoaka",
+    "aboutUsual": "eo ho eo amin'ny mahazatra anao",
+    "afterWatching": "nanaraka rehefa nahita azy",
+    "avg": "salan'isa",
+    "avgWatch": "Fijerena antonony",
+    "bestTime": "Rehefa mijery ny olonao",
+    "bigDrop": "Fihenana be",
+    "byBadge": "araka ny mari-pamantarana",
+    "devices": "Fitaovana (mpikambana)",
+    "finishedLower": "vita",
+    "finishedPct": "{{pct}}% no nijery hatramin'ny farany",
+    "inOut": "Mpikambana {{in}} · {{out}} tsy niditra",
+    "leave": "{{pct}}% no miala",
+    "linkClicks": "Tsindry rohy",
+    "newToYou": "vaovao aminao",
+    "noAccount": "tsy misy kaonty",
+    "noViewersYet": "Mbola tsy nisy nahita ity lahatsoratra ity.",
+    "noWatchYet": "Hiseho eto ny faharetan'ny fijerena rehefa mandefa azy ny olona. Nanomboka nanisa tamin'ny 31 Okt 2026 izy.",
+    "open": "Jereo ny fizotry ny lahatsoratrao",
+    "otherBadges": "Mari-pamantarana hafa",
+    "peak": "Ambony indrindra {{time}} · {{n}}",
+    "peopleReached": "Olona tratra",
+    "playsLower": "fandefasana",
+    "playsMembers": "Fandefasana nataon'ny mpikambana",
+    "playsVisitors": "Fandefasana tsy niditra",
+    "profileTaps": "Tsindry ho any amin'ny mombamombanao",
+    "reach": "Fahatongavana",
+    "saves": "Fitahirizana",
+    "seeAll": "Jereo ny antontan'isa rehetra",
+    "signedIn": "niditra",
+    "signedOutLower": "tsy niditra",
+    "stillWatching": "Mbola mijery",
+    "timesUsual": "{{ratio}}× ny mahazatra",
+    "vsUsualPct": "{{pct}} raha oharina amin'ny lahatsoratrao mahazatra",
+    "unavailableBody": "Ny mpamorona ihany no mahita ny antontan'isan'ity lahatsoratra ity.",
+    "unavailableTitle": "Tsy misy antontan'isa",
+    "vsUsual": "raha oharina amin'ny lahatsoratrao mahazatra",
+    "watching": "Mijery",
+    "whoSawIt": "Iza no nahita azy",
+    "withRepeats": "Famerenana {{n}}",
+    "yourFollowers": "ny mpanaraka anao",
+    "first48": "48 ora voalohany",
+    "howItsDoing": "Ny fizotrany",
+    "bestTip": "Ny ankamaroan'ny mpijery anao dia tonga ny {{day}} amin'ny {{hour}}:00 eo ho eo. Ny famoahana alohan'izay kely no manome fanombohana tsara indrindra ho an'ny lahatsoratra.",
+    "last30": "30 andro farany",
+    "day": {
+      "sun": "Alh",
+      "mon": "Alts",
+      "tue": "Tal",
+      "wed": "Alr",
+      "thu": "Alk",
+      "fri": "Zom",
+      "sat": "Sab"
+    }
+  },
   "tokenLaunch": {
     "eyebrow": "Misy manokana",
     "title": "Mampitohy ny fanampiana ny token ka hatramin'ny aloha.",
@@ -19059,7 +20728,9 @@
     "failed": "Tsy afaka nandraikitra izany. Andramo indray.",
     "privacy": "Misy tsy voasambatra amin'ny fampahatsiarovana.",
     "seoTitle": "Tokony amin'ny fahafito | Riftn",
-    "seoDescription": "Ireo Riftn token any amin'ny fahafito. Hita amin'ny lisitry ny amin'ny fahafito, ary hiverina ny email amin'ny fahafito amin'ny fahafito, ka tsy ho atao amin'ny Riftn wallet."
+    "seoDescription": "Ireo Riftn token any amin'ny fahafito. Hita amin'ny lisitry ny amin'ny fahafito, ary hiverina ny email amin'ny fahafito amin'ny fahafito, ka tsy ho atao amin'ny Riftn wallet.",
+    "sendTo": "Handefa mailaka any amin'ny {{email}} izahay",
+    "emailPlaceholder": "Ny mailakao"
   },
   "githubLink": {
     "hint": "Midira ao amin'ny GitHub mba hanaporofoana fa anao ny kaonty. Riftn dia mahita ny mombamomba ny GitHub.",
@@ -19072,6 +20743,95 @@
     "unavailable": "Ho avy tsy ho ela ny GitHub.",
     "connect": "Mampiasa GitHub",
     "disconnect": "Atsaharo"
+  },
+  "mcpKeys": {
+    "delete": "Fafao",
+    "shortProfile": "Mombamomba",
+    "title": "Lakile manokana",
+    "body": "Ho an'ny script, bot ary app tsy afaka manokatra pejy fidirana. Izay avelanao ihany no ataon'ny lakile, amin'ny kaontinao sy ny agents anananao. Mijanona mavitrika raha mbola ampiasaina izy ary mijanona rehefa tsy ampiasaina 30 andro.",
+    "signIn": "Midira mba hanaovana lakile",
+    "newTitle": "Adikao izao ny lakilenao",
+    "newBody": "Indray mandeha ihany no aseho izy. Izay manana azy dia afaka mampiasa ny kaontinao ao anatin'ny alalana nofidinao, ka tazony ho tsiambaratelo.",
+    "useIt": "Ampidiro ao amin'ny app-nao amin'ny iray amin'ireto:",
+    "name": "Anaran'ny lakile",
+    "namePlaceholder": "Ny botiko",
+    "permissions": "Izay azon'ity lakile ity atao",
+    "limits": "Fetra isan'andro ho an'ny kaontinao sy ny agents: lahatsoratra 50, valiny 300, fihetseham-po 1,000, fanarahana 200, fizarana indray 200 ary fanovana mombamomba 30.",
+    "create": "Mamorona lakile",
+    "show": "Asehoy ny lakileko",
+    "yours": "Ny lakilenao",
+    "empty": "Mbola tsy misy lakile.",
+    "expires": "Mavitrika hatramin'ny {{date}} raha tsy ampiasaina indray",
+    "shortRead": "Mamaky",
+    "shortSocial": "Mamoaka sy mamaly",
+    "shortGenerate": "Mamorona media",
+    "shortAgents": "Ny agents-nao",
+    "settingsBody": "Ampiasao avy amin'ny ChatGPT, Claude na app MCP rehetra ny Riftn sy ny agents-nao, na manaova lakile manokana."
+  },
+  "chatSearch": {
+    "placeholder": "Mitadiava hafatra na olona",
+    "placeholderPerson": "Mitadiava hafatra {{name}}",
+    "close": "Mikatona ny fikarohana",
+    "removePerson": "Mitadiava rehetra",
+    "clear": "Esory",
+    "signInTitle": "Midira amin'ny fikarohana amin'ny chat",
+    "voice": "Hafatra feo",
+    "photo": "Sary",
+    "peopleHere": "Olona ao amin'ity chat ity",
+    "recent": "Fikarohana vao haingana",
+    "hint": "Soraty teny na anarana.",
+    "failed": "Tsy afaka nampiditra ny fikarohana",
+    "people": "Olona",
+    "messages": "Hafatra",
+    "seeCount_one": "Jereo ny hafatra {{count}}",
+    "seeCount_other": "Jereo ny hafatra {{count}}",
+    "messagesCount_one": "Hafatra {{count}}",
+    "messagesCount_other": "Hafatra {{count}}",
+    "results_one": "Valiny {{count}}",
+    "results_other": "Valiny {{count}}",
+    "backToResults": "Miverina amin'ny valiny",
+    "position": "{{current}} amin'ny {{total}}",
+    "older": "Valiny taloha",
+    "newer": "Valiny vaovao",
+    "latest": "Farany",
+    "gone": "Tsy mbola misy io hafatra io eto",
+    "theirMessages": "Hafatra azy ireo",
+    "seeTheirMessages": "Jereo ny hafatra azy ireo"
+  },
+  "dmRequests": {
+    "title": "Fangatahana",
+    "accept": "Ekeo",
+    "delete": "Fafao",
+    "block": "Sakano",
+    "hint": "Hafatra avy amin'ny olona tsy arahinao. Ekeo ny iray, valio na araho izy ary hifindra ao amin'ny boaty fandraisanao ny chat.",
+    "rowHint": "{{n}} avy amin'ny olona tsy arahinao",
+    "banner": "Tsy manaraka an'i {{name}} ianao. Ekeo mba hamindrana ity chat ity ao amin'ny boaty fandraisanao, na valio fotsiny.",
+    "accepted": "Nafindra ao amin'ny boaty fandraisanao",
+    "acceptFailed": "Tsy voaray, andramo indray"
+  },
+  "dmSchedule": {
+    "view": "Jereo",
+    "edit": "Fanovana",
+    "editLabel": "Hanova hafatra",
+    "error": "Tsy nandeha izany. Andramo indray.",
+    "button": "Alaharo ny hafatra",
+    "title": "Hafatra voalahatra",
+    "whenTitle": "Alefa rahoviana?",
+    "waiting": "{{n}} voalahatra",
+    "next": "manaraka {{when}}",
+    "failedCount": "{{n}} tsy lasa",
+    "notSent": "Tsy lasa",
+    "emptyTitle": "Tsy misy voalahatra",
+    "emptyBody": "Manorata hafatra, avy eo tsindrio ny famantaranandro mba hisafidianana ny fotoana handefasana azy.",
+    "changeTime": "Ovay ny ora",
+    "sendNow": "Alefaso izao",
+    "deleted": "Voafafa ny hafatra voalahatra",
+    "unreadable": "Nosoratana tamin'ny fitaovana hafa. Mbola halefa ihany izy.",
+    "footnote": "Amin'ny faritry ny oranao ny ora. Tsy misy mahita hafatra mandra-pandefasana azy.",
+    "footnoteNamed": "Amin'ny faritry ny oranao ny ora. Rehefa lasa ny hafatra vao hitan'i {{name}}.",
+    "textOnly": "Hafatra soratra ihany no azo alahatra amin'izao.",
+    "scheduledToast": "Voalahatra amin'ny {{when}}",
+    "failedToast": "Tsy lasa ny hafatra voalahatra iray"
   },
   "createPost": {
     "title": "Mamorona",
@@ -19149,34 +20909,50 @@
     "txTipSent": "Fanomezana ho an'i {{name}} — {{amount}} tokens",
     "txTipReceived": "{{name}} nanome fanomezana anao — {{amount}} tokens"
   },
-  "chatSearch": {
-    "placeholder": "Mitadiava hafatra na olona",
-    "placeholderPerson": "Mitadiava hafatra {{name}}",
-    "close": "Mikatona ny fikarohana",
-    "removePerson": "Mitadiava rehetra",
-    "clear": "Esory",
-    "signInTitle": "Midira amin'ny fikarohana amin'ny chat",
-    "voice": "Hafatra feo",
-    "photo": "Sary",
-    "peopleHere": "Olona ao amin'ity chat ity",
-    "recent": "Fikarohana vao haingana",
-    "hint": "Soraty teny na anarana.",
-    "failed": "Tsy afaka nampiditra ny fikarohana",
+  "mentionLinks": {
+    "communities": "Vondrona",
+    "pages": "Pejy",
     "people": "Olona",
-    "messages": "Hafatra",
-    "seeCount_one": "Jereo ny hafatra {{count}}",
-    "seeCount_other": "Jereo ny hafatra {{count}}",
-    "messagesCount_one": "Hafatra {{count}}",
-    "messagesCount_other": "Hafatra {{count}}",
-    "results_one": "Valiny {{count}}",
-    "results_other": "Valiny {{count}}",
-    "backToResults": "Miverina amin'ny valiny",
-    "position": "{{current}} amin'ny {{total}}",
-    "older": "Valiny taloha",
-    "newer": "Valiny vaovao",
-    "latest": "Farany",
-    "gone": "Tsy mbola misy io hafatra io eto",
-    "theirMessages": "Hafatra azy ireo",
-    "seeTheirMessages": "Jereo ny hafatra azy ireo"
+    "empty": "Tsy nisy hita",
+    "hint": "Manorata mba hitadiavana olona, vondrom-piarahamonina ary pejy",
+    "linkTo": "Ampifandraiso amin'i {{name}}",
+    "members": " mpikambana",
+    "placeholder": "Hitady olona, vondrom-piarahamonina, pejy...",
+    "title": "Tononina na rohy"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Azoko fa hafenina ny mombamomba ahy ary hivoaka amin'ny toerana rehetra aho.",
+    "title": "Atsaharo ny kaonty",
+    "short": "Afeno vonjimaika ny mombamombanao. Midira indray mba hamerenana azy",
+    "description": "Miala sasatra kosa. Afenina ny mombamombanao, ny lahatsoratrao ary ny fanehoan-kevitrao ary hivoaka amin'ny toerana rehetra ianao. Tsy misy voafafa, ary ny fidirana indray no mamerina izany rehetra izany.",
+    "button": "Atsaharo",
+    "confirmTitle": "Hampiato ny kaontinao?",
+    "confirmBody": "Hafenina ny mombamombanao, ny lahatsoratrao ary ny fanehoan-kevitrao ary hivoaka amin'ny fitaovana rehetra ianao. Midira indray amin'ny fotoana rehetra mba hanafoanana izany.",
+    "busy": "Mampiato…",
+    "done": "Najanona ny kaonty",
+    "receipt": "Miafina ny mombamombanao, ny lahatsoratrao ary ny fanehoan-kevitrao. Midira indray amin'ny fotoana rehetra mba hamerenana ny zava-drehetra.",
+    "error": "Tsy voajanona ny kaontinao. Andramo indray azafady."
+  },
+  "halloween": {
+    "title": "Halloween sambatra",
+    "otherThemes": "Tsy te hampatahotra? Tadiavo ny lohahevitra hafa:",
+    "enter": "Midira ao amin'ny lavaka ambanin'ny tany"
+  },
+  "msgDelete": {
+    "title": "Hamafa hafatra?",
+    "titleMany": "Hamafa hafatra {{count}}?",
+    "bodyOwn": "Esory amin'ny chatinao ihany, na ho an'ny rehetra.",
+    "bodyOwnMany": "Esory amin'ny chatinao ihany izy ireo, na ho an'ny rehetra.",
+    "bodyOthers": "Hesorina amin'ny chatinao ihany izy. Mbola hitan'ny olona iray hafa ihany.",
+    "bodyOthersMany": "Hesorina amin'ny chatinao ihany izy ireo. Mbola hitan'ny hafa ao amin'ny chat ihany.",
+    "bodyOwnBoth": "Esory amin'ny chatinao ihany, na ho anareo roa.",
+    "bodyOwnBothMany": "Esory amin'ny chatinao ihany izy ireo, na ho anareo roa.",
+    "forMe": "Fafao ho ahy",
+    "forEveryone": "Fafao ho an'ny rehetra",
+    "forBoth": "Fafao ho antsika roa",
+    "forMeAndName": "Fafao ho ahy sy {{name}}",
+    "remember": "Tadidio ny safidiko",
+    "rememberHint": "Ovay amin'ny fotoana rehetra ao amin'ny Fikirana",
+    "failed": "Tsy voafafa ny hafatra"
   }
 }

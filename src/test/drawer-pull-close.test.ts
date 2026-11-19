@@ -50,6 +50,15 @@ describe('notifications drawer drag (part open / full / close)', () => {
 
   const expand = () => gesture(scroller, 500, 6, -15, 16);
 
+  it('a swipe up past full on a part-open sheet scrolls the list', () => {
+    // jsdom keeps scrollTop as set; 20 steps of 15px = 300px, PART of it raises the sheet.
+    gesture(scroller, 600, 20, -15, 16);
+    expect(sheet.hasAttribute('data-expanded')).toBe(true);
+    expect(sheet.style.translate).toBe('0 0px');
+    expect(scroller.scrollTop).toBe(300 - PART);
+    expect(close).not.toHaveBeenCalled();
+  });
+
   it('opens part open, lowered by a fifth of the screen', () => {
     expect(sheet.style.translate).toBe(`0 ${PART}px`);
     expect(sheet.hasAttribute('data-expanded')).toBe(false);
@@ -183,5 +192,59 @@ describe('one-height sheet (bell settings)', () => {
     gesture(sheet, 100, 4, 10, 16, 200);
     expect(close).not.toHaveBeenCalled();
     expect(sheet.style.translate).toBe('0 0px');
+  });
+});
+
+describe('notifications drawer: one swipe from the header', () => {
+  let sheet: HTMLElement;
+  let header: HTMLElement;
+  let scroller: HTMLElement;
+  let close: ReturnType<typeof vi.fn<() => void>>;
+
+  beforeEach(() => {
+    vi.spyOn(performance, 'now').mockReturnValue(100_000);
+    document.body.innerHTML = '';
+    sheet = document.createElement('div');
+    Object.defineProperty(sheet, 'offsetHeight', { value: window.innerHeight });
+    scroller = document.createElement('div');
+    header = document.createElement('div');
+    header.setAttribute('data-drawer-grab', '');
+    scroller.appendChild(header);
+    const row = document.createElement('div');
+    row.setAttribute('data-row', '');
+    scroller.appendChild(row);
+    sheet.appendChild(scroller);
+    document.body.appendChild(sheet);
+    close = vi.fn<() => void>();
+    bindDrawerPullClose(sheet, scroller, close, { snap: false, grab: '[data-drawer-grab]' });
+  });
+
+  it('a slow pull a third of the way down closes it, with no stop part way', () => {
+    gesture(header, 100, 20, 14, 16, 200);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('a small flick closes it', () => {
+    gesture(header, 100, 3, 8, 16);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('a short slow pull springs back to full', () => {
+    gesture(header, 100, 4, 10, 16, 200);
+    expect(close).not.toHaveBeenCalled();
+    expect(sheet.style.translate).toBe('0 0px');
+  });
+
+  it('closes from the header even with the list scrolled', () => {
+    scroller.scrollTop = 400;
+    gesture(header, 100, 3, 8, 16);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('a pull on the list never moves the sheet', () => {
+    const row = scroller.querySelector('[data-row]') as HTMLElement;
+    gesture(row, 300, 20, 14, 16);
+    expect(close).not.toHaveBeenCalled();
+    expect(sheet.style.translate ?? '').toBe('');
   });
 });

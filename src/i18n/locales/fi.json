@@ -1,4 +1,17 @@
 {
+  "postBg": {
+    "addMedia": "Lisää kuva, GIF tai video",
+    "changeMedia": "Vaihda kuva, GIF tai video",
+    "mediaType": "Valitse kuva, GIF tai video.",
+    "videoSize": "Video on yli {{n}} Mt. Valitse pienempi."
+  },
+  "textFeed": {
+    "tab": "Teksti",
+    "errorTitle": "Julkaisuja ei voitu ladata",
+    "errorBody": "Yritä ladata tekstisyöte uudelleen.",
+    "emptyTitle": "Ei vielä tekstijulkaisuja",
+    "emptyBody": "Tekstijulkaisut näkyvät täällä."
+  },
   "comic": {
     "showAll": "Näytä kaikki {{count}} sivua"
   },
@@ -14,6 +27,69 @@
     "glitter": "Glitter",
     "saved": "Reunus tallennettu",
     "failed": "Reunuksen tallennus epäonnistui"
+  },
+  "duet": {
+    "policyEveryone": "Kaikki",
+    "policyFollowers": "Seuraajat",
+    "policyNobody": "Ei kukaan",
+    "loadMore": "Lataa lisää",
+    "with": "Duetto käyttäjän @{{username}} kanssa",
+    "withOriginal": "Duetto · katso alkuperäinen",
+    "unavailable": "Tämä video ei ole enää käytettävissä duettoihin.",
+    "allowLabel": "Salli duetot",
+    "allowDescription": "Kuka voi tallentaa duetin videoidesi rinnalle. Voit muuttaa tätä myös julkaisukohtaisesti.",
+    "settingsSection": "Duetot",
+    "policyDefault": "Tilin asetus",
+    "saveFailed": "Tallennus epäonnistui. Yritä uudelleen.",
+    "count_one": "{{count}} duetto",
+    "count_other": "{{count}} duettoa",
+    "pageHeading": "Duetot",
+    "pageTitle": "Duetot videosta {{title}}, tekijä @{{creator}}",
+    "pageTitleNoCreator": "Duetot videosta {{title}}",
+    "pageDescription": "Katso tämän videon kaikki duetot Riftnissä tai tallenna oma rinnakkain.",
+    "empty": "Ei vielä duettoja. Avaa videon valinnat ja valitse Remix → Duetto tehdäksesi ensimmäisen.",
+    "video": "Video",
+    "notFound": "Tämä video ei ole saatavilla.",
+    "browseShorts": "Selaa Shortseja",
+    "notFoundTitle": "Videota ei löytynyt | Riftn"
+  },
+  "videoRemix": {
+    "sound": "Käytä tätä ääntä",
+    "menu": "Remix",
+    "duet": "Duetto",
+    "green-screen": "Vihreä tausta",
+    "stitch": "Stitch",
+    "selectSource": "Avaa videon valinnat ja aloita valitsemalla Remix."
+  },
+  "remixLinks": {
+    "policy": {
+      "everyone": "Kaikki",
+      "followers": "Seuraajat",
+      "nobody": "Ei kukaan",
+      "default": "Oma oletukseni"
+    },
+    "shareFailed": "Tippisi lähetettiin, mutta alkuperäisen tekijän osuus ei mennyt läpi.",
+    "notify": {
+      "duet": "{{name}} teki duetin videostasi",
+      "stitch": "{{name}} teki stitchin videostasi",
+      "react": "{{name}} reagoi videoosi",
+      "reactLive": "{{name}} reagoi videoosi livenä"
+    },
+    "linkFailed": "Julkaisusi on näkyvillä, mutta sitä ei voitu linkittää alkuperäiseen videoon.",
+    "settingsHeading": "Remixit",
+    "stitch": {
+      "allow": "Salli stitchit",
+      "allowDesc": "Kuka voi käyttää enintään 5 sekuntia videoistasi omissaan. Voit muuttaa tätä myös julkaisukohtaisesti.",
+      "saveFailed": "Stitch-asetusta ei voitu tallentaa. Yritä uudelleen.",
+      "settingFailed": "Julkaisusi on näkyvillä, mutta sen stitch-asetusta ei tallennettu. Muuta sitä kohdasta Muokkaa julkaisua.",
+      "from": "Stitch käyttäjältä {{name}}",
+      "count_one": "{{count}} stitch",
+      "count_other": "{{count}} stitchiä",
+      "listTitle": "Stitchit",
+      "listFailed": "Stitchejä ei voitu ladata. Yritä uudelleen.",
+      "listEmpty": "Ei vielä stitchejä.",
+      "unavailable": "Tämä video ei ole enää käytettävissä stitcheihin."
+    }
   },
   "dehubAppPage": {
     "android": "Android",
@@ -38,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Avaa Riftn selaimessasi",
     "seoDescription": "Hanki Riftn-sovellus: avoimen lähdekoodin, käyttäjien omistama sosiaalinen media, jossa on live-suoratoisto, salattu viestintä ja ansaintakatselu. Ilmainen Google Playssa, App Storessa ja verkossa.",
-    "seoTitle": "Riftn-sovellus: Lataa Androidille, iPhonelle ja verkolle"
+    "seoTitle": "Riftn-sovellus: Lataa Androidille, iPhonelle ja verkolle",
+    "learnMore": "Haluatko koko kuvan? <guide>Mikä on Riftn?</guide> esittelee alustan perusteellisesti."
   },
   "dehubLinks": {
     "copyLinkDetail": "Kopioi {{item}} -linkki leikepöydällesi",
@@ -55,12 +132,16 @@
       "profile": "profiili",
       "proposal": "ehdotus",
       "stage": "vaihe",
-      "store": "kauppa"
+      "store": "kauppa",
+      "featureRequest": "pyyntö",
+      "page": "sivu"
     },
     "recipientChat": "keskustelu",
     "recipientUser": "käyttäjä",
     "sendFailed": "Lähettäminen epäonnistui {{item}}",
-    "sentTo": "{{item}} lähetetty henkilölle {{name}}"
+    "sentTo": "{{item}} lähetetty henkilölle {{name}}",
+    "openPage": "Avaa sivu",
+    "viewRequest": "Näytä pyyntö"
   },
   "stageCover": {
     "admitOne": "HYVÄKSY YKSI",
@@ -166,11 +247,35 @@
     "privateNote": "Yksityisiä tilejä ei näytetä fediversumissa.",
     "noUsername": "Valitse käyttäjänimi saadaksesi fediversumiosoitteen."
   },
+  "signedFollows": {
+    "setUp": "Ota käyttöön",
+    "turnOff": "Poista",
+    "efpTurnOff": "Pysäytä",
+    "title": "Seurauksesi lohkoketjussa",
+    "description": "Lompakkosi allekirjoittaa ketä seuraat, ja lista leimataan päivittäin Baseen. Mikä tahansa sovellus löytää seurauksesi lompakostasi, myös ilman Riftniä.",
+    "on": "Päällä tällä laitteella",
+    "off": "Pois tällä laitteella",
+    "turnedOn": "Lompakkosi allekirjoittaa nyt seurauksesi",
+    "turnedOff": "Poistettu käytöstä tällä laitteella",
+    "failed": "Lompakkosi ei allekirjoittanut. Yritä uudelleen.",
+    "hiddenNote": "Piilotetut seurauslistat ja yksityiset tilit jätetään julkisen listan ulkopuolelle.",
+    "efpOn": "Kopioitu EFP:hen · {{count}} seurausta",
+    "efpOff": "Vie ne myös EFP:hen",
+    "efpTurnOn": "Lisää EFP:hen",
+    "efpDone": "Seurauksiasi viedään EFP:hen",
+    "efpStopped": "EFP-kopiointi pysäytetty. Lista pysyy sinun.",
+    "efpHasList": "Sinulla on jo EFP-lista. Riftn ei voi vielä täyttää sitä.",
+    "efpNoGas": "Lompakkosi tarvitsee tähän vähän ETH:ta Basessa.",
+    "efpFailed": "Se ei mennyt läpi. Yritä uudelleen.",
+    "efpNote": "EFP on seurauslista, jota muut sovellukset lukevat (efp.app). Ilmainen Riftn-lompakollasi; muut lompakot maksavat muutaman sentin Basessa. Lista on sinun."
+  },
   "profileFields": {
     "title": "Profiilikentät",
     "description": "Enintään neljä lisäriviä profiiliisi, kuten verkkosivusto tai pronominisi.",
     "label": "Nimi",
     "content": "Sisältö",
+    "add": "Lisää kenttä",
+    "remove": "Poista kenttä",
     "save": "Tallenna kentät",
     "saved": "Profiilikentät tallennettu",
     "failed": "Tallennus ei onnistunut. Yritä uudelleen.",
@@ -340,7 +445,8 @@
     "step": "Tilin hallintaa varten lisää https://riftn.com/mcp OAuth-liittimeksi, kirjaudu sisään Riftniin ja tarkista käyttöoikeudet ennen käytön sallimista.",
     "profilePrompt": "Päivitä Riftn-biojuttuni: Itsenäinen tekijä, joka tekee elokuvia ja musiikkia.",
     "generatePrompt": "Näytä minulle Riftnin kuvamallit ja lainaa muotokuva ennen sen luomista.",
-    "libraryPrompt": "Näytä uusimmat materiaalit Riftn Creator -kirjastossani."
+    "libraryPrompt": "Näytä uusimmat materiaalit Riftn Creator -kirjastossani.",
+    "agents": "Julkaise, vastaa, reagoi, jaa uudelleen, seuraa ja muokkaa profiileja omistamiesi agenttien nimissä"
   },
   "twitchMirror": {
     "title": "Twitch-peilaus",
@@ -368,6 +474,7 @@
     "checkFailed": "Emme pystyneet tarkistamaan varattavuutta. Yritä uudelleen.",
     "checking": "Tarkistetaan...",
     "ownership": "Avoin lähdekoodi. Käyttäjän omistama.",
+    "title": "Vähän työtä.\nParempi Riftn.",
     "intermission": "Väliaikaisesti offline-tilassa",
     "community": "Yhteisö ensin. Aina."
   },
@@ -440,7 +547,66 @@
   "nav": {
     "launchpad": "Laukaisualusta",
     "findWords": {
-      "getTheApp": "lataa sovellus, Android, iPhone, mobiilisovellus, asenna, APK, työpöytäsovellus, asenna tietokoneelle, Windows, Mac"
+      "getTheApp": "lataa sovellus, Android, iPhone, mobiilisovellus, asenna, APK, työpöytäsovellus, asenna tietokoneelle, Windows, Mac",
+      "home": "syöte, aikajana, uusimmat julkaisut, sinulle, seuratut, etusivu",
+      "profile": "oma profiili, oma tili, oma sivu, omat julkaisut, profiilikuva, bio, seuraajat",
+      "explore": "haku, löydä, etsi, trendaavat, suositut, aihetunnisteet, ihmiset, tekijät",
+      "prompt": "tekoäly, AI, luo, tekoälykuva, tekoälyvideo, kuvageneraattori, teksti kuvaksi, tekoälytaide",
+      "editor": "videoeditori, muokkaa videota, trimmaa, leikkaa, tekstitykset, tekstit, efektit",
+      "creator": "luo, studio, tekoälytyökalut, kuva, video, musiikki, selostus, 3D",
+      "converter": "tuo video, lataa, YouTube, TikTok, Instagram, muunna",
+      "migrate": "siirrä kanavani, tuo kanava, joukkotuonti, YouTube-kanava",
+      "notifications": "hälytykset, toiminta, maininnat, vastaukset, tykkäykset, kello",
+      "messages": "DM, yksityisviestit, keskustelu, saapuneet, keskustelut, yksityisviesti",
+      "communities": "ryhmät, yhteisö, huoneet, kerhot, foorumit, jäsenet",
+      "assistant": "tekoäly, AI, chatbot, kysy, apu, tekoälykeskustelu, kysymykset",
+      "settings": "asetukset, tili, yksityisyys, tietoturva, salasana, kieli, teema, tumma tila, estetyt, poista tili",
+      "leaderboard": "ranking, sijoitus, parhaat tekijät, parhaat käyttäjät, pisteet, tulokset",
+      "bookmarks": "tallennetut, suosikit, katso myöhemmin, lue myöhemmin, tallennetut julkaisut, kirjasto",
+      "command": "hallintapaneeli, analytiikka, ansiot, tulot, näkemykset, moderointi, omat tilastot",
+      "wallet": "saldo, raha, varat, poletit, krypto, talletus, nosto, lähetä, vastaanota, maksa",
+      "events": "kalenteri, aikataulu, tapaaminen, tulevat, liput, AMA",
+      "stages": "äänihuoneet, äänikeskustelu, spaces, live-ääni, puhe, podcast",
+      "featureRequests": "rakenna, rakentajat, ideat, ehdotukset, ilmoita bugista, bugit, korjaukset, tiekartta, äänestä, toivelista, paranna",
+      "feedback": "arvostelu, arvio, kysely, mielipide, valitus, anna palautetta",
+      "staking": "panosta, staking, talletus, tuotto, palkkiot, ansaitse, voitonjako, merkki, tasot, korko",
+      "superpowers": "tehostus, mainosta, edut, voimat, merkkiedut, tavoittavuus, päivitykset",
+      "governance": "äänestä, äänestys, ehdotukset, kysely, vaali, päätä",
+      "dao": "kassa, lahjoita, lahjoitus, yhteisörahasto, osallistu, apurahat",
+      "bounties": "työ, työpaikat, tehtävät, keikat, freelance, palkkaa, ansaitse rahaa, palkallinen työ",
+      "myBounties": "omat palkkiotehtävät, omat työt, historia, maksut, valmiit työt",
+      "affiliate": "suosittelu, kutsu ystäviä, kutsu, provisio, kumppani, ansaitse",
+      "careers": "työpaikat, rekrytointi, töihin meille, liity tiimiin, hae, avoimet paikat",
+      "stores": "kauppa, myymälä, markkinapaikka, oheistuotteet, osta, myy, tuotteet, ostokset",
+      "fractions": "osuudet, omistus, sijoita, omista julkaisu, NFT, NFT:t, keräilyesineet, vaihda",
+      "usernames": "käyttäjänimi, tunnus, nimi, vaihda nimeni, osta nimi, myy nimi",
+      "accounts": "osta tili, myy tili, myytävät tilit, seuraajat, siirrä tili",
+      "apps": "sovelluskauppa, minisovellukset, rakenna sovellus, kehittäjät, työkalut",
+      "arcade": "pelit, peli, pelaa, pelaaminen, shakki, ammuskelu, hauskaa",
+      "glossary": "termit, määritelmät, sanakirja, merkitys, mikä on",
+      "compare": "vertailu, vertaa, vastaan, vaihtoehdot, YouTube, X, TikTok",
+      "guide": "aloittaminen, miten, opas, apu, opi, aloittelija, uusi täällä",
+      "stats": "tilastot, analytiikka, luvut, kaaviot, hinta, tarjonta, haltijat",
+      "docs": "dokumentaatio, apu, API, whitepaper, kehittäjät, käyttöohje",
+      "blog": "uutiset, artikkelit, päivitykset, tiedotteet, mitä uutta",
+      "videos": "katso, videot, klipit, pitkät videot",
+      "shorts": "reels, lyhyet videot, pystyvideot, pyyhkäise",
+      "music": "ääni, kappaleet, raidat, kuuntele, radio, soittolista",
+      "liveTv": "TV, lähetykset, suoratoisto, live, lähetys, kanavat, katso livenä",
+      "buyTokens": "osta poletteja, osto, lataa saldoa, kortti, luottokortti, fiat",
+      "bridge": "ketjujen välillä, siirrä poletteja, ketjut, siirto ketjujen välillä",
+      "top100": "top 100, kolikot, kryptovaluutat, markkina-arvo, hinnat",
+      "agents": "tekoälyagentit, agentit, botit, automaatio, persoonat",
+      "advertising": "mainokset, mainos, kampanja, mainosta, sponsori, markkinointi",
+      "premium": "tilaus, päivitä, pro, jäsenyys, ei mainoksia, mainokseton",
+      "pricing": "paketit, kustannus, hinta, paljonko, tilaus",
+      "creators": "tekijäohjelma, lähettiläät, kumppanit, hae tekijäksi, monetisoi",
+      "connectAi": "MCP, ChatGPT, Claude, API, integraatio, yhdistä tekoäly",
+      "packs": "emoji, tarrat, GIFit, emojipaketit, tarrapaketit, omat emojit",
+      "publicChat": "keskustelu, yleinen keskustelu, chat-huone, aula, puhe, yhteisökeskustelu",
+      "planned": "ajastettu, ajasta, ajastetut julkaisut, jono, myöhemmin",
+      "liveStudio": "mene liveen, lähetys, suoratoisto, OBS, overlayt, hälytykset, widgetit",
+      "launchpad": "lanseeraa poletti, luo kolikko, tee kolikko, meemikolikko, bonding curve, tokenisoi"
     },
     "reorderHint": "Järjestä uudelleen pitämällä mitä tahansa kuvaketta painettuna ja vetämällä",
     "reorderReset": "Tyhjennä",
@@ -488,7 +654,14 @@
     "getTheApp": "Hanki sovellus",
     "connectAi": "Yhdistä tekoäly",
     "converter": "Muunnin",
-    "affiliate": "Kumppanuus"
+    "affiliate": "Kumppanuus",
+    "groups": {
+      "create": "Luo",
+      "discover": "Löydä",
+      "main": "Pää",
+      "money": "Raha",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Näytä henkilön {{name}} profiili",
@@ -676,6 +849,8 @@
     "feedTogglesCleared": "Syötteen suodattimet nollattu",
     "defaultProfileTab": "Profiilin oletusvälilehti",
     "defaultProfileTabDesc": "Valitse, minkä välilehden kävijät näkevät ensin profiilissasi",
+    "defaultProfileView": "Profiilin julkaisujen asettelu",
+    "defaultProfileViewDesc": "Näytä julkaisusi ruudukkona tai listana, kun joku avaa profiilisi",
     "public": "Julkinen",
     "publicDesc": "Kuka tahansa voi nähdä julkaisusi",
     "private": "Yksityinen",
@@ -1111,7 +1286,38 @@
     "socialConnectedShort": "Yhdistetty",
     "socialConnectFailed": "Ei voitu yhdistää kohteeseen {{platform}}. Yritä uudelleen.",
     "socialVerifiedFollowers": "{{value}} seuraajaa",
-    "socialFollowersPending": "Alitulostimien määrän päivitys"
+    "socialFollowersPending": "Alitulostimien määrän päivitys",
+    "menuLayoutFolders": "Kansiot",
+    "chatCards": "Keskustelut kortteina",
+    "chatCardsDesc": "Jokainen keskustelu omalla kortillaan. Poista käytöstä, niin saat pelkän listan, jossa keskustelujen välissä on viiva.",
+    "chatDeleteChoice": "Kun poistat viestin",
+    "chatDeleteChoiceDesc": "Kysy joka kerta, tai poista aina vain itseltäsi tai kaikilta keskustelussa.",
+    "chatDeleteAsk": "Kysy joka kerta",
+    "chatDeleteMe": "Poista minulta",
+    "chatDeleteMeDesc": "Poistuu keskustelustasi, muut näkevät sen yhä",
+    "chatDeleteEveryone": "Poista kaikilta",
+    "chatDeleteEveryoneDesc": "Kun mahdollista. Jonkun toisen viesti ryhmässä poistuu silti vain sinulta",
+    "showLikes": "Näytä tykkäykseni kaikille",
+    "showLikesDesc": "Kuka tahansa voi avata profiilisi Tykkäykset-välilehden. Oletuksena pois, joten vain sinä näet, mistä tykkäsit.",
+    "showFollowersList": "Näytä, kuka seuraa minua",
+    "showFollowersListDesc": "Anna kenen tahansa avata seuraajalistasi. Kun tämä on pois, vain sinä näet sen.",
+    "showFollowingList": "Näytä, ketä seuraan",
+    "showFollowingListDesc": "Anna kenen tahansa avata lista ihmisistä, joita seuraat. Kun tämä on pois, vain sinä näet sen.",
+    "showFollowCounts": "Näytä seuraajamääräni",
+    "showFollowCountsDesc": "Näytä, montako seuraajaa sinulla on ja montako ihmistä seuraat. Tämän poistaminen piilottaa myös molemmat listat.",
+    "readerProfileView": "Avaa muiden profiilit näkymässä",
+    "readerProfileViewDesc": "Valitse ruudukko tai lista jokaiselle avaamallesi profiilille, tai säilytä kunkin oma valinta",
+    "readerProfileViewOwner": "Kunkin oma valinta",
+    "tipsOffNote": "Tipit ja lähetykset sinulle ovat pois päältä, kun tämä on käytössä. Poista se käytöstä, jotta voit taas saada tippejä.",
+    "menuLayout": "Valikon asettelu",
+    "menuLayoutDesc": "Miten valikko ryhmittelee sivunsa",
+    "menuLayoutTabs": "Välilehdet",
+    "menuLayoutTabsDesc": "Yksi ryhmä kerrallaan, isoilla kuvakkeilla",
+    "menuLayoutSections": "Osiot",
+    "menuLayoutSectionsDesc": "Kaikki sivut kerralla ryhmäotsikoiden alla",
+    "menuLayoutFoldersDesc": "Pääsivusi ja sitten kansio kullekin ryhmälle",
+    "publicChatInBar": "Julkinen keskustelu alapalkissa",
+    "publicChatInBarDesc": "Yhdellä napautuksella Julkiseen keskusteluun näytön alareunan palkista"
   },
   "common": {
     "confirm": "Vahvista",
@@ -1193,9 +1399,22 @@
     "stagePay": "Maksetaan Riftn Paylle käyttäen {{symbol}}…",
     "stageDelivering": "Riftn Pay lähettää tokeneitasi…",
     "payViaDpay": "Maksettu Riftn Paylle, tokenit saapuvat noin 30 sekunnissa",
+    "payDirect": "Lähetetty suoraan käyttäjälle {{name}}: {{symbol}} verkossa {{chain}}. Ei vaihtoa.",
     "payDirectNoName": "Lähetetty suoraan tekijälle {{symbol}} klo{{chain}}. Ei vaihtoa.",
     "payViaBridgeDpay": "Siirretty Baseen ja maksettu Riftn Paylle, tokenit saapuvat noin minuutissa",
-    "dmSent": "Lähetettiin {{amount}} tokenia vastaanottajalle {{name}}!"
+    "dmSent": "Lähetettiin {{amount}} tokenia vastaanottajalle {{name}}!",
+    "addMessage": "Lisää viesti (valinnainen)",
+    "messagePublic": "Julkinen",
+    "railTitle": "Vinkit",
+    "railTotal": "{{amount}} tokenia",
+    "tokensUnit": "tokenia",
+    "messagePlaceholder": "Sano jotain tipin kanssa",
+    "messagePrivate": "Vain {{name}}",
+    "theCreator": "tekijä",
+    "messageWallNote": "Näkyy tippiseinällä, kun tippi on mennyt läpi.",
+    "sendWithMessage": "Lähetä viestin kanssa",
+    "messageFailed": "Viestiäsi ei voitu lisätä. Tippiä ei lähetetty.",
+    "wallLabel": "Tippiviestit"
   },
   "postOptions": {
     "liveAlertsOn": "Seuraat nyt käyttäjää {{name}}. Saat ilmoituksen, kun hän aloittaa suoran lähetyksen.",
@@ -1235,7 +1454,14 @@
     "giftBoost": "Antaa lisäys",
     "markSection": "Ohitettavat osiot",
     "copyFailed": "Linkkiä ei voitu kopioida",
-    "share": "Jaa"
+    "share": "Jaa",
+    "refreshLinkPreview": "Päivitä linkin esikatselu",
+    "linkPreviewRefreshed": "Linkin esikatselu päivitetty",
+    "linkPreviewRefreshFailed": "Sivustoon ei saatu yhteyttä. Yritä myöhemmin uudelleen.",
+    "castToTv": "Suoratoista televisioon",
+    "castStarted": "Toistetaan televisiossasi",
+    "castUnsupported": "Tämä selain ei voi suoratoistaa. Avaa Riftn Chromessa tai Safarissa toistaaksesi sen televisiossasi.",
+    "castFailed": "Televisioon ei saatu yhteyttä. Tarkista, että se on samassa Wi-Fi-verkossa, ja yritä uudelleen."
   },
   "filters": {
     "sort": "Lajittele",
@@ -1696,6 +1922,9 @@
   "notifications": {
     "title": "Ilmoitukset",
     "markAllRead": "Merkitse kaikki luetuksi",
+    "groupNew": "Uutta",
+    "groupToday": "Tänään",
+    "groupThisWeek": "Tällä viikolla",
     "settings": "Ilmoitusasetukset",
     "actions": "Toiminnot",
     "markAllAsRead": "Merkitse kaikki luetuksi",
@@ -1724,6 +1953,7 @@
     "communities": "Yhteisöt",
     "stores": "Kaupat",
     "noNotificationsYet": "Ei ilmoituksia vielä",
+    "searchClose": "Sulje hakua",
     "noNotificationsDesc": "Kun saat tykkäyksiä, kommentteja, tippejä tai uusia tilaajia, ne näkyvät täällä.",
     "loadMore": "Lataa lisää",
     "markAsRead": "Merkitse luetuksi",
@@ -1808,6 +2038,7 @@
       "governanceVoteNamed": "{{name}} äänesti ehdotuksestasi \"{{title}}\"",
       "governanceVote": "{{name}} äänesti ehdotuksestasi",
       "governanceCommentNamed": "{{name}} kommentoi ehdotustasi \"{{title}}\"",
+      "governanceComment": "{{name}} kommentoi ehdotustasi",
       "governanceReplyNamed": "{{name}} vastasi sinulle ehdotukseen \"{{title}}\"",
       "governanceReply": "{{name}} vastasi kommenttiisi ehdotuksesta",
       "storeOrderNamed": "{{name}} osti kohteesi \"{{title}}\"",
@@ -1833,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} lähetti palkkioosi \"{{title}}\" liittyvän työn",
       "bountySubmitted": "{{name}} lähetti palkkioosi liittyvän työn",
       "sentNotification": "{{name}} lähetti sinulle ilmoituksen"
-    }
+    },
+    "groupEarlier": "Aiemmin",
+    "searchPlaceholder": "Hae ilmoituksista",
+    "searchEmpty": "Ei vastaavia ilmoituksia"
   },
   "leaderboard": {
     "title": "Tulostaulukko",
@@ -1878,7 +2112,13 @@
     "loadingBoard": "Ladataan tulostaulukkoa…",
     "amountTokens": "{{amount}} tokenia",
     "directReferrals": "{{count}} suora",
-    "secondaryReferrals": "{{count}} toissijainen"
+    "secondaryReferrals": "{{count}} toissijainen",
+    "ogChallenge": "OG-haaste",
+    "ogHolders_one": "{{count}} OG-haltija",
+    "ogHolders_other": "{{count}} OG-haltijaa",
+    "ogChallengeTitle": "Tuo OG-haltijat takaisin",
+    "ogChallengeBody": "Kutsu ihmisiä, joilla on yhä DHB:tä. Kun he liittyvät kutsulinkilläsi ja pitävät DHB:nsä Riftn-lompakossaan, heidät lasketaan sinulle täällä.",
+    "ogChallengeCta": "Hanki kutsulinkkisi"
   },
   "dhbListing": {
     "title": "Tokenin listaus tulossa pian!",
@@ -1962,11 +2202,13 @@
     "promptLabel": "Sinun pyynnön",
     "promptPlaceholder": "Kuvaile idea, parannus tai virhe…",
     "promptAttach": "Liitä kuvia",
+    "removeAttachment": "Poista liite",
     "promptDrop": "Lisää kuvia tai heitä ne tästä",
     "promptPost": "Lähetä pyynnön",
     "promptShortcut": "Ctrl / ⌘ + Enter lähettää pyynnön",
     "promptDetails": "Valinnainen tieto",
     "promptDevice": "Laite & OS (virheiden kohdalla)",
+    "deviceInfoNoErrors": "Ei mitään",
     "promptFilters": "Suodata kategorioiden mukaan",
     "promptMediaError": "Valitse kuvia tai videoita, jotka ovat alle 50 MB.",
     "promptMediaLimit": "Enintään {{max}} liitettävää tiedostoa.",
@@ -2019,12 +2261,40 @@
     "shipping": "Työn alla",
     "noShippingYet": "Mitään ei ole työn alla",
     "shippingAppearHere": "Rakenteilla olevat pyynnöt näkyvät täällä.",
-    "loadFailed": "Pyyntöjä ei voida ladata"
+    "loadFailed": "Pyyntöjä ei voida ladata",
+    "editMedia": "Kuvat ja videot",
+    "editAddMedia": "Lisää kuva tai video",
+    "deviceInfoNote": "Laitetiedot liitetään, jotta voimme korjata bugeja.",
+    "deviceInfo": "Laitetiedot",
+    "deviceInfoOwners": "Vain taulun omistajat näkevät tämän",
+    "deviceInfoError": "Laitetietoja ei voitu ladata",
+    "deviceInfoNone": "Tälle pyynnölle ei ole laitetietoja",
+    "deviceInfoErrors": "Viimeaikaiset virheet"
   },
   "auth": {
-    "loginRequired": "Kirjautuminen vaaditaan"
+    "loginRequired": "Kirjautuminen vaaditaan",
+    "accountDeleted": "Tämä tili on poistettu. Voit rekisteröityä uudelleen uutena tilinä.",
+    "accountDeletedHours_one": "Tämä tili on poistettu. Voit rekisteröityä uudelleen samalla sähköpostilla tai puhelinnumerolla noin {{count}} tunnin kuluttua.",
+    "accountDeletedHours_other": "Tämä tili on poistettu. Voit rekisteröityä uudelleen samalla sähköpostilla tai puhelinnumerolla noin {{count}} tunnin kuluttua.",
+    "accountDeletedDays_one": "Tämä tili on poistettu. Voit rekisteröityä uudelleen samalla sähköpostilla tai puhelinnumerolla noin {{count}} päivän kuluttua.",
+    "accountDeletedDays_other": "Tämä tili on poistettu. Voit rekisteröityä uudelleen samalla sähköpostilla tai puhelinnumerolla noin {{count}} päivän kuluttua."
   },
   "messages": {
+    "newDrawer": {
+      "to": "Loppuu",
+      "recent": "Viimeaikaiset",
+      "suggested": "Ehdotetut",
+      "youFollow": "Seuraamasi ihmiset",
+      "placeholder": "Nimi tai @käyttäjänimi",
+      "chattedBefore": "Olette keskustelleet",
+      "mutual": "Molemminpuolinen",
+      "dmsOff": "Yksityisviestit pois",
+      "keepTyping": "Jatka kirjoittamista hakeaksesi kaikista",
+      "noOne": "Ketään ei löytynyt",
+      "tryUsername": "Kokeile tarkkaa @käyttäjänimeä",
+      "sayHi": "Tervehdi jotakuta",
+      "typeAny": "Kirjoita mikä tahansa nimi tai @käyttäjänimi"
+    },
     "reply": "Vastaa",
     "react": "Reagoi",
     "edit": "Muokkaa",
@@ -2061,7 +2331,11 @@
     "checkingTokenBalance": "Tarkistetaan token-saldoasi...",
     "deleteConversationFailed": "Keskustelua ei voitu poistaa",
     "message": "Viesti",
-    "noConversationsYet": "Ei vielä keskusteluja"
+    "noConversationsYet": "Ei vielä keskusteluja",
+    "sending": "Lähetetään",
+    "retrySend": "Yritä uudelleen",
+    "discardSend": "Poista",
+    "notSent": "Ei lähetetty"
   },
   "music": {
     "listeningCount_one": "{{count}} kuuntelee",
@@ -2144,6 +2418,24 @@
     "viewList": "Listanäkymä",
     "viewMode": "Näytä",
     "back": "Takaisin",
+    "reserve": {
+      "signIn": "Kirjaudu sisään",
+      "available": "Käyttäjänimi vapaana",
+      "held": "Varattu sinulle",
+      "ended": "Varaus päättyi",
+      "busy": "Varaus käynnissä",
+      "availableBody": "riftn.com/{{name}} on nyt vapaana. Varaa se, niin pidämme sen sinulle minuutin ajan, kun rekisteröidyt.",
+      "heldBody": "Kukaan muu ei voi ottaa nimeä @{{name}} ennen kuin ajastin loppuu. Viimeistele rekisteröityminen pitääksesi sen.",
+      "endedBody": "Minuuttisi loppui, joten @{{name}} on taas kaikkien vapaasti otettavissa. Se on yhä vapaana.",
+      "busyBody": "Joku rekisteröityy juuri nyt nimellä @{{name}}. Jos hän ei viimeistele, nimi vapautuu, kun ajastin loppuu.",
+      "finish": "Viimeistele rekisteröityminen",
+      "again": "Varaa uudelleen",
+      "cta": "Varaa nyt",
+      "letGo": "Luovu siitä",
+      "haveAccount": "Onko sinulla tili?",
+      "seoTitle": "@{{name}} on vapaana Riftnissä",
+      "seoDescription": "Kenelläkään ei ole vielä osoitetta riftn.com/{{name}}. Varaa se ja rekisteröidy, niin se on sinun."
+    },
     "usernameAvailable": "Käyttäjätunnus on saatavilla!",
     "signUpToClaim": "Rekisteröidy tänään varataksesi",
     "signUp": "Rekisteröidy",
@@ -2162,7 +2454,8 @@
       "total": "Kokonaisulottuvuus",
       "breakdownTitle": "Mistä tämä REACH-järjestelmä on peräisin",
       "dehubFollowers": "Riftn-seuraajat",
-      "verified": "Sosiaaliset laskelmat tulevat tekijän yhdistämistä tileistä."
+      "verified": "Sosiaaliset laskelmat tulevat tekijän yhdistämistä tileistä.",
+      "selfReported": "Tekijä syöttää sosiaalisen seuraajamäärän."
     },
     "loginDescription": "Kirjaudu sisään nähdäksesi ja hallinnoidaksesi profiiliasi.",
     "replyThread": {
@@ -2171,7 +2464,17 @@
     },
     "tabs": {
       "playlists": "Soittolistat",
-      "dislikes": "En tykkää"
+      "dislikes": "En tykkää",
+      "likes": "Tykkäykset",
+      "articles": "Artikkelit"
+    },
+    "likedPosts": {
+      "emptyTitle": "Ei vielä tykkäyksiä",
+      "privateTitle": "Tykkäykset ovat yksityisiä",
+      "loadMore": "Lataa lisää",
+      "emptyOwn": "Julkaisut, joista tykkäät, näkyvät täällä. Vain sinä näet ne, ellet ota asetuksista käyttöön Näytä tykkäykseni.",
+      "emptyOther": "Ei vielä tykkäyksiä.",
+      "privateDesc": "Tämä tili pitää tykkäyksensä omana tietonaan."
     },
     "dislikes": {
       "emptyTitle": "Ei vielä en tykkää -merkintöjä",
@@ -2194,9 +2497,33 @@
     "sortMostViewed": "Eniten nähtyjä",
     "sortLikes": "Tykkäykset",
     "sortMostLiked": "Suosituimmat",
+    "sortCustomShort": "Mukautettu",
+    "arrange": {
+      "saving": "Tallennetaan...",
+      "title": "Järjestä julkaisusi",
+      "hint": "Pidä julkaisua painettuna ja vedä se uuteen paikkaansa. Vierailijat näkevät tämän järjestyksen ensin.",
+      "drag": "Siirrä vetämällä",
+      "toTop": "Siirrä ylimmäksi",
+      "save": "Tallenna järjestys",
+      "saved": "Järjestyksesi on tallennettu",
+      "reset": "Takaisin uusimmat ensin",
+      "resetDone": "Takaisin uusimmat ensin",
+      "saveFailed": "Järjestystä ei voitu tallentaa. Yritä uudelleen.",
+      "loadFailed": "Julkaisujasi ei voitu ladata. Sulje tämä ja yritä uudelleen.",
+      "empty": "Ei vielä mitään järjestettävää. Julkaise ensin jotain."
+    },
     "searchThisChannel": "Etsi kanava",
     "searchResultCount": "1 tulosta \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} tulosta \"{{query}}\""
+    "searchResultCountPlural": "{{count}} tulosta \"{{query}}\"",
+    "unavailable": "Profiili ei ole saatavilla",
+    "mutualsOne": "{{count}} yhteinen:",
+    "mutualsMany": "{{count}} yhteistä:",
+    "articles": {
+      "emptyTitle": "Ei vielä artikkeleita",
+      "emptySubtitle": "Artikkelit näkyvät täällä"
+    },
+    "sortCustom": "Oma järjestys",
+    "arrangeButton": "Järjestä julkaisut"
   },
   "tv": {
     "seoTitle": "Live TV: Ilmaiset kanavat ympäri maailmaa",
@@ -2351,6 +2678,7 @@
       "runSwarm": "Lähetä lauma",
       "description": "Toiminnot suoritetaan valittuna välittäjänä. Ajoitetut tehtävät jatkuvat sovelluksen ollessa suljettuna.",
       "instructions": "Edustajan ohjeet",
+      "examples": "Julkaise kerran päivässä aiheesta: itsenäinen musiikki\nTyyli: utelias, tiivis ja keskusteleva\nTykkää enintään 2 tuoreesta julkaisusta päivässä aiheista: musiikki, livekeikat, vinyyli",
       "preparing": "Valmistellaan tehtävää…",
       "run": "Lähetä pyyntö",
       "limits": "Yksi päivittäinen julkaisu ja enintään 3 asiaankuuluvaa tykkäystä tehtävää kohden. Kaikki välittäjät jakavat 20 minuutin välimatkan. Valokuvissa käytetään valittuja kuvatekstejä; videot tarvitsevat kansikuvan. Julkaisut kestävät alle 500 merkkiä. Ei kaasua paitsi lyömällä; kirjoittaminen voi käyttää krediittejä.",
@@ -2459,6 +2787,28 @@
     "signInAgain": "Kirjaudu uudelleen",
     "createSignIn": "Kirjaudu uudelleen luodaksesi agentin",
     "checkConnection": "Tarkista yhteytesi ja yritä uudelleen.",
+    "welcome": {
+      "text": "Tervetuloviesti",
+      "title": "Toivota uudet jäsenet tervetulleiksi",
+      "help": "Tämä agentti seuraa ja/tai lähettää viestin ihmisille, jotka juuri liittyivät Riftniin, muutamalle päivässä.",
+      "follow": "Seuraa uusia jäseniä",
+      "message": "Lähetä viesti uusille jäsenille",
+      "textHelp": "{name} korvautuu heidän @käyttäjänimellään. Ei linkkejä. Lähetetään kerran kullekin.",
+      "saveText": "Tallenna viesti",
+      "perDay": "Ihmisiä päivässä",
+      "fewer": "Vähemmän päivässä",
+      "more": "Enemmän päivässä",
+      "today": "Tänään: {{follows}} seurattu · {{messages}} viestitetty",
+      "limits": "Ei koskaan samaa ihmistä kahdesti. Ohittaa kaikki, jotka ovat estäneet tai mykistäneet sinut, poistaneet uudet viestit käytöstä tai piiloutuneet Uusista jäsenistä.",
+      "showLog": "Näytä, ketä se toivotti tervetulleeksi",
+      "hideLog": "Piilota tervetulotoivotukset",
+      "empty": "Ei vielä ketään. Uudet jäsenet näkyvät täällä, kun he liittyvät.",
+      "followed": "Seurattu",
+      "messaged": "Viestitetty",
+      "skipped": "Ohitettu",
+      "failed": "Ei tavoitettu",
+      "defaultText": "Hei {name}, tervetuloa Riftniin! 👋"
+    },
     "workspace": {
       "moderation": "Stream-moderointi",
       "moderationHelp": "Ota ensin käyttöön moderointioikeus. Tilin on oltava jo streamin luoja tai nimetty moderaattori. Hyväksyntä- ja luonnostilat ovat edelleen voimassa. Jäähyt päättyvät automaattisesti.",
@@ -2651,7 +3001,17 @@
     "resendCodePhone": "Väärä numero tai koodi puuttuu? Palaa takaisin",
     "continueAs": "Jatka",
     "switchWalletAccount": "Siirry tilille",
-    "walletLoadFailed": "Rahansiirto ei onnistunut. Yritä uudelleen."
+    "walletLoadFailed": "Rahansiirto ei onnistunut. Yritä uudelleen.",
+    "openInBrowser": "Avaa selaimessa",
+    "copyLink": "Kopioi linkki",
+    "bringLoginOver": "Käytitkö Riftniä osoitteessa dehub.io? <bring>Tuo kirjautumisesi tänne</bring>",
+    "didYouMean": "Tarkoititko {{email}}?",
+    "profileMovedTitle": "Profiilisi siirtyi",
+    "migrateWrongLogin": "Tuo kirjautuminen avasi eri lompakon, joten mitään ei muutettu. Vanha profiilisi luotiin tavalla {{login}}. Käytä sitä palauttaaksesi sen.",
+    "googleInAppTitle": "Google ei kirjaudu sisään sovelluksessa {{app}}",
+    "googleInAppTitleUnnamed": "Google ei kirjaudu sisään tässä sovelluksessa",
+    "googleInAppBody": "Avaa Riftn selaimessasi käyttääksesi Googlea tai kirjaudu täällä sähköpostilla.",
+    "tryAnyway": "Yritä silti"
   },
   "careers": {
     "title": "Urat Riftnissa",
@@ -2875,7 +3235,17 @@
     "noMenuMatches": "Mikään valikossa ei täsmää",
     "searchDehubFor": "Hae Riftnista ”{{query}}”",
     "switchAccount": "Vaihda tilitili",
-    "signedInAs": "Kirjauduttu sisään nimellä {{name}}"
+    "signedInAs": "Kirjauduttu sisään nimellä {{name}}",
+    "requestSend": "Lähetä pyyntö",
+    "requestPrompt": "Eikö löydy vielä? Lähetä se pyyntönä",
+    "requestPromptShort": "Eikö löydy vielä?",
+    "requestDraftMenu": "Lisää {{query}} Riftniin",
+    "requestDraftSettings": "Asetus kohteelle {{query}}",
+    "requestPostsTo": "Julkaistaan Pyyntöihin",
+    "requestHint": "Julkaistaan Pyyntöihin sinun nimissäsi. Kerromme, kun se julkaistaan.",
+    "requestSent": "Lähetetty Pyyntöihin",
+    "requestSentHint": "Kerromme, kun se julkaistaan.",
+    "requestSeeIt": "Katso se Pyynnöissä"
   },
   "comments": {
     "reportComment": "Ilmoita kommentista",
@@ -2968,7 +3338,23 @@
     "likersEmptyTitle": "Ei vielä tykkäyksiä",
     "likersEmptyBody": "Tämän kommentin tykkäykset näkyvät täällä.",
     "anonymousLikes_one": "{{count}} tykkäys nimettömältä merkin haltijalta",
-    "anonymousLikes_other": "{{count}} tykkäystä nimettömiltä merkkien haltijoilta"
+    "anonymousLikes_other": "{{count}} tykkäystä nimettömiltä merkkien haltijoilta",
+    "threadParts": {
+      "moveUp": "Siirrä ylös",
+      "moveDown": "Siirrä alas",
+      "reorder": "Järjestä uudelleen",
+      "save": "Tallenna järjestys",
+      "saved": "Ketjun järjestys tallennettu",
+      "saveFailed": "Järjestystä ei voitu tallentaa. Yritä uudelleen.",
+      "dragPart": "Siirrä osaa {{n}} vetämällä",
+      "addPart": "Lisää ketjuun",
+      "addPlaceholder": "Lisää ketjuusi...",
+      "label": "Ketju · {{count}} osaa",
+      "reorderHint": "Vedä osia tai käytä nuolia ja tallenna sitten."
+    },
+    "attachMedia": "Liitä kuva, video tai ääni",
+    "attachUnsupported": "Liitä kuva, video tai äänitiedosto.",
+    "attachTooLarge": "Tiedosto ylittää {{size}} Mt:n rajan."
   },
   "mintChain": {
     "title": "Mintunpylväs",
@@ -2984,6 +3370,16 @@
     "confirm": "Minttu päällä {{chain}}",
     "confirmWithCost": "Minttu päällä {{chain}} · {{cost}}",
     "notAvailable": "Tämän ketjun louhinta ei ole vielä saatavilla."
+  },
+  "postEditHistory": {
+    "original": "Alkuperäinen",
+    "title": "Muokkaushistoria",
+    "edited_one": "Muokattu kerran",
+    "edited_other": "Muokattu {{count}} kertaa",
+    "lastEdit": "Viimeisin muokkaus {{time}}",
+    "editN": "Muokkaus {{n}}",
+    "now": "Nyt",
+    "showChanges": "Näytä muutokset"
   },
   "postInfo": {
     "title": "Julkaisun tiedot",
@@ -3278,7 +3674,10 @@
     "waiting_for_wallet": "Odotetaan lompakkoasi",
     "waiting_for_wallet_desc": "Avaa {{wallet}} ja hyväksy allekirjoitus — pyyntö odottaa siellä.",
     "your_wallet": "lompakkosi",
-    "max_available_on_chain": "Maksimi saatavilla: {{amount}} tokenia {{chain}}:ssa"
+    "max_available_on_chain": "Maksimi saatavilla: {{amount}} tokenia {{chain}}:ssa",
+    "not_available_for_this_post": "Ei saatavilla tälle julkaisulle",
+    "turn_back_on_desktop_notifications": "Otetaanko työpöytäilmoitukset takaisin käyttöön?",
+    "notifications_moved_to_riftn": "Muutimme osoitteeseen riftn.com, joten selaimesi tarvitsee vielä kerran lupasi näyttääkseen vastaukset, tipit ja yksityisviestit täällä."
   },
   "staking": {
     "title": "Steikkaus",
@@ -5096,6 +5495,7 @@
     "settledTitleSpeed": ", tyypillisesti {{speed}}",
     "settledCount_one": "{{count}} ratkaistu",
     "settledCount_other": "{{count}} ratkaistu",
+    "statusInProgress": "Käynnissä",
     "howMany": "Kuinka monta",
     "availableCount_one": "{{count}} saatavilla",
     "availableCount_other": "{{count}} saatavilla",
@@ -5185,9 +5585,169 @@
     "buy": "Osta",
     "reject": "Hylkää",
     "needsYouHold": "Tarvitsee {{needed}}, sinulla on {{held}}",
-    "sellYourFractions": "Myy fraktioitasi ({{held}} hallussasi)"
+    "sellYourFractions": "Myy fraktioitasi ({{held}} hallussasi)",
+    "nftsSubtitle": "Mikä tahansa NFT, yksivaiheiset vaihdot",
+    "buyersTab": "Ostajat",
+    "soldOfListing": "Myyty {{sold}}/{{total}}",
+    "noBuyersYet": "Kukaan ei ole vielä ostanut osuuksia tästä julkaisusta",
+    "fromYou": "sinulta",
+    "statusOverdue": "Myöhässä"
   },
   "creator": {
+    "marketing": {
+      "import": {
+        "use": "Käytä näitä tietoja",
+        "url": "Tuotesivun URL",
+        "action": "Lue tuotesivu",
+        "loading": "Luetaan sivua…",
+        "hint": "Tuo tekstiä julkiselta tuotesivulta. Tarkista tiedot ennen käyttöä; liitä tuotekuvat erikseen studiossa.",
+        "source": "Tuotu lähde",
+        "review": "Valitse tuote kopioitavaksi muokattavaan ohjeeseesi. Otsikkosi, äänensävysi ja brändivärisi pysyvät ennallaan.",
+        "errors": {
+          "signIn": "Kirjaudu sisään tuodaksesi tuotesivun.",
+          "url": "Käytä julkista HTTPS-tuote-URL-osoitetta.",
+          "empty": "Käyttökelpoisia tuotetietoja ei löytynyt. Lisää ne käsin.",
+          "busy": "Liian monta tuontia käynnissä. Yritä hetken päästä uudelleen.",
+          "unavailable": "Tätä sivua ei voitu tuoda. Lisää tuotetiedot käsin.",
+          "failed": "Tuonti epäonnistui. Ohjeesi on tallennettu; yritä uudelleen tai syötä tiedot käsin."
+        }
+      },
+      "return": "Palaa studioluonnokseen",
+      "title": "Kampanjaohje",
+      "intro": "Kuvaile tuotteesi ja brändisi ja valmistele sitten sopivat mainosformaatit.",
+      "saved": "Ohjeesi on tallennettu tälle laitteelle tätä tiliä varten.",
+      "preview": "Valmistele formaatit",
+      "clear": "Tyhjennä ohje",
+      "required": "Lisää tuotteen nimi ja kuvaus valmistellaksesi formaatit.",
+      "variants": "Kampanjaformaatit",
+      "reviewHint": "Tarkista malli, hinta ja tuoteviite studiossa ennen luomista. Jokainen formaatti on erillinen luontikerta.",
+      "open": "Tarkista studiossa",
+      "fields": {
+        "product": "Tuotteen nimi (pakollinen)",
+        "description": "Tuotetiedot (pakollinen)",
+        "brand": "Brändin nimi",
+        "audience": "Kohdeyleisö",
+        "benefit": "Keskeinen hyöty",
+        "voice": "Brändin äänensävy",
+        "palette": "Brändivärit",
+        "headline": "Hyväksytty otsikko",
+        "cta": "Toimintakehotus"
+      },
+      "formats": {
+        "square": "Neliömainos",
+        "portrait": "Pystymainos",
+        "story": "Tarinakuva",
+        "video": "Pystyvideo"
+      }
+    },
+    "cinema": {
+      "close": "Sulje",
+      "performance": {
+        "label": "Suorituskyky",
+        "0": "Iloinen",
+        "1": "Melankolinen",
+        "2": "Ahdistunut",
+        "3": "Itsevarma",
+        "4": "Haltioitunut",
+        "5": "Hillitty",
+        "6": "Leikkisä"
+      },
+      "title": "Elokuvallinen ohjaus",
+      "hint": "Ohjaa seuraavan kuvasi tai videosi visuaalista tyyliä. Tulokset vaihtelevat malleittain.",
+      "none": "Ei ohjausta",
+      "reset": "Tyhjennä ohjaus",
+      "camera": {
+        "label": "Kameran ilme",
+        "0": "Digitaalinen elokuva",
+        "1": "35 mm filmi",
+        "2": "16 mm filmi",
+        "3": "Suurkoko",
+        "4": "Vanha videokamera"
+      },
+      "lens": {
+        "label": "Objektiivin ilme",
+        "0": "Sfäärinen",
+        "1": "Anamorfinen",
+        "2": "Vintage-pehmeä lasi",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Polttoväli",
+        "0": "18 mm laaja",
+        "1": "24 mm laaja",
+        "2": "35 mm luonnollinen",
+        "3": "50 mm normaali",
+        "4": "85 mm muotokuva",
+        "5": "135 mm tele"
+      },
+      "aperture": {
+        "label": "Syväterävyys",
+        "0": "f/1.4 hyvin kapea",
+        "1": "f/2.8 kapea",
+        "2": "f/5.6 kohtalainen",
+        "3": "f/11 syvä tarkennus"
+      },
+      "movement": {
+        "label": "Kameran liike",
+        "0": "Kiinteä jalusta",
+        "1": "Hidas dolly sisään",
+        "2": "Hidas dolly ulos",
+        "3": "Sivuttainen seuranta",
+        "4": "Kohteen kiertäminen",
+        "5": "Käsivara",
+        "6": "Nosturinousu",
+        "7": "Hidas panorointi"
+      },
+      "lighting": {
+        "label": "Valaistus",
+        "0": "Pehmeä päivänvalo",
+        "1": "Kultainen tunti",
+        "2": "Low-key chiaroscuro",
+        "3": "High-key studio",
+        "4": "Neonvalot kuvassa",
+        "5": "Siluetti vastavalossa",
+        "6": "Pilvinen hajavalo"
+      },
+      "tempo": {
+        "label": "Kuvan tempo",
+        "0": "Yksi yhtenäinen otos",
+        "1": "Rauhallinen, kiireetön toiminta",
+        "2": "Dynaaminen, energinen toiminta",
+        "3": "Kaoottinen, hurja toiminta"
+      },
+      "era": {
+        "label": "Aikakausi",
+        "0": "1920-luku",
+        "1": "1950-luku",
+        "2": "1960-luku",
+        "3": "1970-luku",
+        "4": "1980-luku",
+        "5": "1990-luku",
+        "6": "Nykypäivä",
+        "7": "Lähitulevaisuus"
+      },
+      "genre": {
+        "label": "Lajityyppi",
+        "0": "Dokumentti",
+        "1": "Draama",
+        "2": "Film noir",
+        "3": "Tieteisfiktio",
+        "4": "Fantasia",
+        "5": "Romanttinen komedia",
+        "6": "Trilleri",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Väripaletti",
+        "0": "Lämmin meripihka",
+        "1": "Viileä sininen",
+        "2": "Hillityt maanläheiset sävyt",
+        "3": "Pastelli",
+        "4": "Korkeakontrastinen mustavalko",
+        "5": "Kylläiset päävärit"
+      }
+    },
     "libraryEmpty": "Tallennetut generointisi näkyvät täällä.",
     "toolRemake": "Tee uudelleen",
     "toolMaboroshi": "Maboroshi",
@@ -5989,7 +6549,118 @@
       "needsImageToWork": "{{model}} tarvitsee kuvan, josta työskennellä. Kiinnitä yksi ensin.",
       "speechLimit": "Se on {{length}} merkkiä. Raja on {{limit}}.",
       "musicTrackLength": "{{count}}s kappale"
-    }
+    },
+    "gallery": {
+      "send": "Lähetä",
+      "notifications": {
+        "generation_reply": "{{name}} vastasi kommenttiisi",
+        "generation_like": "{{name}} reagoi luomaasi sisältöön",
+        "generation_comment_like": "{{name}} reagoi kommenttiisi",
+        "generation_comment": "{{name}} kommentoi luomaasi sisältöä"
+      },
+      "browse": "Selaa luotuja",
+      "create": "Luo",
+      "fullscreen": "Näytä koko näytöllä",
+      "missing": "Tämä luotu sisältö ei ole saatavilla."
+    },
+    "avatarTitle": "Puhuva muotokuva",
+    "avatarRequirements": "Neliön muotoinen PNG-muotokuva, 512–2048 pikseliä, enintään 5 Mt. Mono 24 kHz 16-bit PCM WAV, 5–30 sekuntia. Viimeinen sekunnin murto-osa täytetään hiljaisuudella.",
+    "avatarPortrait": "Valitse muotokuva-PNG",
+    "avatarAudio": "Valitse puhe-WAV",
+    "avatarPermission": "Minulla on lupa animoida tämä muotokuva ja käyttää tätä ääntä.",
+    "avatarQuote": "{{seconds}} sekuntia hiljaisuus mukaan lukien · {{amount}} polettia",
+    "avatarPrepare": "Valmistele ja tarkista hinta",
+    "batchFlowLimit": "Flow-lista on täynnä. Poista käyttämätön Flow ennen uuden erän luomista.",
+    "batchReviewCampaign": "Tarkista kampanjaerä Flow'ssa",
+    "batchReviewFilmImages": "Tarkista kuvakäsikirjoituksen kuvaerä",
+    "batchReviewFilmVideos": "Tarkista elokuvaklippien erä",
+    "batchReviewHint": "Avaa erillisen tallennetun Flow'n. Tarkista jokainen kohde ja koko hinta ennen maksamista. Valmiit kohteet ja alkuperäinen maksu säilytetään palautusta varten. Viitteet kopioidaan yksityiseen kirjastoosi; tallennus- ja verkkokäyttö veloitetaan.",
+    "batchInvalid": "Viimeistele jokainen kohde ennen kuin valmistelet 1–12 kuvan tai klipin erän.",
+    "batchReferenceLimit": "Tämä erä tukee yhtä kuvaviitettä kohdetta kohden. Poista ylimääräiset viitteet tai valmistele kohde erikseen.",
+    "batchVideoSettings": "Tässä erässä klippien keston on oltava kokonaisluku 4–15 sekuntia ja kuvasuhteen 16:9, 9:16 tai 1:1.",
+    "batchMissingReference": "Viite puuttuu, ei ole tuettu tai on yli 25 Mt. Palauta se editorissa ennen erän valmistelua.",
+    "batchOwnerChanged": "Tili tai luonnos muuttui. Avaa tämä erä uudelleen sen alkuperäisellä tilillä.",
+    "batchConflict": "Tallennettu erä ei vastaa alkuperäistä tilannekuvaansa.",
+    "audioExportFormat": "Vientimuoto",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Liitä yksi lähdeklippi jatkettavaksi.",
+    "extensionSeconds": "+{{seconds}} s uutta kuvaa",
+    "extensionHelp": "Palauttaa lähdeklippisi noin neljällä uudella sekunnilla. Tulos skaalataan enintään 720p:hen 24 fps:llä. Jatkolle luodaan uusi ääni.",
+    "extensionForward": "Lisää noin neljä sekuntia lähdeklipin jälkeen",
+    "extensionBackward": "Lisää noin neljä sekuntia ennen lähdeklippiä",
+    "expandDescription": "Luo kuvalle uudet reunat. Valinnainen englanninkielinen kehote; yksi lähdekuva.",
+    "relightDescription": "Valaise yksi kuva uudelleen valaistus- ja taustakuvauksesi perusteella.",
+    "expandPromptHint": "Liitä yksi kuva ja valitse sen uusi kuvasuhde. Englanninkielinen kehote on valinnainen.",
+    "expandEnglishOnly": "Tämä laajennusmalli hyväksyy englanninkieliset kehotteet. Jätä kehote tyhjäksi automaattista laajennusta varten.",
+    "expandNeedsImage": "Liitä laajennettava kuva.",
+    "learn": {
+      "title": "Tekijän oppitunnit",
+      "intro": "Lyhyitä oppitunteja, tietotesti ja muokattava harjoitus jokaiseen. Edistyminen tallennetaan tälle laitteelle tilillesi.",
+      "back": "Takaisin Tekijään",
+      "lessons": "Oppitunnit",
+      "progress": "{{completed}}/{{total}} tietotestiä läpäisty",
+      "check": "Tarkista vastaus",
+      "correct": "Tietotesti läpäisty",
+      "retry": "Yritä uudelleen. Kertaa yllä oleva oppitunti.",
+      "exerciseTitle": "Käytännön harjoitus",
+      "exerciseHint": "Avaa muokattava esimerkki omassa studiotyötilassasi. Luonnoksen avaaminen on ilmaista; luominen vaatii tarkistuksesi ja oman hinta-arvionsa. Muokkaa esimerkkiä ennen luomista.",
+      "openExercise": "Avaa harjoitusluonnos",
+      "closeExercise": "Sulje harjoitus",
+      "brief": {
+        "title": "Kirjoita selkeä visuaalinen ohje",
+        "body1": "Kuvaile konkreettinen kohde, sen toiminta ja ympäristö. Lisää rajaus tai kameran liike, kun se auttaa kohtausta. Säästä asiaan kuulumattomat ideat toiseen luonnokseen.",
+        "body2": "Valaistus-, objektiivi- ja tyyliohjeet ohjaavat mallia. Ne eivät takaa fyysistä kameran käyttäytymistä tai täsmällistä kuvaa. Muuta yhtä osaa kerrallaan, jotta voit vertailla versioita.",
+        "body3": "Tarkista ennen luomista valittu malli, tuetut liitteet, mitat ja hinta. Säilytä alkuperäinen luonnos, jotta voit palata siihen.",
+        "question": "Mitä ohjetta on helpoin muokata?",
+        "answer0": "Selkeä kohde, toiminta ja ympäristö",
+        "answer1": "Pelkkä mallin nimi",
+        "answer2": "Lista ristiriitaisia tyylejä",
+        "exercise": "Keraaminen teekannu puupöydällä ikkunan vieressä. Pehmeä aamuvalo, keskikokoinen rajaus, yksinkertainen tausta. Pidä teekannu selkeänä kohteena."
+      },
+      "continuity": {
+        "title": "Suunnittele otokset ja tarkista jatkuvuus",
+        "body1": "Tallenna ohje ja järjestetyt otokset editorin Elokuva-paneelissa. Valmistele jokainen kuva tai klippi erikseen, tarkista sen hinta-arvio ja valitse hyväksytty tulos.",
+        "body2": "Liitä vain valitsemasi mallin hyväksymiä viitteitä. Viitteen uudelleenkäyttö voi ohjata ulkonäköä; se ei kouluta identiteettiä eikä takaa vastaavuutta. Hahmot ja äänet voivat vaihdella luontikertojen välillä.",
+        "body3": "Säilytä onnistuneet otot ja kokoa ne aikajanalle. Tarkista liike, kasvot, dialogi ja siirtymät ennen vientiä.",
+        "question": "Mikä tukee jatkuvuutta otosten välillä?",
+        "answer0": "Lisää asiaan kuulumattomia kehotteita",
+        "answer1": "Hyväksytyt viitteet ja tarkistetut otosmuistiinpanot",
+        "answer2": "Oletus, että hahmon identiteetti on taattu",
+        "exercise": "Laaja otos yksinäisestä matkalaisesta saapumassa hiljaiselle rannikolle auringonnousussa. Hidas kameran liike eteenpäin, rauhallinen tunnelma. Yksi yhtenäinen otos."
+      },
+      "campaign": {
+        "title": "Käytä hyväksyttyjä tuotetietoja",
+        "body1": "Aloita tuotetiedoista, jotka voit varmistaa. Tarkista tuodut metatiedot ennen niiden käyttöä. Kirjoita otsikko ja toimintakehotus täsmällisesti; älä keksi hintoja, arvosteluja tai suorituskykyväitteitä.",
+        "body2": "Käytä tallennettuja kampanjaversioita pitääksesi yhteiset muistiinpanot sekä yksittäiset koukut, käsikirjoitukset, kielet ja formaatit yhdessä. Valmistele yksi tarkistettu kohde kerrallaan ja tarkista sen hinta-arvio studiossa.",
+        "body3": "Tarkista tuloksen näkyvä teksti, tuotteen ulkonäkö ja mahdolliset puhutut väitteet. Kehote ei todista tuotteen paikkansapitävyyttä tai markkinoinnin tehoa.",
+        "question": "Milloin tuoteväite kannattaa sisällyttää?",
+        "answer0": "Aina kun se kuulostaa vakuuttavalta",
+        "answer1": "Kun on keksitty viiden tähden arvostelu",
+        "answer2": "Kun se perustuu hyväksyttyihin tuotetietoihin",
+        "exercise": "Luo pystymuotoinen tuotemainos kokolehtiteelle, jota myydään uudelleenkäytettävässä peltirasiassa. Hyväksytty otsikko: Ota aikaa teelle. Hyväksytty toimintakehotus: Tutustu valikoimaan. Käytä vain näitä tietoja; älä keksi alennuksia, arvosteluja tai terveysväitteitä."
+      }
+    },
+    "campaignPlanTitle": "Kampanjaversiot ja jaksot",
+    "campaignPlanIntro": "Tallenna enintään 12 versiota tai jaksoa. Kukin avaa studion omaa tarkistusta ja hinta-arviota varten. Yhteiset muistiinpanot ohjaavat jatkuvuutta; tuotteen ulkonäkö, hahmot ja äänet voivat vaihdella luontikertojen välillä.",
+    "campaignTitle": "Kampanjan tai sarjan nimi",
+    "campaignContinuity": "Yhteiset hahmo-, ääni- ja tyylimuistiinpanot",
+    "campaignVariantTitle": "Version tai jakson nimi",
+    "campaignHook": "Avauskoukku",
+    "campaignLanguage": "Tulostekieli",
+    "campaignScript": "Hyväksytty käsikirjoitus tai kohtausjärjestys",
+    "campaignAdd": "Lisää versio tai jakso",
+    "campaignClear": "Tyhjennä suunnitelma",
+    "campaignFormat": "Tulosteformaatti",
+    "audioInvalidResponse": "Äänipalvelu palautti virheellisen tuloksen.",
+    "batchPaymentHelp": "Jokainen lähetetty kuva veloitetaan erikseen. Jos erä pysähtyy, sen maksun käyttämättömät poletit käytetään automaattisesti myöhempään luontiin, jonka ne kattavat.",
+    "invalidSeed": "Seedin on oltava kokonaisluku väliltä 0–2147483647.",
+    "libraryFavorites": "Suosikit",
+    "libraryFavoriteAdd": "Lisää suosikkeihin",
+    "libraryFavoriteRemove": "Poista suosikeista",
+    "audioTaskDialoguePlaceholder": "Liisa: Meidän pitäisi lähteä.\nPekka: [nauraa] Mene sinä ensin.",
+    "priceOwnKey": "Oma avain",
+    "audioResultTooLarge": "Äänitulos on tyhjä tai ylittää 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Suunnitelmat jokaiselle työnkululle",
@@ -6156,9 +6827,16 @@
     "createTheFirst": "Luo ensimmäinen",
     "docsSeoTitle": "Tekoälyn taito-ohjeet | Riftn",
     "docsSeoDescription": "Riftnin tekoälyavustajan taitojen ja kehotekirjaston viiteasiakirjat.",
-    "raw": "Raw (2004)"
+    "raw": "Raw (2004)",
+    "docsLoadFailed": "# Virhe\nTaidon dokumentaation lataus epäonnistui."
   },
   "nftMarket": {
+    "actAll": "Kaikki",
+    "actListings": "Ilmoitukset",
+    "actOffer": "Tarjotaa",
+    "actOffers": "Tarjoukset",
+    "actSales": "Myydyt",
+    "tabActivity": "Toiminta",
     "shortTitle": "NFTS",
     "filters": "Suodattimet",
     "forSale": "Myytävänä",
@@ -6177,12 +6855,12 @@
     "subtitle": "Osta, myy ja tarjoa BNB: llä, Base: llä, Ethereumilla ja Robinhoodilla",
     "seoTitle": "NFT Market: osta ja myy NFT: itä BNB: llä ja Base: llä | Riftn",
     "seoDescription": "Osta, myy ja tee tarjouksia NFT: STÄ BNB Chainissa ja Baseissa. Maksa BNB-, ETH- tai Riftn-poletteina. Jokainen kauppa vaihtaa NFT: n ja maksun yhdessä vaiheessa.",
-    "dehubPostsName": "DeHub-postaukset",
+    "dehubPostsName": "Riftn-postaukset",
     "allChains": "Kaikki ketjut",
     "sortNew": "Uusimmat",
     "sortLow": "Alin hinta",
     "sortHigh": "Korkein hinta",
-    "dehubPosts": "DeHub-postaukset",
+    "dehubPosts": "Riftn-postaukset",
     "signInTitle": "Kirjaudu sisään kauppaan",
     "signInBody": "Yhdistä taskusi myytäväksi ja seuraa listauksiasi ja tarjouksiasi.",
     "tabBrowse": "Selaa",
@@ -6199,7 +6877,7 @@
     "latestMints": "Viimeisimmät mintit",
     "tapToOffer": "Napsauta yhden tekemään tarjouksen",
     "emptyTitle": "Ei vielä listattua",
-    "emptyBody": "Ole ensimmäinen. Listaa NFT taskustasi ja kuka tahansa DeHubissa voi ostaa sen.",
+    "emptyBody": "Ole ensimmäinen. Listaa NFT taskustasi ja kuka tahansa Riftnissa voi ostaa sen.",
     "sellOne": "Myy NFT",
     "walletError": "Ei voitu lukea taskustasi",
     "tryAgain": "Yritä uudelleen hetken kuluttua.",
@@ -6223,6 +6901,9 @@
     "offered": "Tarjous on annettu. Sopimusvoimassa tulee olla vapaasti hyväksyttävänä.",
     "dehubPost": "Riftn posti",
     "youHold": "Sinä pidät {{n}}.",
+    "price": "Hinta",
+    "volume": "Äänenvoimakkuus",
+    "tabRecent": "Viimeaikaiset",
     "buyNow": "Osta nyt",
     "dropsTo": "Hinta laskee {{price}}:een {{date}}:na.",
     "inBundle": "Myydään pakettina {{n}}",
@@ -6266,7 +6947,27 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT ja maksu vaihtuvat yhdessä vaiheessa.",
     "spotlightOfferNote": "Ei vielä listattu. Lähetä tarjous ja omistaja voi hyväksyä sen milloin tahansa.",
-    "signInToTradeCta": "Kirjaudu sisään kaupaksiin"
+    "signInToTradeCta": "Kirjaudu sisään kaupaksiin",
+    "actCollectionOffer": "Kokoelmatarjous",
+    "actListed": "Listattu",
+    "actSale": "Myynti",
+    "buyAll": "Osta kaikki",
+    "buySeveral": "Osta useita",
+    "cartBought": "Ostettu {{n}}. Ne ovat nyt lompakossasi.",
+    "cartCount": "{{n}} ostoskorissa",
+    "cartFull": "Enintään 20 kerrallaan",
+    "cartOneCoin": "Yksi ketju ja yksi kolikko ostoskoria kohden. Tyhjennä se vaihtaaksesi.",
+    "cartOwn": "Tämä on jo sinun",
+    "cartPick": "Lisää ostoskoriin napauttamalla",
+    "forSaleHere": "Myynnissä täällä",
+    "noActivity": "Täällä ei ole vielä mitään",
+    "volShort": "Vol.",
+    "salesCount": "{{n}} myyty",
+    "bestOffer": "Paras tarjous",
+    "fromOpenSea": "OpenSean suosituimmat kokoelmat",
+    "buyHere": "Osta ne täältä",
+    "openSeaNote": "Listattu OpenSeassa. Maksat myyjälle suoraan Seaportissa; Riftn ei lisää maksuja.",
+    "viewOnOpenSea": "Näytä OpenSeassa"
   },
   "usernames": {
     "seoTitle": "Käyttäjätunnus Marketplace | Riftn",
@@ -6621,7 +7322,18 @@
       "votes_other": "{{count}} ääntä",
       "howToVote_one": "Syötä {{command}} ja numero chatissa äänestääksesi · {{count}} äänestä",
       "howToVote_other": "Syötä {{command}} ja numero chatissa äänestääksesi · {{count}} ääntä"
-    }
+    },
+    "eyebrow": {
+      "follow": "Uusi seuraaja",
+      "subscribe": "Uusi tilaaja",
+      "subscribedTo": "Tilasi · {{plan}}",
+      "gifted_one": "Lahjoitti tilauksen",
+      "gifted_other": "Lahjoitti {{count}} tilausta",
+      "share": "Jakoi striimin",
+      "join": "Liittyi juuri"
+    },
+    "giftedSubs_one": "{{name}} lahjoitti tilauksen!",
+    "giftedSubs_other": "{{name}} lahjoitti {{count}} tilausta!"
   },
   "liveChatModeration": {
     "timeout1m": "Aika loppuu 1 minuutiksi",
@@ -6636,7 +7348,155 @@
     "youAreBanned": "Et voi chattailla tässä luovan virran kanssa",
     "youAreTimedOut": "Olet aikakarsinnassa hetkellisesti"
   },
+  "studioDeck": {
+    "background": {
+      "title": "Tausta",
+      "modes": {
+        "none": "Pois päältä",
+        "blur": "Sumennus",
+        "color": "Väri",
+        "image": "Kuva"
+      },
+      "failed": "Taustan poistoa ei voitu käynnistää tällä laitteella.",
+      "hint": "Toimii laitteellasi. Ensimmäinen lataus kestää muutaman sekunnin."
+    },
+    "remove": "Poista",
+    "scenes": {
+      "countdown": "Lähtölaskenta",
+      "names": {
+        "starting": "Alkaa pian",
+        "chatting": "Jutustelua",
+        "gameplay": "Pelikuva",
+        "brb": "Palaan pian",
+        "ending": "Striimi päättyy"
+      },
+      "title": "Kohtaukset",
+      "edit": "Muokkaa: {{name}}",
+      "subtitle": "Toinen rivi (valinnainen)",
+      "picture": "Kuva",
+      "noCountdown": "Ei lähtölaskentaa",
+      "minutes": "{{count}} min",
+      "muteMic": "Mykistä mikrofoni, kun tämä on päällä",
+      "hints": {
+        "starting": "Kortti ja lähtölaskenta",
+        "chatting": "Kamera koko näytöllä",
+        "gameplay": "Näyttö ja kamerasi",
+        "brb": "Kortti, mikki mykistetty",
+        "ending": "Kiitoskortti"
+      },
+      "subtitles": {
+        "starting": "Striimi alkaa",
+        "brb": "Palaan hetken päästä",
+        "ending": "Kiitos katsomisesta"
+      }
+    },
+    "sources": {
+      "reactAdd": "Näytä",
+      "image": "Kuva",
+      "camera": "Kamera",
+      "show": "Näytä suoratoistossa",
+      "loop": "Silmukka",
+      "positions": {
+        "center": "Keskitä",
+        "top-left": "Ylävasen",
+        "top-right": "Yläoikea",
+        "bottom-left": "Alavasen",
+        "bottom-right": "Alaoikea"
+      },
+      "sizes": {
+        "medium": "Keskitaso",
+        "small": "Pieni",
+        "large": "Suuri"
+      },
+      "shapes": {
+        "circle": "Ympyrä",
+        "rect": "Neliö",
+        "rounded": "Pyöristetty"
+      },
+      "title": "Lähteet",
+      "addImage": "Kuva tai logo",
+      "addCamera": "Toinen kamera",
+      "addClip": "Videoleike",
+      "addReaction": "Reagoi videoon",
+      "reactPlaceholder": "Liitä Riftn-videon linkki",
+      "reactInvalid": "Liitä linkki Riftn-videoon.",
+      "reactNotLive": "Siirry ensin suoraan, ja lisää sitten video.",
+      "reactNoBubble": "Kameraasi ei voitu avata tässä kahdesti. Muuta videon kokoa, jotta kasvosi pysyvät näkyvissä.",
+      "failed": "Lähdettä ei voitu lisätä.",
+      "empty": "Lisää logo, toinen kamera tai videoleike striimisi päälle.",
+      "hint": "Lähteet piirretään kuvasi päälle kaikille katsojille ja kaikille alustoille.",
+      "clip": "Leike",
+      "restart": "Aloita alusta",
+      "play": "Toista tai tauko"
+    },
+    "audio": {
+      "mute": "Mykistä",
+      "unmute": "Poista mykistys",
+      "gateLevels": {
+        "off": "Pois päältä",
+        "low": "Vaalea",
+        "high": "Vahva"
+      },
+      "title": "Äänimikseri",
+      "unavailable": "Tämä selain ei voi miksata ääntä, joten mikrofonisi lähtee sellaisenaan.",
+      "channels": {
+        "mic": "Mikki",
+        "game": "Peli / välilehti",
+        "clip": "Videoleike"
+      },
+      "absent": {
+        "mic": "Ei mikrofonia",
+        "game": "Jaa näyttö äänen kanssa tai käytä kaappauskorttia",
+        "clip": "Lisää videoleike Lähteissä"
+      },
+      "gate": "Kohinaportti",
+      "gateHint": "Hiljentää mikrofonin sanojen välillä, jotta näppäimistön naksutus ja tuulettimet eivät kuulu striimissä."
+    },
+    "imageTooLarge": "Kuva on liian suuri. Kokeile pienempää.",
+    "widgets": {
+      "title": "Näytä widgetit videossani",
+      "hint": "Ilmoitukset, tavoitepalkit ja chat piirretään striimiisi, joten katsojat Twitchissä, YouTubessa ja kaikilla muilla alustoilla näkevät ne myös.",
+      "failed": "Widgettien näkymispaikkaa ei voitu muuttaa. Yritä uudelleen."
+    }
+  },
   "liveStudio": {
+    "destinations": {
+      "platform": "Alusta",
+      "label": "Nimi (vapaaehtoinen)",
+      "key": "Striimiavain",
+      "save": "Lisää",
+      "cancel": "Peruuta",
+      "states": {
+        "off": "Pois päältä",
+        "idle": "Valmis",
+        "live": "Suora",
+        "error": "Virhe",
+        "connecting": "Yhdistetään"
+      },
+      "title": "Multistream-kohteet",
+      "intro": "Siirry suoraan Riftnissä kerran, niin välitämme striimisi ilmaiseksi kaikille tässä päälle kytketyille alustoille. Se alkaa muutaman sekunnin kuluessa siitä, kun menet suoraan.",
+      "add": "Lisää kohde",
+      "empty": "Ei vielä kohteita. Lisää Twitch, YouTube, Kick tai mikä tahansa RTMP-palvelin.",
+      "server": "Palvelimen URL",
+      "findKey": "Etsi {{name}}-palvelimesi ja avaimesi",
+      "customHint": "Liitä alustasi antama RTMP-palvelin ja avain.",
+      "keyNote": "Avaimesi tallennetaan salattuna palvelimillemme, eikä sitä näytetä enää uudelleen.",
+      "added": "{{name}} lisätty",
+      "saveFailed": "Kohdetta ei voitu tallentaa",
+      "toggle": "Striimaa tähän kohteeseen"
+    },
+    "vertical": {
+      "centre": "Keskitä",
+      "live": "LIVENÄ",
+      "title": "Pystynäkymä",
+      "intro": "Puhelimet katsovat striimiäsi pystysyötteessä. Vedä laatikkoa valitaksesi kuvasi osan, jonka ne näkevät.",
+      "enabled": "Näytä striimini pystysyötteessä",
+      "zoom": "Zoomaus",
+      "frame": "Vaakakuvasi",
+      "box": "Mitä puhelimet näkevät",
+      "hint": "Vedä laatikkoa tai käytä nuolinäppäimiä. Tallenna ottaaksesi sen käyttöön livestriimissäsi.",
+      "watch": "Katso {{name}} suorana"
+    },
     "subathon": {
       "title": "Subathon",
       "intro": "Kello laskee suorassa. Jokainen maksullinen lahja, seuraaminen ja tilaus lisää aikaa, jotta huone pitää sinut elossa.",
@@ -6798,7 +7658,8 @@
       "subathon_timer": "Subathon-kello",
       "points_board": "Arvostetuimmat katsojat",
       "streamer_level": "Suoratoistotaso",
-      "tip_jar": "Lahjapurkki"
+      "tip_jar": "Lahjapurkki",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "Juhlii jokaista tippiä sen tason mukaan",
@@ -6822,7 +7683,8 @@
       "subathon_timer": "Laskuri, jonka lahjat, seuraamiset ja tilaukset työntävät takaisin",
       "points_board": "Parhaat katsojasi pisteistä katselusta ja lahjoituksista",
       "streamer_level": "Suoratoistotasosi ja viikoittainen putkesi profiilistasi",
-      "tip_jar": "Purkki, joka täyttyy maksettujen lahjojen tullessa"
+      "tip_jar": "Purkki, joka täyttyy maksettujen lahjojen tullessa",
+      "hype_train": "Näyttää hype trainin sen ollessa käynnissä: kolme lahjaa tai tilausta viiden minuutin sisällä käynnistää sen."
     },
     "fields": {
       "style": "Tyyli",
@@ -7208,7 +8070,10 @@
     "endStreamConfirmBody": "Lähetyksesi pysähtyy kaikille katsojille ja sitä ei voi jatkaa.",
     "keepStreaming": "Jatka striimaamista",
     "encoderPermanentHint": "Tämä avain ei koskaan muutu. Aseta kooderi kerran — seuraavalla kerralla vain paina Aloita siellä ja Riftn luo julkaisun sinulle.",
-    "notEnoughTokensForBounty": "Ei tarpeeksi tokeneita. Tarvitaan {{need}} tokenia, mutta sinulla on {{have}}."
+    "notEnoughTokensForBounty": "Ei tarpeeksi tokeneita. Tarvitaan {{need}} tokenia, mutta sinulla on {{have}}.",
+    "screenInAppHint": "Riftn-sovelluksessa",
+    "screenInAppNote": "Puhelimen selaimet eivät anna minkään verkkosivuston jakaa näyttöäsi. Siirry suoraan Riftn-sovelluksesta ja napauta sitten Jaa näyttö.",
+    "screenInAppCta": "Hanki Riftn-sovellus"
   },
   "events": {
     "seoTitle": "Tapahtumat: Tapaamiset ja yhteisötapahtumat Riftnissa",
@@ -7589,6 +8454,8 @@
     "footerNote": "DePin-osallistuminen on osallistumispalvelu, ei sijoitustuote. Saatavuus, kelpoisuus ja palkkiot voivat muuttua."
   },
   "creatorFlow": {
+    "newNativeFlow": "Uusi flow",
+    "disconnect": "Katkaise yhteys",
     "title": "Creator Flow",
     "backToStudio": "Takaisin Creator Studioon",
     "backToFlows": "Takaisin flowihisi",
@@ -7796,7 +8663,45 @@
     "foldersInFolder_other": "Kansioissa {{count}}",
     "foldersNoItems": "Tässä kansiossa ei ole vielä mitään",
     "foldersNoItemsHint": "Avaa tulos ja valitse \"Lisää kansioon\" tallentaaksesi sen tänne.",
-    "skippedUpstreamFailed": "Ohitettiin, koska aiempi vaihe epäonnistui. Sen hinta pysyy saldossasi."
+    "skippedUpstreamFailed": "Ohitettiin, koska aiempi vaihe epäonnistui. Sen hinta pysyy saldossasi.",
+    "signInForAudioLibrary": "Kirjaudu sisään avataksesi yksityisen tallennetun äänikirjastosi.",
+    "audioLibraryFailed": "Tallennettua ääntäsi ei voitu ladata. Yritä uudelleen.",
+    "retryFreeTask": "Yritä ilmaista tehtävää uudelleen",
+    "previewSavedMedia": "Esikatsele tallennettua mediaa",
+    "audioSavePending": "Ääni on valmis, mutta sen tallennus yksityiseen kirjastoon on kesken. Jatka noutaaksesi sen.",
+    "confirmInterruptedRetry": "Yritä keskeytynyttä ääni- tai avustajatehtävää uudelleen. Sen aiempi lopputulos on tuntematon, ja uusi yritys voi toistaa ajotyön. Nykyistä maksua ja maksettujen töiden tunnuksia käytetään uudelleen.",
+    "freeResultUnknown": "Ilmaisen tehtävän vastaus keskeytyi. Sitä ei lähetetä automaattisesti uudelleen. Valitse Yritä ilmaista tehtävää uudelleen ja jatka sitten; maksusi ja muut työt säilyvät.",
+    "formAuthor": "Muokkaa flow'ta",
+    "formAuthorHint": "Rakenna flow tyypitetyillä syötteillä. Tallenna se tähän tai järjestä se verkon kanvaasilla.",
+    "chooseSavedMedia": "Valitse tallennettu media",
+    "formInput": "Syöte: {{handle}}",
+    "reviewRun": "Tarkista ajo",
+    "resumeRun": "Jatka tallennettua ajoa",
+    "confirmPrice": "Yhteensä: {{price}} tokenia",
+    "recoveryHint": "Työ- ja maksuviitteet tallennetaan tälle laitteelle. Jatka keskeytynyttä työtä ennen uuden ajon aloittamista.",
+    "newRun": "Aloita uusi ajo",
+    "loadMoreMedia": "Lataa lisää mediaa",
+    "invalidGraph": "Tarkista yhteydet: jokainen syöte tarvitsee yhteensopivan lähteen, eikä graafissa saa olla silmukoita.",
+    "unsupportedNode": "Tätä solmua ei voi vielä ajaa natiivilomakkeessa. Käytä tälle flow'lle verkon kanvaasia.",
+    "missingPrompt": "Yhdistä tekstisolmu, jossa on kehote.",
+    "invalidSettings": "Valittu malli ei tue näitä asetuksia.",
+    "missingCapturedFrame": "Kaappaa kehys verkon kanvaasilla ennen kuin käytät tätä videota kuvasyötteenä.",
+    "missingSavedMedia": "Tallennettu lähdemedia puuttuu tai ei ole enää tämän tilin käytettävissä.",
+    "quoteFailed": "Tämän flow'n hintaa ei voitu laskea. Yritä uudelleen.",
+    "recoverBeforeEdit": "Jatka tallennettua ajoa ennen kuin muutat sen graafia tai aloitat uuden ajon.",
+    "runAlreadyComplete": "Tämä ajo on valmis. Valitse Aloita uusi ajo generoidaksesi uudelleen.",
+    "recoveryCorrupt": "Tallennettua palautustietoa ei voitu lukea. Säilytä tämä flow ja ota yhteyttä tukeen ennen kuin maksat uudelleen.",
+    "paidUnavailable": "Voit luoda ja tallentaa flow'ta täällä. Maksulliset ajot eivät ole käytettävissä tässä kaupassa.",
+    "planChanged": "Flow muuttui hinnoittelun jälkeen. Tarkista ajo uudelleen.",
+    "connectOwnerWallet": "Yhdistä lompakko, joka omistaa tämän flow'n.",
+    "runFailed": "Solmu ei voinut valmistua. Sen tallennettu työviite säilytetään palautusta varten.",
+    "recoveryPending": "Renderöinti on vielä kesken. Jatka tätä ajoa noutaaksesi sen.",
+    "nodeAudioGen": "Äänigeneraattori",
+    "nodeAudioGenDesc": "Puhe, äänitehosteet, litterointi ja äänen eristys",
+    "nodeAudioInput": "Tallennettu ääni",
+    "nodeAudioInputDesc": "Käytä yksityistä ääntä kirjastostasi",
+    "audioVoiceId": "Äänen tunnus",
+    "audioSeconds": "Äänen pituus sekunteina"
   },
   "videoPlayer": {
     "volume": "Äänenvoimakkuus",
@@ -7929,6 +8834,9 @@
     "followingBackProgress": "Seurasit takaisin {{completed}} {{total}}",
     "findingFollowers": "Etsi seuraajia...",
     "followBackAll": "Seuraa kaikkia takaisin",
+    "followBackConfirm": "Vastaa seurantaan",
+    "followBackNotNow": "Ei nyt",
+    "followBackDone": "Valmis",
     "nonFollowers": {
       "title": "Siivoatko, ketä seuraat?",
       "body": "{{count}} seuraamasi tilit eivät seuraa sinua takaisin.",
@@ -7944,8 +8852,15 @@
       "doneTitle": "Kaikki tyhjennetty",
       "doneAll": "{{done}} tiliä, jotka eivät seuranneet sinua takaisin, ei seurattu.",
       "doneSome": "{{done}} -tilien seuraamista ei voitu lopettaa. {{failed}} -tilien seuraamista ei voitu lopettaa.",
-      "doneToast": "Ei seurattu {{done}} tiliä, jotka eivät seuraa sinua takaisin"
-    }
+      "doneToast": "Ei seurattu {{done}} tiliä, jotka eivät seuraa sinua takaisin",
+      "working": "Lopetetaan seuraaminen {{done}}/{{total}}..."
+    },
+    "followBackConfirmTitle_one": "Seuraa takaisin {{count}} henkilöä?",
+    "followBackConfirmTitle_other": "Seuraa takaisin {{count}} henkilöä?",
+    "followBackConfirmBody": "He seuraavat sinua jo. Yksityiset tilit saavat seuraamispyynnön.",
+    "followedBackCount_one": "Seurattiin takaisin {{count}} henkilöä",
+    "followedBackCount_other": "Seurattiin takaisin {{count}} henkilöä",
+    "followBackDoneBody": "Löydät heidät kaikki kohdasta Seuratut."
   },
   "reactionInfo": {
     "title": "Reaktiot",
@@ -8741,6 +9656,35 @@
     "priceChartCleared": "Hintakaavio tyhjennetty. Kiinteä viitehinta: $0.0001. Toteutushinnat riippuvat saatavilla olevista tilauksista."
   },
   "editor": {
+    "stage": {
+      "camera": "Kamera",
+      "yaw": "Kierto",
+      "add": "Lisää",
+      "scale": "Koko",
+      "color": "Väri",
+      "light": "Vaalea",
+      "create": "Lisää 3D-lava",
+      "title": "3D-kohtauslava",
+      "hint": "Lavasta otos palloilla ja laatikoilla. Kamera, sijoittelu ja kolme toisistaan riippumatonta aluevaloa muuttavat renderöityä kuvaa.",
+      "preview": "Renderöidyn kohtauksen esikatselu",
+      "error": "Kuvaa ei voitu valmistella. Tarkista otoksen viitteet ja yritä uudelleen.",
+      "elevation": "Korkeus",
+      "distance": "Etäisyys",
+      "fov": "Näkökenttä",
+      "object": "Kappale",
+      "sphere": "Pallo",
+      "box": "Laatikko",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Poista kappale",
+      "intensity": "Voimakkuus",
+      "diffusion": "Hajautus",
+      "saving": "Valmistellaan kuvaa…",
+      "useFrame": "Käytä renderöityä kuvaa otoksen viitteenä",
+      "frameHint": "Luo 320 × 180 PNG-kuvan ja lisää sen tämän otoksen viitteisiin. Tarkista viiterajoitus ja mallin hinta-arvio ennen generointia.",
+      "frameName": "Kohtauslavan kuva"
+    },
     "video": {
       "tFade": "Ristihäivytys",
       "none": "Ei mitään",
@@ -8834,7 +9778,9 @@
       "pptx": "PowerPoint-esitys",
       "pptxHint": "Jokaisesta sivusta tulee yksi diakuva, jossa on esittäjän muistiinpanoja ja linkkejä. Muokkaa yksittäistä tekstiä ja elementtejä alkuperäisessä suunnittelumallissa.",
       "section": "Nimetty osio",
-      "transparent": "Läpinäkyvä tausta"
+      "transparent": "Läpinäkyvä tausta",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Lataa ZIP-tiedoston, jossa on aikajanasi FCPXML- ja Premiere XML -muodossa sekä kaikki mediatiedostot, jotta voit viimeistellä editoinnin Premiere Prossa, Final Cut Prossa tai DaVinci Resolvessa. Tekstistä tulee merkkejä; tehosteet jäävät Riftniin."
     },
     "inspector": {
       "selectHint": "Valitse taso piirtoalueelta tai leike aikajanasta.",
@@ -8907,6 +9853,8 @@
       "tools": "Editorin työkalut"
     },
     "agent": {
+      "stop": "Pysäytä",
+      "queue": "Lisää jonoon",
       "introTitle": "Kerro AI:lle, mitä haluat",
       "introBody": "Kuvaile suunnitelma tai muutos omin sanoin. Se muuttaa sivun kokoa, kirjoittaa ja muotoilee tekstiä, etsii ilmaisia kuvia, videoita ja musiikkia, lisää suodattimia, järjestää tasoja ja animoi niitä. Jokaisen pyynnön voi kumota yhdellä kertaa.",
       "suggestPoster": "Tee neliönmuotoinen Instagram-julkaisu kesäalesta, jossa on rantakuva ja lihavoitu otsikko",
@@ -8926,7 +9874,45 @@
       "failed": "AI ei pystynyt tekemään sitä juuri nyt. Yritä hetken päästä uudelleen.",
       "changes": "Muutoksia: {{count}}",
       "undo": "Kumoa",
-      "openGenerator": "Tarkista ja luo"
+      "openGenerator": "Tarkista ja luo",
+      "stopped": "Pysäytetty. Mitään muuta ei muutettu.",
+      "queued": "{{count}} jonossa",
+      "restore": "Palauta tähän",
+      "restoreHint": "Palauta projekti siihen tilaan, jossa se oli ennen tätä viestiä. Kumoa tuo sen takaisin.",
+      "restored": "Projekti palautettiin tilaan ennen tuota viestiä. Paina kumoa tuodaksesi uudemman version takaisin.",
+      "rewrite": "Selkeytä pyyntöäni",
+      "rewriteFailed": "Uudelleenkirjoitus ei onnistunut. Tekstisi on ennallaan.",
+      "feedback": "Oliko tästä apua?",
+      "good": "Hyvä vastaus",
+      "bad": "Huono vastaus",
+      "retryPrefix": "Tuo ei ollut oikein. Sen sijaan ",
+      "recipesTitle": "Reseptit",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podcast-leike",
+          "prompt": "Etsi vahvin 30 sekunnin hetki, rajaa siihen, lisää Word Pop -tekstitykset ja tee siitä 9:16."
+        },
+        "talkingHead": {
+          "label": "Siisti puhuva pää",
+          "prompt": "Leikkaa pitkät tauot, lisää Classic-tekstitykset ja anna hienovarainen lämmin ilme."
+        },
+        "productPromo": {
+          "label": "Tuote-esittely",
+          "prompt": "Tee 15 sekunnin promo: iskevä otsikko alkuun, Zoom in -siirtymät leikkeiden väliin, Bold-tekstitykset ja pirteä musiikki."
+        },
+        "hypeReel": {
+          "label": "Hype-kooste",
+          "prompt": "Leikkaa leikkeet musiikin tahtiin, käytä Fly up -siirtymiä ja Technicolor-ilmettä."
+        },
+        "retroEdit": {
+          "label": "Retroeditointi",
+          "prompt": "Anna jokaiselle leikkeelle VHS-ilme, lisää iso serif-otsikko ja käytä Fade-siirtymiä."
+        },
+        "tutorial": {
+          "label": "Opetusvideo",
+          "prompt": "Lisää otsikko jokaiselle vaiheelle, Boxed-tekstitykset ja hidasta avainhetki nopeuteen 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Suorakulmio",
@@ -9101,7 +10087,9 @@
       "tint": "Sävy {{value}}",
       "vignette": "Vinjetti {{value}} %",
       "auto": "Automaattinen parannus",
-      "autoFailed": "Kuvaa ei voitu analysoida."
+      "autoFailed": "Kuvaa ei voitu analysoida.",
+      "halation": "Halaatio {{value}} %",
+      "scanlines": "Juovat {{value}} %"
     },
     "pages": {
       "add": "Lisää sivu",
@@ -9175,6 +10163,17 @@
       "reloadText": "Lataa kuvateksti uudelleen",
       "textSaved": "Kuvatekstimuutokset tallennettu.",
       "action": "Automaattiset tekstitykset",
+      "styles": {
+        "bold": "Lihavoitu",
+        "classic": "Klassinen",
+        "boxed": "Laatikoitu",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Pinottu",
+        "serif": "Serif",
+        "bubble": "Kupla"
+      },
       "working": "Kuunnellaan… {{percent}} %",
       "downloading": "Valmistellaan puhemallia… {{percent}} %",
       "hint": "Muuttaa puheen ajastetuiksi tekstityksiksi, joiden tyyliä voit muokata. Toimii laitteellasi: ilmainen ja yksityinen. Ensimmäisellä kerralla malli ladataan.",
@@ -9185,7 +10184,8 @@
       "translateCount": "Käännä {{count}} kuvatekstit",
       "translationDone": "Translated {{count}} kuvatekstit",
       "translationFailed": "Kuvatekstien kääntäminen epäonnistui. Kuvatekstejäsi ei ole muutettu.",
-      "lockedTranslation": "Avaa lukitut kuvatekstit sisällyttääksesi ne."
+      "lockedTranslation": "Avaa lukitut kuvatekstit sisällyttääksesi ne.",
+      "style": "Tekstitysten tyyli"
     },
     "multi": {
       "selected": "{{count}} tasoa valittu",
@@ -9222,7 +10222,10 @@
       "saveNewPreset": "Tallenna uusi",
       "saveStyles": "Tallenna tyylit suunnitelman kanssa",
       "stylesSaved": "Brändityylit tallennettu tähän suunnitelmaan",
-      "usePreset": "Käytä tyylejä"
+      "usePreset": "Käytä tyylejä",
+      "dehubApplied": "Riftn-brändi lisätty {{count}} tasolle.",
+      "dehubApply": "Käytä Riftn-brändiä",
+      "dehubHint": "Viralliset Riftn-värit, Exo- ja Inter-fontit sekä Riftn-logo yhdellä napautuksella."
     },
     "draw": {
       "heading": "Piirrä",
@@ -10554,6 +11557,135 @@
       "toolbar": "Suunnittelupöydän navigointi",
       "zoomIn": "Zoom-ohjelman kannaksen suurennus",
       "zoomOut": "Loitonna kangasta"
+    },
+    "clipFix": {
+      "listening": "Kuunnellaan…",
+      "detach": "Irrota ääni",
+      "detached": "Ääni siirretty omaksi leikkeekseen",
+      "detachFailed": "Tämän leikkeen ääntä ei voitu irrottaa",
+      "removeBars": "Poista mustat palkit",
+      "scanning": "Tarkistetaan kuvia…",
+      "noBars": "Mustia palkkeja ei löytynyt",
+      "barsRemoved": "Mustat palkit rajattu",
+      "barsFailed": "Tätä videota ei voitu tarkistaa mustien palkkien varalta",
+      "reframe": "Automaattinen uudelleenrajaus",
+      "reframeHint": "Video sopii jo tähän sivun muotoon",
+      "reframed": "Rajattu uudelleen seuraamaan toimintaa",
+      "reframeFailed": "Tätä videota ei voitu rajata uudelleen",
+      "retakes": "Poista uusintaotot",
+      "noRetakes": "Uusintaottoja ei löytynyt",
+      "retakesRemoved": "Poistettiin {{count}} uusintaotto(a), viimeinen otto säilytettiin",
+      "retakesFailed": "Uusintaottoja ei voitu poistaa tästä leikkeestä"
+    },
+    "shortcuts": {
+      "action": {
+        "split": "Jaa",
+        "play": "Toista",
+        "pause": "Keskeytä",
+        "frameBack": "Edellinen kohta",
+        "frameForward": "Seuraava kohta",
+        "back": "Taakse 1 sekunti",
+        "rippleDelete": "Poista leike",
+        "liftDelete": "Poista leike",
+        "start": "Siirry alkuun",
+        "end": "Siirry loppuun"
+      },
+      "preset": "Näppäimistöasettelu",
+      "presetHint": "Käytä tuntemasi editorin aikajananäppäimiä. Riftnin omat pikanäppäimet toimivat edelleen kaikessa muussa."
+    },
+    "voiceClone": {
+      "stop": "Lopeta tallennus",
+      "failed": "Ääniklonaus epäonnistui.",
+      "pickerLabel": "Kloonaa äänesi",
+      "pickerDetail": "Selostukset omalla äänelläsi",
+      "title": "Kloonaa äänesi",
+      "description": "Äänitä itsesi tai valitse leike, jossa puhut. Maksat kerran, ja äänesi on käytössäsi kaikissa selostuksissa.",
+      "defaultName": "Minun ääneni",
+      "record": "Äänitä näyte (30 sekunnista 2 minuuttiin)",
+      "fromMedia": "Tai käytä leikettä Mediasta",
+      "recorded": "Äänityksesi",
+      "sample": "Näyte: {{name}}",
+      "hint": "Selkeä puhe ilman musiikkia toimii parhaiten.",
+      "noMic": "Mikrofonia ei voitu käyttää.",
+      "sampleFailed": "Äänen lukeminen leikkeestä ei onnistunut.",
+      "pay": "Kloonaa {{amount}} tokenilla",
+      "useFree": "Kloonaa (jo maksettu)",
+      "owned": "Äänesi ”{{name}}” on jo määritetty. Valitse se äänilistasta.",
+      "useOwned": "Käytä ääntäni",
+      "ready": "”{{name}}” on valmis selostuksiin.",
+      "paidFailed": "Maksusi on tallennettu. Avaa tämä uudelleen, niin seuraava yritys on ilmainen.",
+      "consent": "Kloonaa vain oma äänesi tai ääni, jonka käyttöön sinulla on lupa."
+    },
+    "linkImport": {
+      "go": "Tuo",
+      "downloading": "Ladataan {{percent}}%",
+      "open": "Tuo linkistä",
+      "placeholder": "Liitä YouTube-, TikTok- tai muu linkki",
+      "rights": "Omistan tämän videon tai minulla on lupa käyttää sitä",
+      "audioOnly": "Vain ääni",
+      "queued": "Jonossa…",
+      "waiting": "Odotetaan sivustoa, yritetään pian uudelleen…",
+      "adding": "Lisätään Mediaan…",
+      "added": "Tuotu ja lisätty aikajanalle.",
+      "failed": "Linkkiä ei voitu tuoda."
+    },
+    "reverse": {
+      "action": "Taaksepäin",
+      "working": "Käännetään takaperin {{percent}} %",
+      "done": "Leike käännetty takaperin.",
+      "failed": "Tätä leikettä ei voitu kääntää takaperin.",
+      "unsupported": "Tämä selain ei voi kääntää videota takaperin. Kokeile Chromea tai Edgeä.",
+      "tooLong": "Enintään {{seconds}} sekunnin leikkeet voi kääntää takaperin."
+    },
+    "film": {
+      "repairRefs": "Poista puuttuvat medialinkit",
+      "title": "Elokuvaprojekti",
+      "intro": "Suunnittele otoksia uudelleenkäytettävillä kuvaviitteillä. Briefisi, otosjärjestys ja valitut tulokset tallentuvat tämän projektin mukana.",
+      "create": "Luo elokuvasuunnitelma",
+      "name": "Elokuvan nimi",
+      "brief": "Elokuvan brief",
+      "sharedReferences": "Jaetut kuvaviitteet (enintään 4)",
+      "shot": "Otos",
+      "addShot": "Lisää otos",
+      "shotName": "Otoksen nimi",
+      "action": "Otoksen toiminta ja sommittelu",
+      "seconds": "Pyydetyt videosekunnit",
+      "shotReferences": "Lisäkuvaviitteet (yhteensä enintään 4)",
+      "frame": "Valmistele kuva",
+      "video": "Valmistele video",
+      "review": "Tarkista malli, viitteet, videon kesto ja hinta studiossa ennen generointia.",
+      "result": "Hyväksytty otoksen tulos",
+      "noResult": "Tulosta ei valittu",
+      "resultHint": "Valitse hyväksytty kuva tai video Latauksista. Sen linkki tallentuu tämän otoksen mukana; kokoa elokuva aikajanalla.",
+      "earlier": "Siirrä aiemmaksi",
+      "later": "Siirrä myöhemmäksi",
+      "remove": "Poista otos",
+      "issue": "Tarkista otoksen kuvaus ja viitemedia ja yritä sitten uudelleen. Pidä projekti auki, jos sitä ei voitu tallentaa.",
+      "searchMedia": "Etsi mediaa nimellä",
+      "refreshMedia": "Päivitä media"
+    },
+    "speakers": {
+      "find": "Etsi puhujat",
+      "name": "Puhuja {{number}}",
+      "onlyOne": "Löytyi vain yksi puhuja.",
+      "failed": "Puhujia ei löytynyt.",
+      "kept": "Säilytettiin vain {{name}}.",
+      "editFailed": "Muokkaus ei sopinut tähän leikkeeseen.",
+      "split": "Jaettu {{count}} puhujaotokseen.",
+      "keepOnly": "Säilytä vain",
+      "splitAction": "Leikkaa jokaisessa puhujan vaihdossa"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Kuvaile haluamasi 3D-objekti",
+      "queued": "Rakennetaan 3D-objektiasi. Se ilmestyy Generoinnit-välilehdelle.",
+      "note": "3D-objektit tulevat Mediaan lyhyenä pyörivänä leikkeenä läpinäkyvällä taustalla."
+    },
+    "behind": {
+      "action": "Teksti henkilön taakse",
+      "working": "Rajataan henkilöä irti…",
+      "done": "Teksti ja tekstitykset ovat nyt henkilön takana.",
+      "failed": "Tekstiä ei voitu sijoittaa henkilön taakse."
     }
   },
   "jungleMood": {
@@ -10956,7 +12088,9 @@
     "tokenAmount": "{{amount}} merkkiä",
     "assistant": {
       "question1": "Mikä on Riftn-polettien nykyinen panos APY?",
-      "question2": "Kyllä, jos panostan 10 000 polettia 90 päivän ajan"
+      "question2": "Kyllä, jos panostan 10 000 polettia 90 päivän ajan",
+      "answer1": "Riftn-tokenien nykyinen staking-APY on 12,4 % 30 päivän lukitusjaksolla. Tässä erittely:\n\n• 7 päivän lukitus: 8,2 % APY\n• 30 päivän lukitus: 12,4 % APY\n• 90 päivän lukitus: 18,7 % APY\n\nHaluatko, että autan laskemaan mahdolliset tuotot?",
+      "answer2": "10 000 tokenille, jotka on stakattu 18,7 % APY:llä 90 päiväksi:\n\n📊 Arvioitu palkkio: ~461 tokenia\n\nSe on noin 5,13 tokenia päivässä. Muista, että APY voi vaihdella stakatun kokonaismäärän mukaan."
     },
     "bookmarks": {
       "stakingGuide": "Täydellinen opas Riftn-polettien panostamiseen: selitys APY-erittelystä, lukitusjaksoista ja palkintokertoimista."
@@ -11652,7 +12786,7 @@
   "multiPost": {
     "tab": "Monijulkaisu",
     "title": "Monijulkaisu",
-    "intro": "Julkaise X:ään, YouTubeen, Instagramiin, TikTokiin ja muihin samanaikaisesti dehubin avulla. Yhdistä tilisi kerran ja valitse, minne kukin julkaisu menee.",
+    "intro": "Julkaise X:ään, YouTubeen, Instagramiin, TikTokiin ja muihin samanaikaisesti Riftnin avulla. Yhdistä tilisi kerran ja valitse, minne kukin julkaisu menee.",
     "creditsHeading": "Julkaisupisteet",
     "credits": "{{count}} julkaisupistettä",
     "topUpTitle": "Lisää ja säästä",
@@ -11700,7 +12834,12 @@
   "dm": {
     "planRestricted": "Tämä käyttäjä vaatii tilauksen viestien vastaanottamiseen.",
     "planTypeNotAllowed": "Tämän tekijän paketti ei salli tämäntyyppistä viestiä.",
-    "planMinTip": "Tipin tälle tekijälle on oltava vähintään {{amount}} tokenia."
+    "planMinTip": "Tipin tälle tekijälle on oltava vähintään {{amount}} tokenia.",
+    "shareKindGroup": "Ryhmittele",
+    "shareKindCommunity": "Yhteisö",
+    "shareGroups": "Ryhmät",
+    "shareKindChannel": "Kanava",
+    "reportMessage": "Ilmoita viestistä"
   },
   "credits": {
     "earningsWorth": "Arvo {{amount}}",
@@ -11742,7 +12881,11 @@
     "error": "Poistamispyyntöä ei voitu lähettää. Tiliäsi ei ole vahvistettu poistettavaksi. Yritä uudelleen.",
     "back": "Takaisin asetukset -sivulle",
     "signIn": "Kirjaudu sisään poistaaksesi tilisi",
-    "acknowledge": "Olen tallentanut lompakkoni palautustiedot ja ymmärrän, että poistaminen on pysyvää."
+    "acknowledge": "Olen tallentanut lompakkoni palautustiedot ja ymmärrän, että poistaminen on pysyvää.",
+    "signedInAs": "Kirjautuneena käyttäjänä",
+    "confirmTitle": "Poistetaanko tilisi lopullisesti?",
+    "confirmBody": "Tilisi ja kaikki sen sisältö poistetaan. Sinut kirjataan ulos, eikä tätä voi kumota.",
+    "confirmBodyNamed": "{{who}} ja kaikki sen sisältö poistetaan. Sinut kirjataan ulos, eikä tätä voi kumota."
   },
   "miniApps": {
     "badge": {
@@ -11837,7 +12980,45 @@
       "rewardsWeek": "Viikko {{date}}",
       "rewardPaid": "Maksettu",
       "rewardPending": "Odottaa",
-      "rewardsNone": "Palkintoja ei ole vielä laskettu. Ensimmäinen viikko sulkeutuu maanantaina."
+      "rewardsNone": "Palkintoja ei ole vielä laskettu. Ensimmäinen viikko sulkeutuu maanantaina.",
+      "stats": {
+        "button": "Reaaliaikaiset tilastot",
+        "chartTitle": "Sovelluksesi avanneet ihmiset, viimeiset 30 päivää",
+        "peak_one": "Huippu {{count}} päivässä",
+        "peak_other": "Huippu {{count}} päivässä",
+        "people30": "Ihmiset, 30 päivää",
+        "people7": "Ihmiset, 7 päivää",
+        "added": "Lisäsivät sen",
+        "dhb30": "Maksetut tokenit, 30 päivää",
+        "notified30": "Lähetetyt ilmoitukset, 30 päivää",
+        "rewards": "Ansaitut tokenpalkkiot"
+      },
+      "signin": {
+        "users_one": "{{count}} käyttäjä",
+        "users_other": "{{count}} käyttäjää",
+        "delete": "Poista",
+        "title": "Kirjaudu Riftnillä",
+        "body": "Anna ihmisten kirjautua verkkosivustollesi tai sovellukseesi Riftn-tilillään. Luo avain täällä ja seuraa sitten ohjetta.",
+        "guide": "Lue ohje",
+        "copyId": "Kopioi asiakastunnus",
+        "rotate": "Uusi salaisuus",
+        "rotateConfirm": "Luodaanko uusi salaisuus sovellukselle {{name}}? Vanha salaisuus lakkaa toimimasta heti.",
+        "deleteConfirm": "Poistetaanko {{name}}? Kaikki sillä kirjautuneet kirjataan ulos.",
+        "secretOnce": "Salaisuus sovellukselle {{name}}. Kopioi se nyt: se näytetään vain kerran.",
+        "name": "Sovelluksen nimi",
+        "website": "Verkkosivusto (valinnainen)",
+        "redirects": "Uudelleenohjaus-URL:t, yksi per rivi (https://yoursite.com/callback)",
+        "create": "Luo avain"
+      },
+      "stateRejected": "Livenä linkin kautta · ei hyväksytty kauppaan",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Tapahtumat, jotka Riftn lähetti webhookUrl-osoitteeseesi. Testi lähettää ping-tapahtuman.",
+        "test": "Lähetä testi",
+        "ok": "Webhook vastasi {{status}}",
+        "failed": "Webhook epäonnistui: {{reason}}",
+        "none": "Webhookeja ei ole vielä lähetetty."
+      }
     },
     "card": {
       "open": "Avaa"
@@ -11863,7 +13044,10 @@
       "confirm": "Maksa {{amount}} tokenia:lle",
       "sending": "Lähetät maksun…",
       "sent": "Maksattu {{amount}} tokenia {{name}}:lle.",
-      "noOwner": "Tällä sovelluksella ei ole vielä vahvistettua lompakkoa maksuja varten."
+      "noOwner": "Tällä sovelluksella ei ole vielä vahvistettua lompakkoa maksuja varten.",
+      "testBadge": "Testitila",
+      "testBody": "Omistat tämän sovelluksen, joten tämä on testi: tokeneita ei siirry ja kuitti merkitään testiksi.",
+      "testSent": "Testimaksu {{amount}} tokenia. Mitään ei lähetetty."
     },
     "add": {
       "title": "Lisää {{name}}?",
@@ -11995,6 +13179,9 @@
     "reminderLater": "Ei nyt"
   },
   "copy": {
+    "55656b5e434f": "Sulje hakukenttä",
+    "57e2faa5ec63": "Hae Riftnista",
+    "96d7bff86b44": "Hakua ei voitu ladata",
     "1607715e45ed": "Napauta palloa puhuaksesi tai kirjoita alle",
     "00140a37bd26": "Liiketoimet ovat tilapäisesti pois päältä. Yritä uudelleen.",
     "002286513398": "Sinulla ei ole oikeutta hallinnoida tapahtumia",
@@ -18977,7 +20164,64 @@
     "127053546dd4": "Ei voitu ladata tätä tiedostoa",
     "d14896aa4bf8": "Ilmainen kirjasto ei latautunut. Tarkista yhteys ja yritä uudelleen.",
     "953e708b2287": "Äänituotannon epäonnistui.",
-    "4a52cdd6ac72": "Ei voitu kopioida näitä kerroksia."
+    "4a52cdd6ac72": "Ei voitu kopioida näitä kerroksia.",
+    "3f9b2c71d0a4": "{{n}} tulosta",
+    "8c4e1a6b2f57": "haulle ”{{query}}”",
+    "1d7234ff1b79": "kohteessa {{feed}}",
+    "e122e5c2b563": "Vedä ylös sulkeaksesi",
+    "1aa9d734f2ee": "Valitse, mitä haetaan",
+    "ef557404f465": "Ei tuloksia haulle ”{{query}}”",
+    "35034aa59bd3": "Mikään kohteessa {{feed}} ei vastannut hakua. Kokeile muita sanoja tai hae kaikkialta.",
+    "415155739590": "Hae kaikkialta",
+    "9e13d826baaf": "Hae kuvia",
+    "cbf6f228327c": "Hae musiikkia",
+    "e8756c6865a5": "Hae shortseja",
+    "c7661da99c41": "Hae videoita",
+    "90f1afe66801": "Haetaan ”{{query}}”…",
+    "d7b559f2d8c6": "Kokeile muita sanoja tai muuta suodattimia.",
+    "d1a0c7e2f301": "Mitä mielessäsi tänään?",
+    "d1a0c7e2f302": "Mitä mietit tänään?",
+    "d1a0c7e2f303": "Mitä mielessäsi?",
+    "d1a0c7e2f304": "Onko jotain mielessä?",
+    "d1a0c7e2f305": "Mitä mielessäsi juuri nyt?",
+    "d1a0c7e2f306": "Mitä tänään mietitään?",
+    "d1a0c7e2f307": "Onko tänään jotain mielessä?",
+    "d1a0c7e2f308": "Mitä mielessäsi tällä kertaa?",
+    "a7c1e0f4b2d9": "Napauta puhuaksesi",
+    "b3e8d1c6f0a2": "Napauta lähettääksesi",
+    "c9f2a4e7d1b5": "Kuunnellaan... napauta palloa lähettääksesi",
+    "22577ebd908e": "Generoi Wan 3.0 -video · alkuperäinen ääniraita",
+    "1fa2357ab7e1": "Generoi Seedance 720p -video · alkuperäinen ääniraita",
+    "7f78bdc0762d": "+{{value1}} p",
+    "f0c8bb34335b": "Ansaitsit +{{value1}} pistettä",
+    "0fbe06b679a8": "{{value1}} pistettä jokaisesta toteutetusta pyynnöstä, lisätään Top builders -pisteisiisi.",
+    "431bc73eb60b": "[verse]\nSanoituksesi tähän...\n\n[chorus]\nKertosäkeen sanat...",
+    "a3c1e5f20b71": "Käytä Riftniä ChatGPT:ssä, Claudessa tai missä tahansa MCP-sovelluksessa. Liitä alla oleva URL avustajasi liitinasetuksiin selataksesi julkaisuja, profiileja ja kommentteja, ja kirjaudu sisään pyydettäessä yhdistääksesi oman tilisi.",
+    "b84d2e7c9a16": "Tämä osoite on tekoälysovelluksille, ei verkkosivu. Sen avaaminen selaimessa tuo sinut tänne.",
+    "c5e9f1a3d742": "Yhdistä Riftn-tilisi",
+    "d61a7b4e8c05": "Kun avustajasi pyytää sinua kirjautumaan, kirjaudu Riftniin ja napsauta Salli. Se voi sitten päivittää profiiliasi, julkaista julkaisuja ja kommentteja, seurata ihmisiä ja luoda Creator Studiossa. Yhteydet pysyvät voimassa, kun käytät niitä, ja vanhenevat 30 päivän käyttämättömyyden jälkeen.",
+    "e27b8c5f9d13": "ChatGPT-ohje vaihe vaiheelta",
+    "f38c9d6a0e24": "Claude-ohje vaihe vaiheelta",
+    "0a49d7b1f835": "Haluatko erillisen bottitilin? Luo agentti saadaksesi liittimen URL-osoitteen, joka julkaisee agenttina.",
+    "1b5ae8c20f46": "Kun ChatGPT pyytää, kirjaudu Riftniin ja napsauta Salli yhdistääksesi tilisi.",
+    "2c6bf9d31a57": "Napsauta Yhdistä, kirjaudu Riftniin ja napsauta Salli yhdistääksesi tilisi.",
+    "2bc85f36b3e4": "📎 Media",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Lasipalkit",
+    "5ff272ba7871": "Silkkiviivat",
+    "a941e90ca93d": "Kansikehä",
+    "04dbbe4dff7a": "Todellinen aalto",
+    "31e06f7d89fe": "chat",
+    "85330dcbaadd": "Ei algoritmeja, jotka suosivat väittelyn toista osapuolta. \nJokaisen ääni kuuluu yhtä paljon ja reilusti.",
+    "394df20de422": "{{value1}}, arviolta 2–5 min, {{value2}}",
+    "8d02cfb48fb7": "Muunna enintään 19 kaavion datariviä, jotta taulukko ja sen otsikko mahtuvat 20 riviin",
+    "4e4070b497cb": "Muunna taulukko, jossa on otsikkosarake ja 1–6 numeerista saraketta",
+    "9344a49b2b83": "Tiedostoa ei tueta: {{name}}",
+    "85c3a56c70bc": "Käytä kappaleväliä väliltä 0–300",
+    "58bb9356472b": "Lisää taulukon solut ennen tekstin siivoamista",
+    "d0e941227a2f": "Käytä lukua väliltä {{minimum}}–{{maximum}}",
+    "6e71ae3669b1": "Tallennettu tulos ei ole saatavilla"
   },
   "articles": {
     "cardLabel": "Artikkeli · {{count}} minuutin luettelo",
@@ -18996,6 +20240,7 @@
     "backToTop": "Takaisin ylös",
     "needTitle": "Lisää otsikko jatkaaksesi",
     "needBody": "{{count}} enemmän merkkejä jää vielä.",
+    "imagesLabel": "Kuvat",
     "backToWriting": "Takaisin kirjoittamiseen",
     "readyTitle": "Valmis julkaistavaksi",
     "sharePreview": "Kuinka se näyttää, kun se on jakautunut.",
@@ -19018,7 +20263,16 @@
     "formatting": "Muotoilu",
     "bodyPlaceholder": "Kerro tarinasi. Valitse teksti ja käytä yllä olevaa palkkia otsikoihin, lihavointiin, lainauksiin ja listoihin.",
     "bodyLabel": "Artikkelin runko",
-    "wordCount": "{{count}} sanaa"
+    "wordCount": "{{count}} sanaa",
+    "imageLimit": "Artikkeleissa voi olla enintään {{count}} kuvaa",
+    "imageLimitSome": "Tähän artikkeliin mahtuu enää {{count}} kuvaa",
+    "imageFailed": "Kuvaa ei voitu lisätä. Kokeile toista.",
+    "imagesUploading": "Lisätään kuvia ({{count}})…",
+    "bodyTooLong": "{{count}} merkkiä yli rajan",
+    "imagesCount": "Kuvat · {{count}}/{{max}}",
+    "captionPlaceholder": "Lisää kuvateksti",
+    "captionLabel": "Kuvan {{n}} kuvateksti",
+    "removeInlineImage": "Poista kuva {{n}}"
   },
   "liveAudience": {
     "whosHere": "Kuka on täällä",
@@ -19057,10 +20311,392 @@
     "exploreFirst": "Tutustu ensin",
     "codeNote": "Lähetämme sinulle koodin sähköpostilla, ilman salasanaa."
   },
+  "liveHype": {
+    "gift": {
+      "plan": "Suunnitelma",
+      "howMany": "Kuinka monta",
+      "who": "Käyttäjänimi tai lompakko-osoite",
+      "whoPlaceholder": "@käyttäjänimi",
+      "cancel": "Peruuta",
+      "stage": {
+        "preparing": "Valmistellaan…",
+        "confirming": "Odotetaan tapahtumaa…",
+        "recording": "Viimeistellään…",
+        "wallet": "Vahvista lompakossasi"
+      },
+      "open": "Lahjoita tilauksia",
+      "title": "Lahjoita tilauksia",
+      "mode": {
+        "random": "Satunnaiset katsojat chatissa",
+        "user": "Tietty henkilö"
+      },
+      "randomHint": "Menee ihmisille, jotka ovat chattailleet viimeisen 30 minuutin aikana eivätkä ole vielä tilaajia.",
+      "send_one": "Lahjoita 1 tilaus · ${{price}}",
+      "send_other": "Lahjoita {{count}} tilausta · ${{price}}",
+      "payHint": "Maksetaan lompakkosi tokeneilla yhdellä siirrolla.",
+      "fewer_one": "Vain 1 henkilö chatissa voi saada tilauksen juuri nyt, joten maksat yhdestä.",
+      "fewer_other": "Vain {{count}} henkilöä chatissa voi saada tilauksen juuri nyt, joten maksat {{count}} tilauksesta.",
+      "done_one": "Tilaus lahjoitettu!",
+      "done_other": "{{count}} tilausta lahjoitettu!",
+      "failed": "Tilauksia ei voitu lahjoittaa",
+      "notReady": "Lahjoittaminen ei ole vielä käytettävissä tälle tilaukselle",
+      "noPlan": "Valitse ensin tilaus",
+      "noPlans": "Käyttäjällä {{name}} ei ole vielä lahjoitettavia tilauksia."
+    },
+    "badges": {
+      "emoji": "Emojit",
+      "audience": {
+        "subscribers": "Tilaajat",
+        "both": "Tilaajat ja lahjoittajat",
+        "gifters": "Lahjoittajat"
+      },
+      "ended": "Päättynyt",
+      "until": "{{date}} asti",
+      "failed": "Se ei toiminut. Yritä uudelleen.",
+      "title": "Rajoitetun ajan merkit",
+      "intro": "Tarjoa merkkiä muutaman päivän ajan. Jokainen, joka tilaa tai lahjoittaa sen ollessa voimassa, ansaitsee sen, ja se näkyy pysyvästi hänen nimensä vieressä chatissasi.",
+      "name": "Merkin nimi",
+      "namePlaceholder": "Julkaisuviikko",
+      "days": "Saatavilla (päivää)",
+      "who": "Kuka voi ansaita sen",
+      "create": "Tarjoa merkkiä",
+      "created": "Merkki on voimassa.",
+      "end": "Lopeta nyt",
+      "holders_one": "{{count}} haltija",
+      "holders_other": "{{count}} haltijaa",
+      "limit": "Kolme merkkiä voi olla voimassa kerralla. Lopeta yksi tarjotaksesi toista.",
+      "hypeHint": "Jokainen hype trainiin osallistuva saa myös 🚂-merkkisi sillä tasolla, jolle juna ylsi."
+    },
+    "train": {
+      "level": "Hype Train · Taso {{level}}",
+      "endedLevel": "Hype Train suoritti tason {{level}}!",
+      "ended": "Hype Train päättyi",
+      "thanks_one": "Kiitos {{count}} tukijalle",
+      "thanks_other": "Kiitos {{count}} tukijalle",
+      "top": "Kärjessä: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "lahjoitti tilauksen 🎁",
+      "giftedSubs_other": "lahjoitti {{count}} tilausta 🎁"
+    }
+  },
+  "whenSheet": {
+    "today": "Tänään",
+    "tooSoon": "Valitse tulevaisuuden ajankohta.",
+    "show": "Näytä",
+    "hide": "Piilota",
+    "title": "Milloin?",
+    "tonight": "Tänä iltana",
+    "inAnHour": "Tunnin päästä",
+    "tomorrow": "Huomenna",
+    "primeTime": "Parhaaseen aikaan",
+    "scheduleFor": "Ajasta: {{when}}",
+    "liveTip": "Seuraajasi voivat asettaa muistutuksen. Aloitat Liven itse, kun on aika.",
+    "stageTip": "Se menee heti Tulossa-hyllylle, jotta ihmiset voivat napauttaa Muistuta minua.",
+    "typePlaceholder": "Kirjoita aika, esim. ”pe 20” tai ”2 tunnin päästä”",
+    "typeLabel": "Kirjoita aika",
+    "typeHelp": "Kokeile ”tänä iltana”, ”huomenna 9”, ”la 12” tai ”30.10. klo 19”.",
+    "orPickDay": "Tai valitse päivä",
+    "earlier": "15 minuuttia aiemmin",
+    "later": "15 minuuttia myöhemmin",
+    "earlierShort": "Aiemmin",
+    "laterShort": "Myöhemmin",
+    "tooSoonMin": "Valitse aika vähintään {{count}} minuutin päähän.",
+    "zone": "Sinun aikasi ({{zone}}). Kaikki muut näkevät sen omassa ajassaan.",
+    "remove": "Poista ajastus",
+    "startsIn": "Alkaa {{time}} kuluttua",
+    "bestTime": "Paras aika",
+    "fansOnline": "Milloin faneini ovat paikalla?",
+    "fansBasis": "Kirkkaampi tarkoittaa, että useampi seuraajistasi katsoi, viimeiset {{count}} päivää.",
+    "everyoneBasis": "Seuraajien aktiivisuutta ei ole vielä tarpeeksi, joten tämä koskee kaikkia Riftnissä."
+  },
+  "planned": {
+    "title": "Suunniteltu",
+    "all": "Kaikki",
+    "posts": "Julkaisut",
+    "stages": "Äänihuoneet",
+    "post": "Julkaise",
+    "live": "Suora",
+    "stage": "Lava",
+    "untitledPost": "Julkaise",
+    "untitledLive": "Suora",
+    "loading": "Ladataan…",
+    "startNow": "Aloita nyt",
+    "cancel": "Peruuta",
+    "cancelled": "Peruutettu",
+    "subtitle": "Ajastamasi julkaisut, Livet ja Staget",
+    "seoTitle": "Suunnitellut · Riftn",
+    "seoDescription": "Ajastetut julkaisusi, Livesi ja Stagesi Riftnissä, kaikki yhdessä paikassa.",
+    "lives": "Livet",
+    "signIn": "Kirjaudu sisään nähdäksesi suunnitelmasi",
+    "emptyTitle": "Ei vielä mitään suunniteltuna",
+    "emptyBody": "Valitse ”Milloin?” julkaisua, Liveä tai Stagea tehdessäsi, niin se näkyy täällä.",
+    "move": "Siirrä",
+    "postNow": "Julkaise nyt",
+    "confirmCancel": "Napauta uudelleen peruaksesi",
+    "moved": "Siirretty: {{when}}",
+    "postingNow": "Julkaistaan alle minuutissa",
+    "moveFailed": "Siirto ei onnistunut. Yritä uudelleen.",
+    "seeAll": "Näytä kaikki suunnitelmasi"
+  },
+  "welcome": {
+    "about": {
+      "title": "Tervetuloa Riftniin",
+      "day": "Päivä",
+      "month": "Kuukausi",
+      "year": "Vuosi",
+      "sub": "Syntymäpäiväsi pysyy yksityisenä. Valitse ulkoasu, voit vaihtaa sen milloin tahansa.",
+      "birthday": "Syntymäaika",
+      "pick": "Valitse syntymäpäiväsi",
+      "invalid": "Anna koko syntymäaikasi.",
+      "tooYoung": "Sinun on oltava vähintään {{age}}-vuotias käyttääksesi Riftniä.",
+      "theme": "Ulkoasusi"
+    },
+    "name": {
+      "title": "Nimi",
+      "placeholder": "Nimi",
+      "sub": "Tämä nimi näkyy ihmisille julkaisuissasi."
+    },
+    "card": {
+      "name": "Nimi",
+      "followers": "seuraajat",
+      "interests": "Kiinnostuksen kohteesi",
+      "following": "seuraa"
+    },
+    "topic": {
+      "music": "Musiikki",
+      "art": "Taide",
+      "gaming": "Pelit",
+      "crypto": "Krypto",
+      "sports": "Urheilu",
+      "comedy": "Komedia",
+      "film": "Elokuva",
+      "food": "Ruoka",
+      "news": "Uutiset",
+      "science": "Tiede",
+      "travel": "Matkailu",
+      "anime": "Anime",
+      "cars": "Autot",
+      "podcast": "Podcast",
+      "animals": "Eläimet",
+      "tech": "Teknologia"
+    },
+    "back": "Takaisin",
+    "skipPhoto": "Ohita tällä kertaa",
+    "preview": "Esikatselu",
+    "username": {
+      "title": "Sinun @käyttäjänimesi",
+      "sub": "Kirjaimia, numeroita ja alaviivoja. Voit vaihtaa sen myöhemmin.",
+      "yours": "@{{name}} on sinun"
+    },
+    "photo": {
+      "title": "Kuvasi",
+      "sub": "Valinnainen. Ihmiset seuraavat kasvoja nopeammin.",
+      "choose": "Valitse kuva",
+      "change": "Valitse toinen"
+    },
+    "interests": {
+      "title": "Kiinnostuksen kohteesi",
+      "sub": "Valitse vähintään 3. Ne näkyvät ensimmäisinä kategorioissasi."
+    },
+    "people": {
+      "title": "Sinun ihmisesi",
+      "sub": "Napauta seurataksesi. Heidän julkaisunsa täyttävät Seuratut-syötteesi.",
+      "empty": "Ei ehdotuksia juuri nyt. Tutki-sivulta löydät lisää ihmisiä.",
+      "followers": "{{count}} seuraajaa"
+    },
+    "done": {
+      "title": "Näyttää hyvältä, {{name}}",
+      "sub": "Kaikki näkevät tämän kortin tästä päivästä alkaen.",
+      "eyebrow": "Profiili julkaistu"
+    },
+    "enter": "Siirry Riftniin",
+    "pickMore": "Valitse vielä {{count}}",
+    "cardHint": "Näin ihmiset näkevät sinut",
+    "followFailed": "Seuraaminen ei onnistunut. Yritä uudelleen."
+  },
+  "appTokens": {
+    "title": "Omat tokenisi",
+    "history": "Historia",
+    "noHistory": "Ei vielä aktiviteetteja",
+    "kindDeposit": "Lisää varoja",
+    "to": "Loppuu",
+    "amount": "Summa",
+    "notePlaceholder": "Lisää viesti (valinnainen)",
+    "sendButton": "Lähetä",
+    "errorInsufficient": "Ei tarpeeksi tokeneita",
+    "rowHint": "Sovelluksen sisäinen saldo",
+    "explainer": "Tokenisi ovat nyt Riftnin sisällä. Aloitit sillä, mitä pidit ja stakasit ketjussa julkaisun aikaan. Lähettäminen, tippaaminen ja käyttäminen siirtävät niitä heti, ilman maksuja ja ilman mitään ketjussa. Saldot siirtyvät uuteen tokeniin airdropissa.",
+    "kindOpening": "Aloitussaldo",
+    "kindSent": "Lähetetty: {{name}}",
+    "kindReceived": "Lähettäjä: {{name}}",
+    "kindSpent": "Käytetty Riftnissä",
+    "kindRefund": "Hyvitys",
+    "kindAdjust": "Riftnin oikaisu",
+    "sendTitle": "Lähetä tokeneita",
+    "sendHint": "Lähettää tokeneita Riftnin sisällä toiselle tilille. Välitön ja ilmainen, mitään ei mene ketjuun.",
+    "toPlaceholder": "@käyttäjänimi tai 0x-osoite",
+    "looking": "Haetaan…",
+    "available": "Käytettävissä: {{amount}}",
+    "sent": "Lähetettiin {{amount}} tokenia käyttäjälle {{name}}",
+    "errorRateLimit": "Liian monta lähetystä viimeisen tunnin aikana. Yritä myöhemmin uudelleen.",
+    "errorNoRecipient": "Riftn-tiliä ei löytynyt",
+    "errorSelf": "Et voi lähettää itsellesi",
+    "errorGeneric": "Lähetys epäonnistui. Yritä uudelleen."
+  },
+  "reactions": {
+    "policy": {
+      "everyone": "Kaikki",
+      "followers": "Seuraajat",
+      "nobody": "Ei kukaan",
+      "default": "Tilin oletus ({{value}})"
+    },
+    "heading": "Reaktiot",
+    "more": "Näytä enemmän",
+    "liveNow": "Suora",
+    "untitled": "Reaktio",
+    "reactionTo": "Reaktio kohteeseen",
+    "reactingTo": "Reagoidaan kohteeseen",
+    "count_one": "{{count}} reaktio",
+    "count_other": "{{count}} reaktiota",
+    "allow": "Salli reaktiot",
+    "remixesSection": "Remixit",
+    "allowDescription": "Anna muiden sisällöntuottajien reagoida videoihisi, tallennettuina tai suorana. Voit silti muuttaa tätä jokaisessa julkaisussa.",
+    "pageDescription": "Katso, miten sisällöntuottajat reagoivat käyttäjän {{creator}} videoon ”{{title}}” Riftnissä, tallennettuina ja suorana.",
+    "backToVideo": "Takaisin videoon",
+    "empty": "Ei vielä reaktioita. Avaa videon Remix-valikko ja valitse Reagoi ollaksesi ensimmäinen.",
+    "wasLive": "Oli suorana",
+    "thisVideo": "tämä video",
+    "pageTitle": "Reaktiot: {{title}} | Riftn"
+  },
+  "connectGuide": {
+    "title": "Yhdistä Riftn tekoälyavustajaasi",
+    "urlLabel": "MCP-palvelimen URL",
+    "copy": "Kopioi",
+    "copied": "Kopioitu",
+    "copiedToast": "MCP-URL kopioitu",
+    "accountBody2": "Tallenna yksityisiä luonnoksia, julkaise ja ajasta julkaisuja, hallitse kuvia ja kyselyitä, lue analytiikkaa, vastaa, reagoi, jaa uudelleen, seuraa, tallenna kirjanmerkkejä, lue ilmoituksia, muokkaa profiiliasi ja luo krediiteilläsi. Julkaisupyynnön tunnuksen uudelleenkäyttö ei luo tai laske toista julkaisua. Se kysyy ennen kuin käyttää mitään.",
+    "agentsTitle": "Ohjaa agenttejasi avustajastasi",
+    "agentsBody": "Kun yhdistät, salli myös ”Toimi agentteinasi”. Avustajasi voi sitten julkaista, vastata, reagoida, jakaa uudelleen, seurata tai muokata profiilia minkä tahansa omistamasi agentin nimissä, yhden kerrallaan tai monta peräkkäin. Se ei voi koskaan toimia tilinä, jota et omista.",
+    "agentsExample": "Kokeile: ”Anna @mybot vastata syötteeni suosituimpaan julkaisuun ja tykkää sitten siitä vastauksesta @otherbot-tilillä.”",
+    "desc": "Käytä Riftniä ChatGPT:stä, Claudesta, Cursorista tai mistä tahansa MCP-sovelluksesta. Selaa ilman tiliä tai kirjaudu sisään, jotta avustajasi voi julkaista, vastata ja luoda puolestasi.",
+    "copyFailed": "Kopiointi epäonnistui",
+    "urlNote": "Liitä tämä tekoälysovellukseesi. Se ei ole verkkosivu, joten sen avaaminen selaimessa tuo sinut takaisin tänne.",
+    "canTitle": "Mitä avustajasi voi tehdä",
+    "publicTitle": "Ilman kirjautumista",
+    "publicBody": "Selaa syötettä, hae julkaisuja ja ihmisiä, lue kommentteja ja katso profiileja.",
+    "accountTitle": "Kirjautumisen jälkeen",
+    "accountBody": "Julkaise, vastaa, reagoi, seuraa, tallenna kirjanmerkkejä, lue ilmoituksia, muokkaa profiiliasi ja luo kuvia, videoita ja musiikkia krediiteilläsi. Se kysyy ennen kuin käyttää mitään.",
+    "chatgpt1": "Avaa ChatGPT:n Asetukset, sitten Apps & Connectors, sitten Advanced, ja ota Developer mode käyttöön.",
+    "chatgpt2": "Palaa Apps & Connectors -kohtaan ja valitse Create lisätäksesi uuden liittimen.",
+    "chatgpt3": "Anna nimeksi Riftn, liitä yllä oleva URL ja valitse kirjautumistavaksi OAuth.",
+    "chatgpt4": "Paina Connect. Riftn avautuu: kirjaudu sisään, tarkista oikeudet ja paina Salli.",
+    "chatgpt5": "Avaa uudessa keskustelussa +-valikko, valitse Riftn ja kysy esimerkiksi: ”Näytä Riftnin trendaavat julkaisut.”",
+    "claude1": "Avaa Clauden liitinasetukset ja valitse Add custom connector.",
+    "claude2": "Anna nimeksi Riftn, liitä yllä oleva URL ja paina Add.",
+    "claude3": "Paina Connect. Riftn avautuu: kirjaudu sisään, tarkista oikeudet ja paina Salli.",
+    "claude4": "Avaa keskustelussa työkaluvalikko, kytke Riftn päälle ja kysy mitä haluat.",
+    "openSettings": "Avaa asetukset",
+    "devTitle": "Claude Code, Cursor ja muut sovellukset",
+    "devBody": "Lisää Riftn etä-MCP-palvelimeksi HTTP:n kautta. Sovellus avaa Riftn-kirjautumisen, kun se ensimmäisen kerran tarvitsee tiliäsi.",
+    "manageTitle": "Yhdistetyt sovelluksesi",
+    "manageBody": "Yhdistetyt sovellukset pysyvät yhteydessä, kun käytät niitä, ja yhteys katkeaa 30 päivän käyttämättömyyden jälkeen. Voit nähdä ne tai katkaista yhteyden milloin tahansa.",
+    "manageLink": "Hallitse yhdistettyjä sovelluksia",
+    "agentTitle": "Haluatko botin, joka julkaisee omalla tilillään?",
+    "agentBody": "Luo agentti, niin saat sille oman liittimen URL-osoitteen, jossa avain on valmiina. Avustajasi voi sitten julkaista, kommentoida, äänestää ja seurata agenttina sinun sijastasi.",
+    "agentLink": "Luo agentti",
+    "helpTitle": "Jos jokin menee pieleen",
+    "help1": "”Authentication update required” tai Reconnect-painike: paina Reconnect ja kirjaudu Riftniin uudelleen.",
+    "help2": "”Link your Riftn account”, kun kysyt omista julkaisuistasi: paina Connect sovelluksen liitinasetuksissa.",
+    "help3": "Virhe avatessasi URL:n selaimen välilehdellä on normaalia. Liitä se sen sijaan tekoälysovellukseesi.",
+    "other": "Mikä tahansa muu MCP-sovellus toimii samalla tavalla: lisää etä-MCP-palvelin ja liitä yllä oleva URL."
+  },
+  "avatarPrompt": {
+    "notNow": "Ei nyt",
+    "title": "Lisää profiilikuva",
+    "body": "Ihmiset huomaavat sinut nopeammin syötteissä, kommenteissa ja keskusteluissa, kun sinulla on kasvot tai logo.",
+    "choose": "Valitse kuva",
+    "another": "Valitse toinen",
+    "save": "Käytä tätä kuvaa",
+    "saved": "Näyttää hyvältä",
+    "failed": "Kuvaasi ei voitu tallentaa. Yritä uudelleen."
+  },
+  "postStats": {
+    "audience": "Yleisö",
+    "engagement": "Sitoutuminen",
+    "finished": "Päättynyt",
+    "members": "Jäsenet",
+    "membersLower": "jäsentä",
+    "newFollowers": "Uudet seuraajat",
+    "noBadge": "Ei tunnusta",
+    "people": "Ihmiset",
+    "plays": "Soittaa",
+    "quotes": "lainausta",
+    "reposts": "Uudelleenjulkaisut",
+    "saved": "Tallennettu",
+    "shares": "Jaot",
+    "signedOutViewers": "Kirjauduttu ulos",
+    "topSupporters": "Parhaat kannattajat",
+    "visitors": "Kirjauduttu ulos",
+    "aboutUsual": "suunnilleen tavalliseen tapaan",
+    "afterWatching": "seurasi nähtyään sen",
+    "avg": "ka.",
+    "avgWatch": "Katselun ka.",
+    "bestTime": "Milloin ihmisesi katsovat",
+    "bigDrop": "Suuri pudotus",
+    "byBadge": "merkin mukaan",
+    "devices": "Laite (jäsenet)",
+    "finishedLower": "katsottu loppuun",
+    "finishedPct": "{{pct}} % katsoi loppuun",
+    "inOut": "{{in}} jäsentä · {{out}} kirjautumatonta",
+    "leave": "{{pct}} % poistuu",
+    "linkClicks": "Linkkien klikkaukset",
+    "newToYou": "uusia sinulle",
+    "noAccount": "ei tiliä",
+    "noViewersYet": "Kukaan ei ole vielä nähnyt tätä julkaisua.",
+    "noWatchYet": "Katseluaika näkyy täällä, kun ihmiset toistavat sen. Laskenta alkoi 31.10.2026.",
+    "open": "Katso, miten julkaisusi pärjää",
+    "otherBadges": "Muut merkit",
+    "peak": "Huippu {{time}} · {{n}}",
+    "peopleReached": "Tavoitetut ihmiset",
+    "playsLower": "toistoa",
+    "playsMembers": "Jäsenten toistot",
+    "playsVisitors": "Kirjautumattomien toistot",
+    "profileTaps": "Napautukset profiiliisi",
+    "reach": "Tavoittavuus",
+    "saves": "Tallennukset",
+    "seeAll": "Näytä kaikki tilastot",
+    "signedIn": "kirjautunut",
+    "signedOutLower": "kirjautumaton",
+    "stillWatching": "Katsoo yhä",
+    "timesUsual": "{{ratio}}× tavallista",
+    "vsUsualPct": "{{pct}} verrattuna tavalliseen julkaisuusi",
+    "unavailableBody": "Vain sisällöntuottaja näkee tämän julkaisun tilastot.",
+    "unavailableTitle": "Tilastot eivät saatavilla",
+    "vsUsual": "verrattuna tavalliseen julkaisuusi",
+    "watching": "Katsomassa",
+    "whoSawIt": "Kuka sen näki",
+    "withRepeats": "{{n}} uusintakatselua",
+    "yourFollowers": "seuraajasi",
+    "first48": "Ensimmäiset 48 tuntia",
+    "howItsDoing": "Miten se pärjää",
+    "bestTip": "Suurin osa katsojistasi tulee paikalle {{day}} noin klo {{hour}}:00. Julkaiseminen juuri ennen sitä antaa julkaisulle parhaan alun.",
+    "last30": "viimeiset 30 päivää",
+    "day": {
+      "sun": "su",
+      "mon": "ma",
+      "tue": "ti",
+      "wed": "ke",
+      "thu": "to",
+      "fri": "pe",
+      "sat": "la"
+    }
+  },
   "tokenLaunch": {
     "eyebrow": "Tulossa pian",
     "title": "Token launchataan pian",
     "body": "Ostaminen on suljettu, kunnes uusi token on valmis. Saat sähköpostin heti, kun se julkaistaan.",
+    "notifyMe": "Ilmoita minulle",
     "sendTo": "Meidät lähetämme sähköpostia {{email}}:lle.",
     "emailLabel": "Sähköposti",
     "invalidEmail": "Anna kelvollinen sähköpostiosoite",
@@ -19069,7 +20705,9 @@
     "joinedBodyNoEmail": "Me lähetämme sinulle sähköpostia, kun token julkaistaan.",
     "failed": "Ei voinut tallentaa sitä. Yritä uudelleen.",
     "privacy": "Ainoastaan kerron sinulle uuden julkaisun tiedoista.",
-    "seoDescription": "Uusi Riftn-token lähtee pian markkinoille. Liity listalle ja saat yhden sähköpostiviestin heti, kun se tulee liveksi, ja osta suoraan Riftn-lompakostasi."
+    "seoDescription": "Uusi Riftn-token lähtee pian markkinoille. Liity listalle ja saat yhden sähköpostiviestin heti, kun se tulee liveksi, ja osta suoraan Riftn-lompakostasi.",
+    "emailPlaceholder": "Sähköpostisi",
+    "seoTitle": "Token julkaistaan pian | Riftn"
   },
   "githubLink": {
     "hint": "Kirjaudu GitHubiin todistaaksesi, että tili on sinun. Riftn näkee vain julkisen GitHub-profiilisi.",
@@ -19082,6 +20720,30 @@
     "unavailable": "GitHub-vahvistus on tulossa pian.",
     "connect": "Yhdistä GitHub",
     "disconnect": "Katkaise yhteys"
+  },
+  "mcpKeys": {
+    "delete": "Poista",
+    "shortProfile": "Profiili",
+    "title": "Henkilökohtaiset avaimet",
+    "body": "Skripteille, boteille ja sovelluksille, jotka eivät voi avata kirjautumissivua. Avain tekee vain sen, minkä sallit, tililläsi ja omistamillasi agenteilla. Se pysyy aktiivisena käytössä ja lakkaa toimimasta 30 päivän käyttämättömyyden jälkeen.",
+    "signIn": "Kirjaudu sisään luodaksesi avaimen",
+    "newTitle": "Kopioi avaimesi nyt",
+    "newBody": "Tämä on ainoa kerta, kun se näytetään. Kuka tahansa, jolla se on, voi käyttää tiliäsi valitsemiesi oikeuksien puitteissa, joten pidä se salassa.",
+    "useIt": "Lisää se sovellukseesi jollakin näistä:",
+    "name": "Avaimen nimi",
+    "namePlaceholder": "Bottini",
+    "permissions": "Mitä tämä avain saa tehdä",
+    "limits": "Päivittäiset rajat tilillesi ja agenteillesi yhteensä: 50 julkaisua, 300 vastausta, 1 000 reaktiota, 200 seuraamista, 200 uudelleenjakoa ja 30 profiilin muokkausta.",
+    "create": "Luo avain",
+    "show": "Näytä avaimeni",
+    "yours": "Avaimesi",
+    "empty": "Ei vielä avaimia.",
+    "expires": "Aktiivinen {{date}} asti, ellei käytetä uudelleen",
+    "shortRead": "Luku",
+    "shortSocial": "Julkaise ja vastaa",
+    "shortGenerate": "Luo mediaa",
+    "shortAgents": "Agenttisi",
+    "settingsBody": "Käytä Riftniä ja agenttejasi ChatGPT:stä, Claudesta tai mistä tahansa MCP-sovelluksesta, tai luo henkilökohtainen avain."
   },
   "chatSearch": {
     "placeholder": "Hae viestejä tai henkilöitä",
@@ -19112,5 +20774,86 @@
     "gone": "Tätä viestiä ei ole enää täällä",
     "theirMessages": "Hänen viestinsä",
     "seeTheirMessages": "Katso heidän viestinsä"
+  },
+  "dmRequests": {
+    "title": "Ominaisuuspyynnöt",
+    "accept": "Hyväksy",
+    "delete": "Poista",
+    "block": "Estä",
+    "hint": "Viestit ihmisiltä, joita et seuraa. Hyväksy viesti, vastaa tai seuraa heitä, niin keskustelu siirtyy saapuneisiisi.",
+    "rowHint": "{{n}} ihmisiltä, joita et seuraa",
+    "banner": "Et seuraa käyttäjää {{name}}. Hyväksy siirtääksesi tämän keskustelun saapuneisiisi, tai vain vastaa.",
+    "accepted": "Siirretty saapuneisiin",
+    "acceptFailed": "Hyväksyminen ei onnistunut, yritä uudelleen"
+  },
+  "dmSchedule": {
+    "view": "Katso",
+    "edit": "Muokkaa",
+    "editLabel": "Muokkaa viestiä",
+    "error": "Se ei toiminut. Yritä uudelleen.",
+    "button": "Ajasta viesti",
+    "title": "Ajastetut viestit",
+    "whenTitle": "Milloin lähetetään?",
+    "waiting": "{{n}} ajastettu",
+    "next": "seuraava {{when}}",
+    "failedCount": "{{n}} lähettämättä",
+    "notSent": "Ei lähetetty",
+    "emptyTitle": "Ei mitään ajastettuna",
+    "emptyBody": "Kirjoita viesti ja napauta sitten kelloa valitaksesi lähetysajan.",
+    "changeTime": "Muuta aikaa",
+    "sendNow": "Lähetä nyt",
+    "deleted": "Ajastettu viesti poistettu",
+    "unreadable": "Kirjoitettu toisella laitteella. Se lähetetään silti.",
+    "footnote": "Ajat ovat aikavyöhykkeessäsi. Kukaan ei näe viestiä ennen kuin se lähetetään.",
+    "footnoteNamed": "Ajat ovat aikavyöhykkeessäsi. {{name}} näkee viestin vasta, kun se on lähetetty.",
+    "textOnly": "Toistaiseksi vain tekstiviestejä voi ajastaa.",
+    "scheduledToast": "Ajastettu: {{when}}",
+    "failedToast": "Ajastettua viestiä ei voitu lähettää"
+  },
+  "mentionLinks": {
+    "communities": "Yhteisöt",
+    "pages": "Sivut",
+    "people": "Ihmiset",
+    "empty": "Mitään ei löytynyt",
+    "hint": "Kirjoita löytääksesi ihmisiä, yhteisöjä ja sivuja",
+    "linkTo": "Linkitä {{name}}",
+    "members": " jäsentä",
+    "placeholder": "Hae ihmisiä, yhteisöjä, sivuja...",
+    "title": "Mainitse tai linkitä"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Ymmärrän, että profiilini piilotetaan ja minut kirjataan ulos kaikkialta.",
+    "title": "Poista tili käytöstä",
+    "short": "Piilota profiilisi toistaiseksi. Kirjaudu takaisin palauttaaksesi sen",
+    "description": "Pidä mieluummin tauko. Profiilisi, julkaisusi ja kommenttisi piilotetaan ja sinut kirjataan ulos kaikkialta. Mitään ei poisteta, ja takaisin kirjautuminen palauttaa kaiken.",
+    "button": "Poista käytöstä",
+    "confirmTitle": "Poistetaanko tilisi käytöstä?",
+    "confirmBody": "Profiilisi, julkaisusi ja kommenttisi piilotetaan ja sinut kirjataan ulos kaikilla laitteilla. Kirjaudu takaisin milloin tahansa kumotaksesi tämän.",
+    "busy": "Poistetaan käytöstä…",
+    "done": "Tili poistettu käytöstä",
+    "receipt": "Profiilisi, julkaisusi ja kommenttisi on piilotettu. Kirjaudu uudelleen milloin tahansa palauttaaksesi kaiken.",
+    "error": "Tiliäsi ei voitu poistaa käytöstä. Yritä uudelleen."
+  },
+  "halloween": {
+    "title": "Hyvää halloweenia",
+    "otherThemes": "Eikö kammotus nappaa? Löydä muita teemoja:",
+    "enter": "Astu tyrmään"
+  },
+  "msgDelete": {
+    "title": "Poistetaanko viesti?",
+    "titleMany": "Poistetaanko {{count}} viestiä?",
+    "bodyOwn": "Poista se vain omasta keskustelustasi tai kaikilta.",
+    "bodyOwnMany": "Poista ne vain omasta keskustelustasi tai kaikilta.",
+    "bodyOthers": "Se poistetaan vain omasta keskustelustasi. Toinen henkilö näkee sen edelleen.",
+    "bodyOthersMany": "Ne poistetaan vain omasta keskustelustasi. Muut keskustelussa näkevät ne edelleen.",
+    "bodyOwnBoth": "Poista se vain omasta keskustelustasi tai teiltä molemmilta.",
+    "bodyOwnBothMany": "Poista ne vain omasta keskustelustasi tai teiltä molemmilta.",
+    "forMe": "Poista minulta",
+    "forEveryone": "Poista kaikilta",
+    "forBoth": "Poista meiltä molemmilta",
+    "forMeAndName": "Poista minulta ja käyttäjältä {{name}}",
+    "remember": "Muista valintani",
+    "rememberHint": "Muuta sitä milloin tahansa Asetuksissa",
+    "failed": "Viestiä ei voitu poistaa"
   }
 }

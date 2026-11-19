@@ -1,5 +1,16 @@
 import { apiCall } from './core';
 
+/** Reactions other people left on your lines in a chat, not seen yet. */
+export interface ChatReactionSummary {
+  total: number;
+  /** Most used first. */
+  emojis: { emoji: string; count: number }[];
+  last: { emoji: string; by: string; name: string | null; messageId: string; at: string };
+}
+
+/** Public Chat keeps only its waiting reactions in the settings store. */
+export const PUBLIC_CHAT_PREF_ID = 'live:global';
+
 /** One person's own settings for one chat (only they see them). */
 export interface ChatPref {
   conversationId: string;
@@ -11,6 +22,8 @@ export interface ChatPref {
   listedAt?: string | null;
   /** DMs: your messages in this chat are end-to-end encrypted since then. */
   encryptedAt?: string | null;
+  /** Reactions to your lines you haven't seen; cleared when you open the chat. */
+  reactions?: ChatReactionSummary | null;
 }
 
 /**
@@ -33,6 +46,8 @@ export interface ChatPrefPatch {
   listed?: boolean;
   /** DMs: end-to-end encrypt your messages in this chat. Off by default. */
   encrypted?: boolean;
+  /** You opened the chat: clear its waiting reactions. */
+  seenReactions?: true;
 }
 
 export async function getChatPrefs(): Promise<ChatPref[]> {

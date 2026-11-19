@@ -16,22 +16,28 @@
 
 html {
   --float-glass: rgb(var(--glass-tint, 9 9 11) / 0.72);
+  --float-solid: rgb(var(--glass-tint, 9 9 11));
   --float-glass-blur: blur(24px) saturate(160%);
 }
 html[data-theme='light'] {
   --float-glass: rgb(249 248 244 / 0.78);
+  --float-solid: rgb(249 248 244);
 }
 html[data-system-tone="light"] {
   --float-glass: rgb(249 248 244 / 0.78);
+  --float-solid: rgb(249 248 244);
 }
 html[data-theme='war'] {
   --float-glass: rgb(var(--war-gunmetal, 14 20 18) / 0.76);
+  --float-solid: rgb(var(--war-gunmetal, 14 20 18));
 }
 html[data-theme='osaka'] {
   --float-glass: rgb(var(--osaka-slate, 17 14 28) / 0.76);
+  --float-solid: rgb(var(--osaka-slate, 17 14 28));
 }
 html[data-theme='jungle'] {
   --float-glass: rgb(var(--jungle-bark, 38 28 19) / 0.8);
+  --float-solid: rgb(var(--jungle-bark, 38 28 19));
 }
 
 html[data-theme][data-theme] [data-sonner-toaster] [data-sonner-toast],
@@ -250,13 +256,29 @@ html[data-theme][data-theme] [data-feed-island-surface]:not(#_):not(#_)::after {
   --chip-face-ring: rgb(var(--glass-tint, 9 9 11));
   --chip-shade: rgb(0 0 0 / 0.45);
   color: var(--chip-ink);
-  transition: transform 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.08) 0.2s, filter 0.12s;
+  isolation: isolate;
+  transition: transform 0.36s cubic-bezier(0.2, 0.9, 0.3, 1.08) 0.2s;
 }
-[data-feed-new-posts-chip]:active { filter: brightness(1.2); }
+/* A press lights the drawer with a wash over its glass, never a filter on
+   the drawer itself: any filter there (brightness on :active) makes it a
+   backdrop root, so its frost had nothing to blur and the drawer flashed
+   see-through for as long as it was held, then faded back. */
+[data-feed-new-posts-chip]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--chip-ink) 10%, transparent);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+[data-feed-new-posts-chip]:active::after { opacity: 1; }
 html[data-nav-hidden='true'] [data-feed-new-posts-chip] {
   transform: translateY(-100%);
   pointer-events: none;
-  transition: transform 0.17s cubic-bezier(0.5, 0, 0.75, 0), filter 0.12s;
+  transition: transform 0.17s cubic-bezier(0.5, 0, 0.75, 0);
 }
 @media (prefers-reduced-motion: reduce) {
   [data-feed-new-posts-chip], html[data-nav-hidden='true'] [data-feed-new-posts-chip] { transition: none; }
@@ -505,7 +527,7 @@ html[data-theme='light'] { --top-builders-shipped: rgb(24 24 27); }
    new-posts drawer's material, full width. It is the search pill itself, so
    the search field inside drops its own recess and a press does not flash
    the whole drawer. */
-[data-kit-search-slot] [data-feed-new-posts-chip]:active { filter: none; }
+[data-kit-search-slot] [data-feed-new-posts-chip]::after { display: none; }
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-kit-search-drawer] :is([data-search-surface], input[type='search']) {
   background: transparent !important;
   box-shadow: none !important;

@@ -17,7 +17,12 @@ export interface PostVideoEdits {
   crop?: VideoCropRect;
   /** The shape picked for the crop box (Original, Free, 1:1...). */
   cropRatio?: CropRatioId;
+  /** Playback speed baked into the posted file (1 = as filmed). */
+  speed?: number;
 }
+
+/** The speeds the video editor offers. Same list as the backend (job/video-edits). */
+export const VIDEO_SPEEDS = [0.5, 0.75, 1, 1.5, 2] as const;
 
 export interface VideoEditsPayload {
   mirror?: boolean;
@@ -25,6 +30,7 @@ export interface VideoEditsPayload {
   matrix?: number[];
   vignette?: number;
   crop?: VideoCropRect;
+  speed?: number;
 }
 
 /** The colour matrix the edits paint with, or null for none. */
@@ -45,6 +51,7 @@ export function videoEditsPayload(e?: PostVideoEdits | null): VideoEditsPayload 
   if (vignette > 0) out.vignette = vignette;
   const crop = cropPayload(e.crop);
   if (crop) out.crop = crop;
+  if (e.speed && e.speed !== 1 && (VIDEO_SPEEDS as readonly number[]).includes(e.speed)) out.speed = e.speed;
   return Object.keys(out).length ? out : null;
 }
 

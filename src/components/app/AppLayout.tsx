@@ -13,6 +13,7 @@ import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 // so a phone never downloads it. Desktop kicks the fetch off here, at module
 // evaluation, so the chunk is in flight before React mounts and the rail
 // arrives a beat behind the rest of the shell instead of a round trip later.
+import { HomeRightSidebarSkeleton } from './PageSkeletons';
 const loadRightSidebar = () => import('./RightSidebar').then(m => ({ default: m.RightSidebar }));
 const RightSidebar = React.lazy(loadRightSidebar);
 if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').matches) {
@@ -20,15 +21,16 @@ if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').
 }
 
 /**
- * Same width as the rail's root (RightSidebar.tsx: `w-72 xl:w-80 2xl:w-88`),
+ * Same width as the rail's root (RightSidebar.tsx: `w-72 xl:w-80`),
  * so the column layout is final from the first commit. With a null fallback
  * the middle column briefly took the rail's width too and snapped back when
  * the chunk landed — a visible jump of the welcome panel on every desktop
  * first visit, and Lighthouse desktop scored it as 0.125 of layout shift.
  */
-const RailPlaceholder = () => (
-  <aside aria-hidden="true" className="hidden lg:block w-72 xl:w-80 2xl:w-88 shrink-0" />
-);
+// Draws the same rail skeleton as the boot HTML and the shell fallback, so
+// the rail never blanks out between them and the real rail (it used to be an
+// empty spacer here: skeleton → blank → skeleton-ish → real).
+const RailPlaceholder = HomeRightSidebarSkeleton;
 
 function DesktopRightRail() {
   const isDesktop = useIsDesktopViewport();
@@ -207,7 +209,7 @@ function RetainedPostOverlay({ entry }: { entry: RetainedPostEntry }) {
 function AppLayoutContent({ children }: AppLayoutContentProps) {
   const { t: _copy } = _useCopy();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isPostModalOpen, closePostModal, pendingFiles, clearPendingFiles, initialText, clearInitialText, initialCategory, clearInitialCategory, openPostModal } = useGlobalDropZone();
+  const { isPostModalOpen, closePostModal, pendingFiles, clearPendingFiles, initialText, clearInitialText, initialCategory, clearInitialCategory, initialSound, clearInitialSound, openPostModal } = useGlobalDropZone();
 
   // A post written somewhere on this origin that has no composer of its own —
   // today that is Trenchstar opened straight at /trenchstar-game/, where the
@@ -279,7 +281,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   // so its <main> is most of the screen. Sheets and the login modal must not
   // follow it — they keep the column every other page has, centred where the
   // terminal's <main> sits: the 80rem shell minus the left sidebar and the
-  // rail width for the current breakpoint (RightSidebar: w-72 xl:w-80 2xl:w-88).
+  // rail width for the current breakpoint (RightSidebar: w-72 xl:w-80).
   const isWideMainRoute = location.pathname === '/dex' || location.pathname.startsWith('/dex/');
   useLayoutEffect(() => {
     const mainEl = mainRef.current;
@@ -290,7 +292,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
       const shell = Math.min(window.innerWidth, 1280);
       const sidebar = rect.left - (mainEl.parentElement?.getBoundingClientRect().left ?? 0);
       const w = window.innerWidth;
-      const rail = w >= 1536 ? 352 : w >= 1280 ? 320 : w >= 1024 ? 288 : 0;
+      const rail = w >= 1280 ? 320 : w >= 1024 ? 288 : 0;
       return Math.max(0, shell - sidebar - rail);
     };
     // Any write on <html> restyles every element: write only changes.
@@ -671,11 +673,12 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
         <Suspense fallback={null}>
           <PostModal
             isOpen={isPostModalOpen}
-            onClose={() => { closePostModal(); clearInitialText(); clearInitialCategory(); }}
+            onClose={() => { closePostModal(); clearInitialText(); clearInitialCategory(); clearInitialSound(); }}
             initialFiles={pendingFiles}
             onFilesProcessed={clearPendingFiles}
             initialText={initialText}
             initialCategory={initialCategory}
+            initialSound={initialSound}
           />
         </Suspense>
       )}

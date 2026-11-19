@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload } from 'lucide-react';
+import type { StudioEdits } from '@/features/post/lib/studioPaint';
+import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload, Gauge, Pencil, Volume2, VolumeX } from 'lucide-react';
 import { ADJUST_RANGES, DEFAULT_ADJUST, STUDIO_LOOKS, studioColorMatrix, type StudioAdjust, type StudioAdjustKey } from '@/features/post/lib/studioColor';
-import { POST_DESTRUCT_CHOICES, postDestructLabel, svgMatrixValues, vignetteBackground } from '@/features/post/lib/video-edits';
+import { POST_DESTRUCT_CHOICES, VIDEO_SPEEDS, postDestructLabel, svgMatrixValues, vignetteBackground } from '@/features/post/lib/video-edits';
 import { VIDEO_CROP_RATIOS, cropRatioValue, dragCropRect, fitCropRect, isFullCrop, type CropHandle, type CropRatioId, type VideoCropRect } from '@/features/post/lib/video-crop';
 import X from '@/components/ui/cut-icons/close';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
@@ -20,7 +21,7 @@ import { DmVideoFrame } from './DmVideo';
 import { LockPriceControl } from './LockPriceControl';
 import { LOCK_DEFAULT_USD, formatLockUsd } from '@/lib/dm-lock-price';
 
-export type Tab = 'cover' | 'trim' | 'crop' | 'mirror' | 'rotate' | 'looks' | 'adjust' | 'hide' | 'timer' | 'expire' | 'alt' | 'music';
+export type Tab = 'cover' | 'trim' | 'crop' | 'speed' | 'mirror' | 'rotate' | 'looks' | 'adjust' | 'hide' | 'timer' | 'expire' | 'alt' | 'music';
 const ADJUST_ORDER: StudioAdjustKey[] = ['light', 'contrast', 'warmth', 'tint', 'colour', 'fade', 'vignette'];
 const FRAME_COUNT = 10;
 const MIN_KEEP = 1;
@@ -140,6 +141,9 @@ export interface DmStudioItem {
   options: DmVideoOptions;
   destruct: DmDestructChoice | null;
   lockPrice: number | null;
+  /** Photo editor: the untouched original and the edits over it. */
+  studioOriginal?: File;
+  studioEdits?: StudioEdits;
   /** Alt text, where the place it goes keeps one (posts). */
   description?: string;
   /** Post videos: a look (photo studio id), its strength 0..100, and the adjust dials. */
@@ -174,7 +178,10 @@ export function DmMediaStudio({
   music,
   onUploadCover,
   onReplace,
+  onEditPhoto,
 }: {
+  /** Photos: opens the full photo editor (crop, looks, draw, text) on item i. */
+  onEditPhoto?: (i: number) => void;
   /** Posts: swap the video for another one from the device. */
   onReplace?: () => void;
   /** Posts: how long the whole post stays up (seconds), or null for always. */
@@ -269,6 +276,28 @@ export function DmMediaStudio({
   const end = options.trimEnd ?? dur;
   const kept = keptDuration(options, dur);
   const set = (patch: Partial<DmVideoOptions>) => onOptionsChange({ ...options, ...patch });
+  // Preview the picked speed (post composer only).
+  useEffect(() => { const v = videoRef.current; if (v) v.playbackRate = options.speed ?? 1; }, [options.speed]);
+  // Hear the picked video while editing. Starts with sound; if the browser
+  // refuses to autoplay with sound, it plays muted and the icon shows that.
+  const [soundOn, setSoundOn] = useState(true);
+  useEffect(() => { const v = videoRef.current; if (v) v.muted = !soundOn; }, [soundOn, item?.id]);
+  const startWithSound = () => {
+    const v = videoRef.current;
+    if (!v || !open || !soundOn || !v.paused) return;
+    v.muted = false;
+    void v.play().catch(() => {
+      v.muted = true;
+      setSoundOn(false);
+      void v.play().catch(() => undefined);
+    });
+  };
+  const toggleSound = () => {
+    const v = videoRef.current;
+    const on = !soundOn;
+    setSoundOn(on);
+    if (v) { v.muted = !on; if (on && v.paused) void v.play().catch(() => undefined); }
+  };
 
   const timeAt = (clientX: number) => {
     const r = stripRef.current?.getBoundingClientRect();
@@ -298,6 +327,7 @@ export function DmMediaStudio({
   const allTabs: { key: Tab; label: string; icon: typeof Scissors }[] = [
     { key: 'cover', label: _copy('dmVideo.cover', { defaultValue: 'Cover' }), icon: ImageIcon },
     { key: 'trim', label: _copy('dmVideo.trim', { defaultValue: 'Trim' }), icon: Scissors },
+    { key: 'speed', label: _copy('editor.video.speed', { defaultValue: 'Speed' }), icon: Gauge },
     { key: 'crop', label: _copy('copy.studio.crop', { defaultValue: 'Crop' }), icon: Crop },
     { key: 'mirror', label: _copy('dmVideo.mirror', { defaultValue: 'Mirror' }), icon: FlipHorizontal2 },
     { key: 'rotate', label: _copy('dmVideo.rotate', { defaultValue: 'Rotate' }), icon: RotateCw },
@@ -412,6 +442,7 @@ export function DmMediaStudio({
             onTimeUpdate={setNow}
             onPlayState={setPlaying}
             onMeta={(m) => {
+              startWithSound();
               if (m.w && m.h && (videoSize?.w !== m.w || videoSize?.h !== m.h)) setVideoSize({ w: m.w, h: m.h });
               if (!item.duration && Number.isFinite(m.dur)) onItemChange(active, { duration: m.dur });
             }}
@@ -422,6 +453,7 @@ export function DmMediaStudio({
             maxH={typeof window !== 'undefined' ? Math.max(200, Math.round(window.innerHeight * 0.42)) : 320}
             videoRef={videoRef}
             autoPlay={open}
+            muted={!soundOn}
             loop
             blurred={options.hidden === 'reveal' || lockPrice != null}
             colorFilter={colorMatrix ? `url(#${filterId})` : undefined}
@@ -460,6 +492,16 @@ export function DmMediaStudio({
                 </span>
               )}
             </button>
+            )}
+            {tab !== 'crop' && (
+              <button
+                type="button"
+                onClick={toggleSound}
+                className="absolute right-2 top-2 z-10 p-1 text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] transition-opacity hover:text-white"
+                aria-label={soundOn ? _copy('dmVideo.mute', { defaultValue: 'Mute' }) : _copy('dmVideo.unmute', { defaultValue: 'Unmute' })}
+              >
+                {soundOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+              </button>
             )}
           </DmVideoFrame>
           {dur > 0 && (
@@ -526,6 +568,17 @@ export function DmMediaStudio({
         <div className="flex flex-col gap-3 px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
           {tabs.length > 0 && <>
           <div role="tablist" className={cn('flex border-b border-white/10 [scrollbar-width:none]', tabs.length > 6 ? 'gap-1 overflow-x-auto' : 'justify-around')}>
+            {!isVideo && onEditPhoto && item && !/gif/i.test(item.file.type) && (
+              <button
+                type="button"
+                data-testid="dm-photo-edit"
+                onClick={() => onEditPhoto(Math.min(active, items.length - 1))}
+                className={cn('flex shrink-0 flex-col items-center gap-1 px-2 pb-2 pt-1 text-[11px] text-zinc-400 transition-colors hover:text-white', tabs.length > 6 && 'min-w-[56px]')}
+              >
+                <Pencil className="h-4 w-4" />
+                {_copy('common.edit', { defaultValue: 'Edit' })}
+              </button>
+            )}
             {tabs.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -650,6 +703,20 @@ export function DmMediaStudio({
                     className={cn('flex-1 py-2 text-xs font-semibold text-zinc-400', !!options.mirror === m && 'bg-white text-black')}
                   >
                     {m ? _copy('dmVideo.mirrored', { defaultValue: 'Mirrored' }) : _copy('dmVideo.original', { defaultValue: 'Original' })}
+                  </button>
+                ))}
+              </div>
+            )}
+            {tab === 'speed' && (
+              <div className="flex overflow-hidden rounded-full border border-white/15">
+                {VIDEO_SPEEDS.map((sp) => (
+                  <button
+                    key={sp}
+                    type="button"
+                    onClick={() => set({ speed: sp === 1 ? undefined : sp })}
+                    className={cn('flex-1 py-2 text-xs font-semibold tabular-nums text-zinc-400', (options.speed ?? 1) === sp && 'bg-white text-black')}
+                  >
+                    {sp}×
                   </button>
                 ))}
               </div>

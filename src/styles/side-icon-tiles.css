@@ -14,3 +14,16 @@
     backdrop-filter: blur(8px);
   }
 }
+
+/* No fade on the icon squares when a row stops being the open page.
+   The open row's square has no border; the moment it turns back into a plain
+   row it gains the 1px rim above. With a colour fade on the square, that rim
+   started from the page-wide default border colour (near-white, fully solid)
+   and faded down to the soft rim, so the row you just left flashed a white
+   ring for a split second. The glass highlight already jumps straight to the
+   new row, so the squares swap straight too. Every theme, desktop only. */
+@media (min-width: 1024px) {
+  [data-desktop-left-rail] [data-side-panel] :is(a, button) > div.rounded-xl:not(#_):not(#_) {
+    transition: none !important;
+  }
+}

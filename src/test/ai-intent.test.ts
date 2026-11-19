@@ -73,6 +73,13 @@ describe('assistant intent classification', () => {
     expect(requiresImageGeneration('show me a husky', false, { conversational: true })).toBe(true);
   });
 
+  it('answers a "show me the link" question instead of opening the image paywall', () => {
+    const ask = 'show me the link explaining how people earn money on riftn';
+    expect(requiresImageGeneration(ask, false, { conversational: true })).toBe(false);
+    expect(requiresImageGeneration('show me how staking works', false, { conversational: true })).toBe(false);
+    expect(requiresImageGeneration('show me a picture of a husky', false, { conversational: true })).toBe(true);
+  });
+
   it('routes an explicit request even when it mentions an account word', () => {
     expect(requiresImageGeneration('draw me a picture of a wallet', false)).toBe(true);
     expect(detectAiToolRequest('transcribe this support call', false)).toBe('speech-to-text');

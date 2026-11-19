@@ -43,3 +43,28 @@ export async function markCommunityChatSeen(communityId: string): Promise<void> 
     // Best effort: the worst case is one extra ping.
   }
 }
+
+/**
+ * A reaction you just left on (or took off) someone's line. The API re-reads
+ * the line under your wallet session and shows the emoji in its author's
+ * Chat list until they open the chat.
+ */
+export async function reportCommunityChatReaction(
+  communityId: string,
+  messageId: string,
+  emoji: string,
+  walletAddress: string,
+  removed = false,
+): Promise<void> {
+  try {
+    const session = await ensureWalletSession(walletAddress.toLowerCase());
+    if (!session) return;
+    await apiCall('/api/notification/community-chat/reaction', {
+      method: 'POST',
+      body: { communityId, messageId, emoji, walletSession: session.token, removed },
+      requiresAuth: true,
+    });
+  } catch {
+    // Best effort: a missed badge is never a failed reaction.
+  }
+}

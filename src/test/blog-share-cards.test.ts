@@ -157,3 +157,38 @@ describe('blog post crawler markup', () => {
     expect(res.body).toMatch(/<img src="[^"]+" alt="[^"]+" width="\d+" height="\d+"/);
   });
 });
+
+describe('article share tags for browser-shaped previewers', () => {
+  const SHELL = readFileSync(resolve(ROOT, 'index.html'), 'utf8');
+  const CHROME = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+
+  async function shell(path: string) {
+    const env = makeEnv();
+    const assets = env.ASSETS.fetch.getMockImplementation()!;
+    env.ASSETS.fetch.mockImplementation(async (input: Request | URL | string) => {
+      const u = new URL(typeof input === 'string' ? input : 'url' in input ? input.url : input.href);
+      if (/^\/(?:guides|docs\/blog|explore)/.test(u.pathname)) {
+        return new Response(SHELL, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      }
+      return assets(input);
+    });
+    const res = await worker.fetch(new Request(`https://riftn.com${path}`, { headers: { 'User-Agent': CHROME } }), env, { waitUntil() {} });
+    return res.text();
+  }
+
+  it("the app shell for an article carries the article's title and banner", async () => {
+    const post = manifest.find((p) => p.slug === NEW_SLUG)!;
+    const html = await shell(`/guides/${NEW_SLUG}?ref=ABC`);
+    expect(html).toContain('<div id="root"');
+    expect(meta(html, 'og:image')).toContain(post.bannerImage!);
+    expect(meta(html, 'twitter:image')).toBe(meta(html, 'og:image'));
+    expect(meta(html, 'og:title')).not.toBe('Riftn');
+    expect(html).toContain('<meta property="og:type" content="article"');
+    expect(meta(html, 'og:url')).toBe(`https://riftn.com/guides/${NEW_SLUG}`);
+  });
+
+  it('other app pages keep the default shell', async () => {
+    const html = await shell('/explore');
+    expect(meta(html, 'og:title')).toBe('Riftn');
+  });
+});

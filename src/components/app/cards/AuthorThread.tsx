@@ -96,7 +96,6 @@ function ThreadEntry({
   entry,
   tokenId,
   isOwn,
-  highlighted,
   onProfile,
 }: {
   entry: Comment;
@@ -229,10 +228,7 @@ function ThreadEntry({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
-      className={cn(
-        'relative flex items-start gap-3 py-2 rounded-xl transition-colors',
-        highlighted && 'bg-white/[0.06] ring-1 ring-white/25 px-2 -mx-2',
-      )}
+      className="relative flex items-start gap-3 py-2 rounded-xl transition-colors"
       data-comment-id={entry.id}
       onClick={(e) => {
         // Text selection shouldn't throw you to the deep link, same guard the
