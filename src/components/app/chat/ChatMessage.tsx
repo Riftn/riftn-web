@@ -438,8 +438,11 @@ export const ChatMessage = memo(function ChatMessage({
       data-msg-menu-open={menuPoint.point ? '' : undefined}
       id={`chat-msg-${message.id}`}
       data-chat-row
+      data-chat-own={isMine || undefined}
       data-chat-replying={replying || undefined}
-      className="flex gap-3 py-2 px-4 hover:bg-zinc-800/30 transition-colors group"
+      // Your own lines sit on a soft filled card, as in group chats, so they
+      // stand out from everyone else's. Same text position as other rows.
+      className={`flex gap-3 py-2 transition-colors group ${isMine ? 'mx-1.5 my-0.5 rounded-2xl px-2.5' : 'px-4 hover:bg-zinc-800/30'}`}
       {...hold}
     >
       <button

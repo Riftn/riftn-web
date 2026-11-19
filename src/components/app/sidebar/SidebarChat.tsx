@@ -631,7 +631,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 navigate(`/${handle}`);
               } : undefined;
               return (
-                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
                   {/* Reply indicator – click to scroll to original */}
                   {msg.reply_to && (
                     <button
