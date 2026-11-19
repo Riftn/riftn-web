@@ -297,9 +297,9 @@ const tabs: { value: NotificationTypeFilter; icon: React.ElementType }[] = [
 // unfiltered feed.
 const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
   all: null,
-  likes: ['like', 'comment_like', 'feature_request_like', 'feature_request_comment_like', 'governance_vote', 'governance_comment_like'],
+  likes: ['generation_like', 'generation_comment_like', 'like', 'comment_like', 'feature_request_like', 'feature_request_comment_like', 'governance_vote', 'governance_comment_like'],
   follows: ['following', 'follow_request', 'follow_request_accepted', 'followRequest', 'follow-request'],
-  comments: ['comment', 'comment_reply', 'mention', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
+  comments: ['generation_comment', 'generation_reply', 'comment', 'comment_reply', 'mention', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
   reposts: ['repost', 'quote', 'remix'],
   features: ['feature_request_like', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_new', 'feature_request_comment_like', 'feature_request_status'],
   communities: ['community_chat', 'community_mention', 'community_here', 'community_join'],
@@ -388,6 +388,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'comment_like':
     case 'feature_request_like':
     case 'feature_request_comment_like':
+    case 'generation_like':
+    case 'generation_comment_like':
     case 'governance_comment_like':
       return <ThumbsUp className="w-4 h-4 text-white/70" />;
     case 'comment':
@@ -398,6 +400,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'feature_request_mention':
     case 'feature_request_activity':
     case 'feature_request_new':
+    case 'generation_comment':
+    case 'generation_reply':
     case 'governance_comment':
     case 'governance_reply':
       return <MessageSquareText className="w-4 h-4 text-white/70" />;
@@ -720,6 +724,11 @@ function getNotificationContent(
     const key = kind === 'stitch' ? 'stitch' : kind === 'react' ? 'react' : kind === 'react_live' ? 'reactLive' : 'duet';
     return tr(`remixLinks.notify.${key}`, { name: actorName });
   }
+  if ((notification.type as string).startsWith('generation_')) {
+    const kind = notification.type as string;
+    const fallback = kind === 'generation_like' ? '{{name}} reacted to your generation' : kind === 'generation_comment_like' ? '{{name}} reacted to your comment' : kind === 'generation_reply' ? '{{name}} replied to your comment' : '{{name}} commented on your generation';
+    return tr(`creator.gallery.notifications.${kind}`, { name: actorName, defaultValue: fallback });
+  }
   if ((notification.type as string) === 'governance_vote') {
     const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
     return tr(title ? 'notifications.custom.governanceVoteNamed' : 'notifications.custom.governanceVote', { name: actorName, title });
@@ -972,6 +981,11 @@ function getNavigationLink(notification: DeHubNotification): string | null {
   }
   // A comment or reply row lands on the comment it is about — the proposal
   // page reads the same `?comment=` the features board does.
+  if ((notification.type as string).startsWith('generation_')) {
+    const refId = customReferenceId(notification);
+    const commentId = (notification as DeHubNotification & { _customCommentId?: string })._customCommentId;
+    return refId ? `/creator/gallery/${encodeURIComponent(refId)}${commentId ? `?comment=${encodeURIComponent(commentId)}` : ''}` : '/creator/gallery';
+  }
   const GOVERNANCE_COMMENT_TYPES = ['governance_comment', 'governance_reply', 'governance_comment_like'];
   if ((notification.type as string) === 'governance_vote' || (notification.type as string) === 'governance_result' || GOVERNANCE_COMMENT_TYPES.includes(notification.type as string)) {
     const refId = customReferenceId(notification);

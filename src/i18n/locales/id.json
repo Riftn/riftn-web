@@ -788,6 +788,9 @@
     "defaultProfileTabDesc": "Pilih tab mana yang pertama dilihat pengunjung di profil Anda",
     "defaultProfileView": "Tata letak postingan profil",
     "defaultProfileViewDesc": "Tampilkan postingan Anda sebagai kisi atau daftar saat orang membuka profil Anda",
+    "readerProfileView": "Buka profil lain sebagai",
+    "readerProfileViewDesc": "Pilih grid atau daftar untuk setiap profil yang kamu buka, atau ikuti pilihan masing-masing orang",
+    "readerProfileViewOwner": "Pilihan masing-masing orang",
     "public": "Publik",
     "publicDesc": "Siapa saja dapat melihat postingan Anda",
     "private": "Pribadi",
@@ -1231,7 +1234,9 @@
     "menuLayoutSections": "Bagian",
     "menuLayoutSectionsDesc": "Semua halaman sekaligus, di bawah judul",
     "menuLayoutFolders": "Folder",
-    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup"
+    "menuLayoutFoldersDesc": "Halaman utamamu, lalu satu folder per grup",
+    "chatCards": "Chat sebagai kartu",
+    "chatCardsDesc": "Setiap chat di kartunya sendiri. Matikan untuk daftar polos dengan garis di antara chat."
   },
   "common": {
     "confirm": "Konfirmasi",
@@ -3151,7 +3156,11 @@
     "likersEmptyTitle": "Belum ada suka",
     "likersEmptyBody": "Suka pada komentar ini akan muncul di sini.",
     "anonymousLikes_one": "{{count}} suka dari pemegang lencana anonim",
-    "anonymousLikes_other": "{{count}} suka dari pemegang lencana anonim"
+    "anonymousLikes_other": "{{count}} suka dari pemegang lencana anonim",
+    "threadParts": {
+      "moveUp": "Pindah ke atas",
+      "moveDown": "Pindah ke bawah"
+    }
   },
   "mintChain": {
     "title": "Pos mint",
@@ -6189,6 +6198,12 @@
       "needsImageToWork": "{{model}} membutuhkan gambar untuk bekerja. Lampirkan satu terlebih dahulu.",
       "speechLimit": "Itu adalah {{length}} karakter. Batasnya adalah {{limit}}.",
       "musicTrackLength": "Trek {{count}}"
+    },
+    "gallery": {
+      "send": "Kirim",
+      "notifications": {
+        "generation_reply": "{{name}} membalas komentar Anda"
+      }
     }
   },
   "pricing": {
@@ -11971,7 +11986,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Posting ke X, YouTube, Instagram, TikTok, dan lainnya secara bersamaan dengan dehub. Hubungkan akun Anda sekali, lalu pilih ke mana setiap postingan akan dikirim.",
+    "intro": "Posting ke X, YouTube, Instagram, TikTok, dan lainnya secara bersamaan dengan Riftn. Hubungkan akun Anda sekali, lalu pilih ke mana setiap postingan akan dikirim.",
     "creditsHeading": "Kredit postingan",
     "credits": "{{count}} kredit postingan",
     "topUpTitle": "Isi ulang dan hemat",
@@ -12019,7 +12034,11 @@
   "dm": {
     "planRestricted": "Pengguna ini memerlukan langganan untuk menerima pesan.",
     "planTypeNotAllowed": "Paket kreator ini tidak mengizinkan jenis pesan ini.",
-    "planMinTip": "Tip untuk kreator ini minimal {{amount}} token."
+    "planMinTip": "Tip untuk kreator ini minimal {{amount}} token.",
+    "shareGroups": "Grup",
+    "shareKindGroup": "Grup",
+    "shareKindChannel": "Kanal",
+    "shareKindCommunity": "Komunitas"
   },
   "credits": {
     "earningsWorth": "Layak {{amount}}",

@@ -81,7 +81,8 @@
       "profile": "Profil",
       "proposal": "teklip",
       "stage": "sahne",
-      "store": "dükan"
+      "store": "dükan",
+      "featureRequest": "haýyş"
     },
     "recipientChat": "çat",
     "recipientUser": "ulanýan",
@@ -519,7 +520,11 @@
     "getTheApp": "Programmany al",
     "connectAi": "AI birikdir",
     "converter": "Konverter",
-    "affiliate": "Hyzmatdaş"
+    "affiliate": "Hyzmatdaş",
+    "groups": {
+      "create": "Döret",
+      "discover": "Tap"
+    }
   },
   "feed": {
     "viewProfile": "Açylýan profily: {{name}}",
@@ -1129,7 +1134,8 @@
     "socialConnected": "{{platform}} baglanyşdyryldy",
     "socialConnectedShort": "Baglan",
     "socialConnectFailed": "Bolmasyňyz {{platform}} bilen baglanyşmak mümkin däl. Başga bir ýagdaýa çalyş.",
-    "socialFollowersPending": "Täzeleşdirilen sanlar"
+    "socialFollowersPending": "Täzeleşdirilen sanlar",
+    "menuLayoutFolders": "Bukjalar"
   },
   "common": {
     "confirm": "Tassykla",
@@ -3024,7 +3030,11 @@
     "likersEmptyTitle": "Heniz halama ýok",
     "likersEmptyBody": "Bu teswire gelen halamalar şu ýerde görner.",
     "anonymousLikes_one": "Anonim nyşan eýesinden {{count}} halama",
-    "anonymousLikes_other": "Anonim nyşan eýelerinden {{count}} halama"
+    "anonymousLikes_other": "Anonim nyşan eýelerinden {{count}} halama",
+    "threadParts": {
+      "moveUp": "Ýokary çyk",
+      "moveDown": "Ýükle"
+    }
   },
   "mintChain": {
     "title": "Mint posty",
@@ -6046,6 +6056,12 @@
       "cannotUseReference": "{{model}} Referans resmini ulanyp bolmaýar. Çykaryň ýa-da başga bir nusga saýlaň.",
       "speechLimit": "Bu {{length}} karakterler. Bu çäk {{limit}}.",
       "musicTrackLength": "{{count}}s ýoly"
+    },
+    "gallery": {
+      "send": "Iberiň",
+      "notifications": {
+        "generation_reply": "{{name}} teswiryňize jogap berdi"
+      }
     }
   },
   "pricing": {
@@ -11793,7 +11809,7 @@
   "multiPost": {
     "tab": "Köp-posting",
     "title": "Köp-posting",
-    "intro": "X, YouTube, Instagram, TikTok we beýleki platformalara bir wagtda dehub arkaly poçtalaň. Hasaplaryňyzy bir gezek birikdiriň, soňra her poçta nirede görkezerini saýlaň.",
+    "intro": "X, YouTube, Instagram, TikTok we beýleki platformalara bir wagtda Riftn arkaly poçtalaň. Hasaplaryňyzy bir gezek birikdiriň, soňra her poçta nirede görkezerini saýlaň.",
     "creditsHeading": "Poçta kreditleri",
     "credits": "{{count}} post credits",
     "topUpTitle": "Kredit goşuň we tygşytlaň",
@@ -11841,7 +11857,9 @@
   "dm": {
     "planRestricted": "Bu ulanyjy habar almak üçin abuna talap edýär.",
     "planTypeNotAllowed": "Bu awtoryň meýilnamasy bu görnüşli habara rugsat bermeýär.",
-    "planMinTip": "Bu awtor üçin çaýpul iň azyndan {{amount}} tokenler bolmaly."
+    "planMinTip": "Bu awtor üçin çaýpul iň azyndan {{amount}} tokenler bolmaly.",
+    "shareKindGroup": "Toparla",
+    "shareKindCommunity": "Jemgyýet"
   },
   "credits": {
     "earningsWorth": "Öňki {{amount}}",
@@ -19359,5 +19377,10 @@
     "edit": "Tahrirlash",
     "editLabel": "Haty Editle",
     "error": "Ol ýene-de şeýle dolanyp gelýär."
+  },
+  "mentionLinks": {
+    "communities": "Jemgyýetler",
+    "pages": "Sahypalar",
+    "people": "Adamlar"
   }
 }

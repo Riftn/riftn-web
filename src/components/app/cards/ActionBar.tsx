@@ -165,6 +165,8 @@ interface ActionBarProps {
   isOptimistic?: boolean;
   /** Handler for like action (overrides default voteOnPost) */
   onLike?: () => void;
+  /** Persist a reaction on a non-post entity using the same tray and gestures. */
+  onReaction?: (reaction: PostReaction | null) => Promise<unknown>;
   /** Handler for dislike action (overrides default voteOnPost) */
   onDislike?: () => void;
   /**
@@ -375,6 +377,7 @@ export function ActionBar({
   onRepost,
   onQuote,
   onLike,
+  onReaction,
   onDislike,
   className,
   showBorder = false,
@@ -497,7 +500,7 @@ export function ActionBar({
   const { leftHanded } = useLeftHanded();
   const queryClient = useQueryClient();
   // When external handlers are provided (governance), always sync from props
-  const hasExternalHandlers = !!(onLike || onDislike);
+  const hasExternalHandlers = !!(onLike || onDislike || onReaction);
 
   // Confirmed reactions accept fresh totals immediately, including during the
   // short vote guard. Only an unconfirmed local mutation keeps its overlay.
@@ -554,7 +557,7 @@ export function ActionBar({
     const wantsPositive = isPositiveReaction(reaction);
     // When external handlers are provided (e.g. governance), skip local optimistic updates
     // since the parent mutation handles optimistic state via React Query cache
-    const hasExternalHandler = (wantsPositive && onLike) || (!wantsPositive && onDislike);
+    const hasExternalHandler = onReaction || (wantsPositive && onLike) || (!wantsPositive && onDislike);
 
     const previous = myReaction;
     const isRemovingVote = previous === reaction;
@@ -632,7 +635,9 @@ export function ActionBar({
 
     try {
       // Use override if provided, otherwise hit the reaction endpoint
-      if (wantsPositive && onLike) {
+      if (onReaction) {
+        await onReaction(next);
+      } else if (wantsPositive && onLike) {
         await onLike();
       } else if (!wantsPositive && onDislike) {
         await onDislike();
@@ -715,7 +720,7 @@ export function ActionBar({
       voteInFlightRef.current = false;
       setIsVoting(false);
     }
-  }, [postId, isVoting, externalDisabled, isLiked, isDisliked, myReaction, localLikeCount, localDislikeCount, localReactionCounts, isAuthenticated, queryClient, onLike, onDislike, voteWeight, onLiveReaction, _copy]);
+  }, [postId, isVoting, externalDisabled, isLiked, isDisliked, myReaction, localLikeCount, localDislikeCount, localReactionCounts, isAuthenticated, queryClient, onLike, onDislike, onReaction, voteWeight, onLiveReaction, _copy]);
 
   /**
    * Tapping the thumbs-up / thumbs-down.
@@ -775,7 +780,7 @@ export function ActionBar({
   // reuse this bar with non-numeric ids and their own vote mutations, and the
   // reaction endpoint has no row to write for them.
   const numericPostId = postId ? parseInt(postId, 10) : NaN;
-  const reactionsEnabled = !disableReactions && !hasExternalHandlers && !isNaN(numericPostId);
+  const reactionsEnabled = !disableReactions && (!!onReaction || (!hasExternalHandlers && !isNaN(numericPostId)));
 
   // The breakdown of who reacted what belongs to the author. The ⓘ only exists
   // on your own posts; the API refuses the list to everyone else regardless.
@@ -1090,6 +1095,8 @@ export function ActionBar({
             toast.message(_copy("copy.9b2b21ee911e", { defaultValue: "Post processing, click ⓘ for more info" }), {
               icon: <Info className="w-4 h-4" />,
             });
+          } else if (onShare) {
+            onShare();
           } else if (quickRepost) {
             // Constrained overlays (fullscreen viewer) can't show the z-[100]
             // share drawer above the viewer — repost/undo directly instead.

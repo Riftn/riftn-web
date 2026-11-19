@@ -81,7 +81,8 @@
       "profile": "piraofily",
       "proposal": "soso-kevitra",
       "stage": "sehatra",
-      "store": "fivarotana"
+      "store": "fivarotana",
+      "featureRequest": "hevitra"
     },
     "recipientChat": "tamy_ts's chat",
     "recipientUser": "mPAMPIASA",
@@ -521,7 +522,11 @@
     "getTheApp": "Alaivo ny fampiharana",
     "connectAi": "Ampifandraiso ny AI",
     "converter": "Converter",
-    "affiliate": "Mpiara-miasa"
+    "affiliate": "Mpiara-miasa",
+    "groups": {
+      "create": "Mamorona",
+      "discover": "Hikaroka"
+    }
   },
   "feed": {
     "viewProfile": "Hijery ny mombamomba an'i {{name}}",
@@ -1133,7 +1138,8 @@
     "socialConnectedShort": "Mifandray",
     "socialConnectFailed": "Tsy afaka mifandray {{platform}}. Avereno andramana azafady.",
     "socialVerifiedFollowers": "{{value}} mpanaraka",
-    "socialFollowersPending": "Fanavaozana ny fanisana ny mpanara-dia"
+    "socialFollowersPending": "Fanavaozana ny fanisana ny mpanara-dia",
+    "menuLayoutFolders": "Rakitra"
   },
   "common": {
     "confirm": "Hanamafy",
@@ -3054,7 +3060,11 @@
     "likersEmptyTitle": "Mbola tsy misy fankasitrahana",
     "likersEmptyBody": "Hiseho eto ny fankasitrahana amin'ity fanehoan-kevitra ity.",
     "anonymousLikes_one": "{{count}} fankasitrahana avy amin'ny tompon'ny badge tsy mitonona anarana",
-    "anonymousLikes_other": "{{count}} fankasitrahana avy amin'ireo tompon'ny badge tsy mitonona anarana"
+    "anonymousLikes_other": "{{count}} fankasitrahana avy amin'ireo tompon'ny badge tsy mitonona anarana",
+    "threadParts": {
+      "moveUp": "Atsangana",
+      "moveDown": "Midina"
+    }
   },
   "mintChain": {
     "title": "Mint lahatsoratra",
@@ -6083,6 +6093,12 @@
       "needsImageToAnimate": "{{model}} mila sary hamazivaziana. Azonao atao ny mametraka ny voalohany.",
       "needsImageToWork": "{{model}} mila sary mba hiasa. Azonao atao ny mametraka ny voalohany.",
       "musicTrackLength": "{{count}}s"
+    },
+    "gallery": {
+      "send": "Mandefa",
+      "notifications": {
+        "generation_reply": "{{name}} namaly ny fanehoan-kevitrao"
+      }
     }
   },
   "pricing": {
@@ -11855,7 +11871,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Mba afaka mandefa amin'ny X, YouTube, Instagram, TikTok sy maro hafa miaraka amin'ny dehub. Ampifandraiso indray mandeha ny kaontinao, dia safidio izay handefasana ny tsirairay.",
+    "intro": "Mba afaka mandefa amin'ny X, YouTube, Instagram, TikTok sy maro hafa miaraka amin'ny Riftn. Ampifandraiso indray mandeha ny kaontinao, dia safidio izay handefasana ny tsirairay.",
     "creditsHeading": "Crédits fandefasana",
     "credits": "{{count}} crédits fandefasana",
     "topUpTitle": "Top up ary vonjy",
@@ -11903,7 +11919,9 @@
   "dm": {
     "planRestricted": "Mila famandrihana ity mpampiasa ity vao mahazo hafatra.",
     "planTypeNotAllowed": "Tsy mamela an'io karazana hafatra io ny drafitr'ity mpamorona ity.",
-    "planMinTip": "Tokony ho {{amount}} tokens farafahakeliny ny tip ho an'ity mpamorona ity."
+    "planMinTip": "Tokony ho {{amount}} tokens farafahakeliny ny tip ho an'ity mpamorona ity.",
+    "shareKindGroup": "Vondrona",
+    "shareKindCommunity": "Fiaraha-monina"
   },
   "credits": {
     "earningsWorth": "Mitentina {{amount}}",
@@ -19537,5 +19555,10 @@
     "txPpvSale": "Fivarotana PPV — {{amount}} tokens",
     "txTipSent": "Fanomezana ho an'i {{name}} — {{amount}} tokens",
     "txTipReceived": "{{name}} nanome fanomezana anao — {{amount}} tokens"
+  },
+  "mentionLinks": {
+    "communities": "Vondrona",
+    "pages": "Pejy",
+    "people": "Olona"
   }
 }

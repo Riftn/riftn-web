@@ -81,7 +81,8 @@
       "profile": "ໂປຣໄຟລ໌",
       "proposal": "ສະເໜີ",
       "stage": "ເວທີ",
-      "store": "ຮ້ານຄ້າ"
+      "store": "ຮ້ານຄ້າ",
+      "featureRequest": "ຄຳຂໍ"
     },
     "recipientChat": "ສົນທະນາ",
     "recipientUser": "ຜູ້ໃຊ້",
@@ -517,7 +518,11 @@
     "getTheApp": "ດາວໂຫຼດແອັບ",
     "connectAi": "ເຊື່ອມຕໍ່ AI",
     "converter": "ລະຫັດ QR",
-    "affiliate": "ພັນທະມິດ"
+    "affiliate": "ພັນທະມິດ",
+    "groups": {
+      "create": "ສ້າງ",
+      "discover": "ຄົ້ນພົບ"
+    }
   },
   "feed": {
     "viewProfile": "ເບິ່ງໂປຣໄຟລ໌ຂອງ {{name}}",
@@ -1128,7 +1133,8 @@
     "socialConnectedShort": "ເຊື່ອມຕໍ່",
     "socialConnectFailed": "ບໍ່ສາມາດເຊື່ອມຕໍ່ {{platform}}. ກະລຸນາລອງໃໝ່.",
     "socialVerifiedFollowers": "{{value}} ຜູ້ຕິດຕາມ",
-    "socialFollowersPending": "ຈໍານວນຜູ້ຕິດຕາມກໍາລັງອັບເດດ"
+    "socialFollowersPending": "ຈໍານວນຜູ້ຕິດຕາມກໍາລັງອັບເດດ",
+    "menuLayoutFolders": "ແຟ້ມ"
   },
   "common": {
     "confirm": "ຢືນຢັນ",
@@ -3025,7 +3031,11 @@
     "likersEmptyTitle": "ຍັງບໍ່ມີຄົນຖືກໃຈ",
     "likersEmptyBody": "ການຖືກໃຈຄຳເຫັນນີ້ຈະປາກົດຢູ່ນີ້.",
     "anonymousLikes_one": "{{count}} ຖືກໃຈຈາກຜູ້ຖືປ້າຍທີ່ບໍ່ລະບຸຊື່",
-    "anonymousLikes_other": "{{count}} ຖືກໃຈຈາກຜູ້ຖືປ້າຍທີ່ບໍ່ລະບຸຊື່"
+    "anonymousLikes_other": "{{count}} ຖືກໃຈຈາກຜູ້ຖືປ້າຍທີ່ບໍ່ລະບຸຊື່",
+    "threadParts": {
+      "moveUp": "ຍ້າຍຂຶ້ນ",
+      "moveDown": "ຍ້າຍລົງ"
+    }
   },
   "mintChain": {
     "title": "ໂພສ Mint",
@@ -6044,6 +6054,12 @@
       "needsImageToWork": "{{model}} ຕ້ອງການຮູບເພື່ອເຮັດວຽກຈາກ. ຕິດ 1 ອັນດັບທໍາອິດ.",
       "speechLimit": "ນັ້ນແມ່ນ {{length}} ຕົວອັກສອນ. ຂໍ້ ຈໍາ ກັດແມ່ນ {{limit}}.",
       "musicTrackLength": "{{count}}s ຕິດຕາມ"
+    },
+    "gallery": {
+      "send": "ສົ່ງ",
+      "notifications": {
+        "generation_reply": "{{name}} ຕອບຄຳເຫັນຂອງທ່ານ"
+      }
     }
   },
   "pricing": {
@@ -11809,7 +11825,7 @@
   "multiPost": {
     "tab": "ໂພສຫຼາຍບ່ອນ",
     "title": "ໂພສຫຼາຍບ່ອນ",
-    "intro": "ໂພສໄປ X, YouTube, Instagram, TikTok ແລະ ອື່ນໆ ພ້ອມກັນກັບ dehub. ເຊື່ອມບັນຊີຄັ້ງດຽວ ແລ້ວເລືອກວ່າແຕ່ລະໂພສຈະໄປໃສ.",
+    "intro": "ໂພສໄປ X, YouTube, Instagram, TikTok ແລະ ອື່ນໆ ພ້ອມກັນກັບ Riftn. ເຊື່ອມບັນຊີຄັ້ງດຽວ ແລ້ວເລືອກວ່າແຕ່ລະໂພສຈະໄປໃສ.",
     "creditsHeading": "ເຄຣດິດໂພສ",
     "credits": "{{count}} ເຄຣດິດໂພສ",
     "topUpTitle": "ເຕີມ ແລະ ປະຢັດ",
@@ -11857,7 +11873,9 @@
   "dm": {
     "planRestricted": "ຜູ້ໃຊ້ນີ້ຕ້ອງການການສະໝັກສະມາຊິກເພື່ອຮັບຂໍ້ຄວາມ.",
     "planTypeNotAllowed": "ແຜນຂອງຜູ້ສ້າງນີ້ບໍ່ອະນຸຍາດຂໍ້ຄວາມປະເພດນີ້.",
-    "planMinTip": "ທິບສຳລັບຜູ້ສ້າງນີ້ຕ້ອງຢ່າງໜ້ອຍ {{amount}} ໂທເຄັນ."
+    "planMinTip": "ທິບສຳລັບຜູ້ສ້າງນີ້ຕ້ອງຢ່າງໜ້ອຍ {{amount}} ໂທເຄັນ.",
+    "shareKindGroup": "ຈັດ​ກຸ່ມ",
+    "shareKindCommunity": "ຊຸມຊົນ"
   },
   "credits": {
     "earningsWorth": "ມູນຄ່າ {{amount}}",
@@ -19289,5 +19307,10 @@
     "edit": "ແກ້ໄຂ",
     "editLabel": "ແກ້ໄຂຂໍ້ຄວາມ",
     "error": "ນັ້ນບໍ່ໄດ້ຜົນ. ລອງໃໝ່ອີກຄັ້ງ."
+  },
+  "mentionLinks": {
+    "communities": "ຊຸມຊົນ",
+    "pages": "ໜ້າ",
+    "people": "ຄົນ"
   }
 }

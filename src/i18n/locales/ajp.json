@@ -81,7 +81,8 @@
       "profile": "الملف الشخصي",
       "proposal": "اقتراح",
       "stage": "المرحلة",
-      "store": "المتجر"
+      "store": "المتجر",
+      "featureRequest": "مطلوب"
     },
     "recipientChat": "دردشة",
     "recipientUser": "المستخدم",
@@ -519,7 +520,12 @@
     "getTheApp": "حمّل التطبيق",
     "connectAi": "ربط AI",
     "converter": "محول",
-    "affiliate": "التسويق بالعمولة"
+    "affiliate": "التسويق بالعمولة",
+    "groups": {
+      "create": "إنشاء",
+      "discover": "اكتشف",
+      "riftn": "دي هاب"
+    }
   },
   "feed": {
     "viewProfile": "شوف بروفايل {{name}}",
@@ -1124,7 +1130,10 @@
     "socialConnected": "{{platform}} مرتبط",
     "socialConnectedShort": "متصل",
     "socialConnectFailed": "لا يمكن الاتصال ب{{platform}}. حاول مجددًا.",
-    "socialFollowersPending": "المتابعين يزودون"
+    "socialFollowersPending": "المتابعين يزودون",
+    "hideWatched": "خبي الفيديوهات اللي شفتها",
+    "skipSegments": "تخطي الإعلانات والمقدمات",
+    "menuLayoutFolders": "المجلدات"
   },
   "common": {
     "confirm": "تأكيد",
@@ -3018,7 +3027,11 @@
     "likersEmptyTitle": "ما في إعجابات لهلأ",
     "likersEmptyBody": "الإعجابات على هالتعليق رح تبيّن هون.",
     "anonymousLikes_one": "{{count}} إعجاب من حامل شارة مجهول",
-    "anonymousLikes_other": "{{count}} إعجابات من حاملي شارات مجهولين"
+    "anonymousLikes_other": "{{count}} إعجابات من حاملي شارات مجهولين",
+    "threadParts": {
+      "moveUp": "تحرك لأعلى",
+      "moveDown": "تحرك لأسفل"
+    }
   },
   "mintChain": {
     "title": "مُنتج بُست",
@@ -5999,7 +6012,13 @@
       "musicTrackLength": "تتبع {{count}}"
     },
     "bannerCopy": "أطلق حملاتك الإبداعية بشكل أسرع مع أدوات Riftn AI",
-    "closeBanner": "ختم شعار المبدع"
+    "closeBanner": "ختم شعار المبدع",
+    "gallery": {
+      "send": "أرسل",
+      "notifications": {
+        "generation_reply": "{{name}} رد على تعليقك"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "خطة لكل نمط عمل",
@@ -6059,7 +6078,8 @@
     "indemnification": "التأمين",
     "noTraining": "لا تدريب على بياناتك",
     "soc2": "SOC 2 security (بصير قريب)",
-    "aiEducator": "دعم المعلم للذكاء الاصطناعي و Slack"
+    "aiEducator": "دعم المعلم للذكاء الاصطناعي و Slack",
+    "sso": "تسجيل الدخول الموحد (SSO)"
   },
   "videoLooks": {
     "button": "مظاهر الكاميرا",
@@ -11792,7 +11812,9 @@
   "dm": {
     "planRestricted": "هاد المستخدم بدو اشتراك ليستقبل رسائل.",
     "planTypeNotAllowed": "خطة هاد المنشئ ما بتسمح بهاد النوع من الرسائل.",
-    "planMinTip": "لازم تكون الإكرامية على الأقل {{amount}} توكنز لهاد المنشئ."
+    "planMinTip": "لازم تكون الإكرامية على الأقل {{amount}} توكنز لهاد المنشئ.",
+    "shareKindGroup": "تجميع",
+    "shareKindCommunity": "المجتمع"
   },
   "credits": {
     "earningsWorth": "القيمة {{amount}}",
@@ -19041,5 +19063,10 @@
     "edit": "تعديل",
     "editLabel": "تحرير الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
+  },
+  "mentionLinks": {
+    "communities": "المجتمعات",
+    "pages": "الصفحات",
+    "people": "ناس"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "個人檔案",
       "proposal": "計劃書",
       "stage": "階段",
-      "store": "鱘魚"
+      "store": "鱘魚",
+      "featureRequest": "要求"
     },
     "recipientChat": "傾計",
     "recipientUser": "用戶",
@@ -521,7 +522,12 @@
     "getTheApp": "下載應用程式",
     "connectAi": "連接 AI",
     "converter": "轉換器",
-    "affiliate": "推廣聯盟"
+    "affiliate": "推廣聯盟",
+    "groups": {
+      "create": "建立",
+      "discover": "探索",
+      "riftn": "去中心"
+    }
   },
   "feed": {
     "viewProfile": "睇下 {{name}} 嘅個人檔案",
@@ -1144,7 +1150,8 @@
     "socialConnectedShort": "連接咗",
     "socialConnectFailed": "連接唔到 {{platform}} 。唔該再試多次。",
     "socialVerifiedFollowers": "{{value}} 追蹤者",
-    "socialFollowersPending": "追蹤者數量更新緊"
+    "socialFollowersPending": "追蹤者數量更新緊",
+    "menuLayoutFolders": "資料夾"
   },
   "common": {
     "confirm": "確定",
@@ -3041,7 +3048,11 @@
     "likersEmptyTitle": "暫時未有讚好",
     "likersEmptyBody": "呢則留言嘅讚好會喺度顯示。",
     "anonymousLikes_one": "來自匿名徽章持有人嘅 {{count}} 個讚",
-    "anonymousLikes_other": "來自匿名徽章持有人嘅 {{count}} 個讚"
+    "anonymousLikes_other": "來自匿名徽章持有人嘅 {{count}} 個讚",
+    "threadParts": {
+      "moveUp": "向上移動",
+      "moveDown": "移除"
+    }
   },
   "mintChain": {
     "title": "薄荷帖子",
@@ -6077,6 +6088,12 @@
       "needsImageToWork": "{{model}}需要一個圖像來工作。附加一個先。",
       "speechLimit": "呢係{{length}}個字。限制係{{limit}}。",
       "musicTrackLength": "{{count}}嘅追蹤"
+    },
+    "gallery": {
+      "send": "發送",
+      "notifications": {
+        "generation_reply": "{{name}} 回覆咗你嘅留言"
+      }
     }
   },
   "pricing": {
@@ -11835,7 +11852,7 @@
   "multiPost": {
     "tab": "同時發佈",
     "title": "同時發佈",
-    "intro": "透過 dehub 同時發佈到 X、YouTube、Instagram、TikTok 等平台。一次連接您的帳戶，然後選擇每個帖子的發佈平台。",
+    "intro": "透過 Riftn 同時發佈到 X、YouTube、Instagram、TikTok 等平台。一次連接您的帳戶，然後選擇每個帖子的發佈平台。",
     "creditsHeading": "帖子積分",
     "credits": "{{count}} 個帖子積分",
     "topUpTitle": "增值並節省",
@@ -11883,7 +11900,9 @@
   "dm": {
     "planRestricted": "呢個用戶要訂閱先可以收訊息。",
     "planTypeNotAllowed": "呢位創作者嘅方案唔容許呢類訊息。",
-    "planMinTip": "打賞呢位創作者最少要 {{amount}} 代幣。"
+    "planMinTip": "打賞呢位創作者最少要 {{amount}} 代幣。",
+    "shareKindGroup": "分組",
+    "shareKindCommunity": "社區"
   },
   "credits": {
     "earningsWorth": "值 {{amount}}",
@@ -19404,5 +19423,10 @@
     "edit": "編輯",
     "editLabel": "編輯訊息",
     "error": "噉樣做唔到。再試多次。"
+  },
+  "mentionLinks": {
+    "communities": "社群",
+    "pages": "頁面",
+    "people": "用戶"
   }
 }

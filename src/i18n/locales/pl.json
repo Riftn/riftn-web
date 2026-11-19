@@ -81,7 +81,8 @@
       "profile": "profil",
       "proposal": "oferta",
       "stage": "etap",
-      "store": "sklep"
+      "store": "sklep",
+      "featureRequest": "żądanie"
     },
     "recipientChat": "chat",
     "recipientUser": "użytkownik",
@@ -522,7 +523,11 @@
     "getTheApp": "Pobierz aplikację",
     "connectAi": "Podłącz AI",
     "converter": "Przetwornik",
-    "affiliate": "Program partnerski"
+    "affiliate": "Program partnerski",
+    "groups": {
+      "create": "Utwórz",
+      "discover": "Odkrywaj"
+    }
   },
   "feed": {
     "viewProfile": "Wyświetl profil użytkownika {{name}}",
@@ -720,6 +725,9 @@
     "defaultProfileTabDesc": "Wybierz, którą zakładkę odwiedzający zobaczą najpierw na Twoim profilu",
     "defaultProfileView": "Układ postów na profilu",
     "defaultProfileViewDesc": "Pokazuj swoje posty w siatce lub na liście, gdy ktoś otworzy Twój profil",
+    "readerProfileView": "Otwieraj inne profile jako",
+    "readerProfileViewDesc": "Wybierz siatkę lub listę dla każdego otwieranego profilu albo zostaw wybór każdej osoby",
+    "readerProfileViewOwner": "Wybór danej osoby",
     "public": "Publiczny",
     "publicDesc": "Każdy może zobaczyć Twoje posty",
     "private": "Prywatny",
@@ -1155,7 +1163,10 @@
     "socialConnectedShort": "Połączono",
     "socialConnectFailed": "Nie udało się połączyć {{platform}}. Spróbuj ponownie.",
     "socialVerifiedFollowers": "{{value}} obserwujących",
-    "socialFollowersPending": "Aktualizowanie liczby obserwujących"
+    "socialFollowersPending": "Aktualizowanie liczby obserwujących",
+    "menuLayoutFolders": "Foldery",
+    "chatCards": "Czaty jako karty",
+    "chatCardsDesc": "Każdy czat na osobnej karcie. Wyłącz, aby mieć prostą listę z linią między czatami."
   },
   "common": {
     "confirm": "Potwierdź",
@@ -3065,7 +3076,11 @@
     "likersEmptyTitle": "Brak polubień",
     "likersEmptyBody": "Tu pojawią się polubienia tego komentarza.",
     "anonymousLikes_one": "{{count}} polubienie od anonimowego posiadacza odznaki",
-    "anonymousLikes_other": "Polubienia od anonimowych posiadaczy odznak: {{count}}"
+    "anonymousLikes_other": "Polubienia od anonimowych posiadaczy odznak: {{count}}",
+    "threadParts": {
+      "moveUp": "Przenieś w górę",
+      "moveDown": "Przenieś w dół"
+    }
   },
   "mintChain": {
     "title": "Idealny słupek",
@@ -6101,6 +6116,12 @@
       "needsImageToWork": "{{model}} potrzebuje obrazu do pracy. Najpierw dołącz jeden.",
       "speechLimit": "To jest {{length}} znaków. Limit wynosi {{limit}}.",
       "musicTrackLength": "Ścieżka {{count}}s"
+    },
+    "gallery": {
+      "send": "Wyślij",
+      "notifications": {
+        "generation_reply": "{{name}} odpowiedział na Twój komentarz"
+      }
     }
   },
   "pricing": {
@@ -11947,7 +11968,7 @@
   "multiPost": {
     "tab": "Wielokrotne publikowanie",
     "title": "Wielokrotne publikowanie",
-    "intro": "Publikuj na X, YouTube, Instagram, TikTok i innych jednocześnie za pomocą dehub. Połącz swoje konta raz, a potem wybierz, gdzie ma trafić każdy post.",
+    "intro": "Publikuj na X, YouTube, Instagram, TikTok i innych jednocześnie za pomocą Riftn. Połącz swoje konta raz, a potem wybierz, gdzie ma trafić każdy post.",
     "creditsHeading": "Kredyty na posty",
     "credits": "{{count}} kredyty na posty",
     "topUpTitle": "Doładuj i oszczędzaj",
@@ -11995,7 +12016,10 @@
   "dm": {
     "planRestricted": "Ten użytkownik wymaga subskrypcji, aby otrzymywać wiadomości.",
     "planTypeNotAllowed": "Plan tego twórcy nie pozwala na ten rodzaj wiadomości.",
-    "planMinTip": "Napiwek dla tego twórcy musi wynosić co najmniej {{amount}} tokenów."
+    "planMinTip": "Napiwek dla tego twórcy musi wynosić co najmniej {{amount}} tokenów.",
+    "shareKindGroup": "Grupuj",
+    "shareKindChannel": "Kanał",
+    "shareKindCommunity": "Społeczność"
   },
   "credits": {
     "earningsWorth": "Warta {{amount}}",
@@ -19588,5 +19612,10 @@
     "edit": "Edytuj",
     "editLabel": "Edytuj wiadomość",
     "error": "To nie zadziałało. Spróbuj ponownie."
+  },
+  "mentionLinks": {
+    "communities": "Społeczności",
+    "pages": "Strony",
+    "people": "Ludzie"
   }
 }

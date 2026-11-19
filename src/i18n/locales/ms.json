@@ -80,7 +80,8 @@
       "profile": "profil",
       "proposal": "cadangan",
       "stage": "peringkat",
-      "store": "kedai"
+      "store": "kedai",
+      "featureRequest": "permintaan"
     },
     "recipientChat": "cakap",
     "recipientUser": "pengguna",
@@ -521,7 +522,11 @@
     "getTheApp": "Dapatkan Apl",
     "connectAi": "Sambung AI",
     "converter": "penukar",
-    "affiliate": "Afiliat"
+    "affiliate": "Afiliat",
+    "groups": {
+      "create": "Cipta",
+      "discover": "Terokai"
+    }
   },
   "feed": {
     "viewProfile": "Lihat profil {{name}}",
@@ -1146,7 +1151,8 @@
     "socialConnectedShort": "Bersambung",
     "socialConnectFailed": "Tidak dapat menyambung {{platform}}. Sila cuba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Pengemaskinian kiraan pengikut"
+    "socialFollowersPending": "Pengemaskinian kiraan pengikut",
+    "menuLayoutFolders": "Folder"
   },
   "common": {
     "confirm": "Sahkan",
@@ -3302,7 +3308,11 @@
     "likersEmptyTitle": "Tiada suka lagi",
     "likersEmptyBody": "Suka pada komen ini akan dipaparkan di sini.",
     "anonymousLikes_one": "{{count}} suka daripada pemegang lencana tanpa nama",
-    "anonymousLikes_other": "{{count}} suka daripada pemegang lencana tanpa nama"
+    "anonymousLikes_other": "{{count}} suka daripada pemegang lencana tanpa nama",
+    "threadParts": {
+      "moveUp": "Pindah ke atas",
+      "moveDown": "Pindah ke bawah"
+    }
   },
   "mintChain": {
     "title": "Hantaran pudina",
@@ -6338,6 +6348,12 @@
       "needsImageToWork": "{{model}} memerlukan imej untuk berfungsi. Lampirkan satu dahulu.",
       "speechLimit": "Iaitu {{length}} aksara. Hadnya ialah {{limit}}.",
       "musicTrackLength": "{{count}}s trek"
+    },
+    "gallery": {
+      "send": "Hantar",
+      "notifications": {
+        "generation_reply": "{{name}} membalas komen anda"
+      }
     }
   },
   "pricing": {
@@ -12111,7 +12127,7 @@
   "multiPost": {
     "tab": "Siaran berbilang",
     "title": "Siaran berbilang",
-    "intro": "Siarkan ke X, YouTube, Instagram, TikTok dan banyak lagi pada masa yang sama dengan dehub. Sambungkan akaun anda sekali, kemudian pilih ke mana setiap siaran pergi.",
+    "intro": "Siarkan ke X, YouTube, Instagram, TikTok dan banyak lagi pada masa yang sama dengan Riftn. Sambungkan akaun anda sekali, kemudian pilih ke mana setiap siaran pergi.",
     "creditsHeading": "Kredit siaran",
     "credits": "{{count}} kredit siaran",
     "topUpTitle": "Tambah dan simpan",
@@ -12159,7 +12175,9 @@
   "dm": {
     "planRestricted": "Pengguna ini memerlukan langganan untuk menerima mesej.",
     "planTypeNotAllowed": "Pelan pencipta ini tidak membenarkan jenis mesej ini.",
-    "planMinTip": "Tip untuk pencipta ini mestilah sekurang-kurangnya {{amount}} token."
+    "planMinTip": "Tip untuk pencipta ini mestilah sekurang-kurangnya {{amount}} token.",
+    "shareKindGroup": "Kumpulan",
+    "shareKindCommunity": "Komuniti"
   },
   "credits": {
     "earningsWorth": "Bernilai {{amount}}",
@@ -19724,5 +19742,10 @@
     "edit": "Kemaskini",
     "editLabel": "Edit mesej",
     "error": "Itu tidak berjaya. Cuba lagi."
+  },
+  "mentionLinks": {
+    "communities": "Komuniti",
+    "pages": "Halaman",
+    "people": "Orang"
   }
 }

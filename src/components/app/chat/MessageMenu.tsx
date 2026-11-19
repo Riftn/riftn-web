@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { EmojiPanel } from '@/components/app/emoji/EmojiPanel';
+import { pushRecent, readRecents } from '@/lib/emoji';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { ChatReactorsList, reactionEntries, reactorCount, type ReactorsSource } from './ChatReactorsList';
 import { ReactorFaces } from './ReactorFaces';
@@ -164,9 +165,17 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
   }, [focus]);
 
   const pick = (emoji: string) => {
+    if (!/^:.*:$/.test(emoji)) pushRecent(emoji);
     onReact?.(emoji);
     close();
   };
+
+  // With the chevron, the row side-scrolls: this person's recent reactions
+  // first, then the usual quick ones, so the ones they use sit up front.
+  const [recent] = useState(() => readRecents().filter((e) => !/^:.*:$/.test(e)));
+  const chips = !quickReactions ? [] : allowMore
+    ? [...new Set([...recent, ...quickReactions])].slice(0, 24)
+    : quickReactions.slice(0, width > MENU_W ? 10 : 7);
 
   if (typeof document === 'undefined') return null;
   const actionRows = actions.map((a, i) => (
@@ -213,8 +222,9 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
           className="flex flex-col gap-1.5"
         >
           {showEmoji && view === 'main' && (
-            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-2.5' : 'pr-1.5'} ${width > MENU_W ? 'justify-between' : ''}`} data-msg-menu-surface data-msg-menu-emoji>
-              {quickReactions!.slice(0, allowMore ? 6 : width > MENU_W ? 10 : 7).map((emoji, i) => (
+            <div className={`flex items-center gap-0.5 self-stretch rounded-full py-1 pl-1.5 ${allowMore ? 'pr-3.5' : 'pr-1.5'} ${width > MENU_W && !allowMore ? 'justify-between' : ''}`} data-msg-menu-surface data-msg-menu-emoji>
+              <div className={allowMore ? 'flex min-w-0 flex-1 items-center gap-0.5 -my-1.5 overflow-x-auto overscroll-x-contain py-1.5 [mask-image:linear-gradient(to_right,#000_88%,transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'contents'} data-msg-menu-emoji-scroll>
+              {chips.map((emoji, i) => (
                 <motion.button
                   key={emoji}
                   type="button"
@@ -222,7 +232,7 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   aria-pressed={mine.includes(emoji)}
                   initial={{ opacity: 0, y: 6, scale: 0.6 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.02 + i * 0.022, type: 'spring', stiffness: 520, damping: 24 }}
+                  transition={{ delay: 0.02 + Math.min(i, 8) * 0.022, type: 'spring', stiffness: 520, damping: 24 }}
                   whileHover={{ scale: 1.28, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   // Seven fit the capsule when there is no chevron (comments: the six faces and 👎).
@@ -232,12 +242,13 @@ export function MessageMenu({ point, onClose, quickReactions, mine = [], onReact
                   {emoji}
                 </motion.button>
               ))}
+              </div>
               {allowMore && (
                 <button
                   type="button"
                   onClick={() => setView('emoji')}
                   aria-label={t('emojiPicker.moreReactions')}
-                  className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full opacity-60 transition-[opacity,transform] hover:opacity-100 active:scale-95 active:opacity-100 [&>svg]:transition-[stroke-width] hover:[&>svg]:stroke-[2.75] active:[&>svg]:stroke-[2.75]"
+                  className="ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-full opacity-60 transition-[opacity,transform] hover:opacity-100 active:scale-95 active:opacity-100 [&>svg]:transition-[stroke-width] hover:[&>svg]:stroke-[2.75] active:[&>svg]:stroke-[2.75]"
                   data-msg-menu-chip
                   data-msg-menu-more
                 >

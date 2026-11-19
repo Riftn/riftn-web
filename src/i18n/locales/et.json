@@ -80,7 +80,8 @@
       "profile": "profiil",
       "proposal": "ettepanek",
       "stage": "stseen",
-      "store": "müük"
+      "store": "müük",
+      "featureRequest": "päring"
     },
     "recipientChat": "sõnumid",
     "recipientUser": "kasutaja",
@@ -521,7 +522,11 @@
     "getTheApp": "Hangi rakendus",
     "connectAi": "Ühenda AI",
     "converter": "Konverter",
-    "affiliate": "Partnerid"
+    "affiliate": "Partnerid",
+    "groups": {
+      "create": "Loo",
+      "discover": "Avasta"
+    }
   },
   "feed": {
     "viewProfile": "Vaata kasutaja {{name}} profiili",
@@ -1143,7 +1148,8 @@
     "socialConnectedShort": "Ühendatud",
     "socialConnectFailed": "Ühenduse loomine ei õnnestunud:{{platform}}. Proovi uuesti.",
     "socialVerifiedFollowers": "{{value}} jälgijat",
-    "socialFollowersPending": "Jälgijate arvu uuendamine"
+    "socialFollowersPending": "Jälgijate arvu uuendamine",
+    "menuLayoutFolders": "Kaustad"
   },
   "common": {
     "confirm": "Kinnita",
@@ -3043,7 +3049,11 @@
     "likersEmptyTitle": "Meeldimisi veel pole",
     "likersEmptyBody": "Selle kommentaari meeldimised ilmuvad siia.",
     "anonymousLikes_one": "{{count}} meeldimine anonüümselt märgiomanikult",
-    "anonymousLikes_other": "{{count}} meeldimist anonüümsetelt märgiomanikelt"
+    "anonymousLikes_other": "{{count}} meeldimist anonüümsetelt märgiomanikelt",
+    "threadParts": {
+      "moveUp": "Liiguta üles",
+      "moveDown": "Liiguta alla"
+    }
   },
   "mintChain": {
     "title": "Mündipost",
@@ -6077,6 +6087,12 @@
       "needsImageToAnimate": "{{model}} vajab animeerimiseks pilti. Esmalt kinnitage üks.",
       "speechLimit": "See, et see on {{length}} tähemärki. Piirang on {{limit}}.",
       "musicTrackLength": "{{count}}s rada"
+    },
+    "gallery": {
+      "send": "Saada",
+      "notifications": {
+        "generation_reply": "{{name}} vastas sinu kommentaarile"
+      }
     }
   },
   "pricing": {
@@ -11852,7 +11868,7 @@
   "multiPost": {
     "tab": "Mitme postituse tegemine",
     "title": "Mitme postituse tegemine",
-    "intro": "Postita korraga X-i, YouTube'i, Instagrami, TikToki ja mujale dehubiga. Ühenda oma kontod üks kord, seejärel vali, kuhu iga postitus läheb.",
+    "intro": "Postita korraga X-i, YouTube'i, Instagrami, TikToki ja mujale Riftniga. Ühenda oma kontod üks kord, seejärel vali, kuhu iga postitus läheb.",
     "creditsHeading": "Postituse krediidid",
     "credits": "{{count}} postituse krediiti",
     "topUpTitle": "Laadi juurde ja säästa",
@@ -11900,7 +11916,9 @@
   "dm": {
     "planRestricted": "See kasutaja nõuab sõnumite saamiseks tellimust.",
     "planTypeNotAllowed": "Selle looja pakett ei luba seda tüüpi sõnumit.",
-    "planMinTip": "Selle looja jootraha peab olema vähemalt {{amount}} žetooni."
+    "planMinTip": "Selle looja jootraha peab olema vähemalt {{amount}} žetooni.",
+    "shareKindGroup": "Grupeeri",
+    "shareKindCommunity": "Kogukond"
   },
   "credits": {
     "earningsWorth": "Väärtus {{amount}}",
@@ -19472,5 +19490,10 @@
     "edit": "Redigeeri",
     "editLabel": "Muuda sõnumit",
     "error": "See ei õnnestunud. Proovi uuesti."
+  },
+  "mentionLinks": {
+    "communities": "Kogukonnad",
+    "pages": "Lehed",
+    "people": "Inimesed"
   }
 }

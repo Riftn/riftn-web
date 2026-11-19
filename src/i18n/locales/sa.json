@@ -81,7 +81,8 @@
       "profile": "प्रोफ़ाइल",
       "proposal": "प्रस्ताव",
       "stage": "चरणम्",
-      "store": "स्टोर"
+      "store": "स्टोर",
+      "featureRequest": "अनुरोध"
     },
     "recipientChat": "संवाद",
     "recipientUser": "व्यक्ति",
@@ -521,7 +522,12 @@
     "getTheApp": "अनुप्रयोगं प्राप्नोतु",
     "connectAi": "AI सम्बद्ध्यताम्",
     "converter": "परिवर्तकम्",
-    "affiliate": "सहयोगी"
+    "affiliate": "सहयोगी",
+    "groups": {
+      "create": "सृज",
+      "discover": "अन्विष्यतु",
+      "riftn": "देहुब"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} इत्यस्य प्रोफाइलं पश्यतु",
@@ -1127,7 +1133,9 @@
     "socialConnected": "{{platform}} जडितम्",
     "socialConnectedShort": "सम्बद्धम्",
     "socialVerifiedFollowers": "{{value}} अनुयायी",
-    "socialFollowersPending": "अनुयायी गणना अद्यतन"
+    "socialFollowersPending": "अनुयायी गणना अद्यतन",
+    "channelSpeed": "प्रतिचैनलं प्रसारणवेगः",
+    "menuLayoutFolders": "फोल्डर्स्"
   },
   "common": {
     "confirm": "निश्चितम्",
@@ -3008,7 +3016,11 @@
     "likersEmptyTitle": "अद्यापि रुचयः न सन्ति",
     "likersEmptyBody": "अस्याः टिप्पण्याः रुचयः अत्र द्रक्ष्यन्ते।",
     "anonymousLikes_one": "अनामिकात् चिह्नधारकात् {{count}} रुचिः",
-    "anonymousLikes_other": "अनामिकेभ्यः चिह्नधारकेभ्यः {{count}} रुचयः"
+    "anonymousLikes_other": "अनामिकेभ्यः चिह्नधारकेभ्यः {{count}} रुचयः",
+    "threadParts": {
+      "moveUp": "ऊपर ले जाओ",
+      "moveDown": "नीचे ले जाओ"
+    }
   },
   "mintChain": {
     "title": "MINT पदम्",
@@ -5984,7 +5996,13 @@
     "referenceProductName": "क्लिपे तव उत्पादनं स्थापय।",
     "referenceProductHint": "प्रमुखं उत्पादनं प्रतिस्थाप्य मूलदृश्यं संरक्ष्य।",
     "referenceComposeName": "संदर्भचित्राणि संयोजय।",
-    "referenceComposeHint": "बहुचित्राणि इत्यत्र पात्राणि, वस्तुना, विन्यासाः च एकत्र संयोज्य निर्मातु।"
+    "referenceComposeHint": "बहुचित्राणि इत्यत्र पात्राणि, वस्तुना, विन्यासाः च एकत्र संयोज्य निर्मातु।",
+    "gallery": {
+      "send": "भेजें",
+      "notifications": {
+        "generation_reply": "{{name}} भवतः टिप्पण्यै उत्तरम् अददात्"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "प्रत्येक कार्ययोजना",
@@ -11716,7 +11734,7 @@
   "multiPost": {
     "tab": "बहु-प्रकाशनम्",
     "title": "बहु-प्रकाशनम्",
-    "intro": "X, YouTube, Instagram, TikTok इत्यादि सर्वेभ्यः एकस्मिन् समये dehub इति सह प्रकाशयन्तु। प्रथमं तव खातीं जडयित्वा, तदा प्रत्येकं प्रकाशनं कः कः स्थानं गच्छति इति चयनं कुर्वन्तु।",
+    "intro": "X, YouTube, Instagram, TikTok इत्यादि सर्वेभ्यः एकस्मिन् समये Riftn इति सह प्रकाशयन्तु। प्रथमं तव खातीं जडयित्वा, तदा प्रत्येकं प्रकाशनं कः कः स्थानं गच्छति इति चयनं कुर्वन्तु।",
     "creditsHeading": "प्रकाशन श्रेयः",
     "credits": "{{count}} प्रकाशन श्रेयः",
     "topUpTitle": "उत्थानं च बचयति",
@@ -11764,7 +11782,9 @@
   "dm": {
     "planRestricted": "अस्य उपयोक्तुः सन्देशप्राप्त्यर्थं सदस्यता आवश्यकी।",
     "planTypeNotAllowed": "अस्य रचयितुः योजना एतादृशं सन्देशं न अनुमन्यते।",
-    "planMinTip": "अस्मै रचयित्रे टिप् न्यूनातिन्यूनं {{amount}} टोकन भवेत्।"
+    "planMinTip": "अस्मै रचयित्रे टिप् न्यूनातिन्यूनं {{amount}} टोकन भवेत्।",
+    "shareKindGroup": "समूहः",
+    "shareKindCommunity": "समुदायः"
   },
   "credits": {
     "earningsWorth": "मूल्यम् {{amount}}",
@@ -19184,5 +19204,10 @@
     "edit": "सम्पादय",
     "editLabel": "संदेशस्य संपादनम्",
     "error": "पुनरपि एकवारं प्रयत्नं कुर्मः_= Let us try once more (फिर से एकबार"
+  },
+  "mentionLinks": {
+    "communities": "समुदायाः",
+    "pages": "पृष्ठानि",
+    "people": "जनाः"
   }
 }

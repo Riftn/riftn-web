@@ -80,7 +80,8 @@
       "profile": "Profils",
       "proposal": "priekšlikums",
       "stage": "Stādījums",
-      "store": "Veikals"
+      "store": "Veikals",
+      "featureRequest": "Pieprasījums"
     },
     "recipientChat": "tērzēt",
     "recipientUser": "lietotājs",
@@ -521,7 +522,11 @@
     "getTheApp": "Lejupielādēt lietotni",
     "connectAi": "Savienot MI",
     "converter": "pārveidotājs",
-    "affiliate": "Partneri"
+    "affiliate": "Partneri",
+    "groups": {
+      "create": "Izveidot",
+      "discover": "Atklāj"
+    }
   },
   "feed": {
     "viewProfile": "Skatīt lietotāja {{name}} profilu",
@@ -1143,7 +1148,8 @@
     "socialConnectedShort": "Savienojums izveidots",
     "socialConnectFailed": "Nevarēja izveidot savienojumu ar {{platform}}. Lūdzu, mēģiniet vēlreiz.",
     "socialVerifiedFollowers": "{{value}} sekotāji",
-    "socialFollowersPending": "Sekotāju skaita atjaunināšana"
+    "socialFollowersPending": "Sekotāju skaita atjaunināšana",
+    "menuLayoutFolders": "Mapes"
   },
   "common": {
     "confirm": "Apstiprināt",
@@ -3043,7 +3049,11 @@
     "likersEmptyTitle": "Vēl nav patīk atzīmju",
     "likersEmptyBody": "Šeit parādīsies šī komentāra patīk atzīmes.",
     "anonymousLikes_one": "{{count}} patīk no anonīma nozīmītes īpašnieka",
-    "anonymousLikes_other": "{{count}} patīk no anonīmiem nozīmīšu īpašniekiem"
+    "anonymousLikes_other": "{{count}} patīk no anonīmiem nozīmīšu īpašniekiem",
+    "threadParts": {
+      "moveUp": "Pārvietot uz augšu",
+      "moveDown": "Pārvietot uz leju"
+    }
   },
   "mintChain": {
     "title": "Piparmētru ziņa",
@@ -6079,6 +6089,12 @@
       "needsImageToWork": "{{model}} nepieciešams attēls, no kura strādāt. Vispirms piestipriniet vienu.",
       "speechLimit": "Tās ir {{length}} rakstzīmes. Ierobežojums ir {{limit}}.",
       "musicTrackLength": "{{count}}s ieraksts"
+    },
+    "gallery": {
+      "send": "Sūtīt",
+      "notifications": {
+        "generation_reply": "{{name}} atbildēja uz jūsu komentāru"
+      }
     }
   },
   "pricing": {
@@ -11853,7 +11869,7 @@
   "multiPost": {
     "tab": "Multi-publicēšana",
     "title": "Multi-publicēšana",
-    "intro": "Publicē vienlaicīgi uz X, YouTube, Instagram, TikTok un citām platformām, izmantojot dehub. Savienojiet savus kontus vienreiz, pēc tam izvēlieties, kur katrs publicējums nonāks.",
+    "intro": "Publicē vienlaicīgi uz X, YouTube, Instagram, TikTok un citām platformām, izmantojot Riftn. Savienojiet savus kontus vienreiz, pēc tam izvēlieties, kur katrs publicējums nonāks.",
     "creditsHeading": "Publicēšanas kredīti",
     "credits": "{{count}} publicēšanas kredīti",
     "topUpTitle": "Papildiniet un ietaupiet",
@@ -11901,7 +11917,9 @@
   "dm": {
     "planRestricted": "Šim lietotājam ziņu saņemšanai nepieciešams abonements.",
     "planTypeNotAllowed": "Šī autora plāns neatļauj šāda veida ziņu.",
-    "planMinTip": "Dzeramnaudai šim autoram jābūt vismaz {{amount}} žetoni."
+    "planMinTip": "Dzeramnaudai šim autoram jābūt vismaz {{amount}} žetoni.",
+    "shareKindGroup": "Grupēt",
+    "shareKindCommunity": "Kopiena"
   },
   "credits": {
     "earningsWorth": "Vērts {{amount}}",
@@ -19474,5 +19492,10 @@
     "edit": "Rediģēt",
     "editLabel": "Rediģēt ziņu",
     "error": "Tas neizdevās. Mēģiniet vēlreiz."
+  },
+  "mentionLinks": {
+    "communities": "Kopienas",
+    "pages": "Lapas",
+    "people": "Cilvēki"
   }
 }

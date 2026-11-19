@@ -13,6 +13,7 @@ import Reply from "@/components/ui/cut-icons/reply";
 import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
 import Attach from "@/components/ui/cut-icons/attach";
+import OpenExternally from "@/components/ui/cut-icons/open-externally";
 import X from "@/components/ui/cut-icons/close";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,6 +33,7 @@ import { sendPublicChatImage } from '@/lib/public-chat-attachment';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePublicChatReading } from '@/hooks/use-public-chat-unread';
+import { dblClickReply } from '@/lib/dblclick-reply';
 import { supabase } from '@/integrations/supabase/client';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
@@ -59,7 +61,8 @@ import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from '@/components/app/chat/message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -474,6 +477,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
     });
+    const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
+      : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
+    if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
     if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
   }
   const lineMenu = menuPoint.mounted && menuMsg ? (
@@ -631,7 +637,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 navigate(`/${handle}`);
               } : undefined;
               return (
-                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
                   {/* Reply indicator – click to scroll to original */}
                   {msg.reply_to && (
                     <button
@@ -814,11 +820,22 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div className="flex items-center justify-end gap-0.5 pt-1">
+          <div data-live-chat-toolbar className="flex items-center justify-end gap-2 pt-1">
             {roomId && (
-              <div className="mr-auto flex items-center gap-1.5">
+              <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
                 <ChatTextSizeButton />
+                {/* Pop the global chat out into its own window, beside the feed. */}
+                <button
+                  type="button"
+                  data-chat-popout
+                  aria-label={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
+                  title={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
+                  onClick={() => { window.open('/chat?chat=public', 'riftn-global-chat', 'popup,width=520,height=780'); }}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
+                >
+                  <OpenExternally className="h-4 w-4" />
+                </button>
               </div>
             )}
             <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {

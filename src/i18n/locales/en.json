@@ -791,6 +791,15 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "chatCards": "Chats as cards",
+    "chatCardsDesc": "Each chat on its own card. Turn off for a plain list with a line between chats.",
+    "chatDeleteChoice": "When you delete a message",
+    "chatDeleteChoiceDesc": "Ask every time, or always delete for you only or for everyone in the chat.",
+    "chatDeleteAsk": "Ask every time",
+    "chatDeleteMe": "Delete for me",
+    "chatDeleteMeDesc": "Gone from your chat, others still see it",
+    "chatDeleteEveryone": "Delete for everyone",
+    "chatDeleteEveryoneDesc": "When you can. Someone else’s message in a group still goes for you only",
     "postLanding": "After you post",
     "postLandingDesc": "How your new post lands in your feed",
     "postLandingGhost": "Ghost slot",
@@ -945,6 +954,9 @@
     "defaultProfileTabDesc": "Choose which tab visitors see first on your profile",
     "defaultProfileView": "Profile posts layout",
     "defaultProfileViewDesc": "Show your posts as a grid or a list when people open your profile",
+    "readerProfileView": "Open other profiles as",
+    "readerProfileViewDesc": "Pick grid or list for every profile you open, or keep each person's own choice",
+    "readerProfileViewOwner": "Each person's choice",
     "public": "Public",
     "publicDesc": "Anyone can see your posts",
     "private": "Private",
@@ -5574,6 +5586,18 @@
     "sellYourFractions": "Sell your fractions ({{held}} held)"
   },
   "creator": {
+    "gallery": {
+      "browse": "Browse generations",
+      "fullscreen": "View full screen",
+      "missing": "This generation is unavailable.",
+      "send": "Send",
+      "notifications": {
+        "generation_like": "{{name}} reacted to your generation",
+        "generation_comment_like": "{{name}} reacted to your comment",
+        "generation_reply": "{{name}} replied to your comment",
+        "generation_comment": "{{name}} commented on your generation"
+      }
+    },
     "avatarTitle": "Talking portrait",
     "avatarRequirements": "Square PNG portrait, 512–2048 pixels, up to 5 MB. Mono 24 kHz 16-bit PCM WAV, 5–30 seconds. The last fraction of a second is padded with silence.",
     "avatarPortrait": "Choose portrait PNG",
@@ -12676,7 +12700,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as dehub. Connect your accounts once, then pick where each post goes.",
+    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as Riftn. Connect your accounts once, then pick where each post goes.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up and save",
@@ -12722,6 +12746,11 @@
     "skippedOtherToast": "Skipped {{platforms}}: they couldn't take this post."
   },
   "dm": {
+    "shareGroups": "Groups",
+    "shareKindGroup": "Group",
+    "shareKindChannel": "Channel",
+    "shareKindCommunity": "Community",
+    "reportMessage": "Report message",
     "planRestricted": "This user requires a subscription to receive messages.",
     "planTypeNotAllowed": "This creator's plan doesn't allow this kind of message.",
     "planMinTip": "Tip must be at least {{amount}} tokens for this creator."
@@ -20721,6 +20750,8 @@
     "forEveryone": "Delete for everyone",
     "forBoth": "Delete for both of us",
     "forMeAndName": "Delete for me and {{name}}",
+    "remember": "Remember my choice",
+    "rememberHint": "Change it any time in Settings",
     "failed": "Could not delete the message"
   }
 }

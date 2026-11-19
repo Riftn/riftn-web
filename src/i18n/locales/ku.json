@@ -82,7 +82,8 @@
       "profile": "profîl",
       "proposal": "pêşniyar",
       "stage": "sehne",
-      "store": "firoşgeh"
+      "store": "firoşgeh",
+      "featureRequest": "daxwaz"
     },
     "recipientChat": "sohbet",
     "recipientUser": "bikarhêner",
@@ -516,7 +517,11 @@
     "getTheApp": "Sepanê bistîne",
     "connectAi": "AI girêde",
     "converter": "Veguherîner",
-    "affiliate": "Hevkarî"
+    "affiliate": "Hevkarî",
+    "groups": {
+      "create": "Biafirîne",
+      "discover": "Keşf bike"
+    }
   },
   "feed": {
     "viewProfile": "Profîla {{name}} bibîne",
@@ -1129,7 +1134,8 @@
     "socialConnectedShort": "Girêdayî",
     "socialConnectFailed": "{{platform}} nehat girêdan. Ji kerema xwe dîsa biceribîne.",
     "socialVerifiedFollowers": "{{value}} şopîner",
-    "socialFollowersPending": "Hejmara şopîneran tê nûkirin"
+    "socialFollowersPending": "Hejmara şopîneran tê nûkirin",
+    "menuLayoutFolders": "Peldank"
   },
   "common": {
     "confirm": "Piştrast bike",
@@ -3026,7 +3032,11 @@
     "likersEmptyTitle": "Hêj ecibandin tune",
     "likersEmptyBody": "Ecibandinên vê şîroveyê dê li vir xuya bibin.",
     "anonymousLikes_one": "{{count}} ecibandin ji xwediyê nîşanê yê bênav",
-    "anonymousLikes_other": "{{count}} ecibandin ji xwediyên nîşanan ên bênav"
+    "anonymousLikes_other": "{{count}} ecibandin ji xwediyên nîşanan ên bênav",
+    "threadParts": {
+      "moveUp": "Bibe jor",
+      "moveDown": "Bibe jêr"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6281,6 +6291,12 @@
       "needsImageToWork": "{{model}} wêneyekî hewce dike ku pê bixebite. Pêşî yekî pêve bike.",
       "speechLimit": "Ev {{length}} tîp e. Sînor {{limit}} e.",
       "musicTrackLength": "Parçeya {{count}}s"
+    },
+    "gallery": {
+      "send": "Bişîne",
+      "notifications": {
+        "generation_reply": "{{name}} bersiva şîroveya te da"
+      }
     }
   },
   "pricing": {
@@ -12131,7 +12147,7 @@
   "multiPost": {
     "tab": "Pirweşandin",
     "title": "Pirweşandin",
-    "intro": "Di heman demê de bi dehub re li X, YouTube, Instagram, TikTok û hîn zêdetir biweşîne. Carekê hesabên xwe girê bide, paşê hilbijêre ka her şandî dê biçe ku.",
+    "intro": "Di heman demê de bi Riftn re li X, YouTube, Instagram, TikTok û hîn zêdetir biweşîne. Carekê hesabên xwe girê bide, paşê hilbijêre ka her şandî dê biçe ku.",
     "creditsHeading": "Krediyên şandiyê",
     "credits": "{{count}} krediyên şandiyê",
     "topUpTitle": "Kredî zêde bike û teserûf bike",
@@ -12179,7 +12195,9 @@
   "dm": {
     "planRestricted": "Ev bikarhêner ji bo wergirtina peyaman abonetiyê dixwaze.",
     "planTypeNotAllowed": "Plana vî afirîner vî cureyê peyamê qebûl nake.",
-    "planMinTip": "Ji bo vî afirînerî bexşîş divê herî kêm {{amount}} token be."
+    "planMinTip": "Ji bo vî afirînerî bexşîş divê herî kêm {{amount}} token be.",
+    "shareKindGroup": "Kom",
+    "shareKindCommunity": "Civak"
   },
   "credits": {
     "earningsWorth": "Bi nirxa {{amount}}",
@@ -19358,5 +19376,10 @@
     "edit": "Biguherîne",
     "editLabel": "Peyamê biguherîne",
     "error": "Ew nexebitî. Dîsa biceribîne."
+  },
+  "mentionLinks": {
+    "communities": "Civak",
+    "pages": "Rûpel",
+    "people": "Kes"
   }
 }

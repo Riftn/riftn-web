@@ -141,8 +141,8 @@
   }
 
   /* Messages: the header pill's top lines up with the search bar in the right
-     rail (6px from the top), not 8px lower. */
-  html[data-system-tone='light'] [data-msg-cards] {
+     rail on every System tone (8px dark, 6px light), not 8px lower. */
+  html[data-theme='system'] [data-msg-cards] {
     margin-top: -8px;
   }
 }

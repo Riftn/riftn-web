@@ -81,7 +81,8 @@
       "profile": "a ka ɲɛyirali",
       "proposal": "k'a ɲini ka koo dɔ kɛ",
       "stage": "o ye ɲɛyirali ɲuman ye",
-      "store": "fɛɛn minw be feere"
+      "store": "fɛɛn minw be feere",
+      "featureRequest": "sɛbɛnna"
     },
     "recipientChat": "chat",
     "recipientUser": "baarakɛla",
@@ -518,7 +519,12 @@
     "getTheApp": "Porogaramu sɔrɔ",
     "connectAi": "AI jɛnsɛn",
     "converter": "Ka yɛlɛma",
-    "affiliate": "Jɛɲɔgɔnya"
+    "affiliate": "Jɛɲɔgɔnya",
+    "groups": {
+      "create": "Dilan",
+      "discover": "A ɲini",
+      "riftn": "O ye kooba ye."
+    }
   },
   "feed": {
     "viewProfile": "{{name}} ka profil kɔrɔbɔ",
@@ -1126,7 +1132,9 @@
     "socialConnectedShort": "Koo minw be se k'an dɛmɛ",
     "socialConnectFailed": "Can't add {{platform}} N'i b'a fɛ ka dɔ fara a kan, i ka segi k'a ɲini.",
     "socialVerifiedFollowers": "{{value}} Followers",
-    "socialFollowersPending": "Kalanbagaw ka kunnafoniw"
+    "socialFollowersPending": "Kalanbagaw ka kunnafoniw",
+    "deleteAccountData": "Jatebɔsɛbɛn / Data jɔsi",
+    "menuLayoutFolders": "Dosiyew"
   },
   "common": {
     "confirm": "Ka sɔn",
@@ -3022,7 +3030,11 @@
     "likersEmptyTitle": "Diyanye si tɛ yen fɔlɔ",
     "likersEmptyBody": "Nin hakilina diyanyew bɛna yira yan.",
     "anonymousLikes_one": "Diyanye {{count}} ka bɔ badge tigi tɔgɔbali fɛ",
-    "anonymousLikes_other": "Diyanye {{count}} ka bɔ badge tigi tɔgɔbaliw fɛ"
+    "anonymousLikes_other": "Diyanye {{count}} ka bɔ badge tigi tɔgɔbaliw fɛ",
+    "threadParts": {
+      "moveUp": "Ka teli san fɛ",
+      "moveDown": "Ka teli duguma"
+    }
   },
   "mintChain": {
     "title": "O kɔ, a ye sɛbɛ dɔ ci",
@@ -6001,6 +6013,12 @@
       "needsImageToAnimate": "{{model}} ka kan ka kɛ ni foto ye. An ka kan ka dɔ fara a kan.",
       "needsImageToWork": "{{model}} mako be ja la ka baara kɛ n'o ye. An ka kan ka dɔ fara a kan.",
       "speechLimit": "O ye {{length}}characters ye. O kɔrɔ ko {{limit}}."
+    },
+    "gallery": {
+      "send": "Sɛbɛ",
+      "notifications": {
+        "generation_reply": "{{name}} ye i ka hakilina jaabi"
+      }
     }
   },
   "pricing": {
@@ -11730,7 +11748,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post to X, YouTube, Instagram, TikTok ni kɛlɛw la ka taa dehub. Kɛlɛw bɛɛ bɛɛ kɛ, i bɛ taa ka fɔlɔ i bɛ taa ka fɔlɔ.",
+    "intro": "Post to X, YouTube, Instagram, TikTok ni kɛlɛw la ka taa Riftn. Kɛlɛw bɛɛ bɛɛ kɛ, i bɛ taa ka fɔlɔ i bɛ taa ka fɔlɔ.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Kredi fara a kan ka wari mara",
@@ -11778,7 +11796,9 @@
   "dm": {
     "planRestricted": "Nin baarakɛla mago bɛ abɔnman na walasa ka cikanw sɔrɔ.",
     "planTypeNotAllowed": "Nin dabɔbaga ka labɛn tɛ nin cikan suguya sɔn.",
-    "planMinTip": "Nin dabɔbaga ye, tɛpu ka kan ka kɛ {{amount}} o ye koo ɲuman ye. ye a dɔgɔyali la."
+    "planMinTip": "Nin dabɔbaga ye, tɛpu ka kan ka kɛ {{amount}} o ye koo ɲuman ye. ye a dɔgɔyali la.",
+    "shareKindGroup": "Jɛnkulu",
+    "shareKindCommunity": "Jɛkulu"
   },
   "credits": {
     "earningsWorth": "A sɔngɔ ye {{amount}} ye",
@@ -18934,7 +18954,8 @@
     "127053546dd4": "I tɛ se ka nin kunnafoniw bila",
     "d14896aa4bf8": "Barokunw ka kalanw be se ka kɛ gafew ye. I ka ladɛrɛsi lajɛ ani i ka segi k'a ɲini.",
     "953e708b2287": "O ye cɛnniba lo ye.",
-    "4a52cdd6ac72": "Ne tɛ se ka o ɲɔgɔn kɛ"
+    "4a52cdd6ac72": "Ne tɛ se ka o ɲɔgɔn kɛ",
+    "dbc468a14b60": "Ɲininkali minnu bɛ kɛ tuma caman"
   },
   "articles": {
     "cardLabel": "Article · {{count}} min read",
@@ -19012,7 +19033,8 @@
     "phone": "Foun foun fé",
     "email": "Email",
     "exploreFirst": "Fɔlɔ ka ɲinini kɛ",
-    "codeNote": "An bɛ code ci i ma email fɛ, password tɛ ɲininka."
+    "codeNote": "An bɛ code ci i ma email fɛ, password tɛ ɲininka.",
+    "fingerprint": "I yɛrɛ ɲɛfɔli"
   },
   "liveHype": {
     "gift": {
@@ -19211,5 +19233,10 @@
     "edit": "Yɛlɛma",
     "editLabel": "Ladili labɛn",
     "error": "N'i ma siran, o be yɛlɛma ka kɛ ten."
+  },
+  "mentionLinks": {
+    "communities": "Jɛkuluw",
+    "pages": "Ɲɛw",
+    "people": "Dɔ"
   }
 }

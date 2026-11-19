@@ -80,7 +80,8 @@
       "profile": "profil",
       "proposal": "usulan",
       "stage": "tahapan",
-      "store": "toko"
+      "store": "toko",
+      "featureRequest": "permintaan"
     },
     "recipientChat": "cèthi",
     "recipientUser": "Sedulur",
@@ -519,7 +520,11 @@
     "getTheApp": "Njupuk aplikasi",
     "connectAi": "Nyambungake AI",
     "converter": "Converter",
-    "affiliate": "Afiliasi"
+    "affiliate": "Afiliasi",
+    "groups": {
+      "create": "Gawe",
+      "discover": "Temokake"
+    }
   },
   "feed": {
     "viewProfile": "Deleng profil {{name}}",
@@ -1124,7 +1129,9 @@
     "socialConnectedShort": "Nyambung",
     "socialConnectFailed": "Ora bisa ngubungake {{platform}}. Coba lagi.",
     "socialVerifiedFollowers": "{{value}} pengikut",
-    "socialFollowersPending": "Angka pengikut ngisor-ngerobong"
+    "socialFollowersPending": "Angka pengikut ngisor-ngerobong",
+    "channelSpeed": "Kacepetan muter saben saluran",
+    "menuLayoutFolders": "Folder"
   },
   "common": {
     "confirm": "Kuwuwus ngarani.",
@@ -3022,7 +3029,10 @@
     "likersEmptyTitle": "Durung ana sing seneng",
     "likersEmptyBody": "Sing seneng komentar iki bakal katon ing kene.",
     "anonymousLikes_one": "{{count}} seneng saka pemegang lencana anonim",
-    "anonymousLikes_other": "{{count}} seneng saka pemegang lencana anonim"
+    "anonymousLikes_other": "{{count}} seneng saka pemegang lencana anonim",
+    "threadParts": {
+      "moveUp": "Njupuk dhuwur"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6039,7 +6049,13 @@
       "speechLimit": "Iki ya {{length}} karakter. Batasane {{limit}}.",
       "musicTrackLength": "{{count}} track"
     },
-    "closeBanner": "Tutup banner pembuat"
+    "closeBanner": "Tutup banner pembuat",
+    "gallery": {
+      "send": "Kirim",
+      "notifications": {
+        "generation_reply": "{{name}} mbalas komentarmu"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "Rencana untuk setiap alur kerja",
@@ -7703,7 +7719,8 @@
     "faqInstallNeededA": "Ora. Kabeh mlaku ing tab nggunakake panyimpenan lokal perambanmu. Nutup tab bakal mungkasi simpulmu; ora ana layanan latar mburi lan ora ana instalasi.",
     "ctaTitle": "Miwiti mung nalika kegagalan aman.",
     "ctaBody": "Dhukungan asal, media sing dilindhungi enkripsi, lan karya sing diverifikasi luwih dhisik tinimbang hadiah simpul umum.",
-    "footerNote": "Partisipasi DePin minangka layanan kontribusi, dudu produk investasi. Kasedhiyan, kelayakan, lan hadiah bisa diganti."
+    "footerNote": "Partisipasi DePin minangka layanan kontribusi, dudu produk investasi. Kasedhiyan, kelayakan, lan hadiah bisa diganti.",
+    "navFaq": "Pitakon sing kerep ditakokake"
   },
   "creatorFlow": {
     "newNativeFlow": "Alur anyar",
@@ -11804,7 +11821,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Kirim menyang X, YouTube, Instagram, TikTok lan liya-liyane bebarengan karo dehub. Sambungake akun sampeyan sapisan, banjur pilih ngendi saben kiriman bakal dikirim.",
+    "intro": "Kirim menyang X, YouTube, Instagram, TikTok lan liya-liyane bebarengan karo Riftn. Sambungake akun sampeyan sapisan, banjur pilih ngendi saben kiriman bakal dikirim.",
     "creditsHeading": "Kredit kiriman",
     "credits": "{{count}} kredit kiriman",
     "topUpTitle": "Top up lan ngirit",
@@ -11852,7 +11869,9 @@
   "dm": {
     "planRestricted": "Pangguna iki mbutuhake langganan kanggo nampa pesen.",
     "planTypeNotAllowed": "Paket kreator iki ora ngidini jinis pesen iki.",
-    "planMinTip": "Tip kanggo kreator iki paling sithik {{amount}} token."
+    "planMinTip": "Tip kanggo kreator iki paling sithik {{amount}} token.",
+    "shareKindGroup": "Golongan",
+    "shareKindCommunity": "Komunitas"
   },
   "credits": {
     "earningsWorth": "Nilai {{amount}}",
@@ -18978,7 +18997,8 @@
     "127053546dd4": "Tidak bisa download file iki",
     "d14896aa4bf8": "Perpustakaan bebas ora bisa muat. Cek koneksi lan coba lagi.",
     "953e708b2287": "Penggantian suara gagal.",
-    "4a52cdd6ac72": "Tidak bisa duplikasi layer iki"
+    "4a52cdd6ac72": "Tidak bisa duplikasi layer iki",
+    "dbc468a14b60": "Pitakon sing kerep ditakokake"
   },
   "articles": {
     "cardLabel": "Artikel · {{count}} menit baca",
@@ -19251,5 +19271,10 @@
     "view": "Tonton",
     "edit": "Rubah",
     "error": "Iku ora bisa. Coba maneh."
+  },
+  "mentionLinks": {
+    "communities": "Komunitas",
+    "pages": "Kaca",
+    "people": "Wong"
   }
 }

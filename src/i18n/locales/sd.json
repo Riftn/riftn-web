@@ -81,7 +81,8 @@
       "profile": "پروفائل",
       "proposal": "پروپوزل",
       "stage": "اسٽيج",
-      "store": "دڪان"
+      "store": "دڪان",
+      "featureRequest": "درخواست"
     },
     "recipientChat": "چاٽ",
     "recipientUser": "ڪارڪن",
@@ -521,7 +522,12 @@
     "getTheApp": "ايپ حاصل ڪريو",
     "connectAi": "AI ڳنڍيو",
     "converter": "ڪنورٽر",
-    "affiliate": "ايفيليٽ"
+    "affiliate": "ايفيليٽ",
+    "groups": {
+      "create": "ٺاهيو",
+      "discover": "دريافت ڪريو",
+      "riftn": "هالينڊ"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} جو پروفائل ڏسو",
@@ -1134,7 +1140,8 @@
     "socialConnectedShort": "ڳنڍيل ٿيو",
     "socialConnectFailed": "{{platform}} ڳنڍي نه سگھيو. مهرباني ڪري ٻيهر ڪوشش ڪريو.",
     "socialVerifiedFollowers": "{{value}} پيروي",
-    "socialFollowersPending": "پوئلڳن جي ڳڻپ اپڊيٽ"
+    "socialFollowersPending": "پوئلڳن جي ڳڻپ اپڊيٽ",
+    "menuLayoutFolders": "فولڊرز"
   },
   "common": {
     "confirm": "تصديق ڪريو",
@@ -3029,7 +3036,11 @@
     "likersEmptyTitle": "اڃا ڪا پسند ناهي",
     "likersEmptyBody": "هن تبصري تي پسنديون هتي نظر اينديون.",
     "anonymousLikes_one": "گمنام بيج هولڊر کان {{count}} پسند",
-    "anonymousLikes_other": "گمنام بيج هولڊرز کان {{count}} پسنديون"
+    "anonymousLikes_other": "گمنام بيج هولڊرز کان {{count}} پسنديون",
+    "threadParts": {
+      "moveUp": "مٿي منتقل ڪريو",
+      "moveDown": "هيٺ منتقل ڪريو"
+    }
   },
   "mintChain": {
     "title": "مينٽ پوسٽ",
@@ -6055,6 +6066,12 @@
       "needsImageToAnimate": "{{model}} متحرڪ ڪرڻ لاءِ تصوير جي ضرورت آهي. پهرين هڪ کي منسلڪ ڪريو.",
       "speechLimit": "اھو آھي {{length}} اکر. حد {{limit}} آهي.",
       "musicTrackLength": "{{count}}s ٽريڪ"
+    },
+    "gallery": {
+      "send": "موڪليو",
+      "notifications": {
+        "generation_reply": "{{name}} توهان جي راءِ تي جواب ڏنائين"
+      }
     }
   },
   "pricing": {
@@ -11783,7 +11800,7 @@
   "multiPost": {
     "tab": "ملٽي پوسٽنگ",
     "title": "ملٽي پوسٽنگ",
-    "intro": "X، YouTube، Instagram، TikTok ۽ وڌيڪ کي هڪ ئي وقت تي dehub سان پوسٽ ڪريو. پنهنجا اڪائونٽ هڪ ڀيرو ڳنڍيو، پوءِ چونڊيو هر پوسٽ ڪٿي وڃي.",
+    "intro": "X، YouTube، Instagram، TikTok ۽ وڌيڪ کي هڪ ئي وقت تي Riftn سان پوسٽ ڪريو. پنهنجا اڪائونٽ هڪ ڀيرو ڳنڍيو، پوءِ چونڊيو هر پوسٽ ڪٿي وڃي.",
     "creditsHeading": "پوسٽ ڪريڊٽ",
     "credits": "{{count}} پوسٽ ڪريڊٽ",
     "topUpTitle": "ٽاپ اپ ۽ بچايو",
@@ -11831,7 +11848,9 @@
   "dm": {
     "planRestricted": "هن استعمال ڪندڙ کي پيغام وصول ڪرڻ لاءِ سبسڪرپشن گهرجي.",
     "planTypeNotAllowed": "هن تخليقڪار جو پلان هن قسم جي پيغام جي اجازت نٿو ڏئي.",
-    "planMinTip": "هن تخليقڪار لاءِ ٽپ گهٽ ۾ گهٽ {{amount}} ٽوڪن هجڻ گهرجي."
+    "planMinTip": "هن تخليقڪار لاءِ ٽپ گهٽ ۾ گهٽ {{amount}} ٽوڪن هجڻ گهرجي.",
+    "shareKindGroup": "گروپ",
+    "shareKindCommunity": "ڪميونٽي"
   },
   "credits": {
     "earningsWorth": "ورٿ {{amount}}",
@@ -19069,7 +19088,8 @@
     "fc1b6957a991": "خلاصو قطار شامل نه ڪري سگھيو",
     "127053546dd4": "ھي فائيل ڊائونلوڊ نه ٿي سگھيو",
     "d14896aa4bf8": "مفت لائبريري لوڊ نه ٿي سگھي. پنهنجي ڪنيڪشن جي جانچ ڪريو ۽ ٻيهر ڪوشش ڪريو.",
-    "953e708b2287": "وائس نسل ناڪام ٿي."
+    "953e708b2287": "وائس نسل ناڪام ٿي.",
+    "021aaa052282": "آه آه آه"
   },
   "articles": {
     "cardLabel": "مضمون · {{count}} منٽ پڙهڻ",
@@ -19344,5 +19364,10 @@
     "edit": "ترميم ڪريو",
     "editLabel": "پيغام تبديل ڪريو",
     "error": "اهو ڪم نه ڪيو، ٻيهر ڪوشش ڪريو."
+  },
+  "mentionLinks": {
+    "communities": "ڪميونٽيون",
+    "pages": "صفحا",
+    "people": "ماڻهو"
   }
 }

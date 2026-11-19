@@ -81,7 +81,8 @@
       "profile": "Профайл",
       "proposal": "санал",
       "stage": "үе шат",
-      "store": "дэлгүүр"
+      "store": "дэлгүүр",
+      "featureRequest": "хүсэлт"
     },
     "recipientChat": "чат",
     "recipientUser": "хэрэглэгч",
@@ -519,7 +520,12 @@
     "getTheApp": "Апп авах",
     "connectAi": "AI холбох",
     "converter": "Хөрвүүлэгч",
-    "affiliate": "Түнш"
+    "affiliate": "Түнш",
+    "groups": {
+      "create": "Үүсгэх",
+      "discover": "Нээх",
+      "riftn": "ДЭБ"
+    }
   },
   "feed": {
     "viewProfile": "{{name}}-н профайлыг харах",
@@ -1141,7 +1147,8 @@
     "socialConnectedShort": "Холбогдсон",
     "socialConnectFailed": "{{platform}} холбож чадсангүй. Дахин оролдоно уу.",
     "socialVerifiedFollowers": "{{value}} дагалдагчид",
-    "socialFollowersPending": "Дагагчийн тоолох шинэчлэлт"
+    "socialFollowersPending": "Дагагчийн тоолох шинэчлэлт",
+    "menuLayoutFolders": "Хавтаснууд"
   },
   "common": {
     "confirm": "Баталгаажуулах",
@@ -3041,7 +3048,11 @@
     "likersEmptyTitle": "Одоогоор лайк алга",
     "likersEmptyBody": "Энэ сэтгэгдлийн лайкууд энд харагдана.",
     "anonymousLikes_one": "Нэрээ нуусан тэмдэг эзэмшигчээс {{count}} лайк",
-    "anonymousLikes_other": "Нэрээ нуусан тэмдэг эзэмшигчдээс {{count}} лайк"
+    "anonymousLikes_other": "Нэрээ нуусан тэмдэг эзэмшигчдээс {{count}} лайк",
+    "threadParts": {
+      "moveUp": "Дээш зөөх",
+      "moveDown": "Доош зөөх"
+    }
   },
   "mintChain": {
     "title": "Mint Бичлэгийн тоо",
@@ -6065,6 +6076,12 @@
       "needsImageToWork": "{{model}} -өөс ажиллахын тулд зураг авах хэрэгтэй. Эхлээд нэгийг нь хавсаргана.",
       "speechLimit": "Энэ бол {{length}} тэмдэгтүүд. Хязгаар {{limit}} байна.",
       "musicTrackLength": "{{count}}s зам"
+    },
+    "gallery": {
+      "send": "Илгээх",
+      "notifications": {
+        "generation_reply": "{{name}} таны сэтгэгдэлд хариулсан"
+      }
     }
   },
   "pricing": {
@@ -11829,7 +11846,7 @@
   "multiPost": {
     "tab": "Олон пост",
     "title": "Олон пост",
-    "intro": "X, YouTube, Instagram, TikTok болон бусад платформ руу нэгэн зэрэг dehub ашиглан нийтлэх боломжтой. Данс нэг удаа холбоод, хаана нийтлэхээ сонгоно уу.",
+    "intro": "X, YouTube, Instagram, TikTok болон бусад платформ руу нэгэн зэрэг Riftn ашиглан нийтлэх боломжтой. Данс нэг удаа холбоод, хаана нийтлэхээ сонгоно уу.",
     "creditsHeading": "Пост кредит",
     "credits": "{{count}} пост кредит",
     "topUpTitle": "Нэмж, хэмнэх",
@@ -11877,7 +11894,9 @@
   "dm": {
     "planRestricted": "Энэ хэрэглэгч мессеж хүлээн авахын тулд захиалга шаардана.",
     "planTypeNotAllowed": "Энэ бүтээгчийн төлөвлөгөө ийм төрлийн мессежийг зөвшөөрдөггүй.",
-    "planMinTip": "Энэ бүтээгчид өгөх цай хамгийн багадаа {{amount}} токен байх ёстой."
+    "planMinTip": "Энэ бүтээгчид өгөх цай хамгийн багадаа {{amount}} токен байх ёстой.",
+    "shareKindGroup": "Бүлэглэх",
+    "shareKindCommunity": "Олон нийт"
   },
   "credits": {
     "earningsWorth": "Үнэ {{amount}}",
@@ -19362,5 +19381,10 @@
     "edit": "Засах",
     "editLabel": "Зурвас Засах",
     "error": "Дахин оролдоорой."
+  },
+  "mentionLinks": {
+    "communities": "Нийгэмлэгүүд",
+    "pages": "Хуудаснууд",
+    "people": "Хүмүүс"
   }
 }

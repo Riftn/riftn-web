@@ -788,6 +788,9 @@
     "defaultProfileTabDesc": "Chọn tab mà khách xem đầu tiên trên hồ sơ của bạn",
     "defaultProfileView": "Bố cục bài đăng trên hồ sơ",
     "defaultProfileViewDesc": "Hiển thị bài đăng của bạn dạng lưới hoặc danh sách khi mọi người mở hồ sơ của bạn",
+    "readerProfileView": "Mở hồ sơ khác dưới dạng",
+    "readerProfileViewDesc": "Chọn lưới hoặc danh sách cho mọi hồ sơ bạn mở, hoặc giữ lựa chọn của từng người",
+    "readerProfileViewOwner": "Lựa chọn của từng người",
     "public": "Công khai",
     "publicDesc": "Bất kỳ ai cũng có thể xem bài viết của bạn",
     "private": "Riêng tư",
@@ -1231,7 +1234,9 @@
     "menuLayoutSections": "Mục",
     "menuLayoutSectionsDesc": "Tất cả trang cùng lúc, dưới tiêu đề",
     "menuLayoutFolders": "Thư mục",
-    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục"
+    "menuLayoutFoldersDesc": "Trang chính của bạn, rồi mỗi nhóm một thư mục",
+    "chatCards": "Cuộc trò chuyện dạng thẻ",
+    "chatCardsDesc": "Mỗi cuộc trò chuyện một thẻ. Tắt để có danh sách đơn giản với đường kẻ giữa các cuộc trò chuyện."
   },
   "common": {
     "confirm": "Xác nhận",
@@ -3161,7 +3166,11 @@
     "likersEmptyTitle": "Chưa có lượt thích",
     "likersEmptyBody": "Lượt thích cho bình luận này sẽ hiển thị ở đây.",
     "anonymousLikes_one": "{{count}} lượt thích từ người giữ huy hiệu ẩn danh",
-    "anonymousLikes_other": "{{count}} lượt thích từ những người giữ huy hiệu ẩn danh"
+    "anonymousLikes_other": "{{count}} lượt thích từ những người giữ huy hiệu ẩn danh",
+    "threadParts": {
+      "moveUp": "Chuyển lên",
+      "moveDown": "Chuyển xuống"
+    }
   },
   "mintChain": {
     "title": "Trụ đúc tiền",
@@ -6197,6 +6206,12 @@
       "needsImageToWork": "Chúng ta cần một hình ảnh để {{model}} hoạt động. Vui lòng thêm hình ảnh trước.",
       "speechLimit": "Đó là {{length}} ký tự. Giới hạn là {{limit}}.",
       "musicTrackLength": "{{count}}s theo dõi"
+    },
+    "gallery": {
+      "send": "Gửi",
+      "notifications": {
+        "generation_reply": "{{name}} đã trả lời bình luận của bạn"
+      }
     }
   },
   "pricing": {
@@ -12051,7 +12066,7 @@
   "multiPost": {
     "tab": "Đăng đa nền tảng",
     "title": "Đăng đa nền tảng",
-    "intro": "Đăng lên X, YouTube, Instagram, TikTok và nhiều nền tảng khác cùng một lúc với dehub. Kết nối tài khoản của bạn một lần, sau đó chọn nơi mỗi bài đăng sẽ được gửi.",
+    "intro": "Đăng lên X, YouTube, Instagram, TikTok và nhiều nền tảng khác cùng một lúc với Riftn. Kết nối tài khoản của bạn một lần, sau đó chọn nơi mỗi bài đăng sẽ được gửi.",
     "creditsHeading": "Tín dụng đăng bài",
     "credits": "{{count}} tín dụng đăng bài",
     "topUpTitle": "Nạp thêm và tiết kiệm",
@@ -12099,7 +12114,11 @@
   "dm": {
     "planRestricted": "Người dùng này yêu cầu đăng ký để nhận tin nhắn.",
     "planTypeNotAllowed": "Gói của nhà sáng tạo này không cho phép loại tin nhắn này.",
-    "planMinTip": "Tiền tip cho nhà sáng tạo này phải ít nhất {{amount}} token."
+    "planMinTip": "Tiền tip cho nhà sáng tạo này phải ít nhất {{amount}} token.",
+    "shareGroups": "Nhóm",
+    "shareKindGroup": "Nhóm",
+    "shareKindChannel": "Kênh",
+    "shareKindCommunity": "Cộng đồng"
   },
   "credits": {
     "earningsWorth": "Trị giá {{amount}}",

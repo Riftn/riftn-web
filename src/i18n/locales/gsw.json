@@ -80,7 +80,8 @@
       "profile": "profil",
       "proposal": "Vorschlag",
       "stage": "Stufe",
-      "store": "laden"
+      "store": "laden",
+      "featureRequest": "Anforderig"
     },
     "recipientChat": "Chatt",
     "recipientUser": "Benützer",
@@ -521,7 +522,11 @@
     "getTheApp": "App lade",
     "connectAi": "KI verbinde",
     "converter": "Converter",
-    "affiliate": "Partnerprogramm"
+    "affiliate": "Partnerprogramm",
+    "groups": {
+      "create": "Erstelle",
+      "discover": "Entdecke"
+    }
   },
   "feed": {
     "viewProfile": "Lueg {{name}}'s Profil aa",
@@ -1131,7 +1136,8 @@
     "socialConnectedShort": "Verbunde",
     "socialConnectFailed": "Könnt nöd mit {{platform}} verbunde wärde. Versuech's no.",
     "socialVerifiedFollowers": "{{value}} Follower",
-    "socialFollowersPending": "Followerzahle aktualisierend"
+    "socialFollowersPending": "Followerzahle aktualisierend",
+    "menuLayoutFolders": "Ordner"
   },
   "common": {
     "confirm": "Bestätige.",
@@ -3060,7 +3066,11 @@
     "likersEmptyTitle": "No kei Likes",
     "likersEmptyBody": "Likes uf dä Kommentar erschiined do.",
     "anonymousLikes_one": "{{count}} Like vomene anonyme Badge-Inhaber",
-    "anonymousLikes_other": "{{count}} Likes vo anonyme Badge-Inhaber"
+    "anonymousLikes_other": "{{count}} Likes vo anonyme Badge-Inhaber",
+    "threadParts": {
+      "moveUp": "Nimm nach obe",
+      "moveDown": "Gang abe"
+    }
   },
   "mintChain": {
     "title": "Mint-Post",
@@ -6078,6 +6088,12 @@
       "needsImageToAnimate": "{{model}} braucht e ene Bilde, wo drin animiert wär. Dräi druf!",
       "needsImageToWork": "Dä {{model}} bruucht e e Bild, wuusst du, druf aaschliessend.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "Schicke",
+      "notifications": {
+        "generation_reply": "{{name}} het uf din Kommentar gantwortet"
+      }
     }
   },
   "pricing": {
@@ -11850,7 +11866,7 @@
   "multiPost": {
     "tab": "Multi-Posting",
     "title": "Multi-Posting",
-    "intro": "Post zu X, YouTube, Instagram, TikTok und meh glichziitig mit dehub. Verbind din Account einisch, denn wählsch, wohi jede Post gaht.",
+    "intro": "Post zu X, YouTube, Instagram, TikTok und meh glichziitig mit Riftn. Verbind din Account einisch, denn wählsch, wohi jede Post gaht.",
     "creditsHeading": "Post-Credits",
     "credits": "{{count}} Post-Credits",
     "topUpTitle": "Auflade und spare",
@@ -11898,7 +11914,9 @@
   "dm": {
     "planRestricted": "Dä Benutzer bruucht es Abo, zum Nachrichte übercho.",
     "planTypeNotAllowed": "Dä Plan vo dem Creator erlaubt die Art vo Nachricht nöd.",
-    "planMinTip": "S Trinkgäld für dä Creator mues mindestens {{amount}} Tokens sii."
+    "planMinTip": "S Trinkgäld für dä Creator mues mindestens {{amount}} Tokens sii.",
+    "shareKindGroup": "Gruppä",
+    "shareKindCommunity": "Gmeinschaft"
   },
   "credits": {
     "earningsWorth": "Wert {{amount}}",
@@ -19399,5 +19417,10 @@
     "edit": "Ändere",
     "editLabel": "Nachricht bearbeite",
     "error": "Das het nid funktioniert. Versuchs nomol."
+  },
+  "mentionLinks": {
+    "communities": "Communitys",
+    "pages": "Siite",
+    "people": "Lüt"
   }
 }

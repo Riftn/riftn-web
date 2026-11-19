@@ -780,6 +780,13 @@
     "heading": "Riftn-shorts"
   },
   "settings": {
+    "chatDeleteChoice": "Als je een bericht verwijdert",
+    "chatDeleteChoiceDesc": "Elke keer vragen, of altijd alleen voor jou of voor iedereen in de chat verwijderen.",
+    "chatDeleteAsk": "Elke keer vragen",
+    "chatDeleteMe": "Verwijderen voor mij",
+    "chatDeleteMeDesc": "Weg uit jouw chat, anderen zien het nog",
+    "chatDeleteEveryone": "Verwijderen voor iedereen",
+    "chatDeleteEveryoneDesc": "Waar dat kan. Een bericht van iemand anders in een groep verdwijnt alleen voor jou",
     "postLanding": "Na het plaatsen",
     "postLandingDesc": "Hoe je nieuwe bericht in je feed verschijnt",
     "postLandingGhost": "Spookplek",
@@ -934,6 +941,9 @@
     "defaultProfileTabDesc": "Kies welk tabblad bezoekers als eerste zien op je profiel",
     "defaultProfileView": "Indeling van profielberichten",
     "defaultProfileViewDesc": "Toon je berichten als raster of als lijst wanneer mensen je profiel openen",
+    "readerProfileView": "Andere profielen openen als",
+    "readerProfileViewDesc": "Kies raster of lijst voor elk profiel dat je opent, of houd de keuze van elke persoon aan",
+    "readerProfileViewOwner": "Keuze van de persoon",
     "public": "Openbaar",
     "publicDesc": "Iedereen kan je berichten zien",
     "private": "Privé",
@@ -1378,7 +1388,9 @@
     "menuLayoutSections": "Secties",
     "menuLayoutSectionsDesc": "Alle pagina's tegelijk, onder kopjes",
     "menuLayoutFolders": "Mappen",
-    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep"
+    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep",
+    "chatCards": "Chats als kaarten",
+    "chatCardsDesc": "Elke chat op een eigen kaart. Zet uit voor een gewone lijst met een lijn tussen chats."
   },
   "common": {
     "confirm": "Bevestigen",
@@ -6807,6 +6819,18 @@
       "needsImageToWork": "{{model}} heeft een afbeelding nodig om mee te werken. Bevestig er eerst een.",
       "speechLimit": "Dat zijn {{length}} tekens. De limiet is {{limit}}.",
       "musicTrackLength": "{{count}}s nummer"
+    },
+    "gallery": {
+      "browse": "Creaties bekijken",
+      "fullscreen": "Op volledig scherm bekijken",
+      "missing": "Deze creatie is niet beschikbaar.",
+      "send": "Versturen",
+      "notifications": {
+        "generation_like": "{{name}} reageerde op je creatie",
+        "generation_comment_like": "{{name}} reageerde op je opmerking",
+        "generation_reply": "{{name}} antwoordde op je opmerking",
+        "generation_comment": "{{name}} plaatste een opmerking bij je creatie"
+      }
     }
   },
   "pricing": {
@@ -12989,7 +13013,7 @@
   "multiPost": {
     "tab": "Multi-posten",
     "title": "Multi-posten",
-    "intro": "Post tegelijkertijd naar X, YouTube, Instagram, TikTok en meer met dehub. Verbind je accounts één keer, kies dan waar elke post naartoe gaat.",
+    "intro": "Post tegelijkertijd naar X, YouTube, Instagram, TikTok en meer met Riftn. Verbind je accounts één keer, kies dan waar elke post naartoe gaat.",
     "creditsHeading": "Tegoed plaatsen",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top-up en bespaar",
@@ -13037,7 +13061,12 @@
   "dm": {
     "planRestricted": "Deze gebruiker vereist een abonnement om berichten te ontvangen.",
     "planTypeNotAllowed": "Het abonnement van deze maker staat dit soort bericht niet toe.",
-    "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn."
+    "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn.",
+    "shareGroups": "Groepen",
+    "shareKindGroup": "Groep",
+    "shareKindChannel": "Kanaal",
+    "shareKindCommunity": "Gemeenschap",
+    "reportMessage": "Bericht melden"
   },
   "credits": {
     "earningsWorth": "Waarde {{amount}}",
@@ -21075,6 +21104,8 @@
     "forEveryone": "Verwijderen voor iedereen",
     "forBoth": "Verwijderen voor ons allebei",
     "forMeAndName": "Verwijderen voor mij en {{name}}",
+    "remember": "Onthoud mijn keuze",
+    "rememberHint": "Wijzig dit altijd in Instellingen",
     "failed": "Kon het bericht niet verwijderen"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "профиль",
       "proposal": "ұсыныс",
       "stage": "сахна",
-      "store": "магазин"
+      "store": "магазин",
+      "featureRequest": "сұрау"
     },
     "recipientChat": "чат",
     "recipientUser": "пайдаланушы",
@@ -521,7 +522,12 @@
     "getTheApp": "Қосымшаны алу",
     "connectAi": "AI қосу",
     "converter": "Конвертер",
-    "affiliate": "Серіктестік"
+    "affiliate": "Серіктестік",
+    "groups": {
+      "create": "Жасау",
+      "discover": "Ашу",
+      "riftn": "ДеХаб"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} профилін көру",
@@ -1141,7 +1147,8 @@
     "socialConnected": "{{platform}} қосылды",
     "socialConnectedShort": "Қосылған",
     "socialVerifiedFollowers": "{{value}} ізбасарлары",
-    "socialFollowersPending": "Ізбасарлар санының жаңартылуы"
+    "socialFollowersPending": "Ізбасарлар санының жаңартылуы",
+    "menuLayoutFolders": "Қалталар"
   },
   "common": {
     "confirm": "Растау",
@@ -3058,7 +3065,11 @@
     "likersEmptyTitle": "Әлі ұнату жоқ",
     "likersEmptyBody": "Осы пікірдің ұнатулары осында көрсетіледі.",
     "anonymousLikes_one": "Анонимді бейдж иесінен {{count}} ұнату",
-    "anonymousLikes_other": "Анонимді бейдж иелерінен {{count}} ұнату"
+    "anonymousLikes_other": "Анонимді бейдж иелерінен {{count}} ұнату",
+    "threadParts": {
+      "moveUp": "Жоғары жылжыту",
+      "moveDown": "Төмен жылжыту"
+    }
   },
   "mintChain": {
     "title": "Жалбыз пост",
@@ -6090,6 +6101,12 @@
       "needsImageToWork": "{{model}} Жұмыс істеу үшін кескін қажет. Алдымен біреуін бекітіңіз.",
       "speechLimit": "Бұл {{length}} таңбалар. Шегі - {{limit}}.",
       "musicTrackLength": "{{count}}s трек"
+    },
+    "gallery": {
+      "send": "Жіберу",
+      "notifications": {
+        "generation_reply": "{{name}} пікіріңізге жауап берді"
+      }
     }
   },
   "pricing": {
@@ -11869,7 +11886,7 @@
   "multiPost": {
     "tab": "Көптік жариялау",
     "title": "Көптік жариялау",
-    "intro": "X, YouTube, Instagram, TikTok және т.б. платформаларға бір уақытта dehub арқылы жариялаңыз. Тіркелгілеріңізді бір рет қосыңыз, содан кейін әр жазбаның қайда кететінін таңдаңыз.",
+    "intro": "X, YouTube, Instagram, TikTok және т.б. платформаларға бір уақытта Riftn арқылы жариялаңыз. Тіркелгілеріңізді бір рет қосыңыз, содан кейін әр жазбаның қайда кететінін таңдаңыз.",
     "creditsHeading": "Жазба кредиттері",
     "credits": "{{count}} жазба кредиті",
     "topUpTitle": "Толықтырып, үнемдеңіз",
@@ -11917,7 +11934,9 @@
   "dm": {
     "planRestricted": "Бұл пайдаланушыға хабар алу үшін жазылым қажет.",
     "planTypeNotAllowed": "Бұл автордың жоспары мұндай хабарға рұқсат бермейді.",
-    "planMinTip": "Бұл автор үшін шайпұл кемінде {{amount}} токендер болуы керек."
+    "planMinTip": "Бұл автор үшін шайпұл кемінде {{amount}} токендер болуы керек.",
+    "shareKindGroup": "Топтау",
+    "shareKindCommunity": "Қоғамдастық"
   },
   "credits": {
     "earningsWorth": "Құны {{amount}}",
@@ -19415,5 +19434,10 @@
     "backToBlog": "Блогқа қайту",
     "sharePost": "Жазбаны бөлісу",
     "relatedPosts": "Байланысты жазбалар"
+  },
+  "mentionLinks": {
+    "communities": "Қауымдастықтар",
+    "pages": "Беттер",
+    "people": "Адамдар"
   }
 }

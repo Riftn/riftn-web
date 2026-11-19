@@ -80,7 +80,8 @@
       "profile": "Profile",
       "proposal": "panukala",
       "stage": "entablado",
-      "store": "magasin"
+      "store": "magasin",
+      "featureRequest": "Mga Hiling"
     },
     "recipientChat": "chat",
     "recipientUser": "user",
@@ -520,7 +521,11 @@
     "getTheApp": "Kunin ang app",
     "connectAi": "Ikonekta ang AI",
     "converter": "wala",
-    "affiliate": "Affiliate"
+    "affiliate": "Affiliate",
+    "groups": {
+      "create": "Gumawa",
+      "discover": "Tumuklas"
+    }
   },
   "feed": {
     "viewProfile": "Tingnan ang profile ni {{name}}",
@@ -1145,7 +1150,8 @@
     "socialConnectedShort": "Nakakonekta",
     "socialConnectFailed": "Hindi makakapag-ugnay sa {{platform}}. Pumunta ulit.",
     "socialVerifiedFollowers": "{{value}} mga tagasunod",
-    "socialFollowersPending": "Pag - update ng bilang ng tagasunod"
+    "socialFollowersPending": "Pag - update ng bilang ng tagasunod",
+    "menuLayoutFolders": "Mga folder"
   },
   "common": {
     "confirm": "Kumpirmahin",
@@ -3090,7 +3096,11 @@
     "likersEmptyTitle": "Wala pang like",
     "likersEmptyBody": "Dito lalabas ang mga like sa komentong ito.",
     "anonymousLikes_one": "{{count}} like mula sa anonymous na badge holder",
-    "anonymousLikes_other": "{{count}} like mula sa mga anonymous na badge holder"
+    "anonymousLikes_other": "{{count}} like mula sa mga anonymous na badge holder",
+    "threadParts": {
+      "moveUp": "Ilipat pataas",
+      "moveDown": "Ilipat pababa"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6121,6 +6131,12 @@
       "needsImageToAnimate": "Ang {{model}} ay nangangailangan ng isang larawan upang i - animate. Maglakip muna ng isa.",
       "needsImageToWork": "Ang {{model}} ay nangangailangan ng isang larawan upang gumana mula sa. Maglakip muna ng isa.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "Ipadala",
+      "notifications": {
+        "generation_reply": "Sumagot si {{name}} sa iyong comment"
+      }
     }
   },
   "pricing": {
@@ -11965,7 +11981,7 @@
   "multiPost": {
     "tab": "Maramihang pagpopost",
     "title": "Maramihang pagpopost",
-    "intro": "Mag-post sa X, YouTube, Instagram, TikTok at iba pa nang sabay-sabay gamit ang dehub. Ikonekta ang iyong mga account nang isang beses, pagkatapos piliin kung saan mapupunta ang bawat post.",
+    "intro": "Mag-post sa X, YouTube, Instagram, TikTok at iba pa nang sabay-sabay gamit ang Riftn. Ikonekta ang iyong mga account nang isang beses, pagkatapos piliin kung saan mapupunta ang bawat post.",
     "creditsHeading": "Kredito sa pag-post",
     "credits": "{{count}} kredito sa pag-post",
     "topUpTitle": "Mag-top up at magtipid",
@@ -12013,7 +12029,9 @@
   "dm": {
     "planRestricted": "Kailangan ng user na ito ng subscription para makatanggap ng mga mensahe.",
     "planTypeNotAllowed": "Hindi pinapayagan ng plano ng creator na ito ang ganitong uri ng mensahe.",
-    "planMinTip": "Ang tip para sa creator na ito ay dapat hindi bababa sa {{amount}} tokens."
+    "planMinTip": "Ang tip para sa creator na ito ay dapat hindi bababa sa {{amount}} tokens.",
+    "shareKindGroup": "Pangkatin",
+    "shareKindCommunity": "Komunidad"
   },
   "credits": {
     "earningsWorth": "Sulit {{amount}}",
@@ -19603,5 +19621,10 @@
   "notification": {
     "noNotifications": "Walang mga abiso",
     "loadMore": "Mag-load ng higit pa"
+  },
+  "mentionLinks": {
+    "communities": "Mga Komunidad",
+    "pages": "Mga pahina",
+    "people": "Mga tao"
   }
 }

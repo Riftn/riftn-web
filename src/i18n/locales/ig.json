@@ -81,7 +81,8 @@
       "profile": "profaịlụ",
       "proposal": "ngwaahịa",
       "stage": "ogbo",
-      "store": "ụlọ ahịa"
+      "store": "ụlọ ahịa",
+      "featureRequest": "arịrịọ"
     },
     "recipientChat": "anya",
     "recipientUser": "onyeọrụ",
@@ -518,7 +519,11 @@
     "getTheApp": "Nweta Ngwa Ahụ",
     "connectAi": "Jikọọ AI",
     "converter": "Ntụgharị",
-    "affiliate": "Mmekọrịta"
+    "affiliate": "Mmekọrịta",
+    "groups": {
+      "create": "Mepụta",
+      "discover": "Chọpụta"
+    }
   },
   "feed": {
     "viewProfile": "Gosi profaịlụ {{name}}",
@@ -1130,7 +1135,8 @@
     "socialConnectedShort": "Ejikọtara ya",
     "socialConnectFailed": "Enweghị ike ijikọ {{platform}}. Biko nwaa ọzọ.",
     "socialVerifiedFollowers": "{{value}} ndị na-eso ụzọ",
-    "socialFollowersPending": "Na-eso ụzọ ọgụgụ emelitere"
+    "socialFollowersPending": "Na-eso ụzọ ọgụgụ emelitere",
+    "menuLayoutFolders": "Ndị Folda"
   },
   "common": {
     "confirm": "Gosi",
@@ -3028,7 +3034,11 @@
     "likersEmptyTitle": "Enweghị mmasị ugbu a",
     "likersEmptyBody": "Mmasị na nkọwa a ga-apụta ebe a.",
     "anonymousLikes_one": "Mmasị {{count}} sitere n'aka onye ji baajị na-amaghị aha",
-    "anonymousLikes_other": "Mmasị {{count}} sitere n'aka ndị ji baajị na-amaghị aha"
+    "anonymousLikes_other": "Mmasị {{count}} sitere n'aka ndị ji baajị na-amaghị aha",
+    "threadParts": {
+      "moveUp": "Gaa n'elu",
+      "moveDown": "Gaa n'okpuru"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6025,6 +6035,12 @@
       "needsImageToAnimate": "{{model}} chọrọ ihe oyiyi iji mee ka ọ dị ndụ. Tinye otu mbụ.",
       "speechLimit": "Nke ahụ bụ {{length}} mkpụrụedemede. Mmachi ahụ bụ {{limit}}.",
       "musicTrackLength": "{{count}}s egwu"
+    },
+    "gallery": {
+      "send": "Ziga",
+      "notifications": {
+        "generation_reply": "{{name}} zaghachiri okwu gị"
+      }
     }
   },
   "pricing": {
@@ -11791,7 +11807,7 @@
   "multiPost": {
     "tab": "Mgbasa ozi ọtụtụ",
     "title": "Mgbasa ozi ọtụtụ",
-    "intro": "Zipụ na X, YouTube, Instagram, TikTok na ihe ndị ọzọ n'otu oge dị ka dehub. Jikọọ akaụntụ gị otu ugbo, wee họrọ ebe ọ bụla nzipu ga-aga.",
+    "intro": "Zipụ na X, YouTube, Instagram, TikTok na ihe ndị ọzọ n'otu oge dị ka Riftn. Jikọọ akaụntụ gị otu ugbo, wee họrọ ebe ọ bụla nzipu ga-aga.",
     "creditsHeading": "Ebe nzipu",
     "credits": "{{count}} ebe nzipu",
     "topUpTitle": "Mee ka elu ma chekwaa",
@@ -11839,7 +11855,9 @@
   "dm": {
     "planRestricted": "Onye ọrụ a chọrọ ndenye aha iji nata ozi.",
     "planTypeNotAllowed": "Atụmatụ onye okike a anaghị ekwe ụdị ozi a.",
-    "planMinTip": "Tip ga-abụrịrị opekata mpe {{amount}} tokens maka onye okike a."
+    "planMinTip": "Tip ga-abụrịrị opekata mpe {{amount}} tokens maka onye okike a.",
+    "shareKindGroup": "Ìgwè",
+    "shareKindCommunity": "Ụmụmụba"
   },
   "credits": {
     "earningsWorth": "Ogo {{amount}}",
@@ -19374,5 +19392,10 @@
     "edit": "Gbanwee",
     "editLabel": "Dezie ozi",
     "error": "Nke ahụ arụghị ọrụ. Gbalịa ọzọ."
+  },
+  "mentionLinks": {
+    "communities": "Obodo",
+    "pages": "Peeji",
+    "people": "Ndị mmadụ"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "astaanta isticmaalaha",
       "proposal": "soo jeedin",
       "stage": "masraxa",
-      "store": "dukaan"
+      "store": "dukaan",
+      "featureRequest": "codsi"
     },
     "recipientChat": "sheekaysi",
     "recipientUser": "isticmaale",
@@ -520,7 +521,11 @@
     "getTheApp": "Soo deji abka",
     "connectAi": "Ku xir AI",
     "converter": "Converter",
-    "affiliate": "Iskaashi"
+    "affiliate": "Iskaashi",
+    "groups": {
+      "create": "Samee",
+      "discover": "Sahan"
+    }
   },
   "feed": {
     "viewProfile": "Eeg astaanta {{name}}",
@@ -1133,7 +1138,8 @@
     "socialConnectedShort": "Isku xira",
     "socialConnectFailed": "Ma xiri karo {{platform}}. Fadlan isku day mar kale.",
     "socialVerifiedFollowers": "{{value}} kuwa raacsan",
-    "socialFollowersPending": "Dib u cusbooneysiinta tirinta raacaha"
+    "socialFollowersPending": "Dib u cusbooneysiinta tirinta raacaha",
+    "menuLayoutFolders": "Foolarada"
   },
   "common": {
     "confirm": "Xaqiiji",
@@ -3029,7 +3035,11 @@
     "likersEmptyTitle": "Weli jeclaansho ma jirto",
     "likersEmptyBody": "Jeclaanshaha faalladan halkan ayay ka muuqan doonaan.",
     "anonymousLikes_one": "{{count}} jeclaansho oo ka timid haystaha calaamad qarsoon",
-    "anonymousLikes_other": "{{count}} jeclaansho oo ka yimid haystayaasha calaamado qarsoon"
+    "anonymousLikes_other": "{{count}} jeclaansho oo ka yimid haystayaasha calaamado qarsoon",
+    "threadParts": {
+      "moveUp": "Kor u qaad",
+      "moveDown": "Hoos u dhaqaaq"
+    }
   },
   "mintChain": {
     "title": "MINT POST",
@@ -6013,6 +6023,12 @@
       "needsImageToAnimate": "{{model}} wuxuu u baahan yahay sawir si uu u noolaado. Ku lifaaq mid ka mid ah marka hore.",
       "needsImageToWork": "{{model}} wuxuu u baahan yahay sawir si uu uga shaqeeyo. Ku lifaaq mid ka mid ah marka hore.",
       "speechLimit": "Waa {{length}} characters. Xadka waa {{limit}}."
+    },
+    "gallery": {
+      "send": "Dir",
+      "notifications": {
+        "generation_reply": "{{name}} ayaa jawaabay faalladaada"
+      }
     }
   },
   "pricing": {
@@ -11765,7 +11781,7 @@
   "multiPost": {
     "tab": "Dhowr boost",
     "title": "Dhowr boost",
-    "intro": "U dir X, YouTube, Instagram, TikTok iyo kuwo kale isla markiiba sida dehub. Ku xir akoonnadaada hal mar, ka dibna dooro meesha boost kasta tagayso.",
+    "intro": "U dir X, YouTube, Instagram, TikTok iyo kuwo kale isla markiiba sida Riftn. Ku xir akoonnadaada hal mar, ka dibna dooro meesha boost kasta tagayso.",
     "creditsHeading": "Dhibcaha boostka",
     "credits": "{{count}} dhibcaha boostka",
     "topUpTitle": "Ku soo kabo oo keydi",
@@ -11813,7 +11829,9 @@
   "dm": {
     "planRestricted": "Isticmaalahan wuxuu u baahan yahay rukumid si uu fariimo u helo.",
     "planTypeNotAllowed": "Qorshaha abuurahan ma oggola nooca fariintan.",
-    "planMinTip": "Tip-ka abuurahan waa inuu ahaadaa ugu yaraan {{amount}} tokens."
+    "planMinTip": "Tip-ka abuurahan waa inuu ahaadaa ugu yaraan {{amount}} tokens.",
+    "shareKindGroup": "Koox",
+    "shareKindCommunity": "Bulsho"
   },
   "credits": {
     "earningsWorth": "Qiimihiisu waa {{amount}}",
@@ -19087,7 +19105,9 @@
     "127053546dd4": "Waxaan ka dhalatay file ayaa ka dhacay.",
     "d14896aa4bf8": "Furaha ya librayadaas oo dhex maray. Ku dhex maray xarafkaaga iyo siyaarto badan.",
     "953e708b2287": "Dhacdooyinka qorshooyinka ayaa ka dhacay.",
-    "4a52cdd6ac72": "Laa aqbalaynayaa layarreynan."
+    "4a52cdd6ac72": "Laa aqbalaynayaa layarreynan.",
+    "dbc468a14b60": "Su'aalaha inta badan la is weydiiyo",
+    "ab7b9519e1a2": "Ah ah ah (Girl)"
   },
   "articles": {
     "cardLabel": "Maqaal · {{count}} daqiiqo oo akhris ah",
@@ -19356,5 +19376,10 @@
     "edit": "Wax ka beddel",
     "editLabel": "Tafatir farriinta",
     "error": "Taasi ma aysan shaqeyn. isku day mar kale."
+  },
+  "mentionLinks": {
+    "communities": "Bulshooyin",
+    "pages": "Bogag",
+    "people": "Dadka"
   }
 }

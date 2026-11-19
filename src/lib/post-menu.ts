@@ -53,6 +53,41 @@ export interface PostMenuTarget {
   /** The author turned tips off. */
   noTip?: boolean;
   actions?: PostMenuHostActions;
+  /**
+   * Your own text post or article on your profile: the menu offers its look
+   * picker (set from where the right-click landed, not by the card).
+   */
+  look?: PostLook;
+}
+
+export interface PostLook {
+  kind: 'background' | 'article';
+  /** The post's element; the profile reads which post it is from it. */
+  el: HTMLElement;
+}
+
+/** Asks the profile page to open a look picker (POST_LOOK_EVENT detail is a PostLook). */
+export const POST_LOOK_EVENT = 'dehub:post-look';
+
+export function openPostLook(look: PostLook) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent<PostLook>(POST_LOOK_EVENT, { detail: look }));
+}
+
+/** Your own text post or article on your profile, where the picker lives. */
+function lookAt(target: Element | null): PostLook | undefined {
+  if (!target || !target.closest('[data-pbg-hold]')) return undefined;
+  const text = target.closest('[data-pbg-text]') as HTMLElement | null;
+  if (text) return { kind: 'background', el: text };
+  const article = target.closest('[data-tile="article"]') as HTMLElement | null;
+  if (article) return { kind: 'article', el: article };
+  return undefined;
+}
+
+function withLook(target: PostMenuTarget | null, event: ReactMouseEvent): PostMenuTarget | null {
+  if (!target) return null;
+  const look = lookAt(event.target as Element | null);
+  return look ? { ...target, look } : target;
 }
 
 export interface PostMenuOpen {
@@ -139,8 +174,8 @@ function keepBrowserMenu(target: Element, root: Element) {
 
 /**
  * Surfaces inside a post with a menu of their own: comments, live chat,
- * another menu, the own-profile hold-to-pick-a-background on text posts and
- * articles, a player's subtitle menu.
+ * another menu, a player's subtitle menu. (The own-profile background and
+ * article pickers are an item in this menu instead.)
  */
 const OWN_MENU = '[data-comment-id], [data-msg-menu], [data-chat-message], [data-post-menu-skip]';
 
@@ -154,7 +189,6 @@ function shouldOpen(event: ReactMouseEvent, touch: boolean): boolean {
   const pointerType = (event.nativeEvent as PointerEvent).pointerType;
   if (!touch && pointerType === 'touch') return false;
   if (target.closest(OWN_MENU)) return false;
-  if (root.closest('[data-pbg-hold]') && target.closest('[data-pbg-text], [data-tile="article"]')) return false;
   if (keepBrowserMenu(target, root)) return false;
   return true;
 }
@@ -169,7 +203,7 @@ export function usePostMenuContext(build: () => PostMenuTarget | null) {
   ref.current = build;
   return useCallback((event: ReactMouseEvent) => {
     if (!shouldOpen(event, false)) return;
-    const target = ref.current();
+    const target = withLook(ref.current(), event);
     if (!target) return;
     event.preventDefault();
     event.stopPropagation();
@@ -193,8 +227,8 @@ const cancelHold = () => { clearTimeout(hold.timer); hold.timer = undefined; hol
  * owner's own tiles: background picker, drag to reorder).
  */
 export function postTileMenuProps(build: () => PostMenuTarget | null, { touch = true }: { touch?: boolean } = {}) {
-  const open = (point: { x: number; y: number }) => {
-    const target = build();
+  const open = (point: { x: number; y: number }, event?: ReactMouseEvent) => {
+    const target = event ? withLook(build(), event) : build();
     if (!target) return false;
     openPostMenu(point, target);
     return true;
@@ -203,7 +237,7 @@ export function postTileMenuProps(build: () => PostMenuTarget | null, { touch = 
     onContextMenu: (event: ReactMouseEvent) => {
       if (Date.now() - hold.fired < 1500) { event.preventDefault(); return; }
       if (!shouldOpen(event, touch)) return;
-      if (!open({ x: event.clientX, y: event.clientY })) return;
+      if (!open({ x: event.clientX, y: event.clientY }, event)) return;
       event.preventDefault();
       event.stopPropagation();
       cancelHold();

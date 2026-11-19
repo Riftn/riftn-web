@@ -33,6 +33,8 @@ import { DmLockedState, DmUndecryptableRun } from '@/components/app/chat/DmLocke
 import { DmSafetyBanner } from '@/components/app/chat/DmSafetyBanner';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
+import { PostMenuGate } from '@/components/app/post-menu/PostMenuGate';
 import { PostActionBar } from '@/features/post/components/PostActionBar';
 import { createPortal } from 'react-dom';
 import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
@@ -421,7 +423,7 @@ function MessageMenuGallery() {
       <DeleteMessageDialog
         open={!!deleting}
         onOpenChange={(open) => { if (!open) setDeleting(null); }}
-        canDeleteForEveryone={!!deleting?.mine}
+        canDeleteForEveryone={!!deleting}
         oneToOne
         peerName="Ella Verse"
         onDelete={noop}
@@ -2561,11 +2563,24 @@ function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: strin
   const [own, setOwn] = useState<Map<string, PostBg | null>>(() => new Map());
   const hold = usePostBgHold(true, () => { setTarget(null); setOpen(true); });
   const postHold = usePostBgHold(true, (held) => { setTarget(held?.dataset.pbgPost || null); setOpen(true); }, '[data-pbg-text]');
+  // Right-click opens the post menu; its "Post background" row lands here.
+  useEffect(() => {
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (look?.kind !== 'background') return;
+      setTarget(look.el.dataset.pbgPost || null);
+      setOpen(true);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, []);
   const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
   return (
     <section data-page-bento data-post-bg-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">Profile post backgrounds</h2>
       <AuthContext.Provider value={GALLERY_AUTH}>
+        {/* The gallery sits outside the app shell, so it brings its own right-click menu. */}
+        <PostMenuGate />
         <div
           ref={(el) => { hold.hostRef.current = el; }}
           {...hold.handlers}

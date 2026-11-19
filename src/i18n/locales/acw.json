@@ -81,7 +81,8 @@
       "profile": "الملف الشخصي",
       "proposal": "اقتراح",
       "stage": "ستيج",
-      "store": "مِتْجَر"
+      "store": "مِتْجَر",
+      "featureRequest": "طلب"
     },
     "recipientChat": "دردشة",
     "recipientUser": "مستخدم",
@@ -518,7 +519,12 @@
     "getTheApp": "حمّل التطبيق",
     "connectAi": "ربط AI",
     "converter": "محول",
-    "affiliate": "التسويق بالعمولة"
+    "affiliate": "التسويق بالعمولة",
+    "groups": {
+      "create": "انشر",
+      "discover": "اكتشف",
+      "riftn": "دي هاب"
+    }
   },
   "feed": {
     "viewProfile": "شوف بروفايل {{name}}",
@@ -1141,7 +1147,8 @@
     "socialConnectedShort": "متصل",
     "socialConnectFailed": "لا يمكن إضافة {{platform}}. حاول مرة أخرى.",
     "socialVerifiedFollowers": "{{value}} متابع",
-    "socialFollowersPending": "تحديث عدد المتابعين"
+    "socialFollowersPending": "تحديث عدد المتابعين",
+    "menuLayoutFolders": "المجلدات"
   },
   "common": {
     "confirm": "تأكيد",
@@ -3026,7 +3033,11 @@
     "likersEmptyTitle": "ما فيه إعجابات لسه",
     "likersEmptyBody": "الإعجابات على هذا التعليق حتطلع هنا.",
     "anonymousLikes_one": "{{count}} إعجاب من حامل شارة مجهول",
-    "anonymousLikes_other": "{{count}} إعجابات من حاملي شارات مجهولين"
+    "anonymousLikes_other": "{{count}} إعجابات من حاملي شارات مجهولين",
+    "threadParts": {
+      "moveUp": "تحرك للأعلى",
+      "moveDown": "هبوط"
+    }
   },
   "mintChain": {
     "title": "مُنتج",
@@ -5967,7 +5978,13 @@
       "needsImageToAnimate": "الآن يحتاج {{model}} إلى صورة لتحريكها. ضع صورة أولاً.",
       "musicTrackLength": "{{count}}s تتبع"
     },
-    "closeBanner": "إغلاق شعار المبدع"
+    "closeBanner": "إغلاق شعار المبدع",
+    "gallery": {
+      "send": "أرسل",
+      "notifications": {
+        "generation_reply": "{{name}} رد على تعليقك"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "خطط لكل سير عمل",
@@ -6027,7 +6044,8 @@
     "indemnification": "تعويض",
     "noTraining": "لا تدريب على بياناتك",
     "soc2": "SOC 2 security (جاي قريب)",
-    "aiEducator": "AI Educator & Support فى Slack"
+    "aiEducator": "AI Educator & Support فى Slack",
+    "sso": "تسجيل الدخول الموحد (SSO)"
   },
   "videoLooks": {
     "button": "مظاهر الكاميرا",
@@ -11731,7 +11749,9 @@
   "dm": {
     "planRestricted": "هذا المستخدم يحتاج اشتراك عشان يستقبل رسائل.",
     "planTypeNotAllowed": "خطة هذا المنشئ ما تسمح بهذا النوع من الرسائل.",
-    "planMinTip": "لازم تكون الإكرامية على الأقل {{amount}} توكنز لهذا المنشئ."
+    "planMinTip": "لازم تكون الإكرامية على الأقل {{amount}} توكنز لهذا المنشئ.",
+    "shareKindGroup": "تجميع",
+    "shareKindCommunity": "مجتمع"
   },
   "credits": {
     "earningsWorth": "القيمة {{amount}}",
@@ -18901,5 +18921,10 @@
     "edit": "تعديل",
     "editLabel": "تعديل الرسالة",
     "error": "هذا لم ينجح. حاول مرة أخرى."
+  },
+  "mentionLinks": {
+    "communities": "المجتمعات",
+    "pages": "الصفحات",
+    "people": "ناس"
   }
 }

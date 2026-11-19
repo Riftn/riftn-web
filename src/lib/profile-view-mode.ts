@@ -28,6 +28,23 @@ export function parseProfileViewDefault(raw: unknown): ProfileViewMode {
   return raw === 'list' ? 'list' : 'grid';
 }
 
+/**
+ * How the reader wants every profile they open to start: each owner's own
+ * choice (default), or always grid, or always list. Saved in the reader's own
+ * `customs.profileViewOthers`, so it follows them across web and app.
+ */
+export type ProfileViewReaderPref = 'owner' | ProfileViewMode;
+export const PROFILE_VIEW_READER_KEY = 'profileViewOthers';
+
+export function parseProfileViewReaderPref(raw: unknown): ProfileViewReaderPref {
+  return raw === 'grid' || raw === 'list' ? raw : 'owner';
+}
+
+/** The view a profile opens in for this reader. Your own profile always uses your own default. */
+export function startingProfileView(ownerDefault: ProfileViewMode, readerPref: ProfileViewReaderPref, isOwnProfile: boolean): ProfileViewMode {
+  return isOwnProfile || readerPref === 'owner' ? ownerDefault : readerPref;
+}
+
 const SESSION_KEY = 'riftn.profileViewFlips';
 const listeners = new Set<() => void>();
 let flips: Record<string, ProfileViewMode> | null = null;

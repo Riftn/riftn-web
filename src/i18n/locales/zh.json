@@ -869,6 +869,9 @@
     "defaultProfileTabDesc": "选择访客在你的主页上首先看到哪个标签",
     "defaultProfileView": "主页帖子布局",
     "defaultProfileViewDesc": "别人打开你的主页时，以网格或列表显示你的帖子",
+    "readerProfileView": "打开他人主页的方式",
+    "readerProfileViewDesc": "为你打开的每个主页选择网格或列表，或保留每个人自己的选择",
+    "readerProfileViewOwner": "每个人自己的选择",
     "public": "公开",
     "publicDesc": "任何人都可以看到你的帖子",
     "private": "私密",
@@ -1312,7 +1315,9 @@
     "menuLayoutSections": "分区",
     "menuLayoutSectionsDesc": "所有页面一次显示，按标题分组",
     "menuLayoutFolders": "文件夹",
-    "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹"
+    "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹",
+    "chatCards": "聊天以卡片显示",
+    "chatCardsDesc": "每个聊天单独一张卡片。关闭后变为带分隔线的简洁列表。"
   },
   "common": {
     "confirm": "确认",
@@ -6638,6 +6643,12 @@
       "needsImageToWork": "{{model}}需要一个图片作为参考。先添加一个。",
       "speechLimit": "这是 {{length}} 个字符。限制是 {{limit}}。",
       "musicTrackLength": "{{count}} 的追踪记录"
+    },
+    "gallery": {
+      "send": "发送",
+      "notifications": {
+        "generation_reply": "{{name}}回复了你的评论"
+      }
     }
   },
   "pricing": {
@@ -9657,7 +9668,8 @@
       "diffusion": "扩散",
       "saving": "准备框架…",
       "frameHint": "创建一个 320 × 180 的 PNG 并将其添加到此镜头的参考资料中。在生成之前，请检查参考资料限制和模型配额。",
-      "frameName": "场景舞台框架"
+      "frameName": "场景舞台框架",
+      "useFrame": "将渲染帧用作镜头参考"
     },
     "film": {
       "repairRefs": "移除缺失的媒体链接",
@@ -9681,7 +9693,10 @@
       "remove": "移除镜头",
       "issue": "请检查镜头描述和参考媒体，然后重试。如果项目无法保存，请保持项目打开状态。",
       "searchMedia": "按名称查找媒体",
-      "refreshMedia": "刷新媒体"
+      "refreshMedia": "刷新媒体",
+      "shot": "镜头",
+      "addShot": "添加镜头",
+      "frame": "准备画面"
     },
     "video": {
       "tFade": "交叉溶解",
@@ -12754,7 +12769,7 @@
   "multiPost": {
     "tab": "多平台发布",
     "title": "多平台发布",
-    "intro": "在 dehub 上同时发布到 X、YouTube、Instagram、TikTok 等平台。一次连接你的账号，然后选择每条帖子发布到哪里。",
+    "intro": "在 Riftn 上同时发布到 X、YouTube、Instagram、TikTok 等平台。一次连接你的账号，然后选择每条帖子发布到哪里。",
     "creditsHeading": "发布积分",
     "credits": "{{count}} 发布积分",
     "topUpTitle": "充值并省钱",
@@ -12802,7 +12817,12 @@
   "dm": {
     "planRestricted": "该用户需要订阅才能接收消息。",
     "planTypeNotAllowed": "该创作者的方案不允许发送此类消息。",
-    "planMinTip": "给该创作者的打赏至少为 {{amount}} 代币。"
+    "planMinTip": "给该创作者的打赏至少为 {{amount}} 代币。",
+    "shareGroups": "群组",
+    "shareKindGroup": "群组",
+    "shareKindChannel": "频道",
+    "shareKindCommunity": "社区",
+    "reportMessage": "举报消息"
   },
   "credits": {
     "earningsWorth": "值{{amount}}",
@@ -20100,7 +20120,8 @@
     "4a52cdd6ac72": "无法复制这些层",
     "6e71ae3669b1": "保存的输出不可用",
     "be4b0c384393": "Solana",
-    "2ef54eee0edd": "Trust Wallet"
+    "2ef54eee0edd": "Trust Wallet",
+    "a941e90ca93d": "光晕遮罩"
   },
   "articles": {
     "cardLabel": "文章 · {{count}} 分钟阅读",
@@ -20283,7 +20304,11 @@
     "show": "显示",
     "hide": "隐藏",
     "fansBasis": "更亮意味着在过去的 {{count}} 天里，有更多的关注者在观看。",
-    "everyoneBasis": "目前关注者活跃度还不够，所以这就是 Riftn 上的所有人。"
+    "everyoneBasis": "目前关注者活跃度还不够，所以这就是 Riftn 上的所有人。",
+    "typePlaceholder": "输入时间，例如“周五晚8点”或“2小时后”",
+    "typeLabel": "输入时间",
+    "typeHelp": "尝试“今晚”、“明天上午9点”、“周六中午”或“10月30日晚7点”。",
+    "orPickDay": "或选择日期"
   },
   "planned": {
     "title": "已计划",
@@ -20689,5 +20714,8 @@
     "scheduledToast": "预定于 {{when}}",
     "failedToast": "无法发送定时消息",
     "error": "无效。请重试。"
+  },
+  "msgDelete": {
+    "titleMany": "删除 {{count}} 条消息？"
   }
 }
