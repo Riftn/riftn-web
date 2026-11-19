@@ -51,6 +51,11 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
   let firstFrameAt = 0;
   requestAnimationFrame((at) => { firstFrameAt = at; });
   const inert = main.inert;
+  // Phones: the shell already sits over the whole feed and takes every touch,
+  // and switching `inert` makes the browser restyle each feed card, once on the
+  // way in and once on the way out, while the post is trying to draw. Computers
+  // keep it, for the keyboard.
+  const phone = window.matchMedia?.('(max-width: 1023px)').matches === true;
   let removed = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const restore = () => { main.inert = inert; };
@@ -64,7 +69,7 @@ export function showRouteLoadingShell(title: string, backLabel: string, backward
   // A lost route or error must never leave the feed hidden behind a shell.
   timer = setTimeout(remove, 5000);
   return {
-    cover() { if (!removed) main.inert = true; },
+    cover() { if (!removed && !phone) main.inert = true; },
     reveal() {
       if (removed) return;
       restore();

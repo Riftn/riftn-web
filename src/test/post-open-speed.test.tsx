@@ -24,3 +24,13 @@ it('does not ask the browser for the page width while a post opens on a phone', 
   expect(page).toContain("window.matchMedia('(min-width: 1024px)').matches");
   expect(page).not.toMatch(/const desktopView = .*innerWidth/);
 });
+
+it('keeps :has() off selectors that end in a bare utility class', () => {
+  const css = readFileSync('src/index.css', 'utf8');
+  // Each of these put `.absolute` / `.fixed` in the page-wide :has() restyle
+  // set, so every DOM change anywhere restyled all of them.
+  expect(css).not.toContain(':has([data-audio-studio-placeholder]) > .absolute');
+  expect(css).not.toContain('body:has(#app-root[data-fullscreen-chat])');
+  expect(css).toContain('[data-audio-backdrop] > .absolute:has(> [data-audio-studio-placeholder])');
+  expect(css).toContain('body[data-fullscreen-chat-up] > ');
+});
