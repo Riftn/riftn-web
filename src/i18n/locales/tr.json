@@ -780,6 +780,13 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "chatDeleteChoice": "Bir mesajı sildiğinde",
+    "chatDeleteChoiceDesc": "Her seferinde sor ya da her zaman yalnızca senin için veya sohbetteki herkes için sil.",
+    "chatDeleteAsk": "Her seferinde sor",
+    "chatDeleteMe": "Benden sil",
+    "chatDeleteMeDesc": "Senin sohbetinden gider, diğerleri hâlâ görür",
+    "chatDeleteEveryone": "Herkesten sil",
+    "chatDeleteEveryoneDesc": "Mümkün olduğunda. Bir gruptaki başkasının mesajı yalnızca senden silinir",
     "postLanding": "Paylaştıktan sonra",
     "postLandingDesc": "Yeni gönderinin akışında nasıl belirdiği",
     "postLandingGhost": "Hayalet yuva",
@@ -20841,6 +20848,8 @@
     "forEveryone": "Herkes için sil",
     "forBoth": "İkimiz için de sil",
     "forMeAndName": "Benim ve {{name}} için sil",
+    "remember": "Seçimimi hatırla",
+    "rememberHint": "İstediğin zaman Ayarlar'dan değiştir",
     "failed": "Mesaj silinemedi"
   }
 }
