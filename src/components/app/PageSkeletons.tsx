@@ -198,7 +198,7 @@ function RailPanel({ rows, height }: { rows: number; height: number }) {
 }
 export function HomeRightSidebarSkeleton() {
   return (
-    <aside aria-hidden="true" data-right-rail-skeleton className="hidden lg:block w-72 xl:w-80 2xl:w-88 shrink-0 h-dvh sticky top-0 px-4 pt-[8px] pb-4">
+    <aside aria-hidden="true" data-right-rail-skeleton className="hidden lg:block w-72 xl:w-80 shrink-0 h-dvh sticky top-0 px-4 pt-[8px] pb-4">
       <div className="home-skeleton-block h-[36px] w-full rounded-xl mb-3" />
       <RailPanel rows={5} height={444} />
       <RailPanel rows={2} height={220} />

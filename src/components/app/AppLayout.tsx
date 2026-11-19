@@ -21,7 +21,7 @@ if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').
 }
 
 /**
- * Same width as the rail's root (RightSidebar.tsx: `w-72 xl:w-80 2xl:w-88`),
+ * Same width as the rail's root (RightSidebar.tsx: `w-72 xl:w-80`),
  * so the column layout is final from the first commit. With a null fallback
  * the middle column briefly took the rail's width too and snapped back when
  * the chunk landed — a visible jump of the welcome panel on every desktop
@@ -281,7 +281,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   // so its <main> is most of the screen. Sheets and the login modal must not
   // follow it — they keep the column every other page has, centred where the
   // terminal's <main> sits: the 80rem shell minus the left sidebar and the
-  // rail width for the current breakpoint (RightSidebar: w-72 xl:w-80 2xl:w-88).
+  // rail width for the current breakpoint (RightSidebar: w-72 xl:w-80).
   const isWideMainRoute = location.pathname === '/dex' || location.pathname.startsWith('/dex/');
   useLayoutEffect(() => {
     const mainEl = mainRef.current;
@@ -292,7 +292,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
       const shell = Math.min(window.innerWidth, 1280);
       const sidebar = rect.left - (mainEl.parentElement?.getBoundingClientRect().left ?? 0);
       const w = window.innerWidth;
-      const rail = w >= 1536 ? 352 : w >= 1280 ? 320 : w >= 1024 ? 288 : 0;
+      const rail = w >= 1280 ? 320 : w >= 1024 ? 288 : 0;
       return Math.max(0, shell - sidebar - rail);
     };
     // Any write on <html> restyles every element: write only changes.
