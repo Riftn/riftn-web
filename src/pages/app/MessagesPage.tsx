@@ -582,7 +582,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     activeTab === 'communities' ? false : customTab ? customTab.chats.includes(c.id) : true;
   const roomInTab = (c: { id: string }) =>
     activeTab === 'direct' ? false : customTab ? customTab.chats.includes(roomChatId(c.id)) : true;
-  const publicInTab = activeTab === 'direct' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
+  const publicInTab = activeTab === 'direct' || activeTab === 'communities' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
   const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
     pref: roomPref(c),
     hasUnread: false,
@@ -607,8 +607,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
   const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : tabsOn && activeTab === 'unread' ? 'unread' : 'all';
   const shownConversations = tabFilter === 'groups' ? [] : tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
-  // Computers: the first tab is "Messages", direct chats only; groups, channels,
-  // communities and Public Chat live under Groups.
+  // Computers: the first tab is "Messages", direct chats plus Public Chat;
+  // groups, channels and communities live under Groups.
   const messagesTab = tabFilter === 'all' && deskCards && !searchQuery.trim() && !showArchived && !inRequests;
   const shownRooms = messagesTab ? [] : tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
   const inboxUnreadChats = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)) && convHasUnread(c)).length
@@ -1212,7 +1212,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
     unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
     direct: inboxConvs.reduce((n, c) => n + unreadOf(c), 0),
-    communities: publicUnread,
+    communities: 0,
     requests: requestUnread,
   };
   for (const tab of chatTabs.tabs) {
@@ -1589,7 +1589,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             />
             {/* Public Chat (pinned) */}
             {!inRequests && (<>
-            {((tabFilter === 'all' && !messagesTab) || tabFilter === 'groups' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
+            {(tabFilter === 'all' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
             <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row

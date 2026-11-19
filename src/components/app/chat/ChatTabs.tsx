@@ -9,7 +9,7 @@ import { MAX_TAB_NAME } from '@/lib/api/dehub/chat-tabs';
 import type { ChatTabView } from '@/hooks/use-chat-tabs';
 
 /*
- * Tabs above the chat list on riftn.com/chat: All, Direct, Communities,
+ * Tabs above the chat list on riftn.com/chat: All, Direct, Groups,
  * Requests, then the tabs a person makes. + makes a tab, the sliders button
  * reorders or hides them. Right-click a tab (hold it on a phone) for its menu.
  */
