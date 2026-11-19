@@ -1,6 +1,8 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useHoldBottomNav } from '@/lib/bottom-nav-hold';
+import { useSwipeReply } from '@/hooks/use-swipe-reply';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -15,7 +17,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  * the authority: nothing here is a security boundary.
  */
 
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Fragment } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Fragment, useContext } from 'react';
 import { UnreadMarker, UnreadJumpButton } from '../chat/UnreadJump';
 import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
@@ -93,6 +95,13 @@ const FOREVER_YEAR = 9000;
  * leads and the words follow, matching the DM bubble and the app; before this
  * the channel printed an invite as a lone 🔗 with nothing behind it.
  */
+/** Phone: drag a line left to reply to it, like Public Chat and DMs. */
+function SwipeReplyRow({ onReply, children }: { onReply?: () => void; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSwipeReply(ref, onReply);
+  return <div ref={ref}>{children}</div>;
+}
+
 function CommunityMessageBody({ content }: { content: string }) {
   const { links, displayText } = useDehubLinks(content);
   return (
@@ -985,7 +994,10 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     : '';
 
   // Members get a message box at the bottom: the phone bottom bar stands down.
-  useHoldBottomNav(active && isMember);
+  // Only while its page is on screen: Messages stays mounted (hidden) after
+  // you leave it, and an open group there kept the bar hidden on Home.
+  const pageOnScreen = useContext(CachedPageActiveContext);
+  useHoldBottomNav(active && isMember && pageOnScreen);
   const translateSignal = 0;
   const originalSignal = 0;
 
@@ -1189,8 +1201,8 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                 const isHighlighted = highlight?.id === msg.id;
 
                 return (
+                  <SwipeReplyRow key={msg.client_key ?? msg.id} onReply={isMember && !msg.send_state ? () => setReplyTo(msg) : undefined}>
                   <div
-                    key={msg.client_key ?? msg.id}
                     ref={(node) => { messageRefs.current[msg.id] = node; }}
                     className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isMine ? 'bg-white/5 py-1' : ''} ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
                   >
@@ -1412,6 +1424,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                       )}
                     </div>
                   </div>
+                  </SwipeReplyRow>
                 );
                 })();
                 if (unreadAnchor?.id !== msg.id || searchQuery.trim()) return row;

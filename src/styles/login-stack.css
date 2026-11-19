@@ -128,18 +128,48 @@ html[data-system-tone="light"] .login-stack-corner {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-.login-stack__ai svg { width: 11px; height: 11px; }
-/* Holds the logo and the headline; sits over the faded bottom of the lanes. */
+.login-stack__ai svg { width: 11px; height: 11px; }/* ---------------------------------------------------------------------------
+   The sign: Riftn wordmark + headline over the faded bottom of the lanes.
+   Four looks, picked in Settings → Appearance (lib/login-look):
+   tube (default), vhs, led, holo. Every look draws inside the letters only,
+   with a tight halo instead of a fuzzy glow.
+   --------------------------------------------------------------------------- */
 .login-stack__title {
   position: relative;
   margin-top: -64px;
+  /* Letter colours: --ls-ink on top, --ls-ink-low at the foot of each line,
+     --ls-gap between lines, --ls-halo around the letters. */
+  --ls-ink: #fff;
+  --ls-ink-low: #8d8d93;
+  --ls-gap: rgba(0, 0, 0, 0.78);
+  --ls-halo: rgba(255, 255, 255, 0.5);
+  --ls-halo-soft: rgba(255, 255, 255, 0.16);
+  --ls-shade: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85));
+  animation: ls-tv-flicker 3.6s steps(1) infinite;
 }
-/* Neon wordmark: white tube, glow in the theme colour (white on System and
-   Light, lilac on Hazy, pink on Osaka). Only a tight glow on the letters, no
-   backing shape, so nothing round shows behind it on any clip. */
+html[data-theme="hazy"] .login-stack__title {
+  --ls-ink: #efe4ff;
+  --ls-ink-low: #8f72c4;
+  --ls-halo: rgba(201, 167, 255, 0.6);
+  --ls-halo-soft: rgba(201, 167, 255, 0.22);
+}
+html[data-theme="osaka"] .login-stack__title {
+  --ls-ink: #ffe1f0;
+  --ls-ink-low: #c25a8f;
+  --ls-halo: rgba(255, 111, 181, 0.6);
+  --ls-halo-soft: rgba(255, 111, 181, 0.22);
+}
+html[data-theme="light"] .login-stack__title,
+html[data-system-tone="light"] .login-stack__title {
+  --ls-ink: #0b0b0d;
+  --ls-ink-low: #4a4a52;
+  --ls-gap: rgba(255, 255, 255, 0.72);
+  --ls-halo: rgba(255, 255, 255, 0.7);
+  --ls-halo-soft: rgba(255, 255, 255, 0.35);
+  --ls-shade: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.6));
+}
+.login-stack__sign { position: relative; }
 .login-stack__logo {
-  --ls-neon: #fff;
-  --ls-neon-glow: drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 16px rgba(255, 255, 255, 0.35));
   position: absolute;
   left: 0;
   right: 0;
@@ -147,48 +177,34 @@ html[data-system-tone="light"] .login-stack-corner {
   display: flex;
   justify-content: center;
   pointer-events: none;
-  filter: var(--ls-neon-glow) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
-}
-/* Light themes: the lanes fade to paper behind the logo, so a darker shade keeps the white tube readable. */
-html[data-theme="light"] .login-stack__logo,
-html[data-system-tone="light"] .login-stack__logo {
-  filter: var(--ls-neon-glow) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.75));
-}
-html[data-theme="hazy"] .login-stack__logo { --ls-neon: #c9a7ff; }
-html[data-theme="osaka"] .login-stack__logo { --ls-neon: #ff6fb5; }
-html[data-theme="hazy"] .login-stack__logo,
-html[data-theme="osaka"] .login-stack__logo {
-  --ls-neon-glow: drop-shadow(0 0 2px var(--ls-neon)) drop-shadow(0 0 8px var(--ls-neon)) drop-shadow(0 0 16px var(--ls-neon));
 }
 .login-stack__logo-mark {
   display: block;
   width: 210px;
   aspect-ratio: 720 / 213;
-  /* Old TV: soft scan lines (fade in and out like a tube, no hard edge) rolling upward and a soft band rolling down, inside the letters only. */
-  background:
-    linear-gradient(180deg, transparent, var(--ls-tv-logo-line), transparent) 0 0 / 100% var(--ls-tv-pitch),
-    linear-gradient(180deg, transparent, var(--ls-tv-logo-band), transparent) 0 -40px / 100% 26px no-repeat,
-    linear-gradient(180deg, #fff, color-mix(in srgb, var(--ls-neon) 35%, #fff));
-  animation: ls-tv-band 4.5s linear infinite;
   -webkit-mask: url('/brand-kit/brand/riftn-logo-white.png') center / contain no-repeat;
   mask: url('/brand-kit/brand/riftn-logo-white.png') center / contain no-repeat;
 }
-/* Old TV flicker on the logo and headline together: short, small dips, never fades out. */
-.login-stack__title {
-  --ls-tv-pitch: 3px;
-  --ls-tv-logo-line: rgba(0, 0, 0, 0.26);
-  --ls-tv-logo-band: rgba(255, 255, 255, 0.12);
-  --ls-tv-line: rgba(0, 0, 0, 0.3);
-  --ls-tv-band: rgba(255, 255, 255, 0.18);
-  animation: ls-tv-flicker 3.6s steps(1) infinite;
+.login-stack__headline {
+  position: relative;
+  margin: 0;
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  display: flex;
+  flex-direction: column;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
-html[data-theme="light"] .login-stack__title,
-html[data-system-tone="light"] .login-stack__title {
-  --ls-tv-logo-line: rgba(255, 255, 255, 0.26);
-  --ls-tv-logo-band: rgba(255, 255, 255, 0.1);
-  --ls-tv-line: rgba(255, 255, 255, 0.3);
-  --ls-tv-band: rgba(255, 255, 255, 0.18);
+.login-stack__accent { color: inherit; -webkit-text-fill-color: transparent; }
+.login-stack__logo,
+.login-stack__headline {
+  filter: drop-shadow(0 0 1.5px var(--ls-halo)) drop-shadow(0 0 6px var(--ls-halo-soft)) var(--ls-shade);
 }
+/* Old TV flicker on the whole sign: short, small dips, never fades out. */
 @keyframes ls-tv-flicker {
   0%, 100% { opacity: 1; transform: none; }
   9% { opacity: 0.93; }
@@ -204,56 +220,145 @@ html[data-system-tone="light"] .login-stack__title {
   86% { opacity: 0.92; transform: translateX(-0.5px); }
   87% { opacity: 1; transform: none; }
 }
-/* The scan lines roll upward without a pause (a whole number of lines per loop, so it never jumps) while the band drifts down. */
-@keyframes ls-tv-band {
-  from { background-position: 0 0, 0 -40px, 0 0; }
-  to { background-position: 0 calc(var(--ls-tv-pitch) * -18), 0 110px, 0 0; }
-}
-.login-stack__headline {
-  position: relative;
-  margin: 0;
-  text-align: center;
-  font-size: 30px;
-  line-height: 1.05;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  display: flex;
-  flex-direction: column;
-}
-/* Both lines are lit like the neon logo above them, so the logo and the
-   headline read as one sign: same tint, same glow, no grey second line. */
-.login-stack__accent { color: inherit; }
-.login-stack__headline {
-  --ls-sign: #fff;
-  --ls-sign-glow: rgba(255, 255, 255, 0.35);
-}
-html:not([data-theme="light"]):not([data-system-tone="light"]) .login-stack__headline {
-  color: var(--ls-sign);
-  text-shadow: 0 0 1px var(--ls-sign-glow), 0 0 6px var(--ls-sign-glow), 0 0 12px var(--ls-sign-glow), 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-html[data-theme="hazy"] .login-stack__headline { --ls-sign: #e4d2ff; --ls-sign-glow: rgba(201, 167, 255, 0.5); }
-html[data-theme="osaka"] .login-stack__headline { --ls-sign: #ffc2e0; --ls-sign-glow: rgba(255, 111, 181, 0.5); }
-/* Headline letters carry the same scan lines and band as the logo. */
-.login-stack__headline {
-  --ls-tv-fill: var(--ls-sign);
+
+/* A · Tube TV: crisp chrome lines (one every 6px) rolling up non-stop, with a
+   slow dark bar drifting down through them. */
+.login-stack__title[data-look="tube"] .login-stack__logo-mark,
+.login-stack__title[data-look="tube"] .login-stack__headline {
   background:
-    linear-gradient(180deg, transparent, var(--ls-tv-line), transparent) 0 0 / 100% var(--ls-tv-pitch),
-    linear-gradient(180deg, transparent, var(--ls-tv-band), transparent) 0 -40px / 100% 26px no-repeat,
-    linear-gradient(var(--ls-tv-fill), var(--ls-tv-fill));
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.34), transparent) 0 -60px / 100% 34px no-repeat,
+    linear-gradient(180deg, var(--ls-ink) 0%, var(--ls-ink) 36%, var(--ls-ink-low) 68%, var(--ls-gap) 80%, var(--ls-gap) 90%, var(--ls-ink) 100%) 0 0 / 100% 6px;
+  animation: ls-tube-roll 6s linear infinite;
+}
+.login-stack__title[data-look="tube"] .login-stack__headline {
+  background-size: 100% 34px, 100% 8px;
+  animation-name: ls-tube-roll-headline;
+}
+@keyframes ls-tube-roll-headline {
+  from { background-position: 0 -60px, 0 0; }
+  to { background-position: 0 140px, 0 -72px; }
+}
+@keyframes ls-tube-roll {
+  from { background-position: 0 -60px, 0 0; }
+  to { background-position: 0 140px, 0 -72px; }
+}
+
+/* B · VHS tape: tape lines (one every 4px) rolling up, red and blue edges, and
+   a tracking tear that sweeps down every 5s dragging a slice of the sign
+   sideways. The tear is a second copy of the sign shown only inside the slice;
+   the sign itself is cut away there. */
+.login-stack__title[data-look="vhs"] .login-stack__logo-mark,
+.login-stack__title[data-look="vhs"] .login-stack__headline {
+  background:
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.22), transparent) 0 -40px / 100% 18px no-repeat,
+    linear-gradient(180deg, var(--ls-ink) 0%, var(--ls-ink) 50%, color-mix(in srgb, var(--ls-ink-low) 70%, var(--ls-gap)) 72%, var(--ls-ink) 100%) 0 0 / 100% 4px;
+  animation: ls-vhs-roll 3s linear infinite;
+}
+.login-stack__title[data-look="vhs"] .login-stack__logo,
+.login-stack__title[data-look="vhs"] .login-stack__headline {
+  filter: drop-shadow(-1.5px 0 rgba(255, 40, 80, 0.9)) drop-shadow(1.5px 0 rgba(40, 220, 255, 0.85)) var(--ls-shade);
+}
+@keyframes ls-vhs-roll {
+  from { background-position: 0 -40px, 0 0; }
+  to { background-position: 0 120px, 0 -48px; }
+}
+.login-stack__title[data-look="vhs"] > .login-stack__sign:not(.login-stack__sign--tear) {
+  animation: ls-vhs-cut 5s linear infinite;
+}
+.login-stack__sign--tear {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: ls-vhs-tear 5s linear infinite;
+}
+@keyframes ls-vhs-cut {
+  0%, 58% { clip-path: polygon(-60px -160px, calc(100% + 60px) -160px, calc(100% + 60px) -150px, -60px -150px, -60px -150px, calc(100% + 60px) -150px, calc(100% + 60px) calc(100% + 60px), -60px calc(100% + 60px)); }
+  58.01% { clip-path: polygon(-60px -160px, calc(100% + 60px) -160px, calc(100% + 60px) -140px, -60px -140px, -60px -118px, calc(100% + 60px) -118px, calc(100% + 60px) calc(100% + 60px), -60px calc(100% + 60px)); }
+  70% { clip-path: polygon(-60px -160px, calc(100% + 60px) -160px, calc(100% + 60px) 64px, -60px 64px, -60px 86px, calc(100% + 60px) 86px, calc(100% + 60px) calc(100% + 60px), -60px calc(100% + 60px)); }
+  70.01%, 100% { clip-path: polygon(-60px -160px, calc(100% + 60px) -160px, calc(100% + 60px) -150px, -60px -150px, -60px -150px, calc(100% + 60px) -150px, calc(100% + 60px) calc(100% + 60px), -60px calc(100% + 60px)); }
+}
+@keyframes ls-vhs-tear {
+  0%, 58% { clip-path: polygon(-60px -150px, calc(100% + 60px) -150px, calc(100% + 60px) -150px, -60px -150px); transform: none; }
+  58.01% { clip-path: polygon(-60px -140px, calc(100% + 60px) -140px, calc(100% + 60px) -118px, -60px -118px); transform: translateX(6px); }
+  64% { transform: translateX(11px); }
+  70% { clip-path: polygon(-60px 64px, calc(100% + 60px) 64px, calc(100% + 60px) 86px, -60px 86px); transform: translateX(5px); }
+  70.01%, 100% { clip-path: polygon(-60px -150px, calc(100% + 60px) -150px, calc(100% + 60px) -150px, -60px -150px); transform: none; }
+}
+
+/* C · LED wall: letters built from light dots, slogan in capitals, dark lines
+   rolling up through the dots like a big screen filmed on a phone. */
+.login-stack__title[data-look="led"] .login-stack__logo-mark,
+.login-stack__title[data-look="led"] .login-stack__headline {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 62%, var(--ls-gap) 82%, transparent 100%) 0 0 / 100% 10px,
+    radial-gradient(circle at center, var(--ls-ink) 0 1.05px, transparent 1.45px) 0 0 / 3.5px 3.5px;
+  animation: ls-led-roll 2.4s linear infinite;
+}
+.login-stack__title[data-look="led"] .login-stack__headline {
+  font-size: 24px;
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  background-size: 100% 10px, 3px 3px;
+}
+@keyframes ls-led-roll {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 -40px, 0 0; }
+}
+
+/* D · Hologram: a see-through projection. Thin, wide capitals with a light
+   outline, cool lines racing up, a bright scan line climbing through, and the
+   sign leaning and snapping back in short glitches. */
+.login-stack__title[data-look="holo"] {
+  --ls-holo-top: color-mix(in srgb, var(--ls-ink) 72%, #a9d4f5);
+  --ls-holo-low: color-mix(in srgb, var(--ls-ink-low) 40%, #5f7d98);
+  --ls-halo: rgba(150, 205, 255, 0.55);
+  --ls-halo-soft: rgba(120, 190, 255, 0.22);
+}
+html[data-theme="light"] .login-stack__title[data-look="holo"],
+html[data-system-tone="light"] .login-stack__title[data-look="holo"] {
+  --ls-holo-top: #142130;
+  --ls-holo-low: #3f5a73;
+  --ls-halo: rgba(255, 255, 255, 0.7);
+  --ls-halo-soft: rgba(255, 255, 255, 0.35);
+}
+.login-stack__title[data-look="holo"] .login-stack__logo-mark,
+.login-stack__title[data-look="holo"] .login-stack__headline {
+  background:
+    linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.95), transparent) 0 150px / 100% 5px no-repeat,
+    linear-gradient(180deg, transparent 0%, transparent 58%, color-mix(in srgb, var(--ls-gap) 75%, #0b1a2a) 76%, transparent 94%) 0 0 / 100% 7px,
+    linear-gradient(180deg, var(--ls-holo-top), var(--ls-holo-low));
+  animation: ls-holo-roll 2s linear infinite;
+}
+.login-stack__title[data-look="holo"] .login-stack__headline {
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  -webkit-text-stroke: 0.5px color-mix(in srgb, var(--ls-holo-top) 70%, transparent);
+}
+.login-stack__title[data-look="holo"] > .login-stack__sign {
+  animation: ls-holo-glitch 4.2s steps(1) infinite;
+}
+@keyframes ls-holo-roll {
+  from { background-position: 0 150px, 0 0, 0 0; }
+  to { background-position: 0 -70px, 0 -28px, 0 0; }
+}
+@keyframes ls-holo-glitch {
+  0%, 100% { transform: none; }
+  84% { transform: skewX(-10deg) translateX(4px); }
+  85.5% { transform: skewX(6deg) translateX(-3px); }
+  87% { transform: none; }
+  93% { transform: skewX(-4deg) translateX(2px); }
+  94% { transform: none; }
+}
+
+/* The looks set the whole background; the headline keeps it inside its letters. */
+.login-stack__title[data-look] .login-stack__headline {
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: ls-tv-band 4.5s linear infinite;
-}
-.login-stack__headline .login-stack__accent { -webkit-text-fill-color: transparent; }
-html[data-theme="light"] .login-stack__headline,
-html[data-system-tone="light"] .login-stack__headline { --ls-tv-fill: #0b0b0d; }
-/* Colour themes only: a faint red/blue TV edge. System, Dark and Light stay clean. */
-html:not([data-theme="system"]):not([data-theme="dark"]):not([data-theme="light"]):not([data-system-tone="light"]) .login-stack__logo {
-  filter: drop-shadow(-1px 0 rgba(255, 40, 80, 0.35)) drop-shadow(1px 0 rgba(40, 220, 255, 0.35)) var(--ls-neon-glow) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
-}
-html:not([data-theme="system"]):not([data-theme="dark"]):not([data-theme="light"]):not([data-system-tone="light"]) .login-stack__headline {
-  text-shadow: -1px 0 rgba(255, 40, 80, 0.35), 1px 0 rgba(40, 220, 255, 0.35), 0 0 6px var(--ls-sign-glow), 0 0 12px var(--ls-sign-glow), 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .login-stack-scroll > .login-stack {
@@ -310,8 +415,10 @@ html:not([data-theme="system"]):not([data-theme="dark"]):not([data-theme="light"
 @media (prefers-reduced-motion: reduce) {
   .login-stack__lane { animation: none; }
   .login-stack__title,
-  .login-stack__logo-mark,
-  .login-stack__headline { animation: none; }
+  .login-stack__title .login-stack__sign,
+  .login-stack__title .login-stack__logo-mark,
+  .login-stack__title .login-stack__headline { animation: none !important; }
+  .login-stack__sign--tear { display: none; }
 }
 
 /* The email-first option list under the hero. */
@@ -367,3 +474,26 @@ html[data-system-tone="light"] .login-stack__logo-mark {
     linear-gradient(180deg, transparent, var(--ls-tv-logo-band), transparent) 0 -40px / 100% 26px no-repeat,
     #0b0b0d;
 }
+
+/* Settings → Appearance → Sign-in screen: each card plays its look, shrunk. */
+.login-look-preview {
+  position: relative;
+  display: block;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: radial-gradient(120% 90% at 50% 100%, #1b1b22 0%, #050507 70%);
+}
+html[data-theme="light"] .login-look-preview,
+html[data-system-tone="light"] .login-look-preview {
+  background: radial-gradient(120% 90% at 50% 100%, #ffffff 0%, #e7e7ec 70%);
+}
+.login-look-preview__scale {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 360px;
+  padding-top: 84px;
+  transform: translate(-50%, -50%) scale(0.4);
+}
+.login-look-preview .login-stack__title { margin-top: 0; }
