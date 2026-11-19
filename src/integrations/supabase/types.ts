@@ -2023,6 +2023,48 @@ export type Database = {
         }
         Relationships: []
       }
+      call_dub_usage: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          last_started_at: string | null
+          minutes: number
+          price_dhb_per_min: number
+          room_key: string
+          settled_at: string | null
+          settled_ref: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          last_started_at?: string | null
+          minutes?: number
+          price_dhb_per_min: number
+          room_key: string
+          settled_at?: string | null
+          settled_ref?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          last_started_at?: string | null
+          minutes?: number
+          price_dhb_per_min?: number
+          room_key?: string
+          settled_at?: string | null
+          settled_ref?: string | null
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       call_sessions: {
         Row: {
           call_type: string
@@ -10349,6 +10391,25 @@ export type Database = {
           p_wallet: string
         }
         Returns: undefined
+      }
+      call_dub_tick: {
+        Args: {
+          p_language: string
+          p_price_per_min: number
+          p_room: string
+          p_start?: boolean
+          p_wallet: string
+        }
+        Returns: number
+      }
+      call_dub_unsettled: {
+        Args: { p_wallet: string }
+        Returns: {
+          minutes: number
+          owed_dhb: number
+          price_dhb_per_min: number
+          room_key: string
+        }[]
       }
       category_counts: {
         Args: { p_since?: string }
