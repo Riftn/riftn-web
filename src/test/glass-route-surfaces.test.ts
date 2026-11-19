@@ -9,8 +9,8 @@ describe('Glass route surfaces', () => {
   it('keeps the standalone generation gallery on the shared canvas with readable chrome', () => {
     const gallery = read('src/pages/app/CreatorGalleryPage.tsx');
     expect(gallery).toContain('data-creator-gallery data-glass-page');
-    expect(gallery).toContain('bg-[#090a0b] text-white');
-    expect(gallery).toContain('<header data-theme-page-surface');
+    expect(read('src/styles/creator-gallery.css')).toContain('--cg-canvas');
+    expect(gallery).toContain('data-gallery-look data-gallery-page');
     expect(glass).toContain('[data-glass-page]');
     expect(glass).toContain('[data-post-overlay]');
     expect(glass).toContain('[data-post-overlay-backdrop]');

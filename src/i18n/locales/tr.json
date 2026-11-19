@@ -6623,6 +6623,7 @@
     },
     "gallery": {
       "browse": "Üretimlere göz at",
+      "create": "Oluştur",
       "fullscreen": "Tam ekran görüntüle",
       "missing": "Bu üretim kullanılamıyor.",
       "send": "Gönder",
