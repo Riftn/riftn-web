@@ -16,6 +16,7 @@
 // against someone else's Deepgram balance" hole.
 import { corsHeaders, handleCorsPreflight, jsonResponse, guardPaidEndpoint, serviceClient } from "../_shared/auth.ts";
 import { byokErrorResponse, userProviderKey } from "../_shared/byok.ts";
+import { callRoom, mayTalkInCall } from "../_shared/call-room.ts";
 
 const DEEPGRAM_API_KEY = Deno.env.get("DEEPGRAM_API_KEY") ?? "";
 
@@ -48,6 +49,23 @@ function listenParams(): Record<string, string> {
     // hanging as an interim for noticeably too long.
     endpointing: "300",
   };
+}
+
+/**
+ * The secret caption channel name for a call: an HMAC of its room name, so it
+ * is the same for everyone on the call and unguessable for anyone else.
+ */
+async function privateTopic(roomKey: string): Promise<string> {
+  const secret = Deno.env.get("CALL_CAPTION_SECRET") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`call-captions:${roomKey}`)));
+  return [...mac.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /** Does this wallet hold a seat entitling it to caption itself on this stage? */
@@ -144,7 +162,7 @@ Deno.serve(async (req) => {
   if (preflight) return preflight;
 
   try {
-    const { spaceId } = await req.json().catch(() => ({ spaceId: null }));
+    const { spaceId, topicOnly } = await req.json().catch(() => ({ spaceId: null, topicOnly: false }));
     if (!spaceId || typeof spaceId !== "string") {
       return jsonResponse({ error: "spaceId is required" }, 400);
     }
@@ -158,8 +176,17 @@ Deno.serve(async (req) => {
     });
     if (!guard.ok) return guard.response;
 
-    if (!(await maySpeak(spaceId, guard.wallet))) {
+    // A call passes its room name here; see _shared/call-room.ts.
+    const call = callRoom(spaceId);
+    if (!(call ? await mayTalkInCall(call, guard.wallet) : await maySpeak(spaceId, guard.wallet))) {
       return jsonResponse({ error: "Not entitled to caption this stage." }, 403);
+    }
+
+    // A call's captions ride a channel only its people can name. Everyone on
+    // the call asks for it once; nothing is minted and nothing is billed.
+    if (topicOnly) {
+      if (!call) return jsonResponse({ error: "Only calls have a private caption channel." }, 400);
+      return jsonResponse({ topic: await privateTopic(spaceId) });
     }
 
     // A speaker who saved their own Deepgram key captions on their account.
