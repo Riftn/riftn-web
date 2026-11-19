@@ -896,8 +896,13 @@ export function SharedTranslationProvider({ children }: { children: ReactNode })
   const requestTranslate = useCallback(() => setTranslateSignal(s => s + 1), []);
   const requestOriginal = useCallback(() => setOriginalSignal(s => s + 1), []);
 
+  const value = useMemo(
+    () => ({ translateSignal, originalSignal, requestTranslate, requestOriginal }),
+    [translateSignal, originalSignal, requestTranslate, requestOriginal],
+  );
+
   return (
-    <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate, requestOriginal }}>
+    <SharedTranslationContext.Provider value={value}>
       {children}
     </SharedTranslationContext.Provider>
   );

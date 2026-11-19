@@ -61,6 +61,21 @@ interface PublicChatProps {
   embedded?: boolean;
 }
 
+/**
+ * Converted lines, kept per server row: the hook swaps a row object only when
+ * that row changes, so an unchanged line keeps the same Message and its
+ * memoised ChatMessage skips re-rendering.
+ */
+const localMessageCache = new WeakMap<SupabaseLiveChatMessage, Message>();
+function toLocalMessageCached(msg: SupabaseLiveChatMessage): Message {
+  let out = localMessageCache.get(msg);
+  if (!out) {
+    out = toLocalMessage(msg);
+    localMessageCache.set(msg, out);
+  }
+  return out;
+}
+
 /** Map Supabase livechat message to local ChatMessage format */
 function toLocalMessage(msg: SupabaseLiveChatMessage): Message {
   return {
@@ -150,6 +165,13 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   // Translation state
   const [translateSignal, setTranslateSignal] = useState(0);
   const [originalSignal, setOriginalSignal] = useState(0);
+  // Stable value: a fresh object here re-rendered every line on each render.
+  const translationShare = useMemo(() => ({
+    translateSignal,
+    originalSignal,
+    requestTranslate: () => setTranslateSignal((n) => n + 1),
+    requestOriginal: () => setOriginalSignal((n) => n + 1),
+  }), [translateSignal, originalSignal]);
   const [isAllTranslated, setIsAllTranslated] = useState(false);
 
   // Fetch rooms, use the first available room
@@ -208,7 +230,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   const isModerator = isRoomModerator;
 
   // Convert API messages to local format
-  const messages: Message[] = apiMessages.map(toLocalMessage);
+  const messages: Message[] = useMemo(() => apiMessages.map(toLocalMessageCached), [apiMessages]);
 
   // Assistant replies are ordinary chat messages now — they arrive over the
   // socket like everyone else's and only differ in how they are rendered. The
@@ -656,6 +678,60 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     setSelectedRoomId(room.id);
   }, [refetchRooms]);
 
+  // The rows only change when a line, the reply target, the pin or the
+  // unread marker does. Kept as one memoised list so scroll-driven state
+  // (the jump button, unread counts) re-renders the frame, not every line.
+  const messageRows = useMemo(() => filteredMessages.map((message) => {
+      const row = (
+      message.id.startsWith('buy-alert-') ? (
+        buyBotHidden ? null : (
+          <BuyAlertCard
+            key={message.id}
+            content={message.content}
+            timestamp={message.timestamp.toISOString()}
+            onHide={hideBuyBot}
+          />
+        )
+      ) : isAssistantAddress(message.userId) || message.id.startsWith('assistant-reply-') ? (
+        <AssistantReplyCard
+          key={message.id}
+          content={message.content}
+          timestamp={message.timestamp}
+          replyToName={message.replyTo?.senderName}
+        />
+      ) : (
+      <ChatMessage
+        key={message.clientKey ?? message.id}
+        message={message}
+        showActions={isModerator}
+        moderators={roomDetails?.moderators}
+        currentUserAddress={walletAddress || undefined}
+        onBan={handleBanUser}
+        onUnban={handleUnbanUser}
+        onDelete={handleDeleteMessage}
+        onEdit={handleEditMessage}
+        onReact={isAuthenticated ? addReaction : promptSignIn}
+        onRemoveReaction={removeReaction}
+        onReply={isAuthenticated ? handleReply : undefined}
+        onRetrySend={retrySend}
+        onDiscardSend={discardSend}
+        onSeeMessages={handleSeeMessages}
+        holdFrame
+        replying={!!replyTo && replyTo.id === message.id}
+        onTogglePin={isModerator ? handleTogglePin : undefined}
+        isPinned={pinnedMessage?.id === message.id}
+      />
+      )
+      );
+      if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
+      return (
+        <Fragment key={`unread-${message.id}`}>
+          <UnreadMarker count={unreadAnchor.count} />
+          {row}
+        </Fragment>
+      );
+    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
+
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">
       {/* Header */}
@@ -796,7 +872,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       )}
 
       {/* Messages Area */}
-      <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => setTranslateSignal(s => s + 1), requestOriginal: () => setOriginalSignal(s => s + 1) }}>
+      <SharedTranslationContext.Provider value={translationShare}>
       <div className="relative flex-1">
         <div
           ref={scrollContainerRef}
@@ -854,56 +930,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
                 {_copy("copy.feaf753f6557", { defaultValue: "Start of the chat" })}
               </p>
             ) : null}
-            {filteredMessages.map((message) => {
-              const row = (
-              message.id.startsWith('buy-alert-') ? (
-                buyBotHidden ? null : (
-                  <BuyAlertCard
-                    key={message.id}
-                    content={message.content}
-                    timestamp={message.timestamp.toISOString()}
-                    onHide={hideBuyBot}
-                  />
-                )
-              ) : isAssistantAddress(message.userId) || message.id.startsWith('assistant-reply-') ? (
-                <AssistantReplyCard
-                  key={message.id}
-                  content={message.content}
-                  timestamp={message.timestamp}
-                  replyToName={message.replyTo?.senderName}
-                />
-              ) : (
-              <ChatMessage
-                key={message.clientKey ?? message.id}
-                message={message}
-                showActions={isModerator}
-                moderators={roomDetails?.moderators}
-                currentUserAddress={walletAddress || undefined}
-                onBan={handleBanUser}
-                onUnban={handleUnbanUser}
-                onDelete={handleDeleteMessage}
-                onEdit={handleEditMessage}
-                onReact={isAuthenticated ? addReaction : promptSignIn}
-                onRemoveReaction={removeReaction}
-                onReply={isAuthenticated ? handleReply : undefined}
-                onRetrySend={retrySend}
-                onDiscardSend={discardSend}
-                onSeeMessages={handleSeeMessages}
-                holdFrame
-                replying={!!replyTo && replyTo.id === message.id}
-                onTogglePin={isModerator ? handleTogglePin : undefined}
-                isPinned={pinnedMessage?.id === message.id}
-              />
-              )
-              );
-              if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
-              return (
-                <Fragment key={`unread-${message.id}`}>
-                  <UnreadMarker count={unreadAnchor.count} />
-                  {row}
-                </Fragment>
-              );
-            })}
+            {messageRows}
             </>
           )}
           <div ref={bottomRef} />

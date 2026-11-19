@@ -190,6 +190,17 @@ export type CozyGroupPos = { first: boolean; last: boolean };
 const COZY_GROUP_GAP_MS = 5 * 60_000;
 const COZY_GROUPABLE = new Set(['msg', 'media', 'gif']);
 
+const COZY_POS: Record<string, CozyGroupPos> = {
+  tt: { first: true, last: true },
+  tf: { first: true, last: false },
+  ft: { first: false, last: true },
+  ff: { first: false, last: false },
+};
+/** Shared objects, so a bubble's memo sees the same `cozy` prop each render. */
+function cozyPosFor(first: boolean, last: boolean): CozyGroupPos {
+  return COZY_POS[`${first ? 't' : 'f'}${last ? 't' : 'f'}`];
+}
+
 function cozyDayKey(iso: string) {
   const d = new Date(iso);
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
@@ -1557,7 +1568,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const paidTxHashRef = useRef<{ hash: string; content: string } | null>(null);
   // Version tick: incremented when a tx confirms so the (memoized) bubbles
   // re-render and pick up the new txConfirmed prop.
-  const [, bumpTxConfirmations] = useReducer((v: number) => v + 1, 0);
+  const [txConfirmations, bumpTxConfirmations] = useReducer((v: number) => v + 1, 0);
 
   // Determine if fee is required
   const feeRequired = dmFee?.required && !dmFee.hasFreeAccess;
@@ -2864,6 +2875,121 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
 
   const isVirtualConv = resolvedConversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(resolvedConversationId);
 
+  const handleReact = useCallback((messageId: string, emoji: string) => {
+    void addReaction(messageId, emoji).catch(() => toast.error(_copy("copy.1344ec522f09", { defaultValue: "Could not add reaction." })));
+  }, [addReaction, _copy]);
+  const handleRemoveReaction = useCallback((messageId: string, emoji: string) => {
+    void removeReaction(messageId, emoji).catch(() => toast.error(_copy("copy.b5145e1c11a3", { defaultValue: "Could not remove reaction." })));
+  }, [removeReaction, _copy]);
+
+  // The thread's rows, rebuilt only when a line or what a row shows changes.
+  // Scrolling flips the jump button and unread counts; those re-render the
+  // frame around the list, not every bubble in it.
+  const threadRows = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase().trim();
+    const filtered = searchLower
+      ? messages.filter(m => (m.content || '').toLowerCase().includes(searchLower))
+      : messages;
+
+    if (filtered.length === 0 && searchLower) {
+      return (
+        <AppState
+          icon="search"
+          title={_copy("copy.bf3cda441288", { defaultValue: "No matching messages" })}
+          description={_copy("copy.c3de7ea4ce48", { defaultValue: "No messages match \"{{value1}}\".", value1: searchQuery })}
+          kind="search-empty"
+          size="compact"
+          className="h-full"
+        />
+      );
+    }
+
+    return filtered.map((message, index) => {
+      // Lines encrypted for another device collapse into one row per run.
+      if (message.undecryptable && !message.isDeleted) {
+        const prev = filtered[index - 1];
+        if (prev?.undecryptable && !prev.isDeleted) return null;
+        let count = 1;
+        while (filtered[index + count]?.undecryptable && !filtered[index + count].isDeleted) count++;
+        return <DmUndecryptableRun key={message._id} count={count} />;
+      }
+      const ownAddress = walletAddress?.toLowerCase();
+      const ownId = user?._id;
+      const isOwn = (m: DmMessage) => {
+        const a = m.sender?.address?.toLowerCase();
+        const id = m.sender?._id;
+        return m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId);
+      };
+      const isOwnMessage = isOwn(message);
+
+      // Cozy: a run is back-to-back plain messages from one side,
+      // each within 5 minutes of the last, on the same day.
+      const joins = (a: DmMessage | undefined, b: DmMessage | undefined) =>
+        !!a && !!b && !a.undecryptable && !b.undecryptable && !a.isDeleted && !b.isDeleted &&
+        COZY_GROUPABLE.has(a.msgType || 'msg') && COZY_GROUPABLE.has(b.msgType || 'msg') &&
+        isOwn(a) === isOwn(b) &&
+        (isOwn(a) || (a.sender?.address || a.sender?._id) === (b.sender?.address || b.sender?._id)) &&
+        cozyDayKey(a.createdAt) === cozyDayKey(b.createdAt) &&
+        Math.abs(new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) < COZY_GROUP_GAP_MS;
+      const prevMsg = filtered[index - 1];
+      const cozyPos: CozyGroupPos | undefined = cozy
+        ? cozyPosFor(!joins(prevMsg, message), !joins(message, filtered[index + 1]))
+        : undefined;
+      const dayPill = cozy && (!prevMsg || cozyDayKey(prevMsg.createdAt) !== cozyDayKey(message.createdAt))
+        ? <CozyDayPill iso={message.createdAt} />
+        : null;
+      const unreadMarker = !searchLower && unreadAnchor?.id === message._id
+        ? <UnreadMarker count={unreadAnchor.count} />
+        : null;
+
+      return (
+      <Fragment key={message.clientKey ?? message._id}>
+      {dayPill}
+      {unreadMarker}
+      <MessageBubble
+        message={message}
+        isOwnMessage={isOwnMessage}
+        cozy={cozyPos}
+        highlightText={searchLower}
+        txConfirmed={
+          !!(message.paymentTxHash &&
+            confirmedTxHashes.current.has(message.paymentTxHash.toLowerCase()))
+        }
+        isEditing={editingMessageId === message._id}
+        onPin={canPinHere ? handlePinMessage : undefined}
+        onForward={handleForward}
+        onReply={handleReply}
+        onEdit={handleStartEdit}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={handleCancelEdit}
+        onOpenImage={setFullscreenImage}
+        currentUserAddress={walletAddress || undefined}
+        onReact={handleReact}
+        onRemoveReaction={handleRemoveReaction}
+        onRetrySend={handleRetrySend}
+        onDiscardSend={handleDiscardSend}
+        callPeerAddress={isGroupChat ? undefined : otherUser?.address}
+        selecting={pickedMsgs !== null}
+        picked={!!pickedMsgs?.has(message._id)}
+        onTogglePick={togglePick}
+        onStartPick={startPick}
+        onDelete={setConfirmDeleteOne}
+        onReport={setReportTarget}
+        canPin={canPinHere}
+        isPinned={pinnedMessageId === message._id}
+        onUnpin={handleUnpinMessage}
+      />
+      </Fragment>
+    )});
+  }, [
+    // txConfirmations: re-reads confirmedTxHashes (a ref) after a payment lands.
+    messages, searchQuery, walletAddress, user?._id, cozy, unreadAnchor, txConfirmations,
+    editingMessageId, canPinHere, handlePinMessage, handleForward, handleReply, handleStartEdit,
+    handleSaveEdit, handleCancelEdit, handleReact, handleRemoveReaction, handleRetrySend,
+    handleDiscardSend, isGroupChat, otherUser?.address, pickedMsgs, togglePick, startPick,
+    pinnedMessageId, handleUnpinMessage, _copy, setReportTarget,
+  ]);
+
   return (
     <div data-page-bento data-bento-flat className="h-full flex flex-col overflow-hidden relative">
       {/* Header. The shell carries no fill now, so the bar is separated by a
@@ -3157,103 +3283,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.e65ae0cd6a5a", { defaultValue: "Say hello to start the conversation." })} size="section" className="h-full" />
           )}
 
-          {(() => {
-            const searchLower = searchQuery.toLowerCase().trim();
-            const filtered = searchLower
-              ? messages.filter(m => (m.content || '').toLowerCase().includes(searchLower))
-              : messages;
-
-            if (filtered.length === 0 && searchLower) {
-              return (
-                <AppState
-                  icon="search"
-                  title={_copy("copy.bf3cda441288", { defaultValue: "No matching messages" })}
-                  description={_copy("copy.c3de7ea4ce48", { defaultValue: "No messages match \"{{value1}}\".", value1: searchQuery })}
-                  kind="search-empty"
-                  size="compact"
-                  className="h-full"
-                />
-              );
-            }
-
-            return filtered.map((message, index) => {
-              // Lines encrypted for another device collapse into one row per run.
-              if (message.undecryptable && !message.isDeleted) {
-                const prev = filtered[index - 1];
-                if (prev?.undecryptable && !prev.isDeleted) return null;
-                let count = 1;
-                while (filtered[index + count]?.undecryptable && !filtered[index + count].isDeleted) count++;
-                return <DmUndecryptableRun key={message._id} count={count} />;
-              }
-              const ownAddress = walletAddress?.toLowerCase();
-              const ownId = user?._id;
-              const isOwn = (m: DmMessage) => {
-                const a = m.sender?.address?.toLowerCase();
-                const id = m.sender?._id;
-                return m.author === 'me' || (!!a && !!ownAddress && a === ownAddress) || (!!id && !!ownId && id === ownId);
-              };
-              const isOwnMessage = isOwn(message);
-
-              // Cozy: a run is back-to-back plain messages from one side,
-              // each within 5 minutes of the last, on the same day.
-              const joins = (a: DmMessage | undefined, b: DmMessage | undefined) =>
-                !!a && !!b && !a.undecryptable && !b.undecryptable && !a.isDeleted && !b.isDeleted &&
-                COZY_GROUPABLE.has(a.msgType || 'msg') && COZY_GROUPABLE.has(b.msgType || 'msg') &&
-                isOwn(a) === isOwn(b) &&
-                (isOwn(a) || (a.sender?.address || a.sender?._id) === (b.sender?.address || b.sender?._id)) &&
-                cozyDayKey(a.createdAt) === cozyDayKey(b.createdAt) &&
-                Math.abs(new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) < COZY_GROUP_GAP_MS;
-              const prevMsg = filtered[index - 1];
-              const cozyPos: CozyGroupPos | undefined = cozy
-                ? { first: !joins(prevMsg, message), last: !joins(message, filtered[index + 1]) }
-                : undefined;
-              const dayPill = cozy && (!prevMsg || cozyDayKey(prevMsg.createdAt) !== cozyDayKey(message.createdAt))
-                ? <CozyDayPill iso={message.createdAt} />
-                : null;
-              const unreadMarker = !searchLower && unreadAnchor?.id === message._id
-                ? <UnreadMarker count={unreadAnchor.count} />
-                : null;
-
-              return (
-              <Fragment key={message.clientKey ?? message._id}>
-              {dayPill}
-              {unreadMarker}
-              <MessageBubble
-                message={message}
-                isOwnMessage={isOwnMessage}
-                cozy={cozyPos}
-                highlightText={searchLower}
-                txConfirmed={
-                  !!(message.paymentTxHash &&
-                    confirmedTxHashes.current.has(message.paymentTxHash.toLowerCase()))
-                }
-                isEditing={editingMessageId === message._id}
-                onPin={canPinHere ? handlePinMessage : undefined}
-                onForward={handleForward}
-                onReply={handleReply}
-                onEdit={handleStartEdit}
-                onSaveEdit={handleSaveEdit}
-                onCancelEdit={handleCancelEdit}
-                onOpenImage={setFullscreenImage}
-                currentUserAddress={walletAddress || undefined}
-                onReact={(messageId, emoji) => { void addReaction(messageId, emoji).catch(() => toast.error(_copy("copy.1344ec522f09", { defaultValue: "Could not add reaction." }))); }}
-                onRemoveReaction={(messageId, emoji) => { void removeReaction(messageId, emoji).catch(() => toast.error(_copy("copy.b5145e1c11a3", { defaultValue: "Could not remove reaction." }))); }}
-                onRetrySend={handleRetrySend}
-                onDiscardSend={handleDiscardSend}
-                callPeerAddress={isGroupChat ? undefined : otherUser?.address}
-                selecting={pickedMsgs !== null}
-                picked={!!pickedMsgs?.has(message._id)}
-                onTogglePick={togglePick}
-                onStartPick={startPick}
-                onDelete={setConfirmDeleteOne}
-                onReport={setReportTarget}
-                canPin={canPinHere}
-                isPinned={pinnedMessageId === message._id}
-                onUnpin={handleUnpinMessage}
-              />
-              </Fragment>
-            )});
-          })()}
+          {threadRows}
 
           <div ref={bottomRef} />
           </div>
