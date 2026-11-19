@@ -1,3 +1,5 @@
+import { liveShareState, saysOnlyLive } from './live-share-copy.js';
+
 export const POST_CARD_VERSION = 'v7';
 export const POST_CARD_TTL = 300;
 const ORIGIN = 'https://riftn.com';
@@ -25,7 +27,7 @@ export function plainPostText(value) {
 const flag = (v) => v === true || v === 1 || v === 'true';
 const count = (v) => Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0;
 const SHARE_IMAGE = `${ORIGIN}/og/riftn-share.png`;
-const CARD_POST_TYPES = ['feed-simple', 'text', 'video', 'feed-video', 'image', 'feed-images'];
+const CARD_POST_TYPES = ['feed-simple', 'text', 'video', 'feed-video', 'image', 'feed-images', 'live'];
 
 /** An absent rating reads as safe, as it does everywhere else. Mature, blocked and pending posts never show their content to a stranger. */
 export function hasSafeRating(post) {
@@ -42,11 +44,12 @@ function cdnUrl(path) {
 
 /** The picture the post itself shows: a video's poster, otherwise its first image or cover (see buildImageUrl in src/lib/media-url.ts). */
 export function postCardMedia(post) {
-  const video = !!post.videoUrl || ['video', 'feed-video'].includes(post.postType);
+  const video = !!post.videoUrl || ['video', 'feed-video', 'live'].includes(post.postType);
   const image = (raw) => {
     const path = String(raw || '').trim().replace(/^statics\//, '');
     if (!path || /^https?:/.test(path)) return cdnUrl(path);
-    if (/^(?:images|shorts)\//.test(path)) return cdnUrl(path);
+    // Live streams keep their thumbnail under live/thumbnails/.
+    if (/^(?:images|shorts|live)\//.test(path)) return cdnUrl(path);
     return cdnUrl(`images/${post.tokenId}.${(path.match(/\.([a-z0-9-]+)$/i)?.[1] || 'png').toLowerCase()}`);
   };
   // Covers saved under the legacy nfts/images/ prefix moved to feed-images/.
@@ -97,6 +100,8 @@ export function postCardData(post) {
     views: count(post.totalViews ?? post.views ?? post.view_count),
     tips: count(post.totalTips),
     createdAt: post.createdAt || post.created_at || '',
+    // Only a live post carries this, so every other card keeps its fingerprint.
+    live: liveShareState(post) || undefined,
   };
 }
 
@@ -118,7 +123,10 @@ function setShareTags(html, tags) {
  * drops its og:video, so nothing it carries reaches a preview.
  */
 export function applyPostShareImage(html, post) {
-  if (!post || !hasSafeRating(post)) {
+  // A live post with no usable thumbnail would otherwise keep the page's own
+  // og:image, which for streams points at a file that was never written.
+  const liveWithoutCard = post?.postType === 'live' && !postCardData(post);
+  if (!post || !hasSafeRating(post) || liveWithoutCard) {
     return setShareTags(html.replace(/<meta property="og:video(?::[a-z_:]+)?" content="[^"]*">\s*/g, ''), {
       'og:image': SHARE_IMAGE, 'og:image:secure_url': SHARE_IMAGE, 'og:image:type': 'image/png',
       'og:image:width': '1200', 'og:image:height': '630', 'og:image:alt': 'Riftn',
@@ -257,18 +265,29 @@ function renderPoll(poll) {
 
 /** A media post's own picture fills the panel, its caption and the way in laid over the foot. */
 function renderMediaPanel(data, media) {
-  const caption = wrapPostText(data.title || data.body, 28, 698, 2);
+  // `pureglo is live` under a finished stream would be wrong: it says whose stream it was instead.
+  const over = (data.live === 'replay' || data.live === 'ended') && saysOnlyLive(data.title);
+  const words = over ? data.live === 'replay' ? `${data.author}'s live replay` : `${data.author} was live` : data.title || data.body;
+  const caption = wrapPostText(words, 28, 698, 2);
   const captionY = 482 - (caption.length - 1) * 36;
+  // A stream says whether it is on air or a recording: a red LIVE tag while
+  // it is live, a REPLAY tag once its recording is ready.
+  const tag = data.live === 'live' ? { text: 'LIVE', fill: '#e5243b', width: 92 }
+    : data.live === 'replay' ? { text: 'REPLAY', fill: '#000', width: 112 } : null;
+  const badge = tag ? `<g data-live-tag="${data.live}"><rect x="414" y="108" width="${tag.width}" height="36" rx="10" fill="${tag.fill}" fill-opacity="${data.live === 'live' ? 1 : .62}" stroke="#fff" stroke-opacity="${data.live === 'live' ? 0 : .35}"/>${data.live === 'live' ? '<circle cx="434" cy="126" r="6" fill="#fff"/>' : ''}<text x="${data.live === 'live' ? 448 : 430}" y="133" font-family="Manrope" font-weight="500" font-size="19" letter-spacing="1.5" fill="#fff">${tag.text}</text></g>` : '';
+  const cta = data.live === 'live' ? 'Watch live on Riftn' : data.live === 'replay' ? 'Watch the replay'
+    : data.live ? 'View on Riftn' : data.media.video ? 'Watch on Riftn' : 'View the post';
   const play = data.media.video ? `<g data-media="video"><circle cx="761" cy="${caption.length ? 262 : 290}" r="46" fill="#000" fill-opacity=".55" stroke="#fff" stroke-opacity=".7" stroke-width="2"/><path d="M-13-20 23 0-13 20Z" transform="translate(764 ${caption.length ? 262 : 290})" fill="#f4f4f6"/></g>` : '';
   return `<g data-media="${data.media.video ? 'video-poster' : 'image'}">
     <image x="390" y="84" width="742" height="460" preserveAspectRatio="xMidYMid slice" clip-path="url(#panel)" xlink:href="${media}"/>
     <rect x="390" y="${caption.length ? 324 : 414}" width="742" height="${caption.length ? 220 : 130}" fill="url(#foot)" clip-path="url(#panel)"/>
     <rect x="390" y="84" width="742" height="460" rx="22" fill="none" stroke="#22242a"/>
     ${play}
+    ${badge}
     <g font-family="Manrope" font-weight="500">
       ${textLines(caption, 415, captionY, 28, 36, '#f4f4f6')}
       <text x="415" y="524" font-size="18" fill="#c5c6ce">riftn.com</text>
-      <text x="1064" y="524" text-anchor="end" font-size="18" fill="#f1f1f4">${data.media.video ? 'Watch on Riftn' : 'View the post'}</text>
+      <text x="1064" y="524" text-anchor="end" font-size="18" fill="#f1f1f4">${cta}</text>
       <path d="M1076 523l12-12m-12 0h12v12" fill="none" stroke="#f1f1f4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
   </g>`;

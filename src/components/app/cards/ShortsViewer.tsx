@@ -414,10 +414,23 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     return () => resumeMedia(paused);
   }, []);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const isMuted = useMediaMuted();
+  const prefMuted = useMediaMuted();
+  // The browser refused sound on a short (iPhone, fast swiping), so it plays
+  // silent until the viewer taps the speaker. Not saved as their choice.
+  const [autoMuted, setAutoMuted] = useState(false);
+  const isMuted = prefMuted || autoMuted;
+  const handleAutoMuted = useCallback(() => setAutoMuted(true), []);
   const toggleMute = useCallback(() => {
+    if (autoMuted && !prefMuted) {
+      setAutoMuted(false);
+      // Inside the tap, so the browser lets the sound start.
+      document.querySelectorAll<HTMLVideoElement>('video.shorts-inline-video').forEach((v) => {
+        if (!v.paused) v.muted = false;
+      });
+      return;
+    }
     videoPlaybackManager.globalMuted = getVideoPreferences().mediaMuted !== true;
-  }, []);
+  }, [autoMuted, prefMuted]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const transitioningRef = useRef(false);
   const queuedStep = useRef<'next' | 'prev' | null>(null);
@@ -2167,6 +2180,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                       isActive={isActive && !isPaused}
                       handoffKey={reuseInitialVideo && index === initialIndex ? short.id : undefined}
                       isMuted={isMuted}
+                      onAutoMuted={handleAutoMuted}
                       playbackRate={playbackRate}
                       onTimeUpdate={isActive ? trackView : undefined}
                       onEnded={isActive ? handleShortEnded : undefined}

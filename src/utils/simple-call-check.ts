@@ -8,7 +8,7 @@ export const simpleCallCheck = async (userAddress: string) => {
     // lower-case and the wallet can arrive checksummed, so lower it here.
     const { data: calls, error } = await walletScopedClient(userAddress)
       .from('call_sessions')
-      .select('id,caller_address,recipient_address,status,call_type,created_at')
+      .select('id,caller_address,recipient_address,status,call_type,created_at,group_id,group_name')
       .eq('recipient_address', userAddress.toLowerCase())
       .eq('status', 'ringing')
       .order('created_at', { ascending: false })

@@ -6,7 +6,11 @@
     "videoSize": "Nin widewo ka bon ni {{n}} MB ye. Dɔ sugandi min ka dɔgɔ."
   },
   "textFeed": {
-    "tab": "Sɛbɛn"
+    "tab": "Sɛbɛn",
+    "errorTitle": "Post ma se ka don",
+    "errorBody": "I ka sɛbɛn feed lajɛ ka a don tugun.",
+    "emptyTitle": "Sɛbɛn post si tɛ yen fɔlɔ",
+    "emptyBody": "Sɛbɛn postw bɛna bɔ yan."
   },
   "comic": {
     "showAll": "Ɲɛ {{count}} bɛɛ jira"
@@ -29,16 +33,62 @@
     "policyFollowers": "Tugubagaw",
     "policyNobody": "Mɔgɔ si",
     "loadMore": "Caman wɛrɛ lajɛ",
-    "video": "O video ye min ye"
+    "video": "O video ye min ye",
+    "with": "Duet ni @{{username}}",
+    "withOriginal": "Duet · a fɔlɔ lajɛ",
+    "unavailable": "Nin videyo tɛ se ka kɛ duet ye tugun.",
+    "allowLabel": "Duet yamaruya",
+    "allowDescription": "Mɔgɔ minnu bɛ se ka duet kɛ i ka videyow kɛrɛ fɛ. I bɛ se ka nin yɛlɛma post kelen kelen bɛɛ la fana.",
+    "settingsSection": "Duetw",
+    "policyDefault": "Konti labɛn",
+    "saveFailed": "A ma se ka mara. A lajɛ tugun.",
+    "count_one": "duet {{count}}",
+    "count_other": "duet {{count}}",
+    "pageHeading": "Duetw",
+    "pageTitle": "{{title}} ka duetw, @{{creator}} ta",
+    "pageTitleNoCreator": "{{title}} ka duetw",
+    "pageDescription": "Nin videyo ka duet bɛɛ lajɛ Riftn kan, walima i yɛrɛ ta kɛ a kɛrɛ fɛ.",
+    "empty": "Duet si tɛ yen fɔlɔ. Videyo ka sugandiliw dayɛlɛ ka Remix → Duet sugandi ka a fɔlɔ kɛ.",
+    "notFound": "Nin videyo tɛ sɔrɔ.",
+    "notFoundTitle": "Videyo ma sɔrɔ | Riftn",
+    "browseShorts": "Shortsw lajɛ"
   },
   "videoRemix": {
-    "sound": "I ka nin fɛɛn nin kɛ"
+    "sound": "I ka nin fɛɛn nin kɛ",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Green screen",
+    "stitch": "Stitch",
+    "selectSource": "Videyo dɔ ka sugandiliw dayɛlɛ ka Remix sugandi ka a daminɛ."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Bɛɛ",
       "followers": "Tugubagaw",
-      "nobody": "Mɔgɔ si"
+      "nobody": "Mɔgɔ si",
+      "default": "Ne ka labɛn"
+    },
+    "shareFailed": "I ka bonya cira, nka videyo fɔlɔ dabaga ka tila ma se ka taa.",
+    "notify": {
+      "duet": "{{name}} ye duet kɛ ni i ka videyo ye",
+      "stitch": "{{name}} ye i ka videyo stitch",
+      "react": "{{name}} ye i ka videyo jaabi",
+      "reactLive": "{{name}} bɛ ka i ka videyo jaabi live la"
+    },
+    "linkFailed": "I ka post bilara, nka a ma se ka siri videyo fɔlɔ la.",
+    "settingsHeading": "Remixw",
+    "stitch": {
+      "allow": "Stitch yamaruya",
+      "allowDesc": "Mɔgɔ minnu bɛ se ka i ka videyow segɔn 5 ta ka don u yɛrɛ ta la. I bɛ se ka nin yɛlɛma post kelen kelen bɛɛ la fana.",
+      "saveFailed": "I ka stitch labɛn ma se ka mara. A lajɛ tugun.",
+      "settingFailed": "I ka post bilara, nka a ka stitch labɛn ma mara. A yɛlɛma ka bɔ Post labɛn na.",
+      "from": "Stitch kɛra ka bɔ {{name}} la",
+      "count_one": "Stitch {{count}}",
+      "count_other": "Stitch {{count}}",
+      "listTitle": "Stitchw",
+      "listFailed": "Stitchw ma se ka don. A lajɛ tugun.",
+      "listEmpty": "Stitch si tɛ yen fɔlɔ.",
+      "unavailable": "Nin videyo tɛ se ka kɛ stitch ye tugun."
     }
   },
   "dehubAppPage": {
@@ -64,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "I ka barokun kɔnɔ, i ka sɛbɛri kɛ",
     "seoDescription": "Riftn ka porogaramu ta: sosiyal media min kode bɛ yen bɛɛ ye, min ye baarakɛlaw ta ye, ni kɛnɛ kan jirali, cikan dogolenw ani lajɛli ka sara sɔrɔ ye. A ye fu ye Google Play, App Store ani web kan.",
-    "seoTitle": "O kama, an ka kan ka tɛmɛ fɛɛrɛ dɔw fɛ ka baara kɛ ni Android, iPhone ani Web kan."
+    "seoTitle": "O kama, an ka kan ka tɛmɛ fɛɛrɛ dɔw fɛ ka baara kɛ ni Android, iPhone ani Web kan.",
+    "learnMore": "I b'a fɛ ka a bɛɛ lɔn? <guide>Riftn ye mun ye?</guide> bɛ platform ɲɛfɔ kosɛbɛ."
   },
   "dehubLinks": {
     "copyLinkDetail": "{{item}} link yuɛ́ɛ́ yuɛ́ɛ́ kɔ́ɔ́ yɛ́ɛ́.",
@@ -82,12 +133,15 @@
       "proposal": "k'a ɲini ka koo dɔ kɛ",
       "stage": "o ye ɲɛyirali ɲuman ye",
       "store": "fɛɛn minw be feere",
-      "featureRequest": "sɛbɛnna"
+      "featureRequest": "sɛbɛnna",
+      "page": "ɲɛ"
     },
     "recipientChat": "chat",
     "recipientUser": "baarakɛla",
     "sendFailed": "{{item}} cili ma se ka kɛ",
-    "sentTo": "{{item}}send to {{name}}"
+    "sentTo": "{{item}}send to {{name}}",
+    "openPage": "Ɲɛ dayɛlɛ",
+    "viewRequest": "Ɲinini lajɛ"
   },
   "stageCover": {
     "admitOne": "Ne b'a fɔ aw ye ko aw ka sɔn",
@@ -123,7 +177,8 @@
     "proof": {
       "label1": "lajɛbaga minnu bɛ yen waati kelen na Riftn kɛnɛ kan jirali la",
       "label2": "o kama, an ka ɲi ka to ka baara kɛ n'an ka telefɔniw ye.",
-      "value3": "Saan 2001 marisikalo tile fɔlɔ"
+      "value3": "Saan 2001 marisikalo tile fɔlɔ",
+      "label3": "diɲɛ bɛɛ latency Riftn yɛrɛ ka CDN kan"
     },
     "reasons": {
       "body1": "Mɔgɔ minw b'i filɛ, i ka ladili di u ma ani ka nilifɛnw ci u ma i sii bɛɛ la. I ka ladiliw be sɔrɔ Riftn ka tagamasiɲɛw kɔnɔ ani ka dugukolo don i ka wari la sanni i ka tɛmɛ sira kan.",
@@ -195,7 +250,24 @@
   "signedFollows": {
     "setUp": "A daminɛ",
     "turnOff": "A tila",
-    "efpTurnOff": "Aw kana aw yɛrɛ minɛ"
+    "efpTurnOff": "Aw kana aw yɛrɛ minɛ",
+    "title": "I ka tugulenw, chain kan",
+    "description": "I ka wari bɔrɔ bɛ i ka tugulenw signer, ani don o don lisi bɛ taamasiyɛn kɛ Base kan. Application o application bɛ se ka i ka tugulenw sɔrɔ i ka wari bɔrɔ fɛ, hali Riftn tɛ yen.",
+    "on": "A dayɛlɛlen bɛ nin minan kan",
+    "off": "A datugulen bɛ nin minan kan",
+    "turnedOn": "I ka tugulenw bɛ signer i ka wari bɔrɔ fɛ sisan",
+    "turnedOff": "A datugura nin minan kan",
+    "failed": "I ka wari bɔrɔ ma signer. A lajɛ tugun.",
+    "hiddenNote": "Tugulen lisi dogolenw ani konti gundolenw tɛ don foroba lisi la.",
+    "efpOn": "A copira EFP kan · tugulen {{count}}",
+    "efpOff": "U bila EFP kan fana",
+    "efpTurnOn": "A fara EFP kan",
+    "efpDone": "I ka tugulenw bɛ taa EFP kan",
+    "efpStopped": "EFP copi jɔra. Lisi ye i ta ye hali bi.",
+    "efpHasList": "EFP lisi bɛ i bolo kaban. Riftn tɛ se ka o fa fɔlɔ.",
+    "efpNoGas": "ETH dɔɔnin ka kan ka kɛ i ka wari bɔrɔ la Base kan nin kama.",
+    "efpFailed": "O ma taa. A lajɛ tugun.",
+    "efpNote": "EFP ye tugulen lisi ye application wɛrɛw bɛ min kalan (efp.app). A ye fu ye ni i ka Riftn wari bɔrɔ ye; wari bɔrɔ wɛrɛw bɛ sɛnti dɔɔnin sara Base kan. Lisi ye i ta ye."
   },
   "profileFields": {
     "title": "Porofili yɔrɔw",
@@ -373,7 +445,8 @@
     "step": "Kɔntu kɔlɔsiw kosɔn, a https://riftn.com/mcp i ka OAuth kɔnɛkɛtɛri ye, i don Riftn kɔnɔ ani ka yɛlɛmaliw kalan fɔlɔ ka a dɔn.",
     "profilePrompt": "N ka Riftn biyo yɛlɛma ka kɛ: Kɔrɛatɛri yɛrɛmahɔrɔnya min bɛ filimuw ani fɔli kɛ.",
     "generatePrompt": "N yira Riftn ka nimajin modɛliw la ani ka pɔrtrɛ dɔ fɔ fɔlɔ ka a kɛ.",
-    "libraryPrompt": "N ka Riftn Kɔrɛatɛri libɛri ka kɔntɛnu kura yira n na."
+    "libraryPrompt": "N ka Riftn Kɔrɛatɛri libɛri ka kɔntɛnu kura yira n na.",
+    "agents": "Post, jaabi, reaction, repost, tugu ani profil labɛn i ka agentw tɔgɔ la"
   },
   "twitchMirror": {
     "title": "Twitch Mirroring ka koo",
@@ -523,7 +596,71 @@
     "groups": {
       "create": "Dilan",
       "discover": "A ɲini",
-      "riftn": "O ye kooba ye."
+      "riftn": "O ye kooba ye.",
+      "main": "Kunba",
+      "money": "Wari"
+    },
+    "findWords": {
+      "home": "kunnafoniw, waati sira, sɛbɛn kuraw, i ye, minnu tugura, ɲɛ fɔlɔ",
+      "profile": "n ka porofili, n ka jatebla, n ka ɲɛ, n ka sɛbɛnw, ja, n ka ko, n tugubagaw",
+      "explore": "ɲini, ka sɔrɔ, ka dɔn, minnu bɛ fɔ kosɛbɛ, minnu ka di, hashtags, mɔgɔw, dilanbagaw",
+      "prompt": "AI, dilan, AI ja, AI videyo, ja dilanna, sɛbɛn ka kɛ ja ye, AI seko",
+      "editor": "videyo labɛnna, videyo labɛn, a surunya, a tigɛ, sɛbɛn jiraw, kɔrɔsɛbɛnw, efɛw",
+      "creator": "dilan, sitidiyo, AI baarakɛminɛnw, ja, videyo, fɔli, kumakan bila, 3D",
+      "converter": "videyo don, ka jigin, YouTube, TikTok, Instagram, a yɛlɛma",
+      "migrate": "n ka kanali yɛlɛma, kanali don, caman don ɲɔgɔn fɛ, YouTube kanali",
+      "notifications": "lasɔminiw, ko kɛlenw, tɔgɔ fɔlenw, jaabiw, diyanyew, lasɔminikan",
+      "messages": "DM, bataki tilennenw, baro, bataki bɔlɔ, barow, gundo bataki",
+      "communities": "jɛkuluw, sigida, sobaw, kulubuw, baroyɔrɔw, tɔndenw",
+      "assistant": "AI, chatbot, ɲininka, dɛmɛ, AI baro, ɲininkaliw",
+      "settings": "sugandiliw, jatebla, gundo, lakana, gundo daɲɛ, kan, cogoya, dibi cogoya, minnu bilara, jatebla jɔsi",
+      "leaderboard": "jɔyɔrɔ, dakun, dilanbaga fɔlɔw, baarakɛla fɔlɔw, pwɛnw, jatew",
+      "bookmarks": "minnu maralen don, minnu ka di n ye, lajɛ kɔfɛ, kalan kɔfɛ, sɛbɛn maralenw, gafebon",
+      "command": "dashboard, sɛgɛsɛgɛli, wari sɔrɔlen, sɔrɔ, faamuyaliw, kɔlɔsili, n ka jatew",
+      "wallet": "wari to, wari, nafolo, tokens, crypto, wari bila, wari bɔ, ci, sɔrɔ, sara",
+      "events": "kalandiriye, waati labɛn, ɲɔgɔnye, minnu bɛ na, tikɛw, AMA",
+      "stages": "kumakan sobaw, kumakan baro, spaces, kumakan ɲɛnama, kuma, podcast",
+      "featureRequests": "dilan, dilanbagaw, hakilinaw, laadilikanw, fili jira, filiw, latilenniw, sira labɛn, kalata, nege fɛnw, a ɲɛ",
+      "feedback": "lajɛli, jate, ɲininkali, hakilina, sɔsɔli, i hakilina di",
+      "staking": "stake, wari bila, sɔrɔ, sarali, wari sɔrɔ, tɔnɔ tilali, badiji, dakunw, juru tɔnɔ",
+      "superpowers": "a sinsin, a jira, nafa kɛrɛnkɛrɛnnenw, sebagaya, badiji nafaw, se mɔgɔw ma, ka yiriwa",
+      "governance": "kalata, kalatali, laadilikanw, hakilina ɲininkali, kalata sɛbɛn, latigɛ",
+      "dao": "nafolo maralen, ka di, dili, sigida wari, dɛmɛ don, dɛmɛ wariw",
+      "bounties": "baara, baaraw, baara kɛtaw, baara misɛnw, yɛrɛ baara, baarakɛla ta, wari sɔrɔ, baara sarali",
+      "myBounties": "n ka bounties, n ka baaraw, tariku, saraliw, baara banninw",
+      "affiliate": "mɔgɔ lawele, teriw welele, welele, komisiyɔn, jɛɲɔgɔn, sɔrɔ",
+      "careers": "baaraw, baarakɛlaw tali, an ka baara ɲɔgɔn fɛ, kulu kɔnɔ don, i tɔgɔ sɛbɛn, baara yɔrɔ lankolonw",
+      "stores": "butiki, feereyɔrɔ, sugu, taamasiyɛn minɛnw, san, feere, fɛnw, sanni",
+      "fractions": "niyɔrɔw, tigiya, wari bila, sɛbɛn dɔ tigiya, NFT, NFTs, fɛn lajɛlenw, jago",
+      "usernames": "baarakɛla tɔgɔ, handle, tɔgɔ, n tɔgɔ yɛlɛma, tɔgɔ san, tɔgɔ feere",
+      "accounts": "jatebla san, jatebla feere, jatebla feeretaw, tugubagaw, jatebla di mɔgɔ wɛrɛ ma",
+      "apps": "apps butiki, apps misɛnw, app dilan, dilanbagaw, baarakɛminɛnw",
+      "arcade": "tulonw, tulon, tulon kɛ, tulonkɛli, cɛsi, marifa tulon, ɲɛnajɛ",
+      "glossary": "daɲɛw, kɔrɔfɔw, daɲɛgafe, kɔrɔ, mun ye",
+      "compare": "sumali, ka suma, ɲɔgɔn kɛrɛfɛ, fɛn wɛrɛw, YouTube, X, TikTok",
+      "guide": "ka daminɛ, a kɛcogo, kalan, dɛmɛ, ka kalan, daminɛbaga, n kura don yan",
+      "stats": "jatew, sɛgɛsɛgɛli, nimɔrɔw, jirali jaw, sɔngɔ, hakɛ, tigiw",
+      "docs": "sɛbɛnw, dɛmɛ, API, whitepaper, dilanbagaw, baara gafe",
+      "blog": "kibaruw, sɛbɛnw, kunnafoni kuraw, weleweledaw, mun ye kura ye",
+      "videos": "lajɛ, videyow, videyo surunw, videyo jananw",
+      "shorts": "reels, videyo surunw, videyo jɔlenw, a sama",
+      "music": "kumakan, dɔnkiliw, fɔliw, lamɛn, arajo, dɔnkili lisi",
+      "liveTv": "TV, jɛnsɛnni, ka jɛnsɛn, ɲɛnama, laseli, kanaliw, ɲɛnama lajɛ",
+      "buyTokens": "tokens san, sanni, wari fara a kan, karti, banki karti, wari gansan",
+      "bridge": "cɛn caman cɛ, tokens yɛlɛma, cɛnw, ka bɔ cɛn dɔ la ka taa dɔ wɛrɛ la",
+      "top100": "100 fɔlɔw, coins, crypto wariw, sugu hakɛ, sɔngɔw",
+      "agents": "AI cidenw, cidenw, bots, a yɛrɛ ma baara, mɔgɔ cogoyaw",
+      "advertising": "reklamu, reklamuw, kampaɲi, a jira, dɛmɛbaga, jagokɛcogo",
+      "premium": "abonɛ, ka yiriwa, pro, tɔndenya, reklamu tɛ, reklamu tɛ min na",
+      "pricing": "porogaramuw, musaka, sɔngɔ, joli, abonɛ",
+      "creators": "dilanbagaw porogaramu, ambasadɛrw, jɛɲɔgɔnw, i tɔgɔ sɛbɛn dilanbaga ye, wari sɔrɔ a la",
+      "getTheApp": "app jigin, Android, iPhone, telefɔni app, a don, APK, ordinatɛri app, a don ordinatɛri kan, Windows, Mac",
+      "connectAi": "MCP, ChatGPT, Claude, API, ɲɔgɔn sirili, AI siri",
+      "packs": "emoji, sitikɛrw, GIFs, emoji jɛkuluw, sitikɛr jɛkuluw, i yɛrɛ ka emoji",
+      "publicChat": "baro, diɲɛ baro, baro soba, lobby, kuma, sigida baro",
+      "planned": "waati sigilen, waati sigi, sɛbɛn waati sigilenw, sira, kɔfɛ",
+      "liveStudio": "ɲɛnama daminɛ, jɛnsɛn, jɛnsɛnni, OBS, overlays, lasɔminiw, widgets",
+      "launchpad": "token daminɛ, coin dilan, coin kɛ, meme coin, bonding curve, ka kɛ token ye"
     }
   },
   "feed": {
@@ -1134,7 +1271,53 @@
     "socialVerifiedFollowers": "{{value}} Followers",
     "socialFollowersPending": "Kalanbagaw ka kunnafoniw",
     "deleteAccountData": "Jatebɔsɛbɛn / Data jɔsi",
-    "menuLayoutFolders": "Dosiyew"
+    "menuLayoutFolders": "Dosiyew",
+    "chatCards": "Barow kariti la",
+    "chatCardsDesc": "Baro kelen kelen bɛɛ bɛ a yɛrɛ ka kariti kan. A datugu ka lisi gansan sɔrɔ ni sira ye baro cɛ la.",
+    "chatDeleteChoice": "Ni i bɛ cikan jɔsi",
+    "chatDeleteChoiceDesc": "A ɲininka waati bɛɛ, walima a jɔsi i kelen ye walima baro mɔgɔ bɛɛ ye tuma bɛɛ.",
+    "chatDeleteAsk": "A ɲininka waati bɛɛ",
+    "chatDeleteMe": "A jɔsi ne ye",
+    "chatDeleteMeDesc": "A bɔra i ka baro la, mɔgɔ wɛrɛw b'a ye hali bi",
+    "chatDeleteEveryone": "A jɔsi mɔgɔ bɛɛ ye",
+    "chatDeleteEveryoneDesc": "Ni a bɛ se ka kɛ. Mɔgɔ wɛrɛ ka cikan jɛkulu kɔnɔ bɛ jɔsi i kelen dɔrɔn ye",
+    "postLanding": "I ka post kɔfɛ",
+    "postLandingDesc": "I ka post kura bɛ jigin i ka feed kɔnɔ cogo min na",
+    "postLandingGhost": "Ghost yɔrɔ",
+    "postLandingGhostDesc": "I ka feed bɛ yɔrɔ di ani i ka post bɛ bɔ a nɔ na dɔɔni dɔɔni",
+    "postLandingMorph": "Morph",
+    "postLandingMorphDesc": "Sɛbɛnnikɛyɔrɔ bɛ dɔgɔya ka kɛ i ka post ye",
+    "postLandingPill": "Pill ka taa kariti ma",
+    "postLandingPillDesc": "Bilali barra bɛ bonya ka kɛ i ka post ye ni a bilara",
+    "postLandingDrop": "Jigin",
+    "postLandingDropDesc": "I ka post bɛ jigin ka bɔ sanfɛ ni pan dɔɔnin ye",
+    "showLikes": "Ne ka diyaw yira mɔgɔ bɛɛ la",
+    "showLikesDesc": "Mɔgɔ bɛɛ bɛ se ka Diyaw tab dayɛlɛ i ka profil kan. A datugulen bɛ ka bɔ a daminɛ na, o la i kelen dɔrɔn bɛ se ka i ka diyaw ye.",
+    "showFollowersList": "Ne tugubagaw yira",
+    "showFollowersListDesc": "A to mɔgɔ bɛɛ ka i ka tugubagaw lisi dayɛlɛ. Ni a datugulen don, i kelen dɔrɔn bɛ a ye.",
+    "showFollowingList": "Ne bɛ mɔgɔ minnu tugu, olu yira",
+    "showFollowingListDesc": "A to mɔgɔ bɛɛ ka i bɛ mɔgɔ minnu tugu olu lisi dayɛlɛ. Ni a datugulen don, i kelen dɔrɔn bɛ a ye.",
+    "showFollowCounts": "Ne ka tugubagaw hakɛ yira",
+    "showFollowCountsDesc": "I ka tugubagaw hakɛ ani i bɛ mɔgɔ joli tugu, o yira. Ni i ye nin datugu, lisi fila bɛɛ bɛ dogo fana.",
+    "defaultProfileView": "Profil postw ka layɔrɔ",
+    "defaultProfileViewDesc": "I ka postw yira grille walima lisi la ni mɔgɔw ye i ka profil dayɛlɛ",
+    "readerProfileView": "Profil wɛrɛw dayɛlɛ i n'a fɔ",
+    "readerProfileViewDesc": "Grille walima lisi sugandi profil bɛɛ ye i bɛ minnu dayɛlɛ, walima mɔgɔ kelen kelen bɛɛ ka sugandili mara",
+    "readerProfileViewOwner": "Mɔgɔ kelen kelen bɛɛ ka sugandili",
+    "desktopAppDesc": "Riftn bila nin ordinatɛri kan. A bɛ dayɛlɛ a yɛrɛ ka fenɛtiri la ani a bɛ a yɛrɛ kuraya.",
+    "tipsOffNote": "Bonyaw ni ciliw i ma, olu datugulen don ni nin dayɛlɛlen don. A datugu walasa ka bonya sɔrɔ tugun.",
+    "walletUnlockIntervalDesc": "I ka wari bɔrɔ bɛ to dayɛlɛlen waati min post, bonya ani wari ciliw kama, sani an ka i ka gundo daɲɛ ɲininka tugun. A bɛ to hali ni ɲɛ kuraya; ni i bɔra, a bɛ datugu tuma bɛɛ.",
+    "feedVideoShapeSquareDesc": "Videyo jamanw bɛ don kare kɔnɔ",
+    "socialConnected": "{{platform}} sirilen don",
+    "menuLayout": "Menu ka layɔrɔ",
+    "menuLayoutDesc": "Menu bɛ a ka ɲɛw ladɛ cogo min na",
+    "menuLayoutTabs": "Tabw",
+    "menuLayoutTabsDesc": "Jɛkulu kelen waati kelen, ni ikɔni belebelew ye",
+    "menuLayoutSections": "Yɔrɔw",
+    "menuLayoutSectionsDesc": "Ɲɛ bɛɛ ɲɔgɔn fɛ, jɛkulu kuncɛw kɔrɔ",
+    "menuLayoutFoldersDesc": "I ka ɲɛ kunbabaw, o kɔ dosiye jɛkulu kelen kelen bɛɛ ye",
+    "publicChatInBar": "Jama ka baro duguma bara la",
+    "publicChatInBarDesc": "Digi kelen ka don Jama ka baro la ka bɔ ɛkran duguma bara la"
   },
   "common": {
     "confirm": "Ka sɔn",
@@ -1224,7 +1407,14 @@
     "messagePublic": "Bɛɛ ye",
     "railTitle": "Bonyaw",
     "railTotal": "{{amount}} o ye koo ɲuman ye.",
-    "tokensUnit": "o ye koo ɲuman ye."
+    "tokensUnit": "o ye koo ɲuman ye.",
+    "messagePlaceholder": "Kuma dɔ fɔ i ka bonya fɛ",
+    "messagePrivate": "{{name}} dɔrɔn",
+    "theCreator": "dilanbaga",
+    "messageWallNote": "A bɛna jira bonya kogo kan ni bonya tara.",
+    "sendWithMessage": "A ci ni bataki ye",
+    "messageFailed": "I ka bataki ma se ka fara a kan. Bonya si ma ci.",
+    "wallLabel": "Bonya batakiw"
   },
   "postOptions": {
     "liveAlertsOn": "I bɛ {{name}} nɔfɛ sisan. U ni lajɛ daminɛ, i bɛna kibaru sɔrɔ.",
@@ -1264,7 +1454,14 @@
     "giftBoost": "Fanga be mɔgɔ minw na, olu ka kan ka sɔn",
     "markSection": "Fanga min be mɔgɔ la, o ye ka mɔgɔ lafili.",
     "copyFailed": "A ma se ka lien kopi",
-    "share": "Ka dɔ fara a kan"
+    "share": "Ka dɔ fara a kan",
+    "refreshLinkPreview": "Siri ɲɛjira kuraya",
+    "linkPreviewRefreshed": "Siri ɲɛjira kurayara",
+    "linkPreviewRefreshFailed": "An ma se ka o siti sɔrɔ. A lajɛ tugun kɔfɛ.",
+    "castToTv": "A ci TV la",
+    "castStarted": "A bɛ ka tɛmɛ i ka TV kan",
+    "castUnsupported": "Nin navigatɛri tɛ se ka ci. Riftn da wuli Chrome walima Safari kɔnɔ ka a lajɛ i ka TV kan.",
+    "castFailed": "An ma se ka TV sɔrɔ. A lajɛ ni a bɛ Wi-Fi kelen kan ka a lajɛ tugun."
   },
   "filters": {
     "sort": "Kɔrɔbɔ",
@@ -1863,8 +2060,14 @@
       "bountyApplied": "{{name}} y’a ka baara kɛ i ka bunti",
       "bountySubmittedNamed": "{{name}} y’a ka baara bila i ka bunti “{{title}}”",
       "bountySubmitted": "{{name}} y’a ka baara bila i ka bunti",
-      "sentNotification": "{{name}} y’a ka ladili bila i ma"
-    }
+      "sentNotification": "{{name}} y’a ka ladili bila i ma",
+      "governanceCommentLike": "I ka kuma min fɔra laadilikan dɔ kan, o diyara {{name}} ye",
+      "featureNew": "{{name}} ye ɲinini kura bila",
+      "featureActivityNamed": "{{name}} ye kuma fɔ “{{title}}” kan"
+    },
+    "groupEarlier": "Kɔrɔlenw",
+    "searchPlaceholder": "Lasɔminiw ɲini",
+    "searchEmpty": "Lasɔmini si tɛ bɛn a ma"
   },
   "leaderboard": {
     "title": "Kɛlɛya",
@@ -1909,7 +2112,13 @@
     "loadingBoard": "Ɲɛmɔgɔya sɛbɛn bɛ ka don…",
     "amountTokens": "{{amount}} tɔkɛns",
     "directReferrals": "{{count}} tilennen",
-    "secondaryReferrals": "{{count}} filanan"
+    "secondaryReferrals": "{{count}} filanan",
+    "ogChallenge": "OG Kɛlɛ",
+    "ogHolders_one": "OG marabaga {{count}}",
+    "ogHolders_other": "OG marabagaw {{count}}",
+    "ogChallengeTitle": "OG marabagaw lasegin",
+    "ogChallengeBody": "Mɔgɔ minnu bɛ DHB mara hali bi, olu wele. Ni u donna ni i ka weleli sira ye ka u ka DHB to u ka Riftn wari bɔrɔ kɔnɔ, u bɛ jate i ye yan.",
+    "ogChallengeCta": "I ka weleli sira sɔrɔ"
   },
   "dhbListing": {
     "title": "Tokɛn bɛna sɔrɔ sɔɔni!",
@@ -2052,17 +2261,39 @@
     "shipping": "Dilannen",
     "noShippingYet": "Foyi tɛ ka kɛ",
     "shippingAppearHere": "Ɲininiw minnu bɛ ka dilan, olu bɛna bɔ yan.",
-    "loadFailed": "N tɛ se ka ɲininiw ladon"
+    "loadFailed": "N tɛ se ka ɲininiw ladon",
+    "editMedia": "Jaw ni videyow",
+    "editAddMedia": "Ja walima videyo fara a kan",
+    "deviceInfoNote": "Minan kunnafoniw farala a kan walasa k'an dɛmɛ ka fiw latilen.",
+    "deviceInfo": "Minan kunnafoniw",
+    "deviceInfoOwners": "Board tigiw dɔrɔn bɛ nin ye",
+    "deviceInfoError": "Minan kunnafoniw ma se ka don",
+    "deviceInfoNone": "Minan kunnafoni si tɛ nin ɲinini na",
+    "deviceInfoErrors": "Fili kuraw"
   },
   "auth": {
-    "loginRequired": "Sɔgɔma kɛ"
+    "loginRequired": "Sɔgɔma kɛ",
+    "accountDeleted": "Nin jatebla jɔsira. I bɛ se ka i tɔgɔ sɛbɛn tugun jatebla kura ye.",
+    "accountDeletedHours_one": "Nin jatebla jɔsira. I bɛ se ka i tɔgɔ sɛbɛn tugun ni imɛli walima telefɔni kelen ye lɛrɛ {{count}} ɲɔgɔn kɔfɛ.",
+    "accountDeletedHours_other": "Nin jatebla jɔsira. I bɛ se ka i tɔgɔ sɛbɛn tugun ni imɛli walima telefɔni kelen ye lɛrɛ {{count}} ɲɔgɔn kɔfɛ.",
+    "accountDeletedDays_one": "Nin jatebla jɔsira. I bɛ se ka i tɔgɔ sɛbɛn tugun ni imɛli walima telefɔni kelen ye tile {{count}} ɲɔgɔn kɔfɛ.",
+    "accountDeletedDays_other": "Nin jatebla jɔsira. I bɛ se ka i tɔgɔ sɛbɛn tugun ni imɛli walima telefɔni kelen ye tile {{count}} ɲɔgɔn kɔfɛ."
   },
   "messages": {
     "newDrawer": {
       "to": "Ka",
       "recent": "Kuraw",
       "suggested": "A n so ni imọran",
-      "youFollow": "I bɛ minnu tugu"
+      "youFollow": "I bɛ minnu tugu",
+      "placeholder": "Tɔgɔ walima @username",
+      "chattedBefore": "Aw bɛ baro kɛ",
+      "mutual": "Ɲɔgɔn tugu",
+      "dmsOff": "DM datugulen",
+      "keepTyping": "Sɛbɛnni kɛ ka taa a fɛ ka mɔgɔ bɛɛ ɲini",
+      "noOne": "Mɔgɔ si ma sɔrɔ",
+      "tryUsername": "U ka @username tigitigi lajɛ",
+      "sayHi": "Foli kɛ mɔgɔ dɔ ye",
+      "typeAny": "Tɔgɔ o tɔgɔ walima @username sɛbɛn"
     },
     "reply": "Jaabi",
     "react": "Kɛcogo jira",
@@ -2103,7 +2334,8 @@
     "noConversationsYet": "Kibaro tɛ yan sisan",
     "sending": "Ka taga",
     "retrySend": "A lajɛ tuguni",
-    "discardSend": "A bɔ"
+    "discardSend": "A bɔ",
+    "notSent": "A ma ci"
   },
   "music": {
     "listeningCount_one": "mɔgɔ {{count}} bɛ a lamɛn",
@@ -2187,7 +2419,22 @@
     "viewMode": "O ye ɲɛyirali ye",
     "back": "Kɔrɔbɔ",
     "reserve": {
-      "signIn": "Don"
+      "signIn": "Don",
+      "available": "Tɔgɔ bɛ sɔrɔ",
+      "held": "A maralen bɛ i ye",
+      "ended": "Marali banna",
+      "busy": "A bɛ ka mara",
+      "availableBody": "riftn.com/{{name}} bɛ sɔrɔ sisan. A mara, an bɛna a mara i ye miniti kelen ka i to i tɔgɔ sɛbɛn na.",
+      "heldBody": "Mɔgɔ wɛrɛ tɛ se ka @{{name}} ta fo waati ka ban. I tɔgɔ sɛbɛnni dafa walasa ka a mara.",
+      "endedBody": "I ka miniti banna, o la @{{name}} dayɛlɛlen bɛ bɛɛ ye tugun. A bɛ sɔrɔ hali bi.",
+      "busyBody": "Mɔgɔ dɔ bɛ ka a tɔgɔ sɛbɛn ni @{{name}} ye sisan. Ni a ma a dafa, a bɛna lankolon waati banni na.",
+      "finish": "Tɔgɔ sɛbɛnni dafa",
+      "again": "A mara tugun",
+      "cta": "A mara sisan",
+      "letGo": "A to",
+      "haveAccount": "Jatebla bɛ i fɛ wa?",
+      "seoTitle": "@{{name}} bɛ sɔrɔ Riftn kan",
+      "seoDescription": "Mɔgɔ si ma riftn.com/{{name}} ta fɔlɔ. A mara ka i tɔgɔ sɛbɛn walasa a ka kɛ i ta ye."
     },
     "usernameAvailable": "Kɔrɔbɔ",
     "signUpToClaim": "Sɔgɔma kɛ",
@@ -2218,12 +2465,16 @@
     "tabs": {
       "playlists": "Dɔnkililabagaw",
       "dislikes": "Nɔŋɔ",
-      "likes": "Diyanyew"
+      "likes": "Diyanyew",
+      "articles": "Sɛbɛnw"
     },
     "likedPosts": {
       "emptyTitle": "Diyanye si tɛ yen fɔlɔ",
       "privateTitle": "Diyanyew ye gundo ye",
-      "loadMore": "Caman wɛrɛ lajɛ"
+      "loadMore": "Caman wɛrɛ lajɛ",
+      "emptyOwn": "Sɛbɛn minnu ka di i ye, olu bɛ jira yan. I kelen dɔrɔn bɛ se ka u ye ni i ma N ka diyanyew jira dayɛlɛ Paramɛtiriw kɔnɔ.",
+      "emptyOther": "Foyi ma diya fɔlɔ.",
+      "privateDesc": "Nin jatebla bɛ a ka diyanyew dogo."
     },
     "dislikes": {
       "emptyTitle": "Ne t'a fɛ ka kɛ ten halibi",
@@ -2248,10 +2499,31 @@
     "sortMostLiked": "A ka di ne ye kosɔbɛ",
     "sortCustomShort": "Fɛɛn minw ka teli ka kɛ",
     "arrange": {
-      "saving": "A bɛ mara..."
+      "saving": "A bɛ mara...",
+      "title": "I ka sɛbɛnw labɛn",
+      "hint": "Sɛbɛn minɛ ka a sama ka taa a yɔrɔ kura la. Mɔgɔ nalenw bɛ nin cogoya ye fɔlɔ.",
+      "drag": "A sama ka a lawuli",
+      "toTop": "A ta ka taa sanfɛ",
+      "save": "Cogoya mara",
+      "saved": "I ka cogoya maralen don",
+      "reset": "Seginna kuraw ma fɔlɔ",
+      "resetDone": "Seginna kuraw ma fɔlɔ",
+      "saveFailed": "An ma se ka i ka cogoya mara. Hakɛto ka a lajɛ tugun.",
+      "loadFailed": "An ma se ka i ka sɛbɛnw labɔ. Nin datugu ka a lajɛ tugun.",
+      "empty": "Foyi tɛ yan ka labɛn fɔlɔ. Fɛn dɔ sɛbɛn fɔlɔ."
     },
     "searchThisChannel": "Ka tɛmɛ o kan",
-    "searchResultCount": "1 ka sɔrɔ \"{{query}}\""
+    "searchResultCount": "1 ka sɔrɔ \"{{query}}\"",
+    "unavailable": "Porofili tɛ sɔrɔ",
+    "mutualsOne": "Jɛɲɔgɔn {{count}}:",
+    "mutualsMany": "Jɛɲɔgɔnw {{count}}:",
+    "articles": {
+      "emptyTitle": "Sɛbɛn si tɛ yan fɔlɔ",
+      "emptySubtitle": "Sɛbɛnw bɛna jira yan"
+    },
+    "sortCustom": "I yɛrɛ ka cogoya",
+    "arrangeButton": "Sɛbɛnw labɛn",
+    "searchResultCountPlural": "Jaabi {{count}} \"{{query}}\" kama"
   },
   "tv": {
     "seoTitle": "Lɪv TV: Frɪ Chɛnɛl Frɔm ɔn dɔn Wɔld",
@@ -2516,7 +2788,26 @@
     "createSignIn": "I ka don tuguni walisa ka ciden dɔ dilan",
     "checkConnection": "I ka i ka ɛntɛrinɛti lajɛ, ka a lajɛ tuguni.",
     "welcome": {
-      "text": "Bisimila kuma"
+      "text": "Bisimila kuma",
+      "title": "Mɔgɔ kuraw bisimila",
+      "help": "Nin agent bɛ mɔgɔ minnu donna Riftn kɔnɔ sisan olu tugu ani/walima ka cikan ci u ma, mɔgɔ dama dɔ don o don.",
+      "follow": "Mɔgɔ kuraw tugu",
+      "message": "Cikan ci mɔgɔ kuraw ma",
+      "textHelp": "{name} bɛ kɛ u ka @username ye. Siri si tɛ. A bɛ ci mɔgɔ kelen kelen bɛɛ ma siɲɛ kelen.",
+      "saveText": "Cikan mara",
+      "perDay": "Mɔgɔ don o don",
+      "fewer": "Mɔgɔ dɔɔnin don o don",
+      "more": "Mɔgɔ caman don o don",
+      "today": "Bi: {{follows}} tugura · {{messages}} cikan cira",
+      "limits": "Mɔgɔ kelen tɛ siɲɛ fila. A tɛ mɔgɔ minnu ye i bali walima ka i makun, ka cikan kuraw datugu walima ka u yɛrɛ dogo Mɔgɔ kuraw la, olu ta.",
+      "showLog": "A ye mɔgɔ minnu bisimila, olu lajɛ",
+      "hideLog": "Bisimilaw dogo",
+      "empty": "Mɔgɔ si fɔlɔ. Mɔgɔ kuraw bɛ bɔ yan u donni tuma na.",
+      "followed": "A tugura",
+      "messaged": "Cikan cira",
+      "skipped": "A tora",
+      "failed": "A ma se ka sɔrɔ",
+      "defaultText": "I ni ce {name}, i bisimila Riftn kan! 👋"
     },
     "workspace": {
       "moderation": "Jɛnsɛnni kɔlɔsili",
@@ -2712,7 +3003,15 @@
     "switchWalletAccount": "Account wɛrɛ",
     "walletLoadFailed": "Walɛtiw ma se ka filɛ. I ka kɔnɔ, i ka a bɔ kura.",
     "openInBrowser": "A dabɔ ɲinini yɔrɔ la",
-    "copyLink": "Kumanbolo ka kan ka kɛ"
+    "copyLink": "Kumanbolo ka kan ka kɛ",
+    "bringLoginOver": "I ye Riftn kɛ dehub.io kan wa? <bring>I ka donni lana yan</bring>",
+    "didYouMean": "I tun bɛ {{email}} fɛ wa?",
+    "profileMovedTitle": "I ka porofili yɛlɛmana",
+    "migrateWrongLogin": "O donni ye wari bɔrɔ wɛrɛ dayɛlɛ, o la foyi ma yɛlɛma. I ka porofili kɔrɔ dilanna ni {{login}} ye. O kɛ walasa ka a segin.",
+    "googleInAppTitle": "Google tɛ se ka don {{app}} kɔnɔ",
+    "googleInAppTitleUnnamed": "Google tɛ se ka don nin app kɔnɔ",
+    "googleInAppBody": "Riftn da wuli i ka navigatɛri la ka Google kɛ, walima i don ni imɛli ye yan.",
+    "tryAnyway": "A lajɛ o bɛɛ n'a ta"
   },
   "careers": {
     "title": "Kɔrɔbɔ",
@@ -2937,7 +3236,16 @@
     "searchDehubFor": "\"{{query}}\" ɲini Riftn kan",
     "switchAccount": "Account wɛrɛ",
     "signedInAs": "I don na i n’a fɔ {{name}}",
-    "requestSend": "I ka deliliw ci"
+    "requestSend": "I ka deliliw ci",
+    "requestPrompt": "A tɛ yan fɔlɔ wa? A ci ɲinini ye",
+    "requestPromptShort": "A tɛ yan fɔlɔ wa?",
+    "requestDraftMenu": "{{query}} fara Riftn kan",
+    "requestDraftSettings": "Paramɛtiri dɔ {{query}} kama",
+    "requestPostsTo": "A bɛ taa Ɲininiw la",
+    "requestHint": "A bɛ taa Ɲininiw la i tɔgɔ la. An bɛna a fɔ i ye ni a bɔra.",
+    "requestSent": "A cira Ɲininiw ma",
+    "requestSentHint": "An bɛna a fɔ i ye ni a bɔra.",
+    "requestSeeIt": "A filɛ Ɲininiw kan"
   },
   "comments": {
     "reportComment": "Kɔrɔbɔli kumaw",
@@ -3033,8 +3341,20 @@
     "anonymousLikes_other": "Diyanye {{count}} ka bɔ badge tigi tɔgɔbaliw fɛ",
     "threadParts": {
       "moveUp": "Ka teli san fɛ",
-      "moveDown": "Ka teli duguma"
-    }
+      "moveDown": "Ka teli duguma",
+      "reorder": "Cogoya yɛlɛma",
+      "reorderHint": "Yɔrɔw sama, walima taamasiyɛnw kɛ, o kɔfɛ a mara.",
+      "save": "Cogoya mara",
+      "saved": "Baro cogoya maralen don",
+      "saveFailed": "An ma se ka cogoya mara. A lajɛ tugun.",
+      "dragPart": "A sama ka yɔrɔ {{n}} lawuli",
+      "addPart": "Fara baro kan",
+      "addPlaceholder": "Fɛn fara i ka baro kan...",
+      "label": "Baro · yɔrɔ {{count}}"
+    },
+    "attachMedia": "Ja, videyo walima kumakan fara a kan",
+    "attachUnsupported": "Ja, videyo walima kumakan dosiye fara a kan.",
+    "attachTooLarge": "O dosiye ka bon ni {{size}} MB dan ye."
   },
   "mintChain": {
     "title": "O kɔ, a ye sɛbɛ dɔ ci",
@@ -3046,10 +3366,20 @@
     "paidFromWalletPlain": "I ka wari bɔ i ka wari la",
     "priceUnavailable": "O tɛ se ka kɛ",
     "confirm": "O ye {{chain}}",
-    "notAvailable": "O kama, u ma se ka marifakɛlɛ kɛ."
+    "notAvailable": "O kama, u ma se ka marifakɛlɛ kɛ.",
+    "feeIncludesGas": "≈ {{usd}}, gas b'a la",
+    "gasOnly": "≈ {{usd}} gas",
+    "confirmWithCost": "A mint {{chain}} kan · {{cost}}"
   },
   "postEditHistory": {
-    "original": "A cogo fɔlɔ"
+    "original": "A cogo fɔlɔ",
+    "title": "Yɛlɛmaliw tariku",
+    "edited_one": "A yɛlɛmana siɲɛ kelen",
+    "edited_other": "A yɛlɛmana siɲɛ {{count}}",
+    "lastEdit": "Yɛlɛmali laban {{time}}",
+    "editN": "Yɛlɛmali {{n}}",
+    "now": "Sisan",
+    "showChanges": "Min yɛlɛmana, o yira"
   },
   "postInfo": {
     "title": "Post kunnafoni",
@@ -3343,7 +3673,11 @@
     "waiting_for_wallet": "I ka wari cɛtigɛyɔrɔ la",
     "waiting_for_wallet_desc": "Aw ye {{wallet}} dayɛlɛ ka siginidenw labato — aw ka deliliw be yen.",
     "your_wallet": "i ka wari cɛtigɛyɔrɔ",
-    "max_available_on_chain": "Max bɛ se ka bɔ: {{amount}} tokens {{chain}}"
+    "max_available_on_chain": "Max bɛ se ka bɔ: {{amount}} tokens {{chain}}",
+    "not_available_for_this_post": "A tɛ sɔrɔ nin sɛbɛn na",
+    "no_dhb_tokens_either_chain": "Riftn tokens si tɛ i fɛ cɛn fila si kan.",
+    "turn_back_on_desktop_notifications": "Ordinatɛri lasɔminiw dayɛlɛ tugun wa?",
+    "notifications_moved_to_riftn": "An taara riftn.com kan, o la i ka navigatɛri mago bɛ i ka sɔn na tugun walasa ka jaabiw, bonyaw ani DMw jira yan."
   },
   "staking": {
     "title": "Bilali",
@@ -3628,7 +3962,11 @@
         "listTitle": "Ɛɛn fɔ a wì si kari wa kunwɔ",
         "loading": "O kɔ, a ye n' weele ka na n' ka soo.",
         "emptyTitle": "Mɔgɔ si tɛ yen Gayɛli gɛrɛfɛ.",
-        "empty": "I yɛrɛ labɛn ka mɔgɔw weele ka na i ka soo."
+        "empty": "I yɛrɛ labɛn ka mɔgɔw weele ka na i ka soo.",
+        "expiredWhen": "a banna {{when}}",
+        "expires": "a bɛ ban {{when}}",
+        "limit": "dan {{max}}",
+        "revokeTitle": "{{name}} bɔ?"
       },
       "roleOwner": "Fɛɛn min be sɔrɔ o kɔnɔ",
       "roleAdmin": "K'a to a ka baara la",
@@ -3702,7 +4040,11 @@
       "moveDown": "Ka teli duguma",
       "removeRule": "Sariya bɔ",
       "addRule": "Sariya bila",
-      "saveRules": "Sariya kura sɛbɛn"
+      "saveRules": "Sariya kura sɛbɛn",
+      "deleteConfirmBody": "{{name}} ka mɔgɔ bɛɛ, cikan bɛɛ, ko bɛɛ ani weele siri bɛɛ bɛ jɔsi pewu. O tɛ se ka segin kɔ.",
+      "bannedWithReason": "A balilen don — {{reason}}",
+      "deleteAllMessagesTitle": "{{name}} ka cikan bɛɛ jɔsi?",
+      "deleteAllMessagesBody": "{{name}} ye cikan minnu bɛɛ ci {{community}} kɔnɔ, olu bɛ jɔsi ka bɔ baro la. O tɛ se ka segin kɔ."
     },
     "invite": {
       "revoked": "Nin invite link in bɔra.",
@@ -4340,7 +4682,10 @@
     "fromYourWalletNow": "— ka bɔ i ka wari la sisan, i ka koo ɲɛnabɔli baara la.",
     "disputeTotal": "A bɛɛ lajɛlen: {{total}} / {{remaining}} {{currency}}",
     "resolveAndPay": "Ka wari di ani ka wari di",
-    "resolve": "Koow ɲɛnabɔli jɛnkulu"
+    "resolve": "Koow ɲɛnabɔli jɛnkulu",
+    "awardApplicant": "Nin ɲinibaga sara",
+    "rejectedReason": "A banna: {{reason}}",
+    "approveAndPay": "A sɔn ani {{amount}} sara"
   },
   "stores": {
     "podToggle": "Article en impression à la demande",
@@ -4502,7 +4847,11 @@
     "viewStore": "Fɛɛn min be feere",
     "store": "Fɛɛn min be feere",
     "listing": "Lisiliw",
-    "shopAllowanceUsed": "{{allowance}} ɔf {{allowance}} yuz. Stɛk mɔ Riftn tɔkɛns fɔ haja bɛj ɛn anɔda slɔt."
+    "shopAllowanceUsed": "{{allowance}} ɔf {{allowance}} yuz. Stɛk mɔ Riftn tɔkɛns fɔ haja bɛj ɛn anɔda slɔt.",
+    "catMerch": "Merch",
+    "createStoreBlurb": "I ka butiki dabɔ walasa ka fɛnw feere daminɛ.",
+    "aptPlaceholder": "Apt 4B",
+    "statePlaceholder": "NY"
   },
   "stages": {
     "allStages": "Kan bonw bɛɛ",
@@ -4783,7 +5132,19 @@
       "description": "Mɔgɔ si ma kuma \"{{title}}\" kɔnɔ miniti 30 kɔnɔ, o de kosɔn a datugura."
     },
     "deleteRecordingFailed": "Ne tɛ se ka n ka sɛbɛri kɛ",
-    "deleteStageFailed": "A tun tɛ se ka lɔyɔrɔ sɔrɔ"
+    "deleteStageFailed": "A tun tɛ se ka lɔyɔrɔ sɔrɔ",
+    "joinSeoTitle": "Live Stage dɔ kɔnɔ don | Riftn",
+    "frontRowBooked": "Ɲɛfɛ siginan miniti {{minutes}} kama",
+    "shareThisLink": "Nin siri jɛnsɛn: {{url}}",
+    "chatEmptyScheduled": "Foyi fɔlɔ — foli kɛ sani a ka daminɛ.",
+    "dubbingBill_other": "I ye dubbing kumakan lamɛn miniti {{count}}. O bɛ se {{amount}} ma, a bɛ bɔ i ka wari bɔrɔ la ciliwali kelen na.",
+    "held": "A mineno — so bɛ makun lamɛn",
+    "playingPosition": "A bɛ fɔ so ye · {{position}} {{total}} la",
+    "clipsCount": "clip {{count}}/{{max}} · {{mb}}MB kelen kelen",
+    "dictateText": "Sɛbɛn fɔ",
+    "readAnything": "Fɛn o fɛn kalan kumacogo gansan na segɔn {{seconds}} ma kɔ — i bɛ min fɔ o tɛ kunko ye, i kan bɛ cogo min na o dɔrɔn.",
+    "stopAt": "A jɔ — {{time}}",
+    "tooShort": "A surunyara kojugu — a ta segɔn {{seconds}} ma kɔ."
   },
   "ads": {
     "seoTitle": "Kalanfaw ka kunnafoniw",
@@ -4969,7 +5330,11 @@
     "sentTokensNotCredited": "A tun b'a fɛ ka wari di a ma, nka a tun t'a fɛ k'o wari di a ma. An b'a sɛgɛsɛgɛ k'a filɛ a be se ka kɛ cogo min na.",
     "targetByTokenHoldings": "O ye ka kɛ sababu ye ka mɔgɔ dɔw ka koo dogo. Aw ka kan ka ne kanu, aw ka yɛlɛnyɔrɔw ye filɛli ye. Ni u y'aw minɛ, u b'a fɛ k'aw ye tugu. A to yɔrɔlakolon ka se mɔgɔ bɛɛ ma.",
     "stakersHint": "Mɔgɔ minw be baara kɛ ni Riftn ye, olu be se ka baara kɛ ni o ye",
-    "povrPricingIntro": "An ka saratiw basiginin be saratiw kan, o b'a to an be se ka wari caaman sɔrɔ ka kɛɲɛ n'an lamɛnbagaw ka wari ye. O wari be se ka kɛ wari ye min be se ka kɛ wari ye."
+    "povrPricingIntro": "An ka saratiw basiginin be saratiw kan, o b'a to an be se ka wari caaman sɔrɔ ka kɛɲɛ n'an lamɛnbagaw ka wari ye. O wari be se ka kɛ wari ye min be se ka kɛ wari ye.",
+    "adsBalanceTopUp": "Ads wari fara a kan",
+    "stepOf": "Taabolo {{step}} {{total}} la — {{name}}",
+    "rateToCredit": "@ ${{price}}/token → ${{usd}} credit",
+    "topUpWithTokens": "Wari fara a kan ni tokenw ye"
   },
   "launchpad": {
     "seoDescription": "I ka baara daminɛ Riftn ka site web kan: ka wari sɔrɔ ka ɲɛ wala ka i yɛrɛ ka baara daminɛ.",
@@ -5071,7 +5436,10 @@
     "launch": "K'a daminɛ",
     "launching": "Ka daminɛ...",
     "launched": "{{symbol}} lanced",
-    "createFailed": "O tɛ dan na"
+    "createFailed": "O tɛ dan na",
+    "seoTitle": "Launchpad | Riftn",
+    "sold": "a feerelen",
+    "mcap": "Mcap"
   },
   "fractions": {
     "seoTitle": "Fanga be mɔgɔ minw na, olu ka kan ka kɛ ten.",
@@ -5217,18 +5585,167 @@
     "buy": "Ka fɛɛn dɔ san",
     "reject": "Ka ban",
     "needsYouHold": "Need {{needed}}, you hold {{held}}",
-    "sellYourFractions": "I ka kɛrɛnkɛrɛnnenw di ({{held}} mara)"
+    "sellYourFractions": "I ka kɛrɛnkɛrɛnnenw di ({{held}} mara)",
+    "nftsSubtitle": "NFT o NFT, falen taabolo kelen na",
+    "buyersTab": "Sanbagaw",
+    "soldOfListing": "{{sold}} feerera {{total}} la",
+    "noBuyersYet": "Mɔgɔ si ma nin post tilayɔrɔw san fɔlɔ",
+    "fromYou": "ka bɔ i fɛ",
+    "statusOverdue": "A mɛnna"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Ka ɲɛsin o koo ma"
+        "use": "Ka ɲɛsin o koo ma",
+        "url": "Fɛn ɲɛ URL",
+        "action": "Fɛn ɲɛ kalan",
+        "loading": "Ɲɛ bɛ ka kalan…",
+        "hint": "Sɛbɛn don ka bɔ fɛn ɲɛ foroba dɔ la. Kunnafoniw lajɛ sani i ka u kɛ baara la; fɛn jaw fara a kan studio kɔnɔ u kelen na.",
+        "source": "Sɔrɔyɔrɔ donnen",
+        "review": "Fɛn dɔ sugandi ka a copi i ka ɲɛfɔli kɔnɔ. I ka kunkɔrɔ, kan ani marki kulɛrɛw tɛ yɛlɛma.",
+        "errors": {
+          "signIn": "Don walasa ka fɛn ɲɛ don.",
+          "url": "Fɛn URL foroba HTTPS kɛ baara la.",
+          "empty": "Fɛn kunnafoni nafama si ma sɔrɔ. U fara a kan i yɛrɛ bolo.",
+          "busy": "Donni caman bɛ ka kɛ. A lajɛ tugun sɔɔni.",
+          "unavailable": "Nin ɲɛ ma se ka don. Fɛn kunnafoniw fara a kan i yɛrɛ bolo.",
+          "failed": "Donni ma ɲɛ. I ka ɲɛfɔli maralen don; a lajɛ tugun walima kunnafoniw sɛbɛn i yɛrɛ bolo."
+        }
+      },
+      "return": "Segin studio brouillon ma",
+      "title": "Kampaɲi ɲɛfɔli",
+      "intro": "I ka fɛn ani i ka marki ɲɛfɔ, o kɔ reklamu cogoya bɛnnenw labɛn.",
+      "saved": "I ka ɲɛfɔli maralen bɛ nin minan kan nin konti kama.",
+      "preview": "Cogoyaw labɛn",
+      "clear": "Ɲɛfɔli jɔsi",
+      "required": "Fɛn tɔgɔ ani a ɲɛfɔli fara a kan walasa ka cogoyaw labɛn.",
+      "variants": "Kampaɲi cogoyaw",
+      "reviewHint": "Model, sɔngɔ ani fɛn referansi lajɛ studio kɔnɔ sani i ka dabɔli kɛ. Cogoya kelen kelen bɛɛ ye dabɔli danfara ye.",
+      "open": "A lajɛ studio kɔnɔ",
+      "fields": {
+        "product": "Fɛn tɔgɔ (wajibi)",
+        "description": "Fɛn kunnafoniw (wajibi)",
+        "brand": "Marki tɔgɔ",
+        "audience": "Mɔgɔ minnu ɲininen don",
+        "benefit": "Nafa kunba",
+        "voice": "Marki kan",
+        "palette": "Marki kulɛrɛw",
+        "headline": "Kunkɔrɔ sɔnnen",
+        "cta": "Weelekan"
+      },
+      "formats": {
+        "square": "Reklamu kare",
+        "portrait": "Reklamu portrait",
+        "story": "Story ja",
+        "video": "Videyo jɔlen"
       }
     },
     "cinema": {
       "close": "A datugu",
       "performance": {
-        "label": "Teliya"
+        "label": "Teliya",
+        "0": "Nisɔndiya",
+        "1": "Nimisa",
+        "2": "Hamina",
+        "3": "Dannaya",
+        "4": "Kabakoya",
+        "5": "Mineno",
+        "6": "Tulonkɛ"
+      },
+      "title": "Sinema ɲɛminɛli",
+      "hint": "I ka ja walima videyo nata ka cogoya ɲɛminɛ. Jaabiw bɛ danfara model la.",
+      "none": "Ɲɛminɛli si tɛ",
+      "reset": "Ɲɛminɛli jɔsi",
+      "camera": {
+        "label": "Kamera ka ɲɛ",
+        "0": "Sinema numerikɛ",
+        "1": "Filimu 35mm",
+        "2": "Filimu 16mm",
+        "3": "Cogoya belebele",
+        "4": "Kamescope kɔrɔ"
+      },
+      "lens": {
+        "label": "Lentiye ka ɲɛ",
+        "0": "Kurulen",
+        "1": "Anamorphique",
+        "2": "Vɛrɛ kɔrɔ nɔgɔlen",
+        "3": "Macro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Focale janya",
+        "0": "18mm bonba",
+        "1": "24mm bonba",
+        "2": "35mm ɲɔgɔnna",
+        "3": "50mm standard",
+        "4": "85mm portrait",
+        "5": "135mm télé"
+      },
+      "aperture": {
+        "label": "Dunya lajɛcogo",
+        "0": "f/1.4 dunya dɔgɔman kosɛbɛ",
+        "1": "f/2.8 dunya dɔgɔman",
+        "2": "f/5.6 cɛmancɛ",
+        "3": "f/11 dunya bɛɛ jɛlen"
+      },
+      "movement": {
+        "label": "Kamera taamacogo",
+        "0": "Trepied jɔlen",
+        "1": "Dolly ka don dɔɔni dɔɔni",
+        "2": "Dolly ka bɔ dɔɔni dɔɔni",
+        "3": "Kɛrɛfɛ tugu",
+        "4": "Fɛn lamini",
+        "5": "Bolo la",
+        "6": "Grue ka yɛlɛn",
+        "7": "Pan dɔɔni dɔɔni"
+      },
+      "lighting": {
+        "label": "Yeelen",
+        "0": "Tile yeelen nɔgɔlen",
+        "1": "Sanu waati",
+        "2": "Chiaroscuro dibi",
+        "3": "Studio yeelen kosɛbɛ",
+        "4": "Néon yeelenw",
+        "5": "Kɔfɛ yeelen siluwɛti",
+        "6": "Sankaba yeelen"
+      },
+      "tempo": {
+        "label": "Ja tali teliya",
+        "0": "Ja tali kelen min tɛ tigɛ",
+        "1": "Kɛwale lafiyalen, teliya tɛ",
+        "2": "Kɛwale barikama, fanga b'a la",
+        "3": "Kɛwale ɲagamilen, kunfin"
+      },
+      "era": {
+        "label": "Waati",
+        "0": "1920w",
+        "1": "1950w",
+        "2": "1960w",
+        "3": "1970w",
+        "4": "1980w",
+        "5": "1990w",
+        "6": "Bi waati",
+        "7": "Siniko surun"
+      },
+      "genre": {
+        "label": "Sifa",
+        "0": "Dokimanteri",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Siyansi fiksiyɔn",
+        "4": "Fantezi",
+        "5": "Kanu nyɛnajɛ",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Kulɛrɛ ladɛ",
+        "0": "Ambre goni",
+        "1": "Bulama nɛnɛ",
+        "2": "Dugukolo kulɛrɛ dɔgɔmanw",
+        "3": "Pastel",
+        "4": "Kulɛrɛ kelen danfara barika",
+        "5": "Kulɛrɛ fɔlɔw barikamaw"
       }
     },
     "libraryEmpty": "I ka dilanni maralenw bɛna bɔ yan.",
@@ -6012,14 +6529,138 @@
       "cannotUseReference": "{{model}} tɛ se ka taga ni tagamasiɲɛ ye. Aw k'a to a ka taga, walima aw ka taga ni modɛli wɛrɛ ye.",
       "needsImageToAnimate": "{{model}} ka kan ka kɛ ni foto ye. An ka kan ka dɔ fara a kan.",
       "needsImageToWork": "{{model}} mako be ja la ka baara kɛ n'o ye. An ka kan ka dɔ fara a kan.",
-      "speechLimit": "O ye {{length}}characters ye. O kɔrɔ ko {{limit}}."
+      "speechLimit": "O ye {{length}}characters ye. O kɔrɔ ko {{limit}}.",
+      "musicTrackLength": "track {{count}}s"
     },
     "gallery": {
       "send": "Sɛbɛ",
       "notifications": {
-        "generation_reply": "{{name}} ye i ka hakilina jaabi"
+        "generation_reply": "{{name}} ye i ka hakilina jaabi",
+        "generation_like": "{{name}} ye i ka dabɔli jaabi",
+        "generation_comment_like": "{{name}} ye i ka commentaire jaabi",
+        "generation_comment": "{{name}} ye commentaire kɛ i ka dabɔli kan"
+      },
+      "browse": "Dabɔliw lajɛ",
+      "create": "A dabɔ",
+      "fullscreen": "A lajɛ ɛkran bɛɛ la",
+      "missing": "Nin dabɔli tɛ sɔrɔ."
+    },
+    "avatarTitle": "Ja kumabaga",
+    "avatarRequirements": "Portrait PNG kare, pixel 512–2048, MB 5 ma tɛmɛ. Mono 24 kHz 16-bit PCM WAV, segɔn 5–30. Segɔn tilayɔrɔ laban bɛ fa ni makun ye.",
+    "avatarPortrait": "Portrait PNG sugandi",
+    "avatarAudio": "Kuma WAV sugandi",
+    "avatarPermission": "Yamaruya bɛ ne bolo ka nin portrait lamaga ani ka nin kumakan kɛ baara la.",
+    "avatarQuote": "segɔn {{seconds}} ni makun ye · token {{amount}}",
+    "avatarPrepare": "A labɛn ani sɔngɔ lajɛ",
+    "batchFlowLimit": "Flow lisi fara. Flow dɔ bɔ min tɛ baara la sani i ka batch wɛrɛ dabɔ.",
+    "batchReviewCampaign": "Kampaɲi batch lajɛ Flow kɔnɔ",
+    "batchReviewFilmImages": "Storyboard ja batch lajɛ",
+    "batchReviewFilmVideos": "Filimu clip batch lajɛ",
+    "batchReviewHint": "A bɛ Flow maralen wɛrɛ dayɛlɛ. Fɛn kelen kelen bɛɛ ani sɔngɔ bɛɛ lajɛ sani i ka sara. Fɛn bannenw ani sarali fɔlɔ bɛ mara ka a segin. Referansiw bɛ copi i ka gundo bibliyotɛki kɔnɔ; maralan ani rezo baara bɛ sara.",
+    "batchInvalid": "Fɛn kelen kelen bɛɛ dafa sani i ka ja walima clip 1–12 batch labɛn.",
+    "batchReferenceLimit": "Nin batch bɛ ja referansi kelen dɔrɔn ta fɛn kelen kelen bɛɛ ye. Referansi tɔw bɔ walima o fɛn labɛn a kelen na.",
+    "batchVideoSettings": "Nin batch kama, clipw ka kan ka segɔn 4–15 kɛ dafalen ye ani 16:9, 9:16 walima 1:1 cogoya.",
+    "batchMissingReference": "Referansi dɔ dɛsɛra, a tɛ ta walima a ka bon ni MB 25 ye. A segin editɛri kɔnɔ sani i ka batch labɛn.",
+    "batchOwnerChanged": "Konti walima brouillon yɛlɛmana. Nin batch dayɛlɛ a ka konti fɔlɔ kɔrɔ.",
+    "batchConflict": "Batch maralen tɛ bɛn a ja fɔlɔ ma.",
+    "audioExportFormat": "Bɔli cogoya",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Clip fɔlɔ kelen fara a kan walasa ka a janya.",
+    "extensionSeconds": "+{{seconds}}s ja kura",
+    "extensionHelp": "A bɛ i ka clip fɔlɔ segin ni segɔn naani kura ye. A bɛ dɔgɔya ka se 720p ma 24 fps la. Kumakan kura bɛ dabɔ janyali kama.",
+    "extensionForward": "Segɔn naani ɲɔgɔn fara i ka clip fɔlɔ kɔfɛ",
+    "extensionBackward": "Segɔn naani ɲɔgɔn fara i ka clip fɔlɔ ɲɛfɛ",
+    "expandDescription": "Ja dakɛnɛ kuraw dabɔ. Angilɛkan prompt tɛ wajibi ye; ja fɔlɔ kelen.",
+    "relightDescription": "Ja kelen yeelen yɛlɛma ka da i ka yeelen ani kɔfɛ ɲɛfɔli kan.",
+    "expandPromptHint": "Ja kelen fara a kan ani a cogoya kura sugandi. Angilɛkan prompt tɛ wajibi ye.",
+    "expandEnglishOnly": "Nin bonyali model bɛ Angilɛkan promptw dɔrɔn ta. Prompt to lankolon ka bonyali kɛ a yɛrɛ ma.",
+    "expandNeedsImage": "Ja dɔ fara a kan walasa ka a bonya.",
+    "learn": {
+      "title": "Dabɔbagaw ka kalanw",
+      "intro": "Kalan surunw, lɔnni lajɛli ani baara kɛta min bɛ se ka labɛn, kelen kelen bɛɛ ye. Taa ɲɛ bɛ mara nin minan kan i ka konti kama.",
+      "back": "Segin Creator ma",
+      "lessons": "Kalanw",
+      "progress": "Lɔnni lajɛli {{completed}} tɛmɛna {{total}} la",
+      "check": "Jaabi lajɛ",
+      "correct": "Lɔnni lajɛli tɛmɛna",
+      "retry": "A lajɛ tugun. Kalan min bɛ sanfɛ, o lajɛ tugun.",
+      "exerciseTitle": "Baara kɛta",
+      "exerciseHint": "Misali dɔ dayɛlɛ i yɛrɛ ka studio baarakɛyɔrɔ la. Brouillon dayɛlɛli ye fu ye; dabɔli bɛ i ka lajɛli ani a yɛrɛ ka sɔngɔ ɲini. Misali labɛn sani i ka dabɔli kɛ.",
+      "openExercise": "Baara brouillon dayɛlɛ",
+      "closeExercise": "Baara datugu",
+      "brief": {
+        "title": "Ja ɲɛfɔli jɛlen sɛbɛn",
+        "body1": "Fɛn jɛlen dɔ ɲɛfɔ, a bɛ min kɛ ani a yɔrɔ. Ja cogoya walima kamera taamacogo fara a kan ni o bɛ ko dɛmɛ. Hakilina wɛrɛw mara brouillon wɛrɛ kama.",
+        "body2": "Yeelen, lentiye ani cogoya ɲɛfɔliw bɛ model ɲɛminɛ. U tɛ kamera kɛcogo walima ja tigitigi garanti. Yɔrɔ kelen yɛlɛma waati kelen walasa i ka se ka yɛlɛmaliw suma ɲɔgɔn na.",
+        "body3": "Sani i ka dabɔli kɛ, model sugandilen, fɛn farataw, bonya ani sɔngɔ lajɛ. Brouillon fɔlɔ mara walasa i ka se ka segin a ma.",
+        "question": "Ɲɛfɔli jumɛn ka nɔgɔn ka yɛlɛma?",
+        "answer0": "Fɛn jɛlen, a ka kɛwale ani a yɔrɔ",
+        "answer1": "Model tɔgɔ dɔrɔn",
+        "answer2": "Cogoya minnu tɛ bɛn, olu lisi",
+        "exercise": "Tasa daga dɔ bɔɔn jiri tabali kan fenɛtiri kɛrɛ fɛ. Sɔgɔma yeelen nɔgɔlen, ja cogoya cɛmancɛ, kɔfɛ gansan. Tasa daga to a ka kɛ fɛn jɛlen ye."
+      },
+      "continuity": {
+        "title": "Ja tali labɛn ani tugutugu lajɛ",
+        "body1": "Film panel kɛ baara la editɛri kɔnɔ ka ɲɛfɔli ani ja talilen labɛnnenw mara. Ja walima clip kelen kelen bɛɛ labɛn a kelen na, a sɔngɔ lajɛ, ka jaabi sɔnnen sugandi.",
+        "body2": "I ka model sugandilen bɛ referansi minnu ta, olu dɔrɔn fara a kan. Referansi segin bɛ se ka cogoya ɲɛminɛ; a tɛ mɔgɔya kalan walima bɛnni garanti. Mɔgɔw ani kanw bɛ se ka yɛlɛma dabɔliw cɛ.",
+        "body3": "Ja tali ɲumanw mara ka u ladɛ timeline kɔnɔ. Lamagali, ɲɛdaw, kumaw ani tɛmɛniw lajɛ sani i ka a bɔ.",
+        "question": "Mun bɛ tugutugu dɛmɛ ja taliw cɛ?",
+        "answer0": "Prompt caman minnu tɛ bɛn ɲɔgɔn ma",
+        "answer1": "Referansi sɔnnenw ani ja tali kunnafoni lajɛlenw",
+        "answer2": "Ka miiri ko mɔgɔ ka mɔgɔya garantilen don",
+        "exercise": "Ja tali bonba taamaden kelen dɔ la min bɛ se kɔgɔji da la min makunnen don tile bɔ waati. Kamera bɛ taa ɲɛfɛ dɔɔni dɔɔni, lafiya bɛ yen. Ja tali kelen min tɛ tigɛ."
+      },
+      "campaign": {
+        "title": "Fɛn kunnafoni sɔnnenw kɛ baara la",
+        "body1": "A daminɛ ni fɛn kunnafoni ye i bɛ se ka minnu lajɛ. Kunnafoni donnenw lajɛ sani i ka u kɛ baara la. Kunkɔrɔ ani weelekan sɛbɛn jɛlen ye; kana sɔngɔw, hakilinaw walima baara ko nkalonw dabɔ.",
+        "body2": "Kampaɲi variante maralenw kɛ baara la walasa ka kunnafoni farataw ani hook, script, kan ani cogoya kelen kelenw mara ɲɔgɔn fɛ. Fɛn lajɛlen kelen labɛn waati kelen ani a sɔngɔ lajɛ studio kɔnɔ.",
+        "body3": "Sɛbɛn yelenw, fɛn ka cogoya ani kuma fɔlenw lajɛ jaabi kɔnɔ. Prompt tɛ fɛn tiɲɛya walima marketing ɲɛtaa taamasiyɛn ye.",
+        "question": "Fɛn ko dɔ ka kan ka don a la tuma jumɛn?",
+        "answer0": "Tuma o tuma a bɛ i n'a fɔ tiɲɛ",
+        "answer1": "Ni i ye dolo duuru hakilina nkalon dɔ dabɔ",
+        "answer2": "Ni a bɔra fɛn kunnafoni sɔnnenw na",
+        "exercise": "Fɛn reklamu portrait dɔ dabɔ te furaba la min bɛ feere bwata la min bɛ se ka segin baara la. Kunkɔrɔ sɔnnen: Waati ta te kama. CTA sɔnnen: Kolɛksiyɔn lajɛ. Nin kunnafoniw dɔrɔn kɛ baara la; kana sɔngɔ dɔgɔyali, hakilinaw walima kɛnɛya ko dabɔ."
       }
-    }
+    },
+    "campaignPlanTitle": "Kampaɲi variantew ani episodw",
+    "campaignPlanIntro": "Variante walima episod 12 ma tɛmɛ mara. Kelen kelen bɛɛ bɛ studio dayɛlɛ a yɛrɛ ka lajɛli ani sɔngɔ kama. Kunnafoni farataw bɛ tugutugu ɲɛminɛ; fɛn ka cogoya, mɔgɔw ani kanw bɛ se ka yɛlɛma dabɔliw cɛ.",
+    "campaignTitle": "Kampaɲi walima seri tɔgɔ",
+    "campaignContinuity": "Mɔgɔ, kan ani cogoya kunnafoni farataw",
+    "campaignVariantTitle": "Variante walima episod tɔgɔ",
+    "campaignHook": "Daminɛ hook",
+    "campaignLanguage": "Bɔli kan",
+    "campaignScript": "Script sɔnnen walima yɔrɔw tugutugu",
+    "campaignAdd": "Variante walima episod fara a kan",
+    "campaignClear": "Labɛn jɔsi",
+    "campaignFormat": "Bɔli cogoya",
+    "audioInvalidResponse": "Kumakan baarakɛyɔrɔ ye jaabi jugu segin.",
+    "audioResultTooLarge": "Kumakan jaabi lankolon don walima a ka bon ni MB 128 ye.",
+    "batchPaymentHelp": "Ja ci kelen kelen bɛɛ bɛ sara a kelen na. Ni batch jɔra, a ka sarali tokenw minnu ma kɛ baara la, olu bɛ kɛ baara la a yɛrɛ ma dabɔli nata dɔ kama.",
+    "invalidSeed": "Seed ka kan ka kɛ jateden dafalen ye ka bɔ 0 ka se 2147483647 ma.",
+    "libraryFavorites": "Diyanyekow",
+    "libraryFavoriteAdd": "A fara diyanyekow kan",
+    "libraryFavoriteRemove": "A bɔ diyanyekow la",
+    "consistentDetail": "A bɛ se ka segin, kumacogo nɔgɔlen",
+    "audioTaskDialoguePlaceholder": "Alice: An ka taa.\nBob: [a bɛ yɛlɛ] I ka fɔlɔ.",
+    "clearLibraryAria_other": "Dabɔli bannen {{count}} bɛɛ bɔ bibliyotɛki la",
+    "clearLibraryConfirm_one": "Dabɔli bannen {{count}} bɔ i ka bibliyotɛki la? Fɛn o fɛn ma ci editɛri ma walima ma jigin, o bɛ tunu.",
+    "clearLibraryConfirm_other": "Dabɔli bannen {{count}} bɔ i ka bibliyotɛki la? Fɛn o fɛn ma ci editɛri ma walima ma jigin, o bɛ tunu.",
+    "generationsRunning_other": "Dabɔli {{count}} bɛ ka kɛ.",
+    "generationsFinished_one": "Dabɔli bɛɛ banna. Jaabi {{count}} labɛnnen don.",
+    "generationsFinished_other": "Dabɔli bɛɛ banna. Jaabi {{count}} labɛnnen don.",
+    "nothingGeneratedHint": "Preset dɔ sugandi, fɛn dɔ sɛbɛn, ka Dabɔ digi. Jaabiw bɛ lajɛ yan ani u bɛ to timeline kɛrɛ fɛ.",
+    "typeDescriptionFirst": "Ɲɛfɔli dɔ sɛbɛn sɛbɛnnikɛyɔrɔ la fɔlɔ — si, kumacogo, teliya, cogoya ani hakili.",
+    "saving": "A bɛ ka mara",
+    "presetProductScanHint": "Fɛn yɛrɛ dɔ copi tigitigi",
+    "presetSfxUiHint": "UI mankan dɔgɔman jɛlen",
+    "presetMusicCinematicHint": "A bɛ daminɛ dɔɔni, a bɛ ban ka bon",
+    "presetMusicUpbeatHint": "Yeelen, barika, jago",
+    "nothingMatches": "Foyi tɛ bɛn “{{query}}” ma.",
+    "toolCreativeChatDesc": "Hakilinaw, sɛbɛnw, ɲɛfɔliw ani bɔli labɛnw kan baro kɛ.",
+    "toolVideoEditorDesc": "Timeline labɛnni, layerw, sɛbɛn, kumakan ani navigatɛri bɔli.",
+    "toolFlowDesc": "Sɛbɛn, referansiw, ja ani videyo modelw siri ɲɔgɔn na kanvas kan, a kɛ sarali kelen na, a jɛnsɛn ni siri ye.",
+    "priceOwnKey": "I ka kile"
   },
   "pricing": {
     "plansForEveryWorkflow": "Ka baara kɛ ni baara bɛɛ ye",
@@ -6183,7 +6824,11 @@
     "noneYet": "O tɛ se ka kɛ halibi.",
     "createTheFirst": "O ye koo fɔlɔ ye",
     "docsSeoDescription": "Riftn ka dɛmɛdɛmɛbaga ka lɔnniya ani a ka gafew kalancogo.",
-    "raw": "O ye n' ka miiriya ye."
+    "raw": "O ye n' ka miiriya ye.",
+    "brandAssets": "Marki fɛnw ({{count}}/5)",
+    "descriptionPlaceholder": "Nin skill ka kan ka kɛ baara la tuma jumɛn?",
+    "docsSeoTitle": "AI Skill ladilikanw | Riftn",
+    "docsLoadFailed": "# Fili\nSkill sɛbɛnw ma se ka don."
   },
   "nftMarket": {
     "actAll": "Bɛɛ",
@@ -6289,7 +6934,40 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT naɗa da kudaden shirye a cikin ɗayan ɗayan.",
     "spotlightOfferNote": "O la, a tun be se ka kɛ ko a tun ye min fɔ, a tun b'o le fɔra.",
-    "signInToTradeCta": "Sira cɛ ka jɔ kɔnɔ"
+    "signInToTradeCta": "Sira cɛ ka jɔ kɔnɔ",
+    "actCollectionOffer": "Kolɛksiyɔn sɔngɔ ɲininkali",
+    "actListed": "A bilara feereli la",
+    "actOffer": "Sɔngɔ ɲininkali",
+    "actSale": "Feereli",
+    "buyAll": "A bɛɛ san",
+    "buySeveral": "Dɔw san",
+    "cartBought": "{{n}} sanna. U bɛ i ka wari bɔrɔ la sisan.",
+    "cartCount": "{{n}} bɛ panye kɔnɔ",
+    "cartFull": "20 ma tɛmɛ waati kelen",
+    "cartOneCoin": "Chain kelen ani wari kelen panye kelen kɔnɔ. A jɔsi walasa ka yɛlɛma.",
+    "cartOwn": "O ye i ta ye",
+    "cartPick": "A digi ka a fara panye kan",
+    "forSaleHere": "A bɛ feere yan",
+    "noActivity": "Foyi tɛ yan fɔlɔ",
+    "tapToOffer": "Kelen digi ka sɔngɔ di",
+    "noNftsBody": "Post dɔ mint NFT ye, walima chain yɛlɛma ka fɛn wɛrɛ minnu bɛ i bolo, olu ye.",
+    "noOrders": "Feereli walima sɔngɔ ɲininkali dayɛlɛlen si tɛ yen",
+    "alertSaved": "Lasɔmini dayɛlɛra. An bɛna a fɔ i ye ni kelen bilara feereli la.",
+    "bought": "A sanna. A bɛ i ka wari bɔrɔ la sisan.",
+    "sold": "A feerera. Sarali bɛ i ka wari bɔrɔ la.",
+    "listed": "A bilara feereli la. Mɔgɔ bɛɛ bɛ se k'a san sisan.",
+    "offered": "Sɔngɔ cira. Tigi bɛ se k'a sɔn waati o waati.",
+    "volShort": "Vol",
+    "salesCount": "{{n}} feerera",
+    "bestOffer": "Sɔngɔ ɲuman",
+    "fromOpenSea": "Kolɛksiyɔn kunbabaw OpenSea kan",
+    "buyHere": "U san yan",
+    "openSeaNote": "A bilara feereli la OpenSea kan. I bɛ feerebaga sara a yɛrɛ ma Seaport kan; Riftn tɛ sara si fara a kan.",
+    "viewOnOpenSea": "A lajɛ OpenSea kan",
+    "dropsTo": "Sɔngɔ bɛ jigin ka se {{price}} ma {{date}} tuma",
+    "notListed": "A tɛ feere fɔlɔ. Sɔngɔ di, tigi bɛ se k'a sɔn.",
+    "priceBuyerPays": "Sanbaga bɛ sɔngɔ min sara ({{symbol}})",
+    "buyFor": "A san {{price}}"
   },
   "usernames": {
     "seoTitle": "Fɛɛn min be se ka kɛ a ka baara la",
@@ -6409,7 +7087,12 @@
     "addedToYourUsernames": "A bɛ fara i tɔgɔw kan",
     "boughtNameGoesToVault": "I bɛ to @{{current}} ye. @{{handle}} bɛ don i tɔgɔw la, i b'a sɔrɔ ka yɛlɛma ka taa a ma waati o waati.",
     "youAreNow": "I ye @{{handle}} ye sisan",
-    "boughtToVaultToast": "@{{handle}} bɛ i tɔgɔw la sisan"
+    "boughtToVaultToast": "@{{handle}} bɛ i tɔgɔw la sisan",
+    "exactAvailable": "<handle>@{{handle}}</handle> ma ta fɔlɔ. A ta fu <settings>Labɛnw → Profil</settings> kɔnɔ — foyi tɛ san.",
+    "exactTaken": "<handle>@{{handle}}</handle> ye mɔgɔ dɔ ta ye min ma a bila feereli la. I bɛ se ka <profile>a ɲininka</profile>.",
+    "exactReserved": "<handle>@{{handle}}</handle> ye Riftn sira ye, o la mɔgɔ si tɛ se k'a ta walima k'a feere.",
+    "setUsernameFirst": "Username dɔ bila i ka profil kan sani i ka se ka kelen feere. <settings>Labɛnw → Profil</settings>",
+    "staleListingWarning": "Nin feereli ye <handle>@{{listed}}</handle> ta ye, nka i ye @{{current}} ye sisan. A tɛna feere fo i k'a bila tugun i ka handle sisan kɔrɔ — sanfɛ kurayali bɛ o kɛ."
   },
   "accounts": {
     "seoTitle": "Fanga min be mɔgɔ la, o ye ka mɔgɔ lafili.",
@@ -6472,7 +7155,10 @@
     "signInToBuy": "Don walisa ka san",
     "buyHandle": "@{{handle}} san",
     "transferGuarantee": "I bena o bɛɛ sɔrɔ — ka baara kɛ, ka baara kɛ, ka tugu i kɔ, ka ladiliw di i ka tarikiko la ani ka batɛmu ta. O kɔ, a y'a fɔ ko: \"Ne ye n ka wari bɛɛ di ne ma. O la, a ka ɲi ka to ka wari di a ma.",
-    "shareTitle": "@{{handle}} bɛ feere Riftn kan"
+    "shareTitle": "@{{handle}} bɛ feere Riftn kan",
+    "seoDescription": "Riftn jatebla sabatilenw san ani u feere ni tokens ye. Jateblaw lajɛ u tugubagaw, u ka bilalenw ani u si kɔ; handle, sɛbɛnw, tugubagaw ani badiji josariyaw bɛɛ bɛ yɛlɛma, wari bɛ taa feerebaga yɛrɛ ma.",
+    "setUsernameFirst": "Baarakɛla tɔgɔ sigi i ka porofili kan sani i ka se ka i ka jatebla feere. <settings>Paramɛtiriw → Porofili</settings>",
+    "saleFinalWarning": "Feereli tɛ segin kɔ, a bɛ fɛn bɛɛ ta — handle, sɛbɛnw, tugubagaw, bonya tariku ani badiji josariyaw. I ka wari bɔrɔ ani a kɔnɔfɛnw (tokens, badiji stakelenw, fɛn lajɛlen dilanninw) bɛ to i ta ye; o kɔfɛ nin wari bɔrɔ bɛna don jatebla kura lankolon dɔ la. Wari bɛ na i yɛrɛ ma — Riftn tɛ foyi ta a la."
   },
   "stories": {
     "create": "Da",
@@ -6636,7 +7322,18 @@
       "votes_other": "{{count}} jula",
       "howToVote_one": "Tɔ {{command}} ni nɔma kɔ chat la jula fɛ · {{count}} jula",
       "howToVote_other": "Tɔ {{command}} ni nɔma kɔ chat la jula fɛ · {{count}} jula"
-    }
+    },
+    "eyebrow": {
+      "follow": "Tugubaga kura",
+      "subscribe": "Abonebaga kura",
+      "subscribedTo": "A abonera · {{plan}}",
+      "gifted_one": "Abonman kelen dira",
+      "gifted_other": "Abonman {{count}} dira",
+      "share": "Stream jɛnsɛnna",
+      "join": "A donna sisan"
+    },
+    "giftedSubs_one": "{{name}} ye abonman kelen di!",
+    "giftedSubs_other": "{{name}} ye abonman {{count}} di!"
   },
   "liveChatModeration": {
     "timeout1m": "Dɔɔni fɔlɔ",
@@ -6657,14 +7354,40 @@
       "modes": {
         "none": "A datugulen don",
         "blur": "Dibiya",
-        "color": "A ka ɲi ka kɛ cogo min na"
-      }
+        "color": "A ka ɲi ka kɛ cogo min na",
+        "image": "Ja"
+      },
+      "failed": "Kɔfɛ bɔli ma se ka daminɛ nin minan kan.",
+      "hint": "A bɛ kɛ i ka minan kan. Siɲɛ fɔlɔ bɛ segɔn dama dɔ ta ka don."
     },
     "remove": "A bɔ",
     "scenes": {
       "countdown": "Ka jatiminɛ kɛ",
       "names": {
-        "starting": "A bɛna daminɛ sɔɔni"
+        "starting": "A bɛna daminɛ sɔɔni",
+        "chatting": "Baro dɔrɔn",
+        "gameplay": "Tulonkɛ",
+        "brb": "Ne bɛ segin sisan",
+        "ending": "Stream bɛ ka ban"
+      },
+      "title": "Sɛnw",
+      "edit": "{{name}} labɛn",
+      "subtitle": "Sira filanan (a tɛ wajibi ye)",
+      "picture": "Ja",
+      "noCountdown": "Jate dɔgɔya si tɛ",
+      "minutes": "min {{count}}",
+      "muteMic": "Ne ka mikro makun ni nin dayɛlɛlen don",
+      "hints": {
+        "starting": "Kariti ni jate dɔgɔya ye",
+        "chatting": "Kamera ɛkran bɛɛ la",
+        "gameplay": "Ɛkran ni i ka kamera ye",
+        "brb": "Kariti, mikro makunnen",
+        "ending": "Barika kariti"
+      },
+      "subtitles": {
+        "starting": "Stream bɛ daminɛ",
+        "brb": "Ne bɛ segin sɔɔni",
+        "ending": "I ni ce lajɛli la"
       }
     },
     "sources": {
@@ -6674,15 +7397,37 @@
       "show": "Ka to ka to ka filɛli kɛ",
       "loop": "O ye n' ka miiriya ye.",
       "positions": {
-        "center": "Cɛmancɛ"
+        "center": "Cɛmancɛ",
+        "top-left": "Sanfɛ numanbolo fɛ",
+        "top-right": "Sanfɛ kininbolo fɛ",
+        "bottom-left": "Duguma numanbolo fɛ",
+        "bottom-right": "Duguma kininbolo fɛ"
       },
       "sizes": {
-        "medium": "Cɛmancɛ"
+        "medium": "Cɛmancɛ",
+        "small": "Dɔgɔman",
+        "large": "Belebele"
       },
       "shapes": {
         "circle": "Kori",
-        "rect": "Kare"
-      }
+        "rect": "Kare",
+        "rounded": "Kurulen"
+      },
+      "title": "Sɔrɔyɔrɔw",
+      "addImage": "Ja walima logo",
+      "addCamera": "Kamera filanan",
+      "addClip": "Videyo clip",
+      "addReaction": "Videyo dɔ jaabi",
+      "reactPlaceholder": "Riftn videyo siri dɔ bila yan",
+      "reactInvalid": "Riftn videyo siri dɔ bila yan.",
+      "reactNotLive": "Live daminɛ fɔlɔ, o kɔ videyo fara a kan.",
+      "reactNoBubble": "I ka kamera ma se ka dayɛlɛ siɲɛ fila yan. Videyo bonya yɛlɛma walasa i ɲɛda ka to ɛkran kan.",
+      "failed": "O sɔrɔyɔrɔ ma se ka fara a kan.",
+      "empty": "Logo, kamera filanan walima videyo clip fara i ka stream kan.",
+      "hint": "Sɔrɔyɔrɔw bɛ sɛbɛn i ka ja kan lajɛbaga bɛɛ ani platform bɛɛ ye.",
+      "clip": "Clip",
+      "restart": "A daminɛ tugun",
+      "play": "A fɔ walima a jɔ"
     },
     "audio": {
       "mute": "A dagbɛ",
@@ -6691,7 +7436,27 @@
         "off": "A datugulen don",
         "low": "Yeelen",
         "high": "A barika ka bon"
-      }
+      },
+      "title": "Kumakan ɲagamina",
+      "unavailable": "Nin navigatɛri tɛ se ka kumakan ɲagami, o la i ka mikro bɛ taa a cogo la.",
+      "channels": {
+        "mic": "Mikro",
+        "game": "Tulon / tab",
+        "clip": "Videyo clip"
+      },
+      "absent": {
+        "mic": "Mikro si tɛ",
+        "game": "Ɛkran jɛnsɛn ni kumakan ye walima capture kariti kɛ baara la",
+        "clip": "Videyo clip fara Sɔrɔyɔrɔw kɔnɔ"
+      },
+      "gate": "Mankan da",
+      "gateHint": "A bɛ i ka mikro makun kumaw cɛ walasa klaviye mankan ani fɔɲɔnan kana don stream la."
+    },
+    "imageTooLarge": "O ja ka bon kojugu. Dɔgɔman dɔ lajɛ.",
+    "widgets": {
+      "title": "Widgetw yira ne ka videyo kɔnɔ",
+      "hint": "Lasɔminiw, laɲini barrw ani baro bɛ sɛbɛn i ka stream kɔnɔ, o la lajɛbagaw Twitch, YouTube ani platform wɛrɛw bɛɛ kan b'u ye fana.",
+      "failed": "I ka widgetw yirayɔrɔ ma se ka yɛlɛma. A lajɛ tugun."
     }
   },
   "liveStudio": {
@@ -6705,12 +7470,32 @@
         "off": "A datugulen don",
         "idle": "A labɛnna",
         "live": "Kɛnɛ",
-        "error": "Fili"
-      }
+        "error": "Fili",
+        "connecting": "A bɛ ka siri"
+      },
+      "title": "Multistream taayɔrɔw",
+      "intro": "Live kɛ Riftn kan siɲɛ kelen, an bɛ i ka stream ci platform bɛɛ ma minnu dayɛlɛlen bɛ yan, fu. A bɛ daminɛ segɔn dama dɔ kɔnɔ i ka live daminɛ kɔfɛ.",
+      "add": "Taayɔrɔ fara a kan",
+      "empty": "Taayɔrɔ si tɛ yen fɔlɔ. Twitch, YouTube, Kick walima RTMP server o server fara a kan.",
+      "server": "Server URL",
+      "findKey": "I ka {{name}} server ani kile ɲini",
+      "customHint": "I ka platform bɛ RTMP server ani kile min di i ma, o bila yan.",
+      "keyNote": "I ka kile maralen bɛ gundo la an ka serverw kan ani a tɛna yira tugun abada.",
+      "added": "{{name}} farala a kan",
+      "saveFailed": "Taayɔrɔ ma se ka mara",
+      "toggle": "Stream ci nin taayɔrɔ ma"
     },
     "vertical": {
       "centre": "Cɛmancɛ",
-      "live": "JƆNA"
+      "live": "JƆNA",
+      "title": "Lajɛli jɔlen",
+      "intro": "Telefɔniw bɛ i ka stream lajɛ feed jɔlen kɔnɔ. Kɛsu sama ka i ka ja yɔrɔ min bɛ yira u la, o sugandi.",
+      "enabled": "Ne ka stream yira feed jɔlen kɔnɔ",
+      "zoom": "Zoom",
+      "frame": "I ka ja lamanen",
+      "box": "Telefɔniw bɛ min ye",
+      "hint": "Kɛsu sama, walima tamasiyɛn butɔnw kɛ baara la. A mara walasa ka a kɛ i ka live stream kan.",
+      "watch": "{{name}} lajɛ live la"
     },
     "subathon": {
       "title": "O kɔ, a ye mɔgɔ dɔ weele ka",
@@ -6872,7 +7657,8 @@
       "subathon_timer": "O ye wagati ta ye",
       "points_board": "Mɔgɔ minw be kantigiya kɛ",
       "streamer_level": "Fɛɛn minw be se ka kɛ",
-      "tip_jar": "A ye min fɔ, o ye tiɲɛ ye"
+      "tip_jar": "A ye min fɔ, o ye tiɲɛ ye",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "O la, a tun be se ka kɛ ko a tun ye mɔgɔ min ye, a tun b'o tigi le ye.",
@@ -6896,7 +7682,8 @@
       "subathon_timer": "O la, mɔgɔ minw be sɔn ka fɛɛn dɔ di, olu be sɔn ka fɛɛn dɔ di.",
       "points_board": "I ka mɔgɔ minw ye mɔgɔbabaw ye, i ka olu filɛ ani k'u ka nilifɛnw di u ma",
       "streamer_level": "I ka kunnafoniw hakɛ ani i ka dɔgɔkun o dɔgɔkun kunnafoniw, i ka kunnafoniw kɔnɔ",
-      "tip_jar": "O kɔ, a ye fɛɛn dɔ di a ma min tun ka kan ka kɛ a yɛrɛ ta ye."
+      "tip_jar": "O kɔ, a ye fɛɛn dɔ di a ma min tun ka kan ka kɛ a yɛrɛ ta ye.",
+      "hype_train": "A bɛ hype train yira ni a bɛ taa: bonya walima abonman saba miniti duuru kɔnɔ b'a daminɛ."
     },
     "fields": {
       "style": "O ye ɲɛyirali ɲuman ye",
@@ -7077,7 +7864,8 @@
         "word-timeout_one": "{{target}} a été mis en pause {{count}} seconde pour \"{{word}}\"",
         "word-timeout_other": "{{target}} a été mis en pause {{count}} secondes pour \"{{word}}\""
       }
-    }
+    },
+    "seoTitle": "Live Studio: Stream lasɔminiw, laɲiniw ani overlayw | Riftn"
   },
   "live": {
     "chatJoined": "donna",
@@ -7282,7 +8070,10 @@
     "endStreamConfirmBody": "Broadcast stop ye everyone la watch ye walima resume ye kan.",
     "keepStreaming": "Streaming keep ye",
     "encoderPermanentHint": "O la, a tun be se ka kɛ ko a tun be se ka kɛ cogo min na. I ka coder sigi siɲɛ kelen — siɲɛ wɛrɛ, i ka Start kan ani Riftn ka baara kɛ i ye.",
-    "notEnoughTokensForBounty": "Token tɛ kɛ. Token {{need}} cɛ kɛ nka {{have}} nka."
+    "notEnoughTokensForBounty": "Token tɛ kɛ. Token {{need}} cɛ kɛ nka {{have}} nka.",
+    "screenInAppHint": "Riftn app kɔnɔ",
+    "screenInAppNote": "Telefɔni navigatɛriw tɛ sɔn siti si ka i ka ɛkran tila. Bɔ ɲɛnama Riftn app kɔnɔ o nɔ na, o kɔ ka digi Ɛkran tila kan.",
+    "screenInAppCta": "Riftn app sɔrɔ"
   },
   "events": {
     "seoTitle": "Ɲɛnamayaw: Ɲɛnamayaw ni sigida koo minw be kɛra Riftn kan",
@@ -7871,7 +8662,46 @@
     "foldersInFolder_other": "{{count}} fɔlida-w la",
     "foldersNoItems": "Mun tɛ a la cɛ",
     "foldersNoItemsHint": "Jɛnɛ fɔ gara ani \"Fɔlida la sɛbɛn\" fɔ suula a la.",
-    "skippedUpstreamFailed": "A tun be se ka kɛ ko a tun ye min kɛ, a tun ma se k'o kɛ. I ka wari be to i ka wari la."
+    "skippedUpstreamFailed": "A tun be se ka kɛ ko a tun ye min kɛ, a tun ma se k'o kɛ. I ka wari be to i ka wari la.",
+    "signInForAudioLibrary": "Don walasa ka i ka kumakan bibliyotɛki gundolen dayɛlɛ.",
+    "audioLibraryFailed": "I ka kumakan maralenw ma se ka don. A lajɛ tugun.",
+    "retryFreeTask": "Baara fu lajɛ tugun",
+    "previewSavedMedia": "Fɛn maralenw lajɛ",
+    "audioSavePending": "Kumakan labɛnnen don, nka a marali gundo bibliyotɛki kɔnɔ ma ban fɔlɔ. A taa ɲɛ walasa ka a ta.",
+    "confirmInterruptedRetry": "Kumakan walima dɛmɛbaga baara min tigɛra, o lajɛ tugun. A jaabi fɔlɔ ma lɔn ani a lajɛli tugun bɛ se ka baara segin. Sarali min bɛ yen ani baara saralenw ka IDw bɛ kɛ baara la tugun.",
+    "freeResultUnknown": "Baara fu jaabi tigɛra. A tɛna ci tugun a yɛrɛ ma. Baara fu lajɛ tugun sugandi, o kɔ a taa ɲɛ; i ka sarali ani baara tɔw bɛ mara.",
+    "formAuthor": "Flow labɛn",
+    "formAuthorHint": "Flow dɔ dabɔ ni donnifɛn sugu ye. A mara yan, walima a ladɛ web kanvas kan.",
+    "newNativeFlow": "Flow kura",
+    "chooseSavedMedia": "Fɛn maralen sugandi",
+    "formInput": "Donnifɛn: {{handle}}",
+    "reviewRun": "Baara lajɛ",
+    "resumeRun": "Baara maralen taa ɲɛ",
+    "confirmPrice": "A bɛɛ lajɛlen: token {{price}}",
+    "recoveryHint": "Baara ani sarali referansiw maralen bɛ nin minan kan. Baara tigɛlenw taa ɲɛ sani i ka baara wɛrɛ daminɛ.",
+    "newRun": "Baara wɛrɛ daminɛ",
+    "loadMoreMedia": "Fɛn wɛrɛw don",
+    "invalidGraph": "Siriliw lajɛ: donnifɛn kelen kelen bɛɛ mago bɛ sɔrɔyɔrɔ bɛnnen na ani graph tɛ se ka lamini kɛ.",
+    "unsupportedNode": "Nin node tɛ se ka kɛ cogoya natif la fɔlɔ. Web kanvas kɛ baara la nin flow kama.",
+    "missingPrompt": "Sɛbɛn node dɔ siri ni prompt ye.",
+    "invalidSettings": "Model sugandilen tɛ nin labɛnw ta.",
+    "missingCapturedFrame": "Ja dɔ ta web kanvas kan sani i ka nin videyo kɛ ja donnifɛn ye.",
+    "missingSavedMedia": "Fɛn fɔlɔ maralen dɛsɛra walima a tɛ sɔrɔ nin konti ye tugun.",
+    "quoteFailed": "Nin flow sɔngɔ ma se ka lɔn. A lajɛ tugun.",
+    "recoverBeforeEdit": "Baara maralen taa ɲɛ sani i ka a ka graph yɛlɛma walima ka baara wɛrɛ daminɛ.",
+    "runAlreadyComplete": "Nin baara banna. Baara wɛrɛ daminɛ sugandi walasa ka dabɔli kɛ tugun.",
+    "recoveryCorrupt": "Segin kunnafoni maralen ma se ka kalan. Nin flow mara ani dɛmɛbagaw wele sani i ka sara tugun.",
+    "paidUnavailable": "I bɛ se ka floww dabɔ ka u mara yan. Baara saralenw tɛ sɔrɔ nin butiki kɔnɔ.",
+    "planChanged": "Flow yɛlɛmana sɔngɔ kɔfɛ. Baara lajɛ tugun.",
+    "connectOwnerWallet": "Wari bɔrɔ min ye nin flow tigi ye, o siri.",
+    "runFailed": "Node ma se ka ban. A ka baara referansi maralen bɛ mara segin kama.",
+    "recoveryPending": "Render ma ban fɔlɔ. Nin baara taa ɲɛ walasa ka a ta.",
+    "nodeAudioGen": "Kumakan dabɔbaga",
+    "nodeAudioGenDesc": "Kuma, mankan ɲɛnajɛw, sɛbɛnni ani kumakan farali",
+    "nodeAudioInput": "Kumakan maralen",
+    "nodeAudioInputDesc": "Kumakan gundolen kɛ baara la ka bɔ i ka bibliyotɛki la",
+    "audioVoiceId": "Kan ID",
+    "audioSeconds": "Mankan janya segɔnw na"
   },
   "videoPlayer": {
     "volume": "Mankan",
@@ -8017,8 +8847,20 @@
       "failed": "I be se ka o kɛ tugu miniti damanin kɔnɔ.",
       "close": "O kɔ, a ye dɔ fara",
       "doneTitle": "A bɛɛ saniyanin lo",
-      "doneSome": "{{done}}accounts. {{failed}} tun tɛ se ka tugu."
-    }
+      "doneSome": "{{done}}accounts. {{failed}} tun tɛ se ka tugu.",
+      "body": "I bɛ jatebla {{count}} minnu tugu, olu tɛ i tugu.",
+      "confirmTitle": "Jatebla {{count}} tuguli dabila wa?",
+      "confirm": "Ɔwɔ, {{count}} tuguli dabila",
+      "working": "Tuguli bɛ ka dabila {{done}} {{total}} la...",
+      "doneAll": "I ye jatebla {{done}} minnu tun tɛ i tugu, olu tuguli dabila.",
+      "doneToast": "Jatebla {{done}} minnu tɛ i tugu, olu tuguli dabilara"
+    },
+    "followBackConfirmTitle_one": "Mɔgɔ {{count}} fana tugu wa?",
+    "followBackConfirmTitle_other": "Mɔgɔ {{count}} fana tugu wa?",
+    "followBackConfirmBody": "U bɛ i tugu kaban. Gundo jateblaw bɛna tuguli ɲinini sɔrɔ.",
+    "followedBackCount_one": "I ye mɔgɔ {{count}} fana tugu",
+    "followedBackCount_other": "I ye mɔgɔ {{count}} fana tugu",
+    "followBackDoneBody": "I bɛ se ka u bɛɛ ye Tugulenw kɔnɔ."
   },
   "reactionInfo": {
     "title": "O kama, a ka ɲi ka kɛ ni",
@@ -8820,7 +9662,28 @@
       "add": "Fara a kan",
       "scale": "Hakɛ",
       "color": "Kulɛri",
-      "light": "Yeelen"
+      "light": "Yeelen",
+      "create": "3D stage fara a kan",
+      "title": "3D sɛn stage",
+      "hint": "Ja tali labɛn ni bɔɔrɔw ani kɛsuw ye. Kamera, sigiyɔrɔ ani yeelen saba minnu tɛ ɲɔgɔn mago bɛ ja yɛlɛma.",
+      "preview": "Sɛn render lajɛli",
+      "error": "Ja ma se ka labɛn. I ka ja tali referansiw lajɛ ka a lajɛ tugun.",
+      "elevation": "Janya sanfɛ",
+      "distance": "Janya",
+      "fov": "Lajɛli bonya",
+      "object": "Fɛn",
+      "sphere": "Bɔɔrɔ",
+      "box": "Kɛsu",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Fɛn bɔ",
+      "intensity": "Barika",
+      "diffusion": "Jɛnsɛnni",
+      "saving": "Ja bɛ ka labɛn…",
+      "useFrame": "Ja render kɛ ja tali referansi ye",
+      "frameHint": "A bɛ PNG 320 × 180 dabɔ ka a fara nin ja tali ka referansiw kan. Referansi dan ani model sɔngɔ lajɛ sani i ka dabɔli kɛ.",
+      "frameName": "Sɛn stage ja"
     },
     "video": {
       "tFade": "Ɲɔgɔn kɔnɔ tɛmɛ",
@@ -8915,7 +9778,9 @@
       "pptx": "Ka ɲɛyirali dɔ di",
       "pptxHint": "O ɲɛɛ kelen kelen bɛɛ be kɛ ja kelen ye, a be kɛ ni kunnafoniw ye ani a be kɛ ni linkw ye. O la, a ka ɲi ka kɛ ni sɛbɛri ye min be se k'a dɛmɛ ka baara kɛ ni sɛbɛri ye.",
       "section": "Fɛɛn min be sɔrɔ o yɔrɔ la",
-      "transparent": "O kɔ, a ka ɲi ka kɛ ni fɛɛn dɔ ye min be"
+      "transparent": "O kɔ, a ka ɲi ka kɛ ni fɛɛn dɔ ye min be",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "A bɛ ZIP dɔ jigin ni i ka timeline ye FCPXML ani Premiere XML la ani fɛn bɛɛ, walasa i ka se ka labɛnni ban Premiere Pro, Final Cut Pro walima DaVinci Resolve kɔnɔ. Sɛbɛn bɛ kɛ taamasiyɛnw ye; effetw bɛ to Riftn kɔnɔ."
     },
     "inspector": {
       "selectHint": "Layɛri dɔ sugandi kanvasi kan walima klipu dɔ waati sira kan.",
@@ -9009,7 +9874,45 @@
       "failed": "AI ma se k'o kɛ sisan. Segin a kan dɔɔnin kɔfɛ.",
       "changes": "Yɛlɛma minnu kɛra: {{count}}",
       "undo": "Segin kɔ",
-      "openGenerator": "A lajɛ ka dilan"
+      "openGenerator": "A lajɛ ka dilan",
+      "stopped": "A jɔra. Foyi wɛrɛ ma yɛlɛma.",
+      "queued": "{{count}} bɛ makɔnɔni na",
+      "restore": "A segin yan",
+      "restoreHint": "Porozɛ segin a cogo la sani nin cikan ka na. Kɔsegin bɛ a lasegin.",
+      "restored": "Porozɛ seginna a cogo la sani o cikan ka na. Kɔsegin digi walasa ka a kura lasegin.",
+      "rewrite": "Ne ka ɲinini jɛya",
+      "rewriteFailed": "O ma se ka sɛbɛn tugun. I ka sɛbɛn ma yɛlɛma.",
+      "feedback": "Nin dɛmɛna wa?",
+      "good": "Jaabi ɲuman",
+      "bad": "Jaabi jugu",
+      "retryPrefix": "O ma ɲɛ. O nɔ na,",
+      "recipesTitle": "Resɛtiw",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podcast clip",
+          "prompt": "Segɔn 30 waati barikama ɲini, a tigɛ o la, Word Pop sɛbɛnw fara a kan ani a kɛ 9:16 ye."
+        },
+        "talkingHead": {
+          "label": "Kumabaga ɲɛda jɛlen",
+          "prompt": "Lafiɲɛ janw tigɛ, Classic sɛbɛnw fara a kan, ani ɲɛ goni nɔgɔlen di a ma."
+        },
+        "productPromo": {
+          "label": "Fɛn promo",
+          "prompt": "Promo segɔn 15 dabɔ: kunkɔrɔ barikama daminɛ na, Zoom in tɛmɛniw clipw cɛ, Bold sɛbɛnw ani fɔli ɲɛnajɛlen."
+        },
+        "hypeReel": {
+          "label": "Hype reel",
+          "prompt": "Clipw tigɛ fɔli ka bɛn kan, Fly up tɛmɛniw ani Technicolor ɲɛ kɛ baara la."
+        },
+        "retroEdit": {
+          "label": "Retro labɛnni",
+          "prompt": "VHS ɲɛ di clip bɛɛ ma, serif kunkɔrɔ belebele fara a kan, ani Fade tɛmɛniw kɛ baara la."
+        },
+        "tutorial": {
+          "label": "Kalan",
+          "prompt": "Kunkɔrɔ fara taabolo kelen kelen bɛɛ kan, Boxed sɛbɛnw, ani waati kunba lasuma ka se 0.5x ma."
+        }
+      }
     },
     "shape": {
       "rect": "Kɛrɛnaani janyalen",
@@ -9184,7 +10087,9 @@
       "tint": "Kulɛri {{value}}",
       "vignette": "Dafɛw dibi {{value}}%",
       "auto": "A ɲɛ ka ɲɛ a yɛrɛ ma",
-      "autoFailed": "Ja in ma se ka sɛgɛsɛgɛ."
+      "autoFailed": "Ja in ma se ka sɛgɛsɛgɛ.",
+      "halation": "Halation {{value}}%",
+      "scanlines": "Scanlinew {{value}}%"
     },
     "pages": {
       "add": "Ɲɛ fara a kan",
@@ -9259,7 +10164,15 @@
       "textSaved": "Kɔnɔko yɛlɛmanw sigira.",
       "action": "Sɛbɛnni yɛrɛma",
       "styles": {
-        "bold": "Sɛbɛn bonyalen"
+        "bold": "Sɛbɛn bonyalen",
+        "classic": "Classic",
+        "boxed": "Kɛsu kɔnɔ",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Ɲɔgɔn kan",
+        "serif": "Serif",
+        "bubble": "Bubble"
       },
       "working": "Lamɛnni bɛ taa… {{percent}}%",
       "downloading": "Kuma modɛli bɛ labɛn… {{percent}}%",
@@ -9271,7 +10184,8 @@
       "translateCount": "Kɔnɔko {{count}} bɔli",
       "translationDone": "Kɔnɔko {{count}} bɔli kɛra",
       "translationFailed": "O kɔrɔ ko, a tun be se ka kɛ ko a tun ye mɔgɔ dɔ ye min tun ye mɔgɔ dɔ ye.",
-      "lockedTranslation": "I ka kan ka sɛbɛri kɛ ka sɔrɔ ka sɛbɛri kɛ."
+      "lockedTranslation": "I ka kan ka sɛbɛri kɛ ka sɔrɔ ka sɛbɛri kɛ.",
+      "style": "Sɛbɛn cogoya"
     },
     "multi": {
       "selected": "Layɛri {{count}} sugandira",
@@ -9308,7 +10222,10 @@
       "saveNewPreset": "Ne ye mɔgɔ kura ye",
       "saveStyles": "O cogo la, a tun be se ka kɛ ko a tun be",
       "stylesSaved": "O cogo kelen na, a ka ɲi ka kɛ ni miiriya ɲuman ye.",
-      "usePreset": "O cogo la, a ka ɲi ka kɛ"
+      "usePreset": "O cogo la, a ka ɲi ka kɛ",
+      "dehubApplied": "Riftn marki kɛra layer {{count}} kan.",
+      "dehubApply": "Riftn marki kɛ baara la",
+      "dehubHint": "Riftn kulɛrɛ ofisiyɛliw, Exo ani Inter sɛbɛnsugu, ani Riftn logo, digi kelen na."
     },
     "draw": {
       "heading": "Ja ci",
@@ -10642,7 +11559,23 @@
       "zoomOut": "O kɔ, a ye sira di a ma."
     },
     "clipFix": {
-      "listening": "A y'a fɔ ko:"
+      "listening": "A y'a fɔ ko:",
+      "detach": "Kumakan faran",
+      "detached": "Kumakan taara a yɛrɛ ka clip la",
+      "detachFailed": "Nin clip ka kumakan ma se ka faran",
+      "removeBars": "Barra finw bɔ",
+      "scanning": "Jaw bɛ ka lajɛ…",
+      "noBars": "Barra fin si ma sɔrɔ",
+      "barsRemoved": "Barra finw tigɛra",
+      "barsFailed": "Nin videyo ma se ka lajɛ barra finw kama",
+      "reframe": "Reframe a yɛrɛ ma",
+      "reframeHint": "Videyo bɛnnen don nin ɲɛ cogoya ma kaban",
+      "reframed": "A reframera ka kɛwale tugu",
+      "reframeFailed": "Nin videyo ma se ka reframe",
+      "retakes": "Segin taliw bɔ",
+      "noRetakes": "Segin tali si ma sɔrɔ",
+      "retakesRemoved": "Segin tali {{count}} bɔra, laban tali marara",
+      "retakesFailed": "Segin taliw ma se ka bɔ nin clip la"
     },
     "shortcuts": {
       "action": {
@@ -10650,19 +11583,109 @@
         "play": "A be to ka to ka to",
         "pause": "N' ye n' ka baara dabila",
         "frameBack": "Kɔnɔ kɔrɔ",
-        "frameForward": "Kɔnɔ kura"
-      }
+        "frameForward": "Kɔnɔ kura",
+        "back": "Segɔn 1 kɔfɛ",
+        "rippleDelete": "Clip jɔsi",
+        "liftDelete": "Clip jɔsi",
+        "start": "Taa daminɛ na",
+        "end": "Taa laban na"
+      },
+      "preset": "Klaviye ladɛcogo",
+      "presetHint": "Editɛri min lɔnna i fɛ, o ka timeline butɔnw kɛ baara la. Riftn yɛrɛ ka shortcutw bɛ baara kɛ fɛn tɔw bɛɛ la."
     },
     "generate3d": {
-      "label": "Yodm 3D ka miiriya"
+      "label": "Yodm 3D ka miiriya",
+      "placeholder": "I b'a fɛ 3D fɛn min na, o ɲɛfɔ",
+      "queued": "I ka 3D fɛn bɛ ka dabɔ. A bɛ se Dabɔliw tab kɔnɔ.",
+      "note": "3D fɛnw bɛ na Fɛnw kɔnɔ i n'a fɔ clip surun min bɛ munumunu ni kɔfɛ yelen ye."
     },
     "voiceClone": {
       "stop": "Kan mara jɔ",
-      "failed": "O kɔ, u y'a fɔ ko: \"Aw ye mɛnni kɛ ne fɛ."
+      "failed": "O kɔ, u y'a fɔ ko: \"Aw ye mɛnni kɛ ne fɛ.",
+      "pickerLabel": "I kan copi",
+      "pickerDetail": "Kumaw i yɛrɛ kan na",
+      "title": "I kan copi",
+      "description": "I yɛrɛ kan ta walima clip dɔ sugandi i bɛ kuma min kɔnɔ. I bɛ sara siɲɛ kelen ani i kan ye i ta ye kuma bɛɛ kama.",
+      "defaultName": "Ne kan",
+      "record": "Misali ta (segɔn 30 ka se miniti 2 ma)",
+      "fromMedia": "Walima clip dɔ kɛ baara la Fɛnw kɔnɔ",
+      "recorded": "I ka tali",
+      "sample": "Misali: {{name}}",
+      "hint": "Kuma jɛlen min tɛ ni fɔli ye, o ka ɲi ka tɛmɛ.",
+      "noMic": "Mikro ma se ka kɛ baara la.",
+      "sampleFailed": "O clip mankan ma se ka kalan.",
+      "pay": "A copi token {{amount}} la",
+      "useFree": "A copi (a sarana kaban)",
+      "owned": "I kan “{{name}}” labɛnnen don kaban. A sugandi kan lisi kɔnɔ.",
+      "useOwned": "Ne kan kɛ baara la",
+      "ready": "“{{name}}” labɛnnen don kumaw kama.",
+      "paidFailed": "I ka sarali maralen don. Nin dayɛlɛ tugun, a lajɛli nata ye fu ye.",
+      "consent": "I yɛrɛ kan dɔrɔn copi, walima kan min yamaruya bɛ i bolo."
     },
     "linkImport": {
       "go": "Ka don",
-      "downloading": "Dɔɔniŋ {{percent}}%"
+      "downloading": "Dɔɔniŋ {{percent}}%",
+      "open": "A don ka bɔ siri la",
+      "placeholder": "YouTube, TikTok walima siri wɛrɛ bila yan",
+      "rights": "Ne ye nin videyo tigi ye walima yamaruya bɛ ne bolo ka a kɛ baara la",
+      "audioOnly": "Mankan dɔrɔn",
+      "queued": "A bɛ makɔnɔni na…",
+      "waiting": "Site bɛ ka makɔnɔ, an bɛna a lajɛ tugun sɔɔni…",
+      "adding": "A bɛ ka fara Fɛnw kan…",
+      "added": "A donna ani a farala timeline kan.",
+      "failed": "O siri ma se ka don."
+    },
+    "film": {
+      "repairRefs": "Fɛn sirili dɛsɛlenw bɔ",
+      "title": "Filimu porozɛ",
+      "intro": "Ja taliw labɛn ni ja referansi minnu bɛ se ka segin baara la. I ka ɲɛfɔli, ja tali ladɛ ani jaabi sugandilenw bɛ mara nin porozɛ fɛ.",
+      "create": "Filimu labɛn dabɔ",
+      "name": "Filimu tɔgɔ",
+      "brief": "Filimu ɲɛfɔli",
+      "sharedReferences": "Ja referansi farataw (4 ma tɛmɛ)",
+      "shot": "Ja tali",
+      "addShot": "Ja tali fara a kan",
+      "shotName": "Ja tali tɔgɔ",
+      "action": "Ja tali kɛwale ani a ladɛcogo",
+      "seconds": "Videyo segɔn ɲininenw",
+      "shotReferences": "Ja referansi farataw (dan bɛɛ ɲɔgɔn fɛ 4)",
+      "frame": "Ja labɛn",
+      "video": "Videyo labɛn",
+      "review": "Model, referansiw, videyo janya ani sɔngɔ lajɛ studio kɔnɔ sani i ka dabɔli kɛ.",
+      "result": "Ja tali jaabi sɔnnen",
+      "noResult": "Jaabi si ma sugandi",
+      "resultHint": "Ja walima videyo sɔnnen dɔ sugandi Bilaliw kɔnɔ. A ka siri bɛ mara nin ja tali fɛ; timeline kɛ baara la ka filimu ladɛ.",
+      "earlier": "A bila ɲɛfɛ",
+      "later": "A bila kɔfɛ",
+      "remove": "Ja tali bɔ",
+      "issue": "Ja tali ɲɛfɔli ani referansi fɛnw lajɛ, o kɔ a lajɛ tugun. Porozɛ to dayɛlɛlen ni a ma se ka mara.",
+      "searchMedia": "Fɛnw ɲini tɔgɔ la",
+      "refreshMedia": "Fɛnw kuraya"
+    },
+    "speakers": {
+      "find": "Kumabagaw ɲini",
+      "name": "Kumabaga {{number}}",
+      "onlyOne": "Kumabaga kelen dɔrɔn sɔrɔla.",
+      "failed": "Kumabagaw ma se ka sɔrɔ.",
+      "kept": "{{name}} dɔrɔn marara.",
+      "editFailed": "O labɛnni ma bɛn nin clip ma.",
+      "split": "A tilara kumabaga ja tali {{count}} ye.",
+      "keepOnly": "Nin dɔrɔn mara",
+      "splitAction": "A tigɛ kumabaga yɛlɛmali kelen kelen bɛɛ la"
+    },
+    "reverse": {
+      "action": "A lasegin kɔ",
+      "working": "A bɛ ka segin kɔ {{percent}}%",
+      "done": "Clip seginna kɔ.",
+      "failed": "Nin clip ma se ka segin kɔ.",
+      "unsupported": "Nin navigatɛri tɛ se ka videyo segin kɔ. Chrome walima Edge lajɛ.",
+      "tooLong": "Clip minnu janya tɛ tɛmɛ segɔn {{seconds}} kan, olu bɛ se ka segin kɔ."
+    },
+    "behind": {
+      "action": "Sɛbɛn mɔgɔ kɔfɛ",
+      "working": "Mɔgɔ bɛ ka bɔ…",
+      "done": "Sɛbɛn ani kumasɛbɛnw bɛ mɔgɔ kɔfɛ sisan.",
+      "failed": "Sɛbɛn ma se ka bila mɔgɔ kɔfɛ."
     }
   },
   "jungleMood": {
@@ -10796,7 +11819,8 @@
       "social": "Sosiyalisitiw ka jogow",
       "governance": "Jamana ani mara",
       "badges": "Kɔɔŋɔ & Kɔɔŋɔŋ",
-      "postActions": "Kalanfaw ka baara"
+      "postActions": "Kalanfaw ka baara",
+      "navigation": "Taamasira"
     },
     "thumbsUp": "I ko a tun be cogo min na",
     "thumbsUpDesc": "A yira ko i b'a fɛ ka baara dɔ kɛ wala ko i b'a fɛ ka baara dɔ kɛ. O b'a to a be se ka baara kɛ ka ɲɛ ani k'a dɛmɛ ka baara kɛ ka ɲɛ.",
@@ -10903,7 +11927,10 @@
     "viewOnExplorer": "Kɔrɔbɔli ɲinibaga",
     "viewOnExplorerDesc": "O la, a tun be se ka kɛ ko a tun ye baara kɛ ni mɔgɔ dɔ ye min tun ye baara kɛ ni mɔgɔ dɔ ye.",
     "title": "Glosari",
-    "subtitle": "I be se k'a faamu fɛɛn min kama i be se k'i yɛrɛ tanga o ma."
+    "subtitle": "I be se k'a faamu fɛɛn min kama i be se k'i yɛrɛ tanga o ma.",
+    "dhbTokenDesc": "Riftn ka token natif. $RIFT ye Riftn tokenw ka ticker taamasiyɛn ye. A bɛ kɛ bonya, lajɛli saralen fɛnw, gouvernance kalata ani staking kama.",
+    "thumbsDown": "Bolokɔni duguma (A ma diya)",
+    "editFromInfo": "Post labɛn (ka bɔ Kunnafoniw la)"
   },
   "tipFunding": {
     "noRoute": "Uniswap sira si tɛ sisan ka nin tokɛn falen ka kɛ Riftn tokɛnw ye",
@@ -10985,7 +12012,8 @@
       "versions": "O kɔrɔ ko:",
       "noVersions": "O kama, a ma fɔ ko mɔgɔ si tɛna se ka sinsin o filimu la.",
       "current": "Bi, mɔgɔ caaman be se k'a",
-      "restore": "Ka segi ka na"
+      "restore": "Ka segi ka na",
+      "restored": "Version {{version}} seginna"
     },
     "buildInChat": "I ka DM kɔnɔ dilanni kɛ ni @assistant ye",
     "modelLabel": "Modɛli",
@@ -11033,7 +12061,8 @@
     "postCostShortfall": "O baara nin be wari di {{amount}} tokens ma ani i be {{held}}.",
     "paymentConfirmingDescription": "I ka tagamasiɲɛw yɛlɛmana. An bena a fɔ ko an ye wari min sara, an bena o sara joona joona.",
     "transferIncomplete": "Aw ye to ka miiri, ko sariya sɛbɛbaga ma labɛn. U bena i ɲininga tugun sanni i ka baara nata ka kɛ.",
-    "notEnoughTokensToMint": "O tɛ se ka kɛ sababu ye mɔgɔ tɛ se ka min kɛ"
+    "notEnoughTokensToMint": "O tɛ se ka kɛ sababu ye mɔgɔ tɛ se ka min kɛ",
+    "getTokens": "Tokens sɔrɔ"
   },
   "tokenErrors": {
     "unsupportedNetwork": "Riftn ka tagamasiyɛnw tɛ se ka ci o rezo kan.",
@@ -11056,7 +12085,9 @@
     "tokenAmount": "{{amount}} tɔkɛns",
     "assistant": {
       "question1": "Riftn ka tagamasiɲɛw ye mun ye sisan?",
-      "question2": "N'a sɔrɔ n' tun b'a fɛ ka wari caaman sɔrɔ."
+      "question2": "N'a sɔrɔ n' tun b'a fɛ ka wari caaman sɔrɔ.",
+      "answer1": "Riftn tokenw ka staking APY sisan ye 12.4% ye tile 30 sɔgɔli kama. A tilalen fɛ:\n\n• Tile 7 sɔgɔli: 8.2% APY\n• Tile 30 sɔgɔli: 12.4% APY\n• Tile 90 sɔgɔli: 18.7% APY\n\nI b'a fɛ ne ka i dɛmɛ ka tɔnɔ min bɛ se ka sɔrɔ, o jate wa?",
+      "answer2": "Token 10,000 minnu stakera 18.7% APY la tile 90 kama:\n\n📊 Sara jatelen: ~461 token\n\nO ye token 5.13 ɲɔgɔn ye don o don. A to i hakili la ko APY bɛ se ka yɛlɛma ka da hakɛ stakelen bɛɛ kan."
     },
     "bookmarks": {
       "stakingGuide": "Riftn ka tagamasiɲɛw: APY faranfasi, sɔgɔsɔgɔninjɛ wagatiw ani sara cayabagaw ɲɛfɔra."
@@ -11066,6 +12097,9 @@
     },
     "home": {
       "stakedPost": "50k Riftn ka tagamasiyɛnw. A kinibolo fan fɛ, a be se ka kɛ 45%. O ye wagatijan kɔnɔna miiriya ye. 💎🙌"
+    },
+    "notifications": {
+      "tippedYou": "ye token {{amount}} di i ma bonya ye"
     }
   },
   "emojiPicker": {
@@ -11427,7 +12461,8 @@
           "2": "Repost, kɔmɛntili, reaction, sariya ani layidu tɛ fɛn fɛɛrɛ, ani u tɛ i ka allowance dɔgɔya.",
           "3": "I ka wari be dɔgɔya ani i ka baara be to ka to — o wari be i ka baara nata bali fɔɔ a ka dafa. O la, i bena se ka baara kɛ n'i ka denbaya ye.",
           "4": "O la, a tun be se ka kɛ ko a tun ye fɛɛn min di, a tun b'o di a ma."
-        }
+        },
+        "intro": "Post kɛ i b'a fɛ cogo o cogo, don o don, fu. I ka staking badge bɛ sɛbɛn post joli ani videyo, ja ani kumakan hakɛ min bɛ se foroba feed kunba ma don o don, o latigɛ. Min bɛ tɛmɛ o kan, o bɛ bɔ hali bi, a bɛ yira i ka profil kan ani i ka tugubagaw ye dɔrɔn feed kunba nɔ na."
       },
       "reactions-and-safety": {
         "title": "Mɔgɔkɔrɔbaw ka miiriya, u ka miiriya ani u ka miiriya",
@@ -11798,7 +12833,10 @@
     "planTypeNotAllowed": "Nin dabɔbaga ka labɛn tɛ nin cikan suguya sɔn.",
     "planMinTip": "Nin dabɔbaga ye, tɛpu ka kan ka kɛ {{amount}} o ye koo ɲuman ye. ye a dɔgɔyali la.",
     "shareKindGroup": "Jɛnkulu",
-    "shareKindCommunity": "Jɛkulu"
+    "shareKindCommunity": "Jɛkulu",
+    "shareGroups": "Jɛkuluw",
+    "shareKindChannel": "Chaîne",
+    "reportMessage": "Cikan lakali"
   },
   "credits": {
     "earningsWorth": "A sɔngɔ ye {{amount}} ye",
@@ -11840,7 +12878,11 @@
     "error": "An ma se ka i ka jɔsili ɲinini ci. I ka kɔnti jɔsili ma sɛmɛntiya. Segi k'a lajɛ tugun.",
     "back": "Segi Labɛnw ma",
     "signIn": "Don walasa ka i ka kɔnti jɔsi",
-    "acknowledge": "N ye n ka wariminɛn segincogo kunnafoniw mara, ani n y'a faamu ko jɔsili tɛ se ka segin kɔ."
+    "acknowledge": "N ye n ka wariminɛn segincogo kunnafoniw mara, ani n y'a faamu ko jɔsili tɛ se ka segin kɔ.",
+    "signedInAs": "I donna i n'a fɔ",
+    "confirmTitle": "I ka konti jɔsi pewu?",
+    "confirmBody": "I ka konti ani fɛn o fɛn bɛ a kan, o bɛna jɔsi. I bɛna bɔ ani o tɛ se ka segin kɔ.",
+    "confirmBodyNamed": "{{who}} ani fɛn o fɛn bɛ a kan, o bɛna jɔsi. I bɛna bɔ ani o tɛ se ka segin kɔ."
   },
   "miniApps": {
     "badge": {
@@ -11937,12 +12979,42 @@
       "rewardPending": "Ka kɔnɔni kɛ",
       "rewardsNone": "O la, a tɛ se ka kɛ ko a ye fɛɛrɛ dɔ sɔrɔ min be se ka kɛ. Lɔgɔkun fɔlɔ tun tɛmɛna.",
       "stats": {
-        "button": "Kunnafoni JƆNA"
+        "button": "Kunnafoni JƆNA",
+        "chartTitle": "Mɔgɔ minnu ye i ka application dayɛlɛ, tile 30 labanw",
+        "peak_one": "A caman {{count}} don kelen na",
+        "peak_other": "A caman {{count}} don kelen na",
+        "people30": "Mɔgɔw, tile 30",
+        "people7": "Mɔgɔw, tile 7",
+        "added": "A farala a kan",
+        "dhb30": "Token saralenw, tile 30",
+        "notified30": "Kunnafoni cilenw, tile 30",
+        "rewards": "Token sara sɔrɔlenw"
       },
       "signin": {
         "users_one": "mɔgɔ {{count}}",
         "users_other": "mɔgɔ {{count}}",
-        "delete": "Jɔsi"
+        "delete": "Jɔsi",
+        "title": "Don ni Riftn ye",
+        "body": "A to mɔgɔw ka don i ka site walima application kɔnɔ ni u ka Riftn konti ye. Kile dɔ dabɔ yan, o kɔ ladilikan tugu.",
+        "guide": "Ladilikan kalan",
+        "copyId": "Client ID copi",
+        "rotate": "Gundo kura",
+        "rotateConfirm": "Gundo kura dabɔ {{name}} ye? Gundo kɔrɔ bɛ jɔ o yɔrɔnin bɛɛ.",
+        "deleteConfirm": "{{name}} jɔsi? Mɔgɔ minnu bɛɛ donna ni a ye, olu bɛ bɔ.",
+        "secretOnce": "{{name}} ka gundo. A copi sisan: a bɛ yira siɲɛ kelen dɔrɔn.",
+        "name": "Application tɔgɔ",
+        "website": "Site (a tɛ wajibi ye)",
+        "redirects": "Redirect URLw, kelen sira kelen kan (https://yoursite.com/callback)",
+        "create": "Kile dabɔ"
+      },
+      "stateRejected": "Live siri fɛ · a ma sɔn butiki ye",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Ko minnu Riftn ye ci i ka webhookUrl ma. Lajɛli bɛ ping ko dɔ ci.",
+        "test": "Lajɛli ci",
+        "ok": "Webhook ye jaabi di {{status}}",
+        "failed": "Webhook ma ɲɛ: {{reason}}",
+        "none": "Webhook si ma ci fɔlɔ."
       }
     },
     "card": {
@@ -11969,7 +13041,10 @@
       "confirm": "Pay {{amount}} o ye koo ɲuman ye.",
       "sending": "An wolola walisa ka wari sara.",
       "sent": "Ddddd {{amount}}o ye koo ɲuman ye. to {{name}}.",
-      "noOwner": "O app ma wari sɔrɔ fɔlɔ."
+      "noOwner": "O app ma wari sɔrɔ fɔlɔ.",
+      "testBadge": "Lajɛli cogoya",
+      "testBody": "I ye nin application tigi ye, o la nin ye lajɛli ye: token si tɛ lamaga ani resi bɛ taamasiyɛn kɛ lajɛli ye.",
+      "testSent": "Token {{amount}} lajɛli sarali. Foyi ma ci."
     },
     "add": {
       "title": "Add {{name}}?",
@@ -12031,7 +13106,17 @@
     "install": "Install Riftn",
     "installed": "Installed",
     "inAppHint": "I ye n’a fɛ ka taa ka fɔlɔ app ye.",
-    "desktopMeta": "Windows · Mac · Linux · ChromeOS"
+    "desktopMeta": "Windows · Mac · Linux · ChromeOS",
+    "seoTitleAll": "Riftn App sɔrɔ: Ordinatɛri ani Android APK",
+    "seoDescriptionAll": "Riftn bila i ka ordinatɛri kan digi kelen na, walima butikiw to yen ka Android version kura sɔrɔ APK ye a yɛrɛ ma. Open source, sosiyali mediya min ye a baarakɛbagaw ta ye.",
+    "shareTextAll": "Butikiw to yen: Riftn sɔrɔ i ka ordinatɛri kan, walima Android version kura ta a yɛrɛ ma.",
+    "desktopSubtitle": "A yɛrɛ ka fenɛtiri, a yɛrɛ ka ikɔni, ani a bɛ a yɛrɛ kuraya waati bɛɛ an bɛ fɛn kura bɔ. Butiki tɛ, foyi tɛ jigin.",
+    "installedHint": "Riftn dayɛlɛ i ka Start menu, Dock walima application lisi kɔnɔ.",
+    "desktopHint": "I ka navigatɛri bɛ ɲininkali kɛ siɲɛ kelen, o kɔ Riftn bɛ dayɛlɛ a yɛrɛ ka fenɛtiri la.",
+    "howChromium": "Bilali ikɔni digi adrɛsi barra kininbolo fɛ laban na, o kɔ Installer.",
+    "howSafari": "Safari kɔnɔ, File menu dayɛlɛ ka Add to Dock sugandi.",
+    "howFirefox": "Firefox tɛ se ka applicationw bila. Nin ɲɛ dayɛlɛ Chrome, Edge walima Safari kɔnɔ walasa ka Riftn bila.",
+    "microsoftStore": "Microsoft Store ka di i ye ka tɛmɛ? A sɔrɔ yen o nɔ na."
   },
   "postStage": {
     "back": "I ka kɔsegi ka na.",
@@ -18955,7 +20040,185 @@
     "d14896aa4bf8": "Barokunw ka kalanw be se ka kɛ gafew ye. I ka ladɛrɛsi lajɛ ani i ka segi k'a ɲini.",
     "953e708b2287": "O ye cɛnniba lo ye.",
     "4a52cdd6ac72": "Ne tɛ se ka o ɲɔgɔn kɛ",
-    "dbc468a14b60": "Ɲininkali minnu bɛ kɛ tuma caman"
+    "dbc468a14b60": "Ɲininkali minnu bɛ kɛ tuma caman",
+    "3f9b2c71d0a4": "jaabi {{n}}",
+    "8c4e1a6b2f57": "“{{query}}” kama",
+    "1d7234ff1b79": "{{feed}} kɔnɔ",
+    "e122e5c2b563": "A sama sanfɛ ka a datugu",
+    "1aa9d734f2ee": "I bɛ min ɲini, o sugandi",
+    "ef557404f465": "Jaabi si tɛ “{{query}}” kama",
+    "35034aa59bd3": "Foyi ma bɛn {{feed}} kɔnɔ. Kuma wɛrɛw lajɛ walima fɛn bɛɛ ɲini.",
+    "415155739590": "Fɛn bɛɛ ɲini",
+    "9e13d826baaf": "Jaw ɲini",
+    "cbf6f228327c": "Fɔli ɲini",
+    "e8756c6865a5": "Shortsw ɲini",
+    "c7661da99c41": "Videyow ɲini",
+    "90f1afe66801": "“{{query}}” bɛ ka ɲini…",
+    "d7b559f2d8c6": "Kuma wɛrɛw lajɛ, walima filtriw yɛlɛma.",
+    "d1a0c7e2f301": "Mun bɛ i hakili la bi?",
+    "d1a0c7e2f302": "I bɛ miiri mun na bi?",
+    "d1a0c7e2f303": "Mun bɛ i hakili la?",
+    "d1a0c7e2f304": "Fɛn dɔ bɛ i hakili la wa?",
+    "d1a0c7e2f305": "Mun bɛ i hakili la sisan?",
+    "d1a0c7e2f306": "An bɛ miiri mun na bi?",
+    "d1a0c7e2f307": "Fɛn dɔ bɛ i hakili la bi wa?",
+    "d1a0c7e2f308": "Mun bɛ i hakili la nin siɲɛ?",
+    "a7c1e0f4b2d9": "A digi ka kuma",
+    "b3e8d1c6f0a2": "A digi ka a ci",
+    "c9f2a4e7d1b5": "A bɛ ka lamɛn... bɔɔrɔ digi ka a ci",
+    "002d8f205c6a": "{{value1}} ka tugu ɲinini banna",
+    "056be4d72f24": "Token {{value1}} sarana nin post kama",
+    "06ff3b9cf286": "Ja {{value1}} dɔrɔn de daganen don i ka badge dakun kama",
+    "12e58368b1fe": "Token ma se. {{value1}} ka kan nka {{value2}} bɛ i bolo",
+    "137c70c98e46": "i ka {{value1}} ɲumanw",
+    "17a570ff2a79": "Token kontra adrɛsi tɛ ɲɛ token gating kama",
+    "183a6f2db673": "Mint sɔngɔ ye {{value1}} {{value2}} ye ani i ka wari ma se. Wari fara a kan, i bɛ se k'a mint post ka menu kɔnɔ waati o waati.",
+    "1a19c3a9fe4b": "Kan cogoya dayɛlɛra — kumaɲɔgɔnya {{value1}} sarana.",
+    "1a68fdbd95af": "Signature lajɛli ma ɲɛ chain kan.",
+    "1a764a6e3fc1": "Tilayɔrɔw tɛ sɔrɔ nin chain kan fɔlɔ ({{value1}})",
+    "1b8ea5833a26": "Stream ma se ka fɔ",
+    "2015edac19e5": "Wari bɔrɔ lajɛli ma se ka daminɛ. A lajɛ tugun.",
+    "2431127c6c54": "🚀 Ja lamagali ɲɛnama ka tɛmɛ bɛɛ kan",
+    "2ab5a89c5c7d": "Baarakɛbaga minnu ye fɛn saralenw san",
+    "399f6c7158f3": "💎 Min ka kan ka kɛ baara la ni mesh bɛ taa pipeline yɛrɛ dɔ kɔnɔ",
+    "3b14db60e41d": "GPU tɛ kɛ baara la ({{value1}}). Taama bɛna kɛ ja dama dɔ dɔrɔn na segɔn kelen kɔnɔ. Hardware acceleration dayɛlɛ navigatɛri labɛnw kɔnɔ, o kɔ a daminɛ tugun.",
+    "5c435fbb6c1c": "Streamw bɛ se ka mint chain kan walima ka bɔ chain kɔkan pewu",
+    "5ec12d01e69b": "💰 Nafa ka bon lajɛli teliw kama",
+    "5ef2449f06cb": "{{value1}}: a tɛ kumakan dosiye ye",
+    "6018fc0a180e": "🎨 A ka ɲi abstrait, surréel walima sigida ja kama",
+    "62c53e45cc41": "{{value1}}. I ka sarali bɛ sɔrɔ dabɔli wɛrɛ kama.",
+    "645b3cac6cc1": "Bonya dɔgɔman ye token {{value1}} ye",
+    "64802dfe0ba7": "GPU tɛ kɛ baara la ({{value1}}). Tulon bɛna kɛ ja dama dɔ dɔrɔn na segɔn kelen kɔnɔ. Hardware acceleration dayɛlɛ navigatɛri labɛnw kɔnɔ, o kɔ a daminɛ tugun.",
+    "64849cbbae3a": "Wari: {{value1}} {{value2}} (a ma se)",
+    "6730e5a02d90": "{{value1}} san Riftn kan. Jago mɔgɔ ni mɔgɔ cɛ min bɛ sara tokenw walima USDC la.",
+    "68a65692d2f4": "#{{value1}} nin dɔgɔkun",
+    "6991865c05c9": "A bayɛlɛmana ka bɔ {{value1}} la",
+    "6d8a60ec4ad9": "Bonya sɛmɛntiyara chain kan nka a ma se ka mara. Dɛmɛbagaw wele ni tx ye: {{value1}}...",
+    "6e540fa3b850_one": "kan {{count}}",
+    "7365d92b5455": "{{value1}} {{value2}} bɛ i bolo. Nin post mago bɛ {{value3}} la.",
+    "22577ebd908e": "Wan 3.0 videyo dabɔ · fɔli kura",
+    "1fa2357ab7e1": "Seedance 720p videyo dabɔ · fɔli kura",
+    "85f96a7ac6ee": "Transaction seginna {{value1}} kan. I ka tokenw ma lamaga.",
+    "86d8609422b1": "\"{{value1}}\" jaabiw {{value2}} kɔnɔ",
+    "895236fb16b8": "A bɛ ka bila… {{value1}}%",
+    "89db78228f64": "Tugu ɲinini cira {{value1}} ma",
+    "8c8a27f7d316": "{{value1}} Gundo daɲɛ si tɛ nin wari bɔrɔ la fɔlɔ — don minan dɔ kan biometri bɛ baara kɛ min kan ani kelen fara a kan Labɛnw → Konti lakana kɔnɔ.",
+    "8fc2e70dbd8e_one": "mɔgɔ {{count}} bɛ ka lajɛ",
+    "9fd0c1b98d0a": "Bonya dɔgɔman ye token {{value1}} ye",
+    "ba0ad677202d": "Token wari ma se. Token {{value1}} ka kan nka token {{value2}} bɛ i bolo",
+    "d96ce204c037": "{{value1}} ma se chain sugandilen kan",
+    "ee980688bc72": "{{value1}} ma se gas kama {{value2}} kan",
+    "faea15f280ea": "ye weele siri dɔ dabɔ",
+    "fd21220300ea": "🎙️ {{value1}} — live Stages kan {{value2}}, {{value3}}",
+    "b0cd7f667b0a": " sanniw",
+    "2312d4831889": "Fully Diluted MC",
+    "1250aa8c64e3": "Liquidité tilali",
+    "efe4bbcc61b3": "I ka kunnafoniw",
+    "eae12e0d3bab": "Kunnafoniw bɛ ka don…",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "I ye +{{value1}} points sɔrɔ",
+    "0fbe06b679a8": "Points {{value1}} ɲinini bɔlen kelen kelen bɛɛ kama, a farala i ka Top builders jate kan.",
+    "bf370792fe48": "52W sanfɛla",
+    "e6eadfd6d1d8": " eCPM",
+    "431bc73eb60b": "[verse]\nI ka dɔnkili kumaw yan...\n\n[chorus]\nRefrɛn kumaw...",
+    "a428fbbe6ad2": "Ja jɛlen 1–6 bila: ɲɛfɛ, kɛrɛfɛ, ɲɛda cogoya wɛrɛw. Kɛrɛ caman = bɛnni ɲuman.",
+    "761d0751f5d4": "Sara",
+    "163e1d023bb9": "0x... walima @username",
+    "b43176b40de4": " ETH wari ma se",
+    "5fea44f8d917": "QR code min bɛ siri riftn.com la",
+    "957b1cce1c08": "Web3 dabɔbaga & designer. Sosiyali decentralisé siniko bɛ ka dabɔ 🌐",
+    "a3c1e5f20b71": "Riftn kɛ baara la ChatGPT, Claude walima MCP application o application kɔnɔ. URL min bɛ duguma, o bila i ka dɛmɛbaga ka connector labɛnw kɔnɔ walasa ka postw, profilw ani commentairew lajɛ, o kɔ don ni a ɲininkara walasa ka i yɛrɛ ka konti siri.",
+    "b84d2e7c9a16": "Nin adrɛsi ye AI applicationw ta ye, a tɛ web ɲɛ ye. Ni i y'a dayɛlɛ navigatɛri kɔnɔ, a bɛ i lana yan.",
+    "c5e9f1a3d742": "I ka Riftn konti siri",
+    "d61a7b4e8c05": "Ni i ka dɛmɛbaga ye i ɲininka ka don, don Riftn kɔnɔ ka Yamaruya digi. O kɔ a bɛ se ka i ka profil kuraya, ka postw ani commentairew bɔ, ka mɔgɔw tugu ani ka dabɔli kɛ Creator Studio kɔnɔ. Siriliw bɛ to i bɛ u kɛ baara la tuma min na ani u bɛ ban ni u ma kɛ baara la tile 30.",
+    "e27b8c5f9d13": "ChatGPT ladilikan taabolo ni taabolo",
+    "f38c9d6a0e24": "Claude ladilikan taabolo ni taabolo",
+    "0a49d7b1f835": "Bot konti danfara ka di i ye ka tɛmɛ? Agent dɔ dabɔ walasa ka connector URL sɔrɔ min bɛ post kɛ o agent tɔgɔ la.",
+    "1b5ae8c20f46": "Ni ChatGPT ye i ɲininka, don Riftn kɔnɔ ka Yamaruya digi walasa ka i ka konti siri.",
+    "2c6bf9d31a57": "Siri digi, don Riftn kɔnɔ ka Yamaruya digi walasa ka i ka konti siri.",
+    "7b06ece76fdb": "Kanuya dusukun emoji bɛ bɔ stream kan",
+    "002474e36821": "Badge",
+    "0b69d8573e32": "Dakun sanfɛla sɔrɔla",
+    "f80cac6f6a85": "ETF",
+    "74c4812d040a": "SƆGƆ",
+    "7a1580c49e45": "SCAN",
+    "05f74cfe05cd": "Stream banna, a lajɛ live la walasa ka don a la",
+    "ab274474a6aa": "kalata",
+    "5178a4089a25": "Segin segin datugu",
+    "833dcdfad12f": "Segin segin dayɛlɛ",
+    "cd03861f0ff8": "slug",
+    "674e70bcd915": "Baro tariku bɛɛ dayɛlɛlen bɛ mɔgɔ bɛɛ ye minnu ka konti bɛ yen.",
+    "feaf753f6557": "Baro daminɛ",
+    "b59b8312c449": "Waati wɛrɛ sugandi walasa ka kɛwale wɛrɛw ye.",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "0b88365361e9": "Wari bɔrɔ kɔrɔ sɔrɔla. A bɛ ka bɛn i ka profil ma...",
+    "413ecefdf0a6": "Blog post siri copira",
+    "daa110b14379": "APY cɛmancɛ",
+    "59aa2927dbb9": "I ka makɔnɔ dɔɔnin an ka i ka Riftn siri lajɛ.",
+    "470e681ef727": "Riftn kumakan live Stage tɛmɛnen — a dɔnkili tali lamɛn tugun.",
+    "52f1b54ce34b": "BAND",
+    "b295e355b543": "💵 Fiat Off-Ramp",
+    "831e71a8e8c6": "🔄 Application kɔnɔ falen",
+    "94e2d0eda8c8": "🎮 Last Chad Standing TGE",
+    "ebebdc70335b": "Vɛrɛ barrw",
+    "5ff272ba7871": "Soi siraw",
+    "a941e90ca93d": "Cover Halo",
+    "04dbbe4dff7a": "True Wave",
+    "1ed44687a46a": "LED Stack",
+    "b48bbaa9ddf2": "Kunsigi dalen",
+    "875af21cd687": "Tile fɔɔrɔ",
+    "85330dcbaadd": "Algorithme si tɛ min bɛ kɛrɛ kelen dɛmɛ sɔsɔli la.\nMɔgɔ bɛɛ kan bɛ kɔrɔta ka kɛ kelen ye ani tilennenya la.",
+    "e956a9404b46": "Ɲininkali minnu bɛ kɛ tuma caman",
+    "94a9eac404c8": "Spam",
+    "f4f65ad617fc": "Buzzer",
+    "bf66f3e41e47": "Hue",
+    "6e0290d62f6d": "LOL",
+    "f0268cb9100a": "Luw sɔngɔ",
+    "34e108c0896d": "Yirali",
+    "a247f63db3cc": "A ɲɛnama ka tɛmɛ ani a sabatilen — sugandili lakananen",
+    "1e8777bc4d46": "Studio PBR, a bɛ FBX/OBJ/USDZ bɔ",
+    "7c7a9940551c": "Kan sanfɛla, mankan fitinin",
+    "c7e0489ecaaf": "Electric Soul (Live Performance)",
+    "0bdb3e5571c8": "Neon Nights - Visualizer",
+    "d9bc7691fa55": "@{{value1}} ka telefɔni",
+    "2a4c72c809a7": "@{{value1}} ka email",
+    "ca54d7fc43c4": "{{value1}} di 5 la",
+    "20a4d6a49b66": "{{value1}} ka tariku",
+    "530630818e62": "{{value1}} lajɛ ani a jɛnsɛn",
+    "9fd1e95743eb": "A bɛ ban dɔɔni dɔɔni {{value1}}s",
+    "865e2b87260d": "{{value1}} fara timeline kan",
+    "71d37c72e19b": "Jaabi si tɛ \"{{value1}}\" kama",
+    "c3d7095600bf": "Token #{{value1}} ka post kunnafoniw chain kan Riftn kɔnɔ. Mint transaction, dabɔbaga ka wari bɔrɔ ani tigiw lajɛ.",
+    "d63869b9dc77": "{{value1}} Riftn kan — postw, videyow & profil",
+    "82d0da87f78c": "{{value1}}: Live Riftn kan",
+    "ccf0988984a3": "{{value1}} bɛ yira {{value2}} la",
+    "0f8f49bd32e6": "🔥 Ni i ye bonya {{value1}} <coin></coin> di, i bɛna kɔrɔta {{value2}} ka cikanw kɔnɔ",
+    "1e488da3dfa7": "I bɛ cikan minnu ci {{value1}} ma, olu ye saralenw ye ani kelen kelen bɛɛ bɛna <amount>{{value2}}</amount> <coin></coin> sɔngɔ. I b'a fɛ ka taa ɲɛ tigitigi wa?",
+    "253ffa81cd88": "{{value1}} bɛ bonya dɔgɔman <amount>{{value2}} <coin></coin></amount> ɲini walasa ka baro daminɛ.",
+    "338524eabcce": "🔥 Ni i ye bonya {{value1}} <coin></coin> di cikan kelen kelen bɛɛ la, i bɛna kɔrɔta {{value2}} ka cikanw kɔnɔ",
+    "39958a403593": "I ye <prize>$200 sara</prize> sɔrɔ an ka Coupe du Monde bonya la Twitter kan. I ka tokenw farala i ka konti kan, u bɛna ci ni kontra dayɛlɛra.",
+    "5d486dd87845": "Ni i taara ɲɛ, i sɔnna an ka <terms>Sariyaw</terms> ani <privacy>Gundo marali politiki</privacy> ma",
+    "6ed656c2254e": "<amount></amount> {{value1}} ma",
+    "70d1cca2aba3": "{{value1}} bɛ bonya dɔgɔman <amount>{{value2}} <coin></coin></amount> ɲini cikan kelen kelen bɛɛ la. I bɛ cikan o cikan ci, o hakɛ bɛ bɔ.",
+    "825123b7470b": "I ka wari: {{value1}} <coin></coin>",
+    "9f11cad12bdd": "Wari ma se {{value1}} <coin></coin> bonya kama",
+    "a5b214ef27ab": "Wari ma se. {{value1}} <coin></coin> bɛ i bolo nka {{value2}} <coin></coin> ka kan.",
+    "9bb47b8193d0": "Kunnafoni sira daminɛ sugandi ani sira kelen ka se {{maximum}} ma",
+    "c1ed76a21019": "Kunnafoni sira {{row}} mago bɛ sugu cɛliw falen na minnu tɛ ni / ye",
+    "2766743abef5": "Kunnafoni sira {{row}} mago bɛ ISO don walima UTC waati la X kolɔn kɔnɔ",
+    "54f4138518ee": "Kunnafoni sira {{row}} mago bɛ X jateden na min tɛ tɛmɛ miliyari ba kelen kan",
+    "d8b7986c0e54": "Sɛbɛn layer, logo, cogoya walima ja dɔ sugandi nin ɲɛ kan",
+    "494bbff655ee": "Kɔnɔfɛn janya tɛ ɲɛ",
+    "2f35e5107bbd": "{{name}} ma se ka don",
+    "35c66cde2823": "Ɲɛ kulɛrɛ bɔli waati banna",
+    "55eee5e9b5a2": "Dilabaga ye dosiye lankolon segin",
+    "f6b9549bd36a": "Cloud bɛnni ma ɲɛ {{name}} kama. A marara nin minan kan.",
+    "a3f938cda315": "{name}, {text}, {type}, {n}, walima {nn} kɛ baara la tɔgɔ cogoya kɔnɔ",
+    "c6ee663d308c": "Layer sugandilen 100 ma tɛmɛ segin waati kelen",
+    "b1fee9bb72b1": "Falenni bɛ cɛli {{cell}} janya ka tɛmɛ sɛbɛnden 200 kan",
+    "e23315c213ad": "Sɛbɛn jɛyalen bɛ cɛli {{cell}} janya ka tɛmɛ sɛbɛnden 200 kan",
+    "80c5fecc40ee": "Nin cɛliw ma se ka bila",
+    "6e71ae3669b1": "Bɔli maralen tɛ sɔrɔ"
   },
   "articles": {
     "cardLabel": "Article · {{count}} min read",
@@ -18997,7 +20260,16 @@
     "formatting": "Formatting",
     "bodyPlaceholder": "Fɔ i ka tariku. Sugandi sɛbɛn ka bar kɔnɔna kɛ ka kɛ kuluw, bold, quotes ni lists kɛ.",
     "bodyLabel": "Sɛbɛn kɔnɔkow",
-    "wordCount": "{{count}} words"
+    "wordCount": "{{count}} words",
+    "imageLimit": "Ja {{count}} ma tɛmɛ sɛbɛn kelen kɔnɔ",
+    "imageLimitSome": "Ja {{count}} dɔrɔn de bɛ se ka fara nin sɛbɛn kan",
+    "imageFailed": "O ja ma se ka fara a kan. Wɛrɛ lajɛ.",
+    "imagesUploading": "Jaw bɛ ka fara a kan ({{count}})…",
+    "bodyTooLong": "Sɛbɛnden {{count}} ye dan tɛmɛ",
+    "imagesCount": "Jaw · {{count}}/{{max}}",
+    "captionPlaceholder": "Ɲɛfɔli fara a kan",
+    "captionLabel": "Ja {{n}} ka ɲɛfɔli",
+    "removeInlineImage": "Ja {{n}} bɔ"
   },
   "liveAudience": {
     "whosHere": "Ayiwa, jɔn lo be yen?",
@@ -19046,24 +20318,94 @@
       "stage": {
         "preparing": "A bɛ labɛn na…",
         "confirming": "Fɛnfeere makɔnɔni…",
-        "recording": "A bɛ ban…"
-      }
+        "recording": "A bɛ ban…",
+        "wallet": "A sɛmɛntiya i ka wari bɔrɔ kɔnɔ"
+      },
+      "open": "Abonmanw di",
+      "title": "Abonmanw di",
+      "mode": {
+        "random": "Lajɛbagaw baro kɔnɔ, a kɛra cogo o cogo",
+        "user": "Mɔgɔ kelen dɔ"
+      },
+      "randomHint": "A bɛ taa mɔgɔ minnu ma minnu ye baro kɛ miniti 30 labanw kɔnɔ ani minnu ma abone fɔlɔ.",
+      "send_one": "Abonman 1 di · ${{price}}",
+      "send_other": "Abonman {{count}} di · ${{price}}",
+      "payHint": "A bɛ sara ni token ye ka bɔ i ka wari bɔrɔ la ciliwali kelen na.",
+      "fewer_one": "Mɔgɔ 1 dɔrɔn de bɛ se ka abonman sɔrɔ baro kɔnɔ sisan, o la i bɛ 1 sara.",
+      "fewer_other": "Mɔgɔ {{count}} dɔrɔn de bɛ se ka abonman sɔrɔ baro kɔnɔ sisan, o la i bɛ {{count}} sara.",
+      "done_one": "Abonman dira!",
+      "done_other": "Abonman {{count}} dira!",
+      "failed": "Abonmanw ma se ka di",
+      "notReady": "Bonya tɛ sɔrɔ nin plan kama fɔlɔ",
+      "noPlan": "Plan dɔ sugandi fɔlɔ",
+      "noPlans": "Abonman plan si tɛ {{name}} bolo ka di fɔlɔ."
     },
     "badges": {
       "emoji": "Emoji ka koo",
       "audience": {
-        "subscribers": "Abonnew"
+        "subscribers": "Abonnew",
+        "both": "Abonebagaw ani bonyadibagaw",
+        "gifters": "Bonyadibagaw"
       },
       "ended": "A banna",
       "until": "Fo {{date}}",
-      "failed": "N'i ma siran, o be yɛlɛma ka kɛ ten."
+      "failed": "N'i ma siran, o be yɛlɛma ka kɛ ten.",
+      "title": "Badge waati danlenw",
+      "intro": "Badge dɔ di tile dama dɔ kama. Mɔgɔ o mɔgɔ ye abone walima ka bonya di a waati la, o b'a sɔrɔ, ani a bɛ yira u tɔgɔ kɛrɛ fɛ i ka baro kɔnɔ tuma bɛɛ.",
+      "name": "Badge tɔgɔ",
+      "namePlaceholder": "Bɔli dɔgɔkun",
+      "days": "A bɛ sɔrɔ (tile)",
+      "who": "Jɔn bɛ se k'a sɔrɔ",
+      "create": "Badge di",
+      "created": "Badge bɛ baara la.",
+      "end": "A ban sisan",
+      "holders_one": "tigi {{count}}",
+      "holders_other": "tigi {{count}}",
+      "limit": "Badge saba bɛ se ka kɛ waati kelen. Kelen ban walasa ka wɛrɛ di.",
+      "hypeHint": "Mɔgɔ o mɔgɔ ye hype train ta, o fana bɛ i ka 🚂 badge sɔrɔ a sera dakun min ma."
+    },
+    "train": {
+      "level": "Hype Train · Dakun {{level}}",
+      "endedLevel": "Hype Train ye dakun {{level}} ban!",
+      "ended": "Hype Train banna",
+      "thanks_one": "Barika dɛmɛbaga {{count}} ye",
+      "thanks_other": "Barika dɛmɛbaga {{count}} ye",
+      "top": "Fɔlɔ: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "ye abonman kelen di 🎁",
+      "giftedSubs_other": "ye abonman {{count}} di 🎁"
     }
   },
   "whenSheet": {
     "today": "Bi",
     "tooSoon": "Chagua wakati katika siku zijazo.",
     "show": "A jira",
-    "hide": "A dogo"
+    "hide": "A dogo",
+    "earlierShort": "Kɔrɔlenw",
+    "title": "Tuma jumɛn?",
+    "tonight": "Bi su",
+    "inAnHour": "Lɛri kelen kɔnɔ",
+    "tomorrow": "Sini",
+    "primeTime": "Prime time",
+    "scheduleFor": "A labɛn {{when}} kama",
+    "liveTip": "I ka tugubagaw bɛ se ka hakilijigin bila. I yɛrɛ bɛ Live daminɛ ni a waati sera.",
+    "stageTip": "A bɛ don Nata lisi la o yɔrɔnin bɛɛ, o la mɔgɔw bɛ se ka Hakilijigin digi.",
+    "typePlaceholder": "Waati dɔ sɛbɛn, i n'a fɔ \"fri 8pm\" walima \"lɛri 2 kɔnɔ\"",
+    "typeLabel": "Waati dɔ sɛbɛn",
+    "typeHelp": "A lajɛ \"bi su\", \"sini 9am\", \"sat noon\" walima \"30 oct 7pm\".",
+    "orPickDay": "Walima don dɔ sugandi",
+    "earlier": "Miniti 15 ɲɛfɛ",
+    "later": "Miniti 15 kɔfɛ",
+    "laterShort": "Kɔfɛ",
+    "tooSoonMin": "Waati dɔ sugandi min bɛ miniti {{count}} tɛmɛ sisan kan.",
+    "zone": "I ka waati ({{zone}}). Mɔgɔ tɔw bɛɛ b'a ye u yɛrɛ ka waati la.",
+    "remove": "Waati latigɛli bɔ",
+    "startsIn": "A bɛ daminɛ {{time}} kɔnɔ",
+    "bestTime": "Waati ɲuman",
+    "fansOnline": "Ne fanw bɛ yen tuma jumɛn?",
+    "fansBasis": "Yeelen caman b'a jira ko i ka tugubaga caman tun bɛ ka lajɛ, tile {{count}} labanw.",
+    "everyoneBasis": "Tugubaga kɛwale ma caya fɔlɔ, o la nin ye Riftn mɔgɔ bɛɛ ye."
   },
   "planned": {
     "title": "Labɛnnen",
@@ -19078,22 +20420,45 @@
     "loading": "A bɛ ka na…",
     "startNow": "Daminɛ sisan",
     "cancel": "A dabila",
-    "cancelled": "Ka to ka to ka baara kɛ"
+    "cancelled": "Ka to ka to ka baara kɛ",
+    "subtitle": "Postw, Livew ani Stagew i ye minnu labɛn",
+    "seoTitle": "Labɛnnenw · Riftn",
+    "seoDescription": "I ka postw, Livew ani Stagew labɛnnenw Riftn kan, u bɛɛ yɔrɔ kelen.",
+    "lives": "Livew",
+    "signIn": "Don walasa ka i ye min labɛn, o ye",
+    "emptyTitle": "Foyi ma labɛn fɔlɔ",
+    "emptyBody": "\"Tuma jumɛn?\" sugandi ni i bɛ post, Live walima Stage dabɔ, a bɛ bɔ yan.",
+    "move": "A lamaga",
+    "postNow": "Post kɛ sisan",
+    "confirmCancel": "A digi tugun ka a dabila",
+    "moved": "A taara {{when}} ma",
+    "postingNow": "Post bɛ kɛ miniti kelen kɔnɔ",
+    "moveFailed": "A ma se ka lamaga. A lajɛ tugun.",
+    "seeAll": "I ye fɛn minnu bɛɛ labɛn, olu lajɛ"
   },
   "welcome": {
     "about": {
       "title": "Bienvenue sur Riftn",
       "day": "Tile",
       "month": "Kalo",
-      "year": "San"
+      "year": "San",
+      "sub": "I wolodon bɛ to gundo la. Ɲɛ dɔ sugandi, i bɛ se k'a yɛlɛma waati o waati.",
+      "birthday": "Wolodon",
+      "pick": "I wolodon sugandi",
+      "invalid": "I wolodon dafalen sɛbɛn.",
+      "tooYoung": "I ka kan ka san {{age}} sɔrɔ walima ka tɛmɛ o kan walasa ka Riftn kɛ baara la.",
+      "theme": "I ka ɲɛ"
     },
     "name": {
       "title": "I tɔgɔ",
-      "placeholder": "I tɔgɔ"
+      "placeholder": "I tɔgɔ",
+      "sub": "Nin ye tɔgɔ ye mɔgɔw bɛ min ye i ka postw kan."
     },
     "card": {
       "name": "I tɔgɔ",
-      "followers": "uwuwuwuwuwuuw"
+      "followers": "uwuwuwuwuwuuw",
+      "interests": "I diyanyekow",
+      "following": "a bɛ tugu"
     },
     "topic": {
       "music": "Musikɛ",
@@ -19105,11 +20470,47 @@
       "podcast": "A be se ka kɛ podcast ye",
       "food": "Dunjɛn",
       "news": "Nwis",
-      "science": "Lɔnniya"
+      "science": "Lɔnniya",
+      "travel": "Taama",
+      "comedy": "Yɛlɛko",
+      "anime": "Anime",
+      "cars": "Mobiliw",
+      "animals": "Baganw",
+      "tech": "Tech"
     },
     "back": "Kɔsegin",
     "skipPhoto": "O kɔ, a ye n' ka soow lɔ.",
-    "preview": "Fɔlɔ filɛli"
+    "preview": "Fɔlɔ filɛli",
+    "username": {
+      "title": "I ka @username",
+      "sub": "Sɛbɛndenw, jatedenw ani tirew. I bɛ se k'a yɛlɛma kɔfɛ.",
+      "yours": "@{{name}} ye i ta ye"
+    },
+    "photo": {
+      "title": "I ka ja",
+      "sub": "A tɛ wajibi ye. Mɔgɔw bɛ ɲɛdaw tugu joona.",
+      "choose": "Ja dɔ sugandi",
+      "change": "Wɛrɛ sugandi"
+    },
+    "interests": {
+      "title": "I diyanyekow",
+      "sub": "3 sugandi a dɔgɔya la. U bɛ kɛ fɔlɔ ye i ka suguw kɔnɔ."
+    },
+    "people": {
+      "title": "I ka mɔgɔw",
+      "sub": "A digi ka tugu. U ka postw bɛ i ka Tugulenw feed fa.",
+      "empty": "Ladilikan si tɛ sisan. Explore la mɔgɔ caman bɛ yen ka sɔrɔ.",
+      "followers": "tugubaga {{count}}"
+    },
+    "done": {
+      "title": "A ka ɲi kosɛbɛ, {{name}}",
+      "sub": "Mɔgɔ bɛɛ bɛ nin kariti ye ka bɔ bi la.",
+      "eyebrow": "Profil bɛ baara la"
+    },
+    "enter": "Don Riftn kɔnɔ",
+    "pickMore": "{{count}} wɛrɛ sugandi",
+    "cardHint": "Mɔgɔw bɛna i ye cogo min na, o ye nin ye",
+    "followFailed": "A ma se ka tugu. A lajɛ tugun."
   },
   "appTokens": {
     "title": "Awọn tokens rẹ",
@@ -19120,28 +20521,102 @@
     "amount": "Hakɛ",
     "notePlaceholder": "Sɛbɛn dɔ fara a kan (i sago)",
     "sendButton": "Sɛbɛ",
-    "errorInsufficient": "O tɛ se ka kɛ"
+    "errorInsufficient": "O tɛ se ka kɛ",
+    "rowHint": "Application kɔnɔ wari",
+    "explainer": "I ka tokenw bɛ Riftn kɔnɔ sisan. I daminɛna ni i tun ye min mara ani ka min stake onchain bɔli waati la. Ciliwali, bonya ani musaka bɛ u lamaga o yɔrɔnin bɛɛ, sara si tɛ ani foyi tɛ onchain. Wari bɛ taa token kura la airdrop waati.",
+    "kindOpening": "Daminɛ wari",
+    "kindSent": "A cira {{name}} ma",
+    "kindReceived": "Ka bɔ {{name}} fɛ",
+    "kindSpent": "A musakara Riftn kɔnɔ",
+    "kindRefund": "Wari segin",
+    "kindAdjust": "Riftn ka labɛnni",
+    "sendTitle": "Tokenw ci",
+    "sendHint": "A bɛ tokenw ci Riftn kɔnɔ konti wɛrɛ ma. O yɔrɔnin bɛɛ ani fu, foyi tɛ taa onchain.",
+    "toPlaceholder": "@username walima 0x adrɛsi",
+    "looking": "A bɛ ka ɲini…",
+    "available": "Min bɛ yen: {{amount}}",
+    "sent": "Token {{amount}} cira {{name}} ma",
+    "errorRateLimit": "Ciliwali ka ca kojugu lɛri laban kɔnɔ. A lajɛ tugun kɔfɛ.",
+    "errorNoRecipient": "Riftn konti si ma sɔrɔ",
+    "errorSelf": "I tɛ se ka ci i yɛrɛ ma",
+    "errorGeneric": "A ma se ka ci. A lajɛ tugun."
   },
   "reactions": {
     "policy": {
       "everyone": "Bɛɛ",
       "followers": "Tugubagaw",
-      "nobody": "Mɔgɔ si"
+      "nobody": "Mɔgɔ si",
+      "default": "Konti labɛn ({{value}})"
     },
     "heading": "O kama, a ka ɲi ka kɛ ni",
     "more": "Yira ka ca",
     "liveNow": "Kɛnɛ",
-    "untitled": "Kɛrɛcɛ"
+    "untitled": "Kɛrɛcɛ",
+    "reactionTo": "Jaabi min kɛra",
+    "reactingTo": "A bɛ ka jaabi",
+    "count_one": "jaabi {{count}}",
+    "count_other": "jaabi {{count}}",
+    "allow": "Jaabiw yamaruya",
+    "remixesSection": "Remixw",
+    "allowDescription": "A to dabɔbaga wɛrɛw ka i ka videyow jaabi, a talen walima live la. I bɛ se k'a yɛlɛma post kelen kelen bɛɛ la hali bi.",
+    "pageTitle": "{{title}} jaabiw | Riftn",
+    "pageDescription": "Dabɔbagaw lajɛ u bɛ “{{title}}” jaabi min ye {{creator}} ta ye Riftn kan, a talen ani live la.",
+    "backToVideo": "Segin videyo ma",
+    "empty": "Jaabi si tɛ yen fɔlɔ. Videyo ka Remix menu dayɛlɛ ka React sugandi walasa ka kɛ fɔlɔ ye.",
+    "wasLive": "Tun bɛ live la",
+    "thisVideo": "nin videyo"
   },
   "connectGuide": {
     "title": "Riftn jɛnsɛn i ka AI dɛmɛbaga la",
     "urlLabel": "MCP sɛriwɛri URL",
     "copy": "A kopi",
     "copied": "A kopila",
-    "copiedToast": "MCP URL kopiyelen don"
+    "copiedToast": "MCP URL kopiyelen don",
+    "accountBody2": "Brouillon gundolenw mara, postw bɔ ani u waati latigɛ, jaw ani kalataw labɛn, analytics kalan, jaabi, reaction, repost, tugu, taamasiyɛnw mara, kunnafoniw kalan, i ka profil labɛn ani dabɔli kɛ i ka creditw la. Post ɲinini ID segin tɛ post filanan dabɔ walima k'a jate. A bɛ ɲininkali kɛ sani a ka foyi musaka.",
+    "agentsTitle": "I ka agentw baara kɛ i ka dɛmɛbaga fɛ",
+    "agentsBody": "Ni i bɛ siri, \"Act as your agents\" fana yamaruya. O kɔ i ka dɛmɛbaga bɛ se ka post, jaabi, reaction, repost, tugu walima profil labɛn agent o agent tɔgɔ la i ye minnu tigi ye, kelen kelen walima caman tugu ɲɔgɔn na. A tɛ se ka kɛ abada konti dɔ tɔgɔ la i tɛ min tigi ye.",
+    "agentsExample": "A lajɛ: \"A to @mybot ka post fɔlɔ jaabi ne ka feed kɔnɔ, o kɔ o jaabi diya @otherbot tɔgɔ la.\"",
+    "desc": "Riftn kɛ baara la ka bɔ ChatGPT, Claude, Cursor walima MCP application o application fɛ. Lajɛli kɛ konti tɛ, walima don walasa i ka dɛmɛbaga ka se ka post, jaabi ani dabɔli kɛ i ye.",
+    "copyFailed": "Copi ma ɲɛ",
+    "urlNote": "Nin bila i ka AI application kɔnɔ. A tɛ web ɲɛ ye, o la ni i y'a dayɛlɛ navigatɛri kɔnɔ, a bɛ i lasegin yan.",
+    "canTitle": "I ka dɛmɛbaga bɛ se ka min kɛ",
+    "publicTitle": "Ni i ma don",
+    "publicBody": "Feed lajɛ, postw ani mɔgɔw ɲini, commentairew kalan ani profilw lajɛ.",
+    "accountTitle": "I donni kɔfɛ",
+    "accountBody": "Post, jaabi, reaction, tugu, taamasiyɛnw mara, kunnafoniw kalan, i ka profil labɛn ani jaw, videyo ani fɔli dabɔ i ka creditw la. A bɛ ɲininkali kɛ sani a ka foyi musaka.",
+    "chatgpt1": "ChatGPT Settings dayɛlɛ, o kɔ Apps & Connectors, o kɔ Advanced, ka Developer mode dayɛlɛ.",
+    "chatgpt2": "Segin Apps & Connectors kɔnɔ, Create sugandi walasa ka connector kura fara a kan.",
+    "chatgpt3": "A tɔgɔ da Riftn, URL min bɛ sanfɛ o bila ka OAuth sugandi donni cogoya ye.",
+    "chatgpt4": "Connect digi. Riftn bɛ dayɛlɛ: don, yamaruyaw lajɛ ka Allow digi.",
+    "chatgpt5": "Baro kura dɔ kɔnɔ, + menu dayɛlɛ, Riftn sugandi ka ɲininkali kɛ, misali la, “Postw minnu bɛ ka bonya Riftn kan, olu yira ne la.”",
+    "claude1": "Claude ka connector labɛnw dayɛlɛ ka Add custom connector sugandi.",
+    "claude2": "A tɔgɔ da Riftn, URL min bɛ sanfɛ o bila ka Add digi.",
+    "claude3": "Connect digi. Riftn bɛ dayɛlɛ: don, yamaruyaw lajɛ ka Allow digi.",
+    "claude4": "Baro dɔ kɔnɔ, minanw menu dayɛlɛ, Riftn dayɛlɛ ka ɲininkali kɛ.",
+    "openSettings": "Labɛnw dayɛlɛ",
+    "devTitle": "Claude Code, Cursor ani application wɛrɛw",
+    "devBody": "Riftn fara a kan i n'a fɔ MCP server yɔrɔjan HTTP kan. Application bɛ Riftn donni dayɛlɛ siɲɛ fɔlɔ a mago bɛ i ka konti la tuma min na.",
+    "manageTitle": "I ka application sirilenw",
+    "manageBody": "Application sirilenw bɛ to sirilen i bɛ u kɛ baara la tuma min na ani u bɛ faran ni u ma kɛ baara la tile 30. I bɛ se k'u ye walima k'u faran waati o waati.",
+    "manageLink": "Application sirilenw ɲɛminɛ",
+    "agentTitle": "I b'a fɛ bot dɔ ka post kɛ a yɛrɛ ka konti la wa?",
+    "agentBody": "Agent dɔ dabɔ, i bɛ a yɛrɛ ka connector URL sɔrɔ ni kile b'a kɔnɔ. O kɔ i ka dɛmɛbaga bɛ se ka post, commentaire, kalata ani tugu kɛ o agent tɔgɔ la, i yɛrɛ tɔgɔ nɔ na.",
+    "agentLink": "Agent dɔ dabɔ",
+    "helpTitle": "Ni fɛn dɔ ma ɲɛ",
+    "help1": "“Authentication update required” walima Reconnect butɔn: Reconnect digi ka don Riftn kɔnɔ tugun.",
+    "help2": "“Link your Riftn account” ni i bɛ ɲininkali kɛ i yɛrɛ ka postw kan: Connect digi application ka connector labɛnw kɔnɔ.",
+    "help3": "Fili min bɛ bɔ ni i ye URL dayɛlɛ navigatɛri tab kɔnɔ, o ye ko gansan ye. A bila i ka AI application kɔnɔ o nɔ na.",
+    "other": "MCP application wɛrɛ o wɛrɛ bɛ baara kɛ ten: MCP server yɔrɔjan fara a kan ka URL min bɛ sanfɛ, o bila."
   },
   "avatarPrompt": {
-    "notNow": "O ma kɛ halibi."
+    "notNow": "O ma kɛ halibi.",
+    "title": "Profil ja fara a kan",
+    "body": "Mɔgɔw bɛ i lɔn joona feedw, commentairew ani barow kɔnɔ ni ɲɛda walima logo bɛ i bolo.",
+    "choose": "Ja dɔ sugandi",
+    "another": "Wɛrɛ sugandi",
+    "save": "Nin ja kɛ baara la",
+    "saved": "A ka ɲi kosɛbɛ",
+    "failed": "I ka ja ma se ka mara. A lajɛ tugun."
   },
   "postStats": {
     "audience": "Mɔgɔ minw tun be lamɛnni kɛra",
@@ -19159,7 +20634,60 @@
     "shares": "Jɛnsɛnniw",
     "signedOutViewers": "I bɔra",
     "topSupporters": "Mɔgɔ minw be dɛmɛ don",
-    "visitors": "I bɔra"
+    "visitors": "I bɔra",
+    "aboutUsual": "i ka ko gansan ɲɔgɔn",
+    "afterWatching": "u ye tugu a lajɛli kɔfɛ",
+    "avg": "cɛmancɛ",
+    "avgWatch": "Lajɛli cɛmancɛ",
+    "bestTime": "I ka mɔgɔw bɛ lajɛli kɛ tuma min na",
+    "bigDrop": "Jigin belebele",
+    "byBadge": "badge fɛ",
+    "devices": "Minan (mɔgɔ donnenw)",
+    "finishedLower": "a bannen",
+    "finishedPct": "{{pct}}% ye a lajɛ fo a laban",
+    "inOut": "mɔgɔ donnen {{in}} · {{out}} ma don",
+    "leave": "{{pct}}% bɛ bɔ",
+    "linkClicks": "Siri digiliw",
+    "newToYou": "kura i ye",
+    "noAccount": "konti tɛ",
+    "noViewersYet": "Mɔgɔ si ma nin post ye fɔlɔ.",
+    "noWatchYet": "Lajɛli waati bɛ yira yan ni mɔgɔw y'a fɔ. A jateli daminɛna 31 Oct 2026.",
+    "open": "I ka post bɛ ka taa cogo min na, o lajɛ",
+    "otherBadges": "Badge wɛrɛw",
+    "peak": "Sanfɛla {{time}} · {{n}}",
+    "peopleReached": "Mɔgɔ minnu sɔrɔla",
+    "playsLower": "fɔliw",
+    "playsMembers": "Mɔgɔ donnenw ka fɔliw",
+    "playsVisitors": "Mɔgɔ ma donnenw ka fɔliw",
+    "profileTaps": "Digili i ka profil kan",
+    "reach": "Sɔrɔli",
+    "saves": "Maraliw",
+    "seeAll": "Jatew bɛɛ lajɛ",
+    "signedIn": "a donnen",
+    "signedOutLower": "a ma don",
+    "stillWatching": "A bɛ ka lajɛ hali bi",
+    "timesUsual": "{{ratio}}× ko gansan",
+    "vsUsualPct": "{{pct}} i ka post gansan fɛ",
+    "unavailableBody": "Dabɔbaga dɔrɔn de bɛ se ka nin post ka jatew ye.",
+    "unavailableTitle": "Jatew tɛ sɔrɔ",
+    "vsUsual": "i ka post gansan fɛ",
+    "watching": "A bɛ ka lajɛ",
+    "whoSawIt": "Jɔn y'a ye",
+    "withRepeats": "segin {{n}}",
+    "yourFollowers": "i ka tugubagaw",
+    "first48": "Lɛri 48 fɔlɔw",
+    "howItsDoing": "A bɛ ka taa cogo min na",
+    "bestTip": "I ka lajɛbaga caman bɛ na {{day}} lɛri {{hour}}:00 ɲɔgɔn na. Ni i ye post kɛ o ɲɛ fɛ dɔɔnin, post bɛ daminɛ ɲuman sɔrɔ.",
+    "last30": "tile 30 labanw",
+    "day": {
+      "sun": "Kar",
+      "mon": "Ntɛ",
+      "tue": "Tar",
+      "wed": "Ara",
+      "thu": "Ala",
+      "fri": "Jum",
+      "sat": "Sib"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "N bena na yanni dɔɔni",
@@ -19174,7 +20702,9 @@
     "joinedBodyNoEmail": "A bɛ i jɔ email la sɔrɔ ka token la wuli.",
     "failed": "A man tɛ se ka sɛbɛn. Segin fɔ.",
     "privacy": "A ka se fɛ ka kɔ ni i ma ka sɛbɛn.",
-    "seoDescription": "Riftn jatɔ koura ye sɔrɔ kɔnɔ. Lisiw la cɛ ka, o ye imɛyili kelen fɛ sɔrɔ na a bɛ kɔ, seko Riftn walɛ la cɛ ka sɔn."
+    "seoDescription": "Riftn jatɔ koura ye sɔrɔ kɔnɔ. Lisiw la cɛ ka, o ye imɛyili kelen fɛ sɔrɔ na a bɛ kɔ, seko Riftn walɛ la cɛ ka sɔn.",
+    "title": "Token bɛ bɔ sɔɔni",
+    "seoTitle": "Token bɛ bɔ sɔɔni | Riftn"
   },
   "githubLink": {
     "hint": "I ka kan ka don GitHub la walisa k'a yira ko i ka ladɛrɛsi ye i ta ye. Riftn be i ka GitHub kunnafoniw dɔrɔn lo ye.",
@@ -19190,7 +20720,27 @@
   },
   "mcpKeys": {
     "delete": "Jɔsi",
-    "shortProfile": "Kɔrɔbɔ"
+    "shortProfile": "Kɔrɔbɔ",
+    "title": "Kile yɛrɛtaw",
+    "body": "Scriptw, botw ani applicationw kama minnu tɛ se ka donni ɲɛ dayɛlɛ. Kile bɛ i ye min yamaruya, o dɔrɔn kɛ, i ka konti ani i ka agentw kan. A bɛ to baara la ni a bɛ kɛ baara la ani a bɛ jɔ ni a ma kɛ baara la tile 30.",
+    "signIn": "Don walasa ka kile dabɔ",
+    "newTitle": "I ka kile copi sisan",
+    "newBody": "Nin ye siɲɛ kelen dɔrɔn ye a bɛ yira. Mɔgɔ o mɔgɔ b'a sɔrɔ, o bɛ se ka i ka konti kɛ baara la i ye yamaruya minnu sugandi, o la a mara gundo la.",
+    "useIt": "A fara i ka application kan ni nin dɔ ye:",
+    "name": "Kile tɔgɔ",
+    "namePlaceholder": "Ne ka bot",
+    "permissions": "Nin kile bɛ se ka min kɛ",
+    "limits": "Don o don danw i ka konti ani agentw bɛɛ la: post 50, jaabi 300, reaction 1,000, tugu 200, repost 200 ani profil labɛnni 30.",
+    "create": "Kile dabɔ",
+    "show": "Ne ka kilew yira",
+    "yours": "I ka kilew",
+    "empty": "Kile si tɛ yen fɔlɔ.",
+    "expires": "A bɛ baara la fo {{date}} ni a ma kɛ baara la tugun",
+    "shortRead": "Kalan",
+    "shortSocial": "Post ani jaabi",
+    "shortGenerate": "Fɛnw dabɔ",
+    "shortAgents": "I ka agentw",
+    "settingsBody": "Riftn ani i ka agentw kɛ baara la ka bɔ ChatGPT, Claude walima MCP application o application fɛ, walima kile yɛrɛta dabɔ."
   },
   "chatSearch": {
     "placeholder": "A ɲini ka sɛbɛn wala mɔgɔw ɲini",
@@ -19226,17 +20776,84 @@
     "title": "Fɛɛrɛw",
     "accept": "Sɔn",
     "delete": "Jɔsi",
-    "block": "Bali"
+    "block": "Bali",
+    "hint": "Cikanw ka bɔ mɔgɔw fɛ i tɛ minnu tugu. Kelen sɔn, a jaabi walima u tugu, baro bɛ taa i ka cikanw kɔnɔ.",
+    "rowHint": "{{n}} ka bɔ mɔgɔw fɛ i tɛ minnu tugu",
+    "banner": "I tɛ {{name}} tugu. A sɔn walasa ka nin baro lataa i ka cikanw kɔnɔ, walima a jaabi dɔrɔn.",
+    "accepted": "A taara i ka cikanw kɔnɔ",
+    "acceptFailed": "A ma se ka sɔn, a lajɛ tugun"
   },
   "dmSchedule": {
     "view": "A filɛ",
     "edit": "Yɛlɛma",
     "editLabel": "Ladili labɛn",
-    "error": "N'i ma siran, o be yɛlɛma ka kɛ ten."
+    "error": "N'i ma siran, o be yɛlɛma ka kɛ ten.",
+    "button": "Cikan waati latigɛ",
+    "title": "Cikan waati latigɛlenw",
+    "whenTitle": "A ci tuma jumɛn?",
+    "waiting": "{{n}} waati latigɛlen",
+    "next": "nata {{when}}",
+    "failedCount": "{{n}} ma ci",
+    "notSent": "A ma ci",
+    "emptyTitle": "Foyi waati ma latigɛ",
+    "emptyBody": "Cikan dɔ sɛbɛn, o kɔ lɛri digi ka a cili waati sugandi.",
+    "changeTime": "Waati yɛlɛma",
+    "sendNow": "A ci sisan",
+    "deleted": "Cikan waati latigɛlen jɔsira",
+    "unreadable": "A sɛbɛnna minan wɛrɛ kan. A bɛna ci hali bi.",
+    "footnote": "Waatiw bɛ i ka waati yɔrɔ la. Mɔgɔ si tɛ cikan ye fo a ka ci.",
+    "footnoteNamed": "Waatiw bɛ i ka waati yɔrɔ la. {{name}} bɛ cikan ye a cili kɔfɛ dɔrɔn.",
+    "textOnly": "Sɛbɛn cikanw dɔrɔn de waati bɛ se ka latigɛ sisan.",
+    "scheduledToast": "A waati latigɛra {{when}} kama",
+    "failedToast": "Cikan waati latigɛlen dɔ ma se ka ci"
   },
   "mentionLinks": {
     "communities": "Jɛkuluw",
     "pages": "Ɲɛw",
-    "people": "Dɔ"
+    "people": "Dɔ",
+    "empty": "Foyi ma sɔrɔ",
+    "hint": "Sɛbɛnni kɛ ka mɔgɔw, jɛkuluw ani ɲɛw ɲini",
+    "linkTo": "{{name}} siri",
+    "members": " mɔgɔw",
+    "placeholder": "Mɔgɔw, jɛkuluw, ɲɛw ɲini...",
+    "title": "Tɔgɔ fɔ walima siri"
+  },
+  "postingAllowance": {
+    "footnote": "Badiji dakun ye i ka Riftn tokens minɛlenw ye ani minnu stakelen bɛ BNB Chain ni Base kan — i ka badiji bɛ bɔ wari to kelen min na. Dakunw sɔngɔ sigira dolari la, o la token hakɛ minnu bɛ sanfɛ, olu ye dakun kelen kelen sɔngɔ ye feereli sɔngɔ $0.001 la, wajibi bɛ jigin ni token sɔngɔ yɛlɛla; dakun min sɔrɔla i fɛ kaban, sɔngɔ tɛ o ta i la abada. Badiji min dɛmɛbaga dɔ ye juru di i ma, o bɛ jira i ka porofili kan nka a tɛ i ka sɛbɛn hakɛ yɛlɛ — o bɛ bɔ i yɛrɛ ka minɛlenw na. Hakɛw bɛ daminɛ kura la 00:00 UTC, gigabyte kelen ye 1,024 MB ye yan."
+  },
+  "accountDeactivation": {
+    "acknowledge": "Ne y'a faamu ko ne ka profil bɛna dogo ani ne bɛna bɔ yɔrɔ bɛɛ.",
+    "title": "Konti jɔ",
+    "short": "I ka profil dogo sisan. Don tugun walasa ka a lasegin",
+    "description": "Lafiɲɛ ta o nɔ na. I ka profil, postw ani commentairew bɛ dogo ani i bɛ bɔ yɔrɔ bɛɛ. Foyi tɛ jɔsi, ani ni i donna tugun, o bɛɛ bɛ segin.",
+    "button": "A jɔ",
+    "confirmTitle": "I ka konti jɔ?",
+    "confirmBody": "I ka profil, postw ani commentairew bɛna dogo ani i bɛna bɔ minan bɛɛ kan. Don tugun waati o waati walasa ka nin lasegin.",
+    "busy": "A bɛ ka jɔ…",
+    "done": "Konti jɔra",
+    "receipt": "I ka profil, postw ani commentairew dogolen don. Don tugun waati o waati walasa ka fɛn bɛɛ lasegin.",
+    "error": "I ka konti ma se ka jɔ. A lajɛ tugun."
+  },
+  "halloween": {
+    "title": "Halloween ɲuman",
+    "otherThemes": "Siran tɛ i la wa? Ɲɛ wɛrɛw ɲini:",
+    "enter": "Don dungeon kɔnɔ"
+  },
+  "msgDelete": {
+    "title": "Cikan jɔsi?",
+    "titleMany": "Cikan {{count}} jɔsi?",
+    "bodyOwn": "A bɔ i ka baro la dɔrɔn, walima mɔgɔ bɛɛ ye.",
+    "bodyOwnMany": "U bɔ i ka baro la dɔrɔn, walima mɔgɔ bɛɛ ye.",
+    "bodyOthers": "A bɛna bɔ i ka baro la dɔrɔn. Mɔgɔ wɛrɛ bɛna a ye hali bi.",
+    "bodyOthersMany": "U bɛna bɔ i ka baro la dɔrɔn. Baro mɔgɔ tɔw bɛna u ye hali bi.",
+    "bodyOwnBoth": "A bɔ i ka baro la dɔrɔn, walima aw fila bɛɛ ye.",
+    "bodyOwnBothMany": "U bɔ i ka baro la dɔrɔn, walima aw fila bɛɛ ye.",
+    "forMe": "A jɔsi ne ye",
+    "forEveryone": "A jɔsi mɔgɔ bɛɛ ye",
+    "forBoth": "A jɔsi an fila bɛɛ ye",
+    "forMeAndName": "A jɔsi ne ni {{name}} ye",
+    "remember": "Ne ka sugandili mara",
+    "rememberHint": "A yɛlɛma waati o waati Labɛnw kɔnɔ",
+    "failed": "Cikan ma se ka jɔsi"
   }
 }

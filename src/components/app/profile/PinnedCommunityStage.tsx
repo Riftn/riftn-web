@@ -53,11 +53,14 @@ export function PinnedCommunityStrip({
   if (!community.banner_url) return null;
   return (
     <div data-pinned-strip data-keep-dark className="relative flex h-[72px] items-center gap-3 px-4 sm:px-6">
+      {/* The art turns sharp gradually: three blurred copies, each a little
+          sharper and lower than the last, then the picture itself. */}
       <div data-pinned-dissolve aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10">
-        <div data-pinned-dissolve-bleed style={{ backgroundImage: `url(${storageImage(community.banner_url, 480)})` }} />
-        <div data-pinned-dissolve-art style={{ backgroundImage: `url(${storageImage(community.banner_url, 1100)})` }}>
-          <div data-pinned-strip-shade className="absolute inset-0" />
-        </div>
+        <div data-pinned-dissolve-layer="heavy"><div style={{ backgroundImage: `url(${storageImage(community.banner_url, 480)})` }} /></div>
+        <div data-pinned-dissolve-layer="mid"><div style={{ backgroundImage: `url(${storageImage(community.banner_url, 480)})` }} /></div>
+        <div data-pinned-dissolve-layer="soft"><div style={{ backgroundImage: `url(${storageImage(community.banner_url, 1100)})` }} /></div>
+        <div data-pinned-dissolve-layer="sharp"><div style={{ backgroundImage: `url(${storageImage(community.banner_url, 1100)})` }} /></div>
+        <div data-pinned-strip-shade />
       </div>
       <button
         type="button"

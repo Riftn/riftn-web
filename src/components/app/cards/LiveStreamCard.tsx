@@ -1666,9 +1666,12 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             
             {/* While the picture is loading the spinner is the only thing in
                 the middle: the play/pause button stays tappable but never
-                draws over it. A paused live shows Play and no spinner. */}
+                draws over it. A paused live shows Play and no spinner. While
+                any status is up (connecting, reconnecting, waiting) there is
+                nothing to pause yet, so Pause stays hidden even on hover;
+                Play still shows when playback actually stopped. */}
             <div className={cn('absolute inset-0 flex items-center justify-center transition-opacity',
-              isBuffering && !error && !broadcastPaused
+              (isBuffering && !error && !broadcastPaused) || ((isBuffering || error || broadcastPaused) && isPlaying)
                 ? 'opacity-0'
                 : isPlaying ? 'bg-black/30 opacity-0 hover:opacity-100 focus-within:opacity-100' : 'bg-black/30 opacity-100')}>
               <button

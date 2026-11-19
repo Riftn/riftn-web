@@ -69,6 +69,11 @@ function movedKey(prev: string[], next: string[]): string | null {
   return next[i + 1] === prev[i] ? next[i] : prev[i];
 }
 
+/** A stream that is on air right now. */
+function isLiveEntry(video: VideoItem): boolean {
+  return !!(video.isLiveNow || video.liveIsActive);
+}
+
 /** Bar heights for a song tile — stable per post so a re-render never reshuffles them. */
 function waveFor(id: string, bars = 18): number[] {
   let h = 0;
@@ -196,6 +201,9 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
    */
   const openReel = (entry: MixedGridEntry, id: string): boolean => {
     if (entry.isRepost || entry.isOptimistic || !profileFeed?.current) return false;
+    // A stream on air right now has no slide in the reel (it would read as a
+    // plain "is live" text card), so it opens its post page and the player.
+    if (entry.type === 'video' && isLiveEntry(entry.data as VideoItem)) return false;
     // A pinned post that is not also in the loaded list is usually an old one:
     // the reel would have to page back through the whole history to find it.
     if (entry.isPinned && !entries.some((other) => !other.isPinned && !other.isRepost && other.data.id === entry.data.id)) return false;
@@ -257,7 +265,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
 
           if (entry.type === 'video') {
             const video = entry.data as VideoItem;
-            const isLive = !!(video.isLiveNow || video.liveIsActive);
+            const isLive = isLiveEntry(video);
             const locked = !!(video.isPPV || video.isLocked) && !video.isUnlocked && !video.isOwner;
             const mediaKind = mediaCardOf(video);
 

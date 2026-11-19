@@ -16,9 +16,17 @@ import type { Community } from '@/hooks/use-communities';
 import { communityKindOf, entryPriceOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import dehubCoin from '@/assets/dehub-coin.png';
+import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
+import { formatTimeAgo } from '@/lib/feed-utils';
+import { roomPreviewLine } from '@/lib/room-chat-read';
+import type { RoomSummary } from '@/hooks/use-room-chat-summaries';
 
-export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress }: {
+export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress, summary, me = '' }: {
   community: Community;
+  /** Newest line and unread number (hooks/use-room-chat-summaries). */
+  summary?: RoomSummary;
+  /** Your wallet, so your own newest line reads "You: …". */
+  me?: string;
   onClick: () => void;
   pref?: ChatPref;
   /** Reactions to your messages here that you haven't seen yet. */
@@ -42,9 +50,14 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
       ? t('communities.newChat.groupRow', { defaultValue: 'Group · {{formattedCount}} members', ...members })
       : t('communities.newChat.communityRow', { defaultValue: 'Community · {{formattedCount}} members', ...members });
 
+  const unread = selected ? 0 : (summary?.unread ?? 0);
+  const preview = summary?.last ? roomPreviewLine(summary.last, me, (key, options) => t(key, options)) : '';
+  const lastAt = summary?.last?.created_at ? formatTimeAgo(summary.last.created_at) : '';
+
   return (
     <button
       data-chat-list-row
+      data-unread={unread > 0 ? '' : undefined}
       type="button"
       onClick={() => { if (hold.consumeClick()) return; onClick(); }}
       {...hold.handlers}
@@ -77,15 +90,19 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
           <KindIcon className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
           <span className="truncate">{community.name}</span>
           {community.is_private && <Lock className="w-3 h-3 shrink-0 text-zinc-500" />}
-          {isMuted(pref) && <BellOff data-chat-row-muted aria-hidden="true" className="ml-auto h-3.5 w-3.5 shrink-0 text-zinc-500" />}
-          {pref?.pinnedAt && <Pin data-chat-row-pinned aria-hidden="true" className={`${isMuted(pref) ? '' : 'ml-auto'} h-3.5 w-3.5 shrink-0 rotate-45 text-zinc-500`} />}
-          {pref?.markedUnread && !reactions && (
-            <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className={`${pref?.pinnedAt || isMuted(pref) ? 'ml-1' : 'ml-auto'} h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white`} />
+          {lastAt && <span data-room-last-at className="ml-auto shrink-0 pl-1 text-sm font-normal text-zinc-500 tabular-nums">{lastAt}</span>}
+          {isMuted(pref) && <BellOff data-chat-row-muted aria-hidden="true" className={`${lastAt ? 'ml-1' : 'ml-auto'} h-3.5 w-3.5 shrink-0 text-zinc-500`} />}
+          {pref?.pinnedAt && <Pin data-chat-row-pinned aria-hidden="true" className={`${isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} h-3.5 w-3.5 shrink-0 rotate-45 text-zinc-500`} />}
+          {pref?.markedUnread && !reactions && !(unread > 0) && (
+            <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className={`${pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white`} />
           )}
-          <ReactionAlertBadge reactions={reactions} className={pref?.pinnedAt || isMuted(pref) ? 'ml-1' : 'ml-auto'} />
+          <ReactionAlertBadge reactions={reactions} className={pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} />
+          {unread > 0 && <UnreadCountChip count={unread} className="ml-1" />}
         </span>
         {reactions ? (
           <p data-reaction-alert-line className="text-white font-bold text-sm truncate">{reactionAlertLine(t, reactions, { named: true })}</p>
+        ) : preview ? (
+          <p data-room-preview className={`text-sm truncate text-white ${unread > 0 ? 'font-bold' : 'font-normal'}`}>{preview}</p>
         ) : (
         <p className="text-zinc-500 text-sm truncate flex items-center gap-1">
           {subtitle}

@@ -1,7 +1,10 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useLayoutEffect, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
 import MessagesIcon from '@/components/ui/cut-icons/messages';
 import { cn } from '@/lib/utils';
+
+/** Full-screen shells on the page right now; <body> is marked while any is up. */
+let shellsUp = 0;
 
 /**
  * Messages with nothing else on screen, at riftn.com/chat.
@@ -27,6 +30,16 @@ export function FullScreenChatShell({
   inline?: boolean;
 }) {
   const { t: _copy } = _useCopy();
+  // index.css lifts menus and sheets above this layer while it is up.
+  useLayoutEffect(() => {
+    if (inline) return;
+    shellsUp += 1;
+    document.body.setAttribute('data-fullscreen-chat-up', '');
+    return () => {
+      shellsUp -= 1;
+      if (shellsUp <= 0) { shellsUp = 0; document.body.removeAttribute('data-fullscreen-chat-up'); }
+    };
+  }, [inline]);
   return (
     <div
       id={inline ? undefined : 'app-root'}

@@ -32,6 +32,7 @@
 import { createLogger } from './logger';
 import { getDocumentScrollTop, scrollDocumentTo } from './document-scroll';
 import { bodyScrollLockDepth, bodyScrollLockOwners } from './body-scroll-lock';
+import { bodyMarked } from './body-mark';
 
 const log = createLogger('ScrollFreeze');
 
@@ -75,7 +76,7 @@ function overlayIsOpen(): boolean {
     bodyScrollLockDepth() > 0 ||
     !!document.fullscreenElement ||
     !!document.querySelector(OPEN_OVERLAY_SELECTOR) ||
-    document.body.classList.contains('shorts-viewer-open')
+    bodyMarked('data-shorts-viewer-open')
   );
 }
 

@@ -30,7 +30,7 @@ import { useUserLanguage, LANGUAGE_NAMES } from '@/hooks/use-user-language';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
 import { clientNavigate } from '@/lib/client-navigate';
 import { setFilterValue } from '@/hooks/use-persisted-feed-filter';
-import { parseDehubLink } from '@/lib/dehub-links';
+import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
 import { expandEmojiTokens } from '@/components/app/emoji/EmojiText';
 
 export { LANGUAGE_NAMES };
@@ -435,9 +435,11 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
     }
     if (wrapped) urlRegex.lastIndex += 1;
 
+    // Our own pages open in place, card or not; other sites get a new tab.
     const dehubLink = parseDehubLink(url);
-    const href = dehubLink
-      ? dehubLink.path
+    const ownPath = dehubLink ? dehubLink.path : ownSitePath(url);
+    const href = ownPath
+      ? ownPath
       : url.match(/^https?:\/\//i)
         ? url
         : `https://${url}`;
@@ -446,14 +448,14 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
       <a
         key={`chat-link-${match.index}`}
         href={href}
-        target={dehubLink ? undefined : '_blank'}
-        rel={dehubLink ? undefined : 'noopener noreferrer'}
+        target={ownPath ? undefined : '_blank'}
+        rel={ownPath ? undefined : 'noopener noreferrer'}
         className="underline underline-offset-2 decoration-white/40 hover:decoration-white break-all transition-colors"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (dehubLink) {
-            clientNavigate(dehubLink.path);
+          if (ownPath) {
+            clientNavigate(ownPath);
           } else {
             window.open(href, '_blank', 'noopener,noreferrer');
           }

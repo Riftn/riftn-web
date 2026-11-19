@@ -6,7 +6,11 @@
     "videoSize": "この動画は {{n}} MB を超えています。もっと小さいものを選んでください。"
   },
   "textFeed": {
-    "tab": "テキスト"
+    "tab": "テキスト",
+    "errorTitle": "投稿を読み込めませんでした",
+    "errorBody": "テキストフィードをもう一度読み込んでください。",
+    "emptyTitle": "テキスト投稿はまだありません",
+    "emptyBody": "テキスト投稿はここに表示されます。"
   },
   "comic": {
     "showAll": "全{{count}}ページを表示"
@@ -46,12 +50,16 @@
     "pageDescription": "この動画のすべてのデュエットをRiftnで視聴するか、並べて独自の動画を録画しましょう。",
     "empty": "まだデュエットはありません。動画のオプションを開き、「リミックス」→「デュエット」を選択して最初のデュエットを作成しましょう。",
     "notFound": "この動画は利用できません。",
-    "browseShorts": "ショート動画をブラウズ"
+    "browseShorts": "ショート動画をブラウズ",
+    "notFoundTitle": "動画が見つかりません | Riftn"
   },
   "videoRemix": {
     "sound": "このサウンドを使用",
     "menu": "リミックス",
-    "green-screen": "グリーンスクリーン"
+    "green-screen": "グリーンスクリーン",
+    "duet": "デュエット",
+    "stitch": "スティッチ",
+    "selectSource": "動画のオプションを開き、「リミックス」を選んで始めましょう。"
   },
   "remixLinks": {
     "policy": {
@@ -106,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "ブラウザでRiftnを開く",
     "seoDescription": "Riftnアプリを入手：ライブストリーミング、暗号化されたメッセージング、ウォッチツーアーンを備えたオープンソースのユーザー所有ソーシャルメディア。Google Play、App Store、ウェブで無料でご利用いただけます。",
-    "seoTitle": "Riftnアプリ, Android、iPhone、Web用ダウンロード"
+    "seoTitle": "Riftnアプリ, Android、iPhone、Web用ダウンロード",
+    "learnMore": "全体像を知りたいですか？<guide>Riftnとは？</guide>でプラットフォームを詳しく解説しています。"
   },
   "dehubLinks": {
     "copyLinkDetail": "{{item}}のリンクをクリップボードにコピーする",
@@ -288,7 +297,8 @@
       "location": "場所",
       "custom": "カスタム",
       "customOption": "カスタムラベル"
-    }
+    },
+    "placeholderLink": "yoursite.com"
   },
   "followedTags": {
     "follow": "#{{tag}} をフォロー",
@@ -435,7 +445,8 @@
     "step": "アカウント制御の場合は、OAuthコネクタとしてhttps://riftn.com/mcpを追加し、Riftnにサインインしてアクセスを許可する前にアクセス許可を確認します。",
     "profilePrompt": "Riftnのプロフィールを次のように更新します。映画や音楽を制作する独立系クリエイター。",
     "generatePrompt": "Riftnの画像モデルを表示し、生成する前にポートレートを引用してください。",
-    "libraryPrompt": "Riftn Creatorライブラリに最新のアセットを表示します。"
+    "libraryPrompt": "Riftn Creatorライブラリに最新のアセットを表示します。",
+    "agents": "所有するエージェントとして投稿、返信、リアクション、リポスト、フォロー、プロフィール編集を行う"
   },
   "twitchMirror": {
     "title": "Twitchミラーリング",
@@ -1294,9 +1305,19 @@
     "menuLayoutSectionsDesc": "すべてのページを見出しの下に表示",
     "menuLayoutFolders": "フォルダ",
     "menuLayoutFoldersDesc": "メインのページと、グループごとのフォルダ",
+    "publicChatInBar": "下のバーに公開チャット",
+    "publicChatInBarDesc": "画面下のバーからワンタップで公開チャットへ",
     "tipsOffNote": "これがオンの間、チップの受け取りはオフになります。チップを再び受け取るにはオフにしてください。",
     "chatCards": "チャットをカード表示",
-    "chatCardsDesc": "チャットごとにカードで表示します。オフにすると区切り線付きのシンプルな一覧になります。"
+    "chatCardsDesc": "チャットごとにカードで表示します。オフにすると区切り線付きのシンプルな一覧になります。",
+    "chatDeleteChoice": "メッセージを削除するとき",
+    "chatDeleteChoiceDesc": "毎回確認するか、常に自分だけ、またはチャットの全員から削除するかを選べます。",
+    "chatDeleteAsk": "毎回確認する",
+    "chatDeleteMe": "自分だけ削除",
+    "chatDeleteMeDesc": "自分のチャットからは消えますが、他の人には表示されたままです",
+    "chatDeleteEveryone": "全員から削除",
+    "chatDeleteEveryoneDesc": "可能な場合のみ。グループ内の他の人のメッセージは自分のチャットからのみ削除されます",
+    "ensSection": "ENS"
   },
   "common": {
     "confirm": "確認",
@@ -1437,7 +1458,10 @@
     "refreshLinkPreview": "リンクプレビューを更新",
     "linkPreviewRefreshed": "リンクプレビューを更新しました",
     "linkPreviewRefreshFailed": "サイトに接続できませんでした。後でもう一度試してください。",
-    "castToTv": "テレビにキャスト"
+    "castToTv": "テレビにキャスト",
+    "castStarted": "テレビで再生中",
+    "castUnsupported": "このブラウザはキャストできません。テレビで再生するには、ChromeまたはSafariでRiftnを開いてください。",
+    "castFailed": "テレビに接続できませんでした。同じWi-Fiに接続されているか確認して、もう一度お試しください。"
   },
   "filters": {
     "sort": "並べ替え",
@@ -1838,7 +1862,8 @@
     "receiveEvm": "ベース・BNB・ETH",
     "receiveSolanaDescription": "ここではSOLとSPLトークンのみを送ります。 別のネットワークから送信されたものはすべて失われます。",
     "solanaSendUnavailable": "ソラナで送信することはまだできません",
-    "solanaSendUnavailableHint": "ファントムを直接使用してこのバランスを移動してください。"
+    "solanaSendUnavailableHint": "ファントムを直接使用してこのバランスを移動してください。",
+    "evmAddressLabel": "EVM"
   },
   "bookmarks": {
     "title": "ブックマーク",
@@ -2054,6 +2079,12 @@
     "likes": "いいね",
     "subscribers": "登録者",
     "affiliates": "アフィリエイト",
+    "ogChallenge": "OGチャレンジ",
+    "ogHolders_one": "OGホルダー{{count}}人",
+    "ogHolders_other": "OGホルダー{{count}}人",
+    "ogChallengeTitle": "OGホルダーを呼び戻そう",
+    "ogChallengeBody": "まだDHBを持っている人を招待しよう。招待リンクから参加し、RiftnウォレットにDHBを保有していれば、ここであなたのカウントになります。",
+    "ogChallengeCta": "招待リンクを取得",
     "directReferrals_one": "直接 {{count}} 人",
     "directReferrals_other": "直接 {{count}} 人",
     "secondaryReferrals_one": "間接 {{count}} 人",
@@ -2236,7 +2267,9 @@
     "deviceInfoOwners": "ボードの所有者のみが閲覧可能",
     "deviceInfoError": "デバイス情報を読み込めませんでした",
     "deviceInfoNone": "このリクエストのデバイス情報はありません",
-    "deviceInfoErrors": "最近のエラー"
+    "deviceInfoErrors": "最近のエラー",
+    "editMedia": "写真と動画",
+    "editAddMedia": "写真または動画を追加"
   },
   "auth": {
     "loginRequired": "ログインが必要です",
@@ -2258,7 +2291,9 @@
       "dmsOff": "DM不可",
       "keepTyping": "入力して全員を検索",
       "sayHi": "誰かに挨拶する",
-      "typeAny": "名前または @ユーザー名を検索"
+      "typeAny": "名前または @ユーザー名を検索",
+      "noOne": "見つかりませんでした",
+      "tryUsername": "正確な@ユーザー名で検索してみてください"
     },
     "reply": "返信",
     "react": "リアクション",
@@ -2398,7 +2433,9 @@
       "again": "再予約する",
       "cta": "今すぐ予約",
       "letGo": "解放する",
-      "haveAccount": "アカウントをお持ちですか？"
+      "haveAccount": "アカウントをお持ちですか？",
+      "seoTitle": "@{{name}}はRiftnで利用可能です",
+      "seoDescription": "riftn.com/{{name}}はまだ誰も使っていません。予約してサインアップすれば、あなたのものになります。"
     },
     "usernameAvailable": "ユーザー名が利用可能です！",
     "signUpToClaim": "登録して取得",
@@ -2970,7 +3007,13 @@
     "walletLoadFailed": "ウォレットの読み込みに失敗しました。再試行してください。",
     "openInBrowser": "ブラウザで開く",
     "copyLink": "リンクをコピー",
-    "profileMovedTitle": "プロフィールが移動しました"
+    "profileMovedTitle": "プロフィールが移動しました",
+    "bringLoginOver": "dehub.ioでRiftnを使っていましたか？<bring>ログインを引き継ぐ</bring>",
+    "migrateWrongLogin": "そのサインインでは別のウォレットが開いたため、何も変更されていません。以前のプロフィールは{{login}}で作成されています。それを使って復元してください。",
+    "googleInAppTitle": "{{app}}内ではGoogleでサインインできません",
+    "googleInAppTitleUnnamed": "このアプリ内ではGoogleでサインインできません",
+    "googleInAppBody": "Googleを使うにはブラウザでRiftnを開くか、ここでメールアドレスでサインインしてください。",
+    "tryAnyway": "それでも試す"
   },
   "careers": {
     "title": "Riftn で働く",
@@ -3307,10 +3350,13 @@
       "moveDown": "下へ移動",
       "addPart": "スレッドに追加",
       "addPlaceholder": "スレッドに追加...",
-      "label": "スレッド · {{count}} parts"
+      "label": "スレッド · {{count}} parts",
+      "reorderHint": "パーツをドラッグするか矢印を使って並べ替え、保存してください。",
+      "dragPart": "ドラッグしてパート{{n}}を移動"
     },
     "attachMedia": "写真、動画、またはオーディオを添付",
-    "attachTooLarge": "そのファイルは{{size}} MBの制限を超えています。"
+    "attachTooLarge": "そのファイルは{{size}} MBの制限を超えています。",
+    "attachUnsupported": "写真、動画、または音声ファイルを添付してください。"
   },
   "mintChain": {
     "title": "ミントポスト",
@@ -3631,7 +3677,9 @@
     "waiting_for_wallet": "お財布を待っています",
     "waiting_for_wallet_desc": "{{wallet}}を開き、署名を承認します。リクエストはそこで待っています。",
     "your_wallet": "私たち２人ともそうなる なのにバンチは捕まらないわ",
-    "max_available_on_chain": "最大利用可能：{{chain}}で{{amount}}トークン"
+    "max_available_on_chain": "最大利用可能：{{chain}}で{{amount}}トークン",
+    "turn_back_on_desktop_notifications": "デスクトップ通知を再びオンにしますか？",
+    "notifications_moved_to_riftn": "riftn.comに移転したため、返信、チップ、DMをここに表示するにはブラウザでもう一度許可が必要です。"
   },
   "staking": {
     "title": "ステーキング",
@@ -5097,7 +5145,8 @@
       "description": "「{{title}}」で30分間誰も話さなかったため、終了しました。"
     },
     "deleteRecordingFailed": "録画・録音を削除できませんでした",
-    "deleteStageFailed": "ステージを削除できませんでした"
+    "deleteStageFailed": "ステージを削除できませんでした",
+    "inCountry": "（{{country}}）"
   },
   "ads": {
     "seoTitle": "広告マネージャー | Riftn",
@@ -5539,7 +5588,12 @@
     "reject": "却下",
     "needsYouHold": "{{needed}}が必要です。あなたは{{held}}を保有しています",
     "sellYourFractions": "あなたの分数を売却してください({{held}}保有)",
-    "nftsSubtitle": "あらゆるNFTをワンステップでスワップ"
+    "nftsSubtitle": "あらゆるNFTをワンステップでスワップ",
+    "buyersTab": "購入者",
+    "soldOfListing": "{{total}}件中{{sold}}件販売済み",
+    "noBuyersYet": "この投稿のフラクションを購入した人はまだいません",
+    "fromYou": "あなたから",
+    "statusOverdue": "期限切れ"
   },
   "creator": {
     "marketing": {
@@ -5585,7 +5639,8 @@
         "portrait": "ポートレート広告",
         "story": "ストーリー画像",
         "video": "縦型動画"
-      }
+      },
+      "return": "スタジオの下書きに戻る"
     },
     "cinema": {
       "close": "閉じる",
@@ -5682,7 +5737,8 @@
         "4": "ファンタジー",
         "5": "ロマンティック・コメディ",
         "6": "スリラー",
-        "7": "西部劇"
+        "7": "西部劇",
+        "3": "SF"
       },
       "palette": {
         "label": "カラーパレット",
@@ -6499,8 +6555,15 @@
     "gallery": {
       "send": "送信",
       "notifications": {
-        "generation_reply": "{{name}}があなたのコメントに返信しました"
-      }
+        "generation_reply": "{{name}}があなたのコメントに返信しました",
+        "generation_like": "{{name}}があなたの生成物にリアクションしました",
+        "generation_comment_like": "{{name}}があなたのコメントにリアクションしました",
+        "generation_comment": "{{name}}があなたの生成物にコメントしました"
+      },
+      "browse": "生成物を見る",
+      "create": "作成",
+      "fullscreen": "全画面で表示",
+      "missing": "この生成物は利用できません。"
     },
     "avatarTitle": "トーキングポートレート",
     "avatarRequirements": "正方形のPNGポートレート、512～2048ピクセル、最大5 MB。モノラル 24 kHz 16ビット PCM WAV、5～30秒。最後の1秒未満の部分は無音で埋められます。",
@@ -6553,7 +6616,8 @@
         "answer0": "明確な主題、行為、背景",
         "answer1": "トヨタ・カローラ",
         "answer2": "矛盾するスタイルのリスト",
-        "exercise": "窓際の木製テーブルの上に置かれた陶器のティーポット。柔らかな朝の光、ミディアムショット、シンプルな背景。ティーポットがはっきりと主題になるように。"
+        "exercise": "窓際の木製テーブルの上に置かれた陶器のティーポット。柔らかな朝の光、ミディアムショット、シンプルな背景。ティーポットがはっきりと主題になるように。",
+        "body1": "具体的な被写体、その動作、舞台を説明してください。シーンに役立つならフレーミングやカメラの動きも加えましょう。関係のないアイデアは別の下書きに回してください。"
       },
       "continuity": {
         "title": "ショットの計画と連続性の確認",
@@ -6594,7 +6658,11 @@
     "invalidSeed": "シードは0から2147483647までの整数である必要があります。",
     "libraryFavorites": "お気に入り",
     "libraryFavoriteAdd": "お気に入りに追加",
-    "libraryFavoriteRemove": "お気に入りから削除"
+    "libraryFavoriteRemove": "お気に入りから削除",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioResultTooLarge": "音声の結果が空か、128 MBを超えています。",
+    "audioTaskDialoguePlaceholder": "アリス：もう行こう。\nボブ：[笑う] お先にどうぞ。",
+    "priceOwnKey": "自分のキー"
   },
   "pricing": {
     "plansForEveryWorkflow": "すべてのワークフロー向けプラン",
@@ -6761,7 +6829,8 @@
     "createTheFirst": "最初のものを作成する",
     "docsSeoTitle": "AIスキルインストラクション, Riftn",
     "docsSeoDescription": "RiftnのAIアシスタントスキルとプロンプトライブラリのリファレンスドキュメント。",
-    "raw": "元画像"
+    "raw": "元画像",
+    "docsLoadFailed": "# エラー\nスキルのドキュメントを読み込めませんでした。"
   },
   "nftMarket": {
     "actAll": "すべて",
@@ -6899,7 +6968,8 @@
     "bestOffer": "最高オファー",
     "fromOpenSea": "OpenSeaのトップコレクション",
     "buyHere": "こちらで購入",
-    "openSeaNote": "OpenSeaに出品されました。Seaportで販売者に直接支払います。Riftnは手数料を一切追加しません。"
+    "openSeaNote": "OpenSeaに出品されました。Seaportで販売者に直接支払います。Riftnは手数料を一切追加しません。",
+    "viewOnOpenSea": "OpenSeaで見る"
   },
   "usernames": {
     "seoTitle": "ユーザー名マーケットプレイス| Riftn",
@@ -7263,7 +7333,9 @@
       "gifted_other": "{{count}}件のサブスクをギフトしました",
       "share": "ストリームを共有しました",
       "join": "参加しました"
-    }
+    },
+    "giftedSubs_one": "{{name}}がサブスクをギフトしました！",
+    "giftedSubs_other": "{{name}}がサブスクを{{count}}件ギフトしました！"
   },
   "liveChatModeration": {
     "timeout1m": "1分間のタイムアウト",
@@ -7298,7 +7370,8 @@
         "starting": "まもなく開始",
         "chatting": "ただチャット中",
         "brb": "すぐ戻ります",
-        "ending": "配信終了"
+        "ending": "配信終了",
+        "gameplay": "ゲームプレイ"
       },
       "title": "シーン",
       "picture": "画像",
@@ -7307,13 +7380,17 @@
         "starting": "カウントダウン付きカード",
         "chatting": "カメラ全画面",
         "brb": "カード、マイクミュート",
-        "ending": "サンキューカード"
+        "ending": "サンキューカード",
+        "gameplay": "画面とカメラ"
       },
       "subtitles": {
         "starting": "配信開始まで",
         "brb": "すぐ戻ります",
         "ending": "ご視聴ありがとうございます"
-      }
+      },
+      "edit": "{{name}}を編集",
+      "subtitle": "2行目（任意）",
+      "muteMic": "このシーン中はマイクをミュート"
     },
     "sources": {
       "reactAdd": "表示",
@@ -7335,13 +7412,24 @@
       },
       "shapes": {
         "circle": "円",
-        "rect": "正方形"
+        "rect": "正方形",
+        "rounded": "角丸"
       },
       "title": "ソース",
       "addImage": "画像またはロゴ",
       "failed": "そのソースを追加できませんでした。",
       "hint": "ソースはすべての視聴者とすべてのプラットフォームに対して、あなたの画像の上に描画されます。",
-      "clip": "クリップ"
+      "clip": "クリップ",
+      "addCamera": "2台目のカメラ",
+      "addClip": "動画クリップ",
+      "addReaction": "動画にリアクション",
+      "reactPlaceholder": "Riftnの動画リンクを貼り付け",
+      "reactInvalid": "Riftnの動画へのリンクを貼り付けてください。",
+      "reactNotLive": "先にライブ配信を開始してから、動画を追加してください。",
+      "reactNoBubble": "ここではカメラを2つ同時に開けません。顔が画面に映るよう動画のサイズを調整してください。",
+      "empty": "配信の上にロゴ、2台目のカメラ、動画クリップを追加できます。",
+      "restart": "最初から再生",
+      "play": "再生／一時停止"
     },
     "audio": {
       "mute": "ミュート",
@@ -7350,13 +7438,28 @@
         "off": "オフ",
         "low": "ライト",
         "high": "強い"
-      }
+      },
+      "title": "オーディオミキサー",
+      "unavailable": "このブラウザでは音声をミックスできないため、マイクの音声がそのまま送信されます。",
+      "channels": {
+        "mic": "マイク",
+        "game": "ゲーム／タブ",
+        "clip": "動画クリップ"
+      },
+      "absent": {
+        "mic": "マイクがありません",
+        "game": "音声付きで画面を共有するか、キャプチャカードを使用してください",
+        "clip": "ソースで動画クリップを追加してください"
+      },
+      "gate": "ノイズゲート",
+      "gateHint": "話していない間はマイクを無音にし、キーボードの音やファンの音が配信に乗らないようにします。"
     },
     "widgets": {
       "title": "動画にウィジェットを表示",
       "hint": "アラート、目標バー、チャットは配信に描画されるので、Twitch、YouTube、その他すべてのプラットフォームの視聴者にも見えます。",
       "failed": "ウィジェットの表示位置を変更できませんでした。もう一度お試しください。"
-    }
+    },
+    "imageTooLarge": "画像が大きすぎます。もっと小さいものをお試しください。"
   },
   "liveStudio": {
     "destinations": {
@@ -7386,7 +7489,15 @@
     },
     "vertical": {
       "centre": "中央",
-      "live": "ライブ"
+      "live": "ライブ",
+      "title": "縦型ビュー",
+      "intro": "スマホでは縦型フィードで配信が視聴されます。枠をドラッグして、表示される部分を選んでください。",
+      "enabled": "配信を縦型フィードに表示",
+      "zoom": "ズーム",
+      "frame": "横向きの映像",
+      "box": "スマホで表示される範囲",
+      "hint": "枠をドラッグするか矢印キーを使ってください。保存するとライブ配信に反映されます。",
+      "watch": "{{name}}のライブを視聴"
     },
     "subathon": {
       "title": "サバソン",
@@ -7549,7 +7660,8 @@
       "subathon_timer": "サバソンタイマー",
       "points_board": "忠実な視聴者",
       "streamer_level": "ストリーマーレベル",
-      "tip_jar": "ギフトジャー"
+      "tip_jar": "ギフトジャー",
+      "hype_train": "ハイプトレイン"
     },
     "hints": {
       "tip_alert": "各ティップをそのティアに合わせて祝う",
@@ -7573,7 +7685,8 @@
       "subathon_timer": "ギフト、フォロー、購読によって後退するカウントダウン",
       "points_board": "視聴とギフトによるポイントで上位視聴者",
       "streamer_level": "プロフィールからのストリーマーのレベルと週連続記録",
-      "tip_jar": "有料ギフトが入るといっぱいになる瓶"
+      "tip_jar": "有料ギフトが入るといっぱいになる瓶",
+      "hype_train": "ハイプトレイン中に表示されます：5分以内にギフトまたはサブスクが3件あると開始します。"
     },
     "fields": {
       "style": "スタイル",
@@ -7959,7 +8072,10 @@
     "endStreamConfirmBody": "すべての視聴者のブロードキャストが停止され、再開することはできません。",
     "keepStreaming": "ストリーミング継続",
     "encoderPermanentHint": "このキーは変更されません。エンコーダーを一度セットアップしてください。次回はそこから開始を押すだけで、Riftnがあなたのためにポストを作成します。",
-    "notEnoughTokensForBounty": "トークンが不足しています。{{need}} トークン必要ですが、{{have}} しかありません。"
+    "notEnoughTokensForBounty": "トークンが不足しています。{{need}} トークン必要ですが、{{have}} しかありません。",
+    "screenInAppHint": "Riftnアプリで",
+    "screenInAppNote": "スマホのブラウザでは、どのウェブサイトも画面を共有できません。Riftnアプリからライブ配信を開始し、「画面を共有」をタップしてください。",
+    "screenInAppCta": "Riftnアプリを入手"
   },
   "events": {
     "seoTitle": "イベント: Riftnのミートアップ＆コミュニティイベント",
@@ -8584,7 +8700,10 @@
     "nodeAudioInput": "保存されたオーディオ",
     "nodeAudioInputDesc": "ライブラリのプライベートオーディオを使用",
     "audioVoiceId": "ボイスID",
-    "audioSeconds": "音声の長さ（秒）"
+    "audioSeconds": "音声の長さ（秒）",
+    "signInForAudioLibrary": "サインインして、保存済みのプライベート音声ライブラリを開きましょう。",
+    "audioLibraryFailed": "保存済みの音声を読み込めませんでした。もう一度お試しください。",
+    "confirmInterruptedRetry": "中断された音声またはアシスタントのタスクを再試行します。前回の結果は不明で、再試行すると処理が重複する可能性があります。既存の支払いと支払い済みのジョブIDが再利用されます。"
   },
   "videoPlayer": {
     "volume": "音量",
@@ -9563,7 +9682,10 @@
       "saving": "フレームを準備中…",
       "useFrame": "レンダリングされたフレームをショットの参照として使用",
       "frameHint": "320 × 180 のPNGを作成し、このショットの参照に追加します。参照制限とモデル料金を確認し、生成する前にレビューしてください。",
-      "frameName": "シーンステージフレーム"
+      "frameName": "シーンステージフレーム",
+      "x": "X",
+      "y": "Y",
+      "z": "Z"
     },
     "video": {
       "tFade": "クロスディゾルブ",
@@ -9659,7 +9781,8 @@
       "pptxHint": "各ページは一つのスライド画像となり、プレゼンターのメモとリンクが含まれます。オリジナルのデザイン内の個別のテキストや要素を編集できます。",
       "section": "名前付きセクション",
       "transparent": "透過背景",
-      "nleHint": "タイムラインをFCPXMLおよびPremiere XMLとして、すべてのメディアファイルと共にZIPでダウンロードします。これにより、Premiere Pro、Final Cut Pro、またはDaVinci Resolveで編集を仕上げることができます。テキストはマーカーに変換され、エフェクトはRiftn内に保持されます。"
+      "nleHint": "タイムラインをFCPXMLおよびPremiere XMLとして、すべてのメディアファイルと共にZIPでダウンロードします。これにより、Premiere Pro、Final Cut Pro、またはDaVinci Resolveで編集を仕上げることができます。テキストはマーカーに変換され、エフェクトはRiftn内に保持されます。",
+      "nle": "Premiere / Final Cut / Resolve（XML）"
     },
     "inspector": {
       "selectHint": "キャンバス上のレイヤーまたはタイムライン上のクリップを選択してください。",
@@ -11462,8 +11585,15 @@
         "play": "再生",
         "pause": "一時停止",
         "frameBack": "前のフレーム",
-        "frameForward": "次のフレーム"
-      }
+        "frameForward": "次のフレーム",
+        "back": "1秒戻る",
+        "rippleDelete": "クリップを削除",
+        "liftDelete": "クリップを削除",
+        "start": "先頭へ移動",
+        "end": "末尾へ移動"
+      },
+      "preset": "キーボードレイアウト",
+      "presetHint": "使い慣れたエディターのタイムライン操作キーを使用できます。それ以外はRiftn独自のショートカットがそのまま使えます。"
     },
     "voiceClone": {
       "stop": "録音を停止",
@@ -11485,7 +11615,8 @@
       "useOwned": "私の声を使って",
       "ready": "「{{name}}」はボイスオーバーの準備が完了しました。",
       "paidFailed": "お支払情報が保存されました。次回以降、この画面からのお支払いは無料となります。",
-      "consent": "自分の声、または使用許可を得ている声のみをクローンしてください。"
+      "consent": "自分の声、または使用許可を得ている声のみをクローンしてください。",
+      "sample": "サンプル：{{name}}"
     },
     "linkImport": {
       "go": "インポート",
@@ -11549,7 +11680,8 @@
     "generate3d": {
       "placeholder": "作成したい3Dオブジェクトについて説明してください",
       "queued": "3Dオブジェクトを構築中です。完了すると「Generations」タブに保存されます。",
-      "note": "3Dオブジェクトは、背景が透過された短い回転クリップとしてメディアに取り込まれます。"
+      "note": "3Dオブジェクトは、背景が透過された短い回転クリップとしてメディアに取り込まれます。",
+      "label": "3D"
     },
     "behind": {
       "action": "人物の背後にテキストを配置",
@@ -11958,7 +12090,9 @@
     "tokenAmount": "{{amount}}トークン",
     "assistant": {
       "question1": "Riftnトークンの現在のステーキングAPYはいくらですか？",
-      "question2": "はい、90日間10,000トークンを賭けた場合"
+      "question2": "はい、90日間10,000トークンを賭けた場合",
+      "answer1": "Riftnトークンの現在のステーキングAPYは、30日間のロック期間で12.4%です。内訳は以下のとおりです：\n\n• 7日間ロック：8.2% APY\n• 30日間ロック：12.4% APY\n• 90日間ロック：18.7% APY\n\n想定される収益の計算をお手伝いしましょうか？",
+      "answer2": "10,000トークンを18.7% APYで90日間ステーキングした場合：\n\n📊 推定報酬：約461トークン\n\n1日あたり約5.13トークンです。APYはステーキング総額によって変動する場合があります。"
     },
     "bookmarks": {
       "stakingGuide": "Riftnトークンをステーキングするための完全なガイド： APYの内訳、ロック期間、および報酬乗数の説明。"
@@ -12863,12 +12997,42 @@
       "rewardPending": "保留",
       "rewardsNone": "報酬はまだ計算されていません。最初の週は月曜日に終了します。",
       "stats": {
-        "button": "ライブ統計"
+        "button": "ライブ統計",
+        "chartTitle": "アプリを開いた人数（過去30日間）",
+        "peak_one": "ピーク：1日{{count}}人",
+        "peak_other": "ピーク：1日{{count}}人",
+        "people30": "人数（30日間）",
+        "people7": "人数（7日間）",
+        "added": "追加した人",
+        "dhb30": "支払われたトークン（30日間）",
+        "notified30": "送信された通知（30日間）",
+        "rewards": "獲得したトークン報酬"
       },
       "signin": {
         "users_one": "{{count}} ユーザー",
         "users_other": "{{count}} ユーザー",
-        "delete": "削除"
+        "delete": "削除",
+        "title": "Riftnでサインイン",
+        "body": "あなたのウェブサイトやアプリに、ユーザーがRiftnアカウントでサインインできるようにします。ここでキーを作成し、ガイドに従ってください。",
+        "guide": "ガイドを読む",
+        "copyId": "クライアントIDをコピー",
+        "rotate": "新しいシークレット",
+        "rotateConfirm": "{{name}}の新しいシークレットを作成しますか？古いシークレットはすぐに使えなくなります。",
+        "deleteConfirm": "{{name}}を削除しますか？これでサインインしている全員がサインアウトされます。",
+        "secretOnce": "{{name}}のシークレットです。今すぐコピーしてください：表示されるのは一度だけです。",
+        "name": "アプリ名",
+        "website": "ウェブサイト（任意）",
+        "redirects": "リダイレクトURL（1行に1つ、https://yoursite.com/callback）",
+        "create": "キーを作成"
+      },
+      "stateRejected": "リンクで公開中 · ストア未承認",
+      "webhook": {
+        "button": "Webhook",
+        "body": "RiftnがあなたのwebhookUrlに送信したイベントです。「テスト」でpingイベントを送信します。",
+        "test": "テスト送信",
+        "ok": "Webhookの応答：{{status}}",
+        "failed": "Webhookが失敗しました：{{reason}}",
+        "none": "まだWebhookは送信されていません。"
       }
     },
     "card": {
@@ -12969,7 +13133,8 @@
     "howChromium": "アドレスバーの右端にあるインストールアイコンをクリックし、インストールします。",
     "howSafari": "Safariでは、ファイルメニューを開き「Dockに追加」を選択します。",
     "howFirefox": "Firefoxではアプリをインストールできません。Chrome、Edge、またはSafariでこのページを開いてRiftnをインストールしてください。",
-    "microsoftStore": "Microsoft Storeが好きですか？ そちらで入手してください。"
+    "microsoftStore": "Microsoft Storeが好きですか？ そちらで入手してください。",
+    "desktopMeta": "Windows · Mac · Linux · ChromeOS"
   },
   "postStage": {
     "back": "戻る",
@@ -19977,7 +20142,101 @@
     "ebebdc70335b": "グラスバー",
     "5ff272ba7871": "シルクライン",
     "a941e90ca93d": "カバー・ハロー",
-    "04dbbe4dff7a": "トゥルーウェーブ"
+    "04dbbe4dff7a": "トゥルーウェーブ",
+    "0ddb74a93b79": "{{value1}}…",
+    "16584052fd33": "OK",
+    "42f90c931762": "{{value1}}日",
+    "4ae268ba1719": "方位 {{value1}}",
+    "7a73328114fe": "{{value1}}勝 · {{value2}}敗 · {{value3}}分",
+    "856c1e009fcc": "呉語",
+    "ca56c9d369b9": "TX：{{value1}}…",
+    "d11f9dace97e": "{{value1}}秒 / {{value2}}秒",
+    "fa2a6041c358": "標高 {{value1}} M",
+    "fe1ed8de5976": "Riftn ライブ",
+    "7f78bdc0762d": "+{{value1}}ポイント",
+    "f0c8bb34335b": "+{{value1}}ポイント獲得しました",
+    "0fbe06b679a8": "リリースされたリクエストごとに{{value1}}ポイントが、トップビルダーのスコアに加算されます。",
+    "46f50f3107ee": "PER（TTM）",
+    "694bd43602c6": "買気配 / 売気配",
+    "4a49c5b26d3d": "方位 ",
+    "e6eadfd6d1d8": " eCPM",
+    "da1efe0af503": " 「",
+    "431bc73eb60b": "[verse]\nここに歌詞...\n\n[chorus]\nサビの歌詞...",
+    "ca7842e53ac8": "riftn.com",
+    "ef32a73d0f93": "@name",
+    "ee088652116b": "トピックごとのチャットルームを作成",
+    "6bdf24e0e55f": "RPM $",
+    "877db1b57c60": "@creator",
+    "9f53c8f4376f": "ENTER / 進む",
+    "3f3a27ecab2a": "ESC / とどまる",
+    "53e6cdc30765": "you@example.com",
+    "419f1a83fab2": "yourname.eth",
+    "e2d214894af7": "elevenlabs.io",
+    "f8440db475e2": "@Image1",
+    "a1bbfae0f460": "@Image9",
+    "273a81e9b289": "@Image",
+    "8d94586d66f0": "ESC / 中止",
+    "6cd06db20425": "Livepeer",
+    "00c90f4b707a": "SRT / VTT",
+    "450683b66da4": " SRT / VTT",
+    "e44dc88eb777": "@alice.eth",
+    "7bfe33be8737": "≈ $1,275.00 USD",
+    "bf640b85d499": "riftn.com · ",
+    "12cd58ea291d": "//ANDROID_APK",
+    "a9f80278c12b": "//シェア",
+    "88bd742fdae5": "DLive",
+    "790583caf7d2": " zap.stream。",
+    "5b4569693eb1": "MCP ライブ",
+    "a3c1e5f20b71": "ChatGPT、Claude、またはあらゆるMCPアプリの中でRiftnを使えます。下のURLをアシスタントのコネクタ設定に貼り付けると投稿、プロフィール、コメントを閲覧でき、求められたらサインインして自分のアカウントを連携できます。",
+    "b84d2e7c9a16": "このアドレスはAIアプリ用で、ウェブページではありません。ブラウザで開くとこのページに戻ります。",
+    "c5e9f1a3d742": "Riftnアカウントを連携",
+    "d61a7b4e8c05": "アシスタントからサインインを求められたら、Riftnにログインして「許可」をクリックしてください。その後、プロフィールの更新、投稿やコメントの公開、ユーザーのフォロー、Creator Studioでの作成ができるようになります。接続は使用中は維持され、30日間使用しないと失効します。",
+    "e27b8c5f9d13": "ChatGPTのステップバイステップガイド",
+    "f38c9d6a0e24": "Claudeのステップバイステップガイド",
+    "0a49d7b1f835": "別のボットアカウントを使いたいですか？エージェントを作成すると、そのエージェントとして投稿するコネクタURLを取得できます。",
+    "1b5ae8c20f46": "ChatGPTから求められたら、Riftnにサインインして「許可」をクリックし、アカウントを連携してください。",
+    "2c6bf9d31a57": "「接続」をクリックし、Riftnにサインインして「許可」をクリックすると、アカウントが連携されます。",
+    "ff7a48f27df6": "Riftn MCP API",
+    "12a7c0529934": "/docs/getting-started",
+    "0e633747fd23": "Visa、Mastercard、Apple Pay、Google Pay",
+    "4001b1e9d20e": "dev@riftn.com",
+    "1a00975a0ac1": "@channel",
+    "89c9b65356e3": "X（Twitter）",
+    "616685a138d8": "/api/stats/users",
+    "aaa197c64e1f": "src/constants/app.constants.ts",
+    "addc90cfd45b": "cURL",
+    "c558e7501904": "dapp.daoTitle",
+    "5e3ce481ab0d": "dapp.cinemaTitle",
+    "43b9fafd6db4": "dapp.exchangeTitle",
+    "d924f9b45914": "dapp.marketsTitle",
+    "421205947abf": "dapp.kidsTitle",
+    "97f2d908b7dc": "@noble/ciphers",
+    "8731790030df": "@noble/curves",
+    "e745d68f7240": "@noble/hashes",
+    "886e533d7364": "dev@riftn.com",
+    "e8921bdee214": "@riftn_com",
+    "7046b00dbc33": "• Chrome 90以降",
+    "66dfc75ac659": "• Edge 90以降",
+    "b670b091884c": "OKX CeDeFi",
+    "8a1719815fd8": "/post (",
+    "f80cac6f6a85": "ETF",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "fd0ce9669a4e": "🎞️ GIF",
+    "b635325d40c2": "BSCScan",
+    "743901de27bf": "トラック / 05 コンタクト",
+    "5bf11a3a35a0": "GPT-image-2 medium（画像）",
+    "85330dcbaadd": "議論の一方だけを優遇するアルゴリズムはありません。\n誰もが平等かつ公平に拡散されます。",
+    "811aa4592c1c": "MP3 128 kbps",
+    "4812442f11c9": "MP3 192 kbps",
+    "0d199b18375b": "WAV / PCM",
+    "8c560bd3f0f8": "quickStart.nextBadgesTitle",
+    "b7dc38f3d7f7": "quickStart.nextStakeTitle",
+    "be20bbb07d43": "quickStart.nextFaqTitle",
+    "253ffa81cd88": "{{value1}}と会話を始めるには、最低<amount>{{value2}} <coin></coin></amount>のチップが必要です。",
+    "70d1cca2aba3": "{{value1}}にはメッセージごとに最低<amount>{{value2}} <coin></coin></amount>のチップが必要です。メッセージを送るたびにこの金額が差し引かれます。",
+    "08429ee7bf89": "完全なSVG transformリストを使用してください",
+    "6e71ae3669b1": "保存された出力は利用できません"
   },
   "articles": {
     "cardLabel": "記事· {{count}}分読まれました",
@@ -20027,7 +20286,8 @@
     "imagesCount": "画像 · {{count}}/{{max}}",
     "captionPlaceholder": "キャプションを追加",
     "captionLabel": "画像{{n}}のキャプション",
-    "removeInlineImage": "画像{{n}}を削除"
+    "removeInlineImage": "画像{{n}}を削除",
+    "imageLimitSome": "この記事に追加できる画像はあと{{count}}枚です"
   },
   "liveAudience": {
     "whosHere": "ここにいる人",
@@ -20101,11 +20361,26 @@
     "badges": {
       "emoji": "絵文字",
       "audience": {
-        "subscribers": "登録者"
+        "subscribers": "登録者",
+        "both": "サブスク登録者とギフトした人",
+        "gifters": "ギフトした人"
       },
       "ended": "終了しました",
       "until": "{{date}}まで",
-      "failed": "うまくいきませんでした。もう一度やり直してください。"
+      "failed": "うまくいきませんでした。もう一度やり直してください。",
+      "title": "期間限定バッジ",
+      "intro": "数日間だけバッジを提供しましょう。期間中にサブスク登録またはギフトした人が獲得でき、あなたのチャットで名前の横にずっと表示されます。",
+      "name": "バッジ名",
+      "namePlaceholder": "ローンチウィーク",
+      "days": "提供期間（日数）",
+      "who": "獲得できる人",
+      "create": "バッジを提供",
+      "created": "バッジが公開されました。",
+      "end": "今すぐ終了",
+      "holders_one": "保有者{{count}}人",
+      "holders_other": "保有者{{count}}人",
+      "limit": "同時に提供できるバッジは3つまでです。新しく提供するには1つ終了してください。",
+      "hypeHint": "ハイプトレインに参加した全員が、到達したレベルの🚂バッジも獲得します。"
     },
     "train": {
       "level": "ハイプトレイン · レベル {{level}}",
@@ -20114,6 +20389,10 @@
       "thanks_one": "{{count}}サポーターに感謝",
       "thanks_other": "{{count}}サポーターに感謝",
       "top": "トップ: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "がサブスクをギフトしました 🎁",
+      "giftedSubs_other": "がサブスクを{{count}}件ギフトしました 🎁"
     }
   },
   "whenSheet": {
@@ -20302,7 +20581,8 @@
     "backToVideo": "動画に戻る",
     "empty": "まだリアクションはありません。動画のリミックスメニューを開き、「リアクション」を選択して最初のリアクションを投稿しましょう。",
     "wasLive": "ライブ配信済み",
-    "thisVideo": "この動画"
+    "thisVideo": "この動画",
+    "pageTitle": "{{title}}へのリアクション | Riftn"
   },
   "connectGuide": {
     "title": "RiftnをAIアシスタントに接続",
@@ -20310,7 +20590,41 @@
     "copy": "コピー",
     "copied": "コピーしました",
     "copiedToast": "MCP URLをコピーしました",
-    "agentsTitle": "アシスタントからエージェントを実行"
+    "agentsTitle": "アシスタントからエージェントを実行",
+    "accountBody2": "非公開の下書き保存、投稿の公開と予約、画像や投票の管理、アナリティクスの閲覧、返信、リアクション、リポスト、フォロー、ブックマークの保存、通知の確認、プロフィールの編集、クレジットを使った作成ができます。投稿リクエストIDを再利用しても、2件目の投稿が作成・カウントされることはありません。何かを消費する前には必ず確認します。",
+    "agentsBody": "接続時に「エージェントとして操作」も許可してください。アシスタントは、あなたが所有するどのエージェントとしても、1体ずつまたは複数続けて、投稿、返信、リアクション、リポスト、フォロー、プロフィール編集ができるようになります。所有していないアカウントとして操作することはできません。",
+    "agentsExample": "例：「@mybotでフィードのトップ投稿に返信して、その返信に@otherbotでいいねして。」",
+    "desc": "ChatGPT、Claude、Cursor、またはあらゆるMCPアプリからRiftnを使えます。アカウントなしで閲覧するか、サインインしてアシスタントに投稿、返信、作成を任せましょう。",
+    "copyFailed": "コピーに失敗しました",
+    "urlNote": "これをAIアプリに貼り付けてください。ウェブページではないため、ブラウザで開くとこのページに戻ります。",
+    "canTitle": "アシスタントができること",
+    "publicTitle": "サインインなしで",
+    "publicBody": "フィードの閲覧、投稿やユーザーの検索、コメントの閲覧、プロフィールの確認ができます。",
+    "accountTitle": "サインイン後",
+    "accountBody": "投稿、返信、リアクション、フォロー、ブックマークの保存、通知の確認、プロフィールの編集、クレジットを使った画像・動画・音楽の作成ができます。何かを消費する前には必ず確認します。",
+    "chatgpt1": "ChatGPTの設定を開き、「アプリとコネクタ」→「詳細設定」を選んで、開発者モードをオンにします。",
+    "chatgpt2": "「アプリとコネクタ」に戻り、「作成」を選んで新しいコネクタを追加します。",
+    "chatgpt3": "名前をRiftnにし、上のURLを貼り付けて、サインイン方式にOAuthを選びます。",
+    "chatgpt4": "「接続」を押します。Riftnが開いたらサインインし、権限を確認して「許可」を押します。",
+    "chatgpt5": "新しいチャットで＋メニューを開き、Riftnを選んで、たとえば「Riftnのトレンド投稿を見せて」と聞いてみましょう。",
+    "claude1": "Claudeのコネクタ設定を開き、「カスタムコネクタを追加」を選びます。",
+    "claude2": "名前をRiftnにし、上のURLを貼り付けて「追加」を押します。",
+    "claude3": "「接続」を押します。Riftnが開いたらサインインし、権限を確認して「許可」を押します。",
+    "claude4": "チャットでツールメニューを開き、Riftnをオンにして自由に質問しましょう。",
+    "openSettings": "設定を開く",
+    "devTitle": "Claude Code、Cursorなどのアプリ",
+    "devBody": "RiftnをHTTP経由のリモートMCPサーバーとして追加します。アカウントが初めて必要になったとき、アプリがRiftnのサインイン画面を開きます。",
+    "manageTitle": "連携済みアプリ",
+    "manageBody": "連携済みアプリは使用中は接続されたままで、30日間使用しないと切断されます。いつでも確認や切断ができます。",
+    "manageLink": "連携済みアプリを管理",
+    "agentTitle": "専用アカウントで投稿するボットが欲しいですか？",
+    "agentBody": "エージェントを作成すると、キーが組み込まれた専用のコネクタURLを取得できます。アシスタントはあなたの代わりにそのエージェントとして投稿、コメント、投票、フォローができます。",
+    "agentLink": "エージェントを作成",
+    "helpTitle": "うまくいかないときは",
+    "help1": "「認証の更新が必要です」または再接続ボタンが表示された場合：「再接続」を押して、もう一度Riftnにサインインしてください。",
+    "help2": "自分の投稿について尋ねたときに「Riftnアカウントを連携」と表示された場合：アプリのコネクタ設定で「接続」を押してください。",
+    "help3": "ブラウザのタブでURLを開くとエラーになるのは正常です。代わりにAIアプリに貼り付けてください。",
+    "other": "その他のMCPアプリも同じ手順です：リモートMCPサーバーを追加し、上のURLを貼り付けてください。"
   },
   "avatarPrompt": {
     "notNow": "あとで",
@@ -20430,7 +20744,26 @@
   "mcpKeys": {
     "delete": "削除",
     "shortProfile": "プロフィール",
-    "title": "パーソナルキー"
+    "title": "パーソナルキー",
+    "body": "サインインページを開けないスクリプト、ボット、アプリ向けです。キーはあなたが許可した操作だけを、あなたのアカウントと所有するエージェントに対して行います。使用中は有効で、30日間使用しないと停止します。",
+    "signIn": "サインインしてキーを作成",
+    "newTitle": "今すぐキーをコピー",
+    "newBody": "キーが表示されるのは今回だけです。キーを持つ人は誰でも、選択した権限の範囲であなたのアカウントを使えるため、秘密にしてください。",
+    "useIt": "次のいずれかの方法でアプリに追加してください：",
+    "name": "キー名",
+    "namePlaceholder": "マイボット",
+    "permissions": "このキーで許可する操作",
+    "limits": "アカウントとエージェント全体での1日の上限：投稿50件、返信300件、リアクション1,000件、フォロー200件、リポスト200件、プロフィール編集30回。",
+    "create": "キーを作成",
+    "show": "キーを表示",
+    "yours": "あなたのキー",
+    "empty": "キーはまだありません。",
+    "expires": "再使用されない場合、{{date}}まで有効",
+    "shortRead": "閲覧",
+    "shortSocial": "投稿と返信",
+    "shortGenerate": "メディア作成",
+    "shortAgents": "あなたのエージェント",
+    "settingsBody": "ChatGPT、Claude、またはあらゆるMCPアプリからRiftnとエージェントを使うか、個人用キーを作成しましょう。"
   },
   "chatSearch": {
     "placeholder": "検索メッセージまたは人を検索",
@@ -20509,6 +20842,20 @@
     "title": "メンションまたはリンク"
   },
   "msgDelete": {
-    "titleMany": "{{count}}件のメッセージを削除しますか？"
+    "titleMany": "{{count}}件のメッセージを削除しますか？",
+    "title": "メッセージを削除しますか？",
+    "bodyOwn": "自分のチャットからのみ削除するか、全員から削除します。",
+    "bodyOwnMany": "自分のチャットからのみ削除するか、全員から削除します。",
+    "bodyOthers": "自分のチャットからのみ削除されます。相手には表示されたままです。",
+    "bodyOthersMany": "自分のチャットからのみ削除されます。チャットの他のメンバーには表示されたままです。",
+    "bodyOwnBoth": "自分のチャットからのみ削除するか、お互いから削除します。",
+    "bodyOwnBothMany": "自分のチャットからのみ削除するか、お互いから削除します。",
+    "forMe": "自分だけ削除",
+    "forEveryone": "全員から削除",
+    "forBoth": "お互いから削除",
+    "forMeAndName": "自分と{{name}}から削除",
+    "remember": "選択を記憶する",
+    "rememberHint": "設定からいつでも変更できます",
+    "failed": "メッセージを削除できませんでした"
   }
 }

@@ -1395,6 +1395,8 @@ export const acw = {
     liveStudioB7Desc: 'لما يخلص البث، Live Studio يفتح لك ملخص فيه مدة البث، أعلى عدد مشاهدين، الهدايا المدفوعة، المتابعين الجدد، الشات، والتصويتات.',
     liveStudioB8: 'الإعادات تحتفظ بالتراكب:',
     liveStudioB8Desc: 'تراكب البث يشتغل فوق الإعادة حقته، وينبني من سجل البث نفسه.',
+    watchAnywhereB2: 'Riftn TV:',
+    tocMcpOpen: 'Riftn MCP',
   },
   games: {
     feature1: 'لعب بلا حواجز وفوز مقابل ربح',

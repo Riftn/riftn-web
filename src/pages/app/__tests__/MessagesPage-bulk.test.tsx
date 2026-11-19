@@ -10,6 +10,11 @@ const source = vi.hoisted(() => ({ conversations: [] as DeHubConversation[] }));
 vi.mock('@/contexts/AuthContext', async (importOriginal) => ({
   ...await importOriginal<typeof import('@/contexts/AuthContext')>(), useAuth: () => ({ isAuthenticated: true, walletAddress: 'me' }) }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('@/hooks/use-room-chat-summaries', () => ({
+  useRoomChatSummaries: () => ({}),
+  usePublicChatLastLine: () => null,
+  useRoomChatReading: () => undefined,
+}));
 vi.mock('@/hooks/use-messages', () => ({
   useConversations: () => ({ conversations: source.conversations, isLoading: false, isError: false, refetch: vi.fn() }),
   useCreateConversation: () => ({}),
@@ -28,7 +33,7 @@ vi.mock('@/hooks/use-keyboard-open', () => ({ useKeyboardOpen: () => false, useV
 const del = vi.hoisted(() => ({ scheduleDelete: vi.fn(), undoDelete: vi.fn() }));
 vi.mock('@/lib/undoable-delete', () => ({ usePendingDeletes: () => new Set(), scheduleDelete: del.scheduleDelete, undoDelete: del.undoDelete, UNDO_WINDOW_MS: 5000 }));
 vi.mock('@/lib/api/dehub', () => ({ getAccountInfo: vi.fn(), getMediaUrl: vi.fn() }));
-const sock = vi.hoisted(() => ({ emitSendMessage: vi.fn(async () => ({})), waitForDmSocket: vi.fn(async () => undefined) }));
+const sock = vi.hoisted(() => ({ emitSendMessage: vi.fn(async () => ({})), waitForDmSocket: vi.fn(async () => undefined), onConversationDeleted: () => () => undefined }));
 vi.mock('@/lib/api/dehub/dm-socket', () => sock);
 vi.mock('@/lib/api/dehub/blocks', () => ({ blockUser: vi.fn() }));
 vi.mock('@/lib/dm-e2ee/keys', () => ({ prepareOutgoing: vi.fn(async (_peer: string, text: string) => ({ content: text, encrypted: false })) }));

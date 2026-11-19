@@ -6,7 +6,11 @@
     "videoSize": "Šis video ir lielāks par {{n}} MB. Izvēlies mazāku."
   },
   "textFeed": {
-    "tab": "Teksts"
+    "tab": "Teksts",
+    "errorTitle": "Ierakstus neizdevās ielādēt",
+    "errorBody": "Mēģiniet vēlreiz ielādēt teksta plūsmu.",
+    "emptyTitle": "Vēl nav teksta ierakstu",
+    "emptyBody": "Teksta ieraksti parādīsies šeit."
   },
   "comic": {
     "showAll": "Rādīt visas {{count}} lapas"
@@ -28,16 +32,63 @@
     "policyEveryone": "Visi",
     "policyFollowers": "Sekotāji",
     "policyNobody": "Neviens",
-    "loadMore": "Ielādēt vairāk"
+    "loadMore": "Ielādēt vairāk",
+    "with": "Duets ar @{{username}}",
+    "withOriginal": "Duets · skatīt oriģinālu",
+    "unavailable": "Šis video vairs nav pieejams duetiem.",
+    "allowLabel": "Atļaut duetus",
+    "allowDescription": "Kas var ierakstīt duetu blakus jūsu video. To var mainīt arī katram ierakstam.",
+    "settingsSection": "Dueti",
+    "policyDefault": "Konta iestatījums",
+    "saveFailed": "Neizdevās saglabāt. Mēģiniet vēlreiz.",
+    "count_one": "{{count}} duets",
+    "count_other": "{{count}} dueti",
+    "pageHeading": "Dueti",
+    "pageTitle": "{{title}} dueti no @{{creator}}",
+    "pageTitleNoCreator": "{{title}} dueti",
+    "pageDescription": "Skatieties visus šī video duetus Riftn vai ierakstiet savu blakus.",
+    "empty": "Vēl nav duetu. Atveriet video opcijas un izvēlieties Remikss → Duets, lai izveidotu pirmo.",
+    "video": "Video",
+    "notFound": "Šis video nav pieejams.",
+    "browseShorts": "Pārlūkot Shorts",
+    "notFoundTitle": "Video nav atrasts | Riftn"
   },
   "videoRemix": {
-    "sound": "Izmantot šo skaņu"
+    "sound": "Izmantot šo skaņu",
+    "menu": "Remikss",
+    "duet": "Duets",
+    "green-screen": "Zaļais ekrāns",
+    "stitch": "Stitch",
+    "selectSource": "Atveriet video opcijas un izvēlieties Remikss, lai sāktu."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Visi",
       "followers": "Sekotāji",
-      "nobody": "Neviens"
+      "nobody": "Neviens",
+      "default": "Mans noklusējums"
+    },
+    "shareFailed": "Jūsu dzeramnauda tika nosūtīta, bet sākotnējā autora daļa netika pārskaitīta.",
+    "notify": {
+      "duet": "{{name}} izveidoja duetu ar jūsu video",
+      "stitch": "{{name}} izmantoja jūsu video savā Stitch",
+      "react": "{{name}} reaģēja uz jūsu video",
+      "reactLive": "{{name}} tiešraidē reaģē uz jūsu video"
+    },
+    "linkFailed": "Jūsu ieraksts ir publicēts, bet to neizdevās sasaistīt ar sākotnējo video.",
+    "settingsHeading": "Remiksi",
+    "stitch": {
+      "allow": "Atļaut Stitch",
+      "allowDesc": "Kas var izmantot līdz 5 sekundēm no jūsu video savos video. To var mainīt arī katram ierakstam.",
+      "saveFailed": "Neizdevās saglabāt Stitch iestatījumu. Mēģiniet vēlreiz.",
+      "settingFailed": "Jūsu ieraksts ir publicēts, bet tā Stitch iestatījums netika saglabāts. Mainiet to sadaļā Rediģēt ierakstu.",
+      "from": "Stitch no {{name}}",
+      "count_one": "{{count}} Stitch",
+      "count_other": "{{count}} Stitch",
+      "listTitle": "Stitch video",
+      "listFailed": "Neizdevās ielādēt Stitch video. Mēģiniet vēlreiz.",
+      "listEmpty": "Vēl nav Stitch video.",
+      "unavailable": "Šis video vairs nav pieejams Stitch."
     }
   },
   "dehubAppPage": {
@@ -63,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Atveriet Riftn savā pārlūkprogrammā",
     "seoDescription": "Iegūstiet Riftn lietotni: atvērtā pirmkoda, lietotājam piederošus sociālos medijus ar tiešraidi, šifrētu ziņojumapmaiņu un tiešraidi. Bezmaksas pakalpojumos Google Play, App Store un tīmeklī.",
-    "seoTitle": "Riftn lietotne: lejupielāde Android, iPhone un tīmeklim"
+    "seoTitle": "Riftn lietotne: lejupielāde Android, iPhone un tīmeklim",
+    "learnMore": "Vēlaties pilnu ainu? <guide>Kas ir Riftn?</guide> detalizēti apraksta platformu."
   },
   "dehubLinks": {
     "copyLinkDetail": "Kopējiet {{item}} saiti starpliktuvē",
@@ -81,12 +133,15 @@
       "proposal": "priekšlikums",
       "stage": "Stādījums",
       "store": "Veikals",
-      "featureRequest": "Pieprasījums"
+      "featureRequest": "Pieprasījums",
+      "page": "lapa"
     },
     "recipientChat": "tērzēt",
     "recipientUser": "lietotājs",
     "sendFailed": "Neizdevās nosūtīt {{item}}",
-    "sentTo": "{{item}} nosūtīts uz {{name}}"
+    "sentTo": "{{item}} nosūtīts uz {{name}}",
+    "openPage": "Atvērt lapu",
+    "viewRequest": "Skatīt pieprasījumu"
   },
   "stageCover": {
     "admitOne": "UZŅEMT VIENU",
@@ -195,7 +250,24 @@
   "signedFollows": {
     "setUp": "Ieslēgt",
     "turnOff": "Izslēgt",
-    "efpTurnOff": "Apturēt"
+    "efpTurnOff": "Apturēt",
+    "title": "Jūsu sekojumi ķēdē",
+    "description": "Jūsu maks paraksta, kam jūs sekojat, un katru dienu saraksts tiek apzīmogots Base tīklā. Jebkura lietotne var atrast jūsu sekojumus pēc jūsu maka, pat bez Riftn.",
+    "on": "Ieslēgts šajā ierīcē",
+    "off": "Izslēgts šajā ierīcē",
+    "turnedOn": "Jūsu sekojumus tagad paraksta jūsu maks",
+    "turnedOff": "Izslēgts šajā ierīcē",
+    "failed": "Jūsu maks neparakstīja. Mēģiniet vēlreiz.",
+    "hiddenNote": "Slēptie sekojumu saraksti un privātie konti netiek iekļauti publiskajā sarakstā.",
+    "efpOn": "Nokopēts uz EFP · {{count}} sekojumi",
+    "efpOff": "Pievienot tos arī EFP",
+    "efpTurnOn": "Pievienot EFP",
+    "efpDone": "Jūsu sekojumi tiek pārnesti uz EFP",
+    "efpStopped": "EFP kopēšana apturēta. Saraksts paliek jūsu.",
+    "efpHasList": "Jums jau ir EFP saraksts. Riftn to pagaidām nevar aizpildīt.",
+    "efpNoGas": "Šim nolūkam jūsu makā Base tīklā vajag nedaudz ETH.",
+    "efpFailed": "Tas neizdevās. Mēģiniet vēlreiz.",
+    "efpNote": "EFP ir sekojumu saraksts, ko lasa citas lietotnes (efp.app). Bez maksas ar Riftn maku; citi maki Base tīklā maksā dažus centus. Saraksts pieder jums."
   },
   "profileFields": {
     "title": "Profila lauki",
@@ -373,7 +445,8 @@
     "step": "Lai veiktu konta kontroli, pievienojiet https://riftn.com/mcp kā OAuth savienotāju, pierakstieties Riftn un pārskatiet atļaujas, pirms atļaujat piekļuvi.",
     "profilePrompt": "Atjauniniet manu Riftn biogrāfiju uz: Neatkarīgs radītājs, kas veido filmas un mūziku.",
     "generatePrompt": "Parādiet man Riftn attēlu modeļus un citējiet portretu pirms tā ģenerēšanas.",
-    "libraryPrompt": "Rādīt jaunākos materiālus manā Riftn Creator bibliotēkā."
+    "libraryPrompt": "Rādīt jaunākos materiālus manā Riftn Creator bibliotēkā.",
+    "agents": "Publicējiet, atbildiet, reaģējiet, pārpublicējiet, sekojiet un rediģējiet profilus jūsu aģentu vārdā"
   },
   "twitchMirror": {
     "title": "Twitch spoguļattēls",
@@ -474,7 +547,66 @@
   "nav": {
     "launchpad": "Palaišanas panelis",
     "findWords": {
-      "getTheApp": "Lejupielādējiet lietotni, Android, iPhone, mobilā lietotne, instalēt, APK, datora lietotne, instalēt uz datora, Windows, Mac"
+      "getTheApp": "Lejupielādējiet lietotni, Android, iPhone, mobilā lietotne, instalēt, APK, datora lietotne, instalēt uz datora, Windows, Mac",
+      "home": "plūsma, laika josla, jaunākie ieraksti, jums, sekotie, sākumlapa",
+      "profile": "mans profils, mans konts, mana lapa, mani ieraksti, avatārs, bio, sekotāji",
+      "explore": "meklēt, atklāt, atrast, populārākie, populāri, tēmturi, cilvēki, autori",
+      "prompt": "AI, ģenerēt, AI attēls, AI video, attēlu veidotājs, teksts uz attēlu, AI māksla",
+      "editor": "video redaktors, rediģēt video, apgriezt, griezt, titri, subtitri, efekti",
+      "creator": "izveidot, studija, AI rīki, attēls, video, mūzika, ieskaņošana, 3D",
+      "converter": "importēt video, lejupielādēt, YouTube, TikTok, Instagram, konvertēt",
+      "migrate": "pārvietot kanālu, importēt kanālu, masveida imports, YouTube kanāls",
+      "notifications": "brīdinājumi, aktivitāte, pieminējumi, atbildes, patīk, zvaniņš",
+      "messages": "DM, tiešās ziņas, tērzēšana, iesūtne, sarunas, privāta ziņa",
+      "communities": "grupas, kopiena, istabas, klubi, forumi, dalībnieki",
+      "assistant": "AI, tērzēšanas robots, jautāt, palīdzība, AI tērzēšana, jautājumi",
+      "settings": "preferences, konts, privātums, drošība, parole, valoda, motīvs, tumšais režīms, bloķētie, dzēst kontu",
+      "leaderboard": "reitings, vieta, top autori, top lietotāji, punkti, rezultāti",
+      "bookmarks": "saglabātie, izlase, skatīties vēlāk, lasīt vēlāk, saglabātie ieraksti, bibliotēka",
+      "command": "informācijas panelis, analītika, ieņēmumi, ienākumi, ieskati, moderēšana, mana statistika",
+      "wallet": "atlikums, nauda, līdzekļi, žetoni, kripto, iemaksa, izmaksa, sūtīt, saņemt, maksāt",
+      "events": "kalendārs, grafiks, tikšanās, gaidāmie, biļetes, AMA",
+      "stages": "audio istabas, balss tērzēšana, telpas, tiešraides audio, saruna, podkāsts",
+      "featureRequests": "būvēt, būvētāji, idejas, ieteikumi, ziņot par kļūdu, kļūdas, labojumi, ceļvedis, balsot, vēlmju saraksts, uzlabot",
+      "feedback": "atsauksme, vērtējums, aptauja, viedoklis, sūdzība, sniegt atsauksmi",
+      "staking": "likt, iemaksa, ienesīgums, atlīdzības, nopelnīt, peļņas daļa, emblēma, līmeņi, procenti",
+      "superpowers": "pastiprināt, reklamēt, priekšrocības, spējas, emblēmas priekšrocības, sasniedzamība, uzlabojumi",
+      "governance": "balsot, balsošana, priekšlikumi, aptauja, biļetens, izlemt",
+      "dao": "kase, ziedot, ziedojums, kopienas fonds, piedalīties, granti",
+      "bounties": "darbs, darbi, uzdevumi, gadījuma darbi, ārštata, nolīgt, nopelnīt naudu, apmaksāts darbs",
+      "myBounties": "manas prēmijas, mani darbi, vēsture, izmaksas, paveiktais darbs",
+      "affiliate": "ieteikums, uzaicināt draugus, uzaicināt, komisija, partneris, nopelnīt",
+      "careers": "darbs, vakances, strādā ar mums, pievienoties komandai, pieteikties, brīvās vietas",
+      "stores": "veikals, tirgus, tirgus vieta, atribūtika, pirkt, pārdot, produkti, iepirkšanās",
+      "fractions": "daļas, īpašumtiesības, investēt, iegūt ieraksta daļu, NFT, NFT, kolekcionējamie, tirgot",
+      "usernames": "lietotājvārds, segvārds, vārds, mainīt vārdu, pirkt vārdu, pārdot vārdu",
+      "accounts": "pirkt kontu, pārdot kontu, konti pārdošanā, sekotāji, nodot kontu",
+      "apps": "lietotņu veikals, mini lietotnes, izveidot lietotni, izstrādātāji, rīki",
+      "arcade": "spēles, spēle, spēlēt, spēlēšana, šahs, šāvējspēle, izklaide",
+      "glossary": "termini, definīcijas, vārdnīca, nozīme, kas ir",
+      "compare": "salīdzinājums, salīdzināt, pret, alternatīvas, YouTube, X, TikTok",
+      "guide": "darba sākšana, kā, pamācība, palīdzība, mācīties, iesācējs, esmu jauns",
+      "stats": "statistika, analītika, skaitļi, diagrammas, cena, piedāvājums, turētāji",
+      "docs": "dokumentācija, palīdzība, API, baltā grāmata, izstrādātāji, rokasgrāmata",
+      "blog": "ziņas, raksti, jaunumi, paziņojumi, kas jauns",
+      "videos": "skatīties, video, klipi, gari video",
+      "shorts": "rullīši, īsi video, vertikāli video, vilkt",
+      "music": "audio, dziesmas, ieraksti, klausīties, radio, atskaņošanas saraksts",
+      "liveTv": "TV, straumes, straumēšana, tiešraide, pārraide, kanāli, skatīties tiešraidi",
+      "buyTokens": "pirkt žetonus, pirkums, papildināt, karte, kredītkarte, fiat",
+      "bridge": "starp ķēdēm, pārvietot žetonus, ķēdes, pārskaitīt starp ķēdēm",
+      "top100": "top 100, monētas, kriptovalūtas, tirgus kapitalizācija, cenas",
+      "agents": "AI aģenti, aģenti, boti, automatizācija, personas",
+      "advertising": "reklāmas, sludinājumi, kampaņa, reklamēt, sponsorēt, mārketings",
+      "premium": "abonements, jaunināt, pro, dalība, bez reklāmām",
+      "pricing": "plāni, izmaksas, cena, cik maksā, abonements",
+      "creators": "autoru programma, vēstnieki, partneri, pieteikties kā autoram, monetizēt",
+      "connectAi": "MCP, ChatGPT, Claude, API, integrācija, savienot AI",
+      "packs": "emocijzīmes, uzlīmes, GIF, emocijzīmju komplekti, uzlīmju komplekti, pielāgotas emocijzīmes",
+      "publicChat": "tērzēšana, globālā tērzēšana, tērzētava, vestibils, saruna, kopienas tērzēšana",
+      "planned": "ieplānotie, plānot, ieplānotie ieraksti, rinda, vēlāk",
+      "liveStudio": "sākt tiešraidi, straume, straumēšana, OBS, pārklājumi, brīdinājumi, logrīki",
+      "launchpad": "palaist žetonu, izveidot monētu, uztaisīt monētu, mēma monēta, saistīšanas līkne, tokenizēt"
     },
     "reorderHint": "Turiet un velciet jebkuru ikonu, lai pārkārtotu",
     "reorderReset": "Atiestatīt",
@@ -525,7 +657,10 @@
     "affiliate": "Partneri",
     "groups": {
       "create": "Izveidot",
-      "discover": "Atklāj"
+      "discover": "Atklāj",
+      "main": "Galvenais",
+      "money": "Nauda",
+      "riftn": "Riftn"
     }
   },
   "feed": {
@@ -1149,7 +1284,40 @@
     "socialConnectFailed": "Nevarēja izveidot savienojumu ar {{platform}}. Lūdzu, mēģiniet vēlreiz.",
     "socialVerifiedFollowers": "{{value}} sekotāji",
     "socialFollowersPending": "Sekotāju skaita atjaunināšana",
-    "menuLayoutFolders": "Mapes"
+    "menuLayoutFolders": "Mapes",
+    "chatCards": "Tērzēšanas kā kartītes",
+    "chatCardsDesc": "Katra tērzēšana savā kartītē. Izslēdziet, lai redzētu vienkāršu sarakstu ar līniju starp tērzēšanām.",
+    "chatDeleteChoice": "Kad dzēšat ziņu",
+    "chatDeleteChoiceDesc": "Jautāt katru reizi vai vienmēr dzēst tikai jums vai visiem tērzēšanā.",
+    "chatDeleteAsk": "Jautāt katru reizi",
+    "chatDeleteMe": "Dzēst man",
+    "chatDeleteMeDesc": "Pazūd no jūsu tērzēšanas, citi to joprojām redz",
+    "chatDeleteEveryone": "Dzēst visiem",
+    "chatDeleteEveryoneDesc": "Kad iespējams. Kāda cita ziņa grupā tiek dzēsta tikai jums",
+    "showLikes": "Rādīt manus „Patīk” visiem",
+    "showLikesDesc": "Ikviens var atvērt cilni „Patīk” jūsu profilā. Pēc noklusējuma izslēgts, tāpēc tikai jūs redzat, kas jums patika.",
+    "showFollowersList": "Rādīt, kas man seko",
+    "showFollowersListDesc": "Ļaut ikvienam atvērt jūsu sekotāju sarakstu. Kad tas ir izslēgts, to redzat tikai jūs.",
+    "showFollowingList": "Rādīt, kam es sekoju",
+    "showFollowingListDesc": "Ļaut ikvienam atvērt to cilvēku sarakstu, kuriem sekojat. Kad tas ir izslēgts, to redzat tikai jūs.",
+    "showFollowCounts": "Rādīt manu sekotāju skaitu",
+    "showFollowCountsDesc": "Rādīt, cik jums ir sekotāju un cik cilvēkiem sekojat. Izslēdzot to, tiek paslēpti arī abi saraksti.",
+    "defaultProfileView": "Profila ierakstu izkārtojums",
+    "defaultProfileViewDesc": "Rādīt jūsu ierakstus režģī vai sarakstā, kad cilvēki atver jūsu profilu",
+    "readerProfileView": "Atvērt citus profilus kā",
+    "readerProfileViewDesc": "Izvēlieties režģi vai sarakstu visiem atvērtajiem profiliem vai saglabājiet katras personas izvēli",
+    "readerProfileViewOwner": "Katras personas izvēle",
+    "tipsOffNote": "Kamēr tas ir ieslēgts, dzeramnauda un sūtījumi jums ir izslēgti. Izslēdziet to, lai atkal saņemtu dzeramnaudu.",
+    "socialConnectAria": "Savienot {{platform}}",
+    "menuLayout": "Izvēlnes izkārtojums",
+    "menuLayoutDesc": "Kā izvēlne grupē savas lapas",
+    "menuLayoutTabs": "Cilnes",
+    "menuLayoutTabsDesc": "Viena grupa vienlaikus, ar lielām ikonām",
+    "menuLayoutSections": "Sadaļas",
+    "menuLayoutSectionsDesc": "Visas lapas uzreiz, zem grupu virsrakstiem",
+    "menuLayoutFoldersDesc": "Jūsu galvenās lapas, pēc tam mape katrai grupai",
+    "publicChatInBar": "Publiskā tērzēšana apakšējā joslā",
+    "publicChatInBarDesc": "Viens pieskāriens līdz Publiskajai tērzēšanai no joslas ekrāna apakšā"
   },
   "common": {
     "confirm": "Apstiprināt",
@@ -1239,7 +1407,14 @@
     "messagePublic": "Publisks",
     "railTitle": "Padomi",
     "railTotal": "{{amount}} žetoni",
-    "tokensUnit": "žetoni"
+    "tokensUnit": "žetoni",
+    "messagePlaceholder": "Pievienojiet ziņu dzeramnaudai",
+    "messagePrivate": "Tikai {{name}}",
+    "theCreator": "autors",
+    "messageWallNote": "Parādās dzeramnaudas sienā, kad dzeramnauda ir nosūtīta.",
+    "sendWithMessage": "Sūtīt ar ziņu",
+    "messageFailed": "Jūsu ziņu neizdevās pievienot. Dzeramnauda netika nosūtīta.",
+    "wallLabel": "Dzeramnaudas ziņas"
   },
   "postOptions": {
     "liveAlertsOn": "Tagad jūs sekojat {{name}}. Saņemsiet paziņojumu, kad sāksies tiešraide.",
@@ -1279,7 +1454,14 @@
     "giftBoost": "Dāru palielina",
     "markSection": "Pārskatāmas sekcijas",
     "copyFailed": "Neizdevās nokopēt saiti",
-    "share": "Kopīgot"
+    "share": "Kopīgot",
+    "refreshLinkPreview": "Atsvaidzināt saites priekšskatījumu",
+    "linkPreviewRefreshed": "Saites priekšskatījums atsvaidzināts",
+    "linkPreviewRefreshFailed": "Neizdevās sasniegt šo vietni. Mēģiniet vēlāk.",
+    "castToTv": "Raidīt uz TV",
+    "castStarted": "Atskaņo jūsu TV",
+    "castUnsupported": "Šī pārlūkprogramma nevar raidīt. Atveriet Riftn pārlūkā Chrome vai Safari, lai atskaņotu to savā TV.",
+    "castFailed": "Neizdevās sasniegt TV. Pārbaudiet, vai tas ir tajā pašā Wi-Fi tīklā, un mēģiniet vēlreiz."
   },
   "filters": {
     "sort": "Kārtot",
@@ -1882,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} nodrošināja darbu uz jūsu bountiju \" {{title}}\"",
       "bountySubmitted": "{{name}} nodrošināja darbu uz jūsu bountiju",
       "sentNotification": "{{name}} nosūtīja jums norādījumu"
-    }
+    },
+    "groupEarlier": "Agrāk",
+    "searchPlaceholder": "Meklēt paziņojumus",
+    "searchEmpty": "Neviens paziņojums neatbilst"
   },
   "leaderboard": {
     "title": "Līderu tabula",
@@ -1927,7 +2112,13 @@
     "loadingBoard": "Ielādē līderu tabulu…",
     "amountTokens": "{{amount}} žetoni",
     "directReferrals": "{{count}} tiešā",
-    "secondaryReferrals": "{{count}} otrādā"
+    "secondaryReferrals": "{{count}} otrādā",
+    "ogChallenge": "OG izaicinājums",
+    "ogHolders_one": "{{count}} OG turētājs",
+    "ogHolders_other": "{{count}} OG turētāji",
+    "ogChallengeTitle": "Atgrieziet OG turētājus",
+    "ogChallengeBody": "Uzaiciniet cilvēkus, kuriem joprojām ir DHB. Kad viņi pievienojas ar jūsu uzaicinājuma saiti un tur savu DHB savā Riftn makā, viņi šeit tiek ieskaitīti jums.",
+    "ogChallengeCta": "Saņemt uzaicinājuma saiti"
   },
   "dhbListing": {
     "title": "Tokena listings drīzumā!",
@@ -2070,17 +2261,39 @@
     "shipping": "Top",
     "noShippingYet": "Nekas nenotiek",
     "shippingAppearHere": "Pieprasījumi, pie kuriem strādā, parādīsies šeit.",
-    "loadFailed": "Nespēja ielādēt pieprasījumus"
+    "loadFailed": "Nespēja ielādēt pieprasījumus",
+    "editMedia": "Foto un video",
+    "editAddMedia": "Pievienot foto vai video",
+    "deviceInfoNote": "Ierīces informācija tiek pievienota, lai palīdzētu mums labot kļūdas.",
+    "deviceInfo": "Ierīces informācija",
+    "deviceInfoOwners": "To redz tikai dēļa īpašnieki",
+    "deviceInfoError": "Neizdevās ielādēt ierīces informāciju",
+    "deviceInfoNone": "Šim pieprasījumam nav ierīces informācijas",
+    "deviceInfoErrors": "Nesenās kļūdas"
   },
   "auth": {
-    "loginRequired": "Nepieciešama pieteikšanās"
+    "loginRequired": "Nepieciešama pieteikšanās",
+    "accountDeleted": "Šis konts tika dzēsts. Varat atkal reģistrēties kā jauns konts.",
+    "accountDeletedHours_one": "Šis konts tika dzēsts. Ar to pašu e-pastu vai tālruni varēsiet atkal reģistrēties pēc aptuveni {{count}} stundas.",
+    "accountDeletedHours_other": "Šis konts tika dzēsts. Ar to pašu e-pastu vai tālruni varēsiet atkal reģistrēties pēc aptuveni {{count}} stundām.",
+    "accountDeletedDays_one": "Šis konts tika dzēsts. Ar to pašu e-pastu vai tālruni varēsiet atkal reģistrēties pēc aptuveni {{count}} dienas.",
+    "accountDeletedDays_other": "Šis konts tika dzēsts. Ar to pašu e-pastu vai tālruni varēsiet atkal reģistrēties pēc aptuveni {{count}} dienām."
   },
   "messages": {
     "newDrawer": {
       "to": "Līdz",
       "recent": "Nesenie",
       "suggested": "Ieteicams",
-      "youFollow": "Cilvēki, kuriem sekojat"
+      "youFollow": "Cilvēki, kuriem sekojat",
+      "placeholder": "Vārds vai @lietotājvārds",
+      "chattedBefore": "Jūs sarunājaties",
+      "mutual": "Savstarpēji",
+      "dmsOff": "DM izslēgtas",
+      "keepTyping": "Turpiniet rakstīt, lai meklētu visus",
+      "noOne": "Neviens nav atrasts",
+      "tryUsername": "Mēģiniet precīzu @lietotājvārdu",
+      "sayHi": "Sasveiciniet kādu",
+      "typeAny": "Ierakstiet jebkuru vārdu vai @lietotājvārdu"
     },
     "reply": "Atbildēt",
     "react": "Reaģēt",
@@ -2121,7 +2334,8 @@
     "noConversationsYet": "Šobrīd nav konversāciju",
     "sending": "Sūta",
     "retrySend": "Mēģināt vēlreiz",
-    "discardSend": "Noņemt"
+    "discardSend": "Noņemt",
+    "notSent": "Nav nosūtīts"
   },
   "music": {
     "listeningCount_one": "{{count}} klausīšanās",
@@ -2205,7 +2419,22 @@
     "viewMode": "Skatīt",
     "back": "Atpakaļ",
     "reserve": {
-      "signIn": "Pieteikties"
+      "signIn": "Pieteikties",
+      "available": "Lietotājvārds ir pieejams",
+      "held": "Rezervēts jums",
+      "ended": "Rezervācija beigusies",
+      "busy": "Tiek rezervēts",
+      "availableBody": "riftn.com/{{name}} šobrīd ir brīvs. Rezervējiet to, un mēs to paturēsim vienu minūti, kamēr reģistrējaties.",
+      "heldBody": "Neviens cits nevar paņemt @{{name}}, līdz taimeris beigsies. Pabeidziet reģistrāciju, lai to paturētu.",
+      "endedBody": "Jūsu minūte beidzās, tāpēc @{{name}} atkal ir pieejams visiem. Tas joprojām ir brīvs.",
+      "busyBody": "Kāds tieši tagad reģistrējas kā @{{name}}. Ja viņš nepabeigs, tas atbrīvosies, kad taimeris beigsies.",
+      "finish": "Pabeigt reģistrāciju",
+      "again": "Rezervēt vēlreiz",
+      "cta": "Rezervēt tagad",
+      "letGo": "Atteikties",
+      "haveAccount": "Jums jau ir konts?",
+      "seoTitle": "@{{name}} ir pieejams Riftn",
+      "seoDescription": "Nevienam vēl nav riftn.com/{{name}}. Rezervējiet to un reģistrējieties, lai tas būtu jūsu."
     },
     "usernameAvailable": "Lietotājvārds ir pieejams!",
     "signUpToClaim": "Reģistrējieties šodien, lai to iegūtu",
@@ -2236,12 +2465,16 @@
     "tabs": {
       "playlists": "Repertuāri",
       "dislikes": "Nepatikas",
-      "likes": "Patīk"
+      "likes": "Patīk",
+      "articles": "Raksti"
     },
     "likedPosts": {
       "emptyTitle": "Vēl nav patīk atzīmju",
       "privateTitle": "Patīk atzīmes ir privātas",
-      "loadMore": "Ielādēt vairāk"
+      "loadMore": "Ielādēt vairāk",
+      "emptyOwn": "Šeit parādās ieraksti, kas jums patīk. Tos redzat tikai jūs, ja vien neieslēdzat Iestatījumos „Rādīt manus „Patīk” visiem”.",
+      "emptyOther": "Vēl nekas nav atzīmēts ar „Patīk”.",
+      "privateDesc": "Šis konts savus „Patīk” patur pie sevis."
     },
     "dislikes": {
       "emptyTitle": "Pagaidām nav atzīmju \"nepatīk\"",
@@ -2266,11 +2499,31 @@
     "sortMostLiked": "Visvairāk atbalstīti",
     "sortCustomShort": "Personīgais",
     "arrange": {
-      "saving": "Saglabā..."
+      "saving": "Saglabā...",
+      "title": "Sakārtojiet savus ierakstus",
+      "hint": "Turiet ierakstu un velciet to uz jauno vietu. Apmeklētāji vispirms redz šo secību.",
+      "drag": "Velciet, lai pārvietotu",
+      "toTop": "Pārvietot uz augšu",
+      "save": "Saglabāt secību",
+      "saved": "Jūsu secība ir saglabāta",
+      "reset": "Atpakaļ uz jaunākajiem vispirms",
+      "resetDone": "Atpakaļ uz jaunākajiem vispirms",
+      "saveFailed": "Neizdevās saglabāt jūsu secību. Lūdzu, mēģiniet vēlreiz.",
+      "loadFailed": "Neizdevās ielādēt jūsu ierakstus. Aizveriet šo un mēģiniet vēlreiz.",
+      "empty": "Pagaidām nav ko kārtot. Vispirms kaut ko publicējiet."
     },
     "searchThisChannel": "Atrast šo kanālu",
     "searchResultCount": "1 rezultāts par \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} rezultāti par \"{{query}}\""
+    "searchResultCountPlural": "{{count}} rezultāti par \"{{query}}\"",
+    "unavailable": "Profils nav pieejams",
+    "mutualsOne": "{{count}} kopīgs sekotājs:",
+    "mutualsMany": "{{count}} kopīgi sekotāji:",
+    "articles": {
+      "emptyTitle": "Vēl nav rakstu",
+      "emptySubtitle": "Raksti parādīsies šeit"
+    },
+    "sortCustom": "Pielāgota secība",
+    "arrangeButton": "Kārtot ierakstus"
   },
   "tv": {
     "seoTitle": "Tiešraides TV: bezmaksas kanāli no visas pasaules",
@@ -2535,7 +2788,26 @@
     "createSignIn": "Piesakieties vēlreiz, lai izveidotu aģentu",
     "checkConnection": "Pārbaudiet savienojumu un mēģiniet vēlreiz.",
     "welcome": {
-      "text": "Sveiciena ziņa"
+      "text": "Sveiciena ziņa",
+      "title": "Sveikt jaunos dalībniekus",
+      "help": "Šis aģents seko un/vai raksta ziņas cilvēkiem, kuri tikko pievienojušies Riftn, dažiem dienā.",
+      "follow": "Sekot jaunajiem dalībniekiem",
+      "message": "Rakstīt jaunajiem dalībniekiem",
+      "textHelp": "{name} kļūst par viņu @lietotājvārdu. Bez saitēm. Tiek nosūtīts vienreiz katram cilvēkam.",
+      "saveText": "Saglabāt ziņu",
+      "perDay": "Cilvēki dienā",
+      "fewer": "Mazāk dienā",
+      "more": "Vairāk dienā",
+      "today": "Šodien: {{follows}} sekoti · {{messages}} ziņas",
+      "limits": "Nekad divreiz vienu un to pašu cilvēku. Izlaiž ikvienu, kas jūs bloķējis vai apklusinājis, izslēdzis jaunas ziņas vai paslēpies no Jaunajiem dalībniekiem.",
+      "showLog": "Skatīt, ko tas sveica",
+      "hideLog": "Paslēpt sveicienus",
+      "empty": "Vēl neviena. Jaunie dalībnieki parādās šeit, kad pievienojas.",
+      "followed": "Sekots",
+      "messaged": "Ziņa nosūtīta",
+      "skipped": "Izlaists",
+      "failed": "Neizdevās sasniegt",
+      "defaultText": "Sveiki, {name}! Laipni lūdzam Riftn! 👋"
     },
     "workspace": {
       "moderation": "Straumes moderēšana",
@@ -2731,7 +3003,15 @@
     "switchWalletAccount": "Pārslēgt kontu",
     "walletLoadFailed": "Nevarēja ielādēt makus. Lūdzu, mēģiniet vēlreiz.",
     "openInBrowser": "Atvērt pārlūkā",
-    "copyLink": "Kopēt saiti"
+    "copyLink": "Kopēt saiti",
+    "bringLoginOver": "Izmantojāt Riftn vietnē dehub.io? <bring>Pārnesiet savu pieteikšanos</bring>",
+    "didYouMean": "Vai domājāt {{email}}?",
+    "profileMovedTitle": "Jūsu profils ir pārvietots",
+    "migrateWrongLogin": "Šī pieteikšanās atvēra citu maku, tāpēc nekas netika mainīts. Jūsu vecais profils tika izveidots ar {{login}}. Izmantojiet to, lai to atgūtu.",
+    "googleInAppTitle": "Google nepieteiksies lietotnē {{app}}",
+    "googleInAppTitleUnnamed": "Google nepieteiksies šajā lietotnē",
+    "googleInAppBody": "Atveriet Riftn savā pārlūkprogrammā, lai izmantotu Google, vai piesakieties šeit ar e-pastu.",
+    "tryAnyway": "Tomēr mēģināt"
   },
   "careers": {
     "title": "Karjera Riftn",
@@ -2956,7 +3236,16 @@
     "searchDehubFor": "Meklēt “{{query}}” vietnē Riftn",
     "switchAccount": "Pārvietoties uz kontu",
     "signedInAs": "Ielogojies kā {{name}}",
-    "requestSend": "Nosūtīt pieprasījumu"
+    "requestSend": "Nosūtīt pieprasījumu",
+    "requestPrompt": "Vēl nav šeit? Nosūtiet to kā pieprasījumu",
+    "requestPromptShort": "Vēl nav šeit?",
+    "requestDraftMenu": "Pievienot {{query}} Riftn",
+    "requestDraftSettings": "Iestatījums priekš {{query}}",
+    "requestPostsTo": "Publicē sadaļā Pieprasījumi",
+    "requestHint": "Publicē sadaļā Pieprasījumi jūsu vārdā. Mēs jums paziņosim, kad tas būs ieviests.",
+    "requestSent": "Nosūtīts uz Pieprasījumiem",
+    "requestSentHint": "Mēs jums paziņosim, kad tas būs ieviests.",
+    "requestSeeIt": "Skatīt to Pieprasījumos"
   },
   "comments": {
     "reportComment": "Ziņot par komentāru",
@@ -3052,8 +3341,20 @@
     "anonymousLikes_other": "{{count}} patīk no anonīmiem nozīmīšu īpašniekiem",
     "threadParts": {
       "moveUp": "Pārvietot uz augšu",
-      "moveDown": "Pārvietot uz leju"
-    }
+      "moveDown": "Pārvietot uz leju",
+      "reorder": "Pārkārtot",
+      "save": "Saglabāt secību",
+      "saved": "Pavediena secība saglabāta",
+      "saveFailed": "Neizdevās saglabāt secību. Mēģiniet vēlreiz.",
+      "dragPart": "Velciet, lai pārvietotu {{n}}. daļu",
+      "addPart": "Pievienot pavedienam",
+      "addPlaceholder": "Pievienot savam pavedienam...",
+      "label": "Pavediens · {{count}} daļas",
+      "reorderHint": "Velciet daļas vai izmantojiet bultiņas, pēc tam saglabājiet."
+    },
+    "attachMedia": "Pievienot foto, video vai audio",
+    "attachUnsupported": "Pievienojiet foto, video vai audio failu.",
+    "attachTooLarge": "Šis fails pārsniedz {{size}} MB ierobežojumu."
   },
   "mintChain": {
     "title": "Piparmētru ziņa",
@@ -3071,7 +3372,14 @@
     "notAvailable": "Šīs ķēdes kalšana vēl nav pieejama."
   },
   "postEditHistory": {
-    "original": "Oriģināls"
+    "original": "Oriģināls",
+    "title": "Labojumu vēsture",
+    "edited_one": "Rediģēts vienreiz",
+    "edited_other": "Rediģēts {{count}} reizes",
+    "lastEdit": "Pēdējais labojums {{time}}",
+    "editN": "Labojums {{n}}",
+    "now": "Tagad",
+    "showChanges": "Rādīt izmaiņas"
   },
   "postInfo": {
     "title": "Ieraksta informācija",
@@ -3366,7 +3674,10 @@
     "waiting_for_wallet": "Gaida jūsu maku",
     "waiting_for_wallet_desc": "Atveriet {{wallet}} un apstipriniet parakstu — pieprasījums gaida tur.",
     "your_wallet": "jūsu maks",
-    "max_available_on_chain": "Maksimāli pieejami: {{amount}} žetoni uz {{chain}}"
+    "max_available_on_chain": "Maksimāli pieejami: {{amount}} žetoni uz {{chain}}",
+    "not_available_for_this_post": "Nav pieejams šim ierakstam",
+    "turn_back_on_desktop_notifications": "Atkal ieslēgt darbvirsmas paziņojumus?",
+    "notifications_moved_to_riftn": "Mēs pārcēlāmies uz riftn.com, tāpēc jūsu pārlūkprogrammai vēlreiz vajag jūsu atļauju, lai šeit rādītu atbildes, dzeramnaudas un DM."
   },
   "staking": {
     "title": "Steikings",
@@ -5274,18 +5585,167 @@
     "buy": "Pirkt",
     "reject": "Noraidīt",
     "needsYouHold": "Nepieciešams {{needed}}, tev ir {{held}}",
-    "sellYourFractions": "Pārdot savas daļas ({{held}} turētas)"
+    "sellYourFractions": "Pārdot savas daļas ({{held}} turētas)",
+    "nftsSubtitle": "Jebkurš NFT, maiņa vienā solī",
+    "buyersTab": "Pircēji",
+    "soldOfListing": "Pārdotas {{sold}} no {{total}}",
+    "noBuyersYet": "Neviens vēl nav nopircis šī ieraksta daļas",
+    "fromYou": "no jums",
+    "statusOverdue": "Nokavēts"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Izmantot šo informāciju"
+        "use": "Izmantot šo informāciju",
+        "url": "Produkta lapas URL",
+        "action": "Nolasīt produkta lapu",
+        "loading": "Nolasa lapu…",
+        "hint": "Importējiet tekstu no publiskas produkta lapas. Pārskatiet informāciju pirms tās izmantošanas; produkta attēlus pievienojiet atsevišķi studijā.",
+        "source": "Importētais avots",
+        "review": "Izvēlieties produktu, ko kopēt savā rediģējamajā aprakstā. Jūsu virsraksts, balss un zīmola krāsas paliek nemainīgi.",
+        "errors": {
+          "signIn": "Piesakieties, lai importētu produkta lapu.",
+          "url": "Izmantojiet publisku HTTPS produkta URL.",
+          "empty": "Netika atrasta izmantojama produkta informācija. Pievienojiet to manuāli.",
+          "busy": "Notiek pārāk daudz importu. Drīz mēģiniet vēlreiz.",
+          "unavailable": "Šo lapu nevarēja importēt. Pievienojiet produkta informāciju manuāli.",
+          "failed": "Imports neizdevās. Jūsu apraksts ir saglabāts; mēģiniet vēlreiz vai ievadiet informāciju manuāli."
+        }
+      },
+      "return": "Atgriezties pie studijas melnraksta",
+      "title": "Kampaņas apraksts",
+      "intro": "Aprakstiet savu produktu un zīmolu, pēc tam sagatavojiet atbilstošus reklāmas formātus.",
+      "saved": "Jūsu apraksts ir saglabāts šajā ierīcē šim kontam.",
+      "preview": "Sagatavot formātus",
+      "clear": "Notīrīt aprakstu",
+      "required": "Pievienojiet produkta nosaukumu un aprakstu, lai sagatavotu formātus.",
+      "variants": "Kampaņas formāti",
+      "reviewHint": "Pirms ģenerēšanas pārskatiet modeli, cenu un produkta atsauci studijā. Katrs formāts ir atsevišķs ģenerējums.",
+      "open": "Pārskatīt studijā",
+      "fields": {
+        "product": "Produkta nosaukums (obligāts)",
+        "description": "Produkta fakti (obligāti)",
+        "brand": "Zīmola nosaukums",
+        "audience": "Mērķauditorija",
+        "benefit": "Galvenais ieguvums",
+        "voice": "Zīmola balss",
+        "palette": "Zīmola krāsas",
+        "headline": "Apstiprināts virsraksts",
+        "cta": "Aicinājums uz darbību"
+      },
+      "formats": {
+        "square": "Kvadrātveida reklāma",
+        "portrait": "Portreta reklāma",
+        "story": "Stāsta attēls",
+        "video": "Vertikāls video"
       }
     },
     "cinema": {
       "close": "Aizvērt",
       "performance": {
-        "label": "Veiktspēja"
+        "label": "Veiktspēja",
+        "0": "Priecīgs",
+        "1": "Melanholisks",
+        "2": "Satraukts",
+        "3": "Pārliecināts",
+        "4": "Apbrīnas pilns",
+        "5": "Atturīgs",
+        "6": "Rotaļīgs"
+      },
+      "title": "Kino režija",
+      "hint": "Vadiet nākamā attēla vai video vizuālo stilu. Rezultāti atšķiras atkarībā no modeļa.",
+      "none": "Bez režijas",
+      "reset": "Notīrīt režiju",
+      "camera": {
+        "label": "Kameras izskats",
+        "0": "Digitālais kino",
+        "1": "35 mm filma",
+        "2": "16 mm filma",
+        "3": "Lielformāta",
+        "4": "Vintāžas videokamera"
+      },
+      "lens": {
+        "label": "Objektīva izskats",
+        "0": "Sfērisks",
+        "1": "Anamorfisks",
+        "2": "Vintāžas mīksts stikls",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Fokusa attālums",
+        "0": "18 mm platleņķa",
+        "1": "24 mm platleņķa",
+        "2": "35 mm dabisks",
+        "3": "50 mm standarta",
+        "4": "85 mm portreta",
+        "5": "135 mm teleobjektīvs"
+      },
+      "aperture": {
+        "label": "Asuma dziļums",
+        "0": "f/1.4 ļoti sekls",
+        "1": "f/2.8 sekls",
+        "2": "f/5.6 vidējs",
+        "3": "f/11 dziļš fokuss"
+      },
+      "movement": {
+        "label": "Kameras kustība",
+        "0": "Nekustīgs statīvs",
+        "1": "Lēna tuvināšanās ar ratiņiem",
+        "2": "Lēna attālināšanās ar ratiņiem",
+        "3": "Sānu sekošana",
+        "4": "Riņķot ap objektu",
+        "5": "No rokas",
+        "6": "Celtņa pacēlums",
+        "7": "Lēna panorāma"
+      },
+      "lighting": {
+        "label": "Apgaismojums",
+        "0": "Maiga dienasgaisma",
+        "1": "Zelta stunda",
+        "2": "Tumšs kjaroskuro",
+        "3": "Gaišs studijas",
+        "4": "Neona gaismas kadrā",
+        "5": "Siluets pretgaismā",
+        "6": "Izkliedēts mākoņains"
+      },
+      "tempo": {
+        "label": "Kadra temps",
+        "0": "Viens nepārtraukts kadrs",
+        "1": "Mierīga, nesteidzīga darbība",
+        "2": "Dinamiska, enerģiska darbība",
+        "3": "Haotiska, drudžaina darbība"
+      },
+      "era": {
+        "label": "Laikmets",
+        "0": "20. gadi",
+        "1": "50. gadi",
+        "2": "60. gadi",
+        "3": "70. gadi",
+        "4": "80. gadi",
+        "5": "90. gadi",
+        "6": "Mūsdienas",
+        "7": "Tuvā nākotne"
+      },
+      "genre": {
+        "label": "Žanrs",
+        "0": "Dokumentālā filma",
+        "1": "Drāma",
+        "2": "Film noir",
+        "3": "Zinātniskā fantastika",
+        "4": "Fantāzija",
+        "5": "Romantiskā komēdija",
+        "6": "Trilleris",
+        "7": "Vesterns"
+      },
+      "palette": {
+        "label": "Krāsu palete",
+        "0": "Silts dzintars",
+        "1": "Vēsi zils",
+        "2": "Klusināti zemes toņi",
+        "3": "Pasteļtoņi",
+        "4": "Kontrastains melnbalts",
+        "5": "Piesātinātas pamatkrāsas"
       }
     },
     "libraryEmpty": "Šeit parādīsies jūsu saglabātās ģenerācijas.",
@@ -6093,9 +6553,114 @@
     "gallery": {
       "send": "Sūtīt",
       "notifications": {
-        "generation_reply": "{{name}} atbildēja uz jūsu komentāru"
+        "generation_reply": "{{name}} atbildēja uz jūsu komentāru",
+        "generation_like": "{{name}} reaģēja uz jūsu ģenerējumu",
+        "generation_comment_like": "{{name}} reaģēja uz jūsu komentāru",
+        "generation_comment": "{{name}} komentēja jūsu ģenerējumu"
+      },
+      "browse": "Pārlūkot ģenerējumus",
+      "create": "Izveidot",
+      "fullscreen": "Skatīt pilnekrānā",
+      "missing": "Šis ģenerējums nav pieejams."
+    },
+    "avatarTitle": "Runājošs portrets",
+    "avatarRequirements": "Kvadrātveida PNG portrets, 512–2048 pikseļi, līdz 5 MB. Mono 24 kHz 16 bitu PCM WAV, 5–30 sekundes. Pēdējā sekundes daļa tiek papildināta ar klusumu.",
+    "avatarPortrait": "Izvēlēties PNG portretu",
+    "avatarAudio": "Izvēlēties runas WAV",
+    "avatarPermission": "Man ir atļauja animēt šo portretu un izmantot šo audio.",
+    "avatarQuote": "{{seconds}} sekundes, ieskaitot klusumu · {{amount}} žetoni",
+    "avatarPrepare": "Sagatavot un pārskatīt cenu",
+    "batchFlowLimit": "Flow saraksts ir pilns. Noņemiet neizmantotu Flow, pirms veidojat citu partiju.",
+    "batchReviewCampaign": "Pārskatīt kampaņas partiju Flow",
+    "batchReviewFilmImages": "Pārskatīt scenārija attēlu partiju",
+    "batchReviewFilmVideos": "Pārskatīt filmas klipu partiju",
+    "batchReviewHint": "Atver atsevišķu saglabātu Flow. Pirms maksājuma pārskatiet katru vienumu un pilnu cenu. Pabeigtie vienumi un sākotnējais maksājums tiek saglabāti atkopšanai. Atsauces tiek kopētas jūsu privātajā bibliotēkā; tiek piemērota krātuves un tīkla izmantošana.",
+    "batchInvalid": "Pabeidziet katru vienumu, pirms sagatavojat 1–12 attēlu vai klipu partiju.",
+    "batchReferenceLimit": "Šī partija atbalsta vienu attēla atsauci katram vienumam. Noņemiet liekās atsauces vai sagatavojiet šo vienumu atsevišķi.",
+    "batchVideoSettings": "Šajā partijā klipiem nepieciešams vesels ilgums no 4–15 sekundēm un malu attiecība 16:9, 9:16 vai 1:1.",
+    "batchMissingReference": "Atsauce trūkst, netiek atbalstīta vai ir lielāka par 25 MB. Atjaunojiet to redaktorā pirms partijas sagatavošanas.",
+    "batchOwnerChanged": "Konts vai melnraksts ir mainījies. Atveriet šo partiju vēlreiz tās sākotnējā kontā.",
+    "batchConflict": "Saglabātā partija neatbilst tās sākotnējam momentuzņēmumam.",
+    "audioExportFormat": "Eksporta formāts",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Pievienojiet vienu avota klipu, ko pagarināt.",
+    "extensionSeconds": "+{{seconds}} s jauna materiāla",
+    "extensionHelp": "Atgriež jūsu avota klipu ar aptuveni četrām jaunām sekundēm. Rezultāts tiek mērogots līdz 720p ar 24 kadriem sekundē. Pagarinājumam tiek ģenerēts jauns audio.",
+    "extensionForward": "Pievienot aptuveni četras sekundes pēc avota klipa",
+    "extensionBackward": "Pievienot aptuveni četras sekundes pirms avota klipa",
+    "expandDescription": "Ģenerēt jaunas attēla malas. Neobligāta uzvedne angliski; viens avota attēls.",
+    "relightDescription": "Pārgaismot vienu foto pēc jūsu apgaismojuma un fona apraksta.",
+    "expandPromptHint": "Pievienojiet vienu attēlu un izvēlieties tā jauno malu attiecību. Uzvedne angliski nav obligāta.",
+    "expandEnglishOnly": "Šis paplašināšanas modelis pieņem uzvednes angliski. Atstājiet uzvedni tukšu automātiskai paplašināšanai.",
+    "expandNeedsImage": "Pievienojiet attēlu, ko paplašināt.",
+    "learn": {
+      "title": "Autoru nodarbības",
+      "intro": "Īsas nodarbības, zināšanu pārbaude un rediģējams vingrinājums katrai. Progress tiek saglabāts šajā ierīcē jūsu kontam.",
+      "back": "Atpakaļ uz Creator",
+      "lessons": "Nodarbības",
+      "progress": "Nokārtotas {{completed}} no {{total}} zināšanu pārbaudēm",
+      "check": "Pārbaudīt atbildi",
+      "correct": "Zināšanu pārbaude nokārtota",
+      "retry": "Mēģiniet vēlreiz. Pārskatiet nodarbību augstāk.",
+      "exerciseTitle": "Praktisks vingrinājums",
+      "exerciseHint": "Atveriet rediģējamu piemēru savā studijas darbvietā. Melnraksta atvēršana ir bez maksas; ģenerēšanai nepieciešama jūsu pārskatīšana un sava cenas tāme. Rediģējiet piemēru pirms ģenerēšanas.",
+      "openExercise": "Atvērt vingrinājuma melnrakstu",
+      "closeExercise": "Aizvērt vingrinājumu",
+      "brief": {
+        "title": "Uzrakstiet skaidru vizuālo aprakstu",
+        "body1": "Aprakstiet konkrētu objektu, tā darbību un vidi. Pievienojiet kadrējumu vai kameras kustību, ja tas palīdz ainai. Nesaistītas idejas atstājiet citam melnrakstam.",
+        "body2": "Norādes par apgaismojumu, objektīvu un stilu vada modeli. Tās negarantē fizisku kameras uzvedību vai precīzu attēlu. Mainiet vienu daļu vienlaikus, lai varētu salīdzināt versijas.",
+        "body3": "Pirms ģenerēšanas pārskatiet izvēlēto modeli, atbalstītos pielikumus, izmērus un cenu. Saglabājiet sākotnējo melnrakstu, lai varētu pie tā atgriezties.",
+        "question": "Kuru aprakstu ir visvieglāk pārskatīt?",
+        "answer0": "Skaidrs objekts, darbība un vide",
+        "answer1": "Tikai modeļa nosaukums",
+        "answer2": "Pretrunīgu stilu saraksts",
+        "exercise": "Keramikas tējkanna uz koka galda pie loga. Maiga rīta gaisma, vidējs kadrējums, vienkāršs fons. Tējkanna paliek skaidrs galvenais objekts."
+      },
+      "continuity": {
+        "title": "Plānojiet kadrus un pārbaudiet nepārtrauktību",
+        "body1": "Izmantojiet redaktora paneli Filma, lai saglabātu aprakstu un sakārtotus kadrus. Sagatavojiet katru kadru vai klipu atsevišķi, pārskatiet tā cenas tāmi un izvēlieties pieņemtu rezultātu.",
+        "body2": "Pievienojiet tikai tās atsauces, ko pieņem jūsu izvēlētais modelis. Atsauces atkārtota izmantošana var vadīt izskatu; tā neapmāca identitāti un negarantē atbilstību. Tēli un balsis starp ģenerējumiem var atšķirties.",
+        "body3": "Saglabājiet veiksmīgos uzņēmumus un salieciet tos laika joslā. Pirms eksporta pārskatiet kustību, sejas, dialogu un pārejas.",
+        "question": "Kas atbalsta nepārtrauktību starp kadriem?",
+        "answer0": "Vairāk nesaistītu uzvedņu",
+        "answer1": "Apstiprinātas atsauces un pārskatītas kadru piezīmes",
+        "answer2": "Pieņēmums, ka tēla identitāte ir garantēta",
+        "exercise": "Plats kadrs ar vientuļu ceļotāju, kurš saullēktā sasniedz klusu krastu. Lēna kameras kustība uz priekšu, mierīga atmosfēra. Viens nepārtraukts kadrs."
+      },
+      "campaign": {
+        "title": "Izmantojiet apstiprinātus produkta faktus",
+        "body1": "Sāciet ar produkta faktiem, ko varat pārbaudīt. Pārskatiet importētos metadatus pirms to izmantošanas. Skaidri uzrakstiet virsrakstu un aicinājumu uz darbību; neizdomājiet cenas, atsauksmes vai veiktspējas apgalvojumus.",
+        "body2": "Izmantojiet saglabātus kampaņas variantus, lai kopā turētu kopīgās piezīmes un atsevišķus āķus, scenārijus, valodas un formātus. Sagatavojiet vienu pārskatītu vienumu vienlaikus un pārbaudiet tā cenas tāmi studijā.",
+        "body3": "Pārskatiet rezultātā redzamo tekstu, produkta izskatu un visus izrunātos apgalvojumus. Uzvedne nepierāda produkta precizitāti vai mārketinga efektivitāti.",
+        "question": "Kad produkta apgalvojumu drīkst iekļaut?",
+        "answer0": "Vienmēr, kad tas izklausās pārliecinoši",
+        "answer1": "Pēc piecu zvaigžņu atsauksmes izdomāšanas",
+        "answer2": "Kad tas nāk no apstiprinātiem produkta faktiem",
+        "exercise": "Izveidojiet portreta formāta produkta reklāmu beramajai tējai, kas tiek pārdota atkārtoti lietojamā kārbā. Apstiprinātais virsraksts: Atrodi laiku tējai. Apstiprinātais CTA: Apskati kolekciju. Izmantojiet tikai šos faktus; neizdomājiet atlaides, atsauksmes vai veselības apgalvojumus."
       }
-    }
+    },
+    "campaignPlanTitle": "Kampaņas varianti un sērijas",
+    "campaignPlanIntro": "Saglabājiet līdz 12 variantiem vai sērijām. Katrs atver studiju savai pārskatīšanai un cenas tāmei. Kopīgās piezīmes vada nepārtrauktību; produkta izskats, tēli un balsis starp ģenerējumiem var atšķirties.",
+    "campaignTitle": "Kampaņas vai sērijas nosaukums",
+    "campaignContinuity": "Kopīgas piezīmes par tēlu, balsi un stilu",
+    "campaignVariantTitle": "Varianta vai sērijas nosaukums",
+    "campaignHook": "Sākuma āķis",
+    "campaignLanguage": "Izvades valoda",
+    "campaignScript": "Apstiprināts scenārijs vai ainu secība",
+    "campaignAdd": "Pievienot variantu vai sēriju",
+    "campaignClear": "Notīrīt plānu",
+    "campaignFormat": "Izvades formāts",
+    "audioInvalidResponse": "Audio pakalpojums atgrieza nederīgu rezultātu.",
+    "batchPaymentHelp": "Par katru iesniegto attēlu maksa tiek iekasēta atsevišķi. Ja partija apstājas, tās maksājuma neizmantotie žetoni automātiski tiek izmantoti vēlākam ģenerējumam, ko tie sedz.",
+    "invalidSeed": "Sēklai jābūt veselam skaitlim no 0 līdz 2147483647.",
+    "libraryFavorites": "Izlase",
+    "libraryFavoriteAdd": "Pievienot izlasei",
+    "libraryFavoriteRemove": "Noņemt no izlases",
+    "audioTaskDialoguePlaceholder": "Alise: Mums jāiet.\nBobs: [smejas] Pēc jums.",
+    "priceOwnKey": "Jūsu atslēga",
+    "audioResultTooLarge": "Audio rezultāts ir tukšs vai pārsniedz 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plāni katrai darba plūsmai",
@@ -6262,7 +6827,8 @@
     "createTheFirst": "Izveidojiet pirmo",
     "docsSeoTitle": "AI prasmju instrukcijas Ć¢ÂÂ Riftn",
     "docsSeoDescription": "Uzziņu dokumentācija par Riftn mākslīgā intelekta asistenta prasmēm un ātru bibliotēku.",
-    "raw": "jēlvaski"
+    "raw": "jēlvaski",
+    "docsLoadFailed": "# Kļūda\nNeizdevās ielādēt prasmes dokumentāciju."
   },
   "nftMarket": {
     "actAll": "Viss",
@@ -6381,7 +6947,27 @@
     "spotlight": "Prožektors",
     "spotlightBuyNote": "NFT un maksājums tiek apmainīti vienā solī.",
     "spotlightOfferNote": "Vēl nav uzskaitīts. Nosūtiet piedāvājumu un turētājs to var pieņemt jebkurā laikā.",
-    "signInToTradeCta": "Pierakstieties, lai tirgotu"
+    "signInToTradeCta": "Pierakstieties, lai tirgotu",
+    "actCollectionOffer": "Kolekcijas piedāvājums",
+    "actListed": "Izlikts",
+    "actSale": "Pārdošana",
+    "buyAll": "Pirkt visus",
+    "buySeveral": "Pirkt vairākus",
+    "cartBought": "Nopirkti {{n}}. Tie tagad ir jūsu makā.",
+    "cartCount": "Grozā: {{n}}",
+    "cartFull": "Līdz 20 vienlaikus",
+    "cartOneCoin": "Viena ķēde un viena monēta grozā. Notīriet to, lai pārslēgtos.",
+    "cartOwn": "Šis ir jūsu",
+    "cartPick": "Pieskarieties, lai pievienotu grozam",
+    "forSaleHere": "Pārdošanā šeit",
+    "noActivity": "Šeit vēl nekā nav",
+    "volShort": "Apj.",
+    "salesCount": "Pārdoti {{n}}",
+    "bestOffer": "Labākais piedāvājums",
+    "fromOpenSea": "Top kolekcijas OpenSea",
+    "buyHere": "Pērciet tos šeit",
+    "openSeaNote": "Izlikts OpenSea. Jūs maksājat pārdevējam tieši Seaport; Riftn nepievieno maksu.",
+    "viewOnOpenSea": "Skatīt OpenSea"
   },
   "usernames": {
     "seoTitle": "Lietotājvārda tirgotava | Riftn",
@@ -6736,7 +7322,18 @@
       "votes_other": "{{count}} balsis",
       "howToVote_one": "Ierakstiet {{command}} un skaitli chatā, lai balsotu · {{count}} balsis",
       "howToVote_other": "Ierakstiet {{command}} un skaitli chatā, lai balsotu · {{count}} balsis"
-    }
+    },
+    "eyebrow": {
+      "follow": "Jauns sekotājs",
+      "subscribe": "Jauns abonents",
+      "subscribedTo": "Abonēja · {{plan}}",
+      "gifted_one": "Uzdāvināja abonementu",
+      "gifted_other": "Uzdāvināja {{count}} abonementus",
+      "share": "Kopīgoja straumi",
+      "join": "Tikko pievienojās"
+    },
+    "giftedSubs_one": "{{name}} uzdāvināja abonementu!",
+    "giftedSubs_other": "{{name}} uzdāvināja {{count}} abonementus!"
   },
   "liveChatModeration": {
     "timeout1m": "Laiks izbeigts uz 1 minūti",
@@ -6757,14 +7354,40 @@
       "modes": {
         "none": "Izslēgts",
         "blur": "Aizmiglojums",
-        "color": "Krāsa"
-      }
+        "color": "Krāsa",
+        "image": "Attēls"
+      },
+      "failed": "Fona noņemšanu šajā ierīcē neizdevās sākt.",
+      "hint": "Darbojas jūsu ierīcē. Pirmajā reizē ielāde aizņem dažas sekundes."
     },
     "remove": "Noņemt",
     "scenes": {
       "countdown": "Laika atpakaļskaitīšana",
       "names": {
-        "starting": "Drīz sāksies"
+        "starting": "Drīz sāksies",
+        "chatting": "Tikai sarunas",
+        "gameplay": "Spēle",
+        "brb": "Tūlīt būšu atpakaļ",
+        "ending": "Straume beidzas"
+      },
+      "title": "Ainas",
+      "edit": "Rediģēt {{name}}",
+      "subtitle": "Otrā rinda (neobligāti)",
+      "picture": "Attēls",
+      "noCountdown": "Bez atpakaļskaitīšanas",
+      "minutes": "{{count}} min",
+      "muteMic": "Izslēgt manu mikrofonu, kamēr tas ir ieslēgts",
+      "hints": {
+        "starting": "Kartīte ar atpakaļskaitīšanu",
+        "chatting": "Kamera pilnekrānā",
+        "gameplay": "Ekrāns ar jūsu kameru",
+        "brb": "Kartīte, mikrofons izslēgts",
+        "ending": "Pateicības kartīte"
+      },
+      "subtitles": {
+        "starting": "Straume sāksies pēc",
+        "brb": "Tūlīt atgriezīsimies",
+        "ending": "Paldies, ka skatījāties"
       }
     },
     "sources": {
@@ -6774,15 +7397,37 @@
       "show": "Rādīt straumē",
       "loop": "Cilpa",
       "positions": {
-        "center": "Centrēt"
+        "center": "Centrēt",
+        "top-left": "Augšā pa kreisi",
+        "top-right": "Augšā pa labi",
+        "bottom-left": "Apakšā pa kreisi",
+        "bottom-right": "Apakšā pa labi"
       },
       "sizes": {
-        "medium": "Vidēja"
+        "medium": "Vidēja",
+        "small": "Mazs",
+        "large": "Liels"
       },
       "shapes": {
         "circle": "Aplis",
-        "rect": "Kvadrāts"
-      }
+        "rect": "Kvadrāts",
+        "rounded": "Noapaļots"
+      },
+      "title": "Avoti",
+      "addImage": "Attēls vai logotips",
+      "addCamera": "Otrā kamera",
+      "addClip": "Video klips",
+      "addReaction": "Reaģēt uz video",
+      "reactPlaceholder": "Ielīmējiet Riftn video saiti",
+      "reactInvalid": "Ielīmējiet saiti uz Riftn video.",
+      "reactNotLive": "Vispirms sāciet tiešraidi, tad pievienojiet video.",
+      "reactNoBubble": "Jūsu kameru šeit nevarēja atvērt divreiz. Mainiet video izmēru, lai jūsu seja paliktu ekrānā.",
+      "failed": "Neizdevās pievienot šo avotu.",
+      "empty": "Pievienojiet logotipu, otru kameru vai video klipu virs savas straumes.",
+      "hint": "Avoti tiek zīmēti virs jūsu attēla katram skatītājam un katrā platformā.",
+      "clip": "Klips",
+      "restart": "Sākt no jauna",
+      "play": "Atskaņot vai pauzēt"
     },
     "audio": {
       "mute": "Apklusināt",
@@ -6791,7 +7436,27 @@
         "off": "Izslēgts",
         "low": "Gaišs",
         "high": "Spēcīgs"
-      }
+      },
+      "title": "Audio mikseris",
+      "unavailable": "Šī pārlūkprogramma nevar miksēt audio, tāpēc jūsu mikrofons tiek pārraidīts, kā ir.",
+      "channels": {
+        "mic": "Mikrofons",
+        "game": "Spēle / cilne",
+        "clip": "Video klips"
+      },
+      "absent": {
+        "mic": "Nav mikrofona",
+        "game": "Kopīgojiet ekrānu ar audio vai izmantojiet tveršanas karti",
+        "clip": "Pievienojiet video klipu sadaļā Avoti"
+      },
+      "gate": "Trokšņu vārti",
+      "gateHint": "Apklusina mikrofonu starp vārdiem, lai tastatūras klikšķi un ventilatori nenonāktu straumē."
+    },
+    "imageTooLarge": "Šis attēls ir pārāk liels. Mēģiniet mazāku.",
+    "widgets": {
+      "title": "Rādīt logrīkus manā video",
+      "hint": "Brīdinājumi, mērķu joslas un tērzēšana tiek iezīmēti jūsu straumē, tāpēc tos redz arī skatītāji Twitch, YouTube un visās citās platformās.",
+      "failed": "Neizdevās mainīt logrīku atrašanās vietu. Mēģiniet vēlreiz."
     }
   },
   "liveStudio": {
@@ -6805,12 +7470,32 @@
         "off": "Izslēgts",
         "idle": "Gatavs",
         "live": "Tiešraide",
-        "error": "Kļūda"
-      }
+        "error": "Kļūda",
+        "connecting": "Savienojas"
+      },
+      "title": "Multistraumēšanas galamērķi",
+      "intro": "Sāciet tiešraidi Riftn vienreiz, un mēs bez maksas pārsūtīsim jūsu straumi uz katru šeit ieslēgto platformu. Tā sākas dažu sekunžu laikā pēc tiešraides sākuma.",
+      "add": "Pievienot galamērķi",
+      "empty": "Vēl nav galamērķu. Pievienojiet Twitch, YouTube, Kick vai jebkuru RTMP serveri.",
+      "server": "Servera URL",
+      "findKey": "Atrodiet savu {{name}} serveri un atslēgu",
+      "customHint": "Ielīmējiet RTMP serveri un atslēgu, ko sniedz jūsu platforma.",
+      "keyNote": "Jūsu atslēga tiek glabāta šifrēta mūsu serveros un vairs netiek rādīta.",
+      "added": "{{name}} pievienots",
+      "saveFailed": "Neizdevās saglabāt galamērķi",
+      "toggle": "Straumēt uz šo galamērķi"
     },
     "vertical": {
       "centre": "Centrēt",
-      "live": "TIEŠRAIDĒ"
+      "live": "TIEŠRAIDĒ",
+      "title": "Vertikālais skats",
+      "intro": "Tālruņos jūsu straume tiek skatīta vertikālajā plūsmā. Velciet rāmi, lai izvēlētos, kuru attēla daļu tie redz.",
+      "enabled": "Rādīt manu straumi vertikālajā plūsmā",
+      "zoom": "Tālummaiņa",
+      "frame": "Jūsu horizontālais attēls",
+      "box": "Ko redz tālruņi",
+      "hint": "Velciet rāmi vai izmantojiet bultiņu taustiņus. Saglabājiet, lai piemērotu to tiešraidei.",
+      "watch": "Skatīties {{name}} tiešraidē"
     },
     "subathon": {
       "title": "Subathon",
@@ -6973,7 +7658,8 @@
       "subathon_timer": "Subathon laiks",
       "points_board": "Lojālie skatītāji",
       "streamer_level": "Straumētāja līmenis",
-      "tip_jar": "Dāvanu trauciņš"
+      "tip_jar": "Dāvanu trauciņš",
+      "hype_train": "Hype vilciens"
     },
     "hints": {
       "tip_alert": "Godina ikvienu dzeramnaudu, kuras lielums atbilst tās līmenim",
@@ -6997,7 +7683,8 @@
       "subathon_timer": "Skaitītājs, kuru dāvanas, sekojumi un abonementi atgrūž atpakaļ",
       "points_board": "Jūsu augstākie skatītāji pēc punktiem no skatīšanas un dāvināšanas.",
       "streamer_level": "Jūsu straumētāja līmenis un iknedēļas sērija no jūsu profila",
-      "tip_jar": "Burka, kas piepildās, kad ienāk apmaksātas dāvanas"
+      "tip_jar": "Burka, kas piepildās, kad ienāk apmaksātas dāvanas",
+      "hype_train": "Rāda hype vilcienu, kamēr tas notiek: trīs dāvanas vai abonementi piecu minūšu laikā to iedarbina."
     },
     "fields": {
       "style": "Stils",
@@ -7383,7 +8070,10 @@
     "endStreamConfirmBody": "Jūsu apraide apstājas visiem skatītājiem un to nevar atsākt.",
     "keepStreaming": "Turpināt tiešradi",
     "encoderPermanentHint": "Šī atslēga nekad nemainās. Iestatiet kodētāju vienu reizi — nākamreiz vienkārši nospiediet Start (Sākt), un Riftn izveidos jums ziņu.",
-    "notEnoughTokensForBounty": "Nepietiek žetonu. Nepieciešami {{need}} žetoni, bet ir {{have}}."
+    "notEnoughTokensForBounty": "Nepietiek žetonu. Nepieciešami {{need}} žetoni, bet ir {{have}}.",
+    "screenInAppHint": "Riftn lietotnē",
+    "screenInAppNote": "Tālruņu pārlūkprogrammas neļauj nevienai vietnei kopīgot jūsu ekrānu. Tā vietā sāciet tiešraidi no Riftn lietotnes, pēc tam pieskarieties Kopīgot ekrānu.",
+    "screenInAppCta": "Iegūt Riftn lietotni"
   },
   "events": {
     "seoTitle": "Pasākumi: tikšanās un kopienas pasākumi Riftn",
@@ -7973,7 +8663,45 @@
     "foldersInFolder_other": "Mapēs {{count}}",
     "foldersNoItems": "Šajā mapē vēl nav nekā",
     "foldersNoItemsHint": "Atveriet rezultātu un izvēlieties \"Pievienot mapei\", lai to šeit saglabātu.",
-    "skippedUpstreamFailed": "Izlaists, jo iepriekšējā darbība neizdevās. Tās izmaksas paliek jūsu bilancē."
+    "skippedUpstreamFailed": "Izlaists, jo iepriekšējā darbība neizdevās. Tās izmaksas paliek jūsu bilancē.",
+    "signInForAudioLibrary": "Piesakieties, lai atvērtu savu privāto saglabāto audio bibliotēku.",
+    "audioLibraryFailed": "Jūsu saglabāto audio neizdevās ielādēt. Mēģiniet vēlreiz.",
+    "retryFreeTask": "Atkārtot bezmaksas uzdevumu",
+    "previewSavedMedia": "Priekšskatīt saglabāto multividi",
+    "audioSavePending": "Audio ir gatavs, bet tā saglabāšana privātajā bibliotēkā vēl gaida. Atsāciet, lai to saņemtu.",
+    "confirmInterruptedRetry": "Atkārtot pārtraukto audio vai asistenta uzdevumu. Tā iepriekšējais iznākums nav zināms, un atkārtošana var atkārtot izpildes darbu. Esošais maksājums un apmaksāto darbu ID tiks izmantoti atkārtoti.",
+    "freeResultUnknown": "Bezmaksas uzdevuma atbilde tika pārtraukta. Tā netiks automātiski iesniegta atkārtoti. Izvēlieties Atkārtot bezmaksas uzdevumu, pēc tam atsāciet; jūsu maksājums un citi darbi tiek saglabāti.",
+    "formAuthor": "Rediģēt plūsmu",
+    "formAuthorHint": "Veidojiet plūsmu ar tipizētām ievadēm. Saglabājiet to šeit vai sakārtojiet tīmekļa audeklā.",
+    "chooseSavedMedia": "Izvēlēties saglabāto multividi",
+    "formInput": "Ievade: {{handle}}",
+    "reviewRun": "Pārskatīt palaišanu",
+    "resumeRun": "Atsākt saglabāto palaišanu",
+    "confirmPrice": "Kopā: {{price}} žetoni",
+    "recoveryHint": "Darbu un maksājumu atsauces tiek saglabātas šajā ierīcē. Atsāciet pārtraukto darbu, pirms sākat citu palaišanu.",
+    "newRun": "Sākt citu palaišanu",
+    "loadMoreMedia": "Ielādēt vairāk multivides",
+    "invalidGraph": "Pārbaudiet savienojumus: katrai ievadei vajag saderīgu avotu, un grafā nedrīkst būt ciklu.",
+    "unsupportedNode": "Šo mezglu vēl nevar palaist vietējā formā. Šai plūsmai izmantojiet tīmekļa audeklu.",
+    "missingPrompt": "Pievienojiet teksta mezglu ar uzvedni.",
+    "invalidSettings": "Izvēlētais modelis neatbalsta šos iestatījumus.",
+    "missingCapturedFrame": "Notveriet kadru tīmekļa audeklā, pirms izmantojat šo video kā attēla ievadi.",
+    "missingSavedMedia": "Saglabātā avota multivide trūkst vai vairs nav pieejama šim kontam.",
+    "quoteFailed": "Neizdevās noteikt šīs plūsmas cenu. Mēģiniet vēlreiz.",
+    "recoverBeforeEdit": "Atsāciet saglabāto palaišanu, pirms maināt tās grafu vai sākat citu palaišanu.",
+    "runAlreadyComplete": "Šī palaišana ir pabeigta. Izvēlieties Sākt citu palaišanu, lai ģenerētu vēlreiz.",
+    "recoveryCorrupt": "Saglabāto atkopšanas ierakstu neizdevās nolasīt. Saglabājiet šo plūsmu un sazinieties ar atbalstu, pirms maksājat vēlreiz.",
+    "paidUnavailable": "Šeit varat veidot un saglabāt plūsmas. Maksas palaišanas šajā veikalā nav pieejamas.",
+    "planChanged": "Plūsma mainījās pēc cenas noteikšanas. Pārskatiet palaišanu vēlreiz.",
+    "connectOwnerWallet": "Pievienojiet maku, kuram pieder šī plūsma.",
+    "runFailed": "Mezglu neizdevās pabeigt. Tā saglabātā darba atsauce tiek paturēta atkopšanai.",
+    "recoveryPending": "Renderēšana vēl gaida. Atsāciet šo palaišanu, lai to saņemtu.",
+    "nodeAudioGen": "Audio ģenerators",
+    "nodeAudioGenDesc": "Runa, skaņas efekti, transkripcija un audio izolēšana",
+    "nodeAudioInput": "Saglabātais audio",
+    "nodeAudioInputDesc": "Izmantot privātu audio no savas bibliotēkas",
+    "audioVoiceId": "Balss ID",
+    "audioSeconds": "Skaņas garums sekundēs"
   },
   "videoPlayer": {
     "volume": "Skaļums",
@@ -8126,7 +8854,13 @@
       "doneAll": "Atsekoju {{done}} kontus, kas neietver jūs atpakaļ.",
       "doneSome": "Atsekoju {{done}} kontus. {{failed}} neizdevās atsekot.",
       "doneToast": "Atsekoju {{done}} kontus, kas neietver jūs atpakaļ"
-    }
+    },
+    "followBackConfirmTitle_one": "Sekot atpakaļ {{count}} cilvēkam?",
+    "followBackConfirmTitle_other": "Sekot atpakaļ {{count}} cilvēkiem?",
+    "followBackConfirmBody": "Viņi jau seko jums. Privātiem kontiem tiks nosūtīts sekošanas pieprasījums.",
+    "followedBackCount_one": "Sekojāt atpakaļ {{count}} cilvēkam",
+    "followedBackCount_other": "Sekojāt atpakaļ {{count}} cilvēkiem",
+    "followBackDoneBody": "Visus viņus varat atrast sadaļā Sekotie."
   },
   "reactionInfo": {
     "title": "Reakcijas",
@@ -8928,7 +9662,28 @@
       "add": "Pievienot",
       "scale": "Mērs",
       "color": "Krāsa",
-      "light": "Gaišs"
+      "light": "Gaišs",
+      "create": "Pievienot 3D skatuvi",
+      "title": "3D ainas skatuve",
+      "hint": "Izkārtojiet kadru ar sfērām un kastēm. Kamera, izvietojums un trīs neatkarīgas laukuma gaismas maina renderēto kadru.",
+      "preview": "Renderētās ainas priekšskatījums",
+      "error": "Neizdevās sagatavot kadru. Pārbaudiet kadra atsauces un mēģiniet vēlreiz.",
+      "elevation": "Augstums",
+      "distance": "Attālums",
+      "fov": "Redzes lauks",
+      "object": "Objekts",
+      "sphere": "Sfēra",
+      "box": "Kaste",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Noņemt objektu",
+      "intensity": "Intensitāte",
+      "diffusion": "Izkliede",
+      "saving": "Sagatavo kadru…",
+      "useFrame": "Izmantot renderēto kadru kā kadra atsauci",
+      "frameHint": "Izveido 320 × 180 PNG un pievieno to šī kadra atsaucēm. Pirms ģenerēšanas pārskatiet atsauču ierobežojumu un modeļa cenas tāmi.",
+      "frameName": "Ainas skatuves kadrs"
     },
     "video": {
       "tFade": "Pārplūšana",
@@ -9023,7 +9778,9 @@
       "pptx": "PowerPoint prezentācija",
       "pptxHint": "Katra lapa kļūst par vienu slaida attēlu ar prezentētāja piezīmēm un saitēm. Rediģējiet atsevišķu tekstu un elementus oriģinālajā dizainā.",
       "section": "Sadaļa ar nosaukumu",
-      "transparent": "Caurspīdīgs fons"
+      "transparent": "Caurspīdīgs fons",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Lejupielādē ZIP ar jūsu laika joslu FCPXML un Premiere XML formātā un visiem multivides failiem, lai varētu pabeigt montāžu Premiere Pro, Final Cut Pro vai DaVinci Resolve. Teksts kļūst par marķieriem; efekti paliek Riftn."
     },
     "inspector": {
       "selectHint": "Atlasiet slāni zīmēšanas laukumā vai klipu laika skalā.",
@@ -9117,7 +9874,45 @@
       "failed": "MI šobrīd to nevarēja izdarīt. Mēģiniet vēlreiz pēc brīža.",
       "changes": "Veiktās izmaiņas: {{count}}",
       "undo": "Atsaukt",
-      "openGenerator": "Pārskatīt un ģenerēt"
+      "openGenerator": "Pārskatīt un ģenerēt",
+      "stopped": "Apturēts. Nekas cits netika mainīts.",
+      "queued": "{{count}} rindā",
+      "restore": "Atjaunot līdz šim brīdim",
+      "restoreHint": "Atgriezt projektu tādu, kāds tas bija pirms šīs ziņas. Atsaukšana to atgriež.",
+      "restored": "Projekts atjaunots uz stāvokli pirms šīs ziņas. Nospiediet Atsaukt, lai atgrieztu jaunāko versiju.",
+      "rewrite": "Padarīt manu pieprasījumu skaidrāku",
+      "rewriteFailed": "Neizdevās to pārrakstīt. Jūsu teksts nav mainīts.",
+      "feedback": "Vai tas palīdzēja?",
+      "good": "Laba atbilde",
+      "bad": "Slikta atbilde",
+      "retryPrefix": "Tas nebija pareizi. Tā vietā ",
+      "recipesTitle": "Receptes",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podkāsta klips",
+          "prompt": "Atrodi spēcīgāko 30 sekunžu brīdi, apgriez līdz tam, pievieno Word Pop titrus un padari to 9:16."
+        },
+        "talkingHead": {
+          "label": "Tīra runājošā galva",
+          "prompt": "Izgriez garās pauzes, pievieno Classic titrus un piešķir smalku, siltu izskatu."
+        },
+        "productPromo": {
+          "label": "Produkta promo",
+          "prompt": "Izveido 15 sekunžu promo: trāpīgs virsraksts sākumā, Zoom in pārejas starp klipiem, Bold titri un možra mūzika."
+        },
+        "hypeReel": {
+          "label": "Hype klips",
+          "prompt": "Sagriez klipus mūzikas ritmā, izmanto Fly up pārejas un Technicolor izskatu."
+        },
+        "retroEdit": {
+          "label": "Retro montāža",
+          "prompt": "Piešķir katram klipam VHS izskatu, pievieno lielu serifu virsrakstu un izmanto Fade pārejas."
+        },
+        "tutorial": {
+          "label": "Pamācība",
+          "prompt": "Pievieno virsrakstu katram solim, Boxed titrus un palēnini galveno brīdi līdz 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Taisnstūris",
@@ -9292,7 +10087,9 @@
       "tint": "Tonis {{value}}",
       "vignette": "Vinjete {{value}}%",
       "auto": "Automātiska uzlabošana",
-      "autoFailed": "Neizdevās analizēt šo attēlu."
+      "autoFailed": "Neizdevās analizēt šo attēlu.",
+      "halation": "Halācija {{value}}%",
+      "scanlines": "Skenēšanas līnijas {{value}}%"
     },
     "pages": {
       "add": "Pievienot lapu",
@@ -9367,7 +10164,15 @@
       "textSaved": "Apskatītas atsaukumu izmaiņas saglabātas.",
       "action": "Automātiskie subtitri",
       "styles": {
-        "bold": "Lielie burti"
+        "bold": "Lielie burti",
+        "classic": "Classic",
+        "boxed": "Boxed",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Stacked",
+        "serif": "Serif",
+        "bubble": "Bubble"
       },
       "working": "Klausās… {{percent}}%",
       "downloading": "Sagatavo runas modeli… {{percent}}%",
@@ -9379,7 +10184,8 @@
       "translateCount": "Pārtulkot {{count}} atsaukumus",
       "translationDone": "Pārtulkot {{count}} atsaukumus",
       "translationFailed": "Apskatīt atsaukumu pārtulkošana neizdevās. Jūsu atsaukumi paliek nepārmaiņu stāvoklī.",
-      "lockedTranslation": "Atslēgt atsaukumus, lai tos varētu iekļaut."
+      "lockedTranslation": "Atslēgt atsaukumus, lai tos varētu iekļaut.",
+      "style": "Titru stils"
     },
     "multi": {
       "selected": "Atlasīti slāņi: {{count}}",
@@ -9416,7 +10222,10 @@
       "saveNewPreset": "Saglabāt jaunu",
       "saveStyles": "Saglabājiet stilus ar dizainu",
       "stylesSaved": "Zīmolu stili, kas saglabāti ar šo dizainu",
-      "usePreset": "Izmantot stilus"
+      "usePreset": "Izmantot stilus",
+      "dehubApplied": "Riftn zīmols piemērots {{count}} slāņiem.",
+      "dehubApply": "Izmantot Riftn zīmolu",
+      "dehubHint": "Oficiālās Riftn krāsas, Exo un Inter fonti un Riftn logotips ar vienu klikšķi."
     },
     "draw": {
       "heading": "Zīmēt",
@@ -10750,7 +11559,23 @@
       "zoomOut": "Pārskatīt kanālu"
     },
     "clipFix": {
-      "listening": "Klausīšanās..."
+      "listening": "Klausīšanās...",
+      "detach": "Atdalīt audio",
+      "detached": "Audio pārvietots uz atsevišķu klipu",
+      "detachFailed": "Neizdevās atdalīt šī klipa audio",
+      "removeBars": "Noņemt melnās joslas",
+      "scanning": "Pārbauda kadrus…",
+      "noBars": "Melnās joslas nav atrastas",
+      "barsRemoved": "Melnās joslas apgrieztas",
+      "barsFailed": "Neizdevās pārbaudīt, vai šim video ir melnās joslas",
+      "reframe": "Automātiska pārkadrēšana",
+      "reframeHint": "Video jau atbilst šīs lapas formai",
+      "reframed": "Pārkadrēts, lai sekotu darbībai",
+      "reframeFailed": "Neizdevās pārkadrēt šo video",
+      "retakes": "Noņemt atkārtotos uzņēmumus",
+      "noRetakes": "Atkārtotie uzņēmumi nav atrasti",
+      "retakesRemoved": "Noņemti {{count}} atkārtotie uzņēmumi, paturēts pēdējais",
+      "retakesFailed": "Neizdevās noņemt atkārtotos uzņēmumus no šī klipa"
     },
     "shortcuts": {
       "action": {
@@ -10758,19 +11583,109 @@
         "play": "Atskaņot",
         "pause": "Apturēt",
         "frameBack": "Iepriekšējā rādītāja",
-        "frameForward": "Nākamā rādītāja"
-      }
+        "frameForward": "Nākamā rādītāja",
+        "back": "Atpakaļ 1 sekundi",
+        "rippleDelete": "Dzēst klipu",
+        "liftDelete": "Dzēst klipu",
+        "start": "Uz sākumu",
+        "end": "Uz beigām"
+      },
+      "preset": "Tastatūras izkārtojums",
+      "presetHint": "Izmantojiet laika joslas taustiņus no redaktora, ko pazīstat. Riftn īsinājumtaustiņi turpina darboties visam pārējam."
     },
     "voiceClone": {
       "stop": "Apturēt ierakstīšanu",
-      "failed": "Balss klonēšana neizdevās."
+      "failed": "Balss klonēšana neizdevās.",
+      "pickerLabel": "Klonēt savu balsi",
+      "pickerDetail": "Ieskaņojumi jūsu paša balsī",
+      "title": "Klonēt savu balsi",
+      "description": "Ierakstiet sevi vai izvēlieties klipu, kurā runājat. Jūs maksājat vienreiz, un jūsu balss ir jūsu visiem ieskaņojumiem.",
+      "defaultName": "Mana balss",
+      "record": "Ierakstīt paraugu (no 30 sekundēm līdz 2 minūtēm)",
+      "fromMedia": "Vai izmantojiet klipu no Multivides",
+      "recorded": "Jūsu ieraksts",
+      "sample": "Paraugs: {{name}}",
+      "hint": "Vislabāk der skaidra runa bez mūzikas.",
+      "noMic": "Neizdevās izmantot mikrofonu.",
+      "sampleFailed": "Neizdevās nolasīt skaņu no šī klipa.",
+      "pay": "Klonēt par {{amount}} žetoniem",
+      "useFree": "Klonēt (jau apmaksāts)",
+      "owned": "Jūsu balss „{{name}}” jau ir iestatīta. Izvēlieties to no balsu saraksta.",
+      "useOwned": "Izmantot manu balsi",
+      "ready": "„{{name}}” ir gatava ieskaņojumiem.",
+      "paidFailed": "Jūsu maksājums ir saglabāts. Atveriet šo vēlreiz, un nākamais mēģinājums būs bez maksas.",
+      "consent": "Klonējiet tikai savu balsi vai balsi, kuras izmantošanai jums ir atļauja."
     },
     "linkImport": {
       "go": "Importēt",
-      "downloading": "Lejupielāde {{percent}}%"
+      "downloading": "Lejupielāde {{percent}}%",
+      "open": "Importēt no saites",
+      "placeholder": "Ielīmējiet YouTube, TikTok vai citu saiti",
+      "rights": "Šis video pieder man, vai man ir atļauja to izmantot",
+      "audioOnly": "Tikai skaņa",
+      "queued": "Rindā…",
+      "waiting": "Gaida vietni, drīz mēģinās vēlreiz…",
+      "adding": "Pievieno Multividei…",
+      "added": "Importēts un pievienots laika joslai.",
+      "failed": "Neizdevās importēt šo saiti."
     },
     "reverse": {
-      "action": "Atpakaļgaita"
+      "action": "Atpakaļgaita",
+      "working": "Apgriež {{percent}}%",
+      "done": "Klips apgriezts otrādi.",
+      "failed": "Neizdevās apgriezt šo klipu otrādi.",
+      "unsupported": "Šī pārlūkprogramma nevar apgriezt video otrādi. Mēģiniet Chrome vai Edge.",
+      "tooLong": "Otrādi var apgriezt klipus līdz {{seconds}} sekundēm."
+    },
+    "film": {
+      "repairRefs": "Noņemt trūkstošās multivides saites",
+      "title": "Filmas projekts",
+      "intro": "Plānojiet kadrus ar atkārtoti izmantojamām attēlu atsaucēm. Jūsu apraksts, kadru secība un izvēlētie rezultāti tiek saglabāti ar šo projektu.",
+      "create": "Izveidot filmas plānu",
+      "name": "Filmas nosaukums",
+      "brief": "Filmas apraksts",
+      "sharedReferences": "Kopīgas attēlu atsauces (līdz 4)",
+      "shot": "Kadrs",
+      "addShot": "Pievienot kadru",
+      "shotName": "Kadra nosaukums",
+      "action": "Kadra darbība un kompozīcija",
+      "seconds": "Pieprasītās video sekundes",
+      "shotReferences": "Papildu attēlu atsauces (kopējais limits 4)",
+      "frame": "Sagatavot kadru",
+      "video": "Sagatavot video",
+      "review": "Pirms ģenerēšanas pārskatiet modeli, atsauces, video ilgumu un cenu studijā.",
+      "result": "Pieņemtais kadra rezultāts",
+      "noResult": "Nav izvēlēts rezultāts",
+      "resultHint": "Izvēlieties pieņemtu attēlu vai video no Augšupielādēm. Tā saite tiek saglabāta ar šo kadru; izmantojiet laika joslu, lai saliktu filmu.",
+      "earlier": "Pārvietot agrāk",
+      "later": "Pārvietot vēlāk",
+      "remove": "Noņemt kadru",
+      "issue": "Pārbaudiet kadra aprakstu un atsauces multividi, pēc tam mēģiniet vēlreiz. Turiet projektu atvērtu, ja to neizdevās saglabāt.",
+      "searchMedia": "Meklēt multividi pēc nosaukuma",
+      "refreshMedia": "Atsvaidzināt multividi"
+    },
+    "speakers": {
+      "find": "Atrast runātājus",
+      "name": "Runātājs {{number}}",
+      "onlyOne": "Atrasts tikai viens runātājs.",
+      "failed": "Neizdevās atrast runātājus.",
+      "kept": "Paturēts tikai {{name}}.",
+      "editFailed": "Šī montāža neiederējās šajā klipā.",
+      "split": "Sadalīts {{count}} runātāju kadros.",
+      "keepOnly": "Paturēt tikai",
+      "splitAction": "Griezt pie katras runātāja maiņas"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Aprakstiet vēlamo 3D objektu",
+      "queued": "Veido jūsu 3D objektu. Tas parādīsies cilnē Ģenerējumi.",
+      "note": "3D objekti nonāk Multividē kā īss rotējošs klips ar caurspīdīgu fonu."
+    },
+    "behind": {
+      "action": "Teksts aiz personas",
+      "working": "Izgriež personu…",
+      "done": "Teksts un titri tagad atrodas aiz personas.",
+      "failed": "Neizdevās novietot tekstu aiz personas."
     }
   },
   "jungleMood": {
@@ -11173,7 +12088,9 @@
     "tokenAmount": "{{amount}} žetoni",
     "assistant": {
       "question1": "Kāds ir pašreizējais Riftn žetonu likmju apmērs?",
-      "question2": "Jā, ja lieku 10 000 žetonu uz 90 dienām"
+      "question2": "Jā, ja lieku 10 000 žetonu uz 90 dienām",
+      "answer1": "Pašreizējais Riftn žetonu likšanas APY ir 12,4% 30 dienu bloķēšanas periodam. Lūk, sadalījums:\n\n• 7 dienu bloķēšana: 8,2% APY\n• 30 dienu bloķēšana: 12,4% APY\n• 90 dienu bloķēšana: 18,7% APY\n\nVai vēlaties, lai palīdzu aprēķināt iespējamos ienākumus?",
+      "answer2": "Par 10 000 žetoniem, kas likti ar 18,7% APY uz 90 dienām:\n\n📊 Aptuvenā atlīdzība: ~461 žetons\n\nTas ir aptuveni 5,13 žetoni dienā. Ņemiet vērā, ka APY var mainīties atkarībā no kopējā likto žetonu apjoma."
     },
     "bookmarks": {
       "stakingGuide": "Pilnīgs Riftn žetonu likšanas ceļvedis: APY sadalījums, bloķēšanas periodi un atlīdzības reizinātāji."
@@ -11919,7 +12836,10 @@
     "planTypeNotAllowed": "Šī autora plāns neatļauj šāda veida ziņu.",
     "planMinTip": "Dzeramnaudai šim autoram jābūt vismaz {{amount}} žetoni.",
     "shareKindGroup": "Grupēt",
-    "shareKindCommunity": "Kopiena"
+    "shareKindCommunity": "Kopiena",
+    "shareGroups": "Grupas",
+    "shareKindChannel": "Kanāls",
+    "reportMessage": "Ziņot par ziņu"
   },
   "credits": {
     "earningsWorth": "Vērts {{amount}}",
@@ -11961,7 +12881,11 @@
     "error": "Nevarēja iesniegt jūsu dzēšanas pieprasījumu. Jūsu konts nav apstiprināts dzēšanai. Lūdzu, mēģiniet vēlreiz.",
     "back": "Dodieties atpakaļ uz iestatījumiem.",
     "signIn": "Pierakstieties, lai dzēstu kontu",
-    "acknowledge": "Esmu saglabājis informāciju par maka atkopšanu un saprotu, ka dzēšana ir neatgriezeniska."
+    "acknowledge": "Esmu saglabājis informāciju par maka atkopšanu un saprotu, ka dzēšana ir neatgriezeniska.",
+    "signedInAs": "Pieteicies kā",
+    "confirmTitle": "Dzēst kontu neatgriezeniski?",
+    "confirmBody": "Jūsu konts un viss tajā tiks dzēsts. Jūs tiksiet izrakstīts, un to nevar atsaukt.",
+    "confirmBodyNamed": "{{who}} un viss tajā tiks dzēsts. Jūs tiksiet izrakstīts, un to nevar atsaukt."
   },
   "miniApps": {
     "badge": {
@@ -12058,12 +12982,42 @@
       "rewardPending": "Gaida",
       "rewardsNone": "Atlīdzības vēl nav aprēķinātas. Pirmā nedēļa beidzas pirmdien.",
       "stats": {
-        "button": "Tiešraides statistika"
+        "button": "Tiešraides statistika",
+        "chartTitle": "Cilvēki, kuri atvēra jūsu lietotni, pēdējās 30 dienas",
+        "peak_one": "Maksimums {{count}} dienā",
+        "peak_other": "Maksimums {{count}} dienā",
+        "people30": "Cilvēki, 30 dienas",
+        "people7": "Cilvēki, 7 dienas",
+        "added": "Pievienoja to",
+        "dhb30": "Samaksātie žetoni, 30 dienas",
+        "notified30": "Nosūtītie paziņojumi, 30 dienas",
+        "rewards": "Nopelnītās žetonu atlīdzības"
       },
       "signin": {
         "users_one": "{{count}} lietotājs",
         "users_other": "{{count}} lietotāji",
-        "delete": "Dzēst"
+        "delete": "Dzēst",
+        "title": "Pieteikties ar Riftn",
+        "body": "Ļaujiet cilvēkiem pieteikties jūsu vietnē vai lietotnē ar savu Riftn kontu. Izveidojiet atslēgu šeit, pēc tam sekojiet ceļvedim.",
+        "guide": "Lasīt ceļvedi",
+        "copyId": "Kopēt klienta ID",
+        "rotate": "Jauns noslēpums",
+        "rotateConfirm": "Izveidot jaunu noslēpumu lietotnei {{name}}? Vecais noslēpums uzreiz pārstāj darboties.",
+        "deleteConfirm": "Dzēst {{name}}? Visi, kas ar to pieteikušies, tiks izrakstīti.",
+        "secretOnce": "Noslēpums lietotnei {{name}}. Nokopējiet to tagad: tas tiek parādīts tikai vienreiz.",
+        "name": "Lietotnes nosaukums",
+        "website": "Vietne (neobligāti)",
+        "redirects": "Novirzīšanas URL, pa vienam rindā (https://yoursite.com/callback)",
+        "create": "Izveidot atslēgu"
+      },
+      "stateRejected": "Pieejams pēc saites · nav apstiprināts veikalam",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Notikumi, ko Riftn nosūtīja uz jūsu webhookUrl. Tests nosūta ping notikumu.",
+        "test": "Sūtīt testu",
+        "ok": "Webhook atbildēja {{status}}",
+        "failed": "Webhook neizdevās: {{reason}}",
+        "none": "Vēl nav nosūtīts neviens webhook."
       }
     },
     "card": {
@@ -12090,7 +13044,10 @@
       "confirm": "Maksāt {{amount}} žetoni",
       "sending": "Sūtīts Jūsu maksājumā…",
       "sent": "Maksājums {{amount}} žetoni sūtīts uz {{name}}.",
-      "noOwner": "Šī programma nav vēl apstiprinātu portmonēju, kurā varētu maksāt."
+      "noOwner": "Šī programma nav vēl apstiprinātu portmonēju, kurā varētu maksāt.",
+      "testBadge": "Testa režīms",
+      "testBody": "Šī lietotne pieder jums, tāpēc tas ir tests: žetoni netiek pārvietoti, un kvīts ir atzīmēta kā tests.",
+      "testSent": "Testa maksājums {{amount}} žetonu apmērā. Nekas netika nosūtīts."
     },
     "add": {
       "title": "Pievienot {{name}}?",
@@ -19214,7 +20171,57 @@
     "127053546dd4": "Nevarēja lejupielādēt šo failu",
     "d14896aa4bf8": "Nevarēja ielādēt bezmaksas bibliotēku. Pārbaudiet savienojumu un mēģiniet vēlreiz.",
     "953e708b2287": "Balss ģenerēšana neizdevās.",
-    "4a52cdd6ac72": "Nevarēja dublēt šos slāņus"
+    "4a52cdd6ac72": "Nevarēja dublēt šos slāņus",
+    "3f9b2c71d0a4": "{{n}} rezultāti",
+    "8c4e1a6b2f57": "vaicājumam „{{query}}”",
+    "1d7234ff1b79": "plūsmā {{feed}}",
+    "e122e5c2b563": "Velciet uz augšu, lai aizvērtu",
+    "1aa9d734f2ee": "Izvēlieties, ko meklēt",
+    "ef557404f465": "Nav rezultātu vaicājumam „{{query}}”",
+    "35034aa59bd3": "Plūsmā {{feed}} nekas neatbilda. Mēģiniet citus vārdus vai meklējiet visur.",
+    "415155739590": "Meklēt visur",
+    "9e13d826baaf": "Meklēt attēlus",
+    "cbf6f228327c": "Meklēt mūziku",
+    "e8756c6865a5": "Meklēt Shorts",
+    "c7661da99c41": "Meklēt video",
+    "90f1afe66801": "Meklē „{{query}}”…",
+    "d7b559f2d8c6": "Mēģiniet citus vārdus vai mainiet filtrus.",
+    "d1a0c7e2f301": "Kas jums šodien prātā?",
+    "d1a0c7e2f302": "Par ko jūs šodien domājat?",
+    "d1a0c7e2f303": "Kas jums prātā?",
+    "d1a0c7e2f304": "Ir kas prātā?",
+    "d1a0c7e2f305": "Kas jums šobrīd prātā?",
+    "d1a0c7e2f306": "Par ko domājam šodien?",
+    "d1a0c7e2f307": "Vai šodien ir kas prātā?",
+    "d1a0c7e2f308": "Kas jums prātā šoreiz?",
+    "a7c1e0f4b2d9": "Pieskarieties, lai runātu",
+    "b3e8d1c6f0a2": "Pieskarieties, lai nosūtītu",
+    "c9f2a4e7d1b5": "Klausās... pieskarieties bumbai, lai nosūtītu",
+    "22577ebd908e": "Ģenerēt Wan 3.0 video · oriģināls skaņu celiņš",
+    "1fa2357ab7e1": "Ģenerēt Seedance 720p video · oriģināls skaņu celiņš",
+    "7f78bdc0762d": "+{{value1}} p.",
+    "f0c8bb34335b": "Jūs nopelnījāt +{{value1}} punktus",
+    "0fbe06b679a8": "{{value1}} punkti par katru ieviesto pieprasījumu, pieskaitīti jūsu Top būvētāju rezultātam.",
+    "431bc73eb60b": "[verse]\nJūsu dziesmas vārdi šeit...\n\n[chorus]\nPiedziedājuma vārdi...",
+    "a3c1e5f20b71": "Izmantojiet Riftn ChatGPT, Claude vai jebkurā MCP lietotnē. Ielīmējiet zemāk esošo URL sava asistenta savienotāja iestatījumos, lai pārlūkotu ierakstus, profilus un komentārus, pēc tam piesakieties, kad tiek prasīts, lai sasaistītu savu kontu.",
+    "b84d2e7c9a16": "Šī adrese ir paredzēta AI lietotnēm, nevis tīmekļa lapa. Atverot to pārlūkprogrammā, jūs nonāksiet šeit.",
+    "c5e9f1a3d742": "Sasaistiet savu Riftn kontu",
+    "d61a7b4e8c05": "Kad asistents lūdz pieteikties, piesakieties Riftn un noklikšķiniet uz Atļaut. Tad tas var atjaunināt jūsu profilu, publicēt ierakstus un komentārus, sekot cilvēkiem un veidot Creator Studio. Savienojumi paliek sasaistīti, kamēr tos izmantojat, un beidzas pēc 30 neizmantotām dienām.",
+    "e27b8c5f9d13": "Soli pa solim ChatGPT ceļvedis",
+    "f38c9d6a0e24": "Soli pa solim Claude ceļvedis",
+    "0a49d7b1f835": "Vēlaties atsevišķu bota kontu? Izveidojiet aģentu, lai saņemtu savienotāja URL, kas publicē šī aģenta vārdā.",
+    "1b5ae8c20f46": "Kad ChatGPT jautā, piesakieties Riftn un noklikšķiniet uz Atļaut, lai sasaistītu savu kontu.",
+    "2c6bf9d31a57": "Noklikšķiniet uz Savienot, piesakieties Riftn un noklikšķiniet uz Atļaut, lai sasaistītu savu kontu.",
+    "c7bac46904be": "Microsoft",
+    "00fb5022b75a": "TSMC",
+    "d3d922fa5a39": "Balss režīms",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "ebebdc70335b": "Stikla joslas",
+    "5ff272ba7871": "Zīda līnijas",
+    "a941e90ca93d": "Vāka oreols",
+    "04dbbe4dff7a": "Īstais vilnis",
+    "6e71ae3669b1": "Saglabātais rezultāts nav pieejams"
   },
   "articles": {
     "cardLabel": "Raksts · ${{count}} min lasīšanas laiks",
@@ -19256,7 +20263,16 @@
     "formatting": "Formatēšana",
     "bodyPlaceholder": "Pastāstiet savu stāstu. Izvēlieties tekstu un izmantojiet augšējo joslu virsrakstiem, treknrakstam, citātiem un sarakstiem.",
     "bodyLabel": "Izstrādājuma pamatteksts",
-    "wordCount": "{{count}} vārdi"
+    "wordCount": "{{count}} vārdi",
+    "imageLimit": "Rakstā var būt līdz {{count}} attēliem",
+    "imageLimitSome": "Šajā rakstā ietilpst vēl tikai {{count}} attēli",
+    "imageFailed": "Šo attēlu neizdevās pievienot. Mēģiniet citu.",
+    "imagesUploading": "Pievieno attēlus ({{count}})…",
+    "bodyTooLong": "Par {{count}} rakstzīmēm pāri limitam",
+    "imagesCount": "Attēli · {{count}}/{{max}}",
+    "captionPlaceholder": "Pievienot parakstu",
+    "captionLabel": "Paraksts {{n}}. attēlam",
+    "removeInlineImage": "Noņemt {{n}}. attēlu"
   },
   "liveAudience": {
     "whosHere": "Kurš ir klāt",
@@ -19305,24 +20321,94 @@
       "stage": {
         "preparing": "Sagatavošana…",
         "confirming": "Gaida darījumu…",
-        "recording": "Notiek pabeigšana…"
-      }
+        "recording": "Notiek pabeigšana…",
+        "wallet": "Apstipriniet savā makā"
+      },
+      "open": "Dāvināt abonementus",
+      "title": "Dāvināt abonementus",
+      "mode": {
+        "random": "Nejauši skatītāji tērzēšanā",
+        "user": "Konkrētai personai"
+      },
+      "randomHint": "Tiek cilvēkiem, kuri tērzēja pēdējo 30 minūšu laikā un vēl nav abonējuši.",
+      "send_one": "Dāvināt 1 abonementu · ${{price}}",
+      "send_other": "Dāvināt {{count}} abonementus · ${{price}}",
+      "payHint": "Apmaksāts ar žetoniem no jūsu maka vienā pārskaitījumā.",
+      "fewer_one": "Šobrīd tērzēšanā abonementu var saņemt tikai 1 cilvēks, tāpēc jūs maksājat par 1.",
+      "fewer_other": "Šobrīd tērzēšanā abonementu var saņemt tikai {{count}} cilvēki, tāpēc jūs maksājat par {{count}}.",
+      "done_one": "Abonements uzdāvināts!",
+      "done_other": "{{count}} abonementi uzdāvināti!",
+      "failed": "Neizdevās uzdāvināt abonementus",
+      "notReady": "Dāvināšana šim plānam vēl nav pieejama",
+      "noPlan": "Vispirms izvēlieties plānu",
+      "noPlans": "{{name}} vēl nav abonēšanas plānu, ko dāvināt."
     },
     "badges": {
       "emoji": "Emocijzīmes",
       "audience": {
-        "subscribers": "Abonenti"
+        "subscribers": "Abonenti",
+        "both": "Abonenti un dāvinātāji",
+        "gifters": "Dāvinātāji"
       },
       "ended": "Beidzies",
       "until": "Līdz {{date}}",
-      "failed": "Tas neizdevās. Mēģiniet vēlreiz."
+      "failed": "Tas neizdevās. Mēģiniet vēlreiz.",
+      "title": "Ierobežota laika emblēmas",
+      "intro": "Piedāvājiet emblēmu uz dažām dienām. Ikviens, kas tās laikā abonē vai dāvina, to nopelna, un tā uz visiem laikiem tiek rādīta blakus viņa vārdam jūsu tērzēšanā.",
+      "name": "Emblēmas nosaukums",
+      "namePlaceholder": "Palaišanas nedēļa",
+      "days": "Pieejama (dienas)",
+      "who": "Kas var to nopelnīt",
+      "create": "Piedāvāt emblēmu",
+      "created": "Emblēma ir aktīva.",
+      "end": "Beigt tagad",
+      "holders_one": "{{count}} turētājs",
+      "holders_other": "{{count}} turētāji",
+      "limit": "Vienlaikus var darboties trīs emblēmas. Beidziet vienu, lai piedāvātu citu.",
+      "hypeHint": "Ikviens, kas brauc ar hype vilcienu, saņem arī jūsu 🚂 emblēmu sasniegtajā līmenī."
+    },
+    "train": {
+      "level": "Hype vilciens · {{level}}. līmenis",
+      "endedLevel": "Hype vilciens pabeidza {{level}}. līmeni!",
+      "ended": "Hype vilciens beidzās",
+      "thanks_one": "Paldies {{count}} atbalstītājam",
+      "thanks_other": "Paldies {{count}} atbalstītājiem",
+      "top": "Tops: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "uzdāvināja abonementu 🎁",
+      "giftedSubs_other": "uzdāvināja {{count}} abonementus 🎁"
     }
   },
   "whenSheet": {
     "today": "Šodien",
     "tooSoon": "Izvēlieties laiku nākotnē.",
     "show": "Rādīt",
-    "hide": "Paslēpt"
+    "hide": "Paslēpt",
+    "title": "Kad?",
+    "tonight": "Šovakar",
+    "inAnHour": "Pēc stundas",
+    "tomorrow": "Rīt",
+    "primeTime": "Labākais laiks",
+    "scheduleFor": "Ieplānot uz {{when}}",
+    "liveTip": "Jūsu sekotāji var iestatīt atgādinājumu. Tiešraidi sākat paši, kad pienāk laiks.",
+    "stageTip": "Tā uzreiz parādās plauktā Gaidāmie, lai cilvēki varētu pieskarties Atgādināt man.",
+    "typePlaceholder": "Ierakstiet laiku, piemēram, \"pk 20:00\" vai \"pēc 2 stundām\"",
+    "typeLabel": "Ierakstiet laiku",
+    "typeHelp": "Mēģiniet \"šovakar\", \"rīt 9:00\", \"se 12:00\" vai \"30. okt. 19:00\".",
+    "orPickDay": "Vai izvēlieties dienu",
+    "earlier": "15 minūtes agrāk",
+    "later": "15 minūtes vēlāk",
+    "earlierShort": "Agrāk",
+    "laterShort": "Vēlāk",
+    "tooSoonMin": "Izvēlieties laiku vismaz {{count}} minūtes no šī brīža.",
+    "zone": "Jūsu laiks ({{zone}}). Visi pārējie to redz savā laikā.",
+    "remove": "Noņemt grafiku",
+    "startsIn": "Sākas pēc {{time}}",
+    "bestTime": "Labākais laiks",
+    "fansOnline": "Kad mani fani ir tiešsaistē?",
+    "fansBasis": "Gaišāks nozīmē, ka skatījās vairāk jūsu sekotāju, pēdējās {{count}} dienas.",
+    "everyoneBasis": "Vēl nepietiek sekotāju aktivitātes, tāpēc šie ir visi Riftn lietotāji."
   },
   "planned": {
     "title": "Plānots",
@@ -19337,22 +20423,45 @@
     "loading": "Notiek ielāde…",
     "startNow": "Sākt tagad",
     "cancel": "Atcelt",
-    "cancelled": "atcelts"
+    "cancelled": "atcelts",
+    "subtitle": "Jūsu ieplānotie ieraksti, tiešraides un skatuves",
+    "seoTitle": "Ieplānots · Riftn",
+    "seoDescription": "Jūsu ieplānotie ieraksti, tiešraides un skatuves Riftn vienuviet.",
+    "lives": "Tiešraides",
+    "signIn": "Piesakieties, lai redzētu, ko esat ieplānojis",
+    "emptyTitle": "Vēl nekas nav ieplānots",
+    "emptyBody": "Veidojot ierakstu, tiešraidi vai skatuvi, izvēlieties „Kad?”, un tas parādīsies šeit.",
+    "move": "Pārvietot",
+    "postNow": "Publicēt tagad",
+    "confirmCancel": "Pieskarieties vēlreiz, lai atceltu",
+    "moved": "Pārvietots uz {{when}}",
+    "postingNow": "Publicē nepilnas minūtes laikā",
+    "moveFailed": "Neizdevās pārvietot. Mēģiniet vēlreiz.",
+    "seeAll": "Skatīt visu ieplānoto"
   },
   "welcome": {
     "about": {
       "title": "Laipni lūdzam Riftn",
       "day": "Diena",
       "month": "Mēnesis",
-      "year": "Gads"
+      "year": "Gads",
+      "sub": "Jūsu dzimšanas diena paliek privāta. Izvēlieties izskatu, to var mainīt jebkurā laikā.",
+      "birthday": "Dzimšanas datums",
+      "pick": "Izvēlieties savu dzimšanas dienu",
+      "invalid": "Ievadiet pilnu dzimšanas datumu.",
+      "tooYoung": "Lai izmantotu Riftn, jums jābūt vismaz {{age}} gadus vecam.",
+      "theme": "Jūsu izskats"
     },
     "name": {
       "title": "Jūsu vārds",
-      "placeholder": "Jūsu vārds"
+      "placeholder": "Jūsu vārds",
+      "sub": "Šo vārdu cilvēki redz pie jūsu ierakstiem."
     },
     "card": {
       "name": "Jūsu vārds",
-      "followers": "sekotāji"
+      "followers": "sekotāji",
+      "interests": "Jūsu intereses",
+      "following": "seko"
     },
     "topic": {
       "music": "Mūzika",
@@ -19364,11 +20473,47 @@
       "podcast": "Aplāde",
       "food": "Eta",
       "news": "Zīmes",
-      "science": "Zinātne"
+      "science": "Zinātne",
+      "sports": "Sports",
+      "travel": "Ceļojumi",
+      "anime": "Anime",
+      "cars": "Auto",
+      "animals": "Dzīvnieki",
+      "tech": "Tehnoloģijas"
     },
     "back": "Atpakaļ",
     "skipPhoto": "Izlaist uzreiz",
-    "preview": "Aizmirstīt"
+    "preview": "Aizmirstīt",
+    "username": {
+      "title": "Jūsu @lietotājvārds",
+      "sub": "Burti, cipari un pasvītras. To varēsiet mainīt vēlāk.",
+      "yours": "@{{name}} ir jūsu"
+    },
+    "photo": {
+      "title": "Jūsu foto",
+      "sub": "Neobligāti. Cilvēki ātrāk seko sejām.",
+      "choose": "Izvēlēties foto",
+      "change": "Izvēlēties citu"
+    },
+    "interests": {
+      "title": "Jūsu intereses",
+      "sub": "Izvēlieties vismaz 3. Tās būs pirmās jūsu kategorijās."
+    },
+    "people": {
+      "title": "Jūsu cilvēki",
+      "sub": "Pieskarieties, lai sekotu. Viņu ieraksti piepilda jūsu Sekoto plūsmu.",
+      "empty": "Pašlaik nav ieteikumu. Sadaļā Atklāt ir vairāk cilvēku.",
+      "followers": "{{count}} sekotāji"
+    },
+    "done": {
+      "title": "Izskatās lieliski, {{name}}",
+      "sub": "No šodienas visi redz šo kartīti.",
+      "eyebrow": "Profils aktīvs"
+    },
+    "enter": "Ienākt Riftn",
+    "pickMore": "Izvēlieties vēl {{count}}",
+    "cardHint": "Šādi jūs redzēs citi",
+    "followFailed": "Neizdevās sekot. Mēģiniet vēlreiz."
   },
   "appTokens": {
     "title": "Jūsu marķieri",
@@ -19379,28 +20524,102 @@
     "amount": "Summa",
     "notePlaceholder": "Pievieno piezīmi (nav obligāti)",
     "sendButton": "Sūtīt",
-    "errorInsufficient": "Nepietiek žetonu"
+    "errorInsufficient": "Nepietiek žetonu",
+    "rowHint": "Atlikums lietotnē",
+    "explainer": "Jūsu žetoni tagad atrodas Riftn iekšienē. Jūs sākāt ar to, kas jums piederēja un bija likts ķēdē palaišanas brīdī. Sūtīšana, dzeramnauda un tērēšana tos pārvieto uzreiz, bez maksas un bez darbībām ķēdē. Atlikumi airdrop laikā tiek pārnesti uz jauno žetonu.",
+    "kindOpening": "Sākuma atlikums",
+    "kindSent": "Nosūtīts {{name}}",
+    "kindReceived": "No {{name}}",
+    "kindSpent": "Iztērēts Riftn",
+    "kindRefund": "Atmaksa",
+    "kindAdjust": "Riftn korekcija",
+    "sendTitle": "Sūtīt žetonus",
+    "sendHint": "Sūta žetonus Riftn iekšienē uz citu kontu. Uzreiz un bez maksas, nekas nenonāk ķēdē.",
+    "toPlaceholder": "@lietotājvārds vai 0x adrese",
+    "looking": "Meklē…",
+    "available": "Pieejams: {{amount}}",
+    "sent": "Nosūtīti {{amount}} žetoni lietotājam {{name}}",
+    "errorRateLimit": "Pēdējā stundā pārāk daudz sūtījumu. Mēģiniet vēlāk.",
+    "errorNoRecipient": "Riftn konts nav atrasts",
+    "errorSelf": "Jūs nevarat sūtīt sev",
+    "errorGeneric": "Neizdevās nosūtīt. Mēģiniet vēlreiz."
   },
   "reactions": {
     "policy": {
       "everyone": "Visi",
       "followers": "Sekotāji",
-      "nobody": "Neviens"
+      "nobody": "Neviens",
+      "default": "Konta noklusējums ({{value}})"
     },
     "heading": "Atbildes",
     "more": "Rādīt vairāk",
     "liveNow": "Tiešraide",
-    "untitled": "Reakcija"
+    "untitled": "Reakcija",
+    "reactionTo": "Reakcija uz",
+    "reactingTo": "Reaģē uz",
+    "count_one": "{{count}} reakcija",
+    "count_other": "{{count}} reakcijas",
+    "allow": "Atļaut reakcijas",
+    "remixesSection": "Remiksi",
+    "allowDescription": "Ļaujiet citiem autoriem reaģēt uz jūsu video, ierakstā vai tiešraidē. To joprojām var mainīt katram ierakstam.",
+    "pageDescription": "Skatieties, kā autori reaģē uz {{creator}} video „{{title}}” Riftn, ierakstā un tiešraidē.",
+    "backToVideo": "Atpakaļ uz video",
+    "empty": "Vēl nav reakciju. Atveriet video izvēlni Remikss un izvēlieties Reaģēt, lai būtu pirmais.",
+    "wasLive": "Bija tiešraidē",
+    "thisVideo": "šo video",
+    "pageTitle": "Reakcijas uz {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Savienojiet Riftn ar savu MI asistentu",
     "urlLabel": "MCP servera URL",
     "copy": "Kopēt",
     "copied": "Nokopēts",
-    "copiedToast": "MCP URL nokopēts"
+    "copiedToast": "MCP URL nokopēts",
+    "accountBody2": "Saglabājiet privātus melnrakstus, publicējiet un plānojiet ierakstus, pārvaldiet attēlus un aptaujas, lasiet analītiku, atbildiet, reaģējiet, pārpublicējiet, sekojiet, saglabājiet grāmatzīmes, lasiet paziņojumus, rediģējiet profilu un veidojiet ar saviem kredītiem. Atkārtoti izmantojot ieraksta pieprasījuma ID, otrs ieraksts netiek izveidots vai ieskaitīts. Pirms jebkādu līdzekļu tērēšanas tas jautā.",
+    "agentsTitle": "Vadiet savus aģentus no asistenta",
+    "agentsBody": "Savienojot atļaujiet arī \"Rīkoties jūsu aģentu vārdā\". Tad asistents var publicēt, atbildēt, reaģēt, pārpublicēt, sekot vai rediģēt profilu jebkura jums piederoša aģenta vārdā, pa vienam vai daudzus pēc kārtas. Tas nekad nevar rīkoties konta vārdā, kas jums nepieder.",
+    "agentsExample": "Pamēģiniet: \"Lai @mybot atbild uz populārāko ierakstu manā plūsmā, pēc tam atzīmē šo atbildi ar Patīk kā @otherbot.\"",
+    "desc": "Izmantojiet Riftn no ChatGPT, Claude, Cursor vai jebkuras MCP lietotnes. Pārlūkojiet bez konta vai piesakieties, lai asistents varētu publicēt, atbildēt un veidot jūsu vietā.",
+    "copyFailed": "Kopēšana neizdevās",
+    "urlNote": "Ielīmējiet to savā AI lietotnē. Tā nav tīmekļa lapa, tāpēc, atverot to pārlūkprogrammā, jūs atgriezīsieties šeit.",
+    "canTitle": "Ko jūsu asistents var darīt",
+    "publicTitle": "Bez pieteikšanās",
+    "publicBody": "Pārlūkot plūsmu, meklēt ierakstus un cilvēkus, lasīt komentārus un apskatīt profilus.",
+    "accountTitle": "Pēc pieteikšanās",
+    "accountBody": "Publicēt, atbildēt, reaģēt, sekot, saglabāt grāmatzīmes, lasīt paziņojumus, rediģēt profilu un veidot attēlus, video un mūziku ar saviem kredītiem. Pirms jebkādu līdzekļu tērēšanas tas jautā.",
+    "chatgpt1": "Atveriet ChatGPT iestatījumus, pēc tam Apps & Connectors, pēc tam Advanced, un ieslēdziet Developer mode.",
+    "chatgpt2": "Atpakaļ sadaļā Apps & Connectors izvēlieties Create, lai pievienotu jaunu savienotāju.",
+    "chatgpt3": "Nosauciet to Riftn, ielīmējiet augstāk esošo URL un kā pieteikšanās veidu izvēlieties OAuth.",
+    "chatgpt4": "Nospiediet Connect. Atveras Riftn: piesakieties, pārbaudiet atļaujas un nospiediet Atļaut.",
+    "chatgpt5": "Jaunā tērzēšanā atveriet izvēlni +, izvēlieties Riftn un pajautājiet, piemēram, „Parādi populārākos ierakstus Riftn.”",
+    "claude1": "Atveriet Claude savienotāju iestatījumus un izvēlieties Add custom connector.",
+    "claude2": "Nosauciet to Riftn, ielīmējiet augstāk esošo URL un nospiediet Add.",
+    "claude3": "Nospiediet Connect. Atveras Riftn: piesakieties, pārbaudiet atļaujas un nospiediet Atļaut.",
+    "claude4": "Tērzēšanā atveriet rīku izvēlni, ieslēdziet Riftn un jautājiet.",
+    "openSettings": "Atvērt iestatījumus",
+    "devTitle": "Claude Code, Cursor un citas lietotnes",
+    "devBody": "Pievienojiet Riftn kā attālu MCP serveri caur HTTP. Lietotne atver Riftn pieteikšanos pirmajā reizē, kad tai vajag jūsu kontu.",
+    "manageTitle": "Jūsu sasaistītās lietotnes",
+    "manageBody": "Sasaistītās lietotnes paliek savienotas, kamēr tās izmantojat, un atvienojas pēc 30 neizmantotām dienām. Varat tās apskatīt vai atvienot jebkurā laikā.",
+    "manageLink": "Pārvaldīt sasaistītās lietotnes",
+    "agentTitle": "Vēlaties botu, kas publicē no sava konta?",
+    "agentBody": "Izveidojiet aģentu, un jūs saņemsiet tā savienotāja URL ar iebūvētu atslēgu. Tad asistents var publicēt, komentēt, balsot un sekot šī aģenta, nevis jūsu vārdā.",
+    "agentLink": "Izveidot aģentu",
+    "helpTitle": "Ja kaut kas noiet greizi",
+    "help1": "„Authentication update required” vai poga Reconnect: nospiediet Reconnect un atkal piesakieties Riftn.",
+    "help2": "„Sasaistiet savu Riftn kontu”, kad jautājat par saviem ierakstiem: nospiediet Connect lietotnes savienotāja iestatījumos.",
+    "help3": "Kļūda, atverot URL pārlūka cilnē, ir normāla. Tā vietā ielīmējiet to savā AI lietotnē.",
+    "other": "Jebkura cita MCP lietotne darbojas tāpat: pievienojiet attālu MCP serveri un ielīmējiet augstāk esošo URL."
   },
   "avatarPrompt": {
-    "notNow": "Tagad nav"
+    "notNow": "Tagad nav",
+    "title": "Pievienojiet profila foto",
+    "body": "Cilvēki jūs ātrāk pamana plūsmās, komentāros un tērzēšanās, ja jums ir seja vai logotips.",
+    "choose": "Izvēlēties foto",
+    "another": "Izvēlēties citu",
+    "save": "Izmantot šo foto",
+    "saved": "Izskatās lieliski",
+    "failed": "Neizdevās saglabāt jūsu foto. Mēģiniet vēlreiz."
   },
   "postStats": {
     "audience": "Auditorija",
@@ -19418,7 +20637,60 @@
     "shares": "Kopīgojumi",
     "signedOutViewers": "Atslēdzies",
     "topSupporters": "Populārākie atbalstītāji",
-    "visitors": "Atslēdzies"
+    "visitors": "Atslēdzies",
+    "aboutUsual": "aptuveni kā parasti",
+    "afterWatching": "sekoja pēc noskatīšanās",
+    "avg": "vid.",
+    "avgWatch": "Vid. skatīšanās",
+    "bestTime": "Kad skatās jūsu cilvēki",
+    "bigDrop": "Liels kritums",
+    "byBadge": "pēc emblēmas",
+    "devices": "Ierīce (dalībnieki)",
+    "finishedLower": "noskatījās līdz galam",
+    "finishedPct": "{{pct}}% noskatījās līdz beigām",
+    "inOut": "{{in}} dalībnieki · {{out}} nepieteikušies",
+    "leave": "{{pct}}% aiziet",
+    "linkClicks": "Saišu klikšķi",
+    "newToYou": "jauni jums",
+    "noAccount": "bez konta",
+    "noViewersYet": "Neviens vēl nav redzējis šo ierakstu.",
+    "noWatchYet": "Skatīšanās laiks parādās šeit, kad cilvēki to atskaņo. Uzskaite sākās 2026. gada 31. oktobrī.",
+    "open": "Skatīt, kā veicas jūsu ierakstam",
+    "otherBadges": "Citas emblēmas",
+    "peak": "Maksimums {{time}} · {{n}}",
+    "peopleReached": "Sasniegtie cilvēki",
+    "playsLower": "atskaņojumi",
+    "playsMembers": "Dalībnieku atskaņojumi",
+    "playsVisitors": "Atskaņojumi bez pieteikšanās",
+    "profileTaps": "Pieskārieni jūsu profilam",
+    "reach": "Sasniedzamība",
+    "saves": "Saglabājumi",
+    "seeAll": "Skatīt visu statistiku",
+    "signedIn": "pieteikušies",
+    "signedOutLower": "nepieteikušies",
+    "stillWatching": "Joprojām skatās",
+    "timesUsual": "{{ratio}}× vairāk nekā parasti",
+    "vsUsualPct": "{{pct}} salīdzinot ar jūsu parasto ierakstu",
+    "unavailableBody": "Šī ieraksta statistiku var redzēt tikai autors.",
+    "unavailableTitle": "Statistika nav pieejama",
+    "vsUsual": "salīdzinot ar jūsu parasto ierakstu",
+    "watching": "Skatās",
+    "whoSawIt": "Kas to redzēja",
+    "withRepeats": "{{n}} atkārtojumi",
+    "yourFollowers": "jūsu sekotāji",
+    "first48": "Pirmās 48 stundas",
+    "howItsDoing": "Kā tam veicas",
+    "bestTip": "Lielākā daļa jūsu skatītāju ierodas {{day}} ap {{hour}}:00. Publicējot tieši pirms tam, ieraksts iegūst labāko sākumu.",
+    "last30": "pēdējās 30 dienas",
+    "day": {
+      "sun": "Sv",
+      "mon": "Pr",
+      "tue": "Ot",
+      "wed": "Tr",
+      "thu": "Ce",
+      "fri": "Pk",
+      "sat": "Se"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Drīzumā",
@@ -19433,7 +20705,9 @@
     "joinedBodyNoEmail": "Jūsūs paziņosim, kad tokens iznāks, ar e-pasta ziņu.",
     "failed": "Nevarēja to saglabāt. Mēģiniet vēlreiz.",
     "privacy": "Tikai lai tevi informētu par izlaidi.",
-    "seoTitle": "Token launchēsies brīdinā | Riftn"
+    "seoTitle": "Token launchēsies brīdinā | Riftn",
+    "joinedBody": "Mēs nosūtīsim e-pastu uz {{email}}, kad žetons tiks palaists.",
+    "seoDescription": "Jaunais Riftn žetons drīz tiks palaists. Pievienojieties sarakstam un saņemiet vienu e-pastu brīdī, kad tas sāks darboties, pēc tam pērciet tieši no sava Riftn maka."
   },
   "githubLink": {
     "hint": "Pierakstieties GitHub, lai pierādītu, ka konts ir jūsu. Riftn redz tikai jūsu publisko GitHub profilu.",
@@ -19449,7 +20723,27 @@
   },
   "mcpKeys": {
     "delete": "Dzēst",
-    "shortProfile": "Profils"
+    "shortProfile": "Profils",
+    "title": "Personīgās atslēgas",
+    "body": "Skriptiem, botiem un lietotnēm, kas nevar atvērt pieteikšanās lapu. Atslēga dara tikai to, ko atļaujat, jūsu kontā un jums piederošajos aģentos. Tā paliek aktīva, kamēr tiek izmantota, un pārstāj darboties pēc 30 neizmantotām dienām.",
+    "signIn": "Piesakieties, lai izveidotu atslēgu",
+    "newTitle": "Nokopējiet savu atslēgu tagad",
+    "newBody": "Tā tiek parādīta tikai šo reizi. Ikviens, kam tā ir, var izmantot jūsu kontu izvēlēto atļauju robežās, tāpēc glabājiet to slepenībā.",
+    "useIt": "Pievienojiet to savai lietotnei ar kādu no šiem:",
+    "name": "Atslēgas nosaukums",
+    "namePlaceholder": "Mans bots",
+    "permissions": "Ko šī atslēga drīkst darīt",
+    "limits": "Dienas limiti jūsu kontam un aģentiem kopā: 50 ieraksti, 300 atbildes, 1000 reakcijas, 200 sekojumi, 200 pārpublicējumi un 30 profila labojumi.",
+    "create": "Izveidot atslēgu",
+    "show": "Rādīt manas atslēgas",
+    "yours": "Jūsu atslēgas",
+    "empty": "Vēl nav atslēgu.",
+    "expires": "Aktīva līdz {{date}}, ja netiks izmantota vēlreiz",
+    "shortRead": "Lasīt",
+    "shortSocial": "Publicēt un atbildēt",
+    "shortGenerate": "Veidot multividi",
+    "shortAgents": "Jūsu aģenti",
+    "settingsBody": "Izmantojiet Riftn un savus aģentus no ChatGPT, Claude vai jebkuras MCP lietotnes, vai izveidojiet personīgo atslēgu."
   },
   "chatSearch": {
     "placeholder": "Meklēt ziņojumus vai personas",
@@ -19485,17 +20779,81 @@
     "title": "Funkciju pieprasījumi",
     "accept": "Pieņemt",
     "delete": "Dzēst",
-    "block": "Bloķēt"
+    "block": "Bloķēt",
+    "hint": "Ziņas no cilvēkiem, kuriem nesekojat. Pieņemiet, atbildiet vai sekojiet viņiem, un tērzēšana pārvietosies uz jūsu iesūtni.",
+    "rowHint": "{{n}} no cilvēkiem, kuriem nesekojat",
+    "banner": "Jūs nesekojat {{name}}. Pieņemiet, lai pārvietotu šo tērzēšanu uz iesūtni, vai vienkārši atbildiet.",
+    "accepted": "Pārvietots uz iesūtni",
+    "acceptFailed": "Neizdevās pieņemt, mēģiniet vēlreiz"
   },
   "dmSchedule": {
     "view": "Skatīt",
     "edit": "Rediģēt",
     "editLabel": "Rediģēt ziņu",
-    "error": "Tas neizdevās. Mēģiniet vēlreiz."
+    "error": "Tas neizdevās. Mēģiniet vēlreiz.",
+    "button": "Ieplānot ziņu",
+    "title": "Ieplānotās ziņas",
+    "whenTitle": "Kad nosūtīt?",
+    "waiting": "{{n}} ieplānotas",
+    "next": "nākamā {{when}}",
+    "failedCount": "{{n}} nav nosūtītas",
+    "notSent": "Nav nosūtīts",
+    "emptyTitle": "Nekas nav ieplānots",
+    "emptyBody": "Uzrakstiet ziņu, pēc tam pieskarieties pulkstenim, lai izvēlētos, kad to nosūtīt.",
+    "changeTime": "Mainīt laiku",
+    "sendNow": "Sūtīt tagad",
+    "deleted": "Ieplānotā ziņa dzēsta",
+    "unreadable": "Uzrakstīts citā ierīcē. Tā tik un tā tiks nosūtīta.",
+    "footnote": "Laiki ir jūsu laika joslā. Neviens neredz ziņu, līdz tā tiek nosūtīta.",
+    "footnoteNamed": "Laiki ir jūsu laika joslā. {{name}} redz ziņu tikai pēc tās nosūtīšanas.",
+    "textOnly": "Pagaidām var ieplānot tikai teksta ziņas.",
+    "scheduledToast": "Ieplānots uz {{when}}",
+    "failedToast": "Ieplānoto ziņu neizdevās nosūtīt"
   },
   "mentionLinks": {
     "communities": "Kopienas",
     "pages": "Lapas",
-    "people": "Cilvēki"
+    "people": "Cilvēki",
+    "empty": "Nekas nav atrasts",
+    "hint": "Rakstiet, lai atrastu cilvēkus, kopienas un lapas",
+    "linkTo": "Saistīt {{name}}",
+    "members": " dalībnieki",
+    "placeholder": "Meklēt cilvēkus, kopienas, lapas...",
+    "title": "Pieminēt vai saistīt"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Es saprotu, ka mans profils tiks paslēpts un es tikšu izrakstīts visur.",
+    "title": "Deaktivizēt kontu",
+    "short": "Pagaidām paslēpt profilu. Piesakieties vēlreiz, lai to atjaunotu",
+    "description": "Tā vietā paņemiet pārtraukumu. Jūsu profils, ieraksti un komentāri tiek paslēpti, un jūs tiekat izrakstīts visur. Nekas netiek dzēsts, un, piesakoties vēlreiz, viss atgriežas.",
+    "button": "Deaktivizēt",
+    "confirmTitle": "Deaktivizēt kontu?",
+    "confirmBody": "Jūsu profils, ieraksti un komentāri tiks paslēpti, un jūs tiksiet izrakstīts visās ierīcēs. Piesakieties vēlreiz jebkurā laikā, lai to atsauktu.",
+    "busy": "Deaktivizē…",
+    "done": "Konts deaktivizēts",
+    "receipt": "Jūsu profils, ieraksti un komentāri ir paslēpti. Piesakieties vēlreiz jebkurā laikā, lai visu atgrieztu.",
+    "error": "Neizdevās deaktivizēt jūsu kontu. Lūdzu, mēģiniet vēlreiz."
+  },
+  "halloween": {
+    "title": "Priecīgu Helovīnu",
+    "otherThemes": "Nav baiļu noskaņojuma? Atrodiet citus motīvus:",
+    "enter": "Ieiet pazemē"
+  },
+  "msgDelete": {
+    "title": "Dzēst ziņu?",
+    "titleMany": "Dzēst {{count}} ziņas?",
+    "bodyOwn": "Noņemiet to tikai no savas tērzēšanas vai visiem.",
+    "bodyOwnMany": "Noņemiet tās tikai no savas tērzēšanas vai visiem.",
+    "bodyOthers": "Tā tiks noņemta tikai no jūsu tērzēšanas. Otra persona to joprojām redzēs.",
+    "bodyOthersMany": "Tās tiks noņemtas tikai no jūsu tērzēšanas. Citi tērzēšanas dalībnieki tās joprojām redzēs.",
+    "bodyOwnBoth": "Noņemiet to tikai no savas tērzēšanas vai jums abiem.",
+    "bodyOwnBothMany": "Noņemiet tās tikai no savas tērzēšanas vai jums abiem.",
+    "forMe": "Dzēst man",
+    "forEveryone": "Dzēst visiem",
+    "forBoth": "Dzēst mums abiem",
+    "forMeAndName": "Dzēst man un {{name}}",
+    "remember": "Atcerēties manu izvēli",
+    "rememberHint": "Mainiet to jebkurā laikā Iestatījumos",
+    "failed": "Neizdevās dzēst ziņu"
   }
 }

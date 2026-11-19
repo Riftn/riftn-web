@@ -2800,8 +2800,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       );
   };
 
-  const handleDeleteConversation = () => {
-    deleteConversationMutation.mutate(conversation.id, {
+  const handleDeleteConversation = (scope: DeleteScope = 'me') => {
+    deleteConversationMutation.mutate(scope === 'everyone' ? { id: conversation.id, forEveryone: true } : conversation.id, {
       onSuccess: () => {
         toast.success(_copy("copy.09d6990a101a", { defaultValue: "Conversation deleted" }));
         onBack();
@@ -3252,6 +3252,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             <RefreshCw className="w-3 h-3 mr-2" />{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
         </div>
       ) : (
+        <div className="relative flex-1 min-h-0 flex flex-col">
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
@@ -3288,7 +3289,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           <div ref={bottomRef} />
           </div>
         </div>
-      )}
 
       {/* Jump control: up to the unread marker until it has been seen, then
           down to the newest line. The count is unread lines still below. */}
@@ -3301,10 +3301,12 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             up={up}
             count={count}
             onClick={up ? jumpToUnreadMarker : scrollToBottom}
-            className="absolute bottom-20 right-4 z-10"
+            className="absolute bottom-3 right-3 z-10"
           />
         );
       })()}
+        </div>
+      )}
 
       {/* Init error banner — shown when createAndStart timed out for a new conversation */}
       {initError && isVirtualConv && (
@@ -3398,19 +3400,16 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         confirmBeforeSend={feeRequired ? confirmFeeSend : undefined}
       />}
 
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">{_copy("copy.c1a5a2073bed", { defaultValue: "Delete Conversation?" })}</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">{_copy("copy.7e2cc56d23d2", { defaultValue: "This will permanently delete this conversation and all its messages. This action cannot be undone." })}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConversation}>{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Delete the whole chat: for me, for both (1:1), or cancel */}
+      <DeleteMessageDialog
+        subject="chat"
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        canDeleteForEveryone={!isGroupChat && !isVirtualConv}
+        oneToOne
+        peerName={isGroupChat ? null : displayName}
+        onDelete={(scope) => handleDeleteConversation(scope)}
+      />
 
       {/* First-paid-message warning — shown once per browser before the first fee is charged */}
       <AlertDialog open={showFeeWarning} onOpenChange={handleFeeWarningOpenChange}>

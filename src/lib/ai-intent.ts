@@ -120,6 +120,28 @@ const CONVERSATIONAL_IMAGE_PHRASES = [
   'show me', 'show a', 'give me', 'i want', 'can you show', 'what does', 'look like',
 ];
 
+/**
+ * Words that make a "show me" / "give me" message a request for information.
+ *
+ * "show me the link explaining how people earn money on riftn" is a question,
+ * not a picture, but it starts with a conversational image phrase. When any of
+ * these is in the message, the conversational tail stands down. Explicit
+ * phrases ("picture of", "draw me") still win.
+ */
+const INFO_REQUEST_KEYWORDS = [
+  'link', 'links', 'url', 'website', 'site', 'page', 'pages', 'docs', 'doc',
+  'guide', 'tutorial', 'faq', 'article', 'blog', 'whitepaper', 'roadmap',
+  'explain', 'explains', 'explaining', 'explanation', 'info', 'information',
+  'how', 'why', 'where', 'when', 'who', 'which', 'what is', "what's", 'what are',
+  'steps', 'instructions', 'rules', 'terms', 'policy', 'price', 'cost',
+  'earn', 'earning', 'earnings', 'money', 'income', 'monetize', 'monetise',
+  'list', 'stats', 'settings', 'feature', 'features', 'answer',
+];
+
+function isInfoRequest(message: string): boolean {
+  return matchesAny(message, INFO_REQUEST_KEYWORDS);
+}
+
 /** Phrases that can only mean "generate a video". */
 const EXPLICIT_VIDEO_PHRASES = [
   'generate video', 'generate a video', 'create video', 'create a video',
@@ -218,7 +240,7 @@ export function requiresImageGeneration(
   if (requiresVideoGeneration(message)) return false;
   // An attachment plus an instruction is an edit, whatever the words are.
   if (hasAttachedImage) return true;
-  const loose = options.conversational
+  const loose = options.conversational && !isInfoRequest(message)
     ? [...LOOSE_IMAGE_PHRASES, ...CONVERSATIONAL_IMAGE_PHRASES]
     : LOOSE_IMAGE_PHRASES;
   return classify(message, EXPLICIT_IMAGE_PHRASES, loose);
