@@ -1,0 +1,64 @@
+/* Chat tabs on /chat and /app/messages: plain labels, the open one lit with
+   a glowing underline in the theme's accent (same look as the Messages
+   page's tabs). */
+[data-chat-tabs] {
+  --ct-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 62%, white);
+  --ct-accent-ink: #fff;
+  --ct-soft: rgb(255 255 255 / 0.09);
+  --ct-ink: #fff;
+}
+html[data-theme='system'] [data-chat-tabs] { --ct-accent: #fff; --ct-accent-ink: #0b0b0c; }
+html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-chat-tabs] {
+  --ct-accent: #0b0b0c;
+  --ct-accent-ink: #fff;
+  --ct-soft: rgb(11 11 13 / 0.06);
+  --ct-ink: #0b0b0c;
+}
+html[data-theme='osaka'] [data-chat-tabs] { --ct-accent: #ff6fb5; }
+
+[data-chat-tabs] [data-chat-tab] {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgb(161 161 170);
+  background: transparent;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+@media (hover: hover) { [data-chat-tabs] [data-chat-tab]:hover { color: var(--ct-ink); } }
+[data-chat-tabs] [data-chat-tab][aria-selected='true'] { color: var(--ct-ink); }
+[data-chat-tabs] [data-chat-tab][aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ct-accent);
+  box-shadow: 0 0 10px var(--ct-accent);
+}
+/* A chat dragged over a custom tab. */
+[data-chat-tabs] [data-chat-tab][data-drop] { color: var(--ct-ink); box-shadow: inset 0 0 0 1.5px var(--ct-accent); }
+[data-chat-tabs] [data-chat-tab-unread] {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--ct-accent);
+  color: var(--ct-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+[data-chat-tabs] [data-chat-tab-unread][data-quiet] { background: var(--ct-soft); color: inherit; }
