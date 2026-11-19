@@ -9066,7 +9066,19 @@
     "declined": "Call declined",
     "noAnswer": "No answer",
     "missed": "Missed call",
-    "callBack": "Call back"
+    "callBack": "Call back",
+    "group": "Group",
+    "groupVoiceCall": "Group voice call",
+    "groupVideoCall": "Group video call",
+    "callingGroup": "Ringing the group...",
+    "isCalling": "{{name}} is calling",
+    "leave": "Leave",
+    "joinCall": "Join call",
+    "inCall_one": "{{count}} in the call",
+    "inCall_other": "{{count}} in the call",
+    "startGroupVoice": "Start a group voice call",
+    "startGroupVideo": "Start a group video call",
+    "you": "You"
   },
   "badgeAscension": {
     "reached": "You reached {{tier}}",

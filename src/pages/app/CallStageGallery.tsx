@@ -6,6 +6,8 @@
  * calls = chat | ringing | incoming | connecting | active | muted | mini |
  *         ended | declined | no-answer | missed | notes
  * Add "-video" for the video version (ringing-video, active-video, mini-video).
+ * Prefix "group-" for a group call (group-incoming, group-ringing, group-active,
+ * group-active-video, group-mini, group-ended); `people=` sets how many others are in it.
  */
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -17,6 +19,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import type { CallOutcome, UseCallReturn } from '@/hooks/use-call';
 import VoiceCallModal from '@/components/app/chat/calls/VoiceCallModal';
 import VideoCallModal from '@/components/app/chat/calls/VideoCallModal';
+import GroupCallModal from '@/components/app/chat/calls/GroupCallModal';
 import CallEndedScreen from '@/components/app/chat/calls/CallEndedScreen';
 import { CallMiniPlayer } from '@/components/app/chat/calls/CallMiniPlayer';
 import { CallNoteCard } from '@/components/app/chat/calls/CallNoteCard';
@@ -77,9 +80,12 @@ export default function CallStageGallery() {
   const want = params.get('theme') || 'system';
   useEffect(() => { if (want !== themeChoice) setTheme(want); }, [want, themeChoice, setTheme]);
 
-  const step = params.get('calls') || 'chat';
+  const raw = params.get('calls') || 'chat';
+  const group = raw.startsWith('group-');
+  const step = group ? raw.slice(6) : raw;
   const video = step.endsWith('-video');
   const base = video ? step.slice(0, -6) : step;
+  const people = Math.max(1, Math.min(8, Number(params.get('people')) || 3));
   const outcome = OUTCOMES[base];
   const live = base === 'active' || base === 'muted' || base === 'mini';
   const inCall = live || base === 'ringing' || base === 'incoming' || base === 'connecting';
@@ -91,8 +97,18 @@ export default function CallStageGallery() {
       currentCall: inCall ? {
         id: 'sample', caller_address: base === 'incoming' ? PEER : ME, recipient_address: base === 'incoming' ? ME : PEER,
         status: live || base === 'connecting' ? 'connected' : 'ringing', call_type: video ? 'video' : 'audio', created_at: new Date().toISOString(),
+        ...(group ? { group_id: '00000000-0000-0000-0000-000000000001', group_name: 'Weekend crew' } : {}),
       } : null,
-      callSummary: outcome ? { peerAddress: PEER, callType: video ? 'video' : 'audio', outcome, duration: outcome === 'ended' ? '04:32' : null } : null,
+      callSummary: outcome ? { peerAddress: PEER, callType: video ? 'video' : 'audio', outcome, duration: outcome === 'ended' ? '04:32' : null, groupName: group ? 'Weekend crew' : null } : null,
+      isGroupCall: group,
+      selfSpeaking: false,
+      // Others in the room: every other one on camera in a video call, the second one talking, the third muted.
+      groupParticipants: group && live ? Array.from({ length: people }, (_, index) => ({
+        uid: index + 2, wallet: `0x${String(index + 3).repeat(40).slice(0, 40)}`,
+        audio: index !== 2, video: video && index % 2 === 0, speaking: index === 1,
+      })) : [],
+      attachGroupVideo: (uid: number) => paint(['linear-gradient(160deg, #3b2f63, #1f4a5c)', 'linear-gradient(200deg, #5c3b2f, #1f2a5c)', 'linear-gradient(120deg, #2f5c45, #3b1f5c)'][uid % 3]),
+      startGroupCall: async () => {}, joinGroupCall: async () => {},
       peerAddress: PEER, isMuted: base === 'muted', isCameraOff: false, isMinimized: base === 'mini',
       callStartedAt: live ? Date.now() - 272_000 : null, mediaRevision: 0,
       remoteAudioRef: { current: null }, localVideoTrack: { current: null },
@@ -111,7 +127,7 @@ export default function CallStageGallery() {
       <CallContext.Provider value={call}>
         <div id="call-gallery-ready">
           <div id="app-root" className="min-h-screen overflow-x-clip bg-black text-white"><SampleChat notes={base === 'notes' || base === 'mini'} /></div>
-          {outcome ? <CallEndedScreen /> : base === 'mini' ? <CallMiniPlayer /> : inCall ? (video ? <VideoCallModal /> : <VoiceCallModal />) : null}
+          {outcome ? <CallEndedScreen /> : base === 'mini' ? <CallMiniPlayer /> : inCall ? (group ? <GroupCallModal /> : video ? <VideoCallModal /> : <VoiceCallModal />) : null}
         </div>
       </CallContext.Provider>
     </AuthContext.Provider>

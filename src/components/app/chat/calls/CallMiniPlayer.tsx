@@ -36,7 +36,10 @@ export function CallMiniPlayer() {
   const isVisible = isMinimized && (isCallActive || isConnecting) && currentCall;
   if (!isVisible) return null;
 
-  const isVideo = currentCall.call_type === 'video';
+  // A group call folds to its name; there is no single camera to show.
+  const isGroup = !!currentCall.group_id;
+  const isVideo = currentCall.call_type === 'video' && !isGroup;
+  const name = isGroup ? currentCall.group_name || peer.name : peer.name;
   const statusText = isRinging
     ? t('calls.calling')
     : isConnecting
@@ -64,9 +67,9 @@ export function CallMiniPlayer() {
         ) : null}
         <div className="call-mini__row" onPointerDown={(event) => dragControls.start(event)}>
           <button type="button" className="call-mini__who" onClick={maximizeCall} aria-label={t('calls.expand')} title={t('calls.expand')}>
-            {peer.avatarUrl ? <img src={peer.avatarUrl} alt="" /> : <span>{peerInitial(peer.name)}</span>}
+            {peer.avatarUrl && !isGroup ? <img src={peer.avatarUrl} alt="" /> : <span>{peerInitial(name)}</span>}
             <span className="min-w-0">
-              <span className="call-mini__name">{peer.name}</span>
+              <span className="call-mini__name">{name}</span>
               <span className="call-mini__time">{statusText}</span>
             </span>
           </button>
@@ -79,7 +82,7 @@ export function CallMiniPlayer() {
             disabled={!isCallActive}
             compact
           />
-          <CallControl icon={PhoneOff} label={t('calls.end')} onClick={endCall} primary compact />
+          <CallControl icon={PhoneOff} label={isGroup ? t('calls.leave', 'Leave') : t('calls.end')} onClick={endCall} primary compact />
         </div>
       </div>
     </motion.div>

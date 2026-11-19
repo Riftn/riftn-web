@@ -35,6 +35,7 @@ import Trash2 from "@/components/ui/cut-icons/delete";
 import MicOff from "@/components/ui/cut-icons/mic-off";
 import Megaphone from "@/components/ui/cut-icons/advertising";
 import { communityKindOf } from "@/lib/community-kinds";
+import { GroupCallButtons } from "@/components/app/chat/calls/GroupCallButtons";
 import Ban from "@/components/ui/cut-icons/blocked";
 
 import Send from "@/components/ui/cut-icons/send";
@@ -1006,6 +1007,9 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
         {/* Search bar */}
         <div className="px-1 pb-1 flex items-center gap-1">
+          {!showSearch && isMember && communityKindOf(community) === 'group' ? (
+            <GroupCallButtons groupId={communityId} groupName={community?.name ?? ''} />
+          ) : null}
           {showSearch ? (
             <div className="flex-1 min-w-0">
               <ChatSearchBar

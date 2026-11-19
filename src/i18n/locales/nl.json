@@ -9292,7 +9292,19 @@
     "declined": "Oproep geweigerd",
     "noAnswer": "Geen antwoord",
     "missed": "Gemist gesprek",
-    "callBack": "Terugbellen"
+    "callBack": "Terugbellen",
+    "group": "Groep",
+    "groupVoiceCall": "Groepsspraakoproep",
+    "groupVideoCall": "Groepsvideogesprek",
+    "callingGroup": "Groep wordt gebeld...",
+    "isCalling": "{{name}} belt",
+    "leave": "Verlaten",
+    "joinCall": "Deelnemen",
+    "inCall_one": "{{count}} in het gesprek",
+    "inCall_other": "{{count}} in het gesprek",
+    "startGroupVoice": "Groepsspraakoproep starten",
+    "startGroupVideo": "Groepsvideogesprek starten",
+    "you": "Jij"
   },
   "badgeAscension": {
     "reached": "Je hebt {{tier}} bereikt",

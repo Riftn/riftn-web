@@ -9102,7 +9102,19 @@
     "declined": "Arama reddedildi",
     "noAnswer": "Cevap yok",
     "missed": "Cevapsız arama",
-    "callBack": "Geri ara"
+    "callBack": "Geri ara",
+    "group": "Grup",
+    "groupVoiceCall": "Grup sesli araması",
+    "groupVideoCall": "Grup görüntülü araması",
+    "callingGroup": "Grup aranıyor...",
+    "isCalling": "{{name}} arıyor",
+    "leave": "Ayrıl",
+    "joinCall": "Katıl",
+    "inCall_one": "Aramada {{count}} kişi",
+    "inCall_other": "Aramada {{count}} kişi",
+    "startGroupVoice": "Grup sesli araması başlat",
+    "startGroupVideo": "Grup görüntülü araması başlat",
+    "you": "Sen"
   },
   "badgeAscension": {
     "reached": "{{tier}} seviyesine ulaştınız",
