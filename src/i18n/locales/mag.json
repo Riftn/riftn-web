@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "एक बार में एगो ग्रुप, बड़गो आइकन के साथे",
     "menuLayoutSections": "सेक्सन",
     "menuLayoutSectionsDesc": "सब पेज एक्के साथे, ग्रुप हेडर के नीचे",
-    "menuLayoutFoldersDesc": "तोहर मुख्य पेज, फेन हर ग्रुप ला एगो फोल्डर"
+    "menuLayoutFoldersDesc": "तोहर मुख्य पेज, फेन हर ग्रुप ला एगो फोल्डर",
+    "publicChatInBar": "नीचे के बार में पब्लिक चैट",
+    "publicChatInBarDesc": "स्क्रीन के नीचे वाला बार से एक टैप में पब्लिक चैट खोलऽ"
   },
   "common": {
     "confirm": "कंफर्म",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "लीडरबोर्ड लोड हो रहल हे…",
     "amountTokens": "{{amount}} टोकन",
     "directReferrals": "{{count}} डायरेक्ट",
-    "secondaryReferrals": "{{count}} सेकेंडरी"
+    "secondaryReferrals": "{{count}} सेकेंडरी",
+    "ogChallenge": "OG चैलेंज",
+    "ogHolders_one": "{{count}} OG होल्डर",
+    "ogHolders_other": "{{count}} OG होल्डर",
+    "ogChallengeTitle": "OG होल्डर के वापस लावऽ",
+    "ogChallengeBody": "ओइसन लोग के न्योता भेजऽ जेकरा पास अभियो DHB हे। जब ऊ तोहर इनवाइट लिंक से जुड़तन आ अप्पन DHB अप्पन Riftn वॉलेट में रखतन, तऽ ऊ हियाँ तोहरा लेल गिनल जइतन।",
+    "ogChallengeCta": "अप्पन इनवाइट लिंक पावऽ"
   },
   "dhbListing": {
     "title": "टोकन लिस्टिंग जल्दी आ रहल हे!",
@@ -8062,7 +8070,10 @@
     "endStreamConfirmBody": "आपका प्रसारण सभी देखने वाले लोगों के लिए बंद हो जाता है और इसे फिर से शुरू नहीं किया जा सकता।",
     "keepStreaming": "स्ट्रीमिंग जारी रखें",
     "encoderPermanentHint": "Quote 1: चाहे हर कोई बदल जाए पर वो कभी नहीं बदलता, अपनी एन्कोडर को एक बार सेट करें — अगली बार बस प्रारंभ पर क्लिक करें और Riftn आपके लिए पोस्ट बनाता है ।",
-    "notEnoughTokensForBounty": "पर्याप्त टोकन नइखे। {{need}} टोकन के जरूरत बा लेकिन {{have}} बा।"
+    "notEnoughTokensForBounty": "पर्याप्त टोकन नइखे। {{need}} टोकन के जरूरत बा लेकिन {{have}} बा।",
+    "screenInAppHint": "Riftn ऐप में",
+    "screenInAppNote": "फोन के ब्राउज़र कोनो वेबसाइट के तोहर स्क्रीन शेयर करे न देहे। एकरा बदले Riftn ऐप से लाइव जा, फिर स्क्रीन शेयर करऽ पर टैप करऽ।",
+    "screenInAppCta": "Riftn ऐप पावऽ"
   },
   "events": {
     "seoTitle": "इवेंट्स: मीटअप्स एंड कम्युनिटी इवेंट्स ऑन डिहब",
