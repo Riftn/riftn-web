@@ -325,12 +325,16 @@ export default function LeaderboardPage() {
 
   const isDhbCategory = DHB_CATEGORIES.includes(category);
 
+  const ogValueParts = (entry: LeaderboardEntry): [string, string | null] => {
+    const og = entry as OgChallengeEntry;
+    const holders = String(t('leaderboard.ogHolders', { defaultValue: '{{count}} OG holders', count: og.directReferrals ?? 0 }));
+    return [holders, og.ogDhb ? formatLeaderboardNumber(og.ogDhb) + ' DHB' : null];
+  };
+
   const formatDisplayValue = (entry: LeaderboardEntry): string => {
     if (category === 'ogChallenge') {
-      const og = entry as OgChallengeEntry;
-      const holders = t('leaderboard.ogHolders', { defaultValue: '{{count}} OG holders', count: og.directReferrals ?? 0 });
-      if (!og.ogDhb) return String(holders);
-      return String(holders) + ' · ' + formatLeaderboardNumber(og.ogDhb) + ' DHB';
+      const [holders, dhb] = ogValueParts(entry);
+      return dhb ? holders + ' · ' + dhb : holders;
     }
     if (category === 'affiliates') {
       const affiliate = entry as AffiliateLeaderboardEntry;
@@ -572,7 +576,7 @@ export default function LeaderboardPage() {
                     <LeaderboardUserAvatar avatarUrl={getAvatarUrl(entry)} fallbackSeed={entry.account} displayName={displayName} size="md" />
                     <div className="min-w-0">
                       <span className="flex min-w-0 items-baseline gap-1">
-                        <span className="truncate text-sm font-semibold text-white">{displayName}</span>
+                        <span className="min-w-0 truncate text-sm font-semibold text-white">{displayName}</span>
                         {!hidden && (
                           <BadgeIcon badgeBalance={entry.badgeBalance || entry.total} username={entry.username} className="h-[1em] w-[1em] shrink-0" />
                         )}
@@ -580,8 +584,16 @@ export default function LeaderboardPage() {
                       <span className="block truncate text-xs text-zinc-500">{getHandle(entry)}</span>
                     </div>
                   </div>
-                  <div role="cell" className={`shrink-0 whitespace-nowrap text-sm font-bold tabular-nums ${valueTone(entry)}`}>
-                    {formatDisplayValue(entry)}
+                  <div role="cell" className={`shrink-0 whitespace-nowrap text-right text-sm font-bold tabular-nums ${valueTone(entry)}`}>
+                    {category === 'ogChallenge' ? (() => {
+                      const [holders, dhb] = ogValueParts(entry);
+                      return (
+                        <>
+                          <span className="block">{holders}</span>
+                          {dhb && <span className="block text-xs font-semibold text-zinc-400">{dhb}</span>}
+                        </>
+                      );
+                    })() : formatDisplayValue(entry)}
                   </div>
                 </>
               ) : (
