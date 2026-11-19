@@ -39,6 +39,10 @@ export const PART_OPEN_DROP = 0.2;
 /** A list scrolled this recently is still gliding from a fling. */
 const SCROLL_SETTLE_MS = 140;
 const SPEED_WINDOW_MS = 100;
+/** With `grab`, a small flick closes: this far, at FLICK_SPEED or faster. */
+const GRAB_FLICK_MIN_PULL = 12;
+/** With `grab`, a slow pull past this share of the sheet closes. */
+const GRAB_CLOSE_SHARE = 1 / 3;
 const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
 type Sample = { t: number; y: number };
@@ -49,9 +53,16 @@ export type DrawerPullOptions = {
    * pulls down to close. Used by the bell's settings sheet.
    */
   snap?: boolean;
+  /**
+   * Only a drag that starts inside this selector (the header, around the grab
+   * bar) moves the sheet, wherever the list is scrolled; drags on the list are
+   * always the list's own scroll. Use with `snap: false` for a sheet that
+   * closes in one swipe or a small flick.
+   */
+  grab?: string;
 };
 
-export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, close: () => void, { snap = true }: DrawerPullOptions = {}) {
+export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, close: () => void, { snap = true, grab }: DrawerPullOptions = {}) {
   let lastScrollAt = 0;
   let mode: 'idle' | 'pending' | 'drag' | 'off' = 'idle';
   let startX = 0;
@@ -134,7 +145,10 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
     const target = e.target as Element | null;
     atTop = scroller.scrollTop <= 0 && performance.now() - lastScrollAt > SCROLL_SETTLE_MS;
     const blocked = !!target?.closest?.('[data-vaul-no-drag], input, textarea, select, [contenteditable="true"]');
-    mode = blocked ? 'off' : 'pending';
+    const outsideGrab = !!grab && !target?.closest?.(grab);
+    mode = blocked || outsideGrab ? 'off' : 'pending';
+    // A pull on the header moves the sheet wherever the list is scrolled.
+    if (grab) atTop = true;
     const t = e.touches[0];
     startX = t.clientX;
     startY = t.clientY;
@@ -153,7 +167,7 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
       // Decided on the first move: iOS Safari only lets the first touchmove
       // stop the list's own scroll (and its rubber band).
       const vertical = Math.abs(dy) >= Math.abs(dx);
-      const takes = vertical && (!expanded || (dy > 0 && atTop && scroller.scrollTop <= 0));
+      const takes = vertical && (!expanded || (dy > 0 && atTop && (!!grab || scroller.scrollTop <= 0)));
       if (takes) {
         mode = 'drag';
       } else if (!vertical && Math.abs(dx) < SLOP) {
@@ -198,7 +212,9 @@ export function bindDrawerPullClose(sheet: HTMLElement, scroller: HTMLElement, c
     }
     const visible = Math.max(1, (sheet.offsetHeight || window.innerHeight) - mid);
     const belowMid = offset - mid;
-    const shut = belowMid >= visible * CLOSE_SHARE || (belowMid >= FLICK_MIN_PULL && speed >= FLICK_SPEED);
+    const shut = grab
+      ? belowMid >= visible * GRAB_CLOSE_SHARE || (belowMid >= GRAB_FLICK_MIN_PULL && speed >= FLICK_SPEED)
+      : belowMid >= visible * CLOSE_SHARE || (belowMid >= FLICK_MIN_PULL && speed >= FLICK_SPEED);
     if (shut) {
       slideOut(sheet);
       const o = overlay();
