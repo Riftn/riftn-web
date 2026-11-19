@@ -2548,6 +2548,35 @@ export type Database = {
         }
         Relationships: []
       }
+      community_chat_hidden_messages: {
+        Row: {
+          community_id: string
+          created_at: string
+          message_id: string
+          wallet_address: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          message_id: string
+          wallet_address: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          message_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_chat_hidden_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "community_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_chat_messages: {
         Row: {
           avatar_url: string | null
@@ -10308,6 +10337,14 @@ export type Database = {
         Returns: Json
       }
       community_hex_to_numeric: { Args: { _hex: string }; Returns: number }
+      community_hidden_message_ids: {
+        Args: { _community_id: string }
+        Returns: string[]
+      }
+      community_hide_message: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
       community_holder_check_result: {
         Args: { _community_id: string }
         Returns: Json
