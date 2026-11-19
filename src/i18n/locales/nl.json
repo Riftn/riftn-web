@@ -21055,5 +21055,20 @@
     "members": " leden",
     "placeholder": "Zoek mensen, community’s, pagina’s...",
     "title": "Noemen of linken"
+  },
+  "msgDelete": {
+    "title": "Bericht verwijderen?",
+    "titleMany": "{{count}} berichten verwijderen?",
+    "bodyOwn": "Verwijder het alleen uit jouw chat, of voor iedereen.",
+    "bodyOwnMany": "Verwijder ze alleen uit jouw chat, of voor iedereen.",
+    "bodyOthers": "Het wordt alleen uit jouw chat verwijderd. De ander ziet het nog steeds.",
+    "bodyOthersMany": "Ze worden alleen uit jouw chat verwijderd. Anderen in de chat zien ze nog steeds.",
+    "bodyOwnBoth": "Verwijder het alleen uit jouw chat, of voor jullie allebei.",
+    "bodyOwnBothMany": "Verwijder ze alleen uit jouw chat, of voor jullie allebei.",
+    "forMe": "Verwijderen voor mij",
+    "forEveryone": "Verwijderen voor iedereen",
+    "forBoth": "Verwijderen voor ons allebei",
+    "forMeAndName": "Verwijderen voor mij en {{name}}",
+    "failed": "Kon het bericht niet verwijderen"
   }
 }

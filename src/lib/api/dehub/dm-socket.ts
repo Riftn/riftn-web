@@ -55,6 +55,8 @@ export interface DeletedMessage {
   messageId?: string;
   dmId: string;
   reason?: 'destruct';
+  /** "Delete for me": drop it from this person's view entirely. */
+  forMe?: boolean;
 }
 
 export interface DmReactionUpdate {
@@ -475,6 +477,11 @@ export function emitReadReceipt(dmId: string): void {
  */
 export function emitDeleteMessage(dmId: string, messageId: string): Promise<void> {
   return emitWhenConnected('deleteMessage', { dmId, messageId });
+}
+
+/** Delete for me: removes a message from your own view only (any message in a chat you are in). */
+export function emitHideMessage(dmId: string, messageId: string): Promise<void> {
+  return emitWhenConnected('hideMessage', { dmId, messageId });
 }
 
 export function emitDownloadReceipt(dmId: string, messageId: string): Promise<void> {

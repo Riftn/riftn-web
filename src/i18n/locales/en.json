@@ -20701,5 +20701,20 @@
     "scheduledToast": "Scheduled for {{when}}",
     "failedToast": "A scheduled message could not be sent",
     "error": "That did not work. Try again."
+  },
+  "msgDelete": {
+    "title": "Delete message?",
+    "titleMany": "Delete {{count}} messages?",
+    "bodyOwn": "Remove it from your chat only, or for everyone.",
+    "bodyOwnMany": "Remove them from your chat only, or for everyone.",
+    "bodyOthers": "It will be removed from your chat only. The other person will still see it.",
+    "bodyOthersMany": "They will be removed from your chat only. Others in the chat will still see them.",
+    "bodyOwnBoth": "Remove it from your chat only, or for both of you.",
+    "bodyOwnBothMany": "Remove them from your chat only, or for both of you.",
+    "forMe": "Delete for me",
+    "forEveryone": "Delete for everyone",
+    "forBoth": "Delete for both of us",
+    "forMeAndName": "Delete for me and {{name}}",
+    "failed": "Could not delete the message"
   }
 }

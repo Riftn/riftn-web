@@ -163,6 +163,7 @@ import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
 import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
+import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
 import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
 import type { DeHubUser } from '@/lib/api/dehub';
@@ -368,6 +369,8 @@ function MessageMenuGallery() {
     { m: msg('mm-c', false, 'deal. pinning this so I remember', iso(20)), mine: false },
   ];
   const noop = () => {};
+  // Delete opens the real choice: for me / for both (yours) or for me only (theirs).
+  const [deleting, setDeleting] = useState<{ mine: boolean } | null>(null);
   const live: LiveChatLineMessage[] = [
     { id: 'mm-live-1', userId: others[0], userName: 'Luna', userHandle: 'xluna', content: 'gm chat, who is watching the stream tonight?', timestamp: new Date(Date.now() - 6 * 60_000), type: 'text', reactions: { '👍': [others[1], others[2], me.address], '🚀': [others[1]] } },
     { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
@@ -390,7 +393,7 @@ function MessageMenuGallery() {
               onForward={noop}
               onPin={noop}
               onEdit={noop}
-              onDelete={noop}
+              onDelete={() => setDeleting({ mine })}
               onStartPick={noop}
               onTogglePick={noop}
             />
@@ -415,6 +418,14 @@ function MessageMenuGallery() {
           />
         ))}
       </div>
+      <DeleteMessageDialog
+        open={!!deleting}
+        onOpenChange={(open) => { if (!open) setDeleting(null); }}
+        canDeleteForEveryone={!!deleting?.mine}
+        oneToOne
+        peerName="Ella Verse"
+        onDelete={noop}
+      />
     </section>
   );
 }

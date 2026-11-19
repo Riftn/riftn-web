@@ -57,16 +57,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { AppState } from '@/components/app/AppState';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { EmojiGifPicker } from '../chat/EmojiGifPicker';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
@@ -77,6 +67,7 @@ import { useCommunityChat, type CommunityChatMessage } from '@/hooks/use-communi
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { useCommunityAbilities } from '@/hooks/use-community-admin';
 import type { Community, CommunityMember } from '@/hooks/use-communities';
+import { DeleteMessageDialog, type DeleteScope } from '@/components/app/chat/DeleteMessageDialog';
 import { MemberActionsDialog } from './manage/MemberActionsDialog';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useNavigate } from 'react-router-dom';
@@ -336,6 +327,7 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     discardSend,
     editMessage,
     deleteMessage,
+    hideMessage,
     setPinned,
     addReaction,
     removeReaction,
@@ -772,16 +764,18 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
     }
   }, [setPinned]);
 
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deleteTarget) return;
+  const handleConfirmDelete = useCallback(async (scope: DeleteScope) => {
+    const target = deleteTarget;
+    setDeleteTarget(null);
+    if (!target) return;
     setDeletePending(true);
     try {
-      await deleteMessage(deleteTarget.id);
-      setDeleteTarget(null);
+      if (scope === 'everyone') await deleteMessage(target.id);
+      else await hideMessage(target.id);
     } finally {
       setDeletePending(false);
     }
-  }, [deleteTarget, deleteMessage]);
+  }, [deleteTarget, deleteMessage, hideMessage]);
 
   const sendingRef = useRef(false);
   const handleSend = async () => {
@@ -1188,7 +1182,9 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
                   && !(walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase());
                 const goToProfile = canActHere ? () => void openMemberActions(msg.wallet_address!, openProfile) : openProfile;
                 const isMine = !!walletAddress && msg.wallet_address?.toLowerCase() === walletAddress.toLowerCase();
-                const canDeleteThis = isMine || canDeleteAnyMessage;
+                // Anyone can delete a line for themselves; for everyone needs it
+                // to be yours, or the delete_messages right.
+                const canDeleteThis = !msg.send_state;
                 const isPinned = !!msg.pinned_at;
                 const isHighlighted = highlight?.id === msg.id;
 
@@ -1631,31 +1627,12 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
         </div>
       )}
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}>
-        <AlertDialogContent className="bg-zinc-900 border-white/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">
-              {t('communities.chat.deleteMessageTitle', { defaultValue: 'Delete this message?' })}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
-              {t('communities.chat.deleteMessageBody', { defaultValue: 'This cannot be undone.' })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletePending} className="rounded-xl h-9 px-3">
-              {t('communities.chat.cancel', { defaultValue: 'Cancel' })}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleConfirmDelete(); }}
-              disabled={deletePending}
-              className="rounded-xl h-9 px-3 bg-transparent text-red-400 hover:bg-red-500/15 border border-white/[0.08] gap-1.5"
-            >
-              {deletePending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              {t('communities.chat.delete', { defaultValue: 'Delete' })}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteMessageDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}
+        canDeleteForEveryone={!!deleteTarget && (canDeleteAnyMessage || (!!walletAddress && deleteTarget.wallet_address?.toLowerCase() === walletAddress.toLowerCase()))}
+        onDelete={(scope) => { void handleConfirmDelete(scope); }}
+      />
       <MemberActionsDialog
         community={community}
         membership={membership}

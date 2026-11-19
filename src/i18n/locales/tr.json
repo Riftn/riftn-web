@@ -20806,5 +20806,20 @@
     "members": " üye",
     "placeholder": "Kişi, topluluk, sayfa ara...",
     "title": "Bahset veya bağlantı ver"
+  },
+  "msgDelete": {
+    "title": "Mesaj silinsin mi?",
+    "titleMany": "{{count}} mesaj silinsin mi?",
+    "bodyOwn": "Yalnızca kendi sohbetinden ya da herkes için kaldır.",
+    "bodyOwnMany": "Yalnızca kendi sohbetinden ya da herkes için kaldır.",
+    "bodyOthers": "Yalnızca senin sohbetinden kaldırılacak. Karşı taraf görmeye devam edecek.",
+    "bodyOthersMany": "Yalnızca senin sohbetinden kaldırılacaklar. Sohbetteki diğer kişiler görmeye devam edecek.",
+    "bodyOwnBoth": "Yalnızca kendi sohbetinden ya da ikiniz için kaldır.",
+    "bodyOwnBothMany": "Yalnızca kendi sohbetinden ya da ikiniz için kaldır.",
+    "forMe": "Benim için sil",
+    "forEveryone": "Herkes için sil",
+    "forBoth": "İkimiz için de sil",
+    "forMeAndName": "Benim ve {{name}} için sil",
+    "failed": "Mesaj silinemedi"
   }
 }

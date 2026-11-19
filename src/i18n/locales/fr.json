@@ -20810,5 +20810,20 @@
     "members": " membres",
     "placeholder": "Rechercher personnes, communautés, pages...",
     "title": "Mentionner ou lier"
+  },
+  "msgDelete": {
+    "title": "Supprimer le message ?",
+    "titleMany": "Supprimer {{count}} messages ?",
+    "bodyOwn": "Retirez-le seulement de votre discussion, ou pour tout le monde.",
+    "bodyOwnMany": "Retirez-les seulement de votre discussion, ou pour tout le monde.",
+    "bodyOthers": "Il sera retiré de votre discussion uniquement. L'autre personne le verra toujours.",
+    "bodyOthersMany": "Ils seront retirés de votre discussion uniquement. Les autres membres les verront toujours.",
+    "bodyOwnBoth": "Retirez-le seulement de votre discussion, ou pour vous deux.",
+    "bodyOwnBothMany": "Retirez-les seulement de votre discussion, ou pour vous deux.",
+    "forMe": "Supprimer pour moi",
+    "forEveryone": "Supprimer pour tout le monde",
+    "forBoth": "Supprimer pour nous deux",
+    "forMeAndName": "Supprimer pour moi et {{name}}",
+    "failed": "Impossible de supprimer le message"
   }
 }
