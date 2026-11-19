@@ -324,7 +324,7 @@ export function ProfileSkeleton({ seed }: { seed?: ProfileSkeletonSeed | null } 
       <div className="bg-black/50 backdrop-blur-[24px] border border-white/[0.12] rounded-2xl p-1.5">
         <div className="flex gap-0.5">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-0.5 py-[7px] min-w-[52px]">
+            <div key={i} className="flex-1 flex flex-col items-center justify-center gap-0.5 h-11 min-w-14">
               <Skeleton className={`w-[18px] h-[18px] rounded ${SK}`} />
               <Skeleton className={`w-5 h-[10px] rounded ${SK}`} />
             </div>
