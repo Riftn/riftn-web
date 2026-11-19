@@ -21,9 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Loader2, Clock } from "lucide-react";
 import Lock from "@/components/ui/cut-icons/privacy";
-import Check from "@/components/ui/cut-icons/check";
 import History from "@/components/ui/cut-icons/history";
-import Users from "@/components/ui/cut-icons/communities";
 
 import ChevronRight from "@/components/ui/cut-icons/next";
 import X from "@/components/ui/cut-icons/close";
@@ -33,10 +31,11 @@ import { toast } from 'sonner';
 import { SEOHead } from '@/components/SEOHead';
 import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
 import { BadgeProgress } from '@/components/app/BadgeProgress';
-import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
-import { CleanRow, CleanSection, useCleanPhone } from '@/components/app/clean/CleanKit';
+import { useCleanPhone } from '@/components/app/clean/CleanKit';
+import { SuperPowersOrbit, type OrbitPower } from '@/components/app/superpowers/SuperPowersOrbit';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { badgeImage } from '@/lib/staking-badges';
 import {
   useCancelBoost,
@@ -47,6 +46,10 @@ import { SpendPowerDrawer } from '@/components/app/modals/SpendPowerDrawer';
 import type { SuperPowerInfo } from '@/lib/api/dehub/superpowers';
 import { TeamUpDrawer } from '@/components/app/TeamUpDrawer';
 import { LiveGiftBuyDrawer } from '@/components/app/live/LiveGiftBuyDrawer';
+
+/** Chrome type, the brand's one accent. */
+const CHROME_TEXT =
+  'bg-[linear-gradient(180deg,#fff_0%,#cfd3d8_38%,#7d838b_52%,#e9ecef_70%,#9aa0a7_100%)] bg-clip-text text-transparent';
 
 /** Total slot minutes a tier holds per cycle — the number worth comparing. */
 function cycleMinutes(boosts: number, minutes: number): number {
@@ -88,6 +91,26 @@ export default function SuperPowersPage() {
   const [buyOpen, setBuyOpen] = useState(false);
 
   const clean = useCleanPhone();
+
+  // Team up is public; every other power is held when the account's tier
+  // reaches it. The public ladder has no `unlocked`, so signed out it is all dim.
+  const orbitPowers: OrbitPower[] = powers.map(power => ({
+    power,
+    unlocked: power.key === 'team_up' || !!power.unlocked,
+  }));
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Until a power is tapped, open on the first one this account can spend now,
+  // so the panel under the ring starts on an action rather than a lock.
+  const selected =
+    orbitPowers.find(entry => entry.power.key === selectedKey) ??
+    orbitPowers.find(entry => entry.unlocked && entry.power.available && entry.power.key !== 'team_up') ??
+    orbitPowers[0] ??
+    null;
+
+  const ladderTiers = (ladder?.tiers ?? []).filter(
+    (tier): tier is typeof tier & { name: string } => !!tier.name,
+  );
+  const myTierIndex = ladderTiers.findIndex(tier => tier.name === status?.tier);
   const historyBookings = historyPower
     ? (status?.bookings.filter(booking => booking.power === historyPower.key) ?? [])
     : [];
@@ -122,223 +145,197 @@ export default function SuperPowersPage() {
           </p>
         </header>
 
-        {/* ── Your allowance ─────────────────────────────────────────── */}
-        {loadingStatus ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
-          </div>
-        ) : status?.tier ? (
-          <>
-            <BadgeProgress variant="rail" />
-            {refillsOn && (
-              <p className="text-[12px] text-zinc-500">
-                {t('superpowers.refillsOn', {
-                  date: refillsOn,
-                  defaultValue: `Refills on ${refillsOn} — the same moment for everybody.`,
-                })}
-              </p>
-            )}
-          </>
-        ) : isError ? (
-          // A failed request is not the same as no badge. Telling a Megalodon
-          // to go and stake because the API blipped is worse than saying
-          // nothing — and the ladder below still renders from the public
-          // endpoint, so the page is not empty.
-          <section data-kit-section className="bg-white/5 p-5 flex flex-col gap-3">
-            <p className="text-white text-sm">{t('superpowers.loadFailed')}</p>
-          </section>
-        ) : (
-          // Team up is available without buying tokens or holding a badge.
-          <section data-kit-section={clean ? undefined : true} className={clean ? 'flex flex-col gap-3 px-1 py-2' : 'bg-white/5 p-5 flex flex-col gap-3'}>
-            <p className="text-[12px] text-zinc-400">{t('superpowers.teamUp.openToEveryone')}</p>
-            <BadgeProgress variant="rail" />
-            <Button variant="outline" className="self-start" onClick={() => setBuyOpen(true)}>{t('nav.buyDhb')}</Button>
-          </section>
-        )}
-
-        {clean ? (
-          <CleanSection icon="superpowers" title={t('superpowers.currentPowersHeading', { defaultValue: 'The twelve powers' })} className="-mx-1 border-t border-zinc-800/60">
-            {powers.map((power) => {
-              const isTeamUp = power.key === 'team_up';
-              const unlocked = isTeamUp || !!power.unlocked;
-              const usable = unlocked && power.available;
-              const unlockBadge = badgeImage(power.tier);
-              const allowance =
-                power.key === 'signal_flare' || power.key === 'harpoon'
-                  ? (status?.signalsLeft ?? status?.boostsLeft)
-                  : status?.boostsLeft;
-              return (
-                <CleanRow
-                  key={power.key}
-                  onClick={usable ? () => (isTeamUp ? setTeamUpOpen(true) : setSpending(power)) : undefined}
-                  className={unlocked ? '' : '[&_img[data-power]]:opacity-60'}
-                  lead={<span data-power-lead className={cn('shrink-0', !unlocked && 'opacity-60')}><SuperPowerIcon power={power.key} alt="" className="h-9 w-9 object-contain" /></span>}
-                  title={<span className={unlocked ? '' : 'text-zinc-400'}>{power.label}</span>}
-                  sub={power.summary}
-                  trail={
-                    isTeamUp ? (
-                      <span className="shrink-0 text-[12px] font-semibold text-zinc-300">{_copy("copy.9a4e2cc5cbdc", { defaultValue: "Open to everyone" })}</span>
-                    ) : usable && allowance !== undefined ? (
-                      <span className="shrink-0 text-[13px] font-semibold tabular-nums text-white">{allowance}</span>
-                    ) : !power.available ? (
-                      <span className="shrink-0 text-[12px] text-zinc-500">{t('superpowers.comingSoon')}</span>
-                    ) : unlockBadge ? (
-                      <span className="flex shrink-0 items-center gap-1 text-[12px] text-zinc-500">
-                        <Lock className="h-3 w-3" />
-                        <img src={unlockBadge} alt={power.tier ?? ''} className="h-7 w-7 object-contain" />
-                      </span>
-                    ) : (
-                      <Lock className="h-3.5 w-3.5 shrink-0 text-zinc-600" />
-                    )
-                  }
-                />
-              );
-            })}
-          </CleanSection>
-        ) : (
-        <section data-kit-section className="bg-zinc-900 p-4 flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-            {t('superpowers.currentPowersHeading', { defaultValue: 'The twelve powers' })}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {powers.map((power, index) => {
-              const isTeamUp = power.key === 'team_up';
-              const unlockBadge = badgeImage(power.tier);
-              // Team up itself is public. Opening it while signed out leads
-              // straight to the sign-in action in the drawer.
-              const unlocked = isTeamUp || !!power.unlocked;
-              // Held AND built. A locked card stays inert rather than opening a
-              // picker for something the server would refuse.
-              const usable = unlocked && power.available;
-              const allowance =
-                power.key === 'signal_flare' || power.key === 'harpoon'
-                  ? (status?.signalsLeft ?? status?.boostsLeft)
-                  : status?.boostsLeft;
-              return (
-                <article
-                  key={power.key}
-                  className={cn(
-                    'rounded-xl border overflow-hidden flex flex-col transition-colors',
-                    usable
-                      ? 'border-white/20 bg-white/5'
-                      : 'border-white/10 bg-white/[0.02]',
+        {/* ── The orbit ──────────────────────────────────────────────── */}
+        <section
+          data-kit-section={clean ? undefined : true}
+          className={cn(
+            'flex flex-col gap-5 overflow-hidden',
+            clean ? 'px-1 py-2' : 'bg-zinc-950 p-4 sm:p-6',
+          )}
+        >
+          <SuperPowersOrbit
+            powers={orbitPowers}
+            selectedKey={selected?.power.key ?? null}
+            onSelect={power => setSelectedKey(power.key)}
+            core={
+              loadingStatus ? (
+                <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+              ) : status?.tier ? (
+                <>
+                  {badgeImage(status.tier) && (
+                    <img
+                      src={badgeImage(status.tier) ?? undefined}
+                      alt=""
+                      className="w-[40%] max-w-[120px] object-contain drop-shadow-[0_0_28px_rgba(255,255,255,0.18)]"
+                    />
                   )}
-                >
-                  <button
-                    type="button"
-                    disabled={!usable}
-                    onClick={() => isTeamUp ? setTeamUpOpen(true) : setSpending(power)}
-                    className={cn(
-                      'p-4 pb-3 flex flex-1 flex-col gap-1.5 text-left transition-colors',
-                      usable ? 'hover:bg-white/5 active:bg-white/10' : 'cursor-default',
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <SuperPowerIcon power={power.key} alt="" className="w-8 h-8 shrink-0 object-contain" />
-                      {/* Numbered because this is a fixed, ordered power list. */}
-                      <span className="text-[11px] text-zinc-600 tabular-nums">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <span className={cn('text-sm font-medium flex-1', unlocked ? 'text-white' : 'text-zinc-400')}>
-                        {power.label}
-                      </span>
-                      {isTeamUp && unlocked
-                        ? <Users className="w-3.5 h-3.5 text-white shrink-0" />
-                        : unlocked && power.available && <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />}
-                      {!unlocked && <Lock className="w-3 h-3 text-zinc-600 shrink-0" />}
-                    </div>
-                    <p className="text-[13px] text-zinc-500 leading-snug">{power.summary}</p>
-                    {!isTeamUp && unlockBadge && (
-                      <span className="inline-flex items-center gap-1.5 self-start text-[10px] text-zinc-400">{_copy("copy.9de0a0e9ac06", { defaultValue: "Unlocks at" })}<img
-                          src={unlockBadge}
-                          alt=""
-                          aria-hidden="true"
-                          className="w-6 h-6 shrink-0 object-contain"
-                        />
-                        <span className="text-zinc-300">{power.tier}</span>
-                      </span>
-                    )}
-                  </button>
-                  <div className="min-h-11 border-t border-white/10 px-4 py-2.5 flex items-center justify-between gap-3">
-                    <span
-                      className={cn(
-                        'text-[12px] font-semibold tabular-nums',
-                        usable ? 'text-white' : 'text-zinc-500',
+                  <span className="mt-1 text-base sm:text-2xl font-extrabold text-white leading-tight">{status.tier}</span>
+                  <span className={cn(CHROME_TEXT, 'mt-1 sm:mt-2 text-3xl sm:text-5xl font-extrabold tracking-tight leading-none tabular-nums')}>
+                    {t('superpowers.orbit.boostsLeft', {
+                      count: status.boostsLeft,
+                      defaultValue: status.boostsLeft === 1 ? '{{count}} boost' : '{{count}} boosts',
+                    })}
+                  </span>
+                  <span className="mt-1.5 text-[10px] sm:text-[12px] font-mono text-zinc-500 leading-snug">
+                    {refillsOn
+                      ? t('superpowers.orbit.leftRefills', {
+                          date: refillsOn,
+                          defaultValue: 'left this cycle · refills {{date}}',
+                        })
+                      : t('superpowers.orbit.left', { defaultValue: 'left this cycle' })}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <ThemedIcon icon="superpowers" alt="" className="w-[34%] max-w-[110px] object-contain" />
+                  <span className={cn(CHROME_TEXT, 'mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight leading-none')}>
+                    {t('superpowers.orbit.twelve', { defaultValue: '12 powers' })}
+                  </span>
+                  <span className="mt-1.5 text-[10px] sm:text-[12px] font-mono text-zinc-500 leading-snug">
+                    {t('superpowers.orbit.teamUpOpen', { defaultValue: 'Team up is open to everyone' })}
+                  </span>
+                </>
+              )
+            }
+          />
+
+          {selected && (() => {
+            const { power, unlocked } = selected;
+            const isTeamUp = power.key === 'team_up';
+            const usable = unlocked && power.available;
+            const unlockBadge = badgeImage(power.tier);
+            const allowance =
+              power.key === 'signal_flare' || power.key === 'harpoon'
+                ? (status?.signalsLeft ?? status?.boostsLeft)
+                : status?.boostsLeft;
+            return (
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+                <SuperPowerIcon
+                  power={power.key}
+                  alt=""
+                  className={cn('h-14 w-14 sm:h-16 sm:w-16 shrink-0 object-contain', !unlocked && 'opacity-40 grayscale')}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                    <h2 className={cn('text-lg sm:text-xl font-bold', unlocked ? 'text-white' : 'text-zinc-300')}>{power.label}</h2>
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                      {isTeamUp ? (
+                        _copy("copy.9a4e2cc5cbdc", { defaultValue: "Open to everyone" })
+                      ) : !power.available ? (
+                        t('superpowers.comingSoon')
+                      ) : (
+                        <>
+                          {!unlocked && <Lock className="h-3 w-3" />}
+                          {unlocked
+                            ? t('superpowers.orbit.unlockedAt', { tier: power.tier, defaultValue: 'Unlocked at {{tier}}' })
+                            : t('superpowers.orbit.unlocksAt', { tier: power.tier, defaultValue: 'Unlocks at {{tier}}' })}
+                          {unlockBadge && <img src={unlockBadge} alt="" aria-hidden="true" className="h-5 w-5 object-contain" />}
+                        </>
                       )}
-                    >
-                      {isTeamUp && unlocked
-                        ? _copy("copy.9a4e2cc5cbdc", { defaultValue: "Open to everyone" })
-                        : usable && allowance !== undefined
-                        ? _copy("copy.ff1e56a487ea", { defaultValue: "Remaining uses: {{value1}}", value1: allowance, value2: allowance === 1 ? _copy("copy.a3b142af6e97", { defaultValue: "use" }) : _copy("copy.f480ffb2979d", { defaultValue: "uses" }) })
-                        : !power.available
-                          ? t('superpowers.comingSoon')
-                          : _copy("copy.a424e33d9093", { defaultValue: "Locked" })}
                     </span>
-                    {!isTeamUp && <button
+                  </div>
+                  <p className="mt-1 text-[13px] sm:text-sm text-zinc-400 leading-snug">{power.summary}</p>
+                  {!isTeamUp && usable && allowance !== undefined && (
+                    <p className="mt-1.5 font-mono text-[11px] text-zinc-500 tabular-nums">
+                      {_copy("copy.ff1e56a487ea", { defaultValue: "Remaining uses: {{value1}}", value1: allowance, value2: allowance === 1 ? _copy("copy.a3b142af6e97", { defaultValue: "use" }) : _copy("copy.f480ffb2979d", { defaultValue: "uses" }) })}
+                    </p>
+                  )}
+                </div>
+                <div className="flex w-full sm:w-auto shrink-0 items-center gap-2">
+                  {!isTeamUp && status?.tier && (
+                    <button
                       type="button"
                       onClick={() => {
                         setHistoryPower(power);
                         void refetchStatus();
                       }}
-                      disabled={!status?.tier}
-                      className="group inline-flex items-center gap-1 text-[12px] text-zinc-400 hover:text-white active:text-white transition-colors disabled:opacity-35 disabled:pointer-events-none"
+                      className="group inline-flex h-11 flex-1 sm:flex-none items-center justify-center gap-1 rounded-full border border-white/15 px-4 text-[13px] font-semibold text-zinc-300 hover:text-white hover:border-white/30 transition-colors"
                     >{_copy("copy.504282c0611d", { defaultValue: "Past usage" })}<ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </button>}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                    </button>
+                  )}
+                  {isTeamUp ? (
+                    <button
+                      type="button"
+                      onClick={() => setTeamUpOpen(true)}
+                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full bg-white px-6 text-sm font-extrabold text-black hover:bg-zinc-200 transition-colors"
+                    >
+                      {t('superpowers.orbit.openTeamUp', { defaultValue: 'Open Team up' })}
+                    </button>
+                  ) : usable ? (
+                    <button
+                      type="button"
+                      onClick={() => setSpending(power)}
+                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full bg-white px-6 text-sm font-extrabold text-black hover:bg-zinc-200 transition-colors"
+                    >
+                      {t('superpowers.orbit.use', { defaultValue: 'Use' })}
+                    </button>
+                  ) : !status?.tier && !loadingStatus && !isError ? (
+                    <button
+                      type="button"
+                      onClick={() => setBuyOpen(true)}
+                      className="inline-flex h-11 flex-1 sm:flex-none items-center justify-center rounded-full border border-white/20 px-6 text-sm font-semibold text-white hover:border-white/40 transition-colors"
+                    >
+                      {t('nav.buyDhb')}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })()}
+
+          {isError && !status ? (
+            // A failed request is not the same as no badge. Telling a Megalodon
+            // to go and stake because the API blipped is worse than saying
+            // nothing, and the ring still renders from the public ladder.
+            <p className="text-white text-sm">{t('superpowers.loadFailed')}</p>
+          ) : !loadingStatus ? (
+            <BadgeProgress variant="rail" />
+          ) : null}
         </section>
-        )}
 
         {/* ── The ladder ─────────────────────────────────────────────── */}
-        <section data-kit-section className="bg-zinc-900 p-4 flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
-            {t('superpowers.ladderHeading')}
-          </h2>
+        <section data-kit-section={clean ? undefined : true} className={cn('flex flex-col gap-3', clean ? 'px-1 py-2' : 'bg-zinc-950 p-4 sm:p-6')}>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+              {t('superpowers.ladderHeading')}
+            </h2>
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+              {t('superpowers.orbit.perCycle', { defaultValue: 'Boost time per cycle' })}
+            </span>
+          </div>
 
           {loadingLadder ? (
             <div className="flex justify-center py-6">
               <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-white/10">
-              <table className="w-full text-sm min-w-[520px]">
-                <thead>
-                  <tr className="text-[10px] uppercase tracking-wider text-zinc-500">
-                    <th className="text-left font-medium px-4 py-3">{t('superpowers.colTier')}</th>
-                    <th className="text-right font-medium px-3 py-3">{t('superpowers.colBoosts')}</th>
-                    <th className="text-right font-medium px-3 py-3">{t('superpowers.colEach')}</th>
-                    <th className="text-right font-medium px-4 py-3">{t('superpowers.colTotal')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(ladder?.tiers ?? [])
-                    .filter(tier => tier.name)
-                    .map(tier => {
-                      const isMine = status?.tier === tier.name;
-                      return (
-                        <tr
-                          key={tier.name}
-                          className={cn(
-                            'border-t border-white/5',
-                            isMine ? 'bg-white/10 text-white' : 'text-zinc-400',
-                          )}
-                        >
-                          <td className="px-4 py-2.5 whitespace-nowrap">
-                            <span className={cn(isMine && 'font-medium')}>{tier.name}</span>
-                          </td>
-                          <td className="px-3 py-2.5 text-right tabular-nums">{tier.boostsPerCycle}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums">{tier.minutesPerBoost}m</td>
-                          <td className="px-4 py-2.5 text-right tabular-nums">
-                            {formatMinutes(cycleMinutes(tier.boostsPerCycle, tier.minutesPerBoost))}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+              {ladderTiers.map((tier, index) => {
+                const isMine = index === myTierIndex;
+                const above = myTierIndex >= 0 && index > myTierIndex;
+                const badge = badgeImage(tier.name);
+                return (
+                  <div
+                    key={tier.name}
+                    title={`${tier.name}: ${tier.boostsPerCycle} × ${tier.minutesPerBoost}m`}
+                    className={cn(
+                      'flex min-w-[76px] flex-1 flex-col items-center gap-1 rounded-xl border px-1.5 py-2.5 text-center',
+                      isMine ? 'border-white bg-white/[0.06] text-white' : 'border-white/10 text-zinc-400',
+                    )}
+                  >
+                    {badge && (
+                      <img src={badge} alt="" aria-hidden="true" className={cn('h-8 w-8 object-contain', above && 'grayscale brightness-50')} />
+                    )}
+                    <span className="w-full truncate text-[10px] font-semibold">{tier.name}</span>
+                    <span className="font-mono text-[11px] tabular-nums">
+                      {formatMinutes(cycleMinutes(tier.boostsPerCycle, tier.minutesPerBoost))}
+                    </span>
+                    <span className="font-mono text-[9px] text-zinc-600 tabular-nums">
+                      {tier.boostsPerCycle} × {tier.minutesPerBoost}m
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
 
