@@ -10,8 +10,9 @@ import type { ChatTabView } from '@/hooks/use-chat-tabs';
 
 /*
  * Tabs above the chat list on riftn.com/chat: All, Direct, Communities,
- * Requests, then the tabs a person makes. + makes a tab, the sliders button
- * reorders or hides them. Right-click a tab (hold it on a phone) for its menu.
+ * Requests, then the tabs a person makes. Right-click the empty part of the
+ * bar (hold it on a phone) to make a tab or edit tabs; the sliders button
+ * reorders or hides them. Right-click a tab for its own menu.
  */
 
 const ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
@@ -52,6 +53,8 @@ export function ChatTabBar(p: ChatTabBarProps) {
   }, [p.active, p.tabs.length]);
 
   return (
+    <Ctx.ContextMenu>
+    <Ctx.ContextMenuTrigger asChild>
     <div
       ref={scroller}
       role="tablist"
@@ -143,16 +146,6 @@ export function ChatTabBar(p: ChatTabBarProps) {
       })}
       <button
         type="button"
-        data-chat-tab-new
-        onClick={p.onNew}
-        aria-label={t('chatTabs.new', 'New tab')}
-        title={t('chatTabs.new', 'New tab')}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-zinc-400 hover:bg-white/10 hover:text-white"
-      >
-        <Plus className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
         data-chat-tab-manage
         onClick={p.onManage}
         aria-label={t('chatTabs.edit', 'Edit tabs')}
@@ -161,7 +154,19 @@ export function ChatTabBar(p: ChatTabBarProps) {
       >
         <SlidersHorizontal className="h-4 w-4" />
       </button>
+      {/* Fills the rest of the row so there's room to right-click. */}
+      <div aria-hidden className="h-8 min-w-6 flex-1" />
     </div>
+    </Ctx.ContextMenuTrigger>
+    <Ctx.ContextMenuContent data-chat-tabs-menu className={CHAT_MENU_CONTENT}>
+      <Ctx.ContextMenuItem className={ROW} onSelect={p.onNew}>
+        <Plus />{t('chatTabs.new', 'New tab')}
+      </Ctx.ContextMenuItem>
+      <Ctx.ContextMenuItem className={ROW} onSelect={p.onManage}>
+        <SlidersHorizontal />{t('chatTabs.edit', 'Edit tabs')}
+      </Ctx.ContextMenuItem>
+    </Ctx.ContextMenuContent>
+    </Ctx.ContextMenu>
   );
 }
 
