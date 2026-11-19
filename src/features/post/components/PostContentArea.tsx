@@ -746,35 +746,6 @@ export function PostContentArea({
             )}
           </AnimatePresence>
 
-          {/* Bottom row: destinations + character count */}
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <div className={cn(
-              "flex items-center gap-1.5 flex-wrap transition-opacity duration-200",
-              canPost ? "opacity-100" : "opacity-0"
-            )}>
-              <span className="text-xs text-zinc-500">{_copy("copy.76d6aad1a2a0", { defaultValue: "In:" })}</span>
-              {destinations.map(dest => (
-                <span
-                  key={dest}
-                  className="text-xs px-1.5 py-0.5 rounded-lg bg-white/10 text-zinc-300"
-                >
-                  {dest}
-                </span>
-              ))}
-              {onOpenCategories && (
-                <button
-                  type="button"
-                  onClick={onOpenCategories}
-                  className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                >
-                  <Hash className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-            <span className={cn("text-xs ml-auto", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
-              {charCount.toLocaleString('en-US')}/{maxChars.toLocaleString('en-US')}
-            </span>
-          </div>
         </div>
 
         {/* Poll editor */}
@@ -785,6 +756,37 @@ export function PostContentArea({
             onRemove={() => onPollChange(null)}
           />
         )}
+      </div>
+
+      {/* Destinations + character count sit under the scrolling editor, not
+          inside it, so the count stays in view however long the post gets. */}
+      <div className="flex shrink-0 items-center justify-between gap-2 px-4 pb-1 pt-1.5">
+        <div className={cn(
+          "flex items-center gap-1.5 flex-wrap transition-opacity duration-200",
+          canPost ? "opacity-100" : "opacity-0"
+        )}>
+          <span className="text-xs text-zinc-500">{_copy("copy.76d6aad1a2a0", { defaultValue: "In:" })}</span>
+          {destinations.map(dest => (
+            <span
+              key={dest}
+              className="text-xs px-1.5 py-0.5 rounded-lg bg-white/10 text-zinc-300"
+            >
+              {dest}
+            </span>
+          ))}
+          {onOpenCategories && (
+            <button
+              type="button"
+              onClick={onOpenCategories}
+              className="text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              <Hash className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <span className={cn("text-xs ml-auto", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
+          {charCount.toLocaleString('en-US')}/{maxChars.toLocaleString('en-US')}
+        </span>
       </div>
 
       {/* Schedule Sheet */}
