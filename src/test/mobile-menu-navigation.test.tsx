@@ -77,6 +77,18 @@ describe('mobile menu dismissal', () => {
     expect(screen.queryByText('nav.profile')).toBeNull();
   });
 
+  it('moves to the next group with a sideways swipe on the tiles', () => {
+    localStorage.removeItem('menu-layout');
+    mount();
+    const pager = document.querySelector('[data-menu-pager]')!;
+    const at = (x: number) => ({ touches: [{ clientX: x, clientY: 300 }], changedTouches: [{ clientX: x, clientY: 300 }] });
+    fireEvent.touchStart(pager, at(300));
+    fireEvent.touchMove(pager, at(260));
+    fireEvent.touchMove(pager, at(120));
+    fireEvent.touchEnd(pager, at(120));
+    expect(screen.getByRole('tab', { name: 'nav.groups.create' }).getAttribute('aria-selected')).toBe('true');
+  });
+
   it('turns the tab row into the search field and back', () => {
     localStorage.removeItem('menu-layout');
     mount();

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -44,8 +44,6 @@ export function MobileMenuLayout({
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const [openFolder, setOpenFolder] = useState<string | null>(null);
-  const swipeRef = useRef<{ x: number; y: number; dir: number } | null>(null);
-  const lastDirRef = useRef(0);
   const kidsMode = useKidsModeLock();
   // An opened folder lands under the folders, often below the fold.
   const openPanelRef = useRef<HTMLDivElement>(null);
@@ -132,45 +130,121 @@ export function MobileMenuLayout({
     );
   }
 
-  // Tabs.
-  const index = Math.min(activeTab, groups.length - 1);
-  const group = groups[index];
-  const go = (next: number) => {
-    if (next < 0 || next >= groups.length || next === index) return;
-    lastDirRef.current = next > index ? 1 : -1;
-    onTabChange(next);
-  };
+  // Tabs: the groups sit side by side; a sideways drag moves the row under
+  // the finger and the lit tab's glass slides with it.
   return (
-    <div
-      data-menu-layout="tabs"
-      onTouchStart={(e) => {
-        const touch = e.touches[0];
-        swipeRef.current = touch ? { x: touch.clientX, y: touch.clientY, dir: 0 } : null;
-      }}
-      onTouchEnd={(e) => {
-        const start = swipeRef.current;
-        swipeRef.current = null;
-        const touch = e.changedTouches[0];
-        if (!start || !touch) return;
-        // A held tile is being dragged (use-drag-reorder): leave it alone.
-        if ((e.currentTarget as HTMLElement).querySelector('[data-menu-reorder="dragging"]')) return;
-        const dx = touch.clientX - start.x;
-        const dy = touch.clientY - start.y;
-        if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-        go(index + (dx < 0 ? 1 : -1));
-      }}
-    >
-      <motion.div
-        key={group.id}
-        // Every tab as tall as the longest, so the sheet does not jump in
-        // height as you move between them.
-        style={{ minHeight: tabsMinHeight(groups) }}
-        initial={reduceMotion || !lastDirRef.current ? false : { opacity: 0, x: lastDirRef.current * 28 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      >
+    <TabsPager
+      groups={groups}
+      activeTab={activeTab}
+      onTabChange={onTabChange}
+      reduceMotion={!!reduceMotion}
+      renderPage={(group) => (
         <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} />
-      </motion.div>
+      )}
+    />
+  );
+}
+
+/** Live tab position while a finger drags the pages; `settle` when it lets go. */
+type TabDragListener = (pos: number, settle: boolean) => void;
+const tabDragListeners = new Set<TabDragListener>();
+const emitTabDrag = (pos: number, settle = false) => tabDragListeners.forEach((fn) => fn(pos, settle));
+
+function TabsPager({ groups, activeTab, onTabChange, reduceMotion, renderPage }: {
+  groups: MenuGroup[];
+  activeTab: number;
+  onTabChange: (index: number) => void;
+  reduceMotion: boolean;
+  renderPage: (group: MenuGroup) => ReactNode;
+}) {
+  const index = Math.min(activeTab, groups.length - 1);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const touch = useRef<{ x: number; y: number; t: number; lastX: number; axis: 'x' | 'y' | null; width: number } | null>(null);
+  const last = groups.length - 1;
+
+  const place = (pos: number, animate: boolean) => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    strip.style.transition = animate && !reduceMotion ? 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)' : 'none';
+    strip.style.transform = `translate3d(${-pos * 100}%, 0, 0)`;
+  };
+  // A tap on a tab word (or the end of a drag) settles on the new page.
+  useLayoutEffect(() => {
+    place(index, !!stripRef.current?.style.transform);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (!t || e.touches.length > 1) { touch.current = null; return; }
+    touch.current = { x: t.clientX, y: t.clientY, t: e.timeStamp, lastX: t.clientX, axis: null, width: viewportRef.current?.offsetWidth || 1 };
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const start = touch.current;
+    const t = e.touches[0];
+    if (!start || !t) return;
+    // A held tile is being dragged (use-drag-reorder): leave it alone.
+    if (viewportRef.current?.querySelector('[data-reorder-dragging="true"]')) { touch.current = null; return; }
+    start.lastX = t.clientX;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (!start.axis) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      start.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    if (start.axis !== 'x') return;
+    let pos = index - dx / start.width;
+    // Past the first or last group the row only gives a little.
+    if (pos < 0) pos /= 3;
+    else if (pos > last) pos = last + (pos - last) / 3;
+    place(pos, false);
+    emitTabDrag(pos);
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touch.current;
+    touch.current = null;
+    if (!start || start.axis !== 'x') return;
+    // Where the finger last was: some browsers report the lift at the start point.
+    const dx = start.lastX - start.x;
+    const speed = dx / Math.max(1, e.timeStamp - start.t);
+    let next = index;
+    if (Math.abs(speed) > 0.35 && Math.abs(dx) > 20) next = index + (dx < 0 ? 1 : -1);
+    else if (Math.abs(dx) > start.width * 0.3) next = index + (dx < 0 ? 1 : -1);
+    next = Math.max(0, Math.min(last, next));
+    emitTabDrag(next, true);
+    if (next === index) place(index, true);
+    else onTabChange(next);
+  };
+
+  return (
+    <div data-menu-layout="tabs">
+      <div
+        ref={viewportRef}
+        data-menu-pager
+        className="-mx-1 overflow-hidden px-1 [touch-action:pan-y]"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+      >
+        <div ref={stripRef} className="flex will-change-transform" style={{ minHeight: tabsMinHeight(groups) }}>
+          {groups.map((group, i) => {
+            const near = Math.abs(i - index) <= 1;
+            return (
+              <div
+                key={group.id}
+                data-menu-page={group.id}
+                aria-hidden={i !== index}
+                {...(i !== index ? { inert: '' } : {})}
+                className="w-full shrink-0 px-1"
+              >
+                {near && renderPage(group)}
+              </div>
+            );
+          })}
+        </div>
+      </div>
       <div className="mt-3.5 flex justify-center gap-1.5" aria-hidden>
         {groups.map((g, i) => (
           <span key={g.id} className={cn('h-1.5 rounded-full bg-zinc-400 transition-all', i === index ? 'w-[18px] opacity-90' : 'w-1.5 opacity-35')} />
@@ -206,6 +280,37 @@ export function MenuTabs({ groups, activeTab, onTabChange, className }: MenuTabs
   const [glide, setGlide] = useState(false);
   const index = Math.min(activeTab, groups.length - 1);
 
+  // While a finger drags the pages, the glass sits between the two words.
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const follow: TabDragListener = (pos, settle) => {
+      const el = indicatorRef.current;
+      if (!el) return;
+      if (settle) {
+        // Onto the word the pages settle on, gliding from where the finger left it.
+        el.style.transition = 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), width 0.32s cubic-bezier(0.16, 1, 0.3, 1)';
+        const button = buttonRefs.current[pos];
+        if (button) {
+          el.style.transform = `translate(${button.offsetLeft}px, ${button.offsetTop}px)`;
+          el.style.width = `${button.offsetWidth}px`;
+        }
+        return;
+      }
+      const last = groups.length - 1;
+      const p = Math.max(0, Math.min(last, pos));
+      const i = Math.floor(p);
+      const a = buttonRefs.current[i];
+      const b = buttonRefs.current[Math.min(last, i + 1)] ?? a;
+      if (!a || !b) return;
+      const f = p - i;
+      el.style.transition = 'none';
+      el.style.transform = `translate(${a.offsetLeft + (b.offsetLeft - a.offsetLeft) * f}px, ${a.offsetTop}px)`;
+      el.style.width = `${a.offsetWidth + (b.offsetWidth - a.offsetWidth) * f}px`;
+    };
+    tabDragListeners.add(follow);
+    return () => { tabDragListeners.delete(follow); };
+  }, [groups.length]);
+
   useLayoutEffect(() => {
     const measure = () => {
       const button = buttonRefs.current[index];
@@ -230,7 +335,7 @@ export function MenuTabs({ groups, activeTab, onTabChange, className }: MenuTabs
       data-search-surface
       className={cn('relative flex min-w-0 flex-1 items-stretch rounded-xl border border-white/10 bg-white/5 p-[3px]', className)}
     >
-      <GlassIndicator rect={rect} borderRadius="9px" enableTransition={glide} />
+      <GlassIndicator ref={indicatorRef} rect={rect} borderRadius="9px" enableTransition={glide} />
       {groups.map((group, i) => (
         <button
           key={group.id}
