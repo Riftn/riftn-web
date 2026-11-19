@@ -13,6 +13,7 @@ import Reply from "@/components/ui/cut-icons/reply";
 import Send from "@/components/ui/cut-icons/send";
 import Mic from "@/components/ui/cut-icons/mic";
 import Attach from "@/components/ui/cut-icons/attach";
+import OpenExternally from "@/components/ui/cut-icons/open-externally";
 import X from "@/components/ui/cut-icons/close";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -819,6 +820,17 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
               <div className="mr-auto flex items-center gap-1.5">
                 <LiveChatOnlineCount count={onlineCount} />
                 <ChatTextSizeButton />
+                {/* Pop the global chat out into its own window, beside the feed. */}
+                <button
+                  type="button"
+                  data-chat-popout
+                  aria-label={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
+                  title={_copy('chatMenu.openWindow', { defaultValue: 'Open in new window' })}
+                  onClick={() => { window.open('/chat?chat=public', 'riftn-global-chat', 'popup,width=520,height=780'); }}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/60 hover:text-white"
+                >
+                  <OpenExternally className="h-4 w-4" />
+                </button>
               </div>
             )}
             <Button type="button" data-chat-composer-action variant="ghost" size="icon" disabled={uploadingImage || isSending} aria-label={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} title={_copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })} onClick={() => {

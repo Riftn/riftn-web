@@ -10,7 +10,7 @@ import { parseDefaultProfileTab } from '@/components/app/profile/ProfileConstant
 import { getAiScrapingPreference, mergeAiScrapingPreference, type AiScrapingPreference } from '@/lib/ai-scraping';
 import { getShowOnline, mergeShowOnline } from '@/lib/online-presence';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
-import { PROFILE_VIEW_DEFAULT_KEY, clearProfileViewFlip, parseProfileViewDefault, type ProfileViewMode } from '@/lib/profile-view-mode';
+import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, clearProfileViewFlip, parseProfileViewDefault, parseProfileViewReaderPref, type ProfileViewMode, type ProfileViewReaderPref } from '@/lib/profile-view-mode';
 
 /**
  * Follow visibility modes stored in Riftn API customs.followVisibility:
@@ -108,6 +108,7 @@ export function usePrivacySettings() {
       default_post_visibility?: 'public' | 'private';
       default_profile_tab?: string;
       default_profile_view?: ProfileViewMode;
+      reader_profile_view?: ProfileViewReaderPref;
       is_private?: boolean;
       hide_badge_and_balance?: boolean;
       ai_scraping?: AiScrapingPreference;
@@ -184,6 +185,7 @@ export function usePrivacySettings() {
         // The owner's own toggle flip on their profile would hide the new default.
         clearProfileViewFlip(walletAddress);
       }
+      if (updates.reader_profile_view !== undefined) customsUpdates[PROFILE_VIEW_READER_KEY] = updates.reader_profile_view;
       if (updates.show_dislikes !== undefined) {
         customsUpdates[DISLIKES_VISIBILITY_KEY] = updates.show_dislikes ? 'public' : 'private';
       }
@@ -227,6 +229,7 @@ export function usePrivacySettings() {
     default_post_visibility?: 'public' | 'private';
     default_profile_tab?: string;
     default_profile_view?: ProfileViewMode;
+    reader_profile_view?: ProfileViewReaderPref;
     is_private?: boolean;
     hide_badge_and_balance?: boolean;
     ai_scraping?: AiScrapingPreference;
@@ -256,6 +259,7 @@ export function usePrivacySettings() {
     defaultPostVisibility: (customs?.defaultPostVisibility as 'public' | 'private') ?? 'public',
     defaultProfileTab: parseDefaultProfileTab(customs?.defaultProfileTab),
     defaultProfileView: parseProfileViewDefault(customs?.[PROFILE_VIEW_DEFAULT_KEY]),
+    readerProfileView: parseProfileViewReaderPref(customs?.[PROFILE_VIEW_READER_KEY]),
     updateSettings,
     isUpdating: updateMutation.isPending,
   };

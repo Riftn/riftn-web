@@ -2696,7 +2696,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
   const { isCollapsed, setCollapsed } = useSidebarCollapse();
   const { ref: themePickerFadeRef, style: themePickerFadeStyle } = useScrollFadeMask<HTMLDivElement>();
   const [feedLayout, setFeedLayout] = useState('comfortable');
-  const { defaultProfileTab, defaultProfileView, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  const { defaultProfileTab, defaultProfileView, readerProfileView, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -2821,6 +2821,23 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
               disabled={isUpdating || isLoading}
               title={t('settings.defaultProfileView', 'Profile posts layout')}
               options={[
+                { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
+                { value: 'list', label: t('profile.viewList', 'List view') },
+              ]}
+            />}
+          />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="reader-profile-view"
+            title={t('settings.readerProfileView', 'Open other profiles as')}
+            description={t('settings.readerProfileViewDesc', 'Pick grid or list for every profile you open, or keep each person\'s own choice')}
+            action={<SettingDrawerSelect
+              value={readerProfileView}
+              onValueChange={(value) => updateSettings({ reader_profile_view: value === 'grid' || value === 'list' ? value : 'owner' })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.readerProfileView', 'Open other profiles as')}
+              options={[
+                { value: 'owner', label: t('settings.readerProfileViewOwner', 'Each person\'s choice') },
                 { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
                 { value: 'list', label: t('profile.viewList', 'List view') },
               ]}

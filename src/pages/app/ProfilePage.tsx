@@ -69,7 +69,8 @@ import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/p
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
 import { updateProfile, setPostBackground } from '@/lib/api/dehub';
-import { PROFILE_VIEW_DEFAULT_KEY, ProfileViewModeContext, parseProfileViewDefault, useProfileViewState } from '@/lib/profile-view-mode';
+import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, ProfileViewModeContext, parseProfileViewDefault, parseProfileViewReaderPref, startingProfileView, useProfileViewState } from '@/lib/profile-view-mode';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { checkUsernameAvailability } from '@/lib/api/dehub/auth';
 
@@ -312,9 +313,19 @@ export default function ProfilePage() {
 
   // Grid or list on the All tab: the owner's saved default, unless this
   // visitor flipped the toggle on this profile during this browser tab.
+  // The reader can also pick grid or list for every profile they open
+  // (their own customs.profileViewOthers); "owner" keeps each owner's pick.
+  const { data: readerProfile } = useDeHubProfile({
+    userId: data.currentWalletAddress || undefined,
+    enabled: !!data.currentWalletAddress && data.isAuthenticated,
+  });
   const profileView = useProfileViewState(
     profileKey,
-    parseProfileViewDefault((data.apiProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_DEFAULT_KEY]),
+    startingProfileView(
+      parseProfileViewDefault((data.apiProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_DEFAULT_KEY]),
+      parseProfileViewReaderPref((readerProfile?.customs as Record<string, unknown> | undefined)?.[PROFILE_VIEW_READER_KEY]),
+      !!data.isViewingOwnProfile,
+    ),
   );
 
   // Text-post backdrop the owner picked (customs.postBg). A save shows at once
