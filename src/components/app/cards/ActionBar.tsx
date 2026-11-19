@@ -94,6 +94,7 @@ import {
 import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
 const RepostShareSheet = lazy(() => import('@/components/app/post-stage/RepostShareSheet').then(m => ({ default: m.RepostShareSheet })));
 import { viewerShareUrl } from '@/lib/share-url';
+import { POST_MENU_EVENT, type PostMenuBridgeDetail } from '@/lib/post-menu';
 
 interface ActionBarProps {
   /** Post ID for info navigation and voting */
@@ -927,6 +928,36 @@ export function ActionBar({
     if (!isAuthenticated) { openLoginModal(); return; }
     setDmShareOpen(true);
   };
+
+  // The post's right-click menu (lib/post-menu) does its react, repost and
+  // send-in-a-message through this bar, so the counts here move with it.
+  // The first bar for the post takes it; a second copy of the same post's bar
+  // (the fullscreen viewer's) sets enableDoubleTapLike off and stays out.
+  const menuBridge = useRef({ handleRepost, handleUndoRepost, handleSendInDm, isReposted, myReaction, reactionsEnabled: false, canRepost: false, canSendInDm: false });
+  menuBridge.current = { handleRepost, handleUndoRepost, handleSendInDm, isReposted, myReaction, reactionsEnabled: reactionsEnabledRef.current, canRepost: !!onRepost, canSendInDm };
+  useEffect(() => {
+    if (!postId || !enableDoubleTapLike) return;
+    const listener = (e: Event) => {
+      const detail = (e as CustomEvent<PostMenuBridgeDetail>).detail;
+      if (!detail || detail.handled || String(detail.postId) !== String(postId)) return;
+      const bar = menuBridge.current;
+      if (detail.action === 'state') {
+        detail.handled = true;
+        detail.state = { myReaction: bar.myReaction, isReposted: bar.isReposted, reactionsEnabled: bar.reactionsEnabled };
+      } else if (detail.action === 'react' && detail.reaction && bar.reactionsEnabled) {
+        detail.handled = true;
+        handleReactionRef.current(detail.reaction);
+      } else if (detail.action === 'repost' && bar.canRepost) {
+        detail.handled = true;
+        if (bar.isReposted) bar.handleUndoRepost(); else bar.handleRepost();
+      } else if (detail.action === 'dm' && bar.canSendInDm) {
+        detail.handled = true;
+        bar.handleSendInDm();
+      }
+    };
+    window.addEventListener(POST_MENU_EVENT, listener as EventListener);
+    return () => window.removeEventListener(POST_MENU_EVENT, listener as EventListener);
+  }, [postId, enableDoubleTapLike]);
 
   const ShareOptions = () => (
     <>

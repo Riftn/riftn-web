@@ -15,7 +15,7 @@
  * @module components/app/profile/ProfileMixedGrid
  */
 
-import { memo, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { warmPostPage } from '@/lib/preload-post-page';
 import { cdnImage, deviceWidth } from '@/lib/media-url';
@@ -38,6 +38,8 @@ import { articleReadMinutes } from '@/lib/article-tile';
 import { GridCardFace, GridPollProbe } from './GridCardTile';
 import { FormatMark } from './FormatMark';
 import { mediaCardOf, textCardOf, wordsWithoutLinks, type GridCardKind } from '@/lib/grid-card';
+import { postTileMenuProps, type PostMenuTarget } from '@/lib/post-menu';
+import { imagePostMenuTarget, textPostMenuTarget, videoMenuTarget } from '@/lib/post-menu-targets';
 import './profile-mixed-grid.css';
 
 /** One cell's worth of content. Optimistic posts arrive in the same shape. */
@@ -97,6 +99,13 @@ function tileImage(url: string | undefined): string | undefined {
   return cdnImage(url, { width: deviceWidth(Math.ceil(Math.min(window.innerWidth, 720) / 3) * 1.4) });
 }
 
+function menuTargetOf(entry: MixedGridEntry): PostMenuTarget | null {
+  if (entry.type === 'post') return textPostMenuTarget(entry.data as TextPost);
+  if (entry.type === 'image') return imagePostMenuTarget(entry.data as ImagePost);
+  if (entry.type === 'video') return videoMenuTarget(entry.data as VideoItem);
+  return null;
+}
+
 /** Strip markdown-ish noise so a poster tile shows words, not syntax. */
 function plainText(text: string | undefined): string {
   return (text || '')
@@ -143,7 +152,20 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
     return reorder.order.map((key) => byKey.get(key)).filter((entry): entry is MixedGridEntry => !!entry);
   }, [entries, reorder.order]);
   /** Spread on a tile so it can slide; `grip` goes inside the ones that move. */
-  const tileProps = (entry: MixedGridEntry) => (onMove ? { ...reorder.itemProps(entry.key), 'data-grip': movable(entry) ? '' : undefined } : {});
+  const tileProps = (entry: MixedGridEntry) => {
+    // Right-click (and on a phone, a hold on someone else's tile) opens the
+    // post's menu. The owner's tiles keep their hold for the background
+    // picker and the grip.
+    const menu: Partial<ReturnType<typeof postTileMenuProps>> = entry.type === 'proposal' || entry.isOptimistic ? {} : postTileMenuProps(() => menuTargetOf(entry), { touch: !onMove });
+    if (!onMove) return menu;
+    const item = reorder.itemProps(entry.key);
+    return {
+      ...menu,
+      ...item,
+      onContextMenu: (event: ReactMouseEvent) => { item.onContextMenu(event); menu.onContextMenu?.(event); },
+      'data-grip': movable(entry) ? '' : undefined,
+    };
+  };
   const grip = (entry: MixedGridEntry) => (movable(entry) ? (
     <span className="pmg-grip" role="button" aria-label={t('profile.arrange.drag', 'Drag to move')} title={t('profile.arrange.drag', 'Drag to move')} {...reorder.handleProps(entry.key)}>
       <span className="pmg-grip-chip" aria-hidden><i /><i /><i /><i /><i /><i /></span>
