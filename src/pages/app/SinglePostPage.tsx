@@ -19,6 +19,7 @@ import { QuietPostLoading } from '@/components/app/QuietPostLoading';
 import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getVoteCache } from '@/lib/vote-cache';
 import { scrollDocumentTo } from '@/lib/document-scroll';
+import { markBody } from '@/lib/body-mark';
 import { cn } from '@/lib/utils';
 import {
   resolveLikeCount,
@@ -1249,11 +1250,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   }, [feedLookPhone]);
   const isImmersiveImage = !detailsOnly && isImagePost && isMobileView && !feedLookPhone;
   useEffect(() => {
-    const cls = isFullBleedLive ? 'immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'immersive-video-mode' : null;
-    if (cls) document.body.classList.add(cls);
+    const mark = isFullBleedLive ? 'data-immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'data-immersive-video-mode' : null;
+    if (mark) markBody(mark, true);
     return () => {
-      document.body.classList.remove('immersive-video-mode');
-      document.body.classList.remove('immersive-live-mode');
+      markBody('data-immersive-video-mode', false);
+      markBody('data-immersive-live-mode', false);
     };
   }, [isFullBleedLive, isVideoPost, isImmersiveImage, feedLookPhone]);
 
@@ -1261,8 +1262,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   // and feed settings. Desktop keeps the nav pill's back like every other post.
   const hasMediaBack = isMobileView && isVideoPost && !isAudioPost && !!post && post.status !== 'pending' && !feedLookPhone;
   useEffect(() => {
-    if (hasMediaBack) document.body.classList.add('post-media-back');
-    return () => document.body.classList.remove('post-media-back');
+    if (hasMediaBack) markBody('data-post-media-back', true);
+    return () => markBody('data-post-media-back', false);
   }, [hasMediaBack]);
 
 

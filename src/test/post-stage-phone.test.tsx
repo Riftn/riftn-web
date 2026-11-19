@@ -38,7 +38,7 @@ vi.mock('@/components/app/cards/PostUtilityButtons', () => ({
 import { ActionBar } from '@/components/app/cards/ActionBar';
 import { clearCommentCounts } from '@/lib/comment-count-store';
 import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
-import { PostStagePhone, POST_STAGE_BODY_CLASS } from '@/components/app/post-stage/PostStagePhone';
+import { PostStagePhone, POST_STAGE_BODY_MARK } from '@/components/app/post-stage/PostStagePhone';
 
 function wrap(children: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -151,13 +151,13 @@ describe('the stage page shell', () => {
         <div data-media-full />
       </PostStagePhone>,
     ));
-    expect(document.body.classList.contains(POST_STAGE_BODY_CLASS)).toBe(true);
+    expect(document.body.hasAttribute(POST_STAGE_BODY_MARK)).toBe(true);
     // The mini player is portalled to <body> and starts hidden.
     const mini = document.body.querySelector(':scope > [data-stage-mini]');
     expect(mini).not.toBeNull();
     expect(mini).not.toHaveAttribute('data-visible');
     act(() => unmount());
-    expect(document.body.classList.contains(POST_STAGE_BODY_CLASS)).toBe(false);
+    expect(document.body.hasAttribute(POST_STAGE_BODY_MARK)).toBe(false);
   });
 
   it('hides the bottom nav on phones only, and docks the composer as glass rather than solid', () => {
@@ -190,7 +190,7 @@ describe('the stage page shell', () => {
 
   it('hides the top bar and feed pill on image, video and audio posts', () => {
     const css = readFileSync('src/styles/post-stage.css', 'utf8');
-    expect(css).toContain('body.post-stage-mode :is([data-mobile-header], [data-feed-nav], [data-feed-nav-outer], [data-home-tabs])');
+    expect(css).toContain('body[data-post-stage-mode] :is([data-mobile-header], [data-feed-nav], [data-feed-nav-outer], [data-home-tabs])');
     expect(css).not.toContain('post-stage-keep-nav');
     const src = readFileSync('src/components/app/post-stage/PostStagePhone.tsx', 'utf8');
     expect(src).not.toContain('StageMediaChrome');
