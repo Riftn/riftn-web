@@ -774,6 +774,8 @@
     "feedTogglesCleared": "フィードのフィルターをリセットしました",
     "defaultProfileTab": "既定のプロフィールタブ",
     "defaultProfileTabDesc": "訪問者がプロフィールで最初に見るタブを選びます",
+    "defaultProfileView": "プロフィールの投稿レイアウト",
+    "defaultProfileViewDesc": "プロフィールを開いた人に、投稿をグリッドとリストのどちらで表示するかを選びます",
     "public": "公開",
     "publicDesc": "誰でも投稿を見ることができます",
     "private": "非公開",

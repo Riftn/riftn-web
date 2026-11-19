@@ -2695,7 +2695,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
   const { isCollapsed, setCollapsed } = useSidebarCollapse();
   const { ref: themePickerFadeRef, style: themePickerFadeStyle } = useScrollFadeMask<HTMLDivElement>();
   const [feedLayout, setFeedLayout] = useState('comfortable');
-  const { defaultProfileTab, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  const { defaultProfileTab, defaultProfileView, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -2806,6 +2806,22 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
                 value: o.value,
                 label: t(`profile.tabs.${o.value}`, o.label),
               }))}
+            />}
+          />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="default-profile-view"
+            title={t('settings.defaultProfileView', 'Profile posts layout')}
+            description={t('settings.defaultProfileViewDesc', 'Show your posts as a grid or a list when people open your profile')}
+            action={<SettingDrawerSelect
+              value={defaultProfileView}
+              onValueChange={(value) => updateSettings({ default_profile_view: value === 'list' ? 'list' : 'grid' })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.defaultProfileView', 'Profile posts layout')}
+              options={[
+                { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
+                { value: 'list', label: t('profile.viewList', 'List view') },
+              ]}
             />}
           />
         </div>

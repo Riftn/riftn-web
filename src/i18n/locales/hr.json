@@ -703,6 +703,8 @@
     "feedTogglesCleared": "Filtri feeda poništeni",
     "defaultProfileTab": "Zadana kartica profila",
     "defaultProfileTabDesc": "Odaberite koju karticu posjetitelji prvo vide na vašem profilu",
+    "defaultProfileView": "Raspored objava na profilu",
+    "defaultProfileViewDesc": "Prikažite svoje objave kao rešetku ili popis kad netko otvori vaš profil",
     "public": "Javno",
     "publicDesc": "Svatko može vidjeti vaše objave",
     "private": "Privatno",

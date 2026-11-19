@@ -701,6 +701,8 @@
     "feedTogglesCleared": "Filtry kanálu obnoveny",
     "defaultProfileTab": "Výchozí karta profilu",
     "defaultProfileTabDesc": "Vyber, kterou kartu uvidí návštěvníci na tvém profilu jako první",
+    "defaultProfileView": "Rozložení příspěvků na profilu",
+    "defaultProfileViewDesc": "Zobraz své příspěvky jako mřížku nebo seznam, když někdo otevře tvůj profil",
     "public": "Veřejné",
     "publicDesc": "Kdokoli může vidět vaše příspěvky",
     "private": "Soukromé",

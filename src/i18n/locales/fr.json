@@ -919,6 +919,8 @@
     "feedTogglesCleared": "Filtres du fil réinitialisés",
     "defaultProfileTab": "Onglet de profil par défaut",
     "defaultProfileTabDesc": "Choisissez l'onglet que les visiteurs voient en premier sur votre profil",
+    "defaultProfileView": "Disposition des publications du profil",
+    "defaultProfileViewDesc": "Affichez vos publications en grille ou en liste quand quelqu'un ouvre votre profil",
     "public": "Public",
     "publicDesc": "Tout le monde peut voir vos publications",
     "private": "Privé",

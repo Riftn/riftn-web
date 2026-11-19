@@ -773,6 +773,8 @@
     "feedTogglesCleared": "Đã đặt lại bộ lọc bảng tin",
     "defaultProfileTab": "Tab hồ sơ mặc định",
     "defaultProfileTabDesc": "Chọn tab mà khách xem đầu tiên trên hồ sơ của bạn",
+    "defaultProfileView": "Bố cục bài đăng trên hồ sơ",
+    "defaultProfileViewDesc": "Hiển thị bài đăng của bạn dạng lưới hoặc danh sách khi mọi người mở hồ sơ của bạn",
     "public": "Công khai",
     "publicDesc": "Bất kỳ ai cũng có thể xem bài viết của bạn",
     "private": "Riêng tư",

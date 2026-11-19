@@ -774,6 +774,8 @@
     "feedTogglesCleared": "Filtri del feed reimpostati",
     "defaultProfileTab": "Scheda profilo predefinita",
     "defaultProfileTabDesc": "Scegli quale scheda vedono per prima i visitatori sul tuo profilo",
+    "defaultProfileView": "Layout dei post del profilo",
+    "defaultProfileViewDesc": "Mostra i tuoi post in griglia o in elenco quando qualcuno apre il tuo profilo",
     "public": "Pubblico",
     "publicDesc": "Chiunque può vedere i tuoi post",
     "private": "Privato",

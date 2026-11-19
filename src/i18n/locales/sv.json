@@ -700,6 +700,8 @@
     "feedTogglesCleared": "Flödesfilter återställda",
     "defaultProfileTab": "Standardflik på profilen",
     "defaultProfileTabDesc": "Välj vilken flik besökare ser först på din profil",
+    "defaultProfileView": "Layout för profilinlägg",
+    "defaultProfileViewDesc": "Visa dina inlägg som rutnät eller lista när någon öppnar din profil",
     "public": "Offentlig",
     "publicDesc": "Alla kan se dina inlägg",
     "private": "Privat",
