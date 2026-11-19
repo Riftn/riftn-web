@@ -3252,6 +3252,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             <RefreshCw className="w-3 h-3 mr-2" />{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
         </div>
       ) : (
+        <div className="relative flex-1 min-h-0 flex flex-col">
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
@@ -3288,7 +3289,6 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
           <div ref={bottomRef} />
           </div>
         </div>
-      )}
 
       {/* Jump control: up to the unread marker until it has been seen, then
           down to the newest line. The count is unread lines still below. */}
@@ -3301,10 +3301,12 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             up={up}
             count={count}
             onClick={up ? jumpToUnreadMarker : scrollToBottom}
-            className="absolute bottom-20 right-4 z-10"
+            className="absolute bottom-3 right-3 z-10"
           />
         );
       })()}
+        </div>
+      )}
 
       {/* Init error banner — shown when createAndStart timed out for a new conversation */}
       {initError && isVirtualConv && (
