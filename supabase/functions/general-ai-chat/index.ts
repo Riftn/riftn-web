@@ -644,6 +644,17 @@ function requiresWebSearch(message: string): boolean {
 // somebody else) used to escalate to Pro on a keyword match, which put most
 // traffic, anonymous included, on the expensive model.
 // Returns: { model: string, tier: 'free' | 'standard' | 'premium', reason: string }
+/** Picker ids → gateway models. Gemini 3 replaced the 2.5 pair in the picker. */
+const GEMINI_3_GATEWAY: Record<'gemini-3-flash' | 'gemini-3-pro', string> = {
+  'gemini-3-flash': 'google/gemini-3-flash-preview',
+  'gemini-3-pro': 'google/gemini-3-pro-preview',
+};
+const CHAT_MODEL_RENAMES: Record<string, string> = { 'gemini-2.5-flash': 'gemini-3-flash', 'gemini-2.5-pro': 'gemini-3-pro' };
+function currentChatModelId(id: unknown): string {
+  const raw = typeof id === 'string' && id ? id : 'auto';
+  return CHAT_MODEL_RENAMES[raw] ?? raw;
+}
+
 function selectOptimalModel(message: string, hasPerplexityKey: boolean, allowPro: boolean): { model: string; tier: string; reason: string } {
   const needsSearch = requiresWebSearch(message);
 
@@ -953,7 +964,7 @@ serve(async (req) => {
   const isServiceCall = !!serviceSecret && req.headers.get('x-assistant-secret') === serviceSecret;
 
   try {
-    const { messages, style = 'normal', postContext, model = 'auto', isAuthenticated = false, userLanguage, userContext, dehubToken, stream: streamRequested = false, surface: requestedSurface = 'assistant', callerAddress, maxReplyChars, adminToken, adminContext, threadContext } = await req.json() as {
+    const { messages, style = 'normal', postContext, model: requestedModel = 'auto', isAuthenticated = false, userLanguage, userContext, dehubToken, stream: streamRequested = false, surface: requestedSurface = 'assistant', callerAddress, maxReplyChars, adminToken, adminContext, threadContext } = await req.json() as {
       messages: Message[];
       style?: string;
       postContext?: PostContext;
@@ -1009,6 +1020,8 @@ serve(async (req) => {
       adminContext?: { displayName?: string; role?: string; capabilities?: string[] };
       stream?: boolean;
     };
+    // The picker's Gemini 3 ids; picks saved as the old 2.5 names mean the same.
+    const model = currentChatModelId(requestedModel);
 
     // Who is asking. A service-role key or the assistant service secret is
     // trusted outright; a browser counts as a user only when its Riftn token
@@ -1462,6 +1475,8 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
               : 'google/gemini-2.5-flash'
             : effectiveModel === 'gpt-5-mini'
               ? 'openai/gpt-5-mini'
+              : effectiveModel === 'gemini-3-pro' || effectiveModel === 'gemini-3-flash'
+              ? GEMINI_3_GATEWAY[effectiveModel]
               : effectiveModel === 'gemini-2.5-pro'
                 ? 'google/gemini-2.5-pro'
                 : 'google/gemini-2.5-flash';
@@ -1652,7 +1667,9 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
       apiKey = lovableApiKey;
       
       // Map model IDs to full model paths
-      if (effectiveModel === 'gemini-2.5-flash') {
+      if (effectiveModel === 'gemini-3-flash' || effectiveModel === 'gemini-3-pro') {
+        modelName = GEMINI_3_GATEWAY[effectiveModel];
+      } else if (effectiveModel === 'gemini-2.5-flash') {
         modelName = 'google/gemini-2.5-flash';
       } else if (effectiveModel === 'gemini-2.5-pro') {
         modelName = 'google/gemini-2.5-pro';

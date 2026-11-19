@@ -26,6 +26,7 @@ import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
 import { markCommunityChatSeen, COMMUNITY_CHAT_SEEN_INTERVAL_MS } from '@/lib/community-chat-notify';
+import { useRoomChatReading } from '@/hooks/use-room-chat-summaries';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { Loader2, SmilePlus, CornerDownRight, LogIn, Pin, PinOff, ImagePlus } from "lucide-react";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -267,6 +268,9 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
   }, [active, isMember, walletAddress, communityId, community, membership?.role]);
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  // Clears this chat's unread number in the Messages list.
+  useRoomChatReading(communityId, walletAddress, active && isMember);
 
   // While the chat is on screen its notification is cleared and new pings are
   // held (lib/community-chat-notify). Re-sent every minute and on return to
