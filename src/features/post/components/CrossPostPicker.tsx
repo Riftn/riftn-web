@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import Share2 from "@/components/ui/cut-icons/feedshare";
 
 
@@ -10,6 +10,7 @@ import { useCrossPostStore } from '@/store/crossPostStore';
 import { PLATFORM_NAMES, getMultipostStatus } from '@/lib/multipost';
 import { creditsFor } from '@/lib/social-pricing';
 import { MULTIPOST_QUERY_KEY, PlatformIcon } from '@/components/app/settings/MultiPostSettings';
+import { MultiPostSheet } from './MultiPostSheet';
 
 export function useCrossPostAccountCount(enabled: boolean) {
   const { isAuthenticated } = useAuth();
@@ -21,11 +22,12 @@ export function useCrossPostAccountCount(enabled: boolean) {
 
 /**
  * Multi-post controls inside the shared composer options sheet. Connected
- * accounts stay selectable without stacking another overlay over the sheet.
+ * accounts toggle right here; setting up (connecting, switching on, topping up)
+ * opens a sheet over the composer, so the post is never left behind.
  */
-export function CrossPostPicker({ onNavigateAway }: { onNavigateAway?: () => void }) {
+export function CrossPostPicker() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const [setupOpen, setSetupOpen] = useState(false);
   const { isAuthenticated } = useAuth();
   const { selected, toggle } = useCrossPostStore();
   const status = useQuery({ queryKey: MULTIPOST_QUERY_KEY, queryFn: getMultipostStatus, enabled: isAuthenticated, staleTime: 60_000 });
@@ -35,10 +37,8 @@ export function CrossPostPicker({ onNavigateAway }: { onNavigateAway?: () => voi
   const chosen = accounts.filter((a) => selected.includes(a.id));
   const active = chosen.reduce((sum, a) => sum + creditsFor(a.platform), 0);
 
-  const openSettings = () => {
-    onNavigateAway?.();
-    navigate('/app/settings?tab=multipost');
-  };
+  const openSettings = () => setSetupOpen(true);
+  const sheet = <MultiPostSheet open={setupOpen} onOpenChange={setSetupOpen} />;
 
   const label = t('multiPost.title');
   const icon = (
@@ -54,10 +54,13 @@ export function CrossPostPicker({ onNavigateAway }: { onNavigateAway?: () => voi
 
   if (!accounts.length) {
     return (
+      <>
       <button type="button" onClick={openSettings} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10">
         {icon}
         <span>{label}{status.isError && <span className="block text-xs text-white/60">{t('multiPost.loadFailed')}</span>}</span>
       </button>
+      {sheet}
+      </>
     );
   }
 
@@ -98,6 +101,7 @@ export function CrossPostPicker({ onNavigateAway }: { onNavigateAway?: () => voi
             {t('multiPost.manage')}
           </button>
         </div>
+        {sheet}
     </section>
   );
 }

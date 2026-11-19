@@ -20,6 +20,7 @@ import { postBgById, withPostBgColors, type PostBg } from '@/lib/post-background
 import type { TextPost as GalleryTextPost } from '@/types/feed.types';
 import type { ProviderKeyRow } from '@/lib/api/dehub/provider-keys';
 import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
+import { MultiPostSheetView } from '@/features/post/components/MultiPostSheet';
 import { NewMessageDrawer } from '@/components/app/chat/NewMessageDrawer';
 import type { DeHubConversation } from '@/lib/api/dehub';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -1861,6 +1862,35 @@ function PostStatsGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   );
 }
 
+/** Multi-post set up opened from the composer; ?sheet=multipost, &mp=empty for a first-time poster. */
+function MultiPostSheetGallery({ initiallyOpen, empty }: { initiallyOpen: boolean; empty: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  const [selected, setSelected] = useState<string[]>(['g-x']);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const accounts = empty ? [] : [
+    { id: 'g-x', platform: 'twitter', username: 'riftn_com' },
+    { id: 'g-ig', platform: 'instagram', username: 'riftn.app' },
+    { id: 'g-fc', platform: 'farcaster', username: '', pending: true, approvalUrl: 'https://farcaster.xyz' },
+  ];
+  return (
+    <section data-multipost-gallery className="mb-5">
+      <Button onClick={() => setOpen(true)}>Multi-posting sheet</Button>
+      <MultiPostSheetView
+        open={open}
+        onOpenChange={setOpen}
+        accounts={accounts}
+        balance={empty ? 0 : 42}
+        selected={selected}
+        onToggle={(id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))}
+        connecting={connecting}
+        onConnect={(p) => { setConnecting(p); setTimeout(() => setConnecting(null), 1500); }}
+        buying={false}
+        onBuy={() => {}}
+      />
+    </section>
+  );
+}
+
 /** The "Add a profile photo" ask; saving here only waits, nothing uploads. */
 function AvatarPromptGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
@@ -2241,6 +2271,7 @@ export default function StateGalleryPage() {
         <ChatBulkGallery />
         <PostEditHistoryGallery />
         <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
+        <MultiPostSheetGallery initiallyOpen={params.get('sheet') === 'multipost'} empty={params.get('mp') === 'empty'} />
         <ToastsGallery />
         <TooltipsGallery />
         <AppTokensGallery />
