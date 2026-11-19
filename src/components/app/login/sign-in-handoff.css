@@ -1,15 +1,30 @@
-/* The sign-in hand-off (SignInHandoff). The login sheet is a dark surface on
-   every theme, so these colours are fixed rather than themed. */
+/* The sign-in hand-off, the Rift (SignInHandoff). The login sheet is a dark
+   surface on every theme, so the slit is light on dark everywhere; only its
+   glow takes the theme's colour. */
 
-.signin-handoff {
+.signin-rift {
+  --rift-a: #ffffff;
+  --rift-b: #c9d2e3;
   position: fixed;
   inset: 0;
   z-index: 2147483647;
   pointer-events: none;
 }
+html[data-theme="hazy"] .signin-rift { --rift-a: #a391fc; --rift-b: #f39bff; }
+html[data-theme="cosmic"] .signin-rift { --rift-a: #8f7cff; --rift-b: #7fd4ff; }
+html[data-theme="osaka"] .signin-rift { --rift-a: #ff6fb5; --rift-b: #7fe3e0; }
+html[data-theme="winter"] .signin-rift { --rift-a: #96bee6; --rift-b: #e6f4ff; }
+html[data-theme="war"] .signin-rift { --rift-a: #4fe3e0; --rift-b: #ffb35c; }
+html[data-theme="jungle"] .signin-rift { --rift-a: #84be3c; --rift-b: #e6ff9c; }
+html[data-theme="island"] .signin-rift { --rift-a: #22aac8; --rift-b: #9cf0ff; }
+html[data-theme="hacker"] .signin-rift { --rift-a: #39ff88; --rift-b: #b6ffd2; }
+html[data-theme="horror"] .signin-rift { --rift-a: #ce2030; --rift-b: #ff8a7a; }
+html[data-theme="lavalamp"] .signin-rift { --rift-a: #ff7a59; --rift-b: #ffd36b; }
+html[data-theme="swarms"] .signin-rift { --rift-a: #ffb347; --rift-b: #fff0b8; }
+html[data-theme="glass"] .signin-rift { --rift-a: #6ad8ff; --rift-b: #e2f7ff; }
 
 /* Centred on the sheet: the full screen on phones, the middle column on desktop. */
-.signin-handoff__stage {
+.signin-rift__stage {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -17,61 +32,141 @@
   height: 0;
 }
 @media (min-width: 768px) {
-  .signin-handoff__stage {
+  .signin-rift__stage {
     left: calc(var(--app-main-left, 0px) + var(--app-main-width, 100vw) / 2);
     top: 55%;
   }
 }
+.signin-rift__stage > * { position: absolute; }
 
-/* The frame: the profile picture's shape (96px with a 12px corner), scaled up. */
-.signin-handoff__frame,
-.signin-handoff__pulse {
+/* The intro: the Riftn mark pops in and spins fast (2.75 turns), slowing and
+   stopping edge-on, which is the line. Two fainter copies trail it while it
+   is fast. */
+.signin-rift__stage { perspective: 600px; }
+.signin-rift__logo {
+  left: -55px;
+  top: -55px;
+  width: 110px;
+  height: 110px;
+  overflow: visible;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px var(--rift-a));
+  animation: signin-rift-spin 1100ms cubic-bezier(0.12, 0.7, 0.3, 1) forwards;
+}
+.signin-rift__logo[data-trail] { animation-name: signin-rift-spin-trail; filter: none; }
+.signin-rift__logo[data-trail="1"] { animation-delay: 35ms; }
+.signin-rift__logo[data-trail="2"] { animation-delay: 70ms; }
+
+/* The rift: a thin line with the mark's middle-stroke ends. */
+.signin-rift__slit {
+  left: -3px;
+  top: -56px;
+  width: 6px;
+  height: 112px;
+  overflow: visible;
+  opacity: 0;
+  filter: drop-shadow(0 0 5px var(--rift-a)) drop-shadow(0 0 16px color-mix(in srgb, var(--rift-a) 70%, transparent));
+  transform-origin: 50% 50%;
+  animation:
+    signin-rift-land 160ms ease-out 940ms forwards,
+    signin-rift-breathe 1.6s ease-in-out 1100ms infinite,
+    signin-rift-flicker 2.3s steps(1, end) 1100ms infinite;
+}
+
+/* A soft halo behind it. */
+.signin-rift__glow {
+  left: -44px;
+  top: -92px;
+  width: 88px;
+  height: 184px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--rift-a) 65%, transparent), color-mix(in srgb, var(--rift-b) 18%, transparent) 55%, transparent 70%);
+  filter: blur(20px);
+  opacity: 0;
+  animation: signin-rift-halo 1.6s ease-in-out 950ms infinite;
+}
+
+/* Specks drifting into the slit. */
+.signin-rift__specks { left: 0; top: 0; }
+.signin-rift__specks i {
   position: absolute;
+  left: -1.5px;
+  top: -1.5px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px var(--rift-a);
+  opacity: 0;
+  animation: signin-rift-speck var(--s) cubic-bezier(0.55, 0, 0.85, 0.4) var(--d) infinite;
+}
+.signin-rift__specks i:nth-child(even) { background: var(--rift-b); width: 2px; height: 2px; }
+
+/* The frame the rift opens into: the profile picture's shape (96px with a
+   12px corner), scaled up. Hidden behind the slit until it opens. */
+.signin-rift__frame {
   left: -60px;
   top: -60px;
   width: 120px;
   height: 120px;
   border-radius: 15px;
-}
-.signin-handoff__frame {
   overflow: hidden;
-  background: #1b1d22;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16), 0 18px 50px rgba(0, 0, 0, 0.55);
-  /* `backwards`, not `both`: a held last keyframe would outrank the inline
-     transform that sends the picture home. */
-  animation: signin-handoff-in 220ms ease-out backwards;
-  transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1), border-radius 520ms ease, opacity 160ms ease 440ms, box-shadow 300ms ease;
+  background: #16181d;
+  clip-path: inset(4px 57px round 3px);
+  opacity: 0;
+  transition:
+    transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 520ms ease,
+    opacity 160ms ease 440ms,
+    box-shadow 300ms ease;
   will-change: transform, opacity;
 }
-.signin-handoff__frame img {
+.signin-rift__frame img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 220ms ease;
+  transition: opacity 200ms ease;
 }
-.signin-handoff__frame img[data-ready] { opacity: 1; }
-
-/* A soft ring leaving the empty frame while it waits. */
-.signin-handoff__pulse {
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  opacity: 0;
-}
-.signin-handoff[data-phase="waiting"] .signin-handoff__pulse {
-  animation: signin-handoff-pulse 1.5s ease-out 200ms infinite;
-}
-.signin-handoff[data-phase="waiting"] .signin-handoff__frame::after {
-  content: "";
+.signin-rift__frame img[data-ready] { opacity: 1; }
+.signin-rift__initial {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.09) 50%, transparent 70%);
-  animation: signin-handoff-shine 1.3s linear infinite;
+  display: grid;
+  place-items: center;
+  font-size: 52px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rift-a) 45%, #16181d), #16181d 75%);
 }
 
-.signin-handoff__name {
-  position: absolute;
-  top: 76px;
+/* Open: the stroke tears wide into the picture, the specks are thrown out. */
+.signin-rift[data-opened] .signin-rift__frame {
+  opacity: 1;
+  clip-path: inset(0 0 round 15px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  transition:
+    clip-path 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 520ms ease,
+    opacity 80ms ease,
+    box-shadow 300ms ease;
+}
+.signin-rift[data-opened] .signin-rift__slit {
+  animation: signin-rift-tear 480ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.signin-rift[data-opened] .signin-rift__glow {
+  animation: signin-rift-halo-out 600ms ease-out forwards;
+}
+.signin-rift[data-opened] .signin-rift__specks i {
+  animation: signin-rift-burst 700ms ease-out forwards;
+}
+
+.signin-rift__name {
   left: 0;
+  top: 76px;
   max-width: 300px;
   margin: 0;
   padding: 6px 14px;
@@ -89,18 +184,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   translate: -50% 0;
-  animation: signin-handoff-name 260ms ease-out both;
+  animation: signin-rift-name 260ms ease-out 200ms both;
 }
 
-.signin-handoff[data-phase="flying"] .signin-handoff__frame {
+.signin-rift[data-phase="flying"] .signin-rift__frame {
   opacity: 0;
-  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0), 0 0 0 rgba(0, 0, 0, 0);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 520ms ease,
+    opacity 160ms ease 440ms,
+    box-shadow 300ms ease;
 }
-.signin-handoff[data-phase="leaving"] .signin-handoff__frame {
-  opacity: 0;
-  transform: scale(0.92);
-  transition: opacity 220ms ease, transform 220ms ease;
-}
+.signin-rift[data-phase="leaving"] { opacity: 0; transition: opacity 240ms ease; }
+.signin-rift[data-phase="leaving"] .signin-rift__frame { transform: scale(0.92); transition: transform 240ms ease; }
 
 /* The veil the sheet wears while it waits (rendered by LoginModal). */
 .signin-handoff-veil {
@@ -119,35 +216,76 @@
   pointer-events: auto;
 }
 
-@keyframes signin-handoff-in {
-  from { opacity: 0; transform: scale(0.9); }
+@keyframes signin-rift-spin {
+  0% { opacity: 0; transform: rotateY(0deg) scale(0.85); }
+  22% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { opacity: 0; transform: rotateY(990deg) scale(1.02); }
 }
-@keyframes signin-handoff-pulse {
-  0% { opacity: 0.8; transform: scale(1); }
-  70%, 100% { opacity: 0; transform: scale(1.5); }
+@keyframes signin-rift-spin-trail {
+  0% { opacity: 0; transform: rotateY(0deg) scale(0.85); }
+  20% { opacity: 0.22; }
+  60% { opacity: 0; }
+  100% { opacity: 0; transform: rotateY(990deg) scale(1.02); }
 }
-@keyframes signin-handoff-shine {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
+@keyframes signin-rift-land {
+  from { opacity: 0; transform: scaleY(0.9); }
+  to { opacity: 1; transform: none; }
 }
-@keyframes signin-handoff-name {
+@keyframes signin-rift-breathe {
+  0%, 100% { transform: scaleY(0.88); }
+  50% { transform: scaleY(1.06); }
+}
+@keyframes signin-rift-flicker {
+  0%, 31%, 36%, 72%, 75%, 100% { opacity: 1; }
+  33% { opacity: 0.72; }
+  73% { opacity: 0.84; }
+}
+@keyframes signin-rift-halo {
+  0%, 100% { opacity: 0.6; transform: scale(0.94); }
+  50% { opacity: 0.95; transform: scale(1.04); }
+}
+@keyframes signin-rift-speck {
+  0% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1); }
+  25% { opacity: 0.9; }
+  90% { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+}
+@keyframes signin-rift-tear {
+  0% { opacity: 1; transform: scale(1, 1); }
+  45% { opacity: 0.45; }
+  100% { opacity: 0; transform: scale(20, 1.1); }
+}
+@keyframes signin-rift-halo-out {
+  to { opacity: 0; transform: scale(2.2, 1); }
+}
+@keyframes signin-rift-burst {
+  from { opacity: 0.9; transform: translate(calc(var(--x) * 0.3), calc(var(--y) * 0.3)); }
+  to { opacity: 0; transform: translate(calc(var(--x) * 1.6), calc(var(--y) * 1.6)); }
+}
+@keyframes signin-rift-name {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .signin-handoff__pulse,
-  .signin-handoff__frame::after { animation: none !important; }
+  .signin-rift__slit,
+  .signin-rift__glow,
+  .signin-rift__specks i { animation: none !important; opacity: 1; }
+  .signin-rift__logo { display: none; }
+  .signin-rift__specks { display: none; }
+  .signin-rift[data-opened] .signin-rift__slit,
+  .signin-rift[data-opened] .signin-rift__glow { opacity: 0; }
 }
 
 /* On a page of its own (SignInWaitFrame). */
-.signin-handoff--inline {
+.signin-rift--inline {
   position: relative;
   inset: auto;
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 200px;
 }
-.signin-handoff--inline .signin-handoff__stage {
+.signin-rift--inline .signin-rift__stage {
   left: 50%;
   top: 50%;
 }
