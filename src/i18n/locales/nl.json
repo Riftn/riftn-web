@@ -1388,7 +1388,9 @@
     "menuLayoutSections": "Secties",
     "menuLayoutSectionsDesc": "Alle pagina's tegelijk, onder kopjes",
     "menuLayoutFolders": "Mappen",
-    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep"
+    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep",
+    "chatCards": "Chats als kaarten",
+    "chatCardsDesc": "Elke chat op een eigen kaart. Zet uit voor een gewone lijst met een lijn tussen chats."
   },
   "common": {
     "confirm": "Bevestigen",

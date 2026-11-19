@@ -1315,7 +1315,9 @@
     "menuLayoutSections": "Разделы",
     "menuLayoutSectionsDesc": "Все страницы сразу, под заголовками",
     "menuLayoutFolders": "Папки",
-    "menuLayoutFoldersDesc": "Главные страницы, затем папка для каждой группы"
+    "menuLayoutFoldersDesc": "Главные страницы, затем папка для каждой группы",
+    "chatCards": "Чаты карточками",
+    "chatCardsDesc": "Каждый чат на своей карточке. Выключите для простого списка с линиями между чатами."
   },
   "common": {
     "confirm": "Подтвердить",

@@ -1388,7 +1388,9 @@
     "menuLayoutSections": "Bölümler",
     "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
     "menuLayoutFolders": "Klasörler",
-    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör"
+    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör",
+    "chatCards": "Sohbetler kart olarak",
+    "chatCardsDesc": "Her sohbet kendi kartında. Kapatınca sohbetler arasında çizgi olan sade bir liste olur."
   },
   "common": {
     "confirm": "Onayla",

@@ -1388,7 +1388,9 @@
     "menuLayoutSections": "أقسام",
     "menuLayoutSectionsDesc": "كل الصفحات معًا، تحت عناوين",
     "menuLayoutFolders": "مجلدات",
-    "menuLayoutFoldersDesc": "صفحاتك الرئيسية، ثم مجلد لكل مجموعة"
+    "menuLayoutFoldersDesc": "صفحاتك الرئيسية، ثم مجلد لكل مجموعة",
+    "chatCards": "الدردشات كبطاقات",
+    "chatCardsDesc": "كل دردشة في بطاقتها. أوقفه لقائمة بسيطة بخط بين الدردشات."
   },
   "common": {
     "confirm": "تأكيد",

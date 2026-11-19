@@ -1317,7 +1317,9 @@
     "menuLayoutSections": "सेक्शन",
     "menuLayoutSectionsDesc": "सभी पेज एक साथ, शीर्षकों के नीचे",
     "menuLayoutFolders": "फ़ोल्डर",
-    "menuLayoutFoldersDesc": "आपके मुख्य पेज, फिर हर समूह के लिए एक फ़ोल्डर"
+    "menuLayoutFoldersDesc": "आपके मुख्य पेज, फिर हर समूह के लिए एक फ़ोल्डर",
+    "chatCards": "चैट कार्ड के रूप में",
+    "chatCardsDesc": "हर चैट अपने कार्ड पर। बंद करने पर चैट के बीच लाइन वाली सादी सूची।"
   },
   "common": {
     "confirm": "कन्फ़र्म करें",

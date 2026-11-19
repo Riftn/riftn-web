@@ -1232,7 +1232,9 @@
     "menuLayoutSections": "Abschnitte",
     "menuLayoutSectionsDesc": "Alle Seiten auf einmal, unter Überschriften",
     "menuLayoutFolders": "Ordner",
-    "menuLayoutFoldersDesc": "Deine Hauptseiten, dann ein Ordner pro Gruppe"
+    "menuLayoutFoldersDesc": "Deine Hauptseiten, dann ein Ordner pro Gruppe",
+    "chatCards": "Chats als Karten",
+    "chatCardsDesc": "Jeder Chat auf einer eigenen Karte. Aus für eine schlichte Liste mit Linien zwischen den Chats."
   },
   "common": {
     "confirm": "Bestätigen",

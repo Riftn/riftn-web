@@ -1315,7 +1315,9 @@
     "menuLayoutSections": "分区",
     "menuLayoutSectionsDesc": "所有页面一次显示，按标题分组",
     "menuLayoutFolders": "文件夹",
-    "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹"
+    "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹",
+    "chatCards": "聊天以卡片显示",
+    "chatCardsDesc": "每个聊天单独一张卡片。关闭后变为带分隔线的简洁列表。"
   },
   "common": {
     "confirm": "确认",
