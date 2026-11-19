@@ -179,9 +179,9 @@ function FeePaymentStep({
     try {
       const chainId = BASE_CHAIN_ID;
       const chainConfig = getChainConfig(chainId);
-      await switchChain(chainId);
-      const signerAddress = await getWalletAddress();
-      const balanceWei = await getERC20Balance(chainConfig.dhbToken, signerAddress);
+      // Showing the balance must not open the wallet; only Pay does.
+      const signerAddress = await getWalletAddress({ silent: true });
+      const balanceWei = await getERC20Balance(chainConfig.dhbToken, signerAddress, chainId);
       const balanceHuman = Number(balanceWei) / 1e18;
       setBalanceInfo({
         checked: true,
