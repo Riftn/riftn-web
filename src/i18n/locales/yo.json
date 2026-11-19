@@ -81,7 +81,8 @@
       "profile": "àkọọ́lẹ̀",
       "proposal": "àbá",
       "stage": "ìpele",
-      "store": "ilé-ìtajà"
+      "store": "ilé-ìtajà",
+      "featureRequest": "ìbéèrè"
     },
     "recipientChat": "ìjíròrò",
     "recipientUser": "oníṣe",
@@ -519,7 +520,11 @@
     "getTheApp": "Gba app náà",
     "connectAi": "So AI pọ̀",
     "converter": "Oluyipada",
-    "affiliate": "Alábàáṣiṣẹ́"
+    "affiliate": "Alábàáṣiṣẹ́",
+    "groups": {
+      "create": "Ṣẹ̀dá",
+      "discover": "Ṣàwárí"
+    }
   },
   "feed": {
     "viewProfile": "Wo fáìlì {{name}}",
@@ -1136,7 +1141,8 @@
     "socialConnectedShort": "Ti sopọ mọ",
     "socialConnectFailed": "Kò lè so mọ́ {{platform}}. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan síi.",
     "socialVerifiedFollowers": "{{value}} awọn ọmọlẹyin",
-    "socialFollowersPending": "Ṣíṣe ìmúdójúìwọ̀n iye àwọn ọmọlẹ́yìn"
+    "socialFollowersPending": "Ṣíṣe ìmúdójúìwọ̀n iye àwọn ọmọlẹ́yìn",
+    "menuLayoutFolders": "Àwọn Fódà"
   },
   "common": {
     "confirm": "Jẹrisi",
@@ -3023,7 +3029,11 @@
     "likersEmptyTitle": "Kò sí ìfẹ́ràn síbẹ̀",
     "likersEmptyBody": "Àwọn ìfẹ́ràn lórí àsọyé yìí yóò hàn níbí.",
     "anonymousLikes_one": "Ìfẹ́ràn {{count}} láti ọ̀dọ̀ ẹni tó ní báàjì tí kò fi orúkọ hàn",
-    "anonymousLikes_other": "Ìfẹ́ràn {{count}} láti ọ̀dọ̀ àwọn tó ní báàjì tí kò fi orúkọ hàn"
+    "anonymousLikes_other": "Ìfẹ́ràn {{count}} láti ọ̀dọ̀ àwọn tó ní báàjì tí kò fi orúkọ hàn",
+    "threadParts": {
+      "moveUp": "Gbe soke",
+      "moveDown": "Gbe si isalẹ"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6043,6 +6053,12 @@
       "needsImageToWork": "{{model}} nílò àwòrán láti ṣiṣẹ́ láti. Fi ẹyọ kan kọ́kọ́.",
       "speechLimit": "Ìyẹn ni {{length}} àwọn àkóónú. Ìdènà náà ni {{limit}}.",
       "musicTrackLength": "{{count}}s orin"
+    },
+    "gallery": {
+      "send": "Rán",
+      "notifications": {
+        "generation_reply": "{{name}} dáhùn àsọyé rẹ"
+      }
     }
   },
   "pricing": {
@@ -7696,7 +7712,8 @@
     "faqInstallNeededA": "Rara. O ṣiṣẹ patapata ninu taabu nipa lilo ibi ipamọ agbegbe ẹrọ aṣawakiri rẹ. Pipade taabu naa da node rẹ duro; ko si iṣẹ abẹlẹ ati ko si fifi sori ẹrọ.",
     "ctaTitle": "Bẹrẹ nikan nigbati ikuna ba ni aabo.",
     "ctaBody": "Atunṣe ipilẹṣẹ, media ti o ni aabo ti a paroko ati iṣẹ ti a fọwọsi wa ṣaaju awọn ere node ti gbogbo eniyan.",
-    "footerNote": "Ikopa DePin jẹ iṣẹ iṣe, kii ṣe ọja idoko-owo. Wiwa, ẹtọ ati awọn ere le yipada."
+    "footerNote": "Ikopa DePin jẹ iṣẹ iṣe, kii ṣe ọja idoko-owo. Wiwa, ẹtọ ati awọn ere le yipada.",
+    "navFaq": "Àwọn ìbéèrè tí a máa ń béèrè"
   },
   "creatorFlow": {
     "newNativeFlow": "Ise tuntun",
@@ -11787,7 +11804,7 @@
   "multiPost": {
     "tab": "Ipolowo pupọ",
     "title": "Ipolowo pupọ",
-    "intro": "Fi ranṣẹ si X, YouTube, Instagram, TikTok àti diẹ̀ síi ní àkókò kan náà bí dehub. Sojú àwọn àkọọlẹ rẹ̀ lẹ́ẹ̀kan, lẹ́yìn náà yan ibi tí kọọkan ranṣẹ lọ.",
+    "intro": "Fi ranṣẹ si X, YouTube, Instagram, TikTok àti diẹ̀ síi ní àkókò kan náà bí Riftn. Sojú àwọn àkọọlẹ rẹ̀ lẹ́ẹ̀kan, lẹ́yìn náà yan ibi tí kọọkan ranṣẹ lọ.",
     "creditsHeading": "Ìyọrisi ranṣẹ",
     "credits": "{{count}} ìyọrisi ranṣẹ",
     "topUpTitle": "Tún pọ̀ síi kí o sì fipamọ́",
@@ -11835,7 +11852,9 @@
   "dm": {
     "planRestricted": "Olùmúlò yìí nílò ìforúkọsílẹ̀ láti gba àwọn ìfiránṣẹ́.",
     "planTypeNotAllowed": "Ètò olùdá yìí kò gba irú ìfiránṣẹ́ yìí láàyè.",
-    "planMinTip": "Owó ìmoore fún olùdá yìí gbọ́dọ̀ jẹ́ ó kéré tán {{amount}} àmì."
+    "planMinTip": "Owó ìmoore fún olùdá yìí gbọ́dọ̀ jẹ́ ó kéré tán {{amount}} àmì.",
+    "shareKindGroup": "Ikọ̀",
+    "shareKindCommunity": "Àwùjọ"
   },
   "credits": {
     "earningsWorth": "Iye {{amount}}",
@@ -19099,7 +19118,8 @@
     "127053546dd4": "Kò lè gba fáìlì yìí sílẹ̀.",
     "d14896aa4bf8": "Àti òṣùpọ̀ oríṣiríṣẹ́ ẹgbẹ́ ẹgbẹ́rún ọkàn. Ṣe àṣẹ ọ̀rọ̀ àti ṣe pọ̀ mọ́.",
     "953e708b2287": "Ìran ohùn kùnà.",
-    "4a52cdd6ac72": "Kò lè ṣe ẹ̀dà àwọn ìpele wọ̀nyí."
+    "4a52cdd6ac72": "Kò lè ṣe ẹ̀dà àwọn ìpele wọ̀nyí.",
+    "dbc468a14b60": "Àwọn ìbéèrè tí a máa ń béèrè"
   },
   "articles": {
     "cardLabel": "Àpilẹ̀kọ · {{count}} min ka",
@@ -19380,5 +19400,10 @@
     "edit": "Ṣatunkọ",
     "editLabel": "Ṣàtúnṣe àtẹ̀jíṣẹ́",
     "error": "Ìyẹn kò ṣiṣẹ́. Gbìyànjú lẹ́ẹ̀kan síi."
+  },
+  "mentionLinks": {
+    "communities": "Àwùjọ",
+    "pages": "Àwọn ojú-ìwé",
+    "people": "Ènìyàn"
   }
 }

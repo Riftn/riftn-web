@@ -514,7 +514,10 @@
     "getTheApp": "Get di App",
     "connectAi": "Connect AI",
     "converter": "Chenja",
-    "affiliate": "Affiliate"
+    "affiliate": "Affiliate",
+    "groups": {
+      "create": "Mek"
+    }
   },
   "feed": {
     "viewProfile": "Luk {{name}} profil",
@@ -1113,7 +1116,10 @@
     "socialConnectedShort": "E don konekt",
     "socialConnectFailed": "No konnect wia {{platform}}. Try again.",
     "socialVerifiedFollowers": "{{value}} followers",
-    "socialFollowersPending": "Follower count updating"
+    "socialFollowersPending": "Follower count updating",
+    "deleteAccountData": "Dilit account / data",
+    "skipSegments": "I no go understand wetin you mean.",
+    "menuLayoutFolders": "Folder dem"
   },
   "common": {
     "confirm": "Confam",
@@ -5803,6 +5809,12 @@
       "needsImageToWork": "{{model}} no go fit work wey no picture. Fit attach one fi first.",
       "speechLimit": "Dat be {{length}} character. Limit be {{limit}}.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "Sen",
+      "notifications": {
+        "generation_reply": "{{name}} reply your comment"
+      }
     }
   },
   "pricing": {
@@ -7337,7 +7349,8 @@
     "faqInstallNeededA": "No. E go run wey wey inside tab, use browser local storage. Close tab, node wey wey stop. No background service, no install.",
     "ctaTitle": "Launch only when e safe if something fail.",
     "ctaBody": "Origin backup, encrypted protected media and work wey dem don check go come first before any public node reward.",
-    "footerNote": "DePin participation na contribution service, e no bi investment product. Availability, who fit join and rewards fit change."
+    "footerNote": "DePin participation na contribution service, e no bi investment product. Availability, who fit join and rewards fit change.",
+    "navFaq": "Question wey people dey ask"
   },
   "creatorFlow": {
     "disconnect": "Diskonnekt",
@@ -11353,7 +11366,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post fo X, YouTube, Instagram, TikTok an oda wan dem sem taim as dehub. Konek yu akaunt dem wan taim, den choose usai ech post go go.",
+    "intro": "Post fo X, YouTube, Instagram, TikTok an oda wan dem sem taim as Riftn. Konek yu akaunt dem wan taim, den choose usai ech post go go.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up an save moni",
@@ -11401,7 +11414,8 @@
   "dm": {
     "planRestricted": "Dis pipul need subscription before e fit get message.",
     "planTypeNotAllowed": "Dis creator yi plan no allow dis kain message.",
-    "planMinTip": "Tip for dis creator must be at least {{amount}} tokens."
+    "planMinTip": "Tip for dis creator must be at least {{amount}} tokens.",
+    "shareKindGroup": "Gruup"
   },
   "credits": {
     "earningsWorth": "E worth {{amount}}",
@@ -17911,7 +17925,8 @@
     "127053546dd4": "Di file no fit download.",
     "d14896aa4bf8": "Libray wey dey free no fit load. Chek your connection and try again.",
     "953e708b2287": "Voice generation fail.",
-    "4a52cdd6ac72": "Di layers wey you duplicate no fit."
+    "4a52cdd6ac72": "Di layers wey you duplicate no fit.",
+    "dbc468a14b60": "Question wey people dey ask"
   },
   "articles": {
     "cardLabel": "Article · {{count}} min read",
@@ -18151,5 +18166,10 @@
     "view": "Luk",
     "edit": "Edit am",
     "error": "Dat nɔ́ wɔ́k. Tri agɛ́n."
+  },
+  "mentionLinks": {
+    "communities": "Grup dem",
+    "pages": "Page dem",
+    "people": "Pipo"
   }
 }

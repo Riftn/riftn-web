@@ -81,7 +81,8 @@
       "profile": "پروفایل",
       "proposal": "پیشنهاد",
       "stage": "مرحله",
-      "store": "دکان"
+      "store": "دکان",
+      "featureRequest": "درخواست"
     },
     "recipientChat": "چت",
     "recipientUser": "کاربر",
@@ -522,7 +523,12 @@
     "getTheApp": "دریافت اپلیکیشن",
     "connectAi": "اتصال هوش مصنوعی",
     "converter": "مبدل",
-    "affiliate": "همکاری در فروش"
+    "affiliate": "همکاری در فروش",
+    "groups": {
+      "create": "ایجاد",
+      "discover": "کشف",
+      "riftn": "دی‌هاب"
+    }
   },
   "feed": {
     "viewProfile": "مشاهده پروفایل {{name}}",
@@ -1146,7 +1152,8 @@
     "socialConnectedShort": "وصل شد",
     "socialConnectFailed": "اتصال برقرار نشد {{platform}}. لطفا دوباره امتحان کنید.",
     "socialVerifiedFollowers": "{{value}} دنبال کننده",
-    "socialFollowersPending": "به‌روزرسانی تعداد دنبال‌کنندگان"
+    "socialFollowersPending": "به‌روزرسانی تعداد دنبال‌کنندگان",
+    "menuLayoutFolders": "پوشه‌ها"
   },
   "common": {
     "confirm": "تأیید",
@@ -3076,7 +3083,11 @@
     "likersEmptyTitle": "هنوز لایکی نیست",
     "likersEmptyBody": "لایک‌های این نظر اینجا نمایش داده می‌شوند.",
     "anonymousLikes_one": "{{count}} لایک از دارنده نشان ناشناس",
-    "anonymousLikes_other": "{{count}} لایک از دارندگان نشان ناشناس"
+    "anonymousLikes_other": "{{count}} لایک از دارندگان نشان ناشناس",
+    "threadParts": {
+      "moveUp": "بالا بردن",
+      "moveDown": "پایین بردن"
+    }
   },
   "mintChain": {
     "title": "پست نعناع",
@@ -6112,6 +6123,12 @@
       "needsImageToWork": "{{model}} نیاز به یک تصویر برای کار دارد. یک تصویر را پیوست کنید.",
       "speechLimit": "این متن {{length}} است. حداکثر {{limit}} است.",
       "musicTrackLength": "{{count}} ها"
+    },
+    "gallery": {
+      "send": "ارسال",
+      "notifications": {
+        "generation_reply": "{{name}} به نظر شما پاسخ داد"
+      }
     }
   },
   "pricing": {
@@ -11893,7 +11910,7 @@
   "multiPost": {
     "tab": "پست‌های متعدد",
     "title": "پست‌های متعدد",
-    "intro": "به طور همزمان با dehub در X، یوتیوب، اینستاگرام، تیک‌تاک و موارد دیگر پست بگذارید. حساب‌های خود را یک بار وصل کنید، سپس انتخاب کنید هر پست به کجا می‌رود.",
+    "intro": "به طور همزمان با Riftn در X، یوتیوب، اینستاگرام، تیک‌تاک و موارد دیگر پست بگذارید. حساب‌های خود را یک بار وصل کنید، سپس انتخاب کنید هر پست به کجا می‌رود.",
     "creditsHeading": "اعتبار پست",
     "credits": "{{count}} اعتبار پست",
     "topUpTitle": "شارژ مجدد و صرفه‌جویی",
@@ -11941,7 +11958,10 @@
   "dm": {
     "planRestricted": "این کاربر برای دریافت پیام به اشتراک نیاز دارد.",
     "planTypeNotAllowed": "طرح این سازنده این نوع پیام را مجاز نمی‌داند.",
-    "planMinTip": "انعام برای این سازنده باید حداقل {{amount}} توکن‌ها باشد."
+    "planMinTip": "انعام برای این سازنده باید حداقل {{amount}} توکن‌ها باشد.",
+    "shareKindGroup": "گروه بندی",
+    "shareKindChannel": "کانال",
+    "shareKindCommunity": "انجمن"
   },
   "credits": {
     "earningsWorth": "ارزش {{amount}}",
@@ -19498,5 +19518,10 @@
     "edit": "ویرایش",
     "editLabel": "ویرایش پیام",
     "error": "این کار نکرد. دوباره امتحان کنید."
+  },
+  "mentionLinks": {
+    "communities": "انجمن‌ها",
+    "pages": "صفحه‌ها",
+    "people": "افراد"
   }
 }

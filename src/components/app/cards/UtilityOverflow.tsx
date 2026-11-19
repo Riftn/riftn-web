@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import Add from '@/components/ui/cut-icons/add';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -22,6 +23,38 @@ function flexItems(row: HTMLElement): HTMLElement[] {
   return out;
 }
 
+/** The row's text and element count: what its buttons' widths depend on. */
+function contentKey(row: HTMLElement): string {
+  return `${row.getElementsByTagName('*').length}|${row.textContent ?? ''}`;
+}
+
+/**
+ * One observer for every action row. The browser reports rows after it has
+ * laid the page out and before it paints, all the rows of a frame together:
+ * each is measured against a layout that is already there, and the rows that
+ * have to fold do so in one update ahead of the paint. Measured one by one as
+ * their cards mounted, each row made the browser lay the whole page out again
+ * (a results page of fifteen cards: fifteen layouts in a row).
+ */
+const rowChecks = new WeakMap<Element, () => (() => void) | null>();
+let rowObserver: ResizeObserver | null = null;
+function watchRow(row: HTMLElement, check: () => (() => void) | null): () => void {
+  rowObserver ??= new ResizeObserver((entries) => {
+    const writes: (() => void)[] = [];
+    for (const entry of entries) {
+      const write = rowChecks.get(entry.target)?.();
+      if (write) writes.push(write);
+    }
+    if (writes.length) flushSync(() => { for (const write of writes) write(); });
+  });
+  rowChecks.set(row, check);
+  rowObserver.observe(row);
+  return () => {
+    rowChecks.delete(row);
+    rowObserver?.unobserve(row);
+  };
+}
+
 /**
  * True when the action row cannot hold every button on one line. While it
  * fits, the full set shows; once it would wrap, bookmark / pin / info fold
@@ -34,39 +67,46 @@ export function useFoldUtility(rowRef: RefObject<HTMLElement | null>, enabled: b
   const needed = useRef(0);
   const foldedRef = useRef(false);
   foldedRef.current = folded;
+  // What the row held when it was last measured. Reading it costs no layout.
+  const measured = useRef('');
 
-  const measure = useCallback(() => {
+  /** Measures the row; returns the change to make, if any. */
+  const check = useCallback((): (() => void) | null => {
     const row = rowRef.current;
-    if (!row) return;
+    if (!row) return null;
+    measured.current = contentKey(row);
     const style = getComputedStyle(row);
     const width = row.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
-    if (width <= 0) return;
-    if (foldedRef.current) {
-      if (width >= needed.current) setFolded(false);
-      return;
-    }
+    if (width <= 0) return null;
+    if (foldedRef.current) return width >= needed.current ? () => setFolded(false) : null;
     const items = flexItems(row);
-    if (items.length < 2) return;
+    if (items.length < 2) return null;
     const gap = parseFloat(style.columnGap) || 0;
     const need = items.reduce((sum, el) => sum + el.getBoundingClientRect().width, 0) + gap * (items.length - 1);
-    if (need > width + 0.5) {
-      needed.current = Math.ceil(need);
-      setFolded(true);
-    }
+    if (need <= width + 0.5) return null;
+    needed.current = Math.ceil(need);
+    return () => setFolded(true);
   }, [rowRef]);
 
   useLayoutEffect(() => {
     if (!enabled) { setFolded(false); return; }
     const row = rowRef.current;
     if (!row || typeof ResizeObserver === 'undefined') return;
-    measure();
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(row);
-    return () => ro.disconnect();
-  }, [enabled, measure, rowRef]);
+    // The observer reports a row once as soon as it is watched, so a new
+    // card is measured before its first paint without a measure here.
+    return watchRow(row, check);
+  }, [enabled, check, rowRef]);
 
-  // Counts change width too (a like taking 9 to 10): re-check after renders.
-  useLayoutEffect(() => { if (enabled) measure(); });
+  // Counts change width too (a like taking 9 to 10): re-check after a render
+  // that changed what the row holds. Measuring makes the browser lay the page
+  // out on the spot, and a feed of cards renders many times a second while it
+  // scrolls, so a render that left the row as it was measures nothing, and a
+  // row the observer has yet to report is left to it.
+  useLayoutEffect(() => {
+    if (!enabled || !measured.current) return;
+    const row = rowRef.current;
+    if (row && contentKey(row) !== measured.current) check()?.();
+  });
 
   return enabled && folded;
 }

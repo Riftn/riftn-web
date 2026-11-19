@@ -15,6 +15,7 @@
  */
 
 import { Skeleton } from '@/components/ui/skeleton';
+import '@/styles/home-skeleton.css';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { DeHubPageLoader } from '@/components/app/DeHubLoader';
@@ -170,57 +171,37 @@ function HomeLeftSidebarSkeleton() {
   );
 }
 
-/** Right desktop sidebar shell — mirrors real RightSidebar geometry exactly */
-function HomeRightSidebarSkeleton() {
+/**
+ * Right desktop rail skeleton — the SAME look as the boot skeleton's right
+ * rail in index.html (.bskel-rrail) and the same block style as the feed
+ * cards, so the rail reads as one steady placeholder from first paint until
+ * the real rail lands: boot HTML → this (shell fallback) → this again
+ * (AppLayout's lazy-rail fallback) → real rail. Exported for AppLayout.
+ */
+function RailNavRow() {
   return (
-    <aside className="hidden lg:block w-72 xl:w-80 2xl:w-88 shrink-0 h-dvh sticky top-0 px-4 pt-[8px] pb-4">
-      {/* Search — matches real h-[36px] rounded-xl */}
-      <Skeleton className={`h-[36px] w-full rounded-xl ${SK}`} />
-      {/* Tabbed side panel — matches real mt-[11px] then 400px panel */}
-      <div className="mt-[11px] space-y-4">
-        <div data-side-panel className="bg-zinc-900 rounded-2xl overflow-hidden">
-          {/* Icon tab row — real uses py-3 with w-5 h-5 icons */}
-          <div className="flex">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex-1 py-3 flex items-center justify-center">
-                <Skeleton className={`w-5 h-5 rounded ${SK}`} />
-              </div>
-            ))}
-          </div>
-          {/* Panel body — real height is 400px */}
-          <div className="h-[400px] p-3 space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <Skeleton className={`w-9 h-9 rounded-full ${SK}`} />
-                <div className="flex-1 space-y-1.5">
-                  <Skeleton className={`h-3.5 w-24 rounded ${SK}`} />
-                  <Skeleton className={`h-3 w-16 rounded ${SK}`} />
-                </div>
-                <Skeleton className={`h-7 w-16 rounded-lg ${SK}`} />
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* What's happening — real has -mt-[4px] */}
-        <div data-side-panel className="-mt-[4px] bg-zinc-900 rounded-2xl overflow-hidden">
-          <div className="flex">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex-1 py-3 flex items-center justify-center">
-                <Skeleton className={`w-5 h-5 rounded ${SK}`} />
-              </div>
-            ))}
-          </div>
-          <div className="p-3 space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Skeleton className={`w-4 h-4 rounded ${SK}`} />
-                <Skeleton className={`h-4 flex-1 rounded ${SK}`} />
-                <Skeleton className={`h-3 w-12 rounded ${SK}`} />
-              </div>
-            ))}
-          </div>
-        </div>
+    <div className="h-[58px] flex items-center gap-3">
+      <div className="home-skeleton-block w-9 h-9 rounded-[10px] shrink-0" />
+      <div className="home-skeleton-block w-[72px] h-3.5 rounded" />
+    </div>
+  );
+}
+function RailPanel({ rows, height }: { rows: number; height: number }) {
+  return (
+    <div data-side-panel className="mb-4 p-3 rounded-2xl bg-zinc-900 overflow-hidden" style={{ height }}>
+      <div className="flex justify-around mb-6">
+        {[0, 1, 2].map(i => <div key={i} className="home-skeleton-block w-5 h-5 rounded" />)}
       </div>
+      {Array.from({ length: rows }, (_, i) => <RailNavRow key={i} />)}
+    </div>
+  );
+}
+export function HomeRightSidebarSkeleton() {
+  return (
+    <aside aria-hidden="true" data-right-rail-skeleton className="hidden lg:block w-72 xl:w-80 2xl:w-88 shrink-0 h-dvh sticky top-0 px-4 pt-[8px] pb-4">
+      <div className="home-skeleton-block h-[36px] w-full rounded-xl mb-3" />
+      <RailPanel rows={5} height={444} />
+      <RailPanel rows={2} height={220} />
     </aside>
   );
 }
@@ -343,7 +324,7 @@ export function ProfileSkeleton({ seed }: { seed?: ProfileSkeletonSeed | null } 
       <div className="bg-black/50 backdrop-blur-[24px] border border-white/[0.12] rounded-2xl p-1.5">
         <div className="flex gap-0.5">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-0.5 py-[7px] min-w-[52px]">
+            <div key={i} className="flex-1 flex flex-col items-center justify-center gap-0.5 h-11 min-w-14">
               <Skeleton className={`w-[18px] h-[18px] rounded ${SK}`} />
               <Skeleton className={`w-5 h-[10px] rounded ${SK}`} />
             </div>

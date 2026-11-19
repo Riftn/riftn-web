@@ -81,7 +81,8 @@
       "profile": "ਪ੍ਰੋਫਾਈਲ",
       "proposal": "ਪ੍ਰਸਤਾਵ",
       "stage": "ਸਟੇਜ",
-      "store": "ਸਟੋਰ"
+      "store": "ਸਟੋਰ",
+      "featureRequest": "ਅਰਜ਼ੀ"
     },
     "recipientChat": "ਗੱਲਬਾਤ",
     "recipientUser": "ਯੂਜ਼ਰ",
@@ -520,7 +521,12 @@
     "getTheApp": "ਐਪ ਲਵੋ",
     "connectAi": "AI ਜੋੜੋ",
     "converter": "ਪਰਿਵਰਤਕ",
-    "affiliate": "ਐਫੀਲੀਏਟ"
+    "affiliate": "ਐਫੀਲੀਏਟ",
+    "groups": {
+      "create": "ਬਣਾਓ",
+      "discover": "ਖੋਜੋ",
+      "riftn": "ਡੀਹਬ"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} ਦੀ ਪ੍ਰੋਫਾਈਲ ਦੇਖੋ",
@@ -1142,7 +1148,8 @@
     "socialConnectedShort": "ਕੁਨੈਕਟ ਕੀਤਾ",
     "socialConnectFailed": "{{platform}} ਨੂੰ ਜੋੜਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ । ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ।",
     "socialVerifiedFollowers": "{{value}} ਫਾਲੋਅਰਜ਼",
-    "socialFollowersPending": "ਫਾਲੋਅਰ ਕਾਊਂਟ ਅੱਪਡੇਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"
+    "socialFollowersPending": "ਫਾਲੋਅਰ ਕਾਊਂਟ ਅੱਪਡੇਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ",
+    "menuLayoutFolders": "ਫੋਲਡਰ"
   },
   "common": {
     "confirm": "ਪੁਸ਼ਟੀ ਕਰੋ",
@@ -3046,7 +3053,11 @@
     "likersEmptyTitle": "ਹਾਲੇ ਕੋਈ ਪਸੰਦ ਨਹੀਂ",
     "likersEmptyBody": "ਇਸ ਟਿੱਪਣੀ 'ਤੇ ਪਸੰਦਾਂ ਇੱਥੇ ਦਿਖਾਈ ਦੇਣਗੀਆਂ।",
     "anonymousLikes_one": "ਅਗਿਆਤ ਬੈਜ ਧਾਰਕ ਤੋਂ {{count}} ਪਸੰਦ",
-    "anonymousLikes_other": "ਅਗਿਆਤ ਬੈਜ ਧਾਰਕਾਂ ਤੋਂ {{count}} ਪਸੰਦਾਂ"
+    "anonymousLikes_other": "ਅਗਿਆਤ ਬੈਜ ਧਾਰਕਾਂ ਤੋਂ {{count}} ਪਸੰਦਾਂ",
+    "threadParts": {
+      "moveUp": "ਉੱਤੇ ਭੇਜੋ",
+      "moveDown": "ਹੇਠਾਂ ਭੇਜੋ"
+    }
   },
   "mintChain": {
     "title": "ਮਿੰਟ ਪੋਸਟ",
@@ -6074,6 +6085,12 @@
       "needsImageToWork": "{{model}} ਤੋਂ ਕੰਮ ਕਰਨ ਲਈ ਇੱਕ ਚਿੱਤਰ ਦੀ ਜ਼ਰੂਰਤ ਹੈ. ਪਹਿਲਾਂ ਇੱਕ ਨੱਥੀ ਕਰੋ.",
       "speechLimit": "ਉਹ ਹੈ {{length}} ਅੱਖਰ. ਸੀਮਾ {{limit}}.",
       "musicTrackLength": "{{count}}s ਟਰੈਕ"
+    },
+    "gallery": {
+      "send": "ਭੇਜੋ",
+      "notifications": {
+        "generation_reply": "{{name}} ਨੇ ਤੁਹਾਡੀ ਟਿੱਪਣੀ ਦਾ ਜਵਾਬ ਦਿੱਤਾ"
+      }
     }
   },
   "pricing": {
@@ -11843,7 +11860,7 @@
   "multiPost": {
     "tab": "ਮਲਟੀ-ਪੋਸਟਿੰਗ",
     "title": "ਮਲਟੀ-ਪੋਸਟਿੰਗ",
-    "intro": "X, YouTube, Instagram, TikTok ਅਤੇ ਹੋਰ ਪਲੇਟਫਾਰਮਾਂ 'ਤੇ ਇਕੋ ਸਮੇਂ dehub ਵਾਂਗ ਪੋਸਟ ਕਰੋ। ਆਪਣੇ ਖਾਤਿਆਂ ਨੂੰ ਇੱਕ ਵਾਰ ਕਨੈਕਟ ਕਰੋ, ਫਿਰ ਚੁਣੋ ਕਿ ਹਰ ਪੋਸਟ ਕਿੱਥੇ ਜਾਂਦੀ ਹੈ।",
+    "intro": "X, YouTube, Instagram, TikTok ਅਤੇ ਹੋਰ ਪਲੇਟਫਾਰਮਾਂ 'ਤੇ ਇਕੋ ਸਮੇਂ Riftn ਵਾਂਗ ਪੋਸਟ ਕਰੋ। ਆਪਣੇ ਖਾਤਿਆਂ ਨੂੰ ਇੱਕ ਵਾਰ ਕਨੈਕਟ ਕਰੋ, ਫਿਰ ਚੁਣੋ ਕਿ ਹਰ ਪੋਸਟ ਕਿੱਥੇ ਜਾਂਦੀ ਹੈ।",
     "creditsHeading": "ਪੋਸਟ ਕਰੈਡਿਟਸ",
     "credits": "{{count}} ਪੋਸਟ ਕਰੈਡਿਟਸ",
     "topUpTitle": "ਟੌਪ ਅੱਪ ਕਰੋ ਅਤੇ ਬਚਤ ਕਰੋ",
@@ -11891,7 +11908,9 @@
   "dm": {
     "planRestricted": "ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਲੋੜੀਂਦੀ ਹੈ।",
     "planTypeNotAllowed": "ਇਸ ਕ੍ਰਿਏਟਰ ਦਾ ਪਲਾਨ ਇਸ ਕਿਸਮ ਦੇ ਸੁਨੇਹੇ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦਾ।",
-    "planMinTip": "ਇਸ ਕ੍ਰਿਏਟਰ ਲਈ ਟਿਪ ਘੱਟੋ-ਘੱਟ {{amount}} ਟੋਕਨ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।"
+    "planMinTip": "ਇਸ ਕ੍ਰਿਏਟਰ ਲਈ ਟਿਪ ਘੱਟੋ-ਘੱਟ {{amount}} ਟੋਕਨ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।",
+    "shareKindGroup": "ਗਰੁੱਪ",
+    "shareKindCommunity": "ਕਮਿਊਨਿਟੀ"
   },
   "credits": {
     "earningsWorth": "ਵਰਥ {{amount}}",
@@ -19425,5 +19444,10 @@
     "edit": "ਸੋਧੋ",
     "editLabel": "ਸੁਨੇਹਾ ਸੰਪਾਦਿਤ ਕਰੋ",
     "error": "ਇਹ ਕੰਮ ਨਹੀਂ ਕੀਤਾ । ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ।"
+  },
+  "mentionLinks": {
+    "communities": "ਕਮਿਊਨਿਟੀਆਂ",
+    "pages": "ਪੰਨੇ",
+    "people": "ਲੋਕ"
   }
 }

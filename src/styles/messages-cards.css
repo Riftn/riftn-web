@@ -226,3 +226,29 @@ html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat
     box-shadow: var(--mc-rim), 0 18px 40px -12px rgb(0 0 0 / 0.55) !important;
   }
 }
+
+/* ---- Plain list (Settings > Appearance > Chats as cards, off): no cards,
+   no gaps, a line between chats. Tabs, header and the unread bar stay. ---- */
+[data-msg-cards][data-msg-plain] [data-chat-list-body] { gap: 0; }
+[data-msg-cards][data-msg-plain] [data-chat-list-scroll] .overflow-hidden:has(> .flex > .w-full > [data-chat-list-row]) { border-radius: 0; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: inset 0 -1px 0 var(--mc-soft) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button):hover {
+  background: var(--mc-hover) !important;
+  box-shadow: inset 0 -1px 0 var(--mc-soft) !important;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] [data-chat-list-row]:is([data-selected], [data-bulk-checked='true']) {
+  background: var(--mc-soft) !important;
+  box-shadow: inset 0 -1px 0 var(--mc-soft) !important;
+}
+@media (min-width: 1024px) {
+  [data-msg-cards][data-msg-plain] [data-chat-list-scroll] { padding-top: 8px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+    min-height: 76px;
+  }
+}

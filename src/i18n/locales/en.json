@@ -791,6 +791,15 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "chatCards": "Chats as cards",
+    "chatCardsDesc": "Each chat on its own card. Turn off for a plain list with a line between chats.",
+    "chatDeleteChoice": "When you delete a message",
+    "chatDeleteChoiceDesc": "Ask every time, or always delete for you only or for everyone in the chat.",
+    "chatDeleteAsk": "Ask every time",
+    "chatDeleteMe": "Delete for me",
+    "chatDeleteMeDesc": "Gone from your chat, others still see it",
+    "chatDeleteEveryone": "Delete for everyone",
+    "chatDeleteEveryoneDesc": "When you can. Someone else’s message in a group still goes for you only",
     "postLanding": "After you post",
     "postLandingDesc": "How your new post lands in your feed",
     "postLandingGhost": "Ghost slot",
@@ -12692,7 +12701,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as dehub. Connect your accounts once, then pick where each post goes.",
+    "intro": "Post to X, YouTube, Instagram, TikTok and more at the same time as Riftn. Connect your accounts once, then pick where each post goes.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up and save",
@@ -12738,6 +12747,11 @@
     "skippedOtherToast": "Skipped {{platforms}}: they couldn't take this post."
   },
   "dm": {
+    "shareGroups": "Groups",
+    "shareKindGroup": "Group",
+    "shareKindChannel": "Channel",
+    "shareKindCommunity": "Community",
+    "reportMessage": "Report message",
     "planRestricted": "This user requires a subscription to receive messages.",
     "planTypeNotAllowed": "This creator's plan doesn't allow this kind of message.",
     "planMinTip": "Tip must be at least {{amount}} tokens for this creator."
@@ -20737,6 +20751,8 @@
     "forEveryone": "Delete for everyone",
     "forBoth": "Delete for both of us",
     "forMeAndName": "Delete for me and {{name}}",
+    "remember": "Remember my choice",
+    "rememberHint": "Change it any time in Settings",
     "failed": "Could not delete the message"
   }
 }

@@ -168,7 +168,9 @@ export function signFollow(action: Action, target: string) {
   const outbox = read<Pending[]>(OUTBOX(wallet), []).filter((p) => p.target !== to);
   outbox.push({ action, target: to, at: Math.floor(Date.now() / 1000) });
   write(OUTBOX(wallet), outbox.slice(-2000));
-  void run(true);
+  // A follow is not a wallet action: queue the proof and sign it quietly when
+  // the wallet can (Settings "Turn on" is the only place that asks).
+  void run(false);
 }
 
 /** Quiet catch-up (app start): never asks an external wallet. */

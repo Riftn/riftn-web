@@ -780,6 +780,13 @@
     "heading": "مقاطع Riftn القصيرة"
   },
   "settings": {
+    "chatDeleteChoice": "عند حذف رسالة",
+    "chatDeleteChoiceDesc": "اسألني كل مرة، أو احذف دائمًا لي فقط أو للجميع في المحادثة.",
+    "chatDeleteAsk": "اسألني كل مرة",
+    "chatDeleteMe": "حذف لدي",
+    "chatDeleteMeDesc": "تختفي من محادثتك ويظل الآخرون يرونها",
+    "chatDeleteEveryone": "حذف لدى الجميع",
+    "chatDeleteEveryoneDesc": "عندما يكون ذلك ممكنًا. رسالة شخص آخر في مجموعة تُحذف لديك فقط",
     "postLanding": "بعد النشر",
     "postLandingDesc": "كيف يظهر منشورك الجديد في موجزك",
     "postLandingGhost": "خانة شبحية",
@@ -1381,7 +1388,9 @@
     "menuLayoutSections": "أقسام",
     "menuLayoutSectionsDesc": "كل الصفحات معًا، تحت عناوين",
     "menuLayoutFolders": "مجلدات",
-    "menuLayoutFoldersDesc": "صفحاتك الرئيسية، ثم مجلد لكل مجموعة"
+    "menuLayoutFoldersDesc": "صفحاتك الرئيسية، ثم مجلد لكل مجموعة",
+    "chatCards": "الدردشات كبطاقات",
+    "chatCardsDesc": "كل دردشة في بطاقتها. أوقفه لقائمة بسيطة بخط بين الدردشات."
   },
   "common": {
     "confirm": "تأكيد",
@@ -12776,7 +12785,7 @@
   "multiPost": {
     "tab": "النشر المتعدد",
     "title": "النشر المتعدد",
-    "intro": "انشر على X و YouTube و Instagram و TikTok والمزيد في نفس الوقت باستخدام dehub. قم بتوصيل حساباتك مرة واحدة، ثم اختر إلى أين تذهب كل مشاركة.",
+    "intro": "انشر على X و YouTube و Instagram و TikTok والمزيد في نفس الوقت باستخدام Riftn. قم بتوصيل حساباتك مرة واحدة، ثم اختر إلى أين تذهب كل مشاركة.",
     "creditsHeading": "رصيد المشاركات",
     "credits": "{{count}} رصيد مشاركة",
     "topUpTitle": "إعادة الشحن والتوفير",
@@ -12824,7 +12833,12 @@
   "dm": {
     "planRestricted": "يتطلب هذا المستخدم اشتراكًا لتلقي الرسائل.",
     "planTypeNotAllowed": "لا تسمح خطة هذا المنشئ بهذا النوع من الرسائل.",
-    "planMinTip": "يجب أن تكون الإكرامية {{amount}} عملات على الأقل لهذا المنشئ."
+    "planMinTip": "يجب أن تكون الإكرامية {{amount}} عملات على الأقل لهذا المنشئ.",
+    "shareGroups": "المجموعات",
+    "shareKindGroup": "مجموعة",
+    "shareKindChannel": "قناة",
+    "shareKindCommunity": "مجتمع",
+    "reportMessage": "الإبلاغ عن الرسالة"
   },
   "credits": {
     "earningsWorth": "يستحق {{amount}}",
@@ -20870,6 +20884,8 @@
     "forEveryone": "حذف للجميع",
     "forBoth": "حذف لدينا نحن الاثنين",
     "forMeAndName": "حذف لديّ ولدى {{name}}",
+    "remember": "تذكّر اختياري",
+    "rememberHint": "يمكنك تغييره في أي وقت من الإعدادات",
     "failed": "تعذّر حذف الرسالة"
   }
 }

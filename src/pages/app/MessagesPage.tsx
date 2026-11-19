@@ -34,6 +34,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
+import { useChatCards } from '@/lib/chat-cards';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -481,8 +482,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     setActiveTabRaw(id);
     try { localStorage.setItem('riftn.chatTab', id); } catch { /* private mode */ }
   }, []);
-  // Full-screen /chat only: /app/messages has its own card tabs.
-  const tabsOn = fullscreen && !guest && !searchQuery.trim();
+  // The same tabs on /chat and /app/messages, so both pages behave alike.
+  const tabsOn = !guest && !searchQuery.trim();
   const activeTabView = chatTabs.tabs.find(x => x.id === activeTabRaw && !x.hidden);
   const activeTab = tabsOn && activeTabView ? activeTabView.id : 'all';
   const customTab = activeTabView && !activeTabView.builtin && tabsOn ? activeTabView : null;
@@ -517,9 +518,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
   // a row at the top of the list on phones.
   const cards = !fullscreen;
+  // Settings → Appearance → Chats as cards, off: the same page as a plain list.
+  const plainList = !useChatCards() && cards;
   const deskCards = cards && !phonePill;
-  const phoneCards = cards && phonePill;
-  const [listTab, setListTab] = useState<'all' | 'unread' | 'groups'>('all');
   const clearHistory = useClearChatHistory();
   const [showArchived, setShowArchived] = useState(false);
   // The last request was accepted or deleted: nothing left to show here.
@@ -564,7 +565,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       ? archivedRooms
       : groupChats.filter(c => !isArchived(roomPref(c))).sort((a, b) => roomPinnedAt(b) - roomPinnedAt(a));
   // "Add to tab" in a chat's menu.
-  const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (!fullscreen || guest ? {} : {
+  const tabMenuFor = (chatId: string): Pick<ChatOptionsHandlers, 'tabs' | 'onToggleTab' | 'onNewTabWith'> => (guest ? {} : {
     tabs: chatTabs.tabs.filter(x => !x.builtin).map(x => ({ id: x.id, name: x.name, emoji: x.emoji, has: x.chats.includes(chatId) })),
     onToggleTab: (tabId) => {
       const tab = chatTabs.tabs.find(x => x.id === tabId);
@@ -582,7 +583,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     activeTab === 'communities' ? false : customTab ? customTab.chats.includes(c.id) : true;
   const roomInTab = (c: { id: string }) =>
     activeTab === 'direct' ? false : customTab ? customTab.chats.includes(roomChatId(c.id)) : true;
-  const publicInTab = activeTab === 'direct' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
+  const publicInTab = activeTab === 'direct' || activeTab === 'communities' ? false : customTab ? customTab.chats.includes(PUBLIC_CHAT_TAB_ID) : true;
   const roomOptionsFor = (c: (typeof groupChats)[number]): ChatOptionsHandlers => ({
     pref: roomPref(c),
     hasUnread: false,
@@ -605,14 +606,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread || !!chatPrefs.get(c.id)?.reactions;
   const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions;
   const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
-  const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : tabsOn && activeTab === 'unread' ? 'unread' : 'all';
-  const shownConversations = tabFilter === 'groups' ? [] : tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
-  // Computers: the first tab is "Messages", direct chats only; groups, channels,
-  // communities and Public Chat live under Groups.
-  const messagesTab = tabFilter === 'all' && deskCards && !searchQuery.trim() && !showArchived && !inRequests;
-  const shownRooms = messagesTab ? [] : tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
-  const inboxUnreadChats = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)) && convHasUnread(c)).length
-    + groupChats.filter(c => !isArchived(roomPref(c)) && roomHasUnread(c)).length;
+  const tabFilter = tabsOn && activeTab === 'unread' && !showArchived && !inRequests ? 'unread' : 'all';
+  const shownConversations = tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
+  const shownRooms = tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
   const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
@@ -1212,7 +1208,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
     unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
     direct: inboxConvs.reduce((n, c) => n + unreadOf(c), 0),
-    communities: publicUnread,
+    communities: 0,
     requests: requestUnread,
   };
   for (const tab of chatTabs.tabs) {
@@ -1260,9 +1256,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const tabBar = tabsOn ? (
     <ChatTabBar
       tabs={tabRowTabs}
-      active={activeTab}
       unread={tabUnread}
-      onSelect={(id) => { setShowArchived(false); setActiveTab(id); }}
+      active={showArchived ? 'archived' : inRequests ? 'requests' : activeTab}
+      onSelect={(id) => { setShowArchived(false); setShowRequests(false); setActiveTab(id); }}
       onNew={() => setTabEditor({})}
       onManage={() => setTabManager(true)}
       onEdit={(id) => setTabEditor({ id })}
@@ -1275,6 +1271,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         void chatTabs.addChats(tabId, [chatId]);
         toast.success(_copy('chatTabs.addedTo', { defaultValue: 'Added to {{name}}', name: tab.name }));
       }}
+      className={deskCards ? 'px-0 pb-0 pt-0' : undefined}
+      trailing={deskCards && (archivedCount > 0 || showArchived) ? (
+        <button type="button" role="tab" data-chat-tab="archived" data-msg-cards-archived aria-selected={showArchived}
+          onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
+          <Archive className="h-3.5 w-3.5" />
+          <span className="whitespace-nowrap">{_copy('chatMenu.archived', { defaultValue: 'Archived' })}</span>
+          {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{archivedCount}</span>}
+        </button>
+      ) : undefined}
     />
   ) : null;
   const tabSheets = (
@@ -1363,24 +1368,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           </ChatIconButton>
         </>
       )}
-      actions={<ChatTextSizeButton className="rounded-full" />}
+      actions={<ChatTextSizeButton className="rounded-full transition-[color,transform] duration-150 hover:scale-110 hover:bg-transparent" />}
     />
   ) : null;
 
   // Same total as the nav icon: requests never light it.
   const dmUnread = liveConversations.reduce((sum, c) => sum + (c.isRequest ? 0 : c.unreadCount || 0), 0);
-  const pickTab = (tab: 'all' | 'unread' | 'groups' | 'requests' | 'archived') => {
-    setShowRequests(tab === 'requests');
-    setShowArchived(tab === 'archived');
-    setListTab(tab === 'unread' || tab === 'groups' ? tab : 'all');
-  };
-  const cardTab = showArchived ? 'archived' : inRequests ? 'requests' : listTab;
-  const deskTabs: { key: 'all' | 'unread' | 'groups' | 'requests' | 'archived'; label: string; count?: number }[] = [
-    { key: 'all', label: _copy('nav.messages', { defaultValue: 'Messages' }) },
-    { key: 'unread', label: _copy('messagesTabs.unread', { defaultValue: 'Unread' }), count: inboxUnreadChats },
-    { key: 'groups', label: _copy('messagesTabs.groups', { defaultValue: 'Groups' }) },
-    ...(requestConversations.length > 0 ? [{ key: 'requests' as const, label: _copy('dmRequests.title', { defaultValue: 'Requests' }), count: requestConversations.length }] : []),
-  ];
   const deskTop = deskCards ? (
     <PageIsland
       className="shrink-0"
@@ -1437,23 +1430,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
         </button>
       </div>
-      {!searchQuery.trim() && (
-        <div data-msg-cards-tabs role="tablist" className="flex items-center gap-1">
-          {deskTabs.map(tab => (
-            <button key={tab.key} type="button" role="tab" data-msg-cards-tab aria-selected={cardTab === tab.key} onClick={() => pickTab(tab.key)}>
-              {tab.label}
-              {!!tab.count && <span data-msg-cards-tab-count>{tab.count > 99 ? '99+' : tab.count}</span>}
-            </button>
-          ))}
-          {(archivedCount > 0 || showArchived) && (
-            <button type="button" role="tab" data-msg-cards-tab data-msg-cards-archived aria-selected={cardTab === 'archived'} onClick={() => pickTab(showArchived ? 'all' : 'archived')} className="ml-auto">
-              <Archive />
-              {_copy('chatMenu.archived', { defaultValue: 'Archived' })}
-              {archivedCount > 0 && <span data-msg-cards-tab-count data-quiet>{archivedCount}</span>}
-            </button>
-          )}
-        </div>
-      )}
+      {tabBar}
     </PageIsland>
   ) : null;
 
@@ -1464,7 +1441,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             [data-page-bento] hook stays: the Osaka and Jungle `#app-root` class
             nets exclude on it, and without it every bg-zinc-8/9 descendant in
             here becomes a frosted rectangle. */}
-        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
+        <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
           {fullscreenTop ?? deskTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
@@ -1555,7 +1532,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </div>
           </PageIsland>)}
 
-          {tabBar}
+          {!deskCards && tabBar}
           {tabSheets}
 
           {/* Conversation List */}
@@ -1571,16 +1548,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </div>
             </div>
             <div ref={chatPullRef} data-chat-list-body>
-            {phoneCards && !searchQuery.trim() && (
-              <div data-msg-cards-tabs data-msg-cards-phone-tabs role="tablist">
-                {deskTabs.map(tab => (
-                  <button key={tab.key} type="button" role="tab" data-msg-cards-tab aria-selected={cardTab === tab.key} onClick={() => pickTab(tab.key)}>
-                    {tab.label}
-                    {!!tab.count && <span data-msg-cards-tab-count>{tab.count > 99 ? '99+' : tab.count}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
             <ChatPinStrip
               conversations={pinStrip}
               selectedId={selectedConversation?.id}
@@ -1589,7 +1556,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             />
             {/* Public Chat (pinned) */}
             {!inRequests && (<>
-            {((tabFilter === 'all' && !messagesTab) || tabFilter === 'groups' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
+            {(tabFilter === 'all' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
             <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row

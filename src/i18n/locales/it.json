@@ -1235,7 +1235,9 @@
     "menuLayoutSections": "Sezioni",
     "menuLayoutSectionsDesc": "Tutte le pagine insieme, sotto intestazioni",
     "menuLayoutFolders": "Cartelle",
-    "menuLayoutFoldersDesc": "Le tue pagine principali, poi una cartella per gruppo"
+    "menuLayoutFoldersDesc": "Le tue pagine principali, poi una cartella per gruppo",
+    "chatCards": "Chat come schede",
+    "chatCardsDesc": "Ogni chat sulla sua scheda. Disattiva per un elenco semplice con una linea tra le chat."
   },
   "common": {
     "confirm": "Conferma",
@@ -3154,7 +3156,11 @@
     "likersEmptyTitle": "Ancora nessun Mi piace",
     "likersEmptyBody": "I Mi piace a questo commento appariranno qui.",
     "anonymousLikes_one": "{{count}} Mi piace da un titolare di badge anonimo",
-    "anonymousLikes_other": "{{count}} Mi piace da titolari di badge anonimi"
+    "anonymousLikes_other": "{{count}} Mi piace da titolari di badge anonimi",
+    "threadParts": {
+      "moveUp": "Sposta su",
+      "moveDown": "Sposta giù"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6191,6 +6197,12 @@
       "needsImageToWork": "{{model}} ha bisogno di un'immagine su cui lavorare. Attaccane prima uno.",
       "speechLimit": "Sono {{length}} caratteri. Il limite è {{limit}}.",
       "musicTrackLength": "{{count}}s traccia"
+    },
+    "gallery": {
+      "send": "Invia",
+      "notifications": {
+        "generation_reply": "{{name}} ha risposto al tuo commento"
+      }
     }
   },
   "pricing": {
@@ -11971,7 +11983,7 @@
   "multiPost": {
     "tab": "Pubblicazione multipla",
     "title": "Pubblicazione multipla",
-    "intro": "Pubblica su X, YouTube, Instagram, TikTok e altro contemporaneamente con dehub. Collega i tuoi account una volta, quindi scegli dove va ogni post.",
+    "intro": "Pubblica su X, YouTube, Instagram, TikTok e altro contemporaneamente con Riftn. Collega i tuoi account una volta, quindi scegli dove va ogni post.",
     "creditsHeading": "Crediti di post",
     "credits": "{{count}} crediti di post",
     "topUpTitle": "Ricarica e risparmia",
@@ -12019,7 +12031,11 @@
   "dm": {
     "planRestricted": "Questo utente richiede un abbonamento per ricevere messaggi.",
     "planTypeNotAllowed": "Il piano di questo creator non consente questo tipo di messaggio.",
-    "planMinTip": "La mancia deve essere di almeno {{amount}} token per questo creator."
+    "planMinTip": "La mancia deve essere di almeno {{amount}} token per questo creator.",
+    "shareGroups": "Gruppi",
+    "shareKindGroup": "Gruppo",
+    "shareKindChannel": "Canale",
+    "shareKindCommunity": "Comunità"
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",

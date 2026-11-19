@@ -1233,7 +1233,9 @@
     "menuLayoutSections": "섹션",
     "menuLayoutSectionsDesc": "모든 페이지를 제목 아래에 한 번에",
     "menuLayoutFolders": "폴더",
-    "menuLayoutFoldersDesc": "주요 페이지, 그리고 그룹별 폴더"
+    "menuLayoutFoldersDesc": "주요 페이지, 그리고 그룹별 폴더",
+    "chatCards": "채팅을 카드로",
+    "chatCardsDesc": "채팅마다 카드로 표시합니다. 끄면 채팅 사이에 선이 있는 단순한 목록이 됩니다."
   },
   "common": {
     "confirm": "확인",
@@ -3157,7 +3159,11 @@
     "likersEmptyTitle": "아직 좋아요가 없습니다",
     "likersEmptyBody": "이 댓글의 좋아요가 여기에 표시됩니다.",
     "anonymousLikes_one": "익명 배지 보유자의 좋아요 {{count}}개",
-    "anonymousLikes_other": "익명 배지 보유자의 좋아요 {{count}}개"
+    "anonymousLikes_other": "익명 배지 보유자의 좋아요 {{count}}개",
+    "threadParts": {
+      "moveUp": "위로 이동",
+      "moveDown": "아래로 이동"
+    }
   },
   "mintChain": {
     "title": "민트 포스트",
@@ -6191,6 +6197,12 @@
       "needsImageToWork": "이미지를 첨부하기 전에 {{model}}이 작동하려면 이미지를 먼저 첨부해야 합니다.",
       "speechLimit": "{{length}} 자입니다. 한도는 {{limit}} 입니다.",
       "musicTrackLength": "{{count}} s 트랙"
+    },
+    "gallery": {
+      "send": "전송",
+      "notifications": {
+        "generation_reply": "{{name}}이(가) 댓글에 답글"
+      }
     }
   },
   "pricing": {
@@ -11973,7 +11985,7 @@
   "multiPost": {
     "tab": "멀티 포스팅",
     "title": "멀티 포스팅",
-    "intro": "dehub로 X, YouTube, Instagram, TikTok 등에 동시에 게시하세요. 계정을 한 번 연결한 후 각 게시물을 어디로 보낼지 선택하세요.",
+    "intro": "Riftn로 X, YouTube, Instagram, TikTok 등에 동시에 게시하세요. 계정을 한 번 연결한 후 각 게시물을 어디로 보낼지 선택하세요.",
     "creditsHeading": "게시물 크레딧",
     "credits": "{{count}} 게시물 크레딧",
     "topUpTitle": "충전하고 절약하세요",
@@ -12021,7 +12033,11 @@
   "dm": {
     "planRestricted": "이 사용자에게 메시지를 보내려면 구독이 필요합니다.",
     "planTypeNotAllowed": "이 크리에이터의 플랜은 이 유형의 메시지를 허용하지 않습니다.",
-    "planMinTip": "이 크리에이터에게 보내는 팁은 최소 {{amount}} DHB여야 합니다."
+    "planMinTip": "이 크리에이터에게 보내는 팁은 최소 {{amount}} DHB여야 합니다.",
+    "shareGroups": "그룹",
+    "shareKindGroup": "그룹",
+    "shareKindChannel": "채널",
+    "shareKindCommunity": "커뮤니티"
   },
   "credits": {
     "earningsWorth": "가치 {{amount}}",

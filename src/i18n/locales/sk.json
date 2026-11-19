@@ -78,7 +78,8 @@
       "profile": "profil",
       "proposal": "predložka",
       "stage": "scéna",
-      "store": "obchod"
+      "store": "obchod",
+      "featureRequest": "požiadavka"
     },
     "recipientChat": "chat",
     "recipientUser": "užívateľ",
@@ -519,7 +520,11 @@
     "getTheApp": "Stiahnuť aplikáciu",
     "connectAi": "Pripojiť AI",
     "converter": "Konvertor",
-    "affiliate": "Partnerský program"
+    "affiliate": "Partnerský program",
+    "groups": {
+      "create": "Vytvoriť",
+      "discover": "Objavovať"
+    }
   },
   "feed": {
     "viewProfile": "Zobraziť profil používateľa {{name}}",
@@ -1148,7 +1153,8 @@
     "socialConnectedShort": "Pripojené",
     "socialConnectFailed": "Nepodarilo sa pripojiť {{platform}}. Skúste to znova.",
     "socialVerifiedFollowers": "{{value}} sledujúcich",
-    "socialFollowersPending": "Aktualizácia počtu sledovateľov"
+    "socialFollowersPending": "Aktualizácia počtu sledovateľov",
+    "menuLayoutFolders": "Priečinky"
   },
   "common": {
     "confirm": "Potvrdiť",
@@ -3149,7 +3155,11 @@
     "likersEmptyTitle": "Zatiaľ žiadne lajky",
     "likersEmptyBody": "Lajky tohto komentára sa zobrazia tu.",
     "anonymousLikes_one": "{{count}} lajk od anonymného držiteľa odznaku",
-    "anonymousLikes_other": "{{count}} lajkov od anonymných držiteľov odznakov"
+    "anonymousLikes_other": "{{count}} lajkov od anonymných držiteľov odznakov",
+    "threadParts": {
+      "moveUp": "Pohori",
+      "moveDown": "Dol"
+    }
   },
   "mintChain": {
     "title": "Príspevok mincovne",
@@ -6185,6 +6195,12 @@
       "needsImageToWork": "{{model}} potrebuje obrázok, z ktorého bude fungovať. Najprv jeden priložte.",
       "speechLimit": "To je {{length}} znakov. Limit je {{limit}}.",
       "musicTrackLength": "{{count}}s trať"
+    },
+    "gallery": {
+      "send": "Poslať",
+      "notifications": {
+        "generation_reply": "{{name}} odpovedal na váš komentár"
+      }
     }
   },
   "pricing": {
@@ -11961,7 +11977,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Uverejňujte na X, YouTube, Instagram, TikTok a ďalšie platformy naraz pomocou dehub. Pripojte svoje účty raz a potom si vyberte, kam každý príspevok pôjde.",
+    "intro": "Uverejňujte na X, YouTube, Instagram, TikTok a ďalšie platformy naraz pomocou Riftn. Pripojte svoje účty raz a potom si vyberte, kam každý príspevok pôjde.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Doplniť a ušetriť",
@@ -12009,7 +12025,9 @@
   "dm": {
     "planRestricted": "Tento používateľ vyžaduje predplatné na prijímanie správ.",
     "planTypeNotAllowed": "Plán tohto tvorcu nepovoľuje tento typ správy.",
-    "planMinTip": "Prepitné pre tohto tvorcu musí byť aspoň {{amount}} tokenov."
+    "planMinTip": "Prepitné pre tohto tvorcu musí byť aspoň {{amount}} tokenov.",
+    "shareKindGroup": "Zoskupiť",
+    "shareKindCommunity": "Komunita"
   },
   "credits": {
     "earningsWorth": "V hodnote {{amount}}",
@@ -19632,5 +19650,10 @@
     "inProgress": "V realizácii",
     "completed": "Dokončené",
     "underReview": "V recenzii"
+  },
+  "mentionLinks": {
+    "communities": "Komunity",
+    "pages": "Strany",
+    "people": "Ľudia"
   }
 }

@@ -131,11 +131,13 @@ import {
 } from '@/lib/api/dehub/dm-socket';
 import { ForwardMessageDialog } from './ForwardMessageDialog';
 import { DeleteMessageDialog, type DeleteScope } from './DeleteMessageDialog';
+import { ReportModal } from '@/components/app/modals/ReportModal';
 import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -468,6 +470,16 @@ export function CozyDayPill({ iso }: { iso: string }) {
   );
 }
 
+/** What moderators see with a reported chat message. Same lines as the app sends. */
+function messageReportContext(message: DmMessage, where: string): string {
+  const text = (message.content || '').trim().slice(0, 500);
+  return [
+    `Reported message (${where})`,
+    message._id ? `Message id: ${message._id}` : null,
+    text ? `Text: ${text}` : null,
+  ].filter(Boolean).join('\n');
+}
+
 const MessageBubble = memo(function MessageBubble({
   message,
   isOwnMessage,
@@ -493,6 +505,7 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick,
   onStartPick,
   onDelete,
+  onReport,
   canPin = true,
   isPinned = false,
   onUnpin,
@@ -501,6 +514,8 @@ const MessageBubble = memo(function MessageBubble({
   isOwnMessage: boolean;
   /** Delete one message (asks first: for me, or for everyone when it is yours). */
   onDelete?: (message: DmMessage) => void;
+  /** Report a message someone else sent, with its text attached for moderators. */
+  onReport?: (message: DmMessage) => void;
   /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
   canPin?: boolean;
   isPinned?: boolean;
@@ -728,6 +743,18 @@ const MessageBubble = memo(function MessageBubble({
       () => undefined,
     );
   };
+  // A photo, GIF or video can be copied as itself, not just its caption.
+  // Paid and encrypted attachments stay out, like Download.
+  const copyMediaTarget = (() => {
+    if ((message.msgType !== 'media' && message.msgType !== 'gif') || message.undecryptable || message.lock || encMedia || isLockedMedia || isFileMedia) return null;
+    const url = copyableMediaUrl(getMediaUrl(primaryMediaUrl) || primaryMediaUrl);
+    if (!url) return null;
+    const kind = message.msgType === 'gif' || primaryMedia?.mimeType === 'image/gif' ? 'gif' as const
+      : primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? 'video' as const
+      : 'image' as const;
+    return { url, kind };
+  })();
+  const copyMediaNow = () => { if (copyMediaTarget) copyMediaWithToast(copyMediaTarget.url, copyMediaTarget.kind, _copy); };
   const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
   // Translate also translates every message above this one that still needs it.
   const translateUp = useTranslateUp('dm', message._id, message.createdAt, canTranslate && !isTranslated && !isTranslating, handleTranslate);
@@ -764,6 +791,10 @@ const MessageBubble = memo(function MessageBubble({
       menuActions.push({ key: 'copy', icon: menuIcons.copy, label: L.copy, onSelect: copyText, hint: 'C' });
       holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
     }
+    if (copyMediaTarget) {
+      menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
+      holdActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
+    }
     if (canTranslate) {
       const go = isTranslated ? handleShowOriginal : translateUp;
       menuActions.push({ key: 'translate', icon: menuIcons.translate, label: L.translate, onSelect: go, hint: 'T' });
@@ -786,6 +817,12 @@ const MessageBubble = memo(function MessageBubble({
     if (pickable) {
       menuActions.push({ key: 'select', divided: !canDeleteThis, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
       holdActions.push({ key: 'select', secondary: true, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message) });
+    }
+    // Anyone can report a message they were sent, the same as in the app.
+    if (onReport && !isOwnMessage && !message.isDeleted && (message.sender?.address || message.sender?.username)) {
+      const label = _copy('dm.reportMessage', { defaultValue: 'Report message' });
+      menuActions.push({ key: 'report', destructive: true, icon: menuIcons.report, label, onSelect: () => onReport(message) });
+      holdActions.push({ key: 'report', secondary: true, destructive: true, icon: menuIcons.report, label, onSelect: () => onReport(message) });
     }
   }
   const hasReactions = !!message.reactions && Object.values(message.reactions).some((who) => who?.length);
@@ -2376,6 +2413,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const [confirmPickDelete, setConfirmPickDelete] = useState(false);
   // Delete from the message menu, after picking for me or for everyone.
   const [confirmDeleteOne, setConfirmDeleteOne] = useState<DmMessage | null>(null);
+  // Report message: the sender is reported with the line itself attached.
+  const [reportTarget, setReportTarget] = useState<DmMessage | null>(null);
   /** Take messages out of this chat on screen: gone (for me) or "deleted" (for everyone). */
   const dropFromThread = useCallback((ids: Set<string>, scope: DeleteScope) => {
     if (!resolvedConversationId || ids.size === 0) return;
@@ -2413,11 +2452,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     () => (pickedMsgs ? messages.filter((m) => pickedMsgs.has(m._id) && !m.isDeleted) : []),
     [pickedMsgs, messages],
   );
-  // Every pick can be deleted for you; only when all of them are yours can
-  // they go for everyone too.
-  const pickedAllOwn = useMemo(
-    () => pickedList.length > 0 && pickedList.every((m) => isMineMsg(m)),
-    [pickedList, isMineMsg],
+  // Every pick can be deleted for you. In a one-to-one chat any of them can
+  // also go for both of you; in a group only when all of them are yours.
+  const pickedForEveryone = useMemo(
+    () => pickedList.length > 0 && (!isGroupChat || pickedList.every((m) => isMineMsg(m))),
+    [pickedList, isMineMsg, isGroupChat],
   );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
   const togglePick = useCallback((m: DmMessage) => {
@@ -2452,7 +2491,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   }, [pickedList, _copy]);
   const deletePicked = useCallback(async (scope: DeleteScope) => {
     if (!resolvedConversationId || pickedList.length === 0) return;
-    const forEveryone = scope === 'everyone' && pickedAllOwn;
+    const forEveryone = scope === 'everyone' && pickedForEveryone;
     const send = forEveryone ? emitDeleteMessage : emitHideMessage;
     const results = await Promise.allSettled(pickedList.map((m) => send(resolvedConversationId, m._id)));
     const gone = new Set(pickedList.filter((_, i) => results[i].status === 'fulfilled').map((m) => m._id));
@@ -2463,7 +2502,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     } else {
       toast.error(_copy('msgSelect.partDeleted', { defaultValue: 'Deleted {{ok}} of {{total}}', ok: gone.size, total: pickedList.length }));
     }
-  }, [resolvedConversationId, pickedList, pickedAllOwn, dropFromThread, _copy]);
+  }, [resolvedConversationId, pickedList, pickedForEveryone, dropFromThread, _copy]);
 
   // Handle scroll
   const handleScroll = useCallback(() => {
@@ -3207,6 +3246,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onTogglePick={togglePick}
                 onStartPick={startPick}
                 onDelete={setConfirmDeleteOne}
+                onReport={setReportTarget}
                 canPin={canPinHere}
                 isPinned={pinnedMessageId === message._id}
                 onUnpin={handleUnpinMessage}
@@ -3277,16 +3317,23 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
       <DeleteMessageDialog
         open={!!confirmDeleteOne}
         onOpenChange={(next) => { if (!next) setConfirmDeleteOne(null); }}
-        canDeleteForEveryone={!!confirmDeleteOne && isMineMsg(confirmDeleteOne)}
+        canDeleteForEveryone={!!confirmDeleteOne && (!isGroupChat || isMineMsg(confirmDeleteOne))}
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { const target = confirmDeleteOne; setConfirmDeleteOne(null); if (target) void deleteOne(target, scope); }}
+      />
+      <ReportModal
+        open={!!reportTarget}
+        onOpenChange={(next) => { if (!next) setReportTarget(null); }}
+        reportType="user"
+        userId={reportTarget?.sender?.address || reportTarget?.sender?.username || undefined}
+        context={reportTarget ? messageReportContext(reportTarget, isGroupChat ? 'Group chat' : 'Direct message') : undefined}
       />
       <DeleteMessageDialog
         open={confirmPickDelete}
         onOpenChange={setConfirmPickDelete}
         count={pickedList.length}
-        canDeleteForEveryone={pickedAllOwn}
+        canDeleteForEveryone={pickedForEveryone}
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { void deletePicked(scope); }}

@@ -81,7 +81,8 @@
       "profile": "iphrofayili",
       "proposal": "isiphakamiso",
       "stage": "isiteji",
-      "store": "duka"
+      "store": "duka",
+      "featureRequest": "isicelo"
     },
     "recipientChat": "ingxoxo",
     "recipientUser": "umsebenzisi",
@@ -519,7 +520,12 @@
     "getTheApp": "Thola uhlelo",
     "connectAi": "Xhuma i-AI",
     "converter": "Isiguquli",
-    "affiliate": "Umlingani"
+    "affiliate": "Umlingani",
+    "groups": {
+      "create": "Dala",
+      "discover": "Thola",
+      "riftn": "I-Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Buka iphrofayili ka- {{name}}",
@@ -1142,7 +1148,8 @@
     "socialConnectedShort": "Ixhunyiwe",
     "socialConnectFailed": "Ungakhethwa ukuthola {{platform}}. Funa ukuhlanganisa emagaini.",
     "socialVerifiedFollowers": "{{value}} abalandeli",
-    "socialFollowersPending": "Ukubuyekezwa kwesibalo sabalandeli"
+    "socialFollowersPending": "Ukubuyekezwa kwesibalo sabalandeli",
+    "menuLayoutFolders": "Amafolda"
   },
   "common": {
     "confirm": "Qinisekisa",
@@ -3068,7 +3075,11 @@
     "likersEmptyTitle": "Akukho ukuthandwa okwamanje",
     "likersEmptyBody": "Ukuthandwa kwaleli zwana kuzovela lapha.",
     "anonymousLikes_one": "Ukuthanda okungu-{{count}} okuvela kumnikazi webheji ongaziwa",
-    "anonymousLikes_other": "Ukuthanda okungu-{{count}} okuvela kubanikazi bamabheji abangaziwa"
+    "anonymousLikes_other": "Ukuthanda okungu-{{count}} okuvela kubanikazi bamabheji abangaziwa",
+    "threadParts": {
+      "moveUp": "Nyakazela phezulu",
+      "moveDown": "Nyakazela phansi"
+    }
   },
   "mintChain": {
     "title": "Iphosti yeminti",
@@ -6094,6 +6105,12 @@
       "cannotEditImage": "{{model}} ayikwazi ukuhlela isithombe esinamathiselwe. Yisuse noma ukhethe enye imodeli.",
       "cannotUseReference": "{{model}} ayikwazi ukusebenzisa isithombe sereferensi. Yisuse noma ukhethe enye imodeli.",
       "speechLimit": "Izinhlamvu ezingu- {{length}}. Umkhawulo ngu- {{limit}}."
+    },
+    "gallery": {
+      "send": "Thumela",
+      "notifications": {
+        "generation_reply": "{{name}} uphendule amazwana akho"
+      }
     }
   },
   "pricing": {
@@ -11853,7 +11870,7 @@
   "multiPost": {
     "tab": "Ukuthumela okuningi",
     "title": "Ukuthumela okuningi",
-    "intro": "Thumela ku-X, YouTube, Instagram, TikTok nakwezinye ngesikhathi esisodwa nge-dehub. Xhuma ama-akhawunti akho kanye, bese ukhetha ukuthi i-post ngayinye iya kuphi.",
+    "intro": "Thumela ku-X, YouTube, Instagram, TikTok nakwezinye ngesikhathi esisodwa nge-Riftn. Xhuma ama-akhawunti akho kanye, bese ukhetha ukuthi i-post ngayinye iya kuphi.",
     "creditsHeading": "Amakhredithi wokuthumela",
     "credits": "{{count}} amakhredithi wokuthumela",
     "topUpTitle": "Gcwalisa futhi wonge",
@@ -11901,7 +11918,9 @@
   "dm": {
     "planRestricted": "Lo msebenzisi udinga ukubhalisa ukuze athole imilayezo.",
     "planTypeNotAllowed": "Uhlelo lwalo mdali aluvumeli lolu hlobo lomlayezo.",
-    "planMinTip": "Ithiphu yalo mdali kufanele okungenani ibe ngu-{{amount}} tokens."
+    "planMinTip": "Ithiphu yalo mdali kufanele okungenani ibe ngu-{{amount}} tokens.",
+    "shareKindGroup": "Qoqa",
+    "shareKindCommunity": "Umphakathi"
   },
   "credits": {
     "earningsWorth": "Kubiza {{amount}}",
@@ -19466,5 +19485,10 @@
     "edit": "Hlela",
     "editLabel": "Lungisa umyalezo",
     "error": "Lokho akuzange kusebenze. Phinda uzame."
+  },
+  "mentionLinks": {
+    "communities": "Imiphakathi",
+    "pages": "Amakhasi",
+    "people": "Abantu"
   }
 }

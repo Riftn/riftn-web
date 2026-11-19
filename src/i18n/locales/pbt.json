@@ -81,7 +81,8 @@
       "profile": "دسته بندی: پروفایل",
       "proposal": "وړاندیز",
       "stage": "مرحله په مرحله",
-      "store": "دوکان"
+      "store": "دوکان",
+      "featureRequest": "غوښتنه"
     },
     "recipientChat": "د چچا په اړه",
     "recipientUser": "د کاروونکي په اړه",
@@ -519,7 +520,12 @@
     "getTheApp": "اپلیکیشن ترلاسه کړئ",
     "connectAi": "AI ونښلوئ",
     "converter": "بدلونکي",
-    "affiliate": "ملګرتیا"
+    "affiliate": "ملګرتیا",
+    "groups": {
+      "create": "جوړول",
+      "discover": "ومومئ",
+      "riftn": "د ډبرو سکرو ډبره"
+    }
   },
   "feed": {
     "viewProfile": "د {{name}} پروفایل ته مراجعه وکړئ",
@@ -1129,7 +1135,8 @@
     "socialConnect": "وصل کړئ",
     "socialConnected": "{{platform}} وصل شو",
     "socialConnectedShort": "سره نښلوي",
-    "socialFollowersPending": "د انسټاګرام پیروان تازه کول"
+    "socialFollowersPending": "د انسټاګرام پیروان تازه کول",
+    "menuLayoutFolders": "فولډرونه"
   },
   "common": {
     "confirm": "تایید کړئ",
@@ -3006,7 +3013,11 @@
     "likersEmptyTitle": "تر اوسه خوښې نشته",
     "likersEmptyBody": "په دې تبصره خوښې به دلته ښکاره شي.",
     "anonymousLikes_one": "له بې نومه بیج لرونکي {{count}} خوښه",
-    "anonymousLikes_other": "له بې نومه بیج لرونکو {{count}} خوښې"
+    "anonymousLikes_other": "له بې نومه بیج لرونکو {{count}} خوښې",
+    "threadParts": {
+      "moveUp": "پورته یې کړئ",
+      "moveDown": "لاندې یې کړئ"
+    }
   },
   "mintChain": {
     "title": "د ميني پيغام",
@@ -6009,7 +6020,13 @@
     "referenceProductName": "خپل محصول په کلیپ کې ځای وکړئ",
     "referenceProductHint": "د ځای پر ځای شوي محصول راوړئ او اصلي صحنه پاتې کړئ",
     "referenceComposeName": "مرجع عکسونه یوځای کړئ",
-    "referenceComposeHint": "څلور عکسونو څخه د شخصونو، شیانو او ځایونو راوړل او یو ځای کېدل"
+    "referenceComposeHint": "څلور عکسونو څخه د شخصونو، شیانو او ځایونو راوړل او یو ځای کېدل",
+    "gallery": {
+      "send": "واستول",
+      "notifications": {
+        "generation_reply": "{{name}} ستاسو نظر ته ځواب ورکړ"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "د هر کاري جریان لپاره پلانونه",
@@ -11729,7 +11746,7 @@
   "multiPost": {
     "tab": "څو-پوست کول",
     "title": "څو-پوست کول",
-    "intro": "د X، YouTube، Instagram، TikTok او نورو ته په یو وخت کې د dehub په مرسته پوسټ وکړئ. خپل حسابونه یو ځل وصل کړئ، بیا وټاکئ چې هر پوسټ چیرته ځي.",
+    "intro": "د X، YouTube، Instagram، TikTok او نورو ته په یو وخت کې د Riftn په مرسته پوسټ وکړئ. خپل حسابونه یو ځل وصل کړئ، بیا وټاکئ چې هر پوسټ چیرته ځي.",
     "creditsHeading": "د پوسټ کریډیټونه",
     "credits": "{{count}} پوسټ کریډیټونه",
     "topUpTitle": "پورته کړئ او سپما وکړئ",
@@ -11777,7 +11794,9 @@
   "dm": {
     "planRestricted": "دا کارن د پیغامونو ترلاسه کولو لپاره ګډون ته اړتیا لري.",
     "planTypeNotAllowed": "د دې جوړونکي پلان دا ډول پیغام نه مني.",
-    "planMinTip": "د دې جوړونکي لپاره ټیپ باید لږ تر لږه {{amount}} ټوکنونه وي."
+    "planMinTip": "د دې جوړونکي لپاره ټیپ باید لږ تر لږه {{amount}} ټوکنونه وي.",
+    "shareKindGroup": "د ډلې",
+    "shareKindCommunity": "ټولنه"
   },
   "credits": {
     "earningsWorth": "ارزښت {{amount}}",
@@ -19234,5 +19253,10 @@
     "edit": "ایډیټ کړئ",
     "editLabel": "پيامک سرکاري",
     "error": "دا کار نه کوي، بیا هڅه وکړئ."
+  },
+  "mentionLinks": {
+    "communities": "ټولنې",
+    "pages": "پاڼې",
+    "people": "خلک"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "профил",
       "proposal": "предложение",
       "stage": "сцена",
-      "store": "магазин"
+      "store": "магазин",
+      "featureRequest": "заявка"
     },
     "recipientChat": "чат",
     "recipientUser": "потребител",
@@ -521,7 +522,12 @@
     "getTheApp": "Изтеглете приложението",
     "connectAi": "Свързване на ИИ",
     "converter": "Конвертор",
-    "affiliate": "Партньори"
+    "affiliate": "Партньори",
+    "groups": {
+      "create": "Създай",
+      "discover": "Открийте",
+      "riftn": "ДеЮб"
+    }
   },
   "feed": {
     "viewProfile": "Преглед на профила на {{name}}",
@@ -1146,7 +1152,8 @@
     "socialConnectedShort": "Свързано",
     "socialConnectFailed": "Неуспешно свързване с {{platform}}. Моля, опитайте отново.",
     "socialVerifiedFollowers": "{{value}} последователи",
-    "socialFollowersPending": "Актуализиране на броя последователи"
+    "socialFollowersPending": "Актуализиране на броя последователи",
+    "menuLayoutFolders": "Папки"
   },
   "common": {
     "confirm": "Потвърди",
@@ -3049,7 +3056,11 @@
     "likersEmptyTitle": "Все още няма харесвания",
     "likersEmptyBody": "Тук ще се появят харесванията на този коментар.",
     "anonymousLikes_one": "{{count}} харесване от анонимен притежател на значка",
-    "anonymousLikes_other": "{{count}} харесвания от анонимни притежатели на значки"
+    "anonymousLikes_other": "{{count}} харесвания от анонимни притежатели на значки",
+    "threadParts": {
+      "moveUp": "Преместете нагоре",
+      "moveDown": "Премахни"
+    }
   },
   "mintChain": {
     "title": "Монетен двор",
@@ -6079,6 +6090,12 @@
       "needsImageToWork": "{{model}} се нуждае от изображение, от което да работи. Първо прикрепете едно.",
       "speechLimit": "Това са {{length}} знака. Ограничението е {{limit}}.",
       "musicTrackLength": "{{count}}s запис"
+    },
+    "gallery": {
+      "send": "Изпращане",
+      "notifications": {
+        "generation_reply": "{{name}} отговори на коментара ви"
+      }
     }
   },
   "pricing": {
@@ -11854,7 +11871,7 @@
   "multiPost": {
     "tab": "Мулти-публикуване",
     "title": "Мулти-публикуване",
-    "intro": "Публикувайте в X, YouTube, Instagram, TikTok и други едновременно с dehub. Свържете акаунтите си веднъж, след което изберете къде отива всяка публикация.",
+    "intro": "Публикувайте в X, YouTube, Instagram, TikTok и други едновременно с Riftn. Свържете акаунтите си веднъж, след което изберете къде отива всяка публикация.",
     "creditsHeading": "Кредити за публикации",
     "credits": "{{count}} кредита за публикации",
     "topUpTitle": "Допълнете и спестете",
@@ -11902,7 +11919,9 @@
   "dm": {
     "planRestricted": "Този потребител изисква абонамент, за да получава съобщения.",
     "planTypeNotAllowed": "Планът на този създател не позволява този вид съобщение.",
-    "planMinTip": "Бакшишът трябва да е поне {{amount}} токена за този създател."
+    "planMinTip": "Бакшишът трябва да е поне {{amount}} токена за този създател.",
+    "shareKindGroup": "Групирай",
+    "shareKindCommunity": "Общност"
   },
   "credits": {
     "earningsWorth": "Стойност {{amount}}",
@@ -19420,5 +19439,10 @@
     "edit": "Редактирай",
     "editLabel": "Редактиране на съобщение",
     "error": "Това не проработи. Опитайте отново."
+  },
+  "mentionLinks": {
+    "communities": "Общности",
+    "pages": "Страници",
+    "people": "Хора"
   }
 }

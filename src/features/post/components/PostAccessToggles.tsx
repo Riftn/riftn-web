@@ -135,6 +135,8 @@ interface PostAccessTogglesProps {
    * and a shop board on quotes, so those rows are not offered.
    */
   quoteMode?: boolean;
+  /** Keyboard is up: the options give most of their height to the writing area. */
+  compact?: boolean;
 }
 
 export function PostAccessToggles({
@@ -194,6 +196,7 @@ export function PostAccessToggles({
   mintFeeLabel,
   mintRequired = false,
   quoteMode = false,
+  compact = false,
   onCreatePlan,
 }: PostAccessTogglesProps) {
   const { t: _copy } = _useCopy();
@@ -455,7 +458,7 @@ export function PostAccessToggles({
   return (
     <>
       <div className="relative border-t border-white/10">
-        <div className="px-4 py-2 space-y-1 max-h-[140px] overflow-y-auto scrollbar-none" style={{ maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)' }}>
+        <div className={cn("px-4 py-2 space-y-1 overflow-y-auto scrollbar-none transition-[max-height] duration-200", compact ? "max-h-[56px]" : "max-h-[140px]")} style={{ maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)' }}>
         {/* Mint post — off by default, so a first post needs no wallet at all */}
         <label
           className={cn(

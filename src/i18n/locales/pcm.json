@@ -1095,7 +1095,9 @@
     "socialConnectedShort": "E don connect",
     "socialConnectFailed": "No fit connect {{platform}}. Try again.",
     "socialVerifiedFollowers": "{{value}} followers",
-    "socialFollowersPending": "Follower count updating"
+    "socialFollowersPending": "Follower count updating",
+    "deleteAccountData": "Delete account / data",
+    "skipSegments": "Wetin you dey look for?"
   },
   "common": {
     "confirm": "Confam",
@@ -2129,7 +2131,8 @@
     "reach": {
       "total": "Total reach",
       "breakdownTitle": "Where this reach come from",
-      "dehubFollowers": "Riftn followers"
+      "dehubFollowers": "Riftn followers",
+      "selfReported": "Na the creator type the social follower numbers."
     },
     "loginDescription": "Log in make you fit see and manage your profile.",
     "replyThread": {
@@ -5651,6 +5654,12 @@
       "needsImageToAnimate": "{{model}} need picture for animation. Attach one first.",
       "needsImageToWork": "{{model}} need picture for dey work. Come attach one first.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "Send am",
+      "notifications": {
+        "generation_reply": "{{name}} reply your comment"
+      }
     }
   },
   "pricing": {
@@ -7153,7 +7162,8 @@
     "faqInstallNeededA": "No. E go run fully inside tab for you browser local storage. Close tab, your node stop. No background service, no install.",
     "ctaTitle": "Launch only when e safe if something fail.",
     "ctaBody": "Origin backup, encrypted protected media and work wey dem don check go come first before any public node reward.",
-    "footerNote": "DePin participation na contribution service, e no be investment product. Availability, who fit join and rewards fit change."
+    "footerNote": "DePin participation na contribution service, e no be investment product. Availability, who fit join and rewards fit change.",
+    "navFaq": "Question wey people dey ask"
   },
   "creatorFlow": {
     "title": "Creator Flow",
@@ -11073,7 +11083,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post for X, YouTube, Instagram, TikTok and plenty more at the same time wey you dey post for dehub. Connect your accounts once, then choose where each post go go.",
+    "intro": "Post for X, YouTube, Instagram, TikTok and plenty more at the same time wey you dey post for Riftn. Connect your accounts once, then choose where each post go go.",
     "creditsHeading": "Post credits",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top up make you save money",
@@ -11121,7 +11131,8 @@
   "dm": {
     "planRestricted": "Dis user need subscription before e fit receive message.",
     "planTypeNotAllowed": "Dis creator plan no allow dis kain message.",
-    "planMinTip": "Tip for dis creator must reach at least {{amount}} tokens."
+    "planMinTip": "Tip for dis creator must reach at least {{amount}} tokens.",
+    "shareKindCommunity": "Gburugburu"
   },
   "credits": {
     "earningsWorth": "E worth {{amount}}",
@@ -16955,7 +16966,8 @@
     "127053546dd4": "Wey no fit download dis file",
     "d14896aa4bf8": "Libra free no fit load. Chek your connection and try again.",
     "953e708b2287": "Voice generation fail.",
-    "4a52cdd6ac72": "Wey no fit duplicate dis layers"
+    "4a52cdd6ac72": "Wey no fit duplicate dis layers",
+    "dbc468a14b60": "Question wey people dey ask"
   },
   "articles": {
     "cardLabel": "Article · {{count}} min read",
@@ -17180,5 +17192,9 @@
     "view": "View Am",
     "edit": "Edit am",
     "error": "E no work. Try again."
+  },
+  "mentionLinks": {
+    "pages": "Page Dem",
+    "people": "Pipo"
   }
 }

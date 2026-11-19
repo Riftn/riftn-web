@@ -81,7 +81,8 @@
       "profile": "profil",
       "proposal": "تەكلىپ",
       "stage": "maydon",
-      "store": "do'kon"
+      "store": "do'kon",
+      "featureRequest": "ئىلتىماس"
     },
     "recipientChat": "پاراڭ",
     "recipientUser": "ئىشلەتكۈچى",
@@ -518,7 +519,11 @@
     "getTheApp": "ئەپنى ئېلىش",
     "connectAi": "AI ئۇلاش",
     "converter": "ئۆزگەرتكۈچ",
-    "affiliate": "شېرىكلىك"
+    "affiliate": "شېرىكلىك",
+    "groups": {
+      "create": "قۇرۇش",
+      "discover": "بايقاش"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} نىڭ پروفىلىسىنى كۆرۈش",
@@ -1131,7 +1136,8 @@
     "socialConnectedShort": "باغلانغان",
     "socialConnectFailed": "{{platform}} باغلانغىلى بولمىدى. قايتا سىناپ بېقىڭ.",
     "socialVerifiedFollowers": "{{value}} ئەگەشكۈچىلەر",
-    "socialFollowersPending": "ئەگەشكۈچى سانىنى يېڭىلىش پروگراممىسى"
+    "socialFollowersPending": "ئەگەشكۈچى سانىنى يېڭىلىش پروگراممىسى",
+    "menuLayoutFolders": "قىسقۇچلار"
   },
   "common": {
     "confirm": "تەستىقلاش",
@@ -3021,7 +3027,11 @@
     "likersEmptyTitle": "تېخى ياقتۇرۇش يوق",
     "likersEmptyBody": "بۇ ئىنكاسقا بېرىلگەن ياقتۇرۇشلار بۇ يەردە كۆرۈنىدۇ.",
     "anonymousLikes_one": "نامسىز بەلگە ئىگىسىدىن {{count}} ياقتۇرۇش",
-    "anonymousLikes_other": "نامسىز بەلگە ئىگىلىرىدىن {{count}} ياقتۇرۇش"
+    "anonymousLikes_other": "نامسىز بەلگە ئىگىلىرىدىن {{count}} ياقتۇرۇش",
+    "threadParts": {
+      "moveUp": "يۇقىرىغا كۆتۈرۈش",
+      "moveDown": "چۈشۈرۈش"
+    }
   },
   "mintChain": {
     "title": "Mint POST",
@@ -6045,6 +6055,12 @@
       "needsImageToWork": "{{model}} ئىشلىتىدىغان رەسىمگە ئېھتىياجلىق. ئاۋۋال بىرنى قوشۇڭ.",
       "speechLimit": "بۇ {{length}} ھەرپلەر. چەكلىمىسى {{limit}}.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "يوللا",
+      "notifications": {
+        "generation_reply": "{{name}} ئىنكاسىڭىزغا جاۋاب بەردى"
+      }
     }
   },
   "pricing": {
@@ -11793,7 +11809,7 @@
   "multiPost": {
     "tab": "كۆپ قېتىم يوللاش",
     "title": "كۆپ قېتىم يوللاش",
-    "intro": "dehub بىلەن بىرلا ۋاقىتتا X، YouTube، Instagram، TikTok ۋە باشقا نۇرغۇن جايلارغا يوللاڭ. ھېسابلىرىڭىزنى بىر قېتىم ئۇلاڭ، ئاندىن ھەر بىر يوللانما ھۆججىتىنىڭ قەيەرگە بارىدىغانلىقىنى تاللاڭ.",
+    "intro": "Riftn بىلەن بىرلا ۋاقىتتا X، YouTube، Instagram، TikTok ۋە باشقا نۇرغۇن جايلارغا يوللاڭ. ھېسابلىرىڭىزنى بىر قېتىم ئۇلاڭ، ئاندىن ھەر بىر يوللانما ھۆججىتىنىڭ قەيەرگە بارىدىغانلىقىنى تاللاڭ.",
     "creditsHeading": "يوللانما ھۆججىتىدىن ئېرىشكەن نەپ",
     "credits": "{{count}} يوللانما ھۆججىتىدىن ئېرىشكەن نەپ",
     "topUpTitle": "تولۇقلاپ ۋە ساقلاپ تۇرۇڭ",
@@ -11841,7 +11857,9 @@
   "dm": {
     "planRestricted": "بۇ ئىشلەتكۈچى ئۇچۇر تاپشۇرۇۋېلىش ئۈچۈن مۇشتەرىلىك تەلەپ قىلىدۇ.",
     "planTypeNotAllowed": "بۇ ئىجادكارنىڭ پىلانى بۇ خىل ئۇچۇرغا يول قويمايدۇ.",
-    "planMinTip": "بۇ ئىجادكارغا بېرىلىدىغان تىپ كەم دېگەندە {{amount}} نۆتىك پۇل بولۇشى كېرەك."
+    "planMinTip": "بۇ ئىجادكارغا بېرىلىدىغان تىپ كەم دېگەندە {{amount}} نۆتىك پۇل بولۇشى كېرەك.",
+    "shareKindGroup": "گۇرۇپپا",
+    "shareKindCommunity": "جەمئىيەت"
   },
   "credits": {
     "earningsWorth": "قىممىتى {{amount}}",
@@ -19376,5 +19394,10 @@
     "edit": "تەھرىرلەش",
     "editLabel": "ئۇچۇرنى تەھرىرلەش",
     "error": "بۇ ئۈنۈم بەرمىدى، قايتا سىناپ بېقىڭ."
+  },
+  "mentionLinks": {
+    "communities": "جەمئىيەتلەر",
+    "pages": "بەتلەر",
+    "people": "كىشىلەر"
   }
 }

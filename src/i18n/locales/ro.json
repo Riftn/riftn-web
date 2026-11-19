@@ -78,7 +78,8 @@
       "profile": "profil",
       "proposal": "propunere",
       "stage": "etapă",
-      "store": "magazin"
+      "store": "magazin",
+      "featureRequest": "cerere"
     },
     "recipientChat": "discuție",
     "recipientUser": "utilizator",
@@ -519,7 +520,11 @@
     "getTheApp": "Descarcă aplicația",
     "connectAi": "Conectează AI",
     "converter": "Convertor",
-    "affiliate": "Afiliere"
+    "affiliate": "Afiliere",
+    "groups": {
+      "create": "Creează",
+      "discover": "Descoperă"
+    }
   },
   "feed": {
     "viewProfile": "Afișează profilul lui {{name}}",
@@ -1144,7 +1149,8 @@
     "socialConnectedShort": "Conectat",
     "socialConnectFailed": "Conectarea la {{platform}} nu a reușit. Te rugăm să încerci din nou.",
     "socialVerifiedFollowers": "{{value}} urmăritori",
-    "socialFollowersPending": "Actualizarea numărului de urmăritori"
+    "socialFollowersPending": "Actualizarea numărului de urmăritori",
+    "menuLayoutFolders": "Dosare"
   },
   "common": {
     "confirm": "Confirmă",
@@ -3043,7 +3049,11 @@
     "likersEmptyTitle": "Nicio apreciere încă",
     "likersEmptyBody": "Aprecierile acestui comentariu vor apărea aici.",
     "anonymousLikes_one": "{{count}} apreciere de la un deținător anonim de insignă",
-    "anonymousLikes_other": "{{count}} aprecieri de la deținători anonimi de insigne"
+    "anonymousLikes_other": "{{count}} aprecieri de la deținători anonimi de insigne",
+    "threadParts": {
+      "moveUp": "Mutare în sus",
+      "moveDown": "Deplasare în jos"
+    }
   },
   "mintChain": {
     "title": "Suport pentru mentă",
@@ -6076,6 +6086,12 @@
       "needsImageToWork": "{{model}} are nevoie de o imagine din care să lucreze. Atașați mai întâi unul.",
       "speechLimit": "Acestea sunt {{length}} caractere. Limita este {{limit}}.",
       "musicTrackLength": "{{count}}s piesă"
+    },
+    "gallery": {
+      "send": "Trimite",
+      "notifications": {
+        "generation_reply": "{{name}} a răspuns la comentariul tău"
+      }
     }
   },
   "pricing": {
@@ -11844,7 +11860,7 @@
   "multiPost": {
     "tab": "Multi-postare",
     "title": "Multi-postare",
-    "intro": "Publică pe X, YouTube, Instagram, TikTok și altele simultan ca dehub. Conectează-ți conturile o singură dată, apoi alege unde merge fiecare postare.",
+    "intro": "Publică pe X, YouTube, Instagram, TikTok și altele simultan ca Riftn. Conectează-ți conturile o singură dată, apoi alege unde merge fiecare postare.",
     "creditsHeading": "Credite de postare",
     "credits": "{{count}} credite de postare",
     "topUpTitle": "Reîncarcă și economisește",
@@ -11892,7 +11908,9 @@
   "dm": {
     "planRestricted": "Acest utilizator necesită un abonament pentru a primi mesaje.",
     "planTypeNotAllowed": "Planul acestui creator nu permite acest tip de mesaj.",
-    "planMinTip": "Bacșișul pentru acest creator trebuie să fie de cel puțin {{amount}} tokenuri."
+    "planMinTip": "Bacșișul pentru acest creator trebuie să fie de cel puțin {{amount}} tokenuri.",
+    "shareKindGroup": "Grupează",
+    "shareKindCommunity": "Comunitate"
   },
   "credits": {
     "earningsWorth": "Valoare {{amount}}",
@@ -19470,5 +19488,10 @@
     "contact": "Contact",
     "privacy": "Politica de confidențialitate",
     "terms": "Termeni și condiții"
+  },
+  "mentionLinks": {
+    "communities": "Comunități",
+    "pages": "Pagini",
+    "people": "Oameni"
   }
 }
