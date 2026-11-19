@@ -82,9 +82,11 @@ export function useMenuPoint() {
  * see it (chat-hold.css hides [data-chat-hover-actions] on touch); a hold
  * opens the sheet there.
  */
-export function MessageMoreButton({ onOpen, className = '' }: {
+export function MessageMoreButton({ onOpen, className = '', plain = false }: {
   onOpen: (point: { x: number; y: number }, button: HTMLElement) => void;
   className?: string;
+  /** No hover circle or colour change on the dots themselves. */
+  plain?: boolean;
 }) {
   const label = translateCopy('common.more', { defaultValue: 'More' });
   return (
@@ -100,7 +102,7 @@ export function MessageMoreButton({ onOpen, className = '' }: {
         const r = e.currentTarget.getBoundingClientRect();
         onOpen({ x: Math.round(r.left), y: Math.round(r.bottom + 4) }, e.currentTarget);
       }}
-      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-zinc-500 opacity-0 transition-opacity hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)] hover:text-white focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 ${className}`}
+      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-zinc-500 opacity-0 transition-opacity ${plain ? '' : 'hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)] hover:text-white'} focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 ${className}`}
     >
       <MoreHorizontal className="h-4 w-4" />
     </button>
