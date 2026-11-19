@@ -218,9 +218,9 @@ export function ImageMarkupDialog({ file, onClose, onSave }: ImageMarkupDialogPr
 
   return (
     <Dialog open={!!file} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] p-3 sm:p-4 gap-3">
-        <DialogTitle className="text-base">{t('features.cropDraw', 'Crop & draw')}</DialogTitle>
-        <div className="flex gap-1.5" role="tablist">
+      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] p-3 sm:p-4 gap-3 grid-cols-[minmax(0,1fr)]">
+        <DialogTitle className="text-base text-white pr-8">{t('features.cropDraw', 'Crop & draw')}</DialogTitle>
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0" role="tablist">
           {(['crop', 'draw'] as const).map((id) => (
             <button
               key={id}
@@ -237,13 +237,13 @@ export function ImageMarkupDialog({ file, onClose, onSave }: ImageMarkupDialogPr
               {id === 'crop' ? t('features.crop', 'Crop') : t('editor.draw.heading', 'Draw')}
             </button>
           ))}
-          <span className="self-center text-xs text-zinc-500 ml-1 truncate">
+          <span className="basis-full sm:basis-auto sm:ml-1 text-xs text-zinc-400 leading-snug">
             {tool === 'crop'
               ? t('features.cropHint', 'Drag a box over the part to keep. Drag inside it to move it.')
               : t('features.drawHint', 'Draw on the picture to point things out.')}
           </span>
         </div>
-        <div className="flex items-center justify-center rounded-lg bg-black/40 overflow-hidden max-h-[65vh]">
+        <div className="flex min-w-0 items-center justify-center rounded-lg bg-black/40 overflow-hidden max-h-[50vh] sm:max-h-[65vh]">
           <canvas
             ref={canvasRef}
             onPointerDown={handleDown}
@@ -251,11 +251,11 @@ export function ImageMarkupDialog({ file, onClose, onSave }: ImageMarkupDialogPr
             onPointerUp={handleUp}
             onPointerCancel={handleUp}
             data-markup-canvas
-            className="max-w-full max-h-[65vh] w-auto h-auto touch-none cursor-crosshair"
+            className="max-w-full max-h-[50vh] sm:max-h-[65vh] w-auto h-auto touch-none cursor-crosshair"
             aria-label={tool === 'crop' ? t('features.crop', 'Crop') : t('editor.draw.heading', 'Draw')}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           {tool === 'crop' && (
             <Button type="button" variant="ghost" size="sm" className="rounded-lg" disabled={!hasCrop} onClick={resetCrop}>
               {t('features.resetCrop', 'Reset crop')}
