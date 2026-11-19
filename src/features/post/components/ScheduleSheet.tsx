@@ -1,13 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Clock, Sparkles } from "lucide-react";
-import Minus from "@/components/ui/cut-icons/minus";
-import Plus from "@/components/ui/cut-icons/add";
 import X from '@/components/ui/cut-icons/close';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { parseWhen } from '@/lib/schedule/parseWhen';
+import { TimeWheel } from './TimeWheel';
 import { localWhenPlaceholder, toEnglishWhen } from '@/lib/schedule/localWhen';
 import { bestTime, toLocalGrid } from '@/lib/schedule/fansOnline';
 import { getFansOnline } from '@/lib/api/dehub/scheduled';
@@ -56,7 +55,6 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
   const [minutes, setMinutes] = useState(19 * 60 + 30);
   const [typed, setTyped] = useState('');
   const stripRef = useRef<HTMLDivElement>(null);
-  const hourStripRef = useRef<HTMLDivElement>(null);
   const [showFans, setShowFans] = useState(false);
   // Optional: the state gallery renders this sheet without an AuthProvider.
   const walletAddress = useContext(AuthContext)?.walletAddress;
@@ -135,34 +133,9 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
     } catch { return ''; }
   })();
 
-  const stepBy = kind === 'message' ? 5 : STEP;
-  // Fifteen-minute marks fit one row on a phone; finer times stay on the steppers.
-  const minuteStep = 15;
-  const hourLabel = (h: number) => new Date(2024, 0, 1, h).toLocaleTimeString(locale, { hour: 'numeric' });
+  // The wheels move the time within the picked day.
   const pickClock = (total: number) => {
-    const next = atMinutes(day, total);
-    setDay(startOfDay(next));
-    setMinutes(next.getHours() * 60 + next.getMinutes());
-    setTyped('');
-  };
-  const pickedHour = Math.floor(minutes / 60);
-  // Keep the picked hour in view as the time moves.
-  useEffect(() => {
-    if (!isOpen) return;
-    // The sheet's content mounts a frame after it opens.
-    const id = window.setTimeout(() => {
-      const strip = hourStripRef.current;
-      const chip = strip?.querySelector<HTMLElement>(`[data-hour="${pickedHour}"]`);
-      if (!strip || !chip) return;
-      const left = chip.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
-      strip.scrollTo({ left: Math.max(0, left - 2 * (chip.offsetWidth + 6)), behavior: 'smooth' });
-    }, 60);
-    return () => window.clearTimeout(id);
-  }, [isOpen, pickedHour]);
-  const step = (delta: number) => {
-    const next = atMinutes(day, minutes + delta);
-    setDay(startOfDay(next));
-    setMinutes(next.getHours() * 60 + next.getMinutes());
+    setMinutes(total);
     setTyped('');
   };
   const choose = (at: Date) => {
@@ -333,56 +306,8 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-5 text-white">
-            <button type="button" data-kit-button="quiet" onClick={() => step(-stepBy)} aria-label={kind === 'message' ? t('whenSheet.earlierShort', { defaultValue: 'Earlier' }) : t('whenSheet.earlier', { defaultValue: '15 minutes earlier' })} className="!h-10 !w-10 !rounded-full !p-0">
-              <Minus className="h-4 w-4" />
-            </button>
-            <span className="min-w-[7.5rem] text-center text-[28px] font-extrabold tabular-nums tracking-tight">{timeLabel(selectedAt)}</span>
-            <button type="button" data-kit-button="quiet" onClick={() => step(stepBy)} aria-label={kind === 'message' ? t('whenSheet.laterShort', { defaultValue: 'Later' }) : t('whenSheet.later', { defaultValue: '15 minutes later' })} className="!h-10 !w-10 !rounded-full !p-0">
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* One tap for the hour, one for the minutes: stepping 5 minutes at a
-              time to get across the day was too slow. */}
-          <div ref={hourStripRef} className="scrollbar-hide -mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5 [mask-image:linear-gradient(90deg,transparent,#000_12px,#000_calc(100%_-_28px),transparent)]">
-            {Array.from({ length: 24 }, (_, h) => {
-              const active = pickedHour === h;
-              return (
-                <button
-                  key={h}
-                  type="button"
-                  data-hour={h}
-                  data-kit-chip
-                  data-active={active ? 'true' : undefined}
-                  aria-pressed={active}
-                  aria-label={timeLabel(atMinutes(day, h * 60 + (minutes % 60)))}
-                  onClick={() => pickClock(h * 60 + (minutes % 60))}
-                  className="!h-9 !w-[52px] shrink-0 !justify-center !rounded-[10px] !px-0 text-[13px] font-semibold tabular-nums"
-                >
-                  {hourLabel(h)}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex gap-1.5">
-            {Array.from({ length: 60 / minuteStep }, (_, i) => i * minuteStep).map(m => {
-              const active = minutes % 60 === m;
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  data-kit-chip
-                  data-active={active ? 'true' : undefined}
-                  aria-pressed={active}
-                  onClick={() => pickClock(pickedHour * 60 + m)}
-                  className="!h-9 flex-1 !justify-center !rounded-[10px] !px-0 text-[13px] font-semibold tabular-nums"
-                >
-                  {`:${String(m).padStart(2, '0')}`}
-                </button>
-              );
-            })}
-          </div>
+          {/* Spin the hour and the minutes, like the iPhone clock. */}
+          <TimeWheel minutes={minutes} onChange={pickClock} locale={locale} />
 
           <div className="space-y-1 text-center text-xs text-white/60">
             {!validTime ? (
