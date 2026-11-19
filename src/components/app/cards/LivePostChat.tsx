@@ -69,6 +69,7 @@ import Copy from '@/components/ui/cut-icons/copy';
 import type { ChatCreatorBadge } from '@/lib/live/chat-badges';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
+import { dblClickReply } from '@/lib/dblclick-reply';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function LiveChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
@@ -726,6 +727,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                 id={chatMessageDomId(msg.id)}
                 ref={(el) => { if (el) messageRefs.current.set(msg.id, el); else messageRefs.current.delete(msg.id); }}
                 data-live-msg={msg.id}
+                onDoubleClick={(e) => dblClickReply(e, canReply && editingId !== msg.id && (() => { setReplyTo(msg); textareaRef.current?.focus(); }))}
                 data-chat-row
                 className={`group py-1.5 px-1 rounded-lg transition-colors duration-700 ${isPinned ? 'bg-blue-400/5 border-l-2 border-blue-400/50 pl-2' : ''}${landClass(msg)}`}
               >

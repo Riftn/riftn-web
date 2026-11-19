@@ -80,7 +80,8 @@
       "profile": "profil",
       "proposal": "forslag",
       "stage": "scene",
-      "store": "butik"
+      "store": "butik",
+      "featureRequest": "anmodning"
     },
     "recipientChat": "chat",
     "recipientUser": "bruger",
@@ -520,7 +521,11 @@
     "getTheApp": "Hent appen",
     "connectAi": "Forbind AI",
     "converter": "Omformer",
-    "affiliate": "Partner"
+    "affiliate": "Partner",
+    "groups": {
+      "create": "Opret",
+      "discover": "Opdag"
+    }
   },
   "feed": {
     "viewProfile": "Se profilen for {{name}}",
@@ -1145,7 +1150,8 @@
     "socialConnectedShort": "Forbundet",
     "socialConnectFailed": "Kunne ikke forbinde {{platform}}. Prøv igen.",
     "socialVerifiedFollowers": "{{value}}følgere",
-    "socialFollowersPending": "Opdatering af antal følgere"
+    "socialFollowersPending": "Opdatering af antal følgere",
+    "menuLayoutFolders": "Mapper"
   },
   "common": {
     "confirm": "Bekræft",
@@ -3048,7 +3054,11 @@
     "likersEmptyTitle": "Ingen likes endnu",
     "likersEmptyBody": "Likes på denne kommentar vises her.",
     "anonymousLikes_one": "{{count}} like fra en anonym badgeholder",
-    "anonymousLikes_other": "{{count}} likes fra anonyme badgeholdere"
+    "anonymousLikes_other": "{{count}} likes fra anonyme badgeholdere",
+    "threadParts": {
+      "moveUp": "Flyt op",
+      "moveDown": "Flyt ned"
+    }
   },
   "mintChain": {
     "title": "Mynteindlæg",
@@ -6081,6 +6091,11 @@
       "needsImageToWork": "{{model}} har brug for et billede at arbejde ud fra. Vedhæft en først.",
       "speechLimit": "Det er {{length}} tegn. Grænsen er {{limit}}.",
       "musicTrackLength": "{{count}}s spor"
+    },
+    "gallery": {
+      "notifications": {
+        "generation_reply": "{{name}} svarede på din kommentar"
+      }
     }
   },
   "pricing": {
@@ -11849,7 +11864,7 @@
   "multiPost": {
     "tab": "Multipel-opslag",
     "title": "Multipel-opslag",
-    "intro": "Post til X, YouTube, Instagram, TikTok og mere på samme tid med dehub. Forbind dine konti én gang, og vælg derefter, hvor hvert opslag skal hen.",
+    "intro": "Post til X, YouTube, Instagram, TikTok og mere på samme tid med Riftn. Forbind dine konti én gang, og vælg derefter, hvor hvert opslag skal hen.",
     "creditsHeading": "Post-kreditter",
     "credits": "{{count}} post-kreditter",
     "topUpTitle": "Top op og spar",
@@ -11897,7 +11912,9 @@
   "dm": {
     "planRestricted": "Denne bruger kræver et abonnement for at modtage beskeder.",
     "planTypeNotAllowed": "Denne skabers plan tillader ikke denne type besked.",
-    "planMinTip": "Drikkepenge skal være mindst {{amount}} tokens for denne skaber."
+    "planMinTip": "Drikkepenge skal være mindst {{amount}} tokens for denne skaber.",
+    "shareKindGroup": "Gruppér",
+    "shareKindCommunity": "Fællesskab"
   },
   "credits": {
     "earningsWorth": "{{amount}} værd",
@@ -19462,5 +19479,10 @@
     "edit": "Redigér",
     "editLabel": "Rediger besked",
     "error": "Det virkede ikke. Prøv igen."
+  },
+  "mentionLinks": {
+    "communities": "Fællesskaber",
+    "pages": "Sider",
+    "people": "Personer"
   }
 }

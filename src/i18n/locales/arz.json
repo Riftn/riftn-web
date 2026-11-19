@@ -81,7 +81,8 @@
       "profile": "الملف الشخصي",
       "proposal": "اقتراح",
       "stage": "المرحلة",
-      "store": "المتجر"
+      "store": "المتجر",
+      "featureRequest": "طلب"
     },
     "recipientChat": "دردشة",
     "recipientUser": "مستخدم",
@@ -521,7 +522,12 @@
     "getTheApp": "حمّل التطبيق",
     "connectAi": "اربط الذكاء الاصطناعي",
     "converter": "المحول",
-    "affiliate": "التسويق بالعمولة"
+    "affiliate": "التسويق بالعمولة",
+    "groups": {
+      "create": "إنشاء",
+      "discover": "اكتشف",
+      "riftn": "دي هاب"
+    }
   },
   "feed": {
     "viewProfile": "عرض ملف {{name}} الشخصي",
@@ -1143,7 +1149,8 @@
     "socialConnectedShort": "متصل",
     "socialConnectFailed": "لا يمكن الاتصال ب{{platform}}. حاول مرة أخرى.",
     "socialVerifiedFollowers": "{{value}} متابع",
-    "socialFollowersPending": "تحديث عدد المتابعين"
+    "socialFollowersPending": "تحديث عدد المتابعين",
+    "menuLayoutFolders": "المجلدات"
   },
   "common": {
     "confirm": "تأكيد",
@@ -3042,7 +3049,11 @@
     "likersEmptyTitle": "مفيش لايكات لسه",
     "likersEmptyBody": "اللايكات على التعليق ده هتظهر هنا.",
     "anonymousLikes_one": "{{count}} لايك من صاحب شارة مجهول",
-    "anonymousLikes_other": "{{count}} لايكات من أصحاب شارات مجهولين"
+    "anonymousLikes_other": "{{count}} لايكات من أصحاب شارات مجهولين",
+    "threadParts": {
+      "moveUp": "حرك لأعلى",
+      "moveDown": "حرك لأسفل"
+    }
   },
   "mintChain": {
     "title": "منشور النعناع",
@@ -6074,6 +6085,12 @@
       "needsImageToWork": "يحتاج {{model}} إلى صورة للعمل منها. قم بإرفاق واحد أولاً.",
       "speechLimit": "هذا {{length}} أحرف. الحد الأقصى هو {{limit}}.",
       "musicTrackLength": "مسار {{count}}s"
+    },
+    "gallery": {
+      "send": "إرسال",
+      "notifications": {
+        "generation_reply": "{{name}} رد على تعليقك"
+      }
     }
   },
   "pricing": {
@@ -11852,7 +11869,7 @@
   "multiPost": {
     "tab": "النشر المتعدد",
     "title": "النشر المتعدد",
-    "intro": "انشر على X، يوتيوب، انستجرام، تيك توك والمزيد في نفس الوقت مع dehub. قم بتوصيل حساباتك مرة واحدة، ثم اختر أين تذهب كل مشاركة.",
+    "intro": "انشر على X، يوتيوب، انستجرام، تيك توك والمزيد في نفس الوقت مع Riftn. قم بتوصيل حساباتك مرة واحدة، ثم اختر أين تذهب كل مشاركة.",
     "creditsHeading": "رصيد المشاركات",
     "credits": "{{count}} رصيد مشاركات",
     "topUpTitle": "اشحن ووفر",
@@ -11900,7 +11917,9 @@
   "dm": {
     "planRestricted": "المستخدم ده محتاج اشتراك علشان يستقبل رسايل.",
     "planTypeNotAllowed": "خطة المنشئ ده مش بتسمح بالنوع ده من الرسايل.",
-    "planMinTip": "التيب لازم يكون على الأقل {{amount}} عملات رمزية للمنشئ ده."
+    "planMinTip": "التيب لازم يكون على الأقل {{amount}} عملات رمزية للمنشئ ده.",
+    "shareKindGroup": "تجميع",
+    "shareKindCommunity": "المجتمع"
   },
   "credits": {
     "earningsWorth": "يستحق {{amount}}",
@@ -19416,5 +19435,10 @@
     "edit": "تعديل",
     "editLabel": "تعديل الرسالة",
     "error": "لم ينجح ذلك. حاول مرة أخرى."
+  },
+  "mentionLinks": {
+    "communities": "المجتمعات",
+    "pages": "الصفحات",
+    "people": "ناس"
   }
 }

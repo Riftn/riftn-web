@@ -238,7 +238,9 @@ export function useSpendableDhb() {
       const credits = await getSubscriptionCredits(walletAddress).catch(() => null);
       const creditsDhb = credits ? (credits.usd * 1_000_000) / USD_MICROS_PER_DHB : 0;
       const banked = await fetchUnspentPayments();
-      const receiptAccount = await getWalletAddress();
+      // A balance is a read: it must never open the wallet. The session's
+      // address is enough to match receipts; the unlock waits for payForJob.
+      const receiptAccount = await getWalletAddress({ silent: true }).catch(() => null);
       const bankedDhb = largestJobReceipt(walletAddress, receiptAccount, banked.map(payment => ({ remainingDhb: payment.dhb })));
       return Math.max(onChain, creditsDhb, bankedDhb);
     },

@@ -81,7 +81,8 @@
       "profile": "ప్రొఫైల్",
       "proposal": "ప్రతిపాదన",
       "stage": "స్టేజ్",
-      "store": "స్టోర్"
+      "store": "స్టోర్",
+      "featureRequest": "అభ్యర్థన"
     },
     "recipientChat": "చాట్",
     "recipientUser": "వినియోగదారు",
@@ -521,7 +522,12 @@
     "getTheApp": "యాప్ పొందండి",
     "connectAi": "AI కనెక్ట్ చేయండి",
     "converter": "కన్వర్టర్",
-    "affiliate": "అఫిలియేట్"
+    "affiliate": "అఫిలియేట్",
+    "groups": {
+      "create": "సృష్టించు",
+      "discover": "కనుగొనండి",
+      "riftn": "డీహ్యూబ్"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} ప్రొఫైల్ ‌ ను చూడండి",
@@ -1142,7 +1148,8 @@
     "socialConnectedShort": "కనెక్ట్ చేయబడింది",
     "socialConnectFailed": "{{platform}} కనెక్ట్ చేయలేకపోయాను. దయచేసి మళ్లీ ప్రయత్నించండి.",
     "socialVerifiedFollowers": "{{value}} ఫాలోవర్‌లు",
-    "socialFollowersPending": "ఫాలోవర్ కౌంట్ అప్ ‌ డేట్ చేయడం"
+    "socialFollowersPending": "ఫాలోవర్ కౌంట్ అప్ ‌ డేట్ చేయడం",
+    "menuLayoutFolders": "ఫోల్డర్‌లు"
   },
   "common": {
     "confirm": "నిర్ధారించండి",
@@ -3042,7 +3049,11 @@
     "likersEmptyTitle": "ఇంకా లైక్‌లు లేవు",
     "likersEmptyBody": "ఈ వ్యాఖ్యకు వచ్చిన లైక్‌లు ఇక్కడ కనిపిస్తాయి.",
     "anonymousLikes_one": "అనామక బ్యాడ్జ్ హోల్డర్ నుండి {{count}} లైక్",
-    "anonymousLikes_other": "అనామక బ్యాడ్జ్ హోల్డర్ల నుండి {{count}} లైక్‌లు"
+    "anonymousLikes_other": "అనామక బ్యాడ్జ్ హోల్డర్ల నుండి {{count}} లైక్‌లు",
+    "threadParts": {
+      "moveUp": "పైకి తరలించండి",
+      "moveDown": "క్రిందికి కదలండి"
+    }
   },
   "mintChain": {
     "title": "మింట్ పోస్ట్",
@@ -6069,6 +6080,12 @@
       "cannotUseReference": "{{model}} రిఫరెన్స్ ఇమేజ్ ‌ ను ఉపయోగించలేరు. దాన్ని తీసివేయండి లేదా మరొక మోడల్ ‌ ను ఎంచుకోండి.",
       "needsImageToAnimate": "{{model}} యానిమేట్ చేయడానికి ఒక చిత్రం అవసరం. మొదట ఒకదాన్ని అటాచ్ చేయండి.",
       "speechLimit": "అంటే {{length}} అక్షరాలు. పరిమితి {{limit}}."
+    },
+    "gallery": {
+      "send": "పంపండి",
+      "notifications": {
+        "generation_reply": "{{name}} మీ వ్యాఖ్యకు సమాధానమిచ్చారు"
+      }
     }
   },
   "pricing": {
@@ -11837,7 +11854,7 @@
   "multiPost": {
     "tab": "బహుళ-పోస్టింగ్",
     "title": "బహుళ-పోస్టింగ్",
-    "intro": "X, YouTube, Instagram, TikTok మరియు మరిన్ని ప్లాట్‌ఫార్మ్‌లకు ఒకేసారి dehub ద్వారా పోస్ట్ చేయండి. మీ ఖాతాలను ఒకసారి కనెక్ట్ చేసి, ప్రతి పోస్ట్ ఎక్కడికి వెళ్లాలో ఎంచుకోండి.",
+    "intro": "X, YouTube, Instagram, TikTok మరియు మరిన్ని ప్లాట్‌ఫార్మ్‌లకు ఒకేసారి Riftn ద్వారా పోస్ట్ చేయండి. మీ ఖాతాలను ఒకసారి కనెక్ట్ చేసి, ప్రతి పోస్ట్ ఎక్కడికి వెళ్లాలో ఎంచుకోండి.",
     "creditsHeading": "పోస్ట్ క్రెడిట్స్",
     "credits": "{{count}} పోస్ట్ క్రెడిట్స్",
     "topUpTitle": "టాప్‑అప్ చేసి సేవ్ చేయండి",
@@ -11885,7 +11902,9 @@
   "dm": {
     "planRestricted": "ఈ వినియోగదారుకు సందేశాలు అందుకోవడానికి సబ్‌స్క్రిప్షన్ అవసరం.",
     "planTypeNotAllowed": "ఈ క్రియేటర్ ప్లాన్ ఈ రకమైన సందేశాన్ని అనుమతించదు.",
-    "planMinTip": "ఈ క్రియేటర్‌కు టిప్ కనీసం {{amount}} టోకెన్లు ఉండాలి."
+    "planMinTip": "ఈ క్రియేటర్‌కు టిప్ కనీసం {{amount}} టోకెన్లు ఉండాలి.",
+    "shareKindGroup": "సమూహం",
+    "shareKindCommunity": "కమ్యూనిటీ"
   },
   "credits": {
     "earningsWorth": "విలువ {{amount}}",
@@ -19417,5 +19436,10 @@
     "edit": "సవరించండి",
     "editLabel": "సందేశాన్ని సవరించండి",
     "error": "అది పనిచేయలేదు. మళ్లీ ప్రయత్నించండి."
+  },
+  "mentionLinks": {
+    "communities": "సంఘాలు",
+    "pages": "పేజీలు",
+    "people": "వ్యక్తులు"
   }
 }

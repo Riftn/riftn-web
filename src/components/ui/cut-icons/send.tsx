@@ -1,6 +1,8 @@
 import React from "react";
 import { createCutIcon } from "./create-cut-icon";
 
-export default createCutIcon("CutSend", ({ weight, maskId }) => <>
-<path d="M10.3920 7.2000L24.8000 7.2000L24.8000 23.0000L25.8080 23.0000Q27.2000 23.0000 27.2000 21.6080L27.2000 4.8000L9.0000 4.8000L9.0000 5.8080Q9.0000 7.2000 10.3920 7.2000Z" fill="currentColor" fillRule="evenodd"/><path d="M7.8328 25.8642L26.2485 7.4485L25.5358 6.7358Q24.5515 5.7515 23.5672 6.7358L5.1515 25.1515L5.8642 25.8642Q6.8485 26.8485 7.8328 25.8642Z" fill="currentColor" fillRule="evenodd"/>
+// A paper plane. The old artwork was an up-right arrow, which people took for
+// "open in a new window" (and the Global chat pop-out now uses exactly that).
+export default createCutIcon("CutSend", () => <>
+<path d="M4 4.5L28.5 16L4 27.5L8.6 16Z M7.9 8.9L10.6 15L22.6 15Z M10.6 17L7.9 23.1L22.6 17Z" fill="currentColor" fillRule="evenodd"/>
 </>);

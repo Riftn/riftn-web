@@ -780,6 +780,13 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "chatDeleteChoice": "Bir mesajı sildiğinde",
+    "chatDeleteChoiceDesc": "Her seferinde sor ya da her zaman yalnızca senin için veya sohbetteki herkes için sil.",
+    "chatDeleteAsk": "Her seferinde sor",
+    "chatDeleteMe": "Benden sil",
+    "chatDeleteMeDesc": "Senin sohbetinden gider, diğerleri hâlâ görür",
+    "chatDeleteEveryone": "Herkesten sil",
+    "chatDeleteEveryoneDesc": "Mümkün olduğunda. Bir gruptaki başkasının mesajı yalnızca senden silinir",
     "postLanding": "Paylaştıktan sonra",
     "postLandingDesc": "Yeni gönderinin akışında nasıl belirdiği",
     "postLandingGhost": "Hayalet yuva",
@@ -1381,7 +1388,9 @@
     "menuLayoutSections": "Bölümler",
     "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
     "menuLayoutFolders": "Klasörler",
-    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör"
+    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör",
+    "chatCards": "Sohbetler kart olarak",
+    "chatCardsDesc": "Her sohbet kendi kartında. Kapatınca sohbetler arasında çizgi olan sade bir liste olur."
   },
   "common": {
     "confirm": "Onayla",
@@ -6620,6 +6629,18 @@
       "needsImageToWork": "{{model}} üzerinde çalışmak için bir resme ihtiyaç duyuyor. Önce bir tane ekleyin.",
       "speechLimit": "Bu {{length}} karakterdir. Sınır {{limit}}.",
       "musicTrackLength": "{{count}}s parkur"
+    },
+    "gallery": {
+      "browse": "Üretimlere göz at",
+      "fullscreen": "Tam ekran görüntüle",
+      "missing": "Bu üretim kullanılamıyor.",
+      "send": "Gönder",
+      "notifications": {
+        "generation_like": "{{name}} üretimine tepki verdi",
+        "generation_comment_like": "{{name}} yorumuna tepki verdi",
+        "generation_reply": "{{name}} yorumunu yanıtladı",
+        "generation_comment": "{{name}} üretimine yorum yaptı"
+      }
     }
   },
   "pricing": {
@@ -12743,7 +12764,7 @@
   "multiPost": {
     "tab": "Çoklu gönderim",
     "title": "Çoklu gönderim",
-    "intro": "X, YouTube, Instagram, TikTok ve daha fazlasına aynı anda dehub ile gönderin. Hesaplarınızı bir kez bağlayın, ardından her gönderinin nereye gideceğini seçin.",
+    "intro": "X, YouTube, Instagram, TikTok ve daha fazlasına aynı anda Riftn ile gönderin. Hesaplarınızı bir kez bağlayın, ardından her gönderinin nereye gideceğini seçin.",
     "creditsHeading": "Gönderi kredileri",
     "credits": "{{count}} gönderi kredisi",
     "topUpTitle": "Yükleyin ve tasarruf edin",
@@ -12791,7 +12812,12 @@
   "dm": {
     "planRestricted": "Bu kullanıcı mesaj almak için abonelik gerektiriyor.",
     "planTypeNotAllowed": "Bu içerik üreticisinin planı bu tür mesaja izin vermiyor.",
-    "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı."
+    "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı.",
+    "shareGroups": "Gruplar",
+    "shareKindGroup": "Grup",
+    "shareKindChannel": "Kanal",
+    "shareKindCommunity": "Topluluk",
+    "reportMessage": "Mesajı bildir"
   },
   "credits": {
     "earningsWorth": "{{amount}} değerinde",
@@ -20829,6 +20855,8 @@
     "forEveryone": "Herkes için sil",
     "forBoth": "İkimiz için de sil",
     "forMeAndName": "Benim ve {{name}} için sil",
+    "remember": "Seçimimi hatırla",
+    "rememberHint": "İstediğin zaman Ayarlar'dan değiştir",
     "failed": "Mesaj silinemedi"
   }
 }

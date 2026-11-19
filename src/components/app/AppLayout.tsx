@@ -13,6 +13,7 @@ import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
 // so a phone never downloads it. Desktop kicks the fetch off here, at module
 // evaluation, so the chunk is in flight before React mounts and the rail
 // arrives a beat behind the rest of the shell instead of a round trip later.
+import { HomeRightSidebarSkeleton } from './PageSkeletons';
 const loadRightSidebar = () => import('./RightSidebar').then(m => ({ default: m.RightSidebar }));
 const RightSidebar = React.lazy(loadRightSidebar);
 if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').matches) {
@@ -26,9 +27,10 @@ if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').
  * the chunk landed — a visible jump of the welcome panel on every desktop
  * first visit, and Lighthouse desktop scored it as 0.125 of layout shift.
  */
-const RailPlaceholder = () => (
-  <aside aria-hidden="true" className="hidden lg:block w-72 xl:w-80 2xl:w-88 shrink-0" />
-);
+// Draws the same rail skeleton as the boot HTML and the shell fallback, so
+// the rail never blanks out between them and the real rail (it used to be an
+// empty spacer here: skeleton → blank → skeleton-ish → real).
+const RailPlaceholder = HomeRightSidebarSkeleton;
 
 function DesktopRightRail() {
   const isDesktop = useIsDesktopViewport();

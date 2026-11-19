@@ -63,6 +63,7 @@ import { ProfileFollowButton } from '@/components/app/profile/ProfileFollowButto
 import { UserAvatar } from '@/components/app/UserAvatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { ProfilePostBgContext, ProfilePostBgArtContext, ProfilePostBgMapContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
 import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
@@ -358,8 +359,10 @@ export default function ProfilePage() {
   // Holding (or right-clicking) one of your own text posts opens it for that post.
   const postBgPostHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBgFor, '[data-pbg-text]');
   const postBgSample = useMemo(
-    () => data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
-    [data.PROFILE_POSTS],
+    // The held post's own words, else your newest text post.
+    () => (postBgTarget && data.PROFILE_POSTS.find((p) => String(p.id) === postBgTarget)?.content?.trim())
+      || data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
+    [data.PROFILE_POSTS, postBgTarget],
   );
   const savePostBg = useCallback(async ({ id, colors, file, scope }: PostBgSave) => {
     if (!profileKey) return;
@@ -425,6 +428,19 @@ export default function ProfilePage() {
     : parseArticleTile(data.apiProfile?.customs);
   const openArticleTile = useCallback(() => setArticleTileOpen(true), []);
   const articleTileHold = usePostBgHold(!!data.isViewingOwnProfile, openArticleTile, '[data-tile="article"]');
+  // Right-click on your own text post or article opens the post menu; its
+  // "Post background" / "Article tiles" row lands here.
+  useEffect(() => {
+    if (!data.isViewingOwnProfile) return;
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (!look) return;
+      if (look.kind === 'article') openArticleTile();
+      else openPostBgFor(look.el);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, [data.isViewingOwnProfile, openArticleTile, openPostBgFor]);
   const articleTileSample = useMemo(() => {
     const a = data.PROFILE_POSTS.find((p) => !!p.articleBody);
     return {
@@ -851,7 +867,7 @@ return () => rail.removeEventListener('wheel', onWheel);
           data-nav-hide="off"
           className="sticky z-50 -mx-2 sm:-mx-3 -mb-2 sm:-mb-3 px-2 sm:px-3 pt-1 pb-1"
         >
-        <div data-page-bento data-feed-nav data-profile-single-row className={cn('bg-zinc-900 rounded-xl relative', isTabsStuck && 'flex items-center gap-1 p-1')} style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
+        <div data-page-bento data-feed-nav data-profile-single-row className={cn('bg-zinc-900 rounded-xl relative p-1', isTabsStuck && 'flex items-center gap-1')} style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
           <div data-nav-glass-backdrop aria-hidden />
           {isTabsStuck && <>
             <div className="relative shrink-0 w-9 h-11">
@@ -913,7 +929,8 @@ return () => rail.removeEventListener('wheel', onWheel);
                     className={cn(
                       'relative z-40 flex flex-col items-center justify-center gap-px px-2 rounded-xl transition-[color,opacity] duration-300 text-white',
                       !isActive && 'opacity-60 hover:opacity-90',
-                      isTabsStuck ? 'shrink-0 w-14 h-11' : 'flex-1 min-w-[52px] py-[9px]',
+                      // Same tab size as the pinned bar, so the open pill doesn't squeeze them.
+                      isTabsStuck ? 'shrink-0 w-14 h-11' : 'flex-1 min-w-14 h-11',
                     )}
                   >
                     <tab.icon data-tab-glyph className="w-[18px] h-[18px] relative z-10" />

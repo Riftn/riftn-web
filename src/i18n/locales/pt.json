@@ -1317,7 +1317,9 @@
     "menuLayoutSections": "Seções",
     "menuLayoutSectionsDesc": "Todas as páginas, sob cabeçalhos",
     "menuLayoutFolders": "Pastas",
-    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo"
+    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo",
+    "chatCards": "Chats como cartões",
+    "chatCardsDesc": "Cada chat no seu próprio cartão. Desative para uma lista simples com uma linha entre chats."
   },
   "common": {
     "confirm": "Confirmar",
@@ -6644,6 +6646,12 @@
       "needsImageToWork": "{{model}} precisa de uma imagem para trabalhar. Anexe um primeiro.",
       "speechLimit": "São {{length}} caracteres. O limite é {{limit}}.",
       "musicTrackLength": "Faixa de {{count}}s"
+    },
+    "gallery": {
+      "send": "Enviar",
+      "notifications": {
+        "generation_reply": "{{name}} respondeu ao seu comentário"
+      }
     }
   },
   "pricing": {
@@ -6948,7 +6956,9 @@
     "spotlight": "Destaque",
     "spotlightBuyNote": "O NFT e o pagamento são trocados em uma etapa.",
     "spotlightOfferNote": "Ainda não listado. Envie uma oferta e o detentor pode aceitá-la a qualquer momento.",
-    "signInToTradeCta": "Faça login para negociar"
+    "signInToTradeCta": "Faça login para negociar",
+    "listedCount": "{{n}} à venda",
+    "allChains": "Todas as redes"
   },
   "usernames": {
     "seoTitle": "Nome de utilizador Marketplace | Riftn",
@@ -12761,7 +12771,7 @@
   "multiPost": {
     "tab": "Publicação múltipla",
     "title": "Publicação múltipla",
-    "intro": "Publique no X, YouTube, Instagram, TikTok e mais ao mesmo tempo com o dehub. Conecte suas contas uma vez, depois escolha onde cada publicação vai.",
+    "intro": "Publique no X, YouTube, Instagram, TikTok e mais ao mesmo tempo com o Riftn. Conecte suas contas uma vez, depois escolha onde cada publicação vai.",
     "creditsHeading": "Créditos de publicação",
     "credits": "{{count}} créditos de publicação",
     "topUpTitle": "Recarregue e economize",
@@ -12809,7 +12819,12 @@
   "dm": {
     "planRestricted": "Este usuário exige uma assinatura para receber mensagens.",
     "planTypeNotAllowed": "O plano deste criador não permite este tipo de mensagem.",
-    "planMinTip": "A gorjeta deve ser de pelo menos {{amount}} tokens para este criador."
+    "planMinTip": "A gorjeta deve ser de pelo menos {{amount}} tokens para este criador.",
+    "shareGroups": "Grupos",
+    "shareKindGroup": "Grupo",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Comunidade",
+    "reportMessage": "Denunciar mensagem"
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",
@@ -20688,7 +20703,8 @@
     "failed": "Não foi possível salvar isso. Tente novamente.",
     "privacy": "Apenas para te contar sobre o lançamento.",
     "seoTitle": "Lançamento de token em breve | Riftn",
-    "seoDescription": "O novo token Riftn está prestes a ser lançado. Junte-se à lista e receba um e-mail assim que for lançado, então compre diretamente da sua carteira Riftn."
+    "seoDescription": "O novo token Riftn está prestes a ser lançado. Junte-se à lista e receba um e-mail assim que for lançado, então compre diretamente da sua carteira Riftn.",
+    "emailPlaceholder": "Seu e-mail"
   },
   "githubLink": {
     "hint": "Faça login no GitHub para comprovar que a conta é sua. O Riftn só vê seu perfil público do GitHub.",
@@ -20790,5 +20806,8 @@
     "scheduledToast": "Agendada para {{when}}",
     "failedToast": "Não foi possível enviar uma mensagem agendada",
     "error": "Isso não funcionou. Tente novamente."
+  },
+  "msgDelete": {
+    "titleMany": "Eliminar mensagens {{count}}?"
   }
 }

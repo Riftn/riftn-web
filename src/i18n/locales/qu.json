@@ -80,7 +80,8 @@
       "profile": "perfil",
       "proposal": "munachiy",
       "stage": "pampa",
-      "store": "qhatu"
+      "store": "qhatu",
+      "featureRequest": "solicitud"
     },
     "recipientChat": "rimanakuy",
     "recipientUser": "Runa.",
@@ -521,7 +522,12 @@
     "getTheApp": "App-ta hap'iy",
     "connectAi": "IA-wan t'inkiy",
     "converter": "Tikraq",
-    "affiliate": "Yanapaq"
+    "affiliate": "Yanapaq",
+    "groups": {
+      "create": "Kamariy",
+      "discover": "Tariy",
+      "riftn": "Riftn sutiyuq runa"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} pa perfilninta qhaway",
@@ -1134,7 +1140,8 @@
     "socialConnectedShort": "Tinkuchisqa",
     "socialConnectFailed": "Mana konektaña {{platform}}. Ama hina kaychu yuyarisun.",
     "socialVerifiedFollowers": "{{value}} qatiqninkuna",
-    "socialFollowersPending": "Qatiqnin yupay musuqyachiy"
+    "socialFollowersPending": "Qatiqnin yupay musuqyachiy",
+    "menuLayoutFolders": "Carpetakuna"
   },
   "common": {
     "confirm": "Yuyachiy",
@@ -3062,7 +3069,11 @@
     "likersEmptyTitle": "Manaraq munasqakuna kanchu",
     "likersEmptyBody": "Kay rimaypa munasqankuna kaypi rikhurinqa.",
     "anonymousLikes_one": "Mana sutiyuq insigniayuqmanta {{count}} munasqa",
-    "anonymousLikes_other": "Mana sutiyuq insigniayuqkunamanta {{count}} munasqa"
+    "anonymousLikes_other": "Mana sutiyuq insigniayuqkunamanta {{count}} munasqa",
+    "threadParts": {
+      "moveUp": "Wichayman kuyuy",
+      "moveDown": "Urayman kuyuy"
+    }
   },
   "mintChain": {
     "title": "Menta poste",
@@ -6098,6 +6109,12 @@
       "needsImageToWork": "{{model}} imagen llaqtayta munan. Ñawpaqta huk imagen yapay.",
       "speechLimit": "Kayqa {{length}} caracteres. Limitqa {{limit}} kan.",
       "musicTrackLength": "{{count}} track"
+    },
+    "gallery": {
+      "send": "Apachiy",
+      "notifications": {
+        "generation_reply": "{{name}} rimayniykita kutichirqa"
+      }
     }
   },
   "pricing": {
@@ -11861,7 +11878,7 @@
   "multiPost": {
     "tab": "Múltiple publicación",
     "title": "Múltiple publicación",
-    "intro": "X, YouTube, Instagram, TikTok chaykunaman dehubwan huk tiempo llikan churan. Cuenta-sikunta hukmanta ruwachiy, chaymanta imata post chaykunata ruwan.",
+    "intro": "X, YouTube, Instagram, TikTok chaykunaman Riftnwan huk tiempo llikan churan. Cuenta-sikunta hukmanta ruwachiy, chaymanta imata post chaykunata ruwan.",
     "creditsHeading": "Post creditokuna",
     "credits": "{{count}} post creditokuna",
     "topUpTitle": "Kuska apamuy yuyay",
@@ -11909,7 +11926,9 @@
   "dm": {
     "planRestricted": "Kay runaqa suscripciónta mañan willakuykunata chaskinanpaq.",
     "planTypeNotAllowed": "Kay ruraqpa planninqa manam kay hina willakuyta saqinchu.",
-    "planMinTip": "Kay ruraqpaq propinaqa aswan pisillaqa {{amount}} fichas nisqakuna kanan."
+    "planMinTip": "Kay ruraqpaq propinaqa aswan pisillaqa {{amount}} fichas nisqakuna kanan.",
+    "shareKindGroup": "Huñu...",
+    "shareKindCommunity": "Ayllu"
   },
   "credits": {
     "earningsWorth": "Valor {{amount}} nisqa.",
@@ -19470,5 +19489,10 @@
     "edit": "Ruwapay",
     "editLabel": "Willayta llamk&#39;apuy",
     "error": "Chayqa manan allinchu karqan. Hukmanta kallpachakuy."
+  },
+  "mentionLinks": {
+    "communities": "Ayllukuna",
+    "pages": "Rapikuna",
+    "people": "Runakuna"
   }
 }

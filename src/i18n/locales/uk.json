@@ -81,7 +81,8 @@
       "profile": "профіль",
       "proposal": "пропозиція",
       "stage": "етап",
-      "store": "магазин"
+      "store": "магазин",
+      "featureRequest": "запит"
     },
     "recipientChat": "чат",
     "recipientUser": "користувач",
@@ -520,7 +521,12 @@
     "getTheApp": "Завантажити застосунок",
     "connectAi": "Підключити ШІ",
     "converter": "Конвертер",
-    "affiliate": "Партнерка"
+    "affiliate": "Партнерка",
+    "groups": {
+      "create": "Створити",
+      "discover": "Огляд",
+      "riftn": "ДеЮб"
+    }
   },
   "feed": {
     "viewProfile": "Переглянути профіль {{name}}",
@@ -1155,7 +1161,8 @@
     "socialConnectedShort": "Підключено",
     "socialConnectFailed": "Неможливо під'єднатися {{platform}}. Спробуйте ще раз.",
     "socialVerifiedFollowers": "{{value}} підписники",
-    "socialFollowersPending": "Оновлення кількості підписників"
+    "socialFollowersPending": "Оновлення кількості підписників",
+    "menuLayoutFolders": "Теки"
   },
   "common": {
     "confirm": "Підтвердити",
@@ -3421,7 +3428,11 @@
     "likersEmptyTitle": "Ще немає вподобань",
     "likersEmptyBody": "Тут з’являться вподобання цього коментаря.",
     "anonymousLikes_one": "{{count}} вподобання від анонімного власника значка",
-    "anonymousLikes_other": "{{count}} вподобань від анонімних власників значків"
+    "anonymousLikes_other": "{{count}} вподобань від анонімних власників значків",
+    "threadParts": {
+      "moveUp": "Вище",
+      "moveDown": "Нижче"
+    }
   },
   "mintChain": {
     "title": "М 'ята допис",
@@ -6452,6 +6463,12 @@
       "needsImageToWork": "{{model}} потрібне зображення для роботи. Спочатку прикріпіть один.",
       "speechLimit": "Це {{length}} символів. Обмеження: {{limit}}.",
       "musicTrackLength": "{{count}} трек"
+    },
+    "gallery": {
+      "send": "Надіслати",
+      "notifications": {
+        "generation_reply": "{{name}} відповів на ваш коментар"
+      }
     }
   },
   "pricing": {
@@ -12297,7 +12314,7 @@
   "multiPost": {
     "tab": "Мультипостинг",
     "title": "Мультипостинг",
-    "intro": "Публікуйте в X, YouTube, Instagram, TikTok та інші одночасно за допомогою dehub. Підключіть свої акаунти один раз, а потім виберіть, куди надсилати кожен пост.",
+    "intro": "Публікуйте в X, YouTube, Instagram, TikTok та інші одночасно за допомогою Riftn. Підключіть свої акаунти один раз, а потім виберіть, куди надсилати кожен пост.",
     "creditsHeading": "Кредити на пости",
     "credits": "{{count}} постових кредитів",
     "topUpTitle": "Поповніть і заощаджуйте",
@@ -12345,7 +12362,10 @@
   "dm": {
     "planRestricted": "Цей користувач приймає повідомлення лише за підпискою.",
     "planTypeNotAllowed": "План цього автора не дозволяє такий тип повідомлень.",
-    "planMinTip": "Чайові для цього автора мають бути не менше {{amount}} токенів."
+    "planMinTip": "Чайові для цього автора мають бути не менше {{amount}} токенів.",
+    "shareKindGroup": "Групувати",
+    "shareKindChannel": "Канал",
+    "shareKindCommunity": "Спільнота"
   },
   "credits": {
     "earningsWorth": "Вартість {{amount}}",
@@ -19940,5 +19960,10 @@
     "footer": {
       "allRightsReserved": "Всі права захищені"
     }
+  },
+  "mentionLinks": {
+    "communities": "Спільноти",
+    "pages": "Сторінки",
+    "people": "Люди"
   }
 }

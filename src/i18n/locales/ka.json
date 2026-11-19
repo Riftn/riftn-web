@@ -81,7 +81,8 @@
       "profile": "პროფილი",
       "proposal": "შემოთავაზება",
       "stage": "სტეიჯი",
-      "store": "მაღაზია"
+      "store": "მაღაზია",
+      "featureRequest": "მოთხოვნა"
     },
     "recipientChat": "ჩატი",
     "recipientUser": "მომხმარებელი",
@@ -521,7 +522,12 @@
     "getTheApp": "აპლიკაციის ჩამოტვირთვა",
     "connectAi": "AI-ის დაკავშირება",
     "converter": "გადამყვანი",
-    "affiliate": "პარტნიორი"
+    "affiliate": "პარტნიორი",
+    "groups": {
+      "create": "შექმნა",
+      "discover": "აღმოჩენა",
+      "riftn": "დეჰუბი"
+    }
   },
   "feed": {
     "viewProfile": "{{name}}-ის პროფილის ნახვა",
@@ -1142,7 +1148,8 @@
     "socialConnectedShort": "დაკავშირებულია",
     "socialConnectFailed": "{{platform}} დაკავშირება ვერ მოხერხდა. გთხოვთ, ცადეთ ხელახლა.",
     "socialVerifiedFollowers": "{{value}} ფოლოვერი",
-    "socialFollowersPending": "მიმდევართა რაოდენობის განახლება"
+    "socialFollowersPending": "მიმდევართა რაოდენობის განახლება",
+    "menuLayoutFolders": "საქაღალდეები"
   },
   "common": {
     "confirm": "დადასტურება",
@@ -3058,7 +3065,11 @@
     "likersEmptyTitle": "მოწონებები ჯერ არ არის",
     "likersEmptyBody": "ამ კომენტარის მოწონებები აქ გამოჩნდება.",
     "anonymousLikes_one": "{{count}} მოწონება ანონიმური ბეჯის მფლობელისგან",
-    "anonymousLikes_other": "{{count}} მოწონება ანონიმური ბეჯის მფლობელებისგან"
+    "anonymousLikes_other": "{{count}} მოწონება ანონიმური ბეჯის მფლობელებისგან",
+    "threadParts": {
+      "moveUp": "წინამოდგება",
+      "moveDown": "ქვენამოდგება"
+    }
   },
   "mintChain": {
     "title": "პიტნის პოსტი",
@@ -6089,6 +6100,12 @@
       "needsImageToWork": "{{model}} -ს მუშაობისთვის ესაჭიროება გამოსახულება. ჯერ ერთი მიამაგრეთ.",
       "speechLimit": "ეს არის {{length}} სიმბოლო. ლიმიტი არის {{limit}}.",
       "musicTrackLength": "{{count}} ტრეკი"
+    },
+    "gallery": {
+      "send": "გაგზავნა",
+      "notifications": {
+        "generation_reply": "{{name}}-მ უპასუხა თქვენს კომენტარს"
+      }
     }
   },
   "pricing": {
@@ -11870,7 +11887,7 @@
   "multiPost": {
     "tab": "მრავალჯერადი პოსტინგი",
     "title": "მრავალჯერადი პოსტინგი",
-    "intro": "გამოაქვეყნეთ X-ზე, YouTube-ზე, Instagram-ზე, TikTok-ზე და სხვა პლატფორმებზე ერთდროულად dehub-ის საშუალებით. დააკავშირეთ თქვენი ანგარიშები ერთხელ, შემდეგ აირჩიეთ, სად წავა თითოეული პოსტი.",
+    "intro": "გამოაქვეყნეთ X-ზე, YouTube-ზე, Instagram-ზე, TikTok-ზე და სხვა პლატფორმებზე ერთდროულად Riftn-ის საშუალებით. დააკავშირეთ თქვენი ანგარიშები ერთხელ, შემდეგ აირჩიეთ, სად წავა თითოეული პოსტი.",
     "creditsHeading": "პოსტის კრედიტები",
     "credits": "{{count}} პოსტის კრედიტი",
     "topUpTitle": "დაამატეთ და დაზოგეთ",
@@ -11918,7 +11935,9 @@
   "dm": {
     "planRestricted": "ამ მომხმარებელს შეტყობინებების მისაღებად გამოწერა სჭირდება.",
     "planTypeNotAllowed": "ამ შემქმნელის გეგმა ამ ტიპის შეტყობინებას არ იძლევა.",
-    "planMinTip": "ამ შემქმნელისთვის თიფი მინიმუმ {{amount}} ტოკენები უნდა იყოს."
+    "planMinTip": "ამ შემქმნელისთვის თიფი მინიმუმ {{amount}} ტოკენები უნდა იყოს.",
+    "shareKindGroup": "დაჯგუფება",
+    "shareKindCommunity": "საზოგადოება"
   },
   "credits": {
     "earningsWorth": "ღირს {{amount}}",
@@ -19436,5 +19455,10 @@
     "backToBlog": "ბლოგზე დაბრუნება",
     "sharePost": "პოსტის გაზიარება",
     "relatedPosts": "დაკავშირებული პოსტები"
+  },
+  "mentionLinks": {
+    "communities": "საზოგადოებები",
+    "pages": "გვერდები",
+    "people": "ხალხი"
   }
 }

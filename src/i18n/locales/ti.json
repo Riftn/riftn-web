@@ -81,7 +81,8 @@
       "profile": "ፕሮፋይል",
       "proposal": "መማረጺ",
       "stage": "መድረኽ",
-      "store": "ዱኳን"
+      "store": "ዱኳን",
+      "featureRequest": "ሕቶ"
     },
     "recipientChat": "ቻት",
     "recipientUser": "ተጠቃሚ",
@@ -520,7 +521,11 @@
     "getTheApp": "ኣፕ ውሰድ",
     "connectAi": "AI ኣራኽብ",
     "converter": "ለዋጢ",
-    "affiliate": "ሽርክና"
+    "affiliate": "ሽርክና",
+    "groups": {
+      "create": "ፍጠር",
+      "discover": "ርኸብ"
+    }
   },
   "feed": {
     "viewProfile": "መገለጺ {{name}} ርአ",
@@ -1128,7 +1133,8 @@
     "socialConnectedShort": "ዝተኣሳሰር",
     "socialConnectFailed": "{{platform}} ክትራኸብ ኣይትኽእልን ኢኻ ። በጃኻ ደጊምካ ፈትኖ ።",
     "socialVerifiedFollowers": "{{value}} ተኸታተልቲ",
-    "socialFollowersPending": "ናይ ተኸታሊ ቆጸራ ዝሕደስ"
+    "socialFollowersPending": "ናይ ተኸታሊ ቆጸራ ዝሕደስ",
+    "menuLayoutFolders": "ፎልደራት"
   },
   "common": {
     "confirm": "ኣረጋጊጽካ",
@@ -3009,7 +3015,11 @@
     "likersEmptyTitle": "ገና ምፍታው የለን",
     "likersEmptyBody": "ምፍታዋት ናይዚ ርእይቶ ኣብዚ ክርኣዩ እዮም።",
     "anonymousLikes_one": "ካብ ስሙ ዘይፍለጥ ዋና ባጅ {{count}} ምፍታው",
-    "anonymousLikes_other": "ካብ ስሞም ዘይፍለጥ ወነንቲ ባጅ {{count}} ምፍታዋት"
+    "anonymousLikes_other": "ካብ ስሞም ዘይፍለጥ ወነንቲ ባጅ {{count}} ምፍታዋት",
+    "threadParts": {
+      "moveUp": "ላዕላይ ወስድ",
+      "moveDown": "ታሕታይ ወስድ"
+    }
   },
   "mintChain": {
     "title": "ናይ ምስሊ መግለጺ",
@@ -6022,6 +6032,12 @@
       "cannotEditImage": "{{model}} ነቲ ዝተኣሳሰረ ስእሊ ክትቅይሮ ኣይትኽእልን ኢኻ ። ነዚ ኣወግዶ ወይ ካልእ ሞዴል ምረጽ ።",
       "cannotUseReference": "{{model}} ናይ መወከሲ ስእሊ ክጥቀመሉ ኣይክእልን እዩ ። ነዚ ኣወግዶ ወይ ካልእ ሞዴል ምረጽ ።",
       "speechLimit": "እዚ ድማ {{length}} characters እዩ ። እቲ ወሰን {{limit}} እዩ ።"
+    },
+    "gallery": {
+      "send": "ላኽ",
+      "notifications": {
+        "generation_reply": "{{name}} ንርእይቶኻ መሊሱ"
+      }
     }
   },
   "pricing": {
@@ -11758,7 +11774,7 @@
   "multiPost": {
     "tab": "ብዙሕ ፖስታ",
     "title": "ብዙሕ ፖስታ",
-    "intro": "ናብ X ፣ YouTube ፣ Instagram ፣ TikTokን ካብኡ ንላዕሊን ኣብ ሓደ እዋን ከም dehub ይለኣኽ ። ሕሳብካ ሓደ ግዜ ኣገናኝ ፡ ድሕሪኡ ድማ ነፍሲ ወከፍ ፖስታ ናበይ ከም ዚኸይድ ሕረጽ ።",
+    "intro": "ናብ X ፣ YouTube ፣ Instagram ፣ TikTokን ካብኡ ንላዕሊን ኣብ ሓደ እዋን ከም Riftn ይለኣኽ ። ሕሳብካ ሓደ ግዜ ኣገናኝ ፡ ድሕሪኡ ድማ ነፍሲ ወከፍ ፖስታ ናበይ ከም ዚኸይድ ሕረጽ ።",
     "creditsHeading": "ናይ ልኡኽ ወረቐት",
     "credits": "{{count}} ናይ ፖስት ክሬዲት",
     "topUpTitle": "ናብ ላዕሊን ናብ ላዕሊን",
@@ -11806,7 +11822,9 @@
   "dm": {
     "planRestricted": "እዚ ተጠቃሚ መልእኽትታት ንምቕባል ምዝገባ የድልዮ።",
     "planTypeNotAllowed": "ውጥን እዚ ፈጣሪ ከምዚ ዓይነት መልእኽቲ ኣይፈቅድን።",
-    "planMinTip": "ን'ዚ ፈጣሪ ቲፕ እንተነኣሰ {{amount}} ምልክታት ክኸውን ኣለዎ።"
+    "planMinTip": "ን'ዚ ፈጣሪ ቲፕ እንተነኣሰ {{amount}} ምልክታት ክኸውን ኣለዎ።",
+    "shareKindGroup": "ኣዋህህ",
+    "shareKindCommunity": "ማሕበረሰብ"
   },
   "credits": {
     "earningsWorth": "ዋጋ {{amount}}",
@@ -19289,5 +19307,10 @@
     "edit": "ኣዐሪ",
     "editLabel": "መልእኽቲ ኣዐሪ",
     "error": "በጃኻ ኣይትጨነቕ ፡ ከም'ዚ... እንደገና ይዞር ኣሎ ።"
+  },
+  "mentionLinks": {
+    "communities": "ማሕበረሰባት",
+    "pages": "ገጻት",
+    "people": "ሰባት"
   }
 }

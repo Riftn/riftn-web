@@ -780,6 +780,13 @@
     "heading": "Courts Riftn"
   },
   "settings": {
+    "chatDeleteChoice": "Quand vous supprimez un message",
+    "chatDeleteChoiceDesc": "Demander à chaque fois, ou toujours supprimer pour vous seul ou pour tout le monde dans la discussion.",
+    "chatDeleteAsk": "Demander à chaque fois",
+    "chatDeleteMe": "Supprimer pour moi",
+    "chatDeleteMeDesc": "Disparaît de votre discussion, les autres le voient encore",
+    "chatDeleteEveryone": "Supprimer pour tout le monde",
+    "chatDeleteEveryoneDesc": "Quand c’est possible. Le message de quelqu’un d’autre dans un groupe n’est supprimé que pour vous",
     "postLanding": "Après la publication",
     "postLandingDesc": "Comment votre nouvelle publication arrive dans votre fil",
     "postLandingGhost": "Emplacement fantôme",
@@ -1381,7 +1388,9 @@
     "menuLayoutSections": "Sections",
     "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
     "menuLayoutFolders": "Dossiers",
-    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe"
+    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe",
+    "chatCards": "Chats en cartes",
+    "chatCardsDesc": "Chaque chat sur sa propre carte. Désactivez pour une liste simple avec une ligne entre les chats."
   },
   "common": {
     "confirm": "Confirmer",
@@ -6624,6 +6633,18 @@
       "needsImageToWork": "{{model}} a besoin d'une image pour fonctionner. Attachez-en un en premier.",
       "speechLimit": "Soit {{length}} caractères. La limite est de {{limit}}.",
       "musicTrackLength": "Piste {{count}}s"
+    },
+    "gallery": {
+      "browse": "Parcourir les créations",
+      "fullscreen": "Afficher en plein écran",
+      "missing": "Cette création n’est pas disponible.",
+      "send": "Envoyer",
+      "notifications": {
+        "generation_like": "{{name}} a réagi à votre création",
+        "generation_comment_like": "{{name}} a réagi à votre commentaire",
+        "generation_reply": "{{name}} a répondu à votre commentaire",
+        "generation_comment": "{{name}} a commenté votre création"
+      }
     }
   },
   "pricing": {
@@ -12747,7 +12768,7 @@
   "multiPost": {
     "tab": "Multi-publication",
     "title": "Multi-publication",
-    "intro": "Publiez sur X, YouTube, Instagram, TikTok et plus en même temps avec dehub. Connectez vos comptes une fois, puis choisissez où chaque publication va.",
+    "intro": "Publiez sur X, YouTube, Instagram, TikTok et plus en même temps avec Riftn. Connectez vos comptes une fois, puis choisissez où chaque publication va.",
     "creditsHeading": "Crédits de publication",
     "credits": "{{count}} crédits de publication",
     "topUpTitle": "Rechargez et économisez",
@@ -12795,7 +12816,12 @@
   "dm": {
     "planRestricted": "Cet utilisateur exige un abonnement pour recevoir des messages.",
     "planTypeNotAllowed": "L'offre de ce créateur n'autorise pas ce type de message.",
-    "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur."
+    "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur.",
+    "shareGroups": "Groupes",
+    "shareKindGroup": "Groupe",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Communauté",
+    "reportMessage": "Signaler le message"
   },
   "credits": {
     "earningsWorth": "Valeur {{amount}}",
@@ -20833,6 +20859,8 @@
     "forEveryone": "Supprimer pour tout le monde",
     "forBoth": "Supprimer pour nous deux",
     "forMeAndName": "Supprimer pour moi et {{name}}",
+    "remember": "Mémoriser mon choix",
+    "rememberHint": "Modifiable à tout moment dans les Paramètres",
     "failed": "Impossible de supprimer le message"
   }
 }

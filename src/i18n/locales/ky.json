@@ -81,7 +81,8 @@
       "profile": "профиль",
       "proposal": "сунуш",
       "stage": "сцена",
-      "store": "магазин"
+      "store": "магазин",
+      "featureRequest": "сурам"
     },
     "recipientChat": "чат",
     "recipientUser": "колдонуучу",
@@ -521,7 +522,12 @@
     "getTheApp": "Колдонмону жүктөө",
     "connectAi": "ЖИ туташтыруу",
     "converter": "Конвертер",
-    "affiliate": "Өнөктөш"
+    "affiliate": "Өнөктөш",
+    "groups": {
+      "create": "Түзүү",
+      "discover": "Ачуу",
+      "riftn": "ДеАйб"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} профилин көрүү",
@@ -1134,7 +1140,8 @@
     "socialConnectedShort": "Байланышкан",
     "socialConnectFailed": "{{platform}} туташууга болбоду. Кайра аракет кылып көрүңүз.",
     "socialVerifiedFollowers": "{{value}} көз карандысызтар",
-    "socialFollowersPending": "Жолдоочулардын саны жаңыртылууда"
+    "socialFollowersPending": "Жолдоочулардын саны жаңыртылууда",
+    "menuLayoutFolders": "Папкалар"
   },
   "common": {
     "confirm": "Ырастоо",
@@ -3033,7 +3040,11 @@
     "likersEmptyTitle": "Азырынча жактыруулар жок",
     "likersEmptyBody": "Бул комментарийдин жактыруулары бул жерде көрүнөт.",
     "anonymousLikes_one": "Анонимдүү белги ээсинен {{count}} жактыруу",
-    "anonymousLikes_other": "Анонимдүү белги ээлеринен {{count}} жактыруу"
+    "anonymousLikes_other": "Анонимдүү белги ээлеринен {{count}} жактыруу",
+    "threadParts": {
+      "moveUp": "Жогору жылдыруу",
+      "moveDown": "Төмөн жылдыруу"
+    }
   },
   "mintChain": {
     "title": "Mint билдирүү",
@@ -6069,6 +6080,12 @@
       "needsImageToWork": "{{model}} Иштөө үчүн сүрөт керек. Алгач бирин тиркеңиз.",
       "speechLimit": "Бул {{length}} белгилер. Чеги {{limit}}.",
       "musicTrackLength": "{{count}}s трек"
+    },
+    "gallery": {
+      "send": "Жибирүү",
+      "notifications": {
+        "generation_reply": "{{name}} комментарийиңизге жооп берди"
+      }
     }
   },
   "pricing": {
@@ -11844,7 +11861,7 @@
   "multiPost": {
     "tab": "Көп жолу жарыялоо",
     "title": "Көп жолу жарыялоо",
-    "intro": "X, YouTube, Instagram, TikTok жана башкаларга dehub сыяктуу бир эле учурда жарыялаңыз. Аккаунттарыңызды бир жолу туташтырыңыз, андан кийин ар бир пост кайда кетерин тандаңыз.",
+    "intro": "X, YouTube, Instagram, TikTok жана башкаларга Riftn сыяктуу бир эле учурда жарыялаңыз. Аккаунттарыңызды бир жолу туташтырыңыз, андан кийин ар бир пост кайда кетерин тандаңыз.",
     "creditsHeading": "Пост кредиттери",
     "credits": "{{count}} пост кредити",
     "topUpTitle": "Толуктап, үнөмдөңүз",
@@ -11892,7 +11909,9 @@
   "dm": {
     "planRestricted": "Бул колдонуучу билдирүү алуу үчүн жазылууну талап кылат.",
     "planTypeNotAllowed": "Бул автордун планы мындай билдирүүгө уруксат бербейт.",
-    "planMinTip": "Бул автор үчүн чайпул кеминде {{amount}} токендер болушу керек."
+    "planMinTip": "Бул автор үчүн чайпул кеминде {{amount}} токендер болушу керек.",
+    "shareKindGroup": "Топ",
+    "shareKindCommunity": "Коомчулук"
   },
   "credits": {
     "earningsWorth": "Баасы {{amount}}",
@@ -19449,5 +19468,10 @@
     "edit": "Оңдоо",
     "editLabel": "Кабарды өзгөртүү",
     "error": "Бул иштебей калды. Кайра аракет кылып көрүңүз."
+  },
+  "mentionLinks": {
+    "communities": "Жамааттар",
+    "pages": "Барактар",
+    "people": "Адамдар"
   }
 }

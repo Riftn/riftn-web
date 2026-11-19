@@ -81,7 +81,8 @@
       "profile": "profiel",
       "proposal": "Voorslag",
       "stage": "stadium",
-      "store": "winkel"
+      "store": "winkel",
+      "featureRequest": "aanvrae"
     },
     "recipientChat": "gesels",
     "recipientUser": "gebruiker",
@@ -581,7 +582,11 @@
     "getTheApp": "Kry die app",
     "connectAi": "Koppel KI",
     "converter": "Converter",
-    "affiliate": "Vennoot"
+    "affiliate": "Vennoot",
+    "groups": {
+      "create": "Skep",
+      "discover": "Ontdek"
+    }
   },
   "feed": {
     "viewProfile": "Bekyk {{name}} se profiel",
@@ -1206,7 +1211,8 @@
     "socialVerifiedFollowers": "{{value}} volgers",
     "socialFollowersPending": "Volgertellings aanpas",
     "security": "Sekuriteit",
-    "about": "Oor"
+    "about": "Oor",
+    "menuLayoutFolders": "Vouers"
   },
   "common": {
     "confirm": "Bevestig",
@@ -3137,7 +3143,11 @@
     "likersEmptyTitle": "Nog geen laaiks nie",
     "likersEmptyBody": "Laaiks op hierdie opmerking sal hier verskyn.",
     "anonymousLikes_one": "{{count}} laaik van 'n anonieme badgehouer",
-    "anonymousLikes_other": "{{count}} laaiks van anonieme badgehouers"
+    "anonymousLikes_other": "{{count}} laaiks van anonieme badgehouers",
+    "threadParts": {
+      "moveUp": "Beweeg op",
+      "moveDown": "Beweeg af"
+    }
   },
   "mintChain": {
     "title": "Mint-pos",
@@ -6172,6 +6182,12 @@
       "needsImageToWork": "{{model}} 'n foto om van te werk. Eerste aan te sluiten.",
       "speechLimit": "Dit is {{length}} karakters. Die limiet is {{limit}}.",
       "musicTrackLength": "{{count}}s snit"
+    },
+    "gallery": {
+      "send": "Stuur",
+      "notifications": {
+        "generation_reply": "{{name}} het op jou kommentaar geantwoord"
+      }
     }
   },
   "pricing": {
@@ -11993,7 +12009,7 @@
   "multiPost": {
     "tab": "Multi-plasing",
     "title": "Multi-plasing",
-    "intro": "Plaas gelyktydig na X, YouTube, Instagram, TikTok en meer met dehub. Koppel jou rekeninge een keer, kies dan waar elke plasing heen gaan.",
+    "intro": "Plaas gelyktydig na X, YouTube, Instagram, TikTok en meer met Riftn. Koppel jou rekeninge een keer, kies dan waar elke plasing heen gaan.",
     "creditsHeading": "Plaaskrediete",
     "credits": "{{count}} plaaskrediete",
     "topUpTitle": "Vul aan en spaar",
@@ -12041,7 +12057,9 @@
   "dm": {
     "planRestricted": "Hierdie gebruiker vereis 'n intekening om boodskappe te ontvang.",
     "planTypeNotAllowed": "Hierdie skepper se plan laat nie hierdie soort boodskap toe nie.",
-    "planMinTip": "Fooitjie moet minstens {{amount}} tokens vir hierdie skepper wees."
+    "planMinTip": "Fooitjie moet minstens {{amount}} tokens vir hierdie skepper wees.",
+    "shareKindGroup": "Groepeer",
+    "shareKindCommunity": "Gemeenskap"
   },
   "credits": {
     "earningsWorth": "Die moeite werd {{amount}}",
@@ -19652,5 +19670,10 @@
     "description": "Skep iets nuuts.",
     "newProject": "Nuwe projek",
     "newPost": "Nuwe plasing"
+  },
+  "mentionLinks": {
+    "communities": "Gemeenskappe",
+    "pages": "Bladsye",
+    "people": "Mense"
   }
 }

@@ -780,6 +780,13 @@
     "heading": "Cortos de Riftn"
   },
   "settings": {
+    "chatDeleteChoice": "Al eliminar un mensaje",
+    "chatDeleteChoiceDesc": "Preguntar siempre, o eliminar siempre solo para ti o para todos en el chat.",
+    "chatDeleteAsk": "Preguntar siempre",
+    "chatDeleteMe": "Eliminar para mí",
+    "chatDeleteMeDesc": "Desaparece de tu chat, los demás lo siguen viendo",
+    "chatDeleteEveryone": "Eliminar para todos",
+    "chatDeleteEveryoneDesc": "Cuando se pueda. El mensaje de otra persona en un grupo solo se elimina para ti",
     "postLanding": "Después de publicar",
     "postLandingDesc": "Cómo aparece tu nueva publicación en tu feed",
     "postLandingGhost": "Hueco fantasma",
@@ -1381,7 +1388,9 @@
     "menuLayoutSections": "Secciones",
     "menuLayoutSectionsDesc": "Todas las páginas a la vez, bajo encabezados",
     "menuLayoutFolders": "Carpetas",
-    "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo"
+    "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo",
+    "chatCards": "Chats como tarjetas",
+    "chatCardsDesc": "Cada chat en su propia tarjeta. Desactívalo para una lista simple con una línea entre chats."
   },
   "common": {
     "confirm": "Confirmar",
@@ -6620,6 +6629,18 @@
       "needsImageToWork": "{{model}} necesita una imagen para trabajar. Adjunta uno primero.",
       "speechLimit": "Son {{length}} caracteres. El límite es {{limit}}.",
       "musicTrackLength": "Seguimiento de {{count}}s"
+    },
+    "gallery": {
+      "browse": "Explorar creaciones",
+      "fullscreen": "Ver en pantalla completa",
+      "missing": "Esta creación no está disponible.",
+      "send": "Enviar",
+      "notifications": {
+        "generation_like": "{{name}} reaccionó a tu creación",
+        "generation_comment_like": "{{name}} reaccionó a tu comentario",
+        "generation_reply": "{{name}} respondió a tu comentario",
+        "generation_comment": "{{name}} comentó tu creación"
+      }
     }
   },
   "pricing": {
@@ -12743,7 +12764,7 @@
   "multiPost": {
     "tab": "Publicaciones múltiples",
     "title": "Publicaciones múltiples",
-    "intro": "Publica en X, YouTube, Instagram, TikTok y más al mismo tiempo con dehub. Conecta tus cuentas una vez y elige a dónde va cada publicación.",
+    "intro": "Publica en X, YouTube, Instagram, TikTok y más al mismo tiempo con Riftn. Conecta tus cuentas una vez y elige a dónde va cada publicación.",
     "creditsHeading": "Créditos de publicación",
     "credits": "{{count}} créditos de publicación",
     "topUpTitle": "Recarga y ahorra",
@@ -12791,7 +12812,12 @@
   "dm": {
     "planRestricted": "Este usuario requiere una suscripción para recibir mensajes.",
     "planTypeNotAllowed": "El plan de este creador no permite este tipo de mensaje.",
-    "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador."
+    "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador.",
+    "shareGroups": "Grupos",
+    "shareKindGroup": "Grupo",
+    "shareKindChannel": "Canal",
+    "shareKindCommunity": "Comunidad",
+    "reportMessage": "Denunciar mensaje"
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",
@@ -20829,6 +20855,8 @@
     "forEveryone": "Eliminar para todos",
     "forBoth": "Eliminar para los dos",
     "forMeAndName": "Eliminar para mí y {{name}}",
+    "remember": "Recordar mi elección",
+    "rememberHint": "Cámbialo cuando quieras en Ajustes",
     "failed": "No se pudo eliminar el mensaje"
   }
 }

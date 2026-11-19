@@ -81,7 +81,8 @@
       "profile": "ទម្រង់សំគាល់ខ្លួន",
       "proposal": "សំណើ",
       "stage": "វគ្គ",
-      "store": "រក្សាទុក"
+      "store": "រក្សាទុក",
+      "featureRequest": "សំណើ"
     },
     "recipientChat": "ការជជែក",
     "recipientUser": "អ្នកប្រើប្រាស់",
@@ -519,7 +520,11 @@
     "getTheApp": "ទាញយកកម្មវិធី",
     "connectAi": "ភ្ជាប់ AI",
     "converter": "កម្មវិធី​បម្លែង",
-    "affiliate": "ដៃគូ"
+    "affiliate": "ដៃគូ",
+    "groups": {
+      "create": "បង្កើត",
+      "discover": "ស្វែងរក"
+    }
   },
   "feed": {
     "viewProfile": "មើលប្រវត្តិរូបរបស់ {{name}}",
@@ -1130,7 +1135,8 @@
     "socialConnectedShort": "បានភ្ជាប់",
     "socialConnectFailed": "មិនអាចភ្ជាប់ {{platform}}បានទេ ។ សូមព្យាយាមម្ដងទៀត ។",
     "socialVerifiedFollowers": "{{value}} អ្នកដើរតាម",
-    "socialFollowersPending": "កំពុងធ្វើបច្ចុប្បន្នភាពចំនួនអ្នកតាមដាន"
+    "socialFollowersPending": "កំពុងធ្វើបច្ចុប្បន្នភាពចំនួនអ្នកតាមដាន",
+    "menuLayoutFolders": "ថតឯកសារ"
   },
   "common": {
     "confirm": "បញ្ជាក់",
@@ -3041,7 +3047,11 @@
     "likersEmptyTitle": "មិនទាន់មានការចូលចិត្តទេ",
     "likersEmptyBody": "ការចូលចិត្តលើមតិនេះនឹងបង្ហាញនៅទីនេះ។",
     "anonymousLikes_one": "{{count}} ការចូលចិត្តពីអ្នកកាន់ផ្លាកសញ្ញាអនាមិក",
-    "anonymousLikes_other": "{{count}} ការចូលចិត្តពីអ្នកកាន់ផ្លាកសញ្ញាអនាមិក"
+    "anonymousLikes_other": "{{count}} ការចូលចិត្តពីអ្នកកាន់ផ្លាកសញ្ញាអនាមិក",
+    "threadParts": {
+      "moveUp": "ផ្លាស់ទីឡើង",
+      "moveDown": "ផ្លាស់ទីចុះក្រោម"
+    }
   },
   "mintChain": {
     "title": "បង្គោលជីអង្កាម",
@@ -6065,6 +6075,12 @@
       "needsImageToWork": "{{model}} ត្រូវការរូបភាពដើម្បីធ្វើការពី ។ ភ្ជាប់មួយជាមុនសិន ។",
       "speechLimit": "នោះគឺ {{length}} តួអក្សរ ។ ដែនកំណត់គឺ {{limit}} ។",
       "musicTrackLength": "{{count}}s បទ"
+    },
+    "gallery": {
+      "send": "ផ្ញើ",
+      "notifications": {
+        "generation_reply": "{{name}} បានឆ្លើយតបទៅនឹងមតិរបស់អ្នក"
+      }
     }
   },
   "pricing": {
@@ -11837,7 +11853,7 @@
   "multiPost": {
     "tab": "ការបង្ហោះច្រើន",
     "title": "ការបង្ហោះច្រើន",
-    "intro": "បង្ហោះទៅ X, YouTube, Instagram, TikTok និងច្រើនទៀតក្នុងពេលតែមួយជាមួយ dehub។ ភ្ជាប់គណនីរបស់អ្នកម្តង រួចជ្រើសរើសកន្លែងដែលការបង្ហោះនីមួយៗនឹងទៅ។",
+    "intro": "បង្ហោះទៅ X, YouTube, Instagram, TikTok និងច្រើនទៀតក្នុងពេលតែមួយជាមួយ Riftn។ ភ្ជាប់គណនីរបស់អ្នកម្តង រួចជ្រើសរើសកន្លែងដែលការបង្ហោះនីមួយៗនឹងទៅ។",
     "creditsHeading": "ឥណទានការបង្ហោះ",
     "credits": "ឥណទានការបង្ហោះ {{count}}",
     "topUpTitle": "បញ្ចូលទឹកប្រាក់និងសន្សំ",
@@ -11885,7 +11901,9 @@
   "dm": {
     "planRestricted": "អ្នកប្រើនេះតម្រូវឱ្យមានការជាវ ដើម្បីទទួលសារ។",
     "planTypeNotAllowed": "គម្រោងរបស់អ្នកបង្កើតនេះ មិនអនុញ្ញាតសារប្រភេទនេះទេ។",
-    "planMinTip": "ទឹកប្រាក់ធីបសម្រាប់អ្នកបង្កើតនេះ ត្រូវតែយ៉ាងហោចណាស់ {{amount}} តូខឹន។"
+    "planMinTip": "ទឹកប្រាក់ធីបសម្រាប់អ្នកបង្កើតនេះ ត្រូវតែយ៉ាងហោចណាស់ {{amount}} តូខឹន។",
+    "shareKindGroup": "ក្រុម",
+    "shareKindCommunity": "សហគមន៍"
   },
   "credits": {
     "earningsWorth": "តម្លៃ {{amount}}",
@@ -19388,5 +19406,10 @@
     "backToBlog": "ត្រឡប់ទៅប្លក់",
     "sharePost": "ចែករំលែកការបង្ហោះ",
     "relatedPosts": "ការបង្ហោះពាក់ព័ន្ធ"
+  },
+  "mentionLinks": {
+    "communities": "សហគមន៍",
+    "pages": "ទំព័រ",
+    "people": "មនុស្ស"
   }
 }

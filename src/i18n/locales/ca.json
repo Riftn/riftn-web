@@ -78,7 +78,8 @@
       "profile": "perfil",
       "proposal": "proposta",
       "stage": "etapa",
-      "store": "botiga"
+      "store": "botiga",
+      "featureRequest": "Solicitude"
     },
     "recipientChat": "xat",
     "recipientUser": "usuari",
@@ -519,7 +520,11 @@
     "getTheApp": "Descarrega l'app",
     "connectAi": "Connecta la IA",
     "converter": "Convertidor",
-    "affiliate": "Afiliats"
+    "affiliate": "Afiliats",
+    "groups": {
+      "create": "Crear",
+      "discover": "Descobreix"
+    }
   },
   "feed": {
     "viewProfile": "Veure el perfil de {{name}}",
@@ -1144,7 +1149,8 @@
     "socialConnectedShort": "Connectat",
     "socialConnectFailed": "No s'ha pogut connectar {{platform}}. Torna-ho a provar.",
     "socialVerifiedFollowers": "{{value}} seguidors",
-    "socialFollowersPending": "S'està actualitzant el recompte de seguidors"
+    "socialFollowersPending": "S'està actualitzant el recompte de seguidors",
+    "menuLayoutFolders": "Carpetes"
   },
   "common": {
     "confirm": "Confirma",
@@ -3044,7 +3050,11 @@
     "likersEmptyTitle": "Encara no hi ha m'agrada",
     "likersEmptyBody": "Els m'agrada d'aquest comentari apareixeran aquí.",
     "anonymousLikes_one": "{{count}} m'agrada d'un titular de distintiu anònim",
-    "anonymousLikes_other": "{{count}} m'agrada de titulars de distintius anònims"
+    "anonymousLikes_other": "{{count}} m'agrada de titulars de distintius anònims",
+    "threadParts": {
+      "moveUp": "Mou amunt",
+      "moveDown": "Mou avall"
+    }
   },
   "mintChain": {
     "title": "Post de menta",
@@ -6076,6 +6086,12 @@
       "needsImageToWork": "{{model}} necessita una imatge per treballar. Adjunta'n un primer.",
       "speechLimit": "Són {{length}} caràcters. El límit és {{limit}}.",
       "musicTrackLength": "Seguiment de {{count}}s"
+    },
+    "gallery": {
+      "send": "Enviar",
+      "notifications": {
+        "generation_reply": "{{name}} ha respost al teu comentari"
+      }
     }
   },
   "pricing": {
@@ -11844,7 +11860,7 @@
   "multiPost": {
     "tab": "Publicació múltiple",
     "title": "Publicació múltiple",
-    "intro": "Publica a X, YouTube, Instagram, TikTok i més alhora amb dehub. Connecta els teus comptes un cop i tria on va cada publicació.",
+    "intro": "Publica a X, YouTube, Instagram, TikTok i més alhora amb Riftn. Connecta els teus comptes un cop i tria on va cada publicació.",
     "creditsHeading": "Crèdits de publicació",
     "credits": "{{count}} crèdits de publicació",
     "topUpTitle": "Recarrega i estalvia",
@@ -11892,7 +11908,9 @@
   "dm": {
     "planRestricted": "Aquest usuari requereix una subscripció per rebre missatges.",
     "planTypeNotAllowed": "El pla d'aquest creador no permet aquest tipus de missatge.",
-    "planMinTip": "La propina ha de ser d'almenys {{amount}} fitxes per a aquest creador."
+    "planMinTip": "La propina ha de ser d'almenys {{amount}} fitxes per a aquest creador.",
+    "shareKindGroup": "Agrupar",
+    "shareKindCommunity": "Comunitat"
   },
   "credits": {
     "earningsWorth": "Val {{amount}}",
@@ -19460,5 +19478,10 @@
     "edit": "Editar",
     "editLabel": "Editar missatge",
     "error": "No ha funcionat. Torna-ho a provar."
+  },
+  "mentionLinks": {
+    "communities": "Comunitats",
+    "pages": "Pàgines",
+    "people": "Persones"
   }
 }

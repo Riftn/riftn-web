@@ -81,7 +81,8 @@
       "profile": "પ્રોફાઇલ",
       "proposal": "દરખાસ્ત",
       "stage": "સ્ટેજ",
-      "store": "સ્ટોર"
+      "store": "સ્ટોર",
+      "featureRequest": "વિનંતી"
     },
     "recipientChat": "ચેટ",
     "recipientUser": "વપરાશકર્તા",
@@ -521,7 +522,12 @@
     "getTheApp": "એપ મેળવો",
     "connectAi": "AI જોડો",
     "converter": "કન્વર્ટર",
-    "affiliate": "એફિલિએટ"
+    "affiliate": "એફિલિએટ",
+    "groups": {
+      "create": "બનાવો",
+      "discover": "શોધો",
+      "riftn": "ડીહબ"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} ની પ્રોફાઇલ જુઓ",
@@ -1143,7 +1149,8 @@
     "socialConnectedShort": "કનેક્ટેડ",
     "socialConnectFailed": "{{platform}} ને કનેક્ટ કરી શક્યા નહીં. કૃપા કરીને ફરીથી પ્રયાસ કરો.",
     "socialVerifiedFollowers": "{{value}} અનુયાયીઓ",
-    "socialFollowersPending": "ફોલોઅર કાઉન્ટ અપડેટ થઈ રહ્યું છે"
+    "socialFollowersPending": "ફોલોઅર કાઉન્ટ અપડેટ થઈ રહ્યું છે",
+    "menuLayoutFolders": "ફોલ્ડર્સ"
   },
   "common": {
     "confirm": "પુષ્ટિ કરો",
@@ -3042,7 +3049,11 @@
     "likersEmptyTitle": "હજુ સુધી કોઈ લાઇક નથી",
     "likersEmptyBody": "આ ટિપ્પણી પરની લાઇક્સ અહીં દેખાશે.",
     "anonymousLikes_one": "અનામી બેજ ધારક તરફથી {{count}} લાઇક",
-    "anonymousLikes_other": "અનામી બેજ ધારકો તરફથી {{count}} લાઇક્સ"
+    "anonymousLikes_other": "અનામી બેજ ધારકો તરફથી {{count}} લાઇક્સ",
+    "threadParts": {
+      "moveUp": "ઉપર ખસેડો",
+      "moveDown": "નીચે ખસેડો"
+    }
   },
   "mintChain": {
     "title": "ટંકશાળની પોસ્ટ",
@@ -6073,6 +6084,12 @@
       "needsImageToWork": "{{model}} ને કામ કરવા માટે એક છબીની જરૂર છે. પ્રથમ એક જોડો.",
       "speechLimit": "તે {{length}} અક્ષરો છે. મર્યાદા {{limit}} છે.",
       "musicTrackLength": "{{count}}s ટ્રેક"
+    },
+    "gallery": {
+      "send": "મોકલો",
+      "notifications": {
+        "generation_reply": "{{name}} એ તમારી ટિપ્પણી પર જવાબ આપ્યો"
+      }
     }
   },
   "pricing": {
@@ -11843,7 +11860,7 @@
   "multiPost": {
     "tab": "મલ્ટી-પોસ્ટિંગ",
     "title": "મલ્ટી-પોસ્ટિંગ",
-    "intro": "X, YouTube, Instagram, TikTok અને વધુ પર એકસાથે પોસ્ટ કરો dehub તરીકે. તમારા એકાઉન્ટ્સ એકવાર કનેક્ટ કરો, પછી પસંદ કરો કે દરેક પોસ્ટ ક્યાં જાય છે.",
+    "intro": "X, YouTube, Instagram, TikTok અને વધુ પર એકસાથે પોસ્ટ કરો Riftn તરીકે. તમારા એકાઉન્ટ્સ એકવાર કનેક્ટ કરો, પછી પસંદ કરો કે દરેક પોસ્ટ ક્યાં જાય છે.",
     "creditsHeading": "પોસ્ટ ક્રેડિટ્સ",
     "credits": "{{count}} પોસ્ટ ક્રેડિટ્સ",
     "topUpTitle": "ટોપ અપ કરો અને બચાવો",
@@ -11891,7 +11908,9 @@
   "dm": {
     "planRestricted": "આ વપરાશકર્તાને સંદેશા મેળવવા માટે સબ્સ્ક્રિપ્શન જરૂરી છે.",
     "planTypeNotAllowed": "આ ક્રિએટરનો પ્લાન આ પ્રકારના સંદેશાની મંજૂરી આપતો નથી.",
-    "planMinTip": "આ ક્રિએટર માટે ટિપ ઓછામાં ઓછી {{amount}} ટોકન્સ હોવી જોઈએ."
+    "planMinTip": "આ ક્રિએટર માટે ટિપ ઓછામાં ઓછી {{amount}} ટોકન્સ હોવી જોઈએ.",
+    "shareKindGroup": "જૂથ",
+    "shareKindCommunity": "કોમ્યુનિટી"
   },
   "credits": {
     "earningsWorth": "વર્થ {{amount}}",
@@ -19432,5 +19451,10 @@
     "edit": "સંપાદિત કરો",
     "editLabel": "સંદેશમાં ફેરફાર કરો",
     "error": "તે કામ કરતું નથી. ફરીથી પ્રયાસ કરો."
+  },
+  "mentionLinks": {
+    "communities": "સમુદાયો",
+    "pages": "પૃષ્ઠો",
+    "people": "લોકો"
   }
 }

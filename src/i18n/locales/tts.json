@@ -81,7 +81,8 @@
       "profile": "โปรไฟล์",
       "proposal": "ข้อเสนอ",
       "stage": "ขั้นตอน",
-      "store": "ร้าน"
+      "store": "ร้าน",
+      "featureRequest": "ขอร้อง"
     },
     "recipientChat": "แชท",
     "recipientUser": "ผู้ใช้",
@@ -517,7 +518,12 @@
     "getTheApp": "ดาวน์โหลดแอป",
     "connectAi": "เชื่อมต่อ AI",
     "converter": "ตัวแปลง",
-    "affiliate": "พันธมิตร"
+    "affiliate": "พันธมิตร",
+    "groups": {
+      "create": "สร้าง",
+      "discover": "ค้นหา",
+      "riftn": "เดฮับ"
+    }
   },
   "feed": {
     "viewProfile": "ดูโปรไฟล์ {{name}}",
@@ -1125,7 +1131,8 @@
     "socialConnectedShort": "เชื่อมต่อแล้ว",
     "socialConnectFailed": "ไม่สามารถเชื่อมต่อกับ {{platform}} ได้ โปรดลองอีกครั้ง",
     "socialVerifiedFollowers": "{{value}} คนติดตาม",
-    "socialFollowersPending": "การอัปเดตจำนวนผู้ติดตาม"
+    "socialFollowersPending": "การอัปเดตจำนวนผู้ติดตาม",
+    "menuLayoutFolders": "โฟลเดอร์"
   },
   "common": {
     "confirm": "ยืนยัน",
@@ -3011,7 +3018,11 @@
     "likersEmptyTitle": "ยังบ่มีการถูกใจ",
     "likersEmptyBody": "การถูกใจความคิดเห็นนี้สิสะแดงอยู่นี่",
     "anonymousLikes_one": "{{count}} ถูกใจจากผู้ถือแบดจ์ที่บ่เปิดเผยตัวตน",
-    "anonymousLikes_other": "{{count}} ถูกใจจากผู้ถือแบดจ์ที่บ่เปิดเผยตัวตน"
+    "anonymousLikes_other": "{{count}} ถูกใจจากผู้ถือแบดจ์ที่บ่เปิดเผยตัวตน",
+    "threadParts": {
+      "moveUp": "ย้ายขึ้น",
+      "moveDown": "ย้ายลง"
+    }
   },
   "mintChain": {
     "title": "มินต์โพสต์",
@@ -6014,6 +6025,12 @@
       "needsImageToWork": "{{model}} ต้องการรูปภาพที่จะทำงานก่อน  แบบรูปภาพก่อน",
       "speechLimit": "นั้น {{length}} ตัวอักษร  ความจำกัดคือ {{limit}}",
       "musicTrackLength": "{{count}}s ทรัค"
+    },
+    "gallery": {
+      "send": "ส่ง",
+      "notifications": {
+        "generation_reply": "{{name}} ตอบความเห็นของเจ้า"
+      }
     }
   },
   "pricing": {
@@ -11734,7 +11751,7 @@
   "multiPost": {
     "tab": "โพสต์หลายแพลตฟอร์ม",
     "title": "โพสต์หลายแพลตฟอร์ม",
-    "intro": "โพสต์ไปยัง X, YouTube, Instagram, TikTok และอื่น ๆ พร้อมกันกับ dehub เชื่อมบัญชีของคุณครั้งเดียว แล้วเลือกว่าต้องการโพสต์ไปที่ไหน",
+    "intro": "โพสต์ไปยัง X, YouTube, Instagram, TikTok และอื่น ๆ พร้อมกันกับ Riftn เชื่อมบัญชีของคุณครั้งเดียว แล้วเลือกว่าต้องการโพสต์ไปที่ไหน",
     "creditsHeading": "เครดิตโพสต์",
     "credits": "{{count}} post credits",
     "topUpTitle": "เติมเงินและประหยัด",
@@ -11782,7 +11799,9 @@
   "dm": {
     "planRestricted": "ผู้ใช้คนนี้ต้องสมัครสมาชิกก่อนจั่งสิฮับข้อความได้",
     "planTypeNotAllowed": "แพ็กเกจของครีเอเตอร์คนนี้บ่อนุญาตข้อความแบบนี้",
-    "planMinTip": "ทิปให้ครีเอเตอร์คนนี้ต้องมีอย่างน้อย {{amount}} เหรียญ"
+    "planMinTip": "ทิปให้ครีเอเตอร์คนนี้ต้องมีอย่างน้อย {{amount}} เหรียญ",
+    "shareKindGroup": "จัดกลุ่ม",
+    "shareKindCommunity": "ชุมชน"
   },
   "credits": {
     "earningsWorth": "มูลค่า {{amount}}",
@@ -19021,5 +19040,10 @@
     "edit": "แก้ไข",
     "editLabel": "แก้ไขข้อความ",
     "error": "นั่นไม่ได้ผล ลองอีกครั้ง"
+  },
+  "mentionLinks": {
+    "communities": "ชุมชน",
+    "pages": "หน้า",
+    "people": "คน"
   }
 }

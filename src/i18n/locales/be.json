@@ -81,7 +81,8 @@
       "profile": "профіль",
       "proposal": "прапанова",
       "stage": "этап",
-      "store": "магазін"
+      "store": "магазін",
+      "featureRequest": "запыт"
     },
     "recipientChat": "чат",
     "recipientUser": "карыстальнік",
@@ -521,7 +522,12 @@
     "getTheApp": "Спампаваць праграму",
     "connectAi": "Падлучыць ШІ",
     "converter": "пераўтваральная",
-    "affiliate": "Партнёрка"
+    "affiliate": "Партнёрка",
+    "groups": {
+      "create": "Стварыць",
+      "discover": "Адкрыць",
+      "riftn": "ДэХаб"
+    }
   },
   "feed": {
     "viewProfile": "Праглядзець профіль {{name}}",
@@ -1143,7 +1149,8 @@
     "socialConnectedShort": "Злучаны",
     "socialConnectFailed": "Немагчыма злучыцца з {{platform}}. Паўтарыце спробу.",
     "socialVerifiedFollowers": "{{value}} паслядоўнікі",
-    "socialFollowersPending": "Абнаўленне падліку паслядоўнікаў"
+    "socialFollowersPending": "Абнаўленне падліку паслядоўнікаў",
+    "menuLayoutFolders": "Папкі"
   },
   "common": {
     "confirm": "Пацвердзіць",
@@ -3055,7 +3062,11 @@
     "likersEmptyTitle": "Пакуль няма лайкаў",
     "likersEmptyBody": "Тут з’явяцца лайкі гэтага каментарыя.",
     "anonymousLikes_one": "{{count}} лайк ад ананімнага ўладальніка значка",
-    "anonymousLikes_other": "Лайкі ад ананімных уладальнікаў значкоў: {{count}}"
+    "anonymousLikes_other": "Лайкі ад ананімных уладальнікаў значкоў: {{count}}",
+    "threadParts": {
+      "moveUp": "Перамясціць уверх",
+      "moveDown": "Перамясціць уніз"
+    }
   },
   "mintChain": {
     "title": "Паведамленне аб манетах",
@@ -6088,6 +6099,12 @@
       "needsImageToWork": "{{model}} мае патрэбу ў малюнку, з якога можна працаваць. Далучыце спачатку адну.",
       "speechLimit": "Гэта сімвалы {{length}}. Мяжа - {{limit}}.",
       "musicTrackLength": "{{count}}s трэк"
+    },
+    "gallery": {
+      "send": "Адправіць",
+      "notifications": {
+        "generation_reply": "{{name}} адказаў на ваш каментарый"
+      }
     }
   },
   "pricing": {
@@ -11865,7 +11882,7 @@
   "multiPost": {
     "tab": "Мультыпостынг",
     "title": "Мультыпостынг",
-    "intro": "Публікуйце адначасова ў X, YouTube, Instagram, TikTok і іншых сацыяльных сетках з dehub. Падключыце свае ўліковыя запісы адзін раз, а затым выбірайце, куды адпраўляць кожны пост.",
+    "intro": "Публікуйце адначасова ў X, YouTube, Instagram, TikTok і іншых сацыяльных сетках з Riftn. Падключыце свае ўліковыя запісы адзін раз, а затым выбірайце, куды адпраўляць кожны пост.",
     "creditsHeading": "Крэдыты на публікацыі",
     "credits": "{{count}} крэдытаў на публікацыі",
     "topUpTitle": "Папоўніце і зэканомце",
@@ -11913,7 +11930,9 @@
   "dm": {
     "planRestricted": "Гэты карыстальнік патрабуе падпіску, каб атрымліваць паведамленні.",
     "planTypeNotAllowed": "План гэтага аўтара не дазваляе такі тып паведамлення.",
-    "planMinTip": "Чаявыя для гэтага аўтара павінны быць не менш за {{amount}} токены."
+    "planMinTip": "Чаявыя для гэтага аўтара павінны быць не менш за {{amount}} токены.",
+    "shareKindGroup": "Згрупаваць",
+    "shareKindCommunity": "Супольнасць"
   },
   "credits": {
     "earningsWorth": "Варта {{amount}}",
@@ -19439,5 +19458,10 @@
     "backToBlog": "Вярнуцца да блога",
     "sharePost": "Падзяліцца публікацыяй",
     "relatedPosts": "Звязаныя публікацыі"
+  },
+  "mentionLinks": {
+    "communities": "Супольнасці",
+    "pages": "Старонкі",
+    "people": "Людзі"
   }
 }

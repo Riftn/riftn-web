@@ -775,7 +775,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           </div>
         </div>
         
-        <div className="flex shrink-0 items-center gap-2">
+        <div data-live-chat-toolbar className="flex shrink-0 items-center gap-3">
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
           {/* Translate all toggle */}

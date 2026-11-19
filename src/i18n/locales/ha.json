@@ -81,7 +81,8 @@
       "profile": "bayanin martaba",
       "proposal": "shawarwari",
       "stage": "mataki",
-      "store": "shagon"
+      "store": "shagon",
+      "featureRequest": "tambayar"
     },
     "recipientChat": "hira",
     "recipientUser": "mai amfani",
@@ -521,7 +522,11 @@
     "getTheApp": "Sauke manhajar",
     "connectAi": "Haɗa AI",
     "converter": "Canja wurin",
-    "affiliate": "Abokin Haɗi"
+    "affiliate": "Abokin Haɗi",
+    "groups": {
+      "create": "Ƙirƙira",
+      "discover": "Gano"
+    }
   },
   "feed": {
     "viewProfile": "Duba bayanan {{name}}",
@@ -1139,7 +1144,9 @@
     "socialConnectedShort": "Haɗa",
     "socialConnectFailed": "Ba za a iya haɗa {{platform}} ba. Don Allah a sake gwadawa.",
     "socialVerifiedFollowers": "{{value}} mabiya",
-    "socialFollowersPending": "Karin kai na kujuma' da masu kiran shi."
+    "socialFollowersPending": "Karin kai na kujuma' da masu kiran shi.",
+    "deleteAccountData": "Share Asusu / Bayanai",
+    "menuLayoutFolders": "Fayiloli"
   },
   "common": {
     "confirm": "Tabbatar",
@@ -3037,7 +3044,11 @@
     "likersEmptyTitle": "Babu so tukuna",
     "likersEmptyBody": "So a kan wannan sharhi zai bayyana a nan.",
     "anonymousLikes_one": "So {{count}} daga mai riƙe da lamba da ba a sani ba",
-    "anonymousLikes_other": "So {{count}} daga masu riƙe da lamba da ba a sani ba"
+    "anonymousLikes_other": "So {{count}} daga masu riƙe da lamba da ba a sani ba",
+    "threadParts": {
+      "moveUp": "Motsa sama",
+      "moveDown": "Yi ƙaura ƙasa"
+    }
   },
   "mintChain": {
     "title": "Mint post",
@@ -6042,6 +6053,12 @@
       "needsImageToWork": "{{model}} ya bukatar bayanai. Za ayyana wani bayanai.",
       "speechLimit": "Hakika {{length}}. Hadaddun kawai ya {{limit}}.",
       "musicTrackLength": "{{count}}s na gida"
+    },
+    "gallery": {
+      "send": "Aika",
+      "notifications": {
+        "generation_reply": "{{name}} ya amsa sharhinka"
+      }
     }
   },
   "pricing": {
@@ -11808,7 +11825,7 @@
   "multiPost": {
     "tab": "Rarraba posts da yawa",
     "title": "Rarraba posts da yawa",
-    "intro": "Yi post zuwa X, YouTube, Instagram, TikTok da ƙari a lokaci guda tare da dehub. Haɗa asusunka sau ɗaya, sannan zaɓi inda kowane post zai tafi.",
+    "intro": "Yi post zuwa X, YouTube, Instagram, TikTok da ƙari a lokaci guda tare da Riftn. Haɗa asusunka sau ɗaya, sannan zaɓi inda kowane post zai tafi.",
     "creditsHeading": "Kudin posts",
     "credits": "{{count}} kudin posts",
     "topUpTitle": "Ƙara kuɗi da adanawa",
@@ -11856,7 +11873,9 @@
   "dm": {
     "planRestricted": "Wannan mai amfani yana buƙatar biyan kuɗin shiga don karɓar saƙonni.",
     "planTypeNotAllowed": "Tsarin wannan mahalicci bai yarda da irin wannan saƙo ba.",
-    "planMinTip": "Tip dole ya zama aƙalla {{amount}} tokens ga wannan mahalicci."
+    "planMinTip": "Tip dole ya zama aƙalla {{amount}} tokens ga wannan mahalicci.",
+    "shareKindGroup": "Rukunin",
+    "shareKindCommunity": "Al'umma"
   },
   "credits": {
     "earningsWorth": "Darajarsa {{amount}}",
@@ -19039,7 +19058,8 @@
     "127053546dd4": "Ba za a iya sauke wannan fayil ba",
     "d14896aa4bf8": "Laburaren kyauta ba zai iya ɗorawa ba. Duba haɗin ku kuma sake gwadawa.",
     "953e708b2287": "Tsararrakin murya bai yi nasara ba.",
-    "4a52cdd6ac72": "Ba za a iya ninka waɗannan yadudduka ba"
+    "4a52cdd6ac72": "Ba za a iya ninka waɗannan yadudduka ba",
+    "dbc468a14b60": "Tambayoyin da ake yawan yi"
   },
   "articles": {
     "cardLabel": "Labari · karanta na minti {{count}}",
@@ -19318,5 +19338,10 @@
     "edit": "Gyara",
     "editLabel": "Shirya sako",
     "error": "Wannan bai yi aiki ba. sake gwadawa."
+  },
+  "mentionLinks": {
+    "communities": "Al'ummomi",
+    "pages": "Shafuka",
+    "people": "Mutane"
   }
 }

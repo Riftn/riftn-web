@@ -81,7 +81,8 @@
       "profile": "profil",
       "proposal": "ajánlat",
       "stage": "színpad",
-      "store": "áruház"
+      "store": "áruház",
+      "featureRequest": "kérés"
     },
     "recipientChat": "csevegés",
     "recipientUser": "felhasználó",
@@ -520,7 +521,11 @@
     "getTheApp": "Töltsd le az appot",
     "connectAi": "MI csatlakoztatása",
     "converter": "Konverter",
-    "affiliate": "Partnerprogram"
+    "affiliate": "Partnerprogram",
+    "groups": {
+      "create": "Létrehozás",
+      "discover": "Felfedezés"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} profiljának megtekintése",
@@ -1145,7 +1150,8 @@
     "socialConnectedShort": "Csatlakoztatva",
     "socialConnectFailed": "Nem sikerült csatlakozni a következőhöz:{{platform}}. Próbálkozz újra.",
     "socialVerifiedFollowers": "{{value}} követő",
-    "socialFollowersPending": "Követői szám frissítése folyamatban"
+    "socialFollowersPending": "Követői szám frissítése folyamatban",
+    "menuLayoutFolders": "Mappák"
   },
   "common": {
     "confirm": "Megerősítés",
@@ -3046,7 +3052,11 @@
     "likersEmptyTitle": "Még nincsenek kedvelések",
     "likersEmptyBody": "A hozzászólás kedvelései itt jelennek meg.",
     "anonymousLikes_one": "{{count}} kedvelés névtelen jelvénytulajdonostól",
-    "anonymousLikes_other": "{{count}} kedvelés névtelen jelvénytulajdonosoktól"
+    "anonymousLikes_other": "{{count}} kedvelés névtelen jelvénytulajdonosoktól",
+    "threadParts": {
+      "moveUp": "Fel",
+      "moveDown": "Le"
+    }
   },
   "mintChain": {
     "title": "Menta bejegyzés",
@@ -6081,6 +6091,12 @@
       "needsImageToWork": "{{model}} egy képet szükséges hozzáadni a működéséhez. Csatoljon egyet először.",
       "speechLimit": "Ez {{length}} karakter. A korlát {{limit}}.",
       "musicTrackLength": "{{count}}s szám"
+    },
+    "gallery": {
+      "send": "Küldés",
+      "notifications": {
+        "generation_reply": "{{name}} válaszolt hozzászólására"
+      }
     }
   },
   "pricing": {
@@ -11855,7 +11871,7 @@
   "multiPost": {
     "tab": "Többposztolás",
     "title": "Többposztolás",
-    "intro": "Posztolj egyszerre az X-re, YouTube-ra, Instagramra, TikTokra és még sok másra a dehubbal. Csatlakoztasd a fiókjaidat egyszer, majd válaszd ki, hova kerüljön minden poszt.",
+    "intro": "Posztolj egyszerre az X-re, YouTube-ra, Instagramra, TikTokra és még sok másra a Riftnbal. Csatlakoztasd a fiókjaidat egyszer, majd válaszd ki, hova kerüljön minden poszt.",
     "creditsHeading": "Posztkreditek",
     "credits": "{{count}} posztkredit",
     "topUpTitle": "Feltöltés és megtakarítás",
@@ -11903,7 +11919,9 @@
   "dm": {
     "planRestricted": "Ez a felhasználó előfizetést kér az üzenetek fogadásához.",
     "planTypeNotAllowed": "Ennek az alkotónak a csomagja nem engedi ezt az üzenettípust.",
-    "planMinTip": "A borravalónak legalább {{amount}} tokenek-nek kell lennie ennél az alkotónál."
+    "planMinTip": "A borravalónak legalább {{amount}} tokenek-nek kell lennie ennél az alkotónál.",
+    "shareKindGroup": "Csoportosítás",
+    "shareKindCommunity": "Közösség"
   },
   "credits": {
     "earningsWorth": "Megéri {{amount}}",
@@ -19470,5 +19488,10 @@
     "edit": "Szerkesztés",
     "editLabel": "Üzenet szerkesztése",
     "error": "Ez nem sikerült. Próbálkozz újra."
+  },
+  "mentionLinks": {
+    "communities": "Közösségek",
+    "pages": "Oldalak",
+    "people": "Emberek"
   }
 }

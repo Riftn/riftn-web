@@ -152,9 +152,9 @@ export function NewVersionToast() {
     return () => { toast.dismiss(id); };
   }, [pending, overlayOpen, isMobile]);
 
-  // Once a newer deploy is live, the next page change loads it for real
-  // instead of drawing the new page with the old code. The URL has already
-  // moved, so a reload lands on the page that was asked for.
+  // A tab that has been open for half a day with a newer deploy live loads it
+  // on its next page change (see takeStaleReload). Fresher tabs keep running:
+  // reloading on every deploy made ordinary navigation flash the whole app.
   const { pathname } = useLocation();
   const firstPath = useRef(pathname);
   useEffect(() => {

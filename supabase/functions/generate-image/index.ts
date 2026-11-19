@@ -886,7 +886,7 @@ serve(async (req) => {
 
   const response = await handleGenerateImage(req);
   if (isFreeTemplateRequest(peek) && charged.priceDhb === 0) {
-    await publishFreePoster(peek, charged.priceDhb, charged.jobId, response);
+    await publishFreePoster(peek, charged.priceDhb, charged.jobId, response, charged.wallet);
   }
   // Anything short of a success hands the credit back — a refusal or a provider
   // outage must not be billable.

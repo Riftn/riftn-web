@@ -80,7 +80,8 @@
       "profile": "profil",
       "proposal": "taklif",
       "stage": "maydon",
-      "store": "doʻkon"
+      "store": "doʻkon",
+      "featureRequest": "so'rov"
     },
     "recipientChat": "suhbat",
     "recipientUser": "foydalanuvchi",
@@ -521,7 +522,11 @@
     "getTheApp": "Ilovani yuklab olish",
     "connectAi": "SI ulash",
     "converter": "Konverter",
-    "affiliate": "Hamkorlik"
+    "affiliate": "Hamkorlik",
+    "groups": {
+      "create": "Yaratish",
+      "discover": "Kashf etish"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} profilini ko'rish",
@@ -1140,7 +1145,8 @@
     "socialConnectedShort": "Ulangan",
     "socialConnectFailed": "{{platform}} ga ulanib bo&#39;lmadi. Iltimos, qaytadan urinib ko&#39;ring.",
     "socialVerifiedFollowers": "{{value}} izdoshlari",
-    "socialFollowersPending": "Kuzatuvchilar soni yangilanmoqda"
+    "socialFollowersPending": "Kuzatuvchilar soni yangilanmoqda",
+    "menuLayoutFolders": "Papkalar"
   },
   "common": {
     "confirm": "Tasdiqlash",
@@ -3053,7 +3059,11 @@
     "likersEmptyTitle": "Hozircha layklar yoʻq",
     "likersEmptyBody": "Bu izohga bosilgan layklar shu yerda koʻrinadi.",
     "anonymousLikes_one": "Anonim nishon egasidan {{count}} ta layk",
-    "anonymousLikes_other": "Anonim nishon egalaridan {{count}} ta layk"
+    "anonymousLikes_other": "Anonim nishon egalaridan {{count}} ta layk",
+    "threadParts": {
+      "moveUp": "Yuqoriga siljiting",
+      "moveDown": "Pastga siljiting"
+    }
   },
   "mintChain": {
     "title": "Yalpiz posti",
@@ -6085,6 +6095,12 @@
       "cannotUseReference": "{{model}} mos yozuvlar rasmidan foydalana olmaydi. Uni olib tashlang yoki boshqa modelni tanlang.",
       "needsImageToAnimate": "{{model}} ga animatsiya qilish uchun rasm kerak. Avval bittasini biriktiring.",
       "musicTrackLength": "{{count}}s trek"
+    },
+    "gallery": {
+      "send": "Yuborish",
+      "notifications": {
+        "generation_reply": "{{name}} izohingizga javob berdi"
+      }
     }
   },
   "pricing": {
@@ -11852,7 +11868,7 @@
   "multiPost": {
     "tab": "Ko'p platformali post",
     "title": "Ko'p platformali post",
-    "intro": "X, YouTube, Instagram, TikTok va boshqa platformalarga bir vaqtning o'zida dehub orqali post qiling. Hisoblaringizni bir marta ulashing, keyin har bir post qayerga ketishini tanlang.",
+    "intro": "X, YouTube, Instagram, TikTok va boshqa platformalarga bir vaqtning o'zida Riftn orqali post qiling. Hisoblaringizni bir marta ulashing, keyin har bir post qayerga ketishini tanlang.",
     "creditsHeading": "Post kreditlari",
     "credits": "{{count}} post kreditlari",
     "topUpTitle": "To'ldiring va tejang",
@@ -11900,7 +11916,9 @@
   "dm": {
     "planRestricted": "Bu foydalanuvchi xabar olish uchun obuna talab qiladi.",
     "planTypeNotAllowed": "Bu ijodkorning rejasi bunday turdagi xabarga ruxsat bermaydi.",
-    "planMinTip": "Bu ijodkor uchun choychaqa kamida {{amount}} tokenlar bo‘lishi kerak."
+    "planMinTip": "Bu ijodkor uchun choychaqa kamida {{amount}} tokenlar bo‘lishi kerak.",
+    "shareKindGroup": "Guruhlash",
+    "shareKindCommunity": "Hamjamiyat"
   },
   "credits": {
     "earningsWorth": "{{amount}} ga arziydi",
@@ -19071,7 +19089,8 @@
     "127053546dd4": "Foydalanuvchi ushbu faylni yuklashga urinib ko'rdi",
     "d14896aa4bf8": "Bepul kutubxona yuklab olishga urinib ko'rdi. Internetga ulanishni tekshirib, qayta urinib ko'ring.",
     "953e708b2287": "Ses yaratish muvaffaqiyatsizlik bilan tugadi",
-    "4a52cdd6ac72": "Foydalanuvchi ushbu qatlamlarni nusxalashga urinib ko'rdi"
+    "4a52cdd6ac72": "Foydalanuvchi ushbu qatlamlarni nusxalashga urinib ko'rdi",
+    "dbc468a14b60": "Ko'p so'raladigan savollar"
   },
   "articles": {
     "cardLabel": "Maqola · {{count}} min o'qish",
@@ -19374,5 +19393,10 @@
     "backToBlog": "Blogga qaytish",
     "sharePost": "Postni ulashish",
     "relatedPosts": "Bogʻliq postlar"
+  },
+  "mentionLinks": {
+    "communities": "Hamjamiyatlar",
+    "pages": "Sahifalar",
+    "people": "Odamlar"
   }
 }
