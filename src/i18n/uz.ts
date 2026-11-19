@@ -2029,7 +2029,7 @@ export const uz = {
     notAllowedItem6: 'Boshqa shaxsning shaxsiy ma&#39;lumotlarini uning roziligisiz dokslash yoki nashr qilish',
     notAllowedItem7: 'Spam, aloqa manipulyatsiyasi, bot tarmoqlari va ko&#39;rishlar, ovozlar yoki mukofotlarning sun&#39;iy ravishda inflyatsiyasi',
     notAllowedItem8: 'Boshqa shaxs, ijodkor, brend yoki loyihaning nomidan ish yuritish',
-    notAllowedItem9: 'Zararli dasturlar, фишинг havolalari, hamyonni to&#39;kib tashlovchi vositalar va firibgarlik yoki firibgarlik moliyaviy sxemalari',
+    notAllowedItem9: 'Zararli dasturlar, fishing havolalari, hamyonni bo&#39;shatuvchi vositalar va firibgarlik yoki soxta moliyaviy sxemalar',
     adultContent: 'Voyaga yetganlar uchun kontent',
     adultContentText: 'Riftn’da ochiqchasiga pornografiyaga ruxsat berilmaydi va olib tashlanadi. Ochiq boʻlmagan yalangʻochlik va voyaga yetganlar uchun moʻljallangan mavzularga ruxsat beriladi, lekin post joylashtirganingizda kontent reytingi nazorati yordamida voyaga yetganlar uchun belgilangan boʻlishi kerak, shunda boshqa foydalanuvchilar va yoshga mos filtrlar uni toʻgʻri boshqarishi mumkin. Voyaga yetganlar uchun moʻljallangan kontentni qayta-qayta belgilamaslikning oʻzi ushbu koʻrsatmalarni buzish hisoblanadi.',
     reporting: 'Qanday qilib hisobot berish kerak',

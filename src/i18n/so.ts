@@ -1228,7 +1228,7 @@ export const so = {
     totalStaked: 'Wadarta La Stakegareeyay',
     minimumStake: 'Ugu yaraan Stake',
     lockPeriod: 'Muddada Xidhitaanka',
-    howToStake: 'Sida loo Stakegareeyо',
+    howToStake: 'Sida loo Stakegareeyo',
     stakeStep1: 'Hubi in token-yada tokens ay ku jiraan jeebkaaga',
     stakeStep2: 'Booqo madalka staking-ka',
     stakeStep3: 'Dooro qadarka aad stakegareynayso',
@@ -1301,7 +1301,7 @@ export const so = {
   tokenBridge: {
     title: 'Buundada Token-ka',
     subtitle: 'Cross-chain token bridging u dhaxaysa BASE iyo BNB networks.',
-    description: 'Buundada Riftn waxay u oggolaataa in token-yada tokens lagu wareejiyо shabakadaha blockchain ee la taageero.',
+    description: 'Buundada Riftn waxay u oggolaataa in token-yada lagu wareejiyo shabakadaha blockchain ee la taageero.',
     supportedChains: 'Silsiladaha La taageero',
     bridgeFees: 'Khidmadda Buundada',
     bridgeTime: 'Waqtiga Buundada',
