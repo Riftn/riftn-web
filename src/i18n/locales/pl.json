@@ -2658,6 +2658,7 @@
     "failedSubmit": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie."
   },
   "loginModal": {
+    "didYouMean": "Czy chodziło ci o {{email}}?",
     "restoreWalletTitle": "Zwróć swoją walizkę",
     "restoreOriginalWallet": "Twój profil jest na walizce z oryginalnego logowania, a nie tej zapisanej dla tego logowania. Zaloguj się tak, jak dołączyłeś do Riftn, aby przywrócić tę walizkę. Twój profil i fundusze pozostają takie same.",
     "useAnotherLogin": "Użyj innego logowania",

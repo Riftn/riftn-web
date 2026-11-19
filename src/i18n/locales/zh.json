@@ -2893,6 +2893,7 @@
     "email": "邮箱"
   },
   "loginModal": {
+    "didYouMean": "您是想输入 {{email}} 吗?",
     "bringLoginOver": "在 dehub.io 上用过 Riftn？<bring>同步你的登录信息</bring>",
     "restoreWalletTitle": "取回你的钱包",
     "restoreOriginalWallet": "你的资料是从你最初加入Riftn的方式登录的钱包，而不是这个登录保存的钱包。用你最初加入Riftn的方式登录，才能取回那个钱包。你的资料和资金保持不变。",

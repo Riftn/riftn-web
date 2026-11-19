@@ -2721,6 +2721,7 @@
     "emailRequired": "メールは必須です"
   },
   "loginModal": {
+    "didYouMean": "{{email}} のことですか?",
     "restoreWalletTitle": "お財布をお持ち帰りください",
     "restoreOriginalWallet": "このログイン用に保存されたプロフィールではなく、元のサインイン時のウォレットにプロフィールがあります。最初にRiftnに参加した方法でサインインして、そのウォレットを取り戻します。プロフィールと資金はそのまま維持されます。",
     "useAnotherLogin": "別のログインを使用する",

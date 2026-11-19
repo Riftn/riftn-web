@@ -2737,6 +2737,7 @@
     "failedSubmit": "Einreichung fehlgeschlagen. Bitte erneut versuchen."
   },
   "loginModal": {
+    "didYouMean": "Meintest du {{email}}?",
     "restoreWalletTitle": "Deinen Geldbeutel zurückholen",
     "restoreOriginalWallet": "Dein Profil ist auf dem Geldbeutel von deiner ursprünglichen Anmeldung, nicht auf dem, der für diese Anmeldung gespeichert ist. Melden Sie sich mit der gleichen Methode an, mit der Sie Riftn zuerst beigetreten sind, um diesen Geldbeutel zurückzuholen. Dein Profil und deine Guthaben bleiben wie sie sind.",
     "useAnotherLogin": "Ein anderes Login verwenden",

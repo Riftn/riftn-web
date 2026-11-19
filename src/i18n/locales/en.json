@@ -2918,6 +2918,7 @@
     "connectWallet": "Connect Wallet",
     "emailPlaceholder": "Enter your email",
     "invalidEmail": "Please enter a valid email address",
+    "didYouMean": "Did you mean {{email}}?",
     "sendingLink": "Sending code...",
     "continue": "Continue",
     "magicLinkInfo": "We'll send you a verification code to sign in",

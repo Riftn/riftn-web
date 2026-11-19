@@ -2723,6 +2723,7 @@
     "email": "이메일"
   },
   "loginModal": {
+    "didYouMean": "{{email}}을(를) 말씀하신 건가요?",
     "restoreWalletTitle": "지갑을 다시 불러오세요",
     "restoreOriginalWallet": "프로필은 원래 가입한 방식으로 로그인한 계정의 지갑에서 불러오세요. 이 로그인에 저장된 지갑이 아닌 것입니다. 프로필과 자금은 그대로 유지됩니다.",
     "useAnotherLogin": "다른 로그인 사용",
