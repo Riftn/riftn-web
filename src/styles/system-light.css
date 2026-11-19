@@ -265,3 +265,46 @@ html[data-theme="system"][data-system-tone="light"] #root:not(#_):not(#_) [data-
 /* Explore filter X: dark ink on paper reads as a smudge at the dark themes'
    strength, so the glow is dialled down. */
 html[data-theme="system"][data-system-tone="light"] [data-explore-filter-glow] { --explore-glow-core: 28%; --explore-glow-edge: 8%; }
+
+/* ---- Phone feed: no bentos ----
+   The cards had no visible edge on white, so the inset read as wasted space.
+   Posts step out over the feed's 8px side padding: media runs edge to edge,
+   text sits 12px from the screen edge, and the hairline under each post spans
+   the screen. The Live now strip and Radio row follow suit. */
+@media (max-width: 639px) {
+  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] {
+    margin-left: -0.5rem !important;
+    margin-right: -0.5rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] [data-media-full] {
+    margin-left: -0.75rem !important;
+    margin-right: -0.75rem !important;
+    width: calc(100% + 1.5rem) !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+  }
+  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] [data-media-full] :is(img, video, [data-feed-image-frame], [data-image-slot]) {
+    border-radius: 0 !important;
+  }
+  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_) [data-feed-root] [data-live-now-bar] {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    width: calc(100% + 1rem);
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+  }
+  html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-radio] {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-left: 0.75rem !important;
+    padding-right: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--sl-line) !important;
+    border-radius: 0 !important;
+  }
+}
