@@ -131,6 +131,7 @@ import {
 } from '@/lib/api/dehub/dm-socket';
 import { ForwardMessageDialog } from './ForwardMessageDialog';
 import { DeleteMessageDialog, type DeleteScope } from './DeleteMessageDialog';
+import { ReportModal } from '@/components/app/modals/ReportModal';
 import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
@@ -468,6 +469,16 @@ export function CozyDayPill({ iso }: { iso: string }) {
   );
 }
 
+/** What moderators see with a reported chat message. Same lines as the app sends. */
+function messageReportContext(message: DmMessage, where: string): string {
+  const text = (message.content || '').trim().slice(0, 500);
+  return [
+    `Reported message (${where})`,
+    message._id ? `Message id: ${message._id}` : null,
+    text ? `Text: ${text}` : null,
+  ].filter(Boolean).join('\n');
+}
+
 const MessageBubble = memo(function MessageBubble({
   message,
   isOwnMessage,
@@ -493,6 +504,7 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick,
   onStartPick,
   onDelete,
+  onReport,
   canPin = true,
   isPinned = false,
   onUnpin,
@@ -501,6 +513,8 @@ const MessageBubble = memo(function MessageBubble({
   isOwnMessage: boolean;
   /** Delete one message (asks first: for me, or for everyone when it is yours). */
   onDelete?: (message: DmMessage) => void;
+  /** Report a message someone else sent, with its text attached for moderators. */
+  onReport?: (message: DmMessage) => void;
   /** Pin rights: anyone in a one-to-one chat, the owner in a group. */
   canPin?: boolean;
   isPinned?: boolean;
@@ -786,6 +800,12 @@ const MessageBubble = memo(function MessageBubble({
     if (pickable) {
       menuActions.push({ key: 'select', divided: !canDeleteThis, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message), hint: 'S' });
       holdActions.push({ key: 'select', secondary: true, icon: menuIcons.select, label: L.select, onSelect: () => onStartPick?.(message) });
+    }
+    // Anyone can report a message they were sent, the same as in the app.
+    if (onReport && !isOwnMessage && !message.isDeleted && (message.sender?.address || message.sender?.username)) {
+      const label = _copy('dm.reportMessage', { defaultValue: 'Report message' });
+      menuActions.push({ key: 'report', destructive: true, icon: menuIcons.report, label, onSelect: () => onReport(message) });
+      holdActions.push({ key: 'report', secondary: true, destructive: true, icon: menuIcons.report, label, onSelect: () => onReport(message) });
     }
   }
   const hasReactions = !!message.reactions && Object.values(message.reactions).some((who) => who?.length);
@@ -2376,6 +2396,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const [confirmPickDelete, setConfirmPickDelete] = useState(false);
   // Delete from the message menu, after picking for me or for everyone.
   const [confirmDeleteOne, setConfirmDeleteOne] = useState<DmMessage | null>(null);
+  // Report message: the sender is reported with the line itself attached.
+  const [reportTarget, setReportTarget] = useState<DmMessage | null>(null);
   /** Take messages out of this chat on screen: gone (for me) or "deleted" (for everyone). */
   const dropFromThread = useCallback((ids: Set<string>, scope: DeleteScope) => {
     if (!resolvedConversationId || ids.size === 0) return;
@@ -3207,6 +3229,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 onTogglePick={togglePick}
                 onStartPick={startPick}
                 onDelete={setConfirmDeleteOne}
+                onReport={setReportTarget}
                 canPin={canPinHere}
                 isPinned={pinnedMessageId === message._id}
                 onUnpin={handleUnpinMessage}
@@ -3281,6 +3304,13 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         oneToOne={!isGroupChat}
         peerName={isGroupChat ? null : displayName}
         onDelete={(scope) => { const target = confirmDeleteOne; setConfirmDeleteOne(null); if (target) void deleteOne(target, scope); }}
+      />
+      <ReportModal
+        open={!!reportTarget}
+        onOpenChange={(next) => { if (!next) setReportTarget(null); }}
+        reportType="user"
+        userId={reportTarget?.sender?.address || reportTarget?.sender?.username || undefined}
+        context={reportTarget ? messageReportContext(reportTarget, isGroupChat ? 'Group chat' : 'Direct message') : undefined}
       />
       <DeleteMessageDialog
         open={confirmPickDelete}

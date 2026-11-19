@@ -13011,7 +13011,7 @@
   "multiPost": {
     "tab": "Multi-posten",
     "title": "Multi-posten",
-    "intro": "Post tegelijkertijd naar X, YouTube, Instagram, TikTok en meer met dehub. Verbind je accounts één keer, kies dan waar elke post naartoe gaat.",
+    "intro": "Post tegelijkertijd naar X, YouTube, Instagram, TikTok en meer met Riftn. Verbind je accounts één keer, kies dan waar elke post naartoe gaat.",
     "creditsHeading": "Tegoed plaatsen",
     "credits": "{{count}} post credits",
     "topUpTitle": "Top-up en bespaar",
@@ -13059,7 +13059,12 @@
   "dm": {
     "planRestricted": "Deze gebruiker vereist een abonnement om berichten te ontvangen.",
     "planTypeNotAllowed": "Het abonnement van deze maker staat dit soort bericht niet toe.",
-    "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn."
+    "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn.",
+    "shareGroups": "Groepen",
+    "shareKindGroup": "Groep",
+    "shareKindChannel": "Kanaal",
+    "shareKindCommunity": "Gemeenschap",
+    "reportMessage": "Bericht melden"
   },
   "credits": {
     "earningsWorth": "Waarde {{amount}}",

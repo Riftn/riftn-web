@@ -81,7 +81,8 @@
       "profile": "פרופיל",
       "proposal": "הצעה",
       "stage": "שלב",
-      "store": "חנות"
+      "store": "חנות",
+      "featureRequest": "בקשה"
     },
     "recipientChat": "צ'אט",
     "recipientUser": "משתמש",
@@ -520,7 +521,11 @@
     "getTheApp": "הורדת האפליקציה",
     "connectAi": "חיבור AI",
     "converter": "ממיר",
-    "affiliate": "שותפים"
+    "affiliate": "שותפים",
+    "groups": {
+      "create": "צור",
+      "discover": "גילוי"
+    }
   },
   "feed": {
     "viewProfile": "הצגת הפרופיל של {{name}}",
@@ -1144,7 +1149,8 @@
     "socialConnectedShort": "מחובר",
     "socialConnectFailed": "לא ניתן להתחבר אל {{platform}}. צריך לנסות שוב.",
     "socialVerifiedFollowers": "{{value}} עוקבים",
-    "socialFollowersPending": "מונה עוקבים מעדכן"
+    "socialFollowersPending": "מונה עוקבים מעדכן",
+    "menuLayoutFolders": "תיקיות"
   },
   "common": {
     "confirm": "אישור",
@@ -3045,7 +3051,11 @@
     "likersEmptyTitle": "עדיין אין לייקים",
     "likersEmptyBody": "לייקים לתגובה הזו יופיעו כאן.",
     "anonymousLikes_one": "{{count}} לייק ממחזיק תג אנונימי",
-    "anonymousLikes_other": "{{count}} לייקים ממחזיקי תג אנונימיים"
+    "anonymousLikes_other": "{{count}} לייקים ממחזיקי תג אנונימיים",
+    "threadParts": {
+      "moveUp": "העלה",
+      "moveDown": "הורד"
+    }
   },
   "mintChain": {
     "title": "פוסט מנטה",
@@ -6078,6 +6088,12 @@
       "needsImageToWork": "{{model}} צריכה תמונה כדי לעבוד ממנה. יש לצרף אחד תחילה.",
       "speechLimit": "אותו הוא {{length}} תווים. הגבלת התווים היא {{limit}}.",
       "musicTrackLength": "מסלול {{count}}s"
+    },
+    "gallery": {
+      "send": "שלח",
+      "notifications": {
+        "generation_reply": "{{name}} הגיב לתגובה שלך"
+      }
     }
   },
   "pricing": {
@@ -11855,7 +11871,7 @@
   "multiPost": {
     "tab": "פרסום מרובה",
     "title": "פרסום מרובה",
-    "intro": "פרסם ל-X, YouTube, Instagram, TikTok ועוד בו-זמנית עם dehub. חבר את החשבונות שלך פעם אחת, ואז בחר לאן כל פוסט הולך.",
+    "intro": "פרסם ל-X, YouTube, Instagram, TikTok ועוד בו-זמנית עם Riftn. חבר את החשבונות שלך פעם אחת, ואז בחר לאן כל פוסט הולך.",
     "creditsHeading": "קרדיטים לפוסט",
     "credits": "{{count}} קרדיטים לפוסט",
     "topUpTitle": "טען למעלה וחסוך",
@@ -11903,7 +11919,9 @@
   "dm": {
     "planRestricted": "משתמש זה דורש מינוי כדי לקבל הודעות.",
     "planTypeNotAllowed": "התוכנית של יוצר זה אינה מאפשרת סוג הודעה זה.",
-    "planMinTip": "הטיפ ליוצר זה חייב להיות לפחות {{amount}} אסימונים."
+    "planMinTip": "הטיפ ליוצר זה חייב להיות לפחות {{amount}} אסימונים.",
+    "shareKindGroup": "קבץ",
+    "shareKindCommunity": "קהילה"
   },
   "credits": {
     "earningsWorth": "שווה {{amount}}",
@@ -19371,5 +19389,10 @@
     "edit": "ערוך",
     "editLabel": "ערוך הודעה",
     "error": "זה לא עבד. נסה שוב."
+  },
+  "mentionLinks": {
+    "communities": "קהילות",
+    "pages": "עמודים",
+    "people": "אנשים"
   }
 }

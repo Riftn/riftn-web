@@ -81,7 +81,8 @@
       "profile": "профил",
       "proposal": "предлог",
       "stage": "сцена",
-      "store": "магацин"
+      "store": "магацин",
+      "featureRequest": "захтјев"
     },
     "recipientChat": "чат",
     "recipientUser": "корисник",
@@ -521,7 +522,11 @@
     "getTheApp": "Преузми апликацију",
     "connectAi": "Повежи AI",
     "converter": "Конвертуј",
-    "affiliate": "Партнери"
+    "affiliate": "Партнери",
+    "groups": {
+      "create": "Креирај",
+      "discover": "Откриј"
+    }
   },
   "feed": {
     "viewProfile": "Погледајте профил корисника {{name}}",
@@ -1146,7 +1151,8 @@
     "socialConnectedShort": "Повезано",
     "socialConnectFailed": "Повезивање {{platform}} није успело. Пробајте поново.",
     "socialVerifiedFollowers": "Пратиоци: {{value}}",
-    "socialFollowersPending": "Ажурирање броја пратилаца"
+    "socialFollowersPending": "Ажурирање броја пратилаца",
+    "menuLayoutFolders": "Фасцикле"
   },
   "common": {
     "confirm": "Потврди",
@@ -3050,7 +3056,11 @@
     "likersEmptyTitle": "Још нема лајкова",
     "likersEmptyBody": "Лајкови на овом коментару појавиће се овде.",
     "anonymousLikes_one": "{{count}} лајк од анонимног власника значке",
-    "anonymousLikes_other": "{{count}} лајкова од анонимних власника значки"
+    "anonymousLikes_other": "{{count}} лајкова од анонимних власника значки",
+    "threadParts": {
+      "moveUp": "Помери горе",
+      "moveDown": "Помери доље"
+    }
   },
   "mintChain": {
     "title": "Пошта нане",
@@ -6083,6 +6093,12 @@
       "needsImageToWork": "{{model}} треба слику за рад. Прво причврстите један.",
       "speechLimit": "То је {{length}} знакова. Ограничење је {{limit}}.",
       "musicTrackLength": "{{count}}с нумера"
+    },
+    "gallery": {
+      "send": "Пошаљи",
+      "notifications": {
+        "generation_reply": "{{name}} је одговорио на ваш коментар"
+      }
     }
   },
   "pricing": {
@@ -11860,7 +11876,7 @@
   "multiPost": {
     "tab": "Вишеструко објављивање",
     "title": "Вишеструко објављивање",
-    "intro": "Објављуј на X, YouTube, Instagram, TikTok и другим мрежама истовремено са dehub-ом. Повежи налоге једном, па бирај где иде свака објава.",
+    "intro": "Објављуј на X, YouTube, Instagram, TikTok и другим мрежама истовремено са Riftn-ом. Повежи налоге једном, па бирај где иде свака објава.",
     "creditsHeading": "Кредити за објаве",
     "credits": "Кредити за објаве: {{count}}",
     "topUpTitle": "Допуни и уштеди",
@@ -11908,7 +11924,9 @@
   "dm": {
     "planRestricted": "Овај корисник захтева претплату да би примао поруке.",
     "planTypeNotAllowed": "План овог креатора не дозвољава ову врсту поруке.",
-    "planMinTip": "Напојница за овог креатора мора бити најмање {{amount}} токен-а."
+    "planMinTip": "Напојница за овог креатора мора бити најмање {{amount}} токен-а.",
+    "shareKindGroup": "Групиши",
+    "shareKindCommunity": "Заједница"
   },
   "credits": {
     "earningsWorth": "Вредност {{amount}}",
@@ -19469,5 +19487,10 @@
     "edit": "Уреди",
     "editLabel": "Измијените поруку",
     "error": "То није успело. Покушај поново."
+  },
+  "mentionLinks": {
+    "communities": "Заједнице",
+    "pages": "Странице",
+    "people": "Људи"
   }
 }

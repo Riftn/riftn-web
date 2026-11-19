@@ -81,7 +81,8 @@
       "profile": "प्रोफाइल समायोजित करें",
       "proposal": "सुझावल गइल प्रस्ताव",
       "stage": "स्टेज पे जा रहे हो",
-      "store": "दुकानदार, दुकानदार,"
+      "store": "दुकानदार, दुकानदार,",
+      "featureRequest": "अनुरोध"
     },
     "recipientChat": "बिल्ली, बिल्ली के बाल का",
     "recipientUser": "उपयोगकर्ता के अनुकूल",
@@ -519,7 +520,12 @@
     "getTheApp": "ऐप लीं",
     "connectAi": "AI जोड़ीं",
     "converter": "कनवर्टर बदलें",
-    "affiliate": "एफिलिएट"
+    "affiliate": "एफिलिएट",
+    "groups": {
+      "create": "बनाईं",
+      "discover": "खोजीं",
+      "riftn": "देसी, देसी"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} के प्रोफाइल देखीं",
@@ -1123,7 +1129,8 @@
     "socialConnect": "कनेक्ट करें",
     "socialConnected": "{{platform}} कनेक्टेड",
     "socialConnectedShort": "संसोधित हो ।",
-    "socialFollowersPending": "अपडेट करे खातिर टेम्पलेट"
+    "socialFollowersPending": "अपडेट करे खातिर टेम्पलेट",
+    "menuLayoutFolders": "फोल्डर"
   },
   "common": {
     "confirm": "कन्फर्म",
@@ -3013,7 +3020,11 @@
     "likersEmptyTitle": "अबहीं ले कवनो लाइक नइखे",
     "likersEmptyBody": "एह टिप्पणी के लाइक इहाँ लउकी।",
     "anonymousLikes_one": "गुमनाम बैज धारक से {{count}} लाइक",
-    "anonymousLikes_other": "गुमनाम बैज धारकन से {{count}} लाइक"
+    "anonymousLikes_other": "गुमनाम बैज धारकन से {{count}} लाइक",
+    "threadParts": {
+      "moveUp": "ऊपर ले जाओ",
+      "moveDown": "नीचे ले जाओ"
+    }
   },
   "mintChain": {
     "title": "पोस्ट कइल गइल",
@@ -6003,7 +6014,13 @@
     "referenceProductName": "क्लिप में आपन प्रोडक्ट रखीं",
     "referenceProductHint": "फीचर कइल प्रोडक्ट बदलें और मूल सीन रखीं।",
     "referenceComposeName": "रेफ़रेंस इमेज मिलाईं",
-    "referenceComposeHint": "कई इमेज से कैरेक्टर, वस्तु और सेटिंग एक ही कंपोज़िशन में लाईं।"
+    "referenceComposeHint": "कई इमेज से कैरेक्टर, वस्तु और सेटिंग एक ही कंपोज़िशन में लाईं।",
+    "gallery": {
+      "send": "भेजें",
+      "notifications": {
+        "generation_reply": "{{name}} रउआ टिप्पणी पर जवाब दिहलसु"
+      }
+    }
   },
   "pricing": {
     "plansForEveryWorkflow": "किसी भी प्रक्रिया के लिए योजना",
@@ -11793,7 +11810,9 @@
   "dm": {
     "planRestricted": "ई यूजर के संदेश पावे खातिर सब्सक्रिप्शन चाहीं।",
     "planTypeNotAllowed": "एह क्रिएटर के प्लान में अइसन संदेश के अनुमति नइखे।",
-    "planMinTip": "एह क्रिएटर खातिर टिप कम से कम {{amount}} टोकन होखे के चाहीं।"
+    "planMinTip": "एह क्रिएटर खातिर टिप कम से कम {{amount}} टोकन होखे के चाहीं।",
+    "shareKindGroup": "समूह",
+    "shareKindCommunity": "समुदाय"
   },
   "credits": {
     "earningsWorth": "कीमत {{amount}}",
@@ -18883,7 +18902,8 @@
     "127053546dd4": "कृपया ये फाइल डाउनलोड न कर सके",
     "d14896aa4bf8": "फ्री लाइब्रेरी लोड न कर सकी। अपनी कनेक्शन की जांच करें और फिर से प्रयास करें।",
     "953e708b2287": "वॉइस जनरेशन असफल हो गई।",
-    "4a52cdd6ac72": "कृपया ये लेयर्स को डुप्लिकेट न कर सके"
+    "4a52cdd6ac72": "कृपया ये लेयर्स को डुप्लिकेट न कर सके",
+    "ab7b9519e1a2": "आऊ - आऊ - आऊ"
   },
   "articles": {
     "read": "अउरी लेख पढ़ीं",
@@ -19158,5 +19178,10 @@
     "edit": "संपादित करें",
     "editLabel": "सन्देश संपादित कइल जाय",
     "error": "कृपया उ के सक्षम करीं आ फिर से कोशिश करीं ',"
+  },
+  "mentionLinks": {
+    "communities": "समुदाय",
+    "pages": "पन्ना",
+    "people": "लोग"
   }
 }

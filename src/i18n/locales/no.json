@@ -80,7 +80,8 @@
       "profile": "profiler",
       "proposal": "forslag",
       "stage": "scene",
-      "store": "stør"
+      "store": "stør",
+      "featureRequest": "Forespør"
     },
     "recipientChat": "samtale",
     "recipientUser": "bruker",
@@ -521,7 +522,11 @@
     "getTheApp": "Last ned appen",
     "connectAi": "Koble til KI",
     "converter": "Omformer",
-    "affiliate": "Partner"
+    "affiliate": "Partner",
+    "groups": {
+      "create": "Opprett",
+      "discover": "Oppdag"
+    }
   },
   "feed": {
     "viewProfile": "Vis profilen til {{name}}",
@@ -1144,7 +1149,9 @@
     "socialConnectedShort": "Tilkoblet",
     "socialConnectFailed": "Klarte ikke å koble til {{platform}}. Prøv igjen.",
     "socialVerifiedFollowers": "{{value}} følgere",
-    "socialFollowersPending": "Oppdatering av følgerantall"
+    "socialFollowersPending": "Oppdatering av følgerantall",
+    "skipSegments": "Hopp over sponsorer og introer",
+    "menuLayoutFolders": "Mapper"
   },
   "common": {
     "confirm": "Bekrefte",
@@ -3042,7 +3049,11 @@
     "likersEmptyTitle": "Ingen likerklikk ennå",
     "likersEmptyBody": "Likerklikk på denne kommentaren vises her.",
     "anonymousLikes_one": "{{count}} likerklikk fra en anonym merkeinnehaver",
-    "anonymousLikes_other": "{{count}} likerklikk fra anonyme merkeinnehavere"
+    "anonymousLikes_other": "{{count}} likerklikk fra anonyme merkeinnehavere",
+    "threadParts": {
+      "moveUp": "Flytt opp",
+      "moveDown": "Flytt ned"
+    }
   },
   "mintChain": {
     "title": "Myntpost",
@@ -6076,6 +6087,12 @@
       "needsImageToWork": "{{model}} trenger et bilde å arbeide fra. Tilføyd et først.",
       "speechLimit": "Det er {{length}} tegn. Grensen er {{limit}}.",
       "musicTrackLength": "{{count}}s spor"
+    },
+    "gallery": {
+      "send": "Sende",
+      "notifications": {
+        "generation_reply": "{{name}} svarte på kommentaren din"
+      }
     }
   },
   "pricing": {
@@ -11848,7 +11865,7 @@
   "multiPost": {
     "tab": "Multi-posting",
     "title": "Multi-posting",
-    "intro": "Post til X, YouTube, Instagram, TikTok og mer samtidig med dehub. Koble til kontoene dine én gang, velg deretter hvor hvert innlegg skal.",
+    "intro": "Post til X, YouTube, Instagram, TikTok og mer samtidig med Riftn. Koble til kontoene dine én gang, velg deretter hvor hvert innlegg skal.",
     "creditsHeading": "Post-kreditter",
     "credits": "{{count}} post-kreditter",
     "topUpTitle": "Fyll på og spar",
@@ -11896,7 +11913,9 @@
   "dm": {
     "planRestricted": "Denne brukeren krever et abonnement for å motta meldinger.",
     "planTypeNotAllowed": "Denne skaperens plan tillater ikke denne typen melding.",
-    "planMinTip": "Tipset må være minst {{amount}} tokens for denne skaperen."
+    "planMinTip": "Tipset må være minst {{amount}} tokens for denne skaperen.",
+    "shareKindGroup": "Gruppér",
+    "shareKindCommunity": "Fellesskap"
   },
   "credits": {
     "earningsWorth": "Verdt {{amount}}",
@@ -19461,5 +19480,10 @@
     "edit": "Rediger",
     "editLabel": "Rediger melding",
     "error": "Det fungerte ikke. Prøv igjen."
+  },
+  "mentionLinks": {
+    "communities": "Fellesskap",
+    "pages": "Sider",
+    "people": "Folk"
   }
 }

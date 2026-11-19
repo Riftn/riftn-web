@@ -81,7 +81,8 @@
       "profile": "پروفائل",
       "proposal": "پروپوزل",
       "stage": "ستیرج",
-      "store": "دُکاں"
+      "store": "دُکاں",
+      "featureRequest": "ڈیمانڈ"
     },
     "recipientChat": "چٹ",
     "recipientUser": "کاربر",
@@ -514,7 +515,12 @@
     "getTheApp": "ایپ لوو",
     "connectAi": "AI جوڑو",
     "converter": "کانورٹر",
-    "affiliate": "ایفیلی ایٹ"
+    "affiliate": "ایفیلی ایٹ",
+    "groups": {
+      "create": "بݨاؤ",
+      "discover": "لبھو",
+      "riftn": "ڈی ہیب"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} دی پروفائل ویکھو",
@@ -1114,7 +1120,9 @@
     "socialConnect": "کنیکٹ",
     "socialConnected": "{{platform}} کنیکٹڈ",
     "socialConnectedShort": "جڑ گیا",
-    "socialFollowersPending": "فوللورز کی گنتی اپ ڈیٹ ہو رہی ہے"
+    "socialFollowersPending": "فوللورز کی گنتی اپ ڈیٹ ہو رہی ہے",
+    "channelSpeed": "ہر چینل کیتے پلے بیک رفتار",
+    "menuLayoutFolders": "فولڈر"
   },
   "common": {
     "confirm": "توثیق کریں",
@@ -3010,7 +3018,10 @@
     "likersEmptyTitle": "ہݨے تائیں کوئی لائیک کائنی",
     "likersEmptyBody": "ایں تبصرے دے لائیک اتھاں ݙکھیسن۔",
     "anonymousLikes_one": "گمنام بیج ہولڈر دی طرفوں {{count}} لائیک",
-    "anonymousLikes_other": "گمنام بیج ہولڈرز دی طرفوں {{count}} لائیک"
+    "anonymousLikes_other": "گمنام بیج ہولڈرز دی طرفوں {{count}} لائیک",
+    "threadParts": {
+      "moveUp": "چلنا چلنا"
+    }
   },
   "mintChain": {
     "title": "مٹھا پوسٹ",
@@ -5927,6 +5938,12 @@
     "validation": {
       "speechLimit": "0 {{limit}} کاراڈر۔ حد {{length}} ہے۔",
       "musicTrackLength": "{{count}} دیگھے"
+    },
+    "gallery": {
+      "send": "بھیجو",
+      "notifications": {
+        "generation_reply": "{{name}} تہاڈے تبصرے دا جواب ݙتا"
+      }
     }
   },
   "pricing": {
@@ -11642,7 +11659,7 @@
   "multiPost": {
     "tab": "ملٹی پوسٹنگ",
     "title": "ملٹی پوسٹنگ",
-    "intro": "X، YouTube، Instagram، TikTok تے ہور پلیٹ فارمز تے اک وقت وچ dehub دے نال پوسٹ کرو۔ اپنے اکاؤنٹس ایک واری کنیکٹ کرو، فیر ہر پوسٹ کتھے جائے گی، ایہ چنوں۔",
+    "intro": "X، YouTube، Instagram، TikTok تے ہور پلیٹ فارمز تے اک وقت وچ Riftn دے نال پوسٹ کرو۔ اپنے اکاؤنٹس ایک واری کنیکٹ کرو، فیر ہر پوسٹ کتھے جائے گی، ایہ چنوں۔",
     "creditsHeading": "پوسٹ کریڈٹ",
     "credits": "{{count}} پوسٹ کریڈٹ",
     "topUpTitle": "ٹاپ اپ تے بچت کرو",
@@ -11690,7 +11707,9 @@
   "dm": {
     "planRestricted": "ایں یوزر کوں سنیہے گھنݨ کیتے سبسکرپشن دی لوڑ اے۔",
     "planTypeNotAllowed": "ایں کریئیٹر دا پلان ایں قسم دے سنیہے دی اجازت نئیں ݙیندا۔",
-    "planMinTip": "ایں کریئیٹر کیتے ٹپ گھٹ توں گھٹ {{amount}} ٹوکن ہووݨی چاہیدی اے۔"
+    "planMinTip": "ایں کریئیٹر کیتے ٹپ گھٹ توں گھٹ {{amount}} ٹوکن ہووݨی چاہیدی اے۔",
+    "shareKindGroup": "گروپ ڪريو",
+    "shareKindCommunity": "کمیونٹی"
   },
   "credits": {
     "earningsWorth": "قیمت {{amount}}",
@@ -18662,5 +18681,10 @@
     "edit": "ترمیم",
     "editLabel": "پیغام کو ایڈٹ کریں",
     "error": "یہ کم نئیں آیا۔ دوبارہ کوشش کریں۔"
+  },
+  "mentionLinks": {
+    "communities": "کمیونٹیز",
+    "pages": "ورقے",
+    "people": "لوک"
   }
 }

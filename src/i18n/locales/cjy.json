@@ -81,7 +81,8 @@
       "profile": "个人资料",
       "proposal": "提案",
       "stage": "舞台",
-      "store": "商店"
+      "store": "商店",
+      "featureRequest": "请求"
     },
     "recipientChat": "聊天",
     "recipientUser": "用户",
@@ -521,7 +522,12 @@
     "getTheApp": "装应用",
     "connectAi": "连接 AI",
     "converter": "转换器",
-    "affiliate": "推广联盟"
+    "affiliate": "推广联盟",
+    "groups": {
+      "create": "发布",
+      "discover": "寻寻",
+      "riftn": "德赫布"
+    }
   },
   "feed": {
     "viewProfile": "查看 {{name}} 的个人资料",
@@ -1129,7 +1135,9 @@
     "socialConnectedShort": "已连接",
     "socialConnectFailed": "无法连接{{platform}}。请再试一次。",
     "socialVerifiedFollowers": "{{value}} 粉丝",
-    "socialFollowersPending": "关注人数更新"
+    "socialFollowersPending": "关注人数更新",
+    "channelSpeed": "每个频道的播放速度",
+    "menuLayoutFolders": "文件夹"
   },
   "common": {
     "confirm": "确认",
@@ -3028,7 +3036,11 @@
     "likersEmptyTitle": "还没有点赞",
     "likersEmptyBody": "这条评论的点赞会显示在这儿。",
     "anonymousLikes_one": "来自匿名徽章持有者的 {{count}} 个赞",
-    "anonymousLikes_other": "来自匿名徽章持有者的 {{count}} 个赞"
+    "anonymousLikes_other": "来自匿名徽章持有者的 {{count}} 个赞",
+    "threadParts": {
+      "moveUp": "上升",
+      "moveDown": "下降"
+    }
   },
   "mintChain": {
     "title": "新鲜帖子",
@@ -6058,6 +6070,12 @@
       "needsImageToWork": "需要一个图片才能让{{model}}工作。先把图片附上。",
       "speechLimit": "这是 {{length}} 个字符。限制是 {{limit}}。",
       "musicTrackLength": "{{count}}的轨迹"
+    },
+    "gallery": {
+      "send": "发送",
+      "notifications": {
+        "generation_reply": "{{name}} 回复了你的评论"
+      }
     }
   },
   "pricing": {
@@ -11836,7 +11854,7 @@
   "multiPost": {
     "tab": "同时发布",
     "title": "同时发布",
-    "intro": "与 dehub 一同发布到 X、YouTube、Instagram、TikTok 等平台。一次性连接您的账户，然后选择每个帖子要发布到的平台。",
+    "intro": "与 Riftn 一同发布到 X、YouTube、Instagram、TikTok 等平台。一次性连接您的账户，然后选择每个帖子要发布到的平台。",
     "creditsHeading": "发布积分",
     "credits": "{{count}} 个发布积分",
     "topUpTitle": "充值并节省",
@@ -11884,7 +11902,9 @@
   "dm": {
     "planRestricted": "这个用户要订阅才能收消息。",
     "planTypeNotAllowed": "这个创作者的方案不允许这类消息。",
-    "planMinTip": "给这个创作者的打赏至少要 {{amount}} 代币。"
+    "planMinTip": "给这个创作者的打赏至少要 {{amount}} 代币。",
+    "shareKindGroup": "分组",
+    "shareKindCommunity": "社區"
   },
   "credits": {
     "earningsWorth": "价值 {{amount}}",
@@ -19238,5 +19258,10 @@
     "followers": "关注者",
     "subscribers": "订阅者",
     "mentioned": "被提到的"
+  },
+  "mentionLinks": {
+    "communities": "社区",
+    "pages": "页面",
+    "people": "人"
   }
 }

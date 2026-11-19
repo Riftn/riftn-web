@@ -81,7 +81,8 @@
       "profile": "profilis",
       "proposal": "paslaugos pasiūlymas",
       "stage": "etapas",
-      "store": "parduotuvė"
+      "store": "parduotuvė",
+      "featureRequest": "užklausa"
     },
     "recipientChat": "kalba",
     "recipientUser": "naudotojas",
@@ -522,7 +523,11 @@
     "getTheApp": "Atsisiųsti programėlę",
     "connectAi": "Prijungti DI",
     "converter": "Keitiklis",
-    "affiliate": "Partneriai"
+    "affiliate": "Partneriai",
+    "groups": {
+      "create": "Kurti",
+      "discover": "Atrasti"
+    }
   },
   "feed": {
     "viewProfile": "Peržiūrėti profilį, kurį sukūrė {{name}}",
@@ -1145,7 +1150,8 @@
     "socialConnectedShort": "Sujungta",
     "socialConnectFailed": "Nepavyko prisijungti {{platform}}. Bandykite dar kartą.",
     "socialVerifiedFollowers": "{{value}} sekėjai",
-    "socialFollowersPending": "Sekėjų skaičiaus atnaujinimas"
+    "socialFollowersPending": "Sekėjų skaičiaus atnaujinimas",
+    "menuLayoutFolders": "Aplankai"
   },
   "common": {
     "confirm": "Patvirtinti",
@@ -3045,7 +3051,11 @@
     "likersEmptyTitle": "Dar nėra patiktukų",
     "likersEmptyBody": "Čia bus rodomi šio komentaro patiktukai.",
     "anonymousLikes_one": "{{count}} patiktukas iš anoniminio ženklelio turėtojo",
-    "anonymousLikes_other": "Patiktukai iš anoniminių ženklelių turėtojų: {{count}}"
+    "anonymousLikes_other": "Patiktukai iš anoniminių ženklelių turėtojų: {{count}}",
+    "threadParts": {
+      "moveUp": "Aukštyn",
+      "moveDown": "Perkelti žemyn"
+    }
   },
   "mintChain": {
     "title": "Mėtų stulpelis",
@@ -6080,6 +6090,12 @@
       "needsImageToWork": "{{model}} reikia vaizdo, iš kurio būtų galima dirbti. Pirmiausia pritvirtinkite vieną.",
       "speechLimit": "Tai yra {{length}} simboliai. Limitas yra {{limit}}.",
       "musicTrackLength": "{{count}}s takelis"
+    },
+    "gallery": {
+      "send": "Siųsti",
+      "notifications": {
+        "generation_reply": "{{name}} atsakė į jūsų komentarą"
+      }
     }
   },
   "pricing": {
@@ -11855,7 +11871,7 @@
   "multiPost": {
     "tab": "Daugkartinis skelbimas",
     "title": "Daugkartinis skelbimas",
-    "intro": "Skelbkite į X, YouTube, Instagram, TikTok ir kitas platformas vienu metu su dehub. Prijunkite savo paskyras vieną kartą, tada pasirinkite, kur bus skelbiamas kiekvienas įrašas.",
+    "intro": "Skelbkite į X, YouTube, Instagram, TikTok ir kitas platformas vienu metu su Riftn. Prijunkite savo paskyras vieną kartą, tada pasirinkite, kur bus skelbiamas kiekvienas įrašas.",
     "creditsHeading": "Skelbimų kreditai",
     "credits": "{{count}} skelbimo kreditų",
     "topUpTitle": "Papildykite ir sutaupykite",
@@ -11903,7 +11919,9 @@
   "dm": {
     "planRestricted": "Šiam naudotojui reikia prenumeratos, kad gautų žinutes.",
     "planTypeNotAllowed": "Šio kūrėjo planas neleidžia tokio tipo žinučių.",
-    "planMinTip": "Arbatpinigiai šiam kūrėjui turi būti bent {{amount}} žetonų."
+    "planMinTip": "Arbatpinigiai šiam kūrėjui turi būti bent {{amount}} žetonų.",
+    "shareKindGroup": "Grupuoti",
+    "shareKindCommunity": "Bendruomenė"
   },
   "credits": {
     "earningsWorth": "Verta {{amount}}",
@@ -19470,5 +19488,10 @@
     "edit": "Redaguoti",
     "editLabel": "Redaguoti žinutę",
     "error": "Nepavyko. Bandykite dar kartą."
+  },
+  "mentionLinks": {
+    "communities": "Bendruomenės",
+    "pages": "Puslapiai",
+    "people": "Žmonės"
   }
 }

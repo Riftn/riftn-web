@@ -81,7 +81,8 @@
       "profile": "個人檔案",
       "proposal": "建議",
       "stage": "舞台",
-      "store": "商店"
+      "store": "商店",
+      "featureRequest": "請求"
     },
     "recipientChat": "聊天",
     "recipientUser": "用戶",
@@ -519,7 +520,12 @@
     "getTheApp": "下载应用",
     "connectAi": "连接 AI",
     "converter": "轉換器",
-    "affiliate": "推广联盟"
+    "affiliate": "推广联盟",
+    "groups": {
+      "create": "创建",
+      "discover": "寻寻看",
+      "riftn": "德赫布"
+    }
   },
   "feed": {
     "viewProfile": "看 {{name}} 的资料",
@@ -1131,7 +1137,8 @@
     "socialConnectedShort": "已连接",
     "socialConnectFailed": "無法連接 {{platform}}。請再試一次。",
     "socialVerifiedFollowers": "{{value}}追隨者",
-    "socialFollowersPending": "追隨者數據更新"
+    "socialFollowersPending": "追隨者數據更新",
+    "menuLayoutFolders": "文件夹"
   },
   "common": {
     "confirm": "確認",
@@ -3019,7 +3026,11 @@
     "likersEmptyTitle": "还没点赞",
     "likersEmptyBody": "搿条评论个点赞会显示在这里。",
     "anonymousLikes_one": "来自匿名徽章持有者个 {{count}} 个赞",
-    "anonymousLikes_other": "来自匿名徽章持有者个 {{count}} 个赞"
+    "anonymousLikes_other": "来自匿名徽章持有者个 {{count}} 个赞",
+    "threadParts": {
+      "moveUp": "上升",
+      "moveDown": "下降"
+    }
   },
   "mintChain": {
     "title": "铸造帖子",
@@ -6024,6 +6035,12 @@
       "needsImageToWork": "{{model}} 要一張圖片才能運作。先貼一張。",
       "speechLimit": "這是 {{length}} 個字。限制是 {{limit}} 個字。",
       "musicTrackLength": "{{count}} 的追蹤"
+    },
+    "gallery": {
+      "send": "发送",
+      "notifications": {
+        "generation_reply": "{{name}} 回复了侬个评论"
+      }
     }
   },
   "pricing": {
@@ -11725,7 +11742,7 @@
   "multiPost": {
     "tab": "多平台发布",
     "title": "多平台发布",
-    "intro": "用 dehub 同时向 X、YouTube、Instagram、TikTok 等平台发帖。只要一次连好账号，后头挑拣每条内容要发到哪只平台。",
+    "intro": "用 Riftn 同时向 X、YouTube、Instagram、TikTok 等平台发帖。只要一次连好账号，后头挑拣每条内容要发到哪只平台。",
     "creditsHeading": "发帖积分",
     "credits": "{{count}} 发帖积分",
     "topUpTitle": "充值省钱",
@@ -11773,7 +11790,9 @@
   "dm": {
     "planRestricted": "搿个用户要订阅了再好收消息。",
     "planTypeNotAllowed": "搿个创作者个方案勿允许搿种消息。",
-    "planMinTip": "打赏搿个创作者至少要 {{amount}} 代币。"
+    "planMinTip": "打赏搿个创作者至少要 {{amount}} 代币。",
+    "shareKindGroup": "分组",
+    "shareKindCommunity": "社区"
   },
   "credits": {
     "earningsWorth": "价值{{amount}}",
@@ -18834,5 +18853,10 @@
     "edit": "编辑",
     "editLabel": "編輯訊息",
     "error": "那没有奏效。再试一次。"
+  },
+  "mentionLinks": {
+    "communities": "社区",
+    "pages": "页面",
+    "people": "用户"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "පැතිකඩ",
       "proposal": "යෝජනාව",
       "stage": "වේදිකාව",
-      "store": "වෙළඳසැල"
+      "store": "වෙළඳසැල",
+      "featureRequest": "ඉල්ලීම"
     },
     "recipientChat": "සංවාදය",
     "recipientUser": "පරිශීලකයා",
@@ -520,7 +521,11 @@
     "getTheApp": "යෙදුම ලබා ගන්න",
     "connectAi": "AI සම්බන්ධ කරන්න",
     "converter": "පරිවර්තක",
-    "affiliate": "අනුබද්ධ"
+    "affiliate": "අනුබද්ධ",
+    "groups": {
+      "create": "නිර්මාණය",
+      "discover": "සොයා ගන්න"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} හි පැතිකඩ බලන්න",
@@ -1125,7 +1130,9 @@
     "socialConnectedShort": "සම්බන්ධිතයි",
     "socialConnectFailed": "{{platform}} සම්බන්ධ කළ නොහැකි විය. නැවත උත්සාහ කරන්න.",
     "socialVerifiedFollowers": "{{value}} අනුගාමිකයන්",
-    "socialFollowersPending": "අනුගාමික ගණන යාවත්කාලීන කිරීම"
+    "socialFollowersPending": "අනුගාමික ගණන යාවත්කාලීන කිරීම",
+    "skipSegments": "අනුග්‍රාහකයන් සහ හැඳින්වීම් මඟ හරින්න",
+    "menuLayoutFolders": "ෆෝල්ඩර"
   },
   "common": {
     "confirm": "තහවුරු කරන්න",
@@ -3032,7 +3039,11 @@
     "likersEmptyTitle": "තවම කැමැත්තන් නැත",
     "likersEmptyBody": "මෙම අදහසට ලැබෙන කැමැත්තන් මෙහි දිස්වේ.",
     "anonymousLikes_one": "නිර්නාමික ලාංඡන හිමියෙකුගෙන් කැමැත්තන් {{count}}",
-    "anonymousLikes_other": "නිර්නාමික ලාංඡන හිමියන්ගෙන් කැමැත්තන් {{count}}"
+    "anonymousLikes_other": "නිර්නාමික ලාංඡන හිමියන්ගෙන් කැමැත්තන් {{count}}",
+    "threadParts": {
+      "moveUp": "ඉහළට යන්න",
+      "moveDown": "පහළට ගෙන යන්න"
+    }
   },
   "mintChain": {
     "title": "මින්ට් පශ්චාත්",
@@ -6036,6 +6047,12 @@
     "referenceComposeHint": "බහුවිධ රූපවල අක්ෂර, වස්තූන් සහ සැකසුම් එක් සංයුතියකට ගෙන එන්න.",
     "validation": {
       "musicTrackLength": "{{count}}s ධාවන පථය"
+    },
+    "gallery": {
+      "send": "යවන්න",
+      "notifications": {
+        "generation_reply": "{{name}} ඔබේ අදහසකට ප්‍රතිචාර දැක්වීය"
+      }
     }
   },
   "pricing": {
@@ -11801,7 +11818,7 @@
   "multiPost": {
     "tab": "බහු-පෝස්ට් කිරීම",
     "title": "බහු-පෝස්ට් කිරීම",
-    "intro": "dehub මගින් X, YouTube, Instagram, TikTok සහ තවත් බොහෝ දේ වෙත එකවර පෝස්ට් කරන්න. ඔබගේ ගිණුම් එක් වරක් සම්බන්ධ කරන්න, ඉන්පසු එක් එක් පෝස්ට් එක යන්නේ කොතැනටදැයි තෝරන්න.",
+    "intro": "Riftn මගින් X, YouTube, Instagram, TikTok සහ තවත් බොහෝ දේ වෙත එකවර පෝස්ට් කරන්න. ඔබගේ ගිණුම් එක් වරක් සම්බන්ධ කරන්න, ඉන්පසු එක් එක් පෝස්ට් එක යන්නේ කොතැනටදැයි තෝරන්න.",
     "creditsHeading": "පෝස්ට් ණය",
     "credits": "{{count}} පෝස්ට් ණය",
     "topUpTitle": "ඉහළට ගොස් සුරකින්න",
@@ -11849,7 +11866,9 @@
   "dm": {
     "planRestricted": "මෙම පරිශීලකයාට පණිවිඩ ලැබීමට දායකත්වයක් අවශ්‍යයි.",
     "planTypeNotAllowed": "මෙම නිර්මාණකරුගේ සැලැස්ම මෙවැනි පණිවිඩයකට ඉඩ නොදේ.",
-    "planMinTip": "මෙම නිර්මාණකරුට ටිප් එක අවම වශයෙන් {{amount}} ටෝකන් විය යුතුයි."
+    "planMinTip": "මෙම නිර්මාණකරුට ටිප් එක අවම වශයෙන් {{amount}} ටෝකන් විය යුතුයි.",
+    "shareKindGroup": "කණ්ඩායම් කරන්න",
+    "shareKindCommunity": "ප්‍රජාව"
   },
   "credits": {
     "earningsWorth": "ප්‍රති-පිළිතුරු සැපයීම {{amount}}",
@@ -19226,5 +19245,10 @@
     "backToBlog": "බ්ලොග් වෙත ආපසු",
     "sharePost": "පළකිරීම බෙදා ගන්න",
     "relatedPosts": "සම්බන්ධ පළකිරීම්"
+  },
+  "mentionLinks": {
+    "communities": "ප්‍රජාවන්",
+    "pages": "පිටු",
+    "people": "පුද්ගලයන්"
   }
 }

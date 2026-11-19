@@ -81,7 +81,8 @@
       "profile": "profil",
       "proposal": "təklif",
       "stage": "sahə",
-      "store": "dükkan"
+      "store": "dükkan",
+      "featureRequest": "istənilən istifadəçi hesabını qəbul et"
     },
     "recipientChat": "söhbət",
     "recipientUser": "istifadəçi",
@@ -522,7 +523,11 @@
     "getTheApp": "Tətbiqi yüklə",
     "connectAi": "Süni intellekti qoş",
     "converter": "Konvertor",
-    "affiliate": "Tərəfdaş"
+    "affiliate": "Tərəfdaş",
+    "groups": {
+      "create": "Yarat",
+      "discover": "Kəşf et"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} adlı şəxsin profilinə baxın",
@@ -1144,7 +1149,8 @@
     "socialConnectedShort": "Əlaqələndirilib",
     "socialConnectFailed": "{{platform}} ilə əlaqələndirmək mümkün olmadı. Yenidən cəhd edin.",
     "socialVerifiedFollowers": "{{value}} izləyicilər",
-    "socialFollowersPending": "İzləyici sayı yenilənir"
+    "socialFollowersPending": "İzləyici sayı yenilənir",
+    "menuLayoutFolders": "Qovluqlar"
   },
   "common": {
     "confirm": "Təsdiq et",
@@ -3044,7 +3050,11 @@
     "likersEmptyTitle": "Hələ bəyənmə yoxdur",
     "likersEmptyBody": "Bu şərhin bəyənmələri burada görünəcək.",
     "anonymousLikes_one": "Anonim nişan sahibindən {{count}} bəyənmə",
-    "anonymousLikes_other": "Anonim nişan sahiblərindən {{count}} bəyənmə"
+    "anonymousLikes_other": "Anonim nişan sahiblərindən {{count}} bəyənmə",
+    "threadParts": {
+      "moveUp": "Yuxarıya daşı",
+      "moveDown": "Aşağıya daşı"
+    }
   },
   "mintChain": {
     "title": "Nanə yazısı",
@@ -6077,6 +6087,12 @@
       "needsImageToAnimate": "{{model}} animasiya üçün bir şəkil lazımdır. Əvvəlcə birini əlavə edin.",
       "needsImageToWork": "{{model}} işləmək üçün bir şəkil lazımdır. Əvvəlcə birini əlavə edin.",
       "musicTrackLength": "{{count}}s track"
+    },
+    "gallery": {
+      "send": "Göndər",
+      "notifications": {
+        "generation_reply": "{{name}} şərhinizə cavab verdi"
+      }
     }
   },
   "pricing": {
@@ -11848,7 +11864,7 @@
   "multiPost": {
     "tab": "Çoxlu göndəriş",
     "title": "Çoxlu göndəriş",
-    "intro": "X, YouTube, Instagram, TikTok və daha çox yerə eyni anda dehub kimi göndərin. Hesablarınızı bir dəfə qoşun, sonra hər göndərişin hara gedəcəyini seçin.",
+    "intro": "X, YouTube, Instagram, TikTok və daha çox yerə eyni anda Riftn kimi göndərin. Hesablarınızı bir dəfə qoşun, sonra hər göndərişin hara gedəcəyini seçin.",
     "creditsHeading": "Göndəriş kreditləri",
     "credits": "{{count}} göndəriş krediti",
     "topUpTitle": "Yuxarı doldurun və qənaət edin",
@@ -11896,7 +11912,9 @@
   "dm": {
     "planRestricted": "Bu istifadəçi mesaj almaq üçün abunəlik tələb edir.",
     "planTypeNotAllowed": "Bu yaradıcının planı bu növ mesaja icazə vermir.",
-    "planMinTip": "Bu yaradıcı üçün bəxşiş ən azı {{amount}} tokenlər olmalıdır."
+    "planMinTip": "Bu yaradıcı üçün bəxşiş ən azı {{amount}} tokenlər olmalıdır.",
+    "shareKindGroup": "Qruplaşdır",
+    "shareKindCommunity": "İcma"
   },
   "credits": {
     "earningsWorth": "Dəyər {{amount}}",
@@ -19436,5 +19454,10 @@
     "edit": "Redaktə et",
     "editLabel": "Mesajı redaktə et",
     "error": "Bu alınmadı. Yenidən cəhd edin."
+  },
+  "mentionLinks": {
+    "communities": "İcmalar",
+    "pages": "Səhifələr",
+    "people": "İnsanlar"
   }
 }

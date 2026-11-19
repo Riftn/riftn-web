@@ -81,7 +81,8 @@
       "profile": "profil",
       "proposal": "oferta",
       "stage": "etap",
-      "store": "sklep"
+      "store": "sklep",
+      "featureRequest": "żądanie"
     },
     "recipientChat": "chat",
     "recipientUser": "użytkownik",
@@ -522,7 +523,11 @@
     "getTheApp": "Pobierz aplikację",
     "connectAi": "Podłącz AI",
     "converter": "Przetwornik",
-    "affiliate": "Program partnerski"
+    "affiliate": "Program partnerski",
+    "groups": {
+      "create": "Utwórz",
+      "discover": "Odkrywaj"
+    }
   },
   "feed": {
     "viewProfile": "Wyświetl profil użytkownika {{name}}",
@@ -1158,7 +1163,8 @@
     "socialConnectedShort": "Połączono",
     "socialConnectFailed": "Nie udało się połączyć {{platform}}. Spróbuj ponownie.",
     "socialVerifiedFollowers": "{{value}} obserwujących",
-    "socialFollowersPending": "Aktualizowanie liczby obserwujących"
+    "socialFollowersPending": "Aktualizowanie liczby obserwujących",
+    "menuLayoutFolders": "Foldery"
   },
   "common": {
     "confirm": "Potwierdź",
@@ -3068,7 +3074,11 @@
     "likersEmptyTitle": "Brak polubień",
     "likersEmptyBody": "Tu pojawią się polubienia tego komentarza.",
     "anonymousLikes_one": "{{count}} polubienie od anonimowego posiadacza odznaki",
-    "anonymousLikes_other": "Polubienia od anonimowych posiadaczy odznak: {{count}}"
+    "anonymousLikes_other": "Polubienia od anonimowych posiadaczy odznak: {{count}}",
+    "threadParts": {
+      "moveUp": "Przenieś w górę",
+      "moveDown": "Przenieś w dół"
+    }
   },
   "mintChain": {
     "title": "Idealny słupek",
@@ -6104,6 +6114,12 @@
       "needsImageToWork": "{{model}} potrzebuje obrazu do pracy. Najpierw dołącz jeden.",
       "speechLimit": "To jest {{length}} znaków. Limit wynosi {{limit}}.",
       "musicTrackLength": "Ścieżka {{count}}s"
+    },
+    "gallery": {
+      "send": "Wyślij",
+      "notifications": {
+        "generation_reply": "{{name}} odpowiedział na Twój komentarz"
+      }
     }
   },
   "pricing": {
@@ -11950,7 +11966,7 @@
   "multiPost": {
     "tab": "Wielokrotne publikowanie",
     "title": "Wielokrotne publikowanie",
-    "intro": "Publikuj na X, YouTube, Instagram, TikTok i innych jednocześnie za pomocą dehub. Połącz swoje konta raz, a potem wybierz, gdzie ma trafić każdy post.",
+    "intro": "Publikuj na X, YouTube, Instagram, TikTok i innych jednocześnie za pomocą Riftn. Połącz swoje konta raz, a potem wybierz, gdzie ma trafić każdy post.",
     "creditsHeading": "Kredyty na posty",
     "credits": "{{count}} kredyty na posty",
     "topUpTitle": "Doładuj i oszczędzaj",
@@ -11998,7 +12014,10 @@
   "dm": {
     "planRestricted": "Ten użytkownik wymaga subskrypcji, aby otrzymywać wiadomości.",
     "planTypeNotAllowed": "Plan tego twórcy nie pozwala na ten rodzaj wiadomości.",
-    "planMinTip": "Napiwek dla tego twórcy musi wynosić co najmniej {{amount}} tokenów."
+    "planMinTip": "Napiwek dla tego twórcy musi wynosić co najmniej {{amount}} tokenów.",
+    "shareKindGroup": "Grupuj",
+    "shareKindChannel": "Kanał",
+    "shareKindCommunity": "Społeczność"
   },
   "credits": {
     "earningsWorth": "Warta {{amount}}",
@@ -19591,5 +19610,10 @@
     "edit": "Edytuj",
     "editLabel": "Edytuj wiadomość",
     "error": "To nie zadziałało. Spróbuj ponownie."
+  },
+  "mentionLinks": {
+    "communities": "Społeczności",
+    "pages": "Strony",
+    "people": "Ludzie"
   }
 }

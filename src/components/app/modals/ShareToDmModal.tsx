@@ -16,6 +16,10 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  *
  * Recipients who charge a per-message DM fee are routed into the conversation
  * (openDmWith + autoSendBody) so the existing fee-payment flow handles it.
+ *
+ * Groups, channels the viewer runs and communities shown in Chats are listed
+ * too: there the link goes in as a normal line in the room, which shows its
+ * card, the same as the app's share sheet.
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -44,6 +48,14 @@ import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { parseDehubLink, dehubLinkLabel } from '@/lib/dehub-links';
 import { AppState } from '@/components/app/AppState';
 import { BadgedName } from '@/components/app/BadgedName';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserCommunities, type Community } from '@/hooks/use-communities';
+import { useChatPrefs } from '@/hooks/use-chat-prefs';
+import { roomChatId } from '@/lib/api/dehub/chat-prefs';
+import { chatsFromMemberships, communityKindOf } from '@/lib/community-kinds';
+import { insertCommunityChatMessage } from '@/lib/community-chat-send';
+import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { storageImage, deviceWidth } from '@/lib/media-url';
 
 interface ShareToDmModalProps {
   open: boolean;
@@ -81,6 +93,9 @@ export function ShareToDmModal({ open, onOpenChange, url }: ShareToDmModalProps)
 
   const { conversations, isLoading: convosLoading } = useConversations('');
   const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(search);
+  const { walletAddress, user } = useAuth();
+  const { data: memberships } = useUserCommunities();
+  const { byId: chatPrefs } = useChatPrefs();
 
   // Reset transient state whenever the modal opens.
   useEffect(() => {
@@ -127,6 +142,40 @@ export function ShareToDmModal({ open, onOpenChange, url }: ShareToDmModalProps)
       (u: DeHubUser) => u.address && !existingAddresses.has(u.address.toLowerCase())
     );
   }, [userSearchResults, existingAddresses, search]);
+
+  // Rooms the viewer can post in: every group, channels they own or admin,
+  // and communities they chose to show in Chats.
+  const groups = useMemo(() => {
+    const canPost = new Set(
+      (memberships ?? [])
+        .filter(m => communityKindOf(m.communities) !== 'channel' || m.role === 'owner' || m.role === 'admin')
+        .map(m => m.community_id),
+    );
+    const q = search.trim().toLowerCase();
+    return chatsFromMemberships(memberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt)
+      .filter(c => canPost.has(c.id) && (!q || c.name.toLowerCase().includes(q)));
+  }, [memberships, chatPrefs, search]);
+
+  const sendToGroup = async (group: Community) => {
+    const key = `group:${group.id}`;
+    if (!walletAddress) return;
+    setRowStatus(s => ({ ...s, [key]: 'sending' }));
+    try {
+      const me = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
+      const { data, error } = await insertCommunityChatMessage<{ id: string }>({
+        communityId: group.id, walletAddress, content: buildContent(),
+        sender: { username: me?.username, displayName: me?.displayName, avatarUrl: me?.avatarImageUrl ?? me?.avatarUrl },
+      });
+      if (error) throw error;
+      if (data?.id) void reportCommunityChatMessage(group.id, data.id, walletAddress);
+      setRowStatus(s => ({ ...s, [key]: 'sent' }));
+      toast.success(_copy('dehubLinks.sentTo', { item: sentLabel, name: group.name }));
+    } catch (err) {
+      console.error('[ShareToDm] send to group failed:', err);
+      setRowStatus(s => ({ ...s, [key]: 'idle' }));
+      toast.error(_copy('dehubLinks.sendFailed', { item: noun }));
+    }
+  };
 
   /** Route fee-gated recipients into the chat where the payment flow lives. */
   const routeToChat = (address: string, username: string | undefined) => {
@@ -196,7 +245,7 @@ export function ShareToDmModal({ open, onOpenChange, url }: ShareToDmModalProps)
     }
   };
 
-  const hasResults = filteredConversations.length > 0 || newUserResults.length > 0;
+  const hasResults = groups.length > 0 || filteredConversations.length > 0 || newUserResults.length > 0;
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -248,6 +297,32 @@ export function ShareToDmModal({ open, onOpenChange, url }: ShareToDmModalProps)
               <div className="flex justify-center py-6">
                 <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
               </div>
+            )}
+
+            {groups.length > 0 && (
+              <p className="text-zinc-500 text-[11px] uppercase tracking-wider font-medium px-1 pb-1">{_copy('dm.shareGroups', { defaultValue: 'Groups' })}</p>
+            )}
+            {groups.map((group) => {
+              const key = `group:${group.id}`;
+              const kind = communityKindOf(group);
+              return (
+                <RecipientRow
+                  key={key}
+                  avatarUrl={group.avatar_url ? storageImage(group.avatar_url, deviceWidth(40)) : undefined}
+                  name={group.name}
+                  subtitle={kind === 'channel'
+                    ? _copy('dm.shareKindChannel', { defaultValue: 'Channel' })
+                    : kind === 'group'
+                      ? _copy('dm.shareKindGroup', { defaultValue: 'Group' })
+                      : _copy('dm.shareKindCommunity', { defaultValue: 'Community' })}
+                  fee={0}
+                  status={rowStatus[key] || 'idle'}
+                  onSend={() => sendToGroup(group)}
+                />
+              );
+            })}
+            {groups.length > 0 && filteredConversations.length > 0 && (
+              <p className="text-zinc-500 text-[11px] uppercase tracking-wider font-medium px-1 pt-3 pb-1">{_copy('explore.people', { defaultValue: 'People' })}</p>
             )}
 
             {filteredConversations.map((conv) => {
@@ -319,6 +394,7 @@ function RecipientRow({
   avatarUrl,
   name,
   username,
+  subtitle,
   badgeBalance,
   badgeLookupId,
   verified,
@@ -329,6 +405,8 @@ function RecipientRow({
   avatarUrl?: string;
   name: string;
   username?: string;
+  /** A group's kind ("Group", "Channel"), shown where a person has their @username. */
+  subtitle?: string;
   /** Staked DHB when the row carries it; otherwise the badge is looked up. */
   badgeBalance?: number;
   badgeLookupId?: string | null;
@@ -359,6 +437,7 @@ function RecipientRow({
           {verified && <VerifiedBadge className="w-3.5 h-3.5" />}
         </div>
         {username && <p className="text-xs text-zinc-500 truncate">@{username}</p>}
+        {!username && subtitle && <p className="text-xs text-zinc-500 truncate">{subtitle}</p>}
         {fee > 0 && (
           <p className="text-[11px] text-amber-400 mt-0.5 flex items-center gap-1">
             <Gem className="w-3 h-3" />

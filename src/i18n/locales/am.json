@@ -81,7 +81,8 @@
       "profile": "መገለጫ",
       "proposal": "ፕሮፖዛል",
       "stage": "መድረክ",
-      "store": "መደብር"
+      "store": "መደብር",
+      "featureRequest": "ጥያቄ"
     },
     "recipientChat": "ውይይት",
     "recipientUser": "ተጠቃሚ",
@@ -520,7 +521,11 @@
     "getTheApp": "መተግበሪያውን አግኝ",
     "connectAi": "AI አገናኝ",
     "converter": "ቀይር",
-    "affiliate": "አጋር"
+    "affiliate": "አጋር",
+    "groups": {
+      "create": "ፍጠር",
+      "discover": "አግኝ"
+    }
   },
   "feed": {
     "viewProfile": "የ {{name}} መገለጫ ይመልከቱ",
@@ -1142,7 +1147,8 @@
     "socialConnectedShort": "ተገናኝቷል",
     "socialConnectFailed": "{{platform}}ን ማገናኘት አልተቻለም ። እባክዎ እንደገና ይሞክሩ ።",
     "socialVerifiedFollowers": "{{value}} ተከታዮች",
-    "socialFollowersPending": "የተከታታይ ቆጠራ ማዘመን"
+    "socialFollowersPending": "የተከታታይ ቆጠራ ማዘመን",
+    "menuLayoutFolders": "አቃፊዎች"
   },
   "common": {
     "confirm": "ያረጋግጡ",
@@ -3072,7 +3078,11 @@
     "likersEmptyTitle": "እስካሁን መውደድ የለም",
     "likersEmptyBody": "በዚህ አስተያየት ላይ ያሉ መውደዶች እዚህ ይታያሉ።",
     "anonymousLikes_one": "ስም-አልባ ባጅ ካለው ሰው {{count}} መውደድ",
-    "anonymousLikes_other": "ስም-አልባ ባጅ ካላቸው ሰዎች {{count}} መውደዶች"
+    "anonymousLikes_other": "ስም-አልባ ባጅ ካላቸው ሰዎች {{count}} መውደዶች",
+    "threadParts": {
+      "moveUp": "ወደ ላይ ያንቀሳቅሱ",
+      "moveDown": "ወደ ታች ያንቀሳቅሱ"
+    }
   },
   "mintChain": {
     "title": "Mint ልጥፍ",
@@ -6098,6 +6108,12 @@
       "needsImageToWork": "{{model}} ለመስራት ምስል ይፈልጋል ። በመጀመሪያ አንድ ያያይዙ.",
       "speechLimit": "ይህ {{length}} ቁምፊዎች ነው ። ገደቡ {{limit}} ነው ።",
       "musicTrackLength": "{{count}}s ትራክ"
+    },
+    "gallery": {
+      "send": "ላክ",
+      "notifications": {
+        "generation_reply": "{{name}} አስተያየትህ ላይ ምላሽ ሰጠ"
+      }
     }
   },
   "pricing": {
@@ -11856,7 +11872,7 @@
   "multiPost": {
     "tab": "ባለብዙ ልጥፍ",
     "title": "ባለብዙ ልጥፍ",
-    "intro": "እንደ dehub ሁሉንም በአንድ ጊዜ ወደ X, YouTube, Instagram, TikTok እና ሌሎችም ይለጥፉ። መለያዎችዎን አንድ ጊዜ ያገናኙ፣ ከዚያ እያንዳንዱ ልጥፍ የት እንደሚሄድ ይምረጡ።",
+    "intro": "እንደ Riftn ሁሉንም በአንድ ጊዜ ወደ X, YouTube, Instagram, TikTok እና ሌሎችም ይለጥፉ። መለያዎችዎን አንድ ጊዜ ያገናኙ፣ ከዚያ እያንዳንዱ ልጥፍ የት እንደሚሄድ ይምረጡ።",
     "creditsHeading": "የልጥፍ ክሬዲቶች",
     "credits": "{{count}} የልጥፍ ክሬዲቶች",
     "topUpTitle": "ከፍተኛ እና አስቀምጥ",
@@ -11904,7 +11920,9 @@
   "dm": {
     "planRestricted": "ይህ ተጠቃሚ መልዕክቶችን ለመቀበል ምዝገባ ይፈልጋል።",
     "planTypeNotAllowed": "የዚህ ፈጣሪ እቅድ ይህን አይነት መልዕክት አይፈቅድም።",
-    "planMinTip": "ለዚህ ፈጣሪ ቲፕ ቢያንስ {{amount}} ቶከኖች መሆን አለበት።"
+    "planMinTip": "ለዚህ ፈጣሪ ቲፕ ቢያንስ {{amount}} ቶከኖች መሆን አለበት።",
+    "shareKindGroup": "ቡድን",
+    "shareKindCommunity": "ማህበረሰብ"
   },
   "credits": {
     "earningsWorth": "ዋጋ {{amount}}",
@@ -19441,5 +19459,10 @@
     "edit": "አርትዕ",
     "editLabel": "መልዕክት አርትዕ",
     "error": "ያ አልሰራም እንደገና ሞክር ።"
+  },
+  "mentionLinks": {
+    "communities": "ማህበረሰቦች",
+    "pages": "ገጾች",
+    "people": "ሰዎች"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "kōtaha",
       "proposal": "kaupapa",
       "stage": "atamira",
-      "store": "toa"
+      "store": "toa",
+      "featureRequest": "tono"
     },
     "recipientChat": "kōrerorero",
     "recipientUser": "kaiwhakamahi",
@@ -521,7 +522,12 @@
     "getTheApp": "Tikina te taupānga",
     "connectAi": "Honoa te AI",
     "converter": "Converter",
-    "affiliate": "Hoa Piri"
+    "affiliate": "Hoa Piri",
+    "groups": {
+      "create": "Waihanga",
+      "discover": "Kimihia",
+      "riftn": "Ko Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Mātakitaki i a {{name}}'s profile",
@@ -1133,7 +1139,8 @@
     "socialConnectedShort": "Tūhono",
     "socialConnectFailed": "Kaore e taea te hono {{platform}}. Tena koa tamata ano.",
     "socialVerifiedFollowers": "{{value}} whaiwhai",
-    "socialFollowersPending": "Whakahoutia te kaute whaiwhai"
+    "socialFollowersPending": "Whakahoutia te kaute whaiwhai",
+    "menuLayoutFolders": "Ngā kōpaki"
   },
   "common": {
     "confirm": "Whakamātauria",
@@ -3032,7 +3039,11 @@
     "likersEmptyTitle": "Kāore anō he pai",
     "likersEmptyBody": "Ka puta ki konei ngā pai mō tēnei kōrero.",
     "anonymousLikes_one": "{{count}} pai mai i tētahi kaipupuri tohu huna",
-    "anonymousLikes_other": "{{count}} pai mai i ngā kaipupuri tohu huna"
+    "anonymousLikes_other": "{{count}} pai mai i ngā kaipupuri tohu huna",
+    "threadParts": {
+      "moveUp": "Neke ki runga",
+      "moveDown": "Neke ki raro"
+    }
   },
   "mintChain": {
     "title": "Mint pou",
@@ -6064,6 +6075,12 @@
       "needsImageToAnimate": "{{model}} e hiahia ana ki te whakaahua ki te whakairoiro. Whakamātauria te tuatahi.",
       "needsImageToWork": "{{model}} E hiahia ana koe ki te whakaahua ki te mahi i te reira. Whakamātauria te tuatahi.",
       "musicTrackLength": "{{count}}s tere"
+    },
+    "gallery": {
+      "send": "Tuku",
+      "notifications": {
+        "generation_reply": "I whakautu a {{name}} ki tō tākupu"
+      }
     }
   },
   "pricing": {
@@ -11832,7 +11849,7 @@
   "multiPost": {
     "tab": "Tukunga maha",
     "title": "Tukunga maha",
-    "intro": "Tukuna ki X, YouTube, Instagram, TikTok me ētahi atu i te wā kotahi me dehub. Whakauruhia ō pūkete kotahi, kātahi ka tīpakohia ko wai ka tukuna ia pou.",
+    "intro": "Tukuna ki X, YouTube, Instagram, TikTok me ētahi atu i te wā kotahi me Riftn. Whakauruhia ō pūkete kotahi, kātahi ka tīpakohia ko wai ka tukuna ia pou.",
     "creditsHeading": "Ngā whiwhinga pou",
     "credits": "{{count}} whiwhinga pou",
     "topUpTitle": "Tāpiri ka penapena",
@@ -11880,7 +11897,9 @@
   "dm": {
     "planRestricted": "Me whai ohaurunga kia whiwhi karere tēnei kaiwhakamahi.",
     "planTypeNotAllowed": "Kāore te mahere a tēnei kaihanga e whakaae ki tēnei momo karere.",
-    "planMinTip": "Me {{amount}} tohu te iti rawa o te koha mō tēnei kaihanga."
+    "planMinTip": "Me {{amount}} tohu te iti rawa o te koha mō tēnei kaihanga.",
+    "shareKindGroup": "Rōpū",
+    "shareKindCommunity": "Hapori"
   },
   "credits": {
     "earningsWorth": "Ko te utu {{amount}}",
@@ -19414,5 +19433,10 @@
     "edit": "Whakatika",
     "editLabel": "Whakahoutia te karere",
     "error": "Kaore i mahi. Whakamātauria ano."
+  },
+  "mentionLinks": {
+    "communities": "Hapori",
+    "pages": "Ngā whārangi",
+    "people": "Tāngata"
   }
 }

@@ -81,7 +81,8 @@
       "profile": "โปรไฟล์",
       "proposal": "ข้อเสนอ",
       "stage": "เวที",
-      "store": "ร้านค้า"
+      "store": "ร้านค้า",
+      "featureRequest": "คำขอ"
     },
     "recipientChat": "แชท",
     "recipientUser": "ผู้ใช้",
@@ -526,7 +527,12 @@
     "getTheApp": "ดาวน์โหลดแอป",
     "connectAi": "เชื่อมต่อ AI",
     "converter": "ตัวแปลงกระแสไฟฟ้า",
-    "affiliate": "พันธมิตร"
+    "affiliate": "พันธมิตร",
+    "groups": {
+      "create": "สร้าง",
+      "discover": "ค้นพบ",
+      "riftn": "เดฮับ"
+    }
   },
   "feed": {
     "viewProfile": "ดูโปรไฟล์ของ {{name}}",
@@ -1157,7 +1163,8 @@
     "socialConnectedShort": "เชื่อมต่อแล้ว",
     "socialConnectFailed": "ไม่สามารถเชื่อมต่อ {{platform}} ได้ โปรดลองอีกครั้ง",
     "socialVerifiedFollowers": "ผู้ติดตาม {{value}} คน",
-    "socialFollowersPending": "กำลังอัปเดตจำนวนผู้ติดตาม"
+    "socialFollowersPending": "กำลังอัปเดตจำนวนผู้ติดตาม",
+    "menuLayoutFolders": "โฟลเดอร์"
   },
   "common": {
     "confirm": "ยืนยัน",
@@ -3083,7 +3090,11 @@
     "likersEmptyTitle": "ยังไม่มีการถูกใจ",
     "likersEmptyBody": "การถูกใจความคิดเห็นนี้จะแสดงที่นี่",
     "anonymousLikes_one": "{{count}} ถูกใจจากผู้ถือแบดจ์ที่ไม่ระบุตัวตน",
-    "anonymousLikes_other": "{{count}} ถูกใจจากผู้ถือแบดจ์ที่ไม่ระบุตัวตน"
+    "anonymousLikes_other": "{{count}} ถูกใจจากผู้ถือแบดจ์ที่ไม่ระบุตัวตน",
+    "threadParts": {
+      "moveUp": "เลื่อนขึ้น",
+      "moveDown": "เลื่อนลง"
+    }
   },
   "mintChain": {
     "title": "เสามินต์",
@@ -6111,6 +6122,12 @@
       "needsImageToWork": "ต้องการภาพเพื่อใช้ในการทำงานของ {{model}} ก่อน",
       "speechLimit": "นั่นคือ {{length}} ตัวอักษรจำกัดไว้ที่ {{limit}}",
       "musicTrackLength": "แทร็ก {{count}} s"
+    },
+    "gallery": {
+      "send": "ส่ง",
+      "notifications": {
+        "generation_reply": "{{name}} ตอบกลับความคิดเห็นของคุณ"
+      }
     }
   },
   "pricing": {
@@ -11880,7 +11897,7 @@
   "multiPost": {
     "tab": "การโพสต์หลายแพลตฟอร์ม",
     "title": "การโพสต์หลายแพลตฟอร์ม",
-    "intro": "โพสต์ไปยัง X, YouTube, Instagram, TikTok และอื่นๆ ได้พร้อมกันด้วย dehub เชื่อมต่อบัญชีของคุณเพียงครั้งเดียว จากนั้นเลือกว่าแต่ละโพสต์จะไปที่ใด",
+    "intro": "โพสต์ไปยัง X, YouTube, Instagram, TikTok และอื่นๆ ได้พร้อมกันด้วย Riftn เชื่อมต่อบัญชีของคุณเพียงครั้งเดียว จากนั้นเลือกว่าแต่ละโพสต์จะไปที่ใด",
     "creditsHeading": "เครดิตโพสต์",
     "credits": "เครดิตโพสต์ {{count}} รายการ",
     "topUpTitle": "เติมเงินและประหยัด",
@@ -11928,7 +11945,10 @@
   "dm": {
     "planRestricted": "ผู้ใช้นี้ต้องสมัครสมาชิกก่อนจึงจะรับข้อความได้",
     "planTypeNotAllowed": "แพ็กเกจของครีเอเตอร์นี้ไม่อนุญาตข้อความประเภทนี้",
-    "planMinTip": "ทิปสำหรับครีเอเตอร์นี้ต้องมีอย่างน้อย {{amount}} โทเค็น"
+    "planMinTip": "ทิปสำหรับครีเอเตอร์นี้ต้องมีอย่างน้อย {{amount}} โทเค็น",
+    "shareKindGroup": "จัดกลุ่ม",
+    "shareKindChannel": "ช่อง",
+    "shareKindCommunity": "ชุมชน"
   },
   "credits": {
     "earningsWorth": "คุ้มค่า {{amount}}",
@@ -19137,7 +19157,8 @@
     "127053546dd4": "ดาวน์โหลดไฟล์นี้ไม่ได้",
     "d14896aa4bf8": "ไม่สามารถโหลดไลบรารีฟรีได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
     "953e708b2287": "การสร้างเสียงล้มเหลว",
-    "4a52cdd6ac72": "ไม่สามารถทำซ้ำเลเยอร์เหล่านี้ได้"
+    "4a52cdd6ac72": "ไม่สามารถทำซ้ำเลเยอร์เหล่านี้ได้",
+    "bd9e3879bc60": "เพย์-เพอร์-วิว (Pay-per-view)"
   },
   "articles": {
     "cardLabel": "บทความ · {{count}} นาที อ่าน",
@@ -19422,5 +19443,10 @@
   },
   "footer": {
     "copyright": "ลิขสิทธิ์ © 2024 บริษัทของคุณ"
+  },
+  "mentionLinks": {
+    "communities": "ชุมชน",
+    "pages": "หน้า",
+    "people": "ผู้คน"
   }
 }
