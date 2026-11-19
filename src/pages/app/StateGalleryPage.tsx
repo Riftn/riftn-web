@@ -12,6 +12,7 @@ import { ProfilePostBgContext, PostBgLayer, PostBgPicker, postBgHostProps, usePo
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import type { ArticleTileLook } from '@/lib/article-tile';
 import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
+import { FormatGlyph, type FormatKind } from '@/components/app/profile/FormatMark';
 import { PostCard as GalleryPostCard } from '@/components/app/cards/PostCard';
 import { ContentWarningGate } from '@/components/app/cards/ContentWarningGate';
 import { AuthorThread } from '@/components/app/cards/AuthorThread';
@@ -35,6 +36,7 @@ import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type React
 import { PostActionBar } from '@/features/post/components/PostActionBar';
 import { createPortal } from 'react-dom';
 import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
+import MenuSearchIcon from "@/components/ui/cut-icons/search";
 import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
 import { hideDislikedPost, restoreDislikedPost } from '@/lib/disliked-posts-store';
 import { useTranslation } from 'react-i18next';
@@ -173,7 +175,9 @@ import { ProfileFieldsEditor, type FieldRow } from '@/components/app/settings/Pr
 import type { SuggestedAccount } from '@/lib/api/dehub';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { filterNavItems } from '@/components/app/navigation/nav-search';
-import { MobileMenuGrid } from '@/components/app/navigation/MobileMenuGrid';
+import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { groupMenuItems } from '@/components/app/navigation/menu-groups';
+import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 
 /**
  * Comic posts: the deck as the feed shows it, the post page with the hand of
@@ -894,20 +898,49 @@ function MenuReorderGallery() {
   const { t } = useTranslation();
   // Type here to see the menu search exactly as the phone menu runs it.
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState(0);
+  const layout = useMenuLayout();
+  // ?menuLayout=tabs|sections|folders opens the gallery on that layout.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get('menuLayout');
+    if (param) writeMenuLayout(normaliseMenuLayout(param));
+    const tabParam = Number(new URLSearchParams(window.location.search).get('menuTab'));
+    if (tabParam > 0) setTab(tabParam);
+  }, []);
   const items = useMemo(() => filterNavItems(NAV_ITEMS, query, t, false), [query, t]);
+  const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
   return (
     <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t('sidebar.searchMenu')}
-        aria-label={t('sidebar.searchMenu')}
-        data-menu-search
-        data-search-surface
-        className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
-      />
-      <MobileMenuGrid items={items} searching={!!query.trim()} currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
+      <div className="mb-3 flex gap-1.5">
+        {(['tabs', 'sections', 'folders'] as const).map((value) => (
+          <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}
+            className={`h-8 rounded-lg border px-3 text-[13px] font-semibold ${layout === value ? 'border-white/30 bg-white/15 text-white' : 'border-white/10 text-zinc-400'}`}>
+            {value}
+          </button>
+        ))}
+      </div>
+      {layout === 'tabs' && !query ? (
+        <div className="mb-3 flex items-stretch gap-1.5">
+          <button type="button" onClick={() => setQuery(' ')} aria-label={t('sidebar.searchMenu')} data-search-surface
+            className="flex w-[42px] flex-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-200">
+            <MenuSearchIcon className="h-[18px] w-[18px]" />
+          </button>
+          <MenuTabs groups={groups} activeTab={tab} onTabChange={setTab} />
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('sidebar.searchMenu')}
+          aria-label={t('sidebar.searchMenu')}
+          data-menu-search
+          data-search-surface
+          className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
+        />
+      )}
+      <MobileMenuLayout layout={layout} groups={groups} flatItems={items} searching={!!query.trim()} activeTab={tab} onTabChange={setTab}
+        currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
     </section>
   );
 }
@@ -2068,6 +2101,7 @@ export default function StateGalleryPage() {
         <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
         <TextTilesGallery />
         <ArticleTilesGallery initialLook={params.get('atile')} initiallyOpen={params.get('sheet') === 'article-tile'} />
+        <FormatIconsGallery />
         <GridCardsGallery />
         <GridReorderGallery />
 
@@ -2677,6 +2711,44 @@ function GridCardsGallery() {
       <AuthContext.Provider value={GALLERY_AUTH}>
         {ready && <div className="max-w-[360px]"><ProfileMixedGrid entries={GRID_CARD_ENTRIES} /></div>}
       </AuthContext.Provider>
+    </section>
+  );
+}
+
+const FORMAT_KINDS: FormatKind[] = ['photo', 'photos', 'video', 'short', 'replay', 'audio', 'article', 'text', 'comic', 'earn', 'stage', 'event', 'poll', 'quote', 'sharedPost', 'link', 'community', 'shop', 'profile', 'film', 'bounty', 'app', 'proposal', 'spotify'];
+
+/** Every post format's custom icon, on real grid tiles and as a key. */
+function FormatIconsGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => { seedGridCards(qc); return true; });
+  const media = [
+    pillImage('fi-photo', pillArtF),
+    pillImage('fi-photos', pillArtB, { imageUrls: [pillArtB, pillArtC] }),
+    pillVideo('fi-video', 'Night ride through the city', pillArtB),
+    pillVideo('fi-short', 'POV: first ride', pillArtC, { isShort: true }),
+    pillVideo('fi-replay', 'Friday night stream', pillArtE, { isLivePost: true, duration: '1:12:04' }),
+    pillVideo('fi-audio', 'Midnight drive', pillArtD, { isAudio: true }),
+    pillText('fi-article', 'How we shoot at night', { title: 'How we shoot at night', articleBody: GALLERY_ARTICLE_BODY, articleImageUrl: pillAbs(pillArtE) }),
+    pillImage('fi-comic', pillArtA, { layout: 'comic', imageUrls: [pillArtA, pillArtB, pillArtC] }),
+    pillVideo('fi-earn', 'Watch to the end and earn', pillArtD, { bountyAmount: 1000 }),
+    pillText('fi-plain', 'Sunday reset. Coffee, long walk, no notifications.'),
+  ];
+  const cards = GRID_CARD_ENTRIES.filter((e) => e.type === 'post' && e.key !== 'gc-plain');
+  const entries = [...media, ...cards] as unknown as MixedGridEntry[];
+  return (
+    <section data-page-bento data-format-icons-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: format icons</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {ready && <div className="max-w-[360px]" data-format-icons-grid><ProfileMixedGrid entries={entries} /></div>}
+      </AuthContext.Provider>
+      <div data-format-icons-key className="mt-4 grid max-w-[360px] grid-cols-4 gap-2 text-[10px]">
+        {FORMAT_KINDS.map((kind) => (
+          <div key={kind} className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] p-2">
+            <FormatGlyph kind={kind} className="h-6 w-6 [&_.fmt-wash]:opacity-0" />
+            <span className="opacity-70">{kind === 'sharedPost' ? 'shared' : kind}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

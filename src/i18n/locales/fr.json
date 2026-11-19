@@ -723,7 +723,14 @@
     "getTheApp": "Obtenir l'application",
     "connectAi": "Connecter l'IA",
     "converter": "Convertisseur",
-    "affiliate": "Affiliation"
+    "affiliate": "Affiliation",
+    "groups": {
+      "main": "Principal",
+      "create": "Créer",
+      "discover": "Découvrir",
+      "money": "Argent",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Afficher le profil de {{name}}",
@@ -919,6 +926,8 @@
     "feedTogglesCleared": "Filtres du fil réinitialisés",
     "defaultProfileTab": "Onglet de profil par défaut",
     "defaultProfileTabDesc": "Choisissez l'onglet que les visiteurs voient en premier sur votre profil",
+    "defaultProfileView": "Disposition des publications du profil",
+    "defaultProfileViewDesc": "Affichez vos publications en grille ou en liste quand quelqu'un ouvre votre profil",
     "public": "Public",
     "publicDesc": "Tout le monde peut voir vos publications",
     "private": "Privé",
@@ -1355,7 +1364,15 @@
     "socialConnectedShort": "Connecté",
     "socialConnectFailed": "Impossible de connecter {{platform}}. Veuillez réessayer.",
     "socialVerifiedFollowers": "{{value}} abonnés",
-    "socialFollowersPending": "Mise à jour des abonnés"
+    "socialFollowersPending": "Mise à jour des abonnés",
+    "menuLayout": "Disposition du menu",
+    "menuLayoutDesc": "Comment le menu regroupe ses pages",
+    "menuLayoutTabs": "Onglets",
+    "menuLayoutTabsDesc": "Un groupe à la fois, avec de grandes icônes",
+    "menuLayoutSections": "Sections",
+    "menuLayoutSectionsDesc": "Toutes les pages, sous des en-têtes",
+    "menuLayoutFolders": "Dossiers",
+    "menuLayoutFoldersDesc": "Vos pages principales, puis un dossier par groupe"
   },
   "common": {
     "confirm": "Confirmer",
@@ -2874,6 +2891,7 @@
     "email": "Email"
   },
   "loginModal": {
+    "didYouMean": "Vouliez-vous dire {{email}} ?",
     "bringLoginOver": "Vous utilisiez Riftn sur dehub.io ? <bring>Récupérez votre connexion</bring>",
     "restoreWalletTitle": "Récupérez votre portefeuille",
     "restoreOriginalWallet": "Votre profil se trouve sur le portefeuille de votre connexion d'origine, pas sur celui enregistré pour cette connexion. Connectez-vous comme lors de votre première inscription sur Riftn pour récupérer ce portefeuille. Votre profil et vos fonds restent intacts.",
@@ -15357,6 +15375,9 @@
     "8c7afb50b89c": "Partager ailleurs",
     "bdd4f5015e96": "Fermer la notification de demande expédiée",
     "8f3dc69e83c4": "Votre retour a été envoyé !",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "Tu as gagné +{{value1}} points",
+    "0fbe06b679a8": "{{value1}} points pour chaque demande livrée, ajoutés à ton score Top builders.",
     "1aa7b1c1d5fb": "Merci !",
     "6b1037924516": "% de glissement",
     "e50f1f5e6029": "Tolérance au glissement",

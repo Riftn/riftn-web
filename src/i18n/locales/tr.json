@@ -723,7 +723,14 @@
     "getTheApp": "Uygulamayı İndir",
     "connectAi": "Yapay Zekâyı Bağla",
     "converter": "Dönüştürücü",
-    "affiliate": "Satış Ortaklığı"
+    "affiliate": "Satış Ortaklığı",
+    "groups": {
+      "main": "Ana",
+      "create": "Oluştur",
+      "discover": "Keşfet",
+      "money": "Para",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} adlı kişinin profilini görüntüleyin",
@@ -919,6 +926,8 @@
     "feedTogglesCleared": "Akış filtreleri sıfırlandı",
     "defaultProfileTab": "Varsayılan profil sekmesi",
     "defaultProfileTabDesc": "Ziyaretçilerin profilinizde ilk hangi sekmeyi göreceğini seçin",
+    "defaultProfileView": "Profil gönderi düzeni",
+    "defaultProfileViewDesc": "Profilinizi açanlara gönderilerinizi ızgara ya da liste olarak gösterin",
     "public": "Herkese Açık",
     "publicDesc": "Herkes gönderilerinizi görebilir",
     "private": "Özel",
@@ -1355,7 +1364,15 @@
     "socialConnectedShort": "Bağlı",
     "socialConnectFailed": "{{platform}} bağlanamadı. Lütfen tekrar dene.",
     "socialVerifiedFollowers": "{{value}} takipçi",
-    "socialFollowersPending": "Takipçi sayısı güncelleniyor"
+    "socialFollowersPending": "Takipçi sayısı güncelleniyor",
+    "menuLayout": "Menü düzeni",
+    "menuLayoutDesc": "Menünün sayfaları nasıl grupladığı",
+    "menuLayoutTabs": "Sekmeler",
+    "menuLayoutTabsDesc": "Her seferinde bir grup, büyük simgelerle",
+    "menuLayoutSections": "Bölümler",
+    "menuLayoutSectionsDesc": "Tüm sayfalar bir arada, başlıklar altında",
+    "menuLayoutFolders": "Klasörler",
+    "menuLayoutFoldersDesc": "Ana sayfaların, ardından her grup için bir klasör"
   },
   "common": {
     "confirm": "Onayla",
@@ -2870,6 +2887,7 @@
     "failedSubmit": "Başvuru gönderilemedi. Lütfen tekrar deneyin."
   },
   "loginModal": {
+    "didYouMean": "{{email}} mi demek istediniz?",
     "bringLoginOver": "Riftn'ı dehub.io'da mı kullandın? <bring>Oturumunu buraya taşı</bring>",
     "restoreWalletTitle": "Cüzdanını geri getir",
     "restoreOriginalWallet": "Profilin, bu giriş için kaydedilen cüzdanda değil, ilk girişindeki cüzdanda. O cüzdanı geri getirmek için Riftn'a ilk katıldığın şekilde giriş yap. Profilin ve bakiyen olduğu gibi kalır.",
@@ -15353,6 +15371,9 @@
     "8c7afb50b89c": "Başka Yere Paylaş",
     "bdd4f5015e96": "Gönderilen İstek Bildirimi Kapat",
     "8f3dc69e83c4": "Geribildiriminiz gönderildi!",
+    "7f78bdc0762d": "+{{value1}} puan",
+    "f0c8bb34335b": "+{{value1}} puan kazandın",
+    "0fbe06b679a8": "Yayınlanan her istek için {{value1}} puan, Top builders puanına eklenir.",
     "1aa7b1c1d5fb": "Teşekkürler!",
     "6b1037924516": "% kayma",
     "e50f1f5e6029": "Kayma Toleransı",

@@ -701,6 +701,8 @@
     "feedTogglesCleared": "Filtres del feed restablerts",
     "defaultProfileTab": "Pestanya de perfil per defecte",
     "defaultProfileTabDesc": "Tria quina pestanya veuen primer els visitants al teu perfil",
+    "defaultProfileView": "Disposició de les publicacions del perfil",
+    "defaultProfileViewDesc": "Mostra les teves publicacions en graella o en llista quan algú obri el teu perfil",
     "public": "Públic",
     "publicDesc": "Qualsevol pot veure les teves publicacions",
     "private": "Privat",

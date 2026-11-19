@@ -723,7 +723,14 @@
     "getTheApp": "Descargar la app",
     "connectAi": "Conectar IA",
     "converter": "Conversión",
-    "affiliate": "Afiliados"
+    "affiliate": "Afiliados",
+    "groups": {
+      "main": "Principal",
+      "create": "Crear",
+      "discover": "Descubrir",
+      "money": "Dinero",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Ver el perfil de {{name}}",
@@ -919,6 +926,8 @@
     "feedTogglesCleared": "Filtros del feed restablecidos",
     "defaultProfileTab": "Pestaña de perfil por defecto",
     "defaultProfileTabDesc": "Elige qué pestaña ven primero los visitantes en tu perfil",
+    "defaultProfileView": "Diseño de las publicaciones del perfil",
+    "defaultProfileViewDesc": "Muestra tus publicaciones en cuadrícula o en lista cuando alguien abra tu perfil",
     "public": "Público",
     "publicDesc": "Cualquiera puede ver tus publicaciones",
     "private": "Privado",
@@ -1355,7 +1364,15 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "No se pudo conectar {{platform}}. Inténtalo de nuevo.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Actualizando seguidores"
+    "socialFollowersPending": "Actualizando seguidores",
+    "menuLayout": "Diseño del menú",
+    "menuLayoutDesc": "Cómo agrupa el menú sus páginas",
+    "menuLayoutTabs": "Pestañas",
+    "menuLayoutTabsDesc": "Un grupo a la vez, con iconos grandes",
+    "menuLayoutSections": "Secciones",
+    "menuLayoutSectionsDesc": "Todas las páginas a la vez, bajo encabezados",
+    "menuLayoutFolders": "Carpetas",
+    "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo"
   },
   "common": {
     "confirm": "Confirmar",
@@ -2870,6 +2887,7 @@
     "failedSubmit": "Error al enviar solicitud. Inténtalo de nuevo."
   },
   "loginModal": {
+    "didYouMean": "¿Quisiste decir {{email}}?",
     "bringLoginOver": "¿Usabas Riftn en dehub.io? <bring>Trae tu sesión</bring>",
     "restoreWalletTitle": "Recupera tu billetera",
     "restoreOriginalWallet": "Tu perfil está en la billetera de tu inicio de sesión original, no en la guardada para este inicio de sesión. Inicia sesión como lo hiciste la primera vez en Riftn para recuperar esa billetera. Tu perfil y tus fondos no cambian.",
@@ -15353,6 +15371,9 @@
     "8c7afb50b89c": "Compartir en otro lugar",
     "bdd4f5015e96": "Cerrar notificación de solicitud enviada",
     "8f3dc69e83c4": "¡Tu comentario ha sido enviado!",
+    "7f78bdc0762d": "+{{value1}} pts",
+    "f0c8bb34335b": "Ganaste +{{value1}} puntos",
+    "0fbe06b679a8": "{{value1}} puntos por cada petición lanzada, sumados a tu puntuación de Top builders.",
     "1aa7b1c1d5fb": "¡Gracias!",
     "6b1037924516": "% de deslizamiento",
     "e50f1f5e6029": "Tolerancia al deslizamiento",

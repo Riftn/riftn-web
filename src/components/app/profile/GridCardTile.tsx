@@ -48,6 +48,7 @@ import { fetchLinkPreview, peekLinkPreview, type LinkPreviewData } from '@/lib/a
 import { outsideImage } from '@/lib/outside-image';
 import { buildAvatarUrl, cdnImage, deviceWidth, storageImage } from '@/lib/media-url';
 import { resolveQuotedPostMedia } from '@/components/app/cards/QuotedPostEmbed';
+import { FormatMark } from './FormatMark';
 import { linkHost, type GridCardKind, type TextCard } from '@/lib/grid-card';
 import { parseSpotifyLink, type SpotifyLink } from '@/lib/spotify';
 import { spotifyPositionNow, useSpotifyOnScreen, useSpotifyProgress } from '@/lib/spotify-player';
@@ -86,16 +87,9 @@ const KIND: Record<GridCardKind, { key: string; label: string; Icon: IconT }> = 
   spotify: { key: 'spotify', label: 'Spotify', Icon: SpotifyIcon },
 };
 
-/** The pill: what this tile is. `inline` sits in a text poster's flow instead of over a picture. */
-export function GridKindPill({ kind, live, inline }: { kind: GridCardKind; live?: boolean; inline?: boolean }) {
-  const { t } = useTranslation();
-  const { key, label, Icon } = KIND[kind];
-  return (
-    <span className={`pmg-chip pmg-chip--kind pmg-chip--${kind}${live ? ' pmg-chip--kind-live' : ''}${inline ? ' pmg-chip--inline' : ''}`}>
-      {live ? <i className="pmg-kind-dot" /> : <Icon className="pmg-chip-icon" />}
-      {live ? t('profile.gridCard.liveStage', 'Live stage') : t(`profile.gridCard.${key}`, label)}
-    </span>
-  );
+/** What this tile is: its format icon top right (FormatMark). `inline` is kept for callers; the mark always sits in the corner. */
+export function GridKindPill({ kind, live }: { kind: GridCardKind; live?: boolean; inline?: boolean }) {
+  return <FormatMark kind={kind} live={live} />;
 }
 
 /** 1240 -> 1.2K, in the reader's own number style. */
@@ -121,7 +115,7 @@ function CoverFace({ kind, live, cover, title, sub, chip }: { kind: GridCardKind
         <span className="pmg-mini-title">{title}</span>
         {sub && <span className="pmg-mini-sub">{sub}</span>}
       </span>
-      {chip ?? <GridKindPill kind={kind} live={live} />}
+      {chip}<GridKindPill kind={kind} live={live} />
     </span>
   );
 }
@@ -211,7 +205,7 @@ function PollFace({ tokenId, words, chip, fallback }: FaceProps & { tokenId: num
         })}
         <span className="pmg-mini-sub">{t('profile.gridCard.votes', { count: total, value: short(total), defaultValue: '{{value}} votes' })}</span>
       </span>
-      {chip ?? <GridKindPill kind="poll" />}
+      {chip}<GridKindPill kind="poll" />
     </span>
   );
 }
@@ -231,7 +225,7 @@ function PostInPost({ kind, post, words, chip }: { kind: GridCardKind; post: DeH
           {text && <span>{text}</span>}
         </span>
       </span>
-      {chip ?? <GridKindPill kind={kind} />}
+      {chip}<GridKindPill kind={kind} />
     </span>
   );
 }
@@ -341,7 +335,7 @@ function SpotifyFaceBody({ preview, link, chip }: { preview: LinkPreviewData; li
         <span className="pmg-spotify-sub">{item.subtitle}</span>
       </span>
       {isCurrent && <SpotifyTileBar active={isCurrent} />}
-      {chip ?? <GridKindPill kind="spotify" />}
+      {chip}<GridKindPill kind="spotify" />
     </span>
   );
 }

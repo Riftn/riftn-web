@@ -657,7 +657,14 @@
     "getTheApp": "Скачать приложение",
     "connectAi": "Подключить ИИ",
     "converter": "Преобразователь",
-    "affiliate": "Партнёрка"
+    "affiliate": "Партнёрка",
+    "groups": {
+      "main": "Главное",
+      "create": "Создать",
+      "discover": "Обзор",
+      "money": "Деньги",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Посмотреть профиль {{name}}",
@@ -853,6 +860,8 @@
     "feedTogglesCleared": "Фильтры ленты сброшены",
     "defaultProfileTab": "Вкладка профиля по умолчанию",
     "defaultProfileTabDesc": "Выберите, какую вкладку посетители увидят первой в вашем профиле",
+    "defaultProfileView": "Вид публикаций в профиле",
+    "defaultProfileViewDesc": "Показывайте свои публикации сеткой или списком, когда кто-то открывает ваш профиль",
     "public": "Публичный",
     "publicDesc": "Все могут видеть ваши посты",
     "private": "Приватный",
@@ -1288,7 +1297,15 @@
     "socialConnectedShort": "Подключено",
     "socialConnectFailed": "Не удалось подключить {{platform}}. Попробуйте ещё раз.",
     "socialVerifiedFollowers": "{{value}} подписчиков",
-    "socialFollowersPending": "Обновляем число подписчиков"
+    "socialFollowersPending": "Обновляем число подписчиков",
+    "menuLayout": "Вид меню",
+    "menuLayoutDesc": "Как меню группирует страницы",
+    "menuLayoutTabs": "Вкладки",
+    "menuLayoutTabsDesc": "По одной группе, с крупными значками",
+    "menuLayoutSections": "Разделы",
+    "menuLayoutSectionsDesc": "Все страницы сразу, под заголовками",
+    "menuLayoutFolders": "Папки",
+    "menuLayoutFoldersDesc": "Главные страницы, затем папка для каждой группы"
   },
   "common": {
     "confirm": "Подтвердить",
@@ -2891,6 +2908,7 @@
     "email": "Email"
   },
   "loginModal": {
+    "didYouMean": "Вы имели в виду {{email}}?",
     "bringLoginOver": "Пользовались Riftn на dehub.io? <bring>Перенесите свой логин</bring>",
     "restoreWalletTitle": "Вернуть кошелек",
     "restoreOriginalWallet": "Ваш профиль находится в кошельке от вашего первоначального входа, а не в том, который сохранен для этого входа. Войдите так же, как вы присоединились к Riftn, чтобы вернуть кошелек. Ваш профиль и средства остаются такими же.",

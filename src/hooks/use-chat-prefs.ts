@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { onDmReactionUpdated } from '@/lib/api/dehub/dm-socket';
 import { getChatPrefs, setChatPref, type ChatPref, type ChatPrefPatch } from '@/lib/api/dehub/chat-prefs';
 import { deleteConversation as clearConversationMessages } from '@/lib/api/dehub/dm';
 import { messagesKeys, peerAddressForConversation } from '@/hooks/use-messages';
@@ -22,6 +23,7 @@ function applyPatch(prev: ChatPref | undefined, id: string, patch: ChatPrefPatch
     ...(patch.unread !== undefined ? { markedUnread: patch.unread } : {}),
     ...(patch.listed !== undefined ? { listedAt: patch.listed ? now : null } : {}),
     ...(patch.encrypted !== undefined ? { encryptedAt: patch.encrypted ? now : null } : {}),
+    ...(patch.seenReactions ? { reactions: null } : {}),
     ...(patch.mutedUntil !== undefined ? { mutedUntil: patch.mutedUntil === 'forever' ? FOREVER : patch.mutedUntil } : {}),
   };
 }
@@ -40,7 +42,22 @@ export function useChatPrefs() {
     queryFn: getChatPrefs,
     enabled: isAuthenticated,
     staleTime: 60_000,
+    // Reactions to your messages show in the list without a reload.
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
+
+  // Someone reacted in a DM: fetch the list's reaction badges now.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const off = onDmReactionUpdated((d) => {
+      if (!d.added || !d.by || d.by.toLowerCase() === (walletAddress || '').toLowerCase()) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => queryClient.invalidateQueries({ queryKey: KEY }), 600);
+    });
+    return () => { clearTimeout(timer); off(); };
+  }, [isAuthenticated, walletAddress, queryClient]);
 
   // Sending reads "Encrypt chat" from here (see encrypt-choice).
   useEffect(() => {
@@ -73,7 +90,15 @@ export function useChatPrefs() {
     }
   }, [queryClient, t]);
 
-  return { byId, update };
+  /** Clear a chat's waiting reactions (it is open). Only calls out when there are some. */
+  const seeReactions = useCallback((id: string) => {
+    if (!byId.get(id)?.reactions) return;
+    queryClient.setQueryData<ChatPref[]>(KEY, (cur = []) => cur.map((p) => (p.conversationId === id ? { ...p, reactions: null } : p)));
+    // Quiet on failure: the badge just comes back on the next refresh.
+    setChatPref(id, { seenReactions: true }).catch(() => undefined);
+  }, [byId, queryClient]);
+
+  return { byId, update, seeReactions };
 }
 
 /** True while a mute is still running. */

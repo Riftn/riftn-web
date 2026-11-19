@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DhbCoin } from '@/components/app/DhbAmount';
 import { formatPrice, formatSize, type BookLevel } from '@/lib/dex/orderbook';
 import type { Candle } from '@/lib/dex/live-market';
 
@@ -35,7 +36,7 @@ export function MarketChart({ candles, bids, asks, depth, symbol = 'DHB' }: { ca
     return { path, fill: values.length ? `${path}L${x(values.at(-1)!.x)},270L${x(values[0].x)},270Z` : '' };
   };
   return <div className="dex-chart" role="img" aria-label={depth ? t('dex.chart.depthLabel') : t('dex.chart.priceLabel', { symbol })}>
-    <div className="dex-chart-readout">{cursor ? <><b>{selected ? `O ${formatPrice(selected.open)} H ${formatPrice(selected.high)} L ${formatPrice(selected.low)} C ${formatPrice(selected.close)}` : `${formatSize(cursor.y)} ${symbol}`}</b><span>{depth ? `$${formatPrice(cursor.x)}` : new Date(cursor.x * 1000).toLocaleString()}</span></> : <span>{depth ? t('dex.chart.depthHint', { symbol }) : t('dex.chart.priceHint', { symbol })}</span>}</div>
+    <div className="dex-chart-readout">{cursor ? <><b>{selected ? `O ${formatPrice(selected.open)} H ${formatPrice(selected.high)} L ${formatPrice(selected.low)} C ${formatPrice(selected.close)}` : <>{formatSize(cursor.y)} {symbol === 'DHB' ? <DhbCoin /> : symbol}</>}</b><span>{depth ? `$${formatPrice(cursor.x)}` : new Date(cursor.x * 1000).toLocaleString()}</span></> : <span>{depth ? t('dex.chart.depthHint', { symbol }) : t('dex.chart.priceHint', { symbol })}</span>}</div>
     <svg viewBox="0 0 730 310" onPointerLeave={() => setHover(null)} onPointerMove={(event) => {
       const rect = event.currentTarget.getBoundingClientRect(); setHover((event.clientX - rect.left) / rect.width * 730);
     }}>

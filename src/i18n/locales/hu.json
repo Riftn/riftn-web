@@ -702,6 +702,8 @@
     "feedTogglesCleared": "Hírfolyam-szűrők visszaállítva",
     "defaultProfileTab": "Alapértelmezett profillap",
     "defaultProfileTabDesc": "Válaszd ki, melyik lapot lássák először a látogatók a profilodon",
+    "defaultProfileView": "Profilbejegyzések elrendezése",
+    "defaultProfileViewDesc": "Rácsban vagy listában mutasd a bejegyzéseidet, amikor valaki megnyitja a profilodat",
     "public": "Nyilvános",
     "publicDesc": "Bárki láthatja bejegyzéseit",
     "private": "Privát",

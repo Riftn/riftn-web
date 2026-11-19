@@ -703,6 +703,8 @@
     "feedTogglesCleared": "ফিড ফিল্টার রিসেট হয়েছে",
     "defaultProfileTab": "ডিফল্ট প্রোফাইল ট্যাব",
     "defaultProfileTabDesc": "আপনার প্রোফাইলে দর্শকরা প্রথমে কোন ট্যাব দেখবে তা বেছে নিন",
+    "defaultProfileView": "প্রোফাইল পোস্টের বিন্যাস",
+    "defaultProfileViewDesc": "কেউ আপনার প্রোফাইল খুললে আপনার পোস্টগুলো গ্রিড বা তালিকা আকারে দেখান",
     "public": "সর্বজনীন",
     "publicDesc": "যে কেউ আপনার পোস্ট দেখতে পারে",
     "private": "ব্যক্তিগত",

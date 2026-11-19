@@ -50,7 +50,12 @@ const NAV_ICON_KEYS: Record<string, ThemeIconKey> = {
   'Live Studio': 'live', Launchpad: 'buy',
 };
 
+/** The glossy artwork for a menu row, or undefined to fall back to its glyph. */
+export const menuIconKey = (item: NavItem): ThemeIconKey | undefined => item.themedIcon ?? NAV_ICON_KEYS[item.label];
+
 interface TileShellProps {
+  /** Three-column grids (tabs, folders) get bigger art and names. */
+  big?: boolean;
   label: string;
   iconKey?: ThemeIconKey;
   glyph: LucideIcon;
@@ -58,7 +63,7 @@ interface TileShellProps {
   badge?: number;
 }
 
-function TileBody({ label, iconKey, glyph: Glyph, active, badge }: TileShellProps) {
+function TileBody({ big = false, label, iconKey, glyph: Glyph, active, badge }: TileShellProps) {
   // A missing or blocked file would otherwise leave a broken-image box.
   const [artFailed, setArtFailed] = useState(false);
   const { theme } = useAppTheme();
@@ -70,7 +75,7 @@ function TileBody({ label, iconKey, glyph: Glyph, active, badge }: TileShellProp
     const fit = () => {
       el.style.fontSize = '';
       if (el.scrollWidth > el.clientWidth + 0.5) {
-        el.style.fontSize = `${Math.max(10, (11.5 * el.clientWidth) / el.scrollWidth).toFixed(2)}px`;
+        el.style.fontSize = `${Math.max(10, ((big ? 13 : 11.5) * el.clientWidth) / el.scrollWidth).toFixed(2)}px`;
       }
     };
     fit();
@@ -78,21 +83,21 @@ function TileBody({ label, iconKey, glyph: Glyph, active, badge }: TileShellProp
     const ro = new ResizeObserver(fit);
     ro.observe(el.parentElement ?? el); // the tile: its width, not the label height the fit changes
     return () => ro.disconnect();
-  }, [label, theme]);
+  }, [label, theme, big]);
   return (
     <>
-      <span className="relative flex h-[44px] w-[44px] items-center justify-center">
+      <span className={cn('relative flex items-center justify-center', big ? 'h-[58px] w-[58px]' : 'h-[44px] w-[44px]')}>
         {iconKey && !artFailed ? (
           <ThemedIcon
             icon={iconKey}
             alt=""
-            className="h-[44px] w-[44px] object-contain"
+            className={cn('object-contain', big ? 'h-[58px] w-[58px]' : 'h-[44px] w-[44px]')}
             loading="lazy"
             decoding="async"
             onError={() => setArtFailed(true)}
           />
         ) : (
-          <Glyph data-menu-glyph className="h-7 w-7 text-zinc-200" strokeWidth={1.75} />
+          <Glyph data-menu-glyph className={cn('text-zinc-200', big ? 'h-9 w-9' : 'h-7 w-7')} strokeWidth={1.75} />
         )}
         {!!badge && badge > 0 && (
           <span data-unread-chip data-menu-badge className="absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full leading-none">
@@ -102,16 +107,17 @@ function TileBody({ label, iconKey, glyph: Glyph, active, badge }: TileShellProp
       </span>
       {/* Names fit instead of ending in "…": two words wrap onto a second
           line, and only a single word too long for the tile eases down. */}
-      <span ref={labelRef} className={cn('w-full line-clamp-2 text-center text-[11.5px] leading-tight [text-wrap:balance]', active ? 'font-semibold text-white' : 'font-medium text-zinc-200')}>
+      <span ref={labelRef} className={cn('w-full line-clamp-2 text-center leading-tight [text-wrap:balance]', big ? 'text-[13px]' : 'text-[11.5px]', active ? 'font-semibold text-white' : 'font-medium text-zinc-200')}>
         {label}
       </span>
     </>
   );
 }
 
-const tileClass = (active: boolean) => cn(
+const tileClass = (active: boolean, big = false) => cn(
   // justify-start: in a row where one name wraps, every icon stays on one line.
-  'flex flex-col items-center justify-start gap-1.5 rounded-[14px] px-1 py-2.5 min-h-[84px] border transition-colors',
+  'flex flex-col items-center justify-start rounded-[14px] border transition-colors',
+  big ? 'gap-2 px-1 pt-3 pb-2.5 min-h-[104px]' : 'gap-1.5 px-1 py-2.5 min-h-[84px]',
   active
     ? 'bg-white/[0.12] border-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]'
     : 'bg-white/[0.04] border-white/[0.08] active:bg-white/[0.08]',
@@ -126,9 +132,14 @@ interface MobileMenuGridProps {
   notificationCount: number;
   messageCount?: number;
   onNavigate: () => void;
+  /** 3 = big tiles (tabs and folders layouts), 4 = the classic grid. */
+  columns?: 3 | 4;
+  /** The "hold and drag" line under the grid; one per menu, not per group. */
+  showHint?: boolean;
 }
 
-export function MobileMenuGrid({ items, searching = false, currentPath, notificationCount, messageCount, onNavigate }: MobileMenuGridProps) {
+export function MobileMenuGrid({ items, searching = false, currentPath, notificationCount, messageCount, onNavigate, columns = 4, showHint = true }: MobileMenuGridProps) {
+  const big = columns === 3;
   const { t } = useTranslation();
   const onHome = isHomePath(currentPath);
 
@@ -157,8 +168,9 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
     const lifted = draggingId === navItemId(item);
     const body = (
       <TileBody
+        big={big}
         label={label}
-        iconKey={item.themedIcon ?? NAV_ICON_KEYS[item.label]}
+        iconKey={menuIconKey(item)}
         glyph={item.icon}
         active={active}
         badge={item.path === '/app/notifications' ? notificationCount : item.path === '/app/messages' ? messageCount : undefined}
@@ -167,7 +179,7 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
 
     if (item.external) {
       return (
-        <a key={item.label} {...drag} href={item.path} target="_blank" rel="noopener noreferrer" onClick={onNavigate} data-menu-tile="idle" className={cn(tileClass(false), lifted && liftedClass)}>
+        <a key={item.label} {...drag} href={item.path} target="_blank" rel="noopener noreferrer" onClick={onNavigate} data-menu-tile="idle" className={cn(tileClass(false, big), lifted && liftedClass)}>
           {body}
         </a>
       );
@@ -179,7 +191,7 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
           {...drag}
           type="button"
           onClick={() => { if (item.action === 'open-stages') openStageModal(); onNavigate(); }}
-          data-menu-tile="idle" className={cn(tileClass(false), lifted && liftedClass)}
+          data-menu-tile="idle" className={cn(tileClass(false, big), lifted && liftedClass)}
         >
           {body}
         </button>
@@ -204,7 +216,7 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
         }}
         onTouchStart={() => preloadRoute(item.path)}
         onFocus={() => preloadRoute(item.path)}
-        data-menu-tile={active ? 'active' : 'idle'} className={cn(tileClass(active), lifted && liftedClass)}
+        data-menu-tile={active ? 'active' : 'idle'} className={cn(tileClass(active, big), lifted && liftedClass)}
       >
         {body}
       </Link>
@@ -214,10 +226,10 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
   // The person's own order (default: the rail's), one continuous grid.
   return (
     <>
-      <nav className="grid grid-cols-4 gap-2" data-menu-reorder={draggingId ? 'dragging' : 'idle'}>
+      <nav className={cn('grid gap-2', big ? 'grid-cols-3' : 'grid-cols-4')} data-menu-reorder={draggingId ? 'dragging' : 'idle'}>
         {order.map((id) => byId.get(id)).filter((item): item is NavItem => !!item).map(renderNavTile)}
       </nav>
-      {!searching && (
+      {!searching && showHint && (
         <p data-menu-reorder-hint className="mt-3 flex items-center justify-center gap-1 px-2 text-center text-[13px] leading-[1.35] text-zinc-500">
           <span>{t('nav.reorderHint', { defaultValue: 'Hold and drag any icon to rearrange' })}</span>
           {customised && (
@@ -232,3 +244,22 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
 }
 
 const liftedClass = 'bg-white/[0.16] border-white/30 shadow-[0_12px_28px_rgba(0,0,0,0.45)]';
+
+/**
+ * The "hold and drag" line with its Reset, for a layout made of several grids
+ * (lib/menu-layout), where each grid would otherwise print its own copy.
+ */
+export function MenuReorderHint() {
+  const { t } = useTranslation();
+  const { customised, reset } = useNavOrderEditor('menu', DEFAULT_MENU_IDS);
+  return (
+    <p data-menu-reorder-hint className="mt-3 flex items-center justify-center gap-1 px-2 text-center text-[13px] leading-[1.35] text-zinc-500">
+      <span>{t('nav.reorderHint', { defaultValue: 'Hold and drag any icon to rearrange' })}</span>
+      {customised && (
+        <button type="button" onClick={reset} className="-my-3 flex-none px-2 py-3 font-semibold text-zinc-300 underline-offset-2 hover:underline">
+          {t('nav.reorderReset', { defaultValue: 'Reset' })}
+        </button>
+      )}
+    </p>
+  );
+}

@@ -659,7 +659,14 @@
     "getTheApp": "ऐप पाएँ",
     "connectAi": "AI जोड़ें",
     "converter": "कनवर्टर का",
-    "affiliate": "एफिलिएट"
+    "affiliate": "एफिलिएट",
+    "groups": {
+      "main": "मुख्य",
+      "create": "बनाएँ",
+      "discover": "खोजें",
+      "money": "पैसा",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "{{name}} की प्रोफ़ाइल देखें",
@@ -855,6 +862,8 @@
     "feedTogglesCleared": "फ़ीड फ़िल्टर रीसेट हो गए",
     "defaultProfileTab": "डिफ़ॉल्ट प्रोफ़ाइल टैब",
     "defaultProfileTabDesc": "चुनें कि आपकी प्रोफ़ाइल पर आने वाले सबसे पहले कौन-सा टैब देखें",
+    "defaultProfileView": "प्रोफ़ाइल पोस्ट लेआउट",
+    "defaultProfileViewDesc": "लोग आपकी प्रोफ़ाइल खोलें तो आपकी पोस्ट ग्रिड या सूची में दिखाएँ",
     "public": "सार्वजनिक",
     "publicDesc": "कोई भी आपकी पोस्ट देख सकता है",
     "private": "निजी",
@@ -1291,7 +1300,15 @@
     "socialConnectedShort": "कनेक्टेड",
     "socialConnectFailed": "{{platform}} कनेक्ट नहीं हो सका। फिर से कोशिश करें।",
     "socialVerifiedFollowers": "{{value}} फ़ॉलोअर",
-    "socialFollowersPending": "फ़ॉलोअर संख्या अपडेट हो रही है"
+    "socialFollowersPending": "फ़ॉलोअर संख्या अपडेट हो रही है",
+    "menuLayout": "मेनू लेआउट",
+    "menuLayoutDesc": "मेनू अपने पेज कैसे समूहित करता है",
+    "menuLayoutTabs": "टैब",
+    "menuLayoutTabsDesc": "एक बार में एक समूह, बड़े आइकन के साथ",
+    "menuLayoutSections": "सेक्शन",
+    "menuLayoutSectionsDesc": "सभी पेज एक साथ, शीर्षकों के नीचे",
+    "menuLayoutFolders": "फ़ोल्डर",
+    "menuLayoutFoldersDesc": "आपके मुख्य पेज, फिर हर समूह के लिए एक फ़ोल्डर"
   },
   "common": {
     "confirm": "कन्फ़र्म करें",
@@ -2898,6 +2915,7 @@
     "failedSubmit": "आवेदन सबमिट करने में विफल। कृपया पुनः प्रयास करें।"
   },
   "loginModal": {
+    "didYouMean": "क्या आपका मतलब {{email}} था?",
     "bringLoginOver": "dehub.io पर Riftn का इस्तेमाल किया? <bring>अपना लॉगिन यहाँ लाएँ</bring>",
     "restoreWalletTitle": "अपना वॉलेट वापस लाएं",
     "restoreOriginalWallet": "आपका प्रोफाइल आपके मूल साइन-इन से वॉलेट से नहीं है, बल्कि इस लॉगिन के लिए सेव किया गया है। डीहब में शामिल होने के तरीके से साइन इन करें ताकि वॉलेट वापस आ जाए। आपका प्रोफाइल और फंड्स वही रहेंगे।",

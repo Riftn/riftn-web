@@ -723,7 +723,14 @@
     "getTheApp": "Download de app",
     "connectAi": "AI verbinden",
     "converter": "Omvormer",
-    "affiliate": "Partner"
+    "affiliate": "Partner",
+    "groups": {
+      "main": "Hoofd",
+      "create": "Maken",
+      "discover": "Ontdekken",
+      "money": "Geld",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Bekijk het profiel van {{name}}",
@@ -919,6 +926,8 @@
     "feedTogglesCleared": "Feedfilters gereset",
     "defaultProfileTab": "Standaard profieltabblad",
     "defaultProfileTabDesc": "Kies welk tabblad bezoekers als eerste zien op je profiel",
+    "defaultProfileView": "Indeling van profielberichten",
+    "defaultProfileViewDesc": "Toon je berichten als raster of als lijst wanneer mensen je profiel openen",
     "public": "Openbaar",
     "publicDesc": "Iedereen kan je berichten zien",
     "private": "Privé",
@@ -1355,7 +1364,15 @@
     "socialConnectedShort": "Gekoppeld",
     "socialConnectFailed": "Kan {{platform}} niet koppelen. Probeer het opnieuw.",
     "socialVerifiedFollowers": "{{value}} volgers",
-    "socialFollowersPending": "Aantal volgers wordt bijgewerkt"
+    "socialFollowersPending": "Aantal volgers wordt bijgewerkt",
+    "menuLayout": "Menu-indeling",
+    "menuLayoutDesc": "Hoe het menu zijn pagina's groepeert",
+    "menuLayoutTabs": "Tabbladen",
+    "menuLayoutTabsDesc": "Eén groep tegelijk, met grote iconen",
+    "menuLayoutSections": "Secties",
+    "menuLayoutSectionsDesc": "Alle pagina's tegelijk, onder kopjes",
+    "menuLayoutFolders": "Mappen",
+    "menuLayoutFoldersDesc": "Je hoofdpagina's, dan een map per groep"
   },
   "common": {
     "confirm": "Bevestigen",
@@ -3060,6 +3077,7 @@
     "failedSubmit": "Aanvraag indienen mislukt. Probeer het opnieuw."
   },
   "loginModal": {
+    "didYouMean": "Bedoelde je {{email}}?",
     "bringLoginOver": "Riftn gebruikt op dehub.io? <bring>Neem je login mee</bring>",
     "restoreWalletTitle": "Haal je wallet terug",
     "restoreOriginalWallet": "Je profiel staat op de wallet van je oorspronkelijke aanmelding, niet op de wallet die voor deze login is opgeslagen. Meld je aan zoals je dat de eerste keer bij Riftn deed om die wallet terug te halen. Je profiel en tegoeden blijven zoals ze zijn.",
@@ -15602,6 +15620,9 @@
     "8c7afb50b89c": "Delen elders",
     "bdd4f5015e96": "Sluit verzonden verzoekmelding",
     "8f3dc69e83c4": "Bedankt voor uw feedback — verzonden!",
+    "7f78bdc0762d": "+{{value1}} pnt",
+    "f0c8bb34335b": "Je hebt +{{value1}} punten verdiend",
+    "0fbe06b679a8": "{{value1}} punten voor elk opgeleverd verzoek, opgeteld bij je Top builders-score.",
     "1aa7b1c1d5fb": "Bedankt!",
     "6b1037924516": "% glijden",
     "e50f1f5e6029": "Glijdenstolerantie",

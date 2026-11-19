@@ -63,6 +63,10 @@ export interface DmReactionUpdate {
   dmId: string;
   messageId: string;
   reactions: Record<string, string[]>;
+  /** Who changed it (lowercased address). */
+  by?: string;
+  /** The emoji, when this was a new reaction. */
+  added?: string;
 }
 
 /** Server → client after someone marks read (`readReceipt`). */

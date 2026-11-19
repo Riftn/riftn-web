@@ -659,7 +659,14 @@
     "getTheApp": "Baixar o app",
     "connectAi": "Conectar IA",
     "converter": "Conversor",
-    "affiliate": "Afiliados"
+    "affiliate": "Afiliados",
+    "groups": {
+      "main": "Principal",
+      "create": "Criar",
+      "discover": "Descobrir",
+      "money": "Dinheiro",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "Ver o perfil de {{name}}",
@@ -855,6 +862,8 @@
     "feedTogglesCleared": "Filtros do feed redefinidos",
     "defaultProfileTab": "Separador de perfil padrão",
     "defaultProfileTabDesc": "Escolha que separador os visitantes veem primeiro no seu perfil",
+    "defaultProfileView": "Esquema das publicações do perfil",
+    "defaultProfileViewDesc": "Mostre as suas publicações em grelha ou em lista quando alguém abrir o seu perfil",
     "public": "Público",
     "publicDesc": "Qualquer pessoa pode ver suas publicações",
     "private": "Privado",
@@ -1291,7 +1300,15 @@
     "socialConnectedShort": "Conectado",
     "socialConnectFailed": "Não foi possível conectar {{platform}}. Tente novamente.",
     "socialVerifiedFollowers": "{{value}} seguidores",
-    "socialFollowersPending": "Atualizando seguidores"
+    "socialFollowersPending": "Atualizando seguidores",
+    "menuLayout": "Layout do menu",
+    "menuLayoutDesc": "Como o menu agrupa as páginas",
+    "menuLayoutTabs": "Abas",
+    "menuLayoutTabsDesc": "Um grupo por vez, com ícones grandes",
+    "menuLayoutSections": "Seções",
+    "menuLayoutSectionsDesc": "Todas as páginas, sob cabeçalhos",
+    "menuLayoutFolders": "Pastas",
+    "menuLayoutFoldersDesc": "Suas páginas principais e uma pasta por grupo"
   },
   "common": {
     "confirm": "Confirmar",
@@ -2895,6 +2912,7 @@
     "email": "Email"
   },
   "loginModal": {
+    "didYouMean": "Você quis dizer {{email}}?",
     "bringLoginOver": "Usou o Riftn no dehub.io? <bring>Traga seu login</bring>",
     "restoreWalletTitle": "Volte com sua carteira",
     "restoreOriginalWallet": "Seu perfil está na carteira do seu registro original, não na que foi salva para esse login. Faça o login da forma como você se juntou ao Riftn para trazer essa carteira de volta. Seu perfil e fundos permanecem como estão.",

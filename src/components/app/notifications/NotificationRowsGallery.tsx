@@ -4,6 +4,8 @@
  * comment whole with Reply / Like / Tip). No network: every row is fixture.
  */
 import { useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import type { RequestCommentView, RequestView } from '@/lib/notification-request';
 import { AuthContext, type AuthContextType } from '@/contexts/AuthContext';
 import { NotificationItem, type BundledNotification } from '@/pages/app/NotificationsPage';
 import type { DeHubNotification } from '@/lib/api/dehub/notifications';
@@ -39,11 +41,60 @@ function rows(withComment: boolean): DeHubNotification[] {
   ];
 }
 
+/** Requests board, follows, lives and likes: every kind that got its own controls. */
+function moreRows(): DeHubNotification[] {
+  const base = (id: string, extra: Partial<DeHubNotification> & Record<string, unknown>): DeHubNotification => ({
+    id, address: VIEWER, category: 'engagement', read: false, createdAt: ago(6), updatedAt: ago(6),
+    content: '', ...extra,
+  } as DeHubNotification);
+  return [
+    base('custom_m-1', {
+      type: 'feature_request_comment' as DeHubNotification['type'], actorAddress: '0x4444444444444444444444444444444444444444', actorUsername: 'araf',
+      tokenTitle: 'Dark mode for the wallet', _customReferenceId: 'req-1', _customReferenceTitle: 'Dark mode for the wallet', _customCommentId: 'rc-1',
+    }),
+    base('custom_m-2', {
+      type: 'feature_request_new' as DeHubNotification['type'], actorAddress: '0x5555555555555555555555555555555555555555', actorUsername: 'mira',
+      tokenTitle: 'Pin a comment on my own post', _customReferenceId: 'req-2', _customReferenceTitle: 'Pin a comment on my own post', createdAt: ago(25), updatedAt: ago(25),
+    }),
+    base('m-3', {
+      type: 'following', actorAddress: '0x6666666666666666666666666666666666666666', actorUsername: 'jonas', createdAt: ago(50), updatedAt: ago(50),
+      actor: { address: '0x6666666666666666666666666666666666666666', username: 'jonas', isFollowing: false, followsYou: true },
+    }),
+    base('m-4', {
+      type: 'livestream_start' as DeHubNotification['type'], actorAddress: '0x7777777777777777777777777777777777777777', actorUsername: 'clips',
+      tokenId: 2100, tokenTitle: 'Late night build stream', createdAt: ago(3), updatedAt: ago(3),
+    }),
+    base('m-5', {
+      type: 'like', read: true, actorAddress: '0x3333333333333333333333333333333333333333', actorUsername: 'kai',
+      tokenId: 2008, tokenTitle: 'Golden hour in Lisbon', tokenThumbnail: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=640&q=70',
+      createdAt: ago(120), updatedAt: ago(120),
+    }),
+  ];
+}
+
+const REQUEST_COMMENT: RequestCommentView = {
+  id: 'rc-1', featureRequestId: 'req-1', walletAddress: '0x4444444444444444444444444444444444444444', username: 'araf',
+  content: 'Yes please. The wallet is the only screen still blinding me at night, everything else follows the theme now. Even a plain black version would do.',
+  mediaUrl: null, mediaType: null, likeCount: 3, myReaction: null,
+};
+const REQUEST: RequestView = {
+  id: 'req-2', title: 'Pin a comment on my own post',
+  description: 'Let me pin one comment to the top of my own post, so the answer to the question everyone asks stays first instead of getting buried under 200 replies.',
+  imageUrl: null, authorAddress: '0x5555555555555555555555555555555555555555', voteCount: 7, commentCount: 2,
+};
+
 export function NotificationRowsGallery() {
   const enriched = useMemo(() => new Map(), []);
+  const queryClient = useQueryClient();
+  useMemo(() => {
+    queryClient.setQueryData(['notification-request-comment', 'rc-1', VIEWER], REQUEST_COMMENT);
+    queryClient.setQueryData(['notification-request', 'req-2'], REQUEST);
+    queryClient.setQueryData(['feature-request-votes', VIEWER], {});
+  }, [queryClient]);
   const sets = useMemo(() => [
     { label: 'Before', items: rows(false) },
     { label: 'After', items: rows(true) },
+    { label: 'More kinds', items: moreRows() },
   ], []);
   return (
     <AuthContext.Provider value={AUTH}>

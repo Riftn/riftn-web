@@ -658,7 +658,14 @@
     "connectAi": "连接 AI",
     "converter": "转换器",
     "affiliate": "推广联盟",
-    "dao": "DAO"
+    "dao": "DAO",
+    "groups": {
+      "main": "主要",
+      "create": "创作",
+      "discover": "发现",
+      "money": "资金",
+      "riftn": "Riftn"
+    }
   },
   "feed": {
     "viewProfile": "查看{{name}}的个人资料",
@@ -854,6 +861,8 @@
     "feedTogglesCleared": "动态筛选已重置",
     "defaultProfileTab": "默认档案标签",
     "defaultProfileTabDesc": "选择访客在你的主页上首先看到哪个标签",
+    "defaultProfileView": "主页帖子布局",
+    "defaultProfileViewDesc": "别人打开你的主页时，以网格或列表显示你的帖子",
     "public": "公开",
     "publicDesc": "任何人都可以看到你的帖子",
     "private": "私密",
@@ -1289,7 +1298,15 @@
     "socialConnectedShort": "已连接",
     "socialConnectFailed": "无法连接 {{platform}}，请重试。",
     "socialVerifiedFollowers": "{{value}} 位粉丝",
-    "socialFollowersPending": "粉丝数更新中"
+    "socialFollowersPending": "粉丝数更新中",
+    "menuLayout": "菜单布局",
+    "menuLayoutDesc": "菜单如何分组页面",
+    "menuLayoutTabs": "标签页",
+    "menuLayoutTabsDesc": "一次一个分组，大图标",
+    "menuLayoutSections": "分区",
+    "menuLayoutSectionsDesc": "所有页面一次显示，按标题分组",
+    "menuLayoutFolders": "文件夹",
+    "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹"
   },
   "common": {
     "confirm": "确认",
@@ -2893,6 +2910,7 @@
     "email": "邮箱"
   },
   "loginModal": {
+    "didYouMean": "您是想输入 {{email}} 吗?",
     "bringLoginOver": "在 dehub.io 上用过 Riftn？<bring>同步你的登录信息</bring>",
     "restoreWalletTitle": "取回你的钱包",
     "restoreOriginalWallet": "你的资料是从你最初加入Riftn的方式登录的钱包，而不是这个登录保存的钱包。用你最初加入Riftn的方式登录，才能取回那个钱包。你的资料和资金保持不变。",

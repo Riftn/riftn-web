@@ -703,6 +703,8 @@
     "feedTogglesCleared": "動態篩選已重設",
     "defaultProfileTab": "預設檔案分頁",
     "defaultProfileTabDesc": "揀訪客喺你檔案上最先睇到邊個分頁",
+    "defaultProfileView": "檔案帖子排版",
+    "defaultProfileViewDesc": "人哋打開你個檔案嗰陣，用網格定清單顯示你啲帖子",
     "public": "公開",
     "publicDesc": "任何人都可以睇你嘅帖文",
     "private": "私人",

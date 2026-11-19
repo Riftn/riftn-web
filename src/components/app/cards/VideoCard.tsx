@@ -29,6 +29,7 @@ const BountyClaimActions = lazy(() => import('./BountyClaimActions'));
 import { DhbAmount } from '@/components/app/DhbAmount';
 import { cn } from '@/lib/utils';
 import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
+import { usePostMenuContext } from '@/lib/post-menu';
 import { useNavigate } from 'react-router-dom';
 import { useHandoffVideo } from '@/hooks/use-handoff-video';
 import { useVideoCardOpen } from '@/hooks/use-video-card-open';
@@ -2409,11 +2410,49 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // and the desktop branch has the post shell. Carrying no colour class is what
   // keeps it unreachable by those nets, permanently — do not give it one again.
   // Same fix, same reason, as [data-post-overlay-backdrop] in index.css.
+  // Right-click anywhere on the card: every action for the post at the pointer.
+  const onPostContextMenu = usePostMenuContext(() => ({
+    id: video.id,
+    newPostId: video.status === 'signed' ? video.newPostId ?? null : null,
+    articleSlug: video.articleSlug,
+    authorId: video.creatorId,
+    authorName: video.channel,
+    authorHandle: video.creatorUsername,
+    text: [video.title, video.description].filter(Boolean).join('\n\n'),
+    title: video.title ?? video.description ?? '',
+    isOwn: isOwnPost,
+    visibility: video.visibility,
+    quotePolicy: video.quotePolicy,
+    myReaction: video.myReaction,
+    isReposted: video.isReposted,
+    noTip: !!video.creatorPaymentsDisabled,
+    actions: {
+      comments: () => {
+        if (onOpenComments) { onOpenComments(); return; }
+        setCommentsInitialTab(undefined);
+        setShowComments(true);
+      },
+      askAI: () => { if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); },
+      seeEngagements: () => {
+        if (onOpenComments) { onOpenComments('reposts'); return; }
+        setCommentsInitialTab('reposts');
+        setShowComments(true);
+      },
+      quote: handleQuote,
+      tip: () => setShowTipModal(true),
+      report: () => setShowReportModal(true),
+      boost: () => setShowBoostModal(true),
+      edit: isOwnPost ? () => setShowEditModal(true) : undefined,
+      delete: isOwnPost ? () => setShowDeleteModal(true) : undefined,
+    },
+  }));
+
   return (
     <div
       ref={scrubEventRef}
       data-video-card
       data-stats-token={video.isAd ? undefined : video.id}
+      onContextMenu={video.isAd ? undefined : onPostContextMenu}
       data-video-header-above={headerAboveMedia ? '' : undefined}
       onClick={isImmersive || stage ? undefined : handleCardClick}
       className={isImmersive || stage

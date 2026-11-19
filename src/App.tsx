@@ -34,6 +34,7 @@ import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
 import { AppLayout } from "./components/app/AppLayout";
 import { QuickActionsHost } from "./components/app/QuickActionsHost";
+import { PostMenuGate } from "./components/app/post-menu/PostMenuGate";
 import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
 import { AfterSignIn } from "@/components/app/AfterSignIn";
 import { SignInHandoff } from "@/components/app/login/SignInHandoff";
@@ -550,6 +551,7 @@ function AppContent() {
       <SelfBadgeSync />
       <DefaultChainSync />
       <QuickActionsHost />
+      <PostMenuGate />
       <BadgeShowcaseHost />
       <ViewingPreferencesSync />
       <AccountLanguageSync />
@@ -788,6 +790,10 @@ function AppContent() {
               <Route path="arcade" element={null} />
               
               <Route path="explore" element={null} />
+              {/* Old feed-tab links (shared before the clean URLs) land on the tab, not a 404. */}
+              <Route path="shorts" element={<Navigate to="/shorts" replace />} />
+              <Route path="videos" element={<Navigate to="/videos" replace />} />
+              <Route path="images" element={<Navigate to="/images" replace />} />
               <Route path="profile" element={null} />
               {/* The composer as a page, so it has an address to frame — see pages/app/UploadPage. */}
               <Route path="upload" element={<Suspense fallback={null}><UploadPage /></Suspense>} />

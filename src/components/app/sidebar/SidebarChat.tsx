@@ -502,7 +502,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             const el = event.currentTarget;
             followLatest.current = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
           }}
-          className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2"
+          className="absolute inset-0 chat-text-zone overflow-y-auto overflow-x-hidden py-2 space-y-2"
         >
           {!isLoading && (hiddenLoaded || hasOlder) && !signInWall && (
             <button type="button" data-side-chat-older onClick={loadOlder} disabled={loadingOlder} className="w-full py-2 text-xs text-zinc-400 hover:text-white disabled:opacity-60">
@@ -631,7 +631,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 navigate(`/${handle}`);
               } : undefined;
               return (
-                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>
                   {/* Reply indicator – click to scroll to original */}
                   {msg.reply_to && (
                     <button
@@ -644,7 +644,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           setTimeout(() => (target as HTMLElement).classList.remove('bg-white/10'), 1500);
                         }
                       }}
-                      className="flex items-center gap-1 text-[10px] text-zinc-500 ml-8 mb-0.5 hover:text-zinc-300 transition-colors cursor-pointer"
+                      className="flex max-w-[calc(100%-2rem)] overflow-hidden items-center gap-1 text-[10px] text-zinc-500 ml-8 mb-0.5 hover:text-zinc-300 transition-colors cursor-pointer"
                     >
                       <CornerDownRight className="w-2.5 h-2.5" />
                       <span className="font-medium">{msg.reply_to.sender_name}</span>
