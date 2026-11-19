@@ -3342,7 +3342,9 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
             <div
               data-comment-reply-tag
               className={cn(
-                "flex items-center gap-1.5 px-3 bg-white/[0.08] backdrop-blur-xl border border-white/[0.12] rounded-xl",
+                // Solid, not glass: it sits inside the frosted reply bar, where its own
+                // blur can't reach the page, so the post read straight through it.
+                "flex items-center gap-1.5 px-3 bg-[var(--float-solid)] border border-white/[0.12] rounded-xl",
                 isMobile ? "mb-1 py-1.5" : "mb-2 py-2"
               )}
             >
