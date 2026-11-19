@@ -8,7 +8,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { fetchLinkPreview, extractUrlsFromText, type LinkPreviewData } from '@/lib/api/link-preview';
-import { parseDehubLink } from '@/lib/dehub-links';
+import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
+import { clientNavigate } from '@/lib/client-navigate';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LinkPreviewContent } from '@/components/app/cards/LinkPreviewContent';
 import { RichLinkCard } from '@/components/app/cards/RichLinkCardLazy';
@@ -71,7 +72,10 @@ export function ChatLinkPreviews({ content }: ChatLinkPreviewsProps) {
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            window.open(preview.url, '_blank', 'noopener,noreferrer');
+            // Our own pages open in place, never as a second copy of the site.
+            const own = ownSitePath(preview.url);
+            if (own) clientNavigate(own);
+            else window.open(preview.url, '_blank', 'noopener,noreferrer');
           }}
           onPointerDown={(e) => e.stopPropagation()}
         >

@@ -1631,7 +1631,7 @@ export const el = {
     q4_2024_items: ['On-chain εμπορεύσιμες συνδρομές', 'Teaser Last Chad Standing 1M+ προβολές', 'Agency UK #1 με 1.000 streamers', 'DePIN Φάση 1', 'E2EE chat ✅'],
     y2025: '2025 - Τρέχον Έτος',
     q1_2025: 'Q1 2025',
-    q1_2025_items: ['On-chain ζωντανές μεταδόσεις', 'Υποδομή Livepeer 50.000+ ταυτόχρονοι θεατές', 'Custom CDN <200ms latency'],
+    q1_2025_items: ['On-chain ζωντανές μεταδόσεις', 'Υποδομή Livepeer 50.000+ ταυτόχρονοι θεατές', 'Δημιουργία προσαρμοσμένου CDN που μειώνει την καθυστέρηση κάτω από 200ms παγκοσμίως'],
     q2_2025: 'Q2 2025',
     q2_2025_items: ['Πρόγραμμα UGC ambassadors', 'Εκπαιδευτικό πρόγραμμα δημιουργών', 'dhbscan.com', 'Ανανέωση feed, audio replies', 'Τελικό snapshot Last Chad Standing'],
     q3_2025: 'Q3 2025',
@@ -1640,7 +1640,7 @@ export const el = {
     q4_2025_items: ['Επαναλίστα app stores ✅', 'Πολλαπλοί λογαριασμοί & εκχώρηση ✅', 'Σύστημα CRM', 'Open source πρωτόκολλο ✅', 'Πρόγραμμα κυκλοφορίας Last Chad Standing ✅'],
     y2026: '2026 - Τρέχον Έτος',
     q1q2_2026: 'Q1–Q2 2026',
-    q1q2_2026_items: ['Open beta Last Chad Standing', 'TGE LCS listing - Μάρτιος 2026', 'Apple App Store listing', 'Καμπάνιες μάρκετινγκ', 'Νέα web εφαρμογή', 'LP farming', '$RIFT staking στο Base', 'AI toolkits', 'Advertising stack'],
+    q1q2_2026_items: ['Κυκλοφορία της ανοιχτής beta του Last Chad Standing με νέο προγραμματιστή παιχνιδιού στην ομάδα ✅', 'TGE LCS listing - Μάρτιος 2026', 'Staking του token Riftn στο Base ✅', 'Καμπάνιες μάρκετινγκ', 'Νέα web εφαρμογή', 'LP farming', '$RIFT staking στο Base', 'AI toolkits', 'Advertising stack'],
     q2q4_2026: 'Q2–Q4 2026 και μετά',
     inProgress: 'Σε εξέλιξη',
     q3_2026_items: [

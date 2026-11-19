@@ -3733,6 +3733,10 @@
     "statsLoadFailed": "Staking istatistikleri yüklenemedi"
   },
   "communities": {
+    "muteChat": "Sessize al",
+    "mutedChat": "Sessizde",
+    "muteChatHint": "Bu topluluğun sohbetinden bildirim alma. Sohbeti okumaya devam edebilirsin",
+    "unmuteChatHint": "Bu topluluğun sohbetinden yeniden bildirim al",
     "sortTop": "En İyi",
     "shareLink": "Bağlantıyı paylaş",
     "pinnedMore": "Daha fazla",

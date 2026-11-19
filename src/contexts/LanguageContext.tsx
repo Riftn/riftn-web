@@ -36,7 +36,7 @@ export const languages: LanguageOption[] = [
   { code: 'zh_tw', label: 'Chinese (Traditional)', nativeLabel: '繁體中文', dir: 'ltr' },
   { code: 'hr', label: 'Croatian', nativeLabel: 'Hrvatski', dir: 'ltr' },
   { code: 'hne', label: 'Chhattisgarhi', nativeLabel: 'छत्तीसगढ़ी', dir: 'ltr' },
-  { code: 'dcc', label: 'Deccan', nativeLabel: 'दक्कनी', dir: 'ltr' },
+  { code: 'dcc', label: 'Deccan', nativeLabel: 'دکنی', dir: 'rtl' },
   { code: 'cs', label: 'Czech', nativeLabel: 'Čeština', dir: 'ltr' },
   { code: 'da', label: 'Danish', nativeLabel: 'Dansk', dir: 'ltr' },
   { code: 'dyu', label: 'Jula', nativeLabel: 'Julakan', dir: 'ltr' },
@@ -83,7 +83,7 @@ export const languages: LanguageOption[] = [
   { code: 'rkt', label: 'Rangpuri', nativeLabel: 'রংপুরী', dir: 'ltr' },
   { code: 'ro', label: 'Romanian', nativeLabel: 'Română', dir: 'ltr' },
   { code: 'skr', label: 'Saraiki', nativeLabel: 'سرائیکی', dir: 'rtl' },
-  { code: 'sck', label: 'Sadri', nativeLabel: 'सदरी', dir: 'ltr' },
+  { code: 'sck', label: 'Sadri', nativeLabel: 'सादरी', dir: 'ltr' },
   { code: 'ru', label: 'Russian', nativeLabel: 'Русский', dir: 'ltr' },
   { code: 'sd', label: 'Sindhi', nativeLabel: 'سنڌي', dir: 'rtl' },
   { code: 'si', label: 'Sinhala', nativeLabel: 'සිංහල', dir: 'ltr' },
@@ -261,6 +261,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (candidate === 'zh' && !localStorage.getItem('docs-language')
         && /^zh-(tw|hk|mo)\b|^zh-hant/i.test(navigator.language || '')) candidate = 'zh_tw';
     } catch { /* Keep Simplified Chinese. */ }
+    // The app lists Sadri as 'sdr'; its docs translation ships as 'sck'.
+    if (candidate === 'sdr') candidate = 'sck';
     return languages.some(option => option.code === candidate) ? candidate as Language : 'en';
   });
 
@@ -279,6 +281,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const sync = (lang: string) => {
       selection.current++;
+      if (lang === 'sdr') lang = 'sck';
       if (languages.some(option => option.code === lang)) setLanguageState(lang as Language);
     };
     appI18n.on('languageChanged', sync);

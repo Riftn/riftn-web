@@ -97,6 +97,24 @@ export interface DehubLinkMatch {
  * copied out of a Cloudflare preview build is still a Riftn link, and silently
  * refusing to card it during testing reads as the feature being broken.
  */
+/**
+ * The in-site path of any link to our own site, card or not, so a chat can
+ * open it in place instead of in a new tab. Null for other sites.
+ */
+export function ownSitePath(url: string): string | null {
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`);
+    if (!isDehubHost(parsed.host)) return null;
+    // Other subdomains (docs, staging, builder apps) are separate sites.
+    const h = parsed.hostname.toLowerCase();
+    const sameSite = h === 'riftn.com' || h === 'www.riftn.com' || h === 'dehub.io' || h === 'www.dehub.io'
+      || (typeof window !== 'undefined' && h === window.location.hostname.toLowerCase());
+    return sameSite ? `${parsed.pathname}${parsed.search}${parsed.hash}` : null;
+  } catch {
+    return null;
+  }
+}
+
 function isDehubHost(host: string): boolean {
   const h = host.toLowerCase().replace(/:\d+$/, '');
   if (h === 'localhost' || h === '127.0.0.1') return true;

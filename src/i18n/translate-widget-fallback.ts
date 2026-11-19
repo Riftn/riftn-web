@@ -64,9 +64,8 @@ const GOOGLE_CODE: Record<string, string> = {
   hne: 'hi', mag: 'mai', rkt: 'bn', syl: 'bn', ctg: 'bn',
   skr: 'ur', dcc: 'ur', pbt: 'ps',
 
-  // Sadri is Indo-Aryan, but this app lists it in Arabic script and lays it out
-  // RTL, so Urdu keeps script and direction consistent with the shell around it.
-  sdr: 'ur',
+  // Sadri is written in Devanagari (left to right), so Hindi matches its script.
+  sdr: 'hi',
 
   // West African English-lexified creoles → Krio, their closest relative with
   // Google support. English is the lexifier but reads as no translation at all.

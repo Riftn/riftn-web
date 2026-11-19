@@ -3744,6 +3744,10 @@
     "statsLoadFailed": "Couldn't load staking stats"
   },
   "communities": {
+    "muteChat": "Mute",
+    "mutedChat": "Muted",
+    "muteChatHint": "Stop alerts from this community's chat. You can still read it",
+    "unmuteChatHint": "Get alerts from this community's chat again",
     "sortTop": "Top",
     "shareLink": "Share link",
     "pinnedMore": "More",
