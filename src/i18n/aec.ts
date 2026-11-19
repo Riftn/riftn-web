@@ -1390,6 +1390,11 @@ export const aec = {
     liveStudioB7Desc: 'لما البث يخلص، Live Studio بيفتح ملخص فيه مدة البث، أعلى عدد مشاهدين، الهدايا المدفوعة، المتابعين الجداد، الشات، والتصويتات.',
     liveStudioB8: 'الإعادات بتحتفظ بالأوفرلاي:',
     liveStudioB8Desc: 'أوفرلاي البث بيشتغل فوق الإعادة بتاعته، وبيتبني تاني من سجل البث نفسه.',
+    remixB2Desc: 'سجّل رد فعلك على فيديو من Riftn، أو اتفاعل لايف وهو شغّال.',
+    postToolsB2Desc: 'حوّل كاروسيل الصور لكوميك من قايمة البوست، واختار له إطار.',
+    postToolsB4: 'الثريدات:',
+    postSoundB1: 'أغاني ببلاش:',
+    postSoundB1Desc: 'ضيف صوت من أغاني ببلاش على Audius و Wikimedia Commons.',
   },
   games: {
     chessTitle: 'King\'s Gambit',

@@ -1381,6 +1381,10 @@ export const apd = {
     liveStudioB7Desc: 'لما البث ينتهي، استوديو البث بيفتح ملخص فيهو مدة البث، أعلى عدد مشاهدين، الهدايا المدفوعة، المتابعين الجدد، الدردشة، واستطلاعات الرأي.',
     liveStudioB8: 'إعادة البث بتحتفظ بالتراكب:',
     liveStudioB8Desc: 'تراكب البث بيظهر فوق إعادة البث، وبيتم بناؤه من سجل البث نفسه.',
+    feedsPhotosB4: 'التعليقات:',
+    agentsGuideB1: 'مفتاح Alive:',
+    tocMcpOpen: 'Riftn MCP',
+    fediverseB3: 'روابط بروفايل موثّقة:',
   },
   games: {
     chessTitle: 'King\'s Gambit',
