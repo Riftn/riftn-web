@@ -6,7 +6,11 @@
     "videoSize": "Kjo video është mbi {{n}} MB. Zgjidh një më të vogël."
   },
   "textFeed": {
-    "tab": "Tekst"
+    "tab": "Tekst",
+    "errorTitle": "Postimet nuk u ngarkuan",
+    "errorBody": "Provo ta ngarkosh sërish rrjedhën e tekstit.",
+    "emptyTitle": "Ende pa postime me tekst",
+    "emptyBody": "Postimet me tekst do të shfaqen këtu."
   },
   "comic": {
     "showAll": "Shfaq të gjitha {{count}} faqet"
@@ -28,16 +32,63 @@
     "policyEveryone": "Të gjithë",
     "policyFollowers": "Ndjekësit",
     "policyNobody": "Askush",
-    "loadMore": "Ngarko më shumë"
+    "loadMore": "Ngarko më shumë",
+    "with": "Duet me @{{username}}",
+    "withOriginal": "Duet · shiko origjinalin",
+    "unavailable": "Kjo video nuk është më e disponueshme për duete.",
+    "allowLabel": "Lejo duetet",
+    "allowDescription": "Kush mund të regjistrojë një duet pranë videove të tua. Mund ta ndryshosh edhe për çdo postim.",
+    "settingsSection": "Duetet",
+    "policyDefault": "Cilësimi i llogarisë",
+    "saveFailed": "Nuk u ruajt. Provo përsëri.",
+    "count_one": "{{count}} duet",
+    "count_other": "{{count}} duete",
+    "pageHeading": "Duetet",
+    "pageTitle": "Duetet e {{title}} nga @{{creator}}",
+    "pageTitleNoCreator": "Duetet e {{title}}",
+    "pageDescription": "Shiko çdo duet të kësaj videoje në Riftn, ose regjistro tëndin krah për krah.",
+    "empty": "Ende pa duete. Hap opsionet e videos dhe zgjidh Remix → Duet për të bërë të parin.",
+    "video": "Video",
+    "notFound": "Kjo video nuk është e disponueshme.",
+    "browseShorts": "Shfleto Shorts",
+    "notFoundTitle": "Videoja nuk u gjet | Riftn"
   },
   "videoRemix": {
-    "sound": "Përdorni këtë zë"
+    "sound": "Përdorni këtë zë",
+    "menu": "Remix",
+    "duet": "Duet",
+    "green-screen": "Ekran i gjelbër",
+    "stitch": "Stitch",
+    "selectSource": "Hap opsionet e një videoje dhe zgjidh Remix për të filluar."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Të gjithë",
       "followers": "Ndjekësit",
-      "nobody": "Askush"
+      "nobody": "Askush",
+      "default": "Parazgjedhja ime"
+    },
+    "shareFailed": "Bakshishi yt u dërgua, por pjesa e krijuesit origjinal nuk kaloi.",
+    "notify": {
+      "duet": "{{name}} bëri duet me videon tënde",
+      "stitch": "{{name}} bëri stitch me videon tënde",
+      "react": "{{name}} reagoi ndaj videos tënde",
+      "reactLive": "{{name}} po reagon live ndaj videos tënde"
+    },
+    "linkFailed": "Postimi yt është publikuar, por nuk mund të lidhej me videon origjinale.",
+    "settingsHeading": "Remikset",
+    "stitch": {
+      "allow": "Lejo stitch-et",
+      "allowDesc": "Kush mund të përdorë deri në 5 sekonda nga videot e tua në videot e veta. Mund ta ndryshosh edhe për çdo postim.",
+      "saveFailed": "Cilësimi i stitch-it nuk u ruajt. Provo përsëri.",
+      "settingFailed": "Postimi yt është publikuar, por cilësimi i stitch-it nuk u ruajt. Ndryshoje te Redakto postimin.",
+      "from": "Stitch nga {{name}}",
+      "count_one": "{{count}} stitch",
+      "count_other": "{{count}} stitch-e",
+      "listTitle": "Stitch-et",
+      "listFailed": "Stitch-et nuk u ngarkuan. Provo përsëri.",
+      "listEmpty": "Ende pa stitch-e.",
+      "unavailable": "Kjo video nuk është më e disponueshme për stitch-e."
     }
   },
   "dehubAppPage": {
@@ -63,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Hap Riftn në browserin tuaj",
     "seoDescription": "Marr Riftn app: media sociale me burim të hapur, në pronësi të përdoruesve me transmetim në jetë, mesazhe të kriptuar dhe watch-to-earn. Gratis në Google Play, App Store dhe në web.",
-    "seoTitle": "Riftn App | Lëshimi për Android, iPhone & Web"
+    "seoTitle": "Riftn App | Lëshimi për Android, iPhone & Web",
+    "learnMore": "Do pamjen e plotë? <guide>Çfarë është Riftn?</guide> e shpjegon platformën në thellësi."
   },
   "dehubLinks": {
     "copyLinkDetail": "Kopjo linkun e {{item}} në klipbordin tuaj",
@@ -81,12 +133,15 @@
       "proposal": "Propozim",
       "stage": "skenë",
       "store": "dega",
-      "featureRequest": "kërkesa"
+      "featureRequest": "kërkesa",
+      "page": "faqe"
     },
     "recipientChat": "Chat",
     "recipientUser": "Përdorues",
     "sendFailed": "Pëshoi të dërgohet {{item}}",
-    "sentTo": "{{item}} është dërguar tek {{name}}"
+    "sentTo": "{{item}} është dërguar tek {{name}}",
+    "openPage": "Hap faqen",
+    "viewRequest": "Shiko kërkesën"
   },
   "stageCover": {
     "admitOne": "PRANO NJË",
@@ -195,7 +250,24 @@
   "signedFollows": {
     "setUp": "Aktivizo",
     "turnOff": "Çaktivizo",
-    "efpTurnOff": "Ndaloni"
+    "efpTurnOff": "Ndaloni",
+    "title": "Ndjekjet e tua, në zinxhir",
+    "description": "Portofoli yt nënshkruan kë ndjek, dhe çdo ditë lista vuloset në Base. Çdo aplikacion mund t'i gjejë ndjekjet e tua nga portofoli, edhe pa Riftn.",
+    "on": "Aktiv në këtë pajisje",
+    "off": "Joaktiv në këtë pajisje",
+    "turnedOn": "Ndjekjet e tua tani nënshkruhen nga portofoli yt",
+    "turnedOff": "U çaktivizua në këtë pajisje",
+    "failed": "Portofoli yt nuk nënshkroi. Provo përsëri.",
+    "hiddenNote": "Listat e fshehura të ndjekjes dhe llogaritë private nuk përfshihen në listën publike.",
+    "efpOn": "U kopjua në EFP · {{count}} ndjekje",
+    "efpOff": "Vendosi edhe në EFP",
+    "efpTurnOn": "Shto në EFP",
+    "efpDone": "Ndjekjet e tua po kalojnë në EFP",
+    "efpStopped": "Kopjimi në EFP u ndal. Lista mbetet e jotja.",
+    "efpHasList": "Ke tashmë një listë EFP. Riftn nuk mund ta plotësojë ende atë.",
+    "efpNoGas": "Portofoli yt ka nevojë për pak ETH në Base për këtë.",
+    "efpFailed": "Nuk kaloi. Provo përsëri.",
+    "efpNote": "EFP është një listë ndjekjesh që e lexojnë aplikacione të tjera (efp.app). Falas me portofolin Riftn; portofolet e tjera paguajnë disa cent në Base. Lista është e jotja."
   },
   "profileFields": {
     "title": "Fushat e profilit",
@@ -373,7 +445,8 @@
     "step": "Për kontrollin e llogarisë, shtoni https://riftn.com/mcp si një lidhës OAuth, hyni në Riftn dhe shqyrtoni lejet përpara se të lejoni aksesin.",
     "profilePrompt": "Përditëso bio-në time në Riftn në: Krijues i pavarur që bën filma dhe muzikë.",
     "generatePrompt": "Më trego modelet e imazheve të Riftn dhe citoni një portret para se ta gjeneroni.",
-    "libraryPrompt": "Shfaq asetet më të fundit në bibliotekën time Riftn Creator."
+    "libraryPrompt": "Shfaq asetet më të fundit në bibliotekën time Riftn Creator.",
+    "agents": "Posto, përgjigju, reago, riposto, ndiq dhe redakto profile si agjentët që zotëron"
   },
   "twitchMirror": {
     "title": "Pasqyrimi në Twitch",
@@ -474,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "shkarko aplikacionin, Android, iPhone, aplikacion mobil, instaloni, APK, aplikacion desktop, instaloni në kompjuter, Windows, Mac"
+      "getTheApp": "shkarko aplikacionin, Android, iPhone, aplikacion mobil, instaloni, APK, aplikacion desktop, instaloni në kompjuter, Windows, Mac",
+      "home": "rrjedha, kronologjia, postimet e fundit, për ty, ndjekjet, faqja kryesore",
+      "profile": "profili im, llogaria ime, faqja ime, postimet e mia, avatari, bio, ndjekësit",
+      "explore": "kërko, zbulo, gjej, në trend, popullore, hashtag, njerëz, krijues",
+      "prompt": "AI, gjenero, imazh AI, video AI, krijues fotosh, tekst në imazh, art AI",
+      "editor": "redaktues videosh, redakto videon, shkurto, prit, titra, mbititra, efekte",
+      "creator": "krijo, studio, mjete AI, imazh, video, muzikë, zë jashtë kamerës, 3D",
+      "converter": "importo video, shkarko, YouTube, TikTok, Instagram, konverto",
+      "migrate": "zhvendos kanalin tim, importo kanalin, import në masë, kanal YouTube",
+      "notifications": "sinjalizime, aktiviteti, përmendje, përgjigje, pëlqime, zile",
+      "messages": "DM, mesazhe direkte, chat, kutia hyrëse, biseda, mesazh privat",
+      "communities": "grupe, komunitet, dhoma, klube, forume, anëtarë",
+      "assistant": "AI, chatbot, pyet, ndihmë, chat AI, pyetje",
+      "settings": "preferencat, llogaria, privatësia, siguria, fjalëkalimi, gjuha, tema, modaliteti i errët, të bllokuar, fshi llogarinë",
+      "leaderboard": "renditja, rangu, krijuesit kryesorë, përdoruesit kryesorë, pikë, rezultate",
+      "bookmarks": "të ruajtura, të preferuarat, shiko më vonë, lexo më vonë, postime të ruajtura, biblioteka",
+      "command": "paneli, analitika, fitimet, të ardhurat, statistika, moderimi, statistikat e mia",
+      "wallet": "balanca, para, fonde, tokena, kripto, depozito, tërhiq, dërgo, merr, paguaj",
+      "events": "kalendari, orari, takim, të ardhshme, bileta, AMA",
+      "stages": "dhoma audio, chat zanor, hapësira, audio live, bisedë, podcast",
+      "featureRequests": "ndërto, ndërtues, ide, sugjerime, raporto një gabim, gabime, rregullime, udhërrëfyesi, voto, lista e dëshirave, përmirëso",
+      "feedback": "vlerësim, notë, anketë, mendim, ankesë, jep mendim",
+      "staking": "stake, depozito, rendiment, shpërblime, fito, ndarje fitimi, distinktiv, nivele, interes",
+      "superpowers": "boost, promovo, përfitime, fuqi, përfitime distinktivi, shtrirje, përmirësime",
+      "governance": "voto, votim, propozime, sondazh, fletëvotim, vendos",
+      "dao": "thesari, dhuro, dhurim, fond komuniteti, kontribuo, grante",
+      "bounties": "punë, vende pune, detyra, angazhime, freelance, punëso, fito para, punë me pagesë",
+      "myBounties": "shpërblimet e mia, punët e mia, historiku, pagesat, punë e përfunduar",
+      "affiliate": "referim, fto miqtë, ftesë, komision, partner, fito",
+      "careers": "vende pune, punësim, puno me ne, bashkohu me ekipin, apliko, vende të lira",
+      "stores": "dyqan, dyqani, treg, merch, bli, shit, produkte, blerje",
+      "fractions": "aksione, pronësi, investo, zotëro një postim, NFT, NFT-të, koleksione, tregto",
+      "usernames": "emri i përdoruesit, handle, emri, ndrysho emrin tim, bli një emër, shit një emër",
+      "accounts": "bli llogari, shit llogari, llogari në shitje, ndjekës, transfero llogarinë",
+      "apps": "dyqan aplikacionesh, mini aplikacione, ndërto një aplikacion, zhvillues, mjete",
+      "arcade": "lojëra, lojë, luaj, gaming, shah, shooter, argëtim",
+      "glossary": "terma, përkufizime, fjalor, kuptimi, çfarë është",
+      "compare": "krahasim, krahaso, kundrejt, alternativa, YouTube, X, TikTok",
+      "guide": "fillimi, si të, udhëzues, ndihmë, mëso, fillestar, i ri këtu",
+      "stats": "statistika, analitika, numra, grafikë, çmimi, furnizimi, mbajtësit",
+      "docs": "dokumentacioni, ndihmë, API, whitepaper, zhvillues, manual",
+      "blog": "lajme, artikuj, përditësime, njoftime, çfarë ka të re",
+      "videos": "shiko, video, klipe, video të gjata",
+      "shorts": "reels, video të shkurtra, video vertikale, rrëshqit",
+      "music": "audio, këngë, pista, dëgjo, radio, playlist",
+      "liveTv": "TV, transmetime, transmetim, live, transmetim në ajër, kanale, shiko live",
+      "buyTokens": "bli tokena, blerje, rimbush, kartë, kartë krediti, fiat",
+      "bridge": "ndërzinxhir, zhvendos tokena, zinxhirë, transfero mes zinxhirëve",
+      "top100": "top 100, monedha, kriptomonedha, kapitalizimi i tregut, çmime",
+      "agents": "agjentë AI, agjentë, bote, automatizim, persona",
+      "advertising": "reklama, reklamë, fushatë, promovo, sponsor, marketing",
+      "premium": "abonim, përmirëso, pro, anëtarësim, pa reklama, pa reklama",
+      "pricing": "planet, kosto, çmimi, sa kushton, abonim",
+      "creators": "programi i krijuesve, ambasadorë, partnerë, apliko si krijues, monetizo",
+      "connectAi": "MCP, ChatGPT, Claude, API, integrim, lidh AI",
+      "packs": "emoji, ngjitëse, GIF, paketa emoji, paketa ngjitësesh, emoji të personalizuara",
+      "publicChat": "chat, chat global, dhomë chati, lobby, bisedë, chat komuniteti",
+      "planned": "të planifikuara, planifiko, postime të planifikuara, radha, më vonë",
+      "liveStudio": "shko live, transmeto, transmetim, OBS, mbivendosje, sinjalizime, widget",
+      "launchpad": "lësho një token, krijo një monedhë, bëj një monedhë, meme coin, bonding curve, tokenizo"
     },
     "reorderHint": "Mbaj dhe tërhiq çdo ikonë për të riorganizuar",
     "reorderReset": "Rivendos",
@@ -525,7 +657,10 @@
     "affiliate": "Bashkëpunëtor",
     "groups": {
       "create": "Krijo",
-      "discover": "Zbulo"
+      "discover": "Zbulo",
+      "main": "Kryesore",
+      "money": "Paraja",
+      "riftn": "Riftn"
     }
   },
   "feed": {
@@ -1150,7 +1285,39 @@
     "socialConnectFailed": "Nuk mund të lidhej {{platform}}. Provo përsëri.",
     "socialVerifiedFollowers": "{{value}} ndjekësit",
     "socialFollowersPending": "Numërimi i ndjekësve po përditësohet",
-    "menuLayoutFolders": "Dosjet"
+    "menuLayoutFolders": "Dosjet",
+    "chatCards": "Bisedat si karta",
+    "chatCardsDesc": "Çdo bisedë në kartën e vet. Çaktivizoje për një listë të thjeshtë me një vijë mes bisedave.",
+    "chatDeleteChoice": "Kur fshin një mesazh",
+    "chatDeleteChoiceDesc": "Pyet çdo herë, ose fshi gjithmonë vetëm për ty ose për të gjithë në bisedë.",
+    "chatDeleteAsk": "Pyet çdo herë",
+    "chatDeleteMe": "Fshi për mua",
+    "chatDeleteMeDesc": "Zhduket nga biseda jote, të tjerët ende e shohin",
+    "chatDeleteEveryone": "Fshi për të gjithë",
+    "chatDeleteEveryoneDesc": "Kur është e mundur. Mesazhi i dikujt tjetër në grup fshihet vetëm për ty",
+    "showLikes": "Shfaq pëlqimet e mia për të gjithë",
+    "showLikesDesc": "Kushdo mund të hapë skedën Pëlqimet në profilin tënd. Joaktive si parazgjedhje, që vetëm ti të shohësh çfarë ke pëlqyer.",
+    "showFollowersList": "Shfaq kush më ndjek",
+    "showFollowersListDesc": "Lejo këdo të hapë listën e ndjekësve të tu. Kur është joaktive, vetëm ti mund ta shohësh.",
+    "showFollowingList": "Shfaq kë ndjek",
+    "showFollowingListDesc": "Lejo këdo të hapë listën e personave që ndjek. Kur është joaktive, vetëm ti mund ta shohësh.",
+    "showFollowCounts": "Shfaq numrat e ndjekësve të mi",
+    "showFollowCountsDesc": "Shfaq sa ndjekës ke dhe sa persona ndjek. Çaktivizimi i kësaj fsheh edhe të dyja listat.",
+    "defaultProfileView": "Paraqitja e postimeve në profil",
+    "defaultProfileViewDesc": "Shfaq postimet e tua si rrjetë ose listë kur njerëzit hapin profilin tënd",
+    "readerProfileView": "Hap profilet e tjera si",
+    "readerProfileViewDesc": "Zgjidh rrjetë ose listë për çdo profil që hap, ose mbaj zgjedhjen e secilit person",
+    "readerProfileViewOwner": "Zgjedhja e secilit",
+    "tipsOffNote": "Bakshishet dhe dërgesat për ty janë joaktive ndërsa kjo është aktive. Çaktivizoje për të marrë sërish bakshishe.",
+    "menuLayout": "Paraqitja e menysë",
+    "menuLayoutDesc": "Si i grupon menyja faqet e saj",
+    "menuLayoutTabs": "Skeda",
+    "menuLayoutTabsDesc": "Një grup në një kohë, me ikona të mëdha",
+    "menuLayoutSections": "Seksione",
+    "menuLayoutSectionsDesc": "Të gjitha faqet njëherësh, nën titujt e grupeve",
+    "menuLayoutFoldersDesc": "Faqet e tua kryesore, pastaj një dosje për çdo grup",
+    "publicChatInBar": "Chati Publik në shiritin e poshtëm",
+    "publicChatInBarDesc": "Një prekje për në Chatin Publik nga shiriti në fund të ekranit"
   },
   "common": {
     "confirm": "Konfirmo",
@@ -1240,7 +1407,14 @@
     "messagePublic": "Publik",
     "railTitle": "Këshilla",
     "railTotal": "{{amount}} tokena",
-    "tokensUnit": "tokena"
+    "tokensUnit": "tokena",
+    "messagePlaceholder": "Thuaj diçka me bakshishin",
+    "messagePrivate": "Vetëm {{name}}",
+    "theCreator": "krijuesi",
+    "messageWallNote": "Shfaqet në murin e bakshisheve pasi bakshishi të kalojë.",
+    "sendWithMessage": "Dërgo me mesazh",
+    "messageFailed": "Mesazhi yt nuk mund të shtohej. Nuk u dërgua asnjë bakshish.",
+    "wallLabel": "Mesazhet e bakshisheve"
   },
   "postOptions": {
     "liveAlertsOn": "Tani ndiqni {{name}}. Do të merrni një njoftim kur të nisë transmetimi live.",
@@ -1280,7 +1454,14 @@
     "giftBoost": "Dërgo një ngarkesë",
     "markSection": "Pjesët e braktitura",
     "copyFailed": "Lidhja nuk mund të kopjohej",
-    "share": "Përshëndet"
+    "share": "Përshëndet",
+    "refreshLinkPreview": "Rifresko pamjen paraprake të linkut",
+    "linkPreviewRefreshed": "Pamja paraprake e linkut u rifreskua",
+    "linkPreviewRefreshFailed": "Nuk u arrit faqja. Provo përsëri më vonë.",
+    "castToTv": "Transmeto në TV",
+    "castStarted": "Po luhet në TV-në tënde",
+    "castUnsupported": "Ky shfletues nuk mund të transmetojë. Hap Riftn në Chrome ose Safari për ta luajtur në TV.",
+    "castFailed": "Nuk u arrit TV-ja. Kontrollo që është në të njëjtin Wi-Fi dhe provo përsëri."
   },
   "filters": {
     "sort": "Rendit",
@@ -1883,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} ka dërguar punën e tij në ofertën tuaj “{{title}}”",
       "bountySubmitted": "{{name}} ka dërguar punën e tij në ofertën tuaj",
       "sentNotification": "{{name}} ju ka dërguar një notifikim"
-    }
+    },
+    "groupEarlier": "Më herët",
+    "searchPlaceholder": "Kërko njoftimet",
+    "searchEmpty": "Asnjë njoftim nuk përputhet"
   },
   "leaderboard": {
     "title": "Tabela e Liderëve",
@@ -1928,7 +2112,13 @@
     "loadingBoard": "Po ngarkohet renditja…",
     "amountTokens": "{{amount}} tokena",
     "directReferrals": "{{count}} direkt",
-    "secondaryReferrals": "{{count}} sekondar"
+    "secondaryReferrals": "{{count}} sekondar",
+    "ogChallenge": "Sfida OG",
+    "ogHolders_one": "{{count}} mbajtës OG",
+    "ogHolders_other": "{{count}} mbajtës OG",
+    "ogChallengeTitle": "Rikthe mbajtësit OG",
+    "ogChallengeBody": "Fto njerëz që ende mbajnë DHB. Kur bashkohen me linkun tënd të ftesës dhe e mbajnë DHB-në në portofolin e tyre Riftn, ata llogariten për ty këtu.",
+    "ogChallengeCta": "Merr linkun tënd të ftesës"
   },
   "dhbListing": {
     "title": "Listimi i tokenit së shpejti!",
@@ -2071,17 +2261,39 @@
     "shipping": "Në ndërtim",
     "noShippingYet": "Asgjë në punë",
     "shippingAppearHere": "Kërkesat që po ndërtohen do të shfaqen këtu.",
-    "loadFailed": "Kërkesat nuk mund të ngarkoheshin"
+    "loadFailed": "Kërkesat nuk mund të ngarkoheshin",
+    "editMedia": "Foto dhe video",
+    "editAddMedia": "Shto foto ose video",
+    "deviceInfoNote": "Informacioni i pajisjes bashkëngjitet për të na ndihmuar të rregullojmë gabimet.",
+    "deviceInfo": "Informacioni i pajisjes",
+    "deviceInfoOwners": "Këtë e shohin vetëm pronarët e bordit",
+    "deviceInfoError": "Informacioni i pajisjes nuk u ngarkua",
+    "deviceInfoNone": "Asnjë informacion pajisjeje për këtë kërkesë",
+    "deviceInfoErrors": "Gabimet e fundit"
   },
   "auth": {
-    "loginRequired": "Kërkohet hyrja"
+    "loginRequired": "Kërkohet hyrja",
+    "accountDeleted": "Kjo llogari u fshi. Mund të regjistrohesh sërish si llogari e re.",
+    "accountDeletedHours_one": "Kjo llogari u fshi. Mund të regjistrohesh sërish me të njëjtin email ose telefon pas rreth {{count}} ore.",
+    "accountDeletedHours_other": "Kjo llogari u fshi. Mund të regjistrohesh sërish me të njëjtin email ose telefon pas rreth {{count}} orësh.",
+    "accountDeletedDays_one": "Kjo llogari u fshi. Mund të regjistrohesh sërish me të njëjtin email ose telefon pas rreth {{count}} dite.",
+    "accountDeletedDays_other": "Kjo llogari u fshi. Mund të regjistrohesh sërish me të njëjtin email ose telefon pas rreth {{count}} ditësh."
   },
   "messages": {
     "newDrawer": {
       "to": "Deri",
       "recent": "Të fundit",
       "suggested": "Të sugjeruara",
-      "youFollow": "Njerëzit që ndjek"
+      "youFollow": "Njerëzit që ndjek",
+      "placeholder": "Emri ose @username",
+      "chattedBefore": "Keni biseduar",
+      "mutual": "I përbashkët",
+      "dmsOff": "DM joaktive",
+      "keepTyping": "Vazhdo të shkruash për të kërkuar të gjithë",
+      "noOne": "Nuk u gjet askush",
+      "tryUsername": "Provo @username-in e saktë",
+      "sayHi": "Përshëndet dikë",
+      "typeAny": "Shkruaj çdo emër ose @username"
     },
     "reply": "Përgjigju",
     "react": "Reago",
@@ -2122,7 +2334,8 @@
     "noConversationsYet": "Nuk ka ende biseda",
     "sending": "Transmetohet",
     "retrySend": "Provo sërish",
-    "discardSend": "Hiq"
+    "discardSend": "Hiq",
+    "notSent": "Nuk u dërgua"
   },
   "music": {
     "listeningCount_one": "{{count}} duke dëgjuar",
@@ -2206,7 +2419,22 @@
     "viewMode": "Shfaq",
     "back": "Kthehu",
     "reserve": {
-      "signIn": "Hyni"
+      "signIn": "Hyni",
+      "available": "Emri i përdoruesit i lirë",
+      "held": "I mbajtur për ty",
+      "ended": "Mbajtja përfundoi",
+      "busy": "Po rezervohet",
+      "availableBody": "riftn.com/{{name}} është i lirë tani. Rezervoje dhe ne e mbajmë për një minutë ndërsa regjistrohesh.",
+      "heldBody": "Askush tjetër nuk mund ta marrë @{{name}} derisa të mbarojë kohëmatësi. Përfundo regjistrimin për ta mbajtur.",
+      "endedBody": "Minuta jote mbaroi, ndaj @{{name}} është sërish i hapur për të gjithë. Është ende i lirë.",
+      "busyBody": "Dikush po regjistrohet si @{{name}} tani. Nëse nuk përfundon, lirohet kur mbaron kohëmatësi.",
+      "finish": "Përfundo regjistrimin",
+      "again": "Rezervo sërish",
+      "cta": "Rezervo tani",
+      "letGo": "Lëre",
+      "haveAccount": "Ke llogari?",
+      "seoTitle": "@{{name}} është i lirë në Riftn",
+      "seoDescription": "Askush nuk e ka ende riftn.com/{{name}}. Rezervoje dhe regjistrohu që ta bësh tëndin."
     },
     "usernameAvailable": "Emri i përdoruesit është i disponueshëm!",
     "signUpToClaim": "Regjistrohu sot për ta marrë",
@@ -2237,12 +2465,16 @@
     "tabs": {
       "playlists": "Listat e luajtjes",
       "dislikes": "Nuk të pëlqen",
-      "likes": "Pëlqime"
+      "likes": "Pëlqime",
+      "articles": "Artikuj"
     },
     "likedPosts": {
       "emptyTitle": "Ende pa pëlqime",
       "privateTitle": "Pëlqimet janë private",
-      "loadMore": "Ngarko më shumë"
+      "loadMore": "Ngarko më shumë",
+      "emptyOwn": "Postimet që pëlqen shfaqen këtu. Vetëm ti mund t'i shohësh, përveç nëse aktivizon Shfaq pëlqimet e mia te Cilësimet.",
+      "emptyOther": "Ende nuk është pëlqyer asgjë.",
+      "privateDesc": "Kjo llogari i mban pëlqimet për vete."
     },
     "dislikes": {
       "emptyTitle": "Nuk ka ende mospëlqime",
@@ -2267,11 +2499,31 @@
     "sortMostLiked": "Më të pëlqyerat",
     "sortCustomShort": "Personalizuar",
     "arrange": {
-      "saving": "Duke ruajtur..."
+      "saving": "Duke ruajtur...",
+      "title": "Rendit postimet e tua",
+      "hint": "Mbaj të shtypur një postim dhe tërhiqe në vendin e ri. Vizitorët e shohin së pari këtë renditje.",
+      "drag": "Tërhiq për ta lëvizur",
+      "toTop": "Çoje në krye",
+      "save": "Ruaj renditjen",
+      "saved": "Renditja jote u ruajt",
+      "reset": "Kthehu te më të rejat në fillim",
+      "resetDone": "Kthehu te më të rejat në fillim",
+      "saveFailed": "Renditja nuk u ruajt. Të lutem provo përsëri.",
+      "loadFailed": "Postimet nuk u ngarkuan. Mbylle këtë dhe provo përsëri.",
+      "empty": "Ende s'ka asgjë për të renditur. Posto diçka së pari."
     },
     "searchThisChannel": "Kërko në këtë kanal",
     "searchResultCount": "1 rezultat për \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} rezultatet për \"{{query}}\""
+    "searchResultCountPlural": "{{count}} rezultatet për \"{{query}}\"",
+    "unavailable": "Profili nuk është i disponueshëm",
+    "mutualsOne": "{{count}} i përbashkët:",
+    "mutualsMany": "{{count}} të përbashkët:",
+    "articles": {
+      "emptyTitle": "Ende pa artikuj",
+      "emptySubtitle": "Artikujt do të shfaqen këtu"
+    },
+    "sortCustom": "Renditje e personalizuar",
+    "arrangeButton": "Rendit postimet"
   },
   "tv": {
     "seoTitle": "TV Live: Kanalet e Gratuita nga Çdo Përballë Botës",
@@ -2536,7 +2788,26 @@
     "createSignIn": "Hyni përsëri për të krijuar një agjent",
     "checkConnection": "Kontrolloni lidhjen dhe provoni përsëri.",
     "welcome": {
-      "text": "Mesazhi i mirëseardhjes"
+      "text": "Mesazhi i mirëseardhjes",
+      "title": "Mirëprit anëtarët e rinj",
+      "help": "Ky agjent ndjek dhe/ose u shkruan njerëzve që sapo janë bashkuar me Riftn, disa në ditë.",
+      "follow": "Ndiq anëtarët e rinj",
+      "message": "Shkruaju anëtarëve të rinj",
+      "textHelp": "{name} bëhet @username-i i tyre. Pa linke. Dërgohet një herë për person.",
+      "saveText": "Ruaj mesazhin",
+      "perDay": "Persona në ditë",
+      "fewer": "Më pak në ditë",
+      "more": "Më shumë në ditë",
+      "today": "Sot: {{follows}} të ndjekur · {{messages}} mesazhe",
+      "limits": "Asnjëherë i njëjti person dy herë. Kapërcen këdo që të ka bllokuar ose heshtur, ka çaktivizuar mesazhet e reja ose është fshehur nga Anëtarët e rinj.",
+      "showLog": "Shiko kë mirëpriti",
+      "hideLog": "Fshih mirëseardhjet",
+      "empty": "Ende askush. Anëtarët e rinj shfaqen këtu kur bashkohen.",
+      "followed": "U ndoq",
+      "messaged": "Iu shkrua",
+      "skipped": "U kapërcye",
+      "failed": "Nuk u arrit",
+      "defaultText": "Hej {name}, mirë se vjen në Riftn! 👋"
     },
     "workspace": {
       "moderation": "Moderimi i transmetimit",
@@ -2732,7 +3003,15 @@
     "switchWalletAccount": "Ndërro llogarinë",
     "walletLoadFailed": "Nuk mund të ngarkohen kartelat. Pritni të provoni përsëri.",
     "openInBrowser": "Hap në shfletues",
-    "copyLink": "Kopjo lidhjen"
+    "copyLink": "Kopjo lidhjen",
+    "bringLoginOver": "E ke përdorur Riftn në dehub.io? <bring>Sill hyrjen tënde këtu</bring>",
+    "didYouMean": "Mos doje të thoshe {{email}}?",
+    "profileMovedTitle": "Profili yt u zhvendos",
+    "migrateWrongLogin": "Ajo hyrje hapi një portofol tjetër, ndaj nuk ndryshoi asgjë. Profili yt i vjetër u krijua me {{login}}. Përdor atë për ta rikthyer.",
+    "googleInAppTitle": "Google nuk lejon hyrjen brenda {{app}}",
+    "googleInAppTitleUnnamed": "Google nuk lejon hyrjen brenda këtij aplikacioni",
+    "googleInAppBody": "Hap Riftn në shfletues për të përdorur Google, ose hyr me email këtu.",
+    "tryAnyway": "Provo gjithsesi"
   },
   "careers": {
     "title": "Karriera në Riftn",
@@ -2957,7 +3236,16 @@
     "searchDehubFor": "Kërko „{{query}}” në Riftn",
     "switchAccount": "Hapni llogari",
     "signedInAs": "Regjistruar në si {{name}}",
-    "requestSend": "Dërgo kërkesë"
+    "requestSend": "Dërgo kërkesë",
+    "requestPrompt": "Nuk është ende këtu? Dërgoje si kërkesë",
+    "requestPromptShort": "Nuk është ende këtu?",
+    "requestDraftMenu": "Shto {{query}} në Riftn",
+    "requestDraftSettings": "Një cilësim për {{query}}",
+    "requestPostsTo": "Postohet te Kërkesat",
+    "requestHint": "Postohet te Kërkesat në emrin tënd. Do të të njoftojmë kur të dalë.",
+    "requestSent": "U dërgua te Kërkesat",
+    "requestSentHint": "Do të të njoftojmë kur të dalë.",
+    "requestSeeIt": "Shikoje te Kërkesat"
   },
   "comments": {
     "reportComment": "Raporto komentin",
@@ -3053,8 +3341,20 @@
     "anonymousLikes_other": "{{count}} pëlqime nga mbajtës anonimë distinktivësh",
     "threadParts": {
       "moveUp": "Lëviz lart",
-      "moveDown": "Lëviz poshtë"
-    }
+      "moveDown": "Lëviz poshtë",
+      "reorder": "Rirendit",
+      "save": "Ruaj renditjen",
+      "saved": "Renditja e fillit u ruajt",
+      "saveFailed": "Renditja nuk u ruajt. Provo përsëri.",
+      "dragPart": "Tërhiq për të lëvizur pjesën {{n}}",
+      "addPart": "Shto në fill",
+      "addPlaceholder": "Shto në fillin tënd...",
+      "label": "Fill · {{count}} pjesë",
+      "reorderHint": "Tërhiqni pjesët ose përdorni shigjetat, pastaj ruani."
+    },
+    "attachMedia": "Bashkëngjit një foto, video ose audio",
+    "attachUnsupported": "Bashkëngjit një foto, një video ose një skedar audio.",
+    "attachTooLarge": "Ky skedar e kalon kufirin prej {{size}} MB."
   },
   "mintChain": {
     "title": "Postimi i monedhës",
@@ -3072,7 +3372,14 @@
     "notAvailable": "Gjurmimi në këtë zinxhir nuk është ende i disponueshëm."
   },
   "postEditHistory": {
-    "original": "Origjinal"
+    "original": "Origjinal",
+    "title": "Historiku i redaktimeve",
+    "edited_one": "Redaktuar një herë",
+    "edited_other": "Redaktuar {{count}} herë",
+    "lastEdit": "Redaktimi i fundit {{time}}",
+    "editN": "Redaktimi {{n}}",
+    "now": "Tani",
+    "showChanges": "Shfaq çfarë ndryshoi"
   },
   "postInfo": {
     "title": "Informacione për postimin",
@@ -3367,7 +3674,10 @@
     "waiting_for_wallet": "Në pritje të portofolit tënd",
     "waiting_for_wallet_desc": "Hapni {{wallet}} dhe miratoni nënshkrimin — kërkesa po pret atje.",
     "your_wallet": "Më jep para? a ke para?",
-    "max_available_on_chain": "Maksimumi i disponueshëm: {{amount}} tokena në {{chain}}"
+    "max_available_on_chain": "Maksimumi i disponueshëm: {{amount}} tokena në {{chain}}",
+    "not_available_for_this_post": "Nuk është e disponueshme për këtë postim",
+    "turn_back_on_desktop_notifications": "Të riaktivizohen njoftimet në desktop?",
+    "notifications_moved_to_riftn": "U zhvendosëm në riftn.com, ndaj shfletuesi yt ka nevojë edhe një herë për lejen tënde për të shfaqur këtu përgjigjet, bakshishet dhe DM-të."
   },
   "staking": {
     "title": "Pushtimi",
@@ -5275,18 +5585,167 @@
     "buy": "Blini",
     "reject": "Refuzoni",
     "needsYouHold": "Kërkon {{needed}}, keni {{held}}",
-    "sellYourFractions": "Shitni fraksionet tuaja ({{held}} mbeten)"
+    "sellYourFractions": "Shitni fraksionet tuaja ({{held}} mbeten)",
+    "nftsSubtitle": "Çdo NFT, shkëmbime me një hap",
+    "buyersTab": "Blerësit",
+    "soldOfListing": "U shitën {{sold}} nga {{total}}",
+    "noBuyersYet": "Askush nuk ka blerë ende pjesë të këtij postimi",
+    "fromYou": "nga ti",
+    "statusOverdue": "Me vonesë"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Përdor këto detaje"
+        "use": "Përdor këto detaje",
+        "url": "URL e faqes së produktit",
+        "action": "Lexo faqen e produktit",
+        "loading": "Po lexohet faqja…",
+        "hint": "Importo tekst nga një faqe publike produkti. Shqyrto detajet para se t'i përdorësh; bashkëngjit imazhet e produktit veçmas në studio.",
+        "source": "Burimi i importuar",
+        "review": "Zgjidh një produkt për ta kopjuar në përshkrimin tënd të redaktueshëm. Titulli, zëri dhe ngjyrat e markës mbeten të pandryshuara.",
+        "errors": {
+          "signIn": "Hyr për të importuar një faqe produkti.",
+          "url": "Përdor një URL publike HTTPS produkti.",
+          "empty": "Nuk u gjetën detaje të përdorshme të produktit. Shtoji manualisht.",
+          "busy": "Po ekzekutohen shumë importe. Provo përsëri pas pak.",
+          "unavailable": "Kjo faqe nuk mund të importohej. Shto detajet e produktit manualisht.",
+          "failed": "Importimi dështoi. Përshkrimi yt është ruajtur; provo përsëri ose fut detajet manualisht."
+        }
+      },
+      "return": "Kthehu te drafti i studios",
+      "title": "Përshkrimi i fushatës",
+      "intro": "Përshkruaj produktin dhe markën tënde, pastaj përgatit formatet përkatëse të reklamave.",
+      "saved": "Përshkrimi yt është ruajtur në këtë pajisje për këtë llogari.",
+      "preview": "Përgatit formatet",
+      "clear": "Pastro përshkrimin",
+      "required": "Shto emrin dhe përshkrimin e produktit për të përgatitur formatet.",
+      "variants": "Formatet e fushatës",
+      "reviewHint": "Shqyrto modelin, çmimin dhe referencën e produktit në studio para gjenerimit. Çdo format është një gjenerim më vete.",
+      "open": "Shqyrto në studio",
+      "fields": {
+        "product": "Emri i produktit (i detyrueshëm)",
+        "description": "Fakte për produktin (të detyrueshme)",
+        "brand": "Emri i markës",
+        "audience": "Audienca e synuar",
+        "benefit": "Përfitimi kryesor",
+        "voice": "Zëri i markës",
+        "palette": "Ngjyrat e markës",
+        "headline": "Titulli i miratuar",
+        "cta": "Thirrje për veprim"
+      },
+      "formats": {
+        "square": "Reklamë katrore",
+        "portrait": "Reklamë portret",
+        "story": "Imazh story",
+        "video": "Video vertikale"
       }
     },
     "cinema": {
       "close": "Mbyll",
       "performance": {
-        "label": "Performanca"
+        "label": "Performanca",
+        "0": "I gëzuar",
+        "1": "Melankolik",
+        "2": "I shqetësuar",
+        "3": "I sigurt",
+        "4": "I mahnitur",
+        "5": "I përmbajtur",
+        "6": "Lozonjar"
+      },
+      "title": "Drejtimi kinematografik",
+      "hint": "Drejto stilin vizual të imazhit ose videos tënde të radhës. Rezultatet ndryshojnë sipas modelit.",
+      "none": "Pa drejtim",
+      "reset": "Pastro drejtimin",
+      "camera": {
+        "label": "Pamja e kamerës",
+        "0": "Kinema dixhitale",
+        "1": "Film 35mm",
+        "2": "Film 16mm",
+        "3": "Format i madh",
+        "4": "Videokamerë e vjetër"
+      },
+      "lens": {
+        "label": "Pamja e objektivit",
+        "0": "Sferik",
+        "1": "Anamorfik",
+        "2": "Xham i butë vintage",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Gjatësia fokale",
+        "0": "18mm i gjerë",
+        "1": "24mm i gjerë",
+        "2": "35mm natyral",
+        "3": "50mm standard",
+        "4": "85mm portret",
+        "5": "135mm teleobjektiv"
+      },
+      "aperture": {
+        "label": "Thellësia e fushës",
+        "0": "f/1.4 shumë e cekët",
+        "1": "f/2.8 e cekët",
+        "2": "f/5.6 mesatare",
+        "3": "f/11 fokus i thellë"
+      },
+      "movement": {
+        "label": "Lëvizja e kamerës",
+        "0": "Trekëmbësh i fiksuar",
+        "1": "Dolly i ngadaltë përpara",
+        "2": "Dolly i ngadaltë prapa",
+        "3": "Ndjekje anësore",
+        "4": "Rrotullim rreth subjektit",
+        "5": "Me dorë",
+        "6": "Ngritje me vinç",
+        "7": "Panoramim i ngadaltë"
+      },
+      "lighting": {
+        "label": "Ndriçimi",
+        "0": "Dritë e butë dite",
+        "1": "Ora e artë",
+        "2": "Chiaroscuro me ton të ulët",
+        "3": "Studio me ton të lartë",
+        "4": "Drita neoni në skenë",
+        "5": "Kundërdritë silueti",
+        "6": "Dritë e shpërndarë me re"
+      },
+      "tempo": {
+        "label": "Ritmi i pamjes",
+        "0": "Një pamje e vetme e vazhdueshme",
+        "1": "Veprim i qetë, pa nxitim",
+        "2": "Veprim dinamik, energjik",
+        "3": "Veprim kaotik, i furishëm"
+      },
+      "era": {
+        "label": "Epoka",
+        "0": "Vitet 1920",
+        "1": "Vitet 1950",
+        "2": "Vitet 1960",
+        "3": "Vitet 1970",
+        "4": "Vitet 1980",
+        "5": "Vitet 1990",
+        "6": "Sot",
+        "7": "E ardhme e afërt"
+      },
+      "genre": {
+        "label": "Zhanri",
+        "0": "Dokumentar",
+        "1": "Dramë",
+        "2": "Film noir",
+        "3": "Fantashkencë",
+        "4": "Fantazi",
+        "5": "Komedi romantike",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Paleta e ngjyrave",
+        "0": "Qelibar i ngrohtë",
+        "1": "Blu e ftohtë",
+        "2": "Tone të zbehta toke",
+        "3": "Pastel",
+        "4": "Monokrom me kontrast të lartë",
+        "5": "Ngjyra bazë të ngopura"
       }
     },
     "libraryEmpty": "Gjenerimet tuaja të ruajtura do të shfaqen këtu.",
@@ -6088,14 +6547,120 @@
       "cannotUseReference": "{{model}} nuk mund të përdorë një imazh referimi. Hiqe ose zgjidh një model tjetër.",
       "needsImageToWork": "{{model}} ka nevojë për një imazh për të punuar. Bashkangjitni një më parë.",
       "speechLimit": "Kjo është {{length}} karaktere. Kufiri është {{limit}}.",
-      "musicTrackLength": "{{count}}s pista"
+      "musicTrackLength": "{{count}}s pista",
+      "needsImageToAnimate": "{{model}} ka nevojë për një imazh për ta animuar. Bashkëngjit një fillimisht."
     },
     "gallery": {
       "send": "Dërgoni",
       "notifications": {
-        "generation_reply": "{{name}} iu përgjigj komentit tuaj"
+        "generation_reply": "{{name}} iu përgjigj komentit tuaj",
+        "generation_like": "{{name}} reagoi ndaj gjenerimit tënd",
+        "generation_comment_like": "{{name}} reagoi ndaj komentit tënd",
+        "generation_comment": "{{name}} komentoi gjenerimin tënd"
+      },
+      "browse": "Shfleto gjenerimet",
+      "create": "Krijo",
+      "fullscreen": "Shiko në ekran të plotë",
+      "missing": "Ky gjenerim nuk është i disponueshëm."
+    },
+    "avatarTitle": "Portret që flet",
+    "avatarRequirements": "Portret PNG katror, 512–2048 piksel, deri në 5 MB. WAV PCM mono 24 kHz 16-bit, 5–30 sekonda. Pjesa e fundit e sekondës mbushet me heshtje.",
+    "avatarPortrait": "Zgjidh portretin PNG",
+    "avatarAudio": "Zgjidh WAV-in e të folurit",
+    "avatarPermission": "Kam leje ta animoj këtë portret dhe ta përdor këtë audio.",
+    "avatarQuote": "{{seconds}} sekonda përfshirë heshtjen · {{amount}} tokena",
+    "avatarPrepare": "Përgatit dhe shqyrto çmimin",
+    "batchFlowLimit": "Lista e Flow është plot. Hiq një Flow të papërdorur para se të krijosh një grup tjetër.",
+    "batchReviewCampaign": "Shqyrto grupin e fushatës në Flow",
+    "batchReviewFilmImages": "Shqyrto grupin e imazheve të storyboard-it",
+    "batchReviewFilmVideos": "Shqyrto grupin e klipeve të filmit",
+    "batchReviewHint": "Hap një Flow të ruajtur më vete. Shqyrto çdo element dhe çmimin e plotë para se të paguash. Elementet e përfunduara dhe pagesa origjinale ruhen për rikuperim. Referencat kopjohen në bibliotekën tënde private; zbatohen kostot e ruajtjes dhe të rrjetit.",
+    "batchInvalid": "Plotëso çdo element para se të përgatitësh një grup me 1–12 imazhe ose klipe.",
+    "batchReferenceLimit": "Ky grup mbështet një referencë imazhi për element. Hiq referencat shtesë ose përgatite atë element veçmas.",
+    "batchVideoSettings": "Për këtë grup, klipet kërkojnë kohëzgjatje të plotë 4–15 sekonda dhe raport 16:9, 9:16 ose 1:1.",
+    "batchMissingReference": "Një referencë mungon, nuk mbështetet ose është më e madhe se 25 MB. Riktheje në redaktues para se të përgatitësh grupin.",
+    "batchOwnerChanged": "Llogaria ose drafti ndryshoi. Rihape këtë grup nën llogarinë e tij origjinale.",
+    "batchConflict": "Grupi i ruajtur nuk përputhet me pamjen e tij origjinale.",
+    "audioExportFormat": "Formati i eksportit",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Bashkëngjit një klip burim për ta zgjatur.",
+    "extensionSeconds": "+{{seconds}}s pamje të reja",
+    "extensionHelp": "Kthen klipin tënd burim me rreth katër sekonda të reja. Rezultati ripërmasohet deri në 720p me 24 fps. Për zgjatjen gjenerohet audio e re.",
+    "extensionForward": "Shto rreth katër sekonda pas klipit burim",
+    "extensionBackward": "Shto rreth katër sekonda para klipit burim",
+    "expandDescription": "Gjenero kufij të rinj imazhi. Prompt opsional në anglisht; një imazh burim.",
+    "relightDescription": "Ndriço ndryshe një foto sipas përshkrimit tënd të ndriçimit dhe sfondit.",
+    "expandPromptHint": "Bashkëngjit një imazh dhe zgjidh raportin e ri. Prompti në anglisht është opsional.",
+    "expandEnglishOnly": "Ky model zgjerimi pranon prompte në anglisht. Lëre promptin bosh për zgjerim automatik.",
+    "expandNeedsImage": "Bashkëngjit një imazh për ta zgjeruar.",
+    "learn": {
+      "title": "Mësime për krijuesit",
+      "intro": "Mësime të shkurtra, një test njohurish dhe një ushtrim i redaktueshëm për secilin. Përparimi ruhet në këtë pajisje për llogarinë tënde.",
+      "back": "Kthehu te Creator",
+      "lessons": "Mësimet",
+      "progress": "{{completed}} nga {{total}} teste njohurish të kaluara",
+      "check": "Kontrollo përgjigjen",
+      "correct": "Testi i njohurive u kalua",
+      "retry": "Provo përsëri. Rishiko mësimin më sipër.",
+      "exerciseTitle": "Ushtrim praktik",
+      "exerciseHint": "Hap një shembull të redaktueshëm në hapësirën tënde të studios. Hapja e një drafti është falas; gjenerimi kërkon shqyrtimin tënd dhe ofertën e vet të çmimit. Redakto shembullin para se të gjenerosh.",
+      "openExercise": "Hap draftin e ushtrimit",
+      "closeExercise": "Mbyll ushtrimin",
+      "brief": {
+        "title": "Shkruaj një përshkrim vizual të qartë",
+        "body1": "Përshkruaj një subjekt konkret, veprimin e tij dhe mjedisin. Shto kuadrimin ose lëvizjen e kamerës kur ndihmon skenën. Ide të palidhura ruaji për një draft tjetër.",
+        "body2": "Udhëzimet për ndriçimin, objektivin dhe stilin e drejtojnë modelin. Ato nuk garantojnë sjellje fizike të kamerës ose një imazh të saktë. Ndrysho një pjesë në një kohë që të krahasosh versionet.",
+        "body3": "Para gjenerimit, shqyrto modelin e zgjedhur, bashkëngjitjet e mbështetura, përmasat dhe çmimin. Mbaje draftin origjinal që të mund të kthehesh tek ai.",
+        "question": "Cili përshkrim është më i lehtë për t'u rishikuar?",
+        "answer0": "Një subjekt, veprim dhe mjedis i qartë",
+        "answer1": "Vetëm emri i një modeli",
+        "answer2": "Një listë stilesh kontradiktore",
+        "exercise": "Një çajnik qeramike mbi një tryezë druri pranë dritares. Dritë e butë mëngjesi, kuadrim mesatar, sfond i thjeshtë. Mbaje çajnikun si subjektin e qartë."
+      },
+      "continuity": {
+        "title": "Planifiko pamjet dhe shqyrto vazhdimësinë",
+        "body1": "Përdor panelin Film në redaktues për të ruajtur një përshkrim dhe pamje të renditura. Përgatit çdo kuadër ose klip veçmas, shqyrto ofertën e çmimit dhe zgjidh një rezultat të pranuar.",
+        "body2": "Bashkëngjit vetëm referenca që pranon modeli i zgjedhur. Ripërdorimi i një reference mund të drejtojë pamjen; nuk trajnon një identitet dhe nuk garanton përputhje. Personazhet dhe zërat mund të ndryshojnë mes gjenerimeve.",
+        "body3": "Mbaj marrjet e suksesshme dhe montoji në kronologji. Shqyrto lëvizjen, fytyrat, dialogun dhe kalimet para eksportit.",
+        "question": "Çfarë e mbështet vazhdimësinë mes pamjeve?",
+        "answer0": "Më shumë prompte të palidhura",
+        "answer1": "Referenca të miratuara dhe shënime të shqyrtuara për pamjet",
+        "answer2": "Të supozosh se identiteti i personazhit është i garantuar",
+        "exercise": "Pamje e gjerë e një udhëtari të vetmuar që arrin në një bregdet të qetë në agim. Lëvizje e ngadaltë e kamerës përpara, atmosferë e qetë. Një pamje e vazhdueshme."
+      },
+      "campaign": {
+        "title": "Përdor fakte të miratuara për produktin",
+        "body1": "Fillo me fakte për produktin që mund t'i verifikosh. Shqyrto metadatat e importuara para se t'i përdorësh. Shkruaj titullin dhe thirrjen për veprim në mënyrë të qartë; mos shpik çmime, vlerësime apo pretendime për performancën.",
+        "body2": "Përdor variantet e ruajtura të fushatës për të mbajtur bashkë shënimet e përbashkëta dhe grepat, skenarët, gjuhët e formatet individuale. Përgatit një element të shqyrtuar në një kohë dhe kontrollo ofertën e çmimit në studio.",
+        "body3": "Shqyrto tekstin e dukshëm, pamjen e produktit dhe çdo pretendim të folur në rezultat. Një prompt nuk është provë e saktësisë së produktit apo e performancës së marketingut.",
+        "question": "Kur duhet përfshirë një pretendim për produktin?",
+        "answer0": "Sa herë që tingëllon bindës",
+        "answer1": "Pasi të shpikësh një vlerësim me pesë yje",
+        "answer2": "Kur vjen nga fakte të miratuara për produktin",
+        "exercise": "Krijo një reklamë produkti në format portret për çaj me gjethe të plota që shitet në një kuti metalike të ripërdorshme. Titulli i miratuar: Gjej kohë për çaj. CTA e miratuar: Eksploro koleksionin. Përdor vetëm këto fakte; mos shpik zbritje, vlerësime apo pretendime shëndetësore."
       }
-    }
+    },
+    "campaignPlanTitle": "Variantet dhe episodet e fushatës",
+    "campaignPlanIntro": "Ruaj deri në 12 variante ose episode. Secili hap studion për shqyrtimin dhe ofertën e vet të çmimit. Shënimet e përbashkëta drejtojnë vazhdimësinë; pamja e produktit, personazhet dhe zërat mund të ndryshojnë mes gjenerimeve.",
+    "campaignTitle": "Emri i fushatës ose serisë",
+    "campaignContinuity": "Shënime të përbashkëta për personazhin, zërin dhe stilin",
+    "campaignVariantTitle": "Emri i variantit ose episodit",
+    "campaignHook": "Grepi hapës",
+    "campaignLanguage": "Gjuha e rezultatit",
+    "campaignScript": "Skenar i miratuar ose radhë skenash",
+    "campaignAdd": "Shto variant ose episod",
+    "campaignClear": "Pastro planin",
+    "campaignFormat": "Formati i rezultatit",
+    "audioInvalidResponse": "Shërbimi audio ktheu një rezultat të pavlefshëm.",
+    "batchPaymentHelp": "Çdo imazh i dërguar tarifohet veçmas. Nëse një grup ndalet, tokenat e papërdorur nga pagesa e tij ripërdoren automatikisht për një gjenerim të mëvonshëm që ai mbulon.",
+    "invalidSeed": "Seed duhet të jetë numër i plotë nga 0 deri në 2147483647.",
+    "libraryFavorites": "Të preferuarat",
+    "libraryFavoriteAdd": "Shto te të preferuarat",
+    "libraryFavoriteRemove": "Hiq nga të preferuarat",
+    "audioTaskDialoguePlaceholder": "Alice: Duhet të ikim.\nBob: [qesh] Pas teje.",
+    "priceOwnKey": "Çelësi yt",
+    "audioResultTooLarge": "Rezultati audio është bosh ose i kalon 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planet për çdo rrjedhë pune",
@@ -6262,7 +6827,8 @@
     "createTheFirst": "Krijo të parën",
     "docsSeoTitle": "Udhëzimet e aftësive të AI | Riftn",
     "docsSeoDescription": "Dokumentacioni i referencës për aftësitë e asistencës së AI të Riftn dhe biblioteka e shpejtë.",
-    "raw": "I papërpunuar"
+    "raw": "I papërpunuar",
+    "docsLoadFailed": "# Gabim\nDokumentacioni i aftësisë nuk u ngarkua."
   },
   "nftMarket": {
     "actAll": "Të gjitha",
@@ -6381,7 +6947,27 @@
     "spotlight": "Spotlight",
     "spotlightBuyNote": "NFT dhe pagesa ndërrohen në një hap.",
     "spotlightOfferNote": "Nuk është listuar ende. Dërgo një ofertë dhe mbajtësi mund ta pranojë atë në çdo kohë.",
-    "signInToTradeCta": "Hyrje për të tregtuar"
+    "signInToTradeCta": "Hyrje për të tregtuar",
+    "actCollectionOffer": "Ofertë për koleksionin",
+    "actListed": "Në listë",
+    "actSale": "Shitje",
+    "buyAll": "Bli të gjitha",
+    "buySeveral": "Bli disa",
+    "cartBought": "U blenë {{n}}. Tani janë në portofolin tënd.",
+    "cartCount": "{{n}} në shportë",
+    "cartFull": "Deri në 20 njëherësh",
+    "cartOneCoin": "Një zinxhir dhe një monedhë për shportë. Pastroje për të ndërruar.",
+    "cartOwn": "Ky është yti",
+    "cartPick": "Prek për ta shtuar në shportë",
+    "forSaleHere": "Në shitje këtu",
+    "noActivity": "Ende s'ka asgjë këtu",
+    "volShort": "Vol",
+    "salesCount": "{{n}} të shitura",
+    "bestOffer": "Oferta më e mirë",
+    "fromOpenSea": "Koleksionet kryesore në OpenSea",
+    "buyHere": "Bliji këtu",
+    "openSeaNote": "Listuar në OpenSea. I paguan shitësit drejtpërdrejt në Seaport; Riftn nuk shton asnjë tarifë.",
+    "viewOnOpenSea": "Shiko në OpenSea"
   },
   "usernames": {
     "seoTitle": "Emri i përdoruesit Marketplace | Riftn",
@@ -6504,7 +7090,9 @@
     "addedToYourUsernames": "Shtohet te emrat e tu të përdoruesit",
     "boughtNameGoesToVault": "Mbetesh @{{current}}. @{{handle}} shkon te emrat e tu të përdoruesit dhe mund të kalosh tek ai kur të duash.",
     "youAreNow": "Tani je @{{handle}}",
-    "boughtToVaultToast": "@{{handle}} tani është te emrat e tu të përdoruesit"
+    "boughtToVaultToast": "@{{handle}} tani është te emrat e tu të përdoruesit",
+    "exactTaken": "<handle>@{{handle}}</handle> i përket dikujt që nuk e ka nxjerrë në shitje. Mund të <profile>e pyesësh</profile>.",
+    "exactReserved": "<handle>@{{handle}}</handle> është një rrugë e Riftn, ndaj askush nuk mund ta mbajë apo ta shesë."
   },
   "accounts": {
     "seoTitle": "Tregu i llogarisë | Riftn",
@@ -6734,7 +7322,18 @@
       "votes_other": "{{count}} vota",
       "howToVote_one": "Shkruani {{command}} dhe një numër në mesazhe për të votuar: {{count}} votë",
       "howToVote_other": "Shkruani {{command}} dhe një numër në mesazhe për të votuar: {{count}} vota"
-    }
+    },
+    "eyebrow": {
+      "follow": "Ndjekës i ri",
+      "subscribe": "Abonent i ri",
+      "subscribedTo": "Abonuar · {{plan}}",
+      "gifted_one": "Dhuroi një abonim",
+      "gifted_other": "Dhuroi {{count}} abonime",
+      "share": "Ndau transmetimin",
+      "join": "Sapo u bashkua"
+    },
+    "giftedSubs_one": "{{name}} dhuroi një abonim!",
+    "giftedSubs_other": "{{name}} dhuroi {{count}} abonime!"
   },
   "liveChatModeration": {
     "timeout1m": "Kohë për 1 minutë",
@@ -6755,14 +7354,40 @@
       "modes": {
         "none": "Fikur",
         "blur": "Turbullim",
-        "color": "Ngjyra"
-      }
+        "color": "Ngjyra",
+        "image": "Foto"
+      },
+      "failed": "Heqja e sfondit nuk mund të nisej në këtë pajisje.",
+      "hint": "Funksionon në pajisjen tënde. Herën e parë duhen disa sekonda për t'u ngarkuar."
     },
     "remove": "Hiq",
     "scenes": {
       "countdown": "Numërimi mbrapsht",
       "names": {
-        "starting": "Fillon së shpejti"
+        "starting": "Fillon së shpejti",
+        "chatting": "Thjesht bisedë",
+        "gameplay": "Lojë",
+        "brb": "Kthehem menjëherë",
+        "ending": "Transmetimi po mbaron"
+      },
+      "title": "Skenat",
+      "edit": "Redakto {{name}}",
+      "subtitle": "Rreshti i dytë (opsional)",
+      "picture": "Foto",
+      "noCountdown": "Pa numërim mbrapsht",
+      "minutes": "{{count}} min",
+      "muteMic": "Hesht mikrofonin tim ndërsa kjo është aktive",
+      "hints": {
+        "starting": "Kartë me numërim mbrapsht",
+        "chatting": "Kamera në ekran të plotë",
+        "gameplay": "Ekrani me kamerën tënde",
+        "brb": "Kartë, mikrofoni i heshtur",
+        "ending": "Kartë falënderimi"
+      },
+      "subtitles": {
+        "starting": "Transmetimi fillon pas",
+        "brb": "Kthehem pas pak",
+        "ending": "Faleminderit që shikuat"
       }
     },
     "sources": {
@@ -6772,15 +7397,37 @@
       "show": "Shfaq në stream",
       "loop": "Cikël",
       "positions": {
-        "center": "Qëndro"
+        "center": "Qëndro",
+        "top-left": "Lart majtas",
+        "top-right": "Lart djathtas",
+        "bottom-left": "Poshtë majtas",
+        "bottom-right": "Poshtë djathtas"
       },
       "sizes": {
-        "medium": "Mesatare"
+        "medium": "Mesatare",
+        "small": "I vogël",
+        "large": "I madh"
       },
       "shapes": {
         "circle": "Rreth",
-        "rect": "Katror"
-      }
+        "rect": "Katror",
+        "rounded": "I rrumbullakosur"
+      },
+      "title": "Burimet",
+      "addImage": "Imazh ose logo",
+      "addCamera": "Kamerë e dytë",
+      "addClip": "Klip video",
+      "addReaction": "Reago ndaj një videoje",
+      "reactPlaceholder": "Ngjit një link videoje Riftn",
+      "reactInvalid": "Ngjit një link për një video Riftn.",
+      "reactNotLive": "Shko live së pari, pastaj shto videon.",
+      "reactNoBubble": "Kamera jote nuk mund të hapej dy herë këtu. Ripërmaso videon që fytyra jote të mbetet në ekran.",
+      "failed": "Burimi nuk u shtua.",
+      "empty": "Shto një logo, një kamerë të dytë ose një klip video mbi transmetimin tënd.",
+      "hint": "Burimet vizatohen mbi pamjen tënde për çdo shikues dhe çdo platformë.",
+      "clip": "Klip",
+      "restart": "Rinis",
+      "play": "Luaj ose pauzë"
     },
     "audio": {
       "mute": "Hesht",
@@ -6789,7 +7436,27 @@
         "off": "Fikur",
         "low": "E ndritshme",
         "high": "I fortë"
-      }
+      },
+      "title": "Mikseri audio",
+      "unavailable": "Ky shfletues nuk mund të përziejë audio, ndaj mikrofoni yt dërgohet siç është.",
+      "channels": {
+        "mic": "Mikrofoni",
+        "game": "Loja / skeda",
+        "clip": "Klip video"
+      },
+      "absent": {
+        "mic": "Pa mikrofon",
+        "game": "Ndaj një ekran me audio ose përdor një kartë kapjeje",
+        "clip": "Shto një klip video te Burimet"
+      },
+      "gate": "Porta e zhurmës",
+      "gateHint": "Hesht mikrofonin mes fjalëve, që klikimet e tastierës dhe ventilatorët të mos dëgjohen në transmetim."
+    },
+    "imageTooLarge": "Kjo foto është shumë e madhe. Provo një më të vogël.",
+    "widgets": {
+      "title": "Shfaq widget-et në videon time",
+      "hint": "Sinjalizimet, shiritat e qëllimeve dhe chati vizatohen në transmetimin tënd, që t'i shohin edhe shikuesit në Twitch, YouTube dhe çdo platformë tjetër.",
+      "failed": "Nuk u ndryshua vendi ku shfaqen widget-et. Provo përsëri."
     }
   },
   "liveStudio": {
@@ -6803,12 +7470,32 @@
         "off": "Fikur",
         "idle": "Gati",
         "live": "Drejtpërdrejt",
-        "error": "Gabim"
-      }
+        "error": "Gabim",
+        "connecting": "Po lidhet"
+      },
+      "title": "Destinacionet e multistream",
+      "intro": "Shko live në Riftn një herë dhe ne e dërgojmë transmetimin tënd në çdo platformë të aktivizuar këtu, falas. Fillon brenda pak sekondash pasi del live.",
+      "add": "Shto destinacion",
+      "empty": "Ende pa destinacione. Shto Twitch, YouTube, Kick ose çdo server RTMP.",
+      "server": "URL e serverit",
+      "findKey": "Gjej serverin dhe çelësin tënd të {{name}}",
+      "customHint": "Ngjit serverin RTMP dhe çelësin që të jep platforma.",
+      "keyNote": "Çelësi yt ruhet i enkriptuar në serverët tanë dhe nuk shfaqet më kurrë.",
+      "added": "{{name}} u shtua",
+      "saveFailed": "Destinacioni nuk u ruajt",
+      "toggle": "Transmeto në këtë destinacion"
     },
     "vertical": {
       "centre": "Qëndro",
-      "live": "DREJTPËRDREJT"
+      "live": "DREJTPËRDREJT",
+      "title": "Pamja vertikale",
+      "intro": "Telefonat e shohin transmetimin tënd në rrjedhën vertikale. Tërhiq kutinë për të zgjedhur pjesën e pamjes që shohin.",
+      "enabled": "Shfaq transmetimin tim në rrjedhën vertikale",
+      "zoom": "Zmadho",
+      "frame": "Pamja jote horizontale",
+      "box": "Çfarë shohin telefonat",
+      "hint": "Tërhiq kutinë, ose përdor tastet me shigjeta. Ruaje për ta zbatuar në transmetimin live.",
+      "watch": "Shiko {{name}} live"
     },
     "subathon": {
       "title": "Nënaton",
@@ -6971,7 +7658,8 @@
       "subathon_timer": "Kohëmatësi i subatonit",
       "points_board": "Shikuesit të besnikë",
       "streamer_level": "Niveli i transmetuesit",
-      "tip_jar": "Kavanoz dhuratë"
+      "tip_jar": "Kavanoz dhuratë",
+      "hype_train": "Hype train"
     },
     "hints": {
       "tip_alert": "Feston çdo bakshish, të madhësisë sipas nivelit të tij",
@@ -6995,7 +7683,8 @@
       "subathon_timer": "Një countdown që donacionet, followet dhe abonimet e shtojnë kohën",
       "points_board": "Shikuesit më të mëdhenj sipas pikëve nga shikimi dhe donacionimi",
       "streamer_level": "Niveli i streamer-it dhe intervali javor, nga profili yt",
-      "tip_jar": "Vjen një kavanoz që mbushet me dhurata të paguara"
+      "tip_jar": "Vjen një kavanoz që mbushet me dhurata të paguara",
+      "hype_train": "Shfaq hype train-in kur është në veprim: tri dhurata ose abonime brenda pesë minutash e nisin."
     },
     "fields": {
       "style": "Stili",
@@ -7381,7 +8070,10 @@
     "endStreamConfirmBody": "Transmetimi juaj ndalet për të gjithë ata që po shikojnë dhe nuk mund të rifillon.",
     "keepStreaming": "Vazhdoni transmetimin",
     "encoderPermanentHint": "Ky çelës nuk ndryshon kurrë. Vendosni koduesin tuaj një herë — herën tjetër vetëm shtypni Start atje dhe Riftn krijon postimin për ju.",
-    "notEnoughTokensForBounty": "Nuk ka tokena të mjaftueshëm. Nevojiten {{need}} tokena por keni {{have}}."
+    "notEnoughTokensForBounty": "Nuk ka tokena të mjaftueshëm. Nevojiten {{need}} tokena por keni {{have}}.",
+    "screenInAppHint": "Në aplikacionin Riftn",
+    "screenInAppNote": "Shfletuesit e telefonit nuk lejojnë asnjë faqe interneti të ndajë ekranin tënd. Shko live nga aplikacioni Riftn, pastaj prek Ndaj ekranin.",
+    "screenInAppCta": "Merr aplikacionin Riftn"
   },
   "events": {
     "seoTitle": "Ngjarje: Takime & Ngjarje Komuniteti në Riftn",
@@ -7648,7 +8340,8 @@
     "ambWant5": "Përvoja e mëparshme e ambasadorit, ndikuesit ose menaxhimit të komunitetit është një bonus",
     "ambassadorCompensation": "Ambasadorët e markës marrin një pagë mujore <b> të negociueshme </b> të paguar vazhdimisht. Bonuse shtesë mund të jepen në bazë të performancës së fushatës, regjistrimeve të përdoruesve dhe pikave të rritjes së komunitetit. Me rritjen e ekosistemit, do të marrësh edhe shërbimin ekskluziv Riftn, aksesin e hershëm në funksione dhe alokimet e simboleve.",
     "applyAsAmbassador": "Apliko si ambasador i markës",
-    "noRoleFits": "Nuk sheh një rol që të përshtatet? Na kontakto në <mail> dev@riftn.com</mail> — ne jemi gjithmonë në kërkim të njerëzve të talentuar."
+    "noRoleFits": "Nuk sheh një rol që të përshtatet? Na kontakto në <mail> dev@riftn.com</mail> — ne jemi gjithmonë në kërkim të njerëzve të talentuar.",
+    "bdmCompensation": "Ky rol ofron një <b>pagë bazë të negociueshme</b> plus një <b>strukturë komisioni OTE pa kufi</b> të lidhur drejtpërdrejt me partneritetet që sjell. Më të mirët kanë potencial fitimi të pakufizuar."
   },
   "depin": {
     "seoTitle": "DePin | Infrastruktura e medias e mundësuar nga komuniteti | Riftn",
@@ -7970,7 +8663,45 @@
     "foldersInFolder_other": "Në dosjet {{count}}",
     "foldersNoItems": "Asgjë në këtë dosje akoma",
     "foldersNoItemsHint": "Hap një rezultat dhe zgjidh \"Shto në dosje\" për ta ruajtur këtu.",
-    "skippedUpstreamFailed": "U anashkalua sepse një hap i mëparshëm dështoi. Kostoja e saj qëndron në balancën tënde."
+    "skippedUpstreamFailed": "U anashkalua sepse një hap i mëparshëm dështoi. Kostoja e saj qëndron në balancën tënde.",
+    "signInForAudioLibrary": "Hyr për të hapur bibliotekën tënde private të audios së ruajtur.",
+    "audioLibraryFailed": "Audioja jote e ruajtur nuk u ngarkua. Provo përsëri.",
+    "retryFreeTask": "Riprovo detyrën falas",
+    "previewSavedMedia": "Shiko paraprakisht median e ruajtur",
+    "audioSavePending": "Audioja është gati, por ruajtja në bibliotekën private është në pritje. Vazhdo për ta marrë.",
+    "confirmInterruptedRetry": "Riprovo detyrën e ndërprerë të audios ose asistentit. Rezultati i mëparshëm është i panjohur dhe riprovimi mund ta përsërisë punën. Pagesa ekzistuese dhe ID-të e punëve të paguara do të ripërdoren.",
+    "freeResultUnknown": "Përgjigjja e detyrës falas u ndërpre. Nuk do të dërgohet sërish automatikisht. Zgjidh Riprovo detyrën falas, pastaj vazhdo; pagesa dhe punët e tjera ruhen.",
+    "formAuthor": "Redakto flow-n",
+    "formAuthorHint": "Ndërto një flow me hyrje të tipizuara. Ruaje këtu, ose rregulloje në kanavacën web.",
+    "chooseSavedMedia": "Zgjidh median e ruajtur",
+    "formInput": "Hyrja: {{handle}}",
+    "reviewRun": "Shqyrto ekzekutimin",
+    "resumeRun": "Vazhdo ekzekutimin e ruajtur",
+    "confirmPrice": "Gjithsej: {{price}} tokena",
+    "recoveryHint": "Referencat e punës dhe të pagesës ruhen në këtë pajisje. Vazhdo punën e ndërprerë para se të nisësh një ekzekutim tjetër.",
+    "newRun": "Nis një ekzekutim tjetër",
+    "loadMoreMedia": "Ngarko më shumë media",
+    "invalidGraph": "Kontrollo lidhjet: çdo hyrje ka nevojë për një burim të përputhshëm dhe grafiku nuk mund të ketë cikle.",
+    "unsupportedNode": "Kjo nyje nuk mund të ekzekutohet ende në formën native. Përdor kanavacën web për këtë flow.",
+    "missingPrompt": "Lidh një nyje teksti me një prompt.",
+    "invalidSettings": "Këto cilësime nuk mbështeten nga modeli i zgjedhur.",
+    "missingCapturedFrame": "Kap një kuadër në kanavacën web para se ta përdorësh këtë video si hyrje imazhi.",
+    "missingSavedMedia": "Media burim e ruajtur mungon ose nuk është më e disponueshme për këtë llogari.",
+    "quoteFailed": "Çmimi i këtij flow-i nuk u llogarit. Provo përsëri.",
+    "recoverBeforeEdit": "Vazhdo ekzekutimin e ruajtur para se të ndryshosh grafikun ose të nisësh një ekzekutim tjetër.",
+    "runAlreadyComplete": "Ky ekzekutim ka përfunduar. Zgjidh Nis një ekzekutim tjetër për të gjeneruar sërish.",
+    "recoveryCorrupt": "Regjistri i ruajtur i rikuperimit nuk mund të lexohej. Mbaje këtë flow dhe kontakto mbështetjen para se të paguash sërish.",
+    "paidUnavailable": "Këtu mund të krijosh dhe ruash flow-e. Ekzekutimet me pagesë nuk janë të disponueshme në këtë dyqan.",
+    "planChanged": "Flow-i ndryshoi pas llogaritjes së çmimit. Shqyrto sërish ekzekutimin.",
+    "connectOwnerWallet": "Lidh portofolin që zotëron këtë flow.",
+    "runFailed": "Nyja nuk mund të përfundonte. Referenca e saj e ruajtur e punës mbahet për rikuperim.",
+    "recoveryPending": "Renderimi është ende në pritje. Vazhdo këtë ekzekutim për ta marrë.",
+    "nodeAudioGen": "Gjenerues audio",
+    "nodeAudioGenDesc": "Të folur, efekte zanore, transkriptim dhe izolim audio",
+    "nodeAudioInput": "Audio e ruajtur",
+    "nodeAudioInputDesc": "Përdor audio private nga biblioteka jote",
+    "audioVoiceId": "ID e zërit",
+    "audioSeconds": "Gjatësia e tingullit në sekonda"
   },
   "videoPlayer": {
     "volume": "Volumi",
@@ -8045,7 +8776,8 @@
       "live_streaming": "Transmetim i drejtpërdrejtë",
       "content_or_moderation": "Përmbajtja ose moderimi",
       "feature_request": "Kërkesa për veçori",
-      "other": "Tjetër"
+      "other": "Tjetër",
+      "bug": "Gabim"
     }
   },
   "digest": {
@@ -8122,7 +8854,13 @@
       "doneAll": "Ndërprerëra {{done}} llogaritë që nuk të ndjekin në kthim.",
       "doneSome": "Ndërprerëra {{done}} llogaritë. {{failed}} nuk u arrit të ndërprerë.",
       "doneToast": "Ndërprerëra {{done}} llogaritë që nuk të ndjekin në kthim"
-    }
+    },
+    "followBackConfirmTitle_one": "Të ndjekësh {{count}} person?",
+    "followBackConfirmTitle_other": "Të ndjekësh {{count}} persona?",
+    "followBackConfirmBody": "Ata të ndjekin tashmë. Llogaritë private marrin një kërkesë ndjekjeje.",
+    "followedBackCount_one": "U ndoq {{count}} person",
+    "followedBackCount_other": "U ndoqën {{count}} persona",
+    "followBackDoneBody": "I gjen të gjithë te Duke ndjekur."
   },
   "reactionInfo": {
     "title": "Reagimet",
@@ -8924,7 +9662,28 @@
       "add": "Shto",
       "scale": "Madhësia",
       "color": "Ngjyrë",
-      "light": "E ndritshme"
+      "light": "E ndritshme",
+      "create": "Shto një skenë 3D",
+      "title": "Skena 3D",
+      "hint": "Ndërto një pamje me sfera dhe kuti. Kamera, vendosja dhe tri drita zonale të pavarura ndryshojnë kuadrin e renderuar.",
+      "preview": "Pamja paraprake e skenës së renderuar",
+      "error": "Kuadri nuk u përgatit. Kontrollo referencat e pamjes dhe provo përsëri.",
+      "elevation": "Lartësia",
+      "distance": "Distanca",
+      "fov": "Fusha e shikimit",
+      "object": "Objekti",
+      "sphere": "Sferë",
+      "box": "Kuti",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Hiq objektin",
+      "intensity": "Intensiteti",
+      "diffusion": "Shpërndarja",
+      "saving": "Po përgatitet kuadri…",
+      "useFrame": "Përdor kuadrin e renderuar si referencë pamjeje",
+      "frameHint": "Krijon një PNG 320 × 180 dhe e shton te referencat e kësaj pamjeje. Shqyrto kufirin e referencave dhe ofertën e çmimit të modelit para gjenerimit.",
+      "frameName": "Kuadër i skenës"
     },
     "video": {
       "tFade": "Shkrirje",
@@ -9019,7 +9778,9 @@
       "pptx": "Përshëndetje PowerPoint",
       "pptxHint": "Çdo faqe bëhet një imazh diapozitive, me shënime të prezantuesit dhe lidhje. Redakto shënime të veçanta dhe elemente në dizajnin origjinal.",
       "section": "Seksion me emër",
-      "transparent": "Prapa e pamëdukshme"
+      "transparent": "Prapa e pamëdukshme",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Shkarkon një ZIP me kronologjinë tënde si FCPXML dhe Premiere XML plus çdo skedar media, që ta përfundosh montazhin në Premiere Pro, Final Cut Pro ose DaVinci Resolve. Teksti bëhet shënues; efektet mbeten në Riftn."
     },
     "inspector": {
       "selectHint": "Zgjidhni një shtresë në kanavacë ose një klip në linjën kohore.",
@@ -9113,7 +9874,45 @@
       "failed": "AI nuk mundi ta bëjë këtë tani. Provo përsëri pas pak.",
       "changes": "Ndryshime të bëra: {{count}}",
       "undo": "Zhbëj",
-      "openGenerator": "Rishiko dhe gjenero"
+      "openGenerator": "Rishiko dhe gjenero",
+      "stopped": "U ndal. Asgjë tjetër nuk u ndryshua.",
+      "queued": "{{count}} në radhë",
+      "restore": "Rikthe deri këtu",
+      "restoreHint": "Ktheje projektin siç ishte para këtij mesazhi. Zhbëj e rikthen.",
+      "restored": "Projekti u rikthye para atij mesazhi. Shtyp zhbëj për të rikthyer versionin më të ri.",
+      "rewrite": "Bëje kërkesën time më të qartë",
+      "rewriteFailed": "Nuk u rishkrua dot. Teksti yt nuk ndryshoi.",
+      "feedback": "A të ndihmoi kjo?",
+      "good": "Përgjigje e mirë",
+      "bad": "Përgjigje e keqe",
+      "retryPrefix": "Nuk ishte e saktë. Përkundrazi, ",
+      "recipesTitle": "Receta",
+      "recipe": {
+        "podcastClip": {
+          "label": "Klip podcast-i",
+          "prompt": "Gjej momentin më të fortë 30-sekondësh, shkurtoje aty, shto titra Word Pop dhe bëje 9:16."
+        },
+        "talkingHead": {
+          "label": "Folës i pastër para kamerës",
+          "prompt": "Prit pauzat e gjata, shto titra Classic dhe jepi një pamje të ngrohtë të lehtë."
+        },
+        "productPromo": {
+          "label": "Promovim produkti",
+          "prompt": "Bëj një promovim 15-sekondësh: titull i fuqishëm në fillim, kalime Zoom in mes klipeve, titra Bold dhe muzikë e gjallë."
+        },
+        "hypeReel": {
+          "label": "Reel entuziazmi",
+          "prompt": "Prit klipet sipas ritmit të muzikës, përdor kalime Fly up dhe pamjen Technicolor."
+        },
+        "retroEdit": {
+          "label": "Montazh retro",
+          "prompt": "Jepi çdo klipi pamjen VHS, shto një titull të madh serif dhe përdor kalime Fade."
+        },
+        "tutorial": {
+          "label": "Tutorial",
+          "prompt": "Shto një titull për çdo hap, titra Boxed dhe ngadalëso momentin kyç në 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Drejtkëndësh",
@@ -9288,7 +10087,9 @@
       "tint": "Nuanca {{value}}",
       "vignette": "Vinjeta {{value}}%",
       "auto": "Përmirësim automatik",
-      "autoFailed": "Nuk mund ta analizonim këtë foto."
+      "autoFailed": "Nuk mund ta analizonim këtë foto.",
+      "halation": "Halacion {{value}}%",
+      "scanlines": "Vija skanimi {{value}}%"
     },
     "pages": {
       "add": "Shto faqe",
@@ -9363,7 +10164,15 @@
       "textSaved": "Ndryshimet e diçiturës u ruajtën.",
       "action": "Titra automatike",
       "styles": {
-        "bold": "I guximshëm"
+        "bold": "I guximshëm",
+        "classic": "Klasik",
+        "boxed": "Në kuti",
+        "wordpop": "Word Pop",
+        "rapid": "Shfaqje e shpejtë",
+        "beast": "Beast Mode",
+        "stacked": "Të mbivendosura",
+        "serif": "Serif",
+        "bubble": "Flluskë"
       },
       "working": "Duke dëgjuar… {{percent}}%",
       "downloading": "Duke përgatitur modelin e të folurit… {{percent}}%",
@@ -9375,7 +10184,8 @@
       "translateCount": "Përkthe {{count}} captions",
       "translationDone": "Përkthyer {{count}} captions",
       "translationFailed": "Përkthimi i diçiturës dështoi. Diçiturat e tua janë të pandryshuara.",
-      "lockedTranslation": "Zhblloko diçiturat e kyçura për t 'i përfshirë ato."
+      "lockedTranslation": "Zhblloko diçiturat e kyçura për t 'i përfshirë ato.",
+      "style": "Stili i titrave"
     },
     "multi": {
       "selected": "{{count}} shtresa të përzgjedhura",
@@ -9412,7 +10222,10 @@
       "saveNewPreset": "Ruaj të re",
       "saveStyles": "Ruaj stilin me dizajnin",
       "stylesSaved": "Stilet e brandit janë ruajtura me këtë dizajn",
-      "usePreset": "Përdor stilin"
+      "usePreset": "Përdor stilin",
+      "dehubApplied": "Marka Riftn u zbatua në {{count}} shtresa.",
+      "dehubApply": "Përdor markën Riftn",
+      "dehubHint": "Ngjyrat zyrtare të Riftn, fontet Exo dhe Inter, dhe logoja e Riftn, me një klikim."
     },
     "draw": {
       "heading": "Vizato",
@@ -10746,7 +11559,23 @@
       "zoomOut": "Fito në kanvas"
     },
     "clipFix": {
-      "listening": "Ndërlind."
+      "listening": "Ndërlind.",
+      "detach": "Shkëput audion",
+      "detached": "Audioja u zhvendos në klipin e vet",
+      "detachFailed": "Audioja e këtij klipi nuk u shkëput",
+      "removeBars": "Hiq shiritat e zinj",
+      "scanning": "Po kontrollohen kuadrot…",
+      "noBars": "Nuk u gjetën shirita të zinj",
+      "barsRemoved": "Shiritat e zinj u prenë",
+      "barsFailed": "Kjo video nuk u kontrollua për shirita të zinj",
+      "reframe": "Rikuadrim automatik",
+      "reframeHint": "Videoja përshtatet tashmë me formën e kësaj faqeje",
+      "reframed": "U rikuadrua për të ndjekur veprimin",
+      "reframeFailed": "Kjo video nuk u rikuadrua",
+      "retakes": "Hiq përsëritjet",
+      "noRetakes": "Nuk u gjetën përsëritje",
+      "retakesRemoved": "U hoqën {{count}} përsëritje, u mbajt marrja e fundit",
+      "retakesFailed": "Përsëritjet nuk u hoqën nga ky klip"
     },
     "shortcuts": {
       "action": {
@@ -10754,19 +11583,109 @@
         "play": "Luaj",
         "pause": "Ndalo",
         "frameBack": "Korniza e mëparshme",
-        "frameForward": "Korniza tjetër"
-      }
+        "frameForward": "Korniza tjetër",
+        "back": "Mbrapa 1 sekondë",
+        "rippleDelete": "Fshi klipin",
+        "liftDelete": "Fshi klipin",
+        "start": "Shko në fillim",
+        "end": "Shko në fund"
+      },
+      "preset": "Paraqitja e tastierës",
+      "presetHint": "Përdor tastet e kronologjisë nga redaktuesi që njeh. Shkurtoret e vetë Riftn vazhdojnë të funksionojnë për gjithçka tjetër."
     },
     "voiceClone": {
       "stop": "Ndalo regjistrimin",
-      "failed": "Klonimi i zërit dështoi."
+      "failed": "Klonimi i zërit dështoi.",
+      "pickerLabel": "Klono zërin tënd",
+      "pickerDetail": "Zë jashtë kamerës me zërin tënd",
+      "title": "Klono zërin tënd",
+      "description": "Regjistro veten ose zgjidh një klip ku flet ti. Paguan një herë dhe zëri yt është i yti për çdo zë jashtë kamerës.",
+      "defaultName": "Zëri im",
+      "record": "Regjistro një mostër (30 sekonda deri në 2 minuta)",
+      "fromMedia": "Ose përdor një klip nga Media",
+      "recorded": "Regjistrimi yt",
+      "sample": "Mostra: {{name}}",
+      "hint": "Funksionon më mirë një e folur e qartë pa muzikë.",
+      "noMic": "Mikrofoni nuk mund të përdorej.",
+      "sampleFailed": "Tingulli nga ai klip nuk mund të lexohej.",
+      "pay": "Klono për {{amount}} tokena",
+      "useFree": "Klono (paguar tashmë)",
+      "owned": "Zëri yt “{{name}}” është tashmë gati. Zgjidhe nga lista e zërave.",
+      "useOwned": "Përdor zërin tim",
+      "ready": "“{{name}}” është gati për zë jashtë kamerës.",
+      "paidFailed": "Pagesa jote është ruajtur. Hape sërish dhe prova e radhës është falas.",
+      "consent": "Klono vetëm zërin tënd, ose një zë që ke leje ta përdorësh."
     },
     "linkImport": {
       "go": "Importo",
-      "downloading": "Po shkarkohet {{percent}}%"
+      "downloading": "Po shkarkohet {{percent}}%",
+      "open": "Importo nga një link",
+      "placeholder": "Ngjit një link YouTube, TikTok ose tjetër",
+      "rights": "Kjo video është e imja ose kam leje ta përdor",
+      "audioOnly": "Vetëm zëri",
+      "queued": "Në radhë…",
+      "waiting": "Në pritje të faqes, do të provohet sërish së shpejti…",
+      "adding": "Po shtohet te Media…",
+      "added": "U importua dhe u shtua në kronologji.",
+      "failed": "Ai link nuk mund të importohej."
     },
     "reverse": {
-      "action": "Rretho"
+      "action": "Rretho",
+      "working": "Po kthehet mbrapsht {{percent}}%",
+      "done": "Klipi u kthye mbrapsht.",
+      "failed": "Ky klip nuk mund të kthehej mbrapsht.",
+      "unsupported": "Ky shfletues nuk mund ta kthejë videon mbrapsht. Provo Chrome ose Edge.",
+      "tooLong": "Mund të kthehen mbrapsht klipe deri në {{seconds}} sekonda."
+    },
+    "film": {
+      "repairRefs": "Hiq linket e medias që mungon",
+      "title": "Projekt filmi",
+      "intro": "Planifiko pamjet me referenca imazhi të ripërdorshme. Përshkrimi, renditja e pamjeve dhe rezultatet e zgjedhura ruhen me këtë projekt.",
+      "create": "Krijo planin e filmit",
+      "name": "Emri i filmit",
+      "brief": "Përshkrimi i filmit",
+      "sharedReferences": "Referenca imazhi të përbashkëta (deri në 4)",
+      "shot": "Pamja",
+      "addShot": "Shto pamje",
+      "shotName": "Emri i pamjes",
+      "action": "Veprimi dhe kompozimi i pamjes",
+      "seconds": "Sekondat e kërkuara të videos",
+      "shotReferences": "Referenca imazhi shtesë (kufi i përbashkët 4)",
+      "frame": "Përgatit kuadrin",
+      "video": "Përgatit videon",
+      "review": "Shqyrto modelin, referencat, kohëzgjatjen e videos dhe çmimin në studio para gjenerimit.",
+      "result": "Rezultati i pranuar i pamjes",
+      "noResult": "Asnjë rezultat i zgjedhur",
+      "resultHint": "Zgjidh një imazh ose video të pranuar nga Ngarkimet. Linku i saj ruhet me këtë pamje; përdor kronologjinë për të montuar filmin.",
+      "earlier": "Lëviz më herët",
+      "later": "Lëviz më vonë",
+      "remove": "Hiq pamjen",
+      "issue": "Kontrollo përshkrimin e pamjes dhe median e referencës, pastaj provo përsëri. Mbaje projektin të hapur nëse nuk mund të ruhej.",
+      "searchMedia": "Gjej media sipas emrit",
+      "refreshMedia": "Rifresko median"
+    },
+    "speakers": {
+      "find": "Gjej folësit",
+      "name": "Folësi {{number}}",
+      "onlyOne": "U gjet vetëm një folës.",
+      "failed": "Folësit nuk u gjetën.",
+      "kept": "U mbajt vetëm {{name}}.",
+      "editFailed": "Ai redaktim nuk përshtatej me këtë klip.",
+      "split": "U nda në {{count}} pamje folësish.",
+      "keepOnly": "Mbaj vetëm",
+      "splitAction": "Prit në çdo ndryshim folësi"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Përshkruaj objektin 3D që do",
+      "queued": "Po ndërtohet objekti yt 3D. Do të shfaqet te skeda Gjenerimet.",
+      "note": "Objektet 3D vijnë te Media si një klip i shkurtër që rrotullohet me sfond transparent."
+    },
+    "behind": {
+      "action": "Tekst pas personit",
+      "working": "Po pritet personi…",
+      "done": "Teksti dhe titrat tani qëndrojnë pas personit.",
+      "failed": "Teksti nuk mund të vendosej pas personit."
     }
   },
   "jungleMood": {
@@ -11169,7 +12088,9 @@
     "tokenAmount": "{{amount}} tokena",
     "assistant": {
       "question1": "Cila është APY-ja aktuale e vlerësimit për tokenët Riftn?",
-      "question2": "Po, nëse marr 10,000 monedha për 90 ditë"
+      "question2": "Po, nëse marr 10,000 monedha për 90 ditë",
+      "answer1": "APY aktual i staking-ut për tokenat Riftn është 12.4% për një periudhë bllokimi 30-ditore. Ja ndarja:\n\n• Bllokim 7-ditor: 8.2% APY\n• Bllokim 30-ditor: 12.4% APY\n• Bllokim 90-ditor: 18.7% APY\n\nDo që të të ndihmoj të llogaritësh fitimet e mundshme?",
+      "answer2": "Për 10,000 tokena në staking me 18.7% APY për 90 ditë:\n\n📊 Shpërblimi i vlerësuar: ~461 tokena\n\nKjo është afërsisht 5.13 tokena në ditë. Mbaj parasysh që APY mund të luhatet sipas shumës totale në staking."
     },
     "bookmarks": {
       "stakingGuide": "Udhëzuesi i plotë për marrjen e tokenëve Riftn: shpjegohet zbërthimi APY, periudhat e bllokimit dhe shumëzuesit e shpërblimit."
@@ -11915,7 +12836,10 @@
     "planTypeNotAllowed": "Plani i këtij krijuesi nuk e lejon këtë lloj mesazhi.",
     "planMinTip": "Bakshishi për këtë krijues duhet të jetë të paktën {{amount}} tokena.",
     "shareKindGroup": "GRUPI",
-    "shareKindCommunity": "Komunitet"
+    "shareKindCommunity": "Komunitet",
+    "shareGroups": "Grupet",
+    "shareKindChannel": "Kanal",
+    "reportMessage": "Raporto mesazhin"
   },
   "credits": {
     "earningsWorth": "Vlen {{amount}}",
@@ -11957,7 +12881,11 @@
     "error": "Kërkesa për fshirje nuk u dërgua dot. Llogaria jote nuk është konfirmuar për fshirje. Provo përsëri.",
     "back": "Kthehu te Cilësimet",
     "signIn": "Hyr për të fshirë llogarinë tënde",
-    "acknowledge": "Kam ruajtur detajet e rimëkëmbjes së portofolit dhe e kuptoj se fshirja është e përhershme."
+    "acknowledge": "Kam ruajtur detajet e rimëkëmbjes së portofolit dhe e kuptoj se fshirja është e përhershme.",
+    "signedInAs": "Je identifikuar si",
+    "confirmTitle": "Të fshihet llogaria jote përgjithmonë?",
+    "confirmBody": "Llogaria jote dhe gjithçka në të do të fshihen. Do të dalësh nga llogaria dhe kjo nuk mund të zhbëhet.",
+    "confirmBodyNamed": "{{who}} dhe gjithçka në të do të fshihen. Do të dalësh nga llogaria dhe kjo nuk mund të zhbëhet."
   },
   "miniApps": {
     "badge": {
@@ -12054,12 +12982,42 @@
       "rewardPending": "Në pritje",
       "rewardsNone": "Nuk janë llogaritur ende shpërblime. Java e parë mbyllet të hënën.",
       "stats": {
-        "button": "Statistika të drejtpërdrejta"
+        "button": "Statistika të drejtpërdrejta",
+        "chartTitle": "Persona që hapën aplikacionin tënd, 30 ditët e fundit",
+        "peak_one": "Kulmi {{count}} në ditë",
+        "peak_other": "Kulmi {{count}} në ditë",
+        "people30": "Persona, 30 ditë",
+        "people7": "Persona, 7 ditë",
+        "added": "E shtuan",
+        "dhb30": "Tokena të paguar, 30 ditë",
+        "notified30": "Njoftime të dërguara, 30 ditë",
+        "rewards": "Shpërblime në tokena të fituara"
       },
       "signin": {
         "users_one": "përdorues {{count}}",
         "users_other": "përdorues {{count}}",
-        "delete": "Fshi"
+        "delete": "Fshi",
+        "title": "Hyr me Riftn",
+        "body": "Lejo njerëzit të hyjnë në faqen ose aplikacionin tënd me llogarinë e tyre Riftn. Krijo një çelës këtu, pastaj ndiq udhëzuesin.",
+        "guide": "Lexo udhëzuesin",
+        "copyId": "Kopjo ID-në e klientit",
+        "rotate": "Sekret i ri",
+        "rotateConfirm": "Të krijohet një sekret i ri për {{name}}? Sekreti i vjetër ndalon së funksionuari menjëherë.",
+        "deleteConfirm": "Të fshihet {{name}}? Të gjithë që kanë hyrë me të do të dalin.",
+        "secretOnce": "Sekreti për {{name}}. Kopjoje tani: shfaqet vetëm një herë.",
+        "name": "Emri i aplikacionit",
+        "website": "Faqja e internetit (opsionale)",
+        "redirects": "URL-të e ridrejtimit, një për rresht (https://yoursite.com/callback)",
+        "create": "Krijo çelës"
+      },
+      "stateRejected": "Aktiv me link · nuk është miratuar për dyqanin",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Ngjarjet që Riftn dërgoi në webhookUrl-në tënde. Testi dërgon një ngjarje ping.",
+        "test": "Dërgo test",
+        "ok": "Webhook-u u përgjigj {{status}}",
+        "failed": "Webhook-u dështoi: {{reason}}",
+        "none": "Ende nuk është dërguar asnjë webhook."
       }
     },
     "card": {
@@ -12086,7 +13044,10 @@
       "confirm": "Pagë {{amount}} tokena",
       "sending": "Dërgoj pagëzimin tuaj…",
       "sent": "Paguarë dhënien e dhjetëvjetëshe për {{amount}} nga {{name}}.",
-      "noOwner": "Ky aplikacion nuk ka asnjë portofol të verifikuar për pagime deri tani."
+      "noOwner": "Ky aplikacion nuk ka asnjë portofol të verifikuar për pagime deri tani.",
+      "testBadge": "Modaliteti test",
+      "testBody": "Ky aplikacion është yti, ndaj ky është një test: asnjë token nuk lëviz dhe fatura shënohet si test.",
+      "testSent": "Pagesë test prej {{amount}} tokenash. Nuk u dërgua asgjë."
     },
     "add": {
       "title": "Shfrytëzoj {{name}}?",
@@ -19205,7 +20166,62 @@
     "127053546dd4": "Nuk mund të shkarkohet ky skedar",
     "d14896aa4bf8": "Biblioteka falas nuk mund të ngarkohej. Kontrollo lidhjen dhe provo përsëri.",
     "953e708b2287": "Gjenerimi i zërit dështoi.",
-    "4a52cdd6ac72": "I pamundur dublikimi i këtyre shtresave"
+    "4a52cdd6ac72": "I pamundur dublikimi i këtyre shtresave",
+    "3f9b2c71d0a4": "{{n}} rezultate",
+    "8c4e1a6b2f57": "për “{{query}}”",
+    "1d7234ff1b79": "në {{feed}}",
+    "e122e5c2b563": "Tërhiq lart për ta mbyllur",
+    "1aa9d734f2ee": "Zgjidh çfarë të kërkosh",
+    "ef557404f465": "Asnjë rezultat për “{{query}}”",
+    "35034aa59bd3": "Asgjë në {{feed}} nuk u përputh. Provo fjalë të tjera ose kërko kudo.",
+    "415155739590": "Kërko kudo",
+    "9e13d826baaf": "Kërko imazhe",
+    "cbf6f228327c": "Kërko muzikë",
+    "e8756c6865a5": "Kërko Shorts",
+    "c7661da99c41": "Kërko video",
+    "90f1afe66801": "Po kërkohet “{{query}}”…",
+    "d7b559f2d8c6": "Provo fjalë të tjera, ose ndrysho filtrat.",
+    "d1a0c7e2f301": "Çfarë ke në mendje sot?",
+    "d1a0c7e2f302": "Për çfarë po mendon sot?",
+    "d1a0c7e2f303": "Çfarë ke në mendje?",
+    "d1a0c7e2f304": "Ke diçka në mendje?",
+    "d1a0c7e2f305": "Çfarë ke në mendje tani?",
+    "d1a0c7e2f306": "Për çfarë po mendojmë sot?",
+    "d1a0c7e2f307": "Ndonjë gjë në mendje sot?",
+    "d1a0c7e2f308": "Çfarë ke në mendje këtë herë?",
+    "a7c1e0f4b2d9": "Prek për të folur",
+    "b3e8d1c6f0a2": "Prek për të dërguar",
+    "c9f2a4e7d1b5": "Po dëgjoj... prek topin për të dërguar",
+    "22577ebd908e": "Gjenero video Wan 3.0 · kolonë zanore origjinale",
+    "1fa2357ab7e1": "Gjenero video Seedance 720p · kolonë zanore origjinale",
+    "7f78bdc0762d": "+{{value1}} pikë",
+    "f0c8bb34335b": "Fitove +{{value1}} pikë",
+    "0fbe06b679a8": "{{value1}} pikë për çdo kërkesë të realizuar, të shtuara në rezultatin tënd te Ndërtuesit kryesorë.",
+    "431bc73eb60b": "[verse]\nTeksti yt këtu...\n\n[chorus]\nTeksti i refrenit...",
+    "81acaafba961": "Aa",
+    "a3c1e5f20b71": "Përdor Riftn brenda ChatGPT, Claude ose çdo aplikacioni MCP. Ngjit URL-në më poshtë te cilësimet e konektorit të asistentit për të shfletuar postime, profile dhe komente, pastaj hyr kur të kërkohet për të lidhur llogarinë tënde.",
+    "b84d2e7c9a16": "Kjo adresë është për aplikacionet AI, jo një faqe web. Hapja e saj në shfletues të sjell këtu.",
+    "c5e9f1a3d742": "Lidh llogarinë tënde Riftn",
+    "d61a7b4e8c05": "Kur asistenti të kërkon të hysh, hyr në Riftn dhe kliko Lejo. Pastaj mund të përditësojë profilin tënd, të publikojë postime dhe komente, të ndjekë njerëz dhe të krijojë në Creator Studio. Lidhjet mbeten aktive sa kohë i përdor dhe skadojnë pas 30 ditësh pa përdorim.",
+    "e27b8c5f9d13": "Udhëzues hap pas hapi për ChatGPT",
+    "f38c9d6a0e24": "Udhëzues hap pas hapi për Claude",
+    "0a49d7b1f835": "Preferon një llogari bot më vete? Krijo një agjent për të marrë një URL konektori që poston si ai agjent.",
+    "1b5ae8c20f46": "Kur ta kërkojë ChatGPT, hyr në Riftn dhe kliko Lejo për të lidhur llogarinë tënde.",
+    "2c6bf9d31a57": "Kliko Lidh, hyr në Riftn dhe kliko Lejo për të lidhur llogarinë tënde.",
+    "27c26a5a38b3": "Hyr për të parë mesazhet më të vjetra",
+    "674e70bcd915": "Historiku i plotë i chatit është i hapur për këdo me llogari.",
+    "feaf753f6557": "Fillimi i chatit",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "b4e19ee2ae63": "U krye!",
+    "e09bfd7e137e": "Kalo tokenat Riftn mes Base dhe BNB Chain.",
+    "ebebdc70335b": "Shirita xhami",
+    "5ff272ba7871": "Vija mëndafshi",
+    "a941e90ca93d": "Halo kopertine",
+    "04dbbe4dff7a": "Valë e vërtetë",
+    "85330dcbaadd": "Asnjë algoritëm që favorizon njërën anë të debatit. \nTë gjithë përforcohen në mënyrë të barabartë dhe të drejtë.",
+    "87a58776c5e4": "{{value1}}{{value2}} — Ku ta shikosh | Riftn",
+    "6e71ae3669b1": "Rezultati i ruajtur nuk është i disponueshëm"
   },
   "articles": {
     "cardLabel": "Artikull · {{count}} minuta leximi",
@@ -19247,7 +20263,16 @@
     "formatting": "Formatimi",
     "bodyPlaceholder": "Tregoni historinë tuaj. Zgjidhni tekstin dhe përdorni shiritin e mësipërm për titujt, shkronjat e theksuara, citimet dhe listat.",
     "bodyLabel": "Organi i artikullit",
-    "wordCount": "{{count}} fjalët"
+    "wordCount": "{{count}} fjalët",
+    "imageLimit": "Artikujt mund të mbajnë deri në {{count}} imazhe",
+    "imageLimitSome": "Vetëm {{count}} imazhe të tjera nxë ky artikull",
+    "imageFailed": "Ky imazh nuk mund të shtohej. Provo një tjetër.",
+    "imagesUploading": "Po shtohen imazhet ({{count}})…",
+    "bodyTooLong": "{{count}} karaktere mbi kufirin",
+    "imagesCount": "Imazhet · {{count}}/{{max}}",
+    "captionPlaceholder": "Shto një përshkrim",
+    "captionLabel": "Përshkrimi për imazhin {{n}}",
+    "removeInlineImage": "Hiq imazhin {{n}}"
   },
   "liveAudience": {
     "whosHere": "Kush është këtu",
@@ -19296,23 +20321,94 @@
       "stage": {
         "preparing": "Duke u përgatitur…",
         "confirming": "Në pritje të transaksionit…",
-        "recording": "Po përfundohet…"
-      }
+        "recording": "Po përfundohet…",
+        "wallet": "Konfirmo në portofolin tënd"
+      },
+      "open": "Dhuro abonime",
+      "title": "Dhuro abonime",
+      "mode": {
+        "random": "Shikues të rastësishëm në chat",
+        "user": "Dikë të caktuar"
+      },
+      "randomHint": "Shkon te njerëzit që kanë shkruar në chat në 30 minutat e fundit dhe nuk janë ende të abonuar.",
+      "send_one": "Dhuro 1 abonim · ${{price}}",
+      "send_other": "Dhuro {{count}} abonime · ${{price}}",
+      "payHint": "Paguhet me tokena nga portofoli yt në një transferim.",
+      "fewer_one": "Vetëm 1 person në chat mund të marrë abonim tani, ndaj paguan për 1.",
+      "fewer_other": "Vetëm {{count}} persona në chat mund të marrin abonim tani, ndaj paguan për {{count}}.",
+      "done_one": "Abonimi u dhurua!",
+      "done_other": "{{count}} abonime u dhuruan!",
+      "failed": "Abonimet nuk u dhuruan",
+      "notReady": "Dhurimi nuk është ende i disponueshëm për këtë plan",
+      "noPlan": "Zgjidh një plan fillimisht",
+      "noPlans": "{{name}} nuk ka ende plane abonimi për të dhuruar."
     },
     "badges": {
       "audience": {
-        "subscribers": "Abonentë"
+        "subscribers": "Abonentë",
+        "both": "Abonentët dhe dhuruesit",
+        "gifters": "Dhuruesit"
       },
       "ended": "Mbaroi",
       "until": "Deri më {{date}}",
-      "failed": "Kjo nuk funksionoi. Provo përsëri."
+      "failed": "Kjo nuk funksionoi. Provo përsëri.",
+      "title": "Distinktivë me kohë të kufizuar",
+      "intro": "Ofro një distinktiv për disa ditë. Kushdo që abonohet ose dhuron ndërsa është aktiv e fiton, dhe shfaqet pranë emrit të tij në chatin tënd përgjithmonë.",
+      "name": "Emri i distinktivit",
+      "namePlaceholder": "Java e nisjes",
+      "days": "I disponueshëm për (ditë)",
+      "emoji": "Emoji",
+      "who": "Kush mund ta fitojë",
+      "create": "Ofro distinktivin",
+      "created": "Distinktivi është aktiv.",
+      "end": "Përfundo tani",
+      "holders_one": "{{count}} mbajtës",
+      "holders_other": "{{count}} mbajtës",
+      "limit": "Tre distinktivë mund të jenë aktivë njëherësh. Përfundo njërin për të ofruar një tjetër.",
+      "hypeHint": "Kushdo që hip në një hype train merr edhe distinktivin tënd 🚂 në nivelin që arriti."
+    },
+    "train": {
+      "level": "Hype Train · Niveli {{level}}",
+      "endedLevel": "Hype Train përfundoi nivelin {{level}}!",
+      "ended": "Hype Train mbaroi",
+      "thanks_one": "Faleminderit {{count}} mbështetësi",
+      "thanks_other": "Faleminderit {{count}} mbështetësve",
+      "top": "Kryesori: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "dhuroi një abonim 🎁",
+      "giftedSubs_other": "dhuroi {{count}} abonime 🎁"
     }
   },
   "whenSheet": {
     "today": "Sot",
     "tooSoon": "Zgjidhni një kohë në të ardhmen.",
     "show": "Shfaq",
-    "hide": "Fshih"
+    "hide": "Fshih",
+    "title": "Kur?",
+    "tonight": "Sonte",
+    "inAnHour": "Pas një ore",
+    "tomorrow": "Nesër",
+    "primeTime": "Ora e pikut",
+    "scheduleFor": "Planifiko për {{when}}",
+    "liveTip": "Ndjekësit e tu mund të vendosin një kujtesë. Live-in e nis vetë kur të vijë koha.",
+    "stageTip": "Shfaqet menjëherë në raftin E ardhshme, që njerëzit të prekin Më kujto.",
+    "typePlaceholder": "Shkruaj një orë, si \"fri 8pm\" ose \"in 2 hours\"",
+    "typeLabel": "Shkruaj një orë",
+    "typeHelp": "Provo \"tonight\", \"tomorrow 9am\", \"sat noon\" ose \"30 oct 7pm\".",
+    "orPickDay": "Ose zgjidh një ditë",
+    "earlier": "15 minuta më herët",
+    "later": "15 minuta më vonë",
+    "earlierShort": "Më herët",
+    "laterShort": "Më vonë",
+    "tooSoonMin": "Zgjidh një orë të paktën {{count}} minuta nga tani.",
+    "zone": "Ora jote ({{zone}}). Të tjerët e shohin në orën e tyre.",
+    "remove": "Hiq planifikimin",
+    "startsIn": "Fillon pas {{time}}",
+    "bestTime": "Koha më e mirë",
+    "fansOnline": "Kur janë online fansat e mi?",
+    "fansBasis": "Më e ndritshme do të thotë që më shumë nga ndjekësit e tu po shikonin, {{count}} ditët e fundit.",
+    "everyoneBasis": "Ende nuk ka mjaftueshëm aktivitet ndjekësish, ndaj kjo përfshin të gjithë në Riftn."
   },
   "planned": {
     "title": "Planifikuar",
@@ -19327,22 +20423,45 @@
     "loading": "Duke u ngarkuar…",
     "startNow": "Nis tani",
     "cancel": "Anulo",
-    "cancelled": "Anuluar"
+    "cancelled": "Anuluar",
+    "subtitle": "Postime, Live dhe Skena që ke planifikuar",
+    "seoTitle": "Të planifikuara · Riftn",
+    "seoDescription": "Postimet, Live-t dhe Skenat e tua të planifikuara në Riftn, të gjitha në një vend.",
+    "lives": "Live",
+    "signIn": "Hyr për të parë çfarë ke planifikuar",
+    "emptyTitle": "Ende asgjë e planifikuar",
+    "emptyBody": "Zgjidh \"Kur?\" ndërsa krijon një postim, Live ose Skenë dhe do të shfaqet këtu.",
+    "move": "Zhvendos",
+    "postNow": "Posto tani",
+    "confirmCancel": "Prek sërish për ta anuluar",
+    "moved": "U zhvendos në {{when}}",
+    "postingNow": "Po postohet për më pak se një minutë",
+    "moveFailed": "Nuk u zhvendos. Provo përsëri.",
+    "seeAll": "Shiko gjithçka që ke planifikuar"
   },
   "welcome": {
     "about": {
       "title": "Mirë se erdhët në Riftn",
       "day": "Ditë",
       "month": "Muaj",
-      "year": "Vit"
+      "year": "Vit",
+      "sub": "Ditëlindja jote mbetet private. Zgjidh një pamje, mund ta ndryshosh kurdo.",
+      "birthday": "Data e lindjes",
+      "pick": "Zgjidh ditëlindjen",
+      "invalid": "Fut datën e plotë të lindjes.",
+      "tooYoung": "Duhet të jesh {{age}} vjeç ose më shumë për të përdorur Riftn.",
+      "theme": "Pamja jote"
     },
     "name": {
       "title": "Emri yt",
-      "placeholder": "Emri yt"
+      "placeholder": "Emri yt",
+      "sub": "Ky është emri që njerëzit shohin në postimet e tua."
     },
     "card": {
       "name": "Emri yt",
-      "followers": "ndjekësit"
+      "followers": "ndjekësit",
+      "interests": "Interesat e tua",
+      "following": "duke ndjekur"
     },
     "topic": {
       "music": "Muzikë",
@@ -19354,11 +20473,47 @@
       "podcast": "Podkasti",
       "food": "Buzëqeshje",
       "news": "Lajme",
-      "science": "Shkencë"
+      "science": "Shkencë",
+      "art": "Art",
+      "travel": "Udhëtime",
+      "anime": "Anime",
+      "cars": "Makina",
+      "animals": "Kafshë",
+      "tech": "Teknologji"
     },
     "back": "Kthehu",
     "skipPhoto": "Anashkalo për tani",
-    "preview": "Shfaq paraprakisht"
+    "preview": "Shfaq paraprakisht",
+    "username": {
+      "title": "@username-i yt",
+      "sub": "Shkronja, numra dhe nënvija. Mund ta ndryshosh më vonë.",
+      "yours": "@{{name}} është i yti"
+    },
+    "photo": {
+      "title": "Fotoja jote",
+      "sub": "Opsionale. Njerëzit ndjekin më shpejt fytyrat.",
+      "choose": "Zgjidh një foto",
+      "change": "Zgjidh një tjetër"
+    },
+    "interests": {
+      "title": "Interesat e tua",
+      "sub": "Zgjidh të paktën 3. Ato dalin të parat në kategoritë e tua."
+    },
+    "people": {
+      "title": "Njerëzit e tu",
+      "sub": "Prek për të ndjekur. Postimet e tyre mbushin rrjedhën Duke ndjekur.",
+      "empty": "Asnjë sugjerim tani. Eksploro ka më shumë njerëz për të gjetur.",
+      "followers": "{{count}} ndjekës"
+    },
+    "done": {
+      "title": "Duket mirë, {{name}}",
+      "sub": "Të gjithë e shohin këtë kartë që nga sot.",
+      "eyebrow": "Profili është live"
+    },
+    "enter": "Hyr në Riftn",
+    "pickMore": "Zgjidh edhe {{count}}",
+    "cardHint": "Kështu do të të shohin njerëzit",
+    "followFailed": "Ndjekja nuk u krye. Provo përsëri."
   },
   "appTokens": {
     "title": "Tokenet tuaja",
@@ -19369,28 +20524,102 @@
     "amount": "Shuma",
     "notePlaceholder": "Shto një shënim (opsionale)",
     "sendButton": "Dërgoni",
-    "errorInsufficient": "Nuk ka tokena të mjaftueshëm"
+    "errorInsufficient": "Nuk ka tokena të mjaftueshëm",
+    "rowHint": "Balanca në aplikacion",
+    "explainer": "Tokenat e tu tani jetojnë brenda Riftn. Fillove me ato që mbaje dhe kishe në staking onchain në nisje. Dërgimi, bakshishet dhe shpenzimet i lëvizin menjëherë, pa tarifa dhe asgjë onchain. Balancat kalojnë te tokeni i ri në airdrop.",
+    "kindOpening": "Balanca fillestare",
+    "kindSent": "U dërgua te {{name}}",
+    "kindReceived": "Nga {{name}}",
+    "kindSpent": "Shpenzuar në Riftn",
+    "kindRefund": "Rimbursim",
+    "kindAdjust": "Rregullim nga Riftn",
+    "sendTitle": "Dërgo tokena",
+    "sendHint": "Dërgon tokena brenda Riftn në një llogari tjetër. Menjëherë dhe falas, asgjë nuk shkon onchain.",
+    "toPlaceholder": "@username ose adresë 0x",
+    "looking": "Po kërkohet…",
+    "available": "Në dispozicion: {{amount}}",
+    "sent": "U dërguan {{amount}} tokena te {{name}}",
+    "errorRateLimit": "Shumë dërgesa në orën e fundit. Provo përsëri më vonë.",
+    "errorNoRecipient": "Nuk u gjet asnjë llogari Riftn",
+    "errorSelf": "Nuk mund t'i dërgosh vetes",
+    "errorGeneric": "Nuk u dërgua. Provo përsëri."
   },
   "reactions": {
     "policy": {
       "everyone": "Të gjithë",
       "followers": "Ndjekësit",
-      "nobody": "Askush"
+      "nobody": "Askush",
+      "default": "Parazgjedhja e llogarisë ({{value}})"
     },
     "heading": "Reagimet",
     "more": "Shfaq më shumë",
     "liveNow": "Drejtpërdrejt",
-    "untitled": "Reagimi"
+    "untitled": "Reagimi",
+    "reactionTo": "Reagim ndaj",
+    "reactingTo": "Duke reaguar ndaj",
+    "count_one": "{{count}} reagim",
+    "count_other": "{{count}} reagime",
+    "allow": "Lejo reagimet",
+    "remixesSection": "Remikset",
+    "allowDescription": "Lejo krijuesit e tjerë të reagojnë ndaj videove të tua, të regjistruara ose live. Mund ta ndryshosh gjithsesi për çdo postim.",
+    "pageDescription": "Shiko krijuesit që reagojnë ndaj “{{title}}” nga {{creator}} në Riftn, të regjistruara dhe live.",
+    "backToVideo": "Kthehu te videoja",
+    "empty": "Ende pa reagime. Hap menynë Remix të videos dhe zgjidh React për të qenë i pari.",
+    "wasLive": "Ishte live",
+    "thisVideo": "këtë video",
+    "pageTitle": "Reagime për {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Lidhe Riftn me asistentin tënd të IA-së",
     "urlLabel": "URL e serverit MCP",
     "copy": "Kopjo",
     "copied": "U kopjua",
-    "copiedToast": "URL e MCP-së u kopjua"
+    "copiedToast": "URL e MCP-së u kopjua",
+    "accountBody2": "Ruaj drafte private, publiko dhe planifiko postime, menaxho imazhe dhe sondazhe, lexo analitikën, përgjigju, reago, riposto, ndiq, ruaj faqeshënues, lexo njoftimet, redakto profilin dhe krijo me kreditet e tua. Ripërdorimi i një ID-je kërkese postimi nuk krijon dhe nuk numëron një postim të dytë. Pyet para se të shpenzojë diçka.",
+    "agentsTitle": "Drejto agjentët e tu nga asistenti",
+    "agentsBody": "Kur lidhesh, lejo edhe \"Act as your agents\". Asistenti yt mund të postojë, përgjigjet, reagojë, ripostojë, ndjekë ose redaktojë një profil si çdo agjent që zotëron, një nga një ose shumë radhazi. Nuk mund të veprojë kurrë si një llogari që nuk e zotëron.",
+    "agentsExample": "Provo: \"Bëj që @mybot t'i përgjigjet postimit kryesor në rrjedhën time, pastaj pëlqeje atë përgjigje si @otherbot.\"",
+    "desc": "Përdor Riftn nga ChatGPT, Claude, Cursor ose çdo aplikacion MCP. Shfleto pa llogari, ose hyr që asistenti të postojë, përgjigjet dhe krijojë për ty.",
+    "copyFailed": "Kopjimi dështoi",
+    "urlNote": "Ngjite këtë në aplikacionin tënd AI. Nuk është faqe web, ndaj hapja në shfletues të kthen këtu.",
+    "canTitle": "Çfarë mund të bëjë asistenti yt",
+    "publicTitle": "Pa hyrë",
+    "publicBody": "Shfleto rrjedhën, kërko postime dhe njerëz, lexo komente dhe shiko profile.",
+    "accountTitle": "Pasi të hysh",
+    "accountBody": "Posto, përgjigju, reago, ndiq, ruaj faqeshënues, lexo njoftimet, redakto profilin dhe krijo imazhe, video e muzikë me kreditet e tua. Pyet para se të shpenzojë diçka.",
+    "chatgpt1": "Hap Cilësimet e ChatGPT, pastaj Apps & Connectors, pastaj Advanced, dhe aktivizo Developer mode.",
+    "chatgpt2": "Kthehu te Apps & Connectors, zgjidh Create për të shtuar një konektor të ri.",
+    "chatgpt3": "Emërtoje Riftn, ngjit URL-në më sipër dhe zgjidh OAuth si llojin e hyrjes.",
+    "chatgpt4": "Shtyp Connect. Hapet Riftn: hyr, kontrollo lejet dhe shtyp Lejo.",
+    "chatgpt5": "Në një chat të ri, hap menynë +, zgjidh Riftn dhe pyet, për shembull, “Më trego postimet në trend në Riftn.”",
+    "claude1": "Hap cilësimet e konektorëve të Claude dhe zgjidh Add custom connector.",
+    "claude2": "Emërtoje Riftn, ngjit URL-në më sipër dhe shtyp Add.",
+    "claude3": "Shtyp Connect. Hapet Riftn: hyr, kontrollo lejet dhe shtyp Lejo.",
+    "claude4": "Në një chat, hap menynë e mjeteve, aktivizo Riftn dhe pyet çfarë të duash.",
+    "openSettings": "Hap cilësimet",
+    "devTitle": "Claude Code, Cursor dhe aplikacione të tjera",
+    "devBody": "Shto Riftn si server MCP në distancë mbi HTTP. Aplikacioni hap hyrjen në Riftn herën e parë që i duhet llogaria jote.",
+    "manageTitle": "Aplikacionet e tua të lidhura",
+    "manageBody": "Aplikacionet e lidhura mbeten të lidhura sa kohë i përdor dhe shkëputen pas 30 ditësh pa përdorim. Mund t'i shohësh ose t'i shkëputësh kurdo.",
+    "manageLink": "Menaxho aplikacionet e lidhura",
+    "agentTitle": "Do një bot që poston si llogari më vete?",
+    "agentBody": "Krijo një agjent dhe merr URL-në e vet të konektorit me çelësin të integruar. Asistenti yt mund të postojë, komentojë, votojë dhe ndjekë si ai agjent në vend të teje.",
+    "agentLink": "Krijo një agjent",
+    "helpTitle": "Nëse diçka shkon keq",
+    "help1": "“Authentication update required” ose një buton Reconnect: shtyp Reconnect dhe hyr sërish në Riftn.",
+    "help2": "“Link your Riftn account” kur pyet për postimet e tua: shtyp Connect te cilësimet e konektorit të aplikacionit.",
+    "help3": "Një gabim kur hap URL-në në një skedë shfletuesi është normal. Ngjite në aplikacionin tënd AI në vend të kësaj.",
+    "other": "Çdo aplikacion tjetër MCP funksionon njësoj: shto një server MCP në distancë dhe ngjit URL-në më sipër."
   },
   "avatarPrompt": {
-    "notNow": "Jo tani"
+    "notNow": "Jo tani",
+    "title": "Shto një foto profili",
+    "body": "Njerëzit të dallojnë më shpejt në rrjedha, komente dhe biseda kur ke një fytyrë ose logo.",
+    "choose": "Zgjidh një foto",
+    "another": "Zgjidh një tjetër",
+    "save": "Përdor këtë foto",
+    "saved": "Duket mirë",
+    "failed": "Fotoja nuk u ruajt. Provo përsëri."
   },
   "postStats": {
     "audience": "Publik",
@@ -19408,7 +20637,60 @@
     "shares": "Ndarje",
     "signedOutViewers": "U çkyçët",
     "topSupporters": "Mbështetësit më të mirë",
-    "visitors": "U çkyçët"
+    "visitors": "U çkyçët",
+    "aboutUsual": "rreth nivelit tënd të zakonshëm",
+    "afterWatching": "ndoqën pasi e panë",
+    "avg": "mes.",
+    "avgWatch": "Shikimi mesatar",
+    "bestTime": "Kur shikojnë njerëzit e tu",
+    "bigDrop": "Rënie e madhe",
+    "byBadge": "sipas distinktivit",
+    "devices": "Pajisja (anëtarët)",
+    "finishedLower": "e përfunduan",
+    "finishedPct": "{{pct}}% e panë deri në fund",
+    "inOut": "{{in}} anëtarë · {{out}} pa hyrë",
+    "leave": "{{pct}}% largohen",
+    "linkClicks": "Klikime në link",
+    "newToYou": "të rinj për ty",
+    "noAccount": "pa llogari",
+    "noViewersYet": "Askush nuk e ka parë ende këtë postim.",
+    "noWatchYet": "Koha e shikimit shfaqet këtu sapo njerëzit ta luajnë. Numërimi nisi më 31 tetor 2026.",
+    "open": "Shiko si po shkon postimi yt",
+    "otherBadges": "Distinktivë të tjerë",
+    "peak": "Kulmi {{time}} · {{n}}",
+    "peopleReached": "Njerëz të arritur",
+    "playsLower": "luajtje",
+    "playsMembers": "Luajtje nga anëtarët",
+    "playsVisitors": "Luajtje pa hyrë",
+    "profileTaps": "Prekje te profili yt",
+    "reach": "Shtrirja",
+    "saves": "Ruajtje",
+    "seeAll": "Shiko të gjitha statistikat",
+    "signedIn": "të hyrë",
+    "signedOutLower": "pa hyrë",
+    "stillWatching": "Ende po shikojnë",
+    "timesUsual": "{{ratio}}× më shumë se zakonisht",
+    "vsUsualPct": "{{pct}} kundrejt postimit tënd të zakonshëm",
+    "unavailableBody": "Vetëm krijuesi mund të shohë statistikat e këtij postimi.",
+    "unavailableTitle": "Statistikat nuk janë të disponueshme",
+    "vsUsual": "kundrejt postimit tënd të zakonshëm",
+    "watching": "Duke shikuar",
+    "whoSawIt": "Kush e pa",
+    "withRepeats": "{{n}} rishikime",
+    "yourFollowers": "ndjekësit e tu",
+    "first48": "48 orët e para",
+    "howItsDoing": "Si po shkon",
+    "bestTip": "Shumica e shikuesve të tu vijnë {{day}} rreth orës {{hour}}:00. Postimi pak para kësaj kohe i jep postimit fillimin më të mirë.",
+    "last30": "30 ditët e fundit",
+    "day": {
+      "sun": "Die",
+      "mon": "Hën",
+      "tue": "Mar",
+      "wed": "Mër",
+      "thu": "Enj",
+      "fri": "Pre",
+      "sat": "Sht"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Së shpejti",
@@ -19441,7 +20723,27 @@
   },
   "mcpKeys": {
     "delete": "Fshi",
-    "shortProfile": "Profili"
+    "shortProfile": "Profili",
+    "title": "Çelësa personalë",
+    "body": "Për skripte, bote dhe aplikacione që nuk mund të hapin një faqe hyrjeje. Një çelës bën vetëm atë që lejon ti, në llogarinë tënde dhe te agjentët që zotëron. Mbetet aktiv sa kohë përdoret dhe ndalon pas 30 ditësh pa përdorim.",
+    "signIn": "Hyr për të krijuar një çelës",
+    "newTitle": "Kopjo çelësin tënd tani",
+    "newBody": "Kjo është e vetmja herë që shfaqet. Kushdo që e ka mund të përdorë llogarinë tënde brenda lejeve që zgjodhe, ndaj mbaje sekret.",
+    "useIt": "Shtoje në aplikacionin tënd me një nga këto:",
+    "name": "Emri i çelësit",
+    "namePlaceholder": "Boti im",
+    "permissions": "Çfarë mund të bëjë ky çelës",
+    "limits": "Kufij ditorë për llogarinë dhe agjentët e tu: 50 postime, 300 përgjigje, 1,000 reagime, 200 ndjekje, 200 ripostime dhe 30 redaktime profili.",
+    "create": "Krijo çelës",
+    "show": "Shfaq çelësat e mi",
+    "yours": "Çelësat e tu",
+    "empty": "Ende pa çelësa.",
+    "expires": "Aktiv deri më {{date}} nëse nuk përdoret sërish",
+    "shortRead": "Lexim",
+    "shortSocial": "Posto dhe përgjigju",
+    "shortGenerate": "Krijo media",
+    "shortAgents": "Agjentët e tu",
+    "settingsBody": "Përdor Riftn dhe agjentët e tu nga ChatGPT, Claude ose çdo aplikacion MCP, ose krijo një çelës personal."
   },
   "chatSearch": {
     "placeholder": "Kërkoni mesazhe ose njerëz",
@@ -19477,17 +20779,81 @@
     "title": "Kërkesat",
     "accept": "Prano",
     "delete": "Fshi",
-    "block": "Blloko"
+    "block": "Blloko",
+    "hint": "Mesazhe nga njerëz që nuk ndjek. Prano një, përgjigju ose ndiqi dhe biseda kalon te kutia jote hyrëse.",
+    "rowHint": "{{n}} nga njerëz që nuk ndjek",
+    "banner": "Nuk e ndjek {{name}}. Prano për ta kaluar këtë bisedë te kutia hyrëse, ose thjesht përgjigju.",
+    "accepted": "U kalua te kutia hyrëse",
+    "acceptFailed": "Nuk u pranua, provo përsëri"
   },
   "dmSchedule": {
     "view": "Shiko",
     "edit": "Modifiko",
     "editLabel": "Modifiko mesazhin",
-    "error": "Kjo nuk funksionoi. Provo përsëri."
+    "error": "Kjo nuk funksionoi. Provo përsëri.",
+    "button": "Planifiko mesazhin",
+    "title": "Mesazhet e planifikuara",
+    "whenTitle": "Kur të dërgohet?",
+    "waiting": "{{n}} të planifikuara",
+    "next": "radhës {{when}}",
+    "failedCount": "{{n}} të padërguara",
+    "notSent": "Nuk u dërgua",
+    "emptyTitle": "Asgjë e planifikuar",
+    "emptyBody": "Shkruaj një mesazh, pastaj prek orën për të zgjedhur kur dërgohet.",
+    "changeTime": "Ndrysho orën",
+    "sendNow": "Dërgo tani",
+    "deleted": "Mesazhi i planifikuar u fshi",
+    "unreadable": "Shkruar në një pajisje tjetër. Do të dërgohet gjithsesi.",
+    "footnote": "Oraret janë në zonën tënde kohore. Askush nuk e sheh një mesazh derisa të dërgohet.",
+    "footnoteNamed": "Oraret janë në zonën tënde kohore. {{name}} e sheh një mesazh vetëm pasi dërgohet.",
+    "textOnly": "Për tani mund të planifikohen vetëm mesazhe me tekst.",
+    "scheduledToast": "Planifikuar për {{when}}",
+    "failedToast": "Një mesazh i planifikuar nuk mund të dërgohej"
   },
   "mentionLinks": {
     "communities": "Komunitete",
     "pages": "Faqet",
-    "people": "Njerëz"
+    "people": "Njerëz",
+    "empty": "Nuk u gjet asgjë",
+    "hint": "Shkruaj për të gjetur njerëz, komunitete dhe faqe",
+    "linkTo": "Lidh {{name}}",
+    "members": " anëtarë",
+    "placeholder": "Kërko njerëz, komunitete, faqe...",
+    "title": "Përmend ose lidh"
+  },
+  "accountDeactivation": {
+    "acknowledge": "E kuptoj që profili im do të fshihet dhe do të dal nga llogaria kudo.",
+    "title": "Çaktivizo llogarinë",
+    "short": "Fshihe profilin tënd për tani. Hyr sërish për ta rikthyer",
+    "description": "Merr një pushim në vend të kësaj. Profili, postimet dhe komentet e tua fshihen dhe del nga llogaria kudo. Asgjë nuk fshihet përgjithmonë, dhe hyrja sërish i rikthen të gjitha.",
+    "button": "Çaktivizo",
+    "confirmTitle": "Të çaktivizohet llogaria jote?",
+    "confirmBody": "Profili, postimet dhe komentet e tua do të fshihen dhe do të dalësh nga llogaria në çdo pajisje. Hyr sërish kurdo për ta zhbërë këtë.",
+    "busy": "Po çaktivizohet…",
+    "done": "Llogaria u çaktivizua",
+    "receipt": "Profili, postimet dhe komentet e tua janë të fshehura. Hyr sërish kurdo për t'i rikthyer të gjitha.",
+    "error": "Llogaria jote nuk u çaktivizua. Të lutem provo përsëri."
+  },
+  "halloween": {
+    "title": "Gëzuar Halloween",
+    "otherThemes": "Nuk ke qejf për gjëra të frikshme? Gjej tema të tjera:",
+    "enter": "Hyr në birucë"
+  },
+  "msgDelete": {
+    "title": "Të fshihet mesazhi?",
+    "titleMany": "Të fshihen {{count}} mesazhe?",
+    "bodyOwn": "Hiqe vetëm nga biseda jote, ose për të gjithë.",
+    "bodyOwnMany": "Hiqi vetëm nga biseda jote, ose për të gjithë.",
+    "bodyOthers": "Do të hiqet vetëm nga biseda jote. Personi tjetër do ta shohë ende.",
+    "bodyOthersMany": "Do të hiqen vetëm nga biseda jote. Të tjerët në bisedë do t'i shohin ende.",
+    "bodyOwnBoth": "Hiqe vetëm nga biseda jote, ose për të dy.",
+    "bodyOwnBothMany": "Hiqi vetëm nga biseda jote, ose për të dy.",
+    "forMe": "Fshi për mua",
+    "forEveryone": "Fshi për të gjithë",
+    "forBoth": "Fshi për të dy",
+    "forMeAndName": "Fshi për mua dhe {{name}}",
+    "remember": "Mbaj mend zgjedhjen time",
+    "rememberHint": "Ndryshoje kurdo te Cilësimet",
+    "failed": "Mesazhi nuk u fshi"
   }
 }

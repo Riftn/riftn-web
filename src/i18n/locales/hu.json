@@ -6,7 +6,11 @@
     "videoSize": "Ez a videó nagyobb {{n}} MB-nál. Válassz kisebbet."
   },
   "textFeed": {
-    "tab": "Szöveg"
+    "tab": "Szöveg",
+    "errorTitle": "Nem sikerült betölteni a bejegyzéseket",
+    "errorBody": "Próbáld újra betölteni a szöveges hírfolyamot.",
+    "emptyTitle": "Még nincsenek szöveges bejegyzések",
+    "emptyBody": "A szöveges bejegyzések itt jelennek meg."
   },
   "comic": {
     "showAll": "Mind a(z) {{count}} oldal megjelenítése"
@@ -29,16 +33,62 @@
     "policyFollowers": "Követők",
     "policyNobody": "Senki",
     "loadMore": "Több betöltése",
-    "video": "Videó"
+    "video": "Videó",
+    "with": "Duett @{{username}} felhasználóval",
+    "withOriginal": "Duett · eredeti megtekintése",
+    "unavailable": "Ez a videó már nem érhető el duetthez.",
+    "allowLabel": "Duettek engedélyezése",
+    "allowDescription": "Ki vehet fel duettet a videóid mellé. Ezt bejegyzésenként is módosíthatod.",
+    "settingsSection": "Duettek",
+    "policyDefault": "Fiókbeállítás",
+    "saveFailed": "Nem sikerült menteni. Próbáld újra.",
+    "count_one": "{{count}} duett",
+    "count_other": "{{count}} duett",
+    "pageHeading": "Duettek",
+    "pageTitle": "{{title}} duettjei, készítő: @{{creator}}",
+    "pageTitleNoCreator": "{{title}} duettjei",
+    "pageDescription": "Nézd meg a videó összes duettjét a Riftnen, vagy vedd fel a sajátodat mellé.",
+    "empty": "Még nincsenek duettek. Nyisd meg a videó beállításait, és válaszd a Remix → Duett lehetőséget az elsőhöz.",
+    "notFound": "Ez a videó nem érhető el.",
+    "browseShorts": "Shortsok böngészése",
+    "notFoundTitle": "A videó nem található | Riftn"
   },
   "videoRemix": {
-    "sound": "Használd ezt a hangot"
+    "sound": "Használd ezt a hangot",
+    "menu": "Remix",
+    "duet": "Duett",
+    "green-screen": "Zöld háttér",
+    "stitch": "Összefűzés",
+    "selectSource": "Nyisd meg egy videó beállításait, és válaszd a Remix lehetőséget a kezdéshez."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Mindenki",
       "followers": "Követők",
-      "nobody": "Senki"
+      "nobody": "Senki",
+      "default": "Alapértelmezésem"
+    },
+    "shareFailed": "A borravalód elküldve, de az eredeti alkotó részesedése nem ment át.",
+    "notify": {
+      "duet": "{{name}} duettet készített a videódhoz",
+      "stitch": "{{name}} összefűzte a videódat",
+      "react": "{{name}} reagált a videódra",
+      "reactLive": "{{name}} élőben reagál a videódra"
+    },
+    "linkFailed": "A bejegyzésed kint van, de nem sikerült összekapcsolni az eredeti videóval.",
+    "settingsHeading": "Remixek",
+    "stitch": {
+      "allow": "Összefűzések engedélyezése",
+      "allowDesc": "Ki használhat fel legfeljebb 5 másodpercet a videóidból a sajátjában. Ezt bejegyzésenként is módosíthatod.",
+      "saveFailed": "Nem sikerült menteni az összefűzési beállítást. Próbáld újra.",
+      "settingFailed": "A bejegyzésed kint van, de az összefűzési beállítása nem mentődött el. Módosítsd a Bejegyzés szerkesztése menüben.",
+      "from": "Összefűzve innen: {{name}}",
+      "count_one": "{{count}} összefűzés",
+      "count_other": "{{count}} összefűzés",
+      "listTitle": "Összefűzések",
+      "listFailed": "Nem sikerült betölteni az összefűzéseket. Próbáld újra.",
+      "listEmpty": "Még nincsenek összefűzések.",
+      "unavailable": "Ez a videó már nem érhető el összefűzéshez."
     }
   },
   "dehubAppPage": {
@@ -64,7 +114,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Nyisd meg a Riftnot a böngésződben",
     "seoDescription": "Szerezd meg a Riftn alkalmazást: nyílt forráskódú, felhasználói tulajdonú közösségi média élő közvetítéssel, titkosított üzenetküldéssel és figyeléssel. Ingyenes a Google Playen, az App Store-ban és az interneten.",
-    "seoTitle": "Riftn App | Letöltés Androidra, iPhone-ra és webre"
+    "seoTitle": "Riftn App | Letöltés Androidra, iPhone-ra és webre",
+    "learnMore": "Szeretnéd a teljes képet? A <guide>Mi az a Riftn?</guide> részletesen bemutatja a platformot."
   },
   "dehubLinks": {
     "copyLinkDetail": "{{item}} hivatkozás másolása a vágólapra",
@@ -82,12 +133,15 @@
       "proposal": "ajánlat",
       "stage": "színpad",
       "store": "áruház",
-      "featureRequest": "kérés"
+      "featureRequest": "kérés",
+      "page": "oldal"
     },
     "recipientChat": "csevegés",
     "recipientUser": "felhasználó",
     "sendFailed": "{{item}} elküldése sikertelen",
-    "sentTo": "{{item}} elküldve {{name}} részére"
+    "sentTo": "{{item}} elküldve {{name}} részére",
+    "openPage": "Oldal megnyitása",
+    "viewRequest": "Kérés megtekintése"
   },
   "stageCover": {
     "admitOne": "EGYET FOGADJ EL",
@@ -196,7 +250,24 @@
   "signedFollows": {
     "setUp": "Bekapcsolás",
     "turnOff": "Kikapcsolás",
-    "efpTurnOff": "Leállítás"
+    "efpTurnOff": "Leállítás",
+    "title": "Követéseid a láncon",
+    "description": "A pénztárcád aláírja, kiket követsz, és a lista minden nap rögzítésre kerül a Base-en. Bármely alkalmazás megtalálhatja a követéseidet a pénztárcád alapján, akár a Riftn nélkül is.",
+    "on": "Bekapcsolva ezen az eszközön",
+    "off": "Kikapcsolva ezen az eszközön",
+    "turnedOn": "A követéseidet mostantól a pénztárcád írja alá",
+    "turnedOff": "Kikapcsolva ezen az eszközön",
+    "failed": "A pénztárcád nem írta alá. Próbáld újra.",
+    "hiddenNote": "A rejtett követési listák és a privát fiókok kimaradnak a nyilvános listából.",
+    "efpOn": "Átmásolva az EFP-be · {{count}} követés",
+    "efpOff": "Tedd fel őket az EFP-re is",
+    "efpTurnOn": "Hozzáadás az EFP-hez",
+    "efpDone": "A követéseid most kerülnek fel az EFP-re",
+    "efpStopped": "Az EFP-másolás leállt. A lista a tiéd marad.",
+    "efpHasList": "Már van EFP-listád. A Riftn azt még nem tudja feltölteni.",
+    "efpNoGas": "Ehhez a pénztárcádnak egy kis ETH-ra van szüksége a Base-en.",
+    "efpFailed": "Ez nem ment át. Próbáld újra.",
+    "efpNote": "Az EFP egy követési lista, amelyet más alkalmazások olvasnak (efp.app). Riftn pénztárcával ingyenes; más pénztárcák néhány centet fizetnek a Base-en. A lista a tiéd."
   },
   "profileFields": {
     "title": "Profilmezők",
@@ -225,7 +296,9 @@
       "location": "Hely",
       "custom": "Egyedi",
       "customOption": "Egyedi címke"
-    }
+    },
+    "add": "Mező hozzáadása",
+    "remove": "Mező eltávolítása"
   },
   "followedTags": {
     "follow": "#{{tag}} követése",
@@ -372,7 +445,8 @@
     "step": "A fiókvezérléshez adja hozzá a https://riftn.com/mcp webhelyet OAuth-csatlakozóként, jelentkezzen be a Riftnba, és ellenőrizze az engedélyeket, mielőtt engedélyezné a hozzáférést.",
     "profilePrompt": "Frissítsd a Riftn életrajzomat erre: Független alkotók, akik filmeket és zenét készítenek.",
     "generatePrompt": "Mutassa meg a Riftn képmodelljeit, és idézzen egy portrét, mielőtt létrehozná.",
-    "libraryPrompt": "Mutasd meg a legújabb eszközöket a Riftn Creator könyvtáramban."
+    "libraryPrompt": "Mutasd meg a legújabb eszközöket a Riftn Creator könyvtáramban.",
+    "agents": "Bejegyzés, válasz, reakció, megosztás, követés és profilszerkesztés a saját ügynökeidként"
   },
   "twitchMirror": {
     "title": "Rángatózó tükrözés",
@@ -473,7 +547,66 @@
   "nav": {
     "launchpad": "Launchpad",
     "findWords": {
-      "getTheApp": "töltse le az alkalmazást, Android, iPhone, mobilalkalmazás, telepítés, APK, asztali alkalmazás, telepítés számítógépre, Windows, Mac"
+      "getTheApp": "töltse le az alkalmazást, Android, iPhone, mobilalkalmazás, telepítés, APK, asztali alkalmazás, telepítés számítógépre, Windows, Mac",
+      "home": "hírfolyam, idővonal, legújabb bejegyzések, neked, követett, címlap, feed",
+      "profile": "profilom, fiókom, oldalam, bejegyzéseim, profilkép, bemutatkozás, követők",
+      "explore": "keresés, felfedezés, keresés, felkapott, népszerű, hashtagek, emberek, alkotók",
+      "prompt": "MI, AI, generálás, MI-kép, MI-videó, képkészítő, szövegből kép, MI-művészet",
+      "editor": "videószerkesztő, videó szerkesztése, vágás, kivágás, feliratok, felirat, effektek",
+      "creator": "alkotás, stúdió, MI-eszközök, kép, videó, zene, narráció, 3D",
+      "converter": "videó importálása, letöltés, YouTube, TikTok, Instagram, konvertálás",
+      "migrate": "csatornám áthelyezése, csatorna importálása, tömeges importálás, YouTube-csatorna",
+      "notifications": "értesítések, tevékenység, említések, válaszok, kedvelések, csengő",
+      "messages": "DM, közvetlen üzenetek, csevegés, beérkezett üzenetek, beszélgetések, privát üzenet",
+      "communities": "csoportok, közösség, szobák, klubok, fórumok, tagok",
+      "assistant": "MI, AI, chatbot, kérdezz, súgó, MI-csevegés, kérdések",
+      "settings": "beállítások, fiók, adatvédelem, biztonság, jelszó, nyelv, téma, sötét mód, letiltottak, fiók törlése",
+      "leaderboard": "rangsor, helyezés, top alkotók, top felhasználók, pontok, pontszámok",
+      "bookmarks": "mentett, kedvencek, megnézem később, elolvasom később, mentett bejegyzések, könyvtár",
+      "command": "irányítópult, analitika, bevételek, jövedelem, elemzések, moderálás, statisztikáim",
+      "wallet": "egyenleg, pénz, pénzeszközök, tokenek, kripto, befizetés, kifizetés, küldés, fogadás, fizetés",
+      "events": "naptár, ütemezés, találkozó, közelgő, jegyek, AMA",
+      "stages": "hangszobák, hangcsevegés, spaces, élő hang, beszélgetés, podcast",
+      "featureRequests": "építés, építők, ötletek, javaslatok, hiba bejelentése, hibák, javítások, ütemterv, szavazás, kívánságlista, fejlesztés",
+      "feedback": "értékelés, minősítés, felmérés, vélemény, panasz, visszajelzés küldése",
+      "staking": "staking, stake, befizetés, hozam, jutalmak, kereset, profitmegosztás, jelvény, szintek, kamat",
+      "superpowers": "kiemelés, népszerűsítés, előnyök, képességek, jelvényelőnyök, elérés, fejlesztések",
+      "governance": "szavazás, szavazások, javaslatok, szavazás, szavazólap, döntés",
+      "dao": "kincstár, adományozás, adomány, közösségi alap, hozzájárulás, támogatások",
+      "bounties": "munka, állások, feladatok, megbízások, szabadúszó, felvétel, pénzkeresés, fizetett munka",
+      "myBounties": "fejvadászataim, munkáim, előzmények, kifizetések, elvégzett munka",
+      "affiliate": "ajánlás, barátok meghívása, meghívás, jutalék, partner, kereset",
+      "careers": "állások, felvétel, dolgozz velünk, csatlakozz a csapathoz, jelentkezés, üres állások",
+      "stores": "bolt, áruház, piactér, merch, vásárlás, eladás, termékek, vásárlás",
+      "fractions": "részesedések, tulajdonjog, befektetés, bejegyzés birtoklása, NFT, NFT-k, gyűjthető tárgyak, kereskedés",
+      "usernames": "felhasználónév, azonosító, név, nevem módosítása, név vásárlása, név eladása",
+      "accounts": "fiók vásárlása, fiók eladása, eladó fiókok, követők, fiók átruházása",
+      "apps": "alkalmazásbolt, minialkalmazások, alkalmazás készítése, fejlesztők, eszközök",
+      "arcade": "játékok, játék, játszás, gaming, sakk, lövöldözős, szórakozás",
+      "glossary": "kifejezések, definíciók, szótár, jelentés, mi az",
+      "compare": "összehasonlítás, összehasonlít, kontra, alternatívák, YouTube, X, TikTok",
+      "guide": "első lépések, hogyan, útmutató, súgó, tanulás, kezdő, új vagyok",
+      "stats": "statisztikák, analitika, számok, diagramok, árfolyam, kínálat, tulajdonosok",
+      "docs": "dokumentáció, súgó, API, whitepaper, fejlesztők, kézikönyv",
+      "blog": "hírek, cikkek, frissítések, bejelentések, újdonságok",
+      "videos": "nézés, videók, klipek, hosszú videók",
+      "shorts": "reels, rövid videók, függőleges videók, lapozás",
+      "music": "hang, dalok, számok, zenehallgatás, rádió, lejátszási lista",
+      "liveTv": "TV, közvetítések, streaming, élő, adás, csatornák, élő nézés",
+      "buyTokens": "tokenvásárlás, vásárlás, feltöltés, kártya, bankkártya, fiat",
+      "bridge": "láncok közötti, tokenek mozgatása, láncok, átvitel láncok között",
+      "top100": "top 100, coinok, kriptovaluták, piaci kapitalizáció, árak",
+      "agents": "MI-ügynökök, ügynökök, botok, automatizálás, személyek",
+      "advertising": "hirdetések, reklámok, kampány, népszerűsítés, szponzor, marketing",
+      "premium": "előfizetés, frissítés, pro, tagság, reklámmentes, hirdetések nélkül",
+      "pricing": "csomagok, költség, ár, mennyibe kerül, előfizetés",
+      "creators": "alkotói program, nagykövetek, partnerek, jelentkezés alkotóként, monetizálás",
+      "connectAi": "MCP, ChatGPT, Claude, API, integráció, MI csatlakoztatása",
+      "packs": "emoji, matricák, GIF-ek, emojicsomagok, matricacsomagok, egyéni emoji",
+      "publicChat": "csevegés, globális csevegés, csevegőszoba, előtér, beszélgetés, közösségi csevegés",
+      "planned": "ütemezett, ütemezés, ütemezett bejegyzések, sor, később",
+      "liveStudio": "élő adás indítása, stream, streaming, OBS, overlayek, értesítések, widgetek",
+      "launchpad": "token indítása, coin létrehozása, coin készítése, mémcoin, bonding curve, tokenizálás"
     },
     "reorderHint": "Tartsa lenyomva és húzza bármelyik ikont az átrendezéshez",
     "reorderReset": "Visszaállítás",
@@ -524,7 +657,10 @@
     "affiliate": "Partnerprogram",
     "groups": {
       "create": "Létrehozás",
-      "discover": "Felfedezés"
+      "discover": "Felfedezés",
+      "main": "Fő",
+      "money": "Pénz",
+      "riftn": "Riftn"
     }
   },
   "feed": {
@@ -1151,7 +1287,37 @@
     "socialConnectFailed": "Nem sikerült csatlakozni a következőhöz:{{platform}}. Próbálkozz újra.",
     "socialVerifiedFollowers": "{{value}} követő",
     "socialFollowersPending": "Követői szám frissítése folyamatban",
-    "menuLayoutFolders": "Mappák"
+    "menuLayoutFolders": "Mappák",
+    "chatCards": "Csevegések kártyaként",
+    "chatCardsDesc": "Minden csevegés külön kártyán. Kapcsold ki egy egyszerű listához, vonallal a csevegések között.",
+    "chatDeleteChoice": "Üzenet törlésekor",
+    "chatDeleteChoiceDesc": "Kérdezzen meg minden alkalommal, vagy mindig csak nálad, illetve a csevegés minden résztvevőjénél töröljön.",
+    "chatDeleteAsk": "Kérdezzen minden alkalommal",
+    "chatDeleteMe": "Törlés nálam",
+    "chatDeleteMeDesc": "Eltűnik a csevegésedből, mások továbbra is látják",
+    "chatDeleteEveryone": "Törlés mindenkinél",
+    "chatDeleteEveryoneDesc": "Amikor lehetséges. Valaki más üzenete egy csoportban továbbra is csak nálad törlődik",
+    "showLikes": "Kedveléseim megjelenítése mindenkinek",
+    "showLikesDesc": "Bárki megnyithatja a profilod Kedvelések lapját. Alapértelmezetten ki van kapcsolva, így csak te látod, mit kedveltél.",
+    "showFollowersList": "Követőim megjelenítése",
+    "showFollowersListDesc": "Bárki megnyithatja a követőid listáját. Ha ki van kapcsolva, csak te látod.",
+    "showFollowingList": "Követettjeim megjelenítése",
+    "showFollowingListDesc": "Bárki megnyithatja azoknak a listáját, akiket követsz. Ha ki van kapcsolva, csak te látod.",
+    "showFollowCounts": "Követőszámaim megjelenítése",
+    "showFollowCountsDesc": "Mutasd, hány követőd van, és hány embert követsz. Kikapcsolásával mindkét lista is rejtve lesz.",
+    "readerProfileView": "Más profilok megnyitása így",
+    "readerProfileViewDesc": "Válassz rácsot vagy listát minden megnyitott profilhoz, vagy maradjon mindenkinek a saját választása",
+    "readerProfileViewOwner": "Mindenki saját választása",
+    "tipsOffNote": "Amíg ez be van kapcsolva, a neked szóló borravalók és küldések ki vannak kapcsolva. Kapcsold ki, hogy újra kaphass borravalót.",
+    "menuLayout": "Menü elrendezése",
+    "menuLayoutDesc": "Hogyan csoportosítja a menü az oldalait",
+    "menuLayoutTabs": "Lapok",
+    "menuLayoutTabsDesc": "Egyszerre egy csoport, nagy ikonokkal",
+    "menuLayoutSections": "Szakaszok",
+    "menuLayoutSectionsDesc": "Minden oldal egyszerre, csoportfejlécek alatt",
+    "menuLayoutFoldersDesc": "A fő oldalaid, majd minden csoportnak egy mappa",
+    "publicChatInBar": "Nyilvános csevegés az alsó sávban",
+    "publicChatInBarDesc": "Egy koppintással a Nyilvános csevegésbe a képernyő alján lévő sávból"
   },
   "common": {
     "confirm": "Megerősítés",
@@ -1241,7 +1407,14 @@
     "messagePublic": "Nyilvános",
     "railTitle": "Tippek",
     "railTotal": "{{amount}} token",
-    "tokensUnit": "tokenek"
+    "tokensUnit": "tokenek",
+    "messagePlaceholder": "Írj valamit a borravalód mellé",
+    "messagePrivate": "Csak {{name}}",
+    "theCreator": "az alkotó",
+    "messageWallNote": "A borravaló-falon jelenik meg, amint a borravaló átmegy.",
+    "sendWithMessage": "Küldés üzenettel",
+    "messageFailed": "Nem sikerült hozzáadni az üzenetedet. Nem ment el borravaló.",
+    "wallLabel": "Borravaló-üzenetek"
   },
   "postOptions": {
     "liveAlertsOn": "Mostantól követed: {{name}}. Értesítést kapsz, amikor élő adást indít.",
@@ -1281,7 +1454,14 @@
     "giftBoost": "Adj egy boostot",
     "markSection": "Átugrandó szakaszok",
     "copyFailed": "Nem sikerült a linket másolni",
-    "share": "Oszt"
+    "share": "Oszt",
+    "refreshLinkPreview": "Hivatkozás előnézetének frissítése",
+    "linkPreviewRefreshed": "Hivatkozás előnézete frissítve",
+    "linkPreviewRefreshFailed": "Nem sikerült elérni az oldalt. Próbáld újra később.",
+    "castToTv": "Küldés TV-re",
+    "castStarted": "Lejátszás a TV-den",
+    "castUnsupported": "Ez a böngésző nem tud kivetíteni. Nyisd meg a Riftnt Chrome-ban vagy Safariban, hogy a TV-den játszd le.",
+    "castFailed": "Nem sikerült elérni a TV-t. Ellenőrizd, hogy ugyanazon a Wi-Fin van-e, és próbáld újra."
   },
   "filters": {
     "sort": "Rendezés",
@@ -1884,7 +2064,10 @@
       "bountySubmittedNamed": "{{name}} benyújtotta a munkáját a díjkeresőedre: “{{title}}”",
       "bountySubmitted": "{{name}} benyújtotta a munkáját a díjkeresőedre",
       "sentNotification": "{{name}} értesítést küldött neked"
-    }
+    },
+    "groupEarlier": "Korábban",
+    "searchPlaceholder": "Értesítések keresése",
+    "searchEmpty": "Nincs egyező értesítés"
   },
   "leaderboard": {
     "title": "Ranglista",
@@ -1929,7 +2112,13 @@
     "loadingBoard": "Ranglista betöltése…",
     "amountTokens": "{{amount}} token",
     "directReferrals": "{{count}} direkt",
-    "secondaryReferrals": "{{count}} másodlagos"
+    "secondaryReferrals": "{{count}} másodlagos",
+    "ogChallenge": "OG kihívás",
+    "ogHolders_one": "{{count}} OG tulajdonos",
+    "ogHolders_other": "{{count}} OG tulajdonos",
+    "ogChallengeTitle": "Hozd vissza az OG tulajdonosokat",
+    "ogChallengeBody": "Hívj meg olyanokat, akiknek még van DHB-juk. Ha a meghívó hivatkozásoddal csatlakoznak, és a DHB-jukat a Riftn pénztárcájukban tartják, itt neked számítanak.",
+    "ogChallengeCta": "Szerezd meg a meghívó hivatkozásodat"
   },
   "dhbListing": {
     "title": "Hamarosan jön a token tőzsdei bevezetése!",
@@ -2072,17 +2261,39 @@
     "shipping": "Készül",
     "noShippingYet": "Semmi sincs folyamatban",
     "shippingAppearHere": "Az épülő kérések itt jelennek meg.",
-    "loadFailed": "Nem sikerült betölteni a kéréseket"
+    "loadFailed": "Nem sikerült betölteni a kéréseket",
+    "editMedia": "Fotók és videók",
+    "editAddMedia": "Fotó vagy videó hozzáadása",
+    "deviceInfoNote": "Az eszközadatokat csatoljuk, hogy segítsenek a hibák javításában.",
+    "deviceInfo": "Eszközadatok",
+    "deviceInfoOwners": "Csak a tábla tulajdonosai látják",
+    "deviceInfoError": "Nem sikerült betölteni az eszközadatokat",
+    "deviceInfoNone": "Ehhez a kéréshez nincsenek eszközadatok",
+    "deviceInfoErrors": "Legutóbbi hibák"
   },
   "auth": {
-    "loginRequired": "Bejelentkezés szükséges"
+    "loginRequired": "Bejelentkezés szükséges",
+    "accountDeleted": "Ezt a fiókot törölték. Új fiókként újra regisztrálhatsz.",
+    "accountDeletedHours_one": "Ezt a fiókot törölték. Körülbelül {{count}} óra múlva regisztrálhatsz újra ugyanazzal az e-mail-címmel vagy telefonszámmal.",
+    "accountDeletedHours_other": "Ezt a fiókot törölték. Körülbelül {{count}} óra múlva regisztrálhatsz újra ugyanazzal az e-mail-címmel vagy telefonszámmal.",
+    "accountDeletedDays_one": "Ezt a fiókot törölték. Körülbelül {{count}} nap múlva regisztrálhatsz újra ugyanazzal az e-mail-címmel vagy telefonszámmal.",
+    "accountDeletedDays_other": "Ezt a fiókot törölték. Körülbelül {{count}} nap múlva regisztrálhatsz újra ugyanazzal az e-mail-címmel vagy telefonszámmal."
   },
   "messages": {
     "newDrawer": {
       "to": "Eddig",
       "recent": "Legutóbbi",
       "suggested": "Javasolt",
-      "youFollow": "Akiket követsz"
+      "youFollow": "Akiket követsz",
+      "placeholder": "Név vagy @felhasználónév",
+      "chattedBefore": "Beszélgettetek",
+      "mutual": "Kölcsönös",
+      "dmsOff": "DM kikapcsolva",
+      "keepTyping": "Gépelj tovább a mindenki közötti kereséshez",
+      "noOne": "Nincs találat",
+      "tryUsername": "Próbáld a pontos @felhasználónevét",
+      "sayHi": "Köszönj valakinek",
+      "typeAny": "Írj be bármilyen nevet vagy @felhasználónevet"
     },
     "reply": "Válasz",
     "react": "Reagálás",
@@ -2123,7 +2334,8 @@
     "noConversationsYet": "Még nincs beszélgetés",
     "sending": "Küldés",
     "retrySend": "Újra",
-    "discardSend": "Eltávolítás"
+    "discardSend": "Eltávolítás",
+    "notSent": "Nem ment el"
   },
   "music": {
     "listeningCount_one": "{{count}} odafigyelés",
@@ -2197,14 +2409,32 @@
       "listening_other": "{{value}} odafigyelés",
       "listens_other": "{{value}} figyel",
       "votes_one": "{{value}} szavazat",
-      "votes_other": "{{value}} szavazat"
+      "votes_other": "{{value}} szavazat",
+      "listens_one": "{{value}} hallgatás",
+      "members_one": "{{value}} tag",
+      "members_other": "{{value}} tag"
     },
     "viewGrid": "Rácsnézet",
     "viewList": "Lista nézet",
     "viewMode": "Megtekintés",
     "back": "Vissza",
     "reserve": {
-      "signIn": "Bejelentkezés"
+      "signIn": "Bejelentkezés",
+      "available": "A felhasználónév szabad",
+      "held": "Neked fenntartva",
+      "ended": "A foglalás lejárt",
+      "busy": "Foglalás alatt",
+      "availableBody": "A riftn.com/{{name}} most szabad. Foglald le, és egy percig fenntartjuk, amíg regisztrálsz.",
+      "heldBody": "Senki más nem veheti el a @{{name}} nevet, amíg le nem jár az időzítő. Fejezd be a regisztrációt, hogy megtartsd.",
+      "endedBody": "Lejárt a perced, így a @{{name}} ismét mindenki számára elérhető. Még mindig szabad.",
+      "busyBody": "Valaki éppen most regisztrál @{{name}} néven. Ha nem fejezi be, az időzítő lejártakor felszabadul.",
+      "finish": "Regisztráció befejezése",
+      "again": "Újrafoglalás",
+      "cta": "Foglalás most",
+      "letGo": "Elengedem",
+      "haveAccount": "Van már fiókod?",
+      "seoTitle": "A @{{name}} elérhető a Riftnen",
+      "seoDescription": "A riftn.com/{{name}} még senkié. Foglald le, és regisztrálj, hogy a tiéd legyen."
     },
     "usernameAvailable": "Felhasználónév elérhető!",
     "signUpToClaim": "Regisztráljon és foglalja le",
@@ -2235,12 +2465,16 @@
     "tabs": {
       "playlists": "Játéklisták",
       "dislikes": "Nemtetszések",
-      "likes": "Kedvelések"
+      "likes": "Kedvelések",
+      "articles": "Cikkek"
     },
     "likedPosts": {
       "emptyTitle": "Még nincsenek kedvelések",
       "privateTitle": "A kedvelések privátak",
-      "loadMore": "Több betöltése"
+      "loadMore": "Több betöltése",
+      "emptyOwn": "Az általad kedvelt bejegyzések itt jelennek meg. Csak te látod őket, hacsak be nem kapcsolod a Kedveléseim megjelenítése opciót a Beállításokban.",
+      "emptyOther": "Még nincs kedvelés.",
+      "privateDesc": "Ez a fiók megtartja magának a kedveléseit."
     },
     "dislikes": {
       "emptyTitle": "Még nincs nemtetszés",
@@ -2265,11 +2499,31 @@
     "sortMostLiked": "Leginkább kedveltek",
     "sortCustomShort": "Egyedi",
     "arrange": {
-      "saving": "Mentés..."
+      "saving": "Mentés...",
+      "title": "Rendezd el a bejegyzéseidet",
+      "hint": "Tarts lenyomva egy bejegyzést, és húzd az új helyére. A látogatók először ezt a sorrendet látják.",
+      "drag": "Húzd az áthelyezéshez",
+      "toTop": "Áthelyezés a tetejére",
+      "save": "Sorrend mentése",
+      "saved": "A sorrended elmentve",
+      "reset": "Vissza a legújabbak elöl sorrendhez",
+      "resetDone": "Vissza a legújabbak elöl sorrendhez",
+      "saveFailed": "Nem sikerült menteni a sorrendet. Próbáld újra.",
+      "loadFailed": "Nem sikerült betölteni a bejegyzéseidet. Zárd be, és próbáld újra.",
+      "empty": "Még nincs mit elrendezni. Előbb tegyél közzé valamit."
     },
     "searchThisChannel": "Keresd ezt a csatornát",
     "searchResultCount": "1 találat \"{{query}}\"-ra",
-    "searchResultCountPlural": "{{count}} találat \"{{query}}\"-ra"
+    "searchResultCountPlural": "{{count}} találat \"{{query}}\"-ra",
+    "unavailable": "A profil nem érhető el",
+    "mutualsOne": "{{count}} közös ismerős:",
+    "mutualsMany": "{{count}} közös ismerős:",
+    "articles": {
+      "emptyTitle": "Még nincsenek cikkek",
+      "emptySubtitle": "A cikkek itt jelennek meg"
+    },
+    "sortCustom": "Egyéni sorrend",
+    "arrangeButton": "Bejegyzések elrendezése"
   },
   "tv": {
     "seoTitle": "Élő TV: Ingyenes csatornák a világ minden tájáról",
@@ -2534,7 +2788,26 @@
     "createSignIn": "Jelentkezzen be újra az ügynök létrehozásához",
     "checkConnection": "Ellenőrizze a kapcsolatot, és próbálja újra.",
     "welcome": {
-      "text": "Üdvözlő üzenet"
+      "text": "Üdvözlő üzenet",
+      "title": "Új tagok üdvözlése",
+      "help": "Ez az ügynök követi és/vagy üzenetet küld azoknak, akik nemrég csatlakoztak a Riftnhez, naponta néhánynak.",
+      "follow": "Új tagok követése",
+      "message": "Üzenet az új tagoknak",
+      "textHelp": "A {name} helyére a @felhasználónevük kerül. Hivatkozások nélkül. Személyenként egyszer küldjük.",
+      "saveText": "Üzenet mentése",
+      "perDay": "Ember naponta",
+      "fewer": "Kevesebb naponta",
+      "more": "Több naponta",
+      "today": "Ma: {{follows}} követve · {{messages}} üzenet elküldve",
+      "limits": "Soha nem ugyanannak kétszer. Kihagyja azokat, akik letiltottak vagy elnémítottak, kikapcsolták az új üzeneteket, vagy elrejtőztek az Új tagok elől.",
+      "showLog": "Kiket üdvözölt",
+      "hideLog": "Üdvözlések elrejtése",
+      "empty": "Még senki. Az új tagok csatlakozáskor itt jelennek meg.",
+      "followed": "Követve",
+      "messaged": "Üzenet elküldve",
+      "skipped": "Kihagyva",
+      "failed": "Nem érhető el",
+      "defaultText": "Szia {name}, üdv a Riftnen! 👋"
     },
     "workspace": {
       "moderation": "Stream moderálása",
@@ -2734,7 +3007,15 @@
     "switchWalletAccount": "Fiókváltás",
     "walletLoadFailed": "Nem sikerült betölteni a pénteket. Kérjük, próbálja újra.",
     "openInBrowser": "Megnyitás böngészőben",
-    "copyLink": "Hivatkozás másolása"
+    "copyLink": "Hivatkozás másolása",
+    "bringLoginOver": "Használtad a Riftnt a dehub.io-n? <bring>Hozd át a bejelentkezésedet</bring>",
+    "didYouMean": "Erre gondoltál: {{email}}?",
+    "profileMovedTitle": "A profilod költözött",
+    "migrateWrongLogin": "Ez a bejelentkezés egy másik pénztárcát nyitott meg, így semmi sem változott. A régi profilod ezzel készült: {{login}}. Azzal hozd vissza.",
+    "googleInAppTitle": "A Google nem enged bejelentkezni a(z) {{app}} alkalmazáson belül",
+    "googleInAppTitleUnnamed": "A Google nem enged bejelentkezni ebben az alkalmazásban",
+    "googleInAppBody": "Nyisd meg a Riftnt a böngésződben a Google használatához, vagy jelentkezz be itt e-mail-címmel.",
+    "tryAnyway": "Mégis megpróbálom"
   },
   "careers": {
     "title": "Karrier a Riftn-nál",
@@ -2959,7 +3240,16 @@
     "searchDehubFor": "„{{query}}” keresése a Riftnon",
     "switchAccount": "Váltogasson számla",
     "signedInAs": "Belogózva {{name}}ként",
-    "requestSend": "Kérelem küldése"
+    "requestSend": "Kérelem küldése",
+    "requestPrompt": "Még nincs itt? Küldd be kérésként",
+    "requestPromptShort": "Még nincs itt?",
+    "requestDraftMenu": "{{query}} hozzáadása a Riftnhez",
+    "requestDraftSettings": "Beállítás ehhez: {{query}}",
+    "requestPostsTo": "Közzététel a Kérések között",
+    "requestHint": "A nevedben kerül a Kérések közé. Szólunk, amikor elkészül.",
+    "requestSent": "Elküldve a Kérések közé",
+    "requestSentHint": "Szólunk, amikor elkészül.",
+    "requestSeeIt": "Megtekintés a Kérések között"
   },
   "comments": {
     "reportComment": "Megjegyzés jelentése",
@@ -3055,8 +3345,20 @@
     "anonymousLikes_other": "{{count}} kedvelés névtelen jelvénytulajdonosoktól",
     "threadParts": {
       "moveUp": "Fel",
-      "moveDown": "Le"
-    }
+      "moveDown": "Le",
+      "reorder": "Átrendezés",
+      "save": "Sorrend mentése",
+      "saved": "A szál sorrendje elmentve",
+      "saveFailed": "Nem sikerült menteni a sorrendet. Próbáld újra.",
+      "dragPart": "Húzd a(z) {{n}}. rész áthelyezéséhez",
+      "addPart": "Hozzáadás a szálhoz",
+      "addPlaceholder": "Folytasd a szálad...",
+      "label": "Szál · {{count}} rész",
+      "reorderHint": "Húzd a részeket, vagy használd a nyilakat, majd ments."
+    },
+    "attachMedia": "Fotó, videó vagy hang csatolása",
+    "attachUnsupported": "Csatolj fotót, videót vagy hangfájlt.",
+    "attachTooLarge": "Ez a fájl meghaladja a {{size}} MB-os korlátot."
   },
   "mintChain": {
     "title": "Menta bejegyzés",
@@ -3074,7 +3376,14 @@
     "notAvailable": "Ezen a láncon a verés még nem érhető el."
   },
   "postEditHistory": {
-    "original": "Eredeti"
+    "original": "Eredeti",
+    "title": "Szerkesztési előzmények",
+    "edited_one": "Egyszer szerkesztve",
+    "edited_other": "{{count}} alkalommal szerkesztve",
+    "lastEdit": "Utolsó szerkesztés: {{time}}",
+    "editN": "{{n}}. szerkesztés",
+    "now": "Most",
+    "showChanges": "Változások megjelenítése"
   },
   "postInfo": {
     "title": "Bejegyzés infó",
@@ -3369,7 +3678,10 @@
     "waiting_for_wallet": "Várakozás a pénztárcádra",
     "waiting_for_wallet_desc": "{{wallet}} megnyitása és az aláírás jóváhagyása — a kérés ott vár.",
     "your_wallet": "a pénztárcád",
-    "max_available_on_chain": "Maximum elérhető: {{amount}} token {{chain}} napján"
+    "max_available_on_chain": "Maximum elérhető: {{amount}} token {{chain}} napján",
+    "not_available_for_this_post": "Ehhez a bejegyzéshez nem érhető el",
+    "turn_back_on_desktop_notifications": "Visszakapcsolod az asztali értesítéseket?",
+    "notifications_moved_to_riftn": "Átköltöztünk a riftn.com-ra, ezért a böngésződnek még egyszer szüksége van a jóváhagyásodra, hogy itt megjelenítse a válaszokat, borravalókat és DM-eket."
   },
   "staking": {
     "title": "Tét",
@@ -3735,7 +4047,8 @@
       "moveDown": "Le",
       "removeRule": "Szabály törlése",
       "addRule": "Szabály hozzáadása",
-      "saveRules": "Szabályok mentése"
+      "saveRules": "Szabályok mentése",
+      "transferConfirmTitle": "{{name}} legyen a tulajdonos?"
     },
     "invite": {
       "revoked": "Ez az meghívólink megsemmisült.",
@@ -5276,18 +5589,167 @@
     "buy": "Vásárlás",
     "reject": "Elutasítás",
     "needsYouHold": "{{needed}} szükséges, Ön {{held}} tulajdonában van",
-    "sellYourFractions": "Adja el töredékeit ({{held}} tartva)"
+    "sellYourFractions": "Adja el töredékeit ({{held}} tartva)",
+    "nftsSubtitle": "Bármilyen NFT, egylépéses cserék",
+    "buyersTab": "Vásárlók",
+    "soldOfListing": "{{sold}} / {{total}} eladva",
+    "noBuyersYet": "Még senki sem vett részesedést ebből a bejegyzésből",
+    "fromYou": "tőled",
+    "statusOverdue": "Késésben"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Használd ezeket az adatokat"
+        "use": "Használd ezeket az adatokat",
+        "url": "Termékoldal URL-je",
+        "action": "Termékoldal beolvasása",
+        "loading": "Oldal beolvasása…",
+        "hint": "Szöveg importálása nyilvános termékoldalról. Használat előtt nézd át a részleteket; a termékképeket külön csatold a stúdióban.",
+        "source": "Importált forrás",
+        "review": "Válassz egy terméket, amelyet a szerkeszthető leírásodba másolsz. A címsorod, hangvételed és márkaszíneid változatlanok maradnak.",
+        "errors": {
+          "signIn": "Jelentkezz be egy termékoldal importálásához.",
+          "url": "Nyilvános HTTPS termék-URL-t használj.",
+          "empty": "Nem található használható termékadat. Add meg őket kézzel.",
+          "busy": "Túl sok importálás fut. Próbáld újra hamarosan.",
+          "unavailable": "Ezt az oldalt nem sikerült importálni. Add meg a termékadatokat kézzel.",
+          "failed": "Az importálás sikertelen. A leírásod mentve; próbáld újra, vagy add meg az adatokat kézzel."
+        }
+      },
+      "return": "Vissza a stúdió-piszkozathoz",
+      "title": "Kampányleírás",
+      "intro": "Írd le a termékedet és a márkádat, majd készíts elő hozzá illő hirdetésformátumokat.",
+      "saved": "A leírásod ezen az eszközön mentve van ehhez a fiókhoz.",
+      "preview": "Formátumok előkészítése",
+      "clear": "Leírás törlése",
+      "required": "A formátumok előkészítéséhez adj meg terméknevet és leírást.",
+      "variants": "Kampányformátumok",
+      "reviewHint": "Generálás előtt nézd át a stúdióban a modellt, az árat és a termékreferenciát. Minden formátum külön generálás.",
+      "open": "Áttekintés a stúdióban",
+      "fields": {
+        "product": "Terméknév (kötelező)",
+        "description": "Termékadatok (kötelező)",
+        "brand": "Márkanév",
+        "audience": "Célközönség",
+        "benefit": "Fő előny",
+        "voice": "Márkahang",
+        "palette": "Márkaszínek",
+        "headline": "Jóváhagyott címsor",
+        "cta": "Cselekvésre ösztönzés"
+      },
+      "formats": {
+        "square": "Négyzetes hirdetés",
+        "portrait": "Álló hirdetés",
+        "story": "Story-kép",
+        "video": "Függőleges videó"
       }
     },
     "cinema": {
       "close": "Bezárás",
       "performance": {
-        "label": "Teljesítmény"
+        "label": "Teljesítmény",
+        "0": "Vidám",
+        "1": "Melankolikus",
+        "2": "Szorongó",
+        "3": "Magabiztos",
+        "4": "Lenyűgözött",
+        "5": "Visszafogott",
+        "6": "Játékos"
+      },
+      "title": "Filmes rendezés",
+      "hint": "Irányítsd a következő képed vagy videód vizuális stílusát. Az eredmények modellenként eltérnek.",
+      "none": "Nincs rendezés",
+      "reset": "Rendezés törlése",
+      "camera": {
+        "label": "Kamera kinézete",
+        "0": "Digitális mozi",
+        "1": "35 mm-es film",
+        "2": "16 mm-es film",
+        "3": "Nagy formátum",
+        "4": "Régi kamkorder"
+      },
+      "lens": {
+        "label": "Objektív stílus",
+        "0": "Szférikus",
+        "1": "Anamorf",
+        "2": "Régi lágy üveg",
+        "3": "Makró",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Fókusztávolság",
+        "0": "18 mm széles",
+        "1": "24 mm széles",
+        "2": "35 mm természetes",
+        "3": "50 mm normál",
+        "4": "85 mm portré",
+        "5": "135 mm teleobjektív"
+      },
+      "aperture": {
+        "label": "Mélységélesség",
+        "0": "f/1.4 nagyon sekély",
+        "1": "f/2.8 sekély",
+        "2": "f/5.6 közepes",
+        "3": "f/11 mély fókusz"
+      },
+      "movement": {
+        "label": "Kameramozgás",
+        "0": "Rögzített állvány",
+        "1": "Lassú ráközelítés",
+        "2": "Lassú távolodás",
+        "3": "Oldalirányú követés",
+        "4": "Keringés a téma körül",
+        "5": "Kézi kamera",
+        "6": "Daru emelkedés",
+        "7": "Lassú pásztázás"
+      },
+      "lighting": {
+        "label": "Világítás",
+        "0": "Lágy nappali fény",
+        "1": "Aranyóra",
+        "2": "Sötét tónusú chiaroscuro",
+        "3": "Világos tónusú stúdió",
+        "4": "Neon fényforrások",
+        "5": "Sziluett hátsó fény",
+        "6": "Borult, szórt fény"
+      },
+      "tempo": {
+        "label": "Snitt tempója",
+        "0": "Egyetlen folyamatos snitt",
+        "1": "Nyugodt, ráérős akció",
+        "2": "Dinamikus, energikus akció",
+        "3": "Kaotikus, eszeveszett akció"
+      },
+      "era": {
+        "label": "Korszak",
+        "0": "1920-as évek",
+        "1": "1950-es évek",
+        "2": "1960-as évek",
+        "3": "1970-es évek",
+        "4": "1980-as évek",
+        "5": "1990-es évek",
+        "6": "Napjaink",
+        "7": "Közeli jövő"
+      },
+      "genre": {
+        "label": "Műfaj",
+        "0": "Dokumentumfilm",
+        "1": "Dráma",
+        "2": "Film noir",
+        "3": "Sci-fi",
+        "4": "Fantasy",
+        "5": "Romantikus vígjáték",
+        "6": "Thriller",
+        "7": "Western"
+      },
+      "palette": {
+        "label": "Színpaletta",
+        "0": "Meleg borostyán",
+        "1": "Hideg kék",
+        "2": "Tompa földszínek",
+        "3": "Pasztell",
+        "4": "Nagy kontrasztú fekete-fehér",
+        "5": "Telített alapszínek"
       }
     },
     "libraryEmpty": "A mentett generálásaid itt jelennek meg.",
@@ -6095,9 +6557,114 @@
     "gallery": {
       "send": "Küldés",
       "notifications": {
-        "generation_reply": "{{name}} válaszolt hozzászólására"
+        "generation_reply": "{{name}} válaszolt hozzászólására",
+        "generation_like": "{{name}} reagált a generálásodra",
+        "generation_comment_like": "{{name}} reagált a hozzászólásodra",
+        "generation_comment": "{{name}} hozzászólt a generálásodhoz"
+      },
+      "browse": "Generálások böngészése",
+      "create": "Létrehozás",
+      "fullscreen": "Teljes képernyős nézet",
+      "missing": "Ez a generálás nem érhető el."
+    },
+    "avatarTitle": "Beszélő portré",
+    "avatarRequirements": "Négyzetes PNG portré, 512–2048 pixel, legfeljebb 5 MB. Mono 24 kHz 16 bites PCM WAV, 5–30 másodperc. Az utolsó másodperctöredéket csend tölti ki.",
+    "avatarPortrait": "Portré PNG kiválasztása",
+    "avatarAudio": "Beszéd WAV kiválasztása",
+    "avatarPermission": "Engedélyem van a portré animálására és a hang használatára.",
+    "avatarQuote": "{{seconds}} másodperc a csenddel együtt · {{amount}} token",
+    "avatarPrepare": "Előkészítés és ár áttekintése",
+    "batchFlowLimit": "A Flow-lista megtelt. Távolíts el egy nem használt Flow-t, mielőtt új köteget hozol létre.",
+    "batchReviewCampaign": "Kampánykötet áttekintése a Flow-ban",
+    "batchReviewFilmImages": "Storyboard-képköteg áttekintése",
+    "batchReviewFilmVideos": "Filmklip-köteg áttekintése",
+    "batchReviewHint": "Külön mentett Flow-t nyit meg. Fizetés előtt nézd át az összes elemet és a teljes árat. A kész elemek és az eredeti fizetés megmaradnak a helyreállításhoz. A referenciák a privát könyvtáradba másolódnak; tárhely- és hálózathasználat érvényes.",
+    "batchInvalid": "Egészíts ki minden elemet, mielőtt 1–12 képből vagy klipből álló köteget készítesz elő.",
+    "batchReferenceLimit": "Ez a köteg elemenként egy képreferenciát támogat. Távolítsd el a további referenciákat, vagy készítsd elő azt az elemet külön.",
+    "batchVideoSettings": "Ebben a kötegben a klipekhez 4–15 másodperces egész időtartam és 16:9, 9:16 vagy 1:1 képarány szükséges.",
+    "batchMissingReference": "Egy referencia hiányzik, nem támogatott vagy nagyobb 25 MB-nál. Állítsd vissza a szerkesztőben a köteg előkészítése előtt.",
+    "batchOwnerChanged": "A fiók vagy a piszkozat megváltozott. Nyisd meg újra ezt a köteget az eredeti fiókja alatt.",
+    "batchConflict": "A mentett köteg nem egyezik az eredeti pillanatképével.",
+    "audioExportFormat": "Exportálási formátum",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Csatolj egy forrásklipet a meghosszabbításhoz.",
+    "extensionSeconds": "+{{seconds}} mp új felvétel",
+    "extensionHelp": "Visszaadja a forrásklipedet nagyjából négy új másodperccel. A kimenet legfeljebb 720p-re, 24 fps-re lesz méretezve. A meghosszabbításhoz új hang készül.",
+    "extensionForward": "Kb. négy másodperc hozzáadása a forrásklip után",
+    "extensionBackward": "Kb. négy másodperc hozzáadása a forrásklip elé",
+    "expandDescription": "Új képszélek generálása. Opcionális angol nyelvű prompt; egy forráskép.",
+    "relightDescription": "Egy fotó újravilágítása a megvilágítás és a háttér leírása alapján.",
+    "expandPromptHint": "Csatolj egy képet, és válaszd ki az új képarányát. Az angol prompt opcionális.",
+    "expandEnglishOnly": "Ez a bővítési modell angol nyelvű promptokat fogad. Hagyd üresen a promptot az automatikus bővítéshez.",
+    "expandNeedsImage": "Csatolj egy képet a bővítéshez.",
+    "learn": {
+      "title": "Alkotói leckék",
+      "intro": "Rövid leckék, tudásellenőrzés és szerkeszthető gyakorlat mindegyikhez. A haladás ezen az eszközön mentődik a fiókodhoz.",
+      "back": "Vissza az Alkotóhoz",
+      "lessons": "Leckék",
+      "progress": "{{completed}} / {{total}} tudásellenőrzés teljesítve",
+      "check": "Válasz ellenőrzése",
+      "correct": "Tudásellenőrzés teljesítve",
+      "retry": "Próbáld újra. Nézd át a fenti leckét.",
+      "exerciseTitle": "Gyakorlati feladat",
+      "exerciseHint": "Nyiss meg egy szerkeszthető példát a saját stúdió-munkaterületeden. A piszkozat megnyitása ingyenes; a generáláshoz a jóváhagyásod és külön árajánlat kell. Generálás előtt szerkeszd a példát.",
+      "openExercise": "Gyakorlat piszkozatának megnyitása",
+      "closeExercise": "Gyakorlat bezárása",
+      "brief": {
+        "title": "Írj világos vizuális leírást",
+        "body1": "Írj le egy konkrét témát, annak cselekvését és a helyszínt. Adj hozzá képkivágást vagy kameramozgást, ha segíti a jelenetet. A nem kapcsolódó ötleteket tartsd meg egy másik piszkozatra.",
+        "body2": "A megvilágításra, objektívre és stílusra vonatkozó utasítások irányítják a modellt. Nem garantálják a fizikai kamera viselkedését vagy a pontos képet. Egyszerre egy részt módosíts, hogy össze tudd hasonlítani a változatokat.",
+        "body3": "Generálás előtt nézd át a kiválasztott modellt, a támogatott csatolmányokat, a méreteket és az árat. Tartsd meg az eredeti piszkozatot, hogy visszatérhess hozzá.",
+        "question": "Melyik leírást a legkönnyebb átdolgozni?",
+        "answer0": "Világos téma, cselekvés és helyszín",
+        "answer1": "Csak egy modellnév",
+        "answer2": "Egymásnak ellentmondó stílusok listája",
+        "exercise": "Egy kerámia teáskanna egy fa asztalon az ablak mellett. Lágy reggeli fény, közepes képkivágás, egyszerű háttér. A teáskanna maradjon a világos fő téma."
+      },
+      "continuity": {
+        "title": "Tervezd meg a felvételeket, és ellenőrizd a folytonosságot",
+        "body1": "A szerkesztő Film paneljén menthetsz leírást és sorba rendezett felvételeket. Minden képkockát vagy klipet külön készíts elő, nézd át az árajánlatát, és válassz ki egy elfogadott eredményt.",
+        "body2": "Csak a választott modell által elfogadott referenciákat csatold. Egy referencia újrahasználata irányíthatja a megjelenést; nem tanít be identitást, és nem garantál egyezést. A karakterek és hangok generálásonként eltérhetnek.",
+        "body3": "Tartsd meg a sikeres felvételeket, és állítsd össze őket az idővonalon. Exportálás előtt nézd át a mozgást, az arcokat, a párbeszédet és az átmeneteket.",
+        "question": "Mi segíti a folytonosságot a felvételek között?",
+        "answer0": "Több, egymáshoz nem kapcsolódó prompt",
+        "answer1": "Jóváhagyott referenciák és átnézett felvételi jegyzetek",
+        "answer2": "Annak feltételezése, hogy a karakter identitása garantált",
+        "exercise": "Totálkép egy magányos utazóról, aki napkeltekor egy csendes partra ér. Lassú előre haladó kameramozgás, nyugodt hangulat. Egyetlen folyamatos felvétel."
+      },
+      "campaign": {
+        "title": "Használj jóváhagyott termékadatokat",
+        "body1": "Ellenőrizhető termékadatokkal kezdj. Használat előtt nézd át az importált metaadatokat. A címsort és a cselekvésre ösztönzést kifejezetten írd meg; ne találj ki árakat, értékeléseket vagy teljesítményre vonatkozó állításokat.",
+        "body2": "Használj mentett kampányváltozatokat, hogy a közös jegyzetek és az egyedi hookok, forgatókönyvek, nyelvek és formátumok együtt maradjanak. Egyszerre egy átnézett elemet készíts elő, és ellenőrizd az árajánlatát a stúdióban.",
+        "body3": "Nézd át az eredményben a látható szöveget, a termék megjelenését és az elhangzó állításokat. A prompt nem bizonyítja a termék pontosságát vagy a marketing hatékonyságát.",
+        "question": "Mikor szerepeljen egy termékre vonatkozó állítás?",
+        "answer0": "Amikor meggyőzően hangzik",
+        "answer1": "Egy ötcsillagos értékelés kitalálása után",
+        "answer2": "Amikor jóváhagyott termékadatokból származik",
+        "exercise": "Készíts álló termékhirdetést újrahasználható fémdobozban árult egész leveles teához. Jóváhagyott címsor: Szánj időt a teára. Jóváhagyott CTA: Fedezd fel a kollekciót. Csak ezeket az adatokat használd; ne találj ki kedvezményeket, értékeléseket vagy egészségügyi állításokat."
       }
-    }
+    },
+    "campaignPlanTitle": "Kampányváltozatok és epizódok",
+    "campaignPlanIntro": "Legfeljebb 12 változatot vagy epizódot menthetsz. Mindegyik saját áttekintéssel és árajánlattal nyitja meg a stúdiót. A közös jegyzetek a folytonosságot segítik; a termék megjelenése, a karakterek és a hangok generálásonként eltérhetnek.",
+    "campaignTitle": "Kampány vagy sorozat neve",
+    "campaignContinuity": "Közös karakter-, hang- és stílusjegyzetek",
+    "campaignVariantTitle": "Változat vagy epizód neve",
+    "campaignHook": "Nyitó hook",
+    "campaignLanguage": "Kimeneti nyelv",
+    "campaignScript": "Jóváhagyott forgatókönyv vagy jelenetsor",
+    "campaignAdd": "Változat vagy epizód hozzáadása",
+    "campaignClear": "Terv törlése",
+    "campaignFormat": "Kimeneti formátum",
+    "audioInvalidResponse": "A hangszolgáltatás érvénytelen eredményt adott vissza.",
+    "batchPaymentHelp": "Minden beküldött kép külön kerül felszámításra. Ha egy köteg leáll, a fizetéséből fel nem használt tokenek automatikusan felhasználásra kerülnek egy későbbi, általa fedezett generáláshoz.",
+    "invalidSeed": "A seed 0 és 2147483647 közötti egész szám kell legyen.",
+    "libraryFavorites": "Kedvencek",
+    "libraryFavoriteAdd": "Hozzáadás a kedvencekhez",
+    "libraryFavoriteRemove": "Eltávolítás a kedvencek közül",
+    "audioTaskDialoguePlaceholder": "Alice: Mennünk kéne.\nBob: [nevet] Csak utánad.",
+    "priceOwnKey": "Saját kulcs",
+    "audioResultTooLarge": "A hangeredmény üres, vagy meghaladja a 128 MB-ot."
   },
   "pricing": {
     "plansForEveryWorkflow": "Csomagok minden munkafolyamathoz",
@@ -6264,7 +6831,8 @@
     "createTheFirst": "Hozza létre az elsőt",
     "docsSeoTitle": "AI Skill Instructions | Riftn",
     "docsSeoDescription": "Referenciadokumentáció a Riftn MI asszisztens készségeiről és azonnali könyvtáráról.",
-    "raw": "Nyers"
+    "raw": "Nyers",
+    "docsLoadFailed": "# Hiba\nNem sikerült betölteni a skill dokumentációját."
   },
   "nftMarket": {
     "actAll": "Összes",
@@ -6383,7 +6951,27 @@
     "spotlight": "Reflektorfény",
     "spotlightBuyNote": "Az NFT és a fizetés egy lépésben cserélődik.",
     "spotlightOfferNote": "Még nincs felsorolva. Küldjön ajánlatot, és a tulajdonos bármikor elfogadhatja.",
-    "signInToTradeCta": "Jelentkezzen be a kereskedéshez"
+    "signInToTradeCta": "Jelentkezzen be a kereskedéshez",
+    "actCollectionOffer": "Gyűjteményajánlat",
+    "actListed": "Listázva",
+    "actSale": "Eladás",
+    "buyAll": "Összes megvétele",
+    "buySeveral": "Több megvétele",
+    "cartBought": "{{n}} megvéve. Már a pénztárcádban vannak.",
+    "cartCount": "{{n}} a kosárban",
+    "cartFull": "Egyszerre legfeljebb 20",
+    "cartOneCoin": "Kosaranként egy lánc és egy coin. Ürítsd ki a váltáshoz.",
+    "cartOwn": "Ez már a tiéd",
+    "cartPick": "Koppints a kosárba tételhez",
+    "forSaleHere": "Itt eladó",
+    "noActivity": "Itt még nincs semmi",
+    "volShort": "Forg.",
+    "salesCount": "{{n}} eladva",
+    "bestOffer": "Legjobb ajánlat",
+    "fromOpenSea": "Top gyűjtemények az OpenSea-n",
+    "buyHere": "Vásárold meg itt",
+    "openSeaNote": "Az OpenSea-n listázva. Közvetlenül az eladónak fizetsz a Seaporton; a Riftn nem számol fel díjat.",
+    "viewOnOpenSea": "Megtekintés az OpenSea-n"
   },
   "usernames": {
     "seoTitle": "Username Marketplace | Riftn",
@@ -6738,7 +7326,18 @@
       "votes_other": "{{count}} szavazat",
       "howToVote_one": "Írd be {{command}} nevét és egy számot a csevegésben a szavazáshoz · {{count}} szavazat",
       "howToVote_other": "Írd be {{command}} nevét és egy számot a csevegésben a szavazáshoz · {{count}} szavazat"
-    }
+    },
+    "eyebrow": {
+      "follow": "Új követő",
+      "subscribe": "Új feliratkozó",
+      "subscribedTo": "Feliratkozott · {{plan}}",
+      "gifted_one": "Ajándékozott egy feliratkozást",
+      "gifted_other": "{{count}} feliratkozást ajándékozott",
+      "share": "Megosztotta az adást",
+      "join": "Most csatlakozott"
+    },
+    "giftedSubs_one": "{{name}} ajándékozott egy feliratkozást!",
+    "giftedSubs_other": "{{name}} {{count}} feliratkozást ajándékozott!"
   },
   "liveChatModeration": {
     "timeout1m": "Időtúllépés 1 percre",
@@ -6759,15 +7358,40 @@
       "modes": {
         "none": "Ki",
         "blur": "Elmosódás",
-        "color": "Szín"
-      }
+        "color": "Szín",
+        "image": "Kép"
+      },
+      "failed": "A háttér eltávolítása nem tudott elindulni ezen az eszközön.",
+      "hint": "Az eszközödön fut. Első alkalommal néhány másodpercig tart a betöltés."
     },
     "remove": "Eltávolítás",
     "scenes": {
       "countdown": "Visszaszámlálás",
       "minutes": "{{count}} perc",
       "names": {
-        "starting": "Hamarosan kezdődik"
+        "starting": "Hamarosan kezdődik",
+        "chatting": "Csak beszélgetés",
+        "gameplay": "Játékmenet",
+        "brb": "Mindjárt jövök",
+        "ending": "Az adás véget ér"
+      },
+      "title": "Jelenetek",
+      "edit": "{{name}} szerkesztése",
+      "subtitle": "Második sor (nem kötelező)",
+      "picture": "Kép",
+      "noCountdown": "Nincs visszaszámlálás",
+      "muteMic": "Mikrofon némítása, amíg ez aktív",
+      "hints": {
+        "starting": "Kártya visszaszámlálással",
+        "chatting": "Kamera teljes képernyőn",
+        "gameplay": "Képernyő a kameráddal",
+        "brb": "Kártya, mikrofon némítva",
+        "ending": "Köszönőkártya"
+      },
+      "subtitles": {
+        "starting": "Az adás kezdődik:",
+        "brb": "Egy pillanat és jövök",
+        "ending": "Köszönjük, hogy néztétek"
       }
     },
     "sources": {
@@ -6777,15 +7401,37 @@
       "show": "Megjelenítés az adatfolyamban",
       "loop": "Hurok",
       "positions": {
-        "center": "Középre helyez"
+        "center": "Középre helyez",
+        "top-left": "Bal felső",
+        "top-right": "Jobb felső",
+        "bottom-left": "Bal alsó",
+        "bottom-right": "Jobb alsó"
       },
       "sizes": {
-        "medium": "Közepes"
+        "medium": "Közepes",
+        "small": "Kicsi",
+        "large": "Nagy"
       },
       "shapes": {
         "circle": "Kör",
-        "rect": "Négyzet"
-      }
+        "rect": "Négyzet",
+        "rounded": "Lekerekített"
+      },
+      "title": "Források",
+      "addImage": "Kép vagy logó",
+      "addCamera": "Második kamera",
+      "addClip": "Videoklip",
+      "addReaction": "Reagálás egy videóra",
+      "reactPlaceholder": "Illessz be egy Riftn videólinket",
+      "reactInvalid": "Illessz be egy Riftn videóra mutató linket.",
+      "reactNotLive": "Előbb indíts élő adást, aztán add hozzá a videót.",
+      "reactNoBubble": "A kamerád itt nem nyitható meg kétszer. Méretezd át a videót, hogy az arcod képernyőn maradjon.",
+      "failed": "Nem sikerült hozzáadni ezt a forrást.",
+      "empty": "Adj hozzá logót, második kamerát vagy videoklipet az adásod fölé.",
+      "hint": "A források minden néző és minden platform számára a képed fölé kerülnek.",
+      "clip": "Klip",
+      "restart": "Újraindítás",
+      "play": "Lejátszás vagy szünet"
     },
     "audio": {
       "mute": "Némítás",
@@ -6794,7 +7440,27 @@
         "off": "Ki",
         "low": "Világos",
         "high": "Erős"
-      }
+      },
+      "title": "Hangkeverő",
+      "unavailable": "Ez a böngésző nem tud hangot keverni, így a mikrofonod változatlanul megy ki.",
+      "channels": {
+        "mic": "Mikrofon",
+        "game": "Játék / lap",
+        "clip": "Videoklip"
+      },
+      "absent": {
+        "mic": "Nincs mikrofon",
+        "game": "Ossz meg egy képernyőt hanggal, vagy használj capture kártyát",
+        "clip": "Adj hozzá videoklipet a Forrásokban"
+      },
+      "gate": "Zajkapu",
+      "gateHint": "Elnémítja a mikrofonod a szavak között, így a billentyűzet kattogása és a ventilátorok nem hallatszanak az adásban."
+    },
+    "imageTooLarge": "Ez a kép túl nagy. Próbálj kisebbet.",
+    "widgets": {
+      "title": "Widgetek megjelenítése a videómban",
+      "hint": "A riasztások, célsávok és a csevegés bekerülnek az adásodba, így a Twitch, a YouTube és minden más platform nézői is látják őket.",
+      "failed": "Nem sikerült módosítani a widgetek helyét. Próbáld újra."
     }
   },
   "liveStudio": {
@@ -6807,12 +7473,33 @@
         "off": "Ki",
         "idle": "Kész",
         "live": "Élő",
-        "error": "Hiba"
-      }
+        "error": "Hiba",
+        "connecting": "Csatlakozás"
+      },
+      "title": "Multistream célpontok",
+      "intro": "Indíts egyszer élő adást a Riftnon, és ingyen továbbítjuk az adásodat minden itt bekapcsolt platformra. Az élő adás indulása után néhány másodpercen belül elindul.",
+      "add": "Célpont hozzáadása",
+      "empty": "Még nincsenek célpontok. Adj hozzá Twitch-et, YouTube-ot, Kicket vagy bármilyen RTMP szervert.",
+      "platform": "Platform",
+      "server": "Szerver URL",
+      "findKey": "Keresd meg a(z) {{name}} szerveredet és kulcsodat",
+      "customHint": "Illeszd be a platformod által adott RTMP szervert és kulcsot.",
+      "keyNote": "A kulcsodat titkosítva tároljuk a szervereinken, és soha többé nem jelenítjük meg.",
+      "added": "{{name}} hozzáadva",
+      "saveFailed": "Nem sikerült menteni a célpontot",
+      "toggle": "Közvetítés erre a célpontra"
     },
     "vertical": {
       "centre": "Középre helyez",
-      "live": "ÉLŐ"
+      "live": "ÉLŐ",
+      "title": "Függőleges nézet",
+      "intro": "A telefonok a függőleges hírfolyamban nézik az adásodat. Húzd a keretet, hogy kiválaszd, a képed melyik részét lássák.",
+      "enabled": "Adásom megjelenítése a függőleges hírfolyamban",
+      "zoom": "Nagyítás",
+      "frame": "A fekvő képed",
+      "box": "Amit a telefonok látnak",
+      "hint": "Húzd a keretet, vagy használd a nyílbillentyűket. Mentsd el, hogy az élő adásodra alkalmazd.",
+      "watch": "Nézd {{name}} élő adását"
     },
     "subathon": {
       "title": "Subathon",
@@ -6975,7 +7662,8 @@
       "subathon_timer": "Subathon időzítő",
       "points_board": "Hűséges nézők",
       "streamer_level": "Streamer szint",
-      "tip_jar": "Ajándékdoboz"
+      "tip_jar": "Ajándékdoboz",
+      "hype_train": "Hype vonat"
     },
     "hints": {
       "tip_alert": "Üdvözöl minden tippeket, méretük a szintjükhöz igazodva",
@@ -6999,7 +7687,8 @@
       "subathon_timer": "A visszaszámlálás, amely az ajándékokat, a követéseket és az előfizetéseket visszaszorítja",
       "points_board": "A legjobb nézők pontonként a nézésből és az ajándékozásból",
       "streamer_level": "A streamer szinted és a heti csíkszámod a profilodból",
-      "tip_jar": "Egy befőttesüveg, ami megtelik, ahogy a fizetett ajándékok beérkeznek"
+      "tip_jar": "Egy befőttesüveg, ami megtelik, ahogy a fizetett ajándékok beérkeznek",
+      "hype_train": "Megjeleníti a hype vonatot, amíg tart: öt percen belül három ajándék vagy feliratkozás indítja el."
     },
     "fields": {
       "style": "Stílus",
@@ -7385,7 +8074,10 @@
     "endStreamConfirmBody": "Az Ön közvetítése leáll mindenki számára, aki nézi, és nem folytatható.",
     "keepStreaming": "Streaming folytatása",
     "encoderPermanentHint": "Ez a kulcs soha nem változik. Állítsa be egyszer a kódolót — legközelebb csak nyomja meg a Start gombot, és a Riftn létrehozza a bejegyzést az Ön számára.",
-    "notEnoughTokensForBounty": "Nincs elég token. {{need}} token szükséges, de {{have}} van."
+    "notEnoughTokensForBounty": "Nincs elég token. {{need}} token szükséges, de {{have}} van.",
+    "screenInAppHint": "A Riftn alkalmazásban",
+    "screenInAppNote": "A telefonos böngészők egyetlen weboldalnak sem engedik a képernyőmegosztást. Indíts élő adást a Riftn alkalmazásból, majd koppints a Képernyő megosztása gombra.",
+    "screenInAppCta": "Szerezd be a Riftn alkalmazást"
   },
   "events": {
     "seoTitle": "Események: Találkozók és közösségi események a Riftn-on",
@@ -7975,7 +8667,45 @@
     "foldersInFolder_other": "{{count}} mappában",
     "foldersNoItems": "Ebben a mappában még nincs semmi",
     "foldersNoItemsHint": "Nyiss meg egy eredményt, és válaszd a \"Hozzáadás a mappához\" lehetőséget a mentéshez.",
-    "skippedUpstreamFailed": "Kihagyva, mert egy korábbi lépés nem sikerült. A költsége az egyenlegeden marad."
+    "skippedUpstreamFailed": "Kihagyva, mert egy korábbi lépés nem sikerült. A költsége az egyenlegeden marad.",
+    "signInForAudioLibrary": "Jelentkezz be a privát mentett hangtárad megnyitásához.",
+    "audioLibraryFailed": "A mentett hangjaidat nem sikerült betölteni. Próbáld újra.",
+    "retryFreeTask": "Ingyenes feladat újrapróbálása",
+    "previewSavedMedia": "Mentett média előnézete",
+    "audioSavePending": "A hang elkészült, de a privát tárba mentése függőben van. Folytasd a begyűjtéshez.",
+    "confirmInterruptedRetry": "A megszakadt hang- vagy asszisztensfeladat újrapróbálása. Az előző eredmény ismeretlen, és az újrapróbálás megismételheti a futtatási munkát. A meglévő fizetés és a kifizetett feladatazonosítók újra fel lesznek használva.",
+    "freeResultUnknown": "Az ingyenes feladat válasza megszakadt. Nem lesz automatikusan újra elküldve. Válaszd az Ingyenes feladat újrapróbálása lehetőséget, majd folytasd; a fizetésed és a többi feladat megmarad.",
+    "formAuthor": "Folyamat szerkesztése",
+    "formAuthorHint": "Építs folyamatot típusos bemenetekkel. Mentsd el itt, vagy rendezd el a webes vásznon.",
+    "chooseSavedMedia": "Mentett média kiválasztása",
+    "formInput": "Bemenet: {{handle}}",
+    "reviewRun": "Futtatás áttekintése",
+    "resumeRun": "Mentett futtatás folytatása",
+    "confirmPrice": "Összesen: {{price}} token",
+    "recoveryHint": "A feladat- és fizetési hivatkozások ezen az eszközön vannak mentve. Folytasd a megszakadt munkát, mielőtt újabb futtatást indítasz.",
+    "newRun": "Újabb futtatás indítása",
+    "loadMoreMedia": "További média betöltése",
+    "invalidGraph": "Ellenőrizd a kapcsolatokat: minden bemenetnek kompatibilis forrás kell, és a gráf nem tartalmazhat kört.",
+    "unsupportedNode": "Ez a csomópont még nem futtatható a natív űrlapon. Ehhez a folyamathoz használd a webes vásznat.",
+    "missingPrompt": "Köss be egy szöveges csomópontot prompttal.",
+    "invalidSettings": "Ezeket a beállításokat a kiválasztott modell nem támogatja.",
+    "missingCapturedFrame": "Rögzíts egy képkockát a webes vásznon, mielőtt ezt a videót képbemenetként használod.",
+    "missingSavedMedia": "A mentett forrásmédia hiányzik, vagy már nem érhető el ennek a fióknak.",
+    "quoteFailed": "Nem sikerült beárazni ezt a folyamatot. Próbáld újra.",
+    "recoverBeforeEdit": "Folytasd a mentett futtatást, mielőtt módosítod a gráfját vagy újabb futtatást indítasz.",
+    "runAlreadyComplete": "Ez a futtatás befejeződött. Válaszd az Újabb futtatás indítása lehetőséget az újbóli generáláshoz.",
+    "recoveryCorrupt": "A mentett helyreállítási rekordot nem sikerült beolvasni. Tartsd meg ezt a folyamatot, és fordulj az ügyfélszolgálathoz, mielőtt újra fizetsz.",
+    "paidUnavailable": "Itt létrehozhatsz és menthetsz folyamatokat. A fizetős futtatások ebben az áruházban nem érhetők el.",
+    "planChanged": "A folyamat megváltozott az árazás után. Tekintsd át újra a futtatást.",
+    "connectOwnerWallet": "Csatlakoztasd a folyamat tulajdonosának pénztárcáját.",
+    "runFailed": "A csomópont nem tudott befejeződni. A mentett feladathivatkozása megmarad a helyreállításhoz.",
+    "recoveryPending": "A renderelés még folyamatban van. Folytasd ezt a futtatást a begyűjtéshez.",
+    "nodeAudioGen": "Hanggenerátor",
+    "nodeAudioGenDesc": "Beszéd, hangeffektek, átírás és hangleválasztás",
+    "nodeAudioInput": "Mentett hang",
+    "nodeAudioInputDesc": "Privát hang használata a tárodból",
+    "audioVoiceId": "Hangazonosító",
+    "audioSeconds": "Hang hossza másodpercben"
   },
   "videoPlayer": {
     "volume": "Hangerő",
@@ -8128,7 +8858,13 @@
       "doneAll": "Megszüntetted {{done}} fiók követését, amelyek nem követték vissza.",
       "doneSome": "Megszüntetted {{done}} fiók követését. {{failed}} nem szüntethető meg.",
       "doneToast": "Megszüntetted {{done}} fiók követését, amelyek nem követték vissza"
-    }
+    },
+    "followBackConfirmTitle_one": "Visszakövetsz {{count}} személyt?",
+    "followBackConfirmTitle_other": "Visszakövetsz {{count}} személyt?",
+    "followBackConfirmBody": "Ők már követnek téged. A privát fiókok követési kérelmet kapnak.",
+    "followedBackCount_one": "{{count}} személyt visszakövettél",
+    "followedBackCount_other": "{{count}} személyt visszakövettél",
+    "followBackDoneBody": "Mindannyiukat megtalálod a Követed listában."
   },
   "reactionInfo": {
     "title": "Reakciók",
@@ -8930,7 +9666,28 @@
       "add": "Hozzáadás",
       "scale": "Méret",
       "color": "Szín",
-      "light": "Világos"
+      "light": "Világos",
+      "create": "3D színpad hozzáadása",
+      "title": "3D jelenetszínpad",
+      "hint": "Állítsd be a snittet gömbökkel és dobozokkal. A kamera, az elhelyezés és három független felületi fény módosítja a renderelt képkockát.",
+      "preview": "Renderelt jelenet előnézete",
+      "error": "Nem sikerült előkészíteni a képkockát. Ellenőrizd a snitt referenciáit, és próbáld újra.",
+      "elevation": "Magasság",
+      "distance": "Távolság",
+      "fov": "Látószög",
+      "object": "Objektum",
+      "sphere": "Gömb",
+      "box": "Doboz",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Objektum eltávolítása",
+      "intensity": "Intenzitás",
+      "diffusion": "Szórás",
+      "saving": "Képkocka előkészítése…",
+      "useFrame": "Renderelt képkocka használata snittreferenciaként",
+      "frameHint": "Létrehoz egy 320 × 180-as PNG-t, és hozzáadja a snitt referenciáihoz. Generálás előtt nézd át a referenciakorlátot és a modell árajánlatát.",
+      "frameName": "Jelenetszínpad képkocka"
     },
     "video": {
       "tFade": "Keresztáttűnés",
@@ -9025,7 +9782,9 @@
       "pptx": "PowerPoint prezentáció",
       "pptxHint": "Minden lap egy diaszám lesz, előadójegyzetekkel és hivatkozásokkal. Szerkesztheti az eredeti tervezésben az egyes szövegeket és elemeket.",
       "section": "Névelt szakasz",
-      "transparent": "Áttetsző háttér"
+      "transparent": "Áttetsző háttér",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Letölt egy ZIP-et, amely az idővonaladat FCPXML és Premiere XML formátumban, valamint minden médiafájlt tartalmaz, így a vágást befejezheted Premiere Pro, Final Cut Pro vagy DaVinci Resolve programban. A szövegből jelölők lesznek; az effektek a Riftnben maradnak."
     },
     "inspector": {
       "selectHint": "Válassz ki egy réteget a vásznon vagy egy klipet az idővonalon.",
@@ -9119,7 +9878,45 @@
       "failed": "Az AI most nem tudta ezt megcsinálni. Próbáld újra egy kicsit később.",
       "changes": "Elvégzett módosítások: {{count}}",
       "undo": "Visszavonás",
-      "openGenerator": "Áttekintés és generálás"
+      "openGenerator": "Áttekintés és generálás",
+      "stopped": "Leállítva. Semmi más nem változott.",
+      "queued": "{{count}} sorban áll",
+      "restore": "Visszaállítás ide",
+      "restoreHint": "Visszaállítja a projektet az üzenet előtti állapotba. A visszavonás visszahozza.",
+      "restored": "A projekt visszaállítva az üzenet előtti állapotba. Nyomd meg a visszavonást az újabb verzió visszahozásához.",
+      "rewrite": "Tedd érthetőbbé a kérésemet",
+      "rewriteFailed": "Nem sikerült átírni. A szöveged nem változott.",
+      "feedback": "Hasznos volt?",
+      "good": "Jó válasz",
+      "bad": "Rossz válasz",
+      "retryPrefix": "Ez nem volt jó. Ehelyett ",
+      "recipesTitle": "Receptek",
+      "recipe": {
+        "podcastClip": {
+          "label": "Podcast klip",
+          "prompt": "Keresd meg a legerősebb 30 másodperces pillanatot, vágd rá, adj hozzá Word Pop feliratokat, és tedd 9:16-os arányúvá."
+        },
+        "talkingHead": {
+          "label": "Tiszta beszélő fej",
+          "prompt": "Vágd ki a hosszú szüneteket, adj hozzá Classic feliratokat, és adj neki finom meleg tónust."
+        },
+        "productPromo": {
+          "label": "Termékpromó",
+          "prompt": "Készíts egy 15 másodperces promót: ütős cím az elején, Zoom in átmenetek a klipek között, Bold feliratok és pörgős zene."
+        },
+        "hypeReel": {
+          "label": "Hype összeállítás",
+          "prompt": "Vágd a klipeket a zene ütemére, használj Fly up átmeneteket és Technicolor stílust."
+        },
+        "retroEdit": {
+          "label": "Retró vágás",
+          "prompt": "Adj minden klipnek VHS stílust, tegyél be egy nagy talpas betűs címet, és használj Fade átmeneteket."
+        },
+        "tutorial": {
+          "label": "Oktatóanyag",
+          "prompt": "Adj címet minden lépéshez, Boxed feliratokat, és lassítsd a kulcspillanatot 0,5x-re."
+        }
+      }
     },
     "shape": {
       "rect": "Téglalap",
@@ -9294,7 +10091,9 @@
       "tint": "Színárnyalat {{value}}",
       "vignette": "Vignetta {{value}}%",
       "auto": "Automatikus javítás",
-      "autoFailed": "Nem sikerült elemezni ezt a képet."
+      "autoFailed": "Nem sikerült elemezni ezt a képet.",
+      "halation": "Fényudvar {{value}}%",
+      "scanlines": "Pásztázó sorok {{value}}%"
     },
     "pages": {
       "add": "Oldal hozzáadása",
@@ -9369,7 +10168,15 @@
       "textSaved": "Feliratok mentve.",
       "action": "Automatikus feliratok",
       "styles": {
-        "bold": "Félkövér"
+        "bold": "Félkövér",
+        "classic": "Klasszikus",
+        "boxed": "Keretes",
+        "wordpop": "Word Pop",
+        "rapid": "Rapid Reveal",
+        "beast": "Beast Mode",
+        "stacked": "Halmozott",
+        "serif": "Talpas",
+        "bubble": "Buborék"
       },
       "working": "Figyelés… {{percent}}%",
       "downloading": "A beszédmodell előkészítése… {{percent}}%",
@@ -9381,7 +10188,8 @@
       "translateCount": "Fordítsa az {{count}} feliratokat",
       "translationDone": "Fordított {{count}} feliratok",
       "translationFailed": "A feliratok fordítása sikertelen. A feliratok változatlanok maradtak.",
-      "lockedTranslation": "Oldja fel a zárva lévő feliratokat, hogy be lehessen foglalni őket."
+      "lockedTranslation": "Oldja fel a zárva lévő feliratokat, hogy be lehessen foglalni őket.",
+      "style": "Feliratstílus"
     },
     "multi": {
       "selected": "{{count}} réteg kijelölve",
@@ -9418,7 +10226,10 @@
       "saveNewPreset": "Új mentése",
       "saveStyles": "Stílusok mentése dizájnnal",
       "stylesSaved": "Márkastílusok mentve ezzel a tervvel",
-      "usePreset": "Stílusok használata"
+      "usePreset": "Stílusok használata",
+      "dehubApplied": "Riftn arculat alkalmazva {{count}} rétegre.",
+      "dehubApply": "Riftn arculat használata",
+      "dehubHint": "Hivatalos Riftn színek, Exo és Inter betűtípusok és a Riftn logó egyetlen kattintással."
     },
     "draw": {
       "heading": "Rajzolás",
@@ -10752,7 +11563,23 @@
       "zoomOut": "Vászon kicsinyítése"
     },
     "clipFix": {
-      "listening": "Hallgatás folyamatban…"
+      "listening": "Hallgatás folyamatban…",
+      "detach": "Hang leválasztása",
+      "detached": "A hang külön klipbe került",
+      "detachFailed": "Nem sikerült leválasztani a klip hangját",
+      "removeBars": "Fekete sávok eltávolítása",
+      "scanning": "Képkockák ellenőrzése…",
+      "noBars": "Nem található fekete sáv",
+      "barsRemoved": "Fekete sávok levágva",
+      "barsFailed": "Nem sikerült ellenőrizni a videót fekete sávokra",
+      "reframe": "Automatikus újrakeretezés",
+      "reframeHint": "A videó már illeszkedik ehhez az oldalformához",
+      "reframed": "Újrakeretezve, hogy kövesse az akciót",
+      "reframeFailed": "Nem sikerült újrakeretezni a videót",
+      "retakes": "Ismétlések eltávolítása",
+      "noRetakes": "Nem található ismétlés",
+      "retakesRemoved": "{{count}} ismétlés eltávolítva, az utolsó felvétel megtartva",
+      "retakesFailed": "Nem sikerült eltávolítani az ismétléseket ebből a klipből"
     },
     "shortcuts": {
       "action": {
@@ -10760,19 +11587,109 @@
         "play": "Játék",
         "pause": "Szüneteltetés",
         "frameBack": "Előző keret",
-        "frameForward": "Következő keret"
-      }
+        "frameForward": "Következő keret",
+        "back": "Vissza 1 másodpercet",
+        "rippleDelete": "Klip törlése",
+        "liftDelete": "Klip törlése",
+        "start": "Ugrás az elejére",
+        "end": "Ugrás a végére"
+      },
+      "preset": "Billentyűzetkiosztás",
+      "presetHint": "Használd az általad ismert vágóprogram idővonal-billentyűit. A Riftn saját gyorsbillentyűi minden másra továbbra is működnek."
     },
     "voiceClone": {
       "stop": "Felvétel leállítása",
-      "failed": "Hangklónzás sikertelen volt."
+      "failed": "Hangklónzás sikertelen volt.",
+      "pickerLabel": "Hangod klónozása",
+      "pickerDetail": "Szinkronhang a saját hangodon",
+      "title": "Hangod klónozása",
+      "description": "Vedd fel magad, vagy válassz egy klipet, amelyen beszélsz. Egyszer fizetsz, és a hangod minden szinkronhoz a tiéd.",
+      "defaultName": "Saját hangom",
+      "record": "Minta felvétele (30 másodperc – 2 perc)",
+      "fromMedia": "Vagy használj egy klipet a Médiából",
+      "recorded": "A felvételed",
+      "sample": "Minta: {{name}}",
+      "hint": "Zene nélküli, tiszta beszéd működik a legjobban.",
+      "noMic": "Nem sikerült használni a mikrofont.",
+      "sampleFailed": "Nem sikerült beolvasni a hangot ebből a klipből.",
+      "pay": "Klónozás {{amount}} tokenért",
+      "useFree": "Klónozás (már kifizetve)",
+      "owned": "A(z) „{{name}}” hangod már be van állítva. Válaszd ki a hanglistából.",
+      "useOwned": "Saját hangom használata",
+      "ready": "A(z) „{{name}}” készen áll a szinkronhangokhoz.",
+      "paidFailed": "A fizetésed el van mentve. Nyisd meg újra, és a következő próbálkozás ingyenes.",
+      "consent": "Csak a saját hangodat klónozd, vagy olyat, amelynek használatára engedélyed van."
     },
     "linkImport": {
       "go": "Importálás",
-      "downloading": "Letöltés {{percent}}%"
+      "downloading": "Letöltés {{percent}}%",
+      "open": "Importálás linkből",
+      "placeholder": "Illessz be egy YouTube, TikTok vagy más linket",
+      "rights": "Ez a videó az enyém, vagy engedélyem van a használatára",
+      "audioOnly": "Csak hang",
+      "queued": "Sorban áll…",
+      "waiting": "Várakozás az oldalra, hamarosan újra próbáljuk…",
+      "adding": "Hozzáadás a Médiához…",
+      "added": "Importálva és hozzáadva az idővonalhoz.",
+      "failed": "Nem sikerült importálni ezt a linket."
     },
     "reverse": {
-      "action": "Hátramenet"
+      "action": "Hátramenet",
+      "working": "Visszafordítás {{percent}}%",
+      "done": "Klip visszafordítva.",
+      "failed": "Nem sikerült visszafordítani ezt a klipet.",
+      "unsupported": "Ez a böngésző nem tud videót visszafordítani. Próbáld Chrome-mal vagy Edge-dzsel.",
+      "tooLong": "Legfeljebb {{seconds}} másodperces klipek fordíthatók vissza."
+    },
+    "film": {
+      "repairRefs": "Hiányzó médialinkek eltávolítása",
+      "title": "Filmprojekt",
+      "intro": "Tervezd meg a snitteket újrahasználható képreferenciákkal. Az összefoglalód, a snittek sorrendje és a kiválasztott eredmények a projekttel együtt mentődnek.",
+      "create": "Filmterv létrehozása",
+      "name": "Film neve",
+      "brief": "Film összefoglaló",
+      "sharedReferences": "Közös képreferenciák (legfeljebb 4)",
+      "shot": "Snitt",
+      "addShot": "Snitt hozzáadása",
+      "shotName": "Snitt neve",
+      "action": "Snitt akciója és kompozíciója",
+      "seconds": "Kért videó másodpercben",
+      "shotReferences": "További képreferenciák (összesen legfeljebb 4)",
+      "frame": "Képkocka előkészítése",
+      "video": "Videó előkészítése",
+      "review": "Generálás előtt nézd át a stúdióban a modellt, a referenciákat, a videó hosszát és az árat.",
+      "result": "Elfogadott snitteredmény",
+      "noResult": "Nincs kiválasztott eredmény",
+      "resultHint": "Válassz egy elfogadott képet vagy videót a Feltöltésekből. A linkje a snittel együtt mentődik; a film összeállításához használd az idővonalat.",
+      "earlier": "Mozgatás előrébb",
+      "later": "Mozgatás hátrébb",
+      "remove": "Snitt eltávolítása",
+      "issue": "Ellenőrizd a snitt leírását és a referenciamédiát, majd próbáld újra. Tartsd nyitva a projektet, ha nem sikerült menteni.",
+      "searchMedia": "Média keresése név szerint",
+      "refreshMedia": "Média frissítése"
+    },
+    "speakers": {
+      "find": "Beszélők keresése",
+      "name": "{{number}}. beszélő",
+      "onlyOne": "Csak egy beszélő található.",
+      "failed": "Nem sikerült megtalálni a beszélőket.",
+      "kept": "Csak {{name}} maradt meg.",
+      "editFailed": "Ez a vágás nem illett ehhez a kliphez.",
+      "split": "Felosztva {{count}} beszélői snittre.",
+      "keepOnly": "Csak ezt megtartani",
+      "splitAction": "Vágás minden beszélőváltásnál"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Írd le a kívánt 3D objektumot",
+      "queued": "Készül a 3D objektumod. A Generálások lapon jelenik meg.",
+      "note": "A 3D objektumok rövid, forgó klipként, átlátszó háttérrel kerülnek a Médiába."
+    },
+    "behind": {
+      "action": "Szöveg a személy mögött",
+      "working": "A személy kivágása…",
+      "done": "A szöveg és a feliratok most a személy mögött vannak.",
+      "failed": "Nem sikerült a szöveget a személy mögé tenni."
     }
   },
   "jungleMood": {
@@ -11175,7 +12092,9 @@
     "tokenAmount": "{{amount}} token",
     "assistant": {
       "question1": "Mi a Riftn tokenek jelenlegi tét APY-ja?",
-      "question2": "Igen, ha 10 000 zsetont teszek fel 90 napra"
+      "question2": "Igen, ha 10 000 zsetont teszek fel 90 napra",
+      "answer1": "A Riftn tokenek jelenlegi staking APY-ja 12,4% 30 napos zárolási időre. Részletezve:\n\n• 7 napos zárolás: 8,2% APY\n• 30 napos zárolás: 12,4% APY\n• 90 napos zárolás: 18,7% APY\n\nSegítsek kiszámolni a lehetséges hozamot?",
+      "answer2": "10 000 token esetén, 18,7% APY mellett 90 napra stakelve:\n\n📊 Becsült jutalom: ~461 token\n\nEz nagyjából napi 5,13 token. Ne feledd, az APY a teljes stakelt összegtől függően ingadozhat."
     },
     "bookmarks": {
       "stakingGuide": "Teljes útmutató a Riftn tokenek stakingeléséhez: az APY lebontása, a zárolási időszakok és a jutalomszorzók magyarázata."
@@ -11921,7 +12840,10 @@
     "planTypeNotAllowed": "Ennek az alkotónak a csomagja nem engedi ezt az üzenettípust.",
     "planMinTip": "A borravalónak legalább {{amount}} tokenek-nek kell lennie ennél az alkotónál.",
     "shareKindGroup": "Csoportosítás",
-    "shareKindCommunity": "Közösség"
+    "shareKindCommunity": "Közösség",
+    "shareGroups": "Csoportok",
+    "shareKindChannel": "Csatorna",
+    "reportMessage": "Üzenet jelentése"
   },
   "credits": {
     "earningsWorth": "Megéri {{amount}}",
@@ -11963,7 +12885,11 @@
     "error": "Nem sikerült elküldeni a törlési kérést. A fiókod törlését nem erősítettük meg. Próbálkozz újra.",
     "back": "Vissza a beállításokhoz",
     "signIn": "Jelentkezz be a fiókod törléséhez",
-    "acknowledge": "Elmentettem a pénztárcám helyreállítási adatait, és tudomásul veszem, hogy a törlés végleges."
+    "acknowledge": "Elmentettem a pénztárcám helyreállítási adatait, és tudomásul veszem, hogy a törlés végleges.",
+    "signedInAs": "Bejelentkezve mint",
+    "confirmTitle": "Végleg törlöd a fiókodat?",
+    "confirmBody": "A fiókod és minden rajta lévő tartalom törlődik. Kijelentkeztetünk, és ez nem vonható vissza.",
+    "confirmBodyNamed": "{{who}} és minden rajta lévő tartalom törlődik. Kijelentkeztetünk, és ez nem vonható vissza."
   },
   "miniApps": {
     "badge": {
@@ -12060,12 +12986,42 @@
       "rewardPending": "Függőben",
       "rewardsNone": "Még nem kalkuláltunk jutalmakat. Az első hét hétfőn zárul.",
       "stats": {
-        "button": "Élő statisztika"
+        "button": "Élő statisztika",
+        "chartTitle": "Az alkalmazásodat megnyitó emberek, utolsó 30 nap",
+        "peak_one": "Csúcs: napi {{count}}",
+        "peak_other": "Csúcs: napi {{count}}",
+        "people30": "Emberek, 30 nap",
+        "people7": "Emberek, 7 nap",
+        "added": "Hozzáadták",
+        "dhb30": "Kifizetett tokenek, 30 nap",
+        "notified30": "Elküldött értesítések, 30 nap",
+        "rewards": "Megszerzett tokenjutalmak"
       },
       "signin": {
         "users_one": "{{count}} felhasználó",
         "users_other": "{{count}} felhasználók",
-        "delete": "Törlés"
+        "delete": "Törlés",
+        "title": "Bejelentkezés Riftn-nel",
+        "body": "Engedd, hogy az emberek a Riftn fiókjukkal jelentkezzenek be a weboldaladra vagy alkalmazásodba. Hozz létre itt egy kulcsot, majd kövesd az útmutatót.",
+        "guide": "Útmutató olvasása",
+        "copyId": "Kliensazonosító másolása",
+        "rotate": "Új titok",
+        "rotateConfirm": "Új titkot hozol létre ehhez: {{name}}? A régi titok azonnal megszűnik működni.",
+        "deleteConfirm": "Törlöd ezt: {{name}}? Mindenki, aki ezzel jelentkezett be, ki lesz jelentkeztetve.",
+        "secretOnce": "Titok ehhez: {{name}}. Másold ki most: csak egyszer jelenik meg.",
+        "name": "Alkalmazás neve",
+        "website": "Weboldal (nem kötelező)",
+        "redirects": "Átirányítási URL-ek, soronként egy (https://yoursite.com/callback)",
+        "create": "Kulcs létrehozása"
+      },
+      "stateRejected": "Elérhető linkkel · nincs jóváhagyva az áruházba",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Események, amelyeket a Riftn a webhookUrl-edre küldött. A teszt egy ping eseményt küld.",
+        "test": "Teszt küldése",
+        "ok": "A webhook válasza: {{status}}",
+        "failed": "A webhook sikertelen: {{reason}}",
+        "none": "Még nem küldtünk webhookot."
       }
     },
     "card": {
@@ -12092,7 +13048,10 @@
       "confirm": "Fizess {{amount}} tokenek-t",
       "sending": "Fizetés elküldése…",
       "sent": "Fizetett {{amount}} tokenek-t {{name}}-nak.",
-      "noOwner": "Ennek az alkalmazásnak még nincs ellenőrzött pénztárcája."
+      "noOwner": "Ennek az alkalmazásnak még nincs ellenőrzött pénztárcája.",
+      "testBadge": "Tesztmód",
+      "testBody": "Ez az alkalmazás a tiéd, így ez egy teszt: nem mozognak tokenek, és a nyugta tesztként van jelölve.",
+      "testSent": "{{amount}} tokenes tesztfizetés. Semmi sem lett elküldve."
     },
     "add": {
       "title": "Add {{name}}?",
@@ -19208,7 +20167,65 @@
     "127053546dd4": "Nem sikerült letölteni ezt a fájlt",
     "d14896aa4bf8": "Az ingyenes könyvtár betöltése nem sikerült. Ellenőrizd a kapcsolatot, és próbálkozz újra.",
     "953e708b2287": "A hanggenerálás sikertelen.",
-    "4a52cdd6ac72": "Nem sikerült duplikálni ezeket a rétegeket"
+    "4a52cdd6ac72": "Nem sikerült duplikálni ezeket a rétegeket",
+    "3f9b2c71d0a4": "{{n}} találat",
+    "8c4e1a6b2f57": "erre: „{{query}}”",
+    "1d7234ff1b79": "itt: {{feed}}",
+    "e122e5c2b563": "Húzd felfelé a bezáráshoz",
+    "1aa9d734f2ee": "Válaszd ki, miben keresel",
+    "ef557404f465": "Nincs találat erre: „{{query}}”",
+    "35034aa59bd3": "Semmi sem egyezett itt: {{feed}}. Próbálj más szavakat, vagy keress mindenben.",
+    "415155739590": "Keresés mindenben",
+    "9e13d826baaf": "Képek keresése",
+    "cbf6f228327c": "Zene keresése",
+    "e8756c6865a5": "Shorts keresése",
+    "c7661da99c41": "Videók keresése",
+    "90f1afe66801": "Keresés: „{{query}}”…",
+    "d7b559f2d8c6": "Próbálj más szavakat, vagy módosítsd a szűrőket.",
+    "d1a0c7e2f301": "Mi jár a fejedben ma?",
+    "d1a0c7e2f302": "Min gondolkodsz ma?",
+    "d1a0c7e2f303": "Mi jár a fejedben?",
+    "d1a0c7e2f304": "Van valami a fejedben?",
+    "d1a0c7e2f305": "Mi jár most a fejedben?",
+    "d1a0c7e2f306": "Min gondolkodunk ma?",
+    "d1a0c7e2f307": "Jár valami a fejedben ma?",
+    "d1a0c7e2f308": "Mi jár a fejedben ezúttal?",
+    "a7c1e0f4b2d9": "Koppints a beszédhez",
+    "b3e8d1c6f0a2": "Koppints a küldéshez",
+    "c9f2a4e7d1b5": "Figyelek... koppints a gömbre a küldéshez",
+    "6b22cd35ed6f": "⏱️ Rugalmas 2–12 mp-es időtartam",
+    "22577ebd908e": "Wan 3.0 videó generálása · eredeti hangsáv",
+    "1fa2357ab7e1": "Seedance 720p videó generálása · eredeti hangsáv",
+    "9bbdb1635108": "⏱️ Legfeljebb 15 másodperc",
+    "7f78bdc0762d": "+{{value1}} pont",
+    "f0c8bb34335b": "+{{value1}} pontot szereztél",
+    "0fbe06b679a8": "{{value1}} pont minden megvalósult kérésért, hozzáadva a Top építők pontszámodhoz.",
+    "431bc73eb60b": "[verse]\nIde jön a dalszöveg...\n\n[chorus]\nRefrén szövege...",
+    "4068235b7ac5": "A Coinbase hivatalos tweetje a Base DEX integrációról",
+    "40cc2fc5a264": " Illeszd be ez után",
+    "a3c1e5f20b71": "Használd a Riftnt a ChatGPT-ben, a Claude-ban vagy bármely MCP alkalmazásban. Illeszd be az alábbi URL-t az asszisztensed csatlakozó-beállításaiba a bejegyzések, profilok és hozzászólások böngészéséhez, majd jelentkezz be, amikor kéri, hogy összekapcsold a saját fiókodat.",
+    "b84d2e7c9a16": "Ez a cím AI alkalmazásoknak szól, nem weboldal. Ha böngészőben nyitod meg, ide jutsz.",
+    "c5e9f1a3d742": "Kapcsold össze a Riftn fiókodat",
+    "d61a7b4e8c05": "Amikor az asszisztensed bejelentkezést kér, lépj be a Riftnba, és kattints az Engedélyezés gombra. Ezután frissítheti a profilodat, bejegyzéseket és hozzászólásokat tehet közzé, embereket követhet és alkothat a Creator Studióban. A kapcsolatok aktívak maradnak, amíg használod őket, és 30 nap használaton kívüli idő után lejárnak.",
+    "e27b8c5f9d13": "Lépésről lépésre ChatGPT útmutató",
+    "f38c9d6a0e24": "Lépésről lépésre Claude útmutató",
+    "0a49d7b1f835": "Inkább külön bot fiókot szeretnél? Hozz létre egy ügynököt, hogy kapj egy csatlakozó URL-t, amely az ügynök nevében posztol.",
+    "1b5ae8c20f46": "Amikor a ChatGPT kéri, jelentkezz be a Riftnba, és kattints az Engedélyezés gombra a fiókod összekapcsolásához.",
+    "2c6bf9d31a57": "Kattints a Csatlakozás gombra, jelentkezz be a Riftnba, és kattints az Engedélyezés gombra a fiókod összekapcsolásához.",
+    "674e70bcd915": "A teljes csevegési előzmény mindenki számára elérhető, akinek van fiókja.",
+    "ebebdc70335b": "Üveg sávok",
+    "5ff272ba7871": "Selyem vonalak",
+    "a941e90ca93d": "Borító glória",
+    "04dbbe4dff7a": "Valódi hullám",
+    "ca76a418f18f": "Árnyalat {{value1}}°",
+    "23786872368a": "Kitöltés {{value1}}",
+    "4513b42fa995": "Adj minden kategóriának nem üres címkét",
+    "c7bc9bd6d0bd": "Adj meg oszlopneveket az első sorban, utána címkét és számértékeket",
+    "eb7e789f3c3d": "Adj meg egy cellatartományt, pl. B2:C6, vagy hagyd üresen az összes cellához",
+    "8b97de2abb83": "Használj érvényes színeket és legfeljebb 120 karakteres csomópontcímkéket",
+    "d840bfa9db13": "Válassz támogatott színátmenet-stílusú fájlt érvényes színpontokkal",
+    "1ef84302682d": "Keresés előtt adj hozzá táblázatcellákat",
+    "6e71ae3669b1": "A mentett kimenet nem érhető el"
   },
   "articles": {
     "cardLabel": "Cikk · {{count}} perc olvasás",
@@ -19250,7 +20267,16 @@
     "formatting": "Formázás",
     "bodyPlaceholder": "Írd meg a történetedet. Jelölj ki szöveget, és használd a fenti sávot címsorokhoz, félkövér szedéshez, idézetekhez és listákhoz.",
     "bodyLabel": "Cikktörzs",
-    "wordCount": "{{count}} szó"
+    "wordCount": "{{count}} szó",
+    "imageLimit": "A cikkek legfeljebb {{count}} képet tartalmazhatnak",
+    "imageLimitSome": "Már csak {{count}} kép fér ebbe a cikkbe",
+    "imageFailed": "Ezt a képet nem sikerült hozzáadni. Próbálj másikat.",
+    "imagesUploading": "Képek hozzáadása ({{count}})…",
+    "bodyTooLong": "{{count}} karakterrel túllépve a korlátot",
+    "imagesCount": "Képek · {{count}}/{{max}}",
+    "captionPlaceholder": "Képaláírás hozzáadása",
+    "captionLabel": "Képaláírás a(z) {{n}}. képhez",
+    "removeInlineImage": "{{n}}. kép eltávolítása"
   },
   "liveAudience": {
     "whosHere": "Ki van itt?",
@@ -19299,24 +20325,94 @@
       "stage": {
         "preparing": "Előkészítés…",
         "confirming": "Várakozás a tranzakcióra…",
-        "recording": "Befejezés…"
-      }
+        "recording": "Befejezés…",
+        "wallet": "Erősítsd meg a pénztárcádban"
+      },
+      "open": "Feliratkozások ajándékozása",
+      "title": "Feliratkozások ajándékozása",
+      "mode": {
+        "random": "Véletlenszerű nézők a csevegésben",
+        "user": "Valaki konkrétan"
+      },
+      "randomHint": "Azoknak jár, akik az elmúlt 30 percben írtak a csevegésben, és még nem feliratkozók.",
+      "send_one": "1 feliratkozás ajándékozása · ${{price}}",
+      "send_other": "{{count}} feliratkozás ajándékozása · ${{price}}",
+      "payHint": "Tokenben fizetve a pénztárcádból, egyetlen utalással.",
+      "fewer_one": "Jelenleg csak 1 ember kaphat feliratkozást a csevegésben, így 1-ért fizetsz.",
+      "fewer_other": "Jelenleg csak {{count}} ember kaphat feliratkozást a csevegésben, így {{count}}-ért fizetsz.",
+      "done_one": "Feliratkozás elajándékozva!",
+      "done_other": "{{count}} feliratkozás elajándékozva!",
+      "failed": "Nem sikerült feliratkozásokat ajándékozni",
+      "notReady": "Ehhez a csomaghoz még nem érhető el az ajándékozás",
+      "noPlan": "Előbb válassz csomagot",
+      "noPlans": "{{name}} még nem rendelkezik ajándékozható előfizetési csomaggal."
     },
     "badges": {
       "emoji": "Hangulatjel",
       "audience": {
-        "subscribers": "Feliratkozók"
+        "subscribers": "Feliratkozók",
+        "both": "Feliratkozók és ajándékozók",
+        "gifters": "Ajándékozók"
       },
       "ended": "Véget ért",
       "until": "{{date}}-ig",
-      "failed": "Ez nem sikerült. Próbálkozz újra."
+      "failed": "Ez nem sikerült. Próbálkozz újra.",
+      "title": "Korlátozott idejű jelvények",
+      "intro": "Kínálj fel egy jelvényt néhány napra. Aki feliratkozik vagy ajándékoz, amíg tart, megkapja, és örökre ott lesz a neve mellett a csevegésedben.",
+      "name": "Jelvény neve",
+      "namePlaceholder": "Bemutató hét",
+      "days": "Elérhető (nap)",
+      "who": "Ki szerezheti meg",
+      "create": "Jelvény felkínálása",
+      "created": "A jelvény él.",
+      "end": "Befejezés most",
+      "holders_one": "{{count}} birtokos",
+      "holders_other": "{{count}} birtokos",
+      "limit": "Egyszerre három jelvény futhat. Fejezz be egyet, hogy újat kínálhass.",
+      "hypeHint": "Mindenki, aki felszáll egy hype vonatra, megkapja a 🚂 jelvényedet is az elért szinten."
+    },
+    "train": {
+      "level": "Hype vonat · {{level}}. szint",
+      "endedLevel": "A hype vonat teljesítette a(z) {{level}}. szintet!",
+      "ended": "A hype vonat véget ért",
+      "thanks_one": "Köszönet {{count}} támogatónak",
+      "thanks_other": "Köszönet {{count}} támogatónak",
+      "top": "Top: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "ajándékozott egy feliratkozást 🎁",
+      "giftedSubs_other": "{{count}} feliratkozást ajándékozott 🎁"
     }
   },
   "whenSheet": {
     "today": "Ma",
     "tooSoon": "Válasszon egy jövőbeli időpontot.",
     "show": "Megjelenítés",
-    "hide": "Elrejtés"
+    "hide": "Elrejtés",
+    "title": "Mikor?",
+    "tonight": "Ma este",
+    "inAnHour": "Egy óra múlva",
+    "tomorrow": "Holnap",
+    "primeTime": "Főműsoridő",
+    "scheduleFor": "Ütemezés: {{when}}",
+    "liveTip": "A követőid emlékeztetőt állíthatnak be. Az élő adást te magad indítod, amikor eljön az ideje.",
+    "stageTip": "Azonnal felkerül a Közelgő polcra, így az emberek rákoppinthatnak az Emlékeztess gombra.",
+    "typePlaceholder": "Írj be egy időpontot, pl. „pén 20:00” vagy „2 óra múlva”",
+    "typeLabel": "Időpont beírása",
+    "typeHelp": "Próbáld így: „ma este”, „holnap 9:00”, „szom dél” vagy „okt 30 19:00”.",
+    "orPickDay": "Vagy válassz egy napot",
+    "earlier": "15 perccel korábban",
+    "later": "15 perccel később",
+    "earlierShort": "Korábban",
+    "laterShort": "Később",
+    "tooSoonMin": "Válassz legalább {{count}} perccel későbbi időpontot.",
+    "zone": "A te időd ({{zone}}). Mindenki más a saját idejében látja.",
+    "remove": "Ütemezés eltávolítása",
+    "startsIn": "Kezdés {{time}} múlva",
+    "bestTime": "Legjobb időpont",
+    "fansOnline": "Mikor vannak online a rajongóim?",
+    "fansBasis": "A világosabb azt jelenti, hogy több követőd nézett, az elmúlt {{count}} napban.",
+    "everyoneBasis": "Még nincs elég követői aktivitás, ezért ez a Riftn összes felhasználóját mutatja."
   },
   "planned": {
     "title": "Tervezett",
@@ -19331,22 +20427,45 @@
     "loading": "Betöltés…",
     "startNow": "Indítás most",
     "cancel": "Mégse",
-    "cancelled": "Törölve"
+    "cancelled": "Törölve",
+    "subtitle": "Ütemezett bejegyzéseid, élő adásaid és Stage-eid",
+    "seoTitle": "Tervezett · Riftn",
+    "seoDescription": "Ütemezett bejegyzéseid, élő adásaid és Stage-eid a Riftnon, egy helyen.",
+    "lives": "Élő adások",
+    "signIn": "Jelentkezz be, hogy lásd, mit terveztél",
+    "emptyTitle": "Még nincs semmi tervezve",
+    "emptyBody": "Válaszd a „Mikor?” lehetőséget bejegyzés, élő adás vagy Stage készítésekor, és itt jelenik meg.",
+    "move": "Áthelyezés",
+    "postNow": "Közzététel most",
+    "confirmCancel": "Koppints újra a lemondáshoz",
+    "moved": "Áthelyezve: {{when}}",
+    "postingNow": "Közzététel egy percen belül",
+    "moveFailed": "Nem sikerült áthelyezni. Próbáld újra.",
+    "seeAll": "Minden tervezett elem megtekintése"
   },
   "welcome": {
     "about": {
       "title": "Üdvözöljük a Riftnban",
       "day": "Nap",
       "month": "Hónap",
-      "year": "Év"
+      "year": "Év",
+      "sub": "A születésnapod privát marad. Válassz megjelenést, bármikor módosíthatod.",
+      "birthday": "Születési dátum",
+      "pick": "Válaszd ki a születésnapodat",
+      "invalid": "Add meg a teljes születési dátumodat.",
+      "tooYoung": "A Riftn használatához legalább {{age}} évesnek kell lenned.",
+      "theme": "A megjelenésed"
     },
     "name": {
       "title": "Név",
-      "placeholder": "Név"
+      "placeholder": "Név",
+      "sub": "Ezt a nevet látják az emberek a bejegyzéseiden."
     },
     "card": {
       "name": "Név",
-      "followers": "követők"
+      "followers": "követők",
+      "interests": "Érdeklődési köreid",
+      "following": "követed"
     },
     "topic": {
       "music": "Zene",
@@ -19358,11 +20477,47 @@
       "podcast": "Podcasting",
       "food": "Étkezés",
       "news": "Hírek",
-      "science": "Tudomány"
+      "science": "Tudomány",
+      "travel": "Utazás",
+      "film": "Film",
+      "anime": "Anime",
+      "cars": "Autók",
+      "animals": "Állatok",
+      "tech": "Tech"
     },
     "back": "Vissza",
     "skipPhoto": "Kihagyás most",
-    "preview": "Előnézet"
+    "preview": "Előnézet",
+    "username": {
+      "title": "A @felhasználóneved",
+      "sub": "Betűk, számok és aláhúzásjelek. Később módosíthatod.",
+      "yours": "@{{name}} a tiéd"
+    },
+    "photo": {
+      "title": "A fotód",
+      "sub": "Nem kötelező. Az emberek gyorsabban követik az arcokat.",
+      "choose": "Fotó kiválasztása",
+      "change": "Másik választása"
+    },
+    "interests": {
+      "title": "Érdeklődési köreid",
+      "sub": "Válassz legalább 3-at. Ezek kerülnek előre a kategóriáidban."
+    },
+    "people": {
+      "title": "A te embereid",
+      "sub": "Koppints a követéshez. Bejegyzéseik megtöltik a Követed hírfolyamodat.",
+      "empty": "Most nincsenek javaslatok. A Felfedezés oldalon több embert találsz.",
+      "followers": "{{count}} követő"
+    },
+    "done": {
+      "title": "Jól nézel ki, {{name}}",
+      "sub": "Mától mindenki ezt a kártyát látja.",
+      "eyebrow": "Profil élesítve"
+    },
+    "enter": "Belépés a Riftnba",
+    "pickMore": "Válassz még {{count}}-t",
+    "cardHint": "Így fognak látni az emberek",
+    "followFailed": "Nem sikerült követni. Próbáld újra."
   },
   "appTokens": {
     "title": "A te tokeneid",
@@ -19373,28 +20528,102 @@
     "amount": "Összeg",
     "notePlaceholder": "Írj egy üzenetet (nem kötelező)",
     "sendButton": "Küldés",
-    "errorInsufficient": "Nincs elég token"
+    "errorInsufficient": "Nincs elég token",
+    "rowHint": "Alkalmazáson belüli egyenleg",
+    "explainer": "A tokenjeid mostantól a Riftnon belül vannak. Azzal kezdted, amit az induláskor láncon tartottál és stakeltél. A küldés, a borravaló és a költés azonnal mozgatja őket, díjak nélkül és láncon kívül. Az egyenlegek az airdropkor átkerülnek az új tokenre.",
+    "kindOpening": "Kezdő egyenleg",
+    "kindSent": "Elküldve neki: {{name}}",
+    "kindReceived": "Tőle: {{name}}",
+    "kindSpent": "Elköltve a Riftnon",
+    "kindRefund": "Visszatérítés",
+    "kindAdjust": "Riftn általi korrekció",
+    "sendTitle": "Tokenek küldése",
+    "sendHint": "Tokeneket küld a Riftnon belül egy másik fióknak. Azonnali és ingyenes, semmi sem kerül láncra.",
+    "toPlaceholder": "@felhasználónév vagy 0x cím",
+    "looking": "Keresés…",
+    "available": "Elérhető: {{amount}}",
+    "sent": "{{amount}} token elküldve neki: {{name}}",
+    "errorRateLimit": "Túl sok küldés az elmúlt órában. Próbáld később.",
+    "errorNoRecipient": "Nem található Riftn fiók",
+    "errorSelf": "Magadnak nem küldhetsz",
+    "errorGeneric": "Nem sikerült elküldeni. Próbáld újra."
   },
   "reactions": {
     "policy": {
       "everyone": "Mindenki",
       "followers": "Követők",
-      "nobody": "Senki"
+      "nobody": "Senki",
+      "default": "Fiók alapértelmezése ({{value}})"
     },
     "heading": "Válaszok:",
     "more": "Többet mutat",
     "liveNow": "Élő",
-    "untitled": "Reakció"
+    "untitled": "Reakció",
+    "reactionTo": "Reakció erre:",
+    "reactingTo": "Reagálás erre:",
+    "count_one": "{{count}} reakció",
+    "count_other": "{{count}} reakció",
+    "allow": "Reakciók engedélyezése",
+    "remixesSection": "Remixek",
+    "allowDescription": "Engedd, hogy más alkotók reagáljanak a videóidra, felvéve vagy élőben. Ezt minden bejegyzésnél külön is módosíthatod.",
+    "pageDescription": "Nézd meg, hogyan reagálnak az alkotók {{creator}} „{{title}}” videójára a Riftnon, felvéve és élőben.",
+    "backToVideo": "Vissza a videóhoz",
+    "empty": "Még nincsenek reakciók. Nyisd meg a videó Remix menüjét, és válaszd a Reagálás lehetőséget, hogy te legyél az első.",
+    "wasLive": "Élő volt",
+    "thisVideo": "ez a videó",
+    "pageTitle": "Reakciók erre: {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Csatlakoztasd a Riftnot az MI-asszisztensedhez",
     "urlLabel": "MCP-szerver URL",
     "copy": "Másolás",
     "copied": "Másolva",
-    "copiedToast": "MCP URL kimásolva"
+    "copiedToast": "MCP URL kimásolva",
+    "accountBody2": "Ments privát piszkozatokat, tegyél közzé és ütemezz bejegyzéseket, kezeld a képeket és szavazásokat, olvass elemzéseket, válaszolj, reagálj, oszd meg újra, kövess, ments könyvjelzőket, olvass értesítéseket, szerkeszd a profilodat, és alkoss a kreditjeiddel. Egy bejegyzéskérés-azonosító újrafelhasználása nem hoz létre és nem számol második bejegyzést. Mielőtt bármit elköltene, megkérdez.",
+    "agentsTitle": "Futtasd az ügynökeidet az asszisztensedből",
+    "agentsBody": "Csatlakozáskor engedélyezd az „Ügynökeid nevében eljárás” lehetőséget is. Az asszisztensed ezután bármelyik saját ügynököd nevében posztolhat, válaszolhat, reagálhat, újraküldhet, követhet vagy szerkesztheti a profilt, egyenként vagy sorban többet. Soha nem járhat el olyan fiók nevében, amely nem a tiéd.",
+    "agentsExample": "Próbáld ki: „Válaszoljon @mybot a hírfolyamom legnépszerűbb bejegyzésére, majd lájkolja azt a választ @otherbot nevében.”",
+    "desc": "Használd a Riftnt a ChatGPT-ből, a Claude-ból, a Cursorból vagy bármely MCP alkalmazásból. Böngéssz fiók nélkül, vagy jelentkezz be, hogy az asszisztensed posztolhasson, válaszolhasson és alkothasson helyetted.",
+    "copyFailed": "A másolás sikertelen",
+    "urlNote": "Illeszd be ezt az AI alkalmazásodba. Ez nem weboldal, így ha böngészőben nyitod meg, visszajutsz ide.",
+    "canTitle": "Mit tehet az asszisztensed",
+    "publicTitle": "Bejelentkezés nélkül",
+    "publicBody": "Böngészheti a hírfolyamot, kereshet bejegyzéseket és embereket, olvashat hozzászólásokat és megnézhet profilokat.",
+    "accountTitle": "Bejelentkezés után",
+    "accountBody": "Posztolhat, válaszolhat, reagálhat, követhet, menthet könyvjelzőket, olvashat értesítéseket, szerkesztheti a profilodat, és képeket, videót és zenét készíthet a kreditjeiddel. Mielőtt bármit elköltene, megkérdez.",
+    "chatgpt1": "Nyisd meg a ChatGPT Beállításait, majd az Apps & Connectors, majd az Advanced menüt, és kapcsold be a Developer mode-ot.",
+    "chatgpt2": "Az Apps & Connectors menüben válaszd a Create lehetőséget új csatlakozó hozzáadásához.",
+    "chatgpt3": "Nevezd el Riftn-nek, illeszd be a fenti URL-t, és válaszd az OAuth bejelentkezési típust.",
+    "chatgpt4": "Nyomd meg a Connect gombot. Megnyílik a Riftn: jelentkezz be, ellenőrizd az engedélyeket, és nyomd meg az Engedélyezés gombot.",
+    "chatgpt5": "Egy új csevegésben nyisd meg a + menüt, válaszd a Riftnt, és kérdezz, például: „Mutasd a Riftn felkapott bejegyzéseit.”",
+    "claude1": "Nyisd meg a Claude csatlakozó-beállításait, és válaszd az Add custom connector lehetőséget.",
+    "claude2": "Nevezd el Riftn-nek, illeszd be a fenti URL-t, és nyomd meg az Add gombot.",
+    "claude3": "Nyomd meg a Connect gombot. Megnyílik a Riftn: jelentkezz be, ellenőrizd az engedélyeket, és nyomd meg az Engedélyezés gombot.",
+    "claude4": "Egy csevegésben nyisd meg az eszközök menüt, kapcsold be a Riftnt, és kérdezz bátran.",
+    "openSettings": "Beállítások megnyitása",
+    "devTitle": "Claude Code, Cursor és más alkalmazások",
+    "devBody": "Add hozzá a Riftnt távoli MCP szerverként HTTP-n keresztül. Az alkalmazás az első alkalommal, amikor szüksége van a fiókodra, megnyitja a Riftn bejelentkezést.",
+    "manageTitle": "Összekapcsolt alkalmazásaid",
+    "manageBody": "Az összekapcsolt alkalmazások csatlakozva maradnak, amíg használod őket, és 30 nap használaton kívüli idő után leválnak. Bármikor megtekintheted vagy leválaszthatod őket.",
+    "manageLink": "Összekapcsolt alkalmazások kezelése",
+    "agentTitle": "Olyan botot szeretnél, amely saját fiókként posztol?",
+    "agentBody": "Hozz létre egy ügynököt, és kapsz egy saját csatlakozó URL-t beépített kulccsal. Az asszisztensed ezután helyetted az ügynök nevében posztolhat, hozzászólhat, szavazhat és követhet.",
+    "agentLink": "Ügynök létrehozása",
+    "helpTitle": "Ha valami nem működik",
+    "help1": "„Authentication update required” vagy egy Reconnect gomb: nyomd meg a Reconnect gombot, és jelentkezz be újra a Riftnba.",
+    "help2": "„Kapcsold össze a Riftn fiókodat”, amikor a saját bejegyzéseidről kérdezel: nyomd meg a Connect gombot az alkalmazás csatlakozó-beállításaiban.",
+    "help3": "Normális, ha hibát kapsz, amikor böngészőlapon nyitod meg az URL-t. Illeszd be inkább az AI alkalmazásodba.",
+    "other": "Bármely más MCP alkalmazás ugyanígy működik: adj hozzá egy távoli MCP szervert, és illeszd be a fenti URL-t."
   },
   "avatarPrompt": {
-    "notNow": "Most nem"
+    "notNow": "Most nem",
+    "title": "Profilkép hozzáadása",
+    "body": "Az emberek gyorsabban észrevesznek a hírfolyamokban, hozzászólásokban és csevegésekben, ha van arcod vagy logód.",
+    "choose": "Fotó kiválasztása",
+    "another": "Másik választása",
+    "save": "Ennek a fotónak a használata",
+    "saved": "Jól néz ki",
+    "failed": "Nem sikerült menteni a fotódat. Próbáld újra."
   },
   "postStats": {
     "audience": "Közönség",
@@ -19412,7 +20641,60 @@
     "shares": "Megosztások",
     "signedOutViewers": "Kijelentkezve",
     "topSupporters": "Kiemelt támogatók",
-    "visitors": "Kijelentkezve"
+    "visitors": "Kijelentkezve",
+    "aboutUsual": "nagyjából a szokásos",
+    "afterWatching": "megnézés után követett",
+    "avg": "átl.",
+    "avgWatch": "Átl. nézési idő",
+    "bestTime": "Mikor néznek a követőid",
+    "bigDrop": "Nagy esés",
+    "byBadge": "jelvény szerint",
+    "devices": "Eszköz (tagok)",
+    "finishedLower": "végignézte",
+    "finishedPct": "{{pct}}% nézte végig",
+    "inOut": "{{in}} tag · {{out}} kijelentkezett",
+    "leave": "{{pct}}% kilép",
+    "linkClicks": "Linkkattintások",
+    "newToYou": "új számodra",
+    "noAccount": "nincs fiók",
+    "noViewersYet": "Ezt a bejegyzést még senki sem látta.",
+    "noWatchYet": "A nézési idő itt jelenik meg, amint lejátsszák. A számlálás 2026. okt. 31-én kezdődött.",
+    "open": "Nézd meg, hogyan teljesít a bejegyzésed",
+    "otherBadges": "Egyéb jelvények",
+    "peak": "Csúcs {{time}} · {{n}}",
+    "peopleReached": "Elért emberek",
+    "playsLower": "lejátszás",
+    "playsMembers": "Tagok lejátszásai",
+    "playsVisitors": "Kijelentkezett lejátszások",
+    "profileTaps": "Koppintások a profilodra",
+    "reach": "Elérés",
+    "saves": "Mentések",
+    "seeAll": "Összes statisztika",
+    "signedIn": "bejelentkezett",
+    "signedOutLower": "kijelentkezett",
+    "stillWatching": "Még nézi",
+    "timesUsual": "A szokásos {{ratio}}×-e",
+    "vsUsualPct": "{{pct}} a szokásos bejegyzésedhez képest",
+    "unavailableBody": "Ennek a bejegyzésnek a statisztikáit csak az alkotó láthatja.",
+    "unavailableTitle": "A statisztika nem érhető el",
+    "vsUsual": "a szokásos bejegyzésedhez képest",
+    "watching": "Nézi",
+    "whoSawIt": "Kik látták",
+    "withRepeats": "{{n}} ismétlés",
+    "yourFollowers": "követőid",
+    "first48": "Első 48 óra",
+    "howItsDoing": "Hogy teljesít",
+    "bestTip": "A nézőid többsége {{day}} {{hour}}:00 körül jelenik meg. Ha közvetlenül előtte posztolsz, a bejegyzés a legjobb rajtot kapja.",
+    "last30": "elmúlt 30 nap",
+    "day": {
+      "sun": "V",
+      "mon": "H",
+      "tue": "K",
+      "wed": "Sze",
+      "thu": "Cs",
+      "fri": "P",
+      "sat": "Szo"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Jövőben",
@@ -19445,7 +20727,27 @@
   },
   "mcpKeys": {
     "delete": "Törlés",
-    "shortProfile": "Profil"
+    "shortProfile": "Profil",
+    "title": "Személyes kulcsok",
+    "body": "Szkriptekhez, botokhoz és alkalmazásokhoz, amelyek nem tudnak bejelentkezési oldalt megnyitni. Egy kulcs csak azt teszi, amit engedélyezel, a fiókodon és a saját ügynökeiden. Aktív marad, amíg használják, és 30 nap használaton kívüli idő után leáll.",
+    "signIn": "Jelentkezz be kulcs létrehozásához",
+    "newTitle": "Másold ki most a kulcsodat",
+    "newBody": "Csak most jelenik meg. Bárki, akinél megvan, használhatja a fiókodat a kiválasztott engedélyeken belül, ezért tartsd titokban.",
+    "useIt": "Add hozzá az alkalmazásodhoz ezek egyikével:",
+    "name": "Kulcs neve",
+    "namePlaceholder": "Saját botom",
+    "permissions": "Mit tehet ez a kulcs",
+    "limits": "Napi korlátok a fiókodra és ügynökeidre együtt: 50 bejegyzés, 300 válasz, 1000 reakció, 200 követés, 200 újraküldés és 30 profilszerkesztés.",
+    "create": "Kulcs létrehozása",
+    "show": "Kulcsaim megjelenítése",
+    "yours": "Kulcsaid",
+    "empty": "Még nincsenek kulcsok.",
+    "expires": "Aktív eddig: {{date}}, hacsak nem használják újra",
+    "shortRead": "Olvasás",
+    "shortSocial": "Posztolás és válasz",
+    "shortGenerate": "Média készítése",
+    "shortAgents": "Ügynökeid",
+    "settingsBody": "Használd a Riftnt és az ügynökeidet a ChatGPT-ből, a Claude-ból vagy bármely MCP alkalmazásból, vagy hozz létre személyes kulcsot."
   },
   "chatSearch": {
     "placeholder": "Keresés üzenetek vagy emberek",
@@ -19481,17 +20783,81 @@
     "title": "Funkciókérések",
     "accept": "Elfogad",
     "delete": "Törlés",
-    "block": "Letiltás"
+    "block": "Letiltás",
+    "hint": "Üzenetek olyanoktól, akiket nem követsz. Fogadj el egyet, válaszolj, vagy kövesd őket, és a csevegés átkerül a beérkezett üzeneteid közé.",
+    "rowHint": "{{n}} olyanoktól, akiket nem követsz",
+    "banner": "Nem követed őt: {{name}}. Fogadd el, hogy ez a csevegés a beérkezett üzeneteid közé kerüljön, vagy csak válaszolj.",
+    "accepted": "Áthelyezve a beérkezett üzenetek közé",
+    "acceptFailed": "Nem sikerült elfogadni, próbáld újra"
   },
   "dmSchedule": {
     "view": "Megtekintés",
     "edit": "Szerkesztés",
     "editLabel": "Üzenet szerkesztése",
-    "error": "Ez nem sikerült. Próbálkozz újra."
+    "error": "Ez nem sikerült. Próbálkozz újra.",
+    "button": "Üzenet ütemezése",
+    "title": "Ütemezett üzenetek",
+    "whenTitle": "Mikor küldjük?",
+    "waiting": "{{n}} ütemezve",
+    "next": "következő: {{when}}",
+    "failedCount": "{{n}} nincs elküldve",
+    "notSent": "Nem ment el",
+    "emptyTitle": "Nincs semmi ütemezve",
+    "emptyBody": "Írj egy üzenetet, majd koppints az órára, hogy kiválaszd, mikor menjen el.",
+    "changeTime": "Időpont módosítása",
+    "sendNow": "Küldés most",
+    "deleted": "Ütemezett üzenet törölve",
+    "unreadable": "Másik eszközön írva. Így is el lesz küldve.",
+    "footnote": "Az időpontok a saját időzónádban vannak. Senki sem látja az üzenetet, amíg el nem küldjük.",
+    "footnoteNamed": "Az időpontok a saját időzónádban vannak. {{name}} csak elküldés után látja az üzenetet.",
+    "textOnly": "Egyelőre csak szöveges üzenetek ütemezhetők.",
+    "scheduledToast": "Ütemezve: {{when}}",
+    "failedToast": "Egy ütemezett üzenetet nem sikerült elküldeni"
   },
   "mentionLinks": {
     "communities": "Közösségek",
     "pages": "Oldalak",
-    "people": "Emberek"
+    "people": "Emberek",
+    "empty": "Nincs találat",
+    "hint": "Gépelj emberek, közösségek és oldalak kereséséhez",
+    "linkTo": "{{name}} hivatkozása",
+    "members": " tag",
+    "placeholder": "Emberek, közösségek, oldalak keresése...",
+    "title": "Említés vagy hivatkozás"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Tudomásul veszem, hogy a profilom rejtve lesz, és mindenhol kijelentkeztetnek.",
+    "title": "Fiók deaktiválása",
+    "short": "Rejtsd el egyelőre a profilodat. Jelentkezz be újra a visszaállításhoz",
+    "description": "Tarts inkább szünetet. A profilod, bejegyzéseid és hozzászólásaid rejtve lesznek, és mindenhol kijelentkeztetünk. Semmi sem törlődik, és újbóli bejelentkezéskor minden visszatér.",
+    "button": "Deaktiválás",
+    "confirmTitle": "Deaktiválod a fiókodat?",
+    "confirmBody": "A profilod, bejegyzéseid és hozzászólásaid rejtve lesznek, és minden eszközön kijelentkeztetünk. Bármikor visszavonhatod újbóli bejelentkezéssel.",
+    "busy": "Deaktiválás…",
+    "done": "Fiók deaktiválva",
+    "receipt": "A profilod, bejegyzéseid és hozzászólásaid rejtve vannak. Jelentkezz be újra bármikor, hogy minden visszatérjen.",
+    "error": "Nem sikerült deaktiválni a fiókodat. Próbáld újra."
+  },
+  "halloween": {
+    "title": "Boldog Halloweent",
+    "otherThemes": "Nincs kedved a borzongáshoz? Keress más témákat:",
+    "enter": "Belépés a tömlöcbe"
+  },
+  "msgDelete": {
+    "title": "Törlöd az üzenetet?",
+    "titleMany": "Törölsz {{count}} üzenetet?",
+    "bodyOwn": "Töröld csak a saját csevegésedből, vagy mindenkinél.",
+    "bodyOwnMany": "Töröld őket csak a saját csevegésedből, vagy mindenkinél.",
+    "bodyOthers": "Csak a saját csevegésedből törlődik. A másik fél továbbra is látja.",
+    "bodyOthersMany": "Csak a saját csevegésedből törlődnek. A csevegés többi tagja továbbra is látja őket.",
+    "bodyOwnBoth": "Töröld csak a saját csevegésedből, vagy mindkettőtöknél.",
+    "bodyOwnBothMany": "Töröld őket csak a saját csevegésedből, vagy mindkettőtöknél.",
+    "forMe": "Törlés nálam",
+    "forEveryone": "Törlés mindenkinél",
+    "forBoth": "Törlés mindkettőnknél",
+    "forMeAndName": "Törlés nálam és {{name}} felhasználónál",
+    "remember": "Választás megjegyzése",
+    "rememberHint": "Bármikor módosíthatod a Beállításokban",
+    "failed": "Nem sikerült törölni az üzenetet"
   }
 }

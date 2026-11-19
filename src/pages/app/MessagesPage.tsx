@@ -67,7 +67,10 @@ import { SwipeableRow } from '@/components/ui/swipeable-row';
 import { showUndoToast } from '@/components/ui/undo-toast';
 import { scheduleDelete, undoDelete, usePendingDeletes, UNDO_WINDOW_MS } from '@/lib/undoable-delete';
 import { useKeyboardOpen, useVisualViewportBox } from '@/hooks/use-keyboard-open';
-import { emitSendMessage, waitForDmSocket } from '@/lib/api/dehub/dm-socket';
+import { emitSendMessage, onConversationDeleted, waitForDmSocket } from '@/lib/api/dehub/dm-socket';
+import { DeleteMessageDialog, type DeleteScope } from '@/components/app/chat/DeleteMessageDialog';
+import { usePublicChatLastLine, useRoomChatSummaries } from '@/hooks/use-room-chat-summaries';
+import { roomPreviewLine } from '@/lib/room-chat-read';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import chatBubbleIcon from '@/assets/icons/chat-bubble.webp';
 import messagesBubbleIcon from '@/assets/icons/messages-3d-icon.webp';
@@ -84,6 +87,7 @@ import { useUserCommunities, type Community } from '@/hooks/use-communities';
 import { chatsFromMemberships } from '@/lib/community-kinds';
 import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { previewLinks } from '@/lib/dehub-links';
 
 /**
  * The other person's name with their badge sitting on its baseline, the same
@@ -161,7 +165,7 @@ export function ConversationItem({
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : 'User');
   const lastMessagePreview = conversation.lastMessage?.undecryptable
     ? `🔒 ${t('messages.cannotDecrypt')}`
-    : conversation.lastMessage?.content || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
+    : (conversation.lastMessage?.content && previewLinks(conversation.lastMessage.content)) || _copy("copy.f42e0f66017d", { defaultValue: "No messages yet" });
   const lastMessageTime = conversation.lastMessage?.createdAt
     ? (compactTime
       ? formatTimeAgo(conversation.lastMessage.createdAt)
@@ -447,10 +451,16 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // The row is gone the moment it is swiped away, with Undo in the toast; the
   // real delete runs when that window closes. A swipe is one careless thumb
   // away, and a confirm dialog after every one defeats the point of swiping.
+  // Swiping a chat away asks first: Delete for me, Delete for both (1:1
+  // chats), or Cancel. The same pop-up as deleting a message.
+  const [confirmChatDelete, setConfirmChatDelete] = useState<DeHubConversation | null>(null);
   const handleDeleteConversation = useCallback((conv: DeHubConversation) => {
+    setConfirmChatDelete(conv);
+  }, []);
+  const deleteConversationNow = useCallback((conv: DeHubConversation, scope: DeleteScope) => {
     setSelectedConversation(prev => (prev?.id === conv.id ? null : prev));
     scheduleDelete(conv.id, () =>
-      deleteConversationMutation.mutate(conv.id, {
+      deleteConversationMutation.mutate(scope === 'everyone' ? { id: conv.id, forEveryone: true } : conv.id, {
         onError: () => toast.error(t('messages.deleteConversationFailed')),
       }),
     );
@@ -462,6 +472,13 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onUndo: () => undoDelete(conv.id),
     });
   }, [deleteConversationMutation, t]);
+
+  // The other person deleted a 1:1 chat for both of you: drop it from the list.
+  useEffect(() => onConversationDeleted((data) => {
+    if (!data?.forEveryone) return;
+    setSelectedConversation(prev => (prev?.id === data.dmId ? null : prev));
+    void refetch();
+  }), [refetch]);
 
   const liveConversations = (conversations || []).filter(c => !pendingDeletes.has(c.id));
   // First messages from people you don't follow wait under Requests. A search
@@ -602,10 +619,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     setSelectedRoom(c);
   };
   const archivedCount = archivedConversations.length + archivedRooms.length;
+  // Newest line + unread number for each group row, and General Chat's newest line.
+  const roomSummaries = useRoomChatSummaries(groupChats.map(c => c.id), isAuthenticated ? walletAddress : null);
+  const publicLastLine = usePublicChatLastLine(isAuthenticated);
+  const publicPreview = publicLastLine ? roomPreviewLine(publicLastLine, walletAddress || '', (key, options) => _copy(key, options)) : '';
   // Computer tabs: Unread keeps chats with something new (or marked unread),
   // Groups keeps group, channel and community chats only.
   const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread || !!chatPrefs.get(c.id)?.reactions;
-  const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions;
+  const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions || (roomSummaries[c.id]?.unread ?? 0) > 0;
   const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
   const tabFilter = tabsOn && activeTab === 'unread' && !showArchived && !inRequests ? 'unread' : 'all';
   const shownConversations = tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
@@ -1217,11 +1238,12 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Unread chats per tab, for the counts on the tab row.
   const inboxConvs = liveConversations.filter(c => !c.isRequest);
   const unreadOf = (c: DeHubConversation) => c.unreadCount || 0;
+  const roomsUnread = listedRooms.filter(c => !isMuted(roomPref(c))).reduce((n, c) => n + (roomSummaries[c.id]?.unread ?? 0), 0);
   const tabUnread: Record<string, number> = {
-    all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
-    unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread,
+    all: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread + roomsUnread,
+    unread: inboxConvs.reduce((n, c) => n + unreadOf(c), 0) + publicUnread + roomsUnread,
     direct: inboxConvs.reduce((n, c) => n + unreadOf(c), 0),
-    communities: 0,
+    communities: roomsUnread,
     requests: requestUnread,
   };
   for (const tab of chatTabs.tabs) {
@@ -1584,17 +1606,19 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="font-semibold text-white truncate block">{t('publicChat.title')}</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="font-semibold text-white truncate">{t('publicChat.title')}</span>
+                  {publicLastLine && <span data-room-last-at className="ml-auto shrink-0 text-zinc-500 text-sm tabular-nums">{formatTimeAgo(publicLastLine.created_at)}</span>}
+                  {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} className={publicLastLine ? 'ml-0.5' : 'ml-auto'} />}
+                  {/* Same white number as a private chat, not a red pill. */}
+                  {publicUnread > 0 && !showPublicChat && <UnreadCountChip count={publicUnread} className={publicLastLine || publicReactions ? 'ml-0.5' : 'ml-auto'} />}
+                </span>
                 {publicReactions && !showPublicChat
                   ? <p data-reaction-alert-line className="text-white font-bold text-sm truncate">{reactionAlertLine(t, publicReactions, { named: true })}</p>
-                  : <p className="text-zinc-500 text-sm truncate">{t('publicChat.subtitle')}</p>}
+                  : publicPreview
+                    ? <p data-room-preview className={`text-white text-sm truncate ${publicUnread > 0 ? 'font-bold' : 'font-normal'}`}>{publicPreview}</p>
+                    : <p className="text-zinc-500 text-sm truncate">{t('publicChat.subtitle')}</p>}
               </div>
-              {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} />}
-              {publicUnread > 0 && (
-                <span data-unread-chip data-public-chat-unread className="min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center leading-none">
-                  {publicUnread > 99 ? '99+' : publicUnread}
-                </span>
-              )}
             </button>
             )}
 
@@ -1605,6 +1629,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   key={chat.id}
                   community={chat}
                   pref={richList ? roomPref(chat) : unreadOnly(roomPref(chat))}
+                  summary={roomSummaries[chat.id]}
+                  me={walletAddress || ''}
                   reactions={selectedRoom?.id === chat.id ? null : roomPref(chat)?.reactions}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
@@ -1811,6 +1837,15 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   const dialogs = (
     <>
+      <DeleteMessageDialog
+        subject="chat"
+        open={!!confirmChatDelete}
+        onOpenChange={(open) => { if (!open) setConfirmChatDelete(null); }}
+        canDeleteForEveryone={!!confirmChatDelete && !confirmChatDelete.isGroup && !confirmChatDelete.id.startsWith('new_')}
+        oneToOne
+        peerName={confirmChatDelete ? (confirmChatDelete.otherUser?.displayName || confirmChatDelete.otherUser?.username || null) : null}
+        onDelete={(scope) => { const conv = confirmChatDelete; setConfirmChatDelete(null); if (conv) deleteConversationNow(conv, scope); }}
+      />
       <AlertDialog open={!!clearTarget} onOpenChange={(open) => { if (!open) setClearTarget(null); }}>
         <AlertDialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
           <AlertDialogHeader>

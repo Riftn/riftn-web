@@ -60,6 +60,22 @@ it('shows the destination header and Back before scheduling post content', () =>
   expect(document.querySelector('.app-route-loading-shell')).toBeNull();
 });
 
+it('phones: the cover takes the touches itself and never makes the feed inert', () => {
+  vi.spyOn(window, 'matchMedia').mockImplementation(query => ({ matches: query === '(max-width: 1023px)', media: query, onchange: null, addListener: () => {}, removeListener: () => {}, addEventListener: () => {}, removeEventListener: () => {}, dispatchEvent: () => false }));
+  const from = location('/app', 'feed');
+  const to = location('/app/post/1', 'post');
+  const { result, rerender } = renderHook(({ route }) => useAppRouteMotion(route, false), { initialProps: { route: from } });
+  rerender({ route: to });
+  paintThenRender();
+  expect(result.current).toBe(to);
+  expect(document.querySelector('.app-route-loading-shell')).not.toBeNull();
+  expect(document.querySelector('main')?.inert).toBe(false);
+  act(() => notifyRouteContentReady(to.key));
+  expect(document.querySelector('main')?.inert).toBe(false);
+  act(() => vi.advanceTimersByTime(120));
+  expect(document.querySelector('.app-route-loading-shell')).toBeNull();
+});
+
 it('cancels an unpainted destination when Back returns to the source', () => {
   const from = location('/app', 'feed');
   const { result, rerender } = renderHook(({ route }) => useAppRouteMotion(route, false), { initialProps: { route: from } });

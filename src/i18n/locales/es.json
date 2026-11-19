@@ -1389,6 +1389,8 @@
     "menuLayoutSectionsDesc": "Todas las páginas a la vez, bajo encabezados",
     "menuLayoutFolders": "Carpetas",
     "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo",
+    "publicChatInBar": "Chat público en la barra inferior",
+    "publicChatInBarDesc": "Entra al Chat público con un toque desde la barra inferior de la pantalla",
     "chatCards": "Chats como tarjetas",
     "chatCardsDesc": "Cada chat en su propia tarjeta. Desactívalo para una lista simple con una línea entre chats."
   },
@@ -2152,6 +2154,12 @@
     "likes": "Me gusta",
     "subscribers": "Suscriptores",
     "affiliates": "Afiliados",
+    "ogChallenge": "Reto OG",
+    "ogHolders_one": "{{count}} holder OG",
+    "ogHolders_other": "{{count}} holders OG",
+    "ogChallengeTitle": "Trae de vuelta a los holders OG",
+    "ogChallengeBody": "Invita a quienes aún tienen DHB. Cuando se unan con tu enlace de invitación y mantengan su DHB en su billetera de Riftn, cuentan para ti aquí.",
+    "ogChallengeCta": "Obtén tu enlace de invitación",
     "directReferrals_one": "{{count}} directos",
     "directReferrals_other": "{{count}} directos",
     "secondaryReferrals_one": "{{count}} secundarios",
@@ -2258,6 +2266,11 @@
     "followBack": "Seguir de vuelta"
   },
   "features": {
+    "cropDraw": "Recortar y dibujar",
+    "crop": "Recortar",
+    "cropHint": "Arrastra un recuadro sobre la parte que quieres conservar. Arrastra dentro para moverlo.",
+    "drawHint": "Dibuja sobre la imagen para señalar cosas.",
+    "resetCrop": "Restablecer recorte",
     "prompts": "Propuestas",
     "queued": "En cola",
     "promptPageTitle": "Solicitudes",
@@ -3725,6 +3738,10 @@
     "statsLoadFailed": "No se pudieron cargar las estadísticas de staking"
   },
   "communities": {
+    "muteChat": "Silenciar",
+    "mutedChat": "Silenciado",
+    "muteChatHint": "Deja de recibir avisos del chat de esta comunidad. Podrás seguir leyéndolo",
+    "unmuteChatHint": "Vuelve a recibir avisos del chat de esta comunidad",
     "sortTop": "Top",
     "shareLink": "Compartir enlace",
     "pinnedMore": "Más",
@@ -8014,6 +8031,9 @@
     "sourceEncoder": "OBS / codificador",
     "sourceEncoderHint": "Obtener los datos RTMP",
     "screenPickHint": "A continuación elegirás la pantalla, ventana o pestaña, y saldrá en directo con tu micrófono y el sonido de la propia pestaña.",
+    "screenInAppHint": "En la app de Riftn",
+    "screenInAppNote": "Los navegadores del móvil no dejan que ninguna web comparta tu pantalla. Emite en directo desde la app de Riftn y toca Compartir pantalla.",
+    "screenInAppCta": "Descarga la app de Riftn",
     "replayAllowanceUsed": "Ya has agotado el límite de subida de hoy, así que esta retransmisión no guardará repetición. El límite se reinicia a medianoche UTC.",
     "replayFreeTier": "Las cuentas gratuitas guardan los primeros {{size}} de una retransmisión como repetición; hacer staking de insignias amplía el límite.",
     "replayTiered": "Se guardan como repetición hasta {{size}} de esta retransmisión (límite diario {{tier}}).",
@@ -9087,7 +9107,19 @@
     "declined": "Llamada rechazada",
     "noAnswer": "Sin respuesta",
     "missed": "Llamada perdida",
-    "callBack": "Devolver la llamada"
+    "callBack": "Devolver la llamada",
+    "group": "Grupo",
+    "groupVoiceCall": "Llamada de voz grupal",
+    "groupVideoCall": "Videollamada grupal",
+    "callingGroup": "Llamando al grupo...",
+    "isCalling": "{{name}} está llamando",
+    "leave": "Salir",
+    "joinCall": "Unirse",
+    "inCall_one": "{{count}} en la llamada",
+    "inCall_other": "{{count}} en la llamada",
+    "startGroupVoice": "Iniciar una llamada de voz grupal",
+    "startGroupVideo": "Iniciar una videollamada grupal",
+    "you": "Tú"
   },
   "badgeAscension": {
     "reached": "Has llegado a {{tier}}",
@@ -20844,6 +20876,9 @@
     "title": "Mencionar o enlazar"
   },
   "msgDelete": {
+    "chatTitle": "¿Eliminar este chat?",
+    "chatBodyBoth": "Bórralo solo de tus chats o borra todos los mensajes para los dos. No se puede deshacer.",
+    "chatBodyMe": "Se quitará solo de tus chats. Los demás lo seguirán viendo.",
     "title": "¿Eliminar mensaje?",
     "titleMany": "¿Eliminar {{count}} mensajes?",
     "bodyOwn": "Quítalo solo de tu chat o para todos.",
@@ -20859,5 +20894,9 @@
     "remember": "Recordar mi elección",
     "rememberHint": "Cámbialo cuando quieras en Ajustes",
     "failed": "No se pudo eliminar el mensaje"
+  },
+  "roomPreview": {
+    "you": "Tú",
+    "voice": "🎤 Mensaje de voz"
   }
 }

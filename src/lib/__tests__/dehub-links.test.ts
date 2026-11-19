@@ -9,7 +9,7 @@
  * as ours.
  */
 import { describe, it, expect } from 'vitest';
-import { dehubLinkFor, findDehubLinks, parseDehubLink, proposalPath } from '@/lib/dehub-links';
+import { dehubLinkFor, findDehubLinks, parseDehubLink, previewLinks, proposalPath } from '@/lib/dehub-links';
 
 describe('findDehubLinks /posts short form', () => {
   it('cards the bare short post link', () => {
@@ -270,5 +270,19 @@ describe('feature request and page links', () => {
     expect(parseDehubLink('/app/leaderboard')).toBeNull();
     expect(parseDehubLink('https://evil.example/app/leaderboard')).toBeNull();
     expect(parseDehubLink('https://riftn.com/robots.txt')).toBeNull();
+  });
+});
+
+describe('previewLinks', () => {
+  it('shows old dehub.io links as riftn.com', () => {
+    expect(previewLinks('https://dehub.io/app/leaderboard')).toBe('https://riftn.com/app/leaderboard');
+    expect(previewLinks('look https://www.dehub.io/app/x?y=1 ok')).toBe('look https://riftn.com/app/x?y=1 ok');
+    expect(previewLinks('visit dehub.io.')).toBe('visit riftn.com.');
+  });
+
+  it('leaves subdomains, emails and lookalikes alone', () => {
+    for (const s of ['https://staging.dehub.io/x', 'me@dehub.io', 'notdehub.io', 'dehub.io.evil.com', 'https://riftn.com/app']) {
+      expect(previewLinks(s)).toBe(s);
+    }
   });
 });

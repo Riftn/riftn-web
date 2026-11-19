@@ -19,7 +19,10 @@ const STORAGE_KEY = 'user-preferred-language';
 
 // Read cached language (same key as useUserLanguage hook)
 const savedLang = localStorage.getItem(STORAGE_KEY);
-const browserLang = navigator.language?.split('-')[0] || 'en';
+// Taiwan, Hong Kong, Macau and zh-Hant browsers read Traditional Chinese.
+const browserLang = /^zh-(tw|hk|mo)\b|^zh-hant/i.test(navigator.language || '')
+  ? 'zh_tw'
+  : navigator.language?.split('-')[0] || 'en';
 let defaultLang = savedLang || browserLang;
 
 export const SUPPORTED_LANGUAGES = [
@@ -44,7 +47,8 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'bg', name: 'Bulgarian', nativeName: 'Български' },
   { code: 'my', name: 'Burmese', nativeName: 'မြန်မာ' },
   { code: 'cs', name: 'Czech', nativeName: 'Čeština' },
-  { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: 'zh', name: 'Chinese (Simplified)', nativeName: '简体中文' },
+  { code: 'zh_tw', name: 'Chinese (Traditional)', nativeName: '繁體中文' },
   { code: 'cjy', name: 'Chinese, Jinyu', nativeName: '晋语' },
   { code: 'mnp', name: 'Chinese, Min Bei', nativeName: '闽北语' },
   { code: 'ctg', name: 'Chittagonian', nativeName: 'চাটগাঁইয়া' },

@@ -308,7 +308,8 @@
       "location": "地点",
       "custom": "自定义",
       "customOption": "自定义标签"
-    }
+    },
+    "placeholderLink": "yoursite.com"
   },
   "followedTags": {
     "follow": "关注 #{{tag}}",
@@ -1316,8 +1317,18 @@
     "menuLayoutSectionsDesc": "所有页面一次显示，按标题分组",
     "menuLayoutFolders": "文件夹",
     "menuLayoutFoldersDesc": "主要页面，然后每组一个文件夹",
+    "publicChatInBar": "底部栏中的公共聊天",
+    "publicChatInBarDesc": "在屏幕底部栏一键进入公共聊天",
     "chatCards": "聊天以卡片显示",
-    "chatCardsDesc": "每个聊天单独一张卡片。关闭后变为带分隔线的简洁列表。"
+    "chatCardsDesc": "每个聊天单独一张卡片。关闭后变为带分隔线的简洁列表。",
+    "chatDeleteChoice": "删除消息时",
+    "chatDeleteChoiceDesc": "每次询问，或始终仅为自己删除或为聊天中的所有人删除。",
+    "chatDeleteAsk": "每次询问",
+    "chatDeleteMe": "为我删除",
+    "chatDeleteMeDesc": "从你的聊天中消失，其他人仍可看到",
+    "chatDeleteEveryone": "为所有人删除",
+    "chatDeleteEveryoneDesc": "在可行时。群组中他人的消息仍仅为你删除",
+    "ensSection": "ENS"
   },
   "common": {
     "confirm": "确认",
@@ -2079,6 +2090,12 @@
     "likes": "点赞",
     "subscribers": "订阅者",
     "affiliates": "推广伙伴",
+    "ogChallenge": "OG 挑战",
+    "ogHolders_one": "{{count}} 位 OG 持有者",
+    "ogHolders_other": "{{count}} 位 OG 持有者",
+    "ogChallengeTitle": "把 OG 持有者带回来",
+    "ogChallengeBody": "邀请仍持有 DHB 的人。他们通过你的邀请链接加入并把 DHB 保留在 Riftn 钱包中，就会在这里计入你的成绩。",
+    "ogChallengeCta": "获取你的邀请链接",
     "directReferrals_one": "直接 {{count}} 人",
     "directReferrals_other": "直接 {{count}} 人",
     "secondaryReferrals_one": "间接 {{count}} 人",
@@ -3366,7 +3383,8 @@
     "priceUnavailable": "价格不可用",
     "confirm": "{{chain}}薄荷",
     "confirmWithCost": "在{{chain}} · {{cost}}上完好无损",
-    "notAvailable": "此链上的铸造尚不可用。"
+    "notAvailable": "此链上的铸造尚不可用。",
+    "gasOnly": "≈ {{usd}} Gas 费"
   },
   "postEditHistory": {
     "title": "编辑历史",
@@ -6647,9 +6665,17 @@
     "gallery": {
       "send": "发送",
       "notifications": {
-        "generation_reply": "{{name}}回复了你的评论"
-      }
-    }
+        "generation_reply": "{{name}}回复了你的评论",
+        "generation_like": "{{name}} 回应了你的生成内容",
+        "generation_comment_like": "{{name}} 回应了你的评论",
+        "generation_comment": "{{name}} 评论了你的生成内容"
+      },
+      "browse": "浏览生成内容",
+      "create": "创建",
+      "fullscreen": "全屏查看",
+      "missing": "该生成内容不可用。"
+    },
+    "audioExportMp3": "MP3 · 128 kbps"
   },
   "pricing": {
     "plansForEveryWorkflow": "适配每种工作流的方案",
@@ -8059,7 +8085,10 @@
     "endStreamConfirmBody": "所有正在观看的人都会看到直播中断，且无法恢复。",
     "keepStreaming": "继续直播",
     "encoderPermanentHint": "这个钥匙永远不会改变。设置一次编码器—下次只需按“从那里开始” ， Riftn就会为您创建帖子。",
-    "notEnoughTokensForBounty": "代币不足。需要 {{need}} 个代币，但只有 {{have}} 个。"
+    "notEnoughTokensForBounty": "代币不足。需要 {{need}} 个代币，但只有 {{have}} 个。",
+    "screenInAppHint": "在 Riftn 应用中",
+    "screenInAppNote": "手机浏览器不允许任何网站共享你的屏幕。请改用 Riftn 应用开播，然后点击“共享屏幕”。",
+    "screenInAppCta": "获取 Riftn 应用"
   },
   "events": {
     "seoTitle": "活动: Riftn 上的聚会与社区活动",
@@ -9792,7 +9821,8 @@
       "pptxHint": "每个页面变成一个幻灯片图像，带有演示笔记和链接。编辑原始设计中的单独文本和元素。",
       "section": "命名节",
       "transparent": "透明背景",
-      "nleHint": "下载包含您时间轴的 ZIP 文件（含 FCPXML 和 Premiere XML）以及所有媒体文件，以便您在 Premiere Pro、Final Cut Pro 或 DaVinci Resolve 中完成剪辑。文本将变为标记；特效保留在 Riftn 中。"
+      "nleHint": "下载包含您时间轴的 ZIP 文件（含 FCPXML 和 Premiere XML）以及所有媒体文件，以便您在 Premiere Pro、Final Cut Pro 或 DaVinci Resolve 中完成剪辑。文本将变为标记；特效保留在 Riftn 中。",
+      "nle": "Premiere / Final Cut / Resolve (XML)"
     },
     "inspector": {
       "selectHint": "在画布上选择图层或在时间线上选择片段。",
@@ -12073,7 +12103,9 @@
     "tokenAmount": "{{amount}}代币",
     "assistant": {
       "question1": "Riftn代币目前的质押APY是多少？",
-      "question2": "是的，如果我在90天内质押10,000个代币"
+      "question2": "是的，如果我在90天内质押10,000个代币",
+      "answer1": "Riftn 代币当前 30 天锁仓期的质押年化收益率为 12.4%。明细如下：\n\n• 7 天锁仓：8.2% APY\n• 30 天锁仓：12.4% APY\n• 90 天锁仓：18.7% APY\n\n需要我帮你计算潜在收益吗？",
+      "answer2": "以 18.7% APY 质押 10,000 代币 90 天：\n\n📊 预计奖励：约 461 代币\n\n大约每天 5.13 代币。请注意，APY 可能会根据质押总量而波动。"
     },
     "bookmarks": {
       "stakingGuide": "Riftn代币质押的完整指南： APY明细、锁定期和奖励倍数说明。"
@@ -12983,7 +13015,8 @@
         "test": "发送测试",
         "ok": "Webhook 已响应 {{status}}",
         "failed": "Webhook 失败：{{reason}}",
-        "none": "尚未发送任何 Webhook。"
+        "none": "尚未发送任何 Webhook。",
+        "button": "Webhook"
       },
       "stats": {
         "button": "实时统计",
@@ -13113,7 +13146,8 @@
     "howChromium": "点击地址栏右侧的安装图标，然后选择“安装”。",
     "howSafari": "在 Safari 中，打开“文件”菜单并选择“添加到 Dock”。",
     "howFirefox": "Firefox 不支持安装应用。请在 Chrome、Edge 或 Safari 中打开此页面以安装 Riftn。",
-    "microsoftStore": "更喜欢 Microsoft Store？可以在那里获取。"
+    "microsoftStore": "更喜欢 Microsoft Store？可以在那里获取。",
+    "desktopMeta": "Windows · Mac · Linux · ChromeOS"
   },
   "postStage": {
     "back": "返回",
@@ -20121,7 +20155,101 @@
     "6e71ae3669b1": "保存的输出不可用",
     "be4b0c384393": "Solana",
     "2ef54eee0edd": "Trust Wallet",
-    "a941e90ca93d": "光晕遮罩"
+    "a941e90ca93d": "光晕遮罩",
+    "046f0e116ff3": "吉大港语",
+    "0ddb74a93b79": "{{value1}}…",
+    "42f90c931762": "{{value1}}天",
+    "4ae268ba1719": "BRG {{value1}}",
+    "5f80e47aa1f6": "锡尔赫特语",
+    "7a73328114fe": "{{value1}}胜 · {{value2}}负 · {{value3}}平",
+    "84e0ad815b9c": "扇区 {{value1}}",
+    "9f5a55e28454": "Base, BNB, Robinhood Chain + Solana",
+    "c027c6ac47af": "— {{value1}}，在 {{value2}}",
+    "ca56c9d369b9": "TX: {{value1}}…",
+    "cc9105d204ba": "{{value1}}年 {{value2}}天",
+    "d11f9dace97e": "{{value1}}秒 / {{value2}}秒",
+    "fa907a0d0043": "博杰普尔语",
+    "b880e0bc6395": " Reddit",
+    "edfc0fd2dc23": " DexScreener",
+    "7f78bdc0762d": "+{{value1}} 分",
+    "f0c8bb34335b": "你获得了 +{{value1}} 积分",
+    "0fbe06b679a8": "每个已上线的请求 {{value1}} 积分，计入你的顶级建设者分数。",
+    "4a49c5b26d3d": "BRG ",
+    "4a9c3a78d864": " 次展示 · ",
+    "431bc73eb60b": "[verse]\n在这里写歌词...\n\n[chorus]\n副歌歌词...",
+    "ca7842e53ac8": "riftn.com",
+    "667a759ed273": "X · TG · Discord",
+    "3d6a41e54a82": "USDC · ",
+    "21ff98f704a6": "Riftn · Base",
+    "877db1b57c60": "@creator",
+    "fa9a1cd7ddb3": "// 精选于",
+    "572abf9d987b": " SRT",
+    "e2d214894af7": "elevenlabs.io",
+    "f8440db475e2": "@Image1",
+    "a1bbfae0f460": "@Image9",
+    "273a81e9b289": "@Image",
+    "8d94586d66f0": "ESC / 撤退",
+    "94b3fa810269": "JustWatch",
+    "cfcb306ffbd8": " Mbps)",
+    "00c90f4b707a": "SRT / VTT",
+    "450683b66da4": " SRT / VTT",
+    "e44dc88eb777": "@alice.eth",
+    "bf640b85d499": "riftn.com · ",
+    "e5828dae4735": "Theta",
+    "88bd742fdae5": "DLive",
+    "531595a185f5": " 3Speak.",
+    "790583caf7d2": " zap.stream.",
+    "45808d75bf89": "Webhooks",
+    "ff7a48f27df6": "Riftn MCP API",
+    "12a7c0529934": "/docs/getting-started",
+    "4001b1e9d20e": "dev@riftn.com",
+    "1a00975a0ac1": "@channel",
+    "168559c2d998": "带上 @",
+    "89c9b65356e3": "X (Twitter)",
+    "dcd932e65e57": "discord_username",
+    "ad9f9dcc4cd7": "· BNB",
+    "616685a138d8": "/api/stats/users",
+    "caf79e01972c": "Broadcom",
+    "bf4151fc970f": "WORK_ADMIN_ARBITERS",
+    "aaa197c64e1f": "src/constants/app.constants.ts",
+    "addc90cfd45b": "cURL",
+    "ca8d24a3e762": "dapp.articlesTitle",
+    "eec736f63bbb": "Patreon",
+    "c558e7501904": "dapp.daoTitle",
+    "e79b190608ca": "dapp.packsTitle",
+    "5e3ce481ab0d": "dapp.cinemaTitle",
+    "43b9fafd6db4": "dapp.exchangeTitle",
+    "d924f9b45914": "dapp.marketsTitle",
+    "421205947abf": "dapp.kidsTitle",
+    "97f2d908b7dc": "@noble/ciphers",
+    "8731790030df": "@noble/curves",
+    "e745d68f7240": "@noble/hashes",
+    "886e533d7364": "dev@riftn.com",
+    "e8921bdee214": "@riftn_com",
+    "c44e2f745b9a": "lastchadstanding.com",
+    "7046b00dbc33": "• Chrome 90+",
+    "6dc617ca7c7f": "• Firefox 88+",
+    "98473f30ec45": "• Safari 14+",
+    "66dfc75ac659": "• Edge 90+",
+    "d31dc978d07c": "Certik",
+    "b670b091884c": "OKX CeDeFi",
+    "6334c1d377c6": " (DEX)",
+    "f80cac6f6a85": "ETF",
+    "9b6e8abe425e": "YAML",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "fd0ce9669a4e": "🎞️ GIF",
+    "b635325d40c2": "BSCScan",
+    "993d23ce5b8b": "DHBScan",
+    "a731a58c4cf3": "Twitch",
+    "811aa4592c1c": "MP3 128 kbps",
+    "4812442f11c9": "MP3 192 kbps",
+    "0d199b18375b": "WAV / PCM",
+    "af4707aebdfa": "OpenAI $",
+    "8160489cae2b": "quickStart.nextDappTitle",
+    "a54b07161139": "选择最多 50 行数据的有效范围",
+    "38f88f44cfff": "生成页面前请先为模板页设置时长",
+    "7734523dd2ea": "此批次过大，无法保存。请选择更少的行",
+    "a25f83df8c86": "第 {{row}} 行：不同照片使用了相同的名称“{{name}}”。请为源照片设置唯一的图层名称"
   },
   "articles": {
     "cardLabel": "文章 · {{count}} 分钟阅读",
@@ -20716,6 +20844,20 @@
     "error": "无效。请重试。"
   },
   "msgDelete": {
-    "titleMany": "删除 {{count}} 条消息？"
+    "titleMany": "删除 {{count}} 条消息？",
+    "title": "删除消息？",
+    "bodyOwn": "仅从你的聊天中删除，或为所有人删除。",
+    "bodyOwnMany": "仅从你的聊天中删除，或为所有人删除。",
+    "bodyOthers": "将仅从你的聊天中删除。对方仍可看到。",
+    "bodyOthersMany": "将仅从你的聊天中删除。聊天中的其他人仍可看到。",
+    "bodyOwnBoth": "仅从你的聊天中删除，或为你们双方删除。",
+    "bodyOwnBothMany": "仅从你的聊天中删除，或为你们双方删除。",
+    "forMe": "为我删除",
+    "forEveryone": "为所有人删除",
+    "forBoth": "为我们双方删除",
+    "forMeAndName": "为我和 {{name}} 删除",
+    "remember": "记住我的选择",
+    "rememberHint": "可随时在设置中更改",
+    "failed": "无法删除该消息"
   }
 }

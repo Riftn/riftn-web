@@ -584,7 +584,8 @@ export async function createConversation(
 
 export async function deleteConversation(
   dmId: string,
-  address?: string
+  address?: string,
+  options: { forEveryone?: boolean } = {},
 ): Promise<{ success: boolean }> {
   const myAddress = address?.toLowerCase() || (() => {
     try {
@@ -599,6 +600,16 @@ export async function deleteConversation(
 
   // For virtual/wallet-based conversations, just return success (no more Supabase DMs)
   if (dmId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(dmId)) {
+    return { success: true };
+  }
+
+  // Delete for both (1:1 only): every message and the chat go for both people.
+  if (options.forEveryone) {
+    await apiCall<any>(`/api/dm/conversation/${encodeURIComponent(dmId)}?forEveryone=1`, {
+      method: 'DELETE',
+      body: { forEveryone: true },
+      requiresAuth: true,
+    });
     return { success: true };
   }
 

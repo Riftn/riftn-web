@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState, type RefObject } from 
 import { animate, useMotionValue, useReducedMotion, useTransform, type PanInfo } from 'framer-motion';
 import { containedPicture } from '@/lib/live-overlay/layout';
 import { lockBodyScroll } from '@/lib/body-scroll-lock';
+import { markBody } from '@/lib/body-mark';
 import { videoPlaybackManager } from '@/lib/video-playback-manager';
 import { visualActivity } from '@/lib/visual-activity';
 
@@ -35,8 +36,8 @@ export function useInAppVideoMini(root: RefObject<HTMLElement | null>, index: nu
   useEffect(() => {
     if (minimized) return;
     const release = lockBodyScroll('shorts-viewer');
-    document.body.classList.add('shorts-viewer-open');
-    return () => { release(); document.body.classList.remove('shorts-viewer-open'); };
+    markBody('data-shorts-viewer-open', true);
+    return () => { release(); markBody('data-shorts-viewer-open', false); };
   }, [minimized]);
   const reset = useCallback(() => {
     resets.current.forEach(animation => animation.stop());

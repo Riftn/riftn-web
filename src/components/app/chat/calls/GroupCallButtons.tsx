@@ -1,0 +1,98 @@
+import { useContext, useState, type ContextType } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Phone } from 'lucide-react';
+import Video from '@/components/ui/cut-icons/video';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { AuthContext } from '@/contexts/AuthContext';
+import { CallContext } from '@/contexts/CallContext';
+import { useGroupCallRoster, GROUP_CALL_MAX_RING } from '@/lib/group-call';
+
+/**
+ * Voice and video call buttons for a group chat, and the "Join call" pill
+ * while one is going. Starting rings every member; joining just steps into
+ * the room.
+ */
+export function GroupCallButtons({ groupId, groupName }: { groupId: string; groupName: string }) {
+  // Context reads, not the throwing hooks: the chat also renders in previews with no call or auth provider.
+  const call = useContext(CallContext);
+  const walletAddress = useContext(AuthContext)?.walletAddress ?? null;
+  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} /> : null;
+}
+
+function GroupCallControls({ groupId, groupName, walletAddress, call }: {
+  groupId: string; groupName: string; walletAddress: string; call: NonNullable<ContextType<typeof CallContext>>;
+}) {
+  const { t } = useTranslation();
+  const { startGroupCall, joinGroupCall, currentCall } = call;
+  const roster = useGroupCallRoster(groupId);
+  const [starting, setStarting] = useState(false);
+  const me = walletAddress.toLowerCase();
+  const inThisCall = currentCall?.group_id === groupId;
+  const others = roster.filter(entry => entry.wallet !== me);
+  const busy = !!currentCall || starting;
+
+  const start = async (callType: 'audio' | 'video') => {
+    if (busy) return;
+    setStarting(true);
+    try {
+      const { data, error } = await withWalletHeader(
+        supabase.from('community_members').select('wallet_address').eq('community_id', groupId).eq('status', 'active')
+          .order('joined_at', { ascending: true }).limit(GROUP_CALL_MAX_RING + 1),
+        walletAddress,
+      );
+      if (error) throw error;
+      const members = (data ?? []).map((row: { wallet_address: string }) => row.wallet_address);
+      await startGroupCall({ id: groupId, name: groupName }, members, callType);
+    } catch (error) {
+      console.warn('Group call start failed', error);
+      toast.error(t('copy.8786057edfc1', { defaultValue: 'Could not connect to call' }));
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  if (others.length && !inThisCall) {
+    const callType = others.some(entry => entry.type === 'video') ? 'video' : 'audio';
+    return (
+      <button
+        type="button"
+        data-group-call-join
+        disabled={busy}
+        onClick={() => { void joinGroupCall({ id: groupId, name: groupName }, callType); }}
+        className="flex items-center gap-1.5 rounded-full bg-white/[0.1] px-3 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-white/[0.16] disabled:opacity-50"
+      >
+        {callType === 'video' ? <Video className="h-3.5 w-3.5" /> : <Phone className="h-3.5 w-3.5" />}
+        <span>{t('calls.joinCall', 'Join call')}</span>
+        <span className="font-normal text-white/60">{t('calls.inCall', { count: others.length, defaultValue: '{{count}} in the call' })}</span>
+      </button>
+    );
+  }
+
+  const button = 'flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white disabled:opacity-40';
+  return (
+    <div className="flex items-center gap-0.5" data-group-call-buttons>
+      <button
+        type="button"
+        className={button}
+        disabled={busy}
+        onClick={() => { void start('audio'); }}
+        aria-label={t('calls.startGroupVoice', 'Start a group voice call')}
+        title={t('calls.startGroupVoice', 'Start a group voice call')}
+      >
+        <Phone className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={button}
+        disabled={busy}
+        onClick={() => { void start('video'); }}
+        aria-label={t('calls.startGroupVideo', 'Start a group video call')}
+        title={t('calls.startGroupVideo', 'Start a group video call')}
+      >
+        <Video className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
