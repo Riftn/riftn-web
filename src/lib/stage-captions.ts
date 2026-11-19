@@ -27,9 +27,24 @@
 import { useSyncExternalStore } from 'react';
 import i18n from 'i18next';
 
+/**
+ * Secret channel names for rooms that are not public, keyed by room.
+ *
+ * A stage is public, so its captions ride a channel named after it. A call is
+ * not, and a group's id is no secret, so a call's captions ride a channel name
+ * the server hands only to the people on the call (stage-caption-token with
+ * `topicOnly`). Registered before any caption hook is given the room.
+ */
+const privateTopics = new Map<string, string>();
+
+export function setPrivateCaptionTopic(roomKey: string, topic: string) {
+  privateTopics.set(roomKey, topic);
+}
+
 /** One caption channel per stage, separate from reactions so their rates are independent. */
 export function stageCaptionChannel(spaceId: string): string {
-  return `stage-captions:${spaceId}`;
+  const secret = privateTopics.get(spaceId);
+  return secret ? `call-captions:${secret}` : `stage-captions:${spaceId}`;
 }
 
 export const CAPTION_EVENT = 'caption';
@@ -190,6 +205,12 @@ function writePref(key: string, value: boolean) {
 }
 
 let showCaptions = readPref(SHOW_KEY, true);
+/**
+ * Calls keep their own switch, and it starts off: a call is private, and a
+ * person's voice is only transcribed while someone on the call reads it.
+ */
+const CALL_SHOW_KEY = 'dehub.call.captions.show';
+let showCallCaptions = readPref(CALL_SHOW_KEY, false);
 let sendCaptions = readPref(SEND_KEY, true);
 
 const listeners = new Set<() => void>();
@@ -205,15 +226,28 @@ function subscribe(cb: () => void) {
   };
 }
 
-export function useShowCaptions(): boolean {
-  return useSyncExternalStore(subscribe, () => showCaptions, () => true);
+export type CaptionScope = 'stage' | 'call';
+
+export function useShowCaptions(scope: CaptionScope = 'stage'): boolean {
+  return useSyncExternalStore(
+    subscribe,
+    () => (scope === 'call' ? showCallCaptions : showCaptions),
+    () => scope !== 'call',
+  );
 }
 
 export function useSendCaptions(): boolean {
   return useSyncExternalStore(subscribe, () => sendCaptions, () => true);
 }
 
-export function setShowCaptions(value: boolean) {
+export function setShowCaptions(value: boolean, scope: CaptionScope = 'stage') {
+  if (scope === 'call') {
+    if (showCallCaptions === value) return;
+    showCallCaptions = value;
+    writePref(CALL_SHOW_KEY, value);
+    emit();
+    return;
+  }
   if (showCaptions === value) return;
   showCaptions = value;
   writePref(SHOW_KEY, value);

@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 import i18n from 'i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { ensureFreshToken } from '@/lib/api/dehub/core';
-import { useStage } from '@/contexts/StageContext';
+import { useOptionalStage } from '@/contexts/StageContext';
 import {
   DUB_AUDIO_EVENT,
   DUB_DUCK_VOLUME,
@@ -135,10 +135,16 @@ async function callDub<T>(body: Record<string, unknown>, wallet: string | null):
   }
 }
 
-export function useStageDubbing(spaceId: string | undefined | null, wallet: string | null): StageDubbing {
+export function useStageDubbing(
+  spaceId: string | undefined | null,
+  wallet: string | null,
+  /** Lowers everyone else under a dubbed line. Defaults to the stage's room volume; a call passes its own. */
+  setRoomVolumeOverride?: (volume: number) => void,
+): StageDubbing {
   const { t: _copy } = _useCopy();
   const language = useDubLanguage();
-  const { setRoomVolume } = useStage();
+  const stage = useOptionalStage();
+  const setRoomVolume = setRoomVolumeOverride ?? stage?.setRoomVolume ?? (() => {});
 
   const [quote, setQuote] = useState<DubQuote | null>(null);
   const [starting, setStarting] = useState(false);

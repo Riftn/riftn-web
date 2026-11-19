@@ -18,6 +18,7 @@ import {
   peerInitial,
   usePeerIdentity,
 } from './CallChrome';
+import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 
 /**
  * A group call, voice or video, on the same stage as a direct call.
@@ -120,7 +121,8 @@ const GroupCallModal: React.FC = () => {
       </div>
 
       <div className="call-stage__foot">
-        <CallDock>
+        <CallCaptionsOverlay />
+        <CallDock crowded={isVideo}>
           <CallControl
             icon={isMuted ? MicOff : Mic}
             label={isMuted ? t('calls.unmute') : t('calls.mute')}
@@ -133,6 +135,7 @@ const GroupCallModal: React.FC = () => {
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
             </>
           ) : null}
+          <CallCaptionsControl />
           <CallControl icon={PhoneOff} label={t('calls.leave', 'Leave')} onClick={endCall} primary />
         </CallDock>
       </div>

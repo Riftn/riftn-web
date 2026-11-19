@@ -8,6 +8,7 @@
  * Add "-video" for the video version (ringing-video, active-video, mini-video).
  * Prefix "group-" for a group call (group-incoming, group-ringing, group-active,
  * group-active-video, group-mini, group-ended); `people=` sets how many others are in it.
+ * `subs=1` turns live subtitles on with sample lines; `subs=es` also reads them in Spanish.
  */
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -25,6 +26,8 @@ import { CallMiniPlayer } from '@/components/app/chat/calls/CallMiniPlayer';
 import { CallNoteCard } from '@/components/app/chat/calls/CallNoteCard';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { primeCallCaptionRoom } from '@/components/app/chat/calls/CallCaptions';
+import { emitLocalCaption, emitLocalTranslation, setCaptionLanguage, setShowCaptions } from '@/lib/stage-captions';
 
 const PEER = '0x2222222222222222222222222222222222222222';
 const ME = '0x1111111111111111111111111111111111111111';
@@ -89,6 +92,27 @@ export default function CallStageGallery() {
   const outcome = OUTCOMES[base];
   const live = base === 'active' || base === 'muted' || base === 'mini';
   const inCall = live || base === 'ringing' || base === 'incoming' || base === 'connecting';
+  const subs = params.get('subs');
+  const room = group ? 'group-call-00000000-0000-0000-0000-000000000001' : 'dm-call-00000000-0000-0000-0000-000000000002';
+  if (subs && live) primeCallCaptionRoom(room);
+
+  // Sample subtitle lines, re-sent so they never time out while a screenshot is taken.
+  useEffect(() => {
+    if (!subs || !live) return;
+    setShowCaptions(true, 'call');
+    setCaptionLanguage(subs === '1' ? null : subs);
+    const lines = [
+      { id: 'l1', wallet: group ? `0x${'4'.repeat(40)}` : PEER, name: group ? 'moggel' : 'erica', text: "I'm at the station now, the train was late again.", es: 'Ya estoy en la estación, el tren volvió a llegar tarde.' },
+      { id: 'l2', wallet: ME, name: 'mal', text: 'No worries, grab a coffee and I will meet you there.', es: 'No pasa nada, tómate un café y nos vemos allí.' },
+    ];
+    const send = () => lines.forEach((line, index) => {
+      emitLocalCaption(room, { id: line.id, wallet: line.wallet, name: line.name, text: line.text, final: true, kind: 'speech', at: Date.now() + index });
+      emitLocalTranslation(room, { id: line.id, translations: { es: line.es } });
+    });
+    const first = setTimeout(send, 400);
+    const again = setInterval(send, 3000);
+    return () => { clearTimeout(first); clearInterval(again); };
+  }, [subs, live, room, group]);
 
   const call = useMemo(() => {
     const noop = () => {};
@@ -109,6 +133,9 @@ export default function CallStageGallery() {
       })) : [],
       attachGroupVideo: (uid: number) => paint(['linear-gradient(160deg, #3b2f63, #1f4a5c)', 'linear-gradient(200deg, #5c3b2f, #1f2a5c)', 'linear-gradient(120deg, #2f5c45, #3b1f5c)'][uid % 3]),
       startGroupCall: async () => {}, joinGroupCall: async () => {},
+      captionRoom: subs && live ? room : null,
+      captionSpeakers: [ME, PEER],
+      getMicStream: () => null, setCallVolume: noop,
       peerAddress: PEER, isMuted: base === 'muted', isCameraOff: false, isMinimized: base === 'mini',
       callStartedAt: live ? Date.now() - 272_000 : null, mediaRevision: 0,
       remoteAudioRef: { current: null }, localVideoTrack: { current: null },

@@ -273,3 +273,15 @@ html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; 
 }
 .group-call-tile__name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .group-call-tile { transition: none; } }
+
+/* ── Live subtitles in calls ─────────────────────────────────────────────── */
+.call-captions { width: 100%; margin-bottom: 4px; }
+.call-btn--captions { position: relative; }
+.call-btn__badge { position: absolute; bottom: 7px; left: 0; right: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; opacity: 0.8; }
+.call-btn--captions[data-coded="true"] svg { transform: translateY(-4px); }
+/* Five controls (video calls with subtitles) fit a phone without scrolling. */
+@media (max-width: 440px) {
+  .call-dock[data-crowded="true"] { gap: 8px; padding: 12px 12px; }
+  .call-dock[data-crowded="true"] .call-ctl { min-width: 52px; font-size: 11px; }
+  .call-dock[data-crowded="true"] .call-btn { width: 52px; height: 52px; }
+}

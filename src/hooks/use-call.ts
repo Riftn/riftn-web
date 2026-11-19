@@ -65,6 +65,14 @@ export interface UseCallReturn {
   localVideoTrack: React.MutableRefObject<any>; debugCallState: () => void;
   checkForCalls: () => Promise<void>;
   setCallMessageHandler: (handler: ((content: string) => void) | null) => void;
+  /** The call's room once it is live (`dm-call-<id>` or `group-call-<group>`), for subtitles. */
+  captionRoom: string | null;
+  /** Wallets whose subtitles this call shows: the two people, or everyone in the group room. */
+  captionSpeakers: string[];
+  /** The raw microphone, read by live subtitles. */
+  getMicStream: () => MediaStream | null;
+  /** Everyone else's volume (100 = normal), lowered under a dubbed line. */
+  setCallVolume: (volume: number) => void;
 }
 type GroupRemote = { audio: any; video: any };
 type CallMedia = {
@@ -672,14 +680,36 @@ export const useCall = (): UseCallReturn => {
   const isRinging = !!currentCall && isConnecting && !isCallActive && currentCall.status === 'ringing'
     && currentCall.caller_address.toLowerCase() === userAddress?.toLowerCase();
   const isGroupCall = !!currentCall?.group_id;
+  const captionRoom = !currentCall || !isCallActive
+    ? null
+    : currentCall.group_id ? groupCallChannel(currentCall.group_id) : isSessionId(currentCall.id) ? `dm-call-${currentCall.id}` : null;
+  const captionSpeakers = useMemo(() => {
+    if (!currentCall) return [];
+    const wallets = currentCall.group_id
+      ? [userAddress ?? '', ...groupParticipants.map(p => p.wallet ?? '')]
+      : [currentCall.caller_address, currentCall.recipient_address];
+    return [...new Set(wallets.map(w => w.toLowerCase()).filter(Boolean))];
+  }, [currentCall, groupParticipants, userAddress]);
+  const getMicStream = useCallback((): MediaStream | null => {
+    const track = mediaRef.current?.audio?.getMediaStreamTrack?.();
+    return track ? new MediaStream([track]) : null;
+  }, []);
+  const setCallVolume = useCallback((volume: number) => {
+    const media = mediaRef.current;
+    if (!media) return;
+    for (const track of [media.remoteAudio, ...[...media.remotes.values()].map(r => r.audio)]) {
+      try { track?.setVolume?.(volume); } catch { /* track already gone */ }
+    }
+  }, []);
   return useMemo(() => ({
+    captionRoom, captionSpeakers, getMicStream, setCallVolume,
     isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary,
     isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
     attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
-  }), [isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
+  }), [captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);

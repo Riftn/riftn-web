@@ -1206,7 +1206,8 @@ serve(async (req) => {
     // Smart auto-model selection based on query complexity
     // A requested model is honoured only for a verified user or a service
     // call; anyone else gets auto selection.
-    const isAutoMode = !isVerifiedUser || model === 'auto' || model === 'gemini-2.5-flash';
+    // Older app builds send 'gemini-2.5-flash' as their default; that still means auto.
+    const isAutoMode = !isVerifiedUser || model === 'auto' || requestedModel === 'gemini-2.5-flash';
     const autoSelection = selectOptimalModel(userQuery, !!perplexityKey, isVerifiedUser);
     
     // Use auto-selected model unless user explicitly chose a different one
