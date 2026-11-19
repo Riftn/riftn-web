@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Añade una imagen, un GIF o un vídeo",
+    "changeMedia": "Cambiar imagen, GIF o vídeo",
+    "mediaType": "Elige una imagen, un GIF o un vídeo.",
+    "videoSize": "Ese vídeo pesa más de {{n}} MB. Elige uno más pequeño."
+  },
   "textFeed": {
     "errorTitle": "No se pudieron cargar las publicaciones",
     "errorBody": "Intenta cargar de nuevo el feed de texto.",

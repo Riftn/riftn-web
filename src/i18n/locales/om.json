@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Suuraa, GIF ykn viidiyoo dabali",
+    "changeMedia": "Suuraa, GIF ykn viidiyoo jijjiiri",
+    "mediaType": "Suuraa, GIF ykn viidiyoo filadhu.",
+    "videoSize": "Viidiyoon kun {{n}} MB caala. Isa xiqqaa filadhu."
+  },
   "textFeed": {
     "tab": "Barreeffama"
   },

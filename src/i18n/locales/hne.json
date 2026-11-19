@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "फोटू, GIF या वीडियो जोड़व",
+    "changeMedia": "फोटू, GIF या वीडियो बदलव",
+    "mediaType": "फोटू, GIF या वीडियो चुनव।",
+    "videoSize": "ये वीडियो {{n}} MB ले बड़े हे। छोटे वाला चुनव।"
+  },
   "textFeed": {
     "tab": "लिखाई"
   },

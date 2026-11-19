@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Afegeix una imatge, un GIF o un vídeo",
+    "changeMedia": "Canvia la imatge, el GIF o el vídeo",
+    "mediaType": "Tria una imatge, un GIF o un vídeo.",
+    "videoSize": "Aquest vídeo fa més de {{n}} MB. Tria'n un de més petit."
+  },
   "comic": {
     "showAll": "Mostra les {{count}} pàgines"
   },

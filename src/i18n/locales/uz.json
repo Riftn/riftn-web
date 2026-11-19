@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Rasm, GIF yoki video qo‘shish",
+    "changeMedia": "Rasm, GIF yoki videoni almashtirish",
+    "mediaType": "Rasm, GIF yoki video tanlang.",
+    "videoSize": "Bu video {{n}} MB dan katta. Kichikroq birini tanlang."
+  },
   "textFeed": {
     "tab": "Matn"
   },

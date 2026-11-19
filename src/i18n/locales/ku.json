@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Wêne, GIF an vîdyoyek zêde bike",
+    "changeMedia": "Wêne, GIF an vîdyoyê biguherîne",
+    "mediaType": "Wêneyek, GIF an vîdyoyek hilbijêre.",
+    "videoSize": "Ev vîdyo ji {{n}} MB mezintir e. Yekî biçûktir hilbijêre."
+  },
   "textFeed": {
     "tab": "Nivîs"
   },

@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Şəkil, GIF və ya video əlavə et",
+    "changeMedia": "Şəkli, GIF-i və ya videonu dəyiş",
+    "mediaType": "Şəkil, GIF və ya video seç.",
+    "videoSize": "Bu video {{n}} MB-dan böyükdür. Daha kiçik birini seç."
+  },
   "textFeed": {
     "tab": "Mətn"
   },

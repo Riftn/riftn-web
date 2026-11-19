@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ampio sary, GIF na horonan-tsary",
+    "changeMedia": "Ovay ny sary, GIF na horonan-tsary",
+    "mediaType": "Mifidiana sary, GIF na horonan-tsary.",
+    "videoSize": "Mihoatra ny {{n}} MB io horonan-tsary io. Mifidiana kely kokoa."
+  },
   "textFeed": {
     "tab": "Lahatsoratra"
   },

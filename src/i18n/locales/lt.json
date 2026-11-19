@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Pridėti nuotrauką, GIF ar vaizdo įrašą",
+    "changeMedia": "Keisti nuotrauką, GIF ar vaizdo įrašą",
+    "mediaType": "Pasirinkite nuotrauką, GIF ar vaizdo įrašą.",
+    "videoSize": "Šis vaizdo įrašas didesnis nei {{n}} MB. Pasirinkite mažesnį."
+  },
   "textFeed": {
     "tab": "Tekstas"
   },

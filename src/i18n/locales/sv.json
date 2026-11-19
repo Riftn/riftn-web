@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Lägg till en bild, GIF eller video",
+    "changeMedia": "Byt bild, GIF eller video",
+    "mediaType": "Välj en bild, en GIF eller en video.",
+    "videoSize": "Videon är större än {{n}} MB. Välj en mindre."
+  },
   "comic": {
     "showAll": "Visa alla {{count}} sidor"
   },

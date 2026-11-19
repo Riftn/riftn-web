@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Tāpirihia he pikitia, he GIF, he ataata rānei",
+    "changeMedia": "Hurihia te pikitia, te GIF, te ataata rānei",
+    "mediaType": "Kōwhiria he pikitia, he GIF, he ataata rānei.",
+    "videoSize": "Neke atu i te {{n}} MB taua ataata. Kōwhiria he mea iti ake."
+  },
   "textFeed": {
     "tab": "Kupu"
   },

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import {
   POST_BACKGROUNDS,
   POST_BG_PHOTO_ID,
+  POST_BG_VIDEO_HINT,
   postBgById,
+  postBgIsVideo,
   postBgPaletteIndex,
   postBgVariant,
   withPostBgColors,
@@ -72,7 +74,8 @@ export function PostBgLayer({ bg, seed }: { bg: PostBg | null; seed?: string | n
     style['--c3'] = bg.colors[2];
   }
   if (bg.id === 'echo' && art && !art.endsWith('/placeholder.svg')) style['--pbg-art'] = `url("${art.replace(/["\\\n]/g, '')}")`;
-  if (bg.kind === 'photo' && bg.image) style['--pbg-img'] = `url("${bg.image.replace(/["\\\n]/g, '')}")`;
+  const video = bg.kind === 'photo' && postBgIsVideo(bg.image);
+  if (bg.kind === 'photo' && bg.image && !video) style['--pbg-img'] = `url("${bg.image.replace(/["\\\n]/g, '')}")`;
   return (
     <span
       ref={ref}
@@ -84,8 +87,25 @@ export function PostBgLayer({ bg, seed }: { bg: PostBg | null; seed?: string | n
       data-pbg-still={moving && lowEndDevice ? '' : undefined}
     >
       {moving && (<><i /><i /><i /></>)}
+      {video && <PostBgVideo src={bg.image!} />}
     </span>
   );
+}
+
+/** The owner's video loop: plays while on screen, holds its first frame under reduce motion or on a low-memory phone. */
+function PostBgVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (lowEndDevice || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const play = () => { v.play().catch(() => {}); };
+    if (typeof IntersectionObserver === 'undefined') { play(); return; }
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? play() : v.pause()), { rootMargin: '120px' });
+    io.observe(v);
+    return () => io.disconnect();
+  }, [src]);
+  return <video ref={ref} className="pbg-video" src={src} muted loop playsInline preload="metadata" disablePictureInPicture />;
 }
 
 const HOLD_SKIP = 'a, button, input, textarea, select, video, audio, [role="button"]';
@@ -224,6 +244,7 @@ export interface PostBgPickerProps {
 }
 
 const MAX_PHOTO_BYTES = 15 * 1024 * 1024;
+const MAX_VIDEO_MB = 90;
 
 /**
  * Full-screen preview of a text post on the chosen backdrop. Under it: the
@@ -270,7 +291,7 @@ export function PostBgPicker({ open, current, name, handle, avatarUrl, sampleTex
   useEffect(() => {
     if (!file) { setFileUrl(null); return; }
     const url = URL.createObjectURL(file);
-    setFileUrl(url);
+    setFileUrl(/^video\//.test(file.type) ? url + POST_BG_VIDEO_HINT : url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
@@ -304,8 +325,10 @@ export function PostBgPicker({ open, current, name, handle, avatarUrl, sampleTex
     const f = e.target.files?.[0];
     e.target.value = '';
     if (!f) return;
-    if (!/^image\//.test(f.type)) { setFileError(t('postBg.photoType', 'Pick a picture or a GIF.')); return; }
-    if (f.size > MAX_PHOTO_BYTES) { setFileError(t('postBg.photoSize', 'That file is over 15 MB. Pick a smaller one.')); return; }
+    const isVideo = /^video\//.test(f.type);
+    if (!isVideo && !/^image\//.test(f.type)) { setFileError(t('postBg.mediaType')); return; }
+    if (isVideo && f.size > MAX_VIDEO_MB * 1024 * 1024) { setFileError(t('postBg.videoSize', { n: MAX_VIDEO_MB })); return; }
+    if (!isVideo && f.size > MAX_PHOTO_BYTES) { setFileError(t('postBg.photoSize', 'That file is over 15 MB. Pick a smaller one.')); return; }
     setFileError(null);
     setFile(f);
     setSel(POST_BG_PHOTO_ID);
@@ -447,12 +470,12 @@ export function PostBgPicker({ open, current, name, handle, avatarUrl, sampleTex
           {bg?.kind === 'photo' && (
             <div className="pbg-photo-row">
               <button type="button" className="pbg-chip pbg-chip--solid" onClick={pickPhotoFile}>
-                {photoSrc ? t('postBg.changePhoto', 'Change picture or GIF') : t('postBg.addPhoto', 'Add a picture or GIF')}
+                {photoSrc ? t('postBg.changeMedia') : t('postBg.addMedia')}
               </button>
               {fileError && <span className="pbg-photo-error" role="alert">{fileError}</span>}
             </div>
           )}
-          <input ref={fileInput} type="file" accept="image/*" hidden onChange={onFile} />
+          <input ref={fileInput} type="file" accept="image/*,video/*" hidden onChange={onFile} />
         </div>
 
         <div className="pbg-chips" role="group" aria-label={t('postBg.jump', 'Jump to')}>

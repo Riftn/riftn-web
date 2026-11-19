@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Siq'iyta, GIF-ta utaq videota yapay",
+    "changeMedia": "Siq'iyta, GIF-ta utaq videota tikray",
+    "mediaType": "Siq'iyta, GIF-ta utaq videota akllay.",
+    "videoSize": "Kay videoqa {{n}} MB-manta aswan hatunmi. Aswan huch'uyta akllay."
+  },
   "textFeed": {
     "tab": "Qillqa"
   },

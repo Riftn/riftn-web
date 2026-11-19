@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Kép, GIF vagy videó hozzáadása",
+    "changeMedia": "Kép, GIF vagy videó cseréje",
+    "mediaType": "Válassz képet, GIF-et vagy videót.",
+    "videoSize": "Ez a videó nagyobb {{n}} MB-nál. Válassz kisebbet."
+  },
   "textFeed": {
     "tab": "Szöveg"
   },

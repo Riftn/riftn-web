@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Bild, GIF oder Video derzuetue",
+    "changeMedia": "Bild, GIF oder Video ändere",
+    "mediaType": "Wähl es Bild, es GIF oder es Video.",
+    "videoSize": "Das Video isch grösser als {{n}} MB. Wähl es chliiners."
+  },
   "textFeed": {
     "tab": "Tekscht"
   },

@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Adaugă o imagine, un GIF sau un videoclip",
+    "changeMedia": "Schimbă imaginea, GIF-ul sau videoclipul",
+    "mediaType": "Alege o imagine, un GIF sau un videoclip.",
+    "videoSize": "Videoclipul depășește {{n}} MB. Alege unul mai mic."
+  },
   "comic": {
     "showAll": "Arată toate cele {{count}} pagini"
   },

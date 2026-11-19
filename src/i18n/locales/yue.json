@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "加圖片、GIF 或者影片",
+    "changeMedia": "換圖片、GIF 或者影片",
+    "mediaType": "揀一張圖片、GIF 或者一條影片。",
+    "videoSize": "呢條影片超過 {{n}} MB，揀條細啲嘅。"
+  },
   "textFeed": {
     "tab": "文字"
   },

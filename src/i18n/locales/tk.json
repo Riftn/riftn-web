@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Surat, GIF ýa-da wideo goş",
+    "changeMedia": "Suraty, GIF-i ýa-da wideony üýtget",
+    "mediaType": "Surat, GIF ýa-da wideo saýlaň.",
+    "videoSize": "Bu wideo {{n}} MB-dan uly. Kiçiräk birini saýlaň."
+  },
   "textFeed": {
     "tab": "Tekst"
   },

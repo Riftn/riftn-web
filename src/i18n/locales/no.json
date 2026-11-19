@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Legg til et bilde, en GIF eller en video",
+    "changeMedia": "Bytt bilde, GIF eller video",
+    "mediaType": "Velg et bilde, en GIF eller en video.",
+    "videoSize": "Den videoen er over {{n}} MB. Velg en mindre."
+  },
   "textFeed": {
     "tab": "Tekst"
   },

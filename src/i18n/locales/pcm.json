@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Add picture, GIF or video",
+    "changeMedia": "Change picture, GIF or video",
+    "mediaType": "Pick picture, GIF or video.",
+    "videoSize": "Dat video pass {{n}} MB. Pick one wey small pass."
+  },
   "comic": {
     "showAll": "Show all {{count}} pages"
   },

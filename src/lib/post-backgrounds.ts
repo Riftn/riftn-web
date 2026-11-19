@@ -6,7 +6,7 @@
  * persists as-is; values are scalars only):
  *   - postBg        one of the ids below, 'photo' for the owner's own picture, or '' for none
  *   - postBgColors  "#rrggbb,#rrggbb,#rrggbb": the colour choice for that backdrop (optional)
- *   - postBgImage   CDN key of the owner's own picture, written by the server on upload
+ *   - postBgImage   CDN key of the owner's own picture, GIF or video loop, written by the server on upload
  * Only these ids, plain hex colours and our own upload keys ever render, so a
  * hand-written value can never put anything else behind a post. Apps that
  * predate colours just show the backdrop's first colourway.
@@ -85,13 +85,13 @@ const DEFS: readonly Def[] = [
   { id: 'bokeh', name: 'Bokeh', kind: 'moving', palettes: [P('#0a0812', '#ffb35c', '#ff6fb5'), P('#08080a', '#ffffff', '#a8adb8'), P('#040c14', '#4fd1ff', '#8c7cff'), P('#0c0f05', '#d9ff6b', '#ffd36b')] },
   { id: 'snow', name: 'Snowfall', kind: 'moving', palettes: [P('#0a1220', '#ffffff', '#9fb6d9'), P('#050506', '#ffffff', '#8a8a90'), P('#120a1c', '#ffe9f6', '#b89be0'), P('#04120e', '#eafff7', '#7fd4b8')] },
 
-  // The owner's own picture or GIF.
+  // The owner's own picture, GIF or video.
   { id: POST_BG_PHOTO_ID, name: 'Your photo', kind: 'photo', tone: 'dark', palettes: [] },
 ];
 
 const HEX = /^#[0-9a-f]{6}$/i;
-/** Our own upload keys only: postbgs/<wallet>-<hash>.<jpg|webp>. */
-const IMAGE_KEY = /^postbgs\/0x[0-9a-f]{40}-[0-9a-f]{8,64}\.(?:jpg|webp)$/;
+/** Our own upload keys only: postbgs/<wallet>-<hash>.<jpg|webp|mp4>. */
+const IMAGE_KEY = /^postbgs\/0x[0-9a-f]{40}-[0-9a-f]{8,64}\.(?:jpg|webp|mp4)$/;
 const CDN_BASE = 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com/';
 
 function luminance(hex: string): number {
@@ -147,6 +147,14 @@ export function withPostBgColors(bg: PostBg, colors: PostBgPalette | null | unde
 export function postBgPaletteIndex(bg: PostBg | null): number {
   if (!bg?.colors) return 0;
   return bg.palettes.findIndex((p) => samePalette(p, bg.colors!));
+}
+
+/** Added to the blob: URL of a picked video so its local preview is played, not painted. */
+export const POST_BG_VIDEO_HINT = '#video';
+
+/** The owner's own backdrop is a video loop: one of our .mp4 uploads, or a local preview of a picked video. */
+export function postBgIsVideo(url: string | null | undefined): boolean {
+  return !!url && (/\.mp4(?:[?#]|$)/i.test(url) || (url.startsWith('blob:') && url.endsWith(POST_BG_VIDEO_HINT)));
 }
 
 export function postBgImageUrl(key: unknown, cdnBase = CDN_BASE): string | null {

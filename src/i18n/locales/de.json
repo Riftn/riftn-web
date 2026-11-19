@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Bild, GIF oder Video hinzufügen",
+    "changeMedia": "Bild, GIF oder Video ändern",
+    "mediaType": "Wähle ein Bild, ein GIF oder ein Video.",
+    "videoSize": "Dieses Video ist größer als {{n}} MB. Wähle ein kleineres."
+  },
   "comic": {
     "showAll": "Alle {{count}} Seiten anzeigen"
   },
