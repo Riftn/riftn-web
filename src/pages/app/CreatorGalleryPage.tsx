@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ChevronLeft, ChevronRight, Bookmark, Download, Maximize } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { CardHeader } from '@/components/app/cards/CardHeader';
+import { getAccountSummaries } from '@/lib/api/dehub/users';
 import { ActionBar } from '@/components/app/cards/ActionBar';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { GenerationMosaic } from '@/components/app/creator/GenerationMosaic';
@@ -26,6 +28,7 @@ export default function CreatorGalleryPage() {
     queryFn: ({ pageParam }) => readGenerations(pageParam, undefined, walletAddress), getNextPageParam: (page, pages) => page.length === 40 ? pages.length * 40 : undefined, enabled: !!id });
   const detail = useQuery({ queryKey: ['public-generations', id, walletAddress], queryFn: () => readGenerations(0, id, walletAddress), enabled: !!id });
   const item = detail.data?.[0];
+  const author = useQuery({ queryKey: ['generation-author', item?.owner_wallet], enabled: !!item?.owner_wallet, staleTime: 300_000, queryFn: async () => (await getAccountSummaries([item!.owner_wallet!]))[0] }).data;
   const items = list.data?.pages.flat() ?? [];
   const index = items.findIndex(row => row.id === id);
   // Deep links can start beyond the first page; continue until their neighbours are available.
@@ -44,7 +47,7 @@ export default function CreatorGalleryPage() {
   const share = async () => {
     const url = `${window.location.origin}${generationPath(id!)}`;
     try { if (navigator.share) await navigator.share({ url, title: item?.title }); else { await navigator.clipboard.writeText(url); toast.success(t('common.copied', { defaultValue: 'Link copied' })); } }
-    catch (error) { if (!(error instanceof DOMException && error.name === 'AbortError')) toast.error(t('common.error')); }
+    catch (error) { if (!(error instanceof DOMException && error.name === 'AbortError')) toast.error(t('common.error', { defaultValue: 'Something went wrong. Please try again.' })); }
   };
   const button = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-current/15 px-3 disabled:opacity-30';
   return <main className="min-h-dvh bg-background text-foreground" data-creator-gallery>
@@ -63,16 +66,16 @@ export default function CreatorGalleryPage() {
             {!item.video_url && <button className="absolute right-3 top-3 rounded-full bg-black/60 p-3 text-white" aria-label={t('creator.gallery.fullscreen', { defaultValue: 'View full screen' })} onClick={() => setFullscreen(true)}><Maximize size={18} /></button>}
           </div>
           <ActionBar key={id} postId={`generation:${id}`} shareUrl={`${window.location.origin}${generationPath(id)}`} hideUtility hideDislike
-            isLiked={!!item.my_reaction && item.my_reaction !== 'dislike'} myReaction={item.my_reaction} likeCount={item.likes} commentCount={item.comments} voteWeight={1}
+            isLiked={!!item.my_reaction && item.my_reaction !== 'dislike'} myReaction={item.my_reaction} reactionCounts={item.reaction_counts} likeCount={item.likes} commentCount={item.comments} voteWeight={1}
             disabled={mutation.isPending} onReaction={reaction => mutation.mutateAsync({ action: 'react', data: { reaction } })}
             onComment={() => { comments.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); comments.current?.querySelector('textarea')?.focus({ preventScroll: true }); }} onShare={() => void share()} />
         </div>
         <aside className="min-w-0 border-current/10 p-4 lg:border-l">
+          {item.owner_wallet && <CardHeader username={author?.displayName || author?.username || item.owner_wallet.slice(0, 6) + '…' + item.owner_wallet.slice(-4)} handle={author?.username || undefined} avatarSeed={author?.avatarImageUrl || item.owner_wallet} creatorId={item.owner_wallet} creatorUsername={author?.username || undefined} contentType={item.video_url ? 'video' : 'image'} badgeLookupId={item.owner_wallet} timestamp={new Date(item.created_at).toLocaleDateString()} className="mb-4" />}
           <div className="mb-5 flex items-start justify-between gap-3"><div><h2 className="text-lg font-bold">{item.title || t('creator.aiGenerationAlt')}</h2>
-            {item.owner_wallet && <Link className="text-sm underline" to={`/${item.owner_wallet}`}>{item.owner_wallet.slice(0, 6)}…{item.owner_wallet.slice(-4)}</Link>}
             <p className="text-xs opacity-60">{new Date(item.created_at).toLocaleDateString()}</p></div>
             <div className="flex gap-2"><button className={button} aria-label={t('common.save', { defaultValue: 'Save' })} aria-pressed={item.saved} disabled={mutation.isPending} onClick={() => { if (!walletAddress) openLoginModal(); else mutation.mutate({ action: 'save', data: { saved: !item.saved } }); }}><Bookmark size={18} fill={item.saved ? 'currentColor' : 'none'} /></button>
-              <button className={button} aria-label={t('common.download', { defaultValue: 'Download' })} onClick={() => void downloadMedia(item.image_url, `generation-${id}.png`).catch(() => toast.error(t('common.error')))}><Download size={18} /></button></div></div>
+              <button className={button} aria-label={t('common.download', { defaultValue: 'Download' })} onClick={() => void downloadMedia(item.image_url, `generation-${id}.png`).catch(() => toast.error(t('common.error', { defaultValue: 'Something went wrong. Please try again.' })))}><Download size={18} /></button></div></div>
           <div ref={comments} className="scroll-mt-24"><GenerationDiscussion key={id} id={id} owner={item.owner_wallet} focusCommentId={params.get('comment')} /></div>
         </aside>
       </div>}

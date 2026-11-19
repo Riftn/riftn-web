@@ -780,7 +780,7 @@ export function ActionBar({
   // reuse this bar with non-numeric ids and their own vote mutations, and the
   // reaction endpoint has no row to write for them.
   const numericPostId = postId ? parseInt(postId, 10) : NaN;
-  const reactionsEnabled = !disableReactions && !hasExternalHandlers && !isNaN(numericPostId);
+  const reactionsEnabled = !disableReactions && (!!onReaction || (!hasExternalHandlers && !isNaN(numericPostId)));
 
   // The breakdown of who reacted what belongs to the author. The ⓘ only exists
   // on your own posts; the API refuses the list to everyone else regardless.
@@ -1095,6 +1095,8 @@ export function ActionBar({
             toast.message(_copy("copy.9b2b21ee911e", { defaultValue: "Post processing, click ⓘ for more info" }), {
               icon: <Info className="w-4 h-4" />,
             });
+          } else if (onShare) {
+            onShare();
           } else if (quickRepost) {
             // Constrained overlays (fullscreen viewer) can't show the z-[100]
             // share drawer above the viewer — repost/undo directly instead.

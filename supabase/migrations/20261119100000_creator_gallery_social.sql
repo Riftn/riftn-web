@@ -53,6 +53,7 @@ BEGIN
       (SELECT count(*) FROM creator_gallery_reactions r WHERE r.generation_id=p.id AND r.reaction<>'dislike') AS likes,
       (SELECT count(*) FROM creator_gallery_reactions r WHERE r.generation_id=p.id AND r.reaction='dislike') AS dislikes,
       (SELECT count(*) FROM creator_gallery_comments c WHERE c.generation_id=p.id) AS comments,
+      coalesce((SELECT jsonb_object_agg(rc.reaction,rc.total) FROM (SELECT r.reaction,count(*) AS total FROM creator_gallery_reactions r WHERE r.generation_id=p.id GROUP BY r.reaction) rc),'{}'::jsonb) AS reaction_counts,
       (SELECT r.reaction FROM creator_gallery_reactions r WHERE r.generation_id=p.id AND r.wallet_address=viewer) AS my_reaction,
       EXISTS(SELECT 1 FROM creator_gallery_saves s WHERE s.generation_id=p.id AND s.wallet_address=viewer) AS saved
     FROM creator_public_posters p WHERE p_id IS NULL OR p.id=p_id

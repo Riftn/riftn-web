@@ -6,7 +6,7 @@ import type { PostReaction } from '@/lib/reactions';
 export interface PublicGeneration {
   id: string; image_url: string; video_url: string | null; created_at: string;
   owner_wallet: string | null; title: string; width: number | null; height: number | null;
-  likes: number; dislikes: number; comments: number; my_reaction: PostReaction | null; saved: boolean;
+  reaction_counts: Partial<Record<PostReaction, number>>; likes: number; dislikes: number; comments: number; my_reaction: PostReaction | null; saved: boolean;
 }
 export interface GenerationDiscussion { comments: ThreadCommentRow[]; reactions: CommentReactionRow[] }
 export const generationPath = (id: string, comment?: string | null) => `/creator/gallery/${encodeURIComponent(id)}${comment ? `?comment=${encodeURIComponent(comment)}` : ''}`;

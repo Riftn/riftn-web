@@ -388,6 +388,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'comment_like':
     case 'feature_request_like':
     case 'feature_request_comment_like':
+    case 'generation_like':
+    case 'generation_comment_like':
     case 'governance_comment_like':
       return <ThumbsUp className="w-4 h-4 text-white/70" />;
     case 'comment':
@@ -398,6 +400,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'feature_request_mention':
     case 'feature_request_activity':
     case 'feature_request_new':
+    case 'generation_comment':
+    case 'generation_reply':
     case 'governance_comment':
     case 'governance_reply':
       return <MessageSquareText className="w-4 h-4 text-white/70" />;
