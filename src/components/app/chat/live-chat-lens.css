@@ -39,3 +39,15 @@
 @media (prefers-reduced-motion: reduce) {
   .live-chat-lens, .live-chat-lens::before { animation: none; }
 }
+
+/* Live chat toolbar icons: no hover box, just a brighter white glow and a tiny lift. */
+[data-live-chat-toolbar] button {
+  transition: color .15s ease, transform .15s ease, filter .15s ease;
+}
+[data-live-chat-toolbar] button:hover:not(:disabled),
+[data-live-chat-toolbar] button:focus-visible {
+  background-color: transparent !important;
+  color: #fff !important;
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .55));
+}
