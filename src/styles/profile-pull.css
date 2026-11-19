@@ -107,3 +107,10 @@
   [data-profile-refreshing] [data-profile-pull-ring] rect { animation: none; stroke-dasharray: 100px; stroke-dashoffset: 0; }
   [data-profile-refreshed] [data-profile-avatar] { animation: none !important; }
 }
+
+/* Computers, System theme: the profile header's top lines up with the right
+   rail's search bar (8px from the top; System Light's pearl rail sits at 6px). */
+@media (min-width: 1024px) {
+  html[data-theme='system'] [data-profile-pull-body] { padding-top: 8px; }
+  html[data-theme='system'][data-system-tone='light'] [data-profile-pull-body] { padding-top: 6px; }
+}
