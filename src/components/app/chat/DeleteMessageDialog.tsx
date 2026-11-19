@@ -40,6 +40,12 @@ export interface DeleteMessageDialogProps {
   /** The other person's name in a one-to-one chat. */
   peerName?: string | null;
   onDelete: (scope: DeleteScope) => void;
+  /**
+   * 'chat': deleting a whole chat from the Messages list or the chat menu.
+   * Always asks (a saved message choice never skips it) and has no
+   * "Remember my choice" row.
+   */
+  subject?: 'message' | 'chat';
 }
 
 // The message menu's row (MessageMenu), so the two read as one family.
@@ -54,9 +60,12 @@ export function DeleteMessageDialog({
   oneToOne = false,
   peerName,
   onDelete,
+  subject = 'message',
 }: DeleteMessageDialogProps) {
   const { t } = useTranslation();
-  const saved = useChatDeleteChoice();
+  const storedChoice = useChatDeleteChoice();
+  const wholeChat = subject === 'chat';
+  const saved = wholeChat ? 'ask' : storedChoice;
   const [remember, setRemember] = useState(false);
 
   // A saved choice skips the pop-up: "for everyone" when it's allowed, else "for me".
@@ -71,10 +80,16 @@ export function DeleteMessageDialog({
   useEffect(() => { if (open) setRemember(false); }, [open]);
 
   const many = count > 1;
-  const title = many
+  const title = wholeChat
+    ? t('msgDelete.chatTitle', { defaultValue: 'Delete this chat?' })
+    : many
     ? t('msgDelete.titleMany', { defaultValue: 'Delete {{count}} messages?', count })
     : t('msgDelete.title', { defaultValue: 'Delete message?' });
-  const body = canDeleteForEveryone
+  const body = wholeChat
+    ? (canDeleteForEveryone
+      ? t('msgDelete.chatBodyBoth', { defaultValue: 'Delete it from your chats only, or every message for both of you. This can\'t be undone.' })
+      : t('msgDelete.chatBodyMe', { defaultValue: 'It will be removed from your chats only. Others will still see it.' }))
+    : canDeleteForEveryone
     ? (oneToOne
       ? (many
         ? t('msgDelete.bodyOwnBothMany', { defaultValue: 'Remove them from your chat only, or for both of you.' })
@@ -100,7 +115,7 @@ export function DeleteMessageDialog({
   return (
     <AlertDialog open={open && saved === 'ask'} onOpenChange={onOpenChange}>
       <AlertDialogContent
-        data-msg-delete-dialog
+        data-msg-delete-dialog={wholeChat ? 'chat' : 'message'}
         data-msg-menu
         data-msg-menu-surface
         className="max-w-[340px] gap-0 rounded-[20px] p-1.5 shadow-none"
@@ -121,7 +136,7 @@ export function DeleteMessageDialog({
             <span className="min-w-0 flex-1 truncate">{t('msgDelete.forMe', { defaultValue: 'Delete for me' })}</span>
           </button>
           <div className="mx-3 my-1 h-px" data-msg-menu-rule />
-          <button
+          {!wholeChat && <button
             type="button"
             role="checkbox"
             aria-checked={remember}
@@ -146,7 +161,7 @@ export function DeleteMessageDialog({
                 </span>
               )}
             </span>
-          </button>
+          </button>}
           <button type="button" data-msg-menu-item data-msg-delete-cancel onClick={() => onOpenChange(false)} className={ROW}>
             <span className={ICON}><X /></span>
             <span className="min-w-0 flex-1 truncate">{t('common.cancel', { defaultValue: 'Cancel' })}</span>

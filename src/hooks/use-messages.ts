@@ -1236,14 +1236,20 @@ function persistDeletedConversation(conversationId: string) {
   localStorage.setItem(DELETED_CONVOS_KEY, JSON.stringify([...ids]));
 }
 
+export type DeleteConversationTarget = string | { id: string; forEveryone?: boolean };
+const deleteTargetId = (target: DeleteConversationTarget) => (typeof target === 'string' ? target : target.id);
+
 export function useDeleteConversation() {
   const queryClient = useQueryClient();
   const { walletAddress } = useAuth();
 
   return useMutation({
-    mutationFn: (conversationId: string) =>
-      deleteConversation(conversationId, walletAddress || undefined),
-    onMutate: async (conversationId: string) => {
+    // A bare id deletes the chat for you only; { id, forEveryone } on a 1:1
+    // chat deletes every message and the chat for both people.
+    mutationFn: (target: DeleteConversationTarget) =>
+      deleteConversation(deleteTargetId(target), walletAddress || undefined, { forEveryone: typeof target === 'object' && !!target.forEveryone }),
+    onMutate: async (target: DeleteConversationTarget) => {
+      const conversationId = deleteTargetId(target);
       // Persist deletion so it survives refetches and page reloads
       persistDeletedConversation(conversationId);
 
@@ -1266,7 +1272,8 @@ export function useDeleteConversation() {
     onSuccess: () => {
       // Don't invalidate — the deleted ID is persisted and will be filtered on next fetch
     },
-    onError: (_err, conversationId, context) => {
+    onError: (_err, target, context) => {
+      const conversationId = deleteTargetId(target);
       // Rollback: remove from persisted deletions
       const ids = getDeletedConversationIds();
       ids.delete(conversationId);
