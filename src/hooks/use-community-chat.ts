@@ -15,7 +15,7 @@ import { getAccountSummaries } from '@/lib/api/dehub';
 import { adminErrorMessage } from '@/hooks/use-community-admin';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { notifyCommunityMentions } from '@/lib/community-mention-notify';
-import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { reportCommunityChatMessage, reportCommunityChatReaction } from '@/lib/community-chat-notify';
 import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { toast } from 'sonner';
 import { useCommunityChatHistory } from './use-community-chat-history';
@@ -357,6 +357,8 @@ export function useCommunityChat(
     if (error) {
       toast.error(adminErrorMessage(error, _translateCopy("copy.13931898084d", { defaultValue: "Failed to react" })));
       if (prev) queryClient.setQueryData(messagesKey, prev);
+    } else if (msg.wallet_address && msg.wallet_address.toLowerCase() !== walletAddress.toLowerCase()) {
+      void reportCommunityChatReaction(communityId, messageId, emoji, walletAddress);
     }
   }, [rawMessages, walletAddress, communityId, queryClient, messagesKey]);
 
@@ -389,6 +391,8 @@ export function useCommunityChat(
     if (error) {
       toast.error(adminErrorMessage(error, _translateCopy("copy.bf206a215a1f", { defaultValue: "Failed to remove reaction" })));
       if (prev) queryClient.setQueryData(messagesKey, prev);
+    } else if (msg.wallet_address && msg.wallet_address.toLowerCase() !== walletAddress.toLowerCase()) {
+      void reportCommunityChatReaction(communityId, messageId, emoji, walletAddress, true);
     }
   }, [rawMessages, walletAddress, communityId, queryClient, messagesKey]);
 

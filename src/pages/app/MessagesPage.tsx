@@ -1,5 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
+import { ReactionAlertBadge, reactionAlertLine } from '@/components/app/chat/ReactionAlertBadge';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { BrandIcon } from '@/components/app/war/WarHudIcon';
 import { AppState } from '@/components/app/AppState';
@@ -25,7 +26,7 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
-import { roomChatId, type ChatPref } from '@/lib/api/dehub/chat-prefs';
+import { PUBLIC_CHAT_PREF_ID, roomChatId, type ChatPref, type ChatReactionSummary } from '@/lib/api/dehub/chat-prefs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Archive, BellOff, Pin, ChevronLeft, ListChecks } from 'lucide-react';
 import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
@@ -128,6 +129,7 @@ export function ConversationItem({
   checked = false,
   onLongPress,
   compactTime = false,
+  reactions,
 }: {
   conversation: DeHubConversation;
   onClick: (e: React.MouseEvent) => void;
@@ -143,6 +145,8 @@ export function ConversationItem({
   onLongPress?: () => void;
   /** Computers' card inbox: short times (4m, 2h, 3d). */
   compactTime?: boolean;
+  /** Reactions to your messages here that you haven't seen yet. */
+  reactions?: ChatReactionSummary | null;
 }) {
   const { t: _copy } = _useCopy();
   const hold = useRowLongPress(onLongPress);
@@ -166,6 +170,12 @@ export function ConversationItem({
   // last message, the way every mail and chat client does it — a draft nobody
   // can see from the list is indistinguishable from a draft that was lost.
   const draft = useDraftText(conversationIdentity(conversation));
+  // A reaction newer than the last message takes the preview line, so
+  // "Reacted ❤️ to your message" reads at a glance instead of a bare dot.
+  const reactionLine = reactions && (!conversation.lastMessage?.createdAt
+    || new Date(reactions.last.at).getTime() >= new Date(conversation.lastMessage.createdAt).getTime())
+    ? reactionAlertLine(t, reactions, { named: false })
+    : null;
 
   return (
     <SwipeableRow
@@ -192,7 +202,7 @@ export function ConversationItem({
       {...hold.handlers}
       data-chat-list-row
       data-selected={isSelected ? '' : undefined}
-      data-unread={conversation.unreadCount > 0 || pref?.markedUnread ? '' : undefined}
+      data-unread={conversation.unreadCount > 0 || pref?.markedUnread || reactions ? '' : undefined}
       data-bulk-checked={selecting ? (checked ? 'true' : 'false') : undefined}
       aria-pressed={selecting ? checked : undefined}
       className={`w-full flex items-center gap-3 p-4 border-t border-white/[0.07] hover:bg-white/[0.04] transition-colors text-left ${
@@ -241,13 +251,14 @@ export function ConversationItem({
           )}
           {pref && isMuted(pref) && <BellOff data-chat-row-muted aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-zinc-500" />}
           {pref?.pinnedAt && <Pin data-chat-row-pinned aria-hidden="true" className="h-3.5 w-3.5 shrink-0 rotate-45 text-zinc-500" />}
-          {pref?.markedUnread && !(conversation.unreadCount > 0) && (
+          {pref?.markedUnread && !(conversation.unreadCount > 0) && !reactions && (
             <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className="ml-1 h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white" />
           )}
           {/* Count rides in the name row rather than welded to the avatar corner,
               matching the mobile app. White-on-near-black instead of red-500:
               the palette has no colour in it, and Osaka/Jungle still repaint
               this through [data-count-badge]. */}
+          <ReactionAlertBadge reactions={reactions} className="ml-0.5" />
           <UnreadCountChip count={conversation.unreadCount} className="ml-0.5" />
         </div>
         {draft ? (
@@ -255,6 +266,8 @@ export function ConversationItem({
             <span className="font-medium">{_copy("copy.9565c5e214a4", { defaultValue: "Draft: " })}</span>
             {draft}
           </p>
+        ) : reactionLine ? (
+          <p data-reaction-alert-line className="text-sm truncate text-white font-bold">{reactionLine}</p>
         ) : (
           <p className={`text-sm truncate text-white ${conversation.unreadCount > 0 ? 'font-bold' : 'font-normal'}`}>
             {conversation.lastMessage?.encMedia
@@ -334,7 +347,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
   // Your own pins, archives, mutes, "marked unread" and Show in Chats, for DMs
   // and for group/channel/community chats alike.
-  const { byId: chatPrefs, update: updateChatPref } = useChatPrefs();
+  const { byId: chatPrefs, update: updateChatPref, seeReactions } = useChatPrefs();
   const groupChats = chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).filter(c =>
     !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
   const { isAuthenticated, walletAddress, user, isLoading: authLoading, openLoginModal } = useAuth();
@@ -589,15 +602,17 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const archivedCount = archivedConversations.length + archivedRooms.length;
   // Computer tabs: Unread keeps chats with something new (or marked unread),
   // Groups keeps group, channel and community chats only.
-  const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread;
+  const convHasUnread = (c: DeHubConversation) => (c.unreadCount || 0) > 0 || !!chatPrefs.get(c.id)?.markedUnread || !!chatPrefs.get(c.id)?.reactions;
+  const roomHasUnread = (c: (typeof groupChats)[number]) => !!roomPref(c)?.markedUnread || !!roomPref(c)?.reactions;
+  const publicReactions = chatPrefs.get(PUBLIC_CHAT_PREF_ID)?.reactions ?? null;
   const tabFilter = cards && !searchQuery.trim() && !showArchived && !inRequests ? listTab : tabsOn && activeTab === 'unread' ? 'unread' : 'all';
   const shownConversations = tabFilter === 'groups' ? [] : tabFilter === 'unread' ? listedConversations.filter(convHasUnread) : listedConversations;
   // Computers: the first tab is "Messages", direct chats only; groups, channels,
   // communities and Public Chat live under Groups.
   const messagesTab = tabFilter === 'all' && deskCards && !searchQuery.trim() && !showArchived && !inRequests;
-  const shownRooms = messagesTab ? [] : tabFilter === 'unread' ? listedRooms.filter(c => !!roomPref(c)?.markedUnread) : listedRooms;
+  const shownRooms = messagesTab ? [] : tabFilter === 'unread' ? listedRooms.filter(roomHasUnread) : listedRooms;
   const inboxUnreadChats = visibleConversations.filter(c => !isArchived(chatPrefs.get(c.id), lastActivity(c)) && convHasUnread(c)).length
-    + groupChats.filter(c => !isArchived(roomPref(c)) && !!roomPref(c)?.markedUnread).length;
+    + groupChats.filter(c => !isArchived(roomPref(c)) && roomHasUnread(c)).length;
   // Glass, full screen on computers: pinned chats ride as bubbles above the list.
   const pinStrip = richList && fullscreen && !phonePill && !showArchived && !inRequests && !searchQuery.trim()
     ? listedConversations.filter(c => pinnedAt(c) > 0)
@@ -933,6 +948,17 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   const isMessagesRouteActive = location.pathname === routeBase;
   const publicUnread = usePublicChatUnreadCount();
   usePublicChatReading(isMessagesRouteActive && showPublicChat);
+  // An open chat's reactions are seen: clear them, including ones that land
+  // while it stays open.
+  const openChatPrefId = !isMessagesRouteActive ? null
+    : selectedConversation ? selectedConversation.id
+    : selectedRoom ? roomChatId(selectedRoom.id)
+    : showPublicChat ? PUBLIC_CHAT_PREF_ID
+    : null;
+  const openChatHasReactions = !!(openChatPrefId && chatPrefs.get(openChatPrefId)?.reactions);
+  useEffect(() => {
+    if (openChatPrefId && openChatHasReactions) seeReactions(openChatPrefId);
+  }, [openChatPrefId, openChatHasReactions, seeReactions]);
 
   /*
    * Back out of a chat to the conversation LIST, not out of Messages entirely.
@@ -1563,7 +1589,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             />
             {/* Public Chat (pinned) */}
             {!inRequests && (<>
-            {((tabFilter === 'all' && !messagesTab) || tabFilter === 'groups' || (tabFilter === 'unread' && publicUnread > 0)) && !showArchived && publicInTab && (
+            {((tabFilter === 'all' && !messagesTab) || tabFilter === 'groups' || (tabFilter === 'unread' && (publicUnread > 0 || !!publicReactions))) && !showArchived && publicInTab && (
             <button
               onClick={() => { setSelectedConversation(null); setShowPublicChat(true); }}
               data-chat-list-row
@@ -1579,8 +1605,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               </div>
               <div className="flex-1 min-w-0">
                 <span className="font-semibold text-white truncate block">{t('publicChat.title')}</span>
-                <p className="text-zinc-500 text-sm truncate">{t('publicChat.subtitle')}</p>
+                {publicReactions && !showPublicChat
+                  ? <p data-reaction-alert-line className="text-white font-bold text-sm truncate">{reactionAlertLine(t, publicReactions, { named: true })}</p>
+                  : <p className="text-zinc-500 text-sm truncate">{t('publicChat.subtitle')}</p>}
               </div>
+              {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} />}
               {publicUnread > 0 && (
                 <span data-unread-chip data-public-chat-unread className="min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center leading-none">
                   {publicUnread > 99 ? '99+' : publicUnread}
@@ -1596,6 +1625,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   key={chat.id}
                   community={chat}
                   pref={richList ? roomPref(chat) : unreadOnly(roomPref(chat))}
+                  reactions={selectedRoom?.id === chat.id ? null : roomPref(chat)?.reactions}
                   selected={fullscreen && selectedRoom?.id === chat.id}
                   onClick={() => {
                     if (picking) { toggleBulk(roomChatId(chat.id)); return; }
@@ -1681,6 +1711,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                   pref={richList ? chatPrefs.get(conv.id) : unreadOnly(chatPrefs.get(conv.id))}
                   onLongPress={richList ? undefined : () => holdToPick(conv.id)}
                   compactTime={cards}
+                  reactions={selectedConversation?.id === conv.id ? null : chatPrefs.get(conv.id)?.reactions}
                 />
               );
               return richList ? (
