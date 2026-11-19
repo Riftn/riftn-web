@@ -61,7 +61,8 @@ import { ChatLinkPreviews } from '../chat/ChatLinkPreviews';
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { ChatReactorsDrawer } from '@/components/app/chat/ChatReactorsDrawer';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from '@/components/app/chat/message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from '@/components/app/chat/message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 
@@ -476,6 +477,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
     });
+    const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
+      : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
+    if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
     if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
   }
   const lineMenu = menuPoint.mounted && menuMsg ? (
