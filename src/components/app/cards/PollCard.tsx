@@ -9,12 +9,15 @@ import X from "@/components/ui/cut-icons/close";
 import { cn } from '@/lib/utils';
 import { usePoll, useVoteOnPoll, useRemovePollVote, useClosePoll } from '@/hooks/use-polls';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePollTranslation } from './usePollTranslation';
 
 interface PollCardProps {
   tokenId: number;
+  /** Translate the question and options into the reader's language. Off for private (direct message) polls. */
+  autoTranslate?: boolean;
 }
 
-export function PollCard({ tokenId }: PollCardProps) {
+export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
   const { t: _copy } = _useCopy();
   // Defer the poll probe until the card nears the viewport — the feed API has
   // no "has poll" flag, so without this every card fires a request on mount.
@@ -45,6 +48,7 @@ export function PollCard({ tokenId }: PollCardProps) {
   const voteMutation = useVoteOnPoll();
   const removeVoteMutation = useRemovePollVote();
   const closePollMutation = useClosePoll();
+  const translatedPoll = usePollTranslation(poll?.question, poll?.options, autoTranslate && !!poll);
 
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
   // Persist vote across page refreshes via localStorage
@@ -136,7 +140,7 @@ export function PollCard({ tokenId }: PollCardProps) {
     <div data-poll-card className="rounded-xl bg-white/5 border border-white/10 p-4 space-y-3 mt-2" data-no-navigate onClick={e => e.stopPropagation()}>
       <div className="flex items-start justify-between gap-2">
         <p className="text-white font-medium text-sm leading-snug">
-          {poll.question}
+          {translatedPoll?.question ?? poll.question}
           {/* Phones: the footer already says "Ended 1 day ago", so the title
               does not say it twice. Kept when the poll was closed early. */}
           {isEnded && <span className={cn('ml-2 text-zinc-500 text-xs font-normal', endedByTime && 'max-md:hidden')}>{_copy("copy.813c8951972c", { defaultValue: "(Closed)" })}</span>}
@@ -187,7 +191,7 @@ export function PollCard({ tokenId }: PollCardProps) {
                     </span>
                   )}
                   <span className={cn('text-sm truncate', isVoted || won ? 'text-white font-medium' : 'text-zinc-300')}>
-                    {option.text}
+                    {translatedPoll ? translatedPoll.option(option.index, option.text) : option.text}
                   </span>
                   {won && <Check className="w-3.5 h-3.5 shrink-0 text-white" aria-label={_copy("copy.105dc74a45e3", { defaultValue: "Winner" })} />}
                 </div>

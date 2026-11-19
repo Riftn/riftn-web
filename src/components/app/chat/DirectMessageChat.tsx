@@ -987,7 +987,7 @@ const MessageBubble = memo(function MessageBubble({
         {/* Poll message — the same card a post's poll uses; members vote in place. */}
         {message.msgType === 'poll' && message.poll && !message.isDeleted && (
           <div className="w-[300px] max-w-full text-left">
-            <PollCard tokenId={message.poll.tokenId} />
+            <PollCard tokenId={message.poll.tokenId} autoTranslate={false} />
           </div>
         )}
 
