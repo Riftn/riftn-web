@@ -30,6 +30,7 @@ const KNOWN_LOGOS: Record<string, string> = {
   USDC: 'https://coin-images.coingecko.com/coins/images/6319/large/usdc.png',
   DHB: dhbCoinIcon,
   DEHUB: dhbCoinIcon,
+  RIFTN: dhbCoinIcon,
 };
 
 /** Stock/ETF symbol → company domain for Clearbit logo fallback */
