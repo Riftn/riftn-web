@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ṣàfikún àwòrán, GIF tàbí fídíò",
+    "changeMedia": "Yí àwòrán, GIF tàbí fídíò padà",
+    "mediaType": "Yan àwòrán, GIF tàbí fídíò.",
+    "videoSize": "Fídíò yìí ju {{n}} MB lọ. Yan èyí tí ó kéré."
+  },
   "textFeed": {
     "tab": "Ọ̀rọ̀"
   },

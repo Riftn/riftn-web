@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Resim, GIF veya video ekle",
+    "changeMedia": "Resmi, GIF'i veya videoyu değiştir",
+    "mediaType": "Bir resim, GIF veya video seç.",
+    "videoSize": "Bu video {{n}} MB'tan büyük. Daha küçük bir tane seç."
+  },
   "textFeed": {
     "errorTitle": "Gönderiler yüklenemedi",
     "errorBody": "Metin akışını yeniden yüklemeyi dene.",

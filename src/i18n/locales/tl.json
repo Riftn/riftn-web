@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Magdagdag ng larawan, GIF, o video",
+    "changeMedia": "Palitan ang larawan, GIF, o video",
+    "mediaType": "Pumili ng larawan, GIF, o video.",
+    "videoSize": "Lampas sa {{n}} MB ang video na iyan. Pumili ng mas maliit."
+  },
   "textFeed": {
     "tab": "Teksto"
   },

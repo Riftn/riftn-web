@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Add a picture, GIF or video",
+    "changeMedia": "Change picture, GIF or video",
+    "mediaType": "Pick a picture, GIF or video.",
+    "videoSize": "That video is over {{n}} MB. Pick a smaller one."
+  },
   "textFeed": {
     "errorTitle": "Posts could not load",
     "errorBody": "Try loading the text feed again.",

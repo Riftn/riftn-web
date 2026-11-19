@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Tambah gambar, GIF atau video",
+    "changeMedia": "Tukar gambar, GIF atau video",
+    "mediaType": "Pilih gambar, GIF atau video.",
+    "videoSize": "Video itu melebihi {{n}} MB. Pilih yang lebih kecil."
+  },
   "textFeed": {
     "tab": "Teks"
   },

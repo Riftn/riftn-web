@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Thêm ảnh, GIF hoặc video",
+    "changeMedia": "Đổi ảnh, GIF hoặc video",
+    "mediaType": "Hãy chọn ảnh, GIF hoặc video.",
+    "videoSize": "Video này lớn hơn {{n}} MB. Hãy chọn video nhỏ hơn."
+  },
   "textFeed": {
     "tab": "Văn bản"
   },

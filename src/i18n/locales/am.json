@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "ፎቶ፣ GIF ወይም ቪዲዮ ያክሉ",
+    "changeMedia": "ፎቶ፣ GIF ወይም ቪዲዮ ይቀይሩ",
+    "mediaType": "ፎቶ፣ GIF ወይም ቪዲዮ ይምረጡ።",
+    "videoSize": "ይህ ቪዲዮ ከ{{n}} MB በላይ ነው። ትንሽ የሆነ ይምረጡ።"
+  },
   "textFeed": {
     "tab": "ጽሑፍ"
   },

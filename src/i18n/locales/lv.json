@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Pievienot attēlu, GIF vai video",
+    "changeMedia": "Mainīt attēlu, GIF vai video",
+    "mediaType": "Izvēlies attēlu, GIF vai video.",
+    "videoSize": "Šis video ir lielāks par {{n}} MB. Izvēlies mazāku."
+  },
   "textFeed": {
     "tab": "Teksts"
   },

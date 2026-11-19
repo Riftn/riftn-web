@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "تصویر، GIF یا ویڈیو شامل کرو",
+    "changeMedia": "تصویر، GIF یا ویڈیو بدلو",
+    "mediaType": "تصویر، GIF یا ویڈیو چݨو۔",
+    "videoSize": "ایہ ویڈیو {{n}} MB توں وݙی ہے۔ نکی چݨو۔"
+  },
   "textFeed": {
     "tab": "متن"
   },

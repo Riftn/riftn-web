@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "添加图片、GIF 或视频",
+    "changeMedia": "更换图片、GIF 或视频",
+    "mediaType": "请选择图片、GIF 或视频。",
+    "videoSize": "该视频超过 {{n}} MB，请选择更小的视频。"
+  },
   "textFeed": {
     "tab": "文字"
   },

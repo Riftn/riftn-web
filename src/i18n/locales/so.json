@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ku dar sawir, GIF ama muuqaal",
+    "changeMedia": "Beddel sawirka, GIF-ka ama muuqaalka",
+    "mediaType": "Dooro sawir, GIF ama muuqaal.",
+    "videoSize": "Muuqaalkani wuxuu ka weyn yahay {{n}} MB. Dooro mid ka yar."
+  },
   "textFeed": {
     "tab": "Qoraal"
   },

@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ja, GIF walima widewo fara a kan",
+    "changeMedia": "Ja, GIF walima widewo falen",
+    "mediaType": "Ja, GIF walima widewo dɔ sugandi.",
+    "videoSize": "Nin widewo ka bon ni {{n}} MB ye. Dɔ sugandi min ka dɔgɔ."
+  },
   "textFeed": {
     "tab": "Sɛbɛn"
   },

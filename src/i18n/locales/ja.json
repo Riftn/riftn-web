@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "画像・GIF・動画を追加",
+    "changeMedia": "画像・GIF・動画を変更",
+    "mediaType": "画像、GIF、動画のいずれかを選んでください。",
+    "videoSize": "この動画は {{n}} MB を超えています。もっと小さいものを選んでください。"
+  },
   "textFeed": {
     "tab": "テキスト"
   },

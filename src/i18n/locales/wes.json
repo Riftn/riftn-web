@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Add pikcha, GIF or video",
+    "changeMedia": "Chenj pikcha, GIF or video",
+    "mediaType": "Chos pikcha, GIF or video.",
+    "videoSize": "Dis video pass {{n}} MB. Chos wan weh smol pass."
+  },
   "textFeed": {
     "tab": "Rait"
   },

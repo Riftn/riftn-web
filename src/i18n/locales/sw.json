@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ongeza picha, GIF au video",
+    "changeMedia": "Badilisha picha, GIF au video",
+    "mediaType": "Chagua picha, GIF au video.",
+    "videoSize": "Video hiyo ni zaidi ya {{n}} MB. Chagua ndogo zaidi."
+  },
   "textFeed": {
     "tab": "Maandishi"
   },

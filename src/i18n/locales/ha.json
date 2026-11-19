@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Ƙara hoto, GIF ko bidiyo",
+    "changeMedia": "Canza hoto, GIF ko bidiyo",
+    "mediaType": "Zaɓi hoto, GIF ko bidiyo.",
+    "videoSize": "Wannan bidiyon ya wuce {{n}} MB. Zaɓi ƙarami."
+  },
   "textFeed": {
     "tab": "Rubutu"
   },

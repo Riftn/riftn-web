@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Tinye foto, GIF ma ọ bụ vidiyo",
+    "changeMedia": "Gbanwee foto, GIF ma ọ bụ vidiyo",
+    "mediaType": "Họrọ foto, GIF ma ọ bụ vidiyo.",
+    "videoSize": "Vidiyo ahụ karịrị {{n}} MB. Họrọ nke pere mpe."
+  },
   "textFeed": {
     "tab": "Ederede"
   },

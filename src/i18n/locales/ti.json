@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "ስእሊ፣ GIF ወይ ቪድዮ ወስኽ",
+    "changeMedia": "ስእሊ፣ GIF ወይ ቪድዮ ቀይር",
+    "mediaType": "ስእሊ፣ GIF ወይ ቪድዮ ምረጽ።",
+    "videoSize": "እዚ ቪድዮ ካብ {{n}} MB ይዓቢ። ዝነኣሰ ምረጽ።"
+  },
   "textFeed": {
     "tab": "ጽሑፍ"
   },

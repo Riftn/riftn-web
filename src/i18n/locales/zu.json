@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Engeza isithombe, i-GIF noma ividiyo",
+    "changeMedia": "Shintsha isithombe, i-GIF noma ividiyo",
+    "mediaType": "Khetha isithombe, i-GIF noma ividiyo.",
+    "videoSize": "Leyo vidiyo idlula u-{{n}} MB. Khetha encane."
+  },
   "textFeed": {
     "tab": "Umbhalo"
   },

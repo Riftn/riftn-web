@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Shto një foto, GIF ose video",
+    "changeMedia": "Ndrysho foton, GIF-in ose videon",
+    "mediaType": "Zgjidh një foto, GIF ose video.",
+    "videoSize": "Kjo video është mbi {{n}} MB. Zgjidh një më të vogël."
+  },
   "textFeed": {
     "tab": "Tekst"
   },

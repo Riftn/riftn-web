@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Voeg een afbeelding, GIF of video toe",
+    "changeMedia": "Afbeelding, GIF of video wijzigen",
+    "mediaType": "Kies een afbeelding, GIF of video.",
+    "videoSize": "Die video is groter dan {{n}} MB. Kies een kleinere."
+  },
   "textFeed": {
     "errorTitle": "Berichten konden niet laden",
     "errorBody": "Probeer de tekstfeed opnieuw te laden.",

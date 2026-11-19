@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Lisa pilt, GIF või video",
+    "changeMedia": "Muuda pilti, GIF-i või videot",
+    "mediaType": "Vali pilt, GIF või video.",
+    "videoSize": "See video on üle {{n}} MB. Vali väiksem."
+  },
   "textFeed": {
     "tab": "Tekst"
   },

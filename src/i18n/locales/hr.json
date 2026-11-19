@@ -1,4 +1,10 @@
 {
+  "postBg": {
+    "addMedia": "Dodaj sliku, GIF ili video",
+    "changeMedia": "Promijeni sliku, GIF ili video",
+    "mediaType": "Odaberite sliku, GIF ili video.",
+    "videoSize": "Taj video ima više od {{n}} MB. Odaberite manji."
+  },
   "textFeed": {
     "tab": "Tekst"
   },

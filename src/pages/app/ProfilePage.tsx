@@ -64,7 +64,7 @@ import { UserAvatar } from '@/components/app/UserAvatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { StreamerBadge } from '@/components/app/live/StreamerBadge';
 import { ProfilePostBgContext, ProfilePostBgArtContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
-import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, mergePostBg, parsePostBg, postBgById, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
+import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
 import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
 import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
 import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
@@ -342,7 +342,7 @@ export default function ProfilePage() {
     const next: PostBg | null = !def
       ? null
       : def.kind === 'photo'
-        ? { ...def, image: file ? URL.createObjectURL(file) : postBgPhoto ?? undefined }
+        ? { ...def, image: file ? URL.createObjectURL(file) + (/^video\//.test(file.type) ? POST_BG_VIDEO_HINT : '') : postBgPhoto ?? undefined }
         : withPostBgColors(def, colors);
     const unchanged = !file && (postBg?.id ?? null) === (next?.id ?? null) && (postBg?.colors ?? []).join() === (next?.colors ?? []).join();
     if (unchanged) { setPostBgOpen(false); return; }
