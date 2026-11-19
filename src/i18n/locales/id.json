@@ -2722,6 +2722,7 @@
     "failedSubmit": "Gagal mengirim aplikasi. Silakan coba lagi."
   },
   "loginModal": {
+    "didYouMean": "Maksud Anda {{email}}?",
     "restoreWalletTitle": "Bawa kembali dompet Anda",
     "restoreOriginalWallet": "Profil Anda berada di dompet asli Anda dari saat Anda mendaftar, bukan yang disimpan untuk login ini. Masuklah seperti saat Anda pertama kali bergabung di Riftn untuk membawa dompet itu kembali. Profil dan dana Anda tetap seperti semula.",
     "useAnotherLogin": "Gunakan login yang berbeda",

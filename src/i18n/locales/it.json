@@ -2722,6 +2722,7 @@
     "failedSubmit": "Invio candidatura fallito. Riprova."
   },
   "loginModal": {
+    "didYouMean": "Intendevi {{email}}?",
     "restoreWalletTitle": "Riprendi la tua borsa",
     "restoreOriginalWallet": "Il tuo profilo è sul portafoglio dal tuo primo accesso, non su quello salvato per questo accesso. Accedi come hai fatto per la prima volta su Riftn per riportare indietro quel portafoglio. Il tuo profilo e i tuoi fondi rimangono come sono.",
     "useAnotherLogin": "Usa un diverso accesso",

@@ -2732,6 +2732,7 @@
     "failedSubmit": "Không thể gửi đơn đăng ký. Vui lòng thử lại."
   },
   "loginModal": {
+    "didYouMean": "Ý bạn là {{email}}?",
     "restoreWalletTitle": "Lấy lại ví tiền",
     "restoreOriginalWallet": "Tài khoản của bạn nằm trên ví tiền từ đăng nhập ban đầu, không phải ví tiền được lưu trữ cho lần đăng nhập này. Đăng nhập theo cách bạn đã tham gia Riftn lần đầu để lấy lại ví tiền đó. Tài khoản và số dư của bạn sẽ được giữ nguyên.",
     "useAnotherLogin": "Sử dụng đăng nhập khác",

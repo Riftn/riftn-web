@@ -2897,6 +2897,7 @@
     "email": "Email"
   },
   "loginModal": {
+    "didYouMean": "Você quis dizer {{email}}?",
     "bringLoginOver": "Usou o Riftn no dehub.io? <bring>Traga seu login</bring>",
     "restoreWalletTitle": "Volte com sua carteira",
     "restoreOriginalWallet": "Seu perfil está na carteira do seu registro original, não na que foi salva para esse login. Faça o login da forma como você se juntou ao Riftn para trazer essa carteira de volta. Seu perfil e fundos permanecem como estão.",
