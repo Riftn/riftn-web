@@ -234,13 +234,22 @@ let revealToken = 0;
 let flashTimer: ReturnType<typeof setTimeout> | null = null;
 let flashed: HTMLElement | null = null;
 
-/** Bottom edge of the sticky settings header, in viewport coordinates. */
+/**
+ * Bottom edge of the sticky settings header, in viewport coordinates.
+ * Pages stay mounted in the page cache, so a hidden page's header (e.g. the
+ * home feed's, 0px tall) can come first in the document; only a header that
+ * is actually on screen counts, or the setting lands under the visible one.
+ */
 function stickyHeaderBottom(): number {
-  const header = document.querySelector<HTMLElement>('[data-feed-nav-outer]');
-  if (!header) return 0;
-  const style = getComputedStyle(header);
-  if (style.position !== 'sticky' && style.position !== 'fixed') return 0;
-  return Math.max(0, header.getBoundingClientRect().bottom);
+  let bottom = 0;
+  for (const header of Array.from(document.querySelectorAll<HTMLElement>('[data-feed-nav-outer]'))) {
+    const style = getComputedStyle(header);
+    if (style.position !== 'sticky' && style.position !== 'fixed') continue;
+    const rect = header.getBoundingClientRect();
+    if (rect.height === 0) continue;
+    bottom = Math.max(bottom, rect.bottom);
+  }
+  return bottom;
 }
 
 function scrollAnchorIntoView(el: HTMLElement, smooth: boolean): void {
