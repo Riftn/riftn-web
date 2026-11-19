@@ -50,7 +50,8 @@
     "pageDescription": "喺 Riftn 睇呢條片嘅所有合拍，或者並排錄返個你自己嘅。",
     "empty": "仲未有合拍。打開條片嘅選項，揀 Remix → 合拍，做第一個。",
     "notFound": "呢條片用唔到。",
-    "browseShorts": "瀏覽 Shorts"
+    "browseShorts": "瀏覽 Shorts",
+    "notFoundTitle": "搵唔到影片 | Riftn"
   },
   "videoRemix": {
     "sound": "使用呢個音效",
@@ -3348,7 +3349,8 @@
       "dragPart": "拖動嚟移動第 {{n}} 部分",
       "addPart": "加入串文",
       "addPlaceholder": "加入你嘅串文...",
-      "label": "串文 · {{count}} 部分"
+      "label": "串文 · {{count}} 部分",
+      "reorderHint": "拖動各部分，或者用箭咀，然後儲存。"
     },
     "attachMedia": "附加相片、影片或者音頻",
     "attachUnsupported": "附加相片、影片或者音頻檔案。",
@@ -6657,7 +6659,8 @@
     "libraryFavorites": "最愛",
     "libraryFavoriteAdd": "加到最愛",
     "libraryFavoriteRemove": "由最愛移除",
-    "priceOwnKey": "你嘅金鑰"
+    "priceOwnKey": "你嘅金鑰",
+    "audioResultTooLarge": "音訊結果係空嘅，或者超過 128 MB。"
   },
   "pricing": {
     "plansForEveryWorkflow": "每個工作流程嘅計劃",
@@ -20563,7 +20566,8 @@
     "backToVideo": "返回影片",
     "empty": "暫時未有回應。打開影片嘅 Remix 選單揀「回應」做第一個。",
     "wasLive": "曾經直播",
-    "thisVideo": "呢段影片"
+    "thisVideo": "呢段影片",
+    "pageTitle": "對 {{title}} 嘅反應 | Riftn"
   },
   "connectGuide": {
     "title": "將 Riftn 連接到你嘅 AI 助手",

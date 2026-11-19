@@ -50,7 +50,8 @@
     "pageDescription": "Kyk elke duet van hierdie video op Riftn, of neem jou eie langs mekaar op.",
     "empty": "Nog geen duette nie. Maak die video se opsies oop en kies Remix → Duet om die eerste een te maak.",
     "notFound": "Hierdie video is nie beskikbaar nie.",
-    "browseShorts": "Blaai deur Shorts"
+    "browseShorts": "Blaai deur Shorts",
+    "notFoundTitle": "Video nie gevind nie | Riftn"
   },
   "videoRemix": {
     "sound": "Gebruik hierdie klank",
@@ -3382,7 +3383,8 @@
       "dragPart": "Sleep om deel {{n}} te skuif",
       "addPart": "Voeg by draad",
       "addPlaceholder": "Voeg by jou draad...",
-      "label": "Draad · {{count}} dele"
+      "label": "Draad · {{count}} dele",
+      "reorderHint": "Sleep die dele, of gebruik die pyltjies, en stoor dan."
     },
     "attachMedia": "Heg 'n foto, video of klank aan",
     "attachUnsupported": "Heg 'n foto, 'n video of 'n klanklêer aan.",
@@ -6691,7 +6693,8 @@
     "libraryFavoriteAdd": "Voeg by gunstelinge",
     "libraryFavoriteRemove": "Verwyder uit gunstelinge",
     "audioTaskDialoguePlaceholder": "Alice: Ons moet gaan.\nBob: [lag] Na jou.",
-    "priceOwnKey": "Jou sleutel"
+    "priceOwnKey": "Jou sleutel",
+    "audioResultTooLarge": "Die oudioresultaat is leeg of oorskry 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planne vir elke werkstroom",
@@ -20648,7 +20651,8 @@
     "backToVideo": "Terug na video",
     "empty": "Nog geen reaksies nie. Maak die video se Remix-kieslys oop en kies Reageer om die eerste te wees.",
     "wasLive": "Was regstreeks",
-    "thisVideo": "hierdie video"
+    "thisVideo": "hierdie video",
+    "pageTitle": "Reaksies op {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Koppel Riftn aan jou KI-assistent",

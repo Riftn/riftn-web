@@ -50,7 +50,8 @@
     "pageDescription": "شوف كل ديو لهذا الفيديو على Riftn، أو سجّل ديو حقك جنبه.",
     "empty": "ما فيه ديوهات لسه. افتح خيارات الفيديو واختار ريمكس ← ديو عشان تسوي أول واحد.",
     "notFound": "هذا الفيديو مو متاح.",
-    "browseShorts": "تصفّح Shorts"
+    "browseShorts": "تصفّح Shorts",
+    "notFoundTitle": "ما لقينا الفيديو | Riftn"
   },
   "videoRemix": {
     "sound": "استخدم هذا الصوت",
@@ -3348,7 +3349,8 @@
       "dragPart": "اسحب عشان تحرّك الجزء {{n}}",
       "addPart": "أضف للسلسلة",
       "addPlaceholder": "أضف لسلسلتك...",
-      "label": "سلسلة · {{count}} أجزاء"
+      "label": "سلسلة · {{count}} أجزاء",
+      "reorderHint": "اسحب الأجزاء، أو استخدم الأسهم، وبعدين احفظ."
     },
     "attachMedia": "أرفق صورة أو فيديو أو صوت",
     "attachUnsupported": "أرفق صورة أو فيديو أو ملف صوتي.",
@@ -6658,7 +6660,8 @@
     "toolPoster": "بوستر Riftn",
     "toolImageEdit": "تعديل الصور",
     "toolCreativeChat": "دردشة إبداعية",
-    "priceOwnKey": "مفتاحك"
+    "priceOwnKey": "مفتاحك",
+    "audioResultTooLarge": "نتيجة الصوت فاضية أو أكبر من 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "خطط لكل سير عمل",
@@ -20564,7 +20567,8 @@
     "backToVideo": "ارجع للفيديو",
     "empty": "ما فيه ردود فعل لسه. افتح قائمة الريمكس في الفيديو واختار ردة فعل عشان تكون الأول.",
     "wasLive": "كان مباشر",
-    "thisVideo": "هالفيديو"
+    "thisVideo": "هالفيديو",
+    "pageTitle": "التفاعلات على {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "اربط Riftn بمساعد الذكاء الاصطناعي الخاص بك",

@@ -50,7 +50,8 @@
     "empty": "Manaraqmi duetkuna kanchu. Videopa opcionninkunata kichay, Remix → Duet akllay ñawpaq kaqta ruwanaykipaq.",
     "video": "Video",
     "notFound": "Kay videoqa mana kanchu.",
-    "browseShorts": "Shorts qhawariy"
+    "browseShorts": "Shorts qhawariy",
+    "notFoundTitle": "Videoqa mana tarikunchu | Riftn"
   },
   "videoRemix": {
     "sound": "Kay sonidu ruwachiy",
@@ -3379,7 +3380,8 @@
       "dragPart": "Aysay {{n}} partita astanaykipaq",
       "addPart": "Hiloman yapay",
       "addPlaceholder": "Hiloykiman yapay...",
-      "label": "Hilo · {{count}} partikuna"
+      "label": "Hilo · {{count}} partikuna",
+      "reorderHint": "Partekunata aysay, utaq flechakunata llamk'achiy, chaymanta waqaychay."
     },
     "attachMedia": "Foto, video utaq audio t'inkiy",
     "attachUnsupported": "Foto, video utaq audio archivota t'inkiy.",
@@ -6688,7 +6690,8 @@
     "libraryFavorites": "Munasqakuna",
     "libraryFavoriteAdd": "Munasqakunaman yapay",
     "libraryFavoriteRemove": "Munasqakunamanta hurquy",
-    "priceOwnKey": "Llaveyki"
+    "priceOwnKey": "Llaveyki",
+    "audioResultTooLarge": "Audio lluqsiyninqa ch'usaqmi utaq 128 MB-manta aswanmi."
   },
   "pricing": {
     "plansForEveryWorkflow": "Sapa llamkay puririypaq plankuna",
@@ -6994,7 +6997,8 @@
     "fixedPrice": "Mana tikraq chanin",
     "priceDrop": "Chaninqa pachawan uraykun",
     "endPrice": "Aswan pisi chanin, tukukuypi chayasqa ({{symbol}})",
-    "quantity": "Hayk'a ({{n}} kapusunki)"
+    "quantity": "Hayk'a ({{n}} kapusunki)",
+    "notListed": "Manaraq qhatunapaqchu. Allinchakuyta ruray, kapuqninmi chaskinman."
   },
   "usernames": {
     "seoTitle": "Ruraqpa sutin Qhatu | Riftn sutiyuq runa",
@@ -20593,7 +20597,8 @@
     "backToVideo": "Videoman kutiy",
     "empty": "Manaraqmi reaccionkuna kanchu. Videopa Remix menúnta kichay, Reaccionay akllay ñawpaq kanaykipaq.",
     "wasLive": "Kawsaq karqan",
-    "thisVideo": "kay video"
+    "thisVideo": "kay video",
+    "pageTitle": "{{title}}-man kutichiykuna | Riftn"
   },
   "connectGuide": {
     "title": "Riftn-ta AI yanapaqniykiwan t'inkiy",

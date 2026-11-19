@@ -50,7 +50,8 @@
     "empty": "Ende pa duete. Hap opsionet e videos dhe zgjidh Remix → Duet për të bërë të parin.",
     "video": "Video",
     "notFound": "Kjo video nuk është e disponueshme.",
-    "browseShorts": "Shfleto Shorts"
+    "browseShorts": "Shfleto Shorts",
+    "notFoundTitle": "Videoja nuk u gjet | Riftn"
   },
   "videoRemix": {
     "sound": "Përdorni këtë zë",
@@ -3348,7 +3349,8 @@
       "dragPart": "Tërhiq për të lëvizur pjesën {{n}}",
       "addPart": "Shto në fill",
       "addPlaceholder": "Shto në fillin tënd...",
-      "label": "Fill · {{count}} pjesë"
+      "label": "Fill · {{count}} pjesë",
+      "reorderHint": "Tërhiqni pjesët ose përdorni shigjetat, pastaj ruani."
     },
     "attachMedia": "Bashkëngjit një foto, video ose audio",
     "attachUnsupported": "Bashkëngjit një foto, një video ose një skedar audio.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Shto te të preferuarat",
     "libraryFavoriteRemove": "Hiq nga të preferuarat",
     "audioTaskDialoguePlaceholder": "Alice: Duhet të ikim.\nBob: [qesh] Pas teje.",
-    "priceOwnKey": "Çelësi yt"
+    "priceOwnKey": "Çelësi yt",
+    "audioResultTooLarge": "Rezultati audio është bosh ose i kalon 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Planet për çdo rrjedhë pune",
@@ -20563,7 +20566,8 @@
     "backToVideo": "Kthehu te videoja",
     "empty": "Ende pa reagime. Hap menynë Remix të videos dhe zgjidh React për të qenë i pari.",
     "wasLive": "Ishte live",
-    "thisVideo": "këtë video"
+    "thisVideo": "këtë video",
+    "pageTitle": "Reagime për {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Lidhe Riftn me asistentin tënd të IA-së",

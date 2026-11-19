@@ -50,7 +50,8 @@
     "empty": "Durung ana duet. Bukak pilihan video banjur pilih Remix → Duet kanggo nggawe sing kapisan.",
     "video": "Video",
     "notFound": "Video iki ora kasedhiya.",
-    "browseShorts": "Deleng Shorts"
+    "browseShorts": "Deleng Shorts",
+    "notFoundTitle": "Video ora ketemu | Riftn"
   },
   "videoRemix": {
     "sound": "Gunakake swara iki",
@@ -3348,7 +3349,8 @@
       "dragPart": "Seret kanggo mindhah bagian {{n}}",
       "addPart": "Tambahake menyang utas",
       "addPlaceholder": "Tambahake menyang utas sampeyan...",
-      "label": "Utas · {{count}} bagian"
+      "label": "Utas · {{count}} bagian",
+      "reorderHint": "Seret bagean-bagean, utawa gunakake panah, banjur simpen."
     },
     "attachMedia": "Lampirake foto, video utawa audio",
     "attachUnsupported": "Lampirake foto, video utawa file audio.",
@@ -6658,7 +6660,8 @@
     "libraryFavorites": "Favorit",
     "libraryFavoriteAdd": "Tambah menyang favorit",
     "libraryFavoriteRemove": "Busak saka favorit",
-    "priceOwnKey": "Kunci-mu"
+    "priceOwnKey": "Kunci-mu",
+    "audioResultTooLarge": "Asil audio kosong utawa luwih saka 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Rencana untuk setiap alur kerja",
@@ -20564,7 +20567,8 @@
     "backToVideo": "Bali menyang video",
     "empty": "Durung ana reaksi. Bukak menu Remix video lan pilih Reaksi supaya dadi sing pisanan.",
     "wasLive": "Tau langsung",
-    "thisVideo": "video iki"
+    "thisVideo": "video iki",
+    "pageTitle": "Reaksi kanggo {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Sambungna Riftn karo asisten AI sampeyan",

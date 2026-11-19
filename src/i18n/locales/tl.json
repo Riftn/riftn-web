@@ -50,7 +50,8 @@
     "empty": "Wala pang duet. Buksan ang mga opsyon ng video at piliin ang Remix → Duet para gawin ang una.",
     "video": "Video",
     "notFound": "Hindi available ang video na ito.",
-    "browseShorts": "I-browse ang Shorts"
+    "browseShorts": "I-browse ang Shorts",
+    "notFoundTitle": "Hindi nahanap ang video | Riftn"
   },
   "videoRemix": {
     "sound": "Gamitin ang tunog na ito",
@@ -3393,7 +3394,8 @@
       "dragPart": "I-drag para ilipat ang bahagi {{n}}",
       "addPart": "Idagdag sa thread",
       "addPlaceholder": "Magdagdag sa thread mo...",
-      "label": "Thread · {{count}} bahagi"
+      "label": "Thread · {{count}} bahagi",
+      "reorderHint": "I-drag ang mga bahagi, o gamitin ang mga arrow, saka i-save."
     },
     "attachMedia": "Mag-attach ng larawan, video o audio",
     "attachUnsupported": "Mag-attach ng larawan, video o audio file.",
@@ -6702,7 +6704,8 @@
     "libraryFavoriteRemove": "Alisin sa mga paborito",
     "audioTaskDialoguePlaceholder": "Alice: Tara na.\nBob: [tumatawa] Ikaw muna.",
     "srHeading": "Riftn Creator Studio",
-    "priceOwnKey": "Sarili mong key"
+    "priceOwnKey": "Sarili mong key",
+    "audioResultTooLarge": "Walang laman ang resulta ng audio o lampas ito sa 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Mga plano para sa bawat workflow",
@@ -20686,7 +20689,8 @@
     "backToVideo": "Bumalik sa video",
     "empty": "Wala pang reaksyon. Buksan ang Remix menu ng video at piliin ang React para mauna.",
     "wasLive": "Nag-live",
-    "thisVideo": "ang video na ito"
+    "thisVideo": "ang video na ito",
+    "pageTitle": "Mga reaksyon sa {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Ikonekta ang Riftn sa iyong AI assistant",

@@ -43,7 +43,8 @@
     "empty": "Noch keine Duette. Öffnen Sie die Optionen des Videos und wählen Sie Remix → Duett, um das erste zu erstellen.",
     "video": "Video",
     "notFound": "Dieses Video ist nicht verfügbar.",
-    "browseShorts": "Shorts durchsuchen"
+    "browseShorts": "Shorts durchsuchen",
+    "notFoundTitle": "Video nicht gefunden | Riftn"
   },
   "videoRemix": {
     "sound": "Diesen Sound verwenden",
@@ -3332,7 +3333,8 @@
       "dragPart": "Ziehen, um Teil {{n}} zu verschieben",
       "addPart": "Zum Thread hinzufügen",
       "addPlaceholder": "Zu Ihrem Thread hinzufügen...",
-      "label": "Thread · {{count}} Teile"
+      "label": "Thread · {{count}} Teile",
+      "reorderHint": "Ziehe die Teile oder nutze die Pfeile und speichere dann."
     },
     "attachImage": "Bild anhängen",
     "recordVoiceNote": "Sprachnotiz aufnehmen",
@@ -6640,7 +6642,8 @@
     "libraryFavoriteAdd": "Zu Favoriten hinzufügen",
     "libraryFavoriteRemove": "Aus Favoriten entfernen",
     "audioTaskDialoguePlaceholder": "Alice: Wir sollten gehen.\nBob: [lacht] Nach dir.",
-    "priceOwnKey": "Ihr Schlüssel"
+    "priceOwnKey": "Ihr Schlüssel",
+    "audioResultTooLarge": "Das Audioergebnis ist leer oder größer als 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Pläne für jeden Workflow",
@@ -20559,7 +20562,8 @@
     "backToVideo": "Zurück zum Video",
     "empty": "Noch keine Reaktionen. Öffne das Remix-Menü des Videos und wähle Reagieren, um die erste zu sein.",
     "wasLive": "War live",
-    "thisVideo": "dieses Video"
+    "thisVideo": "dieses Video",
+    "pageTitle": "Reaktionen auf {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Verbinde Riftn mit deinem KI-Assistenten",

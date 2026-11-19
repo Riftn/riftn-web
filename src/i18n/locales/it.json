@@ -50,7 +50,8 @@
     "empty": "Ancora nessun duetto. Apri le opzioni del video e scegli Remix → Duetto per fare il primo.",
     "video": "Video",
     "notFound": "Questo video non è disponibile.",
-    "browseShorts": "Sfoglia gli Shorts"
+    "browseShorts": "Sfoglia gli Shorts",
+    "notFoundTitle": "Video non trovato | Riftn"
   },
   "videoRemix": {
     "sound": "Usa questo suono",
@@ -3348,7 +3349,8 @@
       "dragPart": "Trascina per spostare la parte {{n}}",
       "addPart": "Aggiungi al thread",
       "addPlaceholder": "Aggiungi al tuo thread...",
-      "label": "Thread · {{count}} parti"
+      "label": "Thread · {{count}} parti",
+      "reorderHint": "Trascina le parti o usa le frecce, poi salva."
     },
     "attachMedia": "Allega una foto, un video o un audio",
     "attachUnsupported": "Allega una foto, un video o un file audio.",
@@ -6657,7 +6659,8 @@
     "libraryFavoriteAdd": "Aggiungi ai preferiti",
     "libraryFavoriteRemove": "Rimuovi dai preferiti",
     "audioTaskDialoguePlaceholder": "Alice: Dovremmo andare.\nBob: [ride] Prima tu.",
-    "priceOwnKey": "La tua chiave"
+    "priceOwnKey": "La tua chiave",
+    "audioResultTooLarge": "Il risultato audio è vuoto o supera 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Piani per ogni flusso di lavoro",
@@ -20576,7 +20579,8 @@
     "backToVideo": "Torna al video",
     "empty": "Ancora nessuna reazione. Apri il menu Remix del video e scegli Reagisci per essere il primo.",
     "wasLive": "Era in diretta",
-    "thisVideo": "questo video"
+    "thisVideo": "questo video",
+    "pageTitle": "Reazioni a {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Collega Riftn al tuo assistente IA",

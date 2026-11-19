@@ -50,7 +50,8 @@
     "pageDescription": "ኣብ Riftn ኩሉ ዱኤታት ናይዚ ቪድዮ ርአ፡ ወይ ናትካ ጎኒ ንጎኒ ቅዳሕ።",
     "empty": "ገና ዱኤት የለን። ኣማራጺታት ናይቲ ቪድዮ ክፈት እሞ ሪሚክስ → ዱኤት ምረጽ፡ ቀዳማይ ንምዃን።",
     "notFound": "እዚ ቪድዮ እዚ ኣይርከብን።",
-    "browseShorts": "ሓጺርቲ ዳህስስ"
+    "browseShorts": "ሓጺርቲ ዳህስስ",
+    "notFoundTitle": "ቪድዮ ኣይተረኽበን | Riftn"
   },
   "videoRemix": {
     "sound": "ነዚ ድምጺ ተጠቐም",
@@ -3348,7 +3349,8 @@
       "dragPart": "ክፋል {{n}} ንምንቕስቓስ ስሓብ",
       "addPart": "ናብ ዝርርብ ወስኽ",
       "addPlaceholder": "ናብ ዝርርብካ ወስኽ...",
-      "label": "ዝርርብ · {{count}} ክፋላት"
+      "label": "ዝርርብ · {{count}} ክፋላት",
+      "reorderHint": "ክፋላት ስሓብ፣ ወይ ምልክታት ተጠቐም፣ ድሕሪኡ ዓቅብ።"
     },
     "attachMedia": "ስእሊ፡ ቪድዮ ወይ ድምጺ ኣተሓሕዝ",
     "attachUnsupported": "ስእሊ፡ ቪድዮ ወይ ፋይል ድምጺ ኣተሓሕዝ።",
@@ -6657,7 +6659,8 @@
     "increase": "{{field}} ወስኽ",
     "openApp": "ኣፕ Riftn ክፈት",
     "kind3d": "3D",
-    "priceOwnKey": "ናትካ መፍትሕ"
+    "priceOwnKey": "ናትካ መፍትሕ",
+    "audioResultTooLarge": "ውጽኢት ድምጺ ባዶ እዩ ወይ ካብ 128 MB ይበዝሕ።"
   },
   "pricing": {
     "plansForEveryWorkflow": "ንነፍሲ ወከፍ ናይ ስራሕ ፍሰት መደብ",
@@ -20563,7 +20566,8 @@
     "backToVideo": "ናብ ቪድዮ ተመለስ",
     "empty": "ገና ግብረ-መልሲ የለን። ሜኑ Remix ናይቲ ቪድዮ ክፈት እሞ ቀዳማይ ንምዃን ግብረ-መልሲ ምረጽ።",
     "wasLive": "ቀጥታ ነይሩ",
-    "thisVideo": "እዚ ቪድዮ"
+    "thisVideo": "እዚ ቪድዮ",
+    "pageTitle": "ግብረ መልሲ ኣብ {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Riftn ምስ ናይ AI ሓጋዚኻ ኣራኽብ",

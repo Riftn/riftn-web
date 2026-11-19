@@ -50,7 +50,8 @@
     "pageDescription": "Jereo ny duet rehetra amin'ity horonan-tsary ity ao amin'ny Riftn, na mandraketa ny anao mifanila.",
     "empty": "Mbola tsy misy duet. Sokafy ny safidin'ny horonan-tsary ary safidio Remix → Duet mba hanao ny voalohany.",
     "notFound": "Tsy misy ity horonan-tsary ity.",
-    "browseShorts": "Jereo ny Fohy"
+    "browseShorts": "Jereo ny Fohy",
+    "notFoundTitle": "Tsy hita ilay horonantsary | Riftn"
   },
   "videoRemix": {
     "sound": "Ampiasao ity feo ity",
@@ -3371,7 +3372,8 @@
       "dragPart": "Sintony hamindrana ny ampahany {{n}}",
       "addPart": "Ampio amin'ny thread",
       "addPlaceholder": "Ampio amin'ny thread-nao...",
-      "label": "Thread · ampahany {{count}}"
+      "label": "Thread · ampahany {{count}}",
+      "reorderHint": "Sintony ireo ampahany, na ampiasao ireo zana-tsipika, dia tehirizo."
     },
     "attachMedia": "Ampiarao sary, horonan-tsary na feo",
     "attachUnsupported": "Ampiarao sary, horonan-tsary na rakitra feo.",
@@ -6680,7 +6682,8 @@
     "searchField": "Hitady {{field}}",
     "nothingMatches": "Tsy misy mifanaraka amin'ny “{{query}}”.",
     "navStudio": "Studio",
-    "priceOwnKey": "Ny lakileanao"
+    "priceOwnKey": "Ny lakileanao",
+    "audioResultTooLarge": "Foana na mihoatra ny 128 MB ny vokatra feo."
   },
   "pricing": {
     "plansForEveryWorkflow": "Mikasa ny hikolokoloana amin'ny asa rehetra",
@@ -20586,7 +20589,8 @@
     "backToVideo": "Hiverina amin'ny horonan-tsary",
     "empty": "Mbola tsy misy fihetseham-po. Sokafy ny menio Remix amin'ny horonan-tsary ary safidio React mba ho voalohany.",
     "wasLive": "Nivantana",
-    "thisVideo": "ity horonan-tsary ity"
+    "thisVideo": "ity horonan-tsary ity",
+    "pageTitle": "Fihetsiky ny olona amin'ny {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Ampifandraiso amin'ny mpanampy AI anao ny Riftn",

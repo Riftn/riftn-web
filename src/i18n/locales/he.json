@@ -50,7 +50,8 @@
     "pageDescription": "צפו בכל הדואטים של הסרטון הזה ב-Riftn, או הקליטו דואט משלכם זה לצד זה.",
     "empty": "אין עדיין דואטים. פתחו את האפשרויות של הסרטון ובחרו רמיקס ← דואט כדי ליצור את הראשון.",
     "notFound": "הסרטון הזה אינו זמין.",
-    "browseShorts": "עיון בשורטס"
+    "browseShorts": "עיון בשורטס",
+    "notFoundTitle": "הסרטון לא נמצא | Riftn"
   },
   "videoRemix": {
     "sound": "השתמשו בצליל הזה",
@@ -3352,7 +3353,8 @@
       "dragPart": "גררו כדי להזיז את חלק {{n}}",
       "addPart": "הוספה לשרשור",
       "addPlaceholder": "הוסיפו לשרשור שלכם...",
-      "label": "שרשור · {{count}} חלקים"
+      "label": "שרשור · {{count}} חלקים",
+      "reorderHint": "גררו את החלקים או השתמשו בחצים, ואז שמרו."
     },
     "attachMedia": "צירוף תמונה, סרטון או אודיו",
     "attachUnsupported": "צרפו תמונה, סרטון או קובץ אודיו.",
@@ -6661,7 +6663,8 @@
     "libraryFavoriteRemove": "הסרה מהמועדפים",
     "audioTaskDialoguePlaceholder": "אליס: כדאי שנלך.\nבוב: [צוחק] אחרייך.",
     "presetMusicLofiName": "רקע לו-פיי",
-    "priceOwnKey": "המפתח שלך"
+    "priceOwnKey": "המפתח שלך",
+    "audioResultTooLarge": "תוצאת האודיו ריקה או חורגת מ-128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "תוכניות לכל זרימת עבודה",
@@ -20567,7 +20570,8 @@
     "backToVideo": "חזרה לסרטון",
     "empty": "אין עדיין תגובות. פתח את תפריט הרמיקס של הסרטון ובחר תגובה כדי להיות הראשון.",
     "wasLive": "היה בשידור חי",
-    "thisVideo": "הסרטון הזה"
+    "thisVideo": "הסרטון הזה",
+    "pageTitle": "תגובות ל{{title}} | Riftn"
   },
   "connectGuide": {
     "title": "חברו את Riftn לעוזר הבינה המלאכותית שלכם",

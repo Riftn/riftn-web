@@ -50,7 +50,8 @@
     "empty": "Bado hakuna duet. Fungua chaguo za video na uchague Remix → Duet ili kutengeneza ya kwanza.",
     "video": "Video",
     "notFound": "Video hii haipatikani.",
-    "browseShorts": "Vinjari Shorts"
+    "browseShorts": "Vinjari Shorts",
+    "notFoundTitle": "Video haikupatikana | Riftn"
   },
   "videoRemix": {
     "sound": "Tumia sauti hii",
@@ -3349,7 +3350,8 @@
       "dragPart": "Buruta ili kusogeza sehemu {{n}}",
       "addPart": "Ongeza kwenye mfululizo",
       "addPlaceholder": "Ongeza kwenye mfululizo wako...",
-      "label": "Mfululizo · sehemu {{count}}"
+      "label": "Mfululizo · sehemu {{count}}",
+      "reorderHint": "Buruta sehemu, au tumia mishale, kisha uhifadhi."
     },
     "attachMedia": "Ambatisha picha, video au sauti",
     "attachUnsupported": "Ambatisha picha, video au faili la sauti.",
@@ -6658,7 +6660,8 @@
     "libraryFavoriteAdd": "Ongeza kwenye vipendwa",
     "libraryFavoriteRemove": "Ondoa kwenye vipendwa",
     "audioTaskDialoguePlaceholder": "Alice: Tunapaswa kwenda.\nBob: [anacheka] Tangulia wewe.",
-    "priceOwnKey": "Ufunguo wako"
+    "priceOwnKey": "Ufunguo wako",
+    "audioResultTooLarge": "Matokeo ya sauti ni tupu au yanazidi 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Mipango kwa kila workflow",
@@ -20564,7 +20567,8 @@
     "backToVideo": "Rudi kwenye video",
     "empty": "Bado hakuna mwitikio. Fungua menyu ya Remix ya video na uchague Itikia ili kuwa wa kwanza.",
     "wasLive": "Ilikuwa moja kwa moja",
-    "thisVideo": "video hii"
+    "thisVideo": "video hii",
+    "pageTitle": "Maoni kwa {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Unganisha Riftn na msaidizi wako wa AI",

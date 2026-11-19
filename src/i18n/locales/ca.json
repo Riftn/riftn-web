@@ -43,7 +43,8 @@
     "pageDescription": "Mira tots els duets d'aquest vídeo a Riftn, o grava el teu costat per costat.",
     "empty": "Encara no hi ha duets. Obre les opcions del vídeo i tria Remix → Duet per fer el primer.",
     "notFound": "Aquest vídeo no està disponible.",
-    "browseShorts": "Explora els curts"
+    "browseShorts": "Explora els curts",
+    "notFoundTitle": "No s'ha trobat el vídeo | Riftn"
   },
   "videoRemix": {
     "sound": "Fes servir aquest so",
@@ -3341,7 +3342,8 @@
       "dragPart": "Arrossega per moure la part {{n}}",
       "addPart": "Afegeix al fil",
       "addPlaceholder": "Afegeix al teu fil...",
-      "label": "Fil · {{count}} parts"
+      "label": "Fil · {{count}} parts",
+      "reorderHint": "Arrossega les parts o fes servir les fletxes i després desa."
     },
     "attachMedia": "Adjunta una foto, un vídeo o un àudio",
     "attachUnsupported": "Adjunta una foto, un vídeo o un fitxer d'àudio.",
@@ -6640,7 +6642,8 @@
     "libraryFavoriteRemove": "Treu dels preferits",
     "toolRemake": "Refés",
     "audioTaskDialoguePlaceholder": "Alice: Hauríem de marxar.\nBob: [riu] Tu primer.",
-    "priceOwnKey": "La teva clau"
+    "priceOwnKey": "La teva clau",
+    "audioResultTooLarge": "El resultat d'àudio és buit o supera els 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Plans per a cada flux de treball",
@@ -20546,7 +20549,8 @@
     "backToVideo": "Torna al vídeo",
     "empty": "Encara no hi ha reaccions. Obre el menú Remix del vídeo i tria Reacciona per ser el primer.",
     "wasLive": "Va ser en directe",
-    "thisVideo": "aquest vídeo"
+    "thisVideo": "aquest vídeo",
+    "pageTitle": "Reaccions a {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Connecta Riftn al teu assistent d'IA",

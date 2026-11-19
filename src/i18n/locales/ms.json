@@ -50,7 +50,8 @@
     "empty": "Belum ada duet. Buka pilihan video dan pilih Remix → Duet untuk membuat yang pertama.",
     "video": "Video",
     "notFound": "Video ini tidak tersedia.",
-    "browseShorts": "Layari Shorts"
+    "browseShorts": "Layari Shorts",
+    "notFoundTitle": "Video tidak ditemui | Riftn"
   },
   "videoRemix": {
     "sound": "Gunakan bunyi ini",
@@ -3604,7 +3605,8 @@
       "dragPart": "Seret untuk alih bahagian {{n}}",
       "addPart": "Tambah ke bebenang",
       "addPlaceholder": "Tambah ke bebenang anda...",
-      "label": "Bebenang · {{count}} bahagian"
+      "label": "Bebenang · {{count}} bahagian",
+      "reorderHint": "Seret bahagian atau gunakan anak panah, kemudian simpan."
     },
     "attachMedia": "Lampirkan foto, video atau audio",
     "attachUnsupported": "Lampirkan foto, video atau fail audio.",
@@ -6913,7 +6915,8 @@
     "libraryFavoriteAdd": "Tambah ke kegemaran",
     "libraryFavoriteRemove": "Buang daripada kegemaran",
     "audioTaskDialoguePlaceholder": "Alice: Kita patut pergi.\nBob: [ketawa] Silakan dulu.",
-    "priceOwnKey": "Kunci anda"
+    "priceOwnKey": "Kunci anda",
+    "audioResultTooLarge": "Hasil audio kosong atau melebihi 128 MB."
   },
   "pricing": {
     "plansForEveryWorkflow": "Rancangan untuk setiap aliran kerja",
@@ -20819,7 +20822,8 @@
     "backToVideo": "Kembali ke video",
     "empty": "Belum ada reaksi. Buka menu Remix video dan pilih Reaksi untuk menjadi yang pertama.",
     "wasLive": "Pernah siaran langsung",
-    "thisVideo": "video ini"
+    "thisVideo": "video ini",
+    "pageTitle": "Reaksi kepada {{title}} | Riftn"
   },
   "connectGuide": {
     "title": "Sambungkan Riftn kepada pembantu AI anda",

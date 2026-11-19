@@ -50,7 +50,8 @@
     "pageDescription": "在 Riftn 上观看此视频的所有合拍，或者并排录制你自己的合拍。",
     "empty": "还没有合拍。打开视频选项，选择 二创 → 合拍，拍下第一个吧。",
     "notFound": "此视频不可用。",
-    "browseShorts": "浏览短视频"
+    "browseShorts": "浏览短视频",
+    "notFoundTitle": "影片尋無 | Riftn"
   },
   "videoRemix": {
     "sound": "使用此音效",
@@ -3348,7 +3349,8 @@
       "dragPart": "拖动以移动第 {{n}} 部分",
       "addPart": "添加到帖串",
       "addPlaceholder": "继续你的帖串...",
-      "label": "帖串 · {{count}} 部分"
+      "label": "帖串 · {{count}} 部分",
+      "reorderHint": "拖動各部分，或者用箭頭，再保存。"
     },
     "attachMedia": "附加照片、视频或音频",
     "attachUnsupported": "请附加照片、视频或音频文件。",
@@ -6657,7 +6659,8 @@
     "noCreationsYet": "还没有 AI 作品。来生成第一个吧。",
     "aiGenerationAlt": "AI 生成作品",
     "toolFlowDesc": "在画布上串联文字、参考素材、图片和视频模型，一次付款运行，用链接分享。",
-    "priceOwnKey": "你的密钥"
+    "priceOwnKey": "你的密钥",
+    "audioResultTooLarge": "音頻結果是空個，或者超過 128 MB。"
   },
   "pricing": {
     "plansForEveryWorkflow": "适合各种工作流程的套餐",
@@ -20566,7 +20569,8 @@
     "backToVideo": "返回视频",
     "empty": "还没有反应。打开视频的二创菜单并选择反应，成为第一个吧。",
     "wasLive": "曾直播",
-    "thisVideo": "此视频"
+    "thisVideo": "此视频",
+    "pageTitle": "對 {{title}} 個反應 | Riftn"
   },
   "connectGuide": {
     "title": "将 Riftn 连接到你的 AI 助手",
