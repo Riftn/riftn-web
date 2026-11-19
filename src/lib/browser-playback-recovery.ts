@@ -49,12 +49,21 @@ export function attachPlaybackRecovery(video: HTMLVideoElement, options: {
     previousTime = video.currentTime;
   };
   const playing = () => recovery.progress();
+  // Loaded on first play so it stays off the boot path.
+  let frameWatch: (() => void) | null = null;
+  let detached = false;
+  void import('./frozen-picture').then(({ watchFrozenPicture }) => {
+    if (!detached) frameWatch = watchFrozenPicture(video, options.component, options.postId);
+  }).catch(() => {});
+  const stopFrameWatch = () => { detached = true; frameWatch?.(); };
   const listeners = { play, pause, waiting, stalled: waiting, error, playing, timeupdate: progress, ended: pause };
   Object.entries(listeners).forEach(([name, listener]) => video.addEventListener(name, listener));
   if (!video.paused) { recovery.watch(); if (video.readyState >= 3) recovery.progress(); }
   return () => {
+    stopFrameWatch();
     Object.entries(listeners).forEach(([name, listener]) => video.removeEventListener(name, listener));
     if (recoveries.get(video) === recovery) recoveries.delete(video);
     recovery.stop();
   };
 }
+
