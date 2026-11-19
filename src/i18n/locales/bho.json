@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "एक बेर में एगो ग्रुप, बड़ आइकन के साथे",
     "menuLayoutSections": "सेक्शन",
     "menuLayoutSectionsDesc": "सब पेज एके साथे, ग्रुप हेडर के नीचे",
-    "menuLayoutFoldersDesc": "रउआ मुख्य पेज, फेर हर ग्रुप खातिर एगो फ़ोल्डर"
+    "menuLayoutFoldersDesc": "रउआ मुख्य पेज, फेर हर ग्रुप खातिर एगो फ़ोल्डर",
+    "publicChatInBar": "नीचे के बार में पब्लिक चैट",
+    "publicChatInBarDesc": "स्क्रीन के नीचे वाला बार से एक टैप में पब्लिक चैट खोलीं"
   },
   "common": {
     "confirm": "कन्फर्म",
@@ -2110,7 +2112,13 @@
     "loadingBoard": "लीडरबोर्ड लोड हो रहल बा…",
     "amountTokens": "{{amount}} टोकन",
     "directReferrals": "{{count}} डायरेक्ट",
-    "secondaryReferrals": "{{count}} सेकेंडरी"
+    "secondaryReferrals": "{{count}} सेकेंडरी",
+    "ogChallenge": "OG चैलेंज",
+    "ogHolders_one": "{{count}} OG होल्डर",
+    "ogHolders_other": "{{count}} OG होल्डर",
+    "ogChallengeTitle": "OG होल्डर लोग के वापस ले आईं",
+    "ogChallengeBody": "ओह लोग के न्योता दीं जे अबहियों DHB रखले बा। जब ऊ रउआ इनवाइट लिंक से जुड़ेलें आ आपन DHB अपना Riftn वॉलेट में रखेलें, त ऊ इहाँ रउआ खातिर गिनाइहें।",
+    "ogChallengeCta": "आपन इनवाइट लिंक पाईं"
   },
   "dhbListing": {
     "title": "टोकन लिस्टिंग जल्दी आवत बा!",
@@ -8062,7 +8070,10 @@
     "endStreamConfirmBody": "आपका प्रसारण सभी देखने वाले लोगों के लिए बंद हो जाता है और इसे फिर से शुरू नहीं किया जा सकता।",
     "keepStreaming": "स्ट्रीमिंग जारी रखें",
     "encoderPermanentHint": "ना तुम कभी बदलोगी, ना हम कभी बदलेंगे, अगली बार बस शुरू करें पर क्लिक करें, फिर Riftn पर क्लिक करें ।",
-    "notEnoughTokensForBounty": "पर्याप्त टोकन नहीं हैं। {{need}} टोकन चाहिए लेकिन {{have}} हैं।"
+    "notEnoughTokensForBounty": "पर्याप्त टोकन नहीं हैं। {{need}} टोकन चाहिए लेकिन {{have}} हैं।",
+    "screenInAppHint": "Riftn ऐप में",
+    "screenInAppNote": "फोन के ब्राउज़र कवनो वेबसाइट के रउआ स्क्रीन शेयर करे ना देला। एकरा बदले Riftn ऐप से लाइव होखीं, फेर स्क्रीन शेयर करीं पर टैप करीं।",
+    "screenInAppCta": "Riftn ऐप पाईं"
   },
   "events": {
     "seoTitle": "इवेंट्स: मीटअप्स एंड कम्युनिटी इवेंट्स ऑन डिहब",
