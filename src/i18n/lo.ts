@@ -1382,6 +1382,9 @@ export const lo = {
     liveStudioB7Desc: 'ເມື່ອການຖ່າຍທອດສົດສິ້ນສຸດລົງ, Live Studio ຈະເປີດບົດສະຫຼຸບທີ່ມີຄວາມຍາວ, ຈຳນວນຜູ້ຊົມສູງສຸດ, ຂອງຂວັນທີ່ໄດ້ຮັບ, ຜູ້ຕິດຕາມໃໝ່, ແຊັດ ແລະ ແບບສຳຫຼວດ.',
     liveStudioB8: 'ການເບິ່ງຍ້ອນຫຼັງຍັງຄົງຮັກສາ Overlay ໄວ້:',
     liveStudioB8Desc: 'Overlay ຂອງການຖ່າຍທອດສົດຈະຫຼິ້ນທັບເທິງການເບິ່ງຍ້ອນຫຼັງ, ເຊິ່ງຖືກສ້າງຂຶ້ນໃໝ່ຈາກບັນທຶກຂອງການຖ່າຍທອດສົດນັ້ນເອງ.',
+    postSoundB2: 'Spotify:',
+    watchAnywhereB2: 'Riftn TV:',
+    tocMcpOpen: 'Riftn MCP',
   },
   games: {
     trenchTitle: 'ຊາໂທເປຍ',
