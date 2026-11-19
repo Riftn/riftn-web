@@ -522,7 +522,72 @@
     "affiliate": "Mmekọrịta",
     "groups": {
       "create": "Mepụta",
-      "discover": "Chọpụta"
+      "discover": "Chọpụta",
+      "main": "Isi",
+      "money": "Ego",
+      "riftn": "Riftn"
+    },
+    "findWords": {
+      "home": "feed, usoro oge, posts kachasị ọhụrụ, maka gị, ndị ị na-eso, ihu mbụ",
+      "profile": "profaịlụ m, akaụntụ m, peeji m, posts m, foto profaịlụ, bio, ndị na-eso m",
+      "explore": "chọọ, chọpụta, chọta, na-ewu ewu, a ma ama, hashtags, ndị mmadụ, ndị okike",
+      "prompt": "AI, mepụta, foto AI, vidiyo AI, onye na-eme foto, ederede gaa na foto, nka AI",
+      "editor": "onye ndezi vidiyo, dezie vidiyo, bebie, bee, ederede vidiyo, ndepụta okwu, mmetụta",
+      "creator": "mepụta, studio, ngwaọrụ AI, foto, vidiyo, egwu, olu ntinye, 3D",
+      "converter": "bubata vidiyo, budata, YouTube, TikTok, Instagram, gbanwee",
+      "migrate": "bugharịa ọwa m, bubata ọwa, mbubata n'ọtụtụ, ọwa YouTube",
+      "notifications": "ọkwa, ihe omume, nkọwa aha, nzaghachi, mmasị, mgbịrịgba",
+      "messages": "DM, ozi kpọmkwem, nkata, igbe ozi, mkparịta ụka, ozi nzuzo",
+      "communities": "otu, obodo, ọnụ ụlọ, klọb, ọgbakọ, ndị otu",
+      "assistant": "AI, chatbot, jụọ, enyemaka, nkata AI, ajụjụ",
+      "settings": "mmasị, akaụntụ, nzuzo, nchekwa, okwuntughe, asụsụ, isiokwu, ọchịchịrị, egbochiri, hichapụ akaụntụ",
+      "leaderboard": "ọkwa ndị isi, ọkwa, ndị okike kacha elu, ndị ọrụ kacha elu, akara, nsonaazụ",
+      "bookmarks": "echekwara, ọkacha mmasị, lee ya emesịa, gụọ ya emesịa, posts echekwara, ọbá akwụkwọ",
+      "command": "dashboard, nyocha, ego enwetara, ego mbata, nghọta, nlekọta, ọnụ ọgụgụ m",
+      "wallet": "ego fọdụrụ, ego, ego nchekwa, tokens, crypto, tinye ego, wepụ ego, zipu, nata, kwụọ ụgwọ",
+      "events": "kalenda, usoro oge, nzukọ, na-abịa, tiketi, AMA",
+      "stages": "ọnụ ụlọ olu, nkata olu, spaces, olu ndụ, okwu, podcast",
+      "featureRequests": "wuo, ndị na-ewu, echiche, ntụnye aro, kọọ ahụhụ, ahụhụ, ndozi, atụmatụ, votu, ihe achọrọ, meziwanye",
+      "feedback": "nyocha, ntụle, nnyocha, echiche, mkpesa, nye nzaghachi",
+      "staking": "stake, tinye ego, uru, ụgwọ ọrụ, nweta, nkekọrịta uru, baajị, ọkwa, ọmụrụ nwa",
+      "superpowers": "kwalite, kpọsaa, uru pụrụ iche, ike, uru baajị, iru mmadụ, nkwalite",
+      "governance": "votu, ịtụ vootu, atụmatụ, ntuli echiche, akwụkwọ vootu, kpebie",
+      "dao": "akụ ọha, nye onyinye, onyinye, ego obodo, tinye aka, enyemaka ego",
+      "bounties": "ọrụ, ọrụ dị iche iche, ihe a ga-eme, obere ọrụ, ọrụ onwe, were mmadụ ọrụ, kpata ego, ọrụ a na-akwụ ụgwọ",
+      "myBounties": "bounties m, ọrụ m, akụkọ ihe mere, ịkwụ ụgwọ, ọrụ emechara",
+      "affiliate": "ntụaka, kpọọ ndị enyi, kpọọ, kọmịshọn, onye mmekọ, nweta",
+      "careers": "ọrụ, ịnabata ndị ọrụ, soro anyị rụọ ọrụ, sonye na otu, tinye akwụkwọ, ọnọdụ ọrụ tọgbọrọ chakoo",
+      "stores": "ụlọ ahịa, ahịa, ọma ahịa, ngwa ahịa akara, zụta, ree, ngwaahịa, ịzụ ahịa",
+      "fractions": "òkè, inwe ihe, tinye ego, nwee post, NFT, NFTs, ihe nchịkọta, azụmahịa",
+      "usernames": "aha njirimara, handle, aha, gbanwee aha m, zụta aha, ree aha",
+      "accounts": "zụta akaụntụ, ree akaụntụ, akaụntụ maka ire, ndị na-eso, nyefee akaụntụ",
+      "apps": "ụlọ ahịa apps, obere apps, wuo app, ndị mmepe, ngwaọrụ",
+      "arcade": "egwuregwu, egwu, kpọọ, ịkpọ egwuregwu, chess, ịgba égbè, ihe ụtọ",
+      "glossary": "okwu, nkọwa, akwụkwọ ọkọwa okwu, ihe ọ pụtara, gịnị bụ",
+      "compare": "ntụnyere, tụnyere, megide, ndị ọzọ, YouTube, X, TikTok",
+      "guide": "ịmalite, otu esi eme, nkuzi, enyemaka, mụta, onye mbido, m bụ onye ọhụrụ",
+      "stats": "ọnụ ọgụgụ, nyocha, nọmba, chaatị, ọnụ ahịa, ọnụ ego dị, ndị nwere ya",
+      "docs": "akwụkwọ ntuziaka, enyemaka, API, whitepaper, ndị mmepe, manuel",
+      "blog": "akụkọ, edemede, mmelite, ọkwa, gịnị bụ ihe ọhụrụ",
+      "videos": "lee, vidiyo, obere vidiyo, vidiyo ogologo",
+      "shorts": "reels, vidiyo dị mkpụmkpụ, vidiyo kwụ ọtọ, swaịpụ",
+      "music": "olu, egwu, tracks, gee ntị, redio, ndepụta egwu",
+      "liveTv": "TV, iyi, ịgbasa ozi, ndụ, mgbasa, ọwa, lee ndụ",
+      "buyTokens": "zụta tokens, ịzụta, tinye ego, kaadị, kaadị kredit, ego nkịtị",
+      "bridge": "n'etiti chain, bugharịa tokens, chains, nyefee n'etiti chains",
+      "top100": "top 100, coins, ego crypto, uru ahịa, ọnụ ahịa",
+      "agents": "ndị nnọchi AI, ndị nnọchi, bots, akpaaka, agwa",
+      "advertising": "mgbasa ozi, mkpọsa, kampeen, kwalite, nkwado, ire ahịa",
+      "premium": "ndebanye aha, nkwalite, pro, ịbụ onye otu, enweghị mgbasa ozi, na-enweghị mkpọsa",
+      "pricing": "atụmatụ, ọnụ ego, ọnụ ahịa, ego ole, ndebanye aha",
+      "creators": "mmemme ndị okike, ndị nnọchi anya, ndị mmekọ, deba aha dị ka onye okike, kpata ego",
+      "getTheApp": "budata app, Android, iPhone, app ekwentị, wụnye, APK, app desktop, wụnye na kọmputa, Windows, Mac",
+      "connectAi": "MCP, ChatGPT, Claude, API, njikọ, jikọọ AI",
+      "packs": "emoji, stickers, GIFs, ngwugwu emoji, ngwugwu stickers, emoji pụrụ iche",
+      "publicChat": "nkata, nkata ụwa niile, ọnụ ụlọ nkata, lobby, kparịta ụka, nkata obodo",
+      "planned": "edobere oge, hazie oge, posts edobere oge, ahịrị, emesịa",
+      "liveStudio": "gaa ndụ, iyi, ịgbasa ndụ, OBS, overlays, ọkwa, widgets",
+      "launchpad": "malite token, mepụta coin, mee coin, meme coin, bonding curve, mee ka ọ bụrụ token"
     }
   },
   "feed": {
@@ -1226,7 +1291,14 @@
     "messagePublic": "Ọha",
     "railTitle": "Ndụmọdụ",
     "railTotal": "{{amount}} tokenịị",
-    "tokensUnit": "akara"
+    "tokensUnit": "akara",
+    "messagePlaceholder": "Kwuo ihe ya na onyinye gị",
+    "messagePrivate": "Naanị {{name}}",
+    "theCreator": "onye okike",
+    "messageWallNote": "Ọ ga-apụta na mgbidi onyinye ozugbo onyinye ahụ gara.",
+    "sendWithMessage": "Zipu ya na ozi",
+    "messageFailed": "Enweghị ike itinye ozi gị. Ezipughị onyinye ọ bụla.",
+    "wallLabel": "Ozi onyinye"
   },
   "postOptions": {
     "liveAlertsOn": "Ị na-eso {{name}} ugbu a. Ị ga-enweta ọkwa mgbe ha malitere nkwasa ndụ.",
@@ -1266,7 +1338,14 @@
     "giftBoost": "Nye onyinye nkwalite",
     "markSection": "Akụkụ ndị a nwere ike ịwụfe",
     "copyFailed": "Enweghị ike idetụọ njikọ ahụ",
-    "share": "Ekekọrịta"
+    "share": "Ekekọrịta",
+    "refreshLinkPreview": "Melite nlele njikọ",
+    "linkPreviewRefreshed": "Emelitere nlele njikọ",
+    "linkPreviewRefreshFailed": "Enweghị ike iru saịtị ahụ. Nwaa ọzọ emesịa.",
+    "castToTv": "Kpọọ na TV",
+    "castStarted": "Ọ na-akpọ na TV gị",
+    "castUnsupported": "Ihe nchọgharị a enweghị ike ịkpọ na TV. Mepee Riftn na Chrome ma ọ bụ Safari ka ị kpọọ ya na TV gị.",
+    "castFailed": "Enweghị ike iru TV ahụ. Lelee na ọ nọ n'otu Wi-Fi wee nwaa ọzọ."
   },
   "filters": {
     "sort": "Hazie",
@@ -1867,8 +1946,12 @@
       "bountyApplied": "{{name}} tinyere akwụkwọ maka onyinye gị",
       "bountySubmittedNamed": "{{name}} nyefere ọrụ na onyinye gị “{{title}}”",
       "bountySubmitted": "{{name}} nyefere ọrụ na onyinye gị",
-      "sentNotification": "{{name}} zitere gị ọkwa"
-    }
+      "sentNotification": "{{name}} zitere gị ọkwa",
+      "featureActivityNamed": "{{name}} kwuru okwu na “{{title}}”"
+    },
+    "groupEarlier": "Na mbụ",
+    "searchPlaceholder": "Chọọ ọkwa",
+    "searchEmpty": "Ọ nweghị ọkwa dabara"
   },
   "leaderboard": {
     "title": "Ndepụta Ọkwa",
@@ -2059,7 +2142,12 @@
     "loadFailed": "Agaghị ebubata ihe ndị ahụ a chọrọ"
   },
   "auth": {
-    "loginRequired": "Achọrọ ịbanye"
+    "loginRequired": "Achọrọ ịbanye",
+    "accountDeleted": "Ehichapụla akaụntụ a. Ị nwere ike idebanye aha ọzọ dị ka akaụntụ ọhụrụ.",
+    "accountDeletedHours_one": "Ehichapụla akaụntụ a. Ị nwere ike idebanye aha ọzọ jiri otu email ma ọ bụ ekwentị n'ihe dị ka {{count}} awa.",
+    "accountDeletedHours_other": "Ehichapụla akaụntụ a. Ị nwere ike idebanye aha ọzọ jiri otu email ma ọ bụ ekwentị n'ihe dị ka awa {{count}}.",
+    "accountDeletedDays_one": "Ehichapụla akaụntụ a. Ị nwere ike idebanye aha ọzọ jiri otu email ma ọ bụ ekwentị n'ihe dị ka ụbọchị {{count}}.",
+    "accountDeletedDays_other": "Ehichapụla akaụntụ a. Ị nwere ike idebanye aha ọzọ jiri otu email ma ọ bụ ekwentị n'ihe dị ka ụbọchị {{count}}."
   },
   "messages": {
     "newDrawer": {
@@ -2183,14 +2271,30 @@
       "votes_one": "{{value}} votu",
       "votes_other": "{{value}} votu",
       "members_one": "{{value}} onye otu",
-      "members_other": "{{value}} ndị otu"
+      "members_other": "{{value}} ndị otu",
+      "comic": "Kọmik"
     },
     "viewGrid": "Ngosi grid",
     "viewList": "Ngosi ndesịta",
     "viewMode": "Ngosi",
     "back": "Laghachi",
     "reserve": {
-      "signIn": "Banye"
+      "signIn": "Banye",
+      "available": "Aha njirimara dị",
+      "held": "Edoberela gị ya",
+      "ended": "Oge njide agwụla",
+      "busy": "A na-edobe ya",
+      "availableBody": "riftn.com/{{name}} dị ugbu a. Debe ya, anyị ga-ejide ya maka gị otu nkeji ka ị na-edebanye aha.",
+      "heldBody": "Onye ọzọ enweghị ike iwere @{{name}} ruo mgbe oge gwụrụ. Mechaa ndebanye aha ka ị nwee ya.",
+      "endedBody": "Nkeji gị agwụla, ya mere @{{name}} emeghere onye ọ bụla ọzọ. Ọ ka dị.",
+      "busyBody": "Mmadụ na-edebanye aha dị ka @{{name}} ugbu a. Ọ bụrụ na ha emechaghị, ọ ga-adị ọzọ mgbe oge gwụrụ.",
+      "finish": "Mechaa ndebanye aha",
+      "again": "Debe ọzọ",
+      "cta": "Debe ugbu a",
+      "letGo": "Hapụ ya",
+      "haveAccount": "Ị nwere akaụntụ?",
+      "seoTitle": "@{{name}} dị na Riftn",
+      "seoDescription": "Ọ dịbeghị onye nwere riftn.com/{{name}}. Debe ya ma debanye aha ka ọ bụrụ nke gị."
     },
     "usernameAvailable": "Aha onye ọrụ dị!",
     "signUpToClaim": "Debanye aha taa iji nweta",
@@ -2221,12 +2325,16 @@
     "tabs": {
       "playlists": "Ndepụta egwu",
       "dislikes": "Enweghị mmasị",
-      "likes": "Ịhụnanya"
+      "likes": "Ịhụnanya",
+      "articles": "Edemede"
     },
     "likedPosts": {
       "emptyTitle": "Enweghị mmasị ugbu a",
       "privateTitle": "Mmasị bụ nzuzo",
-      "loadMore": "Bughachite ọzọ"
+      "loadMore": "Bughachite ọzọ",
+      "emptyOwn": "Posts ị masịrị na-apụta ebe a. Naanị gị nwere ike ịhụ ha ma ọ bụrụ na ịgbanyeghị Gosi mmasị m na Ntọala.",
+      "emptyOther": "Ọ dịbeghị ihe a masịrị.",
+      "privateDesc": "Akaụntụ a na-ezobe mmasị ya."
     },
     "dislikes": {
       "emptyTitle": "Ọ dịbeghị enweghị mmasị",
@@ -2251,11 +2359,31 @@
     "sortMostLiked": "Nke kacha nwee mmasị",
     "sortCustomShort": "Omenala",
     "arrange": {
-      "saving": "Na-echekwa..."
+      "saving": "Na-echekwa...",
+      "title": "Hazie posts gị",
+      "hint": "Jide post ma dọkpụrụ ya gaa ebe ọhụrụ ya. Ndị ọbịa na-ahụ usoro a mbụ.",
+      "drag": "Dọkpụrụ ka ị bugharịa",
+      "toTop": "Bugoo n'elu",
+      "save": "Chekwaa usoro",
+      "saved": "Echekwala usoro gị",
+      "reset": "Laghachiri na nke kacha ọhụrụ mbụ",
+      "resetDone": "Laghachiri na nke kacha ọhụrụ mbụ",
+      "saveFailed": "Enweghị ike ichekwa usoro gị. Biko nwaa ọzọ.",
+      "loadFailed": "Enweghị ike ibubata posts gị. Mechie nke a wee nwaa ọzọ.",
+      "empty": "Ọ dịbeghị ihe a ga-ahazi. Buru ụzọ biputa ihe."
     },
     "searchThisChannel": "Chọọ ọwa a",
     "searchResultCount": "Nsonaazụ 1 maka \"{{query}}\"",
-    "searchResultCountPlural": "Nsonaazụ {{count}} maka \"{{query}}\""
+    "searchResultCountPlural": "Nsonaazụ {{count}} maka \"{{query}}\"",
+    "unavailable": "Profaịlụ adịghị",
+    "mutualsOne": "Enyi {{count}} unu nwekọrọ:",
+    "mutualsMany": "Ndị enyi {{count}} unu nwekọrọ:",
+    "articles": {
+      "emptyTitle": "Enweghị edemede ọ bụla ka",
+      "emptySubtitle": "Edemede ga-apụta ebe a"
+    },
+    "sortCustom": "Usoro nke gị",
+    "arrangeButton": "Hazie posts"
   },
   "tv": {
     "seoTitle": "Live TV: Free Channels Site gburugburu ụwa",
@@ -2716,7 +2844,15 @@
     "switchWalletAccount": "Gbanwee akaụntụ",
     "walletLoadFailed": "Enweghị ike ibu akpa ego. Biko nwaa ọzọ.",
     "openInBrowser": "Meghee na ihe nyocha weebụ",
-    "copyLink": "Detuo njikọ"
+    "copyLink": "Detuo njikọ",
+    "bringLoginOver": "Ị jiri Riftn na dehub.io? <bring>Bubata nbanye gị</bring>",
+    "didYouMean": "Ị pụtara {{email}}?",
+    "profileMovedTitle": "Profaịlụ gị akwagala",
+    "migrateWrongLogin": "Nbanye ahụ mepere obere akpa ego ọzọ, ya mere ọ dịghị ihe gbanwere. E jiri {{login}} mee profaịlụ ochie gị. Jiri nke ahụ weghachi ya.",
+    "googleInAppTitle": "Google agaghị abanye n'ime {{app}}",
+    "googleInAppTitleUnnamed": "Google agaghị abanye n'ime app a",
+    "googleInAppBody": "Mepee Riftn na ihe nchọgharị gị iji jiri Google, ma ọ bụ banye na email ebe a.",
+    "tryAnyway": "Nwaa ka o sina dị"
   },
   "careers": {
     "title": "Ọrụ na Riftn",
@@ -2941,7 +3077,16 @@
     "searchDehubFor": "Chọọ Riftn maka \"{{query}}\"",
     "switchAccount": "Gbanye akaụntụ",
     "signedInAs": "Abanyela dị ka {{name}}",
-    "requestSend": "Zipụ arịrịọ"
+    "requestSend": "Zipụ arịrịọ",
+    "requestPrompt": "Ọ nọghị ebe a? Zipu ya dị ka arịrịọ",
+    "requestPromptShort": "Ọ nọghị ebe a?",
+    "requestDraftMenu": "Tinye {{query}} na Riftn",
+    "requestDraftSettings": "Ntọala maka {{query}}",
+    "requestPostsTo": "Ọ na-aga na Arịrịọ",
+    "requestHint": "Ọ na-aga na Arịrịọ n'aha gị. Anyị ga-agwa gị mgbe ọ pụtara.",
+    "requestSent": "Ezigara na Arịrịọ",
+    "requestSentHint": "Anyị ga-agwa gị mgbe ọ pụtara.",
+    "requestSeeIt": "Hụ ya na Arịrịọ"
   },
   "comments": {
     "reportComment": "Report okwu",
@@ -3037,8 +3182,20 @@
     "anonymousLikes_other": "Mmasị {{count}} sitere n'aka ndị ji baajị na-amaghị aha",
     "threadParts": {
       "moveUp": "Gaa n'elu",
-      "moveDown": "Gaa n'okpuru"
-    }
+      "moveDown": "Gaa n'okpuru",
+      "reorder": "Hazie ọzọ",
+      "reorderHint": "Dọkpụrụ akụkụ ndị ahụ, ma ọ bụ jiri akụ, wee chekwaa.",
+      "save": "Chekwaa usoro",
+      "saved": "Echekwala usoro thread",
+      "saveFailed": "Enweghị ike ichekwa usoro. Nwaa ọzọ.",
+      "dragPart": "Dọkpụrụ ka ị bugharịa akụkụ {{n}}",
+      "addPart": "Tinye na thread",
+      "addPlaceholder": "Tinye na thread gị...",
+      "label": "Thread · akụkụ {{count}}"
+    },
+    "attachMedia": "Tinye foto, vidiyo ma ọ bụ olu",
+    "attachUnsupported": "Tinye foto, vidiyo ma ọ bụ faịlụ olu.",
+    "attachTooLarge": "Faịlụ ahụ karịrị oke {{size}} MB."
   },
   "mintChain": {
     "title": "Mint post",
@@ -3351,7 +3508,10 @@
     "waiting_for_wallet": "Na-echere obere akpa gị",
     "waiting_for_wallet_desc": "Mepee {{wallet}} ma kwado mbinye aka — arịrịọ ahụ na-eche ebe ahụ.",
     "your_wallet": "gị obere akpa",
-    "max_available_on_chain": "Max dị: {{amount}} tokens na {{chain}}"
+    "max_available_on_chain": "Max dị: {{amount}} tokens na {{chain}}",
+    "not_available_for_this_post": "Adịghị maka post a",
+    "turn_back_on_desktop_notifications": "Gbanye ọkwa desktop ọzọ?",
+    "notifications_moved_to_riftn": "Anyị kwagara riftn.com, ya mere ihe nchọgharị gị chọrọ nkwenye gị ọzọ iji gosi nzaghachi, onyinye na DM ebe a."
   },
   "staking": {
     "title": "Ntinye Ego",
@@ -8067,7 +8227,13 @@
       "doneAll": "Wepụ ịgbaso akaụntụ {{done}} ndị na-alaghachi gị.",
       "doneSome": "Wepụ ịgbaso akaụntụ {{done}}. Enweghị ike wepụ ịgbaso {{failed}}.",
       "doneToast": "Wepụ ịgbaso akaụntụ {{done}} ndị na-alaghachi gị."
-    }
+    },
+    "followBackConfirmTitle_one": "Soro mmadụ {{count}} azụ?",
+    "followBackConfirmTitle_other": "Soro mmadụ {{count}} azụ?",
+    "followBackConfirmBody": "Ha na-eso gị ugbu a. Akaụntụ nzuzo ga-enweta arịrịọ iso.",
+    "followedBackCount_one": "Esoro mmadụ {{count}} azụ",
+    "followedBackCount_other": "Esoro mmadụ {{count}} azụ",
+    "followBackDoneBody": "Ị nwere ike ịhụ ha niile na Ndị ị na-eso."
   },
   "reactionInfo": {
     "title": "Mmetụta",
@@ -19221,7 +19387,8 @@
     "today": "Taa",
     "tooSoon": "Họrọ oge n'ọdịnihu.",
     "show": "Gosi",
-    "hide": "Zobe"
+    "hide": "Zobe",
+    "earlierShort": "Na mbụ"
   },
   "planned": {
     "title": "Atụmatụrụ",
