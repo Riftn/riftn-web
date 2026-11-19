@@ -816,9 +816,9 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div className="flex items-center justify-end gap-0.5 pt-1">
+          <div data-live-chat-toolbar className="flex items-center justify-end gap-2 pt-1">
             {roomId && (
-              <div className="mr-auto flex items-center gap-1.5">
+              <div className="mr-auto flex items-center gap-3">
                 <LiveChatOnlineCount count={onlineCount} />
                 <ChatTextSizeButton />
                 {/* Pop the global chat out into its own window, beside the feed. */}
