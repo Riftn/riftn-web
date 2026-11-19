@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation as _useCopy } from 'react-i18next';
 import type { StudioEdits } from '@/features/post/lib/studioPaint';
-import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload, Gauge, Pencil } from 'lucide-react';
+import { Crop, Image as ImageIcon, Scissors, FlipHorizontal2, RotateCw, EyeOff, Lock, Eye, Timer, Plus, Play, Pause, Trash2, Check, Type, Palette, SlidersHorizontal, Music, Upload, Gauge, Pencil, Volume2, VolumeX } from 'lucide-react';
 import { ADJUST_RANGES, DEFAULT_ADJUST, STUDIO_LOOKS, studioColorMatrix, type StudioAdjust, type StudioAdjustKey } from '@/features/post/lib/studioColor';
 import { POST_DESTRUCT_CHOICES, VIDEO_SPEEDS, postDestructLabel, svgMatrixValues, vignetteBackground } from '@/features/post/lib/video-edits';
 import { VIDEO_CROP_RATIOS, cropRatioValue, dragCropRect, fitCropRect, isFullCrop, type CropHandle, type CropRatioId, type VideoCropRect } from '@/features/post/lib/video-crop';
@@ -278,6 +278,26 @@ export function DmMediaStudio({
   const set = (patch: Partial<DmVideoOptions>) => onOptionsChange({ ...options, ...patch });
   // Preview the picked speed (post composer only).
   useEffect(() => { const v = videoRef.current; if (v) v.playbackRate = options.speed ?? 1; }, [options.speed]);
+  // Hear the picked video while editing. Starts with sound; if the browser
+  // refuses to autoplay with sound, it plays muted and the icon shows that.
+  const [soundOn, setSoundOn] = useState(true);
+  useEffect(() => { const v = videoRef.current; if (v) v.muted = !soundOn; }, [soundOn, item?.id]);
+  const startWithSound = () => {
+    const v = videoRef.current;
+    if (!v || !open || !soundOn || !v.paused) return;
+    v.muted = false;
+    void v.play().catch(() => {
+      v.muted = true;
+      setSoundOn(false);
+      void v.play().catch(() => undefined);
+    });
+  };
+  const toggleSound = () => {
+    const v = videoRef.current;
+    const on = !soundOn;
+    setSoundOn(on);
+    if (v) { v.muted = !on; if (on && v.paused) void v.play().catch(() => undefined); }
+  };
 
   const timeAt = (clientX: number) => {
     const r = stripRef.current?.getBoundingClientRect();
@@ -307,8 +327,8 @@ export function DmMediaStudio({
   const allTabs: { key: Tab; label: string; icon: typeof Scissors }[] = [
     { key: 'cover', label: _copy('dmVideo.cover', { defaultValue: 'Cover' }), icon: ImageIcon },
     { key: 'trim', label: _copy('dmVideo.trim', { defaultValue: 'Trim' }), icon: Scissors },
-    { key: 'crop', label: _copy('copy.studio.crop', { defaultValue: 'Crop' }), icon: Crop },
     { key: 'speed', label: _copy('editor.video.speed', { defaultValue: 'Speed' }), icon: Gauge },
+    { key: 'crop', label: _copy('copy.studio.crop', { defaultValue: 'Crop' }), icon: Crop },
     { key: 'mirror', label: _copy('dmVideo.mirror', { defaultValue: 'Mirror' }), icon: FlipHorizontal2 },
     { key: 'rotate', label: _copy('dmVideo.rotate', { defaultValue: 'Rotate' }), icon: RotateCw },
     { key: 'looks', label: _copy('copy.studio.looks', { defaultValue: 'Looks' }), icon: Palette },
@@ -422,6 +442,7 @@ export function DmMediaStudio({
             onTimeUpdate={setNow}
             onPlayState={setPlaying}
             onMeta={(m) => {
+              startWithSound();
               if (m.w && m.h && (videoSize?.w !== m.w || videoSize?.h !== m.h)) setVideoSize({ w: m.w, h: m.h });
               if (!item.duration && Number.isFinite(m.dur)) onItemChange(active, { duration: m.dur });
             }}
@@ -432,6 +453,7 @@ export function DmMediaStudio({
             maxH={typeof window !== 'undefined' ? Math.max(200, Math.round(window.innerHeight * 0.42)) : 320}
             videoRef={videoRef}
             autoPlay={open}
+            muted={!soundOn}
             loop
             blurred={options.hidden === 'reveal' || lockPrice != null}
             colorFilter={colorMatrix ? `url(#${filterId})` : undefined}
@@ -470,6 +492,16 @@ export function DmMediaStudio({
                 </span>
               )}
             </button>
+            )}
+            {tab !== 'crop' && (
+              <button
+                type="button"
+                onClick={toggleSound}
+                className="absolute right-2 top-2 z-10 p-1 text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] transition-opacity hover:text-white"
+                aria-label={soundOn ? _copy('dmVideo.mute', { defaultValue: 'Mute' }) : _copy('dmVideo.unmute', { defaultValue: 'Unmute' })}
+              >
+                {soundOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+              </button>
             )}
           </DmVideoFrame>
           {dur > 0 && (
