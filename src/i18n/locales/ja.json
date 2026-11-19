@@ -36,7 +36,6 @@
     }
   },
   "dehubAppPage": {
-    "android": "Android",
     "appStore": "App Storeでダウンロード",
     "downloadApk": "APK（Google PlayなしのAndroid用）をダウンロード",
     "downloadTitle": "Riftnをダウンロード",
@@ -55,10 +54,20 @@
     "heading": "Riftnアプリ",
     "intro1": "Riftnは、2021年以来開発されている分散型ソーシャルネットワークとモバイルアプリです。投稿はチェーン上で鋳造でき、クリエイターはオーディエンス、コンテンツ、収益を維持できます。",
     "intro2": "それは、時系列フィード、ライブストリーミング、エンドツーエンドの暗号化メッセージング、ユーザーが運営するコミュニティ、マルチチェーンウォレット、トークンで支払われるウォッチツーエン報酬を組み合わせています。同じアカウントは、Android、iPhone、最新のブラウザでも機能します。",
-    "iphone": "iPhone",
     "openInBrowser": "ブラウザでRiftnを開く",
     "seoDescription": "Riftnアプリを入手：ライブストリーミング、暗号化されたメッセージング、ウォッチツーアーンを備えたオープンソースのユーザー所有ソーシャルメディア。Google Play、App Store、ウェブで無料でご利用いただけます。",
     "seoTitle": "Riftnアプリ, Android、iPhone、Web用ダウンロード"
+  },
+  "mentionLinks": {
+    "communities": "コミュニティ",
+    "empty": "見つかりませんでした",
+    "hint": "入力してユーザー、コミュニティ、ページを検索",
+    "linkTo": "{{name}} をリンク",
+    "members": " メンバー",
+    "pages": "ページ",
+    "people": "ユーザー",
+    "placeholder": "ユーザー、コミュニティ、ページを検索...",
+    "title": "メンションまたはリンク"
   },
   "dehubLinks": {
     "copyLinkDetail": "{{item}}のリンクをクリップボードにコピーする",
@@ -79,12 +88,12 @@
       "featureRequest": "リクエスト",
       "page": "ページ"
     },
+    "openPage": "ページを開く",
+    "viewRequest": "リクエストを見る",
     "recipientChat": "チャット",
     "recipientUser": "ユーザー",
     "sendFailed": "{{item}}の送信に失敗しました",
-    "sentTo": "{{item}}さんが{{name}}に送信しました",
-    "openPage": "ページを開く",
-    "viewRequest": "リクエストを見る"
+    "sentTo": "{{item}}さんが{{name}}に送信しました"
   },
   "stageCover": {
     "admitOne": "1つ承認する",
@@ -2386,7 +2395,6 @@
     "statusStillArriving": "支払いが完了しました。トークンはまだ途中です — すぐにあなたのウォレットを確認してください。",
     "paymentMethod": "支払い方法",
     "cardBank": "カード / 銀行",
-    "cardBankDesc": "Visa、Mastercard、Apple Pay",
     "fiatOnramp": "法定通貨入金",
     "fiatOnrampDesc": "法定通貨で直接購入",
     "buy": "{{symbol}}を購入",
@@ -2857,7 +2865,6 @@
     "fullName": "氏名",
     "email": "メールアドレス",
     "telegram": "電報",
-    "xTwitter": "X (Twitter)",
     "instagram": "インスタグラム",
     "linkedin": "リンクトイン",
     "otherSocials": "その他のソーシャル",
@@ -4334,7 +4341,6 @@
     "fieldPlatform": "プラットフォーム",
     "fieldTargetUrlClip": "元コンテンツの URL（クリップの素材）",
     "fieldTargetUrl": "対象の投稿・チャンネルの URL",
-    "urlPlaceholder": "https://…",
     "fieldCurrency": "通貨",
     "fieldTotalBudget": "総予算",
     "pricePerUnit": "{{unit}}あたりの単価",
@@ -4462,7 +4468,6 @@
     "podBadge": "オンデマンド印刷",
     "podBuyOn": "{{provider}}で購入",
     "podNote": "{{provider}}が注文ごとに印刷・発送します。決済は相手のサイトで行われます。",
-    "podUrlPlaceholder": "https://…",
     "title": "ストア",
     "browse": "ブラウズ",
     "myStore": "マイストア",
@@ -5185,7 +5190,6 @@
     "max5mb": "最大5 MB",
     "uploadFailed": "アップロードに失敗しました",
     "website": "ウェブサイト",
-    "twitter": "X/Twitter",
     "telegram": "電報",
     "fieldChain": "チェーン",
     "fieldCurve": "曲線",
@@ -5196,7 +5200,6 @@
     "feeSplitInline": "（ 40 ％バーン/30 ％ステーカー/20 ％クリエイター/10 ％プラットフォーム）",
     "review": "レビュー",
     "graduatesAt": "での卒業生",
-    "graduatesAtValue": "$42,000 mcap",
     "mockNote": "フェーズ1モック—チェーン上のトランザクションは送信されません。",
     "back": "戻る",
     "next": "次へ",
@@ -5705,7 +5708,6 @@
     "instrumental": "インストゥルメンタル",
     "dubInto": "にダブする",
     "imagesUnit": "イメージ",
-    "imageUnit": "image",
     "duration": "所要時間",
     "secondsUnit": "秒",
     "secondUnit": "秒",
@@ -6217,7 +6219,6 @@
     "basicAnalytics": "基本分析",
     "detailedAnalytics": "詳細分析",
     "prioritySupport": "優先サポート",
-    "sso": "SSO",
     "adminSpendControl": "管理者支出管理",
     "priorityQueue": "優先キュー",
     "priorityQueueFast": "優先キューでタスク処理を高速化",
@@ -6340,7 +6341,6 @@
     "actOffers": "オファー",
     "actSales": "セールス",
     "tabActivity": "アクティビティ",
-    "shortTitle": "NFT",
     "filters": "フィルター",
     "forSale": "販売中",
     "openToOffers": "オファーを受け付けています",
@@ -8314,7 +8314,6 @@
     "podcast": {
       "tab": "ポッドキャスト",
       "feedUrlLabel": "ポッドキャストRSSフィードURL",
-      "feedUrlPlaceholder": "https://example.com/feed.xml",
       "fetchFeed": "フィードを取得",
       "fetching": "フィードを取得しています…",
       "showBy": "{{author}}による",
@@ -8386,7 +8385,6 @@
     "paying": "{{amount}}トークンを支払っています…",
     "pickCount": "{{selected}} / {{total}} を選択しました。プロフィールに既にあるものはスキップされ、二重請求されることはありません。",
     "pickTitle": "何を移行するか選択",
-    "placeholder": "youtube.com/ @ you、tiktok.com/ @ you、vimeo.com/you…",
     "progressDone": "{{imported}} がインポートされました。",
     "progressDoneWithFailures": "{{imported}} がインポートされました。{{failed}} はインポートできませんでした。",
     "progressIdle": "バッチ内のすべての動画がここに独自のタイルを取得するため、何が成功したか、何を再試行する必要があるかを確認できます。まだ何も実行されていません — 下のグリッドは例です。",
@@ -8767,7 +8765,6 @@
     "scheduled": "予約済み"
   },
   "home": {
-    "seoTitle": "Riftn",
     "seoDescription": "Riftn はオープンソースでユーザーが所有し、検閲に強いソーシャルメディアプロトコルです。既存プラットフォームが提供を拒んだ機能をすべて備えています。"
   },
   "docs": {
@@ -9535,7 +9532,6 @@
       "lanes": "キーフレーム",
       "scrub": "左右にドラッグして変更。Shift を押しながらで速く変わります。",
       "addKeyShortcut": "再生ヘッドにキーフレームを追加 (K)",
-      "segment": "{{from}} → {{to}}",
       "ease": {
         "linear": "リニア",
         "ease": "イーズ",
@@ -10951,7 +10947,6 @@
     "paused": "トークンの転送は現在チェーン上で一時停止されているため、このロックを解除することはできません。しばらくしてから再度お試しください。",
     "otherChain": "この投稿は別のチェーンに固定されるため、ウォレットにRiftnトークンが必要です。",
     "buyCard": "カードでトークンを購入する",
-    "buyCardHint": "Visa、Mastercard、Apple Pay",
     "moveFunds": "資金を移す",
     "moveFundsHint": "別のチェーンからスワップまたは入金",
     "notNow": "今はしない"
@@ -11873,8 +11868,7 @@
     "tabStickers": "ステッカー",
     "tab": {
       "emoji": "絵文字",
-      "sticker": "ステッカー",
-      "gif": "GIF"
+      "sticker": "ステッカー"
     },
     "kind": {
       "emoji": "絵文字パック",
@@ -11899,8 +11893,7 @@
       "tier": "ティア",
       "packs": "パック",
       "emoji": "絵文字",
-      "stickers": "ステッカー",
-      "gifs": "GIF"
+      "stickers": "ステッカー"
     },
     "signInToCreate": "パックを作成するにはサインインしてください",
     "signInToAdd": "追加するにはサインインしてください",
@@ -13842,7 +13835,6 @@
     "bdca14f3e1d4": "ステージチャットはまだセットアップされていません",
     "bdf7c3345a42": "リスナー（{{value1}}）",
     "be205011d048": "⚡ Seedance 2.0と同じ機能を持っていますが、速く安くて便利です",
-    "be4b0c384393": "Solana",
     "be55ef3f4c4e": "カナダ",
     "be567a4c5484": "🔊 ネイティブ音声が含まれています",
     "be9f2a4ccc47": "{{value1}} メッセージは再びボックスに戻りました。",
@@ -15216,8 +15208,6 @@
     "1b52b1397dee": "戻る",
     "9e9ae626652a": "文字、数字、ハイフン、下線。30文字以内。",
     "dc85af8f2b1d": "保存中...",
-    "08b6a3efc2b5": "Phantom",
-    "2ef54eee0edd": "Trust Wallet",
     "bcbaa814d3ca": "ユーザーを言及する",
     "8f1aa08d3a21": "ユーザーを検索する",
     "3457098e7042": "フォローしている",
@@ -16491,7 +16481,6 @@
     "b98adf20f5f3": "ウォレット: クロプト資産の管理",
     "00787feeb046": "バランスを確認し、トークンを送受信し、Riftn上の複数のチェーンでクロプト資産を管理する。",
     "112e22b0fd15": "Riftnウォレット — 分散型ソーシャルメディア、検閲に耐性、言論の自由",
-    "5dc85dbc155e": "BNB Chain",
     "6b8a9141538a": "ステーキング",
     "228fc4afbce4": "ギフト (ロック)",
     "911c67ed8f19": "Visa、Mastercard、Apple Payを使用して購入 — コインバース",
@@ -16707,7 +16696,6 @@
     "b62c681738d1": "クー",
     "b602b7029be6": "Pt",
     "d8d91b2e06df": "ノー",
-    "f223faa96f22": "Apple",
     "c7bac46904be": "マイクロソフト",
     "6850f76b953d": "バークシャー・ハサウェイ",
     "00fb5022b75a": "台積電",
@@ -16748,7 +16736,6 @@
     "b6ad48b669f7": "Dapp.マルチポストタイトル",
     "599f4a9886b4": "フレンド.テック",
     "6133f824f41c": "レンズ プロトコル",
-    "a37468be5d59": "Zora",
     "eec736f63bbb": "パトロン",
     "538447759dad": "MV + MS + BE + BS = (RG / RS)",
     "e79b190608ca": "Dappパック",
@@ -17152,7 +17139,6 @@
     "6662a5411155": "今すぐ書く",
     "4945a70fa7f9": "マッチ",
     "a54084383e3c": "マッチ",
-    "6a40edf1fc87": "WhatsApp",
     "761747747547": "承認されたリクエストに従う",
     "c97583fe9025": "リクエストを承認できませんでした",
     "962b110538f3": "フォローリクエストが拒否されました",
@@ -17931,7 +17917,6 @@
     "74efbe0f30ab": "ハーフトーン",
     "2a0817015729": "クラドニ",
     "f5d61ead3eef": "短い",
-    "a731a58c4cf3": "Twitch",
     "b19565a545ba": "Instagramリール",
     "4268168ace02": "広告収益",
     "314b92e83a11": "報奨金",
@@ -19519,16 +19504,5 @@
     "edit": "編集",
     "editLabel": "メッセージを編集",
     "error": "うまくいきませんでした。もう一度やり直してください。"
-  },
-  "mentionLinks": {
-    "communities": "コミュニティ",
-    "pages": "ページ",
-    "people": "ユーザー",
-    "linkTo": "{{name}} をリンク",
-    "empty": "見つかりませんでした",
-    "hint": "入力してユーザー、コミュニティ、ページを検索",
-    "members": " メンバー",
-    "placeholder": "ユーザー、コミュニティ、ページを検索...",
-    "title": "メンションまたはリンク"
   }
 }
