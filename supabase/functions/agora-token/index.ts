@@ -140,6 +140,19 @@ async function mayPublish(channelName: string, wallet: string, uid: number): Pro
     );
   }
 
+  /**
+   * A group call: the group's own room, `group-call-<community id>`. Any
+   * active member of the group may talk in it; nobody else may.
+   */
+  const groupCall = channelName.match(/^group-call-([0-9a-fA-F-]{36})$/);
+  if (groupCall) {
+    const { data: member } = await admin.rpc("is_active_group_member", {
+      p_group: groupCall[1],
+      p_wallet: wallet,
+    });
+    return member === true;
+  }
+
   const { data: stage } = await admin
     .from("audio_spaces")
     .select("id, host_wallet_address")
