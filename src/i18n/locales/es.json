@@ -3733,6 +3733,10 @@
     "statsLoadFailed": "No se pudieron cargar las estadísticas de staking"
   },
   "communities": {
+    "muteChat": "Silenciar",
+    "mutedChat": "Silenciado",
+    "muteChatHint": "Deja de recibir avisos del chat de esta comunidad. Podrás seguir leyéndolo",
+    "unmuteChatHint": "Vuelve a recibir avisos del chat de esta comunidad",
     "sortTop": "Top",
     "shareLink": "Compartir enlace",
     "pinnedMore": "Más",

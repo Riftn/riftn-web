@@ -2154,16 +2154,16 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   });
 
   /**
-   * Feed taps open the viewer immediately. Inside the player, one tap drives
-   * playback; two taps Like; three taps Love. Playback is
-   * reversible, so the first tap happens immediately and is put back on tap
-   * two rather than making every ordinary play/pause wait for the gesture
-   * window. Fullscreen and seeking stay on their visible controls.
+   * Anywhere on the video, two taps Like and three taps Love. In the phone
+   * feed one tap opens the viewer, a moment later so a second tap can still
+   * turn it into a like. Inside the player one tap drives playback; that is
+   * reversible, so it happens immediately and is put back on tap two rather
+   * than making every play/pause wait for the gesture window. Fullscreen and
+   * seeking stay on their visible controls.
    */
   const tapGestures = useTapGestures({
     postId: video.id,
-    singleTapOnly: feedPreview,
-    reactionArea: isImmersive || isFullscreen ? 'surface' : 'center',
+    reactionArea: 'surface',
     // A gated card (PPV, holdings/subscriber lock, mature warning) draws no
     // burst — TapReactionBurst lives inside the isContentGated block further
     // down — so a cast there would react, invisibly, to a post you cannot

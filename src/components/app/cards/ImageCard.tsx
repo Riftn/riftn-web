@@ -261,7 +261,8 @@ function ImageSlide({
   // gets the same triple-tap ❤️ and hold-for-the-tray as every other surface.
   const tapGestures = useTapGestures({
     postId,
-    reactionArea: immersive ? 'surface' : 'center',
+    // Two taps anywhere on the photo like it, not only in the middle.
+    reactionArea: 'surface',
     onSingleTap: (event) => {
       // A narrow photo sits left-aligned in its frame, so a tap can land beside
       // it. Report whether it landed on the picture itself. The tap can resolve

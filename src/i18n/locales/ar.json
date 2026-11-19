@@ -3757,6 +3757,10 @@
     "statsLoadFailed": "تعذر تحميل إحصائيات الستيكينغ"
   },
   "communities": {
+    "muteChat": "كتم",
+    "mutedChat": "مكتوم",
+    "muteChatHint": "إيقاف تنبيهات دردشة هذا المجتمع. يمكنك قراءتها دائمًا",
+    "unmuteChatHint": "تلقي تنبيهات دردشة هذا المجتمع مجددًا",
     "sortTop": "الأفضل",
     "shareLink": "مشاركة الرابط",
     "pinnedMore": "المزيد",
