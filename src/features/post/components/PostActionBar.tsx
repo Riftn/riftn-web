@@ -2,8 +2,9 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useCrossPostAccountCount } from './CrossPostPicker';
-import { Eye, Loader2, SpellCheck, Palette, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle } from "lucide-react";
+import { Eye, Loader2, SpellCheck, Palette, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle, ScreenShare } from "lucide-react";
 import BookOpen from "@/components/ui/cut-icons/docs";
 import Check from "@/components/ui/cut-icons/check";
 import More from "@/components/ui/cut-icons/more";
@@ -579,6 +580,26 @@ export function PostActionBar({
                   <MonitorPlay className="w-4 h-4 text-white shrink-0" />
                   <span className="text-sm text-white">{t('goLive.sourceEncoder')}</span>
                 </button>
+                {/* Phone browsers have no screen capture for any website, so
+                    screen share on a phone lives in the app; say so here
+                    rather than leave the option missing. */}
+                {typeof navigator !== 'undefined' &&
+                  typeof navigator.mediaDevices?.getDisplayMedia !== 'function' && (
+                  <button
+                    type="button"
+                    onClick={() => toast(t('goLive.screenInAppNote'), {
+                      duration: 8000,
+                      action: { label: t('goLive.screenInAppCta'), onClick: () => navigate('/dehub-app') },
+                    })}
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left hover:bg-white/10 transition-colors"
+                  >
+                    <ScreenShare className="w-4 h-4 text-white shrink-0" />
+                    <span className="flex flex-col">
+                      <span className="text-sm text-white">{t('goLive.sourceScreen')}</span>
+                      <span className="text-[11px] text-zinc-400">{t('goLive.screenInAppHint')}</span>
+                    </span>
+                  </button>
+                )}
                 {/* Desktop only: phones can't take a USB capture card, and
                     getDisplayMedia is the same desktop test the sheet uses. */}
                 {typeof navigator !== 'undefined' &&

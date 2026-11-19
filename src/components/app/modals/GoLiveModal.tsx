@@ -210,6 +210,8 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
   const [step, setStep] = useState<Step>('setup');
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [source, setSource] = useState<StreamSource>(initialSource ?? 'camera');
+  // Phone browsers have no screen capture at all; the tile explains and points to the app.
+  const [screenInApp, setScreenInApp] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -1301,6 +1303,15 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
                       subtitle={t('goLive.sourceScreenHint')}
                     />
                   )}
+                  {!canShareScreen && (
+                    <SourceOption
+                      selected={screenInApp}
+                      onClick={() => setScreenInApp((v) => !v)}
+                      icon={<ScreenShare className="w-4 h-4" />}
+                      title={t('goLive.sourceScreen')}
+                      subtitle={t('goLive.screenInAppHint')}
+                    />
+                  )}
                   {/* Desktop only, same test as screen: a capture card is a
                       USB device on a computer, phones can't take one. */}
                   {canShareScreen && (
@@ -1324,6 +1335,18 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
                   <p className="text-[11px] text-zinc-500">
                     {t('goLive.screenPickHint')}
                   </p>
+                )}
+                {!canShareScreen && screenInApp && (
+                  <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                    <p className="text-[11px] text-zinc-400">{t('goLive.screenInAppNote')}</p>
+                    <button
+                      type="button"
+                      onClick={() => { onClose(); navigate('/dehub-app'); }}
+                      className="mt-1.5 text-xs font-medium text-white underline underline-offset-2"
+                    >
+                      {t('goLive.screenInAppCta')}
+                    </button>
+                  </div>
                 )}
                 {source === 'capture' && <CaptureCardSetup />}
                 {/*
