@@ -6,7 +6,11 @@
     "videoSize": "Šis vaizdo įrašas didesnis nei {{n}} MB. Pasirinkite mažesnį."
   },
   "textFeed": {
-    "tab": "Tekstas"
+    "tab": "Tekstas",
+    "errorTitle": "Nepavyko įkelti įrašų",
+    "errorBody": "Pabandykite iš naujo įkelti tekstinį srautą.",
+    "emptyTitle": "Tekstinių įrašų dar nėra",
+    "emptyBody": "Čia bus rodomi tekstiniai įrašai."
   },
   "comic": {
     "showAll": "Rodyti visus {{count}} puslapius"
@@ -29,16 +33,61 @@
     "policyFollowers": "Sekėjai",
     "policyNobody": "Niekas",
     "loadMore": "Įkelti daugiau",
-    "video": "Vaizdo įrašas"
+    "video": "Vaizdo įrašas",
+    "with": "Duetas su @{{username}}",
+    "withOriginal": "Duetas · žiūrėti originalą",
+    "unavailable": "Šis vaizdo įrašas nebegalimas duetams.",
+    "allowLabel": "Leisti duetus",
+    "allowDescription": "Kas gali įrašyti duetą šalia jūsų vaizdo įrašų. Tai galite keisti ir kiekviename įraše.",
+    "settingsSection": "Duetai",
+    "policyDefault": "Paskyros nustatymas",
+    "saveFailed": "Nepavyko išsaugoti. Bandykite dar kartą.",
+    "count_one": "{{count}} duetas",
+    "count_other": "Duetų: {{count}}",
+    "pageHeading": "Duetai",
+    "pageTitle": "{{title}} duetai, autorius @{{creator}}",
+    "pageTitleNoCreator": "{{title}} duetai",
+    "pageDescription": "Žiūrėkite visus šio vaizdo įrašo duetus „Riftn“ arba įrašykite savo greta.",
+    "empty": "Duetų dar nėra. Atidarykite vaizdo įrašo parinktis ir pasirinkite Remiksas → Duetas, kad sukurtumėte pirmąjį.",
+    "notFound": "Šis vaizdo įrašas nepasiekiamas.",
+    "browseShorts": "Naršyti trumpuosius vaizdo įrašus"
   },
   "videoRemix": {
-    "sound": "Naudoti šį garsą"
+    "sound": "Naudoti šį garsą",
+    "menu": "Remiksas",
+    "duet": "Duetas",
+    "green-screen": "Žalias ekranas",
+    "stitch": "Sujungimas",
+    "selectSource": "Atidarykite vaizdo įrašo parinktis ir pasirinkite Remiksas, kad pradėtumėte."
   },
   "remixLinks": {
     "policy": {
       "everyone": "Visi",
       "followers": "Sekėjai",
-      "nobody": "Niekas"
+      "nobody": "Niekas",
+      "default": "Mano numatytasis"
+    },
+    "shareFailed": "Jūsų arbatpinigiai išsiųsti, bet originalaus kūrėjo dalis nebuvo pervesta.",
+    "notify": {
+      "duet": "{{name}} sukūrė duetą su jūsų vaizdo įrašu",
+      "stitch": "{{name}} sujungė jūsų vaizdo įrašą",
+      "react": "{{name}} sureagavo į jūsų vaizdo įrašą",
+      "reactLive": "{{name}} tiesiogiai reaguoja į jūsų vaizdo įrašą"
+    },
+    "linkFailed": "Jūsų įrašas paskelbtas, bet jo nepavyko susieti su originaliu vaizdo įrašu.",
+    "settingsHeading": "Remiksai",
+    "stitch": {
+      "allow": "Leisti sujungimus",
+      "allowDesc": "Kas gali panaudoti iki 5 sekundžių jūsų vaizdo įrašų savuosiuose. Tai galite keisti ir kiekviename įraše.",
+      "saveFailed": "Nepavyko išsaugoti sujungimo nustatymo. Bandykite dar kartą.",
+      "settingFailed": "Jūsų įrašas paskelbtas, bet jo sujungimo nustatymas neišsaugotas. Pakeiskite jį per Redaguoti įrašą.",
+      "from": "Sujungta iš {{name}}",
+      "count_one": "{{count}} sujungimas",
+      "count_other": "Sujungimų: {{count}}",
+      "listTitle": "Sujungimai",
+      "listFailed": "Nepavyko įkelti sujungimų. Bandykite dar kartą.",
+      "listEmpty": "Sujungimų dar nėra.",
+      "unavailable": "Šis vaizdo įrašas nebegalimas sujungimams."
     }
   },
   "dehubAppPage": {
@@ -64,7 +113,8 @@
     "iphone": "iPhone",
     "openInBrowser": "Atidaryti Riftn naršyklėje",
     "seoDescription": "Gauti Riftn aplikaciją: atviro kodo, naudotojų savyje valdoma socialinė tinklalapis su gyvu transliavimu, užšifruotu pranešimų siuntimu ir „žiūrėti ir uždirbti“. Bevėliavimas Google Play, App Store ir tinklalapyje.",
-    "seoTitle": "Riftn Aplikacija: Įdiegtina į Android, iPhone & Tinklalapį"
+    "seoTitle": "Riftn Aplikacija: Įdiegtina į Android, iPhone & Tinklalapį",
+    "learnMore": "Norite viso vaizdo? <guide>Kas yra Riftn?</guide> išsamiai apžvelgia platformą."
   },
   "dehubLinks": {
     "copyLinkDetail": "Iškopijuokite {{item}} nuorodą į savus naujienlaukį",
@@ -82,12 +132,15 @@
       "proposal": "paslaugos pasiūlymas",
       "stage": "etapas",
       "store": "parduotuvė",
-      "featureRequest": "užklausa"
+      "featureRequest": "užklausa",
+      "page": "puslapis"
     },
     "recipientChat": "kalba",
     "recipientUser": "naudotojas",
     "sendFailed": "Nepavyko išsiųsti {{item}}",
-    "sentTo": "{{item}} išsiųsta {{name}}"
+    "sentTo": "{{item}} išsiųsta {{name}}",
+    "openPage": "Atidaryti puslapį",
+    "viewRequest": "Peržiūrėti užklausą"
   },
   "stageCover": {
     "admitOne": "PRIIMTI VIENĄ",
@@ -196,7 +249,24 @@
   "signedFollows": {
     "setUp": "Įjungti",
     "turnOff": "Išjungti",
-    "efpTurnOff": "Sustabdyti"
+    "efpTurnOff": "Sustabdyti",
+    "title": "Jūsų sekimai grandinėje",
+    "description": "Jūsų piniginė pasirašo, ką sekate, o kasdien sąrašas užfiksuojamas Base tinkle. Bet kuri programėlė gali rasti jūsų sekimus pagal piniginę, net be „Riftn“.",
+    "on": "Įjungta šiame įrenginyje",
+    "off": "Išjungta šiame įrenginyje",
+    "turnedOn": "Jūsų sekimus dabar pasirašo jūsų piniginė",
+    "turnedOff": "Išjungta šiame įrenginyje",
+    "failed": "Jūsų piniginė nepasirašė. Bandykite dar kartą.",
+    "hiddenNote": "Paslėpti sekimų sąrašai ir privačios paskyros į viešą sąrašą neįtraukiami.",
+    "efpOn": "Nukopijuota į EFP · sekimų: {{count}}",
+    "efpOff": "Taip pat perkelti juos į EFP",
+    "efpTurnOn": "Pridėti į EFP",
+    "efpDone": "Jūsų sekimai perkeliami į EFP",
+    "efpStopped": "EFP kopijavimas sustabdytas. Sąrašas lieka jūsų.",
+    "efpHasList": "Jau turite EFP sąrašą. „Riftn“ kol kas negali jo užpildyti.",
+    "efpNoGas": "Tam jūsų piniginėje reikia šiek tiek ETH Base tinkle.",
+    "efpFailed": "Nepavyko. Bandykite dar kartą.",
+    "efpNote": "EFP – tai sekimų sąrašas, kurį skaito kitos programėlės (efp.app). Nemokama su „Riftn“ pinigine; kitos piniginės moka kelis centus Base tinkle. Sąrašas priklauso jums."
   },
   "profileFields": {
     "title": "Profilio laukai",
@@ -374,7 +444,8 @@
     "step": "Norėdami valdyti paskyrą, pridėkite https://riftn.com/mcp kaip „OAuth“ jungtį, prisijunkite prie „Riftn“ ir peržiūrėkite leidimus prieš suteikdami prieigą.",
     "profilePrompt": "Atnaujink mano „Riftn“ biografiją į: Nepriklausomas kūrėjas, kuriantis filmus ir muziką.",
     "generatePrompt": "Parodykite man „Riftn“ vaizdo modelius ir pacituokite portretą prieš jį kurdami.",
-    "libraryPrompt": "Rodyti naujausius išteklius mano Riftn Creator bibliotekoje."
+    "libraryPrompt": "Rodyti naujausius išteklius mano Riftn Creator bibliotekoje.",
+    "agents": "Skelbkite, atsakykite, reaguokite, dalinkitės pakartotinai, sekite ir redaguokite profilius kaip jums priklausantys agentai"
   },
   "twitchMirror": {
     "title": "„Twitch“ veidrodinis atspindys",
@@ -475,7 +546,66 @@
   "nav": {
     "launchpad": "Paleisties skydelis",
     "findWords": {
-      "getTheApp": "Atsisiųskite programą, Android, iPhone, mobilioji programa, įdiegkite, APK, desktopo programa, įdiegkite kompiuterį, Windows, Mac"
+      "getTheApp": "Atsisiųskite programą, Android, iPhone, mobilioji programa, įdiegkite, APK, desktopo programa, įdiegkite kompiuterį, Windows, Mac",
+      "home": "srautas, laiko juosta, naujausi įrašai, jums, sekami, pradžios puslapis",
+      "profile": "mano profilis, mano paskyra, mano puslapis, mano įrašai, avataras, aprašymas, sekėjai",
+      "explore": "paieška, atrasti, rasti, populiaru, tendencijos, grotažymės, žmonės, kūrėjai",
+      "prompt": "DI, generuoti, DI vaizdas, DI vaizdo įrašas, paveikslėlių kūrimas, tekstas į vaizdą, DI menas",
+      "editor": "vaizdo redaktorius, redaguoti vaizdo įrašą, apkirpti, iškirpti, antraštės, subtitrai, efektai",
+      "creator": "kurti, studija, DI įrankiai, vaizdas, vaizdo įrašas, muzika, įgarsinimas, 3D",
+      "converter": "importuoti vaizdo įrašą, atsisiųsti, YouTube, TikTok, Instagram, konvertuoti",
+      "migrate": "perkelti kanalą, importuoti kanalą, masinis importas, YouTube kanalas",
+      "notifications": "įspėjimai, veikla, paminėjimai, atsakymai, patiktukai, varpelis",
+      "messages": "DM, tiesioginės žinutės, pokalbis, gautieji, pokalbiai, privati žinutė",
+      "communities": "grupės, bendruomenė, kambariai, klubai, forumai, nariai",
+      "assistant": "DI, pokalbių robotas, klausti, pagalba, DI pokalbis, klausimai",
+      "settings": "nuostatos, paskyra, privatumas, saugumas, slaptažodis, kalba, tema, tamsusis režimas, užblokuoti, ištrinti paskyrą",
+      "leaderboard": "reitingas, vieta, geriausi kūrėjai, geriausi naudotojai, taškai, rezultatai",
+      "bookmarks": "išsaugoti, mėgstami, žiūrėti vėliau, skaityti vėliau, išsaugoti įrašai, biblioteka",
+      "command": "valdymo skydelis, analitika, uždarbis, pajamos, įžvalgos, moderavimas, mano statistika",
+      "wallet": "likutis, pinigai, lėšos, žetonai, kriptovaliuta, įnešti, išimti, siųsti, gauti, mokėti",
+      "events": "kalendorius, tvarkaraštis, susitikimas, artėjantys, bilietai, AMA",
+      "stages": "garso kambariai, balso pokalbis, erdvės, tiesioginis garsas, pokalbis, tinklalaidė",
+      "featureRequests": "kurti, kūrėjai, idėjos, pasiūlymai, pranešti apie klaidą, klaidos, pataisymai, planas, balsuoti, norų sąrašas, tobulinti",
+      "feedback": "atsiliepimas, įvertinimas, apklausa, nuomonė, skundas, pateikti atsiliepimą",
+      "staking": "įkeisti, įnešti, pajamingumas, atlygiai, uždirbti, pelno dalis, ženklelis, lygiai, palūkanos",
+      "superpowers": "paspartinti, reklamuoti, privalumai, galios, ženklelio privalumai, pasiekiamumas, patobulinimai",
+      "governance": "balsuoti, balsavimas, pasiūlymai, apklausa, biuletenis, nuspręsti",
+      "dao": "iždas, aukoti, auka, bendruomenės fondas, prisidėti, dotacijos",
+      "bounties": "darbas, darbai, užduotys, užsakymai, laisvai samdomas, samdyti, uždirbti pinigų, apmokamas darbas",
+      "myBounties": "mano premijos, mano darbai, istorija, išmokos, atlikti darbai",
+      "affiliate": "rekomendacija, pakviesti draugus, pakviesti, komisinis, partneris, uždirbti",
+      "careers": "darbai, įdarbinimas, dirbk su mumis, prisijunk prie komandos, kandidatuoti, laisvos darbo vietos",
+      "stores": "parduotuvė, prekyvietė, atributika, pirkti, parduoti, produktai, apsipirkimas",
+      "fractions": "dalys, nuosavybė, investuoti, turėti įrašą, NFT, NFT kolekcijos, kolekcionuojami daiktai, prekiauti",
+      "usernames": "naudotojo vardas, slapyvardis, vardas, pakeisti vardą, pirkti vardą, parduoti vardą",
+      "accounts": "pirkti paskyrą, parduoti paskyrą, parduodamos paskyros, sekėjai, perduoti paskyrą",
+      "apps": "programėlių parduotuvė, mini programėlės, sukurti programėlę, kūrėjai, įrankiai",
+      "arcade": "žaidimai, žaidimas, žaisti, žaidimai internete, šachmatai, šaudyklė, linksmybės",
+      "glossary": "terminai, apibrėžimai, žodynas, reikšmė, kas yra",
+      "compare": "palyginimas, palyginti, prieš, alternatyvos, YouTube, X, TikTok",
+      "guide": "pradžia, kaip, pamoka, pagalba, mokytis, pradedantysis, naujas čia",
+      "stats": "statistika, analitika, skaičiai, diagramos, kaina, pasiūla, turėtojai",
+      "docs": "dokumentacija, pagalba, API, baltoji knyga, kūrėjai, vadovas",
+      "blog": "naujienos, straipsniai, atnaujinimai, pranešimai, kas naujo",
+      "videos": "žiūrėti, vaizdo įrašai, klipai, ilgi vaizdo įrašai",
+      "shorts": "reels, trumpi vaizdo įrašai, vertikalūs vaizdo įrašai, braukti",
+      "music": "garsas, dainos, takeliai, klausytis, radijas, grojaraštis",
+      "liveTv": "TV, transliacijos, transliavimas, tiesiogiai, eteris, kanalai, žiūrėti tiesiogiai",
+      "buyTokens": "pirkti žetonų, pirkimas, papildyti, kortelė, kredito kortelė, fiat",
+      "bridge": "tarp grandinių, perkelti žetonus, grandinės, pervedimas tarp grandinių",
+      "top100": "top 100, monetos, kriptovaliutos, rinkos kapitalizacija, kainos",
+      "agents": "DI agentai, agentai, robotai, automatizavimas, personos",
+      "advertising": "reklamos, skelbimai, kampanija, reklamuoti, remti, rinkodara",
+      "premium": "prenumerata, atnaujinti, pro, narystė, be reklamų, be reklamos",
+      "pricing": "planai, kaina, kainos, kiek kainuoja, prenumerata",
+      "creators": "kūrėjų programa, ambasadoriai, partneriai, tapti kūrėju, monetizuoti",
+      "connectAi": "MCP, ChatGPT, Claude, API, integracija, prijungti DI",
+      "packs": "jaustukai, lipdukai, GIF, jaustukų paketai, lipdukų paketai, pasirinktiniai jaustukai",
+      "publicChat": "pokalbis, bendras pokalbis, pokalbių kambarys, fojė, kalbėtis, bendruomenės pokalbis",
+      "planned": "suplanuota, planuoti, suplanuoti įrašai, eilė, vėliau",
+      "liveStudio": "pradėti transliaciją, transliacija, transliavimas, OBS, perdangos, įspėjimai, valdikliai",
+      "launchpad": "išleisti žetoną, sukurti monetą, padaryti monetą, memų moneta, susiejimo kreivė, tokenizuoti"
     },
     "reorderHint": "Laikykite ir vilkite bet kurią piktogramą, kad pertvarkytumėte",
     "reorderReset": "Nustatyti iš naujo",
@@ -526,7 +656,10 @@
     "affiliate": "Partneriai",
     "groups": {
       "create": "Kurti",
-      "discover": "Atrasti"
+      "discover": "Atrasti",
+      "main": "Pagrindinis",
+      "money": "Pinigai",
+      "riftn": "Riftn"
     }
   },
   "feed": {
@@ -1151,7 +1284,39 @@
     "socialConnectFailed": "Nepavyko prisijungti {{platform}}. Bandykite dar kartą.",
     "socialVerifiedFollowers": "{{value}} sekėjai",
     "socialFollowersPending": "Sekėjų skaičiaus atnaujinimas",
-    "menuLayoutFolders": "Aplankai"
+    "menuLayoutFolders": "Aplankai",
+    "chatCards": "Pokalbiai kortelėmis",
+    "chatCardsDesc": "Kiekvienas pokalbis savo kortelėje. Išjunkite, kad matytumėte paprastą sąrašą su linija tarp pokalbių.",
+    "chatDeleteChoice": "Kai ištrinate žinutę",
+    "chatDeleteChoiceDesc": "Klausti kiekvieną kartą arba visada ištrinti tik sau ar visiems pokalbio dalyviams.",
+    "chatDeleteAsk": "Klausti kiekvieną kartą",
+    "chatDeleteMe": "Ištrinti sau",
+    "chatDeleteMeDesc": "Dingsta iš jūsų pokalbio, kiti vis tiek ją mato",
+    "chatDeleteEveryone": "Ištrinti visiems",
+    "chatDeleteEveryoneDesc": "Kai įmanoma. Kito žmogaus žinutė grupėje vis tiek ištrinama tik jums",
+    "showLikes": "Rodyti mano patiktukus visiems",
+    "showLikesDesc": "Bet kas gali atidaryti skirtuką Patiktukai jūsų profilyje. Pagal numatytuosius nustatymus išjungta, todėl tik jūs matote, kas jums patiko.",
+    "showFollowersList": "Rodyti, kas mane seka",
+    "showFollowersListDesc": "Leisti bet kam atidaryti jūsų sekėjų sąrašą. Kai išjungta, jį matote tik jūs.",
+    "showFollowingList": "Rodyti, ką aš seku",
+    "showFollowingListDesc": "Leisti bet kam atidaryti žmonių, kuriuos sekate, sąrašą. Kai išjungta, jį matote tik jūs.",
+    "showFollowCounts": "Rodyti mano sekėjų skaičių",
+    "showFollowCountsDesc": "Rodyti, kiek turite sekėjų ir kiek žmonių sekate. Tai išjungus paslepiami ir abu sąrašai.",
+    "defaultProfileView": "Profilio įrašų išdėstymas",
+    "defaultProfileViewDesc": "Rodyti jūsų įrašus tinkleliu arba sąrašu, kai žmonės atidaro jūsų profilį",
+    "readerProfileView": "Atidaryti kitus profilius kaip",
+    "readerProfileViewDesc": "Pasirinkite tinklelį arba sąrašą visiems atidaromiems profiliams arba palikite kiekvieno žmogaus pasirinkimą",
+    "readerProfileViewOwner": "Kiekvieno žmogaus pasirinkimas",
+    "tipsOffNote": "Kol tai įjungta, arbatpinigiai ir pervedimai jums išjungti. Išjunkite, kad vėl gautumėte arbatpinigių.",
+    "menuLayout": "Meniu išdėstymas",
+    "menuLayoutDesc": "Kaip meniu grupuoja savo puslapius",
+    "menuLayoutTabs": "Skirtukai",
+    "menuLayoutTabsDesc": "Po vieną grupę, su didelėmis piktogramomis",
+    "menuLayoutSections": "Skyriai",
+    "menuLayoutSectionsDesc": "Visi puslapiai iškart, po grupių antraštėmis",
+    "menuLayoutFoldersDesc": "Jūsų pagrindiniai puslapiai, tada aplankas kiekvienai grupei",
+    "publicChatInBar": "Viešas pokalbis apatinėje juostoje",
+    "publicChatInBarDesc": "Vienu bakstelėjimu į Viešą pokalbį iš juostos ekrano apačioje"
   },
   "common": {
     "confirm": "Patvirtinti",
@@ -1241,7 +1406,14 @@
     "messagePublic": "Viešas",
     "railTitle": "Patarimai",
     "railTotal": "{{amount}} ženklų",
-    "tokensUnit": "ženklai"
+    "tokensUnit": "ženklai",
+    "messagePlaceholder": "Parašykite ką nors su arbatpinigiais",
+    "messagePrivate": "Tik {{name}}",
+    "theCreator": "kūrėjas",
+    "messageWallNote": "Rodoma arbatpinigių sienoje, kai arbatpinigiai bus pervesti.",
+    "sendWithMessage": "Siųsti su žinute",
+    "messageFailed": "Nepavyko pridėti jūsų žinutės. Arbatpinigiai neišsiųsti.",
+    "wallLabel": "Arbatpinigių žinutės"
   },
   "postOptions": {
     "liveAlertsOn": "Dabar sekate {{name}}. Gausite pranešimą, kai prasidės tiesioginė transliacija.",
@@ -1281,7 +1453,14 @@
     "giftBoost": "Dovanokite pakitimą",
     "markSection": "Prieinamos dalys",
     "copyFailed": "Nepavyko nukopijuoti nuorodos",
-    "share": "Dalytis"
+    "share": "Dalytis",
+    "refreshLinkPreview": "Atnaujinti nuorodos peržiūrą",
+    "linkPreviewRefreshed": "Nuorodos peržiūra atnaujinta",
+    "linkPreviewRefreshFailed": "Nepavyko pasiekti tos svetainės. Bandykite vėliau.",
+    "castToTv": "Rodyti per TV",
+    "castStarted": "Rodoma jūsų televizoriuje",
+    "castUnsupported": "Ši naršyklė negali transliuoti į TV. Atidarykite „Riftn“ naršyklėje Chrome arba Safari, kad rodytumėte televizoriuje.",
+    "castFailed": "Nepavyko pasiekti televizoriaus. Patikrinkite, ar jis prijungtas prie to paties Wi-Fi, ir bandykite dar kartą."
   },
   "filters": {
     "sort": "Rūšiuoti",
@@ -1884,7 +2063,10 @@
       "bountySubmittedNamed": "{{name}} pateikė darbą jūsų premijai „{{title}}”",
       "bountySubmitted": "{{name}} pateikė darbą jūsų premijai",
       "sentNotification": "{{name}} siuntė jums pranešimą"
-    }
+    },
+    "groupEarlier": "Anksčiau",
+    "searchPlaceholder": "Ieškoti pranešimų",
+    "searchEmpty": "Atitinkančių pranešimų nėra"
   },
   "leaderboard": {
     "title": "Lyderių lentelė",
@@ -1929,7 +2111,13 @@
     "loadingBoard": "Įkeliama lyderių lentelė…",
     "amountTokens": "{{amount}} žetonų",
     "directReferrals": "{{count}} tiesioginis",
-    "secondaryReferrals": "{{count}} antrinis"
+    "secondaryReferrals": "{{count}} antrinis",
+    "ogChallenge": "OG iššūkis",
+    "ogHolders_one": "{{count}} OG turėtojas",
+    "ogHolders_other": "OG turėtojų: {{count}}",
+    "ogChallengeTitle": "Sugrąžinkite OG turėtojus",
+    "ogChallengeBody": "Pakvieskite žmones, kurie vis dar turi DHB. Kai jie prisijungs per jūsų pakvietimo nuorodą ir laikys DHB savo „Riftn“ piniginėje, jie čia bus įskaityti jums.",
+    "ogChallengeCta": "Gauti pakvietimo nuorodą"
   },
   "dhbListing": {
     "title": "Žetono listingas jau netrukus!",
@@ -2072,17 +2260,39 @@
     "shipping": "Kuriama",
     "noShippingYet": "Nieko nevykdoma",
     "shippingAppearHere": "Čia atsiras pageidavimai, kurie jau kuriami.",
-    "loadFailed": "Nepavyko įkelti prašymų"
+    "loadFailed": "Nepavyko įkelti prašymų",
+    "editMedia": "Nuotraukos ir vaizdo įrašai",
+    "editAddMedia": "Pridėti nuotrauką ar vaizdo įrašą",
+    "deviceInfoNote": "Pridedama įrenginio informacija, kad galėtume ištaisyti klaidas.",
+    "deviceInfo": "Įrenginio informacija",
+    "deviceInfoOwners": "Tai mato tik lentos savininkai",
+    "deviceInfoError": "Nepavyko įkelti įrenginio informacijos",
+    "deviceInfoNone": "Šiai užklausai įrenginio informacijos nėra",
+    "deviceInfoErrors": "Naujausios klaidos"
   },
   "auth": {
-    "loginRequired": "Reikia prisijungti"
+    "loginRequired": "Reikia prisijungti",
+    "accountDeleted": "Ši paskyra ištrinta. Galite vėl užsiregistruoti kaip nauja paskyra.",
+    "accountDeletedHours_one": "Ši paskyra ištrinta. Vėl užsiregistruoti tuo pačiu el. paštu ar telefonu galėsite maždaug po {{count}} valandos.",
+    "accountDeletedHours_other": "Ši paskyra ištrinta. Vėl užsiregistruoti tuo pačiu el. paštu ar telefonu galėsite maždaug po {{count}} val.",
+    "accountDeletedDays_one": "Ši paskyra ištrinta. Vėl užsiregistruoti tuo pačiu el. paštu ar telefonu galėsite maždaug po {{count}} dienos.",
+    "accountDeletedDays_other": "Ši paskyra ištrinta. Vėl užsiregistruoti tuo pačiu el. paštu ar telefonu galėsite maždaug po {{count}} d."
   },
   "messages": {
     "newDrawer": {
       "to": "Iki",
       "recent": "Naujausi",
       "suggested": "Siūloma",
-      "youFollow": "Žmonės, kuriuos sekate"
+      "youFollow": "Žmonės, kuriuos sekate",
+      "placeholder": "Vardas arba @naudotojo_vardas",
+      "chattedBefore": "Bendraujate",
+      "mutual": "Abipusis",
+      "dmsOff": "Žinutės išjungtos",
+      "keepTyping": "Rašykite toliau, kad ieškotumėte tarp visų",
+      "noOne": "Nieko nerasta",
+      "tryUsername": "Pabandykite tikslų @naudotojo_vardą",
+      "sayHi": "Pasisveikinkite su kuo nors",
+      "typeAny": "Įveskite bet kokį vardą arba @naudotojo_vardą"
     },
     "reply": "Atsakyti",
     "react": "Reaguoti",
@@ -2123,7 +2333,8 @@
     "noConversationsYet": "Šioje kanalą dar nėra nei vieno pokalbio",
     "sending": "Siunčiama",
     "retrySend": "Bandyti dar kartą",
-    "discardSend": "Pašalinti"
+    "discardSend": "Pašalinti",
+    "notSent": "Neišsiųsta"
   },
   "music": {
     "listeningCount_one": "{{count}} klausymasis",
@@ -2207,7 +2418,22 @@
     "viewMode": "Peržiūrėti",
     "back": "Atgal",
     "reserve": {
-      "signIn": "Prisijungti"
+      "signIn": "Prisijungti",
+      "available": "Naudotojo vardas laisvas",
+      "held": "Rezervuota jums",
+      "ended": "Rezervacija baigėsi",
+      "busy": "Rezervuojama",
+      "availableBody": "riftn.com/{{name}} šiuo metu laisvas. Rezervuokite jį ir mes jį palaikysime vieną minutę, kol registruositės.",
+      "heldBody": "Niekas kitas negali užimti @{{name}}, kol nesibaigs laikmatis. Užbaikite registraciją, kad jį išlaikytumėte.",
+      "endedBody": "Jūsų minutė baigėsi, todėl @{{name}} vėl prieinamas visiems. Jis vis dar laisvas.",
+      "busyBody": "Kažkas šiuo metu registruojasi kaip @{{name}}. Jei registracijos neužbaigs, vardas atsilaisvins pasibaigus laikmačiui.",
+      "finish": "Užbaigti registraciją",
+      "again": "Rezervuoti dar kartą",
+      "cta": "Rezervuoti dabar",
+      "letGo": "Atsisakyti",
+      "haveAccount": "Turite paskyrą?",
+      "seoTitle": "@{{name}} laisvas „Riftn“",
+      "seoDescription": "riftn.com/{{name}} dar niekas neužėmė. Rezervuokite ir užsiregistruokite, kad jis taptų jūsų."
     },
     "usernameAvailable": "Naudotojo vardas laisvas!",
     "signUpToClaim": "Užsiregistruokite šiandien, kad užsitikrintumėte",
@@ -2238,12 +2464,16 @@
     "tabs": {
       "playlists": "Grojaraščiai",
       "dislikes": "Nepatinka",
-      "likes": "Patinka"
+      "likes": "Patinka",
+      "articles": "Straipsniai"
     },
     "likedPosts": {
       "emptyTitle": "Dar nėra patiktukų",
       "privateTitle": "Patiktukai privatūs",
-      "loadMore": "Įkelti daugiau"
+      "loadMore": "Įkelti daugiau",
+      "emptyOwn": "Čia rodomi jums patikę įrašai. Juos matote tik jūs, nebent nustatymuose įjungsite Rodyti mano patiktukus.",
+      "emptyOther": "Dar niekas nepatiko.",
+      "privateDesc": "Ši paskyra savo patiktukų nerodo."
     },
     "dislikes": {
       "emptyTitle": "Dar nėra teigiamų įvertinimų",
@@ -2268,11 +2498,31 @@
     "sortMostLiked": "Daugiausiai palaikytas",
     "sortCustomShort": "Papildomas",
     "arrange": {
-      "saving": "Išsaugoma..."
+      "saving": "Išsaugoma...",
+      "title": "Sutvarkykite savo įrašus",
+      "hint": "Palaikykite įrašą ir nuvilkite jį į naują vietą. Lankytojai pirmiausia matys šią tvarką.",
+      "drag": "Vilkite, kad perkeltumėte",
+      "toTop": "Perkelti į viršų",
+      "save": "Išsaugoti tvarką",
+      "saved": "Jūsų tvarka išsaugota",
+      "reset": "Grįžti prie naujausių pirmiau",
+      "resetDone": "Grįžti prie naujausių pirmiau",
+      "saveFailed": "Nepavyko išsaugoti jūsų tvarkos. Bandykite dar kartą.",
+      "loadFailed": "Nepavyko įkelti jūsų įrašų. Uždarykite ir bandykite dar kartą.",
+      "empty": "Kol kas nėra ko tvarkyti. Pirmiausia ką nors paskelbkite."
     },
     "searchThisChannel": "Peržiūrėti šį kanalą",
     "searchResultCount": "1 rezultatas už \"{{query}}\"",
-    "searchResultCountPlural": "{{count}} rezultatų už \"{{query}}\""
+    "searchResultCountPlural": "{{count}} rezultatų už \"{{query}}\"",
+    "unavailable": "Profilis nepasiekiamas",
+    "mutualsOne": "{{count}} bendras:",
+    "mutualsMany": "Bendrų: {{count}}:",
+    "articles": {
+      "emptyTitle": "Straipsnių dar nėra",
+      "emptySubtitle": "Čia bus rodomi straipsniai"
+    },
+    "sortCustom": "Pasirinktinė tvarka",
+    "arrangeButton": "Tvarkyti įrašus"
   },
   "tv": {
     "seoTitle": "Tiesioginė televizija: nemokami kanalai iš viso pasaulio",
@@ -2537,7 +2787,26 @@
     "createSignIn": "Prisijunkite iš naujo, kad sukurtumėte agentą",
     "checkConnection": "Patikrinkite ryšį ir bandykite dar kartą.",
     "welcome": {
-      "text": "Pasveikinimo žinutė"
+      "text": "Pasveikinimo žinutė",
+      "title": "Pasveikinti naujus narius",
+      "help": "Šis agentas seka ir (arba) rašo žinutes žmonėms, kurie ką tik prisijungė prie „Riftn“, po kelis per dieną.",
+      "follow": "Sekti naujus narius",
+      "message": "Rašyti naujiems nariams",
+      "textHelp": "{name} pakeičiamas jų @naudotojo vardu. Jokių nuorodų. Siunčiama vieną kartą kiekvienam žmogui.",
+      "saveText": "Išsaugoti žinutę",
+      "perDay": "Žmonių per dieną",
+      "fewer": "Mažiau per dieną",
+      "more": "Daugiau per dieną",
+      "today": "Šiandien: pradėta sekti {{follows}} · parašyta {{messages}}",
+      "limits": "Niekada tas pats žmogus du kartus. Praleidžia visus, kurie jus užblokavo ar nutildė, išjungė naujas žinutes ar pasislėpė nuo Naujų narių.",
+      "showLog": "Žiūrėti, ką pasveikino",
+      "hideLog": "Slėpti pasveikinimus",
+      "empty": "Kol kas nieko. Nauji nariai čia atsiras prisijungę.",
+      "followed": "Pradėta sekti",
+      "messaged": "Parašyta",
+      "skipped": "Praleista",
+      "failed": "Nepavyko pasiekti",
+      "defaultText": "Labas, {name}, sveiki atvykę į „Riftn“! 👋"
     },
     "workspace": {
       "moderation": "Transliacijos moderavimas",
@@ -2733,7 +3002,15 @@
     "switchWalletAccount": "Atsijungti",
     "walletLoadFailed": "Neįmanoma įkelti sąskaitas. Prašome bandyti dar kartą.",
     "openInBrowser": "Atidaryti naršyklėje",
-    "copyLink": "Nukopijuoti nuorodą"
+    "copyLink": "Nukopijuoti nuorodą",
+    "bringLoginOver": "Naudojotės „Riftn“ per dehub.io? <bring>Perkelkite savo prisijungimą</bring>",
+    "didYouMean": "Ar turėjote omenyje {{email}}?",
+    "profileMovedTitle": "Jūsų profilis perkeltas",
+    "migrateWrongLogin": "Šis prisijungimas atidarė kitą piniginę, todėl niekas nepasikeitė. Jūsų senasis profilis buvo sukurtas su {{login}}. Naudokite jį, kad jį sugrąžintumėte.",
+    "googleInAppTitle": "Google neleidžia prisijungti programėlėje {{app}}",
+    "googleInAppTitleUnnamed": "Google neleidžia prisijungti šioje programėlėje",
+    "googleInAppBody": "Atidarykite „Riftn“ naršyklėje, kad naudotumėte Google, arba prisijunkite čia el. paštu.",
+    "tryAnyway": "Vis tiek bandyti"
   },
   "careers": {
     "title": "Karjera Riftn",
@@ -2958,7 +3235,16 @@
     "searchDehubFor": "Ieškoti „{{query}}“ Riftn svetainėje",
     "switchAccount": "Keisti paskyrą",
     "signedInAs": "Prisijungęs kaip {{name}}",
-    "requestSend": "Siųsti prašymą"
+    "requestSend": "Siųsti prašymą",
+    "requestPrompt": "Dar nėra? Išsiųskite tai kaip užklausą",
+    "requestPromptShort": "Dar nėra?",
+    "requestDraftMenu": "Pridėti {{query}} į „Riftn“",
+    "requestDraftSettings": "Nustatymas, skirtas {{query}}",
+    "requestPostsTo": "Skelbiama skiltyje Užklausos",
+    "requestHint": "Skelbiama skiltyje Užklausos jūsų vardu. Pranešime, kai tai bus įgyvendinta.",
+    "requestSent": "Išsiųsta į Užklausas",
+    "requestSentHint": "Pranešime, kai tai bus įgyvendinta.",
+    "requestSeeIt": "Žiūrėti Užklausose"
   },
   "comments": {
     "reportComment": "Pranešti apie komentarą",
@@ -3054,8 +3340,19 @@
     "anonymousLikes_other": "Patiktukai iš anoniminių ženklelių turėtojų: {{count}}",
     "threadParts": {
       "moveUp": "Aukštyn",
-      "moveDown": "Perkelti žemyn"
-    }
+      "moveDown": "Perkelti žemyn",
+      "reorder": "Pertvarkyti",
+      "save": "Išsaugoti tvarką",
+      "saved": "Gijos tvarka išsaugota",
+      "saveFailed": "Nepavyko išsaugoti tvarkos. Bandykite dar kartą.",
+      "dragPart": "Vilkite, kad perkeltumėte {{n}} dalį",
+      "addPart": "Pridėti prie gijos",
+      "addPlaceholder": "Pridėkite prie savo gijos...",
+      "label": "Gija · dalių: {{count}}"
+    },
+    "attachMedia": "Pridėti nuotrauką, vaizdo ar garso įrašą",
+    "attachUnsupported": "Pridėkite nuotrauką, vaizdo įrašą arba garso failą.",
+    "attachTooLarge": "Šis failas viršija {{size}} MB ribą."
   },
   "mintChain": {
     "title": "Mėtų stulpelis",
@@ -3073,7 +3370,14 @@
     "notAvailable": "Šios grandinės monetų kaldinti dar negalima."
   },
   "postEditHistory": {
-    "original": "Originalas"
+    "original": "Originalas",
+    "title": "Redagavimo istorija",
+    "edited_one": "Redaguota kartą",
+    "edited_other": "Redaguota kartų: {{count}}",
+    "lastEdit": "Paskutinį kartą redaguota {{time}}",
+    "editN": "{{n}} redagavimas",
+    "now": "Dabar",
+    "showChanges": "Rodyti, kas pasikeitė"
   },
   "postInfo": {
     "title": "Įrašo informacija",
@@ -3368,7 +3672,10 @@
     "waiting_for_wallet": "Laukiame jūsų piniginės",
     "waiting_for_wallet_desc": "Atidarykite {{wallet}} ir patvirtinkite parašą — užklausa laukia ten.",
     "your_wallet": "jūsų piniginė",
-    "max_available_on_chain": "Didžiausias galimas kiekis: {{amount}} žetonų „{{chain}}“"
+    "max_available_on_chain": "Didžiausias galimas kiekis: {{amount}} žetonų „{{chain}}“",
+    "not_available_for_this_post": "Šiam įrašui nepasiekiama",
+    "turn_back_on_desktop_notifications": "Vėl įjungti darbalaukio pranešimus?",
+    "notifications_moved_to_riftn": "Persikėlėme į riftn.com, todėl jūsų naršyklei dar kartą reikia jūsų leidimo čia rodyti atsakymus, arbatpinigius ir žinutes."
   },
   "staking": {
     "title": "Stakingas",
@@ -5276,18 +5583,167 @@
     "buy": "Pirkti",
     "reject": "Atmesti",
     "needsYouHold": "Reikia {{needed}}, jūs turite {{held}}",
-    "sellYourFractions": "Parduokite savo trupmenas ({{held}} turima)"
+    "sellYourFractions": "Parduokite savo trupmenas ({{held}} turima)",
+    "nftsSubtitle": "Bet kuris NFT, keitimai vienu žingsniu",
+    "buyersTab": "Pirkėjai",
+    "soldOfListing": "Parduota {{sold}} iš {{total}}",
+    "noBuyersYet": "Dar niekas nepirko šio įrašo dalių",
+    "fromYou": "iš jūsų",
+    "statusOverdue": "Vėluoja"
   },
   "creator": {
     "marketing": {
       "import": {
-        "use": "Naudoti šią informaciją"
+        "use": "Naudoti šią informaciją",
+        "url": "Produkto puslapio URL",
+        "action": "Nuskaityti produkto puslapį",
+        "loading": "Skaitomas puslapis…",
+        "hint": "Importuokite tekstą iš viešo produkto puslapio. Prieš naudodami peržiūrėkite informaciją; produkto vaizdus pridėkite atskirai studijoje.",
+        "source": "Importuotas šaltinis",
+        "review": "Pasirinkite produktą, kurį nukopijuoti į redaguojamą užduotį. Jūsų antraštė, balsas ir prekės ženklo spalvos nepasikeis.",
+        "errors": {
+          "signIn": "Prisijunkite, kad importuotumėte produkto puslapį.",
+          "url": "Naudokite viešą HTTPS produkto URL.",
+          "empty": "Tinkamos produkto informacijos nerasta. Pridėkite ją rankiniu būdu.",
+          "busy": "Vykdoma per daug importavimų. Netrukus bandykite dar kartą.",
+          "unavailable": "Šio puslapio importuoti nepavyko. Pridėkite produkto informaciją rankiniu būdu.",
+          "failed": "Importuoti nepavyko. Jūsų užduotis išsaugota; bandykite dar kartą arba įveskite informaciją rankiniu būdu."
+        }
+      },
+      "return": "Grįžti į studijos juodraštį",
+      "title": "Kampanijos užduotis",
+      "intro": "Aprašykite savo produktą ir prekės ženklą, tada paruoškite atitinkamus reklamos formatus.",
+      "saved": "Jūsų užduotis išsaugota šiame įrenginyje šiai paskyrai.",
+      "preview": "Paruošti formatus",
+      "clear": "Išvalyti užduotį",
+      "required": "Pridėkite produkto pavadinimą ir aprašymą, kad paruoštumėte formatus.",
+      "variants": "Kampanijos formatai",
+      "reviewHint": "Prieš generuodami studijoje peržiūrėkite modelį, kainą ir produkto nuorodą. Kiekvienas formatas yra atskira generacija.",
+      "open": "Peržiūrėti studijoje",
+      "fields": {
+        "product": "Produkto pavadinimas (privaloma)",
+        "description": "Produkto faktai (privaloma)",
+        "brand": "Prekės ženklo pavadinimas",
+        "audience": "Tikslinė auditorija",
+        "benefit": "Pagrindinė nauda",
+        "voice": "Prekės ženklo balsas",
+        "palette": "Prekės ženklo spalvos",
+        "headline": "Patvirtinta antraštė",
+        "cta": "Raginimas veikti"
+      },
+      "formats": {
+        "square": "Kvadratinė reklama",
+        "portrait": "Vertikali reklama",
+        "story": "Istorijos vaizdas",
+        "video": "Vertikalus vaizdo įrašas"
       }
     },
     "cinema": {
       "close": "Uždaryti",
       "performance": {
-        "label": "Našumas"
+        "label": "Našumas",
+        "0": "Džiugus",
+        "1": "Melancholiškas",
+        "2": "Nerimastingas",
+        "3": "Pasitikintis",
+        "4": "Apstulbęs",
+        "5": "Santūrus",
+        "6": "Žaismingas"
+      },
+      "title": "Kino režisūra",
+      "hint": "Nukreipkite kito vaizdo ar vaizdo įrašo vizualinį stilių. Rezultatai priklauso nuo modelio.",
+      "none": "Be režisūros",
+      "reset": "Išvalyti režisūrą",
+      "camera": {
+        "label": "Kameros išvaizda",
+        "0": "Skaitmeninis kinas",
+        "1": "35 mm juosta",
+        "2": "16 mm juosta",
+        "3": "Didelis formatas",
+        "4": "Senovinė vaizdo kamera"
+      },
+      "lens": {
+        "label": "Objektyvo išvaizda",
+        "0": "Sferinis",
+        "1": "Anamorfinis",
+        "2": "Senovinis minkštas stiklas",
+        "3": "Makro",
+        "4": "Tilt-shift"
+      },
+      "focalLength": {
+        "label": "Židinio nuotolis",
+        "0": "18 mm platus",
+        "1": "24 mm platus",
+        "2": "35 mm natūralus",
+        "3": "50 mm standartinis",
+        "4": "85 mm portretinis",
+        "5": "135 mm teleobjektyvas"
+      },
+      "aperture": {
+        "label": "Ryškumo gylis",
+        "0": "f/1.4 labai seklus",
+        "1": "f/2.8 seklus",
+        "2": "f/5.6 vidutinis",
+        "3": "f/11 gilus fokusas"
+      },
+      "movement": {
+        "label": "Kameros judesys",
+        "0": "Nejudantis stovas",
+        "1": "Lėtas priartėjimas vežimėliu",
+        "2": "Lėtas atitolimas vežimėliu",
+        "3": "Šoninis sekimas",
+        "4": "Sukimasis aplink objektą",
+        "5": "Iš rankų",
+        "6": "Pakilimas kranu",
+        "7": "Lėta panorama"
+      },
+      "lighting": {
+        "label": "Apšvietimas",
+        "0": "Švelni dienos šviesa",
+        "1": "Auksinė valanda",
+        "2": "Tamsus kjaroskuro",
+        "3": "Šviesi studija",
+        "4": "Neoniniai šviesos šaltiniai",
+        "5": "Siluetas su galiniu apšvietimu",
+        "6": "Išsklaidyta debesuota šviesa"
+      },
+      "tempo": {
+        "label": "Kadro tempas",
+        "0": "Vienas nepertraukiamas kadras",
+        "1": "Ramus, neskubus veiksmas",
+        "2": "Dinamiškas, energingas veiksmas",
+        "3": "Chaotiškas, pašėlęs veiksmas"
+      },
+      "era": {
+        "label": "Epocha",
+        "0": "XX a. 3 deš.",
+        "1": "XX a. 6 deš.",
+        "2": "XX a. 7 deš.",
+        "3": "XX a. 8 deš.",
+        "4": "XX a. 9 deš.",
+        "5": "XX a. 10 deš.",
+        "6": "Dabartis",
+        "7": "Artima ateitis"
+      },
+      "genre": {
+        "label": "Žanras",
+        "0": "Dokumentinis",
+        "1": "Drama",
+        "2": "Film noir",
+        "3": "Mokslinė fantastika",
+        "4": "Fantastika",
+        "5": "Romantinė komedija",
+        "6": "Trileris",
+        "7": "Vesternas"
+      },
+      "palette": {
+        "label": "Spalvų paletė",
+        "0": "Šiltas gintarinis",
+        "1": "Šalta mėlyna",
+        "2": "Prislopinti žemės atspalviai",
+        "3": "Pasteliniai",
+        "4": "Kontrastinga nespalvota",
+        "5": "Sodrios pagrindinės spalvos"
       }
     },
     "libraryEmpty": "Čia bus rodomi jūsų išsaugoti generavimai.",
@@ -6089,14 +6545,119 @@
       "needsImageToAnimate": "{{model}} reikia paveikslėlio animacijai. Pirmiausia pritvirtinkite vieną.",
       "needsImageToWork": "{{model}} reikia vaizdo, iš kurio būtų galima dirbti. Pirmiausia pritvirtinkite vieną.",
       "speechLimit": "Tai yra {{length}} simboliai. Limitas yra {{limit}}.",
-      "musicTrackLength": "{{count}}s takelis"
+      "musicTrackLength": "{{count}}s takelis",
+      "cannotEditImage": "{{model}} negali redaguoti pridėto vaizdo. Pašalinkite jį arba pasirinkite kitą modelį."
     },
     "gallery": {
       "send": "Siųsti",
       "notifications": {
-        "generation_reply": "{{name}} atsakė į jūsų komentarą"
+        "generation_reply": "{{name}} atsakė į jūsų komentarą",
+        "generation_like": "{{name}} sureagavo į jūsų generaciją",
+        "generation_comment_like": "{{name}} sureagavo į jūsų komentarą",
+        "generation_comment": "{{name}} pakomentavo jūsų generaciją"
+      },
+      "browse": "Naršyti generacijas",
+      "create": "Kurti",
+      "fullscreen": "Žiūrėti per visą ekraną",
+      "missing": "Ši generacija nepasiekiama."
+    },
+    "avatarTitle": "Kalbantis portretas",
+    "avatarRequirements": "Kvadratinis PNG portretas, 512–2048 pikselių, iki 5 MB. Mono 24 kHz 16 bitų PCM WAV, 5–30 sekundžių. Paskutinė sekundės dalis užpildoma tyla.",
+    "avatarPortrait": "Pasirinkti portreto PNG",
+    "avatarAudio": "Pasirinkti kalbos WAV",
+    "avatarPermission": "Turiu leidimą animuoti šį portretą ir naudoti šį garso įrašą.",
+    "avatarQuote": "{{seconds}} sek. įskaitant tylą · {{amount}} žetonų",
+    "avatarPrepare": "Paruošti ir peržiūrėti kainą",
+    "batchFlowLimit": "Flow sąrašas pilnas. Pašalinkite nenaudojamą Flow prieš kurdami kitą paketą.",
+    "batchReviewCampaign": "Peržiūrėti kampanijos paketą Flow",
+    "batchReviewFilmImages": "Peržiūrėti siužetinės linijos vaizdų paketą",
+    "batchReviewFilmVideos": "Peržiūrėti filmo klipų paketą",
+    "batchReviewHint": "Atidaromas atskiras išsaugotas Flow. Prieš mokėdami peržiūrėkite kiekvieną elementą ir visą kainą. Užbaigti elementai ir pradinis mokėjimas išsaugomi atkūrimui. Nuorodos nukopijuojamos į jūsų privačią biblioteką; taikomas saugyklos ir tinklo naudojimas.",
+    "batchInvalid": "Užbaikite kiekvieną elementą prieš ruošdami 1–12 vaizdų ar klipų paketą.",
+    "batchReferenceLimit": "Šis paketas palaiko vieną vaizdo nuorodą kiekvienam elementui. Pašalinkite papildomas nuorodas arba paruoškite tą elementą atskirai.",
+    "batchVideoSettings": "Šiam paketui klipų trukmė turi būti sveikasis skaičius nuo 4 iki 15 sekundžių, o kraštinių santykis 16:9, 9:16 arba 1:1.",
+    "batchMissingReference": "Trūksta nuorodos, ji nepalaikoma arba didesnė nei 25 MB. Atkurkite ją redaktoriuje prieš ruošdami paketą.",
+    "batchOwnerChanged": "Paskyra arba juodraštis pasikeitė. Iš naujo atidarykite šį paketą su pradine paskyra.",
+    "batchConflict": "Išsaugotas paketas neatitinka pradinės momentinės kopijos.",
+    "audioExportFormat": "Eksporto formatas",
+    "audioExportMp3": "MP3 · 128 kbps",
+    "audioExportWav": "WAV · 24 kHz · mono",
+    "extensionNeedsClip": "Pridėkite vieną šaltinio klipą, kurį norite pratęsti.",
+    "extensionSeconds": "+{{seconds}} s naujos medžiagos",
+    "extensionHelp": "Grąžina jūsų šaltinio klipą su maždaug keturiomis naujomis sekundėmis. Rezultatas pakeičiamas iki 720p, 24 kadrų per sekundę. Pratęsimui sugeneruojamas naujas garsas.",
+    "extensionForward": "Pridėti maždaug keturias sekundes po šaltinio klipo",
+    "extensionBackward": "Pridėti maždaug keturias sekundes prieš šaltinio klipą",
+    "expandDescription": "Sugeneruoti naujus vaizdo kraštus. Neprivaloma užklausa anglų kalba; vienas šaltinio vaizdas.",
+    "relightDescription": "Pakeisti vienos nuotraukos apšvietimą pagal jūsų apšvietimo ir fono aprašymą.",
+    "expandPromptHint": "Pridėkite vieną vaizdą ir pasirinkite naują kraštinių santykį. Užklausa anglų kalba neprivaloma.",
+    "expandEnglishOnly": "Šis išplėtimo modelis priima užklausas anglų kalba. Palikite užklausą tuščią automatiniam išplėtimui.",
+    "expandNeedsImage": "Pridėkite vaizdą, kurį norite išplėsti.",
+    "learn": {
+      "title": "Kūrėjo pamokos",
+      "intro": "Trumpos pamokos, žinių patikrinimas ir redaguojama užduotis kiekvienai. Pažanga išsaugoma šiame įrenginyje jūsų paskyrai.",
+      "back": "Atgal į Kūrėją",
+      "lessons": "Pamokos",
+      "progress": "Išlaikyta {{completed}} iš {{total}} žinių patikrinimų",
+      "check": "Tikrinti atsakymą",
+      "correct": "Žinių patikrinimas išlaikytas",
+      "retry": "Bandykite dar kartą. Peržiūrėkite pamoką aukščiau.",
+      "exerciseTitle": "Praktinė užduotis",
+      "exerciseHint": "Atidarykite redaguojamą pavyzdį savo studijos darbo erdvėje. Juodraščio atidarymas nemokamas; generavimui reikia jūsų peržiūros ir atskiros kainos pasiūlymo. Prieš generuodami redaguokite pavyzdį.",
+      "openExercise": "Atidaryti užduoties juodraštį",
+      "closeExercise": "Uždaryti užduotį",
+      "brief": {
+        "title": "Parašykite aiškią vizualinę užduotį",
+        "body1": "Aprašykite konkretų objektą, jo veiksmą ir aplinką. Pridėkite kadravimą ar kameros judesį, kai tai padeda scenai. Nesusijusias idėjas palikite kitam juodraščiui.",
+        "body2": "Apšvietimo, objektyvo ir stiliaus nurodymai padeda modeliui. Jie negarantuoja fizinio kameros elgesio ar tikslaus vaizdo. Keiskite po vieną dalį, kad galėtumėte palyginti versijas.",
+        "body3": "Prieš generuodami peržiūrėkite pasirinktą modelį, palaikomus priedus, matmenis ir kainą. Išsaugokite pradinį juodraštį, kad galėtumėte prie jo grįžti.",
+        "question": "Kurią užduotį lengviausia patobulinti?",
+        "answer0": "Aiškus objektas, veiksmas ir aplinka",
+        "answer1": "Tik modelio pavadinimas",
+        "answer2": "Prieštaringų stilių sąrašas",
+        "exercise": "Keraminis arbatinukas ant medinio stalo prie lango. Švelni ryto šviesa, vidutinis kadravimas, paprastas fonas. Arbatinukas turi likti aiškiu objektu."
+      },
+      "continuity": {
+        "title": "Planuokite kadrus ir tikrinkite tęstinumą",
+        "body1": "Naudokite redaktoriaus skydelį Filmas, kad išsaugotumėte užduotį ir sutvarkytus kadrus. Paruoškite kiekvieną kadrą ar klipą atskirai, peržiūrėkite jo kainą ir pasirinkite priimtą rezultatą.",
+        "body2": "Pridėkite tik pasirinkto modelio priimamas nuorodas. Pakartotinai naudojama nuoroda gali padėti išlaikyti išvaizdą; ji nemoko tapatybės ir negarantuoja atitikimo. Personažai ir balsai gali skirtis tarp generacijų.",
+        "body3": "Išsaugokite sėkmingus dublius ir sudėkite juos laiko juostoje. Prieš eksportuodami peržiūrėkite judesį, veidus, dialogus ir perėjimus.",
+        "question": "Kas padeda išlaikyti tęstinumą tarp kadrų?",
+        "answer0": "Daugiau nesusijusių užklausų",
+        "answer1": "Patvirtintos nuorodos ir peržiūrėtos kadrų pastabos",
+        "answer2": "Manymas, kad personažo tapatybė garantuota",
+        "exercise": "Bendras planas: vienišas keliautojas saulėtekio metu pasiekia ramią pakrantę. Lėtas kameros judesys į priekį, rami atmosfera. Vienas nepertraukiamas kadras."
+      },
+      "campaign": {
+        "title": "Naudokite patvirtintus produkto faktus",
+        "body1": "Pradėkite nuo produkto faktų, kuriuos galite patikrinti. Prieš naudodami peržiūrėkite importuotus metaduomenis. Antraštę ir raginimą veikti parašykite aiškiai; neišgalvokite kainų, atsiliepimų ar veiksmingumo teiginių.",
+        "body2": "Naudokite išsaugotus kampanijos variantus, kad bendros pastabos ir atskiri kabliukai, scenarijai, kalbos bei formatai būtų kartu. Ruoškite po vieną peržiūrėtą elementą ir studijoje patikrinkite jo kainą.",
+        "body3": "Rezultate peržiūrėkite matomą tekstą, produkto išvaizdą ir bet kokius sakomus teiginius. Užklausa nėra produkto tikslumo ar rinkodaros veiksmingumo įrodymas.",
+        "question": "Kada reikėtų įtraukti teiginį apie produktą?",
+        "answer0": "Kai tik jis skamba įtikinamai",
+        "answer1": "Išgalvojus penkių žvaigždučių atsiliepimą",
+        "answer2": "Kai jis paremtas patvirtintais produkto faktais",
+        "exercise": "Sukurkite vertikalią produkto reklamą biriai arbatai, parduodamai daugkartinio naudojimo skardinėje. Patvirtinta antraštė: Skirkite laiko arbatai. Patvirtintas CTA: Atraskite kolekciją. Naudokite tik šiuos faktus; neišgalvokite nuolaidų, atsiliepimų ar teiginių apie sveikatą."
       }
-    }
+    },
+    "campaignPlanTitle": "Kampanijos variantai ir epizodai",
+    "campaignPlanIntro": "Išsaugokite iki 12 variantų ar epizodų. Kiekvienas atidaro studiją savai peržiūrai ir kainai. Bendros pastabos padeda tęstinumui; produkto išvaizda, personažai ir balsai gali skirtis tarp generacijų.",
+    "campaignTitle": "Kampanijos ar serijos pavadinimas",
+    "campaignContinuity": "Bendros personažo, balso ir stiliaus pastabos",
+    "campaignVariantTitle": "Varianto ar epizodo pavadinimas",
+    "campaignHook": "Pradžios kabliukas",
+    "campaignLanguage": "Rezultato kalba",
+    "campaignScript": "Patvirtintas scenarijus ar scenų seka",
+    "campaignAdd": "Pridėti variantą ar epizodą",
+    "campaignClear": "Išvalyti planą",
+    "campaignFormat": "Rezultato formatas",
+    "audioInvalidResponse": "Garso paslauga grąžino netinkamą rezultatą.",
+    "batchPaymentHelp": "Už kiekvieną pateiktą vaizdą mokama atskirai. Jei paketas sustoja, nepanaudoti jo mokėjimo žetonai automatiškai panaudojami vėlesnei jo apimamai generacijai.",
+    "invalidSeed": "Sėkla turi būti sveikasis skaičius nuo 0 iki 2147483647.",
+    "libraryFavorites": "Mėgstami",
+    "libraryFavoriteAdd": "Pridėti prie mėgstamų",
+    "libraryFavoriteRemove": "Pašalinti iš mėgstamų",
+    "audioTaskDialoguePlaceholder": "Alisa: Reikėtų eiti.\nBobas: [juokiasi] Po jūsų.",
+    "priceOwnKey": "Jūsų raktas"
   },
   "pricing": {
     "plansForEveryWorkflow": "Planai kiekvienam darbo procesui",
@@ -6263,7 +6824,8 @@
     "createTheFirst": "Sukurkite pirmąjį",
     "docsSeoTitle": "DI įgūdžių instrukcijos Ć¢ÂÂ Riftn",
     "docsSeoDescription": "Informaciniai dokumentai apie „Riftn“ dirbtinio intelekto asistento įgūdžius ir greitą biblioteką.",
-    "raw": "briutas"
+    "raw": "briutas",
+    "docsLoadFailed": "# Klaida\nNepavyko įkelti įgūdžio dokumentacijos."
   },
   "nftMarket": {
     "actAll": "Visi",
@@ -6382,7 +6944,27 @@
     "spotlight": "Žibintuvėlis",
     "spotlightBuyNote": "NFT ir mokėjimas keičiasi vienu žingsniu.",
     "spotlightOfferNote": "Dar nėra išvardyta. Siųskite pasiūlymą ir turėtojas gali jį priimti bet kuriuo metu.",
-    "signInToTradeCta": "Prisijunkite, kad prekiautumėte"
+    "signInToTradeCta": "Prisijunkite, kad prekiautumėte",
+    "actCollectionOffer": "Kolekcijos pasiūlymas",
+    "actListed": "Įdėta parduoti",
+    "actSale": "Pardavimas",
+    "buyAll": "Pirkti visus",
+    "buySeveral": "Pirkti kelis",
+    "cartBought": "Nupirkta: {{n}}. Jie jau jūsų piniginėje.",
+    "cartCount": "Krepšelyje: {{n}}",
+    "cartFull": "Iki 20 vienu metu",
+    "cartOneCoin": "Vienas krepšelis – viena grandinė ir viena moneta. Išvalykite jį, kad pakeistumėte.",
+    "cartOwn": "Šis jau jūsų",
+    "cartPick": "Bakstelėkite, kad pridėtumėte į krepšelį",
+    "forSaleHere": "Parduodama čia",
+    "noActivity": "Čia dar nieko nėra",
+    "volShort": "Apimt.",
+    "salesCount": "Parduota: {{n}}",
+    "bestOffer": "Geriausias pasiūlymas",
+    "fromOpenSea": "Populiariausios OpenSea kolekcijos",
+    "buyHere": "Pirkite juos čia",
+    "openSeaNote": "Parduodama OpenSea. Mokate pardavėjui tiesiogiai per Seaport; „Riftn“ jokio mokesčio neprideda.",
+    "viewOnOpenSea": "Žiūrėti OpenSea"
   },
   "usernames": {
     "seoTitle": "Naudotojo vardo prekyvietė | Riftn",
@@ -6737,7 +7319,18 @@
       "votes_other": "{{count}} balsai",
       "howToVote_one": "Rašykite {{command}} ir skaičių chat'e, kad balsuotumėte · {{count}} balsas",
       "howToVote_other": "Rašykite {{command}} ir skaičių chat'e, kad balsuotumėte · {{count}} balsai"
-    }
+    },
+    "eyebrow": {
+      "follow": "Naujas sekėjas",
+      "subscribe": "Naujas prenumeratorius",
+      "subscribedTo": "Prenumeruoja · {{plan}}",
+      "gifted_one": "Padovanojo prenumeratą",
+      "gifted_other": "Padovanojo prenumeratų: {{count}}",
+      "share": "Pasidalino transliacija",
+      "join": "Ką tik prisijungė"
+    },
+    "giftedSubs_one": "{{name}} padovanojo prenumeratą!",
+    "giftedSubs_other": "{{name}} padovanojo prenumeratų: {{count}}!"
   },
   "liveChatModeration": {
     "timeout1m": "Laiką užfiksuota 1 minutę",
@@ -6758,14 +7351,40 @@
       "modes": {
         "none": "Išjungtas",
         "blur": "Suliejimas",
-        "color": "Spalva"
-      }
+        "color": "Spalva",
+        "image": "Paveikslėlis"
+      },
+      "failed": "Šiame įrenginyje nepavyko pradėti fono šalinimo.",
+      "hint": "Veikia jūsų įrenginyje. Pirmą kartą įkėlimas užtrunka kelias sekundes."
     },
     "remove": "Pašalinti",
     "scenes": {
       "countdown": "Atgalinis skaičiavimas",
       "names": {
-        "starting": "Netrukus prasidės"
+        "starting": "Netrukus prasidės",
+        "chatting": "Tiesiog pokalbiai",
+        "gameplay": "Žaidimas",
+        "brb": "Tuoj grįšiu",
+        "ending": "Transliacijos pabaiga"
+      },
+      "title": "Scenos",
+      "edit": "Redaguoti {{name}}",
+      "subtitle": "Antra eilutė (neprivaloma)",
+      "picture": "Paveikslėlis",
+      "noCountdown": "Be atgalinio skaičiavimo",
+      "minutes": "{{count}} min.",
+      "muteMic": "Išjungti mano mikrofoną, kol tai įjungta",
+      "hints": {
+        "starting": "Kortelė su atgaliniu skaičiavimu",
+        "chatting": "Kamera per visą ekraną",
+        "gameplay": "Ekranas su jūsų kamera",
+        "brb": "Kortelė, mikrofonas išjungtas",
+        "ending": "Padėkos kortelė"
+      },
+      "subtitles": {
+        "starting": "Transliacija prasidės po",
+        "brb": "Tuoj grįšiu",
+        "ending": "Ačiū, kad žiūrėjote"
       }
     },
     "sources": {
@@ -6775,15 +7394,37 @@
       "show": "Rodyti transliacijoje",
       "loop": "Ciklas",
       "positions": {
-        "center": "Centras"
+        "center": "Centras",
+        "top-left": "Viršuje kairėje",
+        "top-right": "Viršuje dešinėje",
+        "bottom-left": "Apačioje kairėje",
+        "bottom-right": "Apačioje dešinėje"
       },
       "sizes": {
-        "medium": "Vidutinė"
+        "medium": "Vidutinė",
+        "small": "Mažas",
+        "large": "Didelis"
       },
       "shapes": {
         "circle": "Apskritimas",
-        "rect": "Kvadratas"
-      }
+        "rect": "Kvadratas",
+        "rounded": "Suapvalintas"
+      },
+      "title": "Šaltiniai",
+      "addImage": "Vaizdas arba logotipas",
+      "addCamera": "Antra kamera",
+      "addClip": "Vaizdo klipas",
+      "addReaction": "Reaguoti į vaizdo įrašą",
+      "reactPlaceholder": "Įklijuokite „Riftn“ vaizdo įrašo nuorodą",
+      "reactInvalid": "Įklijuokite nuorodą į „Riftn“ vaizdo įrašą.",
+      "reactNotLive": "Pirmiausia pradėkite transliaciją, tada pridėkite vaizdo įrašą.",
+      "reactNoBubble": "Čia jūsų kamera negali būti atidaryta dukart. Pakeiskite vaizdo įrašo dydį, kad jūsų veidas liktų ekrane.",
+      "failed": "Nepavyko pridėti šio šaltinio.",
+      "empty": "Pridėkite logotipą, antrą kamerą ar vaizdo klipą ant savo transliacijos.",
+      "hint": "Šaltiniai įpiešiami ant jūsų vaizdo kiekvienam žiūrovui ir kiekvienoje platformoje.",
+      "clip": "Klipas",
+      "restart": "Paleisti iš naujo",
+      "play": "Leisti arba pristabdyti"
     },
     "audio": {
       "mute": "Nutildyti",
@@ -6792,7 +7433,27 @@
         "off": "Išjungtas",
         "low": "Šviesi",
         "high": "Stiprus"
-      }
+      },
+      "title": "Garso maišytuvas",
+      "unavailable": "Ši naršyklė negali maišyti garso, todėl jūsų mikrofonas transliuojamas toks, koks yra.",
+      "channels": {
+        "mic": "Mikrofonas",
+        "game": "Žaidimas / skirtukas",
+        "clip": "Vaizdo klipas"
+      },
+      "absent": {
+        "mic": "Nėra mikrofono",
+        "game": "Bendrinkite ekraną su garsu arba naudokite vaizdo įrašymo plokštę",
+        "clip": "Pridėkite vaizdo klipą skiltyje Šaltiniai"
+      },
+      "gate": "Triukšmo vartai",
+      "gateHint": "Nutildo jūsų mikrofoną tarp žodžių, kad klaviatūros spragsėjimas ir ventiliatoriai nepatektų į transliaciją."
+    },
+    "imageTooLarge": "Šis paveikslėlis per didelis. Pabandykite mažesnį.",
+    "widgets": {
+      "title": "Rodyti valdiklius mano vaizdo įraše",
+      "hint": "Įspėjimai, tikslų juostos ir pokalbis įpiešiami į jūsų transliaciją, todėl juos mato ir žiūrovai Twitch, YouTube bei visose kitose platformose.",
+      "failed": "Nepavyko pakeisti, kur rodomi jūsų valdikliai. Bandykite dar kartą."
     }
   },
   "liveStudio": {
@@ -6806,12 +7467,32 @@
         "off": "Išjungtas",
         "idle": "Paruošta",
         "live": "Tiesiogiai",
-        "error": "Klaida"
-      }
+        "error": "Klaida",
+        "connecting": "Jungiamasi"
+      },
+      "title": "Daugiatransliacijos paskirties vietos",
+      "intro": "Pradėkite transliaciją „Riftn“ vieną kartą, ir mes nemokamai perduosime ją į visas čia įjungtas platformas. Tai prasideda per kelias sekundes nuo transliacijos pradžios.",
+      "add": "Pridėti paskirties vietą",
+      "empty": "Paskirties vietų dar nėra. Pridėkite Twitch, YouTube, Kick ar bet kurį RTMP serverį.",
+      "server": "Serverio URL",
+      "findKey": "Raskite savo {{name}} serverį ir raktą",
+      "customHint": "Įklijuokite RTMP serverį ir raktą, kuriuos jums suteikia platforma.",
+      "keyNote": "Jūsų raktas saugomas užšifruotas mūsų serveriuose ir daugiau niekada nerodomas.",
+      "added": "{{name}} pridėta",
+      "saveFailed": "Nepavyko išsaugoti paskirties vietos",
+      "toggle": "Transliuoti į šią paskirties vietą"
     },
     "vertical": {
       "centre": "Centras",
-      "live": "TIESIOGIAI"
+      "live": "TIESIOGIAI",
+      "title": "Vertikalus vaizdas",
+      "intro": "Telefonuose jūsų transliacija rodoma vertikaliame sraute. Vilkite rėmelį, kad pasirinktumėte, kurią vaizdo dalį jie mato.",
+      "enabled": "Rodyti mano transliaciją vertikaliame sraute",
+      "zoom": "Mastelis",
+      "frame": "Jūsų horizontalus vaizdas",
+      "box": "Ką mato telefonai",
+      "hint": "Vilkite rėmelį arba naudokite rodyklių klavišus. Išsaugokite, kad pritaikytumėte tiesioginei transliacijai.",
+      "watch": "Žiūrėti {{name}} tiesiogiai"
     },
     "subathon": {
       "title": "Subatonas",
@@ -6974,7 +7655,8 @@
       "subathon_timer": "Subathon laikrodis",
       "points_board": "Sveriausi žiūrovai",
       "streamer_level": "Transliuotojo lygis",
-      "tip_jar": "Dovanų stiklainis"
+      "tip_jar": "Dovanų stiklainis",
+      "hype_train": "Ažiotažo traukinys"
     },
     "hints": {
       "tip_alert": "Pagerbia kiekvieną patarimą, prilygstantį jo lygiui",
@@ -6998,7 +7680,8 @@
       "subathon_timer": "Skaitiklis, kurį dovanos, sekos ir abonementai atidaro atgal",
       "points_board": "Tavo aukščiausiai taškų už žiūrimą ir dovanavimą žiūrovai",
       "streamer_level": "Srauto lygis ir savaitinė seka iš jūsų profilio",
-      "tip_jar": "Stiklainis, kuris prisipildo, kai ateina apmokamos dovanos"
+      "tip_jar": "Stiklainis, kuris prisipildo, kai ateina apmokamos dovanos",
+      "hype_train": "Rodo ažiotažo traukinį, kol jis vyksta: jį paleidžia trys dovanos ar prenumeratos per penkias minutes."
     },
     "fields": {
       "style": "Stilius",
@@ -7384,7 +8067,10 @@
     "endStreamConfirmBody": "Jūsų transliavimas sustabdomas visiems žiūrintiems ir negali būti atnaujintas.",
     "keepStreaming": "Tęsti transliavimą",
     "encoderPermanentHint": "Šis raktas niekada nesikeičia. Nustatykite koduotuvą vieną kartą — kitą kartą tiesiog paspauskite Pradėti ir Riftn sukurs įrašą už jus.",
-    "notEnoughTokensForBounty": "Nepakanka žetonų. Reikia {{need}} žetonų, bet turite {{have}}."
+    "notEnoughTokensForBounty": "Nepakanka žetonų. Reikia {{need}} žetonų, bet turite {{have}}.",
+    "screenInAppHint": "„Riftn“ programėlėje",
+    "screenInAppNote": "Telefonų naršyklės neleidžia jokiai svetainei bendrinti ekrano. Pradėkite transliaciją iš „Riftn“ programėlės, tada bakstelėkite Bendrinti ekraną.",
+    "screenInAppCta": "Gauti „Riftn“ programėlę"
   },
   "events": {
     "seoTitle": "Renginiai: Susitikimai ir bendruomenės renginiai Riftn",
@@ -7974,7 +8660,45 @@
     "foldersInFolder_other": "Aplankuose {{count}}",
     "foldersNoItems": "Šiame aplanke dar nieko nėra",
     "foldersNoItemsHint": "Atidarykite rezultatą ir pasirinkite „Pridėti prie aplanko“, kad jį čia įrašytumėte.",
-    "skippedUpstreamFailed": "Praleista, nes ankstesnis veiksmas nepavyko. Jo kaina išliks jūsų balanse."
+    "skippedUpstreamFailed": "Praleista, nes ankstesnis veiksmas nepavyko. Jo kaina išliks jūsų balanse.",
+    "signInForAudioLibrary": "Prisijunkite, kad atidarytumėte savo privačią išsaugotų garso įrašų biblioteką.",
+    "audioLibraryFailed": "Nepavyko įkelti jūsų išsaugotų garso įrašų. Bandykite dar kartą.",
+    "retryFreeTask": "Kartoti nemokamą užduotį",
+    "previewSavedMedia": "Peržiūrėti išsaugotą mediją",
+    "audioSavePending": "Garso įrašas paruoštas, bet jo išsaugojimas privačioje bibliotekoje dar laukia. Tęskite, kad jį gautumėte.",
+    "confirmInterruptedRetry": "Pakartoti nutrauktą garso ar asistento užduotį. Ankstesnis jos rezultatas nežinomas, o kartojant gali būti pakartotas vykdymo darbas. Bus pakartotinai panaudotas esamas mokėjimas ir apmokėtų užduočių ID.",
+    "freeResultUnknown": "Nemokamos užduoties atsakymas buvo nutrauktas. Ji nebus automatiškai pateikta dar kartą. Pasirinkite Kartoti nemokamą užduotį, tada tęskite; jūsų mokėjimas ir kitos užduotys išsaugomi.",
+    "formAuthor": "Redaguoti srautą",
+    "formAuthorHint": "Sukurkite srautą su tipizuotomis įvestimis. Išsaugokite jį čia arba išdėstykite žiniatinklio drobėje.",
+    "chooseSavedMedia": "Pasirinkti išsaugotą mediją",
+    "formInput": "Įvestis: {{handle}}",
+    "reviewRun": "Peržiūrėti vykdymą",
+    "resumeRun": "Tęsti išsaugotą vykdymą",
+    "confirmPrice": "Iš viso: {{price}} žetonų",
+    "recoveryHint": "Užduočių ir mokėjimų nuorodos išsaugotos šiame įrenginyje. Prieš pradėdami kitą vykdymą, tęskite nutrauktą darbą.",
+    "newRun": "Pradėti kitą vykdymą",
+    "loadMoreMedia": "Įkelti daugiau medijos",
+    "invalidGraph": "Patikrinkite jungtis: kiekvienai įvesčiai reikia suderinamo šaltinio, o grafe negali būti ciklų.",
+    "unsupportedNode": "Šio mazgo kol kas negalima vykdyti vietinėje formoje. Šiam srautui naudokite žiniatinklio drobę.",
+    "missingPrompt": "Prijunkite teksto mazgą su užklausa.",
+    "invalidSettings": "Pasirinktas modelis šių nustatymų nepalaiko.",
+    "missingCapturedFrame": "Užfiksuokite kadrą žiniatinklio drobėje prieš naudodami šį vaizdo įrašą kaip vaizdo įvestį.",
+    "missingSavedMedia": "Išsaugotos šaltinio medijos trūksta arba ji šiai paskyrai nebepasiekiama.",
+    "quoteFailed": "Nepavyko apskaičiuoti šio srauto kainos. Bandykite dar kartą.",
+    "recoverBeforeEdit": "Tęskite išsaugotą vykdymą prieš keisdami jo grafą ar pradėdami kitą vykdymą.",
+    "runAlreadyComplete": "Šis vykdymas baigtas. Pasirinkite Pradėti kitą vykdymą, kad generuotumėte vėl.",
+    "recoveryCorrupt": "Nepavyko perskaityti išsaugoto atkūrimo įrašo. Išsaugokite šį srautą ir susisiekite su pagalba prieš mokėdami dar kartą.",
+    "paidUnavailable": "Čia galite kurti ir išsaugoti srautus. Mokami vykdymai šioje parduotuvėje negalimi.",
+    "planChanged": "Srautas pasikeitė po kainos apskaičiavimo. Peržiūrėkite vykdymą dar kartą.",
+    "connectOwnerWallet": "Prijunkite piniginę, kuriai priklauso šis srautas.",
+    "runFailed": "Mazgo nepavyko užbaigti. Jo išsaugota užduoties nuoroda paliekama atkūrimui.",
+    "recoveryPending": "Atvaizdavimas dar vyksta. Tęskite šį vykdymą, kad jį gautumėte.",
+    "nodeAudioGen": "Garso generatorius",
+    "nodeAudioGenDesc": "Kalba, garso efektai, transkripcija ir garso išskyrimas",
+    "nodeAudioInput": "Išsaugotas garso įrašas",
+    "nodeAudioInputDesc": "Naudokite privatų garso įrašą iš savo bibliotekos",
+    "audioVoiceId": "Balso ID",
+    "audioSeconds": "Garso trukmė sekundėmis"
   },
   "videoPlayer": {
     "volume": "Garsumas",
@@ -8127,7 +8851,13 @@
       "doneAll": "Nebesekta {{done}} paskyrų, kurios nesekė jūsų atgal.",
       "doneSome": "Nebesekta {{done}} paskyrų. {{failed}} nepavyko nebesekti.",
       "doneToast": "Nebesekta {{done}} paskyrų, nes sekiančių jus atgal."
-    }
+    },
+    "followBackConfirmTitle_one": "Sekti atgal {{count}} žmogų?",
+    "followBackConfirmTitle_other": "Sekti atgal žmones ({{count}})?",
+    "followBackConfirmBody": "Jie jau seka jus. Privačioms paskyroms bus išsiųsta sekimo užklausa.",
+    "followedBackCount_one": "Pradėjote sekti atgal {{count}} žmogų",
+    "followedBackCount_other": "Pradėjote sekti atgal žmonių: {{count}}",
+    "followBackDoneBody": "Juos visus rasite skiltyje Sekami."
   },
   "reactionInfo": {
     "title": "Reakcijos",
@@ -8929,7 +9659,28 @@
       "add": "Pridėti",
       "scale": "Dydis",
       "color": "Spalva",
-      "light": "Šviesi"
+      "light": "Šviesi",
+      "create": "Pridėti 3D sceną",
+      "title": "3D scenos aikštelė",
+      "hint": "Sudėliokite kadrą iš sferų ir dėžių. Kamera, išdėstymas ir trys nepriklausomi ploto šviesos šaltiniai keičia atvaizduotą kadrą.",
+      "preview": "Atvaizduotos scenos peržiūra",
+      "error": "Nepavyko paruošti kadro. Patikrinkite kadro nuorodas ir bandykite dar kartą.",
+      "elevation": "Aukštis",
+      "distance": "Atstumas",
+      "fov": "Matymo laukas",
+      "object": "Objektas",
+      "sphere": "Sfera",
+      "box": "Dėžė",
+      "x": "X",
+      "y": "Y",
+      "z": "Z",
+      "remove": "Pašalinti objektą",
+      "intensity": "Intensyvumas",
+      "diffusion": "Išsklaidymas",
+      "saving": "Ruošiamas kadras…",
+      "useFrame": "Naudoti atvaizduotą kadrą kaip kadro nuorodą",
+      "frameHint": "Sukuria 320 × 180 PNG ir prideda jį prie šio kadro nuorodų. Prieš generuodami peržiūrėkite nuorodų limitą ir modelio kainą.",
+      "frameName": "Scenos aikštelės kadras"
     },
     "video": {
       "tFade": "Persiliejimas",
@@ -9024,7 +9775,9 @@
       "pptx": "„PowerPoint“ pristatymas",
       "pptxHint": "Kiekvienas puslapis tampa vienu skaidrės vaizdu su pranešėjo pastabomis ir nuorodomis. Redaguokite atskirą tekstą ir elementus originaliame dizaine.",
       "section": "Skyrius pavadintas",
-      "transparent": "Skaidrus fonas"
+      "transparent": "Skaidrus fonas",
+      "nle": "Premiere / Final Cut / Resolve (XML)",
+      "nleHint": "Atsisiunčia ZIP su jūsų laiko juosta FCPXML ir Premiere XML formatais bei visais medijos failais, kad galėtumėte baigti montažą Premiere Pro, Final Cut Pro ar DaVinci Resolve. Tekstas tampa žymekliais; efektai lieka „Riftn“."
     },
     "inspector": {
       "selectHint": "Pasirinkite sluoksnį drobėje arba klipą laiko juostoje.",
@@ -9118,7 +9871,45 @@
       "failed": "DI dabar negalėjo to atlikti. Bandykite dar kartą po akimirkos.",
       "changes": "Atlikta pakeitimų: {{count}}",
       "undo": "Anuliuoti",
-      "openGenerator": "Peržiūrėti ir generuoti"
+      "openGenerator": "Peržiūrėti ir generuoti",
+      "stopped": "Sustabdyta. Daugiau niekas nepakeista.",
+      "queued": "Eilėje: {{count}}",
+      "restore": "Atkurti iki čia",
+      "restoreHint": "Grąžinti projektą į būseną prieš šią žinutę. Anuliavimas jį sugrąžins.",
+      "restored": "Projektas atkurtas į būseną prieš tą žinutę. Paspauskite anuliuoti, kad grąžintumėte naujesnę versiją.",
+      "rewrite": "Patikslinti mano užklausą",
+      "rewriteFailed": "Nepavyko to perrašyti. Jūsų tekstas nepakeistas.",
+      "feedback": "Ar tai buvo naudinga?",
+      "good": "Geras atsakymas",
+      "bad": "Blogas atsakymas",
+      "retryPrefix": "Tai buvo neteisinga. Vietoj to, ",
+      "recipesTitle": "Receptai",
+      "recipe": {
+        "podcastClip": {
+          "label": "Tinklalaidės klipas",
+          "prompt": "Rask stipriausią 30 sekundžių momentą, apkirpk iki jo, pridėk Word Pop subtitrus ir padaryk 9:16."
+        },
+        "talkingHead": {
+          "label": "Švarus kalbantis asmuo",
+          "prompt": "Iškirpk ilgas pauzes, pridėk Classic subtitrus ir suteik subtilų šiltą atspalvį."
+        },
+        "productPromo": {
+          "label": "Produkto reklama",
+          "prompt": "Sukurk 15 sekundžių reklamą: įtaigi antraštė pradžioje, Zoom in perėjimai tarp klipų, Bold subtitrai ir energinga muzika."
+        },
+        "hypeReel": {
+          "label": "Energingas rinkinys",
+          "prompt": "Sukarpyk klipus pagal muzikos ritmą, naudok Fly up perėjimus ir Technicolor stilių."
+        },
+        "retroEdit": {
+          "label": "Retro montažas",
+          "prompt": "Suteik kiekvienam klipui VHS stilių, pridėk didelę antraštę serifiniu šriftu ir naudok Fade perėjimus."
+        },
+        "tutorial": {
+          "label": "Pamoka",
+          "prompt": "Pridėk antraštę kiekvienam žingsniui, Boxed subtitrus ir sulėtink pagrindinį momentą iki 0.5x."
+        }
+      }
     },
     "shape": {
       "rect": "Stačiakampis",
@@ -9293,7 +10084,9 @@
       "tint": "Atspalvis {{value}}",
       "vignette": "Vinjetė {{value}} %",
       "auto": "Automatinis pagerinimas",
-      "autoFailed": "Nepavyko išanalizuoti šios nuotraukos."
+      "autoFailed": "Nepavyko išanalizuoti šios nuotraukos.",
+      "halation": "Halacija {{value}}%",
+      "scanlines": "Skenavimo linijos {{value}}%"
     },
     "pages": {
       "add": "Pridėti puslapį",
@@ -9369,7 +10162,14 @@
       "action": "Automatiniai subtitrai",
       "styles": {
         "bold": "Paryškintas",
-        "serif": "Šriftas"
+        "serif": "Šriftas",
+        "classic": "Klasikinis",
+        "boxed": "Rėmelyje",
+        "wordpop": "Iššokantys žodžiai",
+        "rapid": "Greitas atskleidimas",
+        "beast": "Žvėries režimas",
+        "stacked": "Sudėti vienas ant kito",
+        "bubble": "Burbulas"
       },
       "working": "Klausomasi… {{percent}} %",
       "downloading": "Ruošiamas kalbos modelis… {{percent}} %",
@@ -9381,7 +10181,8 @@
       "translateCount": "Išversti {{count}} anotavimus",
       "translationDone": "Išversti {{count}} anotavimus",
       "translationFailed": "Anotavimo vertimas nepavyko. Jūsų anotavimai nepakeisti.",
-      "lockedTranslation": "Atsiskirti užblokuotus anotavimus, kad juos galėtumėte įtraukti."
+      "lockedTranslation": "Atsiskirti užblokuotus anotavimus, kad juos galėtumėte įtraukti.",
+      "style": "Subtitrų stilius"
     },
     "multi": {
       "selected": "Pasirinkta sluoksnių: {{count}}",
@@ -9418,7 +10219,10 @@
       "saveNewPreset": "Išsaugoti naują",
       "saveStyles": "Išsaugoti stilius su dizainu",
       "stylesSaved": "Prekės ženklo stiliai, išsaugoti naudojant šį dizainą",
-      "usePreset": "Naudoti stilius"
+      "usePreset": "Naudoti stilius",
+      "dehubApplied": "„Riftn“ prekės ženklas pritaikytas sluoksniams: {{count}}.",
+      "dehubApply": "Naudoti „Riftn“ prekės ženklą",
+      "dehubHint": "Oficialios „Riftn“ spalvos, Exo ir Inter šriftai bei „Riftn“ logotipas vienu paspaudimu."
     },
     "draw": {
       "heading": "Piešti",
@@ -10752,7 +11556,23 @@
       "zoomOut": "Papildyti paveikslėlį"
     },
     "clipFix": {
-      "listening": "Klausomasi..."
+      "listening": "Klausomasi...",
+      "detach": "Atskirti garsą",
+      "detached": "Garsas perkeltas į atskirą klipą",
+      "detachFailed": "Nepavyko atskirti šio klipo garso",
+      "removeBars": "Pašalinti juodas juostas",
+      "scanning": "Tikrinami kadrai…",
+      "noBars": "Juodų juostų nerasta",
+      "barsRemoved": "Juodos juostos apkirptos",
+      "barsFailed": "Nepavyko patikrinti, ar šiame vaizdo įraše yra juodų juostų",
+      "reframe": "Automatinis kadravimas",
+      "reframeHint": "Vaizdo įrašas jau atitinka šio puslapio formą",
+      "reframed": "Perkadruota, kad sektų veiksmą",
+      "reframeFailed": "Nepavyko perkadruoti šio vaizdo įrašo",
+      "retakes": "Pašalinti pakartotinius dublius",
+      "noRetakes": "Pakartotinių dublių nerasta",
+      "retakesRemoved": "Pašalinta pakartotinių dublių: {{count}}, paliktas paskutinis dublis",
+      "retakesFailed": "Nepavyko pašalinti pakartotinių dublių iš šio klipo"
     },
     "shortcuts": {
       "action": {
@@ -10760,19 +11580,109 @@
         "play": "Paleisti",
         "pause": "Pristabdyti",
         "frameBack": "Ankstesnis kadras",
-        "frameForward": "Kitas kadras"
-      }
+        "frameForward": "Kitas kadras",
+        "back": "Atgal 1 sekundę",
+        "rippleDelete": "Ištrinti klipą",
+        "liftDelete": "Ištrinti klipą",
+        "start": "Eiti į pradžią",
+        "end": "Eiti į pabaigą"
+      },
+      "preset": "Klaviatūros išdėstymas",
+      "presetHint": "Naudokite laiko juostos klavišus iš jums pažįstamo redaktoriaus. Kitiems veiksmams „Riftn“ spartieji klavišai veikia toliau."
     },
     "voiceClone": {
       "stop": "Sustabdyti įrašymą",
-      "failed": "Balsas klono nepavyko."
+      "failed": "Balsas klono nepavyko.",
+      "pickerLabel": "Klonuoti savo balsą",
+      "pickerDetail": "Įgarsinimai jūsų pačių balsu",
+      "title": "Klonuoti savo balsą",
+      "description": "Įrašykite save arba pasirinkite klipą, kuriame kalbate. Sumokate vieną kartą, ir jūsų balsas tinka visiems įgarsinimams.",
+      "defaultName": "Mano balsas",
+      "record": "Įrašyti pavyzdį (nuo 30 sekundžių iki 2 minučių)",
+      "fromMedia": "Arba naudoti klipą iš Medijos",
+      "recorded": "Jūsų įrašas",
+      "sample": "Pavyzdys: {{name}}",
+      "hint": "Geriausiai tinka aiški kalba be muzikos.",
+      "noMic": "Nepavyko naudoti mikrofono.",
+      "sampleFailed": "Nepavyko nuskaityti garso iš to klipo.",
+      "pay": "Klonuoti už {{amount}} žetonų",
+      "useFree": "Klonuoti (jau apmokėta)",
+      "owned": "Jūsų balsas „{{name}}“ jau nustatytas. Pasirinkite jį iš balsų sąrašo.",
+      "useOwned": "Naudoti mano balsą",
+      "ready": "„{{name}}“ paruoštas įgarsinimams.",
+      "paidFailed": "Jūsų mokėjimas išsaugotas. Atidarykite tai dar kartą, ir kitas bandymas bus nemokamas.",
+      "consent": "Klonuokite tik savo balsą arba tą, kurį turite leidimą naudoti."
     },
     "linkImport": {
       "go": "Importuoti",
-      "downloading": "Atsiunčiama {{percent}}%"
+      "downloading": "Atsiunčiama {{percent}}%",
+      "open": "Importuoti iš nuorodos",
+      "placeholder": "Įklijuokite YouTube, TikTok ar kitą nuorodą",
+      "rights": "Šis vaizdo įrašas priklauso man arba turiu leidimą jį naudoti",
+      "audioOnly": "Tik garsas",
+      "queued": "Eilėje…",
+      "waiting": "Laukiama svetainės, netrukus bandysime dar kartą…",
+      "adding": "Pridedama į Mediją…",
+      "added": "Importuota ir pridėta į laiko juostą.",
+      "failed": "Nepavyko importuoti tos nuorodos."
     },
     "reverse": {
-      "action": "Atbulinė eiga"
+      "action": "Atbulinė eiga",
+      "working": "Atbulinama {{percent}}%",
+      "done": "Klipas atbulintas.",
+      "failed": "Nepavyko atbulinti šio klipo.",
+      "unsupported": "Ši naršyklė negali atbulinti vaizdo įrašo. Pabandykite Chrome arba Edge.",
+      "tooLong": "Galima atbulinti klipus iki {{seconds}} sekundžių."
+    },
+    "film": {
+      "repairRefs": "Pašalinti trūkstamas medijos nuorodas",
+      "title": "Filmo projektas",
+      "intro": "Planuokite kadrus su pakartotinai naudojamomis vaizdų nuorodomis. Jūsų užduotis, kadrų tvarka ir pasirinkti rezultatai išsaugomi su šiuo projektu.",
+      "create": "Sukurti filmo planą",
+      "name": "Filmo pavadinimas",
+      "brief": "Filmo užduotis",
+      "sharedReferences": "Bendros vaizdų nuorodos (iki 4)",
+      "shot": "Kadras",
+      "addShot": "Pridėti kadrą",
+      "shotName": "Kadro pavadinimas",
+      "action": "Kadro veiksmas ir kompozicija",
+      "seconds": "Pageidaujama vaizdo įrašo trukmė sekundėmis",
+      "shotReferences": "Papildomos vaizdų nuorodos (bendras limitas 4)",
+      "frame": "Paruošti kadrą",
+      "video": "Paruošti vaizdo įrašą",
+      "review": "Prieš generuodami studijoje peržiūrėkite modelį, nuorodas, vaizdo įrašo trukmę ir kainą.",
+      "result": "Priimtas kadro rezultatas",
+      "noResult": "Rezultatas nepasirinktas",
+      "resultHint": "Pasirinkite priimtą vaizdą ar vaizdo įrašą iš Įkėlimų. Jo nuoroda išsaugoma su šiuo kadru; filmui sudėti naudokite laiko juostą.",
+      "earlier": "Perkelti anksčiau",
+      "later": "Perkelti vėliau",
+      "remove": "Pašalinti kadrą",
+      "issue": "Patikrinkite kadro aprašymą ir nuorodų mediją, tada bandykite dar kartą. Jei projekto nepavyko išsaugoti, palikite jį atidarytą.",
+      "searchMedia": "Ieškoti medijos pagal pavadinimą",
+      "refreshMedia": "Atnaujinti mediją"
+    },
+    "speakers": {
+      "find": "Rasti kalbėtojus",
+      "name": "Kalbėtojas {{number}}",
+      "onlyOne": "Rastas tik vienas kalbėtojas.",
+      "failed": "Nepavyko rasti kalbėtojų.",
+      "kept": "Paliktas tik {{name}}.",
+      "editFailed": "Šis pakeitimas netiko šiam klipui.",
+      "split": "Padalyta į kalbėtojų kadrus: {{count}}.",
+      "keepOnly": "Palikti tik",
+      "splitAction": "Kirpti ties kiekvienu kalbėtojo pasikeitimu"
+    },
+    "generate3d": {
+      "label": "3D",
+      "placeholder": "Aprašykite norimą 3D objektą",
+      "queued": "Kuriamas jūsų 3D objektas. Jis atsiras skirtuke Generacijos.",
+      "note": "3D objektai patenka į Mediją kaip trumpas besisukantis klipas permatomame fone."
+    },
+    "behind": {
+      "action": "Tekstas už žmogaus",
+      "working": "Iškerpamas žmogus…",
+      "done": "Tekstas ir subtitrai dabar yra už žmogaus.",
+      "failed": "Nepavyko perkelti teksto už žmogaus."
     }
   },
   "jungleMood": {
@@ -11175,7 +12085,9 @@
     "tokenAmount": "{{amount}} žetonai",
     "assistant": {
       "question1": "Kokia yra dabartinė „Riftn“ žetonų apsija?",
-      "question2": "Taip, jei 90 dienų statysiu 10 000 žetonų"
+      "question2": "Taip, jei 90 dienų statysiu 10 000 žetonų",
+      "answer1": "Dabartinis „Riftn“ žetonų įkeitimo APY yra 12,4 % su 30 dienų užrakinimo laikotarpiu. Štai suskirstymas:\n\n• 7 dienų užrakinimas: 8,2 % APY\n• 30 dienų užrakinimas: 12,4 % APY\n• 90 dienų užrakinimas: 18,7 % APY\n\nAr norite, kad padėčiau apskaičiuoti galimą uždarbį?",
+      "answer2": "Įkeitus 10 000 žetonų su 18,7 % APY 90 dienų:\n\n📊 Numatomas atlygis: ~461 žetonas\n\nTai maždaug 5,13 žetono per dieną. Atminkite, kad APY gali svyruoti priklausomai nuo bendros įkeistos sumos."
     },
     "bookmarks": {
       "stakingGuide": "Išsamus „Riftn“ žetonų statymo vadovas: paaiškintas APY gedimas, užrakinimo laikotarpiai ir atlygio daugikliai."
@@ -11921,7 +12833,10 @@
     "planTypeNotAllowed": "Šio kūrėjo planas neleidžia tokio tipo žinučių.",
     "planMinTip": "Arbatpinigiai šiam kūrėjui turi būti bent {{amount}} žetonų.",
     "shareKindGroup": "Grupuoti",
-    "shareKindCommunity": "Bendruomenė"
+    "shareKindCommunity": "Bendruomenė",
+    "shareGroups": "Grupės",
+    "shareKindChannel": "Kanalas",
+    "reportMessage": "Pranešti apie žinutę"
   },
   "credits": {
     "earningsWorth": "Verta {{amount}}",
@@ -11963,7 +12878,11 @@
     "error": "Nepavyko pateikti prašymo ištrinti. Jūsų paskyra nepatvirtinta ištrinti. Bandykite dar kartą.",
     "back": "Grįžti į nustatymus",
     "signIn": "Prisijunkite, kad ištrintumėte paskyrą",
-    "acknowledge": "Išsaugojau savo piniginės atkūrimo informaciją ir suprantu, kad ištrynimas yra negrįžtamas."
+    "acknowledge": "Išsaugojau savo piniginės atkūrimo informaciją ir suprantu, kad ištrynimas yra negrįžtamas.",
+    "signedInAs": "Prisijungta kaip",
+    "confirmTitle": "Ištrinti paskyrą visam laikui?",
+    "confirmBody": "Jūsų paskyra ir viskas joje bus ištrinta. Būsite atjungti, o to atšaukti negalima.",
+    "confirmBodyNamed": "{{who}} ir viskas joje bus ištrinta. Būsite atjungti, o to atšaukti negalima."
   },
   "miniApps": {
     "badge": {
@@ -12060,12 +12979,42 @@
       "rewardPending": "Laukiama",
       "rewardsNone": "Atlygiai dar neapskaičiuoti. Pirmoji savaitė baigiasi pirmadienį.",
       "stats": {
-        "button": "Statistika realiu laiku"
+        "button": "Statistika realiu laiku",
+        "chartTitle": "Žmonės, atidarę jūsų programėlę per pastarąsias 30 dienų",
+        "peak_one": "Daugiausia {{count}} per dieną",
+        "peak_other": "Daugiausia {{count}} per dieną",
+        "people30": "Žmonės, 30 dienų",
+        "people7": "Žmonės, 7 dienos",
+        "added": "Pridėjo",
+        "dhb30": "Sumokėta žetonų, 30 dienų",
+        "notified30": "Išsiųsta pranešimų, 30 dienų",
+        "rewards": "Uždirbti žetonų atlygiai"
       },
       "signin": {
         "users_one": "{{count}} vartotojas",
         "users_other": "{{count}} vartotojai",
-        "delete": "Ištrinti"
+        "delete": "Ištrinti",
+        "title": "Prisijungti su „Riftn“",
+        "body": "Leiskite žmonėms prisijungti prie jūsų svetainės ar programėlės su savo „Riftn“ paskyra. Sukurkite raktą čia, tada sekite vadovą.",
+        "guide": "Skaityti vadovą",
+        "copyId": "Kopijuoti kliento ID",
+        "rotate": "Nauja paslaptis",
+        "rotateConfirm": "Sukurti naują paslaptį programėlei {{name}}? Senoji paslaptis iškart nustos veikti.",
+        "deleteConfirm": "Ištrinti {{name}}? Visi per ją prisijungę bus atjungti.",
+        "secretOnce": "{{name}} paslaptis. Nukopijuokite ją dabar: ji rodoma tik vieną kartą.",
+        "name": "Programėlės pavadinimas",
+        "website": "Svetainė (neprivaloma)",
+        "redirects": "Peradresavimo URL, po vieną eilutėje (https://yoursite.com/callback)",
+        "create": "Sukurti raktą"
+      },
+      "stateRejected": "Veikia per nuorodą · nepatvirtinta parduotuvei",
+      "webhook": {
+        "button": "Webhook",
+        "body": "Įvykiai, kuriuos „Riftn“ išsiuntė jūsų webhookUrl. Testas siunčia ping įvykį.",
+        "test": "Siųsti testą",
+        "ok": "Webhook atsakė {{status}}",
+        "failed": "Webhook nepavyko: {{reason}}",
+        "none": "Webhook dar nesiųsta."
       }
     },
     "card": {
@@ -12092,7 +13041,10 @@
       "confirm": "Mokėkite {{amount}} žetonų",
       "sending": "Siunčiama mokėjimo informacija…",
       "sent": "Mokėta {{amount}} žetonų {{name}}.",
-      "noOwner": "Šiame prietaisyje dar nėra patvirtinto portmono, kuriuo galima apmokėti."
+      "noOwner": "Šiame prietaisyje dar nėra patvirtinto portmono, kuriuo galima apmokėti.",
+      "testBadge": "Bandomasis režimas",
+      "testBody": "Ši programėlė priklauso jums, todėl tai bandymas: žetonai nejuda, o kvitas pažymimas kaip bandomasis.",
+      "testSent": "Bandomasis {{amount}} žetonų mokėjimas. Niekas neišsiųsta."
     },
     "add": {
       "title": "Pridėkite {{name}}?",
@@ -12163,7 +13115,8 @@
     "howChromium": "Spustelėkite įdiegimo piktogramą dešinėje adreso juostos galūnėje, tada Įdiegti.",
     "howSafari": "Safari, atidarykite Failo meniu ir pasirinkite Pridėti į Dock.",
     "howFirefox": "Firefox negali įdiegti programų. Atidarykite šią puslapį Chrome, Edge ar Safari, kad įdiegtumėte Riftn.",
-    "desktopMeta": "Windows · Mac · Linux · ChromeOS"
+    "desktopMeta": "Windows · Mac · Linux · ChromeOS",
+    "microsoftStore": "Labiau patinka Microsoft Store? Gaukite ją ten."
   },
   "postStage": {
     "back": "Grįžti",
@@ -19207,7 +20160,65 @@
     "127053546dd4": "Nepavyko atsisiųsti šio failo",
     "d14896aa4bf8": "Nepavyko įkelti nemokamos bibliotekos. Patikrinkite ryšį ir bandykite dar kartą.",
     "953e708b2287": "Nepavyko sugeneruoti balso.",
-    "4a52cdd6ac72": "Nepavyko dubliuoti šių sluoksnių"
+    "4a52cdd6ac72": "Nepavyko dubliuoti šių sluoksnių",
+    "3f9b2c71d0a4": "Rezultatų: {{n}}",
+    "8c4e1a6b2f57": "pagal „{{query}}“",
+    "1d7234ff1b79": "skiltyje {{feed}}",
+    "e122e5c2b563": "Vilkite aukštyn, kad uždarytumėte",
+    "1aa9d734f2ee": "Pasirinkite, ko ieškoti",
+    "ef557404f465": "Pagal „{{query}}“ rezultatų nėra",
+    "35034aa59bd3": "Skiltyje {{feed}} nieko neatitiko. Pabandykite kitus žodžius arba ieškokite visur.",
+    "415155739590": "Ieškoti visur",
+    "9e13d826baaf": "Ieškoti vaizdų",
+    "cbf6f228327c": "Ieškoti muzikos",
+    "e8756c6865a5": "Ieškoti trumpųjų vaizdo įrašų",
+    "c7661da99c41": "Ieškoti vaizdo įrašų",
+    "90f1afe66801": "Ieškoma „{{query}}“…",
+    "d7b559f2d8c6": "Pabandykite kitus žodžius arba pakeiskite filtrus.",
+    "d1a0c7e2f301": "Kas jums šiandien galvoje?",
+    "d1a0c7e2f302": "Apie ką šiandien galvojate?",
+    "d1a0c7e2f303": "Kas jums galvoje?",
+    "d1a0c7e2f304": "Turite ką pasakyti?",
+    "d1a0c7e2f305": "Kas jums dabar galvoje?",
+    "d1a0c7e2f306": "Apie ką šiandien mąstome?",
+    "d1a0c7e2f307": "Ar šiandien turite ką nors galvoje?",
+    "d1a0c7e2f308": "Kas jums galvoje šį kartą?",
+    "a7c1e0f4b2d9": "Bakstelėkite, kad kalbėtumėte",
+    "b3e8d1c6f0a2": "Bakstelėkite, kad išsiųstumėte",
+    "c9f2a4e7d1b5": "Klausomasi... bakstelėkite kamuolį, kad išsiųstumėte",
+    "22577ebd908e": "Generuoti Wan 3.0 vaizdo įrašą · originalus garso takelis",
+    "1fa2357ab7e1": "Generuoti Seedance 720p vaizdo įrašą · originalus garso takelis",
+    "7f78bdc0762d": "+{{value1}} tšk.",
+    "f0c8bb34335b": "Uždirbote +{{value1}} tšk.",
+    "0fbe06b679a8": "{{value1}} tšk. už kiekvieną įgyvendintą užklausą, pridedama prie jūsų Geriausių kūrėjų rezultato.",
+    "431bc73eb60b": "[verse]\nJūsų dainos žodžiai čia...\n\n[chorus]\nPriedainio žodžiai...",
+    "d4a69f6e6a86": "„Riftn“ ChatGPT: naudokite „Riftn“ ChatGPT viduje (MCP jungtis)",
+    "c88ca059a90d": "Pridėti šaltinių",
+    "a3c1e5f20b71": "Naudokite „Riftn“ ChatGPT, Claude ar bet kurioje MCP programėlėje. Įklijuokite toliau pateiktą URL į savo asistento jungčių nustatymus, kad naršytumėte įrašus, profilius ir komentarus, o paprašius prisijunkite, kad susietumėte savo paskyrą.",
+    "b84d2e7c9a16": "Šis adresas skirtas DI programėlėms, o ne tinklalapis. Atidarius jį naršyklėje, būsite nukreipti čia.",
+    "c5e9f1a3d742": "Susiekite savo „Riftn“ paskyrą",
+    "d61a7b4e8c05": "Kai asistentas paprašys prisijungti, prisijunkite prie „Riftn“ ir spustelėkite Leisti. Tada jis galės atnaujinti jūsų profilį, skelbti įrašus ir komentarus, sekti žmones ir kurti „Creator Studio“. Ryšiai lieka susieti, kol juos naudojate, ir baigia galioti po 30 nenaudojimo dienų.",
+    "e27b8c5f9d13": "Išsamus ChatGPT vadovas",
+    "f38c9d6a0e24": "Išsamus Claude vadovas",
+    "0a49d7b1f835": "Norite atskiros roboto paskyros? Sukurkite agentą ir gausite jungties URL, kuriuo skelbiama to agento vardu.",
+    "1b5ae8c20f46": "Kai ChatGPT paprašys, prisijunkite prie „Riftn“ ir spustelėkite Leisti, kad susietumėte paskyrą.",
+    "2c6bf9d31a57": "Spustelėkite Prijungti, prisijunkite prie „Riftn“ ir spustelėkite Leisti, kad susietumėte paskyrą.",
+    "468415f0e112": "Ag",
+    "00fb5022b75a": "TSMC",
+    "9759193089b8": "{\n  \"subject\": \"…\"\n}",
+    "fd0ce9669a4e": "🎞️ GIF",
+    "ebebdc70335b": "Stiklo juostos",
+    "5ff272ba7871": "Šilko linijos",
+    "a941e90ca93d": "Viršelio aureolė",
+    "04dbbe4dff7a": "Tikra banga",
+    "2db0df1472cb": "Sepija {{value1}}%",
+    "98232ace0229": "Nepermatomumas {{value1}}%",
+    "b6f971c911fa": "Pasirinkite diagramos stiliaus failą, mažesnį nei 32 KB",
+    "9bb47b8193d0": "Pasirinkite pradinę duomenų eilutę ir nuo vienos iki {{maximum}} eilučių",
+    "8d02cfb48fb7": "Konvertuokite iki 19 diagramos duomenų eilučių, kad lentelė ir jos antraštė tilptų į 20 eilučių",
+    "6c4bbd9fb1a9": "Naudokite ne daugiau kaip {{maximum}} stulpelių",
+    "29d4c91aa6c2": "Naudokite http arba https kontaktinę svetainę be prisijungimo duomenų",
+    "6e71ae3669b1": "Išsaugotas rezultatas nepasiekiamas"
   },
   "articles": {
     "cardLabel": "Straipsnis · {{count}} min skaitymo",
@@ -19249,7 +20260,16 @@
     "formatting": "Formatavimas",
     "bodyPlaceholder": "Papasakokite savo istoriją. Pasirinkite tekstą ir naudokite aukščiau esančią juostą antraštėms, paryškintoms, citatoms ir sąrašams.",
     "bodyLabel": "Straipsnio tekstas",
-    "wordCount": "{{count}} žodžiai"
+    "wordCount": "{{count}} žodžiai",
+    "imageLimit": "Straipsnyje gali būti iki {{count}} vaizdų",
+    "imageLimitSome": "Į šį straipsnį dar telpa tik {{count}} vaizdai",
+    "imageFailed": "Šio vaizdo nepavyko pridėti. Pabandykite kitą.",
+    "imagesUploading": "Pridedami vaizdai ({{count}})…",
+    "bodyTooLong": "Viršyta riba simbolių: {{count}}",
+    "imagesCount": "Vaizdai · {{count}}/{{max}}",
+    "captionPlaceholder": "Pridėkite paaiškinimą",
+    "captionLabel": "{{n}} vaizdo paaiškinimas",
+    "removeInlineImage": "Pašalinti {{n}} vaizdą"
   },
   "liveAudience": {
     "whosHere": "Kas atvyko",
@@ -19298,24 +20318,94 @@
       "stage": {
         "preparing": "Ruošiama…",
         "confirming": "Laukiama operacijos…",
-        "recording": "Užbaigiama…"
-      }
+        "recording": "Užbaigiama…",
+        "wallet": "Patvirtinkite savo piniginėje"
+      },
+      "open": "Dovanoti prenumeratas",
+      "title": "Dovanoti prenumeratas",
+      "mode": {
+        "random": "Atsitiktiniai pokalbio žiūrovai",
+        "user": "Konkretus žmogus"
+      },
+      "randomHint": "Atitenka žmonėms, kurie rašė pokalbyje per pastarąsias 30 minučių ir dar nėra prenumeratoriai.",
+      "send_one": "Dovanoti 1 prenumeratą · ${{price}}",
+      "send_other": "Dovanoti prenumeratų: {{count}} · ${{price}}",
+      "payHint": "Apmokama žetonais iš jūsų piniginės vienu pervedimu.",
+      "fewer_one": "Šiuo metu tik 1 žmogus pokalbyje gali gauti prenumeratą, todėl mokate už 1.",
+      "fewer_other": "Šiuo metu tik {{count}} žmonės pokalbyje gali gauti prenumeratą, todėl mokate už {{count}}.",
+      "done_one": "Prenumerata padovanota!",
+      "done_other": "Padovanota prenumeratų: {{count}}!",
+      "failed": "Nepavyko padovanoti prenumeratų",
+      "notReady": "Šiam planui dovanojimas kol kas negalimas",
+      "noPlan": "Pirmiausia pasirinkite planą",
+      "noPlans": "{{name}} dar neturi prenumeratos planų, kuriuos galima dovanoti."
     },
     "badges": {
       "emoji": "Jaustukai",
       "audience": {
-        "subscribers": "Prenumeratoriai"
+        "subscribers": "Prenumeratoriai",
+        "both": "Prenumeratoriai ir dovanotojai",
+        "gifters": "Dovanotojai"
       },
       "ended": "Baigta",
       "until": "Iki {{date}}",
-      "failed": "Nepavyko. Bandykite dar kartą."
+      "failed": "Nepavyko. Bandykite dar kartą.",
+      "title": "Riboto laiko ženkleliai",
+      "intro": "Pasiūlykite ženklelį kelioms dienoms. Kiekvienas, kuris tuo metu užsiprenumeruoja ar padovanoja, jį gauna, ir jis visam laikui rodomas šalia jo vardo jūsų pokalbyje.",
+      "name": "Ženklelio pavadinimas",
+      "namePlaceholder": "Pristatymo savaitė",
+      "days": "Galioja (dienomis)",
+      "who": "Kas gali jį gauti",
+      "create": "Pasiūlyti ženklelį",
+      "created": "Ženklelis aktyvus.",
+      "end": "Baigti dabar",
+      "holders_one": "{{count}} turėtojas",
+      "holders_other": "Turėtojų: {{count}}",
+      "limit": "Vienu metu gali veikti trys ženkleliai. Baikite vieną, kad pasiūlytumėte kitą.",
+      "hypeHint": "Kiekvienas, važiavęs ažiotažo traukiniu, taip pat gauna jūsų 🚂 ženklelį pasiekto lygio."
+    },
+    "train": {
+      "level": "Ažiotažo traukinys · {{level}} lygis",
+      "endedLevel": "Ažiotažo traukinys pasiekė {{level}} lygį!",
+      "ended": "Ažiotažo traukinys baigėsi",
+      "thanks_one": "Ačiū {{count}} rėmėjui",
+      "thanks_other": "Ačiū rėmėjams: {{count}}",
+      "top": "Daugiausia: {{name}}"
+    },
+    "chat": {
+      "giftedSubs_one": "padovanojo prenumeratą 🎁",
+      "giftedSubs_other": "padovanojo prenumeratų: {{count}} 🎁"
     }
   },
   "whenSheet": {
     "today": "Šiandien",
     "tooSoon": "Pasirinkite ateities laiką.",
     "show": "Rodyti",
-    "hide": "Slėpti"
+    "hide": "Slėpti",
+    "title": "Kada?",
+    "tonight": "Šįvakar",
+    "inAnHour": "Po valandos",
+    "tomorrow": "Rytoj",
+    "primeTime": "Piko metas",
+    "scheduleFor": "Suplanuoti {{when}}",
+    "liveTip": "Jūsų sekėjai gali nustatyti priminimą. Tiesioginę transliaciją pradedate patys, kai ateina laikas.",
+    "stageTip": "Ji iškart atsiranda lentynoje Artėjantys, kad žmonės galėtų bakstelėti Priminti man.",
+    "typePlaceholder": "Įveskite laiką, pvz., „pn 20:00“ arba „po 2 valandų“",
+    "typeLabel": "Įveskite laiką",
+    "typeHelp": "Pabandykite „šįvakar“, „rytoj 9:00“, „št vidurdienį“ arba „spal 30 19:00“.",
+    "orPickDay": "Arba pasirinkite dieną",
+    "earlier": "15 minučių anksčiau",
+    "later": "15 minučių vėliau",
+    "earlierShort": "Anksčiau",
+    "laterShort": "Vėliau",
+    "tooSoonMin": "Pasirinkite laiką ne anksčiau kaip po {{count}} min. nuo dabar.",
+    "zone": "Jūsų laikas ({{zone}}). Visi kiti mato jį savo laiku.",
+    "remove": "Pašalinti tvarkaraštį",
+    "startsIn": "Prasidės po {{time}}",
+    "bestTime": "Geriausias laikas",
+    "fansOnline": "Kada mano gerbėjai prisijungę?",
+    "fansBasis": "Šviesiau reiškia, kad žiūrėjo daugiau jūsų sekėjų, per pastarąsias {{count}} d.",
+    "everyoneBasis": "Sekėjų aktyvumo dar nepakanka, todėl rodomi visi „Riftn“ naudotojai."
   },
   "planned": {
     "title": "Planuojama",
@@ -19330,22 +20420,45 @@
     "loading": "Įkeliama…",
     "startNow": "Pradėti dabar",
     "cancel": "Atšaukti",
-    "cancelled": "Atšaukta"
+    "cancelled": "Atšaukta",
+    "subtitle": "Jūsų suplanuoti įrašai, tiesioginės transliacijos ir scenos",
+    "seoTitle": "Suplanuota · Riftn",
+    "seoDescription": "Jūsų suplanuoti įrašai, tiesioginės transliacijos ir scenos „Riftn“ vienoje vietoje.",
+    "lives": "Tiesioginės transliacijos",
+    "signIn": "Prisijunkite, kad matytumėte, ką suplanavote",
+    "emptyTitle": "Kol kas nieko nesuplanuota",
+    "emptyBody": "Kurdami įrašą, tiesioginę transliaciją ar sceną pasirinkite „Kada?“, ir ji atsiras čia.",
+    "move": "Perkelti",
+    "postNow": "Skelbti dabar",
+    "confirmCancel": "Bakstelėkite dar kartą, kad atšauktumėte",
+    "moved": "Perkelta į {{when}}",
+    "postingNow": "Bus paskelbta per mažiau nei minutę",
+    "moveFailed": "Nepavyko perkelti. Bandykite dar kartą.",
+    "seeAll": "Žiūrėti viską, ką suplanavote"
   },
   "welcome": {
     "about": {
       "title": "Sveiki atvykę į Riftn",
       "day": "Diena",
       "month": "Mėnuo",
-      "year": "Metai"
+      "year": "Metai",
+      "sub": "Jūsų gimtadienis lieka privatus. Pasirinkite išvaizdą, ją galėsite bet kada pakeisti.",
+      "birthday": "Gimimo data",
+      "pick": "Pasirinkite gimtadienį",
+      "invalid": "Įveskite visą gimimo datą.",
+      "tooYoung": "Norėdami naudotis „Riftn“, turite būti ne jaunesni nei {{age}} m.",
+      "theme": "Jūsų išvaizda"
     },
     "name": {
       "title": "Jūsų vardas",
-      "placeholder": "Jūsų vardas"
+      "placeholder": "Jūsų vardas",
+      "sub": "Šį vardą žmonės matys prie jūsų įrašų."
     },
     "card": {
       "name": "Jūsų vardas",
-      "followers": "sekėjai"
+      "followers": "sekėjai",
+      "interests": "Jūsų pomėgiai",
+      "following": "sekami"
     },
     "topic": {
       "music": "Muzika",
@@ -19358,11 +20471,46 @@
       "podcast": "Tinklalaidė",
       "food": "Maistas",
       "news": "Naujienos",
-      "science": "Mokslas"
+      "science": "Mokslas",
+      "travel": "Kelionės",
+      "anime": "Anime",
+      "cars": "Automobiliai",
+      "animals": "Gyvūnai",
+      "tech": "Technologijos"
     },
     "back": "Atgal",
     "skipPhoto": "Praleisti dabar",
-    "preview": "Peržiūra"
+    "preview": "Peržiūra",
+    "username": {
+      "title": "Jūsų @naudotojo vardas",
+      "sub": "Raidės, skaičiai ir pabraukimai. Vėliau galėsite pakeisti.",
+      "yours": "@{{name}} – jūsų"
+    },
+    "photo": {
+      "title": "Jūsų nuotrauka",
+      "sub": "Neprivaloma. Žmonės greičiau seka veidus.",
+      "choose": "Pasirinkti nuotrauką",
+      "change": "Pasirinkti kitą"
+    },
+    "interests": {
+      "title": "Jūsų pomėgiai",
+      "sub": "Pasirinkite bent 3. Jie bus pirmieji jūsų kategorijose."
+    },
+    "people": {
+      "title": "Jūsų žmonės",
+      "sub": "Bakstelėkite, kad sektumėte. Jų įrašai užpildys jūsų Sekamų srautą.",
+      "empty": "Šiuo metu pasiūlymų nėra. Skiltyje Naršyti rasite daugiau žmonių.",
+      "followers": "Sekėjų: {{count}}"
+    },
+    "done": {
+      "title": "Atrodote puikiai, {{name}}",
+      "sub": "Nuo šiandien šią kortelę mato visi.",
+      "eyebrow": "Profilis aktyvus"
+    },
+    "enter": "Įeiti į „Riftn“",
+    "pickMore": "Pasirinkite dar {{count}}",
+    "cardHint": "Taip jus matys kiti žmonės",
+    "followFailed": "Nepavyko pradėti sekti. Bandykite dar kartą."
   },
   "appTokens": {
     "title": "Jūsų žetonai",
@@ -19373,28 +20521,101 @@
     "amount": "Suma",
     "notePlaceholder": "Pridėk žinutę (neprivaloma)",
     "sendButton": "Siųsti",
-    "errorInsufficient": "Nepakanka ženklų"
+    "errorInsufficient": "Nepakanka ženklų",
+    "rowHint": "Likutis programėlėje",
+    "explainer": "Jūsų žetonai dabar laikomi „Riftn“ viduje. Pradėjote su tuo, ką turėjote ir buvote įkeitę grandinėje paleidimo metu. Siuntimas, arbatpinigiai ir išlaidos juos perkelia akimirksniu, be mokesčių ir be jokių operacijų grandinėje. Per airdrop likučiai pereis į naująjį žetoną.",
+    "kindOpening": "Pradinis likutis",
+    "kindSent": "Išsiųsta {{name}}",
+    "kindReceived": "Nuo {{name}}",
+    "kindSpent": "Išleista „Riftn“",
+    "kindRefund": "Grąžinimas",
+    "kindAdjust": "„Riftn“ koregavimas",
+    "sendTitle": "Siųsti žetonų",
+    "sendHint": "Siunčia žetonus „Riftn“ viduje kitai paskyrai. Akimirksniu ir nemokamai, niekas nepatenka į grandinę.",
+    "toPlaceholder": "@naudotojo_vardas arba 0x adresas",
+    "looking": "Ieškoma…",
+    "available": "Prieinama: {{amount}}",
+    "sent": "Išsiųsta {{amount}} žetonų gavėjui {{name}}",
+    "errorRateLimit": "Per daug siuntimų per pastarąją valandą. Bandykite vėliau.",
+    "errorNoRecipient": "„Riftn“ paskyra nerasta",
+    "errorSelf": "Negalite siųsti sau",
+    "errorGeneric": "Nepavyko išsiųsti. Bandykite dar kartą."
   },
   "reactions": {
     "policy": {
       "everyone": "Visi",
       "followers": "Sekėjai",
-      "nobody": "Niekas"
+      "nobody": "Niekas",
+      "default": "Paskyros numatytasis ({{value}})"
     },
     "heading": "Reakcijos",
     "more": "Rodyti daugiau",
     "liveNow": "Tiesiogiai",
-    "untitled": "Reakcija"
+    "untitled": "Reakcija",
+    "reactionTo": "Reakcija į",
+    "reactingTo": "Reaguojama į",
+    "count_one": "{{count}} reakcija",
+    "count_other": "Reakcijų: {{count}}",
+    "allow": "Leisti reakcijas",
+    "remixesSection": "Remiksai",
+    "allowDescription": "Leiskite kitiems kūrėjams reaguoti į jūsų vaizdo įrašus – įrašytai ar tiesiogiai. Tai vis tiek galite keisti kiekviename įraše.",
+    "pageDescription": "Žiūrėkite, kaip kūrėjai reaguoja į „{{title}}“, kurį sukūrė {{creator}}, „Riftn“ – įrašytai ir tiesiogiai.",
+    "backToVideo": "Atgal į vaizdo įrašą",
+    "empty": "Reakcijų dar nėra. Atidarykite vaizdo įrašo meniu Remiksas ir pasirinkite Reaguoti, kad būtumėte pirmi.",
+    "wasLive": "Buvo tiesiogiai",
+    "thisVideo": "šį vaizdo įrašą"
   },
   "connectGuide": {
     "title": "Prijunkite Riftn prie savo DI asistento",
     "urlLabel": "MCP serverio URL",
     "copy": "Kopijuoti",
     "copied": "Nukopijuota",
-    "copiedToast": "MCP URL nukopijuotas"
+    "copiedToast": "MCP URL nukopijuotas",
+    "accountBody2": "Išsaugokite privačius juodraščius, skelbkite ir planuokite įrašus, tvarkykite vaizdus ir apklausas, skaitykite analitiką, atsakykite, reaguokite, dalinkitės pakartotinai, sekite, išsaugokite žymes, skaitykite pranešimus, redaguokite profilį ir kurkite su savo kreditais. Pakartotinai naudojamas įrašo užklausos ID nesukuria ir neįskaičiuoja antro įrašo. Prieš ką nors išleisdamas jis paklausia.",
+    "agentsTitle": "Valdykite savo agentus per asistentą",
+    "agentsBody": "Jungdamiesi taip pat leiskite „Veikti jūsų agentų vardu“. Tada jūsų asistentas galės skelbti, atsakyti, reaguoti, dalintis pakartotinai, sekti ar redaguoti profilį bet kurio jums priklausančio agento vardu – po vieną ar daug iš eilės. Jis niekada negali veikti paskyros, kuri jums nepriklauso, vardu.",
+    "agentsExample": "Pabandykite: „Tegul @mybot atsako į populiariausią įrašą mano sraute, tada pažymėk tą atsakymą patinka kaip @otherbot.“",
+    "desc": "Naudokite „Riftn“ per ChatGPT, Claude, Cursor ar bet kurią MCP programėlę. Naršykite be paskyros arba prisijunkite, kad asistentas galėtų skelbti, atsakyti ir kurti už jus.",
+    "copyFailed": "Nukopijuoti nepavyko",
+    "urlNote": "Įklijuokite tai į savo DI programėlę. Tai ne tinklalapis, todėl atidarius naršyklėje grįšite čia.",
+    "canTitle": "Ką gali jūsų asistentas",
+    "publicTitle": "Neprisijungus",
+    "publicBody": "Naršyti srautą, ieškoti įrašų ir žmonių, skaityti komentarus ir peržiūrėti profilius.",
+    "accountTitle": "Prisijungus",
+    "accountBody": "Skelbti, atsakyti, reaguoti, sekti, išsaugoti žymes, skaityti pranešimus, redaguoti profilį ir kurti vaizdus, vaizdo įrašus bei muziką su savo kreditais. Prieš ką nors išleisdamas jis paklausia.",
+    "chatgpt1": "Atidarykite ChatGPT nustatymus, tada Apps & Connectors, tada Advanced ir įjunkite Developer mode.",
+    "chatgpt2": "Grįžę į Apps & Connectors, pasirinkite Create, kad pridėtumėte naują jungtį.",
+    "chatgpt3": "Pavadinkite ją Riftn, įklijuokite aukščiau pateiktą URL ir kaip prisijungimo tipą pasirinkite OAuth.",
+    "chatgpt4": "Paspauskite Connect. Atsidarys „Riftn“: prisijunkite, patikrinkite leidimus ir paspauskite Leisti.",
+    "chatgpt5": "Naujame pokalbyje atidarykite meniu +, pasirinkite Riftn ir paklauskite, pavyzdžiui: „Parodyk populiarius įrašus Riftn.“",
+    "claude1": "Atidarykite Claude jungčių nustatymus ir pasirinkite Add custom connector.",
+    "claude2": "Pavadinkite ją Riftn, įklijuokite aukščiau pateiktą URL ir paspauskite Add.",
+    "claude3": "Paspauskite Connect. Atsidarys „Riftn“: prisijunkite, patikrinkite leidimus ir paspauskite Leisti.",
+    "claude4": "Pokalbyje atidarykite įrankių meniu, įjunkite Riftn ir klauskite.",
+    "openSettings": "Atidaryti nustatymus",
+    "devTitle": "Claude Code, Cursor ir kitos programėlės",
+    "devBody": "Pridėkite „Riftn“ kaip nuotolinį MCP serverį per HTTP. Programėlė atidarys „Riftn“ prisijungimą pirmą kartą, kai jai prireiks jūsų paskyros.",
+    "manageTitle": "Jūsų susietos programėlės",
+    "manageBody": "Susietos programėlės lieka prijungtos, kol jas naudojate, ir atjungiamos po 30 nenaudojimo dienų. Galite jas peržiūrėti ar atjungti bet kada.",
+    "manageLink": "Tvarkyti susietas programėles",
+    "agentTitle": "Norite roboto, kuris skelbtų savo paskyros vardu?",
+    "agentBody": "Sukurkite agentą ir gausite atskirą jungties URL su įmontuotu raktu. Tada jūsų asistentas galės skelbti, komentuoti, balsuoti ir sekti to agento, o ne jūsų vardu.",
+    "agentLink": "Sukurti agentą",
+    "helpTitle": "Jei kas nors nepavyksta",
+    "help1": "„Authentication update required“ arba mygtukas Reconnect: paspauskite Reconnect ir vėl prisijunkite prie „Riftn“.",
+    "help2": "„Susiekite savo „Riftn“ paskyrą“, kai klausiate apie savo įrašus: paspauskite Connect programėlės jungčių nustatymuose.",
+    "help3": "Klaida atidarius URL naršyklės skirtuke yra normali. Geriau įklijuokite jį į savo DI programėlę.",
+    "other": "Bet kuri kita MCP programėlė veikia taip pat: pridėkite nuotolinį MCP serverį ir įklijuokite aukščiau pateiktą URL."
   },
   "avatarPrompt": {
-    "notNow": "Ne dabar"
+    "notNow": "Ne dabar",
+    "title": "Pridėkite profilio nuotrauką",
+    "body": "Žmonės greičiau jus pastebi srautuose, komentaruose ir pokalbiuose, kai turite veidą ar logotipą.",
+    "choose": "Pasirinkti nuotrauką",
+    "another": "Pasirinkti kitą",
+    "save": "Naudoti šią nuotrauką",
+    "saved": "Atrodo puikiai",
+    "failed": "Nepavyko išsaugoti nuotraukos. Bandykite dar kartą."
   },
   "postStats": {
     "audience": "Auditorija",
@@ -19412,7 +20633,60 @@
     "shares": "Dalijimai",
     "signedOutViewers": "Atsijungta",
     "topSupporters": "Geriausi rėmėjai",
-    "visitors": "Atsijungta"
+    "visitors": "Atsijungta",
+    "aboutUsual": "maždaug kaip įprastai",
+    "afterWatching": "pradėjo sekti pamatę",
+    "avg": "vid.",
+    "avgWatch": "Vid. žiūrėjimas",
+    "bestTime": "Kada žiūri jūsų žmonės",
+    "bigDrop": "Didelis kritimas",
+    "byBadge": "pagal ženklelį",
+    "devices": "Įrenginys (nariai)",
+    "finishedLower": "peržiūrėjo iki galo",
+    "finishedPct": "{{pct}}% peržiūrėjo iki galo",
+    "inOut": "{{in}} narių · {{out}} neprisijungusių",
+    "leave": "{{pct}}% išeina",
+    "linkClicks": "Nuorodos paspaudimai",
+    "newToYou": "nauji jums",
+    "noAccount": "be paskyros",
+    "noViewersYet": "Šio įrašo dar niekas nematė.",
+    "noWatchYet": "Žiūrėjimo laikas bus rodomas čia, kai žmonės jį paleis. Skaičiuojama nuo 2026 m. spalio 31 d.",
+    "open": "Žiūrėti, kaip sekasi jūsų įrašui",
+    "otherBadges": "Kiti ženkleliai",
+    "peak": "Pikas {{time}} · {{n}}",
+    "peopleReached": "Pasiekta žmonių",
+    "playsLower": "paleidimai",
+    "playsMembers": "Narių paleidimai",
+    "playsVisitors": "Neprisijungusiųjų paleidimai",
+    "profileTaps": "Paspaudimai į jūsų profilį",
+    "reach": "Pasiekiamumas",
+    "saves": "Išsaugojimai",
+    "seeAll": "Žiūrėti visą statistiką",
+    "signedIn": "prisijungę",
+    "signedOutLower": "neprisijungę",
+    "stillWatching": "Vis dar žiūri",
+    "timesUsual": "{{ratio}}× daugiau nei įprastai",
+    "vsUsualPct": "{{pct}}, palyginti su įprastu įrašu",
+    "unavailableBody": "Šio įrašo statistiką mato tik kūrėjas.",
+    "unavailableTitle": "Statistika nepasiekiama",
+    "vsUsual": "palyginti su įprastu įrašu",
+    "watching": "Žiūri",
+    "whoSawIt": "Kas matė",
+    "withRepeats": "Pakartojimų: {{n}}",
+    "yourFollowers": "jūsų sekėjai",
+    "first48": "Pirmos 48 valandos",
+    "howItsDoing": "Kaip sekasi",
+    "bestTip": "Dauguma jūsų žiūrovų pasirodo {{day}} apie {{hour}}:00. Paskelbus prieš pat tą laiką įrašas gauna geriausią startą.",
+    "last30": "pastarosios 30 dienų",
+    "day": {
+      "sun": "Sk",
+      "mon": "Pr",
+      "tue": "An",
+      "wed": "Tr",
+      "thu": "Kt",
+      "fri": "Pn",
+      "sat": "Št"
+    }
   },
   "tokenLaunch": {
     "eyebrow": "Atvyksta greitai",
@@ -19445,7 +20719,27 @@
   },
   "mcpKeys": {
     "delete": "Ištrinti",
-    "shortProfile": "Profilis"
+    "shortProfile": "Profilis",
+    "title": "Asmeniniai raktai",
+    "body": "Scenarijams, robotams ir programėlėms, kurios negali atidaryti prisijungimo puslapio. Raktas daro tik tai, ką leidžiate, jūsų paskyroje ir jums priklausančių agentų vardu. Jis lieka aktyvus, kol naudojamas, ir nustoja veikti po 30 nenaudojimo dienų.",
+    "signIn": "Prisijunkite, kad sukurtumėte raktą",
+    "newTitle": "Nukopijuokite raktą dabar",
+    "newBody": "Jis rodomas tik šį kartą. Bet kas, turintis jį, gali naudotis jūsų paskyra pagal jūsų pasirinktus leidimus, todėl laikykite jį paslaptyje.",
+    "useIt": "Pridėkite jį į savo programėlę vienu iš šių būdų:",
+    "name": "Rakto pavadinimas",
+    "namePlaceholder": "Mano robotas",
+    "permissions": "Ką šis raktas gali daryti",
+    "limits": "Dienos limitai jūsų paskyrai ir agentams: 50 įrašų, 300 atsakymų, 1 000 reakcijų, 200 sekimų, 200 pakartotinių paskelbimų ir 30 profilio redagavimų.",
+    "create": "Sukurti raktą",
+    "show": "Rodyti mano raktus",
+    "yours": "Jūsų raktai",
+    "empty": "Raktų dar nėra.",
+    "expires": "Aktyvus iki {{date}}, jei nebus vėl panaudotas",
+    "shortRead": "Skaityti",
+    "shortSocial": "Skelbti ir atsakyti",
+    "shortGenerate": "Kurti mediją",
+    "shortAgents": "Jūsų agentai",
+    "settingsBody": "Naudokite „Riftn“ ir savo agentus per ChatGPT, Claude ar bet kurią MCP programėlę arba sukurkite asmeninį raktą."
   },
   "chatSearch": {
     "placeholder": "Ieškoti pranešimų ar žmonių",
@@ -19481,17 +20775,81 @@
     "title": "Užklausos",
     "accept": "Priimti",
     "delete": "Ištrinti",
-    "block": "Blokuoti"
+    "block": "Blokuoti",
+    "hint": "Žinutės nuo žmonių, kurių nesekate. Priimkite, atsakykite ar pradėkite juos sekti, ir pokalbis persikels į gautuosius.",
+    "rowHint": "{{n}} nuo žmonių, kurių nesekate",
+    "banner": "Jūs nesekate {{name}}. Priimkite, kad perkeltumėte šį pokalbį į gautuosius, arba tiesiog atsakykite.",
+    "accepted": "Perkelta į gautuosius",
+    "acceptFailed": "Nepavyko priimti, bandykite dar kartą"
   },
   "dmSchedule": {
     "view": "Žiūrėti",
     "edit": "Redaguoti",
     "editLabel": "Redaguoti žinutę",
-    "error": "Nepavyko. Bandykite dar kartą."
+    "error": "Nepavyko. Bandykite dar kartą.",
+    "button": "Suplanuoti žinutę",
+    "title": "Suplanuotos žinutės",
+    "whenTitle": "Kada siųsti?",
+    "waiting": "Suplanuota: {{n}}",
+    "next": "kita {{when}}",
+    "failedCount": "Neišsiųsta: {{n}}",
+    "notSent": "Neišsiųsta",
+    "emptyTitle": "Nieko nesuplanuota",
+    "emptyBody": "Parašykite žinutę, tada bakstelėkite laikrodį ir pasirinkite, kada ją išsiųsti.",
+    "changeTime": "Keisti laiką",
+    "sendNow": "Siųsti dabar",
+    "deleted": "Suplanuota žinutė ištrinta",
+    "unreadable": "Parašyta kitame įrenginyje. Ji vis tiek bus išsiųsta.",
+    "footnote": "Laikas nurodytas jūsų laiko juostoje. Niekas nemato žinutės, kol ji neišsiųsta.",
+    "footnoteNamed": "Laikas nurodytas jūsų laiko juostoje. {{name}} pamatys žinutę tik tada, kai ji bus išsiųsta.",
+    "textOnly": "Kol kas galima planuoti tik tekstines žinutes.",
+    "scheduledToast": "Suplanuota {{when}}",
+    "failedToast": "Nepavyko išsiųsti suplanuotos žinutės"
   },
   "mentionLinks": {
     "communities": "Bendruomenės",
     "pages": "Puslapiai",
-    "people": "Žmonės"
+    "people": "Žmonės",
+    "empty": "Nieko nerasta",
+    "hint": "Rašykite, kad rastumėte žmones, bendruomenes ir puslapius",
+    "linkTo": "Susieti {{name}}",
+    "members": " nariai",
+    "placeholder": "Ieškoti žmonių, bendruomenių, puslapių...",
+    "title": "Paminėti arba susieti"
+  },
+  "accountDeactivation": {
+    "acknowledge": "Suprantu, kad mano profilis bus paslėptas ir būsiu atjungtas visur.",
+    "title": "Deaktyvuoti paskyrą",
+    "short": "Laikinai paslėpkite savo profilį. Prisijunkite vėl, kad jį atkurtumėte",
+    "description": "Geriau padarykite pertrauką. Jūsų profilis, įrašai ir komentarai paslepiami, o jūs atjungiami visur. Niekas neištrinama, o vėl prisijungus viskas sugrįžta.",
+    "button": "Deaktyvuoti",
+    "confirmTitle": "Deaktyvuoti paskyrą?",
+    "confirmBody": "Jūsų profilis, įrašai ir komentarai bus paslėpti, o jūs būsite atjungti visuose įrenginiuose. Bet kada prisijunkite vėl, kad tai atšauktumėte.",
+    "busy": "Deaktyvuojama…",
+    "done": "Paskyra deaktyvuota",
+    "receipt": "Jūsų profilis, įrašai ir komentarai paslėpti. Bet kada prisijunkite vėl, kad viską sugrąžintumėte.",
+    "error": "Nepavyko deaktyvuoti paskyros. Bandykite dar kartą."
+  },
+  "halloween": {
+    "title": "Linksmo Helovyno",
+    "otherThemes": "Nenorite baimės? Raskite kitų temų:",
+    "enter": "Įžengti į požemį"
+  },
+  "msgDelete": {
+    "title": "Ištrinti žinutę?",
+    "titleMany": "Ištrinti žinutes ({{count}})?",
+    "bodyOwn": "Pašalinkite ją tik iš savo pokalbio arba visiems.",
+    "bodyOwnMany": "Pašalinkite jas tik iš savo pokalbio arba visiems.",
+    "bodyOthers": "Ji bus pašalinta tik iš jūsų pokalbio. Kitas žmogus ją vis tiek matys.",
+    "bodyOthersMany": "Jos bus pašalintos tik iš jūsų pokalbio. Kiti pokalbio dalyviai jas vis tiek matys.",
+    "bodyOwnBoth": "Pašalinkite ją tik iš savo pokalbio arba jums abiem.",
+    "bodyOwnBothMany": "Pašalinkite jas tik iš savo pokalbio arba jums abiem.",
+    "forMe": "Ištrinti sau",
+    "forEveryone": "Ištrinti visiems",
+    "forBoth": "Ištrinti mums abiem",
+    "forMeAndName": "Ištrinti man ir {{name}}",
+    "remember": "Prisiminti mano pasirinkimą",
+    "rememberHint": "Bet kada pakeiskite nustatymuose",
+    "failed": "Nepavyko ištrinti žinutės"
   }
 }

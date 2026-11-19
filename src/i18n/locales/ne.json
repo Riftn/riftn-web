@@ -1315,7 +1315,9 @@
     "menuLayoutTabsDesc": "एक पटकमा एउटा समूह, ठूला आइकनसहित",
     "menuLayoutSections": "खण्डहरू",
     "menuLayoutSectionsDesc": "सबै पेज एकैपटक, समूह शीर्षकमुनि",
-    "menuLayoutFoldersDesc": "तपाईंका मुख्य पेजहरू, त्यसपछि हरेक समूहका लागि एउटा फोल्डर"
+    "menuLayoutFoldersDesc": "तपाईंका मुख्य पेजहरू, त्यसपछि हरेक समूहका लागि एउटा फोल्डर",
+    "publicChatInBar": "तलको बारमा सार्वजनिक च्याट",
+    "publicChatInBarDesc": "स्क्रिनको तलको बारबाट एकै ट्यापमा सार्वजनिक च्याटमा जानुहोस्"
   },
   "common": {
     "confirm": "पुष्टि गर्नुहोस्",
@@ -2123,7 +2125,13 @@
     "loadingBoard": "लिडरबोर्ड लोड हुँदैछ…",
     "amountTokens": "{{amount}} टोकन",
     "directReferrals": "{{count}}ले डायरेक्ट पठाएको छ",
-    "secondaryReferrals": "{{count}}ले सेकन्डरी पठाएको छ"
+    "secondaryReferrals": "{{count}}ले सेकन्डरी पठाएको छ",
+    "ogChallenge": "OG च्यालेन्ज",
+    "ogHolders_one": "{{count}} OG होल्डर",
+    "ogHolders_other": "{{count}} OG होल्डरहरू",
+    "ogChallengeTitle": "OG होल्डरहरूलाई फर्काउनुहोस्",
+    "ogChallengeBody": "अझै DHB राख्ने मानिसहरूलाई निम्तो दिनुहोस्। तिनीहरू तपाईंको निमन्त्रणा लिङ्कबाट जोडिएर आफ्नो DHB Riftn वालेटमा राखेपछि यहाँ तपाईंको गणनामा पर्छन्।",
+    "ogChallengeCta": "आफ्नो निमन्त्रणा लिङ्क लिनुहोस्"
   },
   "dhbListing": {
     "title": "टोकन लिस्टिङ छिट्टै!",
@@ -8079,7 +8087,10 @@
     "endStreamConfirmBody": "तपाईको प्रसारण सबै दर्शकहरूको लागि बन्द हुन्छ र पुनः सुरु गर्न सकिंदैन।",
     "keepStreaming": "स्ट्रिमिङ जारी राख्नुहोस्",
     "encoderPermanentHint": "यो कुञ्जी कहिल्यै परिवर्तन हुँदैन । तपाईंको इन्कोडर एक पटक सेट गर्नुहोस् — अर्को पटक त्यहाँ सुरु गर्नुहोस् थिच्नुहोस् र Riftn ले तपाईंको लागि पोष्ट सिर्जना गर्दछ ।",
-    "notEnoughTokensForBounty": "पर्याप्त टोकन छैन। {{need}} टोकन चाहिन्छ तर {{have}} छ।"
+    "notEnoughTokensForBounty": "पर्याप्त टोकन छैन। {{need}} टोकन चाहिन्छ तर {{have}} छ।",
+    "screenInAppHint": "Riftn एपमा",
+    "screenInAppNote": "फोनका ब्राउजरहरूले कुनै पनि वेबसाइटलाई तपाईंको स्क्रिन साझा गर्न दिँदैनन्। बरु Riftn एपबाट लाइभ जानुहोस्, त्यसपछि स्क्रिन साझा गर्नुहोस् ट्याप गर्नुहोस्।",
+    "screenInAppCta": "Riftn एप लिनुहोस्"
   },
   "events": {
     "seoTitle": "घटनाहरू: Riftn मा मिटअप र सामुदायिक घटनाहरू",
