@@ -2028,6 +2028,8 @@ export type Database = {
           call_type: string
           caller_address: string
           created_at: string
+          group_id: string | null
+          group_name: string | null
           id: string
           recipient_address: string
           signaling_data: Json | null
@@ -2038,6 +2040,8 @@ export type Database = {
           call_type: string
           caller_address: string
           created_at?: string
+          group_id?: string | null
+          group_name?: string | null
           id?: string
           recipient_address: string
           signaling_data?: Json | null
@@ -2048,6 +2052,8 @@ export type Database = {
           call_type?: string
           caller_address?: string
           created_at?: string
+          group_id?: string | null
+          group_name?: string | null
           id?: string
           recipient_address?: string
           signaling_data?: Json | null
@@ -11126,6 +11132,10 @@ export type Database = {
       increment_user_skill_usage: {
         Args: { p_skill_id: string }
         Returns: undefined
+      }
+      is_active_group_member: {
+        Args: { p_group: string; p_wallet: string }
+        Returns: boolean
       }
       is_banned_from_community: {
         Args: { _community_id: string; _wallet_address: string }
