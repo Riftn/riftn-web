@@ -8,7 +8,8 @@
  *
  *   - the emoji itself moves once (Noto animated emoji, the flame flickers,
  *     the heart beats) and then settles back to the still glyph;
- *   - the chip answers with the arrival motion (pop, fly in or burst);
+ *   - the chip answers with the arrival motion picked in Settings (fly in by
+ *     default, pop, burst, or off);
  *   - the number rolls up (`RollingCount`).
  *
  * What counts as an arrival: the chip's count went up while it was on screen,
@@ -26,15 +27,17 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import {
+  animatedChatEmojiMs,
   animatedChatEmojiSrc,
   freshPlayUrl,
   paintReactionArrival,
   prefersReducedMotion,
+  reactionMotionStyle,
 } from '@/lib/chat-reaction-motion';
 import './reaction-arrival.css';
 
-/** How long the moving emoji plays before it hands back to the still glyph. */
-const PLAY_MS = 2200;
+/** The longest the moving emoji plays before it hands back to the still glyph. */
+const PLAY_CAP_MS = 2600;
 /** A chip that shows up on a message this soon after the message did is history, not news. */
 const HOST_SETTLE_MS = 700;
 
@@ -95,7 +98,7 @@ export function ReactionGlyph({ messageId, emoji, addresses, me, className }: Re
       arrived = true;
       mine = includes(addresses, me) && !includes(prev, me);
     }
-    if (!arrived || !ref.current || prefersReducedMotion()) return;
+    if (!arrived || !ref.current || prefersReducedMotion() || reactionMotionStyle() === 'off') return;
 
     const el = ref.current;
     const chip = (el.closest('[data-chat-reaction-chip]') as HTMLElement | null) ?? el;
@@ -110,7 +113,7 @@ export function ReactionGlyph({ messageId, emoji, addresses, me, className }: Re
       window.setTimeout(() => {
         if (mounted.current && play === playToken.current) setPlaying(null);
         window.setTimeout(() => URL.revokeObjectURL(url), 100);
-      }, PLAY_MS);
+      }, Math.min(PLAY_CAP_MS, animatedChatEmojiMs(src)));
     });
     // Only a change in who reacted can be an arrival.
     // eslint-disable-next-line react-hooks/exhaustive-deps

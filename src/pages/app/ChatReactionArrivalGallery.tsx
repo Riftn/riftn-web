@@ -3,14 +3,14 @@
  * a DM, a group) and a scripted stream of reactions: someone adds to a chip,
  * you react, a new emoji shows up, two people pile on. It loops, so each
  * motion style can be watched and filmed in every theme:
- * /app/state-gallery?theme=hazy&reactions=burst (pop | fly | burst)
+ * /app/state-gallery?theme=hazy&reactions=fly (fly | pop | burst | off)
  */
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DmMessageBubble } from '@/components/app/chat/DirectMessageChat';
 import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import type { DmMessage } from '@/lib/api/dehub';
-import type { ReactionMotionStyle } from '@/lib/chat-reaction-motion';
+import { CHAT_REACTION_STYLES, isChatReactionStyle, setChatReactionStyle, useChatReactionStyle, type ChatReactionStyle } from '@/lib/chat-reaction-style';
 
 const ME = '0x0000000000000000000000000000000000000001';
 const P = ['0x7777777777777777777777777777777777777771', '0x7777777777777777777777777777777777777772', '0x7777777777777777777777777777777777777773', '0x7777777777777777777777777777777777777774', '0x7777777777777777777777777777777777777775'];
@@ -119,19 +119,19 @@ function DmPanel({ group }: { group?: boolean }) {
   );
 }
 
-const STYLES: ReactionMotionStyle[] = ['pop', 'fly', 'burst'];
-const STYLE_NAMES: Record<ReactionMotionStyle, string> = { pop: 'A · Pop', fly: 'B · Fly in', burst: 'C · Burst' };
+const STYLES = CHAT_REACTION_STYLES;
+const STYLE_NAMES: Record<ChatReactionStyle, string> = { fly: 'Fly in', pop: 'Pop', burst: 'Burst', off: 'Off' };
 
 export function ChatReactionArrivalGallery() {
   const [params] = useSearchParams();
-  const asked = params.get('reactions') as ReactionMotionStyle | null;
-  const [style, setStyle] = useState<ReactionMotionStyle>(() => {
-    if (asked && STYLES.includes(asked)) return asked;
-    try { return (localStorage.getItem('dehub.reactConcept') as ReactionMotionStyle) || 'burst'; } catch { return 'burst'; }
-  });
+  const asked = params.get('reactions');
+  // ?reactions= picks the style for a filmed check; the chips below change the
+  // same device setting Settings → Appearance does.
   useEffect(() => {
-    try { localStorage.setItem('dehub.reactConcept', style); } catch { /* storage blocked */ }
-  }, [style]);
+    if (isChatReactionStyle(asked)) setChatReactionStyle(asked);
+  }, [asked]);
+  const style = useChatReactionStyle();
+  const setStyle = setChatReactionStyle;
   return (
     <section data-page-bento data-reaction-arrival-gallery className="mb-5 space-y-3 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <div className="flex flex-wrap items-center gap-2">
