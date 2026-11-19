@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
-import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Languages, MoreHorizontal, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
+import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Image as ImageIcon, Languages, MoreHorizontal, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { translateCopy } from '@/i18n/copy';
+import { copyMedia, type CopyMediaKind } from '@/lib/copy-media';
 
 /** One line-icon set for every chat's right-click menu, so DMs, groups and live chat read the same. */
 export const menuIcons = {
@@ -9,6 +11,7 @@ export const menuIcons = {
   pin: <Pin />,
   unpin: <PinOff />,
   copy: <Copy />,
+  copyMedia: <ImageIcon />,
   forward: <CornerUpRight />,
   delete: <Trash2 />,
   select: <CheckCircle2 />,
@@ -19,6 +22,18 @@ export const menuIcons = {
   download: <Download />,
   report: <Flag />,
 };
+
+type CopyT = (key: string, opts: { defaultValue: string }) => string;
+
+/** "Copy media" for a photo, GIF or video in any chat, with the toast that says what landed on the clipboard. */
+export function copyMediaWithToast(url: string, kind: CopyMediaKind, t: CopyT) {
+  void copyMedia(url, kind).then(
+    (result) => toast.success(result === 'image'
+      ? (kind === 'gif' ? t('chatHold.gifCopied', { defaultValue: 'GIF copied' }) : t('chatHold.imageCopied', { defaultValue: 'Image copied' }))
+      : t('chatHold.mediaLinkCopied', { defaultValue: 'Link copied' })),
+    () => toast.error(t('chatHold.copyFailed', { defaultValue: "Couldn't copy" })),
+  );
+}
 
 /** "Today at 10:19", "Yesterday at 22:01" or "12 Nov at 09:30", plus "edited" when it was. */
 export function messageMenuMeta(when: Date | string | undefined, edited?: boolean) {

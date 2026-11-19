@@ -136,7 +136,8 @@ import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
-import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton } from './message-menu-kit';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
+import { copyableMediaUrl } from '@/lib/copy-media';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
 import { DmVideoCallButton } from '@/components/app/chat/calls/DmVideoCallButton';
 import { useCallActions } from '@/contexts/CallContext';
@@ -742,6 +743,18 @@ const MessageBubble = memo(function MessageBubble({
       () => undefined,
     );
   };
+  // A photo, GIF or video can be copied as itself, not just its caption.
+  // Paid and encrypted attachments stay out, like Download.
+  const copyMediaTarget = (() => {
+    if ((message.msgType !== 'media' && message.msgType !== 'gif') || message.undecryptable || message.lock || encMedia || isLockedMedia || isFileMedia) return null;
+    const url = copyableMediaUrl(getMediaUrl(primaryMediaUrl) || primaryMediaUrl);
+    if (!url) return null;
+    const kind = message.msgType === 'gif' || primaryMedia?.mimeType === 'image/gif' ? 'gif' as const
+      : primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? 'video' as const
+      : 'image' as const;
+    return { url, kind };
+  })();
+  const copyMediaNow = () => { if (copyMediaTarget) copyMediaWithToast(copyMediaTarget.url, copyMediaTarget.kind, _copy); };
   const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
   // Translate also translates every message above this one that still needs it.
   const translateUp = useTranslateUp('dm', message._id, message.createdAt, canTranslate && !isTranslated && !isTranslating, handleTranslate);
@@ -777,6 +790,10 @@ const MessageBubble = memo(function MessageBubble({
     if (copyable) {
       menuActions.push({ key: 'copy', icon: menuIcons.copy, label: L.copy, onSelect: copyText, hint: 'C' });
       holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
+    }
+    if (copyMediaTarget) {
+      menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
+      holdActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
     }
     if (canTranslate) {
       const go = isTranslated ? handleShowOriginal : translateUp;
