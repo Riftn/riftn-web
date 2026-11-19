@@ -165,6 +165,7 @@ import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
 import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { ChatReactionArrivalGallery } from './ChatReactionArrivalGallery';
 import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
 import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
@@ -2125,6 +2126,7 @@ export default function StateGalleryPage() {
         <NameBadgesGallery />
         <FullScreenChatGallery />
         <MessageMenuGallery />
+        <ChatReactionArrivalGallery />
         <FollowCardsGallery />
 
         <StreamerArtworkGallery />

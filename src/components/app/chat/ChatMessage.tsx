@@ -13,7 +13,6 @@ import { MessageMenu, type MessageMenuAction } from './MessageMenu';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
 import { copyableMediaUrl } from '@/lib/copy-media';
 import Images from '@/components/ui/cut-icons/images';
-import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { ShieldBan, Loader2, RotateCcw, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import Languages from "@/components/ui/cut-icons/language";
@@ -39,6 +38,7 @@ import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { VoiceWaveformPlayer } from './VoiceWaveformPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
@@ -170,6 +170,7 @@ function ReactionBar({
   /** Your own line: a reaction opens the list of who left it. */
   ownLine?: boolean;
 }) {
+  useReactionHost(messageId);
   const [showWho, setShowWho] = useState(false);
   const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
   if (entries.length === 0) return null;
@@ -199,14 +200,14 @@ function ReactionBar({
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <span className="inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+            <ReactionGlyph messageId={messageId} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" />
             {myReaction && !ownLine ? (
               <>
-                <span className="text-[10px] group-hover/reaction:hidden">{addresses.length}</span>
+                <RollingCount value={addresses.length} className="text-[10px] group-hover/reaction:hidden" />
                 <X className="w-3 h-3 hidden group-hover/reaction:block text-white" />
               </>
             ) : (
-              <span className="text-[10px]">{addresses.length}</span>
+              <RollingCount value={addresses.length} className="text-[10px]" />
             )}
           </button>
         );
@@ -631,16 +632,14 @@ export const ChatMessage = memo(function ChatMessage({
         )}
 
         {/* Reactions display */}
-        {message.reactions && (
-          <ReactionBar
-            reactions={message.reactions}
-            currentUserAddress={currentUserAddress}
-            onReact={onReact}
-            onRemoveReaction={onRemoveReaction}
-            ownLine={isMine}
-            messageId={message.id}
-          />
-        )}
+        <ReactionBar
+          reactions={message.reactions ?? {}}
+          currentUserAddress={currentUserAddress}
+          onReact={onReact}
+          onRemoveReaction={onRemoveReaction}
+          ownLine={isMine}
+          messageId={message.id}
+        />
       </div>
     </div>
     </>

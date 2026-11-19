@@ -1,0 +1,19 @@
+/* Live reaction arrival: the rolling count and the moving emoji (ReactionArrival.tsx). */
+.dehub-roll { height: 1.25em; line-height: 1.25em; vertical-align: middle; }
+.dehub-roll-in, .dehub-roll-out { display: inline-block; }
+.dehub-roll[data-dir='up'] .dehub-roll-in { animation: dehub-roll-in-up 0.42s cubic-bezier(.3, 1.3, .5, 1) both; }
+.dehub-roll[data-dir='up'] .dehub-roll-out { animation: dehub-roll-out-up 0.32s ease-in both; }
+.dehub-roll[data-dir='down'] .dehub-roll-in { animation: dehub-roll-in-down 0.42s cubic-bezier(.3, 1.3, .5, 1) both; }
+.dehub-roll[data-dir='down'] .dehub-roll-out { animation: dehub-roll-out-down 0.32s ease-in both; }
+@keyframes dehub-roll-in-up { from { transform: translateY(100%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes dehub-roll-out-up { from { transform: none; opacity: 1; } to { transform: translateY(-100%); opacity: 0; } }
+@keyframes dehub-roll-in-down { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes dehub-roll-out-down { from { transform: none; opacity: 1; } to { transform: translateY(100%); opacity: 0; } }
+
+.dehub-reaction-playing { animation: dehub-reaction-play-in 0.18s ease-out both; }
+@keyframes dehub-reaction-play-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dehub-roll-in, .dehub-roll-out, .dehub-reaction-playing { animation: none !important; }
+  .dehub-roll-out { display: none; }
+}
