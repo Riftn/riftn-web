@@ -8200,7 +8200,6 @@
     "paying": "Bixinta {{amount}} tokens…",
     "pickCount": "{{selected}} oo {{total}} la doortay. Wax kasta oo horay uga jira profilekaaga waa la casuumaa oo lama bixin doono laba jeer.",
     "pickTitle": "Dooro waxa aad keenaysid",
-    "placeholder": "youtube.com/@you, tiktok.com/@you, vimeo.com/you…",
     "progressDone": "{{imported}} soo galay.",
     "progressDoneWithFailures": "{{imported}} soo galay, {{failed}} ma uu soo gelin karin.",
     "progressIdle": "Video kasta oo batch-ka ku jira waxay heysataa tile-yadeeda, sidaas darteed waxaad arki kartaa waxa soo galay iyo waxa kugula dib celinaysid. Wax hadda socodka ah ma jiraan — grid-ka hoose waa tusaale.",

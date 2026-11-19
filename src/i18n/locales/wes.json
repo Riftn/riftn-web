@@ -2,9 +2,7 @@
   "textFeed": {
     "tab": "Rait"
   },
-  "comic": {
-    "showAll": "Show all {{count}} pages"
-  },
+  "comic": {},
   "comicBorder": {
     "title": "Border",
     "theme": "Theme",
@@ -152,17 +150,12 @@
     "hint": "Di logo go stay whole for two second, den e go broke for piece. Put mouse for top am or choose am make e join back."
   },
   "mastodonApps": {
-    "authTitle": "Sign in with Riftn",
     "authWants": "{{app}} want use your Riftn account",
     "authSignedInAs": "You don sign in as {{name}}",
     "authSignIn": "Sign in make you continue",
     "allow": "Allow",
     "cancel": "Kansel",
-    "scopeRead": "See your timelines, posts, notifications and bookmarks",
     "scopeWrite": "Post, reply, like, boost and bookmark for your side",
-    "scopeFollow": "Follow, unfollow, block and mute accounts",
-    "scopePush": "Send you notifications",
-    "scopeProfile": "See your profile",
     "invalid": "This sign-in link no correct. Go back to the app and try again.",
     "failed": "E no work. Try again.",
     "codeTitle": "Copy this code put for the app make you finish sign in.",
@@ -228,7 +221,6 @@
     "clear": "Clear am"
   },
   "notificationFilters": {
-    "title": "Filter notifications from",
     "description": "Choose wetin go happen when person weh no di your circle interact with you. Filtered notifications go wait under Filtered, no badge and no push.",
     "notFollowing": "People weh you no follow",
     "notFollowers": "People weh no follow you",
@@ -258,7 +250,6 @@
     "duration30d": "For 30 days",
     "where": "Where",
     "home": "Haus",
-    "public": "Explore and search",
     "profile": "Profile dem",
     "thread": "Conversations",
     "notifications": "Notifikayshuns",
@@ -313,7 +304,6 @@
     "add": "Add description",
     "edit": "Change description",
     "titleImage": "Describe this picture",
-    "titleVideo": "Describe this video",
     "help": "For people weh no fit see am. Screen reader go read am loud.",
     "placeholder": "Wetin e di show? Put any writing weh e get inside.",
     "show": "Show description",
@@ -322,17 +312,11 @@
   },
   "liveRecap": {
     "title": "Stream recap",
-    "justEnded": "Your stream recap",
-    "lastStream": "Your last stream",
     "share": "Share-am",
-    "shareText": "I just streamed \"{{title}}\" on Riftn: {{duration}} live, {{peak}} watching at the peak and {{followers}} new followers.",
     "untitled": "Untitled stream",
     "copied": "Recap copy a go. Anywhere you wan, you can paste it.",
     "loadFailed": "Na dee load no go well. Try again after a while.",
     "duration": "Time live",
-    "peakViewers": "Most watching at once",
-    "gifts_one": "From {{count}} gift",
-    "gifts_other": "From {{count}} gifts",
     "newFollowers": "Nyu follower dem",
     "chatMessages": "Chat messages",
     "chatters": "People chatting",
@@ -340,8 +324,7 @@
     "shares": "People sharing",
     "topSupporters": "Top supporters",
     "polls": "Polls",
-    "pollWinner": "{{option}} won",
-    "stillCounting": "Still counting: gifts can take a minute to confirm."
+    "pollWinner": "{{option}} won"
   },
   "accountConnect": {
     "title": "Connect yu Riftn account",
@@ -555,7 +538,6 @@
     "sessionsRevokedMany": "{{count}} device dem don sign out",
     "usernameTaken": "Dem don take dis username",
     "postingChain": "Blockchain wey you go use post",
-    "showOnline": "Show when I'm online",
     "showOnlineDesc": "Di pipo wey you dey message go see smol green dot for your name when you dey use Riftn",
     "showDislikes": "Make everybody see my dislike dem",
     "showDislikesDesc": "Anybody fit open di Dislikes tab fo your profile. If you off dis one, na only you go fit see am.",
@@ -1988,7 +1970,6 @@
     "replyingTo": "Yu dey ansa {{name}}",
     "requestAuthorChip": "Author",
     "commentEdited": "dem don edit am",
-    "showOneMoreReply": "Show 1 more reply",
     "showMoreReplies": "Show {{count}} more reply dem",
     "submitDrawerTitle": "Send request fo new feature",
     "titleLabel": "Title",
@@ -2263,7 +2244,6 @@
     "redirectingOnramp": "E dey redirect to onramp...",
     "onrampCreated": "Onramp session don create",
     "failedOnramp": "E no fit start onramp",
-    "badgeDiscount": "{{tier}} holder — {{percent}}% off",
     "otherTokens": "Oda tokens",
     "otherTokensDesc": "Yus yua kad fo bai ETH o USDC fo Base",
     "shareToFeed": "Share fo ma feed",
@@ -2580,9 +2560,6 @@
     "migrateUnmatchedDetail": "Wetin no fit find profile for dis wallet address. If you fit sign in again, go back na use login you use for sign up instead.",
     "migrateGoBack": "Go bak",
     "migrateNoOldAccount": "Wetin no old Riftn account for dis login, so no need bring anyting. Go create new account instead.",
-    "migrateInstead": "Bring over the old account instead",
-    "setUpNewAccount": "Set up a new account",
-    "createNewInstead": "Create a new account instead",
     "migrateAccount": "Carry account come",
     "importExternalWallet": "Import am",
     "invalidImportSecret": "Enter wey you go keep your private key or your seed phrase (seed words).",
@@ -2607,7 +2584,6 @@
     "sendingCode": "E dey send code...",
     "smsInfo": "We go send you verification code for SMS",
     "or": "or",
-    "termsNotice": "By continuing, you agree to our Terms and Privacy Policy",
     "walletConnectedAs": "E don konekt",
     "useDifferentWallet": "Yus anoda wallet",
     "walletInfoDesktop": "Connect your wallet for sign in securely",
@@ -4027,9 +4003,6 @@
       "payOnApproval": "Paid directly after approval",
       "publish": "Publish bounty",
       "posted": "Bounty published",
-      "draftReady": "Draft saved. Publish when ready.",
-      "ratingSummary": "{{rating}}/5 from {{count}} bounty reviews",
-      "newReputation": "No bounty reviews yet",
       "reviewWorker": "Worker to review",
       "reviewHelp": "Yu go review am, na am go affect yor bounty reputation. Yu fit review work wey dem accept, reject, or work wey dem submit afta deadline, including unpaid work.",
       "disputesReputation": "Ef you go check evidence, go record what poster owe. Poster go settle any worker award direct; decision stay on bounty record.",
@@ -4039,9 +4012,7 @@
       "checkPayment": "Check payment",
       "clipVerify": "Check wey number of clip dey get before you approve. For every full 1,000 view, you get one unit.",
       "decisionOnly": "A worker award no save record wey poster dey owe. Poster pay direct, na decision dey stay on bounty record.",
-      "deployEscrow": "Deploy and activate escrow",
       "deploying": "Checking escrow deployment",
-      "deployNotice": "Deploy the tested Base escrow with the owner, fee recipient and supported tokens shown below. Your wallet will show the gas cost before confirmation.",
       "draftFunding": "Draft yu save. \"Publishing\" lock full budget in Base escrow. Worker get 95% of approved amount; platform fee be 5%.",
       "draftSaved": "Draft save wey go. Fund escrow go publish.",
       "escrowActive": "Escrow is active",
@@ -4049,7 +4020,6 @@
       "escrowSetup": "Bounty escrow setup",
       "feeNotice": "Waka dey receive {{net}} {{currency}} after 5% platform fee. Gross budget dey use {{gross}} {{currency}}.",
       "fundingPending": "Funding submitted. Check confirmation.",
-      "fundPublish": "Fund and publish",
       "hashPlaceholder": "0x transaction hash",
       "legacyUnfunded": "Bounty no get fund. Poster pay direct for work dey accept.",
       "paymentPending": "Payment bi dey wait konfirm. Chek am status bifor yu send anoda transfer.",
@@ -4057,7 +4027,6 @@
       "recoverTx": "Yá, wé waka recover transaction na.",
       "releaseConfirm": "Na if wallet signature no dey, na if no transaction dey submit. If transaction dey send, recover am hash and check confirmation instead.",
       "releaseSignature": "Release rejected signature",
-      "reviewWindow": "Funded bounties close after the deadline and a three-day review window. Review and settle every submission first.",
       "setupRequired": "Eskrou setap wey go dem for save befor you go publish. Your draft go stay save a wey.",
       "signatureReleased": "Rejected signature released",
       "verifiedViews": "Verified view count",
@@ -5771,20 +5740,12 @@
     "referenceSingle": "Mi go use one pikin foto to rekonstrukt objek.",
     "referenceHint": "Wen yu wok wit asset, yu fit reference am for yu prompt. Add up to four piks an one kip.",
     "referenceOneClip": "Attach one reference clip.",
-    "referenceClipLength": "Use an MP4 or MOV clip between 3 and 15 seconds for a swap, or up to 30 seconds for motion.",
-    "referenceFourImages": "Attach up to four reference images.",
-    "referenceMultiModel": "Choose a model supporting multiple images, such as FLUX 3 Image.",
-    "referenceNeedsClip": "Attach your character image and the reference clip.",
-    "referenceVideoModel": "Choose Character swap or Copy motion to use a clip.",
     "referenceTooMany": "Dis model no go fit all dem picture dem attach. Remove dem extra or choose different model.",
     "referenceClipSeconds": "Clip length: {{seconds}}s",
     "referenceUploadClip": "Upload reference clip",
     "characterSwap": "Character swap",
     "copyMotion": "Copy motion",
-    "referenceSwapName": "Swap character into a clip",
     "referenceSwapHint": "Dey go replace a person wey dey no dey, but make sure e fit fit in scene wey e dey, move like e dey do before, no change anything else.",
-    "referenceMotionName": "Copy motion to your character",
-    "referenceMotionHint": "Animate a character image using the actions and expressions in a clip.",
     "referenceOutfitName": "Try an outfit fit wey you see fit in video clip.",
     "referenceOutfitHint": "Change wey yu wear, but keep face, motion, and background wey yu dey.",
     "referenceProductName": "Plas ya product for inside clip.",
@@ -6378,19 +6339,13 @@
       "voted_one": "You don vote · {{count}} vote",
       "voted_other": "You vote am · {{count}} votes",
       "votes_one": "{{count}} vote",
-      "votes_other": "{{count}} vote dem",
-      "howToVote_one": "Type {{command}} and a number in chat to vote · {{count}} vote",
-      "howToVote_other": "Type {{command}} and a number in chat to vote · {{count}} votes"
+      "votes_other": "{{count}} vote dem"
     }
   },
   "liveChatModeration": {
-    "timeout1m": "Time out for 1 minute",
-    "timeout10m": "Time out for 10 minutes",
     "timeout1h": "Tym out fo 1 hour.",
-    "ban": "Ban from these streams",
     "makeModerator": "Make moderator",
     "timedOut": "Timed out.",
-    "banned": "Banned from these streams.",
     "madeModerator": "E go be moderator now.",
     "failed": "Na go no dey work. Try again.",
     "youAreBanned": "Wah you no go chat wey dis creator dey stream, eh?",
@@ -6437,26 +6392,19 @@
     },
     "subathon": {
       "title": "Subathon",
-      "intro": "A countdown on your stream. Every paid gift, follow and subscription adds time, so the room keeps you live.",
       "secondsPerThousand": "Seconds added per 1,000 tokens gifted",
       "secondsPerFollow": "Seconds added per follow",
       "secondsPerSubscribe": "Seconds added per subscription",
-      "capHours": "Longest it can run (hours)",
       "save": "Save amounts",
       "saved": "Subathon amounts saved.",
-      "startMinutes": "Start with (minutes)",
-      "start": "Start the countdown",
       "stop": "Stop",
       "addFive": "Add 5 minutes",
-      "removeFive": "Take off 5 minutes",
-      "failed": "Na go no dey work. Try again.",
-      "widgetHint": "Shows your subathon countdown. Start it from the Subathon panel in Live Studio."
+      "failed": "Na go no dey work. Try again."
     },
     "points": {
       "title": "Loyal viewers",
       "intro": "Wot watcha see, dem get one point fo every minute dem watch you, an one point fo every 100 tokens dem give you as gift. Chat an reaction no get point, so point no be fo farming.",
-      "empty": "Na dey no point yet. Dem go add up when people watch and give gift.",
-      "widgetHint": "Add the Loyal viewers widget to show this list on stream."
+      "empty": "Na dey no point yet. Dem go add up when people watch and give gift."
     },
     "controls": {
       "title": "Quick controls",
@@ -6473,19 +6421,13 @@
       "title": "Polls",
       "intro": "Ask dem people watchin’ yu broadcast one question. Dem answer wit’ button in Riftn app, or by type \"{{command}}\" and number of option in chat.",
       "question": "Kweshon",
-      "questionPlaceholder": "What should I play next?",
       "option": "Option {{n}}",
       "addOption": "Add an option",
       "removeOption": "Remove option {{n}}",
-      "duration": "How long voting stays open",
       "seconds_one": "{{count}} second",
       "seconds_other": "{{count}} seconds",
       "minutes_one": "{{count}} minute",
       "minutes_other": "{{count}} minit",
-      "start": "Start the poll",
-      "end": "End voting now",
-      "started": "Your poll is open. Viewers can vote now.",
-      "notLive": "Go live first. A poll runs on the broadcast you are streaming right now.",
       "startFailed": "Poll no dey start yet. Try again.",
       "closeFailed": "Vote no finish yet. Try again.",
       "live": "Voting open · {{time}} left",
@@ -6609,20 +6551,13 @@
       "event_feed": "Latest gift, follower, subscriber, person share broadcast wey",
       "chat_box": "Show broadcast chat message on screen",
       "ticker": "Line wey own text wey dey scroll cross screen",
-      "rule_alert": "Where your rules' alerts appear",
-      "poll": "Youse live poll, wey go come wit button fo vote fo every option.",
-      "spin_wheel": "Where the wheels in your rules spin",
-      "subathon_timer": "A countdown that gifts, follows and subscriptions push back",
-      "points_board": "Your top viewers by points from watching and gifting",
-      "streamer_level": "Your streamer level and weekly streak, from your profile",
-      "tip_jar": "A jar that fills up as paid gifts come in"
+      "poll": "Youse live poll, wey go come wit button fo vote fo every option."
     },
     "fields": {
       "style": "Style",
       "celebration": "Celebration",
       "banner": "Banna",
       "minAmount": "Di smallest tip weh go show (tokens)",
-      "showStreak": "Show the weekly streak",
       "showMessage": "Show di tip message",
       "confirmedOnly": "Only afta di payment don confirm",
       "confirmedOnlyHint": "Wait small seconds for di chain, so di tip wey dem no pay e no go appear.",
@@ -6654,13 +6589,11 @@
       "title": "Di rules",
       "intro": "Wen something happen on your stream, Riftn go do what you say: show alert, play sound, read something out loud, post in your chat, or tell your Discord.",
       "add": "Add a rule",
-      "limit": "You have reached the limit of {{count}} rules.",
       "loadFailed": "Yas rules wey you no fit load. Come back page wey you fit try again.",
       "empty": "No rule yet. Add one fo react fo tip, follow, or chat command.",
       "saved": "Wetin you say go dey save. Dem go run for your next tip, follow, or message.",
       "saveFailed": "Wetin you dey try save no go save wey. Try again or check if you have permission.",
       "testFailed": "Na test dis no go well. Try again after a while.",
-      "saveToTest": "Save your rules to test them",
       "test": "Tes",
       "enabled": "Rule on",
       "remove": "Delete di rule",
@@ -6674,31 +6607,23 @@
       "keyword": "Word or phrase",
       "audience": "Won man a go set dis off?",
       "blockedWords": "Blocked words",
-      "blockedWordsHint": "Separate with commas. Messages containing them are ignored and never read aloud.",
       "cooldown": "Wait between uses (seconds)",
       "userCooldown": "Wait per viewer (seconds)",
       "addAction": "Add an action",
       "removeAction": "Remove action",
-      "placeholders": "Use {name}, {amount} and {message} in your text. Links in messages are removed.",
-      "placeholdersLive": "Use {name}, {title} and {link} in your text: your name, the broadcast's title and a link to watch it.",
       "wheelSegments": "Wheel segments, one per line",
       "wheelHint": "Befo 2 na 12. Riftn go pick whey de wheel stop, so everybody dat watch go see same result. Use {result} in a alert, read-out loud or chat action fo name it.",
       "alertText": "Alert text",
       "sound": "Nois",
-      "sayText": "Text to read aloud",
       "chatText": "Message to post",
-      "chatHint": "Posted from your account into your stream's chat. It cannot repeat the viewer's message.",
       "webhookUrl": "Webhook address",
-      "webhookHint": "A Discord or Slack webhook, or any https address that accepts a POST.",
       "webhookText": "Message to send",
       "triggers": {
         "tip": "A tip arrives",
         "follow": "Someone follows",
         "subscribe": "Someone subscribes",
-        "share": "Someone shares the stream",
         "live": "You start broadcastin",
         "command": "E chat command na use wey a go dey use fo chat",
-        "keyword": "A chat message contains a word",
         "chat": "Any chat message"
       },
       "audiences": {
@@ -6714,28 +6639,18 @@
         "webhook": "Send to a webhook",
         "wheel": "Spin a wheel"
       },
-      "summary": {
-        "tip": "Tip of {{amount}} tokens or more"
-      },
+      "summary": {},
       "presets": {
         "blank": "Blank rule",
         "readChat": "Read chat aloud",
-        "bigTip": "Air horn for big tips",
-        "thankFollowers": "Thank new followers",
         "command": "Chat command"
       },
       "presetHints": {
-        "blank": "Start from nothing",
-        "readChat": "Reads yu followers messages out loud, one for each person, every 30 seconds.",
-        "bigTip": "Plays an air horn and shows an alert for tips of 100,000 tokens or more",
-        "thankFollowers": "Posts a thank-you in your chat when someone follows",
-        "command": "Answers a !command in your chat"
+        "readChat": "Reads yu followers messages out loud, one for each person, every 30 seconds."
       },
       "presetText": {
         "readChat": "{name} says {message}",
-        "bigTip": "{name} sent {amount} tokens!",
-        "thankFollowers": "Thanks for the follow, {name}!",
-        "command": "Hello {name}, welcome to the stream!"
+        "bigTip": "{name} sent {amount} tokens!"
       },
       "sounds": {
         "airhorn": "Air horn",
@@ -6769,8 +6684,6 @@
       "subscribersOnlyHint": "Overrides followers only.",
       "bannedWords": "Banned words",
       "bannedWordsHint": "Wah, no change, same like before.",
-      "wordAction": "When someone uses one",
-      "wordBlock": "Stop the message",
       "wordTimeout": "Stop wey, go time dem for one minute!",
       "moderators": "Moderator",
       "moderatorsHint": "E dem go stop timer an ban viewa fi yu stream. Dem no go act on yu or on each other.",
@@ -7870,7 +7783,6 @@
     "videoCountOne": "{{n}} vidio",
     "videosCount": "{{videos}} vidio dem",
     "viewFeed": "Look your feed",
-    "watchOnSource": "Open the original",
     "yourChannel": "Ya channel",
     "yourChannelHint": "Paste yu channel address — yu handle alone fit wey yu dey use wey too."
   },
@@ -8140,7 +8052,6 @@
         "hostile_tone": "Hostile tone"
       },
       "aiMenu": "AI tools dem",
-      "changeVibe": "Change the vibe",
       "fixSpelling": "Fix spelling an grammar",
       "rewriteFailed": "We no fit rewrite am. Try again."
     }
@@ -10384,7 +10295,6 @@
     "otherChain": "Dis post dey settle for another chain, so you need Riftn tokens for your wallet.",
     "buyCardHint": "Visa, Mastercard, Apple Pay",
     "moveFunds": "Bring money enter",
-    "moveFundsHint": "Swap or deposit from another chain",
     "notNow": "No be now"
   },
   "glossary": {
