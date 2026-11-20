@@ -105,6 +105,10 @@ export function usePublicChatLastLine(enabled: boolean): RoomLastLine | null {
     enabled,
     staleTime: 15_000,
     refetchInterval: 30_000,
+    // Coming back to the tab or the Messages page always asks again, so the
+    // row never sits on a line from before you left.
+    refetchOnWindowFocus: 'always',
+    refetchOnMount: 'always',
     queryFn: async () => {
       const { getLiveChatMessages } = await import('@/lib/api/dehub/livechat');
       const lines = await getLiveChatMessages('global', { limit: 10 });
