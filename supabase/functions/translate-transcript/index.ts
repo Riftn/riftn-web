@@ -62,11 +62,27 @@ async function waitForTranslation(db: ReturnType<typeof admin>, transcriptId: st
 
 interface Chapter { title?: string; start?: number; end?: number }
 
+/** The lines go in numbered so the model keeps them apart. Told to "preserve
+ *  the exact number", it wrote the number into half its answers, and every
+ *  caption and dubbed line then opened with "3." */
+const subtitleRules = (langName: string) =>
+  `You are a subtitle translator. Translate each line to ${langName}. ` +
+  `The lines are numbered only so you can tell them apart: answer with the translated text alone, never the number. ` +
+  `Keep the same count and order. Do not merge, split, or add lines. `;
+
 const subtitleSystemPrompt = (langName: string, count: number) =>
-  `You are a subtitle translator. Translate each numbered line to ${langName}. ` +
-  `Preserve the exact number and order. Do not merge, split, or add lines. ` +
+  subtitleRules(langName) +
   `Return ONLY a JSON array of exactly ${count} translated strings, one per input line, in order. ` +
   `No markdown fences, no commentary, no refusals — a line with nothing to translate is returned as given.`;
+
+/** Drop a list number the model copied from the input. A line that opens with
+ *  that number in the original keeps it. */
+export function stripLineNumber(translated: string, index: number, source: string): string {
+  const copied = translated.match(/^\s*\(?(\d{1,3})[.):]\s+/);
+  if (!copied || Number(copied[1]) !== index + 1) return translated;
+  if (/^\s*\(?\d/.test(source)) return translated;
+  return translated.slice(copied[0].length);
+}
 
 /** Haiku on fal, behind Flash-Lite. Kept as a second vendor: when the gateway
  *  last ran out of credits every chunk threw and the untranslated lines were
@@ -108,9 +124,7 @@ async function chunkViaGateway(numbered: string, langName: string, skipGateway =
       messages: [
         {
           role: 'system',
-          content:
-            `You are a subtitle translator. Translate each numbered line to ${langName}. ` +
-            `Preserve the exact number and order. Do not merge, split, or add lines. ` +
+          content: subtitleRules(langName) +
             `Return ONLY a JSON array of translated strings, one per input line, in order.`,
         },
         { role: 'user', content: numbered },
@@ -157,7 +171,7 @@ async function translateChunk(items: Array<{ text: string }>, langName: string):
   // translation, which nothing downstream can tell apart from success.
   if (out.length === 0 && items.length > 0) throw new Error('provider returned no translations');
   while (out.length < items.length) out.push(items[out.length].text);
-  return out.slice(0, items.length);
+  return out.slice(0, items.length).map((text, i) => stripLineNumber(String(text ?? ''), i, items[i].text));
 }
 
 function packItems(items: Array<{ text: string }>): Array<Array<{ text: string }>> {

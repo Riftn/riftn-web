@@ -9,16 +9,25 @@ app_port: 7860
 Chatterbox Multilingual v3 reads translated transcript segments using a sample
 of each identified speaker. The cached AAC contains speech only. Web and mobile
 play it alongside the video, with independent voice and original-volume controls.
-Original volume stays constant between lines. If no suitable sample exists,
-the worker uses its stock voice. No database credentials reach the worker.
+Original volume stays constant between lines. If a speaker has under three
+seconds of usable lines, the worker uses its stock voice. No database
+credentials reach the worker.
+
+One dub renders at a time and `DUB_QUEUE` more (default 2) wait inside the
+worker. Past that the worker answers 503 and the Edge Function keeps the row
+in its own line: `pending` with an attempt time, no attempt spent. Each time
+the worker reports a dub finished the function sends the next ones, shortest
+video first, so the line drains without a cron. A render that outlives its
+two-hour upload URL asks the function for a new one before uploading.
 
 ## Existing server deployment
 
 The existing backend host can run the worker in `/srv/dehub-dub/app` with an
 isolated `/srv/dehub-dub/venv`. Install CPU torch/torchaudio before the pinned
 requirements, using the same versions/index as the Dockerfile. The checked-in
-systemd unit runs as a dedicated user, on loopback only, capped at one CPU and
-6 GB RAM with lower scheduling priority. Install `nginx-location.conf` as an
+systemd unit runs as a dedicated user, on loopback only, capped at two CPUs and
+6 GB RAM with lower scheduling priority. Keep `DUB_CPU_THREADS` equal to the
+CPU cap: more threads than cores makes the render slower, not faster. Install `nginx-location.conf` as an
 include in the existing TLS server block, validate nginx, then reload it.
 
 The service reads the existing shared worker secret from `/etc/dehub-dub.env`
