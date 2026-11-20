@@ -2237,7 +2237,7 @@
     "promptDevice": "Toestel OS (vir foute)",
     "deviceInfoNoErrors": "Geen",
     "promptFilters": "Kategorie filter",
-    "promptMediaError": "Kies afbeeldings of videos onder 50MB elk.",
+    "promptMediaError": "Kies afbeeldings of videos onder 200MB elk.",
     "promptMediaLimit": "Tot {{max}} aanhangsels.",
     "removePromptAttachment": "Verwyder {{name}}",
     "promptAttachment": "Aanhegsel {{number}}",

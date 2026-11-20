@@ -2311,7 +2311,7 @@
     "promptDevice": "ডিভাইস অ্যান্ড ওএস (বাগের জন্য)",
     "deviceInfoNoErrors": "কোনটিই নয়",
     "promptFilters": "ফিল্টার বাই ক্যাটাগরি",
-    "promptMediaError": "চয়ন করুন ইমেজ অথবা ভিডিও ৫০এমবিয়ে ক’টি।",
+    "promptMediaError": "চয়ন করুন ইমেজ অথবা ভিডিও ২০০এমবিয়ে ক’টি।",
     "promptMediaLimit": "ম্যাক্সিমাম {{max}} আটাচমেন্ট।",
     "removePromptAttachment": "রিমুভ {{name}}",
     "promptAttachment": "আটাচমেন্ট {{number}}",

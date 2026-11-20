@@ -2226,7 +2226,7 @@
     "promptDevice": "उपकरण र ओएस (बगहरूको लागि)",
     "deviceInfoNoErrors": "केही छैन",
     "promptFilters": "वर्गमा फिल्टर गर्नुहोस्",
-    "promptMediaError": "हरेकै २०MB भन्दा कम छवि वा विडियोहरू छनौट गर्नुहोस्।",
+    "promptMediaError": "हरेकै २००MB भन्दा कम छवि वा विडियोहरू छनौट गर्नुहोस्।",
     "promptMediaLimit": "मक्सिमम {{max}} जोड्नेहरू।",
     "removePromptAttachment": "{{name}} हटाउनुहोस्",
     "promptAttachment": "जोड्ने {{number}}",

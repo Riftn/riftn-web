@@ -2213,7 +2213,7 @@
     "promptDevice": "Qalabka & OS (loogu talagalay cayayaanka)",
     "deviceInfoNoErrors": "Midna",
     "promptFilters": "Isku shaandheyn by category",
-    "promptMediaError": "Dooro sawiro ama fiidiyowyo ka yar 20MB mid kasta.",
+    "promptMediaError": "Dooro sawiro ama fiidiyowyo ka yar 200MB mid kasta.",
     "promptMediaLimit": "Badiyadka to {{max}} attachments",
     "removePromptAttachment": "Ka saar {{name}}",
     "promptAttachment": "Lifaaqa {{number}}",

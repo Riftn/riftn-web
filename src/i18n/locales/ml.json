@@ -2213,7 +2213,7 @@
     "promptDevice": "ഡിവൈസ് & ഒഎസ് (ബഗുകൾക്കായി)",
     "deviceInfoNoErrors": "ഒന്നുമില്ല",
     "promptFilters": "വിഭാഗം അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
-    "promptMediaError": "50MBയിൽ താഴെയുള്ള ഇമേജുകളോ വീഡിയോകളോ ഓരോന്നായി തിരഞ്ഞെടുക്കുക.",
+    "promptMediaError": "200MBയിൽ താഴെയുള്ള ഇമേജുകളോ വീഡിയോകളോ ഓരോന്നായി തിരഞ്ഞെടുക്കുക.",
     "promptMediaLimit": "{{max}} അറ്റാച്ചുമെന്റുകൾ വരെ.",
     "removePromptAttachment": "{{name}} നീക്കം ചെയ്യുക",
     "promptAttachment": "അറ്റാച്ച്മെന്റ് {{number}}",

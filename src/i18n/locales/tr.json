@@ -2321,7 +2321,7 @@
     "deviceInfoErrors": "Son hatalar",
     "deviceInfoNoErrors": "Yok",
     "promptFilters": "Kategoriye göre filtrele",
-    "promptMediaError": "Her biri 50 MB’tan küçük görsel veya video seçin.",
+    "promptMediaError": "Her biri 200 MB’tan küçük görsel veya video seçin.",
     "promptMediaLimit": "En fazla {{max}} ek.",
     "removePromptAttachment": "{{name}} ekini kaldır",
     "promptAttachment": "Ek {{number}}",

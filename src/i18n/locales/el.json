@@ -2214,7 +2214,7 @@
     "promptDevice": "Πληροφορίες συσκευής & OS (για σφάλματα)",
     "deviceInfoNoErrors": "Κανένα",
     "promptFilters": "Φιλτράρετε ανά κατηγορία",
-    "promptMediaError": "Επιλέξτε εικόνες ή βίντεο μέχρι 50MB.",
+    "promptMediaError": "Επιλέξτε εικόνες ή βίντεο μέχρι 200MB.",
     "promptMediaLimit": "Μέχρι {{max}} συνημμένα.",
     "removePromptAttachment": "Αφαιρέστε {{name}}",
     "promptAttachment": "Συνημμένο {{number}}",

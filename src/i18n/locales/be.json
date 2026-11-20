@@ -2226,7 +2226,7 @@
     "promptDevice": "Прылада і OS (для памылак)",
     "deviceInfoNoErrors": "Няма",
     "promptFilters": "Фільтраваць па катэгорыі",
-    "promptMediaError": "Выбіраць знімкі ці відэа да 50 МБ кожны.",
+    "promptMediaError": "Выбіраць знімкі ці відэа да 200 МБ кожны.",
     "promptMediaLimit": "Да {{max}} прыкметаў.",
     "removePromptAttachment": "Выдаліць {{name}}",
     "promptAttachment": "Прыкмета {{number}}",

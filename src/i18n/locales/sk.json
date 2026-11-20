@@ -2263,7 +2263,7 @@
     "promptDevice": "Zariadenie a operačný systém (pre chyby)",
     "deviceInfoNoErrors": "Žiadny",
     "promptFilters": "Filtrovať podľa kategórie",
-    "promptMediaError": "Vyberte obrázky alebo videa do 50 MB každé.",
+    "promptMediaError": "Vyberte obrázky alebo videa do 200 MB každé.",
     "promptMediaLimit": "Až {{max}} príloh.",
     "removePromptAttachment": "Odstrániť {{name}}",
     "promptAttachment": "Príloha {{number}}",

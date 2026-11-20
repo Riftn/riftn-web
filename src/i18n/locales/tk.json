@@ -2213,7 +2213,7 @@
     "promptDevice": "Cihaz & OS (buglar ýçin)",
     "deviceInfoNoErrors": "Hiç biri",
     "promptFilters": "Kategoriyaga göre filtrele",
-    "promptMediaError": "Her birini 20MB-dan kichik resimler yada video sec",
+    "promptMediaError": "Her birini 200MB-dan kichik resimler yada video sec",
     "promptMediaLimit": "En az {{max}} yukarı",
     "removePromptAttachment": "Yukarıdan sil {{name}}",
     "promptAttachment": "Yukarı {{number}}",

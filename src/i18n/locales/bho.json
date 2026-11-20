@@ -2213,7 +2213,7 @@
     "promptDevice": "डिवाइस & OS (बग्स के लिए)",
     "deviceInfoNoErrors": "कोई नहीं",
     "promptFilters": "कैटेगरी से फ़िल्टर करें",
-    "promptMediaError": "हर एक 20MB से कम की इमेजेज़ या वीडियोज़ चुनें।",
+    "promptMediaError": "हर एक 200MB से कम की इमेजेज़ या वीडियोज़ चुनें।",
     "promptMediaLimit": "अटैचमेंट्स की अधिकतम {{max}}।",
     "removePromptAttachment": "{{name}} हटाएं",
     "promptAttachment": "अटैचमेंट {{number}}",

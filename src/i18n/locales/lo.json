@@ -2213,7 +2213,7 @@
     "promptDevice": "ອຸປະກອນ & OS (ສໍາລັບຂໍ້ຜິດພາດ)",
     "deviceInfoNoErrors": "ບໍ່​ມີ",
     "promptFilters": "ການສະບັບດີເບີການສະບັບ",
-    "promptMediaError": "ເລືອກຮູບພາບ ຫຼື ວິດີໂອທີ່ມີຂະໜາດຕໍ່າກວ່າ 50MB ແຕ່ລະອັນ.",
+    "promptMediaError": "ເລືອກຮູບພາບ ຫຼື ວິດີໂອທີ່ມີຂະໜາດຕໍ່າກວ່າ 200MB ແຕ່ລະອັນ.",
     "promptMediaLimit": "ເຖິງ {{max}} ເອກະສານຄັດຕິດ.",
     "removePromptAttachment": "ລຶບ {{name}}",
     "promptAttachment": "ເອກະສານຄັດຕິດ {{number}}",

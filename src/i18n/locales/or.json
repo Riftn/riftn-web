@@ -2213,7 +2213,7 @@
     "promptDevice": "ଡିଭାଇସ୍ ଓ OS (ତ୍ରୁଟି ପାଇଁ)",
     "deviceInfoNoErrors": "କୌଣସିଟି ନୁହେଁ",
     "promptFilters": "ଶ୍ରେଣୀ ଅନୁସାରେ ଛାଣନ୍ତୁ",
-    "promptMediaError": "ପ୍ରତ୍ୟେକ ୫୦ ଏମବିରୁ କମ୍ ‌ ପ୍ରତିଛବି ବାଛନ୍ତୁ ।",
+    "promptMediaError": "ପ୍ରତ୍ୟେକ ୨୦୦ ଏମବିରୁ କମ୍ ‌ ପ୍ରତିଛବି ବାଛନ୍ତୁ ।",
     "promptMediaLimit": "{{max}} ସଂଲଗ୍ନକ ପର୍ଯ୍ୟନ୍ତ ।",
     "removePromptAttachment": "{{name}} କୁ ହଟାନ୍ତୁ",
     "promptAttachment": "ସଂଲଗ୍ନକ {{number}}",

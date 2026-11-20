@@ -2233,7 +2233,7 @@
     "deviceInfoErrors": "近期错误",
     "deviceInfoNoErrors": "无",
     "promptFilters": "按类别筛选",
-    "promptMediaError": "选择每张50MB以下的图片或视频。",
+    "promptMediaError": "选择每张200MB以下的图片或视频。",
     "promptMediaLimit": "最多{{max}}个附件。",
     "removePromptAttachment": "移除{{name}}",
     "promptAttachment": "附件{{number}}",

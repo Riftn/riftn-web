@@ -2242,7 +2242,7 @@
     "promptDevice": "อุปกรณ์และระบบปฏิบัติการ (สำหรับข้อบกพร่อง)",
     "deviceInfoNoErrors": "ไม่มี",
     "promptFilters": "กรองตามหมวดหมู่",
-    "promptMediaError": "เลือกภาพหรือวิดีโอที่มีขนาดไม่เกิน 50 MB",
+    "promptMediaError": "เลือกภาพหรือวิดีโอที่มีขนาดไม่เกิน 200 MB",
     "promptMediaLimit": "ไฟล์แนบสูงสุด {{max}} ไฟล์",
     "removePromptAttachment": "ลบ {{name}} ออก",
     "promptAttachment": "ไฟล์แนบ {{number}}",

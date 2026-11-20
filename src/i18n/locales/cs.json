@@ -2207,7 +2207,7 @@
     "promptDevice": "Zarazitelnost a OS (pro chyby)",
     "deviceInfoNoErrors": "Žádný",
     "promptFilters": "Filtrovat podle kategorie",
-    "promptMediaError": "Vyberte obrázky nebo videa do 20 MB.",
+    "promptMediaError": "Vyberte obrázky nebo videa do 200 MB.",
     "promptMediaLimit": "Do {{max}} připojitelných souborů.",
     "removePromptAttachment": "Odstranit {{name}}",
     "promptAttachment": "Připojení {{number}}",

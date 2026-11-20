@@ -2214,7 +2214,7 @@
     "promptDevice": "Isixwayiso & OS (amaphutha)",
     "deviceInfoNoErrors": "Akukho",
     "promptFilters": "Sifuna ngesigaba",
-    "promptMediaError": "Khetha izithombe noma amavidiyo angaphansi kuka-50MB ngakunye.",
+    "promptMediaError": "Khetha izithombe noma amavidiyo angaphansi kuka-200MB ngakunye.",
     "promptMediaLimit": "Kuze kube ngu-{{max}} okwengezwe.",
     "removePromptAttachment": "Susa {{name}}",
     "promptAttachment": "Okwengezwe {{number}}",

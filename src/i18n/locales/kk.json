@@ -2231,7 +2231,7 @@
     "promptDevice": "Ұйымдастырушылық және операционды жүйе (құламалар үшін)",
     "deviceInfoNoErrors": "Ешқайсысы жоқ",
     "promptFilters": "Санат бойынша сүзгілеу",
-    "promptMediaError": "Әрқайсысы 50 МБ-тан төмен кескіндерді немесе бейнелерді таңдаңыз.",
+    "promptMediaError": "Әрқайсысы 200 МБ-тан төмен кескіндерді немесе бейнелерді таңдаңыз.",
     "promptMediaLimit": "{{max}}тіркемелеріне дейін.",
     "removePromptAttachment": "{{name}} жою",
     "promptAttachment": "Қосымша {{number}}",

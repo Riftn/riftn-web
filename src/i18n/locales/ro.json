@@ -2207,7 +2207,7 @@
     "promptDevice": "Dispozitiv și sistem de operare (pentru erori)",
     "deviceInfoNoErrors": "Niciuna",
     "promptFilters": "Filtrează după categorie",
-    "promptMediaError": "Alegeți imagini sau videoclipuri sub 50 MB fiecare.",
+    "promptMediaError": "Alegeți imagini sau videoclipuri sub 200 MB fiecare.",
     "promptMediaLimit": "Până la {{max}} atașamente.",
     "removePromptAttachment": "Elimină pe {{name}}",
     "promptAttachment": "Atașament {{number}}",

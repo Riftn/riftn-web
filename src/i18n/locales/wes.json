@@ -2213,7 +2213,7 @@
     "promptDevice": "Kamfon & Sisị (pamụ na bug)",
     "deviceInfoNoErrors": "Nothing",
     "promptFilters": "Filter by category",
-    "promptMediaError": "Choose pikin pikin wey dey below 50MB.",
+    "promptMediaError": "Choose pikin pikin wey dey below 200MB.",
     "promptMediaLimit": "Up to {{max}} attachment.",
     "removePromptAttachment": "Remove {{name}}",
     "promptAttachment": "Attachment {{number}}",

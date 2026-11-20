@@ -2213,7 +2213,7 @@
     "promptDevice": "Laite & OS (virheiden kohdalla)",
     "deviceInfoNoErrors": "Ei mitään",
     "promptFilters": "Suodata kategorioiden mukaan",
-    "promptMediaError": "Valitse kuvia tai videoita, jotka ovat alle 50 MB.",
+    "promptMediaError": "Valitse kuvia tai videoita, jotka ovat alle 200 MB.",
     "promptMediaLimit": "Enintään {{max}} liitettävää tiedostoa.",
     "removePromptAttachment": "Poista {{name}}",
     "promptAttachment": "Liite {{number}}",

@@ -2214,7 +2214,7 @@
     "promptDevice": "Dispositivo & OS (pantasqakunapaq) .",
     "deviceInfoNoErrors": "Mana mayqinpas",
     "promptFilters": "Katiguriyawan akllay",
-    "promptMediaError": "Sapakama 50MB nisqamanta pisi siq’ikunata utaq videokunata akllay.",
+    "promptMediaError": "Sapakama 200MB nisqamanta pisi siq’ikunata utaq videokunata akllay.",
     "promptMediaLimit": "{{max}} k'askachiykuna kama.",
     "removePromptAttachment": "{{name}} qichuy",
     "promptAttachment": "K'askachiy {{number}}",

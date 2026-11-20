@@ -2214,7 +2214,7 @@
     "promptDevice": "裝置同操作系統（針對錯誤）",
     "deviceInfoNoErrors": "無",
     "promptFilters": "篩選分類",
-    "promptMediaError": "揀每張50MB 以下嘅圖片或者影片。",
+    "promptMediaError": "揀每張200MB 以下嘅圖片或者影片。",
     "promptMediaLimit": "最多 {{max}} 附件。",
     "removePromptAttachment": "移除 {{name}}",
     "promptAttachment": "附件 {{number}}",

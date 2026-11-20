@@ -2213,7 +2213,7 @@
     "promptDevice": "Amûr û OS (ji bo xeletiyan)",
     "deviceInfoNoErrors": "Tune",
     "promptFilters": "Li gorî kategoriyê parzûn bike",
-    "promptMediaError": "Wêne an vîdyoyên ku her yek di bin 50MB de be hilbijêre.",
+    "promptMediaError": "Wêne an vîdyoyên ku her yek di bin 200MB de be hilbijêre.",
     "promptMediaLimit": "Heta {{max}} pêvek.",
     "removePromptAttachment": "{{name}} rake",
     "promptAttachment": "Pêvek {{number}}",

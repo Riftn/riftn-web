@@ -2214,7 +2214,7 @@
     "promptDevice": "Ẹrọ & OS (fún àwọn kòkòrò)",
     "deviceInfoNoErrors": "Ko si",
     "promptFilters": "Ṣíṣe àlẹmọ ní ìbámu pẹ̀lú ẹ̀ka",
-    "promptMediaError": "Yan àwòrán tàbí fídíò lábẹ́ 20MB kọ̀ọ̀kan.",
+    "promptMediaError": "Yan àwòrán tàbí fídíò lábẹ́ 200MB kọ̀ọ̀kan.",
     "promptMediaLimit": "Titi di {{max}} asomọ.",
     "removePromptAttachment": "Yọ {{name}}",
     "promptAttachment": "Àfikún {{number}}",

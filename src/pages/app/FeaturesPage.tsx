@@ -35,6 +35,9 @@ import NotFeasibleIcon from "@/components/ui/cut-icons/blocked";
 import Search from "@/components/ui/cut-icons/search";
 import Plus from "@/components/ui/cut-icons/add";
 import X from "@/components/ui/cut-icons/close";
+import PlayIcon from "@/components/ui/cut-icons/play";
+import FullscreenIcon from "@/components/ui/cut-icons/fullscreen";
+import { createPortal } from 'react-dom';
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
 
 import featuresLightbulb from '@/assets/features-lightbulb.png';
@@ -181,17 +184,78 @@ function LazyAttachmentImage({ url }: { url: string }) {
   );
 }
 
+/**
+ * A request video, large. Tiles on the board are small (four clips sit in a
+ * two-up grid), so tapping one opens it here: dimmed page, the clip as big
+ * as the screen allows, its own controls. Backdrop, the close button or
+ * Escape close it.
+ */
+function RequestVideoLightbox({ url, onClose }: { url: string; onClose: () => void }) {
+  const { t: _copy } = _useCopy();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [onClose]);
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-3 sm:p-8"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <video
+        src={url}
+        className="max-w-full max-h-full w-auto h-auto rounded-xl bg-black"
+        controls
+        autoPlay
+        playsInline
+        onClick={(e) => e.stopPropagation()}
+      />
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label={_copy('common.close', { defaultValue: 'Close' })}
+        className="absolute right-3 h-10 w-10 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center"
+        style={{ top: 'max(12px, env(safe-area-inset-top))' }}
+      >
+        <X className="h-5 w-5" />
+      </button>
+    </div>,
+    document.body,
+  );
+}
+
 function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
   const { t: _copy } = _useCopy();
   const urls = featureAttachments(feature);
+  const [openVideo, setOpenVideo] = useState<string | null>(null);
+  const closeVideo = useCallback(() => setOpenVideo(null), []);
   if (urls.length === 0) return null;
+  const lightbox = openVideo ? <RequestVideoLightbox url={openVideo} onClose={closeVideo} /> : null;
 
   if (urls.length === 1) {
     const url = urls[0];
     return (
-      <div data-media-full className="rounded-xl overflow-hidden border border-white/10">
+      <div data-media-full className="relative rounded-xl overflow-hidden border border-white/10">
         {isVideoAttachment(url) ? (
-          <video src={url} className="w-full max-h-64 object-contain bg-black" controls />
+          <>
+            <video src={url} className="w-full max-h-64 object-contain bg-black" controls playsInline />
+            <button
+              type="button"
+              onClick={() => setOpenVideo(url)}
+              aria-label={_copy('stages.fullscreen', { defaultValue: 'Fullscreen' })}
+              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center"
+            >
+              <FullscreenIcon className="h-4 w-4" />
+            </button>
+            {lightbox}
+          </>
         ) : (
           <LazyAttachmentImage url={url} />
         )}
@@ -204,7 +268,20 @@ function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
       {urls.map((url, index) => (
         <div key={url} className="rounded-xl overflow-hidden border border-white/10 aspect-video bg-black/30">
           {isVideoAttachment(url) ? (
-            <video src={url} className="w-full h-full object-cover" controls preload="metadata" />
+            <button
+              type="button"
+              onClick={() => setOpenVideo(url)}
+              aria-label={_copy('stages.fullscreen', { defaultValue: 'Fullscreen' })}
+              className="relative block w-full h-full"
+            >
+              {/* #t=0.1 makes iPhone Safari draw a real frame instead of grey. */}
+              <video src={`${url}#t=0.1`} className="w-full h-full object-cover pointer-events-none" muted playsInline preload="metadata" />
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="h-10 w-10 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center">
+                  <PlayIcon className="h-5 w-5" />
+                </span>
+              </span>
+            </button>
           ) : (
             <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
               <img
@@ -218,6 +295,7 @@ function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
           )}
         </div>
       ))}
+      {lightbox}
     </div>
   );
 }
@@ -358,7 +436,7 @@ function FeatureCard({
     const accepted = valid.slice(0, room);
     setEditNew(prev => [...prev, ...accepted.map(file => ({ file, preview: URL.createObjectURL(file) }))]);
     setEditMediaError(valid.length < picked.length
-      ? t('features.promptMediaError', 'Choose images or videos under 50MB each.')
+      ? t('features.promptMediaError', 'Choose images or videos under 200MB each.')
       : accepted.length < picked.length
         ? t('features.promptMediaLimit', 'Up to {{max}} attachments.', { max: MAX_FEATURE_ATTACHMENTS }) : '');
   };
@@ -753,7 +831,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
     const accepted = valid.slice(0, room);
     setAttachments(prev => [...prev, ...accepted.map(file => ({ file, preview: URL.createObjectURL(file) }))]);
     setError(valid.length < picked.length
-      ? t('features.promptMediaError', 'Choose images or videos under 50MB each.')
+      ? t('features.promptMediaError', 'Choose images or videos under 200MB each.')
       : accepted.length < picked.length
         ? t('features.promptMediaLimit', 'Up to {{max}} attachments.', { max: MAX_FEATURE_ATTACHMENTS }) : '');
   };

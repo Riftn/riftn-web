@@ -2214,7 +2214,7 @@
     "promptDevice": "ڈیوائس اور OS (خرابیوں کے لیے)",
     "deviceInfoNoErrors": "کوئی نہیں",
     "promptFilters": "زمرہ کے لحاظ سے فلٹر کریں",
-    "promptMediaError": "50MB سے کم ہر ایک تصویر یا ویڈیو منتخب کریں۔",
+    "promptMediaError": "200MB سے کم ہر ایک تصویر یا ویڈیو منتخب کریں۔",
     "promptMediaLimit": "{{max}} منسلکات تک۔",
     "removePromptAttachment": "{{name}} ہٹائیں",
     "promptAttachment": "منسلک {{number}}",

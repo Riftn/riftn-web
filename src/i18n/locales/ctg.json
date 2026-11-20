@@ -2283,7 +2283,7 @@
     "promptDevice": "ডিভাইস ও ওএস (বাগের জন্য)",
     "deviceInfoNoErrors": "কোনটিই নয়",
     "promptFilters": "ক্যাটাগরি দ্বারা ফিল্টার করো",
-    "promptMediaError": "প্রতি ৫০MB পর্যন্ত ছবি বা ভিডিও সিলেক্ট করো।",
+    "promptMediaError": "প্রতি ২০০MB পর্যন্ত ছবি বা ভিডিও সিলেক্ট করো।",
     "promptMediaLimit": "মোট {{max}} টি আটাচমেন্ট।",
     "removePromptAttachment": "{{name}} টি রিমুভ করো",
     "promptAttachment": "আটাচমেন্ট {{number}}",

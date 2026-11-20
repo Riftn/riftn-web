@@ -2213,7 +2213,7 @@
     "promptDevice": "Gerät & Betriebssystem (zur Fehlermeldung)",
     "deviceInfoNoErrors": "Keini",
     "promptFilters": "Filter durch Kategorie",
-    "promptMediaError": "Wähle Bilder oder Videos, die jeweils weniger als 50 MB wiegen.",
+    "promptMediaError": "Wähle Bilder oder Videos, die jeweils weniger als 200 MB wiegen.",
     "promptMediaLimit": "Bis zu {{max}} Dateianhänge.",
     "removePromptAttachment": "Entfärne {{name}}",
     "promptAttachment": "Anhänge {{number}}",

@@ -2574,7 +2574,7 @@
     "promptDevice": "Пристрій та ОС (для помилок)",
     "deviceInfoNoErrors": "Жодного",
     "promptFilters": "Фільтрувати за категоріями",
-    "promptMediaError": "Виберіть зображення або відео розміром до 50 МБ кожне.",
+    "promptMediaError": "Виберіть зображення або відео розміром до 200 МБ кожне.",
     "promptMediaLimit": "До {{max}} вкладень.",
     "removePromptAttachment": "Видалити {{name}}",
     "promptAttachment": "Вкладення {{number}}",

@@ -2216,7 +2216,7 @@
     "promptDevice": "Urządzenie i system operacyjny (dla błędów)",
     "deviceInfoNoErrors": "Brak",
     "promptFilters": "Filtruj według kategorii",
-    "promptMediaError": "Wybierz obrazy lub filmy o rozmiarze poniżej 50 MB każdy.",
+    "promptMediaError": "Wybierz obrazy lub filmy o rozmiarze poniżej 200 MB każdy.",
     "promptMediaLimit": "Do {{max}} załączników.",
     "removePromptAttachment": "Usuń {{name}}",
     "promptAttachment": "Załącznik {{number}}",

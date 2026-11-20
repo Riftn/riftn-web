@@ -2213,7 +2213,7 @@
     "promptDevice": "Igwe na Ozi (n'ime ọrụ ihe)",
     "deviceInfoNoErrors": "Ọ dịghị ihe",
     "promptFilters": "Myọcha site na udi",
-    "promptMediaError": "Họrọ ihe oyiyi ma ọ bụ vidiyo n 'okpuru 50MB ọ bụla.",
+    "promptMediaError": "Họrọ ihe oyiyi ma ọ bụ vidiyo n 'okpuru 200MB ọ bụla.",
     "promptMediaLimit": "Ruo ihe mgbakwunye {{max}}.",
     "removePromptAttachment": "Wepụ {{name}}",
     "promptAttachment": "Mgbakwụnye {{number}}",

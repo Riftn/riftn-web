@@ -2224,7 +2224,7 @@
     "promptDevice": "Thiết bị & Hệ điều hành (cho lỗi)",
     "deviceInfoNoErrors": "Không có",
     "promptFilters": "Lọc theo danh mục",
-    "promptMediaError": "Chọn hình ảnh hoặc video dưới 50MB mỗi cái.",
+    "promptMediaError": "Chọn hình ảnh hoặc video dưới 200MB mỗi cái.",
     "promptMediaLimit": "Tối đa {{max}} tệp đính kèm.",
     "removePromptAttachment": "Xóa {{name}}",
     "promptAttachment": "Đính kèm {{number}}",

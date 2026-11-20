@@ -2213,7 +2213,7 @@
     "promptDevice": "मशीनरी और उपकरण (जीएमओ के लिए)",
     "deviceInfoNoErrors": "कोई नहीं",
     "promptFilters": "फ़िल्टर कैलक्यूलेटर",
-    "promptMediaError": "चुनिए छबिया वा वीडियोहरु, जसको आकार २०MB भन्दा कम हुनुपर्छ।",
+    "promptMediaError": "चुनिए छबिया वा वीडियोहरु, जसको आकार २००MB भन्दा कम हुनुपर्छ।",
     "promptMediaLimit": "मैक्सिमम {{max}} अटैचमेंट्स।",
     "removePromptAttachment": "{{name}} अटैचमेंट हटाएं",
     "promptAttachment": "अटैचमेंट {{number}}",
