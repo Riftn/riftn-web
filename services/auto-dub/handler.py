@@ -8,10 +8,11 @@ worker holds no database key and no state.
 
 Pipeline, per job:
   1. pull the video, extract mono 24 kHz audio
-  2. build a voice sample: the loudest-talking speaker's clean stretches,
-     stitched to ~20 s
+  2. build a voice sample per speaker: their longest clean lines, stitched to
+     ~20 s, and learn the voice from it once
   3. read each translated line with Chatterbox in that voice
-  4. fit each line into its slot (speed up a little, never more than 1.5x)
+  4. bring every line to the same loudness and fit it into its slot (speed up
+     a little, never more than 1.5x)
   5. keep only the new speech; players mix original audio separately
   6. encode AAC, PUT to the signed URL, report back
 
@@ -37,8 +38,20 @@ import torch
 SR = 24_000
 MODEL = "chatterbox-multilingual-v3"
 REF_TARGET_S = 20.0
-REF_MIN_S = 4.0
+# Three seconds of the speaker is a rougher copy than twenty, but it is still
+# their pitch and tone. Below that the stock voice reads the lines.
+REF_MIN_S = 3.0
+# Lines this long go into the sample first; shorter ones only fill a gap.
+REF_LINE_S = 1.0
+REF_SHORT_LINE_S = 0.6
 MAX_STRETCH = 1.5
+# Every line lands at the same speech level, whatever the sample's own level.
+TARGET_RMS = 0.12
+# Longer text is read sentence by sentence: one long passage can run past what
+# the model takes in a single pass.
+MAX_LINE_CHARS = 280
+# A signed upload URL lasts two hours from the moment the job was handed over.
+UPLOAD_REFRESH_S = 45 * 60
 # Lines shorter than this are folded into a neighbour: a two-word
 # fragment badly, and the join is inaudible when the gap is under half a second.
 MERGE_GAP_S = 0.5
@@ -109,21 +122,28 @@ def build_reference(orig: np.ndarray, source_segments: list[dict], tmp: str) -> 
         by_speaker[str(s.get("speaker") or "0")] = by_speaker.get(str(s.get("speaker") or "0"), 0.0) + d
     speaker = max(by_speaker, key=by_speaker.get) if by_speaker else "0"
 
-    lines = [
-        s for s in source_segments
-        if str(s.get("speaker") or "0") == speaker and float(s.get("end", 0)) - float(s.get("start", 0)) >= 1.0
-    ]
-    lines.sort(key=lambda s: float(s["end"]) - float(s["start"]), reverse=True)
+    def length(s: dict) -> float:
+        return float(s.get("end", 0)) - float(s.get("start", 0))
+
+    own = [s for s in source_segments if str(s.get("speaker") or "0") == speaker]
+    # Longest first: the model leans hardest on the opening ten seconds.
+    lines = sorted((s for s in own if length(s) >= REF_LINE_S), key=length, reverse=True)
+    lines += sorted((s for s in own if REF_SHORT_LINE_S <= length(s) < REF_LINE_S), key=length, reverse=True)
 
     pieces: list[np.ndarray] = []
     total = 0.0
-    gap = np.zeros(int(0.2 * SR), dtype=np.float32)
+    gap = np.zeros(int(0.15 * SR), dtype=np.float32)
+    fade = int(0.01 * SR)
     for s in lines:
         a = max(0, int(float(s["start"]) * SR))
         b = min(len(orig), int(float(s["end"]) * SR))
-        if b <= a:
+        if b - a <= 2 * fade:
             continue
-        pieces.append(orig[a:b])
+        piece = orig[a:b].astype(np.float32).copy()
+        # A cut in the middle of a sound clicks, and the click is cloned too.
+        piece[:fade] *= np.linspace(0.0, 1.0, fade, dtype=np.float32)
+        piece[-fade:] *= np.linspace(1.0, 0.0, fade, dtype=np.float32)
+        pieces.append(piece)
         pieces.append(gap)
         total += (b - a) / SR
         if total >= REF_TARGET_S:
@@ -172,15 +192,25 @@ def merge_lines(segments: list[dict]) -> list[dict]:
 # ───────────────────────────── synthesis ─────────────────────────────────
 
 
+# Voice learned from each sample, kept for the length of one job. Learning it
+# again for every line cost more than reading the line.
+_voices: dict[str, Any] = {}
+
+
 def synth(text: str, ref: str | None, lang: str) -> np.ndarray:
     engine = tts()
-    original_conditioning = engine.conds
+    stock = engine.conds
     try:
+        if ref:
+            if ref not in _voices:
+                engine.prepare_conditionals(ref)
+                _voices[ref] = engine.conds
+            engine.conds = _voices[ref]
         with torch.inference_mode():
-            wav = engine.generate(text, language_id=lang, audio_prompt_path=ref)
+            wav = engine.generate(text, language_id=lang)
         arr = wav.squeeze().detach().cpu().numpy().astype(np.float32)
     finally:
-        engine.conds = original_conditioning
+        engine.conds = stock
     # Trim leading/trailing near-silence so the line lands on its cue.
     thresh = 0.01
     idx = np.where(np.abs(arr) > thresh)[0]
@@ -189,15 +219,68 @@ def synth(text: str, ref: str | None, lang: str) -> np.ndarray:
     return arr
 
 
+def split_text(text: str, limit: int = MAX_LINE_CHARS) -> list[str]:
+    """Break long text at sentence ends, then at commas, then at spaces."""
+    if len(text) <= limit:
+        return [text]
+    parts: list[str] = []
+    rest = text
+    while len(rest) > limit:
+        window = rest[:limit]
+        cut = max(window.rfind(mark) for mark in (". ", "! ", "? ", "。", "！", "？", "؟ ", "। "))
+        if cut < limit // 3:
+            cut = max(window.rfind(mark) for mark in (", ", "; ", ": ", "، ", "，", "、"))
+        if cut < limit // 3:
+            cut = window.rfind(" ")
+        if cut < limit // 3:
+            cut = limit - 1
+        parts.append(rest[: cut + 1].strip())
+        rest = rest[cut + 1 :].strip()
+    if rest:
+        parts.append(rest)
+    return [part for part in parts if part]
+
+
+def speak(text: str, ref: str | None, lang: str) -> np.ndarray:
+    pause = np.zeros(int(0.12 * SR), dtype=np.float32)
+    out: list[np.ndarray] = []
+    for part in split_text(text):
+        wav = synth(part, ref, lang)
+        if len(wav):
+            out += [wav, pause]
+    return np.concatenate(out[:-1]) if out else np.zeros(0, dtype=np.float32)
+
+
+def level(wav: np.ndarray) -> np.ndarray:
+    """Bring a line to TARGET_RMS, measured over its voiced frames only."""
+    frame = int(0.02 * SR)
+    count = len(wav) // frame
+    if not count:
+        return wav
+    rms = np.sqrt((wav[: count * frame].reshape(count, frame) ** 2).mean(axis=1))
+    voiced = rms[rms > 0.01]
+    if not len(voiced):
+        return wav
+    out = wav * min(4.0, TARGET_RMS / float(np.sqrt((voiced ** 2).mean())))
+    peak = float(np.max(np.abs(out)))
+    return out * (0.95 / peak) if peak > 0.95 else out
+
+
 def render(orig: np.ndarray, lines: list[dict], refs: dict[str, str | None], lang: str, tmp: str) -> tuple[np.ndarray, int]:
     speech = np.zeros_like(orig)
     cursor = 0.0  # where the previous line actually ended, in seconds
     spoken = 0
 
     for i, line in enumerate(lines):
-        wav = synth(line["text"], refs.get(str(line.get("speaker") or "0")), lang)
+        try:
+            wav = speak(line["text"], refs.get(str(line.get("speaker") or "0")), lang)
+        except Exception as e:  # noqa: BLE001
+            # One unreadable line is a gap in the dub, not a lost dub.
+            print(f"line {i} skipped: {type(e).__name__}: {e}")
+            continue
         if not len(wav):
             continue
+        wav = level(wav)
         start = max(line["start"], cursor + 0.05)
         next_start = lines[i + 1]["start"] if i + 1 < len(lines) else len(orig) / SR
         # The slot is the line's own span plus whatever silence follows it,
@@ -243,6 +326,26 @@ def report(job: dict, payload: dict) -> None:
         time.sleep(2 * (attempt + 1))
 
 
+def upload_url(job: dict, started: float) -> str:
+    """The URL the job came with, or a new one once that one is close to expiry."""
+    url = job.get("callbackUrl")
+    if not url or time.time() - float(job.get("acceptedAt") or started) < UPLOAD_REFRESH_S:
+        return job["uploadUrl"]
+    try:
+        r = requests.post(
+            url,
+            json={"action": "upload", "secret": job.get("secret"), "dubId": job.get("dubId"), "jobId": job.get("jobId")},
+            timeout=30,
+        )
+        fresh = r.json().get("uploadUrl") if r.ok else None
+        if isinstance(fresh, str) and fresh.startswith("https://"):
+            return fresh
+        print(f"upload url not renewed: {r.status_code}")
+    except (requests.RequestException, ValueError):
+        print("upload url not renewed: connection failed")
+    return job["uploadUrl"]
+
+
 def process(job: dict) -> dict:
     t0 = time.time()
     lang = str(job["lang"]).lower()
@@ -253,6 +356,7 @@ def process(job: dict) -> dict:
     if not segments:
         raise RuntimeError("no lines to dub")
 
+    _voices.clear()
     with tempfile.TemporaryDirectory() as tmp:
         video = os.path.join(tmp, "in.mp4")
         with requests.get(job["videoUrl"], stream=True, timeout=120) as r:
@@ -298,7 +402,7 @@ def process(job: dict) -> dict:
         with open(out_path, "rb") as f:
             data = f.read()
         up = requests.put(
-            job["uploadUrl"],
+            upload_url(job, t0),
             data=data,
             headers={"Content-Type": "audio/mp4", "x-upsert": "true"},
             timeout=120,
@@ -306,6 +410,7 @@ def process(job: dict) -> dict:
         if not up.ok:
             raise RuntimeError(f"upload failed ({up.status_code})")
 
+    _voices.clear()
     # The signed URL is .../upload/sign/<bucket>/<path>?token=…; the row wants <path>.
     path = job["path"]
     result = {
