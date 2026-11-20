@@ -518,6 +518,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
           />
           <div className="mb-3">
             <StageCreatorRow
+              tokenId={postTokenId}
               name={post.author.name}
               avatar={post.author.avatarSeed}
               handle={post.author.handle}
@@ -529,6 +530,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
         </>
       ) : (
       <CardHeader
+        tokenId={postTokenId}
         username={post.author.name}
         visibility={post.visibility}
         handle={post.author.handle}

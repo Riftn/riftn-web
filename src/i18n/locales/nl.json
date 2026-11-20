@@ -2195,6 +2195,8 @@
     }
   },
   "notifications": {
+    "coAuthorInvite": "{{name}} heeft je uitgenodigd als co-auteur van hun post",
+    "coAuthorAccepted": "{{name}} is nu co-auteur van je post",
     "title": "Meldingen",
     "markAllRead": "Alles als gelezen markeren",
     "groupNew": "Nieuw",
@@ -21158,5 +21160,30 @@
   "roomPreview": {
     "you": "Jij",
     "voice": "🎤 Spraakbericht"
+  },
+  "coAuthors": {
+    "invite": "Co-auteur uitnodigen",
+    "manage": "Co-auteurs",
+    "answerInvite": "Uitnodiging als co-auteur",
+    "andMore": "+{{count}}",
+    "creatorHint": "Maak deze post samen. Zodra die persoon ja zegt, staat hij ook op hun profiel, met beide namen.",
+    "inviteHint": "Je bent gevraagd co-auteur van deze post te zijn. Zeg ja en hij staat ook op je profiel, met beide namen.",
+    "coAuthorHint": "Je bent co-auteur van deze post. Hij staat op je profiel met beide namen.",
+    "searchPlaceholder": "Zoek mensen om uit te nodigen",
+    "inviteButton": "Uitnodigen",
+    "invited": "Uitnodiging verstuurd naar {{name}}",
+    "alreadyOn": "Op deze post",
+    "full": "Een post kan maximaal {{count}} co-auteurs hebben.",
+    "accept": "Accepteren",
+    "decline": "Weigeren",
+    "accepted": "Je bent nu co-auteur",
+    "remove": "Verwijderen",
+    "leave": "Mij verwijderen",
+    "waiting": "Uitgenodigd",
+    "cancelInvite": "Annuleren",
+    "nothing": "Hier valt niets te doen.",
+    "failed": "Dat lukte niet. Probeer het opnieuw.",
+    "banner": "Je bent uitgenodigd om co-auteur van deze post te zijn.",
+    "bannerNamed": "{{name}} heeft je uitgenodigd om co-auteur van deze post te zijn."
   }
 }

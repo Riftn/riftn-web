@@ -42,7 +42,9 @@ export type NotificationType =
   | 'badge_tier_down'
   | 'video_removal'
   | 'account_warning'
-  | 'system';
+  | 'system'
+  | 'coauthor_invite'
+  | 'coauthor_accepted';
 
 export type NotificationCategory =
   | 'engagement'

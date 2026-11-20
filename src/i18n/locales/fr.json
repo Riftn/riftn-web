@@ -2005,6 +2005,8 @@
     }
   },
   "notifications": {
+    "coAuthorInvite": "{{name}} vous a invité à co-écrire sa publication",
+    "coAuthorAccepted": "{{name}} est maintenant co-auteur de votre publication",
     "title": "Notifications",
     "markAllRead": "Tout marquer comme lu",
     "groupNew": "Nouvelles",
@@ -20913,5 +20915,30 @@
   "roomPreview": {
     "you": "Vous",
     "voice": "🎤 Message vocal"
+  },
+  "coAuthors": {
+    "invite": "Inviter un co-auteur",
+    "manage": "Co-auteurs",
+    "answerInvite": "Invitation de co-auteur",
+    "andMore": "+{{count}}",
+    "creatorHint": "Créez cette publication ensemble. Dès qu’il accepte, elle apparaît aussi sur son profil, avec vos deux noms.",
+    "inviteHint": "On vous propose d’être co-auteur de cette publication. Acceptez et elle apparaîtra aussi sur votre profil, avec les deux noms.",
+    "coAuthorHint": "Vous êtes co-auteur de cette publication. Elle apparaît sur votre profil avec les deux noms.",
+    "searchPlaceholder": "Rechercher des personnes à inviter",
+    "inviteButton": "Inviter",
+    "invited": "Invitation envoyée à {{name}}",
+    "alreadyOn": "Sur cette publication",
+    "full": "Une publication peut avoir jusqu’à {{count}} co-auteurs.",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "accepted": "Vous êtes maintenant co-auteur",
+    "remove": "Retirer",
+    "leave": "Me retirer",
+    "waiting": "Invité",
+    "cancelInvite": "Annuler",
+    "nothing": "Rien à faire ici.",
+    "failed": "Impossible pour le moment. Réessayez.",
+    "banner": "Vous avez été invité à co-écrire cette publication.",
+    "bannerNamed": "{{name}} vous a invité à co-écrire cette publication."
   }
 }

@@ -7,6 +7,7 @@
  * @module hooks/use-unified-feed
  */
 
+import { noteCoAuthors } from '@/lib/co-author-store';
 import { isSignInWall, noteSignInWall } from '@/lib/sign-in-wall';
 import { useEffect, useMemo, useState } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData, type QueryClient } from '@tanstack/react-query';
@@ -760,6 +761,7 @@ async function loadUnifiedFeedPage(args: {
     page: pageParam,
     limit,
   }, viewer);
+  noteCoAuthors(response);
 
   // Store the shuffleSeed from the first page for subsequent pages
   if (params.sortBy === 'random' && response.shuffleSeed && pageParam === 1 && shuffleSeedRef) {

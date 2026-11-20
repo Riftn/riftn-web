@@ -22,8 +22,9 @@ import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
 
 import Bookmark from "@/components/ui/cut-icons/save";
 import Refresh from "@/components/ui/cut-icons/refresh";
+import AddAccount from "@/components/ui/cut-icons/add-account";
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -31,6 +32,8 @@ import { cn } from '@/lib/utils';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { previewedLinkUrl, refreshLinkPreview } from '@/lib/api/link-preview';
+import { AuthContext } from '@/contexts/AuthContext';
+import { openCoAuthorSheet, useCoAuthors } from '@/lib/co-author-store';
 
 interface PostUtilityMenuItemsProps {
   postId?: string;
@@ -73,6 +76,13 @@ export function PostUtilityMenuItems({
   const isPinned = useIsPostPinned(tokenId);
   const linkUrl = previewedLinkUrl(linkText);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const walletAddress = useContext(AuthContext)?.walletAddress;
+  const coAuthors = useCoAuthors(tokenId);
+  const me = walletAddress?.toLowerCase();
+  const isCoAuthor = !!me && coAuthors.users.some(u => u.address === me);
+  // The creator invites and manages; a co-author or an invited person answers
+  // or steps off. Everyone else has nothing to do here.
+  const showCoAuthors = !!tokenId && (isOwnPost || isCoAuthor || !!coAuthors.invited);
 
   const refreshLink = async () => {
     if (!linkUrl || isRefreshing) return;
@@ -114,6 +124,21 @@ export function PostUtilityMenuItems({
         >
           <Pin className={cn('w-5 h-5', isPinned && 'fill-current')} />
           {isPinned ? t('postOptions.unpinPost', 'Unpin from your profile') : t('postOptions.pinPost', 'Pin to your profile')}
+        </button>
+      )}
+
+      {showCoAuthors && (
+        <button
+          onClick={() => { onClose?.(); openCoAuthorSheet(tokenId!); }}
+          className={cn(ROW, 'text-white')}
+          data-co-author-row
+        >
+          <AddAccount className="w-5 h-5" />
+          {isOwnPost
+            ? (coAuthors.users.length ? t('coAuthors.manage', 'Co-authors') : t('coAuthors.invite', 'Invite a co-author'))
+            : coAuthors.invited
+              ? t('coAuthors.answerInvite', 'Co-author invite')
+              : t('coAuthors.manage', 'Co-authors')}
         </button>
       )}
 

@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
 import { useRouteContentReady } from '@/hooks/use-route-content-ready';
 import { bindRetainedComments } from '@/lib/retained-post-surface';
 import More from '@/components/ui/cut-icons/more';
@@ -1866,6 +1867,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
           scrolling content (not an outer margin) so the post scrolls up UNDER the
           sticky nav pill and is swallowed at its rounded top edge on the glass
           themes, exactly like the home feed. */}
+      <CoAuthorInviteBanner tokenId={post?.tokenId} creatorName={post?.minterDisplayName || post?.minterUsername} />
       {useStage && !detailsOnly ? (
         renderPostContent()
       ) : (

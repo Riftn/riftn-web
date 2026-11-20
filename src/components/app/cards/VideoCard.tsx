@@ -420,6 +420,7 @@ function MobileCreatorInfo({
       {stage ? (
         <div className="mb-3">
           <StageCreatorRow
+            tokenId={tokenId}
             name={channel}
             avatar={channelAvatar}
             handle={creatorUsername}
@@ -2474,6 +2475,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
       {!isImmersive && !hideActions && !stage && (
         <div data-card-head={headerAboveMedia ? 'plain' : ''} className="flex items-start justify-between">
           <CardHeader
+            tokenId={videoTokenId}
             username={video.channel}
             visibility={video.visibility}
             handle={video.creatorUsername}

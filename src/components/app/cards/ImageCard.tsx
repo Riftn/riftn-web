@@ -1206,6 +1206,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
     <div data-card-head={stage ? undefined : 'plain'} className={stage ? 'contents' : 'flex items-start justify-between'} style={{ paddingBottom: 0 }}>
       {stage ? (
         <StageCreatorRow
+          tokenId={postTokenId}
           name={post.username}
           avatar={post.avatar}
           handle={post.creatorUsername}
@@ -1215,6 +1216,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         />
       ) : (
       <CardHeader
+        tokenId={postTokenId}
         username={post.username}
         visibility={post.visibility}
         handle={post.creatorUsername}

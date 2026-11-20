@@ -2005,6 +2005,8 @@
     }
   },
   "notifications": {
+    "coAuthorInvite": "{{name}} te invitó a ser coautor de su publicación",
+    "coAuthorAccepted": "{{name}} ahora es coautor de tu publicación",
     "title": "Notificaciones",
     "markAllRead": "Marcar todo leído",
     "groupNew": "Nuevas",
@@ -20909,5 +20911,30 @@
   "roomPreview": {
     "you": "Tú",
     "voice": "🎤 Mensaje de voz"
+  },
+  "coAuthors": {
+    "invite": "Invitar a un coautor",
+    "manage": "Coautores",
+    "answerInvite": "Invitación de coautoría",
+    "andMore": "+{{count}}",
+    "creatorHint": "Hagan esta publicación juntos. Cuando acepte, también aparecerá en su perfil, con ambos nombres.",
+    "inviteHint": "Te pidieron ser coautor de esta publicación. Si aceptas, también aparecerá en tu perfil, con ambos nombres.",
+    "coAuthorHint": "Eres coautor de esta publicación. Aparece en tu perfil con ambos nombres.",
+    "searchPlaceholder": "Busca personas para invitar",
+    "inviteButton": "Invitar",
+    "invited": "Invitación enviada a {{name}}",
+    "alreadyOn": "En esta publicación",
+    "full": "Una publicación puede tener hasta {{count}} coautores.",
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "accepted": "Ahora eres coautor",
+    "remove": "Quitar",
+    "leave": "Quitarme",
+    "waiting": "Invitado",
+    "cancelInvite": "Cancelar",
+    "nothing": "No hay nada que hacer aquí.",
+    "failed": "No se pudo hacer. Inténtalo de nuevo.",
+    "banner": "Te invitaron a ser coautor de esta publicación.",
+    "bannerNamed": "{{name}} te invitó a ser coautor de esta publicación."
   }
 }
