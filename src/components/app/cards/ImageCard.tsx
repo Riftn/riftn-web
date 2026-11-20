@@ -996,6 +996,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   const soundtrackControl = post.soundtrackUrl && soundtrackEnabled ? (
     <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} />
   ) : null;
+  // While the song plays its player docks under the photo, not over it.
+  const soundtrackOpen = !!soundtrackControl && (soundtrack.playing || soundtrack.loading);
   
   // Translation hook for text content
   const descriptionText = [post.title, post.description].filter(Boolean).join('\n\n');
@@ -1601,7 +1603,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
               aboveFold={aboveFold}
               postId={post.id}
               immersive={isImmersive}
-              overlay={fullscreenOpen ? undefined : soundtrackControl}
+              overlay={fullscreenOpen || soundtrackOpen ? undefined : soundtrackControl}
               soundPlaying={soundtrack.playing && !fullscreenOpen}
               wide={widePhoto}
               railPanel={widePhoto === 'rails' ? (
@@ -1647,6 +1649,12 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
           </div>
         )}
       </div>
+
+      {soundtrackOpen && !fullscreenOpen && (
+        <div className={cn('mt-2', isImmersive && 'px-3')} onClick={(event) => event.stopPropagation()}>
+          <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="bar" />
+        </div>
+      )}
 
       {/* Info & Actions. Immersive media runs edge to edge, so the copy under it
           brings its own gutter — the same px-3 the immersive video card uses. */}
