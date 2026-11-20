@@ -193,12 +193,12 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
               data-kit-chip
               data-when-online-pick
               onClick={() => { onWhenOnline(); onClose(); }}
-              className="!flex !h-auto w-full !items-center !justify-start !gap-3 !rounded-[10px] !px-3 !py-2.5 text-left"
+              className="!flex !h-auto w-full !items-center !justify-start !gap-3 !whitespace-normal !rounded-[10px] !px-3 !py-2.5 text-left"
             >
               <Hourglass className="h-4 w-4 shrink-0" />
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-sm font-semibold">{t('dmSchedule.whenOnline', { defaultValue: "When they're next online" })}</span>
-                <span className="text-xs font-medium opacity-70">{t('dmSchedule.whenOnlineHint', { defaultValue: 'Shows as sent now. It reaches them the next time they open Riftn, and the tick turns double when they read it.' })}</span>
+                <span className="whitespace-normal text-xs font-medium leading-snug opacity-70">{t('dmSchedule.whenOnlineHint', { defaultValue: 'Shows as sent now. It reaches them the next time they open Riftn, and the tick turns double when they read it.' })}</span>
               </span>
             </button>
           )}

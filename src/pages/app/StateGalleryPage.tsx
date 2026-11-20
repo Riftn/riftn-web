@@ -1524,8 +1524,8 @@ function ScheduledDmGallery() {
       <AuthContext.Provider value={GALLERY_AUTH}>
         <div className="mx-auto max-w-[640px] overflow-hidden rounded-2xl border border-white/10">
           <div data-when-online-gallery data-chat-wallpaper className="chat-text-zone px-4 pb-2 pt-3">
-            {thread.map((m, i) => (
-              <DmMessageBubble key={m._id} message={m} isOwnMessage cozy={{ first: i === 0, last: i === thread.length - 1 }} currentUserAddress={me.address} />
+            {thread.map((m) => (
+              <DmMessageBubble key={m._id} message={m} isOwnMessage cozy={{ first: true, last: true }} currentUserAddress={me.address} />
             ))}
           </div>
           <ScheduledStrip items={items} onOpen={() => setList(true)} />
