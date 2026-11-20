@@ -9,12 +9,16 @@
 // answer. The worker holds no database key; it uploads through a signed URL
 // minted per job and reports back with a shared secret.
 //
-// Three entry points, one file:
+// Entry points, one file:
 //   {}                                    the sweep, on cron every 10 minutes
 //   { action: 'request', transcriptId | tokenId, lang }
 //                                         a viewer asking for a language now
 //   { action: 'complete', secret, dubId, ok, path | error }
-//                                         the worker reporting a finished job
+//                                         the worker reporting a finished job,
+//                                         which also sends it the next in line
+//   { action: 'upload', secret, dubId, jobId }
+//                                         the worker renewing its upload URL
+//   { action: 'drain' }                   the line's own cron, every 10 minutes
 import { admin, corsHeaders, json, normalizeLang, parseTarget, DEHUB_CDN_BASE } from '../_shared/transcripts.ts';
 import { rateLimitByIp } from '../_shared/auth.ts';
 import { optionalWallet } from '../_shared/byok.ts';
@@ -60,7 +64,13 @@ const SWEEP_BUDGET = 20;
 /** How many recent transcripts the sweep opens rows for per run. */
 const SWEEP_SCAN = 40;
 const MAX_ATTEMPTS = 4;
-const STALE_PROCESSING_MS = 2 * 60 * 60 * 1000;
+/** A fifteen-minute video can take hours on the CPU host. Calling a render
+ *  stale any sooner hands its row to a second attempt and drops the first
+ *  one's audio when it reports back. */
+const STALE_PROCESSING_MS = 6 * 60 * 60 * 1000;
+/** Dubs handed over each time the worker reports a finished one. */
+const DRAIN_BUDGET = 2;
+const DRAIN_SCAN = 60;
 /** Backoff after a failed attempt: 10 min, 1 h, 6 h. */
 const RETRY_MS = [10, 60, 360].map((m) => m * 60 * 1000);
 
@@ -72,10 +82,18 @@ interface DubRow {
   attempts: number;
   last_attempt_at: string | null;
   updated_at: string;
+  job_id?: string | null;
+  /** A finished dub whose audio should be made again (its lines were fixed,
+   *  or a better voice sample is now possible). It stays `ready` and keeps
+   *  playing the audio it has until the new render lands. */
+  needs_redo?: boolean;
 }
+const ROW = 'id, transcript_id, language, status, attempts, last_attempt_at, updated_at, job_id, needs_redo';
+const WAITING = { submitted: 0, busy: 0, skipped: 0, error: 0, 'waiting-translation': 0 };
 
 function retryable(row: DubRow): boolean {
   if (row.attempts >= MAX_ATTEMPTS) return false;
+  if (row.status === 'ready') return false;
   const since = Date.now() - (row.last_attempt_at ? Date.parse(row.last_attempt_at) : 0);
   if (row.status === 'processing') return since > STALE_PROCESSING_MS;
   if (row.status === 'failed') return since > (RETRY_MS[Math.min(row.attempts - 1, RETRY_MS.length - 1)] ?? RETRY_MS[2]);
@@ -88,7 +106,9 @@ function publicUrl(path: string): string {
 
 /* ─────────────────────────────── submit ─────────────────────────────────── */
 
-type Submit = 'submitted' | 'waiting-translation' | 'skipped' | 'error';
+/** `busy`: the worker has no free place. The row stays in line, costs no
+ *  attempt, and goes out again when the worker next reports a finished dub. */
+type Submit = 'submitted' | 'waiting-translation' | 'skipped' | 'busy' | 'error';
 
 /**
  * Hand one row to the worker. Returns without spending anything when the
@@ -149,10 +169,12 @@ async function submit(db: any, row: DubRow, worker: WorkerConfig): Promise<Submi
   }
 
   // Compare-and-set before dispatch: several viewers can request the same dub.
-  const { data: claimed, error: claimError } = await db.from('video_dubs').update({
-    status: 'processing', job_id: jobId, provider: PROVIDER, error: null,
-    attempts: row.attempts + 1, last_attempt_at: new Date().toISOString(),
-  }).eq('id', row.id).eq('status', row.status).eq('attempts', row.attempts).select('id');
+  const redo = row.status === 'ready';
+  const taken = { job_id: jobId, provider: PROVIDER, attempts: row.attempts + 1, last_attempt_at: new Date().toISOString() };
+  const claim = db.from('video_dubs')
+    .update(redo ? taken : { ...taken, status: 'processing', error: null })
+    .eq('id', row.id).eq('status', row.status).eq('attempts', row.attempts);
+  const { data: claimed, error: claimError } = await (redo ? claim.eq('needs_redo', true) : claim).select('id');
   if (claimError) return 'error';
   if (!claimed?.length) return 'skipped';
 
@@ -188,15 +210,104 @@ async function submit(db: any, row: DubRow, worker: WorkerConfig): Promise<Submi
     return 'submitted';
   }
   if (!res.ok) {
+    await res.body?.cancel();
     console.error(`dub worker ${res.status}`);
-    await db.from('video_dubs').update({
-      status: 'failed',
-      error: `dub worker ${res.status}`,
-    }).eq('id', row.id).eq('job_id', jobId).eq('status', 'processing');
+    const mine = () => db.from('video_dubs');
+    if (res.status >= 500) {
+      // Busy or restarting. Give the row back as it was claimed, with no
+      // attempt spent. A quiet render keeps its job id so its own callback can
+      // still land; a redo goes on playing the audio it has.
+      const held = row.status !== 'pending';
+      await mine().update({
+        status: held ? row.status : 'pending',
+        job_id: held ? row.job_id ?? null : null,
+        attempts: row.attempts,
+        last_attempt_at: held ? row.last_attempt_at : new Date().toISOString(),
+      }).eq('id', row.id).eq('job_id', jobId);
+      return 'busy';
+    }
+    // A refused redo keeps its audio; the spent attempt is what stops it looping.
+    if (!redo) {
+      await mine().update({ status: 'failed', error: `dub worker ${res.status}` })
+        .eq('id', row.id).eq('job_id', jobId).eq('status', 'processing');
+    }
     return 'error';
   }
   await res.body?.cancel();
   return 'submitted';
+}
+
+/* ─────────────────────────────── the line ───────────────────────────────── */
+
+/**
+ * Hand the worker its next dubs. Runs whenever the worker reports one finished,
+ * so the line moves without a cron. A row is in line when a viewer asked for
+ * it and the worker had no room (`pending` with an attempt time), or when its
+ * render went quiet. Shortest videos go first: one long render would otherwise
+ * hold every short one behind it for hours.
+ */
+async function drain(db: any, worker: WorkerConfig): Promise<Record<string, number>> {
+  const sent: Record<string, number> = { ...WAITING };
+  if (!worker.configured) return sent;
+  // Before the line existed a busy worker failed the row and spent an attempt.
+  await db.from('video_dubs').update({ status: 'pending', attempts: 0, error: null })
+    .eq('status', 'failed').like('error', 'dub worker 5%');
+  if ((await freePlaces(worker)) === 0) return { ...sent, busy: 1 };
+
+  const staleBefore = new Date(Date.now() - STALE_PROCESSING_MS).toISOString();
+  const [waiting, quiet, redo] = await Promise.all([
+    db.from('video_dubs').select(ROW).eq('status', 'pending').not('last_attempt_at', 'is', null)
+      .lt('attempts', MAX_ATTEMPTS).order('last_attempt_at', { ascending: false }).limit(DRAIN_SCAN),
+    db.from('video_dubs').select(ROW).eq('status', 'processing').lt('last_attempt_at', staleBefore)
+      .lt('attempts', MAX_ATTEMPTS).order('last_attempt_at', { ascending: false }).limit(10),
+    // `last_attempt_at` moves when a redo is handed over, which keeps it from
+    // being handed over twice while it renders.
+    db.from('video_dubs').select(ROW).eq('status', 'ready').eq('needs_redo', true)
+      .lt('attempts', MAX_ATTEMPTS).or(`last_attempt_at.is.null,last_attempt_at.lt."${staleBefore}"`)
+      .order('updated_at', { ascending: false }).limit(DRAIN_SCAN),
+  ]);
+  const asked = [...(waiting.data ?? []), ...(quiet.data ?? [])] as DubRow[];
+  const again = (redo.data ?? []) as DubRow[];
+  if (!asked.length && !again.length) return sent;
+
+  const { data: lengths } = await db.from('transcripts').select('id, duration_seconds')
+    .in('id', [...new Set([...asked, ...again].map((row) => row.transcript_id))]);
+  const seconds = new Map<string, number>((lengths ?? []).map((t: any) => [t.id, Number(t.duration_seconds ?? 0)]));
+  // Stable sort: equal lengths keep the most recently asked for first.
+  const shortestFirst = (a: DubRow, b: DubRow) => (seconds.get(a.transcript_id) ?? 0) - (seconds.get(b.transcript_id) ?? 0);
+  // A viewer is waiting on the first group. A redo still has its old audio
+  // playing until its turn comes, so it goes after them.
+  const rows = [...asked.sort(shortestFirst), ...again.sort(shortestFirst)];
+
+  for (const row of rows.slice(0, DRAIN_BUDGET * 6)) {
+    if (sent.submitted >= DRAIN_BUDGET) break;
+    const result = await submit(db, row, worker);
+    sent[result]++;
+    if (result === 'busy' || (result === 'error' && sent.error >= 2)) break;
+  }
+  return sent;
+}
+
+/** Places the worker has open, or null when it does not say (an older build,
+ *  or the RunPod queue, which takes whatever it is given). */
+async function freePlaces(worker: WorkerConfig): Promise<number | null> {
+  if (!worker.url) return null;
+  try {
+    const res = await fetch(worker.url.replace(/\/jobs\/?$/, '/'), { signal: AbortSignal.timeout(5000) });
+    const free = res.ok ? (await res.json())?.dubFree : null;
+    return typeof free === 'number' ? free : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The worker frees its place a moment after it reports, so wait for that. */
+function drainSoon(db: any, worker: WorkerConfig) {
+  const work = new Promise((resolve) => setTimeout(resolve, 5000))
+    .then(() => drain(db, worker))
+    .catch((error) => console.error('auto-dub drain failed', error));
+  // @ts-ignore EdgeRuntime is provided by Supabase
+  if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(work);
 }
 
 /* ─────────────────────────────── sweep ──────────────────────────────────── */
@@ -233,14 +344,14 @@ async function sweep(db: any, worker: WorkerConfig) {
   /* 2. work the queue: oldest attempt first, newest rows first among fresh ones */
   const { data: queue } = await db
     .from('video_dubs')
-    .select('id, transcript_id, language, status, attempts, last_attempt_at, updated_at')
+    .select(ROW)
     .in('status', ['pending', 'processing', 'failed'])
     .lt('attempts', MAX_ATTEMPTS)
     .order('last_attempt_at', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: false })
     .limit(SWEEP_BUDGET * 4);
 
-  const results: Record<Submit, number> = { submitted: 0, 'waiting-translation': 0, skipped: 0, error: 0 };
+  const results: Record<Submit, number> = { submitted: 0, 'waiting-translation': 0, skipped: 0, busy: 0, error: 0 };
   let considered = 0;
   for (const row of (queue ?? []) as DubRow[]) {
     if (results.submitted >= SWEEP_BUDGET) break;
@@ -248,6 +359,7 @@ async function sweep(db: any, worker: WorkerConfig) {
     considered++;
     const r = await submit(db, row, worker);
     results[r]++;
+    if (r === 'busy') break; // no room; the line moves when the worker reports back
     if (r === 'error' && results.error >= 3) break; // the worker is down; stop burning attempts
   }
   return { opened: wanted.length, considered, ...results };
@@ -288,7 +400,7 @@ async function request(db: any, body: any, worker: WorkerConfig, signedIn: boole
     .upsert({ transcript_id: t.id, language: lang }, { onConflict: 'transcript_id,language', ignoreDuplicates: true });
   const { data: row } = await db
     .from('video_dubs')
-    .select('id, transcript_id, language, status, attempts, last_attempt_at, updated_at, audio_url, provider')
+    .select(`${ROW}, audio_url, provider`)
     .eq('transcript_id', t.id)
     .eq('language', lang)
     .maybeSingle();
@@ -298,7 +410,8 @@ async function request(db: any, body: any, worker: WorkerConfig, signedIn: boole
   if (!retryable(row)) return json({ ok: true, status: row.status });
 
   const r = await submit(db, row, worker);
-  return json({ ok: true, status: r === 'error' ? 'failed' : r === 'waiting-translation' ? 'pending' : 'processing', submit: r });
+  const status = r === 'error' ? 'failed' : r === 'waiting-translation' || r === 'busy' ? 'pending' : 'processing';
+  return json({ ok: true, status, submit: r });
 }
 
 /* ─────────────────────────────── complete ───────────────────────────────── */
@@ -309,6 +422,9 @@ async function complete(db: any, body: any, worker: WorkerConfig) {
   const jobId = String(body?.jobId ?? '');
   if (!dubId || !jobId) return json({ error: 'dubId and jobId required' }, 400);
   const expectedPath = `${dubId}/${jobId}.m4a`;
+  const row = await currentAttempt(db, dubId, jobId);
+  // Not this row's current attempt: a newer one replaced it. Nothing to save.
+  if (!row) return json({ ok: true });
 
   if (body?.ok === true && typeof body?.path === 'string') {
     if (body.path !== expectedPath) return json({ error: 'unexpected audio path' }, 400);
@@ -318,17 +434,50 @@ async function complete(db: any, body: any, worker: WorkerConfig) {
       voice: body?.voice === 'stock' ? 'stock' : 'cloned',
       duration_seconds: Number.isFinite(Number(body?.durationSeconds)) ? Math.round(Number(body.durationSeconds)) : null,
       error: null,
-    }).eq('id', dubId).eq('job_id', jobId).eq('status', 'processing');
+      needs_redo: false,
+    }).eq('id', dubId).eq('job_id', jobId).eq('status', row.status);
     if (error) return json({ error: 'could not save dub' }, 500);
+    drainSoon(db, worker);
     return json({ ok: true });
   }
 
-  const { error } = await db.from('video_dubs').update({
-    status: 'failed',
-    error: String(body?.error ?? 'worker failed').slice(0, 500),
-  }).eq('id', dubId).eq('job_id', jobId).eq('status', 'processing');
-  if (error) return json({ error: 'could not save dub failure' }, 500);
+  // A redo that failed keeps the audio it already had.
+  if (row.status === 'processing') {
+    const { error } = await db.from('video_dubs').update({
+      status: 'failed',
+      error: String(body?.error ?? 'worker failed').slice(0, 500),
+    }).eq('id', dubId).eq('job_id', jobId).eq('status', 'processing');
+    if (error) return json({ error: 'could not save dub failure' }, 500);
+  } else {
+    console.error(`dub redo failed: ${String(body?.error ?? 'worker failed').slice(0, 200)}`);
+  }
+  drainSoon(db, worker);
   return json({ ok: true });
+}
+
+/** The row an attempt belongs to while that attempt is still the current one:
+ *  a first render in `processing`, or a redo of a `ready` dub. */
+async function currentAttempt(db: any, dubId: string, jobId: string): Promise<{ status: string } | null> {
+  const { data } = await db.from('video_dubs').select('status, needs_redo')
+    .eq('id', dubId).eq('job_id', jobId).maybeSingle();
+  if (data?.status === 'processing' || (data?.status === 'ready' && data.needs_redo === true)) return { status: data.status };
+  return null;
+}
+
+/**
+ * A signed upload URL lasts two hours and a long render outlives it. The
+ * worker asks for a new one for the attempt it is still holding.
+ */
+async function freshUpload(db: any, body: any, worker: WorkerConfig) {
+  if (!worker.secret || body?.secret !== worker.secret) return json({ error: 'forbidden' }, 403);
+  const dubId = String(body?.dubId ?? '');
+  const jobId = String(body?.jobId ?? '');
+  if (!dubId || !jobId) return json({ error: 'dubId and jobId required' }, 400);
+  if (!(await currentAttempt(db, dubId, jobId))) return json({ error: 'no such attempt' }, 404);
+  const { data: signed, error } = await db.storage.from(BUCKET)
+    .createSignedUploadUrl(`${dubId}/${jobId}.m4a`, { upsert: true });
+  if (error || !signed?.signedUrl) return json({ error: 'could not sign upload' }, 500);
+  return json({ ok: true, uploadUrl: signed.signedUrl });
 }
 
 /* ─────────────────────────────── handler ────────────────────────────────── */
@@ -349,6 +498,13 @@ Deno.serve(async (req) => {
       return await request(db, body, worker, signedIn);
     }
     if (action === 'complete') return await complete(db, body, worker);
+    if (action === 'upload') return await freshUpload(db, body, worker);
+    if (action === 'drain') {
+      // Moves the existing line only, so it needs no key; the cron calls it.
+      const limited = await rateLimitByIp(req, 'auto-dub-drain', { limit: 30, windowMs: 60 * 60 * 1000 });
+      if (limited) return limited;
+      return json({ ok: true, ...(await drain(db, worker)) });
+    }
     if (req.headers.get('authorization') !== `Bearer ${SERVICE_KEY}`) return json({ error: 'forbidden' }, 403);
     return json({ ok: true, ...(await sweep(db, worker)) });
   } catch (e: any) {
