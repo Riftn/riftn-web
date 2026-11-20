@@ -56,12 +56,14 @@ export interface LiveNowItem {
   badgeLock?: BadgeLock | null;
 }
 
-export function LiveNowBar() {
-  const { t } = useTranslation();
+/**
+ * Everyone live right now, people you follow first, and how to open one.
+ * Shared by this row and the story shelf, which shows each one as a tile.
+ */
+export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowItem) => void } {
   const { walletAddress, isAuthenticated } = useAuth();
   const { openModal, joinSpace } = useStage();
   const navigate = useNavigate();
-  const [sheetOpen, setSheetOpen] = useState(false);
   // HomeFeed is kept mounted forever by PersistentPageCache, so the
   // participants poll runs only while home is actually on screen.
   const { pathname } = useLocation();
@@ -154,7 +156,6 @@ export function LiveNowBar() {
   }, [liveStages, liveData, allParticipants, followingData, walletAddress]);
 
   const open = (item: LiveNowItem) => {
-    setSheetOpen(false);
     if (item.kind === 'stage') {
       // Join the room that was actually tapped, not a generic browse list.
       openModal('live');
@@ -162,6 +163,18 @@ export function LiveNowBar() {
     } else {
       navigate(`/app/post/${item.id}`, { state: { fromFeed: true } });
     }
+  };
+
+  return { items, open };
+}
+
+export function LiveNowBar() {
+  const { t } = useTranslation();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const { items, open: openItem } = useLiveNowItems();
+  const open = (item: LiveNowItem) => {
+    setSheetOpen(false);
+    openItem(item);
   };
 
   if (items.length === 0) return null;
@@ -297,11 +310,11 @@ function cssUrl(url: string | undefined): string | undefined {
 }
 
 /** What the glass shows: the broadcast when there is a picture, else the host's face. */
-function pictureOf(item: LiveNowItem): string | undefined {
+export function pictureOf(item: LiveNowItem): string | undefined {
   return item.cover || faceUrlOf(item);
 }
 
-function faceUrlOf(item: LiveNowItem): string | undefined {
+export function faceUrlOf(item: LiveNowItem): string | undefined {
   if (item.kind === 'stage') {
     return (item.avatar ? buildAvatarUrl(item.wallet, item.avatar) : undefined) || buildAvatarCdnFallbackUrl(item.wallet, item.avatar ?? undefined) || undefined;
   }
