@@ -304,4 +304,15 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-kit-body] [data-kit-section] { background: none !important; box-shadow: none !important; border-radius: 0 !important; }
   /* a flat section is only a hairline between blocks on System, so the line runs straight to both ends */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-kit-body] [data-kit-section] { border-radius: 0 !important; }
+
+  /* What is selected inside a side box follows the box's corner. A highlight
+     that sits N px in from the edge of a 16px box needs a 16 - N corner to run
+     parallel to it; the scale's fixed 12 and 8 did not, so the menu row curved
+     more than the box around it and the tab curved less. The menu row sits 8
+     in, the tab 5 in. One more id than the scale rules above. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-side-panel] [data-sidebar-active-indicator],
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-side-panel] [data-desktop-nav-list] :is(a, button) { border-radius: calc(var(--dk-panel) - 8px) !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-side-panel-tabs] [data-tab-btn],
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-side-panel-tabs] [data-tab-btn] > div,
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-side-panel-tabs] [data-active-tab-indicator] { border-radius: calc(var(--dk-panel) - 5px) !important; }
 }
