@@ -47,6 +47,35 @@ function page(): HTMLElement | null {
   return document.getElementById('root');
 }
 
+/**
+ * The clear backdrops (index.css) sit inside the React tree of whatever opened
+ * the menu or sheet, and React bubbles a press on them up through that tree
+ * before it reaches the document, where Radix listens for "pressed outside". A
+ * card that stops pointerdown so a press on its controls does not navigate
+ * therefore also stopped its own menu from ever closing. So a press on a clear
+ * backdrop closes its layer here if Radix has not by the next tick, the same
+ * way Escape does: only the top layer answers it.
+ */
+function isClearBackdrop(target: Element): boolean {
+  if (target.matches('[data-overlay-shield]')) return true;
+  return target.matches('[data-radix-popper-content-wrapper]') && !!target.querySelector(':scope > [data-modal-shield]');
+}
+
+function stillOpen(backdrop: Element): boolean {
+  if (!backdrop.isConnected) return false;
+  const layer = backdrop.matches('[data-overlay-shield]') ? backdrop.nextElementSibling : backdrop.firstElementChild;
+  return layer?.getAttribute('data-state') === 'open';
+}
+
+function closeTopLayer() {
+  replaying = true;
+  try {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }));
+  } finally {
+    replaying = false;
+  }
+}
+
 function onPointerDown(e: Event) {
   if (replaying) return;
   armed = false;
@@ -55,6 +84,11 @@ function onPointerDown(e: Event) {
   if (!(target instanceof Element)) return;
   if (target.matches(BACKDROP)) {
     armed = true;
+    if (isClearBackdrop(target)) {
+      window.setTimeout(() => {
+        if (stillOpen(target)) closeTopLayer();
+      }, 0);
+    }
     return;
   }
   if (isOverlayExiting() && page()?.contains(target) && !isInteractionInsideOverlay(target)) armed = true;
@@ -65,6 +99,7 @@ function onPointerUp() {
 }
 
 function disarm() {
+  if (replaying) return;
   armed = false;
   releasedAt = 0;
 }
