@@ -179,7 +179,13 @@ export function useFeedSwallowClip(
       const cutY = bottom ? pr.bottom : pr.top + Math.min(cutInset, pr.height / 2);
       const currentY = cutY - cr.top;
       const outer = cut.closest<HTMLElement>('[data-feed-nav-outer], [data-kit-island-outer]');
-      const maxScroll = source.scrollHeight - source.clientHeight;
+      // The scroll timeline runs over the page's real scroll range. Once a phone
+      // browser hides its toolbars the window is taller than clientHeight, so
+      // that range is shorter; keyframes built from clientHeight then overshoot
+      // and, on a short profile scrolled near its end, drop the cut a toolbar's
+      // height below the pill.
+      const viewportHeight = source === (document.scrollingElement || document.documentElement) ? Math.max(source.clientHeight, window.innerHeight) : source.clientHeight;
+      const maxScroll = source.scrollHeight - viewportHeight;
       // The scrollport itself has a stationary clip; its descendants already
       // scroll within that cut on the compositor (including post overlays).
       if (Timeline && outer && !nested && source !== el && maxScroll > 0 && motion && bounds && cutLayer && inverseNavLayer) {
