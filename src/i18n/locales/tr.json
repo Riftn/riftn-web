@@ -8732,6 +8732,7 @@
     "dubbed": "Dublajlı ses",
     "preparing": "Dublajlı ses hazırlanıyor…",
     "unavailable": "Bu video için dublajlı ses mevcut değil.",
+    "creatorVoiceSoon": "Şimdilik cihazınızın sesi. İçerik üreticisinin kendi sesi hazırlanıyor.",
     "notEnoughTokens": "Dublaj için yeterli jeton yok.",
     "notEnoughTokensDescription": "Yaklaşık {{needed}} jetona ihtiyacınız var ve {{held}} tutuyorsunuz.",
     "paymentLeftWallet": "Jetonlarınız cüzdanınızdan çıktı. Onaylamayı tekrar denemek için Öde'ye basın.",
