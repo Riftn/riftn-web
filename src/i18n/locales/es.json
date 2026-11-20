@@ -7843,6 +7843,44 @@
         "shhh": "Shhh"
       }
     },
+    "bot": {
+      "title": "Bot del chat",
+      "intro": "Un copresentador para el chat de tu directo. Saluda a los nuevos, responde preguntas sobre ti y el directo, cuenta a quien llega tarde lo que se perdió y anima un chat callado. Solo habla en tus directos, mientras estás en vivo.",
+      "enabled": "Bot del chat",
+      "enabledHint": "Apagado hasta que lo actives. Al apagarlo se calla al instante.",
+      "about": "Lo que sabe de ti",
+      "aboutPlaceholder": "Quién eres, qué transmites, tu horario, dónde encontrarte. Ejemplo: Artista abstracto y fan del metal. En vivo mar/jue/sáb 20:00 ET. El enlace de Discord está en mi perfil.",
+      "aboutHint": "Responde con esto, el título del directo y el chat. Si no lo sabe, no dice nada",
+      "personality": "Personalidad",
+      "personalities": {
+        "chill": "Tranquilo",
+        "hype": "Animado",
+        "funny": "Gracioso",
+        "formal": "Formal"
+      },
+      "chattiness": "Cuánto habla",
+      "chattinessLevels": {
+        "quiet": "Solo si le preguntan",
+        "normal": "Normal",
+        "lots": "Mucho"
+      },
+      "greet": "Saludar a quien escribe por primera vez",
+      "greetHint": "Una bienvenida por persona en cada directo",
+      "answer": "Responder preguntas",
+      "answerHint": "\"¿Qué estás haciendo?\", \"¿Cuándo es el próximo directo?\"",
+      "catchUp": "Poner al día a quien llega tarde",
+      "catchUpHint": "\"¿Qué me perdí?\" recibe un resumen corto del directo",
+      "wakeQuiet": "Animar un chat callado",
+      "wakeQuietHint": "Tras unos minutos de silencio, hace una pregunta al chat",
+      "commandButtons": "Mostrar mis comandos como botones",
+      "commandButtonsHint": "Tus !comandos de las reglas del directo aparecen sobre el chat para que los espectadores los toquen",
+      "commandsLabel": "Comandos del chat",
+      "safety": "Publica como @assistant, nunca habla de dinero ni tokens y nunca promete nada por ti.",
+      "save": "Guardar bot del chat",
+      "saved": "Bot del chat guardado",
+      "saveFailed": "No se pudo guardar el bot del chat",
+      "loadFailed": "No se pudieron cargar los ajustes del bot del chat"
+    },
     "moderation": {
       "title": "Moderación del chat",
       "intro": "Reglas para el chat bajo todos tus streams. Nunca llegan al chat principal de Riftn: alguien que banees aquí aún puede hablar en todas partes.",

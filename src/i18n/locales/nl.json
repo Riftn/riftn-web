@@ -8033,6 +8033,44 @@
         "shhh": "Sssst..."
       }
     },
+    "bot": {
+      "title": "Chatbot",
+      "intro": "Een co-host voor de chat van je stream. Hij begroet nieuwe mensen, beantwoordt vragen over jou en de stream, vertelt laatkomers wat ze gemist hebben en maakt een stille chat weer levendig. Hij praat alleen in je eigen streams, terwijl je live bent.",
+      "enabled": "Chatbot",
+      "enabledHint": "Uit tot je hem aanzet. Uitzetten maakt hem meteen stil.",
+      "about": "Wat hij over je weet",
+      "aboutPlaceholder": "Wie je bent, wat je streamt, je schema, waar je te vinden bent. Voorbeeld: Abstract kunstenaar en metalfan. Live di/do/za 20:00 ET. De Discord-link staat in mijn profiel.",
+      "aboutHint": "Hij antwoordt op basis hiervan, je streamtitel en de chat. Weet hij het niet, dan zegt hij niets",
+      "personality": "Persoonlijkheid",
+      "personalities": {
+        "chill": "Relaxed",
+        "hype": "Hype",
+        "funny": "Grappig",
+        "formal": "Formeel"
+      },
+      "chattiness": "Hoe spraakzaam",
+      "chattinessLevels": {
+        "quiet": "Alleen als je het vraagt",
+        "normal": "Normaal",
+        "lots": "Veel"
+      },
+      "greet": "Nieuwe chatters begroeten",
+      "greetHint": "Eén welkom per persoon per stream",
+      "answer": "Vragen beantwoorden",
+      "answerHint": "\"Wat maak je?\", \"Wanneer is de volgende stream?\"",
+      "catchUp": "Laatkomers bijpraten",
+      "catchUpHint": "\"Wat heb ik gemist?\" krijgt een korte samenvatting van de stream",
+      "wakeQuiet": "Een stille chat wakker maken",
+      "wakeQuietHint": "Na een paar stille minuten stelt hij de chat een vraag",
+      "commandButtons": "Mijn commando's als knoppen tonen",
+      "commandButtonsHint": "Je !commando's uit Streamregels staan boven het chatvak zodat kijkers erop kunnen tikken",
+      "commandsLabel": "Chatcommando's",
+      "safety": "Hij post als @assistant, praat nooit over geld of tokens en belooft nooit iets namens jou.",
+      "save": "Chatbot opslaan",
+      "saved": "Chatbot opgeslagen",
+      "saveFailed": "Chatbot opslaan is mislukt",
+      "loadFailed": "Chatbotinstellingen laden is mislukt"
+    },
     "moderation": {
       "title": "Chatmoderatie",
       "intro": "Regels voor de chat onder alle je streams. Ze komen nooit in Riftn's hoofdchat: iemand die je hier bant kan nog steeds overal praten.",

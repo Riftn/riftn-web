@@ -7843,6 +7843,44 @@
         "shhh": "Şşşt"
       }
     },
+    "bot": {
+      "title": "Sohbet botu",
+      "intro": "Yayın sohbetin için bir yardımcı sunucu. Yeni gelenleri selamlar, seninle ve yayınla ilgili soruları yanıtlar, geç gelenlere neyi kaçırdıklarını anlatır ve sessiz bir sohbeti canlandırır. Yalnızca kendi yayınlarında, sen canlıyken konuşur.",
+      "enabled": "Sohbet botu",
+      "enabledHint": "Sen açana kadar kapalıdır. Kapatınca hemen susar.",
+      "about": "Senin hakkında bildikleri",
+      "aboutPlaceholder": "Kim olduğun, ne yayınladığın, programın, seni nerede bulabilecekleri. Örnek: Soyut sanatçı ve metal hayranı. Sal/Per/Cmt 20:00 ET canlı. Discord bağlantısı profilimde.",
+      "aboutHint": "Bunlardan, yayın başlığından ve sohbetten yanıt verir. Bilmiyorsa sessiz kalır",
+      "personality": "Kişilik",
+      "personalities": {
+        "chill": "Sakin",
+        "hype": "Coşkulu",
+        "funny": "Komik",
+        "formal": "Resmi"
+      },
+      "chattiness": "Ne kadar konuşkan",
+      "chattinessLevels": {
+        "quiet": "Sadece sorulunca",
+        "normal": "Normal",
+        "lots": "Çok"
+      },
+      "greet": "İlk kez yazanları selamla",
+      "greetHint": "Her yayında kişi başına bir karşılama",
+      "answer": "Soruları yanıtla",
+      "answerHint": "\"Ne yapıyorsun?\", \"Sonraki yayın ne zaman?\"",
+      "catchUp": "Geç gelenleri bilgilendir",
+      "catchUpHint": "\"Ne kaçırdım?\" yayının kısa bir özetini alır",
+      "wakeQuiet": "Sessiz sohbeti canlandır",
+      "wakeQuietHint": "Birkaç dakika sessizlikten sonra sohbete bir soru sorar",
+      "commandButtons": "Komutlarımı düğme olarak göster",
+      "commandButtonsHint": "Yayın kurallarındaki !komutların sohbet kutusunun üstünde görünür, izleyiciler dokunabilir",
+      "commandsLabel": "Sohbet komutları",
+      "safety": "@assistant olarak yazar, asla para veya tokenlardan bahsetmez ve asla senin adına söz vermez.",
+      "save": "Sohbet botunu kaydet",
+      "saved": "Sohbet botu kaydedildi",
+      "saveFailed": "Sohbet botu kaydedilemedi",
+      "loadFailed": "Sohbet botu ayarları yüklenemedi"
+    },
     "moderation": {
       "title": "Sohbet yönetimi",
       "intro": "Tüm akışlarınızın altındaki sohbet için kurallar. Riftn'ın ana sohbetine asla ulaşamazlar: Burada yasakladığınız biri hala başka her yerde konuşabilir.",
