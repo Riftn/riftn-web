@@ -26,7 +26,7 @@ vi.mock('@/lib/document-scroll', () => ({ scrollDocumentToSmooth: vi.fn() }));
 vi.mock('@/components/app/war/WarHudIcon', () => ({ ThemedIcon: () => null }));
 vi.mock('@/contexts/UserPreferencesContext', () => ({ useUserPreferences: () => null }));
 vi.mock('@/components/app/navigation/DesktopSidebar', () => ({ DesktopSidebar: () => null }));
-vi.mock('@/components/app/navigation/SidebarProfileSwitcher', () => ({ SidebarProfileSwitcher: () => null }));
+vi.mock('@/components/app/navigation/MenuAccountSwitcher', () => ({ MenuAccountSwitcher: () => null }));
 vi.mock('@/components/ui/liquid-glass-bubble', () => ({ LiquidGlassBubble: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button> }));
 vi.mock('@/features/post/PostModal', () => ({ PostModal: ({ isOpen }: any) => isOpen ? <div>Composer open</div> : null }));
 vi.mock('@/components/app/navigation/MobileHeader', () => ({
