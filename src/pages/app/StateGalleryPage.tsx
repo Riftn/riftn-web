@@ -342,7 +342,7 @@ function ReactionRowsGallery() {
   ];
   const at = new Date().toISOString();
   const sums: ChatReactionSummary[] = [
-    { total: 1 + extra, emojis: [{ emoji: '❤️', count: 1 + extra }], last: { emoji: '❤️', by: people[0].address, name: 'Ella Verse', messageId: 'g1', at } },
+    { total: 1 + extra, emojis: [{ emoji: '💯', count: 1 + extra }], last: { emoji: '💯', by: people[0].address, name: 'Ella Verse', messageId: 'g1', at } },
     { total: 4, emojis: [{ emoji: '😂', count: 2 }, { emoji: '🔥', count: 1 }, { emoji: '👍', count: 1 }], last: { emoji: '😂', by: people[1].address, name: 'Luna', messageId: 'g2', at } },
     { total: 3, emojis: [{ emoji: '🔥', count: 3 }], last: { emoji: '🔥', by: people[2].address, name: 'Deep Water', messageId: 'g3', at } },
   ];

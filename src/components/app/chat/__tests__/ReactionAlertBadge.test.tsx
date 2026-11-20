@@ -25,13 +25,14 @@ describe('reaction alerts in the Chat list', () => {
 
   it('plays the animated emoji by default', () => {
     render(<ReactionAlertBadge reactions={one} />);
-    expect(document.querySelector('[data-reaction-alert-emoji] img')?.getAttribute('src')).toBe('/emoji/animated/chat/2764_fe0f.webp');
+    expect(document.querySelector('[data-reaction-alert-emoji]')?.getAttribute('data-reaction-alert-art')).toBe('/emoji/animated/chat/2764_fe0f.webp');
   });
 
   it('shows still emojis when reaction motion is Off', () => {
     localStorage.setItem('riftn.chat.reactionStyle', 'off');
     try {
       render(<ReactionAlertBadge reactions={one} />);
+      expect(document.querySelector('[data-reaction-alert-emoji]')?.hasAttribute('data-reaction-alert-art')).toBe(false);
       expect(document.querySelector('[data-reaction-alert-emoji] img')).toBeNull();
       expect(document.querySelector('[data-reaction-alert]')!.textContent).toBe('❤️');
     } finally {
