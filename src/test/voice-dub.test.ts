@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useVoiceDub } from '@/hooks/use-voice-dub';
+import { lineRoom, useVoiceDub } from '@/hooks/use-voice-dub';
 import { setVolume } from '@/lib/video-preferences';
 import { DEFAULT_DUB_MIX, setDubMix, applyVideoVolume } from '@/lib/dub-mix';
 
@@ -10,13 +10,13 @@ vi.mock('@/hooks/dub-preference', () => ({ synth: () => speech }));
 const segments = [{ start: 0, end: 3, text: 'Hola' }, { start: 4, end: 7, text: 'Adiós' }];
 const voice = { lang: 'es-ES' } as SpeechSynthesisVoice;
 
-function setup() {
+function setup(lines = segments) {
   const video = document.createElement('video');
   Object.defineProperty(video, 'paused', { value: false, writable: true });
   video.currentTime = 0.1;
   video.volume = 0.8;
   const videoRef = { current: video };
-  const hook = renderHook(() => useVoiceDub(videoRef, segments, voice));
+  const hook = renderHook(() => useVoiceDub(videoRef, lines, voice));
   const line = () => speech.speak.mock.calls.at(-1)![0] as SpeechSynthesisUtterance;
   return { video, line, ...hook };
 }
@@ -72,23 +72,76 @@ describe('voice dub playback', () => {
     expect(speech.speak).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores completion from a cancelled line after the next line starts', () => {
+  it('lets a line finish when the next one begins, then reads the one that waited', () => {
+    const { video, line } = setup();
+    const first = line();
+    act(() => first.onstart?.({} as SpeechSynthesisEvent));
+    speech.cancel.mockClear();
+    act(() => { video.currentTime = 4.1; vi.advanceTimersByTime(300); });
+    expect(speech.cancel).not.toHaveBeenCalled();
+    expect(speech.speak).toHaveBeenCalledTimes(1);
+    act(() => first.onend?.({} as SpeechSynthesisEvent));
+    expect(speech.speak).toHaveBeenCalledTimes(2);
+    expect(line().text).toBe('Adiós');
+    expect(video.volume).toBeCloseTo(0.008);
+  });
+
+  it('cuts a line only once it is far behind, and ignores its late completion', () => {
     const { video, line, unmount } = setup();
     const first = line();
     act(() => first.onstart?.({} as SpeechSynthesisEvent));
-    act(() => { video.currentTime = 4.1; vi.advanceTimersByTime(100); });
+    speech.cancel.mockClear();
+    act(() => { video.currentTime = 5.6; vi.advanceTimersByTime(100); });
+    expect(speech.cancel).toHaveBeenCalled();
+    expect(line().text).toBe('Adiós');
     act(() => line().onstart?.({} as SpeechSynthesisEvent));
     act(() => first.onend?.({} as SpeechSynthesisEvent));
+    expect(speech.speak).toHaveBeenCalledTimes(2);
     expect(video.volume).toBeCloseTo(0.008);
     unmount();
     expect(video.volume).toBe(0.8);
+  });
+
+  it('reads a line that waited in the silence after it, at full speed', () => {
+    const { video, line } = setup([{ start: 0, end: 3, text: 'Hola' }, { start: 3, end: 4, text: 'Una frase bastante larga para un segundo' }, { start: 6, end: 9, text: 'Tres' }]);
+    const first = line();
+    act(() => first.onstart?.({} as SpeechSynthesisEvent));
+    act(() => { video.currentTime = 3.5; vi.advanceTimersByTime(100); });
+    act(() => { video.currentTime = 4.2; vi.advanceTimersByTime(100); });
+    expect(speech.speak).toHaveBeenCalledTimes(1);
+    act(() => first.onend?.({} as SpeechSynthesisEvent));
+    expect(line().text).toBe('Una frase bastante larga para un segundo');
+    expect(line().rate).toBe(1.5);
+  });
+
+  it('drops a line that waited when there is no room left, instead of cutting the next', () => {
+    const { video, line } = setup([{ start: 0, end: 3, text: 'Hola' }, { start: 3, end: 4, text: 'Dos' }, { start: 4.3, end: 7, text: 'Tres' }]);
+    const first = line();
+    act(() => first.onstart?.({} as SpeechSynthesisEvent));
+    act(() => { video.currentTime = 3.5; vi.advanceTimersByTime(100); });
+    act(() => { video.currentTime = 4.1; vi.advanceTimersByTime(100); });
+    act(() => first.onend?.({} as SpeechSynthesisEvent));
+    expect(speech.speak).toHaveBeenCalledTimes(1);
+    act(() => { video.currentTime = 4.4; vi.advanceTimersByTime(100); });
+    expect(line().text).toBe('Tres');
+  });
+
+  it('counts the silence after a line as room, up to a second, and none once it is long past', () => {
+    const lines = [{ start: 0, end: 3, text: 'a' }, { start: 3.4, end: 5, text: 'b' }, { start: 9, end: 10, text: 'c' }];
+    expect(lineRoom(lines, 0, 1)).toBeCloseTo(2.4);
+    expect(lineRoom(lines, 1, 4.5)).toBeCloseTo(1.5);
+    expect(lineRoom(lines, 1, 5.5)).toBeCloseTo(1);
+    expect(lineRoom(lines, 1, 8.5)).toBeCloseTo(0);
+    expect(lineRoom(lines, 2, 9.5)).toBeCloseTo(1.5);
   });
 
   it('uses the latest viewer volume for the next dub line', () => {
     const { video, line } = setup();
     act(() => setVolume(0.4));
     act(() => vi.advanceTimersByTime(120));
+    act(() => line().onend?.({} as SpeechSynthesisEvent));
     act(() => { video.currentTime = 4.1; vi.advanceTimersByTime(100); });
+    expect(line().text).toBe('Adiós');
     expect(line().volume).toBeCloseTo(0.4);
     act(() => line().onstart?.({} as SpeechSynthesisEvent));
     expect(video.volume).toBeCloseTo(0.004);
