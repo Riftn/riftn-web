@@ -56,6 +56,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation as useI18n } from 'react-i18next';
 import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { cn } from '@/lib/utils';
+import { FadeSlot } from '@/components/ui/fade-slot';
 import { createPortal, flushSync } from 'react-dom';
 import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
 import { POST_STAGE_COMPOSE_EVENT } from '@/components/app/post-stage/post-stage-context';
@@ -3684,7 +3685,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                       <Mic className="w-4 h-4" />
                     </button>
                   )}
-                  {newComment.trim().length > 0 && (
+                  <FadeSlot show={newComment.trim().length > 0} gap={6}>
                     <button
                       type="button"
                       onClick={() => { void commentTranslator.translate(); }}
@@ -3696,9 +3697,9 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                     >
                       {commentTranslator.busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
                     </button>
-                  )}
+                  </FadeSlot>
                   {/* Desktop: AI sits beside the mic. Phones keep it above Post. */}
-                  {!isMobile && newComment.trim().length > 0 && (
+                  <FadeSlot show={!isMobile && newComment.trim().length > 0} gap={6}>
                     <button
                       type="button"
                       onClick={() => setAiMenu('open')}
@@ -3710,10 +3711,10 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                     >
                       {aiRewriting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                     </button>
-                  )}
+                  </FadeSlot>
                 </div>
                 <div data-comment-actions className={cn("shrink-0 flex items-center", composerExpanded ? "col-start-2 row-start-2 flex-row gap-1.5 pt-1" : "ml-1")}>
-                  {isMobile && newComment.trim().length > 0 && (
+                  <FadeSlot show={isMobile && newComment.trim().length > 0} gap={composerExpanded ? 6 : 0} gapSide="right">
                     <button
                       type="button"
                       onClick={() => setAiMenu('open')}
@@ -3725,7 +3726,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                     >
                       {aiRewriting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                     </button>
-                  )}
+                  </FadeSlot>
                   <button
                     type="button"
                     onPointerDown={(event) => {
