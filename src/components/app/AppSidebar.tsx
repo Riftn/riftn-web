@@ -208,12 +208,13 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
               </BadgedName>
             </p>
             {menuFollowers != null || menuFollowing != null ? (
-              <p data-testid="menu-follow-counts" className="flex min-w-0 items-center gap-1 text-[13px] font-semibold text-zinc-400 tabular-nums">
+              <p data-testid="menu-follow-counts" className="flex min-w-0 flex-wrap items-center gap-x-3 text-[13px] font-semibold text-zinc-400 tabular-nums">
                 <button type="button" data-testid="menu-followers" onClick={() => openFollowList('followers')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
                   <span className="flex-shrink-0 font-bold text-zinc-200">{compactCount(menuFollowers ?? 0)}</span>
                   <span className="min-w-0 truncate">{t('profile.followers')}</span>
                 </button>
-                <span aria-hidden className="mx-1 flex-shrink-0 font-bold">·</span>
+                {/* No dot between: on a narrow phone Following drops to its own
+                    line instead of running under the balance chip. */}
                 <button type="button" data-testid="menu-following" onClick={() => openFollowList('following')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
                   <span className="flex-shrink-0 font-bold text-zinc-200">{compactCount(menuFollowing ?? 0)}</span>
                   <span className="min-w-0 truncate">{t('profile.following')}</span>
