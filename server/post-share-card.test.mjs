@@ -66,14 +66,14 @@ test('mature posts and unreadable records share the brand card without their vid
     assert.ok(result.includes('summary_large_image') && result.includes('content="630"'));
   }
   const media = applyPostShareImage(html, { ...post, postType: 'video', videoUrl: 'videos/6501.mp4', thumbnail_url: 'images/6501.jpg' });
-  assert.equal((media.match(/https:\/\/riftn\.com\/_og\/post\/v7\/6501.png/g) || []).length, 3);
+  assert.equal((media.match(/https:\/\/riftn\.com\/_og\/post\/v8\/6501.png/g) || []).length, 3);
   assert.ok(media.includes('og:video'), 'a safe video keeps og:video for players that use it');
 });
 
 test('both crawler tags and structured data select the same versioned PNG', () => {
   const html = '<head><meta property="og:image" content="avatar.jpg"><meta name="twitter:image" content="avatar.jpg"><script type="application/ld+json">{"@type":"SocialMediaPosting","image":"avatar.jpg"}</script></head>';
   const result = applyPostShareImage(html, post);
-  assert.equal((result.match(/https:\/\/riftn\.com\/_og\/post\/v7\/6501.png/g) || []).length, 4);
+  assert.equal((result.match(/https:\/\/riftn\.com\/_og\/post\/v8\/6501.png/g) || []).length, 4);
   assert.ok(result.includes('content="1200"'));
   assert.ok(result.includes('content="630"'));
   assert.ok(result.includes('summary_large_image'));
@@ -102,26 +102,29 @@ const closedPoll = {
   ],
 };
 
-test('post text and polls flow together without a bottom-anchored gap or overlap', () => {
+test('post text and polls sit as one block on the column foot, never above the top line', () => {
   for (const title of ['', 'A short title', 'A long title '.repeat(30)]) {
     for (const body of ['Short body.', post.description, 'Long body text '.repeat(70)]) {
       for (const options of [closedPoll.options, Array.from({ length: 4 }, (_, index) => ({ index, text: 'W'.repeat(60), percent: 25, winner: true }))]) {
         const layout = layoutPostCardCopy({ title, body, poll: { ...closedPoll, question: 'Long poll question '.repeat(12), options } });
-        assert.equal(layout.poll.top - layout.body.bottom, 24);
-        if (title) assert.equal(layout.body.top - layout.title.bottom, 24);
-        assert.ok(layout.poll.top + layout.poll.height <= 488, `results enter the footer space for ${title.length}/${body.length}/${options.length}`);
+        const above = layout.body.lines.length ? layout.body.bottom : layout.title.lines.length ? layout.title.bottom : null;
+        if (above !== null) assert.equal(layout.poll.top - above, 20);
+        if (layout.title.lines.length && layout.body.lines.length) assert.equal(layout.body.top - layout.title.bottom, 20);
+        assert.equal(layout.poll.top + layout.poll.height, 466, 'the poll ends on the column foot');
+        assert.ok(layout.top >= 128, `copy climbs into the logo row for ${title.length}/${body.length}/${options.length}`);
       }
+      const plain = layoutPostCardCopy({ title, body, poll: null });
+      assert.equal(Math.round((plain.body.lines.length ? plain.body.bottom : plain.title.bottom)), 466);
+      assert.ok(plain.top >= 128, `text climbs into the logo row for ${title.length}/${body.length}`);
     }
   }
-  const short = layoutPostCardCopy({ title: '', body: 'One line', poll: closedPoll });
-  assert.ok(short.poll.top < 190, 'a short post must not leave a blank middle before its poll');
 });
 
 test('renders real PNGs at 1200 by 630 using the deployed font and official mark', async () => {
   await initWasm(readFileSync(new URL('../node_modules/@resvg/resvg-wasm/index_bg.wasm', import.meta.url)));
   const logo = `data:image/png;base64,${readFileSync(new URL('../public/brand-kit/brand/riftn-logo-white.png', import.meta.url)).toString('base64')}`;
   const chrome = `data:image/png;base64,${readFileSync(new URL('../public/brand/share-chrome-edge.png', import.meta.url)).toString('base64')}`;
-  const font = readFileSync(new URL('../public/brand-kit/font/manrope-500.ttf', import.meta.url));
+  const font = ['manrope-500', 'manrope-700', 'mono'].map(f => readFileSync(new URL(`../public/brand-kit/font/${f}.ttf`, import.meta.url)));
   const photo = `data:image/jpeg;base64,${readFileSync(new URL('../public/og/apps.jpg', import.meta.url)).toString('base64')}`;
   mkdirSync('post-card-checks', { recursive: true });
   for (const [name, data] of [
@@ -138,7 +141,7 @@ test('renders real PNGs at 1200 by 630 using the deployed font and official mark
     if (data.media) assert.ok(svg.includes(`data-media="${data.media.video ? 'video-poster' : 'image'}"`));
     assert.ok(!svg.includes('integrated-chrome-edge'));
     assert.ok(!svg.includes('chrome-mask'));
-    const renderer = new Resvg(svg, { font: { fontBuffers: [font], defaultFontFamily: 'Manrope' } });
+    const renderer = new Resvg(svg, { font: { fontBuffers: font, defaultFontFamily: 'Manrope' } });
     const image = renderer.render();
     try {
       const png = image.asPng();
@@ -159,16 +162,16 @@ test('profiles share a rendered card with their name, handle and followers', asy
   for (const patch of [{ isBanned: true }, { username: '' }, { username: '../x' }]) assert.equal(profileCardData({ ...account, ...patch }), null);
   const html = '<head><meta property="og:image" content="avatar.jpg"><meta name="twitter:card" content="summary"></head>';
   const tagged = applyProfileShareImage(html, account);
-  assert.equal((tagged.match(/https:\/\/riftn\.com\/_og\/profile\/v3\/mal.eth.png/g) || []).length, 3);
+  assert.equal((tagged.match(/https:\/\/riftn\.com\/_og\/profile\/v4\/mal.eth.png/g) || []).length, 3);
   assert.ok(tagged.includes('summary_large_image') && tagged.includes('content="1200"') && !tagged.includes('avatar.jpg'));
   assert.equal(applyProfileShareImage(html, null), html);
   await initWasm(readFileSync(new URL('../node_modules/@resvg/resvg-wasm/index_bg.wasm', import.meta.url))).catch(() => {});
   const logo = `data:image/png;base64,${readFileSync(new URL('../public/brand-kit/brand/riftn-logo-white.png', import.meta.url)).toString('base64')}`;
-  const font = readFileSync(new URL('../public/brand-kit/font/manrope-500.ttf', import.meta.url));
+  const font = ['manrope-500', 'manrope-700', 'mono'].map(f => readFileSync(new URL(`../public/brand-kit/font/${f}.ttf`, import.meta.url)));
   for (const [name, card] of [['profile', data], ['profile-long-name', { ...data, name: 'Alexandria Montgomery-Wellington of the Northern Reaches', followers: null }]]) {
     const svg = renderProfileCardSvg(card, { logo, avatar: logo });
     assert.ok(!svg.includes('integrated-chrome-edge'));
-    const renderer = new Resvg(svg, { font: { fontBuffers: [font], defaultFontFamily: 'Manrope' } });
+    const renderer = new Resvg(svg, { font: { fontBuffers: font, defaultFontFamily: 'Manrope' } });
     const image = renderer.render();
     try {
       assert.equal(image.width, 1200);
