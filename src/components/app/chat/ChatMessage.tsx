@@ -11,6 +11,7 @@ import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { dblClickReply } from '@/lib/dblclick-reply';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { copyLinkLabel } from '@/lib/chat-message-link';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
 import { copyableMediaUrl } from '@/lib/copy-media';
 import Images from '@/components/ui/cut-icons/images';
@@ -121,6 +122,8 @@ interface ChatMessageProps {
   onDiscardSend?: (clientKey: string) => void;
   /** Open the room's search on everything this line's sender has said. */
   onSeeMessages?: (message: Message) => void;
+  /** "Copy link": a riftn.com link that opens this chat on this line. */
+  onCopyLink?: (message: Message) => void;
   /** Live chat on phones: frame the held line, and outline the line being answered. */
   holdFrame?: boolean;
   replying?: boolean;
@@ -235,6 +238,7 @@ export const ChatMessage = memo(function ChatMessage({
   onRetrySend,
   onDiscardSend,
   onSeeMessages,
+  onCopyLink,
   holdFrame,
   replying,
   onTogglePin,
@@ -357,6 +361,7 @@ export const ChatMessage = memo(function ChatMessage({
   // A photo or GIF can be copied as itself, not just its caption.
   const mediaUrl = (message.type === 'image' || message.type === 'gif') ? copyableMediaUrl(message.imageUrl) : null;
   const copyMediaNow = mediaUrl ? () => copyMediaWithToast(mediaUrl, message.type === 'gif' ? 'gif' : 'image', _copy) : null;
+  if (onCopyLink) holdActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message) });
   if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
   if (message.type === 'text' && message.content?.trim() && !isTooShort) holdActions.push(
     isTranslated
@@ -387,6 +392,7 @@ export const ChatMessage = memo(function ChatMessage({
   if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing(), hint: 'E' });
   if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
   if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
+  if (onCopyLink) menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message), hint: 'L' });
   if (copyMediaNow) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
   if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
     isTranslated

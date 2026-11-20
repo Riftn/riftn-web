@@ -71,6 +71,8 @@ import Copy from '@/components/ui/cut-icons/copy';
 import type { ChatCreatorBadge } from '@/lib/live/chat-badges';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
+import { canLinkMessage, copyChatMessageLink, copyLinkLabel, useLinkedMessage } from '@/lib/chat-message-link';
+import { Link2 } from 'lucide-react';
 import { dblClickReply } from '@/lib/dblclick-reply';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
@@ -377,6 +379,15 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     }
   }, []);
 
+  // A copied message link to this stream's chat: light the line up. The chat
+  // holds the newest 200 lines, so an older one says it is too far back.
+  useLinkedMessage(
+    tokenId ? `stream:${tokenId}` : null,
+    !isLoading,
+    (id) => chatMessages.some((m) => m.id === id),
+    (id) => messageRefs.current.get(id) ?? null,
+  );
+
   const handlePinMessage = useCallback(async (msg: SupabaseLiveChatMessage) => {
     setContextMenuMsg(null);
     setIsPinning(true);
@@ -465,7 +476,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       setHeld({ msg, el: row });
       return;
     }
-    if (!canModerate && !isMine(msg) && !translateHandles.current.has(msg.id)) return false;
+    if (!canModerate && !isMine(msg) && !translateHandles.current.has(msg.id) && !canLinkMessage(msg.id)) return false;
     setContextMenuPos(point);
     setContextMenuMsg(msg);
   });
@@ -551,6 +562,10 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           () => undefined,
         );
       },
+    });
+    if (canLinkMessage(heldMsg.id)) holdActions.push({
+      key: 'copy-link', icon: <Link2 />, label: copyLinkLabel(),
+      onSelect: () => copyChatMessageLink({ kind: 'stream', tokenId }, heldMsg.id),
     });
     if (heldTranslate) holdActions.push(heldTranslate.isTranslated
       ? { key: 'original', icon: <RotateCcw />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: () => heldTranslate.toggle() }
@@ -920,7 +935,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
       {/* Portalled: the chat often sits inside a blurred or transformed
           panel, which turns `fixed` into "fixed to that panel" and threw the
           menu off screen. */}
-      {contextMenuMsg && (canModerate || isMine(contextMenuMsg) || translateHandles.current.has(contextMenuMsg.id)) && createPortal(
+      {contextMenuMsg && (canModerate || isMine(contextMenuMsg) || translateHandles.current.has(contextMenuMsg.id) || canLinkMessage(contextMenuMsg.id)) && createPortal(
         <div
           ref={contextMenuRef}
           data-glass-menu
@@ -928,6 +943,14 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           style={{ top: contextMenuPlace?.top ?? contextMenuPos.y, left: contextMenuPlace?.left ?? contextMenuPos.x, visibility: contextMenuPlace ? undefined : 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
+          {canLinkMessage(contextMenuMsg.id) && (
+            <button
+              onClick={() => { setContextMenuMsg(null); copyChatMessageLink({ kind: 'stream', tokenId }, contextMenuMsg.id); }}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+            >
+              <Link2 className="w-3.5 h-3.5" />{copyLinkLabel()}
+            </button>
+          )}
           {(() => {
             const translate = translateHandles.current.get(contextMenuMsg.id);
             return translate && (

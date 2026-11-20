@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import { clearPendingChatLink, peekPendingChatLink, toastNotInLinkedChat } from '@/lib/chat-message-link';
 import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { ReactionAlertBadge, reactionAlertLine } from '@/components/app/chat/ReactionAlertBadge';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
@@ -897,6 +898,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     pendingConversationIdRef.current = null;
     const match = conversations.find(c => c.id === id);
     if (match) openConversation(match);
+    // A copied message link to a chat this account is not in.
+    else if (peekPendingChatLink(`dm:${id}`)) {
+      clearPendingChatLink();
+      toastNotInLinkedChat();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, conversations, isLoading, pendingConversationTrigger]);
 

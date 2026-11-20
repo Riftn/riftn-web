@@ -21022,5 +21022,9 @@
     "promptCatchUp": "Résume-moi ce que {{handle}} a publié récemment",
     "promptMessage": "Aide-moi à écrire un message à {{handle}}",
     "promptAbout": "À propos de {{handle}} : {{question}}"
+  },
+  "chatLink": {
+    "gone": "Ce message a été supprimé, ou il est trop ancien pour être ouvert.",
+    "notInChat": "Ce lien mène à une discussion privée dont vous ne faites pas partie."
   }
 }

@@ -21018,5 +21018,9 @@
     "promptCatchUp": "{{handle}} son zamanlarda neler paylaştı, özetle",
     "promptMessage": "{{handle}} kişisine mesaj yazmama yardım et",
     "promptAbout": "{{handle}} hakkında: {{question}}"
+  },
+  "chatLink": {
+    "gone": "Bu mesaj silindi ya da açılamayacak kadar eski.",
+    "notInChat": "Bu bağlantı, içinde olmadığın özel bir sohbete ait."
   }
 }

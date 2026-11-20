@@ -3,7 +3,7 @@ import { localizePublicChrome, localizeStructuredData } from './server/public-pa
 import { handleWorkReceipt } from './server/work-receipts.ts';
 import { handleEditorPresence } from './server/editor-presence.ts';
 import { stageShareImageUrl } from './server/stage-share-card.js';
-import { applyPostShareImage, applyProfileShareImage, postShareImageUrl } from './server/post-share-card.js';
+import { applyPostShareImage, applyProfileShareImage, postShareImageUrl, profileShareImageUrl } from './server/post-share-card.js';
 import { liveShareCopy } from './server/live-share-copy.js';
 import { handleFinanceRequest } from './server/finance-stats.js';
 import { handleCreatorMotionSource } from './server/creator-motion-source.js';
@@ -3597,6 +3597,95 @@ function buildCommunityInviteHtml(code, invite) {
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/communities">Communities</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>${invite.slug ? `<p><a href="${APP_URL}/communities/${escHtml(invite.slug)}">${escHtml(name)}</a></p>` : ''}`,
     jsonLd: { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonicalUrl },
+  });
+}
+
+/**
+ * A copied chat message link (lib/chat-message-link): /app/messages with
+ * `msg=<id>`, either `chat=public` (Public Chat, readable by anyone) or
+ * `conversation=<id>` (a DM or group). A Public Chat line unfurls as who said
+ * what, with the sender's card; a private chat says only that it is one, since
+ * the link reaches people who are not in it. Never indexed.
+ */
+const CHAT_LINK_ID = /^[A-Za-z0-9_-]{1,80}$/;
+
+export function chatMessageLinkOf(url) {
+  const path = url.pathname.replace(/\/+$/, '');
+  if (path !== '/app/messages' && path !== '/chat') return null;
+  const msg = url.searchParams.get('msg');
+  if (!msg || !CHAT_LINK_ID.test(msg)) return null;
+  const conversation = url.searchParams.get('conversation');
+  if (conversation && CHAT_LINK_ID.test(conversation)) return { kind: 'dm', msg, conversation };
+  if (url.searchParams.get('chat') === 'public') {
+    const room = url.searchParams.get('room');
+    return { kind: 'public', msg, room: room && CHAT_LINK_ID.test(room) ? room : null };
+  }
+  return null;
+}
+
+async function fetchPublicChatLine(room, msg) {
+  try {
+    // Read as a guest, which sees the newest stretch of the room (`around`
+    // is for signed-in readers only): a recent line gets its own card, an
+    // older one the room's.
+    const qs = new URLSearchParams({ roomId: room || 'global', limit: '100' });
+    const res = await fetch(`${DEHUB_API}/livechat/messages?${qs}`, {
+      headers: { Accept: 'application/json' },
+      cf: { cacheTtl: 300, cacheEverything: true },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return undefined;
+    const body = await res.json();
+    const list = Array.isArray(body?.messages) ? body.messages : Array.isArray(body?.result?.messages) ? body.result.messages : [];
+    return list.find((m) => m && m.id === msg) || null;
+  } catch {
+    return undefined;
+  }
+}
+
+function chatLineSummary(line) {
+  const text = String(line?.content || '').replace(/\s+/g, ' ').trim();
+  if (text) return text;
+  switch (line?.messageType) {
+    case 'image': return 'Sent a photo';
+    case 'gif': return 'Sent a GIF';
+    case 'audio': return 'Sent a voice note';
+    default: return 'Sent a message';
+  }
+}
+
+export function buildChatMessageLinkHtml(link, line) {
+  const qs = link.kind === 'dm'
+    ? `conversation=${encodeURIComponent(link.conversation)}&msg=${encodeURIComponent(link.msg)}`
+    : `chat=public${link.room ? `&room=${encodeURIComponent(link.room)}` : ''}&msg=${encodeURIComponent(link.msg)}`;
+  const canonicalUrl = `${APP_URL}/app/messages?${qs}`;
+  const breadcrumb = `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/chat">Chat</a>`;
+  if (link.kind === 'dm') {
+    const title = 'A message in a private chat on Riftn';
+    const description = 'Open it on Riftn to read it. Only people in this chat can see it.';
+    return entityHtml({
+      canonicalUrl, title, description, image: shareImage('chat'), noindex: true,
+      heading: title, breadcrumb, bodyHtml: `<p>${escHtml(description)}</p>`,
+      jsonLd: { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonicalUrl },
+    });
+  }
+  const handle = String(line?.sender?.username || '').trim();
+  const name = String(line?.sender?.displayName || '').trim() || (handle ? `@${handle}` : '');
+  const said = line ? truncate(chatLineSummary(line), 180) : '';
+  const title = name ? `${name} in Riftn Public Chat` : 'A message in Riftn Public Chat';
+  const description = said
+    ? `${handle ? `@${handle}: ` : ''}“${said}”`
+    : 'Join the conversation in Riftn Public Chat, open to everyone.';
+  const image = handle && /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}$/.test(handle) ? profileShareImageUrl(handle) : shareImage('chat');
+  return entityHtml({
+    canonicalUrl, title, description, image, noindex: true,
+    heading: title, breadcrumb, bodyHtml: `<p>${escHtml(description)}</p>`,
+    jsonLd: {
+      '@context': 'https://schema.org', '@type': 'DiscussionForumPosting',
+      headline: title, text: said || description, url: canonicalUrl,
+      ...(line?.createdAt ? { datePublished: line.createdAt } : {}),
+      ...(handle ? { author: { '@type': 'Person', name: `@${handle}`, url: `${APP_URL}/${encodeURIComponent(handle)}` } } : {}),
+    },
   });
 }
 
@@ -7320,6 +7409,21 @@ async function handleRequest(request, env, ctx) {
   // that Google needs in order to *see* the noindex, freezing the clones in the
   // index; and `follow` keeps internal link equity flowing to /docs.
   // Static assets already returned above, so they never reach this branch.
+  // A copied chat message link, as a link previewer sees it.
+  const chatLink = chatMessageLinkOf(url);
+  if (chatLink && url.searchParams.get(APP_ESCAPE_PARAM) !== '1' && isCrawlerUa(request.headers.get('User-Agent') || '')) {
+    const line = chatLink.kind === 'public' ? await fetchPublicChatLine(chatLink.room, chatLink.msg) : null;
+    return guard(new Response(buildChatMessageLinkHtml(chatLink, line), {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+        'Vary': 'User-Agent',
+        'X-Robots-Tag': 'noindex, follow',
+      },
+    }));
+  }
+
   if (!shouldServeSSR(pathname)) {
     return noindexShell(await guardNext());
   }

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Image as ImageIcon, Languages, MoreHorizontal, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
+import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Image as ImageIcon, Languages, Link2, MoreHorizontal, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { translateCopy } from '@/i18n/copy';
 import { copyMedia, type CopyMediaKind } from '@/lib/copy-media';
@@ -11,6 +11,7 @@ export const menuIcons = {
   pin: <Pin />,
   unpin: <PinOff />,
   copy: <Copy />,
+  link: <Link2 />,
   copyMedia: <ImageIcon />,
   forward: <CornerUpRight />,
   delete: <Trash2 />,

@@ -88,6 +88,11 @@ import Sparkles from "@/components/ui/cut-icons/assistant";
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
+import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from '@/components/app/chat/ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu } from '@/components/app/chat/message-menu-kit';
+import { useHoldMenu } from '@/hooks/use-hold-menu';
+import { canLinkMessage, copyChatMessageLink, copyLinkLabel, useLinkedMessage } from '@/lib/chat-message-link';
 
 /** "Forever" mutes are stored as a date far in the future rather than as null. */
 const FOREVER_YEAR = 9000;
@@ -986,6 +991,67 @@ export function CommunityChat({ communityId, community, membership, isMember, me
     }
   }, [isAuthenticated, walletAddress, messages, addReaction, removeReaction]);
 
+  // Hold a line on a phone, or right-click it with a mouse: reactions and the
+  // line's actions, Copy link among them.
+  const [held, setHeld] = useState<{ msg: CommunityChatMessage; el: HTMLElement } | null>(null);
+  const [menu, setMenu] = useState<{ msg: CommunityChatMessage; point: { x: number; y: number } } | null>(null);
+  const [menuMounted, setMenuMounted] = useState(false);
+  const hold = useHoldMenu((point, target) => {
+    if (editingId) return false;
+    const el = target.closest<HTMLElement>('[data-cc-msg]');
+    const msg = el ? messages.find((m) => m.id === el.dataset.ccMsg) : undefined;
+    if (!el || !msg || msg.send_state) return false;
+    if (isTouchHold()) { setHeld({ msg, el }); return; }
+    if (keepBrowserMenu(target, el)) return false;
+    setMenuMounted(true);
+    setMenu({ msg, point });
+  });
+  const lineActions = (msg: CommunityChatMessage | undefined, phone: boolean) => {
+    const list: (MessageMenuAction & { prime?: boolean; secondary?: boolean })[] = [];
+    if (!msg) return list;
+    const mine = !!walletAddress && msg.wallet_address?.toLowerCase() === walletAddress.toLowerCase();
+    if (isAuthenticated && isMember) list.push({ key: 'reply', prime: phone, icon: menuIcons.reply, label: t('communities.reply'), onSelect: () => setReplyTo(msg), hint: 'R' });
+    if (msg.content?.trim() && msg.message_type !== 'gif') list.push({
+      key: 'copy', icon: menuIcons.copy,
+      label: phone ? _copy('chatHold.copy', { defaultValue: 'Copy' }) : _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(msg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if (community.slug && canLinkMessage(msg.id)) list.push({
+      key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), hint: 'L',
+      onSelect: () => copyChatMessageLink({ kind: 'community', slug: community.slug }, msg.id),
+    });
+    if (mine && isAuthenticated && isMember && msg.message_type !== 'gif') list.push({ key: 'edit', icon: menuIcons.edit, label: t('communities.edit'), onSelect: () => { setEditingId(msg.id); setEditInitial(msg.content); }, hint: 'E' });
+    if (canPinMessages && isAuthenticated && isMember) list.push({
+      key: 'pin', icon: msg.pinned_at ? menuIcons.unpin : menuIcons.pin,
+      label: msg.pinned_at ? t('communities.chat.unpin', { defaultValue: 'Unpin' }) : t('communities.chat.pin', { defaultValue: 'Pin' }),
+      onSelect: () => void handleSetPinned(msg.id, !msg.pinned_at), hint: 'P',
+    });
+    if (isAuthenticated && isMember) list.push({ key: 'delete', divided: true, destructive: true, secondary: phone, icon: menuIcons.delete, label: t('communities.chat.delete', { defaultValue: 'Delete' }), onSelect: () => setDeleteTarget(msg) });
+    return list;
+  };
+  const reactedByMe = (msg: CommunityChatMessage | undefined) => (msg && walletAddress
+    ? Object.entries(msg.reactions ?? {})
+        .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === walletAddress.toLowerCase()))
+        .map(([emoji]) => emoji)
+    : []);
+
+  // A copied message link to this community's chat: open on that line,
+  // reading the history around it when it is older than what is held.
+  useLinkedMessage(
+    community.slug ? `community:${community.slug.toLowerCase()}` : null,
+    active && !isLoading && messages.length > 0 && readSpot.ready,
+    async (id) => {
+      didInitialScrollRef.current = true;
+      readTrackingRef.current = true;
+      setUnreadAnchor(null);
+      setSearchQuery('');
+      if (!messages.some((m) => m.id === id)) await showMessage(id);
+      setVisibleCount((c) => Math.max(c, messages.length + 50));
+      return true;
+    },
+    (id) => messageRefs.current[id] ?? null,
+  );
+
   const pinnedSenderName = pinnedMessage
     ? pinnedMessage.display_name
       || pinnedMessage.username
@@ -1067,7 +1133,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
               onNewer={() => void openResult(activeHit - 1)}
             />
           )}
-          <div ref={scrollRef} onScroll={handleScroll} className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2 ${showSearchList ? 'invisible' : ''}`}>
+          <div ref={scrollRef} onScroll={handleScroll} className={`absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2 ${showSearchList ? 'invisible' : ''}`} {...hold}>
             {historyError && (
               <button onClick={() => void refreshHistory()} className="mx-3 px-3 py-2 text-sm" role="alert">
                 {t('common.failedToLoad')} — {t('common.retry')}
@@ -1214,6 +1280,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
                   <SwipeReplyRow key={msg.client_key ?? msg.id} onReply={isMember && !msg.send_state ? () => setReplyTo(msg) : undefined}>
                   <div
                     ref={(node) => { messageRefs.current[msg.id] = node; }}
+                    data-cc-msg={msg.id}
                     className={`group relative px-3 py-0.5 rounded-xl transition-shadow duration-300 ${isMine ? 'bg-white/5 py-1' : ''} ${isHighlighted ? 'ring-1 ring-white/30' : ''}`}
                   >
                     {msg.reply_to && (
@@ -1656,6 +1723,28 @@ export function CommunityChat({ communityId, community, membership, isMember, me
         </div>
       )}
 
+      <ChatHoldSheet
+        open={!!held}
+        onOpenChange={(open) => { if (!open) setHeld(null); }}
+        anchor={held?.el ?? null}
+        quickReactions={isAuthenticated && isMember ? QUICK_CHAT_REACTIONS.slice(0, 6) : null}
+        mine={reactedByMe(held?.msg)}
+        onReact={(emoji) => { if (held) handleReact(held.msg.id, emoji); }}
+        actions={lineActions(held?.msg, true).map(({ hint: _hint, divided: _divided, ...a }) => a as ChatHoldAction)}
+        reactors={held?.msg.reactions ? { reactions: held.msg.reactions } : null}
+      />
+      {menuMounted && (
+        <MessageMenu
+          point={menu?.point ?? null}
+          onClose={() => setMenu(null)}
+          quickReactions={isAuthenticated && isMember ? QUICK_CHAT_REACTIONS : null}
+          mine={reactedByMe(menu?.msg)}
+          onReact={(emoji) => { if (menu) handleReact(menu.msg.id, emoji); }}
+          actions={lineActions(menu?.msg, false).map(({ prime: _prime, secondary: _secondary, ...a }) => a)}
+          reactors={menu?.msg.reactions ? { reactions: menu.msg.reactions } : null}
+          meta={menu ? messageMenuMeta(menu.msg.created_at, !!menu.msg.edited_at) : null}
+        />
+      )}
       <DeleteMessageDialog
         open={!!deleteTarget}
         onOpenChange={(open) => { if (!open && !deletePending) setDeleteTarget(null); }}
