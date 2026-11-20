@@ -27,7 +27,7 @@ import Link from "@/components/ui/cut-icons/link";
 import Info from "@/components/ui/cut-icons/information";
 
 import MessageSquare from "@/components/ui/cut-icons/messages";
-import Share2 from "@/components/ui/cut-icons/feedshare";
+import Share2 from "@/components/ui/cut-icons/postshare";
 import Repeat2 from "@/components/ui/cut-icons/repost";
 import Send from "@/components/ui/cut-icons/send";
 
