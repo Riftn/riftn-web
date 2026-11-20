@@ -53,6 +53,7 @@ import { myStagesKeys } from '@/hooks/use-my-stages';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 import { toast } from 'sonner';
+import { profilePath } from '@/lib/profile-path';
 
 function timeAgo(ended?: string | null): string {
   if (!ended) return '';
@@ -147,7 +148,7 @@ export function PastStagesList({
     (space: AudioSpace) => {
       const cleanUsername = space.host_username?.replace('@', '');
       if (cleanUsername) {
-        navigate(`/${cleanUsername}`);
+        navigate(profilePath(cleanUsername));
       } else if (space.host_wallet_address) {
         navigate(`/app/profile?id=${space.host_wallet_address}`);
       }

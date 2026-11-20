@@ -22,13 +22,14 @@ import {
 } from '@/lib/api/dehub/assistant-actions';
 import { POST_REACTIONS, reactionMeta, type PostReaction } from '@/lib/reactions';
 import { cn } from '@/lib/utils';
+import { profilePath } from '@/lib/profile-path';
 
 type Choice = PostReaction | 'fitting';
 
 function Person({ person }: { person: AssistantActionPerson }) {
   const name = person.username ? `@${person.username}` : `${person.address.slice(0, 6)}…`;
   return (
-    <Link to={person.username ? `/${person.username}` : '#'} className="flex items-center gap-2 min-w-0">
+    <Link to={person.username ? profilePath(person.username) : '#'} className="flex items-center gap-2 min-w-0">
       <Avatar className="h-7 w-7 shrink-0">
         {person.avatar && <AvatarImage src={getMediaUrl(person.avatar)} alt="" />}
         <AvatarFallback className="text-[10px] bg-transparent text-current ring-1 ring-current opacity-60">{(person.username || '?').slice(0, 2).toUpperCase()}</AvatarFallback>

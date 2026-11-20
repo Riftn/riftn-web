@@ -31,6 +31,7 @@ import { useReauthHandler } from '@/hooks/use-reauth-handler';
 import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import { useFollowStatuses } from '@/hooks/use-follow-status';
 import { useNewMembers, type NewMember } from '@/hooks/use-new-members';
+import { profilePath } from '@/lib/profile-path';
 
 interface NewMembersListProps {
   /** Extra classes on the scrolling container — the only per-surface difference. */
@@ -92,7 +93,7 @@ export function NewMembersList({ listClassName }: NewMembersListProps) {
    * it has loaded the account.
    */
   const openProfile = useCallback((member: NewMember) => {
-    navigate(`/${member.address}`);
+    navigate(profilePath(member.address));
   }, [navigate]);
 
   const handleFollow = useCallback((e: React.MouseEvent, member: NewMember) => {

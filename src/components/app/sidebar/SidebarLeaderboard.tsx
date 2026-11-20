@@ -30,6 +30,7 @@ import medal7 from '@/assets/medal-7.png';
 import medal8 from '@/assets/medal-8.png';
 import medal9 from '@/assets/medal-9.png';
 import medal10 from '@/assets/medal-10.png';
+import { profilePath } from '@/lib/profile-path';
 
 const PERIODS = ['1D', '1W', '1M', '1Y', 'All'] as const;
 type PeriodLabel = typeof PERIODS[number];
@@ -129,7 +130,7 @@ const PeriodList = memo(function PeriodList({ period, isActive }: { period: Peri
         return (
           <Link
             key={entry.account}
-            to={`/${entry.username}`}
+            to={profilePath(entry.username)}
             aria-label={`${t('leaderboard.rankN', { rank })} · ${displayName}`}
             // The strip's off-screen panels must not be tab stops.
             tabIndex={isActive ? 0 : -1}

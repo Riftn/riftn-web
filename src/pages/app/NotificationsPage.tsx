@@ -95,6 +95,7 @@ import type { FeedItem } from '@/types/feed.types';
 import { reactionMeta, type PostReaction } from '@/lib/reactions';
 import { getNotificationFilterLabel, type NotificationTypeFilter } from '@/lib/notification-filter-labels';
 import { orderNotificationTabKeys } from '@/lib/notification-tab-order';
+import { profilePath } from '@/lib/profile-path';
 
 // ============================================================================
 // NotificationPostCards — fetches full NFT data and renders real feed cards
@@ -631,7 +632,7 @@ function resolveActorAvatarUrl(actor: CanonicalActor, enrichedAvatarsMap?: Map<s
 function resolveActorProfileLink(actor: CanonicalActor, enrichedAvatarsMap?: Map<string, EnrichedAvatar>): string | null {
   const enriched = findActorEnrichment(actor, enrichedAvatarsMap);
   const resolvedHandle = normalizeUsername(actor.resolvedUsername || enriched?.username);
-  if (resolvedHandle && /^[a-z0-9._]+$/.test(resolvedHandle)) return `/${resolvedHandle}`;
+  if (resolvedHandle && /^[a-z0-9._]+$/.test(resolvedHandle)) return profilePath(resolvedHandle);
 
   const safeKey = normalizeUsername(actor.key);
   if (safeKey && /^[a-z0-9._]+$/.test(safeKey)) return `/${safeKey}`;
@@ -1075,9 +1076,9 @@ function getNavigationLink(notification: DeHubNotification): string | null {
     case 'following':
     case 'follow_request_accepted':
       return notification.actorAddress
-        ? `/${notification.actorAddress}`
+        ? profilePath(notification.actorAddress)
         : notification.actorUsername
-          ? `/${notification.actorUsername}`
+          ? profilePath(notification.actorUsername)
           : null;
     case 'follow_request':
       // Follow requests don't navigate — they have inline accept/reject buttons
@@ -1085,9 +1086,9 @@ function getNavigationLink(notification: DeHubNotification): string | null {
     case 'subscription':
     case 'ppv_purchase':
       return notification.actorAddress 
-        ? `/${notification.actorAddress}` 
+        ? profilePath(notification.actorAddress) 
         : notification.actorUsername 
-          ? `/${notification.actorUsername}` 
+          ? profilePath(notification.actorUsername) 
           : '/app/command-centre';
     case 'livestream_start':
     case 'signal_flare':
@@ -1295,9 +1296,9 @@ export const NotificationItem = memo(function NotificationItem({
     : null;
   
   const profileLink = notification.actorAddress 
-    ? `/${notification.actorAddress}` 
+    ? profilePath(notification.actorAddress) 
     : notification.actorUsername 
-      ? `/${notification.actorUsername}` 
+      ? profilePath(notification.actorUsername) 
       : null;
 
   const aggregatedActorNames = (notification as any).latestActorNames as string[] | undefined;
@@ -1387,7 +1388,7 @@ export const NotificationItem = memo(function NotificationItem({
       }, walletAddress || undefined);
     }
     const target = username || address;
-    if (target) navigate(`/${target}`);
+    if (target) navigate(profilePath(target));
   };
 
   const handleClick = () => {

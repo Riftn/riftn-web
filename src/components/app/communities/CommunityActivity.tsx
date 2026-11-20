@@ -41,6 +41,7 @@ import {
   type CommunityRef,
 } from '@/lib/community-notifications';
 import type { DeHubNotification } from '@/lib/api/dehub/notifications';
+import { profilePath } from '@/lib/profile-path';
 
 const PAGE_SIZE = 20;
 
@@ -74,7 +75,7 @@ function ActivityRow({ notification }: { notification: DeHubNotification }) {
   const openRow = () => {
     if (!notification.read) markRead.mutate(notification.id);
     if (isJoin) {
-      if (handle) navigate(`/${handle.replace('@', '')}`);
+      if (handle) navigate(profilePath(handle.replace('@', '')));
       return;
     }
     navigate(communityNotificationPath(communityNotificationRef(notification)));

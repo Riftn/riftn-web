@@ -226,6 +226,7 @@ import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
 import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
 import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
 import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
+import { profilePath } from '@/lib/profile-path';
 
 /**
  * How far a touch may travel and still count as a tap on the player. Matches the
@@ -402,7 +403,7 @@ function MobileCreatorInfo({
   const handleProfileClick = () => {
     if (creatorUsername) {
       const cleanUsername = creatorUsername.replace('@', '');
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }
@@ -3421,7 +3422,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             onClick={(e) => {
               e.stopPropagation();
               const cleanUsername = video.creatorUsername?.replace('@', '');
-              if (cleanUsername) navigate(`/${cleanUsername}`);
+              if (cleanUsername) navigate(profilePath(cleanUsername));
               else if (video.creatorId) navigate(`/app/profile?id=${video.creatorId}`);
             }}
             className="cursor-pointer"

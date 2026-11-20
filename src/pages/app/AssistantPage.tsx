@@ -1,4 +1,5 @@
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useAssistantPrefs } from '@/hooks/use-assistant-prefs';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useAccountDraftKey, useDraftState } from '@/hooks/use-draft-state';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
@@ -84,7 +85,7 @@ import { IMAGE_MODELS, IMAGE_MODEL_OPTIONS, type ImageModelKey } from '@/constan
 import { VOICE_PREFERENCES, VOICE_PREFERENCE_OPTIONS, type VoicePreferenceKey } from '@/constants/voice-models.constants';
 import { ElevenLabsVoicePicker } from '@/components/app/shared/ElevenLabsVoicePicker';
 import { VoiceTrainingDrawer } from '@/components/app/shared/VoiceTrainingDrawer';
-import { CHAT_MODEL_OPTIONS, DEFAULT_CHAT_MODEL, type ChatModelKey } from '@/constants/chat-models.constants';
+import { CHAT_MODEL_OPTIONS, type ChatModelKey } from '@/constants/chat-models.constants';
 import { PostModal } from '@/features/post';
 import { getBadgeName } from '@/lib/staking-badges';
 import { VideoPaywallModal, type VideoGenerationOptions } from '@/components/app/video/VideoPaywallModal';
@@ -465,7 +466,8 @@ function AssistantPageForAccount() {
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [imageLoadStartTime, setImageLoadStartTime] = useState<number>(0);
-  const [selectedStyle, setSelectedStyle] = useState<string>('normal');
+  // Shared with the @assistant DM: one personality and chat model everywhere.
+  const { style: selectedStyle, setStyle: setSelectedStyle, model: selectedChatModel, setModel: setSelectedChatModel } = useAssistantPrefs();
   const [selectedVideoModel, setSelectedVideoModel] = useState<VideoModelKey>('kling-2.6-pro');
   const [selectedImageModel, setSelectedImageModel] = useState<ImageModelKey>('gemini-2.5-flash');
   // Which "what's on your mind" line greets this visit; a new one each time.
@@ -488,7 +490,6 @@ function AssistantPageForAccount() {
     try { return localStorage.getItem('dehub-custom-elevenlabs-key') || ''; } catch { return ''; }
   });
   const [apiKeyInput, setApiKeyInput] = useState('');
-  const [selectedChatModel, setSelectedChatModel] = useState<string>(DEFAULT_CHAT_MODEL);
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const [styleSheetOpen, setStyleSheetOpen] = useState(false);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);

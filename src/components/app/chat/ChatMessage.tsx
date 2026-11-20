@@ -44,6 +44,7 @@ import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival'
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { SendStatus } from './SendStatus';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
+import { profilePath } from '@/lib/profile-path';
 
 /** Avatar with cascading fallback: primary → CDN → initials */
 function ChatAvatar({ src, address, name, className }: { src?: string; address?: string; name: string; className?: string }) {
@@ -312,7 +313,7 @@ export const ChatMessage = memo(function ChatMessage({
   const handleProfileClick = () => {
     if (message.userHandle) {
       seedProfileCache(queryClient, { address: message.userId, username: message.userHandle, displayName: message.userName, avatarUrl: message.userAvatar }, currentUserAddress || undefined);
-      navigate(`/${message.userHandle}`);
+      navigate(profilePath(message.userHandle));
     }
   };
 

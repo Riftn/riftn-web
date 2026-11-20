@@ -100,6 +100,7 @@ import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { toStoryboard } from '@/lib/storyboard';
 import { storedVideoAspect } from '@/lib/video-aspect';
+import { profilePath } from '@/lib/profile-path';
 
 /*
  * The post goes up first; everything below it waits its turn. These were
@@ -707,7 +708,7 @@ function ImmersiveVideoHeader({
   const handleProfileClick = () => {
     if (creatorUsername) {
       const cleanUsername = creatorUsername.replace('@', '');
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }

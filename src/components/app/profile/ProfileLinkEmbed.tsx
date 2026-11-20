@@ -18,6 +18,7 @@ import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 
 import { formatCount as formatShortCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 interface ProfileLinkEmbedProps {
   username: string;
   fallback?: ReactNode;
@@ -62,7 +63,7 @@ export function ProfileLinkEmbed({ username, fallback = null }: ProfileLinkEmbed
     <button
       onClick={(e) => {
         e.stopPropagation();
-        navigate(`/${handle}`);
+        navigate(profilePath(handle));
       }}
       data-no-navigate
       className="w-full flex items-center gap-3 p-3 mt-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-colors text-left relative overflow-hidden"

@@ -22,6 +22,7 @@ import { usePostStage } from './post-stage-context';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { useCoAuthors } from '@/lib/co-author-store';
 import { CoAuthorAvatarBadge, CoAuthorNames } from '@/components/app/cards/CoAuthorByline';
+import { profilePath } from '@/lib/profile-path';
 
 interface StageCreatorRowProps {
   name: string;
@@ -67,7 +68,7 @@ export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance,
   const followers = typeof profile?.followers === 'number' ? profile.followers : undefined;
 
   const openProfile = () => {
-    if (cleanHandle) navigate(`/${cleanHandle}`);
+    if (cleanHandle) navigate(profilePath(cleanHandle));
     else if (creatorId) navigate(`/app/profile?id=${creatorId}`);
   };
 

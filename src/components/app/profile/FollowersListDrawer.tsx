@@ -36,6 +36,7 @@ import { playFollowBackChime } from '@/lib/follow-back-chime';
 import { BadgedName } from '@/components/app/BadgedName';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const MAX_PAGES = 3;
 const PAGE_SIZE = 30;
 const FOLLOWING_CACHE_PAGE_SIZE = 100; // API caps at 100 per page regardless of requested limit
@@ -568,7 +569,7 @@ export function FollowersListDrawer({
   const handleUserClick = (user: UserListItem) => {
     onOpenChange(false);
     if (user.username) {
-      navigate(`/${user.username}`);
+      navigate(profilePath(user.username));
     } else {
       navigate(`/profile?id=${user.address}`);
     }

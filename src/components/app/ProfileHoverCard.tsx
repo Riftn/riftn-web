@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import type { DeHubUser } from '@/lib/api/dehub/types';
 
 import { formatCount as formatShortCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 interface ProfileHoverCardProps {
   /** The wallet address / creator ID */
   creatorId?: string;
@@ -161,7 +162,7 @@ export function ProfileHoverCard({
   const handleNavigate = useCallback(() => {
     const cleanUsername = (profile?.username || creatorUsername)?.replace('@', '');
     if (cleanUsername) {
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }

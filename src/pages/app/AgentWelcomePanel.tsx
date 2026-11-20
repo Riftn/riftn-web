@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Switch } from '@/components/ui/switch';
 import { getAgentWelcomeLog, getAgentWelcomes, setAgentWelcome, type AgentWelcome, type AgentWelcomeList } from '@/lib/api/dehub/agent-welcome';
+import { profilePath } from '@/lib/profile-path';
 
 const AGENT_WELCOMES_KEY = ['agent-welcomes'] as const;
 
@@ -82,7 +83,7 @@ export function AgentWelcomePanel({ agentName }: { agentName: string }) {
           <span className="text-white/60">{new Date(entry.at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · </span>
           {t(`agents.welcome.${entry.status === 'done' ? entry.kind === 'follow' ? 'followed' : 'messaged' : entry.status}`)}{' '}
           {entry.target.username
-            ? <Link to={`/${encodeURIComponent(entry.target.username)}`} className="hover:underline">@{entry.target.username}</Link>
+            ? <Link to={profilePath(encodeURIComponent(entry.target.username))} className="hover:underline">@{entry.target.username}</Link>
             : entry.target.address.slice(0, 8)}
           {entry.reason && <span className="text-white/60"> · {entry.reason}</span>}
         </li>)}

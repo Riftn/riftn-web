@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { coAuthorName, type CoAuthorUser } from '@/lib/co-author-store';
 import { cn } from '@/lib/utils';
+import { profilePath } from '@/lib/profile-path';
 
 export function coAuthorAvatarUrl(user: CoAuthorUser): string | undefined {
   if (!user.avatarImageUrl) return undefined;
@@ -47,7 +48,7 @@ export function CoAuthorNames({ users, nameClassName }: { users: CoAuthorUser[];
   const open = (event: React.MouseEvent, user: CoAuthorUser) => {
     event.stopPropagation();
     event.preventDefault();
-    navigate(`/${user.username || user.address}`);
+    navigate(profilePath(user.username || user.address));
   };
   return (
     <span className="inline-flex items-baseline gap-1 min-w-0 shrink" data-co-authors>
