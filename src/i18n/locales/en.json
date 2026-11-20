@@ -8697,6 +8697,7 @@
     "dubbed": "Dubbed audio",
     "preparing": "Preparing dubbed audio…",
     "unavailable": "Dubbed audio is not available for this video.",
+    "creatorVoiceSoon": "Your device's voice for now. The creator's own voice is being prepared.",
     "notEnoughTokens": "Not enough tokens for dubbing.",
     "notEnoughTokensDescription": "You need about {{needed}} tokens and hold {{held}}.",
     "paymentLeftWallet": "Your tokens have left your wallet. Press Pay again to retry confirming it.",

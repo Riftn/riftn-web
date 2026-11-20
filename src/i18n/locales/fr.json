@@ -8737,6 +8737,7 @@
     "dubbed": "Audio doublé",
     "preparing": "Préparation du doublage audio…",
     "unavailable": "Le doublage audio n'est pas disponible pour cette vidéo.",
+    "creatorVoiceSoon": "Pour l'instant, la voix de votre appareil. La voix du créateur est en préparation.",
     "notEnoughTokens": "Jetons insuffisants pour le doublage.",
     "notEnoughTokensDescription": "Vous avez besoin d'environ {{needed}} jetons et vous en possédez {{held}}.",
     "paymentLeftWallet": "Vos jetons ont quitté votre portefeuille. Appuyez à nouveau sur Payer pour réessayer de les confirmer.",

@@ -8733,6 +8733,7 @@
     "dubbed": "Audio doblado",
     "preparing": "Preparando audio doblado...",
     "unavailable": "El audio doblado no está disponible para este vídeo.",
+    "creatorVoiceSoon": "Por ahora, la voz de tu dispositivo. Se está preparando la voz del creador.",
     "notEnoughTokens": "Tokens insuficientes para doblaje.",
     "notEnoughTokensDescription": "Necesitas aproximadamente {{needed}} tokens y tienes {{held}}.",
     "paymentLeftWallet": "Tus tokens han salido de tu billetera. Presiona Pagar de nuevo para intentar confirmar.",
