@@ -2213,7 +2213,7 @@
     "promptDevice": "Prietaisų & OS (klaidų atveju)",
     "deviceInfoNoErrors": "Nėra",
     "promptFilters": "Rodyti pagal kategoriją",
-    "promptMediaError": "Pasirinkite nuotraukas arba vaizdo įrašus iki 50 MB kiekio.",
+    "promptMediaError": "Pasirinkite nuotraukas arba vaizdo įrašus iki 200 MB kiekio.",
     "promptMediaLimit": "Kol kas {{max}} pridėti failai.",
     "removePromptAttachment": "Panaikinkite {{name}}",
     "promptAttachment": "Pridėti {{number}}",

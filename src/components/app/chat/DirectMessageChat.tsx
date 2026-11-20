@@ -1,6 +1,6 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useSwipeReply } from '@/hooks/use-swipe-reply';
-import { dblClickReply } from '@/lib/dblclick-reply';
+import { dblClickReply, touchDoubleTap } from '@/lib/dblclick-reply';
 import { useTranslation as _useCopy, Trans } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
@@ -910,6 +910,11 @@ const MessageBubble = memo(function MessageBubble({
       data-msg-picked={selecting && pickable ? (picked ? 'true' : 'false') : undefined}
       data-msg-menu-open={menuPoint.point ? '' : undefined}
       {...hold.handlers}
+      // Phone: double tap someone else's message to heart it (adds only).
+      onPointerUp={(e) => {
+        hold.handlers.onPointerUp?.(e);
+        touchDoubleTap(e, message._id, !selecting && reactable && !isOwnMessage && !message.isDeleted && !myReactions.includes('❤️') && (() => onReact?.(message._id, '❤️')));
+      }}
       onContextMenu={(e) => {
         hold.handlers.onContextMenu?.(e);
         if (e.defaultPrevented || selecting || !menuable || isTouchHold()) return;

@@ -2470,7 +2470,7 @@
     "promptDevice": "Peranti & OS (untuk pepijat)",
     "deviceInfoNoErrors": "Tiada",
     "promptFilters": "Tapis mengikut kategori",
-    "promptMediaError": "Pilih imej atau video di bawah 50MB setiap satu.",
+    "promptMediaError": "Pilih imej atau video di bawah 200MB setiap satu.",
     "promptMediaLimit": "Sehingga {{max}} lampiran.",
     "removePromptAttachment": "Buang {{name}}",
     "promptAttachment": "Lampiran {{number}}",

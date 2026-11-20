@@ -2213,7 +2213,7 @@
     "promptDevice": "ਜੰਤਰ & OS (ਬੱਗ ਲਈ)",
     "deviceInfoNoErrors": "ਕੋਈ ਨਹੀਂ",
     "promptFilters": "ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
-    "promptMediaError": "ਹਰੇਕ 50MB ਦੇ ਅਧੀਨ ਚਿੱਤਰ ਜਾਂ ਵੀਡੀਓ ਦੀ ਚੋਣ ਕਰੋ.",
+    "promptMediaError": "ਹਰੇਕ 200MB ਦੇ ਅਧੀਨ ਚਿੱਤਰ ਜਾਂ ਵੀਡੀਓ ਦੀ ਚੋਣ ਕਰੋ.",
     "promptMediaLimit": "{{max}} ਅਟੈਚਮੈਂਟਸ ਤੱਕ.",
     "removePromptAttachment": "{{name}} ਨੂੰ ਹਟਾਓ",
     "promptAttachment": "ਅਟੈਚਮੈਂਟ {{number}}",

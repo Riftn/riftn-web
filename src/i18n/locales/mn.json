@@ -2213,7 +2213,7 @@
     "promptDevice": "Төхөөрөмж ба үйлдлийн систем (алдааны хувьд)",
     "deviceInfoNoErrors": "Одоогоор байхгүй",
     "promptFilters": "Ангиллаар шүүх",
-    "promptMediaError": "Тус бүр нь 50МБ-аас доош хэмжээтэй зураг эсвэл видео сонгоно уу.",
+    "promptMediaError": "Тус бүр нь 200МБ-аас доош хэмжээтэй зураг эсвэл видео сонгоно уу.",
     "promptMediaLimit": "{{max}} хүртэлх хавсралт.",
     "removePromptAttachment": "{{name}}-г устгах",
     "promptAttachment": "Хавсралт {{number}}",

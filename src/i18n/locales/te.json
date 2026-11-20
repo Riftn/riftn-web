@@ -2213,7 +2213,7 @@
     "promptDevice": "పరికరం & OS (దోషాల కొరకు)",
     "deviceInfoNoErrors": "ఏదీ లేదు",
     "promptFilters": "కేటగిరీ వారీగా ఫిల్టర్ చేయండి",
-    "promptMediaError": "ఒక్కొక్కటి 50MB లోపు చిత్రాలు లేదా వీడియోలను ఎంచుకోండి.",
+    "promptMediaError": "ఒక్కొక్కటి 200MB లోపు చిత్రాలు లేదా వీడియోలను ఎంచుకోండి.",
     "promptMediaLimit": "{{max}} జోడింపుల వరకు.",
     "removePromptAttachment": "{{name}} ను తొలగించండి",
     "promptAttachment": "అటాచ్ ‌ మెంట్ {{number}}",

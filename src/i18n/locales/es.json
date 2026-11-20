@@ -2321,7 +2321,7 @@
     "deviceInfoErrors": "Errores recientes",
     "deviceInfoNoErrors": "Ninguno",
     "promptFilters": "Filtrar por categoría",
-    "promptMediaError": "Elige imágenes o vídeos de menos de 50 MB cada uno.",
+    "promptMediaError": "Elige imágenes o vídeos de menos de 200 MB cada uno.",
     "promptMediaLimit": "Hasta {{max}} archivos adjuntos.",
     "removePromptAttachment": "Eliminar {{name}}",
     "promptAttachment": "Archivo adjunto {{number}}",

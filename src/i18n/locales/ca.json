@@ -2206,7 +2206,7 @@
     "promptDevice": "Dispositiu i sistema operatiu (per errors)",
     "deviceInfoNoErrors": "Cap",
     "promptFilters": "Filtra per categoria",
-    "promptMediaError": "Selecciona imatges o vídeos de menys de 20MB cadascun.",
+    "promptMediaError": "Selecciona imatges o vídeos de menys de 200MB cadascun.",
     "promptMediaLimit": "Fins a {{max}} adjunts.",
     "removePromptAttachment": "Elimina {{name}}",
     "promptAttachment": "Adjunt {{number}}",

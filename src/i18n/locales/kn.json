@@ -2213,7 +2213,7 @@
     "promptDevice": "ಸಾಧನ ಮತ್ತು OS (ದೋಷಗಳಿಗಾಗಿ)",
     "deviceInfoNoErrors": "ಯಾವುದೂ ಇಲ್ಲ",
     "promptFilters": "ವರ್ಗದ ಪ್ರಕಾರ ಫಿಲ್ಟರ್ ಮಾಡಿ",
-    "promptMediaError": "ಪ್ರತಿ 50MB ಕ್ಕಿಂತ ಕಡಿಮೆ ಗಾತ್ರದ ಚಿತ್ರಗಳು ಅಥವಾ ವೀಡಿಯೊಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "promptMediaError": "ಪ್ರತಿ 200MB ಕ್ಕಿಂತ ಕಡಿಮೆ ಗಾತ್ರದ ಚಿತ್ರಗಳು ಅಥವಾ ವೀಡಿಯೊಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
     "promptMediaLimit": "{{max}} ಲಗತ್ತುಗಳವರೆಗೆ.",
     "removePromptAttachment": "{{name}} ತೆಗೆದುಹಾಕಿ",
     "promptAttachment": "ಲಗತ್ತು {{number}}",

@@ -2214,7 +2214,7 @@
     "promptDevice": "Dispositivo e sistema operativo (per bug)",
     "deviceInfoNoErrors": "Nessuno",
     "promptFilters": "Filtra per categoria",
-    "promptMediaError": "Scegli immagini o video di dimensioni inferiori a 50 MB ciascuno.",
+    "promptMediaError": "Scegli immagini o video di dimensioni inferiori a 200 MB ciascuno.",
     "promptMediaLimit": "Fino a {{max}} allegati.",
     "removePromptAttachment": "Rimuovi {{name}}",
     "promptAttachment": "Allegato {{number}}",

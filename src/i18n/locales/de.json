@@ -2207,7 +2207,7 @@
     "promptDevice": "Gerät & Betriebssystem (für Fehler)",
     "deviceInfoNoErrors": "Keine",
     "promptFilters": "Nach Kategorie filtern",
-    "promptMediaError": "Wählen Sie Bilder oder Videos bis 50 MB.",
+    "promptMediaError": "Wählen Sie Bilder oder Videos bis 200 MB.",
     "promptMediaLimit": "Bis zu {{max}} Anhänge.",
     "removePromptAttachment": "Entfernen Sie {{name}}",
     "promptAttachment": "Anhang {{number}}",

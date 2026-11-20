@@ -2213,7 +2213,7 @@
     "promptDevice": "Enhet og operativsystem (for feil)",
     "deviceInfoNoErrors": "Ingen",
     "promptFilters": "Filtrer etter kategori",
-    "promptMediaError": "Velg bilder eller videoer under 50 MB hver.",
+    "promptMediaError": "Velg bilder eller videoer under 200 MB hver.",
     "promptMediaLimit": "Opptil {{max}} vedlegg.",
     "removePromptAttachment": "Fjern {{name}}",
     "promptAttachment": "Vedlegg {{number}}",

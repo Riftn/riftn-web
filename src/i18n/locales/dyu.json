@@ -2213,7 +2213,7 @@
     "promptDevice": "Fɛn ni OS (buguw fɛ)",
     "deviceInfoNoErrors": "Mɔgɔ si tɛ yen",
     "promptFilters": "Sɛgɛn kɛ kulu fɛ",
-    "promptMediaError": "Sɛbɛnniw walima wideow minw tɛ 50MB tɛmɛ.",
+    "promptMediaError": "Sɛbɛnniw walima wideow minw tɛ 200MB tɛmɛ.",
     "promptMediaLimit": "Hali {{max}} kɔnɔfɛn.",
     "removePromptAttachment": "Ka {{name}} bɔ",
     "promptAttachment": "Kɔnɔfɛn {{number}}",

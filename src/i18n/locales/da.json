@@ -2213,7 +2213,7 @@
     "promptDevice": "Enhed & OS (til fejl)",
     "deviceInfoNoErrors": "Ingen",
     "promptFilters": "Filtrer efter kategori",
-    "promptMediaError": "Vælg billeder eller videoer under 50 MB hver.",
+    "promptMediaError": "Vælg billeder eller videoer under 200 MB hver.",
     "promptMediaLimit": "Op til {{max}} vedhæftede filer.",
     "removePromptAttachment": "Fjern {{name}}",
     "promptAttachment": "Vedhæftet fil {{number}}",

@@ -2231,7 +2231,7 @@
     "promptDevice": "მოწყობილობა & OS (შეცდომებისთვის)",
     "deviceInfoNoErrors": "არცერთი",
     "promptFilters": "კატეგორიის მიხედვით გაფილტვრა",
-    "promptMediaError": "აირჩიეთ 50 მბ ‑ ზე ნაკლები ზომის სურათები ან ვიდეორგოლები.",
+    "promptMediaError": "აირჩიეთ 200 მბ ‑ ზე ნაკლები ზომის სურათები ან ვიდეორგოლები.",
     "promptMediaLimit": "მაქსიმუმ {{max}} დანართი.",
     "removePromptAttachment": "წაშლა {{name}}",
     "promptAttachment": "დანართი {{number}}",

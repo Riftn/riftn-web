@@ -2213,7 +2213,7 @@
     "promptDevice": "Խցիկ եւ ՕՍ (սխալների համար)",
     "deviceInfoNoErrors": "Ոչինչ",
     "promptFilters": "Զտել ըստ կատեգորիայի",
-    "promptMediaError": "Ընտրեք 50 ՄԲ - ից ցածր պատկերներ կամ տեսանյութեր ։",
+    "promptMediaError": "Ընտրեք 200 ՄԲ - ից ցածր պատկերներ կամ տեսանյութեր ։",
     "promptMediaLimit": "Մինչև {{max}} կցորդ։",
     "removePromptAttachment": "Հեռացնել {{name}}",
     "promptAttachment": "Կցորդ {{number}}",

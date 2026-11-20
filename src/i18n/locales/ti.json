@@ -2213,7 +2213,7 @@
     "promptDevice": "መሳርሒታትን ኦኤስታትን (ብጉልበት)",
     "deviceInfoNoErrors": "ወላሓደ",
     "promptFilters": "ብመደብ ኣጣሪ",
-    "promptMediaError": "ምስሊ ወይ ቪድዮ ትሕቲ 50 ሜባ ንነፍሲ ወከፍ ሕረጽ ።",
+    "promptMediaError": "ምስሊ ወይ ቪድዮ ትሕቲ 200 ሜባ ንነፍሲ ወከፍ ሕረጽ ።",
     "promptMediaLimit": "ክሳብ {{max}} መተሓሓዚታት።",
     "removePromptAttachment": "ኣልግስ {{name}}",
     "promptAttachment": "መተሓሓዚ {{number}}",

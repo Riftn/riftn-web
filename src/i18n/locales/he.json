@@ -2214,7 +2214,7 @@
     "promptDevice": "התקן ומערכת הפעלה (לבאגים)",
     "deviceInfoNoErrors": "אין",
     "promptFilters": "סינון לפי קטגוריה",
-    "promptMediaError": "יש לבחור תמונות או סרטונים בגודל של פחות מ -50MB כל אחד.",
+    "promptMediaError": "יש לבחור תמונות או סרטונים בגודל של פחות מ -200MB כל אחד.",
     "promptMediaLimit": "עד {{max}} קבצים מצורפים.",
     "removePromptAttachment": "הסרה של {{name}}",
     "promptAttachment": "קובץ מצורף {{number}}",

@@ -2213,7 +2213,7 @@
     "promptDevice": "ڈیوائس اور OS (غلطیوں کے لئے)",
     "deviceInfoNoErrors": "کوئی نہیں",
     "promptFilters": "فیلٹر کرے کیٹگوری پر",
-    "promptMediaError": "عکس یا وڈیو 50MB سے کم سائز والی چونئو۔",
+    "promptMediaError": "عکس یا وڈیو 200MB سے کم سائز والی چونئو۔",
     "promptMediaLimit": "{{max}} ٹھیکات تک",
     "removePromptAttachment": "ہٹا دیے {{name}}",
     "promptAttachment": "ٹھیکہ {{number}}",

@@ -2213,7 +2213,7 @@
     "promptDevice": "መሣሪያ እና ኦኤስ (ለሳንካዎች)",
     "deviceInfoNoErrors": "ምንም",
     "promptFilters": "በምድብ አጣራ",
-    "promptMediaError": "እያንዳንዳቸው ከ 50 ሜባ በታች ምስሎችን ወይም ቪዲዮዎችን ይምረጡ ።",
+    "promptMediaError": "እያንዳንዳቸው ከ 200 ሜባ በታች ምስሎችን ወይም ቪዲዮዎችን ይምረጡ ።",
     "promptMediaLimit": "እስከ {{max}} አባሪዎች።",
     "removePromptAttachment": "{{name}} አስወግድ",
     "promptAttachment": "አባሪ {{number}}",

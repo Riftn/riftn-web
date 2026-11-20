@@ -2213,7 +2213,7 @@
     "promptDevice": "Түзмөк & ОС (каталар үчүн)",
     "deviceInfoNoErrors": "Эч бири",
     "promptFilters": "Категория боюнча чыпкалоо",
-    "promptMediaError": "50MB ар бир астында сүрөттөрдү же Videos тандоо.",
+    "promptMediaError": "200MB ар бир астында сүрөттөрдү же Videos тандоо.",
     "promptMediaLimit": "{{max}} тиркемелерине чейин.",
     "removePromptAttachment": "Өчүрүү {{name}}",
     "promptAttachment": "Тиркеме {{number}}",

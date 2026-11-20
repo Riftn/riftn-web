@@ -2213,7 +2213,7 @@
     "promptDevice": "Уређај и ОС (за грешке)",
     "deviceInfoNoErrors": "Ниједно",
     "promptFilters": "Филтер по категорији",
-    "promptMediaError": "Изаберите слике или видеозаписе до 50МБ по сваком.",
+    "promptMediaError": "Изаберите слике или видеозаписе до 200МБ по сваком.",
     "promptMediaLimit": "До {{max}} прикажене датотеке.",
     "removePromptAttachment": "Уклони {{name}}",
     "promptAttachment": "Датотека {{number}}",

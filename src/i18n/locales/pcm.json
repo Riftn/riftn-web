@@ -2207,7 +2207,7 @@
     "promptDevice": "Device & OS (for bug)",
     "deviceInfoNoErrors": "Nothing",
     "promptFilters": "Filter by category",
-    "promptMediaError": "Choose image or video wey dey less than 50MB.",
+    "promptMediaError": "Choose image or video wey dey less than 200MB.",
     "promptMediaLimit": "Up to {{max}} attachments.",
     "removePromptAttachment": "Remove {{name}}",
     "promptAttachment": "Attachment {{number}}",

@@ -2213,7 +2213,7 @@
     "promptDevice": "उपकरण एवं ओएस (बग के लिए)",
     "deviceInfoNoErrors": "कोई नहीं",
     "promptFilters": "वर्ग से फ़िल्टर करें",
-    "promptMediaError": "प्रत्येक 20MB से कम के चित्र या वीडियो का चयन करें।",
+    "promptMediaError": "प्रत्येक 200MB से कम के चित्र या वीडियो का चयन करें।",
     "promptMediaLimit": "{{max}} संलग्नक तक।",
     "removePromptAttachment": "{{name}} को हटाएँ",
     "promptAttachment": "संलग्नक {{number}}",

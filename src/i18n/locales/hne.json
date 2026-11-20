@@ -2213,7 +2213,7 @@
     "promptDevice": "कंप्यूटर आणि ऑपरेटिंग सिस्टम (बग्स के लिए)",
     "deviceInfoNoErrors": "कोई नहीं",
     "promptFilters": "स्रेनी से छनइया करव",
-    "promptMediaError": "20MB ले कम के चित्र या वीडियो चुनव ।",
+    "promptMediaError": "200MB ले कम के चित्र या वीडियो चुनव ।",
     "promptMediaLimit": "{{max}} attachments तक पहुंचें ।",
     "removePromptAttachment": "मेटाव {{name}} action:inmenu",
     "promptAttachment": "संलग्नक {{number}}",

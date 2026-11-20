@@ -2213,7 +2213,7 @@
     "promptDevice": "裝置與作業系統（用於錯誤）",
     "deviceInfoNoErrors": "無",
     "promptFilters": "按類別篩選",
-    "promptMediaError": "選擇每個小於50MB的圖片或影片。",
+    "promptMediaError": "選擇每個小於200MB的圖片或影片。",
     "promptMediaLimit": "最多 {{max}} 個附件。",
     "removePromptAttachment": "移除 {{name}}",
     "promptAttachment": "附件 {{number}}",

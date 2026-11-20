@@ -2226,7 +2226,7 @@
     "promptDevice": "စက် & OS (ချို့ယွင်းမှုများအတွက်)",
     "deviceInfoNoErrors": "မရှိပါ",
     "promptFilters": "အမျိုးအစားအလိုက် စစ်ထုတ်ရန်",
-    "promptMediaError": "တစ်ခုချင်းစီကို 50MB အောက်ရှိပုံများသို့မဟုတ်ဗွီဒီယိုများကိုရွေးချယ်ပါ ။",
+    "promptMediaError": "တစ်ခုချင်းစီကို 200MB အောက်ရှိပုံများသို့မဟုတ်ဗွီဒီယိုများကိုရွေးချယ်ပါ ။",
     "promptMediaLimit": "{{max}} attachments သို့သွားပါ ။",
     "removePromptAttachment": "{{name}} ကို ဖယ်ရှားပါ",
     "promptAttachment": "တွဲဖက်မှု {{number}}",

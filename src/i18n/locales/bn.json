@@ -2214,7 +2214,7 @@
     "promptDevice": "ডিভাইস এবং ওএস (বাগগুলির জন্য)",
     "deviceInfoNoErrors": "কোনটিই নয়",
     "promptFilters": "বিভাগ অনুসারে ফিল্টার করুন",
-    "promptMediaError": "প্রতিটি 50MB এর নিচে ছবি বা ভিডিও বেছে নিন ।",
+    "promptMediaError": "প্রতিটি 200MB এর নিচে ছবি বা ভিডিও বেছে নিন ।",
     "promptMediaLimit": "পর্যন্ত {{max}} সংযোগস্থাপন।",
     "removePromptAttachment": "{{name}} অপসারণ করুন",
     "promptAttachment": "সংযুক্তি {{number}}",

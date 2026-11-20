@@ -2213,7 +2213,7 @@
     "promptDevice": "சாதனம் & OS (பிழைகளுக்கு)",
     "deviceInfoNoErrors": "எதுவுமில்லை",
     "promptFilters": "பகுப்பு மூலம் தேர்வு செய்யுங்கள்",
-    "promptMediaError": "ஒவ்வொன்றும் 50MB க்கு கீழ் உள்ள படங்கள் அல்லது வீடியோக்களைத் தேர்ந்தெடுக்கவும்.",
+    "promptMediaError": "ஒவ்வொன்றும் 200MB க்கு கீழ் உள்ள படங்கள் அல்லது வீடியோக்களைத் தேர்ந்தெடுக்கவும்.",
     "promptMediaLimit": "சேர்க்கப்பட்ட பதிவுகள் {{max}}",
     "removePromptAttachment": "நீக்கு {{name}}",
     "promptAttachment": "பதிவு {{number}}",

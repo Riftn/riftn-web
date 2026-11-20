@@ -2213,7 +2213,7 @@
     "promptDevice": "الجهاز و النظام (للتعديل على الأخطاء)",
     "deviceInfoNoErrors": "لا شيء",
     "promptFilters": "حسناً",
-    "promptMediaError": "اختر الصور أو الفيديوهات تحت 50 ميجابايت كل واحدة.",
+    "promptMediaError": "اختر الصور أو الفيديوهات تحت 200 ميجابايت كل واحدة.",
     "promptMediaLimit": "لحد {{max}} مرفق.",
     "removePromptAttachment": "إزالة {{name}}",
     "promptAttachment": "المرفق {{number}}",

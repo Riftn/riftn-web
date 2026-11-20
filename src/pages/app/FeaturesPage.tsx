@@ -35,6 +35,7 @@ import NotFeasibleIcon from "@/components/ui/cut-icons/blocked";
 import Search from "@/components/ui/cut-icons/search";
 import Plus from "@/components/ui/cut-icons/add";
 import X from "@/components/ui/cut-icons/close";
+import FullscreenIcon from "@/components/ui/cut-icons/fullscreen";
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
 
 import featuresLightbulb from '@/assets/features-lightbulb.png';
@@ -181,6 +182,39 @@ function LazyAttachmentImage({ url }: { url: string }) {
   );
 }
 
+/**
+ * A video on a request. Small tiles are hard to watch, so the corner button
+ * (or a double tap) opens it full screen, iPhone Safari included.
+ */
+function FeatureVideo({ url, className }: { url: string; className: string }) {
+  const { t: _copy } = _useCopy();
+  const ref = useRef<HTMLVideoElement>(null);
+  const enlarge = useCallback(() => {
+    const video = ref.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
+    if (!video) return;
+    const play = () => { video.play().catch(() => {}); };
+    if (typeof video.requestFullscreen === 'function') {
+      video.requestFullscreen().then(play).catch(() => { try { video.webkitEnterFullscreen?.(); play(); } catch { /* noop */ } });
+    } else {
+      try { video.webkitEnterFullscreen?.(); play(); } catch { /* noop */ }
+    }
+  }, []);
+  return (
+    <div className="relative w-full h-full">
+      <video ref={ref} src={url} className={className} controls playsInline preload="metadata" onDoubleClick={enlarge} />
+      <button
+        type="button"
+        onClick={enlarge}
+        aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+        data-keep-dark
+        className="absolute top-1.5 right-1.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md"
+      >
+        <FullscreenIcon className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
   const { t: _copy } = _useCopy();
   const urls = featureAttachments(feature);
@@ -191,7 +225,7 @@ function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
     return (
       <div data-media-full className="rounded-xl overflow-hidden border border-white/10">
         {isVideoAttachment(url) ? (
-          <video src={url} className="w-full max-h-64 object-contain bg-black" controls />
+          <FeatureVideo url={url} className="w-full max-h-64 object-contain bg-black" />
         ) : (
           <LazyAttachmentImage url={url} />
         )}
@@ -204,7 +238,7 @@ function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
       {urls.map((url, index) => (
         <div key={url} className="rounded-xl overflow-hidden border border-white/10 aspect-video bg-black/30">
           {isVideoAttachment(url) ? (
-            <video src={url} className="w-full h-full object-cover" controls preload="metadata" />
+            <FeatureVideo url={url} className="w-full h-full object-cover" />
           ) : (
             <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
               <img
@@ -358,7 +392,7 @@ function FeatureCard({
     const accepted = valid.slice(0, room);
     setEditNew(prev => [...prev, ...accepted.map(file => ({ file, preview: URL.createObjectURL(file) }))]);
     setEditMediaError(valid.length < picked.length
-      ? t('features.promptMediaError', 'Choose images or videos under 50MB each.')
+      ? t('features.promptMediaError', 'Choose images or videos under 200MB each.')
       : accepted.length < picked.length
         ? t('features.promptMediaLimit', 'Up to {{max}} attachments.', { max: MAX_FEATURE_ATTACHMENTS }) : '');
   };
@@ -753,7 +787,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
     const accepted = valid.slice(0, room);
     setAttachments(prev => [...prev, ...accepted.map(file => ({ file, preview: URL.createObjectURL(file) }))]);
     setError(valid.length < picked.length
-      ? t('features.promptMediaError', 'Choose images or videos under 50MB each.')
+      ? t('features.promptMediaError', 'Choose images or videos under 200MB each.')
       : accepted.length < picked.length
         ? t('features.promptMediaLimit', 'Up to {{max}} attachments.', { max: MAX_FEATURE_ATTACHMENTS }) : '');
   };

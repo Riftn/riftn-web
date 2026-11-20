@@ -2231,7 +2231,7 @@
     "promptDevice": "Qurilma va operatsion tizim (xatoliklar uchun)",
     "deviceInfoNoErrors": "Yo'q",
     "promptFilters": "Kategoriya bo&#39;yicha filtrlash",
-    "promptMediaError": "Har biri 50 MB dan kam rasm yoki videolarni tanlang.",
+    "promptMediaError": "Har biri 200 MB dan kam rasm yoki videolarni tanlang.",
     "promptMediaLimit": "{{max}} gacha qo&#39;shimchalar.",
     "removePromptAttachment": "{{name}} ni olib tashlang",
     "promptAttachment": "Ilova {{number}}",

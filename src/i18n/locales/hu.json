@@ -2213,7 +2213,7 @@
     "promptDevice": "Eszköz & OS (hibák esetén)",
     "deviceInfoNoErrors": "Egyik sem",
     "promptFilters": "Szűrés kategóriák szerint",
-    "promptMediaError": "Válassz képeket vagy videókat, amelyek max. 20MB-nál kisebbek.",
+    "promptMediaError": "Válassz képeket vagy videókat, amelyek max. 200MB-nál kisebbek.",
     "promptMediaLimit": "Max. {{max}} melléklet.",
     "removePromptAttachment": "Távolítsd el {{name}}",
     "promptAttachment": "Melléklet {{number}}",

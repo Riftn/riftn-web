@@ -2213,7 +2213,7 @@
     "promptDevice": "اوزار ۽ او ايس (بگ لاءِ)",
     "deviceInfoNoErrors": "ڪو به نه",
     "promptFilters": "زمري موجب فلٽر ڪريو",
-    "promptMediaError": "هر 50MB کان گهٽ تصويرون يا وڊيوز چونڊيو.",
+    "promptMediaError": "هر 200MB کان گهٽ تصويرون يا وڊيوز چونڊيو.",
     "promptMediaLimit": "وڌ ۾ وڌ {{max}} منسلڪات.",
     "removePromptAttachment": "{{name}} هٽايو",
     "promptAttachment": "منسلڪ {{number}}",
