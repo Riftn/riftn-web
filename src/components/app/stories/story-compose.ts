@@ -29,7 +29,7 @@ export interface TextLayer {
 
 export const TEXT_COLORS = ['#ffffff', '#000000', '#ff5c7a', '#ffb34d', '#ffe14d', '#5ce08a', '#4dc3ff', '#a391fc'];
 
-const FONT = '700 {size}px Inter, "SF Pro Display", system-ui, -apple-system, sans-serif';
+const FONT = '700 {size}px Inter, "SF Pro Display", system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 function boxColor(color: string): string {
   return color.toLowerCase() === '#ffffff' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.92)';
