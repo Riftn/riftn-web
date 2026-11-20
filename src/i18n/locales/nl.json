@@ -21267,5 +21267,9 @@
     "promptCatchUp": "Praat me bij over wat {{handle}} onlangs heeft gepost",
     "promptMessage": "Help me een bericht te schrijven aan {{handle}}",
     "promptAbout": "Over {{handle}}: {{question}}"
+  },
+  "chatLink": {
+    "gone": "Dat bericht is verwijderd of is te oud om te openen.",
+    "notInChat": "Die link is van een privéchat waar je niet in zit."
   }
 }

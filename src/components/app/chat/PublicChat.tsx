@@ -46,6 +46,7 @@ import { AppState } from '@/components/app/AppState';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
 import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
+import { canLinkMessage, copyChatMessageLink, peekPendingChatLink, useLinkedMessage } from '@/lib/chat-message-link';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { ChatSearchBar, ChatSearchPanel, ChatSearchPill, rememberChatSearch, useChatSearch, type ChatSearchPerson } from './ChatSearch';
 import {
@@ -181,11 +182,14 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Auto-select the first room once loaded
+  // Auto-select the first room once loaded, or the room a copied message
+  // link names.
   useEffect(() => {
-    if (rooms.length > 0 && !selectedRoomId) {
-      setSelectedRoomId(rooms[0].id);
-    }
+    if (!rooms.length) return;
+    const linked = peekPendingChatLink('public')?.target;
+    const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
+    if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
+    else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
   }, [rooms, selectedRoomId]);
 
   const {
@@ -354,6 +358,28 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     if (found) focusRow(hit.id);
     else toast.error(_copy('chatSearch.gone', { defaultValue: 'That message is no longer here' }));
   }, [jumping, search, searchText, jumpTo, focusRow, _copy]);
+
+  // A copied message link: open the room on that line and light it up.
+  const linkedTarget = peekPendingChatLink('public')?.target;
+  const linkedRoomId = linkedTarget?.kind === 'public' ? linkedTarget.roomId : null;
+  const linkRoomReady = !!selectedRoomId && (!linkedRoomId || linkedRoomId === selectedRoomId || !rooms.some((r) => r.id === linkedRoomId));
+  useLinkedMessage(
+    'public',
+    linkRoomReady && !messagesLoading && messages.length > 0,
+    async (id) => {
+      followLatest.current = false;
+      if (selectedRoomId) readDecidedRoom.current = selectedRoomId;
+      readTrackingRef.current = true;
+      setUnreadAnchor(null);
+      const found = await jumpTo(id);
+      // Signed out past the guest window: the chat shows its sign-in wall.
+      return found || isAuthenticated ? found : null;
+    },
+    (id) => document.getElementById(chatMessageDomId(id)),
+  );
+  const handleCopyLink = useCallback((message: Message) => {
+    copyChatMessageLink({ kind: 'public', roomId: selectedRoomId }, message.id);
+  }, [selectedRoomId]);
 
   /** Back to the newest lines after reading old history. */
   const goToLatest = useCallback(async () => {
@@ -716,6 +742,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
         onRetrySend={retrySend}
         onDiscardSend={discardSend}
         onSeeMessages={handleSeeMessages}
+        onCopyLink={canLinkMessage(message.id) ? handleCopyLink : undefined}
         holdFrame
         replying={!!replyTo && replyTo.id === message.id}
         onTogglePin={isModerator ? handleTogglePin : undefined}
@@ -730,7 +757,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
           {row}
         </Fragment>
       );
-    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
+    }), [filteredMessages, buyBotHidden, hideBuyBot, isModerator, roomDetails?.moderators, walletAddress, handleBanUser, handleUnbanUser, handleDeleteMessage, handleEditMessage, isAuthenticated, addReaction, promptSignIn, removeReaction, handleReply, retrySend, discardSend, handleSeeMessages, handleCopyLink, replyTo, handleTogglePin, pinnedMessage?.id, unreadAnchor, selectedRoomId]);
 
   return (
     <div data-page-bento data-bento-flat className="flex flex-col h-full overflow-hidden overflow-x-hidden">

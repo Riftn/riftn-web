@@ -20913,5 +20913,9 @@
     "promptCatchUp": "Catch me up on what {{handle}} has posted lately",
     "promptMessage": "Help me write a message to {{handle}}",
     "promptAbout": "About {{handle}}: {{question}}"
+  },
+  "chatLink": {
+    "gone": "That message was deleted, or it's too far back to open.",
+    "notInChat": "That link is to a private chat you're not in."
   }
 }

@@ -21018,5 +21018,9 @@
     "promptCatchUp": "Ponme al día de lo que {{handle}} ha publicado últimamente",
     "promptMessage": "Ayúdame a escribir un mensaje a {{handle}}",
     "promptAbout": "Sobre {{handle}}: {{question}}"
+  },
+  "chatLink": {
+    "gone": "Ese mensaje se eliminó o es demasiado antiguo para abrirlo.",
+    "notInChat": "Ese enlace es de un chat privado en el que no estás."
   }
 }

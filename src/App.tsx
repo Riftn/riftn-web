@@ -30,6 +30,7 @@ import { useAuth, useLoginSheet } from "@/contexts/AuthContext";
 import { useNotificationClickRouting } from "@/hooks/use-notification-click-routing";
 import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
 import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
+import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
 import { prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
 import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
@@ -1092,6 +1093,7 @@ const App = () => (
           {/* Above <Routes>: /r/:code never reaches AppContent, and it is a
               new visitor's first touch. */}
           <PageViewTracker />
+          <ChatLinkCatcher />
           <Routes>
             <Route path="/maintenance" element={<Suspense fallback={null}><MaintenancePage /></Suspense>} />
             {/*

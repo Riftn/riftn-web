@@ -135,6 +135,7 @@ import { MessagePickTick, MessageSelectBar } from './MessageSelectBar';
 import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
 import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { canLinkMessage, copyChatMessageLink, copyLinkLabel, useLinkedMessage } from '@/lib/chat-message-link';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
 import { copyableMediaUrl } from '@/lib/copy-media';
 import { DmVoiceCallButton } from '@/components/app/chat/calls/DmVoiceCallButton';
@@ -515,6 +516,7 @@ const MessageBubble = memo(function MessageBubble({
   picked = false,
   onTogglePick,
   onStartPick,
+  onCopyLink,
   onDelete,
   onReport,
   canPin = true,
@@ -537,6 +539,8 @@ const MessageBubble = memo(function MessageBubble({
   onTogglePick?: (message: DmMessage) => void;
   /** Start picking with this message (Select on hover, Ctrl/Cmd-click, or a hold on a phone). */
   onStartPick?: (message: DmMessage) => void;
+  /** "Copy link": a riftn.com link that opens this chat on this message, for people in it. */
+  onCopyLink?: (message: DmMessage) => void;
   /** The other person in a one-to-one chat, so a call card can call them back. */
   callPeerAddress?: string;
   /** Set in the cozy layout: where this bubble sits in its sender's run. */
@@ -802,6 +806,10 @@ const MessageBubble = memo(function MessageBubble({
     if (copyable) {
       menuActions.push({ key: 'copy', icon: menuIcons.copy, label: L.copy, onSelect: copyText, hint: 'C' });
       holdActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('chatHold.copy', { defaultValue: 'Copy' }), onSelect: copyText });
+    }
+    if (onCopyLink && canLinkMessage(message._id)) {
+      menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message), hint: 'L' });
+      holdActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message) });
     }
     if (copyMediaTarget) {
       menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
@@ -2493,6 +2501,34 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     [pickedList, isMineMsg, isGroupChat],
   );
   const startPick = useCallback((m: DmMessage) => setPickedMsgs(new Set([m._id])), []);
+
+  // "Copy link" on a message, and opening one. A chat still being set up
+  // (`new_<address>`, a bare address) has no id a link could name yet.
+  const linkableChat = /^[A-Za-z0-9_-]{1,64}$/.test(resolvedConversationId || '')
+    && !resolvedConversationId.startsWith('new_') && !/^0x[0-9a-f]{40}$/i.test(resolvedConversationId);
+  const handleCopyLink = useCallback((m: DmMessage) => {
+    copyChatMessageLink({ kind: 'dm', conversationId: resolvedConversationId }, m._id);
+  }, [resolvedConversationId]);
+  const linkedMessagesRef = useRef(messages);
+  linkedMessagesRef.current = messages;
+  const linkedPagingRef = useRef({ hasNextPage, fetchNextPage });
+  linkedPagingRef.current = { hasNextPage, fetchNextPage };
+  useLinkedMessage(
+    linkableChat ? `dm:${resolvedConversationId}` : null,
+    !isLoading && messages.length > 0,
+    async (id) => {
+      // Older than what is held: read back a page at a time, up to a point.
+      for (let page = 0; page < 25; page += 1) {
+        if (linkedMessagesRef.current.some((m) => m._id === id)) return true;
+        const paging = linkedPagingRef.current;
+        if (!paging.hasNextPage) return false;
+        await paging.fetchNextPage();
+        await new Promise((r) => window.setTimeout(r, 60));
+      }
+      return linkedMessagesRef.current.some((m) => m._id === id);
+    },
+    (id) => document.getElementById(`dm-msg-${id}`),
+  );
   const togglePick = useCallback((m: DmMessage) => {
     setPickedMsgs((prev) => {
       const next = new Set(prev ?? []);
@@ -3000,6 +3036,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         picked={!!pickedMsgs?.has(message._id)}
         onTogglePick={togglePick}
         onStartPick={startPick}
+        onCopyLink={linkableChat ? handleCopyLink : undefined}
         onDelete={setConfirmDeleteOne}
         onReport={setReportTarget}
         canPin={canPinHere}

@@ -6061,6 +6061,21 @@ specificity animation declarations above.
   .focus-target-flash { animation-duration: 1ms; }
 }
 
+/* A chat line opened from a copied message link: the same gold as a chat
+   search hit, held a few seconds and then faded, so the reader sees which
+   line the link meant. */
+@keyframes chat-link-highlight {
+  0%, 70% { background-color: rgba(255, 213, 74, 0.16); box-shadow: inset 3px 0 0 rgba(255, 213, 74, 0.9); }
+  100% { background-color: rgba(255, 213, 74, 0); box-shadow: inset 3px 0 0 rgba(255, 213, 74, 0); }
+}
+.chat-link-highlight {
+  animation: chat-link-highlight 4000ms ease-out both;
+  border-radius: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-link-highlight { animation-duration: 4000ms; animation-timing-function: steps(1, end); }
+}
+
 /* Artwork backing — light themes only
    ===================================
    The badge and medal artwork is drawn for a dark canvas: the silver and chrome
