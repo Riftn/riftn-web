@@ -11,21 +11,47 @@ import { SEOHead } from '@/components/SEOHead';
 import { getStory } from '@/lib/api/dehub/stories';
 import { useStoriesStore } from '@/store/storiesStore';
 import { nameOf } from '@/components/app/stories/story-utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useKidsModeLock } from '@/hooks/use-kids-mode';
+import { useMatureContent } from '@/hooks/use-mature-content';
 
 export default function StoryPermalinkPage() {
   const { id = '' } = useParams();
+  const { walletAddress, isAuthenticated } = useAuth();
+  const { showMatureContent } = useMatureContent();
+  const kidsMode = useKidsModeLock();
+  const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
+  const scope = `${isAuthenticated ? walletAddress?.toLowerCase() : 'guest'}:${canSeeMature}`;
+  return <StoryPermalink key={`${id}:${scope}`} {...{ id, scope, isAuthenticated, canSeeMature }} />;
+}
+
+function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
+  id: string;
+  scope: string;
+  isAuthenticated: boolean;
+  canSeeMature: boolean;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const openViewer = useStoriesStore(s => s.openViewer);
+  const closeViewer = useStoriesStore(s => s.closeViewer);
   const viewer = useStoriesStore(s => s.viewer);
   const [opened, setOpened] = useState(false);
-  const { data, isError, isLoading } = useQuery({ queryKey: ['story', id], queryFn: () => getStory(id), retry: false });
+  const result = useQuery({
+    queryKey: ['story', id, scope],
+    queryFn: () => getStory(id, isAuthenticated),
+    gcTime: 0,
+    retry: false,
+  });
+  const data = result.isSuccess && (!result.data.item.isMature || canSeeMature) ? result.data : undefined;
 
   useEffect(() => {
     if (!data?.author || opened) return;
     openViewer([{ author: data.author, own: false, following: false, seen: false, latestAt: data.item.createdAt, items: [data.item] }], 0, { item: 0 });
     setOpened(true);
   }, [data, opened, openViewer]);
+
+  useEffect(() => () => closeViewer(), [closeViewer]);
 
   useEffect(() => {
     if (opened && !viewer) navigate('/app', { replace: true });
@@ -40,7 +66,7 @@ export default function StoryPermalinkPage() {
         image={data?.item.posterUrl ?? undefined}
         noindex
       />
-      {(isError || (!isLoading && !data)) && (
+      {!result.isLoading && !data && (
         <div>
           <p className="text-[17px] font-semibold mb-2">{t('stories.ended', { defaultValue: 'This moment has ended' })}</p>
           <p className="text-[14px] opacity-70 mb-5">{t('stories.endedBody', { defaultValue: 'Moments stay up for 24 hours.' })}</p>
