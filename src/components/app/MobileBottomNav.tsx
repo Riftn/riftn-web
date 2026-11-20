@@ -171,7 +171,7 @@ const CREATE_ID = 'create';
 const CREATE_SLOT = 2;
 /** Saved under the destination's i18n key, which the app's bar shares. */
 const barItemId = (item: MobileNavItem) => NAV_LABEL_KEYS[item.label] ?? item.label;
-/** The bar's default order (Settings' Public Chat switch rearranges it). */
+/** The bar's default order. */
 export const DEFAULT_BAR_IDS = BAR_ITEMS.map(barItemId);
 
 /**
