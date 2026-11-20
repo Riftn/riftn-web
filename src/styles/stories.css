@@ -1,8 +1,7 @@
 /* Stories: the Glass Shelf above Home, the full-screen viewer and the creator.
 
    One set of tokens per theme. The ring on a tile with something new is the
-   theme's accent (a two-colour edge on Hazy and Osaka, plain white on dark
-   themes, ink on light ones); a watched tile goes quiet and grey. */
+   theme's accent or the default violet; a watched tile has a muted edge. */
 
 [data-stories] {
   --st-ink: #fff;
@@ -11,6 +10,7 @@
   --st-line: rgb(255 255 255 / 0.12);
   --st-acc: #fff;
   --st-acc2: #fff;
+  --st-ring: #a391fc;
   --st-btn-ink: #000;
   --st-live: 255 99 99;
 }
@@ -21,13 +21,14 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-stories] {
   --st-line: rgb(0 0 0 / 0.08);
   --st-acc: #0e0e12;
   --st-acc2: #0e0e12;
+  --st-ring: #7351d9;
   --st-btn-ink: #fff;
   --st-live: 224 64 70;
 }
 html[data-theme='hazy'] [data-stories] { --st-acc: #a391fc; --st-acc2: #f39bff; --st-glass: rgb(38 18 66 / 0.42); --st-btn-ink: #170a2a; }
 html[data-theme='osaka'] [data-stories] { --st-acc: #ff6fb1; --st-acc2: #7fe3e0; --st-glass: rgb(17 14 28 / 0.58); --st-btn-ink: #1a0d18; --st-live: 255 176 92; }
 html[data-theme='jungle'] [data-stories] { --st-acc: #9be15d; --st-acc2: #00e3ae; --st-btn-ink: #0b1a0b; }
-html[data-theme='war'] [data-stories] { --st-acc: #e8b04a; --st-acc2: #e8b04a; --st-btn-ink: #1a1206; }
+html[data-theme='war'] [data-stories] { --st-acc: #e8b04a; --st-acc2: #e8b04a; --st-ring: #e8b04a; --st-btn-ink: #1a1206; }
 
 /* ── Shelf ───────────────────────────────────────────────────────── */
 [data-story-shelf] {
@@ -102,16 +103,17 @@ html[data-theme='war'] [data-stories] { --st-acc: #e8b04a; --st-acc2: #e8b04a; -
   position: absolute;
   inset: 0;
   border-radius: 16px;
-  box-shadow: inset 0 0 0 1.5px var(--st-acc);
+  box-shadow: inset 0 0 0 1.5px var(--st-ring);
   pointer-events: none;
 }
-html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle']) [data-story-tile] [data-st-ring] {
+html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle']) [data-story-tile][data-seen='false'] [data-st-ring] {
   box-shadow: none;
   padding: 1.5px;
   background: linear-gradient(135deg, var(--st-acc), var(--st-acc2));
   -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
+[data-story-tile][data-seen='true'] [data-st-ring] { box-shadow: inset 0 0 0 1px rgb(127 127 127 / 0.45); }
 [data-story-tile][data-seen='true'] > [data-st-bg] { filter: saturate(0.35) brightness(0.7); }
 /* A moment's picture stays hidden until it is tapped: the tile is the person's face on frosted glass. */
 [data-story-tile] > [data-st-bg][data-blur] { filter: blur(14px) saturate(1.4) brightness(0.8); transform: scale(1.3); }
