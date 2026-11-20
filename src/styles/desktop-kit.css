@@ -105,8 +105,10 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-cached-page='affiliate'] [data-feed-swallow-content] > .rounded-lg.border,
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-cached-page='affiliate'] [data-feed-swallow-content] > .rounded-lg.border { box-shadow: inset 0 0 0 1px var(--g-post-line) !important; }
 
-  /* pages laid out by hand in a centred column (Import a video, a bounty) start on the column edge too */
-  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-main-panel] > .max-w-3xl.mx-auto.px-4 { padding-left: var(--dk-pad) !important; padding-right: var(--dk-pad) !important; }
+  /* pages laid out by hand in a centred column (a community, Import a video, a bounty, a proposal) fill the
+     column and start on its edge too */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-main-panel] > :is(.max-w-2xl, .max-w-3xl).mx-auto { max-width: none !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-main-panel] > :is(.max-w-2xl, .max-w-3xl).mx-auto.px-4 { padding-left: var(--dk-pad) !important; padding-right: var(--dk-pad) !important; }
 
   /* ===== Glass tokens ===== */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) {
