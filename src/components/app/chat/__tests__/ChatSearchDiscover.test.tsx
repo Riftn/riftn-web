@@ -17,7 +17,7 @@ vi.mock('react-router-dom', async (orig) => ({ ...(await orig<typeof import('rea
 
 const communities = [{ id: 'c1', name: "Jake's Garage", slug: 'jakes-garage', member_count: 2400, banner_url: null, avatar_url: null }];
 const query: Record<string, unknown> = {};
-for (const m of ['select', 'ilike', 'order']) query[m] = vi.fn(() => query);
+for (const m of ['select', 'or', 'order']) query[m] = vi.fn(() => query);
 query.limit = vi.fn(async () => ({ data: communities, error: null }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: vi.fn(() => query) } }));
 
@@ -42,7 +42,7 @@ describe('ChatSearchDiscover', () => {
   it('offers matching people, communities and ways to start something', async () => {
     const props = setup();
     expect(await screen.findByText("Jake's Garage")).toBeTruthy();
-    expect(query.ilike).toHaveBeenCalledWith('name', '%jake%');
+    expect(query.or).toHaveBeenCalledWith('name.ilike.%jake%,slug.ilike.%jake%');
 
     fireEvent.click(screen.getByTitle('Jake Rivers'));
     expect(props.onMessageUser).toHaveBeenCalledWith(users[0]);

@@ -574,6 +574,7 @@ const PostCardBody = memo(function PostCard({ post, threadSlot, onOpenComments }
                   on desktop — both surfaces read the same state, so the menu is
                   a reliable place to find them at every width. */}
               <PostUtilityMenuItems
+                onActionBar
                 onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
                 postId={post.id}
                 tokenId={postTokenId}

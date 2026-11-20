@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { previewedLinkUrl, refreshLinkPreview } from '@/lib/api/link-preview';
@@ -55,6 +56,8 @@ interface PostUtilityMenuItemsProps {
   linkText?: string | null;
   /** Closes the host's menu, so the refreshed card is visible underneath. */
   onClose?: () => void;
+  /** The host card shows the post's action bar (bookmark, info) under the post. */
+  onActionBar?: boolean;
 }
 
 const ROW =
@@ -68,9 +71,13 @@ export function PostUtilityMenuItems({
   onAskAI,
   linkText,
   onClose,
+  onActionBar = false,
 }: PostUtilityMenuItemsProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  // On a phone the card's action bar already carries Bookmark and Post info
+  // right under the post, so the menu leaves them out (Requests 7399dd7d).
+  const skipBarItems = useIsMobile() && onActionBar;
   const { isBookmarked, isLoading: isBookmarkLoading, toggleBookmark } = useBookmarkPost(postId || '');
   const togglePinMutation = useTogglePin();
   const isPinned = useIsPostPinned(tokenId);
@@ -102,7 +109,7 @@ export function PostUtilityMenuItems({
         </button>
       )}
 
-      <button
+      {!skipBarItems && <button
         onClick={() => toggleBookmark()}
         disabled={isBookmarkLoading}
         className={cn(ROW, 'disabled:opacity-50', isBookmarked ? 'text-yellow-500' : 'text-white')}
@@ -111,7 +118,7 @@ export function PostUtilityMenuItems({
         {isBookmarked
           ? t('postOptions.removeBookmark', 'Remove bookmark')
           : t('postOptions.bookmark', 'Bookmark')}
-      </button>
+      </button>}
 
       {isOwnPost && (
         <button
@@ -149,7 +156,7 @@ export function PostUtilityMenuItems({
         </button>
       )}
 
-      <button
+      {!skipBarItems && <button
         onClick={() => {
           onBeforeNavigate?.();
           if (postId) navigate(`/app/post/${postId}/info`);
@@ -157,7 +164,7 @@ export function PostUtilityMenuItems({
         className={cn(ROW, 'text-white')}
       >
         <Info className="w-5 h-5" /> {t('postInfo.title', 'Post info')}
-      </button>
+      </button>}
     </>
   );
 }

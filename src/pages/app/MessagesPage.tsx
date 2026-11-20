@@ -301,6 +301,12 @@ const RoomChatPane = lazy(() => import('@/components/app/chat/RoomChatPane').the
 // Phones on /chat: the app's bottom nav pill (already loaded by the app shell).
 const MobileBottomNav = lazy(() => import('@/components/app/MobileBottomNav').then(m => ({ default: m.MobileBottomNav })));
 
+/** A group is found by its name or its @name (the slug in its link). Requests 483e1e5f. */
+function groupMatchesSearch(c: { name: string; slug?: string | null }, query: string) {
+  const q = query.trim().toLowerCase().replace(/^@/, '');
+  return c.name.toLowerCase().includes(q) || (c.slug || '').toLowerCase().includes(q);
+}
+
 export default function MessagesPage({ fullscreen = false }: { fullscreen?: boolean } = {}) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
@@ -355,7 +361,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // and for group/channel/community chats alike.
   const { byId: chatPrefs, update: updateChatPref, seeReactions } = useChatPrefs();
   const groupChats = chatsFromMemberships(myMemberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt).filter(c =>
-    !searchQuery.trim() || c.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+    !searchQuery.trim() || groupMatchesSearch(c, searchQuery));
   const { isAuthenticated, walletAddress, user, isLoading: authLoading, openLoginModal } = useAuth();
   const guest = !authLoading && !isAuthenticated;
 

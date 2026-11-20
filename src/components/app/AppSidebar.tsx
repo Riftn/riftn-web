@@ -208,13 +208,16 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
               </BadgedName>
             </p>
             {menuFollowers != null || menuFollowing != null ? (
-              <p data-testid="menu-follow-counts" className="flex min-w-0 items-center gap-1 text-[13px] font-semibold text-zinc-400 tabular-nums">
+              <p data-testid="menu-follow-counts" className="flex min-w-0 flex-wrap items-center gap-x-3 text-[13px] font-semibold text-zinc-400 tabular-nums">
                 <button type="button" data-testid="menu-followers" onClick={() => openFollowList('followers')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
-                  <span className="truncate"><span className="font-bold text-zinc-200">{compactCount(menuFollowers ?? 0)}</span> {t('profile.followers')}</span>
+                  <span className="flex-shrink-0 font-bold text-zinc-200">{compactCount(menuFollowers ?? 0)}</span>
+                  <span className="min-w-0 truncate">{t('profile.followers')}</span>
                 </button>
-                <span aria-hidden className="mx-1 flex-shrink-0 font-bold">·</span>
+                {/* No dot between: on a narrow phone Following drops to its own
+                    line instead of running under the balance chip. */}
                 <button type="button" data-testid="menu-following" onClick={() => openFollowList('following')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
-                  <span className="truncate"><span className="font-bold text-zinc-200">{compactCount(menuFollowing ?? 0)}</span> {t('profile.following')}</span>
+                  <span className="flex-shrink-0 font-bold text-zinc-200">{compactCount(menuFollowing ?? 0)}</span>
+                  <span className="min-w-0 truncate">{t('profile.following')}</span>
                 </button>
               </p>
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
@@ -223,11 +226,13 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
             <button
               type="button"
               onClick={() => { closeMenu(); navigate('/app/wallet'); }}
-              aria-label={t('nav.wallet')}
+              aria-label={`${t('nav.wallet')} ${Math.floor(dhbBalance).toLocaleString()}`}
               data-menu-chip className="flex h-9 flex-shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.06] px-3 text-[13px] font-semibold text-white tabular-nums"
             >
               <DhbCoin className="h-4 w-4 align-middle" />
-              {Math.floor(dhbBalance).toLocaleString()}
+              {/* Compact from 10k up, so the chip never pushes into the
+                  Followers / Following line beside it (Requests eaf824e2). */}
+              {Math.floor(dhbBalance) >= 10_000 ? compactCount(Math.floor(dhbBalance)) : Math.floor(dhbBalance).toLocaleString()}
             </button>
           )}
           {/* Every other account saved on this device, one tap away. */}
