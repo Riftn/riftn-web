@@ -2988,6 +2988,33 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "top-10-alternative-social-media-apps-2026",
+    "slug": "top-10-alternative-social-media-apps-2026",
+    "title": "Top 10 Alternative Social Media Apps in 2026 (and Why Riftn Leads)",
+    "excerpt": "Tired of feeds built to sell your attention? Here are the 10 best alternatives to X, Instagram, TikTok and Reddit in 2026, from Bluesky and Mastodon to Nostr and Farcaster. Riftn takes the top spot because its users own it, run it and build it.",
+    "content": "",
+    "bannerImage": "/media/top-10-alternative-social-media-apps-banner-r2.jpg",
+    "bannerImageAlt": "Top 10 alternative social media apps in 2026, ranked, with Riftn at number one",
+    "author": {
+      "name": "Riftn Team"
+    },
+    "publishedAt": "2026-11-20T15:00:00.000Z",
+    "tags": [
+      "Alternative Social Media",
+      "Decentralized Social Media",
+      "Bluesky",
+      "Mastodon",
+      "Farcaster",
+      "Nostr",
+      "Riftn"
+    ],
+    "readingTime": 11,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Top 10 Alternative Social Media Apps 2026: Ranked",
+    "seoDescription": "The 10 best alternatives to X, Instagram, TikTok and Reddit in 2026: Riftn, Bluesky, Mastodon, Nostr, Farcaster, Lens, Hive, Pixelfed, Lemmy and Zora, ranked by who owns them."
+  },
+  {
     "id": "decentralization-spectrum-social-media",
     "slug": "decentralization-spectrum-social-media",
     "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
@@ -3727,30 +3754,31 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "decentralization-spectrum-social-media",
-  "slug": "decentralization-spectrum-social-media",
-  "title": "The Decentralization Spectrum: How Decentralized Can Social Media Really Get?",
-  "excerpt": "Putting data on a blockchain does not make a social network decentralized. We ranked 30 crypto and decentralized social platforms by who really controls them: rules, moderation, ownership, revenue and code. Here is the spectrum, and why Riftn sits at the top.",
+  "id": "top-10-alternative-social-media-apps-2026",
+  "slug": "top-10-alternative-social-media-apps-2026",
+  "title": "Top 10 Alternative Social Media Apps in 2026 (and Why Riftn Leads)",
+  "excerpt": "Tired of feeds built to sell your attention? Here are the 10 best alternatives to X, Instagram, TikTok and Reddit in 2026, from Bluesky and Mastodon to Nostr and Farcaster. Riftn takes the top spot because its users own it, run it and build it.",
   "content": "",
-  "bannerImage": "/media/decentralization-spectrum-banner-r2.jpg",
-  "bannerImageAlt": "The decentralization spectrum: how decentralized can social media really get?",
+  "bannerImage": "/media/top-10-alternative-social-media-apps-banner-r2.jpg",
+  "bannerImageAlt": "Top 10 alternative social media apps in 2026, ranked, with Riftn at number one",
   "author": {
     "name": "Riftn Team"
   },
-  "publishedAt": "2026-11-13T22:00:00.000Z",
+  "publishedAt": "2026-11-20T15:00:00.000Z",
   "tags": [
-    "Decentralization",
+    "Alternative Social Media",
     "Decentralized Social Media",
-    "Open Source",
-    "Moderation",
-    "Blockchain",
+    "Bluesky",
+    "Mastodon",
+    "Farcaster",
+    "Nostr",
     "Riftn"
   ],
-  "readingTime": 12,
+  "readingTime": 11,
   "featured": false,
   "status": "published",
-  "seoTitle": "The Decentralization Spectrum: How Decentralized Can Social Media Get?",
-  "seoDescription": "30 decentralized and crypto social apps ranked by who really controls them, from Bluesky and Farcaster to Nostr and Hive. Why on-chain is not the same as decentralized."
+  "seoTitle": "Top 10 Alternative Social Media Apps 2026: Ranked",
+  "seoDescription": "The 10 best alternatives to X, Instagram, TikTok and Reddit in 2026: Riftn, Bluesky, Mastodon, Nostr, Farcaster, Lens, Hive, Pixelfed, Lemmy and Zora, ranked by who owns them."
 };
 
 export const excludedTitles: string[] = [
