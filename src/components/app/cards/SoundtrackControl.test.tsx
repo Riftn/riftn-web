@@ -7,7 +7,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 beforeEach(() => { vi.stubGlobal('PointerEvent', MouseEvent); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
-/** A playing 40 s song, with its wave laid out 200 px wide from x = 100. */
+/** A playing 40 s song in the docked bar, its seek line laid out 200 px wide from x = 100. */
 function renderPlaying() {
   const el = document.createElement('audio');
   Object.defineProperty(el, 'duration', { configurable: true, value: 40 });
@@ -15,7 +15,7 @@ function renderPlaying() {
   const photo = { click: vi.fn(), pointerDown: vi.fn() };
   render(
     <div onClick={photo.click} onPointerDown={photo.pointerDown}>
-      <SoundtrackControl title="Song" playing loading={false} error={false} toggle={vi.fn()} audioRef={{ current: el }} />
+      <SoundtrackControl title="Song" playing loading={false} error={false} toggle={vi.fn()} audioRef={{ current: el }} layout="bar" />
     </div>,
   );
   const wave = screen.getByRole('slider');
