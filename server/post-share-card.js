@@ -27,7 +27,8 @@ export function plainPostText(value) {
 const flag = (v) => v === true || v === 1 || v === 'true';
 const count = (v) => Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0;
 const SHARE_IMAGE = `${ORIGIN}/og/riftn-share.png`;
-const CARD_POST_TYPES = ['feed-simple', 'text', 'video', 'feed-video', 'image', 'feed-images', 'live'];
+const CARD_POST_TYPES = ['feed-simple', 'text', 'video', 'feed-video', 'image', 'feed-images', 'live', 'audio', 'feed-audio'];
+const AUDIO_POST_TYPES = ['audio', 'feed-audio'];
 
 /** An absent rating reads as safe, as it does everywhere else. Mature, blocked and pending posts never show their content to a stranger. */
 export function hasSafeRating(post) {
@@ -80,7 +81,8 @@ export function postCardData(post) {
   if (post.plansDetails?.length || post.subscriberPlans?.length || post.subscriptionPlans?.length) return null;
   const media = postCardMedia(post);
   // A video or photo post whose picture the record does not name keeps the page's own preview.
-  if (!media && !['feed-simple', 'text'].includes(post.postType)) return null;
+  // Audio posts may have no cover: their title on the brand backdrop is the card.
+  if (!media && !['feed-simple', 'text', ...AUDIO_POST_TYPES].includes(post.postType)) return null;
   const title = plainPostText(post.title) || plainPostText(post.name);
   const body = plainPostText(post.description);
   if (!title && !body && !media) return null;
@@ -102,6 +104,7 @@ export function postCardData(post) {
     createdAt: post.createdAt || post.created_at || '',
     // Only a live post carries this, so every other card keeps its fingerprint.
     live: liveShareState(post) || undefined,
+    audio: AUDIO_POST_TYPES.includes(post.postType) || undefined,
   };
 }
 
@@ -348,9 +351,9 @@ export function renderPostCardSvg(data, { logo, avatar = '', badges = [], media 
   const copy = layoutPostCardCopy({ ...words, poll: showMedia ? null : data.poll }, { width: showMedia ? 720 : 980 });
   const tag = live === 'live' ? 'LIVE' : live === 'replay' ? 'REPLAY' : live === 'upcoming' ? 'UPCOMING' : live === 'ended' ? 'STREAM ENDED'
     : data.poll && !showMedia ? `POLL · ${data.poll.ended ? `${formatPostCardCount(data.poll.totalVotes)} VOTES` : 'OPEN'}`
-    : showMedia ? data.media.video ? 'VIDEO' : 'PHOTO' : 'POST';
+    : data.audio ? 'AUDIO' : showMedia ? data.media.video ? 'VIDEO' : 'PHOTO' : 'POST';
   const cta = live === 'live' ? 'Watch live on Riftn' : live === 'replay' ? 'Watch the replay'
-    : live ? 'View on Riftn' : data.poll && !showMedia ? 'Vote on Riftn' : showMedia ? data.media.video ? 'Watch on Riftn' : 'View the post' : 'Read the post';
+    : live ? 'View on Riftn' : data.audio ? 'Listen on Riftn' : data.poll && !showMedia ? 'Vote on Riftn' : showMedia ? data.media.video ? 'Watch on Riftn' : 'View the post' : 'Read the post';
   const picture = showMedia
     ? `<g data-media="${data.media.video ? 'video-poster' : 'image'}"><image x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice" xlink:href="${media}"/></g>`
     : backdrop ? `<image x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice" opacity=".5" xlink:href="${backdrop}"/>` : '';

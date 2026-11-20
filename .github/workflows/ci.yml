@@ -279,7 +279,7 @@ jobs:
       - name: Render text post share cards
         run: |
           node --test server/edge-maintenance.test.mjs
-          node --test server/post-share-card.test.mjs server/finance-stats.test.mjs
+          node --test server/post-share-card.test.mjs server/entity-share-card.test.mjs server/finance-stats.test.mjs
           timeout 120s node tests/post-share-workerd.mjs
           timeout 120s node tests/account-mcp-workerd.mjs
 

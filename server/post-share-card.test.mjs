@@ -29,12 +29,12 @@ test('description-only off-chain posts render their actual text and authoritativ
   assert.equal(postCardData({ ...post, totalVotes: { for: 0 } }).likes, 0);
 });
 
-test('restricted, unrated-unsafe and audio posts do not acquire a public image', () => {
+test('restricted and unrated-unsafe posts do not acquire a public image', () => {
   for (const patch of [
     { isHidden: true }, { isPrivate: true }, { visibility: 'private' }, { status: 'draft' },
     { isPublic: false }, { streamInfo: { isPayPerView: true } }, { streamInfo: { isLockContent: true } },
     { plansDetails: [{ id: 'paid' }] }, { streamStatus: { isLockedWithSubscription: true } },
-    { postType: 'feed-audio' }, { postType: 'live', streamInfo: { isPayPerView: true } },
+    { postType: 'feed-audio', isPrivate: true }, { postType: 'live', streamInfo: { isPayPerView: true } },
     { contentRating: 'mature' }, { contentRating: 'blocked' }, { contentRating: 'pending' },
     { postType: 'video', videoUrl: 'videos/6501.mp4', thumbnail_url: 'images/6501.jpg', contentRating: 'mature' },
     { community: { is_private: true } },
@@ -78,7 +78,9 @@ test('both crawler tags and structured data select the same versioned PNG', () =
   assert.ok(result.includes('content="630"'));
   assert.ok(result.includes('summary_large_image'));
   assert.ok(!result.includes('avatar.jpg'));
-  assert.equal(applyPostShareImage(html, { ...post, postType: 'feed-audio' }), html);
+  const audio = applyPostShareImage(html, { ...post, postType: 'feed-audio', title: 'Night drive (demo)' });
+  assert.equal((audio.match(/https:\/\/riftn\.com\/_og\/post\/v8\/6501.png/g) || []).length, 4, 'audio posts share their own card');
+  assert.ok(renderPostCardSvg(postCardData({ ...post, postType: 'feed-audio', title: 'Night drive' }), { logo: '' }).includes('Listen on Riftn'));
 });
 
 test('text is escaped and clipped without allowing image/markup injection', () => {
