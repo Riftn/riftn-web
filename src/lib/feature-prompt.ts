@@ -1,3 +1,5 @@
+export const FEATURE_PROMPT_MAX_LENGTH = 10_000;
+
 /** Keep the existing request row contract while accepting one free-form prompt. */
 export function featurePromptFields(prompt: string, title = '', device = '') {
   const description = prompt.trim();

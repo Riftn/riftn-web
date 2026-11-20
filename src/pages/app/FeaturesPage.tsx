@@ -43,7 +43,7 @@ import { TranslatableText, SharedTranslationProvider, useSharedTranslationContro
 import { PostMetadata } from '@/components/app/cards/PostMetadata';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { featurePromptFields } from '@/lib/feature-prompt';
+import { featurePromptFields, FEATURE_PROMPT_MAX_LENGTH } from '@/lib/feature-prompt';
 import { CardHeader } from '@/components/app/cards/CardHeader';
 import { ActionBar } from '@/components/app/cards/ActionBar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,7 +91,12 @@ import { formatCount } from '@/lib/format-count';
 // Built per use so its messages are read in the reader's language at the time.
 const featureSchema = () => z.object({
   title: z.string().trim().min(1, _translateCopy("copy.d5b06872b556", { defaultValue: "Title is required" })).max(100, _translateCopy("copy.8b4f83e9c989", { defaultValue: "Title must be under 100 characters" })),
-  description: z.string().trim().min(1, _translateCopy("copy.032d33c52dda", { defaultValue: "Description is required" })).max(1000, _translateCopy("copy.d69c0b196525", { defaultValue: "Description must be under 1,000 characters" })),
+  description: z.string().trim()
+    .min(1, _translateCopy("copy.032d33c52dda", { defaultValue: "Description is required" }))
+    .max(FEATURE_PROMPT_MAX_LENGTH, _translateCopy("copy.d8b5fc0e754c", {
+      defaultValue: "Description must be {{value1}} characters or less",
+      value1: FEATURE_PROMPT_MAX_LENGTH.toLocaleString(),
+    })),
   category: z.enum(['ui_ux', 'performance', 'new_feature', 'bug_fix', 'integration', 'other']),
 });
 
@@ -303,6 +308,8 @@ function FeatureCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:editTitle", feature.title, feature.id);
   const [editDescription, setEditDescription] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:editDescription", feature.description, feature.id);
+  // A saved request may also include the optional Device & OS line.
+  const editDescriptionLimit = Math.max(FEATURE_PROMPT_MAX_LENGTH, feature.description.length);
   const [editCategory, setEditCategory] = useState<FeatureCategory>(feature.category);
   // Attachments while editing: the ones already on the request that stay, and
   // new photos or videos picked from the phone or computer.
@@ -404,7 +411,7 @@ function FeatureCard({
   });
 
   const handleSaveEdit = () => {
-    if (!editTitle.trim() || !editDescription.trim()) return;
+    if (!editTitle.trim() || !editDescription.trim() || editDescription.length > editDescriptionLimit) return;
     const before = featureAttachments(feature);
     const mediaChanged = editNew.length > 0 || editKeep.length !== before.length || editKeep.some((u, i) => u !== before[i]);
     editMutation.mutate(
@@ -589,7 +596,7 @@ function FeatureCard({
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                maxLength={1000}
+                maxLength={editDescriptionLimit}
                 rows={3}
                 className="w-full bg-zinc-800/50 border border-white/10 text-white rounded-lg text-sm p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-white/20"
               />
@@ -645,7 +652,7 @@ function FeatureCard({
                 size="sm"
                 variant="glass"
                 onClick={handleSaveEdit}
-                disabled={editMutation.isPending || !editTitle.trim() || !editDescription.trim()}
+                disabled={editMutation.isPending || !editTitle.trim() || !editDescription.trim() || editDescription.length > editDescriptionLimit}
                 className="rounded-lg text-xs"
               >
                 {editMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.1509f561f241", { defaultValue: "Save" })}
@@ -841,7 +848,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
         <textarea ref={promptRef} value={description} onChange={e => setDescription(e.target.value)}
           aria-label={t('features.promptLabel', 'Your prompt')}
           placeholder={t('features.promptPlaceholder', 'Describe an idea, improvement, or bug…')}
-          maxLength={1000} rows={4} disabled={submitMutation.isPending}
+          maxLength={FEATURE_PROMPT_MAX_LENGTH} rows={4} disabled={submitMutation.isPending}
           onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !e.nativeEvent.isComposing) { e.preventDefault(); handleSubmit(); } }}
           onPaste={e => { const files = Array.from(e.clipboardData.files); if (files.length) { e.preventDefault(); addFiles(files); } }}
           className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm leading-relaxed resize-y min-h-24 max-h-80 outline-none disabled:opacity-60" />
@@ -877,7 +884,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
         </div>
       </div>
       <div className="flex justify-between gap-3 mt-2 text-[11px] text-zinc-500">
-        <span>{description.length}/1000</span><span className="hidden sm:inline">{t('features.promptShortcut', 'Ctrl / ⌘ + Enter to post')}</span>
+        <span>{description.length}/{FEATURE_PROMPT_MAX_LENGTH}</span><span className="hidden sm:inline">{t('features.promptShortcut', 'Ctrl / ⌘ + Enter to post')}</span>
       </div>
       {error && <p role="alert" className="text-sm text-red-400 mt-2">{error}</p>}
       <p data-device-info-note className="mt-1 text-[11px] text-zinc-500">{t('features.deviceInfoNote', 'Device info is attached to help us fix bugs.')}</p>
