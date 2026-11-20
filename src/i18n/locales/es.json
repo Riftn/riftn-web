@@ -7197,6 +7197,13 @@
     "shareTitle": "@{{handle}} está a la venta en Riftn"
   },
   "stories": {
+    "remix": "Remix",
+    "moreActions": "Opciones de la historia",
+    "remixing": "Remix de la historia de {{name}}",
+    "watchOriginal": "Ver la historia original",
+    "originalUnavailable": "La historia original ya no está disponible.",
+    "copyLinkFailed": "No se pudo copiar el enlace de la historia.",
+    "whoWatched": "Quién la vio",
     "create": "Crear",
     "createDescription": "Elige qué quieres crear: una retransmisión, una historia o una publicación.",
     "goLive": "Emitir en directo",

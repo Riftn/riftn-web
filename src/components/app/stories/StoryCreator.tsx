@@ -25,6 +25,7 @@ import type { DeHubUser } from '@/lib/api/dehub';
 import type { StoryAudience, StorySong } from '@/lib/api/dehub/stories';
 import { getMediaUrl } from '@/lib/api/dehub/core';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
+import type { StoryRemixSource } from '@/store/storiesStore';
 import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
 import { shareMoment } from './story-upload';
 import '@/styles/stories.css';
@@ -37,10 +38,11 @@ type Tool = null | 'text' | 'draw' | 'mention' | 'trim';
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-export function StoryCreator({ onClose }: { onClose: () => void }) {
+export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
   const [media, setMedia] = useState<Media | null>(null);
+  const remixLabel = remixSource ? t('stories.remixing', { name: remixSource.name, defaultValue: "Remixing {{name}}'s moment" }) : undefined;
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -49,16 +51,18 @@ export function StoryCreator({ onClose }: { onClose: () => void }) {
   }, []);
 
   const body = (
-    <div data-stories data-story-creator data-keep-dark role="dialog" aria-modal="true" aria-label={t('stories.newMoment', { defaultValue: 'New moment' })}>
+    <div data-stories data-story-creator data-keep-dark role="dialog" aria-modal="true" aria-label={remixLabel ?? t('stories.newMoment', { defaultValue: 'New moment' })}>
       {media ? (
         <Editor
           media={media}
+          remixSourceId={remixSource?.id}
+          remixLabel={remixLabel}
           onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
           onClose={onClose}
           onShared={() => refreshShelf()}
         />
       ) : (
-        <Capture onPicked={setMedia} onClose={onClose} />
+        <Capture onPicked={setMedia} onClose={onClose} remixLabel={remixLabel} />
       )}
     </div>
   );
@@ -67,7 +71,7 @@ export function StoryCreator({ onClose }: { onClose: () => void }) {
 
 // ── Step 1: record or pick ──────────────────────────────────────────
 
-function Capture({ onPicked, onClose }: { onPicked: (m: Media) => void; onClose: () => void }) {
+function Capture({ onPicked, onClose, remixLabel }: { onPicked: (m: Media) => void; onClose: () => void; remixLabel?: string }) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -195,6 +199,7 @@ function Capture({ onPicked, onClose }: { onPicked: (m: Media) => void; onClose:
       </div>
       <div data-sc-top>
         <button type="button" data-sc-btn data-st-dark-glass onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
+        {remixLabel && <span data-sc-chip data-st-dark-glass className="min-w-0"><span className="truncate">{remixLabel}</span></span>}
         <span className="flex-1" />
         {camera === 'on' && (
           <button type="button" data-sc-btn data-st-dark-glass onClick={() => setFacing(f => (f === 'user' ? 'environment' : 'user'))} aria-label={t('stories.flip', { defaultValue: 'Flip camera' })}>
@@ -247,7 +252,14 @@ function useStageBox(ref: React.RefObject<HTMLDivElement>) {
   return box;
 }
 
-function Editor({ media, onBack, onClose, onShared }: { media: Media; onBack: () => void; onClose: () => void; onShared: () => void }) {
+function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }: {
+  media: Media;
+  onBack: () => void;
+  onClose: () => void;
+  onShared: () => void;
+  remixSourceId?: string;
+  remixLabel?: string;
+}) {
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
   const box = useStageBox(areaRef);
@@ -424,7 +436,7 @@ function Editor({ media, onBack, onClose, onShared }: { media: Media; onBack: ()
           };
         }
       }
-      const fields = { audience, mentions, song: songField, muted: media.kind === 'video' ? muted : false };
+      const fields = { audience, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -447,7 +459,7 @@ function Editor({ media, onBack, onClose, onShared }: { media: Media; onBack: ()
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, layers, song, media, muted, drew, trim, onShared, onClose, t]);
+  }, [busy, audience, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -509,6 +521,7 @@ function Editor({ media, onBack, onClose, onShared }: { media: Media; onBack: ()
 
       <div data-sc-top>
         <button type="button" data-sc-btn data-st-dark-glass onClick={onBack} aria-label={t('common.back', { defaultValue: 'Back' })}><Close className="w-5 h-5" /></button>
+        {remixLabel && <span data-sc-chip data-st-dark-glass className="min-w-0"><span className="truncate">{remixLabel}</span></span>}
         <span className="flex-1" />
       </div>
 

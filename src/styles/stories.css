@@ -351,6 +351,16 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   line-height: 1.35;
   text-shadow: 0 1px 8px rgb(0 0 0 / 0.6);
   z-index: 2;
+  pointer-events: none;
+}
+[data-sv-original] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  margin-bottom: 6px;
+  border-radius: 18px;
+  pointer-events: auto;
 }
 [data-sv-song] {
   position: absolute;
@@ -382,6 +392,12 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
 }
 @media (min-width: 768px) {
   [data-sv-nav] { display: flex; }
+}
+[data-sv-sheet-backdrop] {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgb(0 0 0 / 0.42);
 }
 [data-sv-sheet] {
   position: absolute;

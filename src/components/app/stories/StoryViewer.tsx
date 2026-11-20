@@ -16,7 +16,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight, Eye, Heart, Loader2, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
 import More from '@/components/ui/cut-icons/more';
 import Send from '@/components/ui/cut-icons/send';
@@ -24,8 +24,10 @@ import Music from '@/components/ui/cut-icons/music';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { formatCount } from '@/lib/format-count';
+import { useStoriesStore } from '@/store/storiesStore';
 import {
   deleteStory,
+  getStory,
   getStoryViewers,
   likeStory,
   markStoryViewed,
@@ -76,6 +78,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
+  const [openingOriginal, setOpeningOriginal] = useState(false);
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
 
   const entry = entries[authorIdx];
@@ -83,15 +86,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const loaded = !!item && loadedId === item.id;
   const setLoaded = useCallback(() => setLoadedId(item?.id ?? null), [item?.id]);
   const own = !!entry && !!me && entry.author.address === me;
-  const paused = held || typing || sheet !== null || !loaded;
+  const paused = held || typing || sheet !== null || openingOriginal || !loaded;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const viewedRef = useRef(new Set<string>());
   const changedRef = useRef(false);
+  const originalRequest = useRef<symbol | null>(null);
 
   // ── Moving between moments ────────────────────────────────────────
   const close = useCallback(() => {
+    originalRequest.current = null;
     if (changedRef.current) refreshShelf();
     onClose();
   }, [onClose, refreshShelf]);
@@ -119,7 +126,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     elapsedRef.current = 0;
     setProgress(0);
     setSheet(s => (s === 'viewers' ? s : null));
+    setOpeningOriginal(false);
+    return () => { originalRequest.current = null; };
   }, [authorIdx, itemIdx]);
+
+  useEffect(() => {
+    if (!sheet) return;
+    sheetRef.current?.querySelector('button')?.focus({ preventScroll: true });
+  }, [sheet]);
+
+  const dismissSheet = useCallback(() => {
+    setSheet(null);
+    if (sheet === 'more') moreButtonRef.current?.focus({ preventScroll: true });
+  }, [sheet]);
 
   // ── Counting the view ─────────────────────────────────────────────
   useEffect(() => {
@@ -192,14 +211,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         if (e.key === 'Escape') (document.activeElement as HTMLElement | null)?.blur();
         return;
       }
-      if (e.key === 'Escape') { if (sheet) setSheet(null); else close(); }
-      else if (e.key === 'ArrowRight') goItem(1);
+      if (e.key === 'Escape') {
+        if (sheet) dismissSheet();
+        else close();
+        return;
+      }
+      if (sheet || openingOriginal || (e.target as HTMLElement | null)?.closest?.('button, a')) return;
+      if (e.key === 'ArrowRight') goItem(1);
       else if (e.key === 'ArrowLeft') goItem(-1);
       else if (e.key === ' ') { e.preventDefault(); setHeld(h => !h); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [goItem, close, typing, sheet]);
+  }, [goItem, close, typing, sheet, openingOriginal, dismissSheet]);
 
   // No page scroll behind the viewer.
   useEffect(() => {
@@ -211,7 +235,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   // ── Touch: tap, hold, swipe ───────────────────────────────────────
   const press = useRef<{ x: number; y: number; t: number; timer: number } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest('button, input, a, [data-sv-sheet]')) return;
+    if (sheet || openingOriginal || (e.target as Element).closest('button, input, a')) return;
     const timer = window.setTimeout(() => setHeld(true), HOLD_MS);
     press.current = { x: e.clientX, y: e.clientY, t: performance.now(), timer };
   };
@@ -293,16 +317,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     }
   };
 
-  const report = async (reason: string) => {
+  const report = (reason: string) => {
     if (!item) return;
-    if (!isAuthenticated) return openLoginModal();
-    setSheet(null);
-    try {
-      await reportStory(item.id, reason);
-      toast.success(t('stories.reported', { defaultValue: 'Thanks. We will take a look.' }));
-    } catch {
-      toast.error(t('stories.reportFailed', { defaultValue: "Couldn't send the report. Try again." }));
+    const send = () => {
+      void reportStory(item.id, reason)
+        .then(() => toast.success(t('stories.reported', { defaultValue: 'Thanks. We will take a look.' })))
+        .catch(() => toast.error(t('stories.reportFailed', { defaultValue: "Couldn't send the report. Try again." })));
+    };
+    if (!isAuthenticated) {
+      close();
+      return openLoginModal({ then: send });
     }
+    setSheet(null);
+    send();
   };
 
   const openProfile = (address: string) => {
@@ -312,6 +339,49 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
 
   if (!entry || !item) return null;
   const a = entry.author;
+  const shareable = item.shareable && Date.parse(item.expiresAt) > Date.now();
+  const remix = () => {
+    const source = { id: item.id, name: nameOf(a) };
+    const openComposer = () => useStoriesStore.getState().openCreator(source);
+    close();
+    if (isAuthenticated) openComposer();
+    else openLoginModal({ then: openComposer });
+  };
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(new URL(`/app/moment/${encodeURIComponent(item.id)}`, window.location.origin).href);
+      dismissSheet();
+      toast.success(t('stories.linkCopied', { defaultValue: 'Link copied' }));
+    } catch {
+      toast.error(t('stories.copyLinkFailed', { defaultValue: "Couldn't copy the moment link." }));
+    }
+  };
+  const openOriginal = async () => {
+    if (!item.remixSourceId || originalRequest.current) return;
+    const request = Symbol();
+    originalRequest.current = request;
+    setOpeningOriginal(true);
+    try {
+      const { author, item: original } = await getStory(item.remixSourceId);
+      if (originalRequest.current !== request) return;
+      if (!author || !original.shareable || Date.parse(original.expiresAt) <= Date.now()) {
+        throw new Error('Original moment unavailable');
+      }
+      if (changedRef.current) refreshShelf();
+      useStoriesStore.getState().openViewer(
+        [{ author, own: author.address === me, following: false, seen: original.viewed, latestAt: original.createdAt, items: [original] }],
+        0,
+        { item: 0 },
+      );
+    } catch {
+      if (originalRequest.current === request) toast.error(t('stories.originalUnavailable', { defaultValue: 'The original moment is no longer available.' }));
+    } finally {
+      if (originalRequest.current === request) {
+        originalRequest.current = null;
+        setOpeningOriginal(false);
+      }
+    }
+  };
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const capFill = progress;
   const nextEntry = entries[authorIdx + 1];
@@ -349,7 +419,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               const v = e.currentTarget;
               if (v.duration) setProgress(v.currentTime / v.duration);
             }}
-            onEnded={() => goItem(1)}
+            onEnded={() => { if (!paused) goItem(1); }}
             onError={() => setLoaded()}
           />
         ) : (
@@ -410,7 +480,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               {muted ? <VolumeX className="w-[18px] h-[18px]" /> : <Volume2 className="w-[18px] h-[18px]" />}
             </button>
           ) : null}
-          <button type="button" className="relative w-9 h-9 grid place-items-center" onClick={() => setSheet('more')} aria-label={t('common.more', { defaultValue: 'More' })}>
+          <button ref={moreButtonRef} type="button" className="relative w-9 h-9 shrink-0 grid place-items-center" onClick={() => setSheet('more')} aria-label={t('stories.moreActions', { defaultValue: 'Moment options' })} aria-expanded={sheet === 'more'}>
             <More className="w-5 h-5" />
           </button>
           <button type="button" className="relative w-9 h-9 grid place-items-center" onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
@@ -425,7 +495,17 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           </div>
         )}
 
-        {item.caption && <div data-sv-caption>{item.caption}</div>}
+        {(item.caption || item.remixSourceId) && (
+          <div data-sv-caption>
+            {item.remixSourceId && (
+              <button type="button" data-sv-original data-st-dark-glass onClick={openOriginal} disabled={openingOriginal}>
+                <Repeat2 className="w-4 h-4" />
+                {t('stories.watchOriginal', { defaultValue: 'Watch original moment' })}
+              </button>
+            )}
+            {item.caption && <div>{item.caption}</div>}
+          </div>
+        )}
 
         <div data-sv-reply>
           {own ? (
@@ -465,20 +545,29 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         </div>
 
         {sheet && (
-          <div className="absolute inset-0 z-[5]" onClick={() => setSheet(null)}>
-            <div data-sv-sheet data-st-glass onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
+          <div data-sv-sheet-backdrop onClick={dismissSheet}>
+            <div ref={sheetRef} data-sv-sheet data-st-glass onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
               {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} />}
               {sheet === 'more' && (
                 <div className="flex flex-col">
+                  {shareable && (
+                    <>
+                      <SheetButton onClick={remix}><Repeat2 className="w-[18px] h-[18px]" />{t('stories.remix', { defaultValue: 'Remix' })}</SheetButton>
+                      <SheetButton onClick={copyLink}><Link2 className="w-[18px] h-[18px]" />{t('postOptions.copyLink', { defaultValue: 'Copy link' })}</SheetButton>
+                    </>
+                  )}
                   {own ? (
-                    <SheetButton danger onClick={() => setSheet('delete')}>{t('stories.deleteMoment', { defaultValue: 'Delete moment' })}</SheetButton>
+                    <>
+                      <SheetButton onClick={() => setSheet('viewers')}>{t('stories.whoWatched', { defaultValue: 'Who watched' })}</SheetButton>
+                      <SheetButton danger onClick={() => setSheet('delete')}>{t('stories.deleteMoment', { defaultValue: 'Delete moment' })}</SheetButton>
+                    </>
                   ) : (
                     <>
                       <SheetButton onClick={() => openProfile(a.address)}>{t('stories.viewProfile', { defaultValue: 'View profile' })}</SheetButton>
                       <SheetButton danger onClick={() => setSheet('report')}>{t('stories.report', { defaultValue: 'Report' })}</SheetButton>
                     </>
                   )}
-                  <SheetButton onClick={() => setSheet(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</SheetButton>
+                  <SheetButton onClick={dismissSheet}>{t('common.cancel', { defaultValue: 'Cancel' })}</SheetButton>
                 </div>
               )}
               {sheet === 'report' && (
@@ -523,7 +612,7 @@ function SheetButton({ children, onClick, danger }: { children: React.ReactNode;
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left py-3 px-1 text-[15px] border-b border-[var(--st-line)] last:border-0 ${danger ? 'text-[rgb(255_92_100)] font-semibold' : ''}`}
+      className={`flex items-center gap-3 w-full text-left py-3 px-1 text-[15px] border-b border-[var(--st-line)] last:border-0 ${danger ? 'text-[rgb(255_92_100)] font-semibold' : ''}`}
     >
       {children}
     </button>

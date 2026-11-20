@@ -7161,6 +7161,13 @@
     "shareTitle": "@{{handle}} is for sale on Riftn"
   },
   "stories": {
+    "remix": "Remix",
+    "moreActions": "Moment options",
+    "remixing": "Remixing {{name}}'s moment",
+    "watchOriginal": "Watch original moment",
+    "originalUnavailable": "The original moment is no longer available.",
+    "copyLinkFailed": "Couldn't copy the moment link.",
+    "whoWatched": "Who watched",
     "create": "Create",
     "createDescription": "Choose what you want to create: a livestream, a story, or a post.",
     "goLive": "Go Live",

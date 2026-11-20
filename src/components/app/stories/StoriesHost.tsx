@@ -8,21 +8,21 @@ import { StoryCreator } from './StoryCreator';
 
 export default function StoriesHost() {
   const viewer = useStoriesStore(s => s.viewer);
-  const creatorOpen = useStoriesStore(s => s.creatorOpen);
+  const creator = useStoriesStore(s => s.creator);
   const closeViewer = useStoriesStore(s => s.closeViewer);
   const closeCreator = useStoriesStore(s => s.closeCreator);
   return (
     <>
       {viewer && (
         <StoryViewer
-          key={`${viewer.entries[viewer.author]?.author.address}-${viewer.item}`}
+          key={`${viewer.entries[viewer.author]?.author.address}-${viewer.item}-${viewer.entries[viewer.author]?.items[viewer.item]?.id ?? ''}`}
           entries={viewer.entries}
           startAuthor={viewer.author}
           startItem={viewer.item}
           onClose={closeViewer}
         />
       )}
-      {creatorOpen && <StoryCreator onClose={closeCreator} />}
+      {creator && <StoryCreator onClose={closeCreator} remixSource={creator.remixSource} />}
     </>
   );
 }
