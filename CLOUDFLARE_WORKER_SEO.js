@@ -2039,6 +2039,23 @@ async function supabaseLookup(query) {
   return rows[0] || null;
 }
 
+/** A STABLE PostgREST function's JSON result over GET, or null. Never throws. */
+async function supabaseRpc(name, params) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6000);
+  try {
+    const res = await fetch(`${SUPABASE_REST_BASE}/rpc/${name}?${new URLSearchParams(params)}`, {
+      signal: controller.signal,
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, Accept: 'application/json' },
+    });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** First row of a PostgREST select, or null. Never throws. */
 async function supabaseRow(query) {
   const controller = new AbortController();
@@ -3553,6 +3570,62 @@ function eventOrganizerLd(event) {
   if (username) return { '@type': 'Person', name: `@${username}`, url: `${APP_URL}/${encodeURIComponent(username)}` };
   const wallet = String(event.creator_wallet_address || '');
   return wallet ? { '@type': 'Person', name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}` } : ORG_JSONLD;
+}
+
+/**
+ * A community invite link, /communities/join/<code>. The page itself shows the
+ * community to anyone holding the link (community_preview_invite is granted to
+ * anon), so the unfurl shows the same: its banner or picture, name and size.
+ * Never indexed: an invite code is a key, not a page.
+ */
+function buildCommunityInviteHtml(code, invite) {
+  const canonicalUrl = `${APP_URL}/communities/join/${encodeURIComponent(code)}`;
+  const name = invite.name || 'a community';
+  const members = Number(invite.member_count) || 0;
+  const title = `Join ${name} on Riftn`;
+  const description = truncate(
+    `${invite.description ? `${invite.description} ` : ''}You have been invited to join ${name}${members ? `, ${members.toLocaleString('en-US')} ${members === 1 ? 'member' : 'members'}` : ''}.`,
+    200,
+  );
+  return entityHtml({
+    canonicalUrl,
+    title,
+    description,
+    image: absolutize(invite.banner_url) || absolutize(invite.avatar_url) || shareImage('communities'),
+    noindex: true,
+    heading: title,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/communities">Communities</a>`,
+    bodyHtml: `<p>${escHtml(description)}</p>${invite.slug ? `<p><a href="${APP_URL}/communities/${escHtml(invite.slug)}">${escHtml(name)}</a></p>` : ''}`,
+    jsonLd: { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonicalUrl },
+  });
+}
+
+/** One picture from the Creator gallery, /creator/gallery/<id>: the picture is the card. */
+function buildCreatorGalleryHtml(item) {
+  const canonicalUrl = `${APP_URL}/creator/gallery/${item.id}`;
+  const name = item.title || 'Creator image';
+  const description = truncate(`${name}, made with Riftn Creator. See it full size, react and comment, or make your own.`, 200);
+  const image = absolutize(item.image_url);
+  return entityHtml({
+    canonicalUrl,
+    title: `${name} | Riftn Creator`,
+    description,
+    image: image || shareImage('creator'),
+    heading: name,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/creator">Creator</a>`,
+    bodyHtml: `<p>${escHtml(description)}</p>`,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      name,
+      description,
+      url: canonicalUrl,
+      ...(image ? { contentUrl: image } : {}),
+      ...(item.width ? { width: item.width } : {}),
+      ...(item.height ? { height: item.height } : {}),
+      ...(item.created_at ? { uploadDate: item.created_at } : {}),
+    },
+  });
 }
 
 function buildEventHtml(event) {
@@ -5231,6 +5304,8 @@ function shouldServeSSR(pathname) {
   // ROUTE_SEGMENT, so without this rule the share link unfurls as the SPA
   // shell — the flow renderer below would never run.
   if (/^\/creator\/flow\/[a-z0-9]{6,32}\/?$/.test(pathname)) return true;
+  // One Creator gallery picture, /creator/gallery/<uuid>.
+  if (/^\/creator\/gallery\/[0-9a-fA-F-]{36}\/?$/.test(pathname)) return true;
   // One creator pack and one community DEX pool. Same story: `packs` and
   // `dex` are reserved ROUTE_SEGMENTs, so both renderers below sat unreached
   // and crawlers got the noindexed SPA shell.
@@ -7671,6 +7746,28 @@ async function handleRequest(request, env, ctx) {
     const post = await fetchPostRecord(reactionsMatch[1]);
     if (post && post.postType !== 'live') return guard(new Response(buildReactionsHtml(post, reactionsMatch[1]), { status: 200, headers: blogHeaders }));
     return entityNotFound();
+  }
+
+  // Community invite links (/communities/join/<code>, and the /app twin the
+  // share button copies). Without this they went to the fn as a community
+  // called "join" and unfurled as the homepage.
+  const inviteMatch = cleanPath.match(/^\/(?:app\/)?communities\/join\/([A-Za-z0-9_-]{4,64})$/);
+  if (inviteMatch) {
+    const invite = await supabaseRpc('community_preview_invite', { _code: inviteMatch[1] });
+    if (invite && invite.name) {
+      return guard(new Response(buildCommunityInviteHtml(inviteMatch[1], invite), {
+        status: 200,
+        headers: { ...blogHeaders, 'X-Robots-Tag': 'noindex, follow' },
+      }));
+    }
+    return entityMiss(invite === null ? undefined : null);
+  }
+
+  const galleryMatch = cleanPath.match(/^\/creator\/gallery\/([0-9a-fA-F-]{36})$/);
+  if (galleryMatch) {
+    const item = await supabaseRow(`rpc/creator_gallery_read?p_id=${galleryMatch[1]}&p_limit=1`);
+    if (item) return guard(new Response(buildCreatorGalleryHtml(item), { status: 200, headers: blogHeaders }));
+    return entityMiss(item);
   }
 
   // Stage invite links: /stages/<n> is the short share form
