@@ -84,6 +84,40 @@ describe('overlay click guard', () => {
     expect(onInside).toHaveBeenCalledTimes(1);
   });
 
+  it('closes a menu whose clear backdrop was pressed when nothing else did', async () => {
+    document.getElementById('overlay-root')!.insertAdjacentHTML(
+      'beforeend',
+      '<div data-radix-popper-content-wrapper id="wrap"><div data-modal-shield data-state="open" role="menu"></div></div>',
+    );
+    const wrap = document.getElementById('wrap')!;
+    const escapes = vi.fn<(e: Event) => void>();
+    document.addEventListener('keydown', escapes);
+    press(wrap);
+    await new Promise((r) => setTimeout(r, 5));
+    expect(escapes).toHaveBeenCalledTimes(1);
+    expect((escapes.mock.calls[0][0] as KeyboardEvent).key).toBe('Escape');
+    // The click that follows the press, once the menu is gone, still does not reach the page.
+    wrap.remove();
+    click(button);
+    expect(onButton).not.toHaveBeenCalled();
+    document.removeEventListener('keydown', escapes);
+  });
+
+  it('leaves a menu alone once it has already closed', async () => {
+    document.getElementById('overlay-root')!.insertAdjacentHTML(
+      'beforeend',
+      '<div data-radix-popper-content-wrapper id="wrap"><div data-modal-shield data-state="open" role="menu"></div></div>',
+    );
+    const wrap = document.getElementById('wrap')!;
+    const escapes = vi.fn<(e: Event) => void>();
+    document.addEventListener('keydown', escapes);
+    press(wrap);
+    wrap.firstElementChild!.setAttribute('data-state', 'closed');
+    await new Promise((r) => setTimeout(r, 5));
+    expect(escapes).not.toHaveBeenCalled();
+    document.removeEventListener('keydown', escapes);
+  });
+
   it('does not eat a keyboard click after a backdrop press that produced none', () => {
     press(scrim);
     window.dispatchEvent(new Event('keydown'));
