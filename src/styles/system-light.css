@@ -4,8 +4,8 @@
    and <html data-system-tone="light"> switches the palette. Every Minimal Light
    rule also matches this tone (the :is(... [data-system-tone="light"]) selectors
    across the sheets), so pages that already read on paper read here too; this
-   file then puts System's look back on top: a white page instead of paper, no
-   bentos (posts run edge to edge between hairlines), frosted white glass on the
+   file then puts System's look back on top: a white page instead of paper,
+   post bentos outlined by a thin grey line, frosted white glass on the
    pills, bars, popups and drawers, and ink-black primary buttons.
 
    The :not(#_) runs are specificity, not logic: they outrank the System sheets
@@ -44,7 +44,7 @@ html[data-theme="system"][data-system-tone="light"]:not(#_) :is(body, #root, #ap
 html[data-theme="system"][data-system-tone="light"] body::after { display: none !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_) [data-vaul-drawer]:not([data-keep-dark]) { background-color: var(--float-glass) !important; backdrop-filter: blur(24px) saturate(180%) !important; color: var(--ink) !important; }
 
-html[data-theme="system"][data-system-tone="light"] { --sl-page: #ffffff; --sl-card: #f4f4f6; --sl-ink: #0b0b0d; --sl-ink-2: rgba(11,11,13,.76); --sl-line: rgba(11,11,13,.09); }
+html[data-theme="system"][data-system-tone="light"] { --sl-page: #ffffff; --sl-card: #f4f4f6; --sl-ink: #0b0b0d; --sl-ink-2: rgba(11,11,13,.76); --sl-line: rgba(11,11,13,.09); --sl-bento-line: rgba(11,11,13,.11); }
 html[data-theme="system"][data-system-tone="light"], html[data-theme="system"][data-system-tone="light"] body, html[data-theme="system"][data-system-tone="light"] #root,
 html[data-theme="system"][data-system-tone="light"] #app-root, html[data-theme="system"][data-system-tone="light"] #app-root > div:not([data-bottom-nav]),
 html[data-theme="system"][data-system-tone="light"] main, html[data-theme="system"][data-system-tone="light"] main > div { background-color: var(--sl-page) !important; color: var(--sl-ink) !important; }
@@ -110,8 +110,9 @@ html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) :is(.w-10.h-10.bg-zinc-800, .w-9.h-9.bg-zinc-800) { background-color: rgba(11,11,13,.05) !important; background-image: none !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) :is(input, textarea)::placeholder { color: rgba(11,11,13,.6) !important; -webkit-text-fill-color: rgba(11,11,13,.6) !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) input.bg-zinc-900 { background-color: rgba(11,11,13,.045) !important; }
-/* System rule: no bentos. Posts run edge to edge, split by hairlines. */
-html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item] { background: transparent !important; border: 0 !important; border-bottom: 1px solid var(--sl-line) !important; border-radius: 0 !important; box-shadow: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+/* Posts keep System's bento shape, outlined by a thin grey line (white on
+   white made the card edge disappear). */
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item] { background: transparent !important; border: 1px solid var(--sl-bento-line) !important; border-radius: 16px !important; box-shadow: none !important; margin-left: 0 !important; margin-right: 0 !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item]::before, html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-item]::after { display: none !important; }
 /* ---- Top bar v2: spacing, depth, segmented feel ---- */
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav-outer] { background: transparent !important; padding: 6px 12px 10px !important; }
