@@ -96,7 +96,7 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
           {pref?.markedUnread && !reactions && !(unread > 0) && (
             <span data-count-badge data-chat-row-marked-unread aria-label="Unread" className={`${pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} h-2.5 w-2.5 shrink-0 rounded-[3px] bg-white`} />
           )}
-          <ReactionAlertBadge reactions={reactions} className={pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} />
+          <ReactionAlertBadge reactions={reactions} rowKey={`room:${community.id}`} className={pref?.pinnedAt || isMuted(pref) || lastAt ? 'ml-1' : 'ml-auto'} />
           {unread > 0 && <UnreadCountChip count={unread} className="ml-1" />}
         </span>
         {reactions ? (
