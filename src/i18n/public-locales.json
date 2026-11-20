@@ -1,5 +1,5 @@
 {
-  "version": "b7b6e30c29fe5f0a",
+  "version": "a1f239566f557e1e",
   "routes": {
     "/": [
       "ar",
@@ -1388,6 +1388,13 @@
       "tr"
     ],
     "/guides/tokenized-subscriptions-explained": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/top-10-alternative-social-media-apps-2026": [
       "ar",
       "es",
       "fr",
