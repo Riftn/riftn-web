@@ -65,7 +65,7 @@ html[data-theme="glass"] .signin-rift { --rift-a: #6ad8ff; --rift-b: #e2f7ff; }
   height: 112px;
   overflow: visible;
   opacity: 0;
-  filter: drop-shadow(0 0 5px var(--rift-a)) drop-shadow(0 0 16px color-mix(in srgb, var(--rift-a) 70%, transparent));
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px var(--rift-a)) drop-shadow(0 0 30px color-mix(in srgb, var(--rift-a) 60%, transparent));
   transform-origin: 50% 50%;
   animation:
     signin-rift-land 160ms ease-out 940ms forwards,
@@ -100,7 +100,7 @@ html[data-theme="glass"] .signin-rift { --rift-a: #6ad8ff; --rift-b: #e2f7ff; }
   opacity: 0;
   animation: signin-rift-speck var(--s) cubic-bezier(0.55, 0, 0.85, 0.4) var(--d) infinite;
 }
-.signin-rift__specks i:nth-child(even) { background: var(--rift-b); width: 2px; height: 2px; }
+.signin-rift__specks i:nth-child(even) { background: var(--rift-b); }
 
 /* The frame the rift opens into: the profile picture's shape (96px with a
    12px corner), scaled up. Hidden behind the slit until it opens. */
@@ -197,6 +197,38 @@ html[data-theme="glass"] .signin-rift { --rift-a: #6ad8ff; --rift-b: #e2f7ff; }
 }
 .signin-rift[data-phase="leaving"] { opacity: 0; transition: opacity 240ms ease; }
 .signin-rift[data-phase="leaving"] .signin-rift__frame { transform: scale(0.92); transition: transform 240ms ease; }
+
+/* Phones: the arrival's own veil, from the wait until the picture flies home.
+   The sheet's veil (below) gives way to it there, so the two never stack and
+   the dark never drops away when the sheet closes early. */
+.signin-rift__veil { display: none; }
+@media (max-width: 767px) {
+  .signin-rift__veil {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 7, 9, 0.88);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    animation: signin-rift-veil-in 240ms ease both;
+  }
+  .signin-rift[data-phase="flying"] .signin-rift__veil {
+    animation: none;
+    opacity: 0;
+    transition: opacity 260ms ease;
+  }
+  .signin-handoff-veil {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* Always on the veil there, so always white. */
+  .signin-rift .signin-rift__name { color: #fff; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45); }
+}
+@keyframes signin-rift-veil-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* The veil the sheet wears while it waits (rendered by LoginModal). */
 .signin-handoff-veil {
