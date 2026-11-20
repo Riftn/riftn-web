@@ -13,7 +13,7 @@ import ArrowLeft from "@/components/ui/cut-icons/back";
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCommunity, useCommunityMembers, useIsCommunityMember, useJoinCommunity, useLeaveCommunity } from '@/hooks/use-communities';
+import { useCommunity, useCommunityMembers, useIsCommunityMember, isMembershipLoading, useJoinCommunity, useLeaveCommunity } from '@/hooks/use-communities';
 import { useCommunityAbilities, isEffectivelyActive, isActivelyBanned } from '@/hooks/use-community-admin';
 import { CommunityManageSheet } from '@/components/app/communities/manage/CommunityManageSheet';
 import { holderGateOf, holderGateMessage, runHolderCheck } from '@/hooks/use-holder-gate';
@@ -58,7 +58,9 @@ export default function CommunityPage() {
 
   const { data: community, isLoading, isError, isFetching, refetch } = useCommunity(slug);
   const { data: members = [] } = useCommunityMembers(community?.id);
-  const { data: membership } = useIsCommunityMember(community?.id);
+  const membershipQuery = useIsCommunityMember(community?.id);
+  const membership = membershipQuery.data;
+  const membershipLoading = isMembershipLoading(membershipQuery);
   const joinMutation = useJoinCommunity();
   const [checkingHolder, setCheckingHolder] = useState(false);
   const leaveMutation = useLeaveCommunity();
@@ -184,6 +186,7 @@ export default function CommunityPage() {
         community={community}
         isMember={isMember}
         isPendingMember={isPendingMember}
+        membershipLoading={membershipLoading}
         isOwner={abilities.isOwner}
         canEdit={abilities.can('change_info')}
         canManage={abilities.canManage}
@@ -233,7 +236,7 @@ export default function CommunityPage() {
       </div>
 
       <div className="px-3 py-4">
-        {community.is_private && !isMember ? (
+        {community.is_private && !isMember && membershipLoading ? null : community.is_private && !isMember ? (
           <CommunityTabEmptyState tab={tab} isPendingApproval={isPendingMember} />
         ) : (
           <>
@@ -268,6 +271,7 @@ export default function CommunityPage() {
                   community={community}
                   membership={membership}
                   isMember={isMember}
+                  membershipLoading={membershipLoading}
                   onJoin={handleJoinLeave}
                   joining={joinMutation.isPending || checkingHolder}
                 />

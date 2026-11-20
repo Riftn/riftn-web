@@ -5,7 +5,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * React Query hooks for community CRUD, membership, and pinned communities.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -266,9 +267,63 @@ export function useBannedCommunityMembers(communityId: string | undefined) {
 
 // ─── Check if user is member ─────────────────────────────────────────────────
 
+// Last membership row we saw per wallet + community, kept on the device so a
+// chat you are already in opens with its message box, not "Join this
+// community", while the fresh read is still on its way.
+const MEMBERSHIP_STORE = 'riftn.community-membership.v1';
+const MEMBERSHIP_STORE_MAX = 300;
+
+function membershipStoreKey(wallet: string, communityId: string) {
+  return `${wallet.toLowerCase()}:${communityId}`;
+}
+
+function readMembershipStore(): Record<string, CommunityMember> {
+  try {
+    const raw = localStorage.getItem(MEMBERSHIP_STORE);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeMembership(wallet: string, communityId: string, row: CommunityMember | null) {
+  try {
+    const store = readMembershipStore();
+    const key = membershipStoreKey(wallet, communityId);
+    if (row) store[key] = row;
+    else if (key in store) delete store[key];
+    else return;
+    const keys = Object.keys(store);
+    for (const k of keys.slice(0, Math.max(0, keys.length - MEMBERSHIP_STORE_MAX))) delete store[k];
+    localStorage.setItem(MEMBERSHIP_STORE, JSON.stringify(store));
+  } catch {
+    // Storage full or blocked: the live read still decides.
+  }
+}
+
+/**
+ * A membership we already know without asking: the joined-communities list
+ * (Messages loads it for its rows) or the copy saved on this device. Only a
+ * "you are in" answer is reused; "not a member" always waits for the server,
+ * so a stale copy can never flash the join prompt at someone who joined since.
+ */
+export function knownMembership(qc: QueryClient, communityId: string | undefined, wallet: string | null | undefined): CommunityMember | undefined {
+  if (!communityId || !wallet) return undefined;
+  for (const [, rows] of qc.getQueriesData<(CommunityMember & { communities?: Community })[]>({ queryKey: ['communities', 'user', wallet] })) {
+    const row = rows?.find(r => r.community_id === communityId);
+    if (row) {
+      const { communities: _c, ...member } = row;
+      return member as CommunityMember;
+    }
+  }
+  return readMembershipStore()[membershipStoreKey(wallet, communityId)];
+}
+
 export function useIsCommunityMember(communityId: string | undefined) {
   const { walletAddress } = useAuth();
-  return useQuery({
+  const qc = useQueryClient();
+  const query = useQuery({
     queryKey: ['communities', 'membership', communityId, walletAddress],
     queryFn: async () => {
       if (!communityId || !walletAddress) return null;
@@ -285,7 +340,25 @@ export function useIsCommunityMember(communityId: string | undefined) {
       return data as CommunityMember | null;
     },
     enabled: !!communityId && !!walletAddress,
+    placeholderData: () => knownMembership(qc, communityId, walletAddress),
   });
+  // Keep the device copy in step with every settled answer, including the
+  // optimistic join/leave writes, so the next cold open starts right.
+  const settled = query.isPlaceholderData ? undefined : query.data;
+  useEffect(() => {
+    if (!communityId || !walletAddress || settled === undefined) return;
+    writeMembership(walletAddress, communityId, settled);
+  }, [communityId, walletAddress, settled]);
+  return query;
+}
+
+/**
+ * True while we do not yet know whether the signed-in wallet belongs to the
+ * community. Callers hold back the join prompt (and anything else that only
+ * a non-member sees) until this turns false.
+ */
+export function isMembershipLoading(q: { data: unknown; fetchStatus: string }): boolean {
+  return q.data === undefined && q.fetchStatus !== 'idle';
 }
 
 // ─── Create community ────────────────────────────────────────────────────────
