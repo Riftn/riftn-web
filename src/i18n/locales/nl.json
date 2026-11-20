@@ -8922,6 +8922,7 @@
     "dubbed": "Gesynchroniseerde audio",
     "preparing": "Voorbereiden van nagesynchroniseerde audio...",
     "unavailable": "Gesynchroniseerde audio is niet beschikbaar voor deze video.",
+    "creatorVoiceSoon": "Voor nu de stem van je apparaat. De eigen stem van de maker wordt voorbereid.",
     "notEnoughTokens": "Niet genoeg tokens voor nasynchronisatie.",
     "notEnoughTokensDescription": "U heeft ongeveer {{needed}} tokens nodig en bezit {{held}}.",
     "paymentLeftWallet": "Je tokens zijn uit je portemonnee gehaald. Druk nogmaals op Betalen om te proberen het te bevestigen.",

@@ -66,6 +66,9 @@ const SIZE_PRESETS = [
 ] as const;
 type SizeKey = typeof SIZE_PRESETS[number]['key'];
 
+/** `creator-voice`: the device voice is playing while the shared creator-voice track is still being made. */
+type DubHint = 'preparing' | 'unavailable' | 'creator-voice' | null;
+
 interface Props {
   /** Numeric NFT/post id. Overlay is a no-op when undefined or 0. */
   tokenId?: number | string | null;
@@ -263,13 +266,15 @@ export function VideoSubtitleOverlay({ tokenId, videoRef, buttonClassName, butto
     () => { setShowSettings(true); setOpen(true); });
 
 
-  const dubHint: 'preparing' | 'unavailable' | null =
+  const dubHint: DubHint =
     !dubOn || !isReady || !dubLang ? null
     // Voices load a moment after the page; an empty list is not a "no".
     : !dubVoice && !hasCachedDubLanguage(dubLang) ? (voices.length ? 'unavailable' : 'preparing')
     : dubFailed || dubTranslationStatus === 'failed' ? 'unavailable'
-    : dubSegments ? null
-    : 'preparing';
+    : !dubSegments ? 'preparing'
+    // The device is reading the lines until the creator-voice track lands.
+    : !cachedDub?.audioUrl && (cachedDub?.status === 'pending' || cachedDub?.status === 'processing') ? 'creator-voice'
+    : null;
 
   // Viewer corrections to the original-language lines. Only fetched once
   // captions are actually wanted, and only applied to the original: a
@@ -581,7 +586,7 @@ interface SubtitleMenuProps {
   setLang: (code: string) => void;
   dubOn: boolean;
   setDubOn: (next: boolean) => void;
-  dubHint: 'preparing' | 'unavailable' | null;
+  dubHint: DubHint;
   /** False when the chosen caption language has no voice. */
   dubPossible: boolean;
 }
@@ -599,7 +604,10 @@ function SubtitleMenu(props: SubtitleMenuProps) {
   const touchOrigin = useRef<{ x: number; y: number } | null>(null);
 
   const dubHintText =
-    dubHint === 'unavailable' ? t('dub.unavailable', 'Dubbed audio is not available for this video.') : dubHint === 'preparing' ? t('dub.preparing', 'Preparing dubbed audio…') : null;
+    dubHint === 'unavailable' ? t('dub.unavailable', 'Dubbed audio is not available for this video.')
+    : dubHint === 'preparing' ? t('dub.preparing', 'Preparing dubbed audio…')
+    : dubHint === 'creator-voice' ? t('dub.creatorVoiceSoon', "Your device's voice for now. The creator's own voice is being prepared.")
+    : null;
 
   // Inside the control row the button is a sibling of the speed/loop/PiP/mute
   // buttons and wears exactly their chrome; standalone it keeps the older
@@ -749,7 +757,7 @@ function SubtitleMenu(props: SubtitleMenuProps) {
       </div>
       {dubOn && dubHintText && (
         <p className="mt-1 text-[11px] text-white/50 flex items-center gap-1">
-          {dubHint === 'preparing' && <Loader2 className="w-3 h-3 animate-spin" />}
+          {dubHint !== 'unavailable' && <Loader2 className="w-3 h-3 shrink-0 animate-spin" />}
           {dubHintText}
         </p>
       )}
