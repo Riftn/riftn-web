@@ -154,6 +154,17 @@ export function soundTimeFor(url: string | null | undefined, mediaTime: number):
 }
 
 const bound = new WeakSet<HTMLMediaElement>();
+/** The song each element's listener chose to play in full, by its link. */
+const freed = new WeakMap<HTMLMediaElement, string>();
+
+/**
+ * The listener moved through the song themselves: play it in full from here,
+ * so a seek past the post's part is not pulled back to its start. Holds for
+ * this song only; the element going on to another link is kept to its part.
+ */
+export function releaseSoundWindow(el: HTMLMediaElement | null | undefined): void {
+  if (el) freed.set(el, el.currentSrc || el.src);
+}
 
 /**
  * Keep `el` inside the post's part of the song: start there, and when it
@@ -165,7 +176,9 @@ const bound = new WeakSet<HTMLMediaElement>();
 export function bindSoundWindow(el: HTMLMediaElement | null | undefined): void {
   if (!el || bound.has(el)) return;
   bound.add(el);
+  const isFreed = () => freed.get(el) === (el.currentSrc || el.src);
   const keepInside = () => {
+    if (isFreed()) return;
     const window = soundWindow(el.currentSrc || el.src);
     if (!window) return;
     const t = el.currentTime;
@@ -180,7 +193,7 @@ export function bindSoundWindow(el: HTMLMediaElement | null | undefined): void {
   el.addEventListener('timeupdate', keepInside);
   el.addEventListener('ended', () => {
     const window = soundWindow(el.currentSrc || el.src);
-    if (!window || !el.loop) return;
+    if (!window || !el.loop || isFreed()) return;
     el.currentTime = window.start;
     el.play().catch(() => {});
   });

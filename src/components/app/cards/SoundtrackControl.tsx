@@ -1,5 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { Loader2, RotateCcw } from "lucide-react";
 import Music from "@/components/ui/cut-icons/music";
 
@@ -9,6 +9,7 @@ import Play from "@/components/ui/cut-icons/play";
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { SoundCreditLink } from './SoundCreditLink';
+import { releaseSoundWindow, soundCredit } from '@/lib/sound-window';
 
 interface Props {
   title?: string;
@@ -20,23 +21,10 @@ interface Props {
   error: boolean;
   toggle: () => void;
   audioRef?: RefObject<HTMLAudioElement | null>;
-  /** overlay: idle capsule that opens into a wave along the photo's bottom edge.
+  /** overlay: the idle capsule on the photo.
+   *  bar: the player docked under the photo while the song plays.
    *  inline: the capsule alone, for places with no photo edge to run along. */
-  layout?: 'overlay' | 'inline';
-}
-
-const BAR_COUNT = 40;
-
-/** Stable bar heights per song, so the same song always draws the same wave. */
-function waveFor(seed: string): number[] {
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
-  return Array.from({ length: BAR_COUNT }, (_, i) => {
-    h = Math.imul(h ^ (h >>> 15), 2246822507) + i;
-    const noise = ((h >>> 0) % 1000) / 1000;
-    const shape = Math.abs(Math.sin(i * 0.55)) * 0.5 + 0.5;
-    return 0.3 + 0.7 * noise * shape;
-  });
+  layout?: 'overlay' | 'bar' | 'inline';
 }
 
 function useProgress(audioRef: RefObject<HTMLAudioElement | null> | undefined, active: boolean) {
@@ -65,13 +53,11 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
   const name = title || t('feed.music');
   const label = `${action}: ${name}${creator ? ` — ${creator}` : ''}`;
   const open = playing || loading;
-  const bars = useMemo(() => waveFor(`${name}|${creator ?? ''}`), [name, creator]);
-  const { current, duration, read } = useProgress(audioRef, open && layout === 'overlay');
+  const { current, duration, read } = useProgress(audioRef, open && layout === 'bar');
   const onClick = (event: React.MouseEvent) => { event.stopPropagation(); toggle(); };
 
-  // The wave is the song's seek bar. It has to catch its own pointer: left
-  // click-through, a drag along it landed on the photo underneath and opened
-  // the post (feed) or the fullscreen viewer (post page).
+  // The seek bar has to catch its own pointer: left click-through, a drag
+  // along it landed on the post underneath and opened it.
   const [scrub, setScrub] = useState<number | null>(null);
   const dragging = useRef(false);
   const fractionAt = (el: HTMLElement, clientX: number) => {
@@ -81,6 +67,10 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
   const seek = (seconds: number) => {
     const a = audioRef?.current;
     if (!a || !duration) return;
+    // Moving through the song themselves means the listener wants the whole
+    // song, not the post's part: without this the part's guard pulled every
+    // seek past its end straight back to the start.
+    releaseSoundWindow(a);
     a.currentTime = Math.min(duration, Math.max(0, seconds));
     read();
   };
@@ -117,55 +107,60 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
     : playing ? <Pause className="h-4 w-4 fill-current" aria-hidden="true" />
     : <Play className="h-4 w-4 translate-x-px fill-current" aria-hidden="true" />;
 
-  if (layout === 'overlay' && open) {
+  if (layout === 'bar') {
+    const shown = scrub === null ? current : scrub * duration;
+    const hasCredit = !!soundCredit(url);
     return (
-      <div data-keep-dark className="dh-soundwave relative w-full pt-10 text-white">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-black/15 to-black/65" aria-hidden="true" />
-        <div className="relative flex items-end gap-3 px-3">
-          <div data-keep-dark className="min-w-0 flex-1 [text-shadow:0_1px_8px_rgba(0,0,0,.6)]">
-            <span className="flex items-center gap-1.5 truncate text-sm font-semibold"><Music className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{name}</span>
-            {creator && <span className="block truncate text-xs text-white/80">{creator}</span>}
-            <SoundCreditLink url={url} creator={creator} className="block truncate text-[10px] text-white/70" />
-          </div>
-          <button
-            type="button"
-            data-no-navigate
-            aria-label={label}
-            aria-pressed={playing}
-            onClick={onClick}
-            className="dh-sound-glass pointer-events-auto grid h-10 w-10 shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            {icon}
-          </button>
+      <div data-glass-embed className="dh-soundbar flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white/10 text-white/70" aria-hidden="true">
+          <span className={cn('dh-sound-eq', playing && 'is-playing')}><i /><i /><i /><i /></span>
         </div>
-        <div
-          role="slider"
-          tabIndex={0}
-          aria-label={_copy("copy.67ae3405bcd4", { defaultValue: "Seek" })}
-          aria-valuemin={0}
-          aria-valuemax={Math.round(duration)}
-          aria-valuenow={Math.round(scrub === null ? current : scrub * duration)}
-          aria-valuetext={_copy("copy.a48c498b8725", { defaultValue: "{{value1}} of {{value2}}", value1: clock(scrub === null ? current : scrub * duration), value2: clock(duration) })}
+        <div className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold leading-tight">{name}</span>
+          {hasCredit
+            ? <SoundCreditLink url={url} creator={creator} className="block truncate text-xs text-white/50" />
+            : creator && <span className="block truncate text-xs text-white/50">{creator}</span>}
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="w-9 shrink-0 text-[11px] tabular-nums text-white/50">{clock(shown)}</span>
+            <div
+              role="slider"
+              tabIndex={0}
+              aria-label={_copy("copy.67ae3405bcd4", { defaultValue: "Seek" })}
+              aria-valuemin={0}
+              aria-valuemax={Math.round(duration)}
+              aria-valuenow={Math.round(shown)}
+              aria-valuetext={_copy("copy.a48c498b8725", { defaultValue: "{{value1}} of {{value2}}", value1: clock(shown), value2: clock(duration) })}
+              data-no-navigate
+              data-no-swipe
+              onPointerDown={onScrubDown}
+              onPointerMove={onScrubMove}
+              onPointerUp={onScrubUp}
+              onPointerCancel={onScrubCancel}
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={onScrubKey}
+              className="group relative flex-1 cursor-pointer touch-none rounded py-2 outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              <div className="relative h-1 rounded-full bg-white/15">
+                <div className="absolute inset-y-0 left-0 rounded-full bg-white" style={{ width: `${progress * 100}%` }} />
+                <div
+                  className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                  style={{ left: `${progress * 100}%`, opacity: scrub !== null ? 1 : undefined }}
+                />
+              </div>
+            </div>
+            <span className="w-9 shrink-0 text-right text-[11px] tabular-nums text-white/50">{duration ? clock(duration) : '–:––'}</span>
+          </div>
+        </div>
+        <button
+          type="button"
           data-no-navigate
-          data-no-swipe
-          onPointerDown={onScrubDown}
-          onPointerMove={onScrubMove}
-          onPointerUp={onScrubUp}
-          onPointerCancel={onScrubCancel}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={onScrubKey}
-          className="pointer-events-auto relative mx-3 cursor-pointer touch-none py-2 outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label={label}
+          aria-pressed={playing}
+          onClick={onClick}
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-black transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
-          <div className={cn('flex h-3.5 items-center gap-[2px]', playing && 'is-playing')} aria-hidden="true">
-            {bars.map((h, i) => (
-              <i
-                key={i}
-                className={cn('dh-soundwave-bar', i / BAR_COUNT < progress && 'is-played')}
-                style={{ '--h': h.toFixed(2), animationDelay: `-${((i * 0.137) % 0.5).toFixed(2)}s` } as React.CSSProperties}
-              />
-            ))}
-          </div>
-        </div>
+          {icon}
+        </button>
       </div>
     );
   }
