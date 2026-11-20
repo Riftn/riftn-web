@@ -891,6 +891,8 @@ type SendVariables = {
   destruct?: DmDestructChoice;
   /** Pay-to-unlock price for a photo or video. */
   lockPrice?: number;
+  /** Text only: delivered when the other person next comes online. */
+  whenOnline?: boolean;
   /** The clientKey of the line already on screen (a retry, or drawn before the mutation). */
   retryKey?: string;
 };
@@ -938,7 +940,7 @@ export function useSendMessage(conversationId: string) {
    * line in the thread yet.
    */
   const insertOptimistic = (variables: SendVariables): string => {
-    const { content, msgType, gifUrl, mediaFile, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice } = variables;
+    const { content, msgType, gifUrl, mediaFile, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice, whenOnline } = variables;
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     pendingSends.set(tempId, variables);
     // Optimistic: prepend temp message, drawn exactly as it will look delivered.
@@ -971,6 +973,7 @@ export function useSendMessage(conversationId: string) {
       voiceDuration: voiceDuration ?? null,
       ...(mediaOptions ? { mediaOptions } : {}),
       ...(destruct ? { destruct: destructFromChoice(destruct) } : {}),
+      ...(whenOnline ? { whenOnline: true } : {}),
       isRead: false,
       isEdited: false,
       editedAt: null,
@@ -1027,6 +1030,7 @@ export function useSendMessage(conversationId: string) {
       mediaOptions,
       destruct,
       lockPrice,
+      whenOnline,
     }: {
       content: string;
       msgType?: DmMsgType;
@@ -1042,6 +1046,8 @@ export function useSendMessage(conversationId: string) {
       destruct?: DmDestructChoice;
       /** Pay-to-unlock price for a photo or video. */
       lockPrice?: number;
+      /** Text only: delivered when the other person next comes online. */
+      whenOnline?: boolean;
       /** Resend a failed line in place: the clientKey of the bubble already on screen. */
       retryKey?: string;
     }): Promise<DmMessage> => {
@@ -1119,6 +1125,7 @@ export function useSendMessage(conversationId: string) {
         txHash,
         voiceDuration,
         forwardedFrom,
+        ...(whenOnline ? { whenOnline: true } : {}),
       };
       const sent = await emitSendMessage(payload);
       return {

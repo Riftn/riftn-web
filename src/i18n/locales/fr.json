@@ -20879,6 +20879,9 @@
     "footnote": "Les heures sont dans votre fuseau horaire. Personne ne voit un message avant son envoi.",
     "footnoteNamed": "Les heures sont dans votre fuseau horaire. {{name}} ne voit un message qu'une fois envoyé.",
     "textOnly": "Seuls les messages texte peuvent être programmés pour l'instant.",
+    "whenOnline": "À sa prochaine connexion",
+    "whenOnlineHint": "S'affiche comme envoyé maintenant. Le message arrive à sa prochaine ouverture de Riftn, et la coche devient double une fois lu.",
+    "whenOnlineTick": "En attente de sa connexion. Passe à deux coches une fois lu.",
     "scheduledToast": "Programmé pour {{when}}",
     "failedToast": "Un message programmé n'a pas pu être envoyé",
     "error": "Ça n'a pas marché. Réessayez."

@@ -38,6 +38,8 @@ export interface SendMessagePayload {
    * decrypts, re-encrypts for the target and cites the original here.
    */
   forwardedFrom?: { messageId: string };
+  /** One-to-one text: held by the server until the other person next comes online. */
+  whenOnline?: boolean;
 }
 
 export interface EditedMessage {

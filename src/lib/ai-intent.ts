@@ -142,6 +142,29 @@ function isInfoRequest(message: string): boolean {
   return matchesAny(message, INFO_REQUEST_KEYWORDS);
 }
 
+/**
+ * Openers that make a message a question, not an order.
+ *
+ * "what does 'create a thread' mean", "how do I make me a profile", "is it
+ * possible to design my page": the loose image words sit inside a question,
+ * and those went to image creation instead of being answered (Requests
+ * 1385bb79, 2026-11-20). A question still makes a picture when it says so
+ * explicitly ("can you draw me a fox") or asks what something looks like.
+ * "can you" / "could you" are requests, so they are not on this list.
+ */
+const QUESTION_OPENERS = [
+  'what', "what's", 'whats', 'how', 'why', 'who', 'whom', 'whose', 'where', 'when', 'which',
+  'is', 'are', 'am', 'was', 'were', 'do', 'does', 'did', 'should', 'would', 'will',
+  'has', 'have', 'explain', 'tell me', 'help me understand', 'i want to know', 'i wanna know',
+  'i have a question', 'question',
+];
+
+function isQuestion(message: string): boolean {
+  const start = message.trim().toLowerCase().replace(/^(?:hey|hi|hello|yo|ok|okay|so|and|but|please)[\s,!.]+/, '');
+  const opens = QUESTION_OPENERS.some((opener) => start.startsWith(opener) && !/[a-z0-9]/.test(start.charAt(opener.length)));
+  return opens && !matchesPhrase(message, 'look like');
+}
+
 /** Phrases that can only mean "generate a video". */
 const EXPLICIT_VIDEO_PHRASES = [
   'generate video', 'generate a video', 'create video', 'create a video',
@@ -240,6 +263,7 @@ export function requiresImageGeneration(
   if (requiresVideoGeneration(message)) return false;
   // An attachment plus an instruction is an edit, whatever the words are.
   if (hasAttachedImage) return true;
+  if (isQuestion(message)) return matchesAny(message, EXPLICIT_IMAGE_PHRASES);
   const loose = options.conversational && !isInfoRequest(message)
     ? [...LOOSE_IMAGE_PHRASES, ...CONVERSATIONAL_IMAGE_PHRASES]
     : LOOSE_IMAGE_PHRASES;
