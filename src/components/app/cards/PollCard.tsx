@@ -73,8 +73,11 @@ export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
   const isEnded = pollHasEnded(poll);
   const isOpen = !isEnded;
   const hasVoted = localVotedIndexes !== null || !!poll.userVote;
-  // Results show once you've voted, and to everyone once the poll is over.
-  const showResults = hasVoted || isEnded;
+  // The poll's creator always sees how it is going (a creator asking their
+  // audience often doesn't vote). Everyone else sees results once they've
+  // voted, and everyone once the poll is over.
+  const isOwner = !!walletAddress && poll.address.toLowerCase() === walletAddress.toLowerCase();
+  const showResults = hasVoted || isEnded || isOwner;
   const votedIndexes = localVotedIndexes ?? poll.userVote?.optionIndexes ?? [];
 
   // Merge local optimistic counts with server counts
@@ -92,8 +95,6 @@ export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
 
   const topCount = Math.max(0, ...poll.options.map(o => getCount(o.index)));
   const isWinner = (index: number) => pollOptionWins(getCount(index), topCount, isEnded);
-
-  const isOwner = walletAddress && poll.address.toLowerCase() === walletAddress.toLowerCase();
 
   const applyOptimisticVote = (indexes: number[]) => {
     const counts: Record<number, number> = {};
