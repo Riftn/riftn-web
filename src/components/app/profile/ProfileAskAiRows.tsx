@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import CutAssistant from '@/components/ui/cut-icons/assistant';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
 import { cn } from '@/lib/utils';
+import { formatCount } from '@/lib/format-count';
 
 /** The link the Assistant reads: fresh chat, prompt sent on arrival. */
 function askAiHref(prompt: string) {
@@ -171,7 +172,7 @@ export function ProfileAskAiRows({ profile, isFollowing, onBack, onClose }: Prof
                   primary ? 'bg-black text-white' : 'bg-white/10 text-white',
                 )}
               >
-                {a.count}
+                {formatCount(a.count)}
               </span>
             )}
           </button>
