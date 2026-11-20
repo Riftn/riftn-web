@@ -73,13 +73,19 @@ function findOwnPicture(): HTMLElement | null {
   return best;
 }
 
-/** Specks drifting into the rift: [start x, start y, seconds, delay] in px / s. */
-const SPECKS: Array<[number, number, number, number]> = [
-  [-92, -70, 2.1, 0], [86, -96, 2.6, 0.4], [-70, 104, 2.3, 0.9], [104, 62, 2.0, 1.3],
-  [-118, 18, 2.8, 0.2], [64, 120, 2.4, 1.6], [-40, -126, 2.2, 1.1], [124, -20, 2.7, 0.7],
-  [-104, 88, 2.5, 1.9], [30, -118, 2.9, 2.2], [-128, -40, 2.2, 1.5], [96, 100, 2.6, 0.5],
-  [-56, 132, 2.0, 2.4], [118, -78, 2.4, 1.8],
-];
+/**
+ * Specks drifting into the rift: [start x, start y, seconds, delay, size] in
+ * px / s. A cloud around the line, taller than wide, as in the concept.
+ */
+const SPECKS: Array<[number, number, number, number, number]> = (() => {
+  let seed = 42;
+  const r = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  return Array.from({ length: 26 }, () => {
+    const ang = r() * Math.PI * 2;
+    const rad = 70 + r() * 110;
+    return [Math.round(Math.cos(ang) * rad * 0.55), Math.round(Math.sin(ang) * rad), 1.7 + r() * 1.3, r() * 2.4, 1.5 + r() * 2] as [number, number, number, number, number];
+  });
+})();
 
 /** The Riftn mark (public/brand-icon.svg). */
 const MARK_PATH = 'M868.0 1411.1C865.0 1410.1 850.4 1405.3 835.5 1400.5C805.2 1390.7 783.8 1382.8 771.1 1376.9C717.6 1351.7 677.9 1324.1 639.5 1285.6C609.6 1255.6 590.7 1231.4 568.8 1195.0C551.3 1165.8 533.4 1123.9 523.7 1089.0C515.5 1059.9 511.6 1039.4 508.5 1009.0C507.1 995.1 506.9 967.6 507.2 749.0L507.5 504.5L552.5 504.5C597.0 504.5 597.6 504.5 605.0 506.9C634.6 516.1 654.8 536.7 664.1 567.0L666.4 574.5L667.1 783.0C667.5 910.3 668.2 994.6 668.8 999.5C672.9 1032.5 683.8 1067.8 699.3 1098.5C706.9 1113.5 712.2 1122.1 723.1 1136.9C751.6 1175.7 783.2 1202.4 828.4 1226.0C838.4 1231.2 843.3 1234.6 850.6 1241.2C860.7 1250.5 869.9 1264.7 874.3 1278.0C878.3 1290.1 878.5 1293.7 878.5 1354.0L878.5 1412.5L876.0 1412.7C874.6 1412.9 871.0 1412.1 868.0 1411.1ZM1035.7 1412.3C1035.3 1412.0 1035.0 1385.5 1035.0 1353.6C1035.0 1300.8 1035.2 1294.7 1036.9 1286.4C1040.5 1269.2 1048.7 1254.3 1060.9 1242.7C1068.7 1235.4 1075.0 1231.1 1088.0 1224.2C1136.6 1198.6 1172.6 1165.5 1201.4 1120.1C1225.3 1082.4 1238.4 1044.7 1244.1 997.6C1245.9 982.2 1246.0 972.8 1246.0 780.3C1246.0 585.7 1246.1 578.9 1247.9 571.3C1250.4 561.2 1252.4 555.8 1256.2 549.0C1268.3 527.2 1287.4 512.3 1310.8 506.4C1320.0 504.1 1321.2 504.0 1362.4 504.0C1393.9 504.0 1404.9 504.3 1405.8 505.2C1407.4 506.8 1407.6 962.7 1406.0 988.5C1402.8 1041.2 1392.1 1089.5 1373.0 1137.5C1361.3 1167.0 1335.8 1211.7 1316.3 1237.0C1299.7 1258.6 1293.0 1266.1 1272.6 1286.5C1239.8 1319.1 1206.7 1343.6 1168.0 1363.7C1162.2 1366.8 1155.9 1370.1 1154.0 1371.1C1137.6 1379.8 1121.7 1385.9 1075.6 1401.1C1040.4 1412.7 1037.0 1413.7 1035.7 1412.3ZM883.1 836.6C882.3 835.6 882.0 765.2 882.2 564.9L882.5 294.5L885.5 286.0C892.9 265.5 909.0 250.5 932.5 242.5C944.5 238.4 950.0 238.0 998.1 238.0C1032.9 238.0 1044.9 238.3 1045.8 239.2C1046.7 240.1 1047.0 300.6 1047.0 505.5C1047.0 786.1 1047.1 779.4 1042.6 791.9C1036.3 809.4 1017.8 826.1 997.5 832.8C982.3 837.8 980.0 838.0 930.7 838.0C892.7 838.0 884.0 837.8 883.1 836.6Z';
@@ -96,10 +102,10 @@ export function RiftMarks() {
     <>
       <div className="signin-rift__glow" aria-hidden />
       <div className="signin-rift__specks" aria-hidden>
-        {SPECKS.map(([x, y, s, d], i) => (
+        {SPECKS.map(([x, y, s, d, size], i) => (
           <i
             key={i}
-            style={{ '--x': `${x}px`, '--y': `${y}px`, '--s': `${s}s`, '--d': `${RIFT_INTRO_MS / 1000 + d}s` } as CSSProperties}
+            style={{ '--x': `${x}px`, '--y': `${y}px`, '--s': `${s}s`, '--d': `${RIFT_INTRO_MS / 1000 + d}s`, width: size, height: size } as CSSProperties}
           />
         ))}
       </div>
@@ -360,6 +366,9 @@ export function SignInHandoff() {
       aria-live="polite"
       aria-label={opened ? name : t('loginModal.signingIn', 'Signing you in…')}
     >
+      {/* Phones: the veil is the arrival's own, so it stays until the picture
+          flies home even when the sheet (and its veil) has already gone. */}
+      <div className="signin-rift__veil" aria-hidden />
       <div className="signin-rift__stage">
         <ArrivalMarks look={look} opened={opened} picture={picture} initial={initial} />
         <div ref={frameRef} className="signin-rift__frame" style={flight} aria-hidden>
