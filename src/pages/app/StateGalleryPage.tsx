@@ -184,6 +184,7 @@ import type { SuggestedAccount } from '@/lib/api/dehub';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { filterNavItems } from '@/components/app/navigation/nav-search';
 import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { MenuAccountSwitcher } from '@/components/app/navigation/MenuAccountSwitcher';
 import { groupMenuItems } from '@/components/app/navigation/menu-groups';
 import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
 
@@ -920,6 +921,15 @@ function MenuReorderGallery() {
   const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
   return (
     <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
+      {/* The menu header: who is signed in, and the quick account switcher. */}
+      <div data-menu-header-gallery className="mb-3 flex items-center gap-3 px-1">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-700 text-sm font-medium text-white">M</div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-semibold text-white">Mal</p>
+          <p className="truncate text-[13px] text-zinc-400">@maldoteth</p>
+        </div>
+        <MenuAccountSwitcher />
+      </div>
       <div className="mb-3 flex gap-1.5">
         {(['tabs', 'sections', 'folders'] as const).map((value) => (
           <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}

@@ -36,8 +36,9 @@ import { useSearchHistory } from '@/hooks/use-search-history';
 // Lazy for the same reason: @/lib/profiles reaches the wallet vault, and a
 // static import from this eager component would put the wallet stack in the
 // entry bundle.
-const SidebarProfileSwitcher = React.lazy(() =>
-  import('./navigation/SidebarProfileSwitcher').then(m => ({ default: m.SidebarProfileSwitcher }))
+const loadAccountSwitcher = () => import('./navigation/MenuAccountSwitcher');
+const MenuAccountSwitcher = React.lazy(() =>
+  loadAccountSwitcher().then(m => ({ default: m.MenuAccountSwitcher }))
 );
 const PostModal = React.lazy(() =>
   import('@/features/post/PostModal').then(m => ({ default: m.PostModal }))
@@ -106,7 +107,7 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   // Fetch the menu's tiles once the page is idle, so the first open is instant.
   useEffect(() => {
     const idle = (window as any).requestIdleCallback as ((cb: () => void) => number) | undefined;
-    const id = idle ? idle(() => { void loadMenuLayout(); }) : window.setTimeout(() => { void loadMenuLayout(); }, 2000);
+    const id = idle ? idle(() => { void loadMenuLayout(); void loadAccountSwitcher(); }) : window.setTimeout(() => { void loadMenuLayout(); void loadAccountSwitcher(); }, 2000);
     return () => {
       const cancel = (window as any).cancelIdleCallback as ((id: number) => void) | undefined;
       if (idle && cancel) cancel(id); else window.clearTimeout(id);
@@ -193,6 +194,10 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
               {Math.floor(dhbBalance).toLocaleString()}
             </button>
           )}
+          {/* Every other account saved on this device, one tap away. */}
+          <Suspense fallback={null}>
+            <MenuAccountSwitcher onNavigate={closeMenu} />
+          </Suspense>
         </div>
       )}
 
@@ -293,12 +298,6 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
       {/* Pinned bottom: account actions - only shown when authenticated */}
       {isAuthenticated && (
         <div data-vaul-no-drag data-menu-footer className="shrink-0 -mx-4 space-y-1 border-t border-white/10 px-4 pt-2">
-          {/* Every other account saved on this device, one tap away. Settings
-              → Profile used to be the only surface for this, which made
-              multi-account invisible unless you already knew it existed. */}
-          <Suspense fallback={null}>
-            <SidebarProfileSwitcher onNavigate={closeMenu} />
-          </Suspense>
           <div className="-mx-1.5 flex items-center justify-between">
             {/* forgetProfile: logging out revokes this session's tokens
                 server-side, so its stored snapshot is dead the moment this
