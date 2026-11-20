@@ -68,6 +68,29 @@ describe('bounded playback recovery', () => {
     vi.advanceTimersByTime(60_000);
     expect(options.play).toHaveBeenCalledTimes(1);
   });
+  it('asks again, without a reload, when the browser drops a play for a new source', async () => {
+    const { options, recovery } = setup();
+    const dropped = Object.assign(new Error('interrupted by a new load request'), { name: 'AbortError' });
+    options.play.mockImplementationOnce(() => Promise.reject(dropped));
+    recovery.start();
+    await Promise.resolve(); await Promise.resolve();
+    expect(options.play.mock.calls.map(call => call[0])).toEqual([false, false]);
+    expect(options.report).not.toHaveBeenCalled();
+    // The one reload is still there for a real stall.
+    vi.advanceTimersByTime(10_000);
+    expect(options.play.mock.calls.map(call => call[0])).toEqual([false, false, true]);
+    expect(options.report).toHaveBeenCalledWith('retry', expect.objectContaining({ reason: 'timeout' }));
+  });
+  it('stops asking when every play is dropped', async () => {
+    const { options, recovery } = setup();
+    const dropped = Object.assign(new Error('interrupted'), { name: 'AbortError' });
+    options.play.mockImplementation(() => Promise.reject(dropped));
+    recovery.start();
+    for (let i = 0; i < 20; i++) await Promise.resolve();
+    // Three more tries, then the usual one reload, then it is a failure.
+    expect(options.play.mock.calls.map(call => call[0])).toEqual([false, false, false, false, true]);
+    expect(recovery.phase).toBe('failed');
+  });
   it('does not time out a playing video or keep timers after stopping', () => {
     const { options, recovery } = setup();
     recovery.start();
