@@ -6,6 +6,7 @@ import { PenSquare, LogIn, CornerDownLeft } from "lucide-react";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 
 import Search from "@/components/ui/cut-icons/search";
+import Users from "@/components/ui/cut-icons/communities";
 import X from "@/components/ui/cut-icons/close";
 
 import { DhbCoin } from '@/components/app/DhbAmount';
@@ -36,6 +37,11 @@ import { useSearchHistory } from '@/hooks/use-search-history';
 // Lazy for the same reason: @/lib/profiles reaches the wallet vault, and a
 // static import from this eager component would put the wallet stack in the
 // entry bundle.
+const compactFormat = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+function compactCount(n: number): string {
+  return compactFormat.format(n);
+}
+
 const loadAccountSwitcher = () => import('./navigation/MenuAccountSwitcher');
 const MenuAccountSwitcher = React.lazy(() =>
   loadAccountSwitcher().then(m => ({ default: m.MenuAccountSwitcher }))
@@ -148,6 +154,14 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     if (isPostModalOpen) setPostModalMounted(true);
   }, [isPostModalOpen]);
 
+  // Follower and following numbers under your name in the phone menu, like
+  // the app's menu header. Falls back to the @handle when the counts are not
+  // on the signed-in user yet.
+  const countOf = (n: unknown, alt: unknown): number | null =>
+    typeof n === 'number' ? n : Array.isArray(n) ? n.length : typeof alt === 'number' ? alt : null;
+  const menuFollowers = user ? countOf(user.followers, user.follower_count) : null;
+  const menuFollowing = user ? countOf(user.followings, user.following_count) : null;
+
   const mobileNavContent = (
     <>
       {/* Pinned top: identity + menu search */}
@@ -181,7 +195,15 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
                 {user.displayName || user.username}
               </BadgedName>
             </p>
-            {user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
+            {menuFollowers != null || menuFollowing != null ? (
+              <p data-testid="menu-follow-counts" className="flex min-w-0 items-center gap-1 text-[13px] text-zinc-400 tabular-nums">
+                <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">{compactCount(menuFollowers ?? 0)} {t('profile.followers')}</span>
+                <span aria-hidden className="mx-1.5 h-3 w-px flex-shrink-0 bg-zinc-500/50" />
+                <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">{compactCount(menuFollowing ?? 0)} {t('profile.following')}</span>
+              </p>
+            ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
           {Math.floor(dhbBalance) > 0 && (
             <button

@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TranslatableText } from '@/components/app/TranslatableText';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -166,7 +167,9 @@ export function NotificationRequestCard({ notification, onEngaged }: Props) {
     <div data-feed-comment className="mt-1.5">
       {text && (
         <p data-feed-comment-text className="text-[14.5px] leading-[1.42] whitespace-pre-wrap break-words [overflow-wrap:anywhere] line-clamp-[12]">
-          {text}
+          {/* Foreign text reads in your language (follows the auto-translate
+              setting), same as comments under a post. */}
+          <TranslatableText text={text} />
         </p>
       )}
 
