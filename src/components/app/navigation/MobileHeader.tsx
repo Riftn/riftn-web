@@ -250,6 +250,17 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </span>
           </button>
         )}
+        {!isAuthenticated && (
+          <button
+            onClick={() => openLoginModal()}
+            onPointerDown={warmSheetForLogin}
+            className="flex h-11 shrink-0 items-center justify-end"
+          >
+            <span className="flex h-7 items-center rounded-full bg-[rgba(127,127,127,0.22)] px-3 text-[13px] font-semibold text-white">
+              {_copy("copy.c189840cf7e2", { defaultValue: "Log in" })}
+            </span>
+          </button>
+        )}
       </div>
     </header>
     {islandBar && showBar && (
