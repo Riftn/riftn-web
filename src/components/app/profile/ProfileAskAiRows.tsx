@@ -21,6 +21,11 @@ function askAiHref(prompt: string) {
   return `/app/assistant#preset=chat&send=1&prompt=${encodeURIComponent(prompt)}`;
 }
 
+const STAR_PATH =
+  'M14.450 3.600L14.900 3.600Q17.550 3.600 17.550 6.250C17.550 11.000 21.000 14.450 28.400 14.450L28.400 14.900Q28.400 17.550 25.750 17.550C21.000 17.550 17.550 21.000 17.550 28.400L17.100 28.400Q14.450 28.400 14.450 25.750C14.450 21.000 11.000 17.550 3.600 17.550L3.600 17.100Q3.600 14.450 6.250 14.450C11.000 14.450 14.450 11.000 14.450 3.600Z M16.000 10.600C17.458 12.976 19.024 14.542 21.400 16.000C19.024 17.458 17.458 19.024 16.000 21.400C14.542 19.024 12.976 17.458 10.600 16.000C12.976 14.542 14.542 12.976 16.000 10.600Z';
+const STAR_URL = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path fill-rule='evenodd' d='${STAR_PATH}'/></svg>`)}")`;
+const STAR_MASK = { WebkitMask: `${STAR_URL} center / contain no-repeat`, mask: `${STAR_URL} center / contain no-repeat` } as const;
+
 /** Chrome edge, shared by the menu row and the main action. */
 const ASK_AI_EDGE =
   "relative before:pointer-events-none before:absolute before:-inset-px before:rounded-[inherit] before:p-px before:content-[''] before:[background:conic-gradient(from_210deg,#fff,#6d6d6d,#e8e8e8,#3a3a3a,#fff)] before:[-webkit-mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude]";
@@ -37,7 +42,8 @@ export function AskAiMenuRow({ onClick }: { onClick: () => void }) {
       )}
     >
       <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0">
-        <CutAssistant className="w-4 h-4 text-black" />
+        {/* A mask, not an svg: themes re-ink every svg inside a glass button. */}
+        <span aria-hidden className="w-4 h-4 bg-black" style={STAR_MASK} />
       </div>
       <div className="min-w-0">
         <span className="block text-white font-medium">{t('profileAskAi.row', { defaultValue: 'Ask AI' })}</span>
@@ -146,6 +152,7 @@ export function ProfileAskAiRows({ profile, isFollowing, onBack, onClose }: Prof
             key={a.key}
             onClick={() => ask(a.prompt)}
             data-ask-ai-action={a.key}
+            data-keep-white={primary || undefined}
             className={cn(
               'w-full flex items-center gap-3 px-3 py-3 rounded-2xl border text-left active:scale-[0.98] transition-[background-color,transform]',
               primary
@@ -195,6 +202,7 @@ export function ProfileAskAiRows({ profile, isFollowing, onBack, onClose }: Prof
         />
         <button
           type="submit"
+          data-keep-white
           disabled={!question.trim()}
           aria-label={t('profileAskAi.send', { defaultValue: 'Send' })}
           className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center shrink-0 disabled:opacity-40"

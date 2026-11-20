@@ -1662,14 +1662,14 @@ function AssistantPageForAccount() {
     };
   }, []);
 
-  const handleSend = async (overrideMessage?: string) => {
+  const handleSend = async (overrideMessage?: string, opts?: { noSkillMatch?: boolean }) => {
     const messageToSend = overrideMessage || input.trim();
     if (!messageToSend || isLoading || restoringConversation) return;
     pendingDraftCompletion.current = () => { if (!overrideMessage) setInput.complete(input, ""); };
 
     // ── Skill matching: slash command wins, otherwise auto-trigger ──
     const slash = extractSlashSkill(messageToSend, userSkills);
-    const matchedSkill: UserSkill | null = slash.skill ?? matchSkill(messageToSend, userSkills);
+    const matchedSkill: UserSkill | null = slash.skill ?? (opts?.noSkillMatch ? null : matchSkill(messageToSend, userSkills));
     const skillCleanedInput = slash.skill ? slash.cleaned : messageToSend;
     let skillSourceImage: string | null = null;
     if (matchedSkill) {
@@ -2007,7 +2007,8 @@ function AssistantPageForAccount() {
     if (!autoSendPrompt || !isAuthenticated || isLoading || restoringConversation) return;
     const prompt = autoSendPrompt;
     setAutoSendPrompt(null);
-    void handleSend(prompt);
+    // A handed-over ask (e.g. "…posts by @riftn") must not trip a skill's auto-match.
+    void handleSend(prompt, { noSkillMatch: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoSendPrompt, isAuthenticated, isLoading, restoringConversation]);
 
