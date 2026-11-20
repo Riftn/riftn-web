@@ -9304,6 +9304,7 @@ export type Database = {
           job_id: string | null
           language: string
           last_attempt_at: string | null
+          needs_redo: boolean
           provider: string | null
           status: string
           transcript_id: string
@@ -9320,6 +9321,7 @@ export type Database = {
           job_id?: string | null
           language: string
           last_attempt_at?: string | null
+          needs_redo?: boolean
           provider?: string | null
           status?: string
           transcript_id: string
@@ -9336,6 +9338,7 @@ export type Database = {
           job_id?: string | null
           language?: string
           last_attempt_at?: string | null
+          needs_redo?: boolean
           provider?: string | null
           status?: string
           transcript_id?: string
