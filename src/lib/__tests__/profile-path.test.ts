@@ -9,9 +9,9 @@ describe('profilePath', () => {
   });
 
   it('sends @assistant to its profile, not the Assistant page', () => {
-    expect(ASSISTANT_PROFILE_PATH).toBe('/@assistant');
-    expect(profilePath('assistant')).toBe('/@assistant');
-    expect(profilePath('@Assistant')).toBe('/@assistant');
-    expect(profilePath(ASSISTANT_ADDRESS.toUpperCase().replace('0X', '0x'))).toBe('/@assistant');
+    expect(ASSISTANT_PROFILE_PATH).toBe(`/app/profile?id=${ASSISTANT_ADDRESS}`);
+    expect(profilePath('assistant')).toBe(ASSISTANT_PROFILE_PATH);
+    expect(profilePath('@Assistant')).toBe(ASSISTANT_PROFILE_PATH);
+    expect(profilePath(ASSISTANT_ADDRESS.toUpperCase().replace('0X', '0x'))).toBe(ASSISTANT_PROFILE_PATH);
   });
 });
