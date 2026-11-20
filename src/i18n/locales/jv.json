@@ -2213,7 +2213,7 @@
     "promptDevice": "Sajeroning Sajeroning",
     "deviceInfoNoErrors": "Ora ana",
     "promptFilters": "Kategori",
-    "promptMediaError": "Pilih gambar utawa file video ingkang ukurané kurang saking 50 MB.",
+    "promptMediaError": "Pilih gambar utawa file video ingkang ukurané kurang saking 200 MB.",
     "promptMediaLimit": "Nganti {{max}} lampiran.",
     "removePromptAttachment": "{{name}}",
     "promptAttachment": "Attachment {{number}}",

@@ -2214,7 +2214,7 @@
     "promptDevice": "Perangkat & OS (untuk bug)",
     "deviceInfoNoErrors": "Tidak ada",
     "promptFilters": "Filter berdasarkan kategori",
-    "promptMediaError": "Pilih gambar atau video masing - masing di bawah 50MB.",
+    "promptMediaError": "Pilih gambar atau video masing - masing di bawah 200MB.",
     "promptMediaLimit": "Hingga {{max}} lampiran.",
     "removePromptAttachment": "Hapus {{name}}",
     "promptAttachment": "Lampiran {{number}}",

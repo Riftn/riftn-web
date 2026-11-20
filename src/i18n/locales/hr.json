@@ -2213,7 +2213,7 @@
     "promptDevice": "Uređaj i OS (za bugove)",
     "deviceInfoNoErrors": "Nijedno",
     "promptFilters": "Filtriraj po kategoriji",
-    "promptMediaError": "Odaberite slike ili videozapise ispod 20 MB svaki.",
+    "promptMediaError": "Odaberite slike ili videozapise ispod 200 MB svaki.",
     "promptMediaLimit": "Do {{max}} privitaka.",
     "removePromptAttachment": "Ukloni {{name}}",
     "promptAttachment": "Privitak {{number}}",

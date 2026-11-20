@@ -2178,7 +2178,7 @@
     "loadFailed": "रिक्वेस्ट लोड नहीं हो पायो",
     "queued": "क्यूमा राखिएको",
     "promptPageTitle": "अनुरोध",
-    "promptMediaError": "हर एक 50MB ले छोट फोटो या वीडियो चुना।",
+    "promptMediaError": "हर एक 200MB ले छोट फोटो या वीडियो चुना।",
     "title": "फीचर के मांग",
     "submit": "जमा करा",
     "requests": "अनुरोध",

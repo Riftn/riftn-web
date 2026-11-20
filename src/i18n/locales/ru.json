@@ -2235,7 +2235,7 @@
     "deviceInfoErrors": "Недавние ошибки",
     "deviceInfoNoErrors": "Нет",
     "promptFilters": "Фильтр по категориям",
-    "promptMediaError": "Выберите изображения или видео размером менее 50 МБ каждое.",
+    "promptMediaError": "Выберите изображения или видео размером менее 200 МБ каждое.",
     "promptMediaLimit": "До {{max}} вложений.",
     "removePromptAttachment": "Удалить {{name}}",
     "promptAttachment": "Вложение {{number}}",

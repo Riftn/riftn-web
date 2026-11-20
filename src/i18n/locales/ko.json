@@ -2214,7 +2214,7 @@
     "promptDevice": "장치 및 OS (버그에 대한)",
     "deviceInfoNoErrors": "없음",
     "promptFilters": "분류별 필터",
-    "promptMediaError": "50MB 이하의 이미지 또는 비디오 선택",
+    "promptMediaError": "200MB 이하의 이미지 또는 비디오 선택",
     "promptMediaLimit": "{{max}}까지의 첨부 가능",
     "removePromptAttachment": "{{name}} 제거",
     "promptAttachment": "첨부 {{number}}",

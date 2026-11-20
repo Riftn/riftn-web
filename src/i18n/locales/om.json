@@ -2226,7 +2226,7 @@
     "promptDevice": "Meeshaa & OS (rakkoolee teknikaaf)",
     "deviceInfoNoErrors": "Homaa",
     "promptFilters": "Gosa tokkoon calaluu",
-    "promptMediaError": "Suuraa ykn viidiyoo tokkoon tokkoon isaanii 50MB gadi filadhaa.",
+    "promptMediaError": "Suuraa ykn viidiyoo tokkoon tokkoon isaanii 200MB gadi filadhaa.",
     "promptMediaLimit": "Hanga {{max}} dabalataatti.",
     "removePromptAttachment": "{{name}} irraa kaasaa.",
     "promptAttachment": "Dabalata {{number}}",

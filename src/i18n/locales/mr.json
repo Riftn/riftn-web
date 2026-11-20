@@ -2213,7 +2213,7 @@
     "promptDevice": "साधन व ओएस (बग करीता)",
     "deviceInfoNoErrors": "काहीही नाही",
     "promptFilters": "श्रेणीनुसार फिल्टर करा",
-    "promptMediaError": "प्रत्येकी 50MB अंतर्गत प्रतिमा किंवा व्हिडिओ निवडा.",
+    "promptMediaError": "प्रत्येकी 200MB अंतर्गत प्रतिमा किंवा व्हिडिओ निवडा.",
     "promptMediaLimit": "अधिकतम {{max}} संलग्नक.",
     "removePromptAttachment": "{{name}} काढून टाका",
     "promptAttachment": "अटॅचमेंट {{number}}",

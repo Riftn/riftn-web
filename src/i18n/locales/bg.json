@@ -2213,7 +2213,7 @@
     "promptDevice": "Устройство и ОС (за грешки)",
     "deviceInfoNoErrors": "Нито едно",
     "promptFilters": "Филтрирай по категория",
-    "promptMediaError": "Изберете снимки или видеа до 50MB всяко.",
+    "promptMediaError": "Изберете снимки или видеа до 200MB всяко.",
     "promptMediaLimit": "Върху {{max}} вложения.",
     "removePromptAttachment": "Изтрий {{name}}",
     "promptAttachment": "Вложение {{number}}",

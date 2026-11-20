@@ -2215,7 +2215,7 @@
     "promptDevice": "Kifaa & OS (kwa hitilafu)",
     "deviceInfoNoErrors": "Hakuna",
     "promptFilters": "Chuja kwa kategoria",
-    "promptMediaError": "Chagua picha au video chini ya 50MB kila moja.",
+    "promptMediaError": "Chagua picha au video chini ya 200MB kila moja.",
     "promptMediaLimit": "Hadi {{max}} viambatanisho.",
     "removePromptAttachment": "Ondoa {{name}}",
     "promptAttachment": "Kiambatanisho {{number}}",

@@ -2207,7 +2207,7 @@
     "promptDevice": "Enhet och operativsystem (för buggar)",
     "deviceInfoNoErrors": "Ingen",
     "promptFilters": "Filtrera efter kategori",
-    "promptMediaError": "Välj bilder eller videor under 20 MB vardera.",
+    "promptMediaError": "Välj bilder eller videor under 200 MB vardera.",
     "promptMediaLimit": "Upp till {{max}} bilagor.",
     "removePromptAttachment": "Ta bort {{name}}",
     "promptAttachment": "Bilaga {{number}}",

@@ -2213,7 +2213,7 @@
     "promptDevice": "Pajisja dhe sistemi operativ (për defektet)",
     "deviceInfoNoErrors": "Asnjë",
     "promptFilters": "Filtro sipas kategorisë",
-    "promptMediaError": "Zgjidh imazhe ose video nën 50MB secila.",
+    "promptMediaError": "Zgjidh imazhe ose video nën 200MB secila.",
     "promptMediaLimit": "Deri në {{max}} attachments.",
     "removePromptAttachment": "Hiq {{name}}",
     "promptAttachment": "Bashkëngjitur {{number}}",

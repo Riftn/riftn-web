@@ -2213,7 +2213,7 @@
     "promptDevice": "Cihaz və OS (böcəklər üçün)",
     "deviceInfoNoErrors": "Heç biri",
     "promptFilters": "Kateqoriyaya görə filtrləyin",
-    "promptMediaError": "Hər biri 20MB-dan kiçik şəkillər və ya videolar seçin.",
+    "promptMediaError": "Hər biri 200MB-dan kiçik şəkillər və ya videolar seçin.",
     "promptMediaLimit": "{{max}} əlavələrinə qədər.",
     "removePromptAttachment": "{{name}}-ı sil",
     "promptAttachment": "Qoşma {{number}}",

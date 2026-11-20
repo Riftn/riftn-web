@@ -2236,7 +2236,7 @@
     "promptDevice": "Fitaovana & OS (ho an'ny bugs)",
     "deviceInfoNoErrors": "Tsy misy",
     "promptFilters": "Sivitra avy amin'ny sokajy",
-    "promptMediaError": "Safidio sary na horonan-tsary eo ambanin'ny 50MB.",
+    "promptMediaError": "Safidio sary na horonan-tsary eo ambanin'ny 200MB.",
     "promptMediaLimit": "Hatramin'ny {{max}} attachments.",
     "removePromptAttachment": "Esorina {{name}}",
     "promptAttachment": "Fametahana {{number}}",

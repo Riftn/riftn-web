@@ -2213,7 +2213,7 @@
     "promptDevice": "อุปกรณ์และระบบปฏิบัติการ (สำหรับปัญหา)",
     "deviceInfoNoErrors": "ไม่มี",
     "promptFilters": "กรองตามหมวดหมู่",
-    "promptMediaError": "เลือกภาพหรือวิดีโอไม่เกิน 50MB ต่อไฟล์",
+    "promptMediaError": "เลือกภาพหรือวิดีโอไม่เกิน 200MB ต่อไฟล์",
     "promptMediaLimit": "สามารถแนบได้สูงสุด {{max}} ไฟล์",
     "removePromptAttachment": "ลบ {{name}}",
     "promptAttachment": "ไฟล์ที่แนบ {{number}}",

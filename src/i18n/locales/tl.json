@@ -2259,7 +2259,7 @@
     "promptDevice": "Device & OS (para sa mga bug)",
     "deviceInfoNoErrors": "Wala",
     "promptFilters": "I - filter ayon sa kategorya",
-    "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 50MB bawat isa.",
+    "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 200MB bawat isa.",
     "promptMediaLimit": "Hanggang {{max}}(na) attachment.",
     "removePromptAttachment": "Alisin ang {{name}}",
     "promptAttachment": "Kalakip {{number}}",

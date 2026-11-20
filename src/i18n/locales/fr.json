@@ -2321,7 +2321,7 @@
     "deviceInfoErrors": "Erreurs récentes",
     "deviceInfoNoErrors": "Aucune",
     "promptFilters": "Filtrer par catégorie",
-    "promptMediaError": "Choisissez des images ou vidéos de moins de 50 Mo chacune.",
+    "promptMediaError": "Choisissez des images ou vidéos de moins de 200 Mo chacune.",
     "promptMediaLimit": "Jusqu’à {{max}} pièces jointes.",
     "removePromptAttachment": "Supprimer {{name}}",
     "promptAttachment": "Pièce jointe {{number}}",

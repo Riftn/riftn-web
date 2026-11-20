@@ -2213,7 +2213,7 @@
     "promptDevice": "Na'ura & OS (don kwari)",
     "deviceInfoNoErrors": "Babu",
     "promptFilters": "Filter da category",
-    "promptMediaError": "Zaɓi hotuna ko bidiyo a ƙarƙashin 20MB kowane.",
+    "promptMediaError": "Zaɓi hotuna ko bidiyo a ƙarƙashin 200MB kowane.",
     "promptMediaLimit": "Har zuwa {{max}} attachments.",
     "removePromptAttachment": "Cire {{name}}",
     "promptAttachment": "Haɗa {{number}}",

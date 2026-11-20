@@ -2214,7 +2214,7 @@
     "promptDevice": "دستگاه و سیستم عامل (برای بررسی باگ‌ها)",
     "deviceInfoNoErrors": "هیچکدام",
     "promptFilters": "فیلتر بر اساس دسته بندی",
-    "promptMediaError": "تصاویر یا ویدیوهایی با حجم کمتر از ۵۰ مگابایت انتخاب کنید.",
+    "promptMediaError": "تصاویر یا ویدیوهایی با حجم کمتر از ۲۰۰ مگابایت انتخاب کنید.",
     "promptMediaLimit": "حداکثر {{max}} فایل پیوست.",
     "removePromptAttachment": "{{name}} را حذف کنید",
     "promptAttachment": "پیوست {{number}}",

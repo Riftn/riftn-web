@@ -2240,7 +2240,7 @@
     "deviceInfoErrors": "हाल की त्रुटियां",
     "deviceInfoNoErrors": "कोई नहीं",
     "promptFilters": "श्रेणी के अनुसार फिल्टर करें",
-    "promptMediaError": "प्रत्येक 50MB के तहत छवियां या वीडियो चुनें।",
+    "promptMediaError": "प्रत्येक 200MB के तहत छवियां या वीडियो चुनें।",
     "promptMediaLimit": "{{max}} तक अटैचमेंट।",
     "removePromptAttachment": "{{name}} हटाएँ",
     "promptAttachment": "अनुलग्नक {{number}}",

@@ -2311,7 +2311,7 @@
     "promptDevice": "ডিভাইস এবং ওএস (ত্রুটির জন্য)",
     "deviceInfoNoErrors": "কোনটিই নয়",
     "promptFilters": "বিকল্প ছবি বা ভিডিও দ্বারা ফিল্টার করুন",
-    "promptMediaError": "চয়ন করুন যে আপনি 50MB প্রতিটির চেয়ে কম আকারের ছবি বা ভিডিও",
+    "promptMediaError": "চয়ন করুন যে আপনি 200MB প্রতিটির চেয়ে কম আকারের ছবি বা ভিডিও",
     "promptMediaLimit": "আপনার জন্য {{max}} অ্যাটাচমেন্ট।",
     "removePromptAttachment": "অ্যাটাচমেন্ট {{name}} অপসারণ করুন",
     "promptAttachment": "অ্যাটাচমেন্ট {{number}}",

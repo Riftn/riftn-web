@@ -2213,7 +2213,7 @@
     "promptDevice": "Iedalījums & sistēma (par kļūdām)",
     "deviceInfoNoErrors": "Nav",
     "promptFilters": "Filtrēt pēc kategorijas",
-    "promptMediaError": "Izvēlēties attēlus vai video, kas ir mazāks par 50MB.",
+    "promptMediaError": "Izvēlēties attēlus vai video, kas ir mazāks par 200MB.",
     "promptMediaLimit": "Līdz {{max}} attēliem vai video.",
     "removePromptAttachment": "Noņemt {{name}}",
     "promptAttachment": "Attēls {{number}}",

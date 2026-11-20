@@ -2213,7 +2213,7 @@
     "promptDevice": "Дастгоҳ & Системаи оператсионӣ (барои хатогиҳо)",
     "deviceInfoNoErrors": "Ҳеҷ",
     "promptFilters": "Филтр аз рӯи категория",
-    "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 50MB bawat.",
+    "promptMediaError": "Pumili ng mga larawan o video sa ilalim ng 200MB bawat.",
     "promptMediaLimit": "{{max}} attachments.",
     "removePromptAttachment": "Удалить {{name}}",
     "promptAttachment": "Замимот {{number}}",

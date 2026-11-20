@@ -2213,7 +2213,7 @@
     "promptDevice": "ئۈسكۈنىلەر ۋە مەشغۇلات سىستېمىسى (خاتالىقلار ئۈچۈن)",
     "deviceInfoNoErrors": "يوق",
     "promptFilters": "تۈرلەر بويىچە سۈزگۈچ",
-    "promptMediaError": "ھەر بىرى 20MB دىن تۆۋەن سۈرەت ياكى فىلىم تاللاڭ.",
+    "promptMediaError": "ھەر بىرى 200MB دىن تۆۋەن سۈرەت ياكى فىلىم تاللاڭ.",
     "promptMediaLimit": "تاكى {{max}}attachments غىچە.",
     "removePromptAttachment": "{{name}} ئۆچۈرۈش",
     "promptAttachment": "قوشۇمچە {{number}}",

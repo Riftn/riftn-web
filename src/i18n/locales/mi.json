@@ -2213,7 +2213,7 @@
     "promptDevice": "Pūrere & OS (mō ngā pepeke)",
     "deviceInfoNoErrors": "Kore",
     "promptFilters": "Tātari mā te kāwai",
-    "promptMediaError": "Kōwhiria ngā whakaahua, ngā ataata rānei i raro i te 50MB ia mea.",
+    "promptMediaError": "Kōwhiria ngā whakaahua, ngā ataata rānei i raro i te 200MB ia mea.",
     "promptMediaLimit": "Kia tae ki te {{max}} ngā tāpiritanga.",
     "removePromptAttachment": "Tangohia te {{name}}",
     "promptAttachment": "Tāpiritanga {{number}}",

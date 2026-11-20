@@ -2214,7 +2214,7 @@
     "promptDevice": "デバイス＆OS（バグの場合）",
     "deviceInfoNoErrors": "なし",
     "promptFilters": "カテゴリ別にフィルタリング",
-    "promptMediaError": "50MB未満の画像または動画を選択してください。",
+    "promptMediaError": "200MB未満の画像または動画を選択してください。",
     "promptMediaLimit": "{{max}}個のアップロード可能",
     "removePromptAttachment": "{{name}}を削除",
     "promptAttachment": "アップロード{{number}}",

@@ -2226,7 +2226,7 @@
     "promptDevice": "අත්‍යාපත්තිය සහ OS (බූග්‍රුවේ ලියාව)",
     "deviceInfoNoErrors": "කිසිවක් නැත",
     "promptFilters": "කාණ්ඩය අනුව පෙරහන් කරන්න",
-    "promptMediaError": "එක් එක් 50MB යටතේ රූප හෝ වීඩියෝ තෝරා ගන්න.",
+    "promptMediaError": "එක් එක් 200MB යටතේ රූප හෝ වීඩියෝ තෝරා ගන්න.",
     "promptMediaLimit": "උපරිම {{max}} ඇමුණුම්.",
     "removePromptAttachment": "{{name}} ඉවත් කරන්න",
     "promptAttachment": "ඇමිණුම {{number}}",

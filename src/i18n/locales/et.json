@@ -2213,7 +2213,7 @@
     "promptDevice": "Seade ja operatsioonisüsteem (vigade jaoks)",
     "deviceInfoNoErrors": "Mitte ühtegi",
     "promptFilters": "Filtreeri kategooria järgi",
-    "promptMediaError": "Valige pildid või videod mahuga alla 50 MB.",
+    "promptMediaError": "Valige pildid või videod mahuga alla 200 MB.",
     "promptMediaLimit": "Kuni {{max}} manust.",
     "removePromptAttachment": "Eemalda {{name}}",
     "promptAttachment": "Manus {{number}}",

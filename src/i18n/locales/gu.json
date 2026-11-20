@@ -2213,7 +2213,7 @@
     "promptDevice": "ઉપકરણ અને OS (બગ્સ માટે)",
     "deviceInfoNoErrors": "કંઈ નહીં",
     "promptFilters": "શ્રેણીઓ",
-    "promptMediaError": "દરેક 50MB હેઠળની છબીઓ અથવા વિડિઓઝ પસંદ કરો.",
+    "promptMediaError": "દરેક 200MB હેઠળની છબીઓ અથવા વિડિઓઝ પસંદ કરો.",
     "promptMediaLimit": "{{max}} જોડાણો સુધી.",
     "removePromptAttachment": "{{name}} દૂર કરો",
     "promptAttachment": "જોડાણ {{number}}",

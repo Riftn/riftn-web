@@ -2226,7 +2226,7 @@
     "promptDevice": "ឧបករណ៍ ប្រព័ន្ធ ប្រតិបត្តិការ (សម្រាប់ កំហុស)",
     "deviceInfoNoErrors": "គ្មាន",
     "promptFilters": "តម្រងតាមប្រភេទ",
-    "promptMediaError": "ជ្រើសរើសរូបភាព ឬវីដេអូក្រោម 50MB នីមួយៗ",
+    "promptMediaError": "ជ្រើសរើសរូបភាព ឬវីដេអូក្រោម 200MB នីមួយៗ",
     "promptMediaLimit": "រហូតដល់ {{max}} ឯកសារភ្ជាប់ ។",
     "removePromptAttachment": "យក {{name}} ចេញ",
     "promptAttachment": "ឯកសារភ្ជាប់{{number}}",

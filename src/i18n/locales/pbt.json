@@ -2213,7 +2213,7 @@
     "promptDevice": "کور/هراړخیز/زموږ لپاره (د ګمرکونو لپاره)",
     "deviceInfoNoErrors": "هیڅ نه",
     "promptFilters": "د کټګورۍ له مخې فلټر کړئ",
-    "promptMediaError": "په هر یو کې د 20MB لاندې عکسونه یا ویډیوګانې غوره کړئ.",
+    "promptMediaError": "په هر یو کې د 200MB لاندې عکسونه یا ویډیوګانې غوره کړئ.",
     "promptMediaLimit": "تر {{max}} پورې ضمیمې.",
     "removePromptAttachment": "{{name}} لرې کړئ",
     "promptAttachment": "ضمیمه {{number}}",
