@@ -20,7 +20,7 @@ type Board = Record<string, R>;
 
 /** [ms into the loop, line, emoji, who]. Panels run the same beat, a little apart. */
 const BEATS: Array<[number, number, string, string]> = [
-  [900, 0, '🔥', P[2]],
+  [900, 0, '💯', P[2]],
   [2500, 2, '❤️', ME],
   [4300, 1, '🚀', P[3]],
   [5600, 0, '😂', P[1]],
