@@ -20859,5 +20859,27 @@
     "remember": "Rántí ìyàn mi",
     "rememberHint": "Yí i padà nígbàkígbà nínú Ètò",
     "failed": "Kò ṣeé ṣe láti pa ìfiránṣẹ́ náà rẹ́"
+  },
+  "profileAskAi": {
+    "row": "Bi AI léèrè",
+    "rowSub": "Tẹ̀lé, fẹ́ràn gbogbo rẹ̀, mọ ìròyìn tuntun",
+    "back": "Padà",
+    "title": "Bi AI léèrè nípa {{handle}}",
+    "sub": "Olùrànlọ́wọ́ ń ṣe é, ìwọ ni o ń fọwọ́sí",
+    "followLikeAll": "Tẹ̀lé kí o sì fẹ́ràn gbogbo rẹ̀",
+    "followLikeAllSub": "Ń tẹ̀lé {{handle}}, ń fèsì sí gbogbo àròkọ",
+    "likeAll": "Fẹ́ràn gbogbo àròkọ wọn",
+    "likeAllSub": "Ń fo àwọn tí o ti fèsì sí tẹ́lẹ̀",
+    "catchUp": "Sọ ìròyìn tuntun fún mi",
+    "catchUpSub": "Ohun tí {{handle}} fi síta láìpẹ́, ní ṣókí",
+    "message": "Kọ ìfiranṣẹ́ sí wọn",
+    "messageSub": "Ń kọ àkọsílẹ̀ ìfiranṣẹ́, ìwọ ni o ń fi ránṣẹ́",
+    "placeholder": "Béèrè ohunkóhun nípa {{handle}}…",
+    "send": "Fi ránṣẹ́",
+    "promptFollowLikeAll": "Tẹ̀lé {{handle}} kí o sì fèsì sí gbogbo àròkọ wọn",
+    "promptLikeAll": "Fèsì sí gbogbo àròkọ {{handle}}",
+    "promptCatchUp": "Sọ fún mi ohun tí {{handle}} ti fi síta láìpẹ́",
+    "promptMessage": "Ràn mí lọ́wọ́ láti kọ ìfiranṣẹ́ sí {{handle}}",
+    "promptAbout": "Nípa {{handle}}: {{question}}"
   }
 }

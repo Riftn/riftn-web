@@ -20888,5 +20888,27 @@
     "remember": "Mini Wahl merke",
     "rememberHint": "Jederzit i de Iistellige änderbar",
     "failed": "D Nachricht het nöd chönne glöscht wärde"
+  },
+  "profileAskAi": {
+    "row": "KI fröge",
+    "rowSub": "Folge, alles liken, ufhole",
+    "back": "Zrugg",
+    "title": "KI über {{handle}} fröge",
+    "sub": "De Assischtänt machts, du bestätigsch",
+    "followLikeAll": "Folge und alles liken",
+    "followLikeAllSub": "Folgt {{handle}}, reagiert uf jede Bitrag",
+    "likeAll": "Alli Biträg liken",
+    "likeAllSub": "Lasst die us, uf die du scho reagiert hesch",
+    "catchUp": "Bring mi uf de Stand",
+    "catchUpSub": "Was {{handle}} zletscht poschtet het, churz",
+    "message": "Nochricht schribe",
+    "messageSub": "Entwirft e Nochricht, du schicksch si",
+    "placeholder": "Frog öppis über {{handle}}…",
+    "send": "Schicke",
+    "promptFollowLikeAll": "Folg {{handle}} und reagier uf alli Biträg",
+    "promptLikeAll": "Reagier uf alli Biträg vo {{handle}}",
+    "promptCatchUp": "Bring mi uf de Stand, was {{handle}} zletscht poschtet het",
+    "promptMessage": "Hilf mir, e Nochricht a {{handle}} z schribe",
+    "promptAbout": "Über {{handle}}: {{question}}"
   }
 }

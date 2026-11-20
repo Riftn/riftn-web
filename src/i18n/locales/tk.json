@@ -20858,5 +20858,27 @@
     "remember": "Saýlawymy ýatda sakla",
     "rememberHint": "Ony islendik wagt Sazlamalarda üýtgediň",
     "failed": "Habary pozup bolmady"
+  },
+  "profileAskAi": {
+    "row": "Emeli aňdan sora",
+    "rowSub": "Yzarla, hemmesini halla, täzeliklerden habarly bol",
+    "back": "Yza",
+    "title": "{{handle}} barada emeli aňdan sora",
+    "sub": "Kömekçi ýerine ýetirýär, sen tassyklaýarsyň",
+    "followLikeAll": "Yzarla we hemmesini halla",
+    "followLikeAllSub": "{{handle}} yzarlaýar, her ýazga reaksiýa bildirýär",
+    "likeAll": "Ähli ýazgylaryny halla",
+    "likeAllSub": "Eýýäm reaksiýa bildirenleriňi geçýär",
+    "catchUp": "Täzelikleri aýt",
+    "catchUpSub": "{{handle}} soňky döwürde näme paýlaşdy, gysgaça",
+    "message": "Hat ýaz",
+    "messageSub": "Hatyň taslamasyny ýazýar, sen iberýärsiň",
+    "placeholder": "{{handle}} barada islän zadyňy sora…",
+    "send": "Iber",
+    "promptFollowLikeAll": "{{handle}} yzarla we onuň ähli ýazgylaryna reaksiýa bildir",
+    "promptLikeAll": "{{handle}} ähli ýazgylaryna reaksiýa bildir",
+    "promptCatchUp": "{{handle}} soňky döwürde näme paýlaşandygyny aýt",
+    "promptMessage": "{{handle}} üçin hat ýazmaga kömek et",
+    "promptAbout": "{{handle}} barada: {{question}}"
   }
 }

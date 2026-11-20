@@ -20910,5 +20910,27 @@
     "remember": "Tanlovimni eslab qolish",
     "rememberHint": "Buni istalgan vaqtda Sozlamalarda o'zgartiring",
     "failed": "Xabarni o'chirib bo'lmadi"
+  },
+  "profileAskAi": {
+    "row": "Sun'iy intellektdan so'rash",
+    "rowSub": "Obuna bo'lish, hammasini yoqtirish, xabardor bo'lish",
+    "back": "Orqaga",
+    "title": "{{handle}} haqida sun'iy intellektdan so'rash",
+    "sub": "Yordamchi bajaradi, siz tasdiqlaysiz",
+    "followLikeAll": "Obuna bo'lish va hammasini yoqtirish",
+    "followLikeAllSub": "{{handle}}ga obuna bo'ladi, har bir postga reaksiya bildiradi",
+    "likeAll": "Barcha postlarini yoqtirish",
+    "likeAllSub": "Reaksiya bildirganlaringizni o'tkazib yuboradi",
+    "catchUp": "Yangiliklarni aytib ber",
+    "catchUpSub": "{{handle}} yaqinda nima joyladi, qisqacha",
+    "message": "Xabar yozish",
+    "messageSub": "Xabar qoralamasini tuzadi, siz yuborasiz",
+    "placeholder": "{{handle}} haqida istalgan narsani so'rang…",
+    "send": "Yuborish",
+    "promptFollowLikeAll": "{{handle}}ga obuna bo'l va uning barcha postlariga reaksiya bildir",
+    "promptLikeAll": "{{handle}}ning barcha postlariga reaksiya bildir",
+    "promptCatchUp": "{{handle}} yaqinda nimalar joylaganini aytib ber",
+    "promptMessage": "{{handle}}ga xabar yozishimga yordam ber",
+    "promptAbout": "{{handle}} haqida: {{question}}"
   }
 }

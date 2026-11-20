@@ -20859,5 +20859,27 @@
     "remember": "Elingna pilihanku",
     "rememberHint": "Ganti kapan wae ing Setelan",
     "failed": "Ora bisa mbusak pesen"
+  },
+  "profileAskAi": {
+    "row": "Takon AI",
+    "rowSub": "Tututi, senengi kabeh, ngerti kabar anyar",
+    "back": "Bali",
+    "title": "Takon AI babagan {{handle}}",
+    "sub": "Asisten sing nindakake, sampeyan sing ngonfirmasi",
+    "followLikeAll": "Tututi lan senengi kabeh",
+    "followLikeAllSub": "Nututi {{handle}}, menehi reaksi ing saben kiriman",
+    "likeAll": "Senengi kabeh kirimane",
+    "likeAllSub": "Ngliwati sing wis sampeyan wenehi reaksi",
+    "catchUp": "Kabari aku",
+    "catchUpSub": "Apa sing dikirim {{handle}} akhir-akhir iki, ringkesan",
+    "message": "Tulis pesen kanggo dheweke",
+    "messageSub": "Nggawe draf pesen, sampeyan sing ngirim",
+    "placeholder": "Takon apa wae babagan {{handle}}…",
+    "send": "Kirim",
+    "promptFollowLikeAll": "Tututi {{handle}} lan wenehi reaksi ing kabeh kirimane",
+    "promptLikeAll": "Wenehi reaksi ing kabeh kiriman {{handle}}",
+    "promptCatchUp": "Kabari aku apa sing dikirim {{handle}} akhir-akhir iki",
+    "promptMessage": "Bantu aku nulis pesen kanggo {{handle}}",
+    "promptAbout": "Babagan {{handle}}: {{question}}"
   }
 }

@@ -20863,5 +20863,27 @@
     "remember": "Lembrar minha escolha",
     "rememberHint": "Altere quando quiser em Configurações",
     "failed": "Não foi possível apagar a mensagem"
+  },
+  "profileAskAi": {
+    "row": "Perguntar à IA",
+    "rowSub": "Seguir, curtir tudo, se atualizar",
+    "back": "Voltar",
+    "title": "Perguntar à IA sobre {{handle}}",
+    "sub": "O Assistente faz, você confirma",
+    "followLikeAll": "Seguir e curtir tudo",
+    "followLikeAllSub": "Segue {{handle}} e reage a cada publicação",
+    "likeAll": "Curtir todas as publicações",
+    "likeAllSub": "Pula as que você já reagiu",
+    "catchUp": "Me atualize",
+    "catchUpSub": "O que {{handle}} publicou recentemente, em resumo",
+    "message": "Escrever uma mensagem",
+    "messageSub": "Cria um rascunho, você envia",
+    "placeholder": "Pergunte qualquer coisa sobre {{handle}}…",
+    "send": "Enviar",
+    "promptFollowLikeAll": "Siga {{handle}} e reaja a todas as publicações",
+    "promptLikeAll": "Reaja a todas as publicações de {{handle}}",
+    "promptCatchUp": "Me atualize sobre o que {{handle}} publicou recentemente",
+    "promptMessage": "Me ajude a escrever uma mensagem para {{handle}}",
+    "promptAbout": "Sobre {{handle}}: {{question}}"
   }
 }

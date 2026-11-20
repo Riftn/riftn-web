@@ -20888,5 +20888,27 @@
     "remember": "ምርጫዬን አስታውስ",
     "rememberHint": "በማንኛውም ጊዜ በቅንብሮች ውስጥ ይቀይሩት",
     "failed": "መልዕክቱን መሰረዝ አልተቻለም"
+  },
+  "profileAskAi": {
+    "row": "AIን ጠይቅ",
+    "rowSub": "ተከተል፣ ሁሉንም ውደድ፣ አዳዲስ ነገሮችን እወቅ",
+    "back": "ተመለስ",
+    "title": "ስለ {{handle}} AIን ጠይቅ",
+    "sub": "ረዳቱ ያደርገዋል፣ አንተ ታረጋግጣለህ",
+    "followLikeAll": "ተከተል እና ሁሉንም ውደድ",
+    "followLikeAllSub": "{{handle}}ን ይከተላል፣ ለእያንዳንዱ ልጥፍ ምላሽ ይሰጣል",
+    "likeAll": "ሁሉንም ልጥፎቻቸውን ውደድ",
+    "likeAllSub": "አስቀድመህ ምላሽ የሰጠህባቸውን ይዘላል",
+    "catchUp": "አዳዲስ ነገሮችን ንገረኝ",
+    "catchUpSub": "{{handle}} በቅርቡ የለጠፈው፣ በአጭሩ",
+    "message": "መልዕክት ጻፍላቸው",
+    "messageSub": "የመልዕክት ረቂቅ ያዘጋጃል፣ አንተ ትልካለህ",
+    "placeholder": "ስለ {{handle}} ማንኛውንም ነገር ጠይቅ…",
+    "send": "ላክ",
+    "promptFollowLikeAll": "{{handle}}ን ተከተል እና ለሁሉም ልጥፎቻቸው ምላሽ ስጥ",
+    "promptLikeAll": "ለ{{handle}} ልጥፎች ሁሉ ምላሽ ስጥ",
+    "promptCatchUp": "{{handle}} በቅርቡ ምን እንደለጠፈ ንገረኝ",
+    "promptMessage": "ለ{{handle}} መልዕክት እንድጽፍ እርዳኝ",
+    "promptAbout": "ስለ {{handle}}፦ {{question}}"
   }
 }

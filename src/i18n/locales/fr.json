@@ -21000,5 +21000,27 @@
       "refunded": "Points rendus",
       "settleFailed": "Mise à jour impossible"
     }
+  },
+  "profileAskAi": {
+    "row": "Demander à l'IA",
+    "rowSub": "Suivre, tout liker, se mettre à jour",
+    "back": "Retour",
+    "title": "Demander à l'IA à propos de {{handle}}",
+    "sub": "L'Assistant s'en charge, vous confirmez",
+    "followLikeAll": "Suivre et tout liker",
+    "followLikeAllSub": "Suit {{handle}} et réagit à chaque publication",
+    "likeAll": "Liker toutes ses publications",
+    "likeAllSub": "Ignore celles auxquelles vous avez déjà réagi",
+    "catchUp": "Mets-moi à jour",
+    "catchUpSub": "Ce que {{handle}} a publié récemment, en bref",
+    "message": "Lui écrire un message",
+    "messageSub": "Rédige un message, vous l'envoyez",
+    "placeholder": "Demandez ce que vous voulez sur {{handle}}…",
+    "send": "Envoyer",
+    "promptFollowLikeAll": "Suis {{handle}} et réagis à toutes ses publications",
+    "promptLikeAll": "Réagis à toutes les publications de {{handle}}",
+    "promptCatchUp": "Résume-moi ce que {{handle}} a publié récemment",
+    "promptMessage": "Aide-moi à écrire un message à {{handle}}",
+    "promptAbout": "À propos de {{handle}} : {{question}}"
   }
 }

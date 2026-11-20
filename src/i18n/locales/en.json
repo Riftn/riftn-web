@@ -20891,5 +20891,27 @@
       "refunded": "Points given back",
       "settleFailed": "Couldn't update that"
     }
+  },
+  "profileAskAi": {
+    "row": "Ask AI",
+    "rowSub": "Follow, like everything, catch up",
+    "back": "Back",
+    "title": "Ask AI about {{handle}}",
+    "sub": "The Assistant does it, you confirm",
+    "followLikeAll": "Follow and like everything",
+    "followLikeAllSub": "Follows {{handle}}, reacts to every post",
+    "likeAll": "Like all their posts",
+    "likeAllSub": "Skips ones you already reacted to",
+    "catchUp": "Catch me up",
+    "catchUpSub": "What {{handle}} posted lately, in short",
+    "message": "Write them a message",
+    "messageSub": "Drafts a message, you send it",
+    "placeholder": "Ask anything about {{handle}}…",
+    "send": "Send",
+    "promptFollowLikeAll": "Follow {{handle}} and react to all of their posts",
+    "promptLikeAll": "React to all of the posts by {{handle}}",
+    "promptCatchUp": "Catch me up on what {{handle}} has posted lately",
+    "promptMessage": "Help me write a message to {{handle}}",
+    "promptAbout": "About {{handle}}: {{question}}"
   }
 }

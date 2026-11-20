@@ -20899,5 +20899,27 @@
     "remember": "记住我的选择",
     "rememberHint": "随时可在设置中更改",
     "failed": "无法删除消息"
+  },
+  "profileAskAi": {
+    "row": "问AI",
+    "rowSub": "关注、全部点赞、了解动态",
+    "back": "返回",
+    "title": "问AI关于{{handle}}",
+    "sub": "助手来做，你来确认",
+    "followLikeAll": "关注并全部点赞",
+    "followLikeAllSub": "关注{{handle}}，回应每条帖子",
+    "likeAll": "给他所有帖子点赞",
+    "likeAllSub": "跳过你已经回应过的",
+    "catchUp": "给我说说动态",
+    "catchUpSub": "{{handle}}最近发了甚，简单说",
+    "message": "给他发消息",
+    "messageSub": "起草一条消息，你来发",
+    "placeholder": "关于{{handle}}，问甚都行…",
+    "send": "发送",
+    "promptFollowLikeAll": "关注{{handle}}，回应他所有的帖子",
+    "promptLikeAll": "回应{{handle}}所有的帖子",
+    "promptCatchUp": "给我说说{{handle}}最近发了甚",
+    "promptMessage": "帮我给{{handle}}写条消息",
+    "promptAbout": "关于{{handle}}：{{question}}"
   }
 }

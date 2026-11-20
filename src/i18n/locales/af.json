@@ -20977,5 +20977,27 @@
     "remember": "Onthou my keuse",
     "rememberHint": "Verander dit enige tyd in Instellings",
     "failed": "Kon nie die boodskap uitvee nie"
+  },
+  "profileAskAi": {
+    "row": "Vra KI",
+    "rowSub": "Volg, hou van alles, raak op hoogte",
+    "back": "Terug",
+    "title": "Vra KI oor {{handle}}",
+    "sub": "Die Assistent doen dit, jy bevestig",
+    "followLikeAll": "Volg en hou van alles",
+    "followLikeAllSub": "Volg {{handle}}, reageer op elke plasing",
+    "likeAll": "Hou van al hul plasings",
+    "likeAllSub": "Slaan dié oor waarop jy reeds gereageer het",
+    "catchUp": "Bring my op hoogte",
+    "catchUpSub": "Wat {{handle}} onlangs geplaas het, kortliks",
+    "message": "Skryf vir hulle 'n boodskap",
+    "messageSub": "Stel 'n boodskap op, jy stuur dit",
+    "placeholder": "Vra enigiets oor {{handle}}…",
+    "send": "Stuur",
+    "promptFollowLikeAll": "Volg {{handle}} en reageer op al hul plasings",
+    "promptLikeAll": "Reageer op al die plasings van {{handle}}",
+    "promptCatchUp": "Bring my op hoogte van wat {{handle}} onlangs geplaas het",
+    "promptMessage": "Help my om 'n boodskap aan {{handle}} te skryf",
+    "promptAbout": "Oor {{handle}}: {{question}}"
   }
 }

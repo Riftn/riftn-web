@@ -20957,5 +20957,27 @@
     "remember": "Tadidio ny safidiko",
     "rememberHint": "Ovay amin'ny fotoana rehetra ao amin'ny Fikirana",
     "failed": "Tsy voafafa ny hafatra"
+  },
+  "profileAskAi": {
+    "row": "Anontanio ny AI",
+    "rowSub": "Araho, tiavo daholo, mahazoa vaovao",
+    "back": "Hiverina",
+    "title": "Anontanio ny AI momba an'i {{handle}}",
+    "sub": "Ny Mpanampy no manao, ianao no manamarina",
+    "followLikeAll": "Araho ary tiavo daholo",
+    "followLikeAllSub": "Manaraka an'i {{handle}}, mamaly ny lahatsoratra rehetra",
+    "likeAll": "Tiavo ny lahatsorany rehetra",
+    "likeAllSub": "Tsy raisina intsony izay efa novalianao",
+    "catchUp": "Omeo vaovao aho",
+    "catchUpSub": "Izay navoakan'i {{handle}} vao haingana, fohifohy",
+    "message": "Manorata hafatra ho azy",
+    "messageSub": "Manoratra drafitra hafatra, ianao no mandefa",
+    "placeholder": "Anontanio na inona na inona momba an'i {{handle}}…",
+    "send": "Alefa",
+    "promptFollowLikeAll": "Araho i {{handle}} ary valio ny lahatsorany rehetra",
+    "promptLikeAll": "Valio ny lahatsoratr'i {{handle}} rehetra",
+    "promptCatchUp": "Lazao ahy izay navoakan'i {{handle}} vao haingana",
+    "promptMessage": "Ampio aho hanoratra hafatra ho an'i {{handle}}",
+    "promptAbout": "Momba an'i {{handle}}: {{question}}"
   }
 }

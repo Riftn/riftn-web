@@ -20858,5 +20858,27 @@
     "remember": "Tuna zaɓina",
     "rememberHint": "Canza shi kowane lokaci a Saituna",
     "failed": "Ba a iya share saƙon ba"
+  },
+  "profileAskAi": {
+    "row": "Tambayi AI",
+    "rowSub": "Bi, so komai, samu labarai",
+    "back": "Koma baya",
+    "title": "Tambayi AI game da {{handle}}",
+    "sub": "Mataimaki yana yi, kai kake tabbatarwa",
+    "followLikeAll": "Bi kuma so komai",
+    "followLikeAllSub": "Yana bin {{handle}}, yana mayar da martani ga kowane rubutu",
+    "likeAll": "So duk rubuce-rubucensu",
+    "likeAllSub": "Yana tsallake waɗanda ka riga ka mayar da martani",
+    "catchUp": "Ba ni labari",
+    "catchUpSub": "Abin da {{handle}} ya wallafa kwanan nan, a taƙaice",
+    "message": "Rubuta musu saƙo",
+    "messageSub": "Yana tsara saƙo, kai kake aikawa",
+    "placeholder": "Tambayi komai game da {{handle}}…",
+    "send": "Aika",
+    "promptFollowLikeAll": "Bi {{handle}} kuma ka mayar da martani ga duk rubuce-rubucensu",
+    "promptLikeAll": "Mayar da martani ga duk rubuce-rubucen {{handle}}",
+    "promptCatchUp": "Ba ni labarin abin da {{handle}} ya wallafa kwanan nan",
+    "promptMessage": "Taimake ni in rubuta saƙo ga {{handle}}",
+    "promptAbout": "Game da {{handle}}: {{question}}"
   }
 }

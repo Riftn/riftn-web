@@ -20862,5 +20862,27 @@
     "remember": "Választás megjegyzése",
     "rememberHint": "Bármikor módosíthatod a Beállításokban",
     "failed": "Nem sikerült törölni az üzenetet"
+  },
+  "profileAskAi": {
+    "row": "Kérdezd az AI-t",
+    "rowSub": "Követés, minden kedvelése, képben maradás",
+    "back": "Vissza",
+    "title": "Kérdezd az AI-t erről: {{handle}}",
+    "sub": "Az Asszisztens elvégzi, te jóváhagyod",
+    "followLikeAll": "Követés és minden kedvelése",
+    "followLikeAllSub": "Követi: {{handle}}, reagál minden bejegyzésre",
+    "likeAll": "Összes bejegyzés kedvelése",
+    "likeAllSub": "Kihagyja azokat, amelyekre már reagáltál",
+    "catchUp": "Hozz képbe",
+    "catchUpSub": "Mit posztolt mostanában {{handle}}, röviden",
+    "message": "Írj neki üzenetet",
+    "messageSub": "Piszkozatot ír, te küldöd el",
+    "placeholder": "Kérdezz bármit erről: {{handle}}…",
+    "send": "Küldés",
+    "promptFollowLikeAll": "Kövesd {{handle}} felhasználót, és reagálj az összes bejegyzésére",
+    "promptLikeAll": "Reagálj {{handle}} összes bejegyzésére",
+    "promptCatchUp": "Hozz képbe, mit posztolt mostanában {{handle}}",
+    "promptMessage": "Segíts üzenetet írni neki: {{handle}}",
+    "promptAbout": "{{handle}} kapcsán: {{question}}"
   }
 }

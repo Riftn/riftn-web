@@ -20905,5 +20905,27 @@
     "remember": "Filannoo koo yaadadhu",
     "rememberHint": "Yeroo kamiyyuu Qindaa'ina keessatti jijjiiri",
     "failed": "Ergaa haquu hin dandeenye"
+  },
+  "profileAskAi": {
+    "row": "AI gaafadhu",
+    "rowSub": "Hordofi, hunda jaalladhu, odeeffannoo argadhu",
+    "back": "Duubatti",
+    "title": "Waa'ee {{handle}} AI gaafadhu",
+    "sub": "Gargaaraan ni hojjeta, ati mirkaneessita",
+    "followLikeAll": "Hordofi fi hunda jaalladhu",
+    "followLikeAllSub": "{{handle}} hordofa, barreeffama hundaaf deebii kenna",
+    "likeAll": "Barreeffamoota isaanii hunda jaalladhu",
+    "likeAllSub": "Kanneen dursitee deebii kenniteef ni darba",
+    "catchUp": "Odeeffannoo naaf kenni",
+    "catchUpSub": "Wanta {{handle}} dhiyeenya maxxanse, gabaabinaan",
+    "message": "Ergaa barreessiif",
+    "messageSub": "Ergaa qopheessa, ati ergita",
+    "placeholder": "Waa'ee {{handle}} waan barbaadde gaafadhu…",
+    "send": "Ergi",
+    "promptFollowLikeAll": "{{handle}} hordofii barreeffamoota isaanii hundaaf deebii kenni",
+    "promptLikeAll": "Barreeffamoota {{handle}} hundaaf deebii kenni",
+    "promptCatchUp": "Wanta {{handle}} dhiyeenya maxxanse natti himi",
+    "promptMessage": "Ergaa {{handle}}f barreessuuf na gargaari",
+    "promptAbout": "Waa'ee {{handle}}: {{question}}"
   }
 }

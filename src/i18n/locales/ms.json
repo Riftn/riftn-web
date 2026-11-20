@@ -21115,5 +21115,27 @@
     "remember": "Ingat pilihan saya",
     "rememberHint": "Ubah bila-bila masa dalam Tetapan",
     "failed": "Tidak dapat memadam mesej"
+  },
+  "profileAskAi": {
+    "row": "Tanya AI",
+    "rowSub": "Ikut, suka semua, ketahui berita terkini",
+    "back": "Kembali",
+    "title": "Tanya AI tentang {{handle}}",
+    "sub": "Pembantu buatkan, anda sahkan",
+    "followLikeAll": "Ikut dan suka semua",
+    "followLikeAllSub": "Mengikut {{handle}}, beri reaksi pada setiap hantaran",
+    "likeAll": "Suka semua hantarannya",
+    "likeAllSub": "Melangkau yang anda sudah beri reaksi",
+    "catchUp": "Kemas kini saya",
+    "catchUpSub": "Apa yang {{handle}} hantar baru-baru ini, secara ringkas",
+    "message": "Tulis mesej kepadanya",
+    "messageSub": "Merangka mesej, anda yang hantar",
+    "placeholder": "Tanya apa sahaja tentang {{handle}}…",
+    "send": "Hantar",
+    "promptFollowLikeAll": "Ikut {{handle}} dan beri reaksi pada semua hantarannya",
+    "promptLikeAll": "Beri reaksi pada semua hantaran {{handle}}",
+    "promptCatchUp": "Kemas kini saya tentang apa yang {{handle}} hantar baru-baru ini",
+    "promptMessage": "Bantu saya tulis mesej kepada {{handle}}",
+    "promptAbout": "Tentang {{handle}}: {{question}}"
   }
 }

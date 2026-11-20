@@ -20889,5 +20889,27 @@
     "remember": "Akllasqayta yuyariy",
     "rememberHint": "Ima pachapas Churanapi tikray",
     "failed": "Willakuyta mana pichayta atikurqanchu"
+  },
+  "profileAskAi": {
+    "row": "AI-ta tapuy",
+    "rowSub": "Qatiy, llapanta munay, musuqkunata yachay",
+    "back": "Kutiy",
+    "title": "{{handle}}-manta AI-ta tapuy",
+    "sub": "Yanapaq ruwan, qam takyachinki",
+    "followLikeAll": "Qatiy llapanta munaytawan",
+    "followLikeAllSub": "{{handle}}-ta qatin, sapa churasqaman kutichin",
+    "likeAll": "Llapan churasqankunata munay",
+    "likeAllSub": "Ñapas kutichisqaykikunata saqen",
+    "catchUp": "Musuqkunata willaway",
+    "catchUpSub": "{{handle}} qayllapi ima churasqan, pisillapi",
+    "message": "Willakuyta qillqay",
+    "messageSub": "Willakuy borradorta ruwan, qam apachinki",
+    "placeholder": "{{handle}}-manta imatapas tapuy…",
+    "send": "Apachiy",
+    "promptFollowLikeAll": "{{handle}}-ta qatiy, llapan churasqankunaman kutichiy",
+    "promptLikeAll": "{{handle}}-pa llapan churasqankunaman kutichiy",
+    "promptCatchUp": "{{handle}} qayllapi ima churasqanta willaway",
+    "promptMessage": "{{handle}}-man willakuyta qillqanaypaq yanapaway",
+    "promptAbout": "{{handle}}-manta: {{question}}"
   }
 }

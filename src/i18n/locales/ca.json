@@ -20858,5 +20858,27 @@
     "remember": "Recorda la meva elecció",
     "rememberHint": "Ho pots canviar quan vulguis a Configuració",
     "failed": "No s'ha pogut eliminar el missatge"
+  },
+  "profileAskAi": {
+    "row": "Pregunta a la IA",
+    "rowSub": "Segueix, fes m'agrada a tot, posa't al dia",
+    "back": "Enrere",
+    "title": "Pregunta a la IA sobre {{handle}}",
+    "sub": "L'Assistent ho fa, tu confirmes",
+    "followLikeAll": "Segueix i fes m'agrada a tot",
+    "followLikeAllSub": "Segueix {{handle}} i reacciona a cada publicació",
+    "likeAll": "M'agrada a totes les publicacions",
+    "likeAllSub": "Omet les que ja has reaccionat",
+    "catchUp": "Posa'm al dia",
+    "catchUpSub": "El que {{handle}} ha publicat últimament, en breu",
+    "message": "Escriu-li un missatge",
+    "messageSub": "Redacta un missatge, tu l'envies",
+    "placeholder": "Pregunta el que vulguis sobre {{handle}}…",
+    "send": "Envia",
+    "promptFollowLikeAll": "Segueix {{handle}} i reacciona a totes les seves publicacions",
+    "promptLikeAll": "Reacciona a totes les publicacions de {{handle}}",
+    "promptCatchUp": "Posa'm al dia del que {{handle}} ha publicat últimament",
+    "promptMessage": "Ajuda'm a escriure un missatge a {{handle}}",
+    "promptAbout": "Sobre {{handle}}: {{question}}"
   }
 }

@@ -20858,5 +20858,27 @@
     "remember": "हमर चुनाव याद रखऽ",
     "rememberHint": "Settings में कभियो बदलऽ",
     "failed": "मैसेज मिट न सकल"
+  },
+  "profileAskAi": {
+    "row": "AI से पूछऽ",
+    "rowSub": "फॉलो करऽ, सब लाइक करऽ, नया जानऽ",
+    "back": "वापस",
+    "title": "{{handle}} के बारे में AI से पूछऽ",
+    "sub": "असिस्टेंट करतो, तूँ पक्का करऽ",
+    "followLikeAll": "फॉलो करऽ आउ सब लाइक करऽ",
+    "followLikeAllSub": "{{handle}} के फॉलो करऽ हे, हर पोस्ट पर रिएक्ट करऽ हे",
+    "likeAll": "उनकर सब पोस्ट लाइक करऽ",
+    "likeAllSub": "जेकरा पर तूँ पहिले रिएक्ट कर चुकलऽ, ओकरा छोड़ दे हे",
+    "catchUp": "हमरा नया बतावऽ",
+    "catchUpSub": "{{handle}} हाल में का पोस्ट कइलका, छोटा में",
+    "message": "उनका मैसेज लिखऽ",
+    "messageSub": "मैसेज के ड्राफ्ट बनावऽ हे, तूँ भेजऽ",
+    "placeholder": "{{handle}} के बारे में कुछो पूछऽ…",
+    "send": "भेजऽ",
+    "promptFollowLikeAll": "{{handle}} के फॉलो करऽ आउ उनकर सब पोस्ट पर रिएक्ट करऽ",
+    "promptLikeAll": "{{handle}} के सब पोस्ट पर रिएक्ट करऽ",
+    "promptCatchUp": "हमरा बतावऽ कि {{handle}} हाल में का पोस्ट कइलका हे",
+    "promptMessage": "{{handle}} के मैसेज लिखे में हमर मदद करऽ",
+    "promptAbout": "{{handle}} के बारे में: {{question}}"
   }
 }

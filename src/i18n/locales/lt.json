@@ -20858,5 +20858,27 @@
     "remember": "Prisiminti mano pasirinkimą",
     "rememberHint": "Bet kada pakeiskite nustatymuose",
     "failed": "Nepavyko ištrinti žinutės"
+  },
+  "profileAskAi": {
+    "row": "Klausti DI",
+    "rowSub": "Sekti, pamėgti viską, sužinoti naujienas",
+    "back": "Atgal",
+    "title": "Klausti DI apie {{handle}}",
+    "sub": "Asistentas atlieka, jūs patvirtinate",
+    "followLikeAll": "Sekti ir pamėgti viską",
+    "followLikeAllSub": "Seka {{handle}}, reaguoja į kiekvieną įrašą",
+    "likeAll": "Pamėgti visus įrašus",
+    "likeAllSub": "Praleidžia tuos, į kuriuos jau sureagavote",
+    "catchUp": "Papasakok naujienas",
+    "catchUpSub": "Ką {{handle}} neseniai paskelbė, trumpai",
+    "message": "Parašyti žinutę",
+    "messageSub": "Paruošia juodraštį, jūs išsiunčiate",
+    "placeholder": "Klauskite ko nors apie {{handle}}…",
+    "send": "Siųsti",
+    "promptFollowLikeAll": "Sek {{handle}} ir sureaguok į visus įrašus",
+    "promptLikeAll": "Sureaguok į visus {{handle}} įrašus",
+    "promptCatchUp": "Papasakok, ką {{handle}} neseniai paskelbė",
+    "promptMessage": "Padėk man parašyti žinutę {{handle}}",
+    "promptAbout": "Apie {{handle}}: {{question}}"
   }
 }

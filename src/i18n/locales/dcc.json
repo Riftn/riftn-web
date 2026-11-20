@@ -20857,5 +20857,27 @@
     "remember": "میری پسند یاد رکھو",
     "rememberHint": "سیٹنگز میں کبھی بھی بدلو",
     "failed": "میسج مٹ نئیں سکا"
+  },
+  "profileAskAi": {
+    "row": "AI سے پوچھو",
+    "rowSub": "فالو کرو، سب لائک کرو، اپ ڈیٹ رہو",
+    "back": "واپس",
+    "title": "{{handle}} کے بارے میں AI سے پوچھو",
+    "sub": "اسسٹنٹ کرتا، تم تصدیق کرو",
+    "followLikeAll": "فالو کرو اور سب لائک کرو",
+    "followLikeAllSub": "{{handle}} کو فالو کرتا، ہر پوسٹ پو ری ایکٹ کرتا",
+    "likeAll": "ان کے سب پوسٹاں لائک کرو",
+    "likeAllSub": "جن پو تم پہلے ری ایکٹ کرے سو ان کو چھوڑ دیتا",
+    "catchUp": "مجھے اپ ڈیٹ کرو",
+    "catchUpSub": "{{handle}} نے ابھی ابھی کیا پوسٹ کرے، مختصر میں",
+    "message": "ان کو پیغام لکھو",
+    "messageSub": "پیغام کا مسودہ بناتا، تم بھیجو",
+    "placeholder": "{{handle}} کے بارے میں کچھ بھی پوچھو…",
+    "send": "بھیجو",
+    "promptFollowLikeAll": "{{handle}} کو فالو کرو اور ان کے سب پوسٹاں پو ری ایکٹ کرو",
+    "promptLikeAll": "{{handle}} کے سب پوسٹاں پو ری ایکٹ کرو",
+    "promptCatchUp": "مجھے بتاؤ {{handle}} نے ابھی ابھی کیا پوسٹ کرے",
+    "promptMessage": "{{handle}} کو پیغام لکھنے میں میری مدد کرو",
+    "promptAbout": "{{handle}} کے بارے میں: {{question}}"
   }
 }

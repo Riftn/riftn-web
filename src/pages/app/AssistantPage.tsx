@@ -506,6 +506,8 @@ function AssistantPageForAccount() {
     model: ImageModelKey;
     sourceImage?: string;
   } | null>(null);
+  // Prompt handed over by a link (#preset=chat&send=1&prompt=…), sent once ready.
+  const [autoSendPrompt, setAutoSendPrompt] = useState<string | null>(null);
   // Riftn poster config drawer
   const [posterConfigOpen, setPosterConfigOpen] = useState(false);
   const [pendingPosterPrompt, setPendingPosterPrompt] = useState<string>('');
@@ -522,6 +524,17 @@ function AssistantPageForAccount() {
       // Optional ?prompt=... pre-fill from /creator composer
       const promptMatch = hash.match(/prompt=([^&]+)/i);
       const prefill = promptMatch ? decodeURIComponent(promptMatch[1]) : '';
+      // &send=1 (the profile menu's Ask AI): start a fresh chat and send the
+      // prompt straight away, so its confirm cards are the first thing seen.
+      if (prefill && /(?:^|[#&])send=1(?:&|$)/.test(hash)) {
+        if (typeof window !== 'undefined' && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        startNewConversation();
+        setMessages([]);
+        setAutoSendPrompt(prefill);
+        return;
+      }
       // Clear hash so re-navigation re-triggers cleanly
       if (typeof window !== 'undefined' && window.history.replaceState) {
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -1989,6 +2002,14 @@ function AssistantPageForAccount() {
       setStreamingReply(false);
     }
   };
+  useEffect(() => {
+    if (!autoSendPrompt || !isAuthenticated || isLoading || restoringConversation) return;
+    const prompt = autoSendPrompt;
+    setAutoSendPrompt(null);
+    void handleSend(prompt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSendPrompt, isAuthenticated, isLoading, restoringConversation]);
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

@@ -20858,5 +20858,27 @@
     "remember": "Atcerēties manu izvēli",
     "rememberHint": "Mainiet to jebkurā laikā Iestatījumos",
     "failed": "Neizdevās dzēst ziņu"
+  },
+  "profileAskAi": {
+    "row": "Jautāt MI",
+    "rowSub": "Sekot, atzīmēt visu, būt lietas kursā",
+    "back": "Atpakaļ",
+    "title": "Jautāt MI par {{handle}}",
+    "sub": "Asistents izdara, tu apstiprini",
+    "followLikeAll": "Sekot un atzīmēt visu ar patīk",
+    "followLikeAllSub": "Seko {{handle}}, reaģē uz katru ierakstu",
+    "likeAll": "Atzīmēt visus ierakstus ar patīk",
+    "likeAllSub": "Izlaiž tos, uz kuriem jau esi reaģējis",
+    "catchUp": "Pastāsti jaunumus",
+    "catchUpSub": "Ko {{handle}} nesen publicējis, īsumā",
+    "message": "Uzrakstīt ziņu",
+    "messageSub": "Sagatavo melnrakstu, tu to nosūti",
+    "placeholder": "Jautā jebko par {{handle}}…",
+    "send": "Sūtīt",
+    "promptFollowLikeAll": "Seko {{handle}} un reaģē uz visiem ierakstiem",
+    "promptLikeAll": "Reaģē uz visiem {{handle}} ierakstiem",
+    "promptCatchUp": "Pastāsti, ko {{handle}} nesen publicējis",
+    "promptMessage": "Palīdzi man uzrakstīt ziņu {{handle}}",
+    "promptAbout": "Par {{handle}}: {{question}}"
   }
 }

@@ -20996,5 +20996,27 @@
       "refunded": "Puanlar geri verildi",
       "settleFailed": "Güncellenemedi"
     }
+  },
+  "profileAskAi": {
+    "row": "Yapay zekâya sor",
+    "rowSub": "Takip et, hepsini beğen, özet al",
+    "back": "Geri",
+    "title": "{{handle}} hakkında yapay zekâya sor",
+    "sub": "Asistan yapar, sen onaylarsın",
+    "followLikeAll": "Takip et ve hepsini beğen",
+    "followLikeAllSub": "{{handle}} kişisini takip eder, her gönderiye tepki verir",
+    "likeAll": "Tüm gönderilerini beğen",
+    "likeAllSub": "Zaten tepki verdiklerini atlar",
+    "catchUp": "Beni bilgilendir",
+    "catchUpSub": "{{handle}} son zamanlarda ne paylaştı, kısaca",
+    "message": "Ona mesaj yaz",
+    "messageSub": "Mesaj taslağı hazırlar, sen gönderirsin",
+    "placeholder": "{{handle}} hakkında her şeyi sor…",
+    "send": "Gönder",
+    "promptFollowLikeAll": "{{handle}} kişisini takip et ve tüm gönderilerine tepki ver",
+    "promptLikeAll": "{{handle}} kişisinin tüm gönderilerine tepki ver",
+    "promptCatchUp": "{{handle}} son zamanlarda neler paylaştı, özetle",
+    "promptMessage": "{{handle}} kişisine mesaj yazmama yardım et",
+    "promptAbout": "{{handle}} hakkında: {{question}}"
   }
 }

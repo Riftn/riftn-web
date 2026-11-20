@@ -20858,5 +20858,27 @@
     "remember": "Bijartina min bîne bîra xwe",
     "rememberHint": "Her dem di Mîhengan de biguherîne",
     "failed": "Peyam nehat jêbirin"
+  },
+  "profileAskAi": {
+    "row": "Ji AI bipirse",
+    "rowSub": "Bişopîne, hemûyan biecibîne, nûçeyan bigire",
+    "back": "Vegere",
+    "title": "Derbarê {{handle}} de ji AI bipirse",
+    "sub": "Arîkar dike, tu piştrast dikî",
+    "followLikeAll": "Bişopîne û hemûyan biecibîne",
+    "followLikeAllSub": "{{handle}} dişopîne, li her şandiyê bertek dide",
+    "likeAll": "Hemû şandiyên wî biecibîne",
+    "likeAllSub": "Yên ku te berê bertek dabûyê derbas dike",
+    "catchUp": "Min agahdar bike",
+    "catchUpSub": "{{handle}} di van demên dawî de çi parve kiriye, bi kurtî",
+    "message": "Peyamekê binivîse",
+    "messageSub": "Pêşnûmeya peyamê amade dike, tu dişînî",
+    "placeholder": "Derbarê {{handle}} de her tiştî bipirse…",
+    "send": "Bişîne",
+    "promptFollowLikeAll": "{{handle}} bişopîne û li hemû şandiyên wî bertek bide",
+    "promptLikeAll": "Li hemû şandiyên {{handle}} bertek bide",
+    "promptCatchUp": "Min agahdar bike ka {{handle}} di van demên dawî de çi parve kiriye",
+    "promptMessage": "Alîkariya min bike ku peyamekê ji {{handle}} re binivîsim",
+    "promptAbout": "Derbarê {{handle}} de: {{question}}"
   }
 }

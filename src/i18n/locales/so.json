@@ -20858,5 +20858,27 @@
     "remember": "Xasuuso doorashadayda",
     "rememberHint": "Ku beddel waqti kasta Settings",
     "failed": "Lama tirtiri karin fariinta"
+  },
+  "profileAskAi": {
+    "row": "Weydii AI",
+    "rowSub": "Raac, jeclow dhammaan, la soco",
+    "back": "Dib u noqo",
+    "title": "Weydii AI wax ku saabsan {{handle}}",
+    "sub": "Kaaliyaha ayaa sameeya, adiga ayaa xaqiijiya",
+    "followLikeAll": "Raac oo jeclow dhammaan",
+    "followLikeAllSub": "Wuxuu raacaa {{handle}}, wuxuu ka falceliyaa qoraal kasta",
+    "likeAll": "Jeclow dhammaan qoraalladooda",
+    "likeAllSub": "Wuu ka boodaa kuwa aad horey uga falcelisay",
+    "catchUp": "I war geli",
+    "catchUpSub": "Waxa {{handle}} dhowaan soo dhigay, si kooban",
+    "message": "U qor fariin",
+    "messageSub": "Wuxuu diyaariyaa qabyo fariin, adiga ayaa dira",
+    "placeholder": "Wax kasta ka weydii {{handle}}…",
+    "send": "Dir",
+    "promptFollowLikeAll": "Raac {{handle}} oo ka falceli dhammaan qoraalladooda",
+    "promptLikeAll": "Ka falceli dhammaan qoraallada {{handle}}",
+    "promptCatchUp": "I war geli waxa {{handle}} dhowaan soo dhigay",
+    "promptMessage": "I caawi inaan fariin u qoro {{handle}}",
+    "promptAbout": "Ku saabsan {{handle}}: {{question}}"
   }
 }

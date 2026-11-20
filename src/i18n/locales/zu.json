@@ -20889,5 +20889,27 @@
     "remember": "Khumbula ukukhetha kwami",
     "rememberHint": "Kushintshe noma nini Kuzilungiselelo",
     "failed": "Ayikwazanga ukususa umlayezo"
+  },
+  "profileAskAi": {
+    "row": "Buza i-AI",
+    "rowSub": "Landela, thanda konke, thola izindaba",
+    "back": "Emuva",
+    "title": "Buza i-AI ngo-{{handle}}",
+    "sub": "Umsizi uyakwenza, wena uyaqinisekisa",
+    "followLikeAll": "Landela futhi uthande konke",
+    "followLikeAllSub": "Ulandela u-{{handle}}, usabela kukho konke okuthunyelwe",
+    "likeAll": "Thanda konke okuthunyelwe kwabo",
+    "likeAllSub": "Weqa lokho osuvele usabele kukho",
+    "catchUp": "Ngitshele okusha",
+    "catchUpSub": "Lokho u-{{handle}} akuthumele muva nje, ngamafuphi",
+    "message": "Bhalela umlayezo",
+    "messageSub": "Ubhala okusalungiswa komlayezo, wena uyathumela",
+    "placeholder": "Buza noma yini ngo-{{handle}}…",
+    "send": "Thumela",
+    "promptFollowLikeAll": "Landela u-{{handle}} futhi usabele kukho konke okuthunyelwe kwabo",
+    "promptLikeAll": "Sabela kukho konke okuthunyelwe ngu-{{handle}}",
+    "promptCatchUp": "Ngitshele lokho u-{{handle}} akuthumele muva nje",
+    "promptMessage": "Ngisize ngibhalele u-{{handle}} umlayezo",
+    "promptAbout": "Ngo-{{handle}}: {{question}}"
   }
 }

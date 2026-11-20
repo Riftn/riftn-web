@@ -20859,5 +20859,27 @@
     "remember": "Ingat pilihan saya",
     "rememberHint": "Ubah kapan saja di Pengaturan",
     "failed": "Tidak dapat menghapus pesan"
+  },
+  "profileAskAi": {
+    "row": "Tanya AI",
+    "rowSub": "Ikuti, sukai semua, ikuti kabar",
+    "back": "Kembali",
+    "title": "Tanya AI tentang {{handle}}",
+    "sub": "Asisten yang mengerjakan, kamu yang konfirmasi",
+    "followLikeAll": "Ikuti dan sukai semua",
+    "followLikeAllSub": "Mengikuti {{handle}}, bereaksi ke setiap postingan",
+    "likeAll": "Sukai semua postingannya",
+    "likeAllSub": "Melewati yang sudah kamu beri reaksi",
+    "catchUp": "Kabari aku",
+    "catchUpSub": "Yang diposting {{handle}} belakangan ini, singkatnya",
+    "message": "Tulis pesan untuknya",
+    "messageSub": "Menyusun draf pesan, kamu yang mengirim",
+    "placeholder": "Tanyakan apa saja tentang {{handle}}…",
+    "send": "Kirim",
+    "promptFollowLikeAll": "Ikuti {{handle}} dan beri reaksi ke semua postingannya",
+    "promptLikeAll": "Beri reaksi ke semua postingan {{handle}}",
+    "promptCatchUp": "Kabari aku apa yang diposting {{handle}} belakangan ini",
+    "promptMessage": "Bantu aku menulis pesan untuk {{handle}}",
+    "promptAbout": "Tentang {{handle}}: {{question}}"
   }
 }

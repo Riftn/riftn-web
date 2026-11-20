@@ -20860,5 +20860,27 @@
     "remember": "تذكّر اختياري",
     "rememberHint": "غيّره بأي وقت من الإعدادات",
     "failed": "ما قدرنا نحذف الرسالة"
+  },
+  "profileAskAi": {
+    "row": "اسأل الذكاء الاصطناعي",
+    "rowSub": "تابع، حط لايك لكل اشي، اعرف الجديد",
+    "back": "رجوع",
+    "title": "اسأل الذكاء الاصطناعي عن {{handle}}",
+    "sub": "المساعد بيعملها، وإنت بتأكد",
+    "followLikeAll": "تابع وحط لايك لكل اشي",
+    "followLikeAllSub": "بيتابع {{handle}} وبيتفاعل مع كل منشور",
+    "likeAll": "حط لايك لكل منشوراته",
+    "likeAllSub": "بيتخطى اللي تفاعلت معه من قبل",
+    "catchUp": "خبرني شو الجديد",
+    "catchUpSub": "شو نشر {{handle}} مؤخرًا، باختصار",
+    "message": "اكتبله رسالة",
+    "messageSub": "بيكتب مسودة رسالة، وإنت بتبعتها",
+    "placeholder": "اسأل أي اشي عن {{handle}}…",
+    "send": "أرسل",
+    "promptFollowLikeAll": "تابع {{handle}} وتفاعل مع كل منشوراته",
+    "promptLikeAll": "تفاعل مع كل منشورات {{handle}}",
+    "promptCatchUp": "خبرني شو نشر {{handle}} مؤخرًا",
+    "promptMessage": "ساعدني أكتب رسالة لـ {{handle}}",
+    "promptAbout": "عن {{handle}}: {{question}}"
   }
 }

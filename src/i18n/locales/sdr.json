@@ -20849,5 +20849,27 @@
     "remember": "हमर चुनाव याद रखा",
     "rememberHint": "Settings में कभी भी बदला",
     "failed": "मैसेज नी मेटाय पारलक"
+  },
+  "profileAskAi": {
+    "row": "AI से पूछा",
+    "rowSub": "फॉलो करा, सब लाइक करा, नवा जाना",
+    "back": "वापस",
+    "title": "{{handle}} कर बारे में AI से पूछा",
+    "sub": "असिस्टेंट करी, तोंय पक्का करा",
+    "followLikeAll": "फॉलो करा आउर सब लाइक करा",
+    "followLikeAllSub": "{{handle}} के फॉलो करेला, हर पोस्ट में रिएक्ट करेला",
+    "likeAll": "ओकर सब पोस्ट लाइक करा",
+    "likeAllSub": "जेकर में तोंय पहिले रिएक्ट कइर चुकला, ओके छोइड़ देवेला",
+    "catchUp": "मोके नवा बतावा",
+    "catchUpSub": "{{handle}} हाल में का पोस्ट करलक, छोटे में",
+    "message": "ओके मैसेज लिखा",
+    "messageSub": "मैसेज कर ड्राफ्ट बनावेला, तोंय भेजा",
+    "placeholder": "{{handle}} कर बारे में कुछो पूछा…",
+    "send": "भेजा",
+    "promptFollowLikeAll": "{{handle}} के फॉलो करा आउर ओकर सब पोस्ट में रिएक्ट करा",
+    "promptLikeAll": "{{handle}} कर सब पोस्ट में रिएक्ट करा",
+    "promptCatchUp": "मोके बतावा कि {{handle}} हाल में का पोस्ट करलक",
+    "promptMessage": "{{handle}} के मैसेज लिखेक में मोर मदद करा",
+    "promptAbout": "{{handle}} कर बारे में: {{question}}"
   }
 }

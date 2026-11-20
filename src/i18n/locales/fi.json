@@ -20858,5 +20858,27 @@
     "remember": "Muista valintani",
     "rememberHint": "Muuta sitä milloin tahansa Asetuksissa",
     "failed": "Viestiä ei voitu poistaa"
+  },
+  "profileAskAi": {
+    "row": "Kysy tekoälyltä",
+    "rowSub": "Seuraa, tykkää kaikesta, pysy ajan tasalla",
+    "back": "Takaisin",
+    "title": "Kysy tekoälyltä: {{handle}}",
+    "sub": "Avustaja hoitaa, sinä vahvistat",
+    "followLikeAll": "Seuraa ja tykkää kaikesta",
+    "followLikeAllSub": "Seuraa käyttäjää {{handle}}, reagoi jokaiseen julkaisuun",
+    "likeAll": "Tykkää kaikista julkaisuista",
+    "likeAllSub": "Ohittaa ne, joihin olet jo reagoinut",
+    "catchUp": "Kerro mitä uutta",
+    "catchUpSub": "Mitä {{handle}} on julkaissut viime aikoina, lyhyesti",
+    "message": "Kirjoita viesti",
+    "messageSub": "Laatii luonnoksen, sinä lähetät",
+    "placeholder": "Kysy mitä tahansa käyttäjästä {{handle}}…",
+    "send": "Lähetä",
+    "promptFollowLikeAll": "Seuraa käyttäjää {{handle}} ja reagoi kaikkiin julkaisuihin",
+    "promptLikeAll": "Reagoi kaikkiin käyttäjän {{handle}} julkaisuihin",
+    "promptCatchUp": "Kerro, mitä {{handle}} on julkaissut viime aikoina",
+    "promptMessage": "Auta minua kirjoittamaan viesti käyttäjälle {{handle}}",
+    "promptAbout": "Käyttäjästä {{handle}}: {{question}}"
   }
 }

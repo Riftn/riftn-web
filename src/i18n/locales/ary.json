@@ -20888,5 +20888,27 @@
     "remember": "عقل على الاختيار ديالي",
     "rememberHint": "بدلو فأي وقت من الإعدادات",
     "failed": "ماقدرناش نمسحو الرسالة"
+  },
+  "profileAskAi": {
+    "row": "سول الذكاء الاصطناعي",
+    "rowSub": "تبّع، دير جام لكلشي، عرف الجديد",
+    "back": "رجوع",
+    "title": "سول الذكاء الاصطناعي على {{handle}}",
+    "sub": "المساعد كيدير، ونتا كتأكد",
+    "followLikeAll": "تبّع ودير جام لكلشي",
+    "followLikeAllSub": "كيتبّع {{handle}} وكيتفاعل مع كل منشور",
+    "likeAll": "دير جام لجميع المنشورات ديالو",
+    "likeAllSub": "كيدوز على اللي ديجا تفاعلتي معاهم",
+    "catchUp": "عطيني الجديد",
+    "catchUpSub": "شنو نشر {{handle}} هاد الأيام، باختصار",
+    "message": "كتب ليه رسالة",
+    "messageSub": "كيكتب مسودة ديال رسالة، ونتا كتصيفطها",
+    "placeholder": "سول أي حاجة على {{handle}}…",
+    "send": "صيفط",
+    "promptFollowLikeAll": "تبّع {{handle}} وتفاعل مع جميع المنشورات ديالو",
+    "promptLikeAll": "تفاعل مع جميع المنشورات ديال {{handle}}",
+    "promptCatchUp": "عطيني شنو نشر {{handle}} هاد الأيام",
+    "promptMessage": "عاوني نكتب رسالة لـ {{handle}}",
+    "promptAbout": "على {{handle}}: {{question}}"
   }
 }

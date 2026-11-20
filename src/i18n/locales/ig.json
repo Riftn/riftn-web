@@ -20858,5 +20858,27 @@
     "remember": "Cheta nhọrọ m",
     "rememberHint": "Gbanwee ya mgbe ọ bụla na Settings",
     "failed": "Enweghị ike ihichapụ ozi ahụ"
+  },
+  "profileAskAi": {
+    "row": "Jụọ AI",
+    "rowSub": "Soro, hụ n'anya ihe niile, mara ihe ọhụrụ",
+    "back": "Laghachi",
+    "title": "Jụọ AI gbasara {{handle}}",
+    "sub": "Onye enyemaka na-eme ya, ị na-akwado",
+    "followLikeAll": "Soro ma hụ n'anya ihe niile",
+    "followLikeAllSub": "Na-eso {{handle}}, na-emeghachi omume n'akwụkwọ ọ bụla",
+    "likeAll": "Hụ n'anya akwụkwọ ha niile",
+    "likeAllSub": "Na-awụfe ndị ị meghachiworo omume",
+    "catchUp": "Gwa m ihe ọhụrụ",
+    "catchUpSub": "Ihe {{handle}} biputere n'oge na-adịbeghị anya, na nkenke",
+    "message": "Dee ha ozi",
+    "messageSub": "Na-ede ụdị ozi, ị na-ezipụ ya",
+    "placeholder": "Jụọ ihe ọ bụla gbasara {{handle}}…",
+    "send": "Ziga",
+    "promptFollowLikeAll": "Soro {{handle}} ma meghachi omume n'akwụkwọ ha niile",
+    "promptLikeAll": "Meghachi omume n'akwụkwọ {{handle}} niile",
+    "promptCatchUp": "Gwa m ihe {{handle}} biputere n'oge na-adịbeghị anya",
+    "promptMessage": "Nyere m aka dee ozi nye {{handle}}",
+    "promptAbout": "Gbasara {{handle}}: {{question}}"
   }
 }

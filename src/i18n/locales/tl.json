@@ -21034,5 +21034,27 @@
     "remember": "Tandaan ang pinili ko",
     "rememberHint": "Baguhin ito anumang oras sa Settings",
     "failed": "Hindi mabura ang mensahe"
+  },
+  "profileAskAi": {
+    "row": "Magtanong sa AI",
+    "rowSub": "I-follow, i-like lahat, humabol sa balita",
+    "back": "Bumalik",
+    "title": "Magtanong sa AI tungkol kay {{handle}}",
+    "sub": "Ang Assistant ang gagawa, ikaw ang magkukumpirma",
+    "followLikeAll": "I-follow at i-like lahat",
+    "followLikeAllSub": "Ifo-follow si {{handle}}, magre-react sa bawat post",
+    "likeAll": "I-like lahat ng post nila",
+    "likeAllSub": "Nilalaktawan ang mga na-react-an mo na",
+    "catchUp": "Ibalita mo sa akin",
+    "catchUpSub": "Ang mga bagong post ni {{handle}}, sa madaling salita",
+    "message": "Sumulat ng mensahe",
+    "messageSub": "Gagawa ng draft, ikaw ang magpapadala",
+    "placeholder": "Magtanong ng kahit ano tungkol kay {{handle}}…",
+    "send": "Ipadala",
+    "promptFollowLikeAll": "I-follow si {{handle}} at mag-react sa lahat ng post nila",
+    "promptLikeAll": "Mag-react sa lahat ng post ni {{handle}}",
+    "promptCatchUp": "Ibalita mo sa akin ang mga pinost ni {{handle}} kamakailan",
+    "promptMessage": "Tulungan mo akong sumulat ng mensahe kay {{handle}}",
+    "promptAbout": "Tungkol kay {{handle}}: {{question}}"
   }
 }
