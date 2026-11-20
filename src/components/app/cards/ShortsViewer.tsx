@@ -46,6 +46,7 @@ import Pause from "@/components/ui/cut-icons/pause";
 import MessageSquare from "@/components/ui/cut-icons/messages";
 import Bookmark from "@/components/ui/cut-icons/save";
 import Share2 from "@/components/ui/cut-icons/feedshare";
+import PostShareIcon from "@/components/ui/cut-icons/postshare";
 import Send from "@/components/ui/cut-icons/send";
 import Gem from "@/components/ui/cut-icons/diamond";
 import Gift from "@/components/ui/cut-icons/gifts";
@@ -1891,7 +1892,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     className="flex min-w-10 items-center justify-center gap-1"
                     aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
                   >
-                    <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
+                    <PostShareIcon className="w-5 h-5 text-white drop-shadow-lg" />
                     <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
                   </button>
 
@@ -2424,7 +2425,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
                     className="flex items-center gap-1"
                     aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
                   >
-                    <Share2 className="w-5 h-5 text-white drop-shadow-lg" />
+                    <PostShareIcon className="w-5 h-5 text-white drop-shadow-lg" />
                     <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
                   </button>
 
