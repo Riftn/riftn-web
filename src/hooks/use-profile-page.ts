@@ -56,7 +56,7 @@ const PROFILE_TAB_POST_TYPE: Partial<Record<TabValue, string>> = {
   articles: 'article',
 };
 import { scrollDocumentTo } from '@/lib/document-scroll';
-import { profilePath } from '@/lib/profile-path';
+import { ASSISTANT_PROFILE_PATH, isAssistantHandle, profilePath } from '@/lib/profile-path';
 
 /** A reposted governance proposal on the profile timeline. */
 export interface ProfileProposalItem {
@@ -127,6 +127,11 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
     if (apiProfile?.handle) {
       const cleanHandle = apiProfile.handle.replace('@', '');
       if (!cleanHandle) return;
+      // @assistant's profile stays on its address link (see profile-path).
+      if (isAssistantHandle(cleanHandle)) {
+        if (routeUsername) navigate(ASSISTANT_PROFILE_PATH, { replace: true });
+        return;
+      }
 
       // Route like /0xABC... → /username
       if (routeUsername && /^0x[a-fA-F0-9]{40}$/i.test(routeUsername)) {
