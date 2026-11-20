@@ -4337,6 +4337,11 @@
       "openNewMembers": "De lijst met nieuwe leden openen",
       "chartMembers": "Leden in de tijd",
       "chartActive": "Actieve mensen",
+      "stickiness": "Binding",
+      "stickinessHint": "vandaag ÷ laatste 30 dagen",
+      "layerDaily": "Dagelijks",
+      "layerWeekly": "Wekelijks",
+      "layerMonthly": "Maandelijks",
       "growth": "+{{percent}}% deze maand",
       "growthTerm": "Groei",
       "recordingSince": "vastgelegd sinds {{date}}"

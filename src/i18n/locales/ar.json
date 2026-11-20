@@ -4171,6 +4171,11 @@
       "openNewMembers": "فتح قائمة الأعضاء الجدد",
       "chartMembers": "الأعضاء عبر الزمن",
       "chartActive": "الأشخاص النشطون",
+      "stickiness": "الالتزام",
+      "stickinessHint": "اليوم ÷ آخر 30 يومًا",
+      "layerDaily": "يومي",
+      "layerWeekly": "أسبوعي",
+      "layerMonthly": "شهري",
       "growth": "+{{percent}}% هذا الشهر",
       "growthTerm": "النمو",
       "recordingSince": "مسجَّل منذ {{date}}"
