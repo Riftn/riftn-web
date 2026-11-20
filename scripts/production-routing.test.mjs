@@ -1,9 +1,27 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { checkAnswers, checkWorkerConfig, contract } from './production-routing.mjs';
+import { checkAnswers, checkWorkerConfig, contract, readProductionVersion } from './production-routing.mjs';
 
 const dns = (addresses, type = 1) => ({ Status: 0, Answer: addresses.map(data => ({ type, data })) });
+test('accepts a direct version response and the exact canonical redirect', async () => {
+  const version = { id: '12345678' };
+  assert.deepEqual(await readProductionVersion(async () => Response.json(version)), version);
+  const canonical = `https://${contract.canonicalHostname}/version.json`;
+  const calls = [];
+  const request = async (url, { redirect }) => {
+    calls.push([url, redirect]);
+    return redirect === 'manual'
+      ? new Response(null, { status: 301, headers: { location: canonical } })
+      : Response.json(version);
+  };
+  assert.deepEqual(await readProductionVersion(request), version);
+  assert.deepEqual(calls, [[`https://${contract.hostname}/version.json`, 'manual'], [canonical, 'error']]);
+});
+test('rejects other version redirects', async () => {
+  const request = async () => new Response(null, { status: 301, headers: { location: 'https://example.com/version.json' } });
+  await assert.rejects(readProductionVersion(request), /unexpected response for \/version.json/);
+});
 test('accepts the direct gateway with no IPv6 record', () => {
   checkAnswers(dns([contract.ipv4]), dns([], 28));
   checkAnswers(dns([contract.ipv4]), { Status: 3 });
