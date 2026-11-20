@@ -188,7 +188,7 @@ export function wrapPostText(text, size, width, maxLines) {
   return lines;
 }
 
-function textLines(lines, x, y, size, lineHeight, color, weight = 500, extra = '') {
+export function textLines(lines, x, y, size, lineHeight, color, weight = 500, extra = '') {
   return `<text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" fill="${color}"${extra}>${lines.map((line, i) => `<tspan x="${x}" dy="${i ? lineHeight : 0}">${escape(line)}</tspan>`).join('')}</text>`;
 }
 
@@ -197,12 +197,12 @@ function textLines(lines, x, y, size, lineHeight, color, weight = 500, extra = '
  * left column on a 64px grid. Logo top-left, a mono tag top-right, the words
  * anchored to the column's foot, then one footer row: author, counts, the way in.
  */
-const M = { x: 64, top: 128, bottom: 466, footY: 548, right: 1136 };
+export const M = { x: 64, top: 128, bottom: 466, footY: 548, right: 1136 };
 const BOLD = 1.07; // Manrope 700 runs a little wider than the 500 advances textWidth models.
 const MONO = 'Consolas';
 
 /** Wrap at a bold weight by measuring against a narrower column. */
-const wrapBold = (text, size, width, maxLines) => wrapPostText(text, size, width / BOLD, maxLines);
+export const wrapBold = (text, size, width, maxLines) => wrapPostText(text, size, width / BOLD, maxLines);
 
 function pollLayout(poll, width, questionWidth = width) {
   if (!poll) return null;
@@ -268,7 +268,7 @@ const ICONS = {
 };
 
 /** Counts in mono with their icons, laid left to right from x; returns the svg and where it ended. */
-function statRow(stats, x, y) {
+export function statRow(stats, x, y) {
   let at = x;
   const svg = stats.map(([value, icon]) => {
     const text = formatPostCardCount(value);
@@ -280,7 +280,7 @@ function statRow(stats, x, y) {
 }
 
 /** The white call-to-action pill, right-aligned on the footer line. */
-function ctaPill(label, y) {
+export function ctaPill(label, y) {
   const width = Math.ceil(textWidth(label, 19) * BOLD) + 70;
   const x = M.right - width;
   return `<g data-cta="${escape(label)}"><rect x="${x}" y="${y - 24}" width="${width}" height="48" rx="12" fill="#f4f4f6"/><text x="${x + 20}" y="${y + 7}" font-size="19" font-weight="700" fill="#060607">${escape(label)}</text><path d="M${M.right - 36} ${y + 6}l11-11m-10 0h10v10" fill="none" stroke="#060607" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g>`;
@@ -294,7 +294,7 @@ function cornerTag(label, live = false) {
 }
 
 /** Shared frame: background, scrim, wordmark, corner tag. */
-function monolithFrame({ backdrop, scrim = true, logo, tag, live }) {
+export function monolithFrame({ backdrop, scrim = true, logo, tag, live }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630" data-look="monolith">
   <defs>
     <linearGradient id="side" x2="1"><stop stop-color="#050506" stop-opacity=".93"/><stop offset=".55" stop-color="#050506" stop-opacity=".58"/><stop offset="1" stop-color="#050506" stop-opacity=".16"/></linearGradient>
