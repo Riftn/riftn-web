@@ -35,6 +35,7 @@ import Stats from '@/components/ui/cut-icons/stats';
 import Superpowers from '@/components/ui/cut-icons/superpowers';
 import AssistantNavIcon from '@/components/ui/AssistantNavIcon';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { useFollow } from '@/hooks/use-follow';
@@ -61,6 +62,8 @@ const EMOJI_BY_REACTION = Object.fromEntries(REACTION_LIST.map((r) => [r.key, r.
 const REACTION_BY_EMOJI = Object.fromEntries(REACTION_LIST.map((r) => [r.emoji, r.key])) as Record<string, PostReaction>;
 const QUICK = REACTION_LIST.map((r) => r.emoji);
 const MENU_WIDTH = 304;
+/** Rows a phone leaves out because the post's action bar already has them. */
+const ON_ACTION_BAR = new Set(['comment', 'repost', 'quote', 'tip', 'bookmark', 'info']);
 
 type Sheet = null | 'dm' | 'quote' | 'tip' | 'report' | 'boost';
 
@@ -215,9 +218,14 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
   const words = (target.text || '').trim();
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
+  // On a phone the post's action bar sits right under it, so the menu leaves
+  // out what that bar already does (Requests 7399dd7d). Desktop keeps them:
+  // their letter shortcuts live in this menu.
+  const phone = useIsMobile();
+
   const actions = useMemo<MessageMenuAction[]>(() => {
     const list: MessageMenuAction[] = [];
-    const add = (a: MessageMenuAction | false | null | undefined) => { if (a) list.push(a); };
+    const add = (a: MessageMenuAction | false | null | undefined) => { if (a && !(phone && ON_ACTION_BAR.has(a.key))) list.push(a); };
     const link = viewerShareUrl(shareLink(target, tokenId));
 
     add({
@@ -303,7 +311,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
       add(!!target.actions?.delete && { key: 'delete', label: t('postOptions.deletePost', 'Delete post'), icon: <Trash2 />, destructive: true, divided: !target.actions?.edit, onSelect: () => target.actions!.delete!() });
     }
     return list;
-  }, [target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
+  }, [phone, target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
     t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor]);
 
   const header = authorLabel ? (
