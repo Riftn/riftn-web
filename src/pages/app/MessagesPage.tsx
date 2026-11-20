@@ -12,7 +12,7 @@ import { DhbCoin } from '@/components/app/DhbAmount';
 import { lazy, Suspense, useState, useEffect, useRef, useCallback, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import CloseIcon from '@/components/ui/cut-icons/close';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Loader2 } from "lucide-react";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
 import Trash2 from "@/components/ui/cut-icons/delete";
@@ -1146,6 +1146,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // its one page of history opens the sign-in sheet in place.
   // Block access for unauthenticated users everywhere else.
   if (!isAuthenticated && !fullscreen) {
+    // A copied Public Chat link opened while signed out: the public room is
+    // readable at riftn.com/chat, so carry the visitor there to see the line.
+    if (!authLoading && (new URLSearchParams(location.search).get('chat') === 'public' || peekPendingChatLink('public'))) {
+      return <Navigate to="/chat?chat=public" replace />;
+    }
     return <AuthGate description={_copy("copy.b38dabfa0639", { defaultValue: "Log in to access your messages and chat with others." })} />;
   }
 
