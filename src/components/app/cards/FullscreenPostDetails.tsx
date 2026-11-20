@@ -7,7 +7,7 @@
  * Follow state is the creator's profile plus the shared optimistic override,
  * the same pair StageCreatorRow uses, so every Follow button agrees.
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +36,7 @@ export function FullscreenPostDetails({ author, onLeave }: { author: FullscreenP
   const handle = author.handle?.replace('@', '');
   const caption = author.caption?.trim();
 
-  const { data: profile } = useDeHubProfile({
+  const { data: profile, isLoading: profileLoading } = useDeHubProfile({
     userId: creatorId || undefined,
     address: walletAddress || undefined,
     enabled: !!creatorId,
@@ -45,6 +45,11 @@ export function FullscreenPostDetails({ author, onLeave }: { author: FullscreenP
   const isFollowing = creatorId
     ? (overrides.get(creatorId.toLowerCase()) ?? profile?.isFollowing === true)
     : false;
+  // Only a Follow button: accounts you already follow get none. Once Follow is
+  // tapped here it stays as "Following" so a mis-tap can be undone.
+  const tappedFollow = useRef(false);
+  const followKnown = !!creatorId && (overrides.has(creatorId.toLowerCase()) || !profileLoading);
+  const showFollow = followKnown && (!isFollowing || tappedFollow.current);
   const isSelf = !!(walletAddress && creatorId && walletAddress.toLowerCase() === creatorId.toLowerCase());
 
   const openProfile = (e: React.MouseEvent) => {
@@ -62,6 +67,7 @@ export function FullscreenPostDetails({ author, onLeave }: { author: FullscreenP
       openLoginModal();
       return;
     }
+    tappedFollow.current = true;
     void toggleFollowFor(queryClient, creatorId, isFollowing, { name });
   };
 
@@ -71,7 +77,7 @@ export function FullscreenPostDetails({ author, onLeave }: { author: FullscreenP
         <button
           type="button"
           onClick={openProfile}
-          className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+          className="flex min-w-0 shrink items-center gap-2.5 text-left"
         >
           {avatar && avatar.startsWith('http') && !avatarError ? (
             <img
@@ -93,15 +99,15 @@ export function FullscreenPostDetails({ author, onLeave }: { author: FullscreenP
             {handle ? <span className="truncate text-[13px] leading-tight text-white/65">@{handle}</span> : null}
           </span>
         </button>
-        {!isSelf && creatorId && (
+        {!isSelf && creatorId && showFollow && (
           <button
             type="button"
             onClick={onFollow}
             data-fullscreen-follow={isFollowing ? 'following' : 'follow'}
             className={
               isFollowing
-                ? 'h-8 shrink-0 rounded-full border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white'
-                : 'h-8 shrink-0 rounded-full bg-white px-4 text-sm font-semibold text-black'
+                ? 'h-[30px] shrink-0 rounded-full border border-white/30 bg-white/10 px-3.5 text-sm font-semibold text-white'
+                : 'h-[30px] shrink-0 rounded-full bg-white px-3.5 text-sm font-semibold text-black'
             }
           >
             {isFollowing ? t('follow.following') : t('follow.follow')}
