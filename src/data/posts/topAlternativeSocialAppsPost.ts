@@ -32,6 +32,8 @@ Numbers are the latest public figures we could verify in November 2026.
 9. **Lemmy**: the federated Reddit alternative.
 10. **Zora**: posts as tradeable coins.
 
+![The top 10 alternative social media apps in 2026 ranked by who runs them, with Riftn at number one](/media/fig-top10-alt-social-ranking.jpg)
+
 ## 1. Riftn: the social media protocol its users own
 
 **Best for:** anyone who wants a full social life online, and a real share of the network that hosts it.
@@ -74,6 +76,8 @@ Mastodon is open source microblogging on ActivityPub. Thousands of independent s
 
 **Verdict:** the most independent mainstream network. Admin power stays local, and nobody shares in the value users create.
 
+![Bluesky has about 46 million registered accounts but 10.4 million mobile monthly users, and Mastodon has 10.35 million accounts but about 717,000 monthly active accounts](/media/fig-top10-signups-vs-active.jpg)
+
 ## 4. Nostr: a key you hold, relays nobody controls
 
 **Best for:** privacy-minded users and Bitcoiners who want an account nobody can ban.
@@ -95,6 +99,8 @@ Farcaster registers your account ID on Optimism and spreads posts across its own
 - **New rules:** the main app now asks users to accept a "social smart contract". Decline, and you get read-only access in the main app and must move your keys and followers to another client.
 
 **Verdict:** a lively developer scene and a clear lesson. On-chain IDs did not stop the platform from changing hands twice in one year, with new rules each time.
+
+![Ownership changes in 2026: Neynar and then Network School bought Farcaster, Mask Network took over Lens, and Coinbase dropped content coins](/media/fig-top10-2026-ownership-changes.jpg)
 
 ## 6. Lens: a social graph on its own chain
 
@@ -155,6 +161,8 @@ Zora turns every post into a coin on Base that anyone can buy and sell. Coinbase
 
 Riftn lets you post, watch, stream, chat, play and get paid, then hands ownership of the whole network to the people who use it. Here is how the pieces fit together.
 
+![How Riftn works in six steps: join and post, keep your words on chain, get paid, govern, share the profit and build anything](/media/fig-top10-how-riftn-works.jpg)
+
 ### 1. Join and post
 
 Sign up free on [riftn.com](https://riftn.com), Android or iPhone. Post text, photos, video, shorts, music or a live stream. Your wallet is your identity, so no company owns your account.
@@ -183,6 +191,8 @@ Request a feature on the [features page](https://riftn.com/features), and the te
 
 Every big tech app ships what one product team decides, on one company's schedule, to serve one advertising business. Riftn flips that. Anyone can build the feature they want, and everyone else gets to use it.
 
+![Big tech ships what one product team decides, while on Riftn every user can build features that help relationships, communities, ideas and creativity grow](/media/fig-top10-build-anything.jpg)
+
 - **Relationships grow.** Friends build the tools that fit how they actually talk: a shared playlist, a game night, a group planner.
 - **Communities thrive.** A fan club, a study group or a local scene builds its own space instead of squeezing into a generic group page.
 - **Ideas spread faster.** When an idea needs a tool, its author builds the tool, and the community picks it up the same day.
@@ -193,6 +203,8 @@ Now picture thousands of members building useful things for each other every wee
 ## Breaking free from algorithmic brainwashing
 
 Big tech feeds optimise for one number: time on app, because time sells ads. Outrage, envy and endless scroll keep that number high, so that is what you see.
+
+![Big tech feeds are optimised for time on app, while the Riftn feed answers to the people who own the network](/media/fig-top10-feed-freedom.jpg)
 
 Riftn removes the incentive. No ad business pays for your attention. [Explore](https://riftn.com/explore) shows public posts in time order, your Following feed shows the people you chose, and the community, not an ad-sales team, decides what drops out of public feeds. The people who own the network use it every day, so they have every reason to keep it healthy.
 
@@ -210,6 +222,7 @@ Ready to own your corner of social media? Join [riftn.com](https://riftn.com), r
   bannerImageAlt: 'Top 10 alternative social media apps in 2026, ranked, with Riftn at number one',
   author: { name: 'Riftn Team' },
   publishedAt: '2026-11-20T15:00:00.000Z',
+  updatedAt: '2026-11-20T15:30:00.000Z',
   tags: ['Alternative Social Media', 'Decentralized Social Media', 'Bluesky', 'Mastodon', 'Farcaster', 'Nostr', 'Riftn'],
   readingTime: 11,
   featured: false,

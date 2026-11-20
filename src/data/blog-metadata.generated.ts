@@ -2999,6 +2999,7 @@ export const newPostsMetadata: BlogPost[] = [
       "name": "Riftn Team"
     },
     "publishedAt": "2026-11-20T15:00:00.000Z",
+    "updatedAt": "2026-11-20T15:30:00.000Z",
     "tags": [
       "Alternative Social Media",
       "Decentralized Social Media",
@@ -3765,6 +3766,7 @@ export const latestPostMetadata: BlogPost | undefined = {
     "name": "Riftn Team"
   },
   "publishedAt": "2026-11-20T15:00:00.000Z",
+  "updatedAt": "2026-11-20T15:30:00.000Z",
   "tags": [
     "Alternative Social Media",
     "Decentralized Social Media",
