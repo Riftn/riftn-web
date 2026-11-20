@@ -1052,10 +1052,38 @@ body:has([id^="w3a-"]) {
   inherits: false;
 }
 
-/* The same cost from Radix's `body { pointer-events: none }` while the login
-   sheet is up: holding #root at auto stops the inherited change at #root.
-   The sheet's backdrop covers the page, so nothing behind it is reachable. */
-html[data-login-sheet] #root {
+/* The same cost from Radix's `body { pointer-events: none }`, which every modal
+   sheet, dialog, menu and select sets while it is open. pointer-events is
+   inherited, so flipping it on <body> restyled every element in the app:
+   ~500ms on the Stages page, once on open and once on close. Holding #root at
+   auto stops the inherited change at #root.
+
+   What kept the page behind an open layer inert was that inheritance, so the
+   layers now do it themselves: sheets and dialogs already cover the page with
+   a backdrop, and the ones that have none get a clear one below. */
+#root {
+  pointer-events: auto;
+}
+
+/* Menus and selects have no backdrop. While one is open (Radix marks <body>),
+   a clear sheet behind it takes the press that dismisses it, so that press
+   cannot also land on the button underneath. It hangs off the popper wrapper,
+   which already carries the menu's own z-index, so it sits above exactly what
+   the menu sits above. */
+body[style*="pointer-events: none"] [data-radix-popper-content-wrapper]:has(> [data-modal-shield])::before {
+  content: "";
+  position: absolute;
+  inset: -200vmax;
+  z-index: -1;
+  pointer-events: auto;
+}
+
+/* The same for a modal sheet drawn without a backdrop. */
+[data-overlay-shield] {
+  display: none;
+}
+body[style*="pointer-events: none"] [data-overlay-shield] {
+  display: block;
   pointer-events: auto;
 }
 

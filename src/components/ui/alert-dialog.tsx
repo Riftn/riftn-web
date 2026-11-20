@@ -1,4 +1,5 @@
 import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +17,9 @@ const AlertDialog = ({ onOpenChange, ...props }: React.ComponentProps<typeof Ale
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 
-const AlertDialogPortal = AlertDialogPrimitive.Portal;
+const AlertDialogPortal = (props: AlertDialogPrimitive.AlertDialogPortalProps) => (
+  <AlertDialogPrimitive.Portal container={overlayRoot()} {...props} />
+);
 
 const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,

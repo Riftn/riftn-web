@@ -1,4 +1,5 @@
 import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 import { cn } from "@/lib/utils";
@@ -22,7 +23,7 @@ const PopoverContent = React.forwardRef<
   const surfaceRef = useOverlayExitRef(ref);
   if (!present) return null;
   return (
-  <PopoverPrimitive.Portal>
+  <PopoverPrimitive.Portal container={overlayRoot()}>
     <PopoverPrimitive.Content
       ref={surfaceRef}
       align={align}

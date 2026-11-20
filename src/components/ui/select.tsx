@@ -1,4 +1,5 @@
 import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Check from "@/components/ui/cut-icons/check";
@@ -69,9 +70,10 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal>
+  <SelectPrimitive.Portal container={overlayRoot()}>
     <SelectPrimitive.Content
       ref={ref}
+      data-modal-shield=""
       className={cn(
         "relative z-[200] max-h-96 min-w-[8rem] overflow-hidden rounded-2xl bg-zinc-900/70 backdrop-blur-xl border-0 text-white shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
