@@ -707,6 +707,7 @@
     "heading": "Krótkie filmy Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Ekran logowania", "desc": "Jak logo i hasło Riftn poruszają się na ekranie logowania na tym urządzeniu.", "tube": "Telewizor kineskopowy", "vhs": "Kaseta VHS", "led": "Ściana LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Płaski"}, "arrivalLook": {"title": "Po zalogowaniu", "desc": "Co widać, gdy konto się wczytuje, zanim zdjęcie trafi na stronę. Na tym urządzeniu.", "rift": "Szczelina", "trace": "Ślad", "frame": "Ramka", "orbit": "Orbita"},
     "postLanding": "Po opublikowaniu",
     "postLandingDesc": "Jak nowy post pojawia się w Twoim feedzie",
     "postLandingGhost": "Puste miejsce",

@@ -707,6 +707,7 @@
     "heading": "Video Fupi za Riftn"
   },
   "settings": {
+    "loginLook": {"title": "Skrini ya kuingia", "desc": "Jinsi nembo na kauli mbiu ya Riftn zinavyosonga kwenye skrini ya kuingia kwenye kifaa hiki.", "tube": "TV ya bomba", "vhs": "Kanda ya VHS", "led": "Ukuta wa LED", "holo": "Hologramu", "neon": "Neoni", "3d": "3D", "flat": "Bapa"}, "arrivalLook": {"title": "Baada ya kuingia", "desc": "Kinachocheza akaunti yako ikipakia, kabla picha yako haijatua kwenye ukurasa. Kwenye kifaa hiki.", "rift": "Ufa", "trace": "Mstari", "frame": "Fremu ya picha", "orbit": "Mzunguko"},
     "postLanding": "Baada ya kuchapisha",
     "postLandingDesc": "Jinsi chapisho lako jipya linavyoingia kwenye mlisho",
     "postLandingGhost": "Nafasi tupu",

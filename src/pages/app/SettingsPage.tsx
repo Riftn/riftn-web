@@ -161,6 +161,7 @@ import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNo
 import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
+import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
 import { ChatReactionStyleSetting } from '@/components/app/settings/ChatReactionStyleSetting';
 import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
@@ -2764,8 +2765,11 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
         </div>
       </div>
 
-      {/* Sign-in screen look: Tube TV, VHS, LED wall or Hologram */}
+      {/* Sign-in screen look: Tube TV, VHS, LED wall, Hologram, Neon glow, 3D or Flat */}
       <LoginLookSetting />
+
+      {/* What plays after signing in: Rift, Trace, Picture frame or Orbit */}
+      <ArrivalLookSetting />
 
       {/* Language */}
       <div data-setting-anchor="language">
