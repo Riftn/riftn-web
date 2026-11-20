@@ -5,7 +5,7 @@ import { loadPostShareDetails, streamerShareSvg } from './post-share-details.js'
 
 const SHARE_IMAGE = 'https://riftn.com/og/riftn-share.png';
 let assets;
-const RENDER_REVISION = 9;
+const RENDER_REVISION = 10;
 const bytesToUri = (bytes, type) => {
   let binary = '';
   for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
@@ -13,7 +13,7 @@ const bytesToUri = (bytes, type) => {
 };
 
 async function loadAssets(env) {
-  if (!assets) assets = Promise.all(['/brand-kit/font/manrope-500.ttf', '/brand-kit/brand/riftn-logo-white.png'].map(async (path) => {
+  if (!assets) assets = Promise.all(['/brand-kit/font/manrope-500.ttf', '/brand-kit/brand/riftn-logo-white.png', '/brand-kit/font/manrope-700.ttf', '/brand-kit/font/mono.ttf', '/brand-kit/bg/bg-12.jpg', '/brand-kit/bg/bg-10.jpg'].map(async (path) => {
     const response = await env.ASSETS.fetch(new Request(`https://riftn.com${path}`));
     if (!response.ok || response.headers.get('Content-Type')?.includes('text/html')) throw new Error('Share card asset unavailable');
     return new Uint8Array(await response.arrayBuffer());
@@ -74,8 +74,8 @@ async function brandCard(request, env, headers, reason) {
   } });
 }
 
-function renderPng(svg, font) {
-  const renderer = new Resvg(svg, { font: { fontBuffers: [font], defaultFontFamily: 'Manrope' } });
+function renderPng(svg, fonts) {
+  const renderer = new Resvg(svg, { font: { fontBuffers: fonts, defaultFontFamily: 'Manrope' } });
   let rendered;
   try { rendered = renderer.render(); return rendered.asPng(); }
   finally { rendered?.free(); renderer.free(); }
@@ -106,7 +106,7 @@ export async function handlePostShareImage(request, env, ctx, tokenId, fetchReco
       hit.headers.set('Cache-Control', publicCache);
       return hit;
     }
-    const [, [font, mark], avatar, media, badges] = await Promise.all([
+    const [, [font, mark, bold, mono, postBackdrop], avatar, media, badges] = await Promise.all([
       resvgReady(), loadAssets(env), loadAvatar(data.avatar), loadPostMedia(data.media),
       Promise.all(data.badges.map(async badge => {
         if (badge.kind === 'new') return badge;
@@ -121,8 +121,8 @@ export async function handlePostShareImage(request, env, ctx, tokenId, fetchReco
     const mediaMissing = !!data.media && !media;
     if (mediaMissing && !data.title && !data.body) return brandCard(request, env, headers, 'media');
     const cacheable = data.detailsComplete && !mediaMissing;
-    const svg = renderPostCardSvg(data, { logo: bytesToUri(mark, 'image/png'), avatar, badges, media });
-    const png = renderPng(svg, font);
+    const svg = renderPostCardSvg(data, { logo: bytesToUri(mark, 'image/png'), avatar, badges, media, backdrop: bytesToUri(postBackdrop, 'image/jpeg') });
+    const png = renderPng(svg, [font, bold, mono]);
     const response = new Response(png, { headers: {
       ...headers, 'Content-Type': 'image/png', 'Cache-Control': cacheable ? publicCache : 'no-store',
       'ETag': `"${POST_CARD_VERSION}-${fingerprint}"`, 'X-DeHub-Share-Card': POST_CARD_VERSION,
@@ -168,8 +168,8 @@ export async function handleProfileShareImage(request, env, ctx, handle, fetchAc
       hit.headers.set('Cache-Control', publicCache);
       return hit;
     }
-    const [, [font, mark], avatar] = await Promise.all([resvgReady(), loadAssets(env), loadAvatar(data.avatar)]);
-    const png = renderPng(renderProfileCardSvg(data, { logo: bytesToUri(mark, 'image/png'), avatar }), font);
+    const [, [font, mark, bold, mono, , profileBackdrop], avatar] = await Promise.all([resvgReady(), loadAssets(env), loadAvatar(data.avatar)]);
+    const png = renderPng(renderProfileCardSvg(data, { logo: bytesToUri(mark, 'image/png'), avatar, backdrop: bytesToUri(profileBackdrop, 'image/jpeg') }), [font, bold, mono]);
     const cacheable = !data.avatar || !!avatar;
     const response = new Response(png, { headers: {
       ...headers, 'Content-Type': 'image/png', 'Cache-Control': cacheable ? publicCache : 'no-store',

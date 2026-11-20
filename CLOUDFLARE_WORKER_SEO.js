@@ -3,6 +3,7 @@ import { localizePublicChrome, localizeStructuredData } from './server/public-pa
 import { handleWorkReceipt } from './server/work-receipts.ts';
 import { handleEditorPresence } from './server/editor-presence.ts';
 import { stageShareImageUrl } from './server/stage-share-card.js';
+import { entityShareImageUrl } from './server/entity-share-card.js';
 import { applyPostShareImage, applyProfileShareImage, postShareImageUrl, profileShareImageUrl } from './server/post-share-card.js';
 import { liveShareCopy } from './server/live-share-copy.js';
 import { handleFinanceRequest } from './server/finance-stats.js';
@@ -3189,6 +3190,7 @@ function shareCardImage(url) {
   // Already a 1200x630 card: one of ours, or one this function made.
   if (url.startsWith(`${APP_URL}/og/`) || url === SHARE_IMAGE) return url;
   if (url.startsWith(`${APP_URL}/_og/stage/`)) return url;
+  if (/^https:\/\/riftn\.com\/_og\/(?:event|community|clip|dex|costream)\/v\d+\//.test(url)) return url;
   if (url.startsWith(`${IMAGE_TRANSFORM_BASE}fit=`)) return url;
   // Undo an earlier transform (the fn's avatar crop, repairProxiedImages'
   // scale-down) so the card is cut from the original.
@@ -3591,7 +3593,7 @@ function buildCommunityInviteHtml(code, invite) {
     canonicalUrl,
     title,
     description,
-    image: absolutize(invite.banner_url) || absolutize(invite.avatar_url) || shareImage('communities'),
+    image: absolutize(invite.banner_url) || absolutize(invite.avatar_url) || (invite.slug ? entityShareImageUrl('community', invite.slug) : shareImage('communities')),
     noindex: true,
     heading: title,
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/communities">Communities</a>`,
@@ -3733,7 +3735,7 @@ function buildEventHtml(event) {
     canonicalUrl,
     title,
     description,
-    image,
+    image: image || (event.is_private ? '' : entityShareImageUrl('event', event.event_number)),
     ogType: 'article',
     // A private event is shareable by whoever holds the link, not crawlable.
     noindex: !!event.is_private || entityLooksThin({ name: event.title, description: event.description, image }),
@@ -3798,7 +3800,7 @@ function buildDexPoolHtml(pool) {
     canonicalUrl,
     title,
     description,
-    image: pool.image_url,
+    image: pool.image_url || entityShareImageUrl('dex', `${pool.chain}~${pool.token_address}`),
     heading: `${pair} · ${chain}`,
     breadcrumb: `<a href="${APP_URL}">Riftn</a> › <a href="${APP_URL}/dex">DEX</a>`,
     bodyHtml: `<p>${escHtml(description)}</p>
@@ -3959,7 +3961,7 @@ function buildClipHtml(clip) {
     canonicalUrl,
     title: `${name}: Clip on Riftn`,
     description,
-    image: clip.card_url || clip.poster_url || '',
+    image: clip.card_url || clip.poster_url || entityShareImageUrl('clip', clip.short_id),
     ogType: 'video.other',
     extraHead,
     heading: name,
@@ -4069,7 +4071,7 @@ function buildCoStreamHtml(room) {
     canonicalUrl,
     title,
     description,
-    image: SHARE_IMAGE,
+    image: entityShareImageUrl('costream', room.id),
     noindex: true,
     heading: title,
     breadcrumb: `<a href="${APP_URL}">Riftn</a>`,
@@ -7394,7 +7396,7 @@ async function handleRequest(request, env, ctx) {
   // Share-card sources for the image transform (see shareCardImage). Ahead of
   // the `/_` static-asset skip below, which would hand these to ASSETS.
   // Older installed apps and already-shared URLs continue to receive the current card.
-  const textPostCard = pathname.match(/^\/_og\/post\/v(?:1|2|3|4|5|6|7)\/([1-9]\d{0,14})\.png$/);
+  const textPostCard = pathname.match(/^\/_og\/post\/v(?:1|2|3|4|5|6|7|8)\/([1-9]\d{0,14})\.png$/);
   if (textPostCard) {
     const { handlePostShareImage } = await import('./server/post-share-image.js');
     return handlePostShareImage(request, env, ctx, textPostCard[1], fetchPostRecord, {
@@ -7402,15 +7404,24 @@ async function handleRequest(request, env, ctx) {
       price: fetchShareBadgePrice,
     });
   }
-  const profileCard = pathname.match(/^\/_og\/profile\/v(?:1|2|3)\/([A-Za-z0-9_][A-Za-z0-9_.-]{0,63})\.png$/);
+  const profileCard = pathname.match(/^\/_og\/profile\/v(?:1|2|3|4)\/([A-Za-z0-9_][A-Za-z0-9_.-]{0,63})\.png$/);
   if (profileCard) {
     const { handleProfileShareImage } = await import('./server/post-share-image.js');
     return handleProfileShareImage(request, env, ctx, profileCard[1], fetchAccountInfo);
   }
-  const stageCard = pathname.match(/^\/_og\/stage\/v[1-6]\/([0-9a-fA-F-]{16,64})\.png$/);
+  const stageCard = pathname.match(/^\/_og\/stage\/v[1-7]\/([0-9a-fA-F-]{16,64})\.png$/);
   if (stageCard) {
     const { handleStageShareImage } = await import('./server/stage-share-image.js');
     return handleStageShareImage(request, env, ctx, stageCard[1], supabaseLookup);
+  }
+  // Monolith cards for events, communities, clips, DEX tokens and co-stream
+  // invites that have no picture of their own (server/entity-share-card.js).
+  const entityCard = pathname.match(/^\/_og\/(event|community|clip|dex|costream)\/v1\/([A-Za-z0-9_~%-]{1,120})\.png$/);
+  if (entityCard) {
+    const { handleEntityShareImage } = await import('./server/entity-share-image.js');
+    let id = entityCard[2];
+    try { id = decodeURIComponent(id); } catch { /* keep raw; the query check rejects it */ }
+    return handleEntityShareImage(request, env, ctx, entityCard[1], id, supabaseLookup);
   }
   if (pathname.startsWith(OG_SOURCE_PREFIX)) return ogSourceResponse(request, env, pathname);
 
@@ -8375,6 +8386,12 @@ async function handleRequest(request, env, ctx) {
       html = rewriteJsonLd(html, (ld) => profilePageLd(ld, proxiedHandle, verifiedLinks));
     } else if (proxiedCommunity) {
       html = cardProxiedImage(rewriteJsonLd(html, communityPageLd));
+      // No avatar or banner: the community's own Monolith card, not the brand one.
+      const ownSlug = (ssrPath.match(/^\/app\/communities\/([^/?#]+)/) || [])[1];
+      if (ownSlug && /^[a-z0-9][a-z0-9_-]{0,63}$/i.test(ownSlug)) {
+        const card = entityShareImageUrl('community', ownSlug);
+        html = html.replace(/(<meta (?:property="og:image(?::secure_url)?"|name="twitter:image") content=")https:\/\/riftn\.com\/og\/riftn-share\.png(")/g, (_, a, b) => `${a}${card}${b}`);
+      }
     }
 
 
