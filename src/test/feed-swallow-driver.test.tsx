@@ -42,8 +42,14 @@ function fixture(timeline = false, contentTop = -100) {
 }
 
 it('applies the fallback before the first paint and has no idle frame tail', () => {
-  const { content, callbacks } = fixture();
-  expect(content.style.clipPath).toBe('inset(112.00px 0 0 0)');
+  const { content, cutLayer, callbacks } = fixture();
+  // The frame fallback shifts the cut layers too: clip-path would be a
+  // backdrop root and leave the frosted cards inside showing the canvas sharp.
+  expect(content.style.clipPath).toBe('');
+  expect(cutLayer.style.clipPath).toBe('');
+  expect(cutLayer.style.translate).toBe('0 112.00px');
+  expect(cutLayer.style.overflow).toBe('clip');
+  expect((cutLayer.firstElementChild as HTMLElement).style.translate).toBe('0 -112.00px');
   expect(content.dataset.feedSwallowDriver).toBe('frame');
   expect(callbacks).toHaveLength(0);
   act(() => window.dispatchEvent(new Event('scroll')));

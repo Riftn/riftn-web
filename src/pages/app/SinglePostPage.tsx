@@ -90,6 +90,7 @@ import {
 import { formatTimeAgo, formatDuration, formatViews } from '@/lib/feed-utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
 import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
 import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
 import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
@@ -1250,6 +1251,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
     return () => setPostFeedLook(false);
   }, [feedLookPhone]);
   const isImmersiveImage = !detailsOnly && isImagePost && isMobileView && !feedLookPhone;
+  const swallowLayers = !inOverlay && contentType !== 'live' && (feedLookPhone || !isMobileView);
   useEffect(() => {
     const mark = isFullBleedLive ? 'data-immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'data-immersive-video-mode' : null;
     if (mark) markBody(mark, true);
@@ -1878,7 +1880,13 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         data-glass-page
         className={cn('flex flex-col', isLivePost && 'bg-black min-h-screen', isImmersiveImage && 'bg-black')}
       >
-        {renderPostContent()}
+        {/* The bento layouts get the swallow layers, so the cut under the nav
+            pill is a shift instead of clip-path: clip-path stops the post's
+            frosted bento (and the related cards) from blurring the theme
+            canvas, which then showed through sharp. Live and the full-bleed
+            viewers keep the plain root: their fixed layers must not sit
+            inside a shifted box. */}
+        {swallowLayers ? <FeedSwallowMotion className="flex flex-col">{renderPostContent()}</FeedSwallowMotion> : renderPostContent()}
       </div>
       )}
     </>
