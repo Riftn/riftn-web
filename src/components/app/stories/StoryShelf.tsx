@@ -104,8 +104,9 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
-      <span data-st-bg style={bg(cover || face)} />
+      <span data-st-bg data-blur style={bg(face)} />
       {!empty && <span data-st-shade />}
+      {!empty && pending?.state !== 'failed' && <img data-st-avatar src={face} alt="" />}
       {busy && <span data-st-fill style={{ height: `${Math.max(6, pending!.state === 'processing' ? 100 : pending!.progress)}%` }} />}
       {empty ? (
         <span data-st-glass data-st-plus><Add className="w-5 h-5" /></span>
@@ -165,14 +166,12 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}
     >
-      <span data-st-bg style={bg(coverOf(entry))} />
+      <span data-st-bg data-blur style={bg(faceBroken ? null : face)} />
       <span data-st-shade />
       {!entry.seen && <span data-st-ring />}
       <span data-st-time>{ageLabel(latest?.createdAt)}</span>
-      <span data-st-who>
-        {face && !faceBroken ? <img src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-face />}
-        <span>{nameOf(a)}</span>
-      </span>
+      {face && !faceBroken ? <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-avatar />}
+      <span data-st-label className="px-2 truncate">{nameOf(a)}</span>
     </button>
   );
 }
