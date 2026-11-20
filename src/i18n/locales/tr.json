@@ -783,6 +783,7 @@
     "heading": "Riftn Kısa Videolar"
   },
   "settings": {
+    "loginLook": {"title": "Giriş ekranı", "desc": "Riftn logosu ve sloganının bu cihazdaki giriş ekranında nasıl hareket ettiği.", "tube": "Tüplü TV", "vhs": "VHS kaset", "led": "LED duvar", "holo": "Hologram", "neon": "Neon ışık", "3d": "3D", "flat": "Düz"}, "arrivalLook": {"title": "Giriş yaptıktan sonra", "desc": "Hesabın yüklenirken, fotoğrafın sayfaya inmeden önce oynayan animasyon. Bu cihazda.", "rift": "Yarık", "trace": "İz", "frame": "Fotoğraf çerçevesi", "orbit": "Yörünge"},
     "chatDeleteChoice": "Bir mesajı sildiğinde",
     "chatDeleteChoiceDesc": "Her seferinde sor ya da her zaman yalnızca senin için veya sohbetteki herkes için sil.",
     "chatReactionStyle": "Sohbette tepkiler",

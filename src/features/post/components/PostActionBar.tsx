@@ -478,7 +478,7 @@ export function PostActionBar({
                 <Music className="w-5 h-5 text-white" />
               </button>
             </PopoverTrigger>
-            <PopoverContent 
+            <PopoverContent data-modal-shield="" 
               className="w-auto p-1 bg-zinc-900/90 backdrop-blur-xl border border-white/10 shadow-xl rounded-xl z-[150]" 
               align="center"
               side="top"
@@ -544,7 +544,7 @@ export function PostActionBar({
                 <Radio className={cn("w-5 h-5", isLive ? "text-white" : "text-white")} />
               </button>
             </PopoverTrigger>
-            <PopoverContent 
+            <PopoverContent data-modal-shield="" 
               className="w-auto p-1 bg-zinc-900/90 backdrop-blur-xl border border-white/10 shadow-xl rounded-xl z-[150]" 
               align="center"
               side="top"

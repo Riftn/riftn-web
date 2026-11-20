@@ -718,6 +718,7 @@
     "heading": "Riftn 短视频"
   },
   "settings": {
+    "loginLook": {"title": "登录界面", "desc": "此设备上登录界面中 Riftn 标志和标语的动态效果。", "tube": "显像管电视", "vhs": "VHS 录像带", "led": "LED 墙", "holo": "全息投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登录之后", "desc": "账号加载时、头像落到页面之前播放的效果。仅此设备。", "rift": "裂隙", "trace": "描边", "frame": "相框", "orbit": "轨道"},
     "postLanding": "发布之后",
     "postLandingDesc": "新帖子出现在动态中的方式",
     "postLandingGhost": "幽灵空位",

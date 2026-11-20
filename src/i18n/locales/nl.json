@@ -783,6 +783,7 @@
     "heading": "Riftn-shorts"
   },
   "settings": {
+    "loginLook": {"title": "Inlogscherm", "desc": "Hoe het Riftn-logo en de slogan bewegen op het inlogscherm op dit apparaat.", "tube": "Buis-tv", "vhs": "VHS-band", "led": "Ledwand", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Plat"}, "arrivalLook": {"title": "Na het inloggen", "desc": "Wat je ziet terwijl je account laadt, voordat je foto op de pagina landt. Op dit apparaat.", "rift": "Scheur", "trace": "Spoor", "frame": "Fotolijst", "orbit": "Baan"},
     "chatDeleteChoice": "Als je een bericht verwijdert",
     "chatDeleteChoiceDesc": "Elke keer vragen, of altijd alleen voor jou of voor iedereen in de chat verwijderen.",
     "chatReactionStyle": "Reacties in chat",

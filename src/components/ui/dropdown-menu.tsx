@@ -1,4 +1,5 @@
 import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Circle } from "lucide-react";
 import Check from "@/components/ui/cut-icons/check";
@@ -21,7 +22,9 @@ const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
-const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+const DropdownMenuPortal = (props: DropdownMenuPrimitive.DropdownMenuPortalProps) => (
+  <DropdownMenuPrimitive.Portal container={overlayRoot()} {...props} />
+);
 
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
@@ -72,10 +75,11 @@ const DropdownMenuContent = React.forwardRef<
   const surfaceRef = useOverlayExitRef(ref);
   if (!present) return null;
   return (
-  <DropdownMenuPrimitive.Portal>
+  <DropdownMenuPrimitive.Portal container={overlayRoot()}>
     <DropdownMenuPrimitive.Content
       ref={surfaceRef}
       sideOffset={sideOffset}
+      data-modal-shield=""
       className={cn(
         "z-50 min-w-[8rem] overflow-hidden rounded-2xl p-1 text-white shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         "bg-zinc-900/70 backdrop-blur-xl border-0",

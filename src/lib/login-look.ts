@@ -1,14 +1,14 @@
 /**
  * How the Riftn logo and headline look on the sign-in sheet.
  *
- * Four screens, all moving: Tube TV (the default), VHS tape, LED wall and
- * Hologram. A per-device choice in Settings → Appearance, kept on this device
+ * Seven looks: Tube TV (the default), VHS tape, LED wall, Hologram, Neon
+ * glow, 3D and Flat (the one that never moves). A per-device choice in Settings → Appearance, kept on this device
  * like the theme, so it still applies after signing out (which is when the
  * sign-in sheet is actually seen).
  */
 import { useSyncExternalStore } from 'react';
 
-export const LOGIN_LOOKS = ['tube', 'vhs', 'led', 'holo'] as const;
+export const LOGIN_LOOKS = ['tube', 'vhs', 'led', 'holo', 'neon', '3d', 'flat'] as const;
 export type LoginLook = (typeof LOGIN_LOOKS)[number];
 export const DEFAULT_LOGIN_LOOK: LoginLook = 'tube';
 

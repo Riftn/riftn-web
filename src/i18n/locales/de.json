@@ -700,6 +700,7 @@
     "heading": "Riftn Kurzvideos"
   },
   "settings": {
+    "loginLook": {"title": "Anmeldebildschirm", "desc": "Wie sich das Riftn-Logo und der Slogan auf dem Anmeldebildschirm dieses Geräts bewegen.", "tube": "Röhren-TV", "vhs": "VHS-Kassette", "led": "LED-Wand", "holo": "Hologramm", "neon": "Neonleuchten", "3d": "3D", "flat": "Flach"}, "arrivalLook": {"title": "Nach der Anmeldung", "desc": "Was läuft, während dein Konto lädt, bevor dein Bild auf der Seite landet. Auf diesem Gerät.", "rift": "Riss", "trace": "Spur", "frame": "Bilderrahmen", "orbit": "Umlaufbahn"},
     "postLanding": "Nach dem Posten",
     "postLandingDesc": "Wie dein neuer Beitrag in deinem Feed erscheint",
     "postLandingGhost": "Geisterplatz",

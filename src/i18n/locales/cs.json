@@ -700,6 +700,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "loginLook": {"title": "Přihlašovací obrazovka", "desc": "Jak se logo a slogan Riftn pohybují na přihlašovací obrazovce tohoto zařízení.", "tube": "Obrazovková TV", "vhs": "Kazeta VHS", "led": "LED stěna", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Plochý"}, "arrivalLook": {"title": "Po přihlášení", "desc": "Co se přehraje, než se načte účet a tvoje fotka dorazí na stránku. Na tomto zařízení.", "rift": "Trhlina", "trace": "Stopa", "frame": "Rámeček", "orbit": "Oběžná dráha"},
     "postLanding": "Po zveřejnění",
     "postLandingDesc": "Jak se nový příspěvek objeví ve feedu",
     "postLandingGhost": "Prázdné místo",

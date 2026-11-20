@@ -11,6 +11,8 @@ import { isChunkLoadError, recoverFromChunkError } from "./lib/lazy-with-retry";
 import { registerServiceWorker } from "./lib/register-sw";
 import "./lib/pwa-install"; // Catch the browser's one-time install offer for the Install Riftn button.
 import { installScrollFreezeWatchdog } from "./lib/scroll-freeze-watchdog";
+import { installOverlayClickGuard } from "./lib/overlay-click-guard";
+import { overlayRoot } from "./lib/overlay-root";
 import { installTapPendingLogo } from "./lib/tap-pending-logo";
 import { installFocusKeys } from "./lib/focus-keys";
 import { installScrollStopTap } from "./lib/scroll-stop-tap";
@@ -51,6 +53,7 @@ import "./styles/post-meta-grey.css";
 import "./styles/pinned-community-stage.css";
 import "./styles/grid-hover.css";
 import "./styles/notifications-feed.css";
+import "./styles/desktop-kit.css";
 // Canvas-theme chrome (war / osaka / jungle) is NOT imported here: each theme
 // is a separate CSS chunk loaded by src/lib/theme-css.ts, only for the theme in
 // use. Their cascade order (after index.css) is preserved because a dynamic
@@ -154,6 +157,9 @@ registerServiceWorker();
 // stuck overlay — report what caused it and put it back on desktop and touch.
 // See lib/scroll-freeze-watchdog.ts.
 installScrollFreezeWatchdog();
+installOverlayClickGuard();
+// Before the first overlay opens, so nothing portals to <body> in the meantime.
+overlayRoot();
 
 // iOS Safari only shows a pressed (:active) state on elements under a
 // touchstart listener; one passive no-op on the document covers everything.

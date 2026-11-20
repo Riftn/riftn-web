@@ -22,6 +22,12 @@
  *
  * Rendered in a portal above the sheet and never takes a pointer event, so the
  * page is usable the moment the sheet is gone.
+ *
+ * The Rift is the default. Settings → Appearance → After you sign in swaps it
+ * for Trace (a light runs round the picture's outline), Picture frame (an
+ * empty frame that fills) or Orbit (a light circles, then the picture opens
+ * from the middle). Only the marks and the way the frame opens change; the
+ * timing, the picture and its flight home are the same for all of them.
  */
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
@@ -29,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSignInSheetState } from '@/lib/sign-in-handoff';
 import { buildAvatarUrl } from '@/lib/media-url';
+import { ARRIVAL_INTRO_MS, useArrivalLook, type ArrivalLook } from '@/lib/arrival-look';
 import './sign-in-handoff.css';
 
 type Phase = 'idle' | 'waiting' | 'arriving' | 'open' | 'flying' | 'leaving';
@@ -113,10 +120,53 @@ export function RiftMarks() {
   );
 }
 
+/** The picture frame's outline, for Trace: a 120px square with a 15px corner. */
+const OUTLINE_PATH = 'M60 1H104A15 15 0 0 1 119 16V104A15 15 0 0 1 104 119H16A15 15 0 0 1 1 104V16A15 15 0 0 1 16 1Z';
+
+/** Trace: the outline draws itself in, then a light keeps running round it. */
+function TraceMarks() {
+  return (
+    <>
+      <div className="signin-arrival__glow" aria-hidden />
+      <svg className="signin-arrival__trace" viewBox="0 0 120 120" aria-hidden>
+        <path className="signin-arrival__trace-base" d={OUTLINE_PATH} pathLength={100} />
+        <path className="signin-arrival__trace-halo" d={OUTLINE_PATH} pathLength={100} />
+        <path className="signin-arrival__trace-run" d={OUTLINE_PATH} pathLength={100} />
+      </svg>
+    </>
+  );
+}
+
+/** Picture frame: an empty frame in the picture's shape, breathing softly. */
+function FrameMarks() {
+  return <div className="signin-arrival__box" aria-hidden />;
+}
+
+/** Orbit: a faint ring with a light circling it. */
+function OrbitMarks() {
+  return (
+    <>
+      <div className="signin-arrival__glow" aria-hidden />
+      <div className="signin-arrival__ring" aria-hidden />
+      <div className="signin-arrival__orbit" aria-hidden><i /></div>
+    </>
+  );
+}
+
+/** What plays while the account loads, for the picked arrival. */
+export function ArrivalMarks({ look }: { look: ArrivalLook }) {
+  if (look === 'trace') return <TraceMarks />;
+  if (look === 'frame') return <FrameMarks />;
+  if (look === 'orbit') return <OrbitMarks />;
+  return <RiftMarks />;
+}
+
 export function SignInHandoff() {
   const sheet = useSignInSheetState();
   const { isAuthenticated, user, requiresUsername } = useAuth();
   const { t } = useTranslation();
+  const look = useArrivalLook();
+  const introMs = ARRIVAL_INTRO_MS[look];
   const [phase, setPhase] = useState<Phase>('idle');
   const [flight, setFlight] = useState<CSSProperties | undefined>(undefined);
   const [pictureReady, setPictureReady] = useState(false);
@@ -203,11 +253,11 @@ export function SignInHandoff() {
   useEffect(() => {
     if (phase !== 'arriving') return;
     const now = Date.now();
-    const spun = shownAt.current + RIFT_INTRO_MS;
+    const spun = shownAt.current + introMs;
     const due = pictureReady ? Math.max(now, spun) : Math.max(arrivingAt.current + PICTURE_CAP_MS, spun);
     const timer = window.setTimeout(() => setPhase('open'), Math.max(0, due - now));
     return () => window.clearTimeout(timer);
-  }, [phase, pictureReady]);
+  }, [phase, pictureReady, introMs]);
 
   // The sheet went without an account: let the slit go.
   useEffect(() => {
@@ -268,6 +318,7 @@ export function SignInHandoff() {
   return createPortal(
     <div
       className="signin-rift"
+      data-arrival={look}
       data-phase={phase}
       data-opened={opened ? '' : undefined}
       role="status"
@@ -275,7 +326,7 @@ export function SignInHandoff() {
       aria-label={opened ? name : t('loginModal.signingIn', 'Signing you in…')}
     >
       <div className="signin-rift__stage">
-        <RiftMarks />
+        <ArrivalMarks look={look} />
         <div ref={frameRef} className="signin-rift__frame" style={flight} aria-hidden>
           {/* Only an account with no picture shows its initial; one whose
               picture is still on its way shows the dark frame it fades into. */}
