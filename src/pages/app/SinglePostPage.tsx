@@ -118,44 +118,44 @@ const StreamShopRail = lazyWithRetry(() =>
 const StreamShopManager = lazyWithRetry(() =>
   import('@/components/app/live/StreamShopManager').then((m) => ({ default: m.StreamShopManager })),
 );
-const EditPostModalLazy = lazyWithRetry(() =>
+const LazyEditPostModal = lazyWithRetry(() =>
   import('@/components/app/modals/EditPostModal').then((m) => ({ default: m.EditPostModal })),
 );
-const AuthorThreadLazy = lazyWithRetry(() =>
+const LazyAuthorThread = lazyWithRetry(() =>
   import('@/components/app/cards/AuthorThread').then((m) => ({ default: m.AuthorThread })),
 );
-const RelatedVideosFeedLazy = lazyWithRetry(() =>
+const LazyRelatedVideosFeed = lazyWithRetry(() =>
   import('@/components/app/feeds/RelatedVideosFeed').then((m) => ({ default: m.RelatedVideosFeed })),
 );
-const RelatedImagesFeedLazy = lazyWithRetry(() =>
+const LazyRelatedImagesFeed = lazyWithRetry(() =>
   import('@/components/app/feeds/RelatedImagesFeed').then((m) => ({ default: m.RelatedImagesFeed })),
 );
-const RelatedPostsFeedLazy = lazyWithRetry(() =>
+const LazyRelatedPostsFeed = lazyWithRetry(() =>
   import('@/components/app/feeds/RelatedPostsFeed').then((m) => ({ default: m.RelatedPostsFeed })),
 );
-const StageRelatedLazy = lazyWithRetry(() =>
+const LazyStageRelated = lazyWithRetry(() =>
   import('@/components/app/post-stage/StageRelated').then((m) => ({ default: m.StageRelated })),
 );
 
-function AuthorThread(props: React.ComponentProps<typeof AuthorThreadLazy>) {
-  return <Suspense fallback={null}><AuthorThreadLazy {...props} /></Suspense>;
+function AuthorThread(props: React.ComponentProps<typeof LazyAuthorThread>) {
+  return <Suspense fallback={null}><LazyAuthorThread {...props} /></Suspense>;
 }
-function RelatedVideosFeed(props: React.ComponentProps<typeof RelatedVideosFeedLazy>) {
-  return <Suspense fallback={null}><RelatedVideosFeedLazy {...props} /></Suspense>;
+function RelatedVideosFeed(props: React.ComponentProps<typeof LazyRelatedVideosFeed>) {
+  return <Suspense fallback={null}><LazyRelatedVideosFeed {...props} /></Suspense>;
 }
-function RelatedImagesFeed(props: React.ComponentProps<typeof RelatedImagesFeedLazy>) {
-  return <Suspense fallback={null}><RelatedImagesFeedLazy {...props} /></Suspense>;
+function RelatedImagesFeed(props: React.ComponentProps<typeof LazyRelatedImagesFeed>) {
+  return <Suspense fallback={null}><LazyRelatedImagesFeed {...props} /></Suspense>;
 }
-function RelatedPostsFeed(props: React.ComponentProps<typeof RelatedPostsFeedLazy>) {
-  return <Suspense fallback={null}><RelatedPostsFeedLazy {...props} /></Suspense>;
+function RelatedPostsFeed(props: React.ComponentProps<typeof LazyRelatedPostsFeed>) {
+  return <Suspense fallback={null}><LazyRelatedPostsFeed {...props} /></Suspense>;
 }
-function StageRelated(props: React.ComponentProps<typeof StageRelatedLazy>) {
-  return <Suspense fallback={null}><StageRelatedLazy {...props} /></Suspense>;
+function StageRelated(props: React.ComponentProps<typeof LazyStageRelated>) {
+  return <Suspense fallback={null}><LazyStageRelated {...props} /></Suspense>;
 }
 /** Built the first time it opens, then kept so its closing animation plays. */
-function EditPostModal(props: React.ComponentProps<typeof EditPostModalLazy>) {
+function EditPostModal(props: React.ComponentProps<typeof LazyEditPostModal>) {
   if (!useOpenedOnce(props.open)) return null;
-  return <Suspense fallback={null}><EditPostModalLazy {...props} /></Suspense>;
+  return <Suspense fallback={null}><LazyEditPostModal {...props} /></Suspense>;
 }
 
 /*
