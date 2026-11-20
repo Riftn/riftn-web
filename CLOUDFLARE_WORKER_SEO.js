@@ -4085,6 +4085,52 @@ function buildCoStreamHtml(room) {
   });
 }
 
+/** A moment (24-hour story): the poster as the card, never indexed. */
+const MOMENT_PATH = /^\/moment\/([a-f\d]{24})\/?$/i;
+
+async function fetchMoment(id) {
+  try {
+    const res = await fetch(`${DEHUB_API}/stories/${encodeURIComponent(id)}`, { signal: AbortSignal.timeout(6000) });
+    if (res.status === 404 || res.status === 403) return null;
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    return data && data.item ? data : null;
+  } catch {
+    return undefined;
+  }
+}
+
+function buildMomentHtml(id, moment) {
+  const canonicalUrl = `${APP_URL}/moment/${id}`;
+  const author = moment.author || {};
+  const item = moment.item || {};
+  const who = author.username ? `@${String(author.username).replace(/^@/, '')}` : (author.displayName || 'Someone');
+  const ended = !!item.expired;
+  const title = ended ? `${who}'s moment has ended` : `${who}'s moment on Riftn`;
+  const description = ended
+    ? 'Moments stay up for 24 hours. See what they are sharing now on Riftn.'
+    : truncate(item.caption || `A moment from ${who}, up for 24 hours on Riftn.`, 200);
+  const poster = !ended && /^https:\/\//.test(String(item.posterUrl || '')) ? item.posterUrl : SHARE_IMAGE;
+  return entityHtml({
+    canonicalUrl,
+    title,
+    description,
+    image: poster,
+    noindex: true,
+    heading: title,
+    breadcrumb: `<a href="${APP_URL}">Riftn</a>`,
+    bodyHtml: `<p>${escHtml(description)}</p>`,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: title,
+      description,
+      url: canonicalUrl,
+      isPartOf: { '@type': 'WebSite', name: 'Riftn', url: APP_URL },
+    },
+  });
+}
+
 function buildBuilderPreviewHtml(id, appMeta) {
   const canonicalUrl = `${APP_URL}/builder/preview/${id}`;
   const name = truncate((appMeta && appMeta.title) || '', 80);
@@ -5435,6 +5481,8 @@ function shouldServeSSR(pathname) {
   // A posted live clip. `clip` is a reserved ROUTE_SEGMENT, so without this
   // the profile fall-through rejects it and the SPA shell goes out instead.
   if (LIVE_CLIP_PATH.test(pathname)) return true;
+  // A moment link: `moment` is a reserved segment, so it needs its own yes here.
+  if (MOMENT_PATH.test(pathname)) return true;
   // A video's duets list: its own title and card, not the post page's.
   if (DUETS_PATH.test(pathname)) return true;
   // Same for its reactions list.
@@ -7825,6 +7873,14 @@ async function handleRequest(request, env, ctx) {
       }));
     }
     return entityMiss(event);
+  }
+
+  // A moment (24-hour story): who shared it and its poster.
+  const momentMatch = cleanPath.match(MOMENT_PATH);
+  if (momentMatch) {
+    const moment = await fetchMoment(momentMatch[1]);
+    if (moment) return guard(new Response(buildMomentHtml(momentMatch[1], moment), { status: 200, headers: { ...blogHeaders, 'X-Robots-Tag': 'noindex, follow' } }));
+    return entityMiss(moment);
   }
 
   // A posted live clip: its title, share card and og:video. Only posted rows

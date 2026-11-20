@@ -115,7 +115,7 @@ import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
 import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
 import { NewMembersCarousel } from '@/components/app/NewMembersCarousel';
 import { LeaderboardCarousel } from '@/components/app/feeds/LeaderboardCarousel';
-import { LiveNowBar } from '@/components/app/feeds/LiveNowBar';
+import { StoryShelf } from '@/components/app/stories/StoryShelf';
 import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
 
 import type { VideoItem, ImagePost, TextPost, ShortVideo } from '@/types/feed.types';
@@ -2209,8 +2209,8 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
         <FeedCardSkeletonList count={6} columns={colCount} />
       ) : (
         <>
-      {/* Everyone live: Stages and livestreams in one row */}
-      <LiveNowBar />
+      {/* The Glass Shelf: your day, everyone live, and people's 24-hour moments */}
+      <StoryShelf />
 
           {/* Follow groups. Only in Following mode, and only once there is a
               group to pick — an empty row would be a permanent nudge to use a
