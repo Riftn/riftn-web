@@ -8368,6 +8368,33 @@ export type Database = {
           },
         ]
       }
+      transcript_translations_numbers_backup: {
+        Row: {
+          chapters: Json | null
+          language: string | null
+          saved_at: string | null
+          segments: Json | null
+          summary: string | null
+          transcript_id: string | null
+        }
+        Insert: {
+          chapters?: Json | null
+          language?: string | null
+          saved_at?: string | null
+          segments?: Json | null
+          summary?: string | null
+          transcript_id?: string | null
+        }
+        Update: {
+          chapters?: Json | null
+          language?: string | null
+          saved_at?: string | null
+          segments?: Json | null
+          summary?: string | null
+          transcript_id?: string | null
+        }
+        Relationships: []
+      }
       transcription_worker: {
         Row: {
           enabled: boolean
