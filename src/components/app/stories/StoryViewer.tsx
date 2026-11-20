@@ -11,7 +11,7 @@
  * direct message; likes and views show only to the owner. Your own moments
  * show who watched instead of a reply bar.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,8 @@ import { ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2
 import Close from '@/components/ui/cut-icons/close';
 import More from '@/components/ui/cut-icons/more';
 import Send from '@/components/ui/cut-icons/send';
+import ShareIcon from '@/components/ui/cut-icons/feedshare';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Music from '@/components/ui/cut-icons/music';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
@@ -49,6 +51,7 @@ interface Props {
 }
 
 const HOLD_MS = 220;
+const ShareToDmModal = lazy(() => import('@/components/app/modals/ShareToDmModal').then(m => ({ default: m.ShareToDmModal })));
 const REPORT_REASONS = [
   ['spam_misleading', 'Spam'],
   ['harassment_bullying', 'Bullying or harassment'],
@@ -71,7 +74,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [progress, setProgress] = useState(0);
   const [held, setHeld] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [sheet, setSheet] = useState<null | 'viewers' | 'more' | 'report' | 'delete'>(null);
+  const [sheet, setSheet] = useState<null | 'viewers' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
   const [muted, setMuted] = useState(false);
   // Which moment has its picture in, by id: a cached image can report in before
   // the reset for a new moment runs, so a plain flag could stick at "loading".
@@ -233,11 +236,13 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   }, []);
 
   // ── Touch: tap, hold, swipe ───────────────────────────────────────
-  const press = useRef<{ x: number; y: number; t: number; timer: number } | null>(null);
+  const press = useRef<{ x: number; y: number; t: number; timer: number; onViewers: boolean } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
-    if (sheet || openingOriginal || (e.target as Element).closest('button, input, a')) return;
+    if (sheet || openingOriginal || typing || !e.isPrimary || e.button !== 0
+      || (e.target as Element).closest('button:not([data-sv-viewers-trigger]), input, a')) return;
     const timer = window.setTimeout(() => setHeld(true), HOLD_MS);
-    press.current = { x: e.clientX, y: e.clientY, t: performance.now(), timer };
+    press.current = { x: e.clientX, y: e.clientY, t: performance.now(), timer,
+      onViewers: !!(e.target as Element).closest('[data-sv-viewers-trigger]') };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const p = press.current;
@@ -249,6 +254,12 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
       setDrag({ x: Math.abs(dx) > Math.abs(dy) ? dx : 0, y: Math.abs(dy) >= Math.abs(dx) ? Math.max(0, dy) : 0 });
     }
   };
+  const cancelPress = () => {
+    if (press.current) window.clearTimeout(press.current.timer);
+    press.current = null;
+    setHeld(false);
+    setDrag(null);
+  };
   const onPointerUp = (e: React.PointerEvent) => {
     const p = press.current;
     press.current = null;
@@ -259,9 +270,13 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     const wasHold = held;
     setHeld(false);
     setDrag(null);
-    if (dy > 110 && Math.abs(dy) > Math.abs(dx)) return close();
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 90) {
+      if (dy > 0) close();
+      else if (own) setSheet('viewers');
+      return;
+    }
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) return goAuthor(dx < 0 ? 1 : -1);
-    if (wasHold || performance.now() - p.t > HOLD_MS) return;
+    if (p.onViewers || wasHold || performance.now() - p.t > HOLD_MS || Math.abs(dx) > 10 || Math.abs(dy) > 10) return;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const page = (e.currentTarget as HTMLElement).querySelector('[data-sv-page]')?.getBoundingClientRect() ?? rect;
     const rel = (e.clientX - page.left) / page.width;
@@ -340,6 +355,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   if (!entry || !item) return null;
   const a = entry.author;
   const shareable = item.shareable && Date.parse(item.expiresAt) > Date.now();
+  const momentUrl = new URL(`/app/moment/${encodeURIComponent(item.id)}`, window.location.origin).href;
   const remix = () => {
     const source = { id: item.id, name: nameOf(a) };
     const openComposer = () => useStoriesStore.getState().openCreator(source);
@@ -349,11 +365,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   };
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(new URL(`/app/moment/${encodeURIComponent(item.id)}`, window.location.origin).href);
+      await navigator.clipboard.writeText(momentUrl);
       dismissSheet();
       toast.success(t('stories.linkCopied', { defaultValue: 'Link copied' }));
     } catch {
       toast.error(t('stories.copyLinkFailed', { defaultValue: "Couldn't copy the moment link." }));
+    }
+  };
+  const shareOutside = async () => {
+    try {
+      await navigator.share({ url: momentUrl });
+      dismissSheet();
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) await copyLink();
     }
   };
   const openOriginal = async () => {
@@ -397,7 +421,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={() => { press.current = null; setHeld(false); setDrag(null); }}
+      onPointerCancel={cancelPress}
     >
       <div data-sv-backdrop style={{ backgroundImage: item.posterUrl ? `url("${item.posterUrl}")` : undefined }} />
       <div
@@ -507,9 +531,9 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           </div>
         )}
 
-        <div data-sv-reply>
+        <div data-sv-reply style={sheet ? { visibility: 'hidden' } : undefined}>
           {own ? (
-            <button type="button" data-st-dark-glass className="h-11 rounded-full px-4 inline-flex items-center gap-2 text-[14px] font-semibold" onClick={() => setSheet('viewers')}>
+            <button type="button" data-sv-viewers-trigger data-st-dark-glass className="h-11 rounded-full px-4 inline-flex items-center gap-2 text-[14px] font-semibold" onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-[18px] h-[18px]" />
               {formatCount(item.viewCount ?? 0)}
               {(item.likeCount ?? 0) > 0 && (<><Heart className="w-4 h-4 ml-1.5 fill-current text-[rgb(255_92_120)]" />{formatCount(item.likeCount ?? 0)}</>)}
@@ -537,6 +561,11 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               <Heart className={`w-5 h-5 ${item.liked ? 'fill-current' : ''}`} />
             </button>
           )}
+          {shareable && (
+            <button type="button" data-sv-round data-st-dark-glass onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
+              <ShareIcon className="w-5 h-5" />
+            </button>
+          )}
           {!own && isAuthenticated && item.allowReplies && reply.trim() && (
             <button type="button" data-sv-round data-st-dark-glass onClick={submitReply} disabled={sending} aria-label={t('common.send', { defaultValue: 'Send' })}>
               {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -544,10 +573,24 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           )}
         </div>
 
-        {sheet && (
+        {sheet === 'share-dm' && (
+          <Suspense fallback={null}>
+            <ShareToDmModal open url={momentUrl} aboveMoment onOpenChange={open => { if (!open) setSheet('share'); }} />
+          </Suspense>
+        )}
+        {sheet && sheet !== 'share-dm' && (
           <div data-sv-sheet-backdrop onClick={dismissSheet}>
-            <div ref={sheetRef} data-sv-sheet data-st-glass onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
-              {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} />}
+            <div ref={sheetRef} data-sv-sheet onClick={e => e.stopPropagation()}>
+              {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} onClose={dismissSheet} />}
+              {sheet === 'share' && shareable && (
+                <div className="flex flex-col">
+                  {isAuthenticated && <SheetButton onClick={() => setSheet('share-dm')}><Send className="size-[18px]" />{t('copy.20e392c29da3', { defaultValue: 'Send in a message' })}</SheetButton>}
+                  <SheetButton onClick={copyLink}><Link2 className="size-[18px]" />{t('postOptions.copyLink', { defaultValue: 'Copy link' })}</SheetButton>
+                  {typeof navigator.share === 'function' && <SheetButton onClick={shareOutside}><ShareIcon className="size-[18px]" />{t('stories.share', { defaultValue: 'Share' })}</SheetButton>}
+                  <SheetButton onClick={remix}><Repeat2 className="size-[18px]" />{t('stories.addToMoment', { defaultValue: 'Add to your Moment' })}</SheetButton>
+                  <SheetButton onClick={dismissSheet}>{t('common.cancel', { defaultValue: 'Cancel' })}</SheetButton>
+                </div>
+              )}
               {sheet === 'more' && (
                 <div className="flex flex-col">
                   {shareable && (
@@ -619,7 +662,7 @@ function SheetButton({ children, onClick, danger }: { children: React.ReactNode;
   );
 }
 
-function ViewersList({ item, onOpen }: { item: StoryItem; onOpen: (address: string) => void }) {
+function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (address: string) => void; onClose: () => void }) {
   const { t } = useTranslation();
   const [rows, setRows] = useState<StoryViewerRow[] | null>(null);
   const [next, setNext] = useState<string | null>(null);
@@ -644,16 +687,15 @@ function ViewersList({ item, onOpen }: { item: StoryItem; onOpen: (address: stri
     setNext(r.next);
   };
 
-  const header = useMemo(() => (
-    <div className="flex items-center gap-3 mb-3 text-[14px] font-semibold">
-      <span className="inline-flex items-center gap-1.5"><Eye className="w-4 h-4" />{formatCount(counts.views)}</span>
-      <span className="inline-flex items-center gap-1.5"><Heart className="w-4 h-4 fill-current text-[rgb(255_92_120)]" />{formatCount(counts.likes)}</span>
-    </div>
-  ), [counts]);
-
   return (
     <div>
-      {header}
+      <div className="flex items-center gap-3 text-[14px] font-semibold">
+        <span className="inline-flex items-center gap-1.5"><Eye className="w-4 h-4" />{formatCount(counts.views)}</span>
+        <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="w-4 h-4 fill-current" />{formatCount(counts.likes)}</span>
+        <button type="button" className="ml-auto grid size-11 place-items-center rounded-full hover:bg-white/10" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
+          <Close className="size-[18px]" />
+        </button>
+      </div>
       {rows === null ? (
         <div className="py-6 grid place-items-center"><Loader2 className="w-5 h-5 animate-spin opacity-70" /></div>
       ) : rows.length === 0 ? (
@@ -662,14 +704,18 @@ function ViewersList({ item, onOpen }: { item: StoryItem; onOpen: (address: stri
         <div className="flex flex-col">
           {rows.map(v => {
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
+            const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
               <button key={v.address} type="button" className="flex items-center gap-3 py-2 text-left" onClick={() => onOpen(v.address)}>
-                {face ? <img src={face} alt="" className="w-9 h-9 rounded-full object-cover" /> : <span className="w-9 h-9 rounded-full bg-white/20" />}
+                <Avatar className="size-9">
+                  {face && <AvatarImage src={face} alt="" className="object-cover" />}
+                  <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
+                </Avatar>
                 <span className="flex-1 min-w-0">
-                  <span className="block text-[14px] font-medium truncate">{v.displayName || v.username || v.address.slice(0, 8)}</span>
+                  <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>
-                {v.liked && <Heart className="w-4 h-4 fill-current text-[rgb(255_92_120)]" />}
+                {v.liked && <Heart data-sv-heart className="w-4 h-4 fill-current" />}
               </button>
             );
           })}

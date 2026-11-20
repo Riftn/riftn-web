@@ -22,9 +22,10 @@ import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 import { soundWindow } from '@/lib/sound-window';
 import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
-import type { StoryAudience, StorySong } from '@/lib/api/dehub/stories';
+import { getStoryShelf, STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
 import { getMediaUrl } from '@/lib/api/dehub/core';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
+import { useQuery } from '@tanstack/react-query';
 import type { StoryRemixSource } from '@/store/storiesStore';
 import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
 import { shareMoment } from './story-upload';
@@ -34,13 +35,19 @@ const MAX_VIDEO_S = 60;
 const AUDIENCE_KEY = 'riftn.stories.audience';
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'lifetime';
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
+  const { data: customLifetime = false } = useQuery({
+    queryKey: ['story-custom-lifetime'],
+    queryFn: async () => (await getStoryShelf('', false)).supportsCustomLifetime === true,
+    staleTime: 60_000,
+    retry: false,
+  });
   const [media, setMedia] = useState<Media | null>(null);
   const remixLabel = remixSource ? t('stories.remixing', { name: remixSource.name, defaultValue: "Remixing {{name}}'s moment" }) : undefined;
 
@@ -57,6 +64,7 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
           media={media}
           remixSourceId={remixSource?.id}
           remixLabel={remixLabel}
+          customLifetime={customLifetime}
           onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
           onClose={onClose}
           onShared={() => refreshShelf()}
@@ -252,13 +260,14 @@ function useStageBox(ref: React.RefObject<HTMLDivElement>) {
   return box;
 }
 
-function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }: {
+function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime }: {
   media: Media;
   onBack: () => void;
   onClose: () => void;
   onShared: () => void;
   remixSourceId?: string;
   remixLabel?: string;
+  customLifetime: boolean;
 }) {
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
@@ -278,6 +287,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
   const [audience, setAudience] = useState<StoryAudience>(() => {
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
   });
+  const [lifetime, setLifetime] = useState<StoryLifetime>(24);
+  const lifetimeLabel = t('stories.lifetime', { defaultValue: 'Story duration' });
   const [busy, setBusy] = useState(false);
   const historyRef = useRef<ImageData[]>([]);
 
@@ -436,7 +447,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
           };
         }
       }
-      const fields = { audience, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
+      const fields = { audience, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -459,7 +470,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, customLifetime, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -551,15 +562,37 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
             {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
             {audience === 'everyone' ? t('stories.everyone', { defaultValue: 'Everyone' }) : t('stories.followersOnly', { defaultValue: 'Followers' })}
           </button>
-          <span data-sc-chip data-st-dark-glass className="opacity-80">24h</span>
+          {customLifetime ? (
+            <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool('lifetime')} aria-label={`${lifetimeLabel}, ${lifetime}h`}>
+              {lifetime}h
+            </button>
+          ) : <span data-sc-chip data-st-dark-glass>24h</span>}
           <button type="button" data-sc-share onClick={share} disabled={busy}>
             {t('stories.share', { defaultValue: 'Share' })}
           </button>
         </div>
       )}
 
+      {tool === 'lifetime' && (
+        <div data-sc-panel data-sc-text-panel>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold">{lifetimeLabel}</p>
+            <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="size-[18px]" /></button>
+          </div>
+          <div className="flex gap-2">
+            {STORY_LIFETIMES.map(hours => (
+              <button key={hours} type="button" data-sc-chip data-st-dark-glass aria-pressed={hours === lifetime}
+                data-on={hours === lifetime ? 'true' : 'false'}
+                onClick={() => { setLifetime(hours); setTool(null); }}>
+                {hours}h
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {tool === 'text' && editingLayer && (
-        <div data-sc-panel data-st-dark-glass onPointerDown={e => e.stopPropagation()}>
+        <div data-sc-panel data-sc-text-panel onPointerDown={e => e.stopPropagation()}>
           <textarea
             autoFocus
             value={editingLayer.text}

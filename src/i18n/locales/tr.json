@@ -7197,6 +7197,9 @@
     "shareTitle": "@{{handle}} Riftn'da satışta"
   },
   "stories": {
+    "lifetime": "Hikâye süresi",
+    "momentPublished": "Anın yayında",
+    "addToMoment": "Anına ekle",
     "remix": "Remiks",
     "moreActions": "Hikâye seçenekleri",
     "remixing": "{{name}} adlı kişinin hikâyesi remiksleniyor",

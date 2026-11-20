@@ -7387,6 +7387,9 @@
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
   "stories": {
+    "lifetime": "Duur van het verhaal",
+    "momentPublished": "Je moment staat online",
+    "addToMoment": "Toevoegen aan je moment",
     "remix": "Remix",
     "moreActions": "Verhaalopties",
     "remixing": "Remix van het verhaal van {{name}}",
