@@ -8,13 +8,13 @@ import { isHomeFeedRoute } from '@/lib/home-routes';
 export const STORY_SHELF_KEY = 'story-shelf';
 
 /** The Glass Shelf for whoever is reading: refreshed every minute while Home is on screen. */
-export function useStoryShelf() {
-  const { walletAddress } = useAuth();
+export function useStoryShelf(liveHosts: string, canSeeMature: boolean) {
+  const { walletAddress, isAuthenticated } = useAuth();
   const { pathname } = useLocation();
   const onHome = isHomeFeedRoute(pathname);
   return useQuery({
-    queryKey: [STORY_SHELF_KEY, walletAddress?.toLowerCase() ?? null],
-    queryFn: getStoryShelf,
+    queryKey: [STORY_SHELF_KEY, isAuthenticated ? walletAddress?.toLowerCase() : null, canSeeMature, liveHosts],
+    queryFn: () => getStoryShelf(liveHosts, isAuthenticated),
     staleTime: 30_000,
     refetchInterval: onHome ? 60_000 : false,
     retry: 1,
