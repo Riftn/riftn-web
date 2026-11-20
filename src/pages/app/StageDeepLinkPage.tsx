@@ -86,6 +86,7 @@ import { RelatedPostsFeed } from '@/components/app/feeds/RelatedPostsFeed';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 import { StageAvatar } from '@/components/app/stages/StageAvatar';
 
+import { formatCount } from '@/lib/format-count';
 export default function StageDeepLinkPage() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
@@ -448,10 +449,10 @@ export default function StageDeepLinkPage() {
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 text-sm text-zinc-400">
               <span className="flex items-center gap-1.5">
                 <Users className="w-4 h-4 text-zinc-500" />
-                <span className="text-white font-medium">{attended}</span>{_copy("copy.d7188df04bc9", { defaultValue: " attended" })}</span>
+                <span className="text-white font-medium">{formatCount(attended)}</span>{_copy("copy.d7188df04bc9", { defaultValue: " attended" })}</span>
               <span className="flex items-center gap-1.5">
                 <Headphones className="w-4 h-4 text-zinc-500" />
-                <span className="text-white font-medium">{stage.total_listens ?? 0}</span>{_copy("copy.4ffa377bb7e7", { defaultValue: " listened" })}</span>
+                <span className="text-white font-medium">{formatCount(stage.total_listens ?? 0)}</span>{_copy("copy.4ffa377bb7e7", { defaultValue: " listened" })}</span>
               {ranFor !== null && (
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-zinc-500" />

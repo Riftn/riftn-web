@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useBoostedPost } from './boosted-post';
 
+import { formatCount } from '@/lib/format-count';
 const PostStatsSheet = lazy(() => import('@/components/app/post-stats/PostStatsSheet'));
 
 interface PostMetadataProps {
@@ -154,13 +155,13 @@ export function PostMetadata({ className, timestamp, viewCount, tokenId, isAd, i
           className="flex items-center gap-1 rounded-full px-2 py-0.5 -my-0.5 bg-white/10 text-white/80 hover:text-white hover:bg-white/15 transition-colors"
         >
           {isAudio ? <Headphones className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-          <span className="tabular-nums">{displayedCount}</span>
+          <span className="tabular-nums">{formatCount(displayedCount)}</span>
           <Stats aria-hidden="true" className="w-3 h-3" />
         </button>
       ) : (
         <span className="flex items-center gap-1">
           {isAudio ? <Headphones className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-          <span className="tabular-nums">{displayedCount}{watched ? watchedLabel(i18n.resolvedLanguage ?? i18n.language) : ''}</span>
+          <span className="tabular-nums">{formatCount(displayedCount)}{watched ? watchedLabel(i18n.resolvedLanguage ?? i18n.language) : ''}</span>
         </span>
       ))}
       {canOpenStats && statsOpen ? (

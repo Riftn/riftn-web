@@ -50,6 +50,7 @@ import { DHB_SALES_PAUSED } from '@/lib/dhb-sales';
 import { TokenComingSoonPage } from '@/components/app/token-launch/TokenComingSoonPage';
 import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
 
+import { formatCount } from '@/lib/format-count';
 const PRESET_AMOUNTS = [0.5, 10, 25, 50, 100, 500];
 const MIN_DHB_PURCHASE_USD = 0.5;
 
@@ -731,7 +732,7 @@ function BuyCoinsCheckout() {
                 <span className="text-xs text-zinc-400">{_copy("copy.3e5136fd4b11", { defaultValue: "Transactions" })}</span>
               </div>
               <span className="text-white font-semibold">
-                {platformStats.totalTransactions.toLocaleString()}
+                {formatCount(platformStats.totalTransactions)}
               </span>
             </div>
           </div>

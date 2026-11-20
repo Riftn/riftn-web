@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useStage } from '@/contexts/StageContext';
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
 
+import { formatCount } from '@/lib/format-count';
 export function StageMiniPlayer() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
@@ -117,7 +118,7 @@ export function StageMiniPlayer() {
           </span>
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3" />
-            {totalCount}
+            {formatCount(totalCount)}
           </span>
           {/* The screen only exists in the full room, so the minimised player
               says one is up rather than reading as an audio-only stage. */}

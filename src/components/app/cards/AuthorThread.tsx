@@ -72,6 +72,7 @@ import type { Comment } from '@/lib/comment-mapper';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
 interface AuthorThreadProps {
   tokenId: string;
   /** Post author's wallet address — the only comments that thread. */
@@ -335,7 +336,7 @@ function ThreadEntry({
               ) : (
                 <ThumbIcon down={thumbDown} nod={thumbMine} className={cn('w-3.5 h-3.5', thumbMine && 'fill-current')} />
               )}
-              {(thumbCount > 0 || isOwn) && <span className="text-xs">{thumbCount}</span>}
+              {(thumbCount > 0 || isOwn) && <span className="text-xs">{formatCount(thumbCount)}</span>}
             </button>
           </span>
           <button

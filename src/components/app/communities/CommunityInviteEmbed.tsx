@@ -25,6 +25,7 @@ import { useInvitePreview } from '@/hooks/use-community-admin';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import { DescriptionWithLinks } from '@/components/app/communities/DescriptionWithLinks';
 
+import { formatCount } from '@/lib/format-count';
 interface CommunityInviteEmbedProps {
   code: string;
   fallback?: ReactNode;
@@ -105,7 +106,7 @@ export function CommunityInviteEmbed({ code, fallback = null }: CommunityInviteE
               <span className="flex items-center gap-1.5 text-xs text-zinc-500">
                 <Users className="w-3 h-3" />
                 <span className="font-semibold text-zinc-300">
-                  {preview.member_count.toLocaleString()}
+                  {formatCount(preview.member_count)}
                 </span>{' '}{_copy("copy.1044a4c056d0", { defaultValue: "Members" })}</span>
             )}
             {preview.requires_approval && (

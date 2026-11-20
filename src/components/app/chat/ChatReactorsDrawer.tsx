@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { ChatReactorsList, reactorCount } from './ChatReactorsList';
 
+import { formatCount } from '@/lib/format-count';
 interface ChatReactorsDrawerProps {
   /** The line to list; null keeps the sheet closed. */
   messageId: string | null;
@@ -41,7 +42,7 @@ export function ChatReactorsDrawer({ messageId, onClose, reactions, local = fals
         <DrawerHeader className="px-5 pt-4 pb-3 shrink-0">
           <DrawerTitle className="text-base font-semibold text-center">
             {t('reactionInfo.title')}
-            {peopleCount > 0 && <span className="opacity-50 font-normal"> · {peopleCount}</span>}
+            {peopleCount > 0 && <span className="opacity-50 font-normal"> · {formatCount(peopleCount)}</span>}
           </DrawerTitle>
         </DrawerHeader>
         {open && (

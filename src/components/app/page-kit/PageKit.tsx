@@ -30,6 +30,7 @@ import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
 import { useTabIndicator } from '@/hooks/use-tab-indicator';
 
+import { formatCount } from '@/lib/format-count';
 /**
  * Phones (below lg) draw every page's island as the home feed's top pill:
  * same glass capsule, same icon tabs, same sliding glass indicator. Only what
@@ -487,7 +488,7 @@ export function PageTabs<T extends string>({
                 )
               ) : null}
               <span>{tab.label}</span>
-              {typeof tab.count === 'number' ? <span data-kit-chip-count>{tab.count}</span> : null}
+              {typeof tab.count === 'number' ? <span data-kit-chip-count>{formatCount(tab.count)}</span> : null}
             </button>
           </Fragment>
         );

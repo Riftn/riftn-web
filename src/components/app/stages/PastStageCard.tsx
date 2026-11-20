@@ -23,6 +23,7 @@ import { StageRecordingPlayer } from '@/components/app/stages/StageRecordingPlay
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 
+import { formatCount } from '@/lib/format-count';
 export function PastStageCard({ space, className }: { space: AudioSpace; className?: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export function PastStageCard({ space, className }: { space: AudioSpace; classNa
           {!!space.total_listens && (
             <span className="flex items-center gap-1 text-zinc-400 text-[11px]">
               <Headphones className="w-3 h-3" />
-              {space.total_listens}
+              {formatCount(space.total_listens)}
             </span>
           )}
         </div>

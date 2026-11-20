@@ -28,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { NOTIFICATION_COMMENT_ACTIONABLE as ACTIONABLE } from '@/lib/notification-comment';
 
+import { formatCount } from '@/lib/format-count';
 const TipModal = lazy(() => import('@/components/app/modals/TipModal').then((m) => ({ default: m.TipModal })));
 
 const CDN = 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com/';
@@ -156,7 +157,7 @@ export function NotificationCommentCard({ notification, onEngaged }: Props) {
             aria-label={t('messages.reply', { defaultValue: 'Reply' })}
           >
             <MessageSquare className="h-[17px] w-[17px] shrink-0" />
-            {replies > 0 && <span className="tabular-nums">{replies}</span>}
+            {replies > 0 && <span className="tabular-nums">{formatCount(replies)}</span>}
           </button>
           <button
             type="button"
@@ -167,7 +168,7 @@ export function NotificationCommentCard({ notification, onEngaged }: Props) {
             aria-label={t('reactionInfo.labels.like', { defaultValue: 'Like' })}
           >
             <ThumbsUp className={cn('h-[17px] w-[17px] shrink-0', liked && 'fill-current')} />
-            {likes > 0 && <span className="tabular-nums">{likes}</span>}
+            {likes > 0 && <span className="tabular-nums">{formatCount(likes)}</span>}
           </button>
           <button
             type="button"

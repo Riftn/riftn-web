@@ -11,6 +11,7 @@ import MoreHorizontal from "@/components/ui/cut-icons/more";
 import Bookmark from "@/components/ui/cut-icons/save";
 
 
+import { formatCount } from '@/lib/format-count';
 const mockBookmarks = (t: TFunction) => [
   { id: '1', user: 'defi_whale', content: t('mobilePreview.bookmarks.stakingGuide'), likes: 342, time: '2d' },
   { id: '2', user: 'crypto_sarah', content: t("copy.02fb0c3db46c", { defaultValue: "The future of decentralized governance — why DAOs will replace traditional corporate structures." }), likes: 189, time: '3d' },
@@ -41,7 +42,7 @@ export function BookmarksScreen() {
                 <div className="flex items-center gap-4 mt-2">
                   <div className="flex items-center gap-1 text-zinc-500">
                     <Heart className="w-3.5 h-3.5" />
-                    <span className="text-xs">{post.likes}</span>
+                    <span className="text-xs">{formatCount(post.likes)}</span>
                   </div>
                   <Bookmark className="w-3.5 h-3.5 text-white fill-white ml-auto" />
                 </div>

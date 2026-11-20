@@ -20,6 +20,7 @@ import {
 } from '@/lib/api/dehub/live-rewards';
 import { PointsIcon } from './PointsIcon';
 
+import { formatCount } from '@/lib/format-count';
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,7 +35,7 @@ export function RewardsSheet({ open, onOpenChange, streamId, balance, rewards, l
   const qc = useQueryClient();
   const [picked, setPicked] = useState<string | null>(null);
   const [text, setText] = useState('');
-  const fmt = (n: number) => n.toLocaleString(i18n.language);
+  const fmt = (n: number) => formatCount(n);
 
   useEffect(() => {
     if (!open) {

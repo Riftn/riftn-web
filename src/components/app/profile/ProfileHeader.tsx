@@ -55,6 +55,7 @@ import { LiveRipple } from '@/components/app/LiveRipple';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
 export interface ProfileHeaderProps {
   profile: ProfileData;
   apiProfile: ProfileData | undefined;
@@ -545,7 +546,7 @@ export function ProfileHeader({
                   className="hover:underline"
                 >
                   {profile.following != null ? (
-                    <><span className="font-bold text-white">{profile.following.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.following)}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -553,7 +554,7 @@ export function ProfileHeader({
               ) : (
                 <div className="flex items-center">
                   {profile.following != null ? (
-                    <><span className="font-bold text-white">{profile.following.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.following)}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -568,7 +569,7 @@ export function ProfileHeader({
                   className="hover:underline"
                 >
                   {profile.followers != null ? (
-                    <><span className="font-bold text-white">{profile.followers.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.followers)}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}
@@ -576,7 +577,7 @@ export function ProfileHeader({
               ) : (
                 <div className="flex items-center">
                   {profile.followers != null ? (
-                    <><span className="font-bold text-white">{profile.followers.toLocaleString()}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
+                    <><span className="font-bold text-white">{formatCount(profile.followers)}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
                   ) : (
                     <Skeleton className="h-4 w-16 rounded bg-white/10" />
                   )}

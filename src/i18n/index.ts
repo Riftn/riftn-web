@@ -14,6 +14,7 @@ import { initReactI18next } from 'react-i18next';
 import en from './core-en.json';
 import { humanizeTranslationKey } from './missing-key-fallback';
 import { fillMissingPluralForms } from './plural-fallback';
+import { shortenCounterPlaceholder } from './counter-placeholders';
 
 const STORAGE_KEY = 'user-preferred-language';
 
@@ -269,7 +270,13 @@ i18n.use(initReactI18next).init({
   postProcess: ['featurePacks'],
   react: { bindI18nStore: 'added' },
   parseMissingKeyHandler: humanizeTranslationKey,
-  interpolation: { escapeValue: false },
+  interpolation: {
+    escapeValue: false,
+    // Counters in copy ({{count}} listens, {{views}} views...) read short, 1.2K
+    // not 1200, the same as everywhere else on the site.
+    alwaysFormat: true,
+    format: (value, format, lng, options) => shortenCounterPlaceholder(value, format, lng, options) as string,
+  },
 });
 
 applyDateLocale(i18n.language || 'en');

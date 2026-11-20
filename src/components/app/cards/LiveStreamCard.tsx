@@ -150,6 +150,7 @@ import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirm
 import type { LiveStream } from '@/types/feed.types';
 import '@/styles/live-frame-ios.css';
 
+import { formatCount } from '@/lib/format-count';
 const logger = createLogger('LiveStreamCard');
 
 /**
@@ -2165,7 +2166,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
           type: 'live',
           author: stream.streamer,
           title: stream.title,
-          caption: `${streamEnded ? 'Ended stream' : 'Playing'} ${stream.game}${!streamEnded ? ` with ${stream.viewers} viewers` : ''}`,
+          caption: `${streamEnded ? 'Ended stream' : 'Playing'} ${stream.game}${!streamEnded ? ` with ${formatCount(stream.viewers)} viewers` : ''}`,
           imageUrl: stream.thumbnail
         }}
       />

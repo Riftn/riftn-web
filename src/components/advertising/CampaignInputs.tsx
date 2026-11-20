@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { badgeTiers } from './utils/badgeTiers';
 import { fill } from './utils/fill';
 
+import { formatCount } from '@/lib/format-count';
 interface CampaignInputsProps {
   budget: number;
   setBudget: (budget: number) => void;
@@ -100,7 +101,7 @@ const CampaignInputs = ({
             <span>{badgeTiers[targetTiers[1]]?.name || t('adTools.noBadge')}</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {fill(t('adTools.totalAudienceCount'), { count: totalAudience.toLocaleString() })}
+            {fill(t('adTools.totalAudienceCount'), { count: formatCount(totalAudience) })}
           </p>
         </div>
       </div>
@@ -110,7 +111,7 @@ const CampaignInputs = ({
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            {fill(t('adTools.audienceWarning'), { count: totalAudience.toLocaleString() })}
+            {fill(t('adTools.audienceWarning'), { count: formatCount(totalAudience) })}
           </AlertDescription>
         </Alert>
       )}

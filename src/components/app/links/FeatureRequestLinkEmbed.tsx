@@ -16,6 +16,7 @@ import { featureAttachments } from '@/lib/feature-attachments';
 import { storageImage, buildAvatarUrl } from '@/lib/media-url';
 import { cn } from '@/lib/utils';
 
+import { formatCount } from '@/lib/format-count';
 // Same hues as the board's own status badge (FeaturesPage STATUS_BADGE_STYLES).
 const STATUS_STYLES: Partial<Record<FeatureStatus, string>> = {
   under_review: 'bg-amber-400/15 text-amber-300/90 border-amber-300/25',
@@ -81,11 +82,11 @@ export function FeatureRequestLinkEmbed({ featureRequestId, path, fallback = nul
             )}
             <span className="flex shrink-0 items-center gap-1">
               <ThumbsUp className="h-3 w-3" />
-              {feature.like_count ?? 0}
+              {formatCount(feature.like_count ?? 0)}
             </span>
             <span className="flex shrink-0 items-center gap-1">
               <MessageCircle className="h-3 w-3" />
-              {feature.comment_count ?? 0}
+              {formatCount(feature.comment_count ?? 0)}
             </span>
           </div>
         </div>

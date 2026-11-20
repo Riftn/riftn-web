@@ -63,6 +63,7 @@ import type {
   SpaceRole,
 } from '@/types/audio-spaces.types';
 
+import { formatCount } from '@/lib/format-count';
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 /** What the schedule form collects. */
@@ -924,7 +925,7 @@ export function StageProvider({ children }: { children: ReactNode }) {
               if (finalised.changed) {
                 blob = finalised.blob;
                 console.log(
-                  `[Stage] Recording finalised: ${finalised.durationMs}ms, ${finalised.cuePoints} cue points`,
+                  `[Stage] Recording finalised: ${finalised.durationMs}ms, ${finalised.cuePoints} cue points`, // exact-number
                 );
               } else {
                 console.warn('[Stage] Recording uploaded as recorded:', finalised.reason);

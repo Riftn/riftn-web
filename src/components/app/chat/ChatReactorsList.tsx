@@ -26,6 +26,7 @@ import { InlineEmoji } from '@/components/app/emoji/EmojiText';
 import { cn } from '@/lib/utils';
 import '@/styles/chat-hold.css';
 
+import { formatCount } from '@/lib/format-count';
 const PAGE_SIZE = 50;
 /** A DM line can't realistically carry more, and the lookup is one request per hundred. */
 const LOCAL_CAP = 300;
@@ -165,7 +166,7 @@ export function ChatReactorsList({ reactions, remoteMessageId, onNavigate, compa
           <button type="button" onClick={() => setEmoji(null)} aria-pressed={emoji === null} data-chat-reactors-chip={emoji === null ? 'on' : ''}
             className={cn('shrink-0 inline-flex items-center gap-1.5 rounded-full text-[13px] font-semibold transition-colors', compact ? 'h-7 px-2.5' : 'h-8 px-3')}>
             {t('filters.all')}
-            <span className="tabular-nums opacity-60">{peopleCount}</span>
+            <span className="tabular-nums opacity-60">{formatCount(peopleCount)}</span>
           </button>
           {filters.map(([key, n]) => (
             <button key={key} type="button" onClick={() => setEmoji(key)} aria-pressed={emoji === key} data-chat-reactors-chip={emoji === key ? 'on' : ''}

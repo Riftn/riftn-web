@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { getAccountInfo } from '@/lib/api/dehub';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 export function StatsBar() {
   const { t: _copy } = _useCopy();
   const { walletAddress, user } = useAuth();
@@ -30,11 +31,7 @@ export function StatsBar() {
   const tipsMade = profile?.sentTips ?? 0;
   const tipsEarned = profile?.receivedTips ?? 0;
 
-  const fmt = (n: number) => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-    return n.toLocaleString();
-  };
+  const fmt = (n: number) => formatShortCount(n);
 
   const stats = [
     { label: _copy("copy.a145ab342a4a", { defaultValue: "Followers" }), value: fmt(followers) },

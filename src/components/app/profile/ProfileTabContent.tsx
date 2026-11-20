@@ -76,6 +76,7 @@ import comment3dIcon from '@/assets/icons/comment-3d-icon.webp';
 import { toStoryboard } from '@/lib/storyboard';
 import { storedVideoAspect } from '@/lib/video-aspect';
 
+import { formatCount } from '@/lib/format-count';
 /** Empty-state copy when the channel toolbar's sort/search is what emptied the tab. */
 const NO_MATCHES_COPY = {
   get title() { return _translateCopy("copy.965b516df3ba", { defaultValue: "Nothing matches" }); },
@@ -1495,7 +1496,7 @@ const CommentCard = React.memo(function CommentCard({ comment, parentPost, paren
             <div className="flex items-center gap-0">
               <span className="flex items-center gap-1.5 text-zinc-400 text-xs px-2 py-1.5 rounded-xl">
                 <ThumbsUp className="w-4 h-4" />
-                {comment.likeCount ?? 0}
+                {formatCount(comment.likeCount ?? 0)}
               </span>
               <span className="flex items-center gap-1.5 text-zinc-400 text-xs px-2 py-1.5 rounded-xl">
                 <MessageSquare className="w-4 h-4" />

@@ -35,6 +35,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { AppState } from '@/components/app/AppState';
 import { registerOffDocumentMedia } from '@/lib/pause-media-in';
 
+import { formatCount } from '@/lib/format-count';
 interface Conversation {
   id: string;
   title: string | null;
@@ -585,7 +586,7 @@ export function ConversationHistoryDrawer({
                           className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white/5 text-white/60 hover:bg-white/10 transition-colors"
                         >
                           {filter === 'all' ? _copy("copy.c80312252586", { defaultValue: "🎨 All" }) : filter === 'image' ? _copy("copy.221dff1bea78", { defaultValue: "🖼️ Images" }) : filter === 'video' ? _copy("copy.633c80a3ecf2", { defaultValue: "🎬 Videos" }) : _copy("copy.95956a639e7a", { defaultValue: "🎵 Audio" })}
-                          <span className="ml-1 text-white/30">{count}</span>
+                          <span className="ml-1 text-white/30">{formatCount(count)}</span>
                         </button>
                       );
                     })}

@@ -32,6 +32,7 @@ import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { BadgedName } from '@/components/app/BadgedName';
 import { AppState } from '@/components/app/AppState';
 
+import { formatCount } from '@/lib/format-count';
 const PAGE_SIZE = 50;
 
 interface CommentLikersDrawerProps {
@@ -90,7 +91,7 @@ export function CommentLikersDrawer({ open, onOpenChange, commentId, loadPage = 
           <DrawerTitle className="text-base font-medium text-white text-center flex items-center justify-center gap-2">
             <ThumbsUp aria-hidden="true" className="w-4 h-4" />
             {t('postInfo.likes')}
-            <span className="text-white/40 font-normal">· {totalCount}</span>
+            <span className="text-white/40 font-normal">· {formatCount(totalCount)}</span>
           </DrawerTitle>
         </DrawerHeader>
 

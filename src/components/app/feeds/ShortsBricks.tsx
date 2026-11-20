@@ -21,6 +21,7 @@ import type { LiveStream, ShortVideo } from '@/types/feed.types';
 import { postTileMenuProps } from '@/lib/post-menu';
 import { shortMenuTarget } from '@/lib/post-menu-targets';
 
+import { formatCount } from '@/lib/format-count';
 function formatDuration(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));
   const h = Math.floor(s / 3600);
@@ -114,7 +115,7 @@ export function ShortTile({ short, viewerOpen, onOpen, className, still }: TileP
               </span>
               <span className="inline-flex items-center gap-0.5" aria-label={_copy("copy.d4d4c7619589", { defaultValue: "{{value1}} likes", value1: short.likes })}>
                 <ThumbsUp className="w-[9px] h-[9px] shrink-0" strokeWidth={1.6} aria-hidden="true" />
-                <span>{short.likes}</span>
+                <span>{formatCount(short.likes)}</span>
               </span>
             </div>
           </div>

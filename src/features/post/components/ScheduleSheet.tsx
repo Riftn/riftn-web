@@ -13,6 +13,7 @@ import { getFansOnline } from '@/lib/api/dehub/scheduled';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
+import { formatCount } from '@/lib/format-count';
 export type ScheduleKind = 'post' | 'live' | 'stage' | 'message';
 
 interface ScheduleSheetProps {
@@ -272,7 +273,7 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
                                 type="button"
                                 disabled={past}
                                 onClick={() => choose(at)}
-                                aria-label={`${dayLabel(at)} ${timeLabel(at)}: ${count}`}
+                                aria-label={`${dayLabel(at)} ${timeLabel(at)}: ${formatCount(count)}`}
                                 className={cn('h-4 rounded-[3px] text-white ', picked && 'ring-1 ring-white')}
                                 style={{ background: 'currentColor', opacity: past ? 0.05 : 0.12 + 0.88 * (count / max) }}
                               />

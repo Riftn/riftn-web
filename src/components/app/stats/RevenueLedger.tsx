@@ -35,6 +35,7 @@ import {
 } from '@/hooks/use-finance-stats';
 import { cn } from '@/lib/utils';
 
+import { formatCount } from '@/lib/format-count';
 const PAGE = 25;
 
 function formatUsd(n: number): string {
@@ -257,13 +258,13 @@ export function RevenueLedger({
                 <div className="text-xs text-zinc-400 tabular-nums">
                   {tax
                     ? t('stats.taxLedger.summary', '{{entries}} lines · {{total}} at the BNB price on each day · every line checkable on BscScan', {
-                        entries: view.items.length.toLocaleString('en-US'),
+                        entries: formatCount(view.items.length),
                         total: formatUsd(view.total),
                       })
                     : t('stats.ledger.summary', '{{entries}} entries · {{total}} · {{proven}} with an on-chain transaction · {{range}}', {
-                        entries: view.items.length.toLocaleString('en-US'),
+                        entries: formatCount(view.items.length),
                         total: formatUsd(view.total),
-                        proven: view.proven.toLocaleString('en-US'),
+                        proven: formatCount(view.proven),
                         range: rangeLabel,
                       })}
                 </div>
@@ -367,7 +368,7 @@ export function RevenueLedger({
                   className="w-full text-xs text-zinc-300 hover:text-white bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg px-3 py-2 transition-colors tabular-nums"
                 >
                   {t('stats.ledger.more', 'Show more ({{left}} left)', {
-                    left: (view.items.length - shown).toLocaleString('en-US'),
+                    left: formatCount(view.items.length - shown),
                   })}
                 </button>
               )}

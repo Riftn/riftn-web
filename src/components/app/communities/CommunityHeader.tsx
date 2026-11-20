@@ -40,6 +40,7 @@ import { storageImage, deviceWidth, isMdUp } from '@/lib/media-url';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
+import { formatCount } from '@/lib/format-count';
 interface CommunityHeaderProps {
   community: Community;
   isMember: boolean;
@@ -366,7 +367,7 @@ export function CommunityHeader({ community, isMember, isPendingMember, membersh
         ) : null}
 
         <p className="mt-3 text-sm text-zinc-400">
-          <span className="font-bold text-white tabular-nums">{community.member_count.toLocaleString()}</span> {t('communities.members')}
+          <span className="font-bold text-white tabular-nums">{formatCount(community.member_count)}</span> {t('communities.members')}
         </p>
 
         {/* Actions */}

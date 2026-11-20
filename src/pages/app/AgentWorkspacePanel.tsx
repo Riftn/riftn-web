@@ -10,6 +10,7 @@ import { agentTaskRequest } from '@/lib/agent-tasks';
 import type { GrowthReport } from '@/lib/agent-workspace';
 import { PERMISSIONS, NEWS_TOPICS, BUILDER_ACTIONS, buildAgentPrompt, workspaceCounts, workspaceAvailable, type BuilderAction, type AgentSettings, type WorkspaceOverview, type PlanPreview } from '@/lib/agent-workspace';
 
+import { formatCount } from '@/lib/format-count';
 const fieldClass = 'mt-1.5 rounded-xl border-white/20 bg-black/35 text-white placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-white/40';
 const labelClass = 'block text-sm font-medium text-white/80';
 
@@ -98,7 +99,7 @@ function AgentWorkspaceContent({ wallet }: { wallet: string }) {
   const receipts = overview.data?.receipts.filter(receipt => (filter === 'all' || receipt.status === filter) && (!selected || receipt.agent_id === selected)) ?? [];
   return <section data-kit-section className="space-y-5 rounded-2xl border border-white/20 bg-black/35 p-5 text-white">
     <div className="flex items-center justify-between gap-3"><h2 className="text-lg font-semibold">{t('agents.workspace.title', 'Agent workspace')}</h2><Button size="sm" variant="ghost" disabled={overview.isFetching} onClick={refresh}>{t('common.refresh', 'Refresh')}</Button></div>
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{Object.entries(counts).map(([key, count]) => <div key={key} className="rounded-xl border border-white/10 bg-white/5 p-4"><p className="text-2xl font-semibold leading-none">{count}</p><p className="mt-2 text-sm leading-snug text-white/70">{t(`agents.workspace.count.${key}`, { defaultValue: key === 'pending' ? 'Drafts to review' : key === 'succeeded' ? 'Recent successes' : key === 'scheduled' ? 'Scheduled tasks' : 'Active agents' })}</p></div>)}</div>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{Object.entries(counts).map(([key, count]) => <div key={key} className="rounded-xl border border-white/10 bg-white/5 p-4"><p className="text-2xl font-semibold leading-none">{formatCount(count)}</p><p className="mt-2 text-sm leading-snug text-white/70">{t(`agents.workspace.count.${key}`, { defaultValue: key === 'pending' ? 'Drafts to review' : key === 'succeeded' ? 'Recent successes' : key === 'scheduled' ? 'Scheduled tasks' : 'Active agents' })}</p></div>)}</div>
     <p className="text-xs text-white/60">{t('agents.workspace.sample', 'Activity and alerts cover the latest 100 actions and 200 tasks. Counts are not lifetime totals or billing usage.')}</p>
     {overview.data?.alerts.length ? <details open className="group space-y-2 rounded-xl border border-amber-400/30 bg-amber-400/5 p-4"><Summary>{t('agents.workspace.alerts', 'Needs attention')} ({overview.data.alerts.length})</Summary>{overview.data.alerts.map(alert => <p key={alert.id} role="alert" className="py-1 text-sm">{alert.message}</p>)}</details> : null}
     <label className={labelClass}>{t('agents.workspace.agent', 'Agent')}<FieldSelect disabled={!overview.data?.agents.length} value={agentId ?? ''} onChange={event => { setSelected(event.target.value); preview.reset(); run.reset(); report.reset(); setRequestId(crypto.randomUUID()); }}>{overview.data?.agents.map(agent => <option key={agent.id} value={agent.id}>@{agent.name}</option>)}{!overview.data?.agents.length && <option value="">{t('agents.tasks.createFirst')}</option>}</FieldSelect></label>
