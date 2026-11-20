@@ -179,6 +179,7 @@ import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
 import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
 import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
+import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
@@ -590,7 +591,34 @@ function FullScreenChatGallery() {
           </div>
         ))}
       </div>
+      <h3 className="text-sm font-semibold">Scroll up: the button counts every line below you</h3>
+      <LinesBelowDemo />
     </section>
+  );
+}
+
+/** A long chat (1,500 lines) wired to the real scroll-down count and glide. */
+function LinesBelowDemo() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [below, setBelow] = useState(0);
+  const ids = useMemo(() => Array.from({ length: 1500 }, (_, i) => `demo-${i}`), []);
+  const refresh = () => {
+    const el = ref.current;
+    if (el) setBelow(countLinesBelow(el, ids, (id) => el.querySelector(`[data-demo-line="${id}"]`)));
+  };
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, []);
+  return (
+    <div data-lines-below-gallery className="relative h-[26rem] overflow-hidden rounded-2xl border border-white/10">
+      <div ref={ref} onScroll={refresh} data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 py-2">
+        {ids.map((id, i) => (
+          <div key={id} data-demo-line={id} className="py-1 text-sm text-zinc-300">Line {i + 1}</div>
+        ))}
+      </div>
+      <UnreadJumpButton show={below > 0} up={false} count={below} onClick={() => ref.current && glideToBottom(ref.current)} className="absolute bottom-4 right-4 z-10" />
+    </div>
   );
 }
 

@@ -22,6 +22,7 @@ import { UnreadMarker, UnreadJumpButton } from '../chat/UnreadJump';
 import type { UnreadAnchor } from '@/lib/chat-unread-anchor';
 import { anchorFromReadSpot, newestLineOnScreen } from '@/lib/chat-read-position';
 import { useChatReadPosition } from '@/hooks/use-chat-read-position';
+import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
 import { roomChatId } from '@/lib/api/dehub/chat-prefs';
 import { holderGateOf, runHolderCheck } from '@/hooks/use-holder-gate';
 import { useQueryClient } from '@tanstack/react-query';
@@ -249,6 +250,8 @@ export function CommunityChat({ communityId, community, membership, isMember, me
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
+  // Every line below the fold: the number on the scroll-down button.
+  const [linesBelow, setLinesBelow] = useState(0);
   const [highlight, setHighlight] = useState<{ id: string; nonce: number } | null>(null);
   const [pinPendingId, setPinPendingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CommunityChatMessage | null>(null);
@@ -559,15 +562,22 @@ export function CommunityChat({ communityId, community, membership, isMember, me
     if (line) readSpot.report(line.id, line.created_at);
   }, [messages, searchQuery, readSpot.report]);
 
+  const refreshLinesBelow = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    setLinesBelow(countLinesBelow(container, messages.map((m) => m.id), (id) => messageRefs.current[id]));
+  }, [messages]);
+
   const scrollFrame = useRef(0);
   const scheduleScrollWork = useCallback(() => {
     if (scrollFrame.current) return;
     scrollFrame.current = requestAnimationFrame(() => {
       scrollFrame.current = 0;
       refreshUnreadJump();
+      refreshLinesBelow();
       reportReadSpot();
     });
-  }, [refreshUnreadJump, reportReadSpot]);
+  }, [refreshUnreadJump, refreshLinesBelow, reportReadSpot]);
   useEffect(() => () => cancelAnimationFrame(scrollFrame.current), []);
   // Lines landing while you sit at the bottom are read as they arrive.
   useEffect(() => {
@@ -766,15 +776,17 @@ export function CommunityChat({ communityId, community, membership, isMember, me
     try {
       await showLatest();
       setSearchQuery('');
-      setVisibleCount(PAGE_SIZE);
+      // Folding the loaded history back to one page mid-glide made the list
+      // snap; only do it when we were in an old window or a search.
+      if (isHistoryWindow || searchQuery.trim()) setVisibleCount(PAGE_SIZE);
       requestAnimationFrame(() => {
         const el = scrollRef.current;
-        if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        if (el) glideToBottom(el);
       });
       setNewMessageCount(0);
       setShowJumpToLatest(false);
     } catch { toast.error(t('common.failedToLoad')); }
-  }, [showLatest, setSearchQuery, t]);
+  }, [showLatest, setSearchQuery, t, isHistoryWindow, searchQuery]);
 
   const handleSetPinned = useCallback(async (messageId: string, pinned: boolean) => {
     setPinPendingId(messageId);
@@ -1540,11 +1552,11 @@ export function CommunityChat({ communityId, community, membership, isMember, me
               unread lines still below. */}
           {(() => {
             const up = !!unreadAnchor && !unreadMarkerSeen && unreadMarkerAbove;
-            if (!(up || showJumpToLatest || newMessageCount > 0 || isHistoryWindow)) return null;
             return (
               <UnreadJumpButton
+                show={up || showJumpToLatest || newMessageCount > 0 || isHistoryWindow}
                 up={up}
-                count={unreadBelow + newMessageCount}
+                count={Math.max(linesBelow, unreadBelow + newMessageCount)}
                 onClick={up ? jumpToUnreadMarker : () => void scrollToBottom()}
                 className="absolute bottom-3 right-3 z-10"
               />
