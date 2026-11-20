@@ -718,7 +718,7 @@
     "heading": "Riftn 短影片"
   },
   "settings": {
-    "loginLook": {"title": "登入畫面", "desc": "此裝置上登入畫面中 Riftn 標誌和標語的動態效果。", "tube": "映像管電視", "vhs": "VHS 錄影帶", "led": "LED 牆", "holo": "全像投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登入之後", "desc": "帳號載入時、頭像落到頁面之前播放的效果。僅此裝置。", "rift": "裂隙", "trace": "描邊", "frame": "相框", "orbit": "軌道"},
+    "loginLook": {"title": "登入畫面", "desc": "此裝置上登入畫面中 Riftn 標誌和標語的動態效果。", "tube": "映像管電視", "vhs": "VHS 錄影帶", "led": "LED 牆", "holo": "全像投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登入之後", "desc": "帳號載入時、頭像落到頁面之前播放的效果。僅此裝置。", "trace": "描邊", "tune": "調台", "rift": "裂隙", "deck": "卡牌", "glass": "玻璃水滴"},
     "postLanding": "發佈之後",
     "postLandingDesc": "新貼文出現在動態中的方式",
     "postLandingGhost": "幽靈空位",

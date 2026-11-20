@@ -707,7 +707,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
-    "loginLook": {"title": "Skrin log masuk", "desc": "Cara logo dan slogan Riftn bergerak pada skrin log masuk di peranti ini.", "tube": "TV tiub", "vhs": "Pita VHS", "led": "Dinding LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Rata"}, "arrivalLook": {"title": "Selepas log masuk", "desc": "Apa yang dimainkan semasa akaun anda dimuatkan, sebelum gambar anda tiba di halaman. Pada peranti ini.", "rift": "Rekahan", "trace": "Jejak", "frame": "Bingkai gambar", "orbit": "Orbit"},
+    "loginLook": {"title": "Skrin log masuk", "desc": "Cara logo dan slogan Riftn bergerak pada skrin log masuk di peranti ini.", "tube": "TV tiub", "vhs": "Pita VHS", "led": "Dinding LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Rata"}, "arrivalLook": {"title": "Selepas log masuk", "desc": "Apa yang dimainkan semasa akaun anda dimuatkan, sebelum gambar anda tiba di halaman. Pada peranti ini.", "trace": "Jejak", "tune": "Tala siaran", "rift": "Rekahan", "deck": "Dek kad", "glass": "Titisan kaca"},
     "postLanding": "Selepas menyiarkan",
     "postLandingDesc": "Cara siaran baharu anda muncul dalam suapan",
     "postLandingGhost": "Slot bayang",

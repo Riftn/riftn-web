@@ -75,7 +75,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
   { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
   { tab: 'appearance', anchor: 'login-look', label: 'Sign-in screen', labelKey: 'settings.loginLook.title', keywords: 'login sign in screen logo animation look tube tv vhs led wall hologram neon glow 3d flat plain retro scan lines slogan' },
-  { tab: 'appearance', anchor: 'arrival-look', label: 'After you sign in', labelKey: 'settings.arrivalLook.title', keywords: 'after sign in login welcome animation rift trace picture frame orbit arrival loading profile photo' },
+  { tab: 'appearance', anchor: 'arrival-look', label: 'After you sign in', labelKey: 'settings.arrivalLook.title', keywords: 'after sign in login welcome animation rift trace tune in tv static deck cards glass drop arrival loading profile photo' },
   { tab: 'appearance', anchor: 'chat-cards', label: 'Chats as cards', labelKey: 'settings.chatCards', keywords: 'chat list cards plain lines rows compact messages inbox layout' },
   { tab: 'appearance', anchor: 'chat-delete-choice', label: 'When you delete a message', labelKey: 'settings.chatDeleteChoice', keywords: 'delete message chat dm remove for me everyone both remember choice ask' },
   { tab: 'appearance', anchor: 'chat-reaction-style', label: 'Reactions in chat', labelKey: 'settings.chatReactionStyle', keywords: 'reaction emoji animation motion fly pop burst off chat dm live moving animate' },

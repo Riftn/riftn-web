@@ -707,7 +707,7 @@
     "heading": "Video ngắn Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Màn hình đăng nhập", "desc": "Cách logo và khẩu hiệu Riftn chuyển động trên màn hình đăng nhập của thiết bị này.", "tube": "TV ống", "vhs": "Băng VHS", "led": "Tường LED", "holo": "Ảnh ba chiều", "neon": "Neon", "3d": "3D", "flat": "Phẳng"}, "arrivalLook": {"title": "Sau khi đăng nhập", "desc": "Hiệu ứng phát khi tài khoản đang tải, trước khi ảnh của bạn hiện trên trang. Trên thiết bị này.", "rift": "Khe nứt", "trace": "Vệt sáng", "frame": "Khung ảnh", "orbit": "Quỹ đạo"},
+    "loginLook": {"title": "Màn hình đăng nhập", "desc": "Cách logo và khẩu hiệu Riftn chuyển động trên màn hình đăng nhập của thiết bị này.", "tube": "TV ống", "vhs": "Băng VHS", "led": "Tường LED", "holo": "Ảnh ba chiều", "neon": "Neon", "3d": "3D", "flat": "Phẳng"}, "arrivalLook": {"title": "Sau khi đăng nhập", "desc": "Hiệu ứng phát khi tài khoản đang tải, trước khi ảnh của bạn hiện trên trang. Trên thiết bị này.", "trace": "Vệt sáng", "tune": "Dò sóng", "rift": "Khe nứt", "deck": "Bộ bài", "glass": "Giọt kính"},
     "postLanding": "Sau khi đăng",
     "postLandingDesc": "Cách bài viết mới xuất hiện trong bảng tin",
     "postLandingGhost": "Ô trống ma",

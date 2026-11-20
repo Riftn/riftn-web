@@ -700,7 +700,7 @@
     "heading": "Shorts på Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Inloggningsskärm", "desc": "Hur Riftn-logotypen och sloganen rör sig på inloggningsskärmen på den här enheten.", "tube": "Tjock-tv", "vhs": "VHS-band", "led": "LED-vägg", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Platt"}, "arrivalLook": {"title": "Efter inloggning", "desc": "Det som spelas medan ditt konto laddas, innan din bild landar på sidan. På den här enheten.", "rift": "Spricka", "trace": "Spår", "frame": "Bildram", "orbit": "Omlopp"},
+    "loginLook": {"title": "Inloggningsskärm", "desc": "Hur Riftn-logotypen och sloganen rör sig på inloggningsskärmen på den här enheten.", "tube": "Tjock-tv", "vhs": "VHS-band", "led": "LED-vägg", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Platt"}, "arrivalLook": {"title": "Efter inloggning", "desc": "Det som spelas medan ditt konto laddas, innan din bild landar på sidan. På den här enheten.", "trace": "Spår", "tune": "Ställ in", "rift": "Spricka", "deck": "Kortlek", "glass": "Glasdroppe"},
     "postLanding": "Efter att du publicerat",
     "postLandingDesc": "Hur ditt nya inlägg dyker upp i flödet",
     "postLandingGhost": "Spökplats",
