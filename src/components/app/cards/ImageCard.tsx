@@ -1782,6 +1782,14 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         isOpen={fullscreenOpen}
         onClose={() => setFullscreenOpen(false)}
         postId={post.id}
+        author={{
+          name: post.username,
+          avatar: post.avatar,
+          handle: post.creatorUsername,
+          creatorId: post.creatorId,
+          verified: post.verified,
+          caption: isTranslated && translatedText ? translatedText : descriptionText,
+        }}
         actions={{
           isLiked: post.isLiked,
           isDisliked: post.isDisliked,
