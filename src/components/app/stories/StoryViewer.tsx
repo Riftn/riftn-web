@@ -11,7 +11,7 @@
  * direct message; likes and views show only to the owner. Your own moments
  * show who watched instead of a reply bar.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ import { ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2
 import Close from '@/components/ui/cut-icons/close';
 import More from '@/components/ui/cut-icons/more';
 import Send from '@/components/ui/cut-icons/send';
+import ShareIcon from '@/components/ui/cut-icons/feedshare';
 import Music from '@/components/ui/cut-icons/music';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
@@ -49,6 +50,7 @@ interface Props {
 }
 
 const HOLD_MS = 220;
+const ShareToDmModal = lazy(() => import('@/components/app/modals/ShareToDmModal').then(m => ({ default: m.ShareToDmModal })));
 const REPORT_REASONS = [
   ['spam_misleading', 'Spam'],
   ['harassment_bullying', 'Bullying or harassment'],
@@ -71,7 +73,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [progress, setProgress] = useState(0);
   const [held, setHeld] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [sheet, setSheet] = useState<null | 'viewers' | 'more' | 'report' | 'delete'>(null);
+  const [sheet, setSheet] = useState<null | 'viewers' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
   const [muted, setMuted] = useState(false);
   // Which moment has its picture in, by id: a cached image can report in before
   // the reset for a new moment runs, so a plain flag could stick at "loading".
@@ -346,6 +348,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   if (!entry || !item) return null;
   const a = entry.author;
   const shareable = item.shareable && Date.parse(item.expiresAt) > Date.now();
+  const momentUrl = new URL(`/app/moment/${encodeURIComponent(item.id)}`, window.location.origin).href;
   const remix = () => {
     const source = { id: item.id, name: nameOf(a) };
     const openComposer = () => useStoriesStore.getState().openCreator(source);
@@ -355,11 +358,19 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   };
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(new URL(`/app/moment/${encodeURIComponent(item.id)}`, window.location.origin).href);
+      await navigator.clipboard.writeText(momentUrl);
       dismissSheet();
       toast.success(t('stories.linkCopied', { defaultValue: 'Link copied' }));
     } catch {
       toast.error(t('stories.copyLinkFailed', { defaultValue: "Couldn't copy the moment link." }));
+    }
+  };
+  const shareOutside = async () => {
+    try {
+      await navigator.share({ url: momentUrl });
+      dismissSheet();
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) await copyLink();
     }
   };
   const openOriginal = async () => {
@@ -543,6 +554,11 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               <Heart className={`w-5 h-5 ${item.liked ? 'fill-current' : ''}`} />
             </button>
           )}
+          {shareable && (
+            <button type="button" data-sv-round data-st-dark-glass onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
+              <ShareIcon className="w-5 h-5" />
+            </button>
+          )}
           {!own && isAuthenticated && item.allowReplies && reply.trim() && (
             <button type="button" data-sv-round data-st-dark-glass onClick={submitReply} disabled={sending} aria-label={t('common.send', { defaultValue: 'Send' })}>
               {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -550,10 +566,24 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           )}
         </div>
 
-        {sheet && (
+        {sheet === 'share-dm' && (
+          <Suspense fallback={null}>
+            <ShareToDmModal open url={momentUrl} aboveMoment onOpenChange={open => { if (!open) setSheet('share'); }} />
+          </Suspense>
+        )}
+        {sheet && sheet !== 'share-dm' && (
           <div data-sv-sheet-backdrop onClick={dismissSheet}>
             <div ref={sheetRef} data-sv-sheet onClick={e => e.stopPropagation()}>
               {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} onClose={dismissSheet} />}
+              {sheet === 'share' && shareable && (
+                <div className="flex flex-col">
+                  {isAuthenticated && <SheetButton onClick={() => setSheet('share-dm')}><Send className="size-[18px]" />{t('copy.20e392c29da3', { defaultValue: 'Send in a message' })}</SheetButton>}
+                  <SheetButton onClick={copyLink}><Link2 className="size-[18px]" />{t('postOptions.copyLink', { defaultValue: 'Copy link' })}</SheetButton>
+                  {typeof navigator.share === 'function' && <SheetButton onClick={shareOutside}><ShareIcon className="size-[18px]" />{t('stories.share', { defaultValue: 'Share' })}</SheetButton>}
+                  <SheetButton onClick={remix}><Repeat2 className="size-[18px]" />{t('stories.addToMoment', { defaultValue: 'Add to your Moment' })}</SheetButton>
+                  <SheetButton onClick={dismissSheet}>{t('common.cancel', { defaultValue: 'Cancel' })}</SheetButton>
+                </div>
+              )}
               {sheet === 'more' && (
                 <div className="flex flex-col">
                   {shareable && (

@@ -131,6 +131,8 @@ function PointsInfo() {
 function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; rank: number; max: number; open: boolean; onToggle: () => void; mine?: boolean }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // exact-number: the expanded leaderboard row reveals the actual score.
+  const exactScore = b.points.toLocaleString();
   return (
     <div className={cn('rounded-xl', mine && 'bg-white/[0.06] ring-1 ring-white/10')}>
       <button
@@ -147,7 +149,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
               <span className="truncate">{mine ? t('features.topBuilders.you', 'You') : displayName(b)}</span>
               {b.username && <BadgeIcon username={b.username} lookupId={b.wallet} className="w-[1em] h-[1em] shrink-0" />}
             </span>
-            <span className="shrink-0 tabular-nums" title={b.points.toLocaleString()}>{open ? b.points.toLocaleString() : formatCount(b.points)}</span>
+            <span className="shrink-0 tabular-nums" title={exactScore}>{open ? exactScore : formatCount(b.points)}</span>
           </span>
           <ScoreBar builder={b} max={max} />
           {open && <Breakdown b={b} />}

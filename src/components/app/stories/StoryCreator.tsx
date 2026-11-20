@@ -22,7 +22,7 @@ import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 import { soundWindow } from '@/lib/sound-window';
 import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
-import type { StoryAudience, StorySong } from '@/lib/api/dehub/stories';
+import { STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
 import { getMediaUrl } from '@/lib/api/dehub/core';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import type { StoryRemixSource } from '@/store/storiesStore';
@@ -34,7 +34,7 @@ const MAX_VIDEO_S = 60;
 const AUDIENCE_KEY = 'riftn.stories.audience';
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'lifetime';
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -278,6 +278,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
   const [audience, setAudience] = useState<StoryAudience>(() => {
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
   });
+  const [lifetime, setLifetime] = useState<StoryLifetime>(24);
+  const lifetimeLabel = t('stories.lifetime', { defaultValue: 'Story duration' });
   const [busy, setBusy] = useState(false);
   const historyRef = useRef<ImageData[]>([]);
 
@@ -436,7 +438,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
           };
         }
       }
-      const fields = { audience, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
+      const fields = { audience, expiresInHours: lifetime, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -459,7 +461,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -551,10 +553,30 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
             {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
             {audience === 'everyone' ? t('stories.everyone', { defaultValue: 'Everyone' }) : t('stories.followersOnly', { defaultValue: 'Followers' })}
           </button>
-          <span data-sc-chip data-st-dark-glass className="opacity-80">24h</span>
+          <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool('lifetime')} aria-label={`${lifetimeLabel}, ${lifetime}h`}>
+            {lifetime}h
+          </button>
           <button type="button" data-sc-share onClick={share} disabled={busy}>
             {t('stories.share', { defaultValue: 'Share' })}
           </button>
+        </div>
+      )}
+
+      {tool === 'lifetime' && (
+        <div data-sc-panel data-sc-text-panel>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold">{lifetimeLabel}</p>
+            <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="size-[18px]" /></button>
+          </div>
+          <div className="flex gap-2">
+            {STORY_LIFETIMES.map(hours => (
+              <button key={hours} type="button" data-sc-chip data-st-dark-glass aria-pressed={hours === lifetime}
+                data-on={hours === lifetime ? 'true' : 'false'}
+                onClick={() => { setLifetime(hours); setTool(null); }}>
+                {hours}h
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

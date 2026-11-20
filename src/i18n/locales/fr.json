@@ -7201,6 +7201,9 @@
     "shareTitle": "@{{handle}} est à vendre sur Riftn"
   },
   "stories": {
+    "lifetime": "Durée de la story",
+    "momentPublished": "Ton moment est en ligne",
+    "addToMoment": "Ajouter à ton moment",
     "remix": "Remix",
     "moreActions": "Options de la story",
     "remixing": "Remix de la story de {{name}}",

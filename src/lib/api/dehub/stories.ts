@@ -14,6 +14,8 @@
 import { apiCall, authedUpload } from './core';
 
 export type StoryAudience = 'everyone' | 'followers';
+export const STORY_LIFETIMES = [6, 12, 24] as const;
+export type StoryLifetime = (typeof STORY_LIFETIMES)[number];
 
 export interface StoryMention {
   address: string;
@@ -107,6 +109,7 @@ export function getStoryArchive(cursor?: string): Promise<{ items: StoryItem[]; 
 
 export interface CreateStoryFields {
   audience: StoryAudience;
+  expiresInHours?: StoryLifetime;
   allowReplies?: boolean;
   muted?: boolean;
   caption?: string;
@@ -128,6 +131,7 @@ export function createStory(
   const form = new FormData();
   form.append('type', fields.draftVideoId ? 'video' : 'photo');
   form.append('audience', fields.audience);
+  if (fields.expiresInHours != null) form.append('expiresInHours', String(fields.expiresInHours));
   form.append('allowReplies', String(fields.allowReplies !== false));
   form.append('muted', String(!!fields.muted));
   if (fields.caption) form.append('caption', fields.caption);

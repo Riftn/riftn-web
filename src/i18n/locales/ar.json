@@ -7221,6 +7221,9 @@
     "shareTitle": "@{{handle}} معروض للبيع على Riftn"
   },
   "stories": {
+    "lifetime": "مدة القصة",
+    "momentPublished": "لحظتك منشورة",
+    "addToMoment": "إضافة إلى لحظتك",
     "remix": "إعادة المزج",
     "moreActions": "خيارات القصة",
     "remixing": "إعادة مزج قصة {{name}}",
