@@ -73,4 +73,14 @@ describe('public chat unread counts', () => {
     store.record('0xme', message('two', 11));
     expect(updates).toBe(2);
   });
+
+  it('drops lines already read on another device but keeps newer ones', () => {
+    const { store } = fixture();
+    for (let i = 1; i <= 5; i += 1) store.record('0xme', message(`m${i}`, i));
+    store.catchUp('0xme', BASE + 3);
+    expect(store.count('0xme')).toBe(2);
+    expect(store.record('0xme', message('m2', 2))).toBe(false);
+    store.catchUp('0xme', BASE + 1);
+    expect(store.count('0xme')).toBe(2);
+  });
 });

@@ -44,7 +44,8 @@ export function fitCropRect(ratio: number | null, frameAspect: number): VideoCro
   return { x: (1 - w) / 2, y: (1 - h) / 2, w, h };
 }
 
-export type CropHandle = 'move' | 'tl' | 'tr' | 'bl' | 'br';
+/** Corners keep any shape; edges (top, bottom, left, right) are for Free only. */
+export type CropHandle = 'move' | 'tl' | 'tr' | 'bl' | 'br' | 't' | 'b' | 'l' | 'r';
 
 /** The box after dragging `handle` by dx, dy (fractions of the frame). */
 export function dragCropRect(
@@ -57,6 +58,17 @@ export function dragCropRect(
 ): VideoCropRect | null {
   if (handle === 'move') {
     return { ...r0, x: clamp(r0.x + dx, 0, 1 - r0.w), y: clamp(r0.y + dy, 0, 1 - r0.h) };
+  }
+  if (handle === 't' || handle === 'b' || handle === 'l' || handle === 'r') {
+    if (ratio) return null;
+    if (handle === 'l' || handle === 'r') {
+      const fx = handle === 'l' ? r0.x + r0.w : r0.x;
+      const w = clamp(handle === 'l' ? r0.w - dx : r0.w + dx, MIN_CROP, handle === 'l' ? fx : 1 - fx);
+      return { ...r0, x: handle === 'l' ? fx - w : fx, w };
+    }
+    const fy = handle === 't' ? r0.y + r0.h : r0.y;
+    const h = clamp(handle === 't' ? r0.h - dy : r0.h + dy, MIN_CROP, handle === 't' ? fy : 1 - fy);
+    return { ...r0, y: handle === 't' ? fy - h : fy, h };
   }
   const left = handle === 'tl' || handle === 'bl';
   const top = handle === 'tl' || handle === 'tr';

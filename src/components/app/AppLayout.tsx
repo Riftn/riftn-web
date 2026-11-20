@@ -124,6 +124,7 @@ import { GlobalFeedNavProvider } from '@/contexts/GlobalFeedNavContext';
 import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import { useStageAlerts } from '@/hooks/use-stage-alerts';
 import { usePublicChatAlerts } from '@/hooks/use-public-chat-alerts';
+import { usePublicChatReadSync } from '@/hooks/use-public-chat-unread';
 import { cn } from '@/lib/utils';
 import { KidsModeGate } from '@/components/app/KidsModeGate';
 // Lazy: only rendered as the post overlay when a post is opened from home —
@@ -270,6 +271,7 @@ function AppLayoutContent({ children }: AppLayoutContentProps) {
   // reason as the stage alerts above: it has to reach you wherever you are,
   // not only on the page that owns the feature.
   usePublicChatAlerts();
+  usePublicChatReadSync();
 
   // Expose the middle panel's live bounds (the gap between the left/right
   // sidebars) as CSS vars so anything mounted outside AppLayout — the login
