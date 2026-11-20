@@ -17,6 +17,7 @@ import { isEffectivelyActive } from '@/hooks/use-community-admin';
 import { communityKindOf } from '@/lib/community-kinds';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 
+import { formatCount } from '@/lib/format-count';
 export function RoomChatPane({ community, onBack }: { community: Community; onBack: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export function RoomChatPane({ community, onBack }: { community: Community; onBa
           <span className="min-w-0">
             <span className="block truncate font-semibold text-white">{community.name}</span>
             <span className="block truncate text-xs text-zinc-500">
-              {t('communities.chat.paneMembers', { defaultValue: '{{formattedCount}} members', count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() })}
+              {t('communities.chat.paneMembers', { defaultValue: '{{formattedCount}} members', count: community.member_count ?? 0, formattedCount: formatCount(community.member_count ?? 0) })}
             </span>
           </span>
         </button>

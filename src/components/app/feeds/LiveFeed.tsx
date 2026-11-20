@@ -45,6 +45,7 @@ import { useCinematicPhone } from '@/hooks/use-cinematic-phone';
 import { usePersistedFeedFilter } from '@/hooks/use-persisted-feed-filter';
 import { LIVE_GAMES, streamMatchesGame } from '@/constants/live-games';
 
+import { formatCount } from '@/lib/format-count';
 // Only a stored game id or "all" is a valid saved category; ids from the old
 // placeholder list fall back to all.
 const CATEGORY_FILTER_VALUES: (string | null)[] = [null, ...LIVE_GAMES.map(g => g.id)];
@@ -324,7 +325,7 @@ function PastStagesSection({ stages }: { stages: AudioSpace[] }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-medium text-sm truncate">{stage.title}</p>
                   <p className="text-white/50 text-xs mt-0.5">
-                    {stage.host_username || _copy("copy.e7a8aa2df7e5", { defaultValue: "Anonymous" })} · {stage.speaker_count || 0}{_copy("copy.a2010905262a", { defaultValue: " speakers" })}{stage.ended_at && ` · ${new Date(stage.ended_at).toLocaleDateString()}`}
+                    {stage.host_username || _copy("copy.e7a8aa2df7e5", { defaultValue: "Anonymous" })} · {formatCount(stage.speaker_count || 0)}{_copy("copy.a2010905262a", { defaultValue: " speakers" })}{stage.ended_at && ` · ${new Date(stage.ended_at).toLocaleDateString()}`}
                   </p>
                   {!stage.recording_url && (
                     <p className="text-white/25 text-xs mt-0.5">{_copy("copy.da849530a46b", { defaultValue: "No recording" })}</p>

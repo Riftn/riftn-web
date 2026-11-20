@@ -33,6 +33,7 @@ import { useStreamerProgress, useSelectStreamerBadge } from '@/hooks/use-streame
 import type { StreamerCardId, StreamerProgress } from '@/lib/api/dehub/livestream';
 import { openStreamerShowcase, preloadStreamerShowcase } from '@/lib/badge-showcase';
 
+import { formatCount } from '@/lib/format-count';
 /** Warm the showcase chunk on the first sign of intent. */
 const warmShowcase = () => {
   preloadStreamerShowcase().catch(() => {});
@@ -102,7 +103,7 @@ export function StreamerLevelCard({ address, className }: StreamerLevelCardProps
               <span className="break-words">{t('live.progress.level', { level: data.level })}</span>
             </div>
             <div className="mt-1 text-[11px] text-white/50 font-mono leading-relaxed">
-              {t('live.progress.xp', { xp: data.xp.toLocaleString() })}
+              {t('live.progress.xp', { xp: formatCount(data.xp) })}
               <span className="text-white/30"> · </span>
               {t('live.progress.hours', { hours: formatHours(data.qualifyingMinutes) })}
             </div>
@@ -115,7 +116,7 @@ export function StreamerLevelCard({ address, className }: StreamerLevelCardProps
           >
             <Layers className="w-3.5 h-3.5" />
             <span>{t('live.progress.viewCards')}</span>
-            <span className="font-mono text-white/50">{earnedCount}/{STREAMER_BADGE_IDS.length}</span>
+            <span className="font-mono text-white/50">{formatCount(earnedCount)}/{STREAMER_BADGE_IDS.length}</span>
           </button>
         </div>
 

@@ -18,6 +18,7 @@ import { isFollowing as checkIsFollowing } from '@/lib/api/dehub';
 import { useFollow } from '@/hooks/use-follow';
 import type { VideoItem } from '@/types/feed.types';
 
+import { formatCount } from '@/lib/format-count';
 // The full comments panel, the one Shorts shows beside a video. It loads only
 // when a viewer goes to write, so a feed of long videos stays light.
 const CommentsSection = lazy(() => import('@/components/app/cards/CommentsSection').then((m) => ({ default: m.CommentsSection })));
@@ -209,7 +210,7 @@ export function WideVideoPanel({ video, onOpenComments, walletAddress, onLogin, 
               className="flex items-baseline justify-between gap-2 text-left text-white/60 transition-colors hover:text-white"
             >
               <span className="text-[11px] font-semibold uppercase tracking-[0.1em]">{t('wideVideo.comments', 'Comments')}</span>
-              {count > 0 && <span className="text-[12px] tabular-nums">{count}</span>}
+              {count > 0 && <span className="text-[12px] tabular-nums">{formatCount(count)}</span>}
             </button>
             {rows.map((row) => {
               const name = row.writor?.displayName || row.writor?.username || '';

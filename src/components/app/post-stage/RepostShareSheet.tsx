@@ -28,6 +28,7 @@ import { trackShare } from '@/lib/analytics';
 import { Code } from 'lucide-react';
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 
+import { formatCount } from '@/lib/format-count';
 interface RepostShareSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -245,7 +246,7 @@ export function RepostShareSheet({
             <Quote className="h-5 w-5 shrink-0" />
             <span className="flex-1 text-[15px] font-semibold">{t('postStage.viewQuotes', 'View quotes')}</span>
             <FaceStack faces={quoteFaces} />
-            <span data-stage-muted className="min-w-[1.5rem] text-right text-sm font-semibold tabular-nums">{quoteCount}</span>
+            <span data-stage-muted className="min-w-[1.5rem] text-right text-sm font-semibold tabular-nums">{formatCount(quoteCount)}</span>
             <ChevronRight data-stage-muted className="h-4 w-4 shrink-0" />
           </button>
           <button
@@ -257,7 +258,7 @@ export function RepostShareSheet({
             <Repeat2 className="h-5 w-5 shrink-0" />
             <span className="flex-1 text-[15px] font-semibold">{t('postStage.viewReposts', 'View reposts')}</span>
             <FaceStack faces={repostFaces} />
-            <span data-stage-muted className="min-w-[1.5rem] text-right text-sm font-semibold tabular-nums">{repostCount}</span>
+            <span data-stage-muted className="min-w-[1.5rem] text-right text-sm font-semibold tabular-nums">{formatCount(repostCount)}</span>
             <ChevronRight data-stage-muted className="h-4 w-4 shrink-0" />
           </button>
         </div>

@@ -15,6 +15,7 @@ import { setting } from '@/lib/live-overlay/registry';
 import type { OverlaySubathon } from '@/lib/live-overlay/types';
 
 
+import { formatCount } from '@/lib/format-count';
 export interface SubathonState {
   running: boolean;
   endsAt: string | null;
@@ -121,7 +122,7 @@ export function PointsBoard({ settings }: { settings: Record<string, unknown> })
         <div key={r.address} data-ow-list-row>
           <span data-ow-rank data-place={i + 1}>{i + 1}</span>
           <span data-ow-name>{r.displayName || r.username || `${r.address.slice(0, 6)}…`}</span>
-          <span data-ow-amount>{t('liveOverlay.points', { count: r.points, formatted: r.points.toLocaleString() })}</span>
+          <span data-ow-amount>{t('liveOverlay.points', { count: r.points, formatted: formatCount(r.points) })}</span>
         </div>
       ))}
     </div>

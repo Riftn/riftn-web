@@ -32,6 +32,7 @@ import { PointsBoard, SubathonTimer } from './subathon';
 import { StreamerLevel, TipJar } from './level-and-jar';
 import { HypeTrainWidget } from './hype-train';
 
+import { formatCount } from '@/lib/format-count';
 export interface WidgetProps {
   settings: Record<string, unknown>;
   streamId: string;
@@ -298,7 +299,7 @@ function ViewerCount({ initialViewers }: WidgetProps) {
   return (
     <div data-ow-counter data-live>
       <Eye aria-hidden />
-      {count.toLocaleString()}
+      {formatCount(count)}
     </div>
   );
 }
@@ -382,7 +383,7 @@ function ReactionCounter({ settings, stats }: WidgetProps) {
   return (
     <div data-ow-counter style={{ '--ow-accent': accent(settings) } as CSSProperties}>
       <Heart aria-hidden />
-      <span data-ow-tabular>{(base + delta).toLocaleString()}</span>
+      <span data-ow-tabular>{formatCount(base + delta)}</span>
     </div>
   );
 }
@@ -486,7 +487,7 @@ function ChatBox({ settings, streamId }: WidgetProps) {
     }
   });
 
-  return (
+  return ( // exact-number: row height, not a counter
     <div data-ow-chat style={{ '--ow-row': `calc(var(--ow-h) / ${count})` } as CSSProperties}>
       {lines.length === 0 && !streamId && <div data-ow-chat-line data-preview>{t('liveOverlay.chatPreview')}</div>}
       {lines.map((line) => (

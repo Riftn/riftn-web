@@ -29,12 +29,13 @@ import {
 } from '@/lib/api/dehub/live-rewards';
 import { PointsIcon } from '../points/PointsIcon';
 
+import { formatCount } from '@/lib/format-count';
 const draftId = () => Math.random().toString(36).slice(2, 10);
 
 export function RewardsPanel() {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
-  const fmt = (n: number) => n.toLocaleString(i18n.language);
+  const fmt = (n: number) => formatCount(n);
 
   const saved = useQuery({ queryKey: ['my-live-rewards'], queryFn: getMyRewards, staleTime: 60_000 });
   const [draft, setDraft] = useState<LiveReward[] | null>(null);

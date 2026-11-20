@@ -785,6 +785,7 @@ export function PostContentArea({
           )}
         </div>
         <span className={cn("text-xs ml-auto", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
+          {/* exact-number: the writer needs the exact character limit */}
           {charCount.toLocaleString('en-US')}/{maxChars.toLocaleString('en-US')}
         </span>
       </div>

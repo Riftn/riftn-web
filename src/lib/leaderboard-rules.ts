@@ -14,6 +14,7 @@
 
 import type { LeaderboardEntry, LeaderboardPeriod, LeaderboardSortMode } from '@/lib/api/dehub';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 /** Every board the API serves, plus the Supabase-aggregated referral board. */
 export type LeaderboardRuleSort = LeaderboardSortMode | 'affiliates' | 'ogChallenge';
 
@@ -120,7 +121,5 @@ export function applyLeaderboardRules<T extends LeaderboardEntry>(
 /** `1.2M`, `3.4K`, or the locale-formatted integer. */
 export function formatLeaderboardNumber(num: number | null | undefined): string {
   if (num === undefined || num === null || Number.isNaN(num)) return '0';
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
-  return num.toLocaleString();
+  return formatShortCount(num);
 }

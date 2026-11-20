@@ -944,7 +944,7 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
                 ) : (
                   <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(COMMENT_ICON_CLASS.like, thumbMine && "fill-current")} />
                 )}
-                {(thumbCount > 0 || isOwnComment) && <span className="text-xs">{thumbCount}</span>}
+                {(thumbCount > 0 || isOwnComment) && <span className="text-xs">{formatCount(thumbCount)}</span>}
               </button>
             </span>
             {/* Every comment is replyable, replies included — threads nest without limit. */}
@@ -2896,7 +2896,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
             <h2 data-stage-ink className="text-[17px] font-bold">
               {t('postStage.comments', 'Comments')}
               {typeof stageCount === 'number' && (
-                <span data-stage-muted className="ml-1.5 font-semibold tabular-nums">{displayStageCount}</span>
+                <span data-stage-muted className="ml-1.5 font-semibold tabular-nums">{formatCount(displayStageCount)}</span>
               )}
             </h2>
           )}

@@ -9,6 +9,7 @@ import type { Community } from '@/hooks/use-communities';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import { useAppTheme } from '@/contexts/ThemeContext';
 
+import { formatCount } from '@/lib/format-count';
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const diffMs = Date.now() - date.getTime();
@@ -85,7 +86,7 @@ export function CommunityCard({ community, isMember, role, unreadCount, onClick 
           <p className="text-xs truncate text-white">{t('communities.noDescription')}</p>
         )}
         <div className="flex items-center gap-3 mt-0.5">
-          <span className="text-white text-xs">{community.member_count.toLocaleString()} {t('communities.members')}</span>
+          <span className="text-white text-xs">{formatCount(community.member_count)} {t('communities.members')}</span>
           {isMember && (
             isOwner ? (
               <span className={`flex items-center gap-1 text-xs ${isLight ? 'text-amber-800' : 'text-amber-400/80'}`}>

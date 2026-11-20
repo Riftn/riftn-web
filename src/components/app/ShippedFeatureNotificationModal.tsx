@@ -20,6 +20,7 @@ import { useUnnotifiedShippedFeatures, useMarkShippedNotified, CATEGORY_LABELS }
 import { getShippedFeatureDestination } from '@/lib/feature-shipped-destination';
 import { SHIPPED_POINTS } from '@/lib/top-builders';
 
+import { formatCount } from '@/lib/format-count';
 export function ShippedFeatureNotificationModal() {
   const { t: _copy } = _useCopy();
   const { isAuthenticated, walletAddress, requiresUsername } = useAuth();
@@ -91,7 +92,7 @@ export function ShippedFeatureNotificationModal() {
             <p className="text-zinc-400 text-sm leading-relaxed mb-4">{isPlural ? _copy("copy.905392fbed15", { defaultValue: "Thanks for helping make Riftn better — {{value1}} things you asked for are now live:", value1: shippedItems.length }) : _copy("copy.2971f9103f78", { defaultValue: "Thanks for helping make Riftn better — something you asked for is now live:" })}</p>
 
             <div className="mb-4 flex items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3.5 py-3">
-              <span className="text-2xl font-bold tabular-nums text-white">+{totalPoints}</span>
+              <span className="text-2xl font-bold tabular-nums text-white">+{formatCount(totalPoints)}</span>
               <div className="min-w-0">
                 <p className="text-white text-sm font-semibold leading-tight">{_copy("copy.f0c8bb34335b", { defaultValue: "You earned +{{value1}} points", value1: totalPoints })}</p>
                 <p className="text-zinc-400 text-xs leading-snug mt-0.5">{_copy("copy.0fbe06b679a8", { defaultValue: "{{value1}} points for each shipped request, added to your Top builders score.", value1: SHIPPED_POINTS })}</p>

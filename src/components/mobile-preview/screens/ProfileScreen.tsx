@@ -9,6 +9,7 @@ import UserPlus from "@/components/ui/cut-icons/add-account";
 import LinkIcon from "@/components/ui/cut-icons/link";
 
 
+import { formatCount } from '@/lib/format-count';
 const MOCK_POSTS_GRID = Array.from({ length: 9 }, (_, i) => ({
   id: String(i),
   likes: Math.floor(Math.random() * 500) + 10,
@@ -85,7 +86,7 @@ export function ProfileScreen() {
             <div className="w-8 h-8 rounded bg-white/[0.06]" />
             <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
               <Heart className="w-3 h-3 text-white/60" />
-              <span className="text-[9px] text-white/60">{post.likes}</span>
+              <span className="text-[9px] text-white/60">{formatCount(post.likes)}</span>
             </div>
           </div>
         ))}

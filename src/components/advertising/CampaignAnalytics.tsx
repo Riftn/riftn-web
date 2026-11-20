@@ -8,6 +8,7 @@ import Users from "@/components/ui/cut-icons/communities";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { fill } from './utils/fill';
 
+import { formatCount } from '@/lib/format-count';
 const CampaignAnalytics = () => {
   const { t } = useLanguage();
 
@@ -158,14 +159,14 @@ const CampaignAnalytics = () => {
                   <div>
                     <h3 className="font-semibold">{fill(t('adTools.tierBadge'), { tier: tier.tier })}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {fill(t('adTools.impressionsCount'), { count: tier.impressions.toLocaleString() })}
+                      {fill(t('adTools.impressionsCount'), { count: formatCount(tier.impressions) })}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-6 text-right">
                   <div>
                     <p className="text-sm text-muted-foreground">{t('adTools.clicks')}</p>
-                    <p className="font-semibold">{tier.clicks}</p>
+                    <p className="font-semibold">{formatCount(tier.clicks)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{t('adTools.ctr')}</p>

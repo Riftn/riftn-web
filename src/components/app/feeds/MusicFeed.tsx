@@ -53,6 +53,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { VideoItem } from '@/types/feed.types';
 import { usePersistedFeedFilter } from '@/hooks/use-persisted-feed-filter';
 
+import { formatCount } from '@/lib/format-count';
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -128,7 +129,7 @@ function videoRows(items: VideoItem[], withViews: boolean): ChartDeskRow[] {
   return items.map(item => ({
     id: item.id,
     title: item.title,
-    subtitle: withViews && item.views ? `${item.channel} · ${item.views}` : item.channel,
+    subtitle: withViews && item.views ? `${item.channel} · ${formatCount(item.views)}` : item.channel,
     thumb: item.thumbnail,
     trailing: item.duration,
   }));

@@ -6,6 +6,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/compone
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+import { formatCount } from '@/lib/format-count';
 export type NonFollowerOfferStage = 'offer' | 'confirm' | 'working' | 'done' | 'error';
 
 interface NonFollowerOfferSheetProps {
@@ -57,7 +58,7 @@ export function NonFollowerOfferSheet({ open, onOpenChange, stage, count, done =
         {stage === 'done' ? <Check className="h-9 w-9" /> : <Unfollow className="h-9 w-9" />}
       </span>
       {stage === 'offer' && (
-        <span data-non-follower-count className="-mt-1 text-4xl font-semibold tabular-nums text-white">{count}</span>
+        <span data-non-follower-count className="-mt-1 text-4xl font-semibold tabular-nums text-white">{formatCount(count)}</span>
       )}
       <p className="max-w-xs text-sm text-zinc-400" aria-live="polite">{body}</p>
       {stage === 'working' && (

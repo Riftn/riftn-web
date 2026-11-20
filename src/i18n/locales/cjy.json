@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "编辑视频", "hiddenTag": "隐藏", "tapToEdit": "点击以编辑", "cover": "封面", "trim": "修剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "定时器", "sheetTitleAny": "发送前编辑", "close": "关闭", "replace": "替换", "hiddenUntilTap": "隐藏，直到他们点击", "pause": "暂停", "play": "播放视频", "mute": "静音", "unmute": "取消静音", "scrub": "在视频中快速浏览", "addMore": "添加照片或视频", "trimAria": "拖动两端进行修剪", "coverAria": "点击帧以设置封面", "coverHint": "点击帧以设置封面", "coverOwn": "你的照片", "coverAuto": "自动", "uploadCover": "上传封面图片", "mirrored": "已镜像", "original": "原始", "rotate90": "旋转90°", "showNormally": "正常显示", "showNormallyBody": "他们会立即看到", "hideUntilTap": "隐藏，直到点击", "hideUntilTapBody": "模糊，直到他们点击", "hidePrice": "隐藏在价格后面", "hidePriceBody": "模糊，直到他们付费", "priceUnavailable": "不在此聊天中", "timerOff": "关闭", "timerOffBody": "它会保留在聊天中。", "timerViewBody": "一旦他们看到后，你们双方都会失去它。", "confirm": "确认", "lockedFor": "解锁需 {{value1}} DHB", "lockedForUsd": "解锁给 {{value1}}", "editItem": "编辑项目 {{value1}}", "kept": "{{time}} 已保留", "timerTimeBody": "发送后，你们双方都会失去 {{value1}}。"},
   "postBg": {
     "addMedia": "添加图片、GIF 或视频",
     "changeMedia": "更换图片、GIF 或视频",

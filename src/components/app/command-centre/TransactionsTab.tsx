@@ -20,6 +20,7 @@ import dehubCoin from '@/assets/dehub-coin.png';
 import { cn } from '@/lib/utils';
 import { AppState } from '@/components/app/AppState';
 
+import { formatCount } from '@/lib/format-count';
 const timeFilters = ['1h', '1d', '1w', '1m', 'Max'];
 const cardClass = "rounded-2xl p-5 bg-zinc-900 border border-zinc-800";
 
@@ -178,7 +179,7 @@ export function TransactionsTab() {
                 {totalCount > 0 && (
                   <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
-                    {totalCount}{_copy("copy.3fa33e61d5d4", { defaultValue: " txns" })}</span>
+                    {formatCount(totalCount)}{_copy("copy.3fa33e61d5d4", { defaultValue: " txns" })}</span>
                 )}
               </div>
               <div className="flex items-center gap-2">

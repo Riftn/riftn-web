@@ -845,7 +845,7 @@ export function WelcomeCard({
           {interests.length > 6 && <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-white/60">+{interests.length - 6}</span>}
         </div>
         <div className="mt-3 flex gap-4 text-[13px] text-white/55">
-          <span><b key={following} data-welcome-pop className="inline-block text-white">{following}</b> {_copy('welcome.card.following', { defaultValue: 'following' })}</span>
+          <span><b key={following} data-welcome-pop className="inline-block text-white">{formatCount(following)}</b> {_copy('welcome.card.following', { defaultValue: 'following' })}</span>
           <span><b className="text-white">0</b> {_copy('welcome.card.followers', { defaultValue: 'followers' })}</span>
         </div>
       </div>

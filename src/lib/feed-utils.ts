@@ -11,6 +11,7 @@ import { formatRelativeTime } from '@/i18n/date-locale';
 import type { DeHubNFT } from '@/lib/api/dehub';
 import type { FeedItem, VideoItem, ImagePost, TextPost } from '@/types/feed.types';
 import { resolveViewCount } from '@/lib/engagement';
+import { formatCount as formatShortCount } from '@/lib/format-count';
 
 // ============================================================================
 // CONTENT ORDERING PATTERN (50-item cycle for Home Feed)
@@ -518,16 +519,11 @@ export function shuffleArray<T>(array: T[], seed: number): T[] {
 
 
 /**
- * Format a large number with K/M suffix.
+ * Format a large number with K/M suffix. Same as formatCount in
+ * '@/lib/format-count', kept here for the many places that import it from here.
  */
-export function formatCount(count: number): string {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M`;
-  }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`;
-  }
-  return count.toString();
+export function formatCount(count: number | string | null | undefined): string {
+  return formatShortCount(count);
 }
 
 // ============================================================================
@@ -554,15 +550,7 @@ export function formatDuration(seconds?: number): string {
  * Format view count to human readable string
  */
 export function formatViews(count?: number): string {
-  if (!count) return '0 views';
-
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M views`;
-  }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K views`;
-  }
-  return `${count} views`;
+  return `${formatShortCount(count || 0)} views`;
 }
 
 /**
@@ -586,13 +574,15 @@ export function parseFormattedCount(value?: string | number | null): number {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
   if (!value) return 0;
 
-  const match = /(-?[\d.]+)\s*([KM])?/i.exec(value.trim());
+  const match = /(-?[\d.]+)\s*([KMB])?/i.exec(value.trim().replace(/,/g, ''));
   if (!match) return 0;
 
   const amount = parseFloat(match[1]);
   if (!Number.isFinite(amount)) return 0;
 
-  const multiplier = match[2]?.toUpperCase() === 'M'
+  const multiplier = match[2]?.toUpperCase() === 'B'
+    ? 1_000_000_000
+    : match[2]?.toUpperCase() === 'M'
     ? 1_000_000
     : match[2]?.toUpperCase() === 'K'
       ? 1_000
