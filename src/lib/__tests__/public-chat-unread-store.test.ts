@@ -83,4 +83,20 @@ describe('public chat unread counts', () => {
     store.catchUp('0xme', BASE + 1);
     expect(store.count('0xme')).toBe(2);
   });
+
+  it('drops cold-start history once when the room has no saved position', () => {
+    const { store, storage } = fixture();
+    for (let i = 1; i < 100; i++) store.record('0xme', message(`old${i}`, i));
+
+    const restarted = createPublicChatUnreadStore(storage);
+    expect(restarted.hasSynced('0xme')).toBe(false);
+    restarted.syncReadPosition('0xme', undefined, BASE + 100);
+    restarted.record('0xme', message('live', 110));
+    restarted.syncReadPosition('0xME', null, BASE + 100);
+
+    expect(restarted.hasSynced('0xme')).toBe(true);
+    expect(restarted.count('0xme')).toBe(1);
+    restarted.syncReadPosition('0xme', null, BASE + 200);
+    expect(restarted.count('0xme')).toBe(1);
+  });
 });

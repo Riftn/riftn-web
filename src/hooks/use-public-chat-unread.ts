@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore, type RefObject } from 'react';
+import { useEffect, useMemo, useSyncExternalStore, type RefObject } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { getChatReadPosition } from '@/lib/api/dehub/read-position';
@@ -15,7 +15,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-/** Same chat id and query key as the room's own read spot (useChatReadPosition). */
+/** Same chat id as the room's own read spot. */
 const PUBLIC_CHAT_ID = 'live:global';
 
 const readers = new Map<string, number>();
@@ -36,25 +36,31 @@ export function recordPublicChatUnread(account: string, message: PublicChatUnrea
 export function usePublicChatReadSync() {
   const { isAuthenticated, walletAddress } = useAuth();
   const account = isAuthenticated ? walletAddress || '' : '';
-  const { data } = useQuery({
-    queryKey: ['chat-read-position', PUBLIC_CHAT_ID],
+  const startedAt = useMemo(() => Date.now(), [account]);
+  const { data, isSuccess, isError } = useQuery({
+    queryKey: ['public-chat-badge-read-position', account.toLowerCase()],
     queryFn: () => getChatReadPosition(PUBLIC_CHAT_ID),
     enabled: !!account,
     staleTime: 30_000,
     refetchInterval: 60_000,
     gcTime: 30 * 60_000,
-    retry: 0,
+    retry: 1,
   });
-  const spotAt = Date.parse(data?.at || '');
   useEffect(() => {
-    if (account && Number.isFinite(spotAt)) publicChatUnread.catchUp(account, spotAt);
-  }, [account, spotAt]);
+    if (!isSuccess && !isError) return;
+    const at = data ? Date.parse(data.at) : data;
+    publicChatUnread.syncReadPosition(account, at, startedAt);
+  }, [account, data, isSuccess, isError, startedAt]);
 }
 
 export function usePublicChatUnreadCount() {
   const { isAuthenticated, walletAddress } = useAuth();
   const account = isAuthenticated ? walletAddress || '' : '';
-  return useSyncExternalStore(publicChatUnread.subscribe, () => publicChatUnread.count(account), () => 0);
+  return useSyncExternalStore(
+    publicChatUnread.subscribe,
+    () => publicChatUnread.hasSynced(account) ? publicChatUnread.count(account) : 0,
+    () => 0,
+  );
 }
 
 /** Hidden cached pages and responsive sidebars must never acknowledge a room. */
