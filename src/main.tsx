@@ -22,6 +22,7 @@ import { installWalletSessionFetch } from "./lib/wallet-session";
 import { installRecentErrorBuffer } from "./lib/device-info";
 import { installTranslatorDomGuard } from "./i18n/translator-dom-guard";
 import { finishMultipostPopup } from "./lib/multipost-popup";
+import { warmPostPage } from "./lib/preload-post-page";
 import "./lib/toast-i18n-interceptor";
 // NOTE: auth-toast translations are no longer imported here — English lives in
 // locales/en.json and other languages are merged lazily by loadLanguage()
@@ -67,6 +68,10 @@ installImageOriginFallback();
 // First-touch attribution. The URL is read now, before a redirect such as
 // /r/CODE -> /app?ref=CODE can replace it; the module itself loads lazily.
 const landing = { path: location.pathname, search: location.search, referrer: document.referrer };
+// A post link: fetch the post page's code now, alongside the boot waits below,
+// rather than once the router reaches the route. The post itself is already
+// on its way (index.html).
+if (/^\/(?:app\/)?(?:post|video|posts)\/\d/.test(location.pathname)) warmPostPage();
 void import("./lib/first-touch").then((m) => m.captureFirstTouch(landing)).catch(() => undefined);
 // Signs wallet-scoped REST and storage requests; see src/lib/wallet-session.ts.
 installWalletSessionFetch();

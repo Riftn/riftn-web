@@ -8,6 +8,35 @@
       window.process = process
     </script>
     <meta charset="UTF-8" />
+    <!-- A post link asks for its post now, while the app code is still on its
+         way, instead of after it has arrived and drawn the page (that wait was
+         ~4 s on desktop, ~6 s on a mid phone). src/lib/post-prefetch.ts picks
+         the answer up. Mirrors apiCall's headers; an expired sign-in is left to
+         the app, which refreshes it first. -->
+    <script>
+      (function () {
+        try {
+          var m = location.pathname.match(/^\/(?:app\/)?(?:post|video|posts)\/(\d+)(?:\/b(?:\/[^/]+)?)?\/?$/);
+          if (!m || !window.fetch) return;
+          var ls = window.localStorage, h = { Accept: 'application/json' };
+          var tok = ls.getItem('dehub_token');
+          if (tok) {
+            var exp = parseInt(ls.getItem('dehub_token_expires_at') || '', 10);
+            if (!(exp > Date.now() + 5000)) return;
+            h.Authorization = 'Bearer ' + tok;
+          }
+          if (ls.getItem('dhb_kids_mode') === '1') h['X-Kids-Mode'] = '1';
+          window.__postPrefetch = {
+            id: m[1],
+            at: Date.now(),
+            signedIn: !!tok,
+            p: fetch('https://api.dehub.io/api/nft_info/' + m[1], { headers: h, cache: 'no-store' })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .catch(function () { return null; })
+          };
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <!-- Apply the saved theme (+ dim settings) to <html> synchronously, during
          head parse — before the render-blocking stylesheet is matched and long

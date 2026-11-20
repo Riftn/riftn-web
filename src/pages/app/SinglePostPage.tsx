@@ -37,6 +37,8 @@ import { getAiScrapingPreference } from '@/lib/ai-scraping';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, Suspense } from 'react';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
+import { useOpenedOnce } from '@/hooks/use-opened-once';
+import { takePrefetchedPost } from '@/lib/post-prefetch';
 import { Clock, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 import Sparkles from "@/components/ui/cut-icons/assistant";
@@ -67,18 +69,10 @@ import { CardHeader } from '@/components/app/cards/CardHeader';
 import { ImageCard } from '@/components/app/cards/ImageCard';
 import { PostCard } from '@/components/app/cards/PostCard';
 import { CommentsWrapper } from '@/components/app/cards/CommentsWrapper';
-import { AuthorThread } from '@/components/app/cards/AuthorThread';
-import { LiveStreamCard } from '@/components/app/cards/LiveStreamCard';
-import { RelatedVideosFeed } from '@/components/app/feeds/RelatedVideosFeed';
-import { RelatedImagesFeed } from '@/components/app/feeds/RelatedImagesFeed';
-import { RelatedPostsFeed } from '@/components/app/feeds/RelatedPostsFeed';
-import { StreamShopRail } from '@/components/app/live/StreamShop';
-import { StreamShopManager } from '@/components/app/live/StreamShopManager';
 import { PostAIChatLazy } from '@/components/app/cards/PostAIChatLazy';
 import { ReportModal } from '@/components/app/modals/ReportModal';
 import { PostUtilityMenuItems } from '@/components/app/cards/PostUtilityMenuItems';
 import { TipModal } from '@/components/app/modals/TipModal';
-import { EditPostModal } from '@/components/app/modals/EditPostModal';
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { DeletePostModal } from '@/components/app/modals/DeletePostModal';
 import {
@@ -97,7 +91,6 @@ import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
 import { bringIntoView } from '@/lib/focus-scroll';
 import { canonicalUrl } from '@/lib/seo/route-meta';
 import { usePostStagePhone } from '@/hooks/use-post-stage-phone';
-import { StageRelated } from '@/components/app/post-stage/StageRelated';
 import { PostStagePhone } from '@/components/app/post-stage/PostStagePhone';
 import { setPostFeedLook } from '@/lib/post-feed-look';
 import { PostCommentsSplit } from '@/components/app/post-stage/PostCommentsSplit';
@@ -107,6 +100,63 @@ import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import { toStoryboard } from '@/lib/storyboard';
 import { storedVideoAspect } from '@/lib/video-aspect';
+
+/*
+ * The post goes up first; everything below it waits its turn. These were
+ * static imports, so the page code could not run (and the post could not be
+ * asked for) until ~50 extra files had arrived: the whole live player and
+ * shop for a post that is not live, the edit sheet nobody has opened, the
+ * author's thread and the related rows that only mount after the post has
+ * painted. Each now loads on its own, behind the post.
+ */
+const LiveStreamCard = lazyWithRetry(() =>
+  import('@/components/app/cards/LiveStreamCard').then((m) => ({ default: m.LiveStreamCard })),
+);
+const StreamShopRail = lazyWithRetry(() =>
+  import('@/components/app/live/StreamShop').then((m) => ({ default: m.StreamShopRail })),
+);
+const StreamShopManager = lazyWithRetry(() =>
+  import('@/components/app/live/StreamShopManager').then((m) => ({ default: m.StreamShopManager })),
+);
+const EditPostModalLazy = lazyWithRetry(() =>
+  import('@/components/app/modals/EditPostModal').then((m) => ({ default: m.EditPostModal })),
+);
+const AuthorThreadLazy = lazyWithRetry(() =>
+  import('@/components/app/cards/AuthorThread').then((m) => ({ default: m.AuthorThread })),
+);
+const RelatedVideosFeedLazy = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedVideosFeed').then((m) => ({ default: m.RelatedVideosFeed })),
+);
+const RelatedImagesFeedLazy = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedImagesFeed').then((m) => ({ default: m.RelatedImagesFeed })),
+);
+const RelatedPostsFeedLazy = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedPostsFeed').then((m) => ({ default: m.RelatedPostsFeed })),
+);
+const StageRelatedLazy = lazyWithRetry(() =>
+  import('@/components/app/post-stage/StageRelated').then((m) => ({ default: m.StageRelated })),
+);
+
+function AuthorThread(props: React.ComponentProps<typeof AuthorThreadLazy>) {
+  return <Suspense fallback={null}><AuthorThreadLazy {...props} /></Suspense>;
+}
+function RelatedVideosFeed(props: React.ComponentProps<typeof RelatedVideosFeedLazy>) {
+  return <Suspense fallback={null}><RelatedVideosFeedLazy {...props} /></Suspense>;
+}
+function RelatedImagesFeed(props: React.ComponentProps<typeof RelatedImagesFeedLazy>) {
+  return <Suspense fallback={null}><RelatedImagesFeedLazy {...props} /></Suspense>;
+}
+function RelatedPostsFeed(props: React.ComponentProps<typeof RelatedPostsFeedLazy>) {
+  return <Suspense fallback={null}><RelatedPostsFeedLazy {...props} /></Suspense>;
+}
+function StageRelated(props: React.ComponentProps<typeof StageRelatedLazy>) {
+  return <Suspense fallback={null}><StageRelatedLazy {...props} /></Suspense>;
+}
+/** Built the first time it opens, then kept so its closing animation plays. */
+function EditPostModal(props: React.ComponentProps<typeof EditPostModalLazy>) {
+  if (!useOpenedOnce(props.open)) return null;
+  return <Suspense fallback={null}><EditPostModalLazy {...props} /></Suspense>;
+}
 
 /*
  * Only a live post ever renders this, and a live post is a small minority of
@@ -573,7 +623,7 @@ function LivePostWithStatus({ liveData, post, chatSlot, immersive }: { liveData:
     ...liveData,
     isLive: !hasStreamEnded((post as any).stream) && (liveData.isLive || !!isLiveFromSupabase),
   };
-  return <LiveStreamCard key={tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} />;
+  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={tokenId} stream={mergedStream} chatSlot={chatSlot} immersive={immersive} /></Suspense>;
 }
 
 /**
@@ -1015,7 +1065,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       // Stream ObjectIds cannot be parsed by the numeric NFT endpoint.
       const isStreamId = /^[a-f\d]{24}$/i.test(id!) && !/^\d+$/.test(id!);
       const loadPost = async (nftId: string): Promise<DeHubNFT> => {
-        const nft = await getNFTInfo(nftId);
+        // A post link asked for this during page load (index.html).
+        const nft = (await takePrefetchedPost(nftId)) ?? await getNFTInfo(nftId);
         const normalizedNft = {
           ...nft,
           createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',
@@ -1027,6 +1078,11 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
         // after opening it. Counts still come from the response; only the
         // per-viewer flags are carried over.
         const merged = mergeViewerState(normalizedNft, shown);
+        // The comments under the post read the same record by ['nft-info'];
+        // without this they asked for it a second time once they mounted.
+        if (queryClient.getQueryData(['nft-info', nftId]) === undefined) {
+          queryClient.setQueryData<DeHubNFT>(['nft-info', nftId], normalizedNft);
+        }
 
         // Enrich quote post if quotedPost data is missing
         if (merged.isQuotePost && merged.quotedTokenId && !merged.quotedPost) {
@@ -1426,7 +1482,18 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
     repostCount: Number(post?.totalReposts || post?.reposts || 0) || 0,
   }), [goBack, registerPostOptions, postOptions, revealStageComments, splitComments, openPageComments, post?.quotes, post?.totalReposts, post?.reposts]);
 
-  const pageComments = post && id ? (
+  // The post goes up on its own first. The comments (list, composer, emoji and
+  // GIF pickers) were built in the same commit and roughly doubled the time to
+  // the first frame with the post in it; they now follow two frames later.
+  const [commentsReady, setCommentsReady] = useState(false);
+  useEffect(() => {
+    if (!post || commentsReady) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => setCommentsReady(true)); });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [post, commentsReady]);
+
+  const pageComments = post && id && commentsReady ? (
     <CommentsWrapper
       open={showPageComments}
       onOpenChange={setShowPageComments}
@@ -1829,8 +1896,8 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
               are not a customer of their own broadcast. */}
           {isLivePost && id && post && (
             walletAddress && post.minter?.toLowerCase() === walletAddress.toLowerCase()
-              ? <StreamShopManager tokenId={liveRoomTokenId} />
-              : <StreamShopRail tokenId={liveRoomTokenId} />
+              ? <Suspense fallback={null}><StreamShopManager tokenId={liveRoomTokenId} /></Suspense>
+              : <Suspense fallback={null}><StreamShopRail tokenId={liveRoomTokenId} /></Suspense>
           )}
           {/* The chat is no longer a panel down here. It hangs off the message
               button in the stream's own action bar (see `chatSlot` above), so a
