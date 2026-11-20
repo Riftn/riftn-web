@@ -79,6 +79,23 @@ export function createPublicChatUnreadStore(storage: {
       state.unread.clear();
       save(account, state);
     },
+    /**
+     * The server's "read up to here" for Public Chat (shared by every device).
+     * Lines at or before it were read somewhere else, so they leave the count;
+     * newer ones stay. Without this the list counted every line since this
+     * device last opened the room, while the room itself counted from the
+     * shared spot (97 on the row, 19 inside).
+     */
+    catchUp(account: string, at: number) {
+      if (!account || !Number.isFinite(at) || at <= 0) return;
+      const state = stateFor(account);
+      let changed = false;
+      if (at > state.readAt) { state.readAt = at; changed = true; }
+      for (const [id, when] of state.unread) {
+        if (when <= at) { state.unread.delete(id); changed = true; }
+      }
+      if (changed) save(account, state);
+    },
     refresh() {
       accounts.clear();
       emit();

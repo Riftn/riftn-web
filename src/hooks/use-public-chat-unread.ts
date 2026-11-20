@@ -1,5 +1,7 @@
 import { useEffect, useSyncExternalStore, type RefObject } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { getChatReadPosition } from '@/lib/api/dehub/read-position';
 import { createPublicChatUnreadStore, type PublicChatUnreadMessage } from '@/lib/public-chat-unread-store';
 
 export const publicChatUnread = createPublicChatUnreadStore({
@@ -13,6 +15,9 @@ if (typeof window !== 'undefined') {
   });
 }
 
+/** Same chat id and query key as the room's own read spot (useChatReadPosition). */
+const PUBLIC_CHAT_ID = 'live:global';
+
 const readers = new Map<string, number>();
 
 export function recordPublicChatUnread(account: string, message: PublicChatUnreadMessage) {
@@ -21,6 +26,29 @@ export function recordPublicChatUnread(account: string, message: PublicChatUnrea
     publicChatUnread.markRead(account);
   }
   return added;
+}
+
+/**
+ * Mounted once (next to the Public Chat alerts). The room opens on the spot
+ * saved on the server, shared with the app, so the badge drops whatever was
+ * already read there. Without it the row said 97 while the room said 19.
+ */
+export function usePublicChatReadSync() {
+  const { isAuthenticated, walletAddress } = useAuth();
+  const account = isAuthenticated ? walletAddress || '' : '';
+  const { data } = useQuery({
+    queryKey: ['chat-read-position', PUBLIC_CHAT_ID],
+    queryFn: () => getChatReadPosition(PUBLIC_CHAT_ID),
+    enabled: !!account,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    gcTime: 30 * 60_000,
+    retry: 0,
+  });
+  const spotAt = Date.parse(data?.at || '');
+  useEffect(() => {
+    if (account && Number.isFinite(spotAt)) publicChatUnread.catchUp(account, spotAt);
+  }, [account, spotAt]);
 }
 
 export function usePublicChatUnreadCount() {

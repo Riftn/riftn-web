@@ -953,7 +953,7 @@ function HideOption({ active, onClick, icon, title, body, disabled }: { active?:
 
 export { cleanVideoOptions };
 
-/** The photo editor's crop box over the playing video: shade outside, thirds, corner dots. */
+/** The photo editor's crop box over the playing video: shade outside, thirds, corner dots, edge bars in Free. */
 function VideoCropOverlay({ rect, ratio, frameAspect, onChange }: {
   rect: VideoCropRect;
   ratio: number | null;
@@ -998,6 +998,24 @@ function VideoCropOverlay({ rect, ratio, frameAspect, onChange }: {
         <div className="pointer-events-none absolute inset-y-0 left-2/3 w-px bg-white/35" />
         <div className="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-white/35" />
         <div className="pointer-events-none absolute inset-x-0 top-2/3 h-px bg-white/35" />
+        {ratio == null && (['t', 'b', 'l', 'r'] as const).map((e) => (
+          <div
+            key={e}
+            onPointerDown={start(e)}
+            className={cn(
+              'absolute flex items-center justify-center',
+              (e === 't' || e === 'b') && 'inset-x-3.5 h-7 cursor-ns-resize',
+              (e === 'l' || e === 'r') && 'inset-y-3.5 w-7 cursor-ew-resize',
+              e === 't' && '-top-3.5',
+              e === 'b' && '-bottom-3.5',
+              e === 'l' && '-left-3.5',
+              e === 'r' && '-right-3.5',
+            )}
+            style={{ touchAction: 'none' }}
+          >
+            <div className={cn('rounded-sm bg-white', e === 't' || e === 'b' ? 'h-1 w-5' : 'h-5 w-1')} />
+          </div>
+        ))}
         {(['tl', 'tr', 'bl', 'br'] as const).map((c) => (
           <div
             key={c}
