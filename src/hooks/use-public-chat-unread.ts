@@ -48,7 +48,7 @@ export function usePublicChatReadSync() {
   });
   useEffect(() => {
     if (!isSuccess && !isError) return;
-    const at = data ? Date.parse(data.at) : data;
+    const at = data === null ? null : Date.parse(data?.at || '');
     publicChatUnread.syncReadPosition(account, at, startedAt);
   }, [account, data, isSuccess, isError, startedAt]);
 }
