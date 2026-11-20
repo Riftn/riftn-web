@@ -42,6 +42,10 @@ function subscribePhone(cb: () => void) {
   mql.addEventListener('change', cb);
   return () => mql.removeEventListener('change', cb);
 }
+/** Main dock pages: on phones these are where you go back to, so no arrow. */
+const PHONE_ROOT_PATHS = new Set(['/', '/app', '/app/explore', '/app/messages', '/chat', '/app/assistant']);
+export const isPhoneRootPath = (pathname: string) => PHONE_ROOT_PATHS.has(pathname.replace(/\/+$/, '') || '/');
+
 export function usePhonePill() {
   return useSyncExternalStore(
     subscribePhone,
@@ -73,7 +77,9 @@ export interface PageIslandProps {
   subtitle?: ReactNode;
   /** A theme icon key (drawn in every theme's style) or a custom node. */
   icon?: IconKey | ReactNode;
-  /** Show the back square. Defaults to off: pages opened from the menu have none. */
+  /** Show the back arrow. On computers it defaults to off. On phones every
+   *  page shows it except the main dock pages (not every phone has a system
+   *  back button, iPhones especially); pass false to hide it. */
   back?: boolean;
   /** Where back goes when there is no history (direct link). */
   backFallback?: string;
@@ -106,7 +112,7 @@ export function PageIsland({
   title,
   subtitle,
   icon,
-  back = false,
+  back,
   backFallback = '/app',
   onBack,
   actions,
@@ -156,6 +162,7 @@ export function PageIsland({
   };
 
   const phone = usePhonePill();
+  const showBack = back ?? (phone && !isPhoneRootPath(location.pathname));
   if (phone) {
     return (
       <div data-feed-nav-outer data-kit-pill-outer className={cn('sticky top-11 z-50 px-2 pt-1 pb-2 sm:px-3', className)}>
@@ -168,7 +175,7 @@ export function PageIsland({
           <span data-nav-glass-backdrop aria-hidden="true" />
           <PillContext.Provider value>
             <div className={cn('relative z-20 flex min-w-0 items-center', PILL_ROW)}>
-              {back ? (
+              {showBack ? (
                 <button
                   type="button"
                   data-kit-pill-lead
@@ -266,7 +273,7 @@ export function PageIsland({
       <div data-page-bento data-kit-island className="rounded-[22px] bg-zinc-900 px-3 pt-3 pb-2.5">
         <span data-nav-glass-backdrop aria-hidden="true" />
         <div className="flex min-h-9 items-center gap-2.5">
-          {back && (
+          {showBack && (
             <button type="button" data-kit-square data-swipe-back onClick={handleBack} aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })} className="-ml-0.5">
               <ArrowLeft className="h-[18px] w-[18px]" />
             </button>

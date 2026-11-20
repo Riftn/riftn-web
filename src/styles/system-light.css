@@ -136,8 +136,8 @@ html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] button:is([data-feed-tab-btn], .z-20 > button:first-child) { padding-top: 9px !important; padding-bottom: 9px !important; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-kit-pill] [data-explore-pill-search] input { height: 36px; }
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] button[data-active="true"] { color: #0b0b0d !important; }
-html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn]) { margin-right: 6px; }
-html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn])::after { content: ""; position: absolute; right: -3px; top: 25%; bottom: 25%; width: 1px; background: rgba(11,11,13,.10); }
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn]):not([data-kit-pill-lead]) { margin-right: 6px; }
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-nav] .z-20 > button:first-child:not([data-feed-tab-btn]):not([data-kit-pill-lead])::after { content: ""; position: absolute; right: -3px; top: 25%; bottom: 25%; width: 1px; background: rgba(11,11,13,.10); }
 /* Logo row: a touch more air */
 html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_) header { background: #fff !important; }
 /* Bottom bar shares the same depth recipe, cast upward: the bar sits 8px
