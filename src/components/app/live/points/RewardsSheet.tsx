@@ -96,11 +96,20 @@ export function RewardsSheet({ open, onOpenChange, streamId, balance, rewards, l
                       onClick={() => setPicked(selected ? null : r.id)}
                       data-reward-tile
                       className={cn(
-                        'flex h-full min-h-[84px] w-full flex-col justify-between gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors',
+                        'relative flex h-full min-h-[84px] w-full flex-col justify-between gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors',
                         selected ? 'border-white/60 bg-white/15' : 'border-white/10 bg-white/5 hover:bg-white/10',
                         !affordable && 'opacity-60',
                       )}
                     >
+                      {/* The pick is a ring of the theme's ink on its own layer: themes repaint a button's fill and border. */}
+                      <span
+                        aria-hidden
+                        data-reward-ring
+                        className={cn(
+                          'pointer-events-none absolute inset-0 rounded-xl text-white ring-2 ring-current transition-opacity duration-200',
+                          selected ? 'opacity-100' : 'opacity-0',
+                        )}
+                      />
                       <span className="line-clamp-2 text-sm font-medium text-white">{r.title}</span>
                       <span className="inline-flex items-center gap-1 text-xs tabular-nums text-zinc-300">
                         <PointsIcon className="h-3.5 w-3.5" />

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { PageSection } from '@/components/app/page-kit/PageKit';
+import { SETTINGS_FIELD_CLASS } from '@/components/app/settings/SettingsRow';
 import { buildAvatarUrl } from '@/lib/media-url';
 import {
   getMyRedemptions,
@@ -99,7 +100,7 @@ export function RewardsPanel() {
                   placeholder={t('livePoints.studio.namePlaceholder')}
                   aria-label={t('livePoints.studio.name')}
                   onChange={(e) => update(r.id, { title: e.target.value })}
-                  className="min-w-0 flex-1"
+                  className={`${SETTINGS_FIELD_CLASS} min-w-0 flex-1`}
                 />
                 <div className="relative w-28 flex-none">
                   <PointsIcon className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
@@ -111,7 +112,7 @@ export function RewardsPanel() {
                     value={r.cost || ''}
                     aria-label={t('livePoints.studio.cost')}
                     onChange={(e) => update(r.id, { cost: Math.max(0, Math.round(Number(e.target.value) || 0)) })}
-                    className="pl-8 tabular-nums"
+                    className={`${SETTINGS_FIELD_CLASS} pl-8 tabular-nums`}
                   />
                 </div>
                 <button

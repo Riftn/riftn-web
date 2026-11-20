@@ -119,6 +119,8 @@ import type { PollData } from '@/features/post/types';
 import { LiveClearedLayer } from '@/components/app/live/LiveClearedLayer';
 import { ImmersiveLiveChrome } from '@/components/app/live/ImmersiveLiveChrome';
 import { LivePostChat } from '@/components/app/cards/LivePostChat';
+import { RewardsSheet } from '@/components/app/live/points/RewardsSheet';
+import { RewardsPanel } from '@/components/app/live/studio/RewardsPanel';
 import type { LiveAudience } from '@/lib/api/dehub/livestream';
 import type { DeHubPoll, DmLock, DmLockStatus, DmMessage } from '@/lib/api/dehub';
 import { LockedMediaBubble, lockedMediaKey } from '@/components/app/chat/LockedMediaBubble';
@@ -2177,6 +2179,7 @@ export default function StateGalleryPage() {
         <ProposalCardGallery />
         <AgentWelcomeGallery />
         <LiveViewerGallery />
+        <LivePointsGallery initiallyOpen={params.get('sheet') === 'rewards'} />
         <HolderGroupGallery />
         <GroupsChannelsGallery />
         <NewMessageDrawerGallery />
@@ -2555,6 +2558,64 @@ function HolderGroupGallery() {
 }
 
 /** The phone live viewer's chrome over a stand-in picture, with a seeded Who's here. */
+const GALLERY_POINTS_VIEWER = '0x00000000000000000000000000000000000000b2';
+const GALLERY_POINTS_AUTH = {
+  isAuthenticated: true,
+  walletAddress: GALLERY_POINTS_VIEWER,
+  user: null,
+  openLoginModal: () => {},
+} as unknown as AuthContextType;
+const GALLERY_POINTS_BALANCE = { creator: '0x00000000000000000000000000000000000000a1', live: true, earned: 1640, spent: 400, balance: 1240 };
+const GALLERY_REWARDS = [
+  { id: 'g-hi', title: 'Say hi to me on stream', cost: 100, needsText: false, enabled: true },
+  { id: 'g-hydrate', title: 'Hydrate!', cost: 250, needsText: false, enabled: true },
+  { id: 'g-song', title: 'Pick the next song', cost: 500, needsText: true, enabled: true },
+  { id: 'g-voice', title: 'Do the voice for one minute', cost: 2500, needsText: false, enabled: true },
+];
+const GALLERY_REDEMPTIONS = [
+  { id: 'r1', rewardId: 'g-song', title: 'Pick the next song', cost: 500, text: 'Anything by Fred again..', status: 'pending', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c3', username: 'nova', displayName: 'Nova' } },
+  { id: 'r2', rewardId: 'g-hydrate', title: 'Hydrate!', cost: 250, text: '', status: 'pending', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c4', username: 'kai' } },
+  { id: 'r3', rewardId: 'g-hi', title: 'Say hi to me on stream', cost: 100, text: '', status: 'done', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c5', username: 'mira' } },
+];
+
+/** Channel points: the button in both chats, the rewards sheet, and Live Studio's panel. */
+function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(initiallyOpen);
+  useState(() => {
+    queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
+    queryClient.setQueryData(['live-rewards', GALLERY_STREAM_ID], { creator: GALLERY_POINTS_BALANCE.creator, live: true, rewards: GALLERY_REWARDS });
+    queryClient.setQueryData(['my-live-rewards'], GALLERY_REWARDS.slice(0, 3));
+    queryClient.setQueryData(['my-live-redemptions'], GALLERY_REDEMPTIONS);
+  });
+  return (
+    <section data-page-bento data-live-points-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Channel points</h2>
+      <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
+        <div className="flex flex-wrap items-start justify-center gap-4">
+          <div
+            data-live-points-phone
+            className="relative flex h-[520px] w-[390px] max-w-full flex-col justify-end overflow-hidden rounded-[28px] px-3 pb-3"
+            style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+          >
+            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+          </div>
+          <div data-live-points-desktop className="w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
+            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
+          </div>
+        </div>
+        <button type="button" data-kit-button="quiet" data-open-rewards onClick={() => setOpen(true)} className="mt-4">
+          Open rewards sheet
+        </button>
+        <RewardsSheet open={open} onOpenChange={setOpen} streamId={GALLERY_STREAM_ID} balance={GALLERY_POINTS_BALANCE} rewards={GALLERY_REWARDS} />
+        <div data-live-points-studio className="mx-auto mt-4 max-w-xl">
+          <RewardsPanel />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
 function LiveViewerGallery() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
