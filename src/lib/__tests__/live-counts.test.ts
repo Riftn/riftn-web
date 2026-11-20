@@ -153,3 +153,30 @@ describe('mergeLiveCounts', () => {
     }
   });
 });
+
+describe('mergeLiveCounts on the pinned or boosted post', () => {
+  beforeEach(() => clearAllVoteCaches());
+
+  it('lifts counts onto the post held in its own query', () => {
+    const queryClient = new QueryClient();
+    const key = ['pinned-post', '8052'];
+    queryClient.setQueryData(key, { tokenId: 8052, name: 'builders', totalViews: 417, totalVotes: { for: 127, against: 0 } });
+    const before = queryClient.getQueryState(key)!.dataUpdatedAt;
+
+    mergeLiveCounts(queryClient, [{ tokenId: 8052, totalViews: 858, totalVotes: { for: 207, against: 0 } }]);
+
+    expect(queryClient.getQueryData(key)).toMatchObject({ name: 'builders', totalViews: 858, totalVotes: { for: 207, against: 0 } });
+    expect(queryClient.getQueryState(key)!.dataUpdatedAt).toBe(before);
+  });
+
+  it('leaves it as the same object when nothing moved', () => {
+    const queryClient = new QueryClient();
+    const key = ['pinned-post', '8052'];
+    const data = { tokenId: 8052, totalViews: 858 };
+    queryClient.setQueryData(key, data);
+
+    mergeLiveCounts(queryClient, [{ tokenId: 8052, totalViews: 858 }]);
+
+    expect(queryClient.getQueryData(key)).toBe(data);
+  });
+});

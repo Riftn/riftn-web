@@ -120,4 +120,28 @@ export function mergeLiveCounts(queryClient: QueryClient, rows: readonly RawFeed
     // list is current and suppress the next real revalidation.
     queryClient.setQueryData(query.queryKey, { ...data, pages }, { updatedAt: query.state.dataUpdatedAt });
   }
+
+  // The pinned or boosted post at the top of Home, and the boosts dealt down
+  // it, are one post per query (`['pinned-post', id]`), kept out of the pages
+  // above so they never show twice. Without this they held the views and
+  // reactions they were first fetched with until the reader pulled to refresh.
+  for (const query of queryClient.getQueryCache().findAll({ queryKey: ['pinned-post'] })) {
+    const item = query.state.data as RawFeedRow | undefined;
+    if (!item || typeof item !== 'object' || item.tokenId === undefined) continue;
+    const row = fresh.get(String(item.tokenId));
+    if (!row) continue;
+
+    const patch: Record<string, unknown> = {};
+    for (const field of LIVE_COUNT_FIELDS) {
+      if (!(field in row)) continue;
+      if (sameCount(item[field], row[field])) continue;
+      patch[field] = row[field];
+    }
+    if (!Object.keys(patch).length) continue;
+
+    const merged = { ...item, ...patch };
+    const pendingVote = getVoteCache(String(item.tokenId));
+    const next = pendingVote && !isVoteConfirmed(row, pendingVote) ? applyVoteStateToNFT(merged, pendingVote) : merged;
+    queryClient.setQueryData(query.queryKey, next, { updatedAt: query.state.dataUpdatedAt });
+  }
 }
