@@ -2507,6 +2507,9 @@
     "returnHome": "Return Home"
   },
   "profile": {
+    "localTime": "Local time {{time}}",
+    "shareLocalTime": "Show my local time",
+    "shareLocalTimeHint": "Show your timezone and local time on your public profile and in chat.",
     "gridCard": {
       "stage": "Stage",
       "liveStage": "Live stage",

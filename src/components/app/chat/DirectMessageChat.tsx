@@ -68,6 +68,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDmSettings } from '@/hooks/use-dm-settings';
 import { useBannedAccount } from '@/hooks/use-banned-account';
 import { getMediaUrl, forwardDmMessage, blockConversation, unblockConversation, getDMPlanSettings, grantFreeDmAccess, revokeFreeDmAccess, getAccountInfo, pinDmMessage, unpinDmMessage, type DMMessageType, type DeHubConversation, type DmMessage, type DmFee } from '@/lib/api/dehub';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { apiCall, getAuthToken, DEHUB_API_BASE } from '@/lib/api/dehub/core';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgedName } from '@/components/app/BadgedName';
@@ -1706,6 +1708,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const displayName = otherUser?.displayName || otherUser?.display_name || otherUser?.username ||
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : _copy("copy.b512d97e7cbf", { defaultValue: "User" }));
   const profileLink = otherUser?.username ? profilePath(otherUser.username) : otherUser?.address ? profilePath(otherUser.address) : '#';
+  const { data: peerProfile } = useDeHubProfile({ userId: otherUser?.address, address: walletAddress || undefined, enabled: !isGroupChat && !!otherUser?.address });
+  const peerLocalTime = useProfileLocalTime(isGroupChat ? undefined : peerProfile?.customs?.publicTimeZone);
 
   // ── Scheduled messages ────────────────────────────────────────────────
   // One-to-one chats that already exist and are free to message. A paid chat
@@ -3132,6 +3136,11 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               </h2>
               {otherUser?.username && (
                 <p className="text-xs text-zinc-500">@{otherUser.username}</p>
+              )}
+              {peerLocalTime && (
+                <p className="truncate text-xs text-zinc-400" title={String(peerProfile?.customs?.publicTimeZone)}>
+                  {_copy('profile.localTime', { defaultValue: 'Local time {{time}}', time: peerLocalTime })}
+                </p>
               )}
             </div>
           </Link>

@@ -2496,6 +2496,9 @@
     "returnHome": "Volver al inicio"
   },
   "profile": {
+    "localTime": "Hora local {{time}}",
+    "shareLocalTime": "Mostrar mi hora local",
+    "shareLocalTimeHint": "Muestra tu zona horaria y tu hora local en tu perfil público y en el chat.",
     "gridCard": {
       "stage": "Escenario",
       "liveStage": "Escenario en vivo",

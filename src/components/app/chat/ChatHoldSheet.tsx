@@ -41,6 +41,7 @@ interface ChatHoldSheetProps {
   frame?: boolean;
   /** Who reacted: a row above the tiles that opens the people sheet. */
   reactors?: ReactorsSource | null;
+  meta?: string;
 }
 
 /** Phones with a finger, not a mouse. Desktop keeps hover buttons and the browser's own right-click. */
@@ -92,7 +93,7 @@ const KEEP = {
  * back and the keyboard dropped), and nothing here closes the sheet it sits
  * in.
  */
-export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine = [], onReact, allowMore = true, actions, frame = false, reactors }: ChatHoldSheetProps) {
+export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine = [], onReact, allowMore = true, actions, frame = false, reactors, meta }: ChatHoldSheetProps) {
   const { t } = useTranslation();
   // The people sheet outlives the hold sheet: a tap on the reactions row
   // closes this one and opens that one.
@@ -277,6 +278,8 @@ export function ChatHoldSheet({ open, onOpenChange, anchor, quickReactions, mine
                 <ChevronRight className="h-4 w-4 shrink-0 opacity-50" />
               </button>
             )}
+
+            {meta && !moreOpen && <p className="px-2 pt-2 text-xs opacity-70">{meta}</p>}
 
             {mainActions.length > 0 && !moreOpen && (
               <div

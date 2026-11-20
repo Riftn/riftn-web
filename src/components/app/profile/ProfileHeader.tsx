@@ -25,6 +25,7 @@ import { BioTranslateButton } from '@/components/app/profile/BioTranslateButton'
 import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
 import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
 import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
+import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { MutualFollowers } from '@/components/app/profile/MutualFollowers';
 import { useMutualFollowers } from '@/hooks/use-mutual-followers';
 import { StreamerLevelCard } from '@/components/app/live/StreamerLevelCard';
@@ -139,6 +140,7 @@ export function ProfileHeader({
   // The links pill sits in the card's bottom corner: on the mutuals row when
   // one shows, otherwise at the end of the Following/Followers line.
   const mutualFollowers = useMutualFollowers({ profileAddress: apiProfile?.walletAddress, enabled: !isViewingOwnProfile });
+  const localTime = useProfileLocalTime(profile.customs?.publicTimeZone);
   const hasMutualsRow = !isViewingOwnProfile && !mutualFollowers.isLoading && mutualFollowers.mutuals.length > 0;
   const linksOnCountsRow = !hasMutualsRow && (!hideFollowerCounts || isViewingOwnProfile);
   const messageSettings = (apiProfile as (ProfileData & {
@@ -507,6 +509,11 @@ export function ProfileHeader({
           )}
 
           <ProfileFieldsList fields={profile.profileFields} />
+          {localTime && (
+            <p className="mt-1 text-sm text-zinc-400" title={String(profile.customs?.publicTimeZone)}>
+              {t('profile.localTime', { defaultValue: 'Local time {{time}}', time: localTime })}
+            </p>
+          )}
 
           {/* Pinned Communities */}
           {profile.walletAddress && (
