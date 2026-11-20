@@ -1223,20 +1223,10 @@ export function ActionBar({
                  Your own reaction moves, the same as it does in the tray — a
                  🔥 somebody else put in the lead stays still. */
               data-engaged-glyph
-              className="relative text-[19.36px] leading-none w-[24.64px] h-[24.64px] flex items-center justify-center"
+              className="text-[19.36px] leading-none w-[24.64px] h-[24.64px] flex items-center justify-center"
               aria-hidden="true"
             >
               <ReactionEmoji reaction={thumbGlyph} animate={thumbGlyph === myReaction} />
-              {/* A small copy of your own reaction on its corner, so a 🔥 you
-                  cast reads differently from a 🔥 that only leads the post. */}
-              {thumbGlyph === myReaction && (
-                <span
-                  data-my-reaction-badge
-                  className="pointer-events-none absolute -top-1 -right-1.5 text-[10px] leading-none drop-shadow-[0_0_1.5px_rgba(0,0,0,0.55)]"
-                >
-                  <ReactionEmoji reaction={thumbGlyph} />
-                </span>
-              )}
             </span>
           ) : (
             <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(FEED_ICON_CLASS.like, thumbMine && "fill-current")} />
