@@ -111,17 +111,17 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
     const shown = scrub === null ? current : scrub * duration;
     const hasCredit = !!soundCredit(url);
     return (
-      <div className="dh-soundbar flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2.5 text-foreground">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground" aria-hidden="true">
+      <div data-glass-embed className="dh-soundbar flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white/10 text-white/70" aria-hidden="true">
           <span className={cn('dh-sound-eq', playing && 'is-playing')}><i /><i /><i /><i /></span>
         </div>
         <div className="min-w-0 flex-1">
           <span className="block truncate text-sm font-semibold leading-tight">{name}</span>
           {hasCredit
-            ? <SoundCreditLink url={url} creator={creator} className="block truncate text-xs text-muted-foreground" />
-            : creator && <span className="block truncate text-xs text-muted-foreground">{creator}</span>}
+            ? <SoundCreditLink url={url} creator={creator} className="block truncate text-xs text-white/50" />
+            : creator && <span className="block truncate text-xs text-white/50">{creator}</span>}
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="w-9 shrink-0 text-[11px] tabular-nums text-muted-foreground">{clock(shown)}</span>
+            <span className="w-9 shrink-0 text-[11px] tabular-nums text-white/50">{clock(shown)}</span>
             <div
               role="slider"
               tabIndex={0}
@@ -138,17 +138,17 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
               onPointerCancel={onScrubCancel}
               onClick={(event) => event.stopPropagation()}
               onKeyDown={onScrubKey}
-              className="group relative flex-1 cursor-pointer touch-none py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+              className="group relative flex-1 cursor-pointer touch-none rounded py-2 outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
-              <div className="relative h-1 rounded-full bg-muted">
-                <div className="absolute inset-y-0 left-0 rounded-full bg-foreground" style={{ width: `${progress * 100}%` }} />
+              <div className="relative h-1 rounded-full bg-white/15">
+                <div className="absolute inset-y-0 left-0 rounded-full bg-white" style={{ width: `${progress * 100}%` }} />
                 <div
-                  className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                  className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
                   style={{ left: `${progress * 100}%`, opacity: scrub !== null ? 1 : undefined }}
                 />
               </div>
             </div>
-            <span className="w-9 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">{duration ? clock(duration) : '–:––'}</span>
+            <span className="w-9 shrink-0 text-right text-[11px] tabular-nums text-white/50">{duration ? clock(duration) : '–:––'}</span>
           </div>
         </div>
         <button
@@ -157,7 +157,7 @@ export function SoundtrackControl({ title, creator, url, playing, loading, error
           aria-label={label}
           aria-pressed={playing}
           onClick={onClick}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-foreground text-background transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-black transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
           {icon}
         </button>
