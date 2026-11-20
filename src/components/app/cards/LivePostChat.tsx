@@ -32,6 +32,7 @@ import Mic from "@/components/ui/cut-icons/mic";
 import X from "@/components/ui/cut-icons/close";
 
 import { Textarea } from '@/components/ui/textarea';
+import { StreamBotCommands } from './StreamBotCommands';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
 import { useDraft } from '@/hooks/use-draft';
@@ -1052,6 +1053,20 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
 
       {/* Input */}
       <div className={overlay ? '' : 'pt-2'}>
+        {!isOffline && (
+          <StreamBotCommands
+            tokenId={tokenId}
+            overlay={overlay}
+            disabled={bannedHere || muted}
+            onSend={(command) => {
+              if (!isAuthenticated) {
+                openLoginModal();
+                return;
+              }
+              send(command, 'text').catch(() => {});
+            }}
+          />
+        )}
         {/* One row at the foot of the screen. Typing hands the whole width
             to the message box and puts the send button on the end; the
             moment it is empty again the box gives the width back and the

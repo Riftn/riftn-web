@@ -7812,6 +7812,44 @@
         "shhh": "Shhh"
       }
     },
+    "bot": {
+      "title": "Chat bot",
+      "intro": "A co-host for your stream chat. It says hi to new people, answers questions about you and the stream, tells late joiners what they missed, and gets a quiet chat talking. It only talks on your own streams, while you're live.",
+      "enabled": "Chat bot",
+      "enabledHint": "Off until you switch it on. Switching it off makes it go silent straight away.",
+      "about": "What it knows about you",
+      "aboutPlaceholder": "Who you are, what you stream, your schedule, where to find you. Example: Abstract artist and metal fan. Live Tue/Thu/Sat 8pm ET. Discord link is in my profile.",
+      "aboutHint": "It answers from this, your stream title and the chat. If it doesn't know, it stays quiet",
+      "personality": "Personality",
+      "personalities": {
+        "chill": "Chill",
+        "hype": "Hype",
+        "funny": "Funny",
+        "formal": "Formal"
+      },
+      "chattiness": "How chatty",
+      "chattinessLevels": {
+        "quiet": "Only when asked",
+        "normal": "Normal",
+        "lots": "Lots"
+      },
+      "greet": "Say hi to first-time chatters",
+      "greetHint": "One welcome per person per stream",
+      "answer": "Answer questions",
+      "answerHint": "\"What are you making?\", \"When's the next stream?\"",
+      "catchUp": "Catch up late joiners",
+      "catchUpHint": "\"What did I miss?\" gets a short recap of the stream so far",
+      "wakeQuiet": "Wake up a quiet chat",
+      "wakeQuietHint": "After a few quiet minutes it asks chat a question",
+      "commandButtons": "Show my commands as buttons",
+      "commandButtonsHint": "Your !commands from Stream rules show above the chat box so viewers can tap them",
+      "commandsLabel": "Chat commands",
+      "safety": "It posts as @assistant, never talks about money or tokens, and never makes promises for you.",
+      "save": "Save chat bot",
+      "saved": "Chat bot saved",
+      "saveFailed": "Couldn't save the chat bot",
+      "loadFailed": "Couldn't load the chat bot settings"
+    },
     "moderation": {
       "title": "Chat moderation",
       "intro": "Rules for the chat under all of your streams. They never reach Riftn's main chat: someone you ban here can still talk everywhere else.",

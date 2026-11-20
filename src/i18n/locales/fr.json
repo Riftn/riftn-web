@@ -7852,6 +7852,44 @@
         "shhh": "Chut"
       }
     },
+    "bot": {
+      "title": "Bot du chat",
+      "intro": "Un coanimateur pour le chat de ton live. Il salue les nouveaux, répond aux questions sur toi et le live, raconte aux retardataires ce qu'ils ont manqué et relance un chat silencieux. Il ne parle que sur tes lives, pendant que tu es en direct.",
+      "enabled": "Bot du chat",
+      "enabledHint": "Désactivé tant que tu ne l'actives pas. Le désactiver le rend muet tout de suite.",
+      "about": "Ce qu'il sait de toi",
+      "aboutPlaceholder": "Qui tu es, ce que tu diffuses, ton planning, où te trouver. Exemple : Artiste abstrait et fan de metal. En direct mar/jeu/sam 20h ET. Le lien Discord est sur mon profil.",
+      "aboutHint": "Il répond à partir de ceci, du titre du live et du chat. S'il ne sait pas, il ne dit rien",
+      "personality": "Personnalité",
+      "personalities": {
+        "chill": "Cool",
+        "hype": "Survolté",
+        "funny": "Drôle",
+        "formal": "Formel"
+      },
+      "chattiness": "Bavardage",
+      "chattinessLevels": {
+        "quiet": "Seulement si on lui demande",
+        "normal": "Normal",
+        "lots": "Beaucoup"
+      },
+      "greet": "Saluer ceux qui écrivent pour la première fois",
+      "greetHint": "Un accueil par personne et par live",
+      "answer": "Répondre aux questions",
+      "answerHint": "« Tu fais quoi ? », « C'est quand le prochain live ? »",
+      "catchUp": "Résumer pour les retardataires",
+      "catchUpHint": "« J'ai raté quoi ? » reçoit un court résumé du live",
+      "wakeQuiet": "Relancer un chat silencieux",
+      "wakeQuietHint": "Après quelques minutes de silence, il pose une question au chat",
+      "commandButtons": "Afficher mes commandes en boutons",
+      "commandButtonsHint": "Tes !commandes des règles du live s'affichent au-dessus du chat pour que les spectateurs les touchent",
+      "commandsLabel": "Commandes du chat",
+      "safety": "Il publie en tant que @assistant, ne parle jamais d'argent ni de tokens et ne promet jamais rien à ta place.",
+      "save": "Enregistrer le bot du chat",
+      "saved": "Bot du chat enregistré",
+      "saveFailed": "Impossible d'enregistrer le bot du chat",
+      "loadFailed": "Impossible de charger les réglages du bot du chat"
+    },
     "moderation": {
       "title": "Modération de la salle de chat",
       "intro": "Règles pour le chat sous tous vos streams. Elles ne s'appliquent jamais au chat principal de Riftn : quelqu'un que vous bannissez ici peut toujours parler ailleurs.",
