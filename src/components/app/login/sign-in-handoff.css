@@ -403,6 +403,9 @@ html[data-arrival-glass] .signin-handoff-veil { background: rgba(6, 7, 9, 0.72);
 .arrival-look-preview .signin-rift__frame,
 .arrival-look-preview .signin-rift__initial { display: block; }
 .arrival-look-preview .signin-rift__initial { display: grid; }
+@media (max-width: 639px) {
+  .arrival-look-preview { height: 118px; }
+}
 
 /* Looping previews that scrolled off screen stand still (both pickers). */
 .look-previews-paused *,
