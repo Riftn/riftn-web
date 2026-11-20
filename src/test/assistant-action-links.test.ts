@@ -23,4 +23,11 @@ describe('assistant card links', () => {
     expect(assistantActionIds(text)).toEqual([]);
     expect(withoutAssistantActionLinks(text)).toBe(text);
   });
+
+  it('draws a request draft as a card and keeps its board link', () => {
+    const board = '[View request](/app/features?request=09349273-e205-471a-9cbf-a497dc7060d0)';
+    const reply = `${board}\n\n[Review request draft](https://riftn.com/app/assistant?requestDraft=${id})`;
+    expect(assistantActionIds(reply)).toEqual([id]);
+    expect(withoutAssistantActionLinks(reply)).toBe(board);
+  });
 });

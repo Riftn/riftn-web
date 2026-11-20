@@ -78,6 +78,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { MarkdownText } from '@/lib/markdown';
 import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
 import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
+import { isRequestBoardCommand } from '@/lib/feature-prompt';
 
 import { AI_ASSISTANT_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
 import { VIDEO_MODELS, VIDEO_MODEL_OPTIONS, type VideoModelKey, type VideoModel } from '@/constants/video-models.constants';
@@ -456,11 +457,12 @@ function AssistantPageForAccount() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setInput]);
-  // ?action=<id>: a card the assistant offered somewhere else (a DM with
+  // A card the assistant offered somewhere else (a DM with
   // @assistant, a shared link). Shown here so it can be confirmed.
   const [linkedAction, setLinkedAction] = useState<string | null>(null);
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get('action');
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('requestDraft') ?? params.get('action');
     if (id && /^[a-f0-9]{24}$/i.test(id)) setLinkedAction(id.toLowerCase());
   }, []);
   const [isImageLoading, setIsImageLoading] = useState(false);
@@ -1669,7 +1671,8 @@ function AssistantPageForAccount() {
 
     // ── Skill matching: slash command wins, otherwise auto-trigger ──
     const slash = extractSlashSkill(messageToSend, userSkills);
-    const matchedSkill: UserSkill | null = slash.skill ?? (opts?.noSkillMatch ? null : matchSkill(messageToSend, userSkills));
+    const boardCommand = !slash.skill && isRequestBoardCommand(messageToSend);
+    const matchedSkill: UserSkill | null = slash.skill ?? (opts?.noSkillMatch || boardCommand ? null : matchSkill(messageToSend, userSkills));
     const skillCleanedInput = slash.skill ? slash.cleaned : messageToSend;
     let skillSourceImage: string | null = null;
     if (matchedSkill) {
@@ -1686,7 +1689,7 @@ function AssistantPageForAccount() {
     }
 
     // ── Character mention matching ──
-    const charMatch = parseCharacterMentions(skillCleanedInput, userCharacters);
+    const charMatch = parseCharacterMentions(skillCleanedInput, boardCommand ? [] : userCharacters);
     let characterSourceImage: string | null = null;
     if (charMatch.hasMentions) {
       const primary = charMatch.characters[0].primary_image_url
@@ -1730,8 +1733,8 @@ function AssistantPageForAccount() {
 
     try {
       // Check if user wants to use the official logo in their image
-      const wantsDeHubBrand = matchedSkill?.slug === 'dehub-poster' || isDeHubBrandedImageRequest(messageToSend) || isDeHubBrandedImageRequest(currentInput);
-      const wantsLogo = wantsDeHubBrand || requiresLogoAsset(currentInput);
+      const wantsDeHubBrand = !boardCommand && (matchedSkill?.slug === 'dehub-poster' || isDeHubBrandedImageRequest(messageToSend) || isDeHubBrandedImageRequest(currentInput));
+      const wantsLogo = !boardCommand && (wantsDeHubBrand || requiresLogoAsset(currentInput));
       const isCreativeLogo = wantsLogo && isCreativeLogoRequest(currentInput);
       
       // If just asking "show me the logo" without creative context, display it directly
@@ -1760,12 +1763,12 @@ function AssistantPageForAccount() {
       }
 
       // Check request type — AI tools first, then video/image
-      const aiToolCategory = detectAiToolRequest(currentInput, !!currentAttachedImage);
-      const isVideoRequest = !aiToolCategory && requiresVideoGeneration(currentInput);
+      const aiToolCategory = boardCommand ? null : detectAiToolRequest(currentInput, !!currentAttachedImage);
+      const isVideoRequest = !boardCommand && !aiToolCategory && requiresVideoGeneration(currentInput);
       // `conversational` opts this surface into the looser phrasing ("show me",
       // "what does … look like"). It is safe here and not in the chat bubble
       // because the paywall below asks before anything is signed.
-      const isImageRequest = !aiToolCategory && (isCreativeLogo || matchedSkill?.kind === 'image' || charMatch.hasMentions || requiresImageGeneration(currentInput, !!currentAttachedImage, { conversational: true }));
+      const isImageRequest = !boardCommand && !aiToolCategory && (isCreativeLogo || matchedSkill?.kind === 'image' || charMatch.hasMentions || requiresImageGeneration(currentInput, !!currentAttachedImage, { conversational: true }));
       
       if (aiToolCategory) {
         // For music requests, show confirm dialog first
