@@ -1138,7 +1138,7 @@ const MessageBubble = memo(function MessageBubble({
                     </div>
                   )}
                   {assistantActions.map((id) => (
-                    <div key={id} className="w-[320px] max-w-full text-left">
+                    <div key={id} className="w-[280px] max-w-full text-left">
                       <AssistantActionCard actionId={id} />
                     </div>
                   ))}
