@@ -1010,11 +1010,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
 
   useEffect(() => {
     if (!isMessagesRouteActive) return;
+    // Signed out, /app/messages is only a gate (or a hop to /chat for a
+    // Public Chat link): pushing ?chat=1 here would pull them back from /chat.
+    if (!isAuthenticated && !fullscreen) return;
     if (chatOpen && !chatEntryRef.current) {
       chatEntryRef.current = true;
       navigate(`${routeBase}?chat=1`);
     }
-  }, [chatOpen, isMessagesRouteActive, navigate, routeBase]);
+  }, [chatOpen, isMessagesRouteActive, navigate, routeBase, isAuthenticated, fullscreen]);
 
   // Back was pressed: the param is gone, so close the chat rather than leave
   // the route. This also clears a selection that would otherwise survive —
