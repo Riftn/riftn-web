@@ -404,6 +404,14 @@ const BoostModal = lazy(() =>
 const CORNER_CONTROL =
   `absolute top-3 z-10 ${VIEWER_CONTROL} transition-opacity duration-300`;
 
+/**
+ * Follow answers outlive one viewer, "not following" included: reopening the
+ * reel or swiping back to a creator does not ask again, so the follow button
+ * no longer blinks a loading box on every slide. A follow or unfollow made
+ * since is in the follow overrides, which win over this.
+ */
+const followAnswers = new Map<string, boolean>();
+
 export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
   const { t: _copy } = _useCopy();
   const { t } = useI18n();
@@ -864,31 +872,29 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   useEffect(() => {
     const creatorAddress = currentShort?.creatorId;
     if (!creatorAddress || !isAuthenticated || followedCreators.has(creatorAddress)) return;
-    
+    const cacheKey = creatorAddress.toLowerCase();
+    const known = followAnswers.get(cacheKey);
+    if (known !== undefined) {
+      if (known) setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+      return;
+    }
+
     setFollowCheckingCreators(prev => new Set(prev).add(creatorAddress));
     let cancelled = false;
-    checkIsFollowing(creatorAddress).then(result => {
-      if (!cancelled) {
-        if (result) {
-          setFollowedCreators(prev => new Set(prev).add(creatorAddress));
-        }
-        setFollowCheckingCreators(prev => {
-          const next = new Set(prev);
-          next.delete(creatorAddress);
-          return next;
-        });
-      }
-    }).catch(() => {
-      if (!cancelled) {
-        setFollowCheckingCreators(prev => {
-          const next = new Set(prev);
-          next.delete(creatorAddress);
-          return next;
-        });
-      }
+    const done = () => setFollowCheckingCreators(prev => {
+      if (!prev.has(creatorAddress)) return prev;
+      const next = new Set(prev);
+      next.delete(creatorAddress);
+      return next;
     });
-    
-    return () => { cancelled = true; };
+    checkIsFollowing(creatorAddress).then(result => {
+      followAnswers.set(cacheKey, !!result);
+      if (!cancelled && result) setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+    }).catch(() => {}).finally(() => { if (!cancelled) done(); });
+
+    // Swiping on before the answer used to leave this creator marked as
+    // checking for good: a "Loading…" box on every later visit.
+    return () => { cancelled = true; done(); };
   }, [currentShort?.creatorId, isAuthenticated]);
 
   /**
@@ -2719,17 +2725,25 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
               <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
               <ShortCaption key={currentShort.id} short={currentShort} variant="stacked" />
               <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
-              {currentShort.creatorId && followCheckingCreators.has(currentShort.creatorId) ? (
-                <div className="w-full mt-3 bg-white/10 backdrop-blur-sm text-white/40 text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/10 text-center animate-pulse">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</div>
-              ) : (
-                <button
-                  onClick={handleFollow}
-                  disabled={isCreatorFollowed(currentShort.creatorId)}
-                  className="w-full mt-3 bg-white/10 backdrop-blur-sm text-white text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isCreatorFollowed(currentShort.creatorId) ? _copy("copy.ec7a1a6ce401", { defaultValue: "Following ✓" }) : _copy("copy.641d1ef657bd", { defaultValue: "Follow" })}
-                </button>
-              )}
+              {/* No follow button on your own post. While the answer is out the
+                  button keeps its place unseen and fades in, instead of a
+                  pulsing loading box that blinked on every slide. */}
+              {!isOwnShort && (() => {
+                const checking = !!currentShort.creatorId && followCheckingCreators.has(currentShort.creatorId);
+                return (
+                  <button
+                    onClick={handleFollow}
+                    disabled={checking || isCreatorFollowed(currentShort.creatorId)}
+                    aria-hidden={checking || undefined}
+                    className={cn(
+                      'w-full mt-3 bg-white/10 backdrop-blur-sm text-white text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-[opacity,background-color] duration-200 disabled:cursor-not-allowed',
+                      checking ? 'opacity-0' : isCreatorFollowed(currentShort.creatorId) ? 'opacity-50' : 'opacity-100',
+                    )}
+                  >
+                    {isCreatorFollowed(currentShort.creatorId) ? _copy("copy.ec7a1a6ce401", { defaultValue: "Following ✓" }) : _copy("copy.641d1ef657bd", { defaultValue: "Follow" })}
+                  </button>
+                );
+              })()}
             </div>
 
             {/* Desktop: Inline comments */}
