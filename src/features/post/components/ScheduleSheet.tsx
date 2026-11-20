@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Clock, Sparkles } from "lucide-react";
+import { Clock, Hourglass, Sparkles } from "lucide-react";
 import X from '@/components/ui/cut-icons/close';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Link } from 'react-router-dom';
@@ -26,6 +26,8 @@ interface ScheduleSheetProps {
   kind?: ScheduleKind;
   /** Moving something already planned: no "Remove schedule", no Planned link. */
   moving?: boolean;
+  /** Messages only: offer "When they're next online" above the clock. */
+  onWhenOnline?: () => void;
 }
 
 const STEP = 15;
@@ -47,7 +49,7 @@ const firstSlot = (minAhead: number) => {
  * choose a day from the strip and step the time. Kit chips and buttons, so
  * every theme styles it like the rest of the app.
  */
-export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, title: titleProp, minimumMinutes = 0, kind = 'post', moving = false }: ScheduleSheetProps) {
+export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, title: titleProp, minimumMinutes = 0, kind = 'post', moving = false, onWhenOnline }: ScheduleSheetProps) {
   const { t, i18n } = useTranslation();
   const title = titleProp ?? t('whenSheet.title', { defaultValue: 'When?' });
   const locale = i18n.language || undefined;
@@ -185,6 +187,21 @@ export function ScheduleSheet({ isOpen, onClose, scheduledDate, onSchedule, titl
         </DrawerHeader>
 
         <div className="mx-auto w-full max-w-[440px] space-y-4">
+          {kind === 'message' && onWhenOnline && (
+            <button
+              type="button"
+              data-kit-chip
+              data-when-online-pick
+              onClick={() => { onWhenOnline(); onClose(); }}
+              className="!flex !h-auto w-full !items-center !justify-start !gap-3 !rounded-[10px] !px-3 !py-2.5 text-left"
+            >
+              <Hourglass className="h-4 w-4 shrink-0" />
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-sm font-semibold">{t('dmSchedule.whenOnline', { defaultValue: "When they're next online" })}</span>
+                <span className="text-xs font-medium opacity-70">{t('dmSchedule.whenOnlineHint', { defaultValue: 'Shows as sent now. It reaches them the next time they open Riftn, and the tick turns double when they read it.' })}</span>
+              </span>
+            </button>
+          )}
           <label className="!flex !h-11 w-full !justify-start !gap-2 !rounded-[10px] !px-3 text-white" data-kit-chip style={{ cursor: 'text' }}>
             <Clock className="h-4 w-4 shrink-0 opacity-60" />
             <input

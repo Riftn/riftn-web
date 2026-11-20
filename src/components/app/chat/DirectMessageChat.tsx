@@ -14,7 +14,7 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, use
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen } from "lucide-react";
+import { MoreVertical, Loader2, ArrowDown, ShieldBan, AlertCircle, RotateCcw, Pin, FileText, Unlock, LockOpen, Hourglass } from "lucide-react";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import RefreshCw from "@/components/ui/cut-icons/refresh";
@@ -1343,7 +1343,17 @@ const MessageBubble = memo(function MessageBubble({
           {isOwnMessage && !showPaymentPending && message.sendState !== 'failed' && (
             // One fixed slot: a spinning ring while the send is out, the tick
             // once it lands. Same box either way, so nothing on the line moves.
-            <span className={`relative inline-flex items-center justify-end min-w-[14px] ${message.isRead ? "text-white" : "text-zinc-500"}`}>
+            <span className={`relative inline-flex items-center justify-end gap-0.5 min-w-[14px] ${message.isRead ? "text-white" : "text-zinc-500"}`}>
+              {/* Sent for when they're next online: stays until it is read,
+                  never when it is delivered, so it says nothing about when
+                  they were online. */}
+              {message.whenOnline && !message.isRead && message.sendState !== 'sending' && (
+                <Hourglass
+                  data-when-online-tick
+                  className="w-3 h-3"
+                  aria-label={tr('dmSchedule.whenOnlineTick', { defaultValue: 'Waiting for them to come online. Turns into two ticks when read.' })}
+                />
+              )}
               {message.sendState === 'sending'
                 ? <SendStatus state="sending" />
                 : (message.isRead ? "✓✓" : "✓")}
@@ -1698,6 +1708,17 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     } catch (err) {
       toast.error(err instanceof Error ? err.message : tr('dmSchedule.error', { defaultValue: 'That did not work. Try again.' }));
     }
+  };
+
+  // "When they're next online": sent now as a normal line (one tick and an
+  // hourglass for the sender), held by the server until they next open the
+  // app or site. Same rules as scheduling: free one-to-one text.
+  const sendWhenOnline = () => {
+    const draft = scheduleDraft;
+    if (!draft) return;
+    draft.clear();
+    // handleSendMessage is declared further down; this only runs on a tap, long after.
+    void handleSendMessage({ content: draft.text, type: 'msg', whenOnline: true });
   };
 
   // createAndStart — get/create conversation + dmFee
@@ -2560,6 +2581,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     mediaOptions,
     destruct,
     lockPrice,
+    whenOnline,
   }: {
     content: string;
     type: 'msg' | 'media' | 'gif' | 'voice';
@@ -2569,6 +2591,8 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     mediaOptions?: DmVideoOptions;
     destruct?: DmDestructChoice;
     lockPrice?: number;
+    /** Held by the server until they next come online (free one-to-one text only). */
+    whenOnline?: boolean;
   }) => {
     // Taken now and cleared at once, like the composer itself — the quote goes
     // out with this message only.
@@ -2772,6 +2796,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         mediaOptions,
         destruct,
         lockPrice,
+        ...(whenOnline ? { whenOnline: true } : {}),
       },
     );
     // The line is on screen from this moment (drawn as it will look once
@@ -3463,6 +3488,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             onClose={() => setScheduleDraft(null)}
             scheduledDate={null}
             onSchedule={confirmSchedule}
+            onWhenOnline={sendWhenOnline}
             kind="message"
             moving
             title={tr('dmSchedule.whenTitle', { defaultValue: 'Send when?' })}

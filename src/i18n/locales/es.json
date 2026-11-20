@@ -20875,6 +20875,9 @@
     "footnote": "Las horas están en tu zona horaria. Nadie ve un mensaje hasta que se envía.",
     "footnoteNamed": "Las horas están en tu zona horaria. {{name}} solo ve un mensaje cuando se envía.",
     "textOnly": "Por ahora solo se pueden programar mensajes de texto.",
+    "whenOnline": "Cuando vuelva a conectarse",
+    "whenOnlineHint": "Aparece como enviado ahora. Le llega la próxima vez que abra Riftn y el check se vuelve doble cuando lo lea.",
+    "whenOnlineTick": "Esperando a que se conecte. Pasa a dos checks cuando lo lea.",
     "scheduledToast": "Programado para {{when}}",
     "failedToast": "No se pudo enviar un mensaje programado",
     "error": "No ha funcionado. Inténtalo de nuevo."

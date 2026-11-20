@@ -20875,6 +20875,9 @@
     "footnote": "Saatler senin saat dilimine göredir. Bir mesaj gönderilene kadar kimse görmez.",
     "footnoteNamed": "Saatler senin saat dilimine göredir. {{name}} bir mesajı ancak gönderildiğinde görür.",
     "textOnly": "Şimdilik yalnızca metin mesajları zamanlanabilir.",
+    "whenOnline": "Bir sonraki çevrimiçi olduğunda",
+    "whenOnlineHint": "Şimdi gönderildi olarak görünür. Riftn'i bir sonraki açışında ona ulaşır, okuduğunda tik çift olur.",
+    "whenOnlineTick": "Çevrimiçi olmasını bekliyor. Okunduğunda iki tik olur.",
     "scheduledToast": "{{when}} için zamanlandı",
     "failedToast": "Zamanlanmış bir mesaj gönderilemedi",
     "error": "Olmadı. Tekrar dene."

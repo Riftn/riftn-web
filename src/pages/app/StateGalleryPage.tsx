@@ -1504,11 +1504,30 @@ function ScheduledDmGallery() {
   ]);
   const [list, setList] = useState(false);
   const [draft, setDraft] = useState<{ text: string; clear: () => void } | null>(null);
+  // "When they're next online": sent lines in the thread. The hourglass stays
+  // beside the one tick until the message is read, then two ticks.
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const sent = (id: string, content: string, minsAgo: number, extra: Partial<DmMessage> = {}): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: me as DmMessage['sender'], author: 'me', content, msgType: 'msg', mediaUrls: [],
+    voiceDuration: null, isRead: false, isEdited: false, editedAt: null, isForwarded: false, replyTo: null, paymentStatus: null,
+    paymentTxHash: null, tipAmount: null, tipSymbol: null, isDeleted: false, createdAt: new Date(Date.now() - minsAgo * 60_000).toISOString(),
+    updatedAt: new Date().toISOString(), ...extra,
+  } as DmMessage);
+  const [thread, setThread] = useState<DmMessage[]>(() => [
+    sent('w1', 'Sent normally', 42),
+    sent('w2', 'Sent for when they are next online, read', 30, { whenOnline: true, isRead: true }),
+    sent('w3', 'Sent for when they are next online, not read yet', 12, { whenOnline: true }),
+  ]);
   return (
     <section data-page-bento data-scheduled-dm-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <h2 className="mb-3 text-sm font-semibold">{t('dmSchedule.title', { defaultValue: 'Scheduled messages' })}</h2>
       <AuthContext.Provider value={GALLERY_AUTH}>
         <div className="mx-auto max-w-[640px] overflow-hidden rounded-2xl border border-white/10">
+          <div data-when-online-gallery data-chat-wallpaper className="chat-text-zone px-4 pb-2 pt-3">
+            {thread.map((m, i) => (
+              <DmMessageBubble key={m._id} message={m} isOwnMessage cozy={{ first: i === 0, last: i === thread.length - 1 }} currentUserAddress={me.address} />
+            ))}
+          </div>
           <ScheduledStrip items={items} onOpen={() => setList(true)} />
           <ChatInput
             onSendMessage={async () => true}
@@ -1525,6 +1544,11 @@ function ScheduledDmGallery() {
           onSchedule={(date) => {
             if (!date || !draft) return;
             setItems(prev => [...prev, row(String(Date.now()), draft.text, (date.getTime() - Date.now()) / 3_600_000)].sort((x, y) => x.sendAt.localeCompare(y.sendAt)));
+            draft.clear();
+          }}
+          onWhenOnline={() => {
+            if (!draft) return;
+            setThread(prev => [...prev, sent(String(Date.now()), draft.text, 0, { whenOnline: true })]);
             draft.clear();
           }}
           kind="message"
