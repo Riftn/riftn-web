@@ -4151,6 +4151,11 @@
       "openNewMembers": "Ouvrir la liste des nouveaux membres",
       "chartMembers": "Évolution des membres",
       "chartActive": "Personnes actives",
+      "stickiness": "Fidélité",
+      "stickinessHint": "aujourd’hui ÷ 30 derniers jours",
+      "layerDaily": "Quotidien",
+      "layerWeekly": "Hebdomadaire",
+      "layerMonthly": "Mensuel",
       "growth": "+{{percent}} % ce mois-ci",
       "growthTerm": "Croissance",
       "recordingSince": "enregistré depuis le {{date}}"

@@ -4147,6 +4147,11 @@
       "openNewMembers": "Yeni üye listesini aç",
       "chartMembers": "Zaman içinde üyeler",
       "chartActive": "Aktif kişiler",
+      "stickiness": "Bağlılık",
+      "stickinessHint": "bugün ÷ son 30 gün",
+      "layerDaily": "Günlük",
+      "layerWeekly": "Haftalık",
+      "layerMonthly": "Aylık",
       "growth": "Bu ay +{{percent}}%",
       "growthTerm": "Büyüme",
       "recordingSince": "{{date}} tarihinden beri kaydediliyor"
