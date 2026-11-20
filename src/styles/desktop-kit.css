@@ -12,8 +12,8 @@
  * one width for the middle column on every page.
  *
  * Minimal, Minimal Light, War and Jungle keep their own chrome; every other
- * theme is covered. Nothing here matches below lg, so phones and small
- * tablets are untouched.
+ * theme is covered. Phones and
+ * tablets below lg are never matched.
  *
  * The long :not(#_) prefix only lifts these rules above the per-theme rules
  * they replace. --g-* are the kit's tokens: dark defaults first, then the
@@ -81,6 +81,14 @@
   /* Messages: header and chat cards on the same edges as every other page */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-msg-cards] [data-kit-island] { margin-inline: 0 !important; }
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-msg-cards] [data-chat-list-scroll] { padding-left: 12px !important; padding-right: 12px !important; }
+  /* System runs page sections edge to edge with no box, so their content starts on the column edge:
+     12 from the column for a section or a plain wrapper, and nothing extra for a section inside a wrapper */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) :is([data-kit-body], [data-kit-body] [data-feed-swallow-content]) > :not([data-kit-section]):not([data-kit-flat-skip]),
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] :is([data-kit-body], [data-kit-body] [data-feed-swallow-content]) > :not([data-kit-section]):not([data-kit-flat-skip]),
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-kit-body] [data-kit-section],
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-kit-body] [data-kit-section] { padding-left: var(--dk-pad) !important; padding-right: var(--dk-pad) !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) :is([data-kit-body], [data-kit-body] [data-feed-swallow-content]) > :not([data-kit-section]):not([data-kit-flat-skip]) [data-kit-section],
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] :is([data-kit-body], [data-kit-body] [data-feed-swallow-content]) > :not([data-kit-section]):not([data-kit-flat-skip]) [data-kit-section] { padding-left: 0 !important; padding-right: 0 !important; }
 
   /* ===== Glass tokens ===== */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) {
@@ -240,4 +248,15 @@
 
   /* the loading placeholder for the nav bar has no backdrop layer, so it wears the pane itself */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-home-skeleton-nav] > [data-feed-nav] { background: var(--g-pane) !important; box-shadow: var(--g-pane-edge) !important; }
+
+  /* page headers built outside the page kit (Requests) are panes like every other header */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-main-panel] [data-feed-nav-outer] > [data-page-bento]:not([data-kit-island]):not([data-feed-nav]) {
+    background: var(--g-pane), var(--g-under) !important;
+    border: 0 !important;
+    box-shadow: var(--g-pane-edge) !important;
+    -webkit-backdrop-filter: var(--g-blur) !important;
+    backdrop-filter: var(--g-blur) !important;
+    border-radius: var(--dk-panel) !important;
+    padding: var(--dk-pad) !important;
+  }
 }
