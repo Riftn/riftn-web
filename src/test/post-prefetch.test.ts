@@ -31,3 +31,10 @@ describe('post link prefetch', () => {
     expect(await takePrefetchedPost('1')).toBeNull();
   });
 });
+
+describe('post link prefetch that never answers', () => {
+  it('gives up so the page can ask again', async () => {
+    (window as W).__postPrefetch = { id: '5', at: Date.now() - 5_990, signedIn: false, p: new Promise(() => {}) };
+    expect(await takePrefetchedPost('5')).toBeNull();
+  });
+});
