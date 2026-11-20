@@ -3145,8 +3145,11 @@ function AssistantPageForAccount() {
                             </LiquidGlassBubble>
                           ) : (
                             /* Assistant message - no bubble */
-                            <div className="text-white">
+                            <div className="text-white select-text">
                               <MarkdownText content={message.content} className="text-sm" />
+                              {message.content && !message.isError && message.id !== 'initial' && !(streamingReply && message.id === messages[messages.length - 1]?.id) && (
+                                <AssistantCopyButton text={message.content} label={t('comments.copyText')} copiedLabel={t('common.copied')} />
+                              )}
                               {/* Swap action card */}
                               {message.swapAction && (
                                 <SwapActionCard action={message.swapAction} autoQuote />
@@ -3547,4 +3550,36 @@ function AssistantPageForAccount() {
 export default function AssistantPage() {
   const account = useAccountDraftKey('assistant');
   return <AssistantPageForAccount key={account ?? 'guest'} />;
+}
+
+/** Copy button under an assistant text reply (Requests 1a783503). */
+function AssistantCopyButton({ text, label, copiedLabel }: { text: string; label: string; copiedLabel: string }) {
+  const [copied, setCopied] = useState(false);
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand('copy'); } finally { area.remove(); }
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      type="button"
+      onClick={() => void onCopy()}
+      aria-label={label}
+      className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-white/55 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+    >
+      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+      <span>{copied ? copiedLabel : label}</span>
+    </button>
+  );
 }
