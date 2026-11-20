@@ -18,6 +18,7 @@ import { FEED_TABS } from '@/constants/app.constants';
 import { setFeedTabsOpen, toggleFeedTabs, useFeedTabsOpen } from '@/lib/feed-tabs-reveal';
 
 import { setFeedIslandPortal } from '@/lib/feed-island-portal';
+import { MobileAccountButton } from './MobileAccountButton';
 
 const HOME_STATE_STORAGE_KEY = 'home-feed-state';
 
@@ -101,9 +102,11 @@ export function FeedIslandCapsule({
           width, so the mark sits in the true middle. */}
       <div data-feed-island-surface className="relative z-10 grid h-11 w-max grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-white/10 px-[10px] text-white">
         <div className="flex min-w-[28px] items-center justify-start">
-          {isAuthenticated && <button onClick={onAvatarClick} tabIndex={visible ? 0 : -1} aria-label={_copy("copy.c02651240c87", { defaultValue: "Toggle menu" })} className="flex shrink-0 items-center justify-center">
+          {isAuthenticated ? <button onClick={onAvatarClick} tabIndex={visible ? 0 : -1} aria-label={_copy("copy.c02651240c87", { defaultValue: "Toggle menu" })} className="flex shrink-0 items-center justify-center">
             {avatar ?? <Menu className="w-6 h-6" />}
-          </button>}
+          </button> : (
+            <MobileAccountButton action="signup" onClick={onAvatarClick} onPointerDown={onLogoPointerDown} tabIndex={visible ? 0 : -1} />
+          )}
         </div>
         <button
           data-entry-logo={show ? '' : undefined}
@@ -121,9 +124,13 @@ export function FeedIslandCapsule({
           </span>
         </button>
         <div className="flex min-w-[28px] items-center justify-end">
-          <button onClick={onBellClick} tabIndex={visible ? 0 : -1} aria-label={`${_copy("copy.788011833a5a", { defaultValue: "Notifications" })}${unread > 0 ? ` (${unread})` : ''}`} className="relative flex h-7 w-7 shrink-0 items-center justify-center">
-            <NotificationBell unread={unread} active={visible && !tabsOpen} />
-          </button>
+          {isAuthenticated ? (
+            <button onClick={onBellClick} tabIndex={visible ? 0 : -1} aria-label={`${_copy("copy.788011833a5a", { defaultValue: "Notifications" })}${unread > 0 ? ` (${unread})` : ''}`} className="relative flex h-7 w-7 shrink-0 items-center justify-center">
+              <NotificationBell unread={unread} active={visible && !tabsOpen} />
+            </button>
+          ) : (
+            <MobileAccountButton action="signin" onClick={onBellClick} onPointerDown={onLogoPointerDown} tabIndex={visible ? 0 : -1} />
+          )}
         </div>
       </div>
       {!tabsOpen && <FeedPillPullEffect distance={refresh.distance ?? 0} pulling={refresh.pulling ?? false} refreshing={refresh.refreshing} />}
