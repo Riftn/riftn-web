@@ -75,6 +75,8 @@ import {
 } from '@/lib/ai-intent';
 import { SEOHead } from '@/components/SEOHead';
 import { MarkdownText } from '@/lib/markdown';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
 
 import { AI_ASSISTANT_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
 import { VIDEO_MODELS, VIDEO_MODEL_OPTIONS, type VideoModelKey, type VideoModel } from '@/constants/video-models.constants';
@@ -452,6 +454,13 @@ function AssistantPageForAccount() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setInput]);
+  // ?action=<id>: a card the assistant offered somewhere else (a DM with
+  // @assistant, a shared link). Shown here so it can be confirmed.
+  const [linkedAction, setLinkedAction] = useState<string | null>(null);
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('action');
+    if (id && /^[a-f0-9]{24}$/i.test(id)) setLinkedAction(id.toLowerCase());
+  }, []);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [imageLoadStartTime, setImageLoadStartTime] = useState<number>(0);
@@ -2839,6 +2848,7 @@ function AssistantPageForAccount() {
                     </h2>
                     <p className="mt-1.5 text-sm text-white/55">{voiceStatusLine.idle}</p>
                   </div>
+                  {linkedAction && <AssistantActionCard actionId={linkedAction} />}
                   <div className="w-full">{composer}</div>
                   <div className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-2.5">
                     {startTiles.map((tile) => (
@@ -2862,6 +2872,7 @@ function AssistantPageForAccount() {
             {/* Messages */}
             <ScrollArea className="flex-1 px-4 pb-24 sm:pb-0 [&>div>div]:!block [&_[data-radix-scroll-area-scrollbar]]:hidden scrollbar-hide [&_*]:scrollbar-hide" ref={scrollRef}>
               <div className="py-4 space-y-4">
+                {linkedAction && <AssistantActionCard actionId={linkedAction} />}
                 <AnimatePresence mode="popLayout">
                   {messages.map((message) => (
                     <motion.div
@@ -2884,7 +2895,10 @@ function AssistantPageForAccount() {
                         <div className="w-full min-w-0 flex-1 flex flex-col gap-2">
                           {message.content && (
                             <div className="rounded-2xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] px-4 py-2.5 text-white">
-                              <MarkdownText content={message.content} className="text-sm" />
+                              <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                              {assistantActionIds(message.content).map((id) => (
+                                <AssistantActionCard key={id} actionId={id} />
+                              ))}
                             </div>
                           )}
                           <GeneratedAudioPlayer audioUrl={message.audioUrl} />
