@@ -13,6 +13,7 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TranslatableText } from '@/components/app/TranslatableText';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -114,7 +115,9 @@ export function NotificationCommentCard({ notification, onEngaged }: Props) {
     <div data-feed-comment className="mt-1.5">
       {text && (
         <p data-feed-comment-text className="text-[14.5px] leading-[1.42] whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-          {text}
+          {/* Foreign text reads in your language (follows the auto-translate
+              setting), same as comments under a post. */}
+          <TranslatableText text={text} />
         </p>
       )}
 
