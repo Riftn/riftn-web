@@ -450,7 +450,7 @@ function ImageCarousel({
   railPanel,
 }: {
   /**
-   * Desktop "Long form videos on wide screens" setting, applied to a single
+   * Desktop "Long form media on wide screens" setting, applied to a single
    * tall photo the same way: Ambient fills the space beside it with the photo
    * blurred, Rails puts the info panel beside it. Undefined everywhere else.
    */
@@ -1018,7 +1018,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
     ? post.imageUrls 
     : [post.image], [post.imageUrls, post.image]);
 
-  // Long form videos on wide screens (Settings > Appearance > Media) covers a
+  // Long form media on wide screens (Settings > Appearance > Media) covers a
   // single tall photo too: desktop feed card and post page only.
   const isDesktopViewport = useIsDesktopViewport();
   const wideVideoMode = useWideVideoMode();
