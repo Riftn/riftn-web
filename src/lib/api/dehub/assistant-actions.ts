@@ -1,6 +1,6 @@
 import { apiCall } from './core';
 
-export type AssistantActionKind = 'react' | 'follow' | 'unfollow' | 'chat_access';
+export type AssistantActionKind = 'react' | 'follow' | 'unfollow' | 'chat_access' | 'request_post';
 export type AssistantActionStatus = 'pending' | 'running' | 'done' | 'cancelled' | 'failed' | 'expired';
 
 export interface AssistantActionPerson {
@@ -23,6 +23,12 @@ export interface AssistantAction {
     sample?: { tokenId: number; title: string }[];
     people?: AssistantActionPerson[];
     allow?: boolean;
+    draft?: {
+      title: string;
+      description: string;
+      category: 'ui_ux' | 'performance' | 'new_feature' | 'bug_fix' | 'integration' | 'other';
+    };
+    duplicates?: { id: string; title: string }[];
   };
   result: {
     done?: number;
@@ -32,6 +38,7 @@ export interface AssistantAction {
     failed?: number;
     ok?: number;
     allowed?: boolean;
+    requestId?: string;
     used?: Record<string, number>;
     error?: string;
   } | null;
@@ -44,10 +51,10 @@ export function getAssistantAction(id: string): Promise<AssistantAction> {
   return apiCall<AssistantAction>(path(id), { requiresAuth: true });
 }
 
-export function confirmAssistantAction(id: string, reaction?: string): Promise<AssistantAction> {
+export function confirmAssistantAction(id: string, options: { reaction?: string; requestPost?: true } = {}): Promise<AssistantAction> {
   return apiCall<AssistantAction>(`${path(id)}/confirm`, {
     method: 'POST',
-    body: reaction ? { reaction } : {},
+    body: options,
     requiresAuth: true,
     timeoutMs: 30_000,
   });
