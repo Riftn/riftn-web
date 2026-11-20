@@ -24,6 +24,7 @@ import MessageCircle from "@/components/ui/cut-icons/message-envelope";
 import Fullscreen from "@/components/ui/cut-icons/fullscreen";
 import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
+import { PhoneChatListTop } from '@/components/app/chat/PhoneChatListTop';
 import { ChatIconButton, ChatListTop } from '@/components/app/chat/FullScreenChatChrome';
 import { ChatRowContextMenu, type ChatOptionsHandlers } from '@/components/app/chat/ChatOptionsMenu';
 import { isArchived, isMuted, useChatPrefs, useClearChatHistory } from '@/hooks/use-chat-prefs';
@@ -1327,7 +1328,8 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         void chatTabs.addChats(tabId, [chatId]);
         toast.success(_copy('chatTabs.addedTo', { defaultValue: 'Added to {{name}}', name: tab.name }));
       }}
-      className={deskCards ? 'px-0 pb-0 pt-0' : undefined}
+      className={deskCards ? 'px-0 pb-0 pt-0' : phonePill ? 'pl-3 pr-1 pb-0 pt-0' : undefined}
+      bare={phonePill}
       trailing={deskCards && (archivedCount > 0 || showArchived) ? (
         <button type="button" role="tab" data-chat-tab="archived" data-msg-cards-archived aria-selected={showArchived}
           onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
@@ -1428,6 +1430,25 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
     />
   ) : null;
 
+  // Phones: no pill. The filter chips scroll sideways and the one menu, new
+  // chat and search stay pinned at the end of their row.
+  const phoneTop = phonePill ? (
+    <PhoneChatListTop
+      title={_copy('settings.chat', { defaultValue: 'Chat' })}
+      chips={tabBar}
+      searchValue={searchQuery}
+      onSearch={setSearchQuery}
+      searchPlaceholder={t('messages.searchConversations')}
+      onNewChat={openNewMessage}
+      onRefresh={() => refetch()}
+      refreshing={isRefetching}
+      picking={picking}
+      onTogglePicking={guest ? undefined : togglePicking}
+      onNewTab={guest ? undefined : () => setTabEditor({})}
+      onEditTabs={guest ? undefined : () => setTabManager(true)}
+    />
+  ) : null;
+
   // Same total as the nav icon: requests never light it.
   const dmUnread = liveConversations.reduce((sum, c) => sum + (c.isRequest ? 0 : c.unreadCount || 0), 0);
   const deskTop = deskCards ? (
@@ -1499,7 +1520,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             here becomes a frosted rectangle. */}
         <div data-page-bento data-bento-flat data-msg-cards={cards ? '' : undefined} data-msg-plain={plainList ? '' : undefined} data-msg-cards-picking={deskCards && picking ? '' : undefined} className="relative w-full h-full flex flex-col overflow-hidden">
           {/* Header */}
-          {fullscreenTop ?? deskTop ?? (<PageIsland
+          {fullscreenTop ?? deskTop ?? phoneTop ?? (<PageIsland
             className={fullscreen ? 'shrink-0 top-0 lg:top-0 px-2 pt-2' : 'shrink-0'}
             icon={<BrandIcon src={messagesBubbleIcon} alt={_copy("copy.04d7b4833927", { defaultValue: "Messages" })} className="h-8 w-8 object-contain" />}
             title={_copy('settings.chat', { defaultValue: 'Chat' })}
@@ -1588,7 +1609,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </div>
           </PageIsland>)}
 
-          {!deskCards && tabBar}
+          {!deskCards && !phonePill && tabBar}
           {tabSheets}
 
           {/* Conversation List */}

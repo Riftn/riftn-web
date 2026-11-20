@@ -37,6 +37,8 @@ export interface ChatTabBarProps {
   className?: string;
   /** Pinned to the right end of the row (Archived on /app/messages). */
   trailing?: ReactNode;
+  /** Phones: only the chips. The tab menu button sits pinned beside the row instead. */
+  bare?: boolean;
 }
 
 export const CHAT_DRAG_TYPE = 'application/x-riftn-chat';
@@ -142,6 +144,7 @@ export function ChatTabBar(p: ChatTabBarProps) {
           </Ctx.ContextMenu>
         );
       })}
+      {!p.bare && (<>
       <button
         type="button"
         data-chat-tab-manage
@@ -154,6 +157,7 @@ export function ChatTabBar(p: ChatTabBarProps) {
       </button>
       {/* Fills the rest of the row so there's room to right-click. */}
       <div aria-hidden className="h-8 min-w-6 flex-1" />
+      </>)}
       {p.trailing}
     </div>
     </Ctx.ContextMenuTrigger>
