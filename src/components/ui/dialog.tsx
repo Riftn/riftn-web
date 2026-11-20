@@ -1,4 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
+import { overlayRoot } from "@/lib/overlay-root";
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import X from "@/components/ui/cut-icons/close";
@@ -22,7 +23,9 @@ const Dialog = ({ modal = true, onOpenChange, ...props }: React.ComponentProps<t
 
 const DialogTrigger = DialogPrimitive.Trigger;
 
-const DialogPortal = DialogPrimitive.Portal;
+const DialogPortal = (props: DialogPrimitive.DialogPortalProps) => (
+  <DialogPrimitive.Portal container={overlayRoot()} {...props} />
+);
 
 const DialogClose = DialogPrimitive.Close;
 

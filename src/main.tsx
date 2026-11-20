@@ -11,6 +11,8 @@ import { isChunkLoadError, recoverFromChunkError } from "./lib/lazy-with-retry";
 import { registerServiceWorker } from "./lib/register-sw";
 import "./lib/pwa-install"; // Catch the browser's one-time install offer for the Install Riftn button.
 import { installScrollFreezeWatchdog } from "./lib/scroll-freeze-watchdog";
+import { installOverlayClickGuard } from "./lib/overlay-click-guard";
+import { overlayRoot } from "./lib/overlay-root";
 import { installTapPendingLogo } from "./lib/tap-pending-logo";
 import { installFocusKeys } from "./lib/focus-keys";
 import { installScrollStopTap } from "./lib/scroll-stop-tap";
@@ -154,6 +156,9 @@ registerServiceWorker();
 // stuck overlay — report what caused it and put it back on desktop and touch.
 // See lib/scroll-freeze-watchdog.ts.
 installScrollFreezeWatchdog();
+installOverlayClickGuard();
+// Before the first overlay opens, so nothing portals to <body> in the meantime.
+overlayRoot();
 
 // iOS Safari only shows a pressed (:active) state on elements under a
 // touchstart listener; one passive no-op on the document covers everything.

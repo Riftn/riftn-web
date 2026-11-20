@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, toast, useSonner } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import X from "@/components/ui/cut-icons/close";
 import { ButtonLoader } from "@/components/app/DeHubLoader";
 import {
   TOAST_CLASSES,
@@ -96,7 +97,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
         visibleToasts={3}
         expand
         containerAriaLabel={_copy("copy.788011833a5a", { defaultValue: "Notifications" })}
-        icons={{ loading: <ButtonLoader size={16} /> }}
+        /* Every toast can be dismissed by hand, not only waited out. */
+        closeButton
+        icons={{ loading: <ButtonLoader size={16} />, close: <X className="h-4 w-4" /> }}
         toastOptions={{
           classNames: {
             // `group` is what ICON_CLASSES selects the loading case from.
