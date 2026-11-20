@@ -90,3 +90,27 @@ describe('assistant intent classification', () => {
     expect(isDeHubBrandedImageRequest('my DHB withdrawal is already pending')).toBe(false);
   });
 });
+
+describe('a question is answered, not drawn (Requests 1385bb79)', () => {
+  const questions = [
+    'what does "create a group" do on riftn',
+    'how do I make me a creator page',
+    'is it possible to design my own profile theme',
+    'why does my feed render so slowly',
+    'Hi, what is the best way to create a community?',
+    'tell me how to generate a referral code',
+    'what does riftn do',
+    'I want to know who made this app',
+  ];
+  it.each(questions)('stays a chat answer: %s', (message) => {
+    expect(requiresImageGeneration(message, false)).toBe(false);
+    expect(requiresImageGeneration(message, false, { conversational: true })).toBe(false);
+  });
+
+  it('still draws when asked for a picture', () => {
+    expect(requiresImageGeneration('what does a snow leopard look like', false, { conversational: true })).toBe(true);
+    expect(requiresImageGeneration('can you create a logo for my channel', false, { conversational: true })).toBe(true);
+    expect(requiresImageGeneration('how about a picture of a fox in the snow', false)).toBe(true);
+    expect(requiresImageGeneration('design a banner with neon colours', false)).toBe(true);
+  });
+});
