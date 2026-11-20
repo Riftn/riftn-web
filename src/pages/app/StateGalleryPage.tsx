@@ -1748,6 +1748,30 @@ function ReactionsGallery() {
 }
 
 /**
+ * The live viewer's Share button over a broadcast: it opens the post's share
+ * drawer (repost, quote, send in a message, copy link, and the device's own
+ * sheet as "Share link").
+ */
+function LiveShareGallery() {
+  const { t: _copy } = _useCopy();
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-live-share-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">LIVE · {_copy("copy.29887a5ff984", { defaultValue: "Share" })}</h2>
+      <div className="relative overflow-hidden rounded-2xl">
+        <img src={galleryCover} alt="" className="aspect-video w-full object-cover" />
+        <div className="absolute bottom-3 right-3" data-keep-dark>
+          <ActionBar compact postId="990020" tokenId={990020} likeCount={12} dislikeCount={0} commentCount={0}
+            reactionCounts={SAMPLE_REACTIONS} myReaction={null} tipCount={3} onTip={() => {}}
+            nativeShare={{ title: 'Live now' }} />
+        </div>
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
  * Disliking a post folds it out of the feed (the 👎 button below plays that
  * without casting a real vote; ↺ brings it back), and the profile Dislikes
  * tab's empty and private states.
@@ -2296,6 +2320,7 @@ export default function StateGalleryPage() {
         <MenuReorderGallery />
         <LiveAvatarsGallery />
         <ReactionsGallery />
+        <LiveShareGallery />
         <DislikesGallery />
         <MenusGallery />
 
