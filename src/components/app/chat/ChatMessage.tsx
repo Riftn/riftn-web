@@ -35,6 +35,8 @@ import { useTranslation as useTextTranslation } from '../TranslatableText';
 import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
@@ -340,6 +342,12 @@ export const ChatMessage = memo(function ChatMessage({
   const [holdOpen, setHoldOpen] = useState(false);
   // Right-click with a mouse: the menu opens where the pointer is.
   const menuPoint = useMenuPoint();
+  const authorLookup = holdOpen || menuPoint.mounted ? message.userId : undefined;
+  const { data: author } = useDeHubProfile({ userId: authorLookup, address: currentUserAddress || undefined, enabled: !!authorLookup });
+  const authorLocalTime = useProfileLocalTime(author?.customs?.publicTimeZone);
+  const localTimeLabel = authorLocalTime
+    ? _copy('profile.localTime', { defaultValue: 'Local time {{time}}', time: authorLocalTime })
+    : undefined;
   const canHold = !message.sendState;
   const hold = useHoldMenu((point, target) => {
     if (isEditing) return false;
@@ -424,6 +432,7 @@ export const ChatMessage = memo(function ChatMessage({
       actions={holdActions}
       frame={holdFrame}
       reactors={reactors}
+      meta={localTimeLabel}
     />
   );
   const menu = menuPoint.mounted ? (
@@ -435,7 +444,7 @@ export const ChatMessage = memo(function ChatMessage({
       onReact={handleQuickReact}
       actions={menuActions}
       reactors={reactors}
-      meta={messageMenuMeta(message.timestamp, message.isEdited)}
+      meta={[messageMenuMeta(message.timestamp, message.isEdited), localTimeLabel].filter(Boolean).join(' · ')}
     />
   ) : null;
 

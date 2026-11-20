@@ -64,6 +64,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { readPublicTimeZone } from '@/hooks/use-profile-local-time';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
@@ -586,6 +587,8 @@ function ProfileSettings() {
   const [displayName, setDisplayName] = useSurfaceDraft("pages/app/SettingsPage.tsx:displayName", '');
   const [username, setUsername] = useSurfaceDraft("pages/app/SettingsPage.tsx:username", '');
   const [bio, setBio] = useSurfaceDraft("pages/app/SettingsPage.tsx:bio", '');
+  const [publicTimeZone, setPublicTimeZone] = useState('');
+  const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [twitterLink, setTwitterLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:twitterLink", '');
   const [discordLink, setDiscordLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:discordLink", '');
   const [instagramLink, setInstagramLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:instagramLink", '');
@@ -619,6 +622,7 @@ function ProfileSettings() {
     displayName: '',
     username: '',
     bio: '',
+    publicTimeZone: '',
     twitterLink: '',
     discordLink: '',
     instagramLink: '',
@@ -672,6 +676,7 @@ function ProfileSettings() {
     const loadedBio = userData.aboutMe || userData.bio || '';
 
     const customs = userData.customs as Record<string, string> | undefined;
+    const loadedTimeZone = readPublicTimeZone(customs?.publicTimeZone);
     const raw = userData as Record<string, unknown>;
     // Check both top-level API fields and customs object (API may return either)
     const loadedTwitter = (raw.twitterLink as string) || customs?.twitterLink || '';
@@ -685,6 +690,7 @@ function ProfileSettings() {
     setDisplayName.initialize(loadedDisplayName);
     setUsername.initialize(loadedUsername);
     setBio.initialize(loadedBio);
+    setPublicTimeZone(loadedTimeZone);
     setTwitterLink.initialize(loadedTwitter);
     setDiscordLink.initialize(loadedDiscord);
     setInstagramLink.initialize(loadedInstagram);
@@ -697,6 +703,7 @@ function ProfileSettings() {
       displayName: loadedDisplayName,
       username: loadedUsername,
       bio: loadedBio,
+      publicTimeZone: loadedTimeZone,
       twitterLink: loadedTwitter,
       discordLink: loadedDiscord,
       instagramLink: loadedInstagram,
@@ -757,6 +764,7 @@ function ProfileSettings() {
     displayName !== originalValues.displayName ||
     username !== originalValues.username ||
     bio !== originalValues.bio ||
+    publicTimeZone !== originalValues.publicTimeZone ||
     twitterLink !== originalValues.twitterLink ||
     discordLink !== originalValues.discordLink ||
     instagramLink !== originalValues.instagramLink ||
@@ -787,6 +795,10 @@ function ProfileSettings() {
   
   const updateMutation = useMutation({
     mutationFn: async (data: UpdateProfileData) => {
+      if (data.customs && authUser?.address) {
+        const latest = await getAccountInfo(authUser.address);
+        data = { ...data, customs: { ...latest.customs, ...data.customs } };
+      }
       return updateProfile(data);
     },
     onSuccess: async (_result, variables) => {
@@ -873,6 +885,7 @@ function ProfileSettings() {
           displayName: userData.displayName || userData.display_name || '',
           username: userData.username || '',
           bio: userData.aboutMe || userData.bio || '',
+          publicTimeZone: readPublicTimeZone(refreshedCustoms?.publicTimeZone),
           twitterLink: (refreshedRaw.twitterLink as string) || refreshedCustoms?.twitterLink || '',
           discordLink: (refreshedRaw.discordLink as string) || refreshedCustoms?.discordLink || '',
           instagramLink: (refreshedRaw.instagramLink as string) || refreshedCustoms?.instagramLink || '',
@@ -1017,6 +1030,9 @@ function ProfileSettings() {
     // would be refused by the guard in updateProfile while editing their bio.
     if (username && usernameChanged) data.username = username;
     if (bio) data.aboutMe = bio;
+    if (publicTimeZone !== originalValues.publicTimeZone) {
+      data.customs = { publicTimeZone: publicTimeZone || false };
+    }
     // Always send social links (even empty strings) so they persist correctly
     data.twitterLink = twitterLink;
     data.discordLink = discordLink;
@@ -1213,6 +1229,23 @@ function ProfileSettings() {
 
       {/* Profile fields — label/value lines under the bio, links verified by rel="me" */}
       <ProfileFieldsSetting />
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <label htmlFor="settings-public-timezone" className={SETTINGS_LABEL_CLASS}>
+            {t('profile.shareLocalTime', { defaultValue: 'Show my local time' })}
+          </label>
+          <p className="text-sm text-zinc-400">
+            {t('profile.shareLocalTimeHint', { defaultValue: 'Show your timezone and local time on your public profile and in chat.' })}
+          </p>
+        </div>
+        <Switch
+          id="settings-public-timezone"
+          checked={!!publicTimeZone}
+          disabled={!deviceTimeZone && !publicTimeZone}
+          onCheckedChange={enabled => setPublicTimeZone(enabled ? deviceTimeZone || '' : '')}
+        />
+      </div>
 
       {/* Fediverse — the @username@riftn.com address Mastodon can follow */}
       <FediverseHandleSetting />
