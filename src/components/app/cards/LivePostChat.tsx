@@ -36,6 +36,8 @@ import { UserMentionDropdown } from '@/components/app/mentions';
 import { useMention } from '@/hooks/use-mention';
 import { useDraft } from '@/hooks/use-draft';
 import { useLiveViewerActions } from '@/components/app/live/live-viewer-actions';
+import { PointsIcon } from '@/components/app/live/points/PointsIcon';
+import { PointsButton } from '@/components/app/live/points/PointsButton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { replaceLinksWithEmoji, renderTextWithLinks } from '@/components/app/TranslatableText';
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
@@ -288,6 +290,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         ? (moment.message || '')
         : moment.type === 'giftSub'
           ? t('liveHype.chat.giftedSubs', { count: moment.giftCount ?? 1 })
+          : moment.type === 'reward'
+            ? t('livePoints.chatRedeemed', { title: moment.rewardTitle || '' }) + (moment.message ? `: ${moment.message}` : '')
           : t('live.chatJoined'),
       message_type: 'system', image_url: null, is_pinned: false, created_at: moment.timestamp,
     })),
@@ -299,6 +303,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // the host's own overlay. Null when the caller has no stream ObjectId to
   // resolve, and then nothing is drawn: no number beats a wrong one.
   const watching = useStreamAudience(liveStreamId, !isOffline);
+  const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && newMessage.trim().length === 0;
   // Lines already in the chat when it loaded sit still; anything after glides
   // in, and your own line or gift lands with its text softly glowing (no ring).
   const settledIdsRef = useRef<Set<string> | null>(null);
@@ -617,6 +622,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         {/* The audience, not the platform. A bare people-icon-plus-number is
             exactly what the old global count looked like, so this one says
             what it is counting. */}
+        <div className="flex items-center gap-2">
+        {!isHost && !isOffline && <PointsButton streamId={liveStreamId} variant="chip" />}
         {watching !== null && (
           <button
             type="button"
@@ -630,6 +637,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             <span>{_copy("copy.8fc2e70dbd8e", { defaultValue: "{{count}} watching", count: watching })}</span>
           </button>
         )}
+        </div>
         {watching !== null && (
           <LiveAudienceSheet open={audienceOpen} onOpenChange={setAudienceOpen} audience={audience} loading={audienceLoading} />
         )}
@@ -706,6 +714,17 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                         </span>
                         {msg.content && (
                           <p className="chat-body text-zinc-300 break-words whitespace-pre-wrap mt-0.5"><InlineEmoji value={msg.content} /></p>
+                        )}
+                      </>
+                    ) : moment?.type === 'reward' ? (
+                      <>
+                        <span className="text-zinc-400 ml-1.5 inline-flex items-center gap-1 align-middle">
+                          <PointsIcon className="h-3 w-3" />
+                          {t('livePoints.chatRedeemedShort')}
+                          <span className="font-semibold text-white">{moment.rewardTitle}</span>
+                        </span>
+                        {moment.message && (
+                          <p className="chat-body text-zinc-300 break-words whitespace-pre-wrap mt-0.5">{moment.message}</p>
                         )}
                       </>
                     ) : (
@@ -1048,7 +1067,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             disabled={isOffline || !isAuthenticated || bannedHere || muted}
             className={cn(
               'chat-text-input max-h-32 resize-none text-white text-sm',
-              overlay ? (newMessage.trim() ? 'pr-14' : 'pr-4') : 'pr-24',
+              overlay ? (newMessage.trim() ? 'pr-14' : showInlinePoints ? 'pr-20' : 'pr-4') : 'pr-24',
               overlay
                 ? 'min-h-[46px] rounded-xl border-white/15 bg-black/40 py-3 pl-4 backdrop-blur-md placeholder:text-white/50'
                 : 'min-h-[56px] rounded-xl border-white/10 bg-white/5 placeholder:text-zinc-500'
@@ -1075,6 +1094,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                 disabled={isOffline || !isAuthenticated || bannedHere || muted}
               />
             )}
+            {/* Channel points, at the end of the empty box: the viewer's
+                balance with this creator, and the rewards behind it. */}
+            {showInlinePoints && <PointsButton streamId={liveStreamId} variant="inline" />}
             {(!overlay || newMessage.trim().length > 0) && (
               <button
                 onClick={handleSend}

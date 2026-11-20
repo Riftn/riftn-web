@@ -39,6 +39,7 @@ import { HighlightsPanel } from './HighlightsPanel';
 import { QuickControls } from './QuickControls';
 import { SubathonPanel } from './SubathonPanel';
 import { PointsPanel } from './PointsPanel';
+import { RewardsPanel } from './RewardsPanel';
 import { OverlayCreatorContext, SubathonContext } from '../overlay/subathon';
 import { HypeContext } from '../overlay/hype-train';
 import { BadgesPanel } from './BadgesPanel';
@@ -400,6 +401,8 @@ export function LiveStudio() {
       <PollPanel poll={poll} onPoll={setPoll} />
 
       <SubathonPanel subathon={subathon} onChange={setSubathon} />
+
+      <RewardsPanel />
 
       <PointsPanel address={walletAddress} />
 
