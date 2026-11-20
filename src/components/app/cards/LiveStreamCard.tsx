@@ -1865,6 +1865,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
                 commentCount={stream.commentCount}
                 tipCount={tipCount}
                 onTip={() => setShowGiftDrawer(true)}
+                nativeShare={{ title: stream.title }}
               />
               </div>
             }
@@ -1887,6 +1888,7 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             commentCount={stream.commentCount}
             tipCount={tipCount}
             onTip={() => setShowGiftDrawer(true)}
+            nativeShare={{ title: stream.title }}
             utilityDesktopAnchor
             onComment={() => setShowComments(prev => !prev)}
             className="p-0 mb-2"

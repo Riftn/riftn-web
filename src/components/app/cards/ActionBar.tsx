@@ -94,6 +94,7 @@ import {
 import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
 const RepostShareSheet = lazy(() => import('@/components/app/post-stage/RepostShareSheet').then(m => ({ default: m.RepostShareSheet })));
 import { viewerShareUrl } from '@/lib/share-url';
+import { trackShare } from '@/lib/analytics';
 import { POST_MENU_EVENT, type PostMenuBridgeDetail } from '@/lib/post-menu';
 
 interface ActionBarProps {
@@ -246,6 +247,12 @@ interface ActionBarProps {
    * invalidation behind it. All of that stays here.
    */
   compact?: boolean;
+  /**
+   * Adds a "Share link" row that opens the device's own share sheet, where
+   * the browser has one. The live viewer sets it: its Share button is the only
+   * way out of a broadcast to another app.
+   */
+  nativeShare?: { title?: string };
 
   /**
    * Hide the utility buttons (bookmark / pin / info) at ALL breakpoints.
@@ -410,6 +417,7 @@ export function ActionBar({
   centered = false,
   hideUtilityDesktop = false,
   compact = false,
+  nativeShare,
   hideUtility = false,
   utilityDesktopAnchor = false,
   stage = null,
@@ -863,6 +871,17 @@ export function ActionBar({
     setSheetOpen(false);
   };
 
+  const canNativeShare = !!nativeShare && typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const handleNativeShare = () => {
+    const url = viewerShareUrl(shareUrlForPost());
+    setSheetOpen(false);
+    navigator
+      .share({ title: nativeShare?.title || undefined, url })
+      .then(() => trackShare('native', { kind: 'post' }))
+      // Dismissing the system sheet rejects; nothing to report.
+      .catch(() => {});
+  };
+
   const [isReposted, setIsReposted] = useState(() => initialIsReposted || (postId ? isPostReposted(postId) : false));
 
   useEffect(() => {
@@ -1029,6 +1048,15 @@ export function ActionBar({
         <Link className="w-5 h-5" />
         <span className="font-medium"><TranslationText name="copy.724e78a3254c" fallback={"Copy Link"} /></span>
       </button>
+      {canNativeShare && (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleNativeShare(); }}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Share2 className="w-5 h-5" />
+          <span className="font-medium">{_copy('communities.shareLink')}</span>
+        </button>
+      )}
       {isPublicPost && postId && /^\d+$/.test(postId) && (
         <button
           onClick={(e) => { e.stopPropagation(); copyPostEmbedCode(postId, _copy); setSheetOpen(false); }}
