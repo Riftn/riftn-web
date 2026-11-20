@@ -72,6 +72,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'appearance', anchor: 'menu-layout', label: 'Menu layout', labelKey: 'settings.menuLayout', keywords: 'menu tabs sections folders groups categories buttons icons grid organise' },
   { tab: 'appearance', anchor: 'default-feed', label: 'Default feed', labelKey: 'settings.defaultFeed', keywords: 'home shorts videos images music audio live open start tab' },
   { tab: 'appearance', anchor: 'feed-toggles', label: 'Reset feed toggles', labelKey: 'settings.feedToggles', keywords: 'filters sort default remember clear' },
+  { tab: 'appearance', anchor: 'feed-separator', label: 'Post separator', labelKey: 'settings.feedSeparator', keywords: 'bento cards line divider separator borders spacing posts feed' },
   { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
   { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
   { tab: 'appearance', anchor: 'login-look', label: 'Sign-in screen', labelKey: 'settings.loginLook.title', keywords: 'login sign in screen logo animation look tube tv vhs led wall hologram neon glow 3d flat plain retro scan lines slogan' },

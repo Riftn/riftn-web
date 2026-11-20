@@ -1,0 +1,41 @@
+/* Settings > Appearance > Layout > Post separator: Thin line
+   (lib/feed-separator.ts sets <html data-feed-sep="line">).
+
+   Each post loses its card: no fill, frame, glow or blur. The post's box
+   stays exactly where the card was, which is the same width as the feed's
+   top pill, so one thin line along its bottom lines up with the pill and the
+   rest of the page. The card's side padding goes, so the name row, text,
+   media and action row move out to where the card's edge used to be. Media
+   keeps its own rounded corners and is never pushed past that edge.
+
+   Themes that already have no cards (Minimal, Light, Immersive) keep their
+   own layout. The :not(#_) chain outranks the theme and desktop-kit rules,
+   which use up to ten. */
+
+html[data-feed-sep='line'] {
+  --feed-sep-line: rgb(255 255 255 / 0.12);
+}
+html[data-feed-sep='line'][data-system-tone='light'] {
+  --feed-sep-line: rgb(11 11 13 / 0.12);
+}
+
+html[data-feed-sep='line']:not([data-theme='minimal'], [data-theme='light'], [data-theme='immersive']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item] {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  outline: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid var(--feed-sep-line) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* A theme's hover lift and hover fill stay off too: there is no card to lift. */
+html[data-feed-sep='line']:not([data-theme='minimal'], [data-theme='light'], [data-theme='immersive']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-feed-root] [data-feed-item]:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}

@@ -62,6 +62,8 @@
           if (tone === 'light') t = 'system';
           d.dataset.theme = t;
           d.dataset.systemTone = tone;
+          // Post separator: thin lines instead of cards (src/lib/feed-separator.ts).
+          if (localStorage.getItem('dehub.feedSeparator') === 'line') d.dataset.feedSep = 'line';
           d.dataset.shortsEnabled = localStorage.getItem('shorts-enabled') === 'false' ? 'false' : 'true';
           d.dataset.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true' ? 'true' : 'false';
 
