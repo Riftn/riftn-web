@@ -54,6 +54,10 @@ const EVENT = {
   share: 'stream.share',
   /** The live creator saved their overlay; redraw it. */
   overlayUpdated: 'stream.overlay.updated',
+  /** A viewer spent channel points on one of the creator's rewards. */
+  reward: 'stream.reward',
+  /** The creator changed their rewards; refetch them. */
+  rewardsUpdated: 'stream.rewards.updated',
 } as const;
 
 export interface StreamReactionBroadcast {
@@ -519,7 +523,9 @@ export type LiveRoomEvent =
   | { type: 'reaction'; reactionType: string; user: StreamJoinUser }
   // From the stream's chat room, which is a different connection (use-overlay-chat).
   | { type: 'chat'; id: string; text: string; user: StreamJoinUser }
-  | { type: 'chatDeleted'; id: string };
+  | { type: 'chatDeleted'; id: string }
+  | { type: 'reward'; id: string; title: string; text: string; cost: number; user: StreamJoinUser }
+  | { type: 'rewardsUpdated' };
 
 export function roomUser(raw: any): StreamJoinUser {
   const user = raw && typeof raw === 'object' ? raw : {};
@@ -624,7 +630,26 @@ export function watchLiveRoomEvents(streamId: string, onEvent: (event: LiveRoomE
     onEvent({ type: 'overlayUpdated', version: Number(data?.version) || 0 });
   };
 
+  const onReward = (data: any) => {
+    if (!isForStream(data, streamId)) return;
+    const r = data?.redemption;
+    if (!r || typeof r.id !== 'string' || typeof r.title !== 'string') return;
+    onEvent({
+      type: 'reward',
+      id: r.id,
+      title: String(r.title).slice(0, 60),
+      text: String(r.text || '').slice(0, 200),
+      cost: Number(r.cost) || 0,
+      user: roomUser(r.viewer),
+    });
+  };
+  const onRewardsUpdated = (data: any) => {
+    if (isForStream(data, streamId)) onEvent({ type: 'rewardsUpdated' });
+  };
+
   const handlers: Array<[string, (data: any) => void]> = [
+    [EVENT.reward, onReward],
+    [EVENT.rewardsUpdated, onRewardsUpdated],
     [EVENT.tipStreamer, onTip],
     [EVENT.tipConfirmed, onTipConfirmed],
     [EVENT.follow, onFollow],

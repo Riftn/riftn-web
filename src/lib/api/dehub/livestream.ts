@@ -30,7 +30,7 @@ export interface StreamKeyInfo {
 
 export interface StreamActivity {
   id: string;
-  type: 'join' | 'leave' | 'like' | 'gift' | 'giftSub' | 'comment' | 'start' | 'end' | 'paused' | 'resumed' | 'reaction' | 'message';
+  type: 'join' | 'leave' | 'like' | 'gift' | 'giftSub' | 'reward' | 'comment' | 'start' | 'end' | 'paused' | 'resumed' | 'reaction' | 'message';
   address: string;
   username?: string;
   avatarUrl?: string;
@@ -39,6 +39,8 @@ export interface StreamActivity {
   giftCurrency?: string;
   /** Subscriptions bought for others, on a `giftSub` moment. */
   giftCount?: number;
+  /** The reward a viewer spent channel points on, on a `reward` moment. */
+  rewardTitle?: string;
   timestamp: string;
 }
 
