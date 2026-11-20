@@ -700,7 +700,7 @@
     "heading": "Shorts pe Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Ecranul de conectare", "desc": "Cum se mișcă logoul și sloganul Riftn pe ecranul de conectare de pe acest dispozitiv.", "tube": "TV cu tub", "vhs": "Casetă VHS", "led": "Perete LED", "holo": "Hologramă", "neon": "Neon", "3d": "3D", "flat": "Plat"}, "arrivalLook": {"title": "După conectare", "desc": "Ce rulează cât se încarcă contul, înainte ca poza ta să ajungă pe pagină. Pe acest dispozitiv.", "rift": "Fisură", "trace": "Urmă", "frame": "Ramă foto", "orbit": "Orbită"},
+    "loginLook": {"title": "Ecranul de conectare", "desc": "Cum se mișcă logoul și sloganul Riftn pe ecranul de conectare de pe acest dispozitiv.", "tube": "TV cu tub", "vhs": "Casetă VHS", "led": "Perete LED", "holo": "Hologramă", "neon": "Neon", "3d": "3D", "flat": "Plat"}, "arrivalLook": {"title": "După conectare", "desc": "Ce rulează cât se încarcă contul, înainte ca poza ta să ajungă pe pagină. Pe acest dispozitiv.", "trace": "Urmă", "tune": "Acord", "rift": "Fisură", "deck": "Pachet", "glass": "Picătură de sticlă"},
     "postLanding": "După ce postezi",
     "postLandingDesc": "Cum apare noua ta postare în flux",
     "postLandingGhost": "Loc fantomă",

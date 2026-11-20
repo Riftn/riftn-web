@@ -783,7 +783,7 @@
     "heading": "Courts Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Écran de connexion", "desc": "Comment le logo et le slogan Riftn bougent sur l'écran de connexion de cet appareil.", "tube": "Télé à tube", "vhs": "Cassette VHS", "led": "Mur LED", "holo": "Hologramme", "neon": "Néon", "3d": "3D", "flat": "Plat"}, "arrivalLook": {"title": "Après la connexion", "desc": "Ce qui s'affiche pendant le chargement de ton compte, avant que ta photo arrive sur la page. Sur cet appareil.", "rift": "Faille", "trace": "Tracé", "frame": "Cadre photo", "orbit": "Orbite"},
+    "loginLook": {"title": "Écran de connexion", "desc": "Comment le logo et le slogan Riftn bougent sur l'écran de connexion de cet appareil.", "tube": "Télé à tube", "vhs": "Cassette VHS", "led": "Mur LED", "holo": "Hologramme", "neon": "Néon", "3d": "3D", "flat": "Plat"}, "arrivalLook": {"title": "Après la connexion", "desc": "Ce qui s'affiche pendant le chargement de ton compte, avant que ta photo arrive sur la page. Sur cet appareil.", "trace": "Tracé", "tune": "Syntonisation", "rift": "Faille", "deck": "Jeu de cartes", "glass": "Goutte de verre"},
     "chatDeleteChoice": "Quand vous supprimez un message",
     "chatDeleteChoiceDesc": "Demander à chaque fois, ou toujours supprimer pour vous seul ou pour tout le monde dans la discussion.",
     "chatReactionStyle": "Réactions dans le chat",

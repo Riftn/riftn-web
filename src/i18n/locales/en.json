@@ -794,7 +794,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
-    "loginLook": {"title": "Sign-in screen", "desc": "How the Riftn logo and slogan move on the sign-in screen on this device.", "tube": "Tube TV", "vhs": "VHS tape", "led": "LED wall", "holo": "Hologram", "neon": "Neon glow", "3d": "3D", "flat": "Flat"}, "arrivalLook": {"title": "After you sign in", "desc": "What plays while your account loads, before your picture lands on the page. On this device.", "rift": "Rift", "trace": "Trace", "frame": "Picture frame", "orbit": "Orbit"},
+    "loginLook": {"title": "Sign-in screen", "desc": "How the Riftn logo and slogan move on the sign-in screen on this device.", "tube": "Tube TV", "vhs": "VHS tape", "led": "LED wall", "holo": "Hologram", "neon": "Neon glow", "3d": "3D", "flat": "Flat"}, "arrivalLook": {"title": "After you sign in", "desc": "What plays while your account loads, before your picture lands on the page. On this device.", "trace": "Trace", "tune": "Tune in", "rift": "Rift", "deck": "Deck", "glass": "Glass drop"},
     "chatCards": "Chats as cards",
     "chatCardsDesc": "Each chat on its own card. Turn off for a plain list with a line between chats.",
     "chatDeleteChoice": "When you delete a message",

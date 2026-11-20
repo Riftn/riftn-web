@@ -707,7 +707,7 @@
     "heading": "Riftn 短片"
   },
   "settings": {
-    "loginLook": {"title": "登入畫面", "desc": "呢部裝置登入畫面入面 Riftn 標誌同標語點樣郁。", "tube": "映像管電視", "vhs": "VHS 錄影帶", "led": "LED 牆", "holo": "全息投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登入之後", "desc": "帳戶載入緊、頭像落到頁面之前播嘅效果。只限呢部裝置。", "rift": "裂縫", "trace": "描邊", "frame": "相框", "orbit": "軌道"},
+    "loginLook": {"title": "登入畫面", "desc": "呢部裝置登入畫面入面 Riftn 標誌同標語點樣郁。", "tube": "映像管電視", "vhs": "VHS 錄影帶", "led": "LED 牆", "holo": "全息投影", "neon": "霓虹", "3d": "3D", "flat": "扁平"}, "arrivalLook": {"title": "登入之後", "desc": "帳戶載入緊、頭像落到頁面之前播嘅效果。只限呢部裝置。", "trace": "描邊", "tune": "調台", "rift": "裂縫", "deck": "一副牌", "glass": "玻璃水滴"},
     "postLanding": "發佈之後",
     "postLandingDesc": "新帖子喺動態入面出現嘅方式",
     "postLandingGhost": "幽靈空位",

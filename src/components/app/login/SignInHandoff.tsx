@@ -24,10 +24,9 @@
  * page is usable the moment the sheet is gone.
  *
  * The Rift is the default. Settings → Appearance → After you sign in swaps it
- * for Trace (a light runs round the picture's outline), Picture frame (an
- * empty frame that fills) or Orbit (a light circles, then the picture opens
- * from the middle). Only the marks and the way the frame opens change; the
- * timing, the picture and its flight home are the same for all of them.
+ * for Trace, Tune in, Deck or Glass drop (arrival-concepts.ts). Only what
+ * plays and how the picture comes in change; the timing, the picture and its
+ * flight home are the same for all of them.
  */
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
@@ -35,7 +34,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSignInSheetState } from '@/lib/sign-in-handoff';
 import { buildAvatarUrl } from '@/lib/media-url';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { ARRIVAL_INTRO_MS, useArrivalLook, type ArrivalLook } from '@/lib/arrival-look';
+import { CONCEPT_LOOKS, CONCEPT_NAME_MS, CONCEPT_REVEAL_MS, mountConcept, type ConceptHandle, type ConceptLook } from './arrival-concepts';
 import './sign-in-handoff.css';
 
 type Phase = 'idle' | 'waiting' | 'arriving' | 'open' | 'flying' | 'leaving';
@@ -55,6 +56,8 @@ const ACCOUNT_GRACE_MS = 600;
 /** The picture waits this long for the sheet to finish leaving before it flies. */
 const SHEET_GONE_CAP_MS = 1500;
 const FRAME_PX = 120;
+/** A concept arrival: from the account landing until the picture flies home. */
+const CONCEPT_HOLD_MS = 1300;
 
 /** Where the signed-in account's own picture sits on the page, if it is on screen. */
 function findOwnPicture(): HTMLElement | null {
@@ -120,44 +123,53 @@ export function RiftMarks() {
   );
 }
 
-/** The picture frame's outline, for Trace: a 120px square with a 15px corner. */
-const OUTLINE_PATH = 'M60 1H104A15 15 0 0 1 119 16V104A15 15 0 0 1 104 119H16A15 15 0 0 1 1 104V16A15 15 0 0 1 16 1Z';
-
-/** Trace: the outline draws itself in, then a light keeps running round it. */
-function TraceMarks() {
-  return (
-    <>
-      <div className="signin-arrival__glow" aria-hidden />
-      <svg className="signin-arrival__trace" viewBox="0 0 120 120" aria-hidden>
-        <path className="signin-arrival__trace-base" d={OUTLINE_PATH} pathLength={100} />
-        <path className="signin-arrival__trace-halo" d={OUTLINE_PATH} pathLength={100} />
-        <path className="signin-arrival__trace-run" d={OUTLINE_PATH} pathLength={100} />
-      </svg>
-    </>
-  );
+/**
+ * Trace, Tune in, Deck and Glass drop: drawn frame by frame (arrival-concepts).
+ * `opened` is the moment the account is in; each one then ends on the picture
+ * where the shared frame sits.
+ */
+function ConceptMarks({ look, opened, picture, initial, keepPicture, playing = true }: {
+  look: ConceptLook;
+  opened: boolean;
+  picture?: string;
+  initial: string;
+  keepPicture?: boolean;
+  playing?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const handle = useRef<ConceptHandle | null>(null);
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const reduced = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const h = mountConcept(root, look, { picture, initial, keepPicture, reduced });
+    handle.current = h;
+    return () => { h.stop(); handle.current = null; };
+    // The picture is passed on below, as soon as the account is known.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [look]);
+  useEffect(() => { handle.current?.setPicture(picture, initial); }, [picture, initial, look]);
+  useEffect(() => { if (opened) handle.current?.open(); }, [opened, look]);
+  useEffect(() => { handle.current?.play(playing); }, [playing, look]);
+  return <div ref={ref} className="signin-concept" aria-hidden />;
 }
 
-/** Picture frame: an empty frame in the picture's shape, breathing softly. */
-function FrameMarks() {
-  return <div className="signin-arrival__box" aria-hidden />;
-}
-
-/** Orbit: a faint ring with a light circling it. */
-function OrbitMarks() {
-  return (
-    <>
-      <div className="signin-arrival__glow" aria-hidden />
-      <div className="signin-arrival__ring" aria-hidden />
-      <div className="signin-arrival__orbit" aria-hidden><i /></div>
-    </>
-  );
+export function isConceptLook(look: ArrivalLook): look is ConceptLook {
+  return (CONCEPT_LOOKS as readonly string[]).includes(look);
 }
 
 /** What plays while the account loads, for the picked arrival. */
-export function ArrivalMarks({ look }: { look: ArrivalLook }) {
-  if (look === 'trace') return <TraceMarks />;
-  if (look === 'frame') return <FrameMarks />;
-  if (look === 'orbit') return <OrbitMarks />;
+export function ArrivalMarks({ look, opened = false, picture, initial = '', keepPicture, playing }: {
+  look: ArrivalLook;
+  opened?: boolean;
+  picture?: string;
+  initial?: string;
+  keepPicture?: boolean;
+  playing?: boolean;
+}) {
+  if (isConceptLook(look)) {
+    return <ConceptMarks key={look} look={look} opened={opened} picture={picture} initial={initial} keepPicture={keepPicture} playing={playing} />;
+  }
   return <RiftMarks />;
 }
 
@@ -170,6 +182,8 @@ export function SignInHandoff() {
   const [phase, setPhase] = useState<Phase>('idle');
   const [flight, setFlight] = useState<CSSProperties | undefined>(undefined);
   const [pictureReady, setPictureReady] = useState(false);
+  /** A concept arrival has put the picture where the frame is. */
+  const [revealed, setRevealed] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
   // Signed in before the sheet opened means "add a profile" or a wallet
   // unlock, neither of which is an arrival.
@@ -186,7 +200,8 @@ export function SignInHandoff() {
     ? buildAvatarUrl(address, user.avatarImageUrl, FRAME_PX * 2)
     : undefined;
   const name = signedIn ? (user?.displayName || user?.display_name || user?.username || '') : '';
-  const initial = (name || user?.username || '?').trim().charAt(0).toUpperCase();
+  // Never a "?": an account with no name yet shows the plain frame.
+  const initial = (name || user?.username || '').trim().charAt(0).toUpperCase();
 
   // Follow the sheet.
   useLayoutEffect(() => {
@@ -269,7 +284,24 @@ export function SignInHandoff() {
     return () => window.clearTimeout(timer);
   }, [phase, sheet, signedIn]);
 
+  // A concept arrival hands the picture to the frame once it stands still.
+  const concept = isConceptLook(look);
+  useEffect(() => {
+    if (!concept || phase !== 'open') { if (phase === 'idle' || phase === 'waiting' || phase === 'arriving') setRevealed(false); return; }
+    const timer = window.setTimeout(() => setRevealed(true), CONCEPT_REVEAL_MS[look as ConceptLook]);
+    return () => window.clearTimeout(timer);
+  }, [concept, phase, look]);
+
+  // The glass wants a lighter veil behind it (sign-in-handoff.css).
+  useEffect(() => {
+    const on = look === 'glass' && phase !== 'idle';
+    document.documentElement.toggleAttribute('data-arrival-glass', on);
+    return () => document.documentElement.removeAttribute('data-arrival-glass');
+  }, [look, phase]);
+
   // Open: hold on the picture, then send it home once the sheet has gone.
+  // The concepts take longer to bring the picture in, and hold it as long.
+  const holdMs = concept ? CONCEPT_HOLD_MS : OPEN_MS + HOLD_MS;
   const openedAt = useRef(0);
   useEffect(() => {
     if (phase === 'open') openedAt.current = Date.now();
@@ -279,8 +311,8 @@ export function SignInHandoff() {
     const sheetGone = sheet === 'closed';
     const since = Date.now() - openedAt.current;
     const wait = sheetGone
-      ? Math.max(0, OPEN_MS + HOLD_MS - since)
-      : Math.max(0, OPEN_MS + HOLD_MS + SHEET_GONE_CAP_MS - since);
+      ? Math.max(0, holdMs - since)
+      : Math.max(0, holdMs + SHEET_GONE_CAP_MS - since);
     const timer = window.setTimeout(() => {
       const from = frameRef.current?.getBoundingClientRect();
       const target = sheetGone ? findOwnPicture() : null;
@@ -299,7 +331,7 @@ export function SignInHandoff() {
       setPhase('flying');
     }, wait);
     return () => window.clearTimeout(timer);
-  }, [phase, sheet]);
+  }, [phase, sheet, holdMs]);
 
   useEffect(() => {
     if (phase !== 'flying' && phase !== 'leaving') return;
@@ -319,14 +351,17 @@ export function SignInHandoff() {
     <div
       className="signin-rift"
       data-arrival={look}
+      data-concept={concept ? '' : undefined}
+      data-revealed={concept && revealed ? '' : undefined}
       data-phase={phase}
       data-opened={opened ? '' : undefined}
+      style={concept ? ({ '--concept-name-delay': `${CONCEPT_NAME_MS[look as ConceptLook]}ms` } as CSSProperties) : undefined}
       role="status"
       aria-live="polite"
       aria-label={opened ? name : t('loginModal.signingIn', 'Signing you in…')}
     >
       <div className="signin-rift__stage">
-        <ArrivalMarks look={look} />
+        <ArrivalMarks look={look} opened={opened} picture={picture} initial={initial} />
         <div ref={frameRef} className="signin-rift__frame" style={flight} aria-hidden>
           {/* Only an account with no picture shows its initial; one whose
               picture is still on its way shows the dark frame it fades into. */}
@@ -342,7 +377,13 @@ export function SignInHandoff() {
           )}
         </div>
         {name && phase === 'open' && (
-          <p className="signin-rift__name" aria-hidden>{name}</p>
+          // As on profiles: the name in bold with the badge after it, no pill.
+          // White on the sheet's dark veil; the theme's own text colour once
+          // the page shows through.
+          <p className="signin-rift__name text-white" data-on-veil={sheet !== 'closed' ? '' : undefined} aria-hidden>
+            <span className="signin-rift__nametext">{name}</span>
+            <span className="signin-rift__badge"><BadgeIcon lookupId={address} username={user?.username || undefined} className="w-[1em] h-[1em]" /></span>
+          </p>
         )}
       </div>
     </div>,

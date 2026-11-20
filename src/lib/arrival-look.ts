@@ -1,21 +1,22 @@
 /**
- * How a log-in lands on the page (SignInHandoff): the Rift (the default),
- * Trace, Picture frame or Orbit. A per-device choice in Settings → Appearance,
+ * How a log-in lands on the page (SignInHandoff): Trace, Tune in, the Rift
+ * (the default), Deck or Glass drop. A per-device choice in Settings → Appearance,
  * kept on this device like the sign-in logo look, since it plays before the
  * account is loaded. Same key and values as the app's `libs/arrival-look.ts`.
  */
 import { useSyncExternalStore } from 'react';
 
-export const ARRIVAL_LOOKS = ['rift', 'trace', 'frame', 'orbit'] as const;
+export const ARRIVAL_LOOKS = ['trace', 'tune', 'rift', 'deck', 'glass'] as const;
 export type ArrivalLook = (typeof ARRIVAL_LOOKS)[number];
 export const DEFAULT_ARRIVAL_LOOK: ArrivalLook = 'rift';
 
 /** How long each one's intro plays before it may open on the picture. */
 export const ARRIVAL_INTRO_MS: Record<ArrivalLook, number> = {
+  trace: 300,
+  tune: 280,
   rift: 1100,
-  trace: 700,
-  frame: 0,
-  orbit: 500,
+  deck: 600,
+  glass: 450,
 };
 
 const KEY = 'riftn.signin.arrival';

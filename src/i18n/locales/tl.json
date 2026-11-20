@@ -707,7 +707,7 @@
     "heading": "Shorts ng Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Screen ng pag-sign in", "desc": "Kung paano gumagalaw ang logo at slogan ng Riftn sa screen ng pag-sign in sa device na ito.", "tube": "Tube TV", "vhs": "VHS tape", "led": "LED wall", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Patag"}, "arrivalLook": {"title": "Pagkatapos mag-sign in", "desc": "Ang ipinapakita habang naglo-load ang account mo, bago lumapag ang larawan mo sa page. Sa device na ito.", "rift": "Lamat", "trace": "Bakas", "frame": "Picture frame", "orbit": "Orbit"},
+    "loginLook": {"title": "Screen ng pag-sign in", "desc": "Kung paano gumagalaw ang logo at slogan ng Riftn sa screen ng pag-sign in sa device na ito.", "tube": "Tube TV", "vhs": "VHS tape", "led": "LED wall", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Patag"}, "arrivalLook": {"title": "Pagkatapos mag-sign in", "desc": "Ang ipinapakita habang naglo-load ang account mo, bago lumapag ang larawan mo sa page. Sa device na ito.", "trace": "Bakas", "tune": "I-tune in", "rift": "Lamat", "deck": "Baraha", "glass": "Patak ng salamin"},
     "postLanding": "Pagkatapos mag-post",
     "postLandingDesc": "Kung paano lumalabas ang bago mong post sa feed",
     "postLandingGhost": "Ghost slot",

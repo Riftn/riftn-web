@@ -1,6 +1,6 @@
 /**
  * Settings → Appearance → After you sign in: what plays between the sign-in
- * sheet and the page (SignInHandoff): the Rift, Trace, Picture frame or Orbit.
+ * sheet and the page (SignInHandoff): Trace, Tune in, the Rift, Deck or Glass drop.
  * Each card plays its arrival on a loop with your own picture, only while the
  * cards are on screen. Kept on this device (lib/arrival-look).
  */
@@ -11,28 +11,32 @@ import { cn } from '@/lib/utils';
 import { AuthContext } from '@/contexts/AuthContext';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { ARRIVAL_INTRO_MS, ARRIVAL_LOOKS, setArrivalLook, useArrivalLook, type ArrivalLook } from '@/lib/arrival-look';
-import { ArrivalMarks } from '@/components/app/login/SignInHandoff';
+import { ArrivalMarks, isConceptLook } from '@/components/app/login/SignInHandoff';
 import { useOnScreen } from '@/hooks/use-on-screen';
 import '@/components/app/login/sign-in-handoff.css';
 
 const LABELS: Record<ArrivalLook, [string, string]> = {
-  rift: ['settings.arrivalLook.rift', 'Rift'],
   trace: ['settings.arrivalLook.trace', 'Trace'],
-  frame: ['settings.arrivalLook.frame', 'Picture frame'],
-  orbit: ['settings.arrivalLook.orbit', 'Orbit'],
+  tune: ['settings.arrivalLook.tune', 'Tune in'],
+  rift: ['settings.arrivalLook.rift', 'Rift'],
+  deck: ['settings.arrivalLook.deck', 'Deck'],
+  glass: ['settings.arrivalLook.glass', 'Glass drop'],
 };
 
 /** How long a preview shows the picture before it plays again. */
 const SHOW_MS = 1600;
 const WAIT_MS = 900;
+const CONCEPT_WAIT_MS = 1500;
 
 function ArrivalPreview({ look, picture, initial, playing }: { look: ArrivalLook; picture?: string; initial: string; playing: boolean }) {
   const [round, setRound] = useState(0);
   const [opened, setOpened] = useState(false);
   useEffect(() => {
     if (!playing) return;
-    const open = window.setTimeout(() => setOpened(true), ARRIVAL_INTRO_MS[look] + WAIT_MS);
-    const again = window.setTimeout(() => { setOpened(false); setRound((r) => r + 1); }, ARRIVAL_INTRO_MS[look] + WAIT_MS + SHOW_MS);
+    // The drawn arrivals get a little longer on their loop before they open.
+    const wait = ARRIVAL_INTRO_MS[look] + (isConceptLook(look) ? CONCEPT_WAIT_MS : WAIT_MS);
+    const open = window.setTimeout(() => setOpened(true), wait);
+    const again = window.setTimeout(() => { setOpened(false); setRound((r) => r + 1); }, wait + SHOW_MS);
     return () => { window.clearTimeout(open); window.clearTimeout(again); };
   }, [playing, look, round]);
   return (
@@ -45,12 +49,14 @@ function ArrivalPreview({ look, picture, initial, playing }: { look: ArrivalLook
         data-opened={opened ? '' : undefined}
       >
         <span className="signin-rift__stage">
-          <ArrivalMarks look={look} />
-          <span className="signin-rift__frame">
-            {picture
-              ? <img src={picture} alt="" draggable={false} data-ready="" />
-              : <span className="signin-rift__initial">{initial}</span>}
-          </span>
+          <ArrivalMarks look={look} opened={opened} picture={picture} initial={initial} keepPicture playing={playing} />
+          {!isConceptLook(look) && (
+            <span className="signin-rift__frame">
+              {picture
+                ? <img src={picture} alt="" draggable={false} data-ready="" />
+                : <span className="signin-rift__initial">{initial}</span>}
+            </span>
+          )}
         </span>
       </span>
     </span>
@@ -73,7 +79,7 @@ export function ArrivalLookSetting() {
       <p className="text-zinc-500 text-xs mb-4">
         {t('settings.arrivalLook.desc', 'What plays while your account loads, before your picture lands on the page. On this device.')}
       </p>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" role="radiogroup" aria-label={t('settings.arrivalLook.title', 'After you sign in')}>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5" role="radiogroup" aria-label={t('settings.arrivalLook.title', 'After you sign in')}>
         {ARRIVAL_LOOKS.map((look) => {
           const [key, fallback] = LABELS[look];
           const active = current === look;

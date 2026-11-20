@@ -718,7 +718,7 @@
     "heading": "Curtas do Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Tela de login", "desc": "Como o logo e o slogan da Riftn se movem na tela de login neste dispositivo.", "tube": "TV de tubo", "vhs": "Fita VHS", "led": "Painel de LED", "holo": "Holograma", "neon": "Neon", "3d": "3D", "flat": "Plano"}, "arrivalLook": {"title": "Depois de entrar", "desc": "O que aparece enquanto sua conta carrega, antes de sua foto chegar à página. Neste dispositivo.", "rift": "Fenda", "trace": "Traço", "frame": "Moldura", "orbit": "Órbita"},
+    "loginLook": {"title": "Tela de login", "desc": "Como o logo e o slogan da Riftn se movem na tela de login neste dispositivo.", "tube": "TV de tubo", "vhs": "Fita VHS", "led": "Painel de LED", "holo": "Holograma", "neon": "Neon", "3d": "3D", "flat": "Plano"}, "arrivalLook": {"title": "Depois de entrar", "desc": "O que aparece enquanto sua conta carrega, antes de sua foto chegar à página. Neste dispositivo.", "trace": "Traço", "tune": "Sintonizar", "rift": "Fenda", "deck": "Baralho", "glass": "Gota de vidro"},
     "postLanding": "Depois de publicar",
     "postLandingDesc": "Como sua nova publicação aparece no seu feed",
     "postLandingGhost": "Espaço fantasma",

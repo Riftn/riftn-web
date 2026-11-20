@@ -707,7 +707,7 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
-    "loginLook": {"title": "Layar masuk", "desc": "Cara logo dan slogan Riftn bergerak di layar masuk pada perangkat ini.", "tube": "TV tabung", "vhs": "Kaset VHS", "led": "Dinding LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Datar"}, "arrivalLook": {"title": "Setelah masuk", "desc": "Yang tampil saat akunmu dimuat, sebelum fotomu mendarat di halaman. Di perangkat ini.", "rift": "Celah", "trace": "Jejak", "frame": "Bingkai foto", "orbit": "Orbit"},
+    "loginLook": {"title": "Layar masuk", "desc": "Cara logo dan slogan Riftn bergerak di layar masuk pada perangkat ini.", "tube": "TV tabung", "vhs": "Kaset VHS", "led": "Dinding LED", "holo": "Hologram", "neon": "Neon", "3d": "3D", "flat": "Datar"}, "arrivalLook": {"title": "Setelah masuk", "desc": "Yang tampil saat akunmu dimuat, sebelum fotomu mendarat di halaman. Di perangkat ini.", "trace": "Jejak", "tune": "Sintonisasi", "rift": "Celah", "deck": "Tumpukan kartu", "glass": "Tetes kaca"},
     "postLanding": "Setelah memposting",
     "postLandingDesc": "Cara postingan barumu muncul di feed",
     "postLandingGhost": "Slot bayangan",

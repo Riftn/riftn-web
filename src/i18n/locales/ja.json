@@ -707,7 +707,7 @@
     "heading": "Riftn ショート"
   },
   "settings": {
-    "loginLook": {"title": "サインイン画面", "desc": "この端末のサインイン画面で、Riftn のロゴとスローガンがどう動くか。", "tube": "ブラウン管テレビ", "vhs": "VHSテープ", "led": "LEDウォール", "holo": "ホログラム", "neon": "ネオン", "3d": "3D", "flat": "フラット"}, "arrivalLook": {"title": "サインイン後", "desc": "アカウントの読み込み中、写真がページに届くまでに流れる演出。この端末のみ。", "rift": "リフト", "trace": "トレース", "frame": "フォトフレーム", "orbit": "オービット"},
+    "loginLook": {"title": "サインイン画面", "desc": "この端末のサインイン画面で、Riftn のロゴとスローガンがどう動くか。", "tube": "ブラウン管テレビ", "vhs": "VHSテープ", "led": "LEDウォール", "holo": "ホログラム", "neon": "ネオン", "3d": "3D", "flat": "フラット"}, "arrivalLook": {"title": "サインイン後", "desc": "アカウントの読み込み中、写真がページに届くまでに流れる演出。この端末のみ。", "trace": "トレース", "tune": "チューニング", "rift": "リフト", "deck": "デッキ", "glass": "ガラスドロップ"},
     "postLanding": "投稿したあと",
     "postLandingDesc": "新しい投稿がフィードに表示されるときの動き",
     "postLandingGhost": "ゴーストスロット",
