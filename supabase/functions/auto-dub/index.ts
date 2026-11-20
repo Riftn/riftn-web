@@ -71,6 +71,8 @@ const STALE_PROCESSING_MS = 6 * 60 * 60 * 1000;
 /** Dubs handed over each time the worker reports a finished one. */
 const DRAIN_BUDGET = 2;
 const DRAIN_SCAN = 60;
+/** Sort value for a recording whose length was never measured. */
+const UNKNOWN_SECONDS = 24 * 60 * 60;
 /** Backoff after a failed attempt: 10 min, 1 h, 6 h. */
 const RETRY_MS = [10, 60, 360].map((m) => m * 60 * 1000);
 
@@ -270,20 +272,33 @@ async function drain(db: any, worker: WorkerConfig): Promise<Record<string, numb
   const again = (redo.data ?? []) as DubRow[];
   if (!asked.length && !again.length) return sent;
 
-  const { data: lengths } = await db.from('transcripts').select('id, duration_seconds')
+  const { data: lengths } = await db.from('transcripts').select('id, duration_seconds, source_kind')
     .in('id', [...new Set([...asked, ...again].map((row) => row.transcript_id))]);
-  const seconds = new Map<string, number>((lengths ?? []).map((t: any) => [t.id, Number(t.duration_seconds ?? 0)]));
+  // A length nobody measured (stage recordings) counts as long, not as zero:
+  // an hours-long stage must not jump ahead of every short video.
+  const seconds = new Map<string, number>((lengths ?? []).map((t: any) => [t.id, Number(t.duration_seconds) > 0 ? Number(t.duration_seconds) : UNKNOWN_SECONDS]));
+  const stage = new Set<string>((lengths ?? []).filter((t: any) => t.source_kind === 'stage').map((t: any) => t.id));
   // Stable sort: equal lengths keep the most recently asked for first.
-  const shortestFirst = (a: DubRow, b: DubRow) => (seconds.get(a.transcript_id) ?? 0) - (seconds.get(b.transcript_id) ?? 0);
+  const shortestFirst = (a: DubRow, b: DubRow) => (seconds.get(a.transcript_id) ?? UNKNOWN_SECONDS) - (seconds.get(b.transcript_id) ?? UNKNOWN_SECONDS);
   // A viewer is waiting on the first group. A redo still has its old audio
   // playing until its turn comes, so it goes after them.
   const rows = [...asked.sort(shortestFirst), ...again.sort(shortestFirst)];
 
-  for (const row of rows.slice(0, DRAIN_BUDGET * 6)) {
-    if (sent.submitted >= DRAIN_BUDGET) break;
+  // Videos and stages render on separate workers. One being full says nothing
+  // about the other, so a busy stage worker never holds the video line.
+  const full = new Set<'video' | 'stage'>();
+  let tried = 0;
+  for (const row of rows) {
+    if (sent.submitted >= DRAIN_BUDGET || tried >= DRAIN_BUDGET * 6) break;
+    const kind = stage.has(row.transcript_id) ? 'stage' : 'video';
+    if (full.has(kind)) continue;
+    tried++;
     const result = await submit(db, row, worker);
     sent[result]++;
-    if (result === 'busy' || (result === 'error' && sent.error >= 2)) break;
+    if (result === 'busy') {
+      full.add(kind);
+      if (full.size === 2) break;
+    } else if (result === 'error' && sent.error >= 2) break;
   }
   return sent;
 }
