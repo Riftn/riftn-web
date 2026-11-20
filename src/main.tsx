@@ -53,6 +53,7 @@ import "./styles/post-meta-grey.css";
 import "./styles/pinned-community-stage.css";
 import "./styles/grid-hover.css";
 import "./styles/notifications-feed.css";
+import "./styles/desktop-kit.css";
 // Canvas-theme chrome (war / osaka / jungle) is NOT imported here: each theme
 // is a separate CSS chunk loaded by src/lib/theme-css.ts, only for the theme in
 // use. Their cascade order (after index.css) is preserved because a dynamic
