@@ -20859,5 +20859,27 @@
     "remember": "Meine Auswahl merken",
     "rememberHint": "Jederzeit in den Einstellungen änderbar",
     "failed": "Die Nachricht konnte nicht gelöscht werden"
+  },
+  "profileAskAi": {
+    "row": "KI fragen",
+    "rowSub": "Folgen, alles liken, aufholen",
+    "back": "Zurück",
+    "title": "KI zu {{handle}} fragen",
+    "sub": "Der Assistent erledigt es, du bestätigst",
+    "followLikeAll": "Folgen und alles liken",
+    "followLikeAllSub": "Folgt {{handle}}, reagiert auf jeden Beitrag",
+    "likeAll": "Alle Beiträge liken",
+    "likeAllSub": "Überspringt die, auf die du schon reagiert hast",
+    "catchUp": "Bring mich auf den Stand",
+    "catchUpSub": "Was {{handle}} zuletzt gepostet hat, kurz gefasst",
+    "message": "Nachricht schreiben",
+    "messageSub": "Entwirft eine Nachricht, du sendest sie",
+    "placeholder": "Frag etwas über {{handle}}…",
+    "send": "Senden",
+    "promptFollowLikeAll": "Folge {{handle}} und reagiere auf alle Beiträge",
+    "promptLikeAll": "Reagiere auf alle Beiträge von {{handle}}",
+    "promptCatchUp": "Bring mich auf den Stand, was {{handle}} zuletzt gepostet hat",
+    "promptMessage": "Hilf mir, eine Nachricht an {{handle}} zu schreiben",
+    "promptAbout": "Über {{handle}}: {{question}}"
   }
 }

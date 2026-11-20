@@ -21020,5 +21020,27 @@
     "remember": "Zapamätať si moju voľbu",
     "rememberHint": "Kedykoľvek to zmeníte v Nastaveniach",
     "failed": "Správu sa nepodarilo vymazať"
+  },
+  "profileAskAi": {
+    "row": "Opýtať sa AI",
+    "rowSub": "Sledovať, lajknúť všetko, byť v obraze",
+    "back": "Späť",
+    "title": "Opýtať sa AI na {{handle}}",
+    "sub": "Asistent to urobí, vy potvrdíte",
+    "followLikeAll": "Sledovať a lajknúť všetko",
+    "followLikeAllSub": "Začne sledovať {{handle}}, reaguje na každý príspevok",
+    "likeAll": "Lajknúť všetky príspevky",
+    "likeAllSub": "Preskočí tie, na ktoré ste už reagovali",
+    "catchUp": "Zhrň mi novinky",
+    "catchUpSub": "Čo {{handle}} v poslednom čase zverejnil, stručne",
+    "message": "Napísať správu",
+    "messageSub": "Pripraví koncept, odošlete ho vy",
+    "placeholder": "Opýtajte sa čokoľvek o {{handle}}…",
+    "send": "Odoslať",
+    "promptFollowLikeAll": "Začni sledovať {{handle}} a zareaguj na všetky príspevky",
+    "promptLikeAll": "Zareaguj na všetky príspevky od {{handle}}",
+    "promptCatchUp": "Zhrň mi, čo {{handle}} v poslednom čase zverejnil",
+    "promptMessage": "Pomôž mi napísať správu pre {{handle}}",
+    "promptAbout": "O {{handle}}: {{question}}"
   }
 }

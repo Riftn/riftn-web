@@ -20862,5 +20862,27 @@
     "remember": "Kom ihåg mitt val",
     "rememberHint": "Ändra det när som helst i Inställningar",
     "failed": "Kunde inte radera meddelandet"
+  },
+  "profileAskAi": {
+    "row": "Fråga AI",
+    "rowSub": "Följ, gilla allt, kom ikapp",
+    "back": "Tillbaka",
+    "title": "Fråga AI om {{handle}}",
+    "sub": "Assistenten gör det, du bekräftar",
+    "followLikeAll": "Följ och gilla allt",
+    "followLikeAllSub": "Följer {{handle}}, reagerar på varje inlägg",
+    "likeAll": "Gilla alla inlägg",
+    "likeAllSub": "Hoppar över dem du redan reagerat på",
+    "catchUp": "Uppdatera mig",
+    "catchUpSub": "Vad {{handle}} har postat på sistone, i korthet",
+    "message": "Skriv ett meddelande",
+    "messageSub": "Skriver ett utkast, du skickar det",
+    "placeholder": "Fråga vad som helst om {{handle}}…",
+    "send": "Skicka",
+    "promptFollowLikeAll": "Följ {{handle}} och reagera på alla inlägg",
+    "promptLikeAll": "Reagera på alla inlägg av {{handle}}",
+    "promptCatchUp": "Uppdatera mig om vad {{handle}} har postat på sistone",
+    "promptMessage": "Hjälp mig skriva ett meddelande till {{handle}}",
+    "promptAbout": "Om {{handle}}: {{question}}"
   }
 }

@@ -20858,5 +20858,27 @@
     "remember": "Seçimimi yadda saxla",
     "rememberHint": "İstənilən vaxt Parametrlərdə dəyişin",
     "failed": "Mesaj silinə bilmədi"
+  },
+  "profileAskAi": {
+    "row": "Süni intellektdən soruş",
+    "rowSub": "İzlə, hamısını bəyən, yeniliklərdən xəbərdar ol",
+    "back": "Geri",
+    "title": "{{handle}} haqqında süni intellektdən soruş",
+    "sub": "Köməkçi edir, sən təsdiqləyirsən",
+    "followLikeAll": "İzlə və hamısını bəyən",
+    "followLikeAllSub": "{{handle}} izləyir, hər paylaşıma reaksiya verir",
+    "likeAll": "Bütün paylaşımlarını bəyən",
+    "likeAllSub": "Artıq reaksiya verdiklərini keçir",
+    "catchUp": "Yenilikləri de",
+    "catchUpSub": "{{handle}} son vaxtlar nə paylaşıb, qısaca",
+    "message": "Mesaj yaz",
+    "messageSub": "Mesaj qaralaması hazırlayır, sən göndərirsən",
+    "placeholder": "{{handle}} haqqında istənilən şeyi soruş…",
+    "send": "Göndər",
+    "promptFollowLikeAll": "{{handle}} izlə və bütün paylaşımlarına reaksiya ver",
+    "promptLikeAll": "{{handle}} bütün paylaşımlarına reaksiya ver",
+    "promptCatchUp": "{{handle}} son vaxtlar nə paylaşdığını de",
+    "promptMessage": "{{handle}} üçün mesaj yazmağıma kömək et",
+    "promptAbout": "{{handle}} haqqında: {{question}}"
   }
 }

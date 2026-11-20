@@ -20860,5 +20860,27 @@
     "remember": "Remember wetin I choose",
     "rememberHint": "Change am anytime for Settings",
     "failed": "We no fit delete di message"
+  },
+  "profileAskAi": {
+    "row": "Ask AI",
+    "rowSub": "Follow, like everytin, sabi wetin dey happen",
+    "back": "Go back",
+    "title": "Ask AI about {{handle}}",
+    "sub": "Di Assistant go do am, na you go confam",
+    "followLikeAll": "Follow and like everytin",
+    "followLikeAllSub": "E go follow {{handle}}, react to every post",
+    "likeAll": "Like all dia post dem",
+    "likeAllSub": "E go skip di ones wey you don react to",
+    "catchUp": "Tell me wetin dey happen",
+    "catchUpSub": "Wetin {{handle}} don post lately, for short",
+    "message": "Write dem message",
+    "messageSub": "E go draft message, na you go send am",
+    "placeholder": "Ask anytin about {{handle}}…",
+    "send": "Send",
+    "promptFollowLikeAll": "Follow {{handle}} and react to all dia post dem",
+    "promptLikeAll": "React to all di post dem wey {{handle}} put",
+    "promptCatchUp": "Tell me wetin {{handle}} don post lately",
+    "promptMessage": "Help me write message give {{handle}}",
+    "promptAbout": "About {{handle}}: {{question}}"
   }
 }

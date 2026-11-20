@@ -20858,5 +20858,27 @@
     "remember": "Maumahara ki taku kōwhiringa",
     "rememberHint": "Hurihia i tētahi wā i ngā Tautuhinga",
     "failed": "Kāore i taea te muku i te karere"
+  },
+  "profileAskAi": {
+    "row": "Pātai ki te AI",
+    "rowSub": "Whai, pai katoa, kia mōhio ki ngā hou",
+    "back": "Hoki",
+    "title": "Pātai ki te AI mō {{handle}}",
+    "sub": "Mā te Kaiāwhina e mahi, māu e whakaū",
+    "followLikeAll": "Whai ka pai katoa",
+    "followLikeAllSub": "Ka whai i a {{handle}}, ka tauhohe ki ia pānui",
+    "likeAll": "Paingia ō rātou pānui katoa",
+    "likeAllSub": "Ka peke i ērā kua tauhohetia kētia e koe",
+    "catchUp": "Whakamōhio mai",
+    "catchUpSub": "Ngā mea i whakairi a {{handle}} inakuanei, poto noa",
+    "message": "Tuhia he karere ki a rātou",
+    "messageSub": "Ka tuhi i tētahi tauira karere, māu e tuku",
+    "placeholder": "Pātai i tētahi mea mō {{handle}}…",
+    "send": "Tuku",
+    "promptFollowLikeAll": "Whāia a {{handle}} ka tauhohe ki ō rātou pānui katoa",
+    "promptLikeAll": "Tauhohe ki ngā pānui katoa a {{handle}}",
+    "promptCatchUp": "Whakamōhio mai ki ngā mea i whakairi a {{handle}} inakuanei",
+    "promptMessage": "Āwhina mai ki te tuhi karere ki a {{handle}}",
+    "promptAbout": "Mō {{handle}}: {{question}}"
   }
 }

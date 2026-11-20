@@ -20926,5 +20926,27 @@
     "remember": "Zapamiętaj mój wybór",
     "rememberHint": "Zmienisz to w każdej chwili w Ustawieniach",
     "failed": "Nie udało się usunąć wiadomości"
+  },
+  "profileAskAi": {
+    "row": "Zapytaj AI",
+    "rowSub": "Obserwuj, polub wszystko, nadrób",
+    "back": "Wstecz",
+    "title": "Zapytaj AI o {{handle}}",
+    "sub": "Asystent to zrobi, ty potwierdzasz",
+    "followLikeAll": "Obserwuj i polub wszystko",
+    "followLikeAllSub": "Obserwuje {{handle}}, reaguje na każdy post",
+    "likeAll": "Polub wszystkie posty",
+    "likeAllSub": "Pomija te, na które już zareagowano",
+    "catchUp": "Streść mi",
+    "catchUpSub": "Co {{handle}} ostatnio publikował, w skrócie",
+    "message": "Napisz wiadomość",
+    "messageSub": "Przygotuje wiadomość, ty ją wysyłasz",
+    "placeholder": "Zapytaj o cokolwiek na temat {{handle}}…",
+    "send": "Wyślij",
+    "promptFollowLikeAll": "Zaobserwuj {{handle}} i zareaguj na wszystkie posty",
+    "promptLikeAll": "Zareaguj na wszystkie posty {{handle}}",
+    "promptCatchUp": "Streść mi, co {{handle}} ostatnio publikował",
+    "promptMessage": "Pomóż mi napisać wiadomość do {{handle}}",
+    "promptAbout": "O {{handle}}: {{question}}"
   }
 }

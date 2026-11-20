@@ -20863,5 +20863,27 @@
     "remember": "זכור את הבחירה שלי",
     "rememberHint": "אפשר לשנות זאת בכל עת בהגדרות",
     "failed": "לא ניתן למחוק את ההודעה"
+  },
+  "profileAskAi": {
+    "row": "שאל את ה-AI",
+    "rowSub": "עקוב, עשה לייק לכול, התעדכן",
+    "back": "חזרה",
+    "title": "שאל את ה-AI על {{handle}}",
+    "sub": "העוזר מבצע, אתה מאשר",
+    "followLikeAll": "עקוב ועשה לייק לכול",
+    "followLikeAllSub": "עוקב אחרי {{handle}} ומגיב לכל פוסט",
+    "likeAll": "לייק לכל הפוסטים",
+    "likeAllSub": "מדלג על פוסטים שכבר הגבת אליהם",
+    "catchUp": "עדכן אותי",
+    "catchUpSub": "מה {{handle}} פרסם לאחרונה, בקצרה",
+    "message": "כתוב הודעה",
+    "messageSub": "מנסח טיוטה, אתה שולח",
+    "placeholder": "שאל כל דבר על {{handle}}…",
+    "send": "שלח",
+    "promptFollowLikeAll": "עקוב אחרי {{handle}} והגב לכל הפוסטים שלו",
+    "promptLikeAll": "הגב לכל הפוסטים של {{handle}}",
+    "promptCatchUp": "עדכן אותי מה {{handle}} פרסם לאחרונה",
+    "promptMessage": "עזור לי לכתוב הודעה ל-{{handle}}",
+    "promptAbout": "על {{handle}}: {{question}}"
   }
 }

@@ -20863,5 +20863,27 @@
     "remember": "記住我的選擇",
     "rememberHint": "可隨時在設定中更改",
     "failed": "無法刪除該訊息"
+  },
+  "profileAskAi": {
+    "row": "問AI",
+    "rowSub": "追蹤、全部按讚、掌握動態",
+    "back": "返回",
+    "title": "向AI詢問{{handle}}",
+    "sub": "助手來做，你來確認",
+    "followLikeAll": "追蹤並全部按讚",
+    "followLikeAllSub": "追蹤{{handle}}，回應每一則貼文",
+    "likeAll": "為所有貼文按讚",
+    "likeAllSub": "略過你已回應過的",
+    "catchUp": "幫我掌握動態",
+    "catchUpSub": "{{handle}}最近發了什麼，簡要說明",
+    "message": "傳訊息給對方",
+    "messageSub": "草擬一則訊息，由你傳送",
+    "placeholder": "關於{{handle}}，什麼都可以問…",
+    "send": "傳送",
+    "promptFollowLikeAll": "追蹤{{handle}}並回應其所有貼文",
+    "promptLikeAll": "回應{{handle}}的所有貼文",
+    "promptCatchUp": "告訴我{{handle}}最近發了什麼",
+    "promptMessage": "幫我寫一則訊息給{{handle}}",
+    "promptAbout": "關於{{handle}}：{{question}}"
   }
 }

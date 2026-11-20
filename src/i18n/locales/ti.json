@@ -20858,5 +20858,27 @@
     "remember": "ምርጫይ ዘክር",
     "rememberHint": "ኣብ ዝኾነ ግዜ ኣብ ቅጥዒታት ቀይሮ",
     "failed": "መልእኽቲ ክድምሰስ ኣይከኣለን"
+  },
+  "profileAskAi": {
+    "row": "AI ሕተት",
+    "rowSub": "ተኸተል፣ ኩሉ ፈትው፣ ሓድሽ ፍለጥ",
+    "back": "ተመለስ",
+    "title": "ብዛዕባ {{handle}} AI ሕተት",
+    "sub": "ተሓጋጋዚ ይገብሮ፣ ንስኻ ተረጋግጽ",
+    "followLikeAll": "ተኸተል ኩሉ ድማ ፈትው",
+    "followLikeAllSub": "{{handle}} ይኽተል፣ ንነፍሲ ወከፍ ጽሑፍ ግብረመልሲ ይህብ",
+    "likeAll": "ኩሎም ጽሑፋቶም ፈትው",
+    "likeAllSub": "ቀደም ግብረመልሲ ዝሃብካሎም ይሓልፍ",
+    "catchUp": "ሓድሽ ንገረኒ",
+    "catchUpSub": "{{handle}} ኣብዚ ቀረባ እዋን ዝለጠፎ፣ ብሓጺሩ",
+    "message": "መልእኽቲ ጽሓፈሎም",
+    "messageSub": "ንድፊ መልእኽቲ የዳሉ፣ ንስኻ ትልእኽ",
+    "placeholder": "ብዛዕባ {{handle}} ዝኾነ ሕተት…",
+    "send": "ላኽ",
+    "promptFollowLikeAll": "{{handle}} ተኸተል ንኹሎም ጽሑፋቶም ድማ ግብረመልሲ ሃብ",
+    "promptLikeAll": "ንኹሎም ጽሑፋት {{handle}} ግብረመልሲ ሃብ",
+    "promptCatchUp": "{{handle}} ኣብዚ ቀረባ እዋን እንታይ ከም ዝለጠፈ ንገረኒ",
+    "promptMessage": "ን{{handle}} መልእኽቲ ክጽሕፍ ሓግዘኒ",
+    "promptAbout": "ብዛዕባ {{handle}}፦ {{question}}"
   }
 }

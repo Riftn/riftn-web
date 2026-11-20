@@ -20859,5 +20859,27 @@
     "remember": "Remember wetin I choose",
     "rememberHint": "Change am any time fo Settings",
     "failed": "E no fit delete di message"
+  },
+  "profileAskAi": {
+    "row": "Ask AI",
+    "rowSub": "Follow, laik ɔltin, no wetin di hapin",
+    "back": "Go back",
+    "title": "Ask AI bɔt {{handle}}",
+    "sub": "Di Helpa go du am, na yu go gri",
+    "followLikeAll": "Follow an laik ɔltin",
+    "followLikeAllSub": "I go follow {{handle}}, sho feeling fɔ ɛvri post",
+    "likeAll": "Laik ɔl dɛn post dem",
+    "likeAllSub": "I go skip di wan dem we yu don sho feeling",
+    "catchUp": "Tɛl mi wetin di hapin",
+    "catchUpSub": "Wetin {{handle}} don post nau nau, fɔ shɔt",
+    "message": "Rait dɛn mesej",
+    "messageSub": "I go draft mesej, na yu go sen am",
+    "placeholder": "Ask ɛnitin bɔt {{handle}}…",
+    "send": "Sen",
+    "promptFollowLikeAll": "Follow {{handle}} an sho feeling fɔ ɔl dɛn post dem",
+    "promptLikeAll": "Sho feeling fɔ ɔl di post dem we {{handle}} put",
+    "promptCatchUp": "Tɛl mi wetin {{handle}} don post nau nau",
+    "promptMessage": "Hɛlp mi rait mesej gi {{handle}}",
+    "promptAbout": "Bɔt {{handle}}: {{question}}"
   }
 }

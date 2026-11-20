@@ -20858,5 +20858,27 @@
     "remember": "Jäta mu valik meelde",
     "rememberHint": "Muuda seda igal ajal seadetes",
     "failed": "Sõnumit ei õnnestunud kustutada"
+  },
+  "profileAskAi": {
+    "row": "Küsi AI-lt",
+    "rowSub": "Jälgi, meeldi kõik, ole kursis",
+    "back": "Tagasi",
+    "title": "Küsi AI-lt kasutaja {{handle}} kohta",
+    "sub": "Assistent teeb, sina kinnitad",
+    "followLikeAll": "Jälgi ja märgi kõik meeldivaks",
+    "followLikeAllSub": "Jälgib kasutajat {{handle}}, reageerib igale postitusele",
+    "likeAll": "Märgi kõik postitused meeldivaks",
+    "likeAllSub": "Jätab vahele need, millele oled juba reageerinud",
+    "catchUp": "Too mind kursi",
+    "catchUpSub": "Mida {{handle}} on viimasel ajal postitanud, lühidalt",
+    "message": "Kirjuta sõnum",
+    "messageSub": "Koostab mustandi, sina saadad",
+    "placeholder": "Küsi kasutaja {{handle}} kohta mida iganes…",
+    "send": "Saada",
+    "promptFollowLikeAll": "Jälgi kasutajat {{handle}} ja reageeri kõigile postitustele",
+    "promptLikeAll": "Reageeri kõigile kasutaja {{handle}} postitustele",
+    "promptCatchUp": "Too mind kursi, mida {{handle}} on viimasel ajal postitanud",
+    "promptMessage": "Aita mul kirjutada sõnum kasutajale {{handle}}",
+    "promptAbout": "Kasutajast {{handle}}: {{question}}"
   }
 }

@@ -20861,5 +20861,27 @@
     "remember": "Запамти мој избор",
     "rememberHint": "Промените то било када у Подешавањима",
     "failed": "Брисање поруке није успело"
+  },
+  "profileAskAi": {
+    "row": "Питај AI",
+    "rowSub": "Прати, лајкуј све, буди у току",
+    "back": "Назад",
+    "title": "Питај AI о {{handle}}",
+    "sub": "Асистент то уради, ти потврдиш",
+    "followLikeAll": "Прати и лајкуј све",
+    "followLikeAllSub": "Прати {{handle}}, реагује на сваку објаву",
+    "likeAll": "Лајкуј све објаве",
+    "likeAllSub": "Прескаче оне на које си већ реаговао",
+    "catchUp": "Ажурирај ме",
+    "catchUpSub": "Шта је {{handle}} недавно објавио, укратко",
+    "message": "Напиши поруку",
+    "messageSub": "Припреми нацрт, ти га шаљеш",
+    "placeholder": "Питај било шта о {{handle}}…",
+    "send": "Пошаљи",
+    "promptFollowLikeAll": "Запрати {{handle}} и реагуј на све објаве",
+    "promptLikeAll": "Реагуј на све објаве корисника {{handle}}",
+    "promptCatchUp": "Реци ми укратко шта је {{handle}} недавно објавио",
+    "promptMessage": "Помози ми да напишем поруку за {{handle}}",
+    "promptAbout": "О {{handle}}: {{question}}"
   }
 }

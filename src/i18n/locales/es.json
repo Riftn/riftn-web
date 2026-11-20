@@ -20996,5 +20996,27 @@
       "refunded": "Puntos devueltos",
       "settleFailed": "No se pudo actualizar"
     }
+  },
+  "profileAskAi": {
+    "row": "Preguntar a la IA",
+    "rowSub": "Seguir, dar like a todo, ponerte al día",
+    "back": "Atrás",
+    "title": "Preguntar a la IA sobre {{handle}}",
+    "sub": "El Asistente lo hace, tú confirmas",
+    "followLikeAll": "Seguir y dar like a todo",
+    "followLikeAllSub": "Sigue a {{handle}} y reacciona a cada publicación",
+    "likeAll": "Dar like a todas sus publicaciones",
+    "likeAllSub": "Omite las que ya reaccionaste",
+    "catchUp": "Ponme al día",
+    "catchUpSub": "Lo que {{handle}} publicó últimamente, en breve",
+    "message": "Escríbele un mensaje",
+    "messageSub": "Redacta un mensaje, tú lo envías",
+    "placeholder": "Pregunta lo que quieras sobre {{handle}}…",
+    "send": "Enviar",
+    "promptFollowLikeAll": "Sigue a {{handle}} y reacciona a todas sus publicaciones",
+    "promptLikeAll": "Reacciona a todas las publicaciones de {{handle}}",
+    "promptCatchUp": "Ponme al día de lo que {{handle}} ha publicado últimamente",
+    "promptMessage": "Ayúdame a escribir un mensaje a {{handle}}",
+    "promptAbout": "Sobre {{handle}}: {{question}}"
   }
 }

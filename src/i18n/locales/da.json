@@ -20862,5 +20862,27 @@
     "remember": "Husk mit valg",
     "rememberHint": "Skift det når som helst i Indstillinger",
     "failed": "Kunne ikke slette beskeden"
+  },
+  "profileAskAi": {
+    "row": "Spørg AI",
+    "rowSub": "Følg, synes godt om alt, bliv opdateret",
+    "back": "Tilbage",
+    "title": "Spørg AI om {{handle}}",
+    "sub": "Assistenten gør det, du bekræfter",
+    "followLikeAll": "Følg og synes godt om alt",
+    "followLikeAllSub": "Følger {{handle}}, reagerer på hvert opslag",
+    "likeAll": "Synes godt om alle opslag",
+    "likeAllSub": "Springer over dem, du allerede har reageret på",
+    "catchUp": "Opdater mig",
+    "catchUpSub": "Hvad {{handle}} har opslået for nylig, kort fortalt",
+    "message": "Skriv en besked",
+    "messageSub": "Laver et udkast, du sender det",
+    "placeholder": "Spørg om hvad som helst om {{handle}}…",
+    "send": "Send",
+    "promptFollowLikeAll": "Følg {{handle}} og reager på alle opslag",
+    "promptLikeAll": "Reager på alle opslag fra {{handle}}",
+    "promptCatchUp": "Opdater mig på, hvad {{handle}} har opslået for nylig",
+    "promptMessage": "Hjælp mig med at skrive en besked til {{handle}}",
+    "promptAbout": "Om {{handle}}: {{question}}"
   }
 }

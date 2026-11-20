@@ -20859,5 +20859,27 @@
     "remember": "Ricorda la mia scelta",
     "rememberHint": "Puoi cambiarla quando vuoi in Impostazioni",
     "failed": "Impossibile eliminare il messaggio"
+  },
+  "profileAskAi": {
+    "row": "Chiedi all'IA",
+    "rowSub": "Segui, metti like a tutto, aggiornati",
+    "back": "Indietro",
+    "title": "Chiedi all'IA su {{handle}}",
+    "sub": "L'Assistente lo fa, tu confermi",
+    "followLikeAll": "Segui e metti like a tutto",
+    "followLikeAllSub": "Segue {{handle}}, reagisce a ogni post",
+    "likeAll": "Metti like a tutti i suoi post",
+    "likeAllSub": "Salta quelli a cui hai già reagito",
+    "catchUp": "Aggiornami",
+    "catchUpSub": "Cosa ha pubblicato di recente {{handle}}, in breve",
+    "message": "Scrivigli un messaggio",
+    "messageSub": "Prepara una bozza, tu la invii",
+    "placeholder": "Chiedi qualsiasi cosa su {{handle}}…",
+    "send": "Invia",
+    "promptFollowLikeAll": "Segui {{handle}} e reagisci a tutti i suoi post",
+    "promptLikeAll": "Reagisci a tutti i post di {{handle}}",
+    "promptCatchUp": "Aggiornami su cosa ha pubblicato di recente {{handle}}",
+    "promptMessage": "Aiutami a scrivere un messaggio a {{handle}}",
+    "promptAbout": "Su {{handle}}: {{question}}"
   }
 }

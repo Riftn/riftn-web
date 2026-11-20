@@ -20858,5 +20858,27 @@
     "remember": "Ne ka sugandili mara",
     "rememberHint": "A yɛlɛma waati o waati Labɛnw kɔnɔ",
     "failed": "Cikan ma se ka jɔsi"
+  },
+  "profileAskAi": {
+    "row": "AI ɲininka",
+    "rowSub": "A nɔfɛ taa, a bɛɛ diya, kibaru kuraw lɔn",
+    "back": "Ka segin",
+    "title": "AI ɲininka {{handle}} ko la",
+    "sub": "Dɛmɛbaga b'a kɛ, i b'a sɔn",
+    "followLikeAll": "A nɔfɛ taa ani a bɛɛ diya",
+    "followLikeAllSub": "A bɛ taa {{handle}} nɔfɛ, a bɛ jaabi di sɛbɛn bɛɛ ma",
+    "likeAll": "A ka sɛbɛnw bɛɛ diya",
+    "likeAllSub": "A bɛ i ka jaabi diyaw tɛmɛ",
+    "catchUp": "Kibaru kuraw fɔ n ye",
+    "catchUpSub": "{{handle}} ye min bila sisan in na, kuma surun na",
+    "message": "Bataki sɛbɛn a ye",
+    "messageSub": "A bɛ bataki labɛn, i b'a ci",
+    "placeholder": "Fɛn o fɛn ɲininka {{handle}} ko la…",
+    "send": "A ci",
+    "promptFollowLikeAll": "Taa {{handle}} nɔfɛ ani i ka jaabi di a ka sɛbɛnw bɛɛ ma",
+    "promptLikeAll": "Jaabi di {{handle}} ka sɛbɛnw bɛɛ ma",
+    "promptCatchUp": "{{handle}} ye min bila sisan in na, o fɔ n ye",
+    "promptMessage": "N dɛmɛ ka bataki sɛbɛn {{handle}} ye",
+    "promptAbout": "{{handle}} ko la: {{question}}"
   }
 }

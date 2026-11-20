@@ -20858,5 +20858,27 @@
     "remember": "Mbaj mend zgjedhjen time",
     "rememberHint": "Ndryshoje kurdo te Cilësimet",
     "failed": "Mesazhi nuk u fshi"
+  },
+  "profileAskAi": {
+    "row": "Pyet AI-në",
+    "rowSub": "Ndiq, pëlqe gjithçka, informohu",
+    "back": "Prapa",
+    "title": "Pyet AI-në për {{handle}}",
+    "sub": "Asistenti e bën, ti konfirmon",
+    "followLikeAll": "Ndiq dhe pëlqe gjithçka",
+    "followLikeAllSub": "Ndjek {{handle}}, reagon në çdo postim",
+    "likeAll": "Pëlqe të gjitha postimet",
+    "likeAllSub": "Kapërcen ato ku ke reaguar tashmë",
+    "catchUp": "Më informo",
+    "catchUpSub": "Çfarë ka postuar {{handle}} së fundmi, shkurt",
+    "message": "Shkruaji një mesazh",
+    "messageSub": "Harton një mesazh, ti e dërgon",
+    "placeholder": "Pyet çdo gjë për {{handle}}…",
+    "send": "Dërgo",
+    "promptFollowLikeAll": "Ndiq {{handle}} dhe reago në të gjitha postimet",
+    "promptLikeAll": "Reago në të gjitha postimet e {{handle}}",
+    "promptCatchUp": "Më informo për atë që ka postuar {{handle}} së fundmi",
+    "promptMessage": "Më ndihmo të shkruaj një mesazh për {{handle}}",
+    "promptAbout": "Për {{handle}}: {{question}}"
   }
 }

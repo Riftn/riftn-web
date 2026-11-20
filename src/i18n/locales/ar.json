@@ -21040,5 +21040,27 @@
     "buttonLabel_few": "نقاط القناة: {{formatted}} نقطة",
     "buttonLabel_many": "نقاط القناة: {{formatted}} نقطة",
     "buttonLabel_other": "نقاط القناة: {{formatted}} نقطة"
+  },
+  "profileAskAi": {
+    "row": "اسأل الذكاء الاصطناعي",
+    "rowSub": "تابِع، أعجب بكل شيء، اطّلع على الجديد",
+    "back": "رجوع",
+    "title": "اسأل الذكاء الاصطناعي عن {{handle}}",
+    "sub": "المساعد ينفّذ، وأنت تؤكّد",
+    "followLikeAll": "تابِع وأعجب بكل شيء",
+    "followLikeAllSub": "يتابع {{handle}} ويتفاعل مع كل منشور",
+    "likeAll": "أعجب بكل منشوراته",
+    "likeAllSub": "يتخطى ما تفاعلت معه سابقًا",
+    "catchUp": "اطلعني على الجديد",
+    "catchUpSub": "ما نشره {{handle}} مؤخرًا باختصار",
+    "message": "اكتب له رسالة",
+    "messageSub": "يكتب مسودة رسالة، وأنت ترسلها",
+    "placeholder": "اسأل أي شيء عن {{handle}}…",
+    "send": "إرسال",
+    "promptFollowLikeAll": "تابِع {{handle}} وتفاعل مع كل منشوراته",
+    "promptLikeAll": "تفاعل مع كل منشورات {{handle}}",
+    "promptCatchUp": "أطلعني على ما نشره {{handle}} مؤخرًا",
+    "promptMessage": "ساعدني في كتابة رسالة إلى {{handle}}",
+    "promptAbout": "عن {{handle}}: {{question}}"
   }
 }

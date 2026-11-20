@@ -20858,5 +20858,27 @@
     "remember": "Husk valget mitt",
     "rememberHint": "Endre det når som helst i Innstillinger",
     "failed": "Kunne ikke slette meldingen"
+  },
+  "profileAskAi": {
+    "row": "Spør AI",
+    "rowSub": "Følg, lik alt, bli oppdatert",
+    "back": "Tilbake",
+    "title": "Spør AI om {{handle}}",
+    "sub": "Assistenten gjør det, du bekrefter",
+    "followLikeAll": "Følg og lik alt",
+    "followLikeAllSub": "Følger {{handle}}, reagerer på hvert innlegg",
+    "likeAll": "Lik alle innleggene",
+    "likeAllSub": "Hopper over dem du allerede har reagert på",
+    "catchUp": "Oppdater meg",
+    "catchUpSub": "Hva {{handle}} har lagt ut i det siste, kort",
+    "message": "Skriv en melding",
+    "messageSub": "Lager et utkast, du sender det",
+    "placeholder": "Spør om hva som helst om {{handle}}…",
+    "send": "Send",
+    "promptFollowLikeAll": "Følg {{handle}} og reager på alle innleggene",
+    "promptLikeAll": "Reager på alle innleggene til {{handle}}",
+    "promptCatchUp": "Oppdater meg på hva {{handle}} har lagt ut i det siste",
+    "promptMessage": "Hjelp meg å skrive en melding til {{handle}}",
+    "promptAbout": "Om {{handle}}: {{question}}"
   }
 }

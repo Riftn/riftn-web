@@ -20861,5 +20861,27 @@
     "remember": "選択を記憶する",
     "rememberHint": "設定からいつでも変更できます",
     "failed": "メッセージを削除できませんでした"
+  },
+  "profileAskAi": {
+    "row": "AIに聞く",
+    "rowSub": "フォロー、全部いいね、最新情報",
+    "back": "戻る",
+    "title": "{{handle}}についてAIに聞く",
+    "sub": "アシスタントが実行し、あなたが確認します",
+    "followLikeAll": "フォローして全部いいね",
+    "followLikeAllSub": "{{handle}}をフォローし、すべての投稿にリアクション",
+    "likeAll": "すべての投稿にいいね",
+    "likeAllSub": "リアクション済みの投稿はスキップします",
+    "catchUp": "最新情報を教えて",
+    "catchUpSub": "{{handle}}の最近の投稿を手短に",
+    "message": "メッセージを書く",
+    "messageSub": "下書きを作成し、送信はあなたが行います",
+    "placeholder": "{{handle}}について何でも聞いてください…",
+    "send": "送信",
+    "promptFollowLikeAll": "{{handle}}をフォローして、すべての投稿にリアクションして",
+    "promptLikeAll": "{{handle}}のすべての投稿にリアクションして",
+    "promptCatchUp": "{{handle}}が最近投稿した内容を教えて",
+    "promptMessage": "{{handle}}へのメッセージを書くのを手伝って",
+    "promptAbout": "{{handle}}について：{{question}}"
   }
 }

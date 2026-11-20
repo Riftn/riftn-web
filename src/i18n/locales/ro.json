@@ -20870,5 +20870,27 @@
     "remember": "Ține minte alegerea mea",
     "rememberHint": "O poți schimba oricând din Setări",
     "failed": "Mesajul nu a putut fi șters"
+  },
+  "profileAskAi": {
+    "row": "Întreabă AI",
+    "rowSub": "Urmărește, apreciază tot, fii la curent",
+    "back": "Înapoi",
+    "title": "Întreabă AI despre {{handle}}",
+    "sub": "Asistentul face, tu confirmi",
+    "followLikeAll": "Urmărește și apreciază tot",
+    "followLikeAllSub": "Urmărește {{handle}}, reacționează la fiecare postare",
+    "likeAll": "Apreciază toate postările",
+    "likeAllSub": "Le sare pe cele la care ai reacționat deja",
+    "catchUp": "Pune-mă la curent",
+    "catchUpSub": "Ce a postat {{handle}} în ultima vreme, pe scurt",
+    "message": "Scrie-i un mesaj",
+    "messageSub": "Pregătește o ciornă, tu o trimiți",
+    "placeholder": "Întreabă orice despre {{handle}}…",
+    "send": "Trimite",
+    "promptFollowLikeAll": "Urmărește {{handle}} și reacționează la toate postările",
+    "promptLikeAll": "Reacționează la toate postările lui {{handle}}",
+    "promptCatchUp": "Pune-mă la curent cu ce a postat {{handle}} în ultima vreme",
+    "promptMessage": "Ajută-mă să scriu un mesaj pentru {{handle}}",
+    "promptAbout": "Despre {{handle}}: {{question}}"
   }
 }

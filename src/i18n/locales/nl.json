@@ -21245,5 +21245,27 @@
       "refunded": "Punten teruggegeven",
       "settleFailed": "Bijwerken lukte niet"
     }
+  },
+  "profileAskAi": {
+    "row": "Vraag het AI",
+    "rowSub": "Volgen, alles liken, bijpraten",
+    "back": "Terug",
+    "title": "Vraag AI over {{handle}}",
+    "sub": "De Assistent doet het, jij bevestigt",
+    "followLikeAll": "Volgen en alles liken",
+    "followLikeAllSub": "Volgt {{handle}} en reageert op elk bericht",
+    "likeAll": "Al hun berichten liken",
+    "likeAllSub": "Slaat berichten over waarop je al reageerde",
+    "catchUp": "Praat me bij",
+    "catchUpSub": "Wat {{handle}} onlangs postte, kort samengevat",
+    "message": "Schrijf ze een bericht",
+    "messageSub": "Maakt een concept, jij verstuurt het",
+    "placeholder": "Vraag alles over {{handle}}…",
+    "send": "Versturen",
+    "promptFollowLikeAll": "Volg {{handle}} en reageer op al hun berichten",
+    "promptLikeAll": "Reageer op alle berichten van {{handle}}",
+    "promptCatchUp": "Praat me bij over wat {{handle}} onlangs heeft gepost",
+    "promptMessage": "Help me een bericht te schrijven aan {{handle}}",
+    "promptAbout": "Over {{handle}}: {{question}}"
   }
 }

@@ -20859,5 +20859,27 @@
     "remember": "記住我嘅選擇",
     "rememberHint": "隨時可以喺設定更改",
     "failed": "刪除唔到訊息"
+  },
+  "profileAskAi": {
+    "row": "問AI",
+    "rowSub": "追蹤、全部讚好、睇吓近況",
+    "back": "返回",
+    "title": "問AI關於{{handle}}",
+    "sub": "助手幫你做，你確認",
+    "followLikeAll": "追蹤兼全部讚好",
+    "followLikeAllSub": "追蹤{{handle}}，回應每一個帖",
+    "likeAll": "讚好佢所有帖文",
+    "likeAllSub": "跳過你已經回應過嘅",
+    "catchUp": "同我講吓近況",
+    "catchUpSub": "{{handle}}最近post咗乜，簡單講",
+    "message": "寫訊息俾佢",
+    "messageSub": "幫你擬好訊息，你自己發送",
+    "placeholder": "問任何關於{{handle}}嘅嘢…",
+    "send": "發送",
+    "promptFollowLikeAll": "追蹤{{handle}}，再回應佢所有帖文",
+    "promptLikeAll": "回應{{handle}}所有帖文",
+    "promptCatchUp": "同我講吓{{handle}}最近post咗啲乜",
+    "promptMessage": "幫我寫個訊息俾{{handle}}",
+    "promptAbout": "關於{{handle}}：{{question}}"
   }
 }

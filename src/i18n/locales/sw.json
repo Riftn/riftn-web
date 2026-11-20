@@ -20860,5 +20860,27 @@
     "remember": "Kumbuka chaguo langu",
     "rememberHint": "Libadilishe wakati wowote kwenye Mipangilio",
     "failed": "Imeshindwa kufuta ujumbe"
+  },
+  "profileAskAi": {
+    "row": "Uliza AI",
+    "rowSub": "Fuata, penda kila kitu, pata habari mpya",
+    "back": "Rudi",
+    "title": "Uliza AI kuhusu {{handle}}",
+    "sub": "Msaidizi anafanya, wewe unathibitisha",
+    "followLikeAll": "Fuata na penda kila kitu",
+    "followLikeAllSub": "Anamfuata {{handle}}, anaitikia kila chapisho",
+    "likeAll": "Penda machapisho yao yote",
+    "likeAllSub": "Anaruka yale uliyokwisha kuitikia",
+    "catchUp": "Nipe habari mpya",
+    "catchUpSub": "Alichochapisha {{handle}} hivi karibuni, kwa ufupi",
+    "message": "Mwandikie ujumbe",
+    "messageSub": "Anaandaa rasimu ya ujumbe, wewe unatuma",
+    "placeholder": "Uliza chochote kuhusu {{handle}}…",
+    "send": "Tuma",
+    "promptFollowLikeAll": "Mfuate {{handle}} na uitikie machapisho yao yote",
+    "promptLikeAll": "Itikia machapisho yote ya {{handle}}",
+    "promptCatchUp": "Nipe habari za alichochapisha {{handle}} hivi karibuni",
+    "promptMessage": "Nisaidie kumwandikia {{handle}} ujumbe",
+    "promptAbout": "Kuhusu {{handle}}: {{question}}"
   }
 }

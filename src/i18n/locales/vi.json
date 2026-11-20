@@ -20941,5 +20941,27 @@
     "remember": "Ghi nhớ lựa chọn của tôi",
     "rememberHint": "Đổi bất cứ lúc nào trong Cài đặt",
     "failed": "Không xóa được tin nhắn"
+  },
+  "profileAskAi": {
+    "row": "Hỏi AI",
+    "rowSub": "Theo dõi, thích tất cả, cập nhật",
+    "back": "Quay lại",
+    "title": "Hỏi AI về {{handle}}",
+    "sub": "Trợ lý thực hiện, bạn xác nhận",
+    "followLikeAll": "Theo dõi và thích tất cả",
+    "followLikeAllSub": "Theo dõi {{handle}}, bày tỏ cảm xúc với mọi bài đăng",
+    "likeAll": "Thích tất cả bài đăng",
+    "likeAllSub": "Bỏ qua những bài bạn đã bày tỏ cảm xúc",
+    "catchUp": "Cập nhật cho tôi",
+    "catchUpSub": "{{handle}} đã đăng gì gần đây, tóm tắt",
+    "message": "Viết tin nhắn",
+    "messageSub": "Soạn sẵn tin nhắn, bạn gửi đi",
+    "placeholder": "Hỏi bất cứ điều gì về {{handle}}…",
+    "send": "Gửi",
+    "promptFollowLikeAll": "Theo dõi {{handle}} và bày tỏ cảm xúc với tất cả bài đăng của họ",
+    "promptLikeAll": "Bày tỏ cảm xúc với tất cả bài đăng của {{handle}}",
+    "promptCatchUp": "Cập nhật cho tôi những gì {{handle}} đã đăng gần đây",
+    "promptMessage": "Giúp tôi viết tin nhắn gửi {{handle}}",
+    "promptAbout": "Về {{handle}}: {{question}}"
   }
 }
