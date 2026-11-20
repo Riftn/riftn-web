@@ -2,7 +2,8 @@ import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import CornerDownRight from "@/components/ui/cut-icons/reply";
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useDraftState } from '@/hooks/use-draft-state';
+import { InPlaceEditField, editOnClick } from '@/components/app/chat/InPlaceEdit';
+import { cn } from '@/lib/utils';
 import { useDraft } from '@/hooks/use-draft';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
@@ -82,12 +83,18 @@ import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 /** Lines the side chat opens on, and reads back per press of Load older. */
 const SIDE_CHAT_PAGE = 30;
 
-function SidebarMessageBody({ content }: { content: string }) {
+function SidebarMessageBody({ content, onEditAt }: { content: string; onEditAt?: (caret: number | null) => void }) {
   const { links, displayText } = useDehubLinks(content);
   return (
     <>
       {displayText.trim() && (
-        <TranslatableText text={displayText} className="chat-body text-xs text-zinc-300 break-words" as="p" auto="chat" />
+        // Your own words edit in place: click into them and type.
+        <div
+          className={cn(onEditAt && 'cursor-text')}
+          onClick={onEditAt ? editOnClick((caret) => onEditAt(displayText === content ? caret : null)) : undefined}
+        >
+          <TranslatableText text={displayText} className="chat-body text-xs text-zinc-300 break-words" as="p" auto="chat" />
+        </div>
       )}
       <DehubLinkEmbeds links={links} compact />
       <ChatLinkPreviews content={displayText} />
@@ -192,16 +199,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   // Edits happen in the row itself rather than in the composer at the foot of
   // the rail — the composer is a 169-character single line shared with the
   // mention picker, and hijacking it would strand a half-typed message.
+  // Same as a Requests comment: the words become the field, a pause saves.
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editInitial, setEditInitial] = useState('');
-  const [editDraft, setEditDraft] = useDraftState(editingId ? `chat:edit:${editingId}` : null, editInitial);
-  const commitDraftEdit = async (id: string) => {
-    if (!editDraft.trim()) return;
-    try {
-      const result = await editMessage(id, editDraft);
-      if (result !== false && setEditDraft.complete(editDraft, editDraft)) setEditingId(current => current === id ? null : current);
-    } catch { /* Keep the edit available for retry. */ }
-  };
+  const [editCaret, setEditCaret] = useState<number | null>(null);
+  const startEdit = (id: string, caret: number | null = null) => { setEditCaret(caret); setEditingId(id); };
+  const stopEdit = useCallback(() => setEditingId(null), []);
 
   const translateSignal = 0;
   const originalSignal = 0;
@@ -477,7 +479,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   if (menuMsg) {
     const own = !!walletAddress && menuMsg.sender_address?.toLowerCase() === walletAddress.toLowerCase();
     if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
-    if (own && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content || ''); }, hint: 'E' });
+    if (own && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEdit(menuMsg.id), hint: 'E' });
     if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push({
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
@@ -687,34 +689,15 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                         )}
                       </span>
                       {editingId === msg.id ? (
-                        <div className="mt-0.5">
-                          <textarea
-                            autoFocus
-                            value={editDraft}
-                            onChange={(e) => setEditDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                void commitDraftEdit(msg.id);
-                              } else if (e.key === 'Escape') {
-                                e.preventDefault();
-                                setEditingId(null);
-                              }
-                            }}
-                            rows={2}
-                            maxLength={169}
-                            className="w-full resize-none rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-xs text-white outline-none focus:border-white/30"
-                          />
-                          <div className="mt-0.5 flex items-center gap-2 text-[10px] text-zinc-500">
-                            <button
-                              onClick={() => {
-                                void commitDraftEdit(msg.id);
-                              }}
-                              className="text-white hover:underline"
-                            >{_copy("copy.1509f561f241", { defaultValue: "Save" })}</button>
-                            <button onClick={() => setEditingId(null)} className="hover:text-zinc-300">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</button>
-                          </div>
-                        </div>
+                        <InPlaceEditField
+                          draftKey={`chat:edit:${msg.id}`}
+                          text={msg.content || ''}
+                          caret={editCaret}
+                          onSave={(next) => editMessage(msg.id, next)}
+                          onDone={stopEdit}
+                          maxLength={169}
+                          className="chat-body text-xs text-zinc-300"
+                        />
                       ) : msg.message_type === 'image' && msg.image_url ? (
                         <img src={getMediaUrl(msg.image_url)} alt="" className="max-w-full max-h-24 rounded mt-0.5 cursor-zoom-in" onClick={() => setViewingImage(getMediaUrl(msg.image_url) || msg.image_url)} />
                       ) : msg.message_type === 'gif' && (msg.image_url || msg.content) ? (
@@ -724,7 +707,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           <VoiceWaveformPlayer src={msg.audio_url || msg.image_url || ''} />
                         </div>
                       ) : (
-                        <SidebarMessageBody content={msg.content} />
+                        <SidebarMessageBody
+                          content={msg.content}
+                          onEditAt={!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase() && !msg.send_state && !msg.id.startsWith('temp-')
+                            ? (caret) => startEdit(msg.id, caret) : undefined}
+                        />
                       )}
                       {/* Reactions */}
                       <SidebarReactions
