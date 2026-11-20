@@ -35,6 +35,7 @@ import {
   replyError,
   type MiniAppContext,
 } from './protocol';
+import { profilePath } from '@/lib/profile-path';
 
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co'}/functions/v1`;
 
@@ -173,7 +174,7 @@ export function useMiniAppHost(frame: RefObject<HTMLIFrameElement>, options: Min
           const handle = cleanHandle(req.params.handle);
           if (!handle) return fail('invalid', 'A dehub handle is required.');
           ok();
-          return navigate(`/${handle}`);
+          return navigate(profilePath(handle));
         }
         case 'actions.viewPost': {
           const id = cleanPostId(req.params.id);

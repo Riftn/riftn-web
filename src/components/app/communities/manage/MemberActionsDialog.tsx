@@ -43,6 +43,7 @@ import { useDeHubProfile } from '@/hooks/use-dehub-profile';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Community, CommunityMember } from '@/hooks/use-communities';
 import { RestrictionDialog } from './RestrictionDialog';
+import { profilePath } from '@/lib/profile-path';
 
 export interface MemberActionsDialogProps {
   community: Community;
@@ -226,7 +227,7 @@ export function MemberActionsDialog({
                   onClick={() => {
                     if (!handle) return;
                     onOpenChange(false);
-                    navigate(`/${handle.replace('@', '')}`);
+                    navigate(profilePath(handle.replace('@', '')));
                   }}
                 />
 

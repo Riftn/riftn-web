@@ -33,6 +33,7 @@ import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import { useFollowStatuses } from '@/hooks/use-follow-status';
 import { isWithinNewWindow, joinedAgoLabel, useNewMembers, type NewMember } from '@/hooks/use-new-members';
 import type { SuggestedAccount } from '@/lib/api/dehub';
+import { profilePath } from '@/lib/profile-path';
 
 interface NewMembersCarouselProps {
   /** Explore lists it among its sections: bigger title, no "See all" back to Explore. */
@@ -97,7 +98,7 @@ export function NewMembersCarousel({ surface = 'feed', rows }: NewMembersCarouse
    * URL to the real username once it has loaded the account.
    */
   const openProfile = useCallback((user: SuggestedAccount) => {
-    navigate(`/${user.address}`);
+    navigate(profilePath(user.address));
   }, [navigate]);
 
   const handleDismiss = useCallback((user: SuggestedAccount) => {

@@ -26,8 +26,8 @@ import { memo } from 'react';
 import Check from "@/components/ui/cut-icons/check";
 import X from "@/components/ui/cut-icons/close";
 import { BadgedName } from '@/components/app/BadgedName';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { buildAvatarUrl, buildCoverUrl, deviceWidth } from '@/lib/media-url';
+import { LadderAvatar } from '@/components/app/LadderAvatar';
+import { buildCoverUrl, deviceWidth } from '@/lib/media-url';
 import { getDefaultBanner } from '@/components/app/profile/ProfileConstants';
 import { formatCount } from '@/lib/feed-utils';
 import type { SuggestedAccount } from '@/lib/api/dehub';
@@ -56,7 +56,6 @@ function FollowCoverCardInner({ user, phase, onOpen, onFollow, onDismiss, meta, 
   const { t: _copy } = _useCopy();
   const name = suggestionName(user);
   const avatarPath = user.avatarImageUrl || user.avatarUrl;
-  const avatar = avatarPath ? buildAvatarUrl(user.address, avatarPath, deviceWidth(56)) : undefined;
   const cover = user.coverImageUrl
     ? buildCoverUrl(user.address, user.coverImageUrl, deviceWidth(240))
     : getDefaultBanner(user.address);
@@ -97,12 +96,15 @@ function FollowCoverCardInner({ user, phase, onOpen, onFollow, onDismiss, meta, 
       )}
       </div>
 
-      <Avatar data-fc-avatar className="w-14 h-14 rounded-2xl">
-        {avatar && <AvatarImage src={avatar} alt="" className="rounded-2xl object-cover" />}
-        <AvatarFallback data-fc-avatar-fallback className="rounded-2xl text-lg font-semibold">
-          {name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <LadderAvatar
+        data-fc-avatar
+        address={user.address}
+        avatar={avatarPath}
+        name={name}
+        size={56}
+        className="w-14 h-14 rounded-2xl"
+        fallbackClassName="text-lg font-semibold"
+      />
 
       <div data-fc-body>
         <BadgedName
@@ -123,8 +125,16 @@ function FollowCoverCardInner({ user, phase, onOpen, onFollow, onDismiss, meta, 
           {mutuals.length > 0 && (
             <span data-fc-mutuals aria-hidden="true">
               {mutuals.map((m) => {
-                const src = m.avatarImageUrl ? buildAvatarUrl(m.address, m.avatarImageUrl, deviceWidth(18)) : undefined;
-                return src ? <img key={m.address} src={src} alt="" loading="lazy" /> : <i key={m.address} />;
+                return (
+                  <LadderAvatar
+                    key={m.address}
+                    address={m.address}
+                    avatar={m.avatarImageUrl}
+                    name={m.displayName || m.username}
+                    size={18}
+                    className="text-[9px]"
+                  />
+                );
               })}
             </span>
           )}

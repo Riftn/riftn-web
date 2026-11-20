@@ -38,6 +38,7 @@ import { engagementWeight, formatEngagementWeight, NO_BADGE_ENGAGEMENT_WEIGHT } 
 import { AppState } from '@/components/app/AppState';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const PAGE_SIZE = 50;
 
 interface ReactionInfoDrawerProps {
@@ -109,7 +110,7 @@ export function ReactionInfoDrawer({ open, onOpenChange, tokenId }: ReactionInfo
 
   const goToProfile = (person: PostLiker) => {
     onOpenChange(false);
-    if (person.username) navigate(`/${person.username.replace('@', '')}`);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
     else if (person.address) navigate(`/app/profile?id=${person.address}`);
   };
 

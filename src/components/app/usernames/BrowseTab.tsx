@@ -35,6 +35,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { UsernameCard } from './UsernameCard';
 import { BuyUsernameDrawer } from './BuyUsernameDrawer';
 import type { UsernameListing } from '@/lib/api/dehub/username-market';
+import { profilePath } from '@/lib/profile-path';
 
 const SORTS: { value: UsernameSort; labelKey: string }[] = [
   { value: 'newest', labelKey: 'usernames.sortNewest' },
@@ -264,7 +265,7 @@ function exactBanner(
             values={{ handle: exact.username }}
             components={{
               handle: <span className="font-semibold break-all" />,
-              profile: <a href={`/${exact.username}`} className="underline" />,
+              profile: <a href={profilePath(exact.username)} className="underline" />,
             }}
           />
         </p>

@@ -25,6 +25,7 @@ import { BadgedName } from '@/components/app/BadgedName';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppState } from '@/components/app/AppState';
+import { profilePath } from '@/lib/profile-path';
 
 interface CommunityMembersProps {
   members: CommunityMember[];
@@ -56,7 +57,7 @@ function MemberRow({ member, anonymous }: { member: CommunityMember; anonymous: 
 
   return (
     <button
-      onClick={() => { if (handle) navigate(`/${handle.replace('@', '')}`); }}
+      onClick={() => { if (handle) navigate(profilePath(handle.replace('@', ''))); }}
       className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.06] transition-colors text-left"
     >
       <div className="w-9 h-9 rounded-lg bg-white/[0.08] flex items-center justify-center overflow-hidden flex-shrink-0">

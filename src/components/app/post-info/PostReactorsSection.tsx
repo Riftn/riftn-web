@@ -20,6 +20,7 @@ import { engagementWeight, NO_BADGE_ENGAGEMENT_WEIGHT } from '@/lib/engagement-w
 import { ReactionInfoDrawer } from '@/components/app/cards/ReactionInfoDrawer';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const PREVIEW_COUNT = 5;
 const EMOJI = new Map(REACTION_LIST.map((meta) => [meta.key, meta.emoji]));
 
@@ -42,7 +43,7 @@ export function PostReactorsSection({ tokenId }: { tokenId: string | number }) {
   const hasMore = !!data?.pagination?.hasMore || anonymousCount > 0;
 
   const goToProfile = (person: PostLiker) => {
-    if (person.username) navigate(`/${person.username.replace('@', '')}`);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
     else if (person.address) navigate(`/app/profile?id=${person.address}`);
   };
 

@@ -44,6 +44,7 @@ import { toast } from 'sonner';
 
 import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
 import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
+import { profilePath } from '@/lib/profile-path';
 
 function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -241,7 +242,7 @@ export function EventChat({ eventId }: EventChatProps) {
                 const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
                 const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
                 const handle = msg.username;
-                const goToProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                const goToProfile = handle ? () => navigate(profilePath(handle)) : undefined;
 
                 return (
                   <div key={msg.id} className="group relative px-3">

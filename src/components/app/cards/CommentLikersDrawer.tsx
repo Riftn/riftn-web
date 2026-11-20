@@ -33,6 +33,7 @@ import { BadgedName } from '@/components/app/BadgedName';
 import { AppState } from '@/components/app/AppState';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const PAGE_SIZE = 50;
 
 interface CommentLikersDrawerProps {
@@ -76,7 +77,7 @@ export function CommentLikersDrawer({ open, onOpenChange, commentId, loadPage = 
 
   const goToProfile = (person: CommentLiker) => {
     onOpenChange(false);
-    if (person.username) navigate(`/${person.username.replace('@', '')}`);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
     else if (person.address) navigate(`/app/profile?id=${person.address}`);
   };
 

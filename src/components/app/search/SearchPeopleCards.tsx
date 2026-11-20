@@ -18,6 +18,7 @@ import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import type { SearchCreator } from '@/hooks/use-dehub-search';
 import type { SuggestedAccount } from '@/lib/api/dehub';
 import { cn } from '@/lib/utils';
+import { profilePath } from '@/lib/profile-path';
 
 export function toSuggestedAccount(user: SearchCreator): SuggestedAccount {
   const username = user.handle.replace(/^@/, '');
@@ -53,7 +54,7 @@ export const SearchPeopleCards = memo(function SearchPeopleCards({ users, layout
   const open = useCallback((u: SuggestedAccount) => {
     const handle = u.username || u.address;
     onProfileClick?.(handle);
-    navigate(`/${handle}`);
+    navigate(profilePath(handle));
   }, [navigate, onProfileClick]);
 
   const follow = useCallback((u: SuggestedAccount) => {

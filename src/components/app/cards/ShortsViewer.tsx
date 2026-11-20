@@ -131,6 +131,7 @@ import {
   type DoubleTapLikeEventDetail,
   type OpenReactionsEventDetail,
 } from '@/lib/tap-reactions';
+import { profilePath } from '@/lib/profile-path';
 
 interface ShortsViewerProps {
   shorts: ShortVideo[];
@@ -793,7 +794,7 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
     const username = currentShort?.creatorUsername || currentShort?.username;
     if (username) {
       onClose();
-      navigate(`/${username}`);
+      navigate(profilePath(username));
     }
   }, [currentShort?.creatorUsername, currentShort?.username, navigate, onClose]);
   

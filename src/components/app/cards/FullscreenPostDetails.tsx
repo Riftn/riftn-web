@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDeHubProfile } from '@/hooks/use-dehub-profile';
 import { toggleFollowFor, useFollowOverrides } from '@/hooks/use-follow';
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
+import { profilePath } from '@/lib/profile-path';
 
 export interface FullscreenPostAuthor {
   name: string;
@@ -56,7 +57,7 @@ export function FullscreenPostDetails({ author, onLeave }: { author: FullscreenP
     e.stopPropagation();
     if (!handle && !creatorId) return;
     onLeave();
-    if (handle) navigate(`/${handle}`);
+    if (handle) navigate(profilePath(handle));
     else navigate(`/app/profile?id=${creatorId}`);
   };
 

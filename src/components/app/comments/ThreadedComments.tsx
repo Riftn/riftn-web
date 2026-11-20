@@ -58,6 +58,7 @@ import {
   type CommentThread,
   type ThreadedComment,
 } from '@/lib/comment-threads';
+import { profilePath } from '@/lib/profile-path';
 
 /** Replies shown before the thread collapses behind "Show N more". */
 const VISIBLE_REPLIES = 1;
@@ -329,7 +330,7 @@ export function ThreadedComments<C extends ThreadedComment>({
   }, [askDelete, onDelete]);
 
   const handleUserPress = useCallback((username: string) => {
-    navigate(`/${username.replace(/^@/, '')}`);
+    navigate(profilePath(username.replace(/^@/, '')));
   }, [navigate]);
 
   const handleShowLikers = useCallback((id: string) => {

@@ -14,7 +14,9 @@ import Sparkles from "@/components/ui/cut-icons/assistant";
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { renderTextWithLinks } from '../TranslatableText';
+import { Link } from 'react-router-dom';
 import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
+import { ASSISTANT_PROFILE_PATH } from '@/lib/profile-path';
 
 interface AssistantReplyCardProps {
   content: string;
@@ -36,14 +38,14 @@ export function AssistantReplyCard({ content, timestamp, replyToName }: Assistan
   const { t: _copy } = _useCopy();
   return (
     <div className="flex gap-3 py-2 px-4 hover:bg-zinc-800/30 transition-colors group">
-      <div className="flex-shrink-0">
+      <Link to={ASSISTANT_PROFILE_PATH} className="flex-shrink-0" aria-label={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}>
         <Avatar className="w-8 h-8">
           <AvatarImage src={assistantAvatar} alt={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })} />
           <AvatarFallback className="bg-primary/20 text-primary">
             <Sparkles className="w-4 h-4" />
           </AvatarFallback>
         </Avatar>
-      </div>
+      </Link>
 
       <div className="flex-1 min-w-0">
         {replyToName && (
@@ -54,7 +56,7 @@ export function AssistantReplyCard({ content, timestamp, replyToName }: Assistan
         )}
 
         <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-white text-sm truncate">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</span>
+          <Link to={ASSISTANT_PROFILE_PATH} className="font-semibold text-white text-sm truncate hover:underline">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</Link>
           <span className="text-[10px] uppercase tracking-wide px-1.5 py-px rounded bg-primary/20 text-primary border border-primary/30">
             {_copy("copy.11fb682be0a0", { defaultValue: "AI" })}
           </span>

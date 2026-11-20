@@ -56,3 +56,17 @@ export function confirmAssistantAction(id: string, reaction?: string): Promise<A
 export function cancelAssistantAction(id: string): Promise<AssistantAction> {
   return apiCall<AssistantAction>(`${path(id)}/cancel`, { method: 'POST', body: {}, requiresAuth: true });
 }
+
+/** Personality + chat model, shared by the Assistant page and the @assistant DM. */
+export interface AssistantPrefs {
+  style: string;
+  model: string;
+}
+
+export function getAssistantPrefs(): Promise<AssistantPrefs> {
+  return apiCall<AssistantPrefs>('/api/assistant-actions/prefs', { requiresAuth: true });
+}
+
+export function saveAssistantPrefs(prefs: Partial<AssistantPrefs>): Promise<AssistantPrefs> {
+  return apiCall<AssistantPrefs>('/api/assistant-actions/prefs', { method: 'POST', body: prefs, requiresAuth: true });
+}

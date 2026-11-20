@@ -32,6 +32,7 @@ import medal7 from '@/assets/medal-7.png';
 import medal8 from '@/assets/medal-8.png';
 import medal9 from '@/assets/medal-9.png';
 import medal10 from '@/assets/medal-10.png';
+import { profilePath } from '@/lib/profile-path';
 
 const MEDALS = [medal1, medal2, medal3, medal4, medal5, medal6, medal7, medal8, medal9, medal10];
 
@@ -55,7 +56,7 @@ const LeaderboardCard = memo(function LeaderboardCard({
 
   return (
     <Link
-      to={`/${entry.username}`}
+      to={profilePath(entry.username)}
       aria-label={`${t('leaderboard.rankN', { rank })} · ${displayName}`}
       className={cn(
         "flex-shrink-0 w-[160px] rounded-xl p-3 cursor-pointer transition-colors block",

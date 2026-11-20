@@ -56,6 +56,7 @@ const PROFILE_TAB_POST_TYPE: Partial<Record<TabValue, string>> = {
   articles: 'article',
 };
 import { scrollDocumentTo } from '@/lib/document-scroll';
+import { profilePath } from '@/lib/profile-path';
 
 /** A reposted governance proposal on the profile timeline. */
 export interface ProfileProposalItem {
@@ -130,23 +131,23 @@ export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {
       // Route like /0xABC... → /username
       if (routeUsername && /^0x[a-fA-F0-9]{40}$/i.test(routeUsername)) {
         if (cleanHandle.toLowerCase() !== routeUsername.toLowerCase()) {
-          navigate(`/${cleanHandle}`, { replace: true });
+          navigate(profilePath(cleanHandle), { replace: true });
         }
       }
       // Route like /sableraven_9847 where canonical is /SableRaven_9847 → normalize casing
       else if (routeUsername && cleanHandle.toLowerCase() === routeUsername.toLowerCase() && cleanHandle !== routeUsername) {
-        navigate(`/${cleanHandle}`, { replace: true });
+        navigate(profilePath(cleanHandle), { replace: true });
       }
       // Route like /app/profile?id=0xABC... → /username
       else if (userId && !routeUsername) {
-        navigate(`/${cleanHandle}`, { replace: true });
+        navigate(profilePath(cleanHandle), { replace: true });
       }
       // Old handle after a rename (/d → /riftn): the API answered with whoever
       // wore it last. Wait for the real answer, never a cached placeholder from
       // the previous page, and leave ENS names (mal.eth) alone.
       else if (routeUsername && !isProfileFromCache && !routeUsername.includes('.')
         && cleanHandle.toLowerCase() !== routeUsername.replace(/^@/, '').toLowerCase()) {
-        navigate(`/${cleanHandle}`, { replace: true });
+        navigate(profilePath(cleanHandle), { replace: true });
       }
     }
   }, [routeUsername, userId, apiProfile?.handle, isProfileFromCache, navigate]);

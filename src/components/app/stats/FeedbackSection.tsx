@@ -18,6 +18,7 @@ import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getAccountSummariesByUsernames, type AccountSummary } from '@/lib/api/dehub';
 import { buildAvatarUrl } from '@/lib/media-url';
+import { profilePath } from '@/lib/profile-path';
 
 const MIN_LENGTH = 10;
 const MAX_LENGTH = 1200;
@@ -285,7 +286,7 @@ export function FeedbackSection({ source }: { source?: 'converter' | 'migration'
                 <figure key={item.id} className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3">
                   <figcaption className="mb-2">
                     {handle ? (
-                      <Link to={`/${handle}`} className="inline-flex max-w-full items-center gap-2 rounded-lg hover:opacity-80 transition-opacity">
+                      <Link to={profilePath(handle)} className="inline-flex max-w-full items-center gap-2 rounded-lg hover:opacity-80 transition-opacity">
                         {face}
                         {who}
                       </Link>

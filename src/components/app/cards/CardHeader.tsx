@@ -31,6 +31,7 @@ import type { BadgeLock } from '@/lib/staking-badges';
 import type { PostVisibility } from '@/lib/api/dehub/types';
 import { useCoAuthors } from '@/lib/co-author-store';
 import { CoAuthorAvatarBadge, CoAuthorNames } from './CoAuthorByline';
+import { profilePath } from '@/lib/profile-path';
 
 interface CardHeaderProps {
   /** Display name or username */
@@ -138,7 +139,7 @@ export function CardHeader({
 
     // Prefer username-based navigation, fallback to ID
     if (creatorUsername) {
-      navigate(`/${cleanUsername}`);
+      navigate(profilePath(cleanUsername));
     } else if (creatorId) {
       navigate(`/app/profile?id=${creatorId}`);
     }

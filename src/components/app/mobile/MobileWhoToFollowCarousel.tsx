@@ -41,6 +41,7 @@ import { useFollowedSuggestions } from '@/hooks/use-followed-suggestions';
 import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import { toast } from 'sonner';
 import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
+import { profilePath } from '@/lib/profile-path';
 
 const BATCH_SIZE = 10;
 /** How long a followed card shows "Following" before it folds away. */
@@ -135,7 +136,7 @@ export function MobileWhoToFollowCarousel({ surface = 'feed', rows }: MobileWhoT
   const handleUserClick = useCallback((user: SuggestedAccount) => {
     const target = user.username || user.address;
     if (target) {
-      navigate(`/${target}`);
+      navigate(profilePath(target));
     }
   }, [navigate]);
 
