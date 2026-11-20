@@ -494,7 +494,7 @@ export function StageTranscriptDrawer({ space, open, onOpenChange }: Props) {
   /* ────── actions ────── */
   const stageDeepLink = (t?: number) => {
     if (!stageId) return '';
-    const base = `${window.location.origin}/app/spaces/${stageId}`;
+    const base = `${window.location.origin}/stage/${stageId}`;
     return typeof t === 'number' ? `${base}?t=${Math.floor(t)}` : base;
   };
 
