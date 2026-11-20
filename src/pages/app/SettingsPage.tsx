@@ -797,7 +797,8 @@ function ProfileSettings() {
     mutationFn: async (data: UpdateProfileData) => {
       if (data.customs && authUser?.address) {
         const latest = await getAccountInfo(authUser.address);
-        data = { ...data, customs: { ...latest.customs, ...data.customs } };
+        const latestCustoms = latest.customs as UpdateProfileData['customs'];
+        data = { ...data, customs: { ...latestCustoms, ...data.customs } };
       }
       return updateProfile(data);
     },

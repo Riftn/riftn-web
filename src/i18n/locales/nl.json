@@ -2686,6 +2686,9 @@
     "returnHome": "Terug naar home"
   },
   "profile": {
+    "localTime": "Lokale tijd {{time}}",
+    "shareLocalTime": "Mijn lokale tijd tonen",
+    "shareLocalTimeHint": "Toon je tijdzone en lokale tijd op je openbare profiel en in de chat.",
     "gridCard": {
       "stage": "Podium",
       "liveStage": "Live podium",
