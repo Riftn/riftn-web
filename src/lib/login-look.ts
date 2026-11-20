@@ -8,7 +8,8 @@
  */
 import { useSyncExternalStore } from 'react';
 
-export const LOGIN_LOOKS = ['tube', 'vhs', 'led', 'holo', 'neon', '3d', 'flat'] as const;
+/** Flat first: it is the default, and the first card in Settings. */
+export const LOGIN_LOOKS = ['flat', 'tube', 'vhs', 'led', 'holo', 'neon', '3d'] as const;
 export type LoginLook = (typeof LOGIN_LOOKS)[number];
 export const DEFAULT_LOGIN_LOOK: LoginLook = 'flat';
 

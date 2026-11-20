@@ -591,6 +591,12 @@ html[data-system-tone="light"] .login-look-preview {
   transform: translate(-50%, -50%) scale(0.4);
 }
 .login-look-preview .login-stack__title { margin-top: 0; }
+/* Phone: the cards are a side-swipe carousel (LookCarousel), wider than the
+   grid cells were, so the sign is drawn bigger and never meets the edges. */
+@media (max-width: 639px) {
+  .login-look-preview { height: 118px; }
+  .login-look-preview__scale { transform: translate(-50%, -50%) scale(0.46); }
+}
 
 /* Looping previews that scrolled off screen stand still. */
 .look-previews-paused *,

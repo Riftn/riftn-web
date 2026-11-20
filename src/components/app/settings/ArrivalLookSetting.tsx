@@ -13,6 +13,7 @@ import { buildAvatarUrl } from '@/lib/media-url';
 import { ARRIVAL_INTRO_MS, ARRIVAL_LOOKS, setArrivalLook, useArrivalLook, type ArrivalLook } from '@/lib/arrival-look';
 import { ArrivalMarks, isConceptLook } from '@/components/app/login/SignInHandoff';
 import { useOnScreen } from '@/hooks/use-on-screen';
+import { LOOK_CARD_CLASS, LookCarousel, useLookCardView } from './LookCarousel';
 import '@/components/app/login/sign-in-handoff.css';
 
 const LABELS: Record<ArrivalLook, [string, string]> = {
@@ -63,6 +64,34 @@ function ArrivalPreview({ look, picture, initial, playing }: { look: ArrivalLook
   );
 }
 
+function ArrivalLookCard({ look, active, label, picture, initial, pageOnScreen }: {
+  look: ArrivalLook; active: boolean; label: string; picture?: string; initial: string; pageOnScreen: boolean;
+}) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const { seen, inView } = useLookCardView(ref);
+  return (
+    <button
+      ref={ref}
+      type="button"
+      role="radio"
+      aria-checked={active}
+      data-arrival-look-option={look}
+      onClick={() => setArrivalLook(look)}
+      className={cn(
+        LOOK_CARD_CLASS,
+        'group flex min-w-0 flex-col gap-2 rounded-2xl p-1.5 text-left transition-colors',
+        active ? 'bg-white/10 ring-2 ring-white' : 'ring-1 ring-white/10 hover:bg-white/5',
+        !inView && 'look-previews-paused',
+      )}
+    >
+      {seen
+        ? <ArrivalPreview look={look} picture={picture} initial={initial} playing={pageOnScreen && inView} />
+        : <span className="arrival-look-preview" aria-hidden />}
+      <span className="px-1.5 pb-1 text-sm font-medium text-white">{label}</span>
+    </button>
+  );
+}
+
 export function ArrivalLookSetting() {
   const { t } = useTranslation();
   const current = useArrivalLook();
@@ -79,29 +108,26 @@ export function ArrivalLookSetting() {
       <p className="text-zinc-500 text-xs mb-4">
         {t('settings.arrivalLook.desc', 'What plays while your account loads, before your picture lands on the page. On this device.')}
       </p>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5" role="radiogroup" aria-label={t('settings.arrivalLook.title', 'After you sign in')}>
+      <LookCarousel
+        label={t('settings.arrivalLook.title', 'After you sign in')}
+        activeIndex={Math.max(0, ARRIVAL_LOOKS.indexOf(current))}
+        desktopCols="sm:grid-cols-5"
+      >
         {ARRIVAL_LOOKS.map((look) => {
           const [key, fallback] = LABELS[look];
-          const active = current === look;
           return (
-            <button
+            <ArrivalLookCard
               key={look}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              data-arrival-look-option={look}
-              onClick={() => setArrivalLook(look)}
-              className={cn(
-                'group flex min-w-0 flex-col gap-2 rounded-2xl p-1.5 text-left transition-colors',
-                active ? 'bg-white/10 ring-2 ring-white' : 'ring-1 ring-white/10 hover:bg-white/5',
-              )}
-            >
-              <ArrivalPreview look={look} picture={picture} initial={initial} playing={onScreen} />
-              <span className="px-1.5 pb-1 text-sm font-medium text-white">{t(key, fallback)}</span>
-            </button>
+              look={look}
+              active={current === look}
+              label={t(key, fallback)}
+              picture={picture}
+              initial={initial}
+              pageOnScreen={onScreen}
+            />
           );
         })}
-      </div>
+      </LookCarousel>
     </div>
   );
 }
