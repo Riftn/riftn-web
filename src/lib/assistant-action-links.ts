@@ -3,7 +3,7 @@
  * putting a riftn.com/app/assistant?action=<id> link in its reply. The chat
  * draws that link as a confirm card and leaves it out of the text.
  */
-const ACTION_LINK = /\[([^\]]*)\]\((?:https?:\/\/[^\s)]*?)?\/(?:app\/)?assistant\?action=([a-f0-9]{24})\)|(?:https?:\/\/[^\s)]*?)\/(?:app\/)?assistant\?action=([a-f0-9]{24})/gi;
+const ACTION_LINK = /\[([^\]]*)\]\((?:https?:\/\/[^\s)]*?)?\/(?:app\/)?assistant\?(?:action|requestDraft)=([a-f0-9]{24})\)|(?:https?:\/\/[^\s)]*?)\/(?:app\/)?assistant\?(?:action|requestDraft)=([a-f0-9]{24})/gi;
 
 export function assistantActionIds(content: string | null | undefined): string[] {
   if (!content) return [];

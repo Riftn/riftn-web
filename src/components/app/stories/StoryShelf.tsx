@@ -13,6 +13,8 @@ import Refresh from '@/components/ui/cut-icons/refresh';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveNowItems, pictureOf, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
 import { useStoryShelf } from '@/hooks/use-story-shelf';
+import { useMatureContent } from '@/hooks/use-mature-content';
+import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
@@ -23,8 +25,13 @@ const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replac
 
 export function StoryShelf() {
   const { isAuthenticated, walletAddress, user, openLoginModal } = useAuth();
-  const { data } = useStoryShelf();
   const { items: live, open: openLive } = useLiveNowItems();
+  const { showMatureContent } = useMatureContent();
+  const kidsMode = useKidsModeLock();
+  const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
+  const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
+  const { data } = useStoryShelf(liveHosts, canSeeMature);
+  const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
   const pending = useStoriesStore(s => s.pending);
@@ -33,8 +40,8 @@ export function StoryShelf() {
   const own = shelf.find(e => e.own) ?? null;
   // What the viewer can page through: your own day when it has something, then everyone else.
   const watchable = useMemo(
-    () => shelf.map(e => ({ ...e, items: playable(e.items) })).filter(e => e.items.length > 0),
-    [shelf],
+    () => shelf.map(e => ({ ...e, items: playable(e.items).filter(item => canSeeMature || !item.isMature) })).filter(e => e.items.length > 0),
+    [shelf, canSeeMature],
   );
   const others = watchable.filter(e => !e.own);
   const ownWatchable = watchable.find(e => e.own) ?? null;
@@ -47,7 +54,7 @@ export function StoryShelf() {
     return () => window.clearTimeout(id);
   }, [hasMoments]);
 
-  if (!isAuthenticated && others.length === 0 && live.length === 0) return null;
+  if (!isAuthenticated && others.length === 0 && eligibleLive.length === 0) return null;
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
@@ -57,7 +64,7 @@ export function StoryShelf() {
   const addMoment = () => (isAuthenticated ? openCreator() : openLoginModal());
 
   return (
-    <div data-stories data-story-shelf role="list">
+    <div data-stories data-story-shelf data-no-swipe role="list">
       {isAuthenticated && (
         <MeTile
           address={walletAddress ?? ''}
@@ -69,7 +76,7 @@ export function StoryShelf() {
           onOpen={el => ownWatchable && openEntry(ownWatchable, el)}
         />
       )}
-      {live.map(item => (
+      {eligibleLive.map(item => (
         <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
       ))}
       {others.map(entry => (

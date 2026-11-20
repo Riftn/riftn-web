@@ -51,7 +51,10 @@ export interface StoryItem {
   height: number | null;
   durationMs: number;
   muted: boolean;
+  isMature?: boolean;
   caption: string | null;
+  remixSourceId?: string | null;
+  shareable?: boolean;
   mentions: StoryMention[];
   song: StorySong | null;
   audience: StoryAudience;
@@ -83,8 +86,8 @@ export interface StoryViewer extends StoryAuthor {
   viewedAt: string;
 }
 
-export function getStoryShelf(): Promise<{ shelf: ShelfEntry[]; signedIn: boolean }> {
-  return apiCall('/api/stories/shelf');
+export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[] }> {
+  return apiCall('/api/stories/shelf', { params: { liveHosts: liveHosts || undefined }, requiresAuth: signedIn });
 }
 
 export function getStoryRings(addresses: string[]): Promise<{ rings: Record<string, 'unseen' | 'seen'> }> {
@@ -95,8 +98,8 @@ export function getUserStories(address: string): Promise<{ author: StoryAuthor |
   return apiCall(`/api/stories/user/${encodeURIComponent(address.toLowerCase())}`);
 }
 
-export function getStory(id: string): Promise<{ author: StoryAuthor | null; item: StoryItem }> {
-  return apiCall(`/api/stories/${encodeURIComponent(id)}`);
+export function getStory(id: string, signedIn = false): Promise<{ author: StoryAuthor | null; item: StoryItem }> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}`, { requiresAuth: signedIn });
 }
 
 export function getStoryArchive(cursor?: string): Promise<{ items: StoryItem[]; next: string | null }> {
@@ -108,6 +111,7 @@ export interface CreateStoryFields {
   allowReplies?: boolean;
   muted?: boolean;
   caption?: string;
+  remixSourceId?: string;
   mentions?: StoryMention[];
   song?: StorySong | null;
   /** Video moments. */
@@ -128,6 +132,7 @@ export function createStory(
   form.append('allowReplies', String(fields.allowReplies !== false));
   form.append('muted', String(!!fields.muted));
   if (fields.caption) form.append('caption', fields.caption);
+  if (fields.remixSourceId) form.append('remixSourceId', fields.remixSourceId);
   if (fields.mentions?.length) form.append('mentions', JSON.stringify(fields.mentions));
   if (fields.song) form.append('song', JSON.stringify(fields.song));
   if (fields.draftVideoId) {

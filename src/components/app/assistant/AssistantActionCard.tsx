@@ -26,6 +26,15 @@ import { profilePath } from '@/lib/profile-path';
 
 type Choice = PostReaction | 'fitting';
 
+const REQUEST_CATEGORY_KEYS = {
+  ui_ux: 'features.uiUx',
+  performance: 'features.performance',
+  new_feature: 'features.newFeature',
+  bug_fix: 'features.bugFix',
+  integration: 'features.integration',
+  other: 'features.other',
+} as const;
+
 function Person({ person }: { person: AssistantActionPerson }) {
   const name = person.username ? `@${person.username}` : `${person.address.slice(0, 6)}…`;
   return (
@@ -95,8 +104,12 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
   const confirm = async () => {
     if (!action) return;
     setBusy(true);
+    setError(null);
     try {
-      const next = await confirmAssistantAction(action.id, action.kind === 'react' ? picked : undefined);
+      const next = await confirmAssistantAction(
+        action.id,
+        action.kind === 'request_post' ? { requestPost: true } : action.kind === 'react' ? { reaction: picked } : {},
+      );
       setAction(next);
       if (next.status === 'running') poll.current = setTimeout(load, 1200);
     } catch (e: any) {
@@ -124,6 +137,7 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
   }
 
   const { kind, status, preview, result } = action;
+  const draft = kind === 'request_post' ? preview.draft : undefined;
   const title =
     kind === 'react'
       ? count === 1
@@ -133,7 +147,9 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
         ? t('assistantCards.follow', { count, defaultValue: 'Follow {{count}}' })
         : kind === 'unfollow'
           ? t('assistantCards.unfollow', { count, defaultValue: 'Unfollow {{count}}' })
-          : preview.allow
+          : kind === 'request_post'
+            ? t('assistantCards.requestDraft', { defaultValue: 'Public request draft' })
+            : preview.allow
             ? t('assistantCards.allowChats', { defaultValue: 'Let the assistant read your chats?' })
             : t('assistantCards.stopChats', { defaultValue: 'Stop the assistant reading your chats?' });
 
@@ -144,7 +160,9 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
         ? t('assistantCards.confirmFollow', { defaultValue: 'Follow' })
         : kind === 'unfollow'
           ? t('assistantCards.confirmUnfollow', { defaultValue: 'Unfollow' })
-          : preview.allow
+          : kind === 'request_post'
+            ? t('assistantCards.postRequest', { defaultValue: 'Post to Requests' })
+            : preview.allow
             ? t('assistantCards.confirmAllow', { defaultValue: 'Allow' })
             : t('assistantCards.confirmStop', { defaultValue: 'Stop' });
 
@@ -154,6 +172,24 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
   return (
     <div className="mt-2 w-full max-w-sm rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3 space-y-3" data-assistant-card={kind}>
       <div className="text-sm font-medium text-white">{title}</div>
+
+      {draft && (
+        <div className="space-y-2 break-words">
+          <div className="text-xs text-white/60">{t(REQUEST_CATEGORY_KEYS[draft.category])}</div>
+          <div className="text-sm font-semibold text-white">{draft.title}</div>
+          <div className="whitespace-pre-wrap text-xs leading-relaxed text-white/80">{draft.description}</div>
+          {!!preview.duplicates?.length && status === 'pending' && (
+            <div className="space-y-1 text-xs">
+              <div className="font-medium text-white/70">{t('assistantCards.possibleDuplicates', { defaultValue: 'Possible duplicates' })}</div>
+              {preview.duplicates.map((request) => (
+                <a key={request.id} className="block text-white underline" href={`/app/features?request=${encodeURIComponent(request.id)}`} target="_blank" rel="noopener">
+                  {request.title}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {kind === 'react' && preview.author && <Person person={preview.author} />}
       {kind === 'react' && !!preview.alreadyReacted && (
@@ -198,7 +234,13 @@ export function AssistantActionCard({ actionId, initial }: { actionId: string; i
         </div>
       )}
 
-      {status === 'done' && (
+      {status === 'done' && kind === 'request_post' && result?.requestId && (
+        <a className="inline-flex items-center gap-2 text-xs text-white underline" href={`/app/features?request=${encodeURIComponent(result.requestId)}`}>
+          <CutCheck className="h-3.5 w-3.5 shrink-0" />
+          {t('assistantCards.viewPostedRequest', { defaultValue: 'View posted request' })}
+        </a>
+      )}
+      {status === 'done' && kind !== 'request_post' && (
         <div className="flex items-center gap-2 text-xs text-white/80">
           <CutCheck className="w-3.5 h-3.5 shrink-0" />
           <span>

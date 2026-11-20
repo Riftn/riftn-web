@@ -1,7 +1,7 @@
 /* Stories: the Glass Shelf above Home, the full-screen viewer and the creator.
 
    One set of tokens per theme. The ring on a tile with something new is the
-   theme's accent or the default violet; a watched tile has a muted edge. */
+   theme's accent or the default smoke line. A watched tile has a muted edge. */
 
 [data-stories] {
   --st-ink: #fff;
@@ -10,7 +10,8 @@
   --st-line: rgb(255 255 255 / 0.12);
   --st-acc: #fff;
   --st-acc2: #fff;
-  --st-ring: #a391fc;
+  --st-ring-color: #66686dba;
+  --st-ring-width: 1px;
   --st-btn-ink: #000;
   --st-live: 255 99 99;
 }
@@ -21,14 +22,19 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-stories] {
   --st-line: rgb(0 0 0 / 0.08);
   --st-acc: #0e0e12;
   --st-acc2: #0e0e12;
-  --st-ring: #7351d9;
   --st-btn-ink: #fff;
   --st-live: 224 64 70;
 }
 html[data-theme='hazy'] [data-stories] { --st-acc: #a391fc; --st-acc2: #f39bff; --st-glass: rgb(38 18 66 / 0.42); --st-btn-ink: #170a2a; }
 html[data-theme='osaka'] [data-stories] { --st-acc: #ff6fb1; --st-acc2: #7fe3e0; --st-glass: rgb(17 14 28 / 0.58); --st-btn-ink: #1a0d18; --st-live: 255 176 92; }
 html[data-theme='jungle'] [data-stories] { --st-acc: #9be15d; --st-acc2: #00e3ae; --st-btn-ink: #0b1a0b; }
-html[data-theme='war'] [data-stories] { --st-acc: #e8b04a; --st-acc2: #e8b04a; --st-ring: #e8b04a; --st-btn-ink: #1a1206; }
+html[data-theme='war'] [data-stories] {
+  --st-acc: #e8b04a;
+  --st-acc2: #e8b04a;
+  --st-ring-color: var(--st-acc);
+  --st-ring-width: 1.5px;
+  --st-btn-ink: #1a1206;
+}
 
 /* ── Shelf ───────────────────────────────────────────────────────── */
 [data-story-shelf] {
@@ -103,7 +109,7 @@ html[data-theme='war'] [data-stories] { --st-acc: #e8b04a; --st-acc2: #e8b04a; -
   position: absolute;
   inset: 0;
   border-radius: 16px;
-  box-shadow: inset 0 0 0 1.5px var(--st-ring);
+  box-shadow: inset 0 0 0 var(--st-ring-width) var(--st-ring-color);
   pointer-events: none;
 }
 html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle']) [data-story-tile][data-seen='false'] [data-st-ring] {
@@ -345,6 +351,16 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   line-height: 1.35;
   text-shadow: 0 1px 8px rgb(0 0 0 / 0.6);
   z-index: 2;
+  pointer-events: none;
+}
+[data-sv-original] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  margin-bottom: 6px;
+  border-radius: 18px;
+  pointer-events: auto;
 }
 [data-sv-song] {
   position: absolute;
@@ -376,6 +392,12 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
 }
 @media (min-width: 768px) {
   [data-sv-nav] { display: flex; }
+}
+[data-sv-sheet-backdrop] {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgb(0 0 0 / 0.42);
 }
 [data-sv-sheet] {
   position: absolute;

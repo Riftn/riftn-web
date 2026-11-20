@@ -31,6 +31,7 @@ import { warmLoginSheet } from '@/components/app/LoginModal';
 import dehubMark from '@/assets/dehub-logo-compact.png';
 import { scrollDocumentToSmooth } from '@/lib/document-scroll';
 import { FeedIslandCapsule } from './FeedIslandCapsule';
+import { MobileAccountButton } from './MobileAccountButton';
 import { usePostFeedLook } from '@/lib/post-feed-look';
 
 const HeaderLogo = memo(function HeaderLogo({ onClick, onPointerDown, isAuthenticated }: {
@@ -221,7 +222,9 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
               </div>
             </DrawerContent>
           </Drawer>
-        ) : null}
+        ) : (
+          <MobileAccountButton action="signup" onClick={() => openLoginModal()} onPointerDown={warmSheetForLogin} />
+        )}
       </div>
 
       {/* dehub mark — centred on the bar itself, not between the side slots, so
@@ -251,15 +254,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
           </button>
         )}
         {!isAuthenticated && (
-          <button
-            onClick={() => openLoginModal()}
-            onPointerDown={warmSheetForLogin}
-            className="flex h-11 shrink-0 items-center justify-end"
-          >
-            <span className="flex h-7 items-center rounded-full bg-[rgba(127,127,127,0.22)] px-3 text-[13px] font-semibold text-white">
-              {_copy("copy.c189840cf7e2", { defaultValue: "Log in" })}
-            </span>
-          </button>
+          <MobileAccountButton action="signin" onClick={() => openLoginModal()} onPointerDown={warmSheetForLogin} />
         )}
       </div>
     </header>

@@ -16,6 +16,7 @@ export function createPublicChatUnreadStore(storage: {
   write: (key: string, value: string) => void;
 }) {
   const accounts = new Map<string, ReadState>();
+  const synced = new Map<string, boolean>();
   const listeners = new Set<() => void>();
   const keyFor = (account: string) => `dehub_public_chat_unread:${account.toLowerCase()}`;
   const emit = () => listeners.forEach((listener) => listener());
@@ -50,6 +51,18 @@ export function createPublicChatUnreadStore(storage: {
     emit();
   }
 
+  function catchUp(account: string, at: number) {
+    if (!account || !Number.isFinite(at) || at <= 0) return false;
+    const state = stateFor(account);
+    let changed = false;
+    if (at > state.readAt) { state.readAt = at; changed = true; }
+    for (const [id, when] of state.unread) {
+      if (when <= at) { state.unread.delete(id); changed = true; }
+    }
+    if (changed) save(account, state);
+    return changed;
+  }
+
   return {
     subscribe(listener: () => void) {
       listeners.add(listener);
@@ -57,6 +70,22 @@ export function createPublicChatUnreadStore(storage: {
     },
     count(account: string) {
       return account ? stateFor(account).unread.size : 0;
+    },
+    hasSynced(account: string) {
+      return synced.has(account.toLowerCase());
+    },
+    syncReadPosition(account: string, at: number | null | undefined, startedAt: number) {
+      if (!account) return;
+      const key = account.toLowerCase();
+      const initial = !synced.has(key);
+      const verified = synced.get(key) === true;
+      const resolved = at === null || (typeof at === 'number' && Number.isFinite(at) && at > 0);
+      synced.set(key, verified || resolved);
+      // A confirmed missing bookmark opens at the latest line in the room.
+      // Discard history replayed at startup once, preserving new live lines.
+      const position = at === null && !verified ? startedAt : at;
+      const changed = typeof position === 'number' && catchUp(key, position);
+      if (initial && !changed) emit();
     },
     record(account: string, message: PublicChatUnreadMessage): boolean {
       if (!account || !message.id || message.excluded
@@ -86,16 +115,7 @@ export function createPublicChatUnreadStore(storage: {
      * device last opened the room, while the room itself counted from the
      * shared spot (97 on the row, 19 inside).
      */
-    catchUp(account: string, at: number) {
-      if (!account || !Number.isFinite(at) || at <= 0) return;
-      const state = stateFor(account);
-      let changed = false;
-      if (at > state.readAt) { state.readAt = at; changed = true; }
-      for (const [id, when] of state.unread) {
-        if (when <= at) { state.unread.delete(id); changed = true; }
-      }
-      if (changed) save(account, state);
-    },
+    catchUp,
     refresh() {
       accounts.clear();
       emit();

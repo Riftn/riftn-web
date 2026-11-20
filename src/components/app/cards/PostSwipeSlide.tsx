@@ -13,7 +13,7 @@
  * @module components/app/cards/PostSwipeSlide
  */
 
-import { lazy, memo, Suspense, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { lazy, memo, Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
@@ -81,19 +81,42 @@ function posterSize(length: number): string {
 }
 
 function TextPoster({ short }: { short: ShortVideo }) {
-  const { t } = useTranslation();
   const post = short.reelPost!;
   const words = useMemo(() => posterText(post.text || ''), [post.text]);
   const body = useMemo(() => renderTextWithLinks(words), [words]);
   const bg = postBgFromToken(post.bgId);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const [overflows, setOverflows] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  useLayoutEffect(() => {
+  // Which edges still have words past them. Drives both whether the box
+  // scrolls and where it fades.
+  const [more, setMore] = useState({ above: false, below: false });
+  const measure = useCallback(() => {
     const el = bodyRef.current;
+    if (!el) return;
+    const room = el.scrollHeight - el.clientHeight;
     // Big type's descenders poke past the box by a few pixels; that is not a cut.
-    if (el && !expanded) setOverflows(el.scrollHeight - el.clientHeight > 12);
-  }, [words, expanded]);
+    const long = room > 12;
+    const above = long && el.scrollTop > 4;
+    const below = long && room - el.scrollTop > 4;
+    setMore((prev) => (prev.above === above && prev.below === below ? prev : { above, below }));
+  }, []);
+  useLayoutEffect(() => {
+    measure();
+    const el = bodyRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [words, measure]);
+  const scrolls = more.above || more.below;
+  // The words fade out toward whichever edge has more past it, so the fade is
+  // also the cue that the box scrolls; it lifts at the end so the last line reads.
+  const fade = more.above && more.below
+    ? 'linear-gradient(to bottom, transparent, #000 18%, #000 78%, transparent)'
+    : more.below
+      ? 'linear-gradient(to bottom, #000 78%, transparent)'
+      : more.above
+        ? 'linear-gradient(to bottom, transparent, #000 18%)'
+        : undefined;
 
   return (
     <div
@@ -108,27 +131,26 @@ function TextPoster({ short }: { short: ShortVideo }) {
           and of the creator row + action row at the foot. */}
       <div className="relative flex flex-col px-4 pb-[170px] pt-[84px]">
         <span aria-hidden className="mb-2 select-none font-serif text-[64px] leading-[0.6] opacity-40">“</span>
-        {/* A long post opens in place the way a short's caption does: "more"
-            under it, then the words scroll and "less" closes them. */}
+        {/* A long post scrolls in place, with no "more" to press and no
+            scrollbar. `data-shorts-scrollable` hands the wheel and the swipe to
+            the words while the pointer is on them, instead of the next post. */}
         <div
           ref={bodyRef}
-          data-shorts-scrollable={expanded || undefined}
-          style={{ maxHeight: 'calc(100dvh - 330px)', touchAction: expanded ? 'pan-y' : undefined }}
-          className={cn(
-            'scrollbar-hide',
-            expanded ? 'overflow-y-auto' : 'overflow-hidden',
-            overflows && !expanded && '[mask-image:linear-gradient(to_bottom,#000_78%,transparent)]',
-          )}
+          onScroll={measure}
+          data-shorts-scrollable={scrolls || undefined}
+          style={{
+            maxHeight: 'calc(100dvh - 330px)',
+            touchAction: scrolls ? 'pan-y' : undefined,
+            overscrollBehavior: scrolls ? 'contain' : undefined,
+            maskImage: fade,
+            WebkitMaskImage: fade,
+          }}
+          className={cn('scrollbar-hide', scrolls ? 'overflow-y-auto' : 'overflow-hidden')}
         >
           <p className={cn('whitespace-pre-line break-words font-semibold tracking-[-0.01em] [text-wrap:pretty]', posterSize(words.length))}>
             {body}
           </p>
         </div>
-        {overflows && (
-          <button type="button" onClick={() => setExpanded((v) => !v)} className="mt-1 self-start text-xs opacity-60">
-            {expanded ? t('copy.4fdd3b6201a2', { defaultValue: 'less' }) : t('copy.187897ce0afc', { defaultValue: 'more' })}
-          </button>
-        )}
 {parseInt(short.id, 10) > 0 && (
 <div data-no-swipe className="mt-4 w-full max-w-[420px]">
 <PollCard tokenId={parseInt(short.id, 10)} />
