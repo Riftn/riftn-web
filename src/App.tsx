@@ -938,6 +938,7 @@ function AppContent() {
             <Route path="/governance/:proposalId" element={<Suspense fallback={<PageLoader />}><GovernanceProposalPage /></Suspense>} />
             <Route path="/packs" element={<Suspense fallback={<PageLoader />}><PacksPage /></Suspense>} />
             <Route path="/packs/:slug" element={<Suspense fallback={<PageLoader />}><PackPage /></Suspense>} />
+            <Route path="/moment/:id" element={<Suspense fallback={<PageLoader />}><StoryPermalinkPage /></Suspense>} />
             <Route path="/post/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
             <Route path="/post/:postId/info" element={<Suspense fallback={<PageLoader />}><PostInfoPage /></Suspense>} />
             <Route path="/post/:postId/reactions" element={<Suspense fallback={<PageLoader />}><PostReactionsPage /></Suspense>} />
