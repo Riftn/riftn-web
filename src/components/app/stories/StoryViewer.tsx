@@ -254,6 +254,12 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
       setDrag({ x: Math.abs(dx) > Math.abs(dy) ? dx : 0, y: Math.abs(dy) >= Math.abs(dx) ? Math.max(0, dy) : 0 });
     }
   };
+  const cancelPress = () => {
+    if (press.current) window.clearTimeout(press.current.timer);
+    press.current = null;
+    setHeld(false);
+    setDrag(null);
+  };
   const onPointerUp = (e: React.PointerEvent) => {
     const p = press.current;
     press.current = null;
@@ -415,7 +421,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={() => { press.current = null; setHeld(false); setDrag(null); }}
+      onPointerCancel={cancelPress}
     >
       <div data-sv-backdrop style={{ backgroundImage: item.posterUrl ? `url("${item.posterUrl}")` : undefined }} />
       <div
