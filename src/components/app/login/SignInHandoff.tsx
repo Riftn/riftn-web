@@ -83,7 +83,7 @@ const SPECKS: Array<[number, number, number, number, number]> = (() => {
   return Array.from({ length: 26 }, () => {
     const ang = r() * Math.PI * 2;
     const rad = 70 + r() * 110;
-    return [Math.round(Math.cos(ang) * rad * 0.55), Math.round(Math.sin(ang) * rad), 1.7 + r() * 1.3, r() * 2.4, 1.5 + r() * 2] as [number, number, number, number, number];
+    return [Math.round(Math.cos(ang) * rad * 0.55), Math.round(Math.sin(ang) * rad), 1.7 + r() * 1.3, r() * 0.6, 1.5 + r() * 2] as [number, number, number, number, number];
   });
 })();
 
