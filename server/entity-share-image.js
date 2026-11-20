@@ -40,7 +40,7 @@ export async function handleEntityShareImage(request, env, ctx, kind, id, lookup
     const query = entityQuery(kind, id);
     const props = query ? entityCardProps(kind, await lookup(query)) : null;
     if (!props) return fallback();
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ kind, props })));
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ revision: 2, kind, props })));
     const fingerprint = Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
     const key = new Request(`https://riftn.com/_og/${kind}/${ENTITY_CARD_VERSION}/${encodeURIComponent(id)}.png?data=${fingerprint}`);
     const cache = typeof caches !== 'undefined' ? caches.default : undefined;

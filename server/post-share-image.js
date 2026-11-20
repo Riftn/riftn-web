@@ -5,7 +5,7 @@ import { loadPostShareDetails, streamerShareSvg } from './post-share-details.js'
 
 const SHARE_IMAGE = 'https://riftn.com/og/riftn-share.png';
 let assets;
-const RENDER_REVISION = 10;
+const RENDER_REVISION = 11;
 const bytesToUri = (bytes, type) => {
   let binary = '';
   for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
