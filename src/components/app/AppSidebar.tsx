@@ -46,6 +46,9 @@ const loadAccountSwitcher = () => import('./navigation/MenuAccountSwitcher');
 const MenuAccountSwitcher = React.lazy(() =>
   loadAccountSwitcher().then(m => ({ default: m.MenuAccountSwitcher }))
 );
+const FollowersListDrawer = React.lazy(() =>
+  import('./profile/FollowersListDrawer').then((m) => ({ default: m.FollowersListDrawer })),
+);
 const PostModal = React.lazy(() =>
   import('@/features/post/PostModal').then(m => ({ default: m.PostModal }))
 );
@@ -161,6 +164,16 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     typeof n === 'number' ? n : Array.isArray(n) ? n.length : typeof alt === 'number' ? alt : null;
   const menuFollowers = user ? countOf(user.followers, user.follower_count) : null;
   const menuFollowing = user ? countOf(user.followings, user.following_count) : null;
+  // Tapping a count closes the menu and opens that list, as on the profile.
+  const [followList, setFollowList] = useState<'followers' | 'following' | null>(null);
+  const [followListMounted, setFollowListMounted] = useState(false);
+  const openFollowList = (type: 'followers' | 'following') => {
+    closeMenu();
+    setFollowListMounted(true);
+    setFollowList(type);
+  };
+  const lastFollowListType = useRef<'followers' | 'following'>('followers');
+  if (followList) lastFollowListType.current = followList;
 
   const mobileNavContent = (
     <>
@@ -197,11 +210,15 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
             </p>
             {menuFollowers != null || menuFollowing != null ? (
               <p data-testid="menu-follow-counts" className="flex min-w-0 items-center gap-1 text-[13px] text-zinc-400 tabular-nums">
-                <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">{compactCount(menuFollowers ?? 0)} {t('profile.followers')}</span>
+                <button type="button" data-testid="menu-followers" onClick={() => openFollowList('followers')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
+                  <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">{compactCount(menuFollowers ?? 0)} {t('profile.followers')}</span>
+                </button>
                 <span aria-hidden className="mx-1.5 h-3 w-px flex-shrink-0 bg-zinc-500/50" />
-                <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">{compactCount(menuFollowing ?? 0)} {t('profile.following')}</span>
+                <button type="button" data-testid="menu-following" onClick={() => openFollowList('following')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
+                  <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">{compactCount(menuFollowing ?? 0)} {t('profile.following')}</span>
+                </button>
               </p>
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
           </div>
@@ -364,6 +381,17 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
           mounts it at that moment, exactly where the CSS would have revealed
           it. Same gate the right rail uses. */}
       {isDesktop && <DesktopSidebar onPostClick={openPostModal} />}
+
+      {followListMounted && (user?.address || walletAddress) && (
+        <Suspense fallback={null}>
+          <FollowersListDrawer
+            open={followList != null}
+            onOpenChange={(open) => { if (!open) setFollowList(null); }}
+            profileAddress={user?.address || walletAddress || ''}
+            listType={lastFollowListType.current}
+          />
+        </Suspense>
+      )}
 
       {/* Post Modal */}
       {postModalMounted && (
