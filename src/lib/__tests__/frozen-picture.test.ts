@@ -33,4 +33,21 @@ describe('frozen picture watchdog', () => {
     expect(setter).not.toHaveBeenCalled();
     stop();
   });
+  it('rebuilds the picture when a nudge paints nothing', () => {
+    vi.useFakeTimers();
+    const { video, paint, tick, setter } = fakeVideo();
+    const parent = document.createElement('div');
+    parent.appendChild(video);
+    const moved = vi.spyOn(parent, 'insertBefore');
+    const stop = watchFrozenPicture(video, 'Test', '1');
+    paint(1); tick(1.2); tick(2.6);
+    expect(setter).toHaveBeenCalledTimes(1);
+    expect(moved).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(4100);
+    tick(3); tick(4.6);
+    expect(moved).toHaveBeenCalledTimes(1);
+    expect(video.parentNode).toBe(parent);
+    stop();
+    vi.useRealTimers();
+  });
 });

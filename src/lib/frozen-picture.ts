@@ -20,10 +20,13 @@ export function watchFrozenPicture(video: HTMLVideoElement, component: string, p
   let handle = 0;
   let lastMediaTime = -1;
   let lastNudgeAt = 0;
+  /** A nudge went out and no frame has painted since. */
+  let nudgeUnanswered = false;
   let stopped = false;
   const onFrame = (_now: number, meta: { mediaTime: number }) => {
     if (stopped) return;
     lastMediaTime = meta.mediaTime;
+    nudgeUnanswered = false;
     handle = v.requestVideoFrameCallback!(onFrame);
   };
   handle = v.requestVideoFrameCallback(onFrame);
@@ -49,10 +52,22 @@ export function watchFrozenPicture(video: HTMLVideoElement, component: string, p
     if (now - lastNudgeAt < 4000) return;
     lastNudgeAt = now;
     lastMediaTime = video.currentTime;
+    // A seek in place repaints a decoder that fell behind. When even that
+    // paints nothing, the element has lost its picture layer (iPhone Safari
+    // can drop it when a playing video is moved between cards): put the
+    // element back where it is, in the same task, so the browser builds the
+    // layer again. Playback, position and buffer are untouched by the move.
+    const rebuild = nudgeUnanswered && !!video.parentNode;
+    if (rebuild) {
+      try { video.parentNode!.insertBefore(video, video.nextSibling); } catch { /* detached meanwhile */ }
+    }
     try { video.currentTime = video.currentTime; } catch { /* not seekable yet */ }
+    nudgeUnanswered = true;
+    const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
+    const browser = /iPhone|iPad|iPod/.test(ua) ? 'ios' : /Safari/.test(ua) && !/Chrome|Chromium|Edg/.test(ua) ? 'safari' : /Firefox/.test(ua) ? 'firefox' : 'chromium';
     void import('./logger').then(({ logToBackend }) => logToBackend({
-      level: 'info', component, message: 'frozen picture nudged',
-      metadata: { postId, behind: Math.round(behind * 10) / 10 },
+      level: 'info', component, message: rebuild ? 'frozen picture rebuilt' : 'frozen picture nudged',
+      metadata: { postId, behind: Math.round(behind * 10) / 10, browser },
     }, true)).catch(() => {});
   };
   video.addEventListener('timeupdate', check);
