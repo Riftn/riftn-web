@@ -119,6 +119,7 @@ import { videoPlaybackManager } from '@/lib/video-playback-manager';
 import { createWheelPager } from '@/lib/wheel-pager';
 import { commitsDismiss } from '@/lib/video-hold-gestures';
 import { useAnyOverlayOpen } from '@/lib/overlay-open';
+import { watchShortsEngagement, type ShortsEngagement } from '@/lib/shorts-engaged';
 import { UserMentionDropdown } from '@/components/app/mentions';
 import { usePostLinkCopyCount, useLinkCopyFloor, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
 import { viewerShareUrl } from '@/lib/share-url';
@@ -1112,8 +1113,28 @@ export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMor
   // or the menu is open over the video: moving on under it would lose the place.
   const shortEndedBlockedRef = useRef(false);
   shortEndedBlockedRef.current = shareSheetOpen || showComments;
+  // Typing a comment or reading the thread beside the video (the desktop
+  // panel is always open, so `showComments` never covers it): the post plays
+  // again instead of paging on, and the next end checks again, so the viewer
+  // carries on by itself once they are done.
+  const engagementRef = useRef<ShortsEngagement | null>(null);
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const watch = watchShortsEngagement(root);
+    engagementRef.current = watch;
+    return () => { watch.dispose(); engagementRef.current = null; };
+  }, []);
   const handleShortEnded = useCallback(() => {
     if (shortEndedBlockedRef.current || getVideoPreferences().isLooping) return;
+    if (engagementRef.current?.isEngaged()) {
+      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndexRef.current}"] video`);
+      if (player) {
+        player.currentTime = 0;
+        player.play().catch(() => {});
+      }
+      return;
+    }
     goToNextRef.current();
   }, []);
   // Where the wheel can go right now, so a push past either end rubber bands.
