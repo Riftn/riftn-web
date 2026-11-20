@@ -25,7 +25,8 @@ import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { useUserSearchForDM } from '@/hooks/use-messages';
-import { getFollowList, type DeHubConversation, type DeHubUser } from '@/lib/api/dehub';
+import { getBlockList, getFollowList, type DeHubConversation, type DeHubUser } from '@/lib/api/dehub';
+import { rankNewMessageSuggestions } from '@/lib/new-message-suggestions';
 import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { cn } from '@/lib/utils';
 
@@ -45,7 +46,7 @@ interface NewMessageDrawerProps {
   onChannel?: () => void;
 }
 
-type Person = DeHubUser & { _followsYou?: boolean };
+type Person = DeHubUser & { _followsYou?: boolean; followedAt?: string };
 
 const addrOf = (u: Partial<DeHubUser> | undefined | null) => (u?.address || '').toLowerCase();
 const nameOf = (u: Partial<DeHubUser>) => u.displayName || u.display_name || u.username || `${(u.address || '').slice(0, 6)}…`;
@@ -97,26 +98,36 @@ export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDra
     setQuery('');
   }, [open]);
 
-  const recents = useMemo(() => {
+  const { data: blockList } = useQuery({
+    queryKey: ['block-list'],
+    queryFn: getBlockList,
+    enabled: open && !!me,
+    staleTime: 5 * 60 * 1000,
+  });
+  const blocked = useMemo(() => new Set((blockList || []).map((b) => (b.address || '').toLowerCase())), [blockList]);
+
+  // Everyone you have chatted with, most recent chat first.
+  const chatted = useMemo(() => {
     const seen = new Set<string>();
     const out: Person[] = [];
     for (const c of conversations) {
       const u = c.otherUser;
       const a = addrOf(u);
-      if (!u || !a || a === me || seen.has(a)) continue;
+      if (!u || !a || a === me || seen.has(a) || c.isBlocked || blocked.has(a)) continue;
       seen.add(a);
       out.push(u);
-      if (out.length >= 12) break;
     }
     return out;
-  }, [conversations, me]);
+  }, [conversations, me, blocked]);
+  const recents = useMemo(() => chatted.slice(0, 12), [chatted]);
 
   const { data: following = [] } = useQuery({
     queryKey: ['new-message-drawer', 'following', me],
     enabled: open && !!me,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const res = await getFollowList(me, 'following', { limit: 24 });
+      // Newest follows first from the server; the list is re-ordered below.
+      const res = await getFollowList(me, 'following', { limit: 100 });
       return (res.items || []).map((f) => ({
         address: f.address,
         username: f.username,
@@ -124,14 +135,17 @@ export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDra
         avatarImageUrl: f.avatarImageUrl || f.avatarUrl,
         badgeBalance: f.badgeBalance,
         _followsYou: !!f.followsYou,
+        followedAt: f.followedAt,
+        followers: f.followers,
       } as unknown as Person));
     },
   });
 
   const recentSet = useMemo(() => new Set(recents.map(addrOf)), [recents]);
+  // Newest follows, then people you have messaged, then most followers.
   const suggested = useMemo(
-    () => following.filter((u) => addrOf(u) && addrOf(u) !== me && !recentSet.has(addrOf(u))).slice(0, 8),
-    [following, recentSet, me],
+    () => rankNewMessageSuggestions({ following, messaged: chatted, me, exclude: recentSet, blocked }),
+    [following, chatted, recentSet, me, blocked],
   );
 
   const q = query.trim().replace(/^@/, '').toLowerCase();
@@ -148,12 +162,13 @@ export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDra
     };
     // People you already talk to or follow first, from the very first letter.
     for (const u of [...recents, ...following]) {
+      if (blocked.has(addrOf(u))) continue;
       const hay = `${u.username || ''} ${u.displayName || ''} ${u.display_name || ''}`.toLowerCase();
       if (hay.includes(q)) add(u);
     }
     for (const u of searchResults?.items || []) add(u as Person);
     return out.slice(0, 20);
-  }, [q, recents, following, searchResults, me]);
+  }, [q, recents, following, searchResults, me, blocked]);
 
   const pick = useCallback((u: Person) => {
     if (dmDisabled(u)) return;
