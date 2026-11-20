@@ -67,6 +67,7 @@ import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreB
 import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
+import { ASSISTANT_PROFILE_PATH, profilePath } from '@/lib/profile-path';
 
 /**
  * A text message in the side panel, with the same cards every other chat
@@ -592,12 +593,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                     style={{ paddingLeft: '10px', paddingRight: '10px' }}
                   >
                     <div className="flex items-start gap-2">
+                      <button type="button" onClick={() => navigate(ASSISTANT_PROFILE_PATH)} className="flex-shrink-0" aria-label={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}>
                       <Avatar className="w-6 h-6 flex-shrink-0">
                         <AvatarImage src={assistantAvatar} alt={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })} />
                         <AvatarFallback className="bg-primary/20 text-primary">
                           <Sparkles className="w-3 h-3" />
                         </AvatarFallback>
                       </Avatar>
+                      </button>
                       <div className="min-w-0 flex-1">
                         {assistantView.replyToName && (
                           <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-0.5">
@@ -606,7 +609,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                           </div>
                         )}
                         <span className="inline-flex items-baseline gap-1.5">
-                          <span className="text-xs font-semibold text-white">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</span>
+                          <button type="button" onClick={() => navigate(ASSISTANT_PROFILE_PATH)} className="text-xs font-semibold text-white hover:underline">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</button>
                           <span className="text-[8px] uppercase tracking-wide px-1 py-px rounded bg-primary/20 text-primary border border-primary/30">
                             AI
                           </span>
@@ -641,7 +644,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
                 // Seed what the row already shows, so the profile opens with
                 // this person's photo and name instead of a blank placeholder.
                 seedProfileCache(queryClient, { address: msg.sender_address || undefined, username: handle, displayName: name, avatarUrl }, walletAddress || undefined);
-                navigate(`/${handle}`);
+                navigate(profilePath(handle));
               } : undefined;
               return (
                 <div key={msg.client_key ?? msg.id} data-message-id={msg.id} data-chat-own={(!!walletAddress && msg.sender_address?.toLowerCase() === walletAddress.toLowerCase()) || undefined} data-chat-continued={continued || undefined} data-msg-menu-open={menuPoint.point && menuMsg?.id === msg.id ? '' : undefined} onContextMenu={(e) => openLineMenu(e, msg)} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))} className={`group relative transition-colors duration-500${continued ? ' -mt-1.5' : ''}`} style={{ paddingLeft: '10px', paddingRight: '10px' }}>

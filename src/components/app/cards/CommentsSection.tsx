@@ -149,6 +149,7 @@ import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 import type { ReplyPolicy } from '@/lib/api/dehub/types';
 import { KeywordFilterGate } from './KeywordFilterGate';
+import { profilePath } from '@/lib/profile-path';
 
 // The comment data shape and its API mapper live in @/lib/comment-mapper so
 // non-component consumers can share them. Re-exported here for the surfaces
@@ -2296,7 +2297,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
   // row a new prop on each of its renders.
   const handleUserPress = useStableCallback((username: string) => {
     onClose();
-    navigate(`/${username}`);
+    navigate(profilePath(username));
   });
 
   /**
@@ -3183,7 +3184,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                       key={user.address}
                       onClick={() => {
                         if (user.username) {
-                          navigate(`/${user.username.replace('@', '')}`);
+                          navigate(profilePath(user.username.replace('@', '')));
                         } else if (user.address) {
                           navigate(`/app/profile?id=${user.address}`);
                         }

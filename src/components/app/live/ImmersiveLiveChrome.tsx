@@ -45,6 +45,7 @@ import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveAudience } from '@/hooks/use-live-audience';
 import { LiveAudienceSheet, audienceAvatar, audienceName } from './LiveAudienceSheet';
+import { profilePath } from '@/lib/profile-path';
 
 const compact = (n: number) => {
   try {
@@ -175,7 +176,7 @@ export function ImmersiveLiveChrome({
      end up at the same URL. */
   const openCreatorProfile = useCallback(() => {
     const handle = creatorUsername?.replace('@', '');
-    if (handle) navigate(`/${handle}`);
+    if (handle) navigate(profilePath(handle));
     else if (creatorId) navigate(`/app/profile?id=${creatorId}`);
   }, [creatorUsername, creatorId, navigate]);
 

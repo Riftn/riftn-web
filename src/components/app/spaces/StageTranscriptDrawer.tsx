@@ -69,6 +69,7 @@ import { primeSpeech } from '@/hooks/dub-preference';
 import { usePendingAction } from '@/hooks/use-pending-action';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
+import { profilePath } from '@/lib/profile-path';
 
 interface Segment { speaker: string; text: string; start: number; end: number }
 interface Chapter { title: string; start: number; end: number }
@@ -217,7 +218,7 @@ function SpeakerHeader({
           </AvatarFallback>
         </Avatar>
         <button
-          onClick={() => navigate(`/${overrideUser.replace('@', '')}`)}
+          onClick={() => navigate(profilePath(overrideUser.replace('@', '')))}
           className="text-xs font-semibold text-white/90 hover:underline truncate max-w-[200px]"
         >
           @{overrideUser}
@@ -251,7 +252,7 @@ function SpeakerHeader({
     return (
       <div className="flex items-center gap-2 mb-2">
         <button
-          onClick={() => handle && navigate(`/${handle.replace('@', '')}`)}
+          onClick={() => handle && navigate(profilePath(handle.replace('@', '')))}
           className="flex items-center gap-2 group min-w-0"
           disabled={!handle}
         >

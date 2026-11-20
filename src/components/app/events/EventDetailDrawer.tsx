@@ -46,6 +46,7 @@ import { FriendsAtEvent } from './FriendsAtEvent';
 import { EditEventDrawer } from './EditEventDrawer';
 import { ShareEntityDrawer } from '@/components/app/ShareEntityDrawer';
 import { dehubLinkFor } from '@/lib/dehub-links';
+import { profilePath } from '@/lib/profile-path';
 
 function CreatorInfo({ event }: { event: CommunityEvent }) {
   const { t: _copy } = _useCopy();
@@ -56,7 +57,7 @@ function CreatorInfo({ event }: { event: CommunityEvent }) {
 
   return (
     <button
-      onClick={() => navigate(`/${handle || event.creator_wallet_address}`)}
+      onClick={() => navigate(profilePath(handle || event.creator_wallet_address))}
       className="flex items-center gap-2 group"
     >
       <Avatar className="w-6 h-6">

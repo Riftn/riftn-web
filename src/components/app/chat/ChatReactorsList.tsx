@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import '@/styles/chat-hold.css';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const PAGE_SIZE = 50;
 /** A DM line can't realistically carry more, and the lookup is one request per hundred. */
 const LOCAL_CAP = 300;
@@ -155,7 +156,7 @@ export function ChatReactorsList({ reactions, remoteMessageId, onNavigate, compa
 
   const goToProfile = (person: ChatReactor) => {
     onNavigate?.();
-    if (person.username) navigate(`/${person.username.replace('@', '')}`);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
     else if (person.address) navigate(`/app/profile?id=${person.address}`);
   };
 

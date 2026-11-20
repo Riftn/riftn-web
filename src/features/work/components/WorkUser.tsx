@@ -18,6 +18,7 @@ import { profileAvatar, profileName, useWalletProfiles } from '@/hooks/use-walle
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useUserReviews } from '../hooks/use-work';
+import { profilePath } from '@/lib/profile-path';
 
 export function shortAddress(address: string): string {
   return address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
@@ -53,7 +54,7 @@ export function WorkUser({
 
   return (
     <div className={cn('flex min-w-0 items-center gap-2', className)}>
-      <Link to={`/${address}`} className="shrink-0">
+      <Link to={profilePath(address)} className="shrink-0">
         <Avatar className={dim}>
           {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
           <AvatarFallback className="bg-white/10 text-[11px] font-medium text-white">
@@ -63,7 +64,7 @@ export function WorkUser({
       </Link>
       <div className="min-w-0 flex-1">
         <Link
-          to={`/${address}`}
+          to={profilePath(address)}
           className="flex items-center gap-1.5 text-sm font-medium text-white hover:underline"
         >
           <span className="inline-flex items-baseline gap-1 min-w-0 truncate">

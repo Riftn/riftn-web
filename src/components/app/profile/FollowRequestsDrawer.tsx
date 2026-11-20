@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { AppState } from '@/components/app/AppState';
 import { BadgedName } from '@/components/app/BadgedName';
+import { profilePath } from '@/lib/profile-path';
 
 interface FollowRequestsDrawerProps {
   open: boolean;
@@ -129,7 +130,7 @@ export function FollowRequestsDrawer({ open, onOpenChange }: FollowRequestsDrawe
     const target = request.username || request.address;
     if (target) {
       onOpenChange(false);
-      navigate(`/${target}`);
+      navigate(profilePath(target));
     }
   };
 

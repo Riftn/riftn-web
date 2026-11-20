@@ -140,6 +140,7 @@ function formatCountdown(seconds: number): string {
 import { BuyAlertCard } from '../chat/BuyAlertCard';
 import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
 import { SendStatus } from '@/components/app/chat/SendStatus';
+import { profilePath } from '@/lib/profile-path';
 
 function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
   const [failed, setFailed] = useState(false);
@@ -1275,7 +1276,7 @@ export function CommunityChat({ communityId, community, membership, isMember, me
                 const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
                 const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
                 const handle = msg.username;
-                const openProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                const openProfile = handle ? () => navigate(profilePath(handle)) : undefined;
                 // Owners and admins who may restrict members get the member's
                 // actions (mute, ban, remove) from a click on the name or face.
                 const canActHere = canRestrictMembers && !!msg.wallet_address

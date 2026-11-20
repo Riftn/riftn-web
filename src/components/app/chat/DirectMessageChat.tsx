@@ -149,6 +149,11 @@ import { CallNoteCard } from './calls/CallNoteCard';
 import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
 import { QUICK_CHAT_REACTIONS } from './reaction-options';
 import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
+import { profilePath } from '@/lib/profile-path';
+import { isAssistantAddress } from '@/lib/assistant';
+import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import { AssistantDmMenu } from './AssistantDmMenu';
 
 // Picking messages: only the ticked rows are shaded, the rest stay clear and
 // only hint on hover. Mixed from the text colour rather than bg-white/..., which
@@ -600,9 +605,9 @@ const MessageBubble = memo(function MessageBubble({
       ? `${message.sender.address.slice(0, 6)}...${message.sender.address.slice(-4)}`
       : _copy("copy.b512d97e7cbf", { defaultValue: "User" }));
   const senderProfilePath = message.sender?.username
-    ? `/${message.sender.username}`
+    ? profilePath(message.sender.username)
     : message.sender?.address
-      ? `/${message.sender.address}`
+      ? profilePath(message.sender.address)
       : null;
 
   const primaryMedia = message.mediaUrls?.[0];
@@ -651,9 +656,21 @@ const MessageBubble = memo(function MessageBubble({
   // This used to recognise posts only, which is why sending someone a shop item
   // or a community from the app produced a naked URL in their inbox while a post
   // produced a card.
+  // @assistant offers to do things (react, follow, read your chats) with a
+  // link in its reply. In its DM, as on the Assistant page, that link is drawn
+  // as a confirm card and left out of the text.
+  const assistantActions = useMemo(
+    () => (!isOwnMessage && message.msgType === 'msg' && isAssistantAddress(message.sender?.address)
+      ? assistantActionIds(message.content)
+      : []),
+    [isOwnMessage, message.msgType, message.sender?.address, message.content],
+  );
+  const bodyContent = assistantActions.length > 0
+    ? withoutAssistantActionLinks(message.content || '')
+    : message.content;
   const sharedLink = useMemo(
-    () => (message.msgType === 'msg' ? findDehubLinks(message.content)[0] ?? null : null),
-    [message.msgType, message.content],
+    () => (message.msgType === 'msg' ? findDehubLinks(bodyContent)[0] ?? null : null),
+    [message.msgType, bodyContent],
   );
   const isPostShare = !!sharedLink;
 
@@ -706,7 +723,7 @@ const MessageBubble = memo(function MessageBubble({
     () => (sharedLink ? stripDehubLinkMatches(message.content || '', [sharedLink]) : ''),
     [sharedLink, message.content],
   );
-  const textContent = isPostShare ? shareCaption : (message.content || '');
+  const textContent = isPostShare ? shareCaption : (bodyContent || '');
   const {
     isTranslated,
     translatedText,
@@ -726,7 +743,7 @@ const MessageBubble = memo(function MessageBubble({
   // does in a post. Entity shares are left alone — they already have a card, and
   // stacking a second one under a 280px bubble reads as a bug.
   const { refs: dmAssetRefs, displayText: dmDisplayText } = useAssetRefsInText(
-    isPostShare ? '' : (isTranslated ? translatedText : message.content) || '',
+    isPostShare ? '' : (isTranslated ? translatedText : bodyContent) || '',
     1,
   );
 
@@ -1120,6 +1137,11 @@ const MessageBubble = memo(function MessageBubble({
                       <AssetRefCards refs={dmAssetRefs} className="mt-0" />
                     </div>
                   )}
+                  {assistantActions.map((id) => (
+                    <div key={id} className="w-[320px] max-w-full text-left">
+                      <AssistantActionCard actionId={id} />
+                    </div>
+                  ))}
                 </div>
               )
             )}
@@ -1683,7 +1705,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const avatarUrl = buildAvatarUrl(otherUser?.address || '', otherUser?.avatarImageUrl || otherUser?.avatarUrl);
   const displayName = otherUser?.displayName || otherUser?.display_name || otherUser?.username ||
     (otherUser?.address ? `${otherUser.address.slice(0, 6)}...${otherUser.address.slice(-4)}` : _copy("copy.b512d97e7cbf", { defaultValue: "User" }));
-  const profileLink = otherUser?.username ? `/${otherUser.username}` : otherUser?.address ? `/${otherUser.address}` : '#';
+  const profileLink = otherUser?.username ? profilePath(otherUser.username) : otherUser?.address ? profilePath(otherUser.address) : '#';
 
   // ── Scheduled messages ────────────────────────────────────────────────
   // One-to-one chats that already exist and are free to message. A paid chat
@@ -3134,7 +3156,14 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
             </Button>
           )}
 
-          {!isGroupChat && otherUser?.address && (
+          {!isGroupChat && isAssistantAddress(otherUser?.address) && (
+            <AssistantDmMenu
+              compact={dock}
+              className={`text-zinc-400 hover:text-white hover:bg-zinc-800 ${dock ? 'h-8 w-8' : ''}`}
+            />
+          )}
+
+          {!isGroupChat && otherUser?.address && !isAssistantAddress(otherUser.address) && (
             <>
               <DmVoiceCallButton
                 recipientAddress={otherUser.address}

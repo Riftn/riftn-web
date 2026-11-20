@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutualFollowers } from '@/hooks/use-mutual-followers';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { profilePath } from '@/lib/profile-path';
 
 interface MutualFollowersProps {
   profileAddress: string | undefined;
@@ -26,7 +27,7 @@ export function MutualFollowers({ profileAddress }: MutualFollowersProps) {
 
   const handleNavigate = (item: typeof mutuals[0]) => {
     if (item.username) {
-      navigate(`/${item.username}`);
+      navigate(profilePath(item.username));
     } else {
       navigate(`/app/profile?id=${item.address}`);
     }

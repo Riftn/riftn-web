@@ -49,6 +49,7 @@ import { menuIcons, messageMenuMeta, keepBrowserMenu, MessageMoreButton } from '
 import { useHoldMenu } from '@/hooks/use-hold-menu';
 import Copy from '@/components/ui/cut-icons/copy';
 import { toast } from 'sonner';
+import { profilePath } from '@/lib/profile-path';
 
 /**
  * One row of any of the chat tables. The columns are the same across all of
@@ -414,7 +415,7 @@ export function RealtimeChatPanel({
                 const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
                 const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
                 const handle = msg.username;
-                const goToProfile = handle ? () => navigate(`/${handle}`) : undefined;
+                const goToProfile = handle ? () => navigate(profilePath(handle)) : undefined;
                 const isMine = !!walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
 
                 return (

@@ -59,6 +59,7 @@ import {
 } from '@/lib/leaderboard-rules';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 // Same project URL and fallback as src/integrations/supabase/client.ts.
 const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co';
@@ -553,7 +554,7 @@ export default function LeaderboardPage() {
             {visibleEntries.map((entry) => {
               const rank = entry.rank;
               const hidden = isHidden(entry);
-              const profileHref = entry.username ? `/${entry.username}` : null;
+              const profileHref = entry.username ? profilePath(entry.username) : null;
               const displayName = getDisplayName(entry);
               const rowClass = cn(
                 phone ? "flex items-center gap-2 px-1 py-3.5" : "grid grid-cols-12 gap-2 sm:gap-4 px-4 sm:px-6 py-4 transition-colors items-center",

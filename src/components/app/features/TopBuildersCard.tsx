@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { COMMENT_CAP, COMMENT_POINTS, SHIPPED_POINTS, VOTE_POINTS, type BuilderPeriod, type TopBuilder } from '@/lib/top-builders';
 
 import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
 const SHOWN = 8;
 /** Extra rows added per "Show more" tap once the full list is open. */
 const PAGE = 20;
@@ -156,7 +157,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
         <div className="flex justify-end px-1.5 pb-1.5">
           <button
             type="button"
-            onClick={() => navigate(b.username ? `/${b.username}` : `/app/profile?id=${b.wallet}`)}
+            onClick={() => navigate(b.username ? profilePath(b.username) : `/app/profile?id=${b.wallet}`)}
             className="rounded-lg px-2.5 py-1 text-xs text-zinc-300 hover:text-white bg-white/[0.06]"
           >
             {t('features.topBuilders.viewProfile', 'View profile')}

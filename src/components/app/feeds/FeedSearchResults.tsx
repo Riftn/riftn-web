@@ -27,6 +27,7 @@ import { feedSearchParams, type FeedSearchTab } from '@/lib/feed-search';
 import { FEED_TABS } from '@/constants/app.constants';
 import { mapToShortVideo } from '@/lib/short-video';
 import { MusicSearchShelves, useMusicSearchShelves } from '@/components/app/feeds/MusicSearchShelves';
+import { profilePath } from '@/lib/profile-path';
 
 const ShortsViewer = lazy(() =>
   import('@/components/app/cards/ShortsViewer').then(m => ({ default: m.ShortsViewer })),
@@ -304,7 +305,7 @@ function FeedSearchResultsGrid({ tab, query, extras }: { tab: FeedSearchTab; que
           <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">{_copy("copy.7db20897053b", { defaultValue: "People" })}</p>
           <div className="flex gap-3 overflow-x-auto px-1 scrollbar-hide">
             {accounts.map((a) => (
-              <button key={a.id} type="button" onClick={() => navigate(`/${a.handle.replace('@', '')}`)} className="flex w-14 shrink-0 flex-col items-center gap-1">
+              <button key={a.id} type="button" onClick={() => navigate(profilePath(a.handle.replace('@', '')))} className="flex w-14 shrink-0 flex-col items-center gap-1">
                 <span className="h-12 w-12 overflow-hidden rounded-full border border-white/20 bg-white/10">
                   {a.avatar && <img src={a.avatar} alt="" className="h-full w-full object-cover" loading="lazy" />}
                 </span>
