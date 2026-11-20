@@ -160,32 +160,3 @@ export function mergeNavOrder(previous: string[], visible: string[]): string[] {
   });
   return result;
 }
-
-/**
- * Public Chat on the bottom bar's first screen (Settings > "Public Chat in the
- * bottom bar"). The bar shows four destinations plus Create before it
- * scrolls, so the room takes the slot after Create, Explore keeps the last
- * one and AI moves to the first scrolled spot. Turning it off puts the three
- * back in their default order. Ids are the shared i18n keys, so the app's bar
- * (libs/navOrder.ts, same function) follows the account's choice.
- */
-export const PUBLIC_CHAT_NAV_ID = 'publicChat.title';
-const BAR_AI_ID = 'nav.assistant';
-const BAR_EXPLORE_ID = 'nav.explore';
-const BAR_FIRST_SCREEN = 4;
-const BAR_SWAP_AT = 2;
-
-export function publicChatInBar(order: string[]): boolean {
-  const at = order.indexOf(PUBLIC_CHAT_NAV_ID);
-  return at >= 0 && at < BAR_FIRST_SCREEN;
-}
-
-export function withPublicChatInBar(order: string[], on: boolean): string[] {
-  const moved = on
-    ? [PUBLIC_CHAT_NAV_ID, BAR_EXPLORE_ID, BAR_AI_ID]
-    : [BAR_AI_ID, BAR_EXPLORE_ID, PUBLIC_CHAT_NAV_ID];
-  const present = moved.filter((id) => order.includes(id));
-  const rest = order.filter((id) => !present.includes(id));
-  rest.splice(Math.min(BAR_SWAP_AT, rest.length), 0, ...present);
-  return rest;
-}
