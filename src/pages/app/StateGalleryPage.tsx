@@ -427,10 +427,12 @@ function MessageMenuGallery() {
   const noop = () => {};
   // Delete opens the real choice: for me / for both (yours) or for me only (theirs).
   const [deleting, setDeleting] = useState<{ mine: boolean } | null>(null);
-  const live: LiveChatLineMessage[] = [
+  const [live, setLive] = useState<LiveChatLineMessage[]>(() => [
     { id: 'mm-live-1', userId: others[0], userName: 'Luna', userHandle: 'xluna', content: 'gm chat, who is watching the stream tonight?', timestamp: new Date(Date.now() - 6 * 60_000), type: 'text', reactions: { '👍': [others[1], others[2], me.address], '🚀': [others[1]] } },
     { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
-  ];
+  ]);
+  // Edits land on the line, so the in-place edit can be tried here.
+  const editLive = (id: string, content: string) => { setLive((rows) => rows.map((r) => (r.id === id ? { ...r, content, isEdited: true } : r))); return true; };
   return (
     <section data-msg-menu-gallery className="mb-5 space-y-3">
       <h2 className="text-sm font-semibold">Message menu (right-click on a computer, hold on a phone)</h2>
@@ -465,7 +467,7 @@ function MessageMenuGallery() {
             onReact={noop}
             onRemoveReaction={noop}
             onReply={noop}
-            onEdit={noop}
+            onEdit={editLive}
             onDelete={noop}
             showActions
             onTogglePin={noop}
