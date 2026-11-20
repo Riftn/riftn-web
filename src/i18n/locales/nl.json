@@ -7387,6 +7387,13 @@
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
   "stories": {
+    "remix": "Remix",
+    "moreActions": "Verhaalopties",
+    "remixing": "Remix van het verhaal van {{name}}",
+    "watchOriginal": "Oorspronkelijk verhaal bekijken",
+    "originalUnavailable": "Het oorspronkelijke verhaal is niet meer beschikbaar.",
+    "copyLinkFailed": "De link naar het verhaal kon niet worden gekopieerd.",
+    "whoWatched": "Wie heeft gekeken",
     "create": "Maken",
     "createDescription": "Kies wat u wilt maken: een livestream, een verhaal of een bericht.",
     "goLive": "Live gaan",
