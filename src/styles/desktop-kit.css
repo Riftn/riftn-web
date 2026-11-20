@@ -299,4 +299,7 @@
     border-radius: var(--dk-panel) !important;
     padding: var(--dk-pad) !important;
   }
+
+  /* System Light runs its page sections flat like System does: no grey band, no shadow */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-kit-body] [data-kit-section] { background: none !important; box-shadow: none !important; border-radius: 0 !important; }
 }
