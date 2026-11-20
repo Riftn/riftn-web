@@ -2544,8 +2544,8 @@
     "submitOffer": "Teklifi Gönder",
     "validOfferAmount": "Lütfen geçerli bir teklif tutarı girin",
     "offerSubmitted": "{{handle}} için {{amount}} jeton teklifi gönderildi",
-    "followers": "Takipçiler",
-    "following": "Takip Edilenler",
+    "followers": "Takipçi",
+    "following": "Takip Edilen",
     "joined": "Katıldı",
     "reach": {
       "total": "Toplam erişim",

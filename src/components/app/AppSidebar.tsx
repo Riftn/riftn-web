@@ -6,7 +6,6 @@ import { PenSquare, LogIn, CornerDownLeft } from "lucide-react";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 
 import Search from "@/components/ui/cut-icons/search";
-import Users from "@/components/ui/cut-icons/communities";
 import X from "@/components/ui/cut-icons/close";
 
 import { DhbCoin } from '@/components/app/DhbAmount';
@@ -209,15 +208,13 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
               </BadgedName>
             </p>
             {menuFollowers != null || menuFollowing != null ? (
-              <p data-testid="menu-follow-counts" className="flex min-w-0 items-center gap-1 text-[13px] text-zinc-400 tabular-nums">
+              <p data-testid="menu-follow-counts" className="flex min-w-0 items-center gap-1 text-[13px] font-semibold text-zinc-400 tabular-nums">
                 <button type="button" data-testid="menu-followers" onClick={() => openFollowList('followers')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
-                  <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">{compactCount(menuFollowers ?? 0)} {t('profile.followers')}</span>
+                  <span className="truncate"><span className="font-bold text-zinc-200">{compactCount(menuFollowers ?? 0)}</span> {t('profile.followers')}</span>
                 </button>
-                <span aria-hidden className="mx-1.5 h-3 w-px flex-shrink-0 bg-zinc-500/50" />
+                <span aria-hidden className="mx-1 flex-shrink-0 font-bold">·</span>
                 <button type="button" data-testid="menu-following" onClick={() => openFollowList('following')} className="flex min-w-0 items-center gap-1 py-1 -my-1 text-left">
-                  <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">{compactCount(menuFollowing ?? 0)} {t('profile.following')}</span>
+                  <span className="truncate"><span className="font-bold text-zinc-200">{compactCount(menuFollowing ?? 0)}</span> {t('profile.following')}</span>
                 </button>
               </p>
             ) : user.username && <p className="truncate text-[13px] text-zinc-400">@{user.username}</p>}
