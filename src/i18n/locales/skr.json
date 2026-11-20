@@ -292,13 +292,15 @@
       "location": "جاگہ",
       "custom": "خودسرائی",
       "newsletter": "نیوز لیٹر",
-      "customOption": "کسٹم لیبل"
+      "customOption": "کسٹم لیبل",
+      "cashapp": "Cash App"
     },
     "add": "فیلڈ شامل کرو",
     "remove": "فیلڈ ہٹاؤ",
     "descriptionPresets": "ویب سائٹ، ضمیر یا کجھ وی ٻیا شامل کرو۔ لنک تہاݙے سوشلز نال ݙِسدے ہن۔",
     "needsLabel": "ہر کسٹم فیلڈ کوں ہک لیبل ݙیوو",
-    "placeholderPronouns": "او/انہاں"
+    "placeholderPronouns": "او/انہاں",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} فالو کرو",

@@ -296,9 +296,11 @@
       "pronouns": "代詞",
       "location": "位置",
       "custom": "習俗",
-      "customOption": "自訂標籤"
+      "customOption": "自訂標籤",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "追蹤 #{{tag}}",

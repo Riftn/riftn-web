@@ -297,8 +297,10 @@
       "pronouns": "Kata ganti nama",
       "location": "Lokasi",
       "custom": "Tersuai",
-      "customOption": "Label tersuai"
-    }
+      "customOption": "Label tersuai",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Ikuti #{{tag}}",

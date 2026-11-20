@@ -8,6 +8,7 @@ import Mic from '@/components/ui/cut-icons/mic';
 import MessageEnvelope from '@/components/ui/cut-icons/message-envelope';
 import Profile from '@/components/ui/cut-icons/profile';
 import Location from '@/components/ui/cut-icons/location';
+import Wallet from '@/components/ui/cut-icons/wallet';
 import LinkIcon from '@/components/ui/cut-icons/link';
 import type { ProfileFieldPresetId } from '@/lib/profile-field-presets';
 
@@ -21,6 +22,7 @@ export const PROFILE_FIELD_ICONS: Record<ProfileFieldPresetId, ComponentType<Luc
   newsletter: MessageEnvelope,
   pronouns: Profile,
   location: Location,
+  cashapp: Wallet,
   custom: LinkIcon,
 };
 

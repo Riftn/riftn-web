@@ -288,10 +288,12 @@
       "pronouns": "Pronouns",
       "location": "Location",
       "custom": "Custom",
-      "customOption": "Custom label"
+      "customOption": "Custom label",
+      "cashapp": "Cash App"
     },
     "descriptionPresets": "Add website, pronouns or anything else. Links go show with your socials.",
-    "needsLabel": "Give each custom field one label"
+    "needsLabel": "Give each custom field one label",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Follow #{{tag}}",

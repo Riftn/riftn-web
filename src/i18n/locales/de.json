@@ -290,8 +290,10 @@
       "pronouns": "Pronomen",
       "location": "Standort",
       "custom": "Benutzerdefiniert",
-      "customOption": "Benutzerdefiniertes Etikett"
-    }
+      "customOption": "Benutzerdefiniertes Etikett",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} folgen",

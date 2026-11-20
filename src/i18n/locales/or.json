@@ -297,8 +297,10 @@
       "pronouns": "ଉଚ୍ଚାରଣ",
       "location": "ଅବସ୍ଥାନ",
       "custom": "ଇଚ୍ଛାରୂପଣ",
-      "customOption": "ଇଚ୍ଛାରୂପଣ ନାମପଟି"
-    }
+      "customOption": "ଇଚ୍ଛାରୂପଣ ନାମପଟି",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ଫଲୋ କରନ୍ତୁ",

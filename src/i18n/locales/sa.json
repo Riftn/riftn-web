@@ -297,8 +297,10 @@
       "pronouns": "लिंगशब्द",
       "location": "स्थानं",
       "custom": "Custom",
-      "customOption": "अनुकूलम् लेबलम्"
-    }
+      "customOption": "अनुकूलम् लेबलम्",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} अनुसरतु",

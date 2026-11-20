@@ -295,10 +295,12 @@
       "pronouns": "Névmások",
       "location": "Hely",
       "custom": "Egyedi",
-      "customOption": "Egyedi címke"
+      "customOption": "Egyedi címke",
+      "cashapp": "Cash App"
     },
     "add": "Mező hozzáadása",
-    "remove": "Mező eltávolítása"
+    "remove": "Mező eltávolítása",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} követése",

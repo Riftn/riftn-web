@@ -297,8 +297,10 @@
       "location": "Địa điểm",
       "custom": "Tùy chỉnh",
       "customOption": "Nhãn tùy chỉnh",
-      "blog": "Blog"
-    }
+      "blog": "Blog",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Theo dõi #{{tag}}",

@@ -295,10 +295,12 @@
       "pronouns": "အသံထွက်များ",
       "location": "တည်နေရာ",
       "custom": "စိတ်ကြိုက်",
-      "customOption": "စိတ်ကြိုက် အညွှန်း"
+      "customOption": "စိတ်ကြိုက် အညွှန်း",
+      "cashapp": "Cash App"
     },
     "remove": "အကွက်ကို ဖယ်ရှားရန်",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ကို လိုက်ကြည့်ရန်",

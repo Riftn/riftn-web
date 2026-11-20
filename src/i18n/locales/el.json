@@ -296,9 +296,11 @@
       "pronouns": "Αντωνυμίες",
       "location": "Τοποθεσία",
       "custom": "Προσαρμογή",
-      "customOption": "Εξατομικευμένη ετικέτα"
+      "customOption": "Εξατομικευμένη ετικέτα",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Ακολούθησε το #{{tag}}",

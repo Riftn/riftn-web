@@ -295,10 +295,12 @@
       "pronouns": "ضمائر",
       "location": "موقع",
       "custom": "مخصص",
-      "customOption": "تسمية مخصصة"
+      "customOption": "تسمية مخصصة",
+      "cashapp": "Cash App"
     },
     "placeholderLink": "yoursite.com",
-    "placeholderPronouns": "هو/هي"
+    "placeholderPronouns": "هو/هي",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "تابع #{{tag}}",

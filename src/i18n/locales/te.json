@@ -296,9 +296,11 @@
       "pronouns": "సర్వనామాలు",
       "location": "లొకేషన్",
       "custom": "కస్టమ్",
-      "customOption": "కస్టమ్ లేబుల్"
+      "customOption": "కస్టమ్ లేబుల్",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ఫాలో చేయి",

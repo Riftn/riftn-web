@@ -297,8 +297,10 @@
       "pronouns": "Ngā tohutohu",
       "location": "Te waahi",
       "custom": "Ritenga",
-      "customOption": "Tohu ritenga"
-    }
+      "customOption": "Tohu ritenga",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Whai i #{{tag}}",

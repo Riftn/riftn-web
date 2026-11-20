@@ -297,8 +297,10 @@
       "pronouns": "ضمایر",
       "location": "مکان",
       "custom": "سفارشی",
-      "customOption": "برچسب سفارشی"
-    }
+      "customOption": "برچسب سفارشی",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "دنبال کردن #{{tag}}",

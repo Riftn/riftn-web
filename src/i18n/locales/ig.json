@@ -297,8 +297,10 @@
       "pronouns": "Kpọtụrụ anyị",
       "location": "Ebe",
       "custom": "Omenala",
-      "customOption": "Akara emeredịkachọrọ"
-    }
+      "customOption": "Akara emeredịkachọrọ",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Soro #{{tag}}",

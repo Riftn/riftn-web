@@ -296,9 +296,11 @@
       "pronouns": "Définition malgache",
       "location": "Toerana",
       "custom": "Safidy:",
-      "customOption": "Mari-tsoratra safidy"
+      "customOption": "Mari-tsoratra safidy",
+      "cashapp": "Cash App"
     },
-    "add": "Ampio saha"
+    "add": "Ampio saha",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Araho #{{tag}}",

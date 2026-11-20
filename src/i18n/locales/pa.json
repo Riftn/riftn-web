@@ -295,10 +295,12 @@
       "pronouns": "ਸਰਵਨਾਮ",
       "location": "ਟਿਕਾਣਾ",
       "custom": "ਪਸੰਦੀਦਾ",
-      "customOption": "ਕਸਟਮ ਲੇਬਲ"
+      "customOption": "ਕਸਟਮ ਲੇਬਲ",
+      "cashapp": "Cash App"
     },
     "placeholderLink": "yoursite.com",
-    "placeholderPronouns": "ਉਹ/ਉਨ੍ਹਾਂ"
+    "placeholderPronouns": "ਉਹ/ਉਨ੍ਹਾਂ",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ਫਾਲੋ ਕਰੋ",

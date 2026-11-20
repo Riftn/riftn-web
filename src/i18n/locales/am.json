@@ -296,9 +296,11 @@
       "pronouns": "ስሞችን ሙሉ ገለጻ ያግኙ Pronouns",
       "location": "አካባቢ",
       "custom": "ብጁ",
-      "customOption": "ብጁ መለያ"
+      "customOption": "ብጁ መለያ",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}}ን ተከተል",

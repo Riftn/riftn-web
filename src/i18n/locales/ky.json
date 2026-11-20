@@ -296,9 +296,11 @@
       "pronouns": "Сүйлөмдөр",
       "location": "Жайгашкан жери",
       "custom": "Көнүмүш",
-      "customOption": "Көнүмүш этикеткасы"
+      "customOption": "Көнүмүш этикеткасы",
+      "cashapp": "Cash App"
     },
-    "remove": "Талааны өчүрүү"
+    "remove": "Талааны өчүрүү",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} жазылуу",

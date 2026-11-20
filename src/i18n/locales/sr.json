@@ -297,8 +297,10 @@
       "pronouns": "Заменице",
       "location": "Локација",
       "custom": "Прилагођено",
-      "customOption": "Прилагођена ознака"
-    }
+      "customOption": "Прилагођена ознака",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Прати #{{tag}}",

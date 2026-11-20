@@ -294,11 +294,13 @@
       "pronouns": "خبرې اترې",
       "location": "ځای په ځای کول",
       "custom": "د معمول په توګه",
-      "customOption": "د ګمرکي لیبل"
+      "customOption": "د ګمرکي لیبل",
+      "cashapp": "Cash App"
     },
     "add": "ساحه ورزیاته کړئ",
     "remove": "ساحه لرې کړئ",
-    "needsLabel": "هرې ځانګړې ساحې ته یو لېبل ورکړئ"
+    "needsLabel": "هرې ځانګړې ساحې ته یو لېبل ورکړئ",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} تعقیب کړئ",

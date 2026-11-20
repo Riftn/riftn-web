@@ -296,9 +296,11 @@
       "pronouns": "នាមត្រកូល",
       "location": "ទីកន្លែង",
       "custom": "ផ្ទាល់ខ្លួន",
-      "customOption": "ស្លាកផ្ទាល់ខ្លួន"
+      "customOption": "ស្លាកផ្ទាល់ខ្លួន",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "តាមដាន #{{tag}}",

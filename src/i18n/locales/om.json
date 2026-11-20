@@ -297,8 +297,10 @@
       "pronouns": "Bamaqoota",
       "location": "Bakka",
       "custom": "Aadaa",
-      "customOption": "Asxaa amala"
-    }
+      "customOption": "Asxaa amala",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} hordofi",

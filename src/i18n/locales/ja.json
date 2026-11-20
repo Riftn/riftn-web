@@ -296,9 +296,11 @@
       "pronouns": "代名詞",
       "location": "場所",
       "custom": "カスタム",
-      "customOption": "カスタムラベル"
+      "customOption": "カスタムラベル",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} をフォロー",

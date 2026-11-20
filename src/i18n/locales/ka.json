@@ -296,9 +296,11 @@
       "pronouns": "ნაცვალსახელები",
       "location": "მდებარეობა",
       "custom": "ინდივიდუალური",
-      "customOption": "მორგებული ეტიკეტი"
+      "customOption": "მორგებული ეტიკეტი",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}}-ის გამოწერა",

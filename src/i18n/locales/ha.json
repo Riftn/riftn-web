@@ -297,8 +297,10 @@
       "pronouns": "Pronouns",
       "location": "Wuri",
       "custom": "Musamman",
-      "customOption": "Alamar al'ada"
-    }
+      "customOption": "Alamar al'ada",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Bi #{{tag}}",

@@ -297,8 +297,10 @@
       "pronouns": "Asesõnad",
       "location": "Asukoht",
       "custom": "Kohandatud",
-      "customOption": "Kohandatud silt"
-    }
+      "customOption": "Kohandatud silt",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Jälgi #{{tag}}",

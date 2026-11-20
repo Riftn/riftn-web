@@ -294,11 +294,13 @@
       "pronouns": "Төлөөлөгчийн газар",
       "location": "Байршил",
       "custom": "Тохируулсан",
-      "customOption": "Тохируулсан шошго"
+      "customOption": "Тохируулсан шошго",
+      "cashapp": "Cash App"
     },
     "add": "Талбар нэмэх",
     "remove": "Талбар хасах",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} дагах",

@@ -293,12 +293,14 @@
       "pronouns": "Pronouns",
       "location": "Location",
       "custom": "Custom",
-      "customOption": "Custom label"
+      "customOption": "Custom label",
+      "cashapp": "Cash App"
     },
     "add": "Qadê zêde bike",
     "remove": "Qadê rake",
     "descriptionPresets": "Malperek, cînav an her tiştekî din zêde bike. Girêdan bi torên te yên civakî re xuya dibin.",
-    "needsLabel": "Navekî bide her qada taybet"
+    "needsLabel": "Navekî bide her qada taybet",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} bişopîne",

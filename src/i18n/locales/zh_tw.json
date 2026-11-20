@@ -307,9 +307,11 @@
       "pronouns": "代詞",
       "location": "地點",
       "custom": "自定義",
-      "customOption": "自定義標籤"
+      "customOption": "自定義標籤",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "關注 #{{tag}}",

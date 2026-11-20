@@ -296,9 +296,11 @@
       "pronouns": "सर्वनाम",
       "location": "स्थान",
       "custom": "सानुकूल",
-      "customOption": "सानुकूल लेबल"
+      "customOption": "सानुकूल लेबल",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} फॉलो करा",

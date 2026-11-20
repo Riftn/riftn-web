@@ -297,8 +297,10 @@
       "pronouns": "Pronomi",
       "location": "Posizione",
       "custom": "Personalizzato",
-      "customOption": "Etichetta personalizzata"
-    }
+      "customOption": "Etichetta personalizzata",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Segui #{{tag}}",

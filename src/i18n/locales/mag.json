@@ -297,8 +297,10 @@
       "pronouns": "लिंग शब्द (pronouns)",
       "location": "उ स्थान, ऊ स्थान, उ स्थान",
       "custom": "सामान्य",
-      "customOption": "अनुकूलित लेबल, अनुकूलित लेबल"
-    }
+      "customOption": "अनुकूलित लेबल, अनुकूलित लेबल",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} फॉलो करऽ",

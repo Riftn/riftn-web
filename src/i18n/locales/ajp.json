@@ -294,11 +294,13 @@
       "pronouns": "ضمائر",
       "location": "موقع",
       "custom": "مخصص",
-      "customOption": "اسم مخصص"
+      "customOption": "اسم مخصص",
+      "cashapp": "Cash App"
     },
     "add": "ضيف حقل",
     "remove": "شيل الحقل",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "تابع #{{tag}}",

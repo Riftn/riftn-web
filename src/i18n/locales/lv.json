@@ -297,8 +297,10 @@
       "pronouns": "Vietniekvārdi",
       "location": "Atrašanās vieta",
       "custom": "Pielāgots",
-      "customOption": "Pielāgota etiķete"
-    }
+      "customOption": "Pielāgota etiķete",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Sekot #{{tag}}",

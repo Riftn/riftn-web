@@ -297,8 +297,10 @@
       "pronouns": "Įvardžiai",
       "location": "Vieta",
       "custom": "Pasirinktinis",
-      "customOption": "Pasirinktinė etiketė"
-    }
+      "customOption": "Pasirinktinė etiketė",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Sekti #{{tag}}",

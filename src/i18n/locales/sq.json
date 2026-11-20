@@ -297,8 +297,10 @@
       "pronouns": "Përemrat",
       "location": "Vendndodhja",
       "custom": "I personalizuar",
-      "customOption": "Etiketa e personalizuar"
-    }
+      "customOption": "Etiketa e personalizuar",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Ndiq #{{tag}}",

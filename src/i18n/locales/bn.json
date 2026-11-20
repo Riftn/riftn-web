@@ -296,9 +296,11 @@
       "pronouns": "সর্বনাম",
       "location": "অবস্থান",
       "custom": "কাস্টম",
-      "customOption": "কাস্টম লেবেল"
+      "customOption": "কাস্টম লেবেল",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ফলো করুন",

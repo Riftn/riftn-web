@@ -296,9 +296,11 @@
       "pronouns": "ضمائر",
       "location": "مقام",
       "custom": "حسب ضرورت",
-      "customOption": "مخصص لہجہ"
+      "customOption": "مخصص لہجہ",
+      "cashapp": "Cash App"
     },
-    "placeholderPronouns": "وہ/ان (ضمیر)"
+    "placeholderPronouns": "وہ/ان (ضمیر)",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} فالو کریں",

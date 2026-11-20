@@ -296,9 +296,11 @@
       "pronouns": "כינויים",
       "location": "מיקום",
       "custom": "התאמה אישית",
-      "customOption": "תווית מותאמת אישית"
+      "customOption": "תווית מותאמת אישית",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "עקוב אחרי #{{tag}}",

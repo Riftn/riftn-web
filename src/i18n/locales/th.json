@@ -296,9 +296,11 @@
       "pronouns": "สรรพนาม",
       "location": "ที่ตั้ง",
       "custom": "กำหนดเอง",
-      "customOption": "ป้ายกำกับที่กำหนดเอง"
+      "customOption": "ป้ายกำกับที่กำหนดเอง",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "ติดตาม #{{tag}}",

@@ -296,9 +296,11 @@
       "pronouns": "Mga Panghalip",
       "location": "Lokasyon",
       "custom": "Custom",
-      "customOption": "Iniangkop na label"
+      "customOption": "Iniangkop na label",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "I-follow ang #{{tag}}",

@@ -297,8 +297,10 @@
       "pronouns": "Unvonlar",
       "location": "Mekan",
       "custom": "Kamolot",
-      "customOption": "Maxsus etiket"
-    }
+      "customOption": "Maxsus etiket",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ni kuzatish",
