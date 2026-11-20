@@ -3744,6 +3744,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
                 desktop — both surfaces read the same state, so the menu is a
                 reliable place to find them at every width. */}
             <PostUtilityMenuItems
+                onActionBar={!hideActions}
               onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
               postId={video.id}
               tokenId={videoTokenId}
@@ -3752,7 +3753,8 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               linkText={video.description}
               onClose={() => setShowOptionsDrawer(false)}
             />
-            {!isOwnPost && (
+            {/* Tip is on the action bar on a phone (Requests 7399dd7d). */}
+            {!isOwnPost && !(isPhone && !hideActions) && (
               <button
                 onClick={() => { setShowOptionsDrawer(false); setShowTipModal(true); }}
                 className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"

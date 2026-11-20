@@ -1615,6 +1615,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
               {/* Bookmark / pin / post info — the same three rows the feed
                   card's menu carries, which this page's menu was missing. */}
               <PostUtilityMenuItems
+                onActionBar
                 postId={id}
                 tokenId={id ? parseInt(id, 10) || undefined : undefined}
                 isOwnPost={!!(walletAddress && videoData.creatorId?.toLowerCase() === walletAddress.toLowerCase())}

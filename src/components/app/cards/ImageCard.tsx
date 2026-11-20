@@ -1254,6 +1254,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   on desktop — both surfaces read the same state, so the menu
                   is a reliable place to find them at every width. */}
               <PostUtilityMenuItems
+                onActionBar
                 onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
                 postId={post.id}
                 tokenId={postTokenId}
@@ -1262,7 +1263,8 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                 linkText={[post.title, post.description].filter(Boolean).join('\n')}
                 onClose={() => setShowOptionsDrawer(false)}
               />
-              {!isOwnPost && (
+              {/* Tip is on the action bar on a phone (Requests 7399dd7d). */}
+              {!isOwnPost && !isPhone && (
                 <button
                   onClick={() => { setShowOptionsDrawer(false); setShowTipModal(true); }}
                   className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
