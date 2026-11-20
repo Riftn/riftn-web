@@ -15,14 +15,19 @@ export interface PendingMoment {
   retry?: () => void;
 }
 
+export interface StoryRemixSource {
+  id: string;
+  name: string;
+}
+
 interface StoriesState {
   mounted: boolean;
   viewer: { entries: ShelfEntry[]; author: number; item: number; from?: DOMRect | null } | null;
-  creatorOpen: boolean;
+  creator: { remixSource?: StoryRemixSource } | null;
   pending: PendingMoment | null;
   openViewer: (entries: ShelfEntry[], author: number, opts?: { item?: number; from?: DOMRect | null }) => void;
   closeViewer: () => void;
-  openCreator: () => void;
+  openCreator: (remixSource?: StoryRemixSource) => void;
   closeCreator: () => void;
   setPending: (pending: PendingMoment | null | ((p: PendingMoment | null) => PendingMoment | null)) => void;
 }
@@ -30,12 +35,12 @@ interface StoriesState {
 export const useStoriesStore = create<StoriesState>((set) => ({
   mounted: false,
   viewer: null,
-  creatorOpen: false,
+  creator: null,
   pending: null,
   openViewer: (entries, author, opts = {}) =>
     set({ mounted: true, viewer: { entries, author, item: opts.item ?? -1, from: opts.from ?? null } }),
   closeViewer: () => set({ viewer: null }),
-  openCreator: () => set({ mounted: true, creatorOpen: true }),
-  closeCreator: () => set({ creatorOpen: false }),
+  openCreator: (remixSource) => set({ mounted: true, creator: { remixSource } }),
+  closeCreator: () => set({ creator: null }),
   setPending: (pending) => set((s) => ({ pending: typeof pending === 'function' ? pending(s.pending) : pending })),
 }));

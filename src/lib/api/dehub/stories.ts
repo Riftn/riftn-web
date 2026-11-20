@@ -52,6 +52,8 @@ export interface StoryItem {
   durationMs: number;
   muted: boolean;
   caption: string | null;
+  remixSourceId?: string | null;
+  shareable?: boolean;
   mentions: StoryMention[];
   song: StorySong | null;
   audience: StoryAudience;
@@ -108,6 +110,7 @@ export interface CreateStoryFields {
   allowReplies?: boolean;
   muted?: boolean;
   caption?: string;
+  remixSourceId?: string;
   mentions?: StoryMention[];
   song?: StorySong | null;
   /** Video moments. */
@@ -128,6 +131,7 @@ export function createStory(
   form.append('allowReplies', String(fields.allowReplies !== false));
   form.append('muted', String(!!fields.muted));
   if (fields.caption) form.append('caption', fields.caption);
+  if (fields.remixSourceId) form.append('remixSourceId', fields.remixSourceId);
   if (fields.mentions?.length) form.append('mentions', JSON.stringify(fields.mentions));
   if (fields.song) form.append('song', JSON.stringify(fields.song));
   if (fields.draftVideoId) {
