@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "Video caman", "hiddenTag": "A bɔra", "tapToEdit": "Fɛɛrɛ ka caman", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Fɛɛrɛ ka caman ka kɔfɛ ka ci", "close": "Close", "replace": "Yɛlɛma", "hiddenUntilTap": "Kà kɛ̀ bɛ̀ nɛ̀ kɔ̀", "pause": "Pause", "play": "Play video", "mute": "Mɛn", "unmute": "Mɛn bɔ", "scrub": "Fɔlɔ video la", "addMore": "Kɛ foto kɛ video", "coverAria": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverHint": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverOwn": "I ka ja", "coverAuto": "Auto", "uploadCover": "Sɔrɔ kɛlɛ fɔlɔ", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "A yi kaŋ", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Bɔ̀lɔ kɔ̀n bɛ̀ kɔ̀n kɔ̀n", "priceUnavailable": "ma ni kɔ̀", "timerOff": "Off", "timerOffBody": "E nɔ kɔ̀ŋ kɔ̀ŋ", "confirm": "Confirm", "lockedFor": "Yɛlɛma {{value1}} DHB fɛ", "editItem": "Edit item {{value1}}", "kept": "{{time}} mara"},
   "postBg": {
     "addMedia": "Ja, GIF walima widewo fara a kan",
     "changeMedia": "Ja, GIF walima widewo falen",

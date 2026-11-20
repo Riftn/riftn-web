@@ -1,4 +1,5 @@
 {
+  "dmVideo": {"edit": "編輯影片", "hiddenTag": "隱藏", "tapToEdit": "點擊以編輯", "cover": "封面", "trim": "裁剪", "mirror": "鏡像", "rotate": "旋轉", "hide": "隱藏", "timer": "計時器", "sheetTitleAny": "傳送前編輯", "close": "關閉", "replace": "取代", "hiddenUntilTap": "點擊前隱藏", "pause": "暫停", "play": "播放影片", "mute": "靜音", "unmute": "取消靜音", "scrub": "拖動影片進度條", "addMore": "加入相片或影片", "trimAria": "拖動兩端以裁剪", "coverAria": "點擊影格以設定封面", "coverHint": "點擊影格以設定封面", "coverOwn": "你的相片", "coverAuto": "自動", "uploadCover": "上傳封面圖片", "mirrored": "已鏡像", "original": "原始", "rotate90": "旋轉 90°", "showNormally": "正常顯示", "showNormallyBody": "立即顯示", "hideUntilTap": "點擊前隱藏", "hideUntilTapBody": "點擊前模糊顯示", "hidePrice": "隱藏於價格後", "hidePriceBody": "付款前模糊顯示", "priceUnavailable": "不在本對話中", "timerOff": "關閉", "timerOffBody": "佢會留喺對話入面。", "timerViewBody": "佢哋睇完之後，對你哋雙方嚟講都會消失。", "confirm": "確認", "lockedFor": "解鎖 {{value1}} DHB", "lockedForUsd": "解鎖 {{value1}}", "editItem": "編輯項目 {{value1}}", "kept": "{{time}} 已保留", "timerTimeBody": "你發送之後 {{value1}}，對你哋雙方嚟講都會消失。"},
   "postBg": {
     "addMedia": "加圖片、GIF 或者影片",
     "changeMedia": "換圖片、GIF 或者影片",
