@@ -707,6 +707,7 @@
     "heading": "Riftn 쇼츠"
   },
   "settings": {
+    "loginLook": {"title": "로그인 화면", "desc": "이 기기의 로그인 화면에서 Riftn 로고와 슬로건이 움직이는 방식.", "tube": "브라운관 TV", "vhs": "VHS 테이프", "led": "LED 월", "holo": "홀로그램", "neon": "네온", "3d": "3D", "flat": "플랫"}, "arrivalLook": {"title": "로그인 후", "desc": "계정을 불러오는 동안, 사진이 페이지에 도착하기 전에 재생되는 효과. 이 기기에서만.", "rift": "균열", "trace": "트레이스", "frame": "액자", "orbit": "궤도"},
     "postLanding": "게시한 후",
     "postLandingDesc": "새 게시물이 피드에 나타나는 방식",
     "postLandingGhost": "고스트 슬롯",
