@@ -35,7 +35,12 @@ import { SEOHead } from '@/components/SEOHead';
 import { Loader2 } from 'lucide-react';
 import { getAiScrapingPreference } from '@/lib/ai-scraping';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, Suspense } from 'react';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { closeBrainrotFeed, isBrainrotPlayable, openBrainrotFeed, useBrainrotSession } from '@/lib/brainrot-feed';
+import { videoItemToShort } from '@/lib/short-video';
+import { hasSharedVideoLanding, holdBackForViewer, takeSharedVideoLanding } from '@/lib/shared-video-landing';
+import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, useContext, Suspense, type ReactNode } from 'react';
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 import { useOpenedOnce } from '@/hooks/use-opened-once';
 import { takePrefetchedPost } from '@/lib/post-prefetch';
@@ -803,6 +808,8 @@ interface SinglePostPageProps {
    * URL the slug exists to avoid.
    */
   overrideId?: string;
+  /** The page the site opened on is being covered by the Shorts viewer (or not any more). */
+  onSharedHold?: (hold: boolean) => void;
 }
 
 /**
@@ -867,6 +874,21 @@ function commentFromSearch(search: string): string | undefined {
  * sources the page itself reads, resolved once here so the list and the
  * author thread can never disagree about which comment was linked.
  */
+/**
+ * A phone that opened the site on this post (lib/shared-video-landing): until
+ * the post is known to be a video, and while the Shorts viewer plays it on
+ * top, the page's own player stays paused so the two never play together.
+ */
+function SharedLandingHold({ enabled, children }: { enabled: boolean; children: (onHold: (hold: boolean) => void) => ReactNode }) {
+  const parentActive = useContext(CachedPageActiveContext);
+  const [hold, setHold] = useState(() => enabled && hasSharedVideoLanding());
+  return (
+    <CachedPageActiveContext.Provider value={parentActive && !hold}>
+      {children(setHold)}
+    </CachedPageActiveContext.Provider>
+  );
+}
+
 export default function SinglePostPage(props: SinglePostPageProps = {}) {
   useRouteContentReady();
   const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
@@ -896,13 +918,17 @@ export default function SinglePostPage(props: SinglePostPageProps = {}) {
   const overrideId = slug ? String(slugQuery.data!.tokenId) : props.overrideId;
   const id = overrideId || postId || tokenId;
   return (
-    <FocusCommentProvider tokenId={id} commentId={focusCommentId}>
-      <SinglePostPageContent {...props} overrideId={overrideId} />
-    </FocusCommentProvider>
+    <SharedLandingHold enabled={!props.inOverlay && !props.detailsOnly}>
+      {onSharedHold => (
+        <FocusCommentProvider tokenId={id} commentId={focusCommentId}>
+          <SinglePostPageContent {...props} overrideId={overrideId} onSharedHold={onSharedHold} />
+        </FocusCommentProvider>
+      )}
+    </SharedLandingHold>
   );
 }
 
-function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = false }: SinglePostPageProps = {}) {
+function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = false, onSharedHold }: SinglePostPageProps = {}) {
   const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -1246,6 +1272,44 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
   const isVideoPost = contentType === 'video' && !isAudioPost;
   const isImagePost = contentType === 'image';
   const isTextPost = contentType === 'post' || contentType === null;
+
+  // Opened from a shared link on a phone: a video plays in the Shorts viewer
+  // on top of this page, the same player a feed tap opens. Back or closing it
+  // shows this page; Back again goes to Home (lib/shared-video-landing).
+  const { shortsEnabled } = useShortsEnabled();
+  const brainrotSession = useBrainrotSession();
+  const sharedViewer = useRef<{ seen: boolean; release: () => void } | null>(null);
+  useEffect(() => {
+    if (!post || inOverlay || detailsOnly || sharedViewer.current) return;
+    if (!takeSharedVideoLanding()) {
+      onSharedHold?.(false);
+      return;
+    }
+    const video = isVideoPost ? toVideoItem(post) : null;
+    const phone = window.matchMedia('(max-width: 767px)').matches;
+    const playable = !!video && phone && shortsEnabled && !!video.videoUrl && !video.spoilerText
+      && post.status !== 'pending' && isBrainrotPlayable(post as Parameters<typeof isBrainrotPlayable>[0]);
+    if (!video || !playable) {
+      onSharedHold?.(false);
+      return;
+    }
+    openBrainrotFeed(video.id, videoItemToShort(video));
+    const viewer = { seen: false, release: () => {} };
+    viewer.release = holdBackForViewer(closeBrainrotFeed, () => !!sharedViewer.current);
+    sharedViewer.current = viewer;
+  }, [post, inOverlay, detailsOnly, isVideoPost, shortsEnabled, onSharedHold]);
+  useEffect(() => {
+    const viewer = sharedViewer.current;
+    if (!viewer) return;
+    if (brainrotSession) {
+      viewer.seen = true;
+      return;
+    }
+    if (!viewer.seen) return;
+    sharedViewer.current = null;
+    viewer.release();
+    onSharedHold?.(false);
+  }, [brainrotSession, onSharedHold]);
 
   // Deep link to a thread entry or comment: put it in view once it has
   // rendered, with no glow or wash, and hold it there while the post loads. The element
