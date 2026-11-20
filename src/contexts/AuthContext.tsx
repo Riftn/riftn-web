@@ -98,6 +98,12 @@ export interface AuthContextType {
    * reloading the page, so it does not return in the normal case.
    */
   switchToProfile: (id: string) => Promise<void>;
+  /**
+   * Sign out. `forgetProfile` is the user's own "Log out": this account is
+   * removed from the device and, when another saved account is left, that
+   * one takes over (most recently used first). Only the last account signs
+   * the browser out completely.
+   */
   disconnect: (options?: { forgetProfile?: boolean }) => Promise<void>;
   refreshUser: () => Promise<void>;
   patchUser: (patch: Partial<DeHubUser>) => void;

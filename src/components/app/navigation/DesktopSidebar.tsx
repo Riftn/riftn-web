@@ -834,7 +834,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                 variant="desktop"
                 collapsed={true}
                 forceCollapsed={isCollapsed}
-                onClick={() => { void disconnect(); }}
+                onClick={() => { void disconnect({ forgetProfile: true }); }}
                 layoutId={isCollapsed ? 'sidebar-nav-collapsed' : 'sidebar-nav-expanded'}
               />
               {/* Only while the fade is actually over the list. Once the list

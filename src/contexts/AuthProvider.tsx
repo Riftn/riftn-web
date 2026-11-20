@@ -118,6 +118,8 @@ import {
   abortProfileSwitch,
   removeProfile,
 } from '@/lib/profiles';
+import { unregisterPushToken } from '@/lib/api/dehub/push';
+import { getDeviceId } from '@/lib/device-id';
 import { AuthContext, LoginSheetContext, type SocialProvider, type WalletProvider, type WalletPhase } from './AuthContext';
 import { finishWalletUnlock, setWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
 import { isChunkLoadError, recoverFromChunkError } from '@/lib/lazy-with-retry';
@@ -3351,6 +3353,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Read the identity off storage before any of it is cleared below, so an
     // explicit sign-out can drop that account from this device's profile list.
     const forgetId = options?.forgetProfile ? currentProfileId() : null;
+    if (options?.forgetProfile) {
+      // This browser stops getting that account's notifications. Sent while
+      // the account's token is still in storage (apiCall reads it before its
+      // first await); the next account registers the browser again itself.
+      unregisterPushToken(getDeviceId()).catch(() => {});
+    }
 
     // Clean up local state FIRST for immediate UI feedback
     clearAuthSession();
@@ -3366,6 +3374,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // "Log out" means this browser forgets the session — its stored profile
     // snapshot (now-dead tokens) goes with it. Other saved profiles stay.
     if (forgetId) removeProfile(forgetId);
+    // Logging out of one of several saved accounts lands on the next one
+    // (most recently used first) instead of the signed-out screen.
+    const nextProfile = options?.forgetProfile
+      ? listProfiles().find((p) => p.id !== forgetId && p.session) ?? null
+      : null;
 
     setWalletAddress(null);
     setUser(null);
@@ -3391,6 +3404,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearPersistedQueryCache();
 
     // Provider-level disconnect AFTER local cleanup (non-blocking)
+    let supabaseSignedOut: Promise<unknown> = Promise.resolve();
     try {
       if (connectionSource === 'web3auth') {
         clearAAProvider();
@@ -3400,13 +3414,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearWalletCache();
         clearPasskeyCache();
         try { sessionStorage.removeItem('dhb_approved_chains'); } catch { /* */ }
-        supabase.auth.signOut().catch(() => {});
+        supabaseSignedOut = supabase.auth.signOut().catch(() => {});
         clearWagmiStorage();
       } else {
         wagmiDisconnect();
       }
     } catch (error) {
       console.error('Disconnect provider error (non-blocking):', error);
+    }
+
+    if (nextProfile) {
+      // Supabase clears its stored session only after the sign-out request
+      // returns. Let that finish first, or it would wipe the next account's
+      // session right after the switch writes it.
+      await Promise.race([
+        supabaseSignedOut,
+        new Promise((resolve) => setTimeout(resolve, 4_000)),
+      ]);
+      await switchToProfile(nextProfile.id);
     }
   };
 
