@@ -3161,7 +3161,11 @@ function AssistantPageForAccount() {
                           ) : (
                             /* Assistant message - no bubble */
                             <div className="text-white select-text">
-                              <MarkdownText content={message.content} className="text-sm" />
+                              <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                              {/* "React ❤️ to every post by @x", "follow @x": the reply's confirm card, under the text */}
+                              {!(streamingReply && message.id === messages[messages.length - 1]?.id) && assistantActionIds(message.content).map((id) => (
+                                <AssistantActionCard key={id} actionId={id} />
+                              ))}
                               {message.content && !message.isError && message.id !== 'initial' && !(streamingReply && message.id === messages[messages.length - 1]?.id) && (
                                 <AssistantCopyButton text={message.content} label={t('comments.copyText')} copiedLabel={t('common.copied')} />
                               )}
