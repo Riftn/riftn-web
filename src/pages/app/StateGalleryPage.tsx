@@ -1,4 +1,6 @@
 import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import type { AssistantAction } from '@/lib/api/dehub/assistant-actions';
 import { setCoAuthors, openCoAuthorSheet } from '@/lib/co-author-store';
 import { CoAuthorSheetHost } from '@/components/app/co-authors/CoAuthorSheetHost';
 import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
@@ -567,6 +569,29 @@ function FollowCardsGallery() {
             <FollowCoverCard key={user.address} user={user} phase={i === 3 ? 'following' : undefined} onOpen={noop} onFollow={noop} onDismiss={noop} />
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/** The assistant's confirm cards: react to many posts, follow, chat reading, running and done. */
+function AssistantCardsGallery() {
+  const jules = { address: '0x1111111111111111111111111111111111111111', username: 'jules', displayName: 'Jules', avatar: null };
+  const base = { result: null, confirmBy: new Date(Date.now() + 15 * 60_000).toISOString() };
+  const cards: AssistantAction[] = [
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa1', kind: 'react', status: 'pending', preview: { choice: 'love', count: 118, alreadyReacted: 4, totalPosts: 122, author: jules } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa2', kind: 'react', status: 'running', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 46, total: 118 } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa3', kind: 'react', status: 'done', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 118, total: 118, added: 118, used: { love: 61, like: 40, lol: 17 } } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa4', kind: 'follow', status: 'pending', preview: { count: 2, people: [jules, { address: '0x2222222222222222222222222222222222222222', username: 'xluna', displayName: 'Luna', avatar: null }] } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa5', kind: 'chat_access', status: 'pending', preview: { allow: true } },
+  ];
+  return (
+    <section data-assistant-cards-gallery className="mb-5">
+      <h2 className="mb-3 text-sm font-semibold">Assistant cards</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {cards.map((card) => (
+          <AssistantActionCard key={card.id} actionId={card.id} initial={card} />
+        ))}
       </div>
     </section>
   );
@@ -2192,6 +2217,7 @@ export default function StateGalleryPage() {
         <MessageMenuGallery />
         <ChatReactionArrivalGallery />
         <FollowCardsGallery />
+        <AssistantCardsGallery />
 
         <StreamerArtworkGallery />
 
