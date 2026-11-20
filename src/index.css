@@ -7402,3 +7402,10 @@ html[data-chat-fx="grow"][data-chat-fx-dir="close"]::view-transition-new(root) {
 @keyframes cx-arrive { from { opacity: .35; transform: scale(.96); filter: blur(2px); } }
 @keyframes cx-surface-open { from { background-color: var(--cx-bg); border-radius: 18px; } to { background-color: var(--cx-bg2); border-radius: 0; } }
 @keyframes cx-surface-close { from { background-color: var(--cx-bg2); border-radius: 0; } to { background-color: var(--cx-bg); border-radius: 18px; } }
+
+/* Menu account switcher: overlapping faces are cut apart by a ring in the
+   sheet's own tone, so light sheets get a light ring. */
+html[data-theme='light'] [data-menu-account-switcher] > span > span,
+html[data-theme='system'][data-system-tone='light'] [data-menu-account-switcher] > span > span {
+  --tw-ring-color: rgb(255 255 255 / 0.9);
+}
