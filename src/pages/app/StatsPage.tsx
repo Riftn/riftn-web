@@ -55,6 +55,7 @@ import { useFinanceStats } from '@/hooks/use-finance-stats';
 import { cn } from '@/lib/utils';
 import { PageBody, PageIsland, PageTabs } from '@/components/app/page-kit/PageKit';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 type Range = '24h' | '3d' | '7d' | '30d' | '1y' | 'all';
 
 /**
@@ -115,14 +116,12 @@ function aggregateBreakdown(rows: SiteStatsBreakdownDay[]) {
 
 function formatCount(n: number | null | undefined): string {
   if (n == null) return '—';
-  return n.toLocaleString();
+  return formatShortCount(n);
 }
 
 function formatCompact(n: number | null | undefined): string {
   if (n == null) return '—';
-  if (n < 1000) return String(n);
-  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}K`;
-  return `${(n / 1_000_000).toFixed(1)}M`;
+  return formatShortCount(n);
 }
 
 function formatBytes(bytes: number | null | undefined): string {

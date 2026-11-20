@@ -567,7 +567,7 @@ function FullScreenChatGallery() {
           <div key={count} className="flex flex-col items-center gap-3 text-xs text-zinc-400">
             <MessagesNavGlyph unread={count} className="h-6 w-6 text-white" />
             <UnreadCountChip count={count} />
-            <span>{count} unread</span>
+            <span>{formatCount(count)} unread</span>
           </div>
         ))}
       </div>
@@ -800,7 +800,7 @@ function ThreadedComposerGallery() {
   const labels = useMemo<ThreadedCommentsLabels>(() => ({
     addComment: 'Add a comment...', writeReply: 'Write a reply...', reply: 'Reply',
     replyingTo: (name) => `Replying to ${name}`, edited: 'edited', empty: 'No comments yet',
-    showMoreReplies: (count) => `Show ${count} more replies`,
+    showMoreReplies: (count) => `Show ${formatCount(count)} more replies`,
   }), []);
   const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
   const noop = () => Promise.resolve();
@@ -847,6 +847,7 @@ import { ComicBorderPicker } from '@/features/post/components/ComicBorderPicker'
 import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
+import { formatCount } from '@/lib/format-count';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -2652,7 +2653,7 @@ function HolderGroupGallery() {
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <p className="text-white text-lg font-bold">{GALLERY_HOLDER_COMMUNITY.name}</p>
-            <p className="text-white text-sm">{GALLERY_HOLDER_COMMUNITY.member_count.toLocaleString()} members</p>
+            <p className="text-white text-sm">{formatCount(GALLERY_HOLDER_COMMUNITY.member_count)} members</p>
             <HolderGateChip gate={gate} />
             <div className="mt-4"><TopHolders community={GALLERY_HOLDER_COMMUNITY} /></div>
           </div>

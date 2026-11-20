@@ -35,6 +35,7 @@ import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
 import { toast } from 'sonner';
 import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
 
+import { formatCount } from '@/lib/format-count';
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -204,7 +205,7 @@ export function PostAIChat({ isOpen, onClose, postContext }: PostAIChatProps) {
       case 'video':
         return `It's a video titled "${ctx.title || 'a video'}" by ${ctx.author || 'unknown'}`;
       case 'live':
-        return `It's a live stream by ${ctx.author || 'unknown'}${ctx.title ? ` titled "${ctx.title}"` : ''}${ctx.game ? ` playing ${ctx.game}` : ''}${ctx.viewers ? ` with ${ctx.viewers} viewers` : ''}`;
+        return `It's a live stream by ${ctx.author || 'unknown'}${ctx.title ? ` titled "${ctx.title}"` : ''}${ctx.game ? ` playing ${ctx.game}` : ''}${ctx.viewers ? ` with ${formatCount(ctx.viewers)} viewers` : ''}`;
       case 'post':
         return `It's a text post by @${ctx.author || 'unknown'}${ctx.caption ? `: "${ctx.caption}"` : ''}`;
       default:

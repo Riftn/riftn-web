@@ -117,6 +117,7 @@ import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
 import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
 import { speechText } from '@/lib/speech-text';
 
+import { formatCount } from '@/lib/format-count';
 const imageGenLogger = createLogger('AssistantPage.imageGen');
 
 const DEHUB_BRAND_IMAGE_MODEL: ImageModelKey = 'gemini-3.1-flash-image';
@@ -2490,7 +2491,7 @@ function AssistantPageForAccount() {
                 {t('support.title')}
                 {!!supportTickets?.openCount && (
                   <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-white text-black text-[10px] font-semibold flex items-center justify-center">
-                    {supportTickets.openCount}
+                    {formatCount(supportTickets.openCount)}
                   </span>
                 )}
               </DropdownMenuItem>

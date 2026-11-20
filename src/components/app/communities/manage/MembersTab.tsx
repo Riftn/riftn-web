@@ -40,6 +40,7 @@ import { BadgedName } from '@/components/app/BadgedName';
 import { MemberActionsDialog } from './MemberActionsDialog';
 import { AdminRightsDialog } from './AdminRightsDialog';
 
+import { formatCount } from '@/lib/format-count';
 const PAGE_SIZE = 30;
 
 const ROLE_ORDER: Record<string, number> = { owner: 0, admin: 1, member: 2 };
@@ -71,7 +72,7 @@ function SectionHeader({ title, count, open }: { title: string; count: number; o
         aria-hidden="true"
       />
       <span className="text-white font-medium text-sm">{title}</span>
-      <span className="text-zinc-500 text-xs">{count}</span>
+      <span className="text-zinc-500 text-xs">{formatCount(count)}</span>
     </CollapsibleTrigger>
   );
 }

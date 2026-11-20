@@ -88,6 +88,7 @@ import { scrollDocumentTo } from '@/lib/document-scroll';
 import { ExploreCategoryWords, ExplorePhoneHome } from '@/components/app/explore/ExplorePhoneHome';
 import { orderByInterests, useFeedInterests } from '@/lib/feed-interests';
 
+import { formatCount } from '@/lib/format-count';
 // Brand-related search terms where @d should be pinned first
 const BRAND_QUERIES = ['d', 'de', 'deh', 'dehu', 'dehub'];
 
@@ -758,7 +759,7 @@ export default function ExplorePage() {
       </AnimatePresence>
       {optionCount > 0 && !showFilters && (
         <span className="absolute top-0 right-0 min-w-[14px] h-[14px] px-0.5 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full leading-none">
-          {optionCount}
+          {formatCount(optionCount)}
         </span>
       )}
     </button>
@@ -852,7 +853,7 @@ export default function ExplorePage() {
                     </h2>
                     {!showLoading && searchResults.total > 0 && (
                       <p className="text-zinc-500 text-sm mt-1">
-                        {t('explorePage.resultsFound', { count: String(searchResults.total.toLocaleString()) } as Record<string, string>)}
+                        {t('explorePage.resultsFound', { count: formatCount(searchResults.total) } as Record<string, string>)}
                       </p>
                     )}
                   </div>

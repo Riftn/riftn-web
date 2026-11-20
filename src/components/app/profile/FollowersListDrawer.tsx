@@ -35,6 +35,7 @@ import { FollowBackAllButton, FollowBackAllSheet, type FollowBackAllStage } from
 import { playFollowBackChime } from '@/lib/follow-back-chime';
 import { BadgedName } from '@/components/app/BadgedName';
 
+import { formatCount } from '@/lib/format-count';
 const MAX_PAGES = 3;
 const PAGE_SIZE = 30;
 const FOLLOWING_CACHE_PAGE_SIZE = 100; // API caps at 100 per page regardless of requested limit
@@ -928,7 +929,7 @@ export function FollowersListDrawer({
 
   const heading = listType === 'followers' ? t('follow.followers') : t('follow.following');
   const titleWithCount = totalCount !== null && totalCount > 0
-    ? `${heading} (${totalCount})`
+    ? `${heading} (${formatCount(totalCount)})`
     : heading;
 
   return (
@@ -937,7 +938,7 @@ export function FollowersListDrawer({
         <DrawerHeader className="px-4 pb-2">
           <DrawerTitle className="text-white flex items-center gap-2">
             <Users className="w-5 h-5" />
-            {titleWithCount}
+            {formatCount(titleWithCount)}
           </DrawerTitle>
         </DrawerHeader>
 

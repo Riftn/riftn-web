@@ -46,6 +46,7 @@ import { buildImageUrl, buildFeedImageUrls } from '@/lib/media-url';
 import { formatTimeAgo } from '@/lib/feed-utils';
 import { AppState } from '@/components/app/AppState';
 
+import { formatCount } from '@/lib/format-count';
 type FolderSort = 'newest' | 'oldest' | 'channel';
 
 const SORT_LABELS: Record<FolderSort, string> = {
@@ -326,7 +327,7 @@ export function BookmarkFoldersPanel() {
                       )}
                     </span>
                     <span className="block text-xs text-zinc-500">
-                      {folder.itemCount ?? 0} {folder.itemCount === 1 ? _copy("copy.72231043bc18", { defaultValue: "post" }) : _copy("copy.a44f1b975171", { defaultValue: "posts" })}
+                      {formatCount(folder.itemCount ?? 0)} {folder.itemCount === 1 ? _copy("copy.72231043bc18", { defaultValue: "post" }) : _copy("copy.a44f1b975171", { defaultValue: "posts" })}
                     </span>
                   </button>
                 )}

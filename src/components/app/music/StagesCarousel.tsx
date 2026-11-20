@@ -42,6 +42,7 @@ import type { AudioSpace } from '@/types/audio-spaces.types';
 // Import the 3D mic icon
 import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
 
+import { formatCount } from '@/lib/format-count';
 interface StagesCarouselProps {
   onOpenStages: () => void;
 }
@@ -74,7 +75,7 @@ function StageCard({ space, onClick, wide = false }: { space: AudioSpace; onClic
         </div>
         <div className="flex items-center gap-1 text-zinc-400 text-xs">
           <Users className="w-3.5 h-3.5" />
-          <span>{totalListeners}</span>
+          <span>{formatCount(totalListeners)}</span>
         </div>
       </div>
       

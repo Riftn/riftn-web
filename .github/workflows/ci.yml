@@ -162,6 +162,8 @@ jobs:
       # looks like ordinary copy, so nothing else here would catch it.
       - run: node scripts/mojibake-check.mjs
       - run: node scripts/check-badge-resource-names.mjs
+      # Every counter on screen reads short (1.2K, not 1200). Fails on a raw one.
+      - run: node scripts/check-counters.mjs
       # The sibling failure: valid UTF-8, wrong alphabet. The translator
       # answers `am` (Amharic) in Armenian, or splices `导入` into a Ge'ez
       # sentence. Placeholders survive and the coverage count goes UP, so the

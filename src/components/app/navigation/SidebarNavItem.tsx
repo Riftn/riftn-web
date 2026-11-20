@@ -18,6 +18,7 @@ import AssistantNavIcon from '@/components/ui/AssistantNavIcon';
 import { NotificationBell } from './NotificationBell';
 import { MessagesNavGlyph } from './MessagesNavGlyph';
 
+import { formatCount } from '@/lib/format-count';
 // Map nav item labels to i18n keys. Exported because the menu-search filter
 // (nav-search.ts) has to match on the same translated label a row renders.
 //
@@ -270,7 +271,7 @@ function SidebarNavItemInner({
       ref={itemRef as React.Ref<HTMLAnchorElement>}
       to={item.path}
       aria-current={isActive ? 'page' : undefined}
-      aria-label={isNotifications ? `${translatedLabel}${notificationCount ? ` (${notificationCount})` : ''}` : undefined}
+      aria-label={isNotifications ? `${translatedLabel}${notificationCount ? ` (${formatCount(notificationCount)})` : ''}` : undefined}
       onClick={handleClick}
       onPointerEnter={() => preloadRoute(item.path)}
       onTouchStart={() => preloadRoute(item.path)}

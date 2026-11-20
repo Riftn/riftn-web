@@ -299,6 +299,7 @@ import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSet
 import { ConnectedAppsSetting } from '@/components/app/settings/ConnectedAppsSetting';
 import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
 
+import { formatCount } from '@/lib/format-count';
 /** `initialTab` opens a tab directly (the full-screen chat opens Messages). */
 export default function SettingsPage({ initialTab }: { initialTab?: string } = {}) {
   const { t: _copy } = _useCopy();
@@ -2196,7 +2197,7 @@ function PrivacySettings() {
               <Users className="size-7 text-white" />
             </div>
             <h3 id="go-public-title" className="text-white font-bold text-lg text-center">{_copy("copy.e186aeeede46", { defaultValue: "Switch to Public?" })}</h3>
-            <p className="text-zinc-300 text-sm text-center">{_copy("copy.1bd68dc16f30", { defaultValue: "You have " })}<span className="text-white font-semibold">{pendingRequestCount}</span>{_copy("copy.8342c8fd8b8e", { defaultValue: " pending follow " })}{pendingRequestCount === 1 ? _copy("copy.1f58b9145b24", { defaultValue: "request" }) : _copy("copy.ec72420df5df", { defaultValue: "requests" })}{_copy("copy.942059c59c39", { defaultValue: ". What would you like to do before going public?" })}</p>
+            <p className="text-zinc-300 text-sm text-center">{_copy("copy.1bd68dc16f30", { defaultValue: "You have " })}<span className="text-white font-semibold">{formatCount(pendingRequestCount)}</span>{_copy("copy.8342c8fd8b8e", { defaultValue: " pending follow " })}{pendingRequestCount === 1 ? _copy("copy.1f58b9145b24", { defaultValue: "request" }) : _copy("copy.ec72420df5df", { defaultValue: "requests" })}{_copy("copy.942059c59c39", { defaultValue: ". What would you like to do before going public?" })}</p>
             <div className="space-y-2 pt-1">
               <Button
                 type="button"

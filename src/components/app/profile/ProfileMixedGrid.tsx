@@ -42,6 +42,7 @@ import { postTileMenuProps, type PostMenuTarget } from '@/lib/post-menu';
 import { imagePostMenuTarget, textPostMenuTarget, videoMenuTarget } from '@/lib/post-menu-targets';
 import './profile-mixed-grid.css';
 
+import { formatCount } from '@/lib/format-count';
 /** One cell's worth of content. Optimistic posts arrive in the same shape. */
 export interface MixedGridEntry {
   key: string;
@@ -298,7 +299,7 @@ export const ProfileMixedGrid = memo(function ProfileMixedGrid({ entries, onMove
                     {!!video.duration && video.duration !== '0:00' && <span className="pmg-dur">{video.duration}</span>}
                   </>
                 )}
-                {!!video.views && video.views !== '0' && <span className="pmg-views">{video.views}</span>}
+                {!!video.views && video.views !== '0' && <span className="pmg-views">{formatCount(video.views)}</span>}
                 {locked && <span className="pmg-lock"><Lock /></span>}
                 {!isLive && pinChip}
                 {grip(entry)}

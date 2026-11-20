@@ -55,6 +55,7 @@ import {
   type ProfileSortMode,
 } from '@/hooks/use-dehub-profile';
 
+import { formatCount } from '@/lib/format-count';
 /** Multi-select access lanes, in the order the home feed's row shows them. */
 const ACCESS_CHIPS: { key: ContentTypeFilterValue; labelKey: string; fallback: string }[] = [
   { key: 'ppv', labelKey: 'filters.ppv', fallback: 'PPV' },
@@ -304,7 +305,7 @@ export function ProfileContentToolbar({
                   <SlidersHorizontal className="h-[18px] w-[18px]" />
                   {activeFilterCount > 0 && (
                     <span data-profile-quiet-count className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[10px] font-bold leading-none">
-                      {activeFilterCount}
+                      {formatCount(activeFilterCount)}
                     </span>
                   )}
                 </button>
@@ -331,7 +332,7 @@ className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center"
 <SlidersHorizontal className="h-[18px] w-[18px]" />
 {activeFilterCount > 0 && (
 <span data-profile-quiet-count className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[10px] font-bold leading-none">
-{activeFilterCount}
+{formatCount(activeFilterCount)}
 </span>
 )}
 </button>

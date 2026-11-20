@@ -17,15 +17,14 @@ import { getAccountByUsername } from '@/lib/api/dehub/users';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 interface ProfileLinkEmbedProps {
   username: string;
   fallback?: ReactNode;
 }
 
 function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
+  return formatShortCount(n);
 }
 
 export function ProfileLinkEmbed({ username, fallback = null }: ProfileLinkEmbedProps) {

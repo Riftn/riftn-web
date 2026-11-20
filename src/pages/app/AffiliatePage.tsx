@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { PageBody } from "@/components/app/page-kit/PageKit";
 import { trackEvent } from "@/lib/analytics";
 
+import { formatCount } from '@/lib/format-count';
 const SITE = typeof window !== "undefined" ? window.location.origin : "https://riftn.com";
 
 function formatMoney(cents: number, currency = "USD") {
@@ -465,7 +466,7 @@ export default function AffiliatePage() {
 function LabeledField({ label, count, children }: { label: string; count?: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
-      <span className="flex items-center justify-between text-xs font-medium text-white/70"><span>{label}</span>{count ? <span className="text-white/35">{count}</span> : null}</span>
+      <span className="flex items-center justify-between text-xs font-medium text-white/70"><span>{label}</span>{count ? <span className="text-white/35">{formatCount(count)}</span> : null}</span>
       {children}
     </label>
   );

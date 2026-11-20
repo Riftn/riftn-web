@@ -32,6 +32,7 @@ import { BadgedName } from '@/components/app/BadgedName';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import type { DeHubNFT } from '@/lib/api/dehub/types';
 
+import { formatCount } from '@/lib/format-count';
 /**
  * What a post's media looks like in an embed: which kind it is, the one
  * thumbnail to show, and whether it has to stay behind a gate. Shared with the
@@ -117,7 +118,7 @@ export function QuotedPostMedia({ post, className }: { post: DeHubNFT; className
       {!gated && hasImage && imageCount > 1 && (
         <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1">
           <Images className="w-3.5 h-3.5 text-white" />
-          <span className="text-xs text-white font-medium">{imageCount}</span>
+          <span className="text-xs text-white font-medium">{formatCount(imageCount)}</span>
         </div>
       )}
     </div>

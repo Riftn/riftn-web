@@ -15,6 +15,7 @@ import { findDehubLinks, stripDehubLinks } from '@/lib/dehub-links';
 import { storageImage, deviceWidth } from '@/lib/media-url';
 import { DescriptionWithLinks } from '@/components/app/communities/DescriptionWithLinks';
 
+import { formatCount } from '@/lib/format-count';
 // ── Legacy detection helpers ────────────────────────────────────────────────
 //
 // Detection moved to lib/dehub-links, which is host-checked and also matches
@@ -96,7 +97,7 @@ export function CommunityLinkEmbed({ slug, fallback = null }: CommunityLinkEmbed
         <div className="flex items-center gap-1.5 mt-1">
           <Users className="w-3 h-3 text-zinc-500" />
           <span className="text-xs text-zinc-500">
-            <span className="font-semibold text-zinc-300">{community.member_count.toLocaleString()}</span>{_copy("copy.0240fc224d27", { defaultValue: " Members" })}</span>
+            <span className="font-semibold text-zinc-300">{formatCount(community.member_count)}</span>{_copy("copy.0240fc224d27", { defaultValue: " Members" })}</span>
         </div>
       </div>
       <span className="relative flex-shrink-0 rounded-full bg-white/[0.12] px-3 py-1.5 text-xs font-semibold text-white">

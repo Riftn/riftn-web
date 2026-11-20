@@ -58,6 +58,7 @@ import {
   type RankedEntry,
 } from '@/lib/leaderboard-rules';
 
+import { formatCount } from '@/lib/format-count';
 // Same project URL and fallback as src/integrations/supabase/client.ts.
 const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co';
@@ -589,7 +590,7 @@ export default function LeaderboardPage() {
                       const [holders, dhb] = ogValueParts(entry);
                       return (
                         <>
-                          <span className="block">{holders}</span>
+                          <span className="block">{formatCount(holders)}</span>
                           {dhb && <span className="block text-xs font-semibold text-zinc-400">{dhb}</span>}
                         </>
                       );

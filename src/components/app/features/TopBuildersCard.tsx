@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { COMMENT_CAP, COMMENT_POINTS, SHIPPED_POINTS, VOTE_POINTS, type BuilderPeriod, type TopBuilder } from '@/lib/top-builders';
 
+import { formatCount } from '@/lib/format-count';
 const SHOWN = 8;
 /** Extra rows added per "Show more" tap once the full list is open. */
 const PAGE = 20;
@@ -145,7 +146,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
               <span className="truncate">{mine ? t('features.topBuilders.you', 'You') : displayName(b)}</span>
               {b.username && <BadgeIcon username={b.username} lookupId={b.wallet} className="w-[1em] h-[1em] shrink-0" />}
             </span>
-            <span className="tabular-nums">{b.points}</span>
+            <span className="tabular-nums">{formatCount(b.points)}</span>
           </span>
           <ScoreBar builder={b} max={max} />
           {open && <Breakdown b={b} />}

@@ -39,6 +39,7 @@ import { clock, soundMix, soundWindow, type SoundMix } from '@/lib/sound-window'
 import { SoundMixer } from './SoundMixer';
 import type { AttachedSound } from '../hooks/usePostSound';
 
+import { formatCount } from '@/lib/format-count';
 interface PostActionBarProps {
   imageInputRef: React.RefObject<HTMLInputElement>;
   videoInputRef: React.RefObject<HTMLInputElement>;
@@ -636,7 +637,7 @@ export function PostActionBar({
           >
             <More className="h-5 w-5" />
             {extraTool && crossPostCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-semibold text-black">{crossPostCount}</span>
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-semibold text-black">{formatCount(crossPostCount)}</span>
             )}
           </button>
         )}

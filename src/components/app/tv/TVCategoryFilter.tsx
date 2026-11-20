@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import type { TVCategory, TVCountryFilter } from '@/lib/api/live-tv';
 import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
 
+import { formatCount } from '@/lib/format-count';
 interface TVCategoryFilterProps {
   activeCountry: TVCountryFilter;
   onCountryChange: (country: TVCountryFilter) => void;
@@ -48,7 +49,7 @@ export function TVCategoryFilter({
                   'ml-1 text-[10px]',
                   activeCountry === cat.id ? 'text-black/50' : 'text-zinc-500'
                 )}>
-                  {cat.count}
+                  {formatCount(cat.count)}
                 </span>
               )}
             </button>

@@ -76,6 +76,7 @@ import { fractionImageFor } from '@/lib/fraction-thumb';
 import { resolveViewCount } from '@/lib/engagement';
 
 
+import { formatCount } from '@/lib/format-count';
 // Chain configuration
 const PostStatsPanel = lazy(() => import('@/components/app/post-stats/PostStatsPanel'));
 
@@ -753,7 +754,7 @@ export default function PostInfoPage() {
               <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
                 <ThumbsUp className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-lg font-bold text-white">{likes.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-white">{formatCount(likes)}</p>
                   <p className="text-xs text-white/60">{t('postInfo.likes')}</p>
                 </div>
               </div>
@@ -762,7 +763,7 @@ export default function PostInfoPage() {
               <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
                 <ThumbsDown className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-lg font-bold text-white">{dislikes.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-white">{formatCount(dislikes)}</p>
                   <p className="text-xs text-white/60">{t('postInfo.dislikes')}</p>
                 </div>
               </div>
@@ -771,7 +772,7 @@ export default function PostInfoPage() {
               <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
                 <Eye className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-lg font-bold text-white">{views.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-white">{formatCount(views)}</p>
                   <p className="text-xs text-white/60">{t('postInfo.views')}</p>
                 </div>
               </div>
@@ -780,7 +781,7 @@ export default function PostInfoPage() {
               <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
                 <MessageSquare className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-lg font-bold text-white">{comments.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-white">{formatCount(comments)}</p>
                   <p className="text-xs text-white/60">{t('postInfo.comments')}</p>
                 </div>
               </div>
@@ -816,7 +817,7 @@ export default function PostInfoPage() {
                 <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
                   <Ticket className="w-5 h-5 text-white" />
                   <div>
-                    <p className="text-lg font-bold text-white">{ppvPurchaseCount ?? 0}</p>
+                    <p className="text-lg font-bold text-white">{formatCount(ppvPurchaseCount ?? 0)}</p>
                     <p className="text-xs text-white/60">{t('postInfo.ppvSales')}</p>
                   </div>
                 </div>

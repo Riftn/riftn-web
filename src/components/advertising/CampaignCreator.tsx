@@ -19,6 +19,7 @@ import { fill } from './utils/fill';
 import { badgeImage } from '@/lib/staking-badges';
 import { DhbAmount } from '@/components/app/DhbAmount';
 
+import { formatCount } from '@/lib/format-count';
 /** Campaign-type values are what the ads manager expects — only the label moves. */
 const CAMPAIGN_TYPES = ['awareness', 'traffic', 'conversion', 'engagement'];
 
@@ -126,7 +127,7 @@ const CampaignCreator = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>{t('adTools.estimatedReachRow')}</span>
-                    <span className="font-semibold">{calculateEstimatedReach().toLocaleString()}</span>
+                    <span className="font-semibold">{formatCount(calculateEstimatedReach())}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t('adTools.estimatedImpressionsRow')}</span>

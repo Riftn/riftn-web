@@ -86,6 +86,7 @@ import { FeatureDeviceInfo } from '@/components/app/features/FeatureDeviceInfo';
 import { TopBuildersCard } from '@/components/app/features/TopBuildersCard';
 import { SEOHead } from '@/components/SEOHead';
 
+import { formatCount } from '@/lib/format-count';
 // Built per use so its messages are read in the reader's language at the time.
 const featureSchema = () => z.object({
   title: z.string().trim().min(1, _translateCopy("copy.d5b06872b556", { defaultValue: "Title is required" })).max(100, _translateCopy("copy.8b4f83e9c989", { defaultValue: "Title must be under 100 characters" })),
@@ -1216,7 +1217,7 @@ export default function FeaturesPage() {
             {t('features.prompts', 'Prompts')}
             {remainingCount > 0 && (
               <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
-                {remainingCount}
+                {formatCount(remainingCount)}
               </span>
             )}
           </button>
@@ -1233,7 +1234,7 @@ export default function FeaturesPage() {
             {t('features.queued', 'Queued')}
             {inProgressCount > 0 && (
               <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
-                {inProgressCount}
+                {formatCount(inProgressCount)}
               </span>
             )}
           </button>
@@ -1250,7 +1251,7 @@ export default function FeaturesPage() {
             {t('features.shipped')}
             {shippedCount > 0 && (
               <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
-                {shippedCount}
+                {formatCount(shippedCount)}
               </span>
             )}
           </button>
@@ -1322,7 +1323,7 @@ export default function FeaturesPage() {
                       <span className="relative z-10">{_copy("copy.2ab63e6ced90", { defaultValue: "Not feasible" })}</span>
                       {notFeasibleCount > 0 && (
                         <span className="relative z-10 text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
-                          {notFeasibleCount}
+                          {formatCount(notFeasibleCount)}
                         </span>
                       )}
                     </button>

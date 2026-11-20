@@ -21,6 +21,7 @@ import { formatTimeAgo } from '@/lib/feed-utils';
 import { roomPreviewLine } from '@/lib/room-chat-read';
 import type { RoomSummary } from '@/hooks/use-room-chat-summaries';
 
+import { formatCount } from '@/lib/format-count';
 export function GroupChatRow({ community, onClick, pref, reactions, selected, selecting = false, checked = false, onLongPress, summary, me = '' }: {
   community: Community;
   /** Newest line and unread number (hooks/use-room-chat-summaries). */
@@ -43,7 +44,7 @@ export function GroupChatRow({ community, onClick, pref, reactions, selected, se
   const kind = communityKindOf(community);
   const KindIcon = kind === 'channel' ? Megaphone : Users;
   const price = entryPriceOf(community);
-  const members = { count: community.member_count ?? 0, formattedCount: (community.member_count ?? 0).toLocaleString() };
+  const members = { count: community.member_count ?? 0, formattedCount: formatCount(community.member_count ?? 0) };
   const subtitle = kind === 'channel'
     ? t('communities.newChat.channelRow', { defaultValue: 'Channel · {{formattedCount}} members', ...members })
     : kind === 'group'

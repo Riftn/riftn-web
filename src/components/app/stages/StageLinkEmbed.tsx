@@ -32,6 +32,7 @@ import { BadgedName } from '@/components/app/BadgedName';
 import { StageRecordingPlayer } from '@/components/app/stages/StageRecordingPlayer';
 import type { AudioSpace } from '@/types/audio-spaces.types';
 
+import { formatCount } from '@/lib/format-count';
 interface StageLinkEmbedProps {
   /** The uuid form (/stage/:id). One of the two ids must be present. */
   stageId?: string;
@@ -136,7 +137,7 @@ export function StageLinkEmbed({ stageId, stageShortId, fallback = null }: Stage
           {isEnded && !!stage.total_listens && (
             <span className="flex items-center gap-1 text-zinc-400 text-xs">
               <Headphones className="w-3.5 h-3.5" />
-              {stage.total_listens}
+              {formatCount(stage.total_listens)}
             </span>
           )}
         </div>

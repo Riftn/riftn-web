@@ -89,6 +89,7 @@ import { insertCommunityChatMessage } from '@/lib/community-chat-send';
 import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
 import { previewLinks } from '@/lib/dehub-links';
 
+import { formatCount } from '@/lib/format-count';
 /**
  * The other person's name with their badge sitting on its baseline, the same
  * BadgedName system the feed uses. The badge rides straight after the name
@@ -1318,7 +1319,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
           onClick={() => { setShowRequests(false); setShowArchived(!showArchived); }}>
           <Archive className="h-3.5 w-3.5" />
           <span className="whitespace-nowrap">{_copy('chatMenu.archived', { defaultValue: 'Archived' })}</span>
-          {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{archivedCount}</span>}
+          {archivedCount > 0 && <span data-chat-tab-unread data-quiet>{formatCount(archivedCount)}</span>}
         </button>
       ) : undefined}
     />
@@ -1741,7 +1742,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               >
                 <Archive className="h-[18px] w-[18px]" />
                 <span className="flex-1">{_copy('chatMenu.archivedChats', { defaultValue: 'Archived chats' })}</span>
-                <span className="tabular-nums">{archivedCount}</span>
+                <span className="tabular-nums">{formatCount(archivedCount)}</span>
               </button>
             )}
 

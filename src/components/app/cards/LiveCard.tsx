@@ -49,6 +49,7 @@ import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useNotifyWhenLive } from '@/hooks/use-notify-when-live';
 import type { LiveStream } from '@/types/feed.types';
 
+import { formatCount } from '@/lib/format-count';
 interface LiveCardProps {
   stream: LiveStream;
 }
@@ -268,7 +269,7 @@ export function LiveCard({ stream }: LiveCardProps) {
           type: 'live',
           author: stream.streamer,
           title: stream.title,
-          caption: `Playing ${stream.game} with ${stream.viewers} viewers`,
+          caption: `Playing ${stream.game} with ${formatCount(stream.viewers)} viewers`,
           imageUrl: stream.thumbnail
         }}
       />

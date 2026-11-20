@@ -23,6 +23,7 @@ import { useTokenPrices } from '@/hooks/use-token-prices';
 import { cn } from '@/lib/utils';
 import dehubCoin from '@/assets/dehub-coin.png';
 
+import { formatCount } from '@/lib/format-count';
 // Takes the translator rather than calling the hook: this is a plain helper,
 // not a component.
 function relativeTime(iso: string, t: TFunction): string {
@@ -110,7 +111,7 @@ export function ActivityTab() {
         <div className="grid grid-cols-3 gap-2">
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.trades')}</p>
-            <p className="text-white font-semibold">{summary.count}</p>
+            <p className="text-white font-semibold">{formatCount(summary.count)}</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.volume')}</p>

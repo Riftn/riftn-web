@@ -29,6 +29,7 @@ import { mapUserToProfile } from '@/hooks/use-dehub-profile';
 import { toast } from 'sonner';
 import type { DeHubUser } from '@/lib/api/dehub/types';
 
+import { formatCount as formatShortCount } from '@/lib/format-count';
 interface ProfileHoverCardProps {
   /** The wallet address / creator ID */
   creatorId?: string;
@@ -166,11 +167,7 @@ export function ProfileHoverCard({
     }
   }, [profile, creatorUsername, creatorId, navigate]);
 
-  const formatCount = (n: number) => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-    return String(n);
-  };
+  const formatCount = (n: number) => formatShortCount(n);
 
   // Don't wrap if no user to show
   if (!userId) return <>{children}</>;

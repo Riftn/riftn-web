@@ -9,6 +9,7 @@ import Search from "@/components/ui/cut-icons/search";
 import ChevronRight from "@/components/ui/cut-icons/next";
 
 
+import { formatCount } from '@/lib/format-count';
 const MOCK_CHANNELS = [
   { name: 'CryptoTV Live', get category() { return _translateCopy("copy.df12b8f89b61", { defaultValue: "Crypto" }); }, country: '🇺🇸', viewers: '12.4K' },
   { name: 'DeFi Daily', get category() { return _translateCopy("copy.b696d75511dc", { defaultValue: "Finance" }); }, country: '🇬🇧', viewers: '8.2K' },
@@ -80,7 +81,7 @@ export function TVScreen() {
                 <div className="flex items-center gap-2">
                   <span className="text-zinc-600 text-xs">{channel.country}</span>
                   <span className="text-zinc-600 text-xs">{channel.category}</span>
-                  <span className="text-zinc-600 text-xs">• {channel.viewers}</span>
+                  <span className="text-zinc-600 text-xs">• {formatCount(channel.viewers)}</span>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-zinc-700" />

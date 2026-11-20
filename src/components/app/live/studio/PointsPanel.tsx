@@ -9,6 +9,7 @@ import { PageSection } from '@/components/app/page-kit/PageKit';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { getPointsBoard } from '@/lib/api/dehub/live-subathon';
 
+import { formatCount } from '@/lib/format-count';
 export function PointsPanel({ address }: { address: string | null | undefined }) {
   const { t } = useTranslation();
   const { data, isLoading } = useQuery({
@@ -32,7 +33,7 @@ export function PointsPanel({ address }: { address: string | null | undefined })
               <span className="w-5 text-center text-zinc-500">{i + 1}</span>
               <img src={buildAvatarUrl(r.address, r.avatarImageUrl)} alt="" className="h-7 w-7 rounded-full object-cover" loading="lazy" />
               <span className="min-w-0 flex-1 truncate text-white">{r.displayName || r.username || `${r.address.slice(0, 6)}…`}</span>
-              <span className="tabular-nums text-zinc-300">{t('liveOverlay.points', { count: r.points, formatted: r.points.toLocaleString() })}</span>
+              <span className="tabular-nums text-zinc-300">{t('liveOverlay.points', { count: r.points, formatted: formatCount(r.points) })}</span>
             </li>
           ))}
         </ol>

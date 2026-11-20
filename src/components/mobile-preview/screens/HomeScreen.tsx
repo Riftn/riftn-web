@@ -13,6 +13,7 @@ import Repeat2 from "@/components/ui/cut-icons/repost";
 import Share from "@/components/ui/cut-icons/share";
 
 
+import { formatCount } from '@/lib/format-count';
 const mockPosts = (t: TFunction) => [
   { id: '1', user: 'alice.eth', content: t("copy.856638383b55", { defaultValue: "Just minted my first NFT collection on Base 🎨 The creative freedom in web3 is unmatched." }), likes: 42, comments: 8, reposts: 3, time: '2m' },
   { id: '2', user: 'bob_dev', content: t("copy.fc4b39480874", { defaultValue: "New governance proposal is live — vote on treasury allocation for Q2 developer grants. Let's build together! 🏗️" }), likes: 128, comments: 24, reposts: 15, time: '15m', hasImage: true },
@@ -74,7 +75,7 @@ export function HomeScreen() {
                 <div className="flex items-center gap-6 mt-2.5">
                   <button className="flex items-center gap-1.5 text-zinc-500">
                     <Heart className="w-4 h-4" />
-                    <span className="text-xs">{post.likes}</span>
+                    <span className="text-xs">{formatCount(post.likes)}</span>
                   </button>
                   <button className="flex items-center gap-1.5 text-zinc-500">
                     <MessageSquare className="w-4 h-4" />
@@ -82,7 +83,7 @@ export function HomeScreen() {
                   </button>
                   <button className="flex items-center gap-1.5 text-zinc-500">
                     <Repeat2 className="w-4 h-4" />
-                    <span className="text-xs">{post.reposts}</span>
+                    <span className="text-xs">{formatCount(post.reposts)}</span>
                   </button>
                   <button className="text-zinc-500 ml-auto">
                     <Share className="w-4 h-4" />
