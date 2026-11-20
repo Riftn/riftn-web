@@ -272,8 +272,9 @@ export function VideoSubtitleOverlay({ tokenId, videoRef, buttonClassName, butto
     : !dubVoice && !hasCachedDubLanguage(dubLang) ? (voices.length ? 'unavailable' : 'preparing')
     : dubFailed || dubTranslationStatus === 'failed' ? 'unavailable'
     : !dubSegments ? 'preparing'
-    // The device is reading the lines until the creator-voice track lands.
-    : !cachedDub?.audioUrl && (cachedDub?.status === 'pending' || cachedDub?.status === 'processing') ? 'creator-voice'
+    // The device is reading the lines until the creator-voice track lands;
+    // with no device voice there is only the wait.
+    : !cachedDub?.audioUrl && (cachedDub?.status === 'pending' || cachedDub?.status === 'processing') ? (dubVoice ? 'creator-voice' : 'preparing')
     : null;
 
   // Viewer corrections to the original-language lines. Only fetched once
