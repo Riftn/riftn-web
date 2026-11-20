@@ -1911,7 +1911,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   const feedVideoShape = useFeedVideoShape();
   const feedFrameAspect = Math.max(mediaAspect, FEED_VIDEO_MIN_ASPECT[feedVideoShape]);
 
-  // Long form videos on wide screens (Settings > Appearance > Media). Desktop
+  // Long form media on wide screens (Settings > Appearance > Media). Desktop
   // only: the feed card and the post page player. Ambient runs the frame full
   // width with the blurred picture beside it; rails hug the picture between
   // two glass pills, and only where there is room beside it.

@@ -3430,7 +3430,7 @@ function VideoGlitchToggle() {
 }
 
 /**
- * Settings > Appearance > Media: how a tall or square long video fills the
+ * Settings > Appearance > Media: how a tall or square video or photo fills the
  * column on a computer (lib/wide-video-mode). Phones and tablets never use it,
  * so the row only shows on wide screens.
  */
@@ -3439,21 +3439,21 @@ function WideVideoModeRow() {
   const mode = useWideVideoMode();
   const isDesktop = useIsDesktopViewport();
   if (!isDesktop) return null;
-  const title = t('settings.wideVideoMode', 'Long form videos on wide screens');
+  const title = t('settings.wideMediaMode', 'Long form media on wide screens');
   return (
     <SettingsRow
       icon={<RectangleHorizontal />}
       anchor="wide-video-mode"
       title={title}
-      description={t('settings.wideVideoModeDesc', 'What fills the space beside tall and square videos on a computer')}
+      description={t('settings.wideMediaModeDesc', 'What fills the space beside tall and square videos and photos on a computer')}
       action={<SettingDrawerSelect
         value={mode}
         onValueChange={(value) => { if (isWideVideoMode(value)) writeWideVideoMode(value); }}
         title={title}
         options={[
-          { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideVideoAmbientDesc', 'The video fills the width, with a soft blurred glow of itself on each side') },
-          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideVideoRailsDesc', 'The video beside one glass panel with what it is, a Follow button and the top comments') },
-          { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideVideoStandardDesc', 'The video on its own, as before') },
+          { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideMediaAmbientDesc', 'The video or photo fills the width, with a soft blurred glow of itself on each side') },
+          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideMediaRailsDesc', 'The video or photo beside one glass panel with what it is, a Follow button and the top comments') },
+          { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideMediaStandardDesc', 'The video or photo on its own, as before') },
         ]}
       />}
     />
