@@ -1,4 +1,7 @@
 import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { setCoAuthors, openCoAuthorSheet } from '@/lib/co-author-store';
+import { CoAuthorSheetHost } from '@/components/app/co-authors/CoAuthorSheetHost';
+import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
 import { SoundtrackControl } from '@/components/app/cards/SoundtrackControl';
@@ -2095,6 +2098,7 @@ export default function StateGalleryPage() {
         )}
         {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
         {params.get('thread') === '1' && <AuthorThreadGallery />}
+        {params.get('coauthors') && <CoAuthorsGallery mode={params.get('coauthors')} />}
         {params.get('composer') === '1' && <ThreadedComposerGallery />}
         {params.get('notifs') === '1' && <NotificationRowsGallery />}
         {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
@@ -2609,6 +2613,45 @@ const GALLERY_TEXT_POSTS: GalleryTextPost[] = [
   author: { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false },
   stats: { comments: 12 + i * 7, reposts: i, likes: 140 + i * 53, dislikes: 0 },
 }) as GalleryTextPost);
+
+/** Co-authored posts: both names on the header, the invite card, and the sheet (?coauthors=sheet opens it). */
+const GALLERY_CO_AUTHORS = [
+  { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' },
+  { address: '0x7777777777777777777777777777777777777772', username: 'kai', displayName: 'Kai' },
+  { address: '0x7777777777777777777777777777777777777773', username: 'juno', displayName: 'Juno' },
+];
+function CoAuthorsGallery({ mode }: { mode: string | null }) {
+  const [ready] = useState(() => {
+    setCoAuthors('990101', { users: [GALLERY_CO_AUTHORS[0]] });
+    setCoAuthors('990102', { users: GALLERY_CO_AUTHORS });
+    setCoAuthors('990103', { users: [], invited: true });
+    return true;
+  });
+  useEffect(() => {
+    if (mode === 'sheet') openCoAuthorSheet('990101');
+  }, [mode]);
+  const posts = [
+    { ...GALLERY_TEXT_POSTS[0], id: '990101', content: 'Shot the whole city in the rain last night with @ellaverse. Our best twelve go up tomorrow.' },
+    { ...GALLERY_TEXT_POSTS[2], id: '990102', content: 'Four of us, one track, made in a weekend. Headphones on.' },
+  ] as GalleryTextPost[];
+  if (!ready) return null;
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-co-authors-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Co-authored posts</h2>
+      <div className="space-y-3">
+        {posts.map((post) => (
+          <div key={post.id} data-feed-item className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+            <GalleryPostCard post={post} />
+          </div>
+        ))}
+      </div>
+      {mode === 'invite' && <CoAuthorInviteBanner tokenId="990103" creatorName="Marco V" />}
+      {mode === 'sheet' && <CoAuthorSheetHost />}
+    </section>
+    </AuthContext.Provider>
+  );
+}
 
 /** Content warning cover: the creator's own line, and the stock notice when a warning has none. */
 function ContentWarningGallery() {

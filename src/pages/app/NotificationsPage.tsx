@@ -326,6 +326,7 @@ const API_BACKED_TYPES = new Set([
   'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased',
   'username_offer', 'username_offer_accepted', 'username_offer_declined',
   'livestream_start', 'signal_flare', 'video_milestone',
+  'coauthor_invite', 'coauthor_accepted',
   'badge_delegated', 'badge_delegation_ended', 'badge_delegation_changed', 'badge_tier_up', 'badge_tier_down',
   'video_removal', 'account_warning', 'system',
   'community_chat',
@@ -449,6 +450,9 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
       return <Zap className="w-4 h-4 text-white/70" />;
     case 'signal_flare':
       return <Siren className="w-4 h-4 text-white/70" />;
+    case 'coauthor_invite':
+    case 'coauthor_accepted':
+      return <UserPlus className="w-4 h-4 text-white/70" />;
     // A lent badge is still a badge — same glyph the tier itself reads as,
     // whichever direction the loan moved.
     case 'badge_delegated':

@@ -20,6 +20,8 @@ import MoreHorizontal from "@/components/ui/cut-icons/more";
 
 import { usePostStage } from './post-stage-context';
 import { LiveRipple } from '@/components/app/LiveRipple';
+import { useCoAuthors } from '@/lib/co-author-store';
+import { CoAuthorAvatarBadge, CoAuthorNames } from '@/components/app/cards/CoAuthorByline';
 
 interface StageCreatorRowProps {
   name: string;
@@ -30,6 +32,8 @@ interface StageCreatorRowProps {
   verified?: boolean;
   /** Extra controls between the name and Follow (PPV / gate badges). */
   trailing?: ReactNode;
+  /** The post, so its co-authors show beside the creator. */
+  tokenId?: string | number;
 }
 
 /** 1200 -> 1.2K, 3400000 -> 3.4M. */
@@ -40,7 +44,8 @@ function formatFollowers(n: number): string {
   return String(Math.floor(n));
 }
 
-export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance, verified, trailing }: StageCreatorRowProps) {
+export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance, verified, trailing, tokenId }: StageCreatorRowProps) {
+  const { users: coAuthors } = useCoAuthors(tokenId);
   const { t } = useTranslation();
   const onOptions = usePostStage()?.openOptions;
   const navigate = useNavigate();
@@ -85,6 +90,7 @@ export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance,
         className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
       >
         <LiveRipple ids={[creatorId, cleanHandle]} className="rounded-lg">
+          <span className="relative flex shrink-0">
           {avatar && avatar.startsWith('http') && !avatarError ? (
             <img
               src={avatar}
@@ -98,6 +104,8 @@ export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance,
               {(name || '?').charAt(0).toUpperCase()}
             </span>
           )}
+          <CoAuthorAvatarBadge users={coAuthors} />
+          </span>
         </LiveRipple>
         <span className="flex min-w-0 flex-col">
           <span className="flex min-w-0 items-center gap-1">
@@ -110,6 +118,7 @@ export function StageCreatorRow({ name, avatar, handle, creatorId, badgeBalance,
               <span data-stage-ink>{name}</span>
             </BadgedName>
             {verified && <VerifiedBadge className="h-3.5 w-3.5 self-center" />}
+            <CoAuthorNames users={coAuthors} nameClassName="text-[15px] leading-tight" />
           </span>
           <span data-stage-muted className="truncate text-[13px] leading-tight">
             {cleanHandle ? `@${cleanHandle}` : null}

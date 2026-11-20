@@ -22,6 +22,7 @@ import { ConnectLinkedWalletModal } from "@/components/app/wallet-setup/ConnectL
 import { SelfBadgeSync } from "@/components/app/SelfBadgeSync";
 import { DefaultChainSync } from "@/components/app/DefaultChainSync";
 import { BadgeShowcaseHost } from "@/components/app/badge-showcase/BadgeShowcaseHost";
+import { CoAuthorSheetHost } from "@/components/app/co-authors/CoAuthorSheetHost";
 import { ViewingPreferencesSync } from "@/components/app/ViewingPreferencesSync";
 import { AccountLanguageSync } from "@/components/app/AccountLanguageSync";
 import { FeedDefaultsSync } from "@/components/app/FeedDefaultsSync";
@@ -554,6 +555,7 @@ function AppContent() {
       <QuickActionsHost />
       <PostMenuGate />
       <BadgeShowcaseHost />
+      <CoAuthorSheetHost />
       <ViewingPreferencesSync />
       <AccountLanguageSync />
       <FeedDefaultsSync />

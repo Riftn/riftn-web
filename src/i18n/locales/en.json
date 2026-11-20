@@ -2016,6 +2016,8 @@
     }
   },
   "notifications": {
+    "coAuthorInvite": "{{name}} invited you to co-author their post",
+    "coAuthorAccepted": "{{name}} is now a co-author on your post",
     "title": "Notifications",
     "markAllRead": "Mark all read",
     "groupNew": "New",
@@ -20804,5 +20806,30 @@
   "roomPreview": {
     "you": "You",
     "voice": "🎤 Voice message"
+  },
+  "coAuthors": {
+    "invite": "Invite a co-author",
+    "manage": "Co-authors",
+    "answerInvite": "Co-author invite",
+    "andMore": "+{{count}}",
+    "creatorHint": "Make this post together. Once they say yes, it shows on their profile too, with both names.",
+    "inviteHint": "You've been asked to co-author this post. Say yes and it shows on your profile too, with both names.",
+    "coAuthorHint": "You're a co-author on this post. It shows on your profile with both names.",
+    "searchPlaceholder": "Search people to invite",
+    "inviteButton": "Invite",
+    "invited": "Invite sent to {{name}}",
+    "alreadyOn": "On this post",
+    "full": "A post can have up to {{count}} co-authors.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "accepted": "You're now a co-author",
+    "remove": "Remove",
+    "leave": "Remove me",
+    "waiting": "Invited",
+    "cancelInvite": "Cancel",
+    "nothing": "Nothing to do here.",
+    "failed": "Couldn't do that. Try again.",
+    "banner": "You were invited to co-author this post.",
+    "bannerNamed": "{{name}} invited you to co-author this post."
   }
 }

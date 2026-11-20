@@ -2005,6 +2005,8 @@
     }
   },
   "notifications": {
+    "coAuthorInvite": "{{name}} seni gönderisinin ortak yazarı olmaya davet etti",
+    "coAuthorAccepted": "{{name}} artık gönderinin ortak yazarı",
     "title": "Bildirimler",
     "markAllRead": "Tümünü okundu işaretle",
     "groupNew": "Yeni",
@@ -20909,5 +20911,30 @@
   "roomPreview": {
     "you": "Sen",
     "voice": "🎤 Sesli mesaj"
+  },
+  "coAuthors": {
+    "invite": "Ortak yazar davet et",
+    "manage": "Ortak yazarlar",
+    "answerInvite": "Ortak yazar daveti",
+    "andMore": "+{{count}}",
+    "creatorHint": "Bu gönderiyi birlikte yapın. Kabul ettiğinde gönderi iki isimle birlikte onun profilinde de görünür.",
+    "inviteHint": "Bu gönderinin ortak yazarı olman istendi. Kabul edersen gönderi iki isimle birlikte senin profilinde de görünür.",
+    "coAuthorHint": "Bu gönderinin ortak yazarısın. Gönderi profilinde iki isimle görünür.",
+    "searchPlaceholder": "Davet edilecek kişileri ara",
+    "inviteButton": "Davet et",
+    "invited": "{{name}} kişisine davet gönderildi",
+    "alreadyOn": "Bu gönderide",
+    "full": "Bir gönderide en fazla {{count}} ortak yazar olabilir.",
+    "accept": "Kabul et",
+    "decline": "Reddet",
+    "accepted": "Artık ortak yazarsın",
+    "remove": "Kaldır",
+    "leave": "Beni kaldır",
+    "waiting": "Davet edildi",
+    "cancelInvite": "İptal",
+    "nothing": "Burada yapılacak bir şey yok.",
+    "failed": "Bu yapılamadı. Tekrar dene.",
+    "banner": "Bu gönderinin ortak yazarı olmaya davet edildin.",
+    "bannerNamed": "{{name}} seni bu gönderinin ortak yazarı olmaya davet etti."
   }
 }

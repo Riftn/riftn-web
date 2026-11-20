@@ -29,6 +29,8 @@ import type { ContentType } from '@/types/feed.types';
 import { preloadRoute } from '@/lib/route-preload';
 import type { BadgeLock } from '@/lib/staking-badges';
 import type { PostVisibility } from '@/lib/api/dehub/types';
+import { useCoAuthors } from '@/lib/co-author-store';
+import { CoAuthorAvatarBadge, CoAuthorNames } from './CoAuthorByline';
 
 interface CardHeaderProps {
   /** Display name or username */
@@ -106,6 +108,7 @@ export function CardHeader({
   const queryClient = useQueryClient();
   const { walletAddress: viewerAddress } = useAuth();
   const [imageError, setImageError] = useState(false);
+  const { users: coAuthors } = useCoAuthors(tokenId);
   const badge = CONTENT_BADGES[contentType];
   const visibilityLabel =
     visibility === 'followers' ? t('postVisibility.followers') : visibility === 'direct' ? t('postVisibility.direct') : null;
@@ -180,10 +183,13 @@ export function CardHeader({
           className={`flex shrink-0 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <LiveRipple ids={[creatorId, creatorUsername, handle]} className="rounded-md">
-            <Avatar className="w-9 h-9 rounded-md">
-              {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
-              <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md">{username[0]?.toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <span className="relative flex">
+              <Avatar className="w-9 h-9 rounded-md">
+                {avatarSrc && <AvatarImage src={avatarSrc} onError={() => setImageError(true)} className="rounded-md" />}
+                <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md">{username[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <CoAuthorAvatarBadge users={coAuthors} />
+            </span>
           </LiveRipple>
         </button>
       </ProfileHoverCard>
@@ -210,6 +216,7 @@ export function CardHeader({
             <NewMemberChip address={creatorId} className="shrink-0 ml-0.5" />
           </button>
           {verified && <CheckCircle className="w-3.5 h-3.5 text-white shrink-0 self-end" />}
+          <CoAuthorNames users={coAuthors} />
         </div>
         {(formattedHandle || timestamp || visibilityLabel) && (
           <div className="flex items-center gap-1 min-w-0 max-w-full -translate-y-px">
