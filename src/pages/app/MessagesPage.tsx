@@ -264,7 +264,7 @@ export function ConversationItem({
               matching the mobile app. White-on-near-black instead of red-500:
               the palette has no colour in it, and Osaka/Jungle still repaint
               this through [data-count-badge]. */}
-          <ReactionAlertBadge reactions={reactions} className="ml-0.5" />
+          <ReactionAlertBadge reactions={reactions} rowKey={`dm:${conversation.id}`} className="ml-0.5" />
           <UnreadCountChip count={conversation.unreadCount} className="ml-0.5" />
         </div>
         {draft ? (
@@ -1615,7 +1615,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 <span className="flex items-center gap-1.5">
                   <span className="font-semibold text-white truncate">{t('publicChat.title')}</span>
                   {publicLastLine && <span data-room-last-at className="ml-auto shrink-0 text-zinc-500 text-sm tabular-nums">{formatTimeAgo(publicLastLine.created_at)}</span>}
-                  {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} className={publicLastLine ? 'ml-0.5' : 'ml-auto'} />}
+                  {!showPublicChat && <ReactionAlertBadge reactions={publicReactions} rowKey="public" className={publicLastLine ? 'ml-0.5' : 'ml-auto'} />}
                   {/* Same white number as a private chat, not a red pill. */}
                   {publicUnread > 0 && !showPublicChat && <UnreadCountChip count={publicUnread} className={publicLastLine || publicReactions ? 'ml-0.5' : 'ml-auto'} />}
                 </span>

@@ -39,6 +39,7 @@ import { DmLockedState, DmUndecryptableRun } from '@/components/app/chat/DmLocke
 import { DmSafetyBanner } from '@/components/app/chat/DmSafetyBanner';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { ChatReactionSummary } from '@/lib/api/dehub/chat-prefs';
 import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
 import { PostMenuGate } from '@/components/app/post-menu/PostMenuGate';
 import { PostActionBar } from '@/features/post/components/PostActionBar';
@@ -326,6 +327,48 @@ function ComicGallery() {
  * Follow is tapped. Laid out bare, as the feed and Explore carry them, so each
  * theme's own card surface (or none, in System) is what shows.
  */
+/**
+ * Messages rows with reactions waiting: bare moving emojis (no pill) where
+ * the unread number sits. "Land a reaction" adds one so the arrival motion
+ * (Settings > Appearance > Reactions in chat) can be seen on the row.
+ */
+function ReactionRowsGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const [extra, setExtra] = useState(0);
+  const people: Array<Partial<DeHubUser> & { address: string }> = [
+    { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' },
+    { address: '0x7777777777777777777777777777777777777772', username: 'xluna', displayName: 'Luna' },
+    { address: '0x7777777777777777777777777777777777777773', username: 'deepwater', displayName: 'Deep Water' },
+  ];
+  const at = new Date().toISOString();
+  const sums: ChatReactionSummary[] = [
+    { total: 1 + extra, emojis: [{ emoji: '❤️', count: 1 + extra }], last: { emoji: '❤️', by: people[0].address, name: 'Ella Verse', messageId: 'g1', at } },
+    { total: 4, emojis: [{ emoji: '😂', count: 2 }, { emoji: '🔥', count: 1 }, { emoji: '👍', count: 1 }], last: { emoji: '😂', by: people[1].address, name: 'Luna', messageId: 'g2', at } },
+    { total: 3, emojis: [{ emoji: '🔥', count: 3 }], last: { emoji: '🔥', by: people[2].address, name: 'Deep Water', messageId: 'g3', at } },
+  ];
+  const rows = people.map((user, i) => ({
+    id: `gallery-react-${i}`,
+    participants: [user as DeHubUser],
+    otherUser: user as DeHubUser,
+    unreadCount: 0,
+    createdAt: now,
+    updatedAt: now,
+    lastMessage: { id: `gallery-react-msg-${i}`, conversationId: `gallery-react-${i}`, sender: user as DeHubUser, content: 'See you on the stream tonight', createdAt: now } as DeHubDMMessage,
+  }));
+  const noop = () => {};
+  return (
+    <section data-page-bento data-reaction-rows-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04]">
+      <div className="flex items-center justify-between px-4 pt-4">
+        <h2 className="text-sm font-semibold">Messages: new reactions</h2>
+        <button type="button" data-land-row-reaction onClick={() => setExtra((n) => n + 1)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Land a reaction</button>
+      </div>
+      {rows.map((c, i) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} reactions={sums[i]} />
+      ))}
+    </section>
+  );
+}
+
 /** Name badges in the Messages list: badge on the name's baseline, then the dot. */
 function NameBadgesGallery() {
   const now = new Date(Date.now() - 2 * 3600_000).toISOString();
@@ -2212,6 +2255,7 @@ export default function StateGalleryPage() {
         <ComicGallery />
         <UsernameReserveGallery />
 
+        <ReactionRowsGallery />
         <NameBadgesGallery />
         <FullScreenChatGallery />
         <MessageMenuGallery />
