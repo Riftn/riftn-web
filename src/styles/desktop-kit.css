@@ -90,6 +90,24 @@
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) :is([data-kit-body], [data-kit-body] [data-feed-swallow-content]) > :not([data-kit-section]):not([data-kit-flat-skip]) [data-kit-section],
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] :is([data-kit-body], [data-kit-body] [data-feed-swallow-content]) > :not([data-kit-section]):not([data-kit-flat-skip]) [data-kit-section] { padding-left: 0 !important; padding-right: 0 !important; }
 
+  /* Affiliate has no header: its invite card starts on the top row and sits on the column like every other box */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-cached-page='affiliate'] [data-kit-body] { padding-top: 8px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-cached-page='affiliate'] [data-feed-swallow-content] > .rounded-3xl { border-radius: var(--dk-panel) !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-cached-page='affiliate'] [data-feed-swallow-content] > :is(.rounded-3xl, .rounded-lg.border),
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-cached-page='affiliate'] [data-feed-swallow-content] > :is(.rounded-3xl, .rounded-lg.border) {
+    margin-left: var(--dk-pad) !important;
+    margin-right: var(--dk-pad) !important;
+    padding: 0 !important;
+    border-radius: var(--dk-panel) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-cached-page='affiliate'] [data-feed-swallow-content] > * + *,
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-cached-page='affiliate'] [data-feed-swallow-content] > * + * { margin-top: var(--dk-pad) !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-cached-page='affiliate'] [data-feed-swallow-content] > .rounded-lg.border,
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-cached-page='affiliate'] [data-feed-swallow-content] > .rounded-lg.border { box-shadow: inset 0 0 0 1px var(--g-post-line) !important; }
+
+  /* pages laid out by hand in a centred column (Import a video, a bounty) start on the column edge too */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) [data-main-panel] > .max-w-3xl.mx-auto.px-4 { padding-left: var(--dk-pad) !important; padding-right: var(--dk-pad) !important; }
+
   /* ===== Glass tokens ===== */
   html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):where(:not([data-theme='minimal'],[data-theme='light'],[data-theme='war'],[data-theme='jungle'])) {
     --g-pane: linear-gradient(180deg, rgb(255 255 255 / 0.085), rgb(255 255 255 / 0.04));
@@ -256,6 +274,26 @@
     box-shadow: var(--g-pane-edge) !important;
     -webkit-backdrop-filter: var(--g-blur) !important;
     backdrop-filter: var(--g-blur) !important;
+    border-radius: var(--dk-panel) !important;
+    padding: var(--dk-pad) !important;
+  }
+
+  /* hand-built page boxes (Requests composer and builders board, Migrate steps, Buy) are flat on System:
+     they get the same thin line box as posts, with the kit padding */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-feed-swallow-content] section[data-page-bento]:not([data-feed-item]):not([data-kit-section]),
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-feed-swallow-content] section[data-page-bento]:not([data-feed-item]):not([data-kit-section]) {
+    box-shadow: inset 0 0 0 1px var(--g-post-line) !important;
+    border-radius: var(--dk-panel) !important;
+    padding: var(--dk-pad) !important;
+  }
+
+  /* Apps: the page wrappers are not posts, and every app tile is the same thin line box */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-kit-body] [data-feed-swallow-content] > :is(div, section)[data-feed-item],
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-kit-body] [data-feed-swallow-content] > :is(div, section)[data-feed-item] { box-shadow: none !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):is([data-theme='system']:not([data-system-tone='light']),[data-theme='immersive']) [data-kit-body] [data-feed-item] > .grid > a:is([data-kit-section], [data-feed-item]),
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)[data-theme='system'][data-system-tone='light'] [data-kit-body] [data-feed-item] > .grid > a:is([data-kit-section], [data-feed-item]) {
+    box-shadow: inset 0 0 0 1px var(--g-post-line) !important;
+    border: 0 !important;
     border-radius: var(--dk-panel) !important;
     padding: var(--dk-pad) !important;
   }
