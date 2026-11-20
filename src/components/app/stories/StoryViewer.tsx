@@ -21,6 +21,7 @@ import Close from '@/components/ui/cut-icons/close';
 import More from '@/components/ui/cut-icons/more';
 import Send from '@/components/ui/cut-icons/send';
 import ShareIcon from '@/components/ui/cut-icons/feedshare';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Music from '@/components/ui/cut-icons/music';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
@@ -684,7 +685,7 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
     <div>
       <div className="flex items-center gap-3 text-[14px] font-semibold">
         <span className="inline-flex items-center gap-1.5"><Eye className="w-4 h-4" />{formatCount(counts.views)}</span>
-        <span className="inline-flex items-center gap-1.5"><Heart className="w-4 h-4 fill-current text-[rgb(255_92_120)]" />{formatCount(counts.likes)}</span>
+        <span className="inline-flex items-center gap-1.5"><Heart data-sv-heart className="w-4 h-4 fill-current" />{formatCount(counts.likes)}</span>
         <button type="button" className="ml-auto grid size-11 place-items-center rounded-full hover:bg-white/10" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
           <Close className="size-[18px]" />
         </button>
@@ -697,14 +698,18 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
         <div className="flex flex-col">
           {rows.map(v => {
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
+            const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
               <button key={v.address} type="button" className="flex items-center gap-3 py-2 text-left" onClick={() => onOpen(v.address)}>
-                {face ? <img src={face} alt="" className="w-9 h-9 rounded-full object-cover" /> : <span className="w-9 h-9 rounded-full bg-white/20" />}
+                <Avatar className="size-9">
+                  {face && <AvatarImage src={face} alt="" className="object-cover" />}
+                  <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
+                </Avatar>
                 <span className="flex-1 min-w-0">
-                  <span className="block text-[14px] font-medium truncate">{v.displayName || v.username || v.address.slice(0, 8)}</span>
+                  <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>
-                {v.liked && <Heart className="w-4 h-4 fill-current text-[rgb(255_92_120)]" />}
+                {v.liked && <Heart data-sv-heart className="w-4 h-4 fill-current" />}
               </button>
             );
           })}

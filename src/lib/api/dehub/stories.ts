@@ -87,7 +87,7 @@ export interface StoryViewer extends StoryAuthor {
   viewedAt: string;
 }
 
-export function getStoryShelf(): Promise<{ shelf: ShelfEntry[]; signedIn: boolean }> {
+export function getStoryShelf(): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; supportsCustomLifetime?: boolean }> {
   return apiCall('/api/stories/shelf');
 }
 

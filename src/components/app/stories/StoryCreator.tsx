@@ -24,7 +24,7 @@ import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
 import { getMediaUrl } from '@/lib/api/dehub/core';
-import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
+import { useRefreshStoryShelf, useStoryShelf } from '@/hooks/use-story-shelf';
 import type { StoryRemixSource } from '@/store/storiesStore';
 import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
 import { shareMoment } from './story-upload';
@@ -41,6 +41,7 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
+  const customLifetime = useStoryShelf().data?.supportsCustomLifetime === true;
   const [media, setMedia] = useState<Media | null>(null);
   const remixLabel = remixSource ? t('stories.remixing', { name: remixSource.name, defaultValue: "Remixing {{name}}'s moment" }) : undefined;
 
@@ -57,6 +58,7 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
           media={media}
           remixSourceId={remixSource?.id}
           remixLabel={remixLabel}
+          customLifetime={customLifetime}
           onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
           onClose={onClose}
           onShared={() => refreshShelf()}
@@ -252,13 +254,14 @@ function useStageBox(ref: React.RefObject<HTMLDivElement>) {
   return box;
 }
 
-function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }: {
+function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime }: {
   media: Media;
   onBack: () => void;
   onClose: () => void;
   onShared: () => void;
   remixSourceId?: string;
   remixLabel?: string;
+  customLifetime: boolean;
 }) {
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
@@ -438,7 +441,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
           };
         }
       }
-      const fields = { audience, expiresInHours: lifetime, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
+      const fields = { audience, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -461,7 +464,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, customLifetime, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -553,9 +556,11 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
             {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
             {audience === 'everyone' ? t('stories.everyone', { defaultValue: 'Everyone' }) : t('stories.followersOnly', { defaultValue: 'Followers' })}
           </button>
-          <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool('lifetime')} aria-label={`${lifetimeLabel}, ${lifetime}h`}>
-            {lifetime}h
-          </button>
+          {customLifetime ? (
+            <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool('lifetime')} aria-label={`${lifetimeLabel}, ${lifetime}h`}>
+              {lifetime}h
+            </button>
+          ) : <span data-sc-chip data-st-dark-glass>24h</span>}
           <button type="button" data-sc-share onClick={share} disabled={busy}>
             {t('stories.share', { defaultValue: 'Share' })}
           </button>
