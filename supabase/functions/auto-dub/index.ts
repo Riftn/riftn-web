@@ -391,10 +391,13 @@ async function request(db: any, body: any, worker: WorkerConfig, signedIn: boole
   // made; only a signed-in viewer can ask for a new one. Players speak the
   // words on-device in the meantime.
   if (!signedIn) {
-    const { data: made } = await db.from('video_dubs').select('status, audio_url, provider')
+    const { data: made } = await db.from('video_dubs').select('status, audio_url, provider, last_attempt_at')
       .eq('transcript_id', t.id).eq('language', lang).maybeSingle();
     if (made?.status === 'ready' && made.provider === PROVIDER) return json({ ok: true, status: 'ready', audioUrl: made.audio_url });
-    return json({ ok: true, status: made?.status === 'processing' ? 'processing' : 'unavailable' });
+    // A dub somebody signed in already asked for is on its way for everyone:
+    // rendering, or waiting in the line.
+    const coming = made?.status === 'processing' || (made?.status === 'pending' && !!made.last_attempt_at);
+    return json({ ok: true, status: coming ? made.status : 'unavailable' });
   }
   await db.from('video_dubs')
     .upsert({ transcript_id: t.id, language: lang }, { onConflict: 'transcript_id,language', ignoreDuplicates: true });
@@ -423,8 +426,12 @@ async function complete(db: any, body: any, worker: WorkerConfig) {
   if (!dubId || !jobId) return json({ error: 'dubId and jobId required' }, 400);
   const expectedPath = `${dubId}/${jobId}.m4a`;
   const row = await currentAttempt(db, dubId, jobId);
-  // Not this row's current attempt: a newer one replaced it. Nothing to save.
-  if (!row) return json({ ok: true });
+  // Not this row's current attempt: a newer one replaced it. Nothing to save,
+  // but the worker is free again.
+  if (!row) {
+    drainSoon(db, worker);
+    return json({ ok: true });
+  }
 
   if (body?.ok === true && typeof body?.path === 'string') {
     if (body.path !== expectedPath) return json({ error: 'unexpected audio path' }, 400);
