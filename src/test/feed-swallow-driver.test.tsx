@@ -90,6 +90,16 @@ it('lets the scroll timeline own fast scrolling and cancels it on unmount', () =
   expect(content.dataset.feedSwallowDriver).toBeUndefined();
 });
 
+it('ends the timeline at the real scroll range once phone toolbars hide', () => {
+  // Hidden toolbars make the window taller than clientHeight and the page's
+  // scroll range shorter. Keyframes sized from clientHeight overshot, and on a
+  // short profile the cut dropped well below the pinned tab pill.
+  vi.stubGlobal('innerHeight', 896);
+  const { animate } = fixture(true);
+  const frames = animate.mock.calls[0][0] as Keyframe[];
+  expect(frames[frames.length - 1]?.transform).toBe('translateY(11104px)');
+});
+
 it('keeps content that starts below the cut line, as a profile grid does', () => {
   // The tab bar pins near the top while the grid starts far below it, so the
   // layer lifts by a negative shift. It must grow by the same distance, or its
