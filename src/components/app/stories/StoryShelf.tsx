@@ -57,7 +57,7 @@ export function StoryShelf() {
   const addMoment = () => (isAuthenticated ? openCreator() : openLoginModal());
 
   return (
-    <div data-stories data-story-shelf role="list">
+    <div data-stories data-story-shelf data-no-swipe role="list">
       {isAuthenticated && (
         <MeTile
           address={walletAddress ?? ''}
