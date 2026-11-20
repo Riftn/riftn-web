@@ -1,5 +1,6 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useSwipeReply } from '@/hooks/use-swipe-reply';
+import { useDoubleTap } from '@/hooks/use-double-tap';
 import { dblClickReply } from '@/lib/dblclick-reply';
 import { useTranslation as _useCopy, Trans } from 'react-i18next';
 import { useDraftState } from '@/hooks/use-draft-state';
@@ -520,6 +521,7 @@ const MessageBubble = memo(function MessageBubble({
   onDiscardSend,
   cozy,
   callPeerAddress,
+  allowDoubleTapLike = true,
   selecting = false,
   picked = false,
   onTogglePick,
@@ -551,6 +553,7 @@ const MessageBubble = memo(function MessageBubble({
   onCopyLink?: (message: DmMessage) => void;
   /** The other person in a one-to-one chat, so a call card can call them back. */
   callPeerAddress?: string;
+  allowDoubleTapLike?: boolean;
   /** Set in the cozy layout: where this bubble sits in its sender's run. */
   cozy?: CozyGroupPos;
   highlightText?: string;
@@ -768,6 +771,11 @@ const MessageBubble = memo(function MessageBubble({
   const myReactions = viewer
     ? Object.entries(message.reactions ?? {}).filter(([, who]) => who?.some((a) => a.toLowerCase() === viewer)).map(([emoji]) => emoji)
     : [];
+  const canDoubleTap = allowDoubleTapLike && !!viewer && !!onReact && menuable && !selecting && !isOwnMessage
+    && message.msgType === 'msg' && !message.undecryptable && !!textContent.trim();
+  const doubleTap = useDoubleTap(canDoubleTap ? () => {
+    if (!myReactions.includes('❤️')) onReact(message._id, '❤️');
+  } : undefined);
   const toggleReact = (emoji: string) => {
     if (myReactions.includes(emoji)) onRemoveReaction?.(message._id, emoji);
     else onReact?.(message._id, emoji);
@@ -1022,6 +1030,8 @@ const MessageBubble = memo(function MessageBubble({
         {/* Regular message bubble */}
         {message.msgType !== 'tip' && !(message.msgType === 'poll' && message.poll) && !message.isDeleted && (
           <div
+            {...doubleTap}
+            style={canDoubleTap ? { touchAction: 'manipulation' } : undefined}
             /* Mine vs theirs is carried by fill-vs-outline rather than by a
                glass stack: a filled block with no border for own messages, a
                hairline block with no fill for theirs. Geometry matches the
@@ -3073,6 +3083,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         onRetrySend={handleRetrySend}
         onDiscardSend={handleDiscardSend}
         callPeerAddress={isGroupChat ? undefined : otherUser?.address}
+        allowDoubleTapLike={!isGroupChat}
         selecting={pickedMsgs !== null}
         picked={!!pickedMsgs?.has(message._id)}
         onTogglePick={togglePick}

@@ -147,7 +147,7 @@ function BuilderRow({ b, rank, max, open, onToggle, mine }: { b: TopBuilder; ran
               <span className="truncate">{mine ? t('features.topBuilders.you', 'You') : displayName(b)}</span>
               {b.username && <BadgeIcon username={b.username} lookupId={b.wallet} className="w-[1em] h-[1em] shrink-0" />}
             </span>
-            <span className="tabular-nums">{formatCount(b.points)}</span>
+            <span className="shrink-0 tabular-nums" title={b.points.toLocaleString()}>{open ? b.points.toLocaleString() : formatCount(b.points)}</span>
           </span>
           <ScoreBar builder={b} max={max} />
           {open && <Breakdown b={b} />}

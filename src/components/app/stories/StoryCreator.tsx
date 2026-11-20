@@ -559,7 +559,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel }:
       )}
 
       {tool === 'text' && editingLayer && (
-        <div data-sc-panel data-st-dark-glass onPointerDown={e => e.stopPropagation()}>
+        <div data-sc-panel data-sc-text-panel onPointerDown={e => e.stopPropagation()}>
           <textarea
             autoFocus
             value={editingLayer.text}

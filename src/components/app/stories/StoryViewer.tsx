@@ -11,7 +11,7 @@
  * direct message; likes and views show only to the owner. Your own moments
  * show who watched instead of a reply bar.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -233,11 +233,13 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   }, []);
 
   // ── Touch: tap, hold, swipe ───────────────────────────────────────
-  const press = useRef<{ x: number; y: number; t: number; timer: number } | null>(null);
+  const press = useRef<{ x: number; y: number; t: number; timer: number; onViewers: boolean } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
-    if (sheet || openingOriginal || (e.target as Element).closest('button, input, a')) return;
+    if (sheet || openingOriginal || typing || !e.isPrimary || e.button !== 0
+      || (e.target as Element).closest('button:not([data-sv-viewers-trigger]), input, a')) return;
     const timer = window.setTimeout(() => setHeld(true), HOLD_MS);
-    press.current = { x: e.clientX, y: e.clientY, t: performance.now(), timer };
+    press.current = { x: e.clientX, y: e.clientY, t: performance.now(), timer,
+      onViewers: !!(e.target as Element).closest('[data-sv-viewers-trigger]') };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const p = press.current;
@@ -259,9 +261,13 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     const wasHold = held;
     setHeld(false);
     setDrag(null);
-    if (dy > 110 && Math.abs(dy) > Math.abs(dx)) return close();
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 90) {
+      if (dy > 0) close();
+      else if (own) setSheet('viewers');
+      return;
+    }
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) return goAuthor(dx < 0 ? 1 : -1);
-    if (wasHold || performance.now() - p.t > HOLD_MS) return;
+    if (p.onViewers || wasHold || performance.now() - p.t > HOLD_MS || Math.abs(dx) > 10 || Math.abs(dy) > 10) return;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const page = (e.currentTarget as HTMLElement).querySelector('[data-sv-page]')?.getBoundingClientRect() ?? rect;
     const rel = (e.clientX - page.left) / page.width;
@@ -507,9 +513,9 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           </div>
         )}
 
-        <div data-sv-reply>
+        <div data-sv-reply style={sheet ? { visibility: 'hidden' } : undefined}>
           {own ? (
-            <button type="button" data-st-dark-glass className="h-11 rounded-full px-4 inline-flex items-center gap-2 text-[14px] font-semibold" onClick={() => setSheet('viewers')}>
+            <button type="button" data-sv-viewers-trigger data-st-dark-glass className="h-11 rounded-full px-4 inline-flex items-center gap-2 text-[14px] font-semibold" onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-[18px] h-[18px]" />
               {formatCount(item.viewCount ?? 0)}
               {(item.likeCount ?? 0) > 0 && (<><Heart className="w-4 h-4 ml-1.5 fill-current text-[rgb(255_92_120)]" />{formatCount(item.likeCount ?? 0)}</>)}
@@ -546,8 +552,8 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
 
         {sheet && (
           <div data-sv-sheet-backdrop onClick={dismissSheet}>
-            <div ref={sheetRef} data-sv-sheet data-st-glass onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
-              {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} />}
+            <div ref={sheetRef} data-sv-sheet onClick={e => e.stopPropagation()}>
+              {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} onClose={dismissSheet} />}
               {sheet === 'more' && (
                 <div className="flex flex-col">
                   {shareable && (
@@ -619,7 +625,7 @@ function SheetButton({ children, onClick, danger }: { children: React.ReactNode;
   );
 }
 
-function ViewersList({ item, onOpen }: { item: StoryItem; onOpen: (address: string) => void }) {
+function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (address: string) => void; onClose: () => void }) {
   const { t } = useTranslation();
   const [rows, setRows] = useState<StoryViewerRow[] | null>(null);
   const [next, setNext] = useState<string | null>(null);
@@ -644,16 +650,15 @@ function ViewersList({ item, onOpen }: { item: StoryItem; onOpen: (address: stri
     setNext(r.next);
   };
 
-  const header = useMemo(() => (
-    <div className="flex items-center gap-3 mb-3 text-[14px] font-semibold">
-      <span className="inline-flex items-center gap-1.5"><Eye className="w-4 h-4" />{formatCount(counts.views)}</span>
-      <span className="inline-flex items-center gap-1.5"><Heart className="w-4 h-4 fill-current text-[rgb(255_92_120)]" />{formatCount(counts.likes)}</span>
-    </div>
-  ), [counts]);
-
   return (
     <div>
-      {header}
+      <div className="flex items-center gap-3 text-[14px] font-semibold">
+        <span className="inline-flex items-center gap-1.5"><Eye className="w-4 h-4" />{formatCount(counts.views)}</span>
+        <span className="inline-flex items-center gap-1.5"><Heart className="w-4 h-4 fill-current text-[rgb(255_92_120)]" />{formatCount(counts.likes)}</span>
+        <button type="button" className="ml-auto grid size-11 place-items-center rounded-full hover:bg-white/10" onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}>
+          <Close className="size-[18px]" />
+        </button>
+      </div>
       {rows === null ? (
         <div className="py-6 grid place-items-center"><Loader2 className="w-5 h-5 animate-spin opacity-70" /></div>
       ) : rows.length === 0 ? (
