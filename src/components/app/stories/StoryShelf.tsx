@@ -175,10 +175,10 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
     >
       <span data-st-bg data-blur style={bg(faceBroken ? null : face)} />
       <span data-st-shade />
-      {!entry.seen && <span data-st-ring />}
+      <span data-st-ring />
       <span data-st-time>{ageLabel(latest?.createdAt)}</span>
       {face && !faceBroken ? <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-avatar />}
-      <span data-st-label className="px-2 truncate">{nameOf(a)}</span>
+      <span data-st-label className="px-2 truncate">{a.username ? `@${a.username}` : nameOf(a)}</span>
     </button>
   );
 }
