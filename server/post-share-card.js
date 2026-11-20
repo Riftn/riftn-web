@@ -169,10 +169,13 @@ function textWidth(text, size) {
     : /[MW@%]/.test(c) ? .94 : c.codePointAt(0) > 0x2fff ? 1 : /[A-Z]/.test(c) ? .7 : .58) * size, 0);
 }
 
+// The card fonts have no emoji, which would draw as empty boxes.
+const EMOJI = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{1F3FB}-\u{1F3FF}\u200d\ufe0f\u20e3]/gu;
+
 export function wrapPostText(text, size, width, maxLines) {
   const lines = [];
   let line = '';
-  for (const word of String(text).split(/(\s+)/u)) {
+  for (const word of String(text).replace(EMOJI, (c) => '©®™'.includes(c) ? c : '').replace(/[ \t]{2,}/g, ' ').split(/(\s+)/u)) {
     if (word.includes('\n')) { if (line.trim()) lines.push(line.trim()); line = ''; continue; }
     if (!word.trim()) { if (line) line += ' '; continue; }
     if (line && textWidth(line + word, size) > width) { lines.push(line.trim()); line = ''; }

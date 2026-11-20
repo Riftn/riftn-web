@@ -51,3 +51,8 @@ test('renders every kind as a 1200 by 630 PNG with escaped text', async () => {
     } finally { image.free(); renderer.free(); }
   }
 });
+
+test('emoji the card fonts cannot draw are left out', async () => {
+  const { wrapPostText } = await import('./post-share-card.js');
+  assert.deepEqual(wrapPostText('fight like real men 🥊🇬🇧 now 👍🏽 ©', 26, 720, 2), ['fight like real men now ©']);
+});
