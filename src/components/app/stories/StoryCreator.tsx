@@ -22,9 +22,10 @@ import type { AttachedSound } from '@/features/post/hooks/usePostSound';
 import { soundWindow } from '@/lib/sound-window';
 import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
-import { STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
+import { getStoryShelf, STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
 import { getMediaUrl } from '@/lib/api/dehub/core';
-import { useRefreshStoryShelf, useStoryShelf } from '@/hooks/use-story-shelf';
+import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
+import { useQuery } from '@tanstack/react-query';
 import type { StoryRemixSource } from '@/store/storiesStore';
 import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
 import { shareMoment } from './story-upload';
@@ -41,7 +42,12 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
-  const customLifetime = useStoryShelf().data?.supportsCustomLifetime === true;
+  const { data: customLifetime = false } = useQuery({
+    queryKey: ['story-custom-lifetime'],
+    queryFn: async () => (await getStoryShelf('', false)).supportsCustomLifetime === true,
+    staleTime: 60_000,
+    retry: false,
+  });
   const [media, setMedia] = useState<Media | null>(null);
   const remixLabel = remixSource ? t('stories.remixing', { name: remixSource.name, defaultValue: "Remixing {{name}}'s moment" }) : undefined;
 
