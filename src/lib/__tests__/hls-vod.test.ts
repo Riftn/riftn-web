@@ -6,13 +6,14 @@ vi.mock('../logger', () => ({ logToBackend: vi.fn() }));
 const instances: FakeHls[] = [];
 let mseSupported = true;
 class FakeHls {
-  static Events = { MANIFEST_PARSED: 'hlsManifestParsed', ERROR: 'hlsError' };
+  static Events = { MANIFEST_PARSED: 'hlsManifestParsed', ERROR: 'hlsError', FRAG_BUFFERED: 'hlsFragBuffered' };
   static ErrorTypes = { MEDIA_ERROR: 'mediaError', NETWORK_ERROR: 'networkError' };
   static isSupported = () => mseSupported;
   config: Record<string, any>;
   handlers = new Map<string, (event: string, data?: any) => void>();
   source?: string;
   media?: HTMLVideoElement;
+  bandwidthEstimate = NaN;
   startLoad = vi.fn();
   stopLoad = vi.fn();
   destroy = vi.fn();
@@ -148,6 +149,57 @@ describe('hls-vod', () => {
     syncVideoLoad(el);
     expect(player.config.maxBufferLength).toBe(4);
     expect(player.startLoad).toHaveBeenCalledTimes(1);
+  });
+
+  describe('a ladder whose rungs cut at different instants', () => {
+    /** Records every seek the module makes on the element. */
+    function seekable(at: number) {
+      const el = video();
+      const seeks: number[] = [];
+      let now = at;
+      Object.defineProperty(el, 'currentTime', { configurable: true, get: () => now, set: (value: number) => { seeks.push(value); now = value; } });
+      Object.defineProperty(el, 'readyState', { configurable: true, get: () => 4 });
+      return { el, seeks, moveTo: (value: number) => { now = value; } };
+    }
+    const buffered = (player: FakeHls, level: number, start: number, end: number) =>
+      player.emit(FakeHls.Events.FRAG_BUFFERED, { frag: { type: 'main', sn: 1, level, start, end } });
+
+    it('restarts the picture from the new rung when its fragment replaces what is on screen', async () => {
+      const { el, seeks } = seekable(0);
+      setVideoSource(el, { src: MP4, hls: freshLadder(), startLow: true });
+      await flush();
+      const player = instances[0];
+      buffered(player, 0, 0, 4);
+      expect(seeks).toEqual([]);
+      // The full-size rung's first fragment runs from the start to 7.6 s.
+      buffered(player, 2, 0.07, 7.7);
+      expect(seeks).toEqual([0]);
+    });
+
+    it('leaves the picture alone when the new rung takes over ahead of it', async () => {
+      const { el, seeks, moveTo } = seekable(1);
+      setVideoSource(el, { src: MP4, hls: freshLadder(), startLow: true });
+      await flush();
+      const player = instances[0];
+      buffered(player, 0, 0, 4);
+      buffered(player, 0, 4, 8);
+      moveTo(5);
+      buffered(player, 2, 7.63, 15.97);
+      // Lined-up rungs and one rung throughout never seek either.
+      buffered(player, 1, 15.97, 24.3);
+      buffered(player, 1, 24.3, 32.6);
+      expect(seeks).toEqual([]);
+    });
+
+    it('starts the next video on the speed the last one measured', async () => {
+      setVideoSource(video(), { src: MP4, hls: freshLadder() });
+      await flush();
+      instances[0].bandwidthEstimate = 6_000_000;
+      buffered(instances[0], 0, 0, 4);
+      setVideoSource(video(), { src: MP4, hls: freshLadder() });
+      await flush();
+      expect(instances[1].config.abrEwmaDefaultEstimate).toBe(6_000_000);
+    });
   });
 
   it('never restarts the download when the same post is asked for again', async () => {

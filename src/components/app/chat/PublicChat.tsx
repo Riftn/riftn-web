@@ -659,9 +659,7 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
     void deleteMessage(messageId);
   }, [deleteMessage]);
 
-  const handleEditMessage = useCallback((messageId: string, content: string) => {
-    void editMessage(messageId, content);
-  }, [editMessage]);
+  const handleEditMessage = useCallback((messageId: string, content: string) => editMessage(messageId, content), [editMessage]);
 
   /*
    * Pinned line, Telegram style: a bar over the list, moderators pin and

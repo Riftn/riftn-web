@@ -1,6 +1,7 @@
 import { outsideImage } from '@/lib/outside-image';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useDraftState } from '@/hooks/use-draft-state';
+import { InPlaceEditField, editOnClick } from './InPlaceEdit';
+import { cn } from '@/lib/utils';
 import { useState, useCallback, useRef, memo } from 'react';
 import { toast } from 'sonner';
 import Copy from '@/components/ui/cut-icons/copy';
@@ -258,7 +259,7 @@ export const ChatMessage = memo(function ChatMessage({
   const queryClient = useQueryClient();
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useDraftState(`chat:edit:${message.id}`, message.content);
+  const [editCaret, setEditCaret] = useState<number | null>(null);
 
   const isMine = !!currentUserAddress && message.userId.toLowerCase() === currentUserAddress.toLowerCase();
   // Only the words are editable. A caption swap under an image or a voice note
@@ -266,19 +267,12 @@ export const ChatMessage = memo(function ChatMessage({
   const canEdit = isMine && !!onEdit && message.type === 'text';
   const canDelete = isMine && !!onDelete;
 
-  const startEditing = useCallback(() => {
-    setDraft.initialize(message.content);
+  const startEditing = useCallback((caret: number | null = null) => {
+    setEditCaret(caret);
     setIsEditing(true);
-  }, [message.content, setDraft]);
-
-  const commitEdit = useCallback(async () => {
-    const next = draft.trim();
-    if (!next) return;
-    try {
-      const result = next === message.content ? true : await onEdit?.(message.id, next);
-      if (result !== false && setDraft.complete(draft, draft)) setIsEditing(false);
-    } catch { /* Keep the edit available for retry. */ }
-  }, [draft, message.content, message.id, onEdit, setDraft]);
+  }, []);
+  const saveEdit = useCallback((next: string) => onEdit?.(message.id, next), [message.id, onEdit]);
+  const stopEditing = useCallback(() => setIsEditing(false), []);
   const {
     isTranslated,
     translatedText,
@@ -375,7 +369,7 @@ export const ChatMessage = memo(function ChatMessage({
       : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp },
   );
   if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
-  if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing });
+  if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing() });
   if ((canDelete || showActions) && onDelete) holdActions.push({ key: 'delete', destructive: true, secondary: true, icon: <Trash2 />, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
   if (showActions && !isMine && onBan) holdActions.push({ key: 'ban', destructive: true, secondary: true, icon: <ShieldBan />, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
   if (showActions && !isMine && onUnban) holdActions.push({ key: 'unban', secondary: true, icon: <ShieldCheck />, label: _copy('chatHold.unban', { defaultValue: 'Unban' }), onSelect: () => onUnban(message.userId, message.userName) });
@@ -395,7 +389,7 @@ export const ChatMessage = memo(function ChatMessage({
   };
   const menuActions: MessageMenuAction[] = [];
   if (onReply) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => onReply(message), hint: 'R' });
-  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: startEditing, hint: 'E' });
+  if (canEdit) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing(), hint: 'E' });
   if (showActions && onTogglePin) menuActions.push({ key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin, label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }), onSelect: () => onTogglePin(message), hint: 'P' });
   if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
   if (onCopyLink) menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message), hint: 'L' });
@@ -514,36 +508,24 @@ export const ChatMessage = memo(function ChatMessage({
         </div>
         
         {message.type === 'text' && isEditing && (
-          <div className="mt-1">
-            <textarea
-              autoFocus
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  commitEdit();
-                } else if (e.key === 'Escape') {
-                  e.preventDefault();
-                  setIsEditing(false);
-                }
-              }}
-              rows={2}
-              maxLength={500}
-              className="w-full resize-none rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1.5 text-sm text-white outline-none focus:border-white/30"
-            />
-            <div className="mt-1 flex items-center gap-2 text-[10px] text-zinc-500">
-              <button onClick={commitEdit} className="text-white hover:underline">{_copy("copy.1509f561f241", { defaultValue: "Save" })}</button>
-              <button onClick={() => setIsEditing(false)} className="hover:text-zinc-300">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</button>
-              <span className="hidden sm:inline">{_copy("copy.f9ddeccf9629", { defaultValue: "Enter to save · Esc to cancel" })}</span>
-            </div>
-          </div>
+          <InPlaceEditField
+            draftKey={`chat:edit:${message.id}`}
+            text={message.content}
+            caret={editCaret}
+            onSave={saveEdit}
+            onDone={stopEditing}
+            maxLength={500}
+            className="text-zinc-300 text-sm whitespace-pre-wrap"
+          />
         )}
 
         {message.type === 'text' && !isEditing && (
             <div>
               {chatDisplayText && (
-                <p className="text-zinc-300 text-sm break-words whitespace-pre-wrap">
+                <p
+                  className={cn("text-zinc-300 text-sm break-words whitespace-pre-wrap", canEdit && !isTranslated && "cursor-text")}
+                  onClick={canEdit && !isTranslated ? editOnClick((caret) => startEditing(chatDisplayText === message.content ? caret : null)) : undefined}
+                >
                   {renderTextWithLinks(chatDisplayText)}
                 </p>
               )}

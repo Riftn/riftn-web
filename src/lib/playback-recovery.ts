@@ -8,6 +8,9 @@ type Options = {
   timeoutMs?: number;
 };
 
+/** Interrupted play() calls answered by asking again before one counts as a failure. */
+const MAX_INTERRUPTED_PLAYS = 3;
+
 /** One reload per play intent. Leaving, pausing or changing source invalidates it. */
 export function createPlaybackRecovery(options: Options) {
   let phase: PlaybackPhase = 'idle';
@@ -17,6 +20,7 @@ export function createPlaybackRecovery(options: Options) {
   let startedAt = 0;
   let replacing = false;
   let recoveryReported = false;
+  let interrupted = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const clear = () => { clearTimeout(timer); timer = undefined; };
   const allowed = () => wanted && options.allowed();
@@ -60,6 +64,16 @@ export function createPlaybackRecovery(options: Options) {
           change('blocked');
           return;
         }
+        // The browser dropped this play() because the element was handed a
+        // new source (or paused) straight after it: a ladder attaching, the
+        // MP4 taking over from one. Nothing is wrong with the video, so it is
+        // asked to play again as it is. Reloading it here restarted the clip
+        // and spent the one retry a real stall would need later.
+        if (error?.name === 'AbortError' && interrupted < MAX_INTERRUPTED_PLAYS) {
+          interrupted++;
+          attempt(false);
+          return;
+        }
         fail(error?.name || 'play-rejected');
       });
     } catch {
@@ -90,6 +104,7 @@ export function createPlaybackRecovery(options: Options) {
     if (wanted || !options.allowed()) return;
     wanted = true;
     retries = 0;
+    interrupted = 0;
     recoveryReported = false;
     startedAt = Date.now();
     change('loading');

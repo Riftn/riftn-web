@@ -1,7 +1,7 @@
 import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { useDraftState } from '@/hooks/use-draft-state';
+import { InPlaceEditField, editOnClick } from '@/components/app/chat/InPlaceEdit';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
  * Live Post Chat Component
@@ -127,7 +127,7 @@ interface TranslateHandle {
  * right-click menu, so the line only says what happened — translating, or
  * translated with the way back.
  */
-function TranslatableChatMsg({ content, onHandle }: { content: string; onHandle: (handle: TranslateHandle | null) => void }) {
+function TranslatableChatMsg({ content, onHandle, onEditAt }: { content: string; onHandle: (handle: TranslateHandle | null) => void; onEditAt?: (caret: number | null) => void }) {
   const { t } = useI18n();
   const {
     isTranslated,
@@ -152,7 +152,11 @@ function TranslatableChatMsg({ content, onHandle }: { content: string; onHandle:
   return (
     <div>
       {shownText.trim() && (
-        <p className="text-sm text-zinc-300 break-words whitespace-pre-wrap">
+        // Your own words edit in place: click into them and type.
+        <p
+          className={cn("text-sm text-zinc-300 break-words whitespace-pre-wrap", onEditAt && !isTranslated && "cursor-text")}
+          onClick={onEditAt && !isTranslated ? editOnClick((caret) => onEditAt(shownText === content ? caret : null)) : undefined}
+        >
           {renderTextWithLinks(shownText)}
         </p>
       )}
@@ -248,16 +252,10 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   const [isPinning, setIsPinning] = useState(false);
   const [contextMenuMsg, setContextMenuMsg] = useState<SupabaseLiveChatMessage | null>(null);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
+  // Same as a Requests comment: the words become the field, a pause saves.
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editInitial, setEditInitial] = useState('');
-  const [editDraft, setEditDraft] = useDraftState(editingId ? `chat:edit:${editingId}` : null, editInitial);
-  const commitDraftEdit = async (id: string) => {
-    if (!editDraft.trim()) return;
-    try {
-      const result = await editMessage(id, editDraft);
-      if (result !== false && setEditDraft.complete(editDraft, editDraft)) setEditingId(current => current === id ? null : current);
-    } catch { /* Keep the edit available for retry. */ }
-  };
+  const [editCaret, setEditCaret] = useState<number | null>(null);
+  const stopEditing = useCallback(() => setEditingId(null), []);
 
 
   const mention = useMention({
@@ -423,15 +421,11 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     [walletAddress]
   );
 
-  const startEditing = useCallback((msg: SupabaseLiveChatMessage) => {
+  const startEditing = useCallback((msg: SupabaseLiveChatMessage, caret: number | null = null) => {
     setContextMenuMsg(null);
+    setEditCaret(caret);
     setEditingId(msg.id);
-    setEditInitial(msg.content || '');
-  }, [setEditDraft]);
-
-  const commitEdit = useCallback((msg: SupabaseLiveChatMessage) => {
-    void commitDraftEdit(msg.id);
-  }, [editDraft, editMessage, setEditDraft]);
+  }, []);
 
   const handleDeleteMessage = useCallback((msg: SupabaseLiveChatMessage) => {
     setContextMenuMsg(null);
@@ -790,29 +784,15 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       {isPinned && <Pin className="w-2.5 h-2.5 text-blue-400 fill-current shrink-0" />}
                     </div>
                     {editingId === msg.id ? (
-                      <div className="mt-0.5">
-                        <textarea
-                          autoFocus
-                          value={editDraft}
-                          onChange={(e) => setEditDraft(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              commitEdit(msg);
-                            } else if (e.key === 'Escape') {
-                              e.preventDefault();
-                              setEditingId(null);
-                            }
-                          }}
-                          rows={2}
-                          maxLength={500}
-                          className="w-full resize-none rounded-lg border border-white/15 bg-black/40 px-2 py-1 text-xs text-white outline-none focus:border-white/30"
-                        />
-                        <div className="mt-0.5 flex items-center gap-2 text-[10px] text-zinc-400">
-                          <button onClick={() => commitEdit(msg)} className="text-white hover:underline">{_copy("copy.1509f561f241", { defaultValue: "Save" })}</button>
-                          <button onClick={() => setEditingId(null)} className="hover:text-white">{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</button>
-                        </div>
-                      </div>
+                      <InPlaceEditField
+                        draftKey={`chat:edit:${msg.id}`}
+                        text={msg.content || ''}
+                        caret={editCaret}
+                        onSave={(next) => editMessage(msg.id, next)}
+                        onDone={stopEditing}
+                        maxLength={500}
+                        className="text-sm text-zinc-300 whitespace-pre-wrap"
+                      />
                     ) : (msg.message_type === 'audio' || msg.message_type === 'voice') && (msg.audio_url || msg.image_url) ? (
                       <div className="mt-1">
                         <VoiceWaveformPlayer src={msg.audio_url || msg.image_url || ''} />
@@ -822,7 +802,11 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                     ) : msg.message_type === 'gif' && (msg.image_url || msg.content) ? (
                       <img src={outsideImage(msg.image_url || msg.content)} alt="GIF" className="max-w-full max-h-20 rounded mt-0.5" />
                     ) : (
-                      <TranslatableChatMsg content={msg.content} onHandle={translateHandleFor(msg.id)} />
+                      <TranslatableChatMsg
+                        content={msg.content}
+                        onHandle={translateHandleFor(msg.id)}
+                        onEditAt={isMine(msg) && !msg.send_state && !msg.id.startsWith('temp-') ? (caret) => startEditing(msg, caret) : undefined}
+                      />
                     )}
                     <span className="text-[10px] text-zinc-600 mt-0.5 flex items-center gap-1.5">
                       {format(new Date(msg.created_at), 'HH:mm')}
