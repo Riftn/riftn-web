@@ -159,6 +159,7 @@ import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
 import { useLeftHanded } from '@/hooks/use-left-handed';
 import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNotificationsSetting';
 import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
+import { FeedSeparatorSetting } from '@/components/app/settings/FeedSeparatorSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
@@ -2805,6 +2806,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
               ]}
             />}
           />
+          <FeedSeparatorSetting />
           <MenuLayoutRow />
           <PublicChatBarRow />
           <DefaultFeedSetting />
