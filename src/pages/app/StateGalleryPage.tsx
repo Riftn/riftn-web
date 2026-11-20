@@ -432,7 +432,7 @@ function MessageMenuGallery() {
     { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
   ]);
   // Edits land on the line, so the in-place edit can be tried here.
-  const editLive = (id: string, content: string) => { setLive((rows) => rows.map((r) => (r.id === id ? { ...r, content, isEdited: true } : r))); return true; };
+  const editLive = (id: string, content: string) => { setLive((rows) => rows.map((r) => (r.id === id ? { ...r, content, isEdited: true } : r))); return Promise.resolve(true); };
   return (
     <section data-msg-menu-gallery className="mb-5 space-y-3">
       <h2 className="text-sm font-semibold">Message menu (right-click on a computer, hold on a phone)</h2>
