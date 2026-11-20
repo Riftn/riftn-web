@@ -208,6 +208,8 @@ interface CommunityChatProps {
   community: Community;
   membership: CommunityMember | null | undefined;
   isMember: boolean;
+  /** Membership is still being read: show neither the join prompt nor the message box yet. */
+  membershipLoading?: boolean;
   /** The chat is the tab on screen. Defaults to true for a chat shown on its own. */
   active?: boolean;
   /** Joins the community: the "join to chat" bar calls it. */
@@ -220,7 +222,7 @@ interface CommunityChatProps {
 /** History pages (50 lines each) a chat may pull in at open to reach where you left off. */
 const MAX_READ_SPOT_PAGES = 10;
 
-export function CommunityChat({ communityId, community, membership, isMember, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
+export function CommunityChat({ communityId, community, membership, isMember, membershipLoading = false, active = true, onJoin, joining, fill = false }: CommunityChatProps) {
   const { t: _copy } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/communities/CommunityChat.tsx:newMessage", '', communityId);
   const [replyTo, setReplyTo] = useDraftState<CommunityChatMessage | null>(`community:${communityId}:reply`, null);
@@ -1501,7 +1503,13 @@ export function CommunityChat({ communityId, community, membership, isMember, ac
       )}
 
       {/* Input area */}
-      {!isMember ? (
+      {!isMember && membershipLoading && isAuthenticated ? (
+        // Same height as the join bar, empty: a member must never see
+        // "Join this community" flash while their row is still loading.
+        <div className="px-1 py-3" data-composer-pending aria-hidden>
+          <div className="h-[46px]" />
+        </div>
+      ) : !isMember ? (
         <div className="px-1 py-3">
           <button
             onClick={() => {
