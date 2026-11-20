@@ -294,11 +294,13 @@
       "pronouns": "ضمیر",
       "location": "مقام",
       "custom": "کسٹم",
-      "customOption": "کسٹم لیبل"
+      "customOption": "کسٹم لیبل",
+      "cashapp": "Cash App"
     },
     "add": "فیلڈ جوڑو",
     "remove": "فیلڈ ہٹاؤ",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} فالو کرو",

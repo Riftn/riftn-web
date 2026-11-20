@@ -297,8 +297,10 @@
       "pronouns": "Voornaamwoorde",
       "location": "Ligging",
       "custom": "Pasmaak",
-      "customOption": "Pasmaak etiket"
-    }
+      "customOption": "Pasmaak etiket",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Volg #{{tag}}",

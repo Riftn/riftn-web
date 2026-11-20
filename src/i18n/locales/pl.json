@@ -297,8 +297,10 @@
       "pronouns": "Zaimki",
       "location": "Lokalizacja",
       "custom": "Niestandardowe",
-      "customOption": "Etykieta niestandardowa"
-    }
+      "customOption": "Etykieta niestandardowa",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Obserwuj #{{tag}}",

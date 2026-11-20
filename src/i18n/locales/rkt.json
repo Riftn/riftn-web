@@ -294,11 +294,13 @@
       "location": "স্থান",
       "custom": "কাস্টম",
       "customOption": "কাস্টম লেবেল",
-      "newsletter": "নিউজলেটার"
+      "newsletter": "নিউজলেটার",
+      "cashapp": "Cash App"
     },
     "add": "ফিল্ড যোগ করো",
     "remove": "ফিল্ড সরাও",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ফলো করেন",

@@ -296,9 +296,11 @@
       "pronouns": "സർവ്വനാമങ്ങൾ",
       "location": "സ്ഥലം",
       "custom": "ഇച്ഛാനുസൃത",
-      "customOption": "ഇഷ്‌ടാനുസൃത ലേബൽ"
+      "customOption": "ഇഷ്‌ടാനുസൃത ലേബൽ",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ഫോളോ ചെയ്യുക",

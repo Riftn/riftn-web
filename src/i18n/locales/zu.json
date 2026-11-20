@@ -297,8 +297,10 @@
       "pronouns": "Izinombolo zesithakazelo",
       "location": "Indawo",
       "custom": "Yesiko",
-      "customOption": "Ilebula lesiko"
-    }
+      "customOption": "Ilebula lesiko",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Landela i-#{{tag}}",

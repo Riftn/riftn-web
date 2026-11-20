@@ -372,8 +372,10 @@
       "pronouns": "Zamirler",
       "location": "Konum",
       "custom": "Özel",
-      "customOption": "Özel etiket"
-    }
+      "customOption": "Özel etiket",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} takip et",

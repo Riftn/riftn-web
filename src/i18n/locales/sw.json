@@ -295,10 +295,12 @@
       "pronouns": "Viwakilishi",
       "location": "Eneo",
       "custom": "Maalum",
-      "customOption": "Lebo mahususi"
+      "customOption": "Lebo mahususi",
+      "cashapp": "Cash App"
     },
     "add": "Ongeza sehemu",
-    "remove": "Ondoa sehemu"
+    "remove": "Ondoa sehemu",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Fuata #{{tag}}",

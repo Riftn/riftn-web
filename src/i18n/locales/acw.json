@@ -293,12 +293,14 @@
       "pronouns": "ضمائر",
       "location": "موقع",
       "custom": "مخصص",
-      "customOption": "تسمية مخصصة"
+      "customOption": "تسمية مخصصة",
+      "cashapp": "Cash App"
     },
     "add": "أضف حقل",
     "remove": "شيل الحقل",
     "placeholderLink": "yoursite.com",
-    "placeholderPronouns": "هو/هي"
+    "placeholderPronouns": "هو/هي",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "تابع #{{tag}}",

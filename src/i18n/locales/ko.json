@@ -296,9 +296,11 @@
       "pronouns": "대명사",
       "location": "위치",
       "custom": "사용자 지정",
-      "customOption": "사용자 지정 레이블"
+      "customOption": "사용자 지정 레이블",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} 팔로우",

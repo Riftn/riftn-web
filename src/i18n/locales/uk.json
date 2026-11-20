@@ -295,10 +295,12 @@
       "pronouns": "Займенники",
       "location": "Місцезнаходження",
       "custom": "Користувацький",
-      "customOption": "Користувацька мітка"
+      "customOption": "Користувацька мітка",
+      "cashapp": "Cash App"
     },
     "placeholderLink": "yoursite.com",
-    "placeholderPronouns": "він/його"
+    "placeholderPronouns": "він/його",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Підписатися на #{{tag}}",

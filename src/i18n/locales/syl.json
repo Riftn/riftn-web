@@ -294,11 +294,13 @@
       "pronouns": "প্রোনাউন",
       "location": "লোকেশন",
       "custom": "কাস্টম",
-      "customOption": "কাস্টম লেবেল"
+      "customOption": "কাস্টম লেবেল",
+      "cashapp": "Cash App"
     },
     "add": "ফিল্ড যোগ করো",
     "remove": "ফিল্ড সরাও",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ফলো করো",

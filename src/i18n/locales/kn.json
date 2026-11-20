@@ -297,8 +297,10 @@
       "pronouns": "ಸರ್ವನಾಮಗಳು",
       "location": "ಸ್ಥಳ",
       "custom": "ಕಸ್ಟಮ್",
-      "customOption": "ಕಸ್ಟಮ್ ಲೇಬಲ್"
-    }
+      "customOption": "ಕಸ್ಟಮ್ ಲೇಬಲ್",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ಫಾಲೋ ಮಾಡಿ",

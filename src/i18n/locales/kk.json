@@ -296,9 +296,11 @@
       "pronouns": "Дәйексөздер",
       "location": "Орналасқан жері",
       "custom": "Реттелетін",
-      "customOption": "Реттелетін жапсырма"
+      "customOption": "Реттелетін жапсырма",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "сайтыңыз.com"
+    "placeholderLink": "сайтыңыз.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} жазылу",

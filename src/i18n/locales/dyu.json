@@ -297,8 +297,10 @@
       "pronouns": "O kɔrɔ ko:",
       "location": "Yɔrɔ",
       "custom": "Fɛɛn minw ka teli ka kɛ",
-      "customOption": "Tɔgɔdafɛ tagamasiɲɛ"
-    }
+      "customOption": "Tɔgɔdafɛ tagamasiɲɛ",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} tugu",

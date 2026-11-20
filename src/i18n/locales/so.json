@@ -295,10 +295,12 @@
       "pronouns": "Pronouns",
       "location": "Goobta",
       "custom": "Custom",
-      "customOption": "Calaamad Custom"
+      "customOption": "Calaamad Custom",
+      "cashapp": "Cash App"
     },
     "add": "Ku dar goob",
-    "remove": "Ka saar goobta"
+    "remove": "Ka saar goobta",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Raac #{{tag}}",

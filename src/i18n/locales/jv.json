@@ -295,10 +295,12 @@
       "pronouns": "Kata Ganti",
       "location": "Lokasi",
       "custom": "Custom",
-      "customOption": "Siji label khusus"
+      "customOption": "Siji label khusus",
+      "cashapp": "Cash App"
     },
     "add": "Tambah kolom",
-    "remove": "Busak kolom"
+    "remove": "Busak kolom",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Tut #{{tag}}",

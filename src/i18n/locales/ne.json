@@ -297,8 +297,10 @@
       "pronouns": "सर्वनामहरू",
       "location": "स्थान",
       "custom": "अनुकूल",
-      "customOption": "अनुकूल लेबल"
-    }
+      "customOption": "अनुकूल लेबल",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} फलो गर्नुहोस्",

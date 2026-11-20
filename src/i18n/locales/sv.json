@@ -290,8 +290,10 @@
       "pronouns": "Pronomen",
       "location": "Plats",
       "custom": "Anpassad",
-      "customOption": "Anpassad etikett"
-    }
+      "customOption": "Anpassad etikett",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Följ #{{tag}}",

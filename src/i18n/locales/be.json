@@ -296,9 +296,11 @@
       "pronouns": "Займеннікі",
       "location": "Месцазнаходжанне",
       "custom": "Прыстасаваныя",
-      "customOption": "Індывідуальная пазнака"
+      "customOption": "Індывідуальная пазнака",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Падпісацца на #{{tag}}",

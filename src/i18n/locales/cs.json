@@ -290,8 +290,10 @@
       "pronouns": "Zájmena",
       "location": "Lokalita",
       "custom": "Vlastní",
-      "customOption": "Vlastní štítek"
-    }
+      "customOption": "Vlastní štítek",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Sledovat #{{tag}}",

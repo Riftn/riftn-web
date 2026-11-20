@@ -296,9 +296,11 @@
       "pronouns": "Местоимения",
       "location": "Местоположение",
       "custom": "Персонализирано",
-      "customOption": "Персонализиран етикет"
+      "customOption": "Персонализиран етикет",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Следвай #{{tag}}",

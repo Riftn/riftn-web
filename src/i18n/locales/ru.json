@@ -307,9 +307,11 @@
       "pronouns": "Местоимения",
       "location": "Местоположение",
       "custom": "Пользовательский",
-      "customOption": "Пользовательская метка"
+      "customOption": "Пользовательская метка",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Подписаться на #{{tag}}",

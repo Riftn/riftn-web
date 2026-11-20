@@ -296,9 +296,11 @@
       "pronouns": "பிரதிபெயர்கள்",
       "location": "இடம்",
       "custom": "தனிப்பயன்",
-      "customOption": "தனிப்பயன் லேபிள்"
+      "customOption": "தனிப்பயன் லேபிள்",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ஐப் பின்தொடர்",

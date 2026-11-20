@@ -290,8 +290,10 @@
       "pronouns": "Pronume",
       "location": "Poziție",
       "custom": "Personalizat",
-      "customOption": "Etichetă personalizată"
-    }
+      "customOption": "Etichetă personalizată",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Urmărește #{{tag}}",

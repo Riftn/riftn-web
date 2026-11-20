@@ -297,8 +297,10 @@
       "pronouns": "Pronomen",
       "location": "Ort",
       "custom": "Benutzerdefiniert",
-      "customOption": "Benutzerdefinierter Label"
-    }
+      "customOption": "Benutzerdefinierter Label",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} folge",

@@ -296,9 +296,11 @@
       "pronouns": "ڪائنات",
       "location": "جڳھ",
       "custom": "حسب ضرورت",
-      "customOption": "ڪسٽم ليبل"
+      "customOption": "ڪسٽم ليبل",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} فالو ڪريو",

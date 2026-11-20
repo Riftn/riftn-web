@@ -293,12 +293,14 @@
       "pronouns": "সর্বনাম",
       "location": "অবস্থান",
       "custom": "কাস্টম",
-      "customOption": "নিজর লেবেল"
+      "customOption": "নিজর লেবেল",
+      "cashapp": "Cash App"
     },
     "add": "ফিল্ড যোগ গরো",
     "remove": "ফিল্ড সরাও",
     "descriptionPresets": "ওয়েবসাইট, সর্বনাম বা আর যিছু যোগ গরো। লিংক তোঁয়ার সোশ্যালর লগে দেহা যাইবো।",
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ফলো গরো",

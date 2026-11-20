@@ -372,8 +372,10 @@
       "pronouns": "Pronoms",
       "location": "Emplacement",
       "custom": "Personnalisé",
-      "customOption": "Étiquette personnalisée"
-    }
+      "customOption": "Étiquette personnalisée",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Suivre #{{tag}}",

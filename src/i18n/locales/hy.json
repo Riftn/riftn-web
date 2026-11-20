@@ -297,8 +297,10 @@
       "pronouns": "Դերանուններ",
       "location": "Տեղադրություն",
       "custom": "Անհատականացված",
-      "customOption": "Անհատականացված պիտակ"
-    }
+      "customOption": "Անհատականացված պիտակ",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Հետևել #{{tag}}-ին",

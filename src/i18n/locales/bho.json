@@ -296,9 +296,11 @@
       "location": "ठिकाना, ठिक",
       "custom": "अनुकूलन",
       "customOption": "अनुकूलन चिह्न",
-      "pronouns": "सर्वनाम"
+      "pronouns": "सर्वनाम",
+      "cashapp": "Cash App"
     },
-    "placeholderLocation": "शहर, देश"
+    "placeholderLocation": "शहर, देश",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} फॉलो करीं",

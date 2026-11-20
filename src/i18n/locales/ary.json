@@ -296,9 +296,11 @@
       "pronouns": "الضمائر",
       "location": "الموقع",
       "custom": "مخصص",
-      "customOption": "تسمية مخصصة"
+      "customOption": "تسمية مخصصة",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "تبع #{{tag}}",

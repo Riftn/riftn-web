@@ -294,11 +294,13 @@
       "location": "جايى",
       "custom": "ئىختىيارىي",
       "customOption": "Custom label",
-      "podcast": "پودكاست"
+      "podcast": "پودكاست",
+      "cashapp": "Cash App"
     },
     "add": "ئۇچۇر بۆلىكى قوشۇش",
     "remove": "ئۇچۇر بۆلىكىنى ئۆچۈرۈش",
-    "needsLabel": "ھەر بىر ئىختىيارىي بۆلەككە ئىسىم بېرىڭ"
+    "needsLabel": "ھەر بىر ئىختىيارىي بۆلەككە ئىسىم بېرىڭ",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} گە ئەگىشىش",

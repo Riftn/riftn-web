@@ -297,8 +297,10 @@
       "pronouns": "Suti rantikuna",
       "location": "Tarikusqan",
       "custom": "Chullachasqa",
-      "customOption": "Etiqueta personalizada nisqa"
-    }
+      "customOption": "Etiqueta personalizada nisqa",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} qatiy",

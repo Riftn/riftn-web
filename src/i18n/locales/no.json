@@ -297,8 +297,10 @@
       "pronouns": "Pronomen",
       "location": "Sted",
       "custom": "Skikk",
-      "customOption": "Tilpasset etikett"
-    }
+      "customOption": "Tilpasset etikett",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Følg #{{tag}}",

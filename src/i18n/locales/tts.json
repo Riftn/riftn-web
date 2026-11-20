@@ -293,12 +293,14 @@
       "pronouns": "Pronouns",
       "location": "ที่ตั้ง",
       "custom": "กำหนดเอง",
-      "customOption": "ป้ายชื่อกำหนดเอง"
+      "customOption": "ป้ายชื่อกำหนดเอง",
+      "cashapp": "Cash App"
     },
     "add": "เพิ่มช่อง",
     "remove": "ลบช่อง",
     "descriptionPresets": "เพิ่มเว็บไซต์ สรรพนาม หรืออย่างอื่น ลิงก์สิแสดงพร้อมโซเชียลของเจ้า",
-    "needsLabel": "ใส่ป้ายชื่อให้แต่ละช่องที่กำหนดเอง"
+    "needsLabel": "ใส่ป้ายชื่อให้แต่ละช่องที่กำหนดเอง",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "ติดตาม #{{tag}}",

@@ -296,9 +296,11 @@
       "pronouns": "ການອາການການສະຖານ",
       "location": "ສະຖານທີ່",
       "custom": "ກຳນົດເອງ",
-      "customOption": "ປ້າຍກຳນົດເອງ"
+      "customOption": "ປ້າຍກຳນົດເອງ",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "ຕິດຕາມ #{{tag}}",

@@ -290,8 +290,10 @@
       "pronouns": "Pronombres",
       "location": "Ubicació",
       "custom": "Personalitzat",
-      "customOption": "Etiqueta personalitzada"
-    }
+      "customOption": "Etiqueta personalitzada",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Segueix #{{tag}}",

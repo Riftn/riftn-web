@@ -296,9 +296,11 @@
       "pronouns": "ክብርታት",
       "location": "ቦታ",
       "custom": "እተለምደ",
-      "customOption": "እተለምደ መርትዖ"
+      "customOption": "እተለምደ መርትዖ",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ተኸተል",

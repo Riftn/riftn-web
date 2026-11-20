@@ -297,8 +297,10 @@
       "pronouns": "Pronominit",
       "location": "Sijainti",
       "custom": "Mukautettu",
-      "customOption": "Mukautettu tunniste"
-    }
+      "customOption": "Mukautettu tunniste",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "Seuraa #{{tag}}",

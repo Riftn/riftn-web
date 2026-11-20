@@ -296,9 +296,11 @@
       "pronouns": "સર્વનામ",
       "location": "સ્થાન",
       "custom": "વૈવિધ્યપૂર્ણ",
-      "customOption": "કસ્ટમ લેબલ"
+      "customOption": "કસ્ટમ લેબલ",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} ફોલો કરો",

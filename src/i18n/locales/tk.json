@@ -297,8 +297,10 @@
       "pronouns": "Çykyşlar",
       "location": "Ýer",
       "custom": "Adat",
-      "customOption": "Özgür etiket"
-    }
+      "customOption": "Özgür etiket",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} yzarla",

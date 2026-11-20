@@ -297,8 +297,10 @@
       "pronouns": "प्रनाउन्स",
       "location": "जगह",
       "custom": "मनमाफिक",
-      "customOption": "मनमाफिक लेबल"
-    }
+      "customOption": "मनमाफिक लेबल",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} फॉलो करव",

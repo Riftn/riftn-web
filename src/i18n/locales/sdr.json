@@ -286,7 +286,8 @@
       "pronouns": "सर्वनाम",
       "location": "जगह",
       "customOption": "कस्टम लेबल",
-      "custom": "कस्टम"
+      "custom": "कस्टम",
+      "cashapp": "Cash App"
     },
     "content": "सामग्री",
     "title": "प्रोफाइल फील्ड",
@@ -298,7 +299,8 @@
     "failed": "ऊ सेव नी होलक। फिर से कोसिस करा।",
     "verified": "पक्का करल लिंक",
     "verifyHint": "लिंक पक्का करेक ले, ई के ओ पेज में जोड़ा, फिर से सेव करा: {{snippet}}",
-    "type": "फील्ड कर किसिम"
+    "type": "फील्ड कर किसिम",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "following": "फॉलोइंग",

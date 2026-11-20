@@ -297,8 +297,10 @@
       "pronouns": "Тахаллусҳо",
       "location": "Ҷойгиршавӣ",
       "custom": "Оддӣ",
-      "customOption": "ТамғаиМатн"
-    }
+      "customOption": "ТамғаиМатн",
+      "cashapp": "Cash App"
+    },
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}}-ро пайгирӣ кардан",

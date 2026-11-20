@@ -296,9 +296,11 @@
       "pronouns": "උච්චාරණ",
       "location": "ස්ථානය",
       "custom": "අභිරුචි",
-      "customOption": "අභිරුචි ලේබලය"
+      "customOption": "අභිරුචි ලේබලය",
+      "cashapp": "Cash App"
     },
-    "placeholderLink": "yoursite.com"
+    "placeholderLink": "yoursite.com",
+    "placeholderCashtag": "$cashtag"
   },
   "followedTags": {
     "follow": "#{{tag}} අනුගමනය කරන්න",
