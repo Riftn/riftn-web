@@ -184,7 +184,7 @@ export function useFeedSwallowClip(
       // that range is shorter; keyframes built from clientHeight then overshoot
       // and, on a short profile scrolled near its end, drop the cut a toolbar's
       // height below the pill.
-      const viewportHeight = source === document.scrollingElement ? Math.max(source.clientHeight, window.innerHeight) : source.clientHeight;
+      const viewportHeight = source === (document.scrollingElement || document.documentElement) ? Math.max(source.clientHeight, window.innerHeight) : source.clientHeight;
       const maxScroll = source.scrollHeight - viewportHeight;
       // The scrollport itself has a stationary clip; its descendants already
       // scroll within that cut on the compositor (including post overlays).
