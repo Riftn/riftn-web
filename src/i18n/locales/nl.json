@@ -21124,6 +21124,9 @@
     "footnote": "Tijden zijn in jouw tijdzone. Niemand ziet een bericht voordat het is verstuurd.",
     "footnoteNamed": "Tijden zijn in jouw tijdzone. {{name}} ziet een bericht pas als het is verstuurd.",
     "textOnly": "Voorlopig kunnen alleen tekstberichten worden ingepland.",
+    "whenOnline": "Als die persoon weer online is",
+    "whenOnlineHint": "Staat nu als verstuurd. Het komt aan zodra die persoon Riftn weer opent, en het vinkje wordt dubbel als het gelezen is.",
+    "whenOnlineTick": "Wacht tot die persoon online komt. Wordt twee vinkjes als het gelezen is.",
     "scheduledToast": "Gepland voor {{when}}",
     "failedToast": "Een gepland bericht kon niet worden verstuurd",
     "error": "Dat is niet gelukt. Probeer het opnieuw."

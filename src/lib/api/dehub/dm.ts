@@ -159,6 +159,8 @@ export interface DmMessage {
   destruct?: DmDestruct | null;
   paymentStatus: null | 'pending' | 'confirmed';
   paymentTxHash: string | null;
+  /** Sent "when they're next online". The sender's bubble shows an hourglass until it is read. */
+  whenOnline?: boolean;
   tipAmount: number | null;
   tipSymbol: string | null;
   /** Only set when msgType === 'poll'; votes are read from the poll itself. */
@@ -370,6 +372,7 @@ function parseDmMessage(raw: any, myAddress: string): DmMessage {
     destruct: raw.destruct && typeof raw.destruct === 'object' && raw.destruct.mode ? raw.destruct : null,
     paymentStatus: raw.paymentStatus ?? null,
     paymentTxHash: raw.paymentTxHash ?? null,
+    ...(raw.whenOnline === true && { whenOnline: true }),
     tipAmount: raw.tipAmount ?? null,
     tipSymbol: raw.tipSymbol ?? null,
     poll: raw.poll && typeof raw.poll.tokenId === 'number' ? { tokenId: raw.poll.tokenId, question: raw.poll.question || '' } : null,

@@ -20781,6 +20781,9 @@
     "footnote": "Times are in your time zone. Nobody sees a message until it is sent.",
     "footnoteNamed": "Times are in your time zone. {{name}} only sees a message once it is sent.",
     "textOnly": "Only text messages can be scheduled for now.",
+    "whenOnline": "When they're next online",
+    "whenOnlineHint": "Shows as sent now. It reaches them the next time they open Riftn, and the tick turns double when they read it.",
+    "whenOnlineTick": "Waiting for them to come online. Turns into two ticks when read.",
     "scheduledToast": "Scheduled for {{when}}",
     "failedToast": "A scheduled message could not be sent",
     "error": "That did not work. Try again."
