@@ -66,7 +66,7 @@ export function catchUpItem<T extends NotificationSource>(source: T, wallet: str
     source,
     sender,
     message: message.slice(0, 260),
-    preview: (message || source.content || type.replaceAll('_', ' ')).slice(0, 260),
+    preview: (message || source.content || type.replace(/_/g, ' ')).slice(0, 260),
     cleanup: reaction || acknowledgment,
     canClear: reaction || (fullText && !/[?？]/u.test(message) && postCommentTypes.has(type)),
     canNeedReply: !reaction && !acknowledgment,

@@ -2025,6 +2025,36 @@
     }
   },
   "notifications": {
+    "catchUp": {
+      "title": "Ponme al día",
+      "close": "Cerrar",
+      "scope": "Pregunta por tus 30 notificaciones sin leer más recientes. Usamos tu pregunta y las vistas previas para generar la respuesta.",
+      "placeholder": "Pregunta por tus notificaciones sin leer",
+      "ask": "Preguntar",
+      "pending": "Se marcarán {{count}} como leídas en 8 segundos.",
+      "undo": "Deshacer",
+      "working": "Procesando…",
+      "empty": "No tienes notificaciones sin leer en esta vista.",
+      "askError": "No se pudieron revisar tus notificaciones. Inténtalo de nuevo.",
+      "undone": "Limpieza deshecha.",
+      "writing": "Guardando cambios…",
+      "sent": "{{count}} enviadas · {{failed}} fallidas",
+      "cleared": "{{count}} marcadas como leídas · {{failed}} fallidas",
+      "drafts": "Revisar respuestas",
+      "remove": "Quitar",
+      "editReply": "Editar respuesta a {{name}}",
+      "send": "Enviar {{count}} respuestas",
+      "preview": "Vista previa de la limpieza",
+      "noCleanup": "No hay notificaciones de baja prioridad que limpiar.",
+      "markRead": "Marcar {{count}} como leídas",
+      "prompt": {
+        "summary": "Ponme al día",
+        "replies": "Requieren respuesta",
+        "urgent": "Urgentes",
+        "cleanup": "Limpiar notificaciones",
+        "drafts": "Preparar respuestas para todos"
+      }
+    },
     "coAuthorInvite": "{{name}} te invitó a ser coautor de su publicación",
     "coAuthorAccepted": "{{name}} ahora es coautor de tu publicación",
     "title": "Notificaciones",

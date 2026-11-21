@@ -2215,6 +2215,36 @@
     }
   },
   "notifications": {
+    "catchUp": {
+      "title": "Praat me bij",
+      "close": "Sluiten",
+      "scope": "Vraag naar je 30 meest recente ongelezen meldingen. Je vraag en de meldingsvoorbeelden worden gebruikt om het antwoord te maken.",
+      "placeholder": "Vraag naar ongelezen meldingen",
+      "ask": "Vragen",
+      "pending": "Over 8 seconden worden {{count}} meldingen als gelezen gemarkeerd.",
+      "undo": "Ongedaan maken",
+      "working": "Bezig…",
+      "empty": "Je hebt geen ongelezen meldingen in deze weergave.",
+      "askError": "Je meldingen konden niet worden bekeken. Probeer het opnieuw.",
+      "undone": "Opruimen ongedaan gemaakt.",
+      "writing": "Wijzigingen opslaan…",
+      "sent": "{{count}} verzonden · {{failed}} mislukt",
+      "cleared": "{{count}} gemarkeerd als gelezen · {{failed}} mislukt",
+      "drafts": "Antwoorden bekijken",
+      "remove": "Verwijderen",
+      "editReply": "Antwoord aan {{name}} bewerken",
+      "send": "{{count}} antwoorden versturen",
+      "preview": "Voorbeeld van opruimen",
+      "noCleanup": "Er zijn geen meldingen met lage prioriteit om op te ruimen.",
+      "markRead": "{{count}} markeren als gelezen",
+      "prompt": {
+        "summary": "Praat me bij",
+        "replies": "Moet worden beantwoord",
+        "urgent": "Dringend",
+        "cleanup": "Meldingen opruimen",
+        "drafts": "Antwoorden voor iedereen opstellen"
+      }
+    },
     "coAuthorInvite": "{{name}} heeft je uitgenodigd als co-auteur van hun post",
     "coAuthorAccepted": "{{name}} is nu co-auteur van je post",
     "title": "Meldingen",
