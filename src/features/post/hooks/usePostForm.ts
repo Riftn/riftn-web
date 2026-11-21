@@ -30,6 +30,7 @@ import { isSmartWalletSession } from '@/lib/connection-source';
 import { applyEditsToImageFile } from '@/lib/filters';
 import { startDraftImage, resolveDraftImages } from '../lib/draftImages';
 import { MEDIA_LIMITS } from '@/constants/post.constants';
+import { createVoiceRecorder, voiceRecordingBlob, voiceRecordingFile } from '@/lib/voice-recording';
 import { splitTitleFromText } from '@/features/post/lib/title-split';
 import { shrinkComicPages } from '@/lib/comic-pages';
 import type { ComicBorder } from '@/lib/comic-borders';
@@ -333,6 +334,7 @@ export function usePostForm(
   quotedPost?: DeHubNFT | null,
   /** The new post's token id, once the server has it (a duet links itself to its source here). */
   onPosted?: (tokenId: string) => void,
+  composerOpen = true,
 ): UsePostFormReturn {
   const { t: _copy } = _useCopy();
   const isQuoting = !!quotedPost;
@@ -685,7 +687,7 @@ export function usePostForm(
   const audioInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingRequest = useRef<symbol | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Computed values
@@ -1442,53 +1444,83 @@ export function usePostForm(
   }, [drafts, user?.address]);
 
   // Audio recording functions
+  useEffect(() => {
+    if (!composerOpen) {
+      setIsRecording(false);
+      setRecordingTime(0);
+    }
+    return () => {
+      recordingRequest.current = null;
+      const recorder = mediaRecorderRef.current;
+      mediaRecorderRef.current = null;
+      if (recorder) {
+        recorder.onstop = null;
+        recorder.onerror = null;
+        if (recorder.state !== 'inactive') recorder.stop();
+        recorder.stream.getTracks().forEach(track => track.stop());
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    };
+  }, [composerOpen]);
+
   const startRecording = useCallback(async () => {
+    if (recordingRequest.current || mediaRecorderRef.current) return;
+    const request = Symbol();
+    recordingRequest.current = request;
+    let stream: MediaStream | undefined;
+    const resetRecording = () => {
+      stream?.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current = null;
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setRecordingTime(0);
+      setIsRecording(false);
+    };
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (recordingRequest.current !== request) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      const mediaRecorder = createVoiceRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+      const chunks: Blob[] = [];
+      const startedAt = performance.now();
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+          chunks.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        resetRecording();
+        const audioBlob = voiceRecordingBlob(chunks, mediaRecorder.mimeType);
+        if (!audioBlob.size) return;
         const audioUrl = URL.createObjectURL(audioBlob);
-        
-        // Create audio element to get duration
-        const audioEl = new Audio(audioUrl);
-        audioEl.onloadedmetadata = () => {
-          const duration = Math.round(audioEl.duration);
-          
-          if (hasImage) {
-            // Add audio to all images
-            setMedia(prev => prev.map(m => 
-              m.type === 'image' ? { ...m, audio: { blob: audioBlob, url: audioUrl, duration } } : m
-            ));
-            toast.success(_copy("copy.57cc482b01a5", { defaultValue: "Audio added to images" }));
-          } else {
-            // Standalone audio post - create a File from the blob
-            const audioFile = new File([audioBlob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
-            setMedia(prev => [...prev, { file: audioFile, preview: audioUrl, type: 'audio', duration }]);
-            toast.success(_copy("copy.a1c44e01b157", { defaultValue: "Audio recorded" }));
-          }
-        };
-
-        // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
-
-        // Clear recording interval
-        if (recordingIntervalRef.current) {
-          clearInterval(recordingIntervalRef.current);
-          recordingIntervalRef.current = null;
+        // Live WebM recorders may write an indefinite metadata duration.
+        const duration = Math.max(1, Math.round((performance.now() - startedAt) / 1000));
+        if (hasImage) {
+          setMedia(prev => prev.map(m =>
+            m.type === 'image' ? { ...m, audio: { blob: audioBlob, url: audioUrl, duration } } : m
+          ));
+          toast.success(_copy("copy.57cc482b01a5", { defaultValue: "Audio added to images" }));
+        } else {
+          const file = voiceRecordingFile(audioBlob);
+          setMedia(prev => [...prev, { file, preview: audioUrl, type: 'audio', duration }]);
+          toast.success(_copy("copy.a1c44e01b157", { defaultValue: "Audio recorded" }));
         }
-        setRecordingTime(0);
       };
 
+      mediaRecorder.onerror = () => {
+        mediaRecorder.onstop = null;
+        resetRecording();
+      };
       mediaRecorder.start();
       setIsRecording(true);
 
@@ -1499,8 +1531,12 @@ export function usePostForm(
 
       toast.success(_copy("copy.be3f4838b198", { defaultValue: "Recording started" }));
     } catch (err) {
+      if (recordingRequest.current !== request) return;
+      resetRecording();
       console.error('Failed to start recording:', err);
       toast.error(_copy("copy.d82a155e3482", { defaultValue: "Could not access microphone. Please check permissions." }));
+    } finally {
+      if (recordingRequest.current === request) recordingRequest.current = null;
     }
   }, [hasImage, _copy]);
 
