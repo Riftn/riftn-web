@@ -717,12 +717,12 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
             const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
-              <button key={v.address} type="button" className="flex items-center gap-3 py-2 text-left" onClick={() => onOpen(v.address)}>
+              <button key={v.address} type="button" className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_1rem] items-center gap-3 py-2 text-start" onClick={() => onOpen(v.address)}>
                 <Avatar className="size-9">
                   {face && <AvatarImage src={face} alt="" className="object-cover" />}
                   <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="flex-1 min-w-0">
+                <span className="min-w-0 overflow-hidden">
                   <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>

@@ -102,7 +102,21 @@ export async function getLeaderboard(
     }
   };
 
-  const cached = await fetchCache();
+  if (sort === 'followers' && period !== 'all') {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await supabase.functions.invoke<LeaderboardResponse>('follower-rankings', { body: { period } });
+    if (data && !error) return data;
+    // During rollout older Supabase projects still expose the raw period row.
+    // Apply the same current account visibility check before rendering it.
+    const board = await fetchCache();
+    if (!board) throw error ?? new Error('Follower rankings are unavailable');
+    const { getAccountSummaries } = await import('./users');
+    const rows = board.result.byWalletBalance;
+    const profiles = await getAccountSummaries(rows.map(row => row.account));
+    const visible = new Set(profiles.filter(p => p.followerCountVisible === true && !p.isBanned).map(p => p.address.toLowerCase()));
+    return { ...board, result: { byWalletBalance: rows.filter(row => visible.has(row.account.toLowerCase())) } };
+  }
+  const cached = sort === 'followers' ? null : await fetchCache();
   if (cached) return cached;
 
   // For non-"all" periods, the API doesn't support period filtering

@@ -16,7 +16,7 @@ export function createPublicChatUnreadStore(storage: {
   write: (key: string, value: string) => void;
 }) {
   const accounts = new Map<string, ReadState>();
-  const synced = new Map<string, boolean>();
+  const synced = new Set<string>();
   const listeners = new Set<() => void>();
   const keyFor = (account: string) => `dehub_public_chat_unread:${account.toLowerCase()}`;
   const emit = () => listeners.forEach((listener) => listener());
@@ -77,15 +77,15 @@ export function createPublicChatUnreadStore(storage: {
     syncReadPosition(account: string, at: number | null | undefined, startedAt: number) {
       if (!account) return;
       const key = account.toLowerCase();
-      const initial = !synced.has(key);
-      const verified = synced.get(key) === true;
+      const verified = synced.has(key);
       const resolved = at === null || (typeof at === 'number' && Number.isFinite(at) && at > 0);
-      synced.set(key, verified || resolved);
+      if (!resolved) return;
+      synced.add(key);
       // A confirmed missing bookmark opens at the latest line in the room.
       // Discard history replayed at startup once, preserving new live lines.
       const position = at === null && !verified ? startedAt : at;
       const changed = typeof position === 'number' && catchUp(key, position);
-      if (initial && !changed) emit();
+      if (!verified && !changed) emit();
     },
     record(account: string, message: PublicChatUnreadMessage): boolean {
       if (!account || !message.id || message.excluded

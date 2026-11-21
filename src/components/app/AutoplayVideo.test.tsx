@@ -1,4 +1,4 @@
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const hlsVod = vi.hoisted(() => ({
@@ -66,6 +66,16 @@ describe('autoplay grid tiles', () => {
     const { container } = render(<AutoplayVideo src={MP4} />);
     visibility(true);
     expect(hlsVod.setVideoSource).toHaveBeenCalledWith(container.querySelector('video'), { src: MP4, hls: undefined, startLow: true });
+  });
+
+  it('starts a replacement source after a previous tile failed', () => {
+    const { container, rerender } = render(<AutoplayVideo src={MP4} />);
+    visibility(true);
+    fireEvent.error(container.querySelector('video')!);
+    expect(container.querySelector('video')).toBeNull();
+    const next = MP4 + '?new';
+    rerender(<AutoplayVideo src={next} />);
+    expect(hlsVod.setVideoSource).toHaveBeenCalledWith(container.querySelector('video'), { src: next, hls: undefined, startLow: true });
   });
 
   it('hold the poster until the tile comes near the screen, then keep it', () => {

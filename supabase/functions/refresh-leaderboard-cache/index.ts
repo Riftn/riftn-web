@@ -926,7 +926,6 @@ Deno.serve(async (req) => {
             avatarUrl: (profile?.avatarUrl as string) || (profile?.avatarImageUrl as string) || config.avatarUrl,
             sentTips: (profile?.sentTips as number) ?? 0,
             receivedTips: (profile?.receivedTips as number) ?? 0,
-            followers: (profile?.followers as number) ?? undefined,
             likes: (profile?.likes as number) ?? undefined,
             subscribers: (profile?.subscribers as number) ?? undefined,
             badgeBalance: balance,

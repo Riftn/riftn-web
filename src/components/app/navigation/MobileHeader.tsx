@@ -167,8 +167,8 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
 
   return (
     <>
-    <header ref={headerRef} data-mobile-header data-clear-top-bar={theme === 'system' ? undefined : ''} className={`${showBar && !islandBar ? '' : 'hidden '}lg:hidden fixed top-0 left-0 right-0 ${anyOverlayOpen ? 'z-[40]' : 'z-[60]'} px-[var(--top-bar-edge,16px)] h-11 flex items-center justify-between pointer-events-auto transition-transform duration-300 ease-in-out ${(!navVisible && !isOpen && !anyOverlayOpen) ? '-translate-y-full' : 'translate-y-0'} ${isOpen ? 'bg-transparent' : 'bg-black'}`}
-      style={theme === 'system' && !isOpen && !anyOverlayOpen ? { transform: 'translateY(var(--system-feed-header-offset, 0px))' } : undefined}
+    <header ref={headerRef} data-mobile-header data-clear-top-bar={theme === 'system' ? undefined : ''} className={`${showBar && !islandBar ? '' : 'hidden '}lg:hidden fixed top-0 left-0 right-0 ${anyOverlayOpen ? 'z-[40]' : 'z-[60]'} px-[var(--top-bar-edge,16px)] h-11 flex items-center justify-between pointer-events-auto transition-transform duration-300 ease-in-out ${(isAuthenticated && !navVisible && !isOpen && !anyOverlayOpen) ? '-translate-y-full' : 'translate-y-0'} ${isOpen ? 'bg-transparent' : 'bg-black'}`}
+      style={isAuthenticated && theme === 'system' && !isOpen && !anyOverlayOpen ? { transform: 'translateY(var(--system-feed-header-offset, 0px))' } : undefined}
     >
       {/* Profile — left slot.
           Direct post-page URL access: back button replaces the menu/settings toggle.
@@ -262,7 +262,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
       <FeedIslandCapsule
         isAuthenticated={isAuthenticated}
         onLogoPointerDown={warmSheetForLogin}
-        visible={navVisible && !isOpen && !anyOverlayOpen && !isPostPage}
+        visible={(!isAuthenticated || navVisible) && !isOpen && !anyOverlayOpen && !isPostPage}
         avatar={isAuthenticated && user ? (
           <Avatar className="w-[28px] h-[28px] rounded-lg">
             {user.avatarImageUrl && user.address && (
