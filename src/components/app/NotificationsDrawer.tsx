@@ -88,7 +88,7 @@ export function NotificationsDrawer() {
           on the header (the grab bar area) closes it in one go, with no stop
           part way, and a small flick does too (useDrawerPullClose). Rows scrolling up under
           the header blur out behind it (index.css). */}
-      <DrawerContent ref={sheetRef} glass overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer data-expanded="" className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <DrawerContent ref={sheetRef} glass overlayClassName="backdrop-blur-[24px] backdrop-saturate-[1.6]" data-notifications-drawer data-notifications-page data-notification-surface data-expanded="" className="!mt-0 h-[100dvh] max-h-[100dvh] !border-x-0 !border-b-0 flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <DrawerTitle className="sr-only">{_copy("copy.788011833a5a", { defaultValue: "Notifications" })}</DrawerTitle>
         <DrawerDescription className="sr-only">{_copy("copy.efe4bbcc61b3", { defaultValue: "Your notifications" })}</DrawerDescription>
         {/* Shows the sheet drags down. Over the pill's own top inset, so it
