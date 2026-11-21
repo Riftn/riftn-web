@@ -70,7 +70,6 @@ import { isMidSessionUnlock } from '@/lib/session-unlock';
 import { authenticateProfileSession, SupabaseSessionMissingError } from '@/lib/profile-login';
 import { ACCOUNT_DELETED_CODE } from '@/lib/deleted-account';
 import { advanceAuthTrace, beginAuthTrace, clearAuthTrace, readAuthTrace } from '@/lib/auth-trace';
-import { isSessionForEmail } from '@/lib/magic-link-session';
 import { clearEngagementCaches } from '@/lib/clear-engagement-caches';
 import { clearPersistedQueryCache } from '@/lib/query-persist';
 import { supabase } from '@/integrations/supabase/client';
@@ -608,8 +607,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Guards double-processing of a landed Supabase session (OAuth return fires
   // both INITIAL_SESSION and SIGNED_IN).
   const supaLoginHandledRef = useRef(false);
-  // Cleanup for the cross-device magic-link realtime channel (see connectWithEmail).
-  const emailSyncCleanupRef = useRef<null | (() => void)>(null);
 
   const isAuthenticated = !!user && !!walletAddress && (
     isLoading ||
@@ -2843,77 +2840,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(SUPA_LOGIN_PENDING_KEY, '1');
     localStorage.setItem(SUPA_LOGIN_PENDING_AT_KEY, String(Date.now()));
 
-    // Generate a per-request nonce for cross-device sync. The initiating
-    // device (this one) subscribes to a realtime channel keyed by the nonce
-    // and passes it through the magic link via emailRedirectTo. When the
-    // link is opened on any device, /auth/confirm broadcasts the session
-    // tokens back here and this tab hydrates via setSession() — so the user
-    // ends up signed in on both browsers/devices.
-    const syncNonce = crypto.randomUUID();
     try {
-      // Tear down any previous sync channel from an earlier attempt.
-      if (emailSyncCleanupRef.current) {
-        try { emailSyncCleanupRef.current(); } catch { /* ignore */ }
-        emailSyncCleanupRef.current = null;
-      }
-      const channel = supabase.channel(`auth-sync-${syncNonce}`, {
-        config: { broadcast: { self: false, ack: false } },
-      });
-      channel.on('broadcast', { event: 'session' }, async (msg) => {
-        const payload = (msg as any)?.payload || {};
-        const access_token = payload.access_token as string | undefined;
-        const refresh_token = payload.refresh_token as string | undefined;
-        if (!access_token || !refresh_token) return;
-        // Anyone holding the emailed link can send here. Only a session for
-        // the email this tab asked a link for is taken (lib/magic-link-session).
-        if (!isSessionForEmail(access_token, email)) {
-          authLogger.warn('magic-link-sync:other-identity-ignored');
-          return;
-        }
-        try {
-          supaLoginHandledRef.current = true;
-          setIsProcessingRedirect(true);
-          const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
-          if (error) throw error;
-          // Same check on the user the server confirmed, not just the token.
-          if (data?.session?.user?.email?.trim().toLowerCase() !== email.trim().toLowerCase()) {
-            await supabase.auth.signOut({ scope: 'local' });
-            throw new Error('Magic link session was for a different email');
-          }
-          const uid = data?.session?.user?.id;
-          if (uid) await proceedToWalletPhase(uid);
-          toast.success(_copy("copy.a551108d059e", { defaultValue: "Signed in — link confirmed on another device" }));
-        } catch (err) {
-          console.error('Cross-device session hydrate failed:', err);
-        } finally {
-          setIsProcessingRedirect(false);
-          supaLoginHandledRef.current = false;
-          try { await supabase.removeChannel(channel); } catch { /* ignore */ }
-          emailSyncCleanupRef.current = null;
-        }
-      });
-      // Wait for the channel to actually be SUBSCRIBED before sending the
-      // magic link. Without this, signInWithOtp could fire (and the user
-      // could tap the email link) before this tab's realtime subscription
-      // was live on the server — the broadcast would be sent to no one and
-      // silently lost. This only affects the cross-device path above; this
-      // device's own sign-in in AuthConfirm.tsx never depends on it.
-      await new Promise<void>((resolve) => {
-        let settled = false;
-        const finish = () => { if (settled) return; settled = true; resolve(); };
-        channel.subscribe((status) => { if (status === 'SUBSCRIBED') finish(); });
-        setTimeout(finish, 2500);
-      });
-      emailSyncCleanupRef.current = () => {
-        try { supabase.removeChannel(channel); } catch { /* ignore */ }
-      };
-
       try {
         await wagmiDisconnect();
         clearWagmiStorage();
       } catch { /* ignore */ }
 
-      const redirectTo = `${window.location.origin}/auth/confirm?sync=${syncNonce}`;
+      const redirectTo = `${window.location.origin}/auth/confirm`;
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: true, emailRedirectTo: redirectTo },
@@ -2927,10 +2860,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(SUPA_LOGIN_PENDING_KEY);
       setConnectionSource(previousSource);
       restoreConnectionSource(previousSource);
-      if (emailSyncCleanupRef.current) {
-        try { emailSyncCleanupRef.current(); } catch { /* ignore */ }
-        emailSyncCleanupRef.current = null;
-      }
       throw error;
     } finally {
       setIsConnecting(false);
@@ -2938,10 +2867,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cancelEmailMagicLink = () => {
-    if (emailSyncCleanupRef.current) {
-      try { emailSyncCleanupRef.current(); } catch { /* ignore */ }
-      emailSyncCleanupRef.current = null;
-    }
     localStorage.removeItem(SUPA_LOGIN_PENDING_KEY);
   };
 

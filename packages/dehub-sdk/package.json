@@ -1,6 +1,6 @@
 {
   "name": "dehub-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build mini apps for DeHub: sign-in, payments, posting and notifications, plus server helpers to verify tokens, receipts and webhooks.",
   "license": "MIT",
   "homepage": "https://riftn.com/docs/developers",

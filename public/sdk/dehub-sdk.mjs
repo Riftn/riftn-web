@@ -101,7 +101,10 @@ export const dehub = {
     close: () => request('close'),
     /** `{ user, location, client }`, asked once and then cached. */
     get context() {
-        contextPromise ?? (contextPromise = request('context'));
+        contextPromise ?? (contextPromise = request('context').catch(error => {
+            contextPromise = null;
+            throw error;
+        }));
         return contextPromise;
     },
     /** The methods this host supports, e.g. `['auth.getToken', 'actions.pay']`. */

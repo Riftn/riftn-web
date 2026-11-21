@@ -1,3 +1,4 @@
+import { useVoiceSampleRecorder } from '@/hooks/use-voice-sample-recorder';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * Setting up the voice a stage gets dubbed in.
@@ -20,7 +21,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * existing voice buys is skipping the recording step.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
 import { Square, Loader2, ChevronLeft } from "lucide-react";
@@ -59,15 +60,10 @@ export function StageVoiceSetup({ wallet, displayName, onReady, onCancel }: Stag
   const { t } = useTranslation();
   const [status, setStatus] = useState<VoiceCloneStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [recording, setRecording] = useState(false);
-  const [seconds, setSeconds] = useState(0);
   const [sample, setSample] = useState<File | null>(null);
   const [sampleSeconds, setSampleSeconds] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -83,56 +79,13 @@ export function StageVoiceSetup({ wallet, displayName, onReady, onCancel }: Stag
     return () => { cancelled = true; };
   }, [wallet]);
 
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-  }, []);
-
-  const stopRecording = useCallback(() => {
-    if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
-    setRecording(false);
-    clearTimer();
-  }, [clearTimer]);
-
-  // A recorder left running when this unmounts holds the microphone open for
-  // the rest of the session — and the next thing this host does is go live.
-  useEffect(() => () => {
-    clearTimer();
-    if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
-  }, [clearTimer]);
-
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      chunksRef.current = [];
-      let elapsed = 0;
-
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      recorder.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        setSample(new File([blob], 'stage-voice.webm', { type: 'audio/webm' }));
-        setSampleSeconds(elapsed);
-      };
-
-      recorderRef.current = recorder;
-      recorder.start(1000);
-      setRecording(true);
-      setSample(null);
-      setSeconds(0);
-      timerRef.current = setInterval(() => {
-        elapsed += 1;
-        setSeconds(elapsed);
-        // Instant cloning gains nothing past a minute, and a host about to run
-        // a stage should not be left holding a running recorder.
-        if (elapsed >= MAX_SECONDS) stopRecording();
-      }, 1000);
-    } catch {
-      toast.error(t('stages.micUnreachable'), {
-        description: t('stages.allowMicAccess'),
-      });
-    }
-  }, [stopRecording]);
+  const { recording, seconds, startRecording, stopRecording } = useVoiceSampleRecorder(
+    true,
+    (file, duration) => { setSample(file); setSampleSeconds(duration); },
+    () => toast.error(t('stages.micUnreachable'), { description: t('stages.allowMicAccess') }),
+    MAX_SECONDS,
+    () => setSample(null),
+  );
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

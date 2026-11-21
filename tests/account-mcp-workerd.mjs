@@ -25,6 +25,10 @@ try {
   assert.equal(initialized.serverInfo.version, '3.0.0');
   const tools = await rpc('tools/list', {});
   assert.ok(tools.tools.some(tool => tool.name === 'dehub_generate_content'));
+  const schema = tools.tools.find(tool => tool.name === 'dehub_quote_generation').inputSchema;
+  assert.equal(schema.type, 'object');
+  assert.ok(schema.properties.kind.enum.includes('image'));
+  assert.deepEqual(schema.required.sort(), ['kind', 'model_id']);
   const input = { name: 'dehub_quote_generation', arguments: { kind: 'image', model_id: 'flux-2-pro' } };
   const quote = await rpc('tools/call', input);
   assert.notEqual(quote.isError, true, JSON.stringify(quote));
