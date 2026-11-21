@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 import { rateLimitByIp, resolveDeHubAddress } from "../_shared/auth.ts";
 import { aiChat } from "../_shared/ai-chat.ts";
 import { ownChatFetch, ownChatRoute, userProviderKey } from "../_shared/byok.ts";
-import { agentConfigured, postCompletion, runAgentLoop, type AgentSurface } from "../_shared/assistant-agent.ts";
+import { agentConfigured, completionHitTokenLimit, postCompletion, runAgentLoop, type AgentSurface } from "../_shared/assistant-agent.ts";
 import { meteredCompletionFetch } from "../_shared/ai-usage.ts";
 import { streamAgentLoop, teeStreamText } from "../_shared/assistant-agent-stream.ts";
 import { DEHUB_PLATFORM_KNOWLEDGE } from "../_shared/dehub-platform-knowledge.ts";
@@ -605,7 +605,7 @@ function selectOptimalModel(message: string, hasPerplexityKey: boolean, allowPro
   return { model: 'gemini-2.5-flash', tier: 'free', reason: 'Standard query' };
 }
 
-async function searchWithPerplexity(query: string, perplexityKey: string): Promise<string> {
+async function searchWithPerplexity(query: string, perplexityKey: string, requireCompleteReply: boolean): Promise<string> {
   console.log('Searching with Perplexity:', query);
   
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -630,6 +630,7 @@ async function searchWithPerplexity(query: string, perplexityKey: string): Promi
   }
 
   const data = await response.json();
+  if (requireCompleteReply && completionHitTokenLimit(data)) throw new Error('Search provider truncated the board reply');
   let content = data.choices?.[0]?.message?.content || '';
   const citations = data.citations || [];
   
@@ -1158,7 +1159,7 @@ serve(async (req) => {
     // If Perplexity was selected by auto-model and key is available, use it
     if (effectiveModel === 'perplexity' && perplexityKey) {
       try {
-        const searchResult = await searchWithPerplexity(userQuery, perplexityKey);
+        const searchResult = await searchWithPerplexity(userQuery, perplexityKey, isThreadReply);
         return new Response(
           JSON.stringify({ 
             response: searchResult, 
@@ -1334,7 +1335,10 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
       : `${basePrompt}${platformContext}${userMemories}${userContextInfo}${postAnalysisInfo}${otherUserInfo}${postContextInfo}`;
 
     // Build messages array - include image/video in user message if available
-    const apiMessages: any[] = [{ role: 'system', content: systemPrompt }];
+    const apiMessages: any[] = [{
+      role: 'system',
+      content: isThreadReply ? THREAD_SUPPORT_PROMPT(threadContext!, maxReplyChars ?? 700) + '\n' + systemPrompt : systemPrompt,
+    }];
     const hasImage = postContext?.imageUrl && postContext?.type === 'image';
     const hasVideo = !!(postContext?.videoUrl && postContext?.type === 'video');
 
@@ -1507,6 +1511,7 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
           lovableApiKey,
           perplexityKey: perplexityKey || undefined,
           ownKeyWallet,
+          requireCompleteReply: isThreadReply,
         });
 
         if (agentResult.text) {
@@ -1768,6 +1773,12 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
 
     // ── NON-STREAMING PATH (existing) ───────────────────────────
     const data = await response.json();
+    if (isThreadReply && completionHitTokenLimit(data)) {
+      console.warn('[Board] Provider truncated the fallback reply');
+      return new Response(JSON.stringify({ error: 'Assistant could not finish the reply' }), {
+        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     // An empty completion is a hiccup on our side, not the user's question
     // being unanswerable — say something they can act on rather than an
     // apology that reads as "I can't help you".
