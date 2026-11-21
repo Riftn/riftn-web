@@ -1,6 +1,7 @@
+import { useVoiceSampleRecorder } from '@/hooks/use-voice-sample-recorder';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { Loader2, Square, Key } from "lucide-react";
 import Upload from "@/components/ui/cut-icons/upload";
 
@@ -29,43 +30,13 @@ export function VoiceTrainingDrawer({ open, onOpenChange, onSuccess, customApiKe
   const { walletAddress } = useAuth();
   const [voiceName, setVoiceName] = useSurfaceDraft("components/app/shared/VoiceTrainingDrawer.tsx:voiceName", '');
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      chunksRef.current = [];
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const file = new File([blob], 'voice-sample.webm', { type: 'audio/webm' });
-        setAudioFile(file);
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setIsRecording(true);
-      setRecordingTime(0);
-      timerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
-    } catch {
+  const { recording: isRecording, seconds: recordingTime, startRecording, stopRecording } =
+    useVoiceSampleRecorder(open, setAudioFile, () => {
       toast.error(_copy("copy.a754a5c36acf", { defaultValue: "Could not access microphone" }));
-    }
-  }, [_copy]);
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current?.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-    setIsRecording(false);
-    if (timerRef.current) clearInterval(timerRef.current);
-  }, []);
+    });
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

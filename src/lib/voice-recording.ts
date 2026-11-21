@@ -2,9 +2,9 @@
 export const VOICE_RECORDING_SECONDS = 29;
 
 export function createVoiceRecorder(stream: MediaStream): MediaRecorder {
-  const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']
-    .find(type => MediaRecorder.isTypeSupported(type));
   try {
+    const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']
+      .find(type => MediaRecorder.isTypeSupported?.(type));
     return new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
   } catch (error) {
     stream.getTracks().forEach(track => track.stop());

@@ -101,7 +101,10 @@
 
     /** { user, location, client } — resolved once, then cached. */
     get context() {
-      if (!contextPromise) contextPromise = request('context');
+      if (!contextPromise) contextPromise = request('context').catch(function (error) {
+        contextPromise = null;
+        throw error;
+      });
       return contextPromise;
     },
 

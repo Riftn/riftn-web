@@ -252,7 +252,7 @@ const createPost = (
   const slug = generateSlug(legacySlugTitle(title));
   const month = (quarterNum - 1) * 3 + 1; // Q1->Jan, Q2->Apr, etc.
   const day = itemIndexInQuarter + 1;
-  const publishedAt = new Date(year, month - 1, day).toISOString();
+  const publishedAt = new Date(Date.UTC(year, month - 1, day)).toISOString();
 
   // Per-post body and card summary, keyed by slug. Every milestone used to
   // share one excerpt and one of nine template bodies; see @/data/milestones.

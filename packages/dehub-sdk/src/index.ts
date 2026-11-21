@@ -115,7 +115,10 @@ export const dehub = {
 
   /** `{ user, location, client }`, asked once and then cached. */
   get context(): Promise<DehubContext> {
-    contextPromise ??= request<DehubContext>('context');
+    contextPromise ??= request<DehubContext>('context').catch(error => {
+      contextPromise = null;
+      throw error;
+    });
     return contextPromise;
   },
 

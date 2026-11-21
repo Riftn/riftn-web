@@ -3,6 +3,7 @@
  * npx https://riftn.com/sdk/create-dehub-app.tgz my-app [--template html|react|server]
  * Copies a starter and fills in the app name. No dependencies.
  */
+import { parseArgs } from 'node:util';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
@@ -14,9 +15,13 @@ const TEMPLATES = {
   server: 'Node server: verifies sign-in, payments and webhooks, sends notifications.',
 };
 
-const args = process.argv.slice(2);
-let name = args.find((a) => !a.startsWith('--'));
-let template = args.includes('--template') ? args[args.indexOf('--template') + 1] : null;
+
+const { values, positionals } = parseArgs({
+  options: { template: { type: 'string' } },
+  allowPositionals: true,
+});
+let [name] = positionals;
+let template = values.template;
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 if (!name) name = (await rl.question('App folder name: ')).trim() || 'my-dehub-app';

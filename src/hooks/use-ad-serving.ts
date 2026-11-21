@@ -52,9 +52,18 @@ export function trackAdEvent(ad: ServedAd, event: 'impression' | 'click'): void 
   };
 
   // keepalive so click beacons survive the CTA navigation.
-  fetch(url, { method: 'POST', headers, body, keepalive: true }).catch(() => {
-    reported.delete(dedupeKey); // allow retry on transient failure
-  });
+  async function deliver() {
+    for (const delay of [0, 1000, 4000]) {
+      if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+      try {
+        const response = await fetch(url, { method: 'POST', headers, body, keepalive: true });
+        if (response.ok) return;
+        if (response.status < 500 && ![408, 429].includes(response.status)) return;
+      } catch { /* Retry with the same signed event. */ }
+    }
+    reported.delete(dedupeKey);
+  }
+  void deliver();
 }
 
 export interface UseServedAdsOptions {

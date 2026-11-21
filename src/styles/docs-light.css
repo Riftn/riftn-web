@@ -64,7 +64,7 @@ html:not(.dark) .docs-root {
   --ring: 0 0% 10%;
 
   background-color: hsl(var(--background));
-  background-image: url('./assets/textures/paper-texture.png');
+  background-image: url('../assets/textures/paper-texture.png');
   background-size: 256px 256px;
 }
 
