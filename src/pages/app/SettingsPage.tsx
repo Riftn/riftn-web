@@ -101,6 +101,7 @@ import { getBlockListPaginated, unblockUser as apiUnblockUser, type BlockedUser,
 import { isReservedUsername } from '@/lib/reserved-usernames';
 import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { useAuth as useAuthContext } from '@/contexts/AuthContext';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsMode } from '@/hooks/use-kids-mode';
@@ -2995,6 +2996,7 @@ function LanguageSelector() {
 }
 
 function ContentSettings() {
+  const { storiesEnabled, canChange, setStoriesEnabled } = useStoriesEnabled();
   const { t } = useTranslation();
   const { chainId, setChainId, saving } = usePostingChain();
 
@@ -3043,6 +3045,15 @@ function ContentSettings() {
       <div>
         <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.playback', 'Playback')}</h3>
         <div className="space-y-4">
+          <SettingToggle
+            icon={Eye}
+            anchor="show-stories"
+            title={t('settings.showStories', 'Show Stories on Home')}
+            description={t('settings.showStoriesDesc', 'Live broadcasts stay visible when Stories are off.')}
+            defaultChecked={storiesEnabled}
+            onCheckedChange={setStoriesEnabled}
+            disabled={!canChange}
+          />
           <HideWatchedToggle />
           <SkipSegmentsToggle />
           <VideoGlitchToggle />

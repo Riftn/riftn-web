@@ -15,10 +15,10 @@ export function startIndex(entry: ShelfEntry): number {
   return i < 0 ? 0 : i;
 }
 
-/** The picture a tile shows: the next unwatched moment's poster, else the newest. */
+/** Use the opening item's still image, including when the viewer replays a watched day. */
 export function coverOf(entry: ShelfEntry): string | null {
-  const next = entry.items.find(it => !it.viewed && it.status === 'ready') ?? entry.items[entry.items.length - 1];
-  return next?.posterUrl || next?.mediaUrl || null;
+  const item = entry.items[startIndex(entry)];
+  return item?.posterUrl || (item?.type === 'photo' ? item.mediaUrl : null);
 }
 
 export function playable(items: StoryItem[]): StoryItem[] {
