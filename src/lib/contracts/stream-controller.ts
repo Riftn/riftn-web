@@ -164,7 +164,7 @@ export interface SendTipResult {
   confirmed: Promise<string>;
 }
 
-export async function sendTip(params: SendTipParams & { skipBalanceCheck?: boolean; signerAddress?: string }): Promise<SendTipResult> {
+export async function sendTip(params: SendTipParams & { skipBalanceCheck?: boolean; signerAddress?: string; beforeSubmit?: () => void }): Promise<SendTipResult> {
   const chainId = params.chainId || BASE_CHAIN_ID;
   const chainConfig = getChainConfig(chainId);
 
@@ -192,7 +192,7 @@ export async function sendTip(params: SendTipParams & { skipBalanceCheck?: boole
       streamControllerV3Interface,
       'sendTip',
       [BigInt(params.tokenId), amountWei, params.to, NATIVE_TOKEN_ADDRESS],
-      { context: 'send tip', chainId, value: amountWei },
+      { context: 'send tip', beforeSubmit: params.beforeSubmit, chainId, value: amountWei },
     );
     return { hash: nativeResult.hash, confirmed: nativeResult.wait(1).then(confirmedTipHash) };
   }
@@ -249,7 +249,7 @@ export async function sendTip(params: SendTipParams & { skipBalanceCheck?: boole
       controllerInterfaceFor(chainId),
       'sendTip',
       [tokenId, amountWei, params.to, tokenAddress],
-      { context: 'send tip', chainId }
+      { context: 'send tip', beforeSubmit: params.beforeSubmit, chainId }
     );
   } catch (err: unknown) {
     const msg = String((err as any)?.message || err).toLowerCase();

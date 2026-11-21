@@ -336,6 +336,7 @@ export async function writeContractAA(
     context?: string;
     chainId?: number;
     calldata?: Hex;
+    beforeSubmit?: () => void;
   }
 ): Promise<AAWriteResult> {
   await ensureSignerOnChain((options?.chainId ?? BASE_CHAIN_ID) as ChainId);
@@ -403,6 +404,7 @@ export async function writeContractAA(
       };
 
       // Never retry a failed Safe send through its owner EOA.
+      options?.beforeSubmit?.();
       txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [txParams],
@@ -413,6 +415,7 @@ export async function writeContractAA(
       const connector = getAccount(wagmiConfig).connector;
       if (!connector) throw requestUnlockForSigning();
       await prepareWalletRelay(await connector.getProvider());
+      options?.beforeSubmit?.();
       txHash = await sendTransaction(wagmiConfig, {
         connector,
         account: fromAddress as Hex,
@@ -463,7 +466,7 @@ export async function writeContractAA(
     };
   } catch (sendError) {
     console.error('[AA] Transaction failed:', sendError);
-    throw new Error(parseTxError(sendError, context));
+    throw Object.assign(new Error(parseTxError(sendError, context)), { cause: sendError });
   }
 }
 
