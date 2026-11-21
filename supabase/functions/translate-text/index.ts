@@ -9,7 +9,7 @@
  *   L2  post_translations   — shared across isolates, evicted when idle
  *   P1  MyMemory            — public prose, known standard language pair, at most 500 UTF-8 bytes
  *   P2  free model tiers    — Groq / Mistral / Cloudflare, see _shared/free-models.ts
- *   P3  OpenAI direct       — GPT-6 Luna via OPENAI_API_KEY
+ *   P3  OpenAI direct       — GPT-6 Luna via the Edge secret or Supabase Vault
  *   P4  Gemini direct       — GEMINI_API_KEY, parked on 402/429
  *   P5  fal / OpenRouter    — FAL_KEY, routed to a non-Google model on purpose,
  *                             parked on 401/402/403/429
@@ -447,6 +447,26 @@ function chatTranslation(data: unknown): string | null {
   return typeof text === 'string' ? text.trim() : null;
 }
 
+// Builder already provisions the shared OpenAI credential in Supabase Vault.
+// Reuse its service-role-only lookup and coalesce concurrent reads per isolate.
+let vaultOpenAiKey: { expiresAt: number; result: Promise<string | null> } | undefined;
+
+function translationOpenAiKey(): string | Promise<string | null> {
+  const configured = Deno.env.get('OPENAI_API_KEY');
+  if (configured) return configured;
+
+  const now = Date.now();
+  if (!vaultOpenAiKey || vaultOpenAiKey.expiresAt <= now) {
+    vaultOpenAiKey = {
+      expiresAt: now + 60_000,
+      result: controlRpc<unknown>('builder_openai_key', {})
+        .then(value => typeof value === 'string' && value ? value : null)
+        .catch(() => null),
+    };
+  }
+  return vaultOpenAiKey.result;
+}
+
 async function translateWithLuna(
   text: string,
   targetLanguageName: string,
@@ -454,7 +474,7 @@ async function translateWithLuna(
   maxOutputTokens: number,
   usage: TranslationUsage,
 ): Promise<TranslateResponse | null> {
-  const apiKey = Deno.env.get('OPENAI_API_KEY');
+  const apiKey = await translationOpenAiKey();
   if (!apiKey) { usage.skip('openai', 'key_unset'); return null; }
 
   const model = 'gpt-6-luna';

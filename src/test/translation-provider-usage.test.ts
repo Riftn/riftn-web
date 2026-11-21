@@ -29,6 +29,7 @@ let batches: any[][];
 let pending: Promise<unknown>[];
 let provider: (url: string) => Response;
 let reserve: () => Response;
+let vaultKey: string | null;
 const translated = 'Esta es una frase para nuestra comunidad.';
 const source = 'This is a sentence for our community.';
 const native = (text = translated, finishReason = 'STOP') => new Response(JSON.stringify({
@@ -57,7 +58,9 @@ beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => {});
   provider = url => url.includes('googleapis') ? native() : gateway();
   reserve = () => Response.json(true);
+  vaultKey = null;
   vi.stubGlobal('fetch', vi.fn(async (url: string, init: RequestInit) => {
+    if (url.endsWith('/rpc/builder_openai_key')) return Response.json(vaultKey);
     if (url.endsWith('/rpc/claim_provider_attempt')) return Response.json({ allowed: true, probe: false });
     if (url.endsWith('/rpc/finish_provider_attempt') || url.endsWith('/rpc/release_translation_work')) return new Response(null, { status: 204 });
     if (url.endsWith('/rpc/claim_translation_work')) return Response.json(true);
@@ -103,6 +106,7 @@ it('reserves, meters and caches Luna as the first paid provider', async () => {
 
   expect(requests).toEqual([lunaUrl]);
   const calls = vi.mocked(fetch).mock.calls;
+  expect(calls.some(([url]) => String(url).endsWith('/rpc/builder_openai_key'))).toBe(false);
   const reserveIndex = calls.findIndex(([url]) => String(url).endsWith('/rpc/reserve_translation_attempt'));
   const lunaIndex = calls.findIndex(([url]) => url === lunaUrl);
   expect(reserveIndex).toBeGreaterThanOrEqual(0);
@@ -116,6 +120,24 @@ it('reserves, meters and caches Luna as the first paid provider', async () => {
     served_model: 'gpt-6-luna', input_tokens: 20, output_tokens: 5, usage_reported: true, outcome: 'accepted' })]);
   expect(JSON.stringify(batches)).not.toMatch(/fixture-openai-key|This is|Esta es|choices/);
   expect([...hooks.cache.values()][0].provider).toBe('openai:gpt-6-luna');
+});
+
+it('uses the existing Vault key for Luna when the Edge secret is absent', async () => {
+  vaultKey = 'fixture-vault-openai-key';
+  provider = url => url === lunaUrl ? luna() : native();
+  await import('../../supabase/functions/translate-text/index');
+  expect((await hooks.handler!(request())).status).toBe(200);
+  expect((await hooks.handler!(request('A separate message for our community.'))).status).toBe(200);
+  await Promise.all(pending);
+
+  const calls = vi.mocked(fetch).mock.calls;
+  const vaultCalls = calls.filter(([url]) => String(url).endsWith('/rpc/builder_openai_key'));
+  expect(vaultCalls).toHaveLength(1);
+  expect(requests).toEqual([lunaUrl, lunaUrl]);
+  for (const [, init] of calls.filter(([url]) => url === lunaUrl)) {
+    expect(new Headers(init?.headers).get('Authorization')).toBe('Bearer fixture-vault-openai-key');
+  }
+  expect(JSON.stringify(batches)).not.toContain(vaultKey);
 });
 
 it.each([
