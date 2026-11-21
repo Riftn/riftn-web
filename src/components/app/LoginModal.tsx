@@ -284,7 +284,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const titleText = step === 'main' ? (
       loginIntent === 'add-profile'
         ? t('loginModal.addProfileTitle', 'Add a profile')
-        : t('loginModal.title')
+        : loginIntent === 'signup' ? t('creator.signUp') : t('loginModal.title')
     )
     : step === 'email' ? t('loginModal.continueEmail')
     : step === 'email-waiting' ? t('loginModal.checkYourEmail', 'Check your email')
@@ -352,6 +352,9 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           headline={step === 'two-factor' ? {
             top: t('twoFactor.stackTop', 'One more step'),
             accent: t('twoFactor.stackAccent', 'Enter your app code.'),
+          } : loginIntent === 'signup' && step === 'main' ? {
+            top: '',
+            accent: t('loginModal.passkeyCreate', 'Create a new account'),
           } : undefined}
         />
         <div className="login-stack-form mt-5">
@@ -369,7 +372,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                     onSubmit={twoFactor.submit}
                     onCancel={() => { twoFactor.cancel(); setStep('main'); }}
                   />
-                : <LoginModalBody open={open} step={step} setStep={setStep} layout="stack" />}
+                : <LoginModalBody open={open} step={step} setStep={setStep} layout="stack" signingUp={loginIntent === 'signup'} />}
             </Suspense>
           </AfterSheetFrame>
         </div>
@@ -419,7 +422,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               UI is needed. */}
           {step === 'profile'
             ? <LoginProfileStep />
-            : <LoginModalBody open={open} step={step} setStep={setStep} />}
+            : <LoginModalBody open={open} step={step} setStep={setStep} signingUp={loginIntent === 'signup'} />}
         </Suspense></AfterSheetFrame>
       </div>
 

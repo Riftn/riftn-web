@@ -223,7 +223,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </DrawerContent>
           </Drawer>
         ) : (
-          <MobileAccountButton action="signup" onClick={() => openLoginModal()} onPointerDown={warmSheetForLogin} />
+          <MobileAccountButton action="signup" onClick={() => openLoginModal({ intent: 'signup' })} onPointerDown={warmSheetForLogin} />
         )}
       </div>
 
@@ -277,7 +277,7 @@ export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderPro
             </AvatarFallback>
           </Avatar>
         ) : null}
-        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal())}
+        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal({ intent: 'signup' }))}
         onCreatePost={() => (isAuthenticated ? openPostModal() : openLoginModal())}
         logoSrc={dehubMark}
         unread={isAuthenticated ? totalNotifUnread : 0}
