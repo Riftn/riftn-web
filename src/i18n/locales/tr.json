@@ -2025,6 +2025,36 @@
     }
   },
   "notifications": {
+    "catchUp": {
+      "title": "Beni haberdar et",
+      "close": "Kapat",
+      "scope": "Okunmamış son 30 bildirimin hakkında soru sor. Yanıtı oluşturmak için sorun ve bildirim önizlemeleri kullanılır.",
+      "placeholder": "Okunmamış bildirimleri sor",
+      "ask": "Sor",
+      "pending": "{{count}} bildirim 8 saniye içinde okundu olarak işaretlenecek.",
+      "undo": "Geri al",
+      "working": "İşleniyor…",
+      "empty": "Bu görünümde okunmamış bildirimin yok.",
+      "askError": "Bildirimlerin incelenemedi. Tekrar dene.",
+      "undone": "Temizlik geri alındı.",
+      "writing": "Değişiklikler kaydediliyor…",
+      "sent": "{{count}} gönderildi · {{failed}} başarısız",
+      "cleared": "{{count}} okundu olarak işaretlendi · {{failed}} başarısız",
+      "drafts": "Yanıtları gözden geçir",
+      "remove": "Kaldır",
+      "editReply": "{{name}} için yanıtı düzenle",
+      "send": "{{count}} yanıt gönder",
+      "preview": "Temizlik önizlemesi",
+      "noCleanup": "Temizlenecek düşük öncelikli bildirim yok.",
+      "markRead": "{{count}} bildirimi okundu olarak işaretle",
+      "prompt": {
+        "summary": "Beni haberdar et",
+        "replies": "Yanıt gerekenler",
+        "urgent": "Acil",
+        "cleanup": "Gereksiz bildirimleri temizle",
+        "drafts": "Herkes için yanıt taslağı hazırla"
+      }
+    },
     "coAuthorInvite": "{{name}} seni gönderisinin ortak yazarı olmaya davet etti",
     "coAuthorAccepted": "{{name}} artık gönderinin ortak yazarı",
     "title": "Bildirimler",

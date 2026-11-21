@@ -2036,6 +2036,36 @@
     }
   },
   "notifications": {
+    "catchUp": {
+      "title": "Catch me up",
+      "close": "Close",
+      "scope": "Ask about your 30 most recent unread notifications. Your question and notification previews are used to generate the answer.",
+      "placeholder": "Ask about unread notifications",
+      "ask": "Ask",
+      "pending": "Marking {{count}} as read in 8 seconds.",
+      "undo": "Undo",
+      "working": "Working…",
+      "empty": "You have no unread notifications in this view.",
+      "askError": "Could not review your notifications. Try again.",
+      "undone": "Cleanup undone.",
+      "writing": "Saving changes…",
+      "sent": "{{count}} sent · {{failed}} failed",
+      "cleared": "{{count}} marked read · {{failed}} failed",
+      "drafts": "Review replies",
+      "remove": "Remove",
+      "editReply": "Edit reply to {{name}}",
+      "send": "Send {{count}} replies",
+      "preview": "Cleanup preview",
+      "noCleanup": "No low-priority notifications to clear.",
+      "markRead": "Mark {{count}} as read",
+      "prompt": {
+        "summary": "Catch me up",
+        "replies": "Needs a reply",
+        "urgent": "Urgent",
+        "cleanup": "Clear the noise",
+        "drafts": "Draft replies for all"
+      }
+    },
     "coAuthorInvite": "{{name}} invited you to co-author their post",
     "coAuthorAccepted": "{{name}} is now a co-author on your post",
     "title": "Notifications",

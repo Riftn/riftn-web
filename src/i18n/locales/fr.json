@@ -2025,6 +2025,36 @@
     }
   },
   "notifications": {
+    "catchUp": {
+      "title": "Fais-moi le point",
+      "close": "Fermer",
+      "scope": "Pose une question sur tes 30 dernières notifications non lues. Ta question et les aperçus des notifications servent à générer la réponse.",
+      "placeholder": "Poser une question sur les notifications non lues",
+      "ask": "Demander",
+      "pending": "{{count}} notifications seront marquées comme lues dans 8 secondes.",
+      "undo": "Annuler",
+      "working": "Traitement…",
+      "empty": "Tu n’as aucune notification non lue dans cette vue.",
+      "askError": "Impossible d’examiner tes notifications. Réessaie.",
+      "undone": "Nettoyage annulé.",
+      "writing": "Enregistrement des modifications…",
+      "sent": "{{count}} envoyées · {{failed}} échecs",
+      "cleared": "{{count}} marquées comme lues · {{failed}} échecs",
+      "drafts": "Relire les réponses",
+      "remove": "Retirer",
+      "editReply": "Modifier la réponse à {{name}}",
+      "send": "Envoyer {{count}} réponses",
+      "preview": "Aperçu du nettoyage",
+      "noCleanup": "Aucune notification de faible priorité à nettoyer.",
+      "markRead": "Marquer {{count}} comme lues",
+      "prompt": {
+        "summary": "Fais-moi le point",
+        "replies": "À répondre",
+        "urgent": "Urgentes",
+        "cleanup": "Faire le tri",
+        "drafts": "Préparer des réponses pour tous"
+      }
+    },
     "coAuthorInvite": "{{name}} vous a invité à co-écrire sa publication",
     "coAuthorAccepted": "{{name}} est maintenant co-auteur de votre publication",
     "title": "Notifications",
