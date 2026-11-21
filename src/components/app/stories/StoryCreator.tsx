@@ -13,13 +13,14 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AtSign, Pencil, RefreshCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
 import Music from '@/components/ui/cut-icons/music';
 import Check from '@/components/ui/cut-icons/check';
 import { SoundPicker } from '@/features/post/components/SoundPicker';
 import type { AttachedSound } from '@/features/post/hooks/usePostSound';
-import { soundWindow } from '@/lib/sound-window';
+import { bindSoundWindow, soundWindow } from '@/lib/sound-window';
 import { searchUsersForDM } from '@/lib/api/dehub/dm';
 import type { DeHubUser } from '@/lib/api/dehub';
 import { getStoryShelf, STORY_LIFETIMES, type StoryAudience, type StoryLifetime, type StorySong } from '@/lib/api/dehub/stories';
@@ -206,7 +207,7 @@ function Capture({ onPicked, onClose, remixLabel }: { onPicked: (m: Media) => vo
         )}
       </div>
       <div data-sc-top>
-        <button type="button" data-sc-btn data-st-dark-glass onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-sc-close onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
         {remixLabel && <span data-sc-chip data-st-dark-glass className="min-w-0"><span className="truncate">{remixLabel}</span></span>}
         <span className="flex-1" />
         {camera === 'on' && (
@@ -401,16 +402,19 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
 
   // ── Song ──────────────────────────────────────────────────────────
   const songAudio = useRef<HTMLAudioElement | null>(null);
-  useEffect(() => {
+  const selectSong = (next: AttachedSound | null) => {
     songAudio.current?.pause();
-    if (!song) return;
-    const a = new Audio(song.url.split('#')[0]);
-    a.loop = true;
-    a.currentTime = soundWindow(song.url)?.start ?? 0;
-    a.play().catch(() => {});
-    songAudio.current = a;
-    return () => a.pause();
-  }, [song]);
+    setSong(next);
+    if (!next) return;
+    // Keep playback inside the selection tap for iOS Safari.
+    const audio = songAudio.current ?? new Audio();
+    songAudio.current = audio;
+    bindSoundWindow(audio);
+    audio.src = next.url;
+    audio.loop = true;
+    void audio.play().catch(() => {});
+  };
+  useEffect(() => () => songAudio.current?.pause(), []);
 
   // ── Video preview loop inside the trim ───────────────────────────
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -523,14 +527,15 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
             <div data-sv-song data-st-dark-glass style={{ top: 72 }}>
               <Music className="w-4 h-4" />
               <span>{song.title}{song.creator ? ` · ${song.creator}` : ''}</span>
-              <button type="button" className="ml-1 opacity-80" onClick={() => setSong(null)} aria-label={t('stories.removeSong', { defaultValue: 'Remove song' })}><Close className="w-3.5 h-3.5" /></button>
+              <button type="button" className="ml-1 opacity-80" onClick={() => selectSong(null)} aria-label={t('stories.removeSong', { defaultValue: 'Remove song' })}><Close className="w-3.5 h-3.5" /></button>
             </div>
           )}
         </div>
       </div>
 
       <div data-sc-top>
-        <button type="button" data-sc-btn data-st-dark-glass onClick={onBack} aria-label={t('common.back', { defaultValue: 'Back' })}><Close className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-st-dark-glass onClick={onBack} aria-label={t('common.back', { defaultValue: 'Back' })}><Back className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-sc-close onClick={() => { URL.revokeObjectURL(media.url); onClose(); }} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="w-5 h-5" /></button>
         {remixLabel && <span data-sc-chip data-st-dark-glass className="min-w-0"><span className="truncate">{remixLabel}</span></span>}
         <span className="flex-1" />
       </div>
@@ -671,7 +676,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         <SoundPicker
           isOpen={soundOpen}
           onClose={() => setSoundOpen(false)}
-          onSelect={s => setSong(s)}
+          aboveMomentEditor
+          onSelect={selectSong}
           currentSound={song}
           clipSeconds={isVideo ? Math.round(trim[1] - trim[0]) : 15}
         />
