@@ -77,7 +77,7 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
   const [articleBody, setArticleBody] = useDraftState(draftScope + ':articleBody', '');
   const finishPost = () => { setArticleBody.complete(articleBody, ''); setArticleBody.clear(); setArticleMode(false); setArticleMode.clear(); onClose(); };
   const { user: authUser } = useAuth();
-  const { state, actions, computed, refs } = usePostForm(finishPost, setLiveStream, draftScope, quotedPost, onPosted);
+  const { state, actions, computed, refs } = usePostForm(finishPost, setLiveStream, draftScope, quotedPost, onPosted, isOpen);
   const { attachedSound, selectSound, clearSound } = usePostSound();
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);

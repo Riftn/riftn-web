@@ -474,6 +474,7 @@ export function PostActionBar({
             <PopoverTrigger asChild>
               <button 
                 type="button" 
+                aria-label={_copy("copy.bc1b88907d3b", { defaultValue: "Audio" })}
                 className="p-2 hover:bg-white/10 rounded-xl transition-colors"
               >
                 <Music className="w-5 h-5 text-white" />
