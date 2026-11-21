@@ -8,6 +8,6 @@ describe('DEX action errors', () => {
     expect(result).not.toContain('requestUrl');
   });
   it('preserves actionable validation errors', () => {
-    expect(dexActionError(new Error('Insufficient DHB on the selected chain'))).toBe('Insufficient DHB on the selected chain');
+    expect(dexActionError(new Error('Insufficient DHB on the selected chain'))).toBe('Insufficient tokens on the selected chain');
   });
 });
