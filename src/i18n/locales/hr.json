@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Pregledi stranica",
       "pageViews": "— zahtjevi koje Cloudflare svrstava u učitavanja stranica, a ne slike, skripte ili API pozive.",
       "botsTerm": "Botovi su uključeni",
-      "bots": "— ovo su sirovi brojevi na rubu mreže, pa su u njima i pretraživači, nadzornici dostupnosti i skriptirani klijenti. Možete ih sami vidjeti u raščlambi po preglednicima iznad, gdje su stavke poput „Curl” i „Nepoznato” automatizirani promet, a ne ljudi. Filtriranje botova traži plaćeni Cloudflare plan koji nemamo, a tiho oduzimanje procjene učinilo bi brojke manje provjerljivima, a ne više.",
+      "bots": "— ovo su sirovi brojevi na rubu mreže, pa su u njima i pretraživači, nadzornici dostupnosti i skriptirani klijenti. Možete ih sami vidjeti u raščlambi po preglednicima iznad, gdje su stavke poput „Curl” i „Nepoznato” automatizirani promet, a ne ljudi. Sve je teže razlikovati botove od stvarnih posjetitelja i uskoro ih u ovim statistikama više neće biti moguće razlikovati, pa ih nema smisla pokušavati filtrirati.",
       "totalTerm": "Zbrojevi raspona",
       "total": "— pregledi stranica i zahtjevi zbrajaju se kroz raspon. Broj posjetitelja namjerno se ne zbraja u „ukupan broj posjetitelja”, jer bi netko tko je bio ovdje u ponedjeljak i utorak bio brojan dvaput.",
       "peakTerm": "Najprometniji sat / dan",

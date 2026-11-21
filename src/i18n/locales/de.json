@@ -4198,7 +4198,7 @@
       "pageViewsTerm": "Seitenaufrufe",
       "pageViews": "– Anfragen, die Cloudflare als Seitenaufrufe einstuft, nicht als Bilder, Skripte oder API-Aufrufe.",
       "botsTerm": "Bots sind enthalten",
-      "bots": "– das sind rohe Edge-Zählungen, also stecken Crawler, Uptime-Monitore und automatisierte Clients mit drin. Du siehst sie selbst in der Browser-Aufschlüsselung oben, wo Einträge wie „Curl\" und „Unbekannt\" automatisierter Traffic sind statt Menschen. Bots herauszufiltern braucht einen kostenpflichtigen Cloudflare-Tarif, den wir nicht haben, und eine Schätzung stillschweigend abzuziehen würde die Zahlen weniger überprüfbar machen, nicht mehr.",
+      "bots": "– das sind rohe Edge-Zählungen, also stecken Crawler, Uptime-Monitore und automatisierte Clients mit drin. Du siehst sie selbst in der Browser-Aufschlüsselung oben, wo Einträge wie „Curl\" und „Unbekannt\" automatisierter Traffic sind statt Menschen. Bots lassen sich immer schwerer von menschlichen Besuchern unterscheiden und werden in diesen Statistiken bald nicht mehr von ihnen zu unterscheiden sein, sodass Filterversuche zwecklos sind.",
       "totalTerm": "Summen im Zeitraum",
       "total": "– Seitenaufrufe und Anfragen werden über den Zeitraum summiert. Besucherzahlen werden bewusst nicht zu einer „Gesamtbesucher\"-Zahl addiert, denn wer am Montag und am Dienstag hier war, würde doppelt zählen.",
       "peakTerm": "Stärkste Stunde / stärkster Tag",

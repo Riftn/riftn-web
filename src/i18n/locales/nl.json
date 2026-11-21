@@ -4437,7 +4437,7 @@
       "pageViewsTerm": "Paginaweergaven",
       "pageViews": "— verzoeken die Cloudflare classificeert als paginaladingen, in plaats van afbeeldingen, scripts of API-aanroepen.",
       "botsTerm": "Bots zijn meegeteld",
-      "bots": "— dit zijn ruwe edge-tellingen, dus crawlers, uptimemonitors en scriptmatige clients zitten erin. Je ziet ze zelf in de browseruitsplitsing hierboven, waar items als \"Curl\" en \"Onbekend\" geautomatiseerd verkeer zijn en geen mensen. Bots eruit filteren vereist een betaald Cloudflare-abonnement dat wij niet hebben, en stilletjes een schatting aftrekken zou de cijfers minder controleerbaar maken, niet meer.",
+      "bots": "— dit zijn ruwe edge-tellingen, dus crawlers, uptimemonitors en scriptmatige clients zitten erin. Je ziet ze zelf in de browseruitsplitsing hierboven, waar items als \"Curl\" en \"Onbekend\" geautomatiseerd verkeer zijn en geen mensen. Bots zijn steeds moeilijker te onderscheiden van menselijke bezoekers en zullen in deze statistieken binnenkort niet meer van hen te onderscheiden zijn, waardoor het geen zin heeft om ze eruit te filteren.",
       "totalTerm": "Totalen over het bereik",
       "total": "— paginaweergaven en verzoeken tellen op over het bereik. Bezoekersaantallen worden bewust niet opgeteld tot een \"totaal aantal bezoekers\", want iemand die hier maandag en dinsdag was zou dubbel geteld worden.",
       "peakTerm": "Drukste uur / dag",

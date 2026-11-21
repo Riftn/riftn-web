@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Lehevaatamised",
       "pageViews": "— päringud, mida Cloudflare liigitab lehe laadimisteks, mitte piltideks, skriptideks või API-kutseteks.",
       "botsTerm": "Robotid on sees",
-      "bots": "— need on toored loendused serva peal, seega on sees ka roomajad, saadavuse jälgijad ja skriptitud kliendid. Näed neid ise ülal olevas brauserijaotuses, kus kirjed nagu „Curl“ ja „Teadmata“ on automaatne liiklus, mitte inimesed. Robotite väljafiltreerimine nõuab tasulist Cloudflare'i paketti, mida meil pole, ja hinnangu vaikne mahaarvamine muudaks numbrid vähem kontrollitavaks, mitte rohkem.",
+      "bots": "— need on toored loendused serva peal, seega on sees ka roomajad, saadavuse jälgijad ja skriptitud kliendid. Näed neid ise ülal olevas brauserijaotuses, kus kirjed nagu „Curl“ ja „Teadmata“ on automaatne liiklus, mitte inimesed. Botte on üha raskem inimestest külastajatest eristada ja peagi on see selles statistikas võimatu, seega pole mõtet neid välja filtreerida.",
       "totalTerm": "Vahemiku kogusummad",
       "total": "— lehevaatamised ja päringud liidetakse üle vahemiku. Külastajate arve teadlikult ei liideta „külastajate koguarvuks“, sest keegi, kes käis siin esmaspäeval ja teisipäeval, loetaks kaks korda.",
       "peakTerm": "Kõige tihedam tund / päev",

@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Sivunäytöt",
       "pageViews": "— pyynnöt, jotka Cloudflare luokittelee sivulatauksiksi eikä kuviksi, skripteiksi tai API-kutsuiksi.",
       "botsTerm": "Botit ovat mukana",
-      "bots": "— nämä ovat raakoja laskuja reunalla, joten mukana ovat myös indeksointirobotit, käytettävyysvalvojat ja skriptatut asiakkaat. Näet ne itse yllä olevasta selainerittelystä, jossa merkinnät kuten ”Curl” ja ”Tuntematon” ovat automaattista liikennettä eivätkä ihmisiä. Bottien suodattaminen vaatisi maksullisen Cloudflare-tason, jota meillä ei ole, ja arvion hiljainen vähentäminen tekisi luvuista vähemmän tarkistettavia, ei enemmän.",
+      "bots": "— nämä ovat raakoja laskuja reunalla, joten mukana ovat myös indeksointirobotit, käytettävyysvalvojat ja skriptatut asiakkaat. Näet ne itse yllä olevasta selainerittelystä, jossa merkinnät kuten ”Curl” ja ”Tuntematon” ovat automaattista liikennettä eivätkä ihmisiä. Botteja on yhä vaikeampi erottaa ihmiskävijöistä, ja pian niitä ei enää voi erottaa näissä tilastoissa, joten niiden suodattamista ei kannata yrittää.",
       "totalTerm": "Aikavälin summat",
       "total": "— sivunäytöt ja pyynnöt lasketaan yhteen koko aikavälillä. Kävijämääriä ei tarkoituksella lasketa yhteen ”kävijöiden kokonaismääräksi”, koska maanantaina ja tiistaina käynyt laskettaisiin kahdesti.",
       "peakTerm": "Vilkkain tunti / päivä",

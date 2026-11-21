@@ -4260,7 +4260,7 @@
       "pageViewsTerm": "Mga page view",
       "pageViews": "— mga kahilingang inuuri ng Cloudflare bilang page load, hindi larawan, script o API call.",
       "botsTerm": "Kasama ang mga bot",
-      "bots": "— hilaw na bilang ito sa edge, kaya kasama rito ang mga crawler, uptime monitor at scripted client. Makikita mo mismo sa breakdown ng browser sa itaas, kung saan ang mga entry gaya ng \"Curl\" at \"Hindi alam\" ay awtomatikong trapiko at hindi tao. Ang pagsala ng bot ay nangangailangan ng bayad na Cloudflare plan na wala kami, at ang tahimik na pagbawas ng tantiya ay gagawing mas mahirap suriin ang mga numero, hindi mas madali.",
+      "bots": "— hilaw na bilang ito sa edge, kaya kasama rito ang mga crawler, uptime monitor at scripted client. Makikita mo mismo sa breakdown ng browser sa itaas, kung saan ang mga entry gaya ng \"Curl\" at \"Hindi alam\" ay awtomatikong trapiko at hindi tao. Pahirap nang pahirap pag-ibahin ang mga bot at totoong bisita, at sa lalong madaling panahon ay hindi na sila makikilala sa mga estadistikang ito, kaya walang saysay subukang salain ang mga bot.",
       "totalTerm": "Kabuuan ng saklaw",
       "total": "— nagsasama-sama ang mga page view at kahilingan sa buong saklaw. Sadyang hindi pinagsasama ang bilang ng bisita sa isang \"kabuuang bisita\", dahil ang taong narito noong Lunes at Martes ay mabibilang nang dalawang beses.",
       "peakTerm": "Pinakaabalang oras / araw",

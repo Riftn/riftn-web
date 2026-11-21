@@ -4204,7 +4204,7 @@
       "pageViewsTerm": "Page view dem",
       "pageViews": "— request dem weh Cloudflare di classify lek page load dem, no be picture dem, script dem or API call dem.",
       "botsTerm": "Bot dem dei insaid",
-      "bots": "— dis dem na raw edge count dem, so crawler dem, uptime monitor dem an scripted client dem dei insaid. Yu fit si-am yuaself fo di browser breakdown weh dei op, wia entry dem lek “Curl” an “Unknown” na automated traffic, no be pesin dem. For filter bot dem komot, i nid wan paid Cloudflare tier weh wi no di run, an if wi kwaitli subtract wan estimate i go mek di number dem les checkable, no moa checkable.",
+      "bots": "— dis dem na raw edge count dem, so crawler dem, uptime monitor dem an scripted client dem dei insaid. Yu fit si-am yuaself fo di browser breakdown weh dei op, wia entry dem lek “Curl” an “Unknown” na automated traffic, no be pesin dem. E di hard pass for tell bot dem from real visitor dem, an soon wi no go fit tell dem apart for dis stats, so e no get use for try filter dem komot.",
       "totalTerm": "Range total dem",
       "total": "— page view dem an request dem di add op across di range. Visitor count dem, dem no purposely sum-am go wan headline “total visitors”, bikos som pesin weh dei ya Monday an Tuesday go dem count-am tuways.",
       "peakTerm": "Awa / dei weh get plenti activity pas",

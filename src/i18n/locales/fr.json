@@ -4251,7 +4251,7 @@
       "pageViewsTerm": "Pages vues",
       "pageViews": "— requêtes que Cloudflare classe comme chargements de page, plutôt qu'images, scripts ou appels d'API.",
       "botsTerm": "Les bots sont inclus",
-      "bots": "— ce sont des comptages bruts de l'edge, donc les robots d'indexation, les moniteurs de disponibilité et les clients automatisés y figurent. Vous pouvez les voir vous-même dans la répartition par navigateur ci-dessus, où des entrées comme « Curl » et « Inconnu » sont du trafic automatisé et non des personnes. Filtrer les bots nécessite une offre Cloudflare payante que nous n'avons pas, et soustraire discrètement une estimation rendrait les chiffres moins vérifiables, pas plus.",
+      "bots": "— ce sont des comptages bruts de l'edge, donc les robots d'indexation, les moniteurs de disponibilité et les clients automatisés y figurent. Vous pouvez les voir vous-même dans la répartition par navigateur ci-dessus, où des entrées comme « Curl » et « Inconnu » sont du trafic automatisé et non des personnes. Les bots sont de plus en plus difficiles à distinguer des visiteurs humains et seront bientôt indiscernables dans ces statistiques, si bien qu’essayer de les filtrer ne sert à rien.",
       "totalTerm": "Totaux de la plage",
       "total": "— les pages vues et les requêtes s'additionnent sur la plage. Les visiteurs ne sont volontairement pas additionnés en un « total de visiteurs », car quelqu'un venu lundi et mardi serait compté deux fois.",
       "peakTerm": "Heure / jour le plus chargé",

@@ -4258,7 +4258,7 @@
       "pageViewsTerm": "Page views",
       "pageViews": "— requests Cloudflare classifies as page loads, rather than images, scripts or API calls.",
       "botsTerm": "Bots are included",
-      "bots": "— these are raw edge counts, so crawlers, uptime monitors and scripted clients are in them. You can see them yourself in the browser breakdown above, where entries like “Curl” and “Unknown” are automated traffic rather than people. Filtering bots out needs a paid Cloudflare tier we do not run, and quietly subtracting an estimate would make the numbers less checkable, not more.",
+      "bots": "— these are raw edge counts, so crawlers, uptime monitors and scripted clients are in them. You can see them yourself in the browser breakdown above, where entries like “Curl” and “Unknown” are automated traffic rather than people. Bots are getting harder to distinguish from human visitors and will soon be indistinguishable in these stats, so there’s little point in trying to filter them out.",
       "totalTerm": "Range totals",
       "total": "— page views and requests add up across the range. Visitor counts deliberately are not summed into a headline \"total visitors\", because someone here on Monday and Tuesday would be counted twice.",
       "peakTerm": "Busiest hour / day",

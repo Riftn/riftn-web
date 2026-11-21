@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Səhifə baxışları",
       "pageViews": "— Cloudflare-in şəkil, skript və ya API çağırışı deyil, səhifə yüklənməsi kimi təsnif etdiyi sorğular.",
       "botsTerm": "Botlar daxildir",
-      "bots": "— bunlar kənar şəbəkədəki xam saylardır, ona görə içərisində crawler-lər, işləmə monitorları və skript müştəriləri də var. Onları yuxarıdakı brauzer bölgüsündə özünüz görə bilərsiniz; «Curl» və «Naməlum» kimi yazılar insan deyil, avtomatik trafikdir. Botları süzmək üçün bizdə olmayan ödənişli Cloudflare planı lazımdır və təxmini rəqəmi səssizcə çıxmaq rəqəmləri daha az yoxlanıla bilən edərdi, daha çox yox.",
+      "bots": "— bunlar kənar şəbəkədəki xam saylardır, ona görə içərisində crawler-lər, işləmə monitorları və skript müştəriləri də var. Onları yuxarıdakı brauzer bölgüsündə özünüz görə bilərsiniz; «Curl» və «Naməlum» kimi yazılar insan deyil, avtomatik trafikdir. Botları insan ziyarətçilərdən ayırmaq getdikcə çətinləşir və tezliklə bu statistikada onları fərqləndirmək mümkün olmayacaq, ona görə də onları süzməyə çalışmağın mənası yoxdur.",
       "totalTerm": "Aralıq cəmləri",
       "total": "— səhifə baxışları və sorğular aralıq boyunca toplanır. Ziyarətçi sayları bilərəkdən «ümumi ziyarətçi»yə toplanmır, çünki bazar ertəsi və çərşənbə axşamı gələn iki dəfə sayılardı.",
       "peakTerm": "Ən sıx saat / gün",
