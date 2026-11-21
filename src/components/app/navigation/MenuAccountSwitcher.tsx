@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AuthContext } from '@/contexts/AuthContext';
 import { buildAvatarUrl, deviceWidth } from '@/lib/media-url';
+import { SavedProfileName } from '@/components/app/profile/SavedProfileName';
 import {
   listProfiles,
   currentProfileId,
@@ -30,12 +31,8 @@ import {
 /** Faces shown in the pill besides your own. */
 const MAX_OTHERS = 2;
 
-function shortAddress(address: string): string {
-  return address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
-}
-
 function label(profile: StoredProfile): string {
-  return profile.name || profile.username || shortAddress(profile.address);
+  return profile.name || profile.username || '';
 }
 
 function Face({ address, path, name, className }: { address?: string | null; path?: string | null; name: string; className: string }) {
@@ -152,11 +149,15 @@ export function MenuAccountSwitcher({ onNavigate }: { onNavigate?: () => void })
             >
               <Face address={profile.address} path={profile.avatarPath} name={label(profile)} className="h-8 w-8 flex-shrink-0 rounded-full" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium text-white">{label(profile)}</span>
-                <span className="block truncate text-[12px] text-zinc-500">
-                  {profile.username ? `@${profile.username}` : shortAddress(profile.address)}
-                  {!profile.session && !isActive ? ` · ${t('settings.profileSignedOut', 'sign in to switch')}` : ''}
-                </span>
+                <SavedProfileName profile={profile} className="font-medium text-white" />
+                {(profile.username || (!profile.session && !isActive)) && (
+                  <span className="block truncate text-[12px] text-zinc-500">
+                    {[
+                      profile.username && `@${profile.username}`,
+                      !profile.session && !isActive && t('settings.profileSignedOut', 'sign in to switch'),
+                    ].filter(Boolean).join(' · ')}
+                  </span>
+                )}
               </span>
               {isActive && <Check className="h-4 w-4 flex-shrink-0 text-white" />}
             </button>

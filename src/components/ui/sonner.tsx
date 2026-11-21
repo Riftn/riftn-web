@@ -109,8 +109,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
               "shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-xl",
               TOAST_CLASSES,
               isMobile ? "" : TOAST_FIT_CLASSES,
-              // Room for the X, so it never sits on the end of the sentence.
-              "has-[[data-close-button]]:pe-10",
             ].join(" "),
             title: TITLE_CLASSES,
             content: CONTENT_CLASSES,
