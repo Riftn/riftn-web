@@ -342,7 +342,14 @@ export async function decryptThread(
   if (!peer && me && /^[0-9a-f]{24}$/i.test(conversationId)) {
     const conversation = await queryClient.fetchQuery({
       queryKey: [...messagesKeys.conversation(conversationId), 'participants', me],
-      queryFn: () => getConversation(conversationId, me),
+      queryFn: async () => {
+        try {
+          return await getConversation(conversationId, me);
+        } catch {
+          const contacts = await getContacts(me);
+          return contacts.find(contact => contact.id === conversationId) ?? null;
+        }
+      },
       staleTime: 60_000,
     }).catch(() => null);
     peer = conversation?.otherUser?.address?.toLowerCase() || null;
