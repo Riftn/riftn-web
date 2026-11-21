@@ -1375,6 +1375,7 @@
     "noFreeAccess": "Hiç kimseye ücretsiz erişim yok. DM sohbetinden erişim ver.",
     "revoke": "İptal Et",
     "showStories": "Ana sayfada hikâyeleri göster",
+    "showStoriesDesc": "Hikâyeler kapalıyken canlı yayınlar görünmeye devam eder.",
     "storiesSaveFailed": "Hikâye ayarınız kaydedilemedi.",
     "hideWatched": "İzlenen videoları gizle",
     "hideWatchedDesc": "Zaten izlediğiniz videoları anasayfanızdan kaldırın. İzlenen videolar her iki durumda da işaretli kalır. Varsayılan olarak kapalı.",

@@ -3049,6 +3049,7 @@ function ContentSettings() {
             icon={Eye}
             anchor="show-stories"
             title={t('settings.showStories', 'Show Stories on Home')}
+            description={t('settings.showStoriesDesc', 'Live broadcasts stay visible when Stories are off.')}
             defaultChecked={storiesEnabled}
             onCheckedChange={setStoriesEnabled}
             disabled={!canChange}

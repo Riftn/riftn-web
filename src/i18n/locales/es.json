@@ -1375,6 +1375,7 @@
     "noFreeAccess": "Ningún usuario tiene acceso gratuito. Conceder acceso desde una conversación DM.",
     "revoke": "Revocar",
     "showStories": "Mostrar historias en Inicio",
+    "showStoriesDesc": "Las transmisiones en directo siguen visibles al desactivar las historias.",
     "storiesSaveFailed": "No se pudo guardar tu preferencia de historias.",
     "hideWatched": "Ocultar videos vistos",
     "hideWatchedDesc": "Mantener los videos que ya has reproducido fuera de tus feeds. Los videos vistos se mantienen marcados de todas formas. Desactivado por defecto.",

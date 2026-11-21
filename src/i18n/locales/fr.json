@@ -1375,6 +1375,7 @@
     "noFreeAccess": "Aucun utilisateur n’a accès gratuitement. Accordez l’accès depuis une conversation DM.",
     "revoke": "Révoquer",
     "showStories": "Afficher les stories sur l’accueil",
+    "showStoriesDesc": "Les directs restent visibles lorsque les stories sont désactivées.",
     "storiesSaveFailed": "Impossible d’enregistrer votre préférence pour les stories.",
     "hideWatched": "Masquer les vidéos regardées",
     "hideWatchedDesc": "Gardez les vidéos que vous avez déjà regardées hors de vos flux. Les vidéos regardées restent marquées de toute façon. Désactivé par défaut.",
