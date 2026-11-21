@@ -164,7 +164,7 @@ export interface SendTipResult {
   confirmed: Promise<string>;
 }
 
-export async function sendTip(params: SendTipParams & { skipBalanceCheck?: boolean; signerAddress?: string; beforeSubmit?: () => void }): Promise<SendTipResult> {
+export async function sendTip(params: SendTipParams & { skipBalanceCheck?: boolean; signerAddress?: string; beforeSubmit?: () => void | Promise<void> }): Promise<SendTipResult> {
   const chainId = params.chainId || BASE_CHAIN_ID;
   const chainConfig = getChainConfig(chainId);
 

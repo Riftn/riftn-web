@@ -130,7 +130,7 @@ BEGIN
     END IF;
     INSERT INTO public.event_gate_quotes AS existing (event_id,payer,recipient,amount,claim)
     VALUES (p_event,wallet,lower(e.creator_wallet_address),e.gate_fee,p_claim)
-    ON CONFLICT (event_id,payer) DO UPDATE SET claim = excluded.claim, recipient = excluded.recipient, amount = excluded.amount
+    ON CONFLICT (event_id,payer) DO UPDATE SET claim = excluded.claim, recipient = excluded.recipient, amount = excluded.amount, created_at = now()
       WHERE existing.claim IS NULL;
   END IF;
 
@@ -141,7 +141,10 @@ BEGIN
   END IF;
   IF p_action = 'prepare' THEN
     RETURN jsonb_build_object('canSubmit', q.claim = p_claim, 'reference', q.reference::text,
-      'amount', q.amount, 'recipient', q.recipient, 'hash', q.tx_hash);
+      'amount', q.amount, 'recipient', q.recipient, 'hash', q.tx_hash,
+      'staleClaim', CASE WHEN q.tx_hash IS NULL AND q.created_at < now() - interval '5 minutes' THEN q.claim END);
+  ELSIF p_action = 'check_claim' THEN
+    RETURN jsonb_build_object('canSubmit', q.claim = p_claim AND q.tx_hash IS NULL);
   ELSIF p_action = 'release' THEN
     UPDATE public.event_gate_quotes SET claim = NULL WHERE reference = q.reference AND claim = p_claim AND tx_hash IS NULL;
     RETURN '{"released":true}';
@@ -155,7 +158,11 @@ BEGIN
   END IF;
 
   IF q.tx_hash = h AND q.request_id IS NOT NULL THEN
-    SELECT CASE WHEN status_code = 200 THEN content::jsonb END INTO batch FROM net._http_response WHERE id = q.request_id;
+    BEGIN
+      SELECT CASE WHEN status_code = 200 THEN content::jsonb END INTO batch FROM net._http_response WHERE id = q.request_id;
+    EXCEPTION WHEN invalid_text_representation THEN
+      batch := NULL;
+    END;
     IF jsonb_typeof(batch) = 'array' THEN
       SELECT item->'result' INTO receipt FROM jsonb_array_elements(batch) item WHERE item->>'id' = '1';
       SELECT public.holder_gate_hex_to_numeric(item->>'result') INTO height FROM jsonb_array_elements(batch) item WHERE item->>'id' = '2';

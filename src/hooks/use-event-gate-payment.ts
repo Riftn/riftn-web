@@ -84,7 +84,7 @@ export function useEventGatePayment({
       } as any), walletAddress!);
       if (error) throw new Error(error.message);
       const result = data as { paid?: boolean; pending?: boolean; canSubmit?: boolean; reference?: string;
-        mismatch?: boolean; amount?: number; recipient?: string; reverted?: boolean; error?: string; hash?: string } | null;
+        staleClaim?: string; mismatch?: boolean; amount?: number; recipient?: string; reverted?: boolean; error?: string; hash?: string } | null;
       if (result?.error) throw new Error(result.error);
       if (!result) throw new Error('Missing event payment response');
       return result;
@@ -105,7 +105,10 @@ export function useEventGatePayment({
           toast.loading(_copy("copy.c03dae247d6d", { defaultValue: "Processing payment..." }), { id: 'gate-payment' });
           const sent = await sendTip({
             tokenId: quote.reference, amount, to: quote.recipient, chainId, signerAddress,
-            beforeSubmit: () => { submitting = true; },
+            beforeSubmit: async () => {
+              if (!(await request('check_claim')).canSubmit) throw new Error('This payment is already being handled.');
+              submitting = true;
+            },
           });
           pending = { hash: sent.hash, claim };
           const confirmed = sent.confirmed.catch(() => null);
@@ -126,7 +129,15 @@ export function useEventGatePayment({
           const hash = window.prompt(_copy('events.recoverPayment', {
             defaultValue: 'A payment has already been started. Enter its Base transaction hash to check the receipt.',
           }))?.trim();
-          if (!hash) return;
+          if (!hash) {
+            if (quote.staleClaim && window.confirm(_copy('events.clearUnusedPayment', {
+              defaultValue: 'Only clear this attempt if you closed the original wallet request and your wallet shows no pending or completed entry payment. Clear the unused attempt?',
+            }))) {
+              await request('release', undefined, quote.staleClaim);
+              toast.info(_copy('events.paymentCleared', { defaultValue: 'Unused attempt cleared. You can now start a payment.' }));
+            }
+            return;
+          }
           pending = { hash, claim };
         }
         let result = await request('confirm', pending.hash);
