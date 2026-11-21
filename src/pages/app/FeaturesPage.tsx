@@ -681,15 +681,15 @@ function FeatureCard({
           <StatusBadge status={feature.status} />
           {/* A short tag on a live request, e.g. "Future review" on Queued. */}
           {feature.status !== 'declined' && feature.status_note?.trim() && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg border backdrop-blur-xl whitespace-nowrap bg-amber-400/15 text-amber-300/90 border-amber-300/25">
-              {feature.status_note.trim()}
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg border backdrop-blur-xl break-words bg-amber-400/15 text-amber-300/90 border-amber-300/25">
+              <TranslatableText publicContent text={feature.status_note.trim()} as="span" hideControls />
             </span>
           )}
         </div>
         {/* The owners' reason for ruling it out. */}
         {notFeasibleReason && (
           <p className="text-zinc-400 text-xs leading-relaxed">
-            <span className="text-zinc-300 font-medium">{_copy("copy.ad389aa4c08e", { defaultValue: "Why:" })}</span>{' '}{notFeasibleReason}
+            <span className="text-zinc-300 font-medium">{_copy("copy.ad389aa4c08e", { defaultValue: "Why:" })}</span>{' '}<TranslatableText publicContent text={notFeasibleReason} as="span" hideControls />
           </p>
         )}
 
