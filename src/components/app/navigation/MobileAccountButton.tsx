@@ -32,7 +32,7 @@ export function MobileAccountButton({ action, onClick, onPointerDown, tabIndex }
       aria-haspopup="dialog"
       onClick={onClick}
       onPointerDown={onPointerDown}
-      className={`flex h-11 w-11 shrink-0 items-center text-foreground transition-opacity active:opacity-70 ${signingUp ? 'justify-start' : 'justify-end'}`}
+      className={`flex h-11 w-11 shrink-0 items-center text-white transition-opacity active:opacity-70 ${signingUp ? 'justify-start' : 'justify-end'}`}
     >
       <Glyph size={24} />
     </button>
