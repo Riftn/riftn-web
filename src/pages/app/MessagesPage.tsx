@@ -36,7 +36,7 @@ import { useRowLongPress } from '@/hooks/use-row-long-press';
 import { MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
 import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
 import '@/styles/messages-cards.css';
-import { useChatCards } from '@/lib/chat-cards';
+import { useFeedSeparator } from '@/lib/feed-separator';
 
 import { VerifiedBadge } from '@/components/app/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -545,8 +545,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // Groups / Requests (/ Archived) tabs: in the header pill on computers, in
   // a row at the top of the list on phones.
   const cards = !fullscreen;
-  // Settings → Appearance → Chats as cards, off: the same page as a plain list.
-  const plainList = !useChatCards() && cards;
+  const plainList = useFeedSeparator() === 'line' && cards;
   const deskCards = cards && !phonePill;
   const clearHistory = useClearChatHistory();
   const [showArchived, setShowArchived] = useState(false);
