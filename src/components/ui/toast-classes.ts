@@ -29,6 +29,7 @@
  */
 export const TOAST_CLASSES = [
   'flex-col items-stretch text-start',
+  '[&:has([data-close-button])_[data-title]]:pe-7',
   // A loading toast has an icon-sized Riftn mark and one short status label.
   // Keep those on the same row; the generic column layout used to put the
   // loader above the copy. `data-type` lives on this element, so this must be
@@ -110,7 +111,7 @@ export const TOASTER_COLUMN_CLASSES =
  * sized and weighted well clear of it. Sonner's own `[data-title]` rule is
  * `:where()`-wrapped, so no `!` is needed to beat its 500 weight.
  */
-export const TITLE_CLASSES = 'text-base font-bold leading-tight group-has-[[data-close-button]]:pe-7';
+export const TITLE_CLASSES = 'text-base font-bold leading-tight';
 
 /**
  * Sonner's title/description gap is 2px, tuned for a 13px title. Under a 16px
@@ -138,18 +139,14 @@ export const ICON_CLASSES = 'hidden group-[[data-type=loading]]:flex';
 /**
  * Both buttons borrow the feed filter chip (see feeds/GlassFilterRow):
  * the same top-left gradient, hairline border, and the pair of inset
- * highlights — bright along the top edge, faint along the bottom — that give it
- * the raised edge. Heights match too (the nav pill is pinned to 35px).
+ * highlights — bright along the top edge and faint along the bottom.
  *
  * This is the list for a button written inside a toast's own description, where
  * sonner has no rules to fight. For sonner's `action`/`cancel` slots, use
  * SLOT_BUTTON_CLASSES.
  */
 export const BUTTON_CLASSES = [
-  // Paired toast actions share a narrow row. Never let a label make one
-  // button taller than its neighbour; min-width lets flex divide the row and
-  // truncation is the final guard for unusually long translations.
-  'inline-flex h-9 min-w-0 w-full flex-1 items-center justify-center overflow-hidden whitespace-nowrap text-ellipsis px-4',
+  'inline-flex min-h-10 min-w-0 w-full items-center justify-center px-4 py-2 text-center',
   'rounded-lg border border-white/30',
   'bg-gradient-to-br from-white/20 via-white/10 to-white/5',
   'backdrop-blur-xl',
@@ -181,7 +178,7 @@ export const BUTTON_CLASSES = [
  * grew to the card's full height and spilled out of it.
  */
 export const SLOT_BUTTON_CLASSES = [
-  'inline-flex !ms-0 mt-2 !h-9 w-full items-center justify-center !px-4',
+  'inline-flex !ms-0 mt-2 !h-auto min-h-10 w-full items-center justify-center !px-4 !py-2 text-center',
   '!rounded-lg !border !border-white/30',
   // `!bg-transparent` clears the colour layer of sonner's `background`
   // shorthand — white in the dark theme, so without it the gradient sat on a
