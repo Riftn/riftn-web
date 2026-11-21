@@ -1,3 +1,4 @@
+import { parseGuestTransfer } from './guest-transfer.ts';
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
@@ -359,19 +360,6 @@ const DEHUB_KEYWORDS = [
   'your token', 'your platform', 'this app', 'this platform'
 ];
 
-// Keywords that indicate token transfer or purchase requests
-const TOKEN_TRANSFER_KEYWORDS = [
-  'send', 'transfer', 'pay', 'tip', 'give',
-  'send tokens', 'transfer tokens', 'send dhb', 'transfer dhb',
-  'send coins', 'transfer coins', 'pay with', 'tip with'
-];
-
-const TOKEN_PURCHASE_KEYWORDS = [
-  'buy', 'purchase', 'swap', 'exchange', 'get tokens',
-  'buy dhb', 'purchase dhb', 'buy tokens', 'purchase tokens',
-  'swap for dhb', 'exchange for dhb', 'get dhb'
-];
-
 // Keywords that indicate a real swap request the AI should extract structured params for
 const SWAP_INTENT_KEYWORDS = [
   'swap', 'exchange', 'convert', 'trade',
@@ -396,67 +384,6 @@ const KNOWN_TOKENS: Record<string, { address: string; symbol: string; decimals: 
 function hasSwapIntent(message: string): boolean {
   const lower = message.toLowerCase();
   return SWAP_INTENT_KEYWORDS.some(kw => lower.includes(kw));
-}
-
-// Parse token transaction from message
-function parseTokenTransaction(message: string): { type: 'transfer' | 'purchase' | null; amount?: string; recipient?: string; token?: string } {
-  const lowerMessage = message.toLowerCase();
-  
-  // Check for transfer patterns like "send 100 DHB to @user1" or "send 100 to bailey"
-  // More flexible regex to handle various formats
-  const transferPatterns = [
-    // "send 100 DHB to @bailey" or "send 100 to bailey"
-    /(?:send|transfer|pay|tip|give)\s+(\d+(?:\.\d+)?)\s*(?:dhb|tokens?|coins?)?\s*(?:to\s+)?@?(\w+)/i,
-    // "send @bailey 100 DHB"
-    /(?:send|transfer|pay|tip|give)\s+@?(\w+)\s+(\d+(?:\.\d+)?)\s*(?:dhb|tokens?|coins?)?/i,
-  ];
-  
-  for (const pattern of transferPatterns) {
-    const match = lowerMessage.match(pattern);
-    if (match) {
-      // First pattern: amount is match[1], recipient is match[2]
-      // Second pattern: recipient is match[1], amount is match[2]
-      const isSecondPattern = pattern.source.includes('@?(\\w+)\\s+(\\d+');
-      const amount = isSecondPattern ? match[2] : match[1];
-      const recipient = isSecondPattern ? match[1] : match[2];
-      
-      // Filter out keywords that aren't usernames
-      const invalidRecipients = ['dhb', 'tokens', 'token', 'coins', 'coin', 'to'];
-      if (!invalidRecipients.includes(recipient.toLowerCase())) {
-        console.log('Transfer parsed:', { amount, recipient });
-        return {
-          type: 'transfer',
-          amount: amount,
-          recipient: recipient,
-          token: 'DHB'
-        };
-      }
-    }
-  }
-  
-  // Check for purchase patterns like "buy 100 DHB"
-  const purchaseMatch = message.match(/(?:buy|purchase|get|swap\s+(?:for)?)\s+(\d+(?:\.\d+)?)\s*(?:dhb|tokens?|coins?)?/i);
-  if (purchaseMatch) {
-    console.log('Purchase parsed:', { amount: purchaseMatch[1] });
-    return {
-      type: 'purchase',
-      amount: purchaseMatch[1],
-      token: 'DHB'
-    };
-  }
-  
-  // Check if it's a general transfer/purchase request without specific amounts
-  const isTransferRequest = TOKEN_TRANSFER_KEYWORDS.some(kw => lowerMessage.includes(kw));
-  const isPurchaseRequest = TOKEN_PURCHASE_KEYWORDS.some(kw => lowerMessage.includes(kw));
-  
-  if (isTransferRequest) {
-    return { type: 'transfer' };
-  }
-  if (isPurchaseRequest) {
-    return { type: 'purchase' };
-  }
-  
-  return { type: null };
 }
 
 // Generate a mock transaction hash
@@ -1083,37 +1010,42 @@ serve(async (req) => {
       ? latestUserMessage.content 
       : latestUserMessage?.content?.find(c => c.type === 'text')?.text || '';
     
-    // Check for token transaction requests (transfer or purchase)
-    const txParsed = parseTokenTransaction(userQuery);
-    
-    // If user is NOT authenticated and requests a token transfer, return simulation.
-    // Purchases are not simulated: buying is paused until the new token lists, so
-    // "where can I buy" gets a real answer from the knowledge map instead of a
-    // pretend 0-token order.
-    if (!isAuthenticated && txParsed.type === 'transfer') {
+    // `admin` has to be asked for by name and, because it is only ever reached
+    // through the API's own proxy, proved with the service secret. A browser
+    // that posts {surface:'admin'} straight at this function gets the ordinary
+    // assistant — and would get an empty admin catalog anyway, since the tools
+    // are cut by an admin token this side cannot mint.
+    const surface: AgentSurface =
+      requestedSurface === 'chat'
+        ? 'chat'
+        : requestedSurface === 'admin' && isServiceCall
+          ? 'admin'
+          : 'assistant';
+    // Speaking as the team, in a thread under somebody's bug report, is not
+    // something a browser gets to ask for. It carries no extra tool scope, but
+    // it does put Riftn's name on the answer, so it needs the same proof the
+    // admin surface does: the service secret. Without it a posted
+    // threadContext is ignored and the ordinary chat voice answers.
+    const isThreadReply =
+      surface === 'chat' && isServiceCall && threadContext?.kind === 'feature_request';
+
+    // A public support thread can quote a payment command as part of a report.
+    const transfer = !isAuthenticated && !isThreadReply ? parseGuestTransfer(userQuery) : null;
+    if (transfer) {
+      const { amount, recipient } = transfer;
       const txHash = generateMockTxHash();
       const timestamp = new Date().toISOString();
-      
-      let simulationResponse: string;
-      
-      if (txParsed.type === 'transfer') {
-        const amount = txParsed.amount || '0';
-        const recipient = txParsed.recipient || 'unknown';
-        simulationResponse = `**Transfer Request**\n\n**Type:** Token Transfer\n**Amount:** ${amount} DHB\n**Recipient:** @${recipient}`;
-      } else {
-        const amount = txParsed.amount || '0';
-        simulationResponse = `**Purchase Request**\n\n**Type:** Token Purchase\n**Amount:** ${amount} DHB`;
-      }
-      
+      const simulationResponse = `**Transfer Request**\n\n**Type:** Token Transfer\n**Amount:** ${amount} DHB\n**Recipient:** @${recipient}`;
+
       return new Response(
         JSON.stringify({ 
           response: simulationResponse,
           isSimulation: true,
-          simulationType: txParsed.type,
+          simulationType: 'transfer',
           simulationData: {
             txHash,
-            amount: txParsed.amount || '0',
-            recipient: txParsed.recipient,
+            amount,
+            recipient,
             token: 'DHB',
             timestamp
           }
@@ -1411,24 +1343,6 @@ ${requestedSurface === 'chat' ? `- The chat rules at the top of this prompt win:
     // itself what to look up, instead of relying on the keyword pre-fetch above
     // to have guessed right. Everything below this block stays as the fallback
     // for video attachments and any failure in the loop.
-    // `admin` has to be asked for by name and, because it is only ever reached
-    // through the API's own proxy, proved with the service secret. A browser
-    // that posts {surface:'admin'} straight at this function gets the ordinary
-    // assistant — and would get an empty admin catalog anyway, since the tools
-    // are cut by an admin token this side cannot mint.
-    const surface: AgentSurface =
-      requestedSurface === 'chat'
-        ? 'chat'
-        : requestedSurface === 'admin' && isServiceCall
-          ? 'admin'
-          : 'assistant';
-    // Speaking as the team, in a thread under somebody's bug report, is not
-    // something a browser gets to ask for. It carries no extra tool scope, but
-    // it does put Riftn's name on the answer, so it needs the same proof the
-    // admin surface does: the service secret. Without it a posted
-    // threadContext is ignored and the ordinary chat voice answers.
-    const isThreadReply =
-      surface === 'chat' && isServiceCall && threadContext?.kind === 'feature_request';
     // Images no longer send the whole conversation down the toolless path.
     // Opening the assistant from an image post is one of the commonest ways in —
     // "why won't this post publish", asked while looking at the post — and it
