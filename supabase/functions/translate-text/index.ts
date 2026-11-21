@@ -3,16 +3,17 @@
  * ============================
  * Uses free translation APIs (MyMemory) for translations with AI fallback.
  *
- * Two caches then five providers, cheapest first. Every provider returns null
+ * Two caches then provider tiers, cheapest first. Every provider returns null
  * rather than throwing, so a dead tier falls through to the next:
  *   L1  in-isolate Map      — free, but dies with the isolate and is not shared
  *   L2  post_translations   — shared across isolates, evicted when idle
  *   P1  MyMemory            — public prose, known standard language pair, at most 500 UTF-8 bytes
  *   P2  free model tiers    — Groq / Mistral / Cloudflare, see _shared/free-models.ts
- *   P3  Gemini direct       — GEMINI_API_KEY, parked on 402/429
- *   P4  fal / OpenRouter    — FAL_KEY, routed to a non-Google model on purpose,
+ *   P3  OpenAI direct       — GPT-6 Luna via OPENAI_API_KEY
+ *   P4  Gemini direct       — GEMINI_API_KEY, parked on 402/429
+ *   P5  fal / OpenRouter    — FAL_KEY, routed to a non-Google model on purpose,
  *                             parked on 401/402/403/429
- *   P5  AI gateway          — metered reseller, last resort
+ *   P6  AI gateway          — metered reseller, last resort
  *
  * Which paid account is out of credit changes from week to week, so it is not
  * written down here: the breakers skip a dead tier on their own, and the
@@ -446,6 +447,53 @@ function chatTranslation(data: unknown): string | null {
   return typeof text === 'string' ? text.trim() : null;
 }
 
+async function translateWithLuna(
+  text: string,
+  targetLanguageName: string,
+  accepts: (output: unknown) => boolean,
+  maxOutputTokens: number,
+  usage: TranslationUsage,
+): Promise<TranslateResponse | null> {
+  const apiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!apiKey) { usage.skip('openai', 'key_unset'); return null; }
+
+  const model = 'gpt-6-luna';
+  const record = usage.start('openai', model, 'direct');
+  try {
+    const response = await usage.fetchProvider(`openai/${model}`, 'https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: TRANSLATOR_SYSTEM_PROMPT(targetLanguageName) },
+          { role: 'user', content: text },
+        ],
+        reasoning_effort: 'none',
+        max_completion_tokens: maxOutputTokens,
+      }),
+    });
+    if (!response.ok) {
+      record(response.status, 'http_error');
+      await response.body?.cancel().catch(() => {});
+      return null;
+    }
+
+    const data = await response.json();
+    const translatedText = chatTranslation(data);
+    if (!translatedText || !accepts(translatedText)) {
+      record(response.status, 'unusable_output', data);
+      return null;
+    }
+
+    record(response.status, 'accepted', data);
+    return { translatedText, detectedLanguage: { language: 'auto', confidence: 0.9 } };
+  } catch {
+    record(0, 'transport_error');
+    return null;
+  }
+}
+
 // Ordered newest-first, and tried in order until one answers.
 //
 // A single hardcoded id is what broke this on the first deploy: the function
@@ -863,6 +911,9 @@ serve(async (req) => {
       );
     }
     usage.skip('free', isPublicText ? 'unavailable' : 'private_unavailable');
+
+    const luna = await translateWithLuna(text, targetLanguageName, accepts, maxOutputTokens, usage);
+    if (luna) return respond(luna, 'openai:gpt-6-luna');
 
     const gemini = await translateWithGemini(text, targetLanguageName, accepts, maxOutputTokens, usage);
     if (gemini) return respond(gemini, 'gemini');

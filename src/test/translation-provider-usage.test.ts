@@ -38,6 +38,11 @@ const native = (text = translated, finishReason = 'STOP') => new Response(JSON.s
 const gateway = () => new Response(JSON.stringify({ model: 'google/gemini-2.5-flash-lite',
   choices: [{ message: { content: translated } }], usage: { prompt_tokens: 21, completion_tokens: 6 },
 }));
+const lunaUrl = 'https://api.openai.com/v1/chat/completions';
+const luna = (content = translated, finishReason = 'stop') => Response.json({
+  model: 'gpt-6-luna', choices: [{ finish_reason: finishReason, message: { content } }],
+  usage: { prompt_tokens: 20, completion_tokens: 5, completion_tokens_details: { reasoning_tokens: 0 } },
+});
 const request = (text = source, options: { targetLang?: string; public?: boolean; sourceLang?: string } = {}) => new Request('https://fixture.invalid/translate-text', {
   method: 'POST', body: JSON.stringify({ text, targetLang: 'es', public: false, ...options }),
 });
@@ -80,11 +85,55 @@ it('stops the paid fallback ladder when a later reservation is denied', async ()
 });
 
 it('never calls a model when the reservation database is unavailable', async () => {
+  env.OPENAI_API_KEY = 'fixture-openai-key';
   reserve = () => new Response(null, { status: 503 });
   await import('../../supabase/functions/translate-text/index');
   const response = await hooks.handler!(request());
   expect(await response.json()).toMatchObject({ code: 'TRANSLATION_BUDGET_UNAVAILABLE' });
   expect(requests.filter(url => !url.includes('mymemory'))).toHaveLength(0);
+});
+
+it('reserves, meters and caches Luna as the first paid provider', async () => {
+  env.OPENAI_API_KEY = 'fixture-openai-key';
+  provider = url => url === lunaUrl ? luna() : native();
+  await import('../../supabase/functions/translate-text/index');
+  expect(await (await hooks.handler!(request())).json()).toMatchObject({ translatedText: translated });
+  expect(await (await hooks.handler!(request())).json()).toMatchObject({ translatedText: translated, cached: true });
+  await Promise.all(pending);
+
+  expect(requests).toEqual([lunaUrl]);
+  const calls = vi.mocked(fetch).mock.calls;
+  const reserveIndex = calls.findIndex(([url]) => String(url).endsWith('/rpc/reserve_translation_attempt'));
+  const lunaIndex = calls.findIndex(([url]) => url === lunaUrl);
+  expect(reserveIndex).toBeGreaterThanOrEqual(0);
+  expect(reserveIndex).toBeLessThan(lunaIndex);
+  const init = calls[lunaIndex][1];
+  expect(JSON.parse(String(init?.body))).toMatchObject({
+    model: 'gpt-6-luna', reasoning_effort: 'none', max_completion_tokens: 4000,
+    messages: [{ role: 'system', content: expect.stringContaining('Spanish') }, { role: 'user', content: source }],
+  });
+  expect(batches[0]).toEqual([expect.objectContaining({ provider: 'openai', route: 'direct',
+    served_model: 'gpt-6-luna', input_tokens: 20, output_tokens: 5, usage_reported: true, outcome: 'accepted' })]);
+  expect(JSON.stringify(batches)).not.toMatch(/fixture-openai-key|This is|Esta es|choices/);
+  expect([...hooks.cache.values()][0].provider).toBe('openai:gpt-6-luna');
+});
+
+it.each([
+  { result: () => new Response(null, { status: 429 }), outcome: 'http_error', reason: 'openai_http_429' },
+  { result: () => luna(`${translated} @Riftn`, 'length'), outcome: 'unusable_output', reason: 'openai_unusable_output' },
+  { result: () => luna(`${translated} @Other`), outcome: 'unusable_output', reason: 'openai_unusable_output' },
+])('falls back to Gemini when Luna reports $reason', async ({ result, outcome, reason }) => {
+  env.OPENAI_API_KEY = 'fixture-openai-key';
+  provider = url => url === lunaUrl ? result() : native(`${translated} @Riftn`);
+  await import('../../supabase/functions/translate-text/index');
+  expect(await (await hooks.handler!(request(`${source} @Riftn`))).json()).toMatchObject({ translatedText: `${translated} @Riftn` });
+  await Promise.all(pending);
+  expect(requests).toEqual([lunaUrl, expect.stringContaining('googleapis')]);
+  expect(batches[0]).toEqual([
+    expect.objectContaining({ provider: 'openai', outcome }),
+    expect.objectContaining({ provider: 'google', outcome: 'accepted', fallback_reason: reason }),
+  ]);
+  expect([...hooks.cache.values()][0].provider).toBe('gemini');
 });
 
 it('meters native translation and serves repeat L1/L2 hits without another provider or aggregate write', async () => {
@@ -102,7 +151,7 @@ it('meters native translation and serves repeat L1/L2 hits without another provi
   expect(await (await hooks.handler!(request())).json()).toMatchObject({ translatedText: translated, cached: true });
   expect(requests).toHaveLength(count);
   expect(batches).toHaveLength(1);
-  expect(JSON.stringify(batches)).not.toMatch(/fixture-.*key|This is|Esta es|candidates|parts|choices/);
+  expect(JSON.stringify(batches)).not.toMatch(/fixture-(?:service|google|gateway)-key|This is|Esta es|candidates|parts|choices/);
 });
 
 it('leaves partial and invalid native token reports missing', async () => {
@@ -128,6 +177,7 @@ it('counts rejected direct output and fal failure in one batch before gateway su
 });
 
 it('records free translation attempts and keeps private content away from the training tier', async () => {
+  env.OPENAI_API_KEY = 'fixture-openai-key';
   env.GROQ_API_KEY = 'fixture-free-key'; env.MISTRAL_API_KEY = 'fixture-training-key';
   provider = url => url.includes('groq.com') ? new Response(JSON.stringify({ model: 'fixture-free-model',
     choices: [{ message: { content: translated } }], usage: { prompt_tokens: 9, completion_tokens: 4 },
@@ -137,6 +187,7 @@ it('records free translation attempts and keeps private content away from the tr
   await Promise.all(pending);
   expect(batches[0][0]).toMatchObject({ route: 'free', input_tokens: 9, output_tokens: 4 });
   expect(requests.some(url => url.includes('mistral'))).toBe(false);
+  expect(requests).not.toContain(lunaUrl);
   expect(requests.some(url => url.includes('googleapis'))).toBe(false);
 });
 
