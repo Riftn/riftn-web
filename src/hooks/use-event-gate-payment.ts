@@ -78,7 +78,7 @@ export function useEventGatePayment({
     setIsPaying(true);
     const key = `event-gate:${chainId}:${eventId}:${walletAddress.toLowerCase()}`;
     const claim = crypto.randomUUID();
-    async function request(action: string, txHash?: string, claimId = claim) {
+    async function request(action: string, txHash?: string, claimId: string = claim) {
       const { data, error } = await withWalletHeader(supabase.rpc('event_gate_checkout' as any, {
         p_action: action, p_event: eventId, p_claim: claimId, p_hash: txHash ?? null,
       } as any), walletAddress!);
