@@ -96,10 +96,11 @@ function ChatReactions({
 }
 
 interface EventChatProps {
+  restricted?: boolean;
   eventId: string;
 }
 
-export function EventChat({ eventId }: EventChatProps) {
+export function EventChat({ eventId, restricted }: EventChatProps) {
   const { t: _copy } = _useCopy();
   const [newMessage, setNewMessage] = useSurfaceDraft("components/app/events/EventChat.tsx:newMessage", '', eventId);
   const [replyTo, setReplyTo] = useDraftState<EventChatMessage | null>(`event:${eventId}:reply`, null);
@@ -125,7 +126,7 @@ export function EventChat({ eventId }: EventChatProps) {
     avatarUrl: user.avatarImageUrl || user.avatarUrl || user.avatar_url,
   } : null;
 
-  const { messages, isLoading, sendMessage, editMessage, addReaction, removeReaction } = useEventChat(eventId);
+  const { messages, isLoading, sendMessage, editMessage, addReaction, removeReaction } = useEventChat(eventId, restricted);
 
   useEffect(() => {
     if (messages.length > 0 && bottomRef.current) {

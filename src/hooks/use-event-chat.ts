@@ -37,26 +37,27 @@ export interface EventChatMessage {
 
 const QUERY_KEY = 'event-chat-messages';
 
-export function useEventChat(eventId: string | undefined) {
+export function useEventChat(eventId: string | undefined, restricted = false) {
   const { t: _copy } = _useCopy();
   const { walletAddress } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: rawMessages = [], isLoading } = useQuery({
-    queryKey: [QUERY_KEY, eventId],
+    queryKey: [QUERY_KEY, eventId, walletAddress?.toLowerCase()],
     queryFn: async () => {
       if (!eventId) return [];
-      const { data, error } = await supabase
+      const { data, error } = await withWalletHeader(supabase
         .from('event_chat_messages' as any)
         .select('*')
         .eq('event_id', eventId)
         .order('created_at', { ascending: false })
-        .limit(200);
+        .limit(200), walletAddress);
       if (error) throw error;
       // The newest 200, shown oldest first.
       return ((data || []) as unknown as EventChatMessage[]).reverse();
     },
     enabled: !!eventId,
+    refetchInterval: restricted ? 5000 : false,
     staleTime: 30_000,
   });
 
@@ -88,34 +89,14 @@ export function useEventChat(eventId: string | undefined) {
           table: 'event_chat_messages',
           filter: `event_id=eq.${eventId}`,
         },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            queryClient.setQueryData<EventChatMessage[]>(
-              [QUERY_KEY, eventId],
-              (old = []) => {
-                if (old.some(m => m.id === (payload.new as EventChatMessage).id)) return old;
-                return [...old, payload.new as EventChatMessage];
-              }
-            );
-          } else if (payload.eventType === 'UPDATE') {
-            queryClient.setQueryData<EventChatMessage[]>(
-              [QUERY_KEY, eventId],
-              (old = []) => old.map(m => m.id === (payload.new as EventChatMessage).id ? { ...m, ...payload.new as EventChatMessage } : m)
-            );
-          } else if (payload.eventType === 'DELETE') {
-            queryClient.setQueryData<EventChatMessage[]>(
-              [QUERY_KEY, eventId],
-              (old = []) => old.filter(m => m.id !== (payload.old as any).id)
-            );
-          }
-        }
+        () => { void queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId, walletAddress?.toLowerCase()] }); }
       )
       .subscribe((status) => {
-        if (status === 'SUBSCRIBED') queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId] });
+        if (status === 'SUBSCRIBED') queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId, walletAddress?.toLowerCase()] });
       });
 
     return () => { supabase.removeChannel(channel); };
-  }, [eventId, queryClient]);
+  }, [eventId, queryClient, walletAddress]);
 
   const sendMessage = useCallback(async (
     content: string,
@@ -148,47 +129,19 @@ export function useEventChat(eventId: string | undefined) {
       toast.error(_copy("copy.66b8e077d85f", { defaultValue: "Failed to send message" }));
       throw error;
     }
-  }, [eventId, walletAddress, _copy]);
+    await queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId, walletAddress.toLowerCase()] });
+  }, [eventId, walletAddress, queryClient, _copy]);
 
-  const addReaction = useCallback(async (messageId: string, emoji: string) => {
+  const setReaction = useCallback(async (messageId: string, emoji: string, add: boolean) => {
     if (!walletAddress || !eventId) return;
-    const msg = rawMessages.find(m => m.id === messageId);
-    if (!msg) return;
-    const reactions = { ...(msg.reactions || {}) };
-    const addresses = reactions[emoji] || [];
-    if (addresses.some(a => a.toLowerCase() === walletAddress.toLowerCase())) return;
-    reactions[emoji] = [...addresses, walletAddress.toLowerCase()];
-
-    queryClient.setQueryData<EventChatMessage[]>(
-      [QUERY_KEY, eventId],
-      (old = []) => old.map(m => m.id === messageId ? { ...m, reactions } : m)
-    );
-
-    await withWalletHeader(
-      supabase.from('event_chat_messages' as any).update({ reactions } as any).eq('id', messageId),
-      walletAddress
-    );
-  }, [rawMessages, walletAddress, eventId, queryClient]);
-
-  const removeReaction = useCallback(async (messageId: string, emoji: string) => {
-    if (!walletAddress || !eventId) return;
-    const msg = rawMessages.find(m => m.id === messageId);
-    if (!msg) return;
-    const reactions = { ...(msg.reactions || {}) };
-    const addresses = reactions[emoji] || [];
-    reactions[emoji] = addresses.filter(a => a.toLowerCase() !== walletAddress.toLowerCase());
-    if (reactions[emoji].length === 0) delete reactions[emoji];
-
-    queryClient.setQueryData<EventChatMessage[]>(
-      [QUERY_KEY, eventId],
-      (old = []) => old.map(m => m.id === messageId ? { ...m, reactions } : m)
-    );
-
-    await withWalletHeader(
-      supabase.from('event_chat_messages' as any).update({ reactions } as any).eq('id', messageId),
-      walletAddress
-    );
-  }, [rawMessages, walletAddress, eventId, queryClient]);
+    const { error } = await withWalletHeader(supabase.rpc('set_event_chat_reaction' as any, {
+      p_event: eventId, p_message: messageId, p_emoji: emoji, p_add: add,
+    } as any), walletAddress);
+    if (error) toast.error(_copy('events.reactionFailed', { defaultValue: 'Could not update reaction' }));
+    await queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId, walletAddress.toLowerCase()] });
+  }, [walletAddress, eventId, queryClient, _copy]);
+  const addReaction = useCallback((id: string, emoji: string) => setReaction(id, emoji, true), [setReaction]);
+  const removeReaction = useCallback((id: string, emoji: string) => setReaction(id, emoji, false), [setReaction]);
 
   const editMessage = useCallback(async (messageId: string, newContent: string) => {
     if (!walletAddress || !eventId) return false;
@@ -196,7 +149,7 @@ export function useEventChat(eventId: string | undefined) {
     if (!trimmed) return false;
 
     queryClient.setQueryData<EventChatMessage[]>(
-      [QUERY_KEY, eventId],
+      [QUERY_KEY, eventId, walletAddress?.toLowerCase()],
       (old = []) => old.map(m => m.id === messageId ? { ...m, content: trimmed } : m)
     );
 
@@ -207,7 +160,7 @@ export function useEventChat(eventId: string | undefined) {
     if (error) {
       console.error('[EventChat] Edit error:', error);
       toast.error(_copy("copy.da8e926af644", { defaultValue: "Failed to edit message" }));
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY, eventId, walletAddress?.toLowerCase()] });
       return false;
     }
     return true;
