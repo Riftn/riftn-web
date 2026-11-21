@@ -4215,7 +4215,7 @@
       "pageViewsTerm": "Tampilan halaman",
       "pageViews": "— permintaan yang diklasifikasikan Cloudflare sebagai pemuatan halaman, bukan gambar, skrip, atau panggilan API.",
       "botsTerm": "Bot ikut dihitung",
-      "bots": "— ini hitungan mentah dari edge, jadi crawler, monitor uptime, dan klien skrip ikut terhitung. Anda bisa melihatnya sendiri di rincian browser di atas, di mana entri seperti \"Curl\" dan \"Tidak diketahui\" adalah lalu lintas otomatis, bukan orang. Menyaring bot butuh paket Cloudflare berbayar yang tidak kami pakai, dan diam-diam mengurangi perkiraan justru membuat angkanya lebih sulit diperiksa, bukan lebih mudah.",
+      "bots": "— ini hitungan mentah dari edge, jadi crawler, monitor uptime, dan klien skrip ikut terhitung. Anda bisa melihatnya sendiri di rincian browser di atas, di mana entri seperti \"Curl\" dan \"Tidak diketahui\" adalah lalu lintas otomatis, bukan orang. Bot makin sulit dibedakan dari pengunjung manusia dan sebentar lagi tak akan bisa dibedakan dalam statistik ini, jadi tak ada gunanya mencoba menyaringnya.",
       "totalTerm": "Total rentang",
       "total": "— tampilan halaman dan permintaan dijumlahkan sepanjang rentang. Jumlah pengunjung sengaja tidak dijumlahkan menjadi \"total pengunjung\", karena orang yang datang Senin dan Selasa akan terhitung dua kali.",
       "peakTerm": "Jam / hari tersibuk",

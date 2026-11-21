@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Tampilan kaca",
       "pageViews": "— panjaluk sing diklasifikasekake Cloudflare minangka pamuatan kaca, dudu gambar, skrip, utawa panggilan API.",
       "botsTerm": "Bot melu diétung",
-      "bots": "— iki cacahan mentah ing pinggir jaringan, dadi crawler, monitor uptime, lan klien skrip melu kalebu. Sampeyan bisa ndeleng dhewe ing rincian panjelajah ing ndhuwur, ing ngendi entri kaya \"Curl\" lan \"Ora dingerteni\" iku lalu lintas otomatis dudu manungsa. Nyaring bot butuh paket Cloudflare mbayar sing ora duwe, lan ngurangi prakiraan kanthi meneng bakal nggawe angkane kurang bisa dipriksa, dudu luwih.",
+      "bots": "— iki cacahan mentah ing pinggir jaringan, dadi crawler, monitor uptime, lan klien skrip melu kalebu. Sampeyan bisa ndeleng dhewe ing rincian panjelajah ing ndhuwur, ing ngendi entri kaya \"Curl\" lan \"Ora dingerteni\" iku lalu lintas otomatis dudu manungsa. Bot saya angel dibédakaké karo pengunjung manungsa lan ora suwé manèh ora bakal bisa dibédakaké ing statistik iki, mula ora ana gunané nyoba nyaring bot.",
       "totalTerm": "Total rentang",
       "total": "— tampilan kaca lan panjaluk ditambahake ing sakabehe rentang. Cacah tamu sengaja ora ditambahake dadi \"total tamu\", amarga wong sing teka dina Senin lan Selasa bakal diétung kaping pindho.",
       "peakTerm": "Jam / dina paling rame",

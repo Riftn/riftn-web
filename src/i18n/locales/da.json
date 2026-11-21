@@ -4208,7 +4208,7 @@
       "pageViewsTerm": "Sidevisninger",
       "pageViews": "— forespørgsler, som Cloudflare klassificerer som sideindlæsninger, ikke billeder, scripts eller API-kald.",
       "botsTerm": "Bots tælles med",
-      "bots": "— det er rå optællinger ved kanten, så crawlere, oppetidsovervågning og scriptede klienter er med. Du kan selv se dem i browserfordelingen ovenfor, hvor poster som “Curl” og “Ukendt” er automatiseret trafik og ikke mennesker. At filtrere bots fra kræver en betalt Cloudflare-plan, vi ikke har, og stille at trække et skøn fra ville gøre tallene mindre efterprøvelige, ikke mere.",
+      "bots": "— det er rå optællinger ved kanten, så crawlere, oppetidsovervågning og scriptede klienter er med. Du kan selv se dem i browserfordelingen ovenfor, hvor poster som “Curl” og “Ukendt” er automatiseret trafik og ikke mennesker. Det bliver sværere at skelne bots fra menneskelige besøgende, og snart kan de ikke længere skelnes i disse tal, så det giver ingen mening at forsøge at filtrere dem fra.",
       "totalTerm": "Totaler for intervallet",
       "total": "— sidevisninger og forespørgsler lægges sammen over intervallet. Besøgstal lægges bevidst ikke sammen til et “samlet antal besøgende”, fordi en, der var her mandag og tirsdag, ville tælle to gange.",
       "peakTerm": "Travleste time / dag",

@@ -4315,7 +4315,7 @@
       "pageViewsTerm": "Zobrazenia stránok",
       "pageViews": "— požiadavky, ktoré Cloudflare klasifikuje ako načítania stránky, nie obrázky, skripty či volania API.",
       "botsTerm": "Boti sú započítaní",
-      "bots": "— sú to surové počty na okraji siete, takže sú v nich aj prehľadávače, monitory dostupnosti a skriptované klienty. Vidíš ich sám v rozdelení podľa prehliadačov vyššie, kde položky ako „Curl“ a „Neznáme“ sú automatická prevádzka, nie ľudia. Filtrovanie botov vyžaduje platený plán Cloudflare, ktorý nemáme, a tiché odpočítanie odhadu by čísla urobilo menej overiteľnými, nie viac.",
+      "bots": "— sú to surové počty na okraji siete, takže sú v nich aj prehľadávače, monitory dostupnosti a skriptované klienty. Vidíš ich sám v rozdelení podľa prehliadačov vyššie, kde položky ako „Curl“ a „Neznáme“ sú automatická prevádzka, nie ľudia. Boty je čoraz ťažšie odlíšiť od ľudských návštevníkov a čoskoro ich v týchto štatistikách nebude možné rozlíšiť, takže nemá zmysel pokúšať sa ich odfiltrovať.",
       "totalTerm": "Súčty rozsahu",
       "total": "— zobrazenia stránok a požiadavky sa v rozsahu sčítavajú. Počty návštevníkov zámerne nesčítavame do „celkového počtu návštevníkov“, lebo kto tu bol v pondelok aj v utorok, by sa počítal dvakrát.",
       "peakTerm": "Najrušnejšia hodina / deň",

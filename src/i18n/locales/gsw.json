@@ -4234,7 +4234,7 @@
       "pageViewsTerm": "Syteufrüef",
       "pageViews": "— Aafroge wo Cloudflare als Syteufrüef yordnet, und nid als Bilder, Skript oder API-Ufrüef.",
       "botsTerm": "Bots sind inbegriffe",
-      "bots": "— das sind rohi Edge-Zahle, drum sind Crawler, Uptime-Monitore und skriptet Clients drin. Du chasch das sälber i de Browser-Ufschlüsslig obe gseh, wo Yträg wie \"Curl\" und \"Unknown\" automatisierte Traffic sind und nid Mensche. Bots usefiltere bruucht e bezahlti Cloudflare-Stuäf wo mir nid hend, und heimlich e Schätzig abzieh würd d'Zahle weniger überprüefbar mache, nid meh.",
+      "bots": "— das sind rohi Edge-Zahle, drum sind Crawler, Uptime-Monitore und skriptet Clients drin. Du chasch das sälber i de Browser-Ufschlüsslig obe gseh, wo Yträg wie \"Curl\" und \"Unknown\" automatisierte Traffic sind und nid Mensche. Es wird immer schwieriger, Bots vo menschliche Bsuecher z unterscheide, und bald cha me sie i däne Statistike nümm unterscheide. Drum bringt’s nüt, sie usefiltere z welle.",
       "totalTerm": "Total für d'Periode",
       "total": "— Syteufrüef und Aafroge zelled sich über d'Periode zäme. Bsucherzahle wärde absichtlich nid zu eren \"totale Bsucher\"-Ziffer zämegrächnet, wil öpper wo Määntig und Ziischtig da isch, zwei Mal gzellt würd.",
       "peakTerm": "Stärchschti Stund / Tag",

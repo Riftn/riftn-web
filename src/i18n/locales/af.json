@@ -4248,7 +4248,7 @@
       "pageViewsTerm": "Bladsyaansigte",
       "pageViews": "— versoeke wat Cloudflare as bladsylaaiings klassifiseer, nie beelde, skrifte of API-oproepe nie.",
       "botsTerm": "Bots is ingesluit",
-      "bots": "— dit is rou tellings by die rand, so kruipers, beskikbaarheidsmonitors en geskrifkliënte is ook in. Jy kan hulle self in die blaaieruiteensetting hierbo sien, waar inskrywings soos “Curl” en “Onbekend” outomatiese verkeer is en nie mense nie. Om bots uit te filter verg 'n betaalde Cloudflare-plan wat ons nie het nie, en om stilweg 'n skatting af te trek sou die syfers minder kontroleerbaar maak, nie meer nie.",
+      "bots": "— dit is rou tellings by die rand, so kruipers, beskikbaarheidsmonitors en geskrifkliënte is ook in. Jy kan hulle self in die blaaieruiteensetting hierbo sien, waar inskrywings soos “Curl” en “Onbekend” outomatiese verkeer is en nie mense nie. Dit word al moeiliker om bots van menslike besoekers te onderskei, en binnekort sal hulle in hierdie statistieke ononderskeibaar wees, wat dit sinloos maak om hulle te probeer uitfilter.",
       "totalTerm": "Reekstotale",
       "total": "— bladsyaansigte en versoeke tel oor die reeks op. Besoekergetalle word doelbewus nie tot 'n “totale besoekers” opgetel nie, want iemand wat Maandag en Dinsdag hier was, sou twee keer tel.",
       "peakTerm": "Besigste uur / dag",
