@@ -347,9 +347,19 @@ export function MobileBottomNav() {
     handleNavClick(e, path);
   };
 
-  const handlePostClick = () => {
+  const onRequests = /^\/(?:app\/)?features\/?$/i.test(location.pathname);
+  const warmCreate = () => {
+    if (isAuthenticated && !onRequests) warmPostComposer();
+  };
+  const handleCreateClick = () => {
     if (!isAuthenticated) {
       setShowAuthPrompt(true);
+      return;
+    }
+    if (onRequests) {
+      const params = new URLSearchParams(location.search);
+      params.set('compose', 'request');
+      navigate({ pathname: location.pathname, search: params.toString(), hash: location.hash }, { replace: true, state: location.state });
       return;
     }
     setPostLiveMode(isOnLiveFeed(location.pathname) ? 'video' : undefined);
@@ -382,11 +392,11 @@ export function MobileBottomNav() {
                      middle of the first screen; everything around it moves. */
                   <button
                     key={CREATE_ID}
-                    onClick={handlePostClick}
-                    onPointerDown={() => { if (isAuthenticated) warmPostComposer(); }}
-                    onPointerEnter={() => { if (isAuthenticated) warmPostComposer(); }}
-                    onFocus={() => { if (isAuthenticated) warmPostComposer(); }}
-                    aria-label={_copy("copy.bcf1bfcaa2af", { defaultValue: "Create post" })}
+                    onClick={handleCreateClick}
+                    onPointerDown={warmCreate}
+                    onPointerEnter={warmCreate}
+                    onFocus={warmCreate}
+                    aria-label={onRequests ? t('features.submitDrawerTitle') : _copy("copy.bcf1bfcaa2af", { defaultValue: "Create post" })}
                     className="relative z-10 flex-shrink-0 w-1/5 h-12 md:h-14 flex items-center justify-center text-white"
                   >
                       <div data-nav-create className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center relative transition-transform duration-300 active:scale-95">

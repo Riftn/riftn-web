@@ -18,7 +18,7 @@ import type { MutableRefObject } from 'react';
 import { useFormDraft } from '@/hooks/use-form-draft';
 import { useTranslation as useI18n } from 'react-i18next';
 import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTabIndicator } from '@/hooks/use-tab-indicator';
 import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
@@ -1005,6 +1005,8 @@ export default function FeaturesPage() {
   const { t } = useI18n();
   const { isAuthenticated, openLoginModal } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { pathname, hash, state } = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<PageTab>('requests');
   const [sort, setSort] = useState<FeatureSort>('newest');
   const [category, setCategory] = useState<CategoryChip>('all');
@@ -1038,9 +1040,26 @@ export default function FeaturesPage() {
   const [composerFocus, setComposerFocus] = useState(0);
   const [initialCategory, setInitialCategory] = useState<FeatureCategory | undefined>(undefined);
 
-  // Handle deep-link from "Report a Bug" buttons: open the bug-fix category
-  // and pre-populate the submit drawer with the bug_fix category.
+  const handleSubmitClick = useCallback(() => {
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    setActiveTab('requests');
+    setCategory((current) => (current === NOT_FEASIBLE ? 'all' : current));
+    setComposerFocus(value => value + 1);
+  }, [isAuthenticated, openLoginModal]);
+
+  // Consume create links once so returning to this board keeps the user's place.
   useEffect(() => {
+    if (searchParams.get('compose') === 'request') {
+      handleSubmitClick();
+      const next = new URLSearchParams(searchParams);
+      next.delete('compose');
+      if (next.has('tab')) next.set('tab', 'requests');
+      navigate({ pathname, search: next.toString(), hash }, { replace: true, state });
+      return;
+    }
     const report = searchParams.get('report');
     if (report === 'bug') {
       setActiveTab('requests');
@@ -1061,7 +1080,7 @@ export default function FeaturesPage() {
     if (requestedTab === 'requests' || requestedTab === 'shipping' || requestedTab === 'shipped') {
       setActiveTab(requestedTab);
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, handleSubmitClick, navigate, pathname, hash, state]);
 
   const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
@@ -1173,16 +1192,6 @@ export default function FeaturesPage() {
     },
     [isAuthenticated, openLoginModal, voteMutation]
   );
-
-  const handleSubmitClick = () => {
-    if (!isAuthenticated) {
-      openLoginModal();
-      return;
-    }
-    setActiveTab('requests');
-    setCategory((current) => (current === NOT_FEASIBLE ? 'all' : current));
-    setComposerFocus(value => value + 1);
-  };
 
   // `open` is counted server-side with the same status filter the list uses, so
   // the tab badge always matches the rows below it.
