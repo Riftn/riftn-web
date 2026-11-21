@@ -557,8 +557,8 @@ const translationCache = new Map<string, { translated: string; sourceLang: strin
 // a wrong-language guess as the "translation", and this cache is checked before
 // the server is ever re-asked — so on affected devices the bad text would
 // outlive every server-side fix. Bumping the key is the only way to reach it.
-const TRANSLATION_STORE_KEY = 'dehub-translation-cache-v3';
-const LEGACY_TRANSLATION_STORE_KEYS = ['dehub-translation-cache-v1', 'dehub-translation-cache-v2'];
+const TRANSLATION_STORE_KEY = 'dehub-translation-cache-v4';
+const LEGACY_TRANSLATION_STORE_KEYS = ['dehub-translation-cache-v1', 'dehub-translation-cache-v2', 'dehub-translation-cache-v3'];
 // Well under the ~5MB localStorage budget: post bodies are large, and this
 // shares that budget with everything else the app keeps there.
 const MAX_PERSISTED_TRANSLATIONS = 300;
@@ -858,7 +858,8 @@ const FUNCTION_WORDS: Record<string, Set<string>> = {
 export function looksLikeReaderLanguage(text: string, readerLang: string): boolean {
   const reader = readerLang.toLowerCase().split(/[-_]/)[0];
   const script = detectNonLatinScript(text);
-  if (script) return !isLatinText(text) && script === reader;
+  // Han characters alone cannot distinguish Simplified and Traditional Chinese.
+  if (script) return script !== 'zh' && !isLatinText(text) && script === reader;
 
   const own = FUNCTION_WORDS[reader];
   if (!own || !isLatinText(text)) return false;

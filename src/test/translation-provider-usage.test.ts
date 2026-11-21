@@ -31,15 +31,15 @@ let provider: (url: string) => Response;
 let reserve: () => Response;
 const translated = 'Esta es una frase para nuestra comunidad.';
 const source = 'This is a sentence for our community.';
-const native = (text = translated) => new Response(JSON.stringify({
-  modelVersion: 'gemini-fixture-version', candidates: [{ content: { parts: [{ text }] } }],
+const native = (text = translated, finishReason = 'STOP') => new Response(JSON.stringify({
+  modelVersion: 'gemini-fixture-version', candidates: [{ finishReason, content: { parts: [{ text }] } }],
   usageMetadata: { promptTokenCount: 20, candidatesTokenCount: 5, thoughtsTokenCount: 2, cachedContentTokenCount: 3 },
 }));
 const gateway = () => new Response(JSON.stringify({ model: 'google/gemini-2.5-flash-lite',
   choices: [{ message: { content: translated } }], usage: { prompt_tokens: 21, completion_tokens: 6 },
 }));
-const request = (text = source) => new Request('https://fixture.invalid/translate-text', {
-  method: 'POST', body: JSON.stringify({ text, targetLang: 'es', public: false }),
+const request = (text = source, options: { targetLang?: string; public?: boolean; sourceLang?: string } = {}) => new Request('https://fixture.invalid/translate-text', {
+  method: 'POST', body: JSON.stringify({ text, targetLang: 'es', public: false, ...options }),
 });
 
 beforeEach(() => {
@@ -61,7 +61,6 @@ beforeEach(() => {
       batches.push(JSON.parse(String(init.body)).p_rows); return new Response(null, { status: 204 });
     }
     requests.push(url);
-    if (url.includes('mymemory')) return new Response(null, { status: 503 });
     return provider(url);
   }));
 });
@@ -152,4 +151,78 @@ it('keeps fallback reasons local when requests overlap and marks absent fal usag
   expect(batches[0][1]).toMatchObject({ fallback_reason: 'google_http_429', usage_reported: false });
   expect(batches[1][0]).toMatchObject({ fallback_reason: 'google_key_unset', usage_reported: true });
   expect(JSON.stringify(batches)).not.toContain('private answer');
+});
+
+
+const knownSource = 'We are meeting at the community centre tomorrow morning to discuss plans for the next event.';
+
+it('reserves the translation memory for known public standard language pairs', async () => {
+  provider = url => url.includes('mymemory')
+    ? Response.json({ responseStatus: 200, responseData: { translatedText: translated } })
+    : native();
+  await import('../../supabase/functions/translate-text/index');
+  const publicRequest = request(knownSource, { public: true, sourceLang: 'en' });
+  expect(await (await hooks.handler!(publicRequest)).json()).toMatchObject({ translatedText: translated });
+  expect(requests).toHaveLength(1);
+  expect(new URL(requests[0]).searchParams.get('langpair')).toBe('en|es');
+
+  const privateRequest = request(knownSource, { sourceLang: 'en' });
+  const result = await (await hooks.handler!(privateRequest)).json();
+  expect(result).toMatchObject({ translatedText: translated });
+  expect(result.cached).toBeUndefined();
+  expect(requests).toHaveLength(2);
+  expect(requests[1]).toContain('googleapis');
+});
+
+it.each([
+  ['short text', 'gm, wagmi', { public: true, sourceLang: 'en' }],
+  ['an Arabic dialect', knownSource, { public: true, sourceLang: 'en', targetLang: 'ary' }],
+  ['a long post', `${knownSource} ${'This paragraph adds the context. '.repeat(30)}`, { public: true, sourceLang: 'en' }],
+  ['Traditional Chinese', '这是一段用来验证语言选项的测试文字。'.repeat(6), { public: true, sourceLang: 'zh', targetLang: 'zh-TW' }],
+])('uses a whole-text model for %s', async (_label, text, options) => {
+  await import('../../supabase/functions/translate-text/index');
+  expect((await hooks.handler!(request(text, options))).status).toBe(200);
+  expect(requests).toHaveLength(1);
+  expect(requests[0]).toContain('googleapis');
+  const call = vi.mocked(fetch).mock.calls.find(([url]) => String(url).includes('googleapis'));
+  const payload = JSON.parse(String(call?.[1]?.body));
+  expect(payload.contents[0].parts[0].text).toBe(text);
+  if (options.targetLang === 'zh-TW') expect(payload.systemInstruction.parts[0].text).toContain('Traditional Chinese');
+});
+
+it('ignores old segmented cache rows and replaces them after regeneration', async () => {
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`v3:${knownSource}`));
+  const key = `${Buffer.from(hash).toString('hex')}:es`;
+  hooks.cache.set(key, { translated_text: 'Vieja traducción.', provider: 'mymemory-segments' });
+  await import('../../supabase/functions/translate-text/index');
+  expect(await (await hooks.handler!(request(knownSource, { public: true }))).json()).toMatchObject({ translatedText: translated });
+  expect(hooks.cache.get(key)).toMatchObject({ translated_text: translated, provider: 'gemini' });
+});
+
+it('rejects truncated text and altered handles before recording provider success', async () => {
+  env.GROQ_API_KEY = 'fixture-free-key';
+  const tagged = `${source} @Riftn @Riftn https://example.net/post`;
+  const accepted = `${translated} @Riftn @Riftn https://example.net/post`;
+  provider = url => url.includes('groq.com')
+    ? Response.json({ choices: [{ finish_reason: 'stop', message: { content: `${translated} @Riftn https://example.net/post` } }] })
+    : url.includes('googleapis') ? native(accepted, 'MAX_TOKENS')
+    : Response.json({ choices: [{ finish_reason: 'stop', message: { content: accepted } }] });
+  await import('../../supabase/functions/translate-text/index');
+  expect(await (await hooks.handler!(request(tagged))).json()).toMatchObject({ translatedText: accepted });
+  await Promise.all(pending);
+  expect(batches[0].filter(row => row.route === 'free').length).toBeGreaterThan(0);
+  expect(batches[0].slice(0, -1).every(row => row.outcome === 'unusable_output')).toBe(true);
+  expect(batches[0]).toContainEqual(expect.objectContaining({ provider: 'google', outcome: 'unusable_output' }));
+  expect(batches[0].at(-1)).toMatchObject({ route: 'gateway', outcome: 'accepted' });
+  expect([...hooks.cache.values()]).toHaveLength(1);
+  expect([...hooks.cache.values()][0].translated_text).toBe(accepted);
+});
+
+it('does not cache an unconfirmed echo as a same-language translation', async () => {
+  provider = () => native(source);
+  await import('../../supabase/functions/translate-text/index');
+  const result = await (await hooks.handler!(request())).json();
+  expect(result).toMatchObject({ translatedText: source });
+  expect(result.sameLanguage).toBeUndefined();
+  expect(hooks.cache.size).toBe(0);
 });
