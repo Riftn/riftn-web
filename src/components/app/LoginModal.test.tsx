@@ -19,7 +19,7 @@ vi.mock('@/components/ui/drawer', () => ({
       <button onClick={() => onOpenChange(false)}>Close sheet</button>{children}
     </section>
   ) : null,
-  DrawerContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DrawerContent: ({ children, ...props }: { children: ReactNode; className?: string; 'data-login-stack-sheet'?: string }) => <div {...props}>{children}</div>,
   DrawerHeader: ({ children }: { children: ReactNode }) => <header>{children}</header>,
   DrawerTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
   warmDeferredSheets: vi.fn(),
@@ -30,6 +30,18 @@ beforeEach(() => {
   Object.assign(auth, { walletPhase: 'none', isProcessingRedirect: false, requiresUsername: false });
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+
+it('opens the full-height sign-in sheet on phones without a Cancel footer', async () => {
+  vi.stubGlobal('innerWidth', 390);
+  const close = vi.fn();
+  const { container } = render(<LoginModal open onOpenChange={close} />);
+  await screen.findByRole('button', { name: 'Sign in with Apple' });
+  expect(container.querySelector('[data-login-stack-sheet]')).toHaveClass('h-[100dvh]');
+  expect(screen.getByText(/By continuing, you agree/)).toBeVisible();
+  expect(screen.queryByRole('button', { name: /cancel/i })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Close sheet' }));
+  expect(close).toHaveBeenCalledWith(false);
+});
 
 it.each([390, 820, 1280])('moves signup into the full-screen welcome flow at %i px and keeps the required profile from being abandoned', async (width) => {
   vi.stubGlobal('innerWidth', width);
