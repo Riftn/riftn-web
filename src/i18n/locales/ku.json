@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Vîdyoyê biguherîne", "hiddenTag": "Veşartî", "tapToEdit": "Ji bo guherandinê bitikîne", "cover": "Berg", "trim": "Jêkirin", "mirror": "Neynik", "rotate": "Zivirandin", "hide": "Veşartin", "timer": "Demjimêr", "sheetTitleAny": "Berî şandinê biguherîne", "close": "Girtin", "replace": "Biguherîne", "hiddenUntilTap": "Heya lê nexin veşartî ye", "pause": "Rawestandin", "play": "Vîdyoyê bilîze", "mute": "Bêdeng bike", "unmute": "Dengê wê veke", "scrub": "Di nav vîdyoyê de bigere", "addMore": "Wêne an vîdyoyan lê zêde bike", "trimAria": "Ji bo jêkirinê dawiyan bikişîne", "coverAria": "Ji bo danîna bergê li çarçoveyekê bixe", "coverHint": "Ji bo danîna bergê li çarçoveyekê bixe", "coverOwn": "Wêneyê te", "coverAuto": "Xweber", "uploadCover": "Wêneyekî bergê bar bike", "mirrored": "Neynikkirî", "original": "Orjînal", "rotate90": "90 pileyî bizivirîne", "showNormally": "Bi awayekî normal nîşan bide", "showNormallyBody": "Ew tavilê dibînin", "hideUntilTap": "Heya lê neyê xistin veşêre", "hideUntilTapBody": "Heya lê nexin şêlû ye", "hidePrice": "Li pişt bihayekî veşêre", "hidePriceBody": "Heya drav nedin şêlû ye", "priceUnavailable": "Di vê chatê de nîne", "timerOff": "Girtî", "timerOffBody": "Di chatê de dimîne.", "timerViewBody": "Gava dîtin, ji bo her duyan jî winda dibe.", "confirm": "Piştrast bike", "lockedFor": "Ji bo {{value1}} DHB veke", "lockedForUsd": "Ji bo {{value1}} veke", "editItem": "Tiştê {{value1}} biguherîne", "kept": "{{time}} hat parastin", "timerTimeBody": "Piştî ku te şand, di nav {{value1}} de ji bo her duyan jî winda dibe."},
+  "dmVideo": {"edit": "Vîdyoyê biguherîne", "hiddenTag": "Veşartî", "tapToEdit": "Ji bo guherandinê bitikîne", "cover": "Berg", "trim": "Jêkirin", "mirror": "Neynik", "rotate": "Zivirandin", "hide": "Veşartin", "timer": "Demjimêr", "sheetTitleAny": "Berî şandinê biguherîne", "close": "Girtin", "replace": "Biguherîne", "hiddenUntilTap": "Heya lê nexin veşartî ye", "pause": "Rawestandin", "play": "Vîdyoyê bilîze", "mute": "Bêdeng bike", "unmute": "Dengê wê veke", "scrub": "Di nav vîdyoyê de bigere", "addMore": "Wêne an vîdyoyan lê zêde bike", "trimAria": "Ji bo jêkirinê dawiyan bikişîne", "coverAria": "Ji bo danîna bergê li çarçoveyekê bixe", "coverHint": "Ji bo danîna bergê li çarçoveyekê bixe", "coverOwn": "Wêneyê te", "coverAuto": "Xweber", "uploadCover": "Wêneyekî bergê bar bike", "mirrored": "Neynikkirî", "original": "Orjînal", "rotate90": "90 pileyî bizivirîne", "showNormally": "Bi awayekî normal nîşan bide", "showNormallyBody": "Ew tavilê dibînin", "hideUntilTap": "Heya lê neyê xistin veşêre", "hideUntilTapBody": "Heya lê nexin şêlû ye", "hidePrice": "Li pişt bihayekî veşêre", "hidePriceBody": "Heya drav nedin şêlû ye", "priceUnavailable": "Di vê chatê de nîne", "timerOff": "Girtî", "timerOffBody": "Di chatê de dimîne.", "timerViewBody": "Gava dîtin, ji bo her duyan jî winda dibe.", "confirm": "Piştrast bike", "lockedFor": "Ji bo {{value1}} token veke", "lockedForUsd": "Ji bo {{value1}} veke", "editItem": "Tiştê {{value1}} biguherîne", "kept": "{{time}} hat parastin", "timerTimeBody": "Piştî ku te şand, di nav {{value1}} de ji bo her duyan jî winda dibe."},
   "postBg": {
     "addMedia": "Wêne, GIF an vîdyoyek zêde bike",
     "changeMedia": "Wêne, GIF an vîdyoyê biguherîne",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} xwediyê OG",
     "ogHolders_other": "{{count}} xwediyên OG",
     "ogChallengeTitle": "Xwediyên OG vegerîne",
-    "ogChallengeBody": "Kesên ku hêj DHB digirin vexwîne. Dema ew bi girêdana vexwendina te tevlî dibin û DHB-ya xwe di berîka xwe ya Riftn de dihêlin, li vir ji bo te tên hejmartin.",
+    "ogChallengeBody": "Kesên ku hêj token digirin vexwîne. Dema ew bi girêdana vexwendina te tevlî dibin û token-ya xwe di berîka xwe ya Riftn de dihêlin, li vir ji bo te tên hejmartin.",
     "ogChallengeCta": "Girêdana xwe ya vexwendinê bistîne"
   },
   "dhbListing": {
@@ -12233,7 +12233,7 @@
           "4": "Ji bo tomarkirina nîşeyeke dengî, li ser îkona mîkrofonê bitikîne.",
           "5": "Ji bo zêdekirina GIF-ekê, li îkona GIF bitikîne û li yekê bigere.",
           "6": "#Haştagan bikar bîne da ku şandiya xwe kategorîze bikî (mînak #crypto, #defi).",
-          "7": "$Cashtagan bikar bîne da ku behsa tokenan bikî (mînak $RIFT, $ETH).",
+          "7": "$Cashtagan bikar bîne da ku behsa tokenan bikî (mînak $BTC, $ETH).",
           "8": "@Behskirinan bikar bîne da ku bikarhênerên din etîket bikî (mînak @username).",
           "9": "Ji bo weşandinê li 'Biweşîne' bitikîne. Şandiya te yekser di herikê de xuya dibe."
         },

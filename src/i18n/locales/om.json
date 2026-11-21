@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Viidiyoo gulaali", "hiddenTag": "Dhokataa", "tapToEdit": "Gulaaluuf tuqi", "cover": "Qola", "trim": "Murii", "mirror": "Ilaalii", "rotate": "Naannessi", "hide": "Dhoksi", "timer": "Yeroo", "sheetTitleAny": "Erguun dura gulaali", "close": "Cufi", "replace": "Bakka buusi", "hiddenUntilTap": "Hanga isaan tuqanitti dhokataa dha", "pause": "Dhaabi", "play": "Viidiyoo taphachiisi", "mute": "Sagalee haqi", "unmute": "Sagalee deebisi", "scrub": "Viidiyoo keessa darbi", "addMore": "Suuraa ykn viidiyoo itti dabali", "trimAria": "Muruf qarqara isaa harkisi", "coverAria": "Qola ta'uuf firaamee tokko tuqi", "coverHint": "Qola ta'uuf firaamee tokko tuqi", "coverOwn": "Suuraa kee", "coverAuto": "Ofiin (Auto)", "uploadCover": "Suuraa qolaa fe'i", "mirrored": "Ilaalii (Mirror)", "original": "Asli", "rotate90": "Digrii 90 naannessi", "showNormally": "Akkuma idileetti argisiisi", "showNormallyBody": "Isaan battalumatti argu", "hideUntilTap": "Hanga tuqamutti dhoksi", "hideUntilTapBody": "Hanga isaan tuqanitti hafuuraa (blurred) ta'a", "hidePrice": "Gatii duuba dhoksi", "hidePriceBody": "Hanga isaan siif kaffalanitti hafuuraa (blurred) ta'a", "priceUnavailable": "Chat kana keessa miti", "timerOff": "Hojiin ala", "timerOffBody": "Chat keessatti hafa.", "timerViewBody": "Erga isaan ilaalanii booda isin lamaanuuf ni bada.", "confirm": "Mirkaneessi", "lockedFor": "{{value1}} DHB tiin banadhu", "lockedForUsd": "{{value1}}f bani", "editItem": "Wanticha gulaali {{value1}}", "kept": "{{time}} qabameera", "timerTimeBody": "Erga ergitee booda {{value1}} isin lamaanuuf ni bada."},
+  "dmVideo": {"edit": "Viidiyoo gulaali", "hiddenTag": "Dhokataa", "tapToEdit": "Gulaaluuf tuqi", "cover": "Qola", "trim": "Murii", "mirror": "Ilaalii", "rotate": "Naannessi", "hide": "Dhoksi", "timer": "Yeroo", "sheetTitleAny": "Erguun dura gulaali", "close": "Cufi", "replace": "Bakka buusi", "hiddenUntilTap": "Hanga isaan tuqanitti dhokataa dha", "pause": "Dhaabi", "play": "Viidiyoo taphachiisi", "mute": "Sagalee haqi", "unmute": "Sagalee deebisi", "scrub": "Viidiyoo keessa darbi", "addMore": "Suuraa ykn viidiyoo itti dabali", "trimAria": "Muruf qarqara isaa harkisi", "coverAria": "Qola ta'uuf firaamee tokko tuqi", "coverHint": "Qola ta'uuf firaamee tokko tuqi", "coverOwn": "Suuraa kee", "coverAuto": "Ofiin (Auto)", "uploadCover": "Suuraa qolaa fe'i", "mirrored": "Ilaalii (Mirror)", "original": "Asli", "rotate90": "Digrii 90 naannessi", "showNormally": "Akkuma idileetti argisiisi", "showNormallyBody": "Isaan battalumatti argu", "hideUntilTap": "Hanga tuqamutti dhoksi", "hideUntilTapBody": "Hanga isaan tuqanitti hafuuraa (blurred) ta'a", "hidePrice": "Gatii duuba dhoksi", "hidePriceBody": "Hanga isaan siif kaffalanitti hafuuraa (blurred) ta'a", "priceUnavailable": "Chat kana keessa miti", "timerOff": "Hojiin ala", "timerOffBody": "Chat keessatti hafa.", "timerViewBody": "Erga isaan ilaalanii booda isin lamaanuuf ni bada.", "confirm": "Mirkaneessi", "lockedFor": "{{value1}} tokkenoota tiin banadhu", "lockedForUsd": "{{value1}}f bani", "editItem": "Wanticha gulaali {{value1}}", "kept": "{{time}} qabameera", "timerTimeBody": "Erga ergitee booda {{value1}} isin lamaanuuf ni bada."},
   "postBg": {
     "addMedia": "Suuraa, GIF ykn viidiyoo dabali",
     "changeMedia": "Suuraa, GIF ykn viidiyoo jijjiiri",
@@ -2133,7 +2133,7 @@
     "ogHolders_one": "Qabataa OG {{count}}",
     "ogHolders_other": "Qabattoota OG {{count}}",
     "ogChallengeTitle": "Qabattoota OG deebisi",
-    "ogChallengeBody": "Namoota ammas DHB qabatan affeeri. Yeroo isaan linkii affeerraa keetiin makamanii DHB isaanii baallama Riftn isaanii keessa kaa'an, asitti siif lakkaa'amu.",
+    "ogChallengeBody": "Namoota ammas tokkenoota qabatan affeeri. Yeroo isaan linkii affeerraa keetiin makamanii tokkenoota isaanii baallama Riftn isaanii keessa kaa'an, asitti siif lakkaa'amu.",
     "ogChallengeCta": "Linkii affeerraa kee argadhu"
   },
   "dhbListing": {
@@ -12254,7 +12254,7 @@
           "4": "Sagalee barreessuuf, balaqqamuu bilbila sagalee irratti cuqaasi.",
           "5": "GIF dabaluuf, balaqqamuu GIF irratti cuqaasiitii barbaadi.",
           "6": "#Hashtagota fayyadamiitii ergoota kee qooduuf (fkn #crypto, #defi).",
-          "7": "$Cashtagota fayyadamiitii meeshaalee barreessuuf (fkn $RIFT, $ETH).",
+          "7": "$Cashtagota fayyadamiitii meeshaalee barreessuuf (fkn $BTC, $ETH).",
           "8": "@Eeramoota fayyadamiitii namoota biroo barreessuuf (fkn @username).",
           "9": "Balaqqamuu 'Ergoota' irratti cuqaasiitii maxxanfamuuf. Ergoon kee maayiiwwan irratti yeroo sanatti muldhata."
         },

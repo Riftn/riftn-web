@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Holders tab
  * ===========
@@ -171,7 +172,7 @@ export function HoldersTab({ community }: HoldersTabProps) {
                 {readingMeta
                   ? t('communities.holderGate.reading', { defaultValue: 'Reading token…' })
                   : meta.symbol
-                    ? `${meta.symbol}${meta.decimals != null ? ` · ${meta.decimals} decimals` : ''}`
+                    ? `${tokenLabel(meta.symbol)}${meta.decimals != null ? ` · ${meta.decimals} decimals` : ''}`
                     : token && !ADDRESS.test(token)
                       ? t('communities.holderGate.badAddress', { defaultValue: 'That is not a token address' })
                       : ''}

@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * PPV Drawer Content Component
  * ============================
@@ -147,7 +148,7 @@ export function PPVDrawerContent({
               ) : (
                 t('drawers.payAmount', 'Pay {{amount}} {{currency}}', {
                   amount: formatCompact(Number(price)),
-                  currency: currency || 'DHB',
+                  currency: tokenLabel(currency),
                 })
               )}
             </Button>

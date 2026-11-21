@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Video bewerken", "hiddenTag": "Verborgen", "tapToEdit": "Tik om te bewerken", "cover": "Omslag", "trim": "Bijsnijden", "mirror": "Spiegelen", "rotate": "Draaien", "hide": "Verbergen", "timer": "Timer", "sheetTitleAny": "Bewerken voor verzenden", "close": "Sluiten", "replace": "Vervangen", "hiddenUntilTap": "Verborgen totdat ze erop tikken", "pause": "Pauze", "play": "Video afspelen", "mute": "Dempen", "unmute": "Dempen opheffen", "scrub": "Door de video scrollen", "addMore": "Foto's of video's toevoegen", "trimAria": "Sleep de uiteinden om bij te snijden", "coverAria": "Tik op een frame om de omslag in te stellen", "coverHint": "Tik op een frame om de omslag in te stellen", "coverOwn": "Jouw foto", "coverAuto": "Auto", "uploadCover": "Een omslagfoto uploaden", "mirrored": "Gespiegeld", "original": "Origineel", "rotate90": "90° draaien", "showNormally": "Normaal weergeven", "showNormallyBody": "Ze zien het meteen", "hideUntilTap": "Verbergen totdat er wordt getikt", "hideUntilTapBody": "Vervaagd totdat ze erop tikken", "hidePrice": "Verbergen achter een prijs", "hidePriceBody": "Vervaagd totdat ze je betalen", "priceUnavailable": "Niet in deze chat", "timerOff": "Uit", "timerOffBody": "Het blijft in de chat.", "timerViewBody": "Weg voor jullie beiden zodra ze het hebben gezien.", "confirm": "Bevestigen", "lockedFor": "Ontgrendelen voor {{value1}} DHB", "lockedForUsd": "Ontgrendelen voor {{value1}}", "editItem": "Item bewerken {{value1}}", "kept": "{{time}} behouden", "timerTimeBody": "Weg voor jullie beiden {{value1}} nadat je het hebt verzonden."},
+  "dmVideo": {"edit": "Video bewerken", "hiddenTag": "Verborgen", "tapToEdit": "Tik om te bewerken", "cover": "Omslag", "trim": "Bijsnijden", "mirror": "Spiegelen", "rotate": "Draaien", "hide": "Verbergen", "timer": "Timer", "sheetTitleAny": "Bewerken voor verzenden", "close": "Sluiten", "replace": "Vervangen", "hiddenUntilTap": "Verborgen totdat ze erop tikken", "pause": "Pauze", "play": "Video afspelen", "mute": "Dempen", "unmute": "Dempen opheffen", "scrub": "Door de video scrollen", "addMore": "Foto's of video's toevoegen", "trimAria": "Sleep de uiteinden om bij te snijden", "coverAria": "Tik op een frame om de omslag in te stellen", "coverHint": "Tik op een frame om de omslag in te stellen", "coverOwn": "Jouw foto", "coverAuto": "Auto", "uploadCover": "Een omslagfoto uploaden", "mirrored": "Gespiegeld", "original": "Origineel", "rotate90": "90° draaien", "showNormally": "Normaal weergeven", "showNormallyBody": "Ze zien het meteen", "hideUntilTap": "Verbergen totdat er wordt getikt", "hideUntilTapBody": "Vervaagd totdat ze erop tikken", "hidePrice": "Verbergen achter een prijs", "hidePriceBody": "Vervaagd totdat ze je betalen", "priceUnavailable": "Niet in deze chat", "timerOff": "Uit", "timerOffBody": "Het blijft in de chat.", "timerViewBody": "Weg voor jullie beiden zodra ze het hebben gezien.", "confirm": "Bevestigen", "lockedFor": "Ontgrendelen voor {{value1}} tokens", "lockedForUsd": "Ontgrendelen voor {{value1}}", "editItem": "Item bewerken {{value1}}", "kept": "{{time}} behouden", "timerTimeBody": "Weg voor jullie beiden {{value1}} nadat je het hebt verzonden."},
   "assistantCards": {"requestDraft": "Concept voor openbaar verzoek", "postRequest": "Plaatsen bij Verzoeken", "possibleDuplicates": "Mogelijke duplicaten", "viewPostedRequest": "Geplaatst verzoek bekijken", "fitting": "Passend", "loadFailed": "Deze kaart kon niet laden. Log in of vraag het opnieuw.", "failed": "Dat lukte niet. Probeer het opnieuw.", "reactOne": "Reageer op 1 bericht", "reactMany": "Reageer op {{count}} berichten", "follow": "Volg {{count}}", "unfollow": "Ontvolg {{count}}", "allowChats": "Mag de assistent je chats lezen?", "stopChats": "Stoppen met het lezen van je chats?", "confirmReact": "Reageer", "confirmFollow": "Volgen", "confirmUnfollow": "Ontvolgen", "confirmAllow": "Toestaan", "confirmStop": "Stoppen", "skipsAlready": "Slaat {{count}} over waarop je al reageerde", "allowChatsWhy": "Alleen jij ziet wat hij leest. Alleen privéchats, en end-to-end versleutelde blijven privé. Vraag hem altijd om te stoppen.", "pickReaction": "Kies een reactie", "progress": "{{done}} van {{total}}", "doneReact": "Gereageerd op {{count}} berichten", "doneAllow": "Toegestaan. Stel je vraag opnieuw.", "doneStop": "Gestopt. Hij kan je chats niet meer lezen.", "doneFollow": "Klaar voor {{count}}", "expired": "Deze kaart is verlopen. Vraag het opnieuw.", "cancelled": "Geannuleerd", "cancel": "Niet nu"},
   "postBg": {
     "addMedia": "Voeg een afbeelding, GIF of video toe",
@@ -2377,7 +2377,7 @@
     "ogHolders_one": "{{count}} OG-holder",
     "ogHolders_other": "{{count}} OG-holders",
     "ogChallengeTitle": "Haal de OG-holders terug",
-    "ogChallengeBody": "Nodig mensen uit die nog DHB hebben. Als ze via jouw uitnodigingslink lid worden en hun DHB in hun Riftn-wallet houden, tellen ze hier voor jou.",
+    "ogChallengeBody": "Nodig mensen uit die nog tokens hebben. Als ze via je uitnodigingslink lid worden en hun tokens in hun Riftn-wallet houden, tellen ze hier voor je mee.",
     "ogChallengeCta": "Haal je uitnodigingslink op",
     "directReferrals_one": "{{count}} rechtstreeks",
     "directReferrals_other": "{{count}} rechtstreeks",
@@ -12235,7 +12235,7 @@
       },
       "dhb": {
         "term": "tokens",
-        "definition": "De native token van het DHB netwerk, gebruikt voor governance, staking en het belonen van deelnemers."
+        "definition": "De native token van het Riftn-netwerk, gebruikt voor governance, staking en het belonen van deelnemers."
       },
       "defi": {
         "term": "DeFi",
@@ -12577,7 +12577,7 @@
           "4": "Om een spraakmemo op te nemen, klikt u op het microfoonicoon.",
           "5": "Om een GIF toe te voegen, klikt u op het GIF-icoon en zoekt u er een.",
           "6": "Gebruik #hashtags om uw bericht te categoriseren (bijv. #crypto, #defi).",
-          "7": "Gebruik $cashtags om naar tokens te verwijzen (bijv. $RIFT, $ETH).",
+          "7": "Gebruik $cashtags om naar tokens te verwijzen (bijv. $BTC, $ETH).",
           "8": "Gebruik @vermeldingen om andere gebruikers te taggen (bijv. @gebruikersnaam).",
           "9": "Klik op 'Post' om te publiceren. Uw bericht verschijnt onmiddellijk in de feed."
         },

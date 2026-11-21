@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Full post stats on Post Info, creator only. Every number that can be told
  * apart is split into members (signed in) and visitors (signed out).
@@ -189,7 +190,7 @@ export function PostStatsPanel({ tokenId, views }: {
       </StatsSection>
 
       {money.topSupporters.length ? (
-        <StatsSection title={t('postStats.topSupporters', 'Top supporters')} aside={`${fmt(money.tips)} DHB`}>
+        <StatsSection title={t('postStats.topSupporters', 'Top supporters')} aside={`${fmt(money.tips)} ${tokenLabel()}`}>
           <ul className="flex flex-col gap-2">
             {money.topSupporters.map((s) => {
               const name = s.displayName || s.username || `${s.address.slice(0, 6)}…`;

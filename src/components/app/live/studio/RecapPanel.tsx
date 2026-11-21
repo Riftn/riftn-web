@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 /**
  * Live Studio's stream recap: what happened on the creator's last stream —
  * or the one they just ended, when Go Live sends them here with `?recap=`.
@@ -113,7 +114,7 @@ export function RecapPanel({ address, streamId }: Props) {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Stat label={t('liveRecap.duration')} value={formatDuration(r.durationSec)} />
               <Stat label={t('liveRecap.peakViewers')} value={formatCount(r.peakViewers)} />
-              <Stat label={t('liveRecap.gifts', { count: r.tips.count })} value={`${whole(r.tips.total)} DHB`} />
+              <Stat label={t('liveRecap.gifts', { count: r.tips.count })} value={`${whole(r.tips.total)} ${tokenLabel()}`} />
               <Stat label={t('liveRecap.newFollowers')} value={formatCount(r.newFollowers)} />
               <Stat label={t('liveRecap.chatMessages')} value={formatCount(r.chat.messages)} />
               <Stat label={t('liveRecap.chatters')} value={formatCount(r.chat.chatters)} />
@@ -130,7 +131,7 @@ export function RecapPanel({ address, streamId }: Props) {
                       <span className="w-4 text-center text-zinc-500">{i + 1}</span>
                       <img src={buildAvatarUrl(p.address, p.avatarImageUrl)} alt="" className="h-7 w-7 rounded-full object-cover" loading="lazy" />
                       <span className="min-w-0 flex-1 truncate text-white">{p.displayName || p.username || `${p.address.slice(0, 6)}…`}</span>
-                      <span className="tabular-nums text-zinc-300">{`${whole(p.total)} DHB`}</span>
+                      <span className="tabular-nums text-zinc-300">{`${whole(p.total)} ${tokenLabel()}`}</span>
                     </li>
                   ))}
                 </ol>

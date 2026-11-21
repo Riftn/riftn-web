@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "剪辑视频", "hiddenTag": "隱藏", "tapToEdit": "點擊編輯", "cover": "封面", "trim": "裁剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "计时器", "sheetTitleAny": "發送前編輯", "close": "关闭", "replace": "替換", "hiddenUntilTap": "点击前隐藏", "pause": "暂停", "play": "播放视频", "mute": "靜音", "unmute": "解靜音", "scrub": "拖动视频进度", "addMore": "添加照片或视频", "trimAria": "拖动两端进行裁剪", "coverAria": "点击画面设置封面", "coverHint": "点击画面设置封面", "coverOwn": "你的照片", "coverAuto": "自動", "uploadCover": "上传封面图片", "mirrored": "已镜像", "original": "原图", "rotate90": "旋转 90°", "showNormally": "正常显示", "showNormallyBody": "立即显示", "hideUntilTap": "点击前隐藏", "hideUntilTapBody": "点击前模糊", "hidePrice": "隐藏并设置价格", "hidePriceBody": "付款前模糊", "priceUnavailable": "不在本聊天中", "timerOff": "关闭", "timerOffBody": "伊会留底在聊天记录里。", "timerViewBody": "等𫧃看过了，两边就都无了。", "confirm": "确认", "lockedFor": "解鎖給 {{value1}} DHB", "lockedForUsd": "解锁需 {{value1}}", "editItem": "编辑物件 {{value1}}", "kept": "{{time}} 保留", "timerTimeBody": "发出去 {{value1}} 后，两边就都无了。"},
+  "dmVideo": {"edit": "剪辑视频", "hiddenTag": "隱藏", "tapToEdit": "點擊編輯", "cover": "封面", "trim": "裁剪", "mirror": "镜像", "rotate": "旋转", "hide": "隐藏", "timer": "计时器", "sheetTitleAny": "發送前編輯", "close": "关闭", "replace": "替換", "hiddenUntilTap": "点击前隐藏", "pause": "暂停", "play": "播放视频", "mute": "靜音", "unmute": "解靜音", "scrub": "拖动视频进度", "addMore": "添加照片或视频", "trimAria": "拖动两端进行裁剪", "coverAria": "点击画面设置封面", "coverHint": "点击画面设置封面", "coverOwn": "你的照片", "coverAuto": "自動", "uploadCover": "上传封面图片", "mirrored": "已镜像", "original": "原图", "rotate90": "旋转 90°", "showNormally": "正常显示", "showNormallyBody": "立即显示", "hideUntilTap": "点击前隐藏", "hideUntilTapBody": "点击前模糊", "hidePrice": "隐藏并设置价格", "hidePriceBody": "付款前模糊", "priceUnavailable": "不在本聊天中", "timerOff": "关闭", "timerOffBody": "伊会留底在聊天记录里。", "timerViewBody": "等𫧃看过了，两边就都无了。", "confirm": "确认", "lockedFor": "解鎖給 {{value1}} 代币", "lockedForUsd": "解锁需 {{value1}}", "editItem": "编辑物件 {{value1}}", "kept": "{{time}} 保留", "timerTimeBody": "发出去 {{value1}} 后，两边就都无了。"},
   "postBg": {
     "addMedia": "添加图片、GIF 或视频",
     "changeMedia": "更换图片、GIF 或视频",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} 位 OG 持有者",
     "ogHolders_other": "{{count}} 位 OG 持有者",
     "ogChallengeTitle": "召回 OG 持有者",
-    "ogChallengeBody": "邀请仍持有 DHB 的人。当他们通过你的邀请链接加入并把 DHB 保留在 Riftn 钱包中时，就会在这里计入你的成绩。",
+    "ogChallengeBody": "邀请仍持有 代币 的人。当他们通过你的邀请链接加入并把 代币 保留在 Riftn 钱包中时，就会在这里计入你的成绩。",
     "ogChallengeCta": "获取你的邀请链接"
   },
   "dhbListing": {
@@ -12236,7 +12236,7 @@
           "4": "要录制语音笔记，请点击麦克风图标。",
           "5": "要加GIF，按GIF图标，搜一个。",
           "6": "用#话题标签来分类你的帖子（例如，#加密货币，#去中心化金融）。",
-          "7": "用 $cashtags 来引用代币（例如，$RIFT，$ETH）。",
+          "7": "用 $cashtags 来引用代币（例如，$BTC，$ETH）。",
           "8": "用 @用户名 来标记其他用户 (例如，@username)。",
           "9": "點擊「發布」發布。你的帖子會立即顯示在動態消息中。"
         },

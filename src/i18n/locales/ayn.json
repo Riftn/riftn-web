@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "عدّل الفيديو", "hiddenTag": "مخفي", "tapToEdit": "إضغط للتعديل", "cover": "غلاف", "trim": "قص", "mirror": "مرآة", "rotate": "دور", "hide": "إخفاء", "timer": "مؤقت", "sheetTitleAny": "عدّل قبل الإرسال", "close": "إغلاق", "replace": "استبدل", "hiddenUntilTap": "مخفي لينضغطوا عليه", "pause": "إيقاف مؤقت", "play": "تشغيل الفيديو", "mute": "كتم", "unmute": "إلغاء الكتم", "scrub": "تسحب الفيديو", "addMore": "أضف صور أو فيديوهات", "trimAria": "اسحب الأطراف للقص", "coverAria": "اضغط على إطار لتعيينه كغلاف", "coverHint": "اضغط على إطار لتعيينه كغلاف", "coverOwn": "صورتك", "coverAuto": "تلقائي", "uploadCover": "ارفع صورة غلاف", "mirrored": "معكوس", "original": "أصلي", "rotate90": "دور 90°", "showNormally": "عرض عادي", "showNormallyBody": "يشوفوه فوراً", "hideUntilTap": "إخفاء لينضغط", "hideUntilTapBody": "مطمّس لينضغط", "hidePrice": "إخفاء خلف سعر", "hidePriceBody": "مطمّس ليندفع لك", "priceUnavailable": "مش في هالدردشة", "timerOff": "إيقاف", "timerOffBody": "تظل في الشات.", "timerViewBody": "تروح لكما الاثنين بعد ما يشوفوها.", "confirm": "أكد", "lockedFor": "افتح لـ {{value1}} DHB", "lockedForUsd": "افتح لـ {{value1}}", "editItem": "عدل العنصر {{value1}}", "kept": "{{time}} احتفظ", "timerTimeBody": "تروح لكما الاثنين {{value1}} بعد ما ترسلها."},
+  "dmVideo": {"edit": "عدّل الفيديو", "hiddenTag": "مخفي", "tapToEdit": "إضغط للتعديل", "cover": "غلاف", "trim": "قص", "mirror": "مرآة", "rotate": "دور", "hide": "إخفاء", "timer": "مؤقت", "sheetTitleAny": "عدّل قبل الإرسال", "close": "إغلاق", "replace": "استبدل", "hiddenUntilTap": "مخفي لينضغطوا عليه", "pause": "إيقاف مؤقت", "play": "تشغيل الفيديو", "mute": "كتم", "unmute": "إلغاء الكتم", "scrub": "تسحب الفيديو", "addMore": "أضف صور أو فيديوهات", "trimAria": "اسحب الأطراف للقص", "coverAria": "اضغط على إطار لتعيينه كغلاف", "coverHint": "اضغط على إطار لتعيينه كغلاف", "coverOwn": "صورتك", "coverAuto": "تلقائي", "uploadCover": "ارفع صورة غلاف", "mirrored": "معكوس", "original": "أصلي", "rotate90": "دور 90°", "showNormally": "عرض عادي", "showNormallyBody": "يشوفوه فوراً", "hideUntilTap": "إخفاء لينضغط", "hideUntilTapBody": "مطمّس لينضغط", "hidePrice": "إخفاء خلف سعر", "hidePriceBody": "مطمّس ليندفع لك", "priceUnavailable": "مش في هالدردشة", "timerOff": "إيقاف", "timerOffBody": "تظل في الشات.", "timerViewBody": "تروح لكما الاثنين بعد ما يشوفوها.", "confirm": "أكد", "lockedFor": "افتح لـ {{value1}} رموز", "lockedForUsd": "افتح لـ {{value1}}", "editItem": "عدل العنصر {{value1}}", "kept": "{{time}} احتفظ", "timerTimeBody": "تروح لكما الاثنين {{value1}} بعد ما ترسلها."},
   "postBg": {
     "addMedia": "أضف صورة أو GIF أو فيديو",
     "changeMedia": "غيّر الصورة أو GIF أو الفيديو",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} حامل OG",
     "ogHolders_other": "{{count}} حاملين OG",
     "ogChallengeTitle": "رجّع حاملين OG",
-    "ogChallengeBody": "ادعُ ناس لسّا عندهم DHB. لما ينضموا برابط الدعوة حقك ويخلّوا الـ DHB حقهم في محفظة Riftn، ينحسبوا لك هنا.",
+    "ogChallengeBody": "ادعُ ناس لسّا عندهم رموز. لما ينضموا برابط الدعوة حقك ويخلّوا الـ رموز حقهم في محفظة Riftn، ينحسبوا لك هنا.",
     "ogChallengeCta": "خذ رابط الدعوة حقك"
   },
   "dhbListing": {
@@ -12233,7 +12233,7 @@
           "4": "عشان تسجل ملاحظة صوتية، اضغط على أيقونة الميكروفون.",
           "5": "عشان تضيف GIF، اضغط على أيقونة GIF وابحث عن واحد.",
           "6": "استخدم #هاشتاجات عشان تصنف بوستك (مثلاً، #كريبتو، #دي_في).",
-          "7": "استخدم $كاشتاجات عشان تشير لرموز (مثلاً، $RIFT، $ETH).",
+          "7": "استخدم $كاشتاجات عشان تشير لرموز (مثلاً، $BTC، $ETH).",
           "8": "استخدم @إشارات عشان تشير لمستخدمين ثانيين (مثلاً، @اسم_المستخدم).",
           "9": "اضغط 'بوست' للنشر. بوستك يظهر في الخلاصة فوراً."
         },

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Muokkaa videota", "hiddenTag": "Piilotettu", "tapToEdit": "Napauta muokataksesi", "cover": "Kansikuva", "trim": "Leikkaa", "mirror": "Peili", "rotate": "Käännä", "hide": "Piilota", "timer": "Ajastin", "sheetTitleAny": "Muokkaa ennen lähettämistä", "close": "Sulje", "replace": "Korvaa", "hiddenUntilTap": "Piilotettu, kunnes he napauttavat sitä", "pause": "Tauko", "play": "Toista video", "mute": "Mykistä", "unmute": "Poista mykistys", "scrub": "Selaa videota", "addMore": "Lisää valokuvia tai videoita", "trimAria": "Vedä päät leikkääksesi", "coverAria": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverHint": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverOwn": "Kuvasi", "coverAuto": "Automaattinen", "uploadCover": "Lataa kansikuva", "mirrored": "Peilattu", "original": "Alkuperäinen", "rotate90": "Käännä 90°", "showNormally": "Näytä normaalisti", "showNormallyBody": "He näkevät sen heti", "hideUntilTap": "Piilota, kunnes napautetaan", "hideUntilTapBody": "Sumennettu, kunnes he napauttavat sitä", "hidePrice": "Piilota hintan takana", "hidePriceBody": "Sumennettu, kunnes maksat", "priceUnavailable": "Ei tässä keskustelussa", "timerOff": "Pois", "timerOffBody": "Se pysyy chatissa.", "timerViewBody": "Kuin pois molemmille teille, kun he ovat nähneet sen.", "confirm": "Vahvista", "lockedFor": "Avaa lukitus {{value1}} DHB", "lockedForUsd": "Avaa lukitus käyttäjälle {{value1}}", "editItem": "Muokkaa kohdetta {{value1}}", "kept": "{{time}} säilytetty", "timerTimeBody": "Poistunut molemmille teille {{value1}} lähettämisen jälkeen."},
+  "dmVideo": {"edit": "Muokkaa videota", "hiddenTag": "Piilotettu", "tapToEdit": "Napauta muokataksesi", "cover": "Kansikuva", "trim": "Leikkaa", "mirror": "Peili", "rotate": "Käännä", "hide": "Piilota", "timer": "Ajastin", "sheetTitleAny": "Muokkaa ennen lähettämistä", "close": "Sulje", "replace": "Korvaa", "hiddenUntilTap": "Piilotettu, kunnes he napauttavat sitä", "pause": "Tauko", "play": "Toista video", "mute": "Mykistä", "unmute": "Poista mykistys", "scrub": "Selaa videota", "addMore": "Lisää valokuvia tai videoita", "trimAria": "Vedä päät leikkääksesi", "coverAria": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverHint": "Napauta kuvaa asettaaksesi sen kansikuvaksi", "coverOwn": "Kuvasi", "coverAuto": "Automaattinen", "uploadCover": "Lataa kansikuva", "mirrored": "Peilattu", "original": "Alkuperäinen", "rotate90": "Käännä 90°", "showNormally": "Näytä normaalisti", "showNormallyBody": "He näkevät sen heti", "hideUntilTap": "Piilota, kunnes napautetaan", "hideUntilTapBody": "Sumennettu, kunnes he napauttavat sitä", "hidePrice": "Piilota hintan takana", "hidePriceBody": "Sumennettu, kunnes maksat", "priceUnavailable": "Ei tässä keskustelussa", "timerOff": "Pois", "timerOffBody": "Se pysyy chatissa.", "timerViewBody": "Kuin pois molemmille teille, kun he ovat nähneet sen.", "confirm": "Vahvista", "lockedFor": "Avaa lukitus {{value1}} tokenia", "lockedForUsd": "Avaa lukitus käyttäjälle {{value1}}", "editItem": "Muokkaa kohdetta {{value1}}", "kept": "{{time}} säilytetty", "timerTimeBody": "Poistunut molemmille teille {{value1}} lähettämisen jälkeen."},
   "postBg": {
     "addMedia": "Lisää kuva, GIF tai video",
     "changeMedia": "Vaihda kuva, GIF tai video",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG-haltija",
     "ogHolders_other": "{{count}} OG-haltijaa",
     "ogChallengeTitle": "Tuo OG-haltijat takaisin",
-    "ogChallengeBody": "Kutsu ihmisiä, joilla on yhä DHB:tä. Kun he liittyvät kutsulinkilläsi ja pitävät DHB:nsä Riftn-lompakossaan, heidät lasketaan sinulle täällä.",
+    "ogChallengeBody": "Kutsu ihmisiä, joilla on yhä tokenia:tä. Kun he liittyvät kutsulinkilläsi ja pitävät tokenia:nsä Riftn-lompakossaan, heidät lasketaan sinulle täällä.",
     "ogChallengeCta": "Hanki kutsulinkkisi"
   },
   "dhbListing": {
@@ -12233,7 +12233,7 @@
           "4": "Tallentaaksesi äänimuistion, napsauta mikrofonikuvaketta.",
           "5": "Lisätäksesi GIF-tiedoston, napsauta GIF-kuvaketta ja etsi sellainen.",
           "6": "Käytä #hashtageja julkaisusi luokittelemiseen (esim. #crypto, #defi).",
-          "7": "Käytä $cashtageja viitataksesi tokeneihin (esim. $RIFT, $ETH).",
+          "7": "Käytä $cashtageja viitataksesi tokeneihin (esim. $BTC, $ETH).",
           "8": "Käytä @mainintoja merkitäksesi muita käyttäjiä (esim. @käyttäjänimi).",
           "9": "Napsauta 'Julkaise' julkaistaksesi. Julkaisusi ilmestyy syötteeseen välittömästi."
         },

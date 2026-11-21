@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Manova video", "hiddenTag": "Nafototra", "tapToEdit": "Tsindrio hanovana", "cover": "Sarony", "trim": "Hetezo", "mirror": "Fitaratra", "rotate": "Ahodino", "hide": "Afeno", "timer": "Fanamariham-potoana", "sheetTitleAny": "Manova alohan'ny fandefasana", "close": "Akaro", "replace": "Soloina", "hiddenUntilTap": "Afenina mandra-kitikiny azy", "pause": "Atsaharo", "play": "Alefaso ny horonan-tsary", "mute": "Mitsahatra", "unmute": "Miverina amin'ny feo", "scrub": "Hetezo ny horonan-tsary", "addMore": "Manampy sary na horonan-tsary", "trimAria": "Tariho ny sisiny mba hanetezana azy", "coverAria": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverHint": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverOwn": "Sary anao", "coverAuto": "Ahoana", "uploadCover": "Ampidiro ny sary ho sarony", "mirrored": "Fitaratra", "original": "Tany am-boalohany", "rotate90": "Ahodino 90°", "showNormally": "Asehoy ara-dalàna", "showNormallyBody": "Hitany avy hatrany izany", "hideUntilTap": "Afeno mandra-kitika", "hideUntilTapBody": "Manjavozavo mandra-kitikiny azy", "hidePrice": "Afeno ao ambadiky ny vidiny", "hidePriceBody": "Manjavozavo mandra-pandoany vola anao", "priceUnavailable": "Tsy ato amin'ity chat ity", "timerOff": "Vonoina", "timerOffBody": "Mijanona ao anatin'ny chat izany.", "timerViewBody": "Lasa ho anareo roa rehefa avy hitan'izy ireo izany.", "confirm": "Hamafisina", "lockedFor": "Avela ho an'ny {{value1}} DHB", "lockedForUsd": "Hamohana amin'ny {{value1}}", "editItem": "Hanova ny zavatra {{value1}}", "kept": "{{time}} voatahiry", "timerTimeBody": "Lasa ho anareo roa {{value1}} aorian'ny fandefasanao azy."},
+  "dmVideo": {"edit": "Manova video", "hiddenTag": "Nafototra", "tapToEdit": "Tsindrio hanovana", "cover": "Sarony", "trim": "Hetezo", "mirror": "Fitaratra", "rotate": "Ahodino", "hide": "Afeno", "timer": "Fanamariham-potoana", "sheetTitleAny": "Manova alohan'ny fandefasana", "close": "Akaro", "replace": "Soloina", "hiddenUntilTap": "Afenina mandra-kitikiny azy", "pause": "Atsaharo", "play": "Alefaso ny horonan-tsary", "mute": "Mitsahatra", "unmute": "Miverina amin'ny feo", "scrub": "Hetezo ny horonan-tsary", "addMore": "Manampy sary na horonan-tsary", "trimAria": "Tariho ny sisiny mba hanetezana azy", "coverAria": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverHint": "Kitiho ny sary iray mba hanaovana azy ho sarony", "coverOwn": "Sary anao", "coverAuto": "Ahoana", "uploadCover": "Ampidiro ny sary ho sarony", "mirrored": "Fitaratra", "original": "Tany am-boalohany", "rotate90": "Ahodino 90°", "showNormally": "Asehoy ara-dalàna", "showNormallyBody": "Hitany avy hatrany izany", "hideUntilTap": "Afeno mandra-kitika", "hideUntilTapBody": "Manjavozavo mandra-kitikiny azy", "hidePrice": "Afeno ao ambadiky ny vidiny", "hidePriceBody": "Manjavozavo mandra-pandoany vola anao", "priceUnavailable": "Tsy ato amin'ity chat ity", "timerOff": "Vonoina", "timerOffBody": "Mijanona ao anatin'ny chat izany.", "timerViewBody": "Lasa ho anareo roa rehefa avy hitan'izy ireo izany.", "confirm": "Hamafisina", "lockedFor": "Avela ho an'ny {{value1}} marika", "lockedForUsd": "Hamohana amin'ny {{value1}}", "editItem": "Hanova ny zavatra {{value1}}", "kept": "{{time}} voatahiry", "timerTimeBody": "Lasa ho anareo roa {{value1}} aorian'ny fandefasanao azy."},
   "postBg": {
     "addMedia": "Ampio sary, GIF na horonan-tsary",
     "changeMedia": "Ovay ny sary, GIF na horonan-tsary",
@@ -2143,7 +2143,7 @@
     "ogHolders_one": "Mpitazona OG {{count}}",
     "ogHolders_other": "Mpitazona OG {{count}}",
     "ogChallengeTitle": "Ampodio ireo mpitazona OG",
-    "ogChallengeBody": "Asao ireo olona mbola mitazona DHB. Rehefa miditra amin'ny rohy fanasanao izy ireo ary mitazona ny DHB-ny ao amin'ny kitapom-bola Riftn, dia isaina ho anao eto izy ireo.",
+    "ogChallengeBody": "Asao ireo olona mbola mitazona marika. Rehefa miditra amin'ny rohy fanasanao izy ireo ary mitazona ny marika-ny ao amin'ny kitapom-bola Riftn, dia isaina ho anao eto izy ireo.",
     "ogChallengeCta": "Alaivo ny rohy fanasanao"
   },
   "dhbListing": {
@@ -12256,7 +12256,7 @@
           "4": "Mba handrakitra feo, tsindrio ny sary mikrô.",
           "5": "Mba hampidirana GIF, tsindrio ny sary GIF ary tadiavo ny iray.",
           "6": "Ampiasao ny #hashtags mba hanasokajiana ny lahatsoratrao (ohatra, #crypto, #defi).",
-          "7": "Ampiasao ny $cashtags mba hanondroana ireo token (ohatra, $RIFT, $ETH).",
+          "7": "Ampiasao ny $cashtags mba hanondroana ireo token (ohatra, $BTC, $ETH).",
           "8": "Ampiasao ny @mentions mba hanondroana mpampiasa hafa (ohatra, @username).",
           "9": "Tsindrio ny 'Post' mba hamoahana. Ny lahatsoratrao dia hiseho eo amin'ny feed avy hatrany."
         },
