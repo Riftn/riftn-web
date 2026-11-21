@@ -1605,7 +1605,7 @@ export const NotificationItem = memo(function NotificationItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p data-feed-text className={`text-[14.5px] leading-[1.38] ${(notification.read || isClosing) ? 'text-white/75' : 'text-white'}`}>
+        <p data-feed-text data-read={notification.read || isClosing ? "" : undefined} className="text-[14.5px] leading-[1.38]">
           {notificationContentWithActorBadge(
             getNotificationContent(notification, bundle, t, () => setShowActorsDrawer(true), canonicalActors),
             notification,
@@ -1801,7 +1801,7 @@ export const NotificationItem = memo(function NotificationItem({
         if (!open) { drawerJustClosed.current = true; setTimeout(() => { drawerJustClosed.current = false; }, 300); }
         setShowActorsDrawer(open);
       }}>
-        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page className="bg-black/60 backdrop-blur-[24px] border-white/10 max-h-[70dvh]">
+        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page data-notification-surface className="border-white/10 max-h-[70dvh]">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="text-white text-base">
               {(notification.type as string) === 'like' ? _copy("copy.0cd09d44006a", { defaultValue: "Reacted by" }) : (notification.type as string) === 'repost' ? _copy("copy.5b79c5daab9d", { defaultValue: "Reposted by" }) : (notification.type as string) === 'comment' ? _copy("copy.03a8c852177a", { defaultValue: "Commented by" }) : _copy("copy.6b0cc904d081", { defaultValue: "Users" })}
@@ -1840,7 +1840,7 @@ export const NotificationItem = memo(function NotificationItem({
         if (!open) { drawerJustClosed.current = true; setTimeout(() => { drawerJustClosed.current = false; }, 300); }
         setShowPostsDrawer(open);
       }}>
-        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page className="bg-black/60 backdrop-blur-[24px] border-white/10 max-h-[80dvh]">
+        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page data-notification-surface className="border-white/10 max-h-[80dvh]">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="text-white text-base">
               {notification.type === 'like' ? _copy("copy.376bde01356c", { defaultValue: "Reacted posts" }) : notification.type === 'comment' ? _copy("copy.25eee375e3f4", { defaultValue: "Commented posts" }) : (notification.type as string) === 'repost' ? _copy("copy.1318b0271dac", { defaultValue: "Reposted posts" }) : _copy("copy.a80811cf6889", { defaultValue: "Posts" })}
@@ -1882,7 +1882,7 @@ export function FilteredNotificationsSection() {
   );
 
   return (
-    <div data-filtered-notifications data-notifications-page className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-zinc-900">
+    <div data-filtered-notifications data-notifications-page data-notification-surface className="mt-4 overflow-hidden rounded-2xl border border-white/5">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
@@ -2595,7 +2595,8 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       <SheetContent
         side="bottom"
         data-notifications-page
-        className="bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border-t border-white/10 rounded-t-3xl max-h-[85vh] overflow-y-auto"
+        data-notification-surface
+        className="border-t border-white/10 rounded-t-3xl max-h-[85vh] overflow-y-auto"
       >
         <SheetHeader className="pb-4">
           <SheetTitle className="text-white text-lg font-bold flex items-center gap-2">
@@ -2612,7 +2613,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       <DrawerTrigger asChild>
         {settingsTrigger}
       </DrawerTrigger>
-      <DrawerContent ref={settingsSheetRef} glass hideHandle={false} scrollable data-notifications-page className="max-h-[85dvh]" aria-describedby={undefined}>
+      <DrawerContent ref={settingsSheetRef} glass hideHandle={false} scrollable data-notifications-page data-notification-surface className="max-h-[85dvh]" aria-describedby={undefined}>
         <div className="px-4 pt-1 pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]">
           <DrawerTitle className="text-white text-lg font-bold flex items-center gap-2 pb-4">
             {settingsTitle}
