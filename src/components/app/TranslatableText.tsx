@@ -165,6 +165,8 @@ export function trimTrailingUrlPunctuation(url: string): string {
   }
 }
 
+const PROFILE_HANDLE_SOURCE = '[a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?';
+
 /**
  * Renders text with URLs replaced by clickable link emojis and @mentions as profile links
  */
@@ -181,7 +183,7 @@ export function renderTextWithLinks(text: string, opts?: { flagged?: boolean }):
   
   // Combined regex: match emails, URLs, @mentions, $cashtags, or #hashtags
   const combinedRegex = new RegExp(
-      `([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|(${URL_WITH_BOUNDARY_REGEX.source})|(@[a-zA-Z0-9_][a-zA-Z0-9_.-]*)|(\\$[a-zA-Z]{1,20})|(#[a-zA-Z][a-zA-Z0-9_]*)`,
+      `([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|(${URL_WITH_BOUNDARY_REGEX.source})|(@${PROFILE_HANDLE_SOURCE})|(\\$[a-zA-Z]{1,20})|(#[a-zA-Z][a-zA-Z0-9_]*)`,
     'gi'
   );
   
@@ -215,6 +217,8 @@ export function renderTextWithLinks(text: string, opts?: { flagged?: boolean }):
             e.preventDefault();
             clientNavigate(profilePath(username));
           }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           data-no-navigate="true"
         >
           @{username}
@@ -486,7 +490,7 @@ export function renderChatTextWithLinks(text: string): ReactNode[] {
 }
 
 /** @name in a message; the character before the @ can't be part of a word, so name@mail.com stays text. */
-const CHAT_MENTION_SOURCE = '(^|[^a-zA-Z0-9_@./])@([a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?)';
+const CHAT_MENTION_SOURCE = `(^|[^a-zA-Z0-9_@./])@(${PROFILE_HANDLE_SOURCE})`;
 /** Group-wide pings, not people. */
 const NON_PROFILE_MENTIONS = new Set(['here', 'everyone', 'channel']);
 
