@@ -164,7 +164,6 @@ import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
 import { ChatReactionStyleSetting } from '@/components/app/settings/ChatReactionStyleSetting';
-import { ChatCardsSetting } from '@/components/app/settings/ChatCardsSetting';
 import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
 import { WalletMenuContent } from '@/components/app/CoinBalanceMenu';
 import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
@@ -2845,7 +2844,6 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
           <FeedTogglesSetting />
           <PostLandingSetting />
           <ChatTextSizeSetting />
-          <ChatCardsSetting />
           <ChatDeleteChoiceSetting />
           <ChatReactionStyleSetting />
           <SettingsRow
