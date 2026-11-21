@@ -27,7 +27,7 @@ vi.mock('@/components/ui/drawer', () => ({
 vi.mock('@/components/ui/dialog', () => ({ Dialog: () => null, DialogContent: () => null, DialogTitle: () => null }));
 
 beforeEach(() => {
-  Object.assign(auth, { walletPhase: 'none', isProcessingRedirect: false, requiresUsername: false });
+  Object.assign(auth, { walletPhase: 'none', isProcessingRedirect: false, requiresUsername: false, loginIntent: 'login' });
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -63,4 +63,11 @@ it.each([390, 820, 1280])('moves signup into the full-screen welcome flow at %i 
   view.rerender(<LoginModal open onOpenChange={close} />);
   fireEvent.click(await screen.findByRole('button', { name: 'Close sheet' }));
   expect(close).toHaveBeenCalledWith(false);
+});
+
+it('opens the account creation sheet from the sign-up action', async () => {
+  vi.stubGlobal('innerWidth', 390);
+  auth.loginIntent = 'signup';
+  render(<LoginModal open onOpenChange={() => {}} />);
+  expect(await screen.findByRole('heading', { name: 'creator.signUp' })).toBeInTheDocument();
 });

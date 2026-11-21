@@ -125,7 +125,7 @@ export interface AuthContextType {
   setWagmiAuthIntent: (value: boolean, wallet?: string | null) => void;
   // Login modal state lives in LoginSheetContext (useLoginSheet below).
   openLoginModal: (options?: {
-    intent?: 'login' | 'add-profile';
+    intent?: 'login' | 'signup' | 'add-profile';
     /** A saved profile being signed back into, which the allowance already counts. */
     forProfileId?: string;
     /**
@@ -160,7 +160,7 @@ export interface LoginSheetState {
    * already signed in — retitles it, so the sheet doesn't read as "you were
    * logged out" to somebody who wasn't.
    */
-  loginIntent: 'login' | 'add-profile';
+  loginIntent: 'login' | 'signup' | 'add-profile';
 }
 
 /**

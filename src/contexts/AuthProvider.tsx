@@ -447,7 +447,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(isSocialLoginResumeExpected);
   // Why the sheet is open — plain sign-in, or adding/switching a profile from
   // Settings while already signed in. Only changes the sheet's title.
-  const [loginIntent, setLoginIntent] = useState<'login' | 'add-profile'>('login');
+  const [loginIntent, setLoginIntent] = useState<'login' | 'signup' | 'add-profile'>('login');
   const [walletPhase, setWalletPhase] = useState<WalletPhase>('none');
   // Signing can fail concurrently in several mounted surfaces (the DM thread,
   // fee gate and encryption bootstrap all do work on entry). Treat their
@@ -641,7 +641,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openLoginModal = useCallback((options?: {
-    intent?: 'login' | 'add-profile';
+    intent?: 'login' | 'signup' | 'add-profile';
     /**
      * The saved profile this sign-in is meant to restore, when there is one.
      * An account already on the device is not a new one, so it is not held
@@ -701,7 +701,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Whatever they tapped carries on once they are signed in.
       armAfterSignIn({ run: options?.then, path: options?.path, fromAddress: sheetOpenedWithAddressRef.current });
     }
-    setLoginIntent(options?.intent === 'add-profile' ? 'add-profile' : 'login');
+    setLoginIntent(options?.intent ?? 'login');
     setIsLoginModalOpen(true);
   }, []);
 
