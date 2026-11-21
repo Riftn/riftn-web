@@ -63,6 +63,7 @@ interface SoundPickerProps {
   onClose: () => void;
   onSelect: (sound: AttachedSound) => void;
   currentSound?: AttachedSound | null;
+  aboveMomentEditor?: boolean;
   /** Length of the attached video, in seconds: the part matches it. */
   clipSeconds?: number;
   /** Open straight on the part step for this song (state gallery). */
@@ -157,7 +158,7 @@ function waveFor(seed: string, count: number): number[] {
   });
 }
 
-export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSeconds, initialPicked }: SoundPickerProps) {
+export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSeconds, initialPicked, aboveMomentEditor = false }: SoundPickerProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [search, setSearch] = useSurfaceDraft("features/post/components/SoundPicker.tsx:search", '');
@@ -270,7 +271,9 @@ export function SoundPicker({ isOpen, onClose, onSelect, currentSound, clipSecon
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DrawerContent column glass className="border-t border-white/10 max-h-[90dvh]">
+      <DrawerContent column glass
+        overlayClassName={aboveMomentEditor ? 'z-[2147482101]' : undefined}
+        className={cn('border-t border-white/10 max-h-[90dvh]', aboveMomentEditor && 'z-[2147482102]')}>
         <DrawerHeader className="border-b border-white/10 pb-3">
           <DrawerTitle className="text-white flex items-center gap-2">
             {picked ? (
