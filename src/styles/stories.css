@@ -252,6 +252,8 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   filter: blur(50px) saturate(1.5) brightness(0.55);
 }
 [data-sv-page] {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -269,6 +271,14 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
     border-radius: 20px;
     box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
   }
+}
+/* Media and mention targets share the same crop above the reply controls. */
+[data-sv-media-frame] {
+  grid-row: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  container-type: size;
 }
 [data-sv-page] [data-sv-media] {
   position: absolute;
@@ -311,10 +321,9 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
 [data-sv-cap] [data-sv-dots] i[data-on='true'] { background: #fff; }
 [data-sv-cap] button { color: #fff; }
 [data-sv-reply] {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: calc(26px + env(safe-area-inset-bottom));
+  grid-row: 2;
+  position: relative;
+  margin: 8px 12px calc(26px + env(safe-area-inset-bottom));
   display: flex;
   gap: 8px;
   align-items: center;
