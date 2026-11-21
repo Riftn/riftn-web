@@ -476,16 +476,25 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           </div>
         )}
 
-        {item.mentions.map(m => (
-          <button
-            key={m.address}
-            type="button"
-            data-sv-mention
-            aria-label={t('stories.openProfile', { defaultValue: 'Open profile' })}
-            style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%`, width: `${Math.max(m.w, 0.1) * 100}%`, height: `${Math.max(m.h, 0.04) * 100}%` }}
-            onClick={() => openProfile(m.address)}
-          />
-        ))}
+        {item.mentions.length > 0 && (
+          <div data-sv-mention-frame>
+            {item.mentions.map(m => (
+              <button
+                key={m.address}
+                type="button"
+                data-sv-mention
+                aria-label={t('stories.openProfile', { defaultValue: 'Open profile' })}
+                style={{
+                  left: `${(m.x + m.w / 2) * 100}%`,
+                  top: `${(m.y + m.h / 2) * 100}%`,
+                  width: `${Math.max(m.w, 0.1) * 100}%`,
+                  height: `${Math.max(m.h, 0.04) * 100}%`,
+                }}
+                onClick={() => openProfile(m.address)}
+              />
+            ))}
+          </div>
+        )}
 
         <div data-sv-cap data-st-dark-glass>
           <span data-sv-fill style={{ width: `${Math.min(100, capFill * 100)}%` }} />

@@ -256,6 +256,7 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   inset: 0;
   overflow: hidden;
   background: #000;
+  container-type: size;
 }
 @media (min-width: 768px) {
   [data-sv-page] {
@@ -377,9 +378,23 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
 }
 [data-sv-song] img { width: 18px; height: 18px; border-radius: 5px; object-fit: cover; }
 [data-sv-song] span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-sv-mention-frame] {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Follow the same centered cover crop as the exported 9:16 image. */
+  width: 100%;
+  height: 100%;
+  width: max(100cqw, 56.25cqh);
+  height: max(177.7778cqw, 100cqh);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
 [data-sv-mention] {
   position: absolute;
-  z-index: 2;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
   border-radius: 10px;
 }
 [data-sv-nav] {
