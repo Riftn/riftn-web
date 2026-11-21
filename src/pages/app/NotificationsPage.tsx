@@ -13,6 +13,7 @@ import { useDrawerPullClose } from '@/hooks/use-drawer-pull-close';
 import { useTranslation } from 'react-i18next';
 import { AppealDrawer } from '@/components/app/notifications/AppealDrawer';
 import { NotificationCommentCard } from '@/components/app/notifications/NotificationCommentCard';
+import { NotificationCatchUp } from '@/components/app/notifications/NotificationCatchUp';
 import { notificationHasComment } from '@/lib/notification-comment';
 import { NotificationRequestCard } from '@/components/app/notifications/NotificationRequestCard';
 import { notificationHasRequestCard } from '@/lib/notification-request';
@@ -1931,6 +1932,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<NotificationTypeFilter>('all');
   const { isAuthenticated, walletAddress: pageWalletAddress } = useAuth();
+  const navigate = useNavigate();
   // Phones: the search button turns the whole pill into a search box that
   // filters the rows already loaded, as Home's pill does.
   const phonePill = usePhonePill();
@@ -2709,6 +2711,18 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
 
       {/* Notifications List */}
       <PageBody frameClip={inDrawer} className={inDrawer ? 'pt-0' : undefined}>
+        {isAuthenticated && pageWalletAddress && (
+          <NotificationCatchUp key={pageWalletAddress} wallet={pageWalletAddress} isVisible={isVisibleNotification}
+            onOpenNotification={notification => {
+              const announcement = announcementTarget(notification);
+              if (announcement?.kind === 'external') {
+                window.open(announcement.url, '_blank', 'noopener,noreferrer');
+                return;
+              }
+              const path = announcement?.path ?? getNavigationLink(notification);
+              if (path) navigate(path);
+            }} />
+        )}
         <div data-page-bento data-kit-section data-notification-list className="overflow-hidden">
           {isLoading ? (
             // Row skeletons that mirror the real list layout — a lone spinner
