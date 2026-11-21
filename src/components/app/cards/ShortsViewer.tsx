@@ -107,6 +107,7 @@ import Captions from "@/components/ui/cut-icons/captions";
 import { cn } from '@/lib/utils';
 import type { ShortVideo } from '@/types/feed.types';
 import { useQueryClient } from '@tanstack/react-query';
+import { asViewerSlide } from '@/lib/short-video';
 import { VideoSlide } from './VideoSlide';
 import { LiveSwipeSlide } from './LiveSwipeSlide';
 import { PostSwipeSlide } from './PostSwipeSlide';
@@ -414,7 +415,8 @@ const CORNER_CONTROL =
  */
 const followAnswers = new Map<string, boolean>();
 
-export function ShortsViewer({ shorts, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+  const shorts = useMemo(() => entries.map(asViewerSlide), [entries]);
   const { t: _copy } = _useCopy();
   const { t } = useI18n();
   const { theme } = useAppTheme();

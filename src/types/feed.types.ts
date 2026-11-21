@@ -508,7 +508,7 @@ export interface LiveStream extends BaseFeedItem {
  * Drawn by PostSwipeSlide instead of a video player.
  */
 export interface ReelPost {
-  kind: 'text' | 'photo' | 'comic' | 'article' | 'locked';
+  kind: 'text' | 'photo' | 'comic' | 'article' | 'locked' | 'mature';
   text?: string;
   title?: string;
   images?: string[];
