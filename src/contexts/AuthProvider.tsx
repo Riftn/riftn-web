@@ -289,6 +289,8 @@ function normalizeUser(userData: Partial<DeHubUser> | null | undefined, fallback
     createdAt: safe.createdAt,
     lastLoginTimestamp: safe.lastLoginTimestamp,
     badgeBalance,
+    badgeLock: safe.badgeLock,
+    hideBadgeAndBalance: safe.hideBadgeAndBalance,
     // Governance votes count only this, so a lent badge can be told apart.
     ownBadgeBalance: typeof safe.ownBadgeBalance === 'number' ? safe.ownBadgeBalance : undefined,
     balanceData: safe.balanceData,
@@ -2191,6 +2193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addProfilePrevIdRef.current = null;
       displacedAnAccountRef.current = false;
       adoptCurrentProfile();
+      if (!authResponse.result?.isNewAccount) void refreshUser(authAddress);
     } else {
       snapshotCurrentSession();
     }
@@ -2292,6 +2295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addProfilePrevIdRef.current = null;
       displacedAnAccountRef.current = false;
       adoptCurrentProfile();
+      if (!authResponse.result?.isNewAccount) void refreshUser(address);
     } else {
       snapshotCurrentSession();
     }
@@ -3419,13 +3423,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // than logging anybody out). It only ever calls through after mount.
   switchToProfileRef.current = switchToProfile;
 
-  const refreshUser = async () => {
-    if (!walletAddress) return;
+  const refreshUser = async (address = walletAddress) => {
+    if (!address) return;
+    const profileId = currentProfileId();
     try {
-      const userData = await getAccountInfo(walletAddress);
-      const normalizedUser = normalizeUser(userData, walletAddress);
+      const userData = await getAccountInfo(address);
+      if (currentProfileId() !== profileId || localStorage.getItem('dehub_wallet')?.toLowerCase() !== address.toLowerCase()) return;
+      const normalizedUser = normalizeUser({ ...userData, hideBadgeAndBalance: userData.hideBadgeAndBalance === true }, address);
       setUser(normalizedUser);
       localStorage.setItem('dehub_user', JSON.stringify(normalizedUser));
+      snapshotCurrentSession();
     } catch (error) {
       console.error('Failed to refresh user data:', error);
     }
@@ -3435,7 +3442,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(prev => {
       if (!prev) return prev;
       const patched = { ...prev, ...patch };
-      localStorage.setItem('dehub_user', JSON.stringify(patched));
+      const serialized = JSON.stringify(patched);
+      localStorage.setItem('dehub_user', serialized);
+      queueMicrotask(() => {
+        if (localStorage.getItem('dehub_user') === serialized) snapshotCurrentSession();
+      });
       return patched;
     });
   };

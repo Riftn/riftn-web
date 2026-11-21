@@ -110,13 +110,13 @@ export const TOASTER_COLUMN_CLASSES =
  * sized and weighted well clear of it. Sonner's own `[data-title]` rule is
  * `:where()`-wrapped, so no `!` is needed to beat its 500 weight.
  */
-export const TITLE_CLASSES = 'text-base font-bold leading-tight';
+export const TITLE_CLASSES = 'text-base font-bold leading-tight group-has-[[data-close-button]]:pe-7';
 
 /**
  * Sonner's title/description gap is 2px, tuned for a 13px title. Under a 16px
  * bold one the description reads as crowding it.
  */
-export const CONTENT_CLASSES = 'gap-1.5';
+export const CONTENT_CLASSES = 'min-w-0 gap-1.5';
 
 /** Matches the title's alignment; sonner's own colour rule is `:where()`-wrapped. */
 export const DESCRIPTION_CLASSES = 'text-white/70';
