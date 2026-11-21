@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Wysig video", "hiddenTag": "Versteek", "tapToEdit": "Tik om te wysig", "cover": "Deksel", "trim": "Sny", "mirror": "Spieël", "rotate": "Draai", "hide": "Versteek", "timer": "Timer", "sheetTitleAny": "Wysig voor stuur", "close": "Maak toe", "replace": "Vervang", "hiddenUntilTap": "Verborge totdat hulle daarop tik", "pause": "Pouseer", "play": "Speel video af", "mute": "Demp", "unmute": "Ontdemp", "scrub": "Blaai deur die video", "addMore": "Voeg foto's of video's by", "trimAria": "Sleep die punte om te snoei", "coverAria": "Tik op 'n raam om die voorblad te stel", "coverHint": "Tik op 'n raam om die voorblad te stel", "coverOwn": "Jou foto", "coverAuto": "Outo", "uploadCover": "Laai 'n voorbladfoto op", "mirrored": "Gespieël", "original": "Oorspronklik", "rotate90": "Draai 90°", "showNormally": "Wys normaalweg", "showNormallyBody": "Hulle sien dit dadelik", "hideUntilTap": "Versteek totdat daar op dit getik word", "hideUntilTapBody": "Vervaag totdat hulle daarop tik", "hidePrice": "Versteek agter 'n prys", "hidePriceBody": "Vervaag totdat hulle jou betaal", "priceUnavailable": "Nie in hierdie gesels nie", "timerOff": "Af", "timerOffBody": "Dit bly in die gesels.", "timerViewBody": "Weg vir julle albei sodra hulle dit gesien het.", "confirm": "Bevestig", "lockedFor": "Ontsluit vir {{value1}} DHB", "lockedForUsd": "Ontsluit vir {{value1}}", "editItem": "Wysig item {{value1}}", "kept": "{{time}} behou", "timerTimeBody": "Weg vir julle albei {{value1}} nadat jy dit gestuur het."},
+  "dmVideo": {"edit": "Wysig video", "hiddenTag": "Versteek", "tapToEdit": "Tik om te wysig", "cover": "Deksel", "trim": "Sny", "mirror": "Spieël", "rotate": "Draai", "hide": "Versteek", "timer": "Timer", "sheetTitleAny": "Wysig voor stuur", "close": "Maak toe", "replace": "Vervang", "hiddenUntilTap": "Verborge totdat hulle daarop tik", "pause": "Pouseer", "play": "Speel video af", "mute": "Demp", "unmute": "Ontdemp", "scrub": "Blaai deur die video", "addMore": "Voeg foto's of video's by", "trimAria": "Sleep die punte om te snoei", "coverAria": "Tik op 'n raam om die voorblad te stel", "coverHint": "Tik op 'n raam om die voorblad te stel", "coverOwn": "Jou foto", "coverAuto": "Outo", "uploadCover": "Laai 'n voorbladfoto op", "mirrored": "Gespieël", "original": "Oorspronklik", "rotate90": "Draai 90°", "showNormally": "Wys normaalweg", "showNormallyBody": "Hulle sien dit dadelik", "hideUntilTap": "Versteek totdat daar op dit getik word", "hideUntilTapBody": "Vervaag totdat hulle daarop tik", "hidePrice": "Versteek agter 'n prys", "hidePriceBody": "Vervaag totdat hulle jou betaal", "priceUnavailable": "Nie in hierdie gesels nie", "timerOff": "Af", "timerOffBody": "Dit bly in die gesels.", "timerViewBody": "Weg vir julle albei sodra hulle dit gesien het.", "confirm": "Bevestig", "lockedFor": "Ontsluit vir {{value1}} tokens", "lockedForUsd": "Ontsluit vir {{value1}}", "editItem": "Wysig item {{value1}}", "kept": "{{time}} behou", "timerTimeBody": "Weg vir julle albei {{value1}} nadat jy dit gestuur het."},
   "postBg": {
     "addMedia": "Voeg 'n prent, GIF of video by",
     "changeMedia": "Verander prent, GIF of video",
@@ -2144,7 +2144,7 @@
     "ogHolders_one": "{{count}} OG-houer",
     "ogHolders_other": "{{count}} OG-houers",
     "ogChallengeTitle": "Bring die OG-houers terug",
-    "ogChallengeBody": "Nooi mense uit wat nog DHB hou. Wanneer hulle met jou uitnodigingskakel aansluit en hul DHB in hul Riftn-beursie hou, tel hulle hier vir jou.",
+    "ogChallengeBody": "Nooi mense uit wat nog tokens hou. Wanneer hulle met jou uitnodigingskakel aansluit en hul tokens in hul Riftn-beursie hou, tel hulle hier vir jou.",
     "ogChallengeCta": "Kry jou uitnodigingskakel"
   },
   "dhbListing": {
@@ -12318,7 +12318,7 @@
           "4": "Om 'n stemnota op te neem, klik die mikrofoon-ikoon.",
           "5": "Om 'n GIF by te voeg, klik die GIF-ikoon en soek vir een.",
           "6": "Gebruik #hutsmerke om jou plasing te kategoriseer (bv., #crypto, #defi).",
-          "7": "Gebruik $kontantmerke om tokens te verwys (bv., $RIFT, $ETH).",
+          "7": "Gebruik $kontantmerke om tokens te verwys (bv., $BTC, $ETH).",
           "8": "Gebruik @noem om ander gebruikers te merk (bv., @gebruikersnaam).",
           "9": "Klik 'Plasing' om te publiseer. Jou plasing verskyn onmiddellik in die voer."
         },

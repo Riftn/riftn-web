@@ -207,7 +207,7 @@ export function useMiniAppHost(frame: RefObject<HTMLIFrameElement>, options: Min
           if (!o.pay) return fail('unsupported', 'Only registered apps can take payments.');
           if (!o.context.user) return fail('signin', 'The user is not signed in to Riftn.');
           const request = cleanPayment(req.params);
-          if (!request) return fail('invalid', 'amount must be a positive number of DHB.');
+          if (!request) return fail('invalid', 'amount must be a positive number of tokens.');
           if (busy.current) return fail('busy', 'Another request is already open.');
           busy.current = true;
           try {

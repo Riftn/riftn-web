@@ -471,7 +471,7 @@ function SubmitProposalDrawer({
           <p className="text-zinc-500 text-[11px] text-center">
             {selfWeight > 0
               ? t('governance.freeForBadgeHolders', 'Free for badge holders. Your draft saves as you type.')
-              : t('governance.proposalFeeNote', 'Proposals cost 10,000 DHB without a staking badge. Your draft saves as you type.')}
+              : t('governance.proposalFeeNote', 'Proposals cost 10,000 tokens without a staking badge. Your draft saves as you type.')}
           </p>
 
           <Button
@@ -605,7 +605,7 @@ function VoteWeightChip({
           onClick={() => navigate('/app/buy')}
           className="shrink-0 text-xs font-semibold text-white underline underline-offset-2"
         >
-          {t('governance.buyDhb', { defaultValue: 'Buy DHB' })}
+          {t('governance.buyDhb', { defaultValue: 'Buy tokens' })}
         </button>
       )}
       <button

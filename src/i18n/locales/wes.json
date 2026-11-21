@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG holder",
     "ogHolders_other": "{{count}} OG holder dem",
     "ogChallengeTitle": "Bring di OG holder dem come back",
-    "ogChallengeBody": "Invite people wey still di hold DHB. When dem join wit ya invite link and keep dia DHB fo dia Riftn wallet, dem go count fo you fo here.",
+    "ogChallengeBody": "Invite people wey still di hold tokens. When dem join wit ya invite link and keep dia tokens fo dia Riftn wallet, dem go count fo you fo here.",
     "ogChallengeCta": "Get ya invite link"
   },
   "dhbListing": {
@@ -11919,7 +11919,7 @@
     "viewOnExplorerDesc": "Yon open blockchain explorer (BaseScan) fi view transaction details for post or transfer.",
     "title": "Glossary",
     "subtitle": "Learn weti every icon and feature mean",
-    "dhbTokenDesc": "Di native utility token fo Riftn. $RIFT na di ticker symbol fo Riftn token. Dem di use am fo tip, pay-per-view content, governance voting, and staking.",
+    "dhbTokenDesc": "Di native utility token fo Riftn. Dem di use am fo tip, pay-per-view content, governance voting, and staking.",
     "governanceDesc": "Submit and vote fo proposal dem wey di shape di platform. Ya voting power di follow how many Riftn token you get.",
     "editFromInfo": "Edit Post (from Info)",
     "editFromInfoDesc": "Post owner dem fit edit di title and description fo dia post direct from di Post Info page if dem tap di edit button.",

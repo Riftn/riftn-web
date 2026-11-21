@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Edita el vídeo", "hiddenTag": "Ocult", "tapToEdit": "Toca per editar", "cover": "Coberta", "trim": "Retalla", "mirror": "Reflecteix", "rotate": "Gira", "hide": "Amaga", "timer": "Temporitzador", "sheetTitleAny": "Edita abans d'enviar", "close": "Tanca", "replace": "Substitueix", "hiddenUntilTap": "Ocult fins que hi toquin", "pause": "Pausa", "play": "Reprodueix el vídeo", "mute": "Silencia", "unmute": "Activa el so", "scrub": "Fes un recorregut pel vídeo", "addMore": "Afegeix fotos o vídeos", "trimAria": "Arrossega els extrems per retallar", "coverAria": "Toca un fotograma per establir-lo com a portada", "coverHint": "Toca un fotograma per establir-lo com a portada", "coverOwn": "La teva foto", "coverAuto": "Automàtic", "uploadCover": "Puja una imatge de portada", "mirrored": "Reflectit", "original": "Original", "rotate90": "Gira 90°", "showNormally": "Mostra normalment", "showNormallyBody": "Ho veuen de seguida", "hideUntilTap": "Amaga fins que s’hi toqui", "hideUntilTapBody": "Es veurà borrosa fins que hi toquin", "hidePrice": "Amaga-ho darrere d'un preu", "hidePriceBody": "Es mostra borrosa fins que et paguin", "priceUnavailable": "No en aquest xat", "timerOff": "Desactivat", "timerOffBody": "Es queda al xat.", "timerViewBody": "Desapareixerà per a tots dos un cop l'hagin vist.", "confirm": "Confirma", "lockedFor": "Desbloqueja per {{value1}} DHB", "lockedForUsd": "Desbloqueja per a {{value1}}", "editItem": "Modifica l'element {{value1}}", "kept": "{{time}} mantingut", "timerTimeBody": "Desapareixerà per a tots dos {{value1}} després d'enviar-ho."},
+  "dmVideo": {"edit": "Edita el vídeo", "hiddenTag": "Ocult", "tapToEdit": "Toca per editar", "cover": "Coberta", "trim": "Retalla", "mirror": "Reflecteix", "rotate": "Gira", "hide": "Amaga", "timer": "Temporitzador", "sheetTitleAny": "Edita abans d'enviar", "close": "Tanca", "replace": "Substitueix", "hiddenUntilTap": "Ocult fins que hi toquin", "pause": "Pausa", "play": "Reprodueix el vídeo", "mute": "Silencia", "unmute": "Activa el so", "scrub": "Fes un recorregut pel vídeo", "addMore": "Afegeix fotos o vídeos", "trimAria": "Arrossega els extrems per retallar", "coverAria": "Toca un fotograma per establir-lo com a portada", "coverHint": "Toca un fotograma per establir-lo com a portada", "coverOwn": "La teva foto", "coverAuto": "Automàtic", "uploadCover": "Puja una imatge de portada", "mirrored": "Reflectit", "original": "Original", "rotate90": "Gira 90°", "showNormally": "Mostra normalment", "showNormallyBody": "Ho veuen de seguida", "hideUntilTap": "Amaga fins que s’hi toqui", "hideUntilTapBody": "Es veurà borrosa fins que hi toquin", "hidePrice": "Amaga-ho darrere d'un preu", "hidePriceBody": "Es mostra borrosa fins que et paguin", "priceUnavailable": "No en aquest xat", "timerOff": "Desactivat", "timerOffBody": "Es queda al xat.", "timerViewBody": "Desapareixerà per a tots dos un cop l'hagin vist.", "confirm": "Confirma", "lockedFor": "Desbloqueja per {{value1}} fitxes", "lockedForUsd": "Desbloqueja per a {{value1}}", "editItem": "Modifica l'element {{value1}}", "kept": "{{time}} mantingut", "timerTimeBody": "Desapareixerà per a tots dos {{value1}} després d'enviar-ho."},
   "postBg": {
     "addMedia": "Afegeix una imatge, un GIF o un vídeo",
     "changeMedia": "Canvia la imatge, el GIF o el vídeo",
@@ -2113,7 +2113,7 @@
     "ogHolders_one": "{{count}} titular OG",
     "ogHolders_other": "{{count}} titulars OG",
     "ogChallengeTitle": "Fes tornar els titulars OG",
-    "ogChallengeBody": "Convida persones que encara tenen DHB. Quan s'uneixin amb el teu enllaç d'invitació i mantinguin el seu DHB a la cartera de Riftn, compten per a tu aquí.",
+    "ogChallengeBody": "Convida persones que encara tenen fitxes. Quan s'uneixin amb el teu enllaç d'invitació i mantinguin el seu fitxes a la cartera de Riftn, compten per a tu aquí.",
     "ogChallengeCta": "Obtén el teu enllaç d'invitació"
   },
   "dhbListing": {
@@ -12216,7 +12216,7 @@
           "4": "Per gravar una nota de veu, fes clic a la icona del micròfon.",
           "5": "Per afegir un GIF, fes clic a la icona del GIF i cerca'n un.",
           "6": "Utilitza #hashtags per categoritzar la teva publicació (per exemple, #crypto, #defi).",
-          "7": "Utilitza $cashtags per fer referència a tokens (per exemple, $RIFT, $ETH).",
+          "7": "Utilitza $cashtags per fer referència a tokens (per exemple, $BTC, $ETH).",
           "8": "Utilitza @mentions per etiquetar altres usuaris (per exemple, @nomdusuari).",
           "9": "Fes clic a 'Publicar' per publicar. La teva publicació apareix al feed immediatament."
         },

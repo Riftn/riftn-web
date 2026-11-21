@@ -1,3 +1,4 @@
+import { tokenLabel } from '@/lib/token-label';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -361,7 +362,7 @@ function BuyCoinsCheckout() {
 
 
   const symbol = selectedToken?.symbol || 'DHB';
-  const displaySymbol = symbol === 'DHB' ? t('buyCoins.tokensUnit') : symbol;
+  const displaySymbol = tokenLabel(symbol);
   const priceData = chainPriceData || generalPriceData;
   const effectiveAmount = customAmount ? Number(customAmount) : selectedAmount;
   const rawPrice = priceData?.price || 0;
@@ -793,7 +794,7 @@ function BuyCoinsCheckout() {
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-zinc-300">
                         {tx.status === 'completed' ? '✅' : tx.status === 'failed' ? '❌' : tx.status === 'expired' ? '⌛' : '⏳'}{' '}
-                        ${tx.amount} — {tx.approxTokensToReceive ? <>~{Number(tx.approxTokensToReceive).toLocaleString()} <DhbCoin label={t('buyCoins.tokensUnit')} /></> : tx.tokenSymbol === 'DHB' ? t('buyCoins.tokensUnit') : tx.tokenSymbol}
+                        ${tx.amount} — {tx.approxTokensToReceive ? <>~{Number(tx.approxTokensToReceive).toLocaleString()} <DhbCoin label={t('buyCoins.tokensUnit')} /></> : tokenLabel(tx.tokenSymbol)}
                         {tx.status === 'failed' && (tx as any).failureReason && (
                           <span className="text-xs text-red-400/70 ml-1 capitalize whitespace-nowrap">({(tx as any).failureReason})</span>
                         )}

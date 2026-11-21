@@ -1990,7 +1990,7 @@ export function usePostForm(
           toast.info(_copy("copy.d26789df47bf", { defaultValue: "Climb tiers to increase your visibility and get more feeds on the post per day" }), {
             ...tierToast,
             description: dhbText(
-              _copy("copy.81ded5297863", { defaultValue: "This post costs {{value1}} DHB and you hold {{value2}}.", value1: owed.toLocaleString(), value2: Math.floor(held).toLocaleString() }),
+              _copy("copy.81ded5297863", { defaultValue: "This post costs {{value1}} tokens and you hold {{value2}}.", value1: owed.toLocaleString(), value2: Math.floor(held).toLocaleString() }),
             ),
           });
           setIsPosting(false);

@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Videó szerkesztése", "hiddenTag": "Rejtett", "tapToEdit": "Koppints a szerkesztéshez", "cover": "Borító", "trim": "Vágás", "mirror": "Tükrözés", "rotate": "Forgatás", "hide": "Elrejtés", "timer": "Időzítő", "sheetTitleAny": "Szerkesztés küldés előtt", "close": "Bezárás", "replace": "Csere", "hiddenUntilTap": "Elrejtve, amíg rá nem koppintanak", "pause": "Szünet", "play": "Videó lejátszása", "mute": "Némítás", "unmute": "Némítás feloldása", "scrub": "Léptetés a videóban", "addMore": "Fotók vagy videók hozzáadása", "trimAria": "Húzd a végeket a vágáshoz", "coverAria": "Koppints egy kockára a borító beállításához", "coverHint": "Koppints egy kockára a borító beállításához", "coverOwn": "A te képed", "coverAuto": "Automatikus", "uploadCover": "Borítókép feltöltése", "mirrored": "Tükrözött", "original": "Eredeti", "rotate90": "90°-os forgatás", "showNormally": "Normál megjelenítés", "showNormallyBody": "Azonnal látják", "hideUntilTap": "Elrejtés koppintásig", "hideUntilTapBody": "Elhomályosítva, amíg rá nem koppintanak", "hidePrice": "Elrejtés ár mögé", "hidePriceBody": "Elhomályosítva, amíg nem fizetnek neked", "priceUnavailable": "Nem ebben a csevegésben", "timerOff": "Ki", "timerOffBody": "A csevegésben marad.", "timerViewBody": "Mindkettőtök számára eltűnik, miután megnézték.", "confirm": "Megerősítés", "lockedFor": "Feloldás {{value1}} DHB-ért", "lockedForUsd": "Feloldás ezért: {{value1}}", "editItem": "Elem szerkesztése {{value1}}", "kept": "{{time}} megtartva", "timerTimeBody": "Mindkettőtök számára eltűnik {{value1}} az elküldés után."},
+  "dmVideo": {"edit": "Videó szerkesztése", "hiddenTag": "Rejtett", "tapToEdit": "Koppints a szerkesztéshez", "cover": "Borító", "trim": "Vágás", "mirror": "Tükrözés", "rotate": "Forgatás", "hide": "Elrejtés", "timer": "Időzítő", "sheetTitleAny": "Szerkesztés küldés előtt", "close": "Bezárás", "replace": "Csere", "hiddenUntilTap": "Elrejtve, amíg rá nem koppintanak", "pause": "Szünet", "play": "Videó lejátszása", "mute": "Némítás", "unmute": "Némítás feloldása", "scrub": "Léptetés a videóban", "addMore": "Fotók vagy videók hozzáadása", "trimAria": "Húzd a végeket a vágáshoz", "coverAria": "Koppints egy kockára a borító beállításához", "coverHint": "Koppints egy kockára a borító beállításához", "coverOwn": "A te képed", "coverAuto": "Automatikus", "uploadCover": "Borítókép feltöltése", "mirrored": "Tükrözött", "original": "Eredeti", "rotate90": "90°-os forgatás", "showNormally": "Normál megjelenítés", "showNormallyBody": "Azonnal látják", "hideUntilTap": "Elrejtés koppintásig", "hideUntilTapBody": "Elhomályosítva, amíg rá nem koppintanak", "hidePrice": "Elrejtés ár mögé", "hidePriceBody": "Elhomályosítva, amíg nem fizetnek neked", "priceUnavailable": "Nem ebben a csevegésben", "timerOff": "Ki", "timerOffBody": "A csevegésben marad.", "timerViewBody": "Mindkettőtök számára eltűnik, miután megnézték.", "confirm": "Megerősítés", "lockedFor": "Feloldás {{value1}} tokenek-ért", "lockedForUsd": "Feloldás ezért: {{value1}}", "editItem": "Elem szerkesztése {{value1}}", "kept": "{{time}} megtartva", "timerTimeBody": "Mindkettőtök számára eltűnik {{value1}} az elküldés után."},
   "postBg": {
     "addMedia": "Kép, GIF vagy videó hozzáadása",
     "changeMedia": "Kép, GIF vagy videó cseréje",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG tulajdonos",
     "ogHolders_other": "{{count}} OG tulajdonos",
     "ogChallengeTitle": "Hozd vissza az OG tulajdonosokat",
-    "ogChallengeBody": "Hívj meg olyanokat, akiknek még van DHB-juk. Ha a meghívó hivatkozásoddal csatlakoznak, és a DHB-jukat a Riftn pénztárcájukban tartják, itt neked számítanak.",
+    "ogChallengeBody": "Hívj meg olyanokat, akiknek még van tokenek-juk. Ha a meghívó hivatkozásoddal csatlakoznak, és a tokenek-jukat a Riftn pénztárcájukban tartják, itt neked számítanak.",
     "ogChallengeCta": "Szerezd meg a meghívó hivatkozásodat"
   },
   "dhbListing": {
@@ -12237,7 +12237,7 @@
           "4": "Hangjegyzet rögzítéséhez kattintson a mikrofon ikonra.",
           "5": "GIF hozzáadásához kattintson a GIF ikonra, és keressen rá.",
           "6": "Használjon #hashtageket a bejegyzés kategorizálásához (pl. #crypto, #defi).",
-          "7": "Használjon $cashtageket tokenekre való hivatkozáshoz (pl. $RIFT, $ETH).",
+          "7": "Használjon $cashtageket tokenekre való hivatkozáshoz (pl. $BTC, $ETH).",
           "8": "Használjon @említéseket más felhasználók megjelöléséhez (pl. @felhasználónév).",
           "9": "Kattintson a 'Bejegyzés' gombra a közzétételhez. A bejegyzés azonnal megjelenik a hírfolyamban."
         },

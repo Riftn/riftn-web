@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Video caman", "hiddenTag": "A bɔra", "tapToEdit": "Fɛɛrɛ ka caman", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Fɛɛrɛ ka caman ka kɔfɛ ka ci", "close": "Close", "replace": "Yɛlɛma", "hiddenUntilTap": "Kà kɛ̀ bɛ̀ nɛ̀ kɔ̀", "pause": "Pause", "play": "Play video", "mute": "Mɛn", "unmute": "Mɛn bɔ", "scrub": "Fɔlɔ video la", "addMore": "Kɛ foto kɛ video", "coverAria": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverHint": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverOwn": "I ka ja", "coverAuto": "Auto", "uploadCover": "Sɔrɔ kɛlɛ fɔlɔ", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "A yi kaŋ", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Bɔ̀lɔ kɔ̀n bɛ̀ kɔ̀n kɔ̀n", "priceUnavailable": "ma ni kɔ̀", "timerOff": "Off", "timerOffBody": "E nɔ kɔ̀ŋ kɔ̀ŋ", "confirm": "Confirm", "lockedFor": "Yɛlɛma {{value1}} DHB fɛ", "editItem": "Edit item {{value1}}", "kept": "{{time}} mara"},
+  "dmVideo": {"edit": "Video caman", "hiddenTag": "A bɔra", "tapToEdit": "Fɛɛrɛ ka caman", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Fɛɛrɛ ka caman ka kɔfɛ ka ci", "close": "Close", "replace": "Yɛlɛma", "hiddenUntilTap": "Kà kɛ̀ bɛ̀ nɛ̀ kɔ̀", "pause": "Pause", "play": "Play video", "mute": "Mɛn", "unmute": "Mɛn bɔ", "scrub": "Fɔlɔ video la", "addMore": "Kɛ foto kɛ video", "coverAria": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverHint": "Kɔ̀nɲi kɛ̀nɛ kɔ̀nɔ̀ kɛ̀nɛ", "coverOwn": "I ka ja", "coverAuto": "Auto", "uploadCover": "Sɔrɔ kɛlɛ fɔlɔ", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "A yi kaŋ", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Bɔ̀lɔ kɔ̀n bɛ̀ kɔ̀n kɔ̀n", "priceUnavailable": "ma ni kɔ̀", "timerOff": "Off", "timerOffBody": "E nɔ kɔ̀ŋ kɔ̀ŋ", "confirm": "Confirm", "lockedFor": "Yɛlɛma {{value1}} o ye koo ɲuman ye. fɛ", "editItem": "Edit item {{value1}}", "kept": "{{time}} mara"},
   "postBg": {
     "addMedia": "Ja, GIF walima widewo fara a kan",
     "changeMedia": "Ja, GIF walima widewo falen",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "OG marabaga {{count}}",
     "ogHolders_other": "OG marabagaw {{count}}",
     "ogChallengeTitle": "OG marabagaw lasegin",
-    "ogChallengeBody": "Mɔgɔ minnu bɛ DHB mara hali bi, olu wele. Ni u donna ni i ka weleli sira ye ka u ka DHB to u ka Riftn wari bɔrɔ kɔnɔ, u bɛ jate i ye yan.",
+    "ogChallengeBody": "Mɔgɔ minnu bɛ o ye koo ɲuman ye. mara hali bi, olu wele. Ni u donna ni i ka weleli sira ye ka u ka o ye koo ɲuman ye. to u ka Riftn wari bɔrɔ kɔnɔ, u bɛ jate i ye yan.",
     "ogChallengeCta": "I ka weleli sira sɔrɔ"
   },
   "dhbListing": {
@@ -11931,7 +11931,7 @@
     "viewOnExplorerDesc": "O la, a tun be se ka kɛ ko a tun ye baara kɛ ni mɔgɔ dɔ ye min tun ye baara kɛ ni mɔgɔ dɔ ye.",
     "title": "Glosari",
     "subtitle": "I be se k'a faamu fɛɛn min kama i be se k'i yɛrɛ tanga o ma.",
-    "dhbTokenDesc": "Riftn ka token natif. $RIFT ye Riftn tokenw ka ticker taamasiyɛn ye. A bɛ kɛ bonya, lajɛli saralen fɛnw, gouvernance kalata ani staking kama.",
+    "dhbTokenDesc": "Riftn ka token natif. A bɛ kɛ bonya, lajɛli saralen fɛnw, gouvernance kalata ani staking kama.",
     "thumbsDown": "Bolokɔni duguma (A ma diya)",
     "editFromInfo": "Post labɛn (ka bɔ Kunnafoniw la)"
   },
@@ -12230,7 +12230,7 @@
           "4": "N'i b'a fɛ ka kumakan dɔ sɛbɛ, i ka mikrofɔni tagamasiɲɛ kan.",
           "5": "N'i b'a fɛ ka GIF dɔ fara a kan, i ka GIF taamasiɲɛ lajɛ ka dɔ ɲini.",
           "6": "Jɛnɛ ka #hashtags ɲɛma i ka sigi la (ka di #crypto, #defi).",
-          "7": "I ka $ cashtags kɛ ka tagamasiɲɛw kofɔ (i.e. $RIFT, $ETH).",
+          "7": "I ka $ cashtags kɛ ka tagamasiɲɛw kofɔ (i.e. $BTC, $ETH).",
           "8": "N'i ye mɔgɔ dɔ weele ka na i ka site web kan, i ka kan k'a fɔ a ye ko: \"I ye mɔgɔ dɔ weele ka na i ka site web kan\".",
           "9": "I ka ɲi ka \"Siga\" tuguni kan ka sɛbɛri kɛ. I ka barokun be sɔrɔ gafe nin kɔnɔ joona joona."
         },

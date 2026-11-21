@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "Modifica video", "hiddenTag": "Nascosto", "tapToEdit": "Tocca per modificare", "cover": "Copertina", "trim": "Ritaglia", "mirror": "Specchia", "rotate": "Ruota", "hide": "Nascondi", "timer": "Timer", "sheetTitleAny": "Modifica prima di inviare", "close": "Chiudi", "replace": "Sostituisci", "hiddenUntilTap": "Nascosto finché non ci toccano sopra", "pause": "Pausa", "play": "Riproduci video", "mute": "Disattiva audio", "unmute": "Attiva audio", "scrub": "Scorri il video", "addMore": "Aggiungi foto o video", "trimAria": "Trascina le estremità per ritagliare", "coverAria": "Tocca un fotogramma per impostare la copertina", "coverHint": "Tocca un fotogramma per impostare la copertina", "coverOwn": "La tua foto", "coverAuto": "Automatico", "uploadCover": "Carica un'immagine di copertina", "mirrored": "Specchiato", "original": "Originale", "rotate90": "Ruota di 90°", "showNormally": "Mostra normalmente", "showNormallyBody": "Lo vedono subito", "hideUntilTap": "Nascondi finché non viene toccato", "hideUntilTapBody": "Sfocato finché non ci toccano sopra", "hidePrice": "Nascondi dietro un prezzo", "hidePriceBody": "Sfocato finché non ti pagano", "priceUnavailable": "Non in questa chat", "timerOff": "Disattivato", "timerOffBody": "Resta nella chat.", "timerViewBody": "Scompare per entrambi una volta visualizzato.", "confirm": "Conferma", "lockedFor": "Sblocca per {{value1}} DHB", "lockedForUsd": "Sblocca per {{value1}}", "editItem": "Modifica elemento {{value1}}", "kept": "{{time}} conservato", "timerTimeBody": "Scompare per entrambi {{value1}} dopo l'invio."},
+  "dmVideo": {"edit": "Modifica video", "hiddenTag": "Nascosto", "tapToEdit": "Tocca per modificare", "cover": "Copertina", "trim": "Ritaglia", "mirror": "Specchia", "rotate": "Ruota", "hide": "Nascondi", "timer": "Timer", "sheetTitleAny": "Modifica prima di inviare", "close": "Chiudi", "replace": "Sostituisci", "hiddenUntilTap": "Nascosto finché non ci toccano sopra", "pause": "Pausa", "play": "Riproduci video", "mute": "Disattiva audio", "unmute": "Attiva audio", "scrub": "Scorri il video", "addMore": "Aggiungi foto o video", "trimAria": "Trascina le estremità per ritagliare", "coverAria": "Tocca un fotogramma per impostare la copertina", "coverHint": "Tocca un fotogramma per impostare la copertina", "coverOwn": "La tua foto", "coverAuto": "Automatico", "uploadCover": "Carica un'immagine di copertina", "mirrored": "Specchiato", "original": "Originale", "rotate90": "Ruota di 90°", "showNormally": "Mostra normalmente", "showNormallyBody": "Lo vedono subito", "hideUntilTap": "Nascondi finché non viene toccato", "hideUntilTapBody": "Sfocato finché non ci toccano sopra", "hidePrice": "Nascondi dietro un prezzo", "hidePriceBody": "Sfocato finché non ti pagano", "priceUnavailable": "Non in questa chat", "timerOff": "Disattivato", "timerOffBody": "Resta nella chat.", "timerViewBody": "Scompare per entrambi una volta visualizzato.", "confirm": "Conferma", "lockedFor": "Sblocca per {{value1}} token", "lockedForUsd": "Sblocca per {{value1}}", "editItem": "Modifica elemento {{value1}}", "kept": "{{time}} conservato", "timerTimeBody": "Scompare per entrambi {{value1}} dopo l'invio."},
   "postBg": {
     "addMedia": "Aggiungi un'immagine, una GIF o un video",
     "changeMedia": "Cambia immagine, GIF o video",
@@ -2087,7 +2087,7 @@
     "ogHolders_one": "{{count}} holder OG",
     "ogHolders_other": "{{count}} holder OG",
     "ogChallengeTitle": "Riporta indietro gli holder OG",
-    "ogChallengeBody": "Invita chi possiede ancora DHB. Quando si uniscono con il tuo link di invito e tengono i DHB nel wallet Riftn, contano per te qui.",
+    "ogChallengeBody": "Invita chi possiede ancora token. Se si iscrivono tramite il tuo link di invito e conservano i loro token nel portafoglio Riftn, verranno conteggiati qui per te.",
     "ogChallengeCta": "Ottieni il tuo link di invito",
     "directReferrals_one": "{{count}} diretti",
     "directReferrals_other": "{{count}} diretti",
@@ -12234,7 +12234,7 @@
           "4": "Per registrare una nota vocale, fai clic sull'icona del microfono.",
           "5": "Per aggiungere una GIF, fai clic sull'icona GIF e cercane una.",
           "6": "Usa gli #hashtag per categorizzare il tuo post (es. #crypto, #defi).",
-          "7": "Usa i $cashtag per fare riferimento ai token (es. $RIFT, $ETH).",
+          "7": "Usa i $cashtag per fare riferimento ai token (es. $BTC, $ETH).",
           "8": "Usa le @menzioni per taggare altri utenti (es. @username).",
           "9": "Fai clic su 'Post' per pubblicare. Il tuo post appare immediatamente nel feed."
         },

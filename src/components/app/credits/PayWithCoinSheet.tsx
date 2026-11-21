@@ -73,7 +73,7 @@ function useCoinBalances(coins: TopUpCoin[] | undefined, enabled = true) {
 }
 
 /**
- * "Not enough DHB" — pay the same amount with another coin.
+ * "Not enough tokens" — pay the same amount with another coin.
  *
  * Opens when someone presses Create holding less DHB than the job costs. The
  * price stays in DHB; each coin shows what covers it. The coin fills the
@@ -186,11 +186,11 @@ export default function PayWithCoinSheet({
         className="z-[120] max-w-md gap-0 border border-white/10 bg-zinc-950/80 p-4 backdrop-blur-[28px] sm:p-5"
       >
         <DialogTitle className="text-[19px] font-extrabold text-white">
-          {t('coinPay.title', { defaultValue: 'Not enough DHB' })}
+          {t('coinPay.title', { defaultValue: 'Not enough tokens' })}
         </DialogTitle>
         <DialogDescription className="mt-1 text-[13px] text-zinc-400">
           {t('coinPay.subtitle', {
-            defaultValue: 'This costs {{cost}} DHB and you hold {{held}}. Pay the same amount with another coin.',
+            defaultValue: 'This costs {{cost}} tokens and you hold {{held}}. Pay the same amount with another coin.',
             cost: dhbText(costDhb),
             held: dhbText(walletDhb ?? 0),
           })}

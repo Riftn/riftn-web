@@ -1,5 +1,5 @@
 {
-  "dmVideo": {"edit": "ቪዲዮ ያርትዑ", "hiddenTag": "የተደበቀ", "tapToEdit": "ለማርትዕ ይንኩ", "cover": "መሸፈኛ", "trim": "ቁረጥ", "mirror": "አንጸባራቂ", "rotate": "አሽከርክር", "hide": "ይደብቁ", "timer": "ቆጣሪ", "sheetTitleAny": "ከመላክዎ በፊት ያርትዑ", "close": "ይዝጉ", "replace": "ይተኩ", "hiddenUntilTap": "እስከሚነኩት ድረስ የተደበቀ", "pause": "አቁም", "play": "ቪዲዮን አጫውት", "mute": "ድምጸ-ከል ያድርጉ", "unmute": "ድምጸ-ከል ያንሱ", "scrub": "በቪዲዮው ውስጥ ይሸብልሉ", "addMore": "ፎቶዎችን ወይም ቪዲዮዎችን ያክሉ", "trimAria": "ለመቁረጥ ጫፎቹን ይጎትቱ", "coverAria": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverHint": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverOwn": "የእርስዎ ምስል", "coverAuto": "አውቶማቲክ", "uploadCover": "የሽፋን ምስል ይስቀሉ", "mirrored": "ተንጸባርቋል", "original": "ዋናው", "rotate90": "በ90° ያዙሩ", "showNormally": "በተለመደው መንገድ ያሳዩ", "showNormallyBody": "ወዲያውኑ ያዩታል", "hideUntilTap": "እስኪታተም ድረስ ይደበቅ", "hidePrice": "በዋጋ ጀርባ ይደበቅ", "priceUnavailable": "በዚህ ውይይት ውስጥ የለም", "timerOff": "አጥፋ", "timerOffBody": "በቻት ውስጥ ይቆያል።", "timerViewBody": "አንዴ ካዩት በኋላ ለሁለታችሁም ይጠፋል።", "confirm": "ያረጋግጡ", "lockedFor": "ለ {{value1}} DHB ይክፈቱ", "lockedForUsd": "ለ{{value1}} ይክፈቱ", "editItem": "ንጥል ነገርን ያርትዑ {{value1}}", "kept": "{{time}} ተይዟል", "timerTimeBody": "ከላኩት በኋላ ለሁለታችሁም {{value1}} ይጠፋል።"},
+  "dmVideo": {"edit": "ቪዲዮ ያርትዑ", "hiddenTag": "የተደበቀ", "tapToEdit": "ለማርትዕ ይንኩ", "cover": "መሸፈኛ", "trim": "ቁረጥ", "mirror": "አንጸባራቂ", "rotate": "አሽከርክር", "hide": "ይደብቁ", "timer": "ቆጣሪ", "sheetTitleAny": "ከመላክዎ በፊት ያርትዑ", "close": "ይዝጉ", "replace": "ይተኩ", "hiddenUntilTap": "እስከሚነኩት ድረስ የተደበቀ", "pause": "አቁም", "play": "ቪዲዮን አጫውት", "mute": "ድምጸ-ከል ያድርጉ", "unmute": "ድምጸ-ከል ያንሱ", "scrub": "በቪዲዮው ውስጥ ይሸብልሉ", "addMore": "ፎቶዎችን ወይም ቪዲዮዎችን ያክሉ", "trimAria": "ለመቁረጥ ጫፎቹን ይጎትቱ", "coverAria": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverHint": "ሽፋኑን ለማዘጋጀት አንድ ክፈፍን መታ ያድርጉ", "coverOwn": "የእርስዎ ምስል", "coverAuto": "አውቶማቲክ", "uploadCover": "የሽፋን ምስል ይስቀሉ", "mirrored": "ተንጸባርቋል", "original": "ዋናው", "rotate90": "በ90° ያዙሩ", "showNormally": "በተለመደው መንገድ ያሳዩ", "showNormallyBody": "ወዲያውኑ ያዩታል", "hideUntilTap": "እስኪታተም ድረስ ይደበቅ", "hidePrice": "በዋጋ ጀርባ ይደበቅ", "priceUnavailable": "በዚህ ውይይት ውስጥ የለም", "timerOff": "አጥፋ", "timerOffBody": "በቻት ውስጥ ይቆያል።", "timerViewBody": "አንዴ ካዩት በኋላ ለሁለታችሁም ይጠፋል።", "confirm": "ያረጋግጡ", "lockedFor": "ለ {{value1}} ቶከኖች ይክፈቱ", "lockedForUsd": "ለ{{value1}} ይክፈቱ", "editItem": "ንጥል ነገርን ያርትዑ {{value1}}", "kept": "{{time}} ተይዟል", "timerTimeBody": "ከላኩት በኋላ ለሁለታችሁም {{value1}} ይጠፋል።"},
   "postBg": {
     "addMedia": "ፎቶ፣ GIF ወይም ቪዲዮ ያክሉ",
     "changeMedia": "ፎቶ፣ GIF ወይም ቪዲዮ ይቀይሩ",
@@ -2120,7 +2120,7 @@
     "ogHolders_one": "{{count}} OG ያዢ",
     "ogHolders_other": "{{count}} OG ያዢዎች",
     "ogChallengeTitle": "የOG ያዢዎችን መልሰው ያምጡ",
-    "ogChallengeBody": "አሁንም DHB የያዙ ሰዎችን ይጋብዙ። በግብዣ አገናኝዎ ሲቀላቀሉ እና DHBቸውን በRiftn የኪስ ቦርሳቸው ውስጥ ሲያቆዩ፣ እዚህ ለእርስዎ ይቆጠራሉ።",
+    "ogChallengeBody": "አሁንም ቶከኖች የያዙ ሰዎችን ይጋብዙ። በግብዣ አገናኝዎ ሲቀላቀሉ እና DHBቸውን በRiftn የኪስ ቦርሳቸው ውስጥ ሲያቆዩ፣ እዚህ ለእርስዎ ይቆጠራሉ።",
     "ogChallengeCta": "የግብዣ አገናኝዎን ያግኙ"
   },
   "dhbListing": {
@@ -12263,7 +12263,7 @@
           "4": "የድምጽ ማስታወሻ ለመቅዳት፣ የማይክሮፎን አዶውን ጠቅ ያድርጉ።",
           "5": "ጂአይኤፍ ለመጨመር፣ የጂአይኤፍ አዶውን ጠቅ ያድርጉ እና አንዱን ይፈልጉ።",
           "6": "ፖስትዎን ለመመደብ #ሃሽታጎችን ይጠቀሙ (ለምሳሌ፣ #crypto፣ #defi)።",
-          "7": "ቶከኖችን ለማጣቀስ $የገንዘብ መለያዎችን ይጠቀሙ (ለምሳሌ፣ $RIFT፣ $ETH)።",
+          "7": "ቶከኖችን ለማጣቀስ $የገንዘብ መለያዎችን ይጠቀሙ (ለምሳሌ፣ $BTC፣ $ETH)።",
           "8": "ሌሎች ተጠቃሚዎችን ለመጥቀስ @መጠቀሶችን ይጠቀሙ (ለምሳሌ፣ @username)።",
           "9": "ለመለጠፍ 'ፖስት' ን ጠቅ ያድርጉ። ፖስትዎ ወዲያውኑ በምግቡ ላይ ይታያል።"
         },
