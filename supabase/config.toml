@@ -468,3 +468,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.remix-links]
 verify_jwt = false
+
+[functions.follower-rankings]
+verify_jwt = false

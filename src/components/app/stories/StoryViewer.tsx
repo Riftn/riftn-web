@@ -428,73 +428,75 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         data-sv-page
         style={drag ? { transform: `${window.innerWidth >= 768 ? 'translate(-50%, -50%) ' : ''}translate(${drag.x * 0.4}px, ${drag.y}px) scale(${1 - Math.min(0.15, drag.y / 1600)})`, transition: 'none' } : undefined}
       >
-        {item.type === 'video' ? (
-          <video
-            key={item.id}
-            ref={videoRef}
-            data-sv-media
-            src={item.mediaUrl ?? undefined}
-            poster={item.posterUrl ?? undefined}
-            playsInline
-            autoPlay
-            muted={muted || item.muted}
-            onLoadedData={() => setLoaded()}
-            onTimeUpdate={e => {
-              const v = e.currentTarget;
-              if (v.duration) setProgress(v.currentTime / v.duration);
-            }}
-            onEnded={() => { if (!paused) goItem(1); }}
-            onError={() => setLoaded()}
-          />
-        ) : (
-          <img
-            key={item.id}
-            data-sv-media
-            src={item.mediaUrl ?? item.posterUrl ?? undefined}
-            alt={item.caption ?? ''}
-            data-fit={item.width && item.height && item.width > item.height ? 'contain' : undefined}
-            onLoad={() => setLoaded()}
-            onError={() => setLoaded()}
-            draggable={false}
-          />
-        )}
-        {item.overlayUrl && <img data-sv-media src={item.overlayUrl} alt="" draggable={false} style={{ pointerEvents: 'none' }} />}
-        {item.song && (
-          <audio
-            key={`song-${item.id}`}
-            ref={audioRef}
-            src={item.song.audioUrl.split('#')[0]}
-            loop
-            muted={muted}
-            preload="auto"
-          />
-        )}
-        <div data-sv-shade />
-        {!loaded && (
-          <div className="absolute inset-0 grid place-items-center z-[1]">
-            <Loader2 className="w-7 h-7 animate-spin text-white/80" />
-          </div>
-        )}
+        <div data-sv-media-frame>
+          {item.type === 'video' ? (
+            <video
+              key={item.id}
+              ref={videoRef}
+              data-sv-media
+              src={item.mediaUrl ?? undefined}
+              poster={item.posterUrl ?? undefined}
+              playsInline
+              autoPlay
+              muted={muted || item.muted}
+              onLoadedData={() => setLoaded()}
+              onTimeUpdate={e => {
+                const v = e.currentTarget;
+                if (v.duration) setProgress(v.currentTime / v.duration);
+              }}
+              onEnded={() => { if (!paused) goItem(1); }}
+              onError={() => setLoaded()}
+            />
+          ) : (
+            <img
+              key={item.id}
+              data-sv-media
+              src={item.mediaUrl ?? item.posterUrl ?? undefined}
+              alt={item.caption ?? ''}
+              data-fit={item.width && item.height && item.width > item.height ? 'contain' : undefined}
+              onLoad={() => setLoaded()}
+              onError={() => setLoaded()}
+              draggable={false}
+            />
+          )}
+          {item.overlayUrl && <img data-sv-media src={item.overlayUrl} alt="" draggable={false} style={{ pointerEvents: 'none' }} />}
+          {item.song && (
+            <audio
+              key={`song-${item.id}`}
+              ref={audioRef}
+              src={item.song.audioUrl.split('#')[0]}
+              loop
+              muted={muted}
+              preload="auto"
+            />
+          )}
+          <div data-sv-shade />
+          {!loaded && (
+            <div className="absolute inset-0 grid place-items-center z-[1]">
+              <Loader2 className="w-7 h-7 animate-spin text-white/80" />
+            </div>
+          )}
 
-        {item.mentions.length > 0 && (
-          <div data-sv-mention-frame>
-            {item.mentions.map(m => (
-              <button
-                key={m.address}
-                type="button"
-                data-sv-mention
-                aria-label={t('stories.openProfile', { defaultValue: 'Open profile' })}
-                style={{
-                  left: `${(m.x + m.w / 2) * 100}%`,
-                  top: `${(m.y + m.h / 2) * 100}%`,
-                  width: `${Math.max(m.w, 0.1) * 100}%`,
-                  height: `${Math.max(m.h, 0.04) * 100}%`,
-                }}
-                onClick={() => openProfile(m.address)}
-              />
-            ))}
-          </div>
-        )}
+          {item.mentions.length > 0 && (
+            <div data-sv-mention-frame>
+              {item.mentions.map(m => (
+                <button
+                  key={m.address}
+                  type="button"
+                  data-sv-mention
+                  aria-label={t('stories.openProfile', { defaultValue: 'Open profile' })}
+                  style={{
+                    left: `${(m.x + m.w / 2) * 100}%`,
+                    top: `${(m.y + m.h / 2) * 100}%`,
+                    width: `${Math.max(m.w, 0.1) * 100}%`,
+                    height: `${Math.max(m.h, 0.04) * 100}%`,
+                  }}
+                  onClick={() => openProfile(m.address)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         <div data-sv-cap data-st-dark-glass>
           <span data-sv-fill style={{ width: `${Math.min(100, capFill * 100)}%` }} />
@@ -715,12 +717,12 @@ function ViewersList({ item, onOpen, onClose }: { item: StoryItem; onOpen: (addr
             const face = v.avatarImageUrl ? buildAvatarUrl(v.address, v.avatarImageUrl) : buildAvatarCdnFallbackUrl(v.address, undefined);
             const name = v.displayName || v.username || v.address.slice(0, 8);
             return (
-              <button key={v.address} type="button" className="flex items-center gap-3 py-2 text-left" onClick={() => onOpen(v.address)}>
+              <button key={v.address} type="button" className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_1rem] items-center gap-3 py-2 text-start" onClick={() => onOpen(v.address)}>
                 <Avatar className="size-9">
                   {face && <AvatarImage src={face} alt="" className="object-cover" />}
                   <AvatarFallback className="bg-white/15 text-[13px] text-white">{name.slice(0, 1).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="flex-1 min-w-0">
+                <span className="min-w-0 overflow-hidden">
                   <span className="block text-[14px] font-medium truncate">{name}</span>
                   {v.username && <span className="block text-[12px] opacity-60 truncate">@{v.username}</span>}
                 </span>

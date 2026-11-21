@@ -509,7 +509,7 @@ export async function getConversations(
   }
 }
 
-export async function getConversation(conversationId: string): Promise<DeHubConversation> {
+export async function getConversation(conversationId: string, myAddress: string): Promise<DeHubConversation> {
   if (conversationId.startsWith('new_')) {
     const address = conversationId.replace('new_', '');
     return {
@@ -525,7 +525,7 @@ export async function getConversation(conversationId: string): Promise<DeHubConv
   const response = await apiCall<{ result: DeHubConversation }>(`/api/dm/${conversationId}`, {
     requiresAuth: true,
   });
-  return response.result;
+  return mapApiConversationToDeHub(response.result, myAddress);
 }
 
 export async function createConversation(

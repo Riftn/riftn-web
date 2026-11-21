@@ -77,31 +77,33 @@ function forgetEmpty(tokenId: number) {
 }
 
 // Ids waiting for the next flush, and everyone waiting on each of them.
-const queued = new Map<
-  number,
-  Array<{ resolve: (poll: DeHubPoll | null) => void; reject: (err: unknown) => void }>
->();
+type PollWaiter = { resolve: (poll: DeHubPoll | null) => void; reject: (err: unknown) => void };
+const queued = new Map<string, Map<number, PollWaiter[]>>();
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function activeViewer() {
+  return localStorage.getItem('dehub_wallet')?.toLowerCase() ?? '';
+}
 
 async function flush() {
   flushTimer = null;
-  const ids = [...queued.keys()].slice(0, POLL_BATCH_LIMIT);
-  if (ids.length === 0) return;
-
-  const take = (id: number) => {
-    const waiters = queued.get(id);
-    queued.delete(id);
-    return waiters ?? [];
-  };
+  const first = queued.entries().next();
+  if (first.done) return;
+  const [viewer, pending] = first.value;
+  const batch = [...pending.entries()].slice(0, POLL_BATCH_LIMIT);
+  for (const [id] of batch) pending.delete(id);
+  if (!pending.size) queued.delete(viewer);
 
   try {
-    const res = await getPolls(ids);
-    const found = (res?.status ? res.result : {}) ?? {};
+    if (activeViewer() !== viewer) throw new Error('Poll account changed');
+    const res = await getPolls(batch.map(([id]) => id));
+    if (activeViewer() !== viewer || !res.status) throw new Error('Poll lookup interrupted');
+    const found = res.result ?? {};
     const empties: number[] = [];
-    for (const id of ids) {
+    for (const [id, waiters] of batch) {
       const poll = (found as Record<string, DeHubPoll>)[String(id)] ?? null;
-      if (poll === null) empties.push(id);
-      take(id).forEach(w => w.resolve(poll));
+      if (!viewer && id > 0 && poll === null) empties.push(id);
+      waiters.forEach(w => w.resolve(poll));
     }
     // The server answered: these posts have no poll, and never will.
     rememberEmpty(empties);
@@ -110,7 +112,7 @@ async function flush() {
     // react-query caches what a queryFn RETURNS for staleTime, so answering
     // "no poll" here would hide a real poll for five minutes on the strength of
     // a rate limit. An error is not cached as data, and remounting retries.
-    for (const id of ids) take(id).forEach(w => w.reject(err));
+    for (const [, waiters] of batch) waiters.forEach(w => w.reject(err));
   }
 
   if (queued.size > 0) scheduleFlush();
@@ -121,23 +123,30 @@ function scheduleFlush() {
   flushTimer = setTimeout(flush, BATCH_WINDOW_MS);
 }
 
-function fetchPollBatched(tokenId: number): Promise<DeHubPoll | null> {
-  if (knownEmpty().has(tokenId)) return Promise.resolve(null);
+function fetchPollBatched(tokenId: number, viewer = ''): Promise<DeHubPoll | null> {
+  if (!viewer && tokenId > 0 && knownEmpty().has(tokenId)) return Promise.resolve(null);
   return new Promise<DeHubPoll | null>((resolve, reject) => {
-    const waiters = queued.get(tokenId);
+    let pending = queued.get(viewer);
+    if (!pending) {
+      pending = new Map();
+      queued.set(viewer, pending);
+    }
+    const waiters = pending.get(tokenId);
     if (waiters) {
       waiters.push({ resolve, reject });
     } else {
-      queued.set(tokenId, [{ resolve, reject }]);
+      pending.set(tokenId, [{ resolve, reject }]);
     }
     scheduleFlush();
   });
 }
 
 export function usePoll(tokenId: number, enabled = true) {
+  const { walletAddress } = useAuth();
+  const viewer = walletAddress?.toLowerCase() ?? '';
   return useQuery({
-    queryKey: [POLLS_KEY, tokenId],
-    queryFn: () => fetchPollBatched(tokenId),
+    queryKey: [POLLS_KEY, tokenId, viewer],
+    queryFn: () => fetchPollBatched(tokenId, viewer),
     // The feed API has no "has poll" flag, so every card must probe — the
     // `enabled` gate lets cards defer that probe until near the viewport, and
     // the batching above turns the probes that do fire into one request.
@@ -168,17 +177,20 @@ export function useCreatePoll() {
 export function useVoteOnPoll() {
   const queryClient = useQueryClient();
 
+  const { walletAddress } = useAuth();
+  const viewer = walletAddress?.toLowerCase() ?? '';
   return useMutation({
     mutationFn: ({ tokenId, optionIndexes }: { tokenId: number; optionIndexes: number[] }) =>
       voteOnPoll(tokenId, optionIndexes),
     // Optimistic: move the ballot the instant the user taps, reconcile with
     // the server response in the background.
     onMutate: async ({ tokenId, optionIndexes }) => {
-      await queryClient.cancelQueries({ queryKey: [POLLS_KEY, tokenId] });
-      const previous = queryClient.getQueryData<DeHubPoll | null>([POLLS_KEY, tokenId]);
+      const queryKey = [POLLS_KEY, tokenId, viewer] as const;
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<DeHubPoll | null>(queryKey);
       if (previous) {
         const prevIndexes = previous.userVote?.optionIndexes ?? [];
-        queryClient.setQueryData<DeHubPoll>([POLLS_KEY, tokenId], {
+        queryClient.setQueryData<DeHubPoll>(queryKey, {
           ...previous,
           options: previous.options.map(opt => ({
             ...opt,
@@ -191,14 +203,14 @@ export function useVoteOnPoll() {
           userVote: { optionIndexes, votedAt: new Date().toISOString() },
         });
       }
-      return { previous };
+      return { previous, queryKey };
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [POLLS_KEY, variables.tokenId] });
     },
     onError: (err: any, variables, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData([POLLS_KEY, variables.tokenId], context.previous);
+        queryClient.setQueryData(context.queryKey, context.previous);
       }
       // Usually "Poll has expired" — refetch so the card flips to final results.
       queryClient.invalidateQueries({ queryKey: [POLLS_KEY, variables.tokenId] });
@@ -211,14 +223,17 @@ export function useRemovePollVote() {
   const { t: _copy } = _useCopy();
   const queryClient = useQueryClient();
 
+  const { walletAddress } = useAuth();
+  const viewer = walletAddress?.toLowerCase() ?? '';
   return useMutation({
     mutationFn: removePollVote,
     onMutate: async (tokenId) => {
-      await queryClient.cancelQueries({ queryKey: [POLLS_KEY, tokenId] });
-      const previous = queryClient.getQueryData<DeHubPoll | null>([POLLS_KEY, tokenId]);
+      const queryKey = [POLLS_KEY, tokenId, viewer] as const;
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<DeHubPoll | null>(queryKey);
       if (previous?.userVote) {
         const prevIndexes = previous.userVote.optionIndexes;
-        queryClient.setQueryData<DeHubPoll>([POLLS_KEY, tokenId], {
+        queryClient.setQueryData<DeHubPoll>(queryKey, {
           ...previous,
           options: previous.options.map(opt => ({
             ...opt,
@@ -228,14 +243,14 @@ export function useRemovePollVote() {
           userVote: null,
         });
       }
-      return { previous };
+      return { previous, queryKey };
     },
     onSuccess: (_data, tokenId) => {
       queryClient.invalidateQueries({ queryKey: [POLLS_KEY, tokenId] });
     },
     onError: (_err, tokenId, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData([POLLS_KEY, tokenId], context.previous);
+        queryClient.setQueryData(context.queryKey, context.previous);
       }
       toast.error(_copy("copy.d088f437ef49", { defaultValue: "Failed to remove vote" }));
     },

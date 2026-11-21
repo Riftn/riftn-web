@@ -215,7 +215,7 @@ export default function LeaderboardPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['leaderboard', apiSortMode, timePeriod],
     queryFn: () => getLeaderboard(apiSortMode, timePeriod),
-    staleTime: 5 * 60_000,
+    staleTime: apiSortMode === 'followers' ? 0 : 5 * 60_000,
     gcTime: 2 * 60 * 60 * 1000,
     refetchOnMount: true,
     // Focus-refetch only while the leaderboard is actually on screen — an
@@ -226,10 +226,10 @@ export default function LeaderboardPage() {
     // without a focus change (restarts on return because the gate is
     // reactive route state). The cache row is rebuilt on a schedule, so
     // polling faster than this only re-reads the same row.
-    refetchInterval: isLeaderboardRouteActive ? 15 * 60_000 : false,
+    refetchInterval: isLeaderboardRouteActive ? (apiSortMode === 'followers' ? 60_000 : 15 * 60_000) : false,
     // Switching period/category keeps the previous ranked list visible while
     // the new one loads, instead of dropping the page to a spinner.
-    placeholderData: keepPreviousData,
+    placeholderData: apiSortMode === 'followers' ? undefined : keepPreviousData,
     enabled: !isAffiliates,
   });
 

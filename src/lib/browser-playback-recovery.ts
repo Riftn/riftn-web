@@ -7,6 +7,7 @@ export const recoveryForVideo = (video: object) => recoveries.get(video);
 export function attachPlaybackRecovery(video: HTMLVideoElement, options: {
   allowed: () => boolean;
   changed: (phase: PlaybackPhase) => void;
+  muteForAutoplay?: () => boolean;
   postId: string;
   component: string;
 }) {
@@ -24,7 +25,13 @@ export function attachPlaybackRecovery(video: HTMLVideoElement, options: {
         if (position > 0 && Number.isFinite(duration) && position < duration) video.currentTime = position;
       }
       if (allowed()) {
-        await video.play();
+        try {
+          await video.play();
+        } catch (error) {
+          if ((error as DOMException)?.name !== 'NotAllowedError' || video.muted || !allowed() || !options.muteForAutoplay?.()) throw error;
+          video.muted = true;
+          await video.play();
+        }
         // A late browser play promise must honor pause/scroll-away, while an
         // old owner must never pause the new owner's adopted element.
         if (!allowed() && recoveries.get(video) === recovery) video.pause();

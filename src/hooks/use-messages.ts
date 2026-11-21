@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   getContacts,
   getConversations,
+  getConversation,
   getMessages,
   createConversation,
   markConversationAsRead,
@@ -56,7 +57,7 @@ import {
 } from '@/lib/api/dehub/dm-socket';
 import type { QueryClient } from '@tanstack/react-query';
 import { isEncryptedContent } from '@/lib/dm-e2ee/crypto';
-import { decryptFromPeer, decryptMessageInPlace, loadIdentity, onIdentityChange, prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { decryptFromPeer, decryptMessageInPlace, hasIdentityFor, loadIdentity, onIdentityChange, prepareOutgoing } from '@/lib/dm-e2ee/keys';
 import { openMediaPlaintext } from '@/lib/dm-e2ee/media-message';
 import { messageHistoryItems, mergeMessageHead, needsMessageHistoryRecovery, nextMessagePage, markRecentlySent, isRecentlySent, type MessageHistory } from '@/lib/dm-head';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -330,12 +331,31 @@ export async function decryptThread(
   const needs = items.some((m) => isEncryptedContent(m?.content) || isEncryptedContent(m?.replyTo?.content));
   if (!needs) return items;
   const me = (myAddress || '').toLowerCase();
+  if (me) loadIdentity(me);
   let peer = peerAddressForConversation(queryClient, conversationId, me);
   if (!peer) {
     const other = items.find((m) => m.sender?.address && m.sender.address.toLowerCase() !== me);
     peer = other?.sender?.address?.toLowerCase() || null;
   }
-  return Promise.all(items.map((m) => decryptMessageInPlace(m, peer)));
+  // A direct link may open before the inbox cache, with a page containing
+  // only the reader's own messages. Resolve the other participant once.
+  if (!peer && me && /^[0-9a-f]{24}$/i.test(conversationId)) {
+    const conversation = await queryClient.fetchQuery({
+      queryKey: [...messagesKeys.conversation(conversationId), 'participants', me],
+      queryFn: async () => {
+        try {
+          return await getConversation(conversationId, me);
+        } catch {
+          const contacts = await getContacts(me);
+          return contacts.find(contact => contact.id === conversationId) ?? null;
+        }
+      },
+      staleTime: 60_000,
+    }).catch(() => null);
+    peer = conversation?.otherUser?.address?.toLowerCase() || null;
+  }
+  const activePeer = me && hasIdentityFor(me) ? peer : null;
+  return Promise.all(items.map((m) => decryptMessageInPlace(m, activePeer)));
 }
 
 // ─── Messages ─────────────────────────────────────────────────────────────────

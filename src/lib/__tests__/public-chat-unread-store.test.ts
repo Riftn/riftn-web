@@ -99,4 +99,17 @@ describe('public chat unread counts', () => {
     restarted.syncReadPosition('0xme', null, BASE + 200);
     expect(restarted.count('0xme')).toBe(1);
   });
+  it('keeps the startup count hidden through a failed bookmark lookup', () => {
+    const { store } = fixture();
+    store.record('me', message('pending', 2));
+    store.syncReadPosition('me', undefined, BASE);
+    expect(store.hasSynced('me')).toBe(false);
+    let updates = 0;
+    store.subscribe(() => { updates++; });
+    store.syncReadPosition('me', BASE, BASE);
+    expect(store.hasSynced('me')).toBe(true);
+    expect(store.count('me')).toBe(1);
+    expect(updates).toBe(1);
+  });
+
 });

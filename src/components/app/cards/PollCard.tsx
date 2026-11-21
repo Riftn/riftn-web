@@ -17,7 +17,13 @@ interface PollCardProps {
   autoTranslate?: boolean;
 }
 
-export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
+export function PollCard(props: PollCardProps) {
+  const { walletAddress } = useAuth();
+  const viewer = walletAddress?.toLowerCase() ?? '';
+  return <ViewerPollCard key={`${viewer}:${props.tokenId}`} {...props} viewer={viewer} />;
+}
+
+function ViewerPollCard({ tokenId, autoTranslate = true, viewer }: PollCardProps & { viewer: string }) {
   const { t: _copy } = _useCopy();
   // Defer the poll probe until the card nears the viewport — the feed API has
   // no "has poll" flag, so without this every card fires a request on mount.
@@ -44,23 +50,12 @@ export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
   }, [nearViewport]);
 
   const { data: poll, isLoading } = usePoll(tokenId, nearViewport);
-  const { walletAddress } = useAuth();
   const voteMutation = useVoteOnPoll();
   const removeVoteMutation = useRemovePollVote();
   const closePollMutation = useClosePoll();
   const translatedPoll = usePollTranslation(poll?.question, poll?.options, autoTranslate && !!poll);
 
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
-  // Persist vote across page refreshes via localStorage
-  const [localVotedIndexes, setLocalVotedIndexes] = useState<number[] | null>(() => {
-    try {
-      const stored = localStorage.getItem(`dehub-poll-vote-${tokenId}`);
-      if (stored) return JSON.parse(stored) as number[];
-    } catch {}
-    return null;
-  });
-  const [localVoteCounts, setLocalVoteCounts] = useState<Record<number, number> | null>(null);
-
   // Zero-height sentinel keeps the IntersectionObserver anchored while the
   // probe is deferred or the post simply has no poll. `absolute` takes it out
   // of flow so parent space-y-* utilities don't count it as a child and add a
@@ -72,22 +67,16 @@ export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
   // open showed a vote button the server then rejected as expired.
   const isEnded = pollHasEnded(poll);
   const isOpen = !isEnded;
-  const hasVoted = localVotedIndexes !== null || !!poll.userVote;
+  const hasVoted = !!poll.userVote;
   // The poll's creator always sees how it is going (a creator asking their
   // audience often doesn't vote). Everyone else sees results once they've
   // voted, and everyone once the poll is over.
-  const isOwner = !!walletAddress && poll.address.toLowerCase() === walletAddress.toLowerCase();
+  const isOwner = !!viewer && poll.address.toLowerCase() === viewer;
   const showResults = hasVoted || isEnded || isOwner;
-  const votedIndexes = localVotedIndexes ?? poll.userVote?.optionIndexes ?? [];
+  const votedIndexes = poll.userVote?.optionIndexes ?? [];
 
-  // Merge local optimistic counts with server counts
-  const getCount = (index: number) => {
-    if (localVoteCounts !== null) return localVoteCounts[index] ?? 0;
-    return poll.options.find(o => o.index === index)?.voteCount ?? 0;
-  };
-  const totalVotes = localVoteCounts !== null
-    ? Object.values(localVoteCounts).reduce((a, b) => a + b, 0)
-    : poll.totalVotes;
+  const getCount = (index: number) => poll.options.find(o => o.index === index)?.voteCount ?? 0;
+  const totalVotes = poll.totalVotes;
 
   const getBarWidth = (index: number) => {
     return pollVotePercent(getCount(index), totalVotes);
@@ -96,15 +85,6 @@ export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
   const topCount = Math.max(0, ...poll.options.map(o => getCount(o.index)));
   const isWinner = (index: number) => pollOptionWins(getCount(index), topCount, isEnded);
 
-  const applyOptimisticVote = (indexes: number[]) => {
-    const counts: Record<number, number> = {};
-    poll.options.forEach(o => { counts[o.index] = o.voteCount ?? 0; });
-    indexes.forEach(idx => { counts[idx] = (counts[idx] ?? 0) + 1; });
-    setLocalVotedIndexes(indexes);
-    setLocalVoteCounts(counts);
-    try { localStorage.setItem(`dehub-poll-vote-${tokenId}`, JSON.stringify(indexes)); } catch {}
-  };
-
   const handleOptionClick = (idx: number) => {
     if (hasVoted || isEnded || voteMutation.isPending) return;
     if (poll.isMultipleChoice) {
@@ -112,26 +92,17 @@ export function PollCard({ tokenId, autoTranslate = true }: PollCardProps) {
         prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
       );
     } else {
-      applyOptimisticVote([idx]);
-      voteMutation.mutate({ tokenId, optionIndexes: [idx] }, {
-        onError: () => { setLocalVotedIndexes(null); setLocalVoteCounts(null); try { localStorage.removeItem(`dehub-poll-vote-${tokenId}`); } catch {} },
-      });
+      voteMutation.mutate({ tokenId, optionIndexes: [idx] });
     }
   };
 
   const handleMultipleChoiceVote = () => {
     if (selectedIndexes.length === 0) return;
-    applyOptimisticVote(selectedIndexes);
-    voteMutation.mutate({ tokenId, optionIndexes: selectedIndexes }, {
-      onError: () => { setLocalVotedIndexes(null); setLocalVoteCounts(null); try { localStorage.removeItem(`dehub-poll-vote-${tokenId}`); } catch {} },
-    });
+    voteMutation.mutate({ tokenId, optionIndexes: selectedIndexes });
     setSelectedIndexes([]);
   };
 
   const handleRemoveVote = () => {
-    setLocalVotedIndexes(null);
-    setLocalVoteCounts(null);
-    try { localStorage.removeItem(`dehub-poll-vote-${tokenId}`); } catch {}
     removeVoteMutation.mutate(tokenId);
   };
 

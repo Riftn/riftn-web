@@ -103,6 +103,7 @@ export const AutoplayVideo = memo(function AutoplayVideo({
   const engaged = playbackAllowed && (!deferUntilInteraction || interacted);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const playingElement = useRef<HTMLVideoElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -191,35 +192,34 @@ export const AutoplayVideo = memo(function AutoplayVideo({
     if (!video) return;
 
     if (isVisible && !disabled && groupAllowed && engaged) {
+      playingElement.current = video;
       let cancelled = false;
       // Delay lets src settle after layout shifts (sidebar collapse etc.)
       const timer = setTimeout(async () => {
         try {
           await video.play();
-          if (cancelled || !visualActivity.isFeedPlaybackAllowed()) video.pause();
+          if (playingElement.current !== video || !visualActivity.isFeedPlaybackAllowed()) video.pause();
         } catch {
           if (cancelled || !visualActivity.isFeedPlaybackAllowed()) return;
           // Autoplay blocked — ensure muted and retry
           video.muted = true;
           try {
             await video.play();
-            if (cancelled || !visualActivity.isFeedPlaybackAllowed()) video.pause();
+            if (playingElement.current !== video || !visualActivity.isFeedPlaybackAllowed()) video.pause();
           } catch { /* wait for user interaction */ }
         }
       }, 80);
-      return () => { cancelled = true; clearTimeout(timer); video.pause(); };
+      return () => { cancelled = true; playingElement.current = null; clearTimeout(timer); video.pause(); };
     } else {
       video.pause();
     }
-  }, [isVisible, disabled, groupAllowed, engaged, src, hlsSrc]);
+  }, [isVisible, disabled, groupAllowed, engaged, src, hlsSrc, hasError]);
 
   // Reset state when src changes or becomes disabled
   useEffect(() => {
-    if (disabled) {
-      setHasLoaded(false);
-      setHasError(false);
-    }
-  }, [disabled, src]);
+    setHasLoaded(false);
+    setHasError(false);
+  }, [disabled, src, hlsSrc]);
 
   // A playback slot also owns the network/decoder budget. Merely pausing the
   // other visible tiles still lets their metadata downloads compete.

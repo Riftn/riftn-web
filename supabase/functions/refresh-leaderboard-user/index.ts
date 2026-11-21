@@ -189,7 +189,6 @@ Deno.serve(async (req) => {
       username: (profile.username as string) || (profile.handle as string) || undefined,
       userDisplayName: (profile.userDisplayName as string) || (profile.displayName as string) || (profile.display_name as string) || undefined,
       avatarUrl: (profile.avatarUrl as string) || (profile.avatar as string) || undefined,
-      followers: (profile.followers as number) ?? (profile.followerCount as number) ?? undefined,
       likes: (profile.likes as number) ?? (profile.likeCount as number) ?? undefined,
       subscribers: (profile.subscribers as number) ?? undefined,
       sentTips: (profile.sentTips as number) ?? 0,

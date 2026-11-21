@@ -25,6 +25,7 @@ export interface AccountSummary {
   badgeBalance?: number | null;
   /** Grandfathered tier; raw, run it through parseBadgeLock. */
   badgeLock?: unknown;
+  followerCountVisible?: boolean;
   isBanned?: boolean;
 }
 

@@ -6,7 +6,7 @@ vi.mock('../logger', () => ({ logToBackend: vi.fn() }));
 describe('browser media recovery', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); });
-  function setup() {
+  function setup(muteForAutoplay?: () => boolean) {
     const video = document.createElement('video');
     video.src = 'https://cdn.test/42.mp4';
     video.play = vi.fn().mockResolvedValue(undefined);
@@ -14,7 +14,7 @@ describe('browser media recovery', () => {
     video.load = vi.fn();
     const allowed = vi.fn(() => true);
     const changed = vi.fn();
-    const detach = attachPlaybackRecovery(video, { allowed, changed, postId: '42', component: 'TestVideo' });
+    const detach = attachPlaybackRecovery(video, { allowed, changed, muteForAutoplay, postId: '42', component: 'TestVideo' });
     return { video, allowed, changed, detach };
   }
   it('retries a failed video once and exposes terminal failure', async () => {
@@ -51,6 +51,17 @@ describe('browser media recovery', () => {
     await requestVideoPlayback(video);
     await vi.advanceTimersByTimeAsync(0);
     expect(changed).toHaveBeenLastCalledWith('blocked');
+    expect(video.load).not.toHaveBeenCalled();
+    detach();
+  });
+
+  it('retries a denied audible feed preview muted without reloading', async () => {
+    const { video, detach } = setup(() => true);
+    video.play = vi.fn().mockRejectedValueOnce({ name: 'NotAllowedError' }).mockResolvedValueOnce(undefined);
+    await requestVideoPlayback(video);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(video.muted).toBe(true);
+    expect(video.play).toHaveBeenCalledTimes(2);
     expect(video.load).not.toHaveBeenCalled();
     detach();
   });
