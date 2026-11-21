@@ -1131,6 +1131,8 @@ export type Database = {
           price_dhb: number
           provider: string | null
           provider_app: string | null
+          refund_lease_until: string | null
+          refund_token: string | null
           result: Json | null
           status: string
           tx_hash: string | null
@@ -1150,6 +1152,8 @@ export type Database = {
           price_dhb: number
           provider?: string | null
           provider_app?: string | null
+          refund_lease_until?: string | null
+          refund_token?: string | null
           result?: Json | null
           status?: string
           tx_hash?: string | null
@@ -1169,6 +1173,8 @@ export type Database = {
           price_dhb?: number
           provider?: string | null
           provider_app?: string | null
+          refund_lease_until?: string | null
+          refund_token?: string | null
           result?: Json | null
           status?: string
           tx_hash?: string | null
@@ -1655,6 +1661,150 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_buy_alerts_20261114: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          community_id: string | null
+          content: string | null
+          created_at: string | null
+          display_name: string | null
+          edited_at: string | null
+          id: string | null
+          image_url: string | null
+          message_type: string | null
+          pinned_at: string | null
+          pinned_by: string | null
+          reactions: Json | null
+          reply_to_id: string | null
+          username: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          community_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          edited_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          message_type?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          community_id?: string | null
+          content?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          edited_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          message_type?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      backup_communities_20261115: {
+        Row: {
+          avatar_url: string | null
+          backed_up_at: string | null
+          banner_url: string | null
+          created_at: string | null
+          creator_wallet_address: string | null
+          default_permissions: Json | null
+          description: string | null
+          entry_price: number | null
+          holder_gate_chain_id: number | null
+          holder_gate_decimals: number | null
+          holder_gate_min: number | null
+          holder_gate_symbol: string | null
+          holder_gate_token: string | null
+          id: string | null
+          is_private: boolean | null
+          kind: string | null
+          member_count: number | null
+          name: string | null
+          rules: Json | null
+          slow_mode_seconds: number | null
+          slug: string | null
+          ticker_chain_id: string | null
+          ticker_contract_address: string | null
+          ticker_pair_address: string | null
+          ticker_symbol: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          backed_up_at?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          creator_wallet_address?: string | null
+          default_permissions?: Json | null
+          description?: string | null
+          entry_price?: number | null
+          holder_gate_chain_id?: number | null
+          holder_gate_decimals?: number | null
+          holder_gate_min?: number | null
+          holder_gate_symbol?: string | null
+          holder_gate_token?: string | null
+          id?: string | null
+          is_private?: boolean | null
+          kind?: string | null
+          member_count?: number | null
+          name?: string | null
+          rules?: Json | null
+          slow_mode_seconds?: number | null
+          slug?: string | null
+          ticker_chain_id?: string | null
+          ticker_contract_address?: string | null
+          ticker_pair_address?: string | null
+          ticker_symbol?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          backed_up_at?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          creator_wallet_address?: string | null
+          default_permissions?: Json | null
+          description?: string | null
+          entry_price?: number | null
+          holder_gate_chain_id?: number | null
+          holder_gate_decimals?: number | null
+          holder_gate_min?: number | null
+          holder_gate_symbol?: string | null
+          holder_gate_token?: string | null
+          id?: string | null
+          is_private?: boolean | null
+          kind?: string | null
+          member_count?: number | null
+          name?: string | null
+          rules?: Json | null
+          slow_mode_seconds?: number | null
+          slug?: string | null
+          ticker_chain_id?: string | null
+          ticker_contract_address?: string | null
+          ticker_pair_address?: string | null
+          ticker_symbol?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       builder_files: {
         Row: {
           content: string
@@ -1687,6 +1837,7 @@ export type Database = {
       builder_messages: {
         Row: {
           content: string
+          cost_usd_micros: number | null
           created_at: string
           id: string
           project_id: string
@@ -1694,6 +1845,7 @@ export type Database = {
         }
         Insert: {
           content: string
+          cost_usd_micros?: number | null
           created_at?: string
           id?: string
           project_id: string
@@ -1701,6 +1853,7 @@ export type Database = {
         }
         Update: {
           content?: string
+          cost_usd_micros?: number | null
           created_at?: string
           id?: string
           project_id?: string
@@ -1716,6 +1869,24 @@ export type Database = {
           },
         ]
       }
+      builder_prefs: {
+        Row: {
+          model: string
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          model: string
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          model?: string
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
       builder_projects: {
         Row: {
           created_at: string
@@ -1723,8 +1894,10 @@ export type Database = {
           error: string | null
           id: string
           is_public: boolean
+          miniapp_app_id: string | null
           name: string
           prompt: string
+          slug: string | null
           status: string
           status_detail: string | null
           updated_at: string
@@ -1737,8 +1910,10 @@ export type Database = {
           error?: string | null
           id?: string
           is_public?: boolean
+          miniapp_app_id?: string | null
           name?: string
           prompt: string
+          slug?: string | null
           status?: string
           status_detail?: string | null
           updated_at?: string
@@ -1751,15 +1926,25 @@ export type Database = {
           error?: string | null
           id?: string
           is_public?: boolean
+          miniapp_app_id?: string | null
           name?: string
           prompt?: string
+          slug?: string | null
           status?: string
           status_detail?: string | null
           updated_at?: string
           version?: number
           wallet?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "builder_projects_miniapp_app_id_fkey"
+            columns: ["miniapp_app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       builder_usage: {
         Row: {
@@ -1779,6 +1964,44 @@ export type Database = {
         }
         Relationships: []
       }
+      builder_versions: {
+        Row: {
+          created_at: string
+          emoji: string
+          files: Json
+          name: string
+          project_id: string
+          summary: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          files: Json
+          name: string
+          project_id: string
+          summary?: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          files?: Json
+          name?: string
+          project_id?: string
+          summary?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "builder_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buy_bot_state: {
         Row: {
           id: string
@@ -1797,6 +2020,48 @@ export type Database = {
           last_block_number?: number
           last_tx_hashes?: string[]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      call_dub_usage: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          last_started_at: string | null
+          minutes: number
+          price_dhb_per_min: number
+          room_key: string
+          settled_at: string | null
+          settled_ref: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          last_started_at?: string | null
+          minutes?: number
+          price_dhb_per_min: number
+          room_key: string
+          settled_at?: string | null
+          settled_ref?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          last_started_at?: string | null
+          minutes?: number
+          price_dhb_per_min?: number
+          room_key?: string
+          settled_at?: string | null
+          settled_ref?: string | null
+          updated_at?: string
+          wallet_address?: string
         }
         Relationships: []
       }
@@ -1872,6 +2137,51 @@ export type Database = {
           requester_address?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      cashout_orders: {
+        Row: {
+          created_at: string
+          crypto_amount: number
+          crypto_currency: string
+          fiat_amount: number | null
+          fiat_currency: string | null
+          id: string
+          network: string
+          partner: string
+          partner_order_id: string | null
+          status: string
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          crypto_amount: number
+          crypto_currency: string
+          fiat_amount?: number | null
+          fiat_currency?: string | null
+          id?: string
+          network: string
+          partner?: string
+          partner_order_id?: string | null
+          status?: string
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          crypto_amount?: number
+          crypto_currency?: string
+          fiat_amount?: number | null
+          fiat_currency?: string | null
+          id?: string
+          network?: string
+          partner?: string
+          partner_order_id?: string | null
+          status?: string
+          updated_at?: string
+          wallet?: string
         }
         Relationships: []
       }
@@ -2077,8 +2387,15 @@ export type Database = {
           creator_wallet_address: string
           default_permissions: Json
           description: string | null
+          entry_price: number | null
+          holder_gate_chain_id: number | null
+          holder_gate_decimals: number
+          holder_gate_min: number | null
+          holder_gate_symbol: string | null
+          holder_gate_token: string | null
           id: string
           is_private: boolean
+          kind: string
           member_count: number
           name: string
           rules: Json | null
@@ -2097,8 +2414,15 @@ export type Database = {
           creator_wallet_address: string
           default_permissions?: Json
           description?: string | null
+          entry_price?: number | null
+          holder_gate_chain_id?: number | null
+          holder_gate_decimals?: number
+          holder_gate_min?: number | null
+          holder_gate_symbol?: string | null
+          holder_gate_token?: string | null
           id?: string
           is_private?: boolean
+          kind?: string
           member_count?: number
           name: string
           rules?: Json | null
@@ -2117,8 +2441,15 @@ export type Database = {
           creator_wallet_address?: string
           default_permissions?: Json
           description?: string | null
+          entry_price?: number | null
+          holder_gate_chain_id?: number | null
+          holder_gate_decimals?: number
+          holder_gate_min?: number | null
+          holder_gate_symbol?: string | null
+          holder_gate_token?: string | null
           id?: string
           is_private?: boolean
+          kind?: string
           member_count?: number
           name?: string
           rules?: Json | null
@@ -2169,6 +2500,127 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_bot_settings: {
+        Row: {
+          automod: Json
+          buy_bot: Json
+          community_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          automod?: Json
+          buy_bot?: Json
+          community_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          automod?: Json
+          buy_bot?: Json
+          community_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_bot_settings_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: true
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_buy_bot_feeds: {
+        Row: {
+          chain_id: string
+          decimals: number | null
+          feed: string
+          head_block: number
+          last_block: number
+          last_error: string | null
+          market_cap: number | null
+          pair_address: string
+          price_at: string | null
+          price_request: number | null
+          price_usd: number | null
+          rpc_request: number | null
+          rpc_sent_at: string | null
+          rpc_to_block: number | null
+          symbol: string | null
+          token_address: string
+          updated_at: string
+        }
+        Insert: {
+          chain_id: string
+          decimals?: number | null
+          feed: string
+          head_block?: number
+          last_block?: number
+          last_error?: string | null
+          market_cap?: number | null
+          pair_address: string
+          price_at?: string | null
+          price_request?: number | null
+          price_usd?: number | null
+          rpc_request?: number | null
+          rpc_sent_at?: string | null
+          rpc_to_block?: number | null
+          symbol?: string | null
+          token_address: string
+          updated_at?: string
+        }
+        Update: {
+          chain_id?: string
+          decimals?: number | null
+          feed?: string
+          head_block?: number
+          last_block?: number
+          last_error?: string | null
+          market_cap?: number | null
+          pair_address?: string
+          price_at?: string | null
+          price_request?: number | null
+          price_usd?: number | null
+          rpc_request?: number | null
+          rpc_sent_at?: string | null
+          rpc_to_block?: number | null
+          symbol?: string | null
+          token_address?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      community_chat_hidden_messages: {
+        Row: {
+          community_id: string
+          created_at: string
+          message_id: string
+          wallet_address: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          message_id: string
+          wallet_address: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          message_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_chat_hidden_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "community_chat_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -2241,6 +2693,50 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "community_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_entry_payments: {
+        Row: {
+          amount: number | null
+          chain_id: number
+          community_id: string
+          created_at: string
+          id: number
+          net_request_id: number | null
+          status: string
+          tx_hash: string
+          wallet_address: string
+        }
+        Insert: {
+          amount?: number | null
+          chain_id: number
+          community_id: string
+          created_at?: string
+          id?: number
+          net_request_id?: number | null
+          status?: string
+          tx_hash: string
+          wallet_address: string
+        }
+        Update: {
+          amount?: number | null
+          chain_id?: number
+          community_id?: string
+          created_at?: string
+          id?: number
+          net_request_id?: number | null
+          status?: string
+          tx_hash?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_entry_payments_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
             referencedColumns: ["id"]
           },
         ]
@@ -2338,6 +2834,73 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "community_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_holder_requests: {
+        Row: {
+          chain_id: number
+          community_id: string
+          created_at: string
+          id: number
+          net_request_id: number
+          token: string
+          wallet_address: string
+        }
+        Insert: {
+          chain_id: number
+          community_id: string
+          created_at?: string
+          id?: number
+          net_request_id: number
+          token: string
+          wallet_address: string
+        }
+        Update: {
+          chain_id?: number
+          community_id?: string
+          created_at?: string
+          id?: number
+          net_request_id?: number
+          token?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_holder_requests_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_holders: {
+        Row: {
+          balance: number
+          checked_at: string
+          community_id: string
+          wallet_address: string
+        }
+        Insert: {
+          balance?: number
+          checked_at?: string
+          community_id: string
+          wallet_address: string
+        }
+        Update: {
+          balance?: number
+          checked_at?: string
+          community_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_holders_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
@@ -2557,6 +3120,8 @@ export type Database = {
       creator_assets: {
         Row: {
           created_at: string
+          favorite: boolean
+          hidden: boolean
           id: string
           metadata: Json
           ready: boolean
@@ -2565,6 +3130,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          favorite?: boolean
+          hidden?: boolean
           id: string
           metadata?: Json
           ready?: boolean
@@ -2573,6 +3140,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          favorite?: boolean
+          hidden?: boolean
           id?: string
           metadata?: Json
           ready?: boolean
@@ -2684,6 +3253,135 @@ export type Database = {
           },
         ]
       }
+      creator_gallery_comment_reactions: {
+        Row: {
+          comment_id: string
+          reaction: string
+          wallet_address: string
+        }
+        Insert: {
+          comment_id: string
+          reaction: string
+          wallet_address: string
+        }
+        Update: {
+          comment_id?: string
+          reaction?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_gallery_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "creator_gallery_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_gallery_comments: {
+        Row: {
+          avatar: string | null
+          content: string
+          created_at: string
+          generation_id: string
+          id: string
+          parent_id: string | null
+          updated_at: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          content: string
+          created_at?: string
+          generation_id: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          content?: string
+          created_at?: string
+          generation_id?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_gallery_comments_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_public_posters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_gallery_comments_parent_id_generation_id_fkey"
+            columns: ["parent_id", "generation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_gallery_comments"
+            referencedColumns: ["id", "generation_id"]
+          },
+        ]
+      }
+      creator_gallery_reactions: {
+        Row: {
+          created_at: string
+          generation_id: string
+          reaction: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          generation_id: string
+          reaction: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          generation_id?: string
+          reaction?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_gallery_reactions_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_public_posters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_gallery_saves: {
+        Row: {
+          generation_id: string
+          wallet_address: string
+        }
+        Insert: {
+          generation_id: string
+          wallet_address: string
+        }
+        Update: {
+          generation_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_gallery_saves_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_public_posters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_pack_items: {
         Row: {
           animated: boolean
@@ -2764,24 +3462,36 @@ export type Database = {
       creator_public_posters: {
         Row: {
           created_at: string
+          height: number | null
           id: string
           image_url: string
+          owner_wallet: string | null
           price_dhb: number
           skill_slug: string
+          title: string
+          width: number | null
         }
         Insert: {
           created_at?: string
+          height?: number | null
           id: string
           image_url: string
+          owner_wallet?: string | null
           price_dhb?: number
           skill_slug?: string
+          title?: string
+          width?: number | null
         }
         Update: {
           created_at?: string
+          height?: number | null
           id?: string
           image_url?: string
+          owner_wallet?: string | null
           price_dhb?: number
           skill_slug?: string
+          title?: string
+          width?: number | null
         }
         Relationships: []
       }
@@ -3974,8 +4684,10 @@ export type Database = {
           creator_wallet_address: string
           event_id: string
           id: string
+          log_index: number | null
           payer_wallet_address: string
           tx_hash: string
+          verified_at: string | null
         }
         Insert: {
           amount: number
@@ -3984,8 +4696,10 @@ export type Database = {
           creator_wallet_address: string
           event_id: string
           id?: string
+          log_index?: number | null
           payer_wallet_address: string
           tx_hash: string
+          verified_at?: string | null
         }
         Update: {
           amount?: number
@@ -3994,12 +4708,64 @@ export type Database = {
           creator_wallet_address?: string
           event_id?: string
           id?: string
+          log_index?: number | null
           payer_wallet_address?: string
           tx_hash?: string
+          verified_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "event_gate_payments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "community_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_gate_quotes: {
+        Row: {
+          amount: number
+          claim: string | null
+          created_at: string
+          event_id: string
+          payer: string
+          recipient: string
+          reference: number
+          request_id: number | null
+          requested_at: string | null
+          submitted_hash: string | null
+          tx_hash: string | null
+        }
+        Insert: {
+          amount: number
+          claim?: string | null
+          created_at?: string
+          event_id: string
+          payer: string
+          recipient: string
+          reference?: never
+          request_id?: number | null
+          requested_at?: string | null
+          submitted_hash?: string | null
+          tx_hash?: string | null
+        }
+        Update: {
+          amount?: number
+          claim?: string | null
+          created_at?: string
+          event_id?: string
+          payer?: string
+          recipient?: string
+          reference?: never
+          request_id?: number | null
+          requested_at?: string | null
+          submitted_hash?: string | null
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_gate_quotes_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "community_events"
@@ -4099,6 +4865,32 @@ export type Database = {
           },
         ]
       }
+      feature_request_device_info: {
+        Row: {
+          created_at: string
+          feature_request_id: string
+          info: Json
+        }
+        Insert: {
+          created_at?: string
+          feature_request_id: string
+          info: Json
+        }
+        Update: {
+          created_at?: string
+          feature_request_id?: string
+          info?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_request_device_info_feature_request_id_fkey"
+            columns: ["feature_request_id"]
+            isOneToOne: true
+            referencedRelation: "feature_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_request_votes: {
         Row: {
           created_at: string
@@ -4146,8 +4938,8 @@ export type Database = {
           image_urls: string[] | null
           like_count: number
           shipped_url: string | null
-          status_note: string | null
           status: string
+          status_note: string | null
           title: string
           title_auto: boolean
           updated_at: string
@@ -4167,8 +4959,8 @@ export type Database = {
           image_urls?: string[] | null
           like_count?: number
           shipped_url?: string | null
-          status_note?: string | null
           status?: string
+          status_note?: string | null
           title: string
           title_auto?: boolean
           updated_at?: string
@@ -4188,8 +4980,8 @@ export type Database = {
           image_urls?: string[] | null
           like_count?: number
           shipped_url?: string | null
-          status_note?: string | null
           status?: string
+          status_note?: string | null
           title?: string
           title_auto?: boolean
           updated_at?: string
@@ -4553,6 +5345,8 @@ export type Database = {
           like_count: number
           media_type: string | null
           media_url: string | null
+          option_tallies: Json | null
+          options: string[] | null
           proposal_number: number
           status: string
           title: string
@@ -4573,6 +5367,8 @@ export type Database = {
           like_count?: number
           media_type?: string | null
           media_url?: string | null
+          option_tallies?: Json | null
+          options?: string[] | null
           proposal_number?: number
           status?: string
           title: string
@@ -4593,6 +5389,8 @@ export type Database = {
           like_count?: number
           media_type?: string | null
           media_url?: string | null
+          option_tallies?: Json | null
+          options?: string[] | null
           proposal_number?: number
           status?: string
           title?: string
@@ -4607,6 +5405,7 @@ export type Database = {
           badge_name: string | null
           created_at: string
           id: string
+          option_index: number | null
           proposal_id: string
           vote_type: number
           vote_weight: number
@@ -4616,6 +5415,7 @@ export type Database = {
           badge_name?: string | null
           created_at?: string
           id?: string
+          option_index?: number | null
           proposal_id: string
           vote_type: number
           vote_weight?: number
@@ -4625,6 +5425,7 @@ export type Database = {
           badge_name?: string | null
           created_at?: string
           id?: string
+          option_index?: number | null
           proposal_id?: string
           vote_type?: number
           vote_weight?: number
@@ -4639,6 +5440,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      growth_autopost_queue: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          media: Json
+          platforms: string[]
+          posted_at: string | null
+          results: Json | null
+          reviewed_by: string | null
+          scheduled_for: string
+          source_ref: string
+          status: string
+          text: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          media?: Json
+          platforms?: string[]
+          posted_at?: string | null
+          results?: Json | null
+          reviewed_by?: string | null
+          scheduled_for?: string
+          source_ref: string
+          status?: string
+          text?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          media?: Json
+          platforms?: string[]
+          posted_at?: string | null
+          results?: Json | null
+          reviewed_by?: string | null
+          scheduled_for?: string
+          source_ref?: string
+          status?: string
+          text?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      growth_autopost_settings: {
+        Row: {
+          auto_approve: boolean
+          daily_caps: Json
+          daily_total_cap: number
+          enabled_kinds: string[]
+          id: boolean
+          live_min_audience: number
+          platforms: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_approve?: boolean
+          daily_caps?: Json
+          daily_total_cap?: number
+          enabled_kinds?: string[]
+          id?: boolean
+          live_min_audience?: number
+          platforms?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_approve?: boolean
+          daily_caps?: Json
+          daily_total_cap?: number
+          enabled_kinds?: string[]
+          id?: boolean
+          live_min_audience?: number
+          platforms?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       job_applications: {
         Row: {
@@ -4885,6 +5773,244 @@ export type Database = {
         }
         Relationships: []
       }
+      live_clips: {
+        Row: {
+          attempts: number
+          broadcast_offset: number | null
+          card_url: string | null
+          clipper_address: string | null
+          clipper_username: string | null
+          created_at: string
+          duration_seconds: number | null
+          end_seconds: number | null
+          error: string | null
+          id: string
+          job_id: string | null
+          kind: string
+          post_token_id: number | null
+          posted_at: string | null
+          poster_url: string | null
+          reason: string | null
+          score: number | null
+          short_id: number
+          source_kind: string
+          source_url: string | null
+          start_seconds: number | null
+          status: string
+          stream_id: string | null
+          stream_title: string
+          stream_token_id: number
+          streamer_address: string
+          streamer_username: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+          window_end: number
+          window_start: number
+        }
+        Insert: {
+          attempts?: number
+          broadcast_offset?: number | null
+          card_url?: string | null
+          clipper_address?: string | null
+          clipper_username?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          end_seconds?: number | null
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          kind: string
+          post_token_id?: number | null
+          posted_at?: string | null
+          poster_url?: string | null
+          reason?: string | null
+          score?: number | null
+          short_id?: never
+          source_kind: string
+          source_url?: string | null
+          start_seconds?: number | null
+          status?: string
+          stream_id?: string | null
+          stream_title?: string
+          stream_token_id: number
+          streamer_address: string
+          streamer_username?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+          window_end?: number
+          window_start?: number
+        }
+        Update: {
+          attempts?: number
+          broadcast_offset?: number | null
+          card_url?: string | null
+          clipper_address?: string | null
+          clipper_username?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          end_seconds?: number | null
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          kind?: string
+          post_token_id?: number | null
+          posted_at?: string | null
+          poster_url?: string | null
+          reason?: string | null
+          score?: number | null
+          short_id?: never
+          source_kind?: string
+          source_url?: string | null
+          start_seconds?: number | null
+          status?: string
+          stream_id?: string | null
+          stream_title?: string
+          stream_token_id?: number
+          streamer_address?: string
+          streamer_username?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+          window_end?: number
+          window_start?: number
+        }
+        Relationships: []
+      }
+      live_costream_guests: {
+        Row: {
+          costream_id: string
+          created_at: string
+          id: string
+          muted: boolean
+          status: string
+          stream_id: string | null
+          updated_at: string
+          username: string | null
+          wallet: string
+        }
+        Insert: {
+          costream_id: string
+          created_at?: string
+          id?: string
+          muted?: boolean
+          status: string
+          stream_id?: string | null
+          updated_at?: string
+          username?: string | null
+          wallet: string
+        }
+        Update: {
+          costream_id?: string
+          created_at?: string
+          id?: string
+          muted?: boolean
+          status?: string
+          stream_id?: string | null
+          updated_at?: string
+          username?: string | null
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_costream_guests_costream_id_fkey"
+            columns: ["costream_id"]
+            isOneToOne: false
+            referencedRelation: "live_costreams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_costream_queue: {
+        Row: {
+          joined_at: string
+          matched_costream_id: string | null
+          seen_at: string
+          stream_id: string
+          username: string | null
+          wallet: string
+        }
+        Insert: {
+          joined_at?: string
+          matched_costream_id?: string | null
+          seen_at?: string
+          stream_id: string
+          username?: string | null
+          wallet: string
+        }
+        Update: {
+          joined_at?: string
+          matched_costream_id?: string | null
+          seen_at?: string
+          stream_id?: string
+          username?: string | null
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_costream_queue_matched_costream_id_fkey"
+            columns: ["matched_costream_id"]
+            isOneToOne: false
+            referencedRelation: "live_costreams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_costreams: {
+        Row: {
+          accepting_requests: boolean
+          battle_ends_at: string | null
+          battle_guest_score: number
+          battle_guest_wallet: string | null
+          battle_host_score: number
+          battle_round: number
+          battle_started_at: string | null
+          created_at: string
+          ended_at: string | null
+          host_stream_id: string
+          host_username: string | null
+          host_wallet: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepting_requests?: boolean
+          battle_ends_at?: string | null
+          battle_guest_score?: number
+          battle_guest_wallet?: string | null
+          battle_host_score?: number
+          battle_round?: number
+          battle_started_at?: string | null
+          created_at?: string
+          ended_at?: string | null
+          host_stream_id: string
+          host_username?: string | null
+          host_wallet: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepting_requests?: boolean
+          battle_ends_at?: string | null
+          battle_guest_score?: number
+          battle_guest_wallet?: string | null
+          battle_host_score?: number
+          battle_round?: number
+          battle_started_at?: string | null
+          created_at?: string
+          ended_at?: string | null
+          host_stream_id?: string
+          host_username?: string | null
+          host_wallet?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       live_stream_sessions: {
         Row: {
           address: string
@@ -4955,12 +6081,15 @@ export type Database = {
           owner_wallet: string | null
           permissions: string[]
           review_note: string | null
+          review_state: string | null
           reviewed_at: string | null
+          reviewed_by: string | null
           slug: string
           source: string
           splash_background_color: string | null
           splash_image_url: string | null
           status: string
+          submitted_at: string | null
           submitted_by: string | null
           subtitle: string | null
           tags: string[]
@@ -4982,12 +6111,15 @@ export type Database = {
           owner_wallet?: string | null
           permissions?: string[]
           review_note?: string | null
+          review_state?: string | null
           reviewed_at?: string | null
+          reviewed_by?: string | null
           slug: string
           source?: string
           splash_background_color?: string | null
           splash_image_url?: string | null
           status?: string
+          submitted_at?: string | null
           submitted_by?: string | null
           subtitle?: string | null
           tags?: string[]
@@ -5009,12 +6141,15 @@ export type Database = {
           owner_wallet?: string | null
           permissions?: string[]
           review_note?: string | null
+          review_state?: string | null
           reviewed_at?: string | null
+          reviewed_by?: string | null
           slug?: string
           source?: string
           splash_background_color?: string | null
           splash_image_url?: string | null
           status?: string
+          submitted_at?: string | null
           submitted_by?: string | null
           subtitle?: string | null
           tags?: string[]
@@ -5281,6 +6416,47 @@ export type Database = {
         }
         Relationships: []
       }
+      miniapp_webhook_deliveries: {
+        Row: {
+          app_id: string
+          created_at: string
+          error: string | null
+          event: string
+          id: number
+          ok: boolean
+          status: number | null
+          url: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          error?: string | null
+          event: string
+          id?: number
+          ok?: boolean
+          status?: number | null
+          url: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          error?: string | null
+          event?: string
+          id?: number
+          ok?: boolean
+          status?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_webhook_deliveries_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       new_members: {
         Row: {
           avatar_url: string | null
@@ -5376,6 +6552,9 @@ export type Database = {
           id: number
           path: string
           prev_path: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
           viewer_id: string
         }
         Insert: {
@@ -5385,6 +6564,9 @@ export type Database = {
           id?: never
           path: string
           prev_path?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           viewer_id: string
         }
         Update: {
@@ -5394,7 +6576,31 @@ export type Database = {
           id?: never
           path?: string
           prev_path?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           viewer_id?: string
+        }
+        Relationships: []
+      }
+      partner_access_tokens: {
+        Row: {
+          expires_at: string
+          partner: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          expires_at: string
+          partner: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          expires_at?: string
+          partner?: string
+          token?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -5600,18 +6806,21 @@ export type Database = {
       }
       post_link_copies: {
         Row: {
+          actor_id: string
           created_at: string
           id: string
           token_id: number
           wallet_address: string | null
         }
         Insert: {
+          actor_id: string
           created_at?: string
           id?: string
           token_id: number
           wallet_address?: string | null
         }
         Update: {
+          actor_id?: string
           created_at?: string
           id?: string
           token_id?: number
@@ -5739,6 +6948,30 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_circuits: {
+        Row: {
+          blocked_until: string
+          failures: number
+          probe_token: string | null
+          probe_until: string
+          provider: string
+        }
+        Insert: {
+          blocked_until?: string
+          failures?: number
+          probe_token?: string | null
+          probe_until?: string
+          provider: string
+        }
+        Update: {
+          blocked_until?: string
+          failures?: number
+          probe_token?: string | null
+          probe_until?: string
+          provider?: string
+        }
+        Relationships: []
+      }
       raise_hand_requests: {
         Row: {
           avatar: string | null
@@ -5779,6 +7012,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      remix_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          details: Json
+          id: string
+          kind: string
+          remix_token_id: number | null
+          remixer_address: string
+          remixer_username: string | null
+          source_address: string
+          source_token_id: number
+          source_username: string | null
+          split_bps: number
+          stream_token_id: number | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          details?: Json
+          id?: string
+          kind: string
+          remix_token_id?: number | null
+          remixer_address: string
+          remixer_username?: string | null
+          source_address: string
+          source_token_id: number
+          source_username?: string | null
+          split_bps?: number
+          stream_token_id?: number | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          details?: Json
+          id?: string
+          kind?: string
+          remix_token_id?: number | null
+          remixer_address?: string
+          remixer_username?: string | null
+          source_address?: string
+          source_token_id?: number
+          source_username?: string | null
+          split_bps?: number
+          stream_token_id?: number | null
+        }
+        Relationships: []
+      }
+      remix_settings: {
+        Row: {
+          allow_duet: string | null
+          allow_react: string | null
+          allow_stitch: string | null
+          owner_address: string
+          token_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          allow_duet?: string | null
+          allow_react?: string | null
+          allow_stitch?: string | null
+          owner_address: string
+          token_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allow_duet?: string | null
+          allow_react?: string | null
+          allow_stitch?: string | null
+          owner_address?: string
+          token_id?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       santa_snake_scores: {
         Row: {
@@ -5874,6 +7182,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      signup_attribution: {
+        Row: {
+          created_at: string
+          first_seen_at: string | null
+          is_new_account: boolean
+          landing_path: string | null
+          ref_code: string | null
+          referrer_host: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          first_seen_at?: string | null
+          is_new_account?: boolean
+          landing_path?: string | null
+          ref_code?: string | null
+          referrer_host?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          first_seen_at?: string | null
+          is_new_account?: boolean
+          landing_path?: string | null
+          ref_code?: string | null
+          referrer_host?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
       }
       social_credit_topups: {
         Row: {
@@ -6025,6 +7378,24 @@ export type Database = {
         }
         Relationships: []
       }
+      social_reach_cache: {
+        Row: {
+          accounts: Json
+          synced_at: string
+          wallet_address: string
+        }
+        Insert: {
+          accounts?: Json
+          synced_at?: string
+          wallet_address: string
+        }
+        Update: {
+          accounts?: Json
+          synced_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       space_participants: {
         Row: {
           avatar: string | null
@@ -6129,6 +7500,74 @@ export type Database = {
           {
             foreignKeyName: "stage_chat_messages_space_id_fkey"
             columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "audio_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_clips: {
+        Row: {
+          attempts: number
+          created_at: string
+          duration_seconds: number | null
+          end_seconds: number
+          error: string | null
+          hook: string
+          id: string
+          idx: number
+          job_id: string | null
+          last_attempt_at: string | null
+          queued_at: string | null
+          stage_id: string
+          start_seconds: number
+          status: string
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          duration_seconds?: number | null
+          end_seconds: number
+          error?: string | null
+          hook?: string
+          id?: string
+          idx: number
+          job_id?: string | null
+          last_attempt_at?: string | null
+          queued_at?: string | null
+          stage_id: string
+          start_seconds: number
+          status?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          duration_seconds?: number | null
+          end_seconds?: number
+          error?: string | null
+          hook?: string
+          id?: string
+          idx?: number
+          job_id?: string | null
+          last_attempt_at?: string | null
+          queued_at?: string | null
+          stage_id?: string
+          start_seconds?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_clips_stage_id_fkey"
+            columns: ["stage_id"]
             isOneToOne: false
             referencedRelation: "audio_spaces"
             referencedColumns: ["id"]
@@ -6985,6 +8424,33 @@ export type Database = {
           },
         ]
       }
+      transcript_translations_numbers_backup: {
+        Row: {
+          chapters: Json | null
+          language: string | null
+          saved_at: string | null
+          segments: Json | null
+          summary: string | null
+          transcript_id: string | null
+        }
+        Insert: {
+          chapters?: Json | null
+          language?: string | null
+          saved_at?: string | null
+          segments?: Json | null
+          summary?: string | null
+          transcript_id?: string | null
+        }
+        Update: {
+          chapters?: Json | null
+          language?: string | null
+          saved_at?: string | null
+          segments?: Json | null
+          summary?: string | null
+          transcript_id?: string | null
+        }
+        Relationships: []
+      }
       transcription_worker: {
         Row: {
           enabled: boolean
@@ -7102,6 +8568,30 @@ export type Database = {
         }
         Relationships: []
       }
+      translation_attempt_budgets: {
+        Row: {
+          attempts: number
+          day: string
+          input_bytes: number
+          output_tokens: number
+          scope: string
+        }
+        Insert: {
+          attempts?: number
+          day: string
+          input_bytes?: number
+          output_tokens?: number
+          scope: string
+        }
+        Update: {
+          attempts?: number
+          day?: string
+          input_bytes?: number
+          output_tokens?: number
+          scope?: string
+        }
+        Relationships: []
+      }
       translation_spend_daily: {
         Row: {
           day: string
@@ -7114,6 +8604,24 @@ export type Database = {
         Update: {
           day?: string
           paid_calls?: number
+        }
+        Relationships: []
+      }
+      translation_work_leases: {
+        Row: {
+          cache_key: string
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          cache_key: string
+          expires_at: string
+          token: string
+        }
+        Update: {
+          cache_key?: string
+          expires_at?: string
+          token?: string
         }
         Relationships: []
       }
@@ -7565,6 +9073,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_provider_keys: {
+        Row: {
+          checked_at: string
+          created_at: string
+          last_used_at: string | null
+          last4: string
+          provider: string
+          secret_id: string
+          status: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          checked_at?: string
+          created_at?: string
+          last_used_at?: string | null
+          last4: string
+          provider: string
+          secret_id: string
+          status?: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          checked_at?: string
+          created_at?: string
+          last_used_at?: string | null
+          last4?: string
+          provider?: string
+          secret_id?: string
+          status?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       user_skills: {
         Row: {
           asset_urls: string[]
@@ -7846,6 +9390,7 @@ export type Database = {
           job_id: string | null
           language: string
           last_attempt_at: string | null
+          needs_redo: boolean
           provider: string | null
           status: string
           transcript_id: string
@@ -7862,6 +9407,7 @@ export type Database = {
           job_id?: string | null
           language: string
           last_attempt_at?: string | null
+          needs_redo?: boolean
           provider?: string | null
           status?: string
           transcript_id: string
@@ -7878,6 +9424,7 @@ export type Database = {
           job_id?: string | null
           language?: string
           last_attempt_at?: string | null
+          needs_redo?: boolean
           provider?: string | null
           status?: string
           transcript_id?: string
@@ -8575,6 +10122,15 @@ export type Database = {
         }
         Relationships: []
       }
+      remix_counts: {
+        Row: {
+          duets: number | null
+          reactions: number | null
+          source_token_id: number | null
+          stitches: number | null
+        }
+        Relationships: []
+      }
       stage_transcript_translations: {
         Row: {
           chapters: Json | null
@@ -8822,6 +10378,39 @@ export type Database = {
         }
         Returns: boolean
       }
+      ai_generation_debit_canceled: {
+        Args: { p_job_id: string; p_token: string }
+        Returns: Json
+      }
+      ai_generation_debit_declined: {
+        Args: { p_job_id: string }
+        Returns: Json
+      }
+      ai_generation_refund_claim: {
+        Args: { p_job_id: string; p_token: string }
+        Returns: Json
+      }
+      ai_generation_refund_finish: {
+        Args: { p_credit_restored?: boolean; p_job_id: string; p_token: string }
+        Returns: Json
+      }
+      ai_generation_save_result: {
+        Args: { p_expected_result: Json; p_job_id: string; p_result: Json }
+        Returns: Json
+      }
+      ai_generation_transition: {
+        Args: {
+          p_created_before?: string
+          p_expected_statuses?: string[]
+          p_job_id: string
+          p_prediction_id?: string
+          p_provider?: string
+          p_provider_app?: string
+          p_result: Json
+          p_status: string
+        }
+        Returns: Json
+      }
       ai_job_record_credits: {
         Args: {
           p_debit_key: string
@@ -8861,11 +10450,57 @@ export type Database = {
         Args: { p_dhb: number; p_tx_hash: string; p_wallet: string }
         Returns: number
       }
+      apply_feature_request_auto_title: {
+        Args: { p_expected: string; p_id: string; p_title: string }
+        Returns: boolean
+      }
+      attach_feature_request_device_info: {
+        Args: { p_id: string; p_info: Json }
+        Returns: boolean
+      }
       attribute_affiliate_referral: {
         Args: { p_code: string; p_sub_id?: string }
         Returns: undefined
       }
+      builder_openai_key: { Args: never; Returns: string }
       bulk_insert_category_log: { Args: { entries: Json }; Returns: number }
+      byok_delete: {
+        Args: { p_provider: string; p_wallet: string }
+        Returns: undefined
+      }
+      byok_get: {
+        Args: { p_provider: string; p_wallet: string }
+        Returns: string
+      }
+      byok_save: {
+        Args: {
+          p_key: string
+          p_provider: string
+          p_status?: string
+          p_wallet: string
+        }
+        Returns: undefined
+      }
+      call_dub_tick: {
+        Args: {
+          p_language: string
+          p_price_per_min: number
+          p_room: string
+          p_start?: boolean
+          p_wallet: string
+        }
+        Returns: number
+      }
+      call_dub_unsettled: {
+        Args: { p_wallet: string }
+        Returns: {
+          minutes: number
+          owed_dhb: number
+          price_dhb_per_min: number
+          room_key: string
+        }[]
+      }
+      can_read_event_chat: { Args: { p_event: string }; Returns: boolean }
       category_counts: {
         Args: { p_since?: string }
         Returns: {
@@ -8888,7 +10523,15 @@ export type Database = {
       claim_agent_life: { Args: never; Returns: string }
       claim_agent_task: { Args: never; Returns: Json }
       claim_paid_translation: { Args: { p_cap: number }; Returns: boolean }
+      claim_provider_attempt: {
+        Args: { p_provider: string; p_token: string }
+        Returns: Json
+      }
       claim_reaction_tip: { Args: never; Returns: boolean }
+      claim_translation_work: {
+        Args: { p_key: string; p_token: string }
+        Returns: boolean
+      }
       claim_video_dub_tip: { Args: never; Returns: boolean }
       claim_xl_cashback_slot: {
         Args: { p_subscription_id: string; p_xl_price_id: string }
@@ -8906,6 +10549,14 @@ export type Database = {
         Args: { _community_id: string; _perm: string }
         Returns: string
       }
+      community_automod_banned: {
+        Args: { _text: string; _words: Json }
+        Returns: string
+      }
+      community_automod_has_link: { Args: { _text: string }; Returns: boolean }
+      community_automod_resolve: { Args: { _raw: Json }; Returns: Json }
+      community_automod_runs: { Args: { _text: string }; Returns: string }
+      community_automod_words: { Args: { _text: string }; Returns: string }
       community_ban_member: {
         Args: {
           _community_id: string
@@ -8914,6 +10565,19 @@ export type Database = {
           _until?: string
         }
         Returns: undefined
+      }
+      community_buy_bot_resolve: { Args: { _raw: Json }; Returns: Json }
+      community_buy_bot_rpc: { Args: { _chain: string }; Returns: string }
+      community_buy_bot_tick: { Args: never; Returns: Json }
+      community_chat_page_v1: {
+        Args: {
+          _anchor_id?: string
+          _before_at?: string
+          _before_id?: string
+          _community_id: string
+          _limit?: number
+        }
+        Returns: Json
       }
       community_claim_invite: {
         Args: { _community_id: string; _recipient: string }
@@ -8955,6 +10619,41 @@ export type Database = {
       community_delete_message: {
         Args: { _message_id: string }
         Returns: undefined
+      }
+      community_entry_check: { Args: { _community_id: string }; Returns: Json }
+      community_entry_paid: {
+        Args: { _community_id: string; _wallet: string }
+        Returns: boolean
+      }
+      community_entry_submit: {
+        Args: { _chain_id: number; _community_id: string; _tx_hash: string }
+        Returns: Json
+      }
+      community_entry_token: { Args: { _chain_id: number }; Returns: string }
+      community_get_bot_settings: {
+        Args: { _community_id: string }
+        Returns: Json
+      }
+      community_hex_to_numeric: { Args: { _hex: string }; Returns: number }
+      community_hidden_message_ids: {
+        Args: { _community_id: string }
+        Returns: string[]
+      }
+      community_hide_message: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
+      community_holder_check_result: {
+        Args: { _community_id: string }
+        Returns: Json
+      }
+      community_holder_check_start: {
+        Args: { _community_id: string }
+        Returns: Json
+      }
+      community_holder_ok: {
+        Args: { _community_id: string; _max_age: string; _wallet: string }
+        Returns: boolean
       }
       community_is_active_member: {
         Args: { _community_id: string; _wallet: string }
@@ -9024,6 +10723,49 @@ export type Database = {
         Args: { _community_id: string; _wallet: string }
         Returns: string
       }
+      community_set_holder_gate: {
+        Args: {
+          _chain_id: number
+          _community_id: string
+          _decimals: number
+          _min: number
+          _symbol: string
+          _token: string
+        }
+        Returns: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          creator_wallet_address: string
+          default_permissions: Json
+          description: string | null
+          entry_price: number | null
+          holder_gate_chain_id: number | null
+          holder_gate_decimals: number
+          holder_gate_min: number | null
+          holder_gate_symbol: string | null
+          holder_gate_token: string | null
+          id: string
+          is_private: boolean
+          kind: string
+          member_count: number
+          name: string
+          rules: Json | null
+          slow_mode_seconds: number
+          slug: string
+          ticker_chain_id: string | null
+          ticker_contract_address: string | null
+          ticker_pair_address: string | null
+          ticker_symbol: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "communities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       community_set_member_role: {
         Args: {
           _community_id: string
@@ -9075,6 +10817,10 @@ export type Database = {
         Args: { _community_id: string; _target: string }
         Returns: undefined
       }
+      community_update_bot_settings: {
+        Args: { _community_id: string; _patch: Json }
+        Returns: Json
+      }
       community_update_settings: {
         Args: { _community_id: string; _patch: Json }
         Returns: {
@@ -9084,8 +10830,15 @@ export type Database = {
           creator_wallet_address: string
           default_permissions: Json
           description: string | null
+          entry_price: number | null
+          holder_gate_chain_id: number | null
+          holder_gate_decimals: number
+          holder_gate_min: number | null
+          holder_gate_symbol: string | null
+          holder_gate_token: string | null
           id: string
           is_private: boolean
+          kind: string
           member_count: number
           name: string
           rules: Json | null
@@ -9103,6 +10856,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      compact_saved_generation_images: {
+        Args: { p_limit?: number }
+        Returns: number
       }
       complete_wallet_replacement: {
         Args: { p_new_address: string }
@@ -9141,6 +10898,13 @@ export type Database = {
           valid: boolean
         }[]
       }
+      costream_queue_join: {
+        Args: { p_stream_id: string; p_username?: string }
+        Returns: Json
+      }
+      costream_queue_leave: { Args: never; Returns: undefined }
+      costream_queue_poll: { Args: never; Returns: Json }
+      costream_queue_size: { Args: never; Returns: number }
       create_agent_swarm_tasks: {
         Args: {
           p_agent_ids: string[]
@@ -9180,6 +10944,15 @@ export type Database = {
         Returns: {
           id: string
         }[]
+      }
+      creator_gallery_discussion: { Args: { p_id: string }; Returns: Json }
+      creator_gallery_read: {
+        Args: { p_id?: string; p_limit?: number; p_offset?: number }
+        Returns: Json
+      }
+      creator_gallery_write: {
+        Args: { p_action: string; p_data?: Json; p_id: string }
+        Returns: Json
       }
       decrement_listing_stock: {
         Args: { p_listing_id: string }
@@ -9399,7 +11172,35 @@ export type Database = {
         Args: { p_wallet: string }
         Returns: undefined
       }
+      event_gate_checkout: {
+        Args: {
+          p_action: string
+          p_claim: string
+          p_event: string
+          p_hash?: string
+        }
+        Returns: Json
+      }
+      event_gate_log_index: {
+        Args: {
+          q: Database["public"]["Tables"]["event_gate_quotes"]["Row"]
+          receipt: Json
+        }
+        Returns: number
+      }
       evict_stale_post_translations: { Args: never; Returns: number }
+      feature_request_device_info_ids: { Args: never; Returns: string[] }
+      feature_request_status_editor_wallets: { Args: never; Returns: string[] }
+      feature_request_watcher_wallets: { Args: never; Returns: string[] }
+      finish_provider_attempt: {
+        Args: {
+          p_cooldown_seconds: number
+          p_probe: boolean
+          p_provider: string
+          p_token: string
+        }
+        Returns: undefined
+      }
       get_affiliate_cta_stats: {
         Args: never
         Returns: {
@@ -9447,6 +11248,7 @@ export type Database = {
           used_bytes: number
         }[]
       }
+      get_feature_request_device_info: { Args: { p_id: string }; Returns: Json }
       get_my_agents: {
         Args: never
         Returns: {
@@ -9475,6 +11277,12 @@ export type Database = {
         Args: { token?: string; wallet: string }
         Returns: boolean
       }
+      growth_autopost_scheduler_authorized: {
+        Args: { p_token: string }
+        Returns: boolean
+      }
+      holder_gate_hex_to_numeric: { Args: { _hex: string }; Returns: number }
+      holder_gate_rpc_url: { Args: { _chain_id: number }; Returns: string }
       increment_category_count: { Args: { p_name: string }; Returns: undefined }
       increment_stage_listens: {
         Args: { p_space_id: string }
@@ -9492,12 +11300,22 @@ export type Database = {
         Args: { p_skill_id: string }
         Returns: undefined
       }
+      is_active_group_member: {
+        Args: { p_group: string; p_wallet: string }
+        Returns: boolean
+      }
       is_banned_from_community: {
         Args: { _community_id: string; _wallet_address: string }
         Returns: boolean
       }
+      is_feature_request_status_editor: { Args: never; Returns: boolean }
+      is_signed_costream_host: {
+        Args: { p_costream_id: string }
+        Returns: boolean
+      }
       is_signed_stage_host: { Args: { p_space_id: string }; Returns: boolean }
       is_stage_host: { Args: { p_space_id: string }; Returns: boolean }
+      issue_maintenance_token: { Args: { p_action: string }; Returns: string }
       issue_wallet_session: {
         Args: {
           p_app_version?: string
@@ -9538,6 +11356,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      miniapp_app_stats: { Args: { p_app: string }; Returns: Json }
       miniapp_compute_rewards: {
         Args: { p_week_start?: string }
         Returns: number
@@ -9584,6 +11403,10 @@ export type Database = {
       recount_space: { Args: { p_space_id: string }; Returns: undefined }
       release_fraction_listing: {
         Args: { p_listing_id: string; p_quantity: number }
+        Returns: undefined
+      }
+      release_translation_work: {
+        Args: { p_key: string; p_token: string }
         Returns: undefined
       }
       replace_user_wallet: {
@@ -9633,11 +11456,59 @@ export type Database = {
         Args: { p_listing_id: string; p_quantity: number }
         Returns: number
       }
+      reserve_translation_attempt: {
+        Args: {
+          p_bulk: boolean
+          p_cap?: number
+          p_input_bytes: number
+          p_output_tokens: number
+        }
+        Returns: boolean
+      }
       resolve_due_dao_proposals: { Args: never; Returns: number }
       resolve_due_governance_proposals: { Args: never; Returns: number }
       set_dex_pool_image: {
         Args: { p_image_url: string; p_pool_id: string }
         Returns: undefined
+      }
+      set_event_chat_reaction: {
+        Args: {
+          p_add: boolean
+          p_emoji: string
+          p_event: string
+          p_message: string
+        }
+        Returns: undefined
+      }
+      set_feature_request_status: {
+        Args: { p_id: string; p_note?: string; p_status: string }
+        Returns: {
+          author_avatar: string | null
+          author_username: string | null
+          author_wallet_address: string
+          category: string
+          comment_count: number
+          created_at: string
+          description: string
+          dislike_count: number
+          id: string
+          image_url: string | null
+          image_urls: string[] | null
+          like_count: number
+          shipped_url: string | null
+          status: string
+          status_note: string | null
+          title: string
+          title_auto: boolean
+          updated_at: string
+          vote_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "feature_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       social_credit_add: {
         Args: {
@@ -9687,7 +11558,7 @@ export type Database = {
       }
       touch_stage_speech: { Args: { space_id: string }; Returns: boolean }
       track_post_link_copy: {
-        Args: { p_token_id: number; p_wallet?: string }
+        Args: { p_actor: string; p_token_id: number; p_wallet?: string }
         Returns: undefined
       }
       trench_fire_alert: {
@@ -9750,6 +11621,10 @@ export type Database = {
       upsert_phone_otp: {
         Args: { p_code_hash: string; p_phone: string; p_ttl_ms: number }
         Returns: undefined
+      }
+      verify_maintenance_token: {
+        Args: { p_action: string; p_token: string }
+        Returns: boolean
       }
       work_action: {
         Args: {
