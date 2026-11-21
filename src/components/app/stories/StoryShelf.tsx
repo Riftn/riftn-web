@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Add from '@/components/ui/cut-icons/add';
 import Refresh from '@/components/ui/cut-icons/refresh';
+import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveNowItems, pictureOf, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
 import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
@@ -19,7 +20,7 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
 import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
-import { ageLabel, coverOf, nameOf, playable } from './story-utils';
+import { ageLabel, coverOf, handleOf, nameOf, playable } from './story-utils';
 import '@/styles/stories.css';
 
 const bg = (url?: string | null) => (url ? { backgroundImage: `url("${url.replace(/"/g, '%22')}")` } : undefined);
@@ -143,6 +144,30 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
   );
 }
 
+function TileIdentity({ address, username, displayName, live }: {
+  address: string;
+  username: string | null;
+  displayName?: string | null;
+  live?: LiveNowItem;
+}) {
+  const account = useBadgeBalance(address, live?.badgeBalance);
+  const badge = useBadgeVisual({
+    badgeBalance: live?.badgeBalance ?? account.badgeBalance,
+    badgeLock: live?.badgeLock ?? account.badgeLock,
+    username: username ?? account.username,
+    lookupId: address,
+  });
+  const label = displayName?.trim() || account.displayName?.trim() || handleOf({ address, username });
+  return (
+    <span data-st-label>
+      <span data-st-name>{label}</span>
+      {badge.url && !live?.hideBadgeAndBalance && !account.hideBadgeAndBalance && (
+        <img data-st-badge src={badge.url} alt={badge.name ?? ''} />
+      )}
+    </span>
+  );
+}
+
 function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
   const { t } = useTranslation();
   const [faceBroken, setFaceBroken] = useState(false);
@@ -152,10 +177,8 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
       <span data-st-bg style={bg(pictureOf(item))} />
       <span data-st-shade />
       <span data-st-live><i />{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
-      <span data-st-who>
-        {face && !faceBroken ? <img src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-face />}
-        <span>{item.displayName || item.username || item.wallet.slice(0, 6)}</span>
-      </span>
+      {face && !faceBroken && <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} />}
+      <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
     </button>
   );
 }
@@ -180,7 +203,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       <span data-st-ring />
       <span data-st-time>{ageLabel(latest?.createdAt)}</span>
       {face && !faceBroken ? <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-avatar />}
-      <span data-st-label className="px-2 truncate">{a.username ? `@${a.username}` : nameOf(a)}</span>
+      <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
     </button>
   );
 }

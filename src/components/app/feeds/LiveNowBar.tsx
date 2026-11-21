@@ -53,6 +53,7 @@ export interface LiveNowItem {
   displayName?: string | null;
   /** Staking badge, when the payload carries it (streams). Stages look it up by wallet. */
   badgeBalance?: number | null;
+  hideBadgeAndBalance?: boolean;
   badgeLock?: BadgeLock | null;
 }
 
@@ -145,6 +146,7 @@ export function useLiveNowItems(): { items: LiveNowItem[]; open: (item: LiveNowI
           size: watching ?? 0,
           cover: stream.thumbnail || null,
           displayName: (raw as any).account?.displayName || null,
+          hideBadgeAndBalance: (raw as any).account?.hideBadgeAndBalance,
           badgeBalance: stream.creatorBadgeBalance ?? null,
           badgeLock: (raw as any).account?.hideBadgeAndBalance ? null : parseBadgeLock((raw as any).account?.badgeLock),
         });
