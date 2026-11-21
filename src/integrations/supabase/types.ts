@@ -7469,6 +7469,7 @@ export type Database = {
           preferences: Json
           reaction_tip_seen: boolean
           shorts_enabled: boolean
+          stories_enabled: boolean
           updated_at: string
           video_dub_tip_seen: boolean
           wallet_address: string
@@ -7478,6 +7479,7 @@ export type Database = {
           preferences?: Json
           reaction_tip_seen?: boolean
           shorts_enabled?: boolean
+          stories_enabled?: boolean
           updated_at?: string
           video_dub_tip_seen?: boolean
           wallet_address: string
@@ -7487,6 +7489,7 @@ export type Database = {
           preferences?: Json
           reaction_tip_seen?: boolean
           shorts_enabled?: boolean
+          stories_enabled?: boolean
           updated_at?: string
           video_dub_tip_seen?: boolean
           wallet_address?: string

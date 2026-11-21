@@ -12,6 +12,7 @@ import Add from '@/components/ui/cut-icons/add';
 import Refresh from '@/components/ui/cut-icons/refresh';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveNowItems, pictureOf, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
+import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { useStoryShelf } from '@/hooks/use-story-shelf';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsModeLock } from '@/hooks/use-kids-mode';
@@ -30,7 +31,8 @@ export function StoryShelf() {
   const kidsMode = useKidsModeLock();
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
-  const { data } = useStoryShelf(liveHosts, canSeeMature);
+  const { storiesEnabled } = useStoriesEnabled();
+  const { data } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
   const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
@@ -49,12 +51,12 @@ export function StoryShelf() {
   // Fetch the viewer's code while the shelf is on screen, so the first tap opens at once.
   const hasMoments = watchable.length > 0;
   useEffect(() => {
-    if (!hasMoments) return;
+    if (!storiesEnabled || !hasMoments) return;
     const id = window.setTimeout(() => void import('./StoriesHost'), 1500);
     return () => window.clearTimeout(id);
-  }, [hasMoments]);
+  }, [storiesEnabled, hasMoments]);
 
-  if (!isAuthenticated && others.length === 0 && eligibleLive.length === 0) return null;
+  if ((!storiesEnabled || (!isAuthenticated && others.length === 0)) && eligibleLive.length === 0) return null;
 
   const openEntry = (entry: ShelfEntry, el: HTMLElement) => {
     const index = watchable.findIndex(e => e.author.address === entry.author.address);
@@ -65,7 +67,7 @@ export function StoryShelf() {
 
   return (
     <div data-stories data-story-shelf data-no-swipe role="list">
-      {isAuthenticated && (
+      {storiesEnabled && isAuthenticated && (
         <MeTile
           address={walletAddress ?? ''}
           avatar={user?.avatarImageUrl ?? own?.author.avatarImageUrl ?? null}
@@ -79,7 +81,7 @@ export function StoryShelf() {
       {eligibleLive.map(item => (
         <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
       ))}
-      {others.map(entry => (
+      {storiesEnabled && others.map(entry => (
         <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)} />
       ))}
     </div>
@@ -97,8 +99,8 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
 }) {
   const { t } = useTranslation();
   const face = avatar ? buildAvatarUrl(address, avatar) : buildAvatarCdnFallbackUrl(address, undefined);
-  const cover = pending?.preview || (entry ? coverOf(entry) : null);
-  const empty = !cover;
+  const cover = pending ? pending.preview : entry && coverOf(entry);
+  const empty = !pending && !entry;
   const busy = pending && pending.state !== 'failed';
 
   return (
@@ -111,7 +113,7 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
-      <span data-st-bg data-blur style={bg(face)} />
+      <span data-st-bg data-blur style={bg(cover)} />
       {!empty && <span data-st-shade />}
       {!empty && pending?.state !== 'failed' && <img data-st-avatar src={face} alt="" />}
       {busy && <span data-st-fill style={{ height: `${Math.max(6, pending!.state === 'processing' ? 100 : pending!.progress)}%` }} />}
@@ -173,7 +175,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}
     >
-      <span data-st-bg data-blur style={bg(faceBroken ? null : face)} />
+      <span data-st-bg data-blur style={bg(coverOf(entry))} />
       <span data-st-shade />
       <span data-st-ring />
       <span data-st-time>{ageLabel(latest?.createdAt)}</span>

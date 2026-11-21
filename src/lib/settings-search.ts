@@ -139,6 +139,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   // Content
   { tab: 'content', anchor: 'posting-chain', label: 'Posting chain', labelKey: 'settings.postingChain', keywords: 'post mint blockchain network base bnb ethereum solana database' },
   { tab: 'content', anchor: 'mature-content', label: 'Show Mature Content', labelKey: 'settings.matureContent', keywords: 'nsfw adult sensitive explicit filter' },
+  { tab: 'content', anchor: 'show-stories', label: 'Show Stories on Home', labelKey: 'settings.showStories', keywords: 'moments stories hide shelf hikaye hikâyeler' },
   { tab: 'content', anchor: 'hide-watched', label: 'Hide watched videos', labelKey: 'settings.hideWatched', keywords: 'seen history feed' },
   { tab: 'content', anchor: 'skip-segments', label: 'Skip sponsors and intros', labelKey: 'settings.skipSegments', keywords: 'sponsorblock ads intro' },
   { tab: 'content', anchor: 'video-glitch', label: 'Glitch effect while videos load', labelKey: 'settings.videoGlitch', keywords: 'static noise scanlines animation loading' },

@@ -1374,6 +1374,8 @@
     "freeAccessListDesc": "Mesaj ücretinizi ödemeden size ücretsiz mesaj gönderebilen kullanıcılar.",
     "noFreeAccess": "Hiç kimseye ücretsiz erişim yok. DM sohbetinden erişim ver.",
     "revoke": "İptal Et",
+    "showStories": "Ana sayfada hikâyeleri göster",
+    "storiesSaveFailed": "Hikâye ayarınız kaydedilemedi.",
     "hideWatched": "İzlenen videoları gizle",
     "hideWatchedDesc": "Zaten izlediğiniz videoları anasayfanızdan kaldırın. İzlenen videolar her iki durumda da işaretli kalır. Varsayılan olarak kapalı.",
     "channelSpeed": "Kanal başına oynatma hızı",

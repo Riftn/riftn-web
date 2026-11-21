@@ -455,12 +455,11 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields }, onShared);
       } else {
         const overlay = await composeOverlay(drawRef.current, drew, visible);
-        const poster = await videoPoster(videoRef.current);
         shareMoment({
           kind: 'video',
           file: media.blob,
           overlay,
-          preview: poster || '',
+          preview: '',
           fields: { ...fields, trimStart: trim[0], trimEnd: trim[1] },
         }, onShared);
       }
@@ -698,24 +697,6 @@ function PhotoPreview({ imgRef, url }: { imgRef: React.RefObject<HTMLImageElemen
       />
     </>
   );
-}
-
-/** A still of the clip for your tile while it uploads. */
-async function videoPoster(video: HTMLVideoElement | null): Promise<string | null> {
-  if (!video || !video.videoWidth) return null;
-  try {
-    const c = document.createElement('canvas');
-    c.width = 270;
-    c.height = 480;
-    const ctx = c.getContext('2d')!;
-    const scale = Math.max(c.width / video.videoWidth, c.height / video.videoHeight);
-    const w = video.videoWidth * scale;
-    const h = video.videoHeight * scale;
-    ctx.drawImage(video, (c.width - w) / 2, (c.height - h) / 2, w, h);
-    return c.toDataURL('image/jpeg', 0.8);
-  } catch {
-    return null;
-  }
 }
 
 export default StoryCreator;
