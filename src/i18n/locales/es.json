@@ -5174,6 +5174,7 @@
     "shopAllowanceUsed": "{{allowance}} de {{allowance}} usados. Haz más staking de tokens Riftn para obtener una insignia superior y otra ranura."
   },
   "stages": {
+    "radioShow": {"toggle": "Programa de radio", "hint": "La música primero: pon tus canciones o una lista, habla cuando quieras. Los oyentes entran cuando quieran y aparece en la fila Radio de Explorar.", "row": "Radio", "start": "Empezar un programa", "empty": "No hay programas de radio ahora. Empieza uno: sal en vivo con tu micrófono y tu propia música.", "listening_one": "{{formatted}} escuchando", "listening_other": "{{formatted}} escuchando", "onAir": "Al aire", "soon": "Pronto", "badge": "Radio", "myMusic": "Mi música", "myMusicHint": "Las canciones que subes suenan para todos en la sala, incluso con el micrófono apagado.", "addSong": "Añadir una canción", "playFailed": "No se pudo reproducir esa canción", "noSongs": "Aún no hay canciones. Añade una para ponerla al aire.", "tooBig": "Las canciones pueden pesar hasta {{max}} MB"},
     "allStages": "Todas las salas de audio",
     "title": "Salas de audio",
     "tabLive": "En directo",

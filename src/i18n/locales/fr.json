@@ -5178,6 +5178,7 @@
     "shopAllowanceUsed": "{{allowance}} sur {{allowance}} utilisés. Staké plus de jetons Riftn pour un badge supérieur et un emplacement supplémentaire."
   },
   "stages": {
+    "radioShow": {"toggle": "Émission de radio", "hint": "La musique d'abord : passe tes morceaux ou une playlist, parle quand tu veux. Les auditeurs arrivent à tout moment, et l'émission apparaît dans la rangée Radio d'Explorer.", "row": "Radio", "start": "Lancer une émission", "empty": "Aucune émission de radio en ce moment. Lance la tienne : passe en direct avec ton micro et ta musique.", "listening_one": "{{formatted}} à l'écoute", "listening_other": "{{formatted}} à l'écoute", "onAir": "À l'antenne", "soon": "Bientôt", "badge": "Radio", "myMusic": "Ma musique", "myMusicHint": "Les morceaux que tu importes sont diffusés à toute la salle, même micro coupé.", "addSong": "Ajouter un morceau", "playFailed": "Impossible de lire ce morceau", "noSongs": "Pas encore de morceaux. Ajoutes-en un pour le diffuser.", "tooBig": "Les morceaux peuvent faire jusqu'à {{max}} Mo"},
     "allStages": "Tous les salons audio",
     "title": "Salons audio",
     "tabLive": "En direct",

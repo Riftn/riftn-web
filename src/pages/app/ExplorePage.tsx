@@ -86,6 +86,7 @@ import type { VideoItem, ImagePost } from '@/types/feed.types';
 import { recordTickerSearch } from '@/lib/ticker-search-tracker';
 import { scrollDocumentTo } from '@/lib/document-scroll';
 import { ExploreCategoryWords, ExplorePhoneHome } from '@/components/app/explore/ExplorePhoneHome';
+import { ExploreRadioShows } from '@/components/app/explore/ExploreRadioShows';
 import { orderByInterests, useFeedInterests } from '@/lib/feed-interests';
 
 import { formatCount } from '@/lib/format-count';
@@ -1210,6 +1211,9 @@ export default function ExplorePage() {
 
                   {/* Trending Bento — same component as sidebar */}
                   <WhatsHappening showCountrySelector surface="explore" />
+
+                  {/* Radio shows on air and coming up, with a way to start one. */}
+                  <ExploreRadioShows boxed />
 
                   {/* New members, last on the page: it is the one bento here
                       whose contents change by the day, so it is worth scrolling
