@@ -6,7 +6,7 @@
  * people's moments: something new has a ring in the theme's colour, watched
  * ones go grey and move to the end. A tile opens the full-screen viewer.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import Add from '@/components/ui/cut-icons/add';
 import Refresh from '@/components/ui/cut-icons/refresh';
@@ -89,6 +89,19 @@ export function StoryShelf() {
   );
 }
 
+function ShelfAvatar({ src, phoneOnly = false, phoneFallback = false }: {
+  src?: string | null;
+  phoneOnly?: boolean;
+  phoneFallback?: boolean;
+}) {
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  return src && brokenSrc !== src ? (
+    <img data-st-avatar data-st-phone-only={phoneOnly || undefined} src={src} alt="" onError={() => setBrokenSrc(src)} />
+  ) : (
+    <span data-st-avatar data-st-phone-only={phoneOnly || phoneFallback || undefined} aria-hidden="true" />
+  );
+}
+
 function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: {
   address: string;
   avatar: string | null;
@@ -103,6 +116,7 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
   const cover = pending ? pending.preview : entry && coverOf(entry);
   const empty = !pending && !entry;
   const busy = pending && pending.state !== 'failed';
+  const fill = busy ? `${Math.max(6, pending.state === 'processing' ? 100 : pending.progress)}%` : undefined;
 
   return (
     <button
@@ -115,8 +129,9 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
       <span data-st-bg style={bg(cover)} />
-      {!empty && pending?.state !== 'failed' && <img data-st-avatar src={face} alt="" />}
-      {busy && <span data-st-fill style={{ height: `${Math.max(6, pending!.state === 'processing' ? 100 : pending!.progress)}%` }} />}
+      <span data-st-shade data-st-phone-only />
+      {pending?.state !== 'failed' && <ShelfAvatar src={face} phoneOnly={empty} />}
+      {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
       {empty ? (
         <span data-st-glass data-st-plus><Add className="w-5 h-5" /></span>
       ) : pending?.state === 'failed' ? (
@@ -169,14 +184,13 @@ function TileIdentity({ address, username, displayName, live }: {
 
 function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
   const { t } = useTranslation();
-  const [faceBroken, setFaceBroken] = useState(false);
   const face = faceUrlOf(item);
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
-      <span data-st-bg style={bg(pictureOf(item))} />
+      <span data-st-bg data-st-avatar-cover={item.cover ? undefined : true} style={bg(pictureOf(item))} />
       <span data-st-shade />
       <span data-st-live><i />{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
-      {face && !faceBroken && <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} />}
+      <ShelfAvatar src={face} phoneFallback />
       <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
     </button>
   );
@@ -184,7 +198,6 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
 
 function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
   const a = entry.author;
-  const [faceBroken, setFaceBroken] = useState(false);
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const latest = entry.items[entry.items.length - 1];
   return (
@@ -200,7 +213,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       <span data-st-bg style={bg(coverOf(entry))} />
       <span data-st-ring />
       <span data-st-time>{ageLabel(latest?.createdAt)}</span>
-      {face && !faceBroken ? <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-avatar />}
+      <ShelfAvatar src={face} />
       <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
     </button>
   );

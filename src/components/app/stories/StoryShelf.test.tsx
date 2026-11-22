@@ -54,3 +54,16 @@ it('labels moments and live hosts with their display name and visible badge', ()
   view.rerender(<StoryShelf />);
   expect(screen.queryByAltText('Dolphin')).toBeNull();
 });
+
+it('provides the cover, avatar and badge slots for the phone carousel', () => {
+  prefs.storiesEnabled = true;
+  const { container } = render(<StoryShelf />);
+  for (const kind of ['me', 'live', 'person']) {
+    const tile = container.querySelector(`[data-kind="${kind}"]`);
+    expect(tile?.querySelector('[data-st-bg]')).toBeTruthy();
+    expect(tile?.querySelector('[data-st-avatar]')).toBeTruthy();
+    expect(tile?.querySelector('[data-st-label]')).toBeTruthy();
+  }
+  expect(container.querySelector('[data-kind="live"] [data-st-live]')).toHaveTextContent('LIVE');
+  expect(container.querySelector('[data-kind="me"] [data-st-plus]')).toBeTruthy();
+});
