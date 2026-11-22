@@ -216,6 +216,7 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
 }
 [data-sv-page] {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
   position: absolute;
   inset: 0;
@@ -288,7 +289,8 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   grid-row: 2;
   grid-column: 1;
   position: relative;
-  margin: 8px 12px calc(26px + env(safe-area-inset-bottom));
+  min-width: 0;
+  margin: 8px 12px calc(12px + env(safe-area-inset-bottom));
   display: flex;
   gap: 8px;
   align-items: center;
