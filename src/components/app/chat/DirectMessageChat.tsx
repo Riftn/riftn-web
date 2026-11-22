@@ -54,6 +54,8 @@ import { DmUndecryptableRun } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
+import { MomentReplyPreview } from './MomentReplyPreview';
+import { parseMomentReply } from '@/lib/moment-reply';
 import { findDehubLinks, stripDehubLinkMatches } from '@/lib/dehub-links';
 import { conversationIdentity } from '@/lib/conversation-identity';
 import { useTranslation, renderChatTextWithLinks } from '../TranslatableText';
@@ -673,16 +675,18 @@ const MessageBubble = memo(function MessageBubble({
   const bodyContent = assistantActions.length > 0
     ? withoutAssistantActionLinks(message.content || '')
     : message.content;
+  const momentReply = useMemo(() => message.msgType === 'msg' && !message.isDeleted
+    ? parseMomentReply(message.content, typeof window === 'undefined' ? undefined : window.location.origin) : null, [message.msgType, message.isDeleted, message.content]);
   const sharedLink = useMemo(
-    () => (message.msgType === 'msg' ? findDehubLinks(bodyContent)[0] ?? null : null),
-    [message.msgType, bodyContent],
+    () => (message.msgType === 'msg' && !momentReply ? findDehubLinks(bodyContent)[0] ?? null : null),
+    [message.msgType, bodyContent, momentReply],
   );
   const isPostShare = !!sharedLink;
 
   // Editing is restricted to plain text messages — an entity share's raw
   // content carries the link the embed card is built from, so letting someone
   // edit the visible caption alone would silently drop that link on save.
-  const canEdit = isOwnMessage && message.msgType === 'msg' && !isPostShare && !message.isDeleted;
+  const canEdit = isOwnMessage && message.msgType === 'msg' && !isPostShare && !momentReply && !message.isDeleted;
   /*
    * A message still on its way out is on screen under a local id the API has
    * never seen, so an edit, forward or pin aimed at it reached the server as an
@@ -728,7 +732,7 @@ const MessageBubble = memo(function MessageBubble({
     () => (sharedLink ? stripDehubLinkMatches(message.content || '', [sharedLink]) : ''),
     [sharedLink, message.content],
   );
-  const textContent = isPostShare ? shareCaption : (bodyContent || '');
+  const textContent = momentReply?.text ?? (isPostShare ? shareCaption : (bodyContent || ''));
   const {
     isTranslated,
     translatedText,
@@ -748,7 +752,7 @@ const MessageBubble = memo(function MessageBubble({
   // does in a post. Entity shares are left alone — they already have a card, and
   // stacking a second one under a 280px bubble reads as a bug.
   const { refs: dmAssetRefs, displayText: dmDisplayText } = useAssetRefsInText(
-    isPostShare ? '' : (isTranslated ? translatedText : bodyContent) || '',
+    isPostShare || momentReply ? '' : (isTranslated ? translatedText : bodyContent) || '',
     1,
   );
 
@@ -1091,6 +1095,11 @@ const MessageBubble = memo(function MessageBubble({
                       {isSavingEdit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                     </button>
                   </div>
+                </div>
+              ) : momentReply ? (
+                <div className="flex w-52 max-w-full flex-col gap-2 text-start">
+                  <MomentReplyPreview id={momentReply.id} />
+                  {textContent && <p dir="auto" className="whitespace-pre-wrap break-words text-sm">{renderChatTextWithLinks(isTranslated ? translatedText : textContent)}</p>}
                 </div>
               ) : isPostShare && sharedLink!.kind !== 'post' ? (
                 /* One bubble, card first and caption after, like a photo with a

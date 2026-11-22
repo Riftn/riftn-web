@@ -4,7 +4,7 @@
  * reader lands on Home. A moment past its 24 hours says so.
  */
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { SEOHead } from '@/components/SEOHead';
@@ -43,7 +43,10 @@ function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
     gcTime: 0,
     retry: false,
   });
-  const data = result.isSuccess && (!result.data.item.isMature || canSeeMature) ? result.data : undefined;
+  const [params] = useSearchParams();
+  const item = result.isSuccess ? result.data.item : null;
+  const active = item && item.status === 'ready' && !item.expired && Date.parse(item.expiresAt) > Date.now();
+  const data = item && (params.get('reply') !== '1' || active) && (!item.isMature || canSeeMature) ? result.data : undefined;
 
   useEffect(() => {
     if (!data?.author || opened) return;
