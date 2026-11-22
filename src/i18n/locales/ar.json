@@ -3663,6 +3663,7 @@
     "stopRecording": "إيقاف",
     "replyPlaceholder": "الرد على @{{name}}...",
     "composerPlaceholder": "اكتب هنا",
+    "shortsPlaceholder": "قل شيئًا...",
     "threadParts": {
       "reorder": "إعادة الترتيب",
       "reorderHint": "اسحب الأجزاء أو استخدم الأسهم، ثم احفظ.",

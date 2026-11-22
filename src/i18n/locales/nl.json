@@ -3832,6 +3832,7 @@
     "stopRecording": "Stoppen",
     "replyPlaceholder": "Antwoord aan @{{name}}...",
     "composerPlaceholder": "Typ hier",
+    "shortsPlaceholder": "Zeg iets...",
     "threadParts": {
       "reorder": "Volgorde wijzigen",
       "reorderHint": "Sleep de delen of gebruik de pijlen en sla daarna op.",
