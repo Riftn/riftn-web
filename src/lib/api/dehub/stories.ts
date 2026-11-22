@@ -65,6 +65,8 @@ export interface StoryItem {
   expiresAt: string;
   viewed: boolean;
   liked: boolean;
+  /** Public comments (older servers leave it out). */
+  commentCount?: number;
   /** Owner only. */
   viewCount?: number;
   likeCount?: number;
@@ -180,4 +182,24 @@ export function getStoryViewers(id: string, cursor?: string): Promise<{ viewCoun
 
 export function reportStory(id: string, reason: string, additionalInfo?: string): Promise<{ ok: boolean }> {
   return apiCall(`/api/stories/${encodeURIComponent(id)}/report`, { method: 'POST', body: { reason, additionalInfo }, requiresAuth: true });
+}
+
+export interface StoryComment {
+  id: string;
+  text: string;
+  createdAt: string;
+  author: StoryAuthor;
+  canDelete: boolean;
+}
+
+export function getStoryComments(id: string, cursor?: string, signedIn = false): Promise<{ commentCount: number; allowComments: boolean; comments: StoryComment[]; next: string | null }> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { params: { cursor }, requiresAuth: signedIn });
+}
+
+export function addStoryComment(id: string, text: string): Promise<StoryComment> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments`, { method: 'POST', body: { text }, requiresAuth: true });
+}
+
+export function deleteStoryComment(id: string, commentId: string): Promise<{ ok: boolean }> {
+  return apiCall(`/api/stories/${encodeURIComponent(id)}/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE', requiresAuth: true });
 }
