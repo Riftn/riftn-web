@@ -44,6 +44,8 @@ const VideoCallModal: React.FC = () => {
     callBackground,
     callBackgroundBusy,
     setCallBackground,
+    callFaceFilter,
+    setCallFaceFilter,
   } = useCall();
 
   const { t } = useTranslation();
@@ -102,7 +104,7 @@ const VideoCallModal: React.FC = () => {
       )}
 
       {!isIncoming && fxAvailable ? (
-        <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none'} />
+        <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none' || callFaceFilter !== 'none'} />
       ) : null}
 
       {/* Your own camera. Hidden on an incoming call until you accept: there is no track yet. */}
@@ -120,7 +122,7 @@ const VideoCallModal: React.FC = () => {
       <div className="call-stage__foot">
         {isCallActive ? <CallCaptionsOverlay /> : null}
         {fxOpen && !isIncoming && fxAvailable ? (
-          <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} />
+          <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} faceFilter={callFaceFilter} onPickFace={setCallFaceFilter} />
         ) : null}
         {isIncoming ? (
           <div className="call-row">

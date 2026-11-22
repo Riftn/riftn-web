@@ -55,6 +55,8 @@ const GroupCallModal: React.FC = () => {
     callBackground,
     callBackgroundBusy,
     setCallBackground,
+    callFaceFilter,
+    setCallFaceFilter,
   } = useCall();
   const fxAvailable = useCallBackgroundAvailable();
   const [fxOpen, setFxOpen] = React.useState(false);
@@ -111,7 +113,7 @@ const GroupCallModal: React.FC = () => {
         </div>
       </div>
       {isVideo && fxAvailable ? (
-        <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none'} />
+        <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none' || callFaceFilter !== 'none'} />
       ) : null}
 
       <div className="group-call-grid" data-count={Math.min(count, 9)} data-video={isVideo ? 'true' : 'false'}>
@@ -132,7 +134,7 @@ const GroupCallModal: React.FC = () => {
       <div className="call-stage__foot">
         <CallCaptionsOverlay />
         {isVideo && fxAvailable && fxOpen ? (
-          <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} />
+          <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} faceFilter={callFaceFilter} onPickFace={setCallFaceFilter} />
         ) : null}
         <CallDock crowded={isVideo}>
           <CallControl
