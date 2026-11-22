@@ -33,6 +33,7 @@ import { useShortsSideGestures } from '@/hooks/use-shorts-side-gestures';
 import { useTranslation } from 'react-i18next';
 import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
 import { StoryboardPreview } from '@/components/app/video/StoryboardPreview';
+import { TranscodingBadge } from '@/components/app/video/TranscodingBadge';
 const VideoSubtitleOverlay = lazy(() =>
   import('@/components/app/video/VideoSubtitleOverlay').then((m) => ({ default: m.VideoSubtitleOverlay })),
 );
@@ -372,6 +373,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
     // file; neither has a ladder.
     hlsSrc: short.soundtrackUrl || playbackSrc !== undefined ? undefined : short.hlsUrl,
     startLow,
+    aspect: short.storedAspect,
     poster: thumbnail,
     muted: isMuted,
     loop: isLooping,
@@ -753,10 +755,7 @@ const VideoSlideBody = memo(function VideoSlideBody({
               <img src={thumbnail} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" />
             )}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
-              <Loader2 className="w-7 h-7 text-white animate-spin" />
-              <span className="text-white/80 text-xs font-medium tracking-wide drop-shadow">
-                {t('videoPlayer.processing')}
-              </span>
+              <TranscodingBadge tokenId={short.id} isOwner /* only its creator is shown a short that cannot play yet */ />
             </div>
           </div>
         ) : (short.videoUrl || short.soundtrackUrl) ? (

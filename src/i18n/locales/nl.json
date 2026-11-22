@@ -9029,6 +9029,8 @@
     "skippedUpstreamFailed": "Overgeslagen omdat een eerdere stap is mislukt. De kosten blijven in uw saldo."
   },
   "videoPlayer": {
+    "transcoding": "Transcoderen",
+    "transcodingOnlyYou": "Alleen jij ziet dit tot het klaar is",
     "volume": "Volume",
     "processing": "Video wordt verwerkt...",
     "processingFailed": "Videoverwerking mislukt",

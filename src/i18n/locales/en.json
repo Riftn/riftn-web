@@ -8803,6 +8803,8 @@
     "skippedUpstreamFailed": "Skipped because an earlier step failed. Its cost stays in your balance."
   },
   "videoPlayer": {
+    "transcoding": "Transcoding",
+    "transcodingOnlyYou": "Only you can see this until it's ready",
     "volume": "Volume",
     "processing": "Processing video…",
     "processingFailed": "Video processing failed",

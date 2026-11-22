@@ -8839,6 +8839,8 @@
     "skippedUpstreamFailed": "Önceki bir adım başarısız olduğu için atlandı. Maliyeti bakiyenizde kalır."
   },
   "videoPlayer": {
+    "transcoding": "Dönüştürülüyor",
+    "transcodingOnlyYou": "Hazır olana kadar bunu yalnızca sen görebilirsin",
     "volume": "Ses düzeyi",
     "processing": "Video işleniyor...",
     "processingFailed": "Video işleme başarısız oldu",

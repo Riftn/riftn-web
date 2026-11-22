@@ -8863,6 +8863,8 @@
     "skippedUpstreamFailed": "تم التخطي بسبب فشل خطوة سابقة. تبقى تكلفتها في رصيدك."
   },
   "videoPlayer": {
+    "transcoding": "جارٍ التحويل",
+    "transcodingOnlyYou": "أنت فقط من يرى هذا حتى يصبح جاهزًا",
     "volume": "مستوى الصوت",
     "processing": "جارٍ معالجة الفيديو...",
     "processingFailed": "فشلت معالجة الفيديو",

@@ -8843,6 +8843,8 @@
     "skippedUpstreamFailed": "Ignoré parce qu'une étape antérieure a échoué. Son coût reste dans votre solde."
   },
   "videoPlayer": {
+    "transcoding": "Transcodage",
+    "transcodingOnlyYou": "Vous seul pouvez la voir jusqu'à ce qu'elle soit prête",
     "volume": "Volume",
     "processing": "Traitement de la vidéo…",
     "processingFailed": "Échec du traitement vidéo",
