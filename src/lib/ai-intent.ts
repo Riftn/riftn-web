@@ -143,6 +143,28 @@ function isInfoRequest(message: string): boolean {
 }
 
 /**
+ * Words that ask for words back: a summary, a caption, a bio, a post.
+ *
+ * "can you give me a short summary of Riftn which I can use to share with
+ * people" opened image creation because "give me" is a conversational image
+ * phrase and "can you" is a request, not a question (Requests 1385bb79,
+ * 2026-11-22). When the thing asked for is text, the loose and conversational
+ * image phrases stand down; "draw me" / "picture of" still make a picture.
+ */
+const TEXT_OUTPUT_KEYWORDS = [
+  'summary', 'summaries', 'summarize', 'summarise', 'summarized', 'summarised', 'recap', 'overview', 'tldr', 'tl;dr',
+  'text', 'caption', 'captions', 'bio', 'description', 'describe', 'paragraph', 'sentence', 'sentences',
+  'tweet', 'reply', 'email', 'letter', 'pitch', 'intro', 'introduction', 'blurb', 'slogan', 'tagline',
+  'script', 'poem', 'joke', 'translate', 'translation', 'rewrite', 'rephrase',
+  'write', 'writing', 'words', 'tips', 'ideas', 'advice', 'opinion', 'feedback',
+  'share with', 'tell people', 'tell my',
+];
+
+function asksForText(message: string): boolean {
+  return matchesAny(message, TEXT_OUTPUT_KEYWORDS);
+}
+
+/**
  * Openers that make a message a question, not an order.
  *
  * "what does 'create a thread' mean", "how do I make me a profile", "is it
@@ -263,7 +285,7 @@ export function requiresImageGeneration(
   if (requiresVideoGeneration(message)) return false;
   // An attachment plus an instruction is an edit, whatever the words are.
   if (hasAttachedImage) return true;
-  if (isQuestion(message)) return matchesAny(message, EXPLICIT_IMAGE_PHRASES);
+  if (isQuestion(message) || asksForText(message)) return matchesAny(message, EXPLICIT_IMAGE_PHRASES);
   const loose = options.conversational && !isInfoRequest(message)
     ? [...LOOSE_IMAGE_PHRASES, ...CONVERSATIONAL_IMAGE_PHRASES]
     : LOOSE_IMAGE_PHRASES;
