@@ -2904,6 +2904,14 @@
       "planned": "Gepland",
       "inProgress": "Bezig",
       "shipped": "Live"
+    },
+    "earlyAccess": {
+      "mine": "Je hebt dit een dag eerder. Iedereen krijgt het over {{hours}} u.",
+      "others": "Wie het vroeg, probeert het eerst. Voor iedereen over {{hours}} u."
+    },
+    "earlySupporter": {
+      "chip": "Vroege supporter",
+      "title": "Vroege supporter: {{value}} van hun verzoeken zijn live"
     }
   },
   "auth": {

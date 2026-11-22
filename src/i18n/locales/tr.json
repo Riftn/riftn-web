@@ -2715,6 +2715,14 @@
       "planned": "Planlandı",
       "inProgress": "Yapılıyor",
       "shipped": "Yayında"
+    },
+    "earlyAccess": {
+      "mine": "Bunu herkesten bir gün önce aldın. Diğerleri {{hours}} sa içinde alacak.",
+      "others": "İsteyen kişi önce deniyor. {{hours}} sa içinde herkese açılacak."
+    },
+    "earlySupporter": {
+      "chip": "Erken destekçi",
+      "title": "Erken destekçi: {{value}} isteği yayında"
     }
   },
   "auth": {

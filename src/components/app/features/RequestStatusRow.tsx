@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '@/components/app/TranslatableText';
 import { STATUS_LABELS, type FeatureStatus } from '@/hooks/use-feature-requests';
+import { earlyAccessHoursLeft } from '@/lib/early-access';
 import '@/styles/request-status.css';
 
 // Statuses still on their way: they get the Asked > now > Shipped track.
@@ -17,12 +18,18 @@ export function RequestStatusRow({
   status,
   note,
   categoryChip,
+  earlyAccessUntil,
+  isPoster = false,
 }: {
   status: FeatureStatus;
   note: string;
   categoryChip: React.ReactNode;
+  /** Shipped with a head start for its poster until this time. */
+  earlyAccessUntil?: string | null;
+  isPoster?: boolean;
 }) {
   const { t } = useTranslation();
+  const earlyHours = status === 'shipped' || status === 'completed' ? earlyAccessHoursLeft(earlyAccessUntil) : null;
   const tracked = TRACKED.includes(status);
   // Declined keeps its own "Why:" line below the row.
   const liveNote = status !== 'declined' ? note : '';
@@ -39,6 +46,13 @@ export function RequestStatusRow({
         )}
       </div>
       {tracked && <Track status={status} t={t} />}
+      {earlyHours !== null && (
+        <p className="rq-note" data-early-access>
+          {isPoster
+            ? t('features.earlyAccess.mine', { defaultValue: 'You have this a day early. Everyone else gets it in {{hours}} h.', hours: earlyHours })
+            : t('features.earlyAccess.others', { defaultValue: 'Its poster is trying this first. Out for everyone in {{hours}} h.', hours: earlyHours })}
+        </p>
+      )}
       {liveNote && (
         <p className="rq-note">
           <TranslatableText publicContent text={liveNote} as="span" hideControls />

@@ -50,6 +50,8 @@ export interface FeatureRequest {
   shipped_url?: string | null;
   /** Short tag shown next to the status, e.g. "Future review". */
   status_note?: string | null;
+  /** Shipped with a head start for its poster until this time (lib/early-access). */
+  early_access_until?: string | null;
   vote_count: number;
   like_count: number;
   dislike_count: number;

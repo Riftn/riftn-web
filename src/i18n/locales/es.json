@@ -2715,6 +2715,14 @@
       "planned": "Planeado",
       "inProgress": "En curso",
       "shipped": "Lanzado"
+    },
+    "earlyAccess": {
+      "mine": "Lo tienes un día antes. Los demás lo tendrán en {{hours}} h.",
+      "others": "Quien lo pidió lo está probando primero. Para todos en {{hours}} h."
+    },
+    "earlySupporter": {
+      "chip": "Apoyo temprano",
+      "title": "Apoyo temprano: {{value}} de sus solicitudes ya salieron"
     }
   },
   "auth": {

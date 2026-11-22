@@ -48,6 +48,7 @@ import { buildAvatarCdnFallbackUrl, cdnImageSrcSet } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { OnboardingCompleteChip } from '@/components/app/OnboardingCompleteChip';
+import { EarlySupporterChip } from '@/components/app/EarlySupporterChip';
 import { BadgePatronChip } from '@/components/app/BadgePatronChip';
 import { toast } from 'sonner';
 import { DISPLAY_WALLET_OVERRIDES, getDefaultBanner, type TabValue } from './ProfileConstants';
@@ -466,6 +467,8 @@ export function ProfileHeader({
                   finished — it is derived from your progress row, not from
                   anything stored on the profile. */}
               <OnboardingCompleteChip address={profile.walletAddress} />
+              {/* One of their requests on the Requests board shipped. */}
+              <EarlySupporterChip address={profile.walletAddress} username={profile.handle} />
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <button
