@@ -122,6 +122,8 @@ Stages are live audio rooms for talk shows, Q&As, music and watch parties.
 3. Listeners raise a hand under **Requests to Speak**. Tap **+** to invite them up as a speaker.
 4. Add your own music clips and they play to the room one after another, like a radio station.
 
+Want a music show? Switch on **Radio show** when you start the Stage. It plays your own songs or a playlist, you talk when you like, listeners drop in any time, and your show appears in the **Radio** row on Explore.
+
 ![Starting a Stage from the composer, the Stages page with live, upcoming and recorded rooms, and a recorded Town Hall with attendance, listens and a transcript](/media/fig-stream-stages.jpg)
 
 Every Stage is recorded. When it ends, people can **listen back**, read the **transcript**, search it and translate it.
