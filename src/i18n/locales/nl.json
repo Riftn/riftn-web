@@ -23079,7 +23079,8 @@
         "random": "Willekeurig",
         "white": "Wit",
         "black": "Zwart"
-      }
+      },
+      "slowButton": "Dagen per zet, tegen een vriend"
     },
     "linkCopied": "Link gekopieerd",
     "share": "Delen",

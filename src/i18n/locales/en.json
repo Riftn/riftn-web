@@ -22805,7 +22805,8 @@
         "random": "Random",
         "white": "White",
         "black": "Black"
-      }
+      },
+      "slowButton": "Days per move, vs a friend"
     },
     "linkCopied": "Link copied",
     "share": "Share",

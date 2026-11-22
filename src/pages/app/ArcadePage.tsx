@@ -17,7 +17,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Swords } from "lucide-react";
+import { Hourglass, Swords } from "lucide-react";
 import Upload from "@/components/ui/cut-icons/upload";
 
 import Play from "@/components/ui/cut-icons/play";
@@ -33,14 +33,6 @@ import { ARCADE_GAMES, type ArcadeGame } from '@/config/arcade-games';
 /** Turn-based games played with friends (riftn-backend src/games). */
 const FRIEND_GAMES = [
   {
-    href: '/arcade/correspondence-chess',
-    art: '/og/arcade-correspondence-chess.jpg',
-    titleKey: 'games.chess.title',
-    title: 'Correspondence chess',
-    blurbKey: 'games.chess.cardBlurb',
-    blurb: 'Challenge a friend and take days per move. You get a notification when it is your turn.',
-  },
-  {
     href: '/arcade/okey',
     art: '/og/arcade-okey.jpg',
     titleKey: 'games.okey.title',
@@ -55,6 +47,7 @@ const RANKED_GAMES = ARCADE_GAMES.filter((game) => game.leaderboard);
 
 function GameCard({ game }: { game: ArcadeGame }) {
   const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
   // Reduced motion gets the clip's poster as a plain image, never the loop.
   const reduceMotion = useReducedMotion();
   return (
@@ -122,6 +115,14 @@ function GameCard({ game }: { game: ArcadeGame }) {
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-zinc-700"
             >
               <Swords className="h-3.5 w-3.5" />{_copy("copy.339071395687", { defaultValue: "Wager" })}</Link>
+          ) : null}
+          {game.slowHref ? (
+            <Link
+              to={game.slowHref}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-zinc-700"
+            >
+              <Hourglass className="h-3.5 w-3.5" />{t('games.chess.slowButton', { defaultValue: 'Days per move, vs a friend' })}
+            </Link>
           ) : null}
         </div>
       </div>

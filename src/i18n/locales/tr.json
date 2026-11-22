@@ -22831,7 +22831,8 @@
         "random": "Rastgele",
         "white": "Beyaz",
         "black": "Siyah"
-      }
+      },
+      "slowButton": "Hamle başına günler, arkadaşa karşı"
     },
     "linkCopied": "Bağlantı kopyalandı",
     "share": "Paylaş",

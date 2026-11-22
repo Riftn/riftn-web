@@ -22835,7 +22835,8 @@
         "random": "Au hasard",
         "white": "Blancs",
         "black": "Noirs"
-      }
+      },
+      "slowButton": "Jours par coup, contre un ami"
     },
     "linkCopied": "Lien copié",
     "share": "Partager",

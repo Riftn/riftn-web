@@ -22831,7 +22831,8 @@
         "random": "Al azar",
         "white": "Blancas",
         "black": "Negras"
-      }
+      },
+      "slowButton": "Días por jugada, contra un amigo"
     },
     "linkCopied": "Enlace copiado",
     "share": "Compartir",
