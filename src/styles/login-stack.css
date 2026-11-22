@@ -448,6 +448,27 @@ html[data-system-tone="light"] .login-stack__title[data-look="3d"] {
   filter: var(--ls-shade);
 }
 .login-stack__title[data-look="flat"] .login-stack__headline { font-weight: 800; letter-spacing: -0.01em; }
+/* Flat wears the desktop wordmark's finish: white fading to soft grey down
+   each line, a darker lip at the foot of the logo, and a tight shadow just
+   under the letters. Light themes get the same in ink. */
+.login-stack__title[data-look="flat"] {
+  /* Mixed from the theme's own ink, so tinted themes keep their colour. */
+  --ls-face: linear-gradient(180deg, var(--ls-ink) 0%, color-mix(in srgb, var(--ls-ink) 94%, #8a8f99) 50%, color-mix(in srgb, var(--ls-ink) 84%, #8a8f99) 90%, color-mix(in srgb, var(--ls-ink) 55%, #8a8f99) 100%);
+  --ls-face-text: linear-gradient(180deg, var(--ls-ink) 0%, color-mix(in srgb, var(--ls-ink) 95%, #8a8f99) 45%, color-mix(in srgb, var(--ls-ink) 80%, #8a8f99) 80%, color-mix(in srgb, var(--ls-ink) 72%, #8a8f99) 100%);
+  --ls-shade: drop-shadow(0 1px 0.5px rgba(0, 0, 0, 0.55)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+}
+html[data-theme="light"] .login-stack__title[data-look="flat"],
+html[data-system-tone="light"] .login-stack__title[data-look="flat"] {
+  --ls-face: linear-gradient(180deg, #2c313a 0%, #21252d 55%, #15181e 100%);
+  --ls-face-text: var(--ls-face);
+  --ls-shade: drop-shadow(0 1px 0.5px rgba(0, 0, 0, 0.22)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22));
+}
+.login-stack__title[data-look="flat"] .login-stack__logo-mark { background: var(--ls-face); }
+.login-stack__title[data-look="flat"] .login-stack__headline {
+  background: var(--ls-face-text) 0 0 / 100% 1.05em repeat-y;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
 
 /* The looks set the whole background; the headline keeps it inside its letters. */
 .login-stack__title[data-look] .login-stack__headline {
