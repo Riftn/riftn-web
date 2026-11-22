@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Dîtinên rûpelan",
       "pageViews": "— daxwazên ku Cloudflare wek barkirina rûpelan dabeş dike, ne wêne, skrîpt an bangên API.",
       "botsTerm": "Bot jî tê de ne",
-      "bots": "— ev hejmarên xav ên kêlekê ne, ji ber vê crawler, çavdêrên çalakbûnê (uptime) û klîentên bi skrîpt jî tê de ne. Tu dikarî wan bi xwe di dabeşkirina gerokan a li jor de bibînî, ku têketinên wek “Curl” û “Unknown” trafîka otomatîk in, ne mirov. Derxistina botan pêdivî bi asteke Cloudflare ya bi pere heye ku em bikar naynin, û bi bêdengî kêmkirina texmînekê dê kontrolkirina hejmaran dijwartir bike, ne hêsantir.",
+      "bots": "— ev hejmarên xav ên kêlekê ne, ji ber vê crawler, çavdêrên çalakbûnê (uptime) û klîentên bi skrîpt jî tê de ne. Tu dikarî wan bi xwe di dabeşkirina gerokan a li jor de bibînî, ku têketinên wek “Curl” û “Unknown” trafîka otomatîk in, ne mirov. Cudakirina botan ji ziyaretvanên mirov her ku diçe dijwartir dibe û di demeke nêz de wê di van amaran de neyê kirin, ji ber vê yekê hewldana derxistina botan bêfeyde ye.",
       "totalTerm": "Tevahiya navberê",
       "total": "— temaşekirina rûpelan û daxwaz li seranserê navberê tên kombûn. Jimarên serdankeran bi zanebûn nayên kombûn di sernaveke \"tevahiya serdankeran\" de, ji ber ku kesekî ku Duşem û Sêşem li vir bû dê du caran bihata jimartin.",
       "peakTerm": "Saet / roja herî mijûl",

@@ -4245,7 +4245,7 @@
       "pageViewsTerm": "Ukubukwa kwamakhasi",
       "pageViews": "— izicelo i-Cloudflare eziqoqa njengokulayishwa kwamakhasi, hhayi izithombe, imibhalo noma amakholi we-API.",
       "botsTerm": "Ama-bot afakiwe",
-      "bots": "— lezi yizibalo ezingahluziwe emaphethelweni, ngakho ama-crawler, abaqaphi bokusebenza namaklayenti anemibhalo akufakiwe. Ungazibona wena kubunjalo besiphequluli ngenhla, lapho okufakiwe okufana no-\"Curl\" no-\"Akwaziwa\" kuyithrafikhi ezenzakalelayo hhayi abantu. Ukuhlunga ama-bot kudinga uhlelo lwe-Cloudflare olukhokhelwayo esingenalo, futhi ukususa isilinganiso buthule kwenza izibalo zingahloleki kalula, hhayi kangcono.",
+      "bots": "— lezi yizibalo ezingahluziwe emaphethelweni, ngakho ama-crawler, abaqaphi bokusebenza namaklayenti anemibhalo akufakiwe. Ungazibona wena kubunjalo besiphequluli ngenhla, lapho okufakiwe okufana no-\"Curl\" no-\"Akwaziwa\" kuyithrafikhi ezenzakalelayo hhayi abantu. Kuya kuba nzima ukuhlukanisa ama-bot ezivakashini ezingabantu, futhi maduze ngeke akwazi ukuhlukaniswa kulezi zibalo, ngakho ukuzama ukuwahlunga akusizi.",
       "totalTerm": "Amasamba ebanga",
       "total": "— ukubukwa kwamakhasi nezicelo kuyahlanganiswa kulo lonke ibanga. Izibalo zezivakashi azihlanganiswa ngamabomu zibe \"yisamba sezivakashi\", ngoba umuntu obelapha ngoMsombuluko nangoLwesibili ubezobalwa kabili.",
       "peakTerm": "Ihora / usuku olumatasa kakhulu",

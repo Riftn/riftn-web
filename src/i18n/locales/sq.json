@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Shikime faqesh",
       "pageViews": "— kërkesa që Cloudflare i klasifikon si ngarkime faqesh, jo imazhe, skripta apo thirrje API.",
       "botsTerm": "Botët janë përfshirë",
-      "bots": "— këto janë numërime të papërpunuara në skaj, prandaj brenda janë edhe zvarritësit, monitoruesit e disponueshmërisë dhe klientët e skriptuar. I sheh vetë te ndarja sipas shfletuesve më lart, ku zërat si „Curl” dhe „E panjohur” janë trafik i automatizuar e jo njerëz. Filtrimi i botëve kërkon një plan me pagesë të Cloudflare që ne nuk e kemi, dhe zbritja e heshtur e një vlerësimi do t'i bënte shifrat më pak të verifikueshme, jo më shumë.",
+      "bots": "— këto janë numërime të papërpunuara në skaj, prandaj brenda janë edhe zvarritësit, monitoruesit e disponueshmërisë dhe klientët e skriptuar. I sheh vetë te ndarja sipas shfletuesve më lart, ku zërat si „Curl” dhe „E panjohur” janë trafik i automatizuar e jo njerëz. Po bëhet gjithnjë e më e vështirë të dallosh botët nga vizitorët njerëzorë dhe së shpejti nuk do të dallohen në këto statistika, ndaj nuk ka kuptim të përpiqemi t’i filtrojmë.",
       "totalTerm": "Totalet e intervalit",
       "total": "— shikimet e faqeve dhe kërkesat mblidhen përgjatë intervalit. Numri i vizitorëve qëllimisht nuk mblidhet në një „total vizitorësh”, sepse dikush që ishte këtu të hënën dhe të martën do të numërohej dy herë.",
       "peakTerm": "Ora / dita më e ngarkuar",

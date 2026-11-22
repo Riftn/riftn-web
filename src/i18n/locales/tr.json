@@ -4281,7 +4281,7 @@
       "pageViewsTerm": "Sayfa görüntülemeleri",
       "pageViews": "— Cloudflare'in görsel, betik veya API çağrısı değil, sayfa yüklemesi olarak sınıflandırdığı istekler.",
       "botsTerm": "Botlar dahildir",
-      "bots": "— bunlar ham uç sayımlarıdır, dolayısıyla tarayıcı botları, çalışma süresi izleyicileri ve betikli istemciler de içindedir. Bunları yukarıdaki tarayıcı dağılımında kendiniz görebilirsiniz; \"Curl\" ve \"Bilinmeyen\" gibi girdiler insan değil otomatik trafiktir. Botları elemek, sahip olmadığımız ücretli bir Cloudflare planı gerektirir ve sessizce bir tahmin çıkarmak sayıları daha az denetlenebilir yapardı, daha çok değil.",
+      "bots": "— bunlar ham uç sayımlarıdır, dolayısıyla tarayıcı botları, çalışma süresi izleyicileri ve betikli istemciler de içindedir. Bunları yukarıdaki tarayıcı dağılımında kendiniz görebilirsiniz; \"Curl\" ve \"Bilinmeyen\" gibi girdiler insan değil otomatik trafiktir. Botları gerçek ziyaretçilerden ayırt etmek giderek zorlaşıyor ve yakında bu istatistiklerde aralarındaki fark anlaşılamayacak, bu yüzden botları filtrelemeye çalışmanın anlamı yok.",
       "totalTerm": "Aralık toplamları",
       "total": "— sayfa görüntülemeleri ve istekler aralık boyunca toplanır. Ziyaretçi sayıları bilerek tek bir \"toplam ziyaretçi\" değerine toplanmaz, çünkü pazartesi ve salı burada olan biri iki kez sayılırdı.",
       "peakTerm": "En yoğun saat / gün",

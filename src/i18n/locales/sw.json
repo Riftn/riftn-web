@@ -4216,7 +4216,7 @@
       "pageViewsTerm": "Mionekano ya kurasa",
       "pageViews": "— maombi ambayo Cloudflare huyaainisha kama upakiaji wa kurasa, si picha, hati au miito ya API.",
       "botsTerm": "Roboti zimejumuishwa",
-      "bots": "— hizi ni hesabu ghafi za ukingoni, kwa hiyo watambaaji, vifuatiliaji vya upatikanaji na wateja wa hati wamo ndani yake. Unaweza kuziona mwenyewe katika mchanganuo wa vivinjari hapo juu, ambapo vipengee kama \"Curl\" na \"Haijulikani\" ni trafiki ya kiotomatiki si watu. Kuchuja roboti kunahitaji mpango wa Cloudflare wa kulipia ambao hatuutumii, na kutoa makadirio kimya kimya kungefanya takwimu zisikaguliwe kwa urahisi zaidi, si kidogo.",
+      "bots": "— hizi ni hesabu ghafi za ukingoni, kwa hiyo watambaaji, vifuatiliaji vya upatikanaji na wateja wa hati wamo ndani yake. Unaweza kuziona mwenyewe katika mchanganuo wa vivinjari hapo juu, ambapo vipengee kama \"Curl\" na \"Haijulikani\" ni trafiki ya kiotomatiki si watu. Inazidi kuwa vigumu kutofautisha roboti na wageni halisi, na hivi karibuni hazitaweza kutofautishwa katika takwimu hizi, kwa hiyo hakuna faida ya kujaribu kuzichuja.",
       "totalTerm": "Jumla za kipindi",
       "total": "— mionekano ya kurasa na maombi hujumlishwa katika kipindi chote. Idadi ya wageni kwa makusudi haijumlishwi kuwa \"jumla ya wageni\", kwa sababu mtu aliyekuwa hapa Jumatatu na Jumanne angehesabiwa mara mbili.",
       "peakTerm": "Saa / siku yenye shughuli nyingi",

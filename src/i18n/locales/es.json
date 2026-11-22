@@ -4281,7 +4281,7 @@
       "pageViewsTerm": "Páginas vistas",
       "pageViews": "— peticiones que Cloudflare clasifica como cargas de página, en lugar de imágenes, scripts o llamadas a la API.",
       "botsTerm": "Los bots están incluidos",
-      "bots": "— son recuentos brutos del edge, así que incluyen rastreadores, monitores de disponibilidad y clientes automatizados. Puedes verlos tú mismo en el desglose de navegadores de arriba, donde entradas como «Curl» y «Desconocido» son tráfico automatizado y no personas. Filtrar los bots requiere un plan de pago de Cloudflare que no tenemos, y restar una estimación en silencio haría las cifras menos comprobables, no más.",
+      "bots": "— son recuentos brutos del edge, así que incluyen rastreadores, monitores de disponibilidad y clientes automatizados. Puedes verlos tú mismo en el desglose de navegadores de arriba, donde entradas como «Curl» y «Desconocido» son tráfico automatizado y no personas. Cada vez es más difícil distinguir los bots de los visitantes humanos y pronto serán indistinguibles en estas estadísticas, así que no tiene sentido intentar filtrarlos.",
       "totalTerm": "Totales del rango",
       "total": "— las páginas vistas y las peticiones se suman a lo largo del rango. Los visitantes deliberadamente no se suman en un «total de visitantes», porque alguien que estuvo aquí el lunes y el martes se contaría dos veces.",
       "peakTerm": "Hora / día con más actividad",

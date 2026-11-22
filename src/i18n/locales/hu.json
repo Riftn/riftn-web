@@ -4218,7 +4218,7 @@
       "pageViewsTerm": "Oldalmegtekintések",
       "pageViews": "— olyan kérések, amelyeket a Cloudflare oldalbetöltésnek minősít, nem képnek, szkriptnek vagy API-hívásnak.",
       "botsTerm": "A botok is benne vannak",
-      "bots": "— ezek nyers edge-számlálók, tehát a bejárók, elérhetőségfigyelők és szkriptelt kliensek is benne vannak. A fenti böngészőbontásban magad is látod: az olyan bejegyzések, mint a „Curl” és az „Ismeretlen”, automatizált forgalom, nem emberek. A botok kiszűréséhez fizetős Cloudflare-csomag kellene, ami nincs nálunk, és egy becslés csendes levonása kevésbé ellenőrizhetővé tenné a számokat, nem inkább.",
+      "bots": "— ezek nyers edge-számlálók, tehát a bejárók, elérhetőségfigyelők és szkriptelt kliensek is benne vannak. A fenti böngészőbontásban magad is látod: az olyan bejegyzések, mint a „Curl” és az „Ismeretlen”, automatizált forgalom, nem emberek. A botokat egyre nehezebb megkülönböztetni az emberi látogatóktól, és hamarosan ezekben a statisztikákban már nem lehet majd különbséget tenni köztük, így nincs értelme megpróbálni kiszűrni őket.",
       "totalTerm": "Tartomány összesítései",
       "total": "— az oldalmegtekintések és a kérések összeadódnak a tartományon. A látogatószámokat szándékosan nem adjuk össze „összes látogató” értékké, mert aki hétfőn és kedden is itt járt, kétszer számítana.",
       "peakTerm": "Legforgalmasabb óra / nap",

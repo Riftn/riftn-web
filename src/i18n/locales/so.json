@@ -4214,7 +4214,7 @@
       "pageViewsTerm": "Muuqaalada bogga",
       "pageViews": "— codsiyada Cloudflare u kala saaro inay yihiin soo dejinta bogga, ee ma aha sawirro, qoraallo ama wicitaanno API.",
       "botsTerm": "Bots way ku jiraan",
-      "bots": "— kuwani waa tirooyin ceyriin ah oo cidhifka ah, sidaas darteed crawlers, kormeerayaasha shaqaynta iyo macaamiisha qoraalka ayaa ku jira. Waxaad ku arki kartaa qeybinta browserada ee kore, halkaas oo qoraallada sida \"Curl\" iyo \"Lama garanayo\" ay yihiin taraafik otomaatig ah oo aan dad ahayn. Sifaynta bots waxay u baahan tahay qorshe Cloudflare oo la bixiyo oo aanan lahayn, oo si aamusan qiyaas laga jaro waxay tirooyinka ka dhigi lahayd kuwo aan la hubin karin, ma aha kuwo la hubin karo.",
+      "bots": "— kuwani waa tirooyin ceyriin ah oo cidhifka ah, sidaas darteed crawlers, kormeerayaasha shaqaynta iyo macaamiisha qoraalka ayaa ku jira. Waxaad ku arki kartaa qeybinta browserada ee kore, halkaas oo qoraallada sida \"Curl\" iyo \"Lama garanayo\" ay yihiin taraafik otomaatig ah oo aan dad ahayn. Kala saaridda bots iyo booqdayaasha dhabta ah way sii adkaanaysaa, dhowaan tirakoobkan laguma kala garan doono, markaa isku dayga in bots la sifeeyo waxba ma tarayo.",
       "totalTerm": "Wadarta xilliga",
       "total": "— muuqaalada bogga iyo codsiyada waa lagu wada xisaabiyaa xilliga. Tirada booqdayaasha si ula kac ah looma isku darin \"wadarta booqdayaasha\", maxaa yeelay qofka joogay Isniinta iyo Talaadada laba jeer ayaa la tirin lahaa.",
       "peakTerm": "Saacadda / maalinta ugu mashquulsan",
