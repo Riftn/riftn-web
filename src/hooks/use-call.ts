@@ -10,6 +10,8 @@ import { simpleCallCheck, debugAllCalls } from '@/utils/simple-call-check';
 import { formatCallDuration } from '@/lib/call-duration';
 import { visualActivity } from '@/lib/visual-activity';
 import { leaseChannel, type ChannelLease } from '@/lib/realtime-channel-lease';
+import { callBackgroundSettings, loadCallBackground, loadCallBackgroundPhoto, saveCallBackground, type CallBackgroundId } from '@/lib/calls/call-background';
+import type { BackgroundStage } from '@/lib/studio/background';
 import { groupCallChannel, groupCallPresenceTopic, groupCallUid, presenceList, GROUP_CALL_MAX_RING, type GroupCallPresence } from '@/lib/group-call';
 
 export interface CallSession {
@@ -73,11 +75,25 @@ export interface UseCallReturn {
   getMicStream: () => MediaStream | null;
   /** Everyone else's volume (100 = normal), lowered under a dubbed line. */
   setCallVolume: (volume: number) => void;
+  /** What is behind you on a video call: off, blur, a scene or your photo. Remembered between calls. */
+  callBackground: CallBackgroundId;
+  /** The effect is loading (the first time takes a second or two). */
+  callBackgroundBusy: boolean;
+  /** Pick a background. `photo` is a data URL, for 'photo'. */
+  setCallBackground: (id: CallBackgroundId, photo?: string | null) => void;
 }
 type GroupRemote = { audio: any; video: any };
 type CallMedia = {
   client: any; audio: any; video: any; remoteVideo: any; remoteAudio: any; closed: boolean;
   remotes: Map<number, GroupRemote>; presence: ChannelLease | null;
+  /**
+   * The background effect, while one is on: the canvas track is what the
+   * camera track sends (replaceTrack), and `raw` is the real camera, which
+   * keeps running underneath and is ours to stop.
+   */
+  bg?: { stage: BackgroundStage; raw: MediaStreamTrack } | null;
+  /** Background changes run one at a time. */
+  bgQueue?: Promise<void>;
 };
 /** The starter's own side of a group call has no row of its own. */
 const isSessionId = (id: string) => id !== 'pending' && !id.startsWith('group:');
@@ -99,6 +115,13 @@ export const useCall = (): UseCallReturn => {
   const [callSummary, setCallSummary] = useState<CallSummary | null>(null);
   const [groupParticipants, setGroupParticipants] = useState<GroupParticipant[]>([]);
   const [selfSpeaking, setSelfSpeaking] = useState(false);
+  const [callBackground, setCallBackgroundState] = useState<CallBackgroundId>(() => loadCallBackground());
+  const [callBackgroundBusy, setCallBackgroundBusy] = useState(false);
+  const callBackgroundRef = useRef<{ id: CallBackgroundId; photo: string | null } | null>(null);
+  if (!callBackgroundRef.current) {
+    const id = loadCallBackground();
+    callBackgroundRef.current = { id, photo: id === 'photo' ? loadCallBackgroundPhoto() : null };
+  }
   const rosterRef = useRef<Map<number, string>>(new Map());
   const speakingRef = useRef<Set<number>>(new Set());
   /** Ring rows a group call's starter wrote, so an unanswered start can stop the phones. */
@@ -161,6 +184,13 @@ export const useCall = (): UseCallReturn => {
       for (const track of [media.audio, media.video]) {
         try { track?.stop(); } catch {}
         try { track?.close(); } catch {}
+      }
+      // The camera track was sending the effect's canvas, so closing it left the real camera on.
+      const bg = media.bg;
+      media.bg = null;
+      if (bg) {
+        try { bg.stage.stop(); } catch {}
+        try { bg.raw.stop(); } catch {}
       }
       for (const track of [media.remoteAudio, media.remoteVideo]) { try { track?.stop(); } catch {} }
       for (const remote of media.remotes.values()) {
@@ -239,6 +269,53 @@ export const useCall = (): UseCallReturn => {
     })));
   }, []);
 
+  /**
+   * Puts the chosen background on the camera that is being sent, or takes it
+   * off. The effect's canvas replaces the camera track's picture in place
+   * (replaceTrack), so nothing is unpublished and the other side sees no
+   * gap; the real camera keeps running underneath for the effect to read.
+   */
+  const applyBackground = useCallback((media: CallMedia) => {
+    const run = async () => {
+      const video = media.video;
+      if (!video || media.closed) return;
+      const { id, photo } = callBackgroundRef.current ?? { id: 'none' as const, photo: null };
+      if (id === 'none') {
+        const bg = media.bg;
+        if (!bg) return;
+        media.bg = null;
+        try { await video.replaceTrack(bg.raw, false); } catch (error) { console.warn('Camera restore failed', error); }
+        bg.stage.stop();
+        setMediaRevision(revision => revision + 1);
+        return;
+      }
+      const { mode, opts } = await callBackgroundSettings(id, photo);
+      if (media.closed) return;
+      if (media.bg) { media.bg.stage.setMode(mode, opts); return; }
+      const raw: MediaStreamTrack | undefined = video.getMediaStreamTrack?.();
+      if (!raw) return;
+      setCallBackgroundBusy(true);
+      try {
+        const { startBackgroundStage } = await import('@/lib/studio/background');
+        const stage = await startBackgroundStage(raw, mode, opts);
+        if (media.closed || media.video !== video) { stage.stop(); return; }
+        await video.replaceTrack(stage.track, false);
+        media.bg = { stage, raw };
+        setMediaRevision(revision => revision + 1);
+      } finally {
+        setCallBackgroundBusy(false);
+      }
+    };
+    const next = (media.bgQueue ?? Promise.resolve()).then(run).catch(error => {
+      console.warn('Call background failed', error);
+      if (media.closed) return;
+      callBackgroundRef.current = { id: 'none', photo: null };
+      setCallBackgroundState('none');
+      toast.error(_copy('calls.backgroundFailed', { defaultValue: "Background effects can't run on this device." }));
+    });
+    media.bgQueue = next;
+    return next;
+  }, [_copy]);
   const joinAgoraChannel = useCallback(async (call: CallSession, generation: number): Promise<boolean> => {
     const current = () => generationRef.current === generation && currentCallRef.current?.id === call.id;
     if (!current()) return false;
@@ -385,6 +462,8 @@ export const useCall = (): UseCallReturn => {
       }
       await client.publish([media.audio, ...(media.video ? [media.video] : [])]);
       if (!current() || media.closed) { await disposeMedia(media); return false; }
+      // The background picked on an earlier call comes back on its own.
+      if (media.video && callBackgroundRef.current?.id !== 'none') void applyBackground(media);
       return true;
     } catch (error) {
       await disposeMedia(media);
@@ -395,7 +474,7 @@ export const useCall = (): UseCallReturn => {
       }
       return false;
     }
-  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup]);
+  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyBackground]);
 
   /** Nobody came: a group room you are alone in closes itself after the ring window. */
   const armGroupTimeout = useCallback((generation: number, outcome: 'no_answer' | 'missed') => {
@@ -652,6 +731,15 @@ export const useCall = (): UseCallReturn => {
     if (node && media && !media.closed) { try { media.remoteVideo?.play(node); } catch {} }
   }, []);
 
+  const setCallBackground = useCallback((id: CallBackgroundId, photo?: string | null) => {
+    const nextPhoto = id === 'photo' ? photo ?? loadCallBackgroundPhoto() : null;
+    callBackgroundRef.current = { id: id === 'photo' && !nextPhoto ? 'blur' : id, photo: nextPhoto };
+    const saved = callBackgroundRef.current!.id;
+    setCallBackgroundState(saved);
+    saveCallBackground(saved);
+    const media = mediaRef.current;
+    if (media && !media.closed && media.video) void applyBackground(media);
+  }, [applyBackground]);
   const toggleMute = useCallback(() => {
     const audio = mediaRef.current?.audio;
     if (audio) setIsMuted(previous => { void audio.setMuted(!previous); return !previous; });
@@ -661,15 +749,26 @@ export const useCall = (): UseCallReturn => {
     if (video) setIsCameraOff(previous => { void video.setMuted(!previous); return !previous; });
   }, []);
   const switchCamera = useCallback(async () => {
-    const video = mediaRef.current?.video;
-    if (!video) return;
+    const media = mediaRef.current;
+    const video = media?.video;
+    if (!media || !video) return;
     try {
       const devices = (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'videoinput');
       if (mediaRef.current?.video !== video || devices.length < 2) return;
-      const label = video.getTrackLabel?.() ?? '';
+      // With a background on, the track is sending the effect's canvas: hand
+      // the camera back first, flip it, then put the effect on the new one.
+      await media.bgQueue;
+      const bg = media.bg;
+      if (bg) {
+        media.bg = null;
+        try { await video.replaceTrack(bg.raw, false); } catch {}
+        bg.stage.stop();
+      }
+      const label = bg?.raw.label ?? video.getTrackLabel?.() ?? '';
       await video.setDevice((devices.find(device => device.label !== label) ?? devices[0]).deviceId);
+      if (bg && !media.closed) void applyBackground(media);
     } catch (error) { console.warn('Camera switch failed', error); }
-  }, []);
+  }, [applyBackground]);
   const minimizeCall = useCallback(() => setIsMinimized(true), []);
   const maximizeCall = useCallback(() => setIsMinimized(false), []);
   const clearCallFailure = useCallback(() => { setCallFailureReason(null); setIsUserOffline(false); }, []);
@@ -709,7 +808,8 @@ export const useCall = (): UseCallReturn => {
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
     attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
-  }), [captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
+    callBackground, callBackgroundBusy, setCallBackground,
+  }), [callBackground, callBackgroundBusy, setCallBackground, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);

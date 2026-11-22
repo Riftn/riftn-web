@@ -19,6 +19,7 @@ import {
   usePeerIdentity,
 } from './CallChrome';
 import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
+import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from './CallBackgroundPicker';
 
 /**
  * A group call, voice or video, on the same stage as a direct call.
@@ -51,7 +52,12 @@ const GroupCallModal: React.FC = () => {
     switchCamera,
     isMinimized,
     minimizeCall,
+    callBackground,
+    callBackgroundBusy,
+    setCallBackground,
   } = useCall();
+  const fxAvailable = useCallBackgroundAvailable();
+  const [fxOpen, setFxOpen] = React.useState(false);
   const { walletAddress } = useAuth();
   const { t } = useTranslation();
   const caller = usePeerIdentity(isIncoming ? peerAddress : '');
@@ -104,6 +110,9 @@ const GroupCallModal: React.FC = () => {
           <span><CallDuration fallback={t('calls.connected')} /></span>
         </div>
       </div>
+      {isVideo && fxAvailable ? (
+        <CallFxButton open={fxOpen} onToggle={() => setFxOpen(open => !open)} active={callBackground !== 'none'} />
+      ) : null}
 
       <div className="group-call-grid" data-count={Math.min(count, 9)} data-video={isVideo ? 'true' : 'false'}>
         <div className="group-call-tile" data-speaking={selfSpeaking && !isMuted ? 'true' : 'false'}>
@@ -122,6 +131,9 @@ const GroupCallModal: React.FC = () => {
 
       <div className="call-stage__foot">
         <CallCaptionsOverlay />
+        {isVideo && fxAvailable && fxOpen ? (
+          <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} />
+        ) : null}
         <CallDock crowded={isVideo}>
           <CallControl
             icon={isMuted ? MicOff : Mic}
