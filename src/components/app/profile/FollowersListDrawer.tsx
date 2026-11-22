@@ -35,6 +35,7 @@ import { FollowBackAllButton, FollowBackAllSheet, type FollowBackAllStage } from
 import { playFollowBackChime } from '@/lib/follow-back-chime';
 import { BadgedName } from '@/components/app/BadgedName';
 
+import { formatCount } from '@/lib/format-count';
 import { profilePath } from '@/lib/profile-path';
 const MAX_PAGES = 3;
 const PAGE_SIZE = 30;
@@ -928,9 +929,8 @@ export function FollowersListDrawer({
   }, [followBackButtonVisible]);
 
   const heading = listType === 'followers' ? t('follow.followers') : t('follow.following');
-  const headingText = totalCount !== null && totalCount > 0
-    // exact-number: show the full count in the follower and following lists.
-    ? `${heading} (${totalCount.toLocaleString()})`
+  const titleWithCount = totalCount !== null && totalCount > 0
+    ? `${heading} (${formatCount(totalCount)})`
     : heading;
 
   return (
@@ -939,7 +939,7 @@ export function FollowersListDrawer({
         <DrawerHeader className="px-4 pb-2">
           <DrawerTitle className="text-white flex items-center gap-2">
             <Users className="w-5 h-5" />
-            {headingText}
+            {formatCount(titleWithCount)}
           </DrawerTitle>
         </DrawerHeader>
 
