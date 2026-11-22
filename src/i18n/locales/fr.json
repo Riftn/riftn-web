@@ -8077,6 +8077,10 @@
           "name": "Foule",
           "hint": "Avoir dix personnes qui regardent en même temps."
         },
+        "millennium": {
+          "name": "Millénaire",
+          "hint": "Cumulez 1 000 heures de diffusion admissibles."
+        },
         "century": {
           "name": "Siècle",
           "hint": "Atteignez cent heures de qualification sur les ondes."

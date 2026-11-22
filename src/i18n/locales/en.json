@@ -8037,6 +8037,10 @@
           "name": "Crowd",
           "hint": "Have ten people watching at the same time."
         },
+        "millennium": {
+          "name": "Millennium",
+          "hint": "Reach 1,000 qualifying hours on air."
+        },
         "century": {
           "name": "Century",
           "hint": "Reach one hundred qualifying hours on air."

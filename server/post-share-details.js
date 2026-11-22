@@ -68,7 +68,7 @@ export async function loadPostShareDetails(data, { rows, price } = {}) {
   const rawAddress = profile?.address || profile?.wallet_address;
   const address = typeof rawAddress === 'string' && /^0x[\da-f]{40}$/i.test(rawAddress) ? rawAddress.toLowerCase() : '';
   const [progressResponse, memberRows] = address ? await Promise.all([
-    publicJson(`/live/creator/${address}/progress?collection=20`),
+    publicJson(`/live/creator/${address}/progress?collection=21`),
     rows?.(`new_members?select=joined_at&wallet_address=eq.${address}&joined_at=gte.${encodeURIComponent(new Date(Date.now() - 30 * 86400000).toISOString())}&limit=1`).catch(() => null),
   ]) : [null, []];
   const progress = progressResponse?.result ?? progressResponse;

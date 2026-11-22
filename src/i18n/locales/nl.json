@@ -8263,6 +8263,10 @@
           "name": "Publiek",
           "hint": "Heb tien mensen tegelijkertijd kijken."
         },
+        "millennium": {
+          "name": "Millennium",
+          "hint": "Bereik 1.000 meetellende uren aan live-uitzendingen."
+        },
         "century": {
           "name": "Eeuw",
           "hint": "Bereik honderd kwalificerende uren in de lucht."

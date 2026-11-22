@@ -8073,6 +8073,10 @@
           "name": "Kalabalık",
           "hint": "Aynı anda on kişinin izlemesini sağlayın."
         },
+        "millennium": {
+          "name": "Milenyum",
+          "hint": "Toplam 1.000 geçerli canlı yayın saatine ulaş."
+        },
         "century": {
           "name": "Yüzyıl",
           "hint": "Yayında yüz nitelikli saate ulaşın."

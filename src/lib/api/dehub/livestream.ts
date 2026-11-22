@@ -461,7 +461,7 @@ export interface StreamerProgress {
 export async function getStreamerProgress(address: string): Promise<StreamerProgress> {
   const res = await apiCall<StreamerProgress | { result: StreamerProgress }>(
     `/api/live/creator/${address.toLowerCase()}/progress`,
-    { params: { collection: '20' } },
+    { params: { collection: '21' } },
   );
   return 'result' in res && res.result && typeof res.result === 'object' && 'level' in res.result
     ? res.result

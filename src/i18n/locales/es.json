@@ -8073,6 +8073,10 @@
           "name": "Multitud",
           "hint": "Ten diez personas mirando al mismo tiempo."
         },
+        "millennium": {
+          "name": "Milenio",
+          "hint": "Alcanza 1.000 horas de emisión que cuenten para este logro."
+        },
         "century": {
           "name": "Siglo",
           "hint": "Alcanza cien horas de calificación en el aire."

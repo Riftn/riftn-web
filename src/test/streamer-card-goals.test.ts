@@ -28,6 +28,7 @@ describe('streamer card goals', () => {
   it('reads each running total from the progress payload', () => {
     expect(streamerCardProgress('on-air', progress)).toEqual({ metric: 'streams', current: 7, target: 10 });
     expect(streamerCardProgress('century', progress)).toEqual({ metric: 'hours', current: 2.5, target: 100 });
+    expect(streamerCardProgress('millennium', progress)).toEqual({ metric: 'hours', current: 2.5, target: 1000 });
     expect(streamerCardProgress('marathon', progress)).toEqual({ metric: 'session', current: 95, target: 120 });
     expect(streamerCardProgress('regular', progress)).toEqual({ metric: 'streak', current: 3, target: 4 });
     expect(streamerCardProgress('legend', progress)).toEqual({ metric: 'level', current: 5, target: 10 });
