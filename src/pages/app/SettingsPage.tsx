@@ -3217,7 +3217,8 @@ function SettingToggle({
  *
  * Off, the public feeds are filtered server-side and a mature post served
  * anywhere else (a profile, the Following feed, a shared link) renders behind
- * a content warning. On, both stop.
+ * a content warning. Turning it on includes mature posts in feeds. Mature
+ * videos still require the viewer to confirm before they play.
  *
  * New i18n keys rather than the existing settings.showSensitive pair: that
  * one's copy — "display content warnings for sensitive posts" — describes the
@@ -3235,8 +3236,8 @@ function MatureContentToggle() {
       anchor="mature-content"
       title={t('settings.matureContent', 'Show Mature Content')}
       description={t(
-        'settings.matureContentDesc',
-        'Include adult and graphic posts in your feeds, and drop the warning on ones you already see. Off by default.',
+        'settings.matureContentPlaybackDesc',
+        'Include adult and graphic posts in your feeds. Mature videos still ask before playing. Off by default.',
       )}
       defaultChecked={showMatureContent}
       onCheckedChange={setShowMatureContent}
