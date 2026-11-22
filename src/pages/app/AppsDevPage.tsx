@@ -396,8 +396,8 @@ function CloudAppRow({ app }: { app: CloudAppSummary }) {
               </div>
             ))}
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input value={secretName} onChange={(e) => setSecretName(e.target.value)} placeholder="API_KEY" className={input} />
-              <input value={secretValue} onChange={(e) => setSecretValue(e.target.value)} placeholder={t('miniApps.dev.cloud.secretValue')} type="password" className={input} />
+              <input value={secretName} onChange={(e) => setSecretName(e.target.value)} placeholder="API_KEY" autoComplete="off" name="cloud-secret-name" className={input} />
+              <input value={secretValue} onChange={(e) => setSecretValue(e.target.value)} placeholder={t('miniApps.dev.cloud.secretValue')} type="password" autoComplete="new-password" name="cloud-secret-value" className={input} />
               <button type="button" disabled={busy || !secretName.trim() || !secretValue} onClick={() => void saveSecret()} className={button}>
                 {t('miniApps.dev.cloud.save')}
               </button>
