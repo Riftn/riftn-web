@@ -7233,6 +7233,10 @@
     "shareTitle": "@{{handle}} está a la venta en Riftn"
   },
   "stories": {
+    "mute": "Silenciar",
+    "unfollow": "Dejar de seguir",
+    "mutedToast": "Silenciado. No verás sus Momentos ni publicaciones.",
+    "unfollowedToast": "Dejaste de seguir",
     "captionFont": "Fuente del texto",
     "captionStyles": {"classic":"Clásica","minimal":"Minimalista","groove":"Rítmica","poster":"Cartel","book":"Libro","editorial":"Editorial","headline":"Titular","mono":"Monoespaciada","terminal":"Terminal","typewriter":"Máquina de escribir","marker":"Rotulador","script":"Caligráfica"},
     "selectedPeople": "Solo las personas seleccionadas",
