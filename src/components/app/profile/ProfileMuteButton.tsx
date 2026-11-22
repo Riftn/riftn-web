@@ -18,6 +18,7 @@ export function ProfileMuteButton({ address }: { address: string }) {
     refetchOnMount: 'always',
     retry: false,
   });
+  const { refetch } = status;
   const toggle = useMutation({
     mutationFn: async (muted: boolean) => {
       const result = await (muted ? unmuteUser(address) : muteUser(address));
@@ -32,7 +33,7 @@ export function ProfileMuteButton({ address }: { address: string }) {
     },
     onError: () => {
       toast.error(t('common.tryAgain'));
-      void status.refetch();
+      void refetch();
     },
   });
   if (!isAuthenticated) return null;
@@ -43,7 +44,7 @@ export function ProfileMuteButton({ address }: { address: string }) {
       disabled={status.isFetching || toggle.isPending}
       onClick={() => {
         if (typeof status.data === 'boolean') toggle.mutate(status.data);
-        else void status.refetch();
+        else void refetch();
       }}
       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-left disabled:opacity-50"
     >
