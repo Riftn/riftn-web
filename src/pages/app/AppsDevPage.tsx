@@ -32,6 +32,7 @@ import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
 import { signEncryptionMessage } from '@/lib/dm-e2ee/signer';
 import { ownershipMessage, parseAppUrl } from '@/lib/miniapp/protocol';
 import { createDeveloperApp, deleteDeveloperApp, listDeveloperApps, rotateDeveloperSecret, type DeveloperSignInApp } from '@/lib/api/dehub/mastodon-apps';
+import { createCloudApp, createDeployKey, deleteCloudApp, getCloudApp, listCloudApps, setCloudSecrets, toCloudSlug, uploadCloudFiles, type CloudAppSummary } from '@/lib/cloud/api';
 import { checkManifest, fetchLatestRewards, createNotifyKey, fetchMyApps, fetchAppStats, fetchWebhookDeliveries, submitApp, testWebhook, type ManifestCheck } from '@/lib/miniapp/registry';
 
 const QUICKSTART = `<script src="https://riftn.com/sdk/miniapp.js"></script>
@@ -232,6 +233,266 @@ function WebhookPanel({ slug }: { slug: string }) {
       ) : (
         <p className="text-[11px] text-zinc-500">{t('miniApps.dev.webhook.none')}</p>
       )}
+    </div>
+  );
+}
+
+const CLOUD_QUICKSTART = `// index.js: your backend. Files in public/ are your website.
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === '/api/notes') {
+      await env.DB.run('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, text TEXT)');
+      if (request.method === 'POST') {
+        const { text } = await request.json();
+        await env.DB.run('INSERT INTO notes (text) VALUES (?)', text);
+      }
+      return Response.json(await env.DB.query('SELECT * FROM notes ORDER BY id DESC'));
+    }
+    return new Response('Not found', { status: 404 });
+  },
+};
+
+// env.DB   your own SQL database: query(), first(), run()
+// env.KV   key/value storage: get(), put(), delete(), list()
+// env.MY_SECRET   any secret you add below`;
+
+const CLOUD_CI = `# Upload from a terminal or CI with a deploy key
+curl -X PUT https://cloud.dhb.gg/v1/apps/my-app/files \\
+  -H "Authorization: Bearer rk_my-app_…" \\
+  -H "Content-Type: application/json" \\
+  -d '{"files":[{"path":"index.js","data":"<base64>"}]}'`;
+
+/** One hosted app: upload a new version, secrets, deploy key, errors, delete. */
+function CloudAppRow({ app }: { app: CloudAppSummary }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const folderRef = useRef<HTMLInputElement>(null);
+  const filesRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [secretName, setSecretName] = useState('');
+  const [secretValue, setSecretValue] = useState('');
+  const [deployKey, setDeployKey] = useState<string | null>(null);
+  const { data: detail, refetch } = useQuery({ queryKey: ['cloud-app', app.slug], queryFn: () => getCloudApp(app.slug), enabled: open });
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['cloud-apps'] });
+    void refetch();
+  };
+
+  const upload = async (list: FileList | null) => {
+    if (!list?.length) return;
+    setBusy(true);
+    try {
+      const out = await uploadCloudFiles(app.slug, Array.from(list));
+      toast.success(t('miniApps.dev.cloud.uploaded', { version: out.version }));
+      refresh();
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setBusy(false);
+      if (folderRef.current) folderRef.current.value = '';
+      if (filesRef.current) filesRef.current.value = '';
+    }
+  };
+  const saveSecret = async () => {
+    const name = secretName.trim().toUpperCase();
+    if (!name || !secretValue) return;
+    setBusy(true);
+    try {
+      await setCloudSecrets(app.slug, { [name]: secretValue });
+      setSecretName('');
+      setSecretValue('');
+      toast.success(t('miniApps.dev.cloud.secretSaved'));
+      refresh();
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const removeSecret = async (name: string) => {
+    try {
+      await setCloudSecrets(app.slug, {}, [name]);
+      refresh();
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+  const newKey = async () => {
+    try {
+      setDeployKey((await createDeployKey(app.slug)).key);
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+  const remove = async () => {
+    if (!window.confirm(t('miniApps.dev.cloud.deleteConfirm', { name: app.name }))) return;
+    try {
+      await deleteCloudApp(app.slug);
+      void queryClient.invalidateQueries({ queryKey: ['cloud-apps'] });
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+
+  const button = 'flex items-center gap-1.5 rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-700 disabled:opacity-40';
+  const input = 'min-w-0 flex-1 rounded-lg bg-black/40 px-3 py-2 text-sm text-white ring-1 ring-white/10 placeholder:text-zinc-500 focus:outline-none focus:ring-white/30';
+  return (
+    <div className="space-y-2 rounded-xl bg-black/40 p-2.5 ring-1 ring-white/10">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-white">{app.name}</p>
+          <a href={app.url} target="_blank" rel="noreferrer" className="block truncate text-xs text-zinc-400 underline underline-offset-2">
+            {app.url.replace('https://', '')}
+          </a>
+        </div>
+        <span className="shrink-0 text-[11px] text-zinc-500">
+          {app.suspended ? t('miniApps.dev.stateSuspended') : app.version ? t('miniApps.dev.cloud.version', { version: app.version }) : t('miniApps.dev.cloud.empty')}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <input
+          ref={folderRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => void upload(e.target.files)}
+          {...({ webkitdirectory: '', directory: '' } as Record<string, string>)}
+        />
+        <input ref={filesRef} type="file" multiple className="hidden" onChange={(e) => void upload(e.target.files)} />
+        <button type="button" disabled={busy} onClick={() => folderRef.current?.click()} className={button}>
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          {t('miniApps.dev.cloud.uploadFolder')}
+        </button>
+        <button type="button" disabled={busy} onClick={() => filesRef.current?.click()} className={button}>
+          {t('miniApps.dev.cloud.uploadFiles')}
+        </button>
+        <button type="button" onClick={() => setOpen((v) => !v)} className={button} aria-expanded={open}>
+          {open ? t('miniApps.dev.cloud.hide') : t('miniApps.dev.cloud.manage')}
+        </button>
+      </div>
+      {open && detail ? (
+        <div className="space-y-3 pt-1">
+          <div>
+            <p className="mb-1 text-[11px] font-semibold text-zinc-300">{t('miniApps.dev.cloud.files')}</p>
+            {detail.files.length ? (
+              <p className="break-all font-mono text-[11px] leading-relaxed text-zinc-400">
+                {detail.files.slice(0, 40).join('  ·  ')}
+                {detail.files.length > 40 ? '  …' : ''}
+              </p>
+            ) : (
+              <p className="text-[11px] text-zinc-500">{t('miniApps.dev.cloud.empty')}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-[11px] font-semibold text-zinc-300">{t('miniApps.dev.cloud.secrets')}</p>
+            {detail.secrets.map((name) => (
+              <div key={name} className="flex items-center gap-2 text-[11px]">
+                <span className="font-mono text-zinc-300">{name}</span>
+                <button type="button" onClick={() => void removeSecret(name)} className="ml-auto text-zinc-500 underline">
+                  {t('miniApps.dev.cloud.remove')}
+                </button>
+              </div>
+            ))}
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input value={secretName} onChange={(e) => setSecretName(e.target.value)} placeholder="API_KEY" className={input} />
+              <input value={secretValue} onChange={(e) => setSecretValue(e.target.value)} placeholder={t('miniApps.dev.cloud.secretValue')} type="password" className={input} />
+              <button type="button" disabled={busy || !secretName.trim() || !secretValue} onClick={() => void saveSecret()} className={button}>
+                {t('miniApps.dev.cloud.save')}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-[11px] font-semibold text-zinc-300">{t('miniApps.dev.cloud.deployKey')}</p>
+            <p className="text-[11px] text-zinc-500">{t('miniApps.dev.cloud.deployKeyBody')}</p>
+            {deployKey ? <CodeBlock code={deployKey} /> : (
+              <button type="button" onClick={() => void newKey()} className={button}>{t('miniApps.dev.cloud.newKey')}</button>
+            )}
+          </div>
+          {detail.errors.length ? (
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold text-zinc-300">{t('miniApps.dev.cloud.errors')}</p>
+              {detail.errors.slice(0, 5).map((e) => (
+                <p key={e.at} className="break-words font-mono text-[11px] text-amber-300/90">
+                  <span className="text-zinc-500">{new Date(e.at).toLocaleString()} </span>
+                  {e.message.split('\n')[0]}
+                </p>
+              ))}
+            </div>
+          ) : null}
+          <button type="button" onClick={() => void remove()} className="text-xs text-red-400 underline underline-offset-2">
+            {t('miniApps.dev.cloud.delete')}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Riftn Cloud: host the whole app (website, backend and database) on Riftn. */
+function CloudHosting({ signedIn }: { signedIn: boolean }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const { data, error } = useQuery({ queryKey: ['cloud-apps'], queryFn: listCloudApps, enabled: signedIn });
+  const slug = toCloudSlug(name);
+
+  const create = async () => {
+    setBusy(true);
+    try {
+      await createCloudApp(slug, name.trim());
+      setName('');
+      void queryClient.invalidateQueries({ queryKey: ['cloud-apps'] });
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div id="cloud">
+      <Section title={t('miniApps.dev.cloud.title')}>
+        <p className="text-xs leading-relaxed text-zinc-400">{t('miniApps.dev.cloud.body')}</p>
+        <ul className="list-disc space-y-0.5 pl-4 text-[11px] text-zinc-500">
+          <li>{t('miniApps.dev.cloud.ruleCode')}</li>
+          <li>{t('miniApps.dev.cloud.rulePublic')}</li>
+          <li>{t('miniApps.dev.cloud.ruleFree')}</li>
+        </ul>
+        {!signedIn ? <p className="text-xs text-zinc-500">{t('miniApps.dev.signInFirst')}</p> : (
+          <>
+            {error ? <p className="text-xs text-amber-300">{(error as Error).message}</p> : null}
+            {data?.apps.map((app) => <CloudAppRow key={app.slug} app={app} />)}
+            <form
+              className="flex flex-col gap-2 sm:flex-row sm:items-center"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (slug.length >= 3) void create();
+              }}
+            >
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t('miniApps.dev.cloud.namePlaceholder')}
+                className="min-w-0 flex-1 rounded-lg bg-black/40 px-3 py-2 text-sm text-white ring-1 ring-white/10 placeholder:text-zinc-500 focus:outline-none focus:ring-white/30"
+              />
+              <button
+                type="submit"
+                disabled={busy || slug.length < 3}
+                className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black disabled:opacity-40"
+              >
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {t('miniApps.dev.cloud.create')}
+              </button>
+            </form>
+            {slug.length >= 3 ? <p className="text-[11px] text-zinc-500">{t('miniApps.dev.cloud.willLive', { url: `${slug}.dhb.gg` })}</p> : null}
+          </>
+        )}
+        <CodeBlock code={CLOUD_QUICKSTART} />
+        <CodeBlock code={CLOUD_CI} />
+      </Section>
     </div>
   );
 }
@@ -469,6 +730,7 @@ export default function AppsDevPage() {
       <div data-feed-swallow-bounds>
 <div ref={contentRef} className="mx-auto max-w-3xl space-y-3 px-2 pb-24 pt-2 sm:px-3">
 <FeedSwallowMotion className="space-y-3">
+        <CloudHosting signedIn={!!walletAddress} />
         <Section title={t('miniApps.dev.checkTitle')}>
           <form
             className="flex flex-col gap-2 sm:flex-row"
