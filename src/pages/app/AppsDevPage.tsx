@@ -257,6 +257,15 @@ export default {
 // env.KV   key/value storage: get(), put(), delete(), list()
 // env.MY_SECRET   any secret you add below`;
 
+const CLOUD_PY = `# main.py: the same backend in Python
+from workers import WorkerEntrypoint, Response
+
+class Default(WorkerEntrypoint):
+    async def fetch(self, request):
+        await self.env.DB.run("CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY, email TEXT, plan TEXT)")
+        rows = await self.env.DB.query("SELECT * FROM plans")
+        return Response.json(rows)  # rows are dicts`;
+
 const CLOUD_CI = `# Upload from a terminal or CI with a deploy key
 curl -X PUT https://cloud.dhb.gg/v1/apps/my-app/files \\
   -H "Authorization: Bearer rk_my-app_…" \\
@@ -491,6 +500,7 @@ function CloudHosting({ signedIn }: { signedIn: boolean }) {
           </>
         )}
         <CodeBlock code={CLOUD_QUICKSTART} />
+        <CodeBlock code={CLOUD_PY} />
         <CodeBlock code={CLOUD_CI} />
       </Section>
     </div>

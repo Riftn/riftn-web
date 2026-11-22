@@ -118,12 +118,14 @@ export function classifyUpload(files, mainHint) {
       modules[path] = moduleKind(path);
     }
   }
-  const hasCode = Object.values(modules).some((k) => k === 'js' || k === 'cjs');
+  const isCode = (k) => k === 'js' || k === 'cjs' || k === 'py';
+  const hasCode = Object.values(modules).some(isCode);
   let main = null;
   if (hasCode) {
-    const preferred = [mainHint, 'index.js', 'worker.js', '_worker.js', 'index.mjs', 'src/index.js', 'dist/index.js', 'server.js'];
-    main = preferred.find((p) => p && (modules[p] === 'js' || modules[p] === 'cjs')) ?? null;
-    if (!main) throw new Error('Could not tell which file starts your app. Name it index.js, or send "main".');
+    const preferred = [mainHint, 'index.js', 'worker.js', '_worker.js', 'index.mjs', 'src/index.js', 'dist/index.js', 'server.js',
+      'main.py', 'worker.py', 'app.py', 'index.py', 'src/main.py'];
+    main = preferred.find((p) => p && isCode(modules[p])) ?? null;
+    if (!main) throw new Error('Could not tell which file starts your app. Name it index.js (or main.py), or send "main".');
   } else {
     // No code: every non-public file is part of the website too.
     for (const path of Object.keys(modules)) assets[path] = typeOf(path);
@@ -136,6 +138,7 @@ function moduleKind(path) {
   const e = ext(path);
   if (e === 'js' || e === 'mjs') return 'js';
   if (e === 'cjs') return 'cjs';
+  if (e === 'py') return 'py';
   if (e === 'json') return 'json';
   if (e === 'wasm') return 'wasm';
   if (['txt', 'html', 'htm', 'css', 'md', 'sql', 'svg', 'xml', 'csv'].includes(e)) return 'text';
@@ -258,6 +261,7 @@ export class CloudApp extends DurableObject {
       const text = () => new TextDecoder().decode(bytes);
       if (kind === 'js') modules[path] = { js: text() };
       else if (kind === 'cjs') modules[path] = { cjs: text() };
+      else if (kind === 'py') modules[path] = { py: text() };
       else if (kind === 'json') {
         try { modules[path] = { json: JSON.parse(text()) }; } catch { modules[path] = { text: text() }; }
       } else if (kind === 'text') modules[path] = { text: text() };
@@ -461,7 +465,7 @@ export async function serveCloudApp(request, env, ctx, entry, page) {
     const code = await app.code(version);
     return {
       compatibilityDate: APP_COMPAT_DATE,
-      compatibilityFlags: ['nodejs_compat'],
+      compatibilityFlags: code.main.endsWith('.py') ? ['python_workers'] : ['nodejs_compat'],
       mainModule: code.main,
       modules: code.modules,
       env: {
@@ -648,7 +652,7 @@ async function currentFiles(app, meta) {
   const files = [];
   const code = meta.main ? await app.code(meta.version) : { modules: {} };
   for (const [path, mod] of Object.entries(code.modules)) {
-    const value = mod.js ?? mod.cjs ?? mod.text ?? (mod.json !== undefined ? JSON.stringify(mod.json) : null);
+    const value = mod.js ?? mod.cjs ?? mod.py ?? mod.text ?? (mod.json !== undefined ? JSON.stringify(mod.json) : null);
     const bytes = value !== null ? new TextEncoder().encode(value) : new Uint8Array(mod.wasm ?? mod.data);
     files.push({ path, bytes });
   }

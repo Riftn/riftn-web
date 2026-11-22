@@ -13684,7 +13684,7 @@
       "cloud": {
         "title": "Host your app on Riftn Cloud",
         "body": "Put your whole app on Riftn: your website, your backend code and its own database, at your own address on dhb.gg. No server to rent or look after. Once it is live, list it in the Riftn Apps store below.",
-        "ruleCode": "Backend: an index.js that exports fetch(request, env), like a Cloudflare Worker. Hono and most npm packages work once bundled into one file.",
+        "ruleCode": "Backend: an index.js that exports fetch(request, env), like a Cloudflare Worker, or a main.py with a Default(WorkerEntrypoint) class for Python. Hono and most npm packages work once bundled into one file.",
         "rulePublic": "Website: put HTML, CSS, images and scripts in a public folder. An upload with no index.js is served as a plain website.",
         "ruleFree": "Free while in beta: 3 apps, 10 MB of files and a 500 MB database each, about 0.1 s of compute per request.",
         "namePlaceholder": "App name, e.g. My Shop",
