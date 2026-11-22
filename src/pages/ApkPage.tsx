@@ -21,7 +21,7 @@ import {
   subscribeInstall,
 } from "@/lib/pwa-install";
 import { cn } from "@/lib/utils";
-import dehubWordmark from "@/assets/riftn-wordmark-flat-white.png";
+import riftnWordmark from "@/assets/riftn-wordmark-flat-white.png";
 
 const PAGE_URL = "https://riftn.com/apk";
 const OG_IMAGE = "https://riftn.com/og/apk.jpg";
@@ -300,6 +300,7 @@ export default function ApkPage() {
       {/* Floor wash — lifts the copy off the particle field without a panel. */}
       <div
         aria-hidden="true"
+        data-dark-backdrop
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_35%,rgba(0,0,0,0.75)_100%)]"
       />
 
@@ -317,7 +318,7 @@ export default function ApkPage() {
           off the bottom of an overflow-hidden viewport. */}
       <main className="relative z-10 flex h-full flex-col items-center justify-center px-5 pb-[clamp(3rem,9vh,4.5rem)] text-center">
         <img
-          src={dehubWordmark}
+          src={riftnWordmark}
           alt="Riftn"
           className="h-[clamp(1.25rem,3.2vh,2rem)] w-auto object-contain opacity-90"
         />

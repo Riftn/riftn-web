@@ -128,5 +128,5 @@ export function NebulaParticlesBg() {
     };
   }, []);
 
-  return <div ref={containerRef} aria-hidden="true" className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.035), transparent 70%)' }} />;
+  return <div ref={containerRef} aria-hidden="true" data-dark-backdrop className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.035), transparent 70%)' }} />;
 }
