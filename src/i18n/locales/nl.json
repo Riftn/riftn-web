@@ -7421,6 +7421,8 @@
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
   "stories": {
+    "selectedPeople": "Alleen geselecteerde personen",
+    "hideFromPeople": "Verbergen voor geselecteerde personen",
     "momentArchive": "Momentenarchief",
     "lifetime": "Duur van het verhaal",
     "momentPublished": "Je moment staat online",

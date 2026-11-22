@@ -7255,6 +7255,8 @@
     "shareTitle": "@{{handle}} معروض للبيع على Riftn"
   },
   "stories": {
+    "selectedPeople": "الأشخاص المحددون فقط",
+    "hideFromPeople": "إخفاء عن أشخاص محددين",
     "momentArchive": "أرشيف اللحظات",
     "lifetime": "مدة القصة",
     "momentPublished": "لحظتك منشورة",

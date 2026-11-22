@@ -7231,6 +7231,8 @@
     "shareTitle": "@{{handle}} Riftn'da satışta"
   },
   "stories": {
+    "selectedPeople": "Yalnızca seçilen kişiler",
+    "hideFromPeople": "Seçilen kişilerden gizle",
     "momentArchive": "An arşivi",
     "lifetime": "Hikâye süresi",
     "momentPublished": "Anın yayında",
