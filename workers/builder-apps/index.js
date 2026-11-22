@@ -13,12 +13,16 @@
 // The apex (dhb.gg), www and docs are not apps: the route
 // is *.dhb.gg/* and www passes straight through to its origin.
 
+import { CLOUD_LABEL, handleCloudApi, lookupCloudApp, serveCloudApp } from './cloud.js';
+
+export { CloudApp, CloudRegistry, CloudDb, CloudKv } from './cloud.js';
+
 const FUNCTIONS = 'https://aigxuutjaqsywioxjefr.supabase.co/functions/v1/builder-serve';
 const APPS_DOMAIN = 'dhb.gg';
 const PASS_THROUGH = new Set(['www', 'docs']);
 
 function page(status, title, message) {
-  const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><body style="background:#0a0a0a;color:#e5e5e5;font-family:system-ui;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px"><div><p style="font-size:18px;margin:0 0 8px">${title}</p><p style="color:#949499;margin:0">${message}</p><p style="margin-top:20px"><a style="color:#e5e5e5" href="https://dehub.io/builder">Build your own on Riftn</a></p></div>`;
+  const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><body style="background:#0a0a0a;color:#e5e5e5;font-family:system-ui;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px"><div><p style="font-size:18px;margin:0 0 8px">${title}</p><p style="color:#949499;margin:0">${message}</p><p style="margin-top:20px"><a style="color:#e5e5e5" href="https://riftn.com/builder">Build your own on Riftn</a></p></div>`;
   return new Response(html, {
     status,
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' },
@@ -26,7 +30,7 @@ function page(status, title, message) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const host = url.hostname.toLowerCase();
     const labels = host.split('.');
@@ -34,10 +38,14 @@ export default {
     if (!host.endsWith(`.${APPS_DOMAIN}`) || labels.length !== 3 || PASS_THROUGH.has(labels[0])) {
       return fetch(request);
     }
+    const slug = labels[0];
+    // Riftn Cloud: the control API, then hosted apps (any method), then Builder.
+    if (slug === CLOUD_LABEL) return handleCloudApi(request, env, ctx);
+    const cloudApp = await lookupCloudApp(env, slug).catch(() => null);
+    if (cloudApp) return serveCloudApp(request, env, ctx, cloudApp, page);
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response('Method not allowed', { status: 405 });
     }
-    const slug = labels[0];
 
     let path = url.pathname;
     let token = '';

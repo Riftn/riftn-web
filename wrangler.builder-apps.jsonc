@@ -13,5 +13,22 @@
   "routes": [
     { "pattern": "*.dhb.gg/*", "zone_name": "dhb.gg" }
   ],
-  "workers_dev": false
+  "workers_dev": false,
+  // Riftn Cloud (workers/builder-apps/cloud.js): creator apps with their own
+  // backend and database. App code runs as Dynamic Workers through LOADER;
+  // CLOUD_APPS holds one Durable Object per app, CLOUD_REGISTRY the slug list.
+  "worker_loaders": [{ "binding": "LOADER" }],
+  "durable_objects": {
+    "bindings": [
+      { "name": "CLOUD_REGISTRY", "class_name": "CloudRegistry" },
+      { "name": "CLOUD_APPS", "class_name": "CloudApp" }
+    ]
+  },
+  "migrations": [{ "tag": "cloud-v1", "new_sqlite_classes": ["CloudRegistry", "CloudApp"] }],
+  "vars": {
+    // Staff who can list every app and switch one off.
+    "ADMIN_WALLETS": "0x9324840523a5d17dd12a2f11a9472e5a199c1937",
+    // Emergency off switch: space-separated app addresses that stop serving.
+    "BLOCKED_SLUGS": ""
+  }
 }
