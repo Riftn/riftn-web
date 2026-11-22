@@ -9,7 +9,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { SITE_URL } from "@/lib/seo/route-meta";
 import { STREAM_LINKS, STREAM_PAGE, streamFaqLd } from "@/lib/streamer-page.js";
-import dehubWordmark from "@/assets/dehub-wordmark-white.png";
+import riftnWordmark from "@/assets/riftn-wordmark-flat-white.png";
 
 const PAGE_URL = `${SITE_URL}${STREAM_PAGE.path}`;
 // Shares the creators card, as the edge does for crawlers (`og: 'creators'`).
@@ -85,7 +85,7 @@ export default function StreamPage() {
       </Link>
 
       <main className="mx-auto flex max-w-3xl flex-col px-5 pb-20 pt-20 sm:pt-24">
-        <img src={dehubWordmark} alt="Riftn" className="h-7 w-auto self-start object-contain opacity-90" />
+        <img src={riftnWordmark} alt="Riftn" className="h-7 w-auto self-start object-contain opacity-90" />
 
         <div className="mt-8 inline-flex items-center gap-2 self-start rounded-full border border-white/15 bg-white/5 px-3 py-1.5">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />

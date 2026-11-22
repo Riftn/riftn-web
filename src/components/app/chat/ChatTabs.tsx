@@ -8,6 +8,9 @@ import { CHAT_MENU_CONTENT } from '@/components/app/chat/ChatOptionsMenu';
 import { MAX_TAB_NAME } from '@/lib/api/dehub/chat-tabs';
 import '@/styles/chat-tabs.css';
 import type { ChatTabView } from '@/hooks/use-chat-tabs';
+// Settings → Appearance → "Pill tabs in Messages": loads the saved choice onto <html> before the tabs draw.
+import '@/lib/messages-pills';
+import '@/styles/messages-pills.css';
 
 /*
  * Tabs above the chat list on riftn.com/chat and /app/messages: All, Unread,
