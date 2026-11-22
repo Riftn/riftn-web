@@ -23062,5 +23062,70 @@
     "streak": "{{value}}-day streak",
     "streakBonus": "Streak bonus +{{pct}}%",
     "dailyHint": "One quiz a day. People who play your quizzes days in a row build a streak and earn bonus points."
+  },
+  "streamPet": {
+    "stage": {
+      "egg": "Egg",
+      "baby": "Baby",
+      "kid": "Kid",
+      "teen": "Teen",
+      "grown": "Grown",
+      "legend": "Legend"
+    },
+    "color": {
+      "violet": "Violet",
+      "pink": "Pink",
+      "mint": "Mint",
+      "sky": "Sky",
+      "sun": "Sun",
+      "coral": "Coral"
+    },
+    "mood": {
+      "egg": "Still an egg. It hatches on the next stream.",
+      "eggOwn": "Still an egg. Stream for 5 minutes to hatch it.",
+      "streaming": "Eating while the stream is on",
+      "happy": "Happy and full",
+      "hungry": "Getting hungry. Falls asleep in {{hours}}h",
+      "asleep": "Asleep until the next stream",
+      "asleepOwn": "Asleep. Go live to wake it up"
+    },
+    "snacks_one": "{{formatted}} snack",
+    "snacks_other": "{{formatted}} snacks",
+    "hoursStreamed_one": "{{formatted}} hour streamed",
+    "hoursStreamed_other": "{{formatted}} hours streamed",
+    "toNext_one": "{{formatted}} snack to {{stage}}",
+    "toNext_other": "{{formatted}} snacks to {{stage}}",
+    "open": "Open {{pet}}",
+    "feed": "Feed a snack",
+    "fed": "{{pet}} ate your snack",
+    "fedBy": "{{name}} fed {{pet}}",
+    "signIn": "Sign in to feed it",
+    "pointsHint": "Paid with your channel points here",
+    "balance": "You have {{formatted}} points here",
+    "errors": {
+      "notEnough": "Not enough points yet. Keep watching to earn more.",
+      "notLive": "You can feed the pet while the stream is live",
+      "tooFast": "Give it a few seconds",
+      "daily": "That's enough snacks for today",
+      "off": "Feeding is off on this channel",
+      "failed": "Something went wrong. Try again."
+    },
+    "studio": {
+      "title": "Stream pet",
+      "intro": "A little pet that eats while you stream: one snack for every 5 minutes live. It grows as it eats, falls asleep after a day without food, and never dies.",
+      "name": "Name",
+      "namePlaceholder": "Name your pet",
+      "color": "Colour",
+      "hatch": "Hatch egg",
+      "hatched": "Your egg is ready. Go live to hatch it.",
+      "save": "Save",
+      "saved": "Saved",
+      "showOnProfile": "Show on my profile",
+      "showOnStream": "Show in the corner of my stream",
+      "feeding": "Viewers can feed it with channel points",
+      "cost": "Points per snack",
+      "rules": "Each viewer can feed it up to 20 snacks a day. Points have no cash value.",
+      "feeders": "Fed it the most"
+    }
   }
 }

@@ -879,6 +879,11 @@ import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
 import { formatCount } from '@/lib/format-count';
+import { PetCard } from '@/components/app/pet/PetCard';
+import { PetSprite } from '@/components/app/pet/PetSprite';
+import StreamPetCorner from '@/components/app/pet/StreamPetCorner';
+import { PetPanel, PetHatch } from '@/components/app/live/studio/PetPanel';
+import type { StreamPet } from '@/lib/api/dehub/stream-pet';
 const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
 
 // The standard public BIP-39 test vector: owns nothing, safe to show.
@@ -2320,6 +2325,7 @@ export default function StateGalleryPage() {
         <AgentWelcomeGallery />
         <LiveViewerGallery />
         <LivePointsGallery initiallyOpen={params.get('sheet') === 'rewards'} />
+        <StreamPetGallery />
         <HolderGroupGallery />
         <GroupsChannelsGallery />
         <NewMessageDrawerGallery />
@@ -2750,6 +2756,89 @@ function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean 
         <RewardsSheet open={open} onOpenChange={setOpen} streamId={GALLERY_STREAM_ID} balance={GALLERY_POINTS_BALANCE} rewards={GALLERY_REWARDS} />
         <div data-live-points-studio className="mx-auto mt-4 max-w-xl">
           <RewardsPanel />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const GALLERY_PET: StreamPet = {
+  owner: '0x00000000000000000000000000000000000000a1',
+  name: 'Mochi',
+  color: 'violet',
+  hatchedAt: '2026-11-01T12:00:00.000Z',
+  stage: 'teen',
+  stageIndex: 3,
+  food: 96,
+  streamFood: 88,
+  viewerFood: 8,
+  stageFood: 60,
+  nextStageFood: 240,
+  progress: 36 / 180,
+  mood: 'happy',
+  lastFedAt: new Date().toISOString(),
+  sleepsAt: new Date(Date.now() + 20 * 3_600_000).toISOString(),
+  streamingNow: true,
+  streamedMinutes: 440,
+  showOnProfile: true,
+  showOnStream: true,
+  feeding: { enabled: true, cost: 100 },
+};
+
+/** Stream pets: every stage and mood, the profile card, the stream corner, and Live Studio. */
+function StreamPetGallery() {
+  const queryClient = useQueryClient();
+  useState(() => {
+    queryClient.setQueryData(['stream-pet', GALLERY_STREAM_ID], GALLERY_PET);
+    queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
+    queryClient.setQueryData(['my-stream-pet'], {
+      pet: { ...GALLERY_PET, streamingNow: false },
+      feeders: [
+        { address: '0x00000000000000000000000000000000000000c3', username: 'nova', displayName: 'Nova', snacks: 14 },
+        { address: '0x00000000000000000000000000000000000000c4', username: 'kai', snacks: 6 },
+      ],
+    });
+  });
+  const stages = ['egg', 'baby', 'kid', 'teen', 'grown', 'legend'] as const;
+  const colors = ['violet', 'pink', 'mint', 'sky', 'sun', 'coral'] as const;
+  return (
+    <section data-page-bento data-stream-pet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Stream pet</h2>
+      <div data-stream-pet-stages className="flex flex-wrap items-end justify-center gap-3">
+        {stages.map((stage, i) => (
+          <div key={stage} className="flex flex-col items-center gap-1">
+            <PetSprite color={colors[i]} stage={stage} mood={stage === 'egg' ? 'egg' : 'happy'} size={84} />
+            <span className="text-[11px] text-white/60">{stage}</span>
+          </div>
+        ))}
+        {(['happy', 'hungry', 'asleep'] as const).map((mood) => (
+          <div key={mood} className="flex flex-col items-center gap-1">
+            <PetSprite color="mint" stage="grown" mood={mood} size={84} />
+            <span className="text-[11px] text-white/60">{mood}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div data-stream-pet-profile>
+          <PetCard pet={{ ...GALLERY_PET, streamingNow: false }} />
+        </div>
+        <div data-stream-pet-profile-asleep>
+          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null }} own />
+        </div>
+      </div>
+      <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
+        <div className="mt-4 flex flex-wrap items-start justify-center gap-4">
+          <div
+            data-stream-pet-phone
+            className="relative h-[520px] w-[390px] max-w-full overflow-hidden rounded-[28px]"
+            style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+          >
+            <StreamPetCorner streamId={GALLERY_STREAM_ID} signedIn initiallyOpen className="absolute bottom-6 right-3 z-20" />
+          </div>
+          <div data-stream-pet-studio className="w-[420px] max-w-full space-y-4">
+            <PetPanel />
+            <PetHatch onHatched={() => undefined} />
+          </div>
         </div>
       </AuthContext.Provider>
     </section>

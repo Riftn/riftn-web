@@ -41,6 +41,7 @@ import { QuickControls } from './QuickControls';
 import { SubathonPanel } from './SubathonPanel';
 import { PointsPanel } from './PointsPanel';
 import { RewardsPanel } from './RewardsPanel';
+import { PetPanel } from './PetPanel';
 import { OverlayCreatorContext, SubathonContext } from '../overlay/subathon';
 import { HypeContext } from '../overlay/hype-train';
 import { BadgesPanel } from './BadgesPanel';
@@ -406,6 +407,8 @@ export function LiveStudio() {
       <RewardsPanel />
 
       <PointsPanel address={walletAddress} />
+
+      <PetPanel />
 
       <BadgesPanel />
 

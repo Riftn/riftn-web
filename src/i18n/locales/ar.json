@@ -23132,5 +23132,82 @@
     "streak": "سلسلة {{value}} أيام",
     "streakBonus": "مكافأة السلسلة +{{pct}}%",
     "dailyHint": "اختبار واحد في اليوم. من يلعب اختباراتك أيامًا متتالية يبني سلسلة ويكسب نقاطًا إضافية."
+  },
+  "streamPet": {
+    "stage": {
+      "egg": "بيضة",
+      "baby": "رضيع",
+      "kid": "صغير",
+      "teen": "يافع",
+      "grown": "بالغ",
+      "legend": "أسطورة"
+    },
+    "color": {
+      "violet": "بنفسجي",
+      "pink": "وردي",
+      "mint": "نعناعي",
+      "sky": "سماوي",
+      "sun": "شمسي",
+      "coral": "مرجاني"
+    },
+    "mood": {
+      "egg": "ما زال بيضة. يفقس في البث القادم.",
+      "eggOwn": "ما زال بيضة. ابث 5 دقائق ليفقس.",
+      "streaming": "يأكل أثناء البث",
+      "happy": "سعيد وشبعان",
+      "hungry": "بدأ يجوع. ينام خلال {{hours}} س",
+      "asleep": "نائم حتى البث القادم",
+      "asleepOwn": "نائم. ابدأ بثًا مباشرًا لإيقاظه"
+    },
+    "snacks_zero": "{{formatted}} وجبة خفيفة",
+    "snacks_one": "{{formatted}} وجبة خفيفة",
+    "snacks_two": "{{formatted}} وجبة خفيفة",
+    "snacks_few": "{{formatted}} وجبة خفيفة",
+    "snacks_many": "{{formatted}} وجبة خفيفة",
+    "snacks_other": "{{formatted}} وجبة خفيفة",
+    "hoursStreamed_zero": "{{formatted}} ساعة بث",
+    "hoursStreamed_one": "{{formatted}} ساعة بث",
+    "hoursStreamed_two": "{{formatted}} ساعة بث",
+    "hoursStreamed_few": "{{formatted}} ساعة بث",
+    "hoursStreamed_many": "{{formatted}} ساعة بث",
+    "hoursStreamed_other": "{{formatted}} ساعة بث",
+    "toNext_zero": "{{formatted}} وجبة حتى {{stage}}",
+    "toNext_one": "{{formatted}} وجبة حتى {{stage}}",
+    "toNext_two": "{{formatted}} وجبة حتى {{stage}}",
+    "toNext_few": "{{formatted}} وجبة حتى {{stage}}",
+    "toNext_many": "{{formatted}} وجبة حتى {{stage}}",
+    "toNext_other": "{{formatted}} وجبة حتى {{stage}}",
+    "open": "فتح {{pet}}",
+    "feed": "قدّم وجبة خفيفة",
+    "fed": "أكل {{pet}} وجبتك",
+    "fedBy": "{{name}} أطعم {{pet}}",
+    "signIn": "سجّل الدخول لإطعامه",
+    "pointsHint": "تُدفع بنقاط القناة هنا",
+    "balance": "لديك {{formatted}} نقطة هنا",
+    "errors": {
+      "notEnough": "لا توجد نقاط كافية بعد. واصل المشاهدة لتكسب المزيد.",
+      "notLive": "يمكنك إطعام الحيوان أثناء البث المباشر",
+      "tooFast": "انتظر بضع ثوانٍ",
+      "daily": "هذا يكفي من الوجبات لليوم",
+      "off": "الإطعام متوقف في هذه القناة",
+      "failed": "حدث خطأ ما. حاول مرة أخرى."
+    },
+    "studio": {
+      "title": "حيوان البث",
+      "intro": "حيوان أليف صغير يأكل أثناء بثك: وجبة خفيفة لكل 5 دقائق مباشرة. يكبر كلما أكل، وينام بعد يوم بلا طعام، ولا يموت أبدًا.",
+      "name": "الاسم",
+      "namePlaceholder": "سمِّ حيوانك",
+      "color": "اللون",
+      "hatch": "احتضن البيضة",
+      "hatched": "بيضتك جاهزة. ابدأ بثًا لتفقس.",
+      "save": "حفظ",
+      "saved": "تم الحفظ",
+      "showOnProfile": "اعرضه في ملفي الشخصي",
+      "showOnStream": "اعرضه في زاوية بثي",
+      "feeding": "يمكن للمشاهدين إطعامه بنقاط القناة",
+      "cost": "النقاط لكل وجبة",
+      "rules": "يمكن لكل مشاهد إطعامه حتى 20 وجبة يوميًا. النقاط ليس لها قيمة مالية.",
+      "feeders": "الأكثر إطعامًا له"
+    }
   }
 }

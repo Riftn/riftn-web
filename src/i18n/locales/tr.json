@@ -23088,5 +23088,70 @@
     "streak": "{{value}} günlük seri",
     "streakBonus": "Seri bonusu +%{{pct}}",
     "dailyHint": "Günde bir bilgi yarışması. Yarışmalarına art arda günlerde katılanlar seri yapar ve bonus puan kazanır."
+  },
+  "streamPet": {
+    "stage": {
+      "egg": "Yumurta",
+      "baby": "Bebek",
+      "kid": "Yavru",
+      "teen": "Genç",
+      "grown": "Yetişkin",
+      "legend": "Efsane"
+    },
+    "color": {
+      "violet": "Mor",
+      "pink": "Pembe",
+      "mint": "Nane",
+      "sky": "Gök",
+      "sun": "Güneş",
+      "coral": "Mercan"
+    },
+    "mood": {
+      "egg": "Hâlâ bir yumurta. Bir sonraki yayında çıkacak.",
+      "eggOwn": "Hâlâ bir yumurta. Çıkması için 5 dakika yayın yap.",
+      "streaming": "Yayın sürerken yemek yiyor",
+      "happy": "Mutlu ve tok",
+      "hungry": "Acıkıyor. {{hours}} sa içinde uyuyacak",
+      "asleep": "Bir sonraki yayına kadar uyuyor",
+      "asleepOwn": "Uyuyor. Uyandırmak için canlı yayına geç"
+    },
+    "snacks_one": "{{formatted}} atıştırmalık",
+    "snacks_other": "{{formatted}} atıştırmalık",
+    "hoursStreamed_one": "{{formatted}} saat yayın",
+    "hoursStreamed_other": "{{formatted}} saat yayın",
+    "toNext_one": "{{stage}} için {{formatted}} atıştırmalık",
+    "toNext_other": "{{stage}} için {{formatted}} atıştırmalık",
+    "open": "{{pet}} aç",
+    "feed": "Atıştırmalık ver",
+    "fed": "{{pet}} atıştırmalığını yedi",
+    "fedBy": "{{name}}, {{pet}} besledi",
+    "signIn": "Beslemek için giriş yap",
+    "pointsHint": "Buradaki kanal puanlarınla ödenir",
+    "balance": "Burada {{formatted}} puanın var",
+    "errors": {
+      "notEnough": "Henüz yeterli puan yok. Daha fazla kazanmak için izlemeye devam et.",
+      "notLive": "Evcil hayvanı yayın canlıyken besleyebilirsin",
+      "tooFast": "Birkaç saniye bekle",
+      "daily": "Bugünlük yeterince atıştırmalık",
+      "off": "Bu kanalda besleme kapalı",
+      "failed": "Bir sorun oluştu. Tekrar dene."
+    },
+    "studio": {
+      "title": "Yayın evcil hayvanı",
+      "intro": "Sen yayın yaparken yemek yiyen küçük bir evcil hayvan: canlı geçen her 5 dakika için bir atıştırmalık. Yedikçe büyür, bir gün aç kalınca uyur ve asla ölmez.",
+      "name": "Ad",
+      "namePlaceholder": "Evcil hayvanına ad ver",
+      "color": "Renk",
+      "hatch": "Yumurtayı kuluçkaya yatır",
+      "hatched": "Yumurtan hazır. Çıkması için canlı yayına geç.",
+      "save": "Kaydet",
+      "saved": "Kaydedildi",
+      "showOnProfile": "Profilimde göster",
+      "showOnStream": "Yayınımın köşesinde göster",
+      "feeding": "İzleyiciler kanal puanlarıyla besleyebilir",
+      "cost": "Atıştırmalık başına puan",
+      "rules": "Her izleyici günde en fazla 20 atıştırmalık verebilir. Puanların parasal değeri yoktur.",
+      "feeders": "En çok besleyenler"
+    }
   }
 }
