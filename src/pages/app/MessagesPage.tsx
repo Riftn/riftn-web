@@ -80,7 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
-import { NotesRow } from '@/components/app/chat/NotesRow';
+import { NotesSheetHost, openNotesSheet } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -1189,6 +1189,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         conversations={conversations ?? []}
         myAddress={walletAddress}
         onPick={pickFromDrawer}
+        onNote={() => { setShowNewMessageDrawer(false); openNotesSheet(); }}
         onGroup={() => { setShowNewMessageDrawer(false); setNewChatKind('group'); }}
         onChannel={() => { setShowNewMessageDrawer(false); setNewChatKind('channel'); }}
       />
@@ -1724,14 +1725,6 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
               />
             )}
 
-            {/* Notes: a 24-hour line from you and the people you follow */}
-            {!guest && walletAddress && !inRequests && !showArchived && tabFilter === 'all' && !searchQuery.trim() && !isError && (
-              <NotesRow
-                me={{ address: walletAddress, username: (user as any)?.username ?? null, displayName: (user as any)?.displayName ?? null, avatarImageUrl: (user as any)?.avatarImageUrl ?? null }}
-                onMessage={author => handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser)}
-              />
-            )}
-
             {/* Message requests: people you don't follow */}
             {inRequests && <MessageRequestsHeader onBack={() => { setShowRequests(false); if (activeTab === 'requests') setActiveTab('all'); }} />}
             {!inRequests && !showArchived && tabFilter === 'all' && !searchQuery.trim() && !isLoading && !isError && requestConversations.length > 0 && (!tabsOn || !requestsTabShown) && (
@@ -1920,9 +1913,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
         open={showMessageSelector}
         onOpenChange={setShowMessageSelector}
         onSelectDM={() => setShowNewConversation(true)}
+        onSelectNote={openNotesSheet}
         onSelectGroup={() => setNewChatKind('group')}
         onSelectChannel={() => setNewChatKind('channel')}
       />
+
+      {!guest && walletAddress && (
+        <NotesSheetHost onMessage={author => handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser)} />
+      )}
 
       <NewGroupChannelSheet
         kind={newChatKind ?? 'group'}

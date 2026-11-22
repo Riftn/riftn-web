@@ -1,6 +1,6 @@
 {
-  "modules": 799,
-  "sourceBytes": 4806815,
+  "modules": 800,
+  "sourceBytes": 4812196,
   "files": [
     "server/public-page-locales.js",
     "src/App.tsx",
@@ -798,6 +798,7 @@
     "src/lib/web-push.ts",
     "src/lib/wide-video-mode.ts",
     "src/lib/worldCupGiveaway.ts",
+    "src/lib/youtube-preview.ts",
     "src/main.tsx",
     "src/pages/app/HomePage.tsx",
     "src/store/storiesStore.ts"
