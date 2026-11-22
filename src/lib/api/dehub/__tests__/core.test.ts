@@ -14,6 +14,7 @@ import {
   getRefreshToken,
   setTokenExpiresAt,
   refreshTokenSharedDetailed,
+  setRefreshRetryDelaysForTests,
 } from '@/lib/api/dehub/core';
 
 // ── getMediaUrl ──
@@ -354,6 +355,52 @@ describe('refreshTokenSharedDetailed', () => {
 
     await expect(refreshTokenSharedDetailed()).resolves.toEqual({ ok: false, reason: 'transient' });
     expect(localStorage.getItem('dehub_refresh_token')).toBe('rt_valid');
+  });
+
+  // A slow server finished the rotation after the browser gave up waiting.
+  // Trying again with the same token gets that pair back; nobody is signed out.
+  it.each([
+    ['a network error', () => Promise.reject(new TypeError('Failed to fetch'))],
+    ['a 409', () => Promise.resolve(new Response(JSON.stringify({ message: 'Refresh already completed in another browser. Please retry.' }), { status: 409 }))],
+    ['a 502', () => Promise.resolve(new Response('bad gateway', { status: 502 }))],
+  ])('tries again after %s with the same token and keeps the session', async (_label, failOnce) => {
+    setRefreshRetryDelaysForTests([0, 0]);
+    try {
+      localStorage.setItem('dehub_token', 'old-access');
+      localStorage.setItem('dehub_refresh_token', 'rt_valid');
+      const fetchSpy = vi.spyOn(globalThis, 'fetch')
+        .mockImplementationOnce(failOnce as () => Promise<Response>)
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ accessToken: 'new-access', refreshToken: 'new-refresh', expiresIn: 900 }), { status: 200 })
+        );
+
+      const outcome = await refreshTokenSharedDetailed();
+
+      expect(outcome.ok).toBe(true);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(JSON.parse(String(fetchSpy.mock.calls[1][1]?.body)).refreshToken).toBe('rt_valid');
+      expect(localStorage.getItem('dehub_refresh_token')).toBe('new-refresh');
+    } finally {
+      setRefreshRetryDelaysForTests([]);
+    }
+  });
+
+  it('keeps the session when every try fails without an answer, and never retries a 401', async () => {
+    setRefreshRetryDelaysForTests([0, 0]);
+    try {
+      localStorage.setItem('dehub_refresh_token', 'rt_valid');
+      const down = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+      await expect(refreshTokenSharedDetailed()).resolves.toEqual({ ok: false, reason: 'transient' });
+      expect(down).toHaveBeenCalledTimes(3);
+      expect(localStorage.getItem('dehub_refresh_token')).toBe('rt_valid');
+
+      down.mockReset();
+      down.mockResolvedValue(new Response(JSON.stringify({ message: 'Invalid refresh token' }), { status: 401 }));
+      await expect(refreshTokenSharedDetailed()).resolves.toEqual({ ok: false, reason: 'revoked' });
+      expect(down).toHaveBeenCalledTimes(1);
+    } finally {
+      setRefreshRetryDelaysForTests([]);
+    }
   });
 
   it('shares one in-flight request across concurrent callers', async () => {
