@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPostImageLimitForBadge } from '@/lib/post-image-allowance';
+import { getPostMediaAllowanceForAccount, getPostImageLimitForBadge } from '@/lib/post-image-allowance';
 
 describe('getPostImageLimitForBadge', () => {
   it('keeps the four-image baseline for accounts without a badge', () => {
@@ -18,5 +18,19 @@ describe('getPostImageLimitForBadge', () => {
       tier: 'Megalodon',
       requirement: 10_000,
     })).toBe(40);
+  });
+});
+
+describe('media allowance before the quota read arrives', () => {
+  it('keeps a lent or display-only badge out of the allowance', () => {
+    const account = { username: 'algiers', ownBadgeBalance: 0, badgeBalance: 250_000 };
+    expect(getPostMediaAllowanceForAccount(account)).toEqual({ tier: null, bytes: 1024 ** 3 });
+  });
+
+  it('recognizes a full-rights grant and a valid earned lock', () => {
+    expect(getPostMediaAllowanceForAccount({ username: '@Mal', badgeBalance: 0 }).tier).toBe('Megalodon');
+    expect(getPostMediaAllowanceForAccount({
+      badgeBalance: 10_000, badgeLock: { tier: 'King Cobra', requirement: 10_000 },
+    }).bytes).toBe(1.5 * 1024 ** 3);
   });
 });

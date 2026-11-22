@@ -34,7 +34,7 @@ import { createVoiceRecorder, voiceRecordingBlob, voiceRecordingFile } from '@/l
 import { splitTitleFromText } from '@/features/post/lib/title-split';
 import { shrinkComicPages } from '@/lib/comic-pages';
 import type { ComicBorder } from '@/lib/comic-borders';
-import { getComicImageLimitForBadge, getPostMediaAllowanceForBadge, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
+import { getComicImageLimitForBadge, getPostMediaAllowanceForAccount, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
 // NOTE: mint/bounty helpers reach wallet/contract code (wagmi + web3auth).
 // usePostForm is reachable from eager UI (PostModal is used by the sidebar /
 // bottom nav / feed), so those helpers are dynamically imported inside
@@ -570,7 +570,7 @@ export function usePostForm(
   activeAddress.current = address;
   const [quotaRead, setQuotaRead] = useState<{ address: string; quota: PostQuotaStatus | null } | null>(null);
   const postQuota = quotaRead && quotaRead.address === address ? quotaRead.quota : null;
-  const fallback = getPostMediaAllowanceForBadge(user?.badgeBalance, user?.username, user?.badgeLock);
+  const fallback = getPostMediaAllowanceForAccount(user);
   const mediaUploadLimit = postQuota?.mediaBytesPerDay ?? fallback.bytes;
   const mediaUploadTier = (postQuota ? postQuota.tier : fallback.tier) || 'base';
   const mediaUploadLimitLabel = `${Number((mediaUploadLimit / (1024 ** 3)).toFixed(1))}GB`;
