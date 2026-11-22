@@ -643,7 +643,6 @@ function ProfileSettings() {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const debouncedUsername = useDebouncedValue(username, 300);
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
   
   // Load profile data via react-query so cached tab returns render instantly
   const { data: profileData, error: profileError } = useQuery({
@@ -864,7 +863,6 @@ function ProfileSettings() {
 
       // Reset file inputs so re-selecting the same file triggers onChange
       if (avatarInputRef.current) avatarInputRef.current.value = '';
-      if (coverInputRef.current) coverInputRef.current.value = '';
 
       await refreshUser();
       // Re-apply optimistic avatar/cover to AuthContext user (sidebar, navbar, etc.)
@@ -952,19 +950,6 @@ function ProfileSettings() {
       setAvatarFile(file);
       setRemoveAvatar(false);
       setAvatarPreview(prev => swapBlobPreview(prev, file));
-    }
-  };
-  
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(t('settings.imageTooLarge10'));
-        return;
-      }
-      setCoverFile(file);
-      setRemoveCover(false);
-      setCoverPreview(prev => swapBlobPreview(prev, file));
     }
   };
   
@@ -1108,7 +1093,7 @@ function ProfileSettings() {
         <button
           type="button"
           data-on-media
-          onClick={() => coverInputRef.current?.click()}
+          onClick={coverMenu.openPicker}
           aria-label={t('settings.clickCameraUpload')}
           className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
@@ -1116,13 +1101,6 @@ function ProfileSettings() {
             <Camera className="size-5 text-white" />
           </span>
         </button>
-        <input
-          ref={coverInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleCoverChange}
-        />
         {coverMenu.menu}
       </div>
 
