@@ -1,4 +1,5 @@
 import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { newStageChannelName } from '@/lib/stage-radio-show';
 import { useTranslation as _useCopy } from 'react-i18next';
 /**
  * StageContext - Global context for Stages (audio spaces)
@@ -74,6 +75,8 @@ export interface ScheduleSpaceInput {
   scheduledAt: string;
   /** Public URL of an already-uploaded cover graphic. */
   coverImageUrl?: string | null;
+  /** A radio show: music first, listed in Explore's Radio row. */
+  radio?: boolean;
 }
 
 interface StageContextType {
@@ -99,7 +102,7 @@ interface StageContextType {
   initialModalView: 'browse' | 'create' | 'live';
 
   // Actions
-  createSpace: (title: string, description?: string, coverImageUrl?: string | null) => Promise<AudioSpace | null>;
+  createSpace: (title: string, description?: string, coverImageUrl?: string | null, options?: { radio?: boolean }) => Promise<AudioSpace | null>;
   scheduleSpace: (input: ScheduleSpaceInput) => Promise<AudioSpace | null>;
   startScheduledSpace: (spaceId: string) => Promise<boolean>;
   cancelScheduledSpace: (spaceId: string) => Promise<void>;
@@ -1385,14 +1388,14 @@ export function StageProvider({ children }: { children: ReactNode }) {
   );
 
   const createSpace = useCallback(
-    async (title: string, description?: string, coverImageUrl?: string | null): Promise<AudioSpace | null> => {
+    async (title: string, description?: string, coverImageUrl?: string | null, options?: { radio?: boolean }): Promise<AudioSpace | null> => {
       if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return null; }
       if (roomSwitchInFlightRef.current) return null;
       if (!(await vacateCurrentRoom(null))) return null;
       roomSwitchInFlightRef.current = true;
       setIsLoading(true);
       try {
-        const channelName = `stage_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        const channelName = newStageChannelName(!!options?.radio);
 
         const { data: space, error } = await signed(
           supabase
@@ -1450,7 +1453,7 @@ export function StageProvider({ children }: { children: ReactNode }) {
       try {
         // The channel name is minted now and kept for the whole life of the
         // stage, so the link handed out today is the room people walk into.
-        const channelName = `stage_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        const channelName = newStageChannelName(!!input.radio);
 
         const { data: space, error } = await signed(
           supabase
