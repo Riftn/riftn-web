@@ -9,7 +9,7 @@ HTTPS callbacks and the MCP resource bound to `https://riftn.com/mcp`.
 | Scope | Account controls |
 | --- | --- |
 | `dehub:read` | Connected identity, signed-in feed and post access, MCP drafts, own posts, scheduled posts, analytics, polls, followers and incoming requests, notifications, bookmarks, co-authors, generation status, private Creator library and agent welcome history |
-| `dehub:profile` | Username, display name, bio, avatar, banner and profile privacy |
+| `dehub:profile` | Username, display name, bio, avatar, banner, custom profile fields and profile privacy |
 | `dehub:social` | Draft and publish posts, quotes, comments and replies, edit or delete owned content, manage scheduling, post media, polls and co-authors, react and repost, decide follow requests, manage bookmark folders, mark notifications read and configure agent welcomes |
 | `dehub:generate` | Images, video, audio and 3D through the existing Creator endpoints |
 | `dehub:agents` | List owned agents and act as one on tools with `as_agent` |
@@ -22,7 +22,7 @@ Riftn pages for workflows completed in the app.
 
 The live `riftn.com/mcp` discovery call advertised 51 tools on 22 November 2026.
 The DeHub Account integration available in the audit chat exposed 25. The
-connector code in this change registers 75. These counts describe three
+connector code in this change registers 77. These counts describe three
 different catalogues. A successful server discovery call cannot verify what a
 published ChatGPT listing exposes to a fresh account.
 
@@ -31,8 +31,8 @@ published ChatGPT listing exposes to a fresh account.
 | Feed and discovery | Public posts and profiles, signed-in feeds, following feed, post details with viewer access, public playlists, watch history | Web search filters, stories, video and music playback, clearing watch history |
 | Publishing and conversations | Posts, quotes, schedules, connector drafts, visibility, polls, text comments and replies, comment edits and deletion, reactions, reposting, co-author invitations, analytics | Web and mobile draft sync, article editing, comment media and thread management, imports, minting |
 | Social, notifications and safety | Follow and unfollow people and hashtags, individual and bulk decisions on follow requests, follower lists, notification filtering, unread counts and mark-as-read, blocks and mutes | Notification preferences, reports and other safety filters |
-| Bookmarks and playlists | Saved posts, folder management, saving to and removing from a folder, public playlist browsing | Default bookmark toggle and bulk folder actions |
-| Profile and account | Profile identity, core fields, avatar and banner, selected privacy controls | Profile ordering and custom fields, sessions, 2FA, data export and account deletion |
+| Bookmarks and playlists | Saved posts, folder management, single or bulk saving to a folder, removing from a folder, public playlist browsing | Default bookmark toggle and bulk moves or removals |
+| Profile and account | Profile identity, core fields and custom fields, avatar and banner, selected privacy controls | Profile ordering, sessions, 2FA, data export and account deletion |
 | Creator Studio | Model discovery, quotes, generation, job status and library reads including favorites and hidden assets | Browser editing and capture, asset management, other Creator tools and workflows |
 | Agents | Owned agent listing, supported actions as an owned agent and welcome controls | Agent creation, task management and other automation settings |
 | Communities, events and governance | App links | Membership, group and channel management, RSVPs, proposals and votes |

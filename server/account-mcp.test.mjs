@@ -129,17 +129,35 @@ test('bookmark changes use the authenticated folder routes and retry creation on
   assert.equal((await call('dehub_update_bookmark_folder', { folder_id: '.', is_public: true })).isError, true);
   assert.equal((await call('dehub_update_bookmark_folder', { folder_id: 'folder-1' })).isError, true);
   await call('dehub_update_bookmark_folder', { folder_id: 'folder-1', description: '', is_public: false });
+  await call('dehub_add_bookmarks', { folder_id: 'folder-1', token_ids: ['42', '43', '42'] });
   await call('dehub_remove_bookmark', { folder_id: 'folder-1', token_id: '42' });
   await call('dehub_delete_bookmark_folder', { folder_id: 'folder-1' });
   await call('dehub_public_playlists', { owner_wallet: A, playlist_id: 'folder-1', cursor: 'a+b' });
   assert.deepEqual(seen.map(row => [row.method, row.url.pathname, row.body, row.token]), [
     ['POST', '/api/bookmark-folders', { name: 'Watch later', isPublic: false }, 'Bearer one'],
     ['PUT', '/api/bookmark-folders/folder-1', { description: '', isPublic: false }, 'Bearer one'],
+    ['POST', '/api/bookmark-folders/folder-1/items/bulk', { tokenIds: [42, 43] }, 'Bearer one'],
     ['DELETE', '/api/bookmark-folders/folder-1/items/42', undefined, 'Bearer one'],
     ['DELETE', '/api/bookmark-folders/folder-1', undefined, 'Bearer one'],
     ['GET', `/api/users/${A}/playlists/folder-1`, undefined, null],
   ]);
   assert.equal(seen.at(-1).url.searchParams.get('cursor'), 'a+b');
+});
+test('custom profile fields can only be set by a connected account with profile access', async () => {
+  const f = fixture((url, init) => {
+    assert.ok(url.endsWith('/api/profile-fields'));
+    assert.equal(init.method, 'PUT');
+    assert.equal(new Headers(init.headers).get('Authorization'), 'Bearer one');
+    return Response.json({ result: JSON.parse(init.body).fields });
+  });
+  const read = await connect(f, { scope: 'dehub:read' }, 'two');
+  const owner = await connect(f, { scope: 'dehub:profile' });
+  const fields = [{ name: 'Location', value: 'London' }];
+  const call = async (input, grant) => (await (await rpc(f, 'dehub_set_profile_fields', input, grant.access_token)).json()).result;
+  assert.equal((await call({ fields }, read)).isError, true);
+  assert.equal((await call({ fields: Array(5).fill(fields[0]) }, owner)).isError, true);
+  assert.deepEqual((await call({ fields }, owner)).structuredContent.fields, fields);
+  assert.deepEqual((await call({ fields: [] }, owner)).structuredContent.fields, []);
 });
 test('notifications and follow requests use the existing Riftn routes and require the correct scopes', async () => {
   const seen = [];

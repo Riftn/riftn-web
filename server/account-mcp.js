@@ -118,14 +118,14 @@ function tool(name, title, description, shape, scope, handler, { destructive = f
 tool('dehub_features', 'Discover Riftn account controls', 'List the available chat tools and find the relevant Riftn page for workflows completed in the app.', {}, null, async () => success({
   endpoint: RESOURCE,
   features: [
-    { feature: 'Profile and privacy', tools: ['dehub_profile','dehub_account','dehub_connected_profile','dehub_update_profile'], url: `${ORIGIN}/app/settings` },
+    { feature: 'Profile and privacy', tools: ['dehub_profile','dehub_account','dehub_connected_profile','dehub_update_profile','dehub_set_profile_fields'], url: `${ORIGIN}/app/settings` },
     { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_save_draft','dehub_drafts','dehub_delete_draft','dehub_create_post','dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_reschedule_post','dehub_fans_online','dehub_create_poll','dehub_poll','dehub_vote_poll','dehub_remove_poll_vote','dehub_close_poll','dehub_post_image_allowance','dehub_add_post_images','dehub_replace_post_image','dehub_replace_video_cover','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
     { feature: 'Your agents', tools: ['dehub_my_agents','dehub_agent_welcomes','dehub_set_agent_welcome','dehub_agent_welcome_log'], note: 'Pass as_agent to post, reply, react, repost, follow, edit the profile or manage notifications as one of your agents.' },
     { feature: 'Your feed, following and follow requests', tools: ['dehub_my_feed','dehub_read_post_as_me','dehub_watch_history','dehub_follow','dehub_follow_list','dehub_followed_tags','dehub_set_followed_tag','dehub_follow_requests','dehub_decide_follow_request','dehub_decide_all_follow_requests'] },
     { feature: 'Comment editing and post collaboration', tools: ['dehub_edit_comment','dehub_delete_comment','dehub_coauthors','dehub_invite_coauthor','dehub_answer_coauthor_invite','dehub_remove_coauthor'] },
     { feature: 'Notifications', tools: ['dehub_notifications','dehub_unread_notifications','dehub_mark_notification_read','dehub_mark_notifications_read'], url: `${ORIGIN}/app/notifications` },
     { feature: 'Blocks and mutes', tools: ['dehub_moderation_list','dehub_set_moderation'], url: `${ORIGIN}/app/settings` },
-    { feature: 'Bookmarks and playlists', tools: ['dehub_saved_posts','dehub_bookmark_folders','dehub_bookmark_items','dehub_save_bookmark','dehub_remove_bookmark','dehub_create_bookmark_folder','dehub_update_bookmark_folder','dehub_delete_bookmark_folder','dehub_public_playlists'], url: `${ORIGIN}/app/bookmarks` },
+    { feature: 'Bookmarks and playlists', tools: ['dehub_saved_posts','dehub_bookmark_folders','dehub_bookmark_items','dehub_save_bookmark','dehub_add_bookmarks','dehub_remove_bookmark','dehub_create_bookmark_folder','dehub_update_bookmark_folder','dehub_delete_bookmark_folder','dehub_public_playlists'], url: `${ORIGIN}/app/bookmarks` },
     { feature: 'Creator Studio', tools: ['dehub_creator_models','dehub_quote_generation','dehub_generate_content','dehub_generation_status','dehub_creator_library'], url: `${ORIGIN}/creator` },
   ],
   in_app: [
@@ -203,6 +203,12 @@ tool('dehub_connected_profile', 'Identify the linked Riftn profile', 'Return the
   if (!['string','number'].includes(typeof profileId) || !String(profileId).trim()) throw new Error('The connected profile has no persistent identity.');
   return success({ id: String(profileId), name: p.displayName || p.username || ctx.wallet, ...(p.username ? { nickname: `@${p.username}` } : {}) });
 }, { read: true, profile: true });
+tool('dehub_set_profile_fields', 'Replace my public profile fields', 'Replace the custom label and value rows on the connected person’s public profile. Read the current profile first. Include any existing rows the person wants to keep. An empty list clears every field.', {
+  fields: z.array(z.object({ name: text(100), value: text(1024) }).strict()).max(4),
+}, 'dehub:profile', async (a, ctx) => {
+  const data = unwrap(await api(ctx, '/profile-fields', 'PUT', { fields: a.fields }));
+  return success({ fields: Array.isArray(data) ? data : [] });
+}, { destructive: true, open: true, idempotent: true, cap: 'profile' });
 
 tool('dehub_update_profile', 'Update my Riftn profile', 'Change only the connected person\'s profile: bio, display name, username, avatar or cover. Images must come from Riftn uploads or the Creator library. Overwrites the selected profile fields.', {
   username: z.string().trim().toLowerCase().regex(/^[a-z0-9_-]{1,30}$/).optional(), bio: z.string().max(2000).optional(), display_name: text(100).optional(),
@@ -425,6 +431,11 @@ tool('dehub_saved_posts', 'Read my saved posts', 'Browse the connected person’
 tool('dehub_bookmark_folders', 'List my bookmark folders', 'Read the connected account\'s bookmark folders and playlists.', {}, 'dehub:read', async (_, ctx) => success(await api(ctx, '/bookmark-folders')), { read: true });
 tool('dehub_bookmark_items', 'Read a bookmark folder', 'Read posts saved in a folder accessible to the connected account.', { folder_id: text(100), page, limit }, 'dehub:read', async (a, ctx) => success(await api(ctx, `/bookmark-folders/${enc(a.folder_id)}/items?page=${a.page}&limit=${a.limit}`)), { read: true });
 tool('dehub_save_bookmark', 'Save a post to a folder', 'Save a post in an existing bookmark folder owned by the connected account.', { folder_id: text(100), token_id: id }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/bookmark-folders/${enc(a.folder_id)}/items`, 'POST', { tokenId: Number(a.token_id) })));
+tool('dehub_add_bookmarks', 'Save several posts to a bookmark folder', 'Add several posts at once to a folder owned by the connected person. Existing folder items stay in place.', {
+  folder_id: recordId, token_ids: z.array(id).min(1).max(100),
+}, 'dehub:social', async (a, ctx) => success(await api(ctx, `/bookmark-folders/${a.folder_id}/items/bulk`, 'POST', {
+  tokenIds: Array.from(new Set(a.token_ids.map(Number))),
+})), { open: true });
 tool('dehub_remove_bookmark', 'Remove a post from a bookmark folder', 'Remove a saved post from one owned folder without deleting the post.', {
   folder_id: recordId, token_id: id,
 }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/bookmark-folders/${a.folder_id}/items/${a.token_id}`, 'DELETE')), { destructive: true });
