@@ -2205,14 +2205,13 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
 
 
       <HomeShortcuts />
+      {!showFilterLoader && <StoryShelf />}
       {showFilterLoader ? (
         <FeedFilterLoader />
       ) : (isLoadingState || isAutoRetrying) ? (
         <FeedCardSkeletonList count={6} columns={colCount} />
       ) : (
         <>
-      {/* The Glass Shelf: your day, everyone live, and people's 24-hour moments */}
-      <StoryShelf />
 
           {/* Follow groups. Only in Following mode, and only once there is a
               group to pick — an empty row would be a permanent nudge to use a
