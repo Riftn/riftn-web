@@ -2892,7 +2892,15 @@
     "shipping": "In uitvoering",
     "noShippingYet": "Niets onderweg",
     "shippingAppearHere": "Verzoeken die gebouwd worden verschijnen hier.",
-    "loadFailed": "Kon verzoeken niet laden"
+    "loadFailed": "Kon verzoeken niet laden",
+    "track": {
+      "label": "Voortgang",
+      "asked": "Gevraagd",
+      "underReview": "In beoordeling",
+      "planned": "Gepland",
+      "inProgress": "Bezig",
+      "shipped": "Live"
+    }
   },
   "auth": {
     "accountDeleted": "Dit account is verwijderd. Je kunt je opnieuw aanmelden met een nieuw account.",

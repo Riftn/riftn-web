@@ -2703,7 +2703,15 @@
     "shipping": "Geliştiriliyor",
     "noShippingYet": "Devam eden bir şey yok",
     "shippingAppearHere": "Geliştirilmekte olan talepler burada görünecek.",
-    "loadFailed": "İstekler yüklenemedi"
+    "loadFailed": "İstekler yüklenemedi",
+    "track": {
+      "label": "İlerleme",
+      "asked": "İstendi",
+      "underReview": "İnceleniyor",
+      "planned": "Planlandı",
+      "inProgress": "Yapılıyor",
+      "shipped": "Yayında"
+    }
   },
   "auth": {
     "accountDeleted": "Bu hesap silindi. Yeni bir hesapla tekrar kaydolabilirsiniz.",

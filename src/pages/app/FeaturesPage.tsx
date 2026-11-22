@@ -70,7 +70,6 @@ import {
   useFeatureDeviceInfoIds,
   isFeatureStatusEditor,
   CATEGORY_LABELS,
-  STATUS_LABELS,
   type FeatureCategory,
   type FeatureSort,
   type FeatureStatus,
@@ -127,20 +126,6 @@ const SORTS: { id: FeatureSort; labelKey: string }[] = [
   { id: 'most_voted', labelKey: 'features.mostVoted' },
   { id: 'newest', labelKey: 'features.newest' },
 ];
-
-// Statuses worth surfacing on an open request. `open` is the default and adds
-// no information, and shipped/completed live on their own tab with their own
-// badge — so both are deliberately absent here and render nothing.
-//
-// Hues match mobile's STATUS_COLORS (dehub-mobile/hooks/useFeatureRequests.ts)
-// so the same request reads the same on both clients: amber = under review,
-// blue = planned, violet = in progress, red = declined.
-const STATUS_BADGE_STYLES: Partial<Record<FeatureStatus, string>> = {
-  under_review: 'bg-amber-400/15 text-amber-300/90 border-amber-300/25',
-  planned: 'bg-blue-400/15 text-blue-300/90 border-blue-300/25',
-  in_progress: 'bg-violet-400/15 text-violet-300/90 border-violet-300/25',
-  declined: 'bg-red-400/15 text-red-300/90 border-red-300/25',
-};
 
 /**
  * A request's attachments. One fills the card the way a single attachment
@@ -259,21 +244,6 @@ function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: FeatureStatus }) {
-  const style = STATUS_BADGE_STYLES[status];
-  if (!style) return null;
-  return (
-    <span
-      className={cn(
-        'text-[10px] font-medium px-2 py-0.5 rounded-lg border backdrop-blur-xl whitespace-nowrap',
-        style
-      )}
-    >
-      {STATUS_LABELS[status]}
-    </span>
   );
 }
 
