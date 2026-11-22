@@ -22715,7 +22715,9 @@
     "archived": "Arşivlenmiş",
     "archivedChats": "Arşivlenmiş sohbetler",
     "clearTitle": "Geçmiş temizlensin mi?",
-    "clearBody": "Bu sohbetteki her mesaj senin için kaybolur. Diğer kişi kendi kopyasını tutmaya devam eder."
+    "clearBody": "Bu sohbetteki her mesaj senin için kaybolur. Diğer kişi kendi kopyasını tutmaya devam eder.",
+    "translateOut": "Onların dilinde gönder",
+    "translateOutOff": "Yazdığım gibi gönder"
   },
   "chat": {
     "buyAlert": {
@@ -23176,5 +23178,17 @@
       "rules": "Her izleyici günde en fazla 20 atıştırmalık verebilir. Puanların parasal değeri yoktur.",
       "feeders": "En çok besleyenler"
     }
+  },
+  "dmTranslateOut": {
+    "showMine": "Yazdığımı göster",
+    "showTheirs": "Onların gördüğünü göster",
+    "showTranslation": "Çeviriyi göster",
+    "asTheySee": "Onların gördüğü",
+    "sentIn": "{{language}} olarak gönderildi",
+    "original": "Orijinal",
+    "translated": "Çevrildi",
+    "offToast": "Mesajların burada yazdığın gibi gider",
+    "onToast": "Mesajların burada artık {{language}} olarak gidiyor",
+    "noLanguage": "Henüz bir uygulama dili seçmediler, bu yüzden mesajların şimdilik yazdığın gibi gider"
   }
 }

@@ -8,6 +8,7 @@ import { getChatPrefs, setChatPref, type ChatPref, type ChatPrefPatch } from '@/
 import { deleteConversation as clearConversationMessages } from '@/lib/api/dehub/dm';
 import { messagesKeys, peerAddressForConversation } from '@/hooks/use-messages';
 import { clearEncryptedChats, registerConversationPeerResolver, setEncryptedChats } from '@/lib/dm-e2ee/encrypt-choice';
+import { setTranslateOutChats } from '@/lib/dm-translate-out';
 import type { DeHubConversation } from '@/lib/api/dehub';
 
 const KEY = ['dm-chat-prefs'] as const;
@@ -23,6 +24,7 @@ function applyPatch(prev: ChatPref | undefined, id: string, patch: ChatPrefPatch
     ...(patch.unread !== undefined ? { markedUnread: patch.unread } : {}),
     ...(patch.listed !== undefined ? { listedAt: patch.listed ? now : null } : {}),
     ...(patch.encrypted !== undefined ? { encryptedAt: patch.encrypted ? now : null } : {}),
+    ...(patch.translateOut !== undefined ? { translateOutAt: patch.translateOut ? now : null } : {}),
     ...(patch.seenReactions ? { reactions: null } : {}),
     ...(patch.mutedUntil !== undefined ? { mutedUntil: patch.mutedUntil === 'forever' ? FOREVER : patch.mutedUntil } : {}),
   };
@@ -64,8 +66,8 @@ export function useChatPrefs() {
     registerConversationPeerResolver((id) => peerAddressForConversation(queryClient, id, walletAddress));
   }, [queryClient, walletAddress]);
   useEffect(() => {
-    if (!isAuthenticated) clearEncryptedChats();
-    else if (data) setEncryptedChats(data);
+    if (!isAuthenticated) { clearEncryptedChats(); setTranslateOutChats(null); }
+    else if (data) { setEncryptedChats(data); setTranslateOutChats(data); }
   }, [isAuthenticated, data]);
 
   const byId = useMemo(() => {
@@ -80,12 +82,14 @@ export function useChatPrefs() {
     const next = applyPatch(prev, id, patch);
     queryClient.setQueryData<ChatPref[]>(KEY, [...before.filter((p) => p.conversationId !== id), next]);
     if (patch.encrypted !== undefined) setEncryptedChats(queryClient.getQueryData<ChatPref[]>(KEY));
+    if (patch.translateOut !== undefined) setTranslateOutChats(queryClient.getQueryData<ChatPref[]>(KEY));
     try {
       const saved = await setChatPref(id, patch);
       queryClient.setQueryData<ChatPref[]>(KEY, (cur = []) => [...cur.filter((p) => p.conversationId !== id), saved]);
     } catch {
       queryClient.setQueryData<ChatPref[]>(KEY, before);
       setEncryptedChats(before);
+      setTranslateOutChats(before);
       toast.error(t('chatMenu.saveFailed', "Couldn't save that, try again"));
     }
   }, [queryClient, t]);

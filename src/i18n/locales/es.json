@@ -22715,7 +22715,9 @@
     "archived": "Archivado",
     "archivedChats": "Chats archivados",
     "clearTitle": "¿Borrar historial?",
-    "clearBody": "Todos los mensajes de este chat desaparecerán para ti. La otra persona conservará su copia."
+    "clearBody": "Todos los mensajes de este chat desaparecerán para ti. La otra persona conservará su copia.",
+    "translateOut": "Enviar en su idioma",
+    "translateOutOff": "Enviar tal como escribo"
   },
   "chat": {
     "buyAlert": {
@@ -23176,5 +23178,17 @@
       "rules": "Cada espectador puede darle hasta 20 bocados al día. Los puntos no tienen valor en dinero.",
       "feeders": "Quién más la alimentó"
     }
+  },
+  "dmTranslateOut": {
+    "showMine": "Mostrar lo que escribí",
+    "showTheirs": "Mostrar lo que ven",
+    "showTranslation": "Mostrar traducción",
+    "asTheySee": "Como lo ven",
+    "sentIn": "Enviado en {{language}}",
+    "original": "Original",
+    "translated": "Traducido",
+    "offToast": "Tus mensajes aquí se envían tal como los escribes",
+    "onToast": "Tus mensajes aquí ahora se envían en {{language}}",
+    "noLanguage": "Aún no han elegido un idioma en la app, así que por ahora tus mensajes se envían tal como los escribes"
   }
 }

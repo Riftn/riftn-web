@@ -553,6 +553,28 @@ function FullScreenChatGallery() {
       <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
       <FullScreenChatShell inline chatOpen list={list} chat={chat} />
       <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Send in their language (you type Turkish, they read English)</h3>
+      <div data-translate-out-gallery className="grid gap-3 sm:grid-cols-2">
+        {[
+          { label: 'You (Turkish)', rows: [
+            { m: { ...msg('to-a', false, 'Selam! Bu akşam yayına geliyor musun?', ago(6)), original: { content: 'Hey! Are you coming to the stream tonight?', lang: 'tr' } } as DmMessage, mine: false },
+            { m: { ...msg('to-b', true, 'Yes, I will be there at nine', ago(5)), original: { content: 'Evet, dokuzda orada olacağım', lang: 'en' } } as DmMessage, mine: true },
+          ] },
+          { label: 'Them (English)', rows: [
+            { m: { ...msg('to-c', true, 'Selam! Bu akşam yayına geliyor musun?', ago(6)), original: { content: 'Hey! Are you coming to the stream tonight?', lang: 'tr' } } as DmMessage, mine: true },
+            { m: { ...msg('to-d', false, 'Yes, I will be there at nine', ago(5)), original: { content: 'Evet, dokuzda orada olacağım', lang: 'en' } } as DmMessage, mine: false },
+          ] },
+        ].map(side => (
+          <div key={side.label} className="overflow-hidden rounded-2xl border border-white/10">
+            <div className="px-4 pt-3 text-xs text-zinc-400">{side.label}</div>
+            <div data-chat-wallpaper className="chat-text-zone px-4 pb-4">
+              {side.rows.map(({ m, mine }) => (
+                <DmMessageBubble key={m._id} message={m} isOwnMessage={mine} cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
       <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
       <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
         <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">

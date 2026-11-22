@@ -22689,7 +22689,9 @@
     "archived": "Archived",
     "archivedChats": "Archived chats",
     "clearTitle": "Clear history?",
-    "clearBody": "Every message in this chat disappears for you. The other person keeps their copy."
+    "clearBody": "Every message in this chat disappears for you. The other person keeps their copy.",
+    "translateOut": "Send in their language",
+    "translateOutOff": "Send as I type"
   },
   "chat": {
     "buyAlert": {
@@ -23150,5 +23152,17 @@
       "rules": "Each viewer can feed it up to 20 snacks a day. Points have no cash value.",
       "feeders": "Fed it the most"
     }
+  },
+  "dmTranslateOut": {
+    "showMine": "Show what I wrote",
+    "showTheirs": "Show what they see",
+    "showTranslation": "Show translation",
+    "asTheySee": "As they see it",
+    "sentIn": "Sent in {{language}}",
+    "original": "Original",
+    "translated": "Translated",
+    "offToast": "Your messages here go as you type them",
+    "onToast": "Your messages here now go out in {{language}}",
+    "noLanguage": "They haven't picked an app language yet, so your messages go as you type them for now"
   }
 }

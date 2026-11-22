@@ -39,6 +39,7 @@ import { TipGemIcon } from '@/components/app/cards/TipGemIcon';
 import { useTranslation as useI18n } from 'react-i18next';
 import { useDmEncryption } from '@/hooks/use-dm-encryption';
 import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { languageName, peerLanguage, translateOutgoing } from '@/lib/dm-translate-out';
 import { encodeMediaDescriptor, type MediaDescriptor } from '@/lib/dm-e2ee/media';
 import { encryptedMediaLabel } from '@/lib/dm-e2ee/media-label';
 import { loadDecryptedBlob, loadDecryptedMedia } from '@/lib/dm-e2ee/media-cache';
@@ -685,9 +686,17 @@ const MessageBubble = memo(function MessageBubble({
       : []),
     [isOwnMessage, message.msgType, message.sender?.address, message.content],
   );
-  const bodyContent = assistantActions.length > 0
-    ? withoutAssistantActionLinks(message.content || '')
-    : message.content;
+  // Sent with "Send in their language": `content` is the line in the
+  // recipient's language, `original` what the sender typed. The sender sees
+  // their own words, the recipient sees theirs, and either can flip.
+  const sentPair = message.msgType === 'msg' && !message.isDeleted && message.original?.content
+    ? message.original : null;
+  const [pairFlipped, setPairFlipped] = useState(false);
+  const bodyContent = sentPair && isOwnMessage
+    ? sentPair.content
+    : assistantActions.length > 0
+      ? withoutAssistantActionLinks(message.content || '')
+      : message.content;
   const momentReply = useMemo(() => message.msgType === 'msg' && !message.isDeleted
     ? parseMomentReply(message.content, typeof window === 'undefined' ? undefined : window.location.origin) : null, [message.msgType, message.isDeleted, message.content]);
   const sharedLink = useMemo(
@@ -707,7 +716,9 @@ const MessageBubble = memo(function MessageBubble({
    * back until the send comes back with a real one.
    */
   const isUnsent = !!message.sendState || message._id.startsWith('temp-');
-  const [draftText, setDraftText] = useDraftState(`dm:edit:${message._id}`, message.content || '');
+  // You edit what you typed; it goes out in their language again on save.
+  const editSource = (sentPair ? sentPair.content : message.content) || '';
+  const [draftText, setDraftText] = useDraftState(`dm:edit:${message._id}`, editSource);
   const editPending = useRef(false);
   // Drives the Save button's spinner/disabled state. A confirmed edit can take
   // up to 15s (confirmChatDelivery's socket round-trip) and the ref above never
@@ -722,8 +733,8 @@ const MessageBubble = memo(function MessageBubble({
     finally { editPending.current = false; setIsSavingEdit(false); }
   };
   useEffect(() => {
-    if (isEditing) setDraftText.initialize(message.content || '');
-  }, [isEditing, message.content, setDraftText]);
+    if (isEditing) setDraftText.initialize(editSource);
+  }, [isEditing, editSource, setDraftText]);
   // Grows the edit box to fit the actual wrapped content instead of guessing
   // rows from newline count (a long single-paragraph message has none, so that
   // guess never got past its 2-row floor and clipped most of the text). Capped
@@ -747,19 +758,31 @@ const MessageBubble = memo(function MessageBubble({
   );
   const textContent = momentReply?.text ?? (isPostShare ? shareCaption : (bodyContent || ''));
   const {
-    isTranslated,
-    translatedText,
+    isTranslated: autoTranslated,
+    translatedText: autoTranslatedText,
     isLoading: isTranslating,
     isTooShort,
-    handleTranslate,
-    handleShowOriginal,
+    handleTranslate: autoTranslate,
+    handleShowOriginal: autoShowOriginal,
     // Messages you receive translate themselves, the same way room chats do:
     // 'chat' rules, so slang and names stay as typed and only lines that plainly
     // read as another language change. Sent as private text (never a training
     // tier), and the Auto-translate setting turns it off. Your own messages
     // stay as you wrote them.
-  } = useTranslation(textContent, isOwnMessage ? false : 'chat');
-  const { t: tr } = useI18n();
+  } = useTranslation(textContent, isOwnMessage || sentPair ? false : 'chat');
+  // A line that already went out in their language carries both versions, so
+  // flipping is local: no translator call.
+  const isTranslated = sentPair ? pairFlipped : autoTranslated;
+  const translatedText = sentPair ? (isOwnMessage ? message.content : sentPair.content) : autoTranslatedText;
+  const handleTranslate = useCallback(
+    () => (sentPair ? setPairFlipped(true) : autoTranslate()),
+    [sentPair, autoTranslate],
+  );
+  const handleShowOriginal = useCallback(
+    () => (sentPair ? setPairFlipped(false) : autoShowOriginal()),
+    [sentPair, autoShowOriginal],
+  );
+  const { t: tr, i18n } = useI18n();
 
   // A contract address or a $TICKER in a plain message cards up the same way it
   // does in a post. Entity shares are left alone — they already have a card, and
@@ -799,7 +822,8 @@ const MessageBubble = memo(function MessageBubble({
   };
   const copyable = !message.undecryptable && !!(isPostShare ? message.content : textContent)?.trim();
   const copyText = () => {
-    void navigator.clipboard?.writeText((message.content || '').trim()).then(
+    const shown = sentPair ? (isTranslated ? translatedText : textContent) : message.content;
+    void navigator.clipboard?.writeText((shown || '').trim()).then(
       () => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })),
       () => undefined,
     );
@@ -816,9 +840,28 @@ const MessageBubble = memo(function MessageBubble({
     return { url, kind };
   })();
   const copyMediaNow = () => { if (copyMediaTarget) copyMediaWithToast(copyMediaTarget.url, copyMediaTarget.kind, _copy); };
-  const canTranslate = !isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort;
+  const canTranslate = !!sentPair || (!isOwnMessage && message.msgType === 'msg' && !!textContent.trim() && !isTooShort);
   // Translate also translates every message above this one that still needs it.
-  const translateUp = useTranslateUp('dm', message._id, message.createdAt, canTranslate && !isTranslated && !isTranslating, handleTranslate);
+  const translateUpAll = useTranslateUp('dm', message._id, message.createdAt, !sentPair && canTranslate && !isTranslated && !isTranslating, handleTranslate);
+  const translateUp = sentPair ? handleTranslate : translateUpAll;
+  // What the flip on a line sent in their language does next.
+  const pairToggleLabel = !sentPair ? ''
+    : isOwnMessage
+      ? (isTranslated
+        ? _copy('dmTranslateOut.showMine', { defaultValue: 'Show what I wrote' })
+        : _copy('dmTranslateOut.showTheirs', { defaultValue: 'Show what they see' }))
+      : (isTranslated
+        ? _copy('dmTranslateOut.showTranslation', { defaultValue: 'Show translation' })
+        : _copy('chatHold.showOriginal', { defaultValue: 'Original' }));
+  // The small note under the line: which version this is.
+  const pairNote = !sentPair ? ''
+    : isOwnMessage
+      ? (isTranslated
+        ? _copy('dmTranslateOut.asTheySee', { defaultValue: 'As they see it' })
+        : _copy('dmTranslateOut.sentIn', { defaultValue: 'Sent in {{language}}', language: languageName(sentPair.lang, i18n.language) }))
+      : (isTranslated
+        ? _copy('dmTranslateOut.original', { defaultValue: 'Original' })
+        : _copy('dmTranslateOut.translated', { defaultValue: 'Translated' }));
   const menuActions: MessageMenuAction[] = [];
   const holdActions: ChatHoldAction[] = [];
   if (menuable && message.msgType !== 'tip') {
@@ -829,7 +872,9 @@ const MessageBubble = memo(function MessageBubble({
       copy: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }),
       forward: tr('messages.forward'),
       download: _copy('copy.d6eafe823591', { defaultValue: 'Download' }),
-      translate: isTranslated ? _copy('chatHold.showOriginal', { defaultValue: 'Original' }) : _copy('chatHold.translate', { defaultValue: 'Translate' }),
+      translate: sentPair
+        ? pairToggleLabel
+        : isTranslated ? _copy('chatHold.showOriginal', { defaultValue: 'Original' }) : _copy('chatHold.translate', { defaultValue: 'Translate' }),
       del: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }),
       select: _copy('msgSelect.select', { defaultValue: 'Select' }),
     };
@@ -1416,7 +1461,19 @@ const MessageBubble = memo(function MessageBubble({
           {/* Image captions get the control too. They had none: the gate was
               msgType === 'msg', so a caption was auto-translated on mount and
               could not be put back. */}
-          {!isTooShort && !message.isDeleted &&
+          {sentPair ? (
+            <button
+              type="button"
+              onClick={isTranslated ? handleShowOriginal : handleTranslate}
+              data-dm-translate-out
+              className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 -my-0.5 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
+              title={pairToggleLabel}
+              aria-label={pairToggleLabel}
+            >
+              <Languages className="w-3 h-3" />
+              <span>{pairNote}</span>
+            </button>
+          ) : !isTooShort && !message.isDeleted &&
             (message.msgType === 'msg' || (message.msgType === 'media' && !!message.content)) && (
             <button
               type="button"
@@ -1585,7 +1642,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const { isBanned: accountBanned } = useBannedAccount();
   const { setCallMessageHandler } = useCallActions();
   const queryClient = useQueryClient();
-  const { t: tr } = useI18n();
+  const { t: tr, i18n } = useI18n();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
@@ -1989,6 +2046,30 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
   const { byId: chatPrefsById, update: updateChatPref } = useChatPrefs();
   const canToggleEncryption = !isGroupChat && /^[0-9a-f]{24}$/i.test(conversation.id || '');
   const chatEncrypted = canToggleEncryption && !!chatPrefsById.get(conversation.id)?.encryptedAt;
+  // "Send in their language": your lines go out translated into the language
+  // they read Riftn in. Not offered while the chat is encrypted.
+  const canTranslateOut = canToggleEncryption && !chatEncrypted;
+  const translateOutOn = canTranslateOut && !!chatPrefsById.get(conversation.id)?.translateOutAt;
+  const toggleTranslateOut = useCallback(() => {
+    const on = !translateOutOn;
+    void updateChatPref(conversation.id, { translateOut: on });
+    if (!on) {
+      toast(tr('dmTranslateOut.offToast', { defaultValue: 'Your messages here go as you type them' }));
+      return;
+    }
+    void peerLanguage(conversation.id).then((lang) => {
+      if (lang) {
+        toast.success(tr('dmTranslateOut.onToast', {
+          defaultValue: 'Your messages here now go out in {{language}}',
+          language: languageName(lang, i18n.language),
+        }));
+      } else {
+        toast(tr('dmTranslateOut.noLanguage', {
+          defaultValue: "They haven't picked an app language yet, so your messages go as you type them for now",
+        }));
+      }
+    });
+  }, [translateOutOn, conversation.id, updateChatPref, tr, i18n.language]);
   const toggleEncryption = useCallback(() => {
     const on = !chatEncrypted;
     void updateChatPref(conversation.id, { encrypted: on });
@@ -2434,13 +2515,23 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
     if (!trimmed || !original) {
       return false;
     }
-    if (trimmed === original.content) return true;
+    if (trimmed === (original.original?.content ?? original.content)) return true;
 
     let wire: { content: string; encrypted: boolean };
+    let translated: Awaited<ReturnType<typeof translateOutgoing>> = null;
     try {
-      // Same rule as a fresh send: encrypted when both sides have keys.
-      wire = await prepareOutgoing(otherUser?.address, trimmed);
-      await emitEditMessage({ dmId: resolvedConversationId, messageId, content: wire.content });
+      // Same rules as a fresh send: in their language when that is on for
+      // this chat, otherwise encrypted when both sides have keys.
+      translated = await translateOutgoing(resolvedConversationId, trimmed);
+      wire = translated
+        ? { content: translated.content, encrypted: false }
+        : await prepareOutgoing(otherUser?.address, trimmed);
+      await emitEditMessage({
+        dmId: resolvedConversationId,
+        messageId,
+        content: wire.content,
+        ...(translated ? { original: translated.original, translatedTo: translated.lang } : {}),
+      });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : _copy("copy.e408e6277aae", { defaultValue: "Could not save the edit." }));
       return false;
@@ -2452,7 +2543,15 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         ...page,
         items: page.items.map((m: DmMessage) =>
           m._id === messageId
-            ? { ...m, content: trimmed, encrypted: wire.encrypted || m.encrypted, undecryptable: false, isEdited: true, editedAt: new Date().toISOString() }
+            ? {
+                ...m,
+                content: translated ? translated.content : trimmed,
+                original: translated ? { content: translated.original, lang: translated.lang } : null,
+                encrypted: wire.encrypted || m.encrypted,
+                undecryptable: false,
+                isEdited: true,
+                editedAt: new Date().toISOString(),
+              }
             : m
         ),
       }));
@@ -3282,6 +3381,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 <ChatOptionsDropdownItems
                   {...options}
                   onToggleEncryption={canToggleEncryption ? toggleEncryption : undefined}
+                  onToggleTranslateOut={canTranslateOut ? toggleTranslateOut : undefined}
                   isBlocked={isBlocked}
                   onBlock={handleToggleBlock}
                   onDelete={() => setShowDeleteDialog(true)}
@@ -3329,6 +3429,17 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
                 {chatEncrypted
                   ? tr('chatMenu.encryptOff', { defaultValue: 'Turn off encryption' })
                   : tr('chatMenu.encrypt', { defaultValue: 'Encrypt chat' })}
+              </DropdownMenuItem>
+            )}
+            {canTranslateOut && (
+              <DropdownMenuItem
+                className="text-zinc-300 focus:text-white focus:bg-zinc-700 cursor-pointer"
+                onClick={toggleTranslateOut}
+              >
+                <Languages className="w-4 h-4 mr-2" />
+                {translateOutOn
+                  ? tr('chatMenu.translateOutOff', { defaultValue: 'Send as I type' })
+                  : tr('chatMenu.translateOut', { defaultValue: 'Send in their language' })}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem

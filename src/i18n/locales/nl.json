@@ -22963,7 +22963,9 @@
     "archived": "Gearchiveerd",
     "archivedChats": "Gearchiveerde chats",
     "clearTitle": "Geschiedenis wissen?",
-    "clearBody": "Elk bericht in deze chat verdwijnt voor jou. De andere persoon behoudt zijn kopie."
+    "clearBody": "Elk bericht in deze chat verdwijnt voor jou. De andere persoon behoudt zijn kopie.",
+    "translateOut": "Versturen in hun taal",
+    "translateOutOff": "Versturen zoals ik typ"
   },
   "chat": {
     "buyAlert": {
@@ -23424,5 +23426,17 @@
       "rules": "Elke kijker kan het tot 20 snacks per dag geven. Punten hebben geen geldwaarde.",
       "feeders": "Heeft het het meest gevoerd"
     }
+  },
+  "dmTranslateOut": {
+    "showMine": "Toon wat ik schreef",
+    "showTheirs": "Toon wat zij zien",
+    "showTranslation": "Toon vertaling",
+    "asTheySee": "Zoals zij het zien",
+    "sentIn": "Verstuurd in het {{language}}",
+    "original": "Origineel",
+    "translated": "Vertaald",
+    "offToast": "Je berichten hier gaan zoals je ze typt",
+    "onToast": "Je berichten hier gaan nu in het {{language}}",
+    "noLanguage": "Ze hebben nog geen app-taal gekozen, dus je berichten gaan voorlopig zoals je ze typt"
   }
 }
