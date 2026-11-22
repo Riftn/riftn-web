@@ -64,6 +64,8 @@
           d.dataset.systemTone = tone;
           // Post separator: thin lines instead of cards (src/lib/feed-separator.ts).
           if (localStorage.getItem('dehub.feedSeparator') === 'line') d.dataset.feedSep = 'line';
+          // Own-line bubbles in General Chat (src/lib/chat-own-bubble.ts).
+          if (localStorage.getItem('riftn.chat.ownBubble') === 'true') d.dataset.chatOwnBubble = '';
           d.dataset.shortsEnabled = localStorage.getItem('shorts-enabled') === 'false' ? 'false' : 'true';
           d.dataset.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true' ? 'true' : 'false';
 

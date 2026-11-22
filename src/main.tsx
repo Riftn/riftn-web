@@ -59,6 +59,9 @@ import "./styles/desktop-kit.css";
 import "./styles/feed-separator.css";
 // Mirrors the saved post separator onto <html> before the feed paints.
 import "./lib/feed-separator";
+import "./styles/chat-own-bubble.css";
+// Mirrors the saved Public Chat bubble choice onto <html>.
+import "./lib/chat-own-bubble";
 // Canvas-theme chrome (war / osaka / jungle) is NOT imported here: each theme
 // is a separate CSS chunk loaded by src/lib/theme-css.ts, only for the theme in
 // use. Their cascade order (after index.css) is preserved because a dynamic

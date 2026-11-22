@@ -804,6 +804,8 @@
     "chatDeleteEveryoneDesc": "Waar dat kan. Een bericht van iemand anders in een groep verdwijnt alleen voor jou",
     "postLanding": "Na het plaatsen",
     "feedSeparator": "Scheiding tussen berichten",
+    "chatOwnBubble": "Ballonnen voor mijn berichten in de Openbare chat",
+    "chatOwnBubbleDesc": "Je eigen berichten staan in een ballon, zoals in privéchats",
     "feedSeparatorDesc": "Kaarten rond elk bericht, of een dunne lijn ertussen",
     "feedSeparatorBento": "Bento-kaarten",
     "feedSeparatorBentoDesc": "Elk bericht in een eigen afgeronde kaart",

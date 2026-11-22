@@ -804,6 +804,8 @@
     "chatDeleteEveryoneDesc": "Mümkün olduğunda. Bir gruptaki başkasının mesajı yalnızca senden silinir",
     "postLanding": "Paylaştıktan sonra",
     "feedSeparator": "Gönderi ayırıcı",
+    "chatOwnBubble": "Genel Sohbet'te mesajlarım için baloncuk",
+    "chatOwnBubbleDesc": "Kendi mesajların özel sohbetlerdeki gibi bir baloncuk içinde görünür",
     "feedSeparatorDesc": "Her gönderinin çevresinde kart ya da aralarında ince bir çizgi",
     "feedSeparatorBento": "Bento kartlar",
     "feedSeparatorBentoDesc": "Her gönderi kendi yuvarlak kartında",

@@ -817,6 +817,8 @@
     "chatDeleteEveryoneDesc": "When you can. Someone else’s message in a group still goes for you only",
     "postLanding": "After you post",
     "feedSeparator": "Post separator",
+    "chatOwnBubble": "Bubbles for my messages in Public Chat",
+    "chatOwnBubbleDesc": "Your own messages sit in a bubble, like in private chats",
     "feedSeparatorDesc": "Cards around each post, or a thin line between them",
     "feedSeparatorBento": "Bento cards",
     "feedSeparatorBentoDesc": "Each post sits in its own rounded card",

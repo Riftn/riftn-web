@@ -804,6 +804,8 @@
     "chatDeleteEveryoneDesc": "عندما يكون ذلك ممكنًا. رسالة شخص آخر في مجموعة تُحذف لديك فقط",
     "postLanding": "بعد النشر",
     "feedSeparator": "فاصل المنشورات",
+    "chatOwnBubble": "فقاعات لرسائلي في الدردشة العامة",
+    "chatOwnBubbleDesc": "تظهر رسائلك داخل فقاعة، كما في المحادثات الخاصة",
     "feedSeparatorDesc": "بطاقات حول كل منشور أو خط رفيع بينها",
     "feedSeparatorBento": "بطاقات بينتو",
     "feedSeparatorBentoDesc": "كل منشور داخل بطاقته المستديرة",

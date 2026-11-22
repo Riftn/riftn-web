@@ -160,6 +160,7 @@ import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting
 import { FeedSeparatorSetting } from '@/components/app/settings/FeedSeparatorSetting';
 import { ShareIconSetting } from '@/components/app/settings/ShareIconSetting';
 import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
+import { ChatOwnBubbleSetting } from '@/components/app/settings/ChatOwnBubbleSetting';
 import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
 import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
 import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
@@ -2822,6 +2823,7 @@ function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; t
           <FeedTogglesSetting />
           <PostLandingSetting />
           <ChatTextSizeSetting />
+          <ChatOwnBubbleSetting />
           <ChatDeleteChoiceSetting />
           <ChatReactionStyleSetting />
           <SettingsRow

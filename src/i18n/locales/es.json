@@ -804,6 +804,8 @@
     "chatDeleteEveryoneDesc": "Cuando se pueda. El mensaje de otra persona en un grupo solo se elimina para ti",
     "postLanding": "Después de publicar",
     "feedSeparator": "Separador de publicaciones",
+    "chatOwnBubble": "Burbujas para mis mensajes en el Chat público",
+    "chatOwnBubbleDesc": "Tus mensajes aparecen en una burbuja, como en los chats privados",
     "feedSeparatorDesc": "Tarjetas alrededor de cada publicación o una línea fina entre ellas",
     "feedSeparatorBento": "Tarjetas bento",
     "feedSeparatorBentoDesc": "Cada publicación va en su propia tarjeta redondeada",

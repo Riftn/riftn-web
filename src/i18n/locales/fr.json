@@ -804,6 +804,8 @@
     "chatDeleteEveryoneDesc": "Quand c’est possible. Le message de quelqu’un d’autre dans un groupe n’est supprimé que pour vous",
     "postLanding": "Après la publication",
     "feedSeparator": "Séparateur de publications",
+    "chatOwnBubble": "Bulles pour mes messages dans le Chat public",
+    "chatOwnBubbleDesc": "Vos messages s’affichent dans une bulle, comme dans les discussions privées",
     "feedSeparatorDesc": "Des cartes autour de chaque publication, ou une fine ligne entre elles",
     "feedSeparatorBento": "Cartes bento",
     "feedSeparatorBentoDesc": "Chaque publication dans sa propre carte arrondie",
