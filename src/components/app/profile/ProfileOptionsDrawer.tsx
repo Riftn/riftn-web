@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { DISPLAY_WALLET_OVERRIDES } from './ProfileConstants';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
 import { LendBadgeRows } from './LendBadgeRows';
+import { ProfileMuteButton } from './ProfileMuteButton';
 import { AskAiMenuRow, ProfileAskAiRows } from './ProfileAskAiRows';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
@@ -231,6 +232,7 @@ export function ProfileOptionsContent({
                   <span className="text-red-400 font-medium">{t('profileOptions.unfollow')}</span>
                 </button>
               )}
+              {profile.walletAddress && <ProfileMuteButton address={profile.walletAddress} />}
               {/* Report User */}
               <button
                 onClick={() => { setShareSheetOpen(false); setReportModalOpen(true); }}
