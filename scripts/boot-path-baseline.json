@@ -1,6 +1,6 @@
 {
   "modules": 830,
-  "sourceBytes": 5056221,
+  "sourceBytes": 5055754,
   "files": [
     "server/public-page-locales.js",
     "src/App.tsx",
@@ -210,7 +210,6 @@
     "src/components/app/unlock/unlock-reveal-kind.ts",
     "src/components/app/video/MediaControlIcon.tsx",
     "src/components/app/video/StoryboardPreview.tsx",
-    "src/components/app/video/TranscodingBadge.tsx",
     "src/components/app/video/VideoGlitchLoaderLazy.tsx",
     "src/components/app/video/WideAmbientFill.tsx",
     "src/components/app/video/WideVideoRails.tsx",
@@ -776,6 +775,7 @@
     "src/lib/stage-notifications.ts",
     "src/lib/stage-pitch-shifter.ts",
     "src/lib/stage-playback.ts",
+    "src/lib/stage-radio-show.ts",
     "src/lib/stage-radio.ts",
     "src/lib/stage-recording-mix.ts",
     "src/lib/stage-recording-source.ts",

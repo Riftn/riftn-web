@@ -1,5 +1,11 @@
 {
-  "dmVideo": {"timerOnOpen": "Once they open it", "timerOpenBody": "Gone for both of you {{value1}} after they first open it.", "edit": "Edit video", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Edit before sending", "close": "Close", "replace": "Replace", "hiddenUntilTap": "Hidden until they tap it", "pause": "Pause", "play": "Play video", "mute": "Mute", "unmute": "Unmute", "scrub": "Scrub through the video", "addMore": "Add photos or videos", "trimAria": "Drag the ends to trim", "coverAria": "Tap a frame to set the cover", "coverHint": "Tap a frame to set the cover", "coverOwn": "Your picture", "coverAuto": "Auto", "uploadCover": "Upload a cover picture", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "They see it right away", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Blurred until they tap it", "hidePrice": "Hide behind a price", "hidePriceBody": "Blurred until they pay you", "priceUnavailable": "Not in this chat", "timerOff": "Off", "timerOffBody": "It stays in the chat.", "timerViewBody": "Gone for both of you once they have seen it.", "confirm": "Confirm", "lockedFor": "Unlock for {{value1}} DHB", "lockedForUsd": "Unlock for {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} kept", "timerTimeBody": "Gone for both of you {{value1}} after you send it."},
+  "ownKeys": {"working": "Working", "invalid": "Rejected, replace it", "noCredit": "Out of credit", "disabled": "Turned off by Riftn", "failed": "Something went wrong. Try again.", "savedNoCredit": "{{name}} key saved, but the account is out of credit.", "saved": "{{name}} key saved. Tools on {{name}} now use your account.", "removed": "{{name}} key removed.", "title": "Your own AI keys", "description": "Add a key from an AI provider and Creator tools run on your account instead. Riftn charges nothing for those jobs. Keys are encrypted and never shown again.", "replace": "Replace", "check": "Check", "remove": "Remove", "add": "Add key", "paste": "Paste your {{name}} key", "save": "Save", "cancel": "Cancel", "getKey": "Get a {{name}} key", "showLess": "Show only my keys", "addAnother": "Add another provider"},
+  "resetWallet": {"mismatch": "Passwords don't match", "tooShort": "Password must be at least {{count}} characters", "breached": "This password has appeared in a data breach. Choose a different one", "weak": "Choose a stronger password (mix letters, numbers and symbols)", "failed": "Could not reset your wallet. Nothing was moved. Try again.", "twoFactor": "Enter the code from your authenticator app to move your account.", "funds": "Tokens, NFTs and other balances do not move. They stay at the old address. If you can still open the old wallet, send them out first.", "doneTitle": "Your account is on its new wallet", "doneBody": "Your username, posts and followers came with it. The old wallet can no longer sign in. Back up the new wallet now from Back up wallet just below.", "close": "Done", "noLogin": "A reset is proved with your account's email or Google sign-in, not the old wallet, because anyone holding the old key could sign too. This account has no sign-in email yet.", "noLoginStep1": "Add an email under Sign-in on this page.", "noLoginStep2": "Log out, then log in with that email.", "noLoginStep3": "Come back here and press Reset.", "goToSignIn": "Add a sign-in email", "relogin": "To prove it is you, log out and log back in with your sign-in email ({{email}}) or Google, then come back here.", "reloginNoEmail": "To prove it is you, log out and log back in with your account's email or Google, then come back here.", "logOut": "Log out", "intro": "Makes a new Riftn wallet and moves your username, posts, followers and messages onto it. Use this if your wallet is lost or someone else has its key. The old wallet stops working for sign-in.", "password": "New wallet password (min {{count}} chars)", "confirm": "Confirm password", "twoFactorPlaceholder": "Authenticator code", "ack": "I understand my old funds stay in the old wallet.", "working": "Moving your account…", "submit": "Reset wallet", "title": "Reset wallet", "rowDesc": "Lost your wallet, or someone else has its key? Move your account to a new wallet. Your username, posts and followers come with you.", "rowButton": "Reset"},
+  "twoFactor": {"rowTitle": "Two-step sign-in", "statusOn": "On", "rowOnDesc": "New sign-ins need a code from your authenticator app. {{count}} backup codes left.", "rowOffDesc": "Ask for a code from your authenticator app at sign-in.", "manage": "Manage", "turnOn": "Turn on", "wrongCode": "That code didn’t match. Try the newest one in your app.", "signingInAs": "Signing in as", "signIn": "Sign in", "trustDevice": "Don’t ask again on this device for 30 days", "useBackupShort": "Use a backup code", "useApp": "Use my authenticator app", "useAnotherShort": "Different account", "lostEverything": "Lost your phone and your backup codes? Contact support", "turnedOff": "Two-step sign-in is off", "introTitle": "Add a second lock", "linkTitle": "Link your authenticator app", "confirmTitle": "Enter the 6-digit code", "codesTitle": "Save your backup codes", "turnOffTitle": "Turn off two-step sign-in", "newCodesTitle": "Get new backup codes", "manageTitle": "Two-step sign-in", "introBody": "After you sign in, Riftn asks for a code from an app on your phone. Someone with your password, email or wallet still can’t get in.", "introPoint1": "A new code every 30 seconds, only on your phone", "introPoint2": "Works however you sign in: Google, Apple, email, phone or wallet", "introPoint3": "Asked once per device, not every time you open Riftn", "introApps": "Use any authenticator app: Google Authenticator, Microsoft Authenticator, Authy, 1Password or your phone’s Passwords app.", "getStarted": "Set it up", "linkBodyPhone": "Tap below to add Riftn to your authenticator app, then come back here.", "openApp": "Add to authenticator app", "showQr": "App on another device? Show QR code", "linkBodyDesktop": "Open your authenticator app, tap + and scan this code with your phone camera.", "linkedNext": "I’ve added it", "confirmBody": "Type the code your app shows for Riftn. This proves it’s linked before we switch anything on.", "turnOffBody": "Enter a code from your authenticator app to turn this off. Your account goes back to one lock.", "newCodesBody": "Enter a code from your authenticator app. Your old backup codes stop working right away.", "codeHint": "Codes change every 30 seconds", "turnOff": "Turn off", "verify": "Verify and turn on", "makeNewCodes": "Make new codes", "nowOn": "Two-step sign-in is on", "codesBody": "Lose your phone? Each of these codes gets you in once. Keep them somewhere safe, like a password manager.", "codesCopied": "Backup codes copied", "codesSaved": "I’ve saved these codes", "since": "Authenticator app since {{date}}", "authenticatorApp": "Authenticator app", "backupCodes": "Backup codes", "codesLeft": "{{count}} of 10 left", "getNew": "Get new", "newPhoneTip": "Changing phones? Most authenticator apps move your codes for you. If yours doesn’t, turn this off on the old phone and set it up again on the new one.", "setupKey": "Or type this setup key", "keyCopied": "Setup key copied"},
+  "chatTextSize": {"title": "Text size"},
+  "msgMenu": {"copyText": "Copy Text", "copyMedia": "Copy Media"},
+  "chatHold": {"copied": "Copied", "showOriginal": "Original", "translate": "Translate"},
+  "dmVideo": {"edit": "Edit video", "timerOpenBody": "Gone for both of you {{value1}} after they first open it.", "timerOnOpen": "Once they open it", "hiddenTag": "Hidden", "tapToEdit": "Tap to edit", "cover": "Cover", "trim": "Trim", "mirror": "Mirror", "rotate": "Rotate", "hide": "Hide", "timer": "Timer", "sheetTitleAny": "Edit before sending", "close": "Close", "replace": "Replace", "hiddenUntilTap": "Hidden until they tap it", "pause": "Pause", "play": "Play video", "mute": "Mute", "unmute": "Unmute", "scrub": "Scrub through the video", "addMore": "Add photos or videos", "trimAria": "Drag the ends to trim", "coverAria": "Tap a frame to set the cover", "coverHint": "Tap a frame to set the cover", "coverOwn": "Your picture", "coverAuto": "Auto", "uploadCover": "Upload a cover picture", "mirrored": "Mirrored", "original": "Original", "rotate90": "Rotate 90°", "showNormally": "Show normally", "showNormallyBody": "They see it right away", "hideUntilTap": "Hide until tapped", "hideUntilTapBody": "Blurred until they tap it", "hidePrice": "Hide behind a price", "hidePriceBody": "Blurred until they pay you", "priceUnavailable": "Not in this chat", "timerOff": "Off", "timerOffBody": "It stays in the chat.", "timerViewBody": "Gone for both of you once they have seen it.", "confirm": "Confirm", "lockedFor": "Unlock for {{value1}} DHB", "lockedForUsd": "Unlock for {{value1}}", "editItem": "Edit item {{value1}}", "kept": "{{time}} kept", "timerTimeBody": "Gone for both of you {{value1}} after you send it."},
   "assistantCards": {"requestDraft": "Public request draft", "postRequest": "Post to Requests", "possibleDuplicates": "Possible duplicates", "viewPostedRequest": "View posted request", "fitting": "Fitting", "loadFailed": "This card could not be loaded. Sign in, or ask again.", "failed": "That did not work. Try again.", "reactOne": "React to 1 post", "reactMany": "React to {{count}} posts", "follow": "Follow {{count}}", "unfollow": "Unfollow {{count}}", "allowChats": "Let the assistant read your chats?", "stopChats": "Stop the assistant reading your chats?", "confirmReact": "React", "confirmFollow": "Follow", "confirmUnfollow": "Unfollow", "confirmAllow": "Allow", "confirmStop": "Stop", "skipsAlready": "Skips {{count}} you already reacted to", "allowChatsWhy": "Only you see what it reads. Direct chats only, and end-to-end encrypted ones stay private. Ask it to stop any time.", "pickReaction": "Pick a reaction", "progress": "{{done}} of {{total}}", "doneReact": "Reacted to {{count}} posts", "doneAllow": "Allowed. Ask your question again.", "doneStop": "Stopped. It can no longer read your chats.", "doneFollow": "Done for {{count}}", "expired": "This card expired. Ask again.", "cancelled": "Cancelled", "cancel": "Not now"},
   "postBg": {
     "addMedia": "Add a picture, GIF or video",
@@ -707,8 +713,8 @@
       "riftn": "Riftn"
     },
     "reorderHint": "Hold and drag any icon to rearrange",
-    "reorderHintGroups": "Hold and drag any icon to rearrange, or onto another tab to move it",
     "moveGroupHint": "Drop on another tab to move it there",
+    "reorderHintGroups": "Hold and drag any icon to rearrange, or onto another tab to move it",
     "reorderReset": "Reset",
     "reorderResetLong": "Reset menu order",
     "home": "Home",
@@ -798,6 +804,20 @@
     "heading": "Riftn Shorts"
   },
   "settings": {
+    "notificationShowCount": "Show the number on the bell",
+    "notificationShowCountDesc": "See how many notifications are unread instead of just the glow",
+    "messagesShowCount": "Show the number on Messages",
+    "messagesShowCountDesc": "See how many messages are unread instead of just the glow",
+    "wideMediaMode": "Long form media on wide screens",
+    "wideMediaModeDesc": "What fills the space beside tall and square videos and photos on a computer",
+    "wideVideoAmbient": "Ambient",
+    "wideMediaAmbientDesc": "The video or photo fills the width, with a soft blurred glow of itself on each side",
+    "wideVideoRails": "Glass rails",
+    "wideMediaRailsDesc": "The video or photo beside one glass panel with what it is, a Follow button and the top comments",
+    "wideVideoStandard": "Standard",
+    "wideMediaStandardDesc": "The video or photo on its own, as before",
+    "chatTextSize": "Chat text size",
+    "chatTextSizeDesc": "Bigger or smaller messages in every chat. Adds to your phone or browser text size.",
     "loginLook": {"title": "Sign-in screen", "desc": "How the Riftn logo and slogan move on the sign-in screen on this device.", "tube": "Tube TV", "vhs": "VHS tape", "led": "LED wall", "holo": "Hologram", "neon": "Neon glow", "3d": "3D", "flat": "Flat"}, "arrivalLook": {"title": "After you sign in", "desc": "What plays while your account loads, before your picture lands on the page. On this device.", "trace": "Trace", "tune": "Tune in", "rift": "Rift", "deck": "Deck", "glass": "Glass drop"},
     "chatCards": "Chats as cards",
     "chatCardsDesc": "Each chat on its own card. Turn off for a plain list with a line between chats.",
@@ -820,8 +840,8 @@
     "chatDeleteEveryoneDesc": "When you can. Someone else’s message in a group still goes for you only",
     "postLanding": "After you post",
     "feedSeparator": "Post separator",
-    "chatOwnBubble": "Bubbles for my messages in Public Chat",
     "chatOwnBubbleDesc": "Your own messages sit in a bubble, like in private chats",
+    "chatOwnBubble": "Bubbles for my messages in Public Chat",
     "feedSeparatorDesc": "Cards around each post, or a thin line between them",
     "feedSeparatorBento": "Bento cards",
     "feedSeparatorBentoDesc": "Each post sits in its own rounded card",
@@ -1441,6 +1461,9 @@
     "publicChatInBarDesc": "One tap into Public Chat from the bar at the bottom of the screen"
   },
   "common": {
+    "notNow": "Not now",
+    "copy": "Copy",
+    "download": "Download",
     "confirm": "Confirm",
     "mute": "Mute",
     "unmute": "Unmute",
@@ -12176,6 +12199,8 @@
     "footnote": "Badge tier is your Riftn tokens held plus staked on BNB Chain and Base — the same balance your badge is drawn from. The ladder is priced in dollars, so the token figures above are what each tier costs at the $0.001 sale price and the requirement falls as the token price rises; a tier you have already earned is never taken back by the price. A badge lent to you by a patron shows on your profile but does not raise your posting allowance — that comes from what you hold yourself. Allowances reset at 00:00 UTC, and a gigabyte here is 1,024 MB."
   },
   "postComposer": {
+    "descriptionOptional": "Description (optional)",
+    "whatsHappening": "What's happening?",
     "homeFeedRestrictedDescription": "This post is live on your profile and in Following, but it will not appear on the Home feed. Hold more Riftn tokens to unlock higher badges and more daily Home-feed reach.",
     "postCostShortfall": "This post costs {{amount}} tokens and you hold {{held}}.",
     "paymentConfirmingDescription": "Your tokens have been transferred. We will finish confirming the payment shortly.",
@@ -12948,8 +12973,8 @@
     "skippedOtherToast": "Skipped {{platforms}}: they couldn't take this post."
   },
   "dm": {
-    "openTimer": {"secs": "{{n}} sec", "oneMin": "1 min", "chip": "{{time}} once opened", "opened": "Opened", "tapPhoto": "Tap to view", "tapVideo": "Tap to watch", "goneAfter": "Disappears {{time}} after you open it"},
     "shareGroups": "Groups",
+    "openTimer": {"secs": "{{n}} sec", "oneMin": "1 min", "chip": "{{time}} once opened", "opened": "Opened", "tapPhoto": "Tap to view", "tapVideo": "Tap to watch", "goneAfter": "Disappears {{time}} after you open it"},
     "shareKindGroup": "Group",
     "shareKindChannel": "Channel",
     "shareKindCommunity": "Community",
