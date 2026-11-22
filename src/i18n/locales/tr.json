@@ -1079,6 +1079,7 @@
     "enableContentWarningsDesc": "Hassas içerikten önce uyarıları göster",
     "matureContent": "Yetişkin İçeriğini Göster",
     "matureContentDesc": "Akışlarınıza yetişkin ve sert içerikli gönderileri dahil eder ve zaten gördüklerinizdeki uyarıyı kaldırır. Varsayılan olarak kapalı.",
+    "matureContentPlaybackDesc": "Akışlarında yetişkinlere yönelik ve rahatsız edici gönderileri gösterir. Yetişkinlere yönelik videolar oynatılmadan önce onay ister. Varsayılan olarak kapalı.",
     "kidsMode": "Çocuk Modu",
     "kidsModeDesc": "Her yerde yalnızca çocuklar için yayınlanan gönderileri gösterir. Bir PIN onu geri kapatır.",
     "kidsModeSetPin": "Bir PIN SEÇİN",

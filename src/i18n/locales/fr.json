@@ -1079,6 +1079,7 @@
     "enableContentWarningsDesc": "Afficher les avertissements avant le contenu sensible",
     "matureContent": "Afficher le contenu pour adultes",
     "matureContentDesc": "Inclut les publications pour adultes et explicites dans vos fils, et retire l'avertissement sur celles que vous voyez déjà. Désactivé par défaut.",
+    "matureContentPlaybackDesc": "Inclut les publications pour adultes et explicites dans vos fils. Les vidéos pour adultes demandent toujours une confirmation avant la lecture. Désactivé par défaut.",
     "kidsMode": "Mode enfants",
     "kidsModeDesc": "N'affiche que les articles publiés pour les enfants, partout. Une ÉPINGLE l'éteint.",
     "kidsModeSetPin": "Choisir un CODE PIN",

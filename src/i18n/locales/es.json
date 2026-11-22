@@ -1079,6 +1079,7 @@
     "enableContentWarningsDesc": "Mostrar advertencias antes de contenido sensible",
     "matureContent": "Mostrar contenido para adultos",
     "matureContentDesc": "Incluye publicaciones para adultos y explícitas en tus feeds, y quita el aviso de las que ya ves. Desactivado por defecto.",
+    "matureContentPlaybackDesc": "Incluye publicaciones para adultos y con contenido gráfico en tus feeds. Los vídeos para adultos siguen pidiendo confirmación antes de reproducirse. Desactivado por defecto.",
     "kidsMode": "Modo infantil",
     "kidsModeDesc": "Muestra solo las publicaciones publicadas para niños, en todas partes. Un PASADOR lo apaga de nuevo.",
     "kidsModeSetPin": "Elige un PIN",

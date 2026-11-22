@@ -1079,6 +1079,7 @@
     "enableContentWarningsDesc": "Waarschuwingen tonen vóór gevoelige inhoud",
     "matureContent": "Content voor volwassenen tonen",
     "matureContentDesc": "Neemt berichten voor volwassenen en expliciete berichten op in je feeds, en haalt de waarschuwing weg bij berichten die je al ziet. Standaard uit.",
+    "matureContentPlaybackDesc": "Toont berichten voor volwassenen en expliciete berichten in je feeds. Video’s voor volwassenen vragen nog steeds om bevestiging voordat ze afspelen. Standaard uit.",
     "kidsMode": "Kindermodus",
     "kidsModeDesc": "Toont alleen berichten gepubliceerd voor kinderen, overal. Een PIN schakelt het weer uit.",
     "kidsModeSetPin": "Kies een PINCODE",

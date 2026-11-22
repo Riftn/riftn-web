@@ -1092,6 +1092,7 @@
     "enableContentWarningsDesc": "Show warnings before displaying sensitive content",
     "matureContent": "Show Mature Content",
     "matureContentDesc": "Include adult and graphic posts in your feeds, and drop the warning on ones you already see. Off by default.",
+    "matureContentPlaybackDesc": "Include adult and graphic posts in your feeds. Mature videos still ask before playing. Off by default.",
     "kidsMode": "Kids Mode",
     "kidsModeDesc": "Shows only posts published for children, everywhere. A PIN turns it back off.",
     "kidsModeSetPin": "Choose a PIN",
