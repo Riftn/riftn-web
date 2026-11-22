@@ -442,6 +442,7 @@
     "failed": "That didn't save. Try again."
   },
   "postVisibility": {
+    "self": "Only me",
     "label": "Who can see this",
     "public": "Everyone",
     "followers": "Followers only",
@@ -1533,6 +1534,8 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "notInterestedDone": "Got it. You'll see fewer posts like this.",
+    "notInterested": "Not interested",
     "liveAlertsOn": "Following {{name}}. You'll get a notification when they go live.",
     "liveAlertsAlreadyOn": "You follow {{name}}, so you'll get a notification when they go live.",
     "embed": "Embed",
@@ -2163,6 +2166,7 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "bioMention": "{{name}} tagged you in their bio",
       "featureCommentLikeNamed": "{{name}} liked your comment on “{{title}}”",
       "featureCommentLike": "{{name}} liked your comment on a request",
       "governanceCommentLikeNamed": "{{name}} liked your comment on proposal “{{title}}”",
@@ -3510,6 +3514,8 @@
     "copyFailed": "Could not copy"
   },
   "profileOptions": {
+    "bioTagRemoved": "You're no longer tagged in this bio",
+    "removeBioTag": "Remove me from their bio",
     "copyRssFeed": "Copy RSS feed link",
     "rssFeedCopied": "RSS feed link copied",
     "copyProfileUrl": "Copy profile URL",
@@ -4938,6 +4944,7 @@
     "shopAllowanceUsed": "{{allowance}} of {{allowance}} used. Stake more Riftn tokens for a higher badge and another slot."
   },
   "stages": {
+    "radioShow": {"toggle": "Radio show", "hint": "Music first: play your own songs or a playlist, talk when you like. Listeners drop in any time, and it shows in Explore's Radio row.", "row": "Radio", "start": "Start a show", "empty": "No radio shows on right now. Start one: go live with your mic and your own music.", "listening_one": "{{formatted}} listening", "listening_other": "{{formatted}} listening", "onAir": "On air", "soon": "Soon", "badge": "Radio", "myMusic": "My music", "myMusicHint": "Songs you upload play to everyone in the room, even with your mic off.", "addSong": "Add a song", "playFailed": "Couldn't play that song", "noSongs": "No songs yet. Add one to play it on air.", "tooBig": "Songs can be up to {{max}} MB"},
     "allStages": "All Stages",
     "title": "Stages",
     "tabLive": "Live",
@@ -7008,6 +7015,7 @@
     "signInToTradeCta": "Sign in to trade"
   },
   "usernames": {
+    "swap": {"start": "Start swap", "placeholder": "@your_other_account", "sent": "Sent. Switch to @{{name}} and accept.", "waiting": "Waiting for @{{to}} to accept. Switch to that account to finish.", "done": "Swapped. You are now @{{name}}.", "decline": "Decline", "accept": "Swap now", "incoming": "@{{from}} wants to swap: this account becomes @{{from}}, and that one becomes @{{to}}.", "body": "Own two accounts? Swap their usernames in one step. Start here, then switch to the other account and accept. Neither name is ever free for someone else to take.", "title": "Swap with your other account"},
     "seoTitle": "Username Marketplace | Riftn",
     "seoDescription": "Buy and sell Riftn usernames with tokens. Search short, numeric and original handles for sale, or list your own, the transfer happens on-chain the moment payment clears.",
     "title": "Usernames",

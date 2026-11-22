@@ -43,7 +43,6 @@ import { videoItemToShort } from '@/lib/short-video';
 import { useTapGestures } from '@/hooks/use-tap-gestures';
 import { useVideoScrubZone } from '@/hooks/use-video-scrub-zone';
 import { StoryboardPreview } from '@/components/app/video/StoryboardPreview';
-import { TranscodingBadge } from '@/components/app/video/TranscodingBadge';
 import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
 import { useIsWatchedVideo } from '@/hooks/use-watched-videos';
 import { useVideoProcessingStatus } from '@/hooks/use-video-processing-status';
@@ -118,6 +117,8 @@ import { FeedLinkPreviews } from '@/components/app/cards/FeedLinkPreviews';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
 import { useTranslation as useI18n } from 'react-i18next';
 const TranscodeRetry = lazy(() => import('./TranscodeRetry').then(m => ({ default: m.TranscodeRetry })));
+// Only a creator's own unfinished upload shows it: kept off the first-paint path.
+const TranscodingBadge = lazy(() => import('@/components/app/video/TranscodingBadge').then(m => ({ default: m.TranscodingBadge })));
 import { PostAIChatLazy } from './PostAIChatLazy';
 import { ReportModal } from '../modals/ReportModal';
 import { DeletePostModal } from '../modals/DeletePostModal';
@@ -2892,12 +2893,14 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             ) : (transcodingStatus === 'pending' || transcodingStatus === 'on') ? (
               /* Still transcoding — same optimistic videoUrl, but recoverable
                  once the job finishes, unlike the 'failed' branch above. */
-              <div className="absolute inset-0 overflow-hidden bg-black">
+              <div data-keep-dark className="absolute inset-0 overflow-hidden bg-black">
                 {thumbnail && (
                   <img src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async" alt="" className="w-full h-full object-cover opacity-50" loading={aboveFold ? 'eager' : 'lazy'} />
                 )}
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
-                  <TranscodingBadge tokenId={video.id} isOwner={isOwnPost} />
+                  <Suspense fallback={<span className="text-white/80 text-xs">{t('videoPlayer.transcoding')}</span>}>
+                    <TranscodingBadge tokenId={video.id} isOwner={isOwnPost} />
+                  </Suspense>
                 </div>
               </div>
             ) : video.videoUrl && !(video.isLivePost && video.isLiveNow) ? (
@@ -3944,7 +3947,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             currentSpoilerText={video.spoilerText}
             currentQuotePolicy={video.quotePolicy}
             currentReplyPolicy={video.replyPolicy}
-            currentVisibility={(video as any).visibility}
+            currentVisibility={(video as any).justMe ? 'self' : (video as any).visibility}
             currentForKids={video.forKids}
             currentShopLinks={video.shopLinks}
             onSuccess={(edited) => {

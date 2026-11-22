@@ -431,6 +431,7 @@
     "failed": "Dat is niet opgeslagen. Probeer het opnieuw."
   },
   "postVisibility": {
+    "self": "Alleen ik",
     "label": "Wie kan dit zien",
     "public": "Iedereen",
     "followers": "Alleen volgers",
@@ -1712,6 +1713,8 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "notInterestedDone": "Begrepen. Je ziet minder berichten zoals deze.",
+    "notInterested": "Niet geïnteresseerd",
     "liveAlertsOn": "Je volgt nu {{name}}. Je krijgt een melding wanneer ze live gaan.",
     "liveAlertsAlreadyOn": "Je volgt {{name}}, dus je krijgt een melding wanneer ze live gaan.",
     "embed": "Insluiten",
@@ -2342,6 +2345,7 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "bioMention": "{{name}} heeft je getagd in hun bio",
       "featureCommentLikeNamed": "{{name}} vond je reactie op “{{title}}”",
       "featureCommentLike": "{{name}} vond je reactie op een verzoek",
       "governanceCommentLikeNamed": "{{name}} vond je reactie op voorstel “{{title}}”",
@@ -3689,6 +3693,8 @@
     "copyFailed": "Kon niet kopiëren"
   },
   "profileOptions": {
+    "bioTagRemoved": "Je bent niet meer getagd in deze bio",
+    "removeBioTag": "Haal me uit hun bio",
     "copyRssFeed": "RSS-feedlink kopiëren",
     "rssFeedCopied": "RSS-feedlink gekopieerd",
     "copyProfileUrl": "Profiel-URL kopiëren",
@@ -5118,6 +5124,7 @@
     "shopAllowanceUsed": "{{allowance}} van {{allowance}} gebruikt. Stake meer Riftn tokens voor een hogere badge en een extra slot."
   },
   "stages": {
+    "radioShow": {"toggle": "Radioshow", "hint": "Muziek eerst: speel je eigen nummers of een playlist, praat wanneer je wilt. Luisteraars komen wanneer ze willen, en hij staat in de rij Radio op Verkennen.", "row": "Radio", "start": "Start een show", "empty": "Er zijn nu geen radioshows. Start er een: ga live met je microfoon en je eigen muziek.", "listening_one": "{{formatted}} luistert", "listening_other": "{{formatted}} luisteren", "onAir": "In de lucht", "soon": "Binnenkort", "badge": "Radio", "myMusic": "Mijn muziek", "myMusicHint": "Nummers die je uploadt spelen voor iedereen in de ruimte, ook met je microfoon uit.", "addSong": "Nummer toevoegen", "playFailed": "Dat nummer kon niet worden afgespeeld", "noSongs": "Nog geen nummers. Voeg er een toe om het uit te zenden.", "tooBig": "Nummers mogen tot {{max}} MB zijn"},
     "allStages": "Alle audioruimtes",
     "title": "Audioruimtes",
     "tabLive": "Leven",
@@ -7234,6 +7241,7 @@
     "signInToTradeCta": "Log in om te handelen"
   },
   "usernames": {
+    "swap": {"start": "Start wissel", "placeholder": "@je_andere_account", "sent": "Verstuurd. Schakel naar @{{name}} en accepteer.", "waiting": "Wacht op @{{to}}. Schakel naar dat account om af te ronden.", "done": "Gewisseld. Je bent nu @{{name}}.", "decline": "Weigeren", "accept": "Nu wisselen", "incoming": "@{{from}} wil wisselen: dit account wordt @{{from}} en dat account @{{to}}.", "body": "Twee accounts? Wissel hun gebruikersnamen in één stap. Begin hier, schakel naar het andere account en accepteer. Geen van beide namen komt ooit vrij voor iemand anders.", "title": "Wissel met je andere account"},
     "seoTitle": "Gebruikersnaammarktplaats | Riftn",
     "seoDescription": "Koop en verkoop Riftn-gebruikersnamen met tokens. Zoek naar korte, numerieke en originele gebruikersnamen die te koop staan, of bied je eigen gebruikersnaam aan, de overdracht vindt on-chain plaats zodra de betaling is verwerkt.",
     "title": "Gebruikersnamen",

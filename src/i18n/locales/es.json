@@ -431,6 +431,7 @@
     "failed": "No se guardó. Inténtalo de nuevo."
   },
   "postVisibility": {
+    "self": "Solo yo",
     "label": "Quién puede ver esto",
     "public": "Todos",
     "followers": "Solo seguidores",
@@ -1522,6 +1523,8 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "notInterestedDone": "Entendido. Verás menos publicaciones como esta.",
+    "notInterested": "No me interesa",
     "liveAlertsOn": "Ahora sigues a {{name}}. Recibirás una notificación cuando transmita en vivo.",
     "liveAlertsAlreadyOn": "Sigues a {{name}}, así que recibirás una notificación cuando transmita en vivo.",
     "embed": "Insertar",
@@ -2152,6 +2155,7 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "bioMention": "{{name}} te etiquetó en su biografía",
       "featureCommentLikeNamed": "A {{name}} le ha gustado su comentario sobre «{{title}}»",
       "featureCommentLike": "A {{name}} le ha gustado su comentario sobre una solicitud",
       "governanceCommentLikeNamed": "A {{name}} le ha gustado su comentario sobre la propuesta «{{title}}»",
@@ -3499,6 +3503,8 @@
     "copyFailed": "No se pudo copiar"
   },
   "profileOptions": {
+    "bioTagRemoved": "Ya no estás etiquetado en esta biografía",
+    "removeBioTag": "Quitarme de su biografía",
     "copyRssFeed": "Copiar enlace del feed RSS",
     "rssFeedCopied": "Enlace del feed RSS copiado",
     "copyProfileUrl": "Copiar URL del perfil",
@@ -4928,6 +4934,7 @@
     "shopAllowanceUsed": "{{allowance}} de {{allowance}} usados. Haz más staking de tokens Riftn para obtener una insignia superior y otra ranura."
   },
   "stages": {
+    "radioShow": {"toggle": "Programa de radio", "hint": "La música primero: pon tus canciones o una lista, habla cuando quieras. Los oyentes entran cuando quieran y aparece en la fila Radio de Explorar.", "row": "Radio", "start": "Empezar un programa", "empty": "No hay programas de radio ahora. Empieza uno: sal en vivo con tu micrófono y tu propia música.", "listening_one": "{{formatted}} escuchando", "listening_other": "{{formatted}} escuchando", "onAir": "Al aire", "soon": "Pronto", "badge": "Radio", "myMusic": "Mi música", "myMusicHint": "Las canciones que subes suenan para todos en la sala, incluso con el micrófono apagado.", "addSong": "Añadir una canción", "playFailed": "No se pudo reproducir esa canción", "noSongs": "Aún no hay canciones. Añade una para ponerla al aire.", "tooBig": "Las canciones pueden pesar hasta {{max}} MB"},
     "allStages": "Todas las salas de audio",
     "title": "Salas de audio",
     "tabLive": "En directo",
@@ -7044,6 +7051,7 @@
     "signInToTradeCta": "Inicia sesión para operar"
   },
   "usernames": {
+    "swap": {"start": "Empezar", "placeholder": "@tu_otra_cuenta", "sent": "Enviado. Cambia a @{{name}} y acepta.", "waiting": "Esperando que @{{to}} acepte. Cambia a esa cuenta para terminar.", "done": "Listo. Ahora eres @{{name}}.", "decline": "Rechazar", "accept": "Intercambiar ahora", "incoming": "@{{from}} quiere intercambiar: esta cuenta pasa a ser @{{from}} y aquella @{{to}}.", "body": "¿Tienes dos cuentas? Intercambia sus nombres de usuario en un paso. Empieza aquí, cambia a la otra cuenta y acepta. Ningún nombre queda libre para otra persona.", "title": "Intercambiar con tu otra cuenta"},
     "seoTitle": "Mercado de nombres de usuario | Riftn",
     "seoDescription": "Compra y vende nombres de usuario de Riftn con tokens. Busca handles cortos, numéricos y originales a la venta, o pon el tuyo, la transferencia ocurre on-chain en cuanto se confirma el pago.",
     "title": "Nombres de usuario",

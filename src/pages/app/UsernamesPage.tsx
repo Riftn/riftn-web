@@ -17,6 +17,7 @@ import { BrowseTab } from '@/components/app/usernames/BrowseTab';
 import { SellTab } from '@/components/app/usernames/SellTab';
 import { OffersTab } from '@/components/app/usernames/OffersTab';
 import { UsernameVault } from '@/components/app/usernames/UsernameVault';
+import { UsernameSwapCard } from '@/components/app/usernames/UsernameSwapCard';
 
 const JSON_LD = {
   '@context': 'https://schema.org',
@@ -82,8 +83,9 @@ export default function UsernamesPage() {
         {/* Browse fills the column; Sell is a form, and a text input stretched
             across a wide desktop column is unreadable, so it keeps a measure. */}
         {tab === 'browse' ? <BrowseTab /> : tab === 'offers' ? <OffersTab /> : tab === 'mine' ? (
-          <div className="max-w-2xl">
+          <div className="max-w-2xl space-y-4">
             <UsernameVault onSell={sellName} />
+            <UsernameSwapCard />
           </div>
         ) : (
           <div className="max-w-2xl">

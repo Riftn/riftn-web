@@ -431,6 +431,7 @@
     "failed": "Ça n'a pas été enregistré. Réessayez."
   },
   "postVisibility": {
+    "self": "Moi uniquement",
     "label": "Qui peut voir ceci",
     "public": "Tout le monde",
     "followers": "Abonnés uniquement",
@@ -1522,6 +1523,8 @@
     "tokensUnit": "jetons"
   },
   "postOptions": {
+    "notInterestedDone": "Compris. Vous verrez moins de publications comme celle-ci.",
+    "notInterested": "Pas intéressé",
     "liveAlertsOn": "Vous suivez désormais {{name}}. Vous recevrez une notification dès le début du direct.",
     "liveAlertsAlreadyOn": "Vous suivez {{name}}, vous recevrez donc une notification dès le début du direct.",
     "embed": "Intégrer",
@@ -2152,6 +2155,7 @@
     "tipTokens": "{{amount}} jetons",
     "tokenAmount": "{{amount}} jetons",
     "custom": {
+      "bioMention": "{{name}} vous a identifié dans sa bio",
       "featureCommentLikeNamed": "{{name}} a aimé votre commentaire sur « {{title}} »",
       "featureCommentLike": "{{name}} a aimé votre commentaire sur une demande",
       "governanceCommentLikeNamed": "{{name}} a aimé votre commentaire sur la proposition « {{title}} »",
@@ -3503,6 +3507,8 @@
     "copyFailed": "Impossible de copier"
   },
   "profileOptions": {
+    "bioTagRemoved": "Vous n'êtes plus identifié dans cette bio",
+    "removeBioTag": "Me retirer de sa bio",
     "copyRssFeed": "Copier le lien du flux RSS",
     "rssFeedCopied": "Lien du flux RSS copié",
     "copyProfileUrl": "Copier l'URL du profil",
@@ -4932,6 +4938,7 @@
     "shopAllowanceUsed": "{{allowance}} sur {{allowance}} utilisés. Staké plus de jetons Riftn pour un badge supérieur et un emplacement supplémentaire."
   },
   "stages": {
+    "radioShow": {"toggle": "Émission de radio", "hint": "La musique d'abord : passe tes morceaux ou une playlist, parle quand tu veux. Les auditeurs arrivent à tout moment, et l'émission apparaît dans la rangée Radio d'Explorer.", "row": "Radio", "start": "Lancer une émission", "empty": "Aucune émission de radio en ce moment. Lance la tienne : passe en direct avec ton micro et ta musique.", "listening_one": "{{formatted}} à l'écoute", "listening_other": "{{formatted}} à l'écoute", "onAir": "À l'antenne", "soon": "Bientôt", "badge": "Radio", "myMusic": "Ma musique", "myMusicHint": "Les morceaux que tu importes sont diffusés à toute la salle, même micro coupé.", "addSong": "Ajouter un morceau", "playFailed": "Impossible de lire ce morceau", "noSongs": "Pas encore de morceaux. Ajoutes-en un pour le diffuser.", "tooBig": "Les morceaux peuvent faire jusqu'à {{max}} Mo"},
     "allStages": "Tous les salons audio",
     "title": "Salons audio",
     "tabLive": "En direct",
@@ -7048,6 +7055,7 @@
     "signInToTradeCta": "Se connecter pour échanger"
   },
   "usernames": {
+    "swap": {"start": "Lancer l'échange", "placeholder": "@votre_autre_compte", "sent": "Envoyé. Passez sur @{{name}} et acceptez.", "waiting": "En attente de @{{to}}. Passez sur ce compte pour terminer.", "done": "Échangé. Vous êtes maintenant @{{name}}.", "decline": "Refuser", "accept": "Échanger maintenant", "incoming": "@{{from}} veut échanger : ce compte devient @{{from}} et l'autre @{{to}}.", "body": "Deux comptes ? Échangez leurs noms d'utilisateur en une étape. Commencez ici, passez à l'autre compte et acceptez. Aucun nom n'est jamais libre pour quelqu'un d'autre.", "title": "Échanger avec votre autre compte"},
     "seoTitle": "Nom d'utilisateur Marketplace | Riftn",
     "seoDescription": "Achetez et vendez des noms d'utilisateur Riftn avec jetons. Recherchez des poignées courtes, numériques et originales à vendre, ou répertoriez les vôtres, le transfert se fait en chaîne au moment où le paiement est effacé.",
     "title": "Noms d’utilisateurs",

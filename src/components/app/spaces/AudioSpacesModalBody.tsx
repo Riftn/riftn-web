@@ -135,6 +135,8 @@ export function AudioSpacesModalBody() {
 
   const [view, setView] = useState<View>(initialModalView);
   const [title, setTitle] = useSurfaceDraft("components/app/spaces/AudioSpacesModalBody.tsx:title", '');
+  // A radio show: the same room, music first, listed in Explore's Radio row.
+  const [radioShow, setRadioShow] = useState(false);
   const [description, setDescription] = useSurfaceDraft("components/app/spaces/AudioSpacesModalBody.tsx:description", '');
   const [createMode, setCreateMode] = useState<'now' | 'later'>('now');
   // Off until they ask for it, and asking for it means going through the
@@ -236,7 +238,7 @@ export function AudioSpacesModalBody() {
 
   const handleCreate = async () => {
     if (!title.trim()) return;
-    const space = await createSpace(title.trim(), description.trim() || undefined);
+    const space = await createSpace(title.trim(), description.trim() || undefined, undefined, { radio: radioShow });
     if (space) {
       setTitle.complete(title, '');
       setDescription.complete(description, '');
@@ -712,6 +714,19 @@ export function AudioSpacesModalBody() {
                   maxLength={280}
                 />
               </div>
+
+              <label className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.06] cursor-pointer" data-radio-show-toggle>
+                <input
+                  type="checkbox"
+                  checked={radioShow}
+                  onChange={(e) => setRadioShow(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded accent-white/80 shrink-0"
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm text-white">{t('stages.radioShow.toggle')}</span>
+                  <span className="block text-xs text-white/50 mt-0.5">{t('stages.radioShow.hint')}</span>
+                </span>
+              </label>
 
               {/* Asking for the voice clone, here — the only moment the host is
                   deciding what this stage is rather than running one. Ticking

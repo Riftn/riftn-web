@@ -33,11 +33,12 @@ import { useShortsSideGestures } from '@/hooks/use-shorts-side-gestures';
 import { useTranslation } from 'react-i18next';
 import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
 import { StoryboardPreview } from '@/components/app/video/StoryboardPreview';
-import { TranscodingBadge } from '@/components/app/video/TranscodingBadge';
 const VideoSubtitleOverlay = lazy(() =>
   import('@/components/app/video/VideoSubtitleOverlay').then((m) => ({ default: m.VideoSubtitleOverlay })),
 );
 const TranscodeRetry = lazy(() => import('./TranscodeRetry').then(m => ({ default: m.TranscodeRetry })));
+// Only a creator's own unfinished upload shows it: kept off the first-paint path.
+const TranscodingBadge = lazy(() => import('@/components/app/video/TranscodingBadge').then(m => ({ default: m.TranscodingBadge })));
 import { useVideoProcessingStatus } from '@/hooks/use-video-processing-status';
 import { useHandoffVideo } from '@/hooks/use-handoff-video';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -755,7 +756,9 @@ const VideoSlideBody = memo(function VideoSlideBody({
               <img src={thumbnail} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" />
             )}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
-              <TranscodingBadge tokenId={short.id} isOwner /* only its creator is shown a short that cannot play yet */ />
+              <Suspense fallback={<span className="text-white/80 text-xs">{t('videoPlayer.transcoding')}</span>}>
+                <TranscodingBadge tokenId={short.id} isOwner /* only its creator is shown a short that cannot play yet */ />
+              </Suspense>
             </div>
           </div>
         ) : (short.videoUrl || short.soundtrackUrl) ? (
