@@ -1,3 +1,7 @@
+# Remember HTTPS on return visits to the public site, including plain HTTP links.
+https://riftn.com/*
+  Strict-Transport-Security: max-age=31536000
+
 # connect-src must list https://live.dehub.io: the stream ingest is
 # deliberately grey-cloud (WebRTC cannot ride Cloudflare's proxy), so WHIP/WHEP
 # signaling, the go-live reachability probe and HLS playback all fetch it
