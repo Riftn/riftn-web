@@ -255,6 +255,15 @@ html[data-theme][data-theme] [data-requests-page] [data-theme-button]:not(#_):no
   backdrop-filter: none !important;
 }
 
+/* Chat pills sit over a changing thread. Preserve their tint and rim without
+   sampling the scrolling thread or the composer again for each control. */
+html[data-theme][data-theme] :is([data-chat-header], [data-drop-attach]:has([data-chat-composer-input]))
+  [data-theme-button]:not(#_):not(#_),
+html[data-theme] :is([data-chat-jump], [data-chat-day-pill] > span, [data-chat-unread-marker] > span:not([data-unread-hairline])) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 /* Bubble actions keep the theme's label colour when their white active
    material is replaced by the shared tinted surface. */
 html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'])
