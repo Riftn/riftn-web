@@ -1,4 +1,5 @@
 import { formatMessageTime } from '@/i18n/date-locale';
+import { openNotesSheet, useNotesSheetAvailable } from './NotesRow';
 import { outsideImage } from '@/lib/outside-image';
 import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { useDoubleTap } from '@/hooks/use-double-tap';
@@ -1578,6 +1579,8 @@ const UNREAD_MARKER_TOP_GAP = 48;
 export function DirectMessageChat({ conversation, onBack, initialComposerText, dock = false, headerActions, focusComposer = false, cozy = false, options }: DirectMessageChatProps) {
   const { t: _copy } = _useCopy();
   const { user, walletAddress, openLoginModal } = useAuth();
+  // The note button shows only where the Notes sheet can open (Messages).
+  const notesAvailable = useNotesSheetAvailable() && !dock;
   const { isBanned: accountBanned } = useBannedAccount();
   const { setCallMessageHandler } = useCallActions();
   const queryClient = useQueryClient();
@@ -3574,6 +3577,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         onCancelReply={() => setReplyTarget.complete(replyTarget, null)}
         onTipClick={feeRequired ? undefined : openTipDialog}
         onPollClick={isVirtualConv ? undefined : () => setShowPollDialog(true)}
+        onNoteClick={notesAvailable ? openNotesSheet : undefined}
         canSend={planAllowsSend}
         sendDisabled={accountBanned || !!feeSendDisabled || (initError && isVirtualConv)}
         sendDisabledReason={

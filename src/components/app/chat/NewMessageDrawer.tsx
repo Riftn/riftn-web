@@ -20,6 +20,7 @@ import { Loader2 } from 'lucide-react';
 import X from '@/components/ui/cut-icons/close';
 import Users from '@/components/ui/cut-icons/communities';
 import Megaphone from '@/components/ui/cut-icons/advertising';
+import Quote from '@/components/ui/cut-icons/quote';
 import Search from '@/components/ui/cut-icons/search';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -42,6 +43,7 @@ interface NewMessageDrawerProps {
   myAddress?: string | null;
   /** Called inside the tap, so the page can open the chat and move focus while the keyboard is still up. */
   onPick: (user: DeHubUser) => void;
+  onNote?: () => void;
   onGroup?: () => void;
   onChannel?: () => void;
 }
@@ -75,7 +77,7 @@ function Face({ user, size }: { user: Partial<DeHubUser>; size: string }) {
 const keepFocus = (e: React.MouseEvent) => e.preventDefault();
 
 export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDrawerProps>(function NewMessageDrawer(
-  { open, onOpenChange, conversations, myAddress, onPick, onGroup, onChannel },
+  { open, onOpenChange, conversations, myAddress, onPick, onNote, onGroup, onChannel },
   ref,
 ) {
   const { t } = useTranslation();
@@ -275,8 +277,14 @@ export const NewMessageDrawer = forwardRef<NewMessageDrawerHandle, NewMessageDra
             </label>
           </div>
 
-          {(onGroup || onChannel) && !q && (
+          {(onNote || onGroup || onChannel) && !q && (
             <div className="flex gap-2 px-4 pt-3">
+              {onNote && (
+                <button type="button" data-new-message-pill="note" onClick={onNote} className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-white">
+                  <Quote className="w-3.5 h-3.5" />
+                  {t('notes.yourNote', { defaultValue: 'Your note' })}
+                </button>
+              )}
               {onGroup && (
                 <button type="button" data-new-message-pill="group" onClick={onGroup} className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-white">
                   <Users className="w-3.5 h-3.5" />

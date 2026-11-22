@@ -1,5 +1,6 @@
 import { useTranslation as _useCopy } from 'react-i18next';
 import BarChart3 from "@/components/ui/cut-icons/stats";
+import Quote from "@/components/ui/cut-icons/quote";
 import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -81,6 +82,8 @@ interface ChatInputProps {
   scheduledCount?: number;
   /** Opens the create-poll drawer. */
   onPollClick?: () => void;
+  /** Opens the Notes sheet (your 24-hour note). */
+  onNoteClick?: () => void;
   /** Externally disable the send button (e.g. insufficient fee balance) */
   sendDisabled?: boolean;
   /** Label shown on disabled send tooltip */
@@ -139,7 +142,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, initialText, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -1028,6 +1031,25 @@ export function ChatInput({ onSendMessage, onTipClick, onScheduleClick, schedule
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{_copy("dmSchedule.button", { defaultValue: "Schedule message" })}</TooltipContent>
+            </Tooltip>
+          )}
+
+          {onNoteClick && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  data-chat-tool="note"
+                  aria-label={_copy("notes.yourNote", { defaultValue: "Your note" })}
+                  className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                  onClick={onNoteClick}
+                >
+                  <Quote className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{_copy("notes.yourNote", { defaultValue: "Your note" })}</TooltipContent>
             </Tooltip>
           )}
 

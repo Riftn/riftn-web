@@ -1,10 +1,10 @@
 /**
- * NotesRow
- * ========
- * The row of notes at the top of Messages: your own ("Your note") first, then
- * the people you follow. A note is a short line with an optional song, GIF or
- * place and stays up for 24 hours. Tap yours to write or change it; tap
- * someone else's to see it in full, hear the song and message them.
+ * Notes
+ * =====
+ * A note is a short line with an optional song, GIF or place that stays up for
+ * 24 hours. The Notes sheet opens from the + in Messages and from the note
+ * button in a chat: write or change yours at the top, and below it see the
+ * notes of people you follow (tap one to see it, hear the song, message them).
  */
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -263,37 +263,72 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
   );
 }
 
-export function NotesRow({ me, onMessage }: { me: StoryAuthor; onMessage: (author: StoryAuthor) => void }) {
+// Opened from the + in Messages and from the note button in a chat's tool
+// rail. One host (NotesSheetHost, mounted by MessagesPage) draws it.
+let sheetOpen = false;
+let hosts = 0;
+const sheetListeners = new Set<() => void>();
+const emitSheet = () => sheetListeners.forEach(l => l());
+export function openNotesSheet(): void { sheetOpen = true; emitSheet(); }
+/** True while a host is mounted, so callers only offer Notes where it can open. */
+export function useNotesSheetAvailable(): boolean {
+  return useSyncExternalStore(
+    useCallback((l: () => void) => { sheetListeners.add(l); return () => { sheetListeners.delete(l); }; }, []),
+    () => hosts > 0,
+    () => false,
+  );
+}
+function useSheetOpen(): boolean {
+  return useSyncExternalStore(
+    useCallback((l: () => void) => { sheetListeners.add(l); return () => { sheetListeners.delete(l); }; }, []),
+    () => sheetOpen,
+    () => false,
+  );
+}
+
+export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor) => void }) {
   const { t } = useTranslation();
+  const open = useSheetOpen();
   const data = useNotes();
-  const [open, setOpen] = useState<'mine' | NoteEntry | null>(null);
+  const [viewing, setViewing] = useState<NoteEntry | null>(null);
+  useEffect(() => { hosts += 1; emitSheet(); return () => { hosts -= 1; emitSheet(); }; }, []);
+  useEffect(() => { if (open) refreshNotes(); else setViewing(null); }, [open]);
+  const close = () => { sheetOpen = false; emitSheet(); };
   const mine = data?.mine?.note ?? null;
   const notes = data?.notes ?? [];
 
   return (
-    <>
-      <div data-notes-row data-kit-section className="flex gap-1 overflow-x-auto px-3 pb-2 pt-1 [scrollbar-width:none]">
-        <NoteTile own author={data?.mine?.author ?? me} note={mine} label={t('notes.yourNote', { defaultValue: 'Your note' })} onClick={() => setOpen('mine')} />
-        {notes.map(entry => (
-          <NoteTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => setOpen(entry)} />
-        ))}
-      </div>
-      <Dialog open={!!open} onOpenChange={v => { if (!v) setOpen(null); }}>
-        <DialogContent data-note-sheet className="max-w-sm border-white/10 bg-zinc-950/95 p-5">
-          <DialogTitle className="text-center text-[15px]">
-            {open === 'mine' ? t('notes.yourNote', { defaultValue: 'Your note' }) : open ? nameOf(open.author) : ''}
-          </DialogTitle>
-          {open === 'mine' && <NoteComposer mine={mine} onClose={() => setOpen(null)} />}
-          {open && open !== 'mine' && (
-            <div className="flex flex-col gap-4">
-              <NoteCard note={open.note} />
-              <button type="button" data-kit-button="primary" data-note-message onClick={() => { const a = open.author; setOpen(null); onMessage(a); }}>
-                {t('notes.message', { defaultValue: 'Message' })}
-              </button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={open} onOpenChange={v => { if (!v) close(); }}>
+      <DialogContent data-note-sheet className="max-h-[90dvh] max-w-sm overflow-y-auto border-white/10 bg-zinc-950/95 p-5">
+        <DialogTitle className="text-center text-[15px]">
+          {viewing ? nameOf(viewing.author) : t('notes.title', { defaultValue: 'Notes' })}
+        </DialogTitle>
+        {viewing ? (
+          <div className="flex flex-col gap-4">
+            <NoteCard note={viewing.note} />
+            <button type="button" data-kit-button="primary" data-note-message onClick={() => { const a = viewing.author; close(); onMessage(a); }}>
+              {t('notes.message', { defaultValue: 'Message' })}
+            </button>
+            <button type="button" data-kit-button="quiet" data-note-back onClick={() => setViewing(null)}>
+              {t('notes.back', { defaultValue: 'Back to notes' })}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {open && <NoteComposer key={mine?.id ?? 'new'} mine={mine} onClose={close} />}
+            {notes.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <p className="text-[12px] font-medium text-zinc-400">{t('notes.fromFollowing', { defaultValue: 'From people you follow' })}</p>
+                <div data-notes-friends className="-mx-1 flex gap-1 overflow-x-auto pb-1 [scrollbar-width:none]">
+                  {notes.map(entry => (
+                    <NoteTile key={entry.note.id} author={entry.author} note={entry.note} label={nameOf(entry.author)} onClick={() => setViewing(entry)} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
