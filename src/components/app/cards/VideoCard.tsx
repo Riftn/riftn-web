@@ -2892,7 +2892,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             ) : (transcodingStatus === 'pending' || transcodingStatus === 'on') ? (
               /* Still transcoding — same optimistic videoUrl, but recoverable
                  once the job finishes, unlike the 'failed' branch above. */
-              <div className="absolute inset-0 overflow-hidden bg-black">
+              <div data-keep-dark className="absolute inset-0 overflow-hidden bg-black">
                 {thumbnail && (
                   <img src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async" alt="" className="w-full h-full object-cover opacity-50" loading={aboveFold ? 'eager' : 'lazy'} />
                 )}
