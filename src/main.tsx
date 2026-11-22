@@ -60,6 +60,7 @@ import "./styles/feed-separator.css";
 // Mirrors the saved post separator onto <html> before the feed paints.
 import "./lib/feed-separator";
 import "./styles/chat-own-bubble.css";
+import "./styles/light-overlays.css";
 // Mirrors the saved Public Chat bubble choice onto <html>.
 import "./lib/chat-own-bubble";
 // Canvas-theme chrome (war / osaka / jungle) is NOT imported here: each theme

@@ -102,7 +102,7 @@ export default function PricingPage() {
           ],
         }}
       />
-      <div data-glass-page className="min-h-[100dvh] bg-black text-white">
+      <div data-glass-page data-pricing-page className="min-h-[100dvh] bg-black text-white">
         <header className="flex items-center justify-between px-4 py-4 sm:px-8">
           <Link to="/" className="flex items-center gap-2">
             <img src={dehubLogo} alt={_copy("copy.3bb419b67da4", { defaultValue: "Riftn logo white" })} className="h-6 w-auto" />
