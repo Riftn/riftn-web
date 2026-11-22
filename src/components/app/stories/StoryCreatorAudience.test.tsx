@@ -9,7 +9,7 @@ vi.mock('@/lib/api/dehub/dm', () => ({ searchUsersForDM: async () => ({ items: [
 vi.mock('@/lib/api/dehub/stories', () => ({ getStoryShelf: async () => ({ supportsCustomAudience: true }), STORY_LIFETIMES: [24] }));
 vi.mock('@/hooks/use-story-shelf', () => ({ useRefreshStoryShelf: () => vi.fn() }));
 vi.mock('@/features/post/components/SoundPicker', () => ({ SoundPicker: () => null }));
-vi.mock('./story-compose', () => ({ composePhoto: async () => new Blob(), mentionBoxes: () => [], TEXT_COLORS: ['#fff'], OUT_H: 1920, OUT_W: 1080 }));
+vi.mock('./story-compose', () => ({ composePhoto: async () => new Blob(), mentionBoxes: () => [], TEXT_COLORS: ['#fff'], OUT_H: 1920, OUT_W: 1080, PHOTO_LOOKS: { none: 'none' }, PHOTO_BACKDROPS: { blur: null }, backdropCss: () => null }));
 vi.mock('./story-upload', () => ({ shareMoment: vi.fn() }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (_key: string, options: { defaultValue: string }) => options.defaultValue }) }));
 

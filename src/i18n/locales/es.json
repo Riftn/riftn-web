@@ -7234,7 +7234,7 @@
     "transferGuarantee": "Recibes la cuenta completa — nombre de usuario, publicaciones, seguidores, historial de propinas y derechos de insignia. El vendedor conserva su billetera y todo lo que contiene. La transferencia se ejecuta solo después de que Riftn lea tu pago en tokens de vuelta de la cadena; si se interrumpe, reintentar la compra la reanuda.",
     "shareTitle": "@{{handle}} está a la venta en Riftn"
   },
-  "stories": {"comments":"Comentarios","commentFailed":"Tu comentario no se publicó. Inténtalo de nuevo.","signInToComment":"Inicia sesión para comentar","post":"Publicar","commentsOff":"Los comentarios están desactivados en este momento",
+  "stories": {"effects":"Efectos","backdrop":"Fondo","looks":{"none": "Original", "warm": "Cálido", "cool": "Frío", "vivid": "Vívido", "fade": "Suave", "mono": "Mono", "noir": "Noir", "retro": "Retro"},"backdrops":{"blur": "Desenfoque", "black": "Negro", "dusk": "Anochecer", "sunset": "Atardecer", "ocean": "Océano", "forest": "Bosque"},"stickers":"Stickers","shapes":"Flechas y formas. Tócalas después de añadirlas para cambiar color, tamaño o ángulo.","closeFriends":"Mejores amigos","closeFriendsSaved":"Guardado como tus Mejores amigos","saveCloseFriends":"Guardar como Mejores amigos","comments":"Comentarios","commentFailed":"Tu comentario no se publicó. Inténtalo de nuevo.","signInToComment":"Inicia sesión para comentar","post":"Publicar","commentsOff":"Los comentarios están desactivados en este momento",
     "mute": "Silenciar",
     "unfollow": "Dejar de seguir",
     "mutedToast": "Silenciado. No verás sus Momentos ni publicaciones.",
