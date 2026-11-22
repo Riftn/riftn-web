@@ -36,7 +36,7 @@ import { useTranslateUp } from '@/hooks/use-translate-up';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDeHubProfile } from '@/hooks/use-dehub-profile';
-import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
 import type { BadgeLock } from '@/lib/staking-badges';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
@@ -346,9 +346,7 @@ export const ChatMessage = memo(function ChatMessage({
   const authorLookup = holdOpen || menuPoint.mounted ? message.userId : undefined;
   const { data: author } = useDeHubProfile({ userId: authorLookup, address: currentUserAddress || undefined, enabled: !!authorLookup });
   const authorLocalTime = useProfileLocalTime(author?.customs?.publicTimeZone);
-  const localTimeLabel = authorLocalTime
-    ? _copy('profile.localTime', { defaultValue: 'Local time {{time}}', time: authorLocalTime })
-    : undefined;
+  const localTimeLabel = localTimeLine(_copy as never, authorLocalTime, author?.customs?.publicTimeZone) || undefined;
   const canHold = !message.sendState;
   const hold = useHoldMenu((point, target) => {
     if (isEditing) return false;

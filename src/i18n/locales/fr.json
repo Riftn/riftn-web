@@ -2531,6 +2531,8 @@
   },
   "profile": {
     "localTime": "Heure locale {{time}}",
+    "localTimeAhead": "{{hours}} h d’avance",
+    "localTimeBehind": "{{hours}} h de retard",
     "shareLocalTime": "Afficher mon heure locale",
     "shareLocalTimeHint": "Affichez votre fuseau horaire et votre heure locale sur votre profil public et dans le chat.",
     "gridCard": {

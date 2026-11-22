@@ -2542,6 +2542,8 @@
   },
   "profile": {
     "localTime": "Local time {{time}}",
+    "localTimeAhead": "{{hours}} hrs ahead",
+    "localTimeBehind": "{{hours}} hrs behind",
     "shareLocalTime": "Show my local time",
     "shareLocalTimeHint": "Show your timezone and local time on your public profile and in chat.",
     "gridCard": {
