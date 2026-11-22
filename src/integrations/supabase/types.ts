@@ -4684,8 +4684,10 @@ export type Database = {
           creator_wallet_address: string
           event_id: string
           id: string
+          log_index: number | null
           payer_wallet_address: string
           tx_hash: string
+          verified_at: string | null
         }
         Insert: {
           amount: number
@@ -4694,8 +4696,10 @@ export type Database = {
           creator_wallet_address: string
           event_id: string
           id?: string
+          log_index?: number | null
           payer_wallet_address: string
           tx_hash: string
+          verified_at?: string | null
         }
         Update: {
           amount?: number
@@ -4704,12 +4708,64 @@ export type Database = {
           creator_wallet_address?: string
           event_id?: string
           id?: string
+          log_index?: number | null
           payer_wallet_address?: string
           tx_hash?: string
+          verified_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "event_gate_payments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "community_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_gate_quotes: {
+        Row: {
+          amount: number
+          claim: string | null
+          created_at: string
+          event_id: string
+          payer: string
+          recipient: string
+          reference: number
+          request_id: number | null
+          requested_at: string | null
+          submitted_hash: string | null
+          tx_hash: string | null
+        }
+        Insert: {
+          amount: number
+          claim?: string | null
+          created_at?: string
+          event_id: string
+          payer: string
+          recipient: string
+          reference?: never
+          request_id?: number | null
+          requested_at?: string | null
+          submitted_hash?: string | null
+          tx_hash?: string | null
+        }
+        Update: {
+          amount?: number
+          claim?: string | null
+          created_at?: string
+          event_id?: string
+          payer?: string
+          recipient?: string
+          reference?: never
+          request_id?: number | null
+          requested_at?: string | null
+          submitted_hash?: string | null
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_gate_quotes_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "community_events"
@@ -8921,6 +8977,7 @@ export type Database = {
           preferences: Json
           reaction_tip_seen: boolean
           shorts_enabled: boolean
+          stories_enabled: boolean
           updated_at: string
           video_dub_tip_seen: boolean
           wallet_address: string
@@ -8930,6 +8987,7 @@ export type Database = {
           preferences?: Json
           reaction_tip_seen?: boolean
           shorts_enabled?: boolean
+          stories_enabled?: boolean
           updated_at?: string
           video_dub_tip_seen?: boolean
           wallet_address: string
@@ -8939,6 +8997,7 @@ export type Database = {
           preferences?: Json
           reaction_tip_seen?: boolean
           shorts_enabled?: boolean
+          stories_enabled?: boolean
           updated_at?: string
           video_dub_tip_seen?: boolean
           wallet_address?: string
@@ -10441,6 +10500,7 @@ export type Database = {
           room_key: string
         }[]
       }
+      can_read_event_chat: { Args: { p_event: string }; Returns: boolean }
       category_counts: {
         Args: { p_since?: string }
         Returns: {
@@ -11112,6 +11172,22 @@ export type Database = {
         Args: { p_wallet: string }
         Returns: undefined
       }
+      event_gate_checkout: {
+        Args: {
+          p_action: string
+          p_claim: string
+          p_event: string
+          p_hash?: string
+        }
+        Returns: Json
+      }
+      event_gate_log_index: {
+        Args: {
+          q: Database["public"]["Tables"]["event_gate_quotes"]["Row"]
+          receipt: Json
+        }
+        Returns: number
+      }
       evict_stale_post_translations: { Args: never; Returns: number }
       feature_request_device_info_ids: { Args: never; Returns: string[] }
       feature_request_status_editor_wallets: { Args: never; Returns: string[] }
@@ -11393,6 +11469,15 @@ export type Database = {
       resolve_due_governance_proposals: { Args: never; Returns: number }
       set_dex_pool_image: {
         Args: { p_image_url: string; p_pool_id: string }
+        Returns: undefined
+      }
+      set_event_chat_reaction: {
+        Args: {
+          p_add: boolean
+          p_emoji: string
+          p_event: string
+          p_message: string
+        }
         Returns: undefined
       }
       set_feature_request_status: {
