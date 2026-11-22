@@ -1089,6 +1089,8 @@
     "postLanding": "Na het plaatsen",
     "feedSeparator": "Scheiding tussen berichten",
     "chatOwnBubbleDesc": "Je eigen berichten staan in een ballon, zoals in privéchats",
+    "messagesPills": "Pilvormige tabbladen in Berichten",
+    "messagesPillsDesc": "Het open tabblad is een gevulde pil en ongelezen aantallen zijn rond",
     "chatOwnBubble": "Ballonnen voor mijn berichten in de Openbare chat",
     "feedSeparatorDesc": "Kaarten rond elk bericht, of een dunne lijn ertussen",
     "feedSeparatorBento": "Bento-kaarten",

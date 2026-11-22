@@ -73,6 +73,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'appearance', anchor: 'default-feed', label: 'Default feed', labelKey: 'settings.defaultFeed', keywords: 'home shorts videos images music audio live open start tab' },
   { tab: 'appearance', anchor: 'feed-toggles', label: 'Reset feed toggles', labelKey: 'settings.feedToggles', keywords: 'filters sort default remember clear' },
   { tab: 'appearance', anchor: 'chat-own-bubble', label: 'Bubbles for my messages in Public Chat', labelKey: 'settings.chatOwnBubble', keywords: 'chat bubble own messages mine general public global colour highlight box card' },
+  { tab: 'appearance', anchor: 'messages-pills', label: 'Pill tabs in Messages', labelKey: 'settings.messagesPills', keywords: 'messages inbox chat list tabs pills chips filled black white round unread badge count redesign clean' },
   { tab: 'appearance', anchor: 'feed-separator', label: 'Bento cards', labelKey: 'settings.feedSeparatorBento', keywords: 'bento cards line divider separator borders spacing posts feed chat messages inbox plain list' },
   { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
   { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
