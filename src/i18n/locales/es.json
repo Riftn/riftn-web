@@ -2724,7 +2724,11 @@
     "earlySupporter": {
       "chip": "Apoyo temprano",
       "title": "Apoyo temprano: {{value}} de sus solicitudes ya salieron"
-    }
+    },
+    "voiceHold": "Mantén para hablar",
+    "voiceLetGo": "Suelta para añadir",
+    "voiceTapDone": "Toca al terminar",
+    "voiceWorking": "Escribiéndolo…"
   },
   "auth": {
     "accountDeleted": "Esta cuenta fue eliminada. Puedes registrarte de nuevo con una cuenta nueva.",
