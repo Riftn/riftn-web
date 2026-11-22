@@ -13,7 +13,7 @@
  */
 import { apiCall, authedUpload } from './core';
 
-export type StoryAudience = 'everyone' | 'followers';
+export type StoryAudience = 'everyone' | 'followers' | 'selected' | 'except';
 export const STORY_LIFETIMES = [6, 12, 24] as const;
 export type StoryLifetime = (typeof STORY_LIFETIMES)[number];
 
@@ -88,7 +88,7 @@ export interface StoryViewer extends StoryAuthor {
   viewedAt: string;
 }
 
-export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[]; supportsCustomLifetime?: boolean }> {
+export function getStoryShelf(liveHosts: string, signedIn: boolean): Promise<{ shelf: ShelfEntry[]; signedIn: boolean; liveHosts?: string[]; supportsCustomLifetime?: boolean; supportsCustomAudience?: boolean }> {
   return apiCall('/api/stories/shelf', { params: { liveHosts: liveHosts || undefined }, requiresAuth: signedIn });
 }
 
@@ -110,6 +110,7 @@ export function getStoryArchive(cursor?: string): Promise<{ items: StoryItem[]; 
 
 export interface CreateStoryFields {
   audience: StoryAudience;
+  audienceAddresses?: string[];
   expiresInHours?: StoryLifetime;
   allowReplies?: boolean;
   muted?: boolean;
@@ -132,6 +133,8 @@ export function createStory(
   const form = new FormData();
   form.append('type', fields.draftVideoId ? 'video' : 'photo');
   form.append('audience', fields.audience);
+  const customAudience = fields.audience === 'selected' || fields.audience === 'except';
+  if (customAudience) form.append('audienceAddresses', JSON.stringify(fields.audienceAddresses ?? []));
   if (fields.expiresInHours != null) form.append('expiresInHours', String(fields.expiresInHours));
   form.append('allowReplies', String(fields.allowReplies !== false));
   form.append('muted', String(!!fields.muted));
@@ -146,7 +149,7 @@ export function createStory(
   }
   if (files.photo) form.append('file', files.photo, 'moment.jpg');
   if (files.overlay) form.append('overlay', files.overlay, 'layer.png');
-  return authedUpload<StoryItem>('/api/stories', form, { onProgress: options.onProgress, signal: options.signal, timeoutMs: 3 * 60 * 1000 });
+  return authedUpload<StoryItem>(customAudience ? '/api/stories/custom-audience' : '/api/stories', form, { onProgress: options.onProgress, signal: options.signal, timeoutMs: 3 * 60 * 1000 });
 }
 
 export function deleteStory(id: string): Promise<{ ok: boolean }> {

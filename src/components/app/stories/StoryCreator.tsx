@@ -36,16 +36,16 @@ const MAX_VIDEO_S = 60;
 const AUDIENCE_KEY = 'riftn.stories.audience';
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'lifetime';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'lifetime' | 'audience';
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 export function StoryCreator({ onClose, remixSource }: { onClose: () => void; remixSource?: StoryRemixSource }) {
   const { t } = useTranslation();
   const refreshShelf = useRefreshStoryShelf();
-  const { data: customLifetime = false } = useQuery({
-    queryKey: ['story-custom-lifetime'],
-    queryFn: async () => (await getStoryShelf('', false)).supportsCustomLifetime === true,
+  const { data: storyCapabilities } = useQuery({
+    queryKey: ['story-posting-capabilities'],
+    queryFn: async () => getStoryShelf('', false).then(({ supportsCustomAudience, supportsCustomLifetime }) => ({ supportsCustomAudience, supportsCustomLifetime })),
     staleTime: 60_000,
     retry: false,
   });
@@ -65,7 +65,7 @@ export function StoryCreator({ onClose, remixSource }: { onClose: () => void; re
           media={media}
           remixSourceId={remixSource?.id}
           remixLabel={remixLabel}
-          customLifetime={customLifetime}
+          customLifetime={!!storyCapabilities?.supportsCustomLifetime} customAudience={!!storyCapabilities?.supportsCustomAudience}
           onBack={() => { URL.revokeObjectURL(media.url); setMedia(null); }}
           onClose={onClose}
           onShared={() => refreshShelf()}
@@ -261,7 +261,7 @@ function useStageBox(ref: React.RefObject<HTMLDivElement>) {
   return box;
 }
 
-function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime }: {
+function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, customLifetime, customAudience }: {
   media: Media;
   onBack: () => void;
   onClose: () => void;
@@ -269,6 +269,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   remixSourceId?: string;
   remixLabel?: string;
   customLifetime: boolean;
+  customAudience: boolean;
 }) {
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
@@ -288,6 +289,14 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const [audience, setAudience] = useState<StoryAudience>(() => {
     try { return localStorage.getItem(AUDIENCE_KEY) === 'followers' ? 'followers' : 'everyone'; } catch { return 'everyone'; }
   });
+  const [audiencePeople, setAudiencePeople] = useState<DeHubUser[]>([]);
+  const restrictPeople = audience === 'selected' || audience === 'except';
+  const audienceLabels = {
+    everyone: t('stories.everyone', { defaultValue: 'Everyone' }),
+    followers: t('stories.followersOnly', { defaultValue: 'Followers' }),
+    selected: t('stories.selectedPeople', { defaultValue: 'Only selected people' }),
+    except: t('stories.hideFromPeople', { defaultValue: 'Hide from selected people' }),
+  };
   const [lifetime, setLifetime] = useState<StoryLifetime>(24);
   const lifetimeLabel = t('stories.lifetime', { defaultValue: 'Story duration' });
   const [busy, setBusy] = useState(false);
@@ -383,8 +392,8 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const [query, setQuery] = useState('');
   const [people, setPeople] = useState<DeHubUser[]>([]);
   useEffect(() => {
-    if (tool !== 'mention') return;
-    const q = query.trim();
+    if (tool !== 'mention' && tool !== 'audience') return;
+    const q = query.trim().replace(/^@/, '');
     if (q.length < 2) { setPeople([]); return; }
     const id = window.setTimeout(() => {
       searchUsersForDM(q, 0, 8).then(r => setPeople(r.items)).catch(() => setPeople([]));
@@ -430,10 +439,10 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
 
   // ── Share ─────────────────────────────────────────────────────────
   const share = useCallback(async () => {
-    if (busy) return;
+    if (busy || (restrictPeople && !audiencePeople.length)) return;
     setBusy(true);
     try {
-      try { localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
+      try { if (!restrictPeople) localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
       const visible = layers.filter(l => l.text.trim());
       const mentions = mentionBoxes(visible);
       let songField: StorySong | null = null;
@@ -451,7 +460,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           };
         }
       }
-      const fields = { audience, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
+      const fields = { audience, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
@@ -473,7 +482,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, customLifetime, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, audiencePeople, restrictPeople, customLifetime, lifetime, layers, song, media, muted, drew, trim, remixSourceId, onShared, onClose, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
@@ -562,19 +571,54 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
             type="button"
             data-sc-chip
             data-st-dark-glass
-            onClick={() => setAudience(a => (a === 'everyone' ? 'followers' : 'everyone'))}
+            onClick={() => { setQuery(''); setPeople([]); setTool('audience'); }}
           >
             {audience === 'everyone' ? <Globe2 className="w-4 h-4" /> : <Users className="w-4 h-4" />}
-            {audience === 'everyone' ? t('stories.everyone', { defaultValue: 'Everyone' }) : t('stories.followersOnly', { defaultValue: 'Followers' })}
+            {audienceLabels[audience]}
           </button>
           {customLifetime ? (
             <button type="button" data-sc-chip data-st-dark-glass onClick={() => setTool('lifetime')} aria-label={`${lifetimeLabel}, ${lifetime}h`}>
               {lifetime}h
             </button>
           ) : <span data-sc-chip data-st-dark-glass>24h</span>}
-          <button type="button" data-sc-share onClick={share} disabled={busy}>
+          <button type="button" data-sc-share onClick={share} disabled={busy || (restrictPeople && !audiencePeople.length)}>
             {t('stories.share', { defaultValue: 'Share' })}
           </button>
+        </div>
+      )}
+
+      {tool === 'audience' && (
+        <div data-sc-panel data-sc-text-panel className="max-h-[70dvh] overflow-y-auto">
+          <div className="mb-2 flex items-center justify-between">
+            <strong>{t('settings.privacy', { defaultValue: 'Privacy' })}</strong>
+            <button type="button" data-sc-chip data-st-dark-glass onClick={() => { setQuery(''); setTool(null); }}>
+              {t('common.done', { defaultValue: 'Done' })}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(audienceLabels) as StoryAudience[]).filter(mode => customAudience || mode === 'everyone' || mode === 'followers').map(mode => (
+              <button key={mode} type="button" data-sc-chip data-st-dark-glass aria-pressed={audience === mode}
+                onClick={() => { if (audience !== mode) setAudiencePeople([]); setAudience(mode); }}>
+                {audience === mode && <Check className="size-4" />}{audienceLabels[mode]}
+              </button>
+            ))}
+          </div>
+          {restrictPeople && (
+            <>
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('common.search', { defaultValue: 'Search' })}
+                aria-label={t('common.search', { defaultValue: 'Search' })} className="my-2 w-full rounded-full bg-white/10 px-4 py-2" />
+              {audiencePeople.map(user => (
+                <button key={user.address} type="button" data-sc-chip data-st-dark-glass
+                  onClick={() => setAudiencePeople(current => current.filter(item => item.address !== user.address))}>@{user.username} ×</button>
+              ))}
+              {people.filter(user => user.address && user.username && !audiencePeople.some(item => item.address === user.address)).map(user => (
+                <button type="button" key={user.address} className="block py-2" disabled={audiencePeople.length >= 50}
+                  onClick={() => { setAudiencePeople(current => [...current, user]); setQuery(''); setPeople([]); }}>
+                  {user.displayName} @{user.username}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       )}
 
