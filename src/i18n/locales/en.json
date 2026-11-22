@@ -3431,6 +3431,7 @@
     "stopRecording": "Stop",
     "replyPlaceholder": "Reply to @{{name}}...",
     "composerPlaceholder": "Type here",
+    "shortsPlaceholder": "Say something...",
     "threadParts": {
       "reorder": "Reorder",
       "reorderHint": "Drag the parts, or use the arrows, then save.",

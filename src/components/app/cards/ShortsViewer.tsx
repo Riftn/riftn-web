@@ -2563,6 +2563,7 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                         tokenId={currentShort.id}
                         onClose={() => setShowComments(false)}
                         initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
                         embedded
                       />
                     </div>
@@ -2666,6 +2667,7 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                       tokenId={currentShort.id}
                       onClose={() => setShowComments(false)}
                       initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
                     />
                   ) : (
                     <div className="flex h-full items-start justify-center pt-8">
@@ -2768,6 +2770,7 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                   tokenId={currentShort.id}
                   onClose={() => {}}
                   initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
               embedded
                 />
               </div>

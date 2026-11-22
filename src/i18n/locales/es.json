@@ -3637,6 +3637,7 @@
     "stopRecording": "Detener",
     "replyPlaceholder": "Responder a @{{name}}...",
     "composerPlaceholder": "Escribe aquí",
+    "shortsPlaceholder": "Di algo...",
     "threadParts": {
       "reorder": "Reordenar",
       "reorderHint": "Arrastra las partes o usa las flechas y luego guarda.",

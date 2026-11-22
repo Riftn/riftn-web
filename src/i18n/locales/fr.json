@@ -3641,6 +3641,7 @@
     "stopRecording": "Arrêter",
     "replyPlaceholder": "Répondre à @{{name}}...",
     "composerPlaceholder": "Écrivez ici",
+    "shortsPlaceholder": "Dites quelque chose...",
     "threadParts": {
       "reorder": "Réorganiser",
       "reorderHint": "Faites glisser les parties ou utilisez les flèches, puis enregistrez.",

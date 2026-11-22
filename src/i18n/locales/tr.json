@@ -3637,6 +3637,7 @@
     "stopRecording": "Durdur",
     "replyPlaceholder": "@{{name}} kişisine yanıt verin...",
     "composerPlaceholder": "Buraya yazın",
+    "shortsPlaceholder": "Bir şey söyle...",
     "threadParts": {
       "reorder": "Yeniden sırala",
       "reorderHint": "Bölümleri sürükleyin ya da okları kullanın, sonra kaydedin.",
