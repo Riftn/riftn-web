@@ -137,7 +137,7 @@ const BoostModal = lazy(() =>
 );
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { CommentsWrapper } from './CommentsWrapper';
 import { LiveEndedMedia } from './LiveEndedMedia';
 // Lazy: only a live post ever renders it, and a static import would put the

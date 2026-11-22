@@ -36,7 +36,8 @@ import { useSignInSheetState } from '@/lib/sign-in-handoff';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { ARRIVAL_INTRO_MS, useArrivalLook, type ArrivalLook } from '@/lib/arrival-look';
-import { CONCEPT_LOOKS, CONCEPT_NAME_MS, CONCEPT_REVEAL_MS, mountConcept, type ConceptHandle, type ConceptLook } from './arrival-concepts';
+import { CONCEPT_LOOKS, CONCEPT_NAME_MS, CONCEPT_REVEAL_MS, type ConceptLook } from './arrival-concept-timing';
+import type { ConceptHandle } from './arrival-concepts';
 import './sign-in-handoff.css';
 
 type Phase = 'idle' | 'waiting' | 'arriving' | 'open' | 'flying' | 'leaving';
@@ -129,6 +130,10 @@ export function RiftMarks() {
   );
 }
 
+/** The drawn arrivals are only for people who picked one, so they stay out of startup. */
+let conceptsChunk: Promise<typeof import('./arrival-concepts')> | null = null;
+const loadConcepts = () => (conceptsChunk ??= import('./arrival-concepts'));
+
 /**
  * Trace, Tune in, Deck and Glass drop: drawn frame by frame (arrival-concepts).
  * `opened` is the moment the account is in; each one then ends on the picture
@@ -144,13 +149,25 @@ function ConceptMarks({ look, opened, picture, initial, keepPicture, playing = t
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const handle = useRef<ConceptHandle | null>(null);
+  // The drawing code loads on demand (loadConcepts); whatever changed while it
+  // was on its way is handed over the moment it mounts.
+  const latest = useRef({ picture, initial, opened, playing });
+  latest.current = { picture, initial, opened, playing };
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const reduced = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const h = mountConcept(root, look, { picture, initial, keepPicture, reduced });
-    handle.current = h;
-    return () => { h.stop(); handle.current = null; };
+    let gone = false;
+    let h: ConceptHandle | null = null;
+    void loadConcepts().then(({ mountConcept }) => {
+      if (gone) return;
+      const now = latest.current;
+      const reduced = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      h = mountConcept(root, look, { picture: now.picture, initial: now.initial, keepPicture, reduced });
+      handle.current = h;
+      h.play(now.playing);
+      if (now.opened) h.open();
+    });
+    return () => { gone = true; h?.stop(); handle.current = null; };
     // The picture is passed on below, as soon as the account is known.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [look]);
@@ -184,6 +201,10 @@ export function SignInHandoff() {
   const { isAuthenticated, user, requiresUsername } = useAuth();
   const { t } = useTranslation();
   const look = useArrivalLook();
+  // Fetch the drawn arrival while the sheet is up, so it is there when the account is.
+  useEffect(() => {
+    if (sheet !== 'closed' && isConceptLook(look)) void loadConcepts();
+  }, [sheet, look]);
   const introMs = ARRIVAL_INTRO_MS[look];
   const [phase, setPhase] = useState<Phase>('idle');
   const [flight, setFlight] = useState<CSSProperties | undefined>(undefined);

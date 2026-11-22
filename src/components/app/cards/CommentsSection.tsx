@@ -126,7 +126,7 @@ import { useCommentTips } from '@/hooks/use-comment-tips';
 import { TipGemIcon } from './TipGemIcon';
 import { subscribePostTipped, commentTipKey } from '@/lib/tip-events';
 import { useAuthorThread } from '@/hooks/use-author-thread';
-import { TipModal } from '@/components/app/modals/TipModal';
+import { TipModalLazy as TipModal } from '@/components/app/modals/TipModalLazy';
 import { ReportModal } from '@/components/app/modals/ReportModal';
 import { CommentLikersDrawer } from './CommentLikersDrawer';
 import { FullscreenImageViewerLazy } from './FullscreenImageViewerLazy';

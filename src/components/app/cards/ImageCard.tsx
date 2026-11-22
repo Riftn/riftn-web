@@ -85,7 +85,7 @@ const BoostModal = lazy(() =>
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
 import { QuotedPostEmbed, RemovedQuoteNotice } from './QuotedPostEmbed';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { SwipeableCarousel } from '../SwipeableCarousel';
 import { usePostTipCount } from '@/hooks/use-post-tip-count';
 import { useTapGestures } from '@/hooks/use-tap-gestures';
