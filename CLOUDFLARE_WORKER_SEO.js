@@ -185,6 +185,7 @@ const OG_CARD_ROUTES = new Set([
   'arcade', 'arcade/kings-gambit', 'arcade/claude-of-duty', 'arcade/jungle-trail',
   'arcade/street-slayer',
   'arcade/trenchstar', 'arcade/love-lock-bridge',
+  'arcade/correspondence-chess', 'arcade/okey',
   'apps', 'apps/dev',
   // App surfaces that had no card of their own and unfurled as the homepage.
   // `superpowers` art was rendered when the page shipped and was never added
@@ -1428,6 +1429,24 @@ const MARKETING_PAGES = {
     bodyHtml: `<p>A first-person walk across a gilded bridge through rose gardens, a river and lake, Paris terraces and drifting cloud. Choose a spot on either golden railing, write up to 64 characters and leave your lock.</p>
 <p>Walk with WASD or the arrow keys and drag to look. On a phone, hold the on-screen arrows or tap the paving to walk.</p>
 <p><a href="${APP_URL}/arcade/love-lock-bridge">Walk the bridge</a>.</p>`,
+  },
+  'arcade/correspondence-chess': {
+    title: 'Correspondence Chess With Friends | Riftn Arcade',
+    description: 'Challenge a friend to chess on Riftn and take up to a week per move. You get a notification when it is your turn. Free, in your browser and the Riftn app.',
+    heading: 'Correspondence Chess: Play A Friend At Your Own Pace',
+    ...arcadeGameLd('/og/arcade-correspondence-chess.jpg'),
+    bodyHtml: `<p>Chess the slow way. Challenge a friend by username, or post an open challenge anyone can take, and pick 1, 2, 3, 5 or 7 days per move.</p>
+<p>The board waits for you. When your opponent moves you get a notification, and a reminder when a move is close to running out. Offer a draw, resign, or share the game link so others can follow along.</p>
+<p><a href="${APP_URL}/arcade/correspondence-chess">Start a game</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
+  },
+  'arcade/okey': {
+    title: 'Okey 101 With Friends | Riftn Arcade',
+    description: 'Play Okey 101 with friends on Riftn. Open a table, lock it with a password, and bots fill any empty seat. Free, in your browser and the Riftn app.',
+    heading: 'Okey 101: Four Seats, Friends Or Bots',
+    ...arcadeGameLd('/og/arcade-okey.jpg'),
+    bodyHtml: `<p>The classic tile game for four. Open a table and share the invite, lock it with a password for friends only, or start straight away and let bots take the empty seats. Anyone who joins later takes over a bot's seat.</p>
+<p>Open with runs and sets worth 101 points or five pairs, add to any group on the table, and throw your last tile to win the round. The lowest total wins. Just for fun, no money involved.</p>
+<p><a href="${APP_URL}/arcade/okey">Find a table</a> or <a href="${APP_URL}/arcade">see the whole arcade</a>.</p>`,
   },
   'arcade/street-slayer': {
     title: 'Street Slayer | Riftn Arcade',
