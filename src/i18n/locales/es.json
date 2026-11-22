@@ -2624,13 +2624,6 @@
   },
   "features": {
     "myRequests": "Mis solicitudes",
-    "boardSide": "Tablero",
-    "sideFeatures": "Ideas nuevas",
-    "sideBugs": "Errores",
-    "bugHeading": "¿Qué no funciona?",
-    "bugHint": "Cuenta qué pasó y qué esperabas. Una captura ayuda.",
-    "sideFeaturesShort": "Ideas",
-    "sideBugsShort": "Errores",
     "cropDraw": "Recortar y dibujar",
     "crop": "Recortar",
     "cropHint": "Arrastra un recuadro sobre la parte que quieres conservar. Arrastra dentro para moverlo.",

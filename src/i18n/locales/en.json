@@ -2624,13 +2624,6 @@
   },
   "features": {
     "myRequests": "My Requests",
-    "boardSide": "Board",
-    "sideFeatures": "Feature requests",
-    "sideBugs": "Bug reports",
-    "bugHeading": "What's not working?",
-    "bugHint": "Say what happened and what you expected. A screenshot helps.",
-    "sideFeaturesShort": "Features",
-    "sideBugsShort": "Bugs",
     "cropDraw": "Crop & draw",
     "crop": "Crop",
     "cropHint": "Drag a box over the part to keep. Drag inside it to move it.",
