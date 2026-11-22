@@ -831,6 +831,7 @@ export function PostContentArea({
         query={mention.query}
         isOpen={mention.isOpen}
         position={mention.position}
+        armed={mention.armed}
         selectedIndex={mention.selectedIndex}
         onSelectedIndexChange={mention.setSelectedIndex}
         onSelect={mention.handleSelect}
