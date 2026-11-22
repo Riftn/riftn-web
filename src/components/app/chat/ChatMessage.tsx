@@ -1,3 +1,4 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 import { outsideImage } from '@/lib/outside-image';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { InPlaceEditField, editOnClick } from './InPlaceEdit';
@@ -302,9 +303,6 @@ export const ChatMessage = memo(function ChatMessage({
   );
   const { refs: chatAssetRefs, displayText: chatDisplayText } = useAssetRefsInText(chatLinkFreeText);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
 
   const formatDate = (date: Date) => {
     const dd = String(date.getDate()).padStart(2, '0');
@@ -545,7 +543,7 @@ export const ChatMessage = memo(function ChatMessage({
               <DehubLinkEmbeds links={chatDehubLinks} />
               <AssetRefCards refs={chatAssetRefs} />
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
+                <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatMessageTime(message.timestamp)}</span>
                 {sendMark}
                 {isTranslateLoading && <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />}
                 {translateError && (
@@ -576,7 +574,7 @@ export const ChatMessage = memo(function ChatMessage({
               </p>
             )}
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
+              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatMessageTime(message.timestamp)}</span>
                 {sendMark}
               {isTranslateLoading && <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />}
             </div>
@@ -597,7 +595,7 @@ export const ChatMessage = memo(function ChatMessage({
           <div className="mt-1 flex flex-col gap-1">
             <VoiceWaveformPlayer src={message.audioUrl} />
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
+              <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatMessageTime(message.timestamp)}</span>
                 {sendMark}
             </div>
           </div>

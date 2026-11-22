@@ -1,3 +1,4 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 import { useCallback, useState } from 'react';
 import { CheckCircle2, Copy, CornerUpLeft, CornerUpRight, Download, Flag, Image as ImageIcon, Languages, Link2, MoreHorizontal, Pencil, Pin, PinOff, Search, ShieldBan, ShieldCheck, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,7 +42,7 @@ export function messageMenuMeta(when: Date | string | undefined, edited?: boolea
   if (!when) return null;
   const date = typeof when === 'string' ? new Date(when) : when;
   if (Number.isNaN(date.getTime())) return null;
-  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const time = formatMessageTime(date);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);

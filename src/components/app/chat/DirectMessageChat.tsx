@@ -1,3 +1,4 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 import { outsideImage } from '@/lib/outside-image';
 import { useSwipeReply } from '@/hooks/use-swipe-reply';
 import { useDoubleTap } from '@/hooks/use-double-tap';
@@ -1356,7 +1357,7 @@ const MessageBubble = memo(function MessageBubble({
         {cozyShowMeta && (
         <div data-cozy-meta={cozy ? '' : undefined} className={`text-xs text-zinc-500 mt-1 flex items-center gap-1 ${isOwnMessage ? 'justify-end' : ''}`}>
           <span>{cozy
-            ? new Date(message.createdAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+            ? formatMessageTime(new Date(message.createdAt))
             : formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}</span>
           {/* Image captions get the control too. They had none: the gate was
               msgType === 'msg', so a caption was auto-translated on mount and
