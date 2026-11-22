@@ -991,9 +991,10 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   // View tracking - batches views when post is visible for 2+ seconds
   const viewRef = useFeedViewTracking(post.id);
 
-  const soundtrackEnabled = !matureGate.isGated && !isPPV && !isLocked && !isSubGated && !isW2E;
-  const soundtrack = useImageSoundtrack(post.soundtrackUrl, viewRef, soundtrackEnabled, post.id);
-  const soundtrackControl = post.soundtrackUrl && soundtrackEnabled ? (
+  const mediaAccessible = !matureGate.isGated && !isPPV && !isLocked && !isSubGated && !isW2E;
+  const canDownloadImage = mediaAccessible && !contentWarning.hidden;
+  const soundtrack = useImageSoundtrack(post.soundtrackUrl, viewRef, mediaAccessible, post.id);
+  const soundtrackControl = post.soundtrackUrl && mediaAccessible ? (
     <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} />
   ) : null;
   // While the song plays its player docks under the photo, not over it.
@@ -1030,21 +1031,22 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
 
   const [isDownloading, setIsDownloading] = useState(false);
   const handleDownloadImage = useCallback(async () => {
-    const source = images[activeImageIndex] || images[0];
-    if (!source || isDownloading) return;
+    const index = Math.min(activeImageIndex, images.length - 1);
+    const source = cdnImageSource(images[index]);
+    if (!canDownloadImage || !source || isDownloading) return;
     setShowOptionsDrawer(false);
     setIsDownloading(true);
     const toastId = `image-download-${post.id}`;
     toast.loading(_copy("copy.757726036c1c", { defaultValue: "Preparing download..." }), { id: toastId });
     try {
-      await downloadMedia(source, imageDownloadName(source, post.id, activeImageIndex));
+      await downloadMedia(source, imageDownloadName(source, post.id, index));
       toast.success(_copy("copy.efece5dd1933", { defaultValue: "Download started" }), { id: toastId });
     } catch {
       toast.error(_copy("copy.d2bde7afd757", { defaultValue: "Download failed. Please try again." }), { id: toastId });
     } finally {
       setIsDownloading(false);
     }
-  }, [images, activeImageIndex, isDownloading, post.id, _copy]);
+  }, [images, activeImageIndex, canDownloadImage, isDownloading, post.id, _copy]);
 
   const openPost = useCallback(() => {
     if (wasDrawerJustDismissed() || showPPVDrawer || showBountyDrawer || showLockedDrawer) return;
@@ -1280,7 +1282,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
               >
                 <Languages className="w-5 h-5" /> {t('postOptions.translateImage')}
               </button>
-              {!isPPV && !isW2E && !isLocked && (
+              {canDownloadImage && (
                 <button onClick={handleDownloadImage} disabled={isDownloading} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-50">
                   <Download className="w-5 h-5" /> {t('postOptions.download')}
                 </button>
@@ -1582,6 +1584,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
             return (
               <Suspense fallback={<div style={{ aspectRatio: '4 / 5' }} />}>
                 <ComicDeckLazy
+                  onIndexChange={setActiveImageIndex}
                   images={images}
                   captions={post.mediaCaptions}
                   border={post.comicBorder}
@@ -1784,6 +1787,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
 
       {/* Fullscreen Image Viewer */}
       <FullscreenImageViewerLazy
+        downloadable={canDownloadImage}
         images={images}
         soundtrackControl={soundtrackControl && (
           <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="inline" />
