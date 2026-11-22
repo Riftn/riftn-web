@@ -1,3 +1,4 @@
+import { formatMessageTime } from '@/i18n/date-locale';
 /**
  * Scheduled messages for one direct chat: the strip above the composer that
  * says something is waiting, and the drawer where each one can be edited,
@@ -106,7 +107,7 @@ export function useWhenLabel() {
       : days === 1
         ? t('whenSheet.tomorrow', { defaultValue: 'Tomorrow' })
         : at.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short', ...(at.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}) });
-    return `${day}, ${at.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}`;
+    return `${day}, ${formatMessageTime(at, locale)}`;
   };
 }
 
