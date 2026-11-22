@@ -13685,7 +13685,7 @@
       "cloud": {
         "title": "Uygulamanı Riftn Cloud’da barındır",
         "body": "Uygulamanın tamamını Riftn’e koy: web siten, backend kodun ve kendi veritabanı, dhb.gg üzerindeki kendi adresinde. Kiralanacak ya da bakımı yapılacak sunucu yok. Yayına girince aşağıdaki Riftn Apps mağazasında listele.",
-        "ruleCode": "Backend: fetch(request, env) dışa aktaran bir index.js, bir Cloudflare Worker gibi. Hono ve çoğu npm paketi tek dosyada paketlendiğinde çalışır.",
+        "ruleCode": "Backend: fetch(request, env) dışa aktaran bir index.js (Cloudflare Worker gibi) ya da Python için Default(WorkerEntrypoint) sınıfı olan bir main.py. Hono ve çoğu npm paketi tek dosyada paketlendiğinde çalışır.",
         "rulePublic": "Web sitesi: HTML, CSS, görselleri ve betikleri public klasörüne koy. index.js olmayan bir yükleme düz web sitesi olarak sunulur.",
         "ruleFree": "Beta boyunca ücretsiz: 3 uygulama, her biri için 10 MB dosya ve 500 MB veritabanı, istek başına yaklaşık 0,1 sn işlem.",
         "namePlaceholder": "Uygulama adı, ör. Dükkanım",

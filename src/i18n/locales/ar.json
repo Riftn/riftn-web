@@ -13721,7 +13721,7 @@
       "cloud": {
         "title": "استضف تطبيقك على Riftn Cloud",
         "body": "ضع تطبيقك كاملاً على Riftn: موقعك وكود الخادم وقاعدة بيانات خاصة به، على عنوانك الخاص في dhb.gg. لا خادم تستأجره أو تديره. عندما يصبح متاحاً، أضفه إلى متجر Riftn Apps في الأسفل.",
-        "ruleCode": "الخادم: ملف index.js يصدّر fetch(request, env)، مثل Cloudflare Worker. يعمل Hono ومعظم حزم npm بعد تجميعها في ملف واحد.",
+        "ruleCode": "الخادم: ملف index.js يصدّر fetch(request, env)، مثل Cloudflare Worker، أو ملف main.py فيه صنف Default(WorkerEntrypoint) للغة Python. يعمل Hono ومعظم حزم npm بعد تجميعها في ملف واحد.",
         "rulePublic": "الموقع: ضع ملفات HTML وCSS والصور والسكربتات في مجلد public. الرفع بدون index.js يُعرض كموقع عادي.",
         "ruleFree": "مجاني خلال النسخة التجريبية: 3 تطبيقات، لكل منها 10 ميغابايت من الملفات وقاعدة بيانات 500 ميغابايت، ونحو 0.1 ثانية معالجة لكل طلب.",
         "namePlaceholder": "اسم التطبيق، مثل متجري",

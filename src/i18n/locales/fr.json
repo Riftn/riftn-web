@@ -13689,7 +13689,7 @@
       "cloud": {
         "title": "Hébergez votre app sur Riftn Cloud",
         "body": "Mettez toute votre app sur Riftn : votre site, votre code backend et sa propre base de données, à votre propre adresse sur dhb.gg. Aucun serveur à louer ni à entretenir. Une fois en ligne, publiez-la dans la boutique Riftn Apps plus bas.",
-        "ruleCode": "Backend : un index.js qui exporte fetch(request, env), comme un Cloudflare Worker. Hono et la plupart des paquets npm fonctionnent une fois regroupés en un seul fichier.",
+        "ruleCode": "Backend : un index.js qui exporte fetch(request, env), comme un Cloudflare Worker, ou un main.py avec une classe Default(WorkerEntrypoint) pour Python. Hono et la plupart des paquets npm fonctionnent une fois regroupés en un seul fichier.",
         "rulePublic": "Site : mettez le HTML, le CSS, les images et les scripts dans un dossier public. Un envoi sans index.js est servi comme un site simple.",
         "ruleFree": "Gratuit pendant la bêta : 3 apps, 10 Mo de fichiers et une base de 500 Mo chacune, environ 0,1 s de calcul par requête.",
         "namePlaceholder": "Nom de l'app, ex. Ma Boutique",
