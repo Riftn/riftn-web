@@ -2498,7 +2498,8 @@
       "bountyApplied": "تم تطبيق {{name}} على مكافأتك",
       "bountySubmittedNamed": "قدم {{name}} عملًا على مكافأتك \\\"{{title}}\\\"",
       "bountySubmitted": "قدم {{name}} عملًا على مكافأتك",
-      "sentNotification": "أرسل لك {{name}} إشعارًا"
+      "sentNotification": "أرسل لك {{name}} إشعارًا",
+      "fractionGift": "{{name}} أرسل لك حصصًا"
     }
   },
   "leaderboard": {
@@ -6063,7 +6064,25 @@
     "buy": "شراء",
     "reject": "رفض",
     "needsYouHold": "يحتاج {{needed}}، وأنت تملك {{held}}",
-    "sellYourFractions": "بِع أجزاءك ({{held}} بحوزتك)"
+    "sellYourFractions": "بِع أجزاءك ({{held}} بحوزتك)",
+    "giftSend": "إرسال",
+    "giftTitle": "إرسال حصص",
+    "giftHint": "تنتقل مباشرة من محفظتك إلى محفظته.",
+    "giftYouOwn": "تملك {{count}} من {{total}}",
+    "giftListedNote": "{{count}} معروضة للبيع. ألغِ العرض لإرسالها.",
+    "giftTo": "إلى",
+    "giftChange": "تغيير",
+    "giftSearch": "ابحث عن أشخاص",
+    "giftNoOne": "لم يتم العثور على أحد",
+    "giftHowMany": "كم",
+    "giftLess": "واحدة أقل",
+    "giftMore": "واحدة أكثر",
+    "giftAll": "الكل",
+    "giftSending": "جارٍ الإرسال…",
+    "giftButton": "إرسال {{count}} إلى {{name}}",
+    "giftSent": "تم إرسال {{count}} إلى {{name}}",
+    "giftFailed": "تعذّر الإرسال. حاول مرة أخرى.",
+    "giftNotSubmitted": "لم يتم إرسال التحويل"
   },
   "creator": {
     "gallery": {

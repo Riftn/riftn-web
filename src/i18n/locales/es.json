@@ -2498,7 +2498,8 @@
       "bountyApplied": "{{name}} aplicado a tu recompensa",
       "bountySubmittedNamed": "{{name}} envió trabajo sobre tu recompensa “{{title}}”",
       "bountySubmitted": "{{name}} ha enviado trabajo sobre tu recompensa",
-      "sentNotification": "{{name}} te ha enviado una notificación"
+      "sentNotification": "{{name}} te ha enviado una notificación",
+      "fractionGift": "{{name}} te envió fracciones"
     }
   },
   "leaderboard": {
@@ -6039,7 +6040,25 @@
     "buy": "Comprar",
     "reject": "Rechazar",
     "needsYouHold": "Necesita {{needed}}, tú tienes {{held}}",
-    "sellYourFractions": "Vender tus fracciones ({{held}} en cartera)"
+    "sellYourFractions": "Vender tus fracciones ({{held}} en cartera)",
+    "giftSend": "Enviar",
+    "giftTitle": "Enviar fracciones",
+    "giftHint": "Pasan directamente de tu billetera a la suya.",
+    "giftYouOwn": "Tienes {{count}} de {{total}}",
+    "giftListedNote": "{{count}} están a la venta. Cancela el anuncio para enviarlas.",
+    "giftTo": "Para",
+    "giftChange": "Cambiar",
+    "giftSearch": "Buscar personas",
+    "giftNoOne": "No se encontró a nadie",
+    "giftHowMany": "Cuántas",
+    "giftLess": "Una menos",
+    "giftMore": "Una más",
+    "giftAll": "Todas",
+    "giftSending": "Enviando…",
+    "giftButton": "Enviar {{count}} a {{name}}",
+    "giftSent": "Enviaste {{count}} a {{name}}",
+    "giftFailed": "No se pudo enviar. Inténtalo de nuevo.",
+    "giftNotSubmitted": "La transferencia no se envió"
   },
   "creator": {
     "gallery": {
