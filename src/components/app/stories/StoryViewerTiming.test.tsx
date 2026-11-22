@@ -14,9 +14,11 @@ it('tracks existing Moments per author when advancing, rewinding and switching c
     author: { address, username: address, displayName: address, avatarImageUrl: null },
     own: false, following: false, seen: false, latestAt: createdAt,
     items: ids.map(id => ({
-      id, type: 'video', mediaUrl: '/video.mp4', mentions: [], createdAt,
-      audience: 'public', status: 'ready', expiresAt: new Date(Date.now() + 3600000).toISOString(),
-    }) as ShelfEntry['items'][number]),
+      id, address, type: 'video', mediaUrl: '/video.mp4', mentions: [], createdAt,
+      posterUrl: null, overlayUrl: null, width: null, height: null, durationMs: 10000,
+      muted: true, caption: null, song: null, allowReplies: true, viewed: false, liked: false,
+      audience: 'everyone', status: 'ready', expiresAt: new Date(Date.now() + 3600000).toISOString(),
+    })),
   });
   const client = new QueryClient();
   const view = render(<MemoryRouter><QueryClientProvider client={client}>
