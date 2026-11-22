@@ -47,6 +47,9 @@ import { setSignInSheetState } from '@/lib/sign-in-handoff';
 import '@/components/app/login/sign-in-handoff.css';
 import '@/styles/welcome-flow.css';
 
+// Only reached when a wallet is slow to answer, so it stays out of the entry.
+const WalletWaitHelp = React.lazy(() => import('@/components/app/login/WalletWaitHelp'));
+
 const flowLog = createLogger('LoginFlow');
 
 /**
@@ -184,7 +187,7 @@ interface LoginModalProps {
 
 export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const { style: keyboardStyle } = useKeyboardSafeSheet(open);
-  const { walletPhase, isProcessingRedirect, requiresUsername } = useAuth();
+  const { walletPhase, isProcessingRedirect, requiresUsername, isConnecting } = useAuth();
   const { loginIntent } = useLoginSheet();
   const { t } = useTranslation();
 
@@ -328,7 +331,9 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     : waitingForSession
     ? <div className={stackLayout ? 'h-[250px]' : 'h-[180px]'} aria-hidden />
     : <DeHubPageLoader size={56} minHeight="180px" />;
-  const veil = <div className="signin-handoff-veil" data-on={open && waitingForSession ? '' : undefined} aria-hidden />;
+  const veil = <div className="signin-handoff-veil" data-on={open && waitingForSession ? '' : undefined} aria-hidden />
+  const walletWaiting = open && isConnecting && (step === 'wallet-signing' || step === 'wallets');
+
 
   const termsNotice = (
     <Trans
@@ -462,6 +467,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
         >
           {sheetBody}
           {veil}
+          {walletWaiting && <Suspense fallback={null}><WalletWaitHelp active /></Suspense>}
         </DialogContent>
       </Dialog>
     );
@@ -490,6 +496,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
       >
         {sheetBody}
           {veil}
+          {walletWaiting && <Suspense fallback={null}><WalletWaitHelp active /></Suspense>}
       </DrawerContent>
     </Drawer>
   );

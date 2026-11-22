@@ -3404,7 +3404,10 @@
     "googleInAppBody": "افتح Riftn في متصفحك لاستخدام Google، أو سجّل الدخول بالبريد الإلكتروني هنا.",
     "openInBrowser": "فتح في المتصفح",
     "copyLink": "نسخ الرابط",
-    "tryAnyway": "حاول على أي حال"
+    "tryAnyway": "حاول على أي حال",
+    "walletWaitTitle": "بانتظار {{wallet}}",
+    "walletWaitBody": "وافق على الطلب في تطبيق محفظتك، أو ألغِ وحاول مرة أخرى.",
+    "walletWaitOpen": "افتح {{wallet}}"
   },
   "careers": {
     "title": "وظائف في Riftn",
