@@ -44,6 +44,7 @@ import Gift from "@/components/ui/cut-icons/gifts";
 import Ban from "@/components/ui/cut-icons/blocked";
 import Megaphone from "@/components/ui/cut-icons/advertising";
 import Radio from "@/components/ui/cut-icons/live";
+import LastSeenIcon from "@/components/ui/cut-icons/history";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import Pause from "@/components/ui/cut-icons/pause";
 
@@ -1799,7 +1800,7 @@ function QuietHoursSection() {
 function PrivacySettings() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showLastSeen, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
   const { option: walletUnlockInterval, setOption: setWalletUnlockInterval } = useWalletUnlockInterval();
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const { user } = useAuthContext();
@@ -1972,6 +1973,15 @@ function PrivacySettings() {
             description={t('settings.showOnlineDesc')}
             defaultChecked={showOnline}
             onCheckedChange={(checked) => updateSettings({ show_online: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={LastSeenIcon}
+            anchor="show-last-seen"
+            title={t('settings.showLastSeen')}
+            description={t('settings.showLastSeenDesc')}
+            defaultChecked={showLastSeen}
+            onCheckedChange={(checked) => updateSettings({ show_last_seen: checked })}
             disabled={isUpdating || isLoading}
           />
           <SettingToggle

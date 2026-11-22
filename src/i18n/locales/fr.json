@@ -1115,6 +1115,8 @@
     "postingChain": "Blockchain des publications",
     "showOnline": "Montrer quand je suis en ligne",
     "showOnlineDesc": "Les personnes que vous envoyez un message voient un point vert à côté de votre nom lorsque vous utilisez Riftn",
+    "showLastSeen": "Afficher ma dernière connexion",
+    "showLastSeenDesc": "Les personnes avec qui tu discutes voient quand tu étais sur Riftn pour la dernière fois, par exemple « Vu il y a 5 min »",
     "showDislikes": "Montrer mes « je n'aime pas » à tout le monde",
     "showDislikesDesc": "Tout le monde peut ouvrir l'onglet « Je n'aime pas » de votre profil. Désactivé, vous seul pouvez le voir.",
     "showLikes": "Montrer mes j'aime à tout le monde",
@@ -2827,6 +2829,8 @@
   },
   "profile": {
     "localTime": "Heure locale {{time}}",
+    "lastSeen": "Vu {{when}}",
+    "lastSeenJustNow": "Vu à l'instant",
     "localTimeAhead": "{{hours}} h d’avance",
     "localTimeBehind": "{{hours}} h de retard",
     "shareLocalTime": "Afficher mon heure locale",

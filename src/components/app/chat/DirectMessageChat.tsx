@@ -81,6 +81,7 @@ import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgedName } from '@/components/app/BadgedName';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { OnlineDot } from '@/components/app/chat/OnlineDot';
+import { LastSeenLine } from '@/components/app/chat/LastSeenLine';
 import { formatAttachmentSize, getAttachmentLabel, isAllowedAttachment } from '@/lib/attachments';
 import { GroupSettingsDrawer } from './GroupSettingsDrawer';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
@@ -3213,6 +3214,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               {otherUser?.username && (
                 <p className="text-xs text-zinc-500">@{otherUser.username}</p>
               )}
+              {!isGroupChat && <LastSeenLine address={otherUser?.address} customs={peerProfile?.customs} />}
               {peerLocalTime && (
                 <p className="truncate text-xs text-zinc-400" title={String(peerProfile?.customs?.publicTimeZone)}>
                   {localTimeLine(_copy as never, peerLocalTime, peerProfile?.customs?.publicTimeZone)}

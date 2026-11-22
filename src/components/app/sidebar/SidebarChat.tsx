@@ -68,6 +68,8 @@ import { copyableMediaUrl } from '@/lib/copy-media';
 import { LiveChatOnlineCount } from '@/components/app/chat/LiveChatOnlineCount';
 import { ChatTextSizeButton } from '@/components/app/chat/ChatTextSizeButton';
 import { ASSISTANT_PROFILE_PATH, profilePath } from '@/lib/profile-path';
+import { usePublicChatDelete } from '@/components/app/chat/PublicChatDeleteDialog';
+import { useHiddenLines } from '@/lib/public-chat-hidden';
 
 /**
  * A text message in the side panel, with the same cards every other chat
@@ -264,6 +266,14 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   useAssistantReplyEngine(messages);
   const localAssistantReplies = useAssistantReplies();
 
+  // Lines you deleted for yourself only; "Delete" asks for everyone or for me.
+  const hiddenLines = useHiddenLines(walletAddress);
+  const { requestDelete, dialog: deleteDialog } = usePublicChatDelete({
+    account: walletAddress,
+    canDeleteAny: false,
+    deleteForEveryone: deleteMessage,
+  });
+
   // Merge livechat messages + buy alerts + any local fallback replies
   type MergedItem =
     | { type: 'message'; data: typeof messages[0] }
@@ -271,7 +281,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     | { type: 'assistant'; data: AssistantReply };
   const mergedItems: MergedItem[] = useMemo(() => {
     const items: MergedItem[] = [
-      ...messages.map((m) => ({ type: 'message' as const, data: m })),
+      ...messages.filter((m) => !hiddenLines.has(m.id)).map((m) => ({ type: 'message' as const, data: m })),
       // Buy alerts sit beside the history that is loaded, never further back.
       ...(buyBotHidden ? [] : buyAlerts
         .filter((a) => !messages.length || a.created_at >= messages[0].created_at)
@@ -282,7 +292,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       it.type === 'assistant' ? it.data.timestamp.getTime() : new Date(it.data.created_at).getTime();
     items.sort((a, b) => tsOf(a) - tsOf(b));
     return items;
-  }, [messages, buyAlerts, localAssistantReplies, buyBotHidden]);
+  }, [messages, buyAlerts, localAssistantReplies, buyBotHidden, hiddenLines]);
 
   // The rail is only 400px tall. Mount recent rows first so old link previews,
   // badges and media do not compete with the feed at startup.
@@ -496,7 +506,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
     const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
       : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
     if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
-    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => void deleteMessage(menuMsg.id) });
+    if (own) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => requestDelete(menuMsg.id, true) });
   }
   const lineMenu = menuPoint.mounted && menuMsg ? (
     <MessageMenu
@@ -516,6 +526,7 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   return (
     <div data-sidebar-chat className="flex flex-col h-full pl-px">
       {lineMenu}
+      {deleteDialog}
       <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
       <div className="relative flex-1">
         <div
