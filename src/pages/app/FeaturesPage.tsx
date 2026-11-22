@@ -1075,7 +1075,7 @@ export default function FeaturesPage() {
   const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
   const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible, isError: isErrorNotFeasible, refetch: refetchNotFeasible } = useNotFeasibleFeatures(authorWallet);
 
-  // A notification about one request pins it above the board. The list query
+  // A notification pins the linked request in its status section. The list query
   // could never be relied on to hold it — it may be shipped, declined, outside
   // the active category, or pages down the infinite scroll — so it is fetched
   // by id and rendered on its own, then removed from whichever list would
@@ -1088,7 +1088,19 @@ export default function FeaturesPage() {
   // A comment link implies the thread should be open, whether or not the row
   // that wrote the URL also said so.
   const focusedCommentsOpen = searchParams.get('comments') === '1' || !!focusedCommentId;
-  const focusedId = focusedRequest?.id ?? null;
+  const focusedStatus = focusedRequest?.status;
+  const focusedTab: PageTab = focusedStatus === 'in_progress'
+    ? 'shipping'
+    : focusedStatus === 'completed' || focusedStatus === 'shipped' ? 'shipped' : 'requests';
+  const focusedNotFeasible = focusedStatus === 'declined';
+  useEffect(() => {
+    if (!focusedRequestId || !focusedStatus) return;
+    setActiveTab(focusedTab);
+    setCategory(focusedNotFeasible ? NOT_FEASIBLE : 'all');
+  }, [focusedRequestId, focusedStatus, focusedTab, focusedNotFeasible]);
+
+  const showFocusedRequest = activeTab === focusedTab && showNotFeasible === focusedNotFeasible;
+  const focusedId = showFocusedRequest ? focusedRequest?.id ?? null : null;
   const withoutFocused = useCallback(
     <T extends { id: string }>(rows: T[] | undefined): T[] =>
       focusedId ? (rows ?? []).filter((row) => row.id !== focusedId) : (rows ?? []),
@@ -1399,8 +1411,8 @@ export default function FeaturesPage() {
         <PromptComposer initialCategory={initialCategory} focusRequest={composerFocus} onPosted={() => { setCategory('all'); setSearchInput(''); setSort('newest'); }} />
         {!isFiltering && <TopBuildersCard compact />}
       </div>
-      {/* The request a notification pointed at, above whichever tab is open. */}
-      {focusedRequest && (
+      {/* Keep the linked request and its comment in the matching status section. */}
+      {focusedRequest && showFocusedRequest && (
         <div className="mb-3">
           <SharedTranslationProvider key={focusedRequest.id}>
             <FeatureCard
