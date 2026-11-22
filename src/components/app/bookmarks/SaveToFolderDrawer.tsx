@@ -92,7 +92,7 @@ export function SaveToFolderDrawer({ open, onOpenChange, tokenId }: SaveToFolder
     try {
       if (adding) {
         await addToFolderAsync({ folderId, tokenId, suppressToast: true });
-        setNotice({ message: _copy("copy.48dbe907c42a", { defaultValue: "Added to {{value1}}", value1: folderName }), tone: 'success' });
+        onOpenChange(false);
       } else {
         await removeFromFolderAsync({ folderId, tokenId, suppressToast: true });
         setNotice({ message: _copy("copy.c95d6fb0cd5c", { defaultValue: "Removed from {{value1}}", value1: folderName }), tone: 'success' });
@@ -127,7 +127,7 @@ export function SaveToFolderDrawer({ open, onOpenChange, tokenId }: SaveToFolder
       setPending((prev) => ({ ...prev, [created._id]: true }));
       try {
         await addToFolderAsync({ folderId: created._id, tokenId, suppressToast: true });
-        setNotice({ message: _copy("copy.05a3a4786104", { defaultValue: "Saved to {{value1}}", value1: created.name }), tone: 'success' });
+        onOpenChange(false);
       } catch {
         setPending((prev) => ({ ...prev, [created._id]: false }));
         setNotice({ message: _copy("copy.c5abcffd4c32", { defaultValue: "Folder created, but the post wasn't added" }), tone: 'error' });
