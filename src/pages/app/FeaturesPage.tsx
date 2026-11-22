@@ -1169,7 +1169,7 @@ export default function FeaturesPage() {
   // ~20k nodes and froze the tab switch, so it reveals a page at a time like the
   // Prompts list does.
   const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
-  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search]);
+  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
   const shippedDeepLink = searchParams.get('feature');
   useEffect(() => {
     if (!shippedDeepLink) return;
@@ -1582,10 +1582,9 @@ export default function FeaturesPage() {
                 </SharedTranslationProvider>
               ))}
               {renderedShipped.length < visibleShipped.length && (
-                <InfiniteScrollSentinel
-                  onIntersect={showMoreShipped}
-                  isFetching={false}
-                />
+                <Button type="button" variant="outline" className="w-full" onClick={showMoreShipped}>
+                  {t('common.loadMore')}
+                </Button>
               )}
             </div>
           ) : (
