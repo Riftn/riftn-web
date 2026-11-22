@@ -18,6 +18,7 @@ import { FEED_ICON_CLASS } from './feed-icon-size';
  */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Pin } from "lucide-react";
 import Info from "@/components/ui/cut-icons/information";
@@ -58,7 +59,7 @@ export function PostUtilityButtons({
   const isPinned = useIsPostPinned(tokenId);
   const togglePinMutation = useTogglePin();
   const { isBookmarked, isLoading: isBookmarkLoading, toggleBookmark } = useBookmarkPost(postId || '');
-  const [showFolderDrawer, setShowFolderDrawer] = useState(false);
+  const [openFolderToken, setOpenFolderToken] = useState<number | null>(null);
 
   // The folder picker needs a numeric token id. `tokenId` is the reliable
   // source; postId is a string id that happens to be numeric on post cards.
@@ -85,7 +86,14 @@ export function PostUtilityButtons({
           stopIfChip(e);
           // Offer the folder picker only on save, and only when we have a token
           // id to file — un-bookmarking just removes it.
-          toggleBookmark(folderTokenId != null ? () => setShowFolderDrawer(true) : undefined);
+          toggleBookmark(() => {
+            toast.success(t('toasts.saved_to_bookmarks'), {
+              action: folderTokenId == null ? undefined : {
+                label: t('copy.fb96ba383ceb', 'Save to folder'),
+                onClick: () => setOpenFolderToken(folderTokenId),
+              },
+            });
+          });
         }}
         className={cn(
           isChip
@@ -131,9 +139,9 @@ export function PostUtilityButtons({
       </button>
 
       <SaveToFolderDrawerLazy
-        open={showFolderDrawer}
-        onOpenChange={setShowFolderDrawer}
-        tokenId={folderTokenId}
+        open={openFolderToken !== null}
+        onOpenChange={open => { if (!open) setOpenFolderToken(null); }}
+        tokenId={openFolderToken}
       />
     </>
   );

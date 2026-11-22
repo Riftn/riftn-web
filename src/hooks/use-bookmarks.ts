@@ -497,7 +497,7 @@ export function useBookmarkPost(tokenId: string | number) {
 
   /**
    * @param onSaved Fired once the server confirms a *save* (never an un-save) —
-   *   used to open the "add to folder" drawer, matching mobile's FeedCard flow.
+   *   used to offer folder selection after saving.
    */
   const toggleBookmark = (onSaved?: () => void) => {
     if (!isAuthenticated) {
