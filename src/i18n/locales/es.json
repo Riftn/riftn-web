@@ -22692,7 +22692,9 @@
     "archived": "Archivado",
     "archivedChats": "Chats archivados",
     "clearTitle": "¿Borrar historial?",
-    "clearBody": "Todos los mensajes de este chat desaparecerán para ti. La otra persona conservará su copia."
+    "clearBody": "Todos los mensajes de este chat desaparecerán para ti. La otra persona conservará su copia.",
+    "translateOut": "Enviar en su idioma",
+    "translateOutOff": "Enviar tal como escribo"
   },
   "chat": {
     "buyAlert": {
@@ -23088,5 +23090,17 @@
     "streak": "Racha de {{value}} días",
     "streakBonus": "Bonus de racha +{{pct}}%",
     "dailyHint": "Un quiz al día. Quien juegue tus quizzes varios días seguidos hace una racha y gana puntos extra."
+  },
+  "dmTranslateOut": {
+    "showMine": "Mostrar lo que escribí",
+    "showTheirs": "Mostrar lo que ven",
+    "showTranslation": "Mostrar traducción",
+    "asTheySee": "Como lo ven",
+    "sentIn": "Enviado en {{language}}",
+    "original": "Original",
+    "translated": "Traducido",
+    "offToast": "Tus mensajes aquí se envían tal como los escribes",
+    "onToast": "Tus mensajes aquí ahora se envían en {{language}}",
+    "noLanguage": "Aún no han elegido un idioma en la app, así que por ahora tus mensajes se envían tal como los escribes"
   }
 }

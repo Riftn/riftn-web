@@ -22692,7 +22692,9 @@
     "archived": "Arşivlenmiş",
     "archivedChats": "Arşivlenmiş sohbetler",
     "clearTitle": "Geçmiş temizlensin mi?",
-    "clearBody": "Bu sohbetteki her mesaj senin için kaybolur. Diğer kişi kendi kopyasını tutmaya devam eder."
+    "clearBody": "Bu sohbetteki her mesaj senin için kaybolur. Diğer kişi kendi kopyasını tutmaya devam eder.",
+    "translateOut": "Onların dilinde gönder",
+    "translateOutOff": "Yazdığım gibi gönder"
   },
   "chat": {
     "buyAlert": {
@@ -23088,5 +23090,17 @@
     "streak": "{{value}} günlük seri",
     "streakBonus": "Seri bonusu +%{{pct}}",
     "dailyHint": "Günde bir bilgi yarışması. Yarışmalarına art arda günlerde katılanlar seri yapar ve bonus puan kazanır."
+  },
+  "dmTranslateOut": {
+    "showMine": "Yazdığımı göster",
+    "showTheirs": "Onların gördüğünü göster",
+    "showTranslation": "Çeviriyi göster",
+    "asTheySee": "Onların gördüğü",
+    "sentIn": "{{language}} olarak gönderildi",
+    "original": "Orijinal",
+    "translated": "Çevrildi",
+    "offToast": "Mesajların burada yazdığın gibi gider",
+    "onToast": "Mesajların burada artık {{language}} olarak gidiyor",
+    "noLanguage": "Henüz bir uygulama dili seçmediler, bu yüzden mesajların şimdilik yazdığın gibi gider"
   }
 }

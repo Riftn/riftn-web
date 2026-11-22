@@ -161,6 +161,11 @@ export interface DmMessage {
   paymentTxHash: string | null;
   /** Sent "when they're next online". The sender's bubble shows an hourglass until it is read. */
   whenOnline?: boolean;
+  /**
+   * Sent with "Send in their language": `content` is the line in the
+   * recipient's language and this is what the sender typed.
+   */
+  original?: { content: string; lang: string } | null;
   tipAmount: number | null;
   tipSymbol: string | null;
   /** Only set when msgType === 'poll'; votes are read from the poll itself. */

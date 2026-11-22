@@ -22696,7 +22696,9 @@
     "archived": "Archivé",
     "archivedChats": "Discussions archivées",
     "clearTitle": "Effacer l'historique ?",
-    "clearBody": "Chaque message de cette discussion disparaîtra pour vous. L'autre personne conservera sa copie."
+    "clearBody": "Chaque message de cette discussion disparaîtra pour vous. L'autre personne conservera sa copie.",
+    "translateOut": "Envoyer dans sa langue",
+    "translateOutOff": "Envoyer tel que j'écris"
   },
   "chat": {
     "buyAlert": {
@@ -23092,5 +23094,17 @@
     "streak": "Série de {{value}} jours",
     "streakBonus": "Bonus de série +{{pct}} %",
     "dailyHint": "Un quiz par jour. Ceux qui jouent à tes quiz plusieurs jours d’affilée font une série et gagnent des points bonus."
+  },
+  "dmTranslateOut": {
+    "showMine": "Voir ce que j'ai écrit",
+    "showTheirs": "Voir ce qu'il ou elle voit",
+    "showTranslation": "Voir la traduction",
+    "asTheySee": "Tel qu'il ou elle le voit",
+    "sentIn": "Envoyé en {{language}}",
+    "original": "Original",
+    "translated": "Traduit",
+    "offToast": "Tes messages ici partent tels que tu les écris",
+    "onToast": "Tes messages ici partent maintenant en {{language}}",
+    "noLanguage": "Cette personne n'a pas encore choisi de langue, tes messages partent donc tels que tu les écris pour l'instant"
   }
 }

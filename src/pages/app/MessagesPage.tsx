@@ -651,6 +651,9 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       onToggleEncryption: conv.isGroup
         ? undefined
         : () => updateChatPref(conv.id, { encrypted: !chatPrefs.get(conv.id)?.encryptedAt }),
+      onToggleTranslateOut: conv.isGroup || !/^[0-9a-f]{24}$/i.test(conv.id)
+        ? undefined
+        : () => updateChatPref(conv.id, { translateOut: !chatPrefs.get(conv.id)?.translateOutAt }),
       onBlock: () => handleBlockConversationUser(conv),
       onClearHistory: () => setClearTarget(conv),
       onDelete: () => handleDeleteConversation(conv),
