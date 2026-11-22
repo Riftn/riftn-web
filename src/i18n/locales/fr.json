@@ -2715,6 +2715,14 @@
       "planned": "Prévu",
       "inProgress": "En cours",
       "shipped": "Livré"
+    },
+    "earlyAccess": {
+      "mine": "Tu l’as un jour avant tout le monde. Les autres l’auront dans {{hours}} h.",
+      "others": "La personne qui l’a demandé l’essaie en premier. Pour tout le monde dans {{hours}} h."
+    },
+    "earlySupporter": {
+      "chip": "Soutien de la première heure",
+      "title": "Soutien de la première heure : {{value}} de ses demandes sont sorties"
     }
   },
   "auth": {

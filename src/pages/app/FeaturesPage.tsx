@@ -648,6 +648,8 @@ function FeatureCard({
         <RequestStatusRow
           status={feature.status}
           note={feature.status_note?.trim() || ''}
+          earlyAccessUntil={feature.early_access_until}
+          isPoster={!!isAuthor}
           categoryChip={
           <span className="text-zinc-300 text-[10px] font-medium px-2 py-0.5 rounded-lg bg-gradient-to-br from-white/15 via-white/8 to-white/3 backdrop-blur-xl border border-white/20 shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.3)]">
             {CATEGORY_LABELS[feature.category]}

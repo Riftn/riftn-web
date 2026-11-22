@@ -2715,6 +2715,14 @@
       "planned": "Planned",
       "inProgress": "In progress",
       "shipped": "Shipped"
+    },
+    "earlyAccess": {
+      "mine": "You have this a day early. Everyone else gets it in {{hours}} h.",
+      "others": "Its poster is trying this first. Out for everyone in {{hours}} h."
+    },
+    "earlySupporter": {
+      "chip": "Early supporter",
+      "title": "Early supporter: {{value}} of their requests shipped"
     }
   },
   "auth": {
