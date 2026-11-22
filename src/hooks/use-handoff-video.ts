@@ -34,6 +34,8 @@ export interface UseHandoffVideoOptions {
   hlsSrc?: string;
   /** Start the ladder on its lowest rung: feed cards. */
   startLow?: boolean;
+  /** The post's stored width / height (`storedAspect`), to check the ladder's shape against. */
+  aspect?: number;
   poster?: string;
   muted: boolean;
   loop: boolean;
@@ -56,6 +58,7 @@ export function useHandoffVideo({
   src,
   hlsSrc,
   startLow = false,
+  aspect,
   poster,
   muted,
   loop,
@@ -205,7 +208,7 @@ export function useHandoffVideo({
     if (src) {
       // A no-op when the element already has this post's media; the hand-off
       // must never restart a download.
-      setVideoSource(el, { src, hls: hlsSrc, startLow });
+      setVideoSource(el, { src, hls: hlsSrc, startLow, aspect });
       syncVideoLoad(el);
     } else if (!firstSync && videoSourceOf(el) && el.paused) {
       // The card has scrolled out of range and wants the media detached again.
@@ -214,7 +217,7 @@ export function useHandoffVideo({
       // dropping the attribute alone does not free the decoder, the load() does.
       clearVideoSource(el);
     }
-  }, [videoRef, handoffKey, className, muted, loop, preload, poster, src, hlsSrc, startLow, claimVersion]);
+  }, [videoRef, handoffKey, className, muted, loop, preload, poster, src, hlsSrc, startLow, aspect, claimVersion]);
 
   /**
    * Take the element back from another card showing the same post. Points the

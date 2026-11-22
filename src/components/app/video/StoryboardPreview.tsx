@@ -42,6 +42,8 @@ interface StoryboardPreviewProps {
   visible: boolean;
   /** Start fetching the sheet before the first scrub (the video is playing or its controls are up). */
   armed?: boolean;
+  /** Show the time chip even for a post with no sheet (a mouse hovering the timeline). */
+  timeWithoutSheet?: boolean;
 }
 
 /**
@@ -53,7 +55,7 @@ interface StoryboardPreviewProps {
  * public storyboard. While the sheet is still loading, or if it fails, only
  * the time chip shows.
  */
-export function StoryboardPreview({ storyboard, fraction, duration, visible, armed = false }: StoryboardPreviewProps) {
+export function StoryboardPreview({ storyboard, fraction, duration, visible, armed = false, timeWithoutSheet = false }: StoryboardPreviewProps) {
   const url = storyboard?.url;
   const [status, setStatus] = useState<SheetStatus | undefined>(() => (url ? sheetStatus.get(url) : undefined));
 
@@ -67,15 +69,15 @@ export function StoryboardPreview({ storyboard, fraction, duration, visible, arm
     return () => { cancelled = true; };
   }, [url, armed, visible]);
 
-  if (!storyboard || !visible || !(duration > 0)) return null;
+  if ((!storyboard && !timeWithoutSheet) || !visible || !(duration > 0)) return null;
 
   const clamped = Math.max(0, Math.min(1, Number.isFinite(fraction) ? fraction : 0));
   const seconds = clamped * duration;
-  const { x, y } = storyboardOffset(storyboard, seconds);
+  const { x, y } = storyboard ? storyboardOffset(storyboard, seconds) : { x: 0, y: 0 };
   // Until the sheet is in (a quick scrub on a slow phone connection), or if it
   // never arrives, the time alone still follows the finger.
-  const showTile = status === 'loaded';
-  const half = showTile ? storyboard.spriteWidth / 2 + 4 : 24;
+  const showTile = !!storyboard && status === 'loaded';
+  const half = showTile && storyboard ? storyboard.spriteWidth / 2 + 4 : 24;
 
   return (
     <div
@@ -84,7 +86,7 @@ export function StoryboardPreview({ storyboard, fraction, duration, visible, arm
       className="pointer-events-none absolute bottom-full z-30 mb-3 flex -translate-x-1/2 flex-col items-center gap-1"
       style={{ left: `clamp(${half}px, ${clamped * 100}%, calc(100% - ${half}px))` }}
     >
-      {showTile && <div
+      {showTile && storyboard && <div
         className="overflow-hidden rounded-md border border-white/30 bg-black shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
         style={{
           width: storyboard.spriteWidth,

@@ -8839,6 +8839,8 @@
     "skippedUpstreamFailed": "Se omitió porque un paso anterior falló. Su coste se queda en tu saldo."
   },
   "videoPlayer": {
+    "transcoding": "Transcodificando",
+    "transcodingOnlyYou": "Solo tú puedes verlo hasta que esté listo",
     "volume": "Volumen",
     "processing": "Procesando vídeo...",
     "processingFailed": "Error en el procesamiento de vídeo",

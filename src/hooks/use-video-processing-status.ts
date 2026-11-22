@@ -5,6 +5,22 @@ import { getNFTInfo } from '@/lib/api/dehub';
 export type VideoProcessingStatus = 'pending' | 'on' | 'done' | 'failed';
 const POLL_MS = 5_000;
 const processingKey = (tokenId: number | string) => ['video-processing', String(tokenId)] as const;
+const progressKey = (tokenId: number | string) => ['video-processing-progress', String(tokenId)] as const;
+
+/**
+ * How far a video still encoding has got, 0-100, or undefined before the
+ * first figure. Fed by the same poll and socket as the status, so it costs
+ * no requests of its own.
+ */
+export function useVideoProcessingProgress(tokenId: number | string, initial?: number): number | undefined {
+  const { data } = useQuery<number>({
+    queryKey: progressKey(tokenId),
+    queryFn: () => Promise.resolve(initial ?? 0),
+    enabled: false,
+    initialData: typeof initial === 'number' ? initial : undefined,
+  });
+  return data;
+}
 const isPending = (status: VideoProcessingStatus | undefined) => status === 'pending' || status === 'on';
 
 export function markVideoProcessing(client: QueryClient, tokenId: number | string) {
@@ -49,6 +65,8 @@ export function useVideoProcessingStatus(
     queryFn: async () => {
       const post = await getNFTInfo(String(tokenId));
       const status = post.transcodingStatus;
+      const progress = Number((post as { progress?: unknown }).progress);
+      if (Number.isFinite(progress) && progress > 0) client.setQueryData(progressKey(tokenId), progress);
       if (!status || !['pending', 'on', 'done', 'failed'].includes(status)) throw new Error('Missing video processing status');
       return status;
     },
@@ -70,6 +88,9 @@ export function useVideoProcessingStatus(
     void import('@/lib/api/dehub/job-socket').then(({ subscribeJobChannel }) => {
       if (cancelled) return;
       unsubscribe = subscribeJobChannel(String(tokenId), (event) => {
+        if (typeof event.progress === 'number' && event.stage === 'transcoding' && event.progress > 0) {
+          client.setQueryData(progressKey(tokenId), event.progress);
+        }
         if (event.stage === 'done') client.setQueryData(processingKey(tokenId), 'done');
         else if (event.stage === 'failed') client.setQueryData(processingKey(tokenId), 'failed');
       });

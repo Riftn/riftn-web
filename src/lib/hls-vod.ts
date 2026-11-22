@@ -39,6 +39,8 @@ interface Session {
   requested: string;
   engine: Engine;
   startLow: boolean;
+  /** The post's stored width / height, when known. */
+  aspect?: number;
   player?: Hls;
   parsed: boolean;
   loading: boolean;
@@ -165,6 +167,13 @@ export interface VideoSourceOptions {
   hls?: string;
   /** Start on the lowest rung — feed cards, which are small and many. */
   startLow?: boolean;
+  /**
+   * The video's width / height as the backend probed it (`videoInfo`). The
+   * ladder is only judged the wrong shape against this, never the poster: a
+   * poster is whatever image the creator picked (a film's upright one-sheet
+   * over a widescreen film) and used to throw a fine ladder away mid-play.
+   */
+  aspect?: number;
 }
 
 /**
@@ -172,7 +181,7 @@ export interface VideoSourceOptions {
  * the element already has is a no-op, so the hand-off pool can re-apply a
  * card's props without restarting the download.
  */
-export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = false }: VideoSourceOptions): void {
+export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = false, aspect }: VideoSourceOptions): void {
   const current = sessions.get(el);
   const ladder = isHlsUrl(hls) && !failedLadders.has(hls) ? hls : undefined;
   // Same post: keep what is running. A card whose copy of the post has no
@@ -198,6 +207,7 @@ export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = fals
     requested: hls ?? '',
     engine: prefersNativeHls(el) ? 'native' : 'hlsjs',
     startLow,
+    aspect,
     parsed: false,
     loading: false,
     recoveredMedia: false,
@@ -219,7 +229,7 @@ export function setVideoSource(el: HTMLVideoElement, { src, hls, startLow = fals
   // short being swiped to.
   const onPlay = () => applyLoadPolicy(el, session);
   const onMetadata = () => {
-    void checkLadderShape(el).then((wrong) => {
+    void checkLadderShape(el, session.aspect).then((wrong) => {
       if (wrong && !session.disposed) fallBackToFile(el, session, 'aspect-mismatch');
     });
   };
@@ -336,23 +346,15 @@ function shapeOf(width: number, height: number): 'portrait' | 'landscape' | null
 
 /**
  * Is the ladder's picture the wrong shape for the post? Ladders made before
- * the backend sized rungs by the displayed size squeeze a phone video shot
- * upright into a landscape frame. The post's thumbnail is cut from the MP4
- * the right way up, so a ladder that is clearly landscape under a clearly
- * portrait poster (or the other way round) is one of those.
+ * the backend sized rungs by the displayed size squeezed a phone video shot
+ * upright into a landscape frame. The size the backend probed from the MP4
+ * says which way up the post really is; with no size on the post there is
+ * nothing trustworthy to compare with, so the ladder is kept.
  */
-async function checkLadderShape(el: HTMLVideoElement): Promise<boolean> {
+async function checkLadderShape(el: HTMLVideoElement, aspect?: number): Promise<boolean> {
   const video = shapeOf(el.videoWidth, el.videoHeight);
-  const poster = el.poster;
-  if (!video || !poster) return false;
-  const img = new Image();
-  img.src = poster;
-  try {
-    await img.decode();
-  } catch {
-    return false;
-  }
-  const expected = shapeOf(img.naturalWidth, img.naturalHeight);
+  if (!video || !(aspect && aspect > 0)) return false;
+  const expected = shapeOf(aspect * 1000, 1000);
   return !!expected && expected !== video;
 }
 
