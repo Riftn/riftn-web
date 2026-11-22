@@ -23,6 +23,8 @@ export interface TextLayer {
   color: string;
   /** Rounded box behind the words. */
   box: boolean;
+  /** Clockwise degrees around the centre. */
+  rotation?: number;
   /** Mentions: whose profile the words open. */
   address?: string;
 }
@@ -50,25 +52,29 @@ export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer) {
 
 export function drawTextLayer(ctx: CanvasRenderingContext2D, layer: TextLayer) {
   if (!layer.text.trim()) return;
+  ctx.save();
   const m = measureText(ctx, layer);
+  ctx.translate(m.cx, m.cy);
+  ctx.rotate((layer.rotation ?? 0) * Math.PI / 180);
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  const top = m.cy - m.h / 2;
+  const top = -m.h / 2;
   m.lines.forEach((line, i) => {
     const y = top + m.px * 0.1 + m.lineH * (i + 0.5);
     if (layer.box) {
       const w = m.widths[i] + m.padX * 2;
       ctx.fillStyle = boxColor(layer.color);
-      roundRect(ctx, m.cx - w / 2, y - m.lineH / 2, w, m.lineH, m.px * 0.28);
+      roundRect(ctx, -w / 2, y - m.lineH / 2, w, m.lineH, m.px * 0.28);
       ctx.fill();
     } else {
       ctx.shadowColor = 'rgba(0,0,0,0.45)';
       ctx.shadowBlur = m.px * 0.35;
     }
     ctx.fillStyle = layer.box && layer.color.toLowerCase() === '#ffffff' ? '#ffffff' : layer.color;
-    ctx.fillText(line, m.cx, y);
+    ctx.fillText(line, 0, y);
     ctx.shadowBlur = 0;
   });
+  ctx.restore();
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {

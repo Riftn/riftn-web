@@ -12,7 +12,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, Pencil, RefreshCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { AtSign, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -510,6 +510,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               style={{
                 left: `${l.x * 100}%`,
                 top: `${l.y * 100}%`,
+                transform: `translate(-50%, -50%) rotate(${l.rotation ?? 0}deg)`,
                 fontSize: fontPx(l),
                 color: l.box && l.color.toLowerCase() !== '#ffffff' ? l.color : l.box ? '#fff' : l.color,
                 textShadow: l.box ? undefined : '0 2px 14px rgba(0,0,0,.45)',
@@ -611,9 +612,14 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               <button key={c} type="button" style={{ background: c }} data-on={editingLayer.color === c ? 'true' : 'false'} onClick={() => patch(editingLayer.id, { color: c })} aria-label={c} />
             ))}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button type="button" data-sc-chip data-st-dark-glass data-on={editingLayer.box ? 'true' : 'false'} onClick={() => patch(editingLayer.id, { box: !editingLayer.box })}>
               {editingLayer.box ? t('stories.boxOn', { defaultValue: 'Box on' }) : t('stories.boxOff', { defaultValue: 'Box off' })}
+            </button>
+            <button type="button" data-sc-chip data-st-dark-glass
+              aria-label={`${t('dmVideo.rotate', { defaultValue: 'Rotate' })} · ${editingLayer.rotation ?? 0}°`}
+              onClick={() => patch(editingLayer.id, { rotation: ((editingLayer.rotation ?? 0) + 45) % 360 })}>
+              <RotateCw className="w-4 h-4" />{editingLayer.rotation ?? 0}°
             </button>
             <input type="range" min={0.045} max={0.14} step={0.005} value={editingLayer.size} onChange={e => patch(editingLayer.id, { size: Number(e.target.value) })} className="flex-1" aria-label={t('stories.size', { defaultValue: 'Size' })} />
             <button type="button" data-sc-btn data-st-dark-glass onClick={finishText} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
