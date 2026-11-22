@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { createLinkScanRegex, renderTextWithLinks, splitLeadingUrlBoundary } from '@/components/app/TranslatableText';
 import { PollCard } from './PollCard';
 import { VIEWER_CONTROL, VIEWER_PILL } from '@/lib/viewer-chrome';
+import { warmPostData } from '@/lib/post-warm';
 
 const ShortsPhotoPager = lazy(() => import('./ShortsPhotoPager').then((m) => ({ default: m.ShortsPhotoPager })));
 const ComicDeck = lazy(() => import('@/components/app/comic/ComicDeck').then((m) => ({ default: m.ComicDeck })));
@@ -174,7 +175,7 @@ function ArticleSlide({ short }: { short: ShortVideo }) {
       <p className="mt-3 line-clamp-4 text-[15px] leading-relaxed text-white/75">{readable(post.text || '')}</p>
       <button
         type="button"
-        onClick={() => { closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
+        onClick={() => { warmPostData(short.id); closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
         className={cn(VIEWER_PILL, 'mt-5 self-start')}
       >
         {t('reel.readArticle', 'Read article')}
@@ -199,7 +200,7 @@ function RestrictedSlide({ short }: { short: ShortVideo }) {
         {mature && <p>{t('copy.5ca2fd8dd3f8', 'The creator marked this post as adult or graphic.')}</p>}
         {(!mature || !kidsMode) && <button
           type="button"
-          onClick={() => { closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
+          onClick={() => { warmPostData(short.id); closeBrainrotFeed(); navigate(`/app/post/${short.articleSlug || short.id}`, { state: { fromFeed: true } }); }}
           className={cn(VIEWER_PILL, 'mt-1')}
         >
           {mature ? t('reel.openPost', 'Open post') : t('reel.openToUnlock', 'Open to unlock')}

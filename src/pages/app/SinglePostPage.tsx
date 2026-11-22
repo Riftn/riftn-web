@@ -44,6 +44,7 @@ import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, use
 import { lazyWithRetry } from '@/lib/lazy-with-retry';
 import { useOpenedOnce } from '@/hooks/use-opened-once';
 import { takePrefetchedPost } from '@/lib/post-prefetch';
+import { loadPostData } from '@/lib/post-warm';
 import { Clock, Code } from "lucide-react";
 import { copyPostEmbedCode } from '@/lib/post-embed-code';
 import Sparkles from "@/components/ui/cut-icons/assistant";
@@ -1093,7 +1094,7 @@ function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = fa
       const isStreamId = /^[a-f\d]{24}$/i.test(id!) && !/^\d+$/.test(id!);
       const loadPost = async (nftId: string): Promise<DeHubNFT> => {
         // A post link asked for this during page load (index.html).
-        const nft = (await takePrefetchedPost(nftId)) ?? await getNFTInfo(nftId);
+        const nft = (await takePrefetchedPost(nftId)) ?? await loadPostData(nftId);
         const normalizedNft = {
           ...nft,
           createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',

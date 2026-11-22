@@ -14,6 +14,7 @@ import { getVoteCache } from '@/lib/vote-cache';
 import { parseFormattedCount } from '@/lib/feed-utils';
 import { liveSourceFromHlsUrl } from '@/lib/live-ingest';
 import { warmPostPage } from '@/lib/preload-post-page';
+import { warmPostData } from '@/lib/post-warm';
 import { buildSoundtrackTag } from '@/lib/soundtrack';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
 
@@ -233,6 +234,8 @@ function applyVoteCache(postId: string, nft: Partial<DeHubNFT>): Partial<DeHubNF
  */
 function seedPostCache(queryClient: QueryClient, id: string, nftData: Partial<DeHubNFT>, articleSlug?: string): void {
   warmPostPage();
+  // The page's own request only leaves after its first render; start it now.
+  warmPostData(id);
   queryClient.setQueryData(['single-post', id], nftData);
   queryClient.invalidateQueries({ queryKey: ['single-post', id], exact: true, refetchType: 'none' });
   // An article opens at its readable address, which the page turns back into

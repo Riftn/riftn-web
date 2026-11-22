@@ -11,6 +11,7 @@
 
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -266,7 +267,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     });
     add(!!target.actions?.askAI && { key: 'ai', label: t('postOptions.aiOverview', 'AI overview'), icon: <AssistantNavIcon />, onSelect: () => target.actions!.askAI!() });
     add(!!target.actions?.seeEngagements && { key: 'engagements', label: t('copy.f5ab429b0727', 'See Engagements'), icon: <Stats />, onSelect: () => target.actions!.seeEngagements!() });
-    add({ key: 'info', label: t('postInfo.title', 'Post Info'), icon: <Info />, hint: 'I', onSelect: () => navigate(`/app/post/${target.id}/info`) });
+    add({ key: 'info', label: t('postInfo.title', 'Post Info'), icon: <Info />, hint: 'I', onSelect: () => openPostInfo(navigate, target.id) });
 
     // SuperPowers: a gift on somebody else's post, a boost on your own.
     if (canGiftBoost && tokenId > 0) {

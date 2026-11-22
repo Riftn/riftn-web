@@ -26,6 +26,7 @@ import AddAccount from "@/components/ui/cut-icons/add-account";
 
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -159,7 +160,7 @@ export function PostUtilityMenuItems({
       {!skipBarItems && <button
         onClick={() => {
           onBeforeNavigate?.();
-          if (postId) navigate(`/app/post/${postId}/info`);
+          if (postId) openPostInfo(navigate, postId);
         }}
         className={cn(ROW, 'text-white')}
       >

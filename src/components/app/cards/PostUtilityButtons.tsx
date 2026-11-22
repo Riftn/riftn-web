@@ -26,6 +26,7 @@ import Info from "@/components/ui/cut-icons/information";
 import Bookmark from "@/components/ui/cut-icons/save";
 
 import { useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useBookmarkPost } from '@/hooks/use-bookmarks';
@@ -74,7 +75,7 @@ export function PostUtilityButtons({
 
   const handleInfoClick = (e: React.MouseEvent) => {
     stopIfChip(e);
-    if (postId) navigate(`/app/post/${postId}/info`);
+    if (postId) openPostInfo(navigate, postId);
   };
 
 
