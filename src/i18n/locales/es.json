@@ -23190,5 +23190,15 @@
     "offToast": "Tus mensajes aquí se envían tal como los escribes",
     "onToast": "Tus mensajes aquí ahora se envían en {{language}}",
     "noLanguage": "Aún no han elegido un idioma en la app, así que por ahora tus mensajes se envían tal como los escribes"
+  },
+  "quickReply": {
+    "reply": "Responder",
+    "send": "Enviar",
+    "placeholder": "Escribe una respuesta…",
+    "failedTitle": "Tu respuesta no se envió",
+    "sent": "Respuesta enviada",
+    "open": "Abrir chat",
+    "encrypted": "Mensaje cifrado",
+    "sentAttachment": "Envió un archivo"
   }
 }

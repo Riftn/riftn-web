@@ -56,6 +56,7 @@ import { CONSOLIDATED_GUIDES } from "@/lib/blog-redirects.js";
 const DexPage = React.lazy(() => import("@/pages/app/DexPage"));
 // DM unread total for the nav badges; keeps the messaging stack out of the boot file.
 const DmUnreadBridge = lazyWithRetry(() => import("@/components/app/chat/DmUnreadBridge"));
+const DmMessageBanner = lazyWithRetry(() => import("@/components/app/chat/DmMessageBanner"));
 const DesktopWordmarkPreview = React.lazy(() => import("@/pages/DesktopWordmarkPreview"));
 const DexPoolPage = React.lazy(() => import("@/pages/app/DexPoolPage"));
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -570,6 +571,8 @@ function AppContent() {
       <SignInHandoff />
       <AfterSignIn />
       {isAuthenticated && <Suspense fallback={null}><DmUnreadBridge /></Suspense>}
+      {/* Phones: a DM that arrives elsewhere drops in at the top, pull down to reply. */}
+      {isAuthenticated && <Suspense fallback={null}><DmMessageBanner /></Suspense>}
       <Suspense fallback={<PageLoader />}>
         <SurfaceTransition>
           {(loc) => (
