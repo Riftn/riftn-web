@@ -15,7 +15,7 @@ import { copyLinkLabel } from '@/lib/chat-message-link';
 import { menuIcons, messageMenuMeta, keepBrowserMenu, useMenuPoint, MessageMoreButton, copyMediaWithToast } from './message-menu-kit';
 import { copyableMediaUrl } from '@/lib/copy-media';
 import Images from '@/components/ui/cut-icons/images';
-import { ShieldBan, Loader2, RotateCcw, CornerDownRight } from "lucide-react";
+import { ShieldBan, Loader2, CornerDownRight } from "lucide-react";
 import ShieldCheck from "@/components/ui/cut-icons/security";
 import Languages from "@/components/ui/cut-icons/language";
 import Reply from "@/components/ui/cut-icons/reply";
@@ -285,6 +285,7 @@ export const ChatMessage = memo(function ChatMessage({
     handleTranslate,
     handleShowOriginal,
   } = useTextTranslation(message.content, 'chat');
+  const canTranslate = (message.type === 'text' || message.type === 'image') && !!message.content?.trim() && !isTooShort;
   // Translate also translates every message above this one that still needs it.
   const translateUp = useTranslateUp(
     'room',
@@ -371,13 +372,13 @@ export const ChatMessage = memo(function ChatMessage({
   const mediaUrl = (message.type === 'image' || message.type === 'gif') ? copyableMediaUrl(message.imageUrl) : null;
   const copyMediaNow = mediaUrl ? () => copyMediaWithToast(mediaUrl, message.type === 'gif' ? 'gif' : 'image', _copy) : null;
   if (onCopyLink) holdActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message) });
-  if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
-  if (message.type === 'text' && message.content?.trim() && !isTooShort) holdActions.push(
+  if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
+  if (canTranslate) holdActions.push(
     isTranslated
       ? { key: 'original', icon: <Languages />, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
       : { key: 'translate', icon: <Languages />, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp },
   );
-  if (onSeeMessages) holdActions.push({ key: 'their-messages', icon: <SearchIcon />, label: _copy('chatSearch.theirMessages', { defaultValue: 'Their messages' }), onSelect: () => onSeeMessages(message) });
+  if (copyMediaNow) holdActions.push({ key: 'copy-media', icon: <Images />, label: _copy('chatHold.copyMedia', { defaultValue: 'Copy media' }), onSelect: copyMediaNow });
   if (canEdit) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => startEditing() });
   if ((canDelete || showActions) && onDelete) holdActions.push({ key: 'delete', destructive: true, secondary: true, icon: <Trash2 />, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
   if (showActions && !isMine && onBan) holdActions.push({ key: 'ban', destructive: true, secondary: true, icon: <ShieldBan />, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
@@ -403,7 +404,7 @@ export const ChatMessage = memo(function ChatMessage({
   if (message.content?.trim()) menuActions.push({ key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), onSelect: copyText, hint: 'C' });
   if (onCopyLink) menuActions.push({ key: 'copy-link', icon: menuIcons.link, label: copyLinkLabel(), onSelect: () => onCopyLink(message), hint: 'L' });
   if (copyMediaNow) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: copyMediaNow });
-  if (message.type === 'text' && message.content?.trim() && !isTooShort) menuActions.push(
+  if (canTranslate) menuActions.push(
     isTranslated
       ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: handleShowOriginal }
       : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), onSelect: translateUp, hint: 'T' },
@@ -412,7 +413,7 @@ export const ChatMessage = memo(function ChatMessage({
   if ((canDelete || showActions) && onDelete) menuActions.push({ key: 'delete', divided: true, destructive: true, icon: menuIcons.delete, label: _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }), onSelect: () => onDelete(message.id) });
   if (showActions && !isMine && onBan) menuActions.push({ key: 'ban', divided: !((canDelete || showActions) && onDelete), destructive: true, icon: menuIcons.ban, label: _copy('chatHold.ban', { defaultValue: 'Ban' }), onSelect: () => onBan(message.userId, message.userName) });
   if (showActions && !isMine && onUnban) menuActions.push({ key: 'unban', icon: menuIcons.unban, label: _copy('chatHold.unban', { defaultValue: 'Unban' }), onSelect: () => onUnban(message.userId, message.userName) });
-  if (showActions && onTogglePin) holdActions.splice(Math.min(1, holdActions.length), 0, {
+  if (showActions && onTogglePin) holdActions.push({
     key: 'pin', icon: isPinned ? menuIcons.unpin : menuIcons.pin,
     label: isPinned ? _copy('copy.ee3c71613054', { defaultValue: 'Unpin' }) : _copy('chatHold.pin', { defaultValue: 'Pin' }),
     onSelect: () => onTogglePin(message),
@@ -430,6 +431,7 @@ export const ChatMessage = memo(function ChatMessage({
       mine={mineReactions}
       onReact={handleQuickReact}
       actions={holdActions}
+      scrollActions
       frame={holdFrame}
       reactors={reactors}
       meta={localTimeLabel}
@@ -544,19 +546,7 @@ export const ChatMessage = memo(function ChatMessage({
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
                 {sendMark}
-                {!isTooShort && (
-                  isTranslateLoading ? (
-                    <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />
-                  ) : isTranslated ? (
-                    <button onClick={handleShowOriginal} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                      <RotateCcw className="w-2.5 h-2.5" />
-                    </button>
-                  ) : (
-                    <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                      <Languages className="w-3 h-3" />
-                    </button>
-                  )
-                )}
+                {isTranslateLoading && <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />}
                 {translateError && (
                   <span className="text-zinc-500 text-[10px]">{translateError}</span>
                 )}
@@ -587,19 +577,7 @@ export const ChatMessage = memo(function ChatMessage({
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="text-zinc-500 text-[10px] whitespace-nowrap">{formatDate(message.timestamp)} {formatTime(message.timestamp)}</span>
                 {sendMark}
-              {message.content && !isTooShort && (
-                isTranslateLoading ? (
-                  <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />
-                ) : isTranslated ? (
-                  <button onClick={handleShowOriginal} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                    <RotateCcw className="w-2.5 h-2.5" />
-                  </button>
-                ) : (
-                  <button onClick={translateUp} className="flex items-center text-zinc-500 hover:text-zinc-300 transition-colors">
-                    <Languages className="w-3 h-3" />
-                  </button>
-                )
-              )}
+              {isTranslateLoading && <Loader2 className="w-2.5 h-2.5 text-zinc-500 animate-spin" />}
             </div>
           </div>
         )}
