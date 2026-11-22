@@ -440,7 +440,9 @@ export function PageTabs<T extends string>({
                   }}
                   className={cn(
                     'relative z-10 flex flex-1 shrink-0 items-center justify-center rounded-xl py-2.5 text-[14px] font-semibold leading-4 transition-colors',
-                    iconOnly ? (typeof tab.count === 'number' ? 'min-w-max whitespace-nowrap px-2.5' : 'min-w-[32px] px-2') : 'whitespace-nowrap px-3',
+                    // Icon tabs keep one width whatever the count: a count growing to "99+" used to
+                    // widen its tab and push the last icons out past the pill's right edge.
+                    iconOnly ? (typeof tab.count === 'number' ? 'min-w-[48px] px-2' : 'min-w-[32px] px-2') : 'whitespace-nowrap px-3',
                     active ? 'text-white' : 'text-zinc-400 [@media(hover:hover)]:hover:text-white',
                   )}
                 >
@@ -453,7 +455,7 @@ export function PageTabs<T extends string>({
                   {typeof tab.count === 'number' ? (
                     // Beside the icon as plain text, as the app draws it; a white
                     // dot over the icon hid the glyph and read as a red badge.
-                    <span data-kit-pill-count className="relative z-10 ml-1 text-[12px] font-semibold leading-none tabular-nums opacity-60">{tab.count > 99 ? '99+' : tab.count}</span>
+                    <span data-kit-pill-count className={cn('z-10 font-semibold leading-none tabular-nums opacity-60', iconOnly ? 'pointer-events-none absolute left-[calc(50%+8px)] top-[5px] whitespace-nowrap text-[9.5px]' : 'relative ml-1 text-[12px]')}>{tab.count > 99 ? '99+' : tab.count}</span>
                   ) : null}
                 </button>
               );

@@ -3,6 +3,12 @@
  * people when the timer runs out, or as soon as the other person has watched
  * a view-once one. Same choices as the backend `src/dm/dm-destruct.ts`.
  */
+import i18n from 'i18next';
+
+/** Translated when i18n is up; plain English before that (tests, very early boot). */
+const tx = (key: string, defaultValue: string, vars: Record<string, unknown> = {}): string =>
+  i18n.isInitialized ? String(i18n.t(key, { defaultValue, ...vars })) : defaultValue.replace(/\{\{(\w+)\}\}/g, (_, k: string) => String(vars[k] ?? ''));
+
 export type DmOpenChoice = 'open:3' | 'open:10' | 'open:25' | 'open:60';
 export type DmDestructChoice = 'view' | 60 | 3600 | 43200 | 86400 | 604800 | 31536000 | DmOpenChoice;
 
@@ -27,25 +33,22 @@ export interface DmDestruct {
   destroyedAt?: string;
 }
 
-/** Short label for a choice: "1 view", "1 min", "12 hours", "1 week". */
+const LABELS: Record<string, string> = { view: '1 view', 60: '1 min', 3600: '1 hour', 43200: '12 hours', 86400: '1 day', 604800: '1 week', 31536000: '1 year' };
+const SHORT: Record<string, string> = { view: '1 view', 60: '1m', 3600: '1h', 43200: '12h', 86400: '1d', 604800: '1w', 31536000: '1y' };
+
+/** Short label for a choice, in the reader's language: "1 view", "1 min", "12 hours", "1 week". */
 export function destructLabel(c: DmDestructChoice): string {
-  if (isOpenChoice(c)) return openSeconds(c) === 60 ? '1 min' : `${openSeconds(c)} sec`;
-  switch (c) {
-    case 'view': return '1 view';
-    case 60: return '1 min';
-    case 3600: return '1 hour';
-    case 43200: return '12 hours';
-    case 86400: return '1 day';
-    case 604800: return '1 week';
-    case 31536000: return '1 year';
+  if (isOpenChoice(c)) {
+    const n = openSeconds(c);
+    return n === 60 ? tx('dmVideo.destruct.60', '1 min') : tx('dmVideo.destructSecs', '{{n}} sec', { n });
   }
+  return tx(`dmVideo.destruct.${c}`, LABELS[String(c)]);
 }
 
 /** Tiny label for small chips: "1 view", "1m", "12h", "1w". */
 export function destructShort(c: DmDestructChoice): string {
-  if (isOpenChoice(c)) return `${openSeconds(c)}s`;
-  const map: Record<string, string> = { view: '1 view', 60: '1m', 3600: '1h', 43200: '12h', 86400: '1d', 604800: '1w', 31536000: '1y' };
-  return map[String(c)];
+  if (isOpenChoice(c)) return tx('dmVideo.destructShortSecs', '{{n}}s', { n: openSeconds(c) });
+  return tx(`dmVideo.destructShort.${c}`, SHORT[String(c)]);
 }
 
 /** Time left on a timed message, as the chip shows it: "59s", "12m", "5h", "3d". */

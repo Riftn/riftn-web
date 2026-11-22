@@ -16,6 +16,8 @@ type View = 'all' | 'social' | 'lacks';
 const EDITOR_CATEGORIES = new Set(['Video editing', 'Design and documents', 'Charts and data', 'Presentations and exports']);
 const inView = (feature: ComparisonFeature, view: View) =>
   view === 'all' || (view === 'social' ? !EDITOR_CATEGORIES.has(feature.category) : markFor(entryFor(feature, 'dehub')) !== 'yes');
+/** Stable i18n key for a section title: "Posts and discovery" -> "postsAndDiscovery". */
+const categoryKey = (category: string) => category.toLowerCase().replace(/[^a-z0-9]+(.)?/g, (_, c: string | undefined) => (c ? c.toUpperCase() : ''));
 const percent = (part: number, whole: number) => `${whole ? Math.round((part / whole) * 100) : 0}%`;
 /** Riftn first, then everyone else from most features to fewest. */
 const COLUMNS: Column[] = [
@@ -51,12 +53,21 @@ const MARK_TONE: Record<Mark, string> = {
 export default function ComparePage() {
   const { t } = useTranslation();
   const copy = (key: string, fallback: string, vars: Record<string, string | number> = {}) => t(`comparison.${key}`, { defaultValue: fallback, ...vars });
+  // Feature names and section titles are English in the data file; each has a key so the table reads in the viewer's language.
+  const featureName = (feature: ComparisonFeature) => t(`comparison.f.${feature.id}`, { defaultValue: feature.name });
+  const categoryName = (category: string) => t(`comparison.c.${categoryKey(category)}`, { defaultValue: category });
   const [params, setParams] = useSearchParams();
   const query = params.get('q') ?? '';
   const view: View = params.get('view') === 'social' || params.get('view') === 'lacks' ? params.get('view') as View : 'all';
   const [open, setOpen] = useState<ComparisonFeature | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
-  const filtered = useMemo(() => filterFeatures(query, 'all').filter(feature => inView(feature, view)), [query, view]);
+  const filtered = useMemo(() => {
+    // Match the English data and the translated name, so a search typed in the viewer's language still finds rows.
+    const english = new Set(filterFeatures(query, 'all').map(feature => feature.id));
+    const needle = query.trim().toLocaleLowerCase();
+    return FEATURES.filter(feature => (english.has(feature.id) || (!!needle && featureName(feature).toLocaleLowerCase().includes(needle))) && inView(feature, view));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, view, t]);
   const totals = useMemo(() => (query || view !== 'all' ? featureTotals(filtered) : ALL_TOTALS), [filtered, query, view]);
   const groups = useMemo(() => CATEGORIES.map(category => {
     const rows = filtered.filter(f => f.category === category);
@@ -178,7 +189,7 @@ export default function ComparePage() {
                       <th scope="rowgroup" className="sticky left-0 z-10 border-b border-r border-white/10 bg-zinc-900 p-0 text-left">
                         <button type="button" aria-expanded={!collapsed.has(group.category)} onClick={() => toggleGroup(group.category)} className="flex w-full items-center gap-1.5 px-3 pb-1.5 pt-3 text-left text-[10.5px] font-semibold uppercase tracking-[0.12em] text-zinc-400 hover:text-white">
                           <svg viewBox="0 0 16 16" className={cn('h-3 w-3 shrink-0 transition-transform', collapsed.has(group.category) && '-rotate-90')} aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                          <span className="min-w-0 flex-1">{group.category}</span>
+                          <span className="min-w-0 flex-1">{categoryName(group.category)}</span>
                           <span className="font-normal normal-case tracking-normal text-zinc-500">{group.rows.length}</span>
                         </button>
                       </th>
@@ -192,7 +203,7 @@ export default function ComparePage() {
                       <tr key={feature.id} className="group">
                         <th scope="row" className="sticky left-0 z-10 border-b border-r border-white/10 bg-zinc-950 p-0 text-left font-normal group-hover:bg-zinc-900">
                           <button type="button" onClick={() => setOpen(feature)} className="block w-full px-3 py-2 text-left text-[12.5px] leading-snug text-white sm:text-[13px]">
-                            {feature.name}
+                            {featureName(feature)}
                           </button>
                         </th>
                         {COLUMNS.map(col => {
@@ -200,7 +211,7 @@ export default function ComparePage() {
                           const mark = markFor(entry);
                           return (
                             <td key={col.id} className={cn('border-b border-white/10 p-0 text-center group-hover:bg-white/[0.04]')} style={col.id === 'dehub' ? DEHUB_TINT : undefined}>
-                              <button type="button" onClick={() => setOpen(feature)} title={`${col.name}: ${markLabel[mark]}`} aria-label={`${feature.name}, ${col.name}: ${markLabel[mark]}`} className={cn('grid h-9 w-full place-items-center', MARK_TONE[mark])}>
+                              <button type="button" onClick={() => setOpen(feature)} title={`${col.name}: ${markLabel[mark]}`} aria-label={`${featureName(feature)}, ${col.name}: ${markLabel[mark]}`} className={cn('grid h-9 w-full place-items-center', MARK_TONE[mark])}>
                                 <MarkGlyph mark={mark} />
                               </button>
                             </td>
@@ -234,8 +245,8 @@ export default function ComparePage() {
           {open && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white">{open.name}</DialogTitle>
-                <DialogDescription>{open.category}</DialogDescription>
+                <DialogTitle className="text-white">{featureName(open)}</DialogTitle>
+                <DialogDescription>{categoryName(open.category)}</DialogDescription>
               </DialogHeader>
               <ul className="space-y-3">
                 {COLUMNS.map(col => {
