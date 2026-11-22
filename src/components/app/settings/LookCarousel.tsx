@@ -3,7 +3,7 @@
  * sign in). On a phone it is a side-swipe carousel: one and a half cards show,
  * and each card's preview is only built once it has been swiped into view and
  * only plays while it is in view, so a row of looping previews never runs at
- * once. From `sm` up it stays the grid it was.
+ * once. Callers can opt into a desktop grid.
  */
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -46,7 +46,7 @@ export function LookCarousel({
   label: string;
   /** The picked card, brought into view when the row first shows. */
   activeIndex: number;
-  desktopCols: 'sm:grid-cols-4' | 'sm:grid-cols-5';
+  desktopCols?: 'sm:grid-cols-5';
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -60,7 +60,7 @@ export function LookCarousel({
     if (!row || opened.current) return;
     opened.current = true;
     const card = row.children[activeIndex] as HTMLElement | undefined;
-    // Only a row that scrolls (a phone) needs the picked card brought in.
+    // Only a row that scrolls needs the picked card brought in.
     if (card && row.scrollWidth > row.clientWidth + 1) {
       row.scrollLeft = Math.max(0, card.offsetLeft - row.offsetLeft - 16);
     }
@@ -75,8 +75,7 @@ export function LookCarousel({
         style={style}
         className={cn(
           'look-carousel flex gap-3 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-1 scrollbar-hide p-1',
-          'sm:grid sm:overflow-visible sm:snap-none sm:p-0',
-          desktopCols,
+          desktopCols && cn('sm:grid sm:overflow-visible sm:snap-none sm:p-0', desktopCols),
         )}
       >
         {children}
