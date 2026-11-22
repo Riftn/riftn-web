@@ -3,7 +3,6 @@
  * ================
  * Natural collage-style image grid for profile pages (matches public image feed).
  * Every 4th image spans 2×2 for visual flow. Tapping opens the full ImageCard.
- * Unlocked when a user has 4+ image posts.
  */
 
 import { useState, memo } from 'react';

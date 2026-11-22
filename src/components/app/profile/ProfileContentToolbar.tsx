@@ -79,6 +79,7 @@ interface ProfileContentToolbarProps {
   onFiltersOpenChange: (open: boolean) => void;
   /** The post-type row only applies on the All tab — see useProfilePage. */
   showPostType: boolean;
+  showViewToggle: boolean;
   /** Items currently rendered under the toolbar — shown while a search runs. */
   resultCount: number;
   isLoading: boolean;
@@ -89,7 +90,7 @@ interface ProfileContentToolbarProps {
 }
 
 /**
- * Grid or list for the All tab: two bare icons, the chosen one lit. Sits on
+ * Grid or list for this profile: two bare icons, the chosen one lit. Sits on
  * the side of the row away from search and filters.
  */
 function ProfileViewToggle() {
@@ -133,6 +134,7 @@ export function ProfileContentToolbar({
   filtersOpen,
   onFiltersOpenChange,
   showPostType,
+  showViewToggle,
   resultCount,
   isLoading,
   hasCustomOrder = false,
@@ -236,7 +238,7 @@ export function ProfileContentToolbar({
           >
             {isMobile ? (
               <div data-profile-quiet-row className="flex h-9 items-center gap-1">
-                {showPostType && <ProfileViewToggle />}
+                {showViewToggle && <ProfileViewToggle />}
                 <Popover open={isSortOpen} onOpenChange={setIsSortOpen}>
                   <PopoverTrigger asChild>
                     <button
@@ -364,7 +366,7 @@ className="relative flex h-9 flex-shrink-0 items-center gap-1.5 px-3 text-xs fon
 {t('profile.arrangeButton', 'Arrange posts')}
 </button>
 )}
-{showPostType && <><span className="min-w-2 flex-1" /><ProfileViewToggle /></>}
+{showViewToggle && <><span className="min-w-2 flex-1" /><ProfileViewToggle /></>}
 </div>
             )}
           </motion.div>
