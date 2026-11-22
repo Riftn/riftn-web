@@ -1,6 +1,6 @@
 {
-  "modules": 798,
-  "sourceBytes": 4801668,
+  "modules": 799,
+  "sourceBytes": 4806815,
   "files": [
     "server/public-page-locales.js",
     "src/App.tsx",
@@ -653,6 +653,7 @@
     "src/lib/media-session.ts",
     "src/lib/media-url.ts",
     "src/lib/memoize-feed-row.ts",
+    "src/lib/menu-group-moves.ts",
     "src/lib/menu-layout.ts",
     "src/lib/messages-envelope-motion.ts",
     "src/lib/miniapp/registry.ts",

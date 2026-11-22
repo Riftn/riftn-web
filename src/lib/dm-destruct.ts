@@ -3,12 +3,25 @@
  * people when the timer runs out, or as soon as the other person has watched
  * a view-once one. Same choices as the backend `src/dm/dm-destruct.ts`.
  */
-export type DmDestructChoice = 'view' | 60 | 3600 | 43200 | 86400 | 604800 | 31536000;
+export type DmOpenChoice = 'open:3' | 'open:10' | 'open:25' | 'open:60';
+export type DmDestructChoice = 'view' | 60 | 3600 | 43200 | 86400 | 604800 | 31536000 | DmOpenChoice;
 
 export const DESTRUCT_CHOICES: DmDestructChoice[] = ['view', 60, 3600, 43200, 86400, 604800, 31536000];
 
+/** Countdowns that start the first time the other person opens it. */
+export const OPEN_CHOICES: DmOpenChoice[] = ['open:3', 'open:10', 'open:25', 'open:60'];
+
+export function isOpenChoice(c: unknown): c is DmOpenChoice {
+  return typeof c === 'string' && (OPEN_CHOICES as string[]).includes(c);
+}
+
+/** Seconds of an on-open countdown: 'open:10' -> 10. */
+export function openSeconds(c: DmOpenChoice): number {
+  return Number(c.slice(5));
+}
+
 export interface DmDestruct {
-  mode: 'view' | 'time';
+  mode: 'view' | 'time' | 'open';
   seconds?: number;
   expiresAt?: string;
   destroyedAt?: string;
@@ -16,6 +29,7 @@ export interface DmDestruct {
 
 /** Short label for a choice: "1 view", "1 min", "12 hours", "1 week". */
 export function destructLabel(c: DmDestructChoice): string {
+  if (isOpenChoice(c)) return openSeconds(c) === 60 ? '1 min' : `${openSeconds(c)} sec`;
   switch (c) {
     case 'view': return '1 view';
     case 60: return '1 min';
@@ -29,6 +43,7 @@ export function destructLabel(c: DmDestructChoice): string {
 
 /** Tiny label for small chips: "1 view", "1m", "12h", "1w". */
 export function destructShort(c: DmDestructChoice): string {
+  if (isOpenChoice(c)) return `${openSeconds(c)}s`;
   const map: Record<string, string> = { view: '1 view', 60: '1m', 3600: '1h', 43200: '12h', 86400: '1d', 604800: '1w', 31536000: '1y' };
   return map[String(c)];
 }
@@ -47,5 +62,6 @@ export function destructLeft(d: DmDestruct | null | undefined, now = Date.now())
 export function destructFromChoice(c: DmDestructChoice | null | undefined, now = Date.now()): DmDestruct | null {
   if (!c) return null;
   if (c === 'view') return { mode: 'view' };
+  if (isOpenChoice(c)) return { mode: 'open', seconds: openSeconds(c) };
   return { mode: 'time', seconds: c, expiresAt: new Date(now + c * 1000).toISOString() };
 }

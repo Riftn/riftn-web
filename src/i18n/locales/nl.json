@@ -119,6 +119,8 @@
   },
   "dmVideo": {
     "edit": "Video bewerken",
+    "timerOpenBody": "Weg voor jullie beiden {{value1}} nadat ze het voor het eerst openen.",
+    "timerOnOpen": "Zodra ze het openen",
     "hiddenTag": "Verborgen",
     "tapToEdit": "Tik om te bewerken",
     "cover": "Omslag",
@@ -900,6 +902,8 @@
       "riftn": "Riftn"
     },
     "reorderHint": "Houd een pictogram ingedrukt en sleep het om de volgorde te wijzigen",
+    "moveGroupHint": "Laat los op een ander tabblad om het daarheen te verplaatsen",
+    "reorderHintGroups": "Houd een pictogram vast en sleep het om te herschikken, of naar een ander tabblad om het te verplaatsen",
     "reorderReset": "Resetten",
     "reorderResetLong": "Menuvolgorde opnieuw instellen",
     "home": "Home",
@@ -1044,6 +1048,8 @@
     "chatDeleteEveryoneDesc": "Waar dat kan. Een bericht van iemand anders in een groep verdwijnt alleen voor jou",
     "postLanding": "Na het plaatsen",
     "feedSeparator": "Scheiding tussen berichten",
+    "chatOwnBubbleDesc": "Je eigen berichten staan in een ballon, zoals in privéchats",
+    "chatOwnBubble": "Ballonnen voor mijn berichten in de Openbare chat",
     "feedSeparatorDesc": "Kaarten rond elk bericht, of een dunne lijn ertussen",
     "feedSeparatorBento": "Bento-kaarten",
     "feedSeparatorBentoDesc": "Elk bericht in een eigen afgeronde kaart",
@@ -13558,6 +13564,7 @@
     "shareKindCommunity": "Gemeenschap",
     "reportMessage": "Bericht melden",
     "planRestricted": "Deze gebruiker vereist een abonnement om berichten te ontvangen.",
+    "openTimer": {"secs": "{{n}} sec", "oneMin": "1 min", "chip": "{{time}} na openen", "opened": "Geopend", "tapPhoto": "Tik om te bekijken", "tapVideo": "Tik om te kijken", "goneAfter": "Verdwijnt {{time}} nadat je het opent"},
     "planTypeNotAllowed": "Het abonnement van deze maker staat dit soort bericht niet toe.",
     "planMinTip": "De fooi voor deze maker moet minstens {{amount}} tokens zijn."
   },
@@ -21727,5 +21734,24 @@
   "chatLink": {
     "gone": "Dat bericht is verwijderd of is te oud om te openen.",
     "notInChat": "Die link is van een privéchat waar je niet in zit."
+  },
+  "notes": {
+    "add": "Notitie",
+    "yourNote": "Jouw notitie",
+    "shared": "Je notitie staat 24 uur online",
+    "failed": "Je notitie is niet geplaatst. Probeer het opnieuw.",
+    "placeholder": "Deel een gedachte…",
+    "removeGif": "GIF verwijderen",
+    "removeSong": "Nummer verwijderen",
+    "placePlaceholder": "Waar ben je?",
+    "removePlace": "Plaats verwijderen",
+    "song": "Nummer",
+    "place": "Plaats",
+    "gifHost": "Kies een GIF uit het GIF-tabblad voor notities.",
+    "who": "Mensen die jou volgen kunnen hem 24 uur zien.",
+    "delete": "Notitie verwijderen",
+    "share": "Delen",
+    "message": "Bericht",
+    "title": "Notities"
   }
 }

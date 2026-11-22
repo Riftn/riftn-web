@@ -119,6 +119,8 @@
   },
   "dmVideo": {
     "edit": "Videoyu düzenle",
+    "timerOpenBody": "İlk açtıktan {{value1}} sonra her ikiniz için de silinir.",
+    "timerOnOpen": "Açtıktan sonra",
     "hiddenTag": "Gizli",
     "tapToEdit": "Düzenlemek için dokun",
     "cover": "Kapak",
@@ -900,6 +902,8 @@
       "riftn": "Riftn"
     },
     "reorderHint": "Yeniden düzenlemek için herhangi bir simgeyi basılı tutun ve sürükleyin",
+    "moveGroupHint": "Oraya taşımak için başka bir sekmeye bırak",
+    "reorderHintGroups": "Yeniden sıralamak için bir simgeye basılı tutup sürükle ya da taşımak için başka bir sekmeye bırak",
     "reorderReset": "Sıfırla",
     "reorderResetLong": "Menü sırasını sıfırla",
     "home": "Ana Sayfa",
@@ -1044,6 +1048,8 @@
     "chatDeleteEveryoneDesc": "Mümkün olduğunda. Bir gruptaki başkasının mesajı yalnızca senden silinir",
     "postLanding": "Paylaştıktan sonra",
     "feedSeparator": "Gönderi ayırıcı",
+    "chatOwnBubbleDesc": "Kendi mesajların özel sohbetlerdeki gibi bir baloncuk içinde görünür",
+    "chatOwnBubble": "Genel Sohbet'te mesajlarım için baloncuk",
     "feedSeparatorDesc": "Her gönderinin çevresinde kart ya da aralarında ince bir çizgi",
     "feedSeparatorBento": "Bento kartlar",
     "feedSeparatorBentoDesc": "Her gönderi kendi yuvarlak kartında",
@@ -13310,6 +13316,7 @@
     "shareKindCommunity": "Topluluk",
     "reportMessage": "Mesajı bildir",
     "planRestricted": "Bu kullanıcı mesaj almak için abonelik gerektiriyor.",
+    "openTimer": {"secs": "{{n}} sn", "oneMin": "1 dk", "chip": "Açılınca {{time}}", "opened": "Açıldı", "tapPhoto": "Görmek için dokun", "tapVideo": "İzlemek için dokun", "goneAfter": "Açtıktan {{time}} sonra kaybolur"},
     "planTypeNotAllowed": "Bu içerik üreticisinin planı bu tür mesaja izin vermiyor.",
     "planMinTip": "Bu içerik üreticisi için bahşiş en az {{amount}} jeton olmalı."
   },
@@ -21479,5 +21486,24 @@
   "chatLink": {
     "gone": "Bu mesaj silindi ya da açılamayacak kadar eski.",
     "notInChat": "Bu bağlantı, içinde olmadığın özel bir sohbete ait."
+  },
+  "notes": {
+    "add": "Not",
+    "yourNote": "Notun",
+    "shared": "Notun 24 saat boyunca görünür",
+    "failed": "Notun paylaşılamadı. Tekrar dene.",
+    "placeholder": "Bir düşünce paylaş…",
+    "removeGif": "GIF'i kaldır",
+    "removeSong": "Şarkıyı kaldır",
+    "placePlaceholder": "Neredesin?",
+    "removePlace": "Yeri kaldır",
+    "song": "Şarkı",
+    "place": "Yer",
+    "gifHost": "Notlar için GIF sekmesinden bir GIF seç.",
+    "who": "Seni takip edenler 24 saat boyunca görebilir.",
+    "delete": "Notu sil",
+    "share": "Paylaş",
+    "message": "Mesaj",
+    "title": "Notlar"
   }
 }

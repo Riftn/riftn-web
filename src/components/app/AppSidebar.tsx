@@ -16,6 +16,7 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { MobileHeader } from './navigation/MobileHeader';
 import { DesktopSidebar } from './navigation/DesktopSidebar';
 import { groupMenuItems } from './navigation/menu-groups';
+import { useMenuGroupMoves } from '@/lib/menu-group-moves';
 import { useMenuLayout } from '@/lib/menu-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -99,7 +100,8 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
     () => filterNavItems(NAV_ITEMS, '', t, canManageAgents(walletAddress)),
     [t, isKidsMode, walletAddress],
   );
-  const menuGroups = useMemo(() => groupMenuItems(allNavItems), [allNavItems]);
+  const menuGroupMoves = useMenuGroupMoves();
+  const menuGroups = useMemo(() => groupMenuItems(allNavItems, menuGroupMoves), [allNavItems, menuGroupMoves]);
   const menuLayout = useMenuLayout();
   const [menuTab, setMenuTab] = useState(0);
   // Tabs layout: search is a button on the tab row until tapped, then that

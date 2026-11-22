@@ -119,6 +119,8 @@
   },
   "dmVideo": {
     "edit": "Modifier la vidéo",
+    "timerOpenBody": "Parti pour vous deux {{value1}} après leur première ouverture.",
+    "timerOnOpen": "Dès qu’ils l’ouvrent",
     "hiddenTag": "Masqué",
     "tapToEdit": "Appuyez pour modifier",
     "cover": "Couverture",
@@ -900,6 +902,8 @@
       "riftn": "Riftn"
     },
     "reorderHint": "Maintenez et faites glisser n'importe quelle icône pour réorganiser",
+    "moveGroupHint": "Déposez-la sur un autre onglet pour l’y déplacer",
+    "reorderHintGroups": "Maintenez et faites glisser une icône pour la réorganiser, ou vers un autre onglet pour l’y déplacer",
     "reorderReset": "Réinitialiser",
     "reorderResetLong": "Réinitialiser l'ordre du menu",
     "home": "Accueil",
@@ -1044,6 +1048,8 @@
     "chatDeleteEveryoneDesc": "Quand c’est possible. Le message de quelqu’un d’autre dans un groupe n’est supprimé que pour vous",
     "postLanding": "Après la publication",
     "feedSeparator": "Séparateur de publications",
+    "chatOwnBubbleDesc": "Vos messages s’affichent dans une bulle, comme dans les discussions privées",
+    "chatOwnBubble": "Bulles pour mes messages dans le Chat public",
     "feedSeparatorDesc": "Des cartes autour de chaque publication, ou une fine ligne entre elles",
     "feedSeparatorBento": "Cartes bento",
     "feedSeparatorBentoDesc": "Chaque publication dans sa propre carte arrondie",
@@ -13314,6 +13320,7 @@
     "shareKindCommunity": "Communauté",
     "reportMessage": "Signaler le message",
     "planRestricted": "Cet utilisateur exige un abonnement pour recevoir des messages.",
+    "openTimer": {"secs": "{{n}} s", "oneMin": "1 min", "chip": "{{time}} après ouverture", "opened": "Ouvert", "tapPhoto": "Appuyez pour voir", "tapVideo": "Appuyez pour regarder", "goneAfter": "Disparaît {{time}} après l’ouverture"},
     "planTypeNotAllowed": "L'offre de ce créateur n'autorise pas ce type de message.",
     "planMinTip": "Le pourboire doit être d'au moins {{amount}} jetons pour ce créateur."
   },
@@ -21483,5 +21490,24 @@
   "chatLink": {
     "gone": "Ce message a été supprimé, ou il est trop ancien pour être ouvert.",
     "notInChat": "Ce lien mène à une discussion privée dont vous ne faites pas partie."
+  },
+  "notes": {
+    "add": "Note",
+    "yourNote": "Ta note",
+    "shared": "Ta note est visible pendant 24 heures",
+    "failed": "Ta note n'a pas été publiée. Réessaie.",
+    "placeholder": "Partage une pensée…",
+    "removeGif": "Retirer le GIF",
+    "removeSong": "Retirer la chanson",
+    "placePlaceholder": "Où es-tu ?",
+    "removePlace": "Retirer le lieu",
+    "song": "Chanson",
+    "place": "Lieu",
+    "gifHost": "Choisis un GIF dans l'onglet GIF pour les notes.",
+    "who": "Les personnes qui te suivent peuvent la voir pendant 24 heures.",
+    "delete": "Supprimer la note",
+    "share": "Partager",
+    "message": "Message",
+    "title": "Notes"
   }
 }

@@ -119,6 +119,8 @@
   },
   "dmVideo": {
     "edit": "Editar video",
+    "timerOpenBody": "Se va para ambos {{value1}} después de que lo abran por primera vez.",
+    "timerOnOpen": "Cuando lo abran",
     "hiddenTag": "Oculto",
     "tapToEdit": "Toca para editar",
     "cover": "Cubierta",
@@ -900,6 +902,8 @@
       "riftn": "Riftn"
     },
     "reorderHint": "Mantén y arrastra cualquier icono para reorganizar",
+    "moveGroupHint": "Suéltalo en otra pestaña para moverlo allí",
+    "reorderHintGroups": "Mantén pulsado y arrastra un icono para reordenarlo, o a otra pestaña para moverlo",
     "reorderReset": "Restablecer",
     "reorderResetLong": "Restablecer el orden del menú",
     "home": "Inicio",
@@ -1044,6 +1048,8 @@
     "chatDeleteEveryoneDesc": "Cuando se pueda. El mensaje de otra persona en un grupo solo se elimina para ti",
     "postLanding": "Después de publicar",
     "feedSeparator": "Separador de publicaciones",
+    "chatOwnBubbleDesc": "Tus mensajes aparecen en una burbuja, como en los chats privados",
+    "chatOwnBubble": "Burbujas para mis mensajes en el Chat público",
     "feedSeparatorDesc": "Tarjetas alrededor de cada publicación o una línea fina entre ellas",
     "feedSeparatorBento": "Tarjetas bento",
     "feedSeparatorBentoDesc": "Cada publicación va en su propia tarjeta redondeada",
@@ -13310,6 +13316,7 @@
     "shareKindCommunity": "Comunidad",
     "reportMessage": "Denunciar mensaje",
     "planRestricted": "Este usuario requiere una suscripción para recibir mensajes.",
+    "openTimer": {"secs": "{{n}} s", "oneMin": "1 min", "chip": "{{time}} al abrirse", "opened": "Abierto", "tapPhoto": "Toca para ver", "tapVideo": "Toca para reproducir", "goneAfter": "Desaparece {{time}} después de abrirlo"},
     "planTypeNotAllowed": "El plan de este creador no permite este tipo de mensaje.",
     "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador."
   },
@@ -21479,5 +21486,24 @@
   "chatLink": {
     "gone": "Ese mensaje se eliminó o es demasiado antiguo para abrirlo.",
     "notInChat": "Ese enlace es de un chat privado en el que no estás."
+  },
+  "notes": {
+    "add": "Nota",
+    "yourNote": "Tu nota",
+    "shared": "Tu nota estará visible 24 horas",
+    "failed": "Tu nota no se publicó. Inténtalo de nuevo.",
+    "placeholder": "Comparte una idea…",
+    "removeGif": "Quitar GIF",
+    "removeSong": "Quitar canción",
+    "placePlaceholder": "¿Dónde estás?",
+    "removePlace": "Quitar lugar",
+    "song": "Canción",
+    "place": "Lugar",
+    "gifHost": "Elige un GIF de la pestaña GIF para las notas.",
+    "who": "Las personas que te siguen pueden verla durante 24 horas.",
+    "delete": "Eliminar nota",
+    "share": "Compartir",
+    "message": "Mensaje",
+    "title": "Notas"
   }
 }
