@@ -3936,7 +3936,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
             currentSpoilerText={video.spoilerText}
             currentQuotePolicy={video.quotePolicy}
             currentReplyPolicy={video.replyPolicy}
-            currentVisibility={(video as any).visibility}
+            currentVisibility={(video as any).justMe ? 'self' : (video as any).visibility}
             currentForKids={video.forKids}
             currentShopLinks={video.shopLinks}
             onSuccess={(edited) => {

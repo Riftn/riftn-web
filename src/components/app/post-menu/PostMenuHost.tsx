@@ -15,7 +15,7 @@ import { openPostInfo } from '@/lib/preload-post-page';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
+import { EyeOff, Palette, Pin, Share, Type, UserCheck } from 'lucide-react';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import Flag from '@/components/ui/cut-icons/report';
 import Ban from '@/components/ui/cut-icons/blocked';
@@ -41,6 +41,7 @@ import { useBookmarkPost } from '@/hooks/use-bookmarks';
 import { useTogglePin, useIsPostPinned } from '@/hooks/use-pins';
 import { useFollow } from '@/hooks/use-follow';
 import { useMuteAuthor } from '@/hooks/use-mute-author';
+import { useNotInterested } from '@/hooks/use-not-interested';
 import { useBlockAuthor } from '@/hooks/use-block-author';
 import { useSuperpowers } from '@/hooks/use-superpowers';
 import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
@@ -136,6 +137,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
   }, [showing, signedIn, isOwn, target.authorId, followOverride, serverFollowing]);
   const following = followOverride ?? serverFollowing;
   const { muteAuthor } = useMuteAuthor();
+  const notInterested = useNotInterested();
   const { blockAuthor } = useBlockAuthor();
   const { data: powers } = useSuperpowers(showing && signedIn);
   const canGiftBoost = !isOwn && !!powers?.powers.some((p) => p.key === 'deep_current' && p.unlocked && p.available);
@@ -293,8 +295,12 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
         key: 'unfollow', label: t('profileOptions.unfollow', 'Unfollow'), icon: <UserCheck />, divided: true,
         onSelect: () => { if (needLogin()) return; void toggleFollow(true, { name: authorName || name }); },
       });
+      add(tokenId > 0 && {
+        key: 'not-interested', label: t('postOptions.notInterested', 'Not interested'), icon: <EyeOff />, divided: following === null,
+        onSelect: () => { if (needLogin()) return; void notInterested(tokenId); },
+      });
       add({
-        key: 'mute', label: t('postOptions.muteCreator', 'Mute creator'), icon: <VolumeX />, divided: following === null,
+        key: 'mute', label: t('postOptions.muteCreator', 'Mute creator'), icon: <VolumeX />, divided: following === null && !(tokenId > 0),
         onSelect: () => { if (needLogin()) return; muteAuthor(target.authorId!, authorName); },
       });
       add({
@@ -313,7 +319,7 @@ function PostMenuBody({ open, target, sheet, setSheet }: {
     }
     return list;
   }, [phone, target, tokenId, isPublic, isOwn, reposted, isBookmarked, isPinned, words, canShare, canGiftBoost, following, authorLabel, authorName, linkCopyCount, walletAddress,
-    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor]);
+    t, navigate, sendInDm, repost, quote, needLogin, setSheet, toggleBookmark, togglePin, copy, trackLinkCopy, toggleFollow, muteAuthor, blockAuthor, notInterested]);
 
   const header = authorLabel ? (
     <p className="truncate text-[12px] font-semibold opacity-60">{authorLabel}</p>

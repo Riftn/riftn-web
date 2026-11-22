@@ -348,6 +348,7 @@
     "failed": "Das wurde nicht gespeichert. Versuch es noch einmal."
   },
   "postVisibility": {
+    "self": "Nur ich",
     "label": "Wer kann das sehen",
     "public": "Alle",
     "followers": "Nur Follower",
@@ -1414,6 +1415,8 @@
     "wallLabel": "Trinkgeld-Nachrichten"
   },
   "postOptions": {
+    "notInterestedDone": "Verstanden. Du siehst weniger Beiträge wie diesen.",
+    "notInterested": "Kein Interesse",
     "liveAlertsOn": "Du folgst jetzt {{name}}. Du bekommst eine Benachrichtigung, sobald es live geht.",
     "liveAlertsAlreadyOn": "Du folgst {{name}}, also bekommst du eine Benachrichtigung, sobald es live geht.",
     "embed": "Einbetten",
@@ -2010,6 +2013,7 @@
     "tipTokens": "{{amount}} Tokens",
     "tokenAmount": "{{amount}} Tokens",
     "custom": {
+      "bioMention": "{{name}} hat dich in der Bio markiert",
       "featureCommentLikeNamed": "{{name}} hat Ihren Kommentar zu „{{title}}“ geliked",
       "featureCommentLike": "{{name}} hat Ihren Kommentar zu einer Anfrage geliked",
       "governanceCommentLikeNamed": "{{name}} hat Ihren Kommentar zum Vorschlag „{{title}}“ geliked",
@@ -3423,6 +3427,8 @@
     "copyFailed": "Konnte nicht kopiert werden"
   },
   "profileOptions": {
+    "bioTagRemoved": "Du bist in dieser Bio nicht mehr markiert",
+    "removeBioTag": "Mich aus der Bio entfernen",
     "copyRssFeed": "RSS-Feed-Link kopieren",
     "rssFeedCopied": "RSS-Feed-Link kopiert",
     "copyProfileUrl": "Profil-URL kopieren",
@@ -6957,6 +6963,7 @@
     "viewOnOpenSea": "Auf OpenSea ansehen"
   },
   "usernames": {
+    "swap": {"start": "Tausch starten", "placeholder": "@dein_anderes_konto", "sent": "Gesendet. Wechsle zu @{{name}} und nimm an.", "waiting": "Warte auf @{{to}}. Wechsle zu diesem Konto, um abzuschließen.", "done": "Getauscht. Du bist jetzt @{{name}}.", "decline": "Ablehnen", "accept": "Jetzt tauschen", "incoming": "@{{from}} möchte tauschen: Dieses Konto wird @{{from}}, das andere @{{to}}.", "body": "Zwei Konten? Tausche ihre Nutzernamen in einem Schritt. Hier starten, zum anderen Konto wechseln und annehmen. Kein Name ist je frei für andere.", "title": "Mit deinem anderen Konto tauschen"},
     "seoTitle": "Benutzername Marketplace | Riftn",
     "seoDescription": "Kaufe und verkaufe Riftn-Benutzernamen bei Tokens. Suchen Sie nach kurzen, numerischen und originalen Griffen zum Verkauf oder listen Sie Ihre eigenen auf, die Übertragung erfolgt in der Kette, sobald die Zahlung abgeschlossen ist.",
     "title": "Benutzernamen",

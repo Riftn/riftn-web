@@ -431,6 +431,7 @@
     "failed": "Dat is niet opgeslagen. Probeer het opnieuw."
   },
   "postVisibility": {
+    "self": "Alleen ik",
     "label": "Wie kan dit zien",
     "public": "Iedereen",
     "followers": "Alleen volgers",
@@ -1712,6 +1713,8 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "notInterestedDone": "Begrepen. Je ziet minder berichten zoals deze.",
+    "notInterested": "Niet geïnteresseerd",
     "liveAlertsOn": "Je volgt nu {{name}}. Je krijgt een melding wanneer ze live gaan.",
     "liveAlertsAlreadyOn": "Je volgt {{name}}, dus je krijgt een melding wanneer ze live gaan.",
     "embed": "Insluiten",
@@ -2342,6 +2345,7 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "bioMention": "{{name}} heeft je getagd in hun bio",
       "featureCommentLikeNamed": "{{name}} vond je reactie op “{{title}}”",
       "featureCommentLike": "{{name}} vond je reactie op een verzoek",
       "governanceCommentLikeNamed": "{{name}} vond je reactie op voorstel “{{title}}”",
@@ -3689,6 +3693,8 @@
     "copyFailed": "Kon niet kopiëren"
   },
   "profileOptions": {
+    "bioTagRemoved": "Je bent niet meer getagd in deze bio",
+    "removeBioTag": "Haal me uit hun bio",
     "copyRssFeed": "RSS-feedlink kopiëren",
     "rssFeedCopied": "RSS-feedlink gekopieerd",
     "copyProfileUrl": "Profiel-URL kopiëren",
@@ -7234,6 +7240,7 @@
     "signInToTradeCta": "Log in om te handelen"
   },
   "usernames": {
+    "swap": {"start": "Start wissel", "placeholder": "@je_andere_account", "sent": "Verstuurd. Schakel naar @{{name}} en accepteer.", "waiting": "Wacht op @{{to}}. Schakel naar dat account om af te ronden.", "done": "Gewisseld. Je bent nu @{{name}}.", "decline": "Weigeren", "accept": "Nu wisselen", "incoming": "@{{from}} wil wisselen: dit account wordt @{{from}} en dat account @{{to}}.", "body": "Twee accounts? Wissel hun gebruikersnamen in één stap. Begin hier, schakel naar het andere account en accepteer. Geen van beide namen komt ooit vrij voor iemand anders.", "title": "Wissel met je andere account"},
     "seoTitle": "Gebruikersnaammarktplaats | Riftn",
     "seoDescription": "Koop en verkoop Riftn-gebruikersnamen met tokens. Zoek naar korte, numerieke en originele gebruikersnamen die te koop staan, of bied je eigen gebruikersnaam aan, de overdracht vindt on-chain plaats zodra de betaling is verwerkt.",
     "title": "Gebruikersnamen",
