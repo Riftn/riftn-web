@@ -3,11 +3,13 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { ProfileContentToolbar } from './ProfileContentToolbar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { EMPTY_PROFILE_FILTERS } from '@/hooks/use-dehub-profile';
 import { ProfileTabContent } from './ProfileTabContent';
 import { clearProfileViewFlip, ProfileViewModeContext, useProfileViewState } from '@/lib/profile-view-mode';
 import type { ComponentProps } from 'react';
 
+vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: vi.fn() }));
 vi.mock('@/components/app/cards/ImageCard', () => ({ ImageCard: () => <div data-testid="image-card" /> }));
 vi.mock('@/components/app/cards/VideoCard', () => ({ VideoCard: () => <div data-testid="video-card" /> }));
 vi.mock('./ProfileMixedGrid', () => ({ ProfileMixedGrid: () => <div data-testid="video-grid" /> }));
@@ -44,7 +46,11 @@ it('restores the layout after reopening and keeps readers and profiles independe
   expect(own.result.current.mode).toBe('grid');
 });
 
-it.each([1, 5])('uses the same toolbar choice across media tabs with %i posts', count => {
+it.each([
+  { mobile: true, count: 1 }, { mobile: true, count: 5 },
+  { mobile: false, count: 1 }, { mobile: false, count: 5 },
+])('shares the toolbar choice across media tabs (mobile=$mobile, posts=$count)', ({ mobile, count }) => {
+  vi.mocked(useIsMobile).mockReturnValue(mobile);
   const client = new QueryClient();
   const items = Array.from({ length: count }, (_, id) => ({ id: String(id) }));
   const props = {
