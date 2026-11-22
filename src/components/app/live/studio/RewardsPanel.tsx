@@ -28,6 +28,7 @@ import {
   type LiveReward,
 } from '@/lib/api/dehub/live-rewards';
 import { PointsIcon } from '../points/PointsIcon';
+import { PointsGivingSection } from './PointsGivingSection';
 
 import { formatCount } from '@/lib/format-count';
 const draftId = () => Math.random().toString(36).slice(2, 10);
@@ -148,6 +149,8 @@ export function RewardsPanel() {
           </div>
         </div>
       )}
+
+      <PointsGivingSection />
 
       <h4 className="mb-2 mt-5 text-sm font-semibold text-white">{t('livePoints.studio.queue')}</h4>
       {queue.isLoading ? (

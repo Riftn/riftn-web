@@ -31,7 +31,7 @@ export interface StreamKeyInfo {
 
 export interface StreamActivity {
   id: string;
-  type: 'join' | 'leave' | 'like' | 'gift' | 'giftSub' | 'reward' | 'comment' | 'start' | 'end' | 'paused' | 'resumed' | 'reaction' | 'message';
+  type: 'join' | 'leave' | 'like' | 'gift' | 'giftSub' | 'reward' | 'pointsGift' | 'comment' | 'start' | 'end' | 'paused' | 'resumed' | 'reaction' | 'message';
   address: string;
   username?: string;
   avatarUrl?: string;
@@ -42,6 +42,9 @@ export interface StreamActivity {
   giftCount?: number;
   /** The reward a viewer spent channel points on, on a `reward` moment. */
   rewardTitle?: string;
+  /** pointsGift: how many points, and who got them. */
+  pointsAmount?: number;
+  recipientName?: string;
   timestamp: string;
 }
 
