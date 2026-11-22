@@ -98,6 +98,9 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] {
   object-fit: cover;
   background: #3c404a;
 }
+html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] [data-st-avatar] {
+  border-radius: 8px;
+}
 [data-story-tile] [data-st-label] {
   position: absolute;
   left: 7px;
