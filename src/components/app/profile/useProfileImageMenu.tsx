@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from 're
 import { useTranslation } from 'react-i18next';
 import { ClipboardPaste, Copy, ImagePlus, Trash2 } from 'lucide-react';
 import './profile-image-menu.css';
+import { BannerCropDialog } from './BannerCropDialog';
 import { toast } from 'sonner';
 import { MessageMenu, type MessageMenuAction } from '@/components/app/chat/MessageMenu';
 import { useMenuPoint } from '@/components/app/chat/message-menu-kit';
@@ -46,6 +47,7 @@ export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile,
   const boxRef = useRef<HTMLElement | null>(null);
   const hovered = useRef(false);
   const hold = useRef<{ timer: number; x: number; y: number; id: number; fired: boolean } | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   const label = kind === 'avatar'
@@ -62,7 +64,8 @@ export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile,
       toast.error(kind === 'avatar' ? t('settings.imageTooLarge5') : t('settings.imageTooLarge10'));
       return;
     }
-    await onFile(ready);
+    if (kind === 'cover' && ready.type !== 'image/gif') setBannerFile(ready);
+    else await onFile(ready);
   }, [kind, onFile, t]);
 
   // Ctrl/Cmd+V while the pointer is on the picture (or it has focus).
@@ -217,6 +220,10 @@ export function useProfileImageMenu({ kind, canEdit, imageUrl, hasImage, onFile,
             if (file) void take(file);
           }}
         />
+      )}
+      {canEdit && bannerFile && (
+        <BannerCropDialog file={bannerFile} onCancel={() => setBannerFile(null)}
+          onApply={async cropped => { await onFile(cropped); setBannerFile(null); }} />
       )}
       {enabled && (
         <MessageMenu
