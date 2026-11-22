@@ -1,5 +1,5 @@
 {
-  "version": "0425d4835696e4ab",
+  "version": "0ca899e05581f5f1",
   "routes": {
     "/": [
       "ar",
@@ -1528,6 +1528,13 @@
       "tr"
     ],
     "/guides/young-creators-ground-you-own": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/youtube-features-users-want-2026": [
       "ar",
       "es",
       "fr",

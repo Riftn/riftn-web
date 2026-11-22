@@ -3,6 +3,7 @@ import { riftnRelaunchPost } from './posts/riftnRelaunchPost';
 import { isRiftnDehubPost } from './posts/isRiftnDehubPost';
 import { decentralizationSpectrumPost } from './posts/decentralizationSpectrumPost';
 import { topAlternativeSocialAppsPost } from './posts/topAlternativeSocialAppsPost';
+import { youtubeFeaturesUsersWantPost } from './posts/youtubeFeaturesUsersWantPost';
 import { binancePioneerBurnAppealPost } from './posts/binancePioneerBurnAppealPost';
 import { ownEverythingTaglinePost } from './posts/ownEverythingTaglinePost';
 import { yearlyWrapUp2025Post } from './posts/yearlyWrapUp2025Post';
@@ -1420,6 +1421,7 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  youtubeFeaturesUsersWantPost,
   topAlternativeSocialAppsPost,
   decentralizationSpectrumPost,
   isRiftnDehubPost,
