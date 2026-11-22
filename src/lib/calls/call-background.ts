@@ -12,6 +12,7 @@
  */
 
 import type { BackgroundMode, BackgroundOptions } from '@/lib/studio/background';
+import type { FaceFilterId } from '@/lib/studio/face-filters';
 
 export type CallBackgroundId = 'none' | 'blur' | 'night' | 'ocean' | 'sunset' | 'forest' | 'photo';
 
@@ -136,4 +137,38 @@ export async function callBackgroundSettings(
   const choice = CALL_BACKGROUNDS.find(entry => entry.id === id);
   if (!choice) return { mode: 'none' };
   return { mode: 'image', opts: { image: sceneCanvas(choice), color: choice.stops?.[1] } };
+}
+
+// ---------------------------------------------------------------------------
+// Face filters (lib/studio/face-filters draws them)
+// ---------------------------------------------------------------------------
+
+export interface CallFaceFilterChoice {
+  id: FaceFilterId;
+  labelKey: string;
+  label: string;
+  emoji: string;
+}
+
+export const CALL_FACE_FILTERS: readonly CallFaceFilterChoice[] = [
+  { id: 'none', labelKey: 'calls.backgroundOff', label: 'Off', emoji: '' },
+  { id: 'shades', labelKey: 'calls.filterShades', label: 'Shades', emoji: '🕶️' },
+  { id: 'cat', labelKey: 'calls.filterCat', label: 'Cat', emoji: '🐱' },
+  { id: 'crown', labelKey: 'calls.filterCrown', label: 'Crown', emoji: '👑' },
+  { id: 'hearts', labelKey: 'calls.filterHearts', label: 'Hearts', emoji: '💕' },
+];
+
+const FACE_KEY = 'riftn.call.faceFilter';
+
+export function loadCallFaceFilter(): FaceFilterId {
+  try {
+    const saved = localStorage.getItem(FACE_KEY);
+    return CALL_FACE_FILTERS.some(choice => choice.id === saved) ? (saved as FaceFilterId) : 'none';
+  } catch {
+    return 'none';
+  }
+}
+
+export function saveCallFaceFilter(id: FaceFilterId) {
+  try { localStorage.setItem(FACE_KEY, id); } catch { /* this call only */ }
 }

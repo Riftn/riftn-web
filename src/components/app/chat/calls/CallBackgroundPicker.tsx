@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import { Droplets, ImagePlus, Loader2, Sparkles, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { CALL_BACKGROUNDS, loadCallBackgroundPhoto, storeCallBackgroundPhoto, type CallBackgroundId } from '@/lib/calls/call-background';
+import { CALL_BACKGROUNDS, CALL_FACE_FILTERS, loadCallBackgroundPhoto, storeCallBackgroundPhoto, type CallBackgroundId } from '@/lib/calls/call-background';
+import { faceFiltersSupported, type FaceFilterId } from '@/lib/studio/face-filters';
 import { backgroundRemovalSupported } from '@/lib/studio/background';
 
 /**
@@ -17,7 +18,7 @@ export function useCallBackgroundAvailable(): boolean {
 
 export function CallFxButton({ open, onToggle, active }: { open: boolean; onToggle: () => void; active: boolean }) {
   const { t } = useTranslation();
-  const label = t('calls.background', 'Background');
+  const label = t('calls.effects', 'Effects');
   return (
     <button
       type="button"
@@ -38,12 +39,17 @@ export function CallBackgroundPanel({
   busy,
   onPick,
   onClose,
+  faceFilter,
+  onPickFace,
 }: {
   value: CallBackgroundId;
   busy: boolean;
   onPick: (id: CallBackgroundId, photo?: string | null) => void;
   onClose: () => void;
+  faceFilter?: FaceFilterId;
+  onPickFace?: (id: FaceFilterId) => void;
 }) {
+  const faceAvailable = React.useMemo(() => faceFiltersSupported(), []);
   const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const savedPhoto = loadCallBackgroundPhoto();
@@ -61,7 +67,7 @@ export function CallBackgroundPanel({
   };
 
   return (
-    <div className="call-fx" role="group" aria-label={t('calls.background', 'Background')}>
+    <div className="call-fx" role="group" aria-label={t('calls.effects', 'Effects')}>
       <div className="call-fx__head">
         <span>{t('calls.background', 'Background')}</span>
         {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-label={t('calls.backgroundLoading', 'Starting effect…')} /> : null}
@@ -100,6 +106,32 @@ export function CallBackgroundPanel({
           );
         })}
       </div>
+      {faceAvailable && onPickFace ? (
+        <>
+          <div className="call-fx__head call-fx__head--sub"><span>{t('calls.faceFilters', 'Face filters')}</span></div>
+          <div className="call-fx__row">
+            {CALL_FACE_FILTERS.map(choice => {
+              const selected = (faceFilter ?? 'none') === choice.id;
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  className="call-fx__opt"
+                  data-selected={selected ? 'true' : 'false'}
+                  aria-pressed={selected}
+                  onClick={() => onPickFace(choice.id)}
+                  disabled={busy}
+                >
+                  <span className="call-fx__swatch" data-kind={`face-${choice.id}`}>
+                    {choice.id === 'none' ? <X className="h-5 w-5" /> : <span className="call-fx__emoji" aria-hidden>{choice.emoji}</span>}
+                  </span>
+                  <span className="call-fx__label">{t(choice.labelKey, choice.label)}</span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickPhoto} />
     </div>
   );

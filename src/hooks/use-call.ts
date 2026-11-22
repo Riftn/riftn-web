@@ -12,6 +12,8 @@ import { visualActivity } from '@/lib/visual-activity';
 import { leaseChannel, type ChannelLease } from '@/lib/realtime-channel-lease';
 import { callBackgroundSettings, loadCallBackground, loadCallBackgroundPhoto, saveCallBackground, type CallBackgroundId } from '@/lib/calls/call-background';
 import type { BackgroundStage } from '@/lib/studio/background';
+import type { FaceFilterId, FaceFilterStage } from '@/lib/studio/face-filters';
+import { loadCallFaceFilter, saveCallFaceFilter } from '@/lib/calls/call-background';
 import { groupCallChannel, groupCallPresenceTopic, groupCallUid, presenceList, GROUP_CALL_MAX_RING, type GroupCallPresence } from '@/lib/group-call';
 
 export interface CallSession {
@@ -81,19 +83,23 @@ export interface UseCallReturn {
   callBackgroundBusy: boolean;
   /** Pick a background. `photo` is a data URL, for 'photo'. */
   setCallBackground: (id: CallBackgroundId, photo?: string | null) => void;
+  /** Shades, cat, crown or hearts that follow your face on a video call. Remembered between calls. */
+  callFaceFilter: FaceFilterId;
+  setCallFaceFilter: (id: FaceFilterId) => void;
 }
 type GroupRemote = { audio: any; video: any };
 type CallMedia = {
   client: any; audio: any; video: any; remoteVideo: any; remoteAudio: any; closed: boolean;
   remotes: Map<number, GroupRemote>; presence: ChannelLease | null;
   /**
-   * The background effect, while one is on: the canvas track is what the
-   * camera track sends (replaceTrack), and `raw` is the real camera, which
-   * keeps running underneath and is ours to stop.
+   * The camera effects, while any is on: raw camera -> background -> face
+   * filter. The last stage's canvas track is what the camera track sends
+   * (replaceTrack); `raw` is the real camera, which keeps running underneath
+   * and is ours to stop.
    */
-  bg?: { stage: BackgroundStage; raw: MediaStreamTrack } | null;
-  /** Background changes run one at a time. */
-  bgQueue?: Promise<void>;
+  fx?: { raw: MediaStreamTrack; bg: BackgroundStage | null; face: FaceFilterStage | null } | null;
+  /** Effect changes run one at a time. */
+  fxQueue?: Promise<void>;
 };
 /** The starter's own side of a group call has no row of its own. */
 const isSessionId = (id: string) => id !== 'pending' && !id.startsWith('group:');
@@ -117,6 +123,8 @@ export const useCall = (): UseCallReturn => {
   const [selfSpeaking, setSelfSpeaking] = useState(false);
   const [callBackground, setCallBackgroundState] = useState<CallBackgroundId>(() => loadCallBackground());
   const [callBackgroundBusy, setCallBackgroundBusy] = useState(false);
+  const [callFaceFilter, setCallFaceFilterState] = useState<FaceFilterId>(() => loadCallFaceFilter());
+  const callFaceFilterRef = useRef<FaceFilterId>(callFaceFilter);
   const callBackgroundRef = useRef<{ id: CallBackgroundId; photo: string | null } | null>(null);
   if (!callBackgroundRef.current) {
     const id = loadCallBackground();
@@ -186,11 +194,12 @@ export const useCall = (): UseCallReturn => {
         try { track?.close(); } catch {}
       }
       // The camera track was sending the effect's canvas, so closing it left the real camera on.
-      const bg = media.bg;
-      media.bg = null;
-      if (bg) {
-        try { bg.stage.stop(); } catch {}
-        try { bg.raw.stop(); } catch {}
+      const fx = media.fx;
+      media.fx = null;
+      if (fx) {
+        try { fx.face?.stop(); } catch {}
+        try { fx.bg?.stop(); } catch {}
+        try { fx.raw.stop(); } catch {}
       }
       for (const track of [media.remoteAudio, media.remoteVideo]) { try { track?.stop(); } catch {} }
       for (const remote of media.remotes.values()) {
@@ -270,50 +279,88 @@ export const useCall = (): UseCallReturn => {
   }, []);
 
   /**
-   * Puts the chosen background on the camera that is being sent, or takes it
-   * off. The effect's canvas replaces the camera track's picture in place
-   * (replaceTrack), so nothing is unpublished and the other side sees no
-   * gap; the real camera keeps running underneath for the effect to read.
+   * Puts the chosen background and face filter on the camera that is being
+   * sent, or takes them off. The last effect's canvas replaces the camera
+   * track's picture in place (replaceTrack), so nothing is unpublished and
+   * the other side sees no gap; the real camera keeps running underneath for
+   * the effects to read. The background always reads the real camera, and
+   * the face filter reads whatever is before it, so toggling the background
+   * under a face filter moves the filter onto the new picture.
    */
-  const applyBackground = useCallback((media: CallMedia) => {
+  const applyEffects = useCallback((media: CallMedia) => {
+    const restoreCamera = async (video: any) => {
+      const fx = media.fx;
+      if (!fx) return;
+      media.fx = null;
+      try { await video.replaceTrack(fx.raw, false); } catch (error) { console.warn('Camera restore failed', error); }
+      fx.face?.stop();
+      fx.bg?.stop();
+      setMediaRevision(revision => revision + 1);
+    };
     const run = async () => {
       const video = media.video;
       if (!video || media.closed) return;
       const { id, photo } = callBackgroundRef.current ?? { id: 'none' as const, photo: null };
-      if (id === 'none') {
-        const bg = media.bg;
-        if (!bg) return;
-        media.bg = null;
-        try { await video.replaceTrack(bg.raw, false); } catch (error) { console.warn('Camera restore failed', error); }
-        bg.stage.stop();
-        setMediaRevision(revision => revision + 1);
-        return;
-      }
-      const { mode, opts } = await callBackgroundSettings(id, photo);
-      if (media.closed) return;
-      if (media.bg) { media.bg.stage.setMode(mode, opts); return; }
-      const raw: MediaStreamTrack | undefined = video.getMediaStreamTrack?.();
+      const face = callFaceFilterRef.current;
+      const fx = media.fx ?? null;
+      if (id === 'none' && face === 'none') { await restoreCamera(video); return; }
+      const raw: MediaStreamTrack | undefined = fx?.raw ?? video.getMediaStreamTrack?.();
       if (!raw) return;
       setCallBackgroundBusy(true);
+      const started: { stop: () => void }[] = [];
+      const retired: { stop: () => void }[] = [];
       try {
-        const { startBackgroundStage } = await import('@/lib/studio/background');
-        const stage = await startBackgroundStage(raw, mode, opts);
-        if (media.closed || media.video !== video) { stage.stop(); return; }
-        await video.replaceTrack(stage.track, false);
-        media.bg = { stage, raw };
-        setMediaRevision(revision => revision + 1);
+        let bg = fx?.bg ?? null;
+        if (id === 'none') {
+          if (bg) retired.push(bg);
+          bg = null;
+        } else {
+          const { mode, opts } = await callBackgroundSettings(id, photo);
+          if (bg) bg.setMode(mode, opts);
+          else {
+            const { startBackgroundStage } = await import('@/lib/studio/background');
+            bg = await startBackgroundStage(raw, mode, opts);
+            started.push(bg);
+          }
+        }
+        let faceStage = fx?.face ?? null;
+        const faceSource = bg?.track ?? raw;
+        if (face === 'none') {
+          if (faceStage) retired.push(faceStage);
+          faceStage = null;
+        } else if (faceStage && faceStage.source === faceSource) {
+          faceStage.setFilter(face);
+        } else {
+          if (faceStage) retired.push(faceStage);
+          const { startFaceFilterStage } = await import('@/lib/studio/face-filters');
+          faceStage = await startFaceFilterStage(faceSource, face);
+          started.push(faceStage);
+        }
+        if (media.closed || media.video !== video) { started.forEach(stage => stage.stop()); return; }
+        const out = faceStage?.track ?? bg?.track ?? raw;
+        const sending = fx ? fx.face?.track ?? fx.bg?.track ?? fx.raw : raw;
+        if (out !== sending) await video.replaceTrack(out, false);
+        media.fx = { raw, bg, face: faceStage };
+        retired.forEach(stage => stage.stop());
+        if (out !== sending) setMediaRevision(revision => revision + 1);
+      } catch (error) {
+        started.forEach(stage => stage.stop());
+        throw error;
       } finally {
         setCallBackgroundBusy(false);
       }
     };
-    const next = (media.bgQueue ?? Promise.resolve()).then(run).catch(error => {
-      console.warn('Call background failed', error);
+    const next = (media.fxQueue ?? Promise.resolve()).then(run).catch(async error => {
+      console.warn('Call effects failed', error);
       if (media.closed) return;
       callBackgroundRef.current = { id: 'none', photo: null };
+      callFaceFilterRef.current = 'none';
       setCallBackgroundState('none');
+      setCallFaceFilterState('none');
+      if (media.video) await restoreCamera(media.video);
       toast.error(_copy('calls.backgroundFailed', { defaultValue: "Background effects can't run on this device." }));
     });
-    media.bgQueue = next;
+    media.fxQueue = next;
     return next;
   }, [_copy]);
   const joinAgoraChannel = useCallback(async (call: CallSession, generation: number): Promise<boolean> => {
@@ -463,7 +510,7 @@ export const useCall = (): UseCallReturn => {
       await client.publish([media.audio, ...(media.video ? [media.video] : [])]);
       if (!current() || media.closed) { await disposeMedia(media); return false; }
       // The background picked on an earlier call comes back on its own.
-      if (media.video && callBackgroundRef.current?.id !== 'none') void applyBackground(media);
+      if (media.video && (callBackgroundRef.current?.id !== 'none' || callFaceFilterRef.current !== 'none')) void applyEffects(media);
       return true;
     } catch (error) {
       await disposeMedia(media);
@@ -474,7 +521,7 @@ export const useCall = (): UseCallReturn => {
       }
       return false;
     }
-  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyBackground]);
+  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyEffects]);
 
   /** Nobody came: a group room you are alone in closes itself after the ring window. */
   const armGroupTimeout = useCallback((generation: number, outcome: 'no_answer' | 'missed') => {
@@ -738,8 +785,15 @@ export const useCall = (): UseCallReturn => {
     setCallBackgroundState(saved);
     saveCallBackground(saved);
     const media = mediaRef.current;
-    if (media && !media.closed && media.video) void applyBackground(media);
-  }, [applyBackground]);
+    if (media && !media.closed && media.video) void applyEffects(media);
+  }, [applyEffects]);
+  const setCallFaceFilter = useCallback((id: FaceFilterId) => {
+    callFaceFilterRef.current = id;
+    setCallFaceFilterState(id);
+    saveCallFaceFilter(id);
+    const media = mediaRef.current;
+    if (media && !media.closed && media.video) void applyEffects(media);
+  }, [applyEffects]);
   const toggleMute = useCallback(() => {
     const audio = mediaRef.current?.audio;
     if (audio) setIsMuted(previous => { void audio.setMuted(!previous); return !previous; });
@@ -757,18 +811,19 @@ export const useCall = (): UseCallReturn => {
       if (mediaRef.current?.video !== video || devices.length < 2) return;
       // With a background on, the track is sending the effect's canvas: hand
       // the camera back first, flip it, then put the effect on the new one.
-      await media.bgQueue;
-      const bg = media.bg;
-      if (bg) {
-        media.bg = null;
-        try { await video.replaceTrack(bg.raw, false); } catch {}
-        bg.stage.stop();
+      await media.fxQueue;
+      const fx = media.fx;
+      if (fx) {
+        media.fx = null;
+        try { await video.replaceTrack(fx.raw, false); } catch {}
+        fx.face?.stop();
+        fx.bg?.stop();
       }
-      const label = bg?.raw.label ?? video.getTrackLabel?.() ?? '';
+      const label = fx?.raw.label ?? video.getTrackLabel?.() ?? '';
       await video.setDevice((devices.find(device => device.label !== label) ?? devices[0]).deviceId);
-      if (bg && !media.closed) void applyBackground(media);
+      if (fx && !media.closed) void applyEffects(media);
     } catch (error) { console.warn('Camera switch failed', error); }
-  }, [applyBackground]);
+  }, [applyEffects]);
   const minimizeCall = useCallback(() => setIsMinimized(true), []);
   const maximizeCall = useCallback(() => setIsMinimized(false), []);
   const clearCallFailure = useCallback(() => { setCallFailureReason(null); setIsUserOffline(false); }, []);
@@ -808,8 +863,8 @@ export const useCall = (): UseCallReturn => {
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
     attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
-    callBackground, callBackgroundBusy, setCallBackground,
-  }), [callBackground, callBackgroundBusy, setCallBackground, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
+    callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter,
+  }), [callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, attachGroupVideo, startGroupCall, joinGroupCall,
     isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
     attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);
