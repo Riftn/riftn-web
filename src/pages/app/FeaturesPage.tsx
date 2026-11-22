@@ -757,6 +757,22 @@ function FeatureCard({
 // ──────────────────────────────────────────────────
 // Submit Feature Drawer
 // ──────────────────────────────────────────────────
+function RequestLoadError({ retry }: { retry: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+      <h3 className="text-white font-semibold mb-1">{t('features.loadFailed', "Couldn't load requests")}</h3>
+      <Button
+        onClick={retry}
+        variant="glass"
+        className="rounded-xl font-semibold mt-3"
+      >
+        {t('common.retry', 'Retry')}
+      </Button>
+    </div>
+  );
+}
+
 function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCategory?: FeatureCategory; focusRequest: number; onPosted: () => void }) {
   const { t } = useI18n();
   const { isAuthenticated, openLoginModal } = useAuth();
@@ -1087,9 +1103,9 @@ export default function FeaturesPage() {
 
   const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
-  const { data: shippedFeatures, isLoading: isLoadingShipped } = useShippedFeatures();
-  const { data: inProgressFeatures, isLoading: isLoadingInProgress } = useInProgressFeatures();
-  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible } = useNotFeasibleFeatures(authorWallet);
+  const { data: shippedFeatures, isLoading: isLoadingShipped, isError: isErrorShipped, refetch: refetchShipped } = useShippedFeatures(authorWallet);
+  const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
+  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible, isError: isErrorNotFeasible, refetch: refetchNotFeasible } = useNotFeasibleFeatures(authorWallet);
 
   // A notification about one request pins it above the board. The list query
   // could never be relied on to hold it — it may be shipped, declined, outside
@@ -1198,7 +1214,7 @@ export default function FeaturesPage() {
 
   // `open` is counted server-side with the same status filter the list uses, so
   // the tab badge always matches the rows below it.
-  const { data: counts } = useFeatureCounts();
+  const { data: counts } = useFeatureCounts(authorWallet);
 
   const remainingCount = counts?.open ?? features.length;
   const shippedCount = shippedFeatures?.length ?? 0;
@@ -1436,6 +1452,8 @@ export default function FeaturesPage() {
         <>
           {isLoadingNotFeasible ? (
             <FeatureSkeletons />
+          ) : isErrorNotFeasible ? (
+            <RequestLoadError retry={() => refetchNotFeasible()} />
           ) : visibleNotFeasible.length > 0 ? (
             <div className="space-y-3">
               {visibleNotFeasible.map((feature) => (
@@ -1468,16 +1486,7 @@ export default function FeaturesPage() {
           {isLoading ? (
             <FeatureSkeletons />
           ) : isError ? (
-            <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
-              <h3 className="text-white font-semibold mb-1">{t('features.loadFailed', "Couldn't load requests")}</h3>
-              <Button
-                onClick={() => refetch()}
-                variant="glass"
-                className="rounded-xl font-semibold mt-3"
-              >
-                {t('common.retry', 'Retry')}
-              </Button>
-            </div>
+            <RequestLoadError retry={() => refetch()} />
           ) : features.length > 0 ? (
             <div className="space-y-3">
               {features.map((feature) => (
@@ -1523,6 +1532,8 @@ export default function FeaturesPage() {
         <>
           {isLoadingInProgress ? (
             <FeatureSkeletons />
+          ) : isErrorInProgress ? (
+            <RequestLoadError retry={() => refetchInProgress()} />
           ) : visibleInProgress.length > 0 ? (
             <div className="space-y-3">
               {visibleInProgress.map((feature) => (
@@ -1556,6 +1567,8 @@ export default function FeaturesPage() {
         <>
           {isLoadingShipped ? (
             <FeatureSkeletons />
+          ) : isErrorShipped ? (
+            <RequestLoadError retry={() => refetchShipped()} />
           ) : visibleShipped.length > 0 ? (
             <div className="space-y-3">
               {renderedShipped.map((feature) => (
