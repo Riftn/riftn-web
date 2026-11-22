@@ -62,6 +62,17 @@ export async function unmuteUser(address: string): Promise<MuteResult> {
   return response?.result ?? response;
 }
 
+/** The viewer's mute state for this profile, including older mutes outside the first page. */
+export async function getMuteStatus(address: string): Promise<boolean> {
+  const response = await apiCall<{ result?: { youMuted: boolean }; youMuted?: boolean }>(
+    `/api/mute/status/${encodeURIComponent(address.toLowerCase())}`,
+    { requiresAuth: true },
+  );
+  const muted = response?.result?.youMuted ?? response?.youMuted;
+  if (typeof muted !== 'boolean') throw new Error('Mute status unavailable');
+  return muted;
+}
+
 /** Every account you have muted, flat — the shape the feed filter wants. */
 export async function getMuteList(): Promise<MutedUser[]> {
   const response = await apiCall<any>('/api/mute?page=1&limit=50', {
