@@ -591,6 +591,20 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
     fullscreenTargetRef.current = node;
     setVideoContainer(node);
   }, []);
+  // The player clips its slides, but a clipped box can still be scrolled by
+  // code: a chat scrolling to its newest line, or focus moving into the slide
+  // parked below. Scrolled, it showed the next short, paused, while the one
+  // playing sat out of sight. It never scrolls, so put it straight back.
+  useEffect(() => {
+    if (!videoContainer) return;
+    const pin = () => {
+      if (videoContainer.scrollTop) videoContainer.scrollTop = 0;
+      if (videoContainer.scrollLeft) videoContainer.scrollLeft = 0;
+    };
+    pin();
+    videoContainer.addEventListener('scroll', pin, { passive: true });
+    return () => videoContainer.removeEventListener('scroll', pin);
+  }, [videoContainer]);
   const noVideoRef = useRef<HTMLVideoElement>(null);
   const { isFullscreen, toggleFullscreen } = useVideoFullscreen(noVideoRef, fullscreenTargetRef, {
     // Unlike a slide, this container has no transformed ancestor — the

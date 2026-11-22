@@ -39,7 +39,12 @@ function useKeepChatGestures(active: boolean) {
     const el = ref.current;
     if (!active || !el) return;
     const keep = (e: Event) => {
-      if ((e.target as HTMLElement | null)?.closest?.('[data-shorts-scrollable], textarea, input')) e.stopPropagation();
+      const zone = (e.target as HTMLElement | null)?.closest?.('[data-shorts-scrollable], textarea, input');
+      if (!zone) return;
+      // A chat with nothing to scroll has no use for the drag: let it page,
+      // or the lower half of a quiet room is a place swipes go to die.
+      if (zone.matches('[data-shorts-scrollable]') && zone.scrollHeight <= zone.clientHeight + 1) return;
+      e.stopPropagation();
     };
     el.addEventListener('pointerdown', keep);
     return () => el.removeEventListener('pointerdown', keep);

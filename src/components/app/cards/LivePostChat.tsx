@@ -360,7 +360,12 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     if (bottomRef.current) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+          // Only the message list moves. scrollIntoView also scrolls every
+          // box around the chat, clipped ones included: in the Shorts viewer
+          // that slid the whole player up by most of a screen, and on the
+          // live page it dragged the page down to the chat.
+          const list = messagesContainerRef.current;
+          list?.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
         });
       });
     }
@@ -395,8 +400,11 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
 
   const scrollToMessage = useCallback((messageId: string) => {
     const el = messageRefs.current.get(messageId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const list = messagesContainerRef.current;
+    if (el && list) {
+      // Centre the line inside the list without moving anything around it.
+      const offset = el.getBoundingClientRect().top - list.getBoundingClientRect().top;
+      list.scrollTo({ top: list.scrollTop + offset - (list.clientHeight - el.offsetHeight) / 2, behavior: 'smooth' });
       el.classList.add('bg-white/10');
       setTimeout(() => el.classList.remove('bg-white/10'), 1200);
     }
