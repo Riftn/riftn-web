@@ -34,7 +34,7 @@ import { createVoiceRecorder, voiceRecordingBlob, voiceRecordingFile } from '@/l
 import { splitTitleFromText } from '@/features/post/lib/title-split';
 import { shrinkComicPages } from '@/lib/comic-pages';
 import type { ComicBorder } from '@/lib/comic-borders';
-import { getComicImageLimitForBadge, getPostImageBytesForBadge, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
+import { getComicImageLimitForBadge, getPostMediaAllowanceForBadge, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
 // NOTE: mint/bounty helpers reach wallet/contract code (wagmi + web3auth).
 // usePostForm is reachable from eager UI (PostModal is used by the sidebar /
 // bottom nav / feed), so those helpers are dynamically imported inside
@@ -565,15 +565,24 @@ export function usePostForm(
    * every keystroke. Null means "could not read it" and shows nothing —
    * never a zero, which would read as "you are out".
    */
-  const [postQuota, setPostQuota] = useState<PostQuotaStatus | null>(null);
-  const mediaUploadLimit = postQuota?.mediaBytesPerDay ?? MEDIA_LIMITS.BASE_MEDIA_UPLOAD_SIZE;
+  const address = user?.address;
+  const activeAddress = useRef(address);
+  activeAddress.current = address;
+  const [quotaRead, setQuotaRead] = useState<{ address: string; quota: PostQuotaStatus | null } | null>(null);
+  const postQuota = quotaRead && quotaRead.address === address ? quotaRead.quota : null;
+  const fallback = getPostMediaAllowanceForBadge(user?.badgeBalance, user?.username, user?.badgeLock);
+  const mediaUploadLimit = postQuota?.mediaBytesPerDay ?? fallback.bytes;
+  const mediaUploadTier = (postQuota ? postQuota.tier : fallback.tier) || 'base';
   const mediaUploadLimitLabel = `${Number((mediaUploadLimit / (1024 ** 3)).toFixed(1))}GB`;
   const refreshPostQuota = useCallback(() => {
-    getPostQuota().then(setPostQuota);
-  }, []);
+    if (!address || activeAddress.current !== address) return;
+    getPostQuota().then(quota => {
+      if (activeAddress.current === address) setQuotaRead({ address, quota });
+    });
+  }, [address]);
   useEffect(() => {
-    if (!user?.address) {
-      setPostQuota(null);
+    if (!address) {
+      setQuotaRead(null);
       return;
     }
     let cancelled = false;
@@ -585,10 +594,10 @@ export function usePostForm(
       .catch(() => {})
       .then(() => getPostQuota())
       .then((quota) => {
-        if (!cancelled) setPostQuota(quota);
+        if (!cancelled && activeAddress.current === address) setQuotaRead({ address, quota });
       });
     return () => { cancelled = true; };
-  }, [user?.address]);
+  }, [address]);
 
   const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
 
@@ -720,13 +729,6 @@ export function usePostForm(
   const canPost = hasContent;
 
   // Actions
-  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    processImageFiles(Array.from(files));
-    e.target.value = '';
-  }, []);
-
   const processImageFiles = useCallback((files: File[]) => {
     // Can't add images if there's already a video
     if (hasVideo) {
@@ -747,8 +749,7 @@ export function usePostForm(
 
     const imageFiles = files.filter(f => f.type.startsWith('image/'));
     // Images share the creator's general media upload ceiling.
-    const imageByteLimit = Math.min(MAX_IMAGE_UPLOAD_BYTES, postQuota?.mediaBytesPerDay
-      ?? getPostImageBytesForBadge(user?.badgeBalance, user?.username, user?.badgeLock));
+    const imageByteLimit = Math.min(MAX_IMAGE_UPLOAD_BYTES, mediaUploadLimit);
     const imageLimitMb = imageByteLimit / 1_000_000;
     const oversized = imageFiles.filter(f => f.size > imageByteLimit);
     if (oversized.length > 0) {
@@ -779,14 +780,14 @@ export function usePostForm(
       const preview = URL.createObjectURL(file);
       setMedia(prev => [...prev, { file, preview, type: 'image' }]);
     });
-  }, [hasVideo, media, postLayout, user?.badgeBalance, user?.badgeLock, user?.username, postQuota?.mediaBytesPerDay, postQuota?.tier, t, _copy]);
+  }, [hasVideo, media, postLayout, user?.badgeBalance, user?.badgeLock, user?.username, mediaUploadLimit, postQuota?.tier, t, _copy]);
     
-  const handleVideoSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
-    await processVideoFile(files[0]);
+    if (!files) return;
+    processImageFiles(Array.from(files));
     e.target.value = '';
-  }, []);
+  }, [processImageFiles]);
 
   const processVideoFile = useCallback(async (file: File, replace = false) => {
     // Can't add video if there are already images
@@ -804,7 +805,7 @@ export function usePostForm(
     if (file.size > mediaUploadLimit) {
       // Without this an oversized video uploaded for up to 8 minutes and died
       // at the XHR timeout with a generic failure.
-      toast.error(_copy("copy.8be9a68e0703", { defaultValue: "Video is too large — your {{value1}} tier allows {{value2}}", value1: postQuota?.tier || 'base', value2: mediaUploadLimitLabel }));
+      toast.error(_copy("copy.8be9a68e0703", { defaultValue: "Video is too large — your {{value1}} tier allows {{value2}}", value1: mediaUploadTier, value2: mediaUploadLimitLabel }));
       return;
     }
 
@@ -905,7 +906,14 @@ export function usePostForm(
     } finally {
       setIsGeneratingThumbnail(false);
     }
-  }, [hasImage, hasVideo, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, postQuota?.tier, setText, setTitleText, _copy]);
+  }, [hasImage, hasVideo, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, mediaUploadTier, setText, setTitleText, _copy]);
+
+  const handleVideoSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processVideoFile(files[0]);
+    e.target.value = '';
+  }, [processVideoFile]);
 
   const removeMedia = useCallback((index: number) => {
     setMedia(prev => {
@@ -928,7 +936,7 @@ export function usePostForm(
 
   const processAudioFile = useCallback((file: File) => {
     if (file.size > mediaUploadLimit) {
-      toast.error(_copy("copy.7de82e4f914f", { defaultValue: "Audio is too large — your {{value1}} tier allows {{value2}}", value1: postQuota?.tier || 'base', value2: mediaUploadLimitLabel }));
+      toast.error(_copy("copy.7de82e4f914f", { defaultValue: "Audio is too large — your {{value1}} tier allows {{value2}}", value1: mediaUploadTier, value2: mediaUploadLimitLabel }));
       return;
     }
     const url = URL.createObjectURL(file);
@@ -961,7 +969,7 @@ export function usePostForm(
         toast.success(_copy("copy.8697acaccf6a", { defaultValue: "Audio uploaded" }));
       }
     };
-  }, [hasImage, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, postQuota?.tier, setText, setTitleText, _copy]);
+  }, [hasImage, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, mediaUploadTier, setText, setTitleText, _copy]);
 
   const handleFileDrop = useCallback((files: FileList) => {
     const fileArray = Array.from(files);

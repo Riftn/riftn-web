@@ -40,18 +40,26 @@ const MEDIA_GB_BY_BADGE_INDEX = [
 
 export const BASE_POST_IMAGE_BYTES = 1024 ** 3;
 
-export function getPostImageBytesForBadge(
+export function getPostMediaAllowanceForBadge(
   badgeBalance: number | string | null | undefined,
   username?: string | null,
   badgeLock?: unknown,
-): number {
+) {
   const badge = getBadgeName(badgeBalance, username, {
     lock: parseBadgeLock(badgeLock),
   });
   const badgeIndex = badge ? BADGE_ORDER.indexOf(badge) : -1;
   const gb = badgeIndex >= 0 ? MEDIA_GB_BY_BADGE_INDEX[badgeIndex] : undefined;
 
-  return gb ? gb * 1024 ** 3 : BASE_POST_IMAGE_BYTES;
+  return { tier: badge, bytes: gb ? gb * 1024 ** 3 : BASE_POST_IMAGE_BYTES };
+}
+
+export function getPostImageBytesForBadge(
+  badgeBalance: number | string | null | undefined,
+  username?: string | null,
+  badgeLock?: unknown,
+): number {
+  return getPostMediaAllowanceForBadge(badgeBalance, username, badgeLock).bytes;
 }
 
 export function getPostImageLimitForBadge(
