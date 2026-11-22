@@ -86,6 +86,7 @@ Every link below is a public page that renders without an account. The app's sig
 - [The decentralization spectrum](https://riftn.com/guides/decentralization-spectrum-social-media): 30 social apps ranked by who really controls them.
 - [Top 10 alternative social media apps 2026](https://riftn.com/guides/top-10-alternative-social-media-apps-2026): Riftn, Bluesky, Mastodon, Nostr, Farcaster and five more alternatives to X, Instagram, TikTok and Reddit, ranked by who owns them.
 - [10 features YouTube users keep asking for](https://riftn.com/guides/youtube-features-users-want-2026): Dislike counts, a feed in time order, fewer ads, viewer clips, private messages and pay from day one, and where Riftn delivers each one.
+- [How to stream on Riftn](https://riftn.com/guides/how-to-stream-on-riftn): Every way to go live step by step: browser, phone, the app, OBS, capture card, audio Stages, guests, group calls and multistream, plus Live Studio, the chat bot and channel points.
 - [Play-to-earn in the UK 2026](https://riftn.com/guides/play-to-earn-uk-2026-earnings-hmrc-tax): Games, real earnings and HMRC tax explained.
 - [UK creator guide to leaving TikTok](https://riftn.com/guides/uk-creators-guide-leaving-tiktok): Moving to a platform you own, for UK creators.
 - [Riftn blog](https://riftn.com/docs/blog): All news, product updates and guides.
