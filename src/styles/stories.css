@@ -74,7 +74,6 @@ html[data-theme='war'] [data-stories] {
   inset: 0;
   background-size: cover;
   background-position: center;
-  transition: filter 0.3s ease;
 }
 [data-story-tile] > [data-st-shade] {
   position: absolute;
@@ -85,6 +84,7 @@ html[data-theme='war'] [data-stories] {
   position: absolute;
   inset: 0;
   border-radius: 16px;
+  z-index: 1;
   box-shadow: inset 0 0 0 var(--st-ring-width) var(--st-ring-color);
   pointer-events: none;
 }
@@ -97,24 +97,21 @@ html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle']) [data-
 }
 [data-story-tile][data-seen='true'] [data-st-ring] { box-shadow: inset 0 0 0 1px rgb(127 127 127 / 0.45); }
 [data-story-tile][data-seen='true'] > [data-st-bg] { filter: saturate(0.35) brightness(0.7); }
-/* A moment's picture stays hidden until it is tapped: the tile is the person's face on frosted glass. */
-[data-story-tile] > [data-st-bg][data-blur] { filter: blur(48px) saturate(0.85) brightness(0.72); transform: scale(1.55); }
-[data-story-tile][data-seen='true'] > [data-st-bg][data-blur] { filter: blur(48px) saturate(0.35) brightness(0.6); }
 [data-story-tile] [data-st-avatar] {
   position: absolute;
   left: 50%;
-  top: 38%;
+  top: 45%;
   transform: translate(-50%, -50%);
-  width: 52px;
-  height: 52px;
-  border-radius: 26px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   object-fit: cover;
   background: rgb(255 255 255 / 0.2);
   box-shadow: 0 0 0 2px rgb(255 255 255 / 0.85), 0 4px 14px rgb(0 0 0 / 0.3);
 }
-[data-story-tile][data-seen='true'] [data-st-avatar] { opacity: 0.7; box-shadow: 0 0 0 2px rgb(255 255 255 / 0.4); }
+[data-story-tile][data-seen='true'] [data-st-avatar] { box-shadow: 0 0 0 2px rgb(255 255 255 / 0.4); }
 @media (min-width: 1024px) {
-  [data-story-tile] [data-st-avatar] { width: 58px; height: 58px; border-radius: 29px; }
+  [data-story-tile] [data-st-avatar] { width: 68px; height: 68px; }
 }
 [data-story-tile] [data-st-time] {
   position: absolute;
@@ -123,11 +120,9 @@ html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle']) [data-
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 8px;
-  background: rgb(0 0 0 / 0.35);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: #242427;
+  z-index: 1;
 }
-[data-story-tile][data-kind='me'][data-empty='true'] > [data-st-bg] { filter: blur(14px) saturate(1.4) brightness(0.8); transform: scale(1.3); }
 [data-story-tile] [data-st-plus] {
   position: absolute;
   left: 50%;
@@ -153,12 +148,13 @@ html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='jungle']) [data-
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 9px;
+  bottom: 0;
+  background: #242427;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding-inline: 4px;
+  padding: 5px 4px 6px;
   text-align: center;
   font-size: 11px;
   font-weight: 600;
@@ -171,8 +167,9 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile]:not(
   color: var(--st-ink);
   box-shadow: inset 0 0 0 1px #d6d9df;
 }
-html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile]:not([data-kind='live']) :is([data-blur], [data-st-shade]) {
-  display: none;
+html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] [data-st-label] {
+  background: #f4f5f7;
+  color: var(--st-ink);
 }
 html:is([data-theme='light'], [data-system-tone='light']) [data-story-tile] [data-st-avatar] {
   background: #e0e3e8;

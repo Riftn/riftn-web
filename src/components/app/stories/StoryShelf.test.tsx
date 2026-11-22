@@ -20,7 +20,7 @@ vi.mock('@/components/app/feeds/LiveNowBar', () => ({
 }));
 vi.mock('@/hooks/use-story-shelf', () => ({
   useStoryShelf: () => ({ data: { liveHosts: ['host'], shelf: [{
-    author: { address: 'reader', username: 'River Song', displayName: 'River Song' }, items: [
+    author: { address: 'reader', username: 'creator', displayName: 'River Song' }, items: [
       { status: 'ready', type: 'photo', mediaUrl: '/seen.jpg', viewed: true },
       { status: 'ready', type: 'video', mediaUrl: '/private.mp4', posterUrl: '/mature.jpg', isMature: true },
       { status: 'ready', type: 'video', mediaUrl: '/clip.mp4', posterUrl: '/opening.jpg' },
@@ -31,7 +31,7 @@ vi.mock('@/hooks/use-story-shelf', () => ({
 it('uses the opening visible story poster and keeps live broadcasts when Stories are hidden', () => {
   prefs.storiesEnabled = true;
   const view = render(<StoryShelf />);
-  expect(screen.getByRole('listitem', { name: 'River Song' }).querySelector('[data-blur]')).toHaveStyle({
+  expect(screen.getByRole('listitem', { name: 'River Song' }).querySelector('[data-st-bg]')).toHaveStyle({
     backgroundImage: 'url("/opening.jpg")',
   });
   prefs.storiesEnabled = false;

@@ -18,7 +18,7 @@ import { useStoryShelf } from '@/hooks/use-story-shelf';
 import { useMatureContent } from '@/hooks/use-mature-content';
 import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import { useStoriesStore } from '@/store/storiesStore';
-import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
+import { buildAvatarUrl, buildAvatarCdnFallbackUrl, deviceWidth } from '@/lib/media-url';
 import type { ShelfEntry } from '@/lib/api/dehub/stories';
 import { ageLabel, coverOf, handleOf, nameOf, playable } from './story-utils';
 import '@/styles/stories.css';
@@ -99,7 +99,7 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
   onOpen: (el: HTMLElement) => void;
 }) {
   const { t } = useTranslation();
-  const face = avatar ? buildAvatarUrl(address, avatar) : buildAvatarCdnFallbackUrl(address, undefined);
+  const face = avatar ? buildAvatarUrl(address, avatar, deviceWidth(68)) : buildAvatarCdnFallbackUrl(address, undefined);
   const cover = pending ? pending.preview : entry && coverOf(entry);
   const empty = !pending && !entry;
   const busy = pending && pending.state !== 'failed';
@@ -114,8 +114,7 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
-      <span data-st-bg data-blur style={bg(cover)} />
-      {!empty && <span data-st-shade />}
+      <span data-st-bg style={bg(cover)} />
       {!empty && pending?.state !== 'failed' && <img data-st-avatar src={face} alt="" />}
       {busy && <span data-st-fill style={{ height: `${Math.max(6, pending!.state === 'processing' ? 100 : pending!.progress)}%` }} />}
       {empty ? (
@@ -186,7 +185,7 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
 function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLElement) => void }) {
   const a = entry.author;
   const [faceBroken, setFaceBroken] = useState(false);
-  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
+  const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl, deviceWidth(68)) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const latest = entry.items[entry.items.length - 1];
   return (
     <button
@@ -198,8 +197,7 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       onClick={e => onOpen(e.currentTarget)}
       aria-label={nameOf(a)}
     >
-      <span data-st-bg data-blur style={bg(coverOf(entry))} />
-      <span data-st-shade />
+      <span data-st-bg style={bg(coverOf(entry))} />
       <span data-st-ring />
       <span data-st-time>{ageLabel(latest?.createdAt)}</span>
       {face && !faceBroken ? <img data-st-avatar src={face} alt="" onError={() => setFaceBroken(true)} /> : <span data-st-avatar />}
