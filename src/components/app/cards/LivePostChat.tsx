@@ -39,6 +39,7 @@ import { useDraft } from '@/hooks/use-draft';
 import { useLiveViewerActions } from '@/components/app/live/live-viewer-actions';
 import { PointsIcon } from '@/components/app/live/points/PointsIcon';
 import { PointsButton } from '@/components/app/live/points/PointsButton';
+import { StreamChatRewards } from '@/components/app/live/points/StreamChatRewards';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { replaceLinksWithEmoji, renderTextWithLinks } from '@/components/app/TranslatableText';
 import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
@@ -931,6 +932,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         )}
         <div ref={bottomRef} />
       </div>
+
+      {!!liveStreamId && !isOffline && <StreamChatRewards streamId={liveStreamId} />}
 
       {/* Right-click context menu for host */}
       {/* Portalled: the chat often sits inside a blurred or transformed

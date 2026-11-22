@@ -2723,7 +2723,7 @@ function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean 
   const [open, setOpen] = useState(initiallyOpen);
   useState(() => {
     queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
-    queryClient.setQueryData(['live-rewards', GALLERY_STREAM_ID], { creator: GALLERY_POINTS_BALANCE.creator, live: true, rewards: GALLERY_REWARDS });
+    queryClient.setQueryData(['live-rewards', GALLERY_STREAM_ID], { creator: GALLERY_POINTS_BALANCE.creator, live: true, rewards: GALLERY_REWARDS, recentRedemptions: GALLERY_REDEMPTIONS.map(({ id, title }) => ({ id, title })) });
     queryClient.setQueryData(['my-live-rewards'], GALLERY_REWARDS.slice(0, 3));
     queryClient.setQueryData(['my-live-redemptions'], GALLERY_REDEMPTIONS);
   });

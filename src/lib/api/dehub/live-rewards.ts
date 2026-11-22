@@ -73,12 +73,17 @@ export function parseRedemption(raw: any): Redemption | null {
   };
 }
 
+function parseRecentRedemptions(value: unknown): Pick<Redemption, 'id' | 'title'>[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(r => r && typeof r.id === 'string' && typeof r.title === 'string');
+}
+
 const streamPath = (streamId: string) => `/api/live-overlay/stream/${encodeURIComponent(streamId)}`;
 
 /** What this stream's creator offers, and whether it is on air (rewards open only then). */
-export async function getStreamRewards(streamId: string): Promise<{ creator: string; live: boolean; rewards: LiveReward[] }> {
+export async function getStreamRewards(streamId: string) {
   const res: any = unwrap(await apiCall(`${streamPath(streamId)}/rewards`));
-  return { creator: String(res?.creator || ''), live: !!res?.live, rewards: rewardList(res) };
+  return { creator: String(res?.creator || ''), live: !!res?.live, rewards: rewardList(res), recentRedemptions: parseRecentRedemptions(res?.recentRedemptions) };
 }
 
 export async function getMyStreamPoints(streamId: string): Promise<PointsBalance> {
