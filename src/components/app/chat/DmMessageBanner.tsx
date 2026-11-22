@@ -233,7 +233,7 @@ export default function DmMessageBanner() {
         >
           <div
             data-glass-menu
-            className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/95 text-foreground shadow-xl backdrop-blur-xl"
+            className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/95 text-white shadow-xl backdrop-blur-xl"
           >
             <div className="flex items-center gap-3 px-3 pt-3">
               <button
@@ -245,19 +245,19 @@ export default function DmMessageBanner() {
                 {avatar ? (
                   <img src={avatar} alt="" className="h-10 w-10 flex-none rounded-lg object-cover" />
                 ) : (
-                  <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-foreground/[0.06]">
+                  <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-white/[0.06]">
                     <MessageCircle className="h-[18px] w-[18px]" />
                   </span>
                 )}
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate text-sm font-bold leading-[18px]">{banner.name}</span>
                   {sendState === 'sent' ? (
-                    <span className="flex items-center gap-1.5 text-[13px] leading-[18px] text-muted-foreground">
-                      <Check className="h-3.5 w-3.5 flex-none text-foreground" />
+                    <span className="flex items-center gap-1.5 text-[13px] leading-[18px] text-white/70">
+                      <Check className="h-3.5 w-3.5 flex-none text-white" />
                       {t('quickReply.sent', { defaultValue: 'Reply sent' })}
                     </span>
                   ) : banner.body ? (
-                    <span className={`text-[13px] leading-[18px] text-muted-foreground ${replying ? 'line-clamp-3' : 'line-clamp-2'}`}>
+                    <span className={`text-[13px] leading-[18px] text-white/70 ${replying ? 'line-clamp-3' : 'line-clamp-2'}`}>
                       {banner.body}
                     </span>
                   ) : null}
@@ -267,7 +267,7 @@ export default function DmMessageBanner() {
                 <button
                   type="button"
                   onClick={startReply}
-                  className="flex h-8 flex-none items-center gap-1.5 rounded-lg border border-foreground/10 bg-foreground/[0.06] px-2.5 text-[13px] font-semibold active:opacity-85"
+                  className="flex h-8 flex-none items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 text-[13px] font-semibold active:opacity-85"
                 >
                   <Reply className="h-3.5 w-3.5" />
                   {t('quickReply.reply', { defaultValue: 'Reply' })}
@@ -294,20 +294,20 @@ export default function DmMessageBanner() {
                   maxLength={5000}
                   disabled={sendState === 'sending'}
                   placeholder={t('quickReply.placeholder', { defaultValue: 'Write a reply…' })}
-                  className="max-h-28 min-h-10 flex-1 resize-none rounded-xl border border-foreground/10 bg-foreground/[0.06] px-3 py-2 text-base leading-5 text-foreground outline-none placeholder:text-muted-foreground"
+                  className="max-h-28 min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-base leading-5 text-white outline-none placeholder:text-white/50"
                 />
                 <button
                   type="submit"
                   disabled={!text.trim() || sendState === 'sending'}
                   aria-label={t('quickReply.send', { defaultValue: 'Send' })}
-                  className="flex h-10 w-10 flex-none items-center justify-center rounded-[10px] border border-foreground/10 bg-foreground/[0.06] disabled:opacity-45"
+                  className="flex h-10 w-10 flex-none items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.06] disabled:opacity-45"
                 >
                   {sendState === 'sending' ? <Loader2 className="h-[18px] w-[18px] animate-spin" /> : <Send className="h-[18px] w-[18px]" />}
                 </button>
               </form>
             ) : banner.canReply && sendState !== 'sent' ? (
               <div className="flex justify-center pb-1.5 pt-2" aria-hidden>
-                <span className="h-1 w-9 rounded-full bg-foreground/30" />
+                <span data-dm-grabber className="h-1 w-9 rounded-full bg-white/30" />
               </div>
             ) : (
               <div className="h-2.5" />
