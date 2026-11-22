@@ -40,6 +40,7 @@ export const MEMBER_RIGHTS = [
   { key: 'create_events', get label() { return _translateCopy("copy.dfb39b614c22", { defaultValue: "Create events" }); }, get hint() { return _translateCopy("copy.149eedd00eb1", { defaultValue: "Schedule community events" }); } },
   { key: 'pin_messages',  get label() { return _translateCopy("copy.d25966790478", { defaultValue: "Pin messages" }); }, get hint() { return _translateCopy("copy.3c4ea43f652c", { defaultValue: "Pin a message to the top of the chat" }); } },
   { key: 'change_info',   get label() { return _translateCopy("copy.44937f6efcbb", { defaultValue: "Change info" }); }, get hint() { return _translateCopy("copy.9cf5ecd7bb2e", { defaultValue: "Edit the community name and description" }); } },
+  { key: 'start_calls',   get label() { return _translateCopy("communities.manage.startCalls", { defaultValue: "Start group calls" }); }, get hint() { return _translateCopy("communities.manage.startCallsHint", { defaultValue: "Ring everyone in the group. Admins always can." }); } },
 ] as const;
 
 export type MemberRight = (typeof MEMBER_RIGHTS)[number]['key'];
@@ -65,6 +66,7 @@ export const DEFAULT_MEMBER_PERMISSIONS: Record<MemberRight, boolean> = {
   create_events: true,
   pin_messages: false,
   change_info: false,
+  start_calls: false,
 };
 
 const MUTING_RIGHTS: CommunityRight[] = ['send_messages', 'send_media', 'embed_links'];

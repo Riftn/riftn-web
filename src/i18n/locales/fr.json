@@ -3952,6 +3952,8 @@
     "noMembersFound": "Aucun membre trouvé",
     "showMore": "Afficher plus",
     "manage": {
+      "startCalls": "Lancer des appels de groupe",
+      "startCallsHint": "Faire sonner tout le groupe. Les admins le peuvent toujours.",
       "rightNotHeld": "Vous n'avez pas ce droit vous-même",
       "customTitle": "Titre personnalisé",
       "adminBadge": "Administrateur",

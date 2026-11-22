@@ -14,15 +14,15 @@ import { useGroupCallRoster, GROUP_CALL_MAX_RING } from '@/lib/group-call';
  * while one is going. Starting rings every member; joining just steps into
  * the room.
  */
-export function GroupCallButtons({ groupId, groupName }: { groupId: string; groupName: string }) {
+export function GroupCallButtons({ groupId, groupName, canStart = true }: { groupId: string; groupName: string; canStart?: boolean }) {
   // Context reads, not the throwing hooks: the chat also renders in previews with no call or auth provider.
   const call = useContext(CallContext);
   const walletAddress = useContext(AuthContext)?.walletAddress ?? null;
-  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} /> : null;
+  return call && walletAddress ? <GroupCallControls groupId={groupId} groupName={groupName} walletAddress={walletAddress} call={call} canStart={canStart} /> : null;
 }
 
-function GroupCallControls({ groupId, groupName, walletAddress, call }: {
-  groupId: string; groupName: string; walletAddress: string; call: NonNullable<ContextType<typeof CallContext>>;
+function GroupCallControls({ groupId, groupName, walletAddress, call, canStart }: {
+  groupId: string; groupName: string; walletAddress: string; call: NonNullable<ContextType<typeof CallContext>>; canStart: boolean;
 }) {
   const { t } = useTranslation();
   const { startGroupCall, joinGroupCall, currentCall } = call;
@@ -69,6 +69,10 @@ function GroupCallControls({ groupId, groupName, walletAddress, call }: {
       </button>
     );
   }
+
+  // Who may ring the group is a group setting (Permissions > Start group calls);
+  // the database refuses the ring otherwise, so the buttons stand down too.
+  if (!canStart) return null;
 
   const button = 'flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white disabled:opacity-40';
   return (

@@ -3948,6 +3948,8 @@
     "noMembersFound": "Üye bulunamadı",
     "showMore": "Daha fazla göster",
     "manage": {
+      "startCalls": "Grup araması başlatma",
+      "startCallsHint": "Gruptaki herkesi ara. Yöneticiler her zaman yapabilir.",
       "rightNotHeld": "Kendiniz bu hakka sahip değilsiniz",
       "customTitle": "Özel başlık",
       "adminBadge": "Yönetici",

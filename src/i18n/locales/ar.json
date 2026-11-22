@@ -3972,6 +3972,8 @@
     "noMembersFound": "لم يتم العثور على أعضاء",
     "showMore": "عرض المزيد",
     "manage": {
+      "startCalls": "بدء مكالمات جماعية",
+      "startCallsHint": "الاتصال بكل أعضاء المجموعة. يمكن للمشرفين دائمًا.",
       "rightNotHeld": "ليس لديك هذا الحق بنفسك",
       "customTitle": "عنوان مخصص",
       "adminBadge": "المشرف",
