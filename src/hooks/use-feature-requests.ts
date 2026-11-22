@@ -191,14 +191,15 @@ function categoryFilterValues(category: FeatureCategory): string[] {
 }
 
 
-export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string) {
+export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string, authorWallet?: string) {
   return useInfiniteQuery({
-    queryKey: ['feature-requests', sort, category, search],
+    queryKey: ['feature-requests', sort, category, search, authorWallet],
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('feature_requests')
         .select('*');
 
+      if (authorWallet) query = query.eq('author_wallet_address', authorWallet);
       if (category !== 'all') {
         query = query.in('category', categoryFilterValues(category));
       }
@@ -352,15 +353,17 @@ export function useInProgressFeatures() {
 // "Not feasible" — requests the board owners have ruled out (status
 // `declined`), with their optional reason in status_note. Few rows, so one
 // query and newest decisions first.
-export function useNotFeasibleFeatures() {
+export function useNotFeasibleFeatures(authorWallet?: string) {
   return useQuery({
-    queryKey: ['feature-requests-not-feasible'],
+    queryKey: ['feature-requests-not-feasible', authorWallet],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('feature_requests')
         .select('*')
         .eq('status', 'declined')
         .order('updated_at', { ascending: false });
+      if (authorWallet) query = query.eq('author_wallet_address', authorWallet);
+      const { data, error } = await query;
       if (error) throw error;
       return normalizeRows((data || []) as FeatureRequest[]);
     },

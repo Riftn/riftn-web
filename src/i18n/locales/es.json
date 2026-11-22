@@ -2328,6 +2328,7 @@
     "followBack": "Seguir de vuelta"
   },
   "features": {
+    "myRequests": "Mis solicitudes",
     "cropDraw": "Recortar y dibujar",
     "crop": "Recortar",
     "cropHint": "Arrastra un recuadro sobre la parte que quieres conservar. Arrastra dentro para moverlo.",

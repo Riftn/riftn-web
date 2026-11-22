@@ -2339,6 +2339,7 @@
     "followBack": "Follow Back"
   },
   "features": {
+    "myRequests": "My Requests",
     "cropDraw": "Crop & draw",
     "crop": "Crop",
     "cropHint": "Drag a box over the part to keep. Drag inside it to move it.",

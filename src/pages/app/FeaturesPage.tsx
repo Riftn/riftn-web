@@ -1003,7 +1003,10 @@ function InfiniteScrollSentinel({ onIntersect, isFetching }: { onIntersect: () =
 export default function FeaturesPage() {
   const { t: _copy } = _useCopy();
   const { t } = useI18n();
-  const { isAuthenticated, openLoginModal } = useAuth();
+  const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
+  const wallet = isAuthenticated ? walletAddress?.toLowerCase() : undefined;
+  const [mineOnly, setMineOnly] = useState(false);
+  const authorWallet = mineOnly ? wallet : undefined;
   const [searchParams, setSearchParams] = useSearchParams();
   const { pathname, hash, state } = useLocation();
   const navigate = useNavigate();
@@ -1082,11 +1085,11 @@ export default function FeaturesPage() {
     }
   }, [searchParams, setSearchParams, handleSubmitClick, navigate, pathname, hash, state]);
 
-  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search);
+  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
   const { data: shippedFeatures, isLoading: isLoadingShipped } = useShippedFeatures();
   const { data: inProgressFeatures, isLoading: isLoadingInProgress } = useInProgressFeatures();
-  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible } = useNotFeasibleFeatures();
+  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible } = useNotFeasibleFeatures(authorWallet);
 
   // A notification about one request pins it above the board. The list query
   // could never be relied on to hold it — it may be shipped, declined, outside
@@ -1096,7 +1099,7 @@ export default function FeaturesPage() {
   // Notifications link ?request=<id>; the share buttons on web and in the app
   // hand out ?feature=<id>. Either one pins the card.
   const focusedRequestId = searchParams.get('request') ?? searchParams.get('feature');
-  const { data: focusedRequest } = useFeatureRequest(focusedRequestId);
+  const { data: focusedRequest } = useFeatureRequest(authorWallet ? undefined : focusedRequestId);
   const focusedCommentId = searchParams.get('comment');
   // A comment link implies the thread should be open, whether or not the row
   // that wrote the URL also said so.
@@ -1124,7 +1127,7 @@ export default function FeaturesPage() {
     },
     [listCategory, search],
   );
-  const isFiltering = search.trim().length > 0 || listCategory !== 'all';
+  const isFiltering = !!authorWallet || search.trim().length > 0 || listCategory !== 'all';
   const visibleInProgress = useMemo(
     () => withoutFocused(inProgressFeatures).filter(matchesFilters),
     [inProgressFeatures, withoutFocused, matchesFilters],
@@ -1240,14 +1243,23 @@ export default function FeaturesPage() {
         </div>
 
         {/* Search */}
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-          <Input
-            placeholder={t('features.promptSearch', 'Search prompts…')}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
-          />
+        <div className="mb-3 flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              placeholder={t('features.promptSearch', 'Search prompts…')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+            />
+          </div>
+          {wallet && (
+            <Button type="button" variant="glass" aria-pressed={mineOnly}
+              onClick={() => setMineOnly(previous => !previous)}
+              className={cn("max-w-[48%] rounded-xl", mineOnly && "bg-white/20 border-white/30")}>
+              <span className="truncate">{t('features.myRequests', 'My Requests')}</span>
+            </Button>
+          )}
         </div>
 
         {/* Page Tabs: Requests / Shipping / Shipped */}
@@ -1491,8 +1503,8 @@ export default function FeaturesPage() {
               <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <BrandIcon src={featuresLightbulb} alt={_copy("copy.c46c50e9cf58", { defaultValue: "No features yet" })} className="w-16 h-16 object-contain opacity-40" />
               </div>
-              <h3 className="text-white font-semibold mb-1">{t('features.noRequestsYet')}</h3>
-              <p className="text-zinc-500 text-sm mb-4">{t('features.beFirstIdea')}</p>
+              <h3 className="text-white font-semibold mb-1">{isFiltering ? t('filters.noMatches') : t('features.noRequestsYet')}</h3>
+              {!isFiltering && <p className="text-zinc-500 text-sm mb-4">{t('features.beFirstIdea')}</p>}
               <Button
                 onClick={handleSubmitClick}
                 variant="glass"

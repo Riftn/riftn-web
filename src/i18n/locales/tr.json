@@ -2328,6 +2328,7 @@
     "followBack": "Takip Et"
   },
   "features": {
+    "myRequests": "Taleplerim",
     "cropDraw": "Kırp ve çiz",
     "crop": "Kırp",
     "cropHint": "Tutmak istediğin kısmın üzerine bir kutu sürükle. Taşımak için kutunun içinden sürükle.",

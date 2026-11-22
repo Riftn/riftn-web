@@ -2328,6 +2328,7 @@
     "followBack": "Suivre en retour"
   },
   "features": {
+    "myRequests": "Mes demandes",
     "cropDraw": "Rogner et dessiner",
     "crop": "Rogner",
     "cropHint": "Tracez un cadre sur la partie à garder. Faites-le glisser de l'intérieur pour le déplacer.",
