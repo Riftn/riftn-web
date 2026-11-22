@@ -688,6 +688,8 @@
       "launchpad": "token lanceren, munt maken, memecoin, bondingcurve, tokeniseren"
     },
     "reorderHint": "Houd een pictogram ingedrukt en sleep het om de volgorde te wijzigen",
+    "reorderHintGroups": "Houd een pictogram vast en sleep het om te herschikken, of naar een ander tabblad om het te verplaatsen",
+    "moveGroupHint": "Laat los op een ander tabblad om het daarheen te verplaatsen",
     "reorderReset": "Resetten",
     "reorderResetLong": "Menuvolgorde opnieuw instellen",
     "home": "Home",

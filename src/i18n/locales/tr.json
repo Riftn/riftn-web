@@ -688,6 +688,8 @@
       "launchpad": "token başlat, coin oluştur, memecoin, bağlanma eğrisi, tokenleştir"
     },
     "reorderHint": "Yeniden düzenlemek için herhangi bir simgeyi basılı tutun ve sürükleyin",
+    "reorderHintGroups": "Yeniden sıralamak için bir simgeye basılı tutup sürükle ya da taşımak için başka bir sekmeye bırak",
+    "moveGroupHint": "Oraya taşımak için başka bir sekmeye bırak",
     "reorderReset": "Sıfırla",
     "reorderResetLong": "Menü sırasını sıfırla",
     "home": "Ana Sayfa",

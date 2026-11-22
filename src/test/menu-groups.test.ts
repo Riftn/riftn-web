@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { MENU_GROUPS, MENU_UNGROUPED, groupMenuItems } from '@/components/app/navigation/menu-groups';
 import { normaliseMenuLayout } from '@/lib/menu-layout';
+import { sanitiseMenuGroupMoves } from '@/lib/menu-group-moves';
+import { navItemId } from '@/components/app/navigation/nav-item-id';
 
 describe('menu groups', () => {
   it('gives every menu page a group, except the ones left out on purpose', () => {
@@ -38,4 +40,18 @@ describe('menu groups', () => {
     expect(normaliseMenuLayout('junk')).toBe('tabs');
     expect(normaliseMenuLayout('folders')).toBe('folders');
   });
+
+  it('moves a page to the group the person dropped it on, and only there', () => {
+    const wallet = NAV_ITEMS.find((item) => item.label === 'Wallet')!;
+    const id = navItemId(wallet);
+    const groups = groupMenuItems(NAV_ITEMS, { [id]: 'create' });
+    expect(groups.find((g) => g.id === 'main')!.items.map((i) => i.label)).not.toContain('Wallet');
+    expect(groups.find((g) => g.id === 'create')!.items.map((i) => i.label)).toContain('Wallet');
+    expect(groups.flatMap((g) => g.items).filter((i) => i.label === 'Wallet')).toHaveLength(1);
+  });
+
+  it('drops moves that are not a real group', () => {
+    expect(sanitiseMenuGroupMoves({ 'nav.wallet': 'nowhere', 'nav.stats': 'money' })).toEqual({ 'nav.stats': 'money' });
+  });
 });
+

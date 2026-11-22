@@ -688,6 +688,8 @@
       "launchpad": "lanzar un token, crear una moneda, memecoin, curva de vinculación, tokenizar"
     },
     "reorderHint": "Mantén y arrastra cualquier icono para reorganizar",
+    "reorderHintGroups": "Mantén pulsado y arrastra un icono para reordenarlo, o a otra pestaña para moverlo",
+    "moveGroupHint": "Suéltalo en otra pestaña para moverlo allí",
     "reorderReset": "Restablecer",
     "reorderResetLong": "Restablecer el orden del menú",
     "home": "Inicio",

@@ -62,11 +62,11 @@ export function MobileMenuLayout({
       <div data-menu-layout="sections">
         {groups.map((group, i) => (
           <section key={group.id} data-menu-group={group.id}>
-            <h3 className={cn('mx-0.5 mb-2 flex items-baseline justify-between', i === 0 ? 'mt-0.5' : 'mt-4')}>
+            <h3 data-menu-drop-group={group.id} className={cn('mx-0.5 mb-2 flex items-baseline justify-between', i === 0 ? 'mt-0.5' : 'mt-4')}>
               <span className="text-[12.5px] font-extrabold uppercase tracking-[0.06em] text-zinc-200">{t(group.labelKey, group.fallback)}</span>
               <span className="text-[12px] text-zinc-500 tabular-nums">{group.items.length}</span>
             </h3>
-            <MobileMenuGrid {...gridProps} items={group.items} columns={4} showHint={false} />
+            <MobileMenuGrid {...gridProps} items={group.items} columns={4} showHint={false} moveHint />
           </section>
         ))}
         <MenuReorderHint />
@@ -79,7 +79,7 @@ export function MobileMenuLayout({
     const open = folders.find((group) => group.id === openFolder) ?? null;
     return (
       <div data-menu-layout="folders">
-        <MobileMenuGrid {...gridProps} items={main.items} columns={3} showHint={false} />
+        <MobileMenuGrid {...gridProps} items={main.items} columns={3} showHint={false} moveHint />
         <div className="grid grid-cols-4 gap-2 mt-2">
           {folders.map((group) => {
             const isOpen = group.id === openFolder;
@@ -88,6 +88,7 @@ export function MobileMenuLayout({
                 key={group.id}
                 type="button"
                 data-menu-folder={group.id}
+                data-menu-drop-group={group.id}
                 aria-expanded={isOpen}
                 onClick={() => setOpenFolder(isOpen ? null : group.id)}
                 className={cn(
@@ -122,7 +123,7 @@ export function MobileMenuLayout({
             className="mt-3 rounded-[18px] border border-white/[0.08] bg-white/[0.04] p-3"
           >
             <p className="mx-0.5 mb-2.5 text-[15px] font-extrabold text-zinc-100">{t(open.labelKey, open.fallback)}</p>
-            <MobileMenuGrid {...gridProps} items={open.items} columns={3} showHint={false} />
+            <MobileMenuGrid {...gridProps} items={open.items} columns={3} showHint={false} moveHint />
           </motion.div>
         )}
         <MenuReorderHint />
@@ -139,7 +140,7 @@ export function MobileMenuLayout({
       onTabChange={onTabChange}
       reduceMotion={!!reduceMotion}
       renderPage={(group) => (
-        <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} />
+        <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} moveHint />
       )}
     />
   );
@@ -344,6 +345,7 @@ export function MenuTabs({ groups, activeTab, onTabChange, className }: MenuTabs
           role="tab"
           aria-selected={i === index}
           data-menu-tab={group.id}
+          data-menu-drop-group={group.id}
           onClick={() => { setGlide(glideOnTabClick()); onTabChange(i); }}
           className={cn(
             'relative z-[1] flex h-[34px] min-w-0 flex-auto items-center justify-center whitespace-nowrap rounded-[9px] px-1.5 text-[13px] font-semibold transition-colors',

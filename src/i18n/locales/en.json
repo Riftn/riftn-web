@@ -706,6 +706,8 @@
       "riftn": "Riftn"
     },
     "reorderHint": "Hold and drag any icon to rearrange",
+    "reorderHintGroups": "Hold and drag any icon to rearrange, or onto another tab to move it",
+    "moveGroupHint": "Drop on another tab to move it there",
     "reorderReset": "Reset",
     "reorderResetLong": "Reset menu order",
     "home": "Home",
