@@ -108,7 +108,7 @@ export function GatedMedia({ gate, preview, className, children }: GatedMediaPro
   const [locallyUnlocked, setLocallyUnlocked] = useState(false);
   const [locallySubscribed, setLocallySubscribed] = useState(false);
 
-  const matureGate = useMatureGate(gate.contentRating);
+  const matureGate = useMatureGate(gate.contentRating, gate.tokenId);
   // Phones: a paid unlock ends with a reveal on the media itself.
   const isMobile = useIsMobile();
   const [revealKind, setRevealKind] = useState<UnlockRevealKind | null>(null);

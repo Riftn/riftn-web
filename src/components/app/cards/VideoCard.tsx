@@ -1255,7 +1255,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
   // Independent of the monetisation gates above: a post can be both mature and
   // pay-per-view, and the creator's own post is warned about too — the warning
   // is for whoever is looking at the screen.
-  const matureGate = useMatureGate(video.contentRating);
+  const matureGate = useMatureGate(video.contentRating, video.isAudio ? undefined : video.id);
   const contentWarning = useContentWarning(video.spoilerText);
   // Folded into isContentGated so the warning gets the behaviour a locked post
   // already has: no autoplay, no controls, no poster fallback painted over it.

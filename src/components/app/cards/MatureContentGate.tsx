@@ -7,8 +7,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
  * The public feeds never carry these posts unless the viewer opted in
  * server-side, so this covers the surfaces where a mature post is served on
  * purpose — a creator's profile, the Following feed, a link somebody shared.
- * Opening it is per-card and per-session: it is a warning, not a lock, and
- * nothing about it is a security boundary.
+ * Video requires an explicit reveal even when the viewer has opted in to
+ * seeing mature posts in feeds.
  *
  * Visual language is deliberately the one PPV and holdings-locked posts
  * already use — blurred media, a rounded glass tile, one line of explanation.
@@ -33,14 +33,16 @@ import type { ContentRating } from '@/lib/api/dehub/types';
  * Safe to call on every card — the underlying profile query is shared and
  * cached, so this costs one boolean read per post.
  */
-export function useMatureGate(contentRating?: ContentRating) {
+export function useMatureGate(contentRating?: ContentRating, videoId?: string | number) {
   const { showMatureContent } = useMatureContent();
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState<{ videoId?: string | number } | null>(null);
 
-  const reveal = useCallback(() => setRevealed(true), []);
+  const reveal = useCallback(() => setRevealed({ videoId }), [videoId]);
 
   return {
-    isGated: contentRating === 'mature' && !showMatureContent && !revealed,
+    isGated: contentRating === 'mature'
+      && (videoId !== undefined || !showMatureContent)
+      && !(revealed && revealed.videoId === videoId),
     reveal,
   };
 }
