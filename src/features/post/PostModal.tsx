@@ -9,6 +9,7 @@ import { usePostSound, type AttachedSound } from './hooks/usePostSound';
 import { buildSoundtrackTag } from '@/lib/soundtrack';
 import type { PollData, LiveStreamHandoff } from './types';
 import { PostContentArea } from './components/PostContentArea';
+import { PostDictationButton } from './components/PostDictationButton';
 import { PostAccessToggles } from './components/PostAccessToggles';
 import { PostActionBar } from './components/PostActionBar';
 import { ArticleComposer } from './components/ArticleComposer';
@@ -311,6 +312,14 @@ function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, 
       <PostContentArea
         text={state.text}
         maxChars={postTextLimit(computed.postQuota)}
+        dictation={isOpen && authUser && !state.isPosting && !state.isRecording && !state.isCameraModalOpen && !state.liveMode && (
+          <PostDictationButton
+            key={JSON.stringify([draftScope, openedDraftRef.current?.id])}
+            setText={actions.setText}
+            maxChars={postTextLimit(computed.postQuota)}
+            atLimit={state.text.length >= postTextLimit(computed.postQuota)}
+          />
+        )}
         setText={actions.setText}
         editorRef={refs.editorRef}
         media={state.media}

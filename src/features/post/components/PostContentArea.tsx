@@ -87,6 +87,7 @@ interface PostContentAreaProps {
   hideScheduleAndDrafts?: boolean;
   /** Replaces the media preview (the Comic tab's page list). */
   mediaSlot?: React.ReactNode;
+  dictation?: React.ReactNode;
   // Recording props
   isRecording?: boolean;
   recordingTime?: number;
@@ -194,6 +195,7 @@ export function PostContentArea({
   canSaveDraft,
   hideScheduleAndDrafts = false,
   mediaSlot,
+  dictation,
   isRecording,
   recordingTime,
   onStopRecording,
@@ -784,7 +786,8 @@ export function PostContentArea({
             </button>
           )}
         </div>
-        <span className={cn("text-xs ml-auto", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
+        {dictation}
+        <span className={cn("text-xs", charCount >= maxChars ? "text-amber-400" : "text-white/60")}>
           {/* exact-number: the writer needs the exact character limit */}
           {charCount.toLocaleString('en-US')}/{maxChars.toLocaleString('en-US')}
         </span>

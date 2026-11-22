@@ -120,7 +120,7 @@ export interface PostFormState {
 }
 
 export interface PostFormActions {
-  setText: (text: string) => void;
+  setText: React.Dispatch<React.SetStateAction<string>>;
   setMedia: React.Dispatch<React.SetStateAction<MediaFile[]>>;
   setIsSubscribersOnly: (value: boolean) => void;
   setIsPPV: (value: boolean) => void;
