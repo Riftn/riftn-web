@@ -34,6 +34,11 @@ function isMissingColumn(error: unknown, column: string): boolean {
 export type FeatureCategory = 'ui_ux' | 'performance' | 'new_feature' | 'bug_fix' | 'integration' | 'other';
 export type FeatureStatus = 'open' | 'under_review' | 'planned' | 'in_progress' | 'completed' | 'shipped' | 'declined';
 export type FeatureSort = 'most_voted' | 'newest';
+/**
+ * The board is split in two: feature requests and bug reports. A bug report is
+ * any row in the Bug Fix category; everything else is a feature request.
+ */
+export type FeatureKind = 'features' | 'bugs';
 
 export interface FeatureRequest {
   id: string;
@@ -183,6 +188,15 @@ function invalidateFeatureRows(queryClient: FeatureQueryClient) {
 // Every category a filter chip should match, including the legacy aliases that
 // fold into it — so picking "New Feature" also surfaces rows still stored as
 // `feature`.
+// Bug reports are stored as `bug_fix` (or the legacy `bug`). The Bugs side of
+// the board shows only those; the Features side shows everything else.
+const BUG_CATEGORY_VALUES = ['bug_fix', 'bug'];
+const BUG_CATEGORY_LIST = `(${BUG_CATEGORY_VALUES.join(',')})`;
+
+export function featureKindOf(category: string): FeatureKind {
+  return normalizeCategory(category) === 'bug_fix' ? 'bugs' : 'features';
+}
+
 function categoryFilterValues(category: FeatureCategory): string[] {
   const legacy = Object.entries(LEGACY_CATEGORY_ALIASES)
     .filter(([, modern]) => modern === category)
@@ -191,9 +205,9 @@ function categoryFilterValues(category: FeatureCategory): string[] {
 }
 
 
-export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string, authorWallet?: string) {
+export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string, authorWallet?: string, kind?: FeatureKind) {
   return useInfiniteQuery({
-    queryKey: ['feature-requests', sort, category, search, authorWallet],
+    queryKey: ['feature-requests', sort, category, search, authorWallet, kind],
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('feature_requests')
@@ -202,6 +216,10 @@ export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory 
       if (authorWallet) query = query.ilike('author_wallet_address', authorWallet);
       if (category !== 'all') {
         query = query.in('category', categoryFilterValues(category));
+      } else if (kind === 'bugs') {
+        query = query.in('category', BUG_CATEGORY_VALUES);
+      } else if (kind === 'features') {
+        query = query.not('category', 'in', BUG_CATEGORY_LIST);
       }
 
       if (search.trim()) {
@@ -280,13 +298,19 @@ export function useFeatureCounts(authorWallet?: string) {
         const query = supabase.from('feature_requests').select('*', { count: 'exact', head: true });
         return authorWallet ? query.ilike('author_wallet_address', authorWallet) : query;
       };
-      const [totalRes, openRes] = await Promise.all([
+      const open = () => count().not('status', 'in', '("completed","shipped","declined","in_progress")');
+      const [totalRes, openRes, openBugsRes] = await Promise.all([
         count(),
-        count().not('status', 'in', '("completed","shipped","declined","in_progress")'),
+        open(),
+        open().in('category', BUG_CATEGORY_VALUES),
       ]);
       if (totalRes.error) throw totalRes.error;
       if (openRes.error) throw openRes.error;
-      return { total: totalRes.count ?? 0, open: openRes.count ?? 0 };
+      // Bug count is a nice-to-have for the Features / Bugs switch. A failure
+      // there must not blank the whole board's counts.
+      const openBugs = openBugsRes.error ? 0 : openBugsRes.count ?? 0;
+      const openTotal = openRes.count ?? 0;
+      return { total: totalRes.count ?? 0, open: openTotal, openBugs, openFeatures: Math.max(0, openTotal - openBugs) };
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000,

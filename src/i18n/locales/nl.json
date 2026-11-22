@@ -2811,6 +2811,13 @@
   },
   "features": {
     "myRequests": "Mijn verzoeken",
+    "boardSide": "Bord",
+    "sideFeatures": "Ideeën",
+    "sideBugs": "Bugs",
+    "bugHeading": "Wat werkt er niet?",
+    "bugHint": "Vertel wat er gebeurde en wat je verwachtte. Een screenshot helpt.",
+    "sideFeaturesShort": "Ideeën",
+    "sideBugsShort": "Bugs",
     "cropDraw": "Bijsnijden en tekenen",
     "crop": "Bijsnijden",
     "cropHint": "Sleep een kader over het deel dat je wilt houden. Sleep erin om het te verplaatsen.",

@@ -43,7 +43,7 @@ it('scopes all three status tabs and counts to the active wallet, including ever
   await waitFor(() => expect(view.result.current.shipped.data).toHaveLength(501));
   expect(view.result.current.open.data?.pages[0][0].id).toBe('ilike.0xa0');
   expect(view.result.current.queued.data?.[0].id).toBe('ilike.0xa0');
-  expect(view.result.current.counts.data).toEqual({ open: 1, total: 503 });
+  expect(view.result.current.counts.data).toEqual({ open: 1, total: 503, openBugs: 1, openFeatures: 0 });
   view.rerender({ wallet: '0xb' });
   expect(view.result.current.shipped.data).toBeUndefined();
   await waitFor(() => expect(view.result.current.shipped.data?.[0].id).toBe('ilike.0xb0'));

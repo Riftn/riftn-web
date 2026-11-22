@@ -2622,6 +2622,13 @@
   },
   "features": {
     "myRequests": "Taleplerim",
+    "boardSide": "Pano",
+    "sideFeatures": "Özellik istekleri",
+    "sideBugs": "Hata bildirimleri",
+    "bugHeading": "Ne çalışmıyor?",
+    "bugHint": "Ne olduğunu ve ne beklediğini yaz. Ekran görüntüsü işe yarar.",
+    "sideFeaturesShort": "Özellikler",
+    "sideBugsShort": "Hatalar",
     "cropDraw": "Kırp ve çiz",
     "crop": "Kırp",
     "cropHint": "Tutmak istediğin kısmın üzerine bir kutu sürükle. Taşımak için kutunun içinden sürükle.",

@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTabIndicator } from '@/hooks/use-tab-indicator';
 import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
 import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
-import { Loader2, CheckCircle2, MoreVertical, ImagePlus, Github } from "lucide-react";
+import { Loader2, CheckCircle2, MoreVertical, ImagePlus, Github, Lightbulb, Bug } from "lucide-react";
 import Sparkles from "@/components/ui/cut-icons/assistant";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import Pencil from "@/components/ui/cut-icons/edit";
@@ -68,9 +68,11 @@ import {
   useSetFeatureStatus,
   useFeatureDeviceInfoIds,
   isFeatureStatusEditor,
+  featureKindOf,
   CATEGORY_LABELS,
   STATUS_LABELS,
   type FeatureCategory,
+  type FeatureKind,
   type FeatureSort,
   type FeatureStatus,
   type FeatureRequest,
@@ -111,6 +113,12 @@ const CATEGORIES: { id: FeatureCategory | 'all'; labelKey: string }[] = [
 ];
 
 type PageTab = 'requests' | 'shipping' | 'shipped';
+
+// Features and Bugs are two sides of the board. Bugs is a single category, so
+// its side has no category chips; Features keeps every category but Bug Fix.
+function categoriesFor(kind: FeatureKind) {
+  return kind === 'bugs' ? CATEGORIES.filter((cat) => cat.id === 'all') : CATEGORIES.filter((cat) => cat.id !== 'bug_fix');
+}
 
 // The last chip in the Requests row, after "Other": requests the board owners
 // ruled out. It is a status view rather than a category, so it only exists on
@@ -773,7 +781,7 @@ function RequestLoadError({ retry }: { retry: () => void }) {
   );
 }
 
-function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCategory?: FeatureCategory; focusRequest: number; onPosted: () => void }) {
+function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCategory?: FeatureCategory; focusRequest: number; onPosted: (category: FeatureCategory) => void }) {
   const { t } = useI18n();
   const { isAuthenticated, openLoginModal } = useAuth();
   const [title, setTitle] = useState('');
@@ -849,7 +857,7 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
       setCategory(initialCategory || 'new_feature');
       previewsRef.current.forEach(a => URL.revokeObjectURL(a.preview));
       setAttachments([]);
-      onPosted();
+      onPosted(category);
     } });
   };
 
@@ -858,8 +866,8 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
       onDragOver={e => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true); } }}
       onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false); }}
       onDrop={e => { e.preventDefault(); setDragging(false); addFiles(Array.from(e.dataTransfer.files)); }}>
-      <h2 className="text-base sm:text-lg font-semibold text-white mb-1">{t('features.promptHeading', 'What should we build next?')}</h2>
-      <p className="text-xs text-zinc-400 mb-3">{t('features.promptHint', 'Describe it. Drop in a screenshot. Make it happen.')}</p>
+      <h2 className="text-base sm:text-lg font-semibold text-white mb-1">{category === 'bug_fix' ? t('features.bugHeading', "What's not working?") : t('features.promptHeading', 'What should we build next?')}</h2>
+      <p className="text-xs text-zinc-400 mb-3">{category === 'bug_fix' ? t('features.bugHint', 'Say what happened and what you expected. A screenshot helps.') : t('features.promptHint', 'Describe it. Drop in a screenshot. Make it happen.')}</p>
       <div className={cn('rounded-xl border border-white/15 bg-black/10 p-3 transition-colors focus-within:border-white/40', dragging && 'ring-2 ring-current')}>
         <textarea ref={promptRef} value={description} onChange={e => setDescription(e.target.value)}
           aria-label={t('features.promptLabel', 'Your prompt')}
@@ -1029,6 +1037,15 @@ export default function FeaturesPage() {
   const [activeTab, setActiveTab] = useState<PageTab>('requests');
   const [sort, setSort] = useState<FeatureSort>('newest');
   const [category, setCategory] = useState<CategoryChip>('all');
+  // Which side of the board: feature requests or bug reports (?kind=bugs links
+  // straight to bugs, and ?report=bug opens the bug side with the composer).
+  const [kind, setKindState] = useState<FeatureKind>(() => (searchParams.get('kind') === 'bugs' || searchParams.get('report') === 'bug' ? 'bugs' : 'features'));
+  const setKind = useCallback((next: FeatureKind) => {
+    setKindState(next);
+    // A category chip from the other side would match nothing here.
+    setCategory((current) => (current === NOT_FEASIBLE ? current : 'all'));
+  }, []);
+  const visibleCategories = useMemo(() => categoriesFor(kind), [kind]);
   const showNotFeasible = activeTab === 'requests' && category === NOT_FEASIBLE;
   // A real category for the queries: the Not feasible chip filters by status.
   const listCategory: FeatureCategory | 'all' = category === NOT_FEASIBLE ? 'all' : category;
@@ -1057,7 +1074,6 @@ export default function FeaturesPage() {
   const [searchInput, setSearchInput] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:searchInput", '');
   const search = useDebouncedValue(searchInput, 300);
   const [composerFocus, setComposerFocus] = useState(0);
-  const [initialCategory, setInitialCategory] = useState<FeatureCategory | undefined>(undefined);
 
   const handleSubmitClick = useCallback(() => {
     if (!isAuthenticated) {
@@ -1082,8 +1098,7 @@ export default function FeaturesPage() {
     const report = searchParams.get('report');
     if (report === 'bug') {
       setActiveTab('requests');
-      setCategory('bug_fix');
-      setInitialCategory('bug_fix');
+      setKind('bugs');
       setComposerFocus(value => value + 1);
       setSearchParams({}, { replace: true });
       return;
@@ -1099,9 +1114,11 @@ export default function FeaturesPage() {
     if (requestedTab === 'requests' || requestedTab === 'shipping' || requestedTab === 'shipped') {
       setActiveTab(requestedTab);
     }
-  }, [searchParams, setSearchParams, handleSubmitClick, navigate, pathname, hash, state]);
+    const requestedKind = searchParams.get('kind');
+    if (requestedKind === 'bugs' || requestedKind === 'features') setKind(requestedKind);
+  }, [searchParams, setSearchParams, handleSubmitClick, navigate, pathname, hash, state, setKind]);
 
-  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
+  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet, kind);
   const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
   const { data: shippedFeatures, isLoading: isLoadingShipped, isError: isErrorShipped, refetch: refetchShipped } = useShippedFeatures(authorWallet);
   const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
@@ -1121,6 +1138,9 @@ export default function FeaturesPage() {
   // that wrote the URL also said so.
   const focusedCommentsOpen = searchParams.get('comments') === '1' || !!focusedCommentId;
   const focusedId = focusedRequest?.id ?? null;
+  // A link to one request opens the side of the board it belongs to.
+  const focusedKind = focusedRequest ? featureKindOf(focusedRequest.category) : null;
+  useEffect(() => { if (focusedKind) setKind(focusedKind); }, [focusedKind, setKind]);
   const withoutFocused = useCallback(
     <T extends { id: string }>(rows: T[] | undefined): T[] =>
       focusedId ? (rows ?? []).filter((row) => row.id !== focusedId) : (rows ?? []),
@@ -1136,12 +1156,13 @@ export default function FeaturesPage() {
   // category aliases, so a plain equality check is enough.
   const matchesFilters = useCallback(
     (row: FeatureRequest) => {
+      if (featureKindOf(row.category) !== kind) return false;
       if (listCategory !== 'all' && row.category !== listCategory) return false;
       const q = search.trim().toLowerCase();
       if (!q) return true;
       return row.title.toLowerCase().includes(q) || row.description.toLowerCase().includes(q);
     },
-    [listCategory, search],
+    [kind, listCategory, search],
   );
   const isFiltering = !!authorWallet || search.trim().length > 0 || listCategory !== 'all';
   const visibleInProgress = useMemo(
@@ -1160,7 +1181,8 @@ export default function FeaturesPage() {
     () => withoutFocused(notFeasibleFeatures).filter(matchesFilters),
     [notFeasibleFeatures, withoutFocused, matchesFilters],
   );
-  const notFeasibleCount = notFeasibleFeatures?.length ?? 0;
+  const ofKind = useCallback((rows: FeatureRequest[] | undefined) => (rows ?? []).filter((row) => featureKindOf(row.category) === kind), [kind]);
+  const notFeasibleCount = useMemo(() => ofKind(notFeasibleFeatures).length, [ofKind, notFeasibleFeatures]);
   const visibleShipped = useMemo(
     () => withoutFocused(shippedFeatures).filter(matchesFilters),
     [shippedFeatures, withoutFocused, matchesFilters],
@@ -1169,7 +1191,7 @@ export default function FeaturesPage() {
   // ~20k nodes and froze the tab switch, so it reveals a page at a time like the
   // Prompts list does.
   const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
-  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
+  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, kind, search, authorWallet]);
   const shippedDeepLink = searchParams.get('feature');
   useEffect(() => {
     if (!shippedDeepLink) return;
@@ -1216,9 +1238,9 @@ export default function FeaturesPage() {
   // the tab badge always matches the rows below it.
   const { data: counts } = useFeatureCounts(authorWallet);
 
-  const remainingCount = counts?.open ?? features.length;
-  const shippedCount = shippedFeatures?.length ?? 0;
-  const inProgressCount = inProgressFeatures?.length ?? 0;
+  const remainingCount = (kind === 'bugs' ? counts?.openBugs : counts?.openFeatures) ?? features.length;
+  const shippedCount = useMemo(() => ofKind(shippedFeatures).length, [ofKind, shippedFeatures]);
+  const inProgressCount = useMemo(() => ofKind(inProgressFeatures).length, [ofKind, inProgressFeatures]);
 
 
   // Swallow the feature-request list at the sticky header bento's top edge under
@@ -1276,6 +1298,39 @@ export default function FeaturesPage() {
               <span className="truncate">{t('features.myRequests', 'My Requests')}</span>
             </Button>
           )}
+        </div>
+
+        {/* Features / Bugs: two sides of the board, so a bug report never
+            gets lost between feature ideas (and the other way round). The
+            counts are what is still open on each side. */}
+        <div role="group" aria-label={t('features.boardSide', 'Board')} data-board-side className="mb-3 grid grid-cols-2 gap-2">
+          {([
+            { id: 'features', label: t('features.sideFeatures', 'Feature requests'), short: t('features.sideFeaturesShort', 'Features'), Icon: Lightbulb, count: counts?.openFeatures },
+            { id: 'bugs', label: t('features.sideBugs', 'Bug reports'), short: t('features.sideBugsShort', 'Bugs'), Icon: Bug, count: counts?.openBugs },
+          ] as const).map(({ id, label, short, Icon, count }) => (
+            <Button
+              key={id}
+              type="button"
+              // The picked side is the glass button; the other is a quiet ghost
+              // so which side you're on reads at a glance on every theme.
+              variant={kind === id ? 'glass' : 'ghost'}
+              aria-pressed={kind === id}
+              onClick={() => setKind(id)}
+              className={cn(
+                'min-w-0 rounded-xl text-sm font-semibold gap-1.5 border',
+                kind === id ? 'text-white' : 'border-white/10 bg-transparent text-zinc-400 hover:text-white',
+              )}
+            >
+              <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="truncate sm:hidden">{short}</span>
+              <span className="truncate hidden sm:inline">{label}</span>
+              {!!count && count > 0 && (
+                <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
+                  {formatCount(count)}
+                </span>
+              )}
+            </Button>
+          ))}
         </div>
 
         {/* Page Tabs: Requests / Shipping / Shipped */}
@@ -1372,7 +1427,7 @@ export default function FeaturesPage() {
                     ))}
                     <span aria-hidden="true" className="shrink-0 self-stretch w-px my-1.5 bg-white/10" />
                   </>}
-                  {CATEGORIES.map((cat) => (
+                  {visibleCategories.map((cat) => (
                     <button
                       key={cat.id}
                       ref={setFeaturesCatRef(cat.id)}
@@ -1428,7 +1483,7 @@ export default function FeaturesPage() {
 <div ref={contentRef} className="px-2 sm:px-3 pt-2 pb-3">
 <FeedSwallowMotion>
       <div hidden={activeTab !== 'requests' || showNotFeasible}>
-        <PromptComposer initialCategory={initialCategory} focusRequest={composerFocus} onPosted={() => { setCategory('all'); setSearchInput(''); setSort('newest'); }} />
+        <PromptComposer initialCategory={kind === 'bugs' ? 'bug_fix' : 'new_feature'} focusRequest={composerFocus} onPosted={(posted) => { setKind(featureKindOf(posted)); setCategory('all'); setSearchInput(''); setSort('newest'); }} />
         {!isFiltering && <TopBuildersCard compact />}
       </div>
       {/* The request a notification pointed at, above whichever tab is open. */}
