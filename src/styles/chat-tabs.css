@@ -6,6 +6,7 @@
   --ct-accent-ink: #fff;
   --ct-soft: rgb(255 255 255 / 0.09);
   --ct-ink: #fff;
+  --ct-idle: rgb(161 161 170);
 }
 html[data-theme='system'] [data-chat-tabs] { --ct-accent: #fff; --ct-accent-ink: #0b0b0c; }
 html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-chat-tabs] {
@@ -14,6 +15,8 @@ html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']
   --ct-soft: rgb(11 11 13 / 0.06);
   --ct-ink: #0b0b0c;
 }
+/* Light themes: zinc-400 on white was 2.6:1. */
+html:is([data-system-tone='light'], [data-theme='light']) [data-chat-tabs] { --ct-idle: rgb(11 11 13 / 0.7); }
 html[data-theme='osaka'] [data-chat-tabs] { --ct-accent: #ff6fb5; }
 
 [data-chat-tabs] [data-chat-tab] {
@@ -28,7 +31,7 @@ html[data-theme='osaka'] [data-chat-tabs] { --ct-accent: #ff6fb5; }
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  color: rgb(161 161 170);
+  color: var(--ct-idle);
   background: transparent;
   user-select: none;
   transition: color 0.15s ease;

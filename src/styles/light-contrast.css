@@ -145,3 +145,27 @@ html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(
 html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-profile-list-view] [data-feed-item] {
   border-radius: 0.75rem !important;
 }
+
+/* Icons that stayed white (or page-coloured) inside a button the light pass
+   had already turned pale: they take the button's own ink. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']) {
+  color: inherit !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-theme-control-label] svg.text-background {
+  color: #0b0b0d !important;
+}
+/* Docs and Support tiles: the brand gradient is dark grey on light, so its icon is white. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  .docs-root [class*='bg-gradient-to-']:is([class*='from-royal-blue'], [class*='from-sky-blue'], [class*='from-middle-blue']) > svg {
+  color: #fff !important;
+}
+
+/* Minimal Light: standalone pages (premium, creator flow, admin manual) paint
+   their own near-black shell with fixed hex classes. Their text was already
+   turned to ink, so the page read as dark on black. Same paper as the rest
+   (System Light does this in system-light.css). */
+html[data-theme='light'] #root:not(#_):not(#_):not(#_) :is([class*='bg-[#090a0b]'], [class*='bg-[#08080b]'], [class*='bg-[#111214]'], [class*='bg-[#0a0a0a]'], [class*='bg-[#0a0a0b]']):not([data-media-full]):not([data-media-full] *):not([data-keep-dark]):not([data-keep-dark] *) {
+  background-color: var(--paper) !important;
+  color: var(--ink) !important;
+}
