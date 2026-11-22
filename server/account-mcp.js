@@ -121,7 +121,7 @@ tool('dehub_features', 'Discover Riftn account controls', 'List the available ch
     { feature: 'Profile and privacy', tools: ['dehub_profile','dehub_account','dehub_connected_profile','dehub_update_profile'], url: `${ORIGIN}/app/settings` },
     { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_save_draft','dehub_drafts','dehub_delete_draft','dehub_create_post','dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_reschedule_post','dehub_fans_online','dehub_create_poll','dehub_poll','dehub_vote_poll','dehub_remove_poll_vote','dehub_close_poll','dehub_post_image_allowance','dehub_add_post_images','dehub_replace_post_image','dehub_replace_video_cover','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
     { feature: 'Your agents', tools: ['dehub_my_agents','dehub_agent_welcomes','dehub_set_agent_welcome','dehub_agent_welcome_log'], note: 'Pass as_agent to post, reply, react, repost, follow, edit the profile or manage notifications as one of your agents.' },
-    { feature: 'Your feed, following and follow requests', tools: ['dehub_my_feed','dehub_read_post_as_me','dehub_follow','dehub_follow_list','dehub_follow_requests','dehub_decide_follow_request'] },
+    { feature: 'Your feed, following and follow requests', tools: ['dehub_my_feed','dehub_read_post_as_me','dehub_follow','dehub_follow_list','dehub_followed_tags','dehub_set_followed_tag','dehub_follow_requests','dehub_decide_follow_request','dehub_decide_all_follow_requests'] },
     { feature: 'Comment editing and post collaboration', tools: ['dehub_edit_comment','dehub_delete_comment','dehub_coauthors','dehub_invite_coauthor','dehub_answer_coauthor_invite','dehub_remove_coauthor'] },
     { feature: 'Notifications', tools: ['dehub_notifications','dehub_unread_notifications','dehub_mark_notification_read','dehub_mark_notifications_read'], url: `${ORIGIN}/app/notifications` },
     { feature: 'Blocks and mutes', tools: ['dehub_moderation_list','dehub_set_moderation'], url: `${ORIGIN}/app/settings` },
@@ -326,6 +326,19 @@ tool('dehub_follow_requests', 'List incoming follow requests', 'List people wait
 tool('dehub_decide_follow_request', 'Accept or decline an incoming follow request', 'Accept or decline one incoming follow request. Read incoming requests first to identify the person and request ID.', {
   request_id: recordId, decision: z.enum(['accept', 'reject']),
 }, 'dehub:social', async (a, ctx) => success(await api(ctx, `/follow-requests/${a.request_id}/${a.decision}`, 'POST')), { destructive: true, open: true });
+tool('dehub_decide_all_follow_requests', 'Accept or decline every incoming follow request', 'Apply one decision to all currently pending follow requests. Use only when the connected person explicitly asks to accept or decline all of them.', {
+  decision: z.enum(['accept', 'reject']),
+}, 'dehub:social', async (a, ctx) => success(await api(ctx, `/follow-requests/${a.decision}-all`, 'POST')), { destructive: true, open: true });
+tool('dehub_followed_tags', 'List my followed hashtags', 'Read the hashtags that contribute posts to the connected person’s Following feed.', {}, 'dehub:read', async (_, ctx) => {
+  const tags = unwrap(await api(ctx, '/followed-tags'));
+  return success({ tags: Array.isArray(tags) ? tags : [] });
+}, { read: true });
+tool('dehub_set_followed_tag', 'Follow or unfollow a hashtag', 'Add or remove one hashtag from the connected person’s Following feed.', {
+  tag: z.string().trim().regex(/^#?[\p{L}\p{M}\p{N}_]{1,64}$/u), follow: z.boolean(),
+}, 'dehub:social', async (a, ctx) => {
+  const tag = a.tag.replace(/^#/, '').toLowerCase();
+  return success(await (a.follow ? api(ctx, '/followed-tags', 'POST', { tag }) : api(ctx, `/followed-tags/${enc(tag)}`, 'DELETE')));
+});
 
 tool('dehub_moderation_list', 'List my blocked or muted accounts', 'List accounts the connected person has blocked or muted. A mute is private and only affects that person’s own feed.', {
   type: z.enum(['block', 'mute']), page, limit,

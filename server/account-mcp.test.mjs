@@ -155,16 +155,27 @@ test('notifications and follow requests use the existing Riftn routes and requir
   const full = await connect(f, { scope: 'dehub:read dehub:social' });
   const call = async (name, input, grant) => (await (await rpc(f, name, input, grant.access_token)).json()).result;
   assert.equal((await call('dehub_decide_follow_request', { request_id: 'request-1', decision: 'accept' }, read)).isError, true);
+  assert.equal((await call('dehub_decide_all_follow_requests', { decision: 'accept' }, read)).isError, true);
+  assert.equal((await call('dehub_set_followed_tag', { tag: 'news', follow: true }, read)).isError, true);
+  assert.equal((await call('dehub_set_followed_tag', { tag: '../../news', follow: false }, full)).isError, true);
   assert.equal((await call('dehub_mark_notifications_read', {}, read)).isError, true);
   const requests = await call('dehub_follow_requests', {}, read);
   assert.equal(requests.structuredContent.requests[0].request_id, 'request-1');
   await call('dehub_decide_follow_request', { request_id: 'request-1', decision: 'accept' }, full);
+  await call('dehub_decide_all_follow_requests', { decision: 'reject' }, full);
+  await call('dehub_followed_tags', {}, read);
+  await call('dehub_set_followed_tag', { tag: '#Music', follow: true }, full);
+  await call('dehub_set_followed_tag', { tag: '#Música', follow: false }, full);
   await call('dehub_notifications', { category: 'social', unread_only: true, filtered: true }, read);
   await call('dehub_unread_notifications', {}, read);
   await call('dehub_mark_notifications_read', { category: 'social' }, full);
   assert.deepEqual(seen, [
     ['GET', '/api/follow-requests'],
     ['POST', '/api/follow-requests/request-1/accept'],
+    ['POST', '/api/follow-requests/reject-all'],
+    ['GET', '/api/followed-tags'],
+    ['POST', '/api/followed-tags'],
+    ['DELETE', '/api/followed-tags/m%C3%BAsica'],
     ['GET', '/api/notification?page=1&limit=20&unreadOnly=true&category=social&filtered=true'],
     ['GET', '/api/notification/unread-count'],
     ['POST', '/api/notification/mark-all-read?category=social'],

@@ -22,7 +22,7 @@ Riftn pages for workflows completed in the app.
 
 The live `riftn.com/mcp` discovery call advertised 51 tools on 22 November 2026.
 The DeHub Account integration available in the audit chat exposed 25. The
-connector code in this change registers 71. These counts describe three
+connector code in this change registers 74. These counts describe three
 different catalogues. A successful server discovery call cannot verify what a
 published ChatGPT listing exposes to a fresh account.
 
@@ -30,7 +30,7 @@ published ChatGPT listing exposes to a fresh account.
 | --- | --- | --- |
 | Feed and discovery | Public posts and profiles, signed-in feeds, following feed, post details with viewer access, public playlists | Web search filters, stories, video and music playback, viewing history |
 | Publishing and conversations | Posts, quotes, schedules, connector drafts, visibility, polls, text comments and replies, comment edits and deletion, reactions, reposting, co-author invitations, analytics | Web and mobile draft sync, article editing, comment media and thread management, imports, minting |
-| Social, notifications and safety | Follow and unfollow, incoming request decisions, follower lists, notification filtering, unread counts and mark-as-read, blocks and mutes | Bulk follow decisions, hashtag management, notification preferences, reports and other safety filters |
+| Social, notifications and safety | Follow and unfollow people and hashtags, individual and bulk decisions on follow requests, follower lists, notification filtering, unread counts and mark-as-read, blocks and mutes | Notification preferences, reports and other safety filters |
 | Bookmarks and playlists | Saved posts, folder management, saving to and removing from a folder, public playlist browsing | Default bookmark toggle and bulk folder actions |
 | Profile and account | Profile identity, core fields, avatar and banner, selected privacy controls | Profile ordering and custom fields, sessions, 2FA, data export and account deletion |
 | Creator Studio | Model discovery, quotes, generation, job status and library reads | Browser editing and capture, asset management, other Creator tools and workflows |
