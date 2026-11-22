@@ -23020,6 +23020,9 @@
     "optionPlaceholder": "Respuesta {{n}}",
     "addQuestion": "Añadir pregunta",
     "pointsLabel": "Puntos por respuesta correcta",
-    "attachFailed": "Tu publicación está lista, pero no se pudo añadir el cuestionario"
+    "attachFailed": "Tu publicación está lista, pero no se pudo añadir el cuestionario",
+    "streak": "Racha de {{value}} días",
+    "streakBonus": "Bonus de racha +{{pct}}%",
+    "dailyHint": "Un quiz al día. Quien juegue tus quizzes varios días seguidos hace una racha y gana puntos extra."
   }
 }

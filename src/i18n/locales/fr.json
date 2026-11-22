@@ -23024,6 +23024,9 @@
     "optionPlaceholder": "Réponse {{n}}",
     "addQuestion": "Ajouter une question",
     "pointsLabel": "Points par bonne réponse",
-    "attachFailed": "Votre publication est en ligne, mais le quiz n'a pas pu être ajouté"
+    "attachFailed": "Votre publication est en ligne, mais le quiz n'a pas pu être ajouté",
+    "streak": "Série de {{value}} jours",
+    "streakBonus": "Bonus de série +{{pct}} %",
+    "dailyHint": "Un quiz par jour. Ceux qui jouent à tes quiz plusieurs jours d’affilée font une série et gagnent des points bonus."
   }
 }

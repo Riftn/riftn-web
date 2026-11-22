@@ -23020,6 +23020,9 @@
     "optionPlaceholder": "Cevap {{n}}",
     "addQuestion": "Soru ekle",
     "pointsLabel": "Doğru cevap başına puan",
-    "attachFailed": "Gönderin paylaşıldı ama bilgi yarışması eklenemedi"
+    "attachFailed": "Gönderin paylaşıldı ama bilgi yarışması eklenemedi",
+    "streak": "{{value}} günlük seri",
+    "streakBonus": "Seri bonusu +%{{pct}}",
+    "dailyHint": "Günde bir bilgi yarışması. Yarışmalarına art arda günlerde katılanlar seri yapar ve bonus puan kazanır."
   }
 }

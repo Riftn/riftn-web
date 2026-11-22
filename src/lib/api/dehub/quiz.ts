@@ -29,6 +29,11 @@ export interface PostQuiz {
   isCreator: boolean;
   /** The reader's badge boost, 1 to 2. */
   multiplier: number;
+  /** Daily quiz: the reader's live streak with this creator (days in a row). */
+  streak?: number;
+  bestStreak?: number;
+  /** The streak bonus the reader's next play earns, 1 to 1.5. */
+  streakBonus?: number;
   questions: QuizQuestion[];
   mine: QuizResult | null;
 }
@@ -55,7 +60,7 @@ export async function getQuiz(tokenId: number): Promise<{ quiz: PostQuiz }> {
   return apiCall(`/api/quiz/${tokenId}`, { requiresAuth: false });
 }
 
-export async function answerQuiz(tokenId: number, answers: number[]): Promise<QuizResult & { questions: Required<QuizQuestion>[] }> {
+export async function answerQuiz(tokenId: number, answers: number[]): Promise<QuizResult & { streak?: number; bestStreak?: number; questions: Required<QuizQuestion>[] }> {
   return apiCall(`/api/quiz/${tokenId}/answer`, { method: 'POST', body: { answers }, requiresAuth: true });
 }
 

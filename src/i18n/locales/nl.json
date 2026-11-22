@@ -23268,6 +23268,9 @@
     "optionPlaceholder": "Antwoord {{n}}",
     "addQuestion": "Vraag toevoegen",
     "pointsLabel": "Punten per goed antwoord",
-    "attachFailed": "Je bericht is geplaatst, maar de quiz kon niet worden toegevoegd"
+    "attachFailed": "Je bericht is geplaatst, maar de quiz kon niet worden toegevoegd",
+    "streak": "Reeks van {{value}} dagen",
+    "streakBonus": "Reeksbonus +{{pct}}%",
+    "dailyHint": "Eén quiz per dag. Wie je quizzen dagen achter elkaar speelt, bouwt een reeks op en verdient bonuspunten."
   }
 }

@@ -70,6 +70,7 @@ export function QuizEditor({ quiz, onChange, onRemove }: QuizEditorProps) {
           </button>
         </div>
         <p className="text-xs text-white/50">{t('quiz.editorHint', 'Check every question before posting. Each person gets one go.')}</p>
+        <p className="text-xs text-white/50">{t('quiz.dailyHint', 'One quiz a day. People who play your quizzes days in a row build a streak and earn bonus points.')}</p>
       </div>
 
       <ol className="space-y-3 p-3">

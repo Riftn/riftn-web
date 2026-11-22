@@ -22994,6 +22994,9 @@
     "optionPlaceholder": "Answer {{n}}",
     "addQuestion": "Add question",
     "pointsLabel": "Points per right answer",
-    "attachFailed": "Your post is up, but the quiz could not be added"
+    "attachFailed": "Your post is up, but the quiz could not be added",
+    "streak": "{{value}}-day streak",
+    "streakBonus": "Streak bonus +{{pct}}%",
+    "dailyHint": "One quiz a day. People who play your quizzes days in a row build a streak and earn bonus points."
   }
 }

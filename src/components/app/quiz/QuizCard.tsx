@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Check, X, Loader2, GraduationCap } from 'lucide-react';
+import { Check, X, Loader2, GraduationCap, Flame } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { answerQuiz, getQuiz, type PostQuiz, type QuizQuestion } from '@/lib/api/dehub';
 import { formatCount } from '@/lib/format-count';
@@ -48,6 +48,8 @@ export function QuizCard({ tokenId }: { tokenId: number }) {
         attempts: old.attempts + 1,
         questions: result.questions,
         mine: { answers: result.answers, correct: result.correct, total: result.total, points: result.points, multiplier: result.multiplier },
+        streak: result.streak ?? old.streak,
+        bestStreak: result.bestStreak ?? old.bestStreak,
       } : old);
       toast.success(result.points > 0
         ? t('quiz.earnedToast', { defaultValue: '{{correct}} of {{total}} right, +{{points}} points', correct: result.correct, total: result.total, points: formatCount(result.points) })
@@ -68,8 +70,14 @@ export function QuizCard({ tokenId }: { tokenId: number }) {
           <GraduationCap className="h-4 w-4 shrink-0" />
           {quiz.topic || t('quiz.title', 'Quiz')}
         </p>
-        <span className="shrink-0 text-xs text-zinc-400">
+        <span className="shrink-0 text-right text-xs text-zinc-400">
           {t('quiz.taken', { defaultValue: '{{value}} took it', value: formatCount(quiz.attempts) })}
+          {!quiz.isCreator && (quiz.streak ?? 0) > 0 && (
+            <span className="ml-2 inline-flex items-center gap-1 text-white">
+              <Flame className="h-3.5 w-3.5" />
+              {t('quiz.streak', { defaultValue: '{{value}}-day streak', value: formatCount(quiz.streak ?? 0) })}
+            </span>
+          )}
         </span>
       </div>
 
@@ -79,7 +87,7 @@ export function QuizCard({ tokenId }: { tokenId: number }) {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-zinc-400">
             <span>{t('quiz.questionOf', { defaultValue: 'Question {{n}} of {{total}}', n: step + 1, total })}</span>
-            <span>{t('quiz.pointsEach', { defaultValue: '{{points}} points each', points: formatCount(Math.round(quiz.pointsPerQuestion * (quiz.multiplier || 1))) })}</span>
+              <span>{t('quiz.pointsEach', { defaultValue: '{{points}} points each', points: formatCount(Math.round(quiz.pointsPerQuestion * (quiz.multiplier || 1) * (quiz.streakBonus || 1))) })}</span>
           </div>
           <p className="text-[15px] leading-snug text-white">{quiz.questions[step]?.q}</p>
           {quiz.questions[step]?.options.map((option, i) => (
@@ -94,6 +102,9 @@ export function QuizCard({ tokenId }: { tokenId: number }) {
               <span className="min-w-0 flex-1">{option}</span>
             </button>
           ))}
+          {(quiz.streakBonus ?? 1) > 1 && (
+            <p className="text-xs text-zinc-500">{t('quiz.streakBonus', { defaultValue: 'Streak bonus +{{pct}}%', pct: Math.round(((quiz.streakBonus ?? 1) - 1) * 100) })}</p>
+          )}
           {quiz.multiplier > 1 && (
             <p className="text-xs text-zinc-500">{t('quiz.badgeBoost', { defaultValue: 'Your badge gives you {{x}}x points', x: quiz.multiplier })}</p>
           )}
