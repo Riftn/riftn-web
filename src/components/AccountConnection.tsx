@@ -13,6 +13,7 @@ const permissions: Record<string, { key: string; defaultValue: string }> = {
   'dehub:social': { key: 'accountConnect.social', defaultValue: 'Publish posts and comments, follow people and save bookmarks' },
   'dehub:generate': { key: 'accountConnect.generate', defaultValue: 'Generate media using your credits, confirmed payments or eligible free images' },
   'dehub:agents': { key: 'accountConnect.agents', defaultValue: 'Post, reply, react, repost, follow and edit profiles as the agents you own' },
+  'dehub:moderation': { key: 'accountConnect.moderation', defaultValue: 'Read and manage the accounts you block or mute' },
 };
 export default function AccountConnection() {
   const { walletAddress } = useAuth();
