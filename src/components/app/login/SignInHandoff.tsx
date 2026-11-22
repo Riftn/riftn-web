@@ -326,6 +326,24 @@ export function SignInHandoff() {
     return () => document.documentElement.removeAttribute('data-arrival-glass');
   }, [look, phase]);
 
+  // The page's own picture, hidden while the copy flies into it.
+  const asideRef = useRef<HTMLElement | null>(null);
+  const stepBack = () => {
+    if (asideRef.current) asideRef.current.style.visibility = '';
+    asideRef.current = null;
+  };
+  const stepAside = (node: HTMLElement) => {
+    stepBack();
+    asideRef.current = node;
+    node.style.visibility = 'hidden';
+  };
+  useEffect(() => stepBack, []);
+  useEffect(() => {
+    if (phase !== 'flying') { stepBack(); return; }
+    const timer = window.setTimeout(stepBack, FLY_MS);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
   // Open: hold on the picture, then send it home once the sheet has gone.
   // The concepts take longer to bring the picture in, and hold it as long.
   const holdMs = concept ? CONCEPT_HOLD_MS : OPEN_MS + HOLD_MS;
@@ -340,10 +358,18 @@ export function SignInHandoff() {
     const wait = sheetGone
       ? Math.max(0, holdMs - since)
       : Math.max(0, holdMs + SHEET_GONE_CAP_MS - since);
-    const timer = window.setTimeout(() => {
+    // Phones: the page under the arrival can still be mounting the picture
+    // it should land on, so look again for a moment before giving up.
+    const phone = window.innerWidth < 768;
+    let retry = 0;
+    const fly = (startedAt: number) => {
       const from = frameRef.current?.getBoundingClientRect();
       const target = sheetGone ? findOwnPicture() : null;
       const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!target && phone && sheetGone && !reduced && Date.now() - startedAt < 700) {
+        retry = window.setTimeout(() => fly(startedAt), 100);
+        return;
+      }
       if (!from || !target || reduced) { setPhase('leaving'); return; }
       const to = target.getBoundingClientRect();
       const scale = to.width / from.width;
@@ -356,8 +382,17 @@ export function SignInHandoff() {
         borderRadius: `${radius / scale}px`,
       });
       setPhase('flying');
-    }, wait);
-    return () => window.clearTimeout(timer);
+      if (phone) {
+        // The page's picture steps aside while the copy flies into its place
+        // and shows the moment it lands: one picture arriving, never two.
+        stepAside(target);
+      }
+    };
+    const timer = window.setTimeout(() => fly(Date.now()), wait);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(retry);
+    };
   }, [phase, sheet, holdMs]);
 
   useEffect(() => {
@@ -366,7 +401,7 @@ export function SignInHandoff() {
       setPhase('idle');
       setFlight(undefined);
       setPictureReady(false);
-    }, phase === 'flying' ? FLY_MS + 160 : LEAVE_MS);
+    }, phase === 'flying' ? FLY_MS + 200 : LEAVE_MS);
     return () => window.clearTimeout(timer);
   }, [phase]);
 
