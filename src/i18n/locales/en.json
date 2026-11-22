@@ -3957,6 +3957,8 @@
     "noMembersFound": "No members found",
     "showMore": "Show more",
     "manage": {
+      "startCalls": "Start group calls",
+      "startCallsHint": "Ring everyone in the group. Admins always can.",
       "rightNotHeld": "You do not have this right yourself",
       "customTitle": "Custom title",
       "adminBadge": "Admin",

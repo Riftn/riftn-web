@@ -4136,6 +4136,8 @@
     "noMembersFound": "Geen leden gevonden",
     "showMore": "Meer weergeven",
     "manage": {
+      "startCalls": "Groepsgesprekken starten",
+      "startCallsHint": "Iedereen in de groep bellen. Beheerders kunnen dit altijd.",
       "rightNotHeld": "Dit recht heb je zelf niet",
       "customTitle": "Aangepaste titel",
       "adminBadge": "Beheerder",
