@@ -2498,7 +2498,8 @@
       "bountyApplied": "{{name}} appliqué à votre prime",
       "bountySubmittedNamed": "{{name}} a soumis des travaux sur votre prime « {{title}} »",
       "bountySubmitted": "{{name}} a soumis des travaux sur votre prime",
-      "sentNotification": "{{name}} vous a envoyé une notification"
+      "sentNotification": "{{name}} vous a envoyé une notification",
+      "fractionGift": "{{name}} t'a envoyé des fractions"
     }
   },
   "leaderboard": {
@@ -6035,7 +6036,25 @@
     "buy": "Acheter",
     "reject": "Rejeter",
     "needsYouHold": "Nécessite {{needed}}, vous en détenez {{held}}",
-    "sellYourFractions": "Vendez vos fractions ({{held}} détenus)"
+    "sellYourFractions": "Vendez vos fractions ({{held}} détenus)",
+    "giftSend": "Envoyer",
+    "giftTitle": "Envoyer des fractions",
+    "giftHint": "Elles passent directement de ton portefeuille au sien.",
+    "giftYouOwn": "Tu possèdes {{count}} sur {{total}}",
+    "giftListedNote": "{{count}} sont en vente. Annule l'annonce pour les envoyer.",
+    "giftTo": "À",
+    "giftChange": "Changer",
+    "giftSearch": "Rechercher des personnes",
+    "giftNoOne": "Personne trouvé",
+    "giftHowMany": "Combien",
+    "giftLess": "Une de moins",
+    "giftMore": "Une de plus",
+    "giftAll": "Toutes",
+    "giftSending": "Envoi…",
+    "giftButton": "Envoyer {{count}} à {{name}}",
+    "giftSent": "{{count}} envoyées à {{name}}",
+    "giftFailed": "Envoi impossible. Réessaie.",
+    "giftNotSubmitted": "Le transfert n'a pas été envoyé"
   },
   "creator": {
     "gallery": {

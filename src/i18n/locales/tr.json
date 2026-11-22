@@ -2498,7 +2498,8 @@
       "bountyApplied": "Ödülünüze {{name}} uygulandı",
       "bountySubmittedNamed": "{{name}}, “{{title}}” ödülünüz için çalışma gönderdi",
       "bountySubmitted": "{{name}} ödülünüz için çalışma gönderdi",
-      "sentNotification": "{{name}} size bir bildirim gönderdi"
+      "sentNotification": "{{name}} size bir bildirim gönderdi",
+      "fractionGift": "{{name}} sana parça gönderdi"
     }
   },
   "leaderboard": {
@@ -6031,7 +6032,25 @@
     "buy": "Al",
     "reject": "Reddet",
     "needsYouHold": "{{needed}} gerekiyor, sizde {{held}} var",
-    "sellYourFractions": "Paylarınızı satın ({{held}} adet)"
+    "sellYourFractions": "Paylarınızı satın ({{held}} adet)",
+    "giftSend": "Gönder",
+    "giftTitle": "Parça gönder",
+    "giftHint": "Doğrudan senin cüzdanından onun cüzdanına gider.",
+    "giftYouOwn": "{{total}} parçanın {{count}} tanesi sende",
+    "giftListedNote": "{{count}} tanesi satışta. Onları göndermek için ilanı iptal et.",
+    "giftTo": "Kime",
+    "giftChange": "Değiştir",
+    "giftSearch": "Kişi ara",
+    "giftNoOne": "Kimse bulunamadı",
+    "giftHowMany": "Kaç tane",
+    "giftLess": "Bir eksik",
+    "giftMore": "Bir fazla",
+    "giftAll": "Hepsi",
+    "giftSending": "Gönderiliyor…",
+    "giftButton": "{{name}} kişisine {{count}} gönder",
+    "giftSent": "{{name}} kişisine {{count}} gönderildi",
+    "giftFailed": "Gönderilemedi. Tekrar dene.",
+    "giftNotSubmitted": "Transfer gönderilmedi"
   },
   "creator": {
     "gallery": {

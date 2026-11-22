@@ -2687,7 +2687,8 @@
       "bountyApplied": "{{name}} toegepast op uw premie",
       "bountySubmittedNamed": "{{name}} heeft werk ingediend voor uw bounty \"{{title}}\"",
       "bountySubmitted": "{{name}} heeft werk ingediend voor je bounty",
-      "sentNotification": "{{name}} heeft je een melding gestuurd"
+      "sentNotification": "{{name}} heeft je een melding gestuurd",
+      "fractionGift": "{{name}} heeft je fracties gestuurd"
     }
   },
   "leaderboard": {
@@ -6220,7 +6221,25 @@
     "buy": "Kopen",
     "reject": "Afwijzen",
     "needsYouHold": "Heeft {{needed}} nodig, u bezit {{held}}",
-    "sellYourFractions": "Verkoop uw fracties ({{held}} in bezit)"
+    "sellYourFractions": "Verkoop uw fracties ({{held}} in bezit)",
+    "giftSend": "Versturen",
+    "giftTitle": "Fracties versturen",
+    "giftHint": "Ze gaan rechtstreeks van jouw wallet naar die van hen.",
+    "giftYouOwn": "Je hebt {{count}} van {{total}}",
+    "giftListedNote": "{{count}} staan te koop. Annuleer de aanbieding om die te versturen.",
+    "giftTo": "Aan",
+    "giftChange": "Wijzigen",
+    "giftSearch": "Mensen zoeken",
+    "giftNoOne": "Niemand gevonden",
+    "giftHowMany": "Hoeveel",
+    "giftLess": "Eén minder",
+    "giftMore": "Eén meer",
+    "giftAll": "Alles",
+    "giftSending": "Versturen…",
+    "giftButton": "{{count}} naar {{name}} versturen",
+    "giftSent": "{{count}} naar {{name}} verstuurd",
+    "giftFailed": "Versturen mislukt. Probeer het opnieuw.",
+    "giftNotSubmitted": "De overdracht is niet verstuurd"
   },
   "creator": {
     "gallery": {

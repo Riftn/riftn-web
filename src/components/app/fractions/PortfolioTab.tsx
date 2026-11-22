@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Tag, ImageIcon, HandCoins, ChevronDown } from "lucide-react";
+import Send from "@/components/ui/cut-icons/send";
 import Wallet from "@/components/ui/cut-icons/wallet";
 
 import X from "@/components/ui/cut-icons/close";
@@ -31,6 +32,7 @@ import {
   TOTAL_FRACTIONS,
 } from '@/hooks/use-fraction-marketplace';
 import { SellFractionsDrawer } from './SellFractionsDrawer';
+import { SendFractionsDrawer } from './SendFractionsDrawer';
 import { SettlementRail } from './SettlementRail';
 import { toast } from 'sonner';
 import dehubCoin from '@/assets/dehub-coin.png';
@@ -38,10 +40,12 @@ import dehubCoin from '@/assets/dehub-coin.png';
 function PositionCard({
   position,
   onSell,
+  onSend,
   onOpen,
 }: {
   position: PortfolioPosition;
   onSell: () => void;
+  onSend: () => void;
   onOpen: () => void;
 }) {
   const { t } = useTranslation();
@@ -72,14 +76,23 @@ function PositionCard({
           <p className="text-xs text-zinc-400">{t('fractions.pctOfPost', { pct: position.percentage.toFixed(1) })}</p>
         </div>
       </button>
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3 flex gap-2">
         <Button
           size="sm"
           onClick={onSell}
-          className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs h-8"
+          className="flex-1 min-w-0 px-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs h-8"
         >
-          <Tag className="w-3.5 h-3.5 mr-1.5" />
-          {t('fractions.sell')}
+          <Tag className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+          <span className="truncate">{t('fractions.sell')}</span>
+        </Button>
+        <Button
+          size="sm"
+          onClick={onSend}
+          data-send-fraction
+          className="flex-1 min-w-0 px-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs h-8"
+        >
+          <Send className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+          <span className="truncate">{t('fractions.giftSend', 'Send')}</span>
         </Button>
       </div>
     </div>
@@ -91,6 +104,7 @@ export function PortfolioTab() {
   const { walletAddress, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selling, setSelling] = useState<PortfolioPosition | null>(null);
+  const [sending, setSending] = useState<PortfolioPosition | null>(null);
   const [showDeleted, setShowDeleted] = useState(false);
 
   const {
@@ -137,6 +151,20 @@ export function PortfolioTab() {
         />
       )}
 
+      {sending && (
+        <SendFractionsDrawer
+          tokenId={sending.tokenId}
+          chainId={sending.chainId}
+          post={{
+            title: sending.title || undefined,
+            imageUrl: sending.imageUrl || undefined,
+            type: sending.postType || undefined,
+          }}
+          open
+          onOpenChange={(v) => { if (!v) setSending(null); }}
+        />
+      )}
+
       <SettlementRail />
 
       {/* Holdings */}
@@ -180,6 +208,7 @@ export function PortfolioTab() {
                     key={`${position.chainId}-${position.tokenId}`}
                     position={position}
                     onSell={() => setSelling(position)}
+                    onSend={() => setSending(position)}
                     onOpen={() => navigate(`/app/post/${position.tokenId}/info`)}
                   />
                 ))}
@@ -203,6 +232,7 @@ export function PortfolioTab() {
                         key={`${position.chainId}-${position.tokenId}`}
                         position={position}
                         onSell={() => setSelling(position)}
+                        onSend={() => setSending(position)}
                         onOpen={() => setSelling(position)}
                       />
                     ))}

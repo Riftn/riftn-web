@@ -40,6 +40,7 @@ import Bell from "@/components/ui/cut-icons/alerts";
 import Repeat2 from "@/components/ui/cut-icons/repost";
 import XIcon from "@/components/ui/cut-icons/close";
 import Send from "@/components/ui/cut-icons/send";
+import Gift from "@/components/ui/cut-icons/gifts";
 
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -305,7 +306,7 @@ const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
   reposts: ['repost', 'quote', 'remix'],
   features: ['feature_request_like', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_new', 'feature_request_comment_like', 'feature_request_status'],
   communities: ['community_chat', 'community_mention', 'community_here', 'community_join'],
-  stores: ['store_order', 'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_sold', 'fraction_delivered', 'fraction_settled', 'username_offer', 'username_offer_accepted', 'username_offer_declined'],
+  stores: ['store_order', 'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift', 'fraction_sold', 'fraction_delivered', 'fraction_settled', 'username_offer', 'username_offer_accepted', 'username_offer_declined'],
   subscriptions: ['subscription', 'ppv_purchase'],
   tips: ['tip', 'bounty_available', 'bounty_claimed', 'work_application', 'work_submission'],
   livestreams: ['livestream_start', 'stage_live', 'stage_reminder'],
@@ -325,7 +326,7 @@ const API_BACKED_TYPES = new Set([
   'repost', 'quote',
   'tip', 'bounty_available', 'bounty_claimed',
   'subscription', 'ppv_purchase',
-  'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased',
+  'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift',
   'username_offer', 'username_offer_accepted', 'username_offer_declined',
   'livestream_start', 'signal_flare', 'video_milestone',
   'coauthor_invite', 'coauthor_accepted',
@@ -486,6 +487,8 @@ function getNotificationIcon(type: string, reaction?: PostReaction) {
     case 'fraction_offer_rejected':
     case 'fraction_settled':
       return <Store className="w-4 h-4 text-white/70" />;
+    case 'fraction_gift':
+      return <Gift className="w-4 h-4 text-white/70" />;
     // Its own glyph rather than the marketplace one: what is being bid for
     // here is the reader's own name, not a thing on a shelf.
     case 'username_offer':
@@ -780,7 +783,7 @@ function getNotificationContent(
   }
   // Fraction rows written before the API learned to describe them carry the
   // placeholder "You have a new notification", so treat that as no content.
-  const fractionTypes = ['fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased'];
+  const fractionTypes = ['fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift'];
   if (fractionTypes.includes(notification.type as string)) {
     const apiContent = (notification as any).content;
     const usableContent = apiContent && apiContent !== 'You have a new notification' ? apiContent : null;
@@ -792,6 +795,8 @@ function getNotificationContent(
         return tr('notifications.custom.fractionOfferAccepted', { name: actorName });
       case 'fraction_offer_rejected':
         return tr('notifications.custom.fractionOfferRejected', { name: actorName });
+      case 'fraction_gift':
+        return tr('notifications.custom.fractionGift', { name: actorName });
       default:
         return tr('notifications.custom.fractionPurchased', { name: actorName });
     }
@@ -1074,6 +1079,7 @@ function getNavigationLink(notification: DeHubNotification): string | null {
     case 'fraction_offer_accepted':
     case 'fraction_offer_rejected':
     case 'fraction_purchased':
+    case 'fraction_gift':
       return notification.tokenId ? `/app/post/${notification.tokenId}` : null;
     // Answering an offer and paying for an accepted one happen on the same
     // tab, so all three rows lead to it.
