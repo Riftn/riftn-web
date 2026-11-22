@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, MessageCircle, MessageCircleDashed, Reply, Trash2, X } from 'lucide-react';
+import { Archive, Loader2, MessageCircle, MessageCircleDashed, Reply, Trash2, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,6 +19,8 @@ export interface BulkChatBarProps {
   /** Every selected chat is already unread, so the button reads "Mark read". */
   allUnread: boolean;
   onToggleUnread: () => void;
+  onToggleArchive?: () => void;
+  allArchived?: boolean;
   onDelete: () => void;
   /** Resolves with how many chats the reply reached. */
   onReply: (text: string) => Promise<number>;
@@ -32,7 +34,7 @@ export interface BulkChatBarProps {
 
 const BTN = 'flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-2 text-[13px] font-semibold text-zinc-100 transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-40 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0';
 
-export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelete, onReply, onCancel, deletableCount = count, touch = false, className }: BulkChatBarProps) {
+export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onToggleArchive, allArchived, onDelete, onReply, onCancel, deletableCount = count, touch = false, className }: BulkChatBarProps) {
   const { t } = useTranslation();
   const [replyOpen, setReplyOpen] = useState(false);
   const none = count === 0;
@@ -67,11 +69,16 @@ export function BulkChatBar({ count, chatIds, allUnread, onToggleUnread, onDelet
             <X />
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-1">
+        <div className={cn('grid gap-1', onToggleArchive ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3')}>
           <button type="button" data-chat-bulk-unread disabled={none} onClick={onToggleUnread} className={BTN}>
             {allUnread ? <MessageCircle /> : <MessageCircleDashed />}
             {allUnread ? t('chatBulk.read', 'Mark read') : t('chatBulk.unread', 'Mark unread')}
           </button>
+          {onToggleArchive && (
+            <button type="button" data-chat-bulk-archive disabled={none} onClick={onToggleArchive} className={BTN}>
+              <Archive />{allArchived ? t('chatMenu.unarchive', 'Unarchive') : t('chatMenu.archive', 'Archive')}
+            </button>
+          )}
           <button type="button" data-chat-bulk-reply disabled={none} onClick={() => setReplyOpen(true)} className={BTN}>
             <Reply />{t('chatBulk.reply', 'Reply')}
           </button>
