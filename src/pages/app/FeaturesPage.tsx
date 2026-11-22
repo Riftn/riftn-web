@@ -37,6 +37,7 @@ import Plus from "@/components/ui/cut-icons/add";
 import X from "@/components/ui/cut-icons/close";
 import FullscreenIcon from "@/components/ui/cut-icons/fullscreen";
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
+import { RequestStatusRow } from '@/components/app/features/RequestStatusRow';
 
 import featuresLightbulb from '@/assets/features-lightbulb.png';
 import { TranslatableText, SharedTranslationProvider, useSharedTranslationControl } from '@/components/app/TranslatableText';
@@ -673,19 +674,16 @@ function FeatureCard({
             {/* Attached media — one full-width, several as a grid */}
             <FeatureAttachments feature={feature} />
 
-        {/* Category + status badges - liquid glass style */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Category, status and the owners' progress note. */}
+        <RequestStatusRow
+          status={feature.status}
+          note={feature.status_note?.trim() || ''}
+          categoryChip={
           <span className="text-zinc-300 text-[10px] font-medium px-2 py-0.5 rounded-lg bg-gradient-to-br from-white/15 via-white/8 to-white/3 backdrop-blur-xl border border-white/20 shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.3)]">
             {CATEGORY_LABELS[feature.category]}
           </span>
-          <StatusBadge status={feature.status} />
-          {/* A short tag on a live request, e.g. "Future review" on Queued. */}
-          {feature.status !== 'declined' && feature.status_note?.trim() && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg border backdrop-blur-xl break-words bg-amber-400/15 text-amber-300/90 border-amber-300/25">
-              <TranslatableText publicContent text={feature.status_note.trim()} as="span" hideControls />
-            </span>
-          )}
-        </div>
+          }
+        />
         {/* The owners' reason for ruling it out. */}
         {notFeasibleReason && (
           <p className="text-zinc-400 text-xs leading-relaxed">
