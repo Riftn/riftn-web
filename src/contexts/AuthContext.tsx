@@ -68,6 +68,8 @@ export interface AuthContextType {
    */
   connectWithPasskey: (mode: 'signin' | 'signup') => Promise<boolean>;
   connectWithWallet: (wallet: WalletProvider) => Promise<boolean>;
+  /** Give up on a wallet sign-in that is still waiting on the wallet, and let the wallet go. */
+  cancelWalletLogin: () => Promise<void>;
   /**
    * Final step of the smart-wallet login: called by the login modal once the
    * wallet key is available (created, imported, or unlocked). Activates the
