@@ -742,7 +742,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       <>
                         <span className="text-zinc-400 ml-1.5">
                           {t('live.chatSentGift')}
-                          <DhbAmount amount={moment.giftAmount} currency={moment.giftCurrency} iconClassName="h-3 w-3" />
+                          <DhbAmount amount={moment.giftAmount} currency={moment.giftCurrency} iconClassName="h-3 w-3" className="ml-1" />
                         </span>
                         {msg.content && (
                           <p className="chat-body text-zinc-300 break-words whitespace-pre-wrap mt-0.5"><InlineEmoji value={msg.content} /></p>

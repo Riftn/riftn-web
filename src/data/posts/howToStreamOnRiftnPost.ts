@@ -98,7 +98,7 @@ Capture cards work from a desktop browser only, because phones cannot take a USB
 4. Tap **Studio** for scenes, background blur, an image or logo, and widgets drawn into your video.
 5. Tap **Go Live**. While you are live, tap **Share screen** to show your phone screen instead.
 
-![The Riftn app: the go-live screen with camera, mic, looks and Studio buttons, the Studio sheet with scenes and a countdown, and a live broadcast with viewers, likes and Share screen](/media/fig-stream-app.jpg)
+![The Riftn app: the go-live screen with camera, mic, looks and Studio buttons, the Studio sheet with scenes and a countdown, and a live broadcast with viewers, likes and Share screen](/media/fig-stream-app-v2.jpg)
 
 Screen share in the app needs the latest version from the App Store or Google Play.
 
@@ -166,7 +166,7 @@ Go live on Riftn once, and Riftn pushes your stream to every platform you switch
 4. Choose where they show: **In the Riftn app**, drawn by each viewer's app, or **In my video**, burned into your picture so they appear on Twitch and YouTube too.
 5. Using OBS? Copy the **Browser source link** into an OBS Browser source at 1920 by 1080.
 
-![Live Studio: the stream preview with goal bar, top supporters, subathon timer and chat box widgets, plus OBS settings and the browser source link](/media/fig-stream-live-studio.jpg)
+![Live Studio: the stream preview with goal bar, top supporters, subathon timer and chat box widgets, plus OBS settings and the browser source link](/media/fig-stream-live-studio-v2.jpg)
 
 ### Everything else in Live Studio
 
@@ -198,7 +198,7 @@ Add your own commands under **Rules** with the trigger **A chat command is used*
 
 ## How viewers back you
 
-![What your viewers see: the Riftn app with chat, a tip, an @assistant answer and !command buttons, the phone web player, and the desktop live chat with rewards](/media/fig-stream-viewer.jpg)
+![What your viewers see: the Riftn app with chat, a tip, an @assistant answer and !command buttons, the phone web player, and the desktop live chat with rewards](/media/fig-stream-viewer-v2.jpg)
 
 - **Tips and gifts**: viewers pick a celebration, from Love Heart and Box of Chocolate up to Golden Screen and Ultimate Celebration. They can add a message that is read aloud. Tips go straight to your wallet, on chain.
 - **Subscriptions and gift subs**: fans subscribe to your plans, or gift subs to people in your chat.
