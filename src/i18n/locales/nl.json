@@ -7424,7 +7424,7 @@
     "transferGuarantee": "Je krijgt het hele account — handle, posts, volgers, tipgeschiedenis en badge-rechten. De verkoper behoudt zijn wallet en alles erin. De overdracht loopt pas nadat Riftn je tokenbetaling terug van de chain heeft gelezen; als deze wordt onderbroken, hervat het opnieuw proberen van de aankoop deze.",
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
-  "stories": {
+  "stories": {"comments":"Reacties","commentFailed":"Je reactie is niet geplaatst. Probeer het opnieuw.","signInToComment":"Log in om te reageren","post":"Plaatsen","commentsOff":"Reacties staan uit voor dit moment",
     "mute": "Dempen",
     "unfollow": "Ontvolgen",
     "mutedToast": "Gedempt. Je ziet hun Momenten en berichten niet meer.",

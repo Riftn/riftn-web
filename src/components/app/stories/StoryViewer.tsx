@@ -44,6 +44,8 @@ import { ageLabel, nameOf, startIndex } from './story-utils';
 import { sendStoryReply } from './story-reply';
 import { muteUser } from '@/lib/api/dehub/mutes';
 import { unfollowUser } from '@/lib/api/dehub/social';
+import { StoryComments } from './StoryComments';
+import { MomentComment, MomentHeart, MomentShare } from './moment-icons';
 import '@/styles/stories.css';
 
 interface Props {
@@ -77,7 +79,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [progress, setProgress] = useState(0);
   const [held, setHeld] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [sheet, setSheet] = useState<null | 'viewers' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
+  const [sheet, setSheet] = useState<null | 'viewers' | 'comments' | 'more' | 'report' | 'delete' | 'share' | 'share-dm'>(null);
   const [muted, setMuted] = useState(false);
   // Which moment has its picture in, by id: a cached image can report in before
   // the reset for a new moment runs, so a plain flag could stick at "loading".
@@ -620,12 +622,16 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           )}
           {!own && (
             <button type="button" data-sv-round data-st-dark-glass data-on={item.liked ? 'true' : 'false'} onClick={toggleLike} aria-label={t('stories.like', { defaultValue: 'Like' })}>
-              <Heart className={`w-5 h-5 ${item.liked ? 'fill-current' : ''}`} />
+              <MomentHeart className="w-[22px] h-[22px]" filled={item.liked} />
             </button>
           )}
+          <button type="button" data-sv-round data-st-dark-glass onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
+            <MomentComment className="w-[22px] h-[22px]" />
+            {(item.commentCount ?? 0) > 0 && <span data-sv-count>{formatCount(item.commentCount ?? 0)}</span>}
+          </button>
           {shareable && (
             <button type="button" data-sv-round data-st-dark-glass onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
-              <ShareIcon className="w-5 h-5" />
+              <MomentShare className="w-[22px] h-[22px]" />
             </button>
           )}
           {!own && isAuthenticated && item.allowReplies && reply.trim() && (
@@ -644,6 +650,16 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           <div data-sv-sheet-backdrop onClick={dismissSheet}>
             <div ref={sheetRef} data-sv-sheet onClick={e => e.stopPropagation()}>
               {sheet === 'viewers' && <ViewersList item={item} onOpen={openProfile} onClose={dismissSheet} />}
+              {sheet === 'comments' && (
+                <StoryComments
+                  item={item}
+                  signedIn={isAuthenticated}
+                  onOpen={openProfile}
+                  onClose={dismissSheet}
+                  onSignIn={() => openLoginModal()}
+                  onCount={n => setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, commentCount: n } : it) }))}
+                />
+              )}
               {sheet === 'share' && shareable && (
                 <div className="flex flex-col">
                   {isAuthenticated && <SheetButton onClick={() => setSheet('share-dm')}><Send className="size-[18px]" />{t('copy.20e392c29da3', { defaultValue: 'Send in a message' })}</SheetButton>}
