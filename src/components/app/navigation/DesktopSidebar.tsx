@@ -628,7 +628,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                       data-search-surface
                       aria-label={t('sidebar.searchMenu')}
                       className={cn(
-                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] outline-none transition-colors",
+                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] [@media(any-pointer:coarse)]:text-[16px] outline-none transition-colors",
                         desktopNavTextColor,
                         isLightTheme
                           ? "bg-black/5 border border-black/10 placeholder:text-zinc-500 focus:border-black/25"
@@ -899,7 +899,7 @@ export function DesktopSidebar({ onPostClick }: DesktopSidebarProps) {
                       data-search-surface
                       aria-label={t('sidebar.searchMenu')}
                       className={cn(
-                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] outline-none transition-colors",
+                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] [@media(any-pointer:coarse)]:text-[16px] outline-none transition-colors",
                         desktopNavTextColor,
                         isLightTheme
                           ? "bg-black/5 border border-black/10 placeholder:text-zinc-500 focus:border-black/25"
