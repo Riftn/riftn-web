@@ -24,6 +24,7 @@ import { TranslatableText, hasTranslatableText } from '@/components/app/Translat
 import { BioTranslateButton } from '@/components/app/profile/BioTranslateButton';
 import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
 import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
+import { MomentArchive } from './MomentArchive';
 import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
 import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { MutualFollowers } from '@/components/app/profile/MutualFollowers';
@@ -616,6 +617,8 @@ export function ProfileHeader({
               <ProfileLinksPill customs={profile.customs} githubLogin={profile.githubLogin} fields={profile.profileFields} className="shrink-0 mt-2" />
             )}
           </div>
+
+          {isViewingOwnProfile && profile.walletAddress && <MomentArchive key={profile.walletAddress} profileAddress={profile.walletAddress} />}
 
           {/* The streamer ladder. Renders nothing for a profile that has
               never ended a stream, so a non-streamer's page is unchanged. */}

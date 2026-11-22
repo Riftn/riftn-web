@@ -7231,6 +7231,7 @@
     "shareTitle": "@{{handle}} está a la venta en Riftn"
   },
   "stories": {
+    "momentArchive": "Archivo de momentos",
     "lifetime": "Duración de la historia",
     "momentPublished": "Tu momento se ha publicado",
     "addToMoment": "Añadir a tu momento",

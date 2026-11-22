@@ -4,7 +4,7 @@
  * reader lands on Home. A moment past its 24 hours says so.
  */
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { SEOHead } from '@/components/SEOHead';
@@ -33,6 +33,7 @@ function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const fromArchive = useLocation().state?.fromMomentArchive === true;
   const openViewer = useStoriesStore(s => s.openViewer);
   const closeViewer = useStoriesStore(s => s.closeViewer);
   const viewer = useStoriesStore(s => s.viewer);
@@ -57,8 +58,11 @@ function StoryPermalink({ id, scope, isAuthenticated, canSeeMature }: {
   useEffect(() => () => closeViewer(), [closeViewer]);
 
   useEffect(() => {
-    if (opened && !viewer) navigate('/app', { replace: true });
-  }, [opened, viewer, navigate]);
+    if (opened && !viewer) {
+      if (fromArchive) navigate(-1);
+      else navigate('/app', { replace: true });
+    }
+  }, [opened, viewer, navigate, fromArchive]);
 
   const name = data?.author ? nameOf(data.author) : null;
   return (
