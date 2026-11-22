@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { MapPin, Music2, Plus, X } from 'lucide-react';
+import { MapPin, Music2, Plus, SendHorizontal, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { buildAvatarUrl } from '@/lib/media-url';
@@ -103,7 +103,7 @@ function NoteTile({ author, note, label, own, onClick }: { author: StoryAuthor; 
   );
 }
 
-function SongLine({ song, autoPlay }: { song: StorySong; autoPlay?: boolean }) {
+function SongLine({ song, autoPlay, playToken = 0 }: { song: StorySong; autoPlay?: boolean; playToken?: number }) {
   const ref = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   useEffect(() => {
@@ -113,6 +113,14 @@ function SongLine({ song, autoPlay }: { song: StorySong; autoPlay?: boolean }) {
     audio.play().then(() => setPlaying(true)).catch(() => {});
     return () => audio.pause();
   }, [autoPlay, song.audioUrl, song.startMs]);
+  // A tap on the note's words plays the song (or keeps it playing): a
+  // browser can block the autoplay above, and the words are what people tap.
+  useEffect(() => {
+    const audio = ref.current;
+    if (!audio || !playToken || !audio.paused) return;
+    if (!audio.currentTime) audio.currentTime = (song.startMs || 0) / 1000;
+    audio.play().then(() => setPlaying(true)).catch(() => {});
+  }, [playToken, song.startMs]);
   const toggle = () => {
     const audio = ref.current;
     if (!audio) return;
@@ -136,11 +144,24 @@ function SongLine({ song, autoPlay }: { song: StorySong; autoPlay?: boolean }) {
 }
 
 function NoteCard({ note }: { note: Note }) {
+  const [playToken, setPlayToken] = useState(0);
   return (
     <div className="flex flex-col gap-2.5">
       {note.gifUrl && <img src={note.gifUrl} alt="" className="max-h-56 w-full rounded-xl object-contain" />}
-      {note.text && <p className="break-words text-center text-[17px] font-medium text-white">{note.text}</p>}
-      {note.song && <SongLine song={note.song} autoPlay />}
+      {/* The words sit in a chat bubble, like a message. With a song, the
+          bubble is a button that plays it. */}
+      {note.text && (
+        <button
+          type="button"
+          data-note-text-bubble
+          onClick={note.song ? () => setPlayToken(n => n + 1) : undefined}
+          disabled={!note.song}
+          className="mx-auto max-w-full break-words rounded-[20px] rounded-bl-md bg-white/10 px-4 py-2.5 text-left text-[16px] font-medium text-white disabled:cursor-default"
+        >
+          {note.text}
+        </button>
+      )}
+      {note.song && <SongLine song={note.song} autoPlay playToken={playToken} />}
       {note.location && (
         <p className="flex items-center justify-center gap-1 text-[13px] text-zinc-400"><MapPin className="h-3.5 w-3.5" />{note.location}</p>
       )}
@@ -286,7 +307,34 @@ function useSheetOpen(): boolean {
   );
 }
 
-export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor) => void }) {
+/** Reply to a note: a message box that sends straight into your chat with them. */
+function NoteReply({ note, name, onSend }: { note: Note; name: string; onSend: (text: string) => void }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState('');
+  const send = () => {
+    const reply = text.trim();
+    if (!reply) return;
+    // The note's words ride along, so the chat shows what was answered.
+    onSend(note.text ? `📝 “${note.text}”\n${reply}` : reply);
+  };
+  return (
+    <form data-note-reply className="flex items-center gap-2" onSubmit={e => { e.preventDefault(); send(); }}>
+      <input
+        value={text}
+        onChange={e => setText(e.target.value)}
+        maxLength={1000}
+        placeholder={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
+        aria-label={t('notes.replyTo', { defaultValue: 'Reply to {{name}}…', name })}
+        className="h-11 min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.06] px-4 text-[15px] text-white outline-none placeholder:text-zinc-500 focus:border-white/30"
+      />
+      <button type="submit" data-kit-button="primary" disabled={!text.trim()} aria-label={t('notes.send', { defaultValue: 'Send' })} className="!h-11 !w-11 !min-w-0 !rounded-full !p-0 flex items-center justify-center">
+        <SendHorizontal className="h-[18px] w-[18px]" />
+      </button>
+    </form>
+  );
+}
+
+export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor, reply?: string) => void }) {
   const { t } = useTranslation();
   const open = useSheetOpen();
   const data = useNotes();
@@ -306,9 +354,7 @@ export function NotesSheetHost({ onMessage }: { onMessage: (author: StoryAuthor)
         {viewing ? (
           <div className="flex flex-col gap-4">
             <NoteCard note={viewing.note} />
-            <button type="button" data-kit-button="primary" data-note-message onClick={() => { const a = viewing.author; close(); onMessage(a); }}>
-              {t('notes.message', { defaultValue: 'Message' })}
-            </button>
+            <NoteReply key={viewing.note.id} note={viewing.note} name={nameOf(viewing.author)} onSend={reply => { const a = viewing.author; close(); onMessage(a, reply); }} />
             <button type="button" data-kit-button="quiet" data-note-back onClick={() => setViewing(null)}>
               {t('notes.back', { defaultValue: 'Back to notes' })}
             </button>

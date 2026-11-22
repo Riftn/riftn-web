@@ -21650,6 +21650,8 @@
     "gifHost": "Choisis un GIF dans l'onglet GIF pour les notes.",
     "back": "Retour aux notes",
     "fromFollowing": "Des personnes que tu suis",
+    "replyTo": "Répondre à {{name}}…",
+    "send": "Envoyer",
     "optionDetail": "Une courte phrase, une chanson ou un GIF pendant 24 heures",
     "who": "Les personnes qui te suivent peuvent la voir pendant 24 heures.",
     "delete": "Supprimer la note",

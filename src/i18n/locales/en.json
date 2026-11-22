@@ -21620,6 +21620,8 @@
     "gifHost": "Pick a GIF from the GIF tab for notes.",
     "back": "Back to notes",
     "fromFollowing": "From people you follow",
+    "replyTo": "Reply to {{name}}…",
+    "send": "Send",
     "optionDetail": "A short line, song or GIF for 24 hours",
     "who": "People who follow you can see it for 24 hours.",
     "delete": "Delete note",

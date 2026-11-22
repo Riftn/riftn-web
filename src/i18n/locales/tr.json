@@ -21646,6 +21646,8 @@
     "gifHost": "Notlar için GIF sekmesinden bir GIF seç.",
     "back": "Notlara dön",
     "fromFollowing": "Takip ettiğin kişilerden",
+    "replyTo": "{{name}} adlı kişiye yanıt ver…",
+    "send": "Gönder",
     "optionDetail": "24 saatliğine kısa bir satır, şarkı veya GIF",
     "who": "Seni takip edenler 24 saat boyunca görebilir.",
     "delete": "Notu sil",
