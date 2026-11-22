@@ -7235,6 +7235,10 @@
     "shareTitle": "@{{handle}} est à vendre sur Riftn"
   },
   "stories": {
+    "mute": "Masquer",
+    "unfollow": "Ne plus suivre",
+    "mutedToast": "Masqué. Vous ne verrez plus ses Moments ni ses publications.",
+    "unfollowedToast": "Vous ne suivez plus ce compte",
     "captionFont": "Police du texte",
     "captionStyles": {"classic":"Classique","minimal":"Minimaliste","groove":"Groove","poster":"Affiche","book":"Livre","editorial":"Éditorial","headline":"À la une","mono":"Monospace","terminal":"Terminal","typewriter":"Machine à écrire","marker":"Feutre","script":"Manuscrite"},
     "selectedPeople": "Uniquement les personnes sélectionnées",

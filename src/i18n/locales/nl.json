@@ -7421,6 +7421,10 @@
     "shareTitle": "@{{handle}} te koop op Riftn"
   },
   "stories": {
+    "mute": "Dempen",
+    "unfollow": "Ontvolgen",
+    "mutedToast": "Gedempt. Je ziet hun Momenten en berichten niet meer.",
+    "unfollowedToast": "Ontvolgd",
     "captionFont": "Lettertype voor tekst",
     "captionStyles": {"classic":"Klassiek","minimal":"Minimalistisch","groove":"Swing","poster":"Poster","book":"Boek","editorial":"Redactioneel","headline":"Krantenkop","mono":"Monospace","terminal":"Terminal","typewriter":"Typemachine","marker":"Markeerstift","script":"Handschrift"},
     "selectedPeople": "Alleen geselecteerde personen",

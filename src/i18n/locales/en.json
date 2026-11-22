@@ -7195,6 +7195,10 @@
     "shareTitle": "@{{handle}} is for sale on Riftn"
   },
   "stories": {
+    "mute": "Mute",
+    "unfollow": "Unfollow",
+    "mutedToast": "Muted. You won't see their Moments or posts.",
+    "unfollowedToast": "Unfollowed",
     "captionFont": "Caption font",
     "captionStyles": {"classic":"Classic","minimal":"Minimal","groove":"Groove","poster":"Poster","book":"Book","editorial":"Editorial","headline":"Headline","mono":"Mono","terminal":"Terminal","typewriter":"Typewriter","marker":"Marker","script":"Script"},
     "selectedPeople": "Only selected people",

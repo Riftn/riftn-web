@@ -7255,6 +7255,10 @@
     "shareTitle": "@{{handle}} معروض للبيع على Riftn"
   },
   "stories": {
+    "mute": "كتم",
+    "unfollow": "إلغاء المتابعة",
+    "mutedToast": "تم الكتم. لن ترى لحظاته أو منشوراته.",
+    "unfollowedToast": "تم إلغاء المتابعة",
     "captionFont": "خط النص",
     "captionStyles": {"classic":"كلاسيكي","minimal":"بسيط","groove":"إيقاعي","poster":"ملصق","book":"كتاب","editorial":"افتتاحية","headline":"عنوان","mono":"أحادي المسافة","terminal":"طرفية","typewriter":"آلة كاتبة","marker":"خط عريض بالقلم","script":"خط يدوي"},
     "selectedPeople": "الأشخاص المحددون فقط",

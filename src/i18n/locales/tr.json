@@ -7231,6 +7231,10 @@
     "shareTitle": "@{{handle}} Riftn'da satışta"
   },
   "stories": {
+    "mute": "Sessize al",
+    "unfollow": "Takibi bırak",
+    "mutedToast": "Sessize alındı. Anlarını ve gönderilerini görmeyeceksin.",
+    "unfollowedToast": "Takip bırakıldı",
     "captionFont": "Yazı tipi",
     "captionStyles": {"classic":"Klasik","minimal":"Minimal","groove":"Ritmik","poster":"Afiş","book":"Kitap","editorial":"Editoryal","headline":"Manşet","mono":"Eş aralıklı","terminal":"Terminal","typewriter":"Daktilo","marker":"Keçeli kalem","script":"El yazısı"},
     "selectedPeople": "Yalnızca seçilen kişiler",

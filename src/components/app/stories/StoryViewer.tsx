@@ -42,6 +42,8 @@ import {
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { ageLabel, nameOf, startIndex } from './story-utils';
 import { sendStoryReply } from './story-reply';
+import { muteUser } from '@/lib/api/dehub/mutes';
+import { unfollowUser } from '@/lib/api/dehub/social';
 import '@/styles/stories.css';
 
 interface Props {
@@ -368,6 +370,32 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     send();
   };
 
+  // Mute hides this person's Moments and posts (the shelf already leaves out
+  // muted accounts); they are never told. Moves on to the next person.
+  const muteAuthor = (address: string) => {
+    setSheet(null);
+    void muteUser(address)
+      .then(result => {
+        if (!result?.status) throw new Error('mute failed');
+        changedRef.current = true;
+        toast.success(t('stories.mutedToast', { defaultValue: "Muted. You won't see their Moments or posts." }));
+        goAuthor(1);
+      })
+      .catch(() => toast.error(t('common.tryAgain', { defaultValue: 'Try again' })));
+  };
+
+  const unfollowAuthor = (address: string) => {
+    setSheet(null);
+    void unfollowUser(address)
+      .then(result => {
+        if (!result?.result) throw new Error('unfollow failed');
+        changedRef.current = true;
+        setEntries(list => list.map(e => e.author.address === address ? { ...e, following: false } : e));
+        toast.success(t('stories.unfollowedToast', { defaultValue: 'Unfollowed' }));
+      })
+      .catch(() => toast.error(t('common.tryAgain', { defaultValue: 'Try again' })));
+  };
+
   const openProfile = (address: string) => {
     close();
     navigate(`/app/profile?id=${address}`);
@@ -641,6 +669,12 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
                   ) : (
                     <>
                       <SheetButton onClick={() => openProfile(a.address)}>{t('stories.viewProfile', { defaultValue: 'View profile' })}</SheetButton>
+                      {isAuthenticated && entry.following && (
+                        <SheetButton onClick={() => unfollowAuthor(a.address)}>{t('stories.unfollow', { defaultValue: 'Unfollow' })}</SheetButton>
+                      )}
+                      {isAuthenticated && (
+                        <SheetButton onClick={() => muteAuthor(a.address)}>{t('stories.mute', { defaultValue: 'Mute' })}</SheetButton>
+                      )}
                       <SheetButton danger onClick={() => setSheet('report')}>{t('stories.report', { defaultValue: 'Report' })}</SheetButton>
                     </>
                   )}
