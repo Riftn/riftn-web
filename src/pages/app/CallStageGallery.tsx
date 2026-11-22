@@ -9,6 +9,7 @@
  * Prefix "group-" for a group call (group-incoming, group-ringing, group-active,
  * group-active-video, group-mini, group-ended); `people=` sets how many others are in it.
  * `subs=1` turns live subtitles on with sample lines; `subs=es` also reads them in Spanish.
+ * `bg=blur|night|ocean|sunset|forest|photo` marks that call background as picked (tap the corner button to see the row).
  */
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -17,6 +18,7 @@ import VideoIcon from '@/components/ui/cut-icons/video';
 import { useAppTheme } from '@/contexts/ThemeContext';
 import { CallContext } from '@/contexts/CallContext';
 import { AuthContext } from '@/contexts/AuthContext';
+import { isCallBackgroundId, type CallBackgroundId } from '@/lib/calls/call-background';
 import type { CallOutcome, UseCallReturn } from '@/hooks/use-call';
 import VoiceCallModal from '@/components/app/chat/calls/VoiceCallModal';
 import VideoCallModal from '@/components/app/chat/calls/VideoCallModal';
@@ -144,6 +146,8 @@ export default function CallStageGallery() {
       startCall: async () => {}, endCall: noop, acceptCall: noop, rejectCall: noop, toggleMute: noop, toggleCamera: noop, switchCamera: noop,
       minimizeCall: noop, maximizeCall: noop, dismissCallSummary: noop, clearCallFailure: noop, debugCallState: noop,
       checkForCalls: async () => {}, setCallMessageHandler: noop,
+      callBackground: isCallBackgroundId(params.get('bg')) ? params.get('bg') as CallBackgroundId : 'none',
+      callBackgroundBusy: false, setCallBackground: noop,
     };
     return value as UseCallReturn;
     // eslint-disable-next-line react-hooks/exhaustive-deps
