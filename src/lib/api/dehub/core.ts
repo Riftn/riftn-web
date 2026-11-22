@@ -1,4 +1,5 @@
 import { isKidsModeLocked } from "@/lib/kids-mode-lock";
+import { MAX_ATTACHMENT_SIZE } from '@/lib/attachments';
 import { noteImageSizes } from '@/lib/image-size-hints';
 import { noteCoAuthors } from '@/lib/co-author-store';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
@@ -750,11 +751,22 @@ export async function authedUpload<T>(
     signal,
   } = options;
 
+  const dmUpload = endpoint === '/api/dm/upload';
+  const totalLimit = dmUpload
+    ? MAX_ATTACHMENT_SIZE + (formData.get('encryptedKind') === 'file' ? 20 + 16 * Math.ceil(MAX_ATTACHMENT_SIZE / 65536) : 0)
+    : 100_000_000;
   let bytes = 0;
   formData.forEach(value => {
     if (typeof value === "string") return;
     bytes += value.size;
-    if ((value.type.startsWith("image/") && value.size > 42_069_000) || bytes > 100_000_000) {
+    if (dmUpload && bytes > totalLimit) {
+      const message = _translateCopy("dm.attachTooLarge", {
+        defaultValue: '"{{name}}" is over the {{size}} MB limit.',
+        name: value.name, size: MAX_ATTACHMENT_SIZE / 1024 / 1024,
+      });
+      throw new UploadHttpError(message, 413, "UPLOAD_TOO_LARGE");
+    }
+    if ((value.type.startsWith("image/") && value.size > 42_069_000) || bytes > totalLimit) {
       throw new UploadHttpError(
         "Images must be 42.069 MB or smaller; this upload must total 100 MB or less. Larger videos require resumable upload. Please retry when it is available.",
         413, "UPLOAD_TOO_LARGE",
