@@ -23194,5 +23194,15 @@
     "offToast": "Tes messages ici partent tels que tu les écris",
     "onToast": "Tes messages ici partent maintenant en {{language}}",
     "noLanguage": "Cette personne n'a pas encore choisi de langue, tes messages partent donc tels que tu les écris pour l'instant"
+  },
+  "quickReply": {
+    "reply": "Répondre",
+    "send": "Envoyer",
+    "placeholder": "Écris une réponse…",
+    "failedTitle": "Ta réponse n'a pas été envoyée",
+    "sent": "Réponse envoyée",
+    "open": "Ouvrir le chat",
+    "encrypted": "Message chiffré",
+    "sentAttachment": "A envoyé une pièce jointe"
   }
 }

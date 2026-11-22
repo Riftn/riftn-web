@@ -23164,5 +23164,15 @@
     "offToast": "Your messages here go as you type them",
     "onToast": "Your messages here now go out in {{language}}",
     "noLanguage": "They haven't picked an app language yet, so your messages go as you type them for now"
+  },
+  "quickReply": {
+    "reply": "Reply",
+    "send": "Send",
+    "placeholder": "Write a reply…",
+    "failedTitle": "Your reply wasn't sent",
+    "sent": "Reply sent",
+    "open": "Open chat",
+    "encrypted": "Encrypted message",
+    "sentAttachment": "Sent an attachment"
   }
 }

@@ -23438,5 +23438,15 @@
     "offToast": "Je berichten hier gaan zoals je ze typt",
     "onToast": "Je berichten hier gaan nu in het {{language}}",
     "noLanguage": "Ze hebben nog geen app-taal gekozen, dus je berichten gaan voorlopig zoals je ze typt"
+  },
+  "quickReply": {
+    "reply": "Beantwoorden",
+    "send": "Versturen",
+    "placeholder": "Schrijf een antwoord…",
+    "failedTitle": "Je antwoord is niet verstuurd",
+    "sent": "Antwoord verstuurd",
+    "open": "Chat openen",
+    "encrypted": "Versleuteld bericht",
+    "sentAttachment": "Heeft een bijlage gestuurd"
   }
 }

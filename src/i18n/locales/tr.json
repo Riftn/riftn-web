@@ -23190,5 +23190,15 @@
     "offToast": "Mesajların burada yazdığın gibi gider",
     "onToast": "Mesajların burada artık {{language}} olarak gidiyor",
     "noLanguage": "Henüz bir uygulama dili seçmediler, bu yüzden mesajların şimdilik yazdığın gibi gider"
+  },
+  "quickReply": {
+    "reply": "Yanıtla",
+    "send": "Gönder",
+    "placeholder": "Yanıt yaz…",
+    "failedTitle": "Yanıtın gönderilmedi",
+    "sent": "Yanıt gönderildi",
+    "open": "Sohbeti aç",
+    "encrypted": "Şifreli mesaj",
+    "sentAttachment": "Bir ek gönderdi"
   }
 }
