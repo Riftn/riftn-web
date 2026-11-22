@@ -220,6 +220,8 @@ test('signed-in feed, comments and co-authors go through Riftn access checks', a
   assert.notEqual((await call('dehub_read_post_as_me', { token_id: '42' })).isError, true);
   assert.equal((await call('dehub_read_post_as_me', { token_id: '42' }, other)).isError, true);
   await call('dehub_my_feed', { following_only: true });
+  assert.equal((await call('dehub_watch_history', { address: B })).isError, true);
+  await call('dehub_watch_history', { page: 2 });
   await call('dehub_saved_posts', { page: 2 });
   await call('dehub_edit_comment', { comment_id: '123', content: 'Updated comment' });
   await call('dehub_delete_comment', { comment_id: '123' });
@@ -231,6 +233,7 @@ test('signed-in feed, comments and co-authors go through Riftn access checks', a
     ['GET', '/api/nft_info/42', undefined, 'Bearer one'],
     ['GET', '/api/nft_info/42', undefined, 'Bearer two'],
     ['GET', '/api/feed?page=1&limit=20&sortBy=createdAt&sortOrder=desc&status=all&followingOnly=true', undefined, 'Bearer one'],
+    ['GET', `/api/my_watched_nfts?page=2&limit=20&address=${A}`, undefined, 'Bearer one'],
     ['GET', '/api/savedPosts?page=2&limit=20', undefined, 'Bearer one'],
     ['POST', '/api/edit_comment', { commentId: '123', content: 'Updated comment' }, 'Bearer one'],
     ['DELETE', '/api/delete_comment', { commentId: 123 }, 'Bearer one'],

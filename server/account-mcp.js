@@ -121,7 +121,7 @@ tool('dehub_features', 'Discover Riftn account controls', 'List the available ch
     { feature: 'Profile and privacy', tools: ['dehub_profile','dehub_account','dehub_connected_profile','dehub_update_profile'], url: `${ORIGIN}/app/settings` },
     { feature: 'Posts and conversations', tools: ['dehub_feed','dehub_post','dehub_search','dehub_my_posts','dehub_save_draft','dehub_drafts','dehub_delete_draft','dehub_create_post','dehub_quote_post','dehub_edit_post','dehub_delete_post','dehub_post_visibility','dehub_post_stats','dehub_best_post_times','dehub_scheduled_posts','dehub_reschedule_post','dehub_fans_online','dehub_create_poll','dehub_poll','dehub_vote_poll','dehub_remove_poll_vote','dehub_close_poll','dehub_post_image_allowance','dehub_add_post_images','dehub_replace_post_image','dehub_replace_video_cover','dehub_comments','dehub_comment','dehub_set_reaction','dehub_repost'] },
     { feature: 'Your agents', tools: ['dehub_my_agents','dehub_agent_welcomes','dehub_set_agent_welcome','dehub_agent_welcome_log'], note: 'Pass as_agent to post, reply, react, repost, follow, edit the profile or manage notifications as one of your agents.' },
-    { feature: 'Your feed, following and follow requests', tools: ['dehub_my_feed','dehub_read_post_as_me','dehub_follow','dehub_follow_list','dehub_followed_tags','dehub_set_followed_tag','dehub_follow_requests','dehub_decide_follow_request','dehub_decide_all_follow_requests'] },
+    { feature: 'Your feed, following and follow requests', tools: ['dehub_my_feed','dehub_read_post_as_me','dehub_watch_history','dehub_follow','dehub_follow_list','dehub_followed_tags','dehub_set_followed_tag','dehub_follow_requests','dehub_decide_follow_request','dehub_decide_all_follow_requests'] },
     { feature: 'Comment editing and post collaboration', tools: ['dehub_edit_comment','dehub_delete_comment','dehub_coauthors','dehub_invite_coauthor','dehub_answer_coauthor_invite','dehub_remove_coauthor'] },
     { feature: 'Notifications', tools: ['dehub_notifications','dehub_unread_notifications','dehub_mark_notification_read','dehub_mark_notifications_read'], url: `${ORIGIN}/app/notifications` },
     { feature: 'Blocks and mutes', tools: ['dehub_moderation_list','dehub_set_moderation'], url: `${ORIGIN}/app/settings` },
@@ -184,6 +184,12 @@ tool('dehub_my_feed', 'Read my Riftn feed', 'Browse the signed-in Riftn feed. Us
 tool('dehub_read_post_as_me', 'Read a post as my Riftn account', 'Read a post with the connected viewer’s access and engagement state. Riftn applies its regular visibility and access checks.', {
   token_id: id,
 }, 'dehub:read', async (a, ctx) => success(await api(ctx, `/nft_info/${a.token_id}`)), { read: true });
+tool('dehub_watch_history', 'Read my watch history', 'Read the connected person’s Riftn viewing history. Use page to get older entries.', {
+  page, limit,
+}, 'dehub:read', async (a, ctx) => {
+  const params = new URLSearchParams({ page: a.page, limit: a.limit, address: ctx.wallet });
+  return success(await api(ctx, `/my_watched_nfts?${params}`));
+}, { read: true });
 
 tool('dehub_account', 'Get my connected Riftn account', 'Identify the connected account and read its profile. Use before changing a profile or publishing to confirm the active identity.', {}, 'dehub:read', async (_, ctx) => {
   const p = unwrap(await api(ctx, `/account_info/${ctx.wallet}`));
@@ -475,7 +481,9 @@ tool('dehub_generate_content', 'Generate content in Creator Studio', 'Create an 
   return ctx.generate(a);
 }, { destructive: true });
 tool('dehub_generation_status', 'Check one of my content jobs', 'Read a job started through this connection. Call once when requested; if still running, return its state and avoid repeated polling. Does not create or charge another generation.', { job_id: z.string().uuid() }, 'dehub:read', async (a, ctx) => ctx.generationStatus(a.job_id), { read: true });
-tool('dehub_creator_library', 'Read my Creator library', 'Read the connected account\'s saved images, videos, audio and 3D assets, shared with web and mobile. Media links expire; request the library again when needed.', { offset: z.number().int().min(0).max(10000).default(0) }, 'dehub:read', async (a, ctx) => success(await edge(ctx, 'creator-library', { action: 'list', offset: a.offset })), { read: true });
+tool('dehub_creator_library', 'Read my Creator library', 'Read the connected account’s saved images, videos, audio and 3D assets. Set favorites or hidden only to view those library sections. Media links expire; request the library again when needed.', {
+  offset: z.number().int().min(0).max(10000).default(0), favorites: z.boolean().optional(), hidden: z.boolean().optional(),
+}, 'dehub:read', async (a, ctx) => success(await edge(ctx, 'creator-library', { action: 'list', offset: a.offset, favorites: a.favorites, hidden: a.hidden })), { read: true });
 
 export const accountTools = tools;
 const authError = scope => failure(
