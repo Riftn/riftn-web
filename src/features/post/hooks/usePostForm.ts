@@ -20,7 +20,8 @@ import { createLogger } from '@/lib/logger';
 
 const mintLogger = createLogger('PostForm.handlePost');
 import { useCreatorPlansLite } from '@/hooks/use-creator-plans';
-import { createQuiz, setPhotoTags as savePhotoTags, isQuizDraftValid, type QuizDraft, type PhotoTag } from '@/lib/api/dehub';
+import { createQuiz, isQuizDraftValid, type QuizDraft } from '@/lib/api/dehub/quiz';
+import { setPhotoTags as savePhotoTags, type PhotoTag } from '@/lib/api/dehub/photo-tags';
 import { mintPost, createPoll, getMintFee, getPostQuota, quotePostCharge, keepPostOffChain, AuthenticationError, PaymentRequiredError, UploadHttpError, type MintFeeQuoteResponse, type MintResponse, type PostQuotaStatus, type ShopLink } from '@/lib/api/dehub';
 import { videoEditsPayload, hasVideoEdits } from '../lib/video-edits';
 import { startDraftVideo, isDraftUsable, type DraftVideoUpload, type DraftVideoSnapshot } from '../lib/draft-video';
