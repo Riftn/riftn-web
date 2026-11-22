@@ -266,3 +266,13 @@ html[data-theme="system"][data-system-tone="light"] #root:not(#_):not(#_) [data-
 /* Explore filter X: dark ink on paper reads as a smudge at the dark themes'
    strength, so the glow is dialled down. */
 html[data-theme="system"][data-system-tone="light"] [data-explore-filter-glow] { --explore-glow-core: 28%; --explore-glow-edge: 8%; }
+
+/* Creator: the parked composer pill (shown once the page scrolls) was forced
+   dark while the light pass turned its words dark too, so on light themes it
+   read as an empty black bar. Give it a solid light surface instead. */
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_) [data-creator-compact] > div {
+  background: rgb(255 255 255 / 0.96) !important;
+  border-color: rgb(0 0 0 / 0.08) !important;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.14) !important;
+  color: #242428;
+}

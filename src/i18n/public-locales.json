@@ -1,5 +1,5 @@
 {
-  "version": "e493002b23901a3e",
+  "version": "720150323bac717a",
   "routes": {
     "/": [
       "ar",
@@ -1031,6 +1031,13 @@
       "tr"
     ],
     "/guides/how-to-buy-dhb-token-uk": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/guides/how-to-stream-on-riftn": [
       "ar",
       "es",
       "fr",
