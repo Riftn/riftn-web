@@ -1,5 +1,5 @@
 {
-  "version": "0ca899e05581f5f1",
+  "version": "e493002b23901a3e",
   "routes": {
     "/": [
       "ar",
@@ -78,6 +78,13 @@
       "nl",
       "tr"
     ],
+    "/arcade/correspondence-chess": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
     "/arcade/gods-eye": [
       "ar",
       "es",
@@ -93,6 +100,13 @@
       "tr"
     ],
     "/arcade/kings-gambit": [
+      "ar",
+      "es",
+      "fr",
+      "nl",
+      "tr"
+    ],
+    "/arcade/okey": [
       "ar",
       "es",
       "fr",

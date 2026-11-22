@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useContext } from 'react';
+import { QueryClientContext, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { marketTicker } from '@/lib/api/dehub/games';
 
@@ -8,6 +9,11 @@ import { marketTicker } from '@/lib/api/dehub/games';
  * price source is down instead of showing an empty strip.
  */
 export function MarketTicker() {
+  // The menu also renders in tests without a query client; draw nothing there.
+  return useContext(QueryClientContext) ? <Ticker /> : null;
+}
+
+function Ticker() {
   const { t, i18n } = useTranslation();
   const { data } = useQuery({
     queryKey: ['market-ticker'],
