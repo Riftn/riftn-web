@@ -115,6 +115,7 @@ import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
 import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
 import { NewMembersCarousel } from '@/components/app/NewMembersCarousel';
 import { LeaderboardCarousel } from '@/components/app/feeds/LeaderboardCarousel';
+import { HomeShortcuts } from '../navigation/HomeShortcuts';
 import { StoryShelf } from '@/components/app/stories/StoryShelf';
 import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
 
@@ -2203,6 +2204,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
       })()}
 
 
+      <HomeShortcuts />
       {showFilterLoader ? (
         <FeedFilterLoader />
       ) : (isLoadingState || isAutoRetrying) ? (

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { House } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { LucideIcon } from 'lucide-react';
@@ -14,7 +16,7 @@ import type { NavItem } from '@/types/app.types';
 import { NAV_LABEL_KEYS } from './SidebarNavItem';
 import { NAV_ITEMS } from '@/constants/app.constants';
 import { applyNavOrder } from '@/lib/nav-order';
-import { useNavOrderEditor } from '@/hooks/use-nav-order';
+import { useHomeShortcuts, useNavOrderEditor } from '@/hooks/use-nav-order';
 import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { navItemId } from './nav-item-id';
 
@@ -153,7 +155,15 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
   const byId = useMemo(() => new Map(ordered.map((item) => [navItemId(item), item])), [ordered]);
   const ids = useMemo(() => ordered.map(navItemId), [ordered]);
   const onCommit = useCallback((next: string[]) => save(next), [save]);
-  const { order, draggingId, animateNextChange, itemProps } = useDragReorder({ ids, onCommit, disabled: searching });
+  const { pins, toggle } = useHomeShortcuts();
+  const homeTarget = useRef<HTMLDivElement>(null);
+  const onDropOutside = (id: string, x: number, y: number) => {
+    const rect = homeTarget.current?.getBoundingClientRect();
+    if (!rect || x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return false;
+    toggle(id);
+    return true;
+  };
+  const { order, draggingId, animateNextChange, itemProps } = useDragReorder({ ids, onCommit, onDropOutside, disabled: searching });
   const onReset = useCallback(() => { animateNextChange(); reset(); }, [animateNextChange, reset]);
 
   const isActive = (item: NavItem) =>
@@ -226,6 +236,12 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
   // The person's own order (default: the rail's), one continuous grid.
   return (
     <>
+      {draggingId && createPortal(
+        <div ref={homeTarget} data-home-shortcut-drop role="status" className="pointer-events-none fixed inset-x-0 top-0 z-[10000] flex h-[14dvh] items-end justify-center pb-2">
+          <span className="flex items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-lg">
+            <House className="size-4" />{t(pins.includes(draggingId) ? 'communities.unpin' : 'communities.pin')} · {t('nav.home')}
+          </span>
+        </div>, document.body)}
       <nav className={cn('grid gap-2', big ? 'grid-cols-3' : 'grid-cols-4')} data-menu-reorder={draggingId ? 'dragging' : 'idle'}>
         {order.map((id) => byId.get(id)).filter((item): item is NavItem => !!item).map(renderNavTile)}
       </nav>

@@ -147,6 +147,7 @@ export function ViewingPreferencesSync() {
   useNavOrderSync('menu');
   useNavOrderSync('rail');
   useNavOrderSync('bar');
+  useNavOrderSync('home');
   useFollowGroupSync();
   useAdLoadSync();
   useFeedVideoShapeSync();
