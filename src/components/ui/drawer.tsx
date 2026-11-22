@@ -143,12 +143,18 @@ export function warmDeferredSheets(): void {
 type CustomDrawerProps = React.ComponentProps<typeof DrawerPrimitive.Root> & {
   /** Opt this deferred sheet in to `warmDeferredSheets()` — see the note there. */
   warmable?: boolean;
+  /**
+   * Mount this one sheet out of dormancy now, closed, because its opener is a
+   * keystroke away (the @ list, once an @ is typed). Same early mount as
+   * `warmable`, but for this sheet alone rather than every listening one.
+   */
+  warm?: boolean;
   walletPrompt?: boolean;
   /** Let this sheet complete Vaul's 500ms exit; other sheets close immediately. */
   animatedExit?: boolean;
 };
 
-const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, warmable = false, walletPrompt = false, animatedExit = false, children, ...props }: CustomDrawerProps) => {
+const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, warmable = false, warm = false, walletPrompt = false, animatedExit = false, children, ...props }: CustomDrawerProps) => {
   const unlockOpen = useWalletUnlockPrompt();
   const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange, animatedExit ? 550 : 0);
   const canDeferRef = React.useRef<boolean | null>(null);
@@ -162,8 +168,8 @@ const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, war
   );
 
   React.useEffect(() => {
-    if (phase === "dormant" && lifetime.open) setPhase("mounting");
-  }, [phase, lifetime.open]);
+    if (phase === "dormant" && (lifetime.open || warm)) setPhase("mounting");
+  }, [phase, lifetime.open, warm]);
 
   // Same transition the open path runs, just early: a warm request mounts the
   // Root closed now so the real `open` flip later is same-frame. Once live the
