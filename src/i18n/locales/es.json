@@ -7709,7 +7709,21 @@
     "addComment": "Añade un comentario...",
     "delete": "Eliminar",
     "sortRecent": "Más recientes",
-    "sortOldest": "Más antiguos"
+    "sortOldest": "Más antiguos",
+    "agoLabel": "hace {{time}}",
+    "momentTag": "MOMENTO",
+    "hoursLeft": "quedan {{n}} h",
+    "minutesLeft": "quedan {{n}} min",
+    "watchedCount": "{{n}} vistas",
+    "nOfM": "{{n}} de {{m}}",
+    "sendTo": "Enviar a",
+    "toEveryone": "Todos",
+    "toOnly": "Solo {{name}}",
+    "signInToSay": "Inicia sesión para escribir",
+    "saySomething": "Di algo…",
+    "replyTo": "Responder a {{name}}",
+    "momentChat": "Chat del momento",
+    "upNext": "A continuación"
   },
   "subscriptions": {
     "subscribersOnly": "Solo suscriptores",

@@ -7898,7 +7898,21 @@
     "addComment": "Voeg een opmerking toe...",
     "delete": "Verwijderen",
     "sortRecent": "Meest recent",
-    "sortOldest": "Oudste"
+    "sortOldest": "Oudste",
+    "agoLabel": "{{time}} geleden",
+    "momentTag": "MOMENT",
+    "hoursLeft": "nog {{n}} u",
+    "minutesLeft": "nog {{n}} min",
+    "watchedCount": "{{n}} keer bekeken",
+    "nOfM": "{{n}} van {{m}}",
+    "sendTo": "Sturen naar",
+    "toEveryone": "Iedereen",
+    "toOnly": "Alleen {{name}}",
+    "signInToSay": "Log in om iets te zeggen",
+    "saySomething": "Zeg iets…",
+    "replyTo": "Reageer op {{name}}",
+    "momentChat": "Momentchat",
+    "upNext": "Hierna"
   },
   "subscriptions": {
     "subscribersOnly": "Alleen voor abonnees",

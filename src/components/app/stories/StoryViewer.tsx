@@ -12,14 +12,15 @@
  * show who watched instead of a reply bar.
  */
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ChevronLeft, ChevronRight, Eye, Heart, Link2, Loader2, Repeat2, Volume2, VolumeX } from 'lucide-react';
 import Close from '@/components/ui/cut-icons/close';
-import More from '@/components/ui/cut-icons/more';
+import MoreVertical from '@/components/ui/cut-icons/morevertical';
+import Plus from '@/components/ui/cut-icons/add';
 import Send from '@/components/ui/cut-icons/send';
 import ShareIcon from '@/components/ui/cut-icons/feedshare';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,6 +30,7 @@ import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
 import { formatCount } from '@/lib/format-count';
 import { useStoriesStore } from '@/store/storiesStore';
 import {
+  addStoryComment,
   deleteStory,
   getStory,
   getStoryViewers,
@@ -40,11 +42,14 @@ import {
   type StoryViewer as StoryViewerRow,
 } from '@/lib/api/dehub/stories';
 import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
-import { ageLabel, nameOf, startIndex } from './story-utils';
+import { ageLabel, coverOf, nameOf, startIndex } from './story-utils';
 import { sendStoryReply } from './story-reply';
 import { muteUser } from '@/lib/api/dehub/mutes';
 import { unfollowUser } from '@/lib/api/dehub/social';
 import { StoryComments } from './StoryComments';
+import { StoryRoomChat, StoryRoomRows, useMomentComments } from './StoryRoomChat';
+import { toggleFollowFor } from '@/hooks/use-follow';
+import '@/styles/live-audience.css';
 import { MomentComment, MomentHeart, MomentShare } from './moment-icons';
 import '@/styles/stories.css';
 
@@ -56,6 +61,27 @@ interface Props {
 }
 
 const HOLD_MS = 220;
+
+/** "21h left", "40m left": how long until the moment goes away. */
+function timeLeftLabel(expiresAt: string, t: (k: string, o: Record<string, unknown>) => string): string {
+  const mins = Math.max(0, Math.round((Date.parse(expiresAt) - Date.now()) / 60000));
+  if (mins >= 60) return t('stories.hoursLeft', { n: Math.floor(mins / 60), defaultValue: '{{n}}h left' });
+  return t('stories.minutesLeft', { n: Math.max(1, mins), defaultValue: '{{n}}m left' });
+}
+
+/** Wide screens park the comments in a panel beside the moment, like the live page. */
+function useDocked(): boolean {
+  const query = '(min-width: 1200px)';
+  const [docked, setDocked] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia?.(query);
+    if (!mq) return;
+    const on = () => setDocked(mq.matches);
+    mq.addEventListener?.('change', on);
+    return () => mq.removeEventListener?.('change', on);
+  }, []);
+  return docked;
+}
 const ShareToDmModal = lazy(() => import('@/components/app/modals/ShareToDmModal').then(m => ({ default: m.ShareToDmModal })));
 const REPORT_REASONS = [
   ['spam_misleading', 'Spam'],
@@ -88,6 +114,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [sending, setSending] = useState(false);
   const [openingOriginal, setOpeningOriginal] = useState(false);
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
+  const [replyTo, setReplyTo] = useState<'everyone' | 'author'>('everyone');
+  const [hearts, setHearts] = useState<{ id: number; x: number; d: number }[]>([]);
+  const docked = useDocked();
+  const queryClient = useQueryClient();
 
   const entry = entries[authorIdx];
   const snapshot: StoryItem | undefined = entry?.items[itemIdx];
@@ -115,6 +145,8 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const setLoaded = useCallback(() => setLoadedId(item?.id ?? null), [item?.id]);
   const own = !!entry && !!me && entry.author.address === me;
   const paused = held || typing || sheet !== null || openingOriginal || !loaded;
+  const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
+  const roomComments = room.data?.comments ?? [];
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -155,6 +187,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     setProgress(0);
     setSheet(s => (s === 'viewers' ? s : null));
     setOpeningOriginal(false);
+    setReplyTo('everyone');
     return () => { originalRequest.current = null; };
   }, [authorIdx, itemIdx]);
 
@@ -313,6 +346,11 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     if (!item) return;
     if (!isAuthenticated) return openLoginModal();
     const liked = !item.liked;
+    if (liked) {
+      const now = Date.now();
+      setHearts(list => [...list, ...[0, 1, 2, 3, 4].map(k => ({ id: now + k, x: Math.round((Math.random() - 0.5) * 24), d: k * 140 }))]);
+      window.setTimeout(() => setHearts(list => list.filter(h => h.id < now || h.id > now + 4)), 2200);
+    }
     setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, liked } : it) }));
     try {
       await likeStory(item.id, liked);
@@ -325,6 +363,22 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     const text = reply.trim();
     if (!item || !text || sending) return;
     setSending(true);
+    if (replyTo === 'everyone') {
+      try {
+        const row = await addStoryComment(item.id, text);
+        queryClient.setQueryData(['moment-room-comments', item.id, isAuthenticated], (old: { comments: (typeof row)[] } | undefined) =>
+          old ? { ...old, comments: [row, ...old.comments] } : { commentCount: 1, allowComments: true, comments: [row], next: null });
+        void queryClient.invalidateQueries({ queryKey: ['moment-room-comments', item.id] });
+        setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, commentCount: (it.commentCount ?? 0) + 1 } : it) }));
+        setReply('');
+        (document.activeElement as HTMLElement | null)?.blur();
+      } catch (e) {
+        toast.error((e as Error)?.message || t('stories.commentFailed', { defaultValue: "Your comment didn't go up. Try again." }));
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
     try {
       const outcome = await sendStoryReply(item, text, t('stories.repliedToYourMoment', { defaultValue: 'Replied to your moment' }));
       if (outcome === 'paid-chat') {
@@ -401,6 +455,17 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const openProfile = (address: string) => {
     close();
     navigate(`/app/profile?id=${address}`);
+  };
+
+  const followAuthor = () => {
+    if (!entry) return;
+    if (!isAuthenticated) return openLoginModal();
+    const address = entry.author.address;
+    setEntries(list => list.map(e => e.author.address === address ? { ...e, following: true } : e));
+    changedRef.current = true;
+    void toggleFollowFor(queryClient, address, false, { name: nameOf(entry.author) }).then(ok => {
+      if (!ok) setEntries(list => list.map(e => e.author.address === address ? { ...e, following: false } : e));
+    });
   };
 
   if (!entry || !item) return null;
@@ -555,36 +620,67 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
             </span>
           ))}
         </div>
-        <div data-sv-cap data-st-dark-glass>
-          <button type="button" className="relative mr-auto flex items-center gap-2.5 min-w-0" onClick={() => openProfile(a.address)}>
-            {face ? <img src={face} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" /> : <span className="w-8 h-8 rounded-full bg-white/20 shrink-0" />}
-            <span className="min-w-0 text-left">
-              <span className="block text-[14px] font-semibold leading-tight truncate">{own ? t('stories.yourDay', { defaultValue: 'Your day' }) : nameOf(a)}</span>
-              <span className="block text-[11.5px] text-white/70 mt-0.5">{ageLabel(item.createdAt)}{item.audience === 'followers' ? ` · ${t('stories.followersOnly', { defaultValue: 'Followers' })}` : ''}</span>
-            </span>
+        <div data-sv-scrim aria-hidden="true" />
+
+        {/* Who posted it, straight on the picture like the live player: the
+            face with Follow as a small glass +, name and age, then bare icons. */}
+        <div data-sv-head>
+          <span data-sv-face>
+            <button type="button" onClick={() => openProfile(a.address)} aria-label={nameOf(a)}>
+              {face ? <img src={face} alt="" /> : <span />}
+            </button>
+            {!own && !entry.following && (
+              <button type="button" data-live-follow onClick={followAuthor} aria-label={t('follow.follow', { defaultValue: 'Follow' })}>
+                <Plus className="h-3 w-3" />
+              </button>
+            )}
+          </span>
+          <button type="button" data-sv-who onClick={() => openProfile(a.address)}>
+            <b>{own ? t('stories.yourDay', { defaultValue: 'Your day' }) : nameOf(a)}</b>
+            <small>
+              {t('stories.agoLabel', { time: ageLabel(item.createdAt), defaultValue: '{{time}} ago' })}
+              {item.audience === 'followers' ? ` · ${t('stories.followersOnly', { defaultValue: 'Followers' })}` : ''}
+            </small>
           </button>
           {(item.type === 'video' && !item.muted) || item.song ? (
-            <button type="button" className="relative w-9 h-9 grid place-items-center" onClick={() => setMuted(m => !m)} aria-label={muted ? 'Sound on' : 'Sound off'}>
+            <button type="button" data-sv-icon onClick={() => setMuted(m => !m)} aria-label={muted ? t('stages.unmute', { defaultValue: 'Unmute' }) : t('stages.mute', { defaultValue: 'Mute' })}>
               {muted ? <VolumeX className="w-[18px] h-[18px]" /> : <Volume2 className="w-[18px] h-[18px]" />}
             </button>
           ) : null}
-          <button ref={moreButtonRef} type="button" className="relative w-9 h-9 shrink-0 grid place-items-center" onClick={() => setSheet('more')} aria-label={t('stories.moreActions', { defaultValue: 'Moment options' })} aria-expanded={sheet === 'more'}>
-            <More className="w-5 h-5" />
+          <button ref={moreButtonRef} type="button" data-sv-icon onClick={() => setSheet('more')} aria-label={t('stories.moreActions', { defaultValue: 'Moment options' })} aria-expanded={sheet === 'more'}>
+            <MoreVertical className="w-5 h-5" />
           </button>
-          <button type="button" className="relative w-9 h-9 grid place-items-center" onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
+          <button type="button" data-sv-icon onClick={close} aria-label={t('common.close', { defaultValue: 'Close' })}>
             <Close className="w-5 h-5" />
           </button>
         </div>
 
-        {item.song && (
-          <div data-sv-song data-st-dark-glass>
-            {item.song.artworkUrl ? <img src={item.song.artworkUrl} alt="" /> : <Music className="w-4 h-4" />}
-            <span>{item.song.title}{item.song.artist ? ` · ${item.song.artist}` : ''}</span>
-          </div>
-        )}
+        {/* Status on one line, text on the picture like the live pills. */}
+        <div data-sv-status>
+          <span data-sv-pill>
+            <span data-sv-tag>{t('stories.momentTag', { defaultValue: 'MOMENT' })}</span>
+            {timeLeftLabel(item.expiresAt, t)}
+          </span>
+          {own && (
+            <button type="button" data-sv-pill data-sv-viewers-trigger onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
+              <Eye className="w-3.5 h-3.5" />
+              {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              {(item.likeCount ?? 0) > 0 && (<><Heart className="w-3 h-3 ml-1 fill-current text-[rgb(255_45_122)]" />{formatCount(item.likeCount ?? 0)}</>)}
+            </button>
+          )}
+          {item.song && (
+            <span data-sv-pill data-sv-song-pill>
+              {item.song.artworkUrl ? <img src={item.song.artworkUrl} alt="" /> : <Music className="w-3.5 h-3.5" />}
+              <span>{item.song.title}{item.song.artist ? ` · ${item.song.artist}` : ''}</span>
+            </span>
+          )}
+          {entry.items.length > 1 && (
+            <span data-sv-pill>{t('stories.nOfM', { n: itemIdx + 1, m: entry.items.length, defaultValue: '{{n}} of {{m}}' })}</span>
+          )}
+        </div>
 
         {(item.caption || item.remixSourceId) && (
-          <div data-sv-caption>
+          <div data-sv-caption data-with-room={roomComments.length > 0 && !docked ? 'true' : undefined}>
             {item.remixSourceId && (
               <button type="button" data-sv-original data-st-dark-glass onClick={openOriginal} disabled={openingOriginal}>
                 <Repeat2 className="w-4 h-4" />
@@ -595,51 +691,73 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           </div>
         )}
 
+        {!docked && !typing && <StoryRoomChat comments={roomComments} onOpen={() => setSheet('comments')} />}
+        <div data-sv-flow aria-hidden="true">
+          {hearts.map(h => (
+            <i key={h.id} style={{ '--x': `${h.x}px`, '--d': `${h.d}ms` } as React.CSSProperties}><MomentHeart className="w-6 h-6" filled /></i>
+          ))}
+        </div>
+
+        {typing && !own && isAuthenticated && item.allowReplies && (
+          <div data-sv-to role="radiogroup" aria-label={t('stories.sendTo', { defaultValue: 'Send to' })} onPointerDown={e => e.preventDefault()}>
+            <button type="button" role="radio" aria-checked={replyTo === 'everyone'} data-on={replyTo === 'everyone'} onClick={() => setReplyTo('everyone')}>
+              {t('stories.toEveryone', { defaultValue: 'Everyone' })}
+            </button>
+            <button type="button" role="radio" aria-checked={replyTo === 'author'} data-on={replyTo === 'author'} onClick={() => setReplyTo('author')}>
+              {t('stories.toOnly', { name: nameOf(a), defaultValue: 'Only {{name}}' })}
+            </button>
+          </div>
+        )}
+
         <div data-sv-reply style={sheet ? { visibility: 'hidden' } : undefined}>
           {own ? (
-            <button type="button" data-sv-viewers-trigger data-st-dark-glass className="h-11 rounded-full px-4 inline-flex items-center gap-2 text-[14px] font-semibold" onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
+            <button type="button" data-sv-field data-sv-viewers-trigger onClick={() => setSheet('viewers')} aria-label={t('stories.whoWatched', { defaultValue: 'Who watched' })}>
               <Eye className="w-[18px] h-[18px]" />
-              {formatCount(item.viewCount ?? 0)}
-              {(item.likeCount ?? 0) > 0 && (<><Heart className="w-4 h-4 ml-1.5 fill-current text-[rgb(255_92_120)]" />{formatCount(item.likeCount ?? 0)}</>)}
+              {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              {(item.likeCount ?? 0) > 0 && (<><MomentHeart className="w-4 h-4 ml-1.5" filled />{formatCount(item.likeCount ?? 0)}</>)}
             </button>
           ) : !isAuthenticated ? (
-            <button type="button" data-st-dark-glass className="h-11 rounded-full px-4 text-[14px] flex-1 text-left text-white/80" onClick={() => openLoginModal()}>
-              {t('stories.signInToReply', { defaultValue: 'Sign in to reply' })}
+            <button type="button" data-sv-field onClick={() => openLoginModal()}>
+              {t('stories.signInToSay', { defaultValue: 'Sign in to say something' })}
             </button>
           ) : item.allowReplies ? (
             <input
-              data-st-dark-glass
+              data-sv-field
               value={reply}
-              maxLength={500}
+              maxLength={replyTo === 'everyone' ? 300 : 500}
               onChange={e => setReply(e.target.value)}
               onFocus={() => setTyping(true)}
               onBlur={() => setTyping(false)}
               onKeyDown={e => { if (e.key === 'Enter') submitReply(); }}
-              placeholder={t('stories.replyTo', { name: nameOf(a), defaultValue: 'Reply to {{name}}' })}
+              placeholder={replyTo === 'everyone'
+                ? t('stories.saySomething', { defaultValue: 'Say something…' })
+                : t('stories.replyTo', { name: nameOf(a), defaultValue: 'Reply to {{name}}' })}
             />
           ) : (
-            <span className="flex-1 text-[13px] text-white/60 px-2">{t('stories.repliesOff', { defaultValue: 'Replies are off' })}</span>
+            <span data-sv-field data-off>{t('stories.repliesOff', { defaultValue: 'Replies are off' })}</span>
           )}
           {!own && (
-            <button type="button" data-sv-round data-st-dark-glass data-on={item.liked ? 'true' : 'false'} onClick={toggleLike} aria-label={t('stories.like', { defaultValue: 'Like' })}>
+            <button type="button" data-sv-key data-on={item.liked ? 'true' : 'false'} onClick={toggleLike} aria-label={t('stories.like', { defaultValue: 'Like' })} aria-pressed={item.liked}>
               <MomentHeart className="w-[22px] h-[22px]" filled={item.liked} />
             </button>
           )}
-          <button type="button" data-sv-round data-st-dark-glass onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
-            <MomentComment className="w-[22px] h-[22px]" />
-            {(item.commentCount ?? 0) > 0 && <span data-sv-count>{formatCount(item.commentCount ?? 0)}</span>}
-          </button>
-          {shareable && (
-            <button type="button" data-sv-round data-st-dark-glass onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
-              <MomentShare className="w-[22px] h-[22px]" />
+          {!docked && (
+            <button type="button" data-sv-key onClick={() => setSheet('comments')} aria-label={t('stories.comments', { defaultValue: 'Comments' })}>
+              <MomentComment className="w-[22px] h-[22px]" />
+              {(item.commentCount ?? 0) > 0 && <span data-sv-count>{formatCount(item.commentCount ?? 0)}</span>}
             </button>
           )}
-          {!own && isAuthenticated && item.allowReplies && reply.trim() && (
-            <button type="button" data-sv-round data-st-dark-glass onClick={submitReply} disabled={sending} aria-label={t('common.send', { defaultValue: 'Send' })}>
+          {!own && isAuthenticated && item.allowReplies && reply.trim() ? (
+            <button type="button" data-sv-key data-sv-send onPointerDown={e => e.preventDefault()} onClick={submitReply} disabled={sending} aria-label={t('common.send', { defaultValue: 'Send' })}>
               {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </button>
-          )}
+          ) : shareable ? (
+            <button type="button" data-sv-key onClick={() => setSheet('share')} aria-label={t('stories.share', { defaultValue: 'Share' })}>
+              <MomentShare className="w-[22px] h-[22px]" />
+            </button>
+          ) : null}
         </div>
+
 
         {sheet === 'share-dm' && (
           <Suspense fallback={null}>
@@ -657,7 +775,10 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
                   onOpen={openProfile}
                   onClose={dismissSheet}
                   onSignIn={() => openLoginModal()}
-                  onCount={n => setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, commentCount: n } : it) }))}
+                  onCount={n => {
+                    void queryClient.invalidateQueries({ queryKey: ['moment-room-comments', item.id] });
+                    setEntries(list => list.map((e, i) => i !== authorIdx ? e : { ...e, items: e.items.map(it => it.id === item.id ? { ...it, commentCount: n } : it) }));
+                  }}
                 />
               )}
               {sheet === 'share' && shareable && (
@@ -718,12 +839,54 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         )}
       </div>
 
-      {authorIdx > 0 && (
+      {docked && (
+        <aside data-sv-panel onPointerDown={e => e.stopPropagation()}>
+          <header>
+            <MomentComment className="w-5 h-5" />
+            {t('stories.momentChat', { defaultValue: 'Moment chat' })}
+            {own ? (
+              <button type="button" data-sv-chip onClick={() => setSheet('viewers')}>
+                <Eye className="w-4 h-4" />
+                {t('stories.watchedCount', { n: formatCount(item.viewCount ?? 0), defaultValue: '{{n}} watched' })}
+              </button>
+            ) : (item.commentCount ?? 0) > 0 ? (
+              <span data-sv-panel-count>{formatCount(item.commentCount ?? 0)}</span>
+            ) : null}
+          </header>
+          <StoryRoomRows
+            comments={roomComments}
+            onOpenProfile={openProfile}
+            emptyLabel={t('stories.noCommentsYet', { defaultValue: 'No comments yet. Say something everyone can see.' })}
+          />
+        </aside>
+      )}
+      {docked && entries.length > authorIdx + 1 && (
+        <nav data-sv-next aria-label={t('stories.upNext', { defaultValue: 'Up next' })}>
+          {entries.slice(authorIdx + 1, authorIdx + 4).map((e, k) => {
+            const cover = coverOf(e);
+            const nextFace = e.author.avatarImageUrl ? buildAvatarUrl(e.author.address, e.author.avatarImageUrl) : buildAvatarCdnFallbackUrl(e.author.address, undefined);
+            return (
+              <button
+                key={e.author.address}
+                type="button"
+                data-seen={e.seen ? 'true' : undefined}
+                style={cover ? { backgroundImage: `url("${cover}")` } : undefined}
+                onClick={() => { setAuthorIdx(authorIdx + 1 + k); setItemIdx(startIndex(e)); }}
+                aria-label={nameOf(e.author)}
+              >
+                {nextFace && <img src={nextFace} alt="" />}
+              </button>
+            );
+          })}
+          <span>{t('stories.upNext', { defaultValue: 'Up next' })}</span>
+        </nav>
+      )}
+      {authorIdx > 0 && !docked && (
         <div data-sv-nav style={{ left: 'calc(50% - min(92vh, 900px) * 9 / 32 - 64px)' }}>
           <button type="button" data-sv-round data-st-dark-glass onClick={() => goAuthor(-1)} aria-label={t('common.previous', { defaultValue: 'Previous' })}><ChevronLeft className="w-5 h-5" /></button>
         </div>
       )}
-      {nextEntry && (
+      {nextEntry && !docked && (
         <div data-sv-nav style={{ right: 'calc(50% - min(92vh, 900px) * 9 / 32 - 64px)' }}>
           <button type="button" data-sv-round data-st-dark-glass onClick={() => goAuthor(1)} aria-label={t('common.next', { defaultValue: 'Next' })}><ChevronRight className="w-5 h-5" /></button>
         </div>
