@@ -3384,7 +3384,10 @@
     "googleInAppBody": "Google'ı kullanmak için Riftn'ı tarayıcınızda açın veya burada e-postayla oturum açın.",
     "openInBrowser": "Tarayıcıda aç",
     "copyLink": "Bağlantıyı kopyala",
-    "tryAnyway": "Yine de dene"
+    "tryAnyway": "Yine de dene",
+    "walletWaitTitle": "{{wallet}} bekleniyor",
+    "walletWaitBody": "Cüzdan uygulamanda isteği onayla ya da iptal edip tekrar dene.",
+    "walletWaitOpen": "{{wallet}} aç"
   },
   "careers": {
     "title": "Riftn'da Kariyer",

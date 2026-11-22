@@ -3384,7 +3384,10 @@
     "googleInAppBody": "Open Riftn in your browser to use Google, or sign in with email here.",
     "openInBrowser": "Open in browser",
     "copyLink": "Copy link",
-    "tryAnyway": "Try anyway"
+    "tryAnyway": "Try anyway",
+    "walletWaitTitle": "Waiting for {{wallet}}",
+    "walletWaitBody": "Approve the request in your wallet app, or cancel and try again.",
+    "walletWaitOpen": "Open {{wallet}}"
   },
   "careers": {
     "title": "Careers at Riftn",

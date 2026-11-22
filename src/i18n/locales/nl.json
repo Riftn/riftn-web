@@ -3573,7 +3573,10 @@
     "googleInAppBody": "Open Riftn in je browser om Google te gebruiken, of log hier in met e-mail.",
     "openInBrowser": "Openen in browser",
     "copyLink": "Link kopiëren",
-    "tryAnyway": "Toch proberen"
+    "tryAnyway": "Toch proberen",
+    "walletWaitTitle": "Wachten op {{wallet}}",
+    "walletWaitBody": "Keur het verzoek goed in je wallet-app, of annuleer en probeer opnieuw.",
+    "walletWaitOpen": "{{wallet}} openen"
   },
   "careers": {
     "title": "Vacatures bij Riftn",
