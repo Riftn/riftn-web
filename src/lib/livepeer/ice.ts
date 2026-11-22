@@ -36,6 +36,8 @@ export function waitForIceGathering(
    * far side needs.
    */
   enough?: RTCIceCandidateType,
+  /** How long to hold the offer for that candidate. */
+  capMs: number = ICE_GATHERING_TIMEOUT_MS,
 ): Promise<void> {
   if (pc.iceGatheringState === 'complete') return Promise.resolve();
 
@@ -64,7 +66,7 @@ export function waitForIceGathering(
     const timer = setTimeout(() => {
       logger.warn('ICE gathering timed out, continuing with the candidates gathered so far');
       finish();
-    }, ICE_GATHERING_TIMEOUT_MS);
+    }, capMs);
   });
 }
 

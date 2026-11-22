@@ -30,7 +30,7 @@ import { useTranslation as _useCopy } from 'react-i18next';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { nativeLiveEdge, watchLiveProgress } from '@/lib/live/stall-watchdog';
-import { forgetWhepSilent, hasRealPicture, rememberWhepSilent, whepRecentlySilent } from '@/lib/live/whep-memory';
+import { forgetWhepSilent, hasRealPicture, rememberWhepSilent, whepRecentlySilent, whepRouteBlocked } from '@/lib/live/whep-memory';
 import { useFeedPlaybackAllowed, useLivePlaybackAllowed, visualActivity } from '@/lib/visual-activity';
 import { useLocation } from 'react-router-dom';
 import type Hls from 'hls.js';
@@ -159,7 +159,9 @@ export function LiveFeedPreview({ urls, thumbnail, className, fallbackLabel, mut
   // One WebRTC attempt per card: the transport only ever moves whep → hls, so
   // a failure cannot trade the element back and forth with the ladder.
   const [transport, setTransport] = useState<'whep' | 'hls'>(
-    !bigEvent && typeof RTCPeerConnection !== 'undefined' && !!source && !whepRecentlySilent(source.playbackId) ? 'whep' : 'hls',
+    // The preview only has the direct route: on a network seen to drop its
+    // media, the ladder shows a picture without the wait.
+    !bigEvent && typeof RTCPeerConnection !== 'undefined' && !!source && !whepRecentlySilent(source.playbackId) && !(selfHosted && whepRouteBlocked('direct')) ? 'whep' : 'hls',
   );
 
   // Only attach while the card is on screen. A feed can hold dozens of live
