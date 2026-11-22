@@ -16,7 +16,7 @@ vi.mock('@/hooks/use-mature-content', () => ({ useMatureContent: () => ({ showMa
 vi.mock('@/hooks/use-kids-mode', () => ({ useKidsModeLock: () => false }));
 vi.mock('@/components/app/feeds/LiveNowBar', () => ({
   useLiveNowItems: () => ({ items: [{ wallet: 'host', id: '1', kind: 'stage', title: 'Live now' }] }),
-  pictureOf: () => null, faceUrlOf: () => null,
+  faceUrlOf: () => null,
 }));
 vi.mock('@/hooks/use-story-shelf', () => ({
   useStoryShelf: () => ({ data: { liveHosts: ['host'], shelf: [{
@@ -55,7 +55,7 @@ it('labels moments and live hosts with their display name and visible badge', ()
   expect(screen.queryByAltText('Dolphin')).toBeNull();
 });
 
-it('provides the cover, avatar and badge slots for the phone carousel', () => {
+it('provides the cover, avatar and badge slots across the carousel', () => {
   prefs.storiesEnabled = true;
   const { container } = render(<StoryShelf />);
   for (const kind of ['me', 'live', 'person']) {
@@ -65,5 +65,5 @@ it('provides the cover, avatar and badge slots for the phone carousel', () => {
     expect(tile?.querySelector('[data-st-label]')).toBeTruthy();
   }
   expect(container.querySelector('[data-kind="live"] [data-st-live]')).toHaveTextContent('LIVE');
-  expect(container.querySelector('[data-kind="me"] [data-st-plus]')).toBeTruthy();
+  expect(container.querySelector('[data-kind="me"] [data-st-plus-corner]')).toBeTruthy();
 });
