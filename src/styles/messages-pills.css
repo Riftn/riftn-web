@@ -33,7 +33,9 @@ html[data-msg-pills] [data-chat-tabs] [data-chat-tab][aria-selected='true'] {
 }
 html[data-msg-pills] [data-chat-tabs] [data-chat-tab][aria-selected='true']::after { display: none; }
 html[data-msg-pills] [data-chat-tabs] [data-chat-tab-unread] {
+  box-sizing: border-box;
   min-width: 20px;
+  padding: 0 6px;
   height: 20px;
   border-radius: 999px;
   line-height: 20px;
