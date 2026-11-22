@@ -50,7 +50,7 @@ import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
-import { DmUndecryptableRun } from './DmLockedState';
+import { DmUndecryptableMessages } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
 import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
@@ -3034,7 +3034,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
         if (prev?.undecryptable && !prev.isDeleted) return null;
         let count = 1;
         while (filtered[index + count]?.undecryptable && !filtered[index + count].isDeleted) count++;
-        return <DmUndecryptableRun key={message._id} count={count} />;
+        return <DmUndecryptableMessages key={message._id} messages={filtered.slice(index, index + count)} onDelete={setConfirmDeleteOne} />;
       }
       const ownAddress = walletAddress?.toLowerCase();
       const ownId = user?._id;
