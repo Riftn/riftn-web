@@ -1497,6 +1497,12 @@ html[data-theme='minimal'] :is([data-comment-tabs-pin], [data-comment-composer-p
     transform: translateY(-100%);
   }
 
+  /* Clear the bento shadow above the viewport in light tones. */
+  html:where([data-theme='light'], [data-theme='system'][data-system-tone='light']):not([data-jungle-phase])[data-sticky-scroll-hidden='true']
+    [data-feed-nav-outer][data-nav-hide-desktop]:not([data-nav-hide='off']) {
+    transform: translateY(calc(-100% - 3rem));
+  }
+
   html:not([data-jungle-phase])[data-sticky-scroll-hidden='true']
     [data-feed-nav-outer][data-nav-hide-desktop]:has(
       :is(input, textarea, [contenteditable]):focus
