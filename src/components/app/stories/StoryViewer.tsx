@@ -2,8 +2,8 @@
  * The full-screen story viewer.
  *
  * One person's moments play in order: a photo for 5 s, a video for its
- * length. The glass capsule at the top fills as the moment plays and its
- * dots count the moments. Tap the right side for the next one, the left for
+ * length. Each moment has a track above the header that fills as it plays.
+ * Tap the right side for the next one, the left for
  * the one before, hold to pause, swipe down (or Esc) to close, swipe sideways
  * (or the arrows on desktop) for the next person.
  *
@@ -428,7 +428,6 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
     }
   };
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
-  const capFill = progress;
   const nextEntry = entries[authorIdx + 1];
 
   const body = (
@@ -519,18 +518,21 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
           )}
         </div>
 
+        <div data-sv-timing aria-hidden="true">
+          {entry.items.map((story, index) => (
+            <span key={story.id} data-played={index < itemIdx}>
+              {index === itemIdx && <i style={{ transform: `scaleX(${Math.min(1, progress)})` }} />}
+            </span>
+          ))}
+        </div>
         <div data-sv-cap data-st-dark-glass>
-          <span data-sv-fill style={{ width: `${Math.min(100, capFill * 100)}%` }} />
-          <button type="button" className="relative flex items-center gap-2.5 min-w-0" onClick={() => openProfile(a.address)}>
+          <button type="button" className="relative mr-auto flex items-center gap-2.5 min-w-0" onClick={() => openProfile(a.address)}>
             {face ? <img src={face} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" /> : <span className="w-8 h-8 rounded-full bg-white/20 shrink-0" />}
             <span className="min-w-0 text-left">
               <span className="block text-[14px] font-semibold leading-tight truncate">{own ? t('stories.yourDay', { defaultValue: 'Your day' }) : nameOf(a)}</span>
               <span className="block text-[11.5px] text-white/70 mt-0.5">{ageLabel(item.createdAt)}{item.audience === 'followers' ? ` · ${t('stories.followersOnly', { defaultValue: 'Followers' })}` : ''}</span>
             </span>
           </button>
-          <span data-sv-dots className="relative">
-            {entry.items.length > 1 && entry.items.map((it, i) => <i key={it.id} data-on={i === itemIdx ? 'true' : 'false'} />)}
-          </span>
           {(item.type === 'video' && !item.muted) || item.song ? (
             <button type="button" className="relative w-9 h-9 grid place-items-center" onClick={() => setMuted(m => !m)} aria-label={muted ? 'Sound on' : 'Sound off'}>
               {muted ? <VolumeX className="w-[18px] h-[18px]" /> : <Volume2 className="w-[18px] h-[18px]" />}
