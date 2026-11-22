@@ -2712,7 +2712,15 @@
     "shipping": "En cours de livraison",
     "noShippingYet": "Rien en cours",
     "shippingAppearHere": "Les demandes en cours de développement apparaîtront ici.",
-    "loadFailed": "Impossible de charger les demandes"
+    "loadFailed": "Impossible de charger les demandes",
+    "track": {
+      "label": "Avancement",
+      "asked": "Demandé",
+      "underReview": "En examen",
+      "planned": "Prévu",
+      "inProgress": "En cours",
+      "shipped": "Livré"
+    }
   },
   "auth": {
     "accountDeleted": "Ce compte a été supprimé. Vous pouvez vous réinscrire avec un nouveau compte.",

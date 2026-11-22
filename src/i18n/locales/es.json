@@ -2712,7 +2712,15 @@
     "shipping": "En desarrollo",
     "noShippingYet": "Nada en curso",
     "shippingAppearHere": "Las solicitudes que se estén construyendo aparecerán aquí.",
-    "loadFailed": "No se pudieron cargar las solicitudes"
+    "loadFailed": "No se pudieron cargar las solicitudes",
+    "track": {
+      "label": "Progreso",
+      "asked": "Pedido",
+      "underReview": "En revisión",
+      "planned": "Planeado",
+      "inProgress": "En curso",
+      "shipped": "Lanzado"
+    }
   },
   "auth": {
     "accountDeleted": "Esta cuenta fue eliminada. Puedes registrarte de nuevo con una cuenta nueva.",

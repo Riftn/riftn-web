@@ -2716,7 +2716,15 @@
     "shipping": "قيد التنفيذ",
     "noShippingYet": "لا شيء قيد التنفيذ",
     "shippingAppearHere": "ستظهر هنا الطلبات التي يجري بناؤها.",
-    "loadFailed": "تعذر تحميل الطلبات"
+    "loadFailed": "تعذر تحميل الطلبات",
+    "track": {
+      "label": "التقدم",
+      "asked": "مطلوب",
+      "underReview": "قيد المراجعة",
+      "planned": "مخطط له",
+      "inProgress": "قيد التنفيذ",
+      "shipped": "تم الإطلاق"
+    }
   },
   "auth": {
     "accountDeleted": "تم حذف هذا الحساب. يمكنك التسجيل مجددًا بحساب جديد.",

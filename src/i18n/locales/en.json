@@ -2712,7 +2712,15 @@
     "shipping": "Shipping",
     "noShippingYet": "Nothing in progress",
     "shippingAppearHere": "Requests being built will appear here.",
-    "loadFailed": "Couldn't load requests"
+    "loadFailed": "Couldn't load requests",
+    "track": {
+      "label": "Progress",
+      "asked": "Asked",
+      "underReview": "Under review",
+      "planned": "Planned",
+      "inProgress": "In progress",
+      "shipped": "Shipped"
+    }
   },
   "auth": {
     "accountDeleted": "This account was deleted. You can sign up again as a new account.",
