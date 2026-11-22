@@ -26,7 +26,7 @@ import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
 import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
 import { MomentArchive } from './MomentArchive';
 import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
-import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { MutualFollowers } from '@/components/app/profile/MutualFollowers';
 import { useMutualFollowers } from '@/hooks/use-mutual-followers';
 import { StreamerLevelCard } from '@/components/app/live/StreamerLevelCard';
@@ -512,7 +512,7 @@ export function ProfileHeader({
           <ProfileFieldsList fields={profile.profileFields} />
           {localTime && (
             <p className="mt-1 text-sm text-zinc-400" title={String(profile.customs?.publicTimeZone)}>
-              {t('profile.localTime', { defaultValue: 'Local time {{time}}', time: localTime })}
+              {localTimeLine(t as never, localTime, profile.customs?.publicTimeZone)}
             </p>
           )}
 

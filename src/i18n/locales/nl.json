@@ -2721,6 +2721,8 @@
   },
   "profile": {
     "localTime": "Lokale tijd {{time}}",
+    "localTimeAhead": "{{hours}} uur voor",
+    "localTimeBehind": "{{hours}} uur achter",
     "shareLocalTime": "Mijn lokale tijd tonen",
     "shareLocalTimeHint": "Toon je tijdzone en lokale tijd op je openbare profiel en in de chat.",
     "gridCard": {

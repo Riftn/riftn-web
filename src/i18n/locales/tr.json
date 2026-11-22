@@ -2531,6 +2531,8 @@
   },
   "profile": {
     "localTime": "Yerel saat {{time}}",
+    "localTimeAhead": "{{hours}} saat ileride",
+    "localTimeBehind": "{{hours}} saat geride",
     "shareLocalTime": "Yerel saatimi göster",
     "shareLocalTimeHint": "Herkese açık profilinde ve sohbette saat dilimini ve yerel saatini göster.",
     "gridCard": {

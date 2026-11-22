@@ -2547,6 +2547,8 @@
   },
   "profile": {
     "localTime": "التوقيت المحلي {{time}}",
+    "localTimeAhead": "متقدم {{hours}} ساعة",
+    "localTimeBehind": "متأخر {{hours}} ساعة",
     "shareLocalTime": "إظهار توقيتي المحلي",
     "shareLocalTimeHint": "اعرض منطقتك الزمنية وتوقيتك المحلي في ملفك الشخصي العام وفي الدردشة.",
     "gridCard": {

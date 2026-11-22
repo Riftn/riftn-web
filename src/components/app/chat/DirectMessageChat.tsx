@@ -72,7 +72,7 @@ import { useDmSettings } from '@/hooks/use-dm-settings';
 import { useBannedAccount } from '@/hooks/use-banned-account';
 import { getMediaUrl, forwardDmMessage, blockConversation, unblockConversation, getDMPlanSettings, grantFreeDmAccess, revokeFreeDmAccess, getAccountInfo, pinDmMessage, unpinDmMessage, type DMMessageType, type DeHubConversation, type DmMessage, type DmFee } from '@/lib/api/dehub';
 import { useDeHubProfile } from '@/hooks/use-dehub-profile';
-import { useProfileLocalTime } from '@/hooks/use-profile-local-time';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
 import { apiCall, getAuthToken, DEHUB_API_BASE } from '@/lib/api/dehub/core';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgedName } from '@/components/app/BadgedName';
@@ -3159,7 +3159,7 @@ export function DirectMessageChat({ conversation, onBack, initialComposerText, d
               )}
               {peerLocalTime && (
                 <p className="truncate text-xs text-zinc-400" title={String(peerProfile?.customs?.publicTimeZone)}>
-                  {_copy('profile.localTime', { defaultValue: 'Local time {{time}}', time: peerLocalTime })}
+                  {localTimeLine(_copy as never, peerLocalTime, peerProfile?.customs?.publicTimeZone)}
                 </p>
               )}
             </div>
