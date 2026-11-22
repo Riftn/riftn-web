@@ -431,6 +431,7 @@
     "failed": "Kaydedilmedi. Tekrar dene."
   },
   "postVisibility": {
+    "self": "Yalnızca ben",
     "label": "Bunu kimler görebilir",
     "public": "Herkes",
     "followers": "Yalnızca takipçiler",
@@ -1522,6 +1523,8 @@
     "tokensUnit": "token"
   },
   "postOptions": {
+    "notInterestedDone": "Anlaşıldı. Bunun gibi daha az gönderi göreceksin.",
+    "notInterested": "İlgilenmiyorum",
     "liveAlertsOn": "Artık {{name}} kullanıcısını takip ediyorsunuz. Canlı yayına geçtiğinde bildirim alacaksınız.",
     "liveAlertsAlreadyOn": "{{name}} kullanıcısını takip ediyorsunuz, bu yüzden canlı yayına geçtiğinde bildirim alacaksınız.",
     "embed": "Yerleştir",
@@ -2152,6 +2155,7 @@
     "tipTokens": "{{amount}} jeton",
     "tokenAmount": "{{amount}} jeton",
     "custom": {
+      "bioMention": "{{name}} seni biyografisinde etiketledi",
       "featureCommentLikeNamed": "{{name}}, “{{title}}” üzerindeki yorumunuzu beğendi",
       "featureCommentLike": "{{name}}, bir istek üzerindeki yorumunuzu beğendi",
       "governanceCommentLikeNamed": "{{name}}, “{{title}}” teklifi üzerindeki yorumunuzu beğendi",
@@ -3499,6 +3503,8 @@
     "copyFailed": "Kopyalanamadı"
   },
   "profileOptions": {
+    "bioTagRemoved": "Artık bu biyografide etiketli değilsin",
+    "removeBioTag": "Beni biyografisinden çıkar",
     "copyRssFeed": "RSS akışı bağlantısını kopyala",
     "rssFeedCopied": "RSS akışı bağlantısı kopyalandı",
     "copyProfileUrl": "Profil URL'sini kopyala",
@@ -4928,6 +4934,7 @@
     "shopAllowanceUsed": "{{allowance}} / {{allowance}} kullanıldı. Daha yüksek bir rozet ve başka bir yuva için daha fazla Riftn jetonu stake edin."
   },
   "stages": {
+    "radioShow": {"toggle": "Radyo yayını", "hint": "Önce müzik: kendi şarkılarını veya bir çalma listesini çal, istediğinde konuş. Dinleyiciler istedikleri zaman katılır ve yayın Keşfet'teki Radyo satırında görünür.", "row": "Radyo", "start": "Yayın başlat", "empty": "Şu an radyo yayını yok. Bir tane başlat: mikrofonun ve kendi müziğinle canlı yayına geç.", "listening_one": "{{formatted}} dinliyor", "listening_other": "{{formatted}} dinliyor", "onAir": "Yayında", "soon": "Yakında", "badge": "Radyo", "myMusic": "Müziğim", "myMusicHint": "Yüklediğin şarkılar, mikrofonun kapalıyken bile odadaki herkese çalar.", "addSong": "Şarkı ekle", "playFailed": "Bu şarkı çalınamadı", "noSongs": "Henüz şarkı yok. Yayında çalmak için bir tane ekle.", "tooBig": "Şarkılar en fazla {{max}} MB olabilir"},
     "allStages": "Tüm sesli odalar",
     "title": "Sesli odalar",
     "tabLive": "Canlı",
@@ -7044,6 +7051,7 @@
     "signInToTradeCta": "İşlem için giriş yap"
   },
   "usernames": {
+    "swap": {"start": "Değişimi başlat", "placeholder": "@diger_hesabin", "sent": "Gönderildi. @{{name}} hesabına geç ve onayla.", "waiting": "@{{to}} onayı bekleniyor. Bitirmek için o hesaba geç.", "done": "Değiştirildi. Artık @{{name}} oldun.", "decline": "Reddet", "accept": "Şimdi değiştir", "incoming": "@{{from}} değiştirmek istiyor: bu hesap @{{from}} olur, o hesap @{{to}} olur.", "body": "İki hesabın mı var? Kullanıcı adlarını tek adımda değiştir. Buradan başlat, sonra diğer hesaba geç ve onayla. İki ad da hiçbir an başkasının alabileceği şekilde boşta kalmaz.", "title": "Diğer hesabınla değiştir"},
     "seoTitle": "Kullanıcı Adı Pazarı | Riftn",
     "seoDescription": "Riftn kullanıcı adlarını jeton ile alıp satın. Satıştaki kısa, sayısal ve özgün kullanıcı adlarını arayın ya da kendinizinkini listeleyin, ödeme onaylandığı anda devir zincir üstünde gerçekleşir.",
     "title": "Kullanıcı adları",
@@ -8839,6 +8847,8 @@
     "skippedUpstreamFailed": "Önceki bir adım başarısız olduğu için atlandı. Maliyeti bakiyenizde kalır."
   },
   "videoPlayer": {
+    "transcoding": "Dönüştürülüyor",
+    "transcodingOnlyYou": "Hazır olana kadar bunu yalnızca sen görebilirsin",
     "volume": "Ses düzeyi",
     "processing": "Video işleniyor...",
     "processingFailed": "Video işleme başarısız oldu",
@@ -9240,6 +9250,12 @@
     "backgroundLoading": "Efekt başlatılıyor…",
     "backgroundFailed": "Arka plan efektleri bu cihazda çalışmıyor.",
     "backgroundPhotoFailed": "Bu resim açılamadı.",
+    "effects": "Efektler",
+    "faceFilters": "Yüz filtreleri",
+    "filterShades": "Gözlük",
+    "filterCat": "Kedi",
+    "filterCrown": "Taç",
+    "filterHearts": "Kalpler",
     "end": "Kapat",
     "minimize": "Küçült",
     "expand": "Genişlet",

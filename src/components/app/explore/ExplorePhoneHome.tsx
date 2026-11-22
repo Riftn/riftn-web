@@ -23,6 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useStableNavigate } from '@/hooks/use-stable-navigate';
 import { cn } from '@/lib/utils';
 import { ExploreListSection } from '@/components/app/explore/ExploreListSection';
+import { ExploreRadioShows } from '@/components/app/explore/ExploreRadioShows';
 import { TickerLogo } from '@/components/app/TickerLogo';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
 import { LiveRipple } from '@/components/app/LiveRipple';
@@ -287,6 +288,8 @@ export function ExplorePhoneHome({
           ))}
         </ExploreListSection>
       )}
+
+      <ExploreRadioShows />
 
       {tickers.length > 0 && (
         <ExploreListSection
