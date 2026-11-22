@@ -169,3 +169,22 @@ html[data-theme='light'] #root:not(#_):not(#_):not(#_) :is([class*='bg-[#090a0b]
   background-color: var(--paper) !important;
   color: var(--ink) !important;
 }
+
+/* Minimal Light: /creator kept its near-black page while half of its text had
+   already been turned to ink (dark grey on black), and the hero title stayed
+   white on a pale picture. One paper page with ink text, as on System Light. */
+html[data-theme='light']:not(#_):not(#_) [data-creator-page] {
+  background-color: var(--paper) !important;
+}
+html[data-theme='light']:not(#_):not(#_) [data-creator-page] .text-white:not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media]):not([data-on-media] *):not([data-media-full] *) {
+  color: var(--ink) !important;
+}
+
+/* Minimal Light, Pricing: the plan cards are washed pale there, so their
+   "included" lines (white/75) and the white logo had nothing to sit on. */
+html[data-theme='light']:not(#_):not(#_):not(#_) [data-pricing-page] [class*='text-white/']:not([data-keep-dark]):not([data-keep-dark] *) {
+  color: var(--ink-muted, #444) !important;
+}
+html[data-theme='light'] [data-pricing-page] img[src*='logo-white'] {
+  filter: invert(1);
+}
