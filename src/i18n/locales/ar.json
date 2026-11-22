@@ -23022,7 +23022,8 @@
       "project": "مشروع",
       "nonprofit": "مؤسسة غير ربحية",
       "local_business": "نشاط تجاري محلي"
-    }
+    },
+    "contactEmailPlaceholder": "hello@yourbusiness.com"
   },
   "photoTags": {
     "title": "الإشارة إلى أشخاص",
