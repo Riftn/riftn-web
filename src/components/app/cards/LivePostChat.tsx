@@ -1,6 +1,7 @@
 import { outsideImage } from '@/lib/outside-image';
 import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
 import { useTranslation as _useCopy } from 'react-i18next';
+import { formatCount } from '@/lib/format-count';
 import { InPlaceEditField, editOnClick } from '@/components/app/chat/InPlaceEdit';
 import { useSurfaceDraft } from '@/hooks/use-surface-draft';
 /**
@@ -38,6 +39,9 @@ import { useMention } from '@/hooks/use-mention';
 import { useDraft } from '@/hooks/use-draft';
 import { useLiveViewerActions } from '@/components/app/live/live-viewer-actions';
 import { PointsIcon } from '@/components/app/live/points/PointsIcon';
+import { GivePointsSheet, type GiveTarget } from '@/components/app/live/points/GivePointsSheet';
+import { useQuery as useGivingQuery } from '@tanstack/react-query';
+import { getStreamRewards } from '@/lib/api/dehub/live-rewards';
 import { PointsButton } from '@/components/app/live/points/PointsButton';
 import { StreamChatRewards } from '@/components/app/live/points/StreamChatRewards';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -294,6 +298,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
           ? t('liveHype.chat.giftedSubs', { count: moment.giftCount ?? 1 })
           : moment.type === 'reward'
             ? t('livePoints.chatRedeemed', { title: moment.rewardTitle || '' }) + (moment.message ? `: ${moment.message}` : '')
+          : moment.type === 'pointsGift'
+            ? t('livePoints.give.chatLine', { amount: formatCount(moment.pointsAmount ?? 0), name: moment.recipientName || '' })
           : t('live.chatJoined'),
       message_type: 'system', image_url: null, is_pinned: false, created_at: moment.timestamp,
     })),
@@ -305,6 +311,21 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   // the host's own overlay. Null when the caller has no stream ObjectId to
   // resolve, and then nothing is drawn: no number beats a wrong one.
   const watching = useStreamAudience(liveStreamId, !isOffline);
+  // Channel points giving: when the creator has it on, a viewer's name in the
+  // chat is a button that opens the give sheet with that person filled in.
+  const givingInfo = useGivingQuery({
+    queryKey: ['live-rewards', liveStreamId],
+    queryFn: () => getStreamRewards(liveStreamId!),
+    enabled: !!liveStreamId && !isOffline && isAuthenticated,
+    staleTime: 60_000,
+  });
+  const giving = givingInfo.data?.live && givingInfo.data.giving.enabled ? givingInfo.data.giving : null;
+  const givingCreator = givingInfo.data?.creator?.toLowerCase() || '';
+  const [giveTarget, setGiveTarget] = useState<GiveTarget | null>(null);
+  const canGiveTo = (address?: string | null) => {
+    const a = (address || '').toLowerCase();
+    return !!giving && !isHost && !!a && a !== (walletAddress || '').toLowerCase() && a !== givingCreator;
+  };
   const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && newMessage.trim().length === 0;
   // Lines already in the chat when it loaded sit still; anything after glides
   // in, and your own line or gift lands with its text softly glowing (no ring).
@@ -727,6 +748,11 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                           <p className="chat-body text-zinc-300 break-words whitespace-pre-wrap mt-0.5"><InlineEmoji value={msg.content} /></p>
                         )}
                       </>
+                    ) : moment?.type === 'pointsGift' ? (
+                      <span className="text-zinc-400 ml-1.5 inline-flex items-center gap-1 align-middle" data-points-gift-line>
+                        <PointsIcon className="h-3 w-3" />
+                        {msg.content}
+                      </span>
                     ) : moment?.type === 'reward' ? (
                       <>
                         <span className="text-zinc-400 ml-1.5 inline-flex items-center gap-1 align-middle">
@@ -777,9 +803,21 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                     )}
                     <div className="flex items-baseline gap-1.5">
                       <span className="relative inline-flex items-baseline gap-1 shrink min-w-0 pr-3">
-                        <span className="text-xs font-semibold text-white truncate max-w-[120px]">
-                          {displayName}
-                        </span>
+                        {canGiveTo(msg.sender_address) ? (
+                          <button
+                            type="button"
+                            data-give-points-name
+                            onClick={() => setGiveTarget({ to: msg.sender_username || msg.sender_address, name: displayName })}
+                            title={t('livePoints.give.titleTo', { name: displayName })}
+                            className="text-xs font-semibold text-white truncate max-w-[120px] hover:underline"
+                          >
+                            {displayName}
+                          </button>
+                        ) : (
+                          <span className="text-xs font-semibold text-white truncate max-w-[120px]">
+                            {displayName}
+                          </span>
+                        )}
                         <LiveChatBadge badgeBalance={msg.sender_badge_balance} badgeLock={msg.sender_badge_lock} username={msg.sender_username} />
                         <CreatorBadges badges={msg.sender_creator_badges} />
                       </span>
@@ -1154,6 +1192,15 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
         onClose={() => setViewingImage(null)}
         downloadable
       />
+      {giving && liveStreamId && (
+        <GivePointsSheet
+          open={!!giveTarget}
+          onOpenChange={(open) => { if (!open) setGiveTarget(null); }}
+          streamId={liveStreamId}
+          dailyCap={giving.dailyCap}
+          target={giveTarget}
+        />
+      )}
     </div>
   );
 }

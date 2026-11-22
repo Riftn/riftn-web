@@ -58,6 +58,8 @@ const EVENT = {
   reward: 'stream.reward',
   /** The creator changed their rewards; refetch them. */
   rewardsUpdated: 'stream.rewards.updated',
+  /** One viewer gave another channel points. */
+  pointsGift: 'stream.points.gift',
 } as const;
 
 export interface StreamReactionBroadcast {
@@ -525,7 +527,8 @@ export type LiveRoomEvent =
   | { type: 'chat'; id: string; text: string; user: StreamJoinUser }
   | { type: 'chatDeleted'; id: string }
   | { type: 'reward'; id: string; title: string; text: string; cost: number; user: StreamJoinUser }
-  | { type: 'rewardsUpdated' };
+  | { type: 'rewardsUpdated' }
+  | { type: 'pointsGift'; id: string; amount: number; user: StreamJoinUser; to: StreamJoinUser };
 
 export function roomUser(raw: any): StreamJoinUser {
   const user = raw && typeof raw === 'object' ? raw : {};
@@ -643,6 +646,14 @@ export function watchLiveRoomEvents(streamId: string, onEvent: (event: LiveRoomE
       user: roomUser(r.viewer),
     });
   };
+  const onPointsGift = (data: any) => {
+    if (!isForStream(data, streamId)) return;
+    const g = data?.gift;
+    if (!g || typeof g.id !== 'string') return;
+    const amount = Math.round(Number(g.amount) || 0);
+    if (amount <= 0) return;
+    onEvent({ type: 'pointsGift', id: g.id, amount, user: roomUser(g.from), to: roomUser(g.to) });
+  };
   const onRewardsUpdated = (data: any) => {
     if (isForStream(data, streamId)) onEvent({ type: 'rewardsUpdated' });
   };
@@ -650,6 +661,7 @@ export function watchLiveRoomEvents(streamId: string, onEvent: (event: LiveRoomE
   const handlers: Array<[string, (data: any) => void]> = [
     [EVENT.reward, onReward],
     [EVENT.rewardsUpdated, onRewardsUpdated],
+    [EVENT.pointsGift, onPointsGift],
     [EVENT.tipStreamer, onTip],
     [EVENT.tipConfirmed, onTipConfirmed],
     [EVENT.follow, onFollow],

@@ -303,6 +303,17 @@ function timeoutSignal(ms: number): { signal: AbortSignal; cancel: () => void } 
   return { signal: controller.signal, cancel: () => clearTimeout(id) };
 }
 
+/** Waits before the second and third try of a refresh that got no answer. */
+// Off under the test runner, where a test that wants them turns them on.
+let refreshRetryDelaysMs: number[] = import.meta.env?.MODE === 'test' ? [] : [1500, 4000];
+/** No new try is started once this long has passed since the first. */
+const REFRESH_RETRY_BUDGET_MS = 20000;
+
+/** Test hook: shorten or turn off the waits above. */
+export function setRefreshRetryDelaysForTests(delays: number[]): void {
+  refreshRetryDelaysMs = delays;
+}
+
 /**
  * Refresh the access token using the stored refresh token, reporting *why* it
  * failed so callers can tell a revoked session apart from a flaky network.
@@ -332,6 +343,23 @@ export async function refreshTokenSharedDetailed(): Promise<TokenRefreshOutcome>
   const ownerAtStart = readSessionOwner();
 
   const performRefresh = async (): Promise<TokenRefreshOutcome> => {
+    // A refresh that got no answer about the token (timeout, offline, 5xx,
+    // 409) is tried again shortly. The server may have finished the rotation
+    // whose answer was lost — a slow deploy did exactly that — and it hands
+    // the same new pair back when the old token is sent again within a few
+    // minutes. Left alone, that old token was later refused as reuse and the
+    // person was signed out.
+    const firstTryAt = Date.now();
+    for (let attempt = 0; ; attempt++) {
+      const outcome = await performRefreshOnce();
+      if (outcome.ok || outcome.reason !== 'transient' || !sameSessionOwner(ownerAtStart)) return outcome;
+      const delay = refreshRetryDelaysMs[attempt];
+      if (delay === undefined || Date.now() - firstTryAt > REFRESH_RETRY_BUDGET_MS) return outcome;
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  };
+
+  const performRefreshOnce = async (): Promise<TokenRefreshOutcome> => {
     // A profile switch while waiting means these credentials no longer own the
     // live keys. Do not mistake the new account's pair for a sibling refresh.
     if (!sameSessionOwner(ownerAtStart)) return { ok: false, reason: 'transient' };

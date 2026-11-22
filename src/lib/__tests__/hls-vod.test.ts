@@ -237,26 +237,15 @@ describe('hls-vod', () => {
   });
 
   describe('a ladder the wrong shape for its post', () => {
-    /** A poster image of the given size, decoded at once. */
-    function stubPoster(width: number, height: number) {
-      vi.stubGlobal('Image', class {
-        src = '';
-        naturalWidth = width;
-        naturalHeight = height;
-        decode() { return Promise.resolve(); }
-      });
-    }
     function withFrame(el: HTMLVideoElement, width: number, height: number) {
       Object.defineProperty(el, 'videoWidth', { value: width, configurable: true });
       Object.defineProperty(el, 'videoHeight', { value: height, configurable: true });
       el.poster = 'https://cdn.test/images/42.jpg';
     }
-    afterEach(() => vi.unstubAllGlobals());
 
     it('plays the MP4 when an upright phone video was squeezed into a landscape ladder', async () => {
-      stubPoster(540, 960);
       const el = video();
-      setVideoSource(el, { src: MP4, hls: freshLadder() });
+      setVideoSource(el, { src: MP4, hls: freshLadder(), aspect: 540 / 960 });
       await flush();
       withFrame(el, 854, 480);
       el.dispatchEvent(new Event('loadedmetadata'));
@@ -265,8 +254,31 @@ describe('hls-vod', () => {
       expect(el.getAttribute('src')).toBe(MP4);
     });
 
-    it('keeps a ladder whose picture matches the poster', async () => {
-      stubPoster(1280, 720);
+    it('keeps a ladder whose picture matches the post', async () => {
+      const el = video();
+      setVideoSource(el, { src: MP4, hls: freshLadder(), aspect: 1280 / 720 });
+      await flush();
+      withFrame(el, 854, 480);
+      el.dispatchEvent(new Event('loadedmetadata'));
+      await flush();
+      expect(instances[0].destroy).not.toHaveBeenCalled();
+      expect(isLadderPlayback(el)).toBe(true);
+    });
+
+    it('keeps a widescreen film whose poster is an upright one-sheet', async () => {
+      // Post 8233: 1920x800 film, 1500x2000 poster. Judging by the poster
+      // swapped the ladder for the MP4 a second in: pause, poster, restart.
+      const el = video();
+      setVideoSource(el, { src: MP4, hls: freshLadder(), aspect: 1920 / 800 });
+      await flush();
+      withFrame(el, 1920, 800);
+      el.dispatchEvent(new Event('loadedmetadata'));
+      await flush();
+      expect(instances[0].destroy).not.toHaveBeenCalled();
+      expect(isLadderPlayback(el)).toBe(true);
+    });
+
+    it('keeps the ladder when the post has no stored size', async () => {
       const el = video();
       setVideoSource(el, { src: MP4, hls: freshLadder() });
       await flush();
@@ -274,7 +286,6 @@ describe('hls-vod', () => {
       el.dispatchEvent(new Event('loadedmetadata'));
       await flush();
       expect(instances[0].destroy).not.toHaveBeenCalled();
-      expect(isLadderPlayback(el)).toBe(true);
     });
   });
 

@@ -94,6 +94,7 @@ export function PointsButton({ streamId, variant, className }: Props) {
         balance={data}
         rewards={rewards.data?.rewards ?? []}
         loadingRewards={rewards.isLoading}
+        giving={rewards.data?.giving}
       />
     </>
   );

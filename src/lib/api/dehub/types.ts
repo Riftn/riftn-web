@@ -293,6 +293,8 @@ export interface DeHubNFT {
   /** Async video transcode state, written optimistically before the CDN file
    *  exists. Absent on posts predating this field — treat as 'done'. */
   transcodingStatus?: 'pending' | 'on' | 'done' | 'failed';
+  /** How far a video still encoding has got, 0-100. */
+  progress?: number;
   /**
    * Seek-preview sprite sheet as the API sends it: `url` is a bucket key, and
    * `private` marks a paid post's sheet. Read it through toStoryboard.
