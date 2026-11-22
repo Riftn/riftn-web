@@ -1,6 +1,6 @@
 {
-  "modules": 829,
-  "sourceBytes": 5048978,
+  "modules": 830,
+  "sourceBytes": 5056221,
   "files": [
     "server/public-page-locales.js",
     "src/App.tsx",
@@ -210,6 +210,7 @@
     "src/components/app/unlock/unlock-reveal-kind.ts",
     "src/components/app/video/MediaControlIcon.tsx",
     "src/components/app/video/StoryboardPreview.tsx",
+    "src/components/app/video/TranscodingBadge.tsx",
     "src/components/app/video/VideoGlitchLoaderLazy.tsx",
     "src/components/app/video/WideAmbientFill.tsx",
     "src/components/app/video/WideVideoRails.tsx",
