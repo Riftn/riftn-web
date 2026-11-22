@@ -83,9 +83,60 @@ function NoteBubble({ note, placeholder }: { note: Note | null; placeholder?: st
   );
 }
 
+/** Share of the 24 hours a note has left, 0..1, refreshed every minute. */
+function useNoteLeft(note: Note | null): number {
+  const calc = useCallback(() => {
+    if (!note) return 0;
+    const start = Date.parse(note.postedAt);
+    const end = Date.parse(note.expiresAt);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return 1;
+    return Math.min(1, Math.max(0, (end - Date.now()) / (end - start)));
+  }, [note]);
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    // Starts empty and sweeps in on the next frame, so the ring animates.
+    const raf = requestAnimationFrame(() => setLeft(calc()));
+    const id = setInterval(() => setLeft(calc()), 60_000);
+    return () => { cancelAnimationFrame(raf); clearInterval(id); };
+  }, [calc]);
+  return left;
+}
+
+const RING = 64;
+const RING_STROKE = 2.5;
+const RING_R = 14;
+const RING_SIDE = RING - RING_STROKE;
+const RING_LEN = 4 * (RING_SIDE - 2 * RING_R) + 2 * Math.PI * RING_R;
+
+/** Countdown ring: a rounded-square line that drains as the 24 hours run out. */
+function NoteRing({ left }: { left: number }) {
+  const box = { x: RING_STROKE / 2, y: RING_STROKE / 2, width: RING_SIDE, height: RING_SIDE, rx: RING_R, ry: RING_R, fill: 'none', strokeWidth: RING_STROKE };
+  return (
+    <svg data-note-ring width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`} className="pointer-events-none absolute inset-0" aria-hidden>
+      <rect {...box} stroke="rgba(255,255,255,0.14)" />
+      <rect
+        {...box}
+        stroke="rgba(255,255,255,0.92)"
+        strokeLinecap="round"
+        strokeDasharray={`${RING_LEN} ${RING_LEN}`}
+        strokeDashoffset={RING_LEN * (1 - left)}
+        style={{ transition: 'stroke-dashoffset 700ms cubic-bezier(.2,.8,.2,1)' }}
+      />
+    </svg>
+  );
+}
+
+/**
+ * One note in the row. Every tile is the same size: a bubble slot on top
+ * (empty when there are no words), the face inside its countdown ring, and
+ * the name. A GIF note shows the GIF in place of the face.
+ */
 function NoteTile({ author, note, label, own, onClick }: { author: StoryAuthor; note: Note | null; label: string; own?: boolean; onClick: () => void }) {
   const { t } = useTranslation();
   const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 112);
+  const left = useNoteLeft(note);
+  const gif = note?.gifUrl || null;
+  const showBubble = !note || !!note.text || (!gif && (!!note.song || !!note.location));
   return (
     <button
       type="button"
@@ -93,11 +144,20 @@ function NoteTile({ author, note, label, own, onClick }: { author: StoryAuthor; 
       onClick={onClick}
       className="relative flex w-[84px] shrink-0 flex-col items-center gap-1 pt-1 text-center"
     >
-      <NoteBubble note={note} placeholder={t('notes.add', { defaultValue: 'Note' })} />
-      <Avatar className="h-14 w-14">
-        {avatar && <AvatarImage src={avatar} />}
-        <AvatarFallback className="bg-zinc-700 text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
-      </Avatar>
+      <span className="flex h-9 items-end justify-center">
+        {showBubble && <NoteBubble note={note && gif ? { ...note, gifUrl: null } : note} placeholder={t('notes.add', { defaultValue: 'Note' })} />}
+      </span>
+      <span className="relative flex h-16 w-16 items-center justify-center">
+        {gif ? (
+          <img data-note-gif-face src={gif} alt="" loading="lazy" className="h-14 w-14 rounded-xl object-cover" />
+        ) : (
+          <Avatar className="h-14 w-14 rounded-xl">
+            {avatar && <AvatarImage src={avatar} className="rounded-xl" />}
+            <AvatarFallback className="rounded-xl bg-zinc-700 text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        )}
+        {note && <NoteRing left={left} />}
+      </span>
       <span className="w-full truncate text-[11px] text-zinc-400">{label}</span>
     </button>
   );
