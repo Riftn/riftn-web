@@ -294,6 +294,7 @@ import { ThemePreviewCard } from '@/components/app/settings/ThemePreviewCard';
 import { KeywordFiltersSection } from '@/components/app/settings/KeywordFiltersSection';
 import { AccountAllowReactions } from '@/components/app/remix/AllowReactionsSwitch';
 import { NotificationFiltersSetting } from '@/components/app/settings/NotificationFiltersSetting';
+import { AccountTypeSetting } from '@/components/app/settings/AccountTypeSetting';
 import { ProfileFieldsSetting } from '@/components/app/settings/ProfileFieldsSetting';
 import { FediverseHandleSetting } from '@/components/app/settings/FediverseHandleSetting';
 import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
@@ -1019,7 +1020,17 @@ function ProfileSettings() {
     if (username && usernameChanged) data.username = username;
     if (bio) data.aboutMe = bio;
     if (publicTimeZone !== originalValues.publicTimeZone) {
-      data.customs = { publicTimeZone: publicTimeZone || false };
+      // The server replaces the whole blob, so carry every other saved
+      // setting (account type, follow visibility, ...) along with this one.
+      const kept: Record<string, string | number | boolean> = {};
+      const stored = {
+        ...((profileData?.customs as Record<string, unknown> | undefined) ?? {}),
+        ...((authUser?.customs as Record<string, unknown> | undefined) ?? {}),
+      };
+      for (const [key, value] of Object.entries(stored)) {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') kept[key] = value;
+      }
+      data.customs = { ...kept, publicTimeZone: publicTimeZone || false };
     }
     // Always send social links (even empty strings) so they persist correctly
     data.twitterLink = twitterLink;
@@ -1227,6 +1238,9 @@ function ProfileSettings() {
           onCheckedChange={enabled => setPublicTimeZone(enabled ? deviceTimeZone || '' : '')}
         />
       </div>
+
+      {/* Personal, Creator or Business: a category under the name, a Contact button */}
+      <AccountTypeSetting />
 
       {/* Fediverse — the @username@riftn.com address Mastodon can follow */}
       <FediverseHandleSetting />

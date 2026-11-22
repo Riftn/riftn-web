@@ -1,6 +1,7 @@
 import { ProfileFollowButton } from './ProfileFollowButton';
 import { useTranslation as _useCopy } from 'react-i18next';
-import { Star, EllipsisVertical, Loader2 } from "lucide-react";
+import { Star, EllipsisVertical, Loader2, Mail } from "lucide-react";
+import { readAccountCategory, readContactEmail } from "@/lib/account-type";
 import Pencil from "@/components/ui/cut-icons/edit";
 import Copy from "@/components/ui/cut-icons/copy";
 import Wallet from "@/components/ui/cut-icons/wallet";
@@ -387,6 +388,22 @@ export function ProfileHeader({
                   <MessageSquare className="w-4 h-4" />
                 </Button>
               )}
+              {!isViewingOwnProfile && readContactEmail(profile.customs as Record<string, unknown> | undefined) && (
+                <Button
+                  asChild
+                  variant="glass"
+                  size="icon"
+                  className="rounded-xl h-9 w-9"
+                >
+                  <a
+                    href={`mailto:${readContactEmail(profile.customs as Record<string, unknown> | undefined)}`}
+                    aria-label={t('accountType.contact', 'Contact')}
+                    title={t('accountType.contact', 'Contact')}
+                  >
+                    <Mail className="w-4 h-4" />
+                  </a>
+                </Button>
+              )}
               <Drawer open={shareSheetOpen} onOpenChange={(open) => {
                 if (!isAuthenticated && open) {
                   setLoginModalOpen(true);
@@ -505,6 +522,13 @@ export function ProfileHeader({
             );
           })()}
           
+          {/* Creator or Business category, Instagram style: a quiet line above the bio. */}
+          {(() => {
+            const category = readAccountCategory(profile.customs as Record<string, unknown> | undefined);
+            return category ? (
+              <p data-account-category className="mt-2 text-sm text-zinc-400">{t(`accountType.cat.${category}`)}</p>
+            ) : null;
+          })()}
           {profile.bio && (
             <TranslatableText publicContent text={translatedBio || profile.bio} className="mt-3 text-white/90 text-base leading-6 block" as="p" />
           )}

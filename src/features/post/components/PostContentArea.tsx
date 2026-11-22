@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PostMediaPreview } from './PostMediaPreview';
 import { LinkPreviews } from './LinkPreviews';
 import { PollEditor } from './PollEditor';
+import { QuizEditor } from './QuizEditor';
+import type { QuizDraft } from '@/lib/api/dehub';
 import type { MediaFile, AudioFile, LiveMode, PollData } from '../types';
 import type { FilterSettings, CropSettings } from '../types/filters';
 import type { DraftVideoSnapshot } from '../lib/draft-video';
@@ -101,6 +103,9 @@ interface PostContentAreaProps {
   // Poll
   poll: PollData | null;
   onPollChange: (poll: PollData | null) => void;
+  /** Create Post > Quiz. */
+  quiz?: QuizDraft | null;
+  onQuizChange?: (quiz: QuizDraft | null) => void;
   onMediaFullscreenChange?: (open: boolean) => void;
   /** The attached video's early upload. */
   draftVideo?: DraftVideoSnapshot | null;
@@ -205,6 +210,8 @@ export function PostContentArea({
   onOpenCategories,
   poll,
   onPollChange,
+  quiz,
+  onQuizChange,
   onMediaFullscreenChange,
   draftVideo,
 }: PostContentAreaProps) {
@@ -757,6 +764,9 @@ export function PostContentArea({
             onChange={onPollChange}
             onRemove={() => onPollChange(null)}
           />
+        )}
+        {quiz && onQuizChange && (
+          <QuizEditor quiz={quiz} onChange={onQuizChange} onRemove={() => onQuizChange(null)} />
         )}
       </div>
 
