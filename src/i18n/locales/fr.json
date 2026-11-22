@@ -2498,7 +2498,8 @@
       "bountyApplied": "{{name}} appliqué à votre prime",
       "bountySubmittedNamed": "{{name}} a soumis des travaux sur votre prime « {{title}} »",
       "bountySubmitted": "{{name}} a soumis des travaux sur votre prime",
-      "sentNotification": "{{name}} vous a envoyé une notification"
+      "sentNotification": "{{name}} vous a envoyé une notification",
+      "fractionGift": "{{name}} t'a envoyé des fractions"
     }
   },
   "leaderboard": {
@@ -2723,7 +2724,11 @@
     "earlySupporter": {
       "chip": "Soutien de la première heure",
       "title": "Soutien de la première heure : {{value}} de ses demandes sont sorties"
-    }
+    },
+    "voiceHold": "Maintenir pour parler",
+    "voiceLetGo": "Relâcher pour ajouter",
+    "voiceTapDone": "Touchez pour finir",
+    "voiceWorking": "Rédaction…"
   },
   "auth": {
     "accountDeleted": "Ce compte a été supprimé. Vous pouvez vous réinscrire avec un nouveau compte.",
@@ -6043,7 +6048,25 @@
     "buy": "Acheter",
     "reject": "Rejeter",
     "needsYouHold": "Nécessite {{needed}}, vous en détenez {{held}}",
-    "sellYourFractions": "Vendez vos fractions ({{held}} détenus)"
+    "sellYourFractions": "Vendez vos fractions ({{held}} détenus)",
+    "giftSend": "Envoyer",
+    "giftTitle": "Envoyer des fractions",
+    "giftHint": "Elles passent directement de ton portefeuille au sien.",
+    "giftYouOwn": "Tu possèdes {{count}} sur {{total}}",
+    "giftListedNote": "{{count}} sont en vente. Annule l'annonce pour les envoyer.",
+    "giftTo": "À",
+    "giftChange": "Changer",
+    "giftSearch": "Rechercher des personnes",
+    "giftNoOne": "Personne trouvé",
+    "giftHowMany": "Combien",
+    "giftLess": "Une de moins",
+    "giftMore": "Une de plus",
+    "giftAll": "Toutes",
+    "giftSending": "Envoi…",
+    "giftButton": "Envoyer {{count}} à {{name}}",
+    "giftSent": "{{count}} envoyées à {{name}}",
+    "giftFailed": "Envoi impossible. Réessaie.",
+    "giftNotSubmitted": "Le transfert n'a pas été envoyé"
   },
   "creator": {
     "gallery": {
@@ -13666,7 +13689,7 @@
       "cloud": {
         "title": "Hébergez votre app sur Riftn Cloud",
         "body": "Mettez toute votre app sur Riftn : votre site, votre code backend et sa propre base de données, à votre propre adresse sur dhb.gg. Aucun serveur à louer ni à entretenir. Une fois en ligne, publiez-la dans la boutique Riftn Apps plus bas.",
-        "ruleCode": "Backend : un index.js qui exporte fetch(request, env), comme un Cloudflare Worker. Hono et la plupart des paquets npm fonctionnent une fois regroupés en un seul fichier.",
+        "ruleCode": "Backend : un index.js qui exporte fetch(request, env), comme un Cloudflare Worker, ou un main.py avec une classe Default(WorkerEntrypoint) pour Python. Hono et la plupart des paquets npm fonctionnent une fois regroupés en un seul fichier.",
         "rulePublic": "Site : mettez le HTML, le CSS, les images et les scripts dans un dossier public. Un envoi sans index.js est servi comme un site simple.",
         "ruleFree": "Gratuit pendant la bêta : 3 apps, 10 Mo de fichiers et une base de 500 Mo chacune, environ 0,1 s de calcul par requête.",
         "namePlaceholder": "Nom de l'app, ex. Ma Boutique",
@@ -23094,6 +23117,71 @@
     "streak": "Série de {{value}} jours",
     "streakBonus": "Bonus de série +{{pct}} %",
     "dailyHint": "Un quiz par jour. Ceux qui jouent à tes quiz plusieurs jours d’affilée font une série et gagnent des points bonus."
+  },
+  "streamPet": {
+    "stage": {
+      "egg": "Œuf",
+      "baby": "Bébé",
+      "kid": "Petit",
+      "teen": "Ado",
+      "grown": "Adulte",
+      "legend": "Légende"
+    },
+    "color": {
+      "violet": "Violet",
+      "pink": "Rose",
+      "mint": "Menthe",
+      "sky": "Ciel",
+      "sun": "Soleil",
+      "coral": "Corail"
+    },
+    "mood": {
+      "egg": "Encore un œuf. Il éclot au prochain live.",
+      "eggOwn": "Encore un œuf. Diffuse 5 minutes pour le faire éclore.",
+      "streaming": "Il mange pendant le live",
+      "happy": "Heureux et rassasié",
+      "hungry": "Il commence à avoir faim. S'endort dans {{hours}} h",
+      "asleep": "Endormi jusqu'au prochain live",
+      "asleepOwn": "Endormi. Lance un live pour le réveiller"
+    },
+    "snacks_one": "{{formatted}} en-cas",
+    "snacks_other": "{{formatted}} en-cas",
+    "hoursStreamed_one": "{{formatted}} heure de live",
+    "hoursStreamed_other": "{{formatted}} heures de live",
+    "toNext_one": "{{formatted}} en-cas avant {{stage}}",
+    "toNext_other": "{{formatted}} en-cas avant {{stage}}",
+    "open": "Ouvrir {{pet}}",
+    "feed": "Donner un en-cas",
+    "fed": "{{pet}} a mangé ton en-cas",
+    "fedBy": "{{name}} a nourri {{pet}}",
+    "signIn": "Connecte-toi pour le nourrir",
+    "pointsHint": "Payé avec tes points de chaîne",
+    "balance": "Tu as {{formatted}} points ici",
+    "errors": {
+      "notEnough": "Pas encore assez de points. Continue de regarder pour en gagner.",
+      "notLive": "Tu peux nourrir l'animal pendant le live",
+      "tooFast": "Attends quelques secondes",
+      "daily": "Assez d'en-cas pour aujourd'hui",
+      "off": "Nourrir est désactivé sur cette chaîne",
+      "failed": "Un problème est survenu. Réessaie."
+    },
+    "studio": {
+      "title": "Animal du live",
+      "intro": "Un petit animal qui mange pendant que tu diffuses : un en-cas toutes les 5 minutes en live. Il grandit en mangeant, s'endort après une journée sans nourriture et ne meurt jamais.",
+      "name": "Nom",
+      "namePlaceholder": "Donne un nom à ton animal",
+      "color": "Couleur",
+      "hatch": "Faire éclore l'œuf",
+      "hatched": "Ton œuf est prêt. Lance un live pour le faire éclore.",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "showOnProfile": "Afficher sur mon profil",
+      "showOnStream": "Afficher dans le coin de mon live",
+      "feeding": "Les spectateurs peuvent le nourrir avec leurs points de chaîne",
+      "cost": "Points par en-cas",
+      "rules": "Chaque spectateur peut lui donner jusqu'à 20 en-cas par jour. Les points n'ont aucune valeur en argent.",
+      "feeders": "L'ont le plus nourri"
+    }
   },
   "dmTranslateOut": {
     "showMine": "Voir ce que j'ai écrit",

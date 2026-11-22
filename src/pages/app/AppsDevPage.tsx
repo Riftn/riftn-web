@@ -257,6 +257,15 @@ export default {
 // env.KV   key/value storage: get(), put(), delete(), list()
 // env.MY_SECRET   any secret you add below`;
 
+const CLOUD_PY = `# main.py: the same backend in Python
+from workers import WorkerEntrypoint, Response
+
+class Default(WorkerEntrypoint):
+    async def fetch(self, request):
+        await self.env.DB.run("CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY, email TEXT, plan TEXT)")
+        rows = await self.env.DB.query("SELECT * FROM plans")
+        return Response.json(rows)  # rows are dicts`;
+
 const CLOUD_CI = `# Upload from a terminal or CI with a deploy key
 curl -X PUT https://cloud.dhb.gg/v1/apps/my-app/files \\
   -H "Authorization: Bearer rk_my-app_…" \\
@@ -396,8 +405,8 @@ function CloudAppRow({ app }: { app: CloudAppSummary }) {
               </div>
             ))}
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input value={secretName} onChange={(e) => setSecretName(e.target.value)} placeholder="API_KEY" className={input} />
-              <input value={secretValue} onChange={(e) => setSecretValue(e.target.value)} placeholder={t('miniApps.dev.cloud.secretValue')} type="password" className={input} />
+              <input value={secretName} onChange={(e) => setSecretName(e.target.value)} placeholder="API_KEY" autoComplete="off" name="cloud-secret-name" className={input} />
+              <input value={secretValue} onChange={(e) => setSecretValue(e.target.value)} placeholder={t('miniApps.dev.cloud.secretValue')} type="password" autoComplete="new-password" name="cloud-secret-value" className={input} />
               <button type="button" disabled={busy || !secretName.trim() || !secretValue} onClick={() => void saveSecret()} className={button}>
                 {t('miniApps.dev.cloud.save')}
               </button>
@@ -491,6 +500,7 @@ function CloudHosting({ signedIn }: { signedIn: boolean }) {
           </>
         )}
         <CodeBlock code={CLOUD_QUICKSTART} />
+        <CodeBlock code={CLOUD_PY} />
         <CodeBlock code={CLOUD_CI} />
       </Section>
     </div>

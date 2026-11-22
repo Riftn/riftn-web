@@ -116,6 +116,7 @@ const GiftSubsDrawer = lazy(() => import('@/components/app/live/GiftSubsDrawer')
 const TipPayWith = lazy(() => import('@/components/app/tips/TipPayWith'));
 // The creator's overlay; lazy, most streams have none.
 const LiveOverlayLayer = lazy(() => import('@/components/app/live/overlay/LiveOverlayLayer'));
+const StreamPetCorner = lazy(() => import('@/components/app/pet/StreamPetCorner'));
 const HypeTrainBar = lazy(() => import('@/components/app/live/overlay/hype-train').then((m) => ({ default: m.HypeTrainBar })));
 const CoStreamViewerLayer = lazy(() => import('@/components/app/live/costream/CoStreamViewerLayer'));
 const ReplayOverlayLayer = lazy(() => import('@/components/app/live/overlay/ReplayOverlayLayer'));
@@ -1758,6 +1759,23 @@ export function LiveStreamCard({ stream, chatSlot, immersive = false, swipeFeed 
             <HypeTrainBar
               streamId={stream.streamId}
               className={cn('absolute left-1/2 z-20 w-[min(92%,26rem)] -translate-x-1/2', immersive ? 'top-[max(3.25rem,calc(env(safe-area-inset-top)+3.25rem))]' : 'top-3')}
+            />
+          </Suspense>
+        )}
+        {/* The creator's stream pet, bottom-right above the room, for everyone
+            watching. A tap opens its card, where viewers can buy it a snack
+            with their channel points. */}
+        {stream.streamId && stream.isLive && !streamEnded && (
+          <Suspense fallback={null}>
+            <StreamPetCorner
+              streamId={stream.streamId}
+              own={isOwnStream}
+              signedIn={!!isAuthenticated}
+              className={cn(
+                'absolute right-3 z-20 transition-opacity duration-300',
+                immersive ? 'bottom-[calc(45%+0.75rem)]' : 'bottom-16',
+                chromeHidden && 'invisible pointer-events-none opacity-0',
+              )}
             />
           </Suspense>
         )}
