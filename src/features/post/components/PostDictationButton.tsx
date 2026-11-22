@@ -50,10 +50,10 @@ export function PostDictationButton({ setText, maxChars, atLimit }: Props) {
 
   const label = transcribing ? t('copy.4e9a93669648') : recorder.recording ? t('editor.voiceClone.stop') : t('stages.dictateText');
   return (
-    <button type="button" data-post-dictation className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
+    <button type="button" data-post-dictation className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-md bg-transparent px-2 text-sm text-white disabled:opacity-50 motion-safe:transition-transform [@media(hover:hover)]:motion-safe:enabled:hover:scale-105"
       disabled={transcribing || (atLimit && !recorder.recording)} onClick={recorder.recording ? recorder.stopRecording : recorder.startRecording}
       aria-label={label} title={label} aria-pressed={recorder.recording}>
-      {transcribing ? <LoaderCircle className="size-4 animate-spin" /> : recorder.recording ? <Square className="size-4 text-red-500" /> : <Mic className="size-4" />}
+      {transcribing ? <LoaderCircle className="size-4 animate-spin" /> : recorder.recording ? <Square className="size-4" /> : <Mic className="size-4" />}
       <span className="text-xs">{recorder.recording
         ? `${Math.floor(recorder.seconds / 60)}:${String(recorder.seconds % 60).padStart(2, '0')}`
         : label}</span>
