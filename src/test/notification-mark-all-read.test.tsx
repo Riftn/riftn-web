@@ -12,7 +12,7 @@ vi.mock('@/lib/api/dehub', () => ({
   markAllNotificationsAsRead: vi.fn(() => new Promise<void>((resolve) => { finishWrite = resolve; })),
 }));
 
-import { MARK_ALL_READ_KEY, notificationKeys, useMarkAllNotificationsAsRead } from '@/hooks/use-notifications';
+import { MARK_ALL_READ_KEY, applyMarkedAllRead, notificationKeys, useMarkAllNotificationsAsRead } from '@/hooks/use-notifications';
 
 type Row = { id: string; read: boolean };
 type List = { pages: { items: Row[] }[] };
@@ -41,6 +41,13 @@ describe('mark all as read', () => {
     expect(client.getQueryData<{ total: number }>(notificationKeys.unreadCount())?.total).toBe(0);
     // Live refreshes check this to hold off until the write has landed.
     expect(client.isMutating({ mutationKey: MARK_ALL_READ_KEY })).toBe(1);
+    // A list answer that left before the write landed still shows the rows
+    // the reader marked as read; a row newer than the tap stays unread.
+    const stale = applyMarkedAllRead([
+      { ...row('a', 'like'), createdAt: '2026-01-01' },
+      { ...row('new', 'like'), createdAt: '2026-01-05' },
+    ] as never);
+    expect(stale.map((n) => n.read)).toEqual([true, false]);
     finishWrite();
     await waitFor(() => expect(client.isMutating({ mutationKey: MARK_ALL_READ_KEY })).toBe(0));
   });

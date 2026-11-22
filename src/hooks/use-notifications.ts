@@ -53,6 +53,29 @@ const LIST_KEEP_MS = 30 * 60 * 1000;
 type ListPage = Awaited<ReturnType<typeof getNotifications>>;
 
 /**
+ * The last "mark all as read": every row up to the newest one loaded at the
+ * tap. A list answer that left before the write landed (a live ping, the
+ * five-minute poll) still carries those rows unread, and without this they
+ * lit the tab counts straight back up and kept them lit until the next poll.
+ * The newest row's time, not the clock, so a fast clock never hides a
+ * notification that arrives after the tap.
+ */
+let markedAllRead: { cutoff: number; at: number } | null = null;
+const MARKED_ALL_KEEP_MS = 5 * 60 * 1000;
+
+const createdMs = (n: DeHubNotification) => {
+  const t = new Date(n.createdAt).getTime();
+  return Number.isFinite(t) ? t : 0;
+};
+
+export function applyMarkedAllRead(rows: DeHubNotification[]): DeHubNotification[] {
+  const mark = markedAllRead;
+  if (!mark || Date.now() - mark.at > MARKED_ALL_KEEP_MS) return rows;
+  if (!rows.some((n) => !n.read && createdMs(n) <= mark.cutoff)) return rows;
+  return rows.map((n) => (!n.read && createdMs(n) <= mark.cutoff ? { ...n, read: true } : n));
+}
+
+/**
  * A tab's first sight before its own request lands: the rows of that type
  * already loaded in the unfiltered feed, so a tab opens filled instead of on
  * a skeleton.
@@ -117,13 +140,13 @@ export function useNotifications(
   // pushes everything down), so a row already listed is not listed twice.
   const notifications = useMemo(() => {
     const seen = new Set<string>();
-    return (query.data?.pages ?? [])
+    return applyMarkedAllRead((query.data?.pages ?? [])
       .flatMap((page) => page?.items || [])
       .filter((item): item is DeHubNotification => {
         if (!item?.id || seen.has(item.id)) return false;
         seen.add(item.id);
         return true;
-      });
+      }));
   }, [query.data]);
   const processedData = useRef<typeof query.data>();
   const initialized = useRef(false);
@@ -326,6 +349,13 @@ export function useMarkAllNotificationsAsRead() {
       const previousLists = queryClient.getQueriesData<{ pages: { items: DeHubNotification[] }[] }>(
         { queryKey: [...notificationKeys.all, 'list'] },
       );
+      if (!category) {
+        let cutoff = markedAllRead?.cutoff ?? 0;
+        for (const [, data] of previousLists) {
+          for (const page of data?.pages ?? []) for (const n of page?.items ?? []) if (n) cutoff = Math.max(cutoff, createdMs(n));
+        }
+        markedAllRead = { cutoff, at: Date.now() };
+      }
       queryClient.setQueryData<UnreadNotificationCount>(notificationKeys.unreadCount(), category && previousCount ? {
         total: Math.max(0, previousCount.total - (previousCount.byCategory[category] || 0)),
         byCategory: { ...previousCount.byCategory, [category]: 0 },
@@ -347,6 +377,7 @@ export function useMarkAllNotificationsAsRead() {
     },
     onError: (_err, _variables, context) => {
       // Rollback on error
+      markedAllRead = null;
       context?.previousLists?.forEach(([key, data]) => queryClient.setQueryData(key, data));
       if (context?.previousCount !== undefined) {
         queryClient.setQueryData(notificationKeys.unreadCount(), context.previousCount);
