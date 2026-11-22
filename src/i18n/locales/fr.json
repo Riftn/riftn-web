@@ -7235,6 +7235,8 @@
     "shareTitle": "@{{handle}} est à vendre sur Riftn"
   },
   "stories": {
+    "captionFont": "Police du texte",
+    "captionStyles": {"classic":"Classique","minimal":"Minimaliste","groove":"Groove","poster":"Affiche","book":"Livre","editorial":"Éditorial","headline":"À la une","mono":"Monospace","terminal":"Terminal","typewriter":"Machine à écrire","marker":"Feutre","script":"Manuscrite"},
     "selectedPeople": "Uniquement les personnes sélectionnées",
     "hideFromPeople": "Masquer aux personnes sélectionnées",
     "momentArchive": "Archives des moments",

@@ -8,6 +8,8 @@
  * over the clip.
  */
 
+import { captionFontStyle, type CaptionFont } from "./caption-fonts";
+
 export const OUT_W = 1080;
 export const OUT_H = 1920;
 
@@ -20,6 +22,7 @@ export interface TextLayer {
   y: number;
   /** Font size as a fraction of the stage width. */
   size: number;
+  font?: CaptionFont;
   color: string;
   /** Rounded box behind the words. */
   box: boolean;
@@ -31,8 +34,6 @@ export interface TextLayer {
 
 export const TEXT_COLORS = ['#ffffff', '#000000', '#ff5c7a', '#ffb34d', '#ffe14d', '#5ce08a', '#4dc3ff', '#a391fc'];
 
-const FONT = '700 {size}px Inter, "SF Pro Display", system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-
 function boxColor(color: string): string {
   return color.toLowerCase() === '#ffffff' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.92)';
 }
@@ -40,7 +41,8 @@ function boxColor(color: string): string {
 /** Where a text layer's lines sit, in output pixels. Shared by drawing and mention tap targets. */
 export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer) {
   const px = Math.round(layer.size * OUT_W);
-  ctx.font = FONT.replace('{size}', String(px));
+  const { fontFamily, fontStyle, fontWeight } = captionFontStyle(layer.font);
+  ctx.font = `${fontStyle} ${fontWeight} ${px}px ${fontFamily}`;
   const lines = layer.text.split('\n');
   const lineH = px * 1.18;
   const padX = px * 0.32;

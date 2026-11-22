@@ -7195,6 +7195,8 @@
     "shareTitle": "@{{handle}} is for sale on Riftn"
   },
   "stories": {
+    "captionFont": "Caption font",
+    "captionStyles": {"classic":"Classic","minimal":"Minimal","groove":"Groove","poster":"Poster","book":"Book","editorial":"Editorial","headline":"Headline","mono":"Mono","terminal":"Terminal","typewriter":"Typewriter","marker":"Marker","script":"Script"},
     "selectedPeople": "Only selected people",
     "hideFromPeople": "Hide from selected people",
     "momentArchive": "Moment archive",

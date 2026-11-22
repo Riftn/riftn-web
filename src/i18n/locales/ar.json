@@ -7255,6 +7255,8 @@
     "shareTitle": "@{{handle}} معروض للبيع على Riftn"
   },
   "stories": {
+    "captionFont": "خط النص",
+    "captionStyles": {"classic":"كلاسيكي","minimal":"بسيط","groove":"إيقاعي","poster":"ملصق","book":"كتاب","editorial":"افتتاحية","headline":"عنوان","mono":"أحادي المسافة","terminal":"طرفية","typewriter":"آلة كاتبة","marker":"خط عريض بالقلم","script":"خط يدوي"},
     "selectedPeople": "الأشخاص المحددون فقط",
     "hideFromPeople": "إخفاء عن أشخاص محددين",
     "momentArchive": "أرشيف اللحظات",

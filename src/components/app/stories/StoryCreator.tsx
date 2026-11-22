@@ -29,6 +29,7 @@ import { useRefreshStoryShelf } from '@/hooks/use-story-shelf';
 import { useQuery } from '@tanstack/react-query';
 import type { StoryRemixSource } from '@/store/storiesStore';
 import { composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, TEXT_COLORS, type TextLayer } from './story-compose';
+import { CAPTION_FONTS, captionFonts, captionFontStyle, type CaptionFont } from "./caption-fonts";
 import { shareMoment } from './story-upload';
 import '@/styles/stories.css';
 
@@ -522,6 +523,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
                 left: `${l.x * 100}%`,
                 top: `${l.y * 100}%`,
                 transform: `translate(-50%, -50%) rotate(${l.rotation ?? 0}deg)`,
+                ...captionFontStyle(l.font),
                 fontSize: fontPx(l),
                 color: l.box && l.color.toLowerCase() !== '#ffffff' ? l.color : l.box ? '#fff' : l.color,
                 textShadow: l.box ? undefined : '0 2px 14px rgba(0,0,0,.45)',
@@ -653,6 +655,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         <div data-sc-panel data-sc-text-panel onPointerDown={e => e.stopPropagation()}>
           <textarea
             autoFocus
+            style={captionFontStyle(editingLayer.font)}
             value={editingLayer.text}
             maxLength={200}
             rows={2}
@@ -674,7 +677,20 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               onClick={() => patch(editingLayer.id, { rotation: ((editingLayer.rotation ?? 0) + 45) % 360 })}>
               <RotateCw className="w-4 h-4" />{editingLayer.rotation ?? 0}°
             </button>
-            <input type="range" min={0.045} max={0.14} step={0.005} value={editingLayer.size} onChange={e => patch(editingLayer.id, { size: Number(e.target.value) })} className="flex-1" aria-label={t('stories.size', { defaultValue: 'Size' })} />
+            <select
+              data-sc-caption-font
+              aria-label={t('stories.captionFont', { defaultValue: 'Caption font' })}
+              className="rounded-lg bg-zinc-800 px-2 py-1.5 text-sm text-white"
+              value={editingLayer.font ?? 'classic'}
+              onChange={event => patch(editingLayer.id, { font: event.target.value as CaptionFont })}
+            >
+              {captionFonts.map(id => (
+                <option key={id} value={id} style={captionFontStyle(id)}>
+                  {t(`stories.captionStyles.${id}`, { defaultValue: CAPTION_FONTS[id].label })}
+                </option>
+              ))}
+            </select>
+            <input type="range" min={0.045} max={0.14} step={0.005} value={editingLayer.size} onChange={e => patch(editingLayer.id, { size: Number(e.target.value) })} className="flex-1" aria-label={t('articles.textSize', { defaultValue: 'Text size' })} />
             <button type="button" data-sc-btn data-st-dark-glass onClick={finishText} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
           </div>
         </div>
