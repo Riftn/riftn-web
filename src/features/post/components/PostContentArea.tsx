@@ -677,7 +677,7 @@ export function PostContentArea({
                   }
                 }
               }}
-              data-placeholder={(showTitle || hasVideo || hasAudio) ? "Description (optional)" : "What's happening?"}
+              data-placeholder={(showTitle || hasVideo || hasAudio) ? _copy('postComposer.descriptionOptional', { defaultValue: 'Description (optional)' }) : _copy('postComposer.whatsHappening', { defaultValue: "What's happening?" })}
               className="w-full bg-transparent text-white text-base sm:text-lg resize-none outline-none min-h-[72px] sm:min-h-[72px] empty:before:content-[attr(data-placeholder)] empty:before:text-white/50 sm:empty:before:text-white/70 empty:before:pointer-events-none empty:before:cursor-text focus:empty:before:content-['\200b'] caret-white block"
               style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', caretColor: 'white' }}
             />

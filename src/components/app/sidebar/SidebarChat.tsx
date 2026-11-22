@@ -206,8 +206,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
   const startEdit = (id: string, caret: number | null = null) => { setEditCaret(caret); setEditingId(id); };
   const stopEdit = useCallback(() => setEditingId(null), []);
 
-  const translateSignal = 0;
-  const originalSignal = 0;
+  // Translate from a line's menu translates the whole side chat, the same as
+  // Translate in the full chat (which also translates every line above).
+  const [translateSignal, setTranslateSignal] = useState(0);
+  const [originalSignal, setOriginalSignal] = useState(0);
+  const [sideTranslated, setSideTranslated] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   usePublicChatReading(isActive, scrollContainerRef);
@@ -485,6 +488,11 @@ export function SidebarChat({ isActive }: SidebarChatProps) {
       key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
       onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
     });
+    if (menuMsg.content?.trim() && (!menuMsg.message_type || menuMsg.message_type === 'text')) menuActions.push(
+      sideTranslated
+        ? { key: 'original', icon: menuIcons.translate, label: _copy('chatHold.showOriginal', { defaultValue: 'Original' }), onSelect: () => { setSideTranslated(false); setOriginalSignal((n) => n + 1); } }
+        : { key: 'translate', icon: menuIcons.translate, label: _copy('chatHold.translate', { defaultValue: 'Translate' }), hint: 'T', onSelect: () => { setSideTranslated(true); setTranslateSignal((n) => n + 1); } },
+    );
     const sideMediaUrl = menuMsg.message_type === 'image' ? copyableMediaUrl(getMediaUrl(menuMsg.image_url) || menuMsg.image_url)
       : menuMsg.message_type === 'gif' ? copyableMediaUrl(menuMsg.image_url || menuMsg.content) : null;
     if (sideMediaUrl) menuActions.push({ key: 'copy-media', icon: menuIcons.copyMedia, label: _copy('msgMenu.copyMedia', { defaultValue: 'Copy Media' }), onSelect: () => copyMediaWithToast(sideMediaUrl, menuMsg.message_type === 'gif' ? 'gif' : 'image', _copy) });
