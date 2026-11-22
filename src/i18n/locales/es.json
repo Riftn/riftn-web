@@ -1,6 +1,199 @@
 {
-  "dmVideo": {"edit": "Editar video", "hiddenTag": "Oculto", "tapToEdit": "Toca para editar", "cover": "Cubierta", "trim": "Recortar", "mirror": "Espejo", "rotate": "Rotar", "hide": "Ocultar", "timer": "Temporizador", "sheetTitleAny": "Editar antes de enviar", "close": "Cerrar", "replace": "Reemplazar", "hiddenUntilTap": "Oculto hasta que lo toquen", "pause": "Pausar", "play": "Reproducir video", "mute": "Silenciar", "unmute": "Activar sonido", "scrub": "Avanzar por el video", "addMore": "Agregar fotos o videos", "trimAria": "Arrastra los extremos para recortar", "coverAria": "Toca un fotograma para establecer la cubierta", "coverHint": "Toca un fotograma para establecer la cubierta", "coverOwn": "Tu foto", "coverAuto": "Automático", "uploadCover": "Subir una imagen de cubierta", "mirrored": "Espejado", "original": "Original", "rotate90": "Rotar 90°", "showNormally": "Mostrar normalmente", "showNormallyBody": "Lo ven de inmediato", "hideUntilTap": "Ocultar hasta que se toque", "hideUntilTapBody": "Desenfocado hasta que lo toquen", "hidePrice": "Ocultar detrás de un precio", "hidePriceBody": "Desenfocado hasta que te paguen", "priceUnavailable": "No en este chat", "timerOff": "Apagado", "timerOffBody": "Se queda en el chat.", "timerViewBody": "Se va para ambos una vez que lo han visto.", "confirm": "Confirmar", "lockedFor": "Desbloquear por {{value1}} DHB", "lockedForUsd": "Desbloquear para {{value1}}", "editItem": "Editar artículo {{value1}}", "kept": "{{time}} guardado", "timerTimeBody": "Se va para ambos {{value1}} después de que lo envíes."},
-  "assistantCards": {"requestDraft": "Borrador de solicitud pública", "postRequest": "Publicar en Solicitudes", "possibleDuplicates": "Posibles duplicados", "viewPostedRequest": "Ver la solicitud publicada", "fitting": "Adecuada", "loadFailed": "No se pudo cargar esta tarjeta. Inicia sesión o pregunta de nuevo.", "failed": "No funcionó. Inténtalo de nuevo.", "reactOne": "Reaccionar a 1 publicación", "reactMany": "Reaccionar a {{count}} publicaciones", "follow": "Seguir a {{count}}", "unfollow": "Dejar de seguir a {{count}}", "allowChats": "¿Dejar que el asistente lea tus chats?", "stopChats": "¿Impedir que el asistente lea tus chats?", "confirmReact": "Reaccionar", "confirmFollow": "Seguir", "confirmUnfollow": "Dejar de seguir", "confirmAllow": "Permitir", "confirmStop": "Detener", "skipsAlready": "Omite {{count}} a las que ya reaccionaste", "allowChatsWhy": "Solo tú ves lo que lee. Solo chats directos, y los cifrados de extremo a extremo siguen privados. Pídele que pare cuando quieras.", "pickReaction": "Elige una reacción", "progress": "{{done}} de {{total}}", "doneReact": "Reaccionaste a {{count}} publicaciones", "doneAllow": "Permitido. Vuelve a hacer tu pregunta.", "doneStop": "Detenido. Ya no puede leer tus chats.", "doneFollow": "Hecho para {{count}}", "expired": "Esta tarjeta caducó. Pregunta de nuevo.", "cancelled": "Cancelado", "cancel": "Ahora no"},
+  "ownKeys": {
+    "working": "Funcionando",
+    "invalid": "Rechazado, reemplázalo",
+    "noCredit": "Sin crédito",
+    "disabled": "Desactivado por Riftn",
+    "failed": "Algo salió mal. Inténtalo de nuevo.",
+    "savedNoCredit": "Clave {{name}} guardada, pero la cuenta no tiene crédito.",
+    "saved": "Clave {{name}} guardada. Las herramientas en {{name}} ahora usan tu cuenta.",
+    "removed": "Clave {{name}} eliminada.",
+    "title": "Tus propias claves de IA",
+    "description": "Agrega una clave de un proveedor de IA y las herramientas de creador se ejecutarán en tu cuenta. Riftn no cobra nada por esos trabajos. Las claves están cifradas y nunca se vuelven a mostrar.",
+    "replace": "Reemplazar",
+    "check": "Verificar",
+    "remove": "Eliminar",
+    "add": "Agregar clave",
+    "paste": "Pega tu clave de {{name}}",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "getKey": "Obtener una clave de {{name}}",
+    "showLess": "Mostrar solo mis claves",
+    "addAnother": "Agregar otro proveedor"
+  },
+  "resetWallet": {
+    "mismatch": "Las contraseñas no coinciden",
+    "tooShort": "La contraseña debe tener al menos {{count}} caracteres",
+    "breached": "Esta contraseña ha aparecido en una filtración de datos. Elige una diferente",
+    "weak": "Elige una contraseña más segura (mezcla letras, números y símbolos)",
+    "failed": "No se pudo restablecer tu billetera. No se movió nada. Inténtalo de nuevo.",
+    "twoFactor": "Ingresa el código de tu aplicación de autenticación para mover tu cuenta.",
+    "funds": "Los tokens, NFT y otros saldos no se mueven. Permanecen en la dirección anterior. Si aún puedes abrir la billetera antigua, envíalos primero.",
+    "doneTitle": "Tu cuenta está en su nueva billetera",
+    "doneBody": "Tu nombre de usuario, publicaciones y seguidores vinieron con ella. La billetera antigua ya no puede iniciar sesión. Haz una copia de seguridad de la nueva billetera ahora desde Copia de seguridad de la billetera justo debajo.",
+    "close": "Listo",
+    "noLogin": "Un restablecimiento se verifica con el correo electrónico de tu cuenta o el inicio de sesión de Google, no con la billetera antigua, porque cualquiera que tenga la clave antigua también podría firmar. Esta cuenta aún no tiene un correo electrónico de inicio de sesión.",
+    "noLoginStep1": "Agrega un correo electrónico en Inicio de sesión en esta página.",
+    "noLoginStep2": "Cierra sesión y luego inicia sesión con ese correo electrónico.",
+    "noLoginStep3": "Regresa aquí y presiona Restablecer.",
+    "goToSignIn": "Agregar un correo electrónico de inicio de sesión",
+    "relogin": "Para demostrar que eres tú, cierra sesión y vuelve a iniciarla con tu correo electrónico de inicio de sesión ({{email}}) o Google, luego regresa aquí.",
+    "reloginNoEmail": "Para demostrar que eres tú, cierra sesión y vuelve a iniciarla con el correo electrónico de tu cuenta o Google, luego regresa aquí.",
+    "logOut": "Cerrar sesión",
+    "intro": "Crea una nueva billetera Riftn y traslada tu nombre de usuario, publicaciones, seguidores y mensajes a ella. Usa esto si perdiste tu billetera o alguien más tiene su clave. La billetera antigua dejará de funcionar para iniciar sesión.",
+    "password": "Nueva contraseña de la billetera (mín. {{count}} caracteres)",
+    "confirm": "Confirmar contraseña",
+    "twoFactorPlaceholder": "Código del autenticador",
+    "ack": "Entiendo que mis fondos antiguos permanecen en la billetera antigua.",
+    "working": "Trasladando tu cuenta…",
+    "submit": "Restablecer billetera",
+    "title": "Restablecer billetera",
+    "rowDesc": "¿Perdiste tu billetera o alguien más tiene su clave? Traslada tu cuenta a una nueva billetera. Tu nombre de usuario, publicaciones y seguidores te acompañarán.",
+    "rowButton": "Restablecer"
+  },
+  "twoFactor": {
+    "rowTitle": "Inicio de sesión en dos pasos",
+    "statusOn": "Activado",
+    "rowOnDesc": "Los nuevos inicios de sesión requieren un código de tu aplicación de autenticación. Quedan {{count}} códigos de respaldo.",
+    "rowOffDesc": "Solicitar un código de tu aplicación de autenticación al iniciar sesión.",
+    "manage": "Administrar",
+    "turnOn": "Activar",
+    "wrongCode": "Ese código no coincide. Prueba con el más reciente en tu aplicación.",
+    "signingInAs": "Iniciando sesión como",
+    "signIn": "Iniciar sesión",
+    "trustDevice": "No volver a preguntar en este dispositivo durante 30 días",
+    "useBackupShort": "Usar un código de respaldo",
+    "useApp": "Usar mi aplicación de autenticación",
+    "useAnotherShort": "Cuenta diferente",
+    "lostEverything": "¿Perdiste tu teléfono y tus códigos de respaldo? Contacta a soporte",
+    "turnedOff": "La verificación en dos pasos está desactivada",
+    "introTitle": "Añade un segundo candado",
+    "linkTitle": "Vincula tu aplicación de autenticación",
+    "confirmTitle": "Introduce el código de 6 dígitos",
+    "codesTitle": "Guarda tus códigos de respaldo",
+    "turnOffTitle": "Desactiva la verificación en dos pasos",
+    "newCodesTitle": "Obtén nuevos códigos de respaldo",
+    "manageTitle": "Verificación en dos pasos",
+    "introBody": "Después de iniciar sesión, Riftn te pedirá un código de una aplicación en tu teléfono. Alguien con tu contraseña, correo electrónico o billetera aún no podrá entrar.",
+    "introPoint1": "Un código nuevo cada 30 segundos, solo en tu teléfono",
+    "introPoint2": "Funciona sin importar cómo inicies sesión: Google, Apple, correo electrónico, teléfono o billetera",
+    "introPoint3": "Se solicita una vez por dispositivo, no cada vez que abres Riftn",
+    "introApps": "Usa cualquier aplicación de autenticación: Google Authenticator, Microsoft Authenticator, Authy, 1Password o la aplicación de contraseñas de tu teléfono.",
+    "getStarted": "Configúralo",
+    "linkBodyPhone": "Toca abajo para añadir Riftn a tu aplicación de autenticación, luego regresa aquí.",
+    "openApp": "Añadir a la aplicación de autenticación",
+    "showQr": "¿Aplicación en otro dispositivo? Mostrar código QR",
+    "linkBodyDesktop": "Abre tu aplicación de autenticación, toca + y escanea este código con la cámara de tu teléfono.",
+    "linkedNext": "Ya lo añadí",
+    "confirmBody": "Escribe el código que muestra tu aplicación para Riftn. Esto demuestra que está vinculado antes de que activemos nada.",
+    "turnOffBody": "Introduce un código de tu aplicación de autenticación para desactivar esto. Tu cuenta volverá a tener un solo candado.",
+    "newCodesBody": "Introduce un código de tu aplicación de autenticación. Tus códigos de respaldo antiguos dejarán de funcionar de inmediato.",
+    "codeHint": "Los códigos cambian cada 30 segundos",
+    "turnOff": "Desactivar",
+    "verify": "Verificar y activar",
+    "makeNewCodes": "Crear nuevos códigos",
+    "nowOn": "La verificación en dos pasos está activada",
+    "codesBody": "¿Perdiste tu teléfono? Cada uno de estos códigos te permite entrar una vez. Guárdalos en un lugar seguro, como un gestor de contraseñas.",
+    "codesCopied": "Códigos de respaldo copiados",
+    "codesSaved": "He guardado estos códigos",
+    "since": "App de autenticación desde {{date}}",
+    "authenticatorApp": "App de autenticación",
+    "backupCodes": "Códigos de respaldo",
+    "codesLeft": "Quedan {{count}} de 10",
+    "getNew": "Obtener nuevos",
+    "newPhoneTip": "¿Cambias de teléfono? La mayoría de las apps de autenticación transfieren tus códigos automáticamente. Si la tuya no lo hace, desactiva esto en el teléfono antiguo y configúralo de nuevo en el nuevo.",
+    "setupKey": "O escribe esta clave de configuración",
+    "keyCopied": "Clave de configuración copiada"
+  },
+  "chatTextSize": {
+    "title": "Tamaño del texto"
+  },
+  "msgMenu": {
+    "copyText": "Copiar texto",
+    "copyMedia": "Copiar contenido multimedia"
+  },
+  "chatHold": {
+    "copied": "Copiado",
+    "showOriginal": "Original",
+    "translate": "Traducir"
+  },
+  "dmVideo": {
+    "edit": "Editar video",
+    "hiddenTag": "Oculto",
+    "tapToEdit": "Toca para editar",
+    "cover": "Cubierta",
+    "trim": "Recortar",
+    "mirror": "Espejo",
+    "rotate": "Rotar",
+    "hide": "Ocultar",
+    "timer": "Temporizador",
+    "sheetTitleAny": "Editar antes de enviar",
+    "close": "Cerrar",
+    "replace": "Reemplazar",
+    "hiddenUntilTap": "Oculto hasta que lo toquen",
+    "pause": "Pausar",
+    "play": "Reproducir video",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido",
+    "scrub": "Avanzar por el video",
+    "addMore": "Agregar fotos o videos",
+    "trimAria": "Arrastra los extremos para recortar",
+    "coverAria": "Toca un fotograma para establecer la cubierta",
+    "coverHint": "Toca un fotograma para establecer la cubierta",
+    "coverOwn": "Tu foto",
+    "coverAuto": "Automático",
+    "uploadCover": "Subir una imagen de cubierta",
+    "mirrored": "Espejado",
+    "original": "Original",
+    "rotate90": "Rotar 90°",
+    "showNormally": "Mostrar normalmente",
+    "showNormallyBody": "Lo ven de inmediato",
+    "hideUntilTap": "Ocultar hasta que se toque",
+    "hideUntilTapBody": "Desenfocado hasta que lo toquen",
+    "hidePrice": "Ocultar detrás de un precio",
+    "hidePriceBody": "Desenfocado hasta que te paguen",
+    "priceUnavailable": "No en este chat",
+    "timerOff": "Apagado",
+    "timerOffBody": "Se queda en el chat.",
+    "timerViewBody": "Se va para ambos una vez que lo han visto.",
+    "confirm": "Confirmar",
+    "lockedFor": "Desbloquear por {{value1}} DHB",
+    "lockedForUsd": "Desbloquear para {{value1}}",
+    "editItem": "Editar artículo {{value1}}",
+    "kept": "{{time}} guardado",
+    "timerTimeBody": "Se va para ambos {{value1}} después de que lo envíes."
+  },
+  "assistantCards": {
+    "requestDraft": "Borrador de solicitud pública",
+    "postRequest": "Publicar en Solicitudes",
+    "possibleDuplicates": "Posibles duplicados",
+    "viewPostedRequest": "Ver la solicitud publicada",
+    "fitting": "Adecuada",
+    "loadFailed": "No se pudo cargar esta tarjeta. Inicia sesión o pregunta de nuevo.",
+    "failed": "No funcionó. Inténtalo de nuevo.",
+    "reactOne": "Reaccionar a 1 publicación",
+    "reactMany": "Reaccionar a {{count}} publicaciones",
+    "follow": "Seguir a {{count}}",
+    "unfollow": "Dejar de seguir a {{count}}",
+    "allowChats": "¿Dejar que el asistente lea tus chats?",
+    "stopChats": "¿Impedir que el asistente lea tus chats?",
+    "confirmReact": "Reaccionar",
+    "confirmFollow": "Seguir",
+    "confirmUnfollow": "Dejar de seguir",
+    "confirmAllow": "Permitir",
+    "confirmStop": "Detener",
+    "skipsAlready": "Omite {{count}} a las que ya reaccionaste",
+    "allowChatsWhy": "Solo tú ves lo que lee. Solo chats directos, y los cifrados de extremo a extremo siguen privados. Pídele que pare cuando quieras.",
+    "pickReaction": "Elige una reacción",
+    "progress": "{{done}} de {{total}}",
+    "doneReact": "Reaccionaste a {{count}} publicaciones",
+    "doneAllow": "Permitido. Vuelve a hacer tu pregunta.",
+    "doneStop": "Detenido. Ya no puede leer tus chats.",
+    "doneFollow": "Hecho para {{count}}",
+    "expired": "Esta tarjeta caducó. Pregunta de nuevo.",
+    "cancelled": "Cancelado",
+    "cancel": "Ahora no"
+  },
   "postBg": {
     "addMedia": "Añade una imagen, un GIF o un vídeo",
     "changeMedia": "Cambiar imagen, GIF o vídeo",
@@ -119,6 +312,17 @@
     "seoDescription": "Descarga la app Riftn: la red social de código abierto que pertenece a sus usuarios, con transmisiones en vivo, mensajería cifrada y recompensas por ver contenido. Gratis en Google Play, el App Store y la web.",
     "seoTitle": "App Riftn: Descárgala para Android, iPhone y web"
   },
+  "mentionLinks": {
+    "communities": "Comunidades",
+    "empty": "No se encontró nada",
+    "hint": "Escribe para buscar personas, comunidades y páginas",
+    "linkTo": "Enlazar {{name}}",
+    "members": " miembros",
+    "pages": "Páginas",
+    "people": "Personas",
+    "placeholder": "Buscar personas, comunidades, páginas...",
+    "title": "Mencionar o enlazar"
+  },
   "dehubLinks": {
     "copyLinkDetail": "Copia el enlace {{item}} en tu portapapeles",
     "kind": {
@@ -138,12 +342,12 @@
       "featureRequest": "solicitud",
       "page": "página"
     },
+    "openPage": "Abrir página",
+    "viewRequest": "Ver solicitud",
     "recipientChat": "chat",
     "recipientUser": "usuario",
     "sendFailed": "Error al enviar {{item}}",
-    "sentTo": "{{item}} enviado a {{name}}",
-    "openPage": "Abrir página",
-    "viewRequest": "Ver solicitud"
+    "sentTo": "{{item}} enviado a {{name}}"
   },
   "stageCover": {
     "admitOne": "ADMITIR UNO",
@@ -364,6 +568,7 @@
     "placeholderLink": "yoursite.com",
     "placeholderPronouns": "ellos/ellas",
     "placeholderLocation": "Ciudad, país",
+    "placeholderCashtag": "$cashtag",
     "presets": {
       "website": "Sitio web",
       "blog": "Blog",
@@ -376,8 +581,7 @@
       "custom": "Personalizado",
       "customOption": "Etiqueta personalizada",
       "cashapp": "Cash App"
-    },
-    "placeholderCashtag": "$cashtag"
+    }
   },
   "followedTags": {
     "follow": "Seguir #{{tag}}",
@@ -688,6 +892,13 @@
       "liveStudio": "emitir en directo, transmitir, streaming, OBS, superposiciones, alertas, widgets",
       "launchpad": "lanzar un token, crear una moneda, memecoin, curva de vinculación, tokenizar"
     },
+    "groups": {
+      "main": "Principal",
+      "create": "Crear",
+      "discover": "Descubrir",
+      "money": "Dinero",
+      "riftn": "Riftn"
+    },
     "reorderHint": "Mantén y arrastra cualquier icono para reorganizar",
     "reorderReset": "Restablecer",
     "reorderResetLong": "Restablecer el orden del menú",
@@ -734,14 +945,7 @@
     "getTheApp": "Descargar la app",
     "connectAi": "Conectar IA",
     "converter": "Conversión",
-    "affiliate": "Afiliados",
-    "groups": {
-      "main": "Principal",
-      "create": "Crear",
-      "discover": "Descubrir",
-      "money": "Dinero",
-      "riftn": "Riftn"
-    }
+    "affiliate": "Afiliados"
   },
   "feed": {
     "viewProfile": "Ver el perfil de {{name}}",
@@ -785,7 +989,42 @@
     "heading": "Cortos de Riftn"
   },
   "settings": {
-    "loginLook": {"title": "Pantalla de inicio de sesión", "desc": "Cómo se mueven el logo y el lema de Riftn en la pantalla de inicio de sesión en este dispositivo.", "tube": "TV de tubo", "vhs": "Cinta VHS", "led": "Pantalla LED", "holo": "Holograma", "neon": "Neón", "3d": "3D", "flat": "Plano"}, "arrivalLook": {"title": "Al iniciar sesión", "desc": "Lo que se ve mientras carga tu cuenta, antes de que tu foto llegue a la página. En este dispositivo.", "trace": "Trazo", "tune": "Sintonizar", "rift": "Grieta", "deck": "Baraja", "glass": "Gota de cristal"},
+    "notificationShowCount": "Mostrar el número en la campana",
+    "notificationShowCountDesc": "Ver cuántas notificaciones no se han leído en lugar de solo el brillo",
+    "messagesShowCount": "Mostrar el número en Mensajes",
+    "messagesShowCountDesc": "Ver cuántos mensajes no se han leído en lugar de solo el brillo",
+    "wideMediaMode": "Contenido multimedia de formato largo en pantallas anchas",
+    "wideMediaModeDesc": "Qué rellena el espacio al lado de videos y fotos verticales y cuadrados en una computadora",
+    "wideVideoAmbient": "Ambiente",
+    "wideMediaAmbientDesc": "El video o la foto ocupa todo el ancho, con un suave brillo difuminado de sí mismo a cada lado",
+    "wideVideoRails": "Paneles de vidrio",
+    "wideMediaRailsDesc": "El video o la foto al lado de un panel de vidrio con lo que es, un botón de Seguir y los comentarios principales",
+    "wideVideoStandard": "Estándar",
+    "wideMediaStandardDesc": "El video o la foto por sí solo, como antes",
+    "chatTextSize": "Tamaño del texto del chat",
+    "chatTextSizeDesc": "Mensajes más grandes o más pequeños en cada chat. Se suma al tamaño del texto de tu teléfono o navegador.",
+    "loginLook": {
+      "title": "Pantalla de inicio de sesión",
+      "desc": "Cómo se mueven el logo y el lema de Riftn en la pantalla de inicio de sesión en este dispositivo.",
+      "tube": "TV de tubo",
+      "vhs": "Cinta VHS",
+      "led": "Pantalla LED",
+      "holo": "Holograma",
+      "neon": "Neón",
+      "3d": "3D",
+      "flat": "Plano"
+    },
+    "arrivalLook": {
+      "title": "Al iniciar sesión",
+      "desc": "Lo que se ve mientras carga tu cuenta, antes de que tu foto llegue a la página. En este dispositivo.",
+      "trace": "Trazo",
+      "tune": "Sintonizar",
+      "rift": "Grieta",
+      "deck": "Baraja",
+      "glass": "Gota de cristal"
+    },
+    "chatCards": "Chats como tarjetas",
+    "chatCardsDesc": "Cada chat en su propia tarjeta. Desactívalo para una lista simple con una línea entre chats.",
     "chatDeleteChoice": "Al eliminar un mensaje",
     "chatDeleteChoiceDesc": "Preguntar siempre, o eliminar siempre solo para ti o para todos en el chat.",
     "chatReactionStyle": "Reacciones en el chat",
@@ -1421,11 +1660,12 @@
     "menuLayoutFolders": "Carpetas",
     "menuLayoutFoldersDesc": "Tus páginas principales y una carpeta por grupo",
     "publicChatInBar": "Chat público en la barra inferior",
-    "publicChatInBarDesc": "Entra al Chat público con un toque desde la barra inferior de la pantalla",
-    "chatCards": "Chats como tarjetas",
-    "chatCardsDesc": "Cada chat en su propia tarjeta. Desactívalo para una lista simple con una línea entre chats."
+    "publicChatInBarDesc": "Entra al Chat público con un toque desde la barra inferior de la pantalla"
   },
   "common": {
+    "notNow": "Ahora no",
+    "copy": "Copiar",
+    "download": "Descargar",
     "confirm": "Confirmar",
     "mute": "Silenciar",
     "unmute": "Activar sonido",
@@ -2990,7 +3230,6 @@
     "failedSubmit": "Error al enviar solicitud. Inténtalo de nuevo."
   },
   "loginModal": {
-    "didYouMean": "¿Quisiste decir {{email}}?",
     "bringLoginOver": "¿Usabas Riftn en dehub.io? <bring>Trae tu sesión</bring>",
     "restoreWalletTitle": "Recupera tu billetera",
     "restoreOriginalWallet": "Tu perfil está en la billetera de tu inicio de sesión original, no en la guardada para este inicio de sesión. Inicia sesión como lo hiciste la primera vez en Riftn para recuperar esa billetera. Tu perfil y tus fondos no cambian.",
@@ -3028,6 +3267,7 @@
     "connectWallet": "Conectar Billetera",
     "emailPlaceholder": "Ingresa tu email",
     "invalidEmail": "Por favor ingresa un email válido",
+    "didYouMean": "¿Quisiste decir {{email}}?",
     "sendingLink": "Enviando enlace...",
     "continue": "Continuar",
     "magicLinkInfo": "Te enviaremos un enlace mágico para iniciar sesión",
@@ -4934,6 +5174,7 @@
     "shopAllowanceUsed": "{{allowance}} de {{allowance}} usados. Haz más staking de tokens Riftn para obtener una insignia superior y otra ranura."
   },
   "stages": {
+    "radioShow": {"toggle": "Programa de radio", "hint": "La música primero: pon tus canciones o una lista, habla cuando quieras. Los oyentes entran cuando quieran y aparece en la fila Radio de Explorar.", "row": "Radio", "start": "Empezar un programa", "empty": "No hay programas de radio ahora. Empieza uno: sal en vivo con tu micrófono y tu propia música.", "listening_one": "{{formatted}} escuchando", "listening_other": "{{formatted}} escuchando", "onAir": "Al aire", "soon": "Pronto", "badge": "Radio", "myMusic": "Mi música", "myMusicHint": "Las canciones que subes suenan para todos en la sala, incluso con el micrófono apagado.", "addSong": "Añadir una canción", "playFailed": "No se pudo reproducir esa canción", "noSongs": "Aún no hay canciones. Añade una para ponerla al aire.", "tooBig": "Las canciones pueden pesar hasta {{max}} MB"},
     "allStages": "Todas las salas de audio",
     "title": "Salas de audio",
     "tabLive": "En directo",
@@ -5674,6 +5915,19 @@
     "sellYourFractions": "Vender tus fracciones ({{held}} en cartera)"
   },
   "creator": {
+    "gallery": {
+      "browse": "Explorar creaciones",
+      "create": "Crear",
+      "fullscreen": "Ver en pantalla completa",
+      "missing": "Esta creación no está disponible.",
+      "send": "Enviar",
+      "notifications": {
+        "generation_like": "{{name}} reaccionó a tu creación",
+        "generation_comment_like": "{{name}} reaccionó a tu comentario",
+        "generation_reply": "{{name}} respondió a tu comentario",
+        "generation_comment": "{{name}} comentó tu creación"
+      }
+    },
     "avatarTitle": "Retrato parlante",
     "avatarRequirements": "Retrato PNG cuadrado, de 512–2048 píxeles y hasta 5 MB. WAV PCM mono de 24 kHz y 16 bits, de 5–30 segundos. La última fracción de segundo se completa con silencio.",
     "avatarPortrait": "Elegir retrato PNG",
@@ -6727,19 +6981,6 @@
       "needsImageToWork": "{{model}} necesita una imagen para trabajar. Adjunta uno primero.",
       "speechLimit": "Son {{length}} caracteres. El límite es {{limit}}.",
       "musicTrackLength": "Seguimiento de {{count}}s"
-    },
-    "gallery": {
-      "browse": "Explorar creaciones",
-      "create": "Crear",
-      "fullscreen": "Ver en pantalla completa",
-      "missing": "Esta creación no está disponible.",
-      "send": "Enviar",
-      "notifications": {
-        "generation_like": "{{name}} reaccionó a tu creación",
-        "generation_comment_like": "{{name}} reaccionó a tu comentario",
-        "generation_reply": "{{name}} respondió a tu comentario",
-        "generation_comment": "{{name}} comentó tu creación"
-      }
     }
   },
   "pricing": {
@@ -7050,7 +7291,18 @@
     "signInToTradeCta": "Inicia sesión para operar"
   },
   "usernames": {
-    "swap": {"start": "Empezar", "placeholder": "@tu_otra_cuenta", "sent": "Enviado. Cambia a @{{name}} y acepta.", "waiting": "Esperando que @{{to}} acepte. Cambia a esa cuenta para terminar.", "done": "Listo. Ahora eres @{{name}}.", "decline": "Rechazar", "accept": "Intercambiar ahora", "incoming": "@{{from}} quiere intercambiar: esta cuenta pasa a ser @{{from}} y aquella @{{to}}.", "body": "¿Tienes dos cuentas? Intercambia sus nombres de usuario en un paso. Empieza aquí, cambia a la otra cuenta y acepta. Ningún nombre queda libre para otra persona.", "title": "Intercambiar con tu otra cuenta"},
+    "swap": {
+      "start": "Empezar",
+      "placeholder": "@tu_otra_cuenta",
+      "sent": "Enviado. Cambia a @{{name}} y acepta.",
+      "waiting": "Esperando que @{{to}} acepte. Cambia a esa cuenta para terminar.",
+      "done": "Listo. Ahora eres @{{name}}.",
+      "decline": "Rechazar",
+      "accept": "Intercambiar ahora",
+      "incoming": "@{{from}} quiere intercambiar: esta cuenta pasa a ser @{{from}} y aquella @{{to}}.",
+      "body": "¿Tienes dos cuentas? Intercambia sus nombres de usuario en un paso. Empieza aquí, cambia a la otra cuenta y acepta. Ningún nombre queda libre para otra persona.",
+      "title": "Intercambiar con tu otra cuenta"
+    },
     "seoTitle": "Mercado de nombres de usuario | Riftn",
     "seoDescription": "Compra y vende nombres de usuario de Riftn con tokens. Busca handles cortos, numéricos y originales a la venta, o pon el tuyo, la transferencia ocurre on-chain en cuanto se confirma el pago.",
     "title": "Nombres de usuario",
@@ -7241,13 +7493,56 @@
     "transferGuarantee": "Recibes la cuenta completa — nombre de usuario, publicaciones, seguidores, historial de propinas y derechos de insignia. El vendedor conserva su billetera y todo lo que contiene. La transferencia se ejecuta solo después de que Riftn lea tu pago en tokens de vuelta de la cadena; si se interrumpe, reintentar la compra la reanuda.",
     "shareTitle": "@{{handle}} está a la venta en Riftn"
   },
-  "stories": {"effects":"Efectos","backdrop":"Fondo","looks":{"none": "Original", "warm": "Cálido", "cool": "Frío", "vivid": "Vívido", "fade": "Suave", "mono": "Mono", "noir": "Noir", "retro": "Retro"},"backdrops":{"blur": "Desenfoque", "black": "Negro", "dusk": "Anochecer", "sunset": "Atardecer", "ocean": "Océano", "forest": "Bosque"},"stickers":"Stickers","shapes":"Flechas y formas. Tócalas después de añadirlas para cambiar color, tamaño o ángulo.","closeFriends":"Mejores amigos","closeFriendsSaved":"Guardado como tus Mejores amigos","saveCloseFriends":"Guardar como Mejores amigos","comments":"Comentarios","commentFailed":"Tu comentario no se publicó. Inténtalo de nuevo.","signInToComment":"Inicia sesión para comentar","post":"Publicar","commentsOff":"Los comentarios están desactivados en este momento",
+  "stories": {
+    "effects": "Efectos",
+    "backdrop": "Fondo",
+    "looks": {
+      "none": "Original",
+      "warm": "Cálido",
+      "cool": "Frío",
+      "vivid": "Vívido",
+      "fade": "Suave",
+      "mono": "Mono",
+      "noir": "Noir",
+      "retro": "Retro"
+    },
+    "backdrops": {
+      "blur": "Desenfoque",
+      "black": "Negro",
+      "dusk": "Anochecer",
+      "sunset": "Atardecer",
+      "ocean": "Océano",
+      "forest": "Bosque"
+    },
+    "stickers": "Stickers",
+    "shapes": "Flechas y formas. Tócalas después de añadirlas para cambiar color, tamaño o ángulo.",
+    "closeFriends": "Mejores amigos",
+    "closeFriendsSaved": "Guardado como tus Mejores amigos",
+    "saveCloseFriends": "Guardar como Mejores amigos",
+    "comments": "Comentarios",
+    "commentFailed": "Tu comentario no se publicó. Inténtalo de nuevo.",
+    "signInToComment": "Inicia sesión para comentar",
+    "post": "Publicar",
+    "commentsOff": "Los comentarios están desactivados en este momento",
     "mute": "Silenciar",
     "unfollow": "Dejar de seguir",
     "mutedToast": "Silenciado. No verás sus Momentos ni publicaciones.",
     "unfollowedToast": "Dejaste de seguir",
     "captionFont": "Fuente del texto",
-    "captionStyles": {"classic":"Clásica","minimal":"Minimalista","groove":"Rítmica","poster":"Cartel","book":"Libro","editorial":"Editorial","headline":"Titular","mono":"Monoespaciada","terminal":"Terminal","typewriter":"Máquina de escribir","marker":"Rotulador","script":"Caligráfica"},
+    "captionStyles": {
+      "classic": "Clásica",
+      "minimal": "Minimalista",
+      "groove": "Rítmica",
+      "poster": "Cartel",
+      "book": "Libro",
+      "editorial": "Editorial",
+      "headline": "Titular",
+      "mono": "Monoespaciada",
+      "terminal": "Terminal",
+      "typewriter": "Máquina de escribir",
+      "marker": "Rotulador",
+      "script": "Caligráfica"
+    },
     "selectedPeople": "Solo las personas seleccionadas",
     "hideFromPeople": "Ocultar a las personas seleccionadas",
     "momentArchive": "Archivo de momentos",
@@ -12235,6 +12530,8 @@
     "footnote": "El nivel de insignia es la cantidad de tokens de Riftn que tienes en posesión y en staking en BNB Chain y Base; el mismo saldo del que se extrae tu insignia. La escala se cotiza en dólares, por lo que las cantidades de tokens anteriores son lo que cuesta cada nivel al precio de venta de $0.001 y el requisito disminuye a medida que aumenta el precio del token; un nivel que ya has ganado nunca se retira por el precio. Una insignia que te presta un patrocinador se muestra en tu perfil pero no aumenta tu asignación de publicación; esa proviene de lo que posees tú mismo. Las asignaciones se restablecen a las 00:00 UTC, y un gigabyte aquí es 1024 MB."
   },
   "postComposer": {
+    "descriptionOptional": "Descripción (opcional)",
+    "whatsHappening": "¿Qué está pasando?",
     "homeFeedRestrictedDescription": "Esta publicación está activa en tu perfil y en Siguiendo, pero no aparecerá en el feed de Inicio. Mantén más tokens de Riftn para desbloquear insignias de mayor nivel y un mayor alcance diario en el feed de Inicio.",
     "postCostShortfall": "Esta publicación cuesta {{amount}} tokens y tienes {{held}}.",
     "paymentConfirmingDescription": "Tus tokens han sido transferidos. Terminaremos de confirmar el pago en breve.",
@@ -13007,14 +13304,14 @@
     "skippedOtherToast": "Omitió {{platforms}}: no pudo aceptar esta publicación."
   },
   "dm": {
-    "planRestricted": "Este usuario requiere una suscripción para recibir mensajes.",
-    "planTypeNotAllowed": "El plan de este creador no permite este tipo de mensaje.",
-    "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador.",
     "shareGroups": "Grupos",
     "shareKindGroup": "Grupo",
     "shareKindChannel": "Canal",
     "shareKindCommunity": "Comunidad",
-    "reportMessage": "Denunciar mensaje"
+    "reportMessage": "Denunciar mensaje",
+    "planRestricted": "Este usuario requiere una suscripción para recibir mensajes.",
+    "planTypeNotAllowed": "El plan de este creador no permite este tipo de mensaje.",
+    "planMinTip": "La propina debe ser de al menos {{amount}} tokens para este creador."
   },
   "credits": {
     "earningsWorth": "Vale {{amount}}",
@@ -21031,17 +21328,6 @@
     "failedToast": "No se pudo enviar un mensaje programado",
     "error": "No ha funcionado. Inténtalo de nuevo."
   },
-  "mentionLinks": {
-    "communities": "Comunidades",
-    "pages": "Páginas",
-    "people": "Personas",
-    "linkTo": "Enlazar {{name}}",
-    "empty": "No se encontró nada",
-    "hint": "Escribe para buscar personas, comunidades y páginas",
-    "members": " miembros",
-    "placeholder": "Buscar personas, comunidades, páginas...",
-    "title": "Mencionar o enlazar"
-  },
   "msgDelete": {
     "chatTitle": "¿Eliminar este chat?",
     "chatBodyBoth": "Bórralo solo de tus chats o borra todos los mensajes para los dos. No se puede deshacer.",
@@ -21102,7 +21388,32 @@
     "needMore_one": "Falta {{formatted}} punto",
     "needMore_other": "Faltan {{formatted}} puntos",
     "howToEarn": "Ganas un punto por cada minuto que miras con la sesión iniciada, más uno por cada 100 tokens que regalas. Los puntos no tienen valor en dinero y no se pueden comprar, vender ni cobrar.",
-    "give": {"open": "Dar puntos a alguien", "title": "Dar puntos", "titleTo": "Dar puntos a {{name}}", "who": "Quién los recibe", "howMany": "Cuántos", "limitNote": "Este canal deja que cada espectador dé hasta {{cap}} puntos al día.", "button": "Dar {{amount}} puntos", "sent": "Diste {{amount}} puntos a {{name}}", "chatLine": "dio {{amount}} puntos a {{name}}", "off": "Dar puntos está desactivado en este canal", "limit": "Llegaste al límite diario", "notFound": "No encontramos a esa persona", "notThem": "No puedes darle puntos", "failed": "No se pudieron dar los puntos. Inténtalo de nuevo.", "studio": {"title": "Los espectadores dan puntos", "intro": "Deja que los espectadores se den entre sí los puntos que ganan en tu canal tocando un nombre en tu chat en vivo. Desactivado por defecto. El límite diario evita que se acumulen puntos en una sola cuenta.", "switch": "Dejar que los espectadores den puntos del canal", "cap": "Máximo que un espectador puede dar al día", "saved": "Guardado", "log": "Puntos dados", "logEmpty": "Nadie ha dado puntos todavía.", "gave": "dio a"}},
+    "give": {
+      "open": "Dar puntos a alguien",
+      "title": "Dar puntos",
+      "titleTo": "Dar puntos a {{name}}",
+      "who": "Quién los recibe",
+      "howMany": "Cuántos",
+      "limitNote": "Este canal deja que cada espectador dé hasta {{cap}} puntos al día.",
+      "button": "Dar {{amount}} puntos",
+      "sent": "Diste {{amount}} puntos a {{name}}",
+      "chatLine": "dio {{amount}} puntos a {{name}}",
+      "off": "Dar puntos está desactivado en este canal",
+      "limit": "Llegaste al límite diario",
+      "notFound": "No encontramos a esa persona",
+      "notThem": "No puedes darle puntos",
+      "failed": "No se pudieron dar los puntos. Inténtalo de nuevo.",
+      "studio": {
+        "title": "Los espectadores dan puntos",
+        "intro": "Deja que los espectadores se den entre sí los puntos que ganan en tu canal tocando un nombre en tu chat en vivo. Desactivado por defecto. El límite diario evita que se acumulen puntos en una sola cuenta.",
+        "switch": "Dejar que los espectadores den puntos del canal",
+        "cap": "Máximo que un espectador puede dar al día",
+        "saved": "Guardado",
+        "log": "Puntos dados",
+        "logEmpty": "Nadie ha dado puntos todavía.",
+        "gave": "dio a"
+      }
+    },
     "redeemed": "Canjeaste {{title}}",
     "notEnough": "Aún no tienes puntos suficientes",
     "notLive": "Las recompensas se abren durante el directo",
