@@ -4,7 +4,7 @@
  * chat composer's menu; the pick is shared (same key as the chat composer and
  * the app).
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,8 +12,8 @@ import { SUPPORTED_LANGUAGES } from '@/i18n';
 
 export const TRANSLATE_TO_KEY = 'riftn.chat.translateTo';
 
-export function translateTarget(): string {
-  try { return localStorage.getItem(TRANSLATE_TO_KEY) || 'en'; } catch { return 'en'; }
+export function translateTarget(fallback = 'en'): string {
+  try { return localStorage.getItem(TRANSLATE_TO_KEY) || fallback; } catch { return fallback; }
 }
 
 export function translateTargetName(code = translateTarget()): string {
@@ -23,10 +23,14 @@ export function translateTargetName(code = translateTarget()): string {
 export function useComposeTranslate(text: string, setText: (value: string) => void) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
-  const translate = useCallback(async () => {
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  const translate = useCallback(async (code = translateTarget()) => {
     const draft = text.trim();
     if (!draft || busy) return;
-    const code = translateTarget();
     setBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke('translate-text', {
@@ -41,7 +45,7 @@ export function useComposeTranslate(text: string, setText: (value: string) => vo
         toast(`${t('copy.8fe147696fbf', { defaultValue: 'Translate' })} · ${translateTargetName(code)} ✓`);
         return;
       }
-      setText(out);
+      if (mounted.current) setText(out);
     } catch {
       toast.error(t('copy.037091068590', { defaultValue: 'Translation failed' }));
     } finally {
