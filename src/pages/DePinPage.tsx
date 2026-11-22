@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDepinNode } from '@/lib/depin-node';
 import { getDepinStats, getDepinMe, type DepinStatsResponse, type DepinMeResponse } from '@/lib/api/dehub/depin';
-import dehubLogo from '@/assets/dehub-logo-white.png';
+import riftnWordmark from '@/assets/riftn-wordmark-flat-white.png';
 import edgeNetworkImage from '@/assets/depin-edge-network.webp';
 import transcodeImage from '@/assets/depin-transcode-workstation.webp';
 
@@ -339,7 +339,7 @@ export default function DePinPage() {
             className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
           >
             <Link to="/" aria-label={t('depin.dehubHome')} className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-              <img src={dehubLogo} alt="Riftn" className="h-7 w-auto" />
+              <img src={riftnWordmark} alt="Riftn" className="h-7 w-auto" />
             </Link>
 
             <div className="hidden items-center gap-7 text-sm font-medium text-zinc-400 md:flex">
@@ -701,7 +701,7 @@ export default function DePinPage() {
 
         <footer className="border-t border-white/10 bg-zinc-950">
           <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 text-sm text-zinc-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-            <img src={dehubLogo} alt="Riftn" className="h-6 w-auto self-start opacity-80" loading="lazy" />
+            <img src={riftnWordmark} alt="Riftn" className="h-6 w-auto self-start opacity-80" loading="lazy" />
             <p className="max-w-2xl md:text-right">
               {t('depin.footerNote')}
             </p>

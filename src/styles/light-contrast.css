@@ -185,6 +185,20 @@ html[data-theme='light']:not(#_):not(#_) [data-creator-page] .text-white:not([da
 html[data-theme='light']:not(#_):not(#_):not(#_) [data-pricing-page] [class*='text-white/']:not([data-keep-dark]):not([data-keep-dark] *) {
   color: var(--ink-muted, #444) !important;
 }
-html[data-theme='light'] [data-pricing-page] img[src*='logo-white'] {
+
+/* The flat white Riftn wordmark on the standalone pages (pricing, DePIN, prize
+   draws, stream, app): those pages turn to paper on light, so the mark is ink. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-glass-page] img[src*='riftn-wordmark-flat-white']:not([data-keep-dark]):not([data-keep-dark] *) {
   filter: invert(1);
+}
+
+/* Star field and its dark floor wash (install page, 404): drawn for a black
+   room, on paper they are a grey smudge behind ink text. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-dark-backdrop] {
+  visibility: hidden;
+}
+/* Minimal Light: the white-glass buttons on those pages keep an edge. */
+html[data-theme='light']:not(#_):not(#_) [data-glass-page] :is(button, a)[class*='bg-white/10']:not([data-keep-dark]):not([data-keep-dark] *) {
+  background-color: rgb(17 17 20 / 0.05) !important;
+  border-color: rgb(17 17 20 / 0.18) !important;
 }
