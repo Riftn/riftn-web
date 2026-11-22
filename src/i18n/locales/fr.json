@@ -2624,13 +2624,6 @@
   },
   "features": {
     "myRequests": "Mes demandes",
-    "boardSide": "Tableau",
-    "sideFeatures": "Idées",
-    "sideBugs": "Bugs",
-    "bugHeading": "Qu'est-ce qui ne marche pas ?",
-    "bugHint": "Dites ce qui s'est passé et ce que vous attendiez. Une capture d'écran aide.",
-    "sideFeaturesShort": "Idées",
-    "sideBugsShort": "Bugs",
     "cropDraw": "Rogner et dessiner",
     "crop": "Rogner",
     "cropHint": "Tracez un cadre sur la partie à garder. Faites-le glisser de l'intérieur pour le déplacer.",

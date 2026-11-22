@@ -2628,13 +2628,6 @@
   },
   "features": {
     "myRequests": "طلباتي",
-    "boardSide": "اللوحة",
-    "sideFeatures": "طلبات الميزات",
-    "sideBugs": "بلاغات الأخطاء",
-    "bugHeading": "ما الذي لا يعمل؟",
-    "bugHint": "قل ما حدث وما كنت تتوقعه. لقطة الشاشة تساعد.",
-    "sideFeaturesShort": "الميزات",
-    "sideBugsShort": "الأخطاء",
     "cropDraw": "قص ورسم",
     "crop": "قص",
     "cropHint": "اسحب مربعًا فوق الجزء الذي تريد الاحتفاظ به. اسحب داخله لتحريكه.",
