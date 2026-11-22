@@ -443,3 +443,17 @@ html[data-arrival-glass] .signin-handoff-veil { background: rgba(6, 7, 9, 0.72);
 .look-previews-paused *,
 .look-previews-paused *::before,
 .look-previews-paused *::after { animation-play-state: paused !important; }
+
+/* Light themes: the sign-in page is light there, and a near-black veil swept
+   over it like a dark wave. A pale veil instead, and none of the rift. */
+html:is([data-theme='light'], [data-system-tone='light']) .signin-rift__veil {
+  background: rgba(247, 248, 250, 0.96);
+}
+html:is([data-theme='light'], [data-system-tone='light']) .signin-rift__stage {
+  visibility: hidden;
+}
+@media (min-width: 768px) {
+  html:is([data-theme='light'], [data-system-tone='light']) .signin-handoff-veil {
+    background: rgba(247, 248, 250, 0.96);
+  }
+}
