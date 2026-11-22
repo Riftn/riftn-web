@@ -21,6 +21,7 @@ import { DISPLAY_WALLET_OVERRIDES } from './ProfileConstants';
 import type { ProfileData } from '@/hooks/use-dehub-profile';
 import { LendBadgeRows } from './LendBadgeRows';
 import { ProfileMuteButton } from './ProfileMuteButton';
+import { BioTagRemoveRow } from './BioTagRemoveRow';
 import { AskAiMenuRow, ProfileAskAiRows } from './ProfileAskAiRows';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
@@ -233,6 +234,7 @@ export function ProfileOptionsContent({
                 </button>
               )}
               {profile.walletAddress && <ProfileMuteButton address={profile.walletAddress} />}
+              <BioTagRemoveRow ownerAddress={profile.walletAddress} bio={profile.bio} onDone={() => setShareSheetOpen(false)} />
               {/* Report User */}
               <button
                 onClick={() => { setShareSheetOpen(false); setReportModalOpen(true); }}

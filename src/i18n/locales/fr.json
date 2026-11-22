@@ -431,6 +431,7 @@
     "failed": "Ça n'a pas été enregistré. Réessayez."
   },
   "postVisibility": {
+    "self": "Moi uniquement",
     "label": "Qui peut voir ceci",
     "public": "Tout le monde",
     "followers": "Abonnés uniquement",
@@ -1522,6 +1523,8 @@
     "tokensUnit": "jetons"
   },
   "postOptions": {
+    "notInterestedDone": "Compris. Vous verrez moins de publications comme celle-ci.",
+    "notInterested": "Pas intéressé",
     "liveAlertsOn": "Vous suivez désormais {{name}}. Vous recevrez une notification dès le début du direct.",
     "liveAlertsAlreadyOn": "Vous suivez {{name}}, vous recevrez donc une notification dès le début du direct.",
     "embed": "Intégrer",
@@ -2152,6 +2155,7 @@
     "tipTokens": "{{amount}} jetons",
     "tokenAmount": "{{amount}} jetons",
     "custom": {
+      "bioMention": "{{name}} vous a identifié dans sa bio",
       "featureCommentLikeNamed": "{{name}} a aimé votre commentaire sur « {{title}} »",
       "featureCommentLike": "{{name}} a aimé votre commentaire sur une demande",
       "governanceCommentLikeNamed": "{{name}} a aimé votre commentaire sur la proposition « {{title}} »",
@@ -3503,6 +3507,8 @@
     "copyFailed": "Impossible de copier"
   },
   "profileOptions": {
+    "bioTagRemoved": "Vous n'êtes plus identifié dans cette bio",
+    "removeBioTag": "Me retirer de sa bio",
     "copyRssFeed": "Copier le lien du flux RSS",
     "rssFeedCopied": "Lien du flux RSS copié",
     "copyProfileUrl": "Copier l'URL du profil",
@@ -7048,6 +7054,7 @@
     "signInToTradeCta": "Se connecter pour échanger"
   },
   "usernames": {
+    "swap": {"start": "Lancer l'échange", "placeholder": "@votre_autre_compte", "sent": "Envoyé. Passez sur @{{name}} et acceptez.", "waiting": "En attente de @{{to}}. Passez sur ce compte pour terminer.", "done": "Échangé. Vous êtes maintenant @{{name}}.", "decline": "Refuser", "accept": "Échanger maintenant", "incoming": "@{{from}} veut échanger : ce compte devient @{{from}} et l'autre @{{to}}.", "body": "Deux comptes ? Échangez leurs noms d'utilisateur en une étape. Commencez ici, passez à l'autre compte et acceptez. Aucun nom n'est jamais libre pour quelqu'un d'autre.", "title": "Échanger avec votre autre compte"},
     "seoTitle": "Nom d'utilisateur Marketplace | Riftn",
     "seoDescription": "Achetez et vendez des noms d'utilisateur Riftn avec jetons. Recherchez des poignées courtes, numériques et originales à vendre, ou répertoriez les vôtres, le transfert se fait en chaîne au moment où le paiement est effacé.",
     "title": "Noms d’utilisateurs",

@@ -431,6 +431,7 @@
     "failed": "Kaydedilmedi. Tekrar dene."
   },
   "postVisibility": {
+    "self": "Yalnızca ben",
     "label": "Bunu kimler görebilir",
     "public": "Herkes",
     "followers": "Yalnızca takipçiler",
@@ -1522,6 +1523,8 @@
     "tokensUnit": "token"
   },
   "postOptions": {
+    "notInterestedDone": "Anlaşıldı. Bunun gibi daha az gönderi göreceksin.",
+    "notInterested": "İlgilenmiyorum",
     "liveAlertsOn": "Artık {{name}} kullanıcısını takip ediyorsunuz. Canlı yayına geçtiğinde bildirim alacaksınız.",
     "liveAlertsAlreadyOn": "{{name}} kullanıcısını takip ediyorsunuz, bu yüzden canlı yayına geçtiğinde bildirim alacaksınız.",
     "embed": "Yerleştir",
@@ -2152,6 +2155,7 @@
     "tipTokens": "{{amount}} jeton",
     "tokenAmount": "{{amount}} jeton",
     "custom": {
+      "bioMention": "{{name}} seni biyografisinde etiketledi",
       "featureCommentLikeNamed": "{{name}}, “{{title}}” üzerindeki yorumunuzu beğendi",
       "featureCommentLike": "{{name}}, bir istek üzerindeki yorumunuzu beğendi",
       "governanceCommentLikeNamed": "{{name}}, “{{title}}” teklifi üzerindeki yorumunuzu beğendi",
@@ -3499,6 +3503,8 @@
     "copyFailed": "Kopyalanamadı"
   },
   "profileOptions": {
+    "bioTagRemoved": "Artık bu biyografide etiketli değilsin",
+    "removeBioTag": "Beni biyografisinden çıkar",
     "copyRssFeed": "RSS akışı bağlantısını kopyala",
     "rssFeedCopied": "RSS akışı bağlantısı kopyalandı",
     "copyProfileUrl": "Profil URL'sini kopyala",
@@ -7044,6 +7050,7 @@
     "signInToTradeCta": "İşlem için giriş yap"
   },
   "usernames": {
+    "swap": {"start": "Değişimi başlat", "placeholder": "@diger_hesabin", "sent": "Gönderildi. @{{name}} hesabına geç ve onayla.", "waiting": "@{{to}} onayı bekleniyor. Bitirmek için o hesaba geç.", "done": "Değiştirildi. Artık @{{name}} oldun.", "decline": "Reddet", "accept": "Şimdi değiştir", "incoming": "@{{from}} değiştirmek istiyor: bu hesap @{{from}} olur, o hesap @{{to}} olur.", "body": "İki hesabın mı var? Kullanıcı adlarını tek adımda değiştir. Buradan başlat, sonra diğer hesaba geç ve onayla. İki ad da hiçbir an başkasının alabileceği şekilde boşta kalmaz.", "title": "Diğer hesabınla değiştir"},
     "seoTitle": "Kullanıcı Adı Pazarı | Riftn",
     "seoDescription": "Riftn kullanıcı adlarını jeton ile alıp satın. Satıştaki kısa, sayısal ve özgün kullanıcı adlarını arayın ya da kendinizinkini listeleyin, ödeme onaylandığı anda devir zincir üstünde gerçekleşir.",
     "title": "Kullanıcı adları",

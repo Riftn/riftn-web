@@ -366,6 +366,7 @@
     "failed": "Não foi salvo. Tente de novo."
   },
   "postVisibility": {
+    "self": "Só eu",
     "label": "Quem pode ver isto",
     "public": "Todos",
     "followers": "Só seguidores",
@@ -1432,6 +1433,8 @@
     "tokensUnit": "tokens"
   },
   "postOptions": {
+    "notInterestedDone": "Entendido. Você verá menos posts como este.",
+    "notInterested": "Não tenho interesse",
     "liveAlertsOn": "Agora você segue {{name}}. Você receberá uma notificação quando a transmissão ao vivo começar.",
     "liveAlertsAlreadyOn": "Você segue {{name}}, então receberá uma notificação quando a transmissão ao vivo começar.",
     "embed": "Incorporar",
@@ -2030,6 +2033,7 @@
     "tipTokens": "{{amount}} tokens",
     "tokenAmount": "{{amount}} tokens",
     "custom": {
+      "bioMention": "{{name}} marcou você na bio",
       "featureCommentLikeNamed": "{{name}} curtiu seu comentário em “{{title}}”",
       "featureCommentLike": "{{name}} curtiu seu comentário em um pedido",
       "governanceCommentLikeNamed": "{{name}} curtiu seu comentário em proposta “{{title}}”",
@@ -3455,6 +3459,8 @@
     "copyFailed": "Não foi possível copiar"
   },
   "profileOptions": {
+    "bioTagRemoved": "Você não está mais marcado nesta bio",
+    "removeBioTag": "Remover-me da bio",
     "copyRssFeed": "Copiar link do feed RSS",
     "rssFeedCopied": "Link do feed RSS copiado",
     "copyProfileUrl": "Copiar URL do perfil",
@@ -6989,6 +6995,7 @@
     "allChains": "Todas as redes"
   },
   "usernames": {
+    "swap": {"start": "Iniciar troca", "placeholder": "@sua_outra_conta", "sent": "Enviado. Mude para @{{name}} e aceite.", "waiting": "Aguardando @{{to}} aceitar. Mude para essa conta para terminar.", "done": "Trocado. Agora você é @{{name}}.", "decline": "Recusar", "accept": "Trocar agora", "incoming": "@{{from}} quer trocar: esta conta vira @{{from}} e aquela vira @{{to}}.", "body": "Tem duas contas? Troque os nomes de usuário em um passo. Comece aqui, mude para a outra conta e aceite. Nenhum nome fica livre para outra pessoa.", "title": "Trocar com sua outra conta"},
     "seoTitle": "Nome de utilizador Marketplace | Riftn",
     "seoDescription": "Compre e venda nomes de utilizador Riftn com a tokens. Pesquise identificadores curtos, numéricos e originais para venda ou liste os seus próprios, a transferência acontece on-chain no momento em que o pagamento é liberado.",
     "title": "Usuários",
