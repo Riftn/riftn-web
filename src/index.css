@@ -7169,15 +7169,52 @@ html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_
 html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notifications-drawer][data-expanded] {
   padding-top: env(safe-area-inset-top, 0px);
 }
-/* The bell drawer's grab bar sits in the pill's top inset, and below the
-   status bar once the sheet fills the screen. */
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer] [data-bell-handle] {
-  top: 3px;
-  transition: top 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+[data-notification-catch-up],
+[data-notifications-drawer] {
+  --notification-drawer-text: #fafafa;
+  --notification-drawer-line: rgb(255 255 255 / 0.18);
+  --notification-drawer-hover: rgb(255 255 255 / 0.08);
+  --notification-drawer-muted: #dedee3;
+  color: var(--notification-drawer-text);
 }
-html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-notifications-drawer][data-expanded] [data-bell-handle] {
-  top: calc(env(safe-area-inset-top, 0px) + 3px);
+html:is([data-theme="light"], [data-system-tone="light"]) :is([data-notification-catch-up], [data-notifications-drawer]) {
+  --notification-drawer-text: var(--ink, #17171a);
+  --notification-drawer-line: rgb(20 20 24 / 0.18);
+  --notification-drawer-hover: rgb(20 20 24 / 0.06);
+  --notification-drawer-muted: #45454d;
 }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notification-catch-up-sheet] {
+  background-color: color-mix(in srgb, var(--float-glass) 65%, rgb(var(--glass-tint, 9 9 11))) !important;
+  background-image: none !important;
+  border-color: var(--notification-drawer-line) !important;
+  color: var(--notification-drawer-text) !important;
+}
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notification-catch-up-sheet] {
+  background-color: color-mix(in srgb, var(--float-glass) 65%, var(--paper, #f9f8f4)) !important;
+}
+.notification-drawer-action {
+  min-height: 44px;
+  border: 1px solid var(--notification-drawer-line);
+  background: transparent;
+  color: var(--notification-drawer-text);
+}
+.notification-drawer-action:hover:not(:disabled),
+button.notification-drawer-field:hover:not(:disabled) {
+  background: var(--notification-drawer-hover);
+}
+.notification-drawer-action:focus-visible,
+.notification-drawer-field:focus-visible {
+  outline: 2px solid var(--notification-drawer-text);
+  outline-offset: 2px;
+}
+.notification-drawer-field {
+  border-color: var(--notification-drawer-line);
+}
+.notification-drawer-field::placeholder,
+.notification-drawer-secondary {
+  color: var(--notification-drawer-muted);
+}
+
 /* The pill's sticky strip is the top of the sheet. Rows
    scrolling up past the pill blur out there instead of showing sharp in the
    gap above it and beside it, fading off just under the pill. Behind the
