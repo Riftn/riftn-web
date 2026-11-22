@@ -1115,6 +1115,8 @@
     "postingChain": "Cadena de bloques de las publicaciones",
     "showOnline": "Mostrar cuando estoy conectado",
     "showOnlineDesc": "Las personas a las que envías mensajes ven un punto verde junto a tu nombre mientras usas Riftn",
+    "showLastSeen": "Mostrar mi última vez",
+    "showLastSeenDesc": "Las personas con las que chateas ven cuándo estuviste en Riftn por última vez, por ejemplo \"Últ. vez hace 5 min\"",
     "showDislikes": "Mostrar mis «no me gusta» a todos",
     "showDislikesDesc": "Cualquiera puede abrir la pestaña «No me gusta» de tu perfil. Si está desactivado, solo tú puedes verla.",
     "showLikes": "Mostrar mis me gusta a todos",
@@ -2827,6 +2829,8 @@
   },
   "profile": {
     "localTime": "Hora local {{time}}",
+    "lastSeen": "Últ. vez {{when}}",
+    "lastSeenJustNow": "Últ. vez hace un momento",
     "localTimeAhead": "{{hours}} h por delante",
     "localTimeBehind": "{{hours}} h por detrás",
     "shareLocalTime": "Mostrar mi hora local",

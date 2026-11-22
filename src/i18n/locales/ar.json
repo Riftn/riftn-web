@@ -1115,6 +1115,8 @@
     "postingChain": "شبكة النشر",
     "showOnline": "اعرض عندما أكون متصلاً بالإنترنت",
     "showOnlineDesc": "يرى الأشخاص الذين تراسلهم نقطة خضراء بجوار اسمك أثناء استخدام Riftn",
+    "showLastSeen": "إظهار آخر ظهور لي",
+    "showLastSeenDesc": "يرى من تتحدث معهم آخر مرة كنت فيها على Riftn، مثل \"آخر ظهور قبل 5 دقائق\"",
     "showDislikes": "أظهر عدم إعجاباتي للجميع",
     "showDislikesDesc": "يمكن لأي شخص فتح تبويب «عدم الإعجاب» في ملفك الشخصي. عند إيقاف هذا الخيار، تراه أنت فقط.",
     "showLikes": "إظهار إعجاباتي للجميع",
@@ -2843,6 +2845,8 @@
   },
   "profile": {
     "localTime": "التوقيت المحلي {{time}}",
+    "lastSeen": "آخر ظهور {{when}}",
+    "lastSeenJustNow": "آخر ظهور الآن",
     "localTimeAhead": "متقدم {{hours}} ساعة",
     "localTimeBehind": "متأخر {{hours}} ساعة",
     "shareLocalTime": "إظهار توقيتي المحلي",

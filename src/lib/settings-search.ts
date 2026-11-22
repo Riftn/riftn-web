@@ -116,6 +116,7 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
   { tab: 'privacy', anchor: 'private-account', label: 'Private Account', labelKey: 'settings.privateAccount', keywords: 'private lock approve followers requests' },
   { tab: 'privacy', anchor: 'private-balance', label: 'Hide badge and balance', labelKey: 'copy.e3043f1c05b3' },
   { tab: 'privacy', anchor: 'show-online', label: "Show when I'm online", labelKey: 'settings.showOnline', keywords: 'online status presence green dot active messages' },
+  { tab: 'privacy', anchor: 'show-last-seen', label: 'Show when I was last seen', labelKey: 'settings.showLastSeen', keywords: 'last seen active ago online status privacy son görülme son görünme görülme ultima vez visto vu dernière connexion laatst gezien آخر ظهور' },
   { tab: 'privacy', anchor: 'show-likes', label: 'Show my likes to everyone', labelKey: 'settings.showLikes', keywords: 'likes liked posts thumbs up hearts profile tab public private hide' },
   { tab: 'privacy', anchor: 'show-followers-list', label: 'Show who follows me', labelKey: 'settings.showFollowersList', keywords: 'followers list hide private who follows' },
   { tab: 'privacy', anchor: 'show-following-list', label: 'Show who I follow', labelKey: 'settings.showFollowingList', keywords: 'following list hide private who i follow' },

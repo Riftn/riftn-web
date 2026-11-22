@@ -1115,6 +1115,8 @@
     "postingChain": "Blockchain voor berichten",
     "showOnline": "Laat zien wanneer ik online ben",
     "showOnlineDesc": "Mensen die je een bericht stuurt, zien een groene stip naast je naam terwijl je Riftn gebruikt",
+    "showLastSeen": "Laat zien wanneer ik het laatst gezien ben",
+    "showLastSeenDesc": "Mensen met wie je chat zien wanneer je voor het laatst op Riftn was, bijvoorbeeld \"Laatst gezien 5 min. geleden\"",
     "showDislikes": "Mijn dislikes aan iedereen tonen",
     "showDislikesDesc": "Iedereen kan het tabblad Dislikes op je profiel openen. Staat dit uit, dan zie alleen jij het.",
     "showLikes": "Mijn likes aan iedereen tonen",
@@ -3016,6 +3018,8 @@
   },
   "profile": {
     "localTime": "Lokale tijd {{time}}",
+    "lastSeen": "Laatst gezien {{when}}",
+    "lastSeenJustNow": "Zojuist gezien",
     "localTimeAhead": "{{hours}} uur voor",
     "localTimeBehind": "{{hours}} uur achter",
     "shareLocalTime": "Mijn lokale tijd tonen",

@@ -1115,6 +1115,8 @@
     "postingChain": "Posting chain",
     "showOnline": "Show when I'm online",
     "showOnlineDesc": "People you message see a green dot next to your name while you're using Riftn",
+    "showLastSeen": "Show when I was last seen",
+    "showLastSeenDesc": "People you chat with see when you were last on Riftn, like \"Last seen 5 min ago\"",
     "showDislikes": "Show my dislikes to everyone",
     "showDislikesDesc": "Anyone can open the Dislikes tab on your profile. When this is off, only you can see it.",
     "showLikes": "Show my likes to everyone",
@@ -2827,6 +2829,8 @@
   },
   "profile": {
     "localTime": "Local time {{time}}",
+    "lastSeen": "Last seen {{when}}",
+    "lastSeenJustNow": "Last seen just now",
     "localTimeAhead": "{{hours}} hrs ahead",
     "localTimeBehind": "{{hours}} hrs behind",
     "shareLocalTime": "Show my local time",

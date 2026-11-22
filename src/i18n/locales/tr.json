@@ -1115,6 +1115,8 @@
     "postingChain": "Gönderi blokzinciri",
     "showOnline": "Çevrimiçi olduğumda göster",
     "showOnlineDesc": "Mesaj gönderdiğiniz kişiler, Riftn'ı kullanırken adınızın yanında yeşil bir nokta görür",
+    "showLastSeen": "Son görülmemi göster",
+    "showLastSeenDesc": "Sohbet ettiğin kişiler Riftn'da en son ne zaman olduğunu görür, örneğin \"Son görülme 5 dk. önce\"",
     "showDislikes": "Beğenmediklerimi herkese göster",
     "showDislikesDesc": "Herkes profilindeki Beğenilmeyenler sekmesini açabilir. Bu kapalıyken yalnızca sen görebilirsin.",
     "showLikes": "Beğenilerimi herkese göster",
@@ -2827,6 +2829,8 @@
   },
   "profile": {
     "localTime": "Yerel saat {{time}}",
+    "lastSeen": "Son görülme {{when}}",
+    "lastSeenJustNow": "Son görülme az önce",
     "localTimeAhead": "{{hours}} saat ileride",
     "localTimeBehind": "{{hours}} saat geride",
     "shareLocalTime": "Yerel saatimi göster",
