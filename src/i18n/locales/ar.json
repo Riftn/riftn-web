@@ -1089,6 +1089,8 @@
     "postLanding": "بعد النشر",
     "feedSeparator": "فاصل المنشورات",
     "chatOwnBubbleDesc": "تظهر رسائلك داخل فقاعة، كما في المحادثات الخاصة",
+    "messagesPills": "علامات تبويب كبسولية في الرسائل",
+    "messagesPillsDesc": "علامة التبويب المفتوحة كبسولة ممتلئة وأعداد غير المقروء دائرية",
     "chatOwnBubble": "فقاعات لرسائلي في الدردشة العامة",
     "feedSeparatorDesc": "بطاقات حول كل منشور أو خط رفيع بينها",
     "feedSeparatorBento": "بطاقات بينتو",
@@ -2626,6 +2628,13 @@
   },
   "features": {
     "myRequests": "طلباتي",
+    "boardSide": "اللوحة",
+    "sideFeatures": "طلبات الميزات",
+    "sideBugs": "بلاغات الأخطاء",
+    "bugHeading": "ما الذي لا يعمل؟",
+    "bugHint": "قل ما حدث وما كنت تتوقعه. لقطة الشاشة تساعد.",
+    "sideFeaturesShort": "الميزات",
+    "sideBugsShort": "الأخطاء",
     "cropDraw": "قص ورسم",
     "crop": "قص",
     "cropHint": "اسحب مربعًا فوق الجزء الذي تريد الاحتفاظ به. اسحب داخله لتحريكه.",
@@ -2709,7 +2718,15 @@
     "shipping": "قيد التنفيذ",
     "noShippingYet": "لا شيء قيد التنفيذ",
     "shippingAppearHere": "ستظهر هنا الطلبات التي يجري بناؤها.",
-    "loadFailed": "تعذر تحميل الطلبات"
+    "loadFailed": "تعذر تحميل الطلبات",
+    "track": {
+      "label": "التقدم",
+      "asked": "مطلوب",
+      "underReview": "قيد المراجعة",
+      "planned": "مخطط له",
+      "inProgress": "قيد التنفيذ",
+      "shipped": "تم الإطلاق"
+    }
   },
   "auth": {
     "accountDeleted": "تم حذف هذا الحساب. يمكنك التسجيل مجددًا بحساب جديد.",

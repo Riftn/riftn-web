@@ -1089,6 +1089,8 @@
     "postLanding": "Paylaştıktan sonra",
     "feedSeparator": "Gönderi ayırıcı",
     "chatOwnBubbleDesc": "Kendi mesajların özel sohbetlerdeki gibi bir baloncuk içinde görünür",
+    "messagesPills": "Mesajlarda hap sekmeler",
+    "messagesPillsDesc": "Açık sekme dolu bir hap olur, okunmamış sayılar yuvarlak görünür",
     "chatOwnBubble": "Genel Sohbet'te mesajlarım için baloncuk",
     "feedSeparatorDesc": "Her gönderinin çevresinde kart ya da aralarında ince bir çizgi",
     "feedSeparatorBento": "Bento kartlar",
@@ -2622,6 +2624,13 @@
   },
   "features": {
     "myRequests": "Taleplerim",
+    "boardSide": "Pano",
+    "sideFeatures": "Özellik istekleri",
+    "sideBugs": "Hata bildirimleri",
+    "bugHeading": "Ne çalışmıyor?",
+    "bugHint": "Ne olduğunu ve ne beklediğini yaz. Ekran görüntüsü işe yarar.",
+    "sideFeaturesShort": "Özellikler",
+    "sideBugsShort": "Hatalar",
     "cropDraw": "Kırp ve çiz",
     "crop": "Kırp",
     "cropHint": "Tutmak istediğin kısmın üzerine bir kutu sürükle. Taşımak için kutunun içinden sürükle.",
@@ -2705,7 +2714,15 @@
     "shipping": "Geliştiriliyor",
     "noShippingYet": "Devam eden bir şey yok",
     "shippingAppearHere": "Geliştirilmekte olan talepler burada görünecek.",
-    "loadFailed": "İstekler yüklenemedi"
+    "loadFailed": "İstekler yüklenemedi",
+    "track": {
+      "label": "İlerleme",
+      "asked": "İstendi",
+      "underReview": "İnceleniyor",
+      "planned": "Planlandı",
+      "inProgress": "Yapılıyor",
+      "shipped": "Yayında"
+    }
   },
   "auth": {
     "accountDeleted": "Bu hesap silindi. Yeni bir hesapla tekrar kaydolabilirsiniz.",

@@ -1089,6 +1089,8 @@
     "postLanding": "Na het plaatsen",
     "feedSeparator": "Scheiding tussen berichten",
     "chatOwnBubbleDesc": "Je eigen berichten staan in een ballon, zoals in privéchats",
+    "messagesPills": "Pilvormige tabbladen in Berichten",
+    "messagesPillsDesc": "Het open tabblad is een gevulde pil en ongelezen aantallen zijn rond",
     "chatOwnBubble": "Ballonnen voor mijn berichten in de Openbare chat",
     "feedSeparatorDesc": "Kaarten rond elk bericht, of een dunne lijn ertussen",
     "feedSeparatorBento": "Bento-kaarten",
@@ -2811,6 +2813,13 @@
   },
   "features": {
     "myRequests": "Mijn verzoeken",
+    "boardSide": "Bord",
+    "sideFeatures": "Ideeën",
+    "sideBugs": "Bugs",
+    "bugHeading": "Wat werkt er niet?",
+    "bugHint": "Vertel wat er gebeurde en wat je verwachtte. Een screenshot helpt.",
+    "sideFeaturesShort": "Ideeën",
+    "sideBugsShort": "Bugs",
     "cropDraw": "Bijsnijden en tekenen",
     "crop": "Bijsnijden",
     "cropHint": "Sleep een kader over het deel dat je wilt houden. Sleep erin om het te verplaatsen.",
@@ -2894,7 +2903,15 @@
     "shipping": "In uitvoering",
     "noShippingYet": "Niets onderweg",
     "shippingAppearHere": "Verzoeken die gebouwd worden verschijnen hier.",
-    "loadFailed": "Kon verzoeken niet laden"
+    "loadFailed": "Kon verzoeken niet laden",
+    "track": {
+      "label": "Voortgang",
+      "asked": "Gevraagd",
+      "underReview": "In beoordeling",
+      "planned": "Gepland",
+      "inProgress": "Bezig",
+      "shipped": "Live"
+    }
   },
   "auth": {
     "accountDeleted": "Dit account is verwijderd. Je kunt je opnieuw aanmelden met een nieuw account.",

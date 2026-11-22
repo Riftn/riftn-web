@@ -1089,6 +1089,8 @@
     "postLanding": "Después de publicar",
     "feedSeparator": "Separador de publicaciones",
     "chatOwnBubbleDesc": "Tus mensajes aparecen en una burbuja, como en los chats privados",
+    "messagesPills": "Pestañas en píldora en Mensajes",
+    "messagesPillsDesc": "La pestaña abierta es una píldora rellena y los no leídos van en círculos",
     "chatOwnBubble": "Burbujas para mis mensajes en el Chat público",
     "feedSeparatorDesc": "Tarjetas alrededor de cada publicación o una línea fina entre ellas",
     "feedSeparatorBento": "Tarjetas bento",
@@ -2622,6 +2624,13 @@
   },
   "features": {
     "myRequests": "Mis solicitudes",
+    "boardSide": "Tablero",
+    "sideFeatures": "Ideas nuevas",
+    "sideBugs": "Errores",
+    "bugHeading": "¿Qué no funciona?",
+    "bugHint": "Cuenta qué pasó y qué esperabas. Una captura ayuda.",
+    "sideFeaturesShort": "Ideas",
+    "sideBugsShort": "Errores",
     "cropDraw": "Recortar y dibujar",
     "crop": "Recortar",
     "cropHint": "Arrastra un recuadro sobre la parte que quieres conservar. Arrastra dentro para moverlo.",
@@ -2705,7 +2714,15 @@
     "shipping": "En desarrollo",
     "noShippingYet": "Nada en curso",
     "shippingAppearHere": "Las solicitudes que se estén construyendo aparecerán aquí.",
-    "loadFailed": "No se pudieron cargar las solicitudes"
+    "loadFailed": "No se pudieron cargar las solicitudes",
+    "track": {
+      "label": "Progreso",
+      "asked": "Pedido",
+      "underReview": "En revisión",
+      "planned": "Planeado",
+      "inProgress": "En curso",
+      "shipped": "Lanzado"
+    }
   },
   "auth": {
     "accountDeleted": "Esta cuenta fue eliminada. Puedes registrarte de nuevo con una cuenta nueva.",

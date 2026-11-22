@@ -1089,6 +1089,8 @@
     "postLanding": "Après la publication",
     "feedSeparator": "Séparateur de publications",
     "chatOwnBubbleDesc": "Vos messages s’affichent dans une bulle, comme dans les discussions privées",
+    "messagesPills": "Onglets en pastilles dans Messages",
+    "messagesPillsDesc": "L'onglet ouvert est une pastille pleine et les non lus sont ronds",
     "chatOwnBubble": "Bulles pour mes messages dans le Chat public",
     "feedSeparatorDesc": "Des cartes autour de chaque publication, ou une fine ligne entre elles",
     "feedSeparatorBento": "Cartes bento",
@@ -2622,6 +2624,13 @@
   },
   "features": {
     "myRequests": "Mes demandes",
+    "boardSide": "Tableau",
+    "sideFeatures": "Idées",
+    "sideBugs": "Bugs",
+    "bugHeading": "Qu'est-ce qui ne marche pas ?",
+    "bugHint": "Dites ce qui s'est passé et ce que vous attendiez. Une capture d'écran aide.",
+    "sideFeaturesShort": "Idées",
+    "sideBugsShort": "Bugs",
     "cropDraw": "Rogner et dessiner",
     "crop": "Rogner",
     "cropHint": "Tracez un cadre sur la partie à garder. Faites-le glisser de l'intérieur pour le déplacer.",
@@ -2705,7 +2714,15 @@
     "shipping": "En cours de livraison",
     "noShippingYet": "Rien en cours",
     "shippingAppearHere": "Les demandes en cours de développement apparaîtront ici.",
-    "loadFailed": "Impossible de charger les demandes"
+    "loadFailed": "Impossible de charger les demandes",
+    "track": {
+      "label": "Avancement",
+      "asked": "Demandé",
+      "underReview": "En examen",
+      "planned": "Prévu",
+      "inProgress": "En cours",
+      "shipped": "Livré"
+    }
   },
   "auth": {
     "accountDeleted": "Ce compte a été supprimé. Vous pouvez vous réinscrire avec un nouveau compte.",
