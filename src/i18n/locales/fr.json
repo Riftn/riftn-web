@@ -7713,7 +7713,21 @@
     "addComment": "Ajouter un commentaire...",
     "delete": "Supprimer",
     "sortRecent": "Plus récent",
-    "sortOldest": "Plus ancien"
+    "sortOldest": "Plus ancien",
+    "agoLabel": "il y a {{time}}",
+    "momentTag": "MOMENT",
+    "hoursLeft": "encore {{n}} h",
+    "minutesLeft": "encore {{n}} min",
+    "watchedCount": "{{n}} vues",
+    "nOfM": "{{n}} sur {{m}}",
+    "sendTo": "Envoyer à",
+    "toEveryone": "Tout le monde",
+    "toOnly": "Seulement {{name}}",
+    "signInToSay": "Connecte-toi pour écrire",
+    "saySomething": "Dis quelque chose…",
+    "replyTo": "Répondre à {{name}}",
+    "momentChat": "Chat du moment",
+    "upNext": "À suivre"
   },
   "subscriptions": {
     "subscribersOnly": "Abonnés uniquement",

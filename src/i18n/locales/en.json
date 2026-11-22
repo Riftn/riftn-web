@@ -7708,7 +7708,21 @@
     "addComment": "Add a comment...",
     "delete": "Delete",
     "sortRecent": "Most Recent",
-    "sortOldest": "Oldest"
+    "sortOldest": "Oldest",
+    "agoLabel": "{{time}} ago",
+    "momentTag": "MOMENT",
+    "hoursLeft": "{{n}}h left",
+    "minutesLeft": "{{n}}m left",
+    "watchedCount": "{{n}} watched",
+    "nOfM": "{{n}} of {{m}}",
+    "sendTo": "Send to",
+    "toEveryone": "Everyone",
+    "toOnly": "Only {{name}}",
+    "signInToSay": "Sign in to say something",
+    "saySomething": "Say something…",
+    "replyTo": "Reply to {{name}}",
+    "momentChat": "Moment chat",
+    "upNext": "Up next"
   },
   "subscriptions": {
     "subscribersOnly": "Subscribers only",

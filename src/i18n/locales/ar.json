@@ -7733,7 +7733,21 @@
     "addComment": "أضف تعليقاً...",
     "delete": "حذف",
     "sortRecent": "الأحدث",
-    "sortOldest": "الأقدم"
+    "sortOldest": "الأقدم",
+    "agoLabel": "منذ {{time}}",
+    "momentTag": "لحظة",
+    "hoursLeft": "يتبقى {{n}} س",
+    "minutesLeft": "يتبقى {{n}} د",
+    "watchedCount": "{{n}} مشاهدة",
+    "nOfM": "{{n}} من {{m}}",
+    "sendTo": "أرسل إلى",
+    "toEveryone": "الجميع",
+    "toOnly": "{{name}} فقط",
+    "signInToSay": "سجّل الدخول لتكتب شيئًا",
+    "saySomething": "قل شيئًا…",
+    "replyTo": "رد على {{name}}",
+    "momentChat": "دردشة اللحظة",
+    "upNext": "التالي"
   },
   "subscriptions": {
     "subscribersOnly": "للمشتركين فقط",

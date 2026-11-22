@@ -7709,7 +7709,21 @@
     "addComment": "Bir yorum ekleyin...",
     "delete": "Sil",
     "sortRecent": "En yeni",
-    "sortOldest": "En eski"
+    "sortOldest": "En eski",
+    "agoLabel": "{{time}} önce",
+    "momentTag": "AN",
+    "hoursLeft": "{{n}} sa kaldı",
+    "minutesLeft": "{{n}} dk kaldı",
+    "watchedCount": "{{n}} izlenme",
+    "nOfM": "{{n}} / {{m}}",
+    "sendTo": "Kime gönderilsin",
+    "toEveryone": "Herkes",
+    "toOnly": "Sadece {{name}}",
+    "signInToSay": "Bir şey yazmak için giriş yap",
+    "saySomething": "Bir şey söyle…",
+    "replyTo": "{{name}} kişisine yanıt ver",
+    "momentChat": "An sohbeti",
+    "upNext": "Sıradaki"
   },
   "subscriptions": {
     "subscribersOnly": "Yalnızca aboneler",
