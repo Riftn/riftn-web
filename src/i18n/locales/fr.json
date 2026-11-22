@@ -2723,7 +2723,11 @@
     "earlySupporter": {
       "chip": "Soutien de la première heure",
       "title": "Soutien de la première heure : {{value}} de ses demandes sont sorties"
-    }
+    },
+    "voiceHold": "Maintenir pour parler",
+    "voiceLetGo": "Relâcher pour ajouter",
+    "voiceTapDone": "Touchez pour finir",
+    "voiceWorking": "Rédaction…"
   },
   "auth": {
     "accountDeleted": "Ce compte a été supprimé. Vous pouvez vous réinscrire avec un nouveau compte.",

@@ -2912,7 +2912,11 @@
     "earlySupporter": {
       "chip": "Vroege supporter",
       "title": "Vroege supporter: {{value}} van hun verzoeken zijn live"
-    }
+    },
+    "voiceHold": "Houd vast om te praten",
+    "voiceLetGo": "Laat los om toe te voegen",
+    "voiceTapDone": "Tik als je klaar bent",
+    "voiceWorking": "Wordt uitgeschreven…"
   },
   "auth": {
     "accountDeleted": "Dit account is verwijderd. Je kunt je opnieuw aanmelden met een nieuw account.",

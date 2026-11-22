@@ -37,6 +37,7 @@ import Plus from "@/components/ui/cut-icons/add";
 import X from "@/components/ui/cut-icons/close";
 import FullscreenIcon from "@/components/ui/cut-icons/fullscreen";
 import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
+import { HoldToTalkButton } from '@/components/app/features/HoldToTalkButton';
 import { RequestStatusRow } from '@/components/app/features/RequestStatusRow';
 
 import featuresLightbulb from '@/assets/features-lightbulb.png';
@@ -798,6 +799,19 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
     setAttachments(prev => prev.filter((_, i) => i !== index));
     setError('');
   };
+  const addSpoken = (spoken: string) => {
+    setDescription(previous => {
+      if (previous.length >= FEATURE_PROMPT_MAX_LENGTH) return previous;
+      const spacer = previous && !/\s$/.test(previous) ? ' ' : '';
+      return (previous + spacer + spoken).slice(0, FEATURE_PROMPT_MAX_LENGTH);
+    });
+    requestAnimationFrame(() => {
+      const box = promptRef.current;
+      if (!box) return;
+      box.focus({ preventScroll: true });
+      box.setSelectionRange(box.value.length, box.value.length);
+    });
+  };
   const handleSubmit = () => {
     if (!description.trim() || submitMutation.isPending) return;
     if (!isAuthenticated) { openLoginModal(); return; }
@@ -862,6 +876,9 @@ function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCa
           <Button type="button" variant="ghost" size="sm" className="rounded-lg px-2" disabled={submitMutation.isPending || attachments.length >= MAX_FEATURE_ATTACHMENTS} onClick={() => fileInputRef.current?.click()}>
             <ImagePlus className="w-4 h-4" />{t('features.promptAttach', 'Attach images')}
           </Button>
+          <HoldToTalkButton disabled={submitMutation.isPending || description.length >= FEATURE_PROMPT_MAX_LENGTH}
+            beforeStart={() => { if (isAuthenticated) return false; openLoginModal(); return true; }}
+            onText={addSpoken} />
           <span className="hidden sm:inline text-[11px] text-zinc-500">{t('features.promptDrop', 'Paste or drop images here')}</span>
           <Button type="button" variant="glass" className="rounded-xl ml-auto" disabled={!description.trim() || submitMutation.isPending} onClick={handleSubmit}>
             {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}

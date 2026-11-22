@@ -2723,7 +2723,11 @@
     "earlySupporter": {
       "chip": "Early supporter",
       "title": "Early supporter: {{value}} of their requests shipped"
-    }
+    },
+    "voiceHold": "Hold to talk",
+    "voiceLetGo": "Let go to add",
+    "voiceTapDone": "Tap when done",
+    "voiceWorking": "Writing it up…"
   },
   "auth": {
     "accountDeleted": "This account was deleted. You can sign up again as a new account.",

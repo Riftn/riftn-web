@@ -2723,7 +2723,11 @@
     "earlySupporter": {
       "chip": "Erken destekçi",
       "title": "Erken destekçi: {{value}} isteği yayında"
-    }
+    },
+    "voiceHold": "Konuşmak için basılı tut",
+    "voiceLetGo": "Eklemek için bırak",
+    "voiceTapDone": "Bitince dokun",
+    "voiceWorking": "Yazıya dökülüyor…"
   },
   "auth": {
     "accountDeleted": "Bu hesap silindi. Yeni bir hesapla tekrar kaydolabilirsiniz.",
