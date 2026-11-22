@@ -77,6 +77,7 @@ export function ScheduleStagePanel({
   });
 
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [radioShow, setRadioShow] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -141,6 +142,7 @@ export function ScheduleStagePanel({
       description: description.trim() || undefined,
       scheduledAt: startsAt.toISOString(),
       coverImageUrl,
+      radio: radioShow,
     });
 
     if (space) {
@@ -266,6 +268,19 @@ export function ScheduleStagePanel({
           </p>
         )}
       </div>
+
+      <label className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.06] cursor-pointer" data-radio-show-toggle>
+        <input
+          type="checkbox"
+          checked={radioShow}
+          onChange={(e) => setRadioShow(e.target.checked)}
+          className="mt-0.5 w-4 h-4 rounded accent-white/80 shrink-0"
+        />
+        <span className="min-w-0">
+          <span className="block text-sm text-white">{t('stages.radioShow.toggle')}</span>
+          <span className="block text-xs text-white/50 mt-0.5">{t('stages.radioShow.hint')}</span>
+        </span>
+      </label>
 
       {/* Cover graphic */}
       <div className="space-y-2">

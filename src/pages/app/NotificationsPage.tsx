@@ -880,6 +880,7 @@ function getNotificationContent(
       // Where the reader was named. Every mention used to say "in a comment",
       // including the ones in a post or a live chat.
       const where = notification.metadata?.mentionContext;
+      if (where === 'bio') return tr('notifications.custom.bioMention', { name: actorName });
       if (where === 'live_chat') return tr('notifications.custom.liveChatMention', { name: actorName });
       if (where === 'public_chat') return tr('notifications.custom.publicChatMention', { name: actorName });
       if (where === 'post' || (!where && !notification.commentId)) return tr('notifications.custom.postMention', { name: actorName });
@@ -1042,6 +1043,12 @@ function getNavigationLink(notification: DeHubNotification): string | null {
       return `/app/post/${notification.tokenId}${query ? `?${query}` : ''}`;
     }
     if (where === 'public_chat') return `/app/messages?chat=public${query ? `&${query}` : ''}`;
+    // A bio tag opens the profile whose bio names the reader ("Remove me" is in its menu).
+    if (where === 'bio') {
+      return notification.actorAddress
+        ? profilePath(notification.actorAddress)
+        : notification.actorUsername ? profilePath(notification.actorUsername) : null;
+    }
   }
 
   switch (notification.type) {
