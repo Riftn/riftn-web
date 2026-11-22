@@ -11,7 +11,8 @@
  * direct message; likes and views show only to the owner. Your own moments
  * show who watched instead of a reply bar.
  */
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -85,7 +86,27 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
 
   const entry = entries[authorIdx];
-  const item: StoryItem | undefined = entry?.items[itemIdx];
+  const snapshot: StoryItem | undefined = entry?.items[itemIdx];
+  const customAudience = snapshot?.audience === 'selected' || snapshot?.audience === 'except';
+  const delivery = useQuery({
+    queryKey: ['private-story-playback', snapshot?.id, me],
+    queryFn: () => getStory(snapshot!.id, true),
+    enabled: customAudience && !!me,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchInterval: 4 * 60 * 1000,
+    retry: false,
+  });
+  const item = useMemo(() => {
+    if (!customAudience) return snapshot;
+    if (!snapshot || !me || !delivery.isSuccess) return undefined;
+    const { mediaUrl, posterUrl, overlayUrl } = delivery.data.item;
+    return { ...snapshot, mediaUrl, posterUrl, overlayUrl };
+  }, [snapshot, customAudience, me, delivery.data, delivery.isSuccess]);
+  useEffect(() => {
+    if (customAudience && (!me || delivery.isError)) onClose();
+  }, [customAudience, me, delivery.isError, onClose]);
   const loaded = !!item && loadedId === item.id;
   const setLoaded = useCallback(() => setLoadedId(item?.id ?? null), [item?.id]);
   const own = !!entry && !!me && entry.author.address === me;
