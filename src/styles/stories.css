@@ -251,7 +251,7 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   height: 100%;
   object-fit: cover;
 }
-[data-sv-page] [data-sv-media][data-fit='contain'] { object-fit: contain; }
+[data-sv-media-frame][data-fit='contain'] [data-sv-media] { object-fit: contain; }
 [data-sv-page] [data-sv-shade] {
   position: absolute;
   inset: 0;
@@ -368,6 +368,10 @@ html:is([data-theme='light'], [data-system-tone='light']) [data-st-glass] {
   transform: translate(-50%, -50%);
   z-index: 2;
   pointer-events: none;
+}
+[data-sv-media-frame][data-fit='contain'] [data-sv-mention-frame] {
+  width: min(100cqw, 56.25cqh);
+  height: min(177.7778cqw, 100cqh);
 }
 [data-sv-mention] {
   position: absolute;

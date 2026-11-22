@@ -69,6 +69,34 @@ function timeLeftLabel(expiresAt: string, t: (k: string, o: Record<string, unkno
   return t('stories.minutesLeft', { n: Math.max(1, mins), defaultValue: '{{n}}m left' });
 }
 
+/**
+ * Fill the frame edge to edge when that crops only a little; otherwise keep
+ * the whole moment (text and stickers near the sides stay readable on tall
+ * phones, landscape moments stay whole).
+ */
+function fitFor(width: number | null | undefined, height: number | null | undefined, frame: { w: number; h: number } | null): 'cover' | 'contain' {
+  const ratio = width && height ? width / height : 9 / 16;
+  if (ratio > 1) return 'contain';
+  if (!frame || !frame.w || !frame.h) return 'cover';
+  const screen = frame.w / frame.h;
+  return Math.abs(ratio - screen) / screen <= 0.1 ? 'cover' : 'contain';
+}
+
+function useFrameSize() {
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  const ro = useRef<ResizeObserver | null>(null);
+  const ref = useCallback((el: HTMLDivElement | null) => {
+    ro.current?.disconnect();
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    ro.current = new ResizeObserver(([e]) => {
+      const { width: w, height: h } = e.contentRect;
+      setSize(prev => (prev && prev.w === w && prev.h === h ? prev : { w, h }));
+    });
+    ro.current.observe(el);
+  }, []);
+  return [ref, size] as const;
+}
+
 /** Wide screens park the comments in a panel beside the moment, like the live page. */
 function useDocked(): boolean {
   const query = '(min-width: 1200px)';
@@ -117,6 +145,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   const [replyTo, setReplyTo] = useState<'everyone' | 'author'>('everyone');
   const [hearts, setHearts] = useState<{ id: number; x: number; d: number }[]>([]);
   const docked = useDocked();
+  const [frameRef, frameSize] = useFrameSize();
   const queryClient = useQueryClient();
 
   const entry = entries[authorIdx];
@@ -524,6 +553,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
   };
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const nextEntry = entries[authorIdx + 1];
+  const fit = fitFor(item.width, item.height, frameSize);
 
   const body = (
     <div
@@ -543,7 +573,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
         data-sv-page
         style={drag ? { transform: `${window.innerWidth >= 768 ? 'translate(-50%, -50%) ' : ''}translate(${drag.x * 0.4}px, ${drag.y}px) scale(${1 - Math.min(0.15, drag.y / 1600)})`, transition: 'none' } : undefined}
       >
-        <div data-sv-media-frame>
+        <div data-sv-media-frame ref={frameRef} data-fit={fit}>
           {item.type === 'video' ? (
             <video
               key={item.id}
@@ -568,7 +598,6 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, onClose 
               data-sv-media
               src={item.mediaUrl ?? item.posterUrl ?? undefined}
               alt={item.caption ?? ''}
-              data-fit={item.width && item.height && item.width > item.height ? 'contain' : undefined}
               onLoad={() => setLoaded()}
               onError={() => setLoaded()}
               draggable={false}
