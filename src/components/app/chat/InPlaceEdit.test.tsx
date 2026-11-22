@@ -62,3 +62,24 @@ it('puts the caret where the words were clicked', () => {
   const field = screen.getByRole('textbox') as HTMLTextAreaElement;
   expect(field.selectionStart).toBe(5);
 });
+
+it('retains a phone edit across keyboard focus changes and finishes on an intentional outside tap', async () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true }));
+  try {
+    const onSave = vi.fn().mockResolvedValue(true);
+    const onDone = vi.fn();
+    render(<InPlaceEditField draftKey={key()} text="hello" onSave={onSave} onDone={onDone} keepOpenOnTouchBlur />);
+    const field = screen.getByRole('textbox');
+    fireEvent.change(field, { target: { value: 'still typing' } });
+    fireEvent.blur(field);
+    await act(async () => { vi.advanceTimersByTime(1600); });
+    expect(onDone).not.toHaveBeenCalled();
+    fireEvent.click(field);
+    fireEvent.change(field, { target: { value: 'complete message' } });
+    await act(async () => { fireEvent.click(document.body); });
+    expect(onSave).toHaveBeenLastCalledWith('complete message');
+    expect(onDone).toHaveBeenCalledTimes(1);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});

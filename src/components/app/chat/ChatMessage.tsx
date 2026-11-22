@@ -519,6 +519,7 @@ export const ChatMessage = memo(function ChatMessage({
         
         {message.type === 'text' && isEditing && (
           <InPlaceEditField
+            keepOpenOnTouchBlur
             draftKey={`chat:edit:${message.id}`}
             text={message.content}
             caret={editCaret}

@@ -758,10 +758,11 @@ export function PublicChat({ onBack, embedded = false }: PublicChatProps) {
       />
       )
       );
-      if (unreadAnchor?.id !== message.id || readDecidedRoom.current !== selectedRoomId) return row;
       return (
-        <Fragment key={`unread-${message.id}`}>
-          <UnreadMarker count={unreadAnchor.count} />
+        <Fragment key={message.clientKey ?? message.id}>
+          {unreadAnchor?.id === message.id && readDecidedRoom.current === selectedRoomId && (
+            <UnreadMarker count={unreadAnchor.count} />
+          )}
           {row}
         </Fragment>
       );
