@@ -10,7 +10,10 @@ import { cn } from '@/lib/utils';
 import { reactionEntries, reactorCount, type ReactorsSource } from './ChatReactorsList';
 import { ChatReactorsDrawer } from './ChatReactorsDrawer';
 import { ReactorFaces } from './ReactorFaces';
+import { HOLD_EVENT, isTouchHold } from './chat-hold-event';
 import '@/styles/chat-hold.css';
+
+export { HOLD_EVENT, isTouchHold };
 
 export interface ChatHoldAction {
   key: string;
@@ -46,10 +49,6 @@ interface ChatHoldSheetProps {
   meta?: string;
 }
 
-/** Phones with a finger, not a mouse. Desktop keeps hover buttons and the browser's own right-click. */
-export function isTouchHold() {
-  return typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
-}
 
 function scrollParent(el: HTMLElement): HTMLElement | null {
   let node = el.parentElement;
@@ -66,8 +65,6 @@ const GAP = 12;
 const TOP_BAR = 64;
 /** Up to five tiles sit in one row; six make two rows of three. */
 const columns = (n: number) => (n <= 5 ? n : n === 6 ? 3 : 4);
-/** The comments sheet keeps its height while a hold sheet is up. */
-export const HOLD_EVENT = 'chat-hold-sheet';
 let releases = 0;
 const SLIDE = { type: 'tween', duration: 0.26, ease: [0.32, 0.72, 0, 1] } as const;
 

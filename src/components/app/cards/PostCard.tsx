@@ -72,7 +72,7 @@ const EditPostModal = lazy(() =>
 import { applyOptimisticEdit } from '@/lib/optimistic-edit';
 import { useMintExistingPost } from '@/hooks/use-mint-existing-post';
 import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
-import { TipModal } from '../modals/TipModal';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
 import { useFeedViewTracking } from '@/hooks/use-view-tracking';
 import { usePostTipCount } from '@/hooks/use-post-tip-count';
 import { useAuth } from '@/contexts/AuthContext';

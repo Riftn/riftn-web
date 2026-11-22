@@ -319,7 +319,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     enabled: !!liveStreamId && !isOffline && isAuthenticated,
     staleTime: 60_000,
   });
-  const giving = givingInfo.data?.live && givingInfo.data.giving.enabled ? givingInfo.data.giving : null;
+  const giving = givingInfo.data?.live && givingInfo.data.giving?.enabled ? givingInfo.data.giving : null;
   const givingCreator = givingInfo.data?.creator?.toLowerCase() || '';
   const [giveTarget, setGiveTarget] = useState<GiveTarget | null>(null);
   const canGiveTo = (address?: string | null) => {
@@ -1141,6 +1141,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             query={mention.query}
             isOpen={mention.isOpen}
             position={mention.position}
+            armed={mention.armed}
             selectedIndex={mention.selectedIndex}
             onSelectedIndexChange={mention.setSelectedIndex}
             onSelect={mention.handleSelect}
