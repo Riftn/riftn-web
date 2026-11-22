@@ -32,7 +32,7 @@ export function StoryShelf() {
   const canSeeMature = isAuthenticated && showMatureContent && !kidsMode;
   const liveHosts = [...new Set(live.map(item => (item.wallet || '').toLowerCase()).filter(Boolean))].sort().slice(0, 100).join(',');
   const { storiesEnabled } = useStoriesEnabled();
-  const { data } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
+  const { data, isLoading } = useStoryShelf(liveHosts, canSeeMature, storiesEnabled || !!liveHosts);
   const eligibleLive = live.filter(item => data?.liveHosts?.includes((item.wallet || '').toLowerCase()));
   const openViewer = useStoriesStore(s => s.openViewer);
   const openCreator = useStoriesStore(s => s.openCreator);
@@ -80,6 +80,12 @@ export function StoryShelf() {
       )}
       {eligibleLive.map(item => (
         <LiveTile key={`${item.kind}-${item.id}`} item={item} onOpen={() => openLive(item)} />
+      ))}
+      {storiesEnabled && isAuthenticated && isLoading && [0, 1, 2, 3].map(index => (
+        <div key={index} data-story-tile aria-hidden="true" className="!bg-foreground/[0.04]">
+          <span data-st-avatar className="!border-0 !bg-foreground/10" />
+          <span className="absolute bottom-2 left-2 h-2 w-10 rounded bg-foreground/10" />
+        </div>
       ))}
       {storiesEnabled && others.map(entry => (
         <PersonTile key={entry.author.address} entry={entry} onOpen={el => openEntry(entry, el)} />
