@@ -12,7 +12,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { AtSign, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
+import { AtSign, Sticker, Timer, Pencil, RefreshCw, RotateCw, Type, Undo2, Users, Globe2, Volume2, VolumeX, Scissors } from 'lucide-react';
 import Back from '@/components/ui/cut-icons/back';
 import Close from '@/components/ui/cut-icons/close';
 import Images from '@/components/ui/cut-icons/images';
@@ -35,9 +35,21 @@ import '@/styles/stories.css';
 
 const MAX_VIDEO_S = 60;
 const AUDIENCE_KEY = 'riftn.stories.audience';
+/** The saved Close friends list (people picked once, reused for "Only selected people"). */
+const CLOSE_FRIENDS_KEY = 'riftn.stories.closeFriends';
+function readCloseFriends(): DeHubUser[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(CLOSE_FRIENDS_KEY) || '[]');
+    return Array.isArray(list) ? list.filter((u: DeHubUser) => u && typeof u.address === 'string').slice(0, 50) : [];
+  } catch { return []; }
+}
 
 type Media = { kind: 'photo' | 'video'; url: string; blob: Blob; duration?: number };
-type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience';
+type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker';
+
+/** Stickers are big glyph layers: emoji keep their own colours, the shapes take the text colour. */
+const STICKER_EMOJI = ['🔥', '😂', '😍', '🥳', '👀', '💯', '🎉', '❤️', '✨', '👏', '🙌', '😎', '🤯', '🫶', '🙏', '💀', '🚀', '⚡', '🌙', '☀️'];
+const STICKER_SHAPES = ['→', '←', '↑', '↓', '↗', '↘', '➜', '○', '✓', '✗', '★', '♥', '!', '?'];
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -358,6 +370,11 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     setEditing(layer.id);
     setTool('text');
   };
+  const addSticker = (glyph: string) => {
+    const layer: TextLayer = { id: uid(), kind: 'text', text: glyph, x: 0.5, y: 0.45, size: 0.16, color: TEXT_COLORS[0], box: false };
+    setLayers(l => [...l, layer]);
+    setTool(null);
+  };
   const patch = (id: string, p: Partial<TextLayer>) => setLayers(l => l.map(x => (x.id === id ? { ...x, ...p } : x)));
   const finishText = () => {
     setLayers(l => l.filter(x => x.text.trim()));
@@ -563,6 +580,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           </button>
         )}
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'text' ? 'true' : 'false'} onClick={addText} aria-label={t('stories.text', { defaultValue: 'Text' })}><Type className="w-5 h-5" /></button>
+        <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'sticker' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'sticker' ? null : 'sticker'))} aria-label={t('stories.stickers', { defaultValue: 'Stickers' })}><Sticker className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'draw' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'draw' ? null : 'draw'))} aria-label={t('stories.draw', { defaultValue: 'Draw' })}><Pencil className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={song ? 'true' : 'false'} onClick={() => setSoundOpen(true)} aria-label={t('stories.song', { defaultValue: 'Song' })}><Music className="w-5 h-5" /></button>
         <button type="button" data-sc-btn data-st-dark-glass data-on={tool === 'mention' ? 'true' : 'false'} onClick={() => setTool(tl => (tl === 'mention' ? null : 'mention'))} aria-label={t('stories.mention', { defaultValue: 'Mention someone' })}><AtSign className="w-5 h-5" /></button>
@@ -614,6 +632,24 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
               </button>
             ))}
           </div>
+          {customAudience && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" data-sc-chip data-st-dark-glass data-sc-close-friends
+                disabled={!readCloseFriends().length}
+                onClick={() => { setAudience('selected'); setAudiencePeople(readCloseFriends()); }}>
+                {t('stories.closeFriends', { defaultValue: 'Close friends' })} ({readCloseFriends().length})
+              </button>
+              {audience === 'selected' && audiencePeople.length > 0 && (
+                <button type="button" data-sc-chip data-st-dark-glass
+                  onClick={() => {
+                    try { localStorage.setItem(CLOSE_FRIENDS_KEY, JSON.stringify(audiencePeople.map(u => ({ address: u.address, username: u.username, displayName: u.displayName })))); } catch { /* private mode */ }
+                    toast.success(t('stories.closeFriendsSaved', { defaultValue: 'Saved as your Close friends' }));
+                  }}>
+                  {t('stories.saveCloseFriends', { defaultValue: 'Save as Close friends' })}
+                </button>
+              )}
+            </div>
+          )}
           {restrictPeople && (
             <>
               <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('common.search', { defaultValue: 'Search' })}
@@ -705,6 +741,26 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           </div>
           <button type="button" data-sc-btn data-st-dark-glass onClick={undoDraw} aria-label={t('common.undo', { defaultValue: 'Undo' })}><Undo2 className="w-5 h-5" /></button>
           <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.done', { defaultValue: 'Done' })}><Check className="w-5 h-5" /></button>
+        </div>
+      )}
+
+      {tool === 'sticker' && (
+        <div data-sc-panel data-st-dark-glass data-sc-stickers onPointerDown={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white text-sm font-semibold">{t('stories.stickers', { defaultValue: 'Stickers' })}</span>
+            <button type="button" data-sc-btn data-st-dark-glass onClick={() => setTool(null)} aria-label={t('common.close', { defaultValue: 'Close' })}><Close className="size-[18px]" /></button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {STICKER_EMOJI.map(g => (
+              <button key={g} type="button" className="h-11 rounded-xl text-[26px] leading-none hover:bg-white/10" onClick={() => addSticker(g)} aria-label={g}>{g}</button>
+            ))}
+          </div>
+          <span className="block text-white/60 text-xs mb-1">{t('stories.shapes', { defaultValue: 'Arrows and shapes. Tap one after adding it to change its colour, size or angle.' })}</span>
+          <div className="grid grid-cols-7 gap-1">
+            {STICKER_SHAPES.map(g => (
+              <button key={g} type="button" className="h-11 rounded-xl text-[24px] leading-none font-bold text-white hover:bg-white/10" onClick={() => addSticker(g)} aria-label={g}>{g}</button>
+            ))}
+          </div>
         </div>
       )}
 

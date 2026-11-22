@@ -7234,7 +7234,7 @@
     "transferGuarantee": "Recibes la cuenta completa — nombre de usuario, publicaciones, seguidores, historial de propinas y derechos de insignia. El vendedor conserva su billetera y todo lo que contiene. La transferencia se ejecuta solo después de que Riftn lea tu pago en tokens de vuelta de la cadena; si se interrumpe, reintentar la compra la reanuda.",
     "shareTitle": "@{{handle}} está a la venta en Riftn"
   },
-  "stories": {
+  "stories": {"stickers":"Stickers","shapes":"Flechas y formas. Tócalas después de añadirlas para cambiar color, tamaño o ángulo.","closeFriends":"Mejores amigos","closeFriendsSaved":"Guardado como tus Mejores amigos","saveCloseFriends":"Guardar como Mejores amigos",
     "mute": "Silenciar",
     "unfollow": "Dejar de seguir",
     "mutedToast": "Silenciado. No verás sus Momentos ni publicaciones.",

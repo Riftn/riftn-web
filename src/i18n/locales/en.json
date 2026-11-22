@@ -7198,7 +7198,7 @@
     "transferGuarantee": "You get the whole account — handle, posts, followers, tips history and badge entitlements. The seller keeps their wallet and everything in it. The transfer runs only after Riftn reads your token payment back off the chain; if it is interrupted, retrying the purchase resumes it.",
     "shareTitle": "@{{handle}} is for sale on Riftn"
   },
-  "stories": {
+  "stories": {"stickers":"Stickers","shapes":"Arrows and shapes. Tap one after adding it to change its colour, size or angle.","closeFriends":"Close friends","closeFriendsSaved":"Saved as your Close friends","saveCloseFriends":"Save as Close friends",
     "mute": "Mute",
     "unfollow": "Unfollow",
     "mutedToast": "Muted. You won't see their Moments or posts.",

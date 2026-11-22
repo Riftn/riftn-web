@@ -7234,7 +7234,7 @@
     "transferGuarantee": "Tüm hesabı alırsınız — kullanıcı adı, gönderiler, takipçiler, ipucu geçmişi ve rozet hakları. Satıcı cüzdanını ve içindekileri saklar. Transfer yalnızca Riftn jeton ödemenizi zincirden okuduktan sonra çalışır; kesintiye uğrarsa, satın alma işlemini yeniden denemek devam ettirir.",
     "shareTitle": "@{{handle}} Riftn'da satışta"
   },
-  "stories": {
+  "stories": {"stickers":"Çıkartmalar","shapes":"Oklar ve şekiller. Ekledikten sonra rengini, boyutunu veya açısını değiştirmek için dokun.","closeFriends":"Yakın arkadaşlar","closeFriendsSaved":"Yakın arkadaşların olarak kaydedildi","saveCloseFriends":"Yakın arkadaşlar olarak kaydet",
     "mute": "Sessize al",
     "unfollow": "Takibi bırak",
     "mutedToast": "Sessize alındı. Anlarını ve gönderilerini görmeyeceksin.",
