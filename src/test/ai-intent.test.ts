@@ -107,7 +107,18 @@ describe('a question is answered, not drawn (Requests 1385bb79)', () => {
     expect(requiresImageGeneration(message, false, { conversational: true })).toBe(false);
   });
 
+  it.each([
+    'can you give me a short summary of Riftn which I can use to share with people',
+    'give me a caption for my live tonight',
+    'could you write me a bio for my profile',
+    'make me a short intro I can share with friends',
+  ])('a request for words gets words: %s', (message) => {
+    expect(requiresImageGeneration(message, false)).toBe(false);
+    expect(requiresImageGeneration(message, false, { conversational: true })).toBe(false);
+  });
+
   it('still draws when asked for a picture', () => {
+    expect(requiresImageGeneration('draw me a fox I can share with people', false, { conversational: true })).toBe(true);
     expect(requiresImageGeneration('what does a snow leopard look like', false, { conversational: true })).toBe(true);
     expect(requiresImageGeneration('can you create a logo for my channel', false, { conversational: true })).toBe(true);
     expect(requiresImageGeneration('how about a picture of a fox in the snow', false)).toBe(true);
