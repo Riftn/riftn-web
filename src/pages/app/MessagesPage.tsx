@@ -1919,7 +1919,11 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       />
 
       {!guest && walletAddress && (
-        <NotesSheetHost onMessage={author => handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser)} />
+        <NotesSheetHost onMessage={(author, reply) => {
+          // A reply to a note is sent as soon as the chat with them is ready.
+          if (reply) pendingAutoSendRef.current = { peerAddress: author.address.toLowerCase(), body: reply };
+          handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser);
+        }} />
       )}
 
       <NewGroupChannelSheet

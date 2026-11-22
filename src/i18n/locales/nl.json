@@ -21894,6 +21894,8 @@
     "gifHost": "Kies een GIF uit het GIF-tabblad voor notities.",
     "back": "Terug naar notities",
     "fromFollowing": "Van mensen die je volgt",
+    "replyTo": "Reageer op {{name}}…",
+    "send": "Versturen",
     "optionDetail": "Een korte zin, nummer of GIF voor 24 uur",
     "who": "Mensen die jou volgen kunnen hem 24 uur zien.",
     "delete": "Notitie verwijderen",
