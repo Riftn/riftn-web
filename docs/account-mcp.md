@@ -84,10 +84,19 @@ are versioned in `wrangler.jsonc`; no Supabase schema migration or paid deployme
 chat is needed. The previous public `/functions/v1/mcp` connector and key-based
 `dehub-mcp/k/...` agent connectors remain compatible with existing clients.
 
-An existing published ChatGPT app must be updated in its developer configuration
-to use `https://riftn.com/mcp`, OAuth discovery and a fresh tool scan. Shipping the
-server alone does not change the tool catalogue already registered with ChatGPT.
-Custom OAuth connectors can use the new endpoint immediately after deployment.
+The Connect to ChatGPT button on `/connect` and `/connect/chatgpt` opens the listing
+configured in `src/components/ConnectChatGPTLink.tsx`. Before launching account
+linking, verify that this listing uses `https://riftn.com/mcp` with OAuth discovery
+and a fresh tool scan. If the listing needs to be replaced, update the button
+with the new listing link after publication.
+
+Smoke-test the published listing from a ChatGPT account with no existing Riftn
+connection. Choose Connect, sign in to Riftn, review the requested permissions
+and choose Allow connection. After ChatGPT returns, ask it to identify the
+connected Riftn profile, then disconnect from `/connect/chatgpt`. A catalogue scan
+and a successful call to a public tool only verify public access.
+
+Custom OAuth connectors can use the endpoint after deployment.
 
 CI runs the authentication, authorization, ownership and retry tests in
 `server/account-mcp.test.mjs`, the Worker bundle validation and the app typechecks.

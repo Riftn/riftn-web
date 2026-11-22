@@ -1,215 +1,63 @@
-import { translateCopy as _translateCopy } from '@/i18n/copy';
-import { useTranslation as _useCopy } from 'react-i18next';
-import { ArrowUpRight } from "lucide-react";
-import Check from "@/components/ui/cut-icons/check";
-
-import ArrowLeft from "@/components/ui/cut-icons/back";
-
-import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { SEOHead } from "@/components/SEOHead";
-import ogImage from "@/assets/og-chatgpt.jpg";
-import dehubLogo from "@/assets/dehub-wordmark-white.png";
-import dehubIcon from "@/assets/dehub-mark-white.png";
-import openaiLogo from "@/assets/ai-logos/openai.png";
+import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import ArrowLeft from '@/components/ui/cut-icons/back';
+import { SEOHead } from '@/components/SEOHead';
 import AccountConnection from '@/components/AccountConnection';
+import ConnectChatGPTLink from '@/components/ConnectChatGPTLink';
+import ogImage from '@/assets/og-chatgpt.jpg';
 
-const APP_URL =
-  "https://chatgpt.com/apps#settings/Connectors?connector=asdk_app_6a4962fb2cdc8191afcda7ca74b6082c";
-// Canonical + OG must live on dehub.io — pointing them at a preview mirror
-// told Google the staging host was the real page.
-const PAGE_URL = "https://riftn.com/connect/chatgpt";
-const OG_IMAGE = "https://riftn.com" + ogImage;
-
-const steps = [
-  {
-    get title() { return _translateCopy("copy.db582e44a2f9", { defaultValue: "Open the Riftn connector in ChatGPT" }); },
-    get body() { return _translateCopy("copy.a1be36bee94a", { defaultValue: "Click the button below. ChatGPT will jump straight to the Riftn connector inside your Settings → Connectors panel." }); },
-  },
-  {
-    get title() { return _translateCopy("copy.ae7947534d62", { defaultValue: "Enable the connector" }); },
-    get body() { return _translateCopy('accountConnect.step', { defaultValue: 'For account controls, add https://riftn.com/mcp as an OAuth connector, sign in to Riftn and review the permissions before allowing access.' }); },
-  },
-  {
-    get title() { return _translateCopy("copy.1c353e8894fb", { defaultValue: "Start a new chat and use it" }); },
-    get body() { return _translateCopy("copy.fd931309f64c", { defaultValue: "Open a new chat, mention Riftn in your prompt (e.g. \"Summarise today's trending posts on Riftn\") and ChatGPT will call the connector automatically." }); },
-  },
-];
-
-const examples = () => [
-  _translateCopy("copy.276b978fa5ec", { defaultValue: "Summarise the top 10 trending posts on Riftn right now." }),
-  _translateCopy("copy.cc498e0e6ed6", { defaultValue: "Find posts on Riftn about Bitcoin from the last 24 hours and give me a bullet-point digest." }),
-  _translateCopy("copy.3b2e4df4defd", { defaultValue: "Look up the Riftn profile @satoshi and tell me what they've posted this week." }),
-  _translateCopy("copy.82c5c975c9b2", { defaultValue: "Draft a reply to the top post on Riftn in my voice." }),
-];
-
-const faqs: { q: string; a: string; aKey?: string }[] = [
-  {
-    get q() { return _translateCopy("copy.ea334731f6e3", { defaultValue: "Is Riftn free to use inside ChatGPT?" }); },
-    get a() { return _translateCopy("copy.004256b0a4f4", { defaultValue: "Yes. The Riftn ChatGPT app is free. You only need an active ChatGPT account that supports connectors (available on ChatGPT Plus, Pro, Team and Enterprise)." }); },
-  },
-  {
-    get q() { return _translateCopy("copy.75332791a900", { defaultValue: "What can the Riftn connector do?" }); },
-    get a() { return _translateCopy('accountConnect.what', { defaultValue: 'Browse public posts and profiles. With an OAuth account connection, manage your profile and privacy, publish posts and comments, follow people, read notifications, save bookmarks and generate images, video, audio and 3D assets. Generation uses Riftn\'s existing payment rules.' }); },
-  },
-  {
-    get q() { return _translateCopy("copy.40fc098cb988", { defaultValue: "Do I need a Riftn account?" }); },
-    get a() { return _translateCopy("copy.af1dcb0cb4da", { defaultValue: "No account is required to read public content through the connector. A Riftn account is only needed if you want to post, tip or hold tokens." }); },
-    aKey: "accountConnect.account",
-  },
-  {
-    get q() { return _translateCopy("copy.087e62e23c74", { defaultValue: "Which ChatGPT models support this?" }); },
-    get a() { return _translateCopy("copy.ad3880ca9416", { defaultValue: "Any ChatGPT model that supports Apps / Connectors — currently GPT-5 and GPT-4.1 class models on Plus, Pro, Team and Enterprise plans." }); },
-  },
-];
+const PAGE_URL = 'https://riftn.com/connect/chatgpt';
+const OG_IMAGE = new URL(ogImage, PAGE_URL).href;
 
 export default function ConnectChatGPTPage() {
-  const { t: _copy } = _useCopy();
   const { t } = useTranslation();
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "HowTo",
-        name: _copy("copy.8b0f0e2f8de1", { defaultValue: "How to use Riftn inside ChatGPT" }),
-        description:
-          _copy("copy.23bc33eaf5bb", { defaultValue: "Add the Riftn connector to ChatGPT and let GPT browse posts, profiles and trends from the Riftn social network." }),
-        image: OG_IMAGE,
-        totalTime: "PT1M",
-        step: steps.map((s, i) => ({
-          "@type": "HowToStep",
-          position: i + 1,
-          name: s.title,
-          text: s.body,
-        })),
-      },
-      {
-        "@type": "FAQPage",
-        mainEntity: faqs.map((f) => ({
-          "@type": "Question",
-          name: f.q,
-          acceptedAnswer: { "@type": "Answer", text: f.a },
-        })),
-      },
-    ],
-  };
+  const [query] = useSearchParams();
+  const requestId = query.get('authorization');
 
   return (
     <div data-glass-page data-theme-page-surface className="relative z-[1] min-h-screen bg-black text-white">
       <SEOHead
-        title={_copy("copy.d4a69f6e6a86", { defaultValue: "Riftn for ChatGPT: Use Riftn inside ChatGPT (MCP Connector)" })}
-        description={_copy("copy.a68813805ba9", { defaultValue: "Add Riftn to ChatGPT in one click. Browse posts, look up profiles and pull trending topics from the Riftn decentralized social network directly inside ChatGPT." })}
+        title={t('accountConnect.chatgptTitle', { defaultValue: 'Riftn for ChatGPT' })}
+        description={t('accountConnect.chatgptDescription', { defaultValue: 'Connect your Riftn account to ChatGPT to browse posts, manage your profile and use Creator Studio.' })}
         url={PAGE_URL}
         image={OG_IMAGE}
         type="article"
-        jsonLd={jsonLd}
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-8 md:py-14">
-        <Link
-          to="/app"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
-        >
-          <ArrowLeft className="h-4 w-4" />{_copy("copy.2e69c1cda2b3", { defaultValue: "Back to Riftn" })}</Link>
+      <main className="mx-auto max-w-3xl px-4 py-8 md:py-14">
+        {requestId ? (
+          <AccountConnection key={requestId} />
+        ) : (
+          <>
+            <Link to="/app" className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm text-white/70 hover:text-white">
+              <ArrowLeft className="size-4" />
+              {t('copy.2e69c1cda2b3', { defaultValue: 'Back to Riftn' })}
+            </Link>
 
-        <div
-          className="mb-8 aspect-[1200/630] w-full overflow-hidden rounded-2xl border border-white/10"
-          style={{
-            backgroundImage: `url(${ogImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-          aria-hidden="true"
-        />
+            <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
+              {t('accountConnect.chatgptTitle', { defaultValue: 'Riftn for ChatGPT' })}
+            </h1>
+            <p className="mt-2 max-w-xl text-base text-white/70 md:text-lg">
+              {t('accountConnect.chatgptDescription', { defaultValue: 'Connect your Riftn account to ChatGPT to browse posts, manage your profile and use Creator Studio.' })}
+            </p>
+            <ConnectChatGPTLink className="mt-5" />
+            <p className="mt-3 text-sm text-white/70">
+              {t('accountConnect.chatgptInstructions', { defaultValue: 'Choose Connect in ChatGPT, then sign in to Riftn and approve access.' })}
+            </p>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1.5 backdrop-blur-[24px]">
-          <img src={dehubIcon} alt="Riftn" className="h-4 w-4 object-contain" />
-          <span className="text-white/40">×</span>
-          <img src={openaiLogo} alt="ChatGPT" className="h-4 w-4 object-contain" />
-          <span className="ml-1 text-[10px] font-black italic tracking-wider text-white">{_copy("copy.5b4569693eb1", { defaultValue: "MCP LIVE" })}</span>
-        </div>
+            <AccountConnection />
 
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">{_copy("copy.81663fc4bc4b", { defaultValue: "Use Riftn inside ChatGPT" })}</h1>
-        <p className="mt-3 text-base text-white/60 md:text-lg">{t('accountConnect.intro')}</p>
-
-        <a
-          href={APP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-8 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/60 px-5 py-3 text-sm font-bold text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-[24px] transition-transform hover:-translate-y-0.5"
-        >
-          <img src={openaiLogo} alt="" className="h-4 w-4 object-contain" />{_copy("copy.e102a35a7417", { defaultValue: "Open Riftn in ChatGPT" })}<ArrowUpRight className="h-4 w-4" />
-        </a>
-
-
-        <AccountConnection />
-        <section className="mt-14">
-          <h2 className="text-xl font-bold md:text-2xl">{_copy("copy.c104151457b7", { defaultValue: "Setup in 3 steps" })}</h2>
-          <ol className="mt-6 space-y-4">
-            {steps.map((s, i) => (
-              <li
-                key={s.title}
-                className="rounded-2xl border border-white/10 bg-black/60 p-5 backdrop-blur-[24px]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-sm font-bold">
-                    {i + 1}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold">{s.title}</h3>
-                    <p className="mt-1 text-sm text-white/60">{s.body}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="mt-14">
-          <h2 className="text-xl font-bold md:text-2xl">{_copy("copy.7887eb17f548", { defaultValue: "Prompts to try" })}</h2>
-          <ul className="mt-6 space-y-2">
-            {[...examples(), t('accountConnect.profilePrompt'), t('accountConnect.generatePrompt'), t('accountConnect.libraryPrompt')].map((e) => (
-              <li
-                key={e}
-                className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/80"
-              >
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-white/40" />
-                <span>{e}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="mt-14">
-          <h2 className="text-xl font-bold md:text-2xl">{_copy("copy.dbc468a14b60", { defaultValue: "FAQ" })}</h2>
-          <div className="mt-6 space-y-4">
-            {faqs.map((f) => (
-              <div
-                key={f.q}
-                className="rounded-2xl border border-white/10 bg-black/60 p-5 backdrop-blur-[24px]"
-              >
-                <h3 className="text-base font-semibold">{f.q}</h3>
-                <p className="mt-2 text-sm text-white/60">{f.aKey ? t(f.aKey) : f.a}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="mt-14 flex flex-wrap gap-3">
-          <a
-            href={APP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/60 px-5 py-3 text-sm font-bold text-white shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-[24px]"
-          >
-            <img src={openaiLogo} alt="" className="h-4 w-4 object-contain" />{_copy("copy.e102a35a7417", { defaultValue: "Open Riftn in ChatGPT" })}<ArrowUpRight className="h-4 w-4" />
-          </a>
-          <Link
-            to="/connect/claude"
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white hover:bg-white/5"
-          >{_copy("copy.512bc7535b46", { defaultValue: "Prefer Claude? Open the Claude guide" })}</Link>
-        </div>
-      </div>
+            <section className="mt-10">
+              <h2 className="text-xl font-semibold">{t('copy.7887eb17f548', { defaultValue: 'Prompts to try' })}</h2>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-white/80">
+                <li>{t('copy.276b978fa5ec', { defaultValue: 'Summarise the top 10 trending posts on Riftn right now.' })}</li>
+                <li>{t('accountConnect.libraryPrompt', { defaultValue: 'Show the latest assets in my Riftn Creator library.' })}</li>
+                <li>{t('accountConnect.generatePrompt', { defaultValue: "Show me Riftn's image models and quote a portrait before generating it." })}</li>
+              </ul>
+            </section>
+          </>
+        )}
+      </main>
     </div>
   );
 }
