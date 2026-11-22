@@ -1799,7 +1799,6 @@ function PrivacySettings() {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
-  const { whoCanMessage, doNotDisturb, isUpdating: isDmUpdating, updateWhoCanMessage, updateDoNotDisturb } = useDmSettings();
   const { option: walletUnlockInterval, setOption: setWalletUnlockInterval } = useWalletUnlockInterval();
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
   const { user } = useAuthContext();
@@ -2091,47 +2090,8 @@ function PrivacySettings() {
         </div>
       </div>
 
-      {/* Messaging */}
-      <div>
-        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.messages', 'Messages')}</h3>
-        <div className="space-y-4">
-          {/* Who Can Message */}
-          <SettingsRow
-            icon={<MessageCircle />}
-            title={t('settings.whoCanMessage', 'Who can message you')}
-            description={t('settings.whoCanMessageDesc', 'Control who can send you direct messages')}
-            action={<SettingDrawerSelect
-              value={whoCanMessage}
-              onValueChange={(value) => updateWhoCanMessage(value as WhoCanMessage)}
-              disabled={isDmUpdating}
-              title={t('settings.whoCanMessage', 'Who can message you')}
-              options={DM_ACCESS_OPTIONS(t)}
-            />}
-          />
-
-          {/* Message Fee */}
-          <SettingsRow
-            icon={<img src={dehubCoin} alt="" />}
-            title={t('settings.messageFee', 'Message fee')}
-            description={t('settings.messageFeeDesc')}
-            action={<MessageFeeControl />}
-          />
-
-          {/* Do Not Disturb */}
-          <SettingToggle
-            icon={Ban}
-            anchor="do-not-disturb"
-            title={t('settings.doNotDisturb', 'Do not disturb')}
-            description={t('settings.doNotDisturbDesc', 'Mute all message notifications')}
-            defaultChecked={doNotDisturb}
-            onCheckedChange={(checked) => updateDoNotDisturb(checked)}
-            disabled={isDmUpdating}
-          />
-        </div>
-      </div>
-
-      {/* Free DM Access List */}
-      <FreeAccessListSection />
+      {/* Message settings (who can message, fee, do not disturb, free access)
+          live only on the Messages tab. */}
 
       {/* Account Security */}
       <div>
