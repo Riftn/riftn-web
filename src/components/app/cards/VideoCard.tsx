@@ -106,6 +106,7 @@ import { ActionBar } from './ActionBar';
 import { useLiveReaction } from '@/hooks/use-live-reaction';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
 import { PollCard } from './PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
 import { PostMetadata } from './PostMetadata';
 import { PPVDrawerContent } from './LazyPPVDrawerContent';
 import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
@@ -3617,6 +3618,7 @@ const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack,
               </div>
             )}
             {parseInt(video.id, 10) > 0 && <PollCard tokenId={parseInt(video.id, 10)} />}
+            {video.hasQuiz && parseInt(video.id, 10) > 0 && <QuizCard tokenId={parseInt(video.id, 10)} />}
             {/* The creator's Shop board. Inline rather than over the player:
                 this card runs an immersive mode that reflows the video, and an
                 absolutely-positioned board would have to track it. Live keeps

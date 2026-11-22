@@ -43,6 +43,11 @@ export interface ApiCommentResponse {
    * minutes. The API sorts a pinned comment above an anchored one.
    */
   isPinned?: boolean;
+  /**
+   * The post's creator hid this reply. Only ever sent to the reply's writer
+   * and to the creator; everyone else never receives the row at all.
+   */
+  hiddenByCreator?: boolean;
   /** Where the post's creator placed this part of their thread (Reorder). Absent when never placed. */
   threadPos?: number;
   /**
@@ -209,6 +214,22 @@ export async function pinComment(commentId: string | number): Promise<{
     body: { commentId: Number(commentId) },
     requiresAuth: true,
   });
+}
+
+/**
+ * Hide somebody's reply on your own post, or bring it back (toggle).
+ *
+ * The post's creator only. A hidden reply is gone for everyone except its
+ * writer, who is not told, and the creator, who sees it faded to undo.
+ */
+export async function hideReply(commentId: string | number): Promise<{ result: boolean; commentId: number; tokenId: number; hidden: boolean }> {
+  const response = await apiCall<{ result: boolean; commentId: number; tokenId: number; hidden: boolean; error?: string }>("/api/hide_reply", {
+    method: "POST",
+    body: { commentId: Number(commentId) },
+    requiresAuth: true,
+  });
+  if (response?.result === false) throw new Error(response.error || i18n.t('hideReply.failed', 'Could not hide that reply'));
+  return response;
 }
 
 /** Save the order of the parts of your own thread, first to last. Creator only. */

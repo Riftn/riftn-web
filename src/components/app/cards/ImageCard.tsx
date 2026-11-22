@@ -26,7 +26,9 @@ import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
 import { usePostMenuContext } from '@/lib/post-menu';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp, ChevronLeft, Globe, Ticket, BarChart2, Star } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, Globe, Ticket, BarChart2, Star, UserRound, UserX } from "lucide-react";
+import { PhotoTagger } from "@/components/app/photo-tags/PhotoTagger";
+import { setPhotoTags as savePhotoTags, removeMyPhotoTag } from "@/lib/api/dehub";
 import Eye from "@/components/ui/cut-icons/visibility";
 import Flag from "@/components/ui/cut-icons/report";
 import Ban from "@/components/ui/cut-icons/blocked";
@@ -66,6 +68,9 @@ import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
 import { ActionBar } from './ActionBar';
 import { ShopBoardLazy } from '../live/ShopBoardLazy';
 import { PollCard } from './PollCard';
+import { QuizCard } from '@/components/app/quiz/QuizCard';
+import { PhotoTagsOverlay } from '@/components/app/photo-tags/PhotoTagsOverlay';
+import type { PhotoTag } from '@/lib/api/dehub';
 import { CommentsWrapper } from './CommentsWrapper';
 import { PostMetadata } from './PostMetadata';
 import { PPVDrawerContent } from './LazyPPVDrawerContent';
@@ -448,7 +453,10 @@ function ImageCarousel({
   soundPlaying = false,
   wide,
   railPanel,
+  imageTags,
 }: {
+  /** People tagged on the photos, shown behind a small person button. */
+  imageTags?: PhotoTag[];
   /**
    * Desktop "Long form media on wide screens" setting, applied to a single
    * tall photo the same way: Ambient fills the space beside it with the photo
@@ -631,7 +639,7 @@ function ImageCarousel({
           <div
             key={idx}
             className={cn(
-              'min-w-0',
+              'relative min-w-0',
               hasMultiple ? 'flex-none max-w-full' : 'flex-[0_0_100%]',
               framed && 'flex flex-col justify-center',
               fillsFrame(idx) && 'flex-[0_0_100%]',
@@ -651,6 +659,7 @@ function ImageCarousel({
               fill={fillsFrame(idx)}
               centered={wideAmbient || wideRails}
             />
+            <PhotoTagsOverlay tags={imageTags} index={idx} />
           </div>
         ))}
       </div>
@@ -896,6 +905,10 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
   const [showTipModal, setShowTipModal] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showPollCreator, setShowPollCreator] = useState(false);
+  /** People tagged on the photos, as saved from this card (until the feed refetches). */
+  const [tagsOverride, setTagsOverride] = useState<PhotoTag[] | null>(null);
+  const [showTagger, setShowTagger] = useState(false);
+  const imageTags = tagsOverride ?? post.imageTags ?? [];
   const [pollQuestion, setPollQuestion] = useSurfaceDraft("components/app/cards/ImageCard.tsx:pollQuestion", '', draftIdentity(post));
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [pollMultiple, setPollMultiple] = useState(false);
@@ -1323,6 +1336,23 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                   <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
                 </button>
               )}
+              {!isOwnPost && postTokenId && walletAddress && imageTags.some((tag) => tag.address?.toLowerCase() === walletAddress.toLowerCase()) && (
+                <button
+                  onClick={async () => {
+                    setShowOptionsDrawer(false);
+                    try {
+                      const { imageTags: next } = await removeMyPhotoTag(Number(postTokenId));
+                      setTagsOverride(next);
+                      toast.success(t('photoTags.removedMe', { defaultValue: 'Your tag was removed' }));
+                    } catch (err: any) {
+                      toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+                    }
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <UserX className="w-5 h-5" /> {t('photoTags.removeMe', { defaultValue: 'Remove me from this photo' })}
+                </button>
+              )}
               {isOwnPost && (
                 <>
                   <div className="border-t border-white/10 my-1" />
@@ -1331,6 +1361,14 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
                     className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
                   >
                     <BarChart2 className="w-5 h-5" />{_copy("copy.b8e082c979d9", { defaultValue: " Create Poll" })}</button>
+                  {postTokenId && images.length > 0 && (
+                    <button
+                      onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowTagger(true), 300); }}
+                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                    >
+                      <UserRound className="w-5 h-5" /> {t('photoTags.title', { defaultValue: 'Tag people' })}
+                    </button>
+                  )}
                   <button
                     onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowEditModal(true), 300); }}
                     className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
@@ -1601,6 +1639,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
             <ImageCarousel
               images={images}
               descriptions={post.mediaDescriptions}
+              imageTags={imageTags}
               onImageClick={handleImageClick}
               onIndexChange={setActiveImageIndex}
               aboveFold={aboveFold}
@@ -1705,6 +1744,7 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         {/* A photo post can carry a poll too, under the caption as on text posts.
             On the post page the page itself places it. */}
         {!postPage && !isLocked && !isSubGated && !isPPV && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
+        {!postPage && !isLocked && !isSubGated && !isPPV && post.hasQuiz && parseInt(post.id, 10) > 0 && <QuizCard tokenId={parseInt(post.id, 10)} />}
 
         {/* The creator's Shop board — affiliate links, opened in place. */}
         <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
@@ -2061,6 +2101,25 @@ const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenC
         onOpenChange={setShowQuoteModal}
         quotedPost={postAsNFT as any}
       />
+
+      {showTagger && postTokenId && (
+        <PhotoTagger
+          open={showTagger}
+          onOpenChange={setShowTagger}
+          images={images}
+          value={imageTags}
+          onDone={async (tags) => {
+            try {
+              const { imageTags: saved } = await savePhotoTags(Number(postTokenId), tags);
+              setTagsOverride(saved);
+              toast.success(t('photoTags.saved', { defaultValue: 'Tags saved' }));
+            } catch (err: any) {
+              toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+              throw err;
+            }
+          }}
+        />
+      )}
 
       {/* Poll Creator Drawer */}
       <Drawer open={showPollCreator} onOpenChange={setShowPollCreator}>

@@ -20,6 +20,7 @@ import { createLogger } from '@/lib/logger';
 
 const mintLogger = createLogger('PostForm.handlePost');
 import { useCreatorPlansLite } from '@/hooks/use-creator-plans';
+import { createQuiz, setPhotoTags as savePhotoTags, isQuizDraftValid, type QuizDraft, type PhotoTag } from '@/lib/api/dehub';
 import { mintPost, createPoll, getMintFee, getPostQuota, quotePostCharge, keepPostOffChain, AuthenticationError, PaymentRequiredError, UploadHttpError, type MintFeeQuoteResponse, type MintResponse, type PostQuotaStatus, type ShopLink } from '@/lib/api/dehub';
 import { videoEditsPayload, hasVideoEdits } from '../lib/video-edits';
 import { startDraftVideo, isDraftUsable, type DraftVideoUpload, type DraftVideoSnapshot } from '../lib/draft-video';
@@ -375,6 +376,10 @@ export function usePostForm(
   const [tokenAmount, setTokenAmount] = useDraftState(draftScope + ":tokenAmount", d?.tokenAmount ?? '');
   const [liveMode, setLiveMode] = useState<LiveMode>(null);
   const [poll, setPoll] = useDraftState<PollData | null>(draftScope + ":poll", d?.poll ?? null);
+  /** Create Post > Quiz: questions attached to the post once it is out. */
+  const [quiz, setQuiz] = useState<QuizDraft | null>(null);
+  /** People tagged on the photos, by photo index; saved once the post is out. */
+  const [photoTags, setPhotoTags] = useState<PhotoTag[]>([]);
   // The content warning being written: null is "none", '' is "toggled on, still empty".
   const [contentWarning, setContentWarning] = useState<string | null>(null);
   /** The comic's border preset; null is the theme's own foil. */
@@ -725,7 +730,8 @@ export function usePostForm(
   const pollIsValid = poll !== null && poll.question.trim().length > 0 && poll.options.filter(o => o.text.trim()).length >= 2;
   // Enough in the composer to publish or save. Drafts key off this, so running
   // out of posts for the day still leaves the draft path open.
-  const hasContent = Boolean((text.trim() || media.length > 0 || isLive || pollIsValid) && !isGeneratingThumbnail);
+  const quizIsValid = isQuizDraftValid(quiz);
+  const hasContent = Boolean((text.trim() || media.length > 0 || isLive || pollIsValid || quizIsValid) && !isGeneratingThumbnail);
   const canPost = hasContent;
 
   // Actions
@@ -1295,6 +1301,8 @@ export function usePostForm(
     setTokenAmount.complete(tokenAmount, '');
     setLiveMode(null);
     setPoll.complete(poll, null);
+    setQuiz(null);
+    setPhotoTags([]);
     setContentWarning(null);
     setHideAssetCards(false);
     setHiddenLinkPreviews([]);
@@ -2285,6 +2293,19 @@ export function usePostForm(
       // The poll rides on the post, whatever else the post carries (photos,
       // a video, a quote). Its clock starts when the post goes out.
       const attachPoll = async (startsAt: number) => {
+        const createdTokenId = typeof mintResponse.createdTokenId === 'string' ? parseInt(mintResponse.createdTokenId, 10) : mintResponse.createdTokenId;
+        // The quiz and the photo tags ride on the post the same way.
+        if (quiz && quizIsValid && createdTokenId) {
+          await createQuiz(createdTokenId, quiz).catch((quizErr) => {
+            console.warn('[Mint] Quiz creation failed:', quizErr);
+            toast.error(_copy('quiz.attachFailed', { defaultValue: 'Your post is up, but the quiz could not be added' }));
+          });
+        }
+        const imageCount = media.filter((m) => m.type === 'image').length;
+        const tags = photoTags.filter((tag) => tag.i < imageCount);
+        if (tags.length && createdTokenId) {
+          await savePhotoTags(createdTokenId, tags).catch((tagErr) => console.warn('[Mint] Photo tags failed:', tagErr));
+        }
         if (!poll || !pollIsValid) return;
         try {
           const validOptions = poll.options.filter(o => o.text.trim()).map(o => o.text.trim());
@@ -2945,7 +2966,7 @@ export function usePostForm(
     isWatch2Earn, w2eViews, w2eComments, w2eTotal,
     isTokenGated, tokenContract, tokenSymbol, tokenAmount, liveMode, scheduledDate,
     hasVideo, hasImage, hasAudio, isPosting, resetForm, onClose, navigate, addOptimisticPost, user,
-    showTitle, titleText, connectionSource, poll, pollIsValid, chainId,
+    showTitle, titleText, connectionSource, poll, pollIsValid, quiz, quizIsValid, photoTags, chainId,
     refreshSession, openLoginModal, requestWalletUnlock,
     effectiveShouldMint, mintFee, isMature, isForKids,
     selectedCategory, shopLinks, shopListingIds, myPlanIds,
@@ -2983,6 +3004,8 @@ export function usePostForm(
       tokenAmount,
       liveMode,
       poll,
+      quiz,
+      photoTags,
       contentWarning,
       hideAssetCards,
       hiddenLinkPreviews,
@@ -3031,6 +3054,8 @@ export function usePostForm(
       setTokenAmount,
       setLiveMode,
       setPoll,
+      setQuiz,
+      setPhotoTags,
       setContentWarning,
       setHideAssetCards,
       setHiddenLinkPreviews,

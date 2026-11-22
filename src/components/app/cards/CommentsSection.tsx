@@ -28,7 +28,7 @@ import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { formatTimeAgo, formatCount } from '@/lib/feed-utils';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from "@/components/ui/skeleton";
-import { Square, Loader2, RotateCcw, Anchor, Baby, Pin, PinOff, Handshake, SpellCheck, Palette, Gauge, ChevronLeft } from "lucide-react";
+import { Square, Loader2, RotateCcw, Anchor, Baby, Pin, PinOff, Handshake, SpellCheck, Palette, Gauge, ChevronLeft, EyeOff } from "lucide-react";
 import Quote from "@/components/ui/cut-icons/quote";
 import Trash2 from "@/components/ui/cut-icons/delete";
 import Link from "@/components/ui/cut-icons/link";
@@ -101,7 +101,7 @@ import { BadgedName } from '@/components/app/BadgedName';
 import { parseBadgeLock } from '@/lib/staking-badges';
 import { NewMemberChip } from '@/components/app/NewMemberChip';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { getNFTCommentPage, postComment, reactToComment, editComment, deleteComment, addImageComment, addMediaComment, addGifComment, addVoiceComment, getPostReposters, recordCommentViews, getPostQuotes, getNFTInfo, pinComment, getTipWall, type ApiCommentResponse } from '@/lib/api/dehub';
+import { getNFTCommentPage, postComment, reactToComment, editComment, deleteComment, addImageComment, addMediaComment, addGifComment, addVoiceComment, getPostReposters, recordCommentViews, getPostQuotes, getNFTInfo, pinComment, hideReply, getTipWall, type ApiCommentResponse } from '@/lib/api/dehub';
 import { TipWall, TipChip } from '@/components/app/comments/TipWall';
 import { subscribeTipMessageSent } from '@/lib/tip-events';
 import {
@@ -388,6 +388,11 @@ interface CommentItemProps {
    */
   onPin?: (commentId: string) => void;
   /**
+   * Hide this reply on the viewer's own post, or bring it back. Set only for
+   * the post's creator on somebody else's comment; the server refuses the rest.
+   */
+  onHide?: (commentId: string) => void;
+  /**
    * Straight comment by the post author on their own post — its permalink is
    * the thread-entry sub-URL (/posts/<tokenId>/b/<id>) rather than ?comment=.
    */
@@ -445,7 +450,7 @@ function caretOffsetAt(root: HTMLElement, x: number, y: number): number | null {
 /** The reactions a held comment offers on a phone: the common faces, then 👎. */
 const HOLD_REACTIONS: HoldReaction[] = ['like', 'love', 'hot', 'lol', 'hundred', 'sad', 'dislike'];
 
-const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, onShowLikers, onReact, onReply, onShare, onEdit, onDelete, onTip, permalink, tipTotal, viewerTipped, onUserPress, isReply, threadLineAbove, threadLineBelow, isOwnComment, isThreadEntry, onAnchor, onPin, onReport }: CommentItemProps) {
+const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, onShowLikers, onReact, onReply, onShare, onEdit, onDelete, onTip, permalink, tipTotal, viewerTipped, onUserPress, isReply, threadLineAbove, threadLineBelow, isOwnComment, isThreadEntry, onAnchor, onPin, onHide, onReport }: CommentItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   // Bumps each time this viewer tips this comment, replaying the gem swirl.
   const [tipBurst, setTipBurst] = useState(0);
@@ -599,6 +604,7 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
     : { key: 'translate', icon: <Languages />, label: i18n.t('chatHold.translate', 'Translate'), onSelect: () => { void translation.handleTranslate(); } });
   holdActions.push({ key: 'link', icon: <Link />, label: i18n.t('chatHold.link', 'Link'), onSelect: () => { void navigator.clipboard?.writeText(commentUrl()); trackShare('copy_link', { kind: 'comment' }); toast.success(i18n.t('comments.linkCopied')); } });
   if (onPin) holdActions.push({ key: 'pin', icon: comment.isPinned ? <PinOff /> : <Pin />, label: comment.isPinned ? i18n.t('chatHold.unpin', 'Unpin') : i18n.t('chatHold.pin', 'Pin'), onSelect: () => onPin(comment.id) });
+  if (onHide && !isOwnComment) holdActions.push({ key: 'hide', icon: comment.hiddenByCreator ? <Eye /> : <EyeOff />, label: comment.hiddenByCreator ? i18n.t('hideReply.unhide', 'Unhide') : i18n.t('hideReply.hide', 'Hide reply'), onSelect: () => onHide(comment.id) });
   if (isOwnComment) {
     holdActions.push({ key: 'edit', icon: <Pencil />, label: i18n.t('common.edit'), onSelect: () => startEdit() });
     holdActions.push({ key: 'delete', destructive: true, icon: <Trash2 />, label: i18n.t('common.delete'), onSelect: () => onDelete(comment.id) });
@@ -646,7 +652,8 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
       // A comment you just sent is already on screen under its placeholder id;
       // when the real id swaps in, the row remounts and must not fade in twice.
       initial={delivery?.status === 'posted' ? false : isPending ? { opacity: 0, y: 28, scale: 0.97 } : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      // A reply the creator hid stays readable to them, faded, so they can undo.
+      animate={{ opacity: onHide && comment.hiddenByCreator ? 0.5 : 1, y: 0, scale: 1 }}
       transition={isPending ? { type: 'spring', stiffness: 380, damping: 30, mass: 0.8 } : undefined}
       // The one you just sent lands with its text softly glowing (on the text,
       // not the row, so no box edge is ever cut off by the sheet's sides).
@@ -752,6 +759,16 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
             >
               <Pin className="w-2.5 h-2.5" />
               {i18n.t('comments.pinnedBadge', 'Pinned')}
+            </span>
+          )}
+          {/* Only the creator sees this: the writer is never told. */}
+          {onHide && comment.hiddenByCreator && (
+            <span
+              title={i18n.t('hideReply.hiddenTitle', 'Only you and the person who wrote it can see this')}
+              className="px-1.5 py-0.5 rounded-md bg-white/[0.12] border border-white/[0.12] text-[10px] font-semibold text-white/75 leading-none flex-shrink-0 inline-flex items-center gap-0.5"
+            >
+              <EyeOff className="w-2.5 h-2.5" />
+              {i18n.t('hideReply.hiddenBadge', 'Hidden')}
             </span>
           )}
           {/* Sent with a tip on the post: the amount rides next to the name. */}
@@ -1087,6 +1104,15 @@ const CommentItemBody = memo(function CommentItem({ comment, tokenId, onLike, on
                     {translation.isTranslated ? i18n.t('common.showOriginal') : i18n.t('comments.translate')}
                   </DropdownMenuItem>
                 )}
+                {onHide && !isOwnComment && (
+                  <DropdownMenuItem
+                    onClick={() => onHide(comment.id)}
+                    className="text-zinc-300 rounded-lg cursor-pointer focus:bg-transparent focus:text-white gap-2"
+                  >
+                    {comment.hiddenByCreator ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {comment.hiddenByCreator ? i18n.t('hideReply.unhide', 'Unhide') : i18n.t('hideReply.hide', 'Hide reply')}
+                  </DropdownMenuItem>
+                )}
                 {onReport && !isOwnComment && (
                   <DropdownMenuItem
                     onClick={() => onReport(comment.id)}
@@ -1357,6 +1383,8 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
   const [pinOverride, setPinOverride] = useState<
     { id: string; pinned: boolean; base?: ApiCommentResponse } | null
   >(null);
+  /** Replies the creator just hid or unhid, until the refetch agrees. */
+  const [hideOverrides, setHideOverrides] = useState<Map<string, { hidden: boolean; base?: ApiCommentResponse }>>(new Map());
   // Track reaction state overrides for optimistic updates. Every field is
   // optional so a like tap never clobbers a dislike count it didn't touch.
   const [likeOverrides, setLikeOverrides] = useState<
@@ -1747,9 +1775,11 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
         if (pinOverride && overrideStands(pinOverride.id, pinOverride.base)) {
           result = { ...result, isPinned: pinOverride.pinned && result.id === pinOverride.id };
         }
+        const hide = hideOverrides.get(c.id);
+        if (hide && overrideStands(c.id, hide.base)) result = { ...result, hiddenByCreator: hide.hidden };
         return result;
       });
-  }, [apiComments, apiRowsById, optimisticComments, likeOverrides, deletedCommentIds, editOverrides, pinOverride]);
+  }, [apiComments, apiRowsById, optimisticComments, likeOverrides, deletedCommentIds, editOverrides, pinOverride, hideOverrides]);
 
   // Tagging @assistant produces a real comment, but only once the model has
   // answered — several seconds after the post returns. This keeps a placeholder
@@ -2296,6 +2326,23 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
     }
   });
 
+  /** Hide a reply on your own post, or bring it back. Faded for you at once. */
+  const handleHideReply = useStableCallback(async (commentId: string) => {
+    const wasHidden = allComments.find(c => c.id === commentId)?.hiddenByCreator === true;
+    const base = apiRowsById.get(commentId);
+    setHideOverrides(prev => new Map(prev).set(commentId, { hidden: !wasHidden, base }));
+    try {
+      const { hidden } = await hideReply(commentId);
+      toast.success(hidden
+        ? t('hideReply.hiddenToast', 'Reply hidden. Only you and the person who wrote it can see it')
+        : t('hideReply.unhiddenToast', 'Reply is visible again'));
+      await queryClient.invalidateQueries({ queryKey: ['comments', tokenId] });
+    } catch (err: any) {
+      setHideOverrides(prev => { const next = new Map(prev); next.delete(commentId); return next; });
+      toast.error(err?.message || t('hideReply.failed', 'Could not hide that reply'));
+    }
+  });
+
   // Stable rather than useCallback over [navigate, onClose]: `onClose` is the
   // host's, and a host that passes an inline arrow would otherwise hand every
   // row a new prop on each of its renders.
@@ -2798,6 +2845,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
           // Root comments only — a reply is sorted inside a subtree nothing
           // re-orders, so pinning one would move nothing.
           onPin={isOwnThread ? handlePinComment : undefined}
+          onHide={isOwnThread ? handleHideReply : undefined}
           threadLineAbove={joinsAbove}
           threadLineBelow={shown.length > 0 || joinsBelow}
           isThreadEntry={authorThreadIds.has(comment.id)}
@@ -2826,6 +2874,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
             // above a control that belongs to the thread.
             threadLineBelow={i < shown.length - 1 || hiddenCount > 0 || joinsBelow}
             isOwnComment={reply.address?.toLowerCase() === walletAddress?.toLowerCase()}
+            onHide={isOwnThread ? handleHideReply : undefined}
             highlighted={reply.id === focusCommentId}
             onReport={isAuthenticated ? handleReportComment : undefined}
           />
