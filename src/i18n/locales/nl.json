@@ -21395,5 +21395,24 @@
   "chatLink": {
     "gone": "Dat bericht is verwijderd of is te oud om te openen.",
     "notInChat": "Die link is van een privéchat waar je niet in zit."
+  },
+  "notes": {
+    "add": "Notitie",
+    "yourNote": "Jouw notitie",
+    "shared": "Je notitie staat 24 uur online",
+    "failed": "Je notitie is niet geplaatst. Probeer het opnieuw.",
+    "placeholder": "Deel een gedachte…",
+    "removeGif": "GIF verwijderen",
+    "removeSong": "Nummer verwijderen",
+    "placePlaceholder": "Waar ben je?",
+    "removePlace": "Plaats verwijderen",
+    "song": "Nummer",
+    "place": "Plaats",
+    "gifHost": "Kies een GIF uit het GIF-tabblad voor notities.",
+    "who": "Mensen die jou volgen kunnen hem 24 uur zien.",
+    "delete": "Notitie verwijderen",
+    "share": "Delen",
+    "message": "Bericht",
+    "title": "Notities"
   }
 }

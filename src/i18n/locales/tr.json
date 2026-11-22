@@ -21146,5 +21146,24 @@
   "chatLink": {
     "gone": "Bu mesaj silindi ya da açılamayacak kadar eski.",
     "notInChat": "Bu bağlantı, içinde olmadığın özel bir sohbete ait."
+  },
+  "notes": {
+    "add": "Not",
+    "yourNote": "Notun",
+    "shared": "Notun 24 saat boyunca görünür",
+    "failed": "Notun paylaşılamadı. Tekrar dene.",
+    "placeholder": "Bir düşünce paylaş…",
+    "removeGif": "GIF'i kaldır",
+    "removeSong": "Şarkıyı kaldır",
+    "placePlaceholder": "Neredesin?",
+    "removePlace": "Yeri kaldır",
+    "song": "Şarkı",
+    "place": "Yer",
+    "gifHost": "Notlar için GIF sekmesinden bir GIF seç.",
+    "who": "Seni takip edenler 24 saat boyunca görebilir.",
+    "delete": "Notu sil",
+    "share": "Paylaş",
+    "message": "Mesaj",
+    "title": "Notlar"
   }
 }

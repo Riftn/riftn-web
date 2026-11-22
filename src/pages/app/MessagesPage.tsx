@@ -80,6 +80,7 @@ import dehubLogo from '@/assets/dehub-logo.png';
 import { SEOHead } from '@/components/SEOHead';
 import { blockUser } from '@/lib/api/dehub/blocks';
 import { toast } from 'sonner';
+import { NotesRow } from '@/components/app/chat/NotesRow';
 import { LiveRipple } from '@/components/app/LiveRipple';
 import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
 import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
@@ -1720,6 +1721,14 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
                 title={t('messages.noConversationsYet', 'No conversations yet')}
                 description={_copy("copy.31dfdb14602d", { defaultValue: "Start a conversation and it will appear here." })}
                 size="drawer"
+              />
+            )}
+
+            {/* Notes: a 24-hour line from you and the people you follow */}
+            {!guest && walletAddress && !inRequests && !showArchived && tabFilter === 'all' && !searchQuery.trim() && !isError && (
+              <NotesRow
+                me={{ address: walletAddress, username: (user as any)?.username ?? null, displayName: (user as any)?.displayName ?? null, avatarImageUrl: (user as any)?.avatarImageUrl ?? null }}
+                onMessage={author => handleSelectSearchUser({ ...author, _id: author.address } as unknown as DeHubUser)}
               />
             )}
 

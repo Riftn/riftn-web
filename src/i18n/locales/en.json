@@ -21041,5 +21041,24 @@
   "chatLink": {
     "gone": "That message was deleted, or it's too far back to open.",
     "notInChat": "That link is to a private chat you're not in."
+  },
+  "notes": {
+    "add": "Note",
+    "yourNote": "Your note",
+    "shared": "Your note is up for 24 hours",
+    "failed": "Your note didn't go up. Try again.",
+    "placeholder": "Share a thought…",
+    "removeGif": "Remove GIF",
+    "removeSong": "Remove song",
+    "placePlaceholder": "Where are you?",
+    "removePlace": "Remove place",
+    "song": "Song",
+    "place": "Place",
+    "gifHost": "Pick a GIF from the GIF tab for notes.",
+    "who": "People who follow you can see it for 24 hours.",
+    "delete": "Delete note",
+    "share": "Share",
+    "message": "Message",
+    "title": "Notes"
   }
 }

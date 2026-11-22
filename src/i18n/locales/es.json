@@ -21146,5 +21146,24 @@
   "chatLink": {
     "gone": "Ese mensaje se eliminó o es demasiado antiguo para abrirlo.",
     "notInChat": "Ese enlace es de un chat privado en el que no estás."
+  },
+  "notes": {
+    "add": "Nota",
+    "yourNote": "Tu nota",
+    "shared": "Tu nota estará visible 24 horas",
+    "failed": "Tu nota no se publicó. Inténtalo de nuevo.",
+    "placeholder": "Comparte una idea…",
+    "removeGif": "Quitar GIF",
+    "removeSong": "Quitar canción",
+    "placePlaceholder": "¿Dónde estás?",
+    "removePlace": "Quitar lugar",
+    "song": "Canción",
+    "place": "Lugar",
+    "gifHost": "Elige un GIF de la pestaña GIF para las notas.",
+    "who": "Las personas que te siguen pueden verla durante 24 horas.",
+    "delete": "Eliminar nota",
+    "share": "Compartir",
+    "message": "Mensaje",
+    "title": "Notas"
   }
 }
