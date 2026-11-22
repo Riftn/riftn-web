@@ -3,8 +3,7 @@
  *
  * "Your day" first (tap + to share a moment, or watch your own), then
  * everyone live right now as tiles (it replaces the Live now row), then
- * people's moments: something new has a ring in the theme's colour, watched
- * ones go grey and move to the end. A tile opens the full-screen viewer.
+ * people's moments, with viewed ones at the end. A tile opens the full-screen viewer.
  */
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +11,7 @@ import Add from '@/components/ui/cut-icons/add';
 import Refresh from '@/components/ui/cut-icons/refresh';
 import { useBadgeBalance, useBadgeVisual } from '@/hooks/use-badge-balance';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLiveNowItems, pictureOf, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
+import { useLiveNowItems, faceUrlOf, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
 import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { useStoryShelf } from '@/hooks/use-story-shelf';
 import { useMatureContent } from '@/hooks/use-mature-content';
@@ -89,16 +88,12 @@ export function StoryShelf() {
   );
 }
 
-function ShelfAvatar({ src, phoneOnly = false, phoneFallback = false }: {
-  src?: string | null;
-  phoneOnly?: boolean;
-  phoneFallback?: boolean;
-}) {
+function ShelfAvatar({ src }: { src?: string | null }) {
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
   return src && brokenSrc !== src ? (
-    <img data-st-avatar data-st-phone-only={phoneOnly || undefined} src={src} alt="" onError={() => setBrokenSrc(src)} />
+    <img data-st-avatar src={src} alt="" onError={() => setBrokenSrc(src)} />
   ) : (
-    <span data-st-avatar data-st-phone-only={phoneOnly || phoneFallback || undefined} aria-hidden="true" />
+    <span data-st-avatar aria-hidden="true" />
   );
 }
 
@@ -124,21 +119,19 @@ function MeTile({ address, avatar, entry, processing, pending, onAdd, onOpen }: 
       role="listitem"
       data-story-tile
       data-kind="me"
-      data-empty={empty ? 'true' : 'false'}
       aria-label={t('stories.yourDay', { defaultValue: 'Your day' })}
       onClick={e => (entry && !pending ? onOpen(e.currentTarget) : !busy ? (pending?.retry ? pending.retry() : onAdd()) : undefined)}
     >
       <span data-st-bg style={bg(cover)} />
-      <span data-st-shade data-st-phone-only />
-      {pending?.state !== 'failed' && <ShelfAvatar src={face} phoneOnly={empty} />}
+      <span data-st-shade />
+      {pending?.state !== 'failed' && <ShelfAvatar src={face} />}
       {fill && <span data-st-fill style={{ '--st-upload-progress': fill } as CSSProperties} />}
       {empty ? (
-        <span data-st-glass data-st-plus><Add className="w-5 h-5" /></span>
+        <span data-st-plus-corner><Add className="w-3.5 h-3.5" /></span>
       ) : pending?.state === 'failed' ? (
-        <span data-st-glass data-st-plus><Refresh className="w-5 h-5" /></span>
+        <span data-st-glass data-st-retry><Refresh className="w-5 h-5" /></span>
       ) : (
         <span
-          data-st-glass
           data-st-plus-corner
           role="button"
           aria-label={t('stories.addMoment', { defaultValue: 'Add a moment' })}
@@ -187,10 +180,10 @@ function LiveTile({ item, onOpen }: { item: LiveNowItem; onOpen: () => void }) {
   const face = faceUrlOf(item);
   return (
     <button type="button" role="listitem" data-story-tile data-kind="live" onClick={onOpen} aria-label={item.title}>
-      <span data-st-bg data-st-avatar-cover={item.cover ? undefined : true} style={bg(pictureOf(item))} />
+      <span data-st-bg style={bg(item.cover)} />
       <span data-st-shade />
-      <span data-st-live><i />{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
-      <ShelfAvatar src={face} phoneFallback />
+      <span data-st-live>{t('stages.liveBadge', { defaultValue: 'LIVE' })}</span>
+      <ShelfAvatar src={face} />
       <TileIdentity address={item.wallet} username={item.username} displayName={item.displayName} live={item} />
     </button>
   );
@@ -211,8 +204,8 @@ function PersonTile({ entry, onOpen }: { entry: ShelfEntry; onOpen: (el: HTMLEle
       aria-label={nameOf(a)}
     >
       <span data-st-bg style={bg(coverOf(entry))} />
-      <span data-st-ring />
-      <span data-st-time>{ageLabel(latest?.createdAt)}</span>
+      <span data-st-shade />
+      {latest?.createdAt && <span data-st-time>{ageLabel(latest.createdAt)}</span>}
       <ShelfAvatar src={face} />
       <TileIdentity address={a.address} username={a.username} displayName={a.displayName} />
     </button>
