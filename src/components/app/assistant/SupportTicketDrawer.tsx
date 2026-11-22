@@ -67,7 +67,7 @@ function StatusPill({ status }: { status: string }) {
   return (
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border shrink-0 ${
-        open ? 'border-white/30 text-white' : 'border-white/10 text-white/50'
+        open ? 'border-white/30 text-white' : 'border-white/10 drawer-secondary'
       }`}
     >
       <Icon className="w-3 h-3" />
@@ -94,7 +94,7 @@ function TicketRow({ ticket }: { ticket: SupportTicket }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm text-white font-medium truncate">{ticket.subject}</p>
-          <p className="text-[11px] text-white/40 mt-0.5">
+          <p className="text-[11px] drawer-secondary mt-0.5">
             {ticket.ref} · {t(`support.category.${ticket.category}`)}
           </p>
         </div>
@@ -104,10 +104,10 @@ function TicketRow({ ticket }: { ticket: SupportTicket }) {
       {/* The only thing on a ticket written for the reporter to read. A row
           without one is just a line; a row with one is the answer. */}
       {ticket.resolution && (
-        <p className="text-xs text-white/70 border-l-2 border-white/20 pl-2">{ticket.resolution}</p>
+        <p className="text-sm drawer-secondary border-l-2 border-white/20 pl-2">{ticket.resolution}</p>
       )}
 
-      <p className="text-[11px] text-white/35">
+      <p className="text-[11px] drawer-secondary">
         {t('support.filedAgo', { when: filed })}
         {updated && updated !== filed ? ` · ${t('support.updatedAgo', { when: updated })}` : ''}
       </p>
@@ -191,18 +191,18 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
   const canSubmit = subject.trim().length >= 3 && description.trim().length >= 20 && !file.isPending;
 
   const fieldClass =
-    'w-full bg-zinc-900/60 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/30';
+    'drawer-field min-h-11 w-full rounded-xl px-3 py-2 text-base';
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent column glass className="h-[85dvh] overflow-hidden border-t border-white/10">
-        <DrawerHeader className="shrink-0 border-b border-white/10">
+      <DrawerContent column glass data-drawer-form className="h-[85dvh] overflow-hidden border-t border-white/10">
+        <DrawerHeader className="shrink-0 border-b border-[var(--drawer-control-line)] pr-16 pt-5 text-left">
           <DrawerTitle className="text-white flex items-center gap-2">
             {composing ? (
               <button
                 type="button"
                 onClick={() => setComposing(false)}
-                className="p-1 -ml-1 rounded-lg text-white/60 hover:text-white transition-colors"
+                className="p-1 -ml-1 rounded-lg drawer-secondary hover:text-white transition-colors"
                 aria-label={t('support.backToTickets')}
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -212,7 +212,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
             )}
             {composing ? t('support.newTicket') : t('support.title')}
           </DrawerTitle>
-          <p className="text-xs text-white/40 text-left">
+          <p className="text-sm drawer-secondary text-left">
             {composing ? t('support.newTicketHint') : t('support.subtitle')}
           </p>
         </DrawerHeader>
@@ -229,14 +229,14 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
               >
                 <div className="grid grid-cols-2 gap-3">
                   <label className="space-y-1">
-                    <span className="text-xs text-white/50">{t('support.categoryLabel')}</span>
+                    <span className="text-sm drawer-secondary">{t('support.categoryLabel')}</span>
                     <select
                       value={category}
                       onChange={(event) => setCategory(event.target.value as SupportCategory)}
                       className={fieldClass}
                     >
                       {SUPPORT_CATEGORIES.map((value) => (
-                        <option key={value} value={value} className="bg-zinc-900">
+                        <option key={value} value={value}>
                           {t(`support.category.${value}`)}
                         </option>
                       ))}
@@ -244,14 +244,14 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                   </label>
 
                   <label className="space-y-1">
-                    <span className="text-xs text-white/50">{t('support.severityLabel')}</span>
+                    <span className="text-sm drawer-secondary">{t('support.severityLabel')}</span>
                     <select
                       value={severity}
                       onChange={(event) => setSeverity(event.target.value as SupportSeverity)}
                       className={fieldClass}
                     >
                       {SUPPORT_SEVERITIES.map((value) => (
-                        <option key={value} value={value} className="bg-zinc-900">
+                        <option key={value} value={value}>
                           {t(`support.severity.${value}`)}
                         </option>
                       ))}
@@ -260,7 +260,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                 </div>
 
                 <label className="block space-y-1">
-                  <span className="text-xs text-white/50">{t('support.subjectLabel')}</span>
+                  <span className="text-sm drawer-secondary">{t('support.subjectLabel')}</span>
                   <input
                     value={subject}
                     onChange={(event) => setSubject(event.target.value)}
@@ -271,7 +271,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                 </label>
 
                 <label className="block space-y-1">
-                  <span className="text-xs text-white/50">{t('support.descriptionLabel')}</span>
+                  <span className="text-sm drawer-secondary">{t('support.descriptionLabel')}</span>
                   <textarea
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
@@ -283,7 +283,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                 </label>
 
                 <label className="block space-y-1">
-                  <span className="text-xs text-white/50">{t('support.stepsLabel')}</span>
+                  <span className="text-sm drawer-secondary">{t('support.stepsLabel')}</span>
                   <textarea
                     value={stepsToReproduce}
                     onChange={(event) => setStepsToReproduce(event.target.value)}
@@ -295,7 +295,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                 </label>
 
                 <label className="block space-y-1">
-                  <span className="text-xs text-white/50">{t('support.contactEmailLabel')}</span>
+                  <span className="text-sm drawer-secondary">{t('support.contactEmailLabel')}</span>
                   <input
                     value={contactEmail}
                     onChange={(event) => setContactEmail(event.target.value)}
@@ -308,7 +308,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-white text-black py-2.5 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 drawer-action rounded-xl py-2.5 text-sm font-semibold"
                 >
                   {file.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                   {file.isPending ? t('support.submitting') : t('support.submit')}
@@ -319,29 +319,29 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
                 <button
                   type="button"
                   onClick={() => setComposing(true)}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] py-2.5 text-sm text-white hover:bg-white/10 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 drawer-action rounded-xl py-2.5 text-sm font-medium"
                 >
                   <Plus className="w-4 h-4" />
                   {t('support.newTicket')}
                 </button>
 
                 {isLoading && (
-                  <div className="flex items-center justify-center py-8 text-white/40">
+                  <div className="flex items-center justify-center py-8 drawer-secondary">
                     <Loader2 className="w-5 h-5 animate-spin" />
                   </div>
                 )}
 
                 {isError && !isLoading && (
-                  <p className="text-sm text-white/50 text-center py-6">{t('support.loadFailed')}</p>
+                  <p className="text-sm drawer-secondary text-center py-6">{t('support.loadFailed')}</p>
                 )}
 
                 {!isLoading && !isError && openTickets.length === 0 && closedTickets.length === 0 && (
-                  <p className="text-sm text-white/40 text-center py-8">{t('support.noTickets')}</p>
+                  <p className="text-sm drawer-secondary text-center py-8">{t('support.noTickets')}</p>
                 )}
 
                 {openTickets.length > 0 && (
                   <section className="space-y-2">
-                    <h3 className="text-xs uppercase tracking-wider text-white/40">
+                    <h3 className="text-xs uppercase tracking-wider drawer-secondary">
                       {t('support.openHeading', { n: openTickets.length })}
                     </h3>
                     {openTickets.map((ticket) => (
@@ -352,7 +352,7 @@ export function SupportTicketDrawer({ open, onOpenChange, enabled = true }: Supp
 
                 {closedTickets.length > 0 && (
                   <section className="space-y-2">
-                    <h3 className="text-xs uppercase tracking-wider text-white/40">
+                    <h3 className="text-xs uppercase tracking-wider drawer-secondary">
                       {t('support.closedHeading', { n: closedTickets.length })}
                     </h3>
                     {closedTickets.map((ticket) => (

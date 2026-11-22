@@ -7,9 +7,8 @@ import { useTranslation as _useCopy } from 'react-i18next';
  */
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
+import { Loader2, X } from 'lucide-react';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { PollEditor } from '@/features/post/components/PollEditor';
 import type { PollData } from '@/features/post/types';
 import { useCreatePoll } from '@/hooks/use-polls';
@@ -64,22 +63,25 @@ export function DmPollDialog({ open, onOpenChange, conversationId, onSent }: DmP
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent scrollable column glass className="px-4 pb-6">
-        <DrawerHeader className="px-0 pb-1">
-          <div className="flex items-center justify-between gap-3">
-          <DrawerTitle className="text-white text-lg text-left">{_copy("copy.b2b9c2e81c4c", { defaultValue: "Create Poll" })}</DrawerTitle>
-          <Button
+      <DrawerContent data-drawer-form data-dm-poll-drawer column glass hideClose>
+        <DrawerClose aria-label={_copy("copy.7d9eb7acb13e", { defaultValue: "Close" })}
+          className="drawer-close-control absolute right-3 top-3 z-10 inline-flex size-11 items-center justify-center rounded-xl">
+          <X className="size-5" aria-hidden />
+        </DrawerClose>
+        <DrawerHeader className="shrink-0 px-4 pb-3 pr-16 pt-5 text-left">
+          <DrawerTitle>{_copy("copy.b2b9c2e81c4c", { defaultValue: "Create Poll" })}</DrawerTitle>
+        </DrawerHeader>
+        <div data-drawer-scroll className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] [touch-action:pan-y]">
+          <PollEditor poll={poll} onChange={setPoll} onRemove={() => onOpenChange(false)} />
+          <button
             type="button"
-            size="sm"
             disabled={!canCreate}
             onClick={submit}
-            className="rounded-full bg-white text-black hover:bg-white/90 disabled:bg-white/10 disabled:text-white/50"
+            className="drawer-action mt-4 flex w-full items-center justify-center rounded-xl px-4 text-sm font-semibold"
           >
-            {createPoll.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : _copy("copy.4759498ac2a7", { defaultValue: "Create" })}
-          </Button>
-          </div>
-        </DrawerHeader>
-        <PollEditor poll={poll} onChange={setPoll} onRemove={() => onOpenChange(false)} />
+            {createPoll.isPending ? <Loader2 className="size-4 animate-spin" /> : _copy("copy.4759498ac2a7", { defaultValue: "Create" })}
+          </button>
+        </div>
       </DrawerContent>
     </Drawer>
   );

@@ -1,3 +1,4 @@
+import "./drawer-controls.css";
 import { useTranslation as _useCopy } from 'react-i18next';
 import { overlayRoot } from "@/lib/overlay-root";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
@@ -82,13 +83,14 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
       <SheetPrimitive.Content
         ref={surfaceRef}
         className={cn(sheetVariants({ side }), className)}
+        data-sheet-content
         {...props}
         /* After the spread: another overlay's own clicks are not clicks off this
            sheet, whatever order the layers registered in (lib/overlay-dismiss). */
         onPointerDownOutside={guardOutsideDismiss(onPointerDownOutside)}
       >
         {children}
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+        <SheetPrimitive.Close className="drawer-close-control absolute right-3 top-3 z-10 inline-flex size-10 items-center justify-center rounded-xl disabled:pointer-events-none">
           <X className="h-4 w-4" />
           <span className="sr-only">{_copy("copy.7d9eb7acb13e", { defaultValue: "Close" })}</span>
         </SheetPrimitive.Close>

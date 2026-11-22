@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { invokeAi } from '@/lib/ai-invoke';
 import { payForJob } from '@/lib/ai-payment';
@@ -92,15 +91,17 @@ export function AvatarVideoPaywall({ open, onOpenChange, onConfirm, avatarPrompt
     catch { toast.error(t('creator.avatarRequirements')); }
   };
   return <Drawer open={open} onOpenChange={next => { if (!busy) onOpenChange(next); }}>
-    <DrawerContent column glass className="max-h-[85dvh] overflow-y-auto p-4">
-      <DrawerHeader><DrawerTitle>{t('creator.avatarTitle')}</DrawerTitle></DrawerHeader>
-      <p className="mb-4 text-sm text-zinc-400">{t('creator.avatarRequirements')}</p>
-      <label className="mb-3 block text-sm">{t('creator.avatarPortrait')}<input className="mt-2 block w-full" type="file" accept="image/png" disabled={busy || pending} onChange={event => void pick(event.target.files?.[0], 'image')} /></label>
-      <label className="mb-3 block text-sm">{t('creator.avatarAudio')}<input className="mt-2 block w-full" type="file" accept="audio/wav,audio/x-wav,.wav" disabled={busy || pending} onChange={event => void pick(event.target.files?.[0], 'audio')} /></label>
-      <label className="mb-4 flex gap-2 text-sm"><input type="checkbox" checked={input.rightsConfirmed} disabled={busy || pending} onChange={event => setInput(previous => ({ ...previous, rightsConfirmed: event.target.checked }))} />{t('creator.avatarPermission')}</label>
-      {quote && <p className="mb-3 text-sm">{t('creator.avatarQuote', { seconds: quote.durationSeconds, amount: quote.priceDhb })}</p>}
-      <Button disabled={busy || isGenerating || !input.imageDataUrl || !input.audioDataUrl || !input.rightsConfirmed || !walletAddress} onClick={() => void (pending ? resume() : quote ? pay() : prepare())}>{busy ? t('work.paying') : pending ? t('creatorFlow.resumeRun') : quote ? t('work.payAmount', { amount: `${quote.priceDhb} DHB` }) : t('creator.avatarPrepare')}</Button>
-      {pending && <Button variant="outline" disabled={busy} onClick={() => void newRun()}>{t('creatorFlow.newRun')}</Button>}
+    <DrawerContent column glass data-drawer-form className="max-h-[85dvh]">
+      <DrawerHeader className="shrink-0 pr-16 pt-5 text-left"><DrawerTitle>{t('creator.avatarTitle')}</DrawerTitle></DrawerHeader>
+      <div data-drawer-scroll className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] [touch-action:pan-y]">
+        <p className="mb-4 text-sm drawer-secondary">{t('creator.avatarRequirements')}</p>
+        <label className="mb-3 block text-sm">{t('creator.avatarPortrait')}<input className="mt-2 block w-full" type="file" accept="image/png" disabled={busy || pending} onChange={event => void pick(event.target.files?.[0], 'image')} /></label>
+        <label className="mb-3 block text-sm">{t('creator.avatarAudio')}<input className="mt-2 block w-full" type="file" accept="audio/wav,audio/x-wav,.wav" disabled={busy || pending} onChange={event => void pick(event.target.files?.[0], 'audio')} /></label>
+        <label className="mb-4 flex gap-2 text-sm"><input type="checkbox" checked={input.rightsConfirmed} disabled={busy || pending} onChange={event => setInput(previous => ({ ...previous, rightsConfirmed: event.target.checked }))} />{t('creator.avatarPermission')}</label>
+        {quote && <p className="mb-3 text-sm">{t('creator.avatarQuote', { seconds: quote.durationSeconds, amount: quote.priceDhb })}</p>}
+        <button type="button" className="drawer-action flex w-full items-center justify-center rounded-xl px-4 text-sm font-semibold" disabled={busy || isGenerating || !input.imageDataUrl || !input.audioDataUrl || !input.rightsConfirmed || !walletAddress} onClick={() => void (pending ? resume() : quote ? pay() : prepare())}>{busy ? t('work.paying') : pending ? t('creatorFlow.resumeRun') : quote ? t('work.payAmount', { amount: `${quote.priceDhb} DHB` }) : t('creator.avatarPrepare')}</button>
+        {pending && <button type="button" className="drawer-action mt-2 flex w-full items-center justify-center rounded-xl px-4 text-sm" disabled={busy} onClick={() => void newRun()}>{t('creatorFlow.newRun')}</button>}
+      </div>
     </DrawerContent>
   </Drawer>;
 }

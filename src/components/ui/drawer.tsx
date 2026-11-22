@@ -1,3 +1,4 @@
+import "./drawer-controls.css";
 import * as React from "react";
 import { overlayRoot } from "@/lib/overlay-root";
 import { Drawer as DrawerPrimitive } from "vaul";
@@ -342,7 +343,7 @@ function DrawerAutoClose() {
         <DrawerPrimitive.Close
           data-drawer-auto-close
           aria-label={t("copy.7d9eb7acb13e", { defaultValue: "Close" })}
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-current opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          className="drawer-close-control absolute right-3 top-3 z-10 inline-flex size-10 items-center justify-center rounded-xl"
         >
           <X className="h-5 w-5" />
         </DrawerPrimitive.Close>

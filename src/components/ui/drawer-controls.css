@@ -1,0 +1,94 @@
+[data-vaul-drawer],
+[data-sheet-content] {
+  --drawer-control-ink: #fafafa;
+  --drawer-control-secondary: #dedee3;
+  --drawer-control-solid: var(--float-solid, #18181b);
+  --drawer-control-line: rgb(255 255 255 / 0.2);
+  --drawer-control-hover: rgb(255 255 255 / 0.08);
+}
+
+html:is([data-theme="light"], [data-system-tone="light"])
+:is([data-vaul-drawer], [data-sheet-content]):not([data-keep-dark]) {
+  --drawer-control-ink: var(--ink, #17171a);
+  --drawer-control-secondary: #45454d;
+  --drawer-control-solid: var(--float-solid, #f9f8f4);
+  --drawer-control-line: rgb(20 20 24 / 0.2);
+  --drawer-control-hover: rgb(20 20 24 / 0.06);
+}
+
+[data-drawer-form] {
+  color: var(--drawer-control-ink);
+}
+
+html[data-theme][data-theme] [data-vaul-drawer][data-drawer-form] {
+  background-color: color-mix(in srgb, var(--float-glass) 55%, var(--drawer-control-solid)) !important;
+}
+
+:is(.drawer-action, .drawer-close-control) {
+  border: 1px solid var(--drawer-control-line);
+  background: transparent;
+  color: var(--drawer-control-ink);
+  transition: background-color 150ms ease;
+}
+
+.drawer-action {
+  min-height: 44px;
+}
+
+:is(.drawer-action, .drawer-close-control):hover:not(:disabled) {
+  background-color: var(--drawer-control-hover);
+}
+
+:is(.drawer-action, .drawer-close-control, .drawer-field):focus-visible {
+  outline: 2px solid var(--drawer-control-ink);
+  outline-offset: 2px;
+}
+
+.drawer-action:disabled,
+.drawer-close-control:disabled {
+  opacity: 0.5;
+}
+
+.drawer-field {
+  border: 1px solid var(--drawer-control-line);
+  background-color: transparent;
+  color: var(--drawer-control-ink);
+}
+
+.drawer-field option {
+  background-color: var(--drawer-control-solid);
+  color: var(--drawer-control-ink);
+}
+
+.drawer-secondary,
+.drawer-field::placeholder {
+  color: var(--drawer-control-secondary);
+}
+
+/* The DM drawer embeds the post composer poll editor. Match its controls
+   to the enclosing drawer without changing the post composer. */
+[data-dm-poll-drawer] [class*="text-white/"],
+[data-dm-poll-drawer] input::placeholder {
+  color: var(--drawer-control-secondary);
+}
+
+[data-dm-poll-drawer] input {
+  min-width: 0;
+  color: var(--drawer-control-ink);
+  font-size: 1rem;
+}
+
+[data-dm-poll-drawer] [data-poll-duration] {
+  border: 1px solid var(--drawer-control-line);
+  background-color: transparent;
+  color: var(--drawer-control-ink);
+}
+
+[data-dm-poll-drawer] [data-poll-duration]:is(:hover, [aria-pressed="true"]) {
+  background-color: var(--drawer-control-hover);
+}
+
+[data-dm-poll-drawer] :is(input, button):focus-visible {
+  outline: 2px solid var(--drawer-control-ink);
+  outline-offset: 2px;
+}
