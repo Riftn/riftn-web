@@ -144,6 +144,7 @@ import type { PostProcessingPhase } from '@/store/postProcessingStore';
 import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
 import { DehubLinkEmbeds } from '@/components/app/cards/DehubLinkEmbedsLazy';
 import { UserMentionDropdown } from '@/components/app/mentions';
+import { useMention } from '@/hooks/use-mention';
 import { findDehubLinks } from '@/lib/dehub-links';
 import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
 import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
@@ -3524,7 +3525,44 @@ function LinkCardsGallery({ mention }: { mention: string | null }) {
         onSelect={() => setOpen(false)}
         onClose={() => setOpen(false)}
       />
+      <MentionComposerDemo />
     </section>
+  );
+}
+
+/**
+ * A message box wired the way every composer is, so the whole @ flow (type,
+ * list opens, pick, text lands) can be tried and timed without an account.
+ */
+function MentionComposerDemo() {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState('');
+  const mention = useMention({ inputRef: ref, onMentionInsert: (_user, next) => setText(next) });
+  return (
+    <div className="mt-3 max-w-[340px]">
+      <textarea
+        ref={ref}
+        data-mention-composer
+        value={text}
+        rows={2}
+        placeholder="Type @ and a letter"
+        onChange={(e) => {
+          setText(e.target.value);
+          mention.handleInput(e.target.value, e.target.selectionStart);
+        }}
+        className="w-full resize-none rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm outline-none"
+      />
+      <UserMentionDropdown
+        query={mention.query}
+        isOpen={mention.isOpen}
+        position={mention.position}
+        armed={mention.armed}
+        selectedIndex={mention.selectedIndex}
+        onSelectedIndexChange={mention.setSelectedIndex}
+        onSelect={mention.handleSelect}
+        onClose={mention.handleClose}
+      />
+    </div>
   );
 }
 

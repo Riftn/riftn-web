@@ -36,7 +36,8 @@ import { useSignInSheetState } from '@/lib/sign-in-handoff';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { BadgeIcon } from '@/components/app/BadgeIcon';
 import { ARRIVAL_INTRO_MS, useArrivalLook, type ArrivalLook } from '@/lib/arrival-look';
-import { CONCEPT_LOOKS, CONCEPT_NAME_MS, CONCEPT_REVEAL_MS, mountConcept, type ConceptHandle, type ConceptLook } from './arrival-concepts';
+import { CONCEPT_LOOKS, CONCEPT_NAME_MS, CONCEPT_REVEAL_MS, type ConceptLook } from './arrival-concept-timing';
+import type { ConceptHandle } from './arrival-concepts';
 import './sign-in-handoff.css';
 
 type Phase = 'idle' | 'waiting' | 'arriving' | 'open' | 'flying' | 'leaving';
@@ -129,6 +130,10 @@ export function RiftMarks() {
   );
 }
 
+/** The drawn arrivals are only for people who picked one, so they stay out of startup. */
+let conceptsChunk: Promise<typeof import('./arrival-concepts')> | null = null;
+const loadConcepts = () => (conceptsChunk ??= import('./arrival-concepts'));
+
 /**
  * Trace, Tune in, Deck and Glass drop: drawn frame by frame (arrival-concepts).
  * `opened` is the moment the account is in; each one then ends on the picture
@@ -144,13 +149,25 @@ function ConceptMarks({ look, opened, picture, initial, keepPicture, playing = t
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const handle = useRef<ConceptHandle | null>(null);
+  // The drawing code loads on demand (loadConcepts); whatever changed while it
+  // was on its way is handed over the moment it mounts.
+  const latest = useRef({ picture, initial, opened, playing });
+  latest.current = { picture, initial, opened, playing };
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const reduced = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const h = mountConcept(root, look, { picture, initial, keepPicture, reduced });
-    handle.current = h;
-    return () => { h.stop(); handle.current = null; };
+    let gone = false;
+    let h: ConceptHandle | null = null;
+    void loadConcepts().then(({ mountConcept }) => {
+      if (gone) return;
+      const now = latest.current;
+      const reduced = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      h = mountConcept(root, look, { picture: now.picture, initial: now.initial, keepPicture, reduced });
+      handle.current = h;
+      h.play(now.playing);
+      if (now.opened) h.open();
+    });
+    return () => { gone = true; h?.stop(); handle.current = null; };
     // The picture is passed on below, as soon as the account is known.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [look]);
@@ -184,6 +201,10 @@ export function SignInHandoff() {
   const { isAuthenticated, user, requiresUsername } = useAuth();
   const { t } = useTranslation();
   const look = useArrivalLook();
+  // Fetch the drawn arrival while the sheet is up, so it is there when the account is.
+  useEffect(() => {
+    if (sheet !== 'closed' && isConceptLook(look)) void loadConcepts();
+  }, [sheet, look]);
   const introMs = ARRIVAL_INTRO_MS[look];
   const [phase, setPhase] = useState<Phase>('idle');
   const [flight, setFlight] = useState<CSSProperties | undefined>(undefined);
@@ -305,6 +326,24 @@ export function SignInHandoff() {
     return () => document.documentElement.removeAttribute('data-arrival-glass');
   }, [look, phase]);
 
+  // The page's own picture, hidden while the copy flies into it.
+  const asideRef = useRef<HTMLElement | null>(null);
+  const stepBack = () => {
+    if (asideRef.current) asideRef.current.style.visibility = '';
+    asideRef.current = null;
+  };
+  const stepAside = (node: HTMLElement) => {
+    stepBack();
+    asideRef.current = node;
+    node.style.visibility = 'hidden';
+  };
+  useEffect(() => stepBack, []);
+  useEffect(() => {
+    if (phase !== 'flying') { stepBack(); return; }
+    const timer = window.setTimeout(stepBack, FLY_MS);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
   // Open: hold on the picture, then send it home once the sheet has gone.
   // The concepts take longer to bring the picture in, and hold it as long.
   const holdMs = concept ? CONCEPT_HOLD_MS : OPEN_MS + HOLD_MS;
@@ -319,10 +358,18 @@ export function SignInHandoff() {
     const wait = sheetGone
       ? Math.max(0, holdMs - since)
       : Math.max(0, holdMs + SHEET_GONE_CAP_MS - since);
-    const timer = window.setTimeout(() => {
+    // Phones: the page under the arrival can still be mounting the picture
+    // it should land on, so look again for a moment before giving up.
+    const phone = window.innerWidth < 768;
+    let retry = 0;
+    const fly = (startedAt: number) => {
       const from = frameRef.current?.getBoundingClientRect();
       const target = sheetGone ? findOwnPicture() : null;
       const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!target && phone && sheetGone && !reduced && Date.now() - startedAt < 700) {
+        retry = window.setTimeout(() => fly(startedAt), 100);
+        return;
+      }
       if (!from || !target || reduced) { setPhase('leaving'); return; }
       const to = target.getBoundingClientRect();
       const scale = to.width / from.width;
@@ -335,8 +382,17 @@ export function SignInHandoff() {
         borderRadius: `${radius / scale}px`,
       });
       setPhase('flying');
-    }, wait);
-    return () => window.clearTimeout(timer);
+      if (phone) {
+        // The page's picture steps aside while the copy flies into its place
+        // and shows the moment it lands: one picture arriving, never two.
+        stepAside(target);
+      }
+    };
+    const timer = window.setTimeout(() => fly(Date.now()), wait);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(retry);
+    };
   }, [phase, sheet, holdMs]);
 
   useEffect(() => {
@@ -345,7 +401,7 @@ export function SignInHandoff() {
       setPhase('idle');
       setFlight(undefined);
       setPictureReady(false);
-    }, phase === 'flying' ? FLY_MS + 160 : LEAVE_MS);
+    }, phase === 'flying' ? FLY_MS + 200 : LEAVE_MS);
     return () => window.clearTimeout(timer);
   }, [phase]);
 

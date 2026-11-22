@@ -126,7 +126,7 @@ import { useCommentTips } from '@/hooks/use-comment-tips';
 import { TipGemIcon } from './TipGemIcon';
 import { subscribePostTipped, commentTipKey } from '@/lib/tip-events';
 import { useAuthorThread } from '@/hooks/use-author-thread';
-import { TipModal } from '@/components/app/modals/TipModal';
+import { TipModalLazy as TipModal } from '@/components/app/modals/TipModalLazy';
 import { ReportModal } from '@/components/app/modals/ReportModal';
 import { CommentLikersDrawer } from './CommentLikersDrawer';
 import { FullscreenImageViewerLazy } from './FullscreenImageViewerLazy';
@@ -217,6 +217,8 @@ interface CommentsSectionProps {
   knownCount?: number;
   /** Tells the host which list the stage is showing, so it can reopen one. */
   onStageTabChange?: (tab: 'replies' | 'quotes' | 'reposts' | 'search') => void;
+  /** Composer hint for a new comment; Shorts says "Say something...". */
+  placeholder?: string;
 }
 
 /**
@@ -1194,7 +1196,7 @@ function useFloatingPin(
   }, [on, barRef, slotRef, sectionRef]);
 }
 
-function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = false, commentsDisabled = false, replyPolicy, forKids = false, postAuthorAddress, onDirtyChange, page = false, stage = false, stageCount, knownCount, onStageTabChange }: CommentsSectionProps) {
+function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = false, commentsDisabled = false, replyPolicy, forKids = false, postAuthorAddress, onDirtyChange, page = false, stage = false, stageCount, knownCount, onStageTabChange, placeholder }: CommentsSectionProps) {
   const displayStageCount = useCommentCount(stage ? tokenId : undefined, stageCount ?? 0);
   // A kids post's thread is open to Kids Mode only. The post's own author is
   // exempt server-side, but they are also the one person who can always reach
@@ -3529,7 +3531,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                   placeholder={replyTo
                     ? t('comments.replyPlaceholder', { name: replyTo.username })
                     // The author's own straight comment is the next part of their thread.
-                    : isOwnThread && postAuthorAddress ? t('comments.threadParts.addPlaceholder') : t('comments.composerPlaceholder')}
+                    : isOwnThread && postAuthorAddress ? t('comments.threadParts.addPlaceholder') : placeholder ?? t('comments.composerPlaceholder')}
                   value={newComment}
                   onChange={(e) => {
                     setNewComment(e.target.value);
@@ -3590,6 +3592,7 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
                   query={mention.query}
                   isOpen={mention.isOpen}
                   position={mention.position}
+                  armed={mention.armed}
                   selectedIndex={mention.selectedIndex}
                   onSelectedIndexChange={mention.setSelectedIndex}
                   onSelect={mention.handleSelect}

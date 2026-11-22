@@ -319,7 +319,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     enabled: !!liveStreamId && !isOffline && isAuthenticated,
     staleTime: 60_000,
   });
-  const giving = givingInfo.data?.live && givingInfo.data.giving.enabled ? givingInfo.data.giving : null;
+  const giving = givingInfo.data?.live && givingInfo.data.giving?.enabled ? givingInfo.data.giving : null;
   const givingCreator = givingInfo.data?.creator?.toLowerCase() || '';
   const [giveTarget, setGiveTarget] = useState<GiveTarget | null>(null);
   const canGiveTo = (address?: string | null) => {
@@ -742,7 +742,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
                       <>
                         <span className="text-zinc-400 ml-1.5">
                           {t('live.chatSentGift')}
-                          <DhbAmount amount={moment.giftAmount} currency={moment.giftCurrency} iconClassName="h-3 w-3" />
+                          <DhbAmount amount={moment.giftAmount} currency={moment.giftCurrency} iconClassName="h-3 w-3" className="ml-1" />
                         </span>
                         {msg.content && (
                           <p className="chat-body text-zinc-300 break-words whitespace-pre-wrap mt-0.5"><InlineEmoji value={msg.content} /></p>
@@ -1141,6 +1141,7 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             query={mention.query}
             isOpen={mention.isOpen}
             position={mention.position}
+            armed={mention.armed}
             selectedIndex={mention.selectedIndex}
             onSelectedIndexChange={mention.setSelectedIndex}
             onSelect={mention.handleSelect}

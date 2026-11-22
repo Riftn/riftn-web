@@ -51,6 +51,7 @@ import { DmVideoBubble } from './DmVideo';
 import type { DmVideoOptions } from '@/lib/dm-video-options';
 import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
 import { markDmMessageViewed } from '@/lib/api/dehub/dm';
+import { DmOpenTimerMedia } from './DmOpenTimerMedia';
 import { DmUndecryptableMessages } from './DmLockedState';
 import { useChatPrefs } from '@/hooks/use-chat-prefs';
 import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
@@ -339,6 +340,15 @@ function EncryptedMediaBody({
   // A video only starts by itself once the viewer has tapped it.
   const [requested, setRequested] = useState(false);
   const uploading = !mediaUrl && !url;
+
+  // Gone a few seconds after the first open: a closed tile until tapped.
+  if (destruct?.mode === 'open' && !isOwn && (media.kind === 'image' || media.kind === 'video')) {
+    return (
+      <DmOpenTimerMedia messageId={messageId} mine={false} destruct={destruct} kind={media.kind} src={url} onNeedSource={load}>
+        {null}
+      </DmOpenTimerMedia>
+    );
+  }
 
   if (media.kind === 'audio') {
     if (status === 'error') {
@@ -1171,6 +1181,18 @@ const MessageBubble = memo(function MessageBubble({
             {/* Media (image or document) — loading state while mediaUrls is empty */}
             {message.msgType === 'media' && encMedia && (
               <div>
+                {message.destruct?.mode === 'open' && isOwnMessage ? (
+                  <DmOpenTimerMedia messageId={message._id} mine destruct={message.destruct} kind={encMedia.kind === 'video' ? 'video' : 'image'}>
+                    <EncryptedMediaBody
+                      messageId={message._id}
+                      isOwn={isOwnMessage}
+                      destruct={message.destruct}
+                      media={encMedia}
+                      mediaUrl={primaryMediaUrl}
+                      onOpenImage={onOpenImage}
+                    />
+                  </DmOpenTimerMedia>
+                ) : (
                 <EncryptedMediaBody
                   messageId={message._id}
                   isOwn={isOwnMessage}
@@ -1179,6 +1201,7 @@ const MessageBubble = memo(function MessageBubble({
                   mediaUrl={primaryMediaUrl}
                   onOpenImage={onOpenImage}
                 />
+                )}
                 {message.content && (
                   <p dir="auto" className="text-sm mt-1 break-words whitespace-pre-wrap text-left">
                     {renderChatTextWithLinks(isTranslated ? translatedText : message.content)}
@@ -1223,7 +1246,36 @@ const MessageBubble = memo(function MessageBubble({
                   </>
                 ) : primaryMediaUrl ? (
                   <>
-                    {primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? (
+                    {message.destruct?.mode === 'open' && !(primaryMedia?.type === 'audio' || primaryMedia?.mimeType?.startsWith('audio/')) && !isOwnMessage ? (
+                      <DmOpenTimerMedia
+                        messageId={message._id}
+                        mine={false}
+                        destruct={message.destruct}
+                        kind={primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? 'video' : 'image'}
+                        src={getMediaUrl(primaryMediaUrl) || primaryMediaUrl}
+                      >
+                        {null}
+                      </DmOpenTimerMedia>
+                    ) : message.destruct?.mode === 'open' && isOwnMessage && !(primaryMedia?.type === 'audio' || primaryMedia?.mimeType?.startsWith('audio/')) ? (
+                      <DmOpenTimerMedia messageId={message._id} mine destruct={message.destruct} kind={primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? 'video' : 'image'}>
+                        {primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? (
+                          <DmVideoBubble
+                            messageId={message._id}
+                            src={getMediaUrl(primaryMediaUrl) || primaryMediaUrl}
+                            options={message.mediaOptions}
+                            mine
+                            destruct={message.destruct}
+                          />
+                        ) : (
+                          <SettledImg
+                            src={getMediaUrl(primaryMediaUrl)!}
+                            alt={_copy("copy.f9c984552075", { defaultValue: "Shared image" })}
+                            className="max-w-full max-h-64 rounded-lg object-cover cursor-zoom-in"
+                            onClick={() => onOpenImage?.(getMediaUrl(primaryMediaUrl)!)}
+                          />
+                        )}
+                      </DmOpenTimerMedia>
+                    ) : primaryMedia?.type === 'video' || primaryMedia?.mimeType?.startsWith('video/') ? (
                       <DmVideoBubble
                         messageId={message._id}
                         src={getMediaUrl(primaryMediaUrl) || primaryMediaUrl}
