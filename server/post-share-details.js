@@ -1,3 +1,4 @@
+import { loadStreamerCollection } from '../src/lib/streamer-collection.ts';
 import { getBadgeName, badgeScaleForPrice, parseBadgeLock } from '../src/lib/staking-badge-rules.ts';
 import { badgePosterBounds } from '../src/lib/badge-poster-bounds.ts';
 import { STREAMER_BADGE_IDS, streamerBadgeBounds, streamerBadgeSvg } from '../src/lib/streamer-badge-art.ts';
@@ -67,12 +68,14 @@ export async function loadPostShareDetails(data, { rows, price } = {}) {
   const profile = account?.status !== false ? account?.result : null;
   const rawAddress = profile?.address || profile?.wallet_address;
   const address = typeof rawAddress === 'string' && /^0x[\da-f]{40}$/i.test(rawAddress) ? rawAddress.toLowerCase() : '';
-  const [progressResponse, memberRows] = address ? await Promise.all([
-    publicJson(`/live/creator/${address}/progress?collection=21`),
+  const [progress, memberRows] = address ? await Promise.all([
+    loadStreamerCollection(async collection => {
+      const response = await publicJson(`/live/creator/${address}/progress?collection=${collection}`);
+      return response?.result ?? response;
+    }),
     rows?.(`new_members?select=joined_at&wallet_address=eq.${address}&joined_at=gte.${encodeURIComponent(new Date(Date.now() - 30 * 86400000).toISOString())}&limit=1`).catch(() => null),
   ]) : [null, []];
-  const progress = progressResponse?.result ?? progressResponse;
-  const complete = !!account && !!pollResponse && (!address || (!!progressResponse && Array.isArray(memberRows)));
+  const complete = !!account && !!pollResponse && (!address || (!!progress && Array.isArray(memberRows)));
   return {
     ...data,
     author: plainPostText(profile?.displayName || profile?.display_name) || data.author,

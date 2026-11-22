@@ -1,4 +1,5 @@
 import { apiCall, authedUpload } from './core';
+import { loadStreamerCollection } from '../../streamer-collection';
 import type { DeHubUser } from './types';
 
 export interface LiveStream {
@@ -459,13 +460,15 @@ export interface StreamerProgress {
 }
 
 export async function getStreamerProgress(address: string): Promise<StreamerProgress> {
-  const res = await apiCall<StreamerProgress | { result: StreamerProgress }>(
-    `/api/live/creator/${address.toLowerCase()}/progress`,
-    { params: { collection: '21' } },
-  );
-  return 'result' in res && res.result && typeof res.result === 'object' && 'level' in res.result
-    ? res.result
-    : (res as StreamerProgress);
+  return loadStreamerCollection(async collection => {
+    const res = await apiCall<StreamerProgress | { result: StreamerProgress }>(
+      `/api/live/creator/${address.toLowerCase()}/progress`,
+      { params: { collection } },
+    );
+    return 'result' in res && res.result && typeof res.result === 'object' && 'level' in res.result
+      ? res.result
+      : (res as StreamerProgress);
+  });
 }
 
 export function selectStreamerBadge(badgeId: StreamerCardId): Promise<{ selectedBadgeId: StreamerCardId }> {
