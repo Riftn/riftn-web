@@ -928,7 +928,8 @@ export function FollowersListDrawer({
   }, [followBackButtonVisible]);
 
   const heading = listType === 'followers' ? t('follow.followers') : t('follow.following');
-  const titleWithCount = totalCount !== null && totalCount > 0
+  const headingText = totalCount !== null && totalCount > 0
+    // exact-number: show the full count in the follower and following lists.
     ? `${heading} (${totalCount.toLocaleString()})`
     : heading;
 
@@ -938,7 +939,7 @@ export function FollowersListDrawer({
         <DrawerHeader className="px-4 pb-2">
           <DrawerTitle className="text-white flex items-center gap-2">
             <Users className="w-5 h-5" />
-            {titleWithCount}
+            {headingText}
           </DrawerTitle>
         </DrawerHeader>
 
