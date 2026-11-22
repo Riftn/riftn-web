@@ -6,9 +6,8 @@
  * place and stays up for 24 hours. Tap yours to write or change it; tap
  * someone else's to see it in full, hear the song and message them.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { MapPin, Music2, Plus, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -25,7 +24,30 @@ import {
   type Note, type NoteEntry, type NoteInput,
 } from '@/lib/api/dehub/notes';
 
-export const NOTES_QUERY_KEY = ['dm-notes'] as const;
+// A tiny shared store instead of react-query, so the row also renders where
+// there is no QueryClientProvider (tests, the state gallery).
+type NotesData = { mine: NoteEntry | null; notes: NoteEntry[] };
+let notesData: NotesData | null = null;
+let notesFetchedAt = 0;
+const listeners = new Set<() => void>();
+const emit = () => listeners.forEach(l => l());
+export function refreshNotes(): void {
+  notesFetchedAt = Date.now();
+  getNotes().then(d => { notesData = d; emit(); }).catch(() => {});
+}
+function useNotes(): NotesData | null {
+  const data = useSyncExternalStore(
+    useCallback((l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; }, []),
+    () => notesData,
+    () => null,
+  );
+  useEffect(() => {
+    if (Date.now() - notesFetchedAt > 60_000) refreshNotes();
+    const id = setInterval(refreshNotes, 5 * 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return data;
+}
 
 const nameOf = (a: StoryAuthor) => a.displayName || a.username || `${a.address.slice(0, 6)}…`;
 
@@ -128,34 +150,28 @@ function NoteCard({ note }: { note: Note }) {
 
 function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => void }) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const [text, setText] = useState(mine?.text ?? '');
   const [location, setLocation] = useState(mine?.location ?? '');
   const [showPlace, setShowPlace] = useState(!!mine?.location);
   const [gifUrl, setGifUrl] = useState<string | null>(mine?.gifUrl ?? null);
   const [song, setSong] = useState<StorySong | null>(mine?.song ?? null);
   const [soundOpen, setSoundOpen] = useState(false);
-
-  const save = useMutation({
-    mutationFn: (input: NoteInput) => putNote(input),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: NOTES_QUERY_KEY }); toast.success(t('notes.shared', { defaultValue: 'Your note is up for 24 hours' })); onClose(); },
-    onError: () => toast.error(t('notes.failed', { defaultValue: "Your note didn't go up. Try again." })),
-  });
-  const remove = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: NOTES_QUERY_KEY }); onClose(); },
-    onError: () => toast.error(t('notes.failed', { defaultValue: "Your note didn't go up. Try again." })),
-  });
-
+  const [saving, setSaving] = useState(false);
+  const failed = () => toast.error(t('notes.failed', { defaultValue: "Your note didn't go up. Try again." }));
+  const run = (work: () => Promise<unknown>, done?: () => void) => {
+    if (saving) return;
+    setSaving(true);
+    work().then(() => { refreshNotes(); done?.(); onClose(); }).catch(failed).finally(() => setSaving(false));
+  };
   const empty = !text.trim() && !location.trim() && !gifUrl && !song;
   const share = () => {
-    if (empty || save.isPending) return;
-    save.mutate({
+    if (empty || saving) return;
+    run(() => putNote({
       ...(text.trim() && { text: text.trim() }),
       ...(location.trim() && { location: location.trim() }),
       ...(gifUrl && { gifUrl }),
       ...(song && { song }),
-    });
+    } as NoteInput), () => toast.success(t('notes.shared', { defaultValue: 'Your note is up for 24 hours' })));
   };
 
   return (
@@ -226,11 +242,11 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
 
         <div className="flex gap-2">
           {mine && (
-            <button type="button" data-kit-button="quiet" data-note-delete disabled={remove.isPending} onClick={() => remove.mutate()} className="flex-1">
+            <button type="button" data-kit-button="quiet" data-note-delete disabled={saving} onClick={() => run(deleteNote)} className="flex-1">
               {t('notes.delete', { defaultValue: 'Delete note' })}
             </button>
           )}
-          <button type="button" data-kit-button="primary" data-note-share disabled={empty || save.isPending} onClick={share} className="flex-1">
+          <button type="button" data-kit-button="primary" data-note-share disabled={empty || saving} onClick={share} className="flex-1">
             {t('notes.share', { defaultValue: 'Share' })}
           </button>
         </div>
@@ -249,7 +265,7 @@ function NoteComposer({ mine, onClose }: { mine: Note | null; onClose: () => voi
 
 export function NotesRow({ me, onMessage }: { me: StoryAuthor; onMessage: (author: StoryAuthor) => void }) {
   const { t } = useTranslation();
-  const { data } = useQuery({ queryKey: NOTES_QUERY_KEY, queryFn: getNotes, staleTime: 60_000, refetchInterval: 5 * 60_000 });
+  const data = useNotes();
   const [open, setOpen] = useState<'mine' | NoteEntry | null>(null);
   const mine = data?.mine?.note ?? null;
   const notes = data?.notes ?? [];

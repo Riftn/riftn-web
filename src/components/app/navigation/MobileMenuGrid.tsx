@@ -165,7 +165,7 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
   const homeTarget = useRef<HTMLDivElement>(null);
   const onDropOutside = (id: string, x: number, y: number) => {
     // Dropped on another group's tab, section header or folder: move it there.
-    const target = document.elementsFromPoint(x, y)
+    const target = (typeof document.elementsFromPoint === 'function' ? document.elementsFromPoint(x, y) : [])
       .map((el) => (el as HTMLElement).closest?.('[data-menu-drop-group]') as HTMLElement | null)
       .find(Boolean);
     const groupId = target?.dataset.menuDropGroup;
