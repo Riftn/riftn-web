@@ -33,6 +33,7 @@ import { NewMemberChip } from '@/components/app/NewMemberChip';
 import type { DeHubNFT } from '@/lib/api/dehub/types';
 
 import { formatCount } from '@/lib/format-count';
+import { warmPostData } from '@/lib/post-warm';
 /**
  * What a post's media looks like in an embed: which kind it is, the one
  * thumbnail to show, and whether it has to stay behind a gate. Shared with the
@@ -255,6 +256,7 @@ export const QuotedPostEmbed = memo(function QuotedPostEmbed({ quotedPost, class
       openBrainrotFeed(String(quotedPost.tokenId), short);
       return;
     }
+    warmPostData(quotedPost.tokenId);
     navigate(`/app/post/${quotedPost.tokenId}`, { state: { fromFeed: true } });
   };
 

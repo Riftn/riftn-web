@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
 import { formatTimeAgo, formatCount } from '@/lib/feed-utils';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { Skeleton } from "@/components/ui/skeleton";
 import { Square, Loader2, RotateCcw, Anchor, Baby, Pin, PinOff, Handshake, SpellCheck, Palette, Gauge, ChevronLeft } from "lucide-react";
 import Quote from "@/components/ui/cut-icons/quote";
 import Trash2 from "@/components/ui/cut-icons/delete";
@@ -3068,8 +3069,17 @@ function CommentsSectionForAccount({ tokenId, onClose, initialTab, embedded = fa
           <div className={page ? "pb-2" : "absolute inset-0 overflow-y-auto pt-2 pb-2"}>
             {isLoading ? (
               hideEmptyInline ? null : (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+                // The shape of the thread while it arrives, not a spinner.
+                <div className="px-3 py-2 space-y-5" aria-busy="true" data-comments-skeleton>
+                  {[0.72, 0.5, 0.62].map((w, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <Skeleton className="w-8 h-8 rounded-full bg-white/[0.06] shrink-0" />
+                      <div className="flex-1 space-y-2 pt-1">
+                        <Skeleton className="h-3 w-24 rounded bg-white/[0.06]" />
+                        <Skeleton className="h-3 rounded bg-white/[0.06]" style={{ width: `${w * 100}%` }} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )
             ) : error ? (

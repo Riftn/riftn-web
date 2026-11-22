@@ -206,7 +206,7 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 // route below), so clicking on and off a blog post never remounts the panels.
 const DocsSurface = React.lazy(() => import("./pages/DocsSurface"));
 const ProfilePage = React.lazy(() => import("./pages/app/ProfilePage"));
-const PostInfoPage = React.lazy(() => import("./pages/app/PostInfoPage"));
+const PostInfoPage = React.lazy(() => import("@/lib/preload-post-page").then(module => module.loadPostInfoPage()));
 const StoryPermalinkPage = React.lazy(() => import("./pages/app/StoryPermalinkPage"));
 const PostReactionsPage = React.lazy(() => import("./pages/app/PostReactionsPage"));
 const SinglePostPage = React.lazy(() => import('@/lib/preload-post-page').then(module => module.loadPostPage()));

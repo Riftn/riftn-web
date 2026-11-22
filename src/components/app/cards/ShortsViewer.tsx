@@ -17,6 +17,7 @@ import {
 } from '@/lib/media-session';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
 import { ChevronUp, ChevronDown, UserCheck, Loader2, Globe, RotateCcw } from "lucide-react";
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
 import Volume2 from "@/components/ui/cut-icons/volume";
@@ -2697,7 +2698,7 @@ export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMor
                   <Bookmark className={cn("w-4 h-4", isBookmarked ? "fill-yellow-500 text-yellow-500" : "text-white/60")} />
                 </motion.button>
                 <button
-                  onClick={() => { navigate(`/app/post/${currentShort.id}/info`); onClose(); }}
+                  onClick={() => { openPostInfo(navigate, currentShort.id); onClose(); }}
                   className="w-8 h-8 bg-white/[0.08] hover:bg-white/15 rounded-lg flex items-center justify-center transition-colors"
                   aria-label={_copy("copy.8ec595494efe", { defaultValue: "Post info" })}
                 >
