@@ -1089,6 +1089,8 @@
     "postLanding": "After you post",
     "feedSeparator": "Post separator",
     "chatOwnBubbleDesc": "Your own messages sit in a bubble, like in private chats",
+    "messagesPills": "Pill tabs in Messages",
+    "messagesPillsDesc": "The open tab is a filled pill and unread counts are round",
     "chatOwnBubble": "Bubbles for my messages in Public Chat",
     "feedSeparatorDesc": "Cards around each post, or a thin line between them",
     "feedSeparatorBento": "Bento cards",

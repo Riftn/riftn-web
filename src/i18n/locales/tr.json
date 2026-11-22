@@ -1089,6 +1089,8 @@
     "postLanding": "Paylaştıktan sonra",
     "feedSeparator": "Gönderi ayırıcı",
     "chatOwnBubbleDesc": "Kendi mesajların özel sohbetlerdeki gibi bir baloncuk içinde görünür",
+    "messagesPills": "Mesajlarda hap sekmeler",
+    "messagesPillsDesc": "Açık sekme dolu bir hap olur, okunmamış sayılar yuvarlak görünür",
     "chatOwnBubble": "Genel Sohbet'te mesajlarım için baloncuk",
     "feedSeparatorDesc": "Her gönderinin çevresinde kart ya da aralarında ince bir çizgi",
     "feedSeparatorBento": "Bento kartlar",

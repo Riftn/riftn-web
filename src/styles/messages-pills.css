@@ -1,0 +1,55 @@
+/* Settings → Appearance → "Pill tabs in Messages" (lib/messages-pills).
+   The open chat tab is a filled pill (white on dark themes, black on light),
+   the others soft grey pills; unread counts are round; the cards lose the
+   lit bar on their edge because the round count already says it.
+   Off by default; Messages keeps its glowing underline. */
+html[data-msg-pills] [data-chat-tabs] {
+  --cp-ink: #fff;
+  --cp-inverse: #0b0b0c;
+  --cp-soft: rgb(255 255 255 / 0.09);
+  --cp-soft-hover: rgb(255 255 255 / 0.14);
+  gap: 8px;
+}
+html[data-msg-pills]:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-chat-tabs] {
+  --cp-ink: #0b0b0c;
+  --cp-inverse: #fff;
+  --cp-soft: rgb(11 11 13 / 0.06);
+  --cp-soft-hover: rgb(11 11 13 / 0.1);
+}
+html[data-msg-pills] [data-chat-tabs] [data-chat-tab] {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--cp-ink);
+  background: var(--cp-soft);
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+@media (hover: hover) {
+  html[data-msg-pills] [data-chat-tabs] [data-chat-tab]:hover { background: var(--cp-soft-hover); }
+}
+html[data-msg-pills] [data-chat-tabs] [data-chat-tab][aria-selected='true'] {
+  color: var(--cp-inverse);
+  background: var(--cp-ink);
+}
+html[data-msg-pills] [data-chat-tabs] [data-chat-tab][aria-selected='true']::after { display: none; }
+html[data-msg-pills] [data-chat-tabs] [data-chat-tab-unread] {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  line-height: 20px;
+  background: var(--cp-ink);
+  color: var(--cp-inverse);
+}
+html[data-msg-pills] [data-chat-tabs] [data-chat-tab][aria-selected='true'] [data-chat-tab-unread] {
+  background: var(--cp-inverse);
+  color: var(--cp-ink);
+}
+html[data-msg-pills] [data-chat-tabs] [data-chat-tab-unread][data-quiet] { background: var(--cp-soft); color: inherit; }
+
+/* Chat rows: a round count, no lit bar. */
+html[data-msg-pills] [data-chat-list-row] .unread-count-chip {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+}
+html[data-msg-pills] [data-msg-cards] [data-chat-list-row][data-unread]::before { display: none; }
