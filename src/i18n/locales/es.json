@@ -23111,5 +23111,70 @@
     "streak": "Racha de {{value}} días",
     "streakBonus": "Bonus de racha +{{pct}}%",
     "dailyHint": "Un quiz al día. Quien juegue tus quizzes varios días seguidos hace una racha y gana puntos extra."
+  },
+  "streamPet": {
+    "stage": {
+      "egg": "Huevo",
+      "baby": "Bebé",
+      "kid": "Pequeño",
+      "teen": "Joven",
+      "grown": "Adulto",
+      "legend": "Leyenda"
+    },
+    "color": {
+      "violet": "Violeta",
+      "pink": "Rosa",
+      "mint": "Menta",
+      "sky": "Cielo",
+      "sun": "Sol",
+      "coral": "Coral"
+    },
+    "mood": {
+      "egg": "Todavía es un huevo. Nace en el próximo directo.",
+      "eggOwn": "Todavía es un huevo. Transmite 5 minutos para que nazca.",
+      "streaming": "Comiendo mientras el directo está activo",
+      "happy": "Feliz y lleno",
+      "hungry": "Le está entrando hambre. Se dormirá en {{hours}} h",
+      "asleep": "Dormido hasta el próximo directo",
+      "asleepOwn": "Dormido. Haz un directo para despertarlo"
+    },
+    "snacks_one": "{{formatted}} bocado",
+    "snacks_other": "{{formatted}} bocados",
+    "hoursStreamed_one": "{{formatted}} hora en directo",
+    "hoursStreamed_other": "{{formatted}} horas en directo",
+    "toNext_one": "{{formatted}} bocado para {{stage}}",
+    "toNext_other": "{{formatted}} bocados para {{stage}}",
+    "open": "Abrir {{pet}}",
+    "feed": "Dar un bocado",
+    "fed": "{{pet}} se comió tu bocado",
+    "fedBy": "{{name}} alimentó a {{pet}}",
+    "signIn": "Inicia sesión para alimentarlo",
+    "pointsHint": "Se paga con tus puntos del canal",
+    "balance": "Tienes {{formatted}} puntos aquí",
+    "errors": {
+      "notEnough": "Aún no tienes suficientes puntos. Sigue mirando para ganar más.",
+      "notLive": "Puedes alimentar a la mascota mientras el directo está activo",
+      "tooFast": "Espera unos segundos",
+      "daily": "Ya son suficientes bocados por hoy",
+      "off": "Alimentar está desactivado en este canal",
+      "failed": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "studio": {
+      "title": "Mascota del directo",
+      "intro": "Una pequeña mascota que come mientras transmites: un bocado por cada 5 minutos en directo. Crece al comer, se duerme tras un día sin comida y nunca muere.",
+      "name": "Nombre",
+      "namePlaceholder": "Ponle nombre a tu mascota",
+      "color": "Color",
+      "hatch": "Incubar huevo",
+      "hatched": "Tu huevo está listo. Haz un directo para que nazca.",
+      "save": "Guardar",
+      "saved": "Guardado",
+      "showOnProfile": "Mostrar en mi perfil",
+      "showOnStream": "Mostrar en la esquina de mi directo",
+      "feeding": "Los espectadores pueden alimentarla con puntos del canal",
+      "cost": "Puntos por bocado",
+      "rules": "Cada espectador puede darle hasta 20 bocados al día. Los puntos no tienen valor en dinero.",
+      "feeders": "Quién más la alimentó"
+    }
   }
 }

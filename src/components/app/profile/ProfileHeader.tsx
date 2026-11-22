@@ -10,7 +10,7 @@ import Ban from "@/components/ui/cut-icons/blocked";
 import MessageSquare from "@/components/ui/cut-icons/message-envelope";
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AuthContext } from '@/contexts/AuthContext';
 import { saveOwnProfileImage, type ProfileImageKind } from '@/lib/profile-image-edit';
@@ -60,6 +60,7 @@ import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
 
 import { formatCount } from '@/lib/format-count';
+const ProfilePetCard = lazy(() => import('@/components/app/pet/ProfilePetCard'));
 export interface ProfileHeaderProps {
   profile: ProfileData;
   apiProfile: ProfileData | undefined;
@@ -651,6 +652,13 @@ export function ProfileHeader({
               never ended a stream, so a non-streamer's page is unchanged. */}
           {isViewingOwnProfile && (
             <StreamerLevelCard address={profile.walletAddress} className="mt-4" />
+          )}
+
+          {/* The creator's stream pet. Nothing for someone without one. */}
+          {profile.walletAddress && (
+            <Suspense fallback={null}>
+              <ProfilePetCard address={profile.walletAddress} own={!!isViewingOwnProfile} className="mt-4" />
+            </Suspense>
           )}
         </div>
       </div>

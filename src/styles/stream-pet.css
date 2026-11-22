@@ -1,0 +1,116 @@
+/* Stream pet motion. Every state moves; nothing pops. */
+.stream-pet { overflow: visible; }
+.stream-pet .stream-pet-body,
+.stream-pet .stream-pet-egg,
+.stream-pet .stream-pet-eyes,
+.stream-pet .stream-pet-shadow { transform-box: fill-box; }
+
+.stream-pet .stream-pet-body { transform-origin: 50% 100%; }
+.stream-pet[data-pet-mood='happy'] .stream-pet-body { animation: stream-pet-bob 2.4s ease-in-out infinite; }
+.stream-pet[data-pet-mood='hungry'] .stream-pet-body { animation: stream-pet-sway 3.2s ease-in-out infinite; }
+.stream-pet[data-pet-mood='asleep'] .stream-pet-body { animation: stream-pet-breathe 4.2s ease-in-out infinite; }
+.stream-pet .stream-pet-body.stream-pet-chomp { animation: stream-pet-chomp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1, stream-pet-bob 2.4s ease-in-out 0.9s infinite; }
+
+.stream-pet .stream-pet-eyes { transform-origin: 50% 50%; animation: stream-pet-blink 5s ease-in-out infinite; }
+.stream-pet[data-pet-mood='hungry'] .stream-pet-eyes { animation-duration: 3.5s; }
+
+.stream-pet .stream-pet-shadow { transform-origin: 50% 50%; }
+.stream-pet[data-pet-mood='happy'] .stream-pet-shadow { animation: stream-pet-shadow 2.4s ease-in-out infinite; }
+
+.stream-pet .stream-pet-egg { transform-origin: 50% 95%; animation: stream-pet-wobble 2.8s ease-in-out infinite; }
+
+.stream-pet .stream-pet-halo { animation: stream-pet-halo 3s ease-in-out infinite; }
+
+.stream-pet .stream-pet-z text { animation: stream-pet-z 3s ease-in-out infinite; }
+.stream-pet .stream-pet-z text:nth-child(2) { animation-delay: 1.2s; }
+
+@keyframes stream-pet-bob {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  45% { transform: translateY(-5%) scale(0.98, 1.03); }
+  55% { transform: translateY(-5%) scale(0.98, 1.03); }
+  90% { transform: translateY(0) scale(1.04, 0.96); }
+}
+@keyframes stream-pet-shadow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.85); opacity: 0.7; }
+}
+@keyframes stream-pet-sway {
+  0%, 100% { transform: rotate(-3deg) scale(1, 0.98); }
+  50% { transform: rotate(3deg) scale(1, 0.98); }
+}
+@keyframes stream-pet-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.03, 0.95); }
+}
+@keyframes stream-pet-chomp {
+  0% { transform: translateY(0) scale(1, 1); }
+  25% { transform: translateY(-14%) scale(0.92, 1.1); }
+  50% { transform: translateY(0) scale(1.1, 0.9); }
+  75% { transform: translateY(-4%) scale(0.98, 1.03); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes stream-pet-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes stream-pet-wobble {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  68% { transform: rotate(-6deg); }
+  76% { transform: rotate(5deg); }
+  84% { transform: rotate(-3deg); }
+  92% { transform: rotate(1deg); }
+}
+@keyframes stream-pet-halo {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-2px); opacity: 1; }
+}
+@keyframes stream-pet-z {
+  0% { transform: translate(0, 4px); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translate(6px, -10px); opacity: 0; }
+}
+
+/* The snack bubble that rises from the corner pet when a viewer feeds it. */
+.stream-pet-fed {
+  animation: stream-pet-fed 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes stream-pet-fed {
+  0% { transform: translateY(6px) scale(0.92); opacity: 0; }
+  12% { transform: translateY(0) scale(1); opacity: 1; }
+  80% { transform: translateY(-6px); opacity: 1; }
+  100% { transform: translateY(-14px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stream-pet *,
+  .stream-pet-fed { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* The corner card opening above the pet. */
+.stream-pet-fed-in { animation: stream-pet-panel 0.28s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: 100% 100%; }
+@keyframes stream-pet-panel {
+  from { transform: translateY(6px) scale(0.96); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Light themes: the white growth bar would vanish on a pale card; ink it instead. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-stream-pet-card] [data-pet-fill] {
+  background: currentColor;
+  color: hsl(240 6% 18%);
+}
+
+/* The corner pet sits on the picture: dark glass and white words in every
+   theme, whatever a light theme does to white text and pale fills elsewhere. */
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] [data-stream-pet-panel] {
+  background: rgb(0 0 0 / 0.6) !important;
+  border-color: rgb(255 255 255 / 0.15) !important;
+  color: #fff !important;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] :is(.text-white, span, p, button) { color: #fff !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] .text-white\/70 { color: rgb(255 255 255 / 0.72) !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] .text-white\/55 { color: rgb(255 255 255 / 0.6) !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] button.bg-white\/15 { background: rgb(255 255 255 / 0.15) !important; border-color: rgb(255 255 255 / 0.2) !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] button.bg-black\/35 { background: rgb(0 0 0 / 0.35) !important; border-color: rgb(255 255 255 / 0.15) !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] .bg-white\/10 { background: rgb(255 255 255 / 0.12) !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] .bg-white\/80 { background: rgb(255 255 255 / 0.85) !important; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-stream-pet-corner] .stream-pet-fed { background: rgb(0 0 0 / 0.6) !important; color: #fff !important; }

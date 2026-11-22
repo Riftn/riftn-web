@@ -23115,5 +23115,70 @@
     "streak": "Série de {{value}} jours",
     "streakBonus": "Bonus de série +{{pct}} %",
     "dailyHint": "Un quiz par jour. Ceux qui jouent à tes quiz plusieurs jours d’affilée font une série et gagnent des points bonus."
+  },
+  "streamPet": {
+    "stage": {
+      "egg": "Œuf",
+      "baby": "Bébé",
+      "kid": "Petit",
+      "teen": "Ado",
+      "grown": "Adulte",
+      "legend": "Légende"
+    },
+    "color": {
+      "violet": "Violet",
+      "pink": "Rose",
+      "mint": "Menthe",
+      "sky": "Ciel",
+      "sun": "Soleil",
+      "coral": "Corail"
+    },
+    "mood": {
+      "egg": "Encore un œuf. Il éclot au prochain live.",
+      "eggOwn": "Encore un œuf. Diffuse 5 minutes pour le faire éclore.",
+      "streaming": "Il mange pendant le live",
+      "happy": "Heureux et rassasié",
+      "hungry": "Il commence à avoir faim. S'endort dans {{hours}} h",
+      "asleep": "Endormi jusqu'au prochain live",
+      "asleepOwn": "Endormi. Lance un live pour le réveiller"
+    },
+    "snacks_one": "{{formatted}} en-cas",
+    "snacks_other": "{{formatted}} en-cas",
+    "hoursStreamed_one": "{{formatted}} heure de live",
+    "hoursStreamed_other": "{{formatted}} heures de live",
+    "toNext_one": "{{formatted}} en-cas avant {{stage}}",
+    "toNext_other": "{{formatted}} en-cas avant {{stage}}",
+    "open": "Ouvrir {{pet}}",
+    "feed": "Donner un en-cas",
+    "fed": "{{pet}} a mangé ton en-cas",
+    "fedBy": "{{name}} a nourri {{pet}}",
+    "signIn": "Connecte-toi pour le nourrir",
+    "pointsHint": "Payé avec tes points de chaîne",
+    "balance": "Tu as {{formatted}} points ici",
+    "errors": {
+      "notEnough": "Pas encore assez de points. Continue de regarder pour en gagner.",
+      "notLive": "Tu peux nourrir l'animal pendant le live",
+      "tooFast": "Attends quelques secondes",
+      "daily": "Assez d'en-cas pour aujourd'hui",
+      "off": "Nourrir est désactivé sur cette chaîne",
+      "failed": "Un problème est survenu. Réessaie."
+    },
+    "studio": {
+      "title": "Animal du live",
+      "intro": "Un petit animal qui mange pendant que tu diffuses : un en-cas toutes les 5 minutes en live. Il grandit en mangeant, s'endort après une journée sans nourriture et ne meurt jamais.",
+      "name": "Nom",
+      "namePlaceholder": "Donne un nom à ton animal",
+      "color": "Couleur",
+      "hatch": "Faire éclore l'œuf",
+      "hatched": "Ton œuf est prêt. Lance un live pour le faire éclore.",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "showOnProfile": "Afficher sur mon profil",
+      "showOnStream": "Afficher dans le coin de mon live",
+      "feeding": "Les spectateurs peuvent le nourrir avec leurs points de chaîne",
+      "cost": "Points par en-cas",
+      "rules": "Chaque spectateur peut lui donner jusqu'à 20 en-cas par jour. Les points n'ont aucune valeur en argent.",
+      "feeders": "L'ont le plus nourri"
+    }
   }
 }
