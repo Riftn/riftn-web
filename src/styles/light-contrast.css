@@ -202,3 +202,22 @@ html[data-theme='light']:not(#_):not(#_) [data-glass-page] :is(button, a)[class*
   background-color: rgb(17 17 20 / 0.05) !important;
   border-color: rgb(17 17 20 / 0.18) !important;
 }
+
+/* Minimal Light, phone top bar: the white Riftn mark sat on paper. Its paper
+   rule keyed on the old alt text and stopped matching when the alt changed. */
+html[data-theme='light'] :is([data-mobile-header], [data-island-logo]) img[src*='dehub-logo-compact'] {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9);
+}
+
+/* Pricing billing switch: the picked chip's glass lift is drawn for a black
+   page; on light it is a heavy grey smear under the chip. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-pricing-page] button.text-black[style*='box-shadow'] {
+  box-shadow: 0 0 0 1px rgb(17 17 20 / 0.12), 0 2px 8px rgb(17 17 20 / 0.1) !important;
+}
+
+/* Settings > profile picture: the camera chip sits on the photo, so it stays a
+   dark chip with a white camera whatever the photo or theme. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-setting-anchor='profile-picture'] button[data-on-media] {
+  background-color: rgb(24 24 27 / 0.82) !important;
+  border-color: rgb(255 255 255 / 0.2) !important;
+}

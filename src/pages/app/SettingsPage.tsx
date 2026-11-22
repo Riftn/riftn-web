@@ -1133,6 +1133,8 @@ function ProfileSettings() {
             type="button"
             onClick={() => avatarInputRef.current?.click()}
             aria-label={t('settings.clickCameraUpload')}
+            data-keep-dark
+            data-on-media
             className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 transition-colors hover:bg-zinc-700"
           >
             <Camera className="w-4 h-4 text-white" />

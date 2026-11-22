@@ -33,10 +33,14 @@ html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_
 html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-vaul-drawer][data-vaul-drawer-direction='bottom']:not([data-keep-dark]):not(.bg-transparent) {
   box-shadow: var(--light-sheet-shadow) !important;
 }
-/* The comments half-sheet keeps no shadow (nothing may reach over the top pill). */
+/* The comments half-sheet has no dim behind it (the post stays in view above),
+   so on a white feed its edge has to carry it: a firmer hairline and a tight
+   lift that stays within a few pixels of the sheet, far below the top pill. */
 html:is([data-theme='light'], [data-system-tone='light']) [data-comments-split] {
   background: var(--light-sheet);
   backdrop-filter: var(--light-sheet-blur);
+  border-top-color: rgb(17 17 20 / 0.14);
+  box-shadow: 0 -6px 18px rgb(17 17 20 / 0.08);
 }
 
 /* Dialog cards. */
